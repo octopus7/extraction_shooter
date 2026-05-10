@@ -4,4 +4,4 @@
 - Treat TunaSweeper as an Unreal Engine 5.7 project.
 - Version check: `TunaSweeper.uproject` has `"EngineAssociation": "5.7"`, and both `TunaSweeper.Target.cs` and `TunaSweeperEditor.Target.cs` use `EngineIncludeOrderVersion.Unreal5_7`.
 - Prefer UE 5.7-compatible APIs and build settings when editing C++ or project configuration.
-- Record user instructions in `Docs/requests.md` with the current timestamp.
+- Record user instructions in `Docs/requests.md` with the current timestamp and elapsed duration next to the timestamp. Do not include a timezone suffix in request log timestamps.

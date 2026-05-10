@@ -12,6 +12,8 @@ public class TunaSweeperEditor : ModuleRules
 			"CoreUObject",
 			"Engine",
 			"EngineSettings",
+			"InputCore",
+			"EnhancedInput",
 			"UnrealEd",
 			"AssetTools",
 			"AssetRegistry",
