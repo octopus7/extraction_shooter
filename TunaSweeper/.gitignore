@@ -1,0 +1,39 @@
+# Unreal Engine generated files
+Binaries/
+DerivedDataCache/
+Intermediate/
+Saved/
+
+# Visual Studio and Rider generated files
+.vs/
+.idea/
+*.sln
+*.suo
+*.user
+*.userosscache
+*.sdf
+*.opensdf
+*.VC.db
+*.VC.opendb
+
+# Build and automation output
+Build/Receipts/
+Build/BatchFiles/
+*.log
+
+# Plugin generated files
+Plugins/*/Binaries/
+Plugins/*/Intermediate/
+
+# Packaged builds
+Windows/
+WindowsNoEditor/
+Linux/
+LinuxNoEditor/
+Mac/
+Android/
+IOS/
+
+# OS files
+.DS_Store
+Thumbs.db
