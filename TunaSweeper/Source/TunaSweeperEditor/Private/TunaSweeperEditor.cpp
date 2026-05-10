@@ -63,7 +63,7 @@ namespace TunaSweeperEditorSetup
 	const FString InteractionTaskId = TEXT("2026-05-10_CreateInteractionAssetsAndPlaceActors");
 	const FString InteractionInputTaskId = TEXT("2026-05-10_AddInteractionInput");
 	const FString InteractionMarkerAlignmentTaskId = TEXT("2026-05-10_RebuildInteractionMarkerAlignmentV2");
-	const FString TempOpenLootUiTaskId = TEXT("2026-05-10_CreateTempOpenLootTileViewAndIcons");
+	const FString TempOpenLootUiTaskId = TEXT("2026-05-10_CreateTempOpenLootTileViewAndIconsV2");
 	const FString GameInstanceAssetPath = TEXT("/Game/Core");
 	const FString GameInstanceAssetName = TEXT("BP_TunaSweeperGameInstance");
 	const FString GameModeAssetName = TEXT("BP_TunaSweeperGameMode");
@@ -874,6 +874,7 @@ namespace TunaSweeperEditorSetup
 
 		RegisterWidgetVariable(WidgetBlueprint, TempLootTileView);
 		RegisterWidgetVariable(WidgetBlueprint, TempCloseButton);
+		RegisterWidgetVariable(WidgetBlueprint, CloseButtonText);
 		WidgetBlueprint->MarkPackageDirty();
 		return true;
 	}
