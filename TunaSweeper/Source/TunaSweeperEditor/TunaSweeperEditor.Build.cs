@@ -19,6 +19,10 @@ public class TunaSweeperEditor : ModuleRules
 			"AssetRegistry",
 			"KismetCompiler",
 			"BlueprintGraph",
+			"UMG",
+			"UMGEditor",
+			"Slate",
+			"SlateCore",
 			"TunaSweeper"
 		});
 	}
