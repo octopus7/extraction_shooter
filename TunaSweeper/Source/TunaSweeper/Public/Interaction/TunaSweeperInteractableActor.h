@@ -90,6 +90,7 @@ protected:
 	float LabelFadeInterpSpeed = 10.0f;
 
 private:
+	void ApplyMarkerWidgetLayout();
 	void EnsureMarkerWidgetClass();
 	void UpdateMarker(float DeltaSeconds);
 	void ApplyMarkerState();

@@ -7,6 +7,25 @@
 #include "UI/TunaSweeperInteractionMarkerWidget.h"
 #include "UObject/ConstructorHelpers.h"
 
+namespace TunaSweeperInteractionMarkerLayout
+{
+	constexpr float DrawWidth = 360.0f;
+	constexpr float DrawHeight = 80.0f;
+	constexpr float MarkerRootWidth = 300.0f;
+	constexpr float MarkerBoxWidth = 56.0f;
+
+	FVector2D GetDrawSize()
+	{
+		return FVector2D(DrawWidth, DrawHeight);
+	}
+
+	FVector2D GetMarkerCenteredPivot()
+	{
+		const float MarkerCenterX = ((DrawWidth - MarkerRootWidth) * 0.5f) + (MarkerBoxWidth * 0.5f);
+		return FVector2D(MarkerCenterX / DrawWidth, 0.5f);
+	}
+}
+
 ATunaSweeperInteractableActor::ATunaSweeperInteractableActor()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -29,8 +48,7 @@ ATunaSweeperInteractableActor::ATunaSweeperInteractableActor()
 	MarkerWidgetComponent->SetupAttachment(RootComponent);
 	MarkerWidgetComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 120.0f));
 	MarkerWidgetComponent->SetWidgetSpace(EWidgetSpace::Screen);
-	MarkerWidgetComponent->SetDrawSize(FVector2D(360.0f, 80.0f));
-	MarkerWidgetComponent->SetPivot(FVector2D(0.5f, 0.5f));
+	ApplyMarkerWidgetLayout();
 	MarkerWidgetComponent->SetVisibility(false);
 
 	MarkerWidgetClass = TSoftClassPtr<UTunaSweeperInteractionMarkerWidget>(
@@ -41,6 +59,7 @@ void ATunaSweeperInteractableActor::BeginPlay()
 {
 	Super::BeginPlay();
 
+	ApplyMarkerWidgetLayout();
 	EnsureMarkerWidgetClass();
 	ApplyMarkerState();
 
@@ -54,6 +73,7 @@ void ATunaSweeperInteractableActor::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
+	ApplyMarkerWidgetLayout();
 	EnsureMarkerWidgetClass();
 	ApplyMarkerState();
 }
@@ -114,6 +134,17 @@ void ATunaSweeperInteractableActor::ConfigureInteractionDefaults(
 	InteractionType = InInteractionType;
 	InteractionDisplayName = InInteractionDisplayName;
 	MarkerWidgetClass = InMarkerWidgetClass;
+}
+
+void ATunaSweeperInteractableActor::ApplyMarkerWidgetLayout()
+{
+	if (!MarkerWidgetComponent)
+	{
+		return;
+	}
+
+	MarkerWidgetComponent->SetDrawSize(TunaSweeperInteractionMarkerLayout::GetDrawSize());
+	MarkerWidgetComponent->SetPivot(TunaSweeperInteractionMarkerLayout::GetMarkerCenteredPivot());
 }
 
 void ATunaSweeperInteractableActor::EnsureMarkerWidgetClass()
