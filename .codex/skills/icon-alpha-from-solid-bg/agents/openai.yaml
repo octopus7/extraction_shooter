@@ -1,0 +1,4 @@
+display_name: Icon Alpha From Solid Background
+short_description: Make transparent icon sheets from one muted solid-background source using matched black/white alpha extraction.
+default_prompt: Create a transparent item icon sheet by generating one muted solid-background source image, deriving matched black and white background images locally, and extracting alpha from their difference.
+
