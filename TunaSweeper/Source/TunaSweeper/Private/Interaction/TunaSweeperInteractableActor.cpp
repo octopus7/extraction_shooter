@@ -3,6 +3,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Subsystem/TunaSweeperInteractionSubsystem.h"
 #include "UI/TunaSweeperInteractionMarkerWidget.h"
 #include "UObject/ConstructorHelpers.h"
 
@@ -42,6 +43,11 @@ void ATunaSweeperInteractableActor::BeginPlay()
 
 	EnsureMarkerWidgetClass();
 	ApplyMarkerState();
+
+	if (UTunaSweeperInteractionSubsystem* InteractionSubsystem = GetWorld()->GetSubsystem<UTunaSweeperInteractionSubsystem>())
+	{
+		InteractionSubsystem->RegisterInteractable(this);
+	}
 }
 
 void ATunaSweeperInteractableActor::OnConstruction(const FTransform& Transform)
@@ -57,6 +63,47 @@ void ATunaSweeperInteractableActor::Tick(float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 
 	UpdateMarker(DeltaSeconds);
+}
+
+void ATunaSweeperInteractableActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	if (UWorld* World = GetWorld())
+	{
+		if (UTunaSweeperInteractionSubsystem* InteractionSubsystem = World->GetSubsystem<UTunaSweeperInteractionSubsystem>())
+		{
+			InteractionSubsystem->UnregisterInteractable(this);
+		}
+	}
+
+	Super::EndPlay(EndPlayReason);
+}
+
+bool ATunaSweeperInteractableActor::IsWithinInteractionDistance(const AActor* OtherActor) const
+{
+	return OtherActor && GetSquaredDistance2DTo(OtherActor) <= FMath::Square(InteractionDistance);
+}
+
+float ATunaSweeperInteractableActor::GetSquaredDistance2DTo(const AActor* OtherActor) const
+{
+	return OtherActor
+		? FVector::DistSquared2D(GetActorLocation(), OtherActor->GetActorLocation())
+		: TNumericLimits<float>::Max();
+}
+
+bool ATunaSweeperInteractableActor::RequestInteraction(APawn* InstigatorPawn)
+{
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		return false;
+	}
+
+	if (UTunaSweeperInteractionSubsystem* InteractionSubsystem = World->GetSubsystem<UTunaSweeperInteractionSubsystem>())
+	{
+		return InteractionSubsystem->RequestInteraction(this, InstigatorPawn);
+	}
+
+	return false;
 }
 
 void ATunaSweeperInteractableActor::ConfigureInteractionDefaults(
@@ -94,9 +141,21 @@ void ATunaSweeperInteractableActor::UpdateMarker(float DeltaSeconds)
 
 	const float TargetAlpha = bInsideVisibleDistance ? 1.0f : 0.0f;
 	const float TargetScale = bInsideVisibleDistance ? 1.0f : 3.0f;
+	bool bIsFocusedInteractable = false;
+
+	if (UTunaSweeperInteractionSubsystem* InteractionSubsystem = GetWorld()->GetSubsystem<UTunaSweeperInteractionSubsystem>())
+	{
+		bIsFocusedInteractable =
+			InteractionSubsystem->GetFocusedInteractable() == this &&
+			PlayerPawn &&
+			IsWithinInteractionDistance(PlayerPawn);
+	}
+
+	const float TargetLabelAlpha = bIsFocusedInteractable ? 1.0f : 0.0f;
 
 	MarkerAlpha = FMath::FInterpTo(MarkerAlpha, TargetAlpha, DeltaSeconds, MarkerFadeInterpSpeed);
 	MarkerRingScale = FMath::FInterpTo(MarkerRingScale, TargetScale, DeltaSeconds, MarkerScaleInterpSpeed);
+	LabelAlpha = FMath::FInterpTo(LabelAlpha, TargetLabelAlpha, DeltaSeconds, LabelFadeInterpSpeed);
 
 	ApplyMarkerState();
 }
@@ -114,6 +173,6 @@ void ATunaSweeperInteractableActor::ApplyMarkerState()
 	if (UTunaSweeperInteractionMarkerWidget* MarkerWidget = Cast<UTunaSweeperInteractionMarkerWidget>(MarkerWidgetComponent->GetUserWidgetObject()))
 	{
 		MarkerWidget->SetMarkerText(InteractionDisplayName);
-		MarkerWidget->SetMarkerPresentation(MarkerAlpha, MarkerRingScale);
+		MarkerWidget->SetMarkerPresentation(MarkerAlpha, MarkerRingScale, LabelAlpha);
 	}
 }

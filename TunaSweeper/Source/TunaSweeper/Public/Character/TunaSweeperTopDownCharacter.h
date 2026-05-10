@@ -61,6 +61,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	TSoftObjectPtr<UInputAction> AimAction;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+	TSoftObjectPtr<UInputAction> InteractAction;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat")
 	TSoftClassPtr<ATunaSweeperWeapon> DefaultWeaponClass;
 
@@ -87,6 +90,7 @@ private:
 	void EndFire(const FInputActionValue& Value);
 	void BeginAim(const FInputActionValue& Value);
 	void EndAim(const FInputActionValue& Value);
+	void HandleInteract(const FInputActionValue& Value);
 	void FireWeapon();
 	void UpdateAimingVisuals(float DeltaSeconds);
 

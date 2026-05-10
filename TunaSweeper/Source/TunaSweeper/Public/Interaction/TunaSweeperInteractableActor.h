@@ -28,11 +28,25 @@ public:
 	virtual void OnConstruction(const FTransform& Transform) override;
 	virtual void Tick(float DeltaSeconds) override;
 
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Interaction")
 	ETunaSweeperInteractionType GetInteractionType() const { return InteractionType; }
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Interaction")
 	FText GetInteractionDisplayName() const { return InteractionDisplayName; }
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Interaction")
+	float GetInteractionDistance() const { return InteractionDistance; }
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Interaction")
+	bool IsWithinInteractionDistance(const AActor* OtherActor) const;
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Interaction")
+	float GetSquaredDistance2DTo(const AActor* OtherActor) const;
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Interaction")
+	bool RequestInteraction(APawn* InstigatorPawn);
 
 	void ConfigureInteractionDefaults(
 		ETunaSweeperInteractionType InInteractionType,
@@ -57,6 +71,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
 	FText InteractionDisplayName = FText::FromString(TEXT("Interact"));
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float InteractionDistance = 250.0f;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction|Marker")
 	TSoftClassPtr<UTunaSweeperInteractionMarkerWidget> MarkerWidgetClass;
 
@@ -69,6 +86,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction|Marker", meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float MarkerScaleInterpSpeed = 10.0f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction|Marker", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float LabelFadeInterpSpeed = 10.0f;
+
 private:
 	void EnsureMarkerWidgetClass();
 	void UpdateMarker(float DeltaSeconds);
@@ -76,4 +96,5 @@ private:
 
 	float MarkerAlpha = 0.0f;
 	float MarkerRingScale = 3.0f;
+	float LabelAlpha = 0.0f;
 };

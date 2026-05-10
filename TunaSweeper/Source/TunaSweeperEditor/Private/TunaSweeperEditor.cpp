@@ -50,6 +50,7 @@ namespace TunaSweeperEditorSetup
 	const FString GameInstanceTaskId = TEXT("2026-05-10_CreateGameInstanceBlueprint");
 	const FString TopDownShooterTaskId = TEXT("2026-05-10_CreateTopDownShooterAssets");
 	const FString InteractionTaskId = TEXT("2026-05-10_CreateInteractionAssetsAndPlaceActors");
+	const FString InteractionInputTaskId = TEXT("2026-05-10_AddInteractionInput");
 	const FString GameInstanceAssetPath = TEXT("/Game/Core");
 	const FString GameInstanceAssetName = TEXT("BP_TunaSweeperGameInstance");
 	const FString GameModeAssetName = TEXT("BP_TunaSweeperGameMode");
@@ -64,6 +65,7 @@ namespace TunaSweeperEditorSetup
 	const FString MoveActionName = TEXT("IA_Move");
 	const FString FireActionName = TEXT("IA_Fire");
 	const FString AimActionName = TEXT("IA_Aim");
+	const FString InteractActionName = TEXT("IA_Interact");
 	const FString MappingContextName = TEXT("IMC_Player");
 	const FString UIAssetPath = TEXT("/Game/UI");
 	const FString InteractionMarkerAssetName = TEXT("WBP_InteractionMarker");
@@ -286,6 +288,50 @@ namespace TunaSweeperEditorSetup
 		MappingContext->MarkPackageDirty();
 		SaveAsset(MappingContext);
 		return MappingContext;
+	}
+
+	bool HasInputMapping(const UInputMappingContext* MappingContext, const UInputAction* Action, const FKey& Key)
+	{
+		if (!MappingContext || !Action)
+		{
+			return false;
+		}
+
+		for (const FEnhancedActionKeyMapping& Mapping : MappingContext->GetMappings())
+		{
+			if (Mapping.Action == Action && Mapping.Key == Key)
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	bool EnsureInteractionInputAssets()
+	{
+		UInputAction* InteractAction = EnsureInputAction(
+			InteractActionName,
+			EInputActionValueType::Boolean,
+			EInputActionAccumulationBehavior::TakeHighestAbsoluteValue);
+
+		UInputMappingContext* MappingContext = LoadObject<UInputMappingContext>(
+			nullptr,
+			*GetAssetObjectPath(InputAssetPath, MappingContextName));
+
+		if (!InteractAction || !MappingContext)
+		{
+			return false;
+		}
+
+		if (!HasInputMapping(MappingContext, InteractAction, EKeys::E))
+		{
+			MappingContext->MapKey(InteractAction, EKeys::E);
+		}
+
+		MappingContext->ContextDescription = FText::FromString(TEXT("TunaSweeper player movement, fire, aim, and interaction input."));
+		MappingContext->MarkPackageDirty();
+		return SaveAsset(MappingContext);
 	}
 
 	bool ConfigureGameModeBlueprint(UBlueprint* GameModeBlueprint, UBlueprint* PlayerBlueprint)
@@ -784,6 +830,13 @@ public:
 			[]()
 			{
 				return TunaSweeperEditorSetup::EnsureTopDownShooterAssets();
+			});
+
+		FTunaSweeperEditorRunOnce::Run(
+			TunaSweeperEditorSetup::InteractionInputTaskId,
+			[]()
+			{
+				return TunaSweeperEditorSetup::EnsureInteractionInputAssets();
 			});
 
 		TunaSweeperEditorSetup::ScheduleInteractionAssetsAndMapPlacement();

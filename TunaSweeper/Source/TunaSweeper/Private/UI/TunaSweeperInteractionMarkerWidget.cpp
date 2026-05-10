@@ -1,6 +1,7 @@
 #include "UI/TunaSweeperInteractionMarkerWidget.h"
 
 #include "Blueprint/WidgetTree.h"
+#include "Components/Border.h"
 #include "Components/TextBlock.h"
 #include "Components/Widget.h"
 
@@ -22,6 +23,7 @@ void UTunaSweeperInteractionMarkerWidget::NativePreConstruct()
 	{
 		CachedAlpha = 1.0f;
 		CachedRingScale = 1.0f;
+		CachedLabelAlpha = 1.0f;
 	}
 
 	ApplyState();
@@ -33,10 +35,11 @@ void UTunaSweeperInteractionMarkerWidget::SetMarkerText(const FText& InText)
 	ApplyState();
 }
 
-void UTunaSweeperInteractionMarkerWidget::SetMarkerPresentation(float InAlpha, float InRingScale)
+void UTunaSweeperInteractionMarkerWidget::SetMarkerPresentation(float InAlpha, float InRingScale, float InLabelAlpha)
 {
 	CachedAlpha = FMath::Clamp(InAlpha, 0.0f, 1.0f);
 	CachedRingScale = FMath::Max(InRingScale, 0.01f);
+	CachedLabelAlpha = FMath::Clamp(InLabelAlpha, 0.0f, 1.0f);
 	ApplyState();
 }
 
@@ -60,6 +63,11 @@ void UTunaSweeperInteractionMarkerWidget::CacheNamedWidgets()
 	if (!FilledText)
 	{
 		FilledText = Cast<UTextBlock>(WidgetTree->FindWidget(TEXT("FilledText")));
+	}
+
+	if (!LabelBackground)
+	{
+		LabelBackground = Cast<UBorder>(WidgetTree->FindWidget(TEXT("LabelBackground")));
 	}
 
 	if (!DisplayNameText)
@@ -91,6 +99,11 @@ void UTunaSweeperInteractionMarkerWidget::ApplyState()
 	if (DisplayNameText)
 	{
 		DisplayNameText->SetText(CachedDisplayText);
-		DisplayNameText->SetRenderOpacity(CachedAlpha);
+		DisplayNameText->SetRenderOpacity(CachedLabelAlpha);
+	}
+
+	if (LabelBackground)
+	{
+		LabelBackground->SetRenderOpacity(CachedLabelAlpha);
 	}
 }

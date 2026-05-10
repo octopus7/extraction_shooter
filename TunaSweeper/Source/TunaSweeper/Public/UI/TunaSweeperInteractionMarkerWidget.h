@@ -6,6 +6,7 @@
 
 class UTextBlock;
 class UWidget;
+class UBorder;
 
 UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API UTunaSweeperInteractionMarkerWidget : public UUserWidget
@@ -17,7 +18,7 @@ public:
 	void SetMarkerText(const FText& InText);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Interaction")
-	void SetMarkerPresentation(float InAlpha, float InRingScale);
+	void SetMarkerPresentation(float InAlpha, float InRingScale, float InLabelAlpha);
 
 protected:
 	virtual void NativeConstruct() override;
@@ -33,6 +34,9 @@ protected:
 	TObjectPtr<UTextBlock> FilledText;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Interaction", meta = (BindWidgetOptional))
+	TObjectPtr<UBorder> LabelBackground;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Interaction", meta = (BindWidgetOptional))
 	TObjectPtr<UTextBlock> DisplayNameText;
 
 private:
@@ -42,4 +46,5 @@ private:
 	FText CachedDisplayText = FText::FromString(TEXT("Interact"));
 	float CachedAlpha = 0.0f;
 	float CachedRingScale = 3.0f;
+	float CachedLabelAlpha = 0.0f;
 };
