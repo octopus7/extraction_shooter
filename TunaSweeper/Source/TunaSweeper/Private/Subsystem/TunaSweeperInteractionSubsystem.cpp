@@ -1,9 +1,12 @@
 #include "Subsystem/TunaSweeperInteractionSubsystem.h"
 
 #include "Engine/Engine.h"
+#include "Blueprint/UserWidget.h"
+#include "GameFramework/PlayerController.h"
 #include "Interaction/TunaSweeperInteractableActor.h"
 #include "Kismet/GameplayStatics.h"
 #include "Stats/Stats.h"
+#include "UI/TunaSweeperTempOpenLootWidget.h"
 
 void UTunaSweeperInteractionSubsystem::Tick(float DeltaTime)
 {
@@ -60,10 +63,63 @@ bool UTunaSweeperInteractionSubsystem::RequestInteraction(ATunaSweeperInteractab
 	const FString DisplayName = Interactable->GetInteractionDisplayName().ToString();
 	const FString DebugMessage = FString::Printf(TEXT("[Interaction] %s: %s"), *DebugTypeName, *DisplayName);
 
+	if (Interactable->GetInteractionType() == ETunaSweeperInteractionType::Open)
+	{
+		return OpenTempOpenLootWidget(InstigatorPawn);
+	}
+
 	if (GEngine)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::White, DebugMessage);
 	}
+
+	return true;
+}
+
+bool UTunaSweeperInteractionSubsystem::OpenTempOpenLootWidget(APawn* InstigatorPawn)
+{
+	if (!IsValid(InstigatorPawn))
+	{
+		return false;
+	}
+
+	APlayerController* PlayerController = Cast<APlayerController>(InstigatorPawn->GetController());
+	if (!PlayerController)
+	{
+		return false;
+	}
+
+	if (ActiveTempOpenLootWidget.IsValid() && ActiveTempOpenLootWidget->IsInViewport())
+	{
+		return true;
+	}
+
+	static const FSoftClassPath TempOpenLootWidgetClassPath(TEXT("/Game/UI/WBP_TempOpenLootTileView.WBP_TempOpenLootTileView_C"));
+	TSubclassOf<UTunaSweeperTempOpenLootWidget> WidgetClass = Cast<UClass>(TempOpenLootWidgetClassPath.TryLoad());
+	if (!WidgetClass)
+	{
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, TEXT("[Interaction] Missing WBP_TempOpenLootTileView."));
+		}
+		return false;
+	}
+
+	UTunaSweeperTempOpenLootWidget* Widget = CreateWidget<UTunaSweeperTempOpenLootWidget>(PlayerController, WidgetClass);
+	if (!Widget)
+	{
+		return false;
+	}
+
+	Widget->AddToViewport(10);
+	ActiveTempOpenLootWidget = Widget;
+
+	FInputModeGameAndUI InputMode;
+	InputMode.SetWidgetToFocus(Widget->TakeWidget());
+	InputMode.SetHideCursorDuringCapture(false);
+	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+	PlayerController->SetInputMode(InputMode);
+	PlayerController->bShowMouseCursor = true;
 
 	return true;
 }

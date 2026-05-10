@@ -5,6 +5,7 @@
 #include "TunaSweeperInteractionSubsystem.generated.h"
 
 class ATunaSweeperInteractableActor;
+class UTunaSweeperTempOpenLootWidget;
 
 UCLASS()
 class TUNASWEEPER_API UTunaSweeperInteractionSubsystem : public UTickableWorldSubsystem
@@ -31,7 +32,9 @@ public:
 private:
 	void RefreshFocusedInteractable();
 	FString GetInteractionDebugTypeName(const ATunaSweeperInteractableActor* Interactable) const;
+	bool OpenTempOpenLootWidget(APawn* InstigatorPawn);
 
 	TSet<TWeakObjectPtr<ATunaSweeperInteractableActor>> RegisteredInteractables;
 	TWeakObjectPtr<ATunaSweeperInteractableActor> FocusedInteractable;
+	TWeakObjectPtr<UTunaSweeperTempOpenLootWidget> ActiveTempOpenLootWidget;
 };

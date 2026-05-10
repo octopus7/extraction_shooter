@@ -3,20 +3,27 @@
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "AssetToolsModule.h"
 #include "AI/TunaSweeperEnemyCharacter.h"
+#include "AutomatedAssetImportData.h"
 #include "Blueprint/WidgetTree.h"
 #include "Character/TunaSweeperTopDownCharacter.h"
 #include "Components/Border.h"
+#include "Components/Button.h"
 #include "Components/CanvasPanel.h"
 #include "Components/CanvasPanelSlot.h"
 #include "Components/HorizontalBox.h"
 #include "Components/HorizontalBoxSlot.h"
 #include "Components/Image.h"
+#include "Components/ListViewBase.h"
 #include "Components/Overlay.h"
 #include "Components/OverlaySlot.h"
 #include "Components/SizeBox.h"
 #include "Components/TextBlock.h"
+#include "Components/TileView.h"
+#include "Components/VerticalBox.h"
+#include "Components/VerticalBoxSlot.h"
 #include "Containers/Ticker.h"
 #include "Engine/Blueprint.h"
+#include "Engine/Texture2D.h"
 #include "EngineUtils.h"
 #include "Editor.h"
 #include "Factories/BlueprintFactory.h"
@@ -38,7 +45,10 @@
 #include "Player/TunaSweeperPlayerController.h"
 #include "TunaSweeperEditorRunOnce.h"
 #include "UI/TunaSweeperInteractionMarkerWidget.h"
+#include "UI/TunaSweeperTempOpenLootTileEntryWidget.h"
+#include "UI/TunaSweeperTempOpenLootWidget.h"
 #include "UObject/SavePackage.h"
+#include "UObject/UnrealType.h"
 #include "Weapon/TunaSweeperProjectile.h"
 #include "Weapon/TunaSweeperWeapon.h"
 #include "WidgetBlueprint.h"
@@ -53,6 +63,7 @@ namespace TunaSweeperEditorSetup
 	const FString InteractionTaskId = TEXT("2026-05-10_CreateInteractionAssetsAndPlaceActors");
 	const FString InteractionInputTaskId = TEXT("2026-05-10_AddInteractionInput");
 	const FString InteractionMarkerAlignmentTaskId = TEXT("2026-05-10_RebuildInteractionMarkerAlignmentV2");
+	const FString TempOpenLootUiTaskId = TEXT("2026-05-10_CreateTempOpenLootTileViewAndIcons");
 	const FString GameInstanceAssetPath = TEXT("/Game/Core");
 	const FString GameInstanceAssetName = TEXT("BP_TunaSweeperGameInstance");
 	const FString GameModeAssetName = TEXT("BP_TunaSweeperGameMode");
@@ -70,7 +81,10 @@ namespace TunaSweeperEditorSetup
 	const FString InteractActionName = TEXT("IA_Interact");
 	const FString MappingContextName = TEXT("IMC_Player");
 	const FString UIAssetPath = TEXT("/Game/UI");
+	const FString UIIconAssetPath = TEXT("/Game/UI/Icons");
 	const FString InteractionMarkerAssetName = TEXT("WBP_InteractionMarker");
+	const FString TempOpenLootWidgetAssetName = TEXT("WBP_TempOpenLootTileView");
+	const FString TempOpenLootEntryWidgetAssetName = TEXT("WBP_TempOpenLootTileEntry");
 	const FString InteractionAssetPath = TEXT("/Game/Interaction");
 	const FString DialogueInteractionAssetName = TEXT("BP_Interact_Dialogue");
 	const FString PickupInteractionAssetName = TEXT("BP_Interact_Pickup");
@@ -556,6 +570,352 @@ namespace TunaSweeperEditorSetup
 		return Brush;
 	}
 
+	const TArray<FString>& GetTempOpenLootIconAssetNames()
+	{
+		static const TArray<FString> IconAssetNames = {
+			TEXT("T_UIIcon_Pistol"),
+			TEXT("T_UIIcon_Rifle"),
+			TEXT("T_UIIcon_Shotgun"),
+			TEXT("T_UIIcon_PistolAmmo"),
+			TEXT("T_UIIcon_RifleAmmo"),
+			TEXT("T_UIIcon_ShotgunAmmo"),
+			TEXT("T_UIIcon_CannedFood"),
+			TEXT("T_UIIcon_WaterBottle"),
+			TEXT("T_UIIcon_EnergyBar"),
+			TEXT("T_UIIcon_Bandage"),
+			TEXT("T_UIIcon_FirstAidKit"),
+			TEXT("T_UIIcon_Painkillers"),
+			TEXT("T_UIIcon_Antibiotics"),
+			TEXT("T_UIIcon_BodyArmor"),
+			TEXT("T_UIIcon_Backpack"),
+			TEXT("T_UIIcon_ValuablesCrate")
+		};
+
+		return IconAssetNames;
+	}
+
+	FString GetTempOpenLootIconSourcePath(const FString& IconAssetName)
+	{
+		FString SourcePath = FPaths::ConvertRelativePathToFull(FPaths::Combine(
+			FPaths::ProjectDir(),
+			TEXT(".."),
+			TEXT("GeneratedImages"),
+			TEXT("ItemIcons"),
+			TEXT("Split"),
+			IconAssetName + TEXT(".png")));
+		FPaths::CollapseRelativeDirectories(SourcePath);
+		return SourcePath;
+	}
+
+	void ConfigureImportedIconTexture(UTexture2D* Texture)
+	{
+		if (!Texture)
+		{
+			return;
+		}
+
+		Texture->Modify();
+		Texture->CompressionSettings = TC_EditorIcon;
+		Texture->MipGenSettings = TMGS_NoMipmaps;
+		Texture->LODGroup = TEXTUREGROUP_UI;
+		Texture->SRGB = true;
+		Texture->UpdateResource();
+		Texture->PostEditChange();
+		Texture->MarkPackageDirty();
+		SaveAsset(Texture);
+	}
+
+	bool EnsureTempOpenLootIconTextures()
+	{
+		TArray<FString> FilesToImport;
+
+		for (const FString& IconAssetName : GetTempOpenLootIconAssetNames())
+		{
+			const FString ObjectPath = GetAssetObjectPath(UIIconAssetPath, IconAssetName);
+			if (UTexture2D* ExistingTexture = LoadObject<UTexture2D>(nullptr, *ObjectPath))
+			{
+				ConfigureImportedIconTexture(ExistingTexture);
+				continue;
+			}
+
+			const FString SourcePath = GetTempOpenLootIconSourcePath(IconAssetName);
+			if (!FPaths::FileExists(SourcePath))
+			{
+				UE_LOG(LogTunaSweeperEditor, Error, TEXT("Missing temp open loot icon source: %s"), *SourcePath);
+				return false;
+			}
+
+			FilesToImport.Add(SourcePath);
+		}
+
+		if (FilesToImport.Num() > 0)
+		{
+			UAutomatedAssetImportData* ImportData = NewObject<UAutomatedAssetImportData>();
+			ImportData->DestinationPath = UIIconAssetPath;
+			ImportData->Filenames = FilesToImport;
+			ImportData->bReplaceExisting = false;
+			ImportData->bSkipReadOnly = true;
+
+			FAssetToolsModule& AssetToolsModule = FModuleManager::LoadModuleChecked<FAssetToolsModule>(TEXT("AssetTools"));
+			const TArray<UObject*> ImportedAssets = AssetToolsModule.Get().ImportAssetsAutomated(ImportData);
+			if (ImportedAssets.Num() == 0)
+			{
+				UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to import temp open loot icons."));
+				return false;
+			}
+		}
+
+		for (const FString& IconAssetName : GetTempOpenLootIconAssetNames())
+		{
+			UTexture2D* Texture = LoadObject<UTexture2D>(nullptr, *GetAssetObjectPath(UIIconAssetPath, IconAssetName));
+			if (!Texture)
+			{
+				UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to load imported temp open loot icon: %s"), *IconAssetName);
+				return false;
+			}
+
+			ConfigureImportedIconTexture(Texture);
+		}
+
+		return true;
+	}
+
+	void SetListViewEntryWidgetClass(UListViewBase* ListViewBase, TSubclassOf<UUserWidget> EntryWidgetClass)
+	{
+		if (!ListViewBase || !EntryWidgetClass)
+		{
+			return;
+		}
+
+		if (FClassProperty* EntryWidgetClassProperty = FindFProperty<FClassProperty>(UListViewBase::StaticClass(), TEXT("EntryWidgetClass")))
+		{
+			EntryWidgetClassProperty->SetPropertyValue_InContainer(ListViewBase, EntryWidgetClass);
+		}
+	}
+
+	UWidgetBlueprint* EnsureWidgetBlueprint(const FString& AssetPath, const FString& AssetName, UClass* ParentClass)
+	{
+		const FString ObjectPath = GetAssetObjectPath(AssetPath, AssetName);
+		if (UWidgetBlueprint* ExistingBlueprint = LoadObject<UWidgetBlueprint>(nullptr, *ObjectPath))
+		{
+			if (!ExistingBlueprint->ParentClass || !ExistingBlueprint->ParentClass->IsChildOf(ParentClass))
+			{
+				UE_LOG(LogTunaSweeperEditor, Error, TEXT("%s already exists, but it is not based on %s."), *ObjectPath, *GetNameSafe(ParentClass));
+				return nullptr;
+			}
+
+			if (!ExistingBlueprint->GeneratedClass)
+			{
+				FKismetEditorUtilities::CompileBlueprint(ExistingBlueprint);
+			}
+
+			return ExistingBlueprint;
+		}
+
+		UWidgetBlueprintFactory* WidgetBlueprintFactory = NewObject<UWidgetBlueprintFactory>();
+		WidgetBlueprintFactory->ParentClass = ParentClass;
+
+		FAssetToolsModule& AssetToolsModule = FModuleManager::LoadModuleChecked<FAssetToolsModule>(TEXT("AssetTools"));
+		UObject* CreatedAsset = AssetToolsModule.Get().CreateAsset(
+			AssetName,
+			AssetPath,
+			UWidgetBlueprint::StaticClass(),
+			WidgetBlueprintFactory);
+
+		UWidgetBlueprint* CreatedBlueprint = Cast<UWidgetBlueprint>(CreatedAsset);
+		if (!CreatedBlueprint)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to create %s."), *ObjectPath);
+			return nullptr;
+		}
+
+		FAssetRegistryModule::AssetCreated(CreatedBlueprint);
+		CreatedBlueprint->MarkPackageDirty();
+		return CreatedBlueprint;
+	}
+
+	bool BuildTempOpenLootEntryWidgetTree(UWidgetBlueprint* WidgetBlueprint)
+	{
+		if (!WidgetBlueprint || !WidgetBlueprint->WidgetTree)
+		{
+			return false;
+		}
+
+		WidgetBlueprint->Modify();
+		WidgetBlueprint->WidgetTree->Modify();
+		ClearWidgetTreeForRebuild(WidgetBlueprint);
+
+		UWidgetTree* WidgetTree = WidgetBlueprint->WidgetTree;
+		USizeBox* RootSizeBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("RootSizeBox"));
+		UBorder* TileBackground = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("TileBackground"));
+		UVerticalBox* TileStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("TileStack"));
+		USizeBox* IconSizeBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("IconSizeBox"));
+		UImage* TempItemIconImage = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("TempItemIconImage"));
+		UTextBlock* TempItemQuantityText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("TempItemQuantityText"));
+
+		if (!RootSizeBox || !TileBackground || !TileStack || !IconSizeBox || !TempItemIconImage || !TempItemQuantityText)
+		{
+			return false;
+		}
+
+		WidgetTree->RootWidget = RootSizeBox;
+		RootSizeBox->SetWidthOverride(128.0f);
+		RootSizeBox->SetHeightOverride(150.0f);
+		RootSizeBox->SetContent(TileBackground);
+
+		TileBackground->SetPadding(FMargin(8.0f));
+		TileBackground->SetBrush(MakeRoundedBoxBrush(FVector2D(128.0f, 150.0f), FLinearColor(0.015f, 0.018f, 0.02f, 0.92f), FLinearColor(0.25f, 0.28f, 0.32f, 1.0f), 1.0f));
+		TileBackground->SetContent(TileStack);
+
+		IconSizeBox->SetWidthOverride(104.0f);
+		IconSizeBox->SetHeightOverride(104.0f);
+		IconSizeBox->SetContent(TempItemIconImage);
+
+		UVerticalBoxSlot* IconSlot = TileStack->AddChildToVerticalBox(IconSizeBox);
+		if (IconSlot)
+		{
+			IconSlot->SetHorizontalAlignment(HAlign_Center);
+			IconSlot->SetVerticalAlignment(VAlign_Center);
+		}
+
+		ConfigureTextBlock(TempItemQuantityText, FText::FromString(TEXT("x1")), FLinearColor::White, 18);
+		UVerticalBoxSlot* QuantitySlot = TileStack->AddChildToVerticalBox(TempItemQuantityText);
+		if (QuantitySlot)
+		{
+			QuantitySlot->SetHorizontalAlignment(HAlign_Center);
+			QuantitySlot->SetVerticalAlignment(VAlign_Center);
+			QuantitySlot->SetPadding(FMargin(0.0f, 8.0f, 0.0f, 0.0f));
+		}
+
+		RegisterWidgetVariable(WidgetBlueprint, TempItemIconImage);
+		RegisterWidgetVariable(WidgetBlueprint, TempItemQuantityText);
+		WidgetBlueprint->MarkPackageDirty();
+		return true;
+	}
+
+	bool BuildTempOpenLootTileViewWidgetTree(UWidgetBlueprint* WidgetBlueprint, TSubclassOf<UUserWidget> EntryWidgetClass)
+	{
+		if (!WidgetBlueprint || !WidgetBlueprint->WidgetTree || !EntryWidgetClass)
+		{
+			return false;
+		}
+
+		WidgetBlueprint->Modify();
+		WidgetBlueprint->WidgetTree->Modify();
+		ClearWidgetTreeForRebuild(WidgetBlueprint);
+
+		UWidgetTree* WidgetTree = WidgetBlueprint->WidgetTree;
+		UCanvasPanel* RootCanvas = WidgetTree->ConstructWidget<UCanvasPanel>(UCanvasPanel::StaticClass(), TEXT("RootCanvas"));
+		UBorder* PanelBackground = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("PanelBackground"));
+		UVerticalBox* PanelStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("PanelStack"));
+		UHorizontalBox* HeaderRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("HeaderRow"));
+		UTextBlock* HeaderText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("HeaderText"));
+		UButton* TempCloseButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("TempCloseButton"));
+		UTextBlock* CloseButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("CloseButtonText"));
+		UTileView* TempLootTileView = WidgetTree->ConstructWidget<UTileView>(UTileView::StaticClass(), TEXT("TempLootTileView"));
+
+		if (!RootCanvas || !PanelBackground || !PanelStack || !HeaderRow || !HeaderText || !TempCloseButton || !CloseButtonText || !TempLootTileView)
+		{
+			return false;
+		}
+
+		WidgetTree->RootWidget = RootCanvas;
+
+		UCanvasPanelSlot* PanelSlot = RootCanvas->AddChildToCanvas(PanelBackground);
+		if (PanelSlot)
+		{
+			PanelSlot->SetAnchors(FAnchors(0.5f, 0.5f, 0.5f, 0.5f));
+			PanelSlot->SetAlignment(FVector2D(0.5f, 0.5f));
+			PanelSlot->SetPosition(FVector2D::ZeroVector);
+			PanelSlot->SetSize(FVector2D(620.0f, 760.0f));
+		}
+
+		PanelBackground->SetPadding(FMargin(18.0f));
+		PanelBackground->SetBrush(MakeRoundedBoxBrush(FVector2D(620.0f, 760.0f), FLinearColor(0.015f, 0.016f, 0.018f, 0.96f), FLinearColor(0.18f, 0.2f, 0.23f, 1.0f), 1.0f));
+		PanelBackground->SetContent(PanelStack);
+
+		ConfigureTextBlock(HeaderText, FText::FromString(TEXT("Temp Loot Test")), FLinearColor::White, 22);
+		UHorizontalBoxSlot* HeaderTextSlot = HeaderRow->AddChildToHorizontalBox(HeaderText);
+		if (HeaderTextSlot)
+		{
+			HeaderTextSlot->SetHorizontalAlignment(HAlign_Left);
+			HeaderTextSlot->SetVerticalAlignment(VAlign_Center);
+			HeaderTextSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+		}
+
+		ConfigureTextBlock(CloseButtonText, FText::FromString(TEXT("Close")), FLinearColor::White, 16);
+		TempCloseButton->SetContent(CloseButtonText);
+		UHorizontalBoxSlot* CloseButtonSlot = HeaderRow->AddChildToHorizontalBox(TempCloseButton);
+		if (CloseButtonSlot)
+		{
+			CloseButtonSlot->SetHorizontalAlignment(HAlign_Right);
+			CloseButtonSlot->SetVerticalAlignment(VAlign_Center);
+		}
+
+		UVerticalBoxSlot* HeaderSlot = PanelStack->AddChildToVerticalBox(HeaderRow);
+		if (HeaderSlot)
+		{
+			HeaderSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 16.0f));
+			HeaderSlot->SetHorizontalAlignment(HAlign_Fill);
+			HeaderSlot->SetVerticalAlignment(VAlign_Top);
+		}
+
+		TempLootTileView->SetEntryWidth(128.0f);
+		TempLootTileView->SetEntryHeight(150.0f);
+		SetListViewEntryWidgetClass(TempLootTileView, EntryWidgetClass);
+
+		UVerticalBoxSlot* TileViewSlot = PanelStack->AddChildToVerticalBox(TempLootTileView);
+		if (TileViewSlot)
+		{
+			TileViewSlot->SetHorizontalAlignment(HAlign_Fill);
+			TileViewSlot->SetVerticalAlignment(VAlign_Fill);
+			TileViewSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+		}
+
+		RegisterWidgetVariable(WidgetBlueprint, TempLootTileView);
+		RegisterWidgetVariable(WidgetBlueprint, TempCloseButton);
+		WidgetBlueprint->MarkPackageDirty();
+		return true;
+	}
+
+	bool EnsureTempOpenLootTileViewAssets()
+	{
+		if (!EnsureTempOpenLootIconTextures())
+		{
+			return false;
+		}
+
+		UWidgetBlueprint* EntryWidgetBlueprint = EnsureWidgetBlueprint(
+			UIAssetPath,
+			TempOpenLootEntryWidgetAssetName,
+			UTunaSweeperTempOpenLootTileEntryWidget::StaticClass());
+		if (!EntryWidgetBlueprint || !BuildTempOpenLootEntryWidgetTree(EntryWidgetBlueprint))
+		{
+			return false;
+		}
+
+		FKismetEditorUtilities::CompileBlueprint(EntryWidgetBlueprint);
+		EntryWidgetBlueprint->MarkPackageDirty();
+		if (!SaveAsset(EntryWidgetBlueprint))
+		{
+			return false;
+		}
+
+		UWidgetBlueprint* TileViewWidgetBlueprint = EnsureWidgetBlueprint(
+			UIAssetPath,
+			TempOpenLootWidgetAssetName,
+			UTunaSweeperTempOpenLootWidget::StaticClass());
+		const TSubclassOf<UUserWidget> EntryWidgetClass = EntryWidgetBlueprint->GeneratedClass.Get();
+		if (!TileViewWidgetBlueprint || !BuildTempOpenLootTileViewWidgetTree(TileViewWidgetBlueprint, EntryWidgetClass))
+		{
+			return false;
+		}
+
+		FKismetEditorUtilities::CompileBlueprint(TileViewWidgetBlueprint);
+		TileViewWidgetBlueprint->MarkPackageDirty();
+		return SaveAsset(TileViewWidgetBlueprint);
+	}
+
 	bool BuildInteractionMarkerWidgetTree(UWidgetBlueprint* WidgetBlueprint)
 	{
 		if (!WidgetBlueprint || !WidgetBlueprint->WidgetTree)
@@ -940,6 +1300,13 @@ public:
 			[]()
 			{
 				return TunaSweeperEditorSetup::RebuildInteractionMarkerWidgetAlignment();
+			});
+
+		FTunaSweeperEditorRunOnce::Run(
+			TunaSweeperEditorSetup::TempOpenLootUiTaskId,
+			[]()
+			{
+				return TunaSweeperEditorSetup::EnsureTempOpenLootTileViewAssets();
 			});
 
 		TunaSweeperEditorSetup::ScheduleInteractionAssetsAndMapPlacement();

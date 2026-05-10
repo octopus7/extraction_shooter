@@ -4,6 +4,8 @@
 #include "Engine/GameInstance.h"
 #include "TunaSweeperGameInstance.generated.h"
 
+class UTexture2D;
+
 USTRUCT(BlueprintType)
 struct TUNASWEEPER_API FTunaSweeperGameplaySettings
 {
@@ -17,6 +19,21 @@ struct TUNASWEEPER_API FTunaSweeperGameplaySettings
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "TunaSweeper|Gameplay")
 	bool bEnableDebugGameplay = false;
+};
+
+USTRUCT(BlueprintType)
+struct TUNASWEEPER_API FTunaSweeperTempOpenLootItemData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Temp Open Loot")
+	FText DisplayName;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Temp Open Loot")
+	int32 Quantity = 1;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Temp Open Loot")
+	TSoftObjectPtr<UTexture2D> IconTexture;
 };
 
 UCLASS(BlueprintType, Blueprintable)
@@ -57,4 +74,18 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|State")
 	void ClearRuntimeState();
+
+	const TArray<FTunaSweeperTempOpenLootItemData>& GetOrCreateTempOpenLootItems();
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Temp Open Loot")
+	void GetTempOpenLootItems(TArray<FTunaSweeperTempOpenLootItemData>& OutItems);
+
+private:
+	void GenerateTempOpenLootItems();
+
+	UPROPERTY()
+	TArray<FTunaSweeperTempOpenLootItemData> TempOpenLootItems;
+
+	UPROPERTY()
+	bool bHasGeneratedTempOpenLootItems = false;
 };
