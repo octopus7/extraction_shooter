@@ -1,0 +1,23 @@
+using UnrealBuildTool;
+
+public class TunaSweeperEditor : ModuleRules
+{
+	public TunaSweeperEditor(ReadOnlyTargetRules Target) : base(Target)
+	{
+		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+
+		PrivateDependencyModuleNames.AddRange(new string[]
+		{
+			"Core",
+			"CoreUObject",
+			"Engine",
+			"EngineSettings",
+			"UnrealEd",
+			"AssetTools",
+			"AssetRegistry",
+			"KismetCompiler",
+			"BlueprintGraph",
+			"TunaSweeper"
+		});
+	}
+}
