@@ -55,14 +55,22 @@ void UTunaSweeperInteractionMarkerWidget::CacheNamedWidgets()
 		MarkerRoot = WidgetTree->FindWidget(TEXT("MarkerRoot"));
 	}
 
-	if (!RingText)
+	if (!RingImage)
 	{
-		RingText = Cast<UTextBlock>(WidgetTree->FindWidget(TEXT("RingText")));
+		RingImage = WidgetTree->FindWidget(TEXT("RingImage"));
+		if (!RingImage)
+		{
+			RingImage = WidgetTree->FindWidget(TEXT("RingText"));
+		}
 	}
 
-	if (!FilledText)
+	if (!FilledImage)
 	{
-		FilledText = Cast<UTextBlock>(WidgetTree->FindWidget(TEXT("FilledText")));
+		FilledImage = WidgetTree->FindWidget(TEXT("FilledImage"));
+		if (!FilledImage)
+		{
+			FilledImage = WidgetTree->FindWidget(TEXT("FilledText"));
+		}
 	}
 
 	if (!LabelBackground)
@@ -85,15 +93,15 @@ void UTunaSweeperInteractionMarkerWidget::ApplyState()
 		MarkerRoot->SetRenderOpacity(CachedAlpha);
 	}
 
-	if (RingText)
+	if (RingImage)
 	{
-		RingText->SetRenderScale(FVector2D(CachedRingScale));
-		RingText->SetRenderOpacity(CachedAlpha);
+		RingImage->SetRenderScale(FVector2D(CachedRingScale));
+		RingImage->SetRenderOpacity(CachedAlpha);
 	}
 
-	if (FilledText)
+	if (FilledImage)
 	{
-		FilledText->SetRenderOpacity(CachedAlpha);
+		FilledImage->SetRenderOpacity(CachedAlpha);
 	}
 
 	if (DisplayNameText)

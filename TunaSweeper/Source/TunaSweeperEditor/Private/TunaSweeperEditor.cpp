@@ -10,6 +10,7 @@
 #include "Components/CanvasPanelSlot.h"
 #include "Components/HorizontalBox.h"
 #include "Components/HorizontalBoxSlot.h"
+#include "Components/Image.h"
 #include "Components/Overlay.h"
 #include "Components/OverlaySlot.h"
 #include "Components/SizeBox.h"
@@ -51,6 +52,7 @@ namespace TunaSweeperEditorSetup
 	const FString TopDownShooterTaskId = TEXT("2026-05-10_CreateTopDownShooterAssets");
 	const FString InteractionTaskId = TEXT("2026-05-10_CreateInteractionAssetsAndPlaceActors");
 	const FString InteractionInputTaskId = TEXT("2026-05-10_AddInteractionInput");
+	const FString InteractionMarkerAlignmentTaskId = TEXT("2026-05-10_RebuildInteractionMarkerAlignmentV2");
 	const FString GameInstanceAssetPath = TEXT("/Game/Core");
 	const FString GameInstanceAssetName = TEXT("BP_TunaSweeperGameInstance");
 	const FString GameModeAssetName = TEXT("BP_TunaSweeperGameMode");
@@ -472,13 +474,57 @@ namespace TunaSweeperEditorSetup
 
 	void RegisterWidgetVariable(UWidgetBlueprint* WidgetBlueprint, UWidget* Widget)
 	{
-		if (!WidgetBlueprint || !Widget || Widget->bIsVariable)
+		if (!WidgetBlueprint || !Widget)
 		{
 			return;
 		}
 
 		Widget->bIsVariable = true;
-		WidgetBlueprint->OnVariableAdded(Widget->GetFName());
+		if (!WidgetBlueprint->WidgetVariableNameToGuidMap.Contains(Widget->GetFName()))
+		{
+			WidgetBlueprint->OnVariableAdded(Widget->GetFName());
+		}
+	}
+
+	void UnregisterWidgetVariable(UWidgetBlueprint* WidgetBlueprint, const FName& VariableName)
+	{
+		if (WidgetBlueprint && WidgetBlueprint->WidgetVariableNameToGuidMap.Contains(VariableName))
+		{
+			WidgetBlueprint->OnVariableRemoved(VariableName);
+		}
+	}
+
+	void ClearWidgetTreeForRebuild(UWidgetBlueprint* WidgetBlueprint)
+	{
+		if (!WidgetBlueprint || !WidgetBlueprint->WidgetTree)
+		{
+			return;
+		}
+
+		TArray<UWidget*> ExistingWidgets;
+		WidgetBlueprint->WidgetTree->GetAllWidgets(ExistingWidgets);
+
+		for (UWidget* ExistingWidget : ExistingWidgets)
+		{
+			if (ExistingWidget && ExistingWidget->bIsVariable)
+			{
+				UnregisterWidgetVariable(WidgetBlueprint, ExistingWidget->GetFName());
+			}
+		}
+
+		if (WidgetBlueprint->WidgetTree->RootWidget)
+		{
+			WidgetBlueprint->WidgetTree->RemoveWidget(WidgetBlueprint->WidgetTree->RootWidget);
+			WidgetBlueprint->WidgetTree->RootWidget = nullptr;
+		}
+
+		for (UWidget* ExistingWidget : ExistingWidgets)
+		{
+			if (ExistingWidget)
+			{
+				ExistingWidget->Rename(nullptr, GetTransientPackage(), REN_DontCreateRedirectors | REN_NonTransactional);
+			}
+		}
 	}
 
 	void ConfigureTextBlock(UTextBlock* TextBlock, const FText& Text, const FLinearColor& Color, int32 FontSize)
@@ -497,6 +543,19 @@ namespace TunaSweeperEditorSetup
 		TextBlock->SetJustification(ETextJustify::Center);
 	}
 
+	FSlateBrush MakeRoundedBoxBrush(const FVector2D& ImageSize, const FLinearColor& FillColor, const FLinearColor& OutlineColor, float OutlineWidth)
+	{
+		FSlateBrush Brush;
+		Brush.DrawAs = ESlateBrushDrawType::RoundedBox;
+		Brush.TintColor = FSlateColor(FillColor);
+		Brush.SetImageSize(ImageSize);
+		Brush.OutlineSettings.RoundingType = ESlateBrushRoundingType::HalfHeightRadius;
+		Brush.OutlineSettings.Color = FSlateColor(OutlineColor);
+		Brush.OutlineSettings.Width = OutlineWidth;
+		Brush.OutlineSettings.bUseBrushTransparency = false;
+		return Brush;
+	}
+
 	bool BuildInteractionMarkerWidgetTree(UWidgetBlueprint* WidgetBlueprint)
 	{
 		if (!WidgetBlueprint || !WidgetBlueprint->WidgetTree)
@@ -507,17 +566,21 @@ namespace TunaSweeperEditorSetup
 		WidgetBlueprint->Modify();
 		WidgetBlueprint->WidgetTree->Modify();
 
+		ClearWidgetTreeForRebuild(WidgetBlueprint);
+
 		UWidgetTree* WidgetTree = WidgetBlueprint->WidgetTree;
 		UCanvasPanel* RootCanvas = WidgetTree->ConstructWidget<UCanvasPanel>(UCanvasPanel::StaticClass(), TEXT("RootCanvas"));
 		UHorizontalBox* MarkerRoot = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("MarkerRoot"));
 		USizeBox* MarkerSizeBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("MarkerSizeBox"));
 		UOverlay* MarkerOverlay = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), TEXT("MarkerOverlay"));
-		UTextBlock* RingText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("RingText"));
-		UTextBlock* FilledText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("FilledText"));
+		USizeBox* RingImage = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("RingImage"));
+		UImage* RingBrushImage = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("RingBrushImage"));
+		USizeBox* FilledImage = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("FilledImage"));
+		UImage* FilledBrushImage = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("FilledBrushImage"));
 		UBorder* LabelBackground = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("LabelBackground"));
 		UTextBlock* DisplayNameText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("DisplayNameText"));
 
-		if (!RootCanvas || !MarkerRoot || !MarkerSizeBox || !MarkerOverlay || !RingText || !FilledText || !LabelBackground || !DisplayNameText)
+		if (!RootCanvas || !MarkerRoot || !MarkerSizeBox || !MarkerOverlay || !RingImage || !RingBrushImage || !FilledImage || !FilledBrushImage || !LabelBackground || !DisplayNameText)
 		{
 			return false;
 		}
@@ -530,7 +593,7 @@ namespace TunaSweeperEditorSetup
 			RootSlot->SetAnchors(FAnchors(0.5f, 0.5f, 0.5f, 0.5f));
 			RootSlot->SetAlignment(FVector2D(0.5f, 0.5f));
 			RootSlot->SetPosition(FVector2D::ZeroVector);
-			RootSlot->SetSize(FVector2D(300.0f, 64.0f));
+			RootSlot->SetSize(FVector2D(300.0f, 56.0f));
 		}
 
 		MarkerRoot->SetRenderOpacity(0.0f);
@@ -546,19 +609,25 @@ namespace TunaSweeperEditorSetup
 			MarkerSlot->SetVerticalAlignment(VAlign_Center);
 		}
 
-		ConfigureTextBlock(RingText, FText::FromString(TEXT("\u25CB")), FLinearColor::White, 48);
-		RingText->SetRenderTransformPivot(FVector2D(0.5f, 0.5f));
+		RingImage->SetWidthOverride(34.0f);
+		RingImage->SetHeightOverride(34.0f);
+		RingImage->SetRenderTransformPivot(FVector2D(0.5f, 0.5f));
+		RingBrushImage->SetBrush(MakeRoundedBoxBrush(FVector2D(34.0f, 34.0f), FLinearColor::Transparent, FLinearColor::White, 3.0f));
+		RingImage->SetContent(RingBrushImage);
 
-		UOverlaySlot* RingSlot = MarkerOverlay->AddChildToOverlay(RingText);
+		UOverlaySlot* RingSlot = MarkerOverlay->AddChildToOverlay(RingImage);
 		if (RingSlot)
 		{
 			RingSlot->SetHorizontalAlignment(HAlign_Center);
 			RingSlot->SetVerticalAlignment(VAlign_Center);
 		}
 
-		ConfigureTextBlock(FilledText, FText::FromString(TEXT("\u25CF")), FLinearColor::White, 18);
+		FilledImage->SetWidthOverride(12.0f);
+		FilledImage->SetHeightOverride(12.0f);
+		FilledBrushImage->SetBrush(MakeRoundedBoxBrush(FVector2D(12.0f, 12.0f), FLinearColor::White, FLinearColor::Transparent, 0.0f));
+		FilledImage->SetContent(FilledBrushImage);
 
-		UOverlaySlot* FilledSlot = MarkerOverlay->AddChildToOverlay(FilledText);
+		UOverlaySlot* FilledSlot = MarkerOverlay->AddChildToOverlay(FilledImage);
 		if (FilledSlot)
 		{
 			FilledSlot->SetHorizontalAlignment(HAlign_Center);
@@ -580,13 +649,40 @@ namespace TunaSweeperEditorSetup
 		}
 
 		RegisterWidgetVariable(WidgetBlueprint, MarkerRoot);
-		RegisterWidgetVariable(WidgetBlueprint, RingText);
-		RegisterWidgetVariable(WidgetBlueprint, FilledText);
+		RegisterWidgetVariable(WidgetBlueprint, RingImage);
+		RegisterWidgetVariable(WidgetBlueprint, FilledImage);
 		RegisterWidgetVariable(WidgetBlueprint, LabelBackground);
 		RegisterWidgetVariable(WidgetBlueprint, DisplayNameText);
 
 		WidgetBlueprint->MarkPackageDirty();
 		return true;
+	}
+
+	UWidgetBlueprint* EnsureInteractionMarkerWidgetBlueprint();
+
+	bool RebuildInteractionMarkerWidgetAlignment()
+	{
+		const FString ObjectPath = GetAssetObjectPath(UIAssetPath, InteractionMarkerAssetName);
+		UWidgetBlueprint* MarkerWidgetBlueprint = LoadObject<UWidgetBlueprint>(nullptr, *ObjectPath);
+		if (!MarkerWidgetBlueprint)
+		{
+			MarkerWidgetBlueprint = EnsureInteractionMarkerWidgetBlueprint();
+		}
+
+		if (!MarkerWidgetBlueprint)
+		{
+			return false;
+		}
+
+		if (!BuildInteractionMarkerWidgetTree(MarkerWidgetBlueprint))
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to rebuild marker alignment for %s."), *ObjectPath);
+			return false;
+		}
+
+		FKismetEditorUtilities::CompileBlueprint(MarkerWidgetBlueprint);
+		MarkerWidgetBlueprint->MarkPackageDirty();
+		return SaveAsset(MarkerWidgetBlueprint);
 	}
 
 	UWidgetBlueprint* EnsureInteractionMarkerWidgetBlueprint()
@@ -837,6 +933,13 @@ public:
 			[]()
 			{
 				return TunaSweeperEditorSetup::EnsureInteractionInputAssets();
+			});
+
+		FTunaSweeperEditorRunOnce::Run(
+			TunaSweeperEditorSetup::InteractionMarkerAlignmentTaskId,
+			[]()
+			{
+				return TunaSweeperEditorSetup::RebuildInteractionMarkerWidgetAlignment();
 			});
 
 		TunaSweeperEditorSetup::ScheduleInteractionAssetsAndMapPlacement();

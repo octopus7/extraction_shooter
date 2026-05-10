@@ -28,10 +28,10 @@ protected:
 	TObjectPtr<UWidget> MarkerRoot;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Interaction", meta = (BindWidgetOptional))
-	TObjectPtr<UTextBlock> RingText;
+	TObjectPtr<UWidget> RingImage;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Interaction", meta = (BindWidgetOptional))
-	TObjectPtr<UTextBlock> FilledText;
+	TObjectPtr<UWidget> FilledImage;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Interaction", meta = (BindWidgetOptional))
 	TObjectPtr<UBorder> LabelBackground;
