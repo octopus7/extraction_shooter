@@ -3,7 +3,7 @@
 #include "Engine/Engine.h"
 #include "Blueprint/UserWidget.h"
 #include "GameFramework/PlayerController.h"
-#include "Interaction/TunaSweeperInteractableActor.h"
+#include "Interaction/TunaSweeperInteractableComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Stats/Stats.h"
 #include "UI/TunaSweeperTempOpenLootWidget.h"
@@ -23,7 +23,7 @@ bool UTunaSweeperInteractionSubsystem::IsTickable() const
 	return GetWorld() && GetWorld()->IsGameWorld();
 }
 
-void UTunaSweeperInteractionSubsystem::RegisterInteractable(ATunaSweeperInteractableActor* Interactable)
+void UTunaSweeperInteractionSubsystem::RegisterInteractable(UTunaSweeperInteractableComponent* Interactable)
 {
 	if (IsValid(Interactable))
 	{
@@ -31,7 +31,7 @@ void UTunaSweeperInteractionSubsystem::RegisterInteractable(ATunaSweeperInteract
 	}
 }
 
-void UTunaSweeperInteractionSubsystem::UnregisterInteractable(ATunaSweeperInteractableActor* Interactable)
+void UTunaSweeperInteractionSubsystem::UnregisterInteractable(UTunaSweeperInteractableComponent* Interactable)
 {
 	RegisteredInteractables.Remove(Interactable);
 
@@ -41,7 +41,7 @@ void UTunaSweeperInteractionSubsystem::UnregisterInteractable(ATunaSweeperIntera
 	}
 }
 
-ATunaSweeperInteractableActor* UTunaSweeperInteractionSubsystem::GetFocusedInteractable() const
+UTunaSweeperInteractableComponent* UTunaSweeperInteractionSubsystem::GetFocusedInteractable() const
 {
 	return FocusedInteractable.Get();
 }
@@ -52,7 +52,7 @@ bool UTunaSweeperInteractionSubsystem::TryInteract(APawn* InstigatorPawn)
 	return RequestInteraction(FocusedInteractable.Get(), InstigatorPawn);
 }
 
-bool UTunaSweeperInteractionSubsystem::RequestInteraction(ATunaSweeperInteractableActor* Interactable, APawn* InstigatorPawn)
+bool UTunaSweeperInteractionSubsystem::RequestInteraction(UTunaSweeperInteractableComponent* Interactable, APawn* InstigatorPawn)
 {
 	if (!IsValid(Interactable) || !IsValid(InstigatorPawn) || !Interactable->IsWithinInteractionDistance(InstigatorPawn))
 	{
@@ -134,12 +134,12 @@ void UTunaSweeperInteractionSubsystem::RefreshFocusedInteractable()
 		return;
 	}
 
-	ATunaSweeperInteractableActor* ClosestInteractable = nullptr;
+	UTunaSweeperInteractableComponent* ClosestInteractable = nullptr;
 	float ClosestDistanceSquared = TNumericLimits<float>::Max();
 
 	for (auto InteractableIt = RegisteredInteractables.CreateIterator(); InteractableIt; ++InteractableIt)
 	{
-		ATunaSweeperInteractableActor* Interactable = InteractableIt->Get();
+		UTunaSweeperInteractableComponent* Interactable = InteractableIt->Get();
 		if (!IsValid(Interactable))
 		{
 			InteractableIt.RemoveCurrent();
@@ -162,7 +162,7 @@ void UTunaSweeperInteractionSubsystem::RefreshFocusedInteractable()
 	FocusedInteractable = ClosestInteractable;
 }
 
-FString UTunaSweeperInteractionSubsystem::GetInteractionDebugTypeName(const ATunaSweeperInteractableActor* Interactable) const
+FString UTunaSweeperInteractionSubsystem::GetInteractionDebugTypeName(const UTunaSweeperInteractableComponent* Interactable) const
 {
 	if (!Interactable)
 	{

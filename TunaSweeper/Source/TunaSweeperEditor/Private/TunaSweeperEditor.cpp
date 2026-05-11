@@ -38,6 +38,8 @@
 #include "InputMappingContext.h"
 #include "InputModifiers.h"
 #include "Interaction/TunaSweeperInteractableActor.h"
+#include "Interaction/TunaSweeperInteractableComponent.h"
+#include "Kismet2/BlueprintEditorUtils.h"
 #include "Kismet2/KismetEditorUtilities.h"
 #include "Misc/ConfigCacheIni.h"
 #include "Misc/PackageName.h"
@@ -60,7 +62,7 @@ namespace TunaSweeperEditorSetup
 {
 	const FString GameInstanceTaskId = TEXT("2026-05-10_CreateGameInstanceBlueprint");
 	const FString TopDownShooterTaskId = TEXT("2026-05-10_CreateTopDownShooterAssets");
-	const FString InteractionTaskId = TEXT("2026-05-10_CreateInteractionAssetsAndPlaceActors");
+	const FString InteractionTaskId = TEXT("2026-05-11_CreateComponentBasedInteractionAssetsAndPlaceActorsV2");
 	const FString InteractionInputTaskId = TEXT("2026-05-10_AddInteractionInput");
 	const FString InteractionMarkerAlignmentTaskId = TEXT("2026-05-10_RebuildInteractionMarkerAlignmentV2");
 	const FString TempOpenLootUiTaskId = TEXT("2026-05-10_CreateTempOpenLootTileViewAndIconsV2");
@@ -1133,14 +1135,45 @@ namespace TunaSweeperEditorSetup
 
 		InteractableBlueprint->Modify();
 		Defaults->Modify();
+		if (UTunaSweeperInteractableComponent* InteractableComponent = Defaults->GetInteractableComponent())
+		{
+			InteractableComponent->Modify();
+		}
 		Defaults->ConfigureInteractionDefaults(
 			InteractionType,
 			DisplayName,
 			TSoftClassPtr<UTunaSweeperInteractionMarkerWidget>(
 				FSoftObjectPath(GetAssetClassPath(UIAssetPath, InteractionMarkerAssetName))));
+		FBlueprintEditorUtils::MarkBlueprintAsModified(InteractableBlueprint);
+		FKismetEditorUtilities::CompileBlueprint(InteractableBlueprint);
 		InteractableBlueprint->MarkPackageDirty();
 
 		return SaveAsset(InteractableBlueprint);
+	}
+
+	bool ConfigureInteractableActorInstance(AActor* Actor, ETunaSweeperInteractionType InteractionType, const FText& DisplayName)
+	{
+		if (!Actor)
+		{
+			return false;
+		}
+
+		UTunaSweeperInteractableComponent* InteractableComponent = Actor->FindComponentByClass<UTunaSweeperInteractableComponent>();
+		if (!InteractableComponent)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("%s does not have a UTunaSweeperInteractableComponent."), *GetNameSafe(Actor));
+			return false;
+		}
+
+		Actor->Modify();
+		InteractableComponent->Modify();
+		InteractableComponent->ConfigureInteractionDefaults(
+			InteractionType,
+			DisplayName,
+			TSoftClassPtr<UTunaSweeperInteractionMarkerWidget>(
+				FSoftObjectPath(GetAssetClassPath(UIAssetPath, InteractionMarkerAssetName))));
+		Actor->MarkPackageDirty();
+		return true;
 	}
 
 	AActor* FindActorByLabel(UWorld* World, const FString& ActorLabel)
@@ -1161,7 +1194,13 @@ namespace TunaSweeperEditorSetup
 		return nullptr;
 	}
 
-	bool PlaceInteractionActor(UWorld* World, UBlueprint* ActorBlueprint, const FString& ActorLabel, const FVector& Location)
+	bool PlaceInteractionActor(
+		UWorld* World,
+		UBlueprint* ActorBlueprint,
+		const FString& ActorLabel,
+		const FVector& Location,
+		ETunaSweeperInteractionType InteractionType,
+		const FText& DisplayName)
 	{
 		if (!World || !ActorBlueprint || !ActorBlueprint->GeneratedClass)
 		{
@@ -1173,7 +1212,7 @@ namespace TunaSweeperEditorSetup
 			ExistingActor->Modify();
 			ExistingActor->SetActorLocation(Location);
 			ExistingActor->SetActorRotation(FRotator::ZeroRotator);
-			return true;
+			return ConfigureInteractableActorInstance(ExistingActor, InteractionType, DisplayName);
 		}
 
 		World->PersistentLevel->Modify();
@@ -1190,6 +1229,10 @@ namespace TunaSweeperEditorSetup
 		}
 
 		SpawnedActor->SetActorLabel(ActorLabel);
+		if (!ConfigureInteractableActorInstance(SpawnedActor, InteractionType, DisplayName))
+		{
+			return false;
+		}
 		SpawnedActor->MarkPackageDirty();
 		return true;
 	}
@@ -1203,9 +1246,27 @@ namespace TunaSweeperEditorSetup
 		}
 
 		const bool bPlacedActors =
-			PlaceInteractionActor(World, DialogueBlueprint, TEXT("TS_Interact_Dialogue"), FVector(200.0f, -200.0f, 80.0f)) &&
-			PlaceInteractionActor(World, PickupBlueprint, TEXT("TS_Interact_Pickup"), FVector(450.0f, -200.0f, 80.0f)) &&
-			PlaceInteractionActor(World, OpenBlueprint, TEXT("TS_Interact_Open"), FVector(700.0f, -200.0f, 80.0f));
+			PlaceInteractionActor(
+				World,
+				DialogueBlueprint,
+				TEXT("TS_Interact_Dialogue"),
+				FVector(200.0f, -200.0f, 80.0f),
+				ETunaSweeperInteractionType::Dialogue,
+				FText::FromString(TEXT("\uB300\uD654"))) &&
+			PlaceInteractionActor(
+				World,
+				PickupBlueprint,
+				TEXT("TS_Interact_Pickup"),
+				FVector(450.0f, -200.0f, 80.0f),
+				ETunaSweeperInteractionType::Pickup,
+				FText::FromString(TEXT("\uC90D\uAE30"))) &&
+			PlaceInteractionActor(
+				World,
+				OpenBlueprint,
+				TEXT("TS_Interact_Open"),
+				FVector(700.0f, -200.0f, 80.0f),
+				ETunaSweeperInteractionType::Open,
+				FText::FromString(TEXT("\uC5F4\uAE30")));
 
 		if (!bPlacedActors)
 		{

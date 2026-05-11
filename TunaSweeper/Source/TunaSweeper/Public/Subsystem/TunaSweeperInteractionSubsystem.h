@@ -1,10 +1,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Interaction/TunaSweeperInteractableComponent.h"
 #include "Subsystems/WorldSubsystem.h"
 #include "TunaSweeperInteractionSubsystem.generated.h"
 
-class ATunaSweeperInteractableActor;
 class UTunaSweeperTempOpenLootWidget;
 
 UCLASS()
@@ -17,24 +17,24 @@ public:
 	virtual TStatId GetStatId() const override;
 	virtual bool IsTickable() const override;
 
-	void RegisterInteractable(ATunaSweeperInteractableActor* Interactable);
-	void UnregisterInteractable(ATunaSweeperInteractableActor* Interactable);
+	void RegisterInteractable(UTunaSweeperInteractableComponent* Interactable);
+	void UnregisterInteractable(UTunaSweeperInteractableComponent* Interactable);
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Interaction")
-	ATunaSweeperInteractableActor* GetFocusedInteractable() const;
+	UTunaSweeperInteractableComponent* GetFocusedInteractable() const;
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Interaction")
 	bool TryInteract(APawn* InstigatorPawn);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Interaction")
-	bool RequestInteraction(ATunaSweeperInteractableActor* Interactable, APawn* InstigatorPawn);
+	bool RequestInteraction(UTunaSweeperInteractableComponent* Interactable, APawn* InstigatorPawn);
 
 private:
 	void RefreshFocusedInteractable();
-	FString GetInteractionDebugTypeName(const ATunaSweeperInteractableActor* Interactable) const;
+	FString GetInteractionDebugTypeName(const UTunaSweeperInteractableComponent* Interactable) const;
 	bool OpenTempOpenLootWidget(APawn* InstigatorPawn);
 
-	TSet<TWeakObjectPtr<ATunaSweeperInteractableActor>> RegisteredInteractables;
-	TWeakObjectPtr<ATunaSweeperInteractableActor> FocusedInteractable;
+	TSet<TWeakObjectPtr<UTunaSweeperInteractableComponent>> RegisteredInteractables;
+	TWeakObjectPtr<UTunaSweeperInteractableComponent> FocusedInteractable;
 	TWeakObjectPtr<UTunaSweeperTempOpenLootWidget> ActiveTempOpenLootWidget;
 };
