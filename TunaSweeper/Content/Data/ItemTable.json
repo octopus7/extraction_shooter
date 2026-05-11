@@ -2,96 +2,119 @@
   {
     "id": 1001,
     "name_string_key": "item.pistol",
+    "description_string_key": "item.pistol.desc",
     "shop_sell_price": 120,
     "icon_file_name": "T_UIIcon_Pistol.uasset"
   },
   {
     "id": 1002,
     "name_string_key": "item.rifle",
+    "description_string_key": "item.rifle.desc",
     "shop_sell_price": 360,
     "icon_file_name": "T_UIIcon_Rifle.uasset"
   },
   {
     "id": 1003,
     "name_string_key": "item.shotgun",
+    "description_string_key": "item.shotgun.desc",
     "shop_sell_price": 300,
     "icon_file_name": "T_UIIcon_Shotgun.uasset"
   },
   {
     "id": 2001,
     "name_string_key": "item.pistol_ammo",
+    "description_string_key": "item.pistol_ammo.desc",
     "shop_sell_price": 12,
     "icon_file_name": "T_UIIcon_PistolAmmo.uasset"
   },
   {
     "id": 2002,
     "name_string_key": "item.rifle_ammo",
+    "description_string_key": "item.rifle_ammo.desc",
     "shop_sell_price": 18,
     "icon_file_name": "T_UIIcon_RifleAmmo.uasset"
   },
   {
     "id": 2003,
     "name_string_key": "item.shotgun_ammo",
+    "description_string_key": "item.shotgun_ammo.desc",
     "shop_sell_price": 16,
     "icon_file_name": "T_UIIcon_ShotgunAmmo.uasset"
   },
   {
     "id": 3001,
     "name_string_key": "item.canned_food",
+    "description_string_key": "item.canned_food.desc",
     "shop_sell_price": 8,
     "icon_file_name": "T_UIIcon_CannedFood.uasset"
   },
   {
     "id": 3002,
     "name_string_key": "item.water_bottle",
+    "description_string_key": "item.water_bottle.desc",
     "shop_sell_price": 6,
     "icon_file_name": "T_UIIcon_WaterBottle.uasset"
   },
   {
     "id": 3003,
     "name_string_key": "item.energy_bar",
+    "description_string_key": "item.energy_bar.desc",
     "shop_sell_price": 10,
     "icon_file_name": "T_UIIcon_EnergyBar.uasset"
   },
   {
+    "id": 3004,
+    "name_string_key": "item.canned_tuna",
+    "description_string_key": "item.canned_tuna.desc",
+    "shop_sell_price": 12,
+    "icon_file_name": "T_UIIcon_CannedTuna.uasset"
+  },
+  {
     "id": 4001,
     "name_string_key": "item.bandage",
+    "description_string_key": "item.bandage.desc",
     "shop_sell_price": 15,
     "icon_file_name": "T_UIIcon_Bandage.uasset"
   },
   {
     "id": 4002,
     "name_string_key": "item.first_aid_kit",
+    "description_string_key": "item.first_aid_kit.desc",
     "shop_sell_price": 45,
     "icon_file_name": "T_UIIcon_FirstAidKit.uasset"
   },
   {
     "id": 4003,
     "name_string_key": "item.painkillers",
+    "description_string_key": "item.painkillers.desc",
     "shop_sell_price": 22,
     "icon_file_name": "T_UIIcon_Painkillers.uasset"
   },
   {
     "id": 4004,
     "name_string_key": "item.antibiotics",
+    "description_string_key": "item.antibiotics.desc",
     "shop_sell_price": 32,
     "icon_file_name": "T_UIIcon_Antibiotics.uasset"
   },
   {
     "id": 5001,
     "name_string_key": "item.body_armor",
+    "description_string_key": "item.body_armor.desc",
     "shop_sell_price": 180,
     "icon_file_name": "T_UIIcon_BodyArmor.uasset"
   },
   {
     "id": 5002,
     "name_string_key": "item.backpack",
+    "description_string_key": "item.backpack.desc",
     "shop_sell_price": 95,
     "icon_file_name": "T_UIIcon_Backpack.uasset"
   },
   {
     "id": 6001,
     "name_string_key": "item.valuables_crate",
+    "description_string_key": "item.valuables_crate.desc",
     "shop_sell_price": 250,
     "icon_file_name": "T_UIIcon_ValuablesCrate.uasset"
   }

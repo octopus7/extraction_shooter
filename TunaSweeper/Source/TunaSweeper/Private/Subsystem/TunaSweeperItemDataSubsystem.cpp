@@ -63,19 +63,24 @@ bool UTunaSweeperItemDataSubsystem::TryGetItemDefinition(int32 ItemId, FTunaSwee
 
 bool UTunaSweeperItemDataSubsystem::TryGetItemNameString(FName NameStringKey, FTunaSweeperItemNameString& OutNameString)
 {
+	return TryGetItemString(NameStringKey, OutNameString);
+}
+
+bool UTunaSweeperItemDataSubsystem::TryGetItemString(FName StringKey, FTunaSweeperItemNameString& OutItemString)
+{
 	if (!EnsureItemDataLoaded())
 	{
-		OutNameString = FTunaSweeperItemNameString();
+		OutItemString = FTunaSweeperItemNameString();
 		return false;
 	}
 
-	if (const FTunaSweeperItemNameString* FoundNameString = ItemNameStringsByKey.Find(NameStringKey))
+	if (const FTunaSweeperItemNameString* FoundNameString = ItemNameStringsByKey.Find(StringKey))
 	{
-		OutNameString = *FoundNameString;
+		OutItemString = *FoundNameString;
 		return true;
 	}
 
-	OutNameString = FTunaSweeperItemNameString();
+	OutItemString = FTunaSweeperItemNameString();
 	return false;
 }
 
@@ -84,8 +89,16 @@ bool UTunaSweeperItemDataSubsystem::TryGetItemNameTextByKey(
 	ETunaSweeperItemTextLanguage Language,
 	FText& OutText)
 {
+	return TryGetItemTextByKey(NameStringKey, Language, OutText);
+}
+
+bool UTunaSweeperItemDataSubsystem::TryGetItemTextByKey(
+	FName StringKey,
+	ETunaSweeperItemTextLanguage Language,
+	FText& OutText)
+{
 	FTunaSweeperItemNameString NameString;
-	if (!TryGetItemNameString(NameStringKey, NameString))
+	if (!TryGetItemString(StringKey, NameString))
 	{
 		OutText = FText::GetEmpty();
 		return false;
@@ -123,6 +136,21 @@ bool UTunaSweeperItemDataSubsystem::TryGetItemNameText(
 	}
 
 	return TryGetItemNameTextByKey(ItemDefinition.NameStringKey, Language, OutText);
+}
+
+bool UTunaSweeperItemDataSubsystem::TryGetItemDescriptionText(
+	int32 ItemId,
+	ETunaSweeperItemTextLanguage Language,
+	FText& OutText)
+{
+	FTunaSweeperItemDefinition ItemDefinition;
+	if (!TryGetItemDefinition(ItemId, ItemDefinition))
+	{
+		OutText = FText::GetEmpty();
+		return false;
+	}
+
+	return TryGetItemTextByKey(ItemDefinition.DescriptionStringKey, Language, OutText);
 }
 
 bool UTunaSweeperItemDataSubsystem::GetAllItemDefinitions(TArray<FTunaSweeperItemDefinition>& OutItemDefinitions)
@@ -178,9 +206,11 @@ bool UTunaSweeperItemDataSubsystem::LoadItemTableJson()
 		double NumericId = 0.0;
 		double NumericShopSellPrice = 0.0;
 		FString NameStringKey;
+		FString DescriptionStringKey;
 		FString IconFileName;
 		if (!(*JsonObject)->TryGetNumberField(TEXT("id"), NumericId) ||
 			!(*JsonObject)->TryGetStringField(TEXT("name_string_key"), NameStringKey) ||
+			!(*JsonObject)->TryGetStringField(TEXT("description_string_key"), DescriptionStringKey) ||
 			!(*JsonObject)->TryGetNumberField(TEXT("shop_sell_price"), NumericShopSellPrice) ||
 			!(*JsonObject)->TryGetStringField(TEXT("icon_file_name"), IconFileName))
 		{
@@ -191,10 +221,12 @@ bool UTunaSweeperItemDataSubsystem::LoadItemTableJson()
 		FTunaSweeperItemDefinition ItemDefinition;
 		ItemDefinition.Id = static_cast<int32>(NumericId);
 		ItemDefinition.NameStringKey = FName(*NameStringKey.TrimStartAndEnd());
+		ItemDefinition.DescriptionStringKey = FName(*DescriptionStringKey.TrimStartAndEnd());
 		ItemDefinition.ShopSellPrice = FMath::Max(0, static_cast<int32>(NumericShopSellPrice));
 		ItemDefinition.IconFileName = IconFileName.TrimStartAndEnd();
 
-		if (ItemDefinition.Id == INDEX_NONE || ItemDefinition.NameStringKey.IsNone() || ItemDefinition.IconFileName.IsEmpty())
+		if (ItemDefinition.Id == INDEX_NONE || ItemDefinition.NameStringKey.IsNone() ||
+			ItemDefinition.DescriptionStringKey.IsNone() || ItemDefinition.IconFileName.IsEmpty())
 		{
 			UE_LOG(LogTunaSweeperItemData, Warning, TEXT("Skipping item table row %d: field value is invalid."), RowIndex);
 			continue;

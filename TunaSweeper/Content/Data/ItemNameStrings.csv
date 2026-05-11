@@ -8,6 +8,7 @@ item.shotgun_ammo,산탄총 탄약,Shotgun Ammo,ショットガン弾薬
 item.canned_food,통조림,Canned Food,缶詰
 item.water_bottle,물병,Water Bottle,水ボトル
 item.energy_bar,에너지바,Energy Bar,エナジーバー
+item.canned_tuna,참치 통조림,Canned Tuna,ツナ缶
 item.bandage,붕대,Bandage,包帯
 item.first_aid_kit,응급키트,First Aid Kit,救急キット
 item.painkillers,진통제,Painkillers,鎮痛剤
@@ -15,3 +16,20 @@ item.antibiotics,항생제,Antibiotics,抗生物質
 item.body_armor,방탄조끼,Body Armor,ボディアーマー
 item.backpack,배낭,Backpack,バックパック
 item.valuables_crate,귀중품 상자,Valuables Crate,貴重品箱
+item.pistol.desc,가까운 거리 방어에 쓰기 좋은 기본 권총이다,A compact sidearm for close defense,近距離防衛に使いやすい基本的な拳銃
+item.rifle.desc,중거리 교전에 적합한 안정적인 소총이다,A reliable rifle suited for mid range fights,中距離戦に適した安定したライフル
+item.shotgun.desc,좁은 공간에서 강한 화력을 내는 산탄총이다,A shotgun with strong close quarters impact,狭い場所で強い火力を出すショットガン
+item.pistol_ammo.desc,권총에 사용하는 소형 탄약 묶음이다,A small bundle of pistol rounds,ピストル用の小型弾薬の束
+item.rifle_ammo.desc,소총에 사용하는 표준 탄약 묶음이다,A standard bundle of rifle rounds,ライフル用の標準弾薬の束
+item.shotgun_ammo.desc,산탄총에 사용하는 산탄 탄약이다,Shells used by shotguns,ショットガンで使う散弾
+item.canned_food.desc,오래 보관할 수 있는 평범한 식량 통조림이다,A plain canned meal with a long shelf life,長期保存できる普通の缶詰食品
+item.water_bottle.desc,갈증을 줄이는 깨끗한 물병이다,A clean water bottle that eases thirst,渇きを抑えるきれいな水ボトル
+item.energy_bar.desc,빠르게 허기를 채우는 작은 에너지바다,A small energy bar that quickly eases hunger,素早く空腹を満たす小さなエナジーバー
+item.canned_tuna.desc,노란 라벨의 참치 통조림이다,A yellow labeled can of tuna,黄色いラベルのツナ缶
+item.bandage.desc,가벼운 상처를 응급 처치하는 붕대다,A bandage for simple first aid,軽い傷を応急処置する包帯
+item.first_aid_kit.desc,기본 치료 도구가 들어 있는 응급키트다,A first aid kit with basic treatment tools,基本的な治療道具が入った救急キット
+item.painkillers.desc,통증을 잠시 줄이는 약품이다,Medicine that briefly reduces pain,痛みを一時的に抑える薬
+item.antibiotics.desc,감염 위험을 낮추는 항생제다,Antibiotics that lower infection risk,感染リスクを下げる抗生物質
+item.body_armor.desc,몸통을 보호하는 간단한 방탄조끼다,A simple vest that protects the torso,胴体を守る簡易ボディアーマー
+item.backpack.desc,추가 보관 공간을 제공하는 배낭이다,A backpack that provides extra storage,追加の収納空間を提供するバックパック
+item.valuables_crate.desc,팔 만한 물건이 들어 있을 수 있는 작은 상자다,A small crate that may hold sellable goods,売れる品が入っているかもしれない小箱

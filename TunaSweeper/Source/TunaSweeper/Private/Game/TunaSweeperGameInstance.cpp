@@ -20,6 +20,7 @@ namespace TunaSweeperTempOpenLoot
 		{ TEXT("Rifle Ammo"), TEXT("/Game/UI/Icons/T_UIIcon_RifleAmmo.T_UIIcon_RifleAmmo"), 30, 120 },
 		{ TEXT("Shotgun Ammo"), TEXT("/Game/UI/Icons/T_UIIcon_ShotgunAmmo.T_UIIcon_ShotgunAmmo"), 6, 32 },
 		{ TEXT("Canned Food"), TEXT("/Game/UI/Icons/T_UIIcon_CannedFood.T_UIIcon_CannedFood"), 1, 5 },
+		{ TEXT("Canned Tuna"), TEXT("/Game/UI/Icons/T_UIIcon_CannedTuna.T_UIIcon_CannedTuna"), 1, 4 },
 		{ TEXT("Water Bottle"), TEXT("/Game/UI/Icons/T_UIIcon_WaterBottle.T_UIIcon_WaterBottle"), 1, 4 },
 		{ TEXT("Energy Bar"), TEXT("/Game/UI/Icons/T_UIIcon_EnergyBar.T_UIIcon_EnergyBar"), 1, 6 },
 		{ TEXT("Bandage"), TEXT("/Game/UI/Icons/T_UIIcon_Bandage.T_UIIcon_Bandage"), 1, 8 },

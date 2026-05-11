@@ -24,6 +24,9 @@ struct TUNASWEEPER_API FTunaSweeperItemDefinition
 	FName NameStringKey;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
+	FName DescriptionStringKey;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
 	int32 ShopSellPrice = 0;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
@@ -67,10 +70,19 @@ public:
 	bool TryGetItemNameString(FName NameStringKey, FTunaSweeperItemNameString& OutNameString);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Item Data")
+	bool TryGetItemString(FName StringKey, FTunaSweeperItemNameString& OutItemString);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Item Data")
 	bool TryGetItemNameTextByKey(FName NameStringKey, ETunaSweeperItemTextLanguage Language, FText& OutText);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Item Data")
+	bool TryGetItemTextByKey(FName StringKey, ETunaSweeperItemTextLanguage Language, FText& OutText);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Item Data")
 	bool TryGetItemNameText(int32 ItemId, ETunaSweeperItemTextLanguage Language, FText& OutText);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Item Data")
+	bool TryGetItemDescriptionText(int32 ItemId, ETunaSweeperItemTextLanguage Language, FText& OutText);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Item Data")
 	bool GetAllItemDefinitions(TArray<FTunaSweeperItemDefinition>& OutItemDefinitions);

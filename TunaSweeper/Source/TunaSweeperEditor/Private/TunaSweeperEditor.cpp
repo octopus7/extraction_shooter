@@ -79,6 +79,7 @@ namespace TunaSweeperEditorSetup
 	const FString TempOpenLootUiTaskId = TEXT("2026-05-10_CreateTempOpenLootTileViewAndIconsV2");
 	const FString PickupItemAndSpawnerTaskId = TEXT("2026-05-11_CreatePickupItemAndSpawnerAssetsV3");
 	const FString CommonGameHudTaskId = TEXT("2026-05-11_CreateCommonGameHudAssetsV1");
+	const FString CannedTunaIconImportTaskId = TEXT("2026-05-11_ImportCannedTunaIconV1");
 	const FString GameInstanceAssetPath = TEXT("/Game/Core");
 	const FString GameInstanceAssetName = TEXT("BP_TunaSweeperGameInstance");
 	const FString GameModeAssetName = TEXT("BP_TunaSweeperGameMode");
@@ -614,6 +615,7 @@ namespace TunaSweeperEditorSetup
 			TEXT("T_UIIcon_RifleAmmo"),
 			TEXT("T_UIIcon_ShotgunAmmo"),
 			TEXT("T_UIIcon_CannedFood"),
+			TEXT("T_UIIcon_CannedTuna"),
 			TEXT("T_UIIcon_WaterBottle"),
 			TEXT("T_UIIcon_EnergyBar"),
 			TEXT("T_UIIcon_Bandage"),
@@ -711,6 +713,50 @@ namespace TunaSweeperEditorSetup
 			ConfigureImportedIconTexture(Texture);
 		}
 
+		return true;
+	}
+
+	bool EnsureCannedTunaIconTexture()
+	{
+		const FString IconAssetName = TEXT("T_UIIcon_CannedTuna");
+		if (UTexture2D* ExistingTexture = LoadObject<UTexture2D>(nullptr, *GetAssetObjectPath(UIIconAssetPath, IconAssetName)))
+		{
+			ConfigureImportedIconTexture(ExistingTexture);
+			return true;
+		}
+
+		const FString SourcePath = GetTempOpenLootIconSourcePath(IconAssetName);
+		if (!FPaths::FileExists(SourcePath))
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Missing canned tuna icon source: %s"), *SourcePath);
+			return false;
+		}
+
+		TArray<FString> FilesToImport;
+		FilesToImport.Add(SourcePath);
+
+		UAutomatedAssetImportData* ImportData = NewObject<UAutomatedAssetImportData>();
+		ImportData->DestinationPath = UIIconAssetPath;
+		ImportData->Filenames = FilesToImport;
+		ImportData->bReplaceExisting = false;
+		ImportData->bSkipReadOnly = true;
+
+		FAssetToolsModule& AssetToolsModule = FModuleManager::LoadModuleChecked<FAssetToolsModule>(TEXT("AssetTools"));
+		const TArray<UObject*> ImportedAssets = AssetToolsModule.Get().ImportAssetsAutomated(ImportData);
+		if (ImportedAssets.Num() == 0)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to import canned tuna icon."));
+			return false;
+		}
+
+		UTexture2D* ImportedTexture = LoadObject<UTexture2D>(nullptr, *GetAssetObjectPath(UIIconAssetPath, IconAssetName));
+		if (!ImportedTexture)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to load imported canned tuna icon."));
+			return false;
+		}
+
+		ConfigureImportedIconTexture(ImportedTexture);
 		return true;
 	}
 
@@ -2477,6 +2523,13 @@ public:
 			[]()
 			{
 				return TunaSweeperEditorSetup::EnsureCommonGameHudAssets();
+			});
+
+		FTunaSweeperEditorRunOnce::Run(
+			TunaSweeperEditorSetup::CannedTunaIconImportTaskId,
+			[]()
+			{
+				return TunaSweeperEditorSetup::EnsureCannedTunaIconTexture();
 			});
 
 		TunaSweeperEditorSetup::ScheduleInteractionAssetsAndMapPlacement();
