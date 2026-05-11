@@ -39,6 +39,8 @@
 #include "InputModifiers.h"
 #include "Interaction/TunaSweeperInteractableActor.h"
 #include "Interaction/TunaSweeperInteractableComponent.h"
+#include "Interaction/TunaSweeperItemSpawnInteractableActor.h"
+#include "Interaction/TunaSweeperPickupItemActor.h"
 #include "Kismet2/BlueprintEditorUtils.h"
 #include "Kismet2/KismetEditorUtilities.h"
 #include "Misc/ConfigCacheIni.h"
@@ -47,6 +49,7 @@
 #include "Player/TunaSweeperPlayerController.h"
 #include "TunaSweeperEditorRunOnce.h"
 #include "UI/TunaSweeperInteractionMarkerWidget.h"
+#include "UI/TunaSweeperPickupItemIconWidget.h"
 #include "UI/TunaSweeperTempOpenLootTileEntryWidget.h"
 #include "UI/TunaSweeperTempOpenLootWidget.h"
 #include "UObject/SavePackage.h"
@@ -66,6 +69,7 @@ namespace TunaSweeperEditorSetup
 	const FString InteractionInputTaskId = TEXT("2026-05-10_AddInteractionInput");
 	const FString InteractionMarkerAlignmentTaskId = TEXT("2026-05-10_RebuildInteractionMarkerAlignmentV2");
 	const FString TempOpenLootUiTaskId = TEXT("2026-05-10_CreateTempOpenLootTileViewAndIconsV2");
+	const FString PickupItemAndSpawnerTaskId = TEXT("2026-05-11_CreatePickupItemAndSpawnerAssetsV2");
 	const FString GameInstanceAssetPath = TEXT("/Game/Core");
 	const FString GameInstanceAssetName = TEXT("BP_TunaSweeperGameInstance");
 	const FString GameModeAssetName = TEXT("BP_TunaSweeperGameMode");
@@ -85,12 +89,15 @@ namespace TunaSweeperEditorSetup
 	const FString UIAssetPath = TEXT("/Game/UI");
 	const FString UIIconAssetPath = TEXT("/Game/UI/Icons");
 	const FString InteractionMarkerAssetName = TEXT("WBP_InteractionMarker");
+	const FString PickupItemIconWidgetAssetName = TEXT("WBP_PickupItemIcon");
 	const FString TempOpenLootWidgetAssetName = TEXT("WBP_TempOpenLootTileView");
 	const FString TempOpenLootEntryWidgetAssetName = TEXT("WBP_TempOpenLootTileEntry");
 	const FString InteractionAssetPath = TEXT("/Game/Interaction");
 	const FString DialogueInteractionAssetName = TEXT("BP_Interact_Dialogue");
 	const FString PickupInteractionAssetName = TEXT("BP_Interact_Pickup");
 	const FString OpenInteractionAssetName = TEXT("BP_Interact_Open");
+	const FString PickupItemAssetName = TEXT("BP_PickupItem");
+	const FString ItemSpawnInteractionAssetName = TEXT("BP_Interact_ItemSpawn");
 	const FString RaidMapPackagePath = TEXT("/Game/RaidMap");
 
 	FString GetGameInstanceObjectPath()
@@ -736,6 +743,41 @@ namespace TunaSweeperEditorSetup
 		return CreatedBlueprint;
 	}
 
+	bool BuildPickupItemIconWidgetTree(UWidgetBlueprint* WidgetBlueprint)
+	{
+		if (!WidgetBlueprint || !WidgetBlueprint->WidgetTree)
+		{
+			return false;
+		}
+
+		WidgetBlueprint->Modify();
+		WidgetBlueprint->WidgetTree->Modify();
+		ClearWidgetTreeForRebuild(WidgetBlueprint);
+
+		UWidgetTree* WidgetTree = WidgetBlueprint->WidgetTree;
+		USizeBox* RootSizeBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("RootSizeBox"));
+		UImage* ItemIconImage = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("ItemIconImage"));
+		if (!RootSizeBox || !ItemIconImage)
+		{
+			return false;
+		}
+
+		WidgetTree->RootWidget = RootSizeBox;
+		RootSizeBox->SetWidthOverride(96.0f);
+		RootSizeBox->SetHeightOverride(96.0f);
+		RootSizeBox->SetContent(ItemIconImage);
+
+		if (UTexture2D* DefaultIconTexture = LoadObject<UTexture2D>(nullptr, TEXT("/Game/UI/Icons/T_UIIcon_Pistol.T_UIIcon_Pistol")))
+		{
+			ItemIconImage->SetBrushFromTexture(DefaultIconTexture, true);
+		}
+
+		RegisterWidgetVariable(WidgetBlueprint, RootSizeBox);
+		RegisterWidgetVariable(WidgetBlueprint, ItemIconImage);
+		WidgetBlueprint->MarkPackageDirty();
+		return true;
+	}
+
 	bool BuildTempOpenLootEntryWidgetTree(UWidgetBlueprint* WidgetBlueprint)
 	{
 		if (!WidgetBlueprint || !WidgetBlueprint->WidgetTree)
@@ -1176,6 +1218,122 @@ namespace TunaSweeperEditorSetup
 		return true;
 	}
 
+	bool ConfigurePickupItemIconWidgetBlueprint(UWidgetBlueprint* WidgetBlueprint)
+	{
+		if (!WidgetBlueprint || !BuildPickupItemIconWidgetTree(WidgetBlueprint))
+		{
+			return false;
+		}
+
+		FKismetEditorUtilities::CompileBlueprint(WidgetBlueprint);
+		WidgetBlueprint->MarkPackageDirty();
+		return SaveAsset(WidgetBlueprint);
+	}
+
+	bool ConfigurePickupItemBlueprint(UBlueprint* PickupItemBlueprint, int32 ItemId)
+	{
+		if (!PickupItemBlueprint)
+		{
+			return false;
+		}
+
+		FKismetEditorUtilities::CompileBlueprint(PickupItemBlueprint);
+
+		ATunaSweeperPickupItemActor* Defaults = PickupItemBlueprint->GeneratedClass
+			? Cast<ATunaSweeperPickupItemActor>(PickupItemBlueprint->GeneratedClass->GetDefaultObject())
+			: nullptr;
+		if (!Defaults)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to configure %s defaults."), *GetNameSafe(PickupItemBlueprint));
+			return false;
+		}
+
+		PickupItemBlueprint->Modify();
+		Defaults->ConfigurePickupItemDefaults(
+			ItemId,
+			TSoftClassPtr<UTunaSweeperPickupItemIconWidget>(
+				FSoftObjectPath(GetAssetClassPath(UIAssetPath, PickupItemIconWidgetAssetName))));
+		FBlueprintEditorUtils::MarkBlueprintAsModified(PickupItemBlueprint);
+		FKismetEditorUtilities::CompileBlueprint(PickupItemBlueprint);
+		PickupItemBlueprint->MarkPackageDirty();
+		return SaveAsset(PickupItemBlueprint);
+	}
+
+	bool ConfigureItemSpawnBlueprint(UBlueprint* ItemSpawnBlueprint)
+	{
+		if (!ItemSpawnBlueprint)
+		{
+			return false;
+		}
+
+		FKismetEditorUtilities::CompileBlueprint(ItemSpawnBlueprint);
+
+		ATunaSweeperItemSpawnInteractableActor* Defaults = ItemSpawnBlueprint->GeneratedClass
+			? Cast<ATunaSweeperItemSpawnInteractableActor>(ItemSpawnBlueprint->GeneratedClass->GetDefaultObject())
+			: nullptr;
+		if (!Defaults)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to configure %s defaults."), *GetNameSafe(ItemSpawnBlueprint));
+			return false;
+		}
+
+		ItemSpawnBlueprint->Modify();
+		Defaults->ConfigureItemSpawnDefaults(
+			TSoftClassPtr<ATunaSweeperPickupItemActor>(
+				FSoftObjectPath(GetAssetClassPath(InteractionAssetPath, PickupItemAssetName))));
+		if (UTunaSweeperInteractableComponent* InteractableComponent = Defaults->GetInteractableComponent())
+		{
+			InteractableComponent->SetInteractionTypeAndDisplayName(
+				ETunaSweeperInteractionType::ItemSpawn,
+				FText::FromString(TEXT("\uC544\uC774\uD15C\uC2A4\uD3F0")));
+		}
+		FBlueprintEditorUtils::MarkBlueprintAsModified(ItemSpawnBlueprint);
+		FKismetEditorUtilities::CompileBlueprint(ItemSpawnBlueprint);
+		ItemSpawnBlueprint->MarkPackageDirty();
+		return SaveAsset(ItemSpawnBlueprint);
+	}
+
+	bool ConfigurePickupItemActorInstance(AActor* Actor, int32 ItemId)
+	{
+		ATunaSweeperPickupItemActor* PickupItemActor = Cast<ATunaSweeperPickupItemActor>(Actor);
+		if (!PickupItemActor)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("%s is not an ATunaSweeperPickupItemActor."), *GetNameSafe(Actor));
+			return false;
+		}
+
+		PickupItemActor->Modify();
+		PickupItemActor->ConfigurePickupItemDefaults(
+			ItemId,
+			TSoftClassPtr<UTunaSweeperPickupItemIconWidget>(
+				FSoftObjectPath(GetAssetClassPath(UIAssetPath, PickupItemIconWidgetAssetName))));
+		PickupItemActor->MarkPackageDirty();
+		return true;
+	}
+
+	bool ConfigureItemSpawnActorInstance(AActor* Actor)
+	{
+		ATunaSweeperItemSpawnInteractableActor* ItemSpawnActor = Cast<ATunaSweeperItemSpawnInteractableActor>(Actor);
+		if (!ItemSpawnActor)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("%s is not an ATunaSweeperItemSpawnInteractableActor."), *GetNameSafe(Actor));
+			return false;
+		}
+
+		ItemSpawnActor->Modify();
+		ItemSpawnActor->ConfigureItemSpawnDefaults(
+			TSoftClassPtr<ATunaSweeperPickupItemActor>(
+				FSoftObjectPath(GetAssetClassPath(InteractionAssetPath, PickupItemAssetName))));
+		if (UTunaSweeperInteractableComponent* InteractableComponent = ItemSpawnActor->GetInteractableComponent())
+		{
+			InteractableComponent->SetInteractionTypeAndDisplayName(
+				ETunaSweeperInteractionType::ItemSpawn,
+				FText::FromString(TEXT("\uC544\uC774\uD15C\uC2A4\uD3F0")));
+		}
+		ItemSpawnActor->MarkPackageDirty();
+		return true;
+	}
+
 	AActor* FindActorByLabel(UWorld* World, const FString& ActorLabel)
 	{
 		if (!World)
@@ -1230,6 +1388,80 @@ namespace TunaSweeperEditorSetup
 
 		SpawnedActor->SetActorLabel(ActorLabel);
 		if (!ConfigureInteractableActorInstance(SpawnedActor, InteractionType, DisplayName))
+		{
+			return false;
+		}
+		SpawnedActor->MarkPackageDirty();
+		return true;
+	}
+
+	bool PlacePickupItemActor(UWorld* World, UBlueprint* ActorBlueprint, const FString& ActorLabel, const FVector& Location, int32 ItemId)
+	{
+		if (!World || !ActorBlueprint || !ActorBlueprint->GeneratedClass)
+		{
+			return false;
+		}
+
+		if (AActor* ExistingActor = FindActorByLabel(World, ActorLabel))
+		{
+			ExistingActor->Modify();
+			ExistingActor->SetActorLocation(Location);
+			ExistingActor->SetActorRotation(FRotator::ZeroRotator);
+			return ConfigurePickupItemActorInstance(ExistingActor, ItemId);
+		}
+
+		World->PersistentLevel->Modify();
+
+		FActorSpawnParameters SpawnParameters;
+		SpawnParameters.OverrideLevel = World->PersistentLevel;
+		SpawnParameters.Name = MakeUniqueObjectName(World->PersistentLevel, ActorBlueprint->GeneratedClass, FName(*ActorLabel));
+		SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+		AActor* SpawnedActor = World->SpawnActor<AActor>(ActorBlueprint->GeneratedClass, Location, FRotator::ZeroRotator, SpawnParameters);
+		if (!SpawnedActor)
+		{
+			return false;
+		}
+
+		SpawnedActor->SetActorLabel(ActorLabel);
+		if (!ConfigurePickupItemActorInstance(SpawnedActor, ItemId))
+		{
+			return false;
+		}
+		SpawnedActor->MarkPackageDirty();
+		return true;
+	}
+
+	bool PlaceItemSpawnActor(UWorld* World, UBlueprint* ActorBlueprint, const FString& ActorLabel, const FVector& Location)
+	{
+		if (!World || !ActorBlueprint || !ActorBlueprint->GeneratedClass)
+		{
+			return false;
+		}
+
+		if (AActor* ExistingActor = FindActorByLabel(World, ActorLabel))
+		{
+			ExistingActor->Modify();
+			ExistingActor->SetActorLocation(Location);
+			ExistingActor->SetActorRotation(FRotator::ZeroRotator);
+			return ConfigureItemSpawnActorInstance(ExistingActor);
+		}
+
+		World->PersistentLevel->Modify();
+
+		FActorSpawnParameters SpawnParameters;
+		SpawnParameters.OverrideLevel = World->PersistentLevel;
+		SpawnParameters.Name = MakeUniqueObjectName(World->PersistentLevel, ActorBlueprint->GeneratedClass, FName(*ActorLabel));
+		SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+		AActor* SpawnedActor = World->SpawnActor<AActor>(ActorBlueprint->GeneratedClass, Location, FRotator::ZeroRotator, SpawnParameters);
+		if (!SpawnedActor)
+		{
+			return false;
+		}
+
+		SpawnedActor->SetActorLabel(ActorLabel);
+		if (!ConfigureItemSpawnActorInstance(SpawnedActor))
 		{
 			return false;
 		}
@@ -1296,6 +1528,63 @@ namespace TunaSweeperEditorSetup
 		return bConfigured && PlaceInteractionActorsInRaidMap(DialogueBlueprint, PickupBlueprint, OpenBlueprint);
 	}
 
+	bool PlacePickupItemAndSpawnerActorsInRaidMap(UBlueprint* PickupItemBlueprint, UBlueprint* ItemSpawnBlueprint)
+	{
+		UWorld* World = GEditor ? GEditor->GetEditorWorldContext().World() : nullptr;
+		if (!World || World->GetPackage()->GetName() != RaidMapPackagePath)
+		{
+			return false;
+		}
+
+		const bool bPlacedActors =
+			PlacePickupItemActor(
+				World,
+				PickupItemBlueprint,
+				TEXT("TS_PickupItem_Sample"),
+				FVector(950.0f, 50.0f, 8.0f),
+				1001) &&
+			PlaceItemSpawnActor(
+				World,
+				ItemSpawnBlueprint,
+				TEXT("TS_Interact_ItemSpawn"),
+				FVector(950.0f, -200.0f, 80.0f));
+
+		if (!bPlacedActors)
+		{
+			return false;
+		}
+
+		return UEditorLoadingAndSavingUtils::SaveMap(World, RaidMapPackagePath);
+	}
+
+	bool EnsurePickupItemAndSpawnerAssetsAndMapPlacement()
+	{
+		UWidgetBlueprint* PickupItemIconWidgetBlueprint = EnsureWidgetBlueprint(
+			UIAssetPath,
+			PickupItemIconWidgetAssetName,
+			UTunaSweeperPickupItemIconWidget::StaticClass());
+		UBlueprint* PickupItemBlueprint = EnsureBlueprint(
+			InteractionAssetPath,
+			PickupItemAssetName,
+			ATunaSweeperPickupItemActor::StaticClass());
+		UBlueprint* ItemSpawnBlueprint = EnsureBlueprint(
+			InteractionAssetPath,
+			ItemSpawnInteractionAssetName,
+			ATunaSweeperItemSpawnInteractableActor::StaticClass());
+
+		if (!PickupItemIconWidgetBlueprint || !PickupItemBlueprint || !ItemSpawnBlueprint)
+		{
+			return false;
+		}
+
+		const bool bConfigured =
+			ConfigurePickupItemIconWidgetBlueprint(PickupItemIconWidgetBlueprint) &&
+			ConfigurePickupItemBlueprint(PickupItemBlueprint, 1001) &&
+			ConfigureItemSpawnBlueprint(ItemSpawnBlueprint);
+
+		return bConfigured && PlacePickupItemAndSpawnerActorsInRaidMap(PickupItemBlueprint, ItemSpawnBlueprint);
+	}
+
 	void ScheduleInteractionAssetsAndMapPlacement()
 	{
 		if (FTunaSweeperEditorRunOnce::HasCompleted(InteractionTaskId))
@@ -1321,6 +1610,35 @@ namespace TunaSweeperEditorSetup
 						});
 
 					return !FTunaSweeperEditorRunOnce::HasCompleted(InteractionTaskId);
+				}),
+			1.0f);
+	}
+
+	void SchedulePickupItemAndSpawnerAssetsAndMapPlacement()
+	{
+		if (FTunaSweeperEditorRunOnce::HasCompleted(PickupItemAndSpawnerTaskId))
+		{
+			return;
+		}
+
+		FTSTicker::GetCoreTicker().AddTicker(
+			FTickerDelegate::CreateLambda(
+				[](float)
+				{
+					UWorld* EditorWorld = GEditor ? GEditor->GetEditorWorldContext().World() : nullptr;
+					if (!EditorWorld || EditorWorld->GetPackage()->GetName() != RaidMapPackagePath)
+					{
+						return true;
+					}
+
+					FTunaSweeperEditorRunOnce::Run(
+						PickupItemAndSpawnerTaskId,
+						[]()
+						{
+							return EnsurePickupItemAndSpawnerAssetsAndMapPlacement();
+						});
+
+					return !FTunaSweeperEditorRunOnce::HasCompleted(PickupItemAndSpawnerTaskId);
 				}),
 			1.0f);
 	}
@@ -1372,6 +1690,7 @@ public:
 			});
 
 		TunaSweeperEditorSetup::ScheduleInteractionAssetsAndMapPlacement();
+		TunaSweeperEditorSetup::SchedulePickupItemAndSpawnerAssetsAndMapPlacement();
 	}
 };
 

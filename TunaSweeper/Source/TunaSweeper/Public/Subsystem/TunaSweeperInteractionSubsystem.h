@@ -33,6 +33,8 @@ private:
 	void RefreshFocusedInteractable();
 	FString GetInteractionDebugTypeName(const UTunaSweeperInteractableComponent* Interactable) const;
 	bool OpenTempOpenLootWidget(APawn* InstigatorPawn);
+	bool HandlePickupItemInteraction(UTunaSweeperInteractableComponent* Interactable);
+	bool HandleItemSpawnInteraction(UTunaSweeperInteractableComponent* Interactable, APawn* InstigatorPawn);
 
 	TSet<TWeakObjectPtr<UTunaSweeperInteractableComponent>> RegisteredInteractables;
 	TWeakObjectPtr<UTunaSweeperInteractableComponent> FocusedInteractable;

@@ -14,7 +14,9 @@ enum class ETunaSweeperInteractionType : uint8
 {
 	Dialogue UMETA(DisplayName = "Dialogue"),
 	Pickup UMETA(DisplayName = "Pickup"),
-	Open UMETA(DisplayName = "Open")
+	Open UMETA(DisplayName = "Open"),
+	ItemPickup UMETA(DisplayName = "Item Pickup"),
+	ItemSpawn UMETA(DisplayName = "Item Spawn")
 };
 
 UCLASS(BlueprintType, Blueprintable, ClassGroup=(TunaSweeper), meta=(BlueprintSpawnableComponent))
@@ -59,6 +61,10 @@ public:
 		ETunaSweeperInteractionType InInteractionType,
 		const FText& InInteractionDisplayName,
 		TSoftClassPtr<UTunaSweeperInteractionMarkerWidget> InMarkerWidgetClass);
+
+	void SetInteractionTypeAndDisplayName(
+		ETunaSweeperInteractionType InInteractionType,
+		const FText& InInteractionDisplayName);
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")

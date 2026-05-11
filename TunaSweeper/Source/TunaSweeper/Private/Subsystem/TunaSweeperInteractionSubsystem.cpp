@@ -3,7 +3,9 @@
 #include "Engine/Engine.h"
 #include "Blueprint/UserWidget.h"
 #include "GameFramework/PlayerController.h"
+#include "Interaction/TunaSweeperItemSpawnInteractableActor.h"
 #include "Interaction/TunaSweeperInteractableComponent.h"
+#include "Interaction/TunaSweeperPickupItemActor.h"
 #include "Kismet/GameplayStatics.h"
 #include "Stats/Stats.h"
 #include "UI/TunaSweeperTempOpenLootWidget.h"
@@ -63,9 +65,16 @@ bool UTunaSweeperInteractionSubsystem::RequestInteraction(UTunaSweeperInteractab
 	const FString DisplayName = Interactable->GetInteractionDisplayName().ToString();
 	const FString DebugMessage = FString::Printf(TEXT("[Interaction] %s: %s"), *DebugTypeName, *DisplayName);
 
-	if (Interactable->GetInteractionType() == ETunaSweeperInteractionType::Open)
+	switch (Interactable->GetInteractionType())
 	{
+	case ETunaSweeperInteractionType::Open:
 		return OpenTempOpenLootWidget(InstigatorPawn);
+	case ETunaSweeperInteractionType::ItemPickup:
+		return HandlePickupItemInteraction(Interactable);
+	case ETunaSweeperInteractionType::ItemSpawn:
+		return HandleItemSpawnInteraction(Interactable, InstigatorPawn);
+	default:
+		break;
 	}
 
 	if (GEngine)
@@ -74,6 +83,44 @@ bool UTunaSweeperInteractionSubsystem::RequestInteraction(UTunaSweeperInteractab
 	}
 
 	return true;
+}
+
+bool UTunaSweeperInteractionSubsystem::HandlePickupItemInteraction(UTunaSweeperInteractableComponent* Interactable)
+{
+	ATunaSweeperPickupItemActor* PickupItemActor = Interactable
+		? Cast<ATunaSweeperPickupItemActor>(Interactable->GetOwner())
+		: nullptr;
+	if (!PickupItemActor)
+	{
+		return false;
+	}
+
+	const FString ItemName = PickupItemActor->GetItemDisplayName().ToString();
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(
+			-1,
+			2.0f,
+			FColor::Green,
+			FString::Printf(TEXT("[Interaction] 획득: %s"), *ItemName));
+	}
+
+	if (PickupItemActor->ShouldDestroyOnPickup())
+	{
+		PickupItemActor->Destroy();
+	}
+
+	return true;
+}
+
+bool UTunaSweeperInteractionSubsystem::HandleItemSpawnInteraction(
+	UTunaSweeperInteractableComponent* Interactable,
+	APawn* InstigatorPawn)
+{
+	ATunaSweeperItemSpawnInteractableActor* ItemSpawnActor = Interactable
+		? Cast<ATunaSweeperItemSpawnInteractableActor>(Interactable->GetOwner())
+		: nullptr;
+	return ItemSpawnActor && ItemSpawnActor->SpawnRandomPickupItem(InstigatorPawn);
 }
 
 bool UTunaSweeperInteractionSubsystem::OpenTempOpenLootWidget(APawn* InstigatorPawn)
@@ -177,6 +224,10 @@ FString UTunaSweeperInteractionSubsystem::GetInteractionDebugTypeName(const UTun
 		return TEXT("Pickup");
 	case ETunaSweeperInteractionType::Open:
 		return TEXT("Open");
+	case ETunaSweeperInteractionType::ItemPickup:
+		return TEXT("ItemPickup");
+	case ETunaSweeperInteractionType::ItemSpawn:
+		return TEXT("ItemSpawn");
 	default:
 		return TEXT("Unknown");
 	}

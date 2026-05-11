@@ -126,6 +126,16 @@ void UTunaSweeperInteractableComponent::ConfigureInteractionDefaults(
 	ApplyMarkerState();
 }
 
+void UTunaSweeperInteractableComponent::SetInteractionTypeAndDisplayName(
+	ETunaSweeperInteractionType InInteractionType,
+	const FText& InInteractionDisplayName)
+{
+	Modify();
+	InteractionType = InInteractionType;
+	InteractionDisplayName = InInteractionDisplayName;
+	ApplyMarkerState();
+}
+
 void UTunaSweeperInteractableComponent::RegisterWithInteractionSubsystem()
 {
 	if (bRegisteredWithInteractionSubsystem)
