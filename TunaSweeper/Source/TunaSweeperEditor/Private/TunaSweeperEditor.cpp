@@ -82,7 +82,7 @@ namespace TunaSweeperEditorSetup
 	const FString InteractionMarkerAlignmentTaskId = TEXT("2026-05-10_RebuildInteractionMarkerAlignmentV2");
 	const FString TempOpenLootUiTaskId = TEXT("2026-05-10_CreateTempOpenLootTileViewAndIconsV2");
 	const FString PickupItemAndSpawnerTaskId = TEXT("2026-05-11_CreatePickupItemAndSpawnerAssetsV3");
-	const FString CommonGameHudTaskId = TEXT("2026-05-11_CreateCommonGameHudAssetsV2");
+	const FString CommonGameHudTaskId = TEXT("2026-05-11_CreateCommonGameHudAssetsV3");
 	const FString InventoryInputTaskId = TEXT("2026-05-11_AddInventoryInput");
 	const FString LootContainerAndSpawnerTaskId = TEXT("2026-05-11_CreateLootContainerAndSpawnerAssetsV1");
 	const FString CannedTunaIconImportTaskId = TEXT("2026-05-11_ImportCannedTunaIconV1");
@@ -630,6 +630,17 @@ namespace TunaSweeperEditorSetup
 	}
 
 	FSlateBrush MakeRoundedBoxBrush(const FVector2D& ImageSize, const FLinearColor& FillColor, const FLinearColor& OutlineColor, float OutlineWidth)
+	{
+		FSlateBrush Brush;
+		Brush.DrawAs = ESlateBrushDrawType::RoundedBox;
+		Brush.TintColor = FSlateColor(FillColor);
+		Brush.SetImageSize(ImageSize);
+		Brush.OutlineSettings = FSlateBrushOutlineSettings(5.0f, FSlateColor(OutlineColor), OutlineWidth);
+		Brush.OutlineSettings.bUseBrushTransparency = false;
+		return Brush;
+	}
+
+	FSlateBrush MakeCircularBrush(const FVector2D& ImageSize, const FLinearColor& FillColor, const FLinearColor& OutlineColor, float OutlineWidth)
 	{
 		FSlateBrush Brush;
 		Brush.DrawAs = ESlateBrushDrawType::RoundedBox;
@@ -2110,7 +2121,7 @@ namespace TunaSweeperEditorSetup
 		RingImage->SetWidthOverride(34.0f);
 		RingImage->SetHeightOverride(34.0f);
 		RingImage->SetRenderTransformPivot(FVector2D(0.5f, 0.5f));
-		RingBrushImage->SetBrush(MakeRoundedBoxBrush(FVector2D(34.0f, 34.0f), FLinearColor::Transparent, FLinearColor::White, 3.0f));
+		RingBrushImage->SetBrush(MakeCircularBrush(FVector2D(34.0f, 34.0f), FLinearColor::Transparent, FLinearColor::White, 3.0f));
 		RingImage->SetContent(RingBrushImage);
 
 		UOverlaySlot* RingSlot = MarkerOverlay->AddChildToOverlay(RingImage);
@@ -2122,7 +2133,7 @@ namespace TunaSweeperEditorSetup
 
 		FilledImage->SetWidthOverride(12.0f);
 		FilledImage->SetHeightOverride(12.0f);
-		FilledBrushImage->SetBrush(MakeRoundedBoxBrush(FVector2D(12.0f, 12.0f), FLinearColor::White, FLinearColor::Transparent, 0.0f));
+		FilledBrushImage->SetBrush(MakeCircularBrush(FVector2D(12.0f, 12.0f), FLinearColor::White, FLinearColor::Transparent, 0.0f));
 		FilledImage->SetContent(FilledBrushImage);
 
 		UOverlaySlot* FilledSlot = MarkerOverlay->AddChildToOverlay(FilledImage);
