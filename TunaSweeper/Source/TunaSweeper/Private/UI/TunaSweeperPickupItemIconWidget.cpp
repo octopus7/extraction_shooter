@@ -35,8 +35,18 @@ void UTunaSweeperPickupItemIconWidget::CacheNamedWidgets()
 
 void UTunaSweeperPickupItemIconWidget::ApplyIconTexture()
 {
-	if (ItemIconImage && CachedIconTexture)
+	if (!ItemIconImage)
+	{
+		return;
+	}
+
+	ItemIconImage->SetColorAndOpacity(FLinearColor::White);
+	ItemIconImage->SetBrushTintColor(FSlateColor(FLinearColor::White));
+	ItemIconImage->SetOpacity(1.0f);
+
+	if (CachedIconTexture)
 	{
 		ItemIconImage->SetBrushFromTexture(CachedIconTexture, true);
+		ItemIconImage->SetBrushTintColor(FSlateColor(FLinearColor::White));
 	}
 }

@@ -69,7 +69,7 @@ namespace TunaSweeperEditorSetup
 	const FString InteractionInputTaskId = TEXT("2026-05-10_AddInteractionInput");
 	const FString InteractionMarkerAlignmentTaskId = TEXT("2026-05-10_RebuildInteractionMarkerAlignmentV2");
 	const FString TempOpenLootUiTaskId = TEXT("2026-05-10_CreateTempOpenLootTileViewAndIconsV2");
-	const FString PickupItemAndSpawnerTaskId = TEXT("2026-05-11_CreatePickupItemAndSpawnerAssetsV2");
+	const FString PickupItemAndSpawnerTaskId = TEXT("2026-05-11_CreatePickupItemAndSpawnerAssetsV3");
 	const FString GameInstanceAssetPath = TEXT("/Game/Core");
 	const FString GameInstanceAssetName = TEXT("BP_TunaSweeperGameInstance");
 	const FString GameModeAssetName = TEXT("BP_TunaSweeperGameMode");
@@ -771,6 +771,9 @@ namespace TunaSweeperEditorSetup
 		{
 			ItemIconImage->SetBrushFromTexture(DefaultIconTexture, true);
 		}
+		ItemIconImage->SetColorAndOpacity(FLinearColor::White);
+		ItemIconImage->SetBrushTintColor(FSlateColor(FLinearColor::White));
+		ItemIconImage->SetOpacity(1.0f);
 
 		RegisterWidgetVariable(WidgetBlueprint, RootSizeBox);
 		RegisterWidgetVariable(WidgetBlueprint, ItemIconImage);

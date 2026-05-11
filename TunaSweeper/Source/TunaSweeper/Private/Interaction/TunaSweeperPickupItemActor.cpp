@@ -24,6 +24,7 @@ ATunaSweeperPickupItemActor::ATunaSweeperPickupItemActor()
 	FloorIconWidgetComponent->SetPivot(FVector2D(0.5f, 0.5f));
 	FloorIconWidgetComponent->SetTwoSided(true);
 	FloorIconWidgetComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	ApplyFloorIconWidgetRenderingSettings();
 
 	InteractableComponent = CreateDefaultSubobject<UTunaSweeperInteractableComponent>(TEXT("Interactable"));
 	InteractableComponent->SetupAttachment(RootComponent);
@@ -41,6 +42,7 @@ void ATunaSweeperPickupItemActor::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
+	ApplyFloorIconWidgetRenderingSettings();
 	EnsureFloorIconWidgetClass();
 	RefreshItemPresentation();
 }
@@ -49,6 +51,7 @@ void ATunaSweeperPickupItemActor::BeginPlay()
 {
 	Super::BeginPlay();
 
+	ApplyFloorIconWidgetRenderingSettings();
 	EnsureFloorIconWidgetClass();
 	RefreshItemPresentation();
 }
@@ -74,6 +77,20 @@ void ATunaSweeperPickupItemActor::ConfigurePickupItemDefaults(
 	FloorIconWidgetClass = InFloorIconWidgetClass;
 	EnsureFloorIconWidgetClass();
 	RefreshItemPresentation();
+}
+
+void ATunaSweeperPickupItemActor::ApplyFloorIconWidgetRenderingSettings()
+{
+	if (!FloorIconWidgetComponent)
+	{
+		return;
+	}
+
+	FloorIconWidgetComponent->SetBlendMode(EWidgetBlendMode::Transparent);
+	FloorIconWidgetComponent->SetBackgroundColor(FLinearColor::Transparent);
+	FloorIconWidgetComponent->SetTintColorAndOpacity(FLinearColor::White);
+	FloorIconWidgetComponent->SetOpacityFromTexture(1.0f);
+	FloorIconWidgetComponent->SetWindowFocusable(false);
 }
 
 void ATunaSweeperPickupItemActor::EnsureFloorIconWidgetClass()

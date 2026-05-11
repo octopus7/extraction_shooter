@@ -64,6 +64,7 @@ protected:
 	TSoftClassPtr<UTunaSweeperPickupItemIconWidget> FloorIconWidgetClass;
 
 private:
+	void ApplyFloorIconWidgetRenderingSettings();
 	void EnsureFloorIconWidgetClass();
 	void RefreshItemPresentation();
 	UTexture2D* LoadIconTexture(const FTunaSweeperItemDefinition& ItemDefinition) const;
