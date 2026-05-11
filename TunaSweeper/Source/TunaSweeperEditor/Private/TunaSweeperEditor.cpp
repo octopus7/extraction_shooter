@@ -78,7 +78,7 @@ namespace TunaSweeperEditorSetup
 	const FString GameInstanceTaskId = TEXT("2026-05-10_CreateGameInstanceBlueprint");
 	const FString TopDownShooterTaskId = TEXT("2026-05-10_CreateTopDownShooterAssets");
 	const FString InteractionTaskId = TEXT("2026-05-11_CreateComponentBasedInteractionAssetsAndPlaceActorsV2");
-	const FString InteractionInputTaskId = TEXT("2026-05-10_AddInteractionInput");
+	const FString InteractionInputTaskId = TEXT("2026-05-11_SetInteractInputToFKey");
 	const FString InteractionMarkerAlignmentTaskId = TEXT("2026-05-10_RebuildInteractionMarkerAlignmentV2");
 	const FString TempOpenLootUiTaskId = TEXT("2026-05-10_CreateTempOpenLootTileViewAndIconsV2");
 	const FString PickupItemAndSpawnerTaskId = TEXT("2026-05-11_CreatePickupItemAndSpawnerAssetsV3");
@@ -377,9 +377,11 @@ namespace TunaSweeperEditorSetup
 			return false;
 		}
 
-		if (!HasInputMapping(MappingContext, InteractAction, EKeys::E))
+		MappingContext->UnmapKey(InteractAction, EKeys::E);
+
+		if (!HasInputMapping(MappingContext, InteractAction, EKeys::F))
 		{
-			MappingContext->MapKey(InteractAction, EKeys::E);
+			MappingContext->MapKey(InteractAction, EKeys::F);
 		}
 
 		MappingContext->ContextDescription = FText::FromString(TEXT("TunaSweeper player movement, fire, aim, and interaction input."));

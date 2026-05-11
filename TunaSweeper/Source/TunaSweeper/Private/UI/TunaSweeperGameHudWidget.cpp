@@ -84,15 +84,16 @@ void UTunaSweeperGameHudWidget::ShowInventoryOnlyPanel()
 void UTunaSweeperGameHudWidget::ToggleInventoryOnlyPanel()
 {
 	const bool bCenterVisible = CenterContentPanel && CenterContentPanel->GetVisibility() != ESlateVisibility::Collapsed;
-	const bool bExternalVisible = ExternalPanelWidget && ExternalPanelWidget->GetVisibility() != ESlateVisibility::Collapsed;
-	const bool bItemInfoVisible = ItemInfoPanelWidget && ItemInfoPanelWidget->GetVisibility() != ESlateVisibility::Collapsed;
 
-	if (!bCenterVisible || bExternalVisible || bItemInfoVisible)
+	if (!bCenterVisible)
 	{
 		ShowInventoryOnlyPanel();
 	}
 	else
 	{
+		SetInventoryAreaVisible(false);
+		SetItemInfoPanelVisible(false);
+		ShowExternalPanel(ETunaSweeperHudExternalPanelMode::None);
 		SetCenterPanelsVisible(false);
 	}
 }
