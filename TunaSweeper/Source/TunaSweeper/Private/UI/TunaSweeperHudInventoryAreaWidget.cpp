@@ -12,6 +12,16 @@
 
 namespace TunaSweeperInventoryArea
 {
+	constexpr int32 InventoryTileColumnCount = 5;
+	constexpr int32 EquipmentReserveColumnCount = 4;
+	constexpr float InventoryTileWidth = 96.0f;
+	constexpr float InventoryTileHeight = 116.0f;
+	constexpr float InventoryTileViewScrollbarReserveWidth = 22.0f;
+	constexpr float InventoryTileViewWidth = InventoryTileColumnCount * InventoryTileWidth + InventoryTileViewScrollbarReserveWidth;
+	constexpr float EquipmentReserveEntryWidth = InventoryTileViewWidth / EquipmentReserveColumnCount;
+	constexpr float AuxiliaryBagTileWidth = 96.0f;
+	constexpr float AuxiliaryBagTileHeight = 116.0f;
+
 	FTunaSweeperItemStackTileData BuildTileData(
 		UTunaSweeperItemDataSubsystem* ItemDataSubsystem,
 		const FTunaSweeperItemStack& ItemStack,
@@ -93,8 +103,8 @@ void UTunaSweeperHudInventoryAreaWidget::RefreshInventoryItems()
 
 	TileObjects.Reset();
 	InventoryTileView->ClearListItems();
-	InventoryTileView->SetEntryWidth(96.0f);
-	InventoryTileView->SetEntryHeight(116.0f);
+	InventoryTileView->SetEntryWidth(TunaSweeperInventoryArea::InventoryTileWidth);
+	InventoryTileView->SetEntryHeight(TunaSweeperInventoryArea::InventoryTileHeight);
 
 	if (!TunaGameInstance)
 	{
@@ -149,8 +159,8 @@ void UTunaSweeperHudInventoryAreaWidget::PopulateReservedTiles()
 	if (EquipmentReserveTileView)
 	{
 		EquipmentReserveTileView->ClearListItems();
-		EquipmentReserveTileView->SetEntryWidth(82.0f);
-		EquipmentReserveTileView->SetEntryHeight(82.0f);
+		EquipmentReserveTileView->SetEntryWidth(TunaSweeperInventoryArea::EquipmentReserveEntryWidth);
+		EquipmentReserveTileView->SetEntryHeight(TunaSweeperInventoryArea::InventoryTileHeight);
 		for (int32 Index = 0; Index < 8; ++Index)
 		{
 			FTunaSweeperItemStack EmptyStack;
@@ -169,8 +179,8 @@ void UTunaSweeperHudInventoryAreaWidget::PopulateReservedTiles()
 	if (AuxiliaryBagTileView)
 	{
 		AuxiliaryBagTileView->ClearListItems();
-		AuxiliaryBagTileView->SetEntryWidth(82.0f);
-		AuxiliaryBagTileView->SetEntryHeight(82.0f);
+		AuxiliaryBagTileView->SetEntryWidth(TunaSweeperInventoryArea::AuxiliaryBagTileWidth);
+		AuxiliaryBagTileView->SetEntryHeight(TunaSweeperInventoryArea::AuxiliaryBagTileHeight);
 		for (int32 Index = 0; Index < 2; ++Index)
 		{
 			FTunaSweeperItemStack EmptyStack;

@@ -82,7 +82,7 @@ namespace TunaSweeperEditorSetup
 	const FString InteractionMarkerAlignmentTaskId = TEXT("2026-05-10_RebuildInteractionMarkerAlignmentV2");
 	const FString TempOpenLootUiTaskId = TEXT("2026-05-10_CreateTempOpenLootTileViewAndIconsV2");
 	const FString PickupItemAndSpawnerTaskId = TEXT("2026-05-11_CreatePickupItemAndSpawnerAssetsV3");
-	const FString CommonGameHudTaskId = TEXT("2026-05-11_RebuildCommonGameHudFiveColumnLootPanel");
+	const FString CommonGameHudTaskId = TEXT("2026-05-11_RebuildInventoryFiveColumnAuxBagPanelV3");
 	const FString InventoryInputTaskId = TEXT("2026-05-11_AddInventoryInput");
 	const FString LootContainerAndSpawnerTaskId = TEXT("2026-05-11_CreateLootContainerAndSpawnerAssetsV1");
 	const FString CannedTunaIconImportTaskId = TEXT("2026-05-11_ImportCannedTunaIconV1");
@@ -118,6 +118,21 @@ namespace TunaSweeperEditorSetup
 	const FString HudExternalPanelWidgetAssetName = TEXT("WBP_HudExternalPanel");
 	const FString ItemThumbnailSlotWidgetAssetName = TEXT("WBP_ItemThumbnailSlot");
 	const FString LootContainerWidgetAssetName = TEXT("WBP_LootContainerPanel");
+	constexpr int32 InventoryTileColumnCount = 5;
+	constexpr int32 EquipmentReserveColumnCount = 4;
+	constexpr float InventoryTileWidth = 96.0f;
+	constexpr float InventoryTileHeight = 116.0f;
+	constexpr float InventoryPanelPadding = 14.0f;
+	constexpr float InventoryTileViewScrollbarReserveWidth = 22.0f;
+	constexpr float InventoryTileViewWidth = InventoryTileColumnCount * InventoryTileWidth + InventoryTileViewScrollbarReserveWidth;
+	constexpr float InventoryPanelWidth = InventoryPanelPadding * 2.0f + InventoryTileViewWidth;
+	constexpr float EquipmentReserveEntryWidth = InventoryTileViewWidth / EquipmentReserveColumnCount;
+	constexpr float EquipmentReserveHeight = 2.0f * InventoryTileHeight;
+	constexpr float AuxiliaryBagPanelPadding = 6.0f;
+	constexpr float AuxiliaryBagPanelGap = 4.0f;
+	constexpr float AuxiliaryBagPanelWidth = AuxiliaryBagPanelPadding * 2.0f + InventoryTileWidth;
+	constexpr float AuxiliaryBagPanelHeight = AuxiliaryBagPanelPadding * 2.0f + 2.0f * InventoryTileHeight;
+	constexpr float InventoryAreaPanelWidth = InventoryPanelWidth + AuxiliaryBagPanelGap + AuxiliaryBagPanelWidth;
 	constexpr int32 LootContainerTileColumnCount = 5;
 	constexpr float LootContainerTileWidth = 96.0f;
 	constexpr float LootContainerTileHeight = 116.0f;
@@ -581,6 +596,21 @@ namespace TunaSweeperEditorSetup
 		}
 	}
 
+	void RegisterAllWidgetsInTree(UWidgetBlueprint* WidgetBlueprint)
+	{
+		if (!WidgetBlueprint || !WidgetBlueprint->WidgetTree)
+		{
+			return;
+		}
+
+		TArray<UWidget*> Widgets;
+		WidgetBlueprint->WidgetTree->GetAllWidgets(Widgets);
+		for (UWidget* Widget : Widgets)
+		{
+			RegisterWidgetVariable(WidgetBlueprint, Widget);
+		}
+	}
+
 	void ClearWidgetTreeForRebuild(UWidgetBlueprint* WidgetBlueprint)
 	{
 		if (!WidgetBlueprint || !WidgetBlueprint->WidgetTree)
@@ -591,12 +621,11 @@ namespace TunaSweeperEditorSetup
 		TArray<UWidget*> ExistingWidgets;
 		WidgetBlueprint->WidgetTree->GetAllWidgets(ExistingWidgets);
 
-		for (UWidget* ExistingWidget : ExistingWidgets)
+		TArray<FName> ExistingVariableNames;
+		WidgetBlueprint->WidgetVariableNameToGuidMap.GenerateKeyArray(ExistingVariableNames);
+		for (const FName& ExistingVariableName : ExistingVariableNames)
 		{
-			if (ExistingWidget && ExistingWidget->bIsVariable)
-			{
-				UnregisterWidgetVariable(WidgetBlueprint, ExistingWidget->GetFName());
-			}
+			UnregisterWidgetVariable(WidgetBlueprint, ExistingVariableName);
 		}
 
 		if (WidgetBlueprint->WidgetTree->RootWidget)
@@ -1312,28 +1341,40 @@ namespace TunaSweeperEditorSetup
 
 		UWidgetTree* WidgetTree = WidgetBlueprint->WidgetTree;
 		USizeBox* RootSizeBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("RootSizeBox"));
+		UHorizontalBox* RootRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("RootRow"));
+		USizeBox* MainInventorySizeBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("MainInventorySizeBox"));
 		UBorder* InventoryPanel = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("InventoryPanel"));
 		UVerticalBox* InventoryStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("InventoryStack"));
 		UTextBlock* InventoryTitleText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("InventoryTitleText"));
-		UHorizontalBox* EquipmentAndBagRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("EquipmentAndBagRow"));
+		USizeBox* EquipmentReserveSizeBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("EquipmentReserveSizeBox"));
 		UTileView* EquipmentReserveTileView = WidgetTree->ConstructWidget<UTileView>(UTileView::StaticClass(), TEXT("EquipmentReserveTileView"));
-		UBorder* AuxiliaryBagPanel = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("AuxiliaryBagPanel"));
+		USizeBox* AuxiliaryBagPanel = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("AuxiliaryBagPanel"));
+		UBorder* AuxiliaryBagBackground = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("AuxiliaryBagBackground"));
 		UTileView* AuxiliaryBagTileView = WidgetTree->ConstructWidget<UTileView>(UTileView::StaticClass(), TEXT("AuxiliaryBagTileView"));
 		UTileView* InventoryTileView = WidgetTree->ConstructWidget<UTileView>(UTileView::StaticClass(), TEXT("InventoryTileView"));
 
-		if (!RootSizeBox || !InventoryPanel || !InventoryStack || !InventoryTitleText || !EquipmentAndBagRow ||
-			!EquipmentReserveTileView || !AuxiliaryBagPanel || !AuxiliaryBagTileView || !InventoryTileView)
+		if (!RootSizeBox || !RootRow || !MainInventorySizeBox || !InventoryPanel || !InventoryStack || !InventoryTitleText ||
+			!EquipmentReserveSizeBox || !EquipmentReserveTileView || !AuxiliaryBagPanel || !AuxiliaryBagBackground ||
+			!AuxiliaryBagTileView || !InventoryTileView)
 		{
 			return false;
 		}
 
 		WidgetTree->RootWidget = RootSizeBox;
-		RootSizeBox->SetWidthOverride(500.0f);
-		RootSizeBox->SetContent(InventoryPanel);
+		RootSizeBox->SetWidthOverride(InventoryAreaPanelWidth);
+		RootSizeBox->SetContent(RootRow);
 
-		InventoryPanel->SetPadding(FMargin(14.0f));
+		MainInventorySizeBox->SetWidthOverride(InventoryPanelWidth);
+		MainInventorySizeBox->SetContent(InventoryPanel);
+		UHorizontalBoxSlot* MainInventorySlot = RootRow->AddChildToHorizontalBox(MainInventorySizeBox);
+		if (MainInventorySlot)
+		{
+			MainInventorySlot->SetVerticalAlignment(VAlign_Fill);
+		}
+
+		InventoryPanel->SetPadding(FMargin(InventoryPanelPadding));
 		InventoryPanel->SetBrush(MakeRoundedBoxBrush(
-			FVector2D(500.0f, 620.0f),
+			FVector2D(InventoryPanelWidth, 620.0f),
 			FLinearColor(0.012f, 0.014f, 0.017f, 0.90f),
 			FLinearColor(0.28f, 0.36f, 0.44f, 1.0f),
 			1.0f));
@@ -1347,34 +1388,12 @@ namespace TunaSweeperEditorSetup
 			TitleSlot->SetVerticalAlignment(VAlign_Top);
 		}
 
-		EquipmentReserveTileView->SetEntryWidth(82.0f);
-		EquipmentReserveTileView->SetEntryHeight(82.0f);
+		EquipmentReserveTileView->SetEntryWidth(EquipmentReserveEntryWidth);
+		EquipmentReserveTileView->SetEntryHeight(InventoryTileHeight);
 		SetListViewEntryWidgetClass(EquipmentReserveTileView, EntryWidgetClass);
-		UHorizontalBoxSlot* EquipmentSlot = EquipmentAndBagRow->AddChildToHorizontalBox(EquipmentReserveTileView);
-		if (EquipmentSlot)
-		{
-			EquipmentSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
-			EquipmentSlot->SetVerticalAlignment(VAlign_Top);
-		}
-
-		AuxiliaryBagPanel->SetPadding(FMargin(6.0f));
-		AuxiliaryBagPanel->SetBrush(MakeRoundedBoxBrush(
-			FVector2D(98.0f, 180.0f),
-			FLinearColor(0.02f, 0.025f, 0.03f, 0.88f),
-			FLinearColor(0.28f, 0.44f, 0.36f, 1.0f),
-			1.0f));
-		AuxiliaryBagTileView->SetEntryWidth(82.0f);
-		AuxiliaryBagTileView->SetEntryHeight(82.0f);
-		SetListViewEntryWidgetClass(AuxiliaryBagTileView, EntryWidgetClass);
-		AuxiliaryBagPanel->SetContent(AuxiliaryBagTileView);
-		UHorizontalBoxSlot* BagSlot = EquipmentAndBagRow->AddChildToHorizontalBox(AuxiliaryBagPanel);
-		if (BagSlot)
-		{
-			BagSlot->SetPadding(FMargin(10.0f, 0.0f, 0.0f, 0.0f));
-			BagSlot->SetVerticalAlignment(VAlign_Top);
-		}
-
-		UVerticalBoxSlot* ReserveRowSlot = InventoryStack->AddChildToVerticalBox(EquipmentAndBagRow);
+		EquipmentReserveSizeBox->SetHeightOverride(EquipmentReserveHeight);
+		EquipmentReserveSizeBox->SetContent(EquipmentReserveTileView);
+		UVerticalBoxSlot* ReserveRowSlot = InventoryStack->AddChildToVerticalBox(EquipmentReserveSizeBox);
 		if (ReserveRowSlot)
 		{
 			ReserveRowSlot->SetPadding(FMargin(0.0f, 12.0f, 0.0f, 12.0f));
@@ -1382,8 +1401,28 @@ namespace TunaSweeperEditorSetup
 			ReserveRowSlot->SetVerticalAlignment(VAlign_Top);
 		}
 
-		InventoryTileView->SetEntryWidth(96.0f);
-		InventoryTileView->SetEntryHeight(116.0f);
+		AuxiliaryBagPanel->SetWidthOverride(AuxiliaryBagPanelWidth);
+		AuxiliaryBagPanel->SetHeightOverride(AuxiliaryBagPanelHeight);
+		AuxiliaryBagPanel->SetContent(AuxiliaryBagBackground);
+		AuxiliaryBagBackground->SetPadding(FMargin(AuxiliaryBagPanelPadding));
+		AuxiliaryBagBackground->SetBrush(MakeRoundedBoxBrush(
+			FVector2D(AuxiliaryBagPanelWidth, AuxiliaryBagPanelHeight),
+			FLinearColor(0.02f, 0.025f, 0.03f, 0.88f),
+			FLinearColor(0.28f, 0.44f, 0.36f, 1.0f),
+			1.0f));
+		AuxiliaryBagTileView->SetEntryWidth(InventoryTileWidth);
+		AuxiliaryBagTileView->SetEntryHeight(InventoryTileHeight);
+		SetListViewEntryWidgetClass(AuxiliaryBagTileView, EntryWidgetClass);
+		AuxiliaryBagBackground->SetContent(AuxiliaryBagTileView);
+		UHorizontalBoxSlot* BagSlot = RootRow->AddChildToHorizontalBox(AuxiliaryBagPanel);
+		if (BagSlot)
+		{
+			BagSlot->SetPadding(FMargin(AuxiliaryBagPanelGap, 0.0f, 0.0f, 0.0f));
+			BagSlot->SetVerticalAlignment(VAlign_Top);
+		}
+
+		InventoryTileView->SetEntryWidth(InventoryTileWidth);
+		InventoryTileView->SetEntryHeight(InventoryTileHeight);
 		SetListViewEntryWidgetClass(InventoryTileView, EntryWidgetClass);
 		UVerticalBoxSlot* InventoryTileSlot = InventoryStack->AddChildToVerticalBox(InventoryTileView);
 		if (InventoryTileSlot)
@@ -1393,8 +1432,15 @@ namespace TunaSweeperEditorSetup
 			InventoryTileSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
 		}
 
+		RegisterWidgetVariable(WidgetBlueprint, RootSizeBox);
+		RegisterWidgetVariable(WidgetBlueprint, RootRow);
+		RegisterWidgetVariable(WidgetBlueprint, MainInventorySizeBox);
 		RegisterWidgetVariable(WidgetBlueprint, InventoryPanel);
+		RegisterWidgetVariable(WidgetBlueprint, InventoryStack);
+		RegisterWidgetVariable(WidgetBlueprint, InventoryTitleText);
+		RegisterWidgetVariable(WidgetBlueprint, EquipmentReserveSizeBox);
 		RegisterWidgetVariable(WidgetBlueprint, AuxiliaryBagPanel);
+		RegisterWidgetVariable(WidgetBlueprint, AuxiliaryBagBackground);
 		RegisterWidgetVariable(WidgetBlueprint, EquipmentReserveTileView);
 		RegisterWidgetVariable(WidgetBlueprint, AuxiliaryBagTileView);
 		RegisterWidgetVariable(WidgetBlueprint, InventoryTileView);
@@ -1664,7 +1710,7 @@ namespace TunaSweeperEditorSetup
 			CenterSlot->SetAnchors(FAnchors(0.5f, 0.5f, 0.5f, 0.5f));
 			CenterSlot->SetAlignment(FVector2D(0.5f, 0.5f));
 			CenterSlot->SetPosition(FVector2D(0.0f, -20.0f));
-			CenterSlot->SetSize(FVector2D(1420.0f, 620.0f));
+			CenterSlot->SetSize(FVector2D(1560.0f, 620.0f));
 		}
 
 		UHorizontalBoxSlot* InventorySlot = CenterContentPanel->AddChildToHorizontalBox(InventoryAreaWidget);
@@ -1995,6 +2041,7 @@ namespace TunaSweeperEditorSetup
 		{
 			return false;
 		}
+		RegisterAllWidgetsInTree(ItemThumbnailWidgetBlueprint);
 		FKismetEditorUtilities::CompileBlueprint(ItemThumbnailWidgetBlueprint);
 		ItemThumbnailWidgetBlueprint->MarkPackageDirty();
 		if (!SaveAsset(ItemThumbnailWidgetBlueprint))
@@ -2030,6 +2077,7 @@ namespace TunaSweeperEditorSetup
 			LootContainerWidgetBlueprint
 		})
 		{
+			RegisterAllWidgetsInTree(ChildWidgetBlueprint);
 			FKismetEditorUtilities::CompileBlueprint(ChildWidgetBlueprint);
 			ChildWidgetBlueprint->MarkPackageDirty();
 			if (!SaveAsset(ChildWidgetBlueprint))
@@ -2042,6 +2090,7 @@ namespace TunaSweeperEditorSetup
 		{
 			return false;
 		}
+		RegisterAllWidgetsInTree(ExternalPanelWidgetBlueprint);
 		FKismetEditorUtilities::CompileBlueprint(ExternalPanelWidgetBlueprint);
 		ExternalPanelWidgetBlueprint->MarkPackageDirty();
 		if (!SaveAsset(ExternalPanelWidgetBlueprint))
@@ -2070,6 +2119,7 @@ namespace TunaSweeperEditorSetup
 			return false;
 		}
 
+		RegisterAllWidgetsInTree(GameHudWidgetBlueprint);
 		FKismetEditorUtilities::CompileBlueprint(GameHudWidgetBlueprint);
 		GameHudWidgetBlueprint->MarkPackageDirty();
 		return SaveAsset(GameHudWidgetBlueprint);
