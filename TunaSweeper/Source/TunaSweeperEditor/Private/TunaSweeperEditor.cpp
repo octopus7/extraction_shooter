@@ -82,7 +82,7 @@ namespace TunaSweeperEditorSetup
 	const FString InteractionMarkerAlignmentTaskId = TEXT("2026-05-10_RebuildInteractionMarkerAlignmentV2");
 	const FString TempOpenLootUiTaskId = TEXT("2026-05-10_CreateTempOpenLootTileViewAndIconsV2");
 	const FString PickupItemAndSpawnerTaskId = TEXT("2026-05-11_CreatePickupItemAndSpawnerAssetsV3");
-	const FString CommonGameHudTaskId = TEXT("2026-05-11_CreateCommonGameHudAssetsV3");
+	const FString CommonGameHudTaskId = TEXT("2026-05-11_RebuildCommonGameHudFiveColumnLootPanel");
 	const FString InventoryInputTaskId = TEXT("2026-05-11_AddInventoryInput");
 	const FString LootContainerAndSpawnerTaskId = TEXT("2026-05-11_CreateLootContainerAndSpawnerAssetsV1");
 	const FString CannedTunaIconImportTaskId = TEXT("2026-05-11_ImportCannedTunaIconV1");
@@ -118,6 +118,14 @@ namespace TunaSweeperEditorSetup
 	const FString HudExternalPanelWidgetAssetName = TEXT("WBP_HudExternalPanel");
 	const FString ItemThumbnailSlotWidgetAssetName = TEXT("WBP_ItemThumbnailSlot");
 	const FString LootContainerWidgetAssetName = TEXT("WBP_LootContainerPanel");
+	constexpr int32 LootContainerTileColumnCount = 5;
+	constexpr float LootContainerTileWidth = 96.0f;
+	constexpr float LootContainerTileHeight = 116.0f;
+	constexpr float LootContainerPanelPadding = 14.0f;
+	constexpr float LootContainerTileViewScrollbarReserveWidth = 22.0f;
+	constexpr float LootContainerPanelHeaderHeight = 74.0f;
+	constexpr float LootContainerPanelWidth =
+		LootContainerPanelPadding * 2.0f + LootContainerTileColumnCount * LootContainerTileWidth + LootContainerTileViewScrollbarReserveWidth;
 	const FString InteractionAssetPath = TEXT("/Game/Interaction");
 	const FString DialogueInteractionAssetName = TEXT("BP_Interact_Dialogue");
 	const FString PickupInteractionAssetName = TEXT("BP_Interact_Pickup");
@@ -1423,7 +1431,7 @@ namespace TunaSweeperEditorSetup
 		RootSizeBox->SetWidthOverride(330.0f);
 		RootSizeBox->SetContent(PanelBackground);
 
-		PanelBackground->SetPadding(FMargin(14.0f));
+		PanelBackground->SetPadding(FMargin(LootContainerPanelPadding));
 		PanelBackground->SetBrush(MakeRoundedBoxBrush(
 			FVector2D(330.0f, 620.0f),
 			FLinearColor(0.012f, 0.014f, 0.017f, 0.90f),
@@ -1498,13 +1506,13 @@ namespace TunaSweeperEditorSetup
 		}
 
 		WidgetTree->RootWidget = RootSizeBox;
-		RootSizeBox->SetWidthOverride(500.0f);
-		RootSizeBox->SetHeightOverride(306.0f);
+		RootSizeBox->SetWidthOverride(LootContainerPanelWidth);
+		RootSizeBox->SetHeightOverride(LootContainerPanelHeaderHeight + 2.0f * LootContainerTileHeight);
 		RootSizeBox->SetContent(PanelBackground);
 
 		PanelBackground->SetPadding(FMargin(14.0f));
 		PanelBackground->SetBrush(MakeRoundedBoxBrush(
-			FVector2D(500.0f, 306.0f),
+			FVector2D(LootContainerPanelWidth, LootContainerPanelHeaderHeight + 2.0f * LootContainerTileHeight),
 			FLinearColor(0.012f, 0.014f, 0.017f, 0.90f),
 			FLinearColor(0.44f, 0.34f, 0.26f, 1.0f),
 			1.0f));
@@ -1518,8 +1526,8 @@ namespace TunaSweeperEditorSetup
 			TitleSlot->SetVerticalAlignment(VAlign_Top);
 		}
 
-		ContainerTileView->SetEntryWidth(96.0f);
-		ContainerTileView->SetEntryHeight(116.0f);
+		ContainerTileView->SetEntryWidth(LootContainerTileWidth);
+		ContainerTileView->SetEntryHeight(LootContainerTileHeight);
 		SetListViewEntryWidgetClass(ContainerTileView, EntryWidgetClass);
 		UVerticalBoxSlot* TileViewSlot = PanelStack->AddChildToVerticalBox(ContainerTileView);
 		if (TileViewSlot)
@@ -1557,13 +1565,13 @@ namespace TunaSweeperEditorSetup
 			WidgetTree,
 			TEXT("ShopPanel"),
 			FText::FromString(TEXT("Shop")),
-			FVector2D(420.0f, 620.0f),
+			FVector2D(LootContainerPanelWidth, 620.0f),
 			FLinearColor(0.28f, 0.40f, 0.50f, 1.0f));
 		UBorder* StoragePanel = BuildHudSimplePanel(
 			WidgetTree,
 			TEXT("StoragePanel"),
 			FText::FromString(TEXT("Storage")),
-			FVector2D(420.0f, 620.0f),
+			FVector2D(LootContainerPanelWidth, 620.0f),
 			FLinearColor(0.38f, 0.42f, 0.32f, 1.0f));
 
 		if (!RootSizeBox || !PanelOverlay || !LootingBoxPanel || !LootContainerWidget || !ShopPanel || !StoragePanel)
@@ -1572,7 +1580,7 @@ namespace TunaSweeperEditorSetup
 		}
 
 		WidgetTree->RootWidget = RootSizeBox;
-		RootSizeBox->SetWidthOverride(500.0f);
+		RootSizeBox->SetWidthOverride(LootContainerPanelWidth);
 		RootSizeBox->SetContent(PanelOverlay);
 
 		UOverlaySlot* LootContainerSlot = LootingBoxPanel->AddChildToOverlay(LootContainerWidget);
@@ -1656,7 +1664,7 @@ namespace TunaSweeperEditorSetup
 			CenterSlot->SetAnchors(FAnchors(0.5f, 0.5f, 0.5f, 0.5f));
 			CenterSlot->SetAlignment(FVector2D(0.5f, 0.5f));
 			CenterSlot->SetPosition(FVector2D(0.0f, -20.0f));
-			CenterSlot->SetSize(FVector2D(1380.0f, 620.0f));
+			CenterSlot->SetSize(FVector2D(1420.0f, 620.0f));
 		}
 
 		UHorizontalBoxSlot* InventorySlot = CenterContentPanel->AddChildToHorizontalBox(InventoryAreaWidget);

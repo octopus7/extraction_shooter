@@ -12,6 +12,15 @@
 
 namespace TunaSweeperLootContainerUi
 {
+	constexpr int32 ContainerTileColumnCount = 5;
+	constexpr float ContainerTileWidth = 96.0f;
+	constexpr float ContainerTileHeight = 116.0f;
+	constexpr float ContainerPanelPadding = 14.0f;
+	constexpr float ContainerTileViewScrollbarReserveWidth = 22.0f;
+	constexpr float ContainerPanelHeaderHeight = 74.0f;
+	constexpr float ContainerPanelWidth =
+		ContainerPanelPadding * 2.0f + ContainerTileColumnCount * ContainerTileWidth + ContainerTileViewScrollbarReserveWidth;
+
 	FTunaSweeperItemStackTileData BuildTileData(
 		UTunaSweeperItemDataSubsystem* ItemDataSubsystem,
 		const FTunaSweeperItemStack& ItemStack,
@@ -95,10 +104,12 @@ void UTunaSweeperLootContainerWidget::PopulateContainerItems()
 	}
 
 	const int32 Capacity = FMath::Clamp(ContainerInstance.Capacity, 5, 15);
-	const int32 RowCount = FMath::Max(1, FMath::DivideAndRoundUp(Capacity, 5));
+	const int32 RowCount = FMath::Max(1, FMath::DivideAndRoundUp(Capacity, TunaSweeperLootContainerUi::ContainerTileColumnCount));
 	if (RootSizeBox)
 	{
-		RootSizeBox->SetHeightOverride(74.0f + RowCount * 116.0f);
+		RootSizeBox->SetWidthOverride(TunaSweeperLootContainerUi::ContainerPanelWidth);
+		RootSizeBox->SetHeightOverride(
+			TunaSweeperLootContainerUi::ContainerPanelHeaderHeight + RowCount * TunaSweeperLootContainerUi::ContainerTileHeight);
 	}
 
 	if (ContainerTitleText)
@@ -114,8 +125,8 @@ void UTunaSweeperLootContainerWidget::PopulateContainerItems()
 
 	TileObjects.Reset();
 	ContainerTileView->ClearListItems();
-	ContainerTileView->SetEntryWidth(96.0f);
-	ContainerTileView->SetEntryHeight(116.0f);
+	ContainerTileView->SetEntryWidth(TunaSweeperLootContainerUi::ContainerTileWidth);
+	ContainerTileView->SetEntryHeight(TunaSweeperLootContainerUi::ContainerTileHeight);
 
 	for (int32 SlotIndex = 0; SlotIndex < Capacity; ++SlotIndex)
 	{
@@ -140,4 +151,3 @@ void UTunaSweeperLootContainerWidget::PopulateContainerItems()
 		ContainerTileView->AddItem(TileObject);
 	}
 }
-
