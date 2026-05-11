@@ -82,7 +82,7 @@ namespace TunaSweeperEditorSetup
 	const FString InteractionMarkerAlignmentTaskId = TEXT("2026-05-10_RebuildInteractionMarkerAlignmentV2");
 	const FString TempOpenLootUiTaskId = TEXT("2026-05-10_CreateTempOpenLootTileViewAndIconsV2");
 	const FString PickupItemAndSpawnerTaskId = TEXT("2026-05-11_CreatePickupItemAndSpawnerAssetsV3");
-	const FString CommonGameHudTaskId = TEXT("2026-05-11_RebuildInventoryFiveColumnAuxBagPanelV3");
+	const FString CommonGameHudTaskId = TEXT("2026-05-11_RebuildSquareItemThumbnailSlots");
 	const FString InventoryInputTaskId = TEXT("2026-05-11_AddInventoryInput");
 	const FString LootContainerAndSpawnerTaskId = TEXT("2026-05-11_CreateLootContainerAndSpawnerAssetsV1");
 	const FString CannedTunaIconImportTaskId = TEXT("2026-05-11_ImportCannedTunaIconV1");
@@ -121,7 +121,7 @@ namespace TunaSweeperEditorSetup
 	constexpr int32 InventoryTileColumnCount = 5;
 	constexpr int32 EquipmentReserveColumnCount = 4;
 	constexpr float InventoryTileWidth = 96.0f;
-	constexpr float InventoryTileHeight = 116.0f;
+	constexpr float InventoryTileHeight = 96.0f;
 	constexpr float InventoryPanelPadding = 14.0f;
 	constexpr float InventoryTileViewScrollbarReserveWidth = 22.0f;
 	constexpr float InventoryTileViewWidth = InventoryTileColumnCount * InventoryTileWidth + InventoryTileViewScrollbarReserveWidth;
@@ -135,7 +135,7 @@ namespace TunaSweeperEditorSetup
 	constexpr float InventoryAreaPanelWidth = InventoryPanelWidth + AuxiliaryBagPanelGap + AuxiliaryBagPanelWidth;
 	constexpr int32 LootContainerTileColumnCount = 5;
 	constexpr float LootContainerTileWidth = 96.0f;
-	constexpr float LootContainerTileHeight = 116.0f;
+	constexpr float LootContainerTileHeight = 96.0f;
 	constexpr float LootContainerPanelPadding = 14.0f;
 	constexpr float LootContainerTileViewScrollbarReserveWidth = 22.0f;
 	constexpr float LootContainerPanelHeaderHeight = 74.0f;
@@ -915,58 +915,66 @@ namespace TunaSweeperEditorSetup
 		UWidgetTree* WidgetTree = WidgetBlueprint->WidgetTree;
 		USizeBox* RootSizeBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("RootSizeBox"));
 		UBorder* SlotBackground = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("SlotBackground"));
-		UVerticalBox* SlotStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("SlotStack"));
+		UOverlay* SlotOverlay = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), TEXT("SlotOverlay"));
 		USizeBox* IconBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("IconBox"));
 		UImage* ItemIconImage = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("ItemIconImage"));
 		UTextBlock* ItemQuantityText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("ItemQuantityText"));
+		UBorder* ItemNamePlate = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("ItemNamePlate"));
 		UTextBlock* ItemNameText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("ItemNameText"));
 
-		if (!RootSizeBox || !SlotBackground || !SlotStack || !IconBox || !ItemIconImage || !ItemQuantityText || !ItemNameText)
+		if (!RootSizeBox || !SlotBackground || !SlotOverlay || !IconBox || !ItemIconImage || !ItemQuantityText || !ItemNamePlate || !ItemNameText)
 		{
 			return false;
 		}
 
 		WidgetTree->RootWidget = RootSizeBox;
 		RootSizeBox->SetWidthOverride(96.0f);
-		RootSizeBox->SetHeightOverride(116.0f);
+		RootSizeBox->SetHeightOverride(96.0f);
 		RootSizeBox->SetContent(SlotBackground);
 
-		SlotBackground->SetPadding(FMargin(7.0f));
+		SlotBackground->SetPadding(FMargin(5.0f));
 		SlotBackground->SetBrush(MakeRoundedBoxBrush(
-			FVector2D(96.0f, 116.0f),
+			FVector2D(96.0f, 96.0f),
 			FLinearColor(0.012f, 0.014f, 0.017f, 0.90f),
 			FLinearColor(0.24f, 0.27f, 0.31f, 0.95f),
 			1.0f));
-		SlotBackground->SetContent(SlotStack);
+		SlotBackground->SetContent(SlotOverlay);
 
-		IconBox->SetWidthOverride(76.0f);
-		IconBox->SetHeightOverride(64.0f);
+		IconBox->SetWidthOverride(78.0f);
+		IconBox->SetHeightOverride(68.0f);
 		IconBox->SetContent(ItemIconImage);
 		ItemIconImage->SetColorAndOpacity(FLinearColor::White);
 
-		UVerticalBoxSlot* IconSlot = SlotStack->AddChildToVerticalBox(IconBox);
+		UOverlaySlot* IconSlot = SlotOverlay->AddChildToOverlay(IconBox);
 		if (IconSlot)
 		{
 			IconSlot->SetHorizontalAlignment(HAlign_Center);
-			IconSlot->SetVerticalAlignment(VAlign_Top);
+			IconSlot->SetVerticalAlignment(VAlign_Center);
+			IconSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 10.0f));
 		}
 
 		ConfigureTextBlock(ItemQuantityText, FText::FromString(TEXT("x1")), FLinearColor::White, 13);
-		UVerticalBoxSlot* QuantitySlot = SlotStack->AddChildToVerticalBox(ItemQuantityText);
+		UOverlaySlot* QuantitySlot = SlotOverlay->AddChildToOverlay(ItemQuantityText);
 		if (QuantitySlot)
 		{
 			QuantitySlot->SetHorizontalAlignment(HAlign_Right);
 			QuantitySlot->SetVerticalAlignment(VAlign_Top);
 		}
 
-		ConfigureTextBlock(ItemNameText, FText::FromString(TEXT("Item")), FLinearColor(0.82f, 0.88f, 0.94f, 1.0f), 11);
-		ItemNameText->SetAutoWrapText(true);
-		UVerticalBoxSlot* NameSlot = SlotStack->AddChildToVerticalBox(ItemNameText);
+		ItemNamePlate->SetPadding(FMargin(3.0f, 1.0f));
+		ItemNamePlate->SetBrush(MakeRoundedBoxBrush(
+			FVector2D(86.0f, 18.0f),
+			FLinearColor(0.0f, 0.0f, 0.0f, 0.62f),
+			FLinearColor::Transparent,
+			0.0f));
+		ConfigureTextBlock(ItemNameText, FText::FromString(TEXT("Item")), FLinearColor(0.82f, 0.88f, 0.94f, 1.0f), 10);
+		ItemNameText->SetAutoWrapText(false);
+		ItemNamePlate->SetContent(ItemNameText);
+		UOverlaySlot* NameSlot = SlotOverlay->AddChildToOverlay(ItemNamePlate);
 		if (NameSlot)
 		{
 			NameSlot->SetHorizontalAlignment(HAlign_Fill);
 			NameSlot->SetVerticalAlignment(VAlign_Bottom);
-			NameSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
 		}
 
 		RegisterWidgetVariable(WidgetBlueprint, SlotBackground);

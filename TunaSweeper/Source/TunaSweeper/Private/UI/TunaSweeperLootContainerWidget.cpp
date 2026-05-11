@@ -14,7 +14,7 @@ namespace TunaSweeperLootContainerUi
 {
 	constexpr int32 ContainerTileColumnCount = 5;
 	constexpr float ContainerTileWidth = 96.0f;
-	constexpr float ContainerTileHeight = 116.0f;
+	constexpr float ContainerTileHeight = 96.0f;
 	constexpr float ContainerPanelPadding = 14.0f;
 	constexpr float ContainerTileViewScrollbarReserveWidth = 22.0f;
 	constexpr float ContainerPanelHeaderHeight = 74.0f;

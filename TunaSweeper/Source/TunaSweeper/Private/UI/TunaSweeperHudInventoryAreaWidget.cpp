@@ -15,12 +15,12 @@ namespace TunaSweeperInventoryArea
 	constexpr int32 InventoryTileColumnCount = 5;
 	constexpr int32 EquipmentReserveColumnCount = 4;
 	constexpr float InventoryTileWidth = 96.0f;
-	constexpr float InventoryTileHeight = 116.0f;
+	constexpr float InventoryTileHeight = 96.0f;
 	constexpr float InventoryTileViewScrollbarReserveWidth = 22.0f;
 	constexpr float InventoryTileViewWidth = InventoryTileColumnCount * InventoryTileWidth + InventoryTileViewScrollbarReserveWidth;
 	constexpr float EquipmentReserveEntryWidth = InventoryTileViewWidth / EquipmentReserveColumnCount;
 	constexpr float AuxiliaryBagTileWidth = 96.0f;
-	constexpr float AuxiliaryBagTileHeight = 116.0f;
+	constexpr float AuxiliaryBagTileHeight = 96.0f;
 
 	FTunaSweeperItemStackTileData BuildTileData(
 		UTunaSweeperItemDataSubsystem* ItemDataSubsystem,
