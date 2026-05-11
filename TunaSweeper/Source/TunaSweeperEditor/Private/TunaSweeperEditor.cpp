@@ -940,6 +940,13 @@ namespace TunaSweeperEditorSetup
 		RegisterWidgetVariable(WidgetBlueprint, HydrationText);
 		RegisterWidgetVariable(WidgetBlueprint, CarryWeightGauge);
 		RegisterWidgetVariable(WidgetBlueprint, WeightWarningIcon);
+		RegisterWidgetVariable(WidgetBlueprint, RootSizeBox);
+		RegisterWidgetVariable(WidgetBlueprint, PanelBackground);
+		RegisterWidgetVariable(WidgetBlueprint, StatusStack);
+		RegisterWidgetVariable(WidgetBlueprint, WeightRow);
+		RegisterWidgetVariable(WidgetBlueprint, GaugeOverlay);
+		RegisterWidgetVariable(WidgetBlueprint, MaxWeightTick);
+		RegisterWidgetVariable(WidgetBlueprint, VitalsRow);
 		WidgetBlueprint->MarkPackageDirty();
 		return true;
 	}
