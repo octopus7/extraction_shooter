@@ -16,6 +16,7 @@
 #include "Components/ListViewBase.h"
 #include "Components/Overlay.h"
 #include "Components/OverlaySlot.h"
+#include "Components/ProgressBar.h"
 #include "Components/SizeBox.h"
 #include "Components/TextBlock.h"
 #include "Components/TileView.h"
@@ -49,6 +50,13 @@
 #include "Player/TunaSweeperPlayerController.h"
 #include "TunaSweeperEditorRunOnce.h"
 #include "UI/TunaSweeperInteractionMarkerWidget.h"
+#include "UI/TunaSweeperGameHudWidget.h"
+#include "UI/TunaSweeperHudBottomStatusWidget.h"
+#include "UI/TunaSweeperHudExternalPanelWidget.h"
+#include "UI/TunaSweeperHudInventoryAreaWidget.h"
+#include "UI/TunaSweeperHudItemInfoPanelWidget.h"
+#include "UI/TunaSweeperHudQuickSlotBarWidget.h"
+#include "UI/TunaSweeperHudTopReserveWidget.h"
 #include "UI/TunaSweeperPickupItemIconWidget.h"
 #include "UI/TunaSweeperTempOpenLootTileEntryWidget.h"
 #include "UI/TunaSweeperTempOpenLootWidget.h"
@@ -70,6 +78,7 @@ namespace TunaSweeperEditorSetup
 	const FString InteractionMarkerAlignmentTaskId = TEXT("2026-05-10_RebuildInteractionMarkerAlignmentV2");
 	const FString TempOpenLootUiTaskId = TEXT("2026-05-10_CreateTempOpenLootTileViewAndIconsV2");
 	const FString PickupItemAndSpawnerTaskId = TEXT("2026-05-11_CreatePickupItemAndSpawnerAssetsV3");
+	const FString CommonGameHudTaskId = TEXT("2026-05-11_CreateCommonGameHudAssetsV1");
 	const FString GameInstanceAssetPath = TEXT("/Game/Core");
 	const FString GameInstanceAssetName = TEXT("BP_TunaSweeperGameInstance");
 	const FString GameModeAssetName = TEXT("BP_TunaSweeperGameMode");
@@ -92,6 +101,13 @@ namespace TunaSweeperEditorSetup
 	const FString PickupItemIconWidgetAssetName = TEXT("WBP_PickupItemIcon");
 	const FString TempOpenLootWidgetAssetName = TEXT("WBP_TempOpenLootTileView");
 	const FString TempOpenLootEntryWidgetAssetName = TEXT("WBP_TempOpenLootTileEntry");
+	const FString GameHudWidgetAssetName = TEXT("WBP_GameHud");
+	const FString HudTopReserveWidgetAssetName = TEXT("WBP_HudTopReserve");
+	const FString HudBottomStatusWidgetAssetName = TEXT("WBP_HudBottomStatus");
+	const FString HudQuickSlotBarWidgetAssetName = TEXT("WBP_HudQuickSlotBar");
+	const FString HudInventoryAreaWidgetAssetName = TEXT("WBP_HudInventoryArea");
+	const FString HudItemInfoPanelWidgetAssetName = TEXT("WBP_HudItemInfoPanel");
+	const FString HudExternalPanelWidgetAssetName = TEXT("WBP_HudExternalPanel");
 	const FString InteractionAssetPath = TEXT("/Game/Interaction");
 	const FString DialogueInteractionAssetName = TEXT("BP_Interact_Dialogue");
 	const FString PickupInteractionAssetName = TEXT("BP_Interact_Pickup");
@@ -566,6 +582,15 @@ namespace TunaSweeperEditorSetup
 		TextBlock->SetJustification(ETextJustify::Center);
 	}
 
+	void ConfigureTextBlockLeft(UTextBlock* TextBlock, const FText& Text, const FLinearColor& Color, int32 FontSize)
+	{
+		ConfigureTextBlock(TextBlock, Text, Color, FontSize);
+		if (TextBlock)
+		{
+			TextBlock->SetJustification(ETextJustify::Left);
+		}
+	}
+
 	FSlateBrush MakeRoundedBoxBrush(const FVector2D& ImageSize, const FLinearColor& FillColor, const FLinearColor& OutlineColor, float OutlineWidth)
 	{
 		FSlateBrush Brush;
@@ -741,6 +766,665 @@ namespace TunaSweeperEditorSetup
 		FAssetRegistryModule::AssetCreated(CreatedBlueprint);
 		CreatedBlueprint->MarkPackageDirty();
 		return CreatedBlueprint;
+	}
+
+	bool BuildHudTopReserveWidgetTree(UWidgetBlueprint* WidgetBlueprint)
+	{
+		if (!WidgetBlueprint || !WidgetBlueprint->WidgetTree)
+		{
+			return false;
+		}
+
+		WidgetBlueprint->Modify();
+		WidgetBlueprint->WidgetTree->Modify();
+		ClearWidgetTreeForRebuild(WidgetBlueprint);
+
+		UWidgetTree* WidgetTree = WidgetBlueprint->WidgetTree;
+		USizeBox* RootSizeBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("RootSizeBox"));
+		UBorder* ReservedBackground = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("ReservedBackground"));
+		if (!RootSizeBox || !ReservedBackground)
+		{
+			return false;
+		}
+
+		WidgetTree->RootWidget = RootSizeBox;
+		RootSizeBox->SetHeightOverride(88.0f);
+		RootSizeBox->SetContent(ReservedBackground);
+
+		ReservedBackground->SetPadding(FMargin(24.0f, 10.0f));
+		ReservedBackground->SetBrush(MakeRoundedBoxBrush(
+			FVector2D(1280.0f, 88.0f),
+			FLinearColor(0.005f, 0.006f, 0.008f, 0.35f),
+			FLinearColor(0.15f, 0.17f, 0.19f, 0.35f),
+			1.0f));
+
+		RegisterWidgetVariable(WidgetBlueprint, RootSizeBox);
+		WidgetBlueprint->MarkPackageDirty();
+		return true;
+	}
+
+	bool BuildHudBottomStatusWidgetTree(UWidgetBlueprint* WidgetBlueprint)
+	{
+		if (!WidgetBlueprint || !WidgetBlueprint->WidgetTree)
+		{
+			return false;
+		}
+
+		WidgetBlueprint->Modify();
+		WidgetBlueprint->WidgetTree->Modify();
+		ClearWidgetTreeForRebuild(WidgetBlueprint);
+
+		UWidgetTree* WidgetTree = WidgetBlueprint->WidgetTree;
+		USizeBox* RootSizeBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("RootSizeBox"));
+		UBorder* PanelBackground = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("PanelBackground"));
+		UVerticalBox* StatusStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("StatusStack"));
+		UHorizontalBox* WeightRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("WeightRow"));
+		UTextBlock* WeightText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("WeightText"));
+		UBorder* WeightWarningIcon = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("WeightWarningIcon"));
+		UTextBlock* WeightWarningText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("WeightWarningText"));
+		UOverlay* GaugeOverlay = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), TEXT("GaugeOverlay"));
+		UProgressBar* CarryWeightGauge = WidgetTree->ConstructWidget<UProgressBar>(UProgressBar::StaticClass(), TEXT("CarryWeightGauge"));
+		USizeBox* MaxWeightTick = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("MaxWeightTick"));
+		UBorder* MaxWeightTickLine = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("MaxWeightTickLine"));
+		UHorizontalBox* VitalsRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("VitalsRow"));
+		UTextBlock* HealthText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("HealthText"));
+		UTextBlock* HungerText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("HungerText"));
+		UTextBlock* HydrationText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("HydrationText"));
+
+		if (!RootSizeBox || !PanelBackground || !StatusStack || !WeightRow || !WeightText || !WeightWarningIcon || !WeightWarningText ||
+			!GaugeOverlay || !CarryWeightGauge || !MaxWeightTick || !MaxWeightTickLine || !VitalsRow || !HealthText || !HungerText || !HydrationText)
+		{
+			return false;
+		}
+
+		WidgetTree->RootWidget = RootSizeBox;
+		RootSizeBox->SetWidthOverride(300.0f);
+		RootSizeBox->SetHeightOverride(118.0f);
+		RootSizeBox->SetContent(PanelBackground);
+
+		PanelBackground->SetPadding(FMargin(14.0f, 10.0f));
+		PanelBackground->SetBrush(MakeRoundedBoxBrush(
+			FVector2D(300.0f, 118.0f),
+			FLinearColor(0.01f, 0.012f, 0.014f, 0.82f),
+			FLinearColor(0.22f, 0.25f, 0.29f, 0.85f),
+			1.0f));
+		PanelBackground->SetContent(StatusStack);
+
+		ConfigureTextBlockLeft(WeightText, FText::FromString(TEXT("0/50 kg")), FLinearColor::White, 18);
+		UHorizontalBoxSlot* WeightTextSlot = WeightRow->AddChildToHorizontalBox(WeightText);
+		if (WeightTextSlot)
+		{
+			WeightTextSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+			WeightTextSlot->SetVerticalAlignment(VAlign_Center);
+		}
+
+		WeightWarningIcon->SetVisibility(ESlateVisibility::Hidden);
+		WeightWarningIcon->SetPadding(FMargin(5.0f, 2.0f));
+		WeightWarningIcon->SetBrush(MakeRoundedBoxBrush(
+			FVector2D(34.0f, 24.0f),
+			FLinearColor(0.9f, 0.18f, 0.08f, 0.95f),
+			FLinearColor(1.0f, 0.75f, 0.25f, 1.0f),
+			1.0f));
+		ConfigureTextBlock(WeightWarningText, FText::FromString(TEXT("KG")), FLinearColor::White, 12);
+		WeightWarningIcon->SetContent(WeightWarningText);
+		UHorizontalBoxSlot* WarningSlot = WeightRow->AddChildToHorizontalBox(WeightWarningIcon);
+		if (WarningSlot)
+		{
+			WarningSlot->SetHorizontalAlignment(HAlign_Right);
+			WarningSlot->SetVerticalAlignment(VAlign_Center);
+		}
+
+		UVerticalBoxSlot* WeightRowSlot = StatusStack->AddChildToVerticalBox(WeightRow);
+		if (WeightRowSlot)
+		{
+			WeightRowSlot->SetHorizontalAlignment(HAlign_Fill);
+			WeightRowSlot->SetVerticalAlignment(VAlign_Top);
+		}
+
+		CarryWeightGauge->SetPercent(0.0f);
+		CarryWeightGauge->SetFillColorAndOpacity(FLinearColor(0.95f, 0.82f, 0.18f, 1.0f));
+		UOverlaySlot* GaugeSlot = GaugeOverlay->AddChildToOverlay(CarryWeightGauge);
+		if (GaugeSlot)
+		{
+			GaugeSlot->SetHorizontalAlignment(HAlign_Fill);
+			GaugeSlot->SetVerticalAlignment(VAlign_Fill);
+		}
+
+		MaxWeightTick->SetWidthOverride(2.0f);
+		MaxWeightTick->SetHeightOverride(18.0f);
+		MaxWeightTickLine->SetBrush(MakeRoundedBoxBrush(
+			FVector2D(2.0f, 18.0f),
+			FLinearColor(1.0f, 1.0f, 1.0f, 0.8f),
+			FLinearColor::Transparent,
+			0.0f));
+		MaxWeightTick->SetContent(MaxWeightTickLine);
+		UOverlaySlot* TickSlot = GaugeOverlay->AddChildToOverlay(MaxWeightTick);
+		if (TickSlot)
+		{
+			TickSlot->SetHorizontalAlignment(HAlign_Center);
+			TickSlot->SetVerticalAlignment(VAlign_Center);
+		}
+
+		UVerticalBoxSlot* GaugeOverlaySlot = StatusStack->AddChildToVerticalBox(GaugeOverlay);
+		if (GaugeOverlaySlot)
+		{
+			GaugeOverlaySlot->SetPadding(FMargin(0.0f, 8.0f, 0.0f, 10.0f));
+			GaugeOverlaySlot->SetHorizontalAlignment(HAlign_Fill);
+			GaugeOverlaySlot->SetVerticalAlignment(VAlign_Top);
+		}
+
+		ConfigureTextBlockLeft(HealthText, FText::FromString(TEXT("HP 100")), FLinearColor(0.98f, 0.38f, 0.32f, 1.0f), 15);
+		ConfigureTextBlockLeft(HungerText, FText::FromString(TEXT("Food 100")), FLinearColor(0.95f, 0.72f, 0.28f, 1.0f), 15);
+		ConfigureTextBlockLeft(HydrationText, FText::FromString(TEXT("Water 100")), FLinearColor(0.35f, 0.72f, 0.98f, 1.0f), 15);
+
+		for (UTextBlock* VitalsText : { HealthText, HungerText, HydrationText })
+		{
+			UHorizontalBoxSlot* VitalsSlot = VitalsRow->AddChildToHorizontalBox(VitalsText);
+			if (VitalsSlot)
+			{
+				VitalsSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+				VitalsSlot->SetVerticalAlignment(VAlign_Center);
+			}
+		}
+
+		UVerticalBoxSlot* VitalsRowSlot = StatusStack->AddChildToVerticalBox(VitalsRow);
+		if (VitalsRowSlot)
+		{
+			VitalsRowSlot->SetHorizontalAlignment(HAlign_Fill);
+			VitalsRowSlot->SetVerticalAlignment(VAlign_Bottom);
+		}
+
+		RegisterWidgetVariable(WidgetBlueprint, WeightText);
+		RegisterWidgetVariable(WidgetBlueprint, HealthText);
+		RegisterWidgetVariable(WidgetBlueprint, HungerText);
+		RegisterWidgetVariable(WidgetBlueprint, HydrationText);
+		RegisterWidgetVariable(WidgetBlueprint, CarryWeightGauge);
+		RegisterWidgetVariable(WidgetBlueprint, WeightWarningIcon);
+		WidgetBlueprint->MarkPackageDirty();
+		return true;
+	}
+
+	bool BuildHudQuickSlotBarWidgetTree(UWidgetBlueprint* WidgetBlueprint)
+	{
+		if (!WidgetBlueprint || !WidgetBlueprint->WidgetTree)
+		{
+			return false;
+		}
+
+		WidgetBlueprint->Modify();
+		WidgetBlueprint->WidgetTree->Modify();
+		ClearWidgetTreeForRebuild(WidgetBlueprint);
+
+		UWidgetTree* WidgetTree = WidgetBlueprint->WidgetTree;
+		USizeBox* RootSizeBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("RootSizeBox"));
+		UHorizontalBox* SlotRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("SlotRow"));
+		if (!RootSizeBox || !SlotRow)
+		{
+			return false;
+		}
+
+		WidgetTree->RootWidget = RootSizeBox;
+		RootSizeBox->SetHeightOverride(118.0f);
+		RootSizeBox->SetContent(SlotRow);
+
+		const FString DefaultIconPaths[8] = {
+			TEXT("/Game/UI/Icons/T_UIIcon_Pistol.T_UIIcon_Pistol"),
+			TEXT("/Game/UI/Icons/T_UIIcon_Rifle.T_UIIcon_Rifle"),
+			TEXT("/Game/UI/Icons/T_UIIcon_Bandage.T_UIIcon_Bandage"),
+			TEXT("/Game/UI/Icons/T_UIIcon_FirstAidKit.T_UIIcon_FirstAidKit"),
+			TEXT("/Game/UI/Icons/T_UIIcon_CannedFood.T_UIIcon_CannedFood"),
+			TEXT("/Game/UI/Icons/T_UIIcon_WaterBottle.T_UIIcon_WaterBottle"),
+			TEXT("/Game/UI/Icons/T_UIIcon_Painkillers.T_UIIcon_Painkillers"),
+			TEXT("/Game/UI/Icons/T_UIIcon_EnergyBar.T_UIIcon_EnergyBar")
+		};
+
+		for (int32 SlotNumber = 1; SlotNumber <= 8; ++SlotNumber)
+		{
+			const bool bWeaponSlot = SlotNumber <= 2;
+			const float SlotSize = bWeaponSlot ? 82.0f : 56.0f;
+			const float IconSize = bWeaponSlot ? 68.0f : 42.0f;
+
+			USizeBox* SlotSizeBox = WidgetTree->ConstructWidget<USizeBox>(
+				USizeBox::StaticClass(),
+				FName(*FString::Printf(TEXT("QuickSlot%dSizeBox"), SlotNumber)));
+			UBorder* SlotBackground = WidgetTree->ConstructWidget<UBorder>(
+				UBorder::StaticClass(),
+				FName(*FString::Printf(TEXT("QuickSlot%dBackground"), SlotNumber)));
+			UOverlay* SlotOverlay = WidgetTree->ConstructWidget<UOverlay>(
+				UOverlay::StaticClass(),
+				FName(*FString::Printf(TEXT("QuickSlot%dOverlay"), SlotNumber)));
+			UImage* SlotIcon = WidgetTree->ConstructWidget<UImage>(
+				UImage::StaticClass(),
+				FName(*FString::Printf(TEXT("QuickSlot%dIcon"), SlotNumber)));
+			UTextBlock* SlotNumberText = WidgetTree->ConstructWidget<UTextBlock>(
+				UTextBlock::StaticClass(),
+				FName(*FString::Printf(TEXT("QuickSlot%dNumberText"), SlotNumber)));
+			UBorder* SelectionFrame = WidgetTree->ConstructWidget<UBorder>(
+				UBorder::StaticClass(),
+				FName(*FString::Printf(TEXT("QuickSlot%dSelectionFrame"), SlotNumber)));
+
+			if (!SlotSizeBox || !SlotBackground || !SlotOverlay || !SlotIcon || !SlotNumberText || !SelectionFrame)
+			{
+				return false;
+			}
+
+			SlotSizeBox->SetWidthOverride(SlotSize);
+			SlotSizeBox->SetHeightOverride(SlotSize);
+			SlotSizeBox->SetContent(SlotBackground);
+
+			SlotBackground->SetPadding(FMargin(4.0f));
+			SlotBackground->SetBrush(MakeRoundedBoxBrush(
+				FVector2D(SlotSize, SlotSize),
+				FLinearColor(0.012f, 0.014f, 0.016f, 0.88f),
+				FLinearColor(0.22f, 0.25f, 0.3f, 0.95f),
+				1.0f));
+			SlotBackground->SetContent(SlotOverlay);
+
+			if (UTexture2D* DefaultIcon = LoadObject<UTexture2D>(nullptr, *DefaultIconPaths[SlotNumber - 1]))
+			{
+				SlotIcon->SetBrushFromTexture(DefaultIcon, true);
+			}
+			SlotIcon->SetDesiredSizeOverride(FVector2D(IconSize, IconSize));
+			SlotIcon->SetColorAndOpacity(FLinearColor::White);
+
+			UOverlaySlot* IconSlot = SlotOverlay->AddChildToOverlay(SlotIcon);
+			if (IconSlot)
+			{
+				IconSlot->SetHorizontalAlignment(HAlign_Center);
+				IconSlot->SetVerticalAlignment(VAlign_Center);
+				IconSlot->SetPadding(FMargin((SlotSize - IconSize) * 0.25f));
+			}
+
+			ConfigureTextBlock(SlotNumberText, FText::AsNumber(SlotNumber), FLinearColor(0.82f, 0.88f, 0.94f, 1.0f), bWeaponSlot ? 16 : 13);
+			UOverlaySlot* NumberSlot = SlotOverlay->AddChildToOverlay(SlotNumberText);
+			if (NumberSlot)
+			{
+				NumberSlot->SetHorizontalAlignment(HAlign_Left);
+				NumberSlot->SetVerticalAlignment(VAlign_Top);
+				NumberSlot->SetPadding(FMargin(3.0f, 1.0f, 0.0f, 0.0f));
+			}
+
+			SelectionFrame->SetVisibility(SlotNumber == 1 ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Hidden);
+			SelectionFrame->SetBrush(MakeRoundedBoxBrush(
+				FVector2D(SlotSize, SlotSize),
+				FLinearColor::Transparent,
+				FLinearColor(0.98f, 0.82f, 0.22f, 1.0f),
+				2.0f));
+			UOverlaySlot* SelectionSlot = SlotOverlay->AddChildToOverlay(SelectionFrame);
+			if (SelectionSlot)
+			{
+				SelectionSlot->SetHorizontalAlignment(HAlign_Fill);
+				SelectionSlot->SetVerticalAlignment(VAlign_Fill);
+			}
+
+			UHorizontalBoxSlot* SlotRowSlot = SlotRow->AddChildToHorizontalBox(SlotSizeBox);
+			if (SlotRowSlot)
+			{
+				SlotRowSlot->SetPadding(FMargin(SlotNumber == 1 ? 0.0f : 8.0f, 0.0f, 0.0f, 0.0f));
+				SlotRowSlot->SetVerticalAlignment(VAlign_Bottom);
+			}
+
+			RegisterWidgetVariable(WidgetBlueprint, SlotIcon);
+			RegisterWidgetVariable(WidgetBlueprint, SelectionFrame);
+		}
+
+		RegisterWidgetVariable(WidgetBlueprint, RootSizeBox);
+		WidgetBlueprint->MarkPackageDirty();
+		return true;
+	}
+
+	UBorder* BuildHudSimplePanel(
+		UWidgetTree* WidgetTree,
+		const FName& PanelName,
+		const FText& Title,
+		const FVector2D& PanelSize,
+		const FLinearColor& AccentColor)
+	{
+		if (!WidgetTree)
+		{
+			return nullptr;
+		}
+
+		UBorder* Panel = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), PanelName);
+		UVerticalBox* PanelStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), FName(*(PanelName.ToString() + TEXT("Stack"))));
+		UTextBlock* TitleText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), FName(*(PanelName.ToString() + TEXT("TitleText"))));
+		if (!Panel || !PanelStack || !TitleText)
+		{
+			return nullptr;
+		}
+
+		Panel->SetPadding(FMargin(14.0f));
+		Panel->SetBrush(MakeRoundedBoxBrush(
+			PanelSize,
+			FLinearColor(0.012f, 0.014f, 0.017f, 0.90f),
+			AccentColor,
+			1.0f));
+		Panel->SetContent(PanelStack);
+
+		ConfigureTextBlockLeft(TitleText, Title, FLinearColor::White, 18);
+		UVerticalBoxSlot* TitleSlot = PanelStack->AddChildToVerticalBox(TitleText);
+		if (TitleSlot)
+		{
+			TitleSlot->SetHorizontalAlignment(HAlign_Fill);
+			TitleSlot->SetVerticalAlignment(VAlign_Top);
+		}
+
+		return Panel;
+	}
+
+	bool BuildHudInventoryAreaWidgetTree(UWidgetBlueprint* WidgetBlueprint)
+	{
+		if (!WidgetBlueprint || !WidgetBlueprint->WidgetTree)
+		{
+			return false;
+		}
+
+		WidgetBlueprint->Modify();
+		WidgetBlueprint->WidgetTree->Modify();
+		ClearWidgetTreeForRebuild(WidgetBlueprint);
+
+		UWidgetTree* WidgetTree = WidgetBlueprint->WidgetTree;
+		USizeBox* RootSizeBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("RootSizeBox"));
+		UHorizontalBox* AreaRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("AreaRow"));
+		UBorder* InventoryPanel = BuildHudSimplePanel(
+			WidgetTree,
+			TEXT("InventoryPanel"),
+			FText::FromString(TEXT("Inventory")),
+			FVector2D(340.0f, 620.0f),
+			FLinearColor(0.28f, 0.36f, 0.44f, 1.0f));
+		UBorder* AuxiliaryBagPanel = BuildHudSimplePanel(
+			WidgetTree,
+			TEXT("AuxiliaryBagPanel"),
+			FText::FromString(TEXT("Bag")),
+			FVector2D(138.0f, 620.0f),
+			FLinearColor(0.28f, 0.44f, 0.36f, 1.0f));
+
+		if (!RootSizeBox || !AreaRow || !InventoryPanel || !AuxiliaryBagPanel)
+		{
+			return false;
+		}
+
+		WidgetTree->RootWidget = RootSizeBox;
+		RootSizeBox->SetWidthOverride(500.0f);
+		RootSizeBox->SetContent(AreaRow);
+
+		UHorizontalBoxSlot* InventorySlot = AreaRow->AddChildToHorizontalBox(InventoryPanel);
+		if (InventorySlot)
+		{
+			InventorySlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+			InventorySlot->SetVerticalAlignment(VAlign_Fill);
+		}
+
+		UHorizontalBoxSlot* BagSlot = AreaRow->AddChildToHorizontalBox(AuxiliaryBagPanel);
+		if (BagSlot)
+		{
+			BagSlot->SetPadding(FMargin(10.0f, 0.0f, 0.0f, 0.0f));
+			BagSlot->SetVerticalAlignment(VAlign_Fill);
+		}
+
+		RegisterWidgetVariable(WidgetBlueprint, InventoryPanel);
+		RegisterWidgetVariable(WidgetBlueprint, AuxiliaryBagPanel);
+		WidgetBlueprint->MarkPackageDirty();
+		return true;
+	}
+
+	bool BuildHudItemInfoPanelWidgetTree(UWidgetBlueprint* WidgetBlueprint)
+	{
+		if (!WidgetBlueprint || !WidgetBlueprint->WidgetTree)
+		{
+			return false;
+		}
+
+		WidgetBlueprint->Modify();
+		WidgetBlueprint->WidgetTree->Modify();
+		ClearWidgetTreeForRebuild(WidgetBlueprint);
+
+		UWidgetTree* WidgetTree = WidgetBlueprint->WidgetTree;
+		USizeBox* RootSizeBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("RootSizeBox"));
+		UBorder* PanelBackground = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("PanelBackground"));
+		UVerticalBox* PanelStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("PanelStack"));
+		UTextBlock* SelectedItemNameText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("SelectedItemNameText"));
+		UTextBlock* SelectedItemDescriptionText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("SelectedItemDescriptionText"));
+		UBorder* ModdingPanel = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("ModdingPanel"));
+		UTextBlock* ModdingText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("ModdingText"));
+
+		if (!RootSizeBox || !PanelBackground || !PanelStack || !SelectedItemNameText || !SelectedItemDescriptionText || !ModdingPanel || !ModdingText)
+		{
+			return false;
+		}
+
+		WidgetTree->RootWidget = RootSizeBox;
+		RootSizeBox->SetWidthOverride(330.0f);
+		RootSizeBox->SetContent(PanelBackground);
+
+		PanelBackground->SetPadding(FMargin(14.0f));
+		PanelBackground->SetBrush(MakeRoundedBoxBrush(
+			FVector2D(330.0f, 620.0f),
+			FLinearColor(0.012f, 0.014f, 0.017f, 0.90f),
+			FLinearColor(0.36f, 0.34f, 0.54f, 1.0f),
+			1.0f));
+		PanelBackground->SetContent(PanelStack);
+
+		ConfigureTextBlockLeft(SelectedItemNameText, FText::FromString(TEXT("No Item")), FLinearColor::White, 20);
+		UVerticalBoxSlot* NameSlot = PanelStack->AddChildToVerticalBox(SelectedItemNameText);
+		if (NameSlot)
+		{
+			NameSlot->SetHorizontalAlignment(HAlign_Fill);
+			NameSlot->SetVerticalAlignment(VAlign_Top);
+		}
+
+		ConfigureTextBlockLeft(SelectedItemDescriptionText, FText::GetEmpty(), FLinearColor(0.75f, 0.8f, 0.86f, 1.0f), 15);
+		SelectedItemDescriptionText->SetAutoWrapText(true);
+		UVerticalBoxSlot* DescriptionSlot = PanelStack->AddChildToVerticalBox(SelectedItemDescriptionText);
+		if (DescriptionSlot)
+		{
+			DescriptionSlot->SetPadding(FMargin(0.0f, 12.0f, 0.0f, 0.0f));
+			DescriptionSlot->SetHorizontalAlignment(HAlign_Fill);
+			DescriptionSlot->SetVerticalAlignment(VAlign_Top);
+			DescriptionSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+		}
+
+		ModdingPanel->SetVisibility(ESlateVisibility::Collapsed);
+		ModdingPanel->SetPadding(FMargin(10.0f));
+		ModdingPanel->SetBrush(MakeRoundedBoxBrush(
+			FVector2D(300.0f, 120.0f),
+			FLinearColor(0.03f, 0.034f, 0.04f, 0.92f),
+			FLinearColor(0.56f, 0.50f, 0.78f, 1.0f),
+			1.0f));
+		ConfigureTextBlockLeft(ModdingText, FText::FromString(TEXT("Modding")), FLinearColor::White, 16);
+		ModdingPanel->SetContent(ModdingText);
+
+		UVerticalBoxSlot* ModdingSlot = PanelStack->AddChildToVerticalBox(ModdingPanel);
+		if (ModdingSlot)
+		{
+			ModdingSlot->SetHorizontalAlignment(HAlign_Fill);
+			ModdingSlot->SetVerticalAlignment(VAlign_Bottom);
+		}
+
+		RegisterWidgetVariable(WidgetBlueprint, SelectedItemNameText);
+		RegisterWidgetVariable(WidgetBlueprint, SelectedItemDescriptionText);
+		RegisterWidgetVariable(WidgetBlueprint, ModdingPanel);
+		WidgetBlueprint->MarkPackageDirty();
+		return true;
+	}
+
+	bool BuildHudExternalPanelWidgetTree(UWidgetBlueprint* WidgetBlueprint)
+	{
+		if (!WidgetBlueprint || !WidgetBlueprint->WidgetTree)
+		{
+			return false;
+		}
+
+		WidgetBlueprint->Modify();
+		WidgetBlueprint->WidgetTree->Modify();
+		ClearWidgetTreeForRebuild(WidgetBlueprint);
+
+		UWidgetTree* WidgetTree = WidgetBlueprint->WidgetTree;
+		USizeBox* RootSizeBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("RootSizeBox"));
+		UOverlay* PanelOverlay = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), TEXT("PanelOverlay"));
+		UBorder* LootingBoxPanel = BuildHudSimplePanel(
+			WidgetTree,
+			TEXT("LootingBoxPanel"),
+			FText::FromString(TEXT("Looting Box")),
+			FVector2D(420.0f, 620.0f),
+			FLinearColor(0.44f, 0.34f, 0.26f, 1.0f));
+		UBorder* ShopPanel = BuildHudSimplePanel(
+			WidgetTree,
+			TEXT("ShopPanel"),
+			FText::FromString(TEXT("Shop")),
+			FVector2D(420.0f, 620.0f),
+			FLinearColor(0.28f, 0.40f, 0.50f, 1.0f));
+		UBorder* StoragePanel = BuildHudSimplePanel(
+			WidgetTree,
+			TEXT("StoragePanel"),
+			FText::FromString(TEXT("Storage")),
+			FVector2D(420.0f, 620.0f),
+			FLinearColor(0.38f, 0.42f, 0.32f, 1.0f));
+
+		if (!RootSizeBox || !PanelOverlay || !LootingBoxPanel || !ShopPanel || !StoragePanel)
+		{
+			return false;
+		}
+
+		WidgetTree->RootWidget = RootSizeBox;
+		RootSizeBox->SetWidthOverride(420.0f);
+		RootSizeBox->SetContent(PanelOverlay);
+
+		for (UBorder* Panel : { LootingBoxPanel, ShopPanel, StoragePanel })
+		{
+			Panel->SetVisibility(ESlateVisibility::Collapsed);
+			UOverlaySlot* PanelSlot = PanelOverlay->AddChildToOverlay(Panel);
+			if (PanelSlot)
+			{
+				PanelSlot->SetHorizontalAlignment(HAlign_Fill);
+				PanelSlot->SetVerticalAlignment(VAlign_Fill);
+			}
+		}
+
+		RegisterWidgetVariable(WidgetBlueprint, LootingBoxPanel);
+		RegisterWidgetVariable(WidgetBlueprint, ShopPanel);
+		RegisterWidgetVariable(WidgetBlueprint, StoragePanel);
+		WidgetBlueprint->MarkPackageDirty();
+		return true;
+	}
+
+	bool BuildGameHudWidgetTree(
+		UWidgetBlueprint* WidgetBlueprint,
+		TSubclassOf<UUserWidget> TopReserveWidgetClass,
+		TSubclassOf<UUserWidget> BottomStatusWidgetClass,
+		TSubclassOf<UUserWidget> QuickSlotBarWidgetClass,
+		TSubclassOf<UUserWidget> InventoryAreaWidgetClass,
+		TSubclassOf<UUserWidget> ItemInfoPanelWidgetClass,
+		TSubclassOf<UUserWidget> ExternalPanelWidgetClass)
+	{
+		if (!WidgetBlueprint || !WidgetBlueprint->WidgetTree || !TopReserveWidgetClass || !BottomStatusWidgetClass ||
+			!QuickSlotBarWidgetClass || !InventoryAreaWidgetClass || !ItemInfoPanelWidgetClass || !ExternalPanelWidgetClass)
+		{
+			return false;
+		}
+
+		WidgetBlueprint->Modify();
+		WidgetBlueprint->WidgetTree->Modify();
+		ClearWidgetTreeForRebuild(WidgetBlueprint);
+
+		UWidgetTree* WidgetTree = WidgetBlueprint->WidgetTree;
+		UCanvasPanel* RootCanvas = WidgetTree->ConstructWidget<UCanvasPanel>(UCanvasPanel::StaticClass(), TEXT("RootCanvas"));
+		UUserWidget* TopStatusReserveWidget = WidgetTree->ConstructWidget<UUserWidget>(TopReserveWidgetClass, TEXT("TopStatusReserveWidget"));
+		UHorizontalBox* CenterContentPanel = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("CenterContentPanel"));
+		UUserWidget* InventoryAreaWidget = WidgetTree->ConstructWidget<UUserWidget>(InventoryAreaWidgetClass, TEXT("InventoryAreaWidget"));
+		UUserWidget* ItemInfoPanelWidget = WidgetTree->ConstructWidget<UUserWidget>(ItemInfoPanelWidgetClass, TEXT("ItemInfoPanelWidget"));
+		UUserWidget* ExternalPanelWidget = WidgetTree->ConstructWidget<UUserWidget>(ExternalPanelWidgetClass, TEXT("ExternalPanelWidget"));
+		UHorizontalBox* BottomRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("BottomRow"));
+		UUserWidget* BottomStatusWidget = WidgetTree->ConstructWidget<UUserWidget>(BottomStatusWidgetClass, TEXT("BottomStatusWidget"));
+		USizeBox* BottomGap = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("BottomGap"));
+		UUserWidget* QuickSlotBarWidget = WidgetTree->ConstructWidget<UUserWidget>(QuickSlotBarWidgetClass, TEXT("QuickSlotBarWidget"));
+
+		if (!RootCanvas || !TopStatusReserveWidget || !CenterContentPanel || !InventoryAreaWidget || !ItemInfoPanelWidget ||
+			!ExternalPanelWidget || !BottomRow || !BottomStatusWidget || !BottomGap || !QuickSlotBarWidget)
+		{
+			return false;
+		}
+
+		WidgetTree->RootWidget = RootCanvas;
+
+		UCanvasPanelSlot* TopSlot = RootCanvas->AddChildToCanvas(TopStatusReserveWidget);
+		if (TopSlot)
+		{
+			TopSlot->SetAnchors(FAnchors(0.0f, 0.0f, 1.0f, 0.0f));
+			TopSlot->SetOffsets(FMargin(24.0f, 16.0f, 24.0f, 88.0f));
+			TopSlot->SetAlignment(FVector2D(0.0f, 0.0f));
+		}
+
+		CenterContentPanel->SetVisibility(ESlateVisibility::Collapsed);
+		UCanvasPanelSlot* CenterSlot = RootCanvas->AddChildToCanvas(CenterContentPanel);
+		if (CenterSlot)
+		{
+			CenterSlot->SetAnchors(FAnchors(0.5f, 0.5f, 0.5f, 0.5f));
+			CenterSlot->SetAlignment(FVector2D(0.5f, 0.5f));
+			CenterSlot->SetPosition(FVector2D(0.0f, -20.0f));
+			CenterSlot->SetSize(FVector2D(1280.0f, 620.0f));
+		}
+
+		UHorizontalBoxSlot* InventorySlot = CenterContentPanel->AddChildToHorizontalBox(InventoryAreaWidget);
+		if (InventorySlot)
+		{
+			InventorySlot->SetVerticalAlignment(VAlign_Fill);
+			InventorySlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
+		}
+
+		UHorizontalBoxSlot* ItemInfoSlot = CenterContentPanel->AddChildToHorizontalBox(ItemInfoPanelWidget);
+		if (ItemInfoSlot)
+		{
+			ItemInfoSlot->SetPadding(FMargin(12.0f, 0.0f, 0.0f, 0.0f));
+			ItemInfoSlot->SetVerticalAlignment(VAlign_Fill);
+			ItemInfoSlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
+		}
+
+		UHorizontalBoxSlot* ExternalSlot = CenterContentPanel->AddChildToHorizontalBox(ExternalPanelWidget);
+		if (ExternalSlot)
+		{
+			ExternalSlot->SetPadding(FMargin(12.0f, 0.0f, 0.0f, 0.0f));
+			ExternalSlot->SetVerticalAlignment(VAlign_Fill);
+			ExternalSlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
+		}
+
+		UCanvasPanelSlot* BottomSlot = RootCanvas->AddChildToCanvas(BottomRow);
+		if (BottomSlot)
+		{
+			BottomSlot->SetAnchors(FAnchors(0.5f, 1.0f, 0.5f, 1.0f));
+			BottomSlot->SetAlignment(FVector2D(0.5f, 1.0f));
+			BottomSlot->SetPosition(FVector2D(0.0f, -20.0f));
+			BottomSlot->SetSize(FVector2D(980.0f, 124.0f));
+		}
+
+		UHorizontalBoxSlot* BottomStatusSlot = BottomRow->AddChildToHorizontalBox(BottomStatusWidget);
+		if (BottomStatusSlot)
+		{
+			BottomStatusSlot->SetVerticalAlignment(VAlign_Bottom);
+		}
+
+		BottomGap->SetWidthOverride(34.0f);
+		UHorizontalBoxSlot* GapSlot = BottomRow->AddChildToHorizontalBox(BottomGap);
+		if (GapSlot)
+		{
+			GapSlot->SetVerticalAlignment(VAlign_Fill);
+		}
+
+		UHorizontalBoxSlot* QuickSlotSlot = BottomRow->AddChildToHorizontalBox(QuickSlotBarWidget);
+		if (QuickSlotSlot)
+		{
+			QuickSlotSlot->SetVerticalAlignment(VAlign_Bottom);
+		}
+
+		RegisterWidgetVariable(WidgetBlueprint, TopStatusReserveWidget);
+		RegisterWidgetVariable(WidgetBlueprint, BottomStatusWidget);
+		RegisterWidgetVariable(WidgetBlueprint, QuickSlotBarWidget);
+		RegisterWidgetVariable(WidgetBlueprint, CenterContentPanel);
+		RegisterWidgetVariable(WidgetBlueprint, InventoryAreaWidget);
+		RegisterWidgetVariable(WidgetBlueprint, ItemInfoPanelWidget);
+		RegisterWidgetVariable(WidgetBlueprint, ExternalPanelWidget);
+		WidgetBlueprint->MarkPackageDirty();
+		return true;
 	}
 
 	bool BuildPickupItemIconWidgetTree(UWidgetBlueprint* WidgetBlueprint)
@@ -962,6 +1646,95 @@ namespace TunaSweeperEditorSetup
 		FKismetEditorUtilities::CompileBlueprint(TileViewWidgetBlueprint);
 		TileViewWidgetBlueprint->MarkPackageDirty();
 		return SaveAsset(TileViewWidgetBlueprint);
+	}
+
+	bool EnsureCommonGameHudAssets()
+	{
+		UWidgetBlueprint* TopReserveWidgetBlueprint = EnsureWidgetBlueprint(
+			UIAssetPath,
+			HudTopReserveWidgetAssetName,
+			UTunaSweeperHudTopReserveWidget::StaticClass());
+		UWidgetBlueprint* BottomStatusWidgetBlueprint = EnsureWidgetBlueprint(
+			UIAssetPath,
+			HudBottomStatusWidgetAssetName,
+			UTunaSweeperHudBottomStatusWidget::StaticClass());
+		UWidgetBlueprint* QuickSlotWidgetBlueprint = EnsureWidgetBlueprint(
+			UIAssetPath,
+			HudQuickSlotBarWidgetAssetName,
+			UTunaSweeperHudQuickSlotBarWidget::StaticClass());
+		UWidgetBlueprint* InventoryAreaWidgetBlueprint = EnsureWidgetBlueprint(
+			UIAssetPath,
+			HudInventoryAreaWidgetAssetName,
+			UTunaSweeperHudInventoryAreaWidget::StaticClass());
+		UWidgetBlueprint* ItemInfoPanelWidgetBlueprint = EnsureWidgetBlueprint(
+			UIAssetPath,
+			HudItemInfoPanelWidgetAssetName,
+			UTunaSweeperHudItemInfoPanelWidget::StaticClass());
+		UWidgetBlueprint* ExternalPanelWidgetBlueprint = EnsureWidgetBlueprint(
+			UIAssetPath,
+			HudExternalPanelWidgetAssetName,
+			UTunaSweeperHudExternalPanelWidget::StaticClass());
+
+		if (!TopReserveWidgetBlueprint || !BottomStatusWidgetBlueprint || !QuickSlotWidgetBlueprint ||
+			!InventoryAreaWidgetBlueprint || !ItemInfoPanelWidgetBlueprint || !ExternalPanelWidgetBlueprint)
+		{
+			return false;
+		}
+
+		const bool bChildWidgetsBuilt =
+			BuildHudTopReserveWidgetTree(TopReserveWidgetBlueprint) &&
+			BuildHudBottomStatusWidgetTree(BottomStatusWidgetBlueprint) &&
+			BuildHudQuickSlotBarWidgetTree(QuickSlotWidgetBlueprint) &&
+			BuildHudInventoryAreaWidgetTree(InventoryAreaWidgetBlueprint) &&
+			BuildHudItemInfoPanelWidgetTree(ItemInfoPanelWidgetBlueprint) &&
+			BuildHudExternalPanelWidgetTree(ExternalPanelWidgetBlueprint);
+
+		if (!bChildWidgetsBuilt)
+		{
+			return false;
+		}
+
+		for (UWidgetBlueprint* ChildWidgetBlueprint : {
+			TopReserveWidgetBlueprint,
+			BottomStatusWidgetBlueprint,
+			QuickSlotWidgetBlueprint,
+			InventoryAreaWidgetBlueprint,
+			ItemInfoPanelWidgetBlueprint,
+			ExternalPanelWidgetBlueprint
+		})
+		{
+			FKismetEditorUtilities::CompileBlueprint(ChildWidgetBlueprint);
+			ChildWidgetBlueprint->MarkPackageDirty();
+			if (!SaveAsset(ChildWidgetBlueprint))
+			{
+				return false;
+			}
+		}
+
+		UWidgetBlueprint* GameHudWidgetBlueprint = EnsureWidgetBlueprint(
+			UIAssetPath,
+			GameHudWidgetAssetName,
+			UTunaSweeperGameHudWidget::StaticClass());
+		if (!GameHudWidgetBlueprint)
+		{
+			return false;
+		}
+
+		if (!BuildGameHudWidgetTree(
+			GameHudWidgetBlueprint,
+			TopReserveWidgetBlueprint->GeneratedClass.Get(),
+			BottomStatusWidgetBlueprint->GeneratedClass.Get(),
+			QuickSlotWidgetBlueprint->GeneratedClass.Get(),
+			InventoryAreaWidgetBlueprint->GeneratedClass.Get(),
+			ItemInfoPanelWidgetBlueprint->GeneratedClass.Get(),
+			ExternalPanelWidgetBlueprint->GeneratedClass.Get()))
+		{
+			return false;
+		}
+
+		FKismetEditorUtilities::CompileBlueprint(GameHudWidgetBlueprint);
+		GameHudWidgetBlueprint->MarkPackageDirty();
+		return SaveAsset(GameHudWidgetBlueprint);
 	}
 
 	bool BuildInteractionMarkerWidgetTree(UWidgetBlueprint* WidgetBlueprint)
@@ -1690,6 +2463,13 @@ public:
 			[]()
 			{
 				return TunaSweeperEditorSetup::EnsureTempOpenLootTileViewAssets();
+			});
+
+		FTunaSweeperEditorRunOnce::Run(
+			TunaSweeperEditorSetup::CommonGameHudTaskId,
+			[]()
+			{
+				return TunaSweeperEditorSetup::EnsureCommonGameHudAssets();
 			});
 
 		TunaSweeperEditorSetup::ScheduleInteractionAssetsAndMapPlacement();

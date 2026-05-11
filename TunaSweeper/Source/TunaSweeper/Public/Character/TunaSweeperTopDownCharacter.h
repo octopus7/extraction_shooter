@@ -70,6 +70,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat")
 	float FireInterval = 0.1f;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement")
+	float BaseWalkSpeed = 600.0f;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Camera")
 	float DefaultCameraFOV = 70.0f;
 
@@ -93,6 +96,7 @@ private:
 	void HandleInteract(const FInputActionValue& Value);
 	void FireWeapon();
 	void UpdateAimingVisuals(float DeltaSeconds);
+	void UpdateCarryWeightMovementSpeed();
 
 	UPROPERTY(Transient)
 	TObjectPtr<ATunaSweeperWeapon> EquippedWeapon;

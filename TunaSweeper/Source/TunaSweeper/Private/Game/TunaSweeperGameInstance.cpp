@@ -32,6 +32,36 @@ namespace TunaSweeperTempOpenLoot
 	};
 }
 
+void FTunaSweeperPlayerHudState::NormalizeWeightLimits()
+{
+	CurrentCarryWeight = FMath::Max(0.0f, CurrentCarryWeight);
+	MaxCarryWeight = FMath::Max(1.0f, MaxCarryWeight);
+	MovementBlockedWeight = FMath::Max(MovementBlockedWeight, MaxCarryWeight * 2.0f);
+	Health = FMath::Clamp(Health, 0.0f, 100.0f);
+	Hunger = FMath::Clamp(Hunger, 0.0f, 100.0f);
+	Hydration = FMath::Clamp(Hydration, 0.0f, 100.0f);
+}
+
+bool FTunaSweeperPlayerHudState::IsCarryWeightOverLimit() const
+{
+	return MaxCarryWeight > 0.0f && CurrentCarryWeight >= MaxCarryWeight;
+}
+
+bool FTunaSweeperPlayerHudState::IsCarryWeightMovementBlocked() const
+{
+	return MovementBlockedWeight > 0.0f && CurrentCarryWeight >= MovementBlockedWeight;
+}
+
+float FTunaSweeperPlayerHudState::GetCarryWeightMovementSpeedMultiplier() const
+{
+	if (IsCarryWeightMovementBlocked())
+	{
+		return 0.0f;
+	}
+
+	return IsCarryWeightOverLimit() ? 0.5f : 1.0f;
+}
+
 void UTunaSweeperGameInstance::SetGameplayInfo(FName Key, const FString& Value)
 {
 	if (!Key.IsNone())
@@ -97,8 +127,30 @@ void UTunaSweeperGameInstance::ClearRuntimeState()
 	GameplayInfo.Reset();
 	NumberSettings.Reset();
 	BoolSettings.Reset();
+	PlayerHudState = FTunaSweeperPlayerHudState();
 	TempOpenLootItems.Reset();
 	bHasGeneratedTempOpenLootItems = false;
+}
+
+void UTunaSweeperGameInstance::SetPlayerHudState(const FTunaSweeperPlayerHudState& InHudState)
+{
+	PlayerHudState = InHudState;
+	PlayerHudState.NormalizeWeightLimits();
+}
+
+void UTunaSweeperGameInstance::SetCarryWeight(float CurrentCarryWeight, float MaxCarryWeight, float MovementBlockedWeight)
+{
+	PlayerHudState.CurrentCarryWeight = CurrentCarryWeight;
+	PlayerHudState.MaxCarryWeight = MaxCarryWeight;
+	PlayerHudState.MovementBlockedWeight = MovementBlockedWeight;
+	PlayerHudState.NormalizeWeightLimits();
+}
+
+float UTunaSweeperGameInstance::GetCarryWeightMovementSpeedMultiplier() const
+{
+	FTunaSweeperPlayerHudState NormalizedHudState = PlayerHudState;
+	NormalizedHudState.NormalizeWeightLimits();
+	return NormalizedHudState.GetCarryWeightMovementSpeedMultiplier();
 }
 
 const TArray<FTunaSweeperTempOpenLootItemData>& UTunaSweeperGameInstance::GetOrCreateTempOpenLootItems()

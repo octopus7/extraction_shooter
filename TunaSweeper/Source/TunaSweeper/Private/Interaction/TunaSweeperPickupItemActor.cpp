@@ -18,11 +18,12 @@ ATunaSweeperPickupItemActor::ATunaSweeperPickupItemActor()
 	FloorIconWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("FloorIconWidget"));
 	FloorIconWidgetComponent->SetupAttachment(RootComponent);
 	FloorIconWidgetComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 2.0f));
-	FloorIconWidgetComponent->SetRelativeRotation(FRotator(-90.0f, 0.0f, 0.0f));
+	FloorIconWidgetComponent->SetRelativeRotation(FRotator(90.0f, 0.0f, 0.0f));
 	FloorIconWidgetComponent->SetWidgetSpace(EWidgetSpace::World);
 	FloorIconWidgetComponent->SetDrawSize(FVector2D(96.0f, 96.0f));
 	FloorIconWidgetComponent->SetPivot(FVector2D(0.5f, 0.5f));
 	FloorIconWidgetComponent->SetTwoSided(true);
+	FloorIconWidgetComponent->SetCastShadow(false);
 	FloorIconWidgetComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	ApplyFloorIconWidgetRenderingSettings();
 
@@ -90,6 +91,12 @@ void ATunaSweeperPickupItemActor::ApplyFloorIconWidgetRenderingSettings()
 	FloorIconWidgetComponent->SetBackgroundColor(FLinearColor::Transparent);
 	FloorIconWidgetComponent->SetTintColorAndOpacity(FLinearColor::White);
 	FloorIconWidgetComponent->SetOpacityFromTexture(1.0f);
+	FloorIconWidgetComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 2.0f));
+	FloorIconWidgetComponent->SetRelativeRotation(FRotator(90.0f, 0.0f, 0.0f));
+	FloorIconWidgetComponent->SetDrawSize(FVector2D(96.0f, 96.0f));
+	FloorIconWidgetComponent->SetPivot(FVector2D(0.5f, 0.5f));
+	FloorIconWidgetComponent->SetTwoSided(true);
+	FloorIconWidgetComponent->SetCastShadow(false);
 	FloorIconWidgetComponent->SetWindowFocusable(false);
 }
 

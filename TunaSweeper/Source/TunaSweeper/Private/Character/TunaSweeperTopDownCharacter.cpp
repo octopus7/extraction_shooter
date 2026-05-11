@@ -6,6 +6,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "Game/TunaSweeperGameInstance.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "InputAction.h"
@@ -27,7 +28,7 @@ ATunaSweeperTopDownCharacter::ATunaSweeperTopDownCharacter()
 	GetCapsuleComponent()->InitCapsuleSize(34.0f, 88.0f);
 	GetCharacterMovement()->bOrientRotationToMovement = false;
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 720.0f, 0.0f);
-	GetCharacterMovement()->MaxWalkSpeed = 600.0f;
+	GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
 
 	GetMesh()->SetHiddenInGame(true);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -82,6 +83,7 @@ void ATunaSweeperTopDownCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
+	UpdateCarryWeightMovementSpeed();
 	UpdateAimingVisuals(DeltaSeconds);
 }
 
@@ -270,4 +272,20 @@ void ATunaSweeperTopDownCharacter::UpdateAimingVisuals(float DeltaSeconds)
 		const FVector TargetOffset = bIsAiming ? AimDirection * AimCameraLeadDistance : FVector::ZeroVector;
 		CameraBoom->TargetOffset = FMath::VInterpTo(CameraBoom->TargetOffset, TargetOffset, DeltaSeconds, CameraInterpSpeed);
 	}
+}
+
+void ATunaSweeperTopDownCharacter::UpdateCarryWeightMovementSpeed()
+{
+	UCharacterMovementComponent* MovementComponent = GetCharacterMovement();
+	if (!MovementComponent)
+	{
+		return;
+	}
+
+	const UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+	const float CarryWeightSpeedMultiplier = TunaGameInstance
+		? TunaGameInstance->GetCarryWeightMovementSpeedMultiplier()
+		: 1.0f;
+
+	MovementComponent->MaxWalkSpeed = BaseWalkSpeed * FMath::Clamp(CarryWeightSpeedMultiplier, 0.0f, 1.0f);
 }

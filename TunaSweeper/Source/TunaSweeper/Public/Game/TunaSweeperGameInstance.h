@@ -36,6 +36,35 @@ struct TUNASWEEPER_API FTunaSweeperTempOpenLootItemData
 	TSoftObjectPtr<UTexture2D> IconTexture;
 };
 
+USTRUCT(BlueprintType)
+struct TUNASWEEPER_API FTunaSweeperPlayerHudState
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float CurrentCarryWeight = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD", meta = (ClampMin = "1.0", UIMin = "1.0"))
+	float MaxCarryWeight = 50.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD", meta = (ClampMin = "1.0", UIMin = "1.0"))
+	float MovementBlockedWeight = 100.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD", meta = (ClampMin = "0.0", ClampMax = "100.0", UIMin = "0.0", UIMax = "100.0"))
+	float Health = 100.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD", meta = (ClampMin = "0.0", ClampMax = "100.0", UIMin = "0.0", UIMax = "100.0"))
+	float Hunger = 100.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD", meta = (ClampMin = "0.0", ClampMax = "100.0", UIMin = "0.0", UIMax = "100.0"))
+	float Hydration = 100.0f;
+
+	void NormalizeWeightLimits();
+	bool IsCarryWeightOverLimit() const;
+	bool IsCarryWeightMovementBlocked() const;
+	float GetCarryWeightMovementSpeedMultiplier() const;
+};
+
 UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API UTunaSweeperGameInstance : public UGameInstance
 {
@@ -53,6 +82,9 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, Category = "TunaSweeper|State")
 	TMap<FName, bool> BoolSettings;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD")
+	FTunaSweeperPlayerHudState PlayerHudState;
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Gameplay Info")
 	void SetGameplayInfo(FName Key, const FString& Value);
@@ -74,6 +106,15 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|State")
 	void ClearRuntimeState();
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
+	void SetPlayerHudState(const FTunaSweeperPlayerHudState& InHudState);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
+	void SetCarryWeight(float CurrentCarryWeight, float MaxCarryWeight, float MovementBlockedWeight);
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|HUD")
+	float GetCarryWeightMovementSpeedMultiplier() const;
 
 	const TArray<FTunaSweeperTempOpenLootItemData>& GetOrCreateTempOpenLootItems();
 

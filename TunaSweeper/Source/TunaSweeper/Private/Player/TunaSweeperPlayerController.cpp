@@ -1,13 +1,16 @@
 #include "Player/TunaSweeperPlayerController.h"
 
+#include "Blueprint/UserWidget.h"
 #include "Character/TunaSweeperTopDownCharacter.h"
 #include "Engine/World.h"
+#include "UI/TunaSweeperGameHudWidget.h"
 
 ATunaSweeperPlayerController::ATunaSweeperPlayerController()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	bShowMouseCursor = true;
 	DefaultMouseCursor = EMouseCursor::Crosshairs;
+	GameHudWidgetClass = TSoftClassPtr<UTunaSweeperGameHudWidget>(FSoftObjectPath(TEXT("/Game/UI/WBP_GameHud.WBP_GameHud_C")));
 }
 
 void ATunaSweeperPlayerController::BeginPlay()
@@ -20,6 +23,8 @@ void ATunaSweeperPlayerController::BeginPlay()
 	InputMode.SetHideCursorDuringCapture(false);
 	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
 	SetInputMode(InputMode);
+
+	EnsureGameHudWidget();
 }
 
 void ATunaSweeperPlayerController::PlayerTick(float DeltaTime)
@@ -36,6 +41,26 @@ void ATunaSweeperPlayerController::PlayerTick(float DeltaTime)
 	if (GetMouseAimPointOnPlane(ControlledCharacter->GetActorLocation().Z, AimPoint))
 	{
 		ControlledCharacter->SetAimWorldPoint(AimPoint);
+	}
+}
+
+void ATunaSweeperPlayerController::EnsureGameHudWidget()
+{
+	if (GameHudWidget || !IsLocalController())
+	{
+		return;
+	}
+
+	TSubclassOf<UTunaSweeperGameHudWidget> LoadedHudWidgetClass = GameHudWidgetClass.LoadSynchronous();
+	if (!LoadedHudWidgetClass)
+	{
+		return;
+	}
+
+	GameHudWidget = CreateWidget<UTunaSweeperGameHudWidget>(this, LoadedHudWidgetClass);
+	if (GameHudWidget)
+	{
+		GameHudWidget->AddToViewport(0);
 	}
 }
 
