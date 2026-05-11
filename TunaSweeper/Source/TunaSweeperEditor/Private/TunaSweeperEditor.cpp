@@ -82,7 +82,7 @@ namespace TunaSweeperEditorSetup
 	const FString InteractionMarkerAlignmentTaskId = TEXT("2026-05-10_RebuildInteractionMarkerAlignmentV2");
 	const FString TempOpenLootUiTaskId = TEXT("2026-05-10_CreateTempOpenLootTileViewAndIconsV2");
 	const FString PickupItemAndSpawnerTaskId = TEXT("2026-05-11_CreatePickupItemAndSpawnerAssetsV3");
-	const FString CommonGameHudTaskId = TEXT("2026-05-11_RebuildSquareItemThumbnailSlots");
+	const FString CommonGameHudTaskId = TEXT("2026-05-11_RebuildThumbnailIconsUnderNameOverlay");
 	const FString InventoryInputTaskId = TEXT("2026-05-11_AddInventoryInput");
 	const FString LootContainerAndSpawnerTaskId = TEXT("2026-05-11_CreateLootContainerAndSpawnerAssetsV1");
 	const FString CannedTunaIconImportTaskId = TEXT("2026-05-11_ImportCannedTunaIconV1");
@@ -940,8 +940,8 @@ namespace TunaSweeperEditorSetup
 			1.0f));
 		SlotBackground->SetContent(SlotOverlay);
 
-		IconBox->SetWidthOverride(78.0f);
-		IconBox->SetHeightOverride(68.0f);
+		IconBox->SetWidthOverride(86.0f);
+		IconBox->SetHeightOverride(86.0f);
 		IconBox->SetContent(ItemIconImage);
 		ItemIconImage->SetColorAndOpacity(FLinearColor::White);
 
@@ -950,7 +950,6 @@ namespace TunaSweeperEditorSetup
 		{
 			IconSlot->SetHorizontalAlignment(HAlign_Center);
 			IconSlot->SetVerticalAlignment(VAlign_Center);
-			IconSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 10.0f));
 		}
 
 		ConfigureTextBlock(ItemQuantityText, FText::FromString(TEXT("x1")), FLinearColor::White, 13);
