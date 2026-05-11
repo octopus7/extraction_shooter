@@ -131,6 +131,8 @@ void UTunaSweeperGameInstance::ClearRuntimeState()
 	PlayerHudState = FTunaSweeperPlayerHudState();
 	TempOpenLootItems.Reset();
 	bHasGeneratedTempOpenLootItems = false;
+	PlayerInventoryItems.Reset();
+	bHasGeneratedPlayerInventoryItems = false;
 }
 
 void UTunaSweeperGameInstance::SetPlayerHudState(const FTunaSweeperPlayerHudState& InHudState)
@@ -169,6 +171,21 @@ void UTunaSweeperGameInstance::GetTempOpenLootItems(TArray<FTunaSweeperTempOpenL
 	OutItems = GetOrCreateTempOpenLootItems();
 }
 
+const TArray<FTunaSweeperItemStack>& UTunaSweeperGameInstance::GetOrCreatePlayerInventoryItems()
+{
+	if (!bHasGeneratedPlayerInventoryItems)
+	{
+		GeneratePlayerInventoryItems();
+	}
+
+	return PlayerInventoryItems;
+}
+
+void UTunaSweeperGameInstance::GetPlayerInventoryItems(TArray<FTunaSweeperItemStack>& OutItems)
+{
+	OutItems = GetOrCreatePlayerInventoryItems();
+}
+
 void UTunaSweeperGameInstance::GenerateTempOpenLootItems()
 {
 	TempOpenLootItems.Reset();
@@ -184,4 +201,28 @@ void UTunaSweeperGameInstance::GenerateTempOpenLootItems()
 	}
 
 	bHasGeneratedTempOpenLootItems = true;
+}
+
+void UTunaSweeperGameInstance::GeneratePlayerInventoryItems()
+{
+	PlayerInventoryItems.Reset();
+
+	const TPair<int32, int32> DefaultInventoryItems[] = {
+		TPair<int32, int32>(1001, 1),
+		TPair<int32, int32>(2001, 36),
+		TPair<int32, int32>(3001, 2),
+		TPair<int32, int32>(3002, 2),
+		TPair<int32, int32>(4001, 4),
+		TPair<int32, int32>(4003, 1)
+	};
+
+	for (const TPair<int32, int32>& InventoryItem : DefaultInventoryItems)
+	{
+		FTunaSweeperItemStack ItemStack;
+		ItemStack.ItemId = InventoryItem.Key;
+		ItemStack.Quantity = InventoryItem.Value;
+		PlayerInventoryItems.Add(ItemStack);
+	}
+
+	bHasGeneratedPlayerInventoryItems = true;
 }

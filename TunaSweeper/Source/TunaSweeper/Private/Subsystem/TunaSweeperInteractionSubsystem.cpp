@@ -5,8 +5,11 @@
 #include "GameFramework/PlayerController.h"
 #include "Interaction/TunaSweeperItemSpawnInteractableActor.h"
 #include "Interaction/TunaSweeperInteractableComponent.h"
+#include "Interaction/TunaSweeperLootContainerActor.h"
+#include "Interaction/TunaSweeperLootContainerSpawnInteractableActor.h"
 #include "Interaction/TunaSweeperPickupItemActor.h"
 #include "Kismet/GameplayStatics.h"
+#include "Player/TunaSweeperPlayerController.h"
 #include "Stats/Stats.h"
 #include "UI/TunaSweeperTempOpenLootWidget.h"
 
@@ -73,6 +76,10 @@ bool UTunaSweeperInteractionSubsystem::RequestInteraction(UTunaSweeperInteractab
 		return HandlePickupItemInteraction(Interactable);
 	case ETunaSweeperInteractionType::ItemSpawn:
 		return HandleItemSpawnInteraction(Interactable, InstigatorPawn);
+	case ETunaSweeperInteractionType::LootContainerOpen:
+		return HandleLootContainerOpenInteraction(Interactable, InstigatorPawn);
+	case ETunaSweeperInteractionType::LootContainerSpawn:
+		return HandleLootContainerSpawnInteraction(Interactable, InstigatorPawn);
 	default:
 		break;
 	}
@@ -121,6 +128,44 @@ bool UTunaSweeperInteractionSubsystem::HandleItemSpawnInteraction(
 		? Cast<ATunaSweeperItemSpawnInteractableActor>(Interactable->GetOwner())
 		: nullptr;
 	return ItemSpawnActor && ItemSpawnActor->SpawnRandomPickupItem(InstigatorPawn);
+}
+
+bool UTunaSweeperInteractionSubsystem::HandleLootContainerOpenInteraction(
+	UTunaSweeperInteractableComponent* Interactable,
+	APawn* InstigatorPawn)
+{
+	ATunaSweeperLootContainerActor* LootContainerActor = Interactable
+		? Cast<ATunaSweeperLootContainerActor>(Interactable->GetOwner())
+		: nullptr;
+	if (!LootContainerActor || !InstigatorPawn)
+	{
+		return false;
+	}
+
+	FTunaSweeperLootContainerInstance ContainerInstance;
+	if (!LootContainerActor->BuildContainerInstance(ContainerInstance))
+	{
+		return false;
+	}
+
+	ATunaSweeperPlayerController* TunaPlayerController = Cast<ATunaSweeperPlayerController>(InstigatorPawn->GetController());
+	if (!TunaPlayerController)
+	{
+		return false;
+	}
+
+	TunaPlayerController->OpenLootContainerPanel(ContainerInstance);
+	return true;
+}
+
+bool UTunaSweeperInteractionSubsystem::HandleLootContainerSpawnInteraction(
+	UTunaSweeperInteractableComponent* Interactable,
+	APawn* InstigatorPawn)
+{
+	ATunaSweeperLootContainerSpawnInteractableActor* SpawnActor = Interactable
+		? Cast<ATunaSweeperLootContainerSpawnInteractableActor>(Interactable->GetOwner())
+		: nullptr;
+	return SpawnActor && SpawnActor->SpawnRandomLootContainer(InstigatorPawn);
 }
 
 bool UTunaSweeperInteractionSubsystem::OpenTempOpenLootWidget(APawn* InstigatorPawn)
@@ -228,6 +273,10 @@ FString UTunaSweeperInteractionSubsystem::GetInteractionDebugTypeName(const UTun
 		return TEXT("ItemPickup");
 	case ETunaSweeperInteractionType::ItemSpawn:
 		return TEXT("ItemSpawn");
+	case ETunaSweeperInteractionType::LootContainerOpen:
+		return TEXT("LootContainerOpen");
+	case ETunaSweeperInteractionType::LootContainerSpawn:
+		return TEXT("LootContainerSpawn");
 	default:
 		return TEXT("Unknown");
 	}

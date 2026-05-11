@@ -2,6 +2,7 @@
 
 #include "Blueprint/UserWidget.h"
 #include "CoreMinimal.h"
+#include "Subsystem/TunaSweeperItemDataSubsystem.h"
 #include "UI/TunaSweeperHudTypes.h"
 #include "TunaSweeperGameHudWidget.generated.h"
 
@@ -30,6 +31,15 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
 	void ShowExternalPanel(ETunaSweeperHudExternalPanelMode PanelMode);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
+	void ShowInventoryOnlyPanel();
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
+	void ToggleInventoryOnlyPanel();
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
+	void ShowLootContainerPanel(const FTunaSweeperLootContainerInstance& ContainerInstance);
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|HUD")
 	UTunaSweeperHudQuickSlotBarWidget* GetQuickSlotBarWidget() const { return QuickSlotBarWidget; }
@@ -65,4 +75,3 @@ protected:
 private:
 	void RefreshBottomStatusFromGameInstance();
 };
-

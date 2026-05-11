@@ -6,6 +6,7 @@
 #include "TunaSweeperInteractionSubsystem.generated.h"
 
 class UTunaSweeperTempOpenLootWidget;
+class ATunaSweeperLootContainerActor;
 
 UCLASS()
 class TUNASWEEPER_API UTunaSweeperInteractionSubsystem : public UTickableWorldSubsystem
@@ -35,6 +36,8 @@ private:
 	bool OpenTempOpenLootWidget(APawn* InstigatorPawn);
 	bool HandlePickupItemInteraction(UTunaSweeperInteractableComponent* Interactable);
 	bool HandleItemSpawnInteraction(UTunaSweeperInteractableComponent* Interactable, APawn* InstigatorPawn);
+	bool HandleLootContainerOpenInteraction(UTunaSweeperInteractableComponent* Interactable, APawn* InstigatorPawn);
+	bool HandleLootContainerSpawnInteraction(UTunaSweeperInteractableComponent* Interactable, APawn* InstigatorPawn);
 
 	TSet<TWeakObjectPtr<UTunaSweeperInteractableComponent>> RegisteredInteractables;
 	TWeakObjectPtr<UTunaSweeperInteractableComponent> FocusedInteractable;

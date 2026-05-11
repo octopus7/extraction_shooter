@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
+#include "Subsystem/TunaSweeperItemDataSubsystem.h"
 #include "TunaSweeperGameInstance.generated.h"
 
 class UTexture2D;
@@ -121,12 +122,24 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Temp Open Loot")
 	void GetTempOpenLootItems(TArray<FTunaSweeperTempOpenLootItemData>& OutItems);
 
+	const TArray<FTunaSweeperItemStack>& GetOrCreatePlayerInventoryItems();
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Inventory")
+	void GetPlayerInventoryItems(TArray<FTunaSweeperItemStack>& OutItems);
+
 private:
 	void GenerateTempOpenLootItems();
+	void GeneratePlayerInventoryItems();
 
 	UPROPERTY()
 	TArray<FTunaSweeperTempOpenLootItemData> TempOpenLootItems;
 
 	UPROPERTY()
 	bool bHasGeneratedTempOpenLootItems = false;
+
+	UPROPERTY()
+	TArray<FTunaSweeperItemStack> PlayerInventoryItems;
+
+	UPROPERTY()
+	bool bHasGeneratedPlayerInventoryItems = false;
 };

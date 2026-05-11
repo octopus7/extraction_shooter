@@ -73,6 +73,43 @@ void UTunaSweeperGameHudWidget::ShowExternalPanel(ETunaSweeperHudExternalPanelMo
 	}
 }
 
+void UTunaSweeperGameHudWidget::ShowInventoryOnlyPanel()
+{
+	SetCenterPanelsVisible(true);
+	SetInventoryAreaVisible(true);
+	SetItemInfoPanelVisible(false);
+	ShowExternalPanel(ETunaSweeperHudExternalPanelMode::None);
+}
+
+void UTunaSweeperGameHudWidget::ToggleInventoryOnlyPanel()
+{
+	const bool bCenterVisible = CenterContentPanel && CenterContentPanel->GetVisibility() != ESlateVisibility::Collapsed;
+	const bool bExternalVisible = ExternalPanelWidget && ExternalPanelWidget->GetVisibility() != ESlateVisibility::Collapsed;
+	const bool bItemInfoVisible = ItemInfoPanelWidget && ItemInfoPanelWidget->GetVisibility() != ESlateVisibility::Collapsed;
+
+	if (!bCenterVisible || bExternalVisible || bItemInfoVisible)
+	{
+		ShowInventoryOnlyPanel();
+	}
+	else
+	{
+		SetCenterPanelsVisible(false);
+	}
+}
+
+void UTunaSweeperGameHudWidget::ShowLootContainerPanel(const FTunaSweeperLootContainerInstance& ContainerInstance)
+{
+	SetCenterPanelsVisible(true);
+	SetInventoryAreaVisible(true);
+	SetItemInfoPanelVisible(false);
+
+	if (ExternalPanelWidget)
+	{
+		ExternalPanelWidget->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+		ExternalPanelWidget->SetLootContainerInstance(ContainerInstance);
+	}
+}
+
 void UTunaSweeperGameHudWidget::RefreshBottomStatusFromGameInstance()
 {
 	if (!BottomStatusWidget)

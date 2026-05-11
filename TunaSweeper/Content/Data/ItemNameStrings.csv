@@ -16,6 +16,9 @@ item.antibiotics,항생제,Antibiotics,抗生物質
 item.body_armor,방탄조끼,Body Armor,ボディアーマー
 item.backpack,배낭,Backpack,バックパック
 item.valuables_crate,귀중품 상자,Valuables Crate,貴重品箱
+container.wooden_crate,나무 상자,Wooden Crate,木箱
+container.metal_case,금속 상자,Metal Case,金属ケース
+container.supply_cache,보급 상자,Supply Cache,補給箱
 item.pistol.desc,가까운 거리 방어에 쓰기 좋은 기본 권총이다,A compact sidearm for close defense,近距離防衛に使いやすい基本的な拳銃
 item.rifle.desc,중거리 교전에 적합한 안정적인 소총이다,A reliable rifle suited for mid range fights,中距離戦に適した安定したライフル
 item.shotgun.desc,좁은 공간에서 강한 화력을 내는 산탄총이다,A shotgun with strong close quarters impact,狭い場所で強い火力を出すショットガン

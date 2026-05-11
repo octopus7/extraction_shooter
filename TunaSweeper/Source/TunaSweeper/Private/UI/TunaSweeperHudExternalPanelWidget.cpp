@@ -1,6 +1,7 @@
 #include "UI/TunaSweeperHudExternalPanelWidget.h"
 
 #include "Components/Widget.h"
+#include "UI/TunaSweeperLootContainerWidget.h"
 
 void UTunaSweeperHudExternalPanelWidget::NativeConstruct()
 {
@@ -12,6 +13,16 @@ void UTunaSweeperHudExternalPanelWidget::SetExternalPanelMode(ETunaSweeperHudExt
 {
 	PanelMode = InPanelMode;
 	ApplyPanelMode();
+}
+
+void UTunaSweeperHudExternalPanelWidget::SetLootContainerInstance(const FTunaSweeperLootContainerInstance& InContainerInstance)
+{
+	SetExternalPanelMode(ETunaSweeperHudExternalPanelMode::LootingBox);
+
+	if (LootContainerWidget)
+	{
+		LootContainerWidget->SetContainerInstance(InContainerInstance);
+	}
 }
 
 void UTunaSweeperHudExternalPanelWidget::ApplyPanelMode()
@@ -31,4 +42,3 @@ void UTunaSweeperHudExternalPanelWidget::ApplyPanelMode()
 		StoragePanel->SetVisibility(PanelMode == ETunaSweeperHudExternalPanelMode::Storage ? ESlateVisibility::SelfHitTestInvisible : ESlateVisibility::Collapsed);
 	}
 }
-

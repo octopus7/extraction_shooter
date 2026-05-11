@@ -13,6 +13,8 @@ namespace TunaSweeperItemDataFiles
 {
 	const TCHAR* ItemTableJsonRelativePath = TEXT("Data/ItemTable.json");
 	const TCHAR* ItemNameStringsCsvRelativePath = TEXT("Data/ItemNameStrings.csv");
+	const TCHAR* LootContainerTableJsonRelativePath = TEXT("Data/LootContainerTable.json");
+	const TCHAR* LootContainerContentsJsonRelativePath = TEXT("Data/LootContainerContents.json");
 
 	FString GetCsvCell(const TArray<const TCHAR*>& Row, int32 CellIndex)
 	{
@@ -33,7 +35,9 @@ bool UTunaSweeperItemDataSubsystem::LoadItemData(bool bForceReload)
 
 	const bool bLoadedItemTable = LoadItemTableJson();
 	const bool bLoadedNameStrings = LoadItemNameStringsCsv();
-	bItemDataLoaded = bLoadedItemTable && bLoadedNameStrings;
+	const bool bLoadedLootContainerTable = LoadLootContainerTableJson();
+	const bool bLoadedLootContainerContents = LoadLootContainerContentsJson();
+	bItemDataLoaded = bLoadedItemTable && bLoadedNameStrings && bLoadedLootContainerTable && bLoadedLootContainerContents;
 
 	if (!bItemDataLoaded)
 	{
@@ -168,6 +172,137 @@ bool UTunaSweeperItemDataSubsystem::GetAllItemDefinitions(TArray<FTunaSweeperIte
 			return Left.Id < Right.Id;
 		});
 	return true;
+}
+
+bool UTunaSweeperItemDataSubsystem::TryGetLootContainerDefinition(
+	int32 ContainerDefinitionId,
+	FTunaSweeperLootContainerDefinition& OutDefinition)
+{
+	if (!EnsureItemDataLoaded())
+	{
+		OutDefinition = FTunaSweeperLootContainerDefinition();
+		return false;
+	}
+
+	if (const FTunaSweeperLootContainerDefinition* FoundDefinition = LootContainerDefinitionsById.Find(ContainerDefinitionId))
+	{
+		OutDefinition = *FoundDefinition;
+		return true;
+	}
+
+	OutDefinition = FTunaSweeperLootContainerDefinition();
+	return false;
+}
+
+bool UTunaSweeperItemDataSubsystem::TryGetLootContainerContents(
+	int32 ContentsId,
+	FTunaSweeperLootContainerContents& OutContents)
+{
+	if (!EnsureItemDataLoaded())
+	{
+		OutContents = FTunaSweeperLootContainerContents();
+		return false;
+	}
+
+	if (const FTunaSweeperLootContainerContents* FoundContents = LootContainerContentsById.Find(ContentsId))
+	{
+		OutContents = *FoundContents;
+		return true;
+	}
+
+	OutContents = FTunaSweeperLootContainerContents();
+	return false;
+}
+
+bool UTunaSweeperItemDataSubsystem::TryBuildLootContainerInstance(
+	int32 ContainerDefinitionId,
+	int32 ContentsId,
+	ETunaSweeperItemTextLanguage Language,
+	FTunaSweeperLootContainerInstance& OutInstance)
+{
+	FTunaSweeperLootContainerDefinition ContainerDefinition;
+	FTunaSweeperLootContainerContents Contents;
+	if (!TryGetLootContainerDefinition(ContainerDefinitionId, ContainerDefinition) ||
+		!TryGetLootContainerContents(ContentsId, Contents))
+	{
+		OutInstance = FTunaSweeperLootContainerInstance();
+		return false;
+	}
+
+	if (Contents.Items.Num() > ContainerDefinition.Capacity)
+	{
+		UE_LOG(
+			LogTunaSweeperItemData,
+			Warning,
+			TEXT("Loot contents %d has %d stacks, exceeding container %d capacity %d."),
+			Contents.Id,
+			Contents.Items.Num(),
+			ContainerDefinition.Id,
+			ContainerDefinition.Capacity);
+		OutInstance = FTunaSweeperLootContainerInstance();
+		return false;
+	}
+
+	FText DisplayName;
+	if (!TryGetItemTextByKey(ContainerDefinition.NameStringKey, Language, DisplayName))
+	{
+		DisplayName = FText::FromString(FString::Printf(TEXT("Container %d"), ContainerDefinition.Id));
+	}
+
+	OutInstance.ContainerDefinitionId = ContainerDefinition.Id;
+	OutInstance.ContentsId = Contents.Id;
+	OutInstance.DisplayName = DisplayName;
+	OutInstance.Capacity = ContainerDefinition.Capacity;
+	OutInstance.Items = Contents.Items;
+	return true;
+}
+
+bool UTunaSweeperItemDataSubsystem::GetAllLootContainerDefinitions(TArray<FTunaSweeperLootContainerDefinition>& OutDefinitions)
+{
+	if (!EnsureItemDataLoaded())
+	{
+		OutDefinitions.Reset();
+		return false;
+	}
+
+	LootContainerDefinitionsById.GenerateValueArray(OutDefinitions);
+	OutDefinitions.Sort(
+		[](const FTunaSweeperLootContainerDefinition& Left, const FTunaSweeperLootContainerDefinition& Right)
+		{
+			return Left.Id < Right.Id;
+		});
+	return true;
+}
+
+bool UTunaSweeperItemDataSubsystem::GetAllLootContainerContents(TArray<FTunaSweeperLootContainerContents>& OutContents)
+{
+	if (!EnsureItemDataLoaded())
+	{
+		OutContents.Reset();
+		return false;
+	}
+
+	LootContainerContentsById.GenerateValueArray(OutContents);
+	OutContents.Sort(
+		[](const FTunaSweeperLootContainerContents& Left, const FTunaSweeperLootContainerContents& Right)
+		{
+			return Left.Id < Right.Id;
+		});
+	return true;
+}
+
+FString UTunaSweeperItemDataSubsystem::BuildItemIconObjectPath(const FTunaSweeperItemDefinition& ItemDefinition) const
+{
+	const FString IconAssetName = FPaths::GetBaseFilename(ItemDefinition.IconFileName);
+	if (IconAssetName.IsEmpty())
+	{
+		return FString();
+	}
+
+	return FString::Printf(
+		TEXT("/Game/UI/Icons/%s.%s"),
+		*IconAssetName,
+		*IconAssetName);
 }
 
 bool UTunaSweeperItemDataSubsystem::EnsureItemDataLoaded()
@@ -323,10 +458,179 @@ bool UTunaSweeperItemDataSubsystem::LoadItemNameStringsCsv()
 	return bHasValidRows;
 }
 
+bool UTunaSweeperItemDataSubsystem::LoadLootContainerTableJson()
+{
+	FString JsonContent;
+	const FString LootContainerTableJsonPath = GetLootContainerTableJsonPath();
+	if (!FFileHelper::LoadFileToString(JsonContent, *LootContainerTableJsonPath))
+	{
+		UE_LOG(LogTunaSweeperItemData, Error, TEXT("Failed to read loot container table JSON: %s"), *LootContainerTableJsonPath);
+		return false;
+	}
+
+	TArray<TSharedPtr<FJsonValue>> JsonRows;
+	const TSharedRef<TJsonReader<>> JsonReader = TJsonReaderFactory<>::Create(JsonContent);
+	if (!FJsonSerializer::Deserialize(JsonReader, JsonRows))
+	{
+		UE_LOG(LogTunaSweeperItemData, Error, TEXT("Failed to parse loot container table JSON: %s"), *LootContainerTableJsonPath);
+		return false;
+	}
+
+	bool bHasValidRows = false;
+	for (int32 RowIndex = 0; RowIndex < JsonRows.Num(); ++RowIndex)
+	{
+		const TSharedPtr<FJsonObject>* JsonObject = nullptr;
+		if (!JsonRows[RowIndex].IsValid() || !JsonRows[RowIndex]->TryGetObject(JsonObject) || !JsonObject || !JsonObject->IsValid())
+		{
+			UE_LOG(LogTunaSweeperItemData, Warning, TEXT("Skipping loot container row %d: row is not an object."), RowIndex);
+			continue;
+		}
+
+		double NumericId = 0.0;
+		double NumericCapacity = 0.0;
+		FString NameStringKey;
+		FString StaticMeshPath;
+		if (!(*JsonObject)->TryGetNumberField(TEXT("id"), NumericId) ||
+			!(*JsonObject)->TryGetStringField(TEXT("name_string_key"), NameStringKey) ||
+			!(*JsonObject)->TryGetNumberField(TEXT("capacity"), NumericCapacity) ||
+			!(*JsonObject)->TryGetStringField(TEXT("static_mesh_path"), StaticMeshPath))
+		{
+			UE_LOG(LogTunaSweeperItemData, Warning, TEXT("Skipping loot container row %d: required field is missing."), RowIndex);
+			continue;
+		}
+
+		FTunaSweeperLootContainerDefinition Definition;
+		Definition.Id = static_cast<int32>(NumericId);
+		Definition.NameStringKey = FName(*NameStringKey.TrimStartAndEnd());
+		Definition.Capacity = static_cast<int32>(NumericCapacity);
+		Definition.StaticMeshPath = StaticMeshPath.TrimStartAndEnd();
+
+		const TArray<TSharedPtr<FJsonValue>>* MeshScaleArray = nullptr;
+		if ((*JsonObject)->TryGetArrayField(TEXT("mesh_scale"), MeshScaleArray) && MeshScaleArray && MeshScaleArray->Num() >= 3)
+		{
+			Definition.MeshScale = FVector(
+				static_cast<float>((*MeshScaleArray)[0]->AsNumber()),
+				static_cast<float>((*MeshScaleArray)[1]->AsNumber()),
+				static_cast<float>((*MeshScaleArray)[2]->AsNumber()));
+		}
+
+		const bool bCapacityIsSupported =
+			Definition.Capacity == 5 ||
+			Definition.Capacity == 10 ||
+			Definition.Capacity == 15;
+		if (Definition.Id == INDEX_NONE || Definition.NameStringKey.IsNone() || Definition.StaticMeshPath.IsEmpty() ||
+			!bCapacityIsSupported)
+		{
+			UE_LOG(LogTunaSweeperItemData, Warning, TEXT("Skipping loot container row %d: field value is invalid."), RowIndex);
+			continue;
+		}
+
+		LootContainerDefinitionsById.Add(Definition.Id, Definition);
+		bHasValidRows = true;
+	}
+
+	if (!bHasValidRows)
+	{
+		UE_LOG(LogTunaSweeperItemData, Error, TEXT("Loot container table JSON has no valid rows: %s"), *LootContainerTableJsonPath);
+	}
+
+	return bHasValidRows;
+}
+
+bool UTunaSweeperItemDataSubsystem::LoadLootContainerContentsJson()
+{
+	FString JsonContent;
+	const FString LootContainerContentsJsonPath = GetLootContainerContentsJsonPath();
+	if (!FFileHelper::LoadFileToString(JsonContent, *LootContainerContentsJsonPath))
+	{
+		UE_LOG(LogTunaSweeperItemData, Error, TEXT("Failed to read loot container contents JSON: %s"), *LootContainerContentsJsonPath);
+		return false;
+	}
+
+	TArray<TSharedPtr<FJsonValue>> JsonRows;
+	const TSharedRef<TJsonReader<>> JsonReader = TJsonReaderFactory<>::Create(JsonContent);
+	if (!FJsonSerializer::Deserialize(JsonReader, JsonRows))
+	{
+		UE_LOG(LogTunaSweeperItemData, Error, TEXT("Failed to parse loot container contents JSON: %s"), *LootContainerContentsJsonPath);
+		return false;
+	}
+
+	bool bHasValidRows = false;
+	for (int32 RowIndex = 0; RowIndex < JsonRows.Num(); ++RowIndex)
+	{
+		const TSharedPtr<FJsonObject>* JsonObject = nullptr;
+		if (!JsonRows[RowIndex].IsValid() || !JsonRows[RowIndex]->TryGetObject(JsonObject) || !JsonObject || !JsonObject->IsValid())
+		{
+			UE_LOG(LogTunaSweeperItemData, Warning, TEXT("Skipping loot contents row %d: row is not an object."), RowIndex);
+			continue;
+		}
+
+		double NumericId = 0.0;
+		const TArray<TSharedPtr<FJsonValue>>* ItemsArray = nullptr;
+		if (!(*JsonObject)->TryGetNumberField(TEXT("id"), NumericId) ||
+			!(*JsonObject)->TryGetArrayField(TEXT("items"), ItemsArray) ||
+			!ItemsArray)
+		{
+			UE_LOG(LogTunaSweeperItemData, Warning, TEXT("Skipping loot contents row %d: required field is missing."), RowIndex);
+			continue;
+		}
+
+		FTunaSweeperLootContainerContents Contents;
+		Contents.Id = static_cast<int32>(NumericId);
+
+		for (const TSharedPtr<FJsonValue>& ItemValue : *ItemsArray)
+		{
+			const TSharedPtr<FJsonObject>* ItemObject = nullptr;
+			if (!ItemValue.IsValid() || !ItemValue->TryGetObject(ItemObject) || !ItemObject || !ItemObject->IsValid())
+			{
+				continue;
+			}
+
+			double NumericItemId = 0.0;
+			double NumericQuantity = 0.0;
+			if (!(*ItemObject)->TryGetNumberField(TEXT("item_id"), NumericItemId) ||
+				!(*ItemObject)->TryGetNumberField(TEXT("quantity"), NumericQuantity))
+			{
+				continue;
+			}
+
+			const int32 ItemId = static_cast<int32>(NumericItemId);
+			if (!ItemDefinitionsById.Contains(ItemId))
+			{
+				UE_LOG(LogTunaSweeperItemData, Warning, TEXT("Skipping unknown item id %d in loot contents %d."), ItemId, Contents.Id);
+				continue;
+			}
+
+			FTunaSweeperItemStack ItemStack;
+			ItemStack.ItemId = ItemId;
+			ItemStack.Quantity = FMath::Max(1, static_cast<int32>(NumericQuantity));
+			Contents.Items.Add(ItemStack);
+		}
+
+		if (Contents.Id == INDEX_NONE || Contents.Items.Num() <= 0 || Contents.Items.Num() > 15)
+		{
+			UE_LOG(LogTunaSweeperItemData, Warning, TEXT("Skipping loot contents row %d: field value is invalid."), RowIndex);
+			continue;
+		}
+
+		LootContainerContentsById.Add(Contents.Id, Contents);
+		bHasValidRows = true;
+	}
+
+	if (!bHasValidRows)
+	{
+		UE_LOG(LogTunaSweeperItemData, Error, TEXT("Loot container contents JSON has no valid rows: %s"), *LootContainerContentsJsonPath);
+	}
+
+	return bHasValidRows;
+}
+
 void UTunaSweeperItemDataSubsystem::ResetLoadedItemData()
 {
 	ItemDefinitionsById.Reset();
 	ItemNameStringsByKey.Reset();
+	LootContainerDefinitionsById.Reset();
+	LootContainerContentsById.Reset();
 	bItemDataLoaded = false;
 }
 
@@ -338,4 +642,14 @@ FString UTunaSweeperItemDataSubsystem::GetItemTableJsonPath() const
 FString UTunaSweeperItemDataSubsystem::GetItemNameStringsCsvPath() const
 {
 	return FPaths::Combine(FPaths::ProjectContentDir(), TunaSweeperItemDataFiles::ItemNameStringsCsvRelativePath);
+}
+
+FString UTunaSweeperItemDataSubsystem::GetLootContainerTableJsonPath() const
+{
+	return FPaths::Combine(FPaths::ProjectContentDir(), TunaSweeperItemDataFiles::LootContainerTableJsonRelativePath);
+}
+
+FString UTunaSweeperItemDataSubsystem::GetLootContainerContentsJsonPath() const
+{
+	return FPaths::Combine(FPaths::ProjectContentDir(), TunaSweeperItemDataFiles::LootContainerContentsJsonRelativePath);
 }

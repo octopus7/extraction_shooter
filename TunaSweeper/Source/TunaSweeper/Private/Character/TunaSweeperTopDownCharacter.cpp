@@ -12,6 +12,7 @@
 #include "InputAction.h"
 #include "InputActionValue.h"
 #include "InputMappingContext.h"
+#include "Player/TunaSweeperPlayerController.h"
 #include "Subsystem/TunaSweeperInteractionSubsystem.h"
 #include "TimerManager.h"
 #include "UObject/ConstructorHelpers.h"
@@ -68,6 +69,7 @@ ATunaSweeperTopDownCharacter::ATunaSweeperTopDownCharacter()
 	FireAction = TSoftObjectPtr<UInputAction>(FSoftObjectPath(TEXT("/Game/Input/IA_Fire.IA_Fire")));
 	AimAction = TSoftObjectPtr<UInputAction>(FSoftObjectPath(TEXT("/Game/Input/IA_Aim.IA_Aim")));
 	InteractAction = TSoftObjectPtr<UInputAction>(FSoftObjectPath(TEXT("/Game/Input/IA_Interact.IA_Interact")));
+	InventoryAction = TSoftObjectPtr<UInputAction>(FSoftObjectPath(TEXT("/Game/Input/IA_Inventory.IA_Inventory")));
 	DefaultWeaponClass = TSoftClassPtr<ATunaSweeperWeapon>(FSoftObjectPath(TEXT("/Game/Weapons/BP_TunaSweeperWeapon.BP_TunaSweeperWeapon_C")));
 }
 
@@ -126,6 +128,11 @@ void ATunaSweeperTopDownCharacter::SetupPlayerInputComponent(UInputComponent* Pl
 	if (UInputAction* LoadedInteractAction = InteractAction.LoadSynchronous())
 	{
 		EnhancedInputComponent->BindAction(LoadedInteractAction, ETriggerEvent::Started, this, &ATunaSweeperTopDownCharacter::HandleInteract);
+	}
+
+	if (UInputAction* LoadedInventoryAction = InventoryAction.LoadSynchronous())
+	{
+		EnhancedInputComponent->BindAction(LoadedInventoryAction, ETriggerEvent::Started, this, &ATunaSweeperTopDownCharacter::HandleInventory);
 	}
 }
 
@@ -241,6 +248,14 @@ void ATunaSweeperTopDownCharacter::HandleInteract(const FInputActionValue& Value
 	if (UTunaSweeperInteractionSubsystem* InteractionSubsystem = World->GetSubsystem<UTunaSweeperInteractionSubsystem>())
 	{
 		InteractionSubsystem->TryInteract(this);
+	}
+}
+
+void ATunaSweeperTopDownCharacter::HandleInventory(const FInputActionValue& Value)
+{
+	if (ATunaSweeperPlayerController* TunaPlayerController = Cast<ATunaSweeperPlayerController>(GetController()))
+	{
+		TunaPlayerController->ToggleInventoryOnlyPanel();
 	}
 }
 

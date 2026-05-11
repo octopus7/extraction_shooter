@@ -64,6 +64,26 @@ void ATunaSweeperPlayerController::EnsureGameHudWidget()
 	}
 }
 
+void ATunaSweeperPlayerController::ToggleInventoryOnlyPanel()
+{
+	EnsureGameHudWidget();
+
+	if (GameHudWidget)
+	{
+		GameHudWidget->ToggleInventoryOnlyPanel();
+	}
+}
+
+void ATunaSweeperPlayerController::OpenLootContainerPanel(const FTunaSweeperLootContainerInstance& ContainerInstance)
+{
+	EnsureGameHudWidget();
+
+	if (GameHudWidget)
+	{
+		GameHudWidget->ShowLootContainerPanel(ContainerInstance);
+	}
+}
+
 bool ATunaSweeperPlayerController::GetMouseAimPointOnPlane(float PlaneZ, FVector& OutAimPoint) const
 {
 	FVector WorldLocation;

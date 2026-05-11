@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "Subsystem/TunaSweeperItemDataSubsystem.h"
 #include "TunaSweeperPlayerController.generated.h"
 
 class UTunaSweeperGameHudWidget;
@@ -19,6 +20,12 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|HUD")
 	UTunaSweeperGameHudWidget* GetGameHudWidget() const { return GameHudWidget; }
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
+	void ToggleInventoryOnlyPanel();
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
+	void OpenLootContainerPanel(const FTunaSweeperLootContainerInstance& ContainerInstance);
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "HUD")

@@ -1,0 +1,24 @@
+[
+  {
+    "id": 7001,
+    "name_string_key": "container.wooden_crate",
+    "capacity": 5,
+    "static_mesh_path": "/Engine/BasicShapes/Cube.Cube",
+    "mesh_scale": [1.1, 0.8, 0.55]
+  },
+  {
+    "id": 7002,
+    "name_string_key": "container.metal_case",
+    "capacity": 10,
+    "static_mesh_path": "/Engine/BasicShapes/Cube.Cube",
+    "mesh_scale": [1.35, 0.95, 0.6]
+  },
+  {
+    "id": 7003,
+    "name_string_key": "container.supply_cache",
+    "capacity": 15,
+    "static_mesh_path": "/Engine/BasicShapes/Cube.Cube",
+    "mesh_scale": [1.65, 1.1, 0.7]
+  }
+]
+

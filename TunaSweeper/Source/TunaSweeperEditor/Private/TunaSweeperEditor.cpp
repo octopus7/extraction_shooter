@@ -41,6 +41,8 @@
 #include "Interaction/TunaSweeperInteractableActor.h"
 #include "Interaction/TunaSweeperInteractableComponent.h"
 #include "Interaction/TunaSweeperItemSpawnInteractableActor.h"
+#include "Interaction/TunaSweeperLootContainerActor.h"
+#include "Interaction/TunaSweeperLootContainerSpawnInteractableActor.h"
 #include "Interaction/TunaSweeperPickupItemActor.h"
 #include "Kismet2/BlueprintEditorUtils.h"
 #include "Kismet2/KismetEditorUtilities.h"
@@ -57,6 +59,8 @@
 #include "UI/TunaSweeperHudItemInfoPanelWidget.h"
 #include "UI/TunaSweeperHudQuickSlotBarWidget.h"
 #include "UI/TunaSweeperHudTopReserveWidget.h"
+#include "UI/TunaSweeperItemThumbnailSlotWidget.h"
+#include "UI/TunaSweeperLootContainerWidget.h"
 #include "UI/TunaSweeperPickupItemIconWidget.h"
 #include "UI/TunaSweeperTempOpenLootTileEntryWidget.h"
 #include "UI/TunaSweeperTempOpenLootWidget.h"
@@ -78,7 +82,9 @@ namespace TunaSweeperEditorSetup
 	const FString InteractionMarkerAlignmentTaskId = TEXT("2026-05-10_RebuildInteractionMarkerAlignmentV2");
 	const FString TempOpenLootUiTaskId = TEXT("2026-05-10_CreateTempOpenLootTileViewAndIconsV2");
 	const FString PickupItemAndSpawnerTaskId = TEXT("2026-05-11_CreatePickupItemAndSpawnerAssetsV3");
-	const FString CommonGameHudTaskId = TEXT("2026-05-11_CreateCommonGameHudAssetsV1");
+	const FString CommonGameHudTaskId = TEXT("2026-05-11_CreateCommonGameHudAssetsV2");
+	const FString InventoryInputTaskId = TEXT("2026-05-11_AddInventoryInput");
+	const FString LootContainerAndSpawnerTaskId = TEXT("2026-05-11_CreateLootContainerAndSpawnerAssetsV1");
 	const FString CannedTunaIconImportTaskId = TEXT("2026-05-11_ImportCannedTunaIconV1");
 	const FString GameInstanceAssetPath = TEXT("/Game/Core");
 	const FString GameInstanceAssetName = TEXT("BP_TunaSweeperGameInstance");
@@ -95,6 +101,7 @@ namespace TunaSweeperEditorSetup
 	const FString FireActionName = TEXT("IA_Fire");
 	const FString AimActionName = TEXT("IA_Aim");
 	const FString InteractActionName = TEXT("IA_Interact");
+	const FString InventoryActionName = TEXT("IA_Inventory");
 	const FString MappingContextName = TEXT("IMC_Player");
 	const FString UIAssetPath = TEXT("/Game/UI");
 	const FString UIIconAssetPath = TEXT("/Game/UI/Icons");
@@ -109,12 +116,16 @@ namespace TunaSweeperEditorSetup
 	const FString HudInventoryAreaWidgetAssetName = TEXT("WBP_HudInventoryArea");
 	const FString HudItemInfoPanelWidgetAssetName = TEXT("WBP_HudItemInfoPanel");
 	const FString HudExternalPanelWidgetAssetName = TEXT("WBP_HudExternalPanel");
+	const FString ItemThumbnailSlotWidgetAssetName = TEXT("WBP_ItemThumbnailSlot");
+	const FString LootContainerWidgetAssetName = TEXT("WBP_LootContainerPanel");
 	const FString InteractionAssetPath = TEXT("/Game/Interaction");
 	const FString DialogueInteractionAssetName = TEXT("BP_Interact_Dialogue");
 	const FString PickupInteractionAssetName = TEXT("BP_Interact_Pickup");
 	const FString OpenInteractionAssetName = TEXT("BP_Interact_Open");
 	const FString PickupItemAssetName = TEXT("BP_PickupItem");
 	const FString ItemSpawnInteractionAssetName = TEXT("BP_Interact_ItemSpawn");
+	const FString LootContainerAssetName = TEXT("BP_LootContainer");
+	const FString LootContainerSpawnInteractionAssetName = TEXT("BP_Interact_LootContainerSpawn");
 	const FString RaidMapPackagePath = TEXT("/Game/RaidMap");
 
 	FString GetGameInstanceObjectPath()
@@ -372,6 +383,32 @@ namespace TunaSweeperEditorSetup
 		}
 
 		MappingContext->ContextDescription = FText::FromString(TEXT("TunaSweeper player movement, fire, aim, and interaction input."));
+		MappingContext->MarkPackageDirty();
+		return SaveAsset(MappingContext);
+	}
+
+	bool EnsureInventoryInputAssets()
+	{
+		UInputAction* InventoryAction = EnsureInputAction(
+			InventoryActionName,
+			EInputActionValueType::Boolean,
+			EInputActionAccumulationBehavior::TakeHighestAbsoluteValue);
+
+		UInputMappingContext* MappingContext = LoadObject<UInputMappingContext>(
+			nullptr,
+			*GetAssetObjectPath(InputAssetPath, MappingContextName));
+
+		if (!InventoryAction || !MappingContext)
+		{
+			return false;
+		}
+
+		if (!HasInputMapping(MappingContext, InventoryAction, EKeys::Tab))
+		{
+			MappingContext->MapKey(InventoryAction, EKeys::Tab);
+		}
+
+		MappingContext->ContextDescription = FText::FromString(TEXT("TunaSweeper player movement, combat, interaction, and inventory input."));
 		MappingContext->MarkPackageDirty();
 		return SaveAsset(MappingContext);
 	}
@@ -814,6 +851,82 @@ namespace TunaSweeperEditorSetup
 		return CreatedBlueprint;
 	}
 
+	bool BuildItemThumbnailSlotWidgetTree(UWidgetBlueprint* WidgetBlueprint)
+	{
+		if (!WidgetBlueprint || !WidgetBlueprint->WidgetTree)
+		{
+			return false;
+		}
+
+		WidgetBlueprint->Modify();
+		WidgetBlueprint->WidgetTree->Modify();
+		ClearWidgetTreeForRebuild(WidgetBlueprint);
+
+		UWidgetTree* WidgetTree = WidgetBlueprint->WidgetTree;
+		USizeBox* RootSizeBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("RootSizeBox"));
+		UBorder* SlotBackground = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("SlotBackground"));
+		UVerticalBox* SlotStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("SlotStack"));
+		USizeBox* IconBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("IconBox"));
+		UImage* ItemIconImage = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("ItemIconImage"));
+		UTextBlock* ItemQuantityText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("ItemQuantityText"));
+		UTextBlock* ItemNameText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("ItemNameText"));
+
+		if (!RootSizeBox || !SlotBackground || !SlotStack || !IconBox || !ItemIconImage || !ItemQuantityText || !ItemNameText)
+		{
+			return false;
+		}
+
+		WidgetTree->RootWidget = RootSizeBox;
+		RootSizeBox->SetWidthOverride(96.0f);
+		RootSizeBox->SetHeightOverride(116.0f);
+		RootSizeBox->SetContent(SlotBackground);
+
+		SlotBackground->SetPadding(FMargin(7.0f));
+		SlotBackground->SetBrush(MakeRoundedBoxBrush(
+			FVector2D(96.0f, 116.0f),
+			FLinearColor(0.012f, 0.014f, 0.017f, 0.90f),
+			FLinearColor(0.24f, 0.27f, 0.31f, 0.95f),
+			1.0f));
+		SlotBackground->SetContent(SlotStack);
+
+		IconBox->SetWidthOverride(76.0f);
+		IconBox->SetHeightOverride(64.0f);
+		IconBox->SetContent(ItemIconImage);
+		ItemIconImage->SetColorAndOpacity(FLinearColor::White);
+
+		UVerticalBoxSlot* IconSlot = SlotStack->AddChildToVerticalBox(IconBox);
+		if (IconSlot)
+		{
+			IconSlot->SetHorizontalAlignment(HAlign_Center);
+			IconSlot->SetVerticalAlignment(VAlign_Top);
+		}
+
+		ConfigureTextBlock(ItemQuantityText, FText::FromString(TEXT("x1")), FLinearColor::White, 13);
+		UVerticalBoxSlot* QuantitySlot = SlotStack->AddChildToVerticalBox(ItemQuantityText);
+		if (QuantitySlot)
+		{
+			QuantitySlot->SetHorizontalAlignment(HAlign_Right);
+			QuantitySlot->SetVerticalAlignment(VAlign_Top);
+		}
+
+		ConfigureTextBlock(ItemNameText, FText::FromString(TEXT("Item")), FLinearColor(0.82f, 0.88f, 0.94f, 1.0f), 11);
+		ItemNameText->SetAutoWrapText(true);
+		UVerticalBoxSlot* NameSlot = SlotStack->AddChildToVerticalBox(ItemNameText);
+		if (NameSlot)
+		{
+			NameSlot->SetHorizontalAlignment(HAlign_Fill);
+			NameSlot->SetVerticalAlignment(VAlign_Bottom);
+			NameSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+		}
+
+		RegisterWidgetVariable(WidgetBlueprint, SlotBackground);
+		RegisterWidgetVariable(WidgetBlueprint, ItemIconImage);
+		RegisterWidgetVariable(WidgetBlueprint, ItemQuantityText);
+		RegisterWidgetVariable(WidgetBlueprint, ItemNameText);
+		WidgetBlueprint->MarkPackageDirty();
+		return true;
+	}
+
 	bool BuildHudTopReserveWidgetTree(UWidgetBlueprint* WidgetBlueprint)
 	{
 		if (!WidgetBlueprint || !WidgetBlueprint->WidgetTree)
@@ -1165,9 +1278,9 @@ namespace TunaSweeperEditorSetup
 		return Panel;
 	}
 
-	bool BuildHudInventoryAreaWidgetTree(UWidgetBlueprint* WidgetBlueprint)
+	bool BuildHudInventoryAreaWidgetTree(UWidgetBlueprint* WidgetBlueprint, TSubclassOf<UUserWidget> EntryWidgetClass)
 	{
-		if (!WidgetBlueprint || !WidgetBlueprint->WidgetTree)
+		if (!WidgetBlueprint || !WidgetBlueprint->WidgetTree || !EntryWidgetClass)
 		{
 			return false;
 		}
@@ -1178,45 +1291,92 @@ namespace TunaSweeperEditorSetup
 
 		UWidgetTree* WidgetTree = WidgetBlueprint->WidgetTree;
 		USizeBox* RootSizeBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("RootSizeBox"));
-		UHorizontalBox* AreaRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("AreaRow"));
-		UBorder* InventoryPanel = BuildHudSimplePanel(
-			WidgetTree,
-			TEXT("InventoryPanel"),
-			FText::FromString(TEXT("Inventory")),
-			FVector2D(340.0f, 620.0f),
-			FLinearColor(0.28f, 0.36f, 0.44f, 1.0f));
-		UBorder* AuxiliaryBagPanel = BuildHudSimplePanel(
-			WidgetTree,
-			TEXT("AuxiliaryBagPanel"),
-			FText::FromString(TEXT("Bag")),
-			FVector2D(138.0f, 620.0f),
-			FLinearColor(0.28f, 0.44f, 0.36f, 1.0f));
+		UBorder* InventoryPanel = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("InventoryPanel"));
+		UVerticalBox* InventoryStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("InventoryStack"));
+		UTextBlock* InventoryTitleText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("InventoryTitleText"));
+		UHorizontalBox* EquipmentAndBagRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("EquipmentAndBagRow"));
+		UTileView* EquipmentReserveTileView = WidgetTree->ConstructWidget<UTileView>(UTileView::StaticClass(), TEXT("EquipmentReserveTileView"));
+		UBorder* AuxiliaryBagPanel = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("AuxiliaryBagPanel"));
+		UTileView* AuxiliaryBagTileView = WidgetTree->ConstructWidget<UTileView>(UTileView::StaticClass(), TEXT("AuxiliaryBagTileView"));
+		UTileView* InventoryTileView = WidgetTree->ConstructWidget<UTileView>(UTileView::StaticClass(), TEXT("InventoryTileView"));
 
-		if (!RootSizeBox || !AreaRow || !InventoryPanel || !AuxiliaryBagPanel)
+		if (!RootSizeBox || !InventoryPanel || !InventoryStack || !InventoryTitleText || !EquipmentAndBagRow ||
+			!EquipmentReserveTileView || !AuxiliaryBagPanel || !AuxiliaryBagTileView || !InventoryTileView)
 		{
 			return false;
 		}
 
 		WidgetTree->RootWidget = RootSizeBox;
 		RootSizeBox->SetWidthOverride(500.0f);
-		RootSizeBox->SetContent(AreaRow);
+		RootSizeBox->SetContent(InventoryPanel);
 
-		UHorizontalBoxSlot* InventorySlot = AreaRow->AddChildToHorizontalBox(InventoryPanel);
-		if (InventorySlot)
+		InventoryPanel->SetPadding(FMargin(14.0f));
+		InventoryPanel->SetBrush(MakeRoundedBoxBrush(
+			FVector2D(500.0f, 620.0f),
+			FLinearColor(0.012f, 0.014f, 0.017f, 0.90f),
+			FLinearColor(0.28f, 0.36f, 0.44f, 1.0f),
+			1.0f));
+		InventoryPanel->SetContent(InventoryStack);
+
+		ConfigureTextBlockLeft(InventoryTitleText, FText::FromString(TEXT("Inventory")), FLinearColor::White, 18);
+		UVerticalBoxSlot* TitleSlot = InventoryStack->AddChildToVerticalBox(InventoryTitleText);
+		if (TitleSlot)
 		{
-			InventorySlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
-			InventorySlot->SetVerticalAlignment(VAlign_Fill);
+			TitleSlot->SetHorizontalAlignment(HAlign_Fill);
+			TitleSlot->SetVerticalAlignment(VAlign_Top);
 		}
 
-		UHorizontalBoxSlot* BagSlot = AreaRow->AddChildToHorizontalBox(AuxiliaryBagPanel);
+		EquipmentReserveTileView->SetEntryWidth(82.0f);
+		EquipmentReserveTileView->SetEntryHeight(82.0f);
+		SetListViewEntryWidgetClass(EquipmentReserveTileView, EntryWidgetClass);
+		UHorizontalBoxSlot* EquipmentSlot = EquipmentAndBagRow->AddChildToHorizontalBox(EquipmentReserveTileView);
+		if (EquipmentSlot)
+		{
+			EquipmentSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+			EquipmentSlot->SetVerticalAlignment(VAlign_Top);
+		}
+
+		AuxiliaryBagPanel->SetPadding(FMargin(6.0f));
+		AuxiliaryBagPanel->SetBrush(MakeRoundedBoxBrush(
+			FVector2D(98.0f, 180.0f),
+			FLinearColor(0.02f, 0.025f, 0.03f, 0.88f),
+			FLinearColor(0.28f, 0.44f, 0.36f, 1.0f),
+			1.0f));
+		AuxiliaryBagTileView->SetEntryWidth(82.0f);
+		AuxiliaryBagTileView->SetEntryHeight(82.0f);
+		SetListViewEntryWidgetClass(AuxiliaryBagTileView, EntryWidgetClass);
+		AuxiliaryBagPanel->SetContent(AuxiliaryBagTileView);
+		UHorizontalBoxSlot* BagSlot = EquipmentAndBagRow->AddChildToHorizontalBox(AuxiliaryBagPanel);
 		if (BagSlot)
 		{
 			BagSlot->SetPadding(FMargin(10.0f, 0.0f, 0.0f, 0.0f));
-			BagSlot->SetVerticalAlignment(VAlign_Fill);
+			BagSlot->SetVerticalAlignment(VAlign_Top);
+		}
+
+		UVerticalBoxSlot* ReserveRowSlot = InventoryStack->AddChildToVerticalBox(EquipmentAndBagRow);
+		if (ReserveRowSlot)
+		{
+			ReserveRowSlot->SetPadding(FMargin(0.0f, 12.0f, 0.0f, 12.0f));
+			ReserveRowSlot->SetHorizontalAlignment(HAlign_Fill);
+			ReserveRowSlot->SetVerticalAlignment(VAlign_Top);
+		}
+
+		InventoryTileView->SetEntryWidth(96.0f);
+		InventoryTileView->SetEntryHeight(116.0f);
+		SetListViewEntryWidgetClass(InventoryTileView, EntryWidgetClass);
+		UVerticalBoxSlot* InventoryTileSlot = InventoryStack->AddChildToVerticalBox(InventoryTileView);
+		if (InventoryTileSlot)
+		{
+			InventoryTileSlot->SetHorizontalAlignment(HAlign_Fill);
+			InventoryTileSlot->SetVerticalAlignment(VAlign_Fill);
+			InventoryTileSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
 		}
 
 		RegisterWidgetVariable(WidgetBlueprint, InventoryPanel);
 		RegisterWidgetVariable(WidgetBlueprint, AuxiliaryBagPanel);
+		RegisterWidgetVariable(WidgetBlueprint, EquipmentReserveTileView);
+		RegisterWidgetVariable(WidgetBlueprint, AuxiliaryBagTileView);
+		RegisterWidgetVariable(WidgetBlueprint, InventoryTileView);
 		WidgetBlueprint->MarkPackageDirty();
 		return true;
 	}
@@ -1301,9 +1461,72 @@ namespace TunaSweeperEditorSetup
 		return true;
 	}
 
-	bool BuildHudExternalPanelWidgetTree(UWidgetBlueprint* WidgetBlueprint)
+	bool BuildLootContainerWidgetTree(UWidgetBlueprint* WidgetBlueprint, TSubclassOf<UUserWidget> EntryWidgetClass)
 	{
-		if (!WidgetBlueprint || !WidgetBlueprint->WidgetTree)
+		if (!WidgetBlueprint || !WidgetBlueprint->WidgetTree || !EntryWidgetClass)
+		{
+			return false;
+		}
+
+		WidgetBlueprint->Modify();
+		WidgetBlueprint->WidgetTree->Modify();
+		ClearWidgetTreeForRebuild(WidgetBlueprint);
+
+		UWidgetTree* WidgetTree = WidgetBlueprint->WidgetTree;
+		USizeBox* RootSizeBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("RootSizeBox"));
+		UBorder* PanelBackground = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("PanelBackground"));
+		UVerticalBox* PanelStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("PanelStack"));
+		UTextBlock* ContainerTitleText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("ContainerTitleText"));
+		UTileView* ContainerTileView = WidgetTree->ConstructWidget<UTileView>(UTileView::StaticClass(), TEXT("ContainerTileView"));
+
+		if (!RootSizeBox || !PanelBackground || !PanelStack || !ContainerTitleText || !ContainerTileView)
+		{
+			return false;
+		}
+
+		WidgetTree->RootWidget = RootSizeBox;
+		RootSizeBox->SetWidthOverride(500.0f);
+		RootSizeBox->SetHeightOverride(306.0f);
+		RootSizeBox->SetContent(PanelBackground);
+
+		PanelBackground->SetPadding(FMargin(14.0f));
+		PanelBackground->SetBrush(MakeRoundedBoxBrush(
+			FVector2D(500.0f, 306.0f),
+			FLinearColor(0.012f, 0.014f, 0.017f, 0.90f),
+			FLinearColor(0.44f, 0.34f, 0.26f, 1.0f),
+			1.0f));
+		PanelBackground->SetContent(PanelStack);
+
+		ConfigureTextBlockLeft(ContainerTitleText, FText::FromString(TEXT("Container")), FLinearColor::White, 18);
+		UVerticalBoxSlot* TitleSlot = PanelStack->AddChildToVerticalBox(ContainerTitleText);
+		if (TitleSlot)
+		{
+			TitleSlot->SetHorizontalAlignment(HAlign_Fill);
+			TitleSlot->SetVerticalAlignment(VAlign_Top);
+		}
+
+		ContainerTileView->SetEntryWidth(96.0f);
+		ContainerTileView->SetEntryHeight(116.0f);
+		SetListViewEntryWidgetClass(ContainerTileView, EntryWidgetClass);
+		UVerticalBoxSlot* TileViewSlot = PanelStack->AddChildToVerticalBox(ContainerTileView);
+		if (TileViewSlot)
+		{
+			TileViewSlot->SetPadding(FMargin(0.0f, 12.0f, 0.0f, 0.0f));
+			TileViewSlot->SetHorizontalAlignment(HAlign_Fill);
+			TileViewSlot->SetVerticalAlignment(VAlign_Fill);
+			TileViewSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+		}
+
+		RegisterWidgetVariable(WidgetBlueprint, RootSizeBox);
+		RegisterWidgetVariable(WidgetBlueprint, ContainerTitleText);
+		RegisterWidgetVariable(WidgetBlueprint, ContainerTileView);
+		WidgetBlueprint->MarkPackageDirty();
+		return true;
+	}
+
+	bool BuildHudExternalPanelWidgetTree(UWidgetBlueprint* WidgetBlueprint, TSubclassOf<UUserWidget> LootContainerWidgetClass)
+	{
+		if (!WidgetBlueprint || !WidgetBlueprint->WidgetTree || !LootContainerWidgetClass)
 		{
 			return false;
 		}
@@ -1315,12 +1538,8 @@ namespace TunaSweeperEditorSetup
 		UWidgetTree* WidgetTree = WidgetBlueprint->WidgetTree;
 		USizeBox* RootSizeBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("RootSizeBox"));
 		UOverlay* PanelOverlay = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), TEXT("PanelOverlay"));
-		UBorder* LootingBoxPanel = BuildHudSimplePanel(
-			WidgetTree,
-			TEXT("LootingBoxPanel"),
-			FText::FromString(TEXT("Looting Box")),
-			FVector2D(420.0f, 620.0f),
-			FLinearColor(0.44f, 0.34f, 0.26f, 1.0f));
+		UOverlay* LootingBoxPanel = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), TEXT("LootingBoxPanel"));
+		UUserWidget* LootContainerWidget = WidgetTree->ConstructWidget<UUserWidget>(LootContainerWidgetClass, TEXT("LootContainerWidget"));
 		UBorder* ShopPanel = BuildHudSimplePanel(
 			WidgetTree,
 			TEXT("ShopPanel"),
@@ -1334,16 +1553,24 @@ namespace TunaSweeperEditorSetup
 			FVector2D(420.0f, 620.0f),
 			FLinearColor(0.38f, 0.42f, 0.32f, 1.0f));
 
-		if (!RootSizeBox || !PanelOverlay || !LootingBoxPanel || !ShopPanel || !StoragePanel)
+		if (!RootSizeBox || !PanelOverlay || !LootingBoxPanel || !LootContainerWidget || !ShopPanel || !StoragePanel)
 		{
 			return false;
 		}
 
 		WidgetTree->RootWidget = RootSizeBox;
-		RootSizeBox->SetWidthOverride(420.0f);
+		RootSizeBox->SetWidthOverride(500.0f);
 		RootSizeBox->SetContent(PanelOverlay);
 
-		for (UBorder* Panel : { LootingBoxPanel, ShopPanel, StoragePanel })
+		UOverlaySlot* LootContainerSlot = LootingBoxPanel->AddChildToOverlay(LootContainerWidget);
+		if (LootContainerSlot)
+		{
+			LootContainerSlot->SetHorizontalAlignment(HAlign_Fill);
+			LootContainerSlot->SetVerticalAlignment(VAlign_Top);
+		}
+
+		TArray<UWidget*> ExternalPanels = { LootingBoxPanel, ShopPanel, StoragePanel };
+		for (UWidget* Panel : ExternalPanels)
 		{
 			Panel->SetVisibility(ESlateVisibility::Collapsed);
 			UOverlaySlot* PanelSlot = PanelOverlay->AddChildToOverlay(Panel);
@@ -1357,6 +1584,7 @@ namespace TunaSweeperEditorSetup
 		RegisterWidgetVariable(WidgetBlueprint, LootingBoxPanel);
 		RegisterWidgetVariable(WidgetBlueprint, ShopPanel);
 		RegisterWidgetVariable(WidgetBlueprint, StoragePanel);
+		RegisterWidgetVariable(WidgetBlueprint, LootContainerWidget);
 		WidgetBlueprint->MarkPackageDirty();
 		return true;
 	}
@@ -1415,7 +1643,7 @@ namespace TunaSweeperEditorSetup
 			CenterSlot->SetAnchors(FAnchors(0.5f, 0.5f, 0.5f, 0.5f));
 			CenterSlot->SetAlignment(FVector2D(0.5f, 0.5f));
 			CenterSlot->SetPosition(FVector2D(0.0f, -20.0f));
-			CenterSlot->SetSize(FVector2D(1280.0f, 620.0f));
+			CenterSlot->SetSize(FVector2D(1380.0f, 620.0f));
 		}
 
 		UHorizontalBoxSlot* InventorySlot = CenterContentPanel->AddChildToHorizontalBox(InventoryAreaWidget);
@@ -1703,6 +1931,10 @@ namespace TunaSweeperEditorSetup
 
 	bool EnsureCommonGameHudAssets()
 	{
+		UWidgetBlueprint* ItemThumbnailWidgetBlueprint = EnsureWidgetBlueprint(
+			UIAssetPath,
+			ItemThumbnailSlotWidgetAssetName,
+			UTunaSweeperItemThumbnailSlotWidget::StaticClass());
 		UWidgetBlueprint* TopReserveWidgetBlueprint = EnsureWidgetBlueprint(
 			UIAssetPath,
 			HudTopReserveWidgetAssetName,
@@ -1727,9 +1959,30 @@ namespace TunaSweeperEditorSetup
 			UIAssetPath,
 			HudExternalPanelWidgetAssetName,
 			UTunaSweeperHudExternalPanelWidget::StaticClass());
+		UWidgetBlueprint* LootContainerWidgetBlueprint = EnsureWidgetBlueprint(
+			UIAssetPath,
+			LootContainerWidgetAssetName,
+			UTunaSweeperLootContainerWidget::StaticClass());
 
-		if (!TopReserveWidgetBlueprint || !BottomStatusWidgetBlueprint || !QuickSlotWidgetBlueprint ||
-			!InventoryAreaWidgetBlueprint || !ItemInfoPanelWidgetBlueprint || !ExternalPanelWidgetBlueprint)
+		if (!ItemThumbnailWidgetBlueprint || !TopReserveWidgetBlueprint || !BottomStatusWidgetBlueprint || !QuickSlotWidgetBlueprint ||
+			!InventoryAreaWidgetBlueprint || !ItemInfoPanelWidgetBlueprint || !ExternalPanelWidgetBlueprint || !LootContainerWidgetBlueprint)
+		{
+			return false;
+		}
+
+		if (!BuildItemThumbnailSlotWidgetTree(ItemThumbnailWidgetBlueprint))
+		{
+			return false;
+		}
+		FKismetEditorUtilities::CompileBlueprint(ItemThumbnailWidgetBlueprint);
+		ItemThumbnailWidgetBlueprint->MarkPackageDirty();
+		if (!SaveAsset(ItemThumbnailWidgetBlueprint))
+		{
+			return false;
+		}
+
+		const TSubclassOf<UUserWidget> ItemThumbnailWidgetClass = ItemThumbnailWidgetBlueprint->GeneratedClass.Get();
+		if (!ItemThumbnailWidgetClass)
 		{
 			return false;
 		}
@@ -1738,9 +1991,9 @@ namespace TunaSweeperEditorSetup
 			BuildHudTopReserveWidgetTree(TopReserveWidgetBlueprint) &&
 			BuildHudBottomStatusWidgetTree(BottomStatusWidgetBlueprint) &&
 			BuildHudQuickSlotBarWidgetTree(QuickSlotWidgetBlueprint) &&
-			BuildHudInventoryAreaWidgetTree(InventoryAreaWidgetBlueprint) &&
+			BuildHudInventoryAreaWidgetTree(InventoryAreaWidgetBlueprint, ItemThumbnailWidgetClass) &&
 			BuildHudItemInfoPanelWidgetTree(ItemInfoPanelWidgetBlueprint) &&
-			BuildHudExternalPanelWidgetTree(ExternalPanelWidgetBlueprint);
+			BuildLootContainerWidgetTree(LootContainerWidgetBlueprint, ItemThumbnailWidgetClass);
 
 		if (!bChildWidgetsBuilt)
 		{
@@ -1753,7 +2006,7 @@ namespace TunaSweeperEditorSetup
 			QuickSlotWidgetBlueprint,
 			InventoryAreaWidgetBlueprint,
 			ItemInfoPanelWidgetBlueprint,
-			ExternalPanelWidgetBlueprint
+			LootContainerWidgetBlueprint
 		})
 		{
 			FKismetEditorUtilities::CompileBlueprint(ChildWidgetBlueprint);
@@ -1762,6 +2015,17 @@ namespace TunaSweeperEditorSetup
 			{
 				return false;
 			}
+		}
+
+		if (!BuildHudExternalPanelWidgetTree(ExternalPanelWidgetBlueprint, LootContainerWidgetBlueprint->GeneratedClass.Get()))
+		{
+			return false;
+		}
+		FKismetEditorUtilities::CompileBlueprint(ExternalPanelWidgetBlueprint);
+		ExternalPanelWidgetBlueprint->MarkPackageDirty();
+		if (!SaveAsset(ExternalPanelWidgetBlueprint))
+		{
+			return false;
 		}
 
 		UWidgetBlueprint* GameHudWidgetBlueprint = EnsureWidgetBlueprint(
@@ -2122,6 +2386,72 @@ namespace TunaSweeperEditorSetup
 		return SaveAsset(ItemSpawnBlueprint);
 	}
 
+	bool ConfigureLootContainerBlueprint(UBlueprint* LootContainerBlueprint, int32 ContainerDefinitionId, int32 ContentsId)
+	{
+		if (!LootContainerBlueprint)
+		{
+			return false;
+		}
+
+		FKismetEditorUtilities::CompileBlueprint(LootContainerBlueprint);
+
+		ATunaSweeperLootContainerActor* Defaults = LootContainerBlueprint->GeneratedClass
+			? Cast<ATunaSweeperLootContainerActor>(LootContainerBlueprint->GeneratedClass->GetDefaultObject())
+			: nullptr;
+		if (!Defaults)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to configure %s defaults."), *GetNameSafe(LootContainerBlueprint));
+			return false;
+		}
+
+		LootContainerBlueprint->Modify();
+		Defaults->ConfigureLootContainerDefaults(ContainerDefinitionId, ContentsId);
+		if (UTunaSweeperInteractableComponent* InteractableComponent = Defaults->GetInteractableComponent())
+		{
+			InteractableComponent->SetInteractionTypeAndDisplayName(
+				ETunaSweeperInteractionType::LootContainerOpen,
+				FText::FromString(TEXT("\uC5F4\uAE30")));
+		}
+		FBlueprintEditorUtils::MarkBlueprintAsModified(LootContainerBlueprint);
+		FKismetEditorUtilities::CompileBlueprint(LootContainerBlueprint);
+		LootContainerBlueprint->MarkPackageDirty();
+		return SaveAsset(LootContainerBlueprint);
+	}
+
+	bool ConfigureLootContainerSpawnBlueprint(UBlueprint* LootContainerSpawnBlueprint)
+	{
+		if (!LootContainerSpawnBlueprint)
+		{
+			return false;
+		}
+
+		FKismetEditorUtilities::CompileBlueprint(LootContainerSpawnBlueprint);
+
+		ATunaSweeperLootContainerSpawnInteractableActor* Defaults = LootContainerSpawnBlueprint->GeneratedClass
+			? Cast<ATunaSweeperLootContainerSpawnInteractableActor>(LootContainerSpawnBlueprint->GeneratedClass->GetDefaultObject())
+			: nullptr;
+		if (!Defaults)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to configure %s defaults."), *GetNameSafe(LootContainerSpawnBlueprint));
+			return false;
+		}
+
+		LootContainerSpawnBlueprint->Modify();
+		Defaults->ConfigureLootContainerSpawnDefaults(
+			TSoftClassPtr<ATunaSweeperLootContainerActor>(
+				FSoftObjectPath(GetAssetClassPath(InteractionAssetPath, LootContainerAssetName))));
+		if (UTunaSweeperInteractableComponent* InteractableComponent = Defaults->GetInteractableComponent())
+		{
+			InteractableComponent->SetInteractionTypeAndDisplayName(
+				ETunaSweeperInteractionType::LootContainerSpawn,
+				FText::FromString(TEXT("\uC0C1\uC790\uC2A4\uD3F0")));
+		}
+		FBlueprintEditorUtils::MarkBlueprintAsModified(LootContainerSpawnBlueprint);
+		FKismetEditorUtilities::CompileBlueprint(LootContainerSpawnBlueprint);
+		LootContainerSpawnBlueprint->MarkPackageDirty();
+		return SaveAsset(LootContainerSpawnBlueprint);
+	}
+
 	bool ConfigurePickupItemActorInstance(AActor* Actor, int32 ItemId)
 	{
 		ATunaSweeperPickupItemActor* PickupItemActor = Cast<ATunaSweeperPickupItemActor>(Actor);
@@ -2160,6 +2490,50 @@ namespace TunaSweeperEditorSetup
 				FText::FromString(TEXT("\uC544\uC774\uD15C\uC2A4\uD3F0")));
 		}
 		ItemSpawnActor->MarkPackageDirty();
+		return true;
+	}
+
+	bool ConfigureLootContainerActorInstance(AActor* Actor, int32 ContainerDefinitionId, int32 ContentsId)
+	{
+		ATunaSweeperLootContainerActor* LootContainerActor = Cast<ATunaSweeperLootContainerActor>(Actor);
+		if (!LootContainerActor)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("%s is not an ATunaSweeperLootContainerActor."), *GetNameSafe(Actor));
+			return false;
+		}
+
+		LootContainerActor->Modify();
+		LootContainerActor->ConfigureLootContainerDefaults(ContainerDefinitionId, ContentsId);
+		if (UTunaSweeperInteractableComponent* InteractableComponent = LootContainerActor->GetInteractableComponent())
+		{
+			InteractableComponent->SetInteractionTypeAndDisplayName(
+				ETunaSweeperInteractionType::LootContainerOpen,
+				FText::FromString(TEXT("\uC5F4\uAE30")));
+		}
+		LootContainerActor->MarkPackageDirty();
+		return true;
+	}
+
+	bool ConfigureLootContainerSpawnActorInstance(AActor* Actor)
+	{
+		ATunaSweeperLootContainerSpawnInteractableActor* SpawnActor = Cast<ATunaSweeperLootContainerSpawnInteractableActor>(Actor);
+		if (!SpawnActor)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("%s is not an ATunaSweeperLootContainerSpawnInteractableActor."), *GetNameSafe(Actor));
+			return false;
+		}
+
+		SpawnActor->Modify();
+		SpawnActor->ConfigureLootContainerSpawnDefaults(
+			TSoftClassPtr<ATunaSweeperLootContainerActor>(
+				FSoftObjectPath(GetAssetClassPath(InteractionAssetPath, LootContainerAssetName))));
+		if (UTunaSweeperInteractableComponent* InteractableComponent = SpawnActor->GetInteractableComponent())
+		{
+			InteractableComponent->SetInteractionTypeAndDisplayName(
+				ETunaSweeperInteractionType::LootContainerSpawn,
+				FText::FromString(TEXT("\uC0C1\uC790\uC2A4\uD3F0")));
+		}
+		SpawnActor->MarkPackageDirty();
 		return true;
 	}
 
@@ -2298,6 +2672,86 @@ namespace TunaSweeperEditorSetup
 		return true;
 	}
 
+	bool PlaceLootContainerActor(
+		UWorld* World,
+		UBlueprint* ActorBlueprint,
+		const FString& ActorLabel,
+		const FVector& Location,
+		int32 ContainerDefinitionId,
+		int32 ContentsId)
+	{
+		if (!World || !ActorBlueprint || !ActorBlueprint->GeneratedClass)
+		{
+			return false;
+		}
+
+		if (AActor* ExistingActor = FindActorByLabel(World, ActorLabel))
+		{
+			ExistingActor->Modify();
+			ExistingActor->SetActorLocation(Location);
+			ExistingActor->SetActorRotation(FRotator::ZeroRotator);
+			return ConfigureLootContainerActorInstance(ExistingActor, ContainerDefinitionId, ContentsId);
+		}
+
+		World->PersistentLevel->Modify();
+
+		FActorSpawnParameters SpawnParameters;
+		SpawnParameters.OverrideLevel = World->PersistentLevel;
+		SpawnParameters.Name = MakeUniqueObjectName(World->PersistentLevel, ActorBlueprint->GeneratedClass, FName(*ActorLabel));
+		SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+		AActor* SpawnedActor = World->SpawnActor<AActor>(ActorBlueprint->GeneratedClass, Location, FRotator::ZeroRotator, SpawnParameters);
+		if (!SpawnedActor)
+		{
+			return false;
+		}
+
+		SpawnedActor->SetActorLabel(ActorLabel);
+		if (!ConfigureLootContainerActorInstance(SpawnedActor, ContainerDefinitionId, ContentsId))
+		{
+			return false;
+		}
+		SpawnedActor->MarkPackageDirty();
+		return true;
+	}
+
+	bool PlaceLootContainerSpawnActor(UWorld* World, UBlueprint* ActorBlueprint, const FString& ActorLabel, const FVector& Location)
+	{
+		if (!World || !ActorBlueprint || !ActorBlueprint->GeneratedClass)
+		{
+			return false;
+		}
+
+		if (AActor* ExistingActor = FindActorByLabel(World, ActorLabel))
+		{
+			ExistingActor->Modify();
+			ExistingActor->SetActorLocation(Location);
+			ExistingActor->SetActorRotation(FRotator::ZeroRotator);
+			return ConfigureLootContainerSpawnActorInstance(ExistingActor);
+		}
+
+		World->PersistentLevel->Modify();
+
+		FActorSpawnParameters SpawnParameters;
+		SpawnParameters.OverrideLevel = World->PersistentLevel;
+		SpawnParameters.Name = MakeUniqueObjectName(World->PersistentLevel, ActorBlueprint->GeneratedClass, FName(*ActorLabel));
+		SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+		AActor* SpawnedActor = World->SpawnActor<AActor>(ActorBlueprint->GeneratedClass, Location, FRotator::ZeroRotator, SpawnParameters);
+		if (!SpawnedActor)
+		{
+			return false;
+		}
+
+		SpawnedActor->SetActorLabel(ActorLabel);
+		if (!ConfigureLootContainerSpawnActorInstance(SpawnedActor))
+		{
+			return false;
+		}
+		SpawnedActor->MarkPackageDirty();
+		return true;
+	}
+
 	bool PlaceInteractionActorsInRaidMap(UBlueprint* DialogueBlueprint, UBlueprint* PickupBlueprint, UBlueprint* OpenBlueprint)
 	{
 		UWorld* World = GEditor ? GEditor->GetEditorWorldContext().World() : nullptr;
@@ -2414,6 +2868,59 @@ namespace TunaSweeperEditorSetup
 		return bConfigured && PlacePickupItemAndSpawnerActorsInRaidMap(PickupItemBlueprint, ItemSpawnBlueprint);
 	}
 
+	bool PlaceLootContainerAndSpawnerActorsInRaidMap(UBlueprint* LootContainerBlueprint, UBlueprint* LootContainerSpawnBlueprint)
+	{
+		UWorld* World = GEditor ? GEditor->GetEditorWorldContext().World() : nullptr;
+		if (!World || World->GetPackage()->GetName() != RaidMapPackagePath)
+		{
+			return false;
+		}
+
+		const bool bPlacedActors =
+			PlaceLootContainerActor(
+				World,
+				LootContainerBlueprint,
+				TEXT("TS_LootContainer_Sample"),
+				FVector(1220.0f, 50.0f, 40.0f),
+				7001,
+				8001) &&
+			PlaceLootContainerSpawnActor(
+				World,
+				LootContainerSpawnBlueprint,
+				TEXT("TS_Interact_LootContainerSpawn"),
+				FVector(1220.0f, -220.0f, 80.0f));
+
+		if (!bPlacedActors)
+		{
+			return false;
+		}
+
+		return UEditorLoadingAndSavingUtils::SaveMap(World, RaidMapPackagePath);
+	}
+
+	bool EnsureLootContainerAndSpawnerAssetsAndMapPlacement()
+	{
+		UBlueprint* LootContainerBlueprint = EnsureBlueprint(
+			InteractionAssetPath,
+			LootContainerAssetName,
+			ATunaSweeperLootContainerActor::StaticClass());
+		UBlueprint* LootContainerSpawnBlueprint = EnsureBlueprint(
+			InteractionAssetPath,
+			LootContainerSpawnInteractionAssetName,
+			ATunaSweeperLootContainerSpawnInteractableActor::StaticClass());
+
+		if (!LootContainerBlueprint || !LootContainerSpawnBlueprint)
+		{
+			return false;
+		}
+
+		const bool bConfigured =
+			ConfigureLootContainerBlueprint(LootContainerBlueprint, 7001, 8001) &&
+			ConfigureLootContainerSpawnBlueprint(LootContainerSpawnBlueprint);
+
+		return bConfigured && PlaceLootContainerAndSpawnerActorsInRaidMap(LootContainerBlueprint, LootContainerSpawnBlueprint);
+	}
+
 	void ScheduleInteractionAssetsAndMapPlacement()
 	{
 		if (FTunaSweeperEditorRunOnce::HasCompleted(InteractionTaskId))
@@ -2471,6 +2978,35 @@ namespace TunaSweeperEditorSetup
 				}),
 			1.0f);
 	}
+
+	void ScheduleLootContainerAndSpawnerAssetsAndMapPlacement()
+	{
+		if (FTunaSweeperEditorRunOnce::HasCompleted(LootContainerAndSpawnerTaskId))
+		{
+			return;
+		}
+
+		FTSTicker::GetCoreTicker().AddTicker(
+			FTickerDelegate::CreateLambda(
+				[](float)
+				{
+					UWorld* EditorWorld = GEditor ? GEditor->GetEditorWorldContext().World() : nullptr;
+					if (!EditorWorld || EditorWorld->GetPackage()->GetName() != RaidMapPackagePath)
+					{
+						return true;
+					}
+
+					FTunaSweeperEditorRunOnce::Run(
+						LootContainerAndSpawnerTaskId,
+						[]()
+						{
+							return EnsureLootContainerAndSpawnerAssetsAndMapPlacement();
+						});
+
+					return !FTunaSweeperEditorRunOnce::HasCompleted(LootContainerAndSpawnerTaskId);
+				}),
+			1.0f);
+	}
 }
 
 class FTunaSweeperEditorModule final : public IModuleInterface
@@ -2505,6 +3041,13 @@ public:
 			});
 
 		FTunaSweeperEditorRunOnce::Run(
+			TunaSweeperEditorSetup::InventoryInputTaskId,
+			[]()
+			{
+				return TunaSweeperEditorSetup::EnsureInventoryInputAssets();
+			});
+
+		FTunaSweeperEditorRunOnce::Run(
 			TunaSweeperEditorSetup::InteractionMarkerAlignmentTaskId,
 			[]()
 			{
@@ -2534,6 +3077,7 @@ public:
 
 		TunaSweeperEditorSetup::ScheduleInteractionAssetsAndMapPlacement();
 		TunaSweeperEditorSetup::SchedulePickupItemAndSpawnerAssetsAndMapPlacement();
+		TunaSweeperEditorSetup::ScheduleLootContainerAndSpawnerAssetsAndMapPlacement();
 	}
 };
 
