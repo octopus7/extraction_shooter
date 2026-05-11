@@ -1,0 +1,17 @@
+string_key,ko,en,ja
+item.pistol,권총,Pistol,ピストル
+item.rifle,소총,Rifle,ライフル
+item.shotgun,산탄총,Shotgun,ショットガン
+item.pistol_ammo,권총 탄약,Pistol Ammo,ピストル弾薬
+item.rifle_ammo,소총 탄약,Rifle Ammo,ライフル弾薬
+item.shotgun_ammo,산탄총 탄약,Shotgun Ammo,ショットガン弾薬
+item.canned_food,통조림,Canned Food,缶詰
+item.water_bottle,물병,Water Bottle,水ボトル
+item.energy_bar,에너지바,Energy Bar,エナジーバー
+item.bandage,붕대,Bandage,包帯
+item.first_aid_kit,응급키트,First Aid Kit,救急キット
+item.painkillers,진통제,Painkillers,鎮痛剤
+item.antibiotics,항생제,Antibiotics,抗生物質
+item.body_armor,방탄조끼,Body Armor,ボディアーマー
+item.backpack,배낭,Backpack,バックパック
+item.valuables_crate,귀중품 상자,Valuables Crate,貴重品箱
