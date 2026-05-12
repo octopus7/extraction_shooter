@@ -2,7 +2,12 @@
 
 #include "Blueprint/UserWidget.h"
 #include "Character/TunaSweeperTopDownCharacter.h"
+#include "EnhancedInputComponent.h"
+#include "Engine/GameInstance.h"
 #include "Engine/World.h"
+#include "InputAction.h"
+#include "InputActionValue.h"
+#include "Subsystem/TunaSweeperKeyboardInputSubsystem.h"
 #include "UI/TunaSweeperGameHudWidget.h"
 
 ATunaSweeperPlayerController::ATunaSweeperPlayerController()
@@ -11,6 +16,15 @@ ATunaSweeperPlayerController::ATunaSweeperPlayerController()
 	bShowMouseCursor = true;
 	DefaultMouseCursor = EMouseCursor::Crosshairs;
 	GameHudWidgetClass = TSoftClassPtr<UTunaSweeperGameHudWidget>(FSoftObjectPath(TEXT("/Game/UI/WBP_GameHud.WBP_GameHud_C")));
+
+	QuickSlotActions.Reserve(8);
+	for (int32 SlotNumber = 1; SlotNumber <= 8; ++SlotNumber)
+	{
+		QuickSlotActions.Add(TSoftObjectPtr<UInputAction>(FSoftObjectPath(FString::Printf(
+			TEXT("/Game/Input/IA_QuickSlot%d.IA_QuickSlot%d"),
+			SlotNumber,
+			SlotNumber))));
+	}
 }
 
 void ATunaSweeperPlayerController::BeginPlay()
@@ -25,6 +39,39 @@ void ATunaSweeperPlayerController::BeginPlay()
 	SetInputMode(InputMode);
 
 	EnsureGameHudWidget();
+}
+
+void ATunaSweeperPlayerController::SetupInputComponent()
+{
+	Super::SetupInputComponent();
+
+	UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent);
+	if (!EnhancedInputComponent)
+	{
+		return;
+	}
+
+	auto BindQuickSlotInputAction = [this, EnhancedInputComponent](int32 SlotIndex, auto Handler)
+	{
+		if (!QuickSlotActions.IsValidIndex(SlotIndex))
+		{
+			return;
+		}
+
+		if (UInputAction* LoadedQuickSlotAction = QuickSlotActions[SlotIndex].LoadSynchronous())
+		{
+			EnhancedInputComponent->BindAction(LoadedQuickSlotAction, ETriggerEvent::Started, this, Handler);
+		}
+	};
+
+	BindQuickSlotInputAction(0, &ATunaSweeperPlayerController::HandleQuickSlot1);
+	BindQuickSlotInputAction(1, &ATunaSweeperPlayerController::HandleQuickSlot2);
+	BindQuickSlotInputAction(2, &ATunaSweeperPlayerController::HandleQuickSlot3);
+	BindQuickSlotInputAction(3, &ATunaSweeperPlayerController::HandleQuickSlot4);
+	BindQuickSlotInputAction(4, &ATunaSweeperPlayerController::HandleQuickSlot5);
+	BindQuickSlotInputAction(5, &ATunaSweeperPlayerController::HandleQuickSlot6);
+	BindQuickSlotInputAction(6, &ATunaSweeperPlayerController::HandleQuickSlot7);
+	BindQuickSlotInputAction(7, &ATunaSweeperPlayerController::HandleQuickSlot8);
 }
 
 void ATunaSweeperPlayerController::PlayerTick(float DeltaTime)
@@ -62,6 +109,60 @@ void ATunaSweeperPlayerController::EnsureGameHudWidget()
 	{
 		GameHudWidget->AddToViewport(0);
 	}
+}
+
+void ATunaSweeperPlayerController::HandleQuickSlot(int32 SlotNumber)
+{
+	UGameInstance* GameInstance = GetGameInstance();
+	if (!GameInstance)
+	{
+		return;
+	}
+
+	if (UTunaSweeperKeyboardInputSubsystem* KeyboardInputSubsystem = GameInstance->GetSubsystem<UTunaSweeperKeyboardInputSubsystem>())
+	{
+		KeyboardInputSubsystem->ReceiveQuickSlotKeyInput(SlotNumber, GetPawn());
+	}
+}
+
+void ATunaSweeperPlayerController::HandleQuickSlot1(const FInputActionValue&)
+{
+	HandleQuickSlot(1);
+}
+
+void ATunaSweeperPlayerController::HandleQuickSlot2(const FInputActionValue&)
+{
+	HandleQuickSlot(2);
+}
+
+void ATunaSweeperPlayerController::HandleQuickSlot3(const FInputActionValue&)
+{
+	HandleQuickSlot(3);
+}
+
+void ATunaSweeperPlayerController::HandleQuickSlot4(const FInputActionValue&)
+{
+	HandleQuickSlot(4);
+}
+
+void ATunaSweeperPlayerController::HandleQuickSlot5(const FInputActionValue&)
+{
+	HandleQuickSlot(5);
+}
+
+void ATunaSweeperPlayerController::HandleQuickSlot6(const FInputActionValue&)
+{
+	HandleQuickSlot(6);
+}
+
+void ATunaSweeperPlayerController::HandleQuickSlot7(const FInputActionValue&)
+{
+	HandleQuickSlot(7);
+}
+
+void ATunaSweeperPlayerController::HandleQuickSlot8(const FInputActionValue&)
+{
+	HandleQuickSlot(8);
 }
 
 void ATunaSweeperPlayerController::ToggleInventoryOnlyPanel()

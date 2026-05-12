@@ -84,6 +84,7 @@ namespace TunaSweeperEditorSetup
 	const FString PickupItemAndSpawnerTaskId = TEXT("2026-05-11_CreatePickupItemAndSpawnerAssetsV3");
 	const FString CommonGameHudTaskId = TEXT("2026-05-11_RebuildThumbnailIconsUnderNameOverlay");
 	const FString InventoryInputTaskId = TEXT("2026-05-11_AddInventoryInput");
+	const FString QuickSlotInputTaskId = TEXT("2026-05-12_AddQuickSlotInputActions");
 	const FString LootContainerAndSpawnerTaskId = TEXT("2026-05-11_CreateLootContainerAndSpawnerAssetsV1");
 	const FString CannedTunaIconImportTaskId = TEXT("2026-05-11_ImportCannedTunaIconV1");
 	const FString GameInstanceAssetPath = TEXT("/Game/Core");
@@ -102,6 +103,7 @@ namespace TunaSweeperEditorSetup
 	const FString AimActionName = TEXT("IA_Aim");
 	const FString InteractActionName = TEXT("IA_Interact");
 	const FString InventoryActionName = TEXT("IA_Inventory");
+	const FString QuickSlotActionNamePrefix = TEXT("IA_QuickSlot");
 	const FString MappingContextName = TEXT("IMC_Player");
 	const FString UIAssetPath = TEXT("/Game/UI");
 	const FString UIIconAssetPath = TEXT("/Game/UI/Icons");
@@ -315,6 +317,11 @@ namespace TunaSweeperEditorSetup
 		return Action;
 	}
 
+	FString GetQuickSlotActionName(int32 SlotNumber)
+	{
+		return FString::Printf(TEXT("%s%d"), *QuickSlotActionNamePrefix, SlotNumber);
+	}
+
 	void AddSwizzleModifier(FEnhancedActionKeyMapping& Mapping, UObject* Outer, EInputAxisSwizzle Order)
 	{
 		UInputModifierSwizzleAxis* SwizzleModifier = NewObject<UInputModifierSwizzleAxis>(Outer, NAME_None, RF_Transactional);
@@ -436,6 +443,49 @@ namespace TunaSweeperEditorSetup
 		MappingContext->ContextDescription = FText::FromString(TEXT("TunaSweeper player movement, combat, interaction, and inventory input."));
 		MappingContext->MarkPackageDirty();
 		return SaveAsset(MappingContext);
+	}
+
+	bool EnsureQuickSlotInputAssets()
+	{
+		UInputMappingContext* MappingContext = LoadObject<UInputMappingContext>(
+			nullptr,
+			*GetAssetObjectPath(InputAssetPath, MappingContextName));
+
+		if (!MappingContext)
+		{
+			return false;
+		}
+
+		static const FKey QuickSlotKeys[8] = {
+			EKeys::One,
+			EKeys::Two,
+			EKeys::Three,
+			EKeys::Four,
+			EKeys::Five,
+			EKeys::Six,
+			EKeys::Seven,
+			EKeys::Eight
+		};
+
+		bool bAllActionsCreated = true;
+		for (int32 SlotIndex = 0; SlotIndex < UE_ARRAY_COUNT(QuickSlotKeys); ++SlotIndex)
+		{
+			const int32 SlotNumber = SlotIndex + 1;
+			UInputAction* QuickSlotAction = EnsureInputAction(
+				GetQuickSlotActionName(SlotNumber),
+				EInputActionValueType::Boolean,
+				EInputActionAccumulationBehavior::TakeHighestAbsoluteValue);
+
+			bAllActionsCreated = bAllActionsCreated && QuickSlotAction;
+			if (QuickSlotAction && !HasInputMapping(MappingContext, QuickSlotAction, QuickSlotKeys[SlotIndex]))
+			{
+				MappingContext->MapKey(QuickSlotAction, QuickSlotKeys[SlotIndex]);
+			}
+		}
+
+		MappingContext->ContextDescription = FText::FromString(TEXT("TunaSweeper player movement, combat, interaction, inventory, and quick slot input."));
+		MappingContext->MarkPackageDirty();
+		return bAllActionsCreated && SaveAsset(MappingContext);
 	}
 
 	bool ConfigureGameModeBlueprint(UBlueprint* GameModeBlueprint, UBlueprint* PlayerBlueprint)
@@ -3123,6 +3173,13 @@ public:
 			[]()
 			{
 				return TunaSweeperEditorSetup::EnsureInventoryInputAssets();
+			});
+
+		FTunaSweeperEditorRunOnce::Run(
+			TunaSweeperEditorSetup::QuickSlotInputTaskId,
+			[]()
+			{
+				return TunaSweeperEditorSetup::EnsureQuickSlotInputAssets();
 			});
 
 		FTunaSweeperEditorRunOnce::Run(
