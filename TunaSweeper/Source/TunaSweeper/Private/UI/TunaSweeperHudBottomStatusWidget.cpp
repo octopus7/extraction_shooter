@@ -65,7 +65,7 @@ void UTunaSweeperHudBottomStatusWidget::ApplyHudState()
 
 	if (HungerText)
 	{
-		HungerText->SetText(FText::Format(FText::FromString(TEXT("Food {0}")), FText::AsNumber(FMath::RoundToInt(PreviewHudState.Hunger))));
+		HungerText->SetText(FText::Format(FText::FromString(TEXT("Food {0}")), FText::AsNumber(FMath::RoundToInt(PreviewHudState.Food))));
 	}
 
 	if (HydrationText)
@@ -89,4 +89,3 @@ void UTunaSweeperHudBottomStatusWidget::ApplyHudState()
 				: ESlateVisibility::Hidden);
 	}
 }
-

@@ -5,6 +5,7 @@
 #include "TunaSweeperTopDownCharacter.generated.h"
 
 class ATunaSweeperWeapon;
+class UTunaSweeperVitalsComponent;
 class UCameraComponent;
 class UInputAction;
 class UInputMappingContext;
@@ -34,6 +35,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Aiming")
 	bool IsAiming() const { return bIsAiming; }
 
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Vitals")
+	UTunaSweeperVitalsComponent* GetVitalsComponent() const { return VitalsComponent; }
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -48,6 +52,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UCameraComponent> TopDownCamera;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UTunaSweeperVitalsComponent> VitalsComponent;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	TSoftObjectPtr<UInputMappingContext> DefaultMappingContext;

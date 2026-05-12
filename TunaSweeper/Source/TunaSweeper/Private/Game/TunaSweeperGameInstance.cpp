@@ -39,7 +39,7 @@ void FTunaSweeperPlayerHudState::NormalizeWeightLimits()
 	MaxCarryWeight = FMath::Max(1.0f, MaxCarryWeight);
 	MovementBlockedWeight = FMath::Max(MovementBlockedWeight, MaxCarryWeight * 2.0f);
 	Health = FMath::Clamp(Health, 0.0f, 100.0f);
-	Hunger = FMath::Clamp(Hunger, 0.0f, 100.0f);
+	Food = FMath::Clamp(Food, 0.0f, 100.0f);
 	Hydration = FMath::Clamp(Hydration, 0.0f, 100.0f);
 }
 

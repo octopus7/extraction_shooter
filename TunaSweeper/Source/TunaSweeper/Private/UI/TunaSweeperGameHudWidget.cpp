@@ -1,7 +1,11 @@
 #include "UI/TunaSweeperGameHudWidget.h"
 
+#include "Character/TunaSweeperTopDownCharacter.h"
+#include "Component/TunaSweeperVitalsComponent.h"
 #include "Components/Widget.h"
 #include "Game/TunaSweeperGameInstance.h"
+#include "GameFramework/PlayerController.h"
+#include "GameFramework/Pawn.h"
 #include "UI/TunaSweeperHudBottomStatusWidget.h"
 #include "UI/TunaSweeperHudExternalPanelWidget.h"
 #include "UI/TunaSweeperHudInventoryAreaWidget.h"
@@ -119,8 +123,29 @@ void UTunaSweeperGameHudWidget::RefreshBottomStatusFromGameInstance()
 	}
 
 	const UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
-	if (TunaGameInstance)
+	FTunaSweeperPlayerHudState HudState = TunaGameInstance ? TunaGameInstance->PlayerHudState : FTunaSweeperPlayerHudState();
+
+	if (const APlayerController* PlayerController = GetOwningPlayer())
 	{
-		BottomStatusWidget->SetHudState(TunaGameInstance->PlayerHudState);
+		const APawn* Pawn = PlayerController->GetPawn();
+		const UTunaSweeperVitalsComponent* VitalsComponent = nullptr;
+		if (const ATunaSweeperTopDownCharacter* TunaCharacter = Cast<ATunaSweeperTopDownCharacter>(Pawn))
+		{
+			VitalsComponent = TunaCharacter->GetVitalsComponent();
+		}
+		else if (Pawn)
+		{
+			VitalsComponent = Pawn->FindComponentByClass<UTunaSweeperVitalsComponent>();
+		}
+
+		if (VitalsComponent)
+		{
+			const FTunaSweeperVitalsState& VitalsState = VitalsComponent->GetVitalsState();
+			HudState.Health = VitalsState.Health;
+			HudState.Food = VitalsState.Food;
+			HudState.Hydration = VitalsState.Hydration;
+		}
 	}
+
+	BottomStatusWidget->SetHudState(HudState);
 }
