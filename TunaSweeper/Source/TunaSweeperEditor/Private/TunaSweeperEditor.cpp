@@ -47,6 +47,7 @@
 #include "Interaction/TunaSweeperPickupItemActor.h"
 #include "Kismet2/BlueprintEditorUtils.h"
 #include "Kismet2/KismetEditorUtilities.h"
+#include "MediaSource.h"
 #include "Misc/CommandLine.h"
 #include "Misc/ConfigCacheIni.h"
 #include "Misc/PackageName.h"
@@ -64,6 +65,7 @@
 #include "UI/TunaSweeperHudTopReserveWidget.h"
 #include "UI/TunaSweeperItemThumbnailSlotWidget.h"
 #include "UI/TunaSweeperIntroMenuWidget.h"
+#include "UI/TunaSweeperLevelTransitionWidget.h"
 #include "UI/TunaSweeperLootContainerWidget.h"
 #include "UI/TunaSweeperPickupItemIconWidget.h"
 #include "UI/TunaSweeperTempOpenLootTileEntryWidget.h"
@@ -92,6 +94,7 @@ namespace TunaSweeperEditorSetup
 	const FString LootContainerAndSpawnerTaskId = TEXT("2026-05-11_CreateLootContainerAndSpawnerAssetsV1");
 	const FString CannedTunaIconImportTaskId = TEXT("2026-05-11_ImportCannedTunaIconV1");
 	const FString IntroMenuAndLevelTravelTaskId = TEXT("2026-05-15_CreateIntroMenuAndLevelTravelActorsV1");
+	const FString LevelTransitionVideoTaskId = TEXT("2026-05-15_AddBunkerToRaidTransitionVideoV1");
 	const FString GameInstanceAssetPath = TEXT("/Game/Core");
 	const FString GameInstanceAssetName = TEXT("BP_TunaSweeperGameInstance");
 	const FString GameModeAssetName = TEXT("BP_TunaSweeperGameMode");
@@ -126,6 +129,7 @@ namespace TunaSweeperEditorSetup
 	const FString ItemThumbnailSlotWidgetAssetName = TEXT("WBP_ItemThumbnailSlot");
 	const FString LootContainerWidgetAssetName = TEXT("WBP_LootContainerPanel");
 	const FString IntroMenuWidgetAssetName = TEXT("WBP_IntroMenu");
+	const FString LevelTransitionVideoWidgetAssetName = TEXT("WBP_LevelTransitionVideo");
 	constexpr int32 InventoryTileColumnCount = 5;
 	constexpr int32 EquipmentReserveColumnCount = 4;
 	constexpr float InventoryTileWidth = 96.0f;
@@ -150,6 +154,8 @@ namespace TunaSweeperEditorSetup
 	constexpr float LootContainerPanelWidth =
 		LootContainerPanelPadding * 2.0f + LootContainerTileColumnCount * LootContainerTileWidth + LootContainerTileViewScrollbarReserveWidth;
 	const FString InteractionAssetPath = TEXT("/Game/Interaction");
+	const FString VideoAssetPath = TEXT("/Game/Movies");
+	const FString BunkerToRaidMediaSourceAssetName = TEXT("MS_BunkerToRaid");
 	const FString DialogueInteractionAssetName = TEXT("BP_Interact_Dialogue");
 	const FString PickupInteractionAssetName = TEXT("BP_Interact_Pickup");
 	const FString OpenInteractionAssetName = TEXT("BP_Interact_Open");
@@ -881,6 +887,64 @@ namespace TunaSweeperEditorSetup
 			QuitSlot->SetHorizontalAlignment(HAlign_Center);
 			QuitSlot->SetVerticalAlignment(VAlign_Center);
 		}
+
+		RegisterAllWidgetsInTree(WidgetBlueprint);
+		WidgetBlueprint->MarkPackageDirty();
+		return true;
+	}
+
+	bool BuildLevelTransitionVideoWidgetTree(UWidgetBlueprint* WidgetBlueprint)
+	{
+		if (!WidgetBlueprint || !WidgetBlueprint->WidgetTree)
+		{
+			return false;
+		}
+
+		WidgetBlueprint->Modify();
+		WidgetBlueprint->WidgetTree->Modify();
+		ClearWidgetTreeForRebuild(WidgetBlueprint);
+
+		UWidgetTree* WidgetTree = WidgetBlueprint->WidgetTree;
+		UCanvasPanel* RootCanvas = WidgetTree->ConstructWidget<UCanvasPanel>(UCanvasPanel::StaticClass(), TEXT("RootCanvas"));
+		UImage* VideoImage = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("VideoImage"));
+		UBorder* BlackFadePanel = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("BlackFadePanel"));
+
+		if (!RootCanvas || !VideoImage || !BlackFadePanel)
+		{
+			return false;
+		}
+
+		auto FillCanvas = [](UCanvasPanelSlot* Slot)
+		{
+			if (!Slot)
+			{
+				return;
+			}
+
+			Slot->SetAnchors(FAnchors(0.0f, 0.0f, 1.0f, 1.0f));
+			Slot->SetOffsets(FMargin(0.0f));
+			Slot->SetAlignment(FVector2D(0.0f, 0.0f));
+		};
+
+		FSlateBrush VideoBrush;
+		VideoBrush.DrawAs = ESlateBrushDrawType::Image;
+		VideoBrush.TintColor = FSlateColor(FLinearColor::White);
+		VideoBrush.SetImageSize(FVector2D(1920.0f, 1080.0f));
+
+		FSlateBrush BlackBrush;
+		BlackBrush.DrawAs = ESlateBrushDrawType::Box;
+		BlackBrush.TintColor = FSlateColor(FLinearColor::Black);
+		BlackBrush.SetImageSize(FVector2D(1920.0f, 1080.0f));
+
+		WidgetTree->RootWidget = RootCanvas;
+		VideoImage->SetBrush(VideoBrush);
+		VideoImage->SetVisibility(ESlateVisibility::Collapsed);
+		FillCanvas(RootCanvas->AddChildToCanvas(VideoImage));
+
+		BlackFadePanel->SetBrush(BlackBrush);
+		BlackFadePanel->SetRenderOpacity(0.0f);
+		BlackFadePanel->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+		FillCanvas(RootCanvas->AddChildToCanvas(BlackFadePanel));
 
 		RegisterAllWidgetsInTree(WidgetBlueprint);
 		WidgetBlueprint->MarkPackageDirty();
@@ -2596,6 +2660,18 @@ namespace TunaSweeperEditorSetup
 		return SaveAsset(WidgetBlueprint);
 	}
 
+	bool ConfigureLevelTransitionVideoWidgetBlueprint(UWidgetBlueprint* WidgetBlueprint)
+	{
+		if (!WidgetBlueprint || !BuildLevelTransitionVideoWidgetTree(WidgetBlueprint))
+		{
+			return false;
+		}
+
+		FKismetEditorUtilities::CompileBlueprint(WidgetBlueprint);
+		WidgetBlueprint->MarkPackageDirty();
+		return SaveAsset(WidgetBlueprint);
+	}
+
 	bool ConfigureLevelTravelBlueprint(UBlueprint* LevelTravelBlueprint)
 	{
 		if (!LevelTravelBlueprint)
@@ -2620,14 +2696,21 @@ namespace TunaSweeperEditorSetup
 			NAME_None,
 			FText::FromString(TEXT("Travel")),
 			TSoftClassPtr<UTunaSweeperInteractionMarkerWidget>(
-				FSoftObjectPath(GetAssetClassPath(UIAssetPath, InteractionMarkerAssetName))));
+				FSoftObjectPath(GetAssetClassPath(UIAssetPath, InteractionMarkerAssetName))),
+			TSoftObjectPtr<UMediaSource>(),
+			TSoftClassPtr<UTunaSweeperLevelTransitionWidget>(
+				FSoftObjectPath(GetAssetClassPath(UIAssetPath, LevelTransitionVideoWidgetAssetName))));
 		FBlueprintEditorUtils::MarkBlueprintAsModified(LevelTravelBlueprint);
 		FKismetEditorUtilities::CompileBlueprint(LevelTravelBlueprint);
 		LevelTravelBlueprint->MarkPackageDirty();
 		return SaveAsset(LevelTravelBlueprint);
 	}
 
-	bool ConfigureLevelTravelActorInstance(AActor* Actor, FName TargetLevelName, const FText& DisplayName)
+	bool ConfigureLevelTravelActorInstance(
+		AActor* Actor,
+		FName TargetLevelName,
+		const FText& DisplayName,
+		TSoftObjectPtr<UMediaSource> TransitionMediaSource = TSoftObjectPtr<UMediaSource>())
 	{
 		ATunaSweeperLevelTravelInteractableActor* LevelTravelActor = Cast<ATunaSweeperLevelTravelInteractableActor>(Actor);
 		if (!LevelTravelActor)
@@ -2641,7 +2724,10 @@ namespace TunaSweeperEditorSetup
 			TargetLevelName,
 			DisplayName,
 			TSoftClassPtr<UTunaSweeperInteractionMarkerWidget>(
-				FSoftObjectPath(GetAssetClassPath(UIAssetPath, InteractionMarkerAssetName))));
+				FSoftObjectPath(GetAssetClassPath(UIAssetPath, InteractionMarkerAssetName))),
+			TransitionMediaSource,
+			TSoftClassPtr<UTunaSweeperLevelTransitionWidget>(
+				FSoftObjectPath(GetAssetClassPath(UIAssetPath, LevelTransitionVideoWidgetAssetName))));
 		LevelTravelActor->MarkPackageDirty();
 		return true;
 	}
@@ -2962,7 +3048,8 @@ namespace TunaSweeperEditorSetup
 		const FString& ActorLabel,
 		const FVector& Location,
 		FName TargetLevelName,
-		const FText& DisplayName)
+		const FText& DisplayName,
+		TSoftObjectPtr<UMediaSource> TransitionMediaSource = TSoftObjectPtr<UMediaSource>())
 	{
 		if (!World || !ActorBlueprint || !ActorBlueprint->GeneratedClass)
 		{
@@ -2974,7 +3061,7 @@ namespace TunaSweeperEditorSetup
 			ExistingActor->Modify();
 			ExistingActor->SetActorLocation(Location);
 			ExistingActor->SetActorRotation(FRotator::ZeroRotator);
-			return ConfigureLevelTravelActorInstance(ExistingActor, TargetLevelName, DisplayName);
+			return ConfigureLevelTravelActorInstance(ExistingActor, TargetLevelName, DisplayName, TransitionMediaSource);
 		}
 
 		World->PersistentLevel->Modify();
@@ -2991,7 +3078,7 @@ namespace TunaSweeperEditorSetup
 		}
 
 		SpawnedActor->SetActorLabel(ActorLabel);
-		if (!ConfigureLevelTravelActorInstance(SpawnedActor, TargetLevelName, DisplayName))
+		if (!ConfigureLevelTravelActorInstance(SpawnedActor, TargetLevelName, DisplayName, TransitionMediaSource))
 		{
 			return false;
 		}
@@ -3329,6 +3416,9 @@ namespace TunaSweeperEditorSetup
 			return false;
 		}
 
+		const TSoftObjectPtr<UMediaSource> BunkerToRaidMediaSource(
+			FSoftObjectPath(GetAssetObjectPath(VideoAssetPath, BunkerToRaidMediaSourceAssetName)));
+
 		UWorld* BunkerWorld = LoadEditorMapForSetup(BunkerMapPackagePath);
 		const bool bBunkerPlaced =
 			BunkerWorld &&
@@ -3338,7 +3428,8 @@ namespace TunaSweeperEditorSetup
 				TEXT("TS_Travel_DeployToRaid"),
 				FVector(220.0f, -220.0f, 80.0f),
 				FName(TEXT("RaidMap")),
-				FText::FromString(TEXT("Deploy"))) &&
+				FText::FromString(TEXT("Deploy")),
+				BunkerToRaidMediaSource) &&
 			UEditorLoadingAndSavingUtils::SaveMap(BunkerWorld, BunkerMapPackagePath);
 
 		UWorld* RaidWorld = LoadEditorMapForSetup(RaidMapPackagePath);
@@ -3376,6 +3467,33 @@ namespace TunaSweeperEditorSetup
 		const bool bConfigured =
 			SetProjectStartupMapsToIntro() &&
 			ConfigureIntroMenuWidgetBlueprint(IntroMenuWidgetBlueprint) &&
+			ConfigureLevelTravelBlueprint(LevelTravelBlueprint);
+
+		return bConfigured && PlaceLevelTravelActorsInBunkerAndRaidMaps(LevelTravelBlueprint);
+	}
+
+	bool EnsureBunkerToRaidTransitionVideoSetup()
+	{
+		UWidgetBlueprint* LevelTransitionWidgetBlueprint = EnsureWidgetBlueprint(
+			UIAssetPath,
+			LevelTransitionVideoWidgetAssetName,
+			UTunaSweeperLevelTransitionWidget::StaticClass());
+		UBlueprint* LevelTravelBlueprint = EnsureBlueprint(
+			InteractionAssetPath,
+			LevelTravelInteractionAssetName,
+			ATunaSweeperLevelTravelInteractableActor::StaticClass());
+		UMediaSource* BunkerToRaidMediaSource = LoadObject<UMediaSource>(
+			nullptr,
+			*GetAssetObjectPath(VideoAssetPath, BunkerToRaidMediaSourceAssetName));
+
+		if (!LevelTransitionWidgetBlueprint || !LevelTravelBlueprint || !BunkerToRaidMediaSource)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Missing level transition video setup asset."));
+			return false;
+		}
+
+		const bool bConfigured =
+			ConfigureLevelTransitionVideoWidgetBlueprint(LevelTransitionWidgetBlueprint) &&
 			ConfigureLevelTravelBlueprint(LevelTravelBlueprint);
 
 		return bConfigured && PlaceLevelTravelActorsInBunkerAndRaidMaps(LevelTravelBlueprint);
@@ -3502,6 +3620,41 @@ namespace TunaSweeperEditorSetup
 				}),
 			1.0f);
 	}
+
+	void ScheduleBunkerToRaidTransitionVideoSetup()
+	{
+		if (FTunaSweeperEditorRunOnce::HasCompleted(LevelTransitionVideoTaskId))
+		{
+			return;
+		}
+
+		FTSTicker::GetCoreTicker().AddTicker(
+			FTickerDelegate::CreateLambda(
+				[](float)
+				{
+					UWorld* EditorWorld = GEditor ? GEditor->GetEditorWorldContext().World() : nullptr;
+					if (!EditorWorld)
+					{
+						return true;
+					}
+
+					FTunaSweeperEditorRunOnce::Run(
+						LevelTransitionVideoTaskId,
+						[]()
+						{
+							return EnsureBunkerToRaidTransitionVideoSetup();
+						});
+
+					const bool bCompleted = FTunaSweeperEditorRunOnce::HasCompleted(LevelTransitionVideoTaskId);
+					if (bCompleted && FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperSetupQuit")))
+					{
+						FPlatformMisc::RequestExit(false);
+					}
+
+					return !bCompleted;
+				}),
+			1.0f);
+	}
 }
 
 class FTunaSweeperEditorModule final : public IModuleInterface
@@ -3581,6 +3734,7 @@ public:
 		TunaSweeperEditorSetup::SchedulePickupItemAndSpawnerAssetsAndMapPlacement();
 		TunaSweeperEditorSetup::ScheduleLootContainerAndSpawnerAssetsAndMapPlacement();
 		TunaSweeperEditorSetup::ScheduleIntroMenuAndLevelTravelSetup();
+		TunaSweeperEditorSetup::ScheduleBunkerToRaidTransitionVideoSetup();
 	}
 };
 

@@ -21,6 +21,7 @@ public class TunaSweeperEditor : ModuleRules
 			"BlueprintGraph",
 			"UMG",
 			"UMGEditor",
+			"MediaAssets",
 			"Slate",
 			"SlateCore",
 			"TunaSweeper"
