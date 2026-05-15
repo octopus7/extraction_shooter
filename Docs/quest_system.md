@@ -200,7 +200,7 @@ UTunaSweeperInteractionSubsystem
 5. `UTunaSweeperQuestWidget`과 `WBP_Quest`를 추가한다.
 6. 플레이어 컨트롤러에 `OpenQuestPanel(QuestId)`를 추가한다.
 7. `ATunaSweeperLevelTravelInteractableActor::TravelToTargetLevel`에서 퀘스트 서브시스템에 레벨 이동 요청을 알린다.
-8. 벙커맵 중심에서 북쪽으로 20m 지점에 `교관` NPC를 배치하고 퀘스트 상호작용만 제공하게 한다.
+8. 벙커맵 중심에서 +X 방향 북쪽으로 7m 지점에 `교관` NPC를 배치하고 퀘스트 상호작용만 제공하게 한다.
 9. 전체 상태 흐름을 테스트한다.
 
 ## 완료 확인 기준

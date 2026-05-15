@@ -98,7 +98,7 @@ namespace TunaSweeperEditorSetup
 	const FString CannedTunaIconImportTaskId = TEXT("2026-05-11_ImportCannedTunaIconV1");
 	const FString IntroMenuAndLevelTravelTaskId = TEXT("2026-05-15_CreateIntroMenuAndLevelTravelActorsV1");
 	const FString LevelTransitionVideoTaskId = TEXT("2026-05-15_AddBunkerToRaidTransitionVideoV1");
-	const FString FirstOutingQuestTaskId = TEXT("2026-05-15_CreateFirstOutingQuestNpcV1");
+	const FString FirstOutingQuestTaskId = TEXT("2026-05-15_CreateFirstOutingQuestNpcV2");
 	const FString GameInstanceAssetPath = TEXT("/Game/Core");
 	const FString GameInstanceAssetName = TEXT("BP_TunaSweeperGameInstance");
 	const FString GameModeAssetName = TEXT("BP_TunaSweeperGameMode");
@@ -3769,7 +3769,7 @@ namespace TunaSweeperEditorSetup
 				BunkerWorld,
 				QuestNpcBlueprint,
 				TEXT("TS_NPC_Instructor"),
-				FVector(0.0f, 2000.0f, 100.0f)) &&
+				FVector(700.0f, 0.0f, 100.0f)) &&
 			UEditorLoadingAndSavingUtils::SaveMap(BunkerWorld, BunkerMapPackagePath);
 
 		LoadEditorMapForSetup(IntroMapPackagePath);
