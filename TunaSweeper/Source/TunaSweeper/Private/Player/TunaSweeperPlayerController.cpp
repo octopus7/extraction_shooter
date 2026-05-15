@@ -37,10 +37,7 @@ void ATunaSweeperPlayerController::BeginPlay()
 
 	bShowMouseCursor = true;
 
-	FInputModeGameAndUI InputMode;
-	InputMode.SetHideCursorDuringCapture(false);
-	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-	SetInputMode(InputMode);
+	ApplyDefaultGameInputMode();
 
 	if (IsIntroMap())
 	{
@@ -263,6 +260,17 @@ void ATunaSweeperPlayerController::OpenQuestPanel(FName QuestId)
 	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
 	SetInputMode(InputMode);
 	bShowMouseCursor = true;
+}
+
+void ATunaSweeperPlayerController::ApplyDefaultGameInputMode()
+{
+	FInputModeGameAndUI InputMode;
+	InputMode.SetHideCursorDuringCapture(false);
+	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+	SetInputMode(InputMode);
+	bShowMouseCursor = true;
+	SetIgnoreMoveInput(false);
+	SetIgnoreLookInput(false);
 }
 
 bool ATunaSweeperPlayerController::GetMouseAimPointOnPlane(float PlaneZ, FVector& OutAimPoint) const

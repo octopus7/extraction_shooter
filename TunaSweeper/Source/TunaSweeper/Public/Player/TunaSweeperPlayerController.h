@@ -35,6 +35,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Quest")
 	void OpenQuestPanel(FName QuestId);
 
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Input")
+	void ApplyDefaultGameInputMode();
+
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "HUD")
 	TSoftClassPtr<UTunaSweeperGameHudWidget> GameHudWidgetClass;

@@ -2,6 +2,7 @@
 
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
+#include "Player/TunaSweeperPlayerController.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
 
 void UTunaSweeperQuestWidget::InitializeQuest(FName InQuestId)
@@ -62,6 +63,11 @@ void UTunaSweeperQuestWidget::HandlePrimaryButtonClicked()
 void UTunaSweeperQuestWidget::HandleCloseButtonClicked()
 {
 	RemoveFromParent();
+
+	if (ATunaSweeperPlayerController* TunaPlayerController = GetOwningPlayer<ATunaSweeperPlayerController>())
+	{
+		TunaPlayerController->ApplyDefaultGameInputMode();
+	}
 }
 
 void UTunaSweeperQuestWidget::RefreshQuestView()

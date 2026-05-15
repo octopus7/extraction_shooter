@@ -8,6 +8,7 @@
 #include "MediaPlayer.h"
 #include "MediaSource.h"
 #include "MediaTexture.h"
+#include "Player/TunaSweeperPlayerController.h"
 #include "Stats/Stats.h"
 #include "UI/TunaSweeperLevelTransitionWidget.h"
 #include "UObject/UObjectGlobals.h"
@@ -241,6 +242,24 @@ void UTunaSweeperLevelTransitionSubsystem::FinishTransition()
 	if (ActiveWidget)
 	{
 		ActiveWidget->RemoveFromParent();
+	}
+
+	if (APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetGameInstance(), 0))
+	{
+		if (ATunaSweeperPlayerController* TunaPlayerController = Cast<ATunaSweeperPlayerController>(PlayerController))
+		{
+			TunaPlayerController->ApplyDefaultGameInputMode();
+		}
+		else
+		{
+			FInputModeGameAndUI InputMode;
+			InputMode.SetHideCursorDuringCapture(false);
+			InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+			PlayerController->SetInputMode(InputMode);
+			PlayerController->bShowMouseCursor = true;
+			PlayerController->SetIgnoreMoveInput(false);
+			PlayerController->SetIgnoreLookInput(false);
+		}
 	}
 
 	ActiveWidget = nullptr;
