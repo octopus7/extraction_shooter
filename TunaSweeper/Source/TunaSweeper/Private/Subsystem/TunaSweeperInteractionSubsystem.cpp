@@ -5,6 +5,7 @@
 #include "GameFramework/PlayerController.h"
 #include "Interaction/TunaSweeperItemSpawnInteractableActor.h"
 #include "Interaction/TunaSweeperInteractableComponent.h"
+#include "Interaction/TunaSweeperLevelTravelInteractableActor.h"
 #include "Interaction/TunaSweeperLootContainerActor.h"
 #include "Interaction/TunaSweeperLootContainerSpawnInteractableActor.h"
 #include "Interaction/TunaSweeperPickupItemActor.h"
@@ -80,6 +81,8 @@ bool UTunaSweeperInteractionSubsystem::RequestInteraction(UTunaSweeperInteractab
 		return HandleLootContainerOpenInteraction(Interactable, InstigatorPawn);
 	case ETunaSweeperInteractionType::LootContainerSpawn:
 		return HandleLootContainerSpawnInteraction(Interactable, InstigatorPawn);
+	case ETunaSweeperInteractionType::LevelTravel:
+		return HandleLevelTravelInteraction(Interactable, InstigatorPawn);
 	default:
 		break;
 	}
@@ -166,6 +169,16 @@ bool UTunaSweeperInteractionSubsystem::HandleLootContainerSpawnInteraction(
 		? Cast<ATunaSweeperLootContainerSpawnInteractableActor>(Interactable->GetOwner())
 		: nullptr;
 	return SpawnActor && SpawnActor->SpawnRandomLootContainer(InstigatorPawn);
+}
+
+bool UTunaSweeperInteractionSubsystem::HandleLevelTravelInteraction(
+	UTunaSweeperInteractableComponent* Interactable,
+	APawn* InstigatorPawn)
+{
+	ATunaSweeperLevelTravelInteractableActor* LevelTravelActor = Interactable
+		? Cast<ATunaSweeperLevelTravelInteractableActor>(Interactable->GetOwner())
+		: nullptr;
+	return LevelTravelActor && LevelTravelActor->TravelToTargetLevel(InstigatorPawn);
 }
 
 bool UTunaSweeperInteractionSubsystem::OpenTempOpenLootWidget(APawn* InstigatorPawn)
@@ -277,6 +290,8 @@ FString UTunaSweeperInteractionSubsystem::GetInteractionDebugTypeName(const UTun
 		return TEXT("LootContainerOpen");
 	case ETunaSweeperInteractionType::LootContainerSpawn:
 		return TEXT("LootContainerSpawn");
+	case ETunaSweeperInteractionType::LevelTravel:
+		return TEXT("LevelTravel");
 	default:
 		return TEXT("Unknown");
 	}

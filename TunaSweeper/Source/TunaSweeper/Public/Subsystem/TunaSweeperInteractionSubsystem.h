@@ -38,6 +38,7 @@ private:
 	bool HandleItemSpawnInteraction(UTunaSweeperInteractableComponent* Interactable, APawn* InstigatorPawn);
 	bool HandleLootContainerOpenInteraction(UTunaSweeperInteractableComponent* Interactable, APawn* InstigatorPawn);
 	bool HandleLootContainerSpawnInteraction(UTunaSweeperInteractableComponent* Interactable, APawn* InstigatorPawn);
+	bool HandleLevelTravelInteraction(UTunaSweeperInteractableComponent* Interactable, APawn* InstigatorPawn);
 
 	TSet<TWeakObjectPtr<UTunaSweeperInteractableComponent>> RegisteredInteractables;
 	TWeakObjectPtr<UTunaSweeperInteractableComponent> FocusedInteractable;

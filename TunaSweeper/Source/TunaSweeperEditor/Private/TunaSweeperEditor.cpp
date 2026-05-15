@@ -41,13 +41,16 @@
 #include "Interaction/TunaSweeperInteractableActor.h"
 #include "Interaction/TunaSweeperInteractableComponent.h"
 #include "Interaction/TunaSweeperItemSpawnInteractableActor.h"
+#include "Interaction/TunaSweeperLevelTravelInteractableActor.h"
 #include "Interaction/TunaSweeperLootContainerActor.h"
 #include "Interaction/TunaSweeperLootContainerSpawnInteractableActor.h"
 #include "Interaction/TunaSweeperPickupItemActor.h"
 #include "Kismet2/BlueprintEditorUtils.h"
 #include "Kismet2/KismetEditorUtilities.h"
+#include "Misc/CommandLine.h"
 #include "Misc/ConfigCacheIni.h"
 #include "Misc/PackageName.h"
+#include "Misc/Parse.h"
 #include "Misc/Paths.h"
 #include "Player/TunaSweeperPlayerController.h"
 #include "TunaSweeperEditorRunOnce.h"
@@ -60,6 +63,7 @@
 #include "UI/TunaSweeperHudQuickSlotBarWidget.h"
 #include "UI/TunaSweeperHudTopReserveWidget.h"
 #include "UI/TunaSweeperItemThumbnailSlotWidget.h"
+#include "UI/TunaSweeperIntroMenuWidget.h"
 #include "UI/TunaSweeperLootContainerWidget.h"
 #include "UI/TunaSweeperPickupItemIconWidget.h"
 #include "UI/TunaSweeperTempOpenLootTileEntryWidget.h"
@@ -87,6 +91,7 @@ namespace TunaSweeperEditorSetup
 	const FString QuickSlotInputTaskId = TEXT("2026-05-12_AddQuickSlotInputActions");
 	const FString LootContainerAndSpawnerTaskId = TEXT("2026-05-11_CreateLootContainerAndSpawnerAssetsV1");
 	const FString CannedTunaIconImportTaskId = TEXT("2026-05-11_ImportCannedTunaIconV1");
+	const FString IntroMenuAndLevelTravelTaskId = TEXT("2026-05-15_CreateIntroMenuAndLevelTravelActorsV1");
 	const FString GameInstanceAssetPath = TEXT("/Game/Core");
 	const FString GameInstanceAssetName = TEXT("BP_TunaSweeperGameInstance");
 	const FString GameModeAssetName = TEXT("BP_TunaSweeperGameMode");
@@ -120,6 +125,7 @@ namespace TunaSweeperEditorSetup
 	const FString HudExternalPanelWidgetAssetName = TEXT("WBP_HudExternalPanel");
 	const FString ItemThumbnailSlotWidgetAssetName = TEXT("WBP_ItemThumbnailSlot");
 	const FString LootContainerWidgetAssetName = TEXT("WBP_LootContainerPanel");
+	const FString IntroMenuWidgetAssetName = TEXT("WBP_IntroMenu");
 	constexpr int32 InventoryTileColumnCount = 5;
 	constexpr int32 EquipmentReserveColumnCount = 4;
 	constexpr float InventoryTileWidth = 96.0f;
@@ -151,6 +157,9 @@ namespace TunaSweeperEditorSetup
 	const FString ItemSpawnInteractionAssetName = TEXT("BP_Interact_ItemSpawn");
 	const FString LootContainerAssetName = TEXT("BP_LootContainer");
 	const FString LootContainerSpawnInteractionAssetName = TEXT("BP_Interact_LootContainerSpawn");
+	const FString LevelTravelInteractionAssetName = TEXT("BP_Interact_LevelTravel");
+	const FString IntroMapPackagePath = TEXT("/Game/IntroMap");
+	const FString BunkerMapPackagePath = TEXT("/Game/BunkerMap");
 	const FString RaidMapPackagePath = TEXT("/Game/RaidMap");
 
 	FString GetGameInstanceObjectPath()
@@ -547,6 +556,46 @@ namespace TunaSweeperEditorSetup
 		return SavedGameModeClass == GameModeClassPath;
 	}
 
+	bool SetProjectStartupMapsToIntro()
+	{
+		const FString IntroMapObjectPath = FString::Printf(TEXT("%s.IntroMap"), *IntroMapPackagePath);
+
+		if (UGameMapsSettings* GameMapsSettings = GetMutableDefault<UGameMapsSettings>())
+		{
+			UGameMapsSettings::SetGameDefaultMap(IntroMapObjectPath);
+			GameMapsSettings->EditorStartupMap = FSoftObjectPath(IntroMapObjectPath);
+			GameMapsSettings->SaveConfig();
+		}
+
+		const FString DefaultEngineIni = FPaths::Combine(FPaths::ProjectConfigDir(), TEXT("DefaultEngine.ini"));
+		GConfig->SetString(
+			TEXT("/Script/EngineSettings.GameMapsSettings"),
+			TEXT("GameDefaultMap"),
+			*IntroMapObjectPath,
+			DefaultEngineIni);
+		GConfig->SetString(
+			TEXT("/Script/EngineSettings.GameMapsSettings"),
+			TEXT("EditorStartupMap"),
+			*IntroMapObjectPath,
+			DefaultEngineIni);
+		GConfig->Flush(false, DefaultEngineIni);
+
+		FString SavedGameDefaultMap;
+		FString SavedEditorStartupMap;
+		GConfig->GetString(
+			TEXT("/Script/EngineSettings.GameMapsSettings"),
+			TEXT("GameDefaultMap"),
+			SavedGameDefaultMap,
+			DefaultEngineIni);
+		GConfig->GetString(
+			TEXT("/Script/EngineSettings.GameMapsSettings"),
+			TEXT("EditorStartupMap"),
+			SavedEditorStartupMap,
+			DefaultEngineIni);
+
+		return SavedGameDefaultMap == IntroMapObjectPath && SavedEditorStartupMap == IntroMapObjectPath;
+	}
+
 	bool EnsureGameInstanceBlueprint()
 	{
 		const FString ObjectPath = GetGameInstanceObjectPath();
@@ -740,6 +789,102 @@ namespace TunaSweeperEditorSetup
 		Brush.OutlineSettings.Width = OutlineWidth;
 		Brush.OutlineSettings.bUseBrushTransparency = false;
 		return Brush;
+	}
+
+	bool BuildIntroMenuWidgetTree(UWidgetBlueprint* WidgetBlueprint)
+	{
+		if (!WidgetBlueprint || !WidgetBlueprint->WidgetTree)
+		{
+			return false;
+		}
+
+		WidgetBlueprint->Modify();
+		WidgetBlueprint->WidgetTree->Modify();
+		ClearWidgetTreeForRebuild(WidgetBlueprint);
+
+		UWidgetTree* WidgetTree = WidgetBlueprint->WidgetTree;
+		UCanvasPanel* RootCanvas = WidgetTree->ConstructWidget<UCanvasPanel>(UCanvasPanel::StaticClass(), TEXT("RootCanvas"));
+		UVerticalBox* ButtonStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("ButtonStack"));
+		USizeBox* StartButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("StartButtonBox"));
+		UButton* StartButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("StartButton"));
+		UTextBlock* StartButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("StartButtonText"));
+		USizeBox* QuitButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("QuitButtonBox"));
+		UButton* QuitButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("QuitButton"));
+		UTextBlock* QuitButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("QuitButtonText"));
+
+		if (!RootCanvas || !ButtonStack || !StartButtonBox || !StartButton || !StartButtonText || !QuitButtonBox || !QuitButton || !QuitButtonText)
+		{
+			return false;
+		}
+
+		auto ConfigureMenuButton = [](UButton* Button, const FVector2D& ButtonSize, const FLinearColor& FillColor, const FLinearColor& HoveredColor)
+		{
+			if (!Button)
+			{
+				return;
+			}
+
+			FButtonStyle ButtonStyle;
+			ButtonStyle.SetNormal(MakeRoundedBoxBrush(ButtonSize, FillColor, FLinearColor(0.78f, 0.84f, 0.90f, 0.95f), 1.5f));
+			ButtonStyle.SetHovered(MakeRoundedBoxBrush(ButtonSize, HoveredColor, FLinearColor(1.0f, 1.0f, 1.0f, 1.0f), 2.0f));
+			ButtonStyle.SetPressed(MakeRoundedBoxBrush(ButtonSize, FillColor * 0.78f, FLinearColor(0.68f, 0.75f, 0.84f, 1.0f), 1.0f));
+			ButtonStyle.SetNormalPadding(FMargin(10.0f, 4.0f));
+			ButtonStyle.SetPressedPadding(FMargin(10.0f, 5.0f, 10.0f, 3.0f));
+			Button->SetStyle(ButtonStyle);
+			Button->SetClickMethod(EButtonClickMethod::DownAndUp);
+		};
+
+		WidgetTree->RootWidget = RootCanvas;
+
+		UCanvasPanelSlot* ButtonStackSlot = RootCanvas->AddChildToCanvas(ButtonStack);
+		if (ButtonStackSlot)
+		{
+			ButtonStackSlot->SetAnchors(FAnchors(0.5f, 0.5f));
+			ButtonStackSlot->SetAlignment(FVector2D(0.5f, 0.5f));
+			ButtonStackSlot->SetPosition(FVector2D(0.0f, 80.0f));
+			ButtonStackSlot->SetSize(FVector2D(380.0f, 170.0f));
+		}
+
+		StartButtonBox->SetWidthOverride(360.0f);
+		StartButtonBox->SetHeightOverride(84.0f);
+		StartButtonBox->SetContent(StartButton);
+		ConfigureMenuButton(
+			StartButton,
+			FVector2D(360.0f, 84.0f),
+			FLinearColor(0.10f, 0.18f, 0.22f, 0.96f),
+			FLinearColor(0.14f, 0.27f, 0.33f, 0.98f));
+		ConfigureTextBlock(StartButtonText, FText::FromString(TEXT("\uC2DC\uC791\uD558\uAE30")), FLinearColor::White, 34);
+		StartButton->SetContent(StartButtonText);
+
+		UVerticalBoxSlot* StartSlot = ButtonStack->AddChildToVerticalBox(StartButtonBox);
+		if (StartSlot)
+		{
+			StartSlot->SetHorizontalAlignment(HAlign_Center);
+			StartSlot->SetVerticalAlignment(VAlign_Center);
+			StartSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 18.0f));
+		}
+
+		QuitButtonBox->SetWidthOverride(220.0f);
+		QuitButtonBox->SetHeightOverride(54.0f);
+		QuitButtonBox->SetContent(QuitButton);
+		ConfigureMenuButton(
+			QuitButton,
+			FVector2D(220.0f, 54.0f),
+			FLinearColor(0.055f, 0.065f, 0.075f, 0.92f),
+			FLinearColor(0.12f, 0.14f, 0.16f, 0.96f));
+		ConfigureTextBlock(QuitButtonText, FText::FromString(TEXT("\uC885\uB8CC")), FLinearColor(0.90f, 0.94f, 0.96f, 1.0f), 20);
+		QuitButton->SetContent(QuitButtonText);
+
+		UVerticalBoxSlot* QuitSlot = ButtonStack->AddChildToVerticalBox(QuitButtonBox);
+		if (QuitSlot)
+		{
+			QuitSlot->SetHorizontalAlignment(HAlign_Center);
+			QuitSlot->SetVerticalAlignment(VAlign_Center);
+		}
+
+		RegisterAllWidgetsInTree(WidgetBlueprint);
+		WidgetBlueprint->MarkPackageDirty();
+		return true;
 	}
 
 	const TArray<FString>& GetTempOpenLootIconAssetNames()
@@ -2439,6 +2584,68 @@ namespace TunaSweeperEditorSetup
 		return true;
 	}
 
+	bool ConfigureIntroMenuWidgetBlueprint(UWidgetBlueprint* WidgetBlueprint)
+	{
+		if (!WidgetBlueprint || !BuildIntroMenuWidgetTree(WidgetBlueprint))
+		{
+			return false;
+		}
+
+		FKismetEditorUtilities::CompileBlueprint(WidgetBlueprint);
+		WidgetBlueprint->MarkPackageDirty();
+		return SaveAsset(WidgetBlueprint);
+	}
+
+	bool ConfigureLevelTravelBlueprint(UBlueprint* LevelTravelBlueprint)
+	{
+		if (!LevelTravelBlueprint)
+		{
+			return false;
+		}
+
+		FKismetEditorUtilities::CompileBlueprint(LevelTravelBlueprint);
+
+		ATunaSweeperLevelTravelInteractableActor* Defaults = LevelTravelBlueprint->GeneratedClass
+			? Cast<ATunaSweeperLevelTravelInteractableActor>(LevelTravelBlueprint->GeneratedClass->GetDefaultObject())
+			: nullptr;
+		if (!Defaults)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to configure %s defaults."), *GetNameSafe(LevelTravelBlueprint));
+			return false;
+		}
+
+		LevelTravelBlueprint->Modify();
+		Defaults->Modify();
+		Defaults->ConfigureLevelTravelDefaults(
+			NAME_None,
+			FText::FromString(TEXT("Travel")),
+			TSoftClassPtr<UTunaSweeperInteractionMarkerWidget>(
+				FSoftObjectPath(GetAssetClassPath(UIAssetPath, InteractionMarkerAssetName))));
+		FBlueprintEditorUtils::MarkBlueprintAsModified(LevelTravelBlueprint);
+		FKismetEditorUtilities::CompileBlueprint(LevelTravelBlueprint);
+		LevelTravelBlueprint->MarkPackageDirty();
+		return SaveAsset(LevelTravelBlueprint);
+	}
+
+	bool ConfigureLevelTravelActorInstance(AActor* Actor, FName TargetLevelName, const FText& DisplayName)
+	{
+		ATunaSweeperLevelTravelInteractableActor* LevelTravelActor = Cast<ATunaSweeperLevelTravelInteractableActor>(Actor);
+		if (!LevelTravelActor)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("%s is not an ATunaSweeperLevelTravelInteractableActor."), *GetNameSafe(Actor));
+			return false;
+		}
+
+		LevelTravelActor->Modify();
+		LevelTravelActor->ConfigureLevelTravelDefaults(
+			TargetLevelName,
+			DisplayName,
+			TSoftClassPtr<UTunaSweeperInteractionMarkerWidget>(
+				FSoftObjectPath(GetAssetClassPath(UIAssetPath, InteractionMarkerAssetName))));
+		LevelTravelActor->MarkPackageDirty();
+		return true;
+	}
+
 	bool ConfigurePickupItemIconWidgetBlueprint(UWidgetBlueprint* WidgetBlueprint)
 	{
 		if (!WidgetBlueprint || !BuildPickupItemIconWidgetTree(WidgetBlueprint))
@@ -2683,6 +2890,29 @@ namespace TunaSweeperEditorSetup
 		return nullptr;
 	}
 
+	UWorld* LoadEditorMapForSetup(const FString& MapPackagePath)
+	{
+		if (UWorld* CurrentWorld = GEditor ? GEditor->GetEditorWorldContext().World() : nullptr)
+		{
+			if (CurrentWorld->GetPackage()->GetName() == MapPackagePath)
+			{
+				return CurrentWorld;
+			}
+		}
+
+		const FString MapFilename = FPackageName::LongPackageNameToFilename(
+			MapPackagePath,
+			FPackageName::GetMapPackageExtension());
+		UWorld* LoadedWorld = UEditorLoadingAndSavingUtils::LoadMap(MapFilename);
+		if (!LoadedWorld || LoadedWorld->GetPackage()->GetName() != MapPackagePath)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to load map %s."), *MapPackagePath);
+			return nullptr;
+		}
+
+		return LoadedWorld;
+	}
+
 	bool PlaceInteractionActor(
 		UWorld* World,
 		UBlueprint* ActorBlueprint,
@@ -2719,6 +2949,49 @@ namespace TunaSweeperEditorSetup
 
 		SpawnedActor->SetActorLabel(ActorLabel);
 		if (!ConfigureInteractableActorInstance(SpawnedActor, InteractionType, DisplayName))
+		{
+			return false;
+		}
+		SpawnedActor->MarkPackageDirty();
+		return true;
+	}
+
+	bool PlaceLevelTravelActor(
+		UWorld* World,
+		UBlueprint* ActorBlueprint,
+		const FString& ActorLabel,
+		const FVector& Location,
+		FName TargetLevelName,
+		const FText& DisplayName)
+	{
+		if (!World || !ActorBlueprint || !ActorBlueprint->GeneratedClass)
+		{
+			return false;
+		}
+
+		if (AActor* ExistingActor = FindActorByLabel(World, ActorLabel))
+		{
+			ExistingActor->Modify();
+			ExistingActor->SetActorLocation(Location);
+			ExistingActor->SetActorRotation(FRotator::ZeroRotator);
+			return ConfigureLevelTravelActorInstance(ExistingActor, TargetLevelName, DisplayName);
+		}
+
+		World->PersistentLevel->Modify();
+
+		FActorSpawnParameters SpawnParameters;
+		SpawnParameters.OverrideLevel = World->PersistentLevel;
+		SpawnParameters.Name = MakeUniqueObjectName(World->PersistentLevel, ActorBlueprint->GeneratedClass, FName(*ActorLabel));
+		SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+		AActor* SpawnedActor = World->SpawnActor<AActor>(ActorBlueprint->GeneratedClass, Location, FRotator::ZeroRotator, SpawnParameters);
+		if (!SpawnedActor)
+		{
+			return false;
+		}
+
+		SpawnedActor->SetActorLabel(ActorLabel);
+		if (!ConfigureLevelTravelActorInstance(SpawnedActor, TargetLevelName, DisplayName))
 		{
 			return false;
 		}
@@ -3049,6 +3322,65 @@ namespace TunaSweeperEditorSetup
 		return bConfigured && PlaceLootContainerAndSpawnerActorsInRaidMap(LootContainerBlueprint, LootContainerSpawnBlueprint);
 	}
 
+	bool PlaceLevelTravelActorsInBunkerAndRaidMaps(UBlueprint* LevelTravelBlueprint)
+	{
+		if (!LevelTravelBlueprint)
+		{
+			return false;
+		}
+
+		UWorld* BunkerWorld = LoadEditorMapForSetup(BunkerMapPackagePath);
+		const bool bBunkerPlaced =
+			BunkerWorld &&
+			PlaceLevelTravelActor(
+				BunkerWorld,
+				LevelTravelBlueprint,
+				TEXT("TS_Travel_DeployToRaid"),
+				FVector(220.0f, -220.0f, 80.0f),
+				FName(TEXT("RaidMap")),
+				FText::FromString(TEXT("Deploy"))) &&
+			UEditorLoadingAndSavingUtils::SaveMap(BunkerWorld, BunkerMapPackagePath);
+
+		UWorld* RaidWorld = LoadEditorMapForSetup(RaidMapPackagePath);
+		const bool bRaidPlaced =
+			RaidWorld &&
+			PlaceLevelTravelActor(
+				RaidWorld,
+				LevelTravelBlueprint,
+				TEXT("TS_Travel_ToBunker"),
+				FVector(220.0f, 220.0f, 80.0f),
+				FName(TEXT("BunkerMap")),
+				FText::FromString(TEXT("To Bunker"))) &&
+			UEditorLoadingAndSavingUtils::SaveMap(RaidWorld, RaidMapPackagePath);
+
+		LoadEditorMapForSetup(IntroMapPackagePath);
+		return bBunkerPlaced && bRaidPlaced;
+	}
+
+	bool EnsureIntroMenuAndLevelTravelSetup()
+	{
+		UWidgetBlueprint* IntroMenuWidgetBlueprint = EnsureWidgetBlueprint(
+			UIAssetPath,
+			IntroMenuWidgetAssetName,
+			UTunaSweeperIntroMenuWidget::StaticClass());
+		UBlueprint* LevelTravelBlueprint = EnsureBlueprint(
+			InteractionAssetPath,
+			LevelTravelInteractionAssetName,
+			ATunaSweeperLevelTravelInteractableActor::StaticClass());
+
+		if (!IntroMenuWidgetBlueprint || !LevelTravelBlueprint)
+		{
+			return false;
+		}
+
+		const bool bConfigured =
+			SetProjectStartupMapsToIntro() &&
+			ConfigureIntroMenuWidgetBlueprint(IntroMenuWidgetBlueprint) &&
+			ConfigureLevelTravelBlueprint(LevelTravelBlueprint);
+
+		return bConfigured && PlaceLevelTravelActorsInBunkerAndRaidMaps(LevelTravelBlueprint);
+	}
+
 	void ScheduleInteractionAssetsAndMapPlacement()
 	{
 		if (FTunaSweeperEditorRunOnce::HasCompleted(InteractionTaskId))
@@ -3135,6 +3467,41 @@ namespace TunaSweeperEditorSetup
 				}),
 			1.0f);
 	}
+
+	void ScheduleIntroMenuAndLevelTravelSetup()
+	{
+		if (FTunaSweeperEditorRunOnce::HasCompleted(IntroMenuAndLevelTravelTaskId))
+		{
+			return;
+		}
+
+		FTSTicker::GetCoreTicker().AddTicker(
+			FTickerDelegate::CreateLambda(
+				[](float)
+				{
+					UWorld* EditorWorld = GEditor ? GEditor->GetEditorWorldContext().World() : nullptr;
+					if (!EditorWorld)
+					{
+						return true;
+					}
+
+					FTunaSweeperEditorRunOnce::Run(
+						IntroMenuAndLevelTravelTaskId,
+						[]()
+						{
+							return EnsureIntroMenuAndLevelTravelSetup();
+						});
+
+					const bool bCompleted = FTunaSweeperEditorRunOnce::HasCompleted(IntroMenuAndLevelTravelTaskId);
+					if (bCompleted && FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperSetupQuit")))
+					{
+						FPlatformMisc::RequestExit(false);
+					}
+
+					return !bCompleted;
+				}),
+			1.0f);
+	}
 }
 
 class FTunaSweeperEditorModule final : public IModuleInterface
@@ -3213,6 +3580,7 @@ public:
 		TunaSweeperEditorSetup::ScheduleInteractionAssetsAndMapPlacement();
 		TunaSweeperEditorSetup::SchedulePickupItemAndSpawnerAssetsAndMapPlacement();
 		TunaSweeperEditorSetup::ScheduleLootContainerAndSpawnerAssetsAndMapPlacement();
+		TunaSweeperEditorSetup::ScheduleIntroMenuAndLevelTravelSetup();
 	}
 };
 

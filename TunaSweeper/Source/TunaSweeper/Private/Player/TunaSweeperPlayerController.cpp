@@ -9,6 +9,7 @@
 #include "InputActionValue.h"
 #include "Subsystem/TunaSweeperKeyboardInputSubsystem.h"
 #include "UI/TunaSweeperGameHudWidget.h"
+#include "UI/TunaSweeperIntroMenuWidget.h"
 
 ATunaSweeperPlayerController::ATunaSweeperPlayerController()
 {
@@ -16,6 +17,7 @@ ATunaSweeperPlayerController::ATunaSweeperPlayerController()
 	bShowMouseCursor = true;
 	DefaultMouseCursor = EMouseCursor::Crosshairs;
 	GameHudWidgetClass = TSoftClassPtr<UTunaSweeperGameHudWidget>(FSoftObjectPath(TEXT("/Game/UI/WBP_GameHud.WBP_GameHud_C")));
+	IntroMenuWidgetClass = TSoftClassPtr<UTunaSweeperIntroMenuWidget>(FSoftObjectPath(TEXT("/Game/UI/WBP_IntroMenu.WBP_IntroMenu_C")));
 
 	QuickSlotActions.Reserve(8);
 	for (int32 SlotNumber = 1; SlotNumber <= 8; ++SlotNumber)
@@ -38,7 +40,14 @@ void ATunaSweeperPlayerController::BeginPlay()
 	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
 	SetInputMode(InputMode);
 
-	EnsureGameHudWidget();
+	if (IsIntroMap())
+	{
+		EnsureIntroMenuWidget();
+	}
+	else
+	{
+		EnsureGameHudWidget();
+	}
 }
 
 void ATunaSweeperPlayerController::SetupInputComponent()
@@ -109,6 +118,38 @@ void ATunaSweeperPlayerController::EnsureGameHudWidget()
 	{
 		GameHudWidget->AddToViewport(0);
 	}
+}
+
+void ATunaSweeperPlayerController::EnsureIntroMenuWidget()
+{
+	if (IntroMenuWidget || !IsLocalController())
+	{
+		return;
+	}
+
+	TSubclassOf<UTunaSweeperIntroMenuWidget> LoadedIntroMenuWidgetClass = IntroMenuWidgetClass.LoadSynchronous();
+	if (!LoadedIntroMenuWidgetClass)
+	{
+		return;
+	}
+
+	IntroMenuWidget = CreateWidget<UTunaSweeperIntroMenuWidget>(this, LoadedIntroMenuWidgetClass);
+	if (IntroMenuWidget)
+	{
+		IntroMenuWidget->AddToViewport(50);
+
+		FInputModeUIOnly InputMode;
+		InputMode.SetWidgetToFocus(IntroMenuWidget->TakeWidget());
+		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+		SetInputMode(InputMode);
+		bShowMouseCursor = true;
+	}
+}
+
+bool ATunaSweeperPlayerController::IsIntroMap() const
+{
+	const UWorld* World = GetWorld();
+	return World && World->GetMapName().EndsWith(TEXT("IntroMap"));
 }
 
 void ATunaSweeperPlayerController::HandleQuickSlot(int32 SlotNumber)

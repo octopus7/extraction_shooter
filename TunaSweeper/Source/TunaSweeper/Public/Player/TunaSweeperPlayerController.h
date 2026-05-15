@@ -6,6 +6,7 @@
 #include "TunaSweeperPlayerController.generated.h"
 
 class UTunaSweeperGameHudWidget;
+class UTunaSweeperIntroMenuWidget;
 class UInputAction;
 struct FInputActionValue;
 
@@ -37,11 +38,19 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "HUD")
 	TObjectPtr<UTunaSweeperGameHudWidget> GameHudWidget;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Intro")
+	TSoftClassPtr<UTunaSweeperIntroMenuWidget> IntroMenuWidgetClass;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro")
+	TObjectPtr<UTunaSweeperIntroMenuWidget> IntroMenuWidget;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	TArray<TSoftObjectPtr<UInputAction>> QuickSlotActions;
 
 private:
 	void EnsureGameHudWidget();
+	void EnsureIntroMenuWidget();
+	bool IsIntroMap() const;
 	bool GetMouseAimPointOnPlane(float PlaneZ, FVector& OutAimPoint) const;
 	void HandleQuickSlot(int32 SlotNumber);
 	void HandleQuickSlot1(const FInputActionValue& Value);

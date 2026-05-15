@@ -18,7 +18,8 @@ enum class ETunaSweeperInteractionType : uint8
 	ItemPickup UMETA(DisplayName = "Item Pickup"),
 	ItemSpawn UMETA(DisplayName = "Item Spawn"),
 	LootContainerOpen UMETA(DisplayName = "Loot Container Open"),
-	LootContainerSpawn UMETA(DisplayName = "Loot Container Spawn")
+	LootContainerSpawn UMETA(DisplayName = "Loot Container Spawn"),
+	LevelTravel UMETA(DisplayName = "Level Travel")
 };
 
 UCLASS(BlueprintType, Blueprintable, ClassGroup=(TunaSweeper), meta=(BlueprintSpawnableComponent))
