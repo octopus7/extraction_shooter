@@ -3,6 +3,7 @@
 #include "Interaction/TunaSweeperInteractableComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Subsystem/TunaSweeperLevelTransitionSubsystem.h"
+#include "Subsystem/TunaSweeperQuestSubsystem.h"
 
 ATunaSweeperLevelTravelInteractableActor::ATunaSweeperLevelTravelInteractableActor()
 {
@@ -43,6 +44,15 @@ bool ATunaSweeperLevelTravelInteractableActor::TravelToTargetLevel(APawn* Instig
 	}
 
 	UObject* WorldContextObject = InstigatorPawn ? Cast<UObject>(InstigatorPawn) : Cast<UObject>(this);
+	const FName SourceLevelName = GetWorld() ? FName(*GetWorld()->GetMapName()) : NAME_None;
+	if (UGameInstance* GameInstance = GetGameInstance())
+	{
+		if (UTunaSweeperQuestSubsystem* QuestSubsystem = GameInstance->GetSubsystem<UTunaSweeperQuestSubsystem>())
+		{
+			QuestSubsystem->NotifyLevelTravelRequested(SourceLevelName, TargetLevelName);
+		}
+	}
+
 	if (!TransitionMediaSource.IsNull() && !TransitionWidgetClass.IsNull())
 	{
 		if (UGameInstance* GameInstance = GetGameInstance())

@@ -2,6 +2,7 @@
 
 #include "Engine/Engine.h"
 #include "Blueprint/UserWidget.h"
+#include "Character/TunaSweeperQuestNpcActor.h"
 #include "GameFramework/PlayerController.h"
 #include "Interaction/TunaSweeperItemSpawnInteractableActor.h"
 #include "Interaction/TunaSweeperInteractableComponent.h"
@@ -83,6 +84,8 @@ bool UTunaSweeperInteractionSubsystem::RequestInteraction(UTunaSweeperInteractab
 		return HandleLootContainerSpawnInteraction(Interactable, InstigatorPawn);
 	case ETunaSweeperInteractionType::LevelTravel:
 		return HandleLevelTravelInteraction(Interactable, InstigatorPawn);
+	case ETunaSweeperInteractionType::Quest:
+		return HandleQuestInteraction(Interactable, InstigatorPawn);
 	default:
 		break;
 	}
@@ -179,6 +182,28 @@ bool UTunaSweeperInteractionSubsystem::HandleLevelTravelInteraction(
 		? Cast<ATunaSweeperLevelTravelInteractableActor>(Interactable->GetOwner())
 		: nullptr;
 	return LevelTravelActor && LevelTravelActor->TravelToTargetLevel(InstigatorPawn);
+}
+
+bool UTunaSweeperInteractionSubsystem::HandleQuestInteraction(
+	UTunaSweeperInteractableComponent* Interactable,
+	APawn* InstigatorPawn)
+{
+	ATunaSweeperQuestNpcActor* QuestNpcActor = Interactable
+		? Cast<ATunaSweeperQuestNpcActor>(Interactable->GetOwner())
+		: nullptr;
+	if (!QuestNpcActor || !InstigatorPawn)
+	{
+		return false;
+	}
+
+	ATunaSweeperPlayerController* TunaPlayerController = Cast<ATunaSweeperPlayerController>(InstigatorPawn->GetController());
+	if (!TunaPlayerController)
+	{
+		return false;
+	}
+
+	TunaPlayerController->OpenQuestPanel(QuestNpcActor->GetQuestId());
+	return true;
 }
 
 bool UTunaSweeperInteractionSubsystem::OpenTempOpenLootWidget(APawn* InstigatorPawn)
@@ -292,6 +317,8 @@ FString UTunaSweeperInteractionSubsystem::GetInteractionDebugTypeName(const UTun
 		return TEXT("LootContainerSpawn");
 	case ETunaSweeperInteractionType::LevelTravel:
 		return TEXT("LevelTravel");
+	case ETunaSweeperInteractionType::Quest:
+		return TEXT("Quest");
 	default:
 		return TEXT("Unknown");
 	}

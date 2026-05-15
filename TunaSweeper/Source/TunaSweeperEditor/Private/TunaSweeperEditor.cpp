@@ -5,6 +5,7 @@
 #include "AI/TunaSweeperEnemyCharacter.h"
 #include "AutomatedAssetImportData.h"
 #include "Blueprint/WidgetTree.h"
+#include "Character/TunaSweeperQuestNpcActor.h"
 #include "Character/TunaSweeperTopDownCharacter.h"
 #include "Components/Border.h"
 #include "Components/Button.h"
@@ -54,6 +55,7 @@
 #include "Misc/Parse.h"
 #include "Misc/Paths.h"
 #include "Player/TunaSweeperPlayerController.h"
+#include "Subsystem/TunaSweeperQuestSubsystem.h"
 #include "TunaSweeperEditorRunOnce.h"
 #include "UI/TunaSweeperInteractionMarkerWidget.h"
 #include "UI/TunaSweeperGameHudWidget.h"
@@ -68,6 +70,7 @@
 #include "UI/TunaSweeperLevelTransitionWidget.h"
 #include "UI/TunaSweeperLootContainerWidget.h"
 #include "UI/TunaSweeperPickupItemIconWidget.h"
+#include "UI/TunaSweeperQuestWidget.h"
 #include "UI/TunaSweeperTempOpenLootTileEntryWidget.h"
 #include "UI/TunaSweeperTempOpenLootWidget.h"
 #include "UObject/SavePackage.h"
@@ -95,11 +98,14 @@ namespace TunaSweeperEditorSetup
 	const FString CannedTunaIconImportTaskId = TEXT("2026-05-11_ImportCannedTunaIconV1");
 	const FString IntroMenuAndLevelTravelTaskId = TEXT("2026-05-15_CreateIntroMenuAndLevelTravelActorsV1");
 	const FString LevelTransitionVideoTaskId = TEXT("2026-05-15_AddBunkerToRaidTransitionVideoV1");
+	const FString FirstOutingQuestTaskId = TEXT("2026-05-15_CreateFirstOutingQuestNpcV1");
 	const FString GameInstanceAssetPath = TEXT("/Game/Core");
 	const FString GameInstanceAssetName = TEXT("BP_TunaSweeperGameInstance");
 	const FString GameModeAssetName = TEXT("BP_TunaSweeperGameMode");
 	const FString PlayerAssetPath = TEXT("/Game/Characters/Player");
 	const FString PlayerAssetName = TEXT("BP_TunaSweeperPlayerCharacter");
+	const FString NpcAssetPath = TEXT("/Game/Characters/NPC");
+	const FString InstructorQuestNpcAssetName = TEXT("BP_NPC_InstructorQuest");
 	const FString EnemyAssetPath = TEXT("/Game/Characters/Enemy");
 	const FString EnemyAssetName = TEXT("BP_TunaSweeperEnemy");
 	const FString WeaponAssetPath = TEXT("/Game/Weapons");
@@ -130,6 +136,7 @@ namespace TunaSweeperEditorSetup
 	const FString LootContainerWidgetAssetName = TEXT("WBP_LootContainerPanel");
 	const FString IntroMenuWidgetAssetName = TEXT("WBP_IntroMenu");
 	const FString LevelTransitionVideoWidgetAssetName = TEXT("WBP_LevelTransitionVideo");
+	const FString QuestWidgetAssetName = TEXT("WBP_Quest");
 	constexpr int32 InventoryTileColumnCount = 5;
 	constexpr int32 EquipmentReserveColumnCount = 4;
 	constexpr float InventoryTileWidth = 96.0f;
@@ -945,6 +952,156 @@ namespace TunaSweeperEditorSetup
 		BlackFadePanel->SetRenderOpacity(0.0f);
 		BlackFadePanel->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 		FillCanvas(RootCanvas->AddChildToCanvas(BlackFadePanel));
+
+		RegisterAllWidgetsInTree(WidgetBlueprint);
+		WidgetBlueprint->MarkPackageDirty();
+		return true;
+	}
+
+	bool BuildQuestWidgetTree(UWidgetBlueprint* WidgetBlueprint)
+	{
+		if (!WidgetBlueprint || !WidgetBlueprint->WidgetTree)
+		{
+			return false;
+		}
+
+		WidgetBlueprint->Modify();
+		WidgetBlueprint->WidgetTree->Modify();
+		ClearWidgetTreeForRebuild(WidgetBlueprint);
+
+		UWidgetTree* WidgetTree = WidgetBlueprint->WidgetTree;
+		UCanvasPanel* RootCanvas = WidgetTree->ConstructWidget<UCanvasPanel>(UCanvasPanel::StaticClass(), TEXT("RootCanvas"));
+		UBorder* PanelBackground = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("PanelBackground"));
+		UVerticalBox* PanelStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("PanelStack"));
+		UHorizontalBox* HeaderRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("HeaderRow"));
+		UTextBlock* QuestTitleText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("QuestTitleText"));
+		UButton* QuestCloseButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("QuestCloseButton"));
+		UTextBlock* QuestCloseButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("QuestCloseButtonText"));
+		UTextBlock* QuestDescriptionText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("QuestDescriptionText"));
+		UTextBlock* QuestObjectiveText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("QuestObjectiveText"));
+		UTextBlock* QuestRewardText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("QuestRewardText"));
+		UTextBlock* QuestStateText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("QuestStateText"));
+		USizeBox* QuestPrimaryButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("QuestPrimaryButtonBox"));
+		UButton* QuestPrimaryButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("QuestPrimaryButton"));
+		UTextBlock* QuestPrimaryButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("QuestPrimaryButtonText"));
+
+		if (!RootCanvas || !PanelBackground || !PanelStack || !HeaderRow || !QuestTitleText || !QuestCloseButton ||
+			!QuestCloseButtonText || !QuestDescriptionText || !QuestObjectiveText || !QuestRewardText ||
+			!QuestStateText || !QuestPrimaryButtonBox || !QuestPrimaryButton || !QuestPrimaryButtonText)
+		{
+			return false;
+		}
+
+		auto ConfigureQuestButton = [](UButton* Button, const FVector2D& ButtonSize, const FLinearColor& FillColor, const FLinearColor& HoveredColor)
+		{
+			if (!Button)
+			{
+				return;
+			}
+
+			FButtonStyle ButtonStyle;
+			ButtonStyle.SetNormal(MakeRoundedBoxBrush(ButtonSize, FillColor, FLinearColor(0.64f, 0.72f, 0.76f, 0.90f), 1.2f));
+			ButtonStyle.SetHovered(MakeRoundedBoxBrush(ButtonSize, HoveredColor, FLinearColor(0.92f, 0.96f, 1.0f, 0.96f), 1.8f));
+			ButtonStyle.SetPressed(MakeRoundedBoxBrush(ButtonSize, FillColor * 0.78f, FLinearColor(0.56f, 0.64f, 0.70f, 1.0f), 1.0f));
+			ButtonStyle.SetNormalPadding(FMargin(10.0f, 4.0f));
+			ButtonStyle.SetPressedPadding(FMargin(10.0f, 5.0f, 10.0f, 3.0f));
+			Button->SetStyle(ButtonStyle);
+			Button->SetClickMethod(EButtonClickMethod::DownAndUp);
+		};
+
+		WidgetTree->RootWidget = RootCanvas;
+
+		UCanvasPanelSlot* PanelSlot = RootCanvas->AddChildToCanvas(PanelBackground);
+		if (PanelSlot)
+		{
+			PanelSlot->SetAnchors(FAnchors(0.5f, 0.5f));
+			PanelSlot->SetAlignment(FVector2D(0.5f, 0.5f));
+			PanelSlot->SetPosition(FVector2D(0.0f, 0.0f));
+			PanelSlot->SetSize(FVector2D(560.0f, 380.0f));
+		}
+
+		PanelBackground->SetBrush(MakeRoundedBoxBrush(
+			FVector2D(560.0f, 380.0f),
+			FLinearColor(0.055f, 0.065f, 0.075f, 0.96f),
+			FLinearColor(0.40f, 0.48f, 0.54f, 0.85f),
+			1.5f));
+		PanelBackground->SetPadding(FMargin(24.0f, 20.0f));
+		PanelBackground->SetContent(PanelStack);
+
+		UVerticalBoxSlot* HeaderSlot = PanelStack->AddChildToVerticalBox(HeaderRow);
+		if (HeaderSlot)
+		{
+			HeaderSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 20.0f));
+		}
+
+		ConfigureTextBlockLeft(QuestTitleText, FText::FromString(TEXT("\uCCAB \uC678\uCD9C")), FLinearColor::White, 28);
+		UHorizontalBoxSlot* TitleSlot = HeaderRow->AddChildToHorizontalBox(QuestTitleText);
+		if (TitleSlot)
+		{
+			TitleSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+			TitleSlot->SetVerticalAlignment(VAlign_Center);
+		}
+
+		ConfigureQuestButton(
+			QuestCloseButton,
+			FVector2D(78.0f, 38.0f),
+			FLinearColor(0.12f, 0.14f, 0.16f, 0.94f),
+			FLinearColor(0.18f, 0.21f, 0.24f, 0.98f));
+		ConfigureTextBlock(QuestCloseButtonText, FText::FromString(TEXT("\uB2EB\uAE30")), FLinearColor(0.90f, 0.94f, 0.96f, 1.0f), 15);
+		QuestCloseButton->SetContent(QuestCloseButtonText);
+		UHorizontalBoxSlot* CloseSlot = HeaderRow->AddChildToHorizontalBox(QuestCloseButton);
+		if (CloseSlot)
+		{
+			CloseSlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
+			CloseSlot->SetVerticalAlignment(VAlign_Center);
+		}
+
+		ConfigureTextBlockLeft(QuestDescriptionText, FText::FromString(TEXT("\uC774\uC81C \uB4E4\uC5B4\uC654\uC73C\uB2C8 \uB098\uAC00\uC11C \uD55C\uBC88 \uC0B0\uCC45\uD558\uACE0 \uB4E4\uC5B4\uC640")), FLinearColor(0.83f, 0.88f, 0.91f, 1.0f), 18);
+		QuestDescriptionText->SetAutoWrapText(true);
+		UVerticalBoxSlot* DescriptionSlot = PanelStack->AddChildToVerticalBox(QuestDescriptionText);
+		if (DescriptionSlot)
+		{
+			DescriptionSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 26.0f));
+		}
+
+		ConfigureTextBlockLeft(QuestObjectiveText, FText::FromString(TEXT("\uBAA9\uD45C: \uBC99\uCEE4 \uBC16\uC73C\uB85C \uC774\uB3D9")), FLinearColor(0.97f, 0.91f, 0.72f, 1.0f), 18);
+		UVerticalBoxSlot* ObjectiveSlot = PanelStack->AddChildToVerticalBox(QuestObjectiveText);
+		if (ObjectiveSlot)
+		{
+			ObjectiveSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 10.0f));
+		}
+
+		ConfigureTextBlockLeft(QuestRewardText, FText::FromString(TEXT("\uBCF4\uC0C1: \uCF54\uC778 100")), FLinearColor(0.95f, 0.78f, 0.36f, 1.0f), 17);
+		UVerticalBoxSlot* RewardSlot = PanelStack->AddChildToVerticalBox(QuestRewardText);
+		if (RewardSlot)
+		{
+			RewardSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 10.0f));
+		}
+
+		ConfigureTextBlockLeft(QuestStateText, FText::FromString(TEXT("\uC0C1\uD0DC: \uBC1B\uAE30 \uAC00\uB2A5")), FLinearColor(0.72f, 0.80f, 0.86f, 1.0f), 16);
+		UVerticalBoxSlot* StateSlot = PanelStack->AddChildToVerticalBox(QuestStateText);
+		if (StateSlot)
+		{
+			StateSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 28.0f));
+		}
+
+		QuestPrimaryButtonBox->SetWidthOverride(220.0f);
+		QuestPrimaryButtonBox->SetHeightOverride(54.0f);
+		QuestPrimaryButtonBox->SetContent(QuestPrimaryButton);
+		ConfigureQuestButton(
+			QuestPrimaryButton,
+			FVector2D(220.0f, 54.0f),
+			FLinearColor(0.14f, 0.27f, 0.22f, 0.96f),
+			FLinearColor(0.18f, 0.37f, 0.30f, 0.98f));
+		ConfigureTextBlock(QuestPrimaryButtonText, FText::FromString(TEXT("\uC218\uB77D")), FLinearColor::White, 20);
+		QuestPrimaryButton->SetContent(QuestPrimaryButtonText);
+
+		UVerticalBoxSlot* PrimaryButtonSlot = PanelStack->AddChildToVerticalBox(QuestPrimaryButtonBox);
+		if (PrimaryButtonSlot)
+		{
+			PrimaryButtonSlot->SetHorizontalAlignment(HAlign_Right);
+			PrimaryButtonSlot->SetVerticalAlignment(VAlign_Bottom);
+		}
 
 		RegisterAllWidgetsInTree(WidgetBlueprint);
 		WidgetBlueprint->MarkPackageDirty();
@@ -2672,6 +2829,18 @@ namespace TunaSweeperEditorSetup
 		return SaveAsset(WidgetBlueprint);
 	}
 
+	bool ConfigureQuestWidgetBlueprint(UWidgetBlueprint* WidgetBlueprint)
+	{
+		if (!WidgetBlueprint || !BuildQuestWidgetTree(WidgetBlueprint))
+		{
+			return false;
+		}
+
+		FKismetEditorUtilities::CompileBlueprint(WidgetBlueprint);
+		WidgetBlueprint->MarkPackageDirty();
+		return SaveAsset(WidgetBlueprint);
+	}
+
 	bool ConfigureLevelTravelBlueprint(UBlueprint* LevelTravelBlueprint)
 	{
 		if (!LevelTravelBlueprint)
@@ -2729,6 +2898,56 @@ namespace TunaSweeperEditorSetup
 			TSoftClassPtr<UTunaSweeperLevelTransitionWidget>(
 				FSoftObjectPath(GetAssetClassPath(UIAssetPath, LevelTransitionVideoWidgetAssetName))));
 		LevelTravelActor->MarkPackageDirty();
+		return true;
+	}
+
+	bool ConfigureQuestNpcBlueprint(UBlueprint* QuestNpcBlueprint)
+	{
+		if (!QuestNpcBlueprint)
+		{
+			return false;
+		}
+
+		FKismetEditorUtilities::CompileBlueprint(QuestNpcBlueprint);
+
+		ATunaSweeperQuestNpcActor* Defaults = QuestNpcBlueprint->GeneratedClass
+			? Cast<ATunaSweeperQuestNpcActor>(QuestNpcBlueprint->GeneratedClass->GetDefaultObject())
+			: nullptr;
+		if (!Defaults)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to configure %s defaults."), *GetNameSafe(QuestNpcBlueprint));
+			return false;
+		}
+
+		QuestNpcBlueprint->Modify();
+		Defaults->Modify();
+		Defaults->ConfigureQuestNpcDefaults(
+			UTunaSweeperQuestSubsystem::GetFirstOutingQuestId(),
+			FText::FromString(TEXT("\uAD50\uAD00")),
+			TSoftClassPtr<UTunaSweeperInteractionMarkerWidget>(
+				FSoftObjectPath(GetAssetClassPath(UIAssetPath, InteractionMarkerAssetName))));
+		FBlueprintEditorUtils::MarkBlueprintAsModified(QuestNpcBlueprint);
+		FKismetEditorUtilities::CompileBlueprint(QuestNpcBlueprint);
+		QuestNpcBlueprint->MarkPackageDirty();
+		return SaveAsset(QuestNpcBlueprint);
+	}
+
+	bool ConfigureQuestNpcActorInstance(AActor* Actor)
+	{
+		ATunaSweeperQuestNpcActor* QuestNpcActor = Cast<ATunaSweeperQuestNpcActor>(Actor);
+		if (!QuestNpcActor)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("%s is not an ATunaSweeperQuestNpcActor."), *GetNameSafe(Actor));
+			return false;
+		}
+
+		QuestNpcActor->Modify();
+		QuestNpcActor->ConfigureQuestNpcDefaults(
+			UTunaSweeperQuestSubsystem::GetFirstOutingQuestId(),
+			FText::FromString(TEXT("\uAD50\uAD00")),
+			TSoftClassPtr<UTunaSweeperInteractionMarkerWidget>(
+				FSoftObjectPath(GetAssetClassPath(UIAssetPath, InteractionMarkerAssetName))));
+		QuestNpcActor->MarkPackageDirty();
 		return true;
 	}
 
@@ -3079,6 +3298,43 @@ namespace TunaSweeperEditorSetup
 
 		SpawnedActor->SetActorLabel(ActorLabel);
 		if (!ConfigureLevelTravelActorInstance(SpawnedActor, TargetLevelName, DisplayName, TransitionMediaSource))
+		{
+			return false;
+		}
+		SpawnedActor->MarkPackageDirty();
+		return true;
+	}
+
+	bool PlaceQuestNpcActor(UWorld* World, UBlueprint* ActorBlueprint, const FString& ActorLabel, const FVector& Location)
+	{
+		if (!World || !ActorBlueprint || !ActorBlueprint->GeneratedClass)
+		{
+			return false;
+		}
+
+		if (AActor* ExistingActor = FindActorByLabel(World, ActorLabel))
+		{
+			ExistingActor->Modify();
+			ExistingActor->SetActorLocation(Location);
+			ExistingActor->SetActorRotation(FRotator::ZeroRotator);
+			return ConfigureQuestNpcActorInstance(ExistingActor);
+		}
+
+		World->PersistentLevel->Modify();
+
+		FActorSpawnParameters SpawnParameters;
+		SpawnParameters.OverrideLevel = World->PersistentLevel;
+		SpawnParameters.Name = MakeUniqueObjectName(World->PersistentLevel, ActorBlueprint->GeneratedClass, FName(*ActorLabel));
+		SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+		AActor* SpawnedActor = World->SpawnActor<AActor>(ActorBlueprint->GeneratedClass, Location, FRotator::ZeroRotator, SpawnParameters);
+		if (!SpawnedActor)
+		{
+			return false;
+		}
+
+		SpawnedActor->SetActorLabel(ActorLabel);
+		if (!ConfigureQuestNpcActorInstance(SpawnedActor))
 		{
 			return false;
 		}
@@ -3499,6 +3755,50 @@ namespace TunaSweeperEditorSetup
 		return bConfigured && PlaceLevelTravelActorsInBunkerAndRaidMaps(LevelTravelBlueprint);
 	}
 
+	bool PlaceFirstOutingQuestNpcInBunkerMap(UBlueprint* QuestNpcBlueprint)
+	{
+		if (!QuestNpcBlueprint)
+		{
+			return false;
+		}
+
+		UWorld* BunkerWorld = LoadEditorMapForSetup(BunkerMapPackagePath);
+		const bool bNpcPlaced =
+			BunkerWorld &&
+			PlaceQuestNpcActor(
+				BunkerWorld,
+				QuestNpcBlueprint,
+				TEXT("TS_NPC_Instructor"),
+				FVector(0.0f, 2000.0f, 100.0f)) &&
+			UEditorLoadingAndSavingUtils::SaveMap(BunkerWorld, BunkerMapPackagePath);
+
+		LoadEditorMapForSetup(IntroMapPackagePath);
+		return bNpcPlaced;
+	}
+
+	bool EnsureFirstOutingQuestSetup()
+	{
+		UWidgetBlueprint* QuestWidgetBlueprint = EnsureWidgetBlueprint(
+			UIAssetPath,
+			QuestWidgetAssetName,
+			UTunaSweeperQuestWidget::StaticClass());
+		UBlueprint* QuestNpcBlueprint = EnsureBlueprint(
+			NpcAssetPath,
+			InstructorQuestNpcAssetName,
+			ATunaSweeperQuestNpcActor::StaticClass());
+
+		if (!QuestWidgetBlueprint || !QuestNpcBlueprint)
+		{
+			return false;
+		}
+
+		const bool bConfigured =
+			ConfigureQuestWidgetBlueprint(QuestWidgetBlueprint) &&
+			ConfigureQuestNpcBlueprint(QuestNpcBlueprint);
+
+		return bConfigured && PlaceFirstOutingQuestNpcInBunkerMap(QuestNpcBlueprint);
+	}
+
 	void ScheduleInteractionAssetsAndMapPlacement()
 	{
 		if (FTunaSweeperEditorRunOnce::HasCompleted(InteractionTaskId))
@@ -3655,6 +3955,41 @@ namespace TunaSweeperEditorSetup
 				}),
 			1.0f);
 	}
+
+	void ScheduleFirstOutingQuestSetup()
+	{
+		if (FTunaSweeperEditorRunOnce::HasCompleted(FirstOutingQuestTaskId))
+		{
+			return;
+		}
+
+		FTSTicker::GetCoreTicker().AddTicker(
+			FTickerDelegate::CreateLambda(
+				[](float)
+				{
+					UWorld* EditorWorld = GEditor ? GEditor->GetEditorWorldContext().World() : nullptr;
+					if (!EditorWorld)
+					{
+						return true;
+					}
+
+					FTunaSweeperEditorRunOnce::Run(
+						FirstOutingQuestTaskId,
+						[]()
+						{
+							return EnsureFirstOutingQuestSetup();
+						});
+
+					const bool bCompleted = FTunaSweeperEditorRunOnce::HasCompleted(FirstOutingQuestTaskId);
+					if (bCompleted && FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperSetupQuit")))
+					{
+						FPlatformMisc::RequestExit(false);
+					}
+
+					return !bCompleted;
+				}),
+			1.0f);
+	}
 }
 
 class FTunaSweeperEditorModule final : public IModuleInterface
@@ -3735,6 +4070,7 @@ public:
 		TunaSweeperEditorSetup::ScheduleLootContainerAndSpawnerAssetsAndMapPlacement();
 		TunaSweeperEditorSetup::ScheduleIntroMenuAndLevelTravelSetup();
 		TunaSweeperEditorSetup::ScheduleBunkerToRaidTransitionVideoSetup();
+		TunaSweeperEditorSetup::ScheduleFirstOutingQuestSetup();
 	}
 };
 

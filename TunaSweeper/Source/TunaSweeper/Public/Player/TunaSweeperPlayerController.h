@@ -7,6 +7,7 @@
 
 class UTunaSweeperGameHudWidget;
 class UTunaSweeperIntroMenuWidget;
+class UTunaSweeperQuestWidget;
 class UInputAction;
 struct FInputActionValue;
 
@@ -31,6 +32,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
 	void OpenLootContainerPanel(const FTunaSweeperLootContainerInstance& ContainerInstance);
 
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Quest")
+	void OpenQuestPanel(FName QuestId);
+
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "HUD")
 	TSoftClassPtr<UTunaSweeperGameHudWidget> GameHudWidgetClass;
@@ -43,6 +47,12 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, Category = "Intro")
 	TObjectPtr<UTunaSweeperIntroMenuWidget> IntroMenuWidget;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Quest")
+	TSoftClassPtr<UTunaSweeperQuestWidget> QuestWidgetClass;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Quest")
+	TObjectPtr<UTunaSweeperQuestWidget> QuestWidget;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	TArray<TSoftObjectPtr<UInputAction>> QuickSlotActions;

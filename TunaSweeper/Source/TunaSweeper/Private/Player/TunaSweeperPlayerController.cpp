@@ -10,6 +10,7 @@
 #include "Subsystem/TunaSweeperKeyboardInputSubsystem.h"
 #include "UI/TunaSweeperGameHudWidget.h"
 #include "UI/TunaSweeperIntroMenuWidget.h"
+#include "UI/TunaSweeperQuestWidget.h"
 
 ATunaSweeperPlayerController::ATunaSweeperPlayerController()
 {
@@ -18,6 +19,7 @@ ATunaSweeperPlayerController::ATunaSweeperPlayerController()
 	DefaultMouseCursor = EMouseCursor::Crosshairs;
 	GameHudWidgetClass = TSoftClassPtr<UTunaSweeperGameHudWidget>(FSoftObjectPath(TEXT("/Game/UI/WBP_GameHud.WBP_GameHud_C")));
 	IntroMenuWidgetClass = TSoftClassPtr<UTunaSweeperIntroMenuWidget>(FSoftObjectPath(TEXT("/Game/UI/WBP_IntroMenu.WBP_IntroMenu_C")));
+	QuestWidgetClass = TSoftClassPtr<UTunaSweeperQuestWidget>(FSoftObjectPath(TEXT("/Game/UI/WBP_Quest.WBP_Quest_C")));
 
 	QuickSlotActions.Reserve(8);
 	for (int32 SlotNumber = 1; SlotNumber <= 8; ++SlotNumber)
@@ -224,6 +226,43 @@ void ATunaSweeperPlayerController::OpenLootContainerPanel(const FTunaSweeperLoot
 	{
 		GameHudWidget->ShowLootContainerPanel(ContainerInstance);
 	}
+}
+
+void ATunaSweeperPlayerController::OpenQuestPanel(FName QuestId)
+{
+	if (!IsLocalController())
+	{
+		return;
+	}
+
+	if (!QuestWidget)
+	{
+		TSubclassOf<UTunaSweeperQuestWidget> LoadedQuestWidgetClass = QuestWidgetClass.LoadSynchronous();
+		if (!LoadedQuestWidgetClass)
+		{
+			return;
+		}
+
+		QuestWidget = CreateWidget<UTunaSweeperQuestWidget>(this, LoadedQuestWidgetClass);
+	}
+
+	if (!QuestWidget)
+	{
+		return;
+	}
+
+	QuestWidget->InitializeQuest(QuestId);
+	if (!QuestWidget->IsInViewport())
+	{
+		QuestWidget->AddToViewport(30);
+	}
+
+	FInputModeGameAndUI InputMode;
+	InputMode.SetWidgetToFocus(QuestWidget->TakeWidget());
+	InputMode.SetHideCursorDuringCapture(false);
+	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+	SetInputMode(InputMode);
+	bShowMouseCursor = true;
 }
 
 bool ATunaSweeperPlayerController::GetMouseAimPointOnPlane(float PlaneZ, FVector& OutAimPoint) const

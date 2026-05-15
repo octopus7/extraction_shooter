@@ -16,7 +16,7 @@
 | 목표 | `벙커 밖으로 이동` |
 | 달성 조건 | `BunkerMap -> RaidMap` 레벨 이동 요청 성공 |
 | 초기 상태 | `Available` |
-| 보상 | 첫 단계에서는 없음. 단, 보상 상태 흐름은 유지 |
+| 보상 | 코인 100 |
 
 ## 퀘스트 상태
 
@@ -83,7 +83,7 @@ void NotifyLevelTravelRequested(FName SourceLevelName, FName TargetLevelName);
 - Map<FName, ETunaSweeperQuestState>
 ```
 
-첫 단계에서는 퀘스트 정의를 C++에 하드코딩해도 된다. 퀘스트 수가 늘어나 에디터에서 관리할 필요가 생기면 `UPrimaryDataAsset` 기반으로 옮긴다.
+첫 단계에서는 퀘스트 정의를 C++에 하드코딩해도 된다. 퀘스트 수가 늘어나 에디터에서 관리할 필요가 생기면 `UPrimaryDataAsset` 기반으로 옮긴다. 모든 퀘스트는 최소 코인 보상을 가져야 하며, 보상이 없는 퀘스트는 만들지 않는다.
 
 ## 레벨 이동 완료 처리
 
@@ -175,7 +175,7 @@ WBP_Quest
 | `RewardAvailable` | `보상 받기` | 예 | `ClaimQuestReward(quest_first_outing)` |
 | `RewardCompleted` | `완료` | 아니오 | 없음 |
 
-첫 퀘스트에 실제 보상이 없더라도 `RewardAvailable -> RewardCompleted` 단계는 유지한다. 그래야 상태 모델을 검증할 수 있고, 이후 보상이 있는 퀘스트와 같은 흐름을 사용할 수 있다.
+퀘스트는 최소 코인 보상을 가지므로 `RewardAvailable -> RewardCompleted` 단계에서 코인 보상을 지급한다.
 
 ## 플레이어 컨트롤러 연동
 
@@ -200,7 +200,7 @@ UTunaSweeperInteractionSubsystem
 5. `UTunaSweeperQuestWidget`과 `WBP_Quest`를 추가한다.
 6. 플레이어 컨트롤러에 `OpenQuestPanel(QuestId)`를 추가한다.
 7. `ATunaSweeperLevelTravelInteractableActor::TravelToTargetLevel`에서 퀘스트 서브시스템에 레벨 이동 요청을 알린다.
-8. 벙커에 퀘스트 상호작용 제공자를 배치하거나 설정한다.
+8. 벙커맵 중심에서 북쪽으로 20m 지점에 `교관` NPC를 배치하고 퀘스트 상호작용만 제공하게 한다.
 9. 전체 상태 흐름을 테스트한다.
 
 ## 완료 확인 기준
