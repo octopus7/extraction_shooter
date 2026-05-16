@@ -157,3 +157,23 @@ UE에서는 보편적으로 북쪽이 +Y 방향인가?
 ### 답변
 
 원인은 UMG/Slate의 스크린 좌표와 위젯 로컬 좌표를 같은 기준처럼 다룬 데 있었다. 부모 위젯의 `NativeOnDrop()`에서 드롭 슬롯을 판정할 때 마우스의 `ScreenSpacePosition` 또는 hover 기록에 의존했는데, 에디터 환경에서는 에디터 창, 뷰포트 위치, DPI/윈도우 오프셋이 끼어서 실제 `TileView` 안의 로컬 위치와 어긋날 수 있다. 그 결과 PIE에서는 정상처럼 보이지만 에디터 뷰포트에서는 커서가 다른 슬롯에 있는 것처럼 계산될 수 있었다. 수정은 Drop 시점에 `InDragDropEvent.GetScreenSpacePosition()`을 `TileView->GetCachedGeometry().AbsoluteToLocal()`로 변환한 뒤 슬롯 인덱스를 다시 계산하게 한 것이다.
+
+## 2026-05-16 23:33:05 (소요시간: 1분 미만)
+
+### 질문
+
+ffmpeg를 이용해서 특정 프레임까지만 mp4 영상을 잘라내고 싶을 때 커맨드는 어떻게 하는가?
+
+### 답변
+
+처음부터 N프레임까지만 남기려면 `-frames:v N`을 쓰면 된다. 예를 들어 처음부터 300프레임만 남기려면 `ffmpeg -i input.mp4 -frames:v 300 -c:v libx264 -crf 18 -preset medium -c:a aac -shortest output.mp4`처럼 실행한다. 프레임 번호를 0부터 세는 인덱스 기준으로 특정 프레임까지 포함하고 싶다면 `select='lte(n\,FRAME_INDEX)'` 필터를 써서 정확히 지정할 수 있다.
+
+## 2026-05-16 23:42:28 (소요시간: 1분 미만)
+
+### 질문
+
+영상에서 특정 구간만 잘라내는 행동을 무엇이라 부르는가?
+
+### 답변
+
+일반적으로는 `트리밍(trim)` 또는 `클리핑(clipping)`이라고 부른다. 영상 편집 맥락에서는 `구간 추출`, `클립 추출`, `자르기`라고도 하며, ffmpeg 명령 관점에서는 `-ss`와 `-t`로 구간을 지정해 `trim` 또는 `segment extraction`을 하는 작업이라고 볼 수 있다.
