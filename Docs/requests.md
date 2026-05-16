@@ -364,3 +364,8 @@
 ## 2026-05-15 23:17:23 (소요시간: 1분 미만)
 
 - 게임용 아이템 아이콘 파일 크기 사양을 `Docs/game_conventions.md`에 기록할 것.
+
+## 2026-05-16 15:03:33 (소요시간: 2분 36초)
+
+- `Docs/Steam/tuna_sweeper_story_summary.md` 파일 상단에 `tuna_sweeper_logo_transparent.png` 이미지를 넣을 것.
+- `image0.PNG`부터 `image4.PNG`, `north.PNG` 이미지는 내용을 읽고 문서상 적절한 위치에 넣을 것.
