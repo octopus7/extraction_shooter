@@ -10,6 +10,7 @@
 namespace TunaSweeperSave
 {
 	const TCHAR* SaveSlotNamePrefix = TEXT("TunaSweeperSave_Slot");
+	const TCHAR* SaveSettingsSlotName = TEXT("TunaSweeperSaveSettings");
 	constexpr int32 SaveUserIndex = 0;
 	constexpr int32 MinSaveSlotIndex = 1;
 	constexpr int32 MaxSaveSlotIndex = 3;
@@ -139,8 +140,18 @@ float FTunaSweeperPlayerHudState::GetCarryWeightMovementSpeedMultiplier() const
 void UTunaSweeperGameInstance::Init()
 {
 	Super::Init();
+	int32 LoadedSaveSlotIndex = 1;
+	if (LoadActiveSaveSlotSelection(LoadedSaveSlotIndex))
+	{
+		ActiveSaveSlotIndex = SanitizeSaveSlotIndex(LoadedSaveSlotIndex);
+	}
+	else
+	{
+		ActiveSaveSlotIndex = FindFirstExistingSaveSlotIndex();
+		SaveActiveSaveSlotSelection();
+	}
+
 	ActiveSlotStartTimeSeconds = FPlatformTime::Seconds();
-	EnsureInventoryStateInitialized();
 }
 
 void UTunaSweeperGameInstance::SetGameplayInfo(FName Key, const FString& Value)
@@ -236,9 +247,7 @@ FTunaSweeperSaveSlotSummary UTunaSweeperGameInstance::GetSaveSlotSummary(int32 S
 
 bool UTunaSweeperGameInstance::ActivateSaveSlot(int32 SaveSlotIndex, bool bStartNewGame)
 {
-	ActiveSaveSlotIndex = SanitizeSaveSlotIndex(SaveSlotIndex);
-	ResetRuntimeStateForSaveSlotSelection();
-	ActiveSaveSlotIndex = SanitizeSaveSlotIndex(SaveSlotIndex);
+	SetActiveSaveSlotIndex(SaveSlotIndex);
 
 	if (bStartNewGame)
 	{
@@ -253,6 +262,13 @@ bool UTunaSweeperGameInstance::ActivateSaveSlot(int32 SaveSlotIndex, bool bStart
 
 	EnsureInventoryStateInitialized();
 	return true;
+}
+
+bool UTunaSweeperGameInstance::SetActiveSaveSlotIndex(int32 SaveSlotIndex)
+{
+	ActiveSaveSlotIndex = SanitizeSaveSlotIndex(SaveSlotIndex);
+	ResetRuntimeStateForSaveSlotSelection();
+	return SaveActiveSaveSlotSelection();
 }
 
 bool UTunaSweeperGameInstance::DeleteSaveSlot(int32 SaveSlotIndex)
@@ -1373,6 +1389,57 @@ void UTunaSweeperGameInstance::TrimSaveGameBackups() const
 	}
 }
 
+bool UTunaSweeperGameInstance::LoadActiveSaveSlotSelection(int32& OutSaveSlotIndex) const
+{
+	if (!UGameplayStatics::DoesSaveGameExist(GetSaveSettingsSlotName(), TunaSweeperSave::SaveUserIndex))
+	{
+		OutSaveSlotIndex = 1;
+		return false;
+	}
+
+	const UTunaSweeperSaveSettings* SaveSettings = Cast<UTunaSweeperSaveSettings>(
+		UGameplayStatics::LoadGameFromSlot(GetSaveSettingsSlotName(), TunaSweeperSave::SaveUserIndex));
+	if (!SaveSettings)
+	{
+		OutSaveSlotIndex = 1;
+		return false;
+	}
+
+	OutSaveSlotIndex = SanitizeSaveSlotIndex(SaveSettings->LastSelectedSaveSlotIndex);
+	return true;
+}
+
+bool UTunaSweeperGameInstance::SaveActiveSaveSlotSelection() const
+{
+	UTunaSweeperSaveSettings* SaveSettings = Cast<UTunaSweeperSaveSettings>(
+		UGameplayStatics::CreateSaveGameObject(UTunaSweeperSaveSettings::StaticClass()));
+	if (!SaveSettings)
+	{
+		return false;
+	}
+
+	SaveSettings->LastSelectedSaveSlotIndex = SanitizeSaveSlotIndex(ActiveSaveSlotIndex);
+	return UGameplayStatics::SaveGameToSlot(
+		SaveSettings,
+		GetSaveSettingsSlotName(),
+		TunaSweeperSave::SaveUserIndex);
+}
+
+int32 UTunaSweeperGameInstance::FindFirstExistingSaveSlotIndex() const
+{
+	for (int32 SaveSlotIndex = TunaSweeperSave::MinSaveSlotIndex;
+		SaveSlotIndex <= TunaSweeperSave::MaxSaveSlotIndex;
+		++SaveSlotIndex)
+	{
+		if (!GetExistingSaveGameSlotName(SaveSlotIndex).IsEmpty())
+		{
+			return SaveSlotIndex;
+		}
+	}
+
+	return TunaSweeperSave::MinSaveSlotIndex;
+}
+
 int32 UTunaSweeperGameInstance::SanitizeSaveSlotIndex(int32 SaveSlotIndex) const
 {
 	return FMath::Clamp(
@@ -1387,6 +1454,11 @@ FString UTunaSweeperGameInstance::GetSaveGameSlotName(int32 SaveSlotIndex) const
 		TEXT("%s%02d"),
 		TunaSweeperSave::SaveSlotNamePrefix,
 		SanitizeSaveSlotIndex(SaveSlotIndex));
+}
+
+FString UTunaSweeperGameInstance::GetSaveSettingsSlotName() const
+{
+	return FString(TunaSweeperSave::SaveSettingsSlotName);
 }
 
 FString UTunaSweeperGameInstance::GetExistingSaveGameSlotName(int32 SaveSlotIndex) const

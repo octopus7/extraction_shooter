@@ -35,3 +35,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Inventory")
 	TArray<FTunaSweeperInventorySlot> AuxiliaryBagSlots;
 };
+
+UCLASS()
+class TUNASWEEPER_API UTunaSweeperSaveSettings : public USaveGame
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Save")
+	int32 LastSelectedSaveSlotIndex = 1;
+};

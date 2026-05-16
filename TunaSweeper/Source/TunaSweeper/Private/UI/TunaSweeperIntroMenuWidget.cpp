@@ -18,6 +18,12 @@ void UTunaSweeperIntroMenuWidget::NativeConstruct()
 		StartButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleStartClicked);
 	}
 
+	if (SlotSelectButton)
+	{
+		SlotSelectButton->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleSlotSelectClicked);
+		SlotSelectButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleSlotSelectClicked);
+	}
+
 	if (QuitButton)
 	{
 		QuitButton->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleQuitClicked);
@@ -61,16 +67,7 @@ void UTunaSweeperIntroMenuWidget::NativeConstruct()
 	}
 
 	SelectedSaveSlotIndex = INDEX_NONE;
-	if (MainMenuPanel)
-	{
-		MainMenuPanel->SetVisibility(ESlateVisibility::Visible);
-	}
-	if (SaveSlotPanel)
-	{
-		SaveSlotPanel->SetVisibility(ESlateVisibility::Collapsed);
-	}
-
-	RefreshSaveSlotMenu();
+	ShowMainMenu();
 }
 
 void UTunaSweeperIntroMenuWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
@@ -98,21 +95,23 @@ void UTunaSweeperIntroMenuWidget::NativeTick(const FGeometry& MyGeometry, float 
 
 void UTunaSweeperIntroMenuWidget::HandleStartClicked()
 {
-	if (SaveSlotPanel)
+	UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GetGameInstance());
+	if (TunaGameInstance)
 	{
-		ShowSaveSlotSelection();
-		return;
-	}
-
-	if (UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GetGameInstance()))
-	{
-		TunaGameInstance->ActivateSaveSlot(1, false);
+		const int32 ActiveSaveSlotIndex = TunaGameInstance->GetActiveSaveSlotIndex();
+		const FTunaSweeperSaveSlotSummary Summary = TunaGameInstance->GetSaveSlotSummary(ActiveSaveSlotIndex);
+		TunaGameInstance->ActivateSaveSlot(ActiveSaveSlotIndex, !Summary.bHasData);
 	}
 
 	if (!StartTargetLevelName.IsNone())
 	{
 		UGameplayStatics::OpenLevel(this, StartTargetLevelName);
 	}
+}
+
+void UTunaSweeperIntroMenuWidget::HandleSlotSelectClicked()
+{
+	ShowSaveSlotSelection();
 }
 
 void UTunaSweeperIntroMenuWidget::HandleQuitClicked()
@@ -137,7 +136,7 @@ void UTunaSweeperIntroMenuWidget::HandleSaveSlot3Focused()
 
 void UTunaSweeperIntroMenuWidget::HandlePrimarySaveSlotClicked()
 {
-	if (SelectedSaveSlotIndex == INDEX_NONE || StartTargetLevelName.IsNone())
+	if (SelectedSaveSlotIndex == INDEX_NONE)
 	{
 		return;
 	}
@@ -148,9 +147,8 @@ void UTunaSweeperIntroMenuWidget::HandlePrimarySaveSlotClicked()
 		return;
 	}
 
-	const FTunaSweeperSaveSlotSummary Summary = TunaGameInstance->GetSaveSlotSummary(SelectedSaveSlotIndex);
-	TunaGameInstance->ActivateSaveSlot(SelectedSaveSlotIndex, !Summary.bHasData);
-	UGameplayStatics::OpenLevel(this, StartTargetLevelName);
+	TunaGameInstance->SetActiveSaveSlotIndex(SelectedSaveSlotIndex);
+	ShowMainMenu();
 }
 
 void UTunaSweeperIntroMenuWidget::HandleDeleteSaveSlotClicked()
@@ -165,6 +163,23 @@ void UTunaSweeperIntroMenuWidget::HandleDeleteSaveSlotClicked()
 		TunaGameInstance->DeleteSaveSlot(SelectedSaveSlotIndex);
 	}
 
+	RefreshSaveSlotMenu();
+	RefreshMainMenu();
+}
+
+void UTunaSweeperIntroMenuWidget::ShowMainMenu()
+{
+	if (MainMenuPanel)
+	{
+		MainMenuPanel->SetVisibility(ESlateVisibility::Visible);
+	}
+	if (SaveSlotPanel)
+	{
+		SaveSlotPanel->SetVisibility(ESlateVisibility::Collapsed);
+	}
+
+	SelectedSaveSlotIndex = INDEX_NONE;
+	RefreshMainMenu();
 	RefreshSaveSlotMenu();
 }
 
@@ -192,6 +207,27 @@ void UTunaSweeperIntroMenuWidget::SelectSaveSlot(int32 SaveSlotIndex)
 
 	SelectedSaveSlotIndex = FMath::Clamp(SaveSlotIndex, 1, 3);
 	RefreshSaveSlotMenu();
+}
+
+void UTunaSweeperIntroMenuWidget::RefreshMainMenu()
+{
+	FTunaSweeperSaveSlotSummary Summary;
+	if (const UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GetGameInstance()))
+	{
+		Summary = TunaGameInstance->GetSaveSlotSummary(TunaGameInstance->GetActiveSaveSlotIndex());
+	}
+
+	if (CurrentSaveSlotText)
+	{
+		CurrentSaveSlotText->SetText(BuildSaveSlotButtonText(Summary.SaveSlotIndex));
+	}
+
+	if (StartButtonText)
+	{
+		StartButtonText->SetText(Summary.bHasData
+			? FText::FromString(TEXT("\uC774\uC5B4\uC11C\uD558\uAE30"))
+			: FText::FromString(TEXT("\uC0C8\uB85C\uC2DC\uC791\uD558\uAE30")));
+	}
 }
 
 void UTunaSweeperIntroMenuWidget::RefreshSaveSlotMenu()
@@ -224,9 +260,7 @@ void UTunaSweeperIntroMenuWidget::RefreshSaveSlotMenu()
 
 	if (PrimarySaveSlotButtonText)
 	{
-		PrimarySaveSlotButtonText->SetText(Summary.bHasData
-			? FText::FromString(TEXT("\uC774\uC5B4\uC11C\uD558\uAE30"))
-			: FText::FromString(TEXT("\uC0C8\uB85C\uC2DC\uC791\uD558\uAE30")));
+		PrimarySaveSlotButtonText->SetText(FText::FromString(TEXT("\uC138\uC774\uBE0C \uC2AC\uB86F \uC120\uD0DD")));
 	}
 
 	if (DeleteSaveSlotButton)

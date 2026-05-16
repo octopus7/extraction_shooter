@@ -33,6 +33,15 @@ protected:
 	TObjectPtr<UButton> StartButton;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UTextBlock> StartButtonText;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UTextBlock> CurrentSaveSlotText;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UButton> SlotSelectButton;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
 	TObjectPtr<UButton> QuitButton;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
@@ -67,6 +76,9 @@ private:
 	void HandleStartClicked();
 
 	UFUNCTION()
+	void HandleSlotSelectClicked();
+
+	UFUNCTION()
 	void HandleQuitClicked();
 
 	UFUNCTION()
@@ -84,8 +96,10 @@ private:
 	UFUNCTION()
 	void HandleDeleteSaveSlotClicked();
 
+	void ShowMainMenu();
 	void ShowSaveSlotSelection();
 	void SelectSaveSlot(int32 SaveSlotIndex);
+	void RefreshMainMenu();
 	void RefreshSaveSlotMenu();
 	void RefreshSaveSlotButton(int32 SaveSlotIndex, UButton* SlotButton, UTextBlock* SlotText);
 	FText BuildSaveSlotButtonText(int32 SaveSlotIndex) const;

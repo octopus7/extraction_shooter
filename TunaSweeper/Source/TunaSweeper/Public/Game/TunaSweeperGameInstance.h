@@ -145,6 +145,9 @@ public:
 	FTunaSweeperSaveSlotSummary GetSaveSlotSummary(int32 SaveSlotIndex) const;
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Save")
+	bool SetActiveSaveSlotIndex(int32 SaveSlotIndex);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Save")
 	bool ActivateSaveSlot(int32 SaveSlotIndex, bool bStartNewGame);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Save")
@@ -251,8 +254,12 @@ private:
 	void CollectPlayerOwnedItemUids(TSet<FGuid>& OutItemUids) const;
 	bool BackupExistingSaveGame(const FString& ExistingSlotName) const;
 	void TrimSaveGameBackups() const;
+	bool LoadActiveSaveSlotSelection(int32& OutSaveSlotIndex) const;
+	bool SaveActiveSaveSlotSelection() const;
+	int32 FindFirstExistingSaveSlotIndex() const;
 	int32 SanitizeSaveSlotIndex(int32 SaveSlotIndex) const;
 	FString GetSaveGameSlotName(int32 SaveSlotIndex) const;
+	FString GetSaveSettingsSlotName() const;
 	FString GetExistingSaveGameSlotName(int32 SaveSlotIndex) const;
 	FString GetSaveGameFilePath(const FString& SaveSlotName) const;
 	FString GetSaveGameBackupDirectory() const;

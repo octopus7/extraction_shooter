@@ -103,7 +103,7 @@ namespace TunaSweeperEditorSetup
 	const FString LootContainerAndSpawnerTaskId = TEXT("2026-05-11_CreateLootContainerAndSpawnerAssetsV1");
 	const FString CannedTunaIconImportTaskId = TEXT("2026-05-11_ImportCannedTunaIconV1");
 	const FString BackpackInventoryTaskId = TEXT("2026-05-16_CreateEquipmentInventoryAssetsV3");
-	const FString IntroMenuAndLevelTravelTaskId = TEXT("2026-05-16_CreateIntroMenuSaveSlotSelectionV2");
+	const FString IntroMenuAndLevelTravelTaskId = TEXT("2026-05-17_CreateIntroMenuPersistentSaveSlotSelectionV1");
 	const FString LevelTransitionVideoTaskId = TEXT("2026-05-16_AddBidirectionalLevelTransitionVideoV3");
 	const FString FirstOutingQuestTaskId = TEXT("2026-05-15_CreateFirstOutingQuestNpcV2");
 	const FString SelfDestructInteractionTaskId = TEXT("2026-05-16_CreateSelfDestructInteractionV1");
@@ -928,9 +928,16 @@ namespace TunaSweeperEditorSetup
 		UCanvasPanel* RootCanvas = WidgetTree->ConstructWidget<UCanvasPanel>(UCanvasPanel::StaticClass(), TEXT("RootCanvas"));
 		UVerticalBox* MenuStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("MenuStack"));
 		UVerticalBox* MainMenuPanel = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("MainMenuPanel"));
+		UHorizontalBox* MainMenuRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("MainMenuRow"));
+		USizeBox* CurrentSaveSlotBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("CurrentSaveSlotBox"));
+		UBorder* CurrentSaveSlotBorder = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("CurrentSaveSlotBorder"));
+		UTextBlock* CurrentSaveSlotText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("CurrentSaveSlotText"));
 		USizeBox* StartButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("StartButtonBox"));
 		UButton* StartButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("StartButton"));
 		UTextBlock* StartButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("StartButtonText"));
+		USizeBox* SlotSelectButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("SlotSelectButtonBox"));
+		UButton* SlotSelectButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("SlotSelectButton"));
+		UTextBlock* SlotSelectButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("SlotSelectButtonText"));
 		UVerticalBox* SaveSlotPanel = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("SaveSlotPanel"));
 		UHorizontalBox* SaveSlotButtonRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("SaveSlotButtonRow"));
 		USizeBox* SaveSlot1ButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("SaveSlot1ButtonBox"));
@@ -953,7 +960,9 @@ namespace TunaSweeperEditorSetup
 		UButton* QuitButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("QuitButton"));
 		UTextBlock* QuitButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("QuitButtonText"));
 
-		if (!RootCanvas || !MenuStack || !MainMenuPanel || !StartButtonBox || !StartButton || !StartButtonText ||
+		if (!RootCanvas || !MenuStack || !MainMenuPanel || !MainMenuRow || !CurrentSaveSlotBox ||
+			!CurrentSaveSlotBorder || !CurrentSaveSlotText || !StartButtonBox || !StartButton || !StartButtonText ||
+			!SlotSelectButtonBox || !SlotSelectButton || !SlotSelectButtonText ||
 			!SaveSlotPanel || !SaveSlotButtonRow || !SaveSlot1ButtonBox || !SaveSlot1Button || !SaveSlot1Text ||
 			!SaveSlot2ButtonBox || !SaveSlot2Button || !SaveSlot2Text || !SaveSlot3ButtonBox || !SaveSlot3Button ||
 			!SaveSlot3Text || !SaveSlotActionRow || !PrimarySaveSlotButtonBox || !PrimarySaveSlotButton ||
@@ -988,25 +997,64 @@ namespace TunaSweeperEditorSetup
 			MenuStackSlot->SetAnchors(FAnchors(0.5f, 0.5f));
 			MenuStackSlot->SetAlignment(FVector2D(0.5f, 0.5f));
 			MenuStackSlot->SetPosition(FVector2D(0.0f, 80.0f));
-			MenuStackSlot->SetSize(FVector2D(860.0f, 320.0f));
+			MenuStackSlot->SetSize(FVector2D(920.0f, 340.0f));
 		}
 
-		StartButtonBox->SetWidthOverride(360.0f);
-		StartButtonBox->SetHeightOverride(84.0f);
+		CurrentSaveSlotBox->SetWidthOverride(330.0f);
+		CurrentSaveSlotBox->SetHeightOverride(120.0f);
+		CurrentSaveSlotBorder->SetBrush(MakeRoundedBoxBrush(
+			FVector2D(330.0f, 120.0f),
+			FLinearColor(0.035f, 0.045f, 0.052f, 0.96f),
+			FLinearColor(0.28f, 0.34f, 0.38f, 1.0f),
+			1.2f));
+		CurrentSaveSlotBorder->SetPadding(FMargin(16.0f, 10.0f));
+		ConfigureTextBlock(
+			CurrentSaveSlotText,
+			FText::FromString(TEXT("\uC2AC\uB86F 1\n\uBE48 \uC2AC\uB86F")),
+			FLinearColor(0.82f, 0.88f, 0.92f, 1.0f),
+			19);
+		CurrentSaveSlotText->SetAutoWrapText(true);
+		CurrentSaveSlotBorder->SetContent(CurrentSaveSlotText);
+		CurrentSaveSlotBox->SetContent(CurrentSaveSlotBorder);
+
+		StartButtonBox->SetWidthOverride(230.0f);
+		StartButtonBox->SetHeightOverride(120.0f);
 		StartButtonBox->SetContent(StartButton);
 		ConfigureMenuButton(
 			StartButton,
-			FVector2D(360.0f, 84.0f),
+			FVector2D(230.0f, 120.0f),
 			FLinearColor(0.10f, 0.18f, 0.22f, 0.96f),
 			FLinearColor(0.14f, 0.27f, 0.33f, 0.98f));
-		ConfigureTextBlock(StartButtonText, FText::FromString(TEXT("\uC2DC\uC791\uD558\uAE30")), FLinearColor::White, 34);
+		ConfigureTextBlock(StartButtonText, FText::FromString(TEXT("\uC774\uC5B4\uC11C\uD558\uAE30")), FLinearColor::White, 26);
 		StartButton->SetContent(StartButtonText);
 
-		UVerticalBoxSlot* StartSlot = MainMenuPanel->AddChildToVerticalBox(StartButtonBox);
-		if (StartSlot)
+		SlotSelectButtonBox->SetWidthOverride(210.0f);
+		SlotSelectButtonBox->SetHeightOverride(120.0f);
+		SlotSelectButtonBox->SetContent(SlotSelectButton);
+		ConfigureMenuButton(
+			SlotSelectButton,
+			FVector2D(210.0f, 120.0f),
+			FLinearColor(0.055f, 0.075f, 0.085f, 0.96f),
+			FLinearColor(0.10f, 0.16f, 0.19f, 0.98f));
+		ConfigureTextBlock(SlotSelectButtonText, FText::FromString(TEXT("\uC2AC\uB86F \uC120\uD0DD")), FLinearColor(0.90f, 0.94f, 0.96f, 1.0f), 24);
+		SlotSelectButton->SetContent(SlotSelectButtonText);
+
+		for (UWidget* MainMenuItem : { static_cast<UWidget*>(CurrentSaveSlotBox), static_cast<UWidget*>(StartButtonBox), static_cast<UWidget*>(SlotSelectButtonBox) })
 		{
-			StartSlot->SetHorizontalAlignment(HAlign_Center);
-			StartSlot->SetVerticalAlignment(VAlign_Center);
+			UHorizontalBoxSlot* MainMenuItemSlot = MainMenuRow->AddChildToHorizontalBox(MainMenuItem);
+			if (MainMenuItemSlot)
+			{
+				MainMenuItemSlot->SetHorizontalAlignment(HAlign_Center);
+				MainMenuItemSlot->SetVerticalAlignment(VAlign_Center);
+				MainMenuItemSlot->SetPadding(FMargin(8.0f, 0.0f));
+			}
+		}
+
+		UVerticalBoxSlot* MainMenuRowSlot = MainMenuPanel->AddChildToVerticalBox(MainMenuRow);
+		if (MainMenuRowSlot)
+		{
+			MainMenuRowSlot->SetHorizontalAlignment(HAlign_Center);
+			MainMenuRowSlot->SetVerticalAlignment(VAlign_Center);
 		}
 
 		UVerticalBoxSlot* MainMenuPanelSlot = MenuStack->AddChildToVerticalBox(MainMenuPanel);
@@ -1068,7 +1116,7 @@ namespace TunaSweeperEditorSetup
 			FLinearColor(0.14f, 0.27f, 0.33f, 0.98f));
 		ConfigureTextBlock(
 			PrimarySaveSlotButtonText,
-			FText::FromString(TEXT("\uC774\uC5B4\uC11C\uD558\uAE30")),
+			FText::FromString(TEXT("\uC138\uC774\uBE0C \uC2AC\uB86F \uC120\uD0DD")),
 			FLinearColor::White,
 			22);
 		PrimarySaveSlotButton->SetContent(PrimarySaveSlotButtonText);
