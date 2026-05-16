@@ -48,6 +48,24 @@ struct TUNASWEEPER_API FTunaSweeperTempOpenLootItemData
 };
 
 USTRUCT(BlueprintType)
+struct TUNASWEEPER_API FTunaSweeperSaveSlotSummary
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Save")
+	int32 SaveSlotIndex = 1;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Save")
+	bool bHasData = false;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Save")
+	float TotalPlaySeconds = 0.0f;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Save")
+	int64 LastSavedAtTicks = 0;
+};
+
+USTRUCT(BlueprintType)
 struct TUNASWEEPER_API FTunaSweeperPlayerHudState
 {
 	GENERATED_BODY()
@@ -119,6 +137,18 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|State")
 	void ClearRuntimeState();
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Save")
+	int32 GetActiveSaveSlotIndex() const { return ActiveSaveSlotIndex; }
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Save")
+	FTunaSweeperSaveSlotSummary GetSaveSlotSummary(int32 SaveSlotIndex) const;
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Save")
+	bool ActivateSaveSlot(int32 SaveSlotIndex, bool bStartNewGame);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Save")
+	bool DeleteSaveSlot(int32 SaveSlotIndex);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
 	void SetPlayerHudState(const FTunaSweeperPlayerHudState& InHudState);
@@ -192,6 +222,7 @@ private:
 	void EnsureInventoryStateInitialized();
 	bool LoadInventoryState();
 	bool SaveInventoryStateInternal() const;
+	void ResetRuntimeStateForSaveSlotSelection();
 	void GenerateDefaultInventoryState();
 	void ResetPlayerSlotArrays();
 	void RefreshLegacyPlayerInventoryItems();
@@ -218,6 +249,10 @@ private:
 		const TArray<FTunaSweeperInventorySlot>& InInventorySlots,
 		int32 Capacity) const;
 	void CollectPlayerOwnedItemUids(TSet<FGuid>& OutItemUids) const;
+	int32 SanitizeSaveSlotIndex(int32 SaveSlotIndex) const;
+	FString GetInventorySaveSlotName(int32 SaveSlotIndex) const;
+	FString GetExistingInventorySaveSlotName(int32 SaveSlotIndex) const;
+	float GetCurrentActiveSlotTotalPlaySeconds() const;
 	bool IsBunkerToRaidTravel(FName SourceLevelName, FName TargetLevelName) const;
 	bool IsRaidToBunkerTravel(FName SourceLevelName, FName TargetLevelName) const;
 	bool IsMapNameMatch(FName MapName, const TCHAR* ExpectedMapName) const;
@@ -269,4 +304,13 @@ private:
 
 	UPROPERTY(Transient)
 	bool bInventoryStateInitialized = false;
+
+	UPROPERTY(Transient)
+	int32 ActiveSaveSlotIndex = 1;
+
+	UPROPERTY(Transient)
+	float LoadedSlotTotalPlaySeconds = 0.0f;
+
+	UPROPERTY(Transient)
+	double ActiveSlotStartTimeSeconds = 0.0;
 };

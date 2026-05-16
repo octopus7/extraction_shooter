@@ -6,8 +6,11 @@
 
 namespace TunaSweeperInventory
 {
-	const TCHAR* SaveSlotName = TEXT("TunaSweeperInventoryState");
+	const TCHAR* LegacySaveSlotName = TEXT("TunaSweeperInventoryState");
+	const TCHAR* SaveSlotNamePrefix = TEXT("TunaSweeperInventoryState_Slot");
 	constexpr int32 SaveUserIndex = 0;
+	constexpr int32 MinSaveSlotIndex = 1;
+	constexpr int32 MaxSaveSlotIndex = 3;
 	constexpr int32 RequiredBareInventorySlots = 40;
 	constexpr int32 RequiredMaxInventorySlots = 100;
 	constexpr int32 RequiredEquipmentSlots = 8;
@@ -129,6 +132,7 @@ float FTunaSweeperPlayerHudState::GetCarryWeightMovementSpeedMultiplier() const
 void UTunaSweeperGameInstance::Init()
 {
 	Super::Init();
+	ActiveSlotStartTimeSeconds = FPlatformTime::Seconds();
 	EnsureInventoryStateInitialized();
 }
 
@@ -194,27 +198,82 @@ bool UTunaSweeperGameInstance::TryGetBoolSetting(FName Key, bool& bOutValue) con
 
 void UTunaSweeperGameInstance::ClearRuntimeState()
 {
-	GameplayInfo.Reset();
-	NumberSettings.Reset();
-	BoolSettings.Reset();
-	PlayerHudState = FTunaSweeperPlayerHudState();
-	TempOpenLootItems.Reset();
-	bHasGeneratedTempOpenLootItems = false;
-	PlayerInventoryItems.Reset();
-	bHasGeneratedPlayerInventoryItems = false;
-	ItemInstancesByUid.Reset();
-	PlayerInventorySlots.Reset();
-	EquipmentSlots.Reset();
-	AuxiliaryBagSlots.Reset();
-	ActiveLootContainerSlots.Reset();
-	SelectedWeaponAttachmentSlotTags.Reset();
-	SelectedWeaponAttachmentSlots.Reset();
-	SelectedItemSlotReference = FTunaSweeperItemSlotReference();
-	ActiveLootContainerDisplayName = FText::GetEmpty();
-	ActiveLootContainerCapacity = 0;
-	bHasActiveLootContainer = false;
-	bInventoryStateInitialized = false;
+	ResetRuntimeStateForSaveSlotSelection();
 	EnsureInventoryStateInitialized();
+}
+
+FTunaSweeperSaveSlotSummary UTunaSweeperGameInstance::GetSaveSlotSummary(int32 SaveSlotIndex) const
+{
+	FTunaSweeperSaveSlotSummary Summary;
+	Summary.SaveSlotIndex = SanitizeSaveSlotIndex(SaveSlotIndex);
+
+	const FString ExistingSlotName = GetExistingInventorySaveSlotName(Summary.SaveSlotIndex);
+	if (ExistingSlotName.IsEmpty())
+	{
+		return Summary;
+	}
+
+	UTunaSweeperInventorySaveGame* SaveGame = Cast<UTunaSweeperInventorySaveGame>(UGameplayStatics::LoadGameFromSlot(
+		ExistingSlotName,
+		TunaSweeperInventory::SaveUserIndex));
+	if (!SaveGame)
+	{
+		return Summary;
+	}
+
+	Summary.bHasData = true;
+	Summary.TotalPlaySeconds = FMath::Max(0.0f, SaveGame->TotalPlaySeconds);
+	Summary.LastSavedAtTicks = SaveGame->LastSavedAtTicks;
+	return Summary;
+}
+
+bool UTunaSweeperGameInstance::ActivateSaveSlot(int32 SaveSlotIndex, bool bStartNewGame)
+{
+	ActiveSaveSlotIndex = SanitizeSaveSlotIndex(SaveSlotIndex);
+	ResetRuntimeStateForSaveSlotSelection();
+	ActiveSaveSlotIndex = SanitizeSaveSlotIndex(SaveSlotIndex);
+
+	if (bStartNewGame)
+	{
+		LoadedSlotTotalPlaySeconds = 0.0f;
+		ActiveSlotStartTimeSeconds = FPlatformTime::Seconds();
+		GenerateDefaultInventoryState();
+		bInventoryStateInitialized = true;
+		RefreshLegacyPlayerInventoryItems();
+		SaveInventoryStateInternal();
+		return true;
+	}
+
+	EnsureInventoryStateInitialized();
+	return true;
+}
+
+bool UTunaSweeperGameInstance::DeleteSaveSlot(int32 SaveSlotIndex)
+{
+	const int32 SanitizedSlotIndex = SanitizeSaveSlotIndex(SaveSlotIndex);
+	bool bDeleted = false;
+
+	const FString SlotName = GetInventorySaveSlotName(SanitizedSlotIndex);
+	if (UGameplayStatics::DoesSaveGameExist(SlotName, TunaSweeperInventory::SaveUserIndex))
+	{
+		bDeleted |= UGameplayStatics::DeleteGameInSlot(SlotName, TunaSweeperInventory::SaveUserIndex);
+	}
+
+	if (SanitizedSlotIndex == 1 &&
+		UGameplayStatics::DoesSaveGameExist(TunaSweeperInventory::LegacySaveSlotName, TunaSweeperInventory::SaveUserIndex))
+	{
+		bDeleted |= UGameplayStatics::DeleteGameInSlot(
+			TunaSweeperInventory::LegacySaveSlotName,
+			TunaSweeperInventory::SaveUserIndex);
+	}
+
+	if (ActiveSaveSlotIndex == SanitizedSlotIndex)
+	{
+		ResetRuntimeStateForSaveSlotSelection();
+		ActiveSaveSlotIndex = SanitizedSlotIndex;
+	}
+
+	return bDeleted;
 }
 
 void UTunaSweeperGameInstance::SetPlayerHudState(const FTunaSweeperPlayerHudState& InHudState)
@@ -687,6 +746,8 @@ void UTunaSweeperGameInstance::EnsureInventoryStateInitialized()
 
 	if (!LoadInventoryState())
 	{
+		LoadedSlotTotalPlaySeconds = 0.0f;
+		ActiveSlotStartTimeSeconds = FPlatformTime::Seconds();
 		GenerateDefaultInventoryState();
 	}
 
@@ -696,19 +757,22 @@ void UTunaSweeperGameInstance::EnsureInventoryStateInitialized()
 
 bool UTunaSweeperGameInstance::LoadInventoryState()
 {
-	if (!UGameplayStatics::DoesSaveGameExist(TunaSweeperInventory::SaveSlotName, TunaSweeperInventory::SaveUserIndex))
+	const FString ExistingSlotName = GetExistingInventorySaveSlotName(ActiveSaveSlotIndex);
+	if (ExistingSlotName.IsEmpty())
 	{
 		return false;
 	}
 
 	UTunaSweeperInventorySaveGame* SaveGame = Cast<UTunaSweeperInventorySaveGame>(UGameplayStatics::LoadGameFromSlot(
-		TunaSweeperInventory::SaveSlotName,
+		ExistingSlotName,
 		TunaSweeperInventory::SaveUserIndex));
 	if (!SaveGame)
 	{
 		return false;
 	}
 
+	LoadedSlotTotalPlaySeconds = FMath::Max(0.0f, SaveGame->TotalPlaySeconds);
+	ActiveSlotStartTimeSeconds = FPlatformTime::Seconds();
 	ItemInstancesByUid.Reset();
 	for (const FTunaSweeperItemInstance& ItemInstance : SaveGame->ItemInstances)
 	{
@@ -771,14 +835,43 @@ bool UTunaSweeperGameInstance::SaveInventoryStateInternal() const
 		}
 	}
 
+	SaveGame->SaveSlotIndex = ActiveSaveSlotIndex;
+	SaveGame->TotalPlaySeconds = GetCurrentActiveSlotTotalPlaySeconds();
+	SaveGame->LastSavedAtTicks = FDateTime::Now().GetTicks();
 	SaveGame->InventorySlots = PlayerInventorySlots;
 	SaveGame->EquipmentSlots = EquipmentSlots;
 	SaveGame->AuxiliaryBagSlots = AuxiliaryBagSlots;
 
 	return UGameplayStatics::SaveGameToSlot(
 		SaveGame,
-		TunaSweeperInventory::SaveSlotName,
+		GetInventorySaveSlotName(ActiveSaveSlotIndex),
 		TunaSweeperInventory::SaveUserIndex);
+}
+
+void UTunaSweeperGameInstance::ResetRuntimeStateForSaveSlotSelection()
+{
+	GameplayInfo.Reset();
+	NumberSettings.Reset();
+	BoolSettings.Reset();
+	PlayerHudState = FTunaSweeperPlayerHudState();
+	TempOpenLootItems.Reset();
+	bHasGeneratedTempOpenLootItems = false;
+	PlayerInventoryItems.Reset();
+	bHasGeneratedPlayerInventoryItems = false;
+	ItemInstancesByUid.Reset();
+	PlayerInventorySlots.Reset();
+	EquipmentSlots.Reset();
+	AuxiliaryBagSlots.Reset();
+	ActiveLootContainerSlots.Reset();
+	SelectedWeaponAttachmentSlotTags.Reset();
+	SelectedWeaponAttachmentSlots.Reset();
+	SelectedItemSlotReference = FTunaSweeperItemSlotReference();
+	ActiveLootContainerDisplayName = FText::GetEmpty();
+	ActiveLootContainerCapacity = 0;
+	bHasActiveLootContainer = false;
+	bInventoryStateInitialized = false;
+	LoadedSlotTotalPlaySeconds = 0.0f;
+	ActiveSlotStartTimeSeconds = FPlatformTime::Seconds();
 }
 
 void UTunaSweeperGameInstance::GenerateDefaultInventoryState()
@@ -1221,6 +1314,48 @@ void UTunaSweeperGameInstance::CollectPlayerOwnedItemUids(TSet<FGuid>& OutItemUi
 	CollectSlots(PlayerInventorySlots);
 	CollectSlots(EquipmentSlots);
 	CollectSlots(AuxiliaryBagSlots);
+}
+
+int32 UTunaSweeperGameInstance::SanitizeSaveSlotIndex(int32 SaveSlotIndex) const
+{
+	return FMath::Clamp(
+		SaveSlotIndex,
+		TunaSweeperInventory::MinSaveSlotIndex,
+		TunaSweeperInventory::MaxSaveSlotIndex);
+}
+
+FString UTunaSweeperGameInstance::GetInventorySaveSlotName(int32 SaveSlotIndex) const
+{
+	return FString::Printf(
+		TEXT("%s%d"),
+		TunaSweeperInventory::SaveSlotNamePrefix,
+		SanitizeSaveSlotIndex(SaveSlotIndex));
+}
+
+FString UTunaSweeperGameInstance::GetExistingInventorySaveSlotName(int32 SaveSlotIndex) const
+{
+	const int32 SanitizedSlotIndex = SanitizeSaveSlotIndex(SaveSlotIndex);
+	const FString SlotName = GetInventorySaveSlotName(SanitizedSlotIndex);
+	if (UGameplayStatics::DoesSaveGameExist(SlotName, TunaSweeperInventory::SaveUserIndex))
+	{
+		return SlotName;
+	}
+
+	if (SanitizedSlotIndex == 1 &&
+		UGameplayStatics::DoesSaveGameExist(TunaSweeperInventory::LegacySaveSlotName, TunaSweeperInventory::SaveUserIndex))
+	{
+		return FString(TunaSweeperInventory::LegacySaveSlotName);
+	}
+
+	return FString();
+}
+
+float UTunaSweeperGameInstance::GetCurrentActiveSlotTotalPlaySeconds() const
+{
+	const double SessionSeconds = ActiveSlotStartTimeSeconds > 0.0
+		? FPlatformTime::Seconds() - ActiveSlotStartTimeSeconds
+		: 0.0;
+	return LoadedSlotTotalPlaySeconds + static_cast<float>(FMath::Max(0.0, SessionSeconds));
 }
 
 bool UTunaSweeperGameInstance::IsBunkerToRaidTravel(FName SourceLevelName, FName TargetLevelName) const
