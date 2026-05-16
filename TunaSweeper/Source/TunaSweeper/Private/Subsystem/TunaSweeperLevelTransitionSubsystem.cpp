@@ -10,6 +10,7 @@
 #include "MediaSource.h"
 #include "MediaTexture.h"
 #include "Player/TunaSweeperPlayerController.h"
+#include "Subsystem/TunaSweeperEnemySpawnSubsystem.h"
 #include "Stats/Stats.h"
 #include "UI/TunaSweeperLevelTransitionWidget.h"
 #include "UObject/UObjectGlobals.h"
@@ -176,6 +177,14 @@ void UTunaSweeperLevelTransitionSubsystem::HandlePostLoadMapWithWorld(UWorld* Lo
 	if (Phase != ETransitionPhase::LoadingLevel)
 	{
 		return;
+	}
+
+	if (UGameInstance* GameInstance = GetGameInstance())
+	{
+		if (UTunaSweeperEnemySpawnSubsystem* EnemySpawnSubsystem = GameInstance->GetSubsystem<UTunaSweeperEnemySpawnSubsystem>())
+		{
+			EnemySpawnSubsystem->EnsureEnemiesSpawnedForWorld(LoadedWorld);
+		}
 	}
 
 	EnsureTransitionWidget(LoadedWorld);

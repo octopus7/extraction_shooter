@@ -17,13 +17,17 @@ protected:
 	virtual void OnPossess(APawn* InPawn) override;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI")
-	float UpdateInterval = 0.4f;
+	float UpdateInterval = 0.25f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI")
-	float AcceptanceRadius = 120.0f;
+	float AttackRange = 800.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI")
+	float AttackCooldownSeconds = 1.5f;
 
 private:
-	void UpdateChaseTarget();
+	void UpdateAttackTarget();
 
 	FTimerHandle UpdateTimerHandle;
+	double LastAttackTimeSeconds = -1000.0;
 };

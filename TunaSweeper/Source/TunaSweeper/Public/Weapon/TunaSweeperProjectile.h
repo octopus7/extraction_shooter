@@ -5,6 +5,7 @@
 #include "TunaSweeperProjectile.generated.h"
 
 class UProjectileMovementComponent;
+class UPrimitiveComponent;
 class USphereComponent;
 class UStaticMeshComponent;
 
@@ -16,8 +17,18 @@ class TUNASWEEPER_API ATunaSweeperProjectile : public AActor
 public:
 	ATunaSweeperProjectile();
 
+	void SetDamageAmount(float InDamageAmount) { DamageAmount = FMath::Max(0.0f, InDamageAmount); }
+
 protected:
 	virtual void BeginPlay() override;
+
+	UFUNCTION()
+	void HandleHit(
+		UPrimitiveComponent* HitComponent,
+		AActor* OtherActor,
+		UPrimitiveComponent* OtherComp,
+		FVector NormalImpulse,
+		const FHitResult& Hit);
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Projectile")
 	TObjectPtr<USphereComponent> CollisionComponent;
@@ -30,4 +41,7 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Projectile")
 	float LifeSeconds = 3.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Projectile", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float DamageAmount = 10.0f;
 };

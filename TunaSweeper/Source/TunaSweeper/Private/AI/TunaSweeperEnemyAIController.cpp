@@ -1,5 +1,7 @@
 #include "AI/TunaSweeperEnemyAIController.h"
 
+#include "AI/TunaSweeperEnemyCharacter.h"
+#include "Character/TunaSweeperTopDownCharacter.h"
 #include "Kismet/GameplayStatics.h"
 #include "TimerManager.h"
 
@@ -12,17 +14,17 @@ void ATunaSweeperEnemyAIController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	GetWorldTimerManager().SetTimer(UpdateTimerHandle, this, &ATunaSweeperEnemyAIController::UpdateChaseTarget, UpdateInterval, true, 0.0f);
+	GetWorldTimerManager().SetTimer(UpdateTimerHandle, this, &ATunaSweeperEnemyAIController::UpdateAttackTarget, UpdateInterval, true, 0.0f);
 }
 
 void ATunaSweeperEnemyAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
 
-	UpdateChaseTarget();
+	UpdateAttackTarget();
 }
 
-void ATunaSweeperEnemyAIController::UpdateChaseTarget()
+void ATunaSweeperEnemyAIController::UpdateAttackTarget()
 {
 	APawn* ControlledPawn = GetPawn();
 	APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(this, 0);
@@ -32,6 +34,34 @@ void ATunaSweeperEnemyAIController::UpdateChaseTarget()
 		return;
 	}
 
+	if (const ATunaSweeperTopDownCharacter* PlayerCharacter = Cast<ATunaSweeperTopDownCharacter>(PlayerPawn))
+	{
+		if (PlayerCharacter->IsDead())
+		{
+			ClearFocus(EAIFocusPriority::Gameplay);
+			return;
+		}
+	}
+
+	const float AttackRangeSquared = FMath::Square(FMath::Max(0.0f, AttackRange));
+	if (FVector::DistSquared2D(ControlledPawn->GetActorLocation(), PlayerPawn->GetActorLocation()) > AttackRangeSquared)
+	{
+		ClearFocus(EAIFocusPriority::Gameplay);
+		return;
+	}
+
 	SetFocus(PlayerPawn, EAIFocusPriority::Gameplay);
-	MoveToActor(PlayerPawn, AcceptanceRadius, true, true, true);
+
+	UWorld* World = GetWorld();
+	const double CurrentTimeSeconds = World ? World->GetTimeSeconds() : 0.0;
+	if (CurrentTimeSeconds - LastAttackTimeSeconds < AttackCooldownSeconds)
+	{
+		return;
+	}
+
+	ATunaSweeperEnemyCharacter* EnemyCharacter = Cast<ATunaSweeperEnemyCharacter>(ControlledPawn);
+	if (EnemyCharacter && EnemyCharacter->FireProjectileAt(PlayerPawn))
+	{
+		LastAttackTimeSeconds = CurrentTimeSeconds;
+	}
 }
