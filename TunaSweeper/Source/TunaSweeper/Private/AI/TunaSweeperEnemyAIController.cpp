@@ -7,14 +7,27 @@
 
 ATunaSweeperEnemyAIController::ATunaSweeperEnemyAIController()
 {
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
+}
+
+void ATunaSweeperEnemyAIController::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	MoveTowardCurrentTarget(DeltaSeconds);
 }
 
 void ATunaSweeperEnemyAIController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	GetWorldTimerManager().SetTimer(UpdateTimerHandle, this, &ATunaSweeperEnemyAIController::UpdateAttackTarget, UpdateInterval, true, 0.0f);
+	GetWorldTimerManager().SetTimer(
+		UpdateTimerHandle,
+		this,
+		&ATunaSweeperEnemyAIController::UpdateAttackTarget,
+		FMath::Max(0.01f, UpdateInterval),
+		true,
+		0.0f);
 }
 
 void ATunaSweeperEnemyAIController::OnPossess(APawn* InPawn)
@@ -30,7 +43,7 @@ void ATunaSweeperEnemyAIController::UpdateAttackTarget()
 	APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(this, 0);
 	if (!ControlledPawn || !PlayerPawn)
 	{
-		ClearFocus(EAIFocusPriority::Gameplay);
+		ClearCombatTarget();
 		return;
 	}
 
@@ -38,19 +51,26 @@ void ATunaSweeperEnemyAIController::UpdateAttackTarget()
 	{
 		if (PlayerCharacter->IsDead())
 		{
-			ClearFocus(EAIFocusPriority::Gameplay);
+			ClearCombatTarget();
 			return;
 		}
 	}
 
-	const float AttackRangeSquared = FMath::Square(FMath::Max(0.0f, AttackRange));
-	if (FVector::DistSquared2D(ControlledPawn->GetActorLocation(), PlayerPawn->GetActorLocation()) > AttackRangeSquared)
+	const float DistanceToPlayer = FMath::Sqrt(FVector::DistSquared2D(ControlledPawn->GetActorLocation(), PlayerPawn->GetActorLocation()));
+	if (DistanceToPlayer > FMath::Max(0.0f, TrackingRange))
 	{
-		ClearFocus(EAIFocusPriority::Gameplay);
+		ClearCombatTarget();
 		return;
 	}
 
+	CurrentTargetActor = PlayerPawn;
 	SetFocus(PlayerPawn, EAIFocusPriority::Gameplay);
+	UpdateApproachState(DistanceToPlayer);
+
+	if (bIsClosingDistance || DistanceToPlayer > FMath::Max(0.0f, AttackRange))
+	{
+		return;
+	}
 
 	UWorld* World = GetWorld();
 	const double CurrentTimeSeconds = World ? World->GetTimeSeconds() : 0.0;
@@ -64,4 +84,72 @@ void ATunaSweeperEnemyAIController::UpdateAttackTarget()
 	{
 		LastAttackTimeSeconds = CurrentTimeSeconds;
 	}
+}
+
+void ATunaSweeperEnemyAIController::UpdateApproachState(float DistanceToTarget)
+{
+	const float StartRange = FMath::Max(0.0f, ApproachStartRange);
+	const float StopRange = FMath::Clamp(ApproachStopRange, 0.0f, StartRange);
+
+	if (bIsClosingDistance)
+	{
+		if (DistanceToTarget <= StopRange)
+		{
+			bIsClosingDistance = false;
+			StopMovement();
+		}
+
+		return;
+	}
+
+	if (DistanceToTarget > StartRange)
+	{
+		bIsClosingDistance = true;
+	}
+}
+
+void ATunaSweeperEnemyAIController::MoveTowardCurrentTarget(float DeltaSeconds)
+{
+	if (!bIsClosingDistance || DeltaSeconds <= 0.0f)
+	{
+		return;
+	}
+
+	APawn* ControlledPawn = GetPawn();
+	AActor* TargetActor = CurrentTargetActor.Get();
+	if (!ControlledPawn || !TargetActor)
+	{
+		ClearCombatTarget();
+		return;
+	}
+
+	FVector ToTarget = TargetActor->GetActorLocation() - ControlledPawn->GetActorLocation();
+	ToTarget.Z = 0.0f;
+
+	const float DistanceToTarget = ToTarget.Size();
+	const float StartRange = FMath::Max(0.0f, ApproachStartRange);
+	const float StopRange = FMath::Clamp(ApproachStopRange, 0.0f, StartRange);
+	if (DistanceToTarget <= StopRange)
+	{
+		bIsClosingDistance = false;
+		StopMovement();
+		return;
+	}
+
+	const FVector MoveDirection = ToTarget.GetSafeNormal();
+	if (MoveDirection.IsNearlyZero())
+	{
+		return;
+	}
+
+	ControlledPawn->SetActorRotation(FRotator(0.0f, MoveDirection.Rotation().Yaw, 0.0f));
+	ControlledPawn->AddMovementInput(MoveDirection, 1.0f);
+}
+
+void ATunaSweeperEnemyAIController::ClearCombatTarget()
+{
+	CurrentTargetActor.Reset();
+	bIsClosingDistance = false;
+	StopMovement();
+	ClearFocus(EAIFocusPriority::Gameplay);
 }

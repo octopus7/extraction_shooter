@@ -17,7 +17,7 @@ ATunaSweeperEnemyCharacter::ATunaSweeperEnemyCharacter()
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
 	GetCapsuleComponent()->InitCapsuleSize(34.0f, 88.0f);
-	GetCharacterMovement()->MaxWalkSpeed = 0.0f;
+	GetCharacterMovement()->MaxWalkSpeed = 260.0f;
 	GetCharacterMovement()->bOrientRotationToMovement = false;
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 480.0f, 0.0f);
 
@@ -59,6 +59,7 @@ void ATunaSweeperEnemyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	GetCharacterMovement()->MaxWalkSpeed = MovementSpeed;
 	ApplyVisualMaterials();
 }
 

@@ -37,6 +37,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat", meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float ProjectileDamage = 10.0f;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float MovementSpeed = 260.0f;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Visual")
 	TSoftObjectPtr<UMaterialInterface> BodyMaterial;
 
