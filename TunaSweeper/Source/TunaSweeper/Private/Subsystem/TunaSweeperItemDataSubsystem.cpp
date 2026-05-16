@@ -340,9 +340,12 @@ bool UTunaSweeperItemDataSubsystem::LoadItemTableJson()
 
 		double NumericId = 0.0;
 		double NumericShopSellPrice = 0.0;
+		double NumericInventorySlotCapacity = 0.0;
 		FString NameStringKey;
 		FString DescriptionStringKey;
 		FString IconFileName;
+		FString CategoryTag;
+		FString EquipmentSlotTag;
 		if (!(*JsonObject)->TryGetNumberField(TEXT("id"), NumericId) ||
 			!(*JsonObject)->TryGetStringField(TEXT("name_string_key"), NameStringKey) ||
 			!(*JsonObject)->TryGetStringField(TEXT("description_string_key"), DescriptionStringKey) ||
@@ -359,6 +362,18 @@ bool UTunaSweeperItemDataSubsystem::LoadItemTableJson()
 		ItemDefinition.DescriptionStringKey = FName(*DescriptionStringKey.TrimStartAndEnd());
 		ItemDefinition.ShopSellPrice = FMath::Max(0, static_cast<int32>(NumericShopSellPrice));
 		ItemDefinition.IconFileName = IconFileName.TrimStartAndEnd();
+		if ((*JsonObject)->TryGetStringField(TEXT("category_tag"), CategoryTag))
+		{
+			ItemDefinition.CategoryTag = FName(*CategoryTag.TrimStartAndEnd());
+		}
+		if ((*JsonObject)->TryGetStringField(TEXT("equipment_slot_tag"), EquipmentSlotTag))
+		{
+			ItemDefinition.EquipmentSlotTag = FName(*EquipmentSlotTag.TrimStartAndEnd());
+		}
+		if ((*JsonObject)->TryGetNumberField(TEXT("inventory_slot_capacity"), NumericInventorySlotCapacity))
+		{
+			ItemDefinition.InventorySlotCapacity = FMath::Max(0, static_cast<int32>(NumericInventorySlotCapacity));
+		}
 
 		if (ItemDefinition.Id == INDEX_NONE || ItemDefinition.NameStringKey.IsNone() ||
 			ItemDefinition.DescriptionStringKey.IsNone() || ItemDefinition.IconFileName.IsEmpty())

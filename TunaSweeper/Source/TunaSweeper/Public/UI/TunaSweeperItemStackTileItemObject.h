@@ -1,20 +1,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Inventory/TunaSweeperInventoryTypes.h"
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
 #include "UObject/Object.h"
 #include "TunaSweeperItemStackTileItemObject.generated.h"
 
 class UTexture2D;
-
-UENUM(BlueprintType)
-enum class ETunaSweeperItemSlotSource : uint8
-{
-	Equipment UMETA(DisplayName = "Equipment"),
-	AuxiliaryBag UMETA(DisplayName = "Auxiliary Bag"),
-	Inventory UMETA(DisplayName = "Inventory"),
-	LootContainer UMETA(DisplayName = "Loot Container")
-};
 
 USTRUCT(BlueprintType)
 struct TUNASWEEPER_API FTunaSweeperItemStackTileData
@@ -23,6 +15,9 @@ struct TUNASWEEPER_API FTunaSweeperItemStackTileData
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Tile")
 	FTunaSweeperItemStack ItemStack;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Tile")
+	FTunaSweeperItemInstance ItemInstance;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Tile")
 	FText DisplayName;
@@ -35,6 +30,9 @@ struct TUNASWEEPER_API FTunaSweeperItemStackTileData
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Tile")
 	int32 SourceIndex = INDEX_NONE;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Tile")
+	FTunaSweeperItemSlotReference SlotReference;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Tile")
 	bool bIsEmpty = true;
@@ -55,4 +53,3 @@ private:
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Tile", meta = (AllowPrivateAccess = "true"))
 	FTunaSweeperItemStackTileData TileData;
 };
-

@@ -23,6 +23,19 @@ protected:
 		const FGeometry& InGeometry,
 		const FPointerEvent& InMouseEvent,
 		UDragDropOperation*& OutOperation) override;
+	virtual void NativeOnDragEnter(
+		const FGeometry& InGeometry,
+		const FDragDropEvent& InDragDropEvent,
+		UDragDropOperation* InOperation) override;
+	virtual void NativeOnDragLeave(const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
+	virtual bool NativeOnDragOver(
+		const FGeometry& InGeometry,
+		const FDragDropEvent& InDragDropEvent,
+		UDragDropOperation* InOperation) override;
+	virtual bool NativeOnDrop(
+		const FGeometry& InGeometry,
+		const FDragDropEvent& InDragDropEvent,
+		UDragDropOperation* InOperation) override;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Tile", meta = (BindWidgetOptional))
 	TObjectPtr<UBorder> SlotBackground;
@@ -38,6 +51,9 @@ protected:
 
 private:
 	void ApplyTileData();
+	void ApplyDropHighlight(bool bCanAcceptDrop);
+	bool CanAcceptDragOperation(UDragDropOperation* InOperation) const;
+	FTunaSweeperItemSlotReference GetCachedSlotReference() const;
 
 	UPROPERTY(Transient)
 	FTunaSweeperItemStackTileData CachedTileData;

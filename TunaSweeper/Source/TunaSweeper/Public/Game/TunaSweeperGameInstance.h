@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
+#include "Inventory/TunaSweeperInventoryTypes.h"
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
 #include "TunaSweeperGameInstance.generated.h"
 
@@ -16,7 +17,16 @@ struct TUNASWEEPER_API FTunaSweeperGameplaySettings
 	float InteractionTraceDistance = 500.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "TunaSweeper|Gameplay")
-	int32 MaxInventorySlots = 24;
+	int32 BareInventorySlots = 40;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "TunaSweeper|Gameplay")
+	int32 MaxInventorySlots = 100;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "TunaSweeper|Gameplay")
+	int32 EquipmentSlotCount = 1;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "TunaSweeper|Gameplay")
+	int32 AuxiliaryBagSlotCount = 2;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "TunaSweeper|Gameplay")
 	bool bEnableDebugGameplay = false;
@@ -72,6 +82,8 @@ class TUNASWEEPER_API UTunaSweeperGameInstance : public UGameInstance
 	GENERATED_BODY()
 
 public:
+	virtual void Init() override;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "TunaSweeper|Settings")
 	FTunaSweeperGameplaySettings GameplaySettings;
 
@@ -127,9 +139,71 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Inventory")
 	void GetPlayerInventoryItems(TArray<FTunaSweeperItemStack>& OutItems);
 
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Inventory")
+	int32 GetCurrentInventorySlotCapacity();
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Inventory")
+	int32 GetEquippedBackpackSlotBonus();
+
+	const TArray<FTunaSweeperInventorySlot>& GetInventorySlots();
+	const TArray<FTunaSweeperInventorySlot>& GetEquipmentSlots();
+	const TArray<FTunaSweeperInventorySlot>& GetAuxiliaryBagSlots();
+	const TArray<FTunaSweeperInventorySlot>& GetActiveLootContainerSlots();
+	bool HasActiveLootContainer() const { return bHasActiveLootContainer; }
+	FText GetActiveLootContainerDisplayName() const { return ActiveLootContainerDisplayName; }
+	int32 GetActiveLootContainerCapacity() const { return ActiveLootContainerCapacity; }
+
+	bool TryGetItemInstance(const FGuid& ItemUid, FTunaSweeperItemInstance& OutItemInstance) const;
+	bool TryGetSlotItemInstance(const FTunaSweeperItemSlotReference& SlotReference, FTunaSweeperItemInstance& OutItemInstance);
+	bool CanSlotAcceptItem(const FTunaSweeperItemSlotReference& SlotReference, const FGuid& ItemUid);
+	bool CanMoveItemBetweenSlots(
+		const FTunaSweeperItemSlotReference& SourceSlot,
+		const FTunaSweeperItemSlotReference& TargetSlot,
+		FString* OutFailureReason = nullptr);
+	bool MoveItemBetweenSlots(
+		const FTunaSweeperItemSlotReference& SourceSlot,
+		const FTunaSweeperItemSlotReference& TargetSlot);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Inventory")
+	bool AddItemToFirstAvailableInventorySlot(int32 ItemId, int32 Quantity = 1);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Inventory")
+	void CompactInventorySlots();
+
+	void SetActiveLootContainerInstance(const FTunaSweeperLootContainerInstance& InContainerInstance);
+	void SaveInventoryState();
+	void ClearInventoryAndSave();
+	void HandleLevelTravelPersistence(FName SourceLevelName, FName TargetLevelName);
+
+	FSimpleMulticastDelegate OnInventoryStateChanged;
+
 private:
 	void GenerateTempOpenLootItems();
 	void GeneratePlayerInventoryItems();
+	void EnsureInventoryStateInitialized();
+	bool LoadInventoryState();
+	bool SaveInventoryStateInternal() const;
+	void GenerateDefaultInventoryState();
+	void ResetPlayerSlotArrays();
+	void RefreshLegacyPlayerInventoryItems();
+	void BroadcastInventoryStateChanged();
+	FGuid CreateItemInstance(int32 ItemId, int32 Quantity);
+	bool AddItemUidToFirstEmptySlot(const FGuid& ItemUid, TArray<FTunaSweeperInventorySlot>& Slots);
+	void RemoveInvalidSlotReferences(TArray<FTunaSweeperInventorySlot>& Slots) const;
+	void EnsureSlotArraySize(TArray<FTunaSweeperInventorySlot>& Slots, int32 DesiredSize) const;
+	TArray<FTunaSweeperInventorySlot>* GetMutableSlotsForSource(ETunaSweeperItemSlotSource Source);
+	const TArray<FTunaSweeperInventorySlot>* GetSlotsForSource(ETunaSweeperItemSlotSource Source) const;
+	int32 CalculateInventoryCapacityForEquipmentSlots(const TArray<FTunaSweeperInventorySlot>& InEquipmentSlots);
+	int32 GetInventoryCapacityForItemUid(const FGuid& ItemUid);
+	bool IsBackpackItemUid(const FGuid& ItemUid);
+	bool IsBackpackItemDefinition(const FTunaSweeperItemDefinition& ItemDefinition) const;
+	bool HasOccupiedInventorySlotsBeyondCapacity(
+		const TArray<FTunaSweeperInventorySlot>& InInventorySlots,
+		int32 Capacity) const;
+	void CollectPlayerOwnedItemUids(TSet<FGuid>& OutItemUids) const;
+	bool IsBunkerToRaidTravel(FName SourceLevelName, FName TargetLevelName) const;
+	bool IsRaidToBunkerTravel(FName SourceLevelName, FName TargetLevelName) const;
+	bool IsMapNameMatch(FName MapName, const TCHAR* ExpectedMapName) const;
 
 	UPROPERTY()
 	TArray<FTunaSweeperTempOpenLootItemData> TempOpenLootItems;
@@ -142,4 +216,31 @@ private:
 
 	UPROPERTY()
 	bool bHasGeneratedPlayerInventoryItems = false;
+
+	UPROPERTY(Transient)
+	TMap<FGuid, FTunaSweeperItemInstance> ItemInstancesByUid;
+
+	UPROPERTY(Transient)
+	TArray<FTunaSweeperInventorySlot> PlayerInventorySlots;
+
+	UPROPERTY(Transient)
+	TArray<FTunaSweeperInventorySlot> EquipmentSlots;
+
+	UPROPERTY(Transient)
+	TArray<FTunaSweeperInventorySlot> AuxiliaryBagSlots;
+
+	UPROPERTY(Transient)
+	TArray<FTunaSweeperInventorySlot> ActiveLootContainerSlots;
+
+	UPROPERTY(Transient)
+	FText ActiveLootContainerDisplayName;
+
+	UPROPERTY(Transient)
+	int32 ActiveLootContainerCapacity = 0;
+
+	UPROPERTY(Transient)
+	bool bHasActiveLootContainer = false;
+
+	UPROPERTY(Transient)
+	bool bInventoryStateInitialized = false;
 };

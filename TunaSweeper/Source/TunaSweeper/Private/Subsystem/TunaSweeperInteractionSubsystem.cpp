@@ -3,6 +3,7 @@
 #include "Engine/Engine.h"
 #include "Blueprint/UserWidget.h"
 #include "Character/TunaSweeperQuestNpcActor.h"
+#include "Game/TunaSweeperGameInstance.h"
 #include "GameFramework/PlayerController.h"
 #include "Interaction/TunaSweeperItemSpawnInteractableActor.h"
 #include "Interaction/TunaSweeperInteractableComponent.h"
@@ -112,6 +113,20 @@ bool UTunaSweeperInteractionSubsystem::HandlePickupItemInteraction(UTunaSweeperI
 	}
 
 	const FString ItemName = PickupItemActor->GetItemDisplayName().ToString();
+	UTunaSweeperGameInstance* TunaGameInstance = GetWorld() ? GetWorld()->GetGameInstance<UTunaSweeperGameInstance>() : nullptr;
+	if (!TunaGameInstance || !TunaGameInstance->AddItemToFirstAvailableInventorySlot(PickupItemActor->GetItemId(), 1))
+	{
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(
+				-1,
+				2.0f,
+				FColor::Red,
+				FString::Printf(TEXT("[Interaction] Inventory full: %s"), *ItemName));
+		}
+		return false;
+	}
+
 	if (GEngine)
 	{
 		GEngine->AddOnScreenDebugMessage(

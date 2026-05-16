@@ -106,10 +106,43 @@
   },
   {
     "id": 5002,
-    "name_string_key": "item.backpack",
-    "description_string_key": "item.backpack.desc",
+    "name_string_key": "item.backpack_tier1",
+    "description_string_key": "item.backpack_tier1.desc",
     "shop_sell_price": 95,
-    "icon_file_name": "T_UIIcon_Backpack.uasset"
+    "icon_file_name": "T_UIIcon_Backpack_Tier1.uasset",
+    "category_tag": "item.category.bag",
+    "equipment_slot_tag": "equipment.slot.backpack",
+    "inventory_slot_capacity": 50
+  },
+  {
+    "id": 5003,
+    "name_string_key": "item.backpack_tier2",
+    "description_string_key": "item.backpack_tier2.desc",
+    "shop_sell_price": 150,
+    "icon_file_name": "T_UIIcon_Backpack_Tier2.uasset",
+    "category_tag": "item.category.bag",
+    "equipment_slot_tag": "equipment.slot.backpack",
+    "inventory_slot_capacity": 60
+  },
+  {
+    "id": 5004,
+    "name_string_key": "item.backpack_tier3",
+    "description_string_key": "item.backpack_tier3.desc",
+    "shop_sell_price": 260,
+    "icon_file_name": "T_UIIcon_Backpack_Tier3.uasset",
+    "category_tag": "item.category.bag",
+    "equipment_slot_tag": "equipment.slot.backpack",
+    "inventory_slot_capacity": 80
+  },
+  {
+    "id": 5005,
+    "name_string_key": "item.backpack_tier4",
+    "description_string_key": "item.backpack_tier4.desc",
+    "shop_sell_price": 420,
+    "icon_file_name": "T_UIIcon_Backpack_Tier4.uasset",
+    "category_tag": "item.category.bag",
+    "equipment_slot_tag": "equipment.slot.backpack",
+    "inventory_slot_capacity": 100
   },
   {
     "id": 6001,

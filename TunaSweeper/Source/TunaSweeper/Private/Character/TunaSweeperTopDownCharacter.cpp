@@ -366,6 +366,11 @@ void ATunaSweeperTopDownCharacter::HandleDeath()
 	bIsAiming = false;
 	GetWorldTimerManager().ClearTimer(FireTimerHandle);
 
+	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
+	{
+		TunaGameInstance->ClearInventoryAndSave();
+	}
+
 	if (UCharacterMovementComponent* MovementComponent = GetCharacterMovement())
 	{
 		MovementComponent->StopMovementImmediately();

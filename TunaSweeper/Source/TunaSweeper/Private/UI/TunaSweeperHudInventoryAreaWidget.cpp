@@ -1,9 +1,9 @@
 #include "UI/TunaSweeperHudInventoryAreaWidget.h"
 
 #include "Blueprint/DragDropOperation.h"
+#include "Components/Button.h"
 #include "Components/TileView.h"
 #include "Components/Widget.h"
-#include "Engine/Engine.h"
 #include "Engine/Texture2D.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
@@ -24,20 +24,24 @@ namespace TunaSweeperInventoryArea
 
 	FTunaSweeperItemStackTileData BuildTileData(
 		UTunaSweeperItemDataSubsystem* ItemDataSubsystem,
-		const FTunaSweeperItemStack& ItemStack,
+		const FTunaSweeperItemInstance& ItemInstance,
 		ETunaSweeperItemSlotSource Source,
 		int32 SourceIndex)
 	{
 		FTunaSweeperItemStackTileData TileData;
-		TileData.ItemStack = ItemStack;
+		TileData.ItemInstance = ItemInstance;
+		TileData.ItemStack.ItemId = ItemInstance.ItemId;
+		TileData.ItemStack.Quantity = FMath::Max(1, ItemInstance.Quantity);
 		TileData.Source = Source;
 		TileData.SourceIndex = SourceIndex;
-		TileData.bIsEmpty = ItemStack.ItemId == INDEX_NONE;
+		TileData.SlotReference.Source = Source;
+		TileData.SlotReference.SlotIndex = SourceIndex;
+		TileData.bIsEmpty = !ItemInstance.IsValid();
 
 		if (!TileData.bIsEmpty && ItemDataSubsystem)
 		{
 			FTunaSweeperItemDefinition ItemDefinition;
-			if (ItemDataSubsystem->TryGetItemDefinition(ItemStack.ItemId, ItemDefinition))
+			if (ItemDataSubsystem->TryGetItemDefinition(ItemInstance.ItemId, ItemDefinition))
 			{
 				FText DisplayName;
 				if (ItemDataSubsystem->TryGetItemNameTextByKey(ItemDefinition.NameStringKey, ETunaSweeperItemTextLanguage::Korean, DisplayName))
@@ -46,7 +50,7 @@ namespace TunaSweeperInventoryArea
 				}
 				else
 				{
-					TileData.DisplayName = FText::FromString(FString::Printf(TEXT("Item %d"), ItemStack.ItemId));
+					TileData.DisplayName = FText::FromString(FString::Printf(TEXT("Item %d"), ItemInstance.ItemId));
 				}
 
 				const FString IconObjectPath = ItemDataSubsystem->BuildItemIconObjectPath(ItemDefinition);
@@ -71,14 +75,79 @@ namespace TunaSweeperInventoryArea
 		}
 		return TileObject;
 	}
+
+	void PopulateTileView(
+		UObject* Outer,
+		UTileView* TileView,
+		const TArray<FTunaSweeperInventorySlot>& Slots,
+		UTunaSweeperGameInstance* TunaGameInstance,
+		UTunaSweeperItemDataSubsystem* ItemDataSubsystem,
+		ETunaSweeperItemSlotSource Source,
+		float TileWidth,
+		float TileHeight,
+		TArray<TObjectPtr<UObject>>& TileObjects)
+	{
+		if (!TileView)
+		{
+			return;
+		}
+
+		TileView->ClearListItems();
+		TileView->SetEntryWidth(TileWidth);
+		TileView->SetEntryHeight(TileHeight);
+
+		for (int32 Index = 0; Index < Slots.Num(); ++Index)
+		{
+			FTunaSweeperItemInstance ItemInstance;
+			if (TunaGameInstance && Slots[Index].ItemUid.IsValid())
+			{
+				TunaGameInstance->TryGetItemInstance(Slots[Index].ItemUid, ItemInstance);
+			}
+
+			UTunaSweeperItemStackTileItemObject* TileObject = CreateTileObject(
+				Outer,
+				BuildTileData(ItemDataSubsystem, ItemInstance, Source, Index));
+			if (TileObject)
+			{
+				TileObjects.Add(TileObject);
+				TileView->AddItem(TileObject);
+			}
+		}
+	}
 }
 
 void UTunaSweeperHudInventoryAreaWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	PopulateReservedTiles();
+	if (SortInventoryButton)
+	{
+		SortInventoryButton->OnClicked.RemoveDynamic(this, &UTunaSweeperHudInventoryAreaWidget::HandleSortInventoryClicked);
+		SortInventoryButton->OnClicked.AddDynamic(this, &UTunaSweeperHudInventoryAreaWidget::HandleSortInventoryClicked);
+	}
+
+	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
+	{
+		TunaGameInstance->OnInventoryStateChanged.RemoveAll(this);
+		TunaGameInstance->OnInventoryStateChanged.AddUObject(this, &UTunaSweeperHudInventoryAreaWidget::RefreshInventoryItems);
+	}
+
 	RefreshInventoryItems();
+}
+
+void UTunaSweeperHudInventoryAreaWidget::NativeDestruct()
+{
+	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
+	{
+		TunaGameInstance->OnInventoryStateChanged.RemoveAll(this);
+	}
+
+	if (SortInventoryButton)
+	{
+		SortInventoryButton->OnClicked.RemoveDynamic(this, &UTunaSweeperHudInventoryAreaWidget::HandleSortInventoryClicked);
+	}
+
+	Super::NativeDestruct();
 }
 
 void UTunaSweeperHudInventoryAreaWidget::SetInventoryVisible(bool bVisible)
@@ -91,38 +160,46 @@ void UTunaSweeperHudInventoryAreaWidget::SetInventoryVisible(bool bVisible)
 
 void UTunaSweeperHudInventoryAreaWidget::RefreshInventoryItems()
 {
-	if (!InventoryTileView)
-	{
-		return;
-	}
-
 	UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
 	UTunaSweeperItemDataSubsystem* ItemDataSubsystem = TunaGameInstance
 		? TunaGameInstance->GetSubsystem<UTunaSweeperItemDataSubsystem>()
 		: nullptr;
 
 	TileObjects.Reset();
-	InventoryTileView->ClearListItems();
-	InventoryTileView->SetEntryWidth(TunaSweeperInventoryArea::InventoryTileWidth);
-	InventoryTileView->SetEntryHeight(TunaSweeperInventoryArea::InventoryTileHeight);
 
-	if (!TunaGameInstance)
-	{
-		return;
-	}
+	static const TArray<FTunaSweeperInventorySlot> EmptySlots;
+	TunaSweeperInventoryArea::PopulateTileView(
+		this,
+		EquipmentReserveTileView,
+		TunaGameInstance ? TunaGameInstance->GetEquipmentSlots() : EmptySlots,
+		TunaGameInstance,
+		ItemDataSubsystem,
+		ETunaSweeperItemSlotSource::Equipment,
+		TunaSweeperInventoryArea::EquipmentReserveEntryWidth,
+		TunaSweeperInventoryArea::InventoryTileHeight,
+		TileObjects);
 
-	const TArray<FTunaSweeperItemStack>& InventoryItems = TunaGameInstance->GetOrCreatePlayerInventoryItems();
-	for (int32 Index = 0; Index < InventoryItems.Num(); ++Index)
-	{
-		UTunaSweeperItemStackTileItemObject* TileObject = TunaSweeperInventoryArea::CreateTileObject(
-			this,
-			TunaSweeperInventoryArea::BuildTileData(ItemDataSubsystem, InventoryItems[Index], ETunaSweeperItemSlotSource::Inventory, Index));
-		if (TileObject)
-		{
-			TileObjects.Add(TileObject);
-			InventoryTileView->AddItem(TileObject);
-		}
-	}
+	TunaSweeperInventoryArea::PopulateTileView(
+		this,
+		AuxiliaryBagTileView,
+		TunaGameInstance ? TunaGameInstance->GetAuxiliaryBagSlots() : EmptySlots,
+		TunaGameInstance,
+		ItemDataSubsystem,
+		ETunaSweeperItemSlotSource::AuxiliaryBag,
+		TunaSweeperInventoryArea::AuxiliaryBagTileWidth,
+		TunaSweeperInventoryArea::AuxiliaryBagTileHeight,
+		TileObjects);
+
+	TunaSweeperInventoryArea::PopulateTileView(
+		this,
+		InventoryTileView,
+		TunaGameInstance ? TunaGameInstance->GetInventorySlots() : EmptySlots,
+		TunaGameInstance,
+		ItemDataSubsystem,
+		ETunaSweeperItemSlotSource::Inventory,
+		TunaSweeperInventoryArea::InventoryTileWidth,
+		TunaSweeperInventoryArea::InventoryTileHeight,
+		TileObjects);
 }
 
 bool UTunaSweeperHudInventoryAreaWidget::NativeOnDrop(
@@ -136,66 +213,17 @@ bool UTunaSweeperHudInventoryAreaWidget::NativeOnDrop(
 		return Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
 	}
 
-	if (GEngine)
-	{
-		GEngine->AddOnScreenDebugMessage(
-			-1,
-			1.5f,
-			FColor::Yellow,
-			FString::Printf(TEXT("[Inventory] Drop received: item=%d qty=%d"),
-				ItemDragOperation->TileData.ItemStack.ItemId,
-				ItemDragOperation->TileData.ItemStack.Quantity));
-	}
-
-	return true;
+	return Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
 }
 
-void UTunaSweeperHudInventoryAreaWidget::PopulateReservedTiles()
+void UTunaSweeperHudInventoryAreaWidget::HandleSortInventoryClicked()
 {
-	UTunaSweeperItemDataSubsystem* ItemDataSubsystem = GetGameInstance()
-		? GetGameInstance()->GetSubsystem<UTunaSweeperItemDataSubsystem>()
-		: nullptr;
-
-	if (EquipmentReserveTileView)
+	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
 	{
-		EquipmentReserveTileView->ClearListItems();
-		EquipmentReserveTileView->SetEntryWidth(TunaSweeperInventoryArea::EquipmentReserveEntryWidth);
-		EquipmentReserveTileView->SetEntryHeight(TunaSweeperInventoryArea::InventoryTileHeight);
-		for (int32 Index = 0; Index < 8; ++Index)
-		{
-			FTunaSweeperItemStack EmptyStack;
-			EmptyStack.ItemId = INDEX_NONE;
-			UTunaSweeperItemStackTileItemObject* TileObject = TunaSweeperInventoryArea::CreateTileObject(
-				this,
-				TunaSweeperInventoryArea::BuildTileData(ItemDataSubsystem, EmptyStack, ETunaSweeperItemSlotSource::Equipment, Index));
-			if (TileObject)
-			{
-				TileObjects.Add(TileObject);
-				EquipmentReserveTileView->AddItem(TileObject);
-			}
-		}
-	}
-
-	if (AuxiliaryBagTileView)
-	{
-		AuxiliaryBagTileView->ClearListItems();
-		AuxiliaryBagTileView->SetEntryWidth(TunaSweeperInventoryArea::AuxiliaryBagTileWidth);
-		AuxiliaryBagTileView->SetEntryHeight(TunaSweeperInventoryArea::AuxiliaryBagTileHeight);
-		for (int32 Index = 0; Index < 2; ++Index)
-		{
-			FTunaSweeperItemStack EmptyStack;
-			EmptyStack.ItemId = INDEX_NONE;
-			UTunaSweeperItemStackTileItemObject* TileObject = TunaSweeperInventoryArea::CreateTileObject(
-				this,
-				TunaSweeperInventoryArea::BuildTileData(ItemDataSubsystem, EmptyStack, ETunaSweeperItemSlotSource::AuxiliaryBag, Index));
-			if (TileObject)
-			{
-				TileObjects.Add(TileObject);
-				AuxiliaryBagTileView->AddItem(TileObject);
-			}
-		}
+		TunaGameInstance->CompactInventorySlots();
 	}
 }
+
 void UTunaSweeperHudInventoryAreaWidget::SetAuxiliaryBagVisible(bool bVisible)
 {
 	if (AuxiliaryBagPanel)

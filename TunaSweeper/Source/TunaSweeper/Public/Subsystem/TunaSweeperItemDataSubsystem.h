@@ -31,6 +31,15 @@ struct TUNASWEEPER_API FTunaSweeperItemDefinition
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
 	FString IconFileName;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
+	FName CategoryTag;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
+	FName EquipmentSlotTag;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
+	int32 InventorySlotCapacity = 0;
 };
 
 USTRUCT(BlueprintType)

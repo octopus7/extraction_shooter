@@ -36,3 +36,11 @@ item.antibiotics.desc,감염 위험을 낮추는 항생제다,Antibiotics that l
 item.body_armor.desc,몸통을 보호하는 간단한 방탄조끼다,A simple vest that protects the torso,胴体を守る簡易ボディアーマー
 item.backpack.desc,추가 보관 공간을 제공하는 배낭이다,A backpack that provides extra storage,追加の収納空間を提供するバックパック
 item.valuables_crate.desc,팔 만한 물건이 들어 있을 수 있는 작은 상자다,A small crate that may hold sellable goods,売れる品が入っているかもしれない小箱
+item.backpack_tier1,1단계 가방,Bag I,バッグ I
+item.backpack_tier2,2단계 가방,Bag II,バッグ II
+item.backpack_tier3,3단계 가방,Bag III,バッグ III
+item.backpack_tier4,4단계 가방,Bag IV,バッグ IV
+item.backpack_tier1.desc,인벤토리를 40칸에서 50칸으로 확장한다,Expands inventory from 40 to 50 slots,インベントリを40スロットから50スロットへ拡張する
+item.backpack_tier2.desc,인벤토리를 40칸에서 60칸으로 확장한다,Expands inventory from 40 to 60 slots,インベントリを40スロットから60スロットへ拡張する
+item.backpack_tier3.desc,인벤토리를 40칸에서 80칸으로 확장한다,Expands inventory from 40 to 80 slots,インベントリを40スロットから80スロットへ拡張する
+item.backpack_tier4.desc,인벤토리를 40칸에서 100칸으로 확장한다,Expands inventory from 40 to 100 slots,インベントリを40スロットから100スロットへ拡張する

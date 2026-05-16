@@ -7,6 +7,7 @@
 class UWidget;
 class UTileView;
 class UDragDropOperation;
+class UButton;
 
 UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API UTunaSweeperHudInventoryAreaWidget : public UUserWidget
@@ -25,6 +26,7 @@ public:
 
 protected:
 	virtual void NativeConstruct() override;
+	virtual void NativeDestruct() override;
 	virtual bool NativeOnDrop(
 		const FGeometry& InGeometry,
 		const FDragDropEvent& InDragDropEvent,
@@ -45,8 +47,12 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
 	TObjectPtr<UTileView> InventoryTileView;
 
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
+	TObjectPtr<UButton> SortInventoryButton;
+
 private:
-	void PopulateReservedTiles();
+	UFUNCTION()
+	void HandleSortInventoryClicked();
 
 	UPROPERTY(Transient)
 	TArray<TObjectPtr<UObject>> TileObjects;

@@ -4,8 +4,8 @@
 #include "Components/SizeBox.h"
 #include "Components/TextBlock.h"
 #include "Components/TileView.h"
-#include "Engine/Engine.h"
 #include "Engine/Texture2D.h"
+#include "Game/TunaSweeperGameInstance.h"
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
 #include "UI/TunaSweeperItemDragDropOperation.h"
 #include "UI/TunaSweeperItemStackTileItemObject.h"
@@ -23,19 +23,23 @@ namespace TunaSweeperLootContainerUi
 
 	FTunaSweeperItemStackTileData BuildTileData(
 		UTunaSweeperItemDataSubsystem* ItemDataSubsystem,
-		const FTunaSweeperItemStack& ItemStack,
+		const FTunaSweeperItemInstance& ItemInstance,
 		int32 SourceIndex)
 	{
 		FTunaSweeperItemStackTileData TileData;
-		TileData.ItemStack = ItemStack;
+		TileData.ItemInstance = ItemInstance;
+		TileData.ItemStack.ItemId = ItemInstance.ItemId;
+		TileData.ItemStack.Quantity = FMath::Max(1, ItemInstance.Quantity);
 		TileData.Source = ETunaSweeperItemSlotSource::LootContainer;
 		TileData.SourceIndex = SourceIndex;
-		TileData.bIsEmpty = ItemStack.ItemId == INDEX_NONE;
+		TileData.SlotReference.Source = ETunaSweeperItemSlotSource::LootContainer;
+		TileData.SlotReference.SlotIndex = SourceIndex;
+		TileData.bIsEmpty = !ItemInstance.IsValid();
 
 		if (!TileData.bIsEmpty && ItemDataSubsystem)
 		{
 			FTunaSweeperItemDefinition ItemDefinition;
-			if (ItemDataSubsystem->TryGetItemDefinition(ItemStack.ItemId, ItemDefinition))
+			if (ItemDataSubsystem->TryGetItemDefinition(ItemInstance.ItemId, ItemDefinition))
 			{
 				FText DisplayName;
 				if (ItemDataSubsystem->TryGetItemNameTextByKey(ItemDefinition.NameStringKey, ETunaSweeperItemTextLanguage::Korean, DisplayName))
@@ -44,7 +48,7 @@ namespace TunaSweeperLootContainerUi
 				}
 				else
 				{
-					TileData.DisplayName = FText::FromString(FString::Printf(TEXT("Item %d"), ItemStack.ItemId));
+					TileData.DisplayName = FText::FromString(FString::Printf(TEXT("Item %d"), ItemInstance.ItemId));
 				}
 
 				const FString IconObjectPath = ItemDataSubsystem->BuildItemIconObjectPath(ItemDefinition);
@@ -62,13 +66,38 @@ namespace TunaSweeperLootContainerUi
 void UTunaSweeperLootContainerWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
+
+	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
+	{
+		TunaGameInstance->OnInventoryStateChanged.RemoveAll(this);
+		TunaGameInstance->OnInventoryStateChanged.AddUObject(this, &UTunaSweeperLootContainerWidget::PopulateContainerItems);
+	}
+
 	PopulateContainerItems();
+}
+
+void UTunaSweeperLootContainerWidget::NativeDestruct()
+{
+	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
+	{
+		TunaGameInstance->OnInventoryStateChanged.RemoveAll(this);
+	}
+
+	Super::NativeDestruct();
 }
 
 void UTunaSweeperLootContainerWidget::SetContainerInstance(const FTunaSweeperLootContainerInstance& InContainerInstance)
 {
 	ContainerInstance = InContainerInstance;
-	PopulateContainerItems();
+
+	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
+	{
+		TunaGameInstance->SetActiveLootContainerInstance(InContainerInstance);
+	}
+	else
+	{
+		PopulateContainerItems();
+	}
 }
 
 bool UTunaSweeperLootContainerWidget::NativeOnDrop(
@@ -82,18 +111,7 @@ bool UTunaSweeperLootContainerWidget::NativeOnDrop(
 		return Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
 	}
 
-	if (GEngine)
-	{
-		GEngine->AddOnScreenDebugMessage(
-			-1,
-			1.5f,
-			FColor::Yellow,
-			FString::Printf(TEXT("[Container] Drop received: item=%d qty=%d"),
-				ItemDragOperation->TileData.ItemStack.ItemId,
-				ItemDragOperation->TileData.ItemStack.Quantity));
-	}
-
-	return true;
+	return Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
 }
 
 void UTunaSweeperLootContainerWidget::PopulateContainerItems()
@@ -103,7 +121,11 @@ void UTunaSweeperLootContainerWidget::PopulateContainerItems()
 		return;
 	}
 
-	const int32 Capacity = FMath::Clamp(ContainerInstance.Capacity, 5, 15);
+	UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+	const TArray<FTunaSweeperInventorySlot>* Slots = TunaGameInstance && TunaGameInstance->HasActiveLootContainer()
+		? &TunaGameInstance->GetActiveLootContainerSlots()
+		: nullptr;
+	const int32 Capacity = Slots ? Slots->Num() : FMath::Max(0, ContainerInstance.Capacity);
 	const int32 RowCount = FMath::Max(1, FMath::DivideAndRoundUp(Capacity, TunaSweeperLootContainerUi::ContainerTileColumnCount));
 	if (RootSizeBox)
 	{
@@ -114,9 +136,12 @@ void UTunaSweeperLootContainerWidget::PopulateContainerItems()
 
 	if (ContainerTitleText)
 	{
-		ContainerTitleText->SetText(ContainerInstance.DisplayName.IsEmpty()
+		const FText DisplayName = TunaGameInstance && TunaGameInstance->HasActiveLootContainer()
+			? TunaGameInstance->GetActiveLootContainerDisplayName()
+			: ContainerInstance.DisplayName;
+		ContainerTitleText->SetText(DisplayName.IsEmpty()
 			? FText::FromString(TEXT("Container"))
-			: ContainerInstance.DisplayName);
+			: DisplayName);
 	}
 
 	UTunaSweeperItemDataSubsystem* ItemDataSubsystem = GetGameInstance()
@@ -130,14 +155,10 @@ void UTunaSweeperLootContainerWidget::PopulateContainerItems()
 
 	for (int32 SlotIndex = 0; SlotIndex < Capacity; ++SlotIndex)
 	{
-		FTunaSweeperItemStack ItemStack;
-		if (ContainerInstance.Items.IsValidIndex(SlotIndex))
+		FTunaSweeperItemInstance ItemInstance;
+		if (Slots && Slots->IsValidIndex(SlotIndex) && (*Slots)[SlotIndex].ItemUid.IsValid() && TunaGameInstance)
 		{
-			ItemStack = ContainerInstance.Items[SlotIndex];
-		}
-		else
-		{
-			ItemStack.ItemId = INDEX_NONE;
+			TunaGameInstance->TryGetItemInstance((*Slots)[SlotIndex].ItemUid, ItemInstance);
 		}
 
 		UTunaSweeperItemStackTileItemObject* TileObject = NewObject<UTunaSweeperItemStackTileItemObject>(this);
@@ -146,7 +167,7 @@ void UTunaSweeperLootContainerWidget::PopulateContainerItems()
 			continue;
 		}
 
-		TileObject->Initialize(TunaSweeperLootContainerUi::BuildTileData(ItemDataSubsystem, ItemStack, SlotIndex));
+		TileObject->Initialize(TunaSweeperLootContainerUi::BuildTileData(ItemDataSubsystem, ItemInstance, SlotIndex));
 		TileObjects.Add(TileObject);
 		ContainerTileView->AddItem(TileObject);
 	}
