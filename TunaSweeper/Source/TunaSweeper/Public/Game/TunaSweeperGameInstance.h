@@ -209,7 +209,7 @@ public:
 	void SelectItemSlot(const FTunaSweeperItemSlotReference& SlotReference);
 	void ClearSelectedItemSelection();
 	void SetActiveLootContainerInstance(const FTunaSweeperLootContainerInstance& InContainerInstance);
-	void SaveInventoryState();
+	void SaveGameState();
 	void ClearInventoryAndSave();
 	void HandleLevelTravelPersistence(FName SourceLevelName, FName TargetLevelName);
 
@@ -220,8 +220,8 @@ private:
 	void GenerateTempOpenLootItems();
 	void GeneratePlayerInventoryItems();
 	void EnsureInventoryStateInitialized();
-	bool LoadInventoryState();
-	bool SaveInventoryStateInternal() const;
+	bool LoadGameState();
+	bool SaveGameStateInternal() const;
 	void ResetRuntimeStateForSaveSlotSelection();
 	void GenerateDefaultInventoryState();
 	void ResetPlayerSlotArrays();
@@ -249,14 +249,14 @@ private:
 		const TArray<FTunaSweeperInventorySlot>& InInventorySlots,
 		int32 Capacity) const;
 	void CollectPlayerOwnedItemUids(TSet<FGuid>& OutItemUids) const;
-	bool BackupExistingInventorySaveState(const FString& ExistingSlotName) const;
-	void TrimInventorySaveBackups() const;
+	bool BackupExistingSaveGame(const FString& ExistingSlotName) const;
+	void TrimSaveGameBackups() const;
 	int32 SanitizeSaveSlotIndex(int32 SaveSlotIndex) const;
-	FString GetInventorySaveSlotName(int32 SaveSlotIndex) const;
-	FString GetExistingInventorySaveSlotName(int32 SaveSlotIndex) const;
-	FString GetInventorySaveFilePath(const FString& SaveSlotName) const;
-	FString GetInventoryBackupDirectory() const;
-	FString CreateInventoryBackupFilePath(int32 SaveSlotIndex, FDateTime BackupTime) const;
+	FString GetSaveGameSlotName(int32 SaveSlotIndex) const;
+	FString GetExistingSaveGameSlotName(int32 SaveSlotIndex) const;
+	FString GetSaveGameFilePath(const FString& SaveSlotName) const;
+	FString GetSaveGameBackupDirectory() const;
+	FString CreateSaveGameBackupFilePath(int32 SaveSlotIndex, FDateTime BackupTime) const;
 	float GetCurrentActiveSlotTotalPlaySeconds() const;
 	bool IsBunkerToRaidTravel(FName SourceLevelName, FName TargetLevelName) const;
 	bool IsRaidToBunkerTravel(FName SourceLevelName, FName TargetLevelName) const;

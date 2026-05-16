@@ -490,3 +490,8 @@
 ## 2026-05-17 00:16:04 (소요시간: 1분 미만)
 
 - 빌드 후 에디터 실행 가능 시 Unreal Editor를 열라는 지침을 `AGENTS.md`에도 반영할 것.
+
+## 2026-05-17 00:25:28 (소요시간: 약 5분)
+
+- `TunaSweeperInventoryState_SlotN` / `TunaSweeperInventorySaveGame`처럼 인벤토리 전용으로 보이는 기존 세이브 파일명과 코드명을 일반 세이브명으로 변경할 것.
+- 코드상에서 레거시 세이브는 대응하지 말 것.
