@@ -9,6 +9,16 @@
 #include "UObject/ConstructorHelpers.h"
 #include "Weapon/TunaSweeperProjectile.h"
 
+namespace
+{
+	float GetRandomizedEnemyValue(float BaseValue, const FVector2D& OffsetRange, float MinValue)
+	{
+		const float MinOffset = FMath::Min(OffsetRange.X, OffsetRange.Y);
+		const float MaxOffset = FMath::Max(OffsetRange.X, OffsetRange.Y);
+		return FMath::Max(MinValue, BaseValue + FMath::FRandRange(MinOffset, MaxOffset));
+	}
+}
+
 ATunaSweeperEnemyCharacter::ATunaSweeperEnemyCharacter()
 {
 	PrimaryActorTick.bCanEverTick = false;
@@ -59,7 +69,7 @@ void ATunaSweeperEnemyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	GetCharacterMovement()->MaxWalkSpeed = MovementSpeed;
+	GetCharacterMovement()->MaxWalkSpeed = GetRandomizedEnemyValue(MovementSpeed, MovementSpeedRandomOffset, 0.0f);
 	ApplyVisualMaterials();
 }
 

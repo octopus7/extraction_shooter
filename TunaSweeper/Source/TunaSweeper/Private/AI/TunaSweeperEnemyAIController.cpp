@@ -5,6 +5,16 @@
 #include "Kismet/GameplayStatics.h"
 #include "TimerManager.h"
 
+namespace
+{
+	float GetRandomizedValue(float BaseValue, const FVector2D& OffsetRange, float MinValue)
+	{
+		const float MinOffset = FMath::Min(OffsetRange.X, OffsetRange.Y);
+		const float MaxOffset = FMath::Max(OffsetRange.X, OffsetRange.Y);
+		return FMath::Max(MinValue, BaseValue + FMath::FRandRange(MinOffset, MaxOffset));
+	}
+}
+
 ATunaSweeperEnemyAIController::ATunaSweeperEnemyAIController()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -21,24 +31,57 @@ void ATunaSweeperEnemyAIController::BeginPlay()
 {
 	Super::BeginPlay();
 
+	RandomizeCombatTuning();
+	const float InitialUpdateDelay = FMath::FRandRange(0.0f, EffectiveUpdateInterval);
 	GetWorldTimerManager().SetTimer(
 		UpdateTimerHandle,
 		this,
 		&ATunaSweeperEnemyAIController::UpdateAttackTarget,
-		FMath::Max(0.01f, UpdateInterval),
+		EffectiveUpdateInterval,
 		true,
-		0.0f);
+		InitialUpdateDelay);
 }
 
 void ATunaSweeperEnemyAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
 
+	RandomizeCombatTuning();
 	UpdateAttackTarget();
+}
+
+void ATunaSweeperEnemyAIController::RandomizeCombatTuning()
+{
+	if (bHasRandomizedCombatTuning)
+	{
+		return;
+	}
+
+	EffectiveUpdateInterval = GetRandomizedValue(UpdateInterval, UpdateIntervalRandomOffset, 0.01f);
+	EffectiveApproachStartRange = GetRandomizedValue(ApproachStartRange, ApproachStartRangeRandomOffset, 0.0f);
+	const float MaxStopRange = FMath::Max(0.0f, EffectiveApproachStartRange - FMath::Max(0.0f, MinApproachRangeGap));
+	EffectiveApproachStopRange = FMath::Clamp(
+		GetRandomizedValue(ApproachStopRange, ApproachStopRangeRandomOffset, 0.0f),
+		0.0f,
+		MaxStopRange);
+	EffectiveAttackRange = FMath::Max(
+		GetRandomizedValue(AttackRange, AttackRangeRandomOffset, 0.0f),
+		EffectiveApproachStartRange);
+	EffectiveTrackingRange = FMath::Max(
+		GetRandomizedValue(TrackingRange, TrackingRangeRandomOffset, 0.0f),
+		EffectiveApproachStartRange);
+	EffectiveAttackCooldownSeconds = GetRandomizedValue(AttackCooldownSeconds, AttackCooldownRandomOffset, 0.05f);
+
+	UWorld* World = GetWorld();
+	const double CurrentTimeSeconds = World ? World->GetTimeSeconds() : 0.0;
+	LastAttackTimeSeconds = CurrentTimeSeconds - FMath::FRandRange(0.0f, EffectiveAttackCooldownSeconds);
+	bHasRandomizedCombatTuning = true;
 }
 
 void ATunaSweeperEnemyAIController::UpdateAttackTarget()
 {
+	RandomizeCombatTuning();
+
 	APawn* ControlledPawn = GetPawn();
 	APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(this, 0);
 	if (!ControlledPawn || !PlayerPawn)
@@ -57,7 +100,7 @@ void ATunaSweeperEnemyAIController::UpdateAttackTarget()
 	}
 
 	const float DistanceToPlayer = FMath::Sqrt(FVector::DistSquared2D(ControlledPawn->GetActorLocation(), PlayerPawn->GetActorLocation()));
-	if (DistanceToPlayer > FMath::Max(0.0f, TrackingRange))
+	if (DistanceToPlayer > EffectiveTrackingRange)
 	{
 		ClearCombatTarget();
 		return;
@@ -67,14 +110,14 @@ void ATunaSweeperEnemyAIController::UpdateAttackTarget()
 	SetFocus(PlayerPawn, EAIFocusPriority::Gameplay);
 	UpdateApproachState(DistanceToPlayer);
 
-	if (bIsClosingDistance || DistanceToPlayer > FMath::Max(0.0f, AttackRange))
+	if (bIsClosingDistance || DistanceToPlayer > EffectiveAttackRange)
 	{
 		return;
 	}
 
 	UWorld* World = GetWorld();
 	const double CurrentTimeSeconds = World ? World->GetTimeSeconds() : 0.0;
-	if (CurrentTimeSeconds - LastAttackTimeSeconds < AttackCooldownSeconds)
+	if (CurrentTimeSeconds - LastAttackTimeSeconds < EffectiveAttackCooldownSeconds)
 	{
 		return;
 	}
@@ -88,12 +131,9 @@ void ATunaSweeperEnemyAIController::UpdateAttackTarget()
 
 void ATunaSweeperEnemyAIController::UpdateApproachState(float DistanceToTarget)
 {
-	const float StartRange = FMath::Max(0.0f, ApproachStartRange);
-	const float StopRange = FMath::Clamp(ApproachStopRange, 0.0f, StartRange);
-
 	if (bIsClosingDistance)
 	{
-		if (DistanceToTarget <= StopRange)
+		if (DistanceToTarget <= EffectiveApproachStopRange)
 		{
 			bIsClosingDistance = false;
 			StopMovement();
@@ -102,7 +142,7 @@ void ATunaSweeperEnemyAIController::UpdateApproachState(float DistanceToTarget)
 		return;
 	}
 
-	if (DistanceToTarget > StartRange)
+	if (DistanceToTarget > EffectiveApproachStartRange)
 	{
 		bIsClosingDistance = true;
 	}
@@ -127,9 +167,7 @@ void ATunaSweeperEnemyAIController::MoveTowardCurrentTarget(float DeltaSeconds)
 	ToTarget.Z = 0.0f;
 
 	const float DistanceToTarget = ToTarget.Size();
-	const float StartRange = FMath::Max(0.0f, ApproachStartRange);
-	const float StopRange = FMath::Clamp(ApproachStopRange, 0.0f, StartRange);
-	if (DistanceToTarget <= StopRange)
+	if (DistanceToTarget <= EffectiveApproachStopRange)
 	{
 		bIsClosingDistance = false;
 		StopMovement();
