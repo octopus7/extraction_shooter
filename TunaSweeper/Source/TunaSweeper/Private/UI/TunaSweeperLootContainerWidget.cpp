@@ -84,6 +84,70 @@ namespace TunaSweeperLootContainerUi
 		ItemDragOperation->HoveredSlotReference = FTunaSweeperItemSlotReference();
 		return bMoved;
 	}
+
+	bool TryResolveSlotFromTileView(
+		const UTileView* TileView,
+		int32 SlotCount,
+		const FVector2D& ScreenSpacePosition,
+		FTunaSweeperItemSlotReference& OutSlotReference)
+	{
+		if (!TileView || SlotCount <= 0)
+		{
+			return false;
+		}
+
+		const FGeometry& TileViewGeometry = TileView->GetCachedGeometry();
+		const FVector2D LocalPosition = TileViewGeometry.AbsoluteToLocal(ScreenSpacePosition);
+		const FVector2D LocalSize = TileViewGeometry.GetLocalSize();
+		if (LocalPosition.X < 0.0f || LocalPosition.Y < 0.0f ||
+			LocalPosition.X >= LocalSize.X || LocalPosition.Y >= LocalSize.Y)
+		{
+			return false;
+		}
+
+		const float EntryWidth = FMath::Max(1.0f, TileView->GetEntryWidth());
+		const float EntryHeight = FMath::Max(1.0f, TileView->GetEntryHeight());
+		const int32 ColumnIndex = FMath::FloorToInt(LocalPosition.X / EntryWidth);
+		const int32 RowIndex = FMath::FloorToInt(LocalPosition.Y / EntryHeight);
+		if (ColumnIndex < 0 || ColumnIndex >= ContainerTileColumnCount || RowIndex < 0)
+		{
+			return false;
+		}
+
+		const int32 FirstVisibleItemIndex = FMath::Max(0, FMath::FloorToInt(TileView->GetScrollOffset()));
+		const int32 SlotIndex = FirstVisibleItemIndex + RowIndex * ContainerTileColumnCount + ColumnIndex;
+		if (SlotIndex < 0 || SlotIndex >= SlotCount)
+		{
+			return false;
+		}
+
+		OutSlotReference.Source = ETunaSweeperItemSlotSource::LootContainer;
+		OutSlotReference.SlotIndex = SlotIndex;
+		return true;
+	}
+
+	bool TryMoveFromDropSlot(
+		UTunaSweeperGameInstance* TunaGameInstance,
+		UTunaSweeperItemDragDropOperation* ItemDragOperation,
+		const FTunaSweeperItemSlotReference& TargetSlot)
+	{
+		if (!TunaGameInstance || !ItemDragOperation || ItemDragOperation->TileData.bIsEmpty || !TargetSlot.IsValid())
+		{
+			return false;
+		}
+
+		FTunaSweeperItemSlotReference SourceSlot = ItemDragOperation->TileData.SlotReference;
+		if (!SourceSlot.IsValid())
+		{
+			SourceSlot.Source = ItemDragOperation->TileData.Source;
+			SourceSlot.SlotIndex = ItemDragOperation->TileData.SourceIndex;
+		}
+
+		const bool bMoved = TunaGameInstance->MoveItemBetweenSlots(SourceSlot, TargetSlot);
+		ItemDragOperation->bHasHoveredSlotReference = false;
+		ItemDragOperation->HoveredSlotReference = FTunaSweeperItemSlotReference();
+		return bMoved;
+	}
 }
 
 void UTunaSweeperLootContainerWidget::NativeConstruct()
@@ -107,6 +171,22 @@ void UTunaSweeperLootContainerWidget::NativeDestruct()
 	}
 
 	Super::NativeDestruct();
+}
+
+bool UTunaSweeperLootContainerWidget::TryResolveDropSlotFromCursor(
+	const FVector2D& ScreenSpacePosition,
+	FTunaSweeperItemSlotReference& OutSlotReference)
+{
+	UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+	const int32 Capacity = TunaGameInstance && TunaGameInstance->HasActiveLootContainer()
+		? TunaGameInstance->GetActiveLootContainerSlots().Num()
+		: FMath::Max(0, ContainerInstance.Capacity);
+
+	return TunaSweeperLootContainerUi::TryResolveSlotFromTileView(
+		ContainerTileView,
+		Capacity,
+		ScreenSpacePosition,
+		OutSlotReference);
 }
 
 void UTunaSweeperLootContainerWidget::SetContainerInstance(const FTunaSweeperLootContainerInstance& InContainerInstance)
@@ -134,7 +214,15 @@ bool UTunaSweeperLootContainerWidget::NativeOnDrop(
 		return Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
 	}
 
-	if (TunaSweeperLootContainerUi::TryMoveFromHoveredDropSlot(GetGameInstance<UTunaSweeperGameInstance>(), ItemDragOperation))
+	UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+	FTunaSweeperItemSlotReference CursorSlotReference;
+	if (TryResolveDropSlotFromCursor(InDragDropEvent.GetScreenSpacePosition(), CursorSlotReference) &&
+		TunaSweeperLootContainerUi::TryMoveFromDropSlot(TunaGameInstance, ItemDragOperation, CursorSlotReference))
+	{
+		return true;
+	}
+
+	if (TunaSweeperLootContainerUi::TryMoveFromHoveredDropSlot(TunaGameInstance, ItemDragOperation))
 	{
 		return true;
 	}

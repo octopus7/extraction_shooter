@@ -9,6 +9,7 @@ class USizeBox;
 class UTextBlock;
 class UTileView;
 class UDragDropOperation;
+struct FTunaSweeperItemSlotReference;
 
 UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API UTunaSweeperLootContainerWidget : public UUserWidget
@@ -38,6 +39,9 @@ protected:
 
 private:
 	void PopulateContainerItems();
+	bool TryResolveDropSlotFromCursor(
+		const FVector2D& ScreenSpacePosition,
+		FTunaSweeperItemSlotReference& OutSlotReference);
 
 	UPROPERTY(Transient)
 	FTunaSweeperLootContainerInstance ContainerInstance;

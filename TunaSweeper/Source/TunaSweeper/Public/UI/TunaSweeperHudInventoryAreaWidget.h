@@ -8,6 +8,7 @@ class UWidget;
 class UTileView;
 class UDragDropOperation;
 class UButton;
+struct FTunaSweeperItemSlotReference;
 
 UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API UTunaSweeperHudInventoryAreaWidget : public UUserWidget
@@ -51,6 +52,10 @@ protected:
 	TObjectPtr<UButton> SortInventoryButton;
 
 private:
+	bool TryResolveDropSlotFromCursor(
+		const FVector2D& ScreenSpacePosition,
+		FTunaSweeperItemSlotReference& OutSlotReference);
+
 	UFUNCTION()
 	void HandleSortInventoryClicked();
 

@@ -137,6 +137,113 @@ namespace TunaSweeperInventoryArea
 		ItemDragOperation->HoveredSlotReference = FTunaSweeperItemSlotReference();
 		return bMoved;
 	}
+
+	bool TryResolveSlotFromTileView(
+		const UTileView* TileView,
+		ETunaSweeperItemSlotSource Source,
+		int32 ColumnCount,
+		int32 SlotCount,
+		const FVector2D& ScreenSpacePosition,
+		FTunaSweeperItemSlotReference& OutSlotReference)
+	{
+		if (!TileView || ColumnCount <= 0 || SlotCount <= 0)
+		{
+			return false;
+		}
+
+		const FGeometry& TileViewGeometry = TileView->GetCachedGeometry();
+		const FVector2D LocalPosition = TileViewGeometry.AbsoluteToLocal(ScreenSpacePosition);
+		const FVector2D LocalSize = TileViewGeometry.GetLocalSize();
+		if (LocalPosition.X < 0.0f || LocalPosition.Y < 0.0f ||
+			LocalPosition.X >= LocalSize.X || LocalPosition.Y >= LocalSize.Y)
+		{
+			return false;
+		}
+
+		const float EntryWidth = FMath::Max(1.0f, TileView->GetEntryWidth());
+		const float EntryHeight = FMath::Max(1.0f, TileView->GetEntryHeight());
+		const int32 ColumnIndex = FMath::FloorToInt(LocalPosition.X / EntryWidth);
+		const int32 RowIndex = FMath::FloorToInt(LocalPosition.Y / EntryHeight);
+		if (ColumnIndex < 0 || ColumnIndex >= ColumnCount || RowIndex < 0)
+		{
+			return false;
+		}
+
+		const int32 FirstVisibleItemIndex = FMath::Max(0, FMath::FloorToInt(TileView->GetScrollOffset()));
+		const int32 SlotIndex = FirstVisibleItemIndex + RowIndex * ColumnCount + ColumnIndex;
+		if (SlotIndex < 0 || SlotIndex >= SlotCount)
+		{
+			return false;
+		}
+
+		OutSlotReference.Source = Source;
+		OutSlotReference.SlotIndex = SlotIndex;
+		return true;
+	}
+
+	bool TryMoveFromDropSlot(
+		UTunaSweeperGameInstance* TunaGameInstance,
+		UTunaSweeperItemDragDropOperation* ItemDragOperation,
+		const FTunaSweeperItemSlotReference& TargetSlot)
+	{
+		if (!TunaGameInstance || !ItemDragOperation || ItemDragOperation->TileData.bIsEmpty || !TargetSlot.IsValid())
+		{
+			return false;
+		}
+
+		FTunaSweeperItemSlotReference SourceSlot = ItemDragOperation->TileData.SlotReference;
+		if (!SourceSlot.IsValid())
+		{
+			SourceSlot.Source = ItemDragOperation->TileData.Source;
+			SourceSlot.SlotIndex = ItemDragOperation->TileData.SourceIndex;
+		}
+
+		const bool bMoved = TunaGameInstance->MoveItemBetweenSlots(SourceSlot, TargetSlot);
+		ItemDragOperation->bHasHoveredSlotReference = false;
+		ItemDragOperation->HoveredSlotReference = FTunaSweeperItemSlotReference();
+		return bMoved;
+	}
+}
+
+bool UTunaSweeperHudInventoryAreaWidget::TryResolveDropSlotFromCursor(
+	const FVector2D& ScreenSpacePosition,
+	FTunaSweeperItemSlotReference& OutSlotReference)
+{
+	UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+	if (!TunaGameInstance)
+	{
+		return false;
+	}
+
+	if (TunaSweeperInventoryArea::TryResolveSlotFromTileView(
+		EquipmentReserveTileView,
+		ETunaSweeperItemSlotSource::Equipment,
+		TunaSweeperInventoryArea::EquipmentReserveColumnCount,
+		TunaGameInstance->GetEquipmentSlots().Num(),
+		ScreenSpacePosition,
+		OutSlotReference))
+	{
+		return true;
+	}
+
+	if (TunaSweeperInventoryArea::TryResolveSlotFromTileView(
+		AuxiliaryBagTileView,
+		ETunaSweeperItemSlotSource::AuxiliaryBag,
+		1,
+		TunaGameInstance->GetAuxiliaryBagSlots().Num(),
+		ScreenSpacePosition,
+		OutSlotReference))
+	{
+		return true;
+	}
+
+	return TunaSweeperInventoryArea::TryResolveSlotFromTileView(
+		InventoryTileView,
+		ETunaSweeperItemSlotSource::Inventory,
+		TunaSweeperInventoryArea::InventoryTileColumnCount,
+		TunaGameInstance->GetInventorySlots().Num(),
+		ScreenSpacePosition,
+		OutSlotReference);
 }
 
 void UTunaSweeperHudInventoryAreaWidget::NativeConstruct()
@@ -236,7 +343,15 @@ bool UTunaSweeperHudInventoryAreaWidget::NativeOnDrop(
 		return Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
 	}
 
-	if (TunaSweeperInventoryArea::TryMoveFromHoveredDropSlot(GetGameInstance<UTunaSweeperGameInstance>(), ItemDragOperation))
+	UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+	FTunaSweeperItemSlotReference CursorSlotReference;
+	if (TryResolveDropSlotFromCursor(InDragDropEvent.GetScreenSpacePosition(), CursorSlotReference) &&
+		TunaSweeperInventoryArea::TryMoveFromDropSlot(TunaGameInstance, ItemDragOperation, CursorSlotReference))
+	{
+		return true;
+	}
+
+	if (TunaSweeperInventoryArea::TryMoveFromHoveredDropSlot(TunaGameInstance, ItemDragOperation))
 	{
 		return true;
 	}

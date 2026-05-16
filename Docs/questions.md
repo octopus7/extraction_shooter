@@ -147,3 +147,13 @@ UE에서는 보편적으로 북쪽이 +Y 방향인가?
 ### 답변
 
 원인은 드롭 이벤트를 실제로 처리하는 위치가 달랐기 때문이다. 슬롯 위젯은 `NativeOnDragOver()`를 받아서 받을 수 있는 슬롯 하이라이트를 켰지만, 마우스 버튼을 뗄 때의 `NativeOnDrop()`은 항상 그 슬롯 위젯으로 들어오지 않고 `TileView`나 부모 인벤토리/루팅 패널 쪽으로 빠지는 경우가 있었다. 부모 쪽 `NativeOnDrop()`에는 실제 이동 호출이 없어서 hover 중에는 하이라이트가 보이지만 drop 시에는 아무 이동도 일어나지 않았다. 수정은 hover 중 마지막 유효 슬롯을 `DragDropOperation`에 기록해 두고, drop이 부모로 들어와도 그 슬롯으로 `MoveItemBetweenSlots()`를 호출하게 한 것이다.
+
+## 2026-05-16 18:46:30 (소요시간: 1분 미만)
+
+### 질문
+
+에디터에서는 드래그 커서 위치가 이상하게 인식되고 PIE에서는 정상으로 동작했던 원인이 무엇인가?
+
+### 답변
+
+원인은 UMG/Slate의 스크린 좌표와 위젯 로컬 좌표를 같은 기준처럼 다룬 데 있었다. 부모 위젯의 `NativeOnDrop()`에서 드롭 슬롯을 판정할 때 마우스의 `ScreenSpacePosition` 또는 hover 기록에 의존했는데, 에디터 환경에서는 에디터 창, 뷰포트 위치, DPI/윈도우 오프셋이 끼어서 실제 `TileView` 안의 로컬 위치와 어긋날 수 있다. 그 결과 PIE에서는 정상처럼 보이지만 에디터 뷰포트에서는 커서가 다른 슬롯에 있는 것처럼 계산될 수 있었다. 수정은 Drop 시점에 `InDragDropEvent.GetScreenSpacePosition()`을 `TileView->GetCachedGeometry().AbsoluteToLocal()`로 변환한 뒤 슬롯 인덱스를 다시 계산하게 한 것이다.
