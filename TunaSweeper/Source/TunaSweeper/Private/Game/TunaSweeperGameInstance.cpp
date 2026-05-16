@@ -10,8 +10,47 @@ namespace TunaSweeperInventory
 	constexpr int32 SaveUserIndex = 0;
 	constexpr int32 RequiredBareInventorySlots = 40;
 	constexpr int32 RequiredMaxInventorySlots = 100;
+	constexpr int32 RequiredEquipmentSlots = 8;
+	constexpr int32 BackpackSlotIndex = 7;
+	const FName GunCategoryTag(TEXT("item.category.weapon.gun"));
+	const FName GunEquipmentSlotTag(TEXT("equipment.slot.gun"));
+	const FName MeleeCategoryTag(TEXT("item.category.weapon.melee"));
+	const FName MeleeEquipmentSlotTag(TEXT("equipment.slot.melee"));
+	const FName HeadCategoryTag(TEXT("item.category.head"));
+	const FName HeadEquipmentSlotTag(TEXT("equipment.slot.head"));
+	const FName BodyCategoryTag(TEXT("item.category.body"));
+	const FName BodyEquipmentSlotTag(TEXT("equipment.slot.body"));
+	const FName FaceCategoryTag(TEXT("item.category.face"));
+	const FName FaceEquipmentSlotTag(TEXT("equipment.slot.face"));
+	const FName EarCategoryTag(TEXT("item.category.ear"));
+	const FName EarEquipmentSlotTag(TEXT("equipment.slot.ear"));
 	const FName BackpackCategoryTag(TEXT("item.category.bag"));
 	const FName BackpackEquipmentSlotTag(TEXT("equipment.slot.backpack"));
+	const FName RifleWeaponTypeTag(TEXT("weapon.type.rifle"));
+	const FName MagazineAttachmentSlotTag(TEXT("attachment.slot.magazine"));
+	const FName OpticAttachmentSlotTag(TEXT("attachment.slot.optic"));
+
+	struct FEquipmentSlotRule
+	{
+		FName CategoryTag;
+		FName EquipmentSlotTag;
+	};
+
+	const FEquipmentSlotRule* GetEquipmentSlotRule(int32 SlotIndex)
+	{
+		static const FEquipmentSlotRule Rules[] = {
+			{ GunCategoryTag, GunEquipmentSlotTag },
+			{ GunCategoryTag, GunEquipmentSlotTag },
+			{ MeleeCategoryTag, MeleeEquipmentSlotTag },
+			{ HeadCategoryTag, HeadEquipmentSlotTag },
+			{ BodyCategoryTag, BodyEquipmentSlotTag },
+			{ FaceCategoryTag, FaceEquipmentSlotTag },
+			{ EarCategoryTag, EarEquipmentSlotTag },
+			{ BackpackCategoryTag, BackpackEquipmentSlotTag }
+		};
+
+		return SlotIndex >= 0 && SlotIndex < UE_ARRAY_COUNT(Rules) ? &Rules[SlotIndex] : nullptr;
+	}
 
 	int32 ClampSlotCount(int32 SlotCount, int32 MinSlots, int32 MaxSlots)
 	{
@@ -44,7 +83,14 @@ namespace TunaSweeperTempOpenLoot
 		{ TEXT("First Aid Kit"), TEXT("/Game/UI/Icons/T_UIIcon_FirstAidKit.T_UIIcon_FirstAidKit"), 1, 3 },
 		{ TEXT("Painkillers"), TEXT("/Game/UI/Icons/T_UIIcon_Painkillers.T_UIIcon_Painkillers"), 1, 6 },
 		{ TEXT("Antibiotics"), TEXT("/Game/UI/Icons/T_UIIcon_Antibiotics.T_UIIcon_Antibiotics"), 1, 5 },
+		{ TEXT("Combat Knife"), TEXT("/Game/UI/Icons/T_UIIcon_CombatKnife.T_UIIcon_CombatKnife"), 1, 1 },
+		{ TEXT("Rifle Extended Magazine"), TEXT("/Game/UI/Icons/T_UIIcon_RifleExtendedMagazine.T_UIIcon_RifleExtendedMagazine"), 1, 1 },
+		{ TEXT("Red Dot Optic"), TEXT("/Game/UI/Icons/T_UIIcon_RedDotOptic.T_UIIcon_RedDotOptic"), 1, 1 },
+		{ TEXT("Ballistic Helmet"), TEXT("/Game/UI/Icons/T_UIIcon_BallisticHelmet.T_UIIcon_BallisticHelmet"), 1, 1 },
 		{ TEXT("Body Armor"), TEXT("/Game/UI/Icons/T_UIIcon_BodyArmor.T_UIIcon_BodyArmor"), 1, 1 },
+		{ TEXT("Tactical Sunglasses"), TEXT("/Game/UI/Icons/T_UIIcon_TacticalSunglasses.T_UIIcon_TacticalSunglasses"), 1, 1 },
+		{ TEXT("Tactical Earphones I"), TEXT("/Game/UI/Icons/T_UIIcon_TacticalEarphones_Tier1.T_UIIcon_TacticalEarphones_Tier1"), 1, 1 },
+		{ TEXT("Tactical Earphones II"), TEXT("/Game/UI/Icons/T_UIIcon_TacticalEarphones_Tier2.T_UIIcon_TacticalEarphones_Tier2"), 1, 1 },
 		{ TEXT("Bag I"), TEXT("/Game/UI/Icons/T_UIIcon_Backpack_Tier1.T_UIIcon_Backpack_Tier1"), 1, 1 },
 		{ TEXT("Valuables Crate"), TEXT("/Game/UI/Icons/T_UIIcon_ValuablesCrate.T_UIIcon_ValuablesCrate"), 1, 2 },
 	};
@@ -161,6 +207,9 @@ void UTunaSweeperGameInstance::ClearRuntimeState()
 	EquipmentSlots.Reset();
 	AuxiliaryBagSlots.Reset();
 	ActiveLootContainerSlots.Reset();
+	SelectedWeaponAttachmentSlotTags.Reset();
+	SelectedWeaponAttachmentSlots.Reset();
+	SelectedItemSlotReference = FTunaSweeperItemSlotReference();
 	ActiveLootContainerDisplayName = FText::GetEmpty();
 	ActiveLootContainerCapacity = 0;
 	bHasActiveLootContainer = false;
@@ -256,6 +305,13 @@ const TArray<FTunaSweeperInventorySlot>& UTunaSweeperGameInstance::GetActiveLoot
 	return ActiveLootContainerSlots;
 }
 
+const TArray<FTunaSweeperInventorySlot>& UTunaSweeperGameInstance::GetSelectedWeaponAttachmentSlots()
+{
+	EnsureInventoryStateInitialized();
+	RefreshSelectedWeaponAttachmentSlots();
+	return SelectedWeaponAttachmentSlots;
+}
+
 bool UTunaSweeperGameInstance::TryGetItemInstance(const FGuid& ItemUid, FTunaSweeperItemInstance& OutItemInstance) const
 {
 	if (const FTunaSweeperItemInstance* FoundItemInstance = ItemInstancesByUid.Find(ItemUid))
@@ -284,6 +340,25 @@ bool UTunaSweeperGameInstance::TryGetSlotItemInstance(
 	return TryGetItemInstance(ItemUid, OutItemInstance);
 }
 
+bool UTunaSweeperGameInstance::TryGetSelectedItemInstance(FTunaSweeperItemInstance& OutItemInstance)
+{
+	EnsureInventoryStateInitialized();
+	return TryGetSlotItemInstance(SelectedItemSlotReference, OutItemInstance);
+}
+
+bool UTunaSweeperGameInstance::TryGetSelectedItemDefinition(FTunaSweeperItemDefinition& OutItemDefinition)
+{
+	FTunaSweeperItemInstance SelectedItemInstance;
+	if (!TryGetSelectedItemInstance(SelectedItemInstance))
+	{
+		OutItemDefinition = FTunaSweeperItemDefinition();
+		return false;
+	}
+
+	UTunaSweeperItemDataSubsystem* ItemDataSubsystem = GetSubsystem<UTunaSweeperItemDataSubsystem>();
+	return ItemDataSubsystem && ItemDataSubsystem->TryGetItemDefinition(SelectedItemInstance.ItemId, OutItemDefinition);
+}
+
 bool UTunaSweeperGameInstance::CanSlotAcceptItem(const FTunaSweeperItemSlotReference& SlotReference, const FGuid& ItemUid)
 {
 	EnsureInventoryStateInitialized();
@@ -300,7 +375,12 @@ bool UTunaSweeperGameInstance::CanSlotAcceptItem(const FTunaSweeperItemSlotRefer
 
 	if (SlotReference.Source == ETunaSweeperItemSlotSource::Equipment)
 	{
-		return SlotReference.SlotIndex == 0 && IsBackpackItemUid(ItemUid);
+		return IsItemCompatibleWithEquipmentSlot(SlotReference.SlotIndex, ItemUid);
+	}
+
+	if (SlotReference.Source == ETunaSweeperItemSlotSource::SelectedWeaponAttachment)
+	{
+		return IsItemCompatibleWithSelectedWeaponAttachmentSlot(SlotReference.SlotIndex, ItemUid);
 	}
 
 	return true;
@@ -312,6 +392,7 @@ bool UTunaSweeperGameInstance::CanMoveItemBetweenSlots(
 	FString* OutFailureReason)
 {
 	EnsureInventoryStateInitialized();
+	RefreshSelectedWeaponAttachmentSlots();
 
 	auto SetFailure = [OutFailureReason](const TCHAR* Reason)
 	{
@@ -362,8 +443,9 @@ bool UTunaSweeperGameInstance::CanMoveItemBetweenSlots(
 	TArray<FTunaSweeperInventorySlot> SimEquipmentSlots = EquipmentSlots;
 	TArray<FTunaSweeperInventorySlot> SimAuxiliaryBagSlots = AuxiliaryBagSlots;
 	TArray<FTunaSweeperInventorySlot> SimLootContainerSlots = ActiveLootContainerSlots;
+	TArray<FTunaSweeperInventorySlot> SimSelectedWeaponAttachmentSlots = SelectedWeaponAttachmentSlots;
 
-	auto GetSimSlots = [&SimInventorySlots, &SimEquipmentSlots, &SimAuxiliaryBagSlots, &SimLootContainerSlots](
+	auto GetSimSlots = [&SimInventorySlots, &SimEquipmentSlots, &SimAuxiliaryBagSlots, &SimLootContainerSlots, &SimSelectedWeaponAttachmentSlots](
 		ETunaSweeperItemSlotSource Source) -> TArray<FTunaSweeperInventorySlot>*
 	{
 		switch (Source)
@@ -376,6 +458,8 @@ bool UTunaSweeperGameInstance::CanMoveItemBetweenSlots(
 			return &SimInventorySlots;
 		case ETunaSweeperItemSlotSource::LootContainer:
 			return &SimLootContainerSlots;
+		case ETunaSweeperItemSlotSource::SelectedWeaponAttachment:
+			return &SimSelectedWeaponAttachmentSlots;
 		default:
 			return nullptr;
 		}
@@ -429,6 +513,11 @@ bool UTunaSweeperGameInstance::MoveItemBetweenSlots(
 	const FGuid TargetUid = (*TargetSlots)[TargetSlot.SlotIndex].ItemUid;
 	(*SourceSlots)[SourceSlot.SlotIndex].ItemUid = TargetUid;
 	(*TargetSlots)[TargetSlot.SlotIndex].ItemUid = SourceUid;
+	if (SourceSlot.Source == ETunaSweeperItemSlotSource::SelectedWeaponAttachment ||
+		TargetSlot.Source == ETunaSweeperItemSlotSource::SelectedWeaponAttachment)
+	{
+		CommitSelectedWeaponAttachmentSlotsToSelectedItem();
+	}
 
 	const int32 NewInventoryCapacity = CalculateInventoryCapacityForEquipmentSlots(EquipmentSlots);
 	EnsureSlotArraySize(PlayerInventorySlots, NewInventoryCapacity);
@@ -481,6 +570,37 @@ void UTunaSweeperGameInstance::CompactInventorySlots()
 	BroadcastInventoryStateChanged();
 }
 
+void UTunaSweeperGameInstance::SelectItemSlot(const FTunaSweeperItemSlotReference& SlotReference)
+{
+	EnsureInventoryStateInitialized();
+
+	FTunaSweeperItemInstance ItemInstance;
+	if (!TryGetSlotItemInstance(SlotReference, ItemInstance))
+	{
+		ClearSelectedItemSelection();
+		return;
+	}
+
+	SelectedItemSlotReference = SlotReference;
+	RefreshSelectedWeaponAttachmentSlots();
+	OnSelectedInventoryItemChanged.Broadcast();
+}
+
+void UTunaSweeperGameInstance::ClearSelectedItemSelection()
+{
+	const bool bHadSelection = SelectedItemSlotReference.IsValid() ||
+		SelectedWeaponAttachmentSlotTags.Num() > 0 ||
+		SelectedWeaponAttachmentSlots.Num() > 0;
+	SelectedItemSlotReference = FTunaSweeperItemSlotReference();
+	SelectedWeaponAttachmentSlotTags.Reset();
+	SelectedWeaponAttachmentSlots.Reset();
+
+	if (bHadSelection)
+	{
+		OnSelectedInventoryItemChanged.Broadcast();
+	}
+}
+
 void UTunaSweeperGameInstance::SetActiveLootContainerInstance(
 	const FTunaSweeperLootContainerInstance& InContainerInstance)
 {
@@ -515,6 +635,7 @@ void UTunaSweeperGameInstance::SaveInventoryState()
 void UTunaSweeperGameInstance::ClearInventoryAndSave()
 {
 	EnsureInventoryStateInitialized();
+	ClearSelectedItemSelection();
 	ItemInstancesByUid.Reset();
 	ResetPlayerSlotArrays();
 	ActiveLootContainerSlots.Reset();
@@ -604,8 +725,9 @@ bool UTunaSweeperGameInstance::LoadInventoryState()
 	RemoveInvalidSlotReferences(EquipmentSlots);
 	RemoveInvalidSlotReferences(AuxiliaryBagSlots);
 
-	EnsureSlotArraySize(EquipmentSlots, FMath::Max(1, GameplaySettings.EquipmentSlotCount));
+	EnsureSlotArraySize(EquipmentSlots, FMath::Max(TunaSweeperInventory::RequiredEquipmentSlots, GameplaySettings.EquipmentSlotCount));
 	EnsureSlotArraySize(AuxiliaryBagSlots, FMath::Max(0, GameplaySettings.AuxiliaryBagSlotCount));
+	MigrateLegacyEquipmentSlots();
 
 	int32 InventoryCapacity = CalculateInventoryCapacityForEquipmentSlots(EquipmentSlots);
 	for (int32 SlotIndex = PlayerInventorySlots.Num() - 1; SlotIndex >= InventoryCapacity; --SlotIndex)
@@ -624,6 +746,9 @@ bool UTunaSweeperGameInstance::LoadInventoryState()
 	ActiveLootContainerDisplayName = FText::GetEmpty();
 	ActiveLootContainerCapacity = 0;
 	bHasActiveLootContainer = false;
+	SelectedItemSlotReference = FTunaSweeperItemSlotReference();
+	SelectedWeaponAttachmentSlotTags.Reset();
+	SelectedWeaponAttachmentSlots.Reset();
 	return true;
 }
 
@@ -664,15 +789,26 @@ void UTunaSweeperGameInstance::GenerateDefaultInventoryState()
 	ActiveLootContainerDisplayName = FText::GetEmpty();
 	ActiveLootContainerCapacity = 0;
 	bHasActiveLootContainer = false;
+	SelectedItemSlotReference = FTunaSweeperItemSlotReference();
+	SelectedWeaponAttachmentSlotTags.Reset();
+	SelectedWeaponAttachmentSlots.Reset();
 
 	const TPair<int32, int32> DefaultInventoryItems[] = {
 		TPair<int32, int32>(1001, 1),
+		TPair<int32, int32>(1002, 1),
 		TPair<int32, int32>(2001, 36),
+		TPair<int32, int32>(2004, 1),
+		TPair<int32, int32>(2005, 1),
 		TPair<int32, int32>(3001, 2),
 		TPair<int32, int32>(3002, 2),
 		TPair<int32, int32>(4001, 4),
 		TPair<int32, int32>(4003, 1),
-		TPair<int32, int32>(5002, 1)
+		TPair<int32, int32>(1004, 1),
+		TPair<int32, int32>(5001, 1),
+		TPair<int32, int32>(5002, 1),
+		TPair<int32, int32>(5006, 1),
+		TPair<int32, int32>(5007, 1),
+		TPair<int32, int32>(5008, 1)
 	};
 
 	for (const TPair<int32, int32>& InventoryItem : DefaultInventoryItems)
@@ -688,7 +824,7 @@ void UTunaSweeperGameInstance::ResetPlayerSlotArrays()
 	EquipmentSlots.Reset();
 	AuxiliaryBagSlots.Reset();
 	PlayerInventorySlots.Reset();
-	EnsureSlotArraySize(EquipmentSlots, FMath::Max(1, GameplaySettings.EquipmentSlotCount));
+	EnsureSlotArraySize(EquipmentSlots, FMath::Max(TunaSweeperInventory::RequiredEquipmentSlots, GameplaySettings.EquipmentSlotCount));
 	EnsureSlotArraySize(AuxiliaryBagSlots, FMath::Max(0, GameplaySettings.AuxiliaryBagSlotCount));
 	EnsureSlotArraySize(PlayerInventorySlots, FMath::Max(TunaSweeperInventory::RequiredBareInventorySlots, GameplaySettings.BareInventorySlots));
 }
@@ -719,6 +855,7 @@ void UTunaSweeperGameInstance::BroadcastInventoryStateChanged()
 {
 	bHasGeneratedPlayerInventoryItems = false;
 	RefreshLegacyPlayerInventoryItems();
+	ClearSelectedItemIfInvalid();
 	OnInventoryStateChanged.Broadcast();
 }
 
@@ -792,6 +929,8 @@ TArray<FTunaSweeperInventorySlot>* UTunaSweeperGameInstance::GetMutableSlotsForS
 		return &PlayerInventorySlots;
 	case ETunaSweeperItemSlotSource::LootContainer:
 		return bHasActiveLootContainer ? &ActiveLootContainerSlots : nullptr;
+	case ETunaSweeperItemSlotSource::SelectedWeaponAttachment:
+		return &SelectedWeaponAttachmentSlots;
 	default:
 		return nullptr;
 	}
@@ -809,6 +948,8 @@ const TArray<FTunaSweeperInventorySlot>* UTunaSweeperGameInstance::GetSlotsForSo
 		return &PlayerInventorySlots;
 	case ETunaSweeperItemSlotSource::LootContainer:
 		return bHasActiveLootContainer ? &ActiveLootContainerSlots : nullptr;
+	case ETunaSweeperItemSlotSource::SelectedWeaponAttachment:
+		return &SelectedWeaponAttachmentSlots;
 	default:
 		return nullptr;
 	}
@@ -821,9 +962,9 @@ int32 UTunaSweeperGameInstance::CalculateInventoryCapacityForEquipmentSlots(
 	const int32 MaxSlots = FMath::Max(BareSlots, FMath::Max(TunaSweeperInventory::RequiredMaxInventorySlots, GameplaySettings.MaxInventorySlots));
 	int32 Capacity = BareSlots;
 
-	if (InEquipmentSlots.IsValidIndex(0))
+	if (InEquipmentSlots.IsValidIndex(TunaSweeperInventory::BackpackSlotIndex))
 	{
-		const int32 BackpackCapacity = GetInventoryCapacityForItemUid(InEquipmentSlots[0].ItemUid);
+		const int32 BackpackCapacity = GetInventoryCapacityForItemUid(InEquipmentSlots[TunaSweeperInventory::BackpackSlotIndex].ItemUid);
 		if (BackpackCapacity > BareSlots)
 		{
 			Capacity = BareSlots + (BackpackCapacity - BareSlots);
@@ -853,6 +994,36 @@ int32 UTunaSweeperGameInstance::GetInventoryCapacityForItemUid(const FGuid& Item
 		: 0;
 }
 
+bool UTunaSweeperGameInstance::IsItemCompatibleWithEquipmentSlot(int32 SlotIndex, const FGuid& ItemUid)
+{
+	const FTunaSweeperItemInstance* ItemInstance = ItemInstancesByUid.Find(ItemUid);
+	if (!ItemInstance)
+	{
+		return false;
+	}
+
+	UTunaSweeperItemDataSubsystem* ItemDataSubsystem = GetSubsystem<UTunaSweeperItemDataSubsystem>();
+	FTunaSweeperItemDefinition ItemDefinition;
+	return ItemDataSubsystem &&
+		ItemDataSubsystem->TryGetItemDefinition(ItemInstance->ItemId, ItemDefinition) &&
+		DoesItemDefinitionMatchEquipmentSlot(SlotIndex, ItemDefinition);
+}
+
+bool UTunaSweeperGameInstance::DoesItemDefinitionMatchEquipmentSlot(
+	int32 SlotIndex,
+	const FTunaSweeperItemDefinition& ItemDefinition) const
+{
+	const TunaSweeperInventory::FEquipmentSlotRule* Rule = TunaSweeperInventory::GetEquipmentSlotRule(SlotIndex);
+	if (!Rule)
+	{
+		return false;
+	}
+
+	return ItemDefinition.EquipmentSlotTag == Rule->EquipmentSlotTag ||
+		ItemDefinition.CategoryTag == Rule->CategoryTag ||
+		(SlotIndex == TunaSweeperInventory::BackpackSlotIndex && IsBackpackItemDefinition(ItemDefinition));
+}
+
 bool UTunaSweeperGameInstance::IsBackpackItemUid(const FGuid& ItemUid)
 {
 	const FTunaSweeperItemInstance* ItemInstance = ItemInstancesByUid.Find(ItemUid);
@@ -875,6 +1046,136 @@ bool UTunaSweeperGameInstance::IsBackpackItemDefinition(const FTunaSweeperItemDe
 		ItemDefinition.InventorySlotCapacity > FMath::Max(TunaSweeperInventory::RequiredBareInventorySlots, GameplaySettings.BareInventorySlots);
 }
 
+void UTunaSweeperGameInstance::MigrateLegacyEquipmentSlots()
+{
+	if (EquipmentSlots.IsValidIndex(0) &&
+		EquipmentSlots.IsValidIndex(TunaSweeperInventory::BackpackSlotIndex) &&
+		EquipmentSlots[0].ItemUid.IsValid() &&
+		!EquipmentSlots[TunaSweeperInventory::BackpackSlotIndex].ItemUid.IsValid() &&
+		IsBackpackItemUid(EquipmentSlots[0].ItemUid))
+	{
+		EquipmentSlots[TunaSweeperInventory::BackpackSlotIndex].ItemUid = EquipmentSlots[0].ItemUid;
+		EquipmentSlots[0].Clear();
+	}
+}
+
+void UTunaSweeperGameInstance::RefreshSelectedWeaponAttachmentSlots()
+{
+	SelectedWeaponAttachmentSlotTags.Reset();
+	SelectedWeaponAttachmentSlots.Reset();
+
+	FTunaSweeperItemInstance SelectedItemInstance;
+	FTunaSweeperItemDefinition SelectedItemDefinition;
+	if (!TryGetSelectedItemInstance(SelectedItemInstance) ||
+		!TryGetSelectedItemDefinition(SelectedItemDefinition) ||
+		SelectedItemDefinition.AttachmentSlotTags.Num() <= 0)
+	{
+		return;
+	}
+
+	for (const FName& AttachmentSlotTag : SelectedItemDefinition.AttachmentSlotTags)
+	{
+		if (AttachmentSlotTag.IsNone())
+		{
+			continue;
+		}
+
+		SelectedWeaponAttachmentSlotTags.Add(AttachmentSlotTag);
+		FTunaSweeperInventorySlot AttachmentSlot;
+		if (const FGuid* AttachmentUid = SelectedItemInstance.AttachmentSlots.Find(AttachmentSlotTag))
+		{
+			AttachmentSlot.ItemUid = *AttachmentUid;
+		}
+		SelectedWeaponAttachmentSlots.Add(AttachmentSlot);
+	}
+}
+
+bool UTunaSweeperGameInstance::CommitSelectedWeaponAttachmentSlotsToSelectedItem()
+{
+	FTunaSweeperItemInstance SelectedItemInstance;
+	if (!TryGetSelectedItemInstance(SelectedItemInstance))
+	{
+		return false;
+	}
+
+	FTunaSweeperItemInstance* MutableSelectedItemInstance = ItemInstancesByUid.Find(SelectedItemInstance.Uid);
+	if (!MutableSelectedItemInstance)
+	{
+		return false;
+	}
+
+	MutableSelectedItemInstance->AttachmentSlots.Reset();
+	for (int32 SlotIndex = 0; SlotIndex < SelectedWeaponAttachmentSlotTags.Num(); ++SlotIndex)
+	{
+		if (!SelectedWeaponAttachmentSlots.IsValidIndex(SlotIndex))
+		{
+			continue;
+		}
+
+		const FGuid& AttachmentUid = SelectedWeaponAttachmentSlots[SlotIndex].ItemUid;
+		if (AttachmentUid.IsValid())
+		{
+			MutableSelectedItemInstance->AttachmentSlots.Add(SelectedWeaponAttachmentSlotTags[SlotIndex], AttachmentUid);
+		}
+	}
+
+	return true;
+}
+
+bool UTunaSweeperGameInstance::DoesSelectedWeaponAcceptAttachmentSlot(FName AttachmentSlotTag) const
+{
+	return SelectedWeaponAttachmentSlotTags.Contains(AttachmentSlotTag);
+}
+
+bool UTunaSweeperGameInstance::IsItemCompatibleWithSelectedWeaponAttachmentSlot(int32 SlotIndex, const FGuid& ItemUid)
+{
+	if (!SelectedWeaponAttachmentSlotTags.IsValidIndex(SlotIndex))
+	{
+		return false;
+	}
+
+	const FTunaSweeperItemInstance* ItemInstance = ItemInstancesByUid.Find(ItemUid);
+	if (!ItemInstance)
+	{
+		return false;
+	}
+
+	FTunaSweeperItemDefinition SelectedWeaponDefinition;
+	UTunaSweeperItemDataSubsystem* ItemDataSubsystem = GetSubsystem<UTunaSweeperItemDataSubsystem>();
+	FTunaSweeperItemDefinition AttachmentDefinition;
+	if (!ItemDataSubsystem ||
+		!TryGetSelectedItemDefinition(SelectedWeaponDefinition) ||
+		!ItemDataSubsystem->TryGetItemDefinition(ItemInstance->ItemId, AttachmentDefinition))
+	{
+		return false;
+	}
+
+	const FName RequiredAttachmentSlotTag = SelectedWeaponAttachmentSlotTags[SlotIndex];
+	if (AttachmentDefinition.AttachmentSlotTag != RequiredAttachmentSlotTag ||
+		!DoesSelectedWeaponAcceptAttachmentSlot(RequiredAttachmentSlotTag))
+	{
+		return false;
+	}
+
+	return AttachmentDefinition.CompatibleWeaponTypeTags.Num() <= 0 ||
+		AttachmentDefinition.CompatibleWeaponTypeTags.Contains(SelectedWeaponDefinition.WeaponTypeTag);
+}
+
+void UTunaSweeperGameInstance::ClearSelectedItemIfInvalid()
+{
+	FTunaSweeperItemInstance SelectedItemInstance;
+	if (SelectedItemSlotReference.IsValid() && !TryGetSelectedItemInstance(SelectedItemInstance))
+	{
+		SelectedItemSlotReference = FTunaSweeperItemSlotReference();
+		SelectedWeaponAttachmentSlotTags.Reset();
+		SelectedWeaponAttachmentSlots.Reset();
+		OnSelectedInventoryItemChanged.Broadcast();
+		return;
+	}
+
+	RefreshSelectedWeaponAttachmentSlots();
+}
+
 bool UTunaSweeperGameInstance::HasOccupiedInventorySlotsBeyondCapacity(
 	const TArray<FTunaSweeperInventorySlot>& InInventorySlots,
 	int32 Capacity) const
@@ -892,14 +1193,28 @@ bool UTunaSweeperGameInstance::HasOccupiedInventorySlotsBeyondCapacity(
 
 void UTunaSweeperGameInstance::CollectPlayerOwnedItemUids(TSet<FGuid>& OutItemUids) const
 {
-	auto CollectSlots = [&OutItemUids](const TArray<FTunaSweeperInventorySlot>& Slots)
+	TFunction<void(const FGuid&)> CollectItemUid = [this, &OutItemUids, &CollectItemUid](const FGuid& ItemUid)
+	{
+		if (!ItemUid.IsValid() || OutItemUids.Contains(ItemUid))
+		{
+			return;
+		}
+
+		OutItemUids.Add(ItemUid);
+		if (const FTunaSweeperItemInstance* ItemInstance = ItemInstancesByUid.Find(ItemUid))
+		{
+			for (const TPair<FName, FGuid>& AttachmentSlot : ItemInstance->AttachmentSlots)
+			{
+				CollectItemUid(AttachmentSlot.Value);
+			}
+		}
+	};
+
+	auto CollectSlots = [&CollectItemUid](const TArray<FTunaSweeperInventorySlot>& Slots)
 	{
 		for (const FTunaSweeperInventorySlot& Slot : Slots)
 		{
-			if (Slot.ItemUid.IsValid())
-			{
-				OutItemUids.Add(Slot.ItemUid);
-			}
+			CollectItemUid(Slot.ItemUid);
 		}
 	};
 

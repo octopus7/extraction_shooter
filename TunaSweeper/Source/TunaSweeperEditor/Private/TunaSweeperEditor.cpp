@@ -97,12 +97,12 @@ namespace TunaSweeperEditorSetup
 	const FString InteractionMarkerAlignmentTaskId = TEXT("2026-05-10_RebuildInteractionMarkerAlignmentV2");
 	const FString TempOpenLootUiTaskId = TEXT("2026-05-10_CreateTempOpenLootTileViewAndIconsV2");
 	const FString PickupItemAndSpawnerTaskId = TEXT("2026-05-11_CreatePickupItemAndSpawnerAssetsV3");
-	const FString CommonGameHudTaskId = TEXT("2026-05-11_RebuildThumbnailIconsUnderNameOverlay");
+	const FString CommonGameHudTaskId = TEXT("2026-05-16_RebuildInventoryLayoutAndModdingPanelV1");
 	const FString InventoryInputTaskId = TEXT("2026-05-11_AddInventoryInput");
 	const FString QuickSlotInputTaskId = TEXT("2026-05-12_AddQuickSlotInputActions");
 	const FString LootContainerAndSpawnerTaskId = TEXT("2026-05-11_CreateLootContainerAndSpawnerAssetsV1");
 	const FString CannedTunaIconImportTaskId = TEXT("2026-05-11_ImportCannedTunaIconV1");
-	const FString BackpackInventoryTaskId = TEXT("2026-05-16_CreateBackpackInventoryAssetsV1");
+	const FString BackpackInventoryTaskId = TEXT("2026-05-16_CreateEquipmentInventoryAssetsV3");
 	const FString IntroMenuAndLevelTravelTaskId = TEXT("2026-05-15_CreateIntroMenuAndLevelTravelActorsV1");
 	const FString LevelTransitionVideoTaskId = TEXT("2026-05-16_AddBidirectionalLevelTransitionVideoV3");
 	const FString FirstOutingQuestTaskId = TEXT("2026-05-15_CreateFirstOutingQuestNpcV2");
@@ -1304,6 +1304,8 @@ namespace TunaSweeperEditorSetup
 			TEXT("T_UIIcon_PistolAmmo"),
 			TEXT("T_UIIcon_RifleAmmo"),
 			TEXT("T_UIIcon_ShotgunAmmo"),
+			TEXT("T_UIIcon_RifleExtendedMagazine"),
+			TEXT("T_UIIcon_RedDotOptic"),
 			TEXT("T_UIIcon_CannedFood"),
 			TEXT("T_UIIcon_CannedTuna"),
 			TEXT("T_UIIcon_WaterBottle"),
@@ -1312,13 +1314,40 @@ namespace TunaSweeperEditorSetup
 			TEXT("T_UIIcon_FirstAidKit"),
 			TEXT("T_UIIcon_Painkillers"),
 			TEXT("T_UIIcon_Antibiotics"),
+			TEXT("T_UIIcon_CombatKnife"),
+			TEXT("T_UIIcon_BallisticHelmet"),
 			TEXT("T_UIIcon_BodyArmor"),
+			TEXT("T_UIIcon_TacticalSunglasses"),
+			TEXT("T_UIIcon_TacticalEarphones_Tier1"),
+			TEXT("T_UIIcon_TacticalEarphones_Tier2"),
+			TEXT("T_UIIcon_TacticalJacket"),
 			TEXT("T_UIIcon_Backpack"),
 			TEXT("T_UIIcon_Backpack_Tier1"),
 			TEXT("T_UIIcon_Backpack_Tier2"),
 			TEXT("T_UIIcon_Backpack_Tier3"),
 			TEXT("T_UIIcon_Backpack_Tier4"),
 			TEXT("T_UIIcon_ValuablesCrate")
+		};
+
+		return IconAssetNames;
+	}
+
+	const TArray<FString>& GetEquipmentIconAssetNames()
+	{
+		static const TArray<FString> IconAssetNames = {
+			TEXT("T_UIIcon_CombatKnife"),
+			TEXT("T_UIIcon_BallisticHelmet"),
+			TEXT("T_UIIcon_BodyArmor"),
+			TEXT("T_UIIcon_TacticalSunglasses"),
+			TEXT("T_UIIcon_TacticalEarphones_Tier1"),
+			TEXT("T_UIIcon_TacticalEarphones_Tier2"),
+			TEXT("T_UIIcon_TacticalJacket"),
+			TEXT("T_UIIcon_RifleExtendedMagazine"),
+			TEXT("T_UIIcon_RedDotOptic"),
+			TEXT("T_UIIcon_Backpack_Tier1"),
+			TEXT("T_UIIcon_Backpack_Tier2"),
+			TEXT("T_UIIcon_Backpack_Tier3"),
+			TEXT("T_UIIcon_Backpack_Tier4")
 		};
 
 		return IconAssetNames;
@@ -1408,6 +1437,55 @@ namespace TunaSweeperEditorSetup
 		}
 
 		return true;
+	}
+
+	bool ImportIconTextureSources(const TArray<FString>& IconAssetNames, bool bReplaceExisting)
+	{
+		TArray<FString> FilesToImport;
+		for (const FString& IconAssetName : IconAssetNames)
+		{
+			const FString SourcePath = GetTempOpenLootIconSourcePath(IconAssetName);
+			if (!FPaths::FileExists(SourcePath))
+			{
+				UE_LOG(LogTunaSweeperEditor, Error, TEXT("Missing icon source: %s"), *SourcePath);
+				return false;
+			}
+
+			FilesToImport.Add(SourcePath);
+		}
+
+		UAutomatedAssetImportData* ImportData = NewObject<UAutomatedAssetImportData>();
+		ImportData->DestinationPath = UIIconAssetPath;
+		ImportData->Filenames = FilesToImport;
+		ImportData->bReplaceExisting = bReplaceExisting;
+		ImportData->bSkipReadOnly = true;
+
+		FAssetToolsModule& AssetToolsModule = FModuleManager::LoadModuleChecked<FAssetToolsModule>(TEXT("AssetTools"));
+		const TArray<UObject*> ImportedAssets = AssetToolsModule.Get().ImportAssetsAutomated(ImportData);
+		if (ImportedAssets.Num() == 0)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to import icon textures."));
+			return false;
+		}
+
+		for (const FString& IconAssetName : IconAssetNames)
+		{
+			UTexture2D* Texture = LoadObject<UTexture2D>(nullptr, *GetAssetObjectPath(UIIconAssetPath, IconAssetName));
+			if (!Texture)
+			{
+				UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to load icon texture: %s"), *IconAssetName);
+				return false;
+			}
+
+			ConfigureImportedIconTexture(Texture);
+		}
+
+		return true;
+	}
+
+	bool EnsureEquipmentIconTextures()
+	{
+		return ImportIconTextureSources(GetEquipmentIconAssetNames(), true);
 	}
 
 	bool EnsureCannedTunaIconTexture()
@@ -2105,9 +2183,9 @@ namespace TunaSweeperEditorSetup
 		return true;
 	}
 
-	bool BuildHudItemInfoPanelWidgetTree(UWidgetBlueprint* WidgetBlueprint)
+	bool BuildHudItemInfoPanelWidgetTree(UWidgetBlueprint* WidgetBlueprint, TSubclassOf<UUserWidget> EntryWidgetClass)
 	{
-		if (!WidgetBlueprint || !WidgetBlueprint->WidgetTree)
+		if (!WidgetBlueprint || !WidgetBlueprint->WidgetTree || !EntryWidgetClass)
 		{
 			return false;
 		}
@@ -2123,9 +2201,12 @@ namespace TunaSweeperEditorSetup
 		UTextBlock* SelectedItemNameText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("SelectedItemNameText"));
 		UTextBlock* SelectedItemDescriptionText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("SelectedItemDescriptionText"));
 		UBorder* ModdingPanel = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("ModdingPanel"));
+		UVerticalBox* ModdingStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("ModdingStack"));
 		UTextBlock* ModdingText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("ModdingText"));
+		UTileView* AttachmentSlotTileView = WidgetTree->ConstructWidget<UTileView>(UTileView::StaticClass(), TEXT("AttachmentSlotTileView"));
 
-		if (!RootSizeBox || !PanelBackground || !PanelStack || !SelectedItemNameText || !SelectedItemDescriptionText || !ModdingPanel || !ModdingText)
+		if (!RootSizeBox || !PanelBackground || !PanelStack || !SelectedItemNameText || !SelectedItemDescriptionText ||
+			!ModdingPanel || !ModdingStack || !ModdingText || !AttachmentSlotTileView)
 		{
 			return false;
 		}
@@ -2164,12 +2245,28 @@ namespace TunaSweeperEditorSetup
 		ModdingPanel->SetVisibility(ESlateVisibility::Collapsed);
 		ModdingPanel->SetPadding(FMargin(10.0f));
 		ModdingPanel->SetBrush(MakeRoundedBoxBrush(
-			FVector2D(300.0f, 120.0f),
+			FVector2D(300.0f, 150.0f),
 			FLinearColor(0.03f, 0.034f, 0.04f, 0.92f),
 			FLinearColor(0.56f, 0.50f, 0.78f, 1.0f),
 			1.0f));
-		ConfigureTextBlockLeft(ModdingText, FText::FromString(TEXT("Modding")), FLinearColor::White, 16);
-		ModdingPanel->SetContent(ModdingText);
+		ConfigureTextBlockLeft(ModdingText, FText::FromString(TEXT("Modding")), FLinearColor::White, 15);
+		ModdingPanel->SetContent(ModdingStack);
+		UVerticalBoxSlot* ModdingTextSlot = ModdingStack->AddChildToVerticalBox(ModdingText);
+		if (ModdingTextSlot)
+		{
+			ModdingTextSlot->SetHorizontalAlignment(HAlign_Fill);
+			ModdingTextSlot->SetVerticalAlignment(VAlign_Top);
+		}
+		AttachmentSlotTileView->SetEntryWidth(96.0f);
+		AttachmentSlotTileView->SetEntryHeight(96.0f);
+		SetListViewEntryWidgetClass(AttachmentSlotTileView, EntryWidgetClass);
+		UVerticalBoxSlot* AttachmentSlot = ModdingStack->AddChildToVerticalBox(AttachmentSlotTileView);
+		if (AttachmentSlot)
+		{
+			AttachmentSlot->SetPadding(FMargin(0.0f, 8.0f, 0.0f, 0.0f));
+			AttachmentSlot->SetHorizontalAlignment(HAlign_Fill);
+			AttachmentSlot->SetVerticalAlignment(VAlign_Top);
+		}
 
 		UVerticalBoxSlot* ModdingSlot = PanelStack->AddChildToVerticalBox(ModdingPanel);
 		if (ModdingSlot)
@@ -2181,6 +2278,8 @@ namespace TunaSweeperEditorSetup
 		RegisterWidgetVariable(WidgetBlueprint, SelectedItemNameText);
 		RegisterWidgetVariable(WidgetBlueprint, SelectedItemDescriptionText);
 		RegisterWidgetVariable(WidgetBlueprint, ModdingPanel);
+		RegisterWidgetVariable(WidgetBlueprint, ModdingText);
+		RegisterWidgetVariable(WidgetBlueprint, AttachmentSlotTileView);
 		WidgetBlueprint->MarkPackageDirty();
 		return true;
 	}
@@ -2335,7 +2434,7 @@ namespace TunaSweeperEditorSetup
 		UWidgetTree* WidgetTree = WidgetBlueprint->WidgetTree;
 		UCanvasPanel* RootCanvas = WidgetTree->ConstructWidget<UCanvasPanel>(UCanvasPanel::StaticClass(), TEXT("RootCanvas"));
 		UUserWidget* TopStatusReserveWidget = WidgetTree->ConstructWidget<UUserWidget>(TopReserveWidgetClass, TEXT("TopStatusReserveWidget"));
-		UHorizontalBox* CenterContentPanel = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("CenterContentPanel"));
+		UCanvasPanel* CenterContentPanel = WidgetTree->ConstructWidget<UCanvasPanel>(UCanvasPanel::StaticClass(), TEXT("CenterContentPanel"));
 		UUserWidget* InventoryAreaWidget = WidgetTree->ConstructWidget<UUserWidget>(InventoryAreaWidgetClass, TEXT("InventoryAreaWidget"));
 		UUserWidget* ItemInfoPanelWidget = WidgetTree->ConstructWidget<UUserWidget>(ItemInfoPanelWidgetClass, TEXT("ItemInfoPanelWidget"));
 		UUserWidget* ExternalPanelWidget = WidgetTree->ConstructWidget<UUserWidget>(ExternalPanelWidgetClass, TEXT("ExternalPanelWidget"));
@@ -2364,33 +2463,37 @@ namespace TunaSweeperEditorSetup
 		UCanvasPanelSlot* CenterSlot = RootCanvas->AddChildToCanvas(CenterContentPanel);
 		if (CenterSlot)
 		{
-			CenterSlot->SetAnchors(FAnchors(0.5f, 0.5f, 0.5f, 0.5f));
-			CenterSlot->SetAlignment(FVector2D(0.5f, 0.5f));
-			CenterSlot->SetPosition(FVector2D(0.0f, -20.0f));
-			CenterSlot->SetSize(FVector2D(1560.0f, 620.0f));
+			CenterSlot->SetAnchors(FAnchors(0.0f, 0.5f, 1.0f, 0.5f));
+			CenterSlot->SetAlignment(FVector2D(0.0f, 0.5f));
+			CenterSlot->SetOffsets(FMargin(34.0f, -20.0f, 34.0f, 620.0f));
 		}
 
-		UHorizontalBoxSlot* InventorySlot = CenterContentPanel->AddChildToHorizontalBox(InventoryAreaWidget);
+		UCanvasPanelSlot* InventorySlot = CenterContentPanel->AddChildToCanvas(InventoryAreaWidget);
 		if (InventorySlot)
 		{
-			InventorySlot->SetVerticalAlignment(VAlign_Fill);
-			InventorySlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
+			InventorySlot->SetAnchors(FAnchors(0.0f, 0.0f, 0.0f, 0.0f));
+			InventorySlot->SetAlignment(FVector2D(0.0f, 0.0f));
+			InventorySlot->SetPosition(FVector2D(0.0f, 0.0f));
+			InventorySlot->SetSize(FVector2D(InventoryAreaPanelWidth, 620.0f));
 		}
 
-		UHorizontalBoxSlot* ItemInfoSlot = CenterContentPanel->AddChildToHorizontalBox(ItemInfoPanelWidget);
+		ItemInfoPanelWidget->SetVisibility(ESlateVisibility::Collapsed);
+		UCanvasPanelSlot* ItemInfoSlot = CenterContentPanel->AddChildToCanvas(ItemInfoPanelWidget);
 		if (ItemInfoSlot)
 		{
-			ItemInfoSlot->SetPadding(FMargin(12.0f, 0.0f, 0.0f, 0.0f));
-			ItemInfoSlot->SetVerticalAlignment(VAlign_Fill);
-			ItemInfoSlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
+			ItemInfoSlot->SetAnchors(FAnchors(0.5f, 0.0f, 0.5f, 0.0f));
+			ItemInfoSlot->SetAlignment(FVector2D(0.5f, 0.0f));
+			ItemInfoSlot->SetPosition(FVector2D(0.0f, 0.0f));
+			ItemInfoSlot->SetSize(FVector2D(330.0f, 620.0f));
 		}
 
-		UHorizontalBoxSlot* ExternalSlot = CenterContentPanel->AddChildToHorizontalBox(ExternalPanelWidget);
+		UCanvasPanelSlot* ExternalSlot = CenterContentPanel->AddChildToCanvas(ExternalPanelWidget);
 		if (ExternalSlot)
 		{
-			ExternalSlot->SetPadding(FMargin(12.0f, 0.0f, 0.0f, 0.0f));
-			ExternalSlot->SetVerticalAlignment(VAlign_Fill);
-			ExternalSlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
+			ExternalSlot->SetAnchors(FAnchors(1.0f, 0.0f, 1.0f, 0.0f));
+			ExternalSlot->SetAlignment(FVector2D(1.0f, 0.0f));
+			ExternalSlot->SetPosition(FVector2D(0.0f, 0.0f));
+			ExternalSlot->SetSize(FVector2D(LootContainerPanelWidth, 620.0f));
 		}
 
 		UCanvasPanelSlot* BottomSlot = RootCanvas->AddChildToCanvas(BottomRow);
@@ -2717,7 +2820,7 @@ namespace TunaSweeperEditorSetup
 			BuildHudBottomStatusWidgetTree(BottomStatusWidgetBlueprint) &&
 			BuildHudQuickSlotBarWidgetTree(QuickSlotWidgetBlueprint) &&
 			BuildHudInventoryAreaWidgetTree(InventoryAreaWidgetBlueprint, ItemThumbnailWidgetClass) &&
-			BuildHudItemInfoPanelWidgetTree(ItemInfoPanelWidgetBlueprint) &&
+			BuildHudItemInfoPanelWidgetTree(ItemInfoPanelWidgetBlueprint, ItemThumbnailWidgetClass) &&
 			BuildLootContainerWidgetTree(LootContainerWidgetBlueprint, ItemThumbnailWidgetClass);
 
 		if (!bChildWidgetsBuilt)
@@ -2784,7 +2887,7 @@ namespace TunaSweeperEditorSetup
 
 	bool EnsureBackpackInventoryAssets()
 	{
-		if (!EnsureTempOpenLootIconTextures())
+		if (!EnsureTempOpenLootIconTextures() || !EnsureEquipmentIconTextures())
 		{
 			return false;
 		}

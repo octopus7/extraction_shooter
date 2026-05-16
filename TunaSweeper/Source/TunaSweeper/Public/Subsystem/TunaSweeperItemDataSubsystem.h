@@ -39,6 +39,18 @@ struct TUNASWEEPER_API FTunaSweeperItemDefinition
 	FName EquipmentSlotTag;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
+	FName WeaponTypeTag;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
+	FName AttachmentSlotTag;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
+	TArray<FName> AttachmentSlotTags;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
+	TArray<FName> CompatibleWeaponTypeTags;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
 	int32 InventorySlotCapacity = 0;
 };
 

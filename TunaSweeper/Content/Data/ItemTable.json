@@ -4,21 +4,45 @@
     "name_string_key": "item.pistol",
     "description_string_key": "item.pistol.desc",
     "shop_sell_price": 120,
-    "icon_file_name": "T_UIIcon_Pistol.uasset"
+    "icon_file_name": "T_UIIcon_Pistol.uasset",
+    "category_tag": "item.category.weapon.gun",
+    "equipment_slot_tag": "equipment.slot.gun",
+    "weapon_type_tag": "weapon.type.pistol",
+    "attachment_slot_tags": []
   },
   {
     "id": 1002,
     "name_string_key": "item.rifle",
     "description_string_key": "item.rifle.desc",
     "shop_sell_price": 360,
-    "icon_file_name": "T_UIIcon_Rifle.uasset"
+    "icon_file_name": "T_UIIcon_Rifle.uasset",
+    "category_tag": "item.category.weapon.gun",
+    "equipment_slot_tag": "equipment.slot.gun",
+    "weapon_type_tag": "weapon.type.rifle",
+    "attachment_slot_tags": [
+      "attachment.slot.magazine",
+      "attachment.slot.optic"
+    ]
   },
   {
     "id": 1003,
     "name_string_key": "item.shotgun",
     "description_string_key": "item.shotgun.desc",
     "shop_sell_price": 300,
-    "icon_file_name": "T_UIIcon_Shotgun.uasset"
+    "icon_file_name": "T_UIIcon_Shotgun.uasset",
+    "category_tag": "item.category.weapon.gun",
+    "equipment_slot_tag": "equipment.slot.gun",
+    "weapon_type_tag": "weapon.type.shotgun",
+    "attachment_slot_tags": []
+  },
+  {
+    "id": 1004,
+    "name_string_key": "item.combat_knife",
+    "description_string_key": "item.combat_knife.desc",
+    "shop_sell_price": 65,
+    "icon_file_name": "T_UIIcon_CombatKnife.uasset",
+    "category_tag": "item.category.weapon.melee",
+    "equipment_slot_tag": "equipment.slot.melee"
   },
   {
     "id": 2001,
@@ -40,6 +64,30 @@
     "description_string_key": "item.shotgun_ammo.desc",
     "shop_sell_price": 16,
     "icon_file_name": "T_UIIcon_ShotgunAmmo.uasset"
+  },
+  {
+    "id": 2004,
+    "name_string_key": "item.rifle_extended_magazine",
+    "description_string_key": "item.rifle_extended_magazine.desc",
+    "shop_sell_price": 55,
+    "icon_file_name": "T_UIIcon_RifleExtendedMagazine.uasset",
+    "category_tag": "item.category.attachment",
+    "attachment_slot_tag": "attachment.slot.magazine",
+    "compatible_weapon_type_tags": [
+      "weapon.type.rifle"
+    ]
+  },
+  {
+    "id": 2005,
+    "name_string_key": "item.red_dot_optic",
+    "description_string_key": "item.red_dot_optic.desc",
+    "shop_sell_price": 75,
+    "icon_file_name": "T_UIIcon_RedDotOptic.uasset",
+    "category_tag": "item.category.attachment",
+    "attachment_slot_tag": "attachment.slot.optic",
+    "compatible_weapon_type_tags": [
+      "weapon.type.rifle"
+    ]
   },
   {
     "id": 3001,
@@ -102,7 +150,9 @@
     "name_string_key": "item.body_armor",
     "description_string_key": "item.body_armor.desc",
     "shop_sell_price": 180,
-    "icon_file_name": "T_UIIcon_BodyArmor.uasset"
+    "icon_file_name": "T_UIIcon_BodyArmor.uasset",
+    "category_tag": "item.category.body",
+    "equipment_slot_tag": "equipment.slot.body"
   },
   {
     "id": 5002,
@@ -143,6 +193,51 @@
     "category_tag": "item.category.bag",
     "equipment_slot_tag": "equipment.slot.backpack",
     "inventory_slot_capacity": 100
+  },
+  {
+    "id": 5006,
+    "name_string_key": "item.ballistic_helmet",
+    "description_string_key": "item.ballistic_helmet.desc",
+    "shop_sell_price": 220,
+    "icon_file_name": "T_UIIcon_BallisticHelmet.uasset",
+    "category_tag": "item.category.head",
+    "equipment_slot_tag": "equipment.slot.head"
+  },
+  {
+    "id": 5007,
+    "name_string_key": "item.tactical_sunglasses",
+    "description_string_key": "item.tactical_sunglasses.desc",
+    "shop_sell_price": 35,
+    "icon_file_name": "T_UIIcon_TacticalSunglasses.uasset",
+    "category_tag": "item.category.face",
+    "equipment_slot_tag": "equipment.slot.face"
+  },
+  {
+    "id": 5008,
+    "name_string_key": "item.tactical_earphones_tier1",
+    "description_string_key": "item.tactical_earphones_tier1.desc",
+    "shop_sell_price": 80,
+    "icon_file_name": "T_UIIcon_TacticalEarphones_Tier1.uasset",
+    "category_tag": "item.category.ear",
+    "equipment_slot_tag": "equipment.slot.ear"
+  },
+  {
+    "id": 5009,
+    "name_string_key": "item.tactical_earphones_tier2",
+    "description_string_key": "item.tactical_earphones_tier2.desc",
+    "shop_sell_price": 160,
+    "icon_file_name": "T_UIIcon_TacticalEarphones_Tier2.uasset",
+    "category_tag": "item.category.ear",
+    "equipment_slot_tag": "equipment.slot.ear"
+  },
+  {
+    "id": 5010,
+    "name_string_key": "item.tactical_jacket",
+    "description_string_key": "item.tactical_jacket.desc",
+    "shop_sell_price": 90,
+    "icon_file_name": "T_UIIcon_TacticalJacket.uasset",
+    "category_tag": "item.category.body",
+    "equipment_slot_tag": "equipment.slot.body"
   },
   {
     "id": 6001,

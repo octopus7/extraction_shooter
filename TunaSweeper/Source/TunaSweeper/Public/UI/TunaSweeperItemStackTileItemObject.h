@@ -36,6 +36,9 @@ struct TUNASWEEPER_API FTunaSweeperItemStackTileData
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Tile")
 	bool bIsEmpty = true;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Tile")
+	bool bShowEmptySlotLabel = false;
 };
 
 UCLASS(BlueprintType)

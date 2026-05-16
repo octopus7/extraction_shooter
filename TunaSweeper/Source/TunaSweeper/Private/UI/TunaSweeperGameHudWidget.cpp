@@ -15,8 +15,25 @@ void UTunaSweeperGameHudWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
+	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
+	{
+		TunaGameInstance->OnSelectedInventoryItemChanged.RemoveAll(this);
+		TunaGameInstance->OnSelectedInventoryItemChanged.AddUObject(this, &UTunaSweeperGameHudWidget::HandleSelectedInventoryItemChanged);
+	}
+
 	SetCenterPanelsVisible(false);
+	SetItemInfoPanelVisible(false);
 	RefreshBottomStatusFromGameInstance();
+}
+
+void UTunaSweeperGameHudWidget::NativeDestruct()
+{
+	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
+	{
+		TunaGameInstance->OnSelectedInventoryItemChanged.RemoveAll(this);
+	}
+
+	Super::NativeDestruct();
 }
 
 void UTunaSweeperGameHudWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
@@ -81,7 +98,7 @@ void UTunaSweeperGameHudWidget::ShowInventoryOnlyPanel()
 {
 	SetCenterPanelsVisible(true);
 	SetInventoryAreaVisible(true);
-	SetItemInfoPanelVisible(false);
+	HandleSelectedInventoryItemChanged();
 	ShowExternalPanel(ETunaSweeperHudExternalPanelMode::None);
 }
 
@@ -95,6 +112,11 @@ void UTunaSweeperGameHudWidget::ToggleInventoryOnlyPanel()
 	}
 	else
 	{
+		if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
+		{
+			TunaGameInstance->ClearSelectedItemSelection();
+		}
+
 		SetInventoryAreaVisible(false);
 		SetItemInfoPanelVisible(false);
 		ShowExternalPanel(ETunaSweeperHudExternalPanelMode::None);
@@ -106,7 +128,7 @@ void UTunaSweeperGameHudWidget::ShowLootContainerPanel(const FTunaSweeperLootCon
 {
 	SetCenterPanelsVisible(true);
 	SetInventoryAreaVisible(true);
-	SetItemInfoPanelVisible(false);
+	HandleSelectedInventoryItemChanged();
 
 	if (ExternalPanelWidget)
 	{
@@ -148,4 +170,18 @@ void UTunaSweeperGameHudWidget::RefreshBottomStatusFromGameInstance()
 	}
 
 	BottomStatusWidget->SetHudState(HudState);
+}
+
+void UTunaSweeperGameHudWidget::HandleSelectedInventoryItemChanged()
+{
+	const bool bCenterVisible = CenterContentPanel && CenterContentPanel->GetVisibility() != ESlateVisibility::Collapsed;
+	const bool bHasSelection = bCenterVisible &&
+		GetGameInstance<UTunaSweeperGameInstance>() &&
+		GetGameInstance<UTunaSweeperGameInstance>()->HasSelectedInventoryItem();
+
+	SetItemInfoPanelVisible(bHasSelection);
+	if (bHasSelection && ItemInfoPanelWidget)
+	{
+		ItemInfoPanelWidget->RefreshSelectedItemInfo();
+	}
 }

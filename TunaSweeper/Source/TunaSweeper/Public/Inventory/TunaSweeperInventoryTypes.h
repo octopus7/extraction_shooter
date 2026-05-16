@@ -9,7 +9,8 @@ enum class ETunaSweeperItemSlotSource : uint8
 	Equipment UMETA(DisplayName = "Equipment"),
 	AuxiliaryBag UMETA(DisplayName = "Auxiliary Bag"),
 	Inventory UMETA(DisplayName = "Inventory"),
-	LootContainer UMETA(DisplayName = "Loot Container")
+	LootContainer UMETA(DisplayName = "Loot Container"),
+	SelectedWeaponAttachment UMETA(DisplayName = "Selected Weapon Attachment")
 };
 
 USTRUCT(BlueprintType)
@@ -42,6 +43,9 @@ struct TUNASWEEPER_API FTunaSweeperItemInstance
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Inventory", meta = (ClampMin = "1", UIMin = "1"))
 	int32 Quantity = 1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Inventory")
+	TMap<FName, FGuid> AttachmentSlots;
 
 	bool IsValid() const
 	{

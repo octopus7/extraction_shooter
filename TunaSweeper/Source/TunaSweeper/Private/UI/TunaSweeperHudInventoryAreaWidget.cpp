@@ -22,6 +22,24 @@ namespace TunaSweeperInventoryArea
 	constexpr float AuxiliaryBagTileWidth = 96.0f;
 	constexpr float AuxiliaryBagTileHeight = 96.0f;
 
+	FText GetEquipmentSlotDisplayName(int32 SlotIndex)
+	{
+		static const FText SlotNames[] = {
+			FText::FromString(TEXT("\uCD1D\uAE30 1")),
+			FText::FromString(TEXT("\uCD1D\uAE30 2")),
+			FText::FromString(TEXT("\uADFC\uC811")),
+			FText::FromString(TEXT("\uBA38\uB9AC")),
+			FText::FromString(TEXT("\uC2E0\uCCB4")),
+			FText::FromString(TEXT("\uC5BC\uAD74")),
+			FText::FromString(TEXT("\uC774\uC5B4\uD3F0")),
+			FText::FromString(TEXT("\uAC00\uBC29"))
+		};
+
+		return SlotIndex >= 0 && SlotIndex < UE_ARRAY_COUNT(SlotNames)
+			? SlotNames[SlotIndex]
+			: FText::FromString(FString::Printf(TEXT("Slot %d"), SlotIndex + 1));
+	}
+
 	FTunaSweeperItemStackTileData BuildTileData(
 		UTunaSweeperItemDataSubsystem* ItemDataSubsystem,
 		const FTunaSweeperItemInstance& ItemInstance,
@@ -37,6 +55,12 @@ namespace TunaSweeperInventoryArea
 		TileData.SlotReference.Source = Source;
 		TileData.SlotReference.SlotIndex = SourceIndex;
 		TileData.bIsEmpty = !ItemInstance.IsValid();
+		TileData.bShowEmptySlotLabel = Source == ETunaSweeperItemSlotSource::Equipment;
+
+		if (TileData.bIsEmpty && TileData.bShowEmptySlotLabel)
+		{
+			TileData.DisplayName = GetEquipmentSlotDisplayName(SourceIndex);
+		}
 
 		if (!TileData.bIsEmpty && ItemDataSubsystem)
 		{

@@ -49,6 +49,7 @@ public:
 
 protected:
 	virtual void NativeConstruct() override;
+	virtual void NativeDestruct() override;
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
@@ -74,4 +75,5 @@ protected:
 
 private:
 	void RefreshBottomStatusFromGameInstance();
+	void HandleSelectedInventoryItemChanged();
 };

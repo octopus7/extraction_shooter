@@ -346,6 +346,8 @@ bool UTunaSweeperItemDataSubsystem::LoadItemTableJson()
 		FString IconFileName;
 		FString CategoryTag;
 		FString EquipmentSlotTag;
+		FString WeaponTypeTag;
+		FString AttachmentSlotTag;
 		if (!(*JsonObject)->TryGetNumberField(TEXT("id"), NumericId) ||
 			!(*JsonObject)->TryGetStringField(TEXT("name_string_key"), NameStringKey) ||
 			!(*JsonObject)->TryGetStringField(TEXT("description_string_key"), DescriptionStringKey) ||
@@ -369,6 +371,42 @@ bool UTunaSweeperItemDataSubsystem::LoadItemTableJson()
 		if ((*JsonObject)->TryGetStringField(TEXT("equipment_slot_tag"), EquipmentSlotTag))
 		{
 			ItemDefinition.EquipmentSlotTag = FName(*EquipmentSlotTag.TrimStartAndEnd());
+		}
+		if ((*JsonObject)->TryGetStringField(TEXT("weapon_type_tag"), WeaponTypeTag))
+		{
+			ItemDefinition.WeaponTypeTag = FName(*WeaponTypeTag.TrimStartAndEnd());
+		}
+		if ((*JsonObject)->TryGetStringField(TEXT("attachment_slot_tag"), AttachmentSlotTag))
+		{
+			ItemDefinition.AttachmentSlotTag = FName(*AttachmentSlotTag.TrimStartAndEnd());
+		}
+		const TArray<TSharedPtr<FJsonValue>>* AttachmentSlotTagsArray = nullptr;
+		if ((*JsonObject)->TryGetArrayField(TEXT("attachment_slot_tags"), AttachmentSlotTagsArray) && AttachmentSlotTagsArray)
+		{
+			for (const TSharedPtr<FJsonValue>& AttachmentSlotTagValue : *AttachmentSlotTagsArray)
+			{
+				const FString AttachmentSlotTagString = AttachmentSlotTagValue.IsValid()
+					? AttachmentSlotTagValue->AsString().TrimStartAndEnd()
+					: FString();
+				if (!AttachmentSlotTagString.IsEmpty())
+				{
+					ItemDefinition.AttachmentSlotTags.Add(FName(*AttachmentSlotTagString));
+				}
+			}
+		}
+		const TArray<TSharedPtr<FJsonValue>>* CompatibleWeaponTypeTagsArray = nullptr;
+		if ((*JsonObject)->TryGetArrayField(TEXT("compatible_weapon_type_tags"), CompatibleWeaponTypeTagsArray) && CompatibleWeaponTypeTagsArray)
+		{
+			for (const TSharedPtr<FJsonValue>& WeaponTypeTagValue : *CompatibleWeaponTypeTagsArray)
+			{
+				const FString WeaponTypeTagString = WeaponTypeTagValue.IsValid()
+					? WeaponTypeTagValue->AsString().TrimStartAndEnd()
+					: FString();
+				if (!WeaponTypeTagString.IsEmpty())
+				{
+					ItemDefinition.CompatibleWeaponTypeTags.Add(FName(*WeaponTypeTagString));
+				}
+			}
 		}
 		if ((*JsonObject)->TryGetNumberField(TEXT("inventory_slot_capacity"), NumericInventorySlotCapacity))
 		{

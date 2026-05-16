@@ -23,7 +23,7 @@ struct TUNASWEEPER_API FTunaSweeperGameplaySettings
 	int32 MaxInventorySlots = 100;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "TunaSweeper|Gameplay")
-	int32 EquipmentSlotCount = 1;
+	int32 EquipmentSlotCount = 8;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "TunaSweeper|Gameplay")
 	int32 AuxiliaryBagSlotCount = 2;
@@ -149,12 +149,18 @@ public:
 	const TArray<FTunaSweeperInventorySlot>& GetEquipmentSlots();
 	const TArray<FTunaSweeperInventorySlot>& GetAuxiliaryBagSlots();
 	const TArray<FTunaSweeperInventorySlot>& GetActiveLootContainerSlots();
+	const TArray<FTunaSweeperInventorySlot>& GetSelectedWeaponAttachmentSlots();
+	const TArray<FName>& GetSelectedWeaponAttachmentSlotTags() const { return SelectedWeaponAttachmentSlotTags; }
 	bool HasActiveLootContainer() const { return bHasActiveLootContainer; }
 	FText GetActiveLootContainerDisplayName() const { return ActiveLootContainerDisplayName; }
 	int32 GetActiveLootContainerCapacity() const { return ActiveLootContainerCapacity; }
+	bool HasSelectedInventoryItem() const { return SelectedItemSlotReference.IsValid(); }
+	FTunaSweeperItemSlotReference GetSelectedItemSlotReference() const { return SelectedItemSlotReference; }
 
 	bool TryGetItemInstance(const FGuid& ItemUid, FTunaSweeperItemInstance& OutItemInstance) const;
 	bool TryGetSlotItemInstance(const FTunaSweeperItemSlotReference& SlotReference, FTunaSweeperItemInstance& OutItemInstance);
+	bool TryGetSelectedItemInstance(FTunaSweeperItemInstance& OutItemInstance);
+	bool TryGetSelectedItemDefinition(FTunaSweeperItemDefinition& OutItemDefinition);
 	bool CanSlotAcceptItem(const FTunaSweeperItemSlotReference& SlotReference, const FGuid& ItemUid);
 	bool CanMoveItemBetweenSlots(
 		const FTunaSweeperItemSlotReference& SourceSlot,
@@ -170,12 +176,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Inventory")
 	void CompactInventorySlots();
 
+	void SelectItemSlot(const FTunaSweeperItemSlotReference& SlotReference);
+	void ClearSelectedItemSelection();
 	void SetActiveLootContainerInstance(const FTunaSweeperLootContainerInstance& InContainerInstance);
 	void SaveInventoryState();
 	void ClearInventoryAndSave();
 	void HandleLevelTravelPersistence(FName SourceLevelName, FName TargetLevelName);
 
 	FSimpleMulticastDelegate OnInventoryStateChanged;
+	FSimpleMulticastDelegate OnSelectedInventoryItemChanged;
 
 private:
 	void GenerateTempOpenLootItems();
@@ -195,8 +204,16 @@ private:
 	const TArray<FTunaSweeperInventorySlot>* GetSlotsForSource(ETunaSweeperItemSlotSource Source) const;
 	int32 CalculateInventoryCapacityForEquipmentSlots(const TArray<FTunaSweeperInventorySlot>& InEquipmentSlots);
 	int32 GetInventoryCapacityForItemUid(const FGuid& ItemUid);
+	bool IsItemCompatibleWithEquipmentSlot(int32 SlotIndex, const FGuid& ItemUid);
+	bool DoesItemDefinitionMatchEquipmentSlot(int32 SlotIndex, const FTunaSweeperItemDefinition& ItemDefinition) const;
 	bool IsBackpackItemUid(const FGuid& ItemUid);
 	bool IsBackpackItemDefinition(const FTunaSweeperItemDefinition& ItemDefinition) const;
+	void MigrateLegacyEquipmentSlots();
+	void RefreshSelectedWeaponAttachmentSlots();
+	bool CommitSelectedWeaponAttachmentSlotsToSelectedItem();
+	bool DoesSelectedWeaponAcceptAttachmentSlot(FName AttachmentSlotTag) const;
+	bool IsItemCompatibleWithSelectedWeaponAttachmentSlot(int32 SlotIndex, const FGuid& ItemUid);
+	void ClearSelectedItemIfInvalid();
 	bool HasOccupiedInventorySlotsBeyondCapacity(
 		const TArray<FTunaSweeperInventorySlot>& InInventorySlots,
 		int32 Capacity) const;
@@ -231,6 +248,15 @@ private:
 
 	UPROPERTY(Transient)
 	TArray<FTunaSweeperInventorySlot> ActiveLootContainerSlots;
+
+	UPROPERTY(Transient)
+	TArray<FName> SelectedWeaponAttachmentSlotTags;
+
+	UPROPERTY(Transient)
+	TArray<FTunaSweeperInventorySlot> SelectedWeaponAttachmentSlots;
+
+	UPROPERTY(Transient)
+	FTunaSweeperItemSlotReference SelectedItemSlotReference;
 
 	UPROPERTY(Transient)
 	FText ActiveLootContainerDisplayName;

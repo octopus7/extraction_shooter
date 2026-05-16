@@ -26,6 +26,12 @@ FReply UTunaSweeperItemThumbnailSlotWidget::NativeOnMouseButtonDown(
 {
 	if (!CachedTileData.bIsEmpty)
 	{
+		if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+			TunaGameInstance && CachedTileData.Source != ETunaSweeperItemSlotSource::SelectedWeaponAttachment)
+		{
+			TunaGameInstance->SelectItemSlot(GetCachedSlotReference());
+		}
+
 		return UWidgetBlueprintLibrary::DetectDragIfPressed(InMouseEvent, this, EKeys::LeftMouseButton).NativeReply;
 	}
 
@@ -151,7 +157,10 @@ void UTunaSweeperItemThumbnailSlotWidget::ApplyTileData()
 
 	if (ItemNameText)
 	{
-		ItemNameText->SetText(CachedTileData.bIsEmpty ? FText::GetEmpty() : CachedTileData.DisplayName);
+		ItemNameText->SetText(
+			(!CachedTileData.bIsEmpty || CachedTileData.bShowEmptySlotLabel)
+				? CachedTileData.DisplayName
+				: FText::GetEmpty());
 	}
 }
 
