@@ -2,19 +2,19 @@
   {
     "level_name": "RaidMap",
     "enemy_class": "/Game/Characters/Enemy/BP_TunaSweeperEnemy.BP_TunaSweeperEnemy_C",
-    "location": [850.0, 420.0, 90.0],
+    "location": [5200.0, 1040.0, 90.0],
     "rotation": [0.0, 180.0, 0.0]
   },
   {
     "level_name": "RaidMap",
     "enemy_class": "/Game/Characters/Enemy/BP_TunaSweeperEnemy.BP_TunaSweeperEnemy_C",
-    "location": [1300.0, 520.0, 90.0],
+    "location": [6200.0, 1520.0, 90.0],
     "rotation": [0.0, 180.0, 0.0]
   },
   {
     "level_name": "RaidMap",
     "enemy_class": "/Game/Characters/Enemy/BP_TunaSweeperEnemy.BP_TunaSweeperEnemy_C",
-    "location": [1750.0, 420.0, 90.0],
+    "location": [7200.0, 1040.0, 90.0],
     "rotation": [0.0, 180.0, 0.0]
   }
 ]
