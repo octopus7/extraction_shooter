@@ -249,9 +249,14 @@ private:
 		const TArray<FTunaSweeperInventorySlot>& InInventorySlots,
 		int32 Capacity) const;
 	void CollectPlayerOwnedItemUids(TSet<FGuid>& OutItemUids) const;
+	bool BackupExistingInventorySaveState(const FString& ExistingSlotName) const;
+	void TrimInventorySaveBackups() const;
 	int32 SanitizeSaveSlotIndex(int32 SaveSlotIndex) const;
 	FString GetInventorySaveSlotName(int32 SaveSlotIndex) const;
 	FString GetExistingInventorySaveSlotName(int32 SaveSlotIndex) const;
+	FString GetInventorySaveFilePath(const FString& SaveSlotName) const;
+	FString GetInventoryBackupDirectory() const;
+	FString CreateInventoryBackupFilePath(int32 SaveSlotIndex, FDateTime BackupTime) const;
 	float GetCurrentActiveSlotTotalPlaySeconds() const;
 	bool IsBunkerToRaidTravel(FName SourceLevelName, FName TargetLevelName) const;
 	bool IsRaidToBunkerTravel(FName SourceLevelName, FName TargetLevelName) const;

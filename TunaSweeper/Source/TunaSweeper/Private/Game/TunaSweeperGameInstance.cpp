@@ -1,8 +1,11 @@
 #include "Game/TunaSweeperGameInstance.h"
 
 #include "Engine/Texture2D.h"
+#include "HAL/FileManager.h"
 #include "Inventory/TunaSweeperInventorySaveGame.h"
 #include "Kismet/GameplayStatics.h"
+#include "Misc/FileHelper.h"
+#include "Misc/Paths.h"
 
 namespace TunaSweeperInventory
 {
@@ -11,6 +14,7 @@ namespace TunaSweeperInventory
 	constexpr int32 SaveUserIndex = 0;
 	constexpr int32 MinSaveSlotIndex = 1;
 	constexpr int32 MaxSaveSlotIndex = 3;
+	constexpr int32 MaxInventorySaveBackupCount = 30;
 	constexpr int32 RequiredBareInventorySlots = 40;
 	constexpr int32 RequiredMaxInventorySlots = 100;
 	constexpr int32 RequiredEquipmentSlots = 8;
@@ -842,6 +846,12 @@ bool UTunaSweeperGameInstance::SaveInventoryStateInternal() const
 	SaveGame->EquipmentSlots = EquipmentSlots;
 	SaveGame->AuxiliaryBagSlots = AuxiliaryBagSlots;
 
+	const FString ExistingSlotName = GetExistingInventorySaveSlotName(ActiveSaveSlotIndex);
+	if (!ExistingSlotName.IsEmpty() && !BackupExistingInventorySaveState(ExistingSlotName))
+	{
+		return false;
+	}
+
 	return UGameplayStatics::SaveGameToSlot(
 		SaveGame,
 		GetInventorySaveSlotName(ActiveSaveSlotIndex),
@@ -1316,6 +1326,87 @@ void UTunaSweeperGameInstance::CollectPlayerOwnedItemUids(TSet<FGuid>& OutItemUi
 	CollectSlots(AuxiliaryBagSlots);
 }
 
+bool UTunaSweeperGameInstance::BackupExistingInventorySaveState(const FString& ExistingSlotName) const
+{
+	if (ExistingSlotName.IsEmpty())
+	{
+		return true;
+	}
+
+	const FString SourceFilePath = GetInventorySaveFilePath(ExistingSlotName);
+	if (!FPaths::FileExists(SourceFilePath))
+	{
+		return false;
+	}
+
+	const FString BackupDirectory = GetInventoryBackupDirectory();
+	if (!IFileManager::Get().MakeDirectory(*BackupDirectory, true))
+	{
+		return false;
+	}
+
+	const int32 BackupSlotIndex = SanitizeSaveSlotIndex(ActiveSaveSlotIndex);
+	const FString BackupFilePath = CreateInventoryBackupFilePath(BackupSlotIndex, FDateTime::Now());
+	bool bBackupWritten = false;
+
+	if (UTunaSweeperInventorySaveGame* ExistingSaveGame = Cast<UTunaSweeperInventorySaveGame>(
+		UGameplayStatics::LoadGameFromSlot(ExistingSlotName, TunaSweeperInventory::SaveUserIndex)))
+	{
+		ExistingSaveGame->SaveSlotIndex = BackupSlotIndex;
+
+		TArray<uint8> BackupData;
+		bBackupWritten =
+			UGameplayStatics::SaveGameToMemory(ExistingSaveGame, BackupData) &&
+			FFileHelper::SaveArrayToFile(BackupData, *BackupFilePath);
+	}
+
+	if (!bBackupWritten)
+	{
+		TArray<uint8> RawSaveData;
+		bBackupWritten =
+			FFileHelper::LoadFileToArray(RawSaveData, *SourceFilePath) &&
+			FFileHelper::SaveArrayToFile(RawSaveData, *BackupFilePath);
+	}
+
+	if (!bBackupWritten)
+	{
+		return false;
+	}
+
+	TrimInventorySaveBackups();
+	return true;
+}
+
+void UTunaSweeperGameInstance::TrimInventorySaveBackups() const
+{
+	const FString BackupDirectory = GetInventoryBackupDirectory();
+	TArray<FString> BackupFiles;
+	IFileManager::Get().FindFilesRecursive(
+		BackupFiles,
+		*BackupDirectory,
+		TEXT("*.sav"),
+		true,
+		false);
+
+	if (BackupFiles.Num() <= TunaSweeperInventory::MaxInventorySaveBackupCount)
+	{
+		return;
+	}
+
+	BackupFiles.Sort([](const FString& Left, const FString& Right)
+	{
+		const FDateTime LeftTime = IFileManager::Get().GetTimeStamp(*Left);
+		const FDateTime RightTime = IFileManager::Get().GetTimeStamp(*Right);
+		return LeftTime == RightTime ? Left < Right : LeftTime < RightTime;
+	});
+
+	const int32 DeleteCount = BackupFiles.Num() - TunaSweeperInventory::MaxInventorySaveBackupCount;
+	for (int32 BackupIndex = 0; BackupIndex < DeleteCount; ++BackupIndex)
+	{
+		IFileManager::Get().Delete(*BackupFiles[BackupIndex], false, true);
+	}
+}
+
 int32 UTunaSweeperGameInstance::SanitizeSaveSlotIndex(int32 SaveSlotIndex) const
 {
 	return FMath::Clamp(
@@ -1348,6 +1439,30 @@ FString UTunaSweeperGameInstance::GetExistingInventorySaveSlotName(int32 SaveSlo
 	}
 
 	return FString();
+}
+
+FString UTunaSweeperGameInstance::GetInventorySaveFilePath(const FString& SaveSlotName) const
+{
+	return FPaths::Combine(
+		FPaths::ProjectSavedDir(),
+		TEXT("SaveGames"),
+		SaveSlotName + TEXT(".sav"));
+}
+
+FString UTunaSweeperGameInstance::GetInventoryBackupDirectory() const
+{
+	return FPaths::Combine(FPaths::ProjectSavedDir(), TEXT("SaveGames"), TEXT("Backups"));
+}
+
+FString UTunaSweeperGameInstance::CreateInventoryBackupFilePath(int32 SaveSlotIndex, FDateTime BackupTime) const
+{
+	const FString BackupFileName = FString::Printf(
+		TEXT("InventorySlot%02d_%s_%lld.sav"),
+		SanitizeSaveSlotIndex(SaveSlotIndex),
+		*BackupTime.ToString(TEXT("%Y%m%d_%H%M%S")),
+		BackupTime.GetTicks());
+
+	return FPaths::Combine(GetInventoryBackupDirectory(), BackupFileName);
 }
 
 float UTunaSweeperGameInstance::GetCurrentActiveSlotTotalPlaySeconds() const
