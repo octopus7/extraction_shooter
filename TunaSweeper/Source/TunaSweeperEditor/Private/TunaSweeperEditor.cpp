@@ -3,6 +3,7 @@
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "AssetToolsModule.h"
 #include "AI/TunaSweeperEnemyCharacter.h"
+#include "AI/TunaSweeperCoverPointActor.h"
 #include "AutomatedAssetImportData.h"
 #include "Blueprint/WidgetTree.h"
 #include "Character/TunaSweeperQuestNpcActor.h"
@@ -101,11 +102,13 @@ namespace TunaSweeperEditorSetup
 	const FString QuickSlotInputTaskId = TEXT("2026-05-12_AddQuickSlotInputActions");
 	const FString LootContainerAndSpawnerTaskId = TEXT("2026-05-11_CreateLootContainerAndSpawnerAssetsV1");
 	const FString CannedTunaIconImportTaskId = TEXT("2026-05-11_ImportCannedTunaIconV1");
+	const FString BackpackInventoryTaskId = TEXT("2026-05-16_CreateBackpackInventoryAssetsV1");
 	const FString IntroMenuAndLevelTravelTaskId = TEXT("2026-05-15_CreateIntroMenuAndLevelTravelActorsV1");
 	const FString LevelTransitionVideoTaskId = TEXT("2026-05-16_AddBidirectionalLevelTransitionVideoV3");
 	const FString FirstOutingQuestTaskId = TEXT("2026-05-15_CreateFirstOutingQuestNpcV2");
 	const FString SelfDestructInteractionTaskId = TEXT("2026-05-16_CreateSelfDestructInteractionV1");
 	const FString EnemyVisualMaterialTaskId = TEXT("2026-05-16_CreateEnemyVisualMaterialsV2");
+	const FString CoverPointAssetTaskId = TEXT("2026-05-16_CreateCoverPointBlueprintV1");
 	const FString GameInstanceAssetPath = TEXT("/Game/Core");
 	const FString GameInstanceAssetName = TEXT("BP_TunaSweeperGameInstance");
 	const FString GameModeAssetName = TEXT("BP_TunaSweeperGameMode");
@@ -117,6 +120,8 @@ namespace TunaSweeperEditorSetup
 	const FString EnemyAssetName = TEXT("BP_TunaSweeperEnemy");
 	const FString EnemyBodyMaterialAssetName = TEXT("M_Enemy_Red");
 	const FString EnemySightlineMaterialAssetName = TEXT("M_Enemy_Sightline");
+	const FString CoverAssetPath = TEXT("/Game/AI/Cover");
+	const FString CoverPointAssetName = TEXT("BP_TunaSweeperCoverPoint");
 	const FString WeaponAssetPath = TEXT("/Game/Weapons");
 	const FString WeaponAssetName = TEXT("BP_TunaSweeperWeapon");
 	const FString ProjectileAssetName = TEXT("BP_TunaSweeperProjectile");
@@ -780,6 +785,16 @@ namespace TunaSweeperEditorSetup
 		return BodyMaterial && SightlineMaterial;
 	}
 
+	bool EnsureCoverPointAssets()
+	{
+		UBlueprint* CoverPointBlueprint = EnsureBlueprint(
+			CoverAssetPath,
+			CoverPointAssetName,
+			ATunaSweeperCoverPointActor::StaticClass());
+
+		return CoverPointBlueprint != nullptr;
+	}
+
 	void RegisterWidgetVariable(UWidgetBlueprint* WidgetBlueprint, UWidget* Widget)
 	{
 		if (!WidgetBlueprint || !Widget)
@@ -1299,6 +1314,10 @@ namespace TunaSweeperEditorSetup
 			TEXT("T_UIIcon_Antibiotics"),
 			TEXT("T_UIIcon_BodyArmor"),
 			TEXT("T_UIIcon_Backpack"),
+			TEXT("T_UIIcon_Backpack_Tier1"),
+			TEXT("T_UIIcon_Backpack_Tier2"),
+			TEXT("T_UIIcon_Backpack_Tier3"),
+			TEXT("T_UIIcon_Backpack_Tier4"),
 			TEXT("T_UIIcon_ValuablesCrate")
 		};
 
@@ -1940,7 +1959,10 @@ namespace TunaSweeperEditorSetup
 		USizeBox* MainInventorySizeBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("MainInventorySizeBox"));
 		UBorder* InventoryPanel = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("InventoryPanel"));
 		UVerticalBox* InventoryStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("InventoryStack"));
+		UHorizontalBox* InventoryHeaderRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("InventoryHeaderRow"));
 		UTextBlock* InventoryTitleText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("InventoryTitleText"));
+		UButton* SortInventoryButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("SortInventoryButton"));
+		UTextBlock* SortInventoryButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("SortInventoryButtonText"));
 		USizeBox* EquipmentReserveSizeBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("EquipmentReserveSizeBox"));
 		UTileView* EquipmentReserveTileView = WidgetTree->ConstructWidget<UTileView>(UTileView::StaticClass(), TEXT("EquipmentReserveTileView"));
 		USizeBox* AuxiliaryBagPanel = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("AuxiliaryBagPanel"));
@@ -1948,9 +1970,9 @@ namespace TunaSweeperEditorSetup
 		UTileView* AuxiliaryBagTileView = WidgetTree->ConstructWidget<UTileView>(UTileView::StaticClass(), TEXT("AuxiliaryBagTileView"));
 		UTileView* InventoryTileView = WidgetTree->ConstructWidget<UTileView>(UTileView::StaticClass(), TEXT("InventoryTileView"));
 
-		if (!RootSizeBox || !RootRow || !MainInventorySizeBox || !InventoryPanel || !InventoryStack || !InventoryTitleText ||
-			!EquipmentReserveSizeBox || !EquipmentReserveTileView || !AuxiliaryBagPanel || !AuxiliaryBagBackground ||
-			!AuxiliaryBagTileView || !InventoryTileView)
+		if (!RootSizeBox || !RootRow || !MainInventorySizeBox || !InventoryPanel || !InventoryStack || !InventoryHeaderRow ||
+			!InventoryTitleText || !SortInventoryButton || !SortInventoryButtonText || !EquipmentReserveSizeBox ||
+			!EquipmentReserveTileView || !AuxiliaryBagPanel || !AuxiliaryBagBackground || !AuxiliaryBagTileView || !InventoryTileView)
 		{
 			return false;
 		}
@@ -1976,11 +1998,48 @@ namespace TunaSweeperEditorSetup
 		InventoryPanel->SetContent(InventoryStack);
 
 		ConfigureTextBlockLeft(InventoryTitleText, FText::FromString(TEXT("Inventory")), FLinearColor::White, 18);
-		UVerticalBoxSlot* TitleSlot = InventoryStack->AddChildToVerticalBox(InventoryTitleText);
+		UHorizontalBoxSlot* TitleSlot = InventoryHeaderRow->AddChildToHorizontalBox(InventoryTitleText);
 		if (TitleSlot)
 		{
 			TitleSlot->SetHorizontalAlignment(HAlign_Fill);
-			TitleSlot->SetVerticalAlignment(VAlign_Top);
+			TitleSlot->SetVerticalAlignment(VAlign_Center);
+			TitleSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+		}
+
+		FButtonStyle SortButtonStyle;
+		SortButtonStyle.SetNormal(MakeRoundedBoxBrush(
+			FVector2D(76.0f, 30.0f),
+			FLinearColor(0.10f, 0.17f, 0.20f, 0.96f),
+			FLinearColor(0.34f, 0.48f, 0.56f, 1.0f),
+			1.0f));
+		SortButtonStyle.SetHovered(MakeRoundedBoxBrush(
+			FVector2D(76.0f, 30.0f),
+			FLinearColor(0.14f, 0.25f, 0.29f, 0.98f),
+			FLinearColor(0.56f, 0.74f, 0.80f, 1.0f),
+			1.5f));
+		SortButtonStyle.SetPressed(MakeRoundedBoxBrush(
+			FVector2D(76.0f, 30.0f),
+			FLinearColor(0.07f, 0.12f, 0.15f, 1.0f),
+			FLinearColor(0.28f, 0.40f, 0.48f, 1.0f),
+			1.0f));
+		SortButtonStyle.SetNormalPadding(FMargin(8.0f, 3.0f));
+		SortButtonStyle.SetPressedPadding(FMargin(8.0f, 4.0f, 8.0f, 2.0f));
+		SortInventoryButton->SetStyle(SortButtonStyle);
+		SortInventoryButton->SetClickMethod(EButtonClickMethod::DownAndUp);
+		ConfigureTextBlock(SortInventoryButtonText, FText::FromString(TEXT("\uC815\uB9AC")), FLinearColor::White, 14);
+		SortInventoryButton->SetContent(SortInventoryButtonText);
+		UHorizontalBoxSlot* SortButtonSlot = InventoryHeaderRow->AddChildToHorizontalBox(SortInventoryButton);
+		if (SortButtonSlot)
+		{
+			SortButtonSlot->SetHorizontalAlignment(HAlign_Right);
+			SortButtonSlot->SetVerticalAlignment(VAlign_Center);
+		}
+
+		UVerticalBoxSlot* HeaderSlot = InventoryStack->AddChildToVerticalBox(InventoryHeaderRow);
+		if (HeaderSlot)
+		{
+			HeaderSlot->SetHorizontalAlignment(HAlign_Fill);
+			HeaderSlot->SetVerticalAlignment(VAlign_Top);
 		}
 
 		EquipmentReserveTileView->SetEntryWidth(EquipmentReserveEntryWidth);
@@ -2032,7 +2091,10 @@ namespace TunaSweeperEditorSetup
 		RegisterWidgetVariable(WidgetBlueprint, MainInventorySizeBox);
 		RegisterWidgetVariable(WidgetBlueprint, InventoryPanel);
 		RegisterWidgetVariable(WidgetBlueprint, InventoryStack);
+		RegisterWidgetVariable(WidgetBlueprint, InventoryHeaderRow);
 		RegisterWidgetVariable(WidgetBlueprint, InventoryTitleText);
+		RegisterWidgetVariable(WidgetBlueprint, SortInventoryButton);
+		RegisterWidgetVariable(WidgetBlueprint, SortInventoryButtonText);
 		RegisterWidgetVariable(WidgetBlueprint, EquipmentReserveSizeBox);
 		RegisterWidgetVariable(WidgetBlueprint, AuxiliaryBagPanel);
 		RegisterWidgetVariable(WidgetBlueprint, AuxiliaryBagBackground);
@@ -2718,6 +2780,54 @@ namespace TunaSweeperEditorSetup
 		FKismetEditorUtilities::CompileBlueprint(GameHudWidgetBlueprint);
 		GameHudWidgetBlueprint->MarkPackageDirty();
 		return SaveAsset(GameHudWidgetBlueprint);
+	}
+
+	bool EnsureBackpackInventoryAssets()
+	{
+		if (!EnsureTempOpenLootIconTextures())
+		{
+			return false;
+		}
+
+		UWidgetBlueprint* ItemThumbnailWidgetBlueprint = EnsureWidgetBlueprint(
+			UIAssetPath,
+			ItemThumbnailSlotWidgetAssetName,
+			UTunaSweeperItemThumbnailSlotWidget::StaticClass());
+		UWidgetBlueprint* InventoryAreaWidgetBlueprint = EnsureWidgetBlueprint(
+			UIAssetPath,
+			HudInventoryAreaWidgetAssetName,
+			UTunaSweeperHudInventoryAreaWidget::StaticClass());
+		if (!ItemThumbnailWidgetBlueprint || !InventoryAreaWidgetBlueprint)
+		{
+			return false;
+		}
+
+		if (!BuildItemThumbnailSlotWidgetTree(ItemThumbnailWidgetBlueprint))
+		{
+			return false;
+		}
+		RegisterAllWidgetsInTree(ItemThumbnailWidgetBlueprint);
+		FKismetEditorUtilities::CompileBlueprint(ItemThumbnailWidgetBlueprint);
+		ItemThumbnailWidgetBlueprint->MarkPackageDirty();
+		if (!SaveAsset(ItemThumbnailWidgetBlueprint))
+		{
+			return false;
+		}
+
+		const TSubclassOf<UUserWidget> ItemThumbnailWidgetClass = ItemThumbnailWidgetBlueprint->GeneratedClass.Get();
+		if (!ItemThumbnailWidgetClass)
+		{
+			return false;
+		}
+
+		if (!BuildHudInventoryAreaWidgetTree(InventoryAreaWidgetBlueprint, ItemThumbnailWidgetClass))
+		{
+			return false;
+		}
+		RegisterAllWidgetsInTree(InventoryAreaWidgetBlueprint);
+		FKismetEditorUtilities::CompileBlueprint(InventoryAreaWidgetBlueprint);
+		InventoryAreaWidgetBlueprint->MarkPackageDirty();
+		return SaveAsset(InventoryAreaWidgetBlueprint);
 	}
 
 	bool BuildInteractionMarkerWidgetTree(UWidgetBlueprint* WidgetBlueprint)
@@ -4383,6 +4493,18 @@ public:
 			});
 
 		FTunaSweeperEditorRunOnce::Run(
+			TunaSweeperEditorSetup::CoverPointAssetTaskId,
+			[]()
+			{
+				return TunaSweeperEditorSetup::EnsureCoverPointAssets();
+			});
+		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperCoverPointSetupQuit")) &&
+			FTunaSweeperEditorRunOnce::HasCompleted(TunaSweeperEditorSetup::CoverPointAssetTaskId))
+		{
+			FPlatformMisc::RequestExit(false);
+		}
+
+		FTunaSweeperEditorRunOnce::Run(
 			TunaSweeperEditorSetup::InteractionInputTaskId,
 			[]()
 			{
@@ -4430,6 +4552,18 @@ public:
 			{
 				return TunaSweeperEditorSetup::EnsureCannedTunaIconTexture();
 			});
+
+		const bool bBackpackInventoryTaskRan = FTunaSweeperEditorRunOnce::Run(
+			TunaSweeperEditorSetup::BackpackInventoryTaskId,
+			[]()
+			{
+				return TunaSweeperEditorSetup::EnsureBackpackInventoryAssets();
+			});
+		if ((bBackpackInventoryTaskRan || FTunaSweeperEditorRunOnce::HasCompleted(TunaSweeperEditorSetup::BackpackInventoryTaskId)) &&
+			FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperSetupQuit")))
+		{
+			FPlatformMisc::RequestExit(false);
+		}
 
 		TunaSweeperEditorSetup::ScheduleInteractionAssetsAndMapPlacement();
 		TunaSweeperEditorSetup::SchedulePickupItemAndSpawnerAssetsAndMapPlacement();
