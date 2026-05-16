@@ -50,6 +50,9 @@
 #include "Kismet2/BlueprintEditorUtils.h"
 #include "Kismet2/KismetEditorUtilities.h"
 #include "MediaSource.h"
+#include "Factories/MaterialFactoryNew.h"
+#include "Materials/Material.h"
+#include "Materials/MaterialExpressionConstant3Vector.h"
 #include "Misc/CommandLine.h"
 #include "Misc/ConfigCacheIni.h"
 #include "Misc/PackageName.h"
@@ -102,6 +105,7 @@ namespace TunaSweeperEditorSetup
 	const FString LevelTransitionVideoTaskId = TEXT("2026-05-16_AddBidirectionalLevelTransitionVideoV3");
 	const FString FirstOutingQuestTaskId = TEXT("2026-05-15_CreateFirstOutingQuestNpcV2");
 	const FString SelfDestructInteractionTaskId = TEXT("2026-05-16_CreateSelfDestructInteractionV1");
+	const FString EnemyVisualMaterialTaskId = TEXT("2026-05-16_CreateEnemyVisualMaterialsV2");
 	const FString GameInstanceAssetPath = TEXT("/Game/Core");
 	const FString GameInstanceAssetName = TEXT("BP_TunaSweeperGameInstance");
 	const FString GameModeAssetName = TEXT("BP_TunaSweeperGameMode");
@@ -111,6 +115,8 @@ namespace TunaSweeperEditorSetup
 	const FString InstructorQuestNpcAssetName = TEXT("BP_NPC_InstructorQuest");
 	const FString EnemyAssetPath = TEXT("/Game/Characters/Enemy");
 	const FString EnemyAssetName = TEXT("BP_TunaSweeperEnemy");
+	const FString EnemyBodyMaterialAssetName = TEXT("M_Enemy_Red");
+	const FString EnemySightlineMaterialAssetName = TEXT("M_Enemy_Sightline");
 	const FString WeaponAssetPath = TEXT("/Game/Weapons");
 	const FString WeaponAssetName = TEXT("BP_TunaSweeperWeapon");
 	const FString ProjectileAssetName = TEXT("BP_TunaSweeperProjectile");
@@ -305,6 +311,72 @@ namespace TunaSweeperEditorSetup
 		}
 
 		return CreatedBlueprint;
+	}
+
+	UMaterial* EnsureSolidColorMaterial(
+		const FString& AssetPath,
+		const FString& AssetName,
+		const FLinearColor& BaseColor,
+		float Roughness = 0.65f)
+	{
+		const FString ObjectPath = GetAssetObjectPath(AssetPath, AssetName);
+		UMaterial* Material = LoadObject<UMaterial>(nullptr, *ObjectPath);
+		if (!Material)
+		{
+			UMaterialFactoryNew* MaterialFactory = NewObject<UMaterialFactoryNew>();
+
+			FAssetToolsModule& AssetToolsModule = FModuleManager::LoadModuleChecked<FAssetToolsModule>(TEXT("AssetTools"));
+			UObject* CreatedAsset = AssetToolsModule.Get().CreateAsset(
+				AssetName,
+				AssetPath,
+				UMaterial::StaticClass(),
+				MaterialFactory);
+
+			Material = Cast<UMaterial>(CreatedAsset);
+			if (!Material)
+			{
+				UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to create %s."), *ObjectPath);
+				return nullptr;
+			}
+
+			FAssetRegistryModule::AssetCreated(Material);
+		}
+
+		Material->Modify();
+		Material->GetExpressionCollection().Empty();
+
+		UMaterialEditorOnlyData* MaterialEditorOnly = Material->GetEditorOnlyData();
+		if (!MaterialEditorOnly)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to edit %s."), *ObjectPath);
+			return nullptr;
+		}
+
+		UMaterialExpressionConstant3Vector* BaseColorExpression = NewObject<UMaterialExpressionConstant3Vector>(Material);
+		BaseColorExpression->Material = Material;
+		BaseColorExpression->Constant = BaseColor;
+		BaseColorExpression->MaterialExpressionEditorX = -240;
+		BaseColorExpression->MaterialExpressionEditorY = 0;
+		Material->GetExpressionCollection().AddExpression(BaseColorExpression);
+		MaterialEditorOnly->BaseColor.Connect(0, BaseColorExpression);
+
+		MaterialEditorOnly->Roughness.UseConstant = true;
+		MaterialEditorOnly->Roughness.Constant = Roughness;
+		MaterialEditorOnly->Metallic.UseConstant = true;
+		MaterialEditorOnly->Metallic.Constant = 0.0f;
+		MaterialEditorOnly->Specular.UseConstant = true;
+		MaterialEditorOnly->Specular.Constant = 0.25f;
+
+		Material->PostEditChange();
+		Material->MarkPackageDirty();
+
+		if (!SaveAsset(Material))
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to save %s."), *ObjectPath);
+			return nullptr;
+		}
+
+		return Material;
 	}
 
 	template <typename AssetType>
@@ -690,6 +762,22 @@ namespace TunaSweeperEditorSetup
 		}
 
 		return ConfigureGameModeBlueprint(GameModeBlueprint, PlayerBlueprint) && SetProjectGameModeToBlueprint();
+	}
+
+	bool EnsureEnemyVisualMaterialAssets()
+	{
+		UMaterial* BodyMaterial = EnsureSolidColorMaterial(
+			EnemyAssetPath,
+			EnemyBodyMaterialAssetName,
+			FLinearColor(0.9f, 0.02f, 0.015f, 1.0f),
+			0.7f);
+		UMaterial* SightlineMaterial = EnsureSolidColorMaterial(
+			EnemyAssetPath,
+			EnemySightlineMaterialAssetName,
+			FLinearColor(0.35f, 0.0f, 0.0f, 1.0f),
+			0.75f);
+
+		return BodyMaterial && SightlineMaterial;
 	}
 
 	void RegisterWidgetVariable(UWidgetBlueprint* WidgetBlueprint, UWidget* Widget)
@@ -4285,6 +4373,13 @@ public:
 			[]()
 			{
 				return TunaSweeperEditorSetup::EnsureTopDownShooterAssets();
+			});
+
+		FTunaSweeperEditorRunOnce::Run(
+			TunaSweeperEditorSetup::EnemyVisualMaterialTaskId,
+			[]()
+			{
+				return TunaSweeperEditorSetup::EnsureEnemyVisualMaterialAssets();
 			});
 
 		FTunaSweeperEditorRunOnce::Run(

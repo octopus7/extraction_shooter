@@ -5,6 +5,7 @@
 #include "TunaSweeperEnemyCharacter.generated.h"
 
 class UStaticMeshComponent;
+class UMaterialInterface;
 class ATunaSweeperProjectile;
 
 UCLASS(BlueprintType, Blueprintable)
@@ -24,6 +25,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UStaticMeshComponent> VisualMesh;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UStaticMeshComponent> ForwardMarkerMesh;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat")
 	TSoftClassPtr<ATunaSweeperProjectile> ProjectileClass;
 
@@ -34,8 +38,11 @@ protected:
 	float ProjectileDamage = 10.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Visual")
-	FLinearColor VisualTint = FLinearColor(0.85f, 0.04f, 0.03f, 1.0f);
+	TSoftObjectPtr<UMaterialInterface> BodyMaterial;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Visual")
+	TSoftObjectPtr<UMaterialInterface> ForwardMarkerMaterial;
 
 private:
-	void ApplyVisualTint();
+	void ApplyVisualMaterials();
 };

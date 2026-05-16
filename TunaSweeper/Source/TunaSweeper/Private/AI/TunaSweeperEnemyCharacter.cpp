@@ -4,6 +4,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Materials/MaterialInterface.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Weapon/TunaSweeperProjectile.h"
@@ -34,15 +35,31 @@ ATunaSweeperEnemyCharacter::ATunaSweeperEnemyCharacter()
 		VisualMesh->SetStaticMesh(CylinderMesh.Object);
 	}
 
+	ForwardMarkerMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ForwardMarkerMesh"));
+	ForwardMarkerMesh->SetupAttachment(RootComponent);
+	ForwardMarkerMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	ForwardMarkerMesh->SetRelativeLocation(FVector(60.0f, 0.0f, 50.0f));
+	ForwardMarkerMesh->SetRelativeRotation(FRotator(90.0f, 0.0f, 0.0f));
+	ForwardMarkerMesh->SetRelativeScale3D(FVector(0.1f, 0.1f, 0.8f));
+
+	if (CylinderMesh.Succeeded())
+	{
+		ForwardMarkerMesh->SetStaticMesh(CylinderMesh.Object);
+	}
+
 	ProjectileClass = TSoftClassPtr<ATunaSweeperProjectile>(
 		FSoftObjectPath(TEXT("/Game/Weapons/BP_TunaSweeperProjectile.BP_TunaSweeperProjectile_C")));
+	BodyMaterial = TSoftObjectPtr<UMaterialInterface>(
+		FSoftObjectPath(TEXT("/Game/Characters/Enemy/M_Enemy_Red.M_Enemy_Red")));
+	ForwardMarkerMaterial = TSoftObjectPtr<UMaterialInterface>(
+		FSoftObjectPath(TEXT("/Game/Characters/Enemy/M_Enemy_Sightline.M_Enemy_Sightline")));
 }
 
 void ATunaSweeperEnemyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	ApplyVisualTint();
+	ApplyVisualMaterials();
 }
 
 bool ATunaSweeperEnemyCharacter::FireProjectileAt(AActor* TargetActor)
@@ -92,19 +109,31 @@ bool ATunaSweeperEnemyCharacter::FireProjectileAt(AActor* TargetActor)
 	return true;
 }
 
-void ATunaSweeperEnemyCharacter::ApplyVisualTint()
+void ATunaSweeperEnemyCharacter::ApplyVisualMaterials()
 {
-	if (!VisualMesh)
+	UMaterialInterface* LoadedBodyMaterial = BodyMaterial.LoadSynchronous();
+	if (VisualMesh && LoadedBodyMaterial)
 	{
-		return;
+		VisualMesh->SetMaterial(0, LoadedBodyMaterial);
+	}
+	else if (VisualMesh)
+	{
+		UMaterialInstanceDynamic* DynamicMaterial = VisualMesh->CreateAndSetMaterialInstanceDynamic(0);
+		if (DynamicMaterial)
+		{
+			const FLinearColor FallbackTint(0.85f, 0.04f, 0.03f, 1.0f);
+			DynamicMaterial->SetVectorParameterValue(TEXT("Color"), FallbackTint);
+			DynamicMaterial->SetVectorParameterValue(TEXT("BaseColor"), FallbackTint);
+		}
 	}
 
-	UMaterialInstanceDynamic* DynamicMaterial = VisualMesh->CreateAndSetMaterialInstanceDynamic(0);
-	if (!DynamicMaterial)
+	UMaterialInterface* LoadedForwardMarkerMaterial = ForwardMarkerMaterial.LoadSynchronous();
+	if (ForwardMarkerMesh && LoadedForwardMarkerMaterial)
 	{
-		return;
+		ForwardMarkerMesh->SetMaterial(0, LoadedForwardMarkerMaterial);
 	}
-
-	DynamicMaterial->SetVectorParameterValue(TEXT("Color"), VisualTint);
-	DynamicMaterial->SetVectorParameterValue(TEXT("BaseColor"), VisualTint);
+	else if (ForwardMarkerMesh && LoadedBodyMaterial)
+	{
+		ForwardMarkerMesh->SetMaterial(0, LoadedBodyMaterial);
+	}
 }
