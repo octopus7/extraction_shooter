@@ -390,3 +390,7 @@
 
 - `Docs/Story/tuna_dialogue/images`의 4, 5, 6번 스플릿 이미지에 7, 8, 9번 영역이 넘어온 문제를 수정할 것.
 - `00_storyboard_overview.png` 이미지를 기준으로 04번부터 09번까지 6개 이미지를 다시 잘라 저장할 것.
+
+## 2026-05-16 17:04:34 (소요시간: 1분 1초)
+
+- `README.md`에 `Docs/GameDesign`와 `Docs/Story` 내부 문서를 링크로 걸어둘 것.
