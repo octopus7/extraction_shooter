@@ -42,8 +42,8 @@ protected:
 	TSoftClassPtr<UTunaSweeperLevelTransitionWidget> TransitionWidgetClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Travel|Transition Video", meta = (ClampMin = "0.01", UIMin = "0.01"))
-	float FadeToBlackDuration = 0.45f;
+	float FadeToBlackDuration = 0.2f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Travel|Transition Video", meta = (ClampMin = "0.01", UIMin = "0.01"))
-	float FadeFromBlackDuration = 0.55f;
+	float FadeFromBlackDuration = 0.2f;
 };

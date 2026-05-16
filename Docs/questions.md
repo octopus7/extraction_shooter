@@ -88,3 +88,12 @@ UE에서는 보편적으로 북쪽이 +Y 방향인가?
 ### 답변
 
 `game_conventions.md`가 가장 적합하다. 좌표/방향/거리 단위뿐 아니라 코인 같은 재화 단위, 수치 표기, 프로젝트 공통 기준까지 담을 수 있다.
+## 2026-05-15 23:16:55 (소요시간: 1분 미만)
+
+### 질문
+
+지금 게임용 아이템 아이콘 파일은 256x256 맞지?
+
+### 답변
+
+맞다. `GeneratedImages/ItemIcons/Split` 아래의 `T_UIIcon_*.png` 분할 아이템 아이콘 17개는 모두 256x256이다. 참고로 원본 아이콘 시트 `ExtractionItemIconSheet_4x4_Transparent_1024.png`와 작업 원본 `T_UIIcon_CannedTuna_Transparent1024.png`는 1024x1024이고, 게임 데이터는 `TunaSweeper/Content/UI/Icons/T_UIIcon_*.uasset` 텍스처를 참조한다.
