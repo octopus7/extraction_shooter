@@ -7,6 +7,7 @@
 class UBorder;
 class UImage;
 class UMediaTexture;
+class UTextBlock;
 
 UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API UTunaSweeperLevelTransitionWidget : public UUserWidget
@@ -23,6 +24,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Level Transition")
 	void SetBlackOpacity(float InOpacity);
 
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Level Transition")
+	void SetTransitionMessage(const FText& InMessage);
+
 protected:
 	virtual void NativeConstruct() override;
 
@@ -31,4 +35,10 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Level Transition", meta = (BindWidgetOptional))
 	TObjectPtr<UBorder> BlackFadePanel;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Level Transition", meta = (BindWidgetOptional))
+	TObjectPtr<UBorder> MessageBackground;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Level Transition", meta = (BindWidgetOptional))
+	TObjectPtr<UTextBlock> TransitionMessageText;
 };

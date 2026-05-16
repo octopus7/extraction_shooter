@@ -99,7 +99,7 @@ namespace TunaSweeperEditorSetup
 	const FString LootContainerAndSpawnerTaskId = TEXT("2026-05-11_CreateLootContainerAndSpawnerAssetsV1");
 	const FString CannedTunaIconImportTaskId = TEXT("2026-05-11_ImportCannedTunaIconV1");
 	const FString IntroMenuAndLevelTravelTaskId = TEXT("2026-05-15_CreateIntroMenuAndLevelTravelActorsV1");
-	const FString LevelTransitionVideoTaskId = TEXT("2026-05-15_AddBunkerToRaidTransitionVideoV2");
+	const FString LevelTransitionVideoTaskId = TEXT("2026-05-16_AddBidirectionalLevelTransitionVideoV3");
 	const FString FirstOutingQuestTaskId = TEXT("2026-05-15_CreateFirstOutingQuestNpcV2");
 	const FString SelfDestructInteractionTaskId = TEXT("2026-05-16_CreateSelfDestructInteractionV1");
 	const FString GameInstanceAssetPath = TEXT("/Game/Core");
@@ -167,6 +167,7 @@ namespace TunaSweeperEditorSetup
 	const FString InteractionAssetPath = TEXT("/Game/Interaction");
 	const FString VideoAssetPath = TEXT("/Game/Movies");
 	const FString BunkerToRaidMediaSourceAssetName = TEXT("MS_BunkerToRaid");
+	const FString RaidToBunkerMediaSourceAssetName = TEXT("MS_BunkerToRaid");
 	const FString DialogueInteractionAssetName = TEXT("BP_Interact_Dialogue");
 	const FString PickupInteractionAssetName = TEXT("BP_Interact_Pickup");
 	const FString OpenInteractionAssetName = TEXT("BP_Interact_Open");
@@ -919,9 +920,11 @@ namespace TunaSweeperEditorSetup
 		UWidgetTree* WidgetTree = WidgetBlueprint->WidgetTree;
 		UCanvasPanel* RootCanvas = WidgetTree->ConstructWidget<UCanvasPanel>(UCanvasPanel::StaticClass(), TEXT("RootCanvas"));
 		UImage* VideoImage = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("VideoImage"));
+		UBorder* MessageBackground = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("MessageBackground"));
+		UTextBlock* TransitionMessageText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("TransitionMessageText"));
 		UBorder* BlackFadePanel = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("BlackFadePanel"));
 
-		if (!RootCanvas || !VideoImage || !BlackFadePanel)
+		if (!RootCanvas || !VideoImage || !MessageBackground || !TransitionMessageText || !BlackFadePanel)
 		{
 			return false;
 		}
@@ -952,6 +955,25 @@ namespace TunaSweeperEditorSetup
 		VideoImage->SetBrush(VideoBrush);
 		VideoImage->SetVisibility(ESlateVisibility::Collapsed);
 		FillCanvas(RootCanvas->AddChildToCanvas(VideoImage));
+
+		MessageBackground->SetPadding(FMargin(18.0f, 7.0f));
+		MessageBackground->SetBrush(MakeRoundedBoxBrush(
+			FVector2D(520.0f, 48.0f),
+			FLinearColor(0.015f, 0.018f, 0.022f, 0.72f),
+			FLinearColor(0.65f, 0.72f, 0.78f, 0.45f),
+			1.0f));
+		MessageBackground->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+		ConfigureTextBlock(TransitionMessageText, FText::GetEmpty(), FLinearColor(0.88f, 0.92f, 0.95f, 1.0f), 18);
+		MessageBackground->SetContent(TransitionMessageText);
+
+		UCanvasPanelSlot* MessageSlot = RootCanvas->AddChildToCanvas(MessageBackground);
+		if (MessageSlot)
+		{
+			MessageSlot->SetAnchors(FAnchors(0.5f, 1.0f));
+			MessageSlot->SetAlignment(FVector2D(0.5f, 1.0f));
+			MessageSlot->SetPosition(FVector2D(0.0f, -58.0f));
+			MessageSlot->SetSize(FVector2D(520.0f, 48.0f));
+		}
 
 		BlackFadePanel->SetBrush(BlackBrush);
 		BlackFadePanel->SetRenderOpacity(0.0f);
@@ -2942,7 +2964,8 @@ namespace TunaSweeperEditorSetup
 				FSoftObjectPath(GetAssetClassPath(UIAssetPath, InteractionMarkerAssetName))),
 			TSoftObjectPtr<UMediaSource>(),
 			TSoftClassPtr<UTunaSweeperLevelTransitionWidget>(
-				FSoftObjectPath(GetAssetClassPath(UIAssetPath, LevelTransitionVideoWidgetAssetName))));
+				FSoftObjectPath(GetAssetClassPath(UIAssetPath, LevelTransitionVideoWidgetAssetName))),
+			FText::GetEmpty());
 		FBlueprintEditorUtils::MarkBlueprintAsModified(LevelTravelBlueprint);
 		FKismetEditorUtilities::CompileBlueprint(LevelTravelBlueprint);
 		LevelTravelBlueprint->MarkPackageDirty();
@@ -2953,7 +2976,8 @@ namespace TunaSweeperEditorSetup
 		AActor* Actor,
 		FName TargetLevelName,
 		const FText& DisplayName,
-		TSoftObjectPtr<UMediaSource> TransitionMediaSource = TSoftObjectPtr<UMediaSource>())
+		TSoftObjectPtr<UMediaSource> TransitionMediaSource = TSoftObjectPtr<UMediaSource>(),
+		const FText& TransitionMessage = FText::GetEmpty())
 	{
 		ATunaSweeperLevelTravelInteractableActor* LevelTravelActor = Cast<ATunaSweeperLevelTravelInteractableActor>(Actor);
 		if (!LevelTravelActor)
@@ -2970,7 +2994,8 @@ namespace TunaSweeperEditorSetup
 				FSoftObjectPath(GetAssetClassPath(UIAssetPath, InteractionMarkerAssetName))),
 			TransitionMediaSource,
 			TSoftClassPtr<UTunaSweeperLevelTransitionWidget>(
-				FSoftObjectPath(GetAssetClassPath(UIAssetPath, LevelTransitionVideoWidgetAssetName))));
+				FSoftObjectPath(GetAssetClassPath(UIAssetPath, LevelTransitionVideoWidgetAssetName))),
+			TransitionMessage);
 		LevelTravelActor->MarkPackageDirty();
 		return true;
 	}
@@ -3392,7 +3417,8 @@ namespace TunaSweeperEditorSetup
 		const FVector& Location,
 		FName TargetLevelName,
 		const FText& DisplayName,
-		TSoftObjectPtr<UMediaSource> TransitionMediaSource = TSoftObjectPtr<UMediaSource>())
+		TSoftObjectPtr<UMediaSource> TransitionMediaSource = TSoftObjectPtr<UMediaSource>(),
+		const FText& TransitionMessage = FText::GetEmpty())
 	{
 		if (!World || !ActorBlueprint || !ActorBlueprint->GeneratedClass)
 		{
@@ -3404,7 +3430,7 @@ namespace TunaSweeperEditorSetup
 			ExistingActor->Modify();
 			ExistingActor->SetActorLocation(Location);
 			ExistingActor->SetActorRotation(FRotator::ZeroRotator);
-			return ConfigureLevelTravelActorInstance(ExistingActor, TargetLevelName, DisplayName, TransitionMediaSource);
+			return ConfigureLevelTravelActorInstance(ExistingActor, TargetLevelName, DisplayName, TransitionMediaSource, TransitionMessage);
 		}
 
 		World->PersistentLevel->Modify();
@@ -3421,7 +3447,7 @@ namespace TunaSweeperEditorSetup
 		}
 
 		SpawnedActor->SetActorLabel(ActorLabel);
-		if (!ConfigureLevelTravelActorInstance(SpawnedActor, TargetLevelName, DisplayName, TransitionMediaSource))
+		if (!ConfigureLevelTravelActorInstance(SpawnedActor, TargetLevelName, DisplayName, TransitionMediaSource, TransitionMessage))
 		{
 			return false;
 		}
@@ -3879,6 +3905,8 @@ namespace TunaSweeperEditorSetup
 
 		const TSoftObjectPtr<UMediaSource> BunkerToRaidMediaSource(
 			FSoftObjectPath(GetAssetObjectPath(VideoAssetPath, BunkerToRaidMediaSourceAssetName)));
+		const TSoftObjectPtr<UMediaSource> RaidToBunkerMediaSource(
+			FSoftObjectPath(GetAssetObjectPath(VideoAssetPath, RaidToBunkerMediaSourceAssetName)));
 
 		UWorld* BunkerWorld = LoadEditorMapForSetup(BunkerMapPackagePath);
 		const bool bBunkerPlaced =
@@ -3890,7 +3918,8 @@ namespace TunaSweeperEditorSetup
 				FVector(220.0f, -220.0f, 80.0f),
 				FName(TEXT("RaidMap")),
 				FText::FromString(TEXT("Deploy")),
-				BunkerToRaidMediaSource) &&
+				BunkerToRaidMediaSource,
+				FText::FromString(TEXT("Deploying to Raid"))) &&
 			UEditorLoadingAndSavingUtils::SaveMap(BunkerWorld, BunkerMapPackagePath);
 
 		UWorld* RaidWorld = LoadEditorMapForSetup(RaidMapPackagePath);
@@ -3902,7 +3931,9 @@ namespace TunaSweeperEditorSetup
 				TEXT("TS_Travel_ToBunker"),
 				FVector(220.0f, 220.0f, 80.0f),
 				FName(TEXT("BunkerMap")),
-				FText::FromString(TEXT("To Bunker"))) &&
+				FText::FromString(TEXT("To Bunker")),
+				RaidToBunkerMediaSource,
+				FText::FromString(TEXT("Returning to Bunker"))) &&
 			UEditorLoadingAndSavingUtils::SaveMap(RaidWorld, RaidMapPackagePath);
 
 		LoadEditorMapForSetup(IntroMapPackagePath);

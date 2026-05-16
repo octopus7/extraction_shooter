@@ -2,6 +2,7 @@
 
 #include "Components/Border.h"
 #include "Components/Image.h"
+#include "Components/TextBlock.h"
 #include "MediaTexture.h"
 
 void UTunaSweeperLevelTransitionWidget::NativeConstruct()
@@ -10,6 +11,7 @@ void UTunaSweeperLevelTransitionWidget::NativeConstruct()
 
 	SetVideoVisible(false);
 	SetBlackOpacity(0.0f);
+	SetTransitionMessage(FText::GetEmpty());
 }
 
 void UTunaSweeperLevelTransitionWidget::SetVideoTexture(UMediaTexture* InMediaTexture)
@@ -43,4 +45,23 @@ void UTunaSweeperLevelTransitionWidget::SetBlackOpacity(float InOpacity)
 
 	BlackFadePanel->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 	BlackFadePanel->SetRenderOpacity(FMath::Clamp(InOpacity, 0.0f, 1.0f));
+}
+
+void UTunaSweeperLevelTransitionWidget::SetTransitionMessage(const FText& InMessage)
+{
+	if (!TransitionMessageText)
+	{
+		return;
+	}
+
+	TransitionMessageText->SetText(InMessage);
+	const ESlateVisibility MessageVisibility = InMessage.IsEmpty()
+		? ESlateVisibility::Collapsed
+		: ESlateVisibility::SelfHitTestInvisible;
+
+	TransitionMessageText->SetVisibility(MessageVisibility);
+	if (MessageBackground)
+	{
+		MessageBackground->SetVisibility(MessageVisibility);
+	}
 }

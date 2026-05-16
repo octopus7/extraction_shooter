@@ -404,7 +404,8 @@ void ATunaSweeperTopDownCharacter::StartRespawnTransition()
 				RespawnMediaSource,
 				RespawnTransitionWidgetClass,
 				RespawnFadeToBlackDuration,
-				RespawnFadeFromBlackDuration))
+				RespawnFadeFromBlackDuration,
+				FText::FromString(TEXT("Respawning"))))
 			{
 				return;
 			}

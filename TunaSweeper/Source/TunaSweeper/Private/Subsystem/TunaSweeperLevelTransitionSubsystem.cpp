@@ -87,7 +87,8 @@ bool UTunaSweeperLevelTransitionSubsystem::StartTransition(
 	TSoftObjectPtr<UMediaSource> InMediaSource,
 	TSoftClassPtr<UTunaSweeperLevelTransitionWidget> InWidgetClass,
 	float InFadeToBlackDuration,
-	float InFadeFromBlackDuration)
+	float InFadeFromBlackDuration,
+	const FText& InTransitionMessage)
 {
 	if (Phase != ETransitionPhase::Idle || InTargetLevelName.IsNone() || InMediaSource.IsNull() || InWidgetClass.IsNull())
 	{
@@ -96,6 +97,7 @@ bool UTunaSweeperLevelTransitionSubsystem::StartTransition(
 
 	TargetLevelName = InTargetLevelName;
 	WidgetClass = InWidgetClass;
+	TransitionMessage = InTransitionMessage;
 	FadeToBlackDuration = FMath::Max(0.01f, InFadeToBlackDuration);
 	FadeFromBlackDuration = FMath::Max(0.01f, InFadeFromBlackDuration);
 	FadeElapsedSeconds = 0.0f;
@@ -133,6 +135,7 @@ bool UTunaSweeperLevelTransitionSubsystem::StartTransition(
 	MediaTexture->UpdateResource();
 
 	ActiveWidget->SetVideoTexture(MediaTexture);
+	ActiveWidget->SetTransitionMessage(TransitionMessage);
 	ActiveWidget->SetVideoVisible(false);
 	ActiveWidget->SetBlackOpacity(0.0f);
 
@@ -182,6 +185,7 @@ void UTunaSweeperLevelTransitionSubsystem::HandlePostLoadMapWithWorld(UWorld* Lo
 		{
 			ActiveWidget->SetVideoTexture(MediaTexture);
 		}
+		ActiveWidget->SetTransitionMessage(TransitionMessage);
 		ActiveWidget->SetVideoVisible(true);
 		ActiveWidget->SetBlackOpacity(0.0f);
 	}
@@ -217,6 +221,7 @@ bool UTunaSweeperLevelTransitionSubsystem::EnsureTransitionWidget(UObject* World
 
 	ActiveWidget->AddToViewport(1000);
 	ActiveWidget->SetVideoVisible(false);
+	ActiveWidget->SetTransitionMessage(TransitionMessage);
 	ActiveWidget->SetBlackOpacity(0.0f);
 
 	if (APlayerController* PlayerController = UGameplayStatics::GetPlayerController(WorldContextObject ? WorldContextObject : GameInstance, 0))
@@ -244,6 +249,7 @@ void UTunaSweeperLevelTransitionSubsystem::BeginVideoReveal()
 		{
 			ActiveWidget->SetVideoTexture(MediaTexture);
 		}
+		ActiveWidget->SetTransitionMessage(TransitionMessage);
 		ActiveWidget->SetVideoVisible(true);
 		ActiveWidget->SetBlackOpacity(1.0f);
 	}
@@ -305,6 +311,7 @@ void UTunaSweeperLevelTransitionSubsystem::FinishTransition()
 	MediaTexture = nullptr;
 	LastWorldContextObject = nullptr;
 	TargetLevelName = NAME_None;
+	TransitionMessage = FText::GetEmpty();
 	Phase = ETransitionPhase::Idle;
 	FadeElapsedSeconds = 0.0f;
 	VideoVisibleStartSeconds = 0.0;

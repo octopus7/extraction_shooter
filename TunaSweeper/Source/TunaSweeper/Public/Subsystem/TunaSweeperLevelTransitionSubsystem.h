@@ -28,7 +28,8 @@ public:
 		TSoftObjectPtr<UMediaSource> InMediaSource,
 		TSoftClassPtr<UTunaSweeperLevelTransitionWidget> InWidgetClass,
 		float InFadeToBlackDuration,
-		float InFadeFromBlackDuration);
+		float InFadeFromBlackDuration,
+		const FText& InTransitionMessage);
 
 private:
 	enum class ETransitionPhase : uint8
@@ -70,6 +71,7 @@ private:
 	TObjectPtr<UObject> LastWorldContextObject;
 
 	TSoftClassPtr<UTunaSweeperLevelTransitionWidget> WidgetClass;
+	FText TransitionMessage;
 	FName TargetLevelName;
 	ETransitionPhase Phase = ETransitionPhase::Idle;
 	float FadeElapsedSeconds = 0.0f;

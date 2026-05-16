@@ -10,6 +10,7 @@ ATunaSweeperLevelTravelInteractableActor::ATunaSweeperLevelTravelInteractableAct
 	TargetLevelName = NAME_None;
 	FadeToBlackDuration = 0.2f;
 	FadeFromBlackDuration = 0.2f;
+	TransitionMessage = FText::GetEmpty();
 	TransitionWidgetClass = TSoftClassPtr<UTunaSweeperLevelTransitionWidget>(
 		FSoftObjectPath(TEXT("/Game/UI/WBP_LevelTransitionVideo.WBP_LevelTransitionVideo_C")));
 
@@ -26,11 +27,13 @@ void ATunaSweeperLevelTravelInteractableActor::ConfigureLevelTravelDefaults(
 	const FText& InInteractionDisplayName,
 	TSoftClassPtr<UTunaSweeperInteractionMarkerWidget> InMarkerWidgetClass,
 	TSoftObjectPtr<UMediaSource> InTransitionMediaSource,
-	TSoftClassPtr<UTunaSweeperLevelTransitionWidget> InTransitionWidgetClass)
+	TSoftClassPtr<UTunaSweeperLevelTransitionWidget> InTransitionWidgetClass,
+	const FText& InTransitionMessage)
 {
 	Modify();
 	TargetLevelName = InTargetLevelName;
 	TransitionMediaSource = InTransitionMediaSource;
+	TransitionMessage = InTransitionMessage;
 	FadeToBlackDuration = 0.2f;
 	FadeFromBlackDuration = 0.2f;
 	if (!InTransitionWidgetClass.IsNull())
@@ -69,7 +72,8 @@ bool ATunaSweeperLevelTravelInteractableActor::TravelToTargetLevel(APawn* Instig
 					TransitionMediaSource,
 					TransitionWidgetClass,
 					FadeToBlackDuration,
-					FadeFromBlackDuration))
+					FadeFromBlackDuration,
+					TransitionMessage))
 				{
 					return true;
 				}
