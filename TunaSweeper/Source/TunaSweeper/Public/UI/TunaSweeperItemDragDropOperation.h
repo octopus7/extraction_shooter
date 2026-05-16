@@ -13,5 +13,10 @@ class TUNASWEEPER_API UTunaSweeperItemDragDropOperation : public UDragDropOperat
 public:
 	UPROPERTY(BlueprintReadWrite, Category = "TunaSweeper|Item Drag")
 	FTunaSweeperItemStackTileData TileData;
-};
 
+	UPROPERTY(BlueprintReadWrite, Category = "TunaSweeper|Item Drag")
+	FTunaSweeperItemSlotReference HoveredSlotReference;
+
+	UPROPERTY(BlueprintReadWrite, Category = "TunaSweeper|Item Drag")
+	bool bHasHoveredSlotReference = false;
+};

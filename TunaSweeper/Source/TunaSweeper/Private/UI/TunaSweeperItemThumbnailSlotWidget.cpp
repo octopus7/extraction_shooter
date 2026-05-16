@@ -51,6 +51,8 @@ void UTunaSweeperItemThumbnailSlotWidget::NativeOnDragDetected(
 	}
 
 	DragOperation->TileData = CachedTileData;
+	DragOperation->HoveredSlotReference = FTunaSweeperItemSlotReference();
+	DragOperation->bHasHoveredSlotReference = false;
 	DragOperation->DefaultDragVisual = this;
 	DragOperation->Pivot = EDragPivot::MouseDown;
 	OutOperation = DragOperation;
@@ -62,13 +64,16 @@ void UTunaSweeperItemThumbnailSlotWidget::NativeOnDragEnter(
 	UDragDropOperation* InOperation)
 {
 	Super::NativeOnDragEnter(InGeometry, InDragDropEvent, InOperation);
-	ApplyDropHighlight(CanAcceptDragOperation(InOperation));
+	const bool bCanAcceptDrop = CanAcceptDragOperation(InOperation);
+	UpdateHoveredDropSlot(InOperation, bCanAcceptDrop);
+	ApplyDropHighlight(bCanAcceptDrop);
 }
 
 void UTunaSweeperItemThumbnailSlotWidget::NativeOnDragLeave(
 	const FDragDropEvent& InDragDropEvent,
 	UDragDropOperation* InOperation)
 {
+	UpdateHoveredDropSlot(InOperation, false);
 	ApplyDropHighlight(false);
 	Super::NativeOnDragLeave(InDragDropEvent, InOperation);
 }
@@ -79,6 +84,7 @@ bool UTunaSweeperItemThumbnailSlotWidget::NativeOnDragOver(
 	UDragDropOperation* InOperation)
 {
 	const bool bCanAcceptDrop = CanAcceptDragOperation(InOperation);
+	UpdateHoveredDropSlot(InOperation, bCanAcceptDrop);
 	ApplyDropHighlight(bCanAcceptDrop);
 	return bCanAcceptDrop || Super::NativeOnDragOver(InGeometry, InDragDropEvent, InOperation);
 }
@@ -104,8 +110,13 @@ bool UTunaSweeperItemThumbnailSlotWidget::NativeOnDrop(
 		SourceSlot.SlotIndex = ItemDragOperation->TileData.SourceIndex;
 	}
 	const FTunaSweeperItemSlotReference TargetSlot = GetCachedSlotReference();
-	return TunaGameInstance->MoveItemBetweenSlots(SourceSlot, TargetSlot) ||
-		Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
+	const bool bMoved = TunaGameInstance->MoveItemBetweenSlots(SourceSlot, TargetSlot);
+	if (UTunaSweeperItemDragDropOperation* MutableItemDragOperation = Cast<UTunaSweeperItemDragDropOperation>(InOperation))
+	{
+		MutableItemDragOperation->bHasHoveredSlotReference = false;
+	}
+
+	return bMoved || Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
 }
 
 void UTunaSweeperItemThumbnailSlotWidget::ApplyTileData()
@@ -173,6 +184,34 @@ bool UTunaSweeperItemThumbnailSlotWidget::CanAcceptDragOperation(UDragDropOperat
 		SourceSlot.SlotIndex = ItemDragOperation->TileData.SourceIndex;
 	}
 	return TunaGameInstance->CanMoveItemBetweenSlots(SourceSlot, GetCachedSlotReference());
+}
+
+void UTunaSweeperItemThumbnailSlotWidget::UpdateHoveredDropSlot(
+	UDragDropOperation* InOperation,
+	bool bCanAcceptDrop) const
+{
+	UTunaSweeperItemDragDropOperation* ItemDragOperation = Cast<UTunaSweeperItemDragDropOperation>(InOperation);
+	if (!ItemDragOperation)
+	{
+		return;
+	}
+
+	const FTunaSweeperItemSlotReference SlotReference = GetCachedSlotReference();
+	const bool bIsCurrentHoveredSlot =
+		ItemDragOperation->bHasHoveredSlotReference &&
+		ItemDragOperation->HoveredSlotReference.Source == SlotReference.Source &&
+		ItemDragOperation->HoveredSlotReference.SlotIndex == SlotReference.SlotIndex;
+
+	if (bCanAcceptDrop)
+	{
+		ItemDragOperation->HoveredSlotReference = SlotReference;
+		ItemDragOperation->bHasHoveredSlotReference = true;
+	}
+	else if (bIsCurrentHoveredSlot)
+	{
+		ItemDragOperation->HoveredSlotReference = FTunaSweeperItemSlotReference();
+		ItemDragOperation->bHasHoveredSlotReference = false;
+	}
 }
 
 FTunaSweeperItemSlotReference UTunaSweeperItemThumbnailSlotWidget::GetCachedSlotReference() const

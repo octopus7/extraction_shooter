@@ -53,6 +53,7 @@ private:
 	void ApplyTileData();
 	void ApplyDropHighlight(bool bCanAcceptDrop);
 	bool CanAcceptDragOperation(UDragDropOperation* InOperation) const;
+	void UpdateHoveredDropSlot(UDragDropOperation* InOperation, bool bCanAcceptDrop) const;
 	FTunaSweeperItemSlotReference GetCachedSlotReference() const;
 
 	UPROPERTY(Transient)

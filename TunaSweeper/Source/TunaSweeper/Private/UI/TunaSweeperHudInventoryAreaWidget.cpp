@@ -114,6 +114,29 @@ namespace TunaSweeperInventoryArea
 			}
 		}
 	}
+
+	bool TryMoveFromHoveredDropSlot(
+		UTunaSweeperGameInstance* TunaGameInstance,
+		UTunaSweeperItemDragDropOperation* ItemDragOperation)
+	{
+		if (!TunaGameInstance || !ItemDragOperation || ItemDragOperation->TileData.bIsEmpty ||
+			!ItemDragOperation->bHasHoveredSlotReference || !ItemDragOperation->HoveredSlotReference.IsValid())
+		{
+			return false;
+		}
+
+		FTunaSweeperItemSlotReference SourceSlot = ItemDragOperation->TileData.SlotReference;
+		if (!SourceSlot.IsValid())
+		{
+			SourceSlot.Source = ItemDragOperation->TileData.Source;
+			SourceSlot.SlotIndex = ItemDragOperation->TileData.SourceIndex;
+		}
+
+		const bool bMoved = TunaGameInstance->MoveItemBetweenSlots(SourceSlot, ItemDragOperation->HoveredSlotReference);
+		ItemDragOperation->bHasHoveredSlotReference = false;
+		ItemDragOperation->HoveredSlotReference = FTunaSweeperItemSlotReference();
+		return bMoved;
+	}
 }
 
 void UTunaSweeperHudInventoryAreaWidget::NativeConstruct()
@@ -207,10 +230,15 @@ bool UTunaSweeperHudInventoryAreaWidget::NativeOnDrop(
 	const FDragDropEvent& InDragDropEvent,
 	UDragDropOperation* InOperation)
 {
-	const UTunaSweeperItemDragDropOperation* ItemDragOperation = Cast<UTunaSweeperItemDragDropOperation>(InOperation);
+	UTunaSweeperItemDragDropOperation* ItemDragOperation = Cast<UTunaSweeperItemDragDropOperation>(InOperation);
 	if (!ItemDragOperation || ItemDragOperation->TileData.bIsEmpty)
 	{
 		return Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
+	}
+
+	if (TunaSweeperInventoryArea::TryMoveFromHoveredDropSlot(GetGameInstance<UTunaSweeperGameInstance>(), ItemDragOperation))
+	{
+		return true;
 	}
 
 	return Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
