@@ -46,6 +46,7 @@
 #include "Interaction/TunaSweeperLootContainerActor.h"
 #include "Interaction/TunaSweeperLootContainerSpawnInteractableActor.h"
 #include "Interaction/TunaSweeperPickupItemActor.h"
+#include "Interaction/TunaSweeperSelfDestructInteractableActor.h"
 #include "Kismet2/BlueprintEditorUtils.h"
 #include "Kismet2/KismetEditorUtilities.h"
 #include "MediaSource.h"
@@ -71,6 +72,7 @@
 #include "UI/TunaSweeperLootContainerWidget.h"
 #include "UI/TunaSweeperPickupItemIconWidget.h"
 #include "UI/TunaSweeperQuestWidget.h"
+#include "UI/TunaSweeperSpeechBubbleWidget.h"
 #include "UI/TunaSweeperTempOpenLootTileEntryWidget.h"
 #include "UI/TunaSweeperTempOpenLootWidget.h"
 #include "UObject/SavePackage.h"
@@ -99,6 +101,7 @@ namespace TunaSweeperEditorSetup
 	const FString IntroMenuAndLevelTravelTaskId = TEXT("2026-05-15_CreateIntroMenuAndLevelTravelActorsV1");
 	const FString LevelTransitionVideoTaskId = TEXT("2026-05-15_AddBunkerToRaidTransitionVideoV2");
 	const FString FirstOutingQuestTaskId = TEXT("2026-05-15_CreateFirstOutingQuestNpcV2");
+	const FString SelfDestructInteractionTaskId = TEXT("2026-05-16_CreateSelfDestructInteractionV1");
 	const FString GameInstanceAssetPath = TEXT("/Game/Core");
 	const FString GameInstanceAssetName = TEXT("BP_TunaSweeperGameInstance");
 	const FString GameModeAssetName = TEXT("BP_TunaSweeperGameMode");
@@ -137,6 +140,7 @@ namespace TunaSweeperEditorSetup
 	const FString IntroMenuWidgetAssetName = TEXT("WBP_IntroMenu");
 	const FString LevelTransitionVideoWidgetAssetName = TEXT("WBP_LevelTransitionVideo");
 	const FString QuestWidgetAssetName = TEXT("WBP_Quest");
+	const FString SpeechBubbleWidgetAssetName = TEXT("WBP_SpeechBubble");
 	constexpr int32 InventoryTileColumnCount = 5;
 	constexpr int32 EquipmentReserveColumnCount = 4;
 	constexpr float InventoryTileWidth = 96.0f;
@@ -171,6 +175,7 @@ namespace TunaSweeperEditorSetup
 	const FString LootContainerAssetName = TEXT("BP_LootContainer");
 	const FString LootContainerSpawnInteractionAssetName = TEXT("BP_Interact_LootContainerSpawn");
 	const FString LevelTravelInteractionAssetName = TEXT("BP_Interact_LevelTravel");
+	const FString SelfDestructInteractionAssetName = TEXT("BP_Interact_SelfDestruct");
 	const FString IntroMapPackagePath = TEXT("/Game/IntroMap");
 	const FString BunkerMapPackagePath = TEXT("/Game/BunkerMap");
 	const FString RaidMapPackagePath = TEXT("/Game/RaidMap");
@@ -954,6 +959,63 @@ namespace TunaSweeperEditorSetup
 		FillCanvas(RootCanvas->AddChildToCanvas(BlackFadePanel));
 
 		RegisterAllWidgetsInTree(WidgetBlueprint);
+		WidgetBlueprint->MarkPackageDirty();
+		return true;
+	}
+
+	bool BuildSpeechBubbleWidgetTree(UWidgetBlueprint* WidgetBlueprint)
+	{
+		if (!WidgetBlueprint || !WidgetBlueprint->WidgetTree)
+		{
+			return false;
+		}
+
+		WidgetBlueprint->Modify();
+		WidgetBlueprint->WidgetTree->Modify();
+		ClearWidgetTreeForRebuild(WidgetBlueprint);
+
+		UWidgetTree* WidgetTree = WidgetBlueprint->WidgetTree;
+		UCanvasPanel* RootCanvas = WidgetTree->ConstructWidget<UCanvasPanel>(UCanvasPanel::StaticClass(), TEXT("RootCanvas"));
+		UBorder* BubbleTail = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("BubbleTail"));
+		UBorder* BubbleBackground = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("BubbleBackground"));
+		UTextBlock* BubbleText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("BubbleText"));
+
+		if (!RootCanvas || !BubbleTail || !BubbleBackground || !BubbleText)
+		{
+			return false;
+		}
+
+		WidgetTree->RootWidget = RootCanvas;
+
+		const FLinearColor FillColor(0.96f, 0.98f, 1.0f, 0.96f);
+		const FLinearColor OutlineColor(0.08f, 0.10f, 0.12f, 0.92f);
+		BubbleTail->SetBrush(MakeRoundedBoxBrush(FVector2D(18.0f, 18.0f), FillColor, OutlineColor, 1.0f));
+		BubbleTail->SetRenderTransformAngle(45.0f);
+
+		UCanvasPanelSlot* TailSlot = RootCanvas->AddChildToCanvas(BubbleTail);
+		if (TailSlot)
+		{
+			TailSlot->SetAnchors(FAnchors(0.5f, 0.0f));
+			TailSlot->SetAlignment(FVector2D(0.5f, 0.0f));
+			TailSlot->SetPosition(FVector2D(0.0f, 40.0f));
+			TailSlot->SetSize(FVector2D(18.0f, 18.0f));
+		}
+
+		BubbleBackground->SetPadding(FMargin(12.0f, 6.0f));
+		BubbleBackground->SetBrush(MakeRoundedBoxBrush(FVector2D(160.0f, 48.0f), FillColor, OutlineColor, 1.5f));
+		ConfigureTextBlock(BubbleText, FText::FromString(TEXT("3")), FLinearColor(0.02f, 0.025f, 0.03f, 1.0f), 28);
+		BubbleBackground->SetContent(BubbleText);
+
+		UCanvasPanelSlot* BackgroundSlot = RootCanvas->AddChildToCanvas(BubbleBackground);
+		if (BackgroundSlot)
+		{
+			BackgroundSlot->SetAnchors(FAnchors(0.5f, 0.0f));
+			BackgroundSlot->SetAlignment(FVector2D(0.5f, 0.0f));
+			BackgroundSlot->SetPosition(FVector2D(0.0f, 0.0f));
+			BackgroundSlot->SetSize(FVector2D(160.0f, 48.0f));
+		}
+
+		RegisterWidgetVariable(WidgetBlueprint, BubbleText);
 		WidgetBlueprint->MarkPackageDirty();
 		return true;
 	}
@@ -2829,6 +2891,18 @@ namespace TunaSweeperEditorSetup
 		return SaveAsset(WidgetBlueprint);
 	}
 
+	bool ConfigureSpeechBubbleWidgetBlueprint(UWidgetBlueprint* WidgetBlueprint)
+	{
+		if (!WidgetBlueprint || !BuildSpeechBubbleWidgetTree(WidgetBlueprint))
+		{
+			return false;
+		}
+
+		FKismetEditorUtilities::CompileBlueprint(WidgetBlueprint);
+		WidgetBlueprint->MarkPackageDirty();
+		return SaveAsset(WidgetBlueprint);
+	}
+
 	bool ConfigureQuestWidgetBlueprint(UWidgetBlueprint* WidgetBlueprint)
 	{
 		if (!WidgetBlueprint || !BuildQuestWidgetTree(WidgetBlueprint))
@@ -2898,6 +2972,56 @@ namespace TunaSweeperEditorSetup
 			TSoftClassPtr<UTunaSweeperLevelTransitionWidget>(
 				FSoftObjectPath(GetAssetClassPath(UIAssetPath, LevelTransitionVideoWidgetAssetName))));
 		LevelTravelActor->MarkPackageDirty();
+		return true;
+	}
+
+	bool ConfigureSelfDestructBlueprint(UBlueprint* SelfDestructBlueprint)
+	{
+		if (!SelfDestructBlueprint)
+		{
+			return false;
+		}
+
+		FKismetEditorUtilities::CompileBlueprint(SelfDestructBlueprint);
+
+		ATunaSweeperSelfDestructInteractableActor* Defaults = SelfDestructBlueprint->GeneratedClass
+			? Cast<ATunaSweeperSelfDestructInteractableActor>(SelfDestructBlueprint->GeneratedClass->GetDefaultObject())
+			: nullptr;
+		if (!Defaults)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to configure %s defaults."), *GetNameSafe(SelfDestructBlueprint));
+			return false;
+		}
+
+		SelfDestructBlueprint->Modify();
+		Defaults->Modify();
+		Defaults->ConfigureSelfDestructDefaults(
+			TSoftClassPtr<UTunaSweeperInteractionMarkerWidget>(
+				FSoftObjectPath(GetAssetClassPath(UIAssetPath, InteractionMarkerAssetName))),
+			TSoftClassPtr<UTunaSweeperSpeechBubbleWidget>(
+				FSoftObjectPath(GetAssetClassPath(UIAssetPath, SpeechBubbleWidgetAssetName))));
+		FBlueprintEditorUtils::MarkBlueprintAsModified(SelfDestructBlueprint);
+		FKismetEditorUtilities::CompileBlueprint(SelfDestructBlueprint);
+		SelfDestructBlueprint->MarkPackageDirty();
+		return SaveAsset(SelfDestructBlueprint);
+	}
+
+	bool ConfigureSelfDestructActorInstance(AActor* Actor)
+	{
+		ATunaSweeperSelfDestructInteractableActor* SelfDestructActor = Cast<ATunaSweeperSelfDestructInteractableActor>(Actor);
+		if (!SelfDestructActor)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("%s is not an ATunaSweeperSelfDestructInteractableActor."), *GetNameSafe(Actor));
+			return false;
+		}
+
+		SelfDestructActor->Modify();
+		SelfDestructActor->ConfigureSelfDestructDefaults(
+			TSoftClassPtr<UTunaSweeperInteractionMarkerWidget>(
+				FSoftObjectPath(GetAssetClassPath(UIAssetPath, InteractionMarkerAssetName))),
+			TSoftClassPtr<UTunaSweeperSpeechBubbleWidget>(
+				FSoftObjectPath(GetAssetClassPath(UIAssetPath, SpeechBubbleWidgetAssetName))));
+		SelfDestructActor->MarkPackageDirty();
 		return true;
 	}
 
@@ -3496,6 +3620,43 @@ namespace TunaSweeperEditorSetup
 		return true;
 	}
 
+	bool PlaceSelfDestructActor(UWorld* World, UBlueprint* ActorBlueprint, const FString& ActorLabel, const FVector& Location)
+	{
+		if (!World || !ActorBlueprint || !ActorBlueprint->GeneratedClass)
+		{
+			return false;
+		}
+
+		if (AActor* ExistingActor = FindActorByLabel(World, ActorLabel))
+		{
+			ExistingActor->Modify();
+			ExistingActor->SetActorLocation(Location);
+			ExistingActor->SetActorRotation(FRotator::ZeroRotator);
+			return ConfigureSelfDestructActorInstance(ExistingActor);
+		}
+
+		World->PersistentLevel->Modify();
+
+		FActorSpawnParameters SpawnParameters;
+		SpawnParameters.OverrideLevel = World->PersistentLevel;
+		SpawnParameters.Name = MakeUniqueObjectName(World->PersistentLevel, ActorBlueprint->GeneratedClass, FName(*ActorLabel));
+		SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+		AActor* SpawnedActor = World->SpawnActor<AActor>(ActorBlueprint->GeneratedClass, Location, FRotator::ZeroRotator, SpawnParameters);
+		if (!SpawnedActor)
+		{
+			return false;
+		}
+
+		SpawnedActor->SetActorLabel(ActorLabel);
+		if (!ConfigureSelfDestructActorInstance(SpawnedActor))
+		{
+			return false;
+		}
+		SpawnedActor->MarkPackageDirty();
+		return true;
+	}
+
 	bool PlaceInteractionActorsInRaidMap(UBlueprint* DialogueBlueprint, UBlueprint* PickupBlueprint, UBlueprint* OpenBlueprint)
 	{
 		UWorld* World = GEditor ? GEditor->GetEditorWorldContext().World() : nullptr;
@@ -3663,6 +3824,50 @@ namespace TunaSweeperEditorSetup
 			ConfigureLootContainerSpawnBlueprint(LootContainerSpawnBlueprint);
 
 		return bConfigured && PlaceLootContainerAndSpawnerActorsInRaidMap(LootContainerBlueprint, LootContainerSpawnBlueprint);
+	}
+
+	bool PlaceSelfDestructActorInRaidMap(UBlueprint* SelfDestructBlueprint)
+	{
+		if (!SelfDestructBlueprint)
+		{
+			return false;
+		}
+
+		UWorld* RaidWorld = LoadEditorMapForSetup(RaidMapPackagePath);
+		const bool bPlaced =
+			RaidWorld &&
+			PlaceSelfDestructActor(
+				RaidWorld,
+				SelfDestructBlueprint,
+				TEXT("TS_Interact_SelfDestruct"),
+				FVector(1520.0f, -220.0f, 80.0f)) &&
+			UEditorLoadingAndSavingUtils::SaveMap(RaidWorld, RaidMapPackagePath);
+
+		LoadEditorMapForSetup(IntroMapPackagePath);
+		return bPlaced;
+	}
+
+	bool EnsureSelfDestructInteractionSetup()
+	{
+		UWidgetBlueprint* SpeechBubbleWidgetBlueprint = EnsureWidgetBlueprint(
+			UIAssetPath,
+			SpeechBubbleWidgetAssetName,
+			UTunaSweeperSpeechBubbleWidget::StaticClass());
+		UBlueprint* SelfDestructBlueprint = EnsureBlueprint(
+			InteractionAssetPath,
+			SelfDestructInteractionAssetName,
+			ATunaSweeperSelfDestructInteractableActor::StaticClass());
+
+		if (!SpeechBubbleWidgetBlueprint || !SelfDestructBlueprint)
+		{
+			return false;
+		}
+
+		const bool bConfigured =
+			ConfigureSpeechBubbleWidgetBlueprint(SpeechBubbleWidgetBlueprint) &&
+			ConfigureSelfDestructBlueprint(SelfDestructBlueprint);
+
+		return bConfigured && PlaceSelfDestructActorInRaidMap(SelfDestructBlueprint);
 	}
 
 	bool PlaceLevelTravelActorsInBunkerAndRaidMaps(UBlueprint* LevelTravelBlueprint)
@@ -3990,6 +4195,41 @@ namespace TunaSweeperEditorSetup
 				}),
 			1.0f);
 	}
+
+	void ScheduleSelfDestructInteractionSetup()
+	{
+		if (FTunaSweeperEditorRunOnce::HasCompleted(SelfDestructInteractionTaskId))
+		{
+			return;
+		}
+
+		FTSTicker::GetCoreTicker().AddTicker(
+			FTickerDelegate::CreateLambda(
+				[](float)
+				{
+					UWorld* EditorWorld = GEditor ? GEditor->GetEditorWorldContext().World() : nullptr;
+					if (!EditorWorld)
+					{
+						return true;
+					}
+
+					FTunaSweeperEditorRunOnce::Run(
+						SelfDestructInteractionTaskId,
+						[]()
+						{
+							return EnsureSelfDestructInteractionSetup();
+						});
+
+					const bool bCompleted = FTunaSweeperEditorRunOnce::HasCompleted(SelfDestructInteractionTaskId);
+					if (bCompleted && FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperSetupQuit")))
+					{
+						FPlatformMisc::RequestExit(false);
+					}
+
+					return !bCompleted;
+				}),
+			1.0f);
+	}
 }
 
 class FTunaSweeperEditorModule final : public IModuleInterface
@@ -4071,6 +4311,7 @@ public:
 		TunaSweeperEditorSetup::ScheduleIntroMenuAndLevelTravelSetup();
 		TunaSweeperEditorSetup::ScheduleBunkerToRaidTransitionVideoSetup();
 		TunaSweeperEditorSetup::ScheduleFirstOutingQuestSetup();
+		TunaSweeperEditorSetup::ScheduleSelfDestructInteractionSetup();
 	}
 };
 

@@ -87,7 +87,7 @@ void ATunaSweeperPlayerController::PlayerTick(float DeltaTime)
 	Super::PlayerTick(DeltaTime);
 
 	ATunaSweeperTopDownCharacter* ControlledCharacter = Cast<ATunaSweeperTopDownCharacter>(GetPawn());
-	if (!ControlledCharacter)
+	if (!ControlledCharacter || ControlledCharacter->IsDead())
 	{
 		return;
 	}
@@ -153,6 +153,14 @@ bool ATunaSweeperPlayerController::IsIntroMap() const
 
 void ATunaSweeperPlayerController::HandleQuickSlot(int32 SlotNumber)
 {
+	if (const ATunaSweeperTopDownCharacter* ControlledCharacter = Cast<ATunaSweeperTopDownCharacter>(GetPawn()))
+	{
+		if (ControlledCharacter->IsDead())
+		{
+			return;
+		}
+	}
+
 	UGameInstance* GameInstance = GetGameInstance();
 	if (!GameInstance)
 	{

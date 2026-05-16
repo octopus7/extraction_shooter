@@ -97,3 +97,23 @@ UE에서는 보편적으로 북쪽이 +Y 방향인가?
 ### 답변
 
 맞다. `GeneratedImages/ItemIcons/Split` 아래의 `T_UIIcon_*.png` 분할 아이템 아이콘 17개는 모두 256x256이다. 참고로 원본 아이콘 시트 `ExtractionItemIconSheet_4x4_Transparent_1024.png`와 작업 원본 `T_UIIcon_CannedTuna_Transparent1024.png`는 1024x1024이고, 게임 데이터는 `TunaSweeper/Content/UI/Icons/T_UIIcon_*.uasset` 텍스처를 참조한다.
+
+## 2026-05-16 15:25:50 (소요시간: 1분 미만)
+
+### 질문
+
+레이드에서 벙커로 돌아오는 방식이 지금은 벙커 이동 액터뿐인가?
+
+### 답변
+
+맞다. 현재 구현상 레이드에서 벙커로 돌아오는 명시적 경로는 `RaidMap`에 배치되는 `TS_Travel_ToBunker` 레벨 이동 액터뿐이다. 이 액터는 상호작용 표시명 `To Bunker`로 `BunkerMap`을 대상으로 열며, 별도의 추출 지점, 귀환 메뉴, 사망/탈출 처리, 자동 귀환 루트는 아직 구현되어 있지 않다.
+
+## 2026-05-16 15:36:40 (소요시간: 1분 미만)
+
+### 질문
+
+현재 플레이어 체력 기본값은 얼마인가?
+
+### 답변
+
+현재 C++ 기본값 기준으로 플레이어 체력은 `Health = 100.0`, 최대 체력은 `MaxHealth = 100.0`이다. `ATunaSweeperTopDownCharacter`가 `UTunaSweeperVitalsComponent`를 기본 컴포넌트로 생성하므로, 블루프린트에서 별도로 오버라이드하지 않았다면 플레이어 기본 체력은 100이다.

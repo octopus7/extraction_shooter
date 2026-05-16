@@ -10,6 +10,7 @@
 #include "Interaction/TunaSweeperLootContainerActor.h"
 #include "Interaction/TunaSweeperLootContainerSpawnInteractableActor.h"
 #include "Interaction/TunaSweeperPickupItemActor.h"
+#include "Interaction/TunaSweeperSelfDestructInteractableActor.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/TunaSweeperPlayerController.h"
 #include "Stats/Stats.h"
@@ -86,6 +87,8 @@ bool UTunaSweeperInteractionSubsystem::RequestInteraction(UTunaSweeperInteractab
 		return HandleLevelTravelInteraction(Interactable, InstigatorPawn);
 	case ETunaSweeperInteractionType::Quest:
 		return HandleQuestInteraction(Interactable, InstigatorPawn);
+	case ETunaSweeperInteractionType::SelfDestruct:
+		return HandleSelfDestructInteraction(Interactable, InstigatorPawn);
 	default:
 		break;
 	}
@@ -206,6 +209,16 @@ bool UTunaSweeperInteractionSubsystem::HandleQuestInteraction(
 	return true;
 }
 
+bool UTunaSweeperInteractionSubsystem::HandleSelfDestructInteraction(
+	UTunaSweeperInteractableComponent* Interactable,
+	APawn* InstigatorPawn)
+{
+	ATunaSweeperSelfDestructInteractableActor* SelfDestructActor = Interactable
+		? Cast<ATunaSweeperSelfDestructInteractableActor>(Interactable->GetOwner())
+		: nullptr;
+	return SelfDestructActor && SelfDestructActor->StartSelfDestruct(InstigatorPawn);
+}
+
 bool UTunaSweeperInteractionSubsystem::OpenTempOpenLootWidget(APawn* InstigatorPawn)
 {
 	if (!IsValid(InstigatorPawn))
@@ -319,6 +332,8 @@ FString UTunaSweeperInteractionSubsystem::GetInteractionDebugTypeName(const UTun
 		return TEXT("LevelTravel");
 	case ETunaSweeperInteractionType::Quest:
 		return TEXT("Quest");
+	case ETunaSweeperInteractionType::SelfDestruct:
+		return TEXT("SelfDestruct");
 	default:
 		return TEXT("Unknown");
 	}

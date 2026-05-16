@@ -13,9 +13,13 @@
 #include "InputAction.h"
 #include "InputActionValue.h"
 #include "InputMappingContext.h"
+#include "Kismet/GameplayStatics.h"
+#include "MediaSource.h"
 #include "Player/TunaSweeperPlayerController.h"
 #include "Subsystem/TunaSweeperInteractionSubsystem.h"
+#include "Subsystem/TunaSweeperLevelTransitionSubsystem.h"
 #include "TimerManager.h"
+#include "UI/TunaSweeperLevelTransitionWidget.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Weapon/TunaSweeperWeapon.h"
 
@@ -74,6 +78,9 @@ ATunaSweeperTopDownCharacter::ATunaSweeperTopDownCharacter()
 	InteractAction = TSoftObjectPtr<UInputAction>(FSoftObjectPath(TEXT("/Game/Input/IA_Interact.IA_Interact")));
 	InventoryAction = TSoftObjectPtr<UInputAction>(FSoftObjectPath(TEXT("/Game/Input/IA_Inventory.IA_Inventory")));
 	DefaultWeaponClass = TSoftClassPtr<ATunaSweeperWeapon>(FSoftObjectPath(TEXT("/Game/Weapons/BP_TunaSweeperWeapon.BP_TunaSweeperWeapon_C")));
+	RespawnMediaSource = TSoftObjectPtr<UMediaSource>(FSoftObjectPath(TEXT("/Game/Movies/MS_Respawn.MS_Respawn")));
+	RespawnTransitionWidgetClass = TSoftClassPtr<UTunaSweeperLevelTransitionWidget>(
+		FSoftObjectPath(TEXT("/Game/UI/WBP_LevelTransitionVideo.WBP_LevelTransitionVideo_C")));
 }
 
 void ATunaSweeperTopDownCharacter::BeginPlay()
@@ -82,14 +89,41 @@ void ATunaSweeperTopDownCharacter::BeginPlay()
 
 	DefaultCameraFOV = TopDownCamera ? TopDownCamera->FieldOfView : DefaultCameraFOV;
 	SpawnDefaultWeapon();
+
+	if (VitalsComponent)
+	{
+		VitalsComponent->OnVitalsChanged.AddDynamic(this, &ATunaSweeperTopDownCharacter::HandleVitalsChanged);
+		HandleVitalsChanged(VitalsComponent->GetVitalsState());
+	}
 }
 
 void ATunaSweeperTopDownCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
+	if (bIsDead)
+	{
+		return;
+	}
+
 	UpdateCarryWeightMovementSpeed();
 	UpdateAimingVisuals(DeltaSeconds);
+}
+
+void ATunaSweeperTopDownCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	if (GetWorld())
+	{
+		GetWorldTimerManager().ClearTimer(FireTimerHandle);
+		GetWorldTimerManager().ClearTimer(RespawnTransitionTimerHandle);
+	}
+
+	if (VitalsComponent)
+	{
+		VitalsComponent->OnVitalsChanged.RemoveDynamic(this, &ATunaSweeperTopDownCharacter::HandleVitalsChanged);
+	}
+
+	Super::EndPlay(EndPlayReason);
 }
 
 void ATunaSweeperTopDownCharacter::PawnClientRestart()
@@ -97,6 +131,23 @@ void ATunaSweeperTopDownCharacter::PawnClientRestart()
 	Super::PawnClientRestart();
 
 	AddDefaultInputMapping();
+}
+
+float ATunaSweeperTopDownCharacter::TakeDamage(
+	float DamageAmount,
+	FDamageEvent const& DamageEvent,
+	AController* EventInstigator,
+	AActor* DamageCauser)
+{
+	if (bIsDead || DamageAmount <= 0.0f || !VitalsComponent)
+	{
+		return 0.0f;
+	}
+
+	FTunaSweeperVitalsDelta DamageDelta;
+	DamageDelta.Health = -DamageAmount;
+	VitalsComponent->ApplyVitalsDelta(DamageDelta);
+	return DamageAmount;
 }
 
 void ATunaSweeperTopDownCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -201,6 +252,11 @@ void ATunaSweeperTopDownCharacter::SpawnDefaultWeapon()
 
 void ATunaSweeperTopDownCharacter::HandleMove(const FInputActionValue& Value)
 {
+	if (bIsDead)
+	{
+		return;
+	}
+
 	const FVector2D MoveVector = Value.Get<FVector2D>();
 	if (!FMath::IsNearlyZero(MoveVector.Y))
 	{
@@ -215,6 +271,11 @@ void ATunaSweeperTopDownCharacter::HandleMove(const FInputActionValue& Value)
 
 void ATunaSweeperTopDownCharacter::BeginFire(const FInputActionValue& Value)
 {
+	if (bIsDead)
+	{
+		return;
+	}
+
 	bFireHeld = true;
 	FireWeapon();
 
@@ -232,6 +293,11 @@ void ATunaSweeperTopDownCharacter::EndFire(const FInputActionValue& Value)
 
 void ATunaSweeperTopDownCharacter::BeginAim(const FInputActionValue& Value)
 {
+	if (bIsDead)
+	{
+		return;
+	}
+
 	bIsAiming = true;
 }
 
@@ -242,6 +308,11 @@ void ATunaSweeperTopDownCharacter::EndAim(const FInputActionValue& Value)
 
 void ATunaSweeperTopDownCharacter::HandleInteract(const FInputActionValue& Value)
 {
+	if (bIsDead)
+	{
+		return;
+	}
+
 	UWorld* World = GetWorld();
 	if (!World)
 	{
@@ -256,6 +327,11 @@ void ATunaSweeperTopDownCharacter::HandleInteract(const FInputActionValue& Value
 
 void ATunaSweeperTopDownCharacter::HandleInventory(const FInputActionValue& Value)
 {
+	if (bIsDead)
+	{
+		return;
+	}
+
 	if (ATunaSweeperPlayerController* TunaPlayerController = Cast<ATunaSweeperPlayerController>(GetController()))
 	{
 		TunaPlayerController->ToggleInventoryOnlyPanel();
@@ -264,10 +340,78 @@ void ATunaSweeperTopDownCharacter::HandleInventory(const FInputActionValue& Valu
 
 void ATunaSweeperTopDownCharacter::FireWeapon()
 {
-	if (EquippedWeapon)
+	if (!bIsDead && EquippedWeapon)
 	{
 		EquippedWeapon->Fire(AimDirection, this);
 	}
+}
+
+void ATunaSweeperTopDownCharacter::HandleVitalsChanged(const FTunaSweeperVitalsState& VitalsState)
+{
+	if (!bIsDead && VitalsState.Health <= 0.0f)
+	{
+		HandleDeath();
+	}
+}
+
+void ATunaSweeperTopDownCharacter::HandleDeath()
+{
+	if (bIsDead)
+	{
+		return;
+	}
+
+	bIsDead = true;
+	bFireHeld = false;
+	bIsAiming = false;
+	GetWorldTimerManager().ClearTimer(FireTimerHandle);
+
+	if (UCharacterMovementComponent* MovementComponent = GetCharacterMovement())
+	{
+		MovementComponent->StopMovementImmediately();
+		MovementComponent->DisableMovement();
+	}
+
+	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
+	{
+		PlayerController->SetIgnoreMoveInput(true);
+		PlayerController->SetIgnoreLookInput(true);
+		DisableInput(PlayerController);
+	}
+
+	GetWorldTimerManager().SetTimer(
+		RespawnTransitionTimerHandle,
+		this,
+		&ATunaSweeperTopDownCharacter::StartRespawnTransition,
+		FMath::Max(0.0f, RespawnDelaySeconds),
+		false);
+}
+
+void ATunaSweeperTopDownCharacter::StartRespawnTransition()
+{
+	if (RespawnTargetLevelName.IsNone())
+	{
+		return;
+	}
+
+	if (UGameInstance* GameInstance = GetGameInstance())
+	{
+		if (UTunaSweeperLevelTransitionSubsystem* TransitionSubsystem = GameInstance->GetSubsystem<UTunaSweeperLevelTransitionSubsystem>())
+		{
+			if (TransitionSubsystem->StartTransition(
+				this,
+				RespawnTargetLevelName,
+				RespawnMediaSource,
+				RespawnTransitionWidgetClass,
+				RespawnFadeToBlackDuration,
+				RespawnFadeFromBlackDuration))
+			{
+				return;
+			}
+		}
+	}
+
+	UGameplayStatics::OpenLevel(this, RespawnTargetLevelName);
 }
 
 void ATunaSweeperTopDownCharacter::UpdateAimingVisuals(float DeltaSeconds)
