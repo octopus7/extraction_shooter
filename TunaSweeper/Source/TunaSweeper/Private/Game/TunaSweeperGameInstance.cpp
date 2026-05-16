@@ -886,31 +886,6 @@ void UTunaSweeperGameInstance::GenerateDefaultInventoryState()
 	SelectedItemSlotReference = FTunaSweeperItemSlotReference();
 	SelectedWeaponAttachmentSlotTags.Reset();
 	SelectedWeaponAttachmentSlots.Reset();
-
-	const TPair<int32, int32> DefaultInventoryItems[] = {
-		TPair<int32, int32>(1001, 1),
-		TPair<int32, int32>(1002, 1),
-		TPair<int32, int32>(2001, 36),
-		TPair<int32, int32>(2004, 1),
-		TPair<int32, int32>(2005, 1),
-		TPair<int32, int32>(3001, 2),
-		TPair<int32, int32>(3002, 2),
-		TPair<int32, int32>(4001, 4),
-		TPair<int32, int32>(4003, 1),
-		TPair<int32, int32>(1004, 1),
-		TPair<int32, int32>(5001, 1),
-		TPair<int32, int32>(5002, 1),
-		TPair<int32, int32>(5006, 1),
-		TPair<int32, int32>(5007, 1),
-		TPair<int32, int32>(5008, 1)
-	};
-
-	for (const TPair<int32, int32>& InventoryItem : DefaultInventoryItems)
-	{
-		AddItemUidToFirstEmptySlot(
-			CreateItemInstance(InventoryItem.Key, InventoryItem.Value),
-			PlayerInventorySlots);
-	}
 }
 
 void UTunaSweeperGameInstance::ResetPlayerSlotArrays()
