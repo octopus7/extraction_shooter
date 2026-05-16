@@ -97,7 +97,7 @@ namespace TunaSweeperEditorSetup
 	const FString LootContainerAndSpawnerTaskId = TEXT("2026-05-11_CreateLootContainerAndSpawnerAssetsV1");
 	const FString CannedTunaIconImportTaskId = TEXT("2026-05-11_ImportCannedTunaIconV1");
 	const FString IntroMenuAndLevelTravelTaskId = TEXT("2026-05-15_CreateIntroMenuAndLevelTravelActorsV1");
-	const FString LevelTransitionVideoTaskId = TEXT("2026-05-15_AddBunkerToRaidTransitionVideoV1");
+	const FString LevelTransitionVideoTaskId = TEXT("2026-05-15_AddBunkerToRaidTransitionVideoV2");
 	const FString FirstOutingQuestTaskId = TEXT("2026-05-15_CreateFirstOutingQuestNpcV2");
 	const FString GameInstanceAssetPath = TEXT("/Game/Core");
 	const FString GameInstanceAssetName = TEXT("BP_TunaSweeperGameInstance");

@@ -4,6 +4,7 @@
 #include "Engine/Engine.h"
 #include "Engine/GameInstance.h"
 #include "GameFramework/PlayerController.h"
+#include "HAL/PlatformTime.h"
 #include "Kismet/GameplayStatics.h"
 #include "MediaPlayer.h"
 #include "MediaSource.h"
@@ -38,20 +39,28 @@ void UTunaSweeperLevelTransitionSubsystem::Tick(float DeltaTime)
 {
 	switch (Phase)
 	{
-	case ETransitionPhase::FadingToBlackBeforeLoad:
+	case ETransitionPhase::FadingToBlackBeforeVideo:
 		FadeElapsedSeconds += DeltaTime;
 		SetBlackOpacity(FadeToBlackDuration > 0.0f ? FadeElapsedSeconds / FadeToBlackDuration : 1.0f);
 		if (FadeElapsedSeconds >= FadeToBlackDuration)
 		{
 			SetBlackOpacity(1.0f);
+			BeginVideoReveal();
+		}
+		break;
+
+	case ETransitionPhase::FadingFromBlackToVideo:
+		FadeElapsedSeconds += DeltaTime;
+		SetBlackOpacity(1.0f - (FadeFromBlackDuration > 0.0f ? FadeElapsedSeconds / FadeFromBlackDuration : 1.0f));
+		if (FadeElapsedSeconds >= FadeFromBlackDuration)
+		{
+			SetBlackOpacity(0.0f);
 			OpenTargetLevel();
 		}
 		break;
 
-	case ETransitionPhase::FadingFromBlackAfterLoad:
-		FadeElapsedSeconds += DeltaTime;
-		SetBlackOpacity(1.0f - (FadeFromBlackDuration > 0.0f ? FadeElapsedSeconds / FadeFromBlackDuration : 1.0f));
-		if (FadeElapsedSeconds >= FadeFromBlackDuration)
+	case ETransitionPhase::WaitingForMinimumVideoTime:
+		if (GetVideoVisibleElapsedSeconds() >= MinimumVideoDisplaySeconds)
 		{
 			FinishTransition();
 		}
@@ -90,6 +99,7 @@ bool UTunaSweeperLevelTransitionSubsystem::StartTransition(
 	FadeToBlackDuration = FMath::Max(0.01f, InFadeToBlackDuration);
 	FadeFromBlackDuration = FMath::Max(0.01f, InFadeFromBlackDuration);
 	FadeElapsedSeconds = 0.0f;
+	VideoVisibleStartSeconds = 0.0;
 	bOpenLevelRequested = false;
 	LastWorldContextObject = WorldContextObject;
 
@@ -117,16 +127,16 @@ bool UTunaSweeperLevelTransitionSubsystem::StartTransition(
 	MediaPlayer->OnMediaOpened.AddDynamic(this, &UTunaSweeperLevelTransitionSubsystem::HandleMediaOpened);
 	MediaPlayer->OnMediaOpenFailed.AddDynamic(this, &UTunaSweeperLevelTransitionSubsystem::HandleMediaOpenFailed);
 	MediaPlayer->OnEndReached.AddDynamic(this, &UTunaSweeperLevelTransitionSubsystem::HandleMediaEndReached);
-	MediaPlayer->SetLooping(false);
+	MediaPlayer->SetLooping(true);
 
 	MediaTexture->SetMediaPlayer(MediaPlayer);
 	MediaTexture->UpdateResource();
 
 	ActiveWidget->SetVideoTexture(MediaTexture);
-	ActiveWidget->SetVideoVisible(true);
+	ActiveWidget->SetVideoVisible(false);
 	ActiveWidget->SetBlackOpacity(0.0f);
 
-	Phase = ETransitionPhase::PlayingVideo;
+	Phase = ETransitionPhase::FadingToBlackBeforeVideo;
 	if (!MediaPlayer->OpenSource(MediaSource))
 	{
 		FinishTransition();
@@ -138,7 +148,7 @@ bool UTunaSweeperLevelTransitionSubsystem::StartTransition(
 
 void UTunaSweeperLevelTransitionSubsystem::HandleMediaOpened(FString)
 {
-	if (MediaPlayer && Phase == ETransitionPhase::PlayingVideo)
+	if (MediaPlayer && Phase != ETransitionPhase::Idle)
 	{
 		MediaPlayer->Play();
 	}
@@ -151,12 +161,16 @@ void UTunaSweeperLevelTransitionSubsystem::HandleMediaOpenFailed(FString)
 
 void UTunaSweeperLevelTransitionSubsystem::HandleMediaEndReached()
 {
-	BeginFadeToBlack();
+	if (MediaPlayer)
+	{
+		MediaPlayer->Rewind();
+		MediaPlayer->Play();
+	}
 }
 
 void UTunaSweeperLevelTransitionSubsystem::HandlePostLoadMapWithWorld(UWorld* LoadedWorld)
 {
-	if (Phase != ETransitionPhase::WaitingForPostLoad)
+	if (Phase != ETransitionPhase::LoadingLevel)
 	{
 		return;
 	}
@@ -164,12 +178,21 @@ void UTunaSweeperLevelTransitionSubsystem::HandlePostLoadMapWithWorld(UWorld* Lo
 	EnsureTransitionWidget(LoadedWorld);
 	if (ActiveWidget)
 	{
-		ActiveWidget->SetVideoVisible(false);
-		ActiveWidget->SetBlackOpacity(1.0f);
+		if (MediaTexture)
+		{
+			ActiveWidget->SetVideoTexture(MediaTexture);
+		}
+		ActiveWidget->SetVideoVisible(true);
+		ActiveWidget->SetBlackOpacity(0.0f);
 	}
 
-	FadeElapsedSeconds = 0.0f;
-	Phase = ETransitionPhase::FadingFromBlackAfterLoad;
+	if (GetVideoVisibleElapsedSeconds() >= MinimumVideoDisplaySeconds)
+	{
+		FinishTransition();
+		return;
+	}
+
+	Phase = ETransitionPhase::WaitingForMinimumVideoTime;
 }
 
 bool UTunaSweeperLevelTransitionSubsystem::EnsureTransitionWidget(UObject* WorldContextObject)
@@ -194,7 +217,7 @@ bool UTunaSweeperLevelTransitionSubsystem::EnsureTransitionWidget(UObject* World
 
 	ActiveWidget->AddToViewport(1000);
 	ActiveWidget->SetVideoVisible(false);
-	ActiveWidget->SetBlackOpacity(1.0f);
+	ActiveWidget->SetBlackOpacity(0.0f);
 
 	if (APlayerController* PlayerController = UGameplayStatics::GetPlayerController(WorldContextObject ? WorldContextObject : GameInstance, 0))
 	{
@@ -208,15 +231,26 @@ bool UTunaSweeperLevelTransitionSubsystem::EnsureTransitionWidget(UObject* World
 	return true;
 }
 
-void UTunaSweeperLevelTransitionSubsystem::BeginFadeToBlack()
+void UTunaSweeperLevelTransitionSubsystem::BeginVideoReveal()
 {
-	if (Phase != ETransitionPhase::PlayingVideo)
+	if (Phase != ETransitionPhase::FadingToBlackBeforeVideo)
 	{
 		return;
 	}
 
+	if (ActiveWidget)
+	{
+		if (MediaTexture)
+		{
+			ActiveWidget->SetVideoTexture(MediaTexture);
+		}
+		ActiveWidget->SetVideoVisible(true);
+		ActiveWidget->SetBlackOpacity(1.0f);
+	}
+
+	VideoVisibleStartSeconds = FPlatformTime::Seconds();
 	FadeElapsedSeconds = 0.0f;
-	Phase = ETransitionPhase::FadingToBlackBeforeLoad;
+	Phase = ETransitionPhase::FadingFromBlackToVideo;
 }
 
 void UTunaSweeperLevelTransitionSubsystem::OpenTargetLevel()
@@ -227,7 +261,11 @@ void UTunaSweeperLevelTransitionSubsystem::OpenTargetLevel()
 	}
 
 	bOpenLevelRequested = true;
-	Phase = ETransitionPhase::WaitingForPostLoad;
+	Phase = ETransitionPhase::LoadingLevel;
+	if (VideoVisibleStartSeconds <= 0.0)
+	{
+		VideoVisibleStartSeconds = FPlatformTime::Seconds();
+	}
 	UObject* WorldContextObject = LastWorldContextObject ? LastWorldContextObject.Get() : GetGameInstance();
 	UGameplayStatics::OpenLevel(WorldContextObject, TargetLevelName);
 }
@@ -269,6 +307,7 @@ void UTunaSweeperLevelTransitionSubsystem::FinishTransition()
 	TargetLevelName = NAME_None;
 	Phase = ETransitionPhase::Idle;
 	FadeElapsedSeconds = 0.0f;
+	VideoVisibleStartSeconds = 0.0;
 	bOpenLevelRequested = false;
 }
 
@@ -278,4 +317,11 @@ void UTunaSweeperLevelTransitionSubsystem::SetBlackOpacity(float InOpacity)
 	{
 		ActiveWidget->SetBlackOpacity(InOpacity);
 	}
+}
+
+float UTunaSweeperLevelTransitionSubsystem::GetVideoVisibleElapsedSeconds() const
+{
+	return VideoVisibleStartSeconds > 0.0
+		? static_cast<float>(FPlatformTime::Seconds() - VideoVisibleStartSeconds)
+		: 0.0f;
 }

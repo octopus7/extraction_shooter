@@ -34,10 +34,10 @@ private:
 	enum class ETransitionPhase : uint8
 	{
 		Idle,
-		PlayingVideo,
-		FadingToBlackBeforeLoad,
-		WaitingForPostLoad,
-		FadingFromBlackAfterLoad
+		FadingToBlackBeforeVideo,
+		FadingFromBlackToVideo,
+		LoadingLevel,
+		WaitingForMinimumVideoTime
 	};
 
 	UFUNCTION()
@@ -51,10 +51,11 @@ private:
 
 	void HandlePostLoadMapWithWorld(UWorld* LoadedWorld);
 	bool EnsureTransitionWidget(UObject* WorldContextObject);
-	void BeginFadeToBlack();
+	void BeginVideoReveal();
 	void OpenTargetLevel();
 	void FinishTransition();
 	void SetBlackOpacity(float InOpacity);
+	float GetVideoVisibleElapsedSeconds() const;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UTunaSweeperLevelTransitionWidget> ActiveWidget;
@@ -74,6 +75,8 @@ private:
 	float FadeElapsedSeconds = 0.0f;
 	float FadeToBlackDuration = 0.45f;
 	float FadeFromBlackDuration = 0.55f;
+	float MinimumVideoDisplaySeconds = 1.0f;
+	double VideoVisibleStartSeconds = 0.0;
 	bool bOpenLevelRequested = false;
 	FDelegateHandle PostLoadMapHandle;
 };
