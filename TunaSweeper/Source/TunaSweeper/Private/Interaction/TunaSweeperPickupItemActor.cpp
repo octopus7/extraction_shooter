@@ -14,6 +14,7 @@ namespace TunaSweeperPickupItemIcon
 {
 	constexpr float DisplayHeight = 16.0f;
 	constexpr float DrawSize = 96.0f;
+	const FRotator FloorPlaneRotation(90.0f, 0.0f, 0.0f);
 }
 
 ATunaSweeperPickupItemActor::ATunaSweeperPickupItemActor()
@@ -24,8 +25,8 @@ ATunaSweeperPickupItemActor::ATunaSweeperPickupItemActor()
 	FloorIconWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("FloorIconWidget"));
 	FloorIconWidgetComponent->SetupAttachment(RootComponent);
 	FloorIconWidgetComponent->SetRelativeLocation(FVector(0.0f, 0.0f, TunaSweeperPickupItemIcon::DisplayHeight));
-	FloorIconWidgetComponent->SetRelativeRotation(FRotator::ZeroRotator);
-	FloorIconWidgetComponent->SetWidgetSpace(EWidgetSpace::Screen);
+	FloorIconWidgetComponent->SetRelativeRotation(TunaSweeperPickupItemIcon::FloorPlaneRotation);
+	FloorIconWidgetComponent->SetWidgetSpace(EWidgetSpace::World);
 	FloorIconWidgetComponent->SetDrawSize(FVector2D(TunaSweeperPickupItemIcon::DrawSize, TunaSweeperPickupItemIcon::DrawSize));
 	FloorIconWidgetComponent->SetPivot(FVector2D(0.5f, 0.5f));
 	FloorIconWidgetComponent->SetTwoSided(true);
@@ -97,9 +98,9 @@ void ATunaSweeperPickupItemActor::ApplyFloorIconWidgetRenderingSettings()
 	FloorIconWidgetComponent->SetBackgroundColor(FLinearColor::Transparent);
 	FloorIconWidgetComponent->SetTintColorAndOpacity(FLinearColor::White);
 	FloorIconWidgetComponent->SetOpacityFromTexture(1.0f);
-	FloorIconWidgetComponent->SetWidgetSpace(EWidgetSpace::Screen);
+	FloorIconWidgetComponent->SetWidgetSpace(EWidgetSpace::World);
 	FloorIconWidgetComponent->SetRelativeLocation(FVector(0.0f, 0.0f, TunaSweeperPickupItemIcon::DisplayHeight));
-	FloorIconWidgetComponent->SetRelativeRotation(FRotator::ZeroRotator);
+	FloorIconWidgetComponent->SetRelativeRotation(TunaSweeperPickupItemIcon::FloorPlaneRotation);
 	FloorIconWidgetComponent->SetDrawSize(FVector2D(TunaSweeperPickupItemIcon::DrawSize, TunaSweeperPickupItemIcon::DrawSize));
 	FloorIconWidgetComponent->SetPivot(FVector2D(0.5f, 0.5f));
 	FloorIconWidgetComponent->SetTwoSided(true);
