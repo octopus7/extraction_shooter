@@ -159,6 +159,11 @@ void UTunaSweeperItemHoverPromptWidget::SetPromptViewportPosition(const FVector2
 
 TSharedRef<SWidget> UTunaSweeperItemHoverPromptWidget::RebuildWidget()
 {
+	if (!WidgetTree)
+	{
+		WidgetTree = NewObject<UWidgetTree>(this, TEXT("WidgetTree"), RF_Transient);
+	}
+
 	if (WidgetTree && !WidgetTree->RootWidget)
 	{
 		BuildNativeWidgetTree();
