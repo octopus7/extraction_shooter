@@ -97,6 +97,7 @@ namespace TunaSweeperEditorSetup
 	const FString QuickSlotInputTaskId = TEXT("2026-05-12_AddQuickSlotInputActions");
 	const FString DropInputTaskId = TEXT("2026-05-18_AddDropInputAction");
 	const FString LootContainerAndSpawnerTaskId = TEXT("2026-05-11_CreateLootContainerAndSpawnerAssetsV1");
+	const FString LootContainerOccupancyHeaderTaskId = TEXT("2026-05-18_AddLootContainerOccupancyHeaderV1");
 	const FString CannedTunaIconImportTaskId = TEXT("2026-05-11_ImportCannedTunaIconV1");
 	const FString BackpackInventoryTaskId = TEXT("2026-05-16_CreateEquipmentInventoryAssetsV3");
 	const FString IntroMenuAndLevelTravelTaskId = TEXT("2026-05-17_CreateIntroMenuPersistentSaveSlotSelectionV1");
@@ -2500,10 +2501,13 @@ namespace TunaSweeperEditorSetup
 		USizeBox* RootSizeBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("RootSizeBox"));
 		UBorder* PanelBackground = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("PanelBackground"));
 		UVerticalBox* PanelStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("PanelStack"));
+		UHorizontalBox* ContainerHeaderRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("ContainerHeaderRow"));
 		UTextBlock* ContainerTitleText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("ContainerTitleText"));
+		UTextBlock* ContainerOccupancyText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("ContainerOccupancyText"));
 		UTileView* ContainerTileView = WidgetTree->ConstructWidget<UTileView>(UTileView::StaticClass(), TEXT("ContainerTileView"));
 
-		if (!RootSizeBox || !PanelBackground || !PanelStack || !ContainerTitleText || !ContainerTileView)
+		if (!RootSizeBox || !PanelBackground || !PanelStack || !ContainerHeaderRow ||
+			!ContainerTitleText || !ContainerOccupancyText || !ContainerTileView)
 		{
 			return false;
 		}
@@ -2522,7 +2526,26 @@ namespace TunaSweeperEditorSetup
 		PanelBackground->SetContent(PanelStack);
 
 		ConfigureTextBlockLeft(ContainerTitleText, FText::FromString(TEXT("Container")), FLinearColor::White, 18);
-		UVerticalBoxSlot* TitleSlot = PanelStack->AddChildToVerticalBox(ContainerTitleText);
+		ConfigureTextBlockLeft(ContainerOccupancyText, FText::FromString(TEXT("(0/0)")), FLinearColor(0.92f, 0.94f, 0.96f, 1.0f), 18);
+
+		UHorizontalBoxSlot* TitleTextSlot = ContainerHeaderRow->AddChildToHorizontalBox(ContainerTitleText);
+		if (TitleTextSlot)
+		{
+			TitleTextSlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
+			TitleTextSlot->SetHorizontalAlignment(HAlign_Left);
+			TitleTextSlot->SetVerticalAlignment(VAlign_Center);
+		}
+
+		UHorizontalBoxSlot* OccupancyTextSlot = ContainerHeaderRow->AddChildToHorizontalBox(ContainerOccupancyText);
+		if (OccupancyTextSlot)
+		{
+			OccupancyTextSlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
+			OccupancyTextSlot->SetHorizontalAlignment(HAlign_Left);
+			OccupancyTextSlot->SetVerticalAlignment(VAlign_Center);
+			OccupancyTextSlot->SetPadding(FMargin(8.0f, 0.0f, 0.0f, 0.0f));
+		}
+
+		UVerticalBoxSlot* TitleSlot = PanelStack->AddChildToVerticalBox(ContainerHeaderRow);
 		if (TitleSlot)
 		{
 			TitleSlot->SetHorizontalAlignment(HAlign_Fill);
@@ -2542,7 +2565,9 @@ namespace TunaSweeperEditorSetup
 		}
 
 		RegisterWidgetVariable(WidgetBlueprint, RootSizeBox);
+		RegisterWidgetVariable(WidgetBlueprint, ContainerHeaderRow);
 		RegisterWidgetVariable(WidgetBlueprint, ContainerTitleText);
+		RegisterWidgetVariable(WidgetBlueprint, ContainerOccupancyText);
 		RegisterWidgetVariable(WidgetBlueprint, ContainerTileView);
 		WidgetBlueprint->MarkPackageDirty();
 		return true;
@@ -2901,6 +2926,38 @@ namespace TunaSweeperEditorSetup
 		FKismetEditorUtilities::CompileBlueprint(GameHudWidgetBlueprint);
 		GameHudWidgetBlueprint->MarkPackageDirty();
 		return SaveAsset(GameHudWidgetBlueprint);
+	}
+
+	bool EnsureLootContainerOccupancyHeaderAssets()
+	{
+		UWidgetBlueprint* ItemThumbnailWidgetBlueprint = EnsureWidgetBlueprint(
+			UIAssetPath,
+			ItemThumbnailSlotWidgetAssetName,
+			UTunaSweeperItemThumbnailSlotWidget::StaticClass());
+		UWidgetBlueprint* LootContainerWidgetBlueprint = EnsureWidgetBlueprint(
+			UIAssetPath,
+			LootContainerWidgetAssetName,
+			UTunaSweeperLootContainerWidget::StaticClass());
+		if (!ItemThumbnailWidgetBlueprint || !LootContainerWidgetBlueprint)
+		{
+			return false;
+		}
+
+		if (!ItemThumbnailWidgetBlueprint->GeneratedClass)
+		{
+			FKismetEditorUtilities::CompileBlueprint(ItemThumbnailWidgetBlueprint);
+		}
+
+		const TSubclassOf<UUserWidget> ItemThumbnailWidgetClass = ItemThumbnailWidgetBlueprint->GeneratedClass.Get();
+		if (!ItemThumbnailWidgetClass || !BuildLootContainerWidgetTree(LootContainerWidgetBlueprint, ItemThumbnailWidgetClass))
+		{
+			return false;
+		}
+
+		RegisterAllWidgetsInTree(LootContainerWidgetBlueprint);
+		FKismetEditorUtilities::CompileBlueprint(LootContainerWidgetBlueprint);
+		LootContainerWidgetBlueprint->MarkPackageDirty();
+		return SaveAsset(LootContainerWidgetBlueprint);
 	}
 
 	bool EnsureBackpackInventoryAssets()
@@ -4473,6 +4530,13 @@ public:
 			[]()
 			{
 				return TunaSweeperEditorSetup::EnsureCommonGameHudAssets();
+			});
+
+		FTunaSweeperEditorRunOnce::Run(
+			TunaSweeperEditorSetup::LootContainerOccupancyHeaderTaskId,
+			[]()
+			{
+				return TunaSweeperEditorSetup::EnsureLootContainerOccupancyHeaderAssets();
 			});
 
 		FTunaSweeperEditorRunOnce::Run(

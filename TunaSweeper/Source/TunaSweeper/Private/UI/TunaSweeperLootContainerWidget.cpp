@@ -157,6 +157,32 @@ namespace TunaSweeperLootContainerUi
 		ItemDragOperation->HoveredSlotReference = FTunaSweeperItemSlotReference();
 		return bMoved;
 	}
+
+	int32 CountOccupiedSlots(const TArray<FTunaSweeperInventorySlot>& Slots)
+	{
+		int32 OccupiedSlotCount = 0;
+		for (const FTunaSweeperInventorySlot& Slot : Slots)
+		{
+			if (Slot.ItemUid.IsValid())
+			{
+				++OccupiedSlotCount;
+			}
+		}
+		return OccupiedSlotCount;
+	}
+
+	int32 CountOccupiedStacks(const TArray<FTunaSweeperItemStack>& Items)
+	{
+		int32 OccupiedStackCount = 0;
+		for (const FTunaSweeperItemStack& Item : Items)
+		{
+			if (Item.ItemId != INDEX_NONE && Item.Quantity > 0)
+			{
+				++OccupiedStackCount;
+			}
+		}
+		return OccupiedStackCount;
+	}
 }
 
 void UTunaSweeperLootContainerWidget::NativeConstruct()
@@ -251,6 +277,9 @@ void UTunaSweeperLootContainerWidget::PopulateContainerItems()
 		? &TunaGameInstance->GetActiveLootContainerSlots()
 		: nullptr;
 	const int32 Capacity = Slots ? Slots->Num() : FMath::Max(0, ContainerInstance.Capacity);
+	const int32 OccupiedSlotCount = Slots
+		? TunaSweeperLootContainerUi::CountOccupiedSlots(*Slots)
+		: TunaSweeperLootContainerUi::CountOccupiedStacks(ContainerInstance.Items);
 	const int32 RowCount = FMath::Max(1, FMath::DivideAndRoundUp(Capacity, TunaSweeperLootContainerUi::ContainerTileColumnCount));
 	if (RootSizeBox)
 	{
@@ -267,6 +296,10 @@ void UTunaSweeperLootContainerWidget::PopulateContainerItems()
 		ContainerTitleText->SetText(DisplayName.IsEmpty()
 			? FText::FromString(TEXT("Container"))
 			: DisplayName);
+	}
+	if (ContainerOccupancyText)
+	{
+		ContainerOccupancyText->SetText(FText::FromString(FString::Printf(TEXT("(%d/%d)"), OccupiedSlotCount, Capacity)));
 	}
 
 	UTunaSweeperItemDataSubsystem* ItemDataSubsystem = GetGameInstance()

@@ -35,6 +35,9 @@ protected:
 	TObjectPtr<UTextBlock> ContainerTitleText;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Loot Container", meta = (BindWidgetOptional))
+	TObjectPtr<UTextBlock> ContainerOccupancyText;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Loot Container", meta = (BindWidgetOptional))
 	TObjectPtr<UTileView> ContainerTileView;
 
 private:
