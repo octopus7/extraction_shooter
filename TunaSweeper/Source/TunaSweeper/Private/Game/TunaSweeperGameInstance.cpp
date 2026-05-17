@@ -722,12 +722,14 @@ void UTunaSweeperGameInstance::ClearHoveredItemSlot()
 }
 
 void UTunaSweeperGameInstance::SetActiveLootContainerInstance(
-	const FTunaSweeperLootContainerInstance& InContainerInstance)
+	const FTunaSweeperLootContainerInstance& InContainerInstance,
+	UObject* InOwner)
 {
 	EnsureInventoryStateInitialized();
 
 	ActiveLootContainerDisplayName = InContainerInstance.DisplayName;
 	ActiveLootContainerCapacity = FMath::Max(0, InContainerInstance.Capacity);
+	ActiveLootContainerOwner = InOwner;
 	ActiveLootContainerSlots.Reset();
 	EnsureSlotArraySize(ActiveLootContainerSlots, ActiveLootContainerCapacity);
 
@@ -741,6 +743,24 @@ void UTunaSweeperGameInstance::SetActiveLootContainerInstance(
 
 		ActiveLootContainerSlots[SlotIndex].ItemUid = CreateItemInstance(ItemStack.ItemId, ItemStack.Quantity);
 	}
+
+	bHasActiveLootContainer = true;
+	BroadcastInventoryStateChanged();
+}
+
+void UTunaSweeperGameInstance::SetActiveLootContainerRuntimeSlots(
+	const FTunaSweeperLootContainerInstance& InContainerInstance,
+	const TArray<FTunaSweeperInventorySlot>& InRuntimeSlots,
+	UObject* InOwner)
+{
+	EnsureInventoryStateInitialized();
+
+	ActiveLootContainerDisplayName = InContainerInstance.DisplayName;
+	ActiveLootContainerCapacity = FMath::Max(0, InContainerInstance.Capacity);
+	ActiveLootContainerOwner = InOwner;
+	ActiveLootContainerSlots = InRuntimeSlots;
+	EnsureSlotArraySize(ActiveLootContainerSlots, ActiveLootContainerCapacity);
+	RemoveInvalidSlotReferences(ActiveLootContainerSlots);
 
 	bHasActiveLootContainer = true;
 	BroadcastInventoryStateChanged();
@@ -760,6 +780,7 @@ void UTunaSweeperGameInstance::ClearInventoryAndSave()
 	ItemInstancesByUid.Reset();
 	ResetPlayerSlotArrays();
 	ActiveLootContainerSlots.Reset();
+	ActiveLootContainerOwner.Reset();
 	ActiveLootContainerDisplayName = FText::GetEmpty();
 	ActiveLootContainerCapacity = 0;
 	bHasActiveLootContainer = false;
@@ -852,6 +873,7 @@ bool UTunaSweeperGameInstance::LoadGameState()
 	EnsureSlotArraySize(PlayerInventorySlots, InventoryCapacity);
 
 	ActiveLootContainerSlots.Reset();
+	ActiveLootContainerOwner.Reset();
 	ActiveLootContainerDisplayName = FText::GetEmpty();
 	ActiveLootContainerCapacity = 0;
 	bHasActiveLootContainer = false;
@@ -913,6 +935,7 @@ void UTunaSweeperGameInstance::ResetRuntimeStateForSaveSlotSelection()
 	EquipmentSlots.Reset();
 	AuxiliaryBagSlots.Reset();
 	ActiveLootContainerSlots.Reset();
+	ActiveLootContainerOwner.Reset();
 	SelectedWeaponAttachmentSlotTags.Reset();
 	SelectedWeaponAttachmentSlots.Reset();
 	SelectedItemSlotReference = FTunaSweeperItemSlotReference();
@@ -930,6 +953,7 @@ void UTunaSweeperGameInstance::GenerateDefaultInventoryState()
 	ItemInstancesByUid.Reset();
 	ResetPlayerSlotArrays();
 	ActiveLootContainerSlots.Reset();
+	ActiveLootContainerOwner.Reset();
 	ActiveLootContainerDisplayName = FText::GetEmpty();
 	ActiveLootContainerCapacity = 0;
 	bHasActiveLootContainer = false;

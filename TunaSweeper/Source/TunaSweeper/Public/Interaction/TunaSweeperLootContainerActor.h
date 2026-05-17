@@ -2,10 +2,12 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Inventory/TunaSweeperInventoryTypes.h"
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
 #include "TunaSweeperLootContainerActor.generated.h"
 
 class UTunaSweeperInteractableComponent;
+class UTunaSweeperGameInstance;
 class USceneComponent;
 class UStaticMeshComponent;
 
@@ -19,6 +21,7 @@ public:
 
 	virtual void OnConstruction(const FTransform& Transform) override;
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Loot Container")
 	void SetContainerDataIds(int32 InContainerDefinitionId, int32 InContentsId);
@@ -31,6 +34,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Loot Container")
 	bool BuildContainerInstance(FTunaSweeperLootContainerInstance& OutInstance) const;
+
+	bool OpenRuntimeContainer(UTunaSweeperGameInstance* TunaGameInstance, FTunaSweeperLootContainerInstance& OutInstance);
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Interaction")
 	UTunaSweeperInteractableComponent* GetInteractableComponent() const { return InteractableComponent; }
@@ -58,6 +63,30 @@ protected:
 
 private:
 	void RefreshContainerPresentation();
+	void ResetRuntimeContainerState();
+	void CaptureRuntimeContentsFromActiveContainer();
+	bool IsRuntimeContainerStateValid(const UTunaSweeperGameInstance* TunaGameInstance) const;
+	FTunaSweeperLootContainerInstance BuildRuntimeContainerInstance() const;
 	UTunaSweeperItemDataSubsystem* GetItemDataSubsystem() const;
-};
 
+	UPROPERTY(Transient)
+	TWeakObjectPtr<UTunaSweeperGameInstance> RuntimeGameInstance;
+
+	UPROPERTY(Transient)
+	TArray<FTunaSweeperInventorySlot> RuntimeSlots;
+
+	UPROPERTY(Transient)
+	FText RuntimeDisplayName;
+
+	UPROPERTY(Transient)
+	int32 RuntimeCapacity = 0;
+
+	UPROPERTY(Transient)
+	int32 RuntimeContainerDefinitionId = INDEX_NONE;
+
+	UPROPERTY(Transient)
+	int32 RuntimeContentsId = INDEX_NONE;
+
+	UPROPERTY(Transient)
+	bool bHasRuntimeContainerState = false;
+};

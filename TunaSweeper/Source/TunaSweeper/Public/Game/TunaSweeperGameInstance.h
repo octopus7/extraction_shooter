@@ -163,6 +163,7 @@ public:
 	const TArray<FTunaSweeperInventorySlot>& GetSelectedWeaponAttachmentSlots();
 	const TArray<FName>& GetSelectedWeaponAttachmentSlotTags() const { return SelectedWeaponAttachmentSlotTags; }
 	bool HasActiveLootContainer() const { return bHasActiveLootContainer; }
+	UObject* GetActiveLootContainerOwner() const { return ActiveLootContainerOwner.Get(); }
 	FText GetActiveLootContainerDisplayName() const { return ActiveLootContainerDisplayName; }
 	int32 GetActiveLootContainerCapacity() const { return ActiveLootContainerCapacity; }
 	bool HasSelectedInventoryItem() const { return SelectedItemSlotReference.IsValid(); }
@@ -197,7 +198,11 @@ public:
 	void SetHoveredItemSlot(const FTunaSweeperItemSlotReference& SlotReference);
 	void ClearHoveredItemSlot(const FTunaSweeperItemSlotReference& SlotReference);
 	void ClearHoveredItemSlot();
-	void SetActiveLootContainerInstance(const FTunaSweeperLootContainerInstance& InContainerInstance);
+	void SetActiveLootContainerInstance(const FTunaSweeperLootContainerInstance& InContainerInstance, UObject* InOwner = nullptr);
+	void SetActiveLootContainerRuntimeSlots(
+		const FTunaSweeperLootContainerInstance& InContainerInstance,
+		const TArray<FTunaSweeperInventorySlot>& InRuntimeSlots,
+		UObject* InOwner = nullptr);
 	void SaveGameState();
 	void ClearInventoryAndSave();
 	void HandleLevelTravelPersistence(FName SourceLevelName, FName TargetLevelName);
@@ -274,6 +279,9 @@ private:
 
 	UPROPERTY(Transient)
 	TArray<FTunaSweeperInventorySlot> ActiveLootContainerSlots;
+
+	UPROPERTY(Transient)
+	TWeakObjectPtr<UObject> ActiveLootContainerOwner;
 
 	UPROPERTY(Transient)
 	TArray<FName> SelectedWeaponAttachmentSlotTags;

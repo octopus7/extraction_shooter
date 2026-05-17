@@ -5,6 +5,7 @@
 #include "Engine/GameInstance.h"
 #include "Engine/StaticMesh.h"
 #include "Engine/World.h"
+#include "Game/TunaSweeperGameInstance.h"
 #include "Interaction/TunaSweeperInteractableComponent.h"
 #include "UObject/ConstructorHelpers.h"
 
@@ -44,11 +45,26 @@ void ATunaSweeperLootContainerActor::BeginPlay()
 	RefreshContainerPresentation();
 }
 
+void ATunaSweeperLootContainerActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	if (RuntimeGameInstance.IsValid())
+	{
+		RuntimeGameInstance->OnInventoryStateChanged.RemoveAll(this);
+	}
+
+	Super::EndPlay(EndPlayReason);
+}
+
 void ATunaSweeperLootContainerActor::SetContainerDataIds(int32 InContainerDefinitionId, int32 InContentsId)
 {
 	Modify();
+	const bool bDataIdsChanged = ContainerDefinitionId != InContainerDefinitionId || ContentsId != InContentsId;
 	ContainerDefinitionId = InContainerDefinitionId;
 	ContentsId = InContentsId;
+	if (bDataIdsChanged)
+	{
+		ResetRuntimeContainerState();
+	}
 	RefreshContainerPresentation();
 }
 
@@ -68,11 +84,66 @@ bool ATunaSweeperLootContainerActor::BuildContainerInstance(FTunaSweeperLootCont
 		OutInstance);
 }
 
+bool ATunaSweeperLootContainerActor::OpenRuntimeContainer(
+	UTunaSweeperGameInstance* TunaGameInstance,
+	FTunaSweeperLootContainerInstance& OutInstance)
+{
+	if (!TunaGameInstance)
+	{
+		OutInstance = FTunaSweeperLootContainerInstance();
+		return false;
+	}
+
+	if (RuntimeGameInstance.Get() != TunaGameInstance)
+	{
+		if (RuntimeGameInstance.IsValid())
+		{
+			RuntimeGameInstance->OnInventoryStateChanged.RemoveAll(this);
+		}
+
+		RuntimeGameInstance = TunaGameInstance;
+		TunaGameInstance->OnInventoryStateChanged.RemoveAll(this);
+		TunaGameInstance->OnInventoryStateChanged.AddUObject(this, &ATunaSweeperLootContainerActor::CaptureRuntimeContentsFromActiveContainer);
+	}
+
+	if (bHasRuntimeContainerState && !IsRuntimeContainerStateValid(TunaGameInstance))
+	{
+		ResetRuntimeContainerState();
+	}
+
+	if (bHasRuntimeContainerState)
+	{
+		OutInstance = BuildRuntimeContainerInstance();
+		TunaGameInstance->SetActiveLootContainerRuntimeSlots(OutInstance, RuntimeSlots, this);
+		CaptureRuntimeContentsFromActiveContainer();
+		return true;
+	}
+
+	if (!BuildContainerInstance(OutInstance))
+	{
+		return false;
+	}
+
+	TunaGameInstance->SetActiveLootContainerInstance(OutInstance, this);
+	RuntimeContainerDefinitionId = OutInstance.ContainerDefinitionId;
+	RuntimeContentsId = OutInstance.ContentsId;
+	RuntimeDisplayName = OutInstance.DisplayName;
+	RuntimeCapacity = FMath::Max(0, OutInstance.Capacity);
+	RuntimeSlots = TunaGameInstance->GetActiveLootContainerSlots();
+	bHasRuntimeContainerState = true;
+	return true;
+}
+
 void ATunaSweeperLootContainerActor::ConfigureLootContainerDefaults(int32 InContainerDefinitionId, int32 InContentsId)
 {
 	Modify();
+	const bool bDataIdsChanged = ContainerDefinitionId != InContainerDefinitionId || ContentsId != InContentsId;
 	ContainerDefinitionId = InContainerDefinitionId;
 	ContentsId = InContentsId;
+	if (bDataIdsChanged)
+	{
+		ResetRuntimeContainerState();
+	}
 	RefreshContainerPresentation();
 }
 
@@ -104,6 +175,74 @@ void ATunaSweeperLootContainerActor::RefreshContainerPresentation()
 	VisualMesh->SetRelativeScale3D(Definition.MeshScale);
 }
 
+void ATunaSweeperLootContainerActor::ResetRuntimeContainerState()
+{
+	RuntimeSlots.Reset();
+	RuntimeDisplayName = FText::GetEmpty();
+	RuntimeCapacity = 0;
+	RuntimeContainerDefinitionId = INDEX_NONE;
+	RuntimeContentsId = INDEX_NONE;
+	bHasRuntimeContainerState = false;
+}
+
+void ATunaSweeperLootContainerActor::CaptureRuntimeContentsFromActiveContainer()
+{
+	UTunaSweeperGameInstance* TunaGameInstance = RuntimeGameInstance.Get();
+	if (!TunaGameInstance ||
+		!TunaGameInstance->HasActiveLootContainer() ||
+		TunaGameInstance->GetActiveLootContainerOwner() != this)
+	{
+		return;
+	}
+
+	RuntimeContainerDefinitionId = ContainerDefinitionId;
+	RuntimeContentsId = ContentsId;
+	RuntimeDisplayName = TunaGameInstance->GetActiveLootContainerDisplayName();
+	RuntimeCapacity = TunaGameInstance->GetActiveLootContainerCapacity();
+	RuntimeSlots = TunaGameInstance->GetActiveLootContainerSlots();
+	bHasRuntimeContainerState = true;
+}
+
+bool ATunaSweeperLootContainerActor::IsRuntimeContainerStateValid(const UTunaSweeperGameInstance* TunaGameInstance) const
+{
+	if (!TunaGameInstance)
+	{
+		return false;
+	}
+
+	for (const FTunaSweeperInventorySlot& Slot : RuntimeSlots)
+	{
+		if (!Slot.ItemUid.IsValid())
+		{
+			continue;
+		}
+
+		FTunaSweeperItemInstance ItemInstance;
+		if (!TunaGameInstance->TryGetItemInstance(Slot.ItemUid, ItemInstance))
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+FTunaSweeperLootContainerInstance ATunaSweeperLootContainerActor::BuildRuntimeContainerInstance() const
+{
+	FTunaSweeperLootContainerInstance RuntimeInstance;
+	RuntimeInstance.ContainerDefinitionId = RuntimeContainerDefinitionId != INDEX_NONE
+		? RuntimeContainerDefinitionId
+		: ContainerDefinitionId;
+	RuntimeInstance.ContentsId = RuntimeContentsId != INDEX_NONE
+		? RuntimeContentsId
+		: ContentsId;
+	RuntimeInstance.DisplayName = RuntimeDisplayName.IsEmpty()
+		? FText::FromString(FString::Printf(TEXT("Container %d"), RuntimeInstance.ContainerDefinitionId))
+		: RuntimeDisplayName;
+	RuntimeInstance.Capacity = FMath::Max(0, RuntimeCapacity);
+	return RuntimeInstance;
+}
+
 UTunaSweeperItemDataSubsystem* ATunaSweeperLootContainerActor::GetItemDataSubsystem() const
 {
 	const UGameInstance* GameInstance = GetGameInstance();
@@ -111,4 +250,3 @@ UTunaSweeperItemDataSubsystem* ATunaSweeperLootContainerActor::GetItemDataSubsys
 		? GameInstance->GetSubsystem<UTunaSweeperItemDataSubsystem>()
 		: nullptr;
 }
-

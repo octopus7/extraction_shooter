@@ -227,15 +227,7 @@ bool UTunaSweeperLootContainerWidget::TryResolveDropSlotFromCursor(
 void UTunaSweeperLootContainerWidget::SetContainerInstance(const FTunaSweeperLootContainerInstance& InContainerInstance)
 {
 	ContainerInstance = InContainerInstance;
-
-	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
-	{
-		TunaGameInstance->SetActiveLootContainerInstance(InContainerInstance);
-	}
-	else
-	{
-		PopulateContainerItems();
-	}
+	PopulateContainerItems();
 }
 
 bool UTunaSweeperLootContainerWidget::NativeOnDrop(

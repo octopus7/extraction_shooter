@@ -151,7 +151,8 @@ bool UTunaSweeperInteractionSubsystem::HandleLootContainerOpenInteraction(
 	}
 
 	FTunaSweeperLootContainerInstance ContainerInstance;
-	if (!LootContainerActor->BuildContainerInstance(ContainerInstance))
+	UTunaSweeperGameInstance* TunaGameInstance = GetWorld() ? GetWorld()->GetGameInstance<UTunaSweeperGameInstance>() : nullptr;
+	if (!LootContainerActor->OpenRuntimeContainer(TunaGameInstance, ContainerInstance))
 	{
 		return false;
 	}
