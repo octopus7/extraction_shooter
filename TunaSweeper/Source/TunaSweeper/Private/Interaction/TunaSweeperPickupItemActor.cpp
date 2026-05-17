@@ -1,10 +1,12 @@
 #include "Interaction/TunaSweeperPickupItemActor.h"
 
+#include "Camera/PlayerCameraManager.h"
 #include "Components/SceneComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Engine/GameInstance.h"
 #include "Engine/Texture2D.h"
 #include "Engine/World.h"
+#include "GameFramework/PlayerController.h"
 #include "Interaction/TunaSweeperInteractableComponent.h"
 #include "Misc/Paths.h"
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
@@ -12,20 +14,21 @@
 
 namespace TunaSweeperPickupItemIcon
 {
-	constexpr float DisplayHeight = 16.0f;
 	constexpr float DrawSize = 96.0f;
-	const FRotator FloorPlaneRotation(90.0f, 0.0f, 0.0f);
+	constexpr float DisplayHeight = DrawSize * 0.5f + 8.0f;
 }
 
 ATunaSweeperPickupItemActor::ATunaSweeperPickupItemActor()
 {
+	PrimaryActorTick.bCanEverTick = true;
+
 	SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("SceneRoot"));
 	RootComponent = SceneRoot;
 
 	FloorIconWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("FloorIconWidget"));
 	FloorIconWidgetComponent->SetupAttachment(RootComponent);
 	FloorIconWidgetComponent->SetRelativeLocation(FVector(0.0f, 0.0f, TunaSweeperPickupItemIcon::DisplayHeight));
-	FloorIconWidgetComponent->SetRelativeRotation(TunaSweeperPickupItemIcon::FloorPlaneRotation);
+	FloorIconWidgetComponent->SetRelativeRotation(FRotator::ZeroRotator);
 	FloorIconWidgetComponent->SetWidgetSpace(EWidgetSpace::World);
 	FloorIconWidgetComponent->SetDrawSize(FVector2D(TunaSweeperPickupItemIcon::DrawSize, TunaSweeperPickupItemIcon::DrawSize));
 	FloorIconWidgetComponent->SetPivot(FVector2D(0.5f, 0.5f));
@@ -53,6 +56,7 @@ void ATunaSweeperPickupItemActor::OnConstruction(const FTransform& Transform)
 	ApplyFloorIconWidgetRenderingSettings();
 	EnsureFloorIconWidgetClass();
 	RefreshItemPresentation();
+	UpdateFloorIconBillboardRotation();
 }
 
 void ATunaSweeperPickupItemActor::BeginPlay()
@@ -62,6 +66,14 @@ void ATunaSweeperPickupItemActor::BeginPlay()
 	ApplyFloorIconWidgetRenderingSettings();
 	EnsureFloorIconWidgetClass();
 	RefreshItemPresentation();
+	UpdateFloorIconBillboardRotation();
+}
+
+void ATunaSweeperPickupItemActor::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	UpdateFloorIconBillboardRotation();
 }
 
 void ATunaSweeperPickupItemActor::SetItemId(int32 InItemId)
@@ -100,7 +112,7 @@ void ATunaSweeperPickupItemActor::ApplyFloorIconWidgetRenderingSettings()
 	FloorIconWidgetComponent->SetOpacityFromTexture(1.0f);
 	FloorIconWidgetComponent->SetWidgetSpace(EWidgetSpace::World);
 	FloorIconWidgetComponent->SetRelativeLocation(FVector(0.0f, 0.0f, TunaSweeperPickupItemIcon::DisplayHeight));
-	FloorIconWidgetComponent->SetRelativeRotation(TunaSweeperPickupItemIcon::FloorPlaneRotation);
+	FloorIconWidgetComponent->SetRelativeRotation(FRotator::ZeroRotator);
 	FloorIconWidgetComponent->SetDrawSize(FVector2D(TunaSweeperPickupItemIcon::DrawSize, TunaSweeperPickupItemIcon::DrawSize));
 	FloorIconWidgetComponent->SetPivot(FVector2D(0.5f, 0.5f));
 	FloorIconWidgetComponent->SetTwoSided(true);
@@ -163,6 +175,25 @@ void ATunaSweeperPickupItemActor::RefreshItemPresentation()
 			IconWidget->SetIconTexture(IconTexture);
 		}
 	}
+}
+
+void ATunaSweeperPickupItemActor::UpdateFloorIconBillboardRotation()
+{
+	if (!FloorIconWidgetComponent)
+	{
+		return;
+	}
+
+	UWorld* World = GetWorld();
+	const APlayerController* PlayerController = World ? World->GetFirstPlayerController() : nullptr;
+	const APlayerCameraManager* CameraManager = PlayerController ? PlayerController->PlayerCameraManager : nullptr;
+	if (!CameraManager)
+	{
+		return;
+	}
+
+	const FVector BillboardFacingDirection = -CameraManager->GetCameraRotation().Vector();
+	FloorIconWidgetComponent->SetWorldRotation(BillboardFacingDirection.Rotation());
 }
 
 UTexture2D* ATunaSweeperPickupItemActor::LoadIconTexture(const FTunaSweeperItemDefinition& ItemDefinition) const

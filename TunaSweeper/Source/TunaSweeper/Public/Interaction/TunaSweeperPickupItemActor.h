@@ -21,6 +21,7 @@ public:
 
 	virtual void OnConstruction(const FTransform& Transform) override;
 	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaSeconds) override;
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Pickup Item")
 	void SetItemId(int32 InItemId);
@@ -67,6 +68,7 @@ private:
 	void ApplyFloorIconWidgetRenderingSettings();
 	void EnsureFloorIconWidgetClass();
 	void RefreshItemPresentation();
+	void UpdateFloorIconBillboardRotation();
 	UTexture2D* LoadIconTexture(const FTunaSweeperItemDefinition& ItemDefinition) const;
 	FText BuildFallbackItemName() const;
 
