@@ -67,6 +67,9 @@ namespace TunaSweeperInventoryArea
 			FTunaSweeperItemDefinition ItemDefinition;
 			if (ItemDataSubsystem->TryGetItemDefinition(ItemInstance.ItemId, ItemDefinition))
 			{
+				TileData.ItemDefinition = ItemDefinition;
+				TileData.bHasItemDefinition = true;
+
 				FText DisplayName;
 				if (ItemDataSubsystem->TryGetItemNameTextByKey(ItemDefinition.NameStringKey, ETunaSweeperItemTextLanguage::Korean, DisplayName))
 				{
@@ -81,6 +84,12 @@ namespace TunaSweeperInventoryArea
 				if (!IconObjectPath.IsEmpty())
 				{
 					TileData.IconTexture = TSoftObjectPtr<UTexture2D>(FSoftObjectPath(IconObjectPath));
+				}
+
+				FText DescriptionText;
+				if (ItemDataSubsystem->TryGetItemTextByKey(ItemDefinition.DescriptionStringKey, ETunaSweeperItemTextLanguage::Korean, DescriptionText))
+				{
+					TileData.DescriptionText = DescriptionText;
 				}
 			}
 		}

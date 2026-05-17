@@ -10,6 +10,7 @@ class UBorder;
 class UImage;
 class UTextBlock;
 class UDragDropOperation;
+class UTunaSweeperItemHoverPromptWidget;
 
 UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API UTunaSweeperItemThumbnailSlotWidget : public UUserWidget, public IUserObjectListEntry
@@ -18,6 +19,10 @@ class TUNASWEEPER_API UTunaSweeperItemThumbnailSlotWidget : public UUserWidget, 
 
 protected:
 	virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override;
+	virtual void NativeDestruct() override;
+	virtual void NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+	virtual void NativeOnMouseLeave(const FPointerEvent& InMouseEvent) override;
+	virtual FReply NativeOnMouseMove(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 	virtual void NativeOnDragDetected(
 		const FGeometry& InGeometry,
@@ -55,7 +60,16 @@ private:
 	bool CanAcceptDragOperation(UDragDropOperation* InOperation) const;
 	void UpdateHoveredDropSlot(UDragDropOperation* InOperation, bool bCanAcceptDrop) const;
 	FTunaSweeperItemSlotReference GetCachedSlotReference() const;
+	bool CanShowHoverPrompt() const;
+	void ShowHoverPrompt(const FPointerEvent& InMouseEvent);
+	void HideHoverPrompt();
+	void UpdateHoverPromptPosition(const FPointerEvent& InMouseEvent) const;
+	void SetHoveredItemSlot() const;
+	void ClearHoveredItemSlot() const;
 
 	UPROPERTY(Transient)
 	FTunaSweeperItemStackTileData CachedTileData;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTunaSweeperItemHoverPromptWidget> ActiveHoverPrompt;
 };

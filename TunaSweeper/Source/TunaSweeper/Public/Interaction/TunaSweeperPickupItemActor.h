@@ -26,8 +26,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Pickup Item")
 	void SetItemId(int32 InItemId);
 
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Pickup Item")
+	void SetItemStack(int32 InItemId, int32 InQuantity);
+
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Pickup Item")
 	int32 GetItemId() const { return ItemId; }
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Pickup Item")
+	int32 GetQuantity() const { return ItemQuantity; }
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Pickup Item")
 	FText GetItemDisplayName() const { return CachedItemDisplayName; }
@@ -54,6 +60,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pickup Item")
 	int32 ItemId = 1001;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pickup Item", meta = (ClampMin = "1", UIMin = "1"))
+	int32 ItemQuantity = 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pickup Item")
 	ETunaSweeperItemTextLanguage DisplayLanguage = ETunaSweeperItemTextLanguage::Korean;

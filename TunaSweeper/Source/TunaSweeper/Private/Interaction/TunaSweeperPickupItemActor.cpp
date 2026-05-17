@@ -88,12 +88,27 @@ void ATunaSweeperPickupItemActor::SetItemId(int32 InItemId)
 	RefreshItemPresentation();
 }
 
+void ATunaSweeperPickupItemActor::SetItemStack(int32 InItemId, int32 InQuantity)
+{
+	const int32 ClampedQuantity = FMath::Max(1, InQuantity);
+	if (ItemId == InItemId && ItemQuantity == ClampedQuantity)
+	{
+		return;
+	}
+
+	Modify();
+	ItemId = InItemId;
+	ItemQuantity = ClampedQuantity;
+	RefreshItemPresentation();
+}
+
 void ATunaSweeperPickupItemActor::ConfigurePickupItemDefaults(
 	int32 InItemId,
 	TSoftClassPtr<UTunaSweeperPickupItemIconWidget> InFloorIconWidgetClass)
 {
 	Modify();
 	ItemId = InItemId;
+	ItemQuantity = 1;
 	FloorIconWidgetClass = InFloorIconWidgetClass;
 	EnsureFloorIconWidgetClass();
 	RefreshItemPresentation();

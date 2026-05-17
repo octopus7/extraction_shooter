@@ -541,6 +541,88 @@ bool UTunaSweeperGameInstance::MoveItemBetweenSlots(
 	return true;
 }
 
+bool UTunaSweeperGameInstance::RemoveItemFromSlot(
+	const FTunaSweeperItemSlotReference& SlotReference,
+	FTunaSweeperItemInstance& OutRemovedItemInstance)
+{
+	EnsureInventoryStateInitialized();
+	RefreshSelectedWeaponAttachmentSlots();
+
+	OutRemovedItemInstance = FTunaSweeperItemInstance();
+	if (!SlotReference.IsValid())
+	{
+		return false;
+	}
+
+	TArray<FTunaSweeperInventorySlot>* Slots = GetMutableSlotsForSource(SlotReference.Source);
+	if (!Slots || !Slots->IsValidIndex(SlotReference.SlotIndex))
+	{
+		return false;
+	}
+
+	const FGuid ItemUid = (*Slots)[SlotReference.SlotIndex].ItemUid;
+	if (!TryGetItemInstance(ItemUid, OutRemovedItemInstance))
+	{
+		return false;
+	}
+
+	if (SlotReference.Source == ETunaSweeperItemSlotSource::Equipment)
+	{
+		TArray<FTunaSweeperInventorySlot> SimEquipmentSlots = EquipmentSlots;
+		if (SimEquipmentSlots.IsValidIndex(SlotReference.SlotIndex))
+		{
+			SimEquipmentSlots[SlotReference.SlotIndex].Clear();
+			const int32 SimInventoryCapacity = CalculateInventoryCapacityForEquipmentSlots(SimEquipmentSlots);
+			if (HasOccupiedInventorySlotsBeyondCapacity(PlayerInventorySlots, SimInventoryCapacity))
+			{
+				OutRemovedItemInstance = FTunaSweeperItemInstance();
+				return false;
+			}
+		}
+	}
+
+	(*Slots)[SlotReference.SlotIndex].Clear();
+	if (SlotReference.Source == ETunaSweeperItemSlotSource::SelectedWeaponAttachment)
+	{
+		CommitSelectedWeaponAttachmentSlotsToSelectedItem();
+	}
+
+	TFunction<void(const FGuid&)> RemoveItemUid = [this, &RemoveItemUid](const FGuid& Uid)
+	{
+		if (!Uid.IsValid())
+		{
+			return;
+		}
+
+		TArray<FGuid> AttachmentUids;
+		if (const FTunaSweeperItemInstance* ItemInstance = ItemInstancesByUid.Find(Uid))
+		{
+			for (const TPair<FName, FGuid>& AttachmentSlot : ItemInstance->AttachmentSlots)
+			{
+				AttachmentUids.Add(AttachmentSlot.Value);
+			}
+		}
+
+		ItemInstancesByUid.Remove(Uid);
+		for (const FGuid& AttachmentUid : AttachmentUids)
+		{
+			RemoveItemUid(AttachmentUid);
+		}
+	};
+	RemoveItemUid(ItemUid);
+
+	if (HoveredItemSlotReference.Source == SlotReference.Source &&
+		HoveredItemSlotReference.SlotIndex == SlotReference.SlotIndex)
+	{
+		HoveredItemSlotReference = FTunaSweeperItemSlotReference();
+	}
+
+	const int32 NewInventoryCapacity = CalculateInventoryCapacityForEquipmentSlots(EquipmentSlots);
+	EnsureSlotArraySize(PlayerInventorySlots, NewInventoryCapacity);
+	BroadcastInventoryStateChanged();
+	return true;
+}
+
 bool UTunaSweeperGameInstance::AddItemToFirstAvailableInventorySlot(int32 ItemId, int32 Quantity)
 {
 	EnsureInventoryStateInitialized();
@@ -617,6 +699,28 @@ void UTunaSweeperGameInstance::ClearSelectedItemSelection()
 	}
 }
 
+void UTunaSweeperGameInstance::SetHoveredItemSlot(const FTunaSweeperItemSlotReference& SlotReference)
+{
+	HoveredItemSlotReference = SlotReference.IsValid()
+		? SlotReference
+		: FTunaSweeperItemSlotReference();
+}
+
+void UTunaSweeperGameInstance::ClearHoveredItemSlot(const FTunaSweeperItemSlotReference& SlotReference)
+{
+	if (!SlotReference.IsValid() ||
+		(HoveredItemSlotReference.Source == SlotReference.Source &&
+			HoveredItemSlotReference.SlotIndex == SlotReference.SlotIndex))
+	{
+		ClearHoveredItemSlot();
+	}
+}
+
+void UTunaSweeperGameInstance::ClearHoveredItemSlot()
+{
+	HoveredItemSlotReference = FTunaSweeperItemSlotReference();
+}
+
 void UTunaSweeperGameInstance::SetActiveLootContainerInstance(
 	const FTunaSweeperLootContainerInstance& InContainerInstance)
 {
@@ -652,6 +756,7 @@ void UTunaSweeperGameInstance::ClearInventoryAndSave()
 {
 	EnsureInventoryStateInitialized();
 	ClearSelectedItemSelection();
+	ClearHoveredItemSlot();
 	ItemInstancesByUid.Reset();
 	ResetPlayerSlotArrays();
 	ActiveLootContainerSlots.Reset();
@@ -751,6 +856,7 @@ bool UTunaSweeperGameInstance::LoadGameState()
 	ActiveLootContainerCapacity = 0;
 	bHasActiveLootContainer = false;
 	SelectedItemSlotReference = FTunaSweeperItemSlotReference();
+	HoveredItemSlotReference = FTunaSweeperItemSlotReference();
 	SelectedWeaponAttachmentSlotTags.Reset();
 	SelectedWeaponAttachmentSlots.Reset();
 	return true;
@@ -810,6 +916,7 @@ void UTunaSweeperGameInstance::ResetRuntimeStateForSaveSlotSelection()
 	SelectedWeaponAttachmentSlotTags.Reset();
 	SelectedWeaponAttachmentSlots.Reset();
 	SelectedItemSlotReference = FTunaSweeperItemSlotReference();
+	HoveredItemSlotReference = FTunaSweeperItemSlotReference();
 	ActiveLootContainerDisplayName = FText::GetEmpty();
 	ActiveLootContainerCapacity = 0;
 	bHasActiveLootContainer = false;
@@ -827,6 +934,7 @@ void UTunaSweeperGameInstance::GenerateDefaultInventoryState()
 	ActiveLootContainerCapacity = 0;
 	bHasActiveLootContainer = false;
 	SelectedItemSlotReference = FTunaSweeperItemSlotReference();
+	HoveredItemSlotReference = FTunaSweeperItemSlotReference();
 	SelectedWeaponAttachmentSlotTags.Reset();
 	SelectedWeaponAttachmentSlots.Reset();
 }

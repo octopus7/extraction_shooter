@@ -340,6 +340,7 @@ bool UTunaSweeperItemDataSubsystem::LoadItemTableJson()
 
 		double NumericId = 0.0;
 		double NumericShopSellPrice = 0.0;
+		double NumericWeightKg = 0.0;
 		double NumericInventorySlotCapacity = 0.0;
 		FString NameStringKey;
 		FString DescriptionStringKey;
@@ -364,6 +365,11 @@ bool UTunaSweeperItemDataSubsystem::LoadItemTableJson()
 		ItemDefinition.DescriptionStringKey = FName(*DescriptionStringKey.TrimStartAndEnd());
 		ItemDefinition.ShopSellPrice = FMath::Max(0, static_cast<int32>(NumericShopSellPrice));
 		ItemDefinition.IconFileName = IconFileName.TrimStartAndEnd();
+		if ((*JsonObject)->TryGetNumberField(TEXT("weight_kg"), NumericWeightKg) ||
+			(*JsonObject)->TryGetNumberField(TEXT("weight"), NumericWeightKg))
+		{
+			ItemDefinition.WeightKg = FMath::Max(0.0f, static_cast<float>(NumericWeightKg));
+		}
 		if ((*JsonObject)->TryGetStringField(TEXT("category_tag"), CategoryTag))
 		{
 			ItemDefinition.CategoryTag = FName(*CategoryTag.TrimStartAndEnd());

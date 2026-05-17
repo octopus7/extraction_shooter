@@ -95,6 +95,7 @@ namespace TunaSweeperEditorSetup
 	const FString CommonGameHudTaskId = TEXT("2026-05-16_RebuildInventoryLayoutAndModdingPanelV1");
 	const FString InventoryInputTaskId = TEXT("2026-05-11_AddInventoryInput");
 	const FString QuickSlotInputTaskId = TEXT("2026-05-12_AddQuickSlotInputActions");
+	const FString DropInputTaskId = TEXT("2026-05-18_AddDropInputAction");
 	const FString LootContainerAndSpawnerTaskId = TEXT("2026-05-11_CreateLootContainerAndSpawnerAssetsV1");
 	const FString CannedTunaIconImportTaskId = TEXT("2026-05-11_ImportCannedTunaIconV1");
 	const FString BackpackInventoryTaskId = TEXT("2026-05-16_CreateEquipmentInventoryAssetsV3");
@@ -126,6 +127,7 @@ namespace TunaSweeperEditorSetup
 	const FString AimActionName = TEXT("IA_Aim");
 	const FString InteractActionName = TEXT("IA_Interact");
 	const FString InventoryActionName = TEXT("IA_Inventory");
+	const FString DropActionName = TEXT("IA_Drop");
 	const FString QuickSlotActionNamePrefix = TEXT("IA_QuickSlot");
 	const FString MappingContextName = TEXT("IMC_Player");
 	const FString UIAssetPath = TEXT("/Game/UI");
@@ -581,6 +583,32 @@ namespace TunaSweeperEditorSetup
 		MappingContext->ContextDescription = FText::FromString(TEXT("TunaSweeper player movement, combat, interaction, inventory, and quick slot input."));
 		MappingContext->MarkPackageDirty();
 		return bAllActionsCreated && SaveAsset(MappingContext);
+	}
+
+	bool EnsureDropInputAssets()
+	{
+		UInputAction* DropAction = EnsureInputAction(
+			DropActionName,
+			EInputActionValueType::Boolean,
+			EInputActionAccumulationBehavior::TakeHighestAbsoluteValue);
+
+		UInputMappingContext* MappingContext = LoadObject<UInputMappingContext>(
+			nullptr,
+			*GetAssetObjectPath(InputAssetPath, MappingContextName));
+
+		if (!DropAction || !MappingContext)
+		{
+			return false;
+		}
+
+		if (!HasInputMapping(MappingContext, DropAction, EKeys::X))
+		{
+			MappingContext->MapKey(DropAction, EKeys::X);
+		}
+
+		MappingContext->ContextDescription = FText::FromString(TEXT("TunaSweeper player movement, combat, interaction, inventory, quick slot, and item drop input."));
+		MappingContext->MarkPackageDirty();
+		return SaveAsset(MappingContext);
 	}
 
 	bool ConfigureGameModeBlueprint(UBlueprint* GameModeBlueprint, UBlueprint* PlayerBlueprint)
@@ -4424,6 +4452,13 @@ public:
 			[]()
 			{
 				return TunaSweeperEditorSetup::EnsureQuickSlotInputAssets();
+			});
+
+		FTunaSweeperEditorRunOnce::Run(
+			TunaSweeperEditorSetup::DropInputTaskId,
+			[]()
+			{
+				return TunaSweeperEditorSetup::EnsureDropInputAssets();
 			});
 
 		FTunaSweeperEditorRunOnce::Run(

@@ -23,6 +23,12 @@ struct TUNASWEEPER_API FTunaSweeperItemStackTileData
 	FText DisplayName;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Tile")
+	FText DescriptionText;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Tile")
+	FTunaSweeperItemDefinition ItemDefinition;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Tile")
 	TSoftObjectPtr<UTexture2D> IconTexture;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Tile")
@@ -39,6 +45,9 @@ struct TUNASWEEPER_API FTunaSweeperItemStackTileData
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Tile")
 	bool bShowEmptySlotLabel = false;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Tile")
+	bool bHasItemDefinition = false;
 };
 
 UCLASS(BlueprintType)

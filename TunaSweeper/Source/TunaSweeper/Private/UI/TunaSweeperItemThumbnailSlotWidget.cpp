@@ -5,11 +5,14 @@
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
 #include "Engine/Texture2D.h"
+#include "GameFramework/PlayerController.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "InputCoreTypes.h"
 #include "Input/Reply.h"
 #include "UI/TunaSweeperItemDragDropOperation.h"
+#include "UI/TunaSweeperItemHoverPromptWidget.h"
 #include "UI/TunaSweeperItemStackTileItemObject.h"
+#include "Blueprint/WidgetLayoutLibrary.h"
 
 void UTunaSweeperItemThumbnailSlotWidget::NativeOnListItemObjectSet(UObject* ListItemObject)
 {
@@ -18,6 +21,65 @@ void UTunaSweeperItemThumbnailSlotWidget::NativeOnListItemObjectSet(UObject* Lis
 	const UTunaSweeperItemStackTileItemObject* TileItemObject = Cast<UTunaSweeperItemStackTileItemObject>(ListItemObject);
 	CachedTileData = TileItemObject ? TileItemObject->GetTileData() : FTunaSweeperItemStackTileData();
 	ApplyTileData();
+
+	if (ActiveHoverPrompt)
+	{
+		if (CanShowHoverPrompt())
+		{
+			ActiveHoverPrompt->SetItemTileData(CachedTileData);
+			SetHoveredItemSlot();
+		}
+		else
+		{
+			HideHoverPrompt();
+			ClearHoveredItemSlot();
+		}
+	}
+}
+
+void UTunaSweeperItemThumbnailSlotWidget::NativeDestruct()
+{
+	HideHoverPrompt();
+	ClearHoveredItemSlot();
+	Super::NativeDestruct();
+}
+
+void UTunaSweeperItemThumbnailSlotWidget::NativeOnMouseEnter(
+	const FGeometry& InGeometry,
+	const FPointerEvent& InMouseEvent)
+{
+	Super::NativeOnMouseEnter(InGeometry, InMouseEvent);
+
+	if (CanShowHoverPrompt())
+	{
+		SetHoveredItemSlot();
+		ShowHoverPrompt(InMouseEvent);
+	}
+}
+
+void UTunaSweeperItemThumbnailSlotWidget::NativeOnMouseLeave(const FPointerEvent& InMouseEvent)
+{
+	HideHoverPrompt();
+	ClearHoveredItemSlot();
+	Super::NativeOnMouseLeave(InMouseEvent);
+}
+
+FReply UTunaSweeperItemThumbnailSlotWidget::NativeOnMouseMove(
+	const FGeometry& InGeometry,
+	const FPointerEvent& InMouseEvent)
+{
+	if (CanShowHoverPrompt())
+	{
+		SetHoveredItemSlot();
+		ShowHoverPrompt(InMouseEvent);
+	}
+	else
+	{
+		HideHoverPrompt();
+		ClearHoveredItemSlot();
+	}
+
+	return Super::NativeOnMouseMove(InGeometry, InMouseEvent);
 }
 
 FReply UTunaSweeperItemThumbnailSlotWidget::NativeOnMouseButtonDown(
@@ -48,6 +110,9 @@ void UTunaSweeperItemThumbnailSlotWidget::NativeOnDragDetected(
 		OutOperation = nullptr;
 		return;
 	}
+
+	HideHoverPrompt();
+	ClearHoveredItemSlot();
 
 	UTunaSweeperItemDragDropOperation* DragOperation = NewObject<UTunaSweeperItemDragDropOperation>(this);
 	if (!DragOperation)
@@ -234,4 +299,80 @@ FTunaSweeperItemSlotReference UTunaSweeperItemThumbnailSlotWidget::GetCachedSlot
 	SlotReference.Source = CachedTileData.Source;
 	SlotReference.SlotIndex = CachedTileData.SourceIndex;
 	return SlotReference;
+}
+
+bool UTunaSweeperItemThumbnailSlotWidget::CanShowHoverPrompt() const
+{
+	return !CachedTileData.bIsEmpty && GetCachedSlotReference().IsValid();
+}
+
+void UTunaSweeperItemThumbnailSlotWidget::ShowHoverPrompt(const FPointerEvent& InMouseEvent)
+{
+	if (!CanShowHoverPrompt())
+	{
+		HideHoverPrompt();
+		return;
+	}
+
+	if (!ActiveHoverPrompt)
+	{
+		APlayerController* OwningPlayer = GetOwningPlayer();
+		ActiveHoverPrompt = OwningPlayer
+			? CreateWidget<UTunaSweeperItemHoverPromptWidget>(OwningPlayer, UTunaSweeperItemHoverPromptWidget::StaticClass())
+			: CreateWidget<UTunaSweeperItemHoverPromptWidget>(GetWorld(), UTunaSweeperItemHoverPromptWidget::StaticClass());
+		if (ActiveHoverPrompt)
+		{
+			ActiveHoverPrompt->SetVisibility(ESlateVisibility::HitTestInvisible);
+			ActiveHoverPrompt->AddToViewport(85);
+		}
+	}
+
+	if (!ActiveHoverPrompt)
+	{
+		return;
+	}
+
+	ActiveHoverPrompt->SetItemTileData(CachedTileData);
+	UpdateHoverPromptPosition(InMouseEvent);
+}
+
+void UTunaSweeperItemThumbnailSlotWidget::HideHoverPrompt()
+{
+	if (ActiveHoverPrompt)
+	{
+		ActiveHoverPrompt->RemoveFromParent();
+		ActiveHoverPrompt = nullptr;
+	}
+}
+
+void UTunaSweeperItemThumbnailSlotWidget::UpdateHoverPromptPosition(const FPointerEvent& InMouseEvent) const
+{
+	if (!ActiveHoverPrompt)
+	{
+		return;
+	}
+
+	FVector2D ViewportPosition = InMouseEvent.GetScreenSpacePosition();
+	if (UWorld* World = GetWorld())
+	{
+		ViewportPosition = UWidgetLayoutLibrary::GetMousePositionOnViewport(World);
+	}
+
+	ActiveHoverPrompt->SetPromptViewportPosition(ViewportPosition);
+}
+
+void UTunaSweeperItemThumbnailSlotWidget::SetHoveredItemSlot() const
+{
+	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
+	{
+		TunaGameInstance->SetHoveredItemSlot(GetCachedSlotReference());
+	}
+}
+
+void UTunaSweeperItemThumbnailSlotWidget::ClearHoveredItemSlot() const
+{
+	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
+	{
+		TunaGameInstance->ClearHoveredItemSlot(GetCachedSlotReference());
+	}
 }

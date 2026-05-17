@@ -167,6 +167,8 @@ public:
 	int32 GetActiveLootContainerCapacity() const { return ActiveLootContainerCapacity; }
 	bool HasSelectedInventoryItem() const { return SelectedItemSlotReference.IsValid(); }
 	FTunaSweeperItemSlotReference GetSelectedItemSlotReference() const { return SelectedItemSlotReference; }
+	bool HasHoveredItemSlot() const { return HoveredItemSlotReference.IsValid(); }
+	FTunaSweeperItemSlotReference GetHoveredItemSlotReference() const { return HoveredItemSlotReference; }
 
 	bool TryGetItemInstance(const FGuid& ItemUid, FTunaSweeperItemInstance& OutItemInstance) const;
 	bool TryGetSlotItemInstance(const FTunaSweeperItemSlotReference& SlotReference, FTunaSweeperItemInstance& OutItemInstance);
@@ -180,6 +182,9 @@ public:
 	bool MoveItemBetweenSlots(
 		const FTunaSweeperItemSlotReference& SourceSlot,
 		const FTunaSweeperItemSlotReference& TargetSlot);
+	bool RemoveItemFromSlot(
+		const FTunaSweeperItemSlotReference& SlotReference,
+		FTunaSweeperItemInstance& OutRemovedItemInstance);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Inventory")
 	bool AddItemToFirstAvailableInventorySlot(int32 ItemId, int32 Quantity = 1);
@@ -189,6 +194,9 @@ public:
 
 	void SelectItemSlot(const FTunaSweeperItemSlotReference& SlotReference);
 	void ClearSelectedItemSelection();
+	void SetHoveredItemSlot(const FTunaSweeperItemSlotReference& SlotReference);
+	void ClearHoveredItemSlot(const FTunaSweeperItemSlotReference& SlotReference);
+	void ClearHoveredItemSlot();
 	void SetActiveLootContainerInstance(const FTunaSweeperLootContainerInstance& InContainerInstance);
 	void SaveGameState();
 	void ClearInventoryAndSave();
@@ -275,6 +283,9 @@ private:
 
 	UPROPERTY(Transient)
 	FTunaSweeperItemSlotReference SelectedItemSlotReference;
+
+	UPROPERTY(Transient)
+	FTunaSweeperItemSlotReference HoveredItemSlotReference;
 
 	UPROPERTY(Transient)
 	FText ActiveLootContainerDisplayName;

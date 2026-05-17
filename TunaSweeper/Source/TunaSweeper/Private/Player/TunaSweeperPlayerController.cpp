@@ -5,6 +5,8 @@
 #include "EnhancedInputComponent.h"
 #include "Engine/GameInstance.h"
 #include "Engine/World.h"
+#include "Game/TunaSweeperGameInstance.h"
+#include "Interaction/TunaSweeperPickupItemActor.h"
 #include "InputAction.h"
 #include "InputActionValue.h"
 #include "Subsystem/TunaSweeperKeyboardInputSubsystem.h"
@@ -20,6 +22,9 @@ ATunaSweeperPlayerController::ATunaSweeperPlayerController()
 	GameHudWidgetClass = TSoftClassPtr<UTunaSweeperGameHudWidget>(FSoftObjectPath(TEXT("/Game/UI/WBP_GameHud.WBP_GameHud_C")));
 	IntroMenuWidgetClass = TSoftClassPtr<UTunaSweeperIntroMenuWidget>(FSoftObjectPath(TEXT("/Game/UI/WBP_IntroMenu.WBP_IntroMenu_C")));
 	QuestWidgetClass = TSoftClassPtr<UTunaSweeperQuestWidget>(FSoftObjectPath(TEXT("/Game/UI/WBP_Quest.WBP_Quest_C")));
+	DropAction = TSoftObjectPtr<UInputAction>(FSoftObjectPath(TEXT("/Game/Input/IA_Drop.IA_Drop")));
+	PickupItemActorClass = TSoftClassPtr<ATunaSweeperPickupItemActor>(
+		FSoftObjectPath(TEXT("/Game/Interaction/BP_PickupItem.BP_PickupItem_C")));
 
 	QuickSlotActions.Reserve(8);
 	for (int32 SlotNumber = 1; SlotNumber <= 8; ++SlotNumber)
@@ -80,6 +85,11 @@ void ATunaSweeperPlayerController::SetupInputComponent()
 	BindQuickSlotInputAction(5, &ATunaSweeperPlayerController::HandleQuickSlot6);
 	BindQuickSlotInputAction(6, &ATunaSweeperPlayerController::HandleQuickSlot7);
 	BindQuickSlotInputAction(7, &ATunaSweeperPlayerController::HandleQuickSlot8);
+
+	if (UInputAction* LoadedDropAction = DropAction.LoadSynchronous())
+	{
+		EnhancedInputComponent->BindAction(LoadedDropAction, ETriggerEvent::Started, this, &ATunaSweeperPlayerController::HandleDrop);
+	}
 }
 
 void ATunaSweeperPlayerController::PlayerTick(float DeltaTime)
@@ -151,6 +161,68 @@ bool ATunaSweeperPlayerController::IsIntroMap() const
 	return World && World->GetMapName().EndsWith(TEXT("IntroMap"));
 }
 
+bool ATunaSweeperPlayerController::GetDropLocation(FVector& OutDropLocation) const
+{
+	const APawn* ControlledPawn = GetPawn();
+	const float PlaneZ = ControlledPawn ? ControlledPawn->GetActorLocation().Z : 0.0f;
+
+	FVector AimPoint;
+	if (GetMouseAimPointOnPlane(PlaneZ, AimPoint))
+	{
+		OutDropLocation = AimPoint + FVector(0.0f, 0.0f, 8.0f);
+		return true;
+	}
+
+	if (ControlledPawn)
+	{
+		OutDropLocation = ControlledPawn->GetActorLocation() + ControlledPawn->GetActorForwardVector() * 100.0f;
+		OutDropLocation.Z += 8.0f;
+		return true;
+	}
+
+	return false;
+}
+
+ATunaSweeperPickupItemActor* ATunaSweeperPlayerController::SpawnDroppedPickupItem(int32 ItemId, int32 Quantity)
+{
+	UWorld* World = GetWorld();
+	if (!World || ItemId == INDEX_NONE || Quantity <= 0)
+	{
+		return nullptr;
+	}
+
+	FVector DropLocation;
+	if (!GetDropLocation(DropLocation))
+	{
+		return nullptr;
+	}
+
+	TSubclassOf<ATunaSweeperPickupItemActor> LoadedPickupClass = ATunaSweeperPickupItemActor::StaticClass();
+	if (UClass* SoftPickupClass = PickupItemActorClass.LoadSynchronous())
+	{
+		if (SoftPickupClass->IsChildOf(ATunaSweeperPickupItemActor::StaticClass()))
+		{
+			LoadedPickupClass = SoftPickupClass;
+		}
+	}
+
+	FActorSpawnParameters SpawnParameters;
+	SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	SpawnParameters.Instigator = GetPawn();
+
+	ATunaSweeperPickupItemActor* SpawnedPickupItem = World->SpawnActor<ATunaSweeperPickupItemActor>(
+		LoadedPickupClass,
+		DropLocation,
+		FRotator::ZeroRotator,
+		SpawnParameters);
+	if (SpawnedPickupItem)
+	{
+		SpawnedPickupItem->SetItemStack(ItemId, Quantity);
+	}
+
+	return SpawnedPickupItem;
+}
+
 void ATunaSweeperPlayerController::HandleQuickSlot(int32 SlotNumber)
 {
 	if (const ATunaSweeperTopDownCharacter* ControlledCharacter = Cast<ATunaSweeperTopDownCharacter>(GetPawn()))
@@ -171,6 +243,51 @@ void ATunaSweeperPlayerController::HandleQuickSlot(int32 SlotNumber)
 	{
 		KeyboardInputSubsystem->ReceiveQuickSlotKeyInput(SlotNumber, GetPawn());
 	}
+}
+
+void ATunaSweeperPlayerController::HandleDrop(const FInputActionValue&)
+{
+	if (IsIntroMap())
+	{
+		return;
+	}
+
+	if (const ATunaSweeperTopDownCharacter* ControlledCharacter = Cast<ATunaSweeperTopDownCharacter>(GetPawn()))
+	{
+		if (ControlledCharacter->IsDead())
+		{
+			return;
+		}
+	}
+
+	UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+	if (!TunaGameInstance || !TunaGameInstance->HasHoveredItemSlot())
+	{
+		return;
+	}
+
+	const FTunaSweeperItemSlotReference HoveredSlot = TunaGameInstance->GetHoveredItemSlotReference();
+	FTunaSweeperItemInstance ItemInstance;
+	if (!TunaGameInstance->TryGetSlotItemInstance(HoveredSlot, ItemInstance))
+	{
+		TunaGameInstance->ClearHoveredItemSlot(HoveredSlot);
+		return;
+	}
+
+	ATunaSweeperPickupItemActor* SpawnedPickupItem = SpawnDroppedPickupItem(ItemInstance.ItemId, ItemInstance.Quantity);
+	if (!SpawnedPickupItem)
+	{
+		return;
+	}
+
+	FTunaSweeperItemInstance RemovedItemInstance;
+	if (!TunaGameInstance->RemoveItemFromSlot(HoveredSlot, RemovedItemInstance))
+	{
+		SpawnedPickupItem->Destroy();
+		return;
+	}
+
+	SpawnedPickupItem->SetItemStack(RemovedItemInstance.ItemId, RemovedItemInstance.Quantity);
 }
 
 void ATunaSweeperPlayerController::HandleQuickSlot1(const FInputActionValue&)

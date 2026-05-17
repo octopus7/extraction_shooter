@@ -9,6 +9,7 @@ class UTunaSweeperGameHudWidget;
 class UTunaSweeperIntroMenuWidget;
 class UTunaSweeperQuestWidget;
 class UInputAction;
+class ATunaSweeperPickupItemActor;
 struct FInputActionValue;
 
 UCLASS(BlueprintType, Blueprintable)
@@ -60,12 +61,21 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	TArray<TSoftObjectPtr<UInputAction>> QuickSlotActions;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+	TSoftObjectPtr<UInputAction> DropAction;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Loot")
+	TSoftClassPtr<ATunaSweeperPickupItemActor> PickupItemActorClass;
+
 private:
 	void EnsureGameHudWidget();
 	void EnsureIntroMenuWidget();
 	bool IsIntroMap() const;
 	bool GetMouseAimPointOnPlane(float PlaneZ, FVector& OutAimPoint) const;
+	bool GetDropLocation(FVector& OutDropLocation) const;
+	ATunaSweeperPickupItemActor* SpawnDroppedPickupItem(int32 ItemId, int32 Quantity);
 	void HandleQuickSlot(int32 SlotNumber);
+	void HandleDrop(const FInputActionValue& Value);
 	void HandleQuickSlot1(const FInputActionValue& Value);
 	void HandleQuickSlot2(const FInputActionValue& Value);
 	void HandleQuickSlot3(const FInputActionValue& Value);
