@@ -1,5 +1,6 @@
 #include "UI/TunaSweeperItemHoverPromptWidget.h"
 
+#include "Blueprint/WidgetLayoutLibrary.h"
 #include "Blueprint/WidgetTree.h"
 #include "Components/Border.h"
 #include "Components/HorizontalBox.h"
@@ -17,7 +18,11 @@ namespace TunaSweeperItemHoverPrompt
 	constexpr float PromptOffsetY = 16.0f;
 	constexpr float InfoBoxWidth = 300.0f;
 	constexpr float ActionBoxWidth = 154.0f;
-	constexpr float PromptHeight = 124.0f;
+	constexpr float PromptGap = 6.0f;
+	constexpr float PromptWidth = InfoBoxWidth + ActionBoxWidth + PromptGap;
+	constexpr float MinPromptHeight = 124.0f;
+	constexpr float ItemInfoHorizontalPadding = 32.0f;
+	constexpr float DescriptionWrapWidth = InfoBoxWidth - ItemInfoHorizontalPadding;
 
 	FSlateBrush MakeRoundedBoxBrush(
 		const FVector2D& ImageSize,
@@ -152,9 +157,23 @@ void UTunaSweeperItemHoverPromptWidget::SetItemTileData(const FTunaSweeperItemSt
 
 void UTunaSweeperItemHoverPromptWidget::SetPromptViewportPosition(const FVector2D& ViewportPosition)
 {
-	SetPositionInViewport(
-		ViewportPosition + FVector2D(TunaSweeperItemHoverPrompt::PromptOffsetX, TunaSweeperItemHoverPrompt::PromptOffsetY),
-		false);
+	FVector2D PromptPosition =
+		ViewportPosition + FVector2D(TunaSweeperItemHoverPrompt::PromptOffsetX, TunaSweeperItemHoverPrompt::PromptOffsetY);
+
+	if (UWorld* World = GetWorld())
+	{
+		FVector2D ViewportSize = UWidgetLayoutLibrary::GetViewportSize(World);
+		const float ViewportScale = UWidgetLayoutLibrary::GetViewportScale(World);
+		if (!FMath::IsNearlyZero(ViewportScale))
+		{
+			ViewportSize /= ViewportScale;
+		}
+
+		const float MaxPositionX = FMath::Max(0.0f, ViewportSize.X - TunaSweeperItemHoverPrompt::PromptWidth);
+		PromptPosition.X = FMath::Clamp(PromptPosition.X, 0.0f, MaxPositionX);
+	}
+
+	SetPositionInViewport(PromptPosition, false);
 }
 
 TSharedRef<SWidget> UTunaSweeperItemHoverPromptWidget::RebuildWidget()
@@ -210,16 +229,16 @@ void UTunaSweeperItemHoverPromptWidget::BuildNativeWidgetTree()
 	}
 
 	WidgetTree->RootWidget = RootSizeBox;
-	RootSizeBox->SetWidthOverride(TunaSweeperItemHoverPrompt::InfoBoxWidth + TunaSweeperItemHoverPrompt::ActionBoxWidth + 6.0f);
-	RootSizeBox->SetHeightOverride(TunaSweeperItemHoverPrompt::PromptHeight);
+	RootSizeBox->SetWidthOverride(TunaSweeperItemHoverPrompt::PromptWidth);
+	RootSizeBox->SetMinDesiredHeight(TunaSweeperItemHoverPrompt::MinPromptHeight);
 	RootSizeBox->SetContent(PromptRootRow);
 
 	InfoSizeBox->SetWidthOverride(TunaSweeperItemHoverPrompt::InfoBoxWidth);
-	InfoSizeBox->SetHeightOverride(TunaSweeperItemHoverPrompt::PromptHeight);
+	InfoSizeBox->SetMinDesiredHeight(TunaSweeperItemHoverPrompt::MinPromptHeight);
 	InfoSizeBox->SetContent(ItemInfoBackground);
 	ItemInfoBackground->SetPadding(FMargin(16.0f, 10.0f));
 	ItemInfoBackground->SetBrush(TunaSweeperItemHoverPrompt::MakeRoundedBoxBrush(
-		FVector2D(TunaSweeperItemHoverPrompt::InfoBoxWidth, TunaSweeperItemHoverPrompt::PromptHeight),
+		FVector2D(TunaSweeperItemHoverPrompt::InfoBoxWidth, TunaSweeperItemHoverPrompt::MinPromptHeight),
 		FLinearColor(0.0f, 0.0f, 0.0f, 0.82f),
 		FLinearColor(0.10f, 0.12f, 0.14f, 0.72f),
 		1.0f));
@@ -232,6 +251,7 @@ void UTunaSweeperItemHoverPromptWidget::BuildNativeWidgetTree()
 	ItemNameText->SetAutoWrapText(false);
 	ItemWeightText->SetAutoWrapText(false);
 	ItemDescriptionText->SetAutoWrapText(true);
+	ItemDescriptionText->SetWrapTextAt(TunaSweeperItemHoverPrompt::DescriptionWrapWidth);
 	ItemPriceText->SetAutoWrapText(false);
 	TunaSweeperItemHoverPrompt::AddTextLine(ItemInfoStack, ItemNameText, 8.0f);
 	TunaSweeperItemHoverPrompt::AddTextLine(ItemInfoStack, ItemWeightText, 8.0f);
@@ -239,11 +259,11 @@ void UTunaSweeperItemHoverPromptWidget::BuildNativeWidgetTree()
 	TunaSweeperItemHoverPrompt::AddTextLine(ItemInfoStack, ItemPriceText, 0.0f);
 
 	ActionSizeBox->SetWidthOverride(TunaSweeperItemHoverPrompt::ActionBoxWidth);
-	ActionSizeBox->SetHeightOverride(TunaSweeperItemHoverPrompt::PromptHeight);
+	ActionSizeBox->SetMinDesiredHeight(TunaSweeperItemHoverPrompt::MinPromptHeight);
 	ActionSizeBox->SetContent(ActionHintsBackground);
 	ActionHintsBackground->SetPadding(FMargin(10.0f, 12.0f));
 	ActionHintsBackground->SetBrush(TunaSweeperItemHoverPrompt::MakeRoundedBoxBrush(
-		FVector2D(TunaSweeperItemHoverPrompt::ActionBoxWidth, TunaSweeperItemHoverPrompt::PromptHeight),
+		FVector2D(TunaSweeperItemHoverPrompt::ActionBoxWidth, TunaSweeperItemHoverPrompt::MinPromptHeight),
 		FLinearColor(0.0f, 0.0f, 0.0f, 0.82f),
 		FLinearColor(0.10f, 0.12f, 0.14f, 0.72f),
 		1.0f));
@@ -279,15 +299,15 @@ void UTunaSweeperItemHoverPromptWidget::BuildNativeWidgetTree()
 	if (InfoSlot)
 	{
 		InfoSlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
-		InfoSlot->SetVerticalAlignment(VAlign_Top);
+		InfoSlot->SetVerticalAlignment(VAlign_Fill);
 	}
 
 	UHorizontalBoxSlot* ActionSlot = PromptRootRow->AddChildToHorizontalBox(ActionSizeBox);
 	if (ActionSlot)
 	{
 		ActionSlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
-		ActionSlot->SetVerticalAlignment(VAlign_Top);
-		ActionSlot->SetPadding(FMargin(6.0f, 0.0f, 0.0f, 0.0f));
+		ActionSlot->SetVerticalAlignment(VAlign_Fill);
+		ActionSlot->SetPadding(FMargin(TunaSweeperItemHoverPrompt::PromptGap, 0.0f, 0.0f, 0.0f));
 	}
 }
 
@@ -365,6 +385,7 @@ void UTunaSweeperItemHoverPromptWidget::ApplyTileData()
 	if (ItemDescriptionText)
 	{
 		ItemDescriptionText->SetText(CachedTileData.DescriptionText);
+		ItemDescriptionText->SetWrapTextAt(TunaSweeperItemHoverPrompt::DescriptionWrapWidth);
 	}
 	if (ItemPriceText)
 	{
@@ -386,6 +407,36 @@ void UTunaSweeperItemHoverPromptWidget::ApplyTileData()
 	{
 		DropActionText->SetText(FText::FromString(TEXT("\uBC84\uB9AC\uAE30")));
 	}
+
+	RefreshPromptHeight();
+}
+
+void UTunaSweeperItemHoverPromptWidget::RefreshPromptHeight()
+{
+	if (!WidgetTree)
+	{
+		return;
+	}
+
+	if (RootSizeBox)
+	{
+		RootSizeBox->ClearHeightOverride();
+		RootSizeBox->SetMinDesiredHeight(TunaSweeperItemHoverPrompt::MinPromptHeight);
+	}
+
+	if (USizeBox* InfoSizeBox = Cast<USizeBox>(WidgetTree->FindWidget(FName(TEXT("InfoSizeBox")))))
+	{
+		InfoSizeBox->ClearHeightOverride();
+		InfoSizeBox->SetMinDesiredHeight(TunaSweeperItemHoverPrompt::MinPromptHeight);
+	}
+
+	if (USizeBox* ActionSizeBox = Cast<USizeBox>(WidgetTree->FindWidget(FName(TEXT("ActionSizeBox")))))
+	{
+		ActionSizeBox->ClearHeightOverride();
+		ActionSizeBox->SetMinDesiredHeight(TunaSweeperItemHoverPrompt::MinPromptHeight);
+	}
+
+	InvalidateLayoutAndVolatility();
 }
 
 FText UTunaSweeperItemHoverPromptWidget::BuildNameText() const

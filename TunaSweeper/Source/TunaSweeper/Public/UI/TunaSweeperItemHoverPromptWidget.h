@@ -62,6 +62,7 @@ private:
 	void BuildNativeWidgetTree();
 	void CacheNamedWidgets();
 	void ApplyTileData();
+	void RefreshPromptHeight();
 	FText BuildNameText() const;
 	FText BuildWeightText() const;
 	FText BuildPriceText() const;
