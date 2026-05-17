@@ -29,7 +29,7 @@ ETunaSweeperInteractionType ATunaSweeperInteractableActor::GetInteractionType() 
 {
 	return InteractableComponent
 		? InteractableComponent->GetInteractionType()
-		: ETunaSweeperInteractionType::Dialogue;
+		: ETunaSweeperInteractionType::None;
 }
 
 FText ATunaSweeperInteractableActor::GetInteractionDisplayName() const

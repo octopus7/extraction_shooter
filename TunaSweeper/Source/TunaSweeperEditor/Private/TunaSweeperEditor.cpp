@@ -40,7 +40,6 @@
 #include "InputCoreTypes.h"
 #include "InputMappingContext.h"
 #include "InputModifiers.h"
-#include "Interaction/TunaSweeperInteractableActor.h"
 #include "Interaction/TunaSweeperInteractableComponent.h"
 #include "Interaction/TunaSweeperItemSpawnInteractableActor.h"
 #include "Interaction/TunaSweeperLevelTravelInteractableActor.h"
@@ -77,8 +76,6 @@
 #include "UI/TunaSweeperPickupItemIconWidget.h"
 #include "UI/TunaSweeperQuestWidget.h"
 #include "UI/TunaSweeperSpeechBubbleWidget.h"
-#include "UI/TunaSweeperTempOpenLootTileEntryWidget.h"
-#include "UI/TunaSweeperTempOpenLootWidget.h"
 #include "UObject/SavePackage.h"
 #include "UObject/UnrealType.h"
 #include "Weapon/TunaSweeperProjectile.h"
@@ -92,10 +89,8 @@ namespace TunaSweeperEditorSetup
 {
 	const FString GameInstanceTaskId = TEXT("2026-05-10_CreateGameInstanceBlueprint");
 	const FString TopDownShooterTaskId = TEXT("2026-05-10_CreateTopDownShooterAssets");
-	const FString InteractionTaskId = TEXT("2026-05-11_CreateComponentBasedInteractionAssetsAndPlaceActorsV2");
 	const FString InteractionInputTaskId = TEXT("2026-05-11_SetInteractInputToFKey");
 	const FString InteractionMarkerAlignmentTaskId = TEXT("2026-05-10_RebuildInteractionMarkerAlignmentV2");
-	const FString TempOpenLootUiTaskId = TEXT("2026-05-10_CreateTempOpenLootTileViewAndIconsV2");
 	const FString PickupItemAndSpawnerTaskId = TEXT("2026-05-11_CreatePickupItemAndSpawnerAssetsV3");
 	const FString CommonGameHudTaskId = TEXT("2026-05-16_RebuildInventoryLayoutAndModdingPanelV1");
 	const FString InventoryInputTaskId = TEXT("2026-05-11_AddInventoryInput");
@@ -137,8 +132,6 @@ namespace TunaSweeperEditorSetup
 	const FString UIIconAssetPath = TEXT("/Game/UI/Icons");
 	const FString InteractionMarkerAssetName = TEXT("WBP_InteractionMarker");
 	const FString PickupItemIconWidgetAssetName = TEXT("WBP_PickupItemIcon");
-	const FString TempOpenLootWidgetAssetName = TEXT("WBP_TempOpenLootTileView");
-	const FString TempOpenLootEntryWidgetAssetName = TEXT("WBP_TempOpenLootTileEntry");
 	const FString GameHudWidgetAssetName = TEXT("WBP_GameHud");
 	const FString HudTopReserveWidgetAssetName = TEXT("WBP_HudTopReserve");
 	const FString HudBottomStatusWidgetAssetName = TEXT("WBP_HudBottomStatus");
@@ -179,9 +172,6 @@ namespace TunaSweeperEditorSetup
 	const FString VideoAssetPath = TEXT("/Game/Movies");
 	const FString BunkerToRaidMediaSourceAssetName = TEXT("MS_BunkerToRaid");
 	const FString RaidToBunkerMediaSourceAssetName = TEXT("MS_BunkerToRaid");
-	const FString DialogueInteractionAssetName = TEXT("BP_Interact_Dialogue");
-	const FString PickupInteractionAssetName = TEXT("BP_Interact_Pickup");
-	const FString OpenInteractionAssetName = TEXT("BP_Interact_Open");
 	const FString PickupItemAssetName = TEXT("BP_PickupItem");
 	const FString ItemSpawnInteractionAssetName = TEXT("BP_Interact_ItemSpawn");
 	const FString LootContainerAssetName = TEXT("BP_LootContainer");
@@ -1478,7 +1468,7 @@ namespace TunaSweeperEditorSetup
 		return true;
 	}
 
-	const TArray<FString>& GetTempOpenLootIconAssetNames()
+	const TArray<FString>& GetItemIconAssetNames()
 	{
 		static const TArray<FString> IconAssetNames = {
 			TEXT("T_UIIcon_Pistol"),
@@ -1536,7 +1526,7 @@ namespace TunaSweeperEditorSetup
 		return IconAssetNames;
 	}
 
-	FString GetTempOpenLootIconSourcePath(const FString& IconAssetName)
+	FString GetItemIconSourcePath(const FString& IconAssetName)
 	{
 		FString SourcePath = FPaths::ConvertRelativePathToFull(FPaths::Combine(
 			FPaths::ProjectDir(),
@@ -1567,11 +1557,11 @@ namespace TunaSweeperEditorSetup
 		SaveAsset(Texture);
 	}
 
-	bool EnsureTempOpenLootIconTextures()
+	bool EnsureItemIconTextures()
 	{
 		TArray<FString> FilesToImport;
 
-		for (const FString& IconAssetName : GetTempOpenLootIconAssetNames())
+		for (const FString& IconAssetName : GetItemIconAssetNames())
 		{
 			const FString ObjectPath = GetAssetObjectPath(UIIconAssetPath, IconAssetName);
 			if (UTexture2D* ExistingTexture = LoadObject<UTexture2D>(nullptr, *ObjectPath))
@@ -1580,10 +1570,10 @@ namespace TunaSweeperEditorSetup
 				continue;
 			}
 
-			const FString SourcePath = GetTempOpenLootIconSourcePath(IconAssetName);
+			const FString SourcePath = GetItemIconSourcePath(IconAssetName);
 			if (!FPaths::FileExists(SourcePath))
 			{
-				UE_LOG(LogTunaSweeperEditor, Error, TEXT("Missing temp open loot icon source: %s"), *SourcePath);
+				UE_LOG(LogTunaSweeperEditor, Error, TEXT("Missing item icon source: %s"), *SourcePath);
 				return false;
 			}
 
@@ -1602,17 +1592,17 @@ namespace TunaSweeperEditorSetup
 			const TArray<UObject*> ImportedAssets = AssetToolsModule.Get().ImportAssetsAutomated(ImportData);
 			if (ImportedAssets.Num() == 0)
 			{
-				UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to import temp open loot icons."));
+				UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to import item icons."));
 				return false;
 			}
 		}
 
-		for (const FString& IconAssetName : GetTempOpenLootIconAssetNames())
+		for (const FString& IconAssetName : GetItemIconAssetNames())
 		{
 			UTexture2D* Texture = LoadObject<UTexture2D>(nullptr, *GetAssetObjectPath(UIIconAssetPath, IconAssetName));
 			if (!Texture)
 			{
-				UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to load imported temp open loot icon: %s"), *IconAssetName);
+				UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to load imported item icon: %s"), *IconAssetName);
 				return false;
 			}
 
@@ -1627,7 +1617,7 @@ namespace TunaSweeperEditorSetup
 		TArray<FString> FilesToImport;
 		for (const FString& IconAssetName : IconAssetNames)
 		{
-			const FString SourcePath = GetTempOpenLootIconSourcePath(IconAssetName);
+			const FString SourcePath = GetItemIconSourcePath(IconAssetName);
 			if (!FPaths::FileExists(SourcePath))
 			{
 				UE_LOG(LogTunaSweeperEditor, Error, TEXT("Missing icon source: %s"), *SourcePath);
@@ -1680,7 +1670,7 @@ namespace TunaSweeperEditorSetup
 			return true;
 		}
 
-		const FString SourcePath = GetTempOpenLootIconSourcePath(IconAssetName);
+		const FString SourcePath = GetItemIconSourcePath(IconAssetName);
 		if (!FPaths::FileExists(SourcePath))
 		{
 			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Missing canned tuna icon source: %s"), *SourcePath);
@@ -2756,189 +2746,6 @@ namespace TunaSweeperEditorSetup
 		return true;
 	}
 
-	bool BuildTempOpenLootEntryWidgetTree(UWidgetBlueprint* WidgetBlueprint)
-	{
-		if (!WidgetBlueprint || !WidgetBlueprint->WidgetTree)
-		{
-			return false;
-		}
-
-		WidgetBlueprint->Modify();
-		WidgetBlueprint->WidgetTree->Modify();
-		ClearWidgetTreeForRebuild(WidgetBlueprint);
-
-		UWidgetTree* WidgetTree = WidgetBlueprint->WidgetTree;
-		USizeBox* RootSizeBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("RootSizeBox"));
-		UBorder* TileBackground = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("TileBackground"));
-		UVerticalBox* TileStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("TileStack"));
-		USizeBox* IconSizeBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("IconSizeBox"));
-		UImage* TempItemIconImage = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("TempItemIconImage"));
-		UTextBlock* TempItemQuantityText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("TempItemQuantityText"));
-
-		if (!RootSizeBox || !TileBackground || !TileStack || !IconSizeBox || !TempItemIconImage || !TempItemQuantityText)
-		{
-			return false;
-		}
-
-		WidgetTree->RootWidget = RootSizeBox;
-		RootSizeBox->SetWidthOverride(128.0f);
-		RootSizeBox->SetHeightOverride(150.0f);
-		RootSizeBox->SetContent(TileBackground);
-
-		TileBackground->SetPadding(FMargin(8.0f));
-		TileBackground->SetBrush(MakeRoundedBoxBrush(FVector2D(128.0f, 150.0f), FLinearColor(0.015f, 0.018f, 0.02f, 0.92f), FLinearColor(0.25f, 0.28f, 0.32f, 1.0f), 1.0f));
-		TileBackground->SetContent(TileStack);
-
-		IconSizeBox->SetWidthOverride(104.0f);
-		IconSizeBox->SetHeightOverride(104.0f);
-		IconSizeBox->SetContent(TempItemIconImage);
-
-		UVerticalBoxSlot* IconSlot = TileStack->AddChildToVerticalBox(IconSizeBox);
-		if (IconSlot)
-		{
-			IconSlot->SetHorizontalAlignment(HAlign_Center);
-			IconSlot->SetVerticalAlignment(VAlign_Center);
-		}
-
-		ConfigureTextBlock(TempItemQuantityText, FText::FromString(TEXT("x1")), FLinearColor::White, 18);
-		UVerticalBoxSlot* QuantitySlot = TileStack->AddChildToVerticalBox(TempItemQuantityText);
-		if (QuantitySlot)
-		{
-			QuantitySlot->SetHorizontalAlignment(HAlign_Center);
-			QuantitySlot->SetVerticalAlignment(VAlign_Center);
-			QuantitySlot->SetPadding(FMargin(0.0f, 8.0f, 0.0f, 0.0f));
-		}
-
-		RegisterWidgetVariable(WidgetBlueprint, TempItemIconImage);
-		RegisterWidgetVariable(WidgetBlueprint, TempItemQuantityText);
-		WidgetBlueprint->MarkPackageDirty();
-		return true;
-	}
-
-	bool BuildTempOpenLootTileViewWidgetTree(UWidgetBlueprint* WidgetBlueprint, TSubclassOf<UUserWidget> EntryWidgetClass)
-	{
-		if (!WidgetBlueprint || !WidgetBlueprint->WidgetTree || !EntryWidgetClass)
-		{
-			return false;
-		}
-
-		WidgetBlueprint->Modify();
-		WidgetBlueprint->WidgetTree->Modify();
-		ClearWidgetTreeForRebuild(WidgetBlueprint);
-
-		UWidgetTree* WidgetTree = WidgetBlueprint->WidgetTree;
-		UCanvasPanel* RootCanvas = WidgetTree->ConstructWidget<UCanvasPanel>(UCanvasPanel::StaticClass(), TEXT("RootCanvas"));
-		UBorder* PanelBackground = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("PanelBackground"));
-		UVerticalBox* PanelStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("PanelStack"));
-		UHorizontalBox* HeaderRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("HeaderRow"));
-		UTextBlock* HeaderText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("HeaderText"));
-		UButton* TempCloseButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("TempCloseButton"));
-		UTextBlock* CloseButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("CloseButtonText"));
-		UTileView* TempLootTileView = WidgetTree->ConstructWidget<UTileView>(UTileView::StaticClass(), TEXT("TempLootTileView"));
-
-		if (!RootCanvas || !PanelBackground || !PanelStack || !HeaderRow || !HeaderText || !TempCloseButton || !CloseButtonText || !TempLootTileView)
-		{
-			return false;
-		}
-
-		WidgetTree->RootWidget = RootCanvas;
-
-		UCanvasPanelSlot* PanelSlot = RootCanvas->AddChildToCanvas(PanelBackground);
-		if (PanelSlot)
-		{
-			PanelSlot->SetAnchors(FAnchors(0.5f, 0.5f, 0.5f, 0.5f));
-			PanelSlot->SetAlignment(FVector2D(0.5f, 0.5f));
-			PanelSlot->SetPosition(FVector2D::ZeroVector);
-			PanelSlot->SetSize(FVector2D(620.0f, 760.0f));
-		}
-
-		PanelBackground->SetPadding(FMargin(18.0f));
-		PanelBackground->SetBrush(MakeRoundedBoxBrush(FVector2D(620.0f, 760.0f), FLinearColor(0.015f, 0.016f, 0.018f, 0.96f), FLinearColor(0.18f, 0.2f, 0.23f, 1.0f), 1.0f));
-		PanelBackground->SetContent(PanelStack);
-
-		ConfigureTextBlock(HeaderText, FText::FromString(TEXT("Temp Loot Test")), FLinearColor::White, 22);
-		UHorizontalBoxSlot* HeaderTextSlot = HeaderRow->AddChildToHorizontalBox(HeaderText);
-		if (HeaderTextSlot)
-		{
-			HeaderTextSlot->SetHorizontalAlignment(HAlign_Left);
-			HeaderTextSlot->SetVerticalAlignment(VAlign_Center);
-			HeaderTextSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
-		}
-
-		ConfigureTextBlock(CloseButtonText, FText::FromString(TEXT("Close")), FLinearColor::White, 16);
-		TempCloseButton->SetContent(CloseButtonText);
-		UHorizontalBoxSlot* CloseButtonSlot = HeaderRow->AddChildToHorizontalBox(TempCloseButton);
-		if (CloseButtonSlot)
-		{
-			CloseButtonSlot->SetHorizontalAlignment(HAlign_Right);
-			CloseButtonSlot->SetVerticalAlignment(VAlign_Center);
-		}
-
-		UVerticalBoxSlot* HeaderSlot = PanelStack->AddChildToVerticalBox(HeaderRow);
-		if (HeaderSlot)
-		{
-			HeaderSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 16.0f));
-			HeaderSlot->SetHorizontalAlignment(HAlign_Fill);
-			HeaderSlot->SetVerticalAlignment(VAlign_Top);
-		}
-
-		TempLootTileView->SetEntryWidth(128.0f);
-		TempLootTileView->SetEntryHeight(150.0f);
-		SetListViewEntryWidgetClass(TempLootTileView, EntryWidgetClass);
-
-		UVerticalBoxSlot* TileViewSlot = PanelStack->AddChildToVerticalBox(TempLootTileView);
-		if (TileViewSlot)
-		{
-			TileViewSlot->SetHorizontalAlignment(HAlign_Fill);
-			TileViewSlot->SetVerticalAlignment(VAlign_Fill);
-			TileViewSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
-		}
-
-		RegisterWidgetVariable(WidgetBlueprint, TempLootTileView);
-		RegisterWidgetVariable(WidgetBlueprint, TempCloseButton);
-		RegisterWidgetVariable(WidgetBlueprint, CloseButtonText);
-		WidgetBlueprint->MarkPackageDirty();
-		return true;
-	}
-
-	bool EnsureTempOpenLootTileViewAssets()
-	{
-		if (!EnsureTempOpenLootIconTextures())
-		{
-			return false;
-		}
-
-		UWidgetBlueprint* EntryWidgetBlueprint = EnsureWidgetBlueprint(
-			UIAssetPath,
-			TempOpenLootEntryWidgetAssetName,
-			UTunaSweeperTempOpenLootTileEntryWidget::StaticClass());
-		if (!EntryWidgetBlueprint || !BuildTempOpenLootEntryWidgetTree(EntryWidgetBlueprint))
-		{
-			return false;
-		}
-
-		FKismetEditorUtilities::CompileBlueprint(EntryWidgetBlueprint);
-		EntryWidgetBlueprint->MarkPackageDirty();
-		if (!SaveAsset(EntryWidgetBlueprint))
-		{
-			return false;
-		}
-
-		UWidgetBlueprint* TileViewWidgetBlueprint = EnsureWidgetBlueprint(
-			UIAssetPath,
-			TempOpenLootWidgetAssetName,
-			UTunaSweeperTempOpenLootWidget::StaticClass());
-		const TSubclassOf<UUserWidget> EntryWidgetClass = EntryWidgetBlueprint->GeneratedClass.Get();
-		if (!TileViewWidgetBlueprint || !BuildTempOpenLootTileViewWidgetTree(TileViewWidgetBlueprint, EntryWidgetClass))
-		{
-			return false;
-		}
-
-		FKismetEditorUtilities::CompileBlueprint(TileViewWidgetBlueprint);
-		TileViewWidgetBlueprint->MarkPackageDirty();
-		return SaveAsset(TileViewWidgetBlueprint);
-	}
-
 	bool EnsureCommonGameHudAssets()
 	{
 		UWidgetBlueprint* ItemThumbnailWidgetBlueprint = EnsureWidgetBlueprint(
@@ -3070,7 +2877,7 @@ namespace TunaSweeperEditorSetup
 
 	bool EnsureBackpackInventoryAssets()
 	{
-		if (!EnsureTempOpenLootIconTextures() || !EnsureEquipmentIconTextures())
+		if (!EnsureItemIconTextures() || !EnsureEquipmentIconTextures())
 		{
 			return false;
 		}
@@ -3308,69 +3115,6 @@ namespace TunaSweeperEditorSetup
 		}
 
 		return CreatedBlueprint;
-	}
-
-	bool ConfigureInteractableBlueprint(UBlueprint* InteractableBlueprint, ETunaSweeperInteractionType InteractionType, const FText& DisplayName)
-	{
-		if (!InteractableBlueprint)
-		{
-			return false;
-		}
-
-		FKismetEditorUtilities::CompileBlueprint(InteractableBlueprint);
-
-		UClass* GeneratedClass = InteractableBlueprint->GeneratedClass;
-		ATunaSweeperInteractableActor* Defaults = GeneratedClass
-			? Cast<ATunaSweeperInteractableActor>(GeneratedClass->GetDefaultObject())
-			: nullptr;
-
-		if (!Defaults)
-		{
-			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to configure %s defaults."), *GetNameSafe(InteractableBlueprint));
-			return false;
-		}
-
-		InteractableBlueprint->Modify();
-		Defaults->Modify();
-		if (UTunaSweeperInteractableComponent* InteractableComponent = Defaults->GetInteractableComponent())
-		{
-			InteractableComponent->Modify();
-		}
-		Defaults->ConfigureInteractionDefaults(
-			InteractionType,
-			DisplayName,
-			TSoftClassPtr<UTunaSweeperInteractionMarkerWidget>(
-				FSoftObjectPath(GetAssetClassPath(UIAssetPath, InteractionMarkerAssetName))));
-		FBlueprintEditorUtils::MarkBlueprintAsModified(InteractableBlueprint);
-		FKismetEditorUtilities::CompileBlueprint(InteractableBlueprint);
-		InteractableBlueprint->MarkPackageDirty();
-
-		return SaveAsset(InteractableBlueprint);
-	}
-
-	bool ConfigureInteractableActorInstance(AActor* Actor, ETunaSweeperInteractionType InteractionType, const FText& DisplayName)
-	{
-		if (!Actor)
-		{
-			return false;
-		}
-
-		UTunaSweeperInteractableComponent* InteractableComponent = Actor->FindComponentByClass<UTunaSweeperInteractableComponent>();
-		if (!InteractableComponent)
-		{
-			UE_LOG(LogTunaSweeperEditor, Error, TEXT("%s does not have a UTunaSweeperInteractableComponent."), *GetNameSafe(Actor));
-			return false;
-		}
-
-		Actor->Modify();
-		InteractableComponent->Modify();
-		InteractableComponent->ConfigureInteractionDefaults(
-			InteractionType,
-			DisplayName,
-			TSoftClassPtr<UTunaSweeperInteractionMarkerWidget>(
-				FSoftObjectPath(GetAssetClassPath(UIAssetPath, InteractionMarkerAssetName))));
-		Actor->MarkPackageDirty();
-		return true;
 	}
 
 	bool ConfigureIntroMenuWidgetBlueprint(UWidgetBlueprint* WidgetBlueprint)
@@ -3851,49 +3595,6 @@ namespace TunaSweeperEditorSetup
 		return LoadedWorld;
 	}
 
-	bool PlaceInteractionActor(
-		UWorld* World,
-		UBlueprint* ActorBlueprint,
-		const FString& ActorLabel,
-		const FVector& Location,
-		ETunaSweeperInteractionType InteractionType,
-		const FText& DisplayName)
-	{
-		if (!World || !ActorBlueprint || !ActorBlueprint->GeneratedClass)
-		{
-			return false;
-		}
-
-		if (AActor* ExistingActor = FindActorByLabel(World, ActorLabel))
-		{
-			ExistingActor->Modify();
-			ExistingActor->SetActorLocation(Location);
-			ExistingActor->SetActorRotation(FRotator::ZeroRotator);
-			return ConfigureInteractableActorInstance(ExistingActor, InteractionType, DisplayName);
-		}
-
-		World->PersistentLevel->Modify();
-
-		FActorSpawnParameters SpawnParameters;
-		SpawnParameters.OverrideLevel = World->PersistentLevel;
-		SpawnParameters.Name = MakeUniqueObjectName(World->PersistentLevel, ActorBlueprint->GeneratedClass, FName(*ActorLabel));
-		SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-
-		AActor* SpawnedActor = World->SpawnActor<AActor>(ActorBlueprint->GeneratedClass, Location, FRotator::ZeroRotator, SpawnParameters);
-		if (!SpawnedActor)
-		{
-			return false;
-		}
-
-		SpawnedActor->SetActorLabel(ActorLabel);
-		if (!ConfigureInteractableActorInstance(SpawnedActor, InteractionType, DisplayName))
-		{
-			return false;
-		}
-		SpawnedActor->MarkPackageDirty();
-		return true;
-	}
-
 	bool PlaceLevelTravelActor(
 		UWorld* World,
 		UBlueprint* ActorBlueprint,
@@ -4165,65 +3866,6 @@ namespace TunaSweeperEditorSetup
 		}
 		SpawnedActor->MarkPackageDirty();
 		return true;
-	}
-
-	bool PlaceInteractionActorsInRaidMap(UBlueprint* DialogueBlueprint, UBlueprint* PickupBlueprint, UBlueprint* OpenBlueprint)
-	{
-		UWorld* World = GEditor ? GEditor->GetEditorWorldContext().World() : nullptr;
-		if (!World || World->GetPackage()->GetName() != RaidMapPackagePath)
-		{
-			return false;
-		}
-
-		const bool bPlacedActors =
-			PlaceInteractionActor(
-				World,
-				DialogueBlueprint,
-				TEXT("TS_Interact_Dialogue"),
-				FVector(200.0f, -200.0f, 80.0f),
-				ETunaSweeperInteractionType::Dialogue,
-				FText::FromString(TEXT("\uB300\uD654"))) &&
-			PlaceInteractionActor(
-				World,
-				PickupBlueprint,
-				TEXT("TS_Interact_Pickup"),
-				FVector(450.0f, -200.0f, 80.0f),
-				ETunaSweeperInteractionType::Pickup,
-				FText::FromString(TEXT("\uC90D\uAE30"))) &&
-			PlaceInteractionActor(
-				World,
-				OpenBlueprint,
-				TEXT("TS_Interact_Open"),
-				FVector(700.0f, -200.0f, 80.0f),
-				ETunaSweeperInteractionType::Open,
-				FText::FromString(TEXT("\uC5F4\uAE30")));
-
-		if (!bPlacedActors)
-		{
-			return false;
-		}
-
-		return UEditorLoadingAndSavingUtils::SaveMap(World, RaidMapPackagePath);
-	}
-
-	bool EnsureInteractionAssetsAndMapPlacement()
-	{
-		UWidgetBlueprint* MarkerWidgetBlueprint = EnsureInteractionMarkerWidgetBlueprint();
-		UBlueprint* DialogueBlueprint = EnsureBlueprint(InteractionAssetPath, DialogueInteractionAssetName, ATunaSweeperInteractableActor::StaticClass());
-		UBlueprint* PickupBlueprint = EnsureBlueprint(InteractionAssetPath, PickupInteractionAssetName, ATunaSweeperInteractableActor::StaticClass());
-		UBlueprint* OpenBlueprint = EnsureBlueprint(InteractionAssetPath, OpenInteractionAssetName, ATunaSweeperInteractableActor::StaticClass());
-
-		if (!MarkerWidgetBlueprint || !DialogueBlueprint || !PickupBlueprint || !OpenBlueprint)
-		{
-			return false;
-		}
-
-		const bool bConfigured =
-			ConfigureInteractableBlueprint(DialogueBlueprint, ETunaSweeperInteractionType::Dialogue, FText::FromString(TEXT("\uB300\uD654"))) &&
-			ConfigureInteractableBlueprint(PickupBlueprint, ETunaSweeperInteractionType::Pickup, FText::FromString(TEXT("\uC90D\uAE30"))) &&
-			ConfigureInteractableBlueprint(OpenBlueprint, ETunaSweeperInteractionType::Open, FText::FromString(TEXT("\uC5F4\uAE30")));
-
-		return bConfigured && PlaceInteractionActorsInRaidMap(DialogueBlueprint, PickupBlueprint, OpenBlueprint);
 	}
 
 	bool PlacePickupItemAndSpawnerActorsInRaidMap(UBlueprint* PickupItemBlueprint, UBlueprint* ItemSpawnBlueprint)
@@ -4519,35 +4161,6 @@ namespace TunaSweeperEditorSetup
 		return bConfigured && PlaceFirstOutingQuestNpcInBunkerMap(QuestNpcBlueprint);
 	}
 
-	void ScheduleInteractionAssetsAndMapPlacement()
-	{
-		if (FTunaSweeperEditorRunOnce::HasCompleted(InteractionTaskId))
-		{
-			return;
-		}
-
-		FTSTicker::GetCoreTicker().AddTicker(
-			FTickerDelegate::CreateLambda(
-				[](float)
-				{
-					UWorld* EditorWorld = GEditor ? GEditor->GetEditorWorldContext().World() : nullptr;
-					if (!EditorWorld || EditorWorld->GetPackage()->GetName() != RaidMapPackagePath)
-					{
-						return true;
-					}
-
-					FTunaSweeperEditorRunOnce::Run(
-						InteractionTaskId,
-						[]()
-						{
-							return EnsureInteractionAssetsAndMapPlacement();
-						});
-
-					return !FTunaSweeperEditorRunOnce::HasCompleted(InteractionTaskId);
-				}),
-			1.0f);
-	}
-
 	void SchedulePickupItemAndSpawnerAssetsAndMapPlacement()
 	{
 		if (FTunaSweeperEditorRunOnce::HasCompleted(PickupItemAndSpawnerTaskId))
@@ -4821,13 +4434,6 @@ public:
 			});
 
 		FTunaSweeperEditorRunOnce::Run(
-			TunaSweeperEditorSetup::TempOpenLootUiTaskId,
-			[]()
-			{
-				return TunaSweeperEditorSetup::EnsureTempOpenLootTileViewAssets();
-			});
-
-		FTunaSweeperEditorRunOnce::Run(
 			TunaSweeperEditorSetup::CommonGameHudTaskId,
 			[]()
 			{
@@ -4853,7 +4459,6 @@ public:
 			FPlatformMisc::RequestExit(false);
 		}
 
-		TunaSweeperEditorSetup::ScheduleInteractionAssetsAndMapPlacement();
 		TunaSweeperEditorSetup::SchedulePickupItemAndSpawnerAssetsAndMapPlacement();
 		TunaSweeperEditorSetup::ScheduleLootContainerAndSpawnerAssetsAndMapPlacement();
 		TunaSweeperEditorSetup::ScheduleIntroMenuAndLevelTravelSetup();

@@ -1,10 +1,8 @@
 #include "Subsystem/TunaSweeperInteractionSubsystem.h"
 
 #include "Engine/Engine.h"
-#include "Blueprint/UserWidget.h"
 #include "Character/TunaSweeperQuestNpcActor.h"
 #include "Game/TunaSweeperGameInstance.h"
-#include "GameFramework/PlayerController.h"
 #include "Interaction/TunaSweeperItemSpawnInteractableActor.h"
 #include "Interaction/TunaSweeperInteractableComponent.h"
 #include "Interaction/TunaSweeperLevelTravelInteractableActor.h"
@@ -15,7 +13,6 @@
 #include "Kismet/GameplayStatics.h"
 #include "Player/TunaSweeperPlayerController.h"
 #include "Stats/Stats.h"
-#include "UI/TunaSweeperTempOpenLootWidget.h"
 
 void UTunaSweeperInteractionSubsystem::Tick(float DeltaTime)
 {
@@ -68,14 +65,8 @@ bool UTunaSweeperInteractionSubsystem::RequestInteraction(UTunaSweeperInteractab
 		return false;
 	}
 
-	const FString DebugTypeName = GetInteractionDebugTypeName(Interactable);
-	const FString DisplayName = Interactable->GetInteractionDisplayName().ToString();
-	const FString DebugMessage = FString::Printf(TEXT("[Interaction] %s: %s"), *DebugTypeName, *DisplayName);
-
 	switch (Interactable->GetInteractionType())
 	{
-	case ETunaSweeperInteractionType::Open:
-		return OpenTempOpenLootWidget(InstigatorPawn);
 	case ETunaSweeperInteractionType::ItemPickup:
 		return HandlePickupItemInteraction(Interactable);
 	case ETunaSweeperInteractionType::ItemSpawn:
@@ -91,15 +82,8 @@ bool UTunaSweeperInteractionSubsystem::RequestInteraction(UTunaSweeperInteractab
 	case ETunaSweeperInteractionType::SelfDestruct:
 		return HandleSelfDestructInteraction(Interactable, InstigatorPawn);
 	default:
-		break;
+		return false;
 	}
-
-	if (GEngine)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::White, DebugMessage);
-	}
-
-	return true;
 }
 
 bool UTunaSweeperInteractionSubsystem::HandlePickupItemInteraction(UTunaSweeperInteractableComponent* Interactable)
@@ -234,54 +218,6 @@ bool UTunaSweeperInteractionSubsystem::HandleSelfDestructInteraction(
 	return SelfDestructActor && SelfDestructActor->StartSelfDestruct(InstigatorPawn);
 }
 
-bool UTunaSweeperInteractionSubsystem::OpenTempOpenLootWidget(APawn* InstigatorPawn)
-{
-	if (!IsValid(InstigatorPawn))
-	{
-		return false;
-	}
-
-	APlayerController* PlayerController = Cast<APlayerController>(InstigatorPawn->GetController());
-	if (!PlayerController)
-	{
-		return false;
-	}
-
-	if (ActiveTempOpenLootWidget.IsValid() && ActiveTempOpenLootWidget->IsInViewport())
-	{
-		return true;
-	}
-
-	static const FSoftClassPath TempOpenLootWidgetClassPath(TEXT("/Game/UI/WBP_TempOpenLootTileView.WBP_TempOpenLootTileView_C"));
-	TSubclassOf<UTunaSweeperTempOpenLootWidget> WidgetClass = Cast<UClass>(TempOpenLootWidgetClassPath.TryLoad());
-	if (!WidgetClass)
-	{
-		if (GEngine)
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, TEXT("[Interaction] Missing WBP_TempOpenLootTileView."));
-		}
-		return false;
-	}
-
-	UTunaSweeperTempOpenLootWidget* Widget = CreateWidget<UTunaSweeperTempOpenLootWidget>(PlayerController, WidgetClass);
-	if (!Widget)
-	{
-		return false;
-	}
-
-	Widget->AddToViewport(10);
-	ActiveTempOpenLootWidget = Widget;
-
-	FInputModeGameAndUI InputMode;
-	InputMode.SetWidgetToFocus(Widget->TakeWidget());
-	InputMode.SetHideCursorDuringCapture(false);
-	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-	PlayerController->SetInputMode(InputMode);
-	PlayerController->bShowMouseCursor = true;
-
-	return true;
-}
-
 void UTunaSweeperInteractionSubsystem::RefreshFocusedInteractable()
 {
 	UWorld* World = GetWorld();
@@ -318,38 +254,4 @@ void UTunaSweeperInteractionSubsystem::RefreshFocusedInteractable()
 	}
 
 	FocusedInteractable = ClosestInteractable;
-}
-
-FString UTunaSweeperInteractionSubsystem::GetInteractionDebugTypeName(const UTunaSweeperInteractableComponent* Interactable) const
-{
-	if (!Interactable)
-	{
-		return TEXT("None");
-	}
-
-	switch (Interactable->GetInteractionType())
-	{
-	case ETunaSweeperInteractionType::Dialogue:
-		return TEXT("Dialogue");
-	case ETunaSweeperInteractionType::Pickup:
-		return TEXT("Pickup");
-	case ETunaSweeperInteractionType::Open:
-		return TEXT("Open");
-	case ETunaSweeperInteractionType::ItemPickup:
-		return TEXT("ItemPickup");
-	case ETunaSweeperInteractionType::ItemSpawn:
-		return TEXT("ItemSpawn");
-	case ETunaSweeperInteractionType::LootContainerOpen:
-		return TEXT("LootContainerOpen");
-	case ETunaSweeperInteractionType::LootContainerSpawn:
-		return TEXT("LootContainerSpawn");
-	case ETunaSweeperInteractionType::LevelTravel:
-		return TEXT("LevelTravel");
-	case ETunaSweeperInteractionType::Quest:
-		return TEXT("Quest");
-	case ETunaSweeperInteractionType::SelfDestruct:
-		return TEXT("SelfDestruct");
-	default:
-		return TEXT("Unknown");
-	}
 }

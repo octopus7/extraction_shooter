@@ -6,8 +6,6 @@
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
 #include "TunaSweeperGameInstance.generated.h"
 
-class UTexture2D;
-
 USTRUCT(BlueprintType)
 struct TUNASWEEPER_API FTunaSweeperGameplaySettings
 {
@@ -30,21 +28,6 @@ struct TUNASWEEPER_API FTunaSweeperGameplaySettings
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "TunaSweeper|Gameplay")
 	bool bEnableDebugGameplay = false;
-};
-
-USTRUCT(BlueprintType)
-struct TUNASWEEPER_API FTunaSweeperTempOpenLootItemData
-{
-	GENERATED_BODY()
-
-	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Temp Open Loot")
-	FText DisplayName;
-
-	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Temp Open Loot")
-	int32 Quantity = 1;
-
-	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Temp Open Loot")
-	TSoftObjectPtr<UTexture2D> IconTexture;
 };
 
 USTRUCT(BlueprintType)
@@ -162,11 +145,6 @@ public:
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|HUD")
 	float GetCarryWeightMovementSpeedMultiplier() const;
 
-	const TArray<FTunaSweeperTempOpenLootItemData>& GetOrCreateTempOpenLootItems();
-
-	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Temp Open Loot")
-	void GetTempOpenLootItems(TArray<FTunaSweeperTempOpenLootItemData>& OutItems);
-
 	const TArray<FTunaSweeperItemStack>& GetOrCreatePlayerInventoryItems();
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Inventory")
@@ -220,7 +198,6 @@ public:
 	FSimpleMulticastDelegate OnSelectedInventoryItemChanged;
 
 private:
-	void GenerateTempOpenLootItems();
 	void GeneratePlayerInventoryItems();
 	void EnsureInventoryStateInitialized();
 	bool LoadGameState();
@@ -268,12 +245,6 @@ private:
 	bool IsBunkerToRaidTravel(FName SourceLevelName, FName TargetLevelName) const;
 	bool IsRaidToBunkerTravel(FName SourceLevelName, FName TargetLevelName) const;
 	bool IsMapNameMatch(FName MapName, const TCHAR* ExpectedMapName) const;
-
-	UPROPERTY()
-	TArray<FTunaSweeperTempOpenLootItemData> TempOpenLootItems;
-
-	UPROPERTY()
-	bool bHasGeneratedTempOpenLootItems = false;
 
 	UPROPERTY()
 	TArray<FTunaSweeperItemStack> PlayerInventoryItems;

@@ -1,6 +1,5 @@
 #include "Game/TunaSweeperGameInstance.h"
 
-#include "Engine/Texture2D.h"
 #include "HAL/FileManager.h"
 #include "Inventory/TunaSweeperSaveGame.h"
 #include "Kismet/GameplayStatics.h"
@@ -67,44 +66,6 @@ namespace TunaSweeperInventory
 	{
 		return FMath::Clamp(SlotCount, FMath::Max(1, MinSlots), FMath::Max(MinSlots, MaxSlots));
 	}
-}
-
-namespace TunaSweeperTempOpenLoot
-{
-	struct FTempLootSeed
-	{
-		const TCHAR* DisplayName;
-		const TCHAR* TexturePath;
-		int32 MinQuantity;
-		int32 MaxQuantity;
-	};
-
-	const FTempLootSeed TempLootSeeds[] = {
-		{ TEXT("Pistol"), TEXT("/Game/UI/Icons/T_UIIcon_Pistol.T_UIIcon_Pistol"), 1, 2 },
-		{ TEXT("Rifle"), TEXT("/Game/UI/Icons/T_UIIcon_Rifle.T_UIIcon_Rifle"), 1, 1 },
-		{ TEXT("Shotgun"), TEXT("/Game/UI/Icons/T_UIIcon_Shotgun.T_UIIcon_Shotgun"), 1, 1 },
-		{ TEXT("Pistol Ammo"), TEXT("/Game/UI/Icons/T_UIIcon_PistolAmmo.T_UIIcon_PistolAmmo"), 18, 72 },
-		{ TEXT("Rifle Ammo"), TEXT("/Game/UI/Icons/T_UIIcon_RifleAmmo.T_UIIcon_RifleAmmo"), 30, 120 },
-		{ TEXT("Shotgun Ammo"), TEXT("/Game/UI/Icons/T_UIIcon_ShotgunAmmo.T_UIIcon_ShotgunAmmo"), 6, 32 },
-		{ TEXT("Canned Food"), TEXT("/Game/UI/Icons/T_UIIcon_CannedFood.T_UIIcon_CannedFood"), 1, 5 },
-		{ TEXT("Canned Tuna"), TEXT("/Game/UI/Icons/T_UIIcon_CannedTuna.T_UIIcon_CannedTuna"), 1, 4 },
-		{ TEXT("Water Bottle"), TEXT("/Game/UI/Icons/T_UIIcon_WaterBottle.T_UIIcon_WaterBottle"), 1, 4 },
-		{ TEXT("Energy Bar"), TEXT("/Game/UI/Icons/T_UIIcon_EnergyBar.T_UIIcon_EnergyBar"), 1, 6 },
-		{ TEXT("Bandage"), TEXT("/Game/UI/Icons/T_UIIcon_Bandage.T_UIIcon_Bandage"), 1, 8 },
-		{ TEXT("First Aid Kit"), TEXT("/Game/UI/Icons/T_UIIcon_FirstAidKit.T_UIIcon_FirstAidKit"), 1, 3 },
-		{ TEXT("Painkillers"), TEXT("/Game/UI/Icons/T_UIIcon_Painkillers.T_UIIcon_Painkillers"), 1, 6 },
-		{ TEXT("Antibiotics"), TEXT("/Game/UI/Icons/T_UIIcon_Antibiotics.T_UIIcon_Antibiotics"), 1, 5 },
-		{ TEXT("Combat Knife"), TEXT("/Game/UI/Icons/T_UIIcon_CombatKnife.T_UIIcon_CombatKnife"), 1, 1 },
-		{ TEXT("Rifle Extended Magazine"), TEXT("/Game/UI/Icons/T_UIIcon_RifleExtendedMagazine.T_UIIcon_RifleExtendedMagazine"), 1, 1 },
-		{ TEXT("Red Dot Optic"), TEXT("/Game/UI/Icons/T_UIIcon_RedDotOptic.T_UIIcon_RedDotOptic"), 1, 1 },
-		{ TEXT("Ballistic Helmet"), TEXT("/Game/UI/Icons/T_UIIcon_BallisticHelmet.T_UIIcon_BallisticHelmet"), 1, 1 },
-		{ TEXT("Body Armor"), TEXT("/Game/UI/Icons/T_UIIcon_BodyArmor.T_UIIcon_BodyArmor"), 1, 1 },
-		{ TEXT("Tactical Sunglasses"), TEXT("/Game/UI/Icons/T_UIIcon_TacticalSunglasses.T_UIIcon_TacticalSunglasses"), 1, 1 },
-		{ TEXT("Tactical Earphones I"), TEXT("/Game/UI/Icons/T_UIIcon_TacticalEarphones_Tier1.T_UIIcon_TacticalEarphones_Tier1"), 1, 1 },
-		{ TEXT("Tactical Earphones II"), TEXT("/Game/UI/Icons/T_UIIcon_TacticalEarphones_Tier2.T_UIIcon_TacticalEarphones_Tier2"), 1, 1 },
-		{ TEXT("Bag I"), TEXT("/Game/UI/Icons/T_UIIcon_Backpack_Tier1.T_UIIcon_Backpack_Tier1"), 1, 1 },
-		{ TEXT("Valuables Crate"), TEXT("/Game/UI/Icons/T_UIIcon_ValuablesCrate.T_UIIcon_ValuablesCrate"), 1, 2 },
-	};
 }
 
 void FTunaSweeperPlayerHudState::NormalizeWeightLimits()
@@ -306,21 +267,6 @@ float UTunaSweeperGameInstance::GetCarryWeightMovementSpeedMultiplier() const
 	FTunaSweeperPlayerHudState NormalizedHudState = PlayerHudState;
 	NormalizedHudState.NormalizeWeightLimits();
 	return NormalizedHudState.GetCarryWeightMovementSpeedMultiplier();
-}
-
-const TArray<FTunaSweeperTempOpenLootItemData>& UTunaSweeperGameInstance::GetOrCreateTempOpenLootItems()
-{
-	if (!bHasGeneratedTempOpenLootItems)
-	{
-		GenerateTempOpenLootItems();
-	}
-
-	return TempOpenLootItems;
-}
-
-void UTunaSweeperGameInstance::GetTempOpenLootItems(TArray<FTunaSweeperTempOpenLootItemData>& OutItems)
-{
-	OutItems = GetOrCreateTempOpenLootItems();
 }
 
 const TArray<FTunaSweeperItemStack>& UTunaSweeperGameInstance::GetOrCreatePlayerInventoryItems()
@@ -725,23 +671,6 @@ void UTunaSweeperGameInstance::HandleLevelTravelPersistence(FName SourceLevelNam
 	}
 }
 
-void UTunaSweeperGameInstance::GenerateTempOpenLootItems()
-{
-	TempOpenLootItems.Reset();
-
-	FRandomStream QuantityStream(static_cast<int32>(FDateTime::Now().GetTicks() & 0x7fffffff));
-	for (const TunaSweeperTempOpenLoot::FTempLootSeed& Seed : TunaSweeperTempOpenLoot::TempLootSeeds)
-	{
-		FTunaSweeperTempOpenLootItemData ItemData;
-		ItemData.DisplayName = FText::FromString(FString(Seed.DisplayName));
-		ItemData.Quantity = QuantityStream.RandRange(Seed.MinQuantity, Seed.MaxQuantity);
-		ItemData.IconTexture = TSoftObjectPtr<UTexture2D>(FSoftObjectPath(Seed.TexturePath));
-		TempOpenLootItems.Add(ItemData);
-	}
-
-	bHasGeneratedTempOpenLootItems = true;
-}
-
 void UTunaSweeperGameInstance::GeneratePlayerInventoryItems()
 {
 	EnsureInventoryStateInitialized();
@@ -871,8 +800,6 @@ void UTunaSweeperGameInstance::ResetRuntimeStateForSaveSlotSelection()
 	NumberSettings.Reset();
 	BoolSettings.Reset();
 	PlayerHudState = FTunaSweeperPlayerHudState();
-	TempOpenLootItems.Reset();
-	bHasGeneratedTempOpenLootItems = false;
 	PlayerInventoryItems.Reset();
 	bHasGeneratedPlayerInventoryItems = false;
 	ItemInstancesByUid.Reset();

@@ -12,16 +12,14 @@ class APawn;
 UENUM(BlueprintType)
 enum class ETunaSweeperInteractionType : uint8
 {
-	Dialogue UMETA(DisplayName = "Dialogue"),
-	Pickup UMETA(DisplayName = "Pickup"),
-	Open UMETA(DisplayName = "Open"),
-	ItemPickup UMETA(DisplayName = "Item Pickup"),
-	ItemSpawn UMETA(DisplayName = "Item Spawn"),
-	LootContainerOpen UMETA(DisplayName = "Loot Container Open"),
-	LootContainerSpawn UMETA(DisplayName = "Loot Container Spawn"),
-	LevelTravel UMETA(DisplayName = "Level Travel"),
-	Quest UMETA(DisplayName = "Quest"),
-	SelfDestruct UMETA(DisplayName = "Self Destruct")
+	None = 0 UMETA(DisplayName = "None"),
+	ItemPickup = 3 UMETA(DisplayName = "Item Pickup"),
+	ItemSpawn = 4 UMETA(DisplayName = "Item Spawn"),
+	LootContainerOpen = 5 UMETA(DisplayName = "Loot Container Open"),
+	LootContainerSpawn = 6 UMETA(DisplayName = "Loot Container Spawn"),
+	LevelTravel = 7 UMETA(DisplayName = "Level Travel"),
+	Quest = 8 UMETA(DisplayName = "Quest"),
+	SelfDestruct = 9 UMETA(DisplayName = "Self Destruct")
 };
 
 UCLASS(BlueprintType, Blueprintable, ClassGroup=(TunaSweeper), meta=(BlueprintSpawnableComponent))
@@ -73,7 +71,7 @@ public:
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
-	ETunaSweeperInteractionType InteractionType = ETunaSweeperInteractionType::Dialogue;
+	ETunaSweeperInteractionType InteractionType = ETunaSweeperInteractionType::None;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
 	FText InteractionDisplayName = FText::FromString(TEXT("Interact"));

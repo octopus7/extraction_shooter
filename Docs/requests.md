@@ -516,3 +516,9 @@
 ## 2026-05-17 23:07:27 (소요시간: 약 2분)
 
 - 레벨에 올라간 초기 상호작용 테스트 액터를 먼저 삭제할 것.
+
+## 2026-05-17 23:20:09 (소요시간: 약 8분)
+
+- 초기 상호작용 테스트용으로 만든 `BP_Interact_Dialogue`, `BP_Interact_Pickup`, `BP_Interact_Open`과 임시 `WBP_TempOpenLoot*` 자산을 삭제할 것.
+- 필요 없어지는 TempOpenLoot 런타임 클래스와 GameInstance 임시 루팅 데이터를 삭제할 것.
+- 관련 에디터 모듈의 임시 BP/WBP 생성, 레벨 배치, 스케줄 등록 코드를 삭제할 것.
