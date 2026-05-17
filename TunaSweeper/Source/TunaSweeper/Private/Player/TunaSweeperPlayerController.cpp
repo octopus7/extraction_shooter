@@ -103,6 +103,72 @@ namespace TunaSweeperDropPlacement
 	}
 }
 
+namespace TunaSweeperHoveredItemInteraction
+{
+	bool TryFindEquipmentTarget(
+		UTunaSweeperGameInstance* TunaGameInstance,
+		const FTunaSweeperItemSlotReference& SourceSlot,
+		bool bRequireEmptyTarget,
+		FTunaSweeperItemSlotReference& OutTargetSlot)
+	{
+		if (!TunaGameInstance || SourceSlot.Source == ETunaSweeperItemSlotSource::Equipment)
+		{
+			return false;
+		}
+
+		const TArray<FTunaSweeperInventorySlot>& EquipmentSlots = TunaGameInstance->GetEquipmentSlots();
+		for (int32 SlotIndex = 0; SlotIndex < EquipmentSlots.Num(); ++SlotIndex)
+		{
+			if (bRequireEmptyTarget != EquipmentSlots[SlotIndex].IsEmpty())
+			{
+				continue;
+			}
+
+			FTunaSweeperItemSlotReference TargetSlot;
+			TargetSlot.Source = ETunaSweeperItemSlotSource::Equipment;
+			TargetSlot.SlotIndex = SlotIndex;
+			if (TunaGameInstance->CanMoveItemBetweenSlots(SourceSlot, TargetSlot))
+			{
+				OutTargetSlot = TargetSlot;
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	bool TryFindFirstInventoryTarget(
+		UTunaSweeperGameInstance* TunaGameInstance,
+		const FTunaSweeperItemSlotReference& SourceSlot,
+		FTunaSweeperItemSlotReference& OutTargetSlot)
+	{
+		if (!TunaGameInstance)
+		{
+			return false;
+		}
+
+		const TArray<FTunaSweeperInventorySlot>& InventorySlots = TunaGameInstance->GetInventorySlots();
+		for (int32 SlotIndex = 0; SlotIndex < InventorySlots.Num(); ++SlotIndex)
+		{
+			if (!InventorySlots[SlotIndex].IsEmpty())
+			{
+				continue;
+			}
+
+			FTunaSweeperItemSlotReference TargetSlot;
+			TargetSlot.Source = ETunaSweeperItemSlotSource::Inventory;
+			TargetSlot.SlotIndex = SlotIndex;
+			if (TunaGameInstance->CanMoveItemBetweenSlots(SourceSlot, TargetSlot))
+			{
+				OutTargetSlot = TargetSlot;
+				return true;
+			}
+		}
+
+		return false;
+	}
+}
+
 ATunaSweeperPlayerController::ATunaSweeperPlayerController()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -191,6 +257,11 @@ void ATunaSweeperPlayerController::PlayerTick(float DeltaTime)
 		return;
 	}
 
+	if (IsInventoryUiOpen())
+	{
+		return;
+	}
+
 	FVector AimPoint;
 	if (GetMouseAimPointOnPlane(ControlledCharacter->GetActorLocation().Z, AimPoint))
 	{
@@ -241,6 +312,14 @@ void ATunaSweeperPlayerController::EnsureIntroMenuWidget()
 		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
 		SetInputMode(InputMode);
 		bShowMouseCursor = true;
+	}
+}
+
+void ATunaSweeperPlayerController::CancelPawnGameplayActions() const
+{
+	if (ATunaSweeperTopDownCharacter* ControlledCharacter = Cast<ATunaSweeperTopDownCharacter>(GetPawn()))
+	{
+		ControlledCharacter->CancelActiveGameplayActions();
 	}
 }
 
@@ -335,8 +414,62 @@ ATunaSweeperPickupItemActor* ATunaSweeperPlayerController::SpawnDroppedPickupIte
 	return SpawnedPickupItem;
 }
 
+bool ATunaSweeperPlayerController::TryHandleHoveredItemInteract()
+{
+	if (IsIntroMap())
+	{
+		return false;
+	}
+
+	if (const ATunaSweeperTopDownCharacter* ControlledCharacter = Cast<ATunaSweeperTopDownCharacter>(GetPawn()))
+	{
+		if (ControlledCharacter->IsDead())
+		{
+			return true;
+		}
+	}
+
+	UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+	if (!TunaGameInstance || !TunaGameInstance->HasHoveredItemSlot())
+	{
+		return false;
+	}
+
+	const FTunaSweeperItemSlotReference HoveredSlot = TunaGameInstance->GetHoveredItemSlotReference();
+	FTunaSweeperItemInstance HoveredItemInstance;
+	if (!TunaGameInstance->TryGetSlotItemInstance(HoveredSlot, HoveredItemInstance))
+	{
+		TunaGameInstance->ClearHoveredItemSlot(HoveredSlot);
+		return true;
+	}
+
+	FTunaSweeperItemSlotReference TargetSlot;
+	if (TunaSweeperHoveredItemInteraction::TryFindEquipmentTarget(TunaGameInstance, HoveredSlot, true, TargetSlot) ||
+		TunaSweeperHoveredItemInteraction::TryFindEquipmentTarget(TunaGameInstance, HoveredSlot, false, TargetSlot))
+	{
+		TunaGameInstance->MoveItemBetweenSlots(HoveredSlot, TargetSlot);
+		TunaGameInstance->ClearHoveredItemSlot(HoveredSlot);
+		return true;
+	}
+
+	if (HoveredSlot.Source == ETunaSweeperItemSlotSource::LootContainer &&
+		TunaSweeperHoveredItemInteraction::TryFindFirstInventoryTarget(TunaGameInstance, HoveredSlot, TargetSlot))
+	{
+		TunaGameInstance->MoveItemBetweenSlots(HoveredSlot, TargetSlot);
+		TunaGameInstance->ClearHoveredItemSlot(HoveredSlot);
+		return true;
+	}
+
+	return true;
+}
+
 void ATunaSweeperPlayerController::HandleQuickSlot(int32 SlotNumber)
 {
+	if (IsInventoryUiOpen())
+	{
+		return;
+	}
+
 	if (const ATunaSweeperTopDownCharacter* ControlledCharacter = Cast<ATunaSweeperTopDownCharacter>(GetPawn()))
 	{
 		if (ControlledCharacter->IsDead())
@@ -449,6 +582,10 @@ void ATunaSweeperPlayerController::ToggleInventoryOnlyPanel()
 	if (GameHudWidget)
 	{
 		GameHudWidget->ToggleInventoryOnlyPanel();
+		if (IsInventoryUiOpen())
+		{
+			CancelPawnGameplayActions();
+		}
 	}
 }
 
@@ -459,6 +596,7 @@ void ATunaSweeperPlayerController::OpenLootContainerPanel(const FTunaSweeperLoot
 	if (GameHudWidget)
 	{
 		GameHudWidget->ShowLootContainerPanel(ContainerInstance);
+		CancelPawnGameplayActions();
 	}
 }
 
@@ -508,6 +646,11 @@ void ATunaSweeperPlayerController::ApplyDefaultGameInputMode()
 	bShowMouseCursor = true;
 	SetIgnoreMoveInput(false);
 	SetIgnoreLookInput(false);
+}
+
+bool ATunaSweeperPlayerController::IsInventoryUiOpen() const
+{
+	return GameHudWidget && GameHudWidget->IsInventoryUiOpen();
 }
 
 bool ATunaSweeperPlayerController::GetMouseAimPointOnPlane(float PlaneZ, FVector& OutAimPoint) const

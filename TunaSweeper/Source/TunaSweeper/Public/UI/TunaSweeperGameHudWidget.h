@@ -42,6 +42,9 @@ public:
 	void ShowLootContainerPanel(const FTunaSweeperLootContainerInstance& ContainerInstance);
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|HUD")
+	bool IsInventoryUiOpen() const;
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|HUD")
 	UTunaSweeperHudQuickSlotBarWidget* GetQuickSlotBarWidget() const { return QuickSlotBarWidget; }
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|HUD")

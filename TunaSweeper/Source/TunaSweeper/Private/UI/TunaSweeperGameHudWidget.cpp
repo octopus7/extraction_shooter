@@ -137,6 +137,27 @@ void UTunaSweeperGameHudWidget::ShowLootContainerPanel(const FTunaSweeperLootCon
 	}
 }
 
+bool UTunaSweeperGameHudWidget::IsInventoryUiOpen() const
+{
+	auto IsWidgetVisible = [](const UWidget* Widget)
+	{
+		if (!Widget)
+		{
+			return false;
+		}
+
+		const ESlateVisibility Visibility = Widget->GetVisibility();
+		return Visibility != ESlateVisibility::Collapsed && Visibility != ESlateVisibility::Hidden;
+	};
+
+	if (CenterContentPanel)
+	{
+		return IsWidgetVisible(CenterContentPanel);
+	}
+
+	return IsWidgetVisible(InventoryAreaWidget) || IsWidgetVisible(ExternalPanelWidget);
+}
+
 void UTunaSweeperGameHudWidget::RefreshBottomStatusFromGameInstance()
 {
 	if (!BottomStatusWidget)

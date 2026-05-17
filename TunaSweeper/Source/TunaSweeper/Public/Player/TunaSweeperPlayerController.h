@@ -39,6 +39,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Input")
 	void ApplyDefaultGameInputMode();
 
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Input")
+	bool IsInventoryUiOpen() const;
+
+	bool TryHandleHoveredItemInteract();
+
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "HUD")
 	TSoftClassPtr<UTunaSweeperGameHudWidget> GameHudWidgetClass;
@@ -70,6 +75,7 @@ protected:
 private:
 	void EnsureGameHudWidget();
 	void EnsureIntroMenuWidget();
+	void CancelPawnGameplayActions() const;
 	bool IsIntroMap() const;
 	bool GetMouseAimPointOnPlane(float PlaneZ, FVector& OutAimPoint) const;
 	bool FindDropLocationNearPlayer(FVector& OutDropLocation) const;

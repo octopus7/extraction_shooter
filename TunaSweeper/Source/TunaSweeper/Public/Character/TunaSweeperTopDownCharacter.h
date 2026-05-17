@@ -49,6 +49,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Death")
 	bool IsDead() const { return bIsDead; }
 
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Input")
+	void CancelActiveGameplayActions();
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -137,6 +140,7 @@ private:
 	void HandleInteract(const FInputActionValue& Value);
 	void HandleInventory(const FInputActionValue& Value);
 	void FireWeapon();
+	bool IsGameplayActionInputLocked() const;
 	void UpdateAimingVisuals(float DeltaSeconds);
 	void UpdateCarryWeightMovementSpeed();
 	void HandleDeath();

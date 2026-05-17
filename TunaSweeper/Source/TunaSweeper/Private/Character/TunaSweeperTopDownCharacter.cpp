@@ -252,7 +252,7 @@ void ATunaSweeperTopDownCharacter::SpawnDefaultWeapon()
 
 void ATunaSweeperTopDownCharacter::HandleMove(const FInputActionValue& Value)
 {
-	if (bIsDead)
+	if (bIsDead || IsGameplayActionInputLocked())
 	{
 		return;
 	}
@@ -271,7 +271,7 @@ void ATunaSweeperTopDownCharacter::HandleMove(const FInputActionValue& Value)
 
 void ATunaSweeperTopDownCharacter::BeginFire(const FInputActionValue& Value)
 {
-	if (bIsDead)
+	if (bIsDead || IsGameplayActionInputLocked())
 	{
 		return;
 	}
@@ -293,7 +293,7 @@ void ATunaSweeperTopDownCharacter::EndFire(const FInputActionValue& Value)
 
 void ATunaSweeperTopDownCharacter::BeginAim(const FInputActionValue& Value)
 {
-	if (bIsDead)
+	if (bIsDead || IsGameplayActionInputLocked())
 	{
 		return;
 	}
@@ -319,6 +319,19 @@ void ATunaSweeperTopDownCharacter::HandleInteract(const FInputActionValue& Value
 		return;
 	}
 
+	if (ATunaSweeperPlayerController* TunaPlayerController = Cast<ATunaSweeperPlayerController>(GetController()))
+	{
+		if (TunaPlayerController->TryHandleHoveredItemInteract())
+		{
+			return;
+		}
+
+		if (TunaPlayerController->IsInventoryUiOpen())
+		{
+			return;
+		}
+	}
+
 	if (UTunaSweeperInteractionSubsystem* InteractionSubsystem = World->GetSubsystem<UTunaSweeperInteractionSubsystem>())
 	{
 		InteractionSubsystem->TryInteract(this);
@@ -340,9 +353,37 @@ void ATunaSweeperTopDownCharacter::HandleInventory(const FInputActionValue& Valu
 
 void ATunaSweeperTopDownCharacter::FireWeapon()
 {
+	if (IsGameplayActionInputLocked())
+	{
+		CancelActiveGameplayActions();
+		return;
+	}
+
 	if (!bIsDead && EquippedWeapon)
 	{
 		EquippedWeapon->Fire(AimDirection, this);
+	}
+}
+
+bool ATunaSweeperTopDownCharacter::IsGameplayActionInputLocked() const
+{
+	const ATunaSweeperPlayerController* TunaPlayerController = Cast<ATunaSweeperPlayerController>(GetController());
+	return TunaPlayerController && TunaPlayerController->IsInventoryUiOpen();
+}
+
+void ATunaSweeperTopDownCharacter::CancelActiveGameplayActions()
+{
+	bFireHeld = false;
+	bIsAiming = false;
+
+	if (GetWorld())
+	{
+		GetWorldTimerManager().ClearTimer(FireTimerHandle);
+	}
+
+	if (UCharacterMovementComponent* MovementComponent = GetCharacterMovement())
+	{
+		MovementComponent->StopMovementImmediately();
 	}
 }
 
