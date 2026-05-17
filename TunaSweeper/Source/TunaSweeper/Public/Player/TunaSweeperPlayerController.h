@@ -72,7 +72,7 @@ private:
 	void EnsureIntroMenuWidget();
 	bool IsIntroMap() const;
 	bool GetMouseAimPointOnPlane(float PlaneZ, FVector& OutAimPoint) const;
-	bool GetDropLocation(FVector& OutDropLocation) const;
+	bool FindDropLocationNearPlayer(FVector& OutDropLocation) const;
 	ATunaSweeperPickupItemActor* SpawnDroppedPickupItem(int32 ItemId, int32 Quantity);
 	void HandleQuickSlot(int32 SlotNumber);
 	void HandleDrop(const FInputActionValue& Value);
