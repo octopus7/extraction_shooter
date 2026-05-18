@@ -5,6 +5,7 @@
 #include "TunaSweeperIntroMenuWidget.generated.h"
 
 class UButton;
+class UImage;
 class UTextBlock;
 class UWidget;
 
@@ -77,6 +78,24 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
 	TObjectPtr<UButton> DeleteSaveSlotButton;
 
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UTextBlock> DeleteSaveSlotButtonText;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UImage> DeleteHoldGaugeFill;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UButton> BackToMainMenuButton;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UWidget> DeleteConfirmPanel;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UButton> ConfirmDeleteButton;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UButton> CancelDeleteButton;
+
 private:
 	UFUNCTION()
 	void HandleStartClicked();
@@ -108,16 +127,42 @@ private:
 	UFUNCTION()
 	void HandleDeleteSaveSlotClicked();
 
+	UFUNCTION()
+	void HandleDeleteSaveSlotPressed();
+
+	UFUNCTION()
+	void HandleDeleteSaveSlotReleased();
+
+	UFUNCTION()
+	void HandleBackToMainMenuClicked();
+
+	UFUNCTION()
+	void HandleConfirmDeleteClicked();
+
+	UFUNCTION()
+	void HandleCancelDeleteClicked();
+
 	void ShowMainMenu();
 	void ShowSaveSlotSelection();
 	void SelectSaveSlot(int32 SaveSlotIndex);
 	void RefreshMainMenu();
 	void RefreshSaveSlotMenu();
 	void RefreshSaveSlotButton(int32 SaveSlotIndex, UButton* SlotButton, UTextBlock* SlotText);
+	FText BuildCurrentSaveSlotText(int32 SaveSlotIndex) const;
 	FText BuildSaveSlotButtonText(int32 SaveSlotIndex) const;
 	FString FormatPlayTime(float TotalSeconds) const;
 	FString FormatSaveTime(int64 LastSavedAtTicks) const;
 	bool IsSaveSlotSelectionVisible() const;
+	bool CanDeleteSelectedSaveSlot() const;
+	void ResetDeleteHoldProgress();
+	void SetDeleteHoldProgress(float Progress);
+	void ShowDeleteConfirmDialog();
+	void HideDeleteConfirmDialog();
 
 	int32 SelectedSaveSlotIndex = INDEX_NONE;
+	float DeleteHoldElapsedSeconds = 0.0f;
+	bool bDeleteHoldActive = false;
+	bool bDeleteConfirmVisible = false;
+
+	static constexpr float DeleteHoldDurationSeconds = 3.0f;
 };

@@ -100,7 +100,7 @@ namespace TunaSweeperEditorSetup
 	const FString LootContainerOccupancyHeaderTaskId = TEXT("2026-05-18_AddLootContainerOccupancyHeaderV1");
 	const FString CannedTunaIconImportTaskId = TEXT("2026-05-11_ImportCannedTunaIconV1");
 	const FString BackpackInventoryTaskId = TEXT("2026-05-16_CreateEquipmentInventoryAssetsV3");
-	const FString IntroMenuAndLevelTravelTaskId = TEXT("2026-05-18_CreateTitleIntroMenuPersistentSaveSlotSelectionV2");
+	const FString IntroMenuAndLevelTravelTaskId = TEXT("2026-05-18_CreateTitleIntroMenuPersistentSaveSlotSelectionV3");
 	const FString LevelTransitionVideoTaskId = TEXT("2026-05-16_AddBidirectionalLevelTransitionVideoV3");
 	const FString FirstOutingQuestTaskId = TEXT("2026-05-15_CreateFirstOutingQuestNpcV2");
 	const FString SelfDestructInteractionTaskId = TEXT("2026-05-16_CreateSelfDestructInteractionV1");
@@ -1280,7 +1280,10 @@ namespace TunaSweeperEditorSetup
 		USizeBox* QuitButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("QuitButtonBox"));
 		UButton* QuitButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("QuitButton"));
 		UTextBlock* QuitButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("QuitButtonText"));
-		UVerticalBox* SaveSlotPanel = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("SaveSlotPanel"));
+		UCanvasPanel* SaveSlotPanel = WidgetTree->ConstructWidget<UCanvasPanel>(UCanvasPanel::StaticClass(), TEXT("SaveSlotPanel"));
+		UBorder* SaveSlotBackdrop = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("SaveSlotBackdrop"));
+		UBorder* SaveSlotContentBackground = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("SaveSlotContentBackground"));
+		UVerticalBox* SaveSlotContentStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("SaveSlotContentStack"));
 		UTextBlock* SaveSlotPanelTitleText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("SaveSlotPanelTitleText"));
 		USizeBox* SaveSlot1ButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("SaveSlot1ButtonBox"));
 		UButton* SaveSlot1Button = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("SaveSlot1Button"));
@@ -1291,24 +1294,47 @@ namespace TunaSweeperEditorSetup
 		USizeBox* SaveSlot3ButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("SaveSlot3ButtonBox"));
 		UButton* SaveSlot3Button = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("SaveSlot3Button"));
 		UTextBlock* SaveSlot3Text = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("SaveSlot3Text"));
-		UHorizontalBox* SaveSlotActionRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("SaveSlotActionRow"));
+		UVerticalBox* SaveSlotActionRow = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("SaveSlotActionRow"));
 		USizeBox* PrimarySaveSlotButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("PrimarySaveSlotButtonBox"));
 		UButton* PrimarySaveSlotButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("PrimarySaveSlotButton"));
 		UTextBlock* PrimarySaveSlotButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("PrimarySaveSlotButtonText"));
 		USizeBox* DeleteSaveSlotButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("DeleteSaveSlotButtonBox"));
 		UButton* DeleteSaveSlotButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("DeleteSaveSlotButton"));
 		UTextBlock* DeleteSaveSlotButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("DeleteSaveSlotButtonText"));
+		UHorizontalBox* DeleteSaveSlotButtonContent = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("DeleteSaveSlotButtonContent"));
+		USizeBox* DeleteHoldGaugeBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("DeleteHoldGaugeBox"));
+		UOverlay* DeleteHoldGaugeOverlay = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), TEXT("DeleteHoldGaugeOverlay"));
+		UBorder* DeleteHoldGaugeRing = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("DeleteHoldGaugeRing"));
+		UImage* DeleteHoldGaugeFill = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("DeleteHoldGaugeFill"));
+		USizeBox* BackToMainMenuButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("BackToMainMenuButtonBox"));
+		UButton* BackToMainMenuButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("BackToMainMenuButton"));
+		UTextBlock* BackToMainMenuButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("BackToMainMenuButtonText"));
+		UBorder* DeleteConfirmPanel = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("DeleteConfirmPanel"));
+		UVerticalBox* DeleteConfirmStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("DeleteConfirmStack"));
+		UTextBlock* DeleteConfirmTitleText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("DeleteConfirmTitleText"));
+		UTextBlock* DeleteConfirmMessageText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("DeleteConfirmMessageText"));
+		UHorizontalBox* DeleteConfirmButtonRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("DeleteConfirmButtonRow"));
+		USizeBox* ConfirmDeleteButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("ConfirmDeleteButtonBox"));
+		UButton* ConfirmDeleteButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("ConfirmDeleteButton"));
+		UTextBlock* ConfirmDeleteButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("ConfirmDeleteButtonText"));
+		USizeBox* CancelDeleteButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("CancelDeleteButtonBox"));
+		UButton* CancelDeleteButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("CancelDeleteButton"));
+		UTextBlock* CancelDeleteButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("CancelDeleteButtonText"));
 		UTextBlock* VersionText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("VersionText"));
 
 		if (!RootCanvas || !BackgroundImage || !LeftScrim || !LogoImage || !MainMenuPanel || !StartButtonBox ||
 			!StartButton || !StartButtonText || !CurrentSaveSlotBox || !CurrentSaveSlotBorder || !CurrentSaveSlotText ||
 			!SlotSelectButtonBox || !SlotSelectButton || !SlotSelectButtonText || !SettingsButtonBox || !SettingsButton ||
 			!SettingsButtonText || !CreditsButtonBox || !CreditsButton || !CreditsButtonText || !QuitButtonBox ||
-			!QuitButton || !QuitButtonText || !SaveSlotPanel || !SaveSlotPanelTitleText || !SaveSlot1ButtonBox ||
-			!SaveSlot1Button || !SaveSlot1Text || !SaveSlot2ButtonBox || !SaveSlot2Button || !SaveSlot2Text ||
+			!QuitButton || !QuitButtonText || !SaveSlotPanel || !SaveSlotBackdrop || !SaveSlotContentBackground ||
+			!SaveSlotContentStack || !SaveSlotPanelTitleText || !SaveSlot1ButtonBox || !SaveSlot1Button || !SaveSlot1Text || !SaveSlot2ButtonBox || !SaveSlot2Button || !SaveSlot2Text ||
 			!SaveSlot3ButtonBox || !SaveSlot3Button || !SaveSlot3Text || !SaveSlotActionRow || !PrimarySaveSlotButtonBox ||
 			!PrimarySaveSlotButton || !PrimarySaveSlotButtonText || !DeleteSaveSlotButtonBox || !DeleteSaveSlotButton ||
-			!DeleteSaveSlotButtonText || !VersionText)
+			!DeleteSaveSlotButtonText || !DeleteSaveSlotButtonContent || !DeleteHoldGaugeBox || !DeleteHoldGaugeOverlay ||
+			!DeleteHoldGaugeRing || !DeleteHoldGaugeFill || !BackToMainMenuButtonBox || !BackToMainMenuButton ||
+			!BackToMainMenuButtonText || !DeleteConfirmPanel || !DeleteConfirmStack || !DeleteConfirmTitleText ||
+			!DeleteConfirmMessageText || !DeleteConfirmButtonRow || !ConfirmDeleteButtonBox || !ConfirmDeleteButton ||
+			!ConfirmDeleteButtonText || !CancelDeleteButtonBox || !CancelDeleteButton || !CancelDeleteButtonText || !VersionText)
 		{
 			return false;
 		}
@@ -1532,29 +1558,58 @@ namespace TunaSweeperEditorSetup
 			MainMenuSlot->SetSize(FVector2D(460.0f, 440.0f));
 		}
 
+		SaveSlotPanel->SetVisibility(ESlateVisibility::Collapsed);
+		FillCanvas(RootCanvas->AddChildToCanvas(SaveSlotPanel));
+
+		SaveSlotBackdrop->SetBrush(MakeRoundedBoxBrush(
+			FVector2D(1920.0f, 1080.0f),
+			FLinearColor(0.0f, 0.0f, 0.0f, 0.58f),
+			FLinearColor::Transparent,
+			0.0f,
+			0.0f));
+		FillCanvas(SaveSlotPanel->AddChildToCanvas(SaveSlotBackdrop));
+
+		SaveSlotContentBackground->SetPadding(FMargin(36.0f, 32.0f));
+		SaveSlotContentBackground->SetBrush(MakeRoundedBoxBrush(
+			FVector2D(780.0f, 710.0f),
+			FLinearColor(0.018f, 0.030f, 0.034f, 0.88f),
+			FLinearColor(0.70f, 0.78f, 0.76f, 0.72f),
+			1.2f,
+			16.0f));
+		SaveSlotContentBackground->SetContent(SaveSlotContentStack);
+		UCanvasPanelSlot* SaveContentSlot = SaveSlotPanel->AddChildToCanvas(SaveSlotContentBackground);
+		if (SaveContentSlot)
+		{
+			SaveContentSlot->SetAnchors(FAnchors(0.0f, 0.5f));
+			SaveContentSlot->SetAlignment(FVector2D(0.0f, 0.5f));
+			SaveContentSlot->SetPosition(FVector2D(88.0f, 14.0f));
+			SaveContentSlot->SetSize(FVector2D(780.0f, 710.0f));
+		}
+
 		ConfigureTextBlockLeft(
 			SaveSlotPanelTitleText,
 			FText::FromString(TEXT("\uC2AC\uB86F \uC120\uD0DD")),
 			FLinearColor(0.94f, 0.92f, 0.84f, 1.0f),
-			26);
-		UVerticalBoxSlot* SaveTitleSlot = SaveSlotPanel->AddChildToVerticalBox(SaveSlotPanelTitleText);
+			30);
+		UVerticalBoxSlot* SaveTitleSlot = SaveSlotContentStack->AddChildToVerticalBox(SaveSlotPanelTitleText);
 		if (SaveTitleSlot)
 		{
-			SaveTitleSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 18.0f));
+			SaveTitleSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 20.0f));
 		}
 
 		auto ConfigureSaveSlotButton = [&ConfigureButtonStyle](USizeBox* ButtonBox, UButton* Button, UTextBlock* TextBlock, int32 SlotIndex)
 		{
-			ButtonBox->SetWidthOverride(420.0f);
-			ButtonBox->SetHeightOverride(58.0f);
+			ButtonBox->SetWidthOverride(700.0f);
+			ButtonBox->SetHeightOverride(112.0f);
 			ButtonBox->SetContent(Button);
-			ConfigureButtonStyle(Button, FVector2D(420.0f, 58.0f), false);
+			ConfigureButtonStyle(Button, FVector2D(700.0f, 112.0f), false);
 			ConfigureTextBlockLeft(
 				TextBlock,
-				FText::FromString(FString::Printf(TEXT("\uC2AC\uB86F %d - \uBE48 \uC2AC\uB86F"), SlotIndex)),
+				FText::FromString(FString::Printf(TEXT("\uC2AC\uB86F %d\n\uBE48 \uC2AC\uB86F\n\uC0C8 \uAC8C\uC784 \uC2DC\uC791"), SlotIndex)),
 				FLinearColor(0.82f, 0.86f, 0.84f, 1.0f),
 				18);
-			TextBlock->SetMargin(FMargin(22.0f, 0.0f));
+			TextBlock->SetMargin(FMargin(26.0f, 10.0f));
+			TextBlock->SetAutoWrapText(true);
 			Button->SetContent(TextBlock);
 		};
 
@@ -1564,49 +1619,160 @@ namespace TunaSweeperEditorSetup
 
 		for (UWidget* SlotButtonBox : { static_cast<UWidget*>(SaveSlot1ButtonBox), static_cast<UWidget*>(SaveSlot2ButtonBox), static_cast<UWidget*>(SaveSlot3ButtonBox) })
 		{
-			UVerticalBoxSlot* SlotButtonSlot = SaveSlotPanel->AddChildToVerticalBox(SlotButtonBox);
+			UVerticalBoxSlot* SlotButtonSlot = SaveSlotContentStack->AddChildToVerticalBox(SlotButtonBox);
 			if (SlotButtonSlot)
 			{
-				SlotButtonSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 12.0f));
+				SlotButtonSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 14.0f));
 			}
 		}
 
-		PrimarySaveSlotButtonBox->SetWidthOverride(250.0f);
-		PrimarySaveSlotButtonBox->SetHeightOverride(50.0f);
+		PrimarySaveSlotButtonBox->SetWidthOverride(420.0f);
+		PrimarySaveSlotButtonBox->SetHeightOverride(56.0f);
 		PrimarySaveSlotButtonBox->SetContent(PrimarySaveSlotButton);
-		ConfigureButtonStyle(PrimarySaveSlotButton, FVector2D(250.0f, 50.0f), true);
-		ConfigureTextBlock(PrimarySaveSlotButtonText, FText::FromString(TEXT("\uC2AC\uB86F \uC120\uD0DD")), FLinearColor::White, 18);
+		ConfigureButtonStyle(PrimarySaveSlotButton, FVector2D(420.0f, 56.0f), true);
+		ConfigureTextBlock(PrimarySaveSlotButtonText, FText::FromString(TEXT("\uC2AC\uB86F \uC120\uD0DD")), FLinearColor::White, 19);
 		PrimarySaveSlotButton->SetContent(PrimarySaveSlotButtonText);
 
-		DeleteSaveSlotButtonBox->SetWidthOverride(150.0f);
-		DeleteSaveSlotButtonBox->SetHeightOverride(50.0f);
+		DeleteSaveSlotButtonBox->SetWidthOverride(420.0f);
+		DeleteSaveSlotButtonBox->SetHeightOverride(56.0f);
 		DeleteSaveSlotButtonBox->SetContent(DeleteSaveSlotButton);
-		ConfigureButtonStyle(DeleteSaveSlotButton, FVector2D(150.0f, 50.0f), false);
-		ConfigureTextBlock(DeleteSaveSlotButtonText, FText::FromString(TEXT("\uC0AD\uC81C")), FLinearColor::White, 18);
-		DeleteSaveSlotButton->SetContent(DeleteSaveSlotButtonText);
+		ConfigureButtonStyle(DeleteSaveSlotButton, FVector2D(420.0f, 56.0f), false);
+		ConfigureTextBlockLeft(
+			DeleteSaveSlotButtonText,
+			FText::FromString(TEXT("\uAE38\uAC8C \uB20C\uB7EC \uC0AD\uC81C\uD558\uAE30")),
+			FLinearColor::White,
+			18);
 
-		UHorizontalBoxSlot* PrimarySlot = SaveSlotActionRow->AddChildToHorizontalBox(PrimarySaveSlotButtonBox);
-		if (PrimarySlot)
+		DeleteHoldGaugeBox->SetWidthOverride(36.0f);
+		DeleteHoldGaugeBox->SetHeightOverride(36.0f);
+		DeleteHoldGaugeBox->SetContent(DeleteHoldGaugeOverlay);
+		DeleteHoldGaugeRing->SetBrush(MakeCircularBrush(
+			FVector2D(34.0f, 34.0f),
+			FLinearColor(0.0f, 0.0f, 0.0f, 0.0f),
+			FLinearColor(0.95f, 0.92f, 0.84f, 0.72f),
+			1.6f));
+		DeleteHoldGaugeFill->SetBrush(MakeCircularBrush(
+			FVector2D(34.0f, 34.0f),
+			FLinearColor(0.86f, 0.30f, 0.24f, 0.86f),
+			FLinearColor::Transparent,
+			0.0f));
+		DeleteHoldGaugeFill->SetRenderOpacity(0.0f);
+		DeleteHoldGaugeFill->SetRenderTransformPivot(FVector2D(0.5f, 0.5f));
+		DeleteHoldGaugeFill->SetRenderScale(FVector2D::ZeroVector);
+		UOverlaySlot* GaugeFillSlot = DeleteHoldGaugeOverlay->AddChildToOverlay(DeleteHoldGaugeFill);
+		if (GaugeFillSlot)
 		{
-			PrimarySlot->SetPadding(FMargin(0.0f, 0.0f, 14.0f, 0.0f));
+			GaugeFillSlot->SetHorizontalAlignment(HAlign_Center);
+			GaugeFillSlot->SetVerticalAlignment(VAlign_Center);
 		}
-		SaveSlotActionRow->AddChildToHorizontalBox(DeleteSaveSlotButtonBox);
-		SaveSlotActionRow->SetVisibility(ESlateVisibility::Collapsed);
+		UOverlaySlot* GaugeRingSlot = DeleteHoldGaugeOverlay->AddChildToOverlay(DeleteHoldGaugeRing);
+		if (GaugeRingSlot)
+		{
+			GaugeRingSlot->SetHorizontalAlignment(HAlign_Center);
+			GaugeRingSlot->SetVerticalAlignment(VAlign_Center);
+		}
 
-		UVerticalBoxSlot* ActionSlot = SaveSlotPanel->AddChildToVerticalBox(SaveSlotActionRow);
+		UHorizontalBoxSlot* DeleteGaugeSlot = DeleteSaveSlotButtonContent->AddChildToHorizontalBox(DeleteHoldGaugeBox);
+		if (DeleteGaugeSlot)
+		{
+			DeleteGaugeSlot->SetHorizontalAlignment(HAlign_Center);
+			DeleteGaugeSlot->SetVerticalAlignment(VAlign_Center);
+			DeleteGaugeSlot->SetPadding(FMargin(22.0f, 0.0f, 16.0f, 0.0f));
+			DeleteGaugeSlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
+		}
+		UHorizontalBoxSlot* DeleteLabelSlot = DeleteSaveSlotButtonContent->AddChildToHorizontalBox(DeleteSaveSlotButtonText);
+		if (DeleteLabelSlot)
+		{
+			DeleteLabelSlot->SetHorizontalAlignment(HAlign_Fill);
+			DeleteLabelSlot->SetVerticalAlignment(VAlign_Center);
+			DeleteLabelSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+		}
+		DeleteSaveSlotButton->SetContent(DeleteSaveSlotButtonContent);
+
+		SaveSlotActionRow->SetVisibility(ESlateVisibility::Collapsed);
+		for (UWidget* ActionButton : { static_cast<UWidget*>(PrimarySaveSlotButtonBox), static_cast<UWidget*>(DeleteSaveSlotButtonBox) })
+		{
+			UVerticalBoxSlot* ActionButtonSlot = SaveSlotActionRow->AddChildToVerticalBox(ActionButton);
+			if (ActionButtonSlot)
+			{
+				ActionButtonSlot->SetHorizontalAlignment(HAlign_Left);
+				ActionButtonSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 10.0f));
+			}
+		}
+		UVerticalBoxSlot* ActionSlot = SaveSlotContentStack->AddChildToVerticalBox(SaveSlotActionRow);
 		if (ActionSlot)
 		{
-			ActionSlot->SetPadding(FMargin(0.0f, 8.0f, 0.0f, 0.0f));
+			ActionSlot->SetPadding(FMargin(0.0f, 6.0f, 0.0f, 2.0f));
 		}
 
-		SaveSlotPanel->SetVisibility(ESlateVisibility::Collapsed);
-		UCanvasPanelSlot* SavePanelSlot = RootCanvas->AddChildToCanvas(SaveSlotPanel);
-		if (SavePanelSlot)
+		BackToMainMenuButtonBox->SetWidthOverride(420.0f);
+		BackToMainMenuButtonBox->SetHeightOverride(54.0f);
+		BackToMainMenuButtonBox->SetContent(BackToMainMenuButton);
+		ConfigureButtonStyle(BackToMainMenuButton, FVector2D(420.0f, 54.0f), false);
+		ConfigureTextBlock(BackToMainMenuButtonText, FText::FromString(TEXT("\uB3CC\uC544\uAC00\uAE30")), FLinearColor::White, 18);
+		BackToMainMenuButton->SetContent(BackToMainMenuButtonText);
+		UVerticalBoxSlot* BackSlot = SaveSlotContentStack->AddChildToVerticalBox(BackToMainMenuButtonBox);
+		if (BackSlot)
 		{
-			SavePanelSlot->SetAnchors(FAnchors(0.0f, 0.0f));
-			SavePanelSlot->SetAlignment(FVector2D::ZeroVector);
-			SavePanelSlot->SetPosition(FVector2D(92.0f, 330.0f));
-			SavePanelSlot->SetSize(FVector2D(460.0f, 420.0f));
+			BackSlot->SetHorizontalAlignment(HAlign_Left);
+			BackSlot->SetPadding(FMargin(0.0f, 4.0f, 0.0f, 0.0f));
+		}
+
+		DeleteConfirmPanel->SetPadding(FMargin(30.0f, 26.0f));
+		DeleteConfirmPanel->SetBrush(MakeRoundedBoxBrush(
+			FVector2D(520.0f, 220.0f),
+			FLinearColor(0.012f, 0.018f, 0.022f, 0.96f),
+			FLinearColor(0.92f, 0.36f, 0.30f, 0.88f),
+			1.4f,
+			14.0f));
+		DeleteConfirmPanel->SetContent(DeleteConfirmStack);
+		DeleteConfirmPanel->SetVisibility(ESlateVisibility::Collapsed);
+		ConfigureTextBlockLeft(
+			DeleteConfirmTitleText,
+			FText::FromString(TEXT("\uC2AC\uB86F \uC0AD\uC81C")),
+			FLinearColor::White,
+			24);
+		ConfigureTextBlockLeft(
+			DeleteConfirmMessageText,
+			FText::FromString(TEXT("\uC120\uD0DD\uD55C \uC800\uC7A5 \uB370\uC774\uD130\uB97C \uC0AD\uC81C\uD560\uAE4C\uC694?")),
+			FLinearColor(0.82f, 0.86f, 0.84f, 1.0f),
+			17);
+		DeleteConfirmStack->AddChildToVerticalBox(DeleteConfirmTitleText);
+		UVerticalBoxSlot* ConfirmMessageSlot = DeleteConfirmStack->AddChildToVerticalBox(DeleteConfirmMessageText);
+		if (ConfirmMessageSlot)
+		{
+			ConfirmMessageSlot->SetPadding(FMargin(0.0f, 10.0f, 0.0f, 22.0f));
+		}
+
+		ConfirmDeleteButtonBox->SetWidthOverride(188.0f);
+		ConfirmDeleteButtonBox->SetHeightOverride(48.0f);
+		ConfirmDeleteButtonBox->SetContent(ConfirmDeleteButton);
+		ConfigureButtonStyle(ConfirmDeleteButton, FVector2D(188.0f, 48.0f), true);
+		ConfigureTextBlock(ConfirmDeleteButtonText, FText::FromString(TEXT("\uC0AD\uC81C\uD558\uAE30")), FLinearColor::White, 17);
+		ConfirmDeleteButton->SetContent(ConfirmDeleteButtonText);
+
+		CancelDeleteButtonBox->SetWidthOverride(188.0f);
+		CancelDeleteButtonBox->SetHeightOverride(48.0f);
+		CancelDeleteButtonBox->SetContent(CancelDeleteButton);
+		ConfigureButtonStyle(CancelDeleteButton, FVector2D(188.0f, 48.0f), false);
+		ConfigureTextBlock(CancelDeleteButtonText, FText::FromString(TEXT("\uCDE8\uC18C")), FLinearColor::White, 17);
+		CancelDeleteButton->SetContent(CancelDeleteButtonText);
+
+		UHorizontalBoxSlot* ConfirmButtonSlot = DeleteConfirmButtonRow->AddChildToHorizontalBox(ConfirmDeleteButtonBox);
+		if (ConfirmButtonSlot)
+		{
+			ConfirmButtonSlot->SetPadding(FMargin(0.0f, 0.0f, 14.0f, 0.0f));
+		}
+		DeleteConfirmButtonRow->AddChildToHorizontalBox(CancelDeleteButtonBox);
+		DeleteConfirmStack->AddChildToVerticalBox(DeleteConfirmButtonRow);
+
+		UCanvasPanelSlot* ConfirmSlot = SaveSlotPanel->AddChildToCanvas(DeleteConfirmPanel);
+		if (ConfirmSlot)
+		{
+			ConfirmSlot->SetAnchors(FAnchors(0.5f, 0.5f));
+			ConfirmSlot->SetAlignment(FVector2D(0.5f, 0.5f));
+			ConfirmSlot->SetPosition(FVector2D(0.0f, 0.0f));
+			ConfirmSlot->SetSize(FVector2D(520.0f, 220.0f));
 		}
 
 		ConfigureTextBlock(VersionText, FText::FromString(TEXT("v0.1")), FLinearColor(1.0f, 1.0f, 1.0f, 0.86f), 14);

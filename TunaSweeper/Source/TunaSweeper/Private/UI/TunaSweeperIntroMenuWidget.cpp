@@ -1,6 +1,7 @@
 #include "UI/TunaSweeperIntroMenuWidget.h"
 
 #include "Components/Button.h"
+#include "Components/Image.h"
 #include "Components/TextBlock.h"
 #include "Components/Widget.h"
 #include "Game/TunaSweeperGameInstance.h"
@@ -75,10 +76,33 @@ void UTunaSweeperIntroMenuWidget::NativeConstruct()
 	if (DeleteSaveSlotButton)
 	{
 		DeleteSaveSlotButton->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleDeleteSaveSlotClicked);
-		DeleteSaveSlotButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleDeleteSaveSlotClicked);
+		DeleteSaveSlotButton->OnPressed.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleDeleteSaveSlotPressed);
+		DeleteSaveSlotButton->OnPressed.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleDeleteSaveSlotPressed);
+		DeleteSaveSlotButton->OnReleased.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleDeleteSaveSlotReleased);
+		DeleteSaveSlotButton->OnReleased.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleDeleteSaveSlotReleased);
+	}
+
+	if (BackToMainMenuButton)
+	{
+		BackToMainMenuButton->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleBackToMainMenuClicked);
+		BackToMainMenuButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleBackToMainMenuClicked);
+	}
+
+	if (ConfirmDeleteButton)
+	{
+		ConfirmDeleteButton->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleConfirmDeleteClicked);
+		ConfirmDeleteButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleConfirmDeleteClicked);
+	}
+
+	if (CancelDeleteButton)
+	{
+		CancelDeleteButton->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleCancelDeleteClicked);
+		CancelDeleteButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleCancelDeleteClicked);
 	}
 
 	SelectedSaveSlotIndex = INDEX_NONE;
+	ResetDeleteHoldProgress();
+	HideDeleteConfirmDialog();
 	ShowMainMenu();
 }
 
@@ -88,6 +112,10 @@ void UTunaSweeperIntroMenuWidget::NativeTick(const FGeometry& MyGeometry, float 
 
 	if (!IsSaveSlotSelectionVisible())
 	{
+		if (bDeleteHoldActive || DeleteHoldElapsedSeconds > 0.0f)
+		{
+			ResetDeleteHoldProgress();
+		}
 		return;
 	}
 
@@ -102,6 +130,27 @@ void UTunaSweeperIntroMenuWidget::NativeTick(const FGeometry& MyGeometry, float 
 	else if (SaveSlot3Button && SaveSlot3Button->HasKeyboardFocus())
 	{
 		SelectSaveSlot(3);
+	}
+
+	if (!bDeleteHoldActive)
+	{
+		return;
+	}
+
+	if (bDeleteConfirmVisible || !CanDeleteSelectedSaveSlot())
+	{
+		ResetDeleteHoldProgress();
+		return;
+	}
+
+	DeleteHoldElapsedSeconds += InDeltaTime;
+	const float HoldProgress = FMath::Clamp(DeleteHoldElapsedSeconds / DeleteHoldDurationSeconds, 0.0f, 1.0f);
+	SetDeleteHoldProgress(HoldProgress);
+
+	if (HoldProgress >= 1.0f)
+	{
+		bDeleteHoldActive = false;
+		ShowDeleteConfirmDialog();
 	}
 }
 
@@ -175,22 +224,66 @@ void UTunaSweeperIntroMenuWidget::HandlePrimarySaveSlotClicked()
 
 void UTunaSweeperIntroMenuWidget::HandleDeleteSaveSlotClicked()
 {
-	if (SelectedSaveSlotIndex == INDEX_NONE)
+	HandleDeleteSaveSlotPressed();
+}
+
+void UTunaSweeperIntroMenuWidget::HandleDeleteSaveSlotPressed()
+{
+	if (!CanDeleteSelectedSaveSlot() || bDeleteConfirmVisible)
 	{
+		ResetDeleteHoldProgress();
 		return;
 	}
 
-	if (UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GetGameInstance()))
+	bDeleteHoldActive = true;
+	DeleteHoldElapsedSeconds = 0.0f;
+	SetDeleteHoldProgress(0.0f);
+}
+
+void UTunaSweeperIntroMenuWidget::HandleDeleteSaveSlotReleased()
+{
+	if (!bDeleteConfirmVisible)
 	{
-		TunaGameInstance->DeleteSaveSlot(SelectedSaveSlotIndex);
+		ResetDeleteHoldProgress();
+	}
+	else
+	{
+		bDeleteHoldActive = false;
+	}
+}
+
+void UTunaSweeperIntroMenuWidget::HandleBackToMainMenuClicked()
+{
+	ShowMainMenu();
+}
+
+void UTunaSweeperIntroMenuWidget::HandleConfirmDeleteClicked()
+{
+	if (CanDeleteSelectedSaveSlot())
+	{
+		if (UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GetGameInstance()))
+		{
+			TunaGameInstance->DeleteSaveSlot(SelectedSaveSlotIndex);
+		}
 	}
 
+	HideDeleteConfirmDialog();
+	ResetDeleteHoldProgress();
 	RefreshSaveSlotMenu();
 	RefreshMainMenu();
 }
 
+void UTunaSweeperIntroMenuWidget::HandleCancelDeleteClicked()
+{
+	HideDeleteConfirmDialog();
+	ResetDeleteHoldProgress();
+}
+
 void UTunaSweeperIntroMenuWidget::ShowMainMenu()
 {
+	HideDeleteConfirmDialog();
+	ResetDeleteHoldProgress();
+
 	if (MainMenuPanel)
 	{
 		MainMenuPanel->SetVisibility(ESlateVisibility::Visible);
@@ -207,6 +300,9 @@ void UTunaSweeperIntroMenuWidget::ShowMainMenu()
 
 void UTunaSweeperIntroMenuWidget::ShowSaveSlotSelection()
 {
+	HideDeleteConfirmDialog();
+	ResetDeleteHoldProgress();
+
 	if (MainMenuPanel)
 	{
 		MainMenuPanel->SetVisibility(ESlateVisibility::Collapsed);
@@ -227,6 +323,8 @@ void UTunaSweeperIntroMenuWidget::SelectSaveSlot(int32 SaveSlotIndex)
 		return;
 	}
 
+	HideDeleteConfirmDialog();
+	ResetDeleteHoldProgress();
 	SelectedSaveSlotIndex = FMath::Clamp(SaveSlotIndex, 1, 3);
 	RefreshSaveSlotMenu();
 }
@@ -241,7 +339,7 @@ void UTunaSweeperIntroMenuWidget::RefreshMainMenu()
 
 	if (CurrentSaveSlotText)
 	{
-		CurrentSaveSlotText->SetText(BuildSaveSlotButtonText(Summary.SaveSlotIndex));
+		CurrentSaveSlotText->SetText(BuildCurrentSaveSlotText(Summary.SaveSlotIndex));
 	}
 
 	if (StartButtonText)
@@ -287,6 +385,19 @@ void UTunaSweeperIntroMenuWidget::RefreshSaveSlotMenu()
 	{
 		DeleteSaveSlotButton->SetIsEnabled(Summary.bHasData);
 	}
+
+	if (DeleteSaveSlotButtonText)
+	{
+		DeleteSaveSlotButtonText->SetText(FText::FromString(TEXT("\uAE38\uAC8C \uB20C\uB7EC \uC0AD\uC81C\uD558\uAE30")));
+		DeleteSaveSlotButtonText->SetColorAndOpacity(FSlateColor(Summary.bHasData
+			? FLinearColor::White
+			: FLinearColor(0.55f, 0.60f, 0.62f, 1.0f)));
+	}
+
+	if (!Summary.bHasData)
+	{
+		ResetDeleteHoldProgress();
+	}
 }
 
 void UTunaSweeperIntroMenuWidget::RefreshSaveSlotButton(int32 SaveSlotIndex, UButton* SlotButton, UTextBlock* SlotText)
@@ -305,7 +416,7 @@ void UTunaSweeperIntroMenuWidget::RefreshSaveSlotButton(int32 SaveSlotIndex, UBu
 	}
 }
 
-FText UTunaSweeperIntroMenuWidget::BuildSaveSlotButtonText(int32 SaveSlotIndex) const
+FText UTunaSweeperIntroMenuWidget::BuildCurrentSaveSlotText(int32 SaveSlotIndex) const
 {
 	FTunaSweeperSaveSlotSummary Summary;
 	if (const UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GetGameInstance()))
@@ -324,6 +435,31 @@ FText UTunaSweeperIntroMenuWidget::BuildSaveSlotButtonText(int32 SaveSlotIndex) 
 
 	return FText::FromString(FString::Printf(
 		TEXT("\uC2AC\uB86F %d - %s"),
+		SaveSlotIndex,
+		*FormatPlayTime(Summary.TotalPlaySeconds)));
+}
+
+FText UTunaSweeperIntroMenuWidget::BuildSaveSlotButtonText(int32 SaveSlotIndex) const
+{
+	FTunaSweeperSaveSlotSummary Summary;
+	if (const UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GetGameInstance()))
+	{
+		Summary = TunaGameInstance->GetSaveSlotSummary(SaveSlotIndex);
+	}
+	else
+	{
+		Summary.SaveSlotIndex = SaveSlotIndex;
+	}
+
+	if (!Summary.bHasData)
+	{
+		return FText::FromString(FString::Printf(
+			TEXT("\uC2AC\uB86F %d\n\uBE48 \uC2AC\uB86F\n\uC0C8 \uAC8C\uC784 \uC2DC\uC791"),
+			SaveSlotIndex));
+	}
+
+	return FText::FromString(FString::Printf(
+		TEXT("\uC2AC\uB86F %d\n\uD50C\uB808\uC774 \uC2DC\uAC04 %s\n\uC9C4\uD589 \uB370\uC774\uD130 \uC788\uC74C"),
 		SaveSlotIndex,
 		*FormatPlayTime(Summary.TotalPlaySeconds)));
 }
@@ -350,4 +486,60 @@ FString UTunaSweeperIntroMenuWidget::FormatSaveTime(int64 LastSavedAtTicks) cons
 bool UTunaSweeperIntroMenuWidget::IsSaveSlotSelectionVisible() const
 {
 	return SaveSlotPanel && SaveSlotPanel->GetVisibility() == ESlateVisibility::Visible;
+}
+
+bool UTunaSweeperIntroMenuWidget::CanDeleteSelectedSaveSlot() const
+{
+	if (SelectedSaveSlotIndex == INDEX_NONE)
+	{
+		return false;
+	}
+
+	if (const UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GetGameInstance()))
+	{
+		return TunaGameInstance->GetSaveSlotSummary(SelectedSaveSlotIndex).bHasData;
+	}
+
+	return false;
+}
+
+void UTunaSweeperIntroMenuWidget::ResetDeleteHoldProgress()
+{
+	bDeleteHoldActive = false;
+	DeleteHoldElapsedSeconds = 0.0f;
+	SetDeleteHoldProgress(0.0f);
+}
+
+void UTunaSweeperIntroMenuWidget::SetDeleteHoldProgress(float Progress)
+{
+	if (!DeleteHoldGaugeFill)
+	{
+		return;
+	}
+
+	const float ClampedProgress = FMath::Clamp(Progress, 0.0f, 1.0f);
+	DeleteHoldGaugeFill->SetRenderOpacity(ClampedProgress > 0.0f ? 1.0f : 0.0f);
+	DeleteHoldGaugeFill->SetRenderTransformPivot(FVector2D(0.5f, 0.5f));
+	DeleteHoldGaugeFill->SetRenderScale(FVector2D(ClampedProgress, ClampedProgress));
+}
+
+void UTunaSweeperIntroMenuWidget::ShowDeleteConfirmDialog()
+{
+	bDeleteConfirmVisible = true;
+	SetDeleteHoldProgress(1.0f);
+
+	if (DeleteConfirmPanel)
+	{
+		DeleteConfirmPanel->SetVisibility(ESlateVisibility::Visible);
+	}
+}
+
+void UTunaSweeperIntroMenuWidget::HideDeleteConfirmDialog()
+{
+	bDeleteConfirmVisible = false;
+
+	if (DeleteConfirmPanel)
+	{
+		DeleteConfirmPanel->SetVisibility(ESlateVisibility::Collapsed);
+	}
 }
