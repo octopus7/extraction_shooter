@@ -101,7 +101,7 @@ namespace TunaSweeperEditorSetup
 	const FString LootContainerOccupancyHeaderTaskId = TEXT("2026-05-18_AddLootContainerOccupancyHeaderV1");
 	const FString CannedTunaIconImportTaskId = TEXT("2026-05-11_ImportCannedTunaIconV1");
 	const FString BackpackInventoryTaskId = TEXT("2026-05-16_CreateEquipmentInventoryAssetsV3");
-	const FString IntroMenuAndLevelTravelTaskId = TEXT("2026-05-18_CreateTitleIntroMenuPersistentSaveSlotSelectionV4");
+	const FString IntroMenuAndLevelTravelTaskId = TEXT("2026-05-18_CreateTitleIntroMenuPersistentSaveSlotSelectionV7");
 	const FString LevelTransitionVideoTaskId = TEXT("2026-05-16_AddBidirectionalLevelTransitionVideoV3");
 	const FString FirstOutingQuestTaskId = TEXT("2026-05-15_CreateFirstOutingQuestNpcV2");
 	const FString SelfDestructInteractionTaskId = TEXT("2026-05-16_CreateSelfDestructInteractionV1");
@@ -1352,12 +1352,18 @@ namespace TunaSweeperEditorSetup
 		UTextBlock* BackFromSettingsButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("BackFromSettingsButtonText"));
 		UCanvasPanel* CreditsPanel = WidgetTree->ConstructWidget<UCanvasPanel>(UCanvasPanel::StaticClass(), TEXT("CreditsPanel"));
 		UBorder* CreditsBackdrop = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("CreditsBackdrop"));
-		UBorder* CreditsContentBackground = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("CreditsContentBackground"));
 		UVerticalBox* CreditsContentStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("CreditsContentStack"));
 		UTextBlock* CreditsTitleText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("CreditsTitleText"));
+		UHorizontalBox* CreditsColumnRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("CreditsColumnRow"));
 		USizeBox* CreditsScrollBoxFrame = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("CreditsScrollBoxFrame"));
 		UScrollBox* CreditsScrollBox = WidgetTree->ConstructWidget<UScrollBox>(UScrollBox::StaticClass(), TEXT("CreditsScrollBox"));
 		UTextBlock* CreditsText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("CreditsText"));
+		USizeBox* CreditsScrollBoxFrame2 = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("CreditsScrollBoxFrame2"));
+		UScrollBox* CreditsScrollBox2 = WidgetTree->ConstructWidget<UScrollBox>(UScrollBox::StaticClass(), TEXT("CreditsScrollBox2"));
+		UTextBlock* CreditsText2 = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("CreditsText2"));
+		USizeBox* CreditsScrollBoxFrame3 = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("CreditsScrollBoxFrame3"));
+		UScrollBox* CreditsScrollBox3 = WidgetTree->ConstructWidget<UScrollBox>(UScrollBox::StaticClass(), TEXT("CreditsScrollBox3"));
+		UTextBlock* CreditsText3 = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("CreditsText3"));
 		USizeBox* BackFromCreditsButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("BackFromCreditsButtonBox"));
 		UButton* BackFromCreditsButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("BackFromCreditsButton"));
 		UTextBlock* BackFromCreditsButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("BackFromCreditsButtonText"));
@@ -1383,8 +1389,10 @@ namespace TunaSweeperEditorSetup
 			!Resolution1280ButtonText || !Resolution1600ButtonBox || !Resolution1600Button || !Resolution1600ButtonText ||
 			!Resolution1920ButtonBox || !Resolution1920Button || !Resolution1920ButtonText || !Resolution2560ButtonBox ||
 			!Resolution2560Button || !Resolution2560ButtonText || !BackFromSettingsButtonBox || !BackFromSettingsButton ||
-			!BackFromSettingsButtonText || !CreditsPanel || !CreditsBackdrop || !CreditsContentBackground ||
-			!CreditsContentStack || !CreditsTitleText || !CreditsScrollBoxFrame || !CreditsScrollBox || !CreditsText ||
+			!BackFromSettingsButtonText || !CreditsPanel || !CreditsBackdrop || !CreditsContentStack || !CreditsTitleText ||
+			!CreditsColumnRow || !CreditsScrollBoxFrame || !CreditsScrollBox || !CreditsText ||
+			!CreditsScrollBoxFrame2 || !CreditsScrollBox2 || !CreditsText2 || !CreditsScrollBoxFrame3 ||
+			!CreditsScrollBox3 || !CreditsText3 ||
 			!BackFromCreditsButtonBox || !BackFromCreditsButton || !BackFromCreditsButtonText || !VersionText)
 		{
 			return false;
@@ -1929,56 +1937,83 @@ namespace TunaSweeperEditorSetup
 		FillCanvas(RootCanvas->AddChildToCanvas(CreditsPanel));
 		CreditsBackdrop->SetBrush(MakeRoundedBoxBrush(
 			FVector2D(1920.0f, 1080.0f),
-			FLinearColor(0.0f, 0.0f, 0.0f, 0.64f),
+			FLinearColor(0.0f, 0.0f, 0.0f, 0.46f),
 			FLinearColor::Transparent,
 			0.0f,
 			0.0f));
 		FillCanvas(CreditsPanel->AddChildToCanvas(CreditsBackdrop));
 
-		CreditsContentBackground->SetPadding(FMargin(34.0f, 30.0f));
-		CreditsContentBackground->SetBrush(MakeRoundedBoxBrush(
-			FVector2D(660.0f, 700.0f),
-			FLinearColor(0.018f, 0.030f, 0.034f, 0.92f),
-			FLinearColor(0.70f, 0.78f, 0.76f, 0.74f),
-			1.2f,
-			16.0f));
-		CreditsContentBackground->SetContent(CreditsContentStack);
-		UCanvasPanelSlot* CreditsContentSlot = CreditsPanel->AddChildToCanvas(CreditsContentBackground);
-		if (CreditsContentSlot)
+		CreditsContentStack->SetVisibility(ESlateVisibility::Collapsed);
+		UCanvasPanelSlot* LegacyCreditsStackSlot = CreditsPanel->AddChildToCanvas(CreditsContentStack);
+		if (LegacyCreditsStackSlot)
 		{
-			CreditsContentSlot->SetAnchors(FAnchors(0.0f, 0.5f));
-			CreditsContentSlot->SetAlignment(FVector2D(0.0f, 0.5f));
-			CreditsContentSlot->SetPosition(FVector2D(88.0f, 0.0f));
-			CreditsContentSlot->SetSize(FVector2D(660.0f, 700.0f));
+			LegacyCreditsStackSlot->SetAnchors(FAnchors(0.0f, 0.0f));
+			LegacyCreditsStackSlot->SetAlignment(FVector2D::ZeroVector);
+			LegacyCreditsStackSlot->SetPosition(FVector2D::ZeroVector);
+			LegacyCreditsStackSlot->SetSize(FVector2D::ZeroVector);
+		}
+
+		ConfigurePlainButton(BackFromCreditsButtonBox, BackFromCreditsButton, BackFromCreditsButtonText, FText::FromString(TEXT("\uB3CC\uC544\uAC00\uAE30")), FVector2D(380.0f, 52.0f), false);
+		UCanvasPanelSlot* BackFromCreditsSlot = CreditsPanel->AddChildToCanvas(BackFromCreditsButtonBox);
+		if (BackFromCreditsSlot)
+		{
+			BackFromCreditsSlot->SetAnchors(FAnchors(0.0f, 0.0f));
+			BackFromCreditsSlot->SetAlignment(FVector2D::ZeroVector);
+			BackFromCreditsSlot->SetPosition(FVector2D(92.0f, 310.0f));
+			BackFromCreditsSlot->SetSize(FVector2D(380.0f, 52.0f));
 		}
 
 		ConfigureTextBlockLeft(CreditsTitleText, FText::FromString(TEXT("\uD06C\uB808\uB527")), FLinearColor::White, 30);
-		UVerticalBoxSlot* CreditsTitleSlot = CreditsContentStack->AddChildToVerticalBox(CreditsTitleText);
+		UCanvasPanelSlot* CreditsTitleSlot = CreditsPanel->AddChildToCanvas(CreditsTitleText);
 		if (CreditsTitleSlot)
 		{
-			CreditsTitleSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 16.0f));
-		}
-		CreditsScrollBoxFrame->SetWidthOverride(592.0f);
-		CreditsScrollBoxFrame->SetHeightOverride(518.0f);
-		CreditsScrollBoxFrame->SetContent(CreditsScrollBox);
-		ConfigureTextBlock(
-			CreditsText,
-			FText::FromString(TEXT("Tuna Sweeper\n\nBlenG")),
-			FLinearColor(0.88f, 0.92f, 0.90f, 1.0f),
-			18);
-		CreditsText->SetAutoWrapText(true);
-		CreditsScrollBox->AddChild(CreditsText);
-		UVerticalBoxSlot* CreditsScrollSlot = CreditsContentStack->AddChildToVerticalBox(CreditsScrollBoxFrame);
-		if (CreditsScrollSlot)
-		{
-			CreditsScrollSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 18.0f));
+			CreditsTitleSlot->SetAnchors(FAnchors(0.0f, 0.0f));
+			CreditsTitleSlot->SetAlignment(FVector2D::ZeroVector);
+			CreditsTitleSlot->SetPosition(FVector2D(560.0f, 116.0f));
+			CreditsTitleSlot->SetSize(FVector2D(1180.0f, 42.0f));
 		}
 
-		ConfigurePlainButton(BackFromCreditsButtonBox, BackFromCreditsButton, BackFromCreditsButtonText, FText::FromString(TEXT("\uB3CC\uC544\uAC00\uAE30")), FVector2D(236.0f, 52.0f), false);
-		UVerticalBoxSlot* BackFromCreditsSlot = CreditsContentStack->AddChildToVerticalBox(BackFromCreditsButtonBox);
-		if (BackFromCreditsSlot)
+		auto ConfigureCreditsColumn = [](USizeBox* Frame, UScrollBox* ScrollBox, UTextBlock* TextBlock, const FText& PreviewText)
 		{
-			BackFromCreditsSlot->SetHorizontalAlignment(HAlign_Left);
+			Frame->SetWidthOverride(380.0f);
+			Frame->SetHeightOverride(700.0f);
+			Frame->SetContent(ScrollBox);
+			ConfigureTextBlock(
+				TextBlock,
+				PreviewText,
+				FLinearColor(0.90f, 0.94f, 0.92f, 1.0f),
+				17);
+			TextBlock->SetAutoWrapText(true);
+			TextBlock->SetShadowOffset(FVector2D(1.0f, 1.0f));
+			TextBlock->SetShadowColorAndOpacity(FLinearColor(0.0f, 0.0f, 0.0f, 0.72f));
+			ScrollBox->AddChild(TextBlock);
+		};
+
+		ConfigureCreditsColumn(CreditsScrollBoxFrame, CreditsScrollBox, CreditsText, FText::FromString(TEXT("Tuna Sweeper\n\nBlenG")));
+		ConfigureCreditsColumn(CreditsScrollBoxFrame2, CreditsScrollBox2, CreditsText2, FText::FromString(TEXT("BlenG")));
+		ConfigureCreditsColumn(CreditsScrollBoxFrame3, CreditsScrollBox3, CreditsText3, FText::FromString(TEXT("BlenG")));
+
+		for (UWidget* CreditsColumn : {
+				static_cast<UWidget*>(CreditsScrollBoxFrame),
+				static_cast<UWidget*>(CreditsScrollBoxFrame2),
+				static_cast<UWidget*>(CreditsScrollBoxFrame3) })
+		{
+			UHorizontalBoxSlot* ColumnSlot = CreditsColumnRow->AddChildToHorizontalBox(CreditsColumn);
+			if (ColumnSlot)
+			{
+				ColumnSlot->SetHorizontalAlignment(HAlign_Fill);
+				ColumnSlot->SetVerticalAlignment(VAlign_Fill);
+				ColumnSlot->SetPadding(FMargin(0.0f, 0.0f, 32.0f, 0.0f));
+				ColumnSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+			}
+		}
+		UCanvasPanelSlot* CreditsColumnSlot = CreditsPanel->AddChildToCanvas(CreditsColumnRow);
+		if (CreditsColumnSlot)
+		{
+			CreditsColumnSlot->SetAnchors(FAnchors(0.0f, 0.0f));
+			CreditsColumnSlot->SetAlignment(FVector2D::ZeroVector);
+			CreditsColumnSlot->SetPosition(FVector2D(560.0f, 176.0f));
+			CreditsColumnSlot->SetSize(FVector2D(1240.0f, 720.0f));
 		}
 
 		ConfigureTextBlock(VersionText, FText::FromString(TEXT("v0.1")), FLinearColor(1.0f, 1.0f, 1.0f, 0.86f), 14);

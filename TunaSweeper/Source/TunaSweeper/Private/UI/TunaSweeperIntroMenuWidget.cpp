@@ -155,7 +155,15 @@ void UTunaSweeperIntroMenuWidget::NativeConstruct()
 
 	if (CreditsText)
 	{
-		CreditsText->SetText(FText::FromString(BuildCreditsRollText()));
+		CreditsText->SetText(FText::FromString(BuildCreditsColumnText(0)));
+	}
+	if (CreditsText2)
+	{
+		CreditsText2->SetText(FText::FromString(BuildCreditsColumnText(1)));
+	}
+	if (CreditsText3)
+	{
+		CreditsText3->SetText(FText::FromString(BuildCreditsColumnText(2)));
 	}
 
 	SelectedSaveSlotIndex = INDEX_NONE;
@@ -173,10 +181,26 @@ void UTunaSweeperIntroMenuWidget::NativeTick(const FGeometry& MyGeometry, float 
 	{
 		CreditsScrollOffset += InDeltaTime * CreditsScrollSpeed;
 		CreditsScrollBox->SetScrollOffset(CreditsScrollOffset);
+		if (CreditsScrollBox2)
+		{
+			CreditsScrollBox2->SetScrollOffset(CreditsScrollOffset);
+		}
+		if (CreditsScrollBox3)
+		{
+			CreditsScrollBox3->SetScrollOffset(CreditsScrollOffset);
+		}
 		if (CreditsScrollOffset > 3600.0f)
 		{
 			CreditsScrollOffset = 0.0f;
 			CreditsScrollBox->SetScrollOffset(0.0f);
+			if (CreditsScrollBox2)
+			{
+				CreditsScrollBox2->SetScrollOffset(0.0f);
+			}
+			if (CreditsScrollBox3)
+			{
+				CreditsScrollBox3->SetScrollOffset(0.0f);
+			}
 		}
 	}
 
@@ -386,7 +410,7 @@ void UTunaSweeperIntroMenuWidget::HandleBackFromSettingsClicked()
 
 void UTunaSweeperIntroMenuWidget::HandleBackFromCreditsClicked()
 {
-	HideOverlayPanels();
+	ShowMainMenu();
 }
 
 void UTunaSweeperIntroMenuWidget::ShowMainMenu()
@@ -454,6 +478,10 @@ void UTunaSweeperIntroMenuWidget::ShowCreditsPanel()
 	HideDeleteConfirmDialog();
 	ResetDeleteHoldProgress();
 
+	if (MainMenuPanel)
+	{
+		MainMenuPanel->SetVisibility(ESlateVisibility::Collapsed);
+	}
 	if (SaveSlotPanel)
 	{
 		SaveSlotPanel->SetVisibility(ESlateVisibility::Collapsed);
@@ -464,7 +492,15 @@ void UTunaSweeperIntroMenuWidget::ShowCreditsPanel()
 	}
 	if (CreditsText)
 	{
-		CreditsText->SetText(FText::FromString(BuildCreditsRollText()));
+		CreditsText->SetText(FText::FromString(BuildCreditsColumnText(0)));
+	}
+	if (CreditsText2)
+	{
+		CreditsText2->SetText(FText::FromString(BuildCreditsColumnText(1)));
+	}
+	if (CreditsText3)
+	{
+		CreditsText3->SetText(FText::FromString(BuildCreditsColumnText(2)));
 	}
 	if (CreditsPanel)
 	{
@@ -474,6 +510,14 @@ void UTunaSweeperIntroMenuWidget::ShowCreditsPanel()
 	{
 		CreditsScrollOffset = 0.0f;
 		CreditsScrollBox->SetScrollOffset(0.0f);
+	}
+	if (CreditsScrollBox2)
+	{
+		CreditsScrollBox2->SetScrollOffset(0.0f);
+	}
+	if (CreditsScrollBox3)
+	{
+		CreditsScrollBox3->SetScrollOffset(0.0f);
 	}
 }
 
@@ -695,6 +739,34 @@ FString UTunaSweeperIntroMenuWidget::BuildCreditsRollText() const
 		TEXT("Audio Direction\nBlenG\n\n")
 		TEXT("QA\nBlenG\n\n\n")
 		TEXT("Thank you for playing.\n"));
+}
+
+FString UTunaSweeperIntroMenuWidget::BuildCreditsColumnText(int32 ColumnIndex) const
+{
+	TArray<FString> Lines;
+	BuildCreditsRollText().ParseIntoArrayLines(Lines, false);
+
+	if (Lines.IsEmpty())
+	{
+		return FString();
+	}
+
+	const int32 ClampedColumnIndex = FMath::Clamp(ColumnIndex, 0, 2);
+	const int32 LinesPerColumn = FMath::Max(1, FMath::DivideAndRoundUp(Lines.Num(), 3));
+	const int32 StartIndex = ClampedColumnIndex * LinesPerColumn;
+	const int32 EndIndex = FMath::Min(StartIndex + LinesPerColumn, Lines.Num());
+
+	FString ColumnText;
+	for (int32 LineIndex = StartIndex; LineIndex < EndIndex; ++LineIndex)
+	{
+		if (!ColumnText.IsEmpty())
+		{
+			ColumnText += LINE_TERMINATOR;
+		}
+		ColumnText += Lines[LineIndex];
+	}
+
+	return ColumnText;
 }
 
 FString UTunaSweeperIntroMenuWidget::FormatPlayTime(float TotalSeconds) const

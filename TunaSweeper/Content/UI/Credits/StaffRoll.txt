@@ -61,7 +61,7 @@ Quality Assurance
 BlenG
 
 Playtest
-BlenG
+-
 
 Audio Direction
 BlenG
@@ -73,7 +73,7 @@ Publishing
 BlenG
 
 Special Thanks
-BlenG
+-
 
 
 Thank you for playing Tuna Sweeper.

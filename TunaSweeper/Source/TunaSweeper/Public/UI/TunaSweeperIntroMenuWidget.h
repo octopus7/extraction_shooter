@@ -132,7 +132,19 @@ protected:
 	TObjectPtr<UScrollBox> CreditsScrollBox;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UScrollBox> CreditsScrollBox2;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UScrollBox> CreditsScrollBox3;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
 	TObjectPtr<UTextBlock> CreditsText;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UTextBlock> CreditsText2;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UTextBlock> CreditsText3;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
 	TObjectPtr<UButton> BackFromCreditsButton;
@@ -220,6 +232,7 @@ private:
 	FText BuildCurrentSaveSlotText(int32 SaveSlotIndex) const;
 	FText BuildSaveSlotButtonText(int32 SaveSlotIndex) const;
 	FString BuildCreditsRollText() const;
+	FString BuildCreditsColumnText(int32 ColumnIndex) const;
 	FString FormatPlayTime(float TotalSeconds) const;
 	FString FormatSaveTime(int64 LastSavedAtTicks) const;
 	bool IsSaveSlotSelectionVisible() const;
