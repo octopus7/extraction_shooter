@@ -2,10 +2,12 @@
 
 #include "Blueprint/UserWidget.h"
 #include "CoreMinimal.h"
+#include "GenericPlatform/GenericWindow.h"
 #include "TunaSweeperIntroMenuWidget.generated.h"
 
 class UButton;
 class UImage;
+class UScrollBox;
 class UTextBlock;
 class UWidget;
 
@@ -96,6 +98,45 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
 	TObjectPtr<UButton> CancelDeleteButton;
 
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UWidget> SettingsPanel;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UTextBlock> SettingsStatusText;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UButton> WindowedModeButton;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UButton> FullscreenModeButton;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UButton> Resolution1280Button;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UButton> Resolution1600Button;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UButton> Resolution1920Button;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UButton> Resolution2560Button;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UButton> BackFromSettingsButton;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UWidget> CreditsPanel;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UScrollBox> CreditsScrollBox;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UTextBlock> CreditsText;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UButton> BackFromCreditsButton;
+
 private:
 	UFUNCTION()
 	void HandleStartClicked();
@@ -142,18 +183,50 @@ private:
 	UFUNCTION()
 	void HandleCancelDeleteClicked();
 
+	UFUNCTION()
+	void HandleWindowedModeClicked();
+
+	UFUNCTION()
+	void HandleFullscreenModeClicked();
+
+	UFUNCTION()
+	void HandleResolution1280Clicked();
+
+	UFUNCTION()
+	void HandleResolution1600Clicked();
+
+	UFUNCTION()
+	void HandleResolution1920Clicked();
+
+	UFUNCTION()
+	void HandleResolution2560Clicked();
+
+	UFUNCTION()
+	void HandleBackFromSettingsClicked();
+
+	UFUNCTION()
+	void HandleBackFromCreditsClicked();
+
 	void ShowMainMenu();
 	void ShowSaveSlotSelection();
+	void ShowSettingsPanel();
+	void ShowCreditsPanel();
+	void HideOverlayPanels();
 	void SelectSaveSlot(int32 SaveSlotIndex);
 	void RefreshMainMenu();
 	void RefreshSaveSlotMenu();
+	void RefreshSettingsPanel();
 	void RefreshSaveSlotButton(int32 SaveSlotIndex, UButton* SlotButton, UTextBlock* SlotText);
 	FText BuildCurrentSaveSlotText(int32 SaveSlotIndex) const;
 	FText BuildSaveSlotButtonText(int32 SaveSlotIndex) const;
+	FString BuildCreditsRollText() const;
 	FString FormatPlayTime(float TotalSeconds) const;
 	FString FormatSaveTime(int64 LastSavedAtTicks) const;
 	bool IsSaveSlotSelectionVisible() const;
+	bool IsCreditsPanelVisible() const;
 	bool CanDeleteSelectedSaveSlot() const;
+	void ApplyDisplaySettings(EWindowMode::Type WindowMode);
+	void ApplyResolutionSetting(const FIntPoint& Resolution);
 	void ResetDeleteHoldProgress();
 	void SetDeleteHoldProgress(float Progress);
 	void ShowDeleteConfirmDialog();
@@ -161,8 +234,10 @@ private:
 
 	int32 SelectedSaveSlotIndex = INDEX_NONE;
 	float DeleteHoldElapsedSeconds = 0.0f;
+	float CreditsScrollOffset = 0.0f;
 	bool bDeleteHoldActive = false;
 	bool bDeleteConfirmVisible = false;
 
 	static constexpr float DeleteHoldDurationSeconds = 3.0f;
+	static constexpr float CreditsScrollSpeed = 34.0f;
 };

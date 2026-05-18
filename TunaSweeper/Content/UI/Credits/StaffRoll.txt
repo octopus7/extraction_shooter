@@ -1,0 +1,79 @@
+Tuna Sweeper
+
+A Game by BlenG
+
+
+Producer
+BlenG
+
+Director
+BlenG
+
+Game Design
+BlenG
+
+Programming
+BlenG
+
+Technical Direction
+BlenG
+
+Art Direction
+BlenG
+
+Background Illustration Direction
+BlenG
+
+Character Direction
+BlenG
+
+UI Design
+BlenG
+
+UX Design
+BlenG
+
+Scenario
+BlenG
+
+Worldbuilding
+BlenG
+
+Level Design
+BlenG
+
+Combat Design
+BlenG
+
+Systems Design
+BlenG
+
+Save System
+BlenG
+
+Tools
+BlenG
+
+Build Engineering
+BlenG
+
+Quality Assurance
+BlenG
+
+Playtest
+BlenG
+
+Audio Direction
+BlenG
+
+Music Direction
+BlenG
+
+Publishing
+BlenG
+
+Special Thanks
+BlenG
+
+
+Thank you for playing Tuna Sweeper.

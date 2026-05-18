@@ -19,6 +19,7 @@
 #include "Components/Overlay.h"
 #include "Components/OverlaySlot.h"
 #include "Components/ProgressBar.h"
+#include "Components/ScrollBox.h"
 #include "Components/SizeBox.h"
 #include "Components/TextBlock.h"
 #include "Components/TileView.h"
@@ -100,7 +101,7 @@ namespace TunaSweeperEditorSetup
 	const FString LootContainerOccupancyHeaderTaskId = TEXT("2026-05-18_AddLootContainerOccupancyHeaderV1");
 	const FString CannedTunaIconImportTaskId = TEXT("2026-05-11_ImportCannedTunaIconV1");
 	const FString BackpackInventoryTaskId = TEXT("2026-05-16_CreateEquipmentInventoryAssetsV3");
-	const FString IntroMenuAndLevelTravelTaskId = TEXT("2026-05-18_CreateTitleIntroMenuPersistentSaveSlotSelectionV3");
+	const FString IntroMenuAndLevelTravelTaskId = TEXT("2026-05-18_CreateTitleIntroMenuPersistentSaveSlotSelectionV4");
 	const FString LevelTransitionVideoTaskId = TEXT("2026-05-16_AddBidirectionalLevelTransitionVideoV3");
 	const FString FirstOutingQuestTaskId = TEXT("2026-05-15_CreateFirstOutingQuestNpcV2");
 	const FString SelfDestructInteractionTaskId = TEXT("2026-05-16_CreateSelfDestructInteractionV1");
@@ -1320,6 +1321,46 @@ namespace TunaSweeperEditorSetup
 		USizeBox* CancelDeleteButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("CancelDeleteButtonBox"));
 		UButton* CancelDeleteButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("CancelDeleteButton"));
 		UTextBlock* CancelDeleteButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("CancelDeleteButtonText"));
+		UCanvasPanel* SettingsPanel = WidgetTree->ConstructWidget<UCanvasPanel>(UCanvasPanel::StaticClass(), TEXT("SettingsPanel"));
+		UBorder* SettingsBackdrop = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("SettingsBackdrop"));
+		UBorder* SettingsContentBackground = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("SettingsContentBackground"));
+		UVerticalBox* SettingsContentStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("SettingsContentStack"));
+		UTextBlock* SettingsTitleText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("SettingsTitleText"));
+		UTextBlock* SettingsStatusText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("SettingsStatusText"));
+		UHorizontalBox* WindowModeRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("WindowModeRow"));
+		USizeBox* WindowedModeButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("WindowedModeButtonBox"));
+		UButton* WindowedModeButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("WindowedModeButton"));
+		UTextBlock* WindowedModeButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("WindowedModeButtonText"));
+		USizeBox* FullscreenModeButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("FullscreenModeButtonBox"));
+		UButton* FullscreenModeButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("FullscreenModeButton"));
+		UTextBlock* FullscreenModeButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("FullscreenModeButtonText"));
+		UVerticalBox* ResolutionButtonStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("ResolutionButtonStack"));
+		USizeBox* Resolution1280ButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("Resolution1280ButtonBox"));
+		UButton* Resolution1280Button = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("Resolution1280Button"));
+		UTextBlock* Resolution1280ButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("Resolution1280ButtonText"));
+		USizeBox* Resolution1600ButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("Resolution1600ButtonBox"));
+		UButton* Resolution1600Button = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("Resolution1600Button"));
+		UTextBlock* Resolution1600ButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("Resolution1600ButtonText"));
+		USizeBox* Resolution1920ButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("Resolution1920ButtonBox"));
+		UButton* Resolution1920Button = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("Resolution1920Button"));
+		UTextBlock* Resolution1920ButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("Resolution1920ButtonText"));
+		USizeBox* Resolution2560ButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("Resolution2560ButtonBox"));
+		UButton* Resolution2560Button = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("Resolution2560Button"));
+		UTextBlock* Resolution2560ButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("Resolution2560ButtonText"));
+		USizeBox* BackFromSettingsButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("BackFromSettingsButtonBox"));
+		UButton* BackFromSettingsButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("BackFromSettingsButton"));
+		UTextBlock* BackFromSettingsButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("BackFromSettingsButtonText"));
+		UCanvasPanel* CreditsPanel = WidgetTree->ConstructWidget<UCanvasPanel>(UCanvasPanel::StaticClass(), TEXT("CreditsPanel"));
+		UBorder* CreditsBackdrop = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("CreditsBackdrop"));
+		UBorder* CreditsContentBackground = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("CreditsContentBackground"));
+		UVerticalBox* CreditsContentStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("CreditsContentStack"));
+		UTextBlock* CreditsTitleText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("CreditsTitleText"));
+		USizeBox* CreditsScrollBoxFrame = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("CreditsScrollBoxFrame"));
+		UScrollBox* CreditsScrollBox = WidgetTree->ConstructWidget<UScrollBox>(UScrollBox::StaticClass(), TEXT("CreditsScrollBox"));
+		UTextBlock* CreditsText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("CreditsText"));
+		USizeBox* BackFromCreditsButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("BackFromCreditsButtonBox"));
+		UButton* BackFromCreditsButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("BackFromCreditsButton"));
+		UTextBlock* BackFromCreditsButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("BackFromCreditsButtonText"));
 		UTextBlock* VersionText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("VersionText"));
 
 		if (!RootCanvas || !BackgroundImage || !LeftScrim || !LogoImage || !MainMenuPanel || !StartButtonBox ||
@@ -1334,7 +1375,17 @@ namespace TunaSweeperEditorSetup
 			!DeleteHoldGaugeRing || !DeleteHoldGaugeFill || !BackToMainMenuButtonBox || !BackToMainMenuButton ||
 			!BackToMainMenuButtonText || !DeleteConfirmPanel || !DeleteConfirmStack || !DeleteConfirmTitleText ||
 			!DeleteConfirmMessageText || !DeleteConfirmButtonRow || !ConfirmDeleteButtonBox || !ConfirmDeleteButton ||
-			!ConfirmDeleteButtonText || !CancelDeleteButtonBox || !CancelDeleteButton || !CancelDeleteButtonText || !VersionText)
+			!ConfirmDeleteButtonText || !CancelDeleteButtonBox || !CancelDeleteButton || !CancelDeleteButtonText ||
+			!SettingsPanel || !SettingsBackdrop || !SettingsContentBackground || !SettingsContentStack ||
+			!SettingsTitleText || !SettingsStatusText || !WindowModeRow || !WindowedModeButtonBox ||
+			!WindowedModeButton || !WindowedModeButtonText || !FullscreenModeButtonBox || !FullscreenModeButton ||
+			!FullscreenModeButtonText || !ResolutionButtonStack || !Resolution1280ButtonBox || !Resolution1280Button ||
+			!Resolution1280ButtonText || !Resolution1600ButtonBox || !Resolution1600Button || !Resolution1600ButtonText ||
+			!Resolution1920ButtonBox || !Resolution1920Button || !Resolution1920ButtonText || !Resolution2560ButtonBox ||
+			!Resolution2560Button || !Resolution2560ButtonText || !BackFromSettingsButtonBox || !BackFromSettingsButton ||
+			!BackFromSettingsButtonText || !CreditsPanel || !CreditsBackdrop || !CreditsContentBackground ||
+			!CreditsContentStack || !CreditsTitleText || !CreditsScrollBoxFrame || !CreditsScrollBox || !CreditsText ||
+			!BackFromCreditsButtonBox || !BackFromCreditsButton || !BackFromCreditsButtonText || !VersionText)
 		{
 			return false;
 		}
@@ -1432,6 +1483,22 @@ namespace TunaSweeperEditorSetup
 				Label,
 				bPrimary ? 28 : 20,
 				bPrimary ? 28 : 20));
+		};
+
+		auto ConfigurePlainButton = [&ConfigureButtonStyle](
+			USizeBox* ButtonBox,
+			UButton* Button,
+			UTextBlock* ButtonText,
+			const FText& Label,
+			const FVector2D& ButtonSize,
+			bool bPrimary)
+		{
+			ButtonBox->SetWidthOverride(ButtonSize.X);
+			ButtonBox->SetHeightOverride(ButtonSize.Y);
+			ButtonBox->SetContent(Button);
+			ConfigureButtonStyle(Button, ButtonSize, bPrimary);
+			ConfigureTextBlock(ButtonText, Label, FLinearColor::White, bPrimary ? 19 : 17);
+			Button->SetContent(ButtonText);
 		};
 
 		if (BackgroundTexture)
@@ -1773,6 +1840,145 @@ namespace TunaSweeperEditorSetup
 			ConfirmSlot->SetAlignment(FVector2D(0.5f, 0.5f));
 			ConfirmSlot->SetPosition(FVector2D(0.0f, 0.0f));
 			ConfirmSlot->SetSize(FVector2D(520.0f, 220.0f));
+		}
+
+		SettingsPanel->SetVisibility(ESlateVisibility::Collapsed);
+		FillCanvas(RootCanvas->AddChildToCanvas(SettingsPanel));
+		SettingsBackdrop->SetBrush(MakeRoundedBoxBrush(
+			FVector2D(1920.0f, 1080.0f),
+			FLinearColor(0.0f, 0.0f, 0.0f, 0.62f),
+			FLinearColor::Transparent,
+			0.0f,
+			0.0f));
+		FillCanvas(SettingsPanel->AddChildToCanvas(SettingsBackdrop));
+
+		SettingsContentBackground->SetPadding(FMargin(34.0f, 30.0f));
+		SettingsContentBackground->SetBrush(MakeRoundedBoxBrush(
+			FVector2D(560.0f, 520.0f),
+			FLinearColor(0.018f, 0.030f, 0.034f, 0.92f),
+			FLinearColor(0.70f, 0.78f, 0.76f, 0.74f),
+			1.2f,
+			16.0f));
+		SettingsContentBackground->SetContent(SettingsContentStack);
+		UCanvasPanelSlot* SettingsContentSlot = SettingsPanel->AddChildToCanvas(SettingsContentBackground);
+		if (SettingsContentSlot)
+		{
+			SettingsContentSlot->SetAnchors(FAnchors(0.0f, 0.5f));
+			SettingsContentSlot->SetAlignment(FVector2D(0.0f, 0.5f));
+			SettingsContentSlot->SetPosition(FVector2D(88.0f, 0.0f));
+			SettingsContentSlot->SetSize(FVector2D(560.0f, 520.0f));
+		}
+
+		ConfigureTextBlockLeft(SettingsTitleText, FText::FromString(TEXT("\uC124\uC815")), FLinearColor::White, 30);
+		UVerticalBoxSlot* SettingsTitleSlot = SettingsContentStack->AddChildToVerticalBox(SettingsTitleText);
+		if (SettingsTitleSlot)
+		{
+			SettingsTitleSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 16.0f));
+		}
+		ConfigureTextBlockLeft(SettingsStatusText, FText::FromString(TEXT("\uD604\uC7AC: --")), FLinearColor(0.82f, 0.86f, 0.84f, 1.0f), 17);
+		UVerticalBoxSlot* SettingsStatusSlot = SettingsContentStack->AddChildToVerticalBox(SettingsStatusText);
+		if (SettingsStatusSlot)
+		{
+			SettingsStatusSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 18.0f));
+		}
+
+		ConfigurePlainButton(WindowedModeButtonBox, WindowedModeButton, WindowedModeButtonText, FText::FromString(TEXT("\uCC3D\uBAA8\uB4DC")), FVector2D(236.0f, 52.0f), false);
+		ConfigurePlainButton(FullscreenModeButtonBox, FullscreenModeButton, FullscreenModeButtonText, FText::FromString(TEXT("\uC804\uCCB4\uD654\uBA74")), FVector2D(236.0f, 52.0f), false);
+		UHorizontalBoxSlot* WindowedSlot = WindowModeRow->AddChildToHorizontalBox(WindowedModeButtonBox);
+		if (WindowedSlot)
+		{
+			WindowedSlot->SetPadding(FMargin(0.0f, 0.0f, 12.0f, 0.0f));
+		}
+		WindowModeRow->AddChildToHorizontalBox(FullscreenModeButtonBox);
+		UVerticalBoxSlot* WindowModeSlot = SettingsContentStack->AddChildToVerticalBox(WindowModeRow);
+		if (WindowModeSlot)
+		{
+			WindowModeSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 18.0f));
+		}
+
+		ConfigurePlainButton(Resolution1280ButtonBox, Resolution1280Button, Resolution1280ButtonText, FText::FromString(TEXT("1280 x 720")), FVector2D(484.0f, 48.0f), false);
+		ConfigurePlainButton(Resolution1600ButtonBox, Resolution1600Button, Resolution1600ButtonText, FText::FromString(TEXT("1600 x 900")), FVector2D(484.0f, 48.0f), false);
+		ConfigurePlainButton(Resolution1920ButtonBox, Resolution1920Button, Resolution1920ButtonText, FText::FromString(TEXT("1920 x 1080")), FVector2D(484.0f, 48.0f), false);
+		ConfigurePlainButton(Resolution2560ButtonBox, Resolution2560Button, Resolution2560ButtonText, FText::FromString(TEXT("2560 x 1440")), FVector2D(484.0f, 48.0f), false);
+		for (UWidget* ResolutionButtonBox : {
+				static_cast<UWidget*>(Resolution1280ButtonBox),
+				static_cast<UWidget*>(Resolution1600ButtonBox),
+				static_cast<UWidget*>(Resolution1920ButtonBox),
+				static_cast<UWidget*>(Resolution2560ButtonBox) })
+		{
+			UVerticalBoxSlot* ResolutionSlot = ResolutionButtonStack->AddChildToVerticalBox(ResolutionButtonBox);
+			if (ResolutionSlot)
+			{
+				ResolutionSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 10.0f));
+			}
+		}
+		UVerticalBoxSlot* ResolutionStackSlot = SettingsContentStack->AddChildToVerticalBox(ResolutionButtonStack);
+		if (ResolutionStackSlot)
+		{
+			ResolutionStackSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 8.0f));
+		}
+
+		ConfigurePlainButton(BackFromSettingsButtonBox, BackFromSettingsButton, BackFromSettingsButtonText, FText::FromString(TEXT("\uB3CC\uC544\uAC00\uAE30")), FVector2D(236.0f, 52.0f), false);
+		UVerticalBoxSlot* BackFromSettingsSlot = SettingsContentStack->AddChildToVerticalBox(BackFromSettingsButtonBox);
+		if (BackFromSettingsSlot)
+		{
+			BackFromSettingsSlot->SetHorizontalAlignment(HAlign_Left);
+		}
+
+		CreditsPanel->SetVisibility(ESlateVisibility::Collapsed);
+		FillCanvas(RootCanvas->AddChildToCanvas(CreditsPanel));
+		CreditsBackdrop->SetBrush(MakeRoundedBoxBrush(
+			FVector2D(1920.0f, 1080.0f),
+			FLinearColor(0.0f, 0.0f, 0.0f, 0.64f),
+			FLinearColor::Transparent,
+			0.0f,
+			0.0f));
+		FillCanvas(CreditsPanel->AddChildToCanvas(CreditsBackdrop));
+
+		CreditsContentBackground->SetPadding(FMargin(34.0f, 30.0f));
+		CreditsContentBackground->SetBrush(MakeRoundedBoxBrush(
+			FVector2D(660.0f, 700.0f),
+			FLinearColor(0.018f, 0.030f, 0.034f, 0.92f),
+			FLinearColor(0.70f, 0.78f, 0.76f, 0.74f),
+			1.2f,
+			16.0f));
+		CreditsContentBackground->SetContent(CreditsContentStack);
+		UCanvasPanelSlot* CreditsContentSlot = CreditsPanel->AddChildToCanvas(CreditsContentBackground);
+		if (CreditsContentSlot)
+		{
+			CreditsContentSlot->SetAnchors(FAnchors(0.0f, 0.5f));
+			CreditsContentSlot->SetAlignment(FVector2D(0.0f, 0.5f));
+			CreditsContentSlot->SetPosition(FVector2D(88.0f, 0.0f));
+			CreditsContentSlot->SetSize(FVector2D(660.0f, 700.0f));
+		}
+
+		ConfigureTextBlockLeft(CreditsTitleText, FText::FromString(TEXT("\uD06C\uB808\uB527")), FLinearColor::White, 30);
+		UVerticalBoxSlot* CreditsTitleSlot = CreditsContentStack->AddChildToVerticalBox(CreditsTitleText);
+		if (CreditsTitleSlot)
+		{
+			CreditsTitleSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 16.0f));
+		}
+		CreditsScrollBoxFrame->SetWidthOverride(592.0f);
+		CreditsScrollBoxFrame->SetHeightOverride(518.0f);
+		CreditsScrollBoxFrame->SetContent(CreditsScrollBox);
+		ConfigureTextBlock(
+			CreditsText,
+			FText::FromString(TEXT("Tuna Sweeper\n\nBlenG")),
+			FLinearColor(0.88f, 0.92f, 0.90f, 1.0f),
+			18);
+		CreditsText->SetAutoWrapText(true);
+		CreditsScrollBox->AddChild(CreditsText);
+		UVerticalBoxSlot* CreditsScrollSlot = CreditsContentStack->AddChildToVerticalBox(CreditsScrollBoxFrame);
+		if (CreditsScrollSlot)
+		{
+			CreditsScrollSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 18.0f));
+		}
+
+		ConfigurePlainButton(BackFromCreditsButtonBox, BackFromCreditsButton, BackFromCreditsButtonText, FText::FromString(TEXT("\uB3CC\uC544\uAC00\uAE30")), FVector2D(236.0f, 52.0f), false);
+		UVerticalBoxSlot* BackFromCreditsSlot = CreditsContentStack->AddChildToVerticalBox(BackFromCreditsButtonBox);
+		if (BackFromCreditsSlot)
+		{
+			BackFromCreditsSlot->SetHorizontalAlignment(HAlign_Left);
 		}
 
 		ConfigureTextBlock(VersionText, FText::FromString(TEXT("v0.1")), FLinearColor(1.0f, 1.0f, 1.0f, 0.86f), 14);

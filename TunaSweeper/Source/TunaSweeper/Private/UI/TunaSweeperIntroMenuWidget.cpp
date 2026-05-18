@@ -2,12 +2,17 @@
 
 #include "Components/Button.h"
 #include "Components/Image.h"
+#include "Components/ScrollBox.h"
 #include "Components/TextBlock.h"
 #include "Components/Widget.h"
+#include "Engine/Engine.h"
 #include "Game/TunaSweeperGameInstance.h"
+#include "GameFramework/GameUserSettings.h"
 #include "GameFramework/PlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Misc/FileHelper.h"
+#include "Misc/Paths.h"
 
 void UTunaSweeperIntroMenuWidget::NativeConstruct()
 {
@@ -100,15 +105,80 @@ void UTunaSweeperIntroMenuWidget::NativeConstruct()
 		CancelDeleteButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleCancelDeleteClicked);
 	}
 
+	if (WindowedModeButton)
+	{
+		WindowedModeButton->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleWindowedModeClicked);
+		WindowedModeButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleWindowedModeClicked);
+	}
+
+	if (FullscreenModeButton)
+	{
+		FullscreenModeButton->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleFullscreenModeClicked);
+		FullscreenModeButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleFullscreenModeClicked);
+	}
+
+	if (Resolution1280Button)
+	{
+		Resolution1280Button->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleResolution1280Clicked);
+		Resolution1280Button->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleResolution1280Clicked);
+	}
+
+	if (Resolution1600Button)
+	{
+		Resolution1600Button->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleResolution1600Clicked);
+		Resolution1600Button->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleResolution1600Clicked);
+	}
+
+	if (Resolution1920Button)
+	{
+		Resolution1920Button->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleResolution1920Clicked);
+		Resolution1920Button->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleResolution1920Clicked);
+	}
+
+	if (Resolution2560Button)
+	{
+		Resolution2560Button->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleResolution2560Clicked);
+		Resolution2560Button->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleResolution2560Clicked);
+	}
+
+	if (BackFromSettingsButton)
+	{
+		BackFromSettingsButton->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleBackFromSettingsClicked);
+		BackFromSettingsButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleBackFromSettingsClicked);
+	}
+
+	if (BackFromCreditsButton)
+	{
+		BackFromCreditsButton->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleBackFromCreditsClicked);
+		BackFromCreditsButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleBackFromCreditsClicked);
+	}
+
+	if (CreditsText)
+	{
+		CreditsText->SetText(FText::FromString(BuildCreditsRollText()));
+	}
+
 	SelectedSaveSlotIndex = INDEX_NONE;
 	ResetDeleteHoldProgress();
 	HideDeleteConfirmDialog();
+	HideOverlayPanels();
 	ShowMainMenu();
 }
 
 void UTunaSweeperIntroMenuWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
 	Super::NativeTick(MyGeometry, InDeltaTime);
+
+	if (IsCreditsPanelVisible() && CreditsScrollBox)
+	{
+		CreditsScrollOffset += InDeltaTime * CreditsScrollSpeed;
+		CreditsScrollBox->SetScrollOffset(CreditsScrollOffset);
+		if (CreditsScrollOffset > 3600.0f)
+		{
+			CreditsScrollOffset = 0.0f;
+			CreditsScrollBox->SetScrollOffset(0.0f);
+		}
+	}
 
 	if (!IsSaveSlotSelectionVisible())
 	{
@@ -177,12 +247,12 @@ void UTunaSweeperIntroMenuWidget::HandleSlotSelectClicked()
 
 void UTunaSweeperIntroMenuWidget::HandleSettingsClicked()
 {
-	UE_LOG(LogTemp, Log, TEXT("Title settings button clicked."));
+	ShowSettingsPanel();
 }
 
 void UTunaSweeperIntroMenuWidget::HandleCreditsClicked()
 {
-	UE_LOG(LogTemp, Log, TEXT("Title credits button clicked."));
+	ShowCreditsPanel();
 }
 
 void UTunaSweeperIntroMenuWidget::HandleQuitClicked()
@@ -279,8 +349,49 @@ void UTunaSweeperIntroMenuWidget::HandleCancelDeleteClicked()
 	ResetDeleteHoldProgress();
 }
 
+void UTunaSweeperIntroMenuWidget::HandleWindowedModeClicked()
+{
+	ApplyDisplaySettings(EWindowMode::Windowed);
+}
+
+void UTunaSweeperIntroMenuWidget::HandleFullscreenModeClicked()
+{
+	ApplyDisplaySettings(EWindowMode::Fullscreen);
+}
+
+void UTunaSweeperIntroMenuWidget::HandleResolution1280Clicked()
+{
+	ApplyResolutionSetting(FIntPoint(1280, 720));
+}
+
+void UTunaSweeperIntroMenuWidget::HandleResolution1600Clicked()
+{
+	ApplyResolutionSetting(FIntPoint(1600, 900));
+}
+
+void UTunaSweeperIntroMenuWidget::HandleResolution1920Clicked()
+{
+	ApplyResolutionSetting(FIntPoint(1920, 1080));
+}
+
+void UTunaSweeperIntroMenuWidget::HandleResolution2560Clicked()
+{
+	ApplyResolutionSetting(FIntPoint(2560, 1440));
+}
+
+void UTunaSweeperIntroMenuWidget::HandleBackFromSettingsClicked()
+{
+	HideOverlayPanels();
+}
+
+void UTunaSweeperIntroMenuWidget::HandleBackFromCreditsClicked()
+{
+	HideOverlayPanels();
+}
+
 void UTunaSweeperIntroMenuWidget::ShowMainMenu()
 {
+	HideOverlayPanels();
 	HideDeleteConfirmDialog();
 	ResetDeleteHoldProgress();
 
@@ -302,6 +413,7 @@ void UTunaSweeperIntroMenuWidget::ShowSaveSlotSelection()
 {
 	HideDeleteConfirmDialog();
 	ResetDeleteHoldProgress();
+	HideOverlayPanels();
 
 	if (MainMenuPanel)
 	{
@@ -314,6 +426,69 @@ void UTunaSweeperIntroMenuWidget::ShowSaveSlotSelection()
 
 	SelectedSaveSlotIndex = INDEX_NONE;
 	RefreshSaveSlotMenu();
+}
+
+void UTunaSweeperIntroMenuWidget::ShowSettingsPanel()
+{
+	HideDeleteConfirmDialog();
+	ResetDeleteHoldProgress();
+
+	if (SaveSlotPanel)
+	{
+		SaveSlotPanel->SetVisibility(ESlateVisibility::Collapsed);
+	}
+	if (CreditsPanel)
+	{
+		CreditsPanel->SetVisibility(ESlateVisibility::Collapsed);
+	}
+	if (SettingsPanel)
+	{
+		SettingsPanel->SetVisibility(ESlateVisibility::Visible);
+	}
+
+	RefreshSettingsPanel();
+}
+
+void UTunaSweeperIntroMenuWidget::ShowCreditsPanel()
+{
+	HideDeleteConfirmDialog();
+	ResetDeleteHoldProgress();
+
+	if (SaveSlotPanel)
+	{
+		SaveSlotPanel->SetVisibility(ESlateVisibility::Collapsed);
+	}
+	if (SettingsPanel)
+	{
+		SettingsPanel->SetVisibility(ESlateVisibility::Collapsed);
+	}
+	if (CreditsText)
+	{
+		CreditsText->SetText(FText::FromString(BuildCreditsRollText()));
+	}
+	if (CreditsPanel)
+	{
+		CreditsPanel->SetVisibility(ESlateVisibility::Visible);
+	}
+	if (CreditsScrollBox)
+	{
+		CreditsScrollOffset = 0.0f;
+		CreditsScrollBox->SetScrollOffset(0.0f);
+	}
+}
+
+void UTunaSweeperIntroMenuWidget::HideOverlayPanels()
+{
+	if (SettingsPanel)
+	{
+		SettingsPanel->SetVisibility(ESlateVisibility::Collapsed);
+	}
+	if (CreditsPanel)
+	{
+		CreditsPanel->SetVisibility(ESlateVisibility::Collapsed);
+	}
+
+	CreditsScrollOffset = 0.0f;
 }
 
 void UTunaSweeperIntroMenuWidget::SelectSaveSlot(int32 SaveSlotIndex)
@@ -400,6 +575,34 @@ void UTunaSweeperIntroMenuWidget::RefreshSaveSlotMenu()
 	}
 }
 
+void UTunaSweeperIntroMenuWidget::RefreshSettingsPanel()
+{
+	if (!SettingsStatusText)
+	{
+		return;
+	}
+
+	FIntPoint CurrentResolution(0, 0);
+	EWindowMode::Type CurrentWindowMode = EWindowMode::Windowed;
+	if (GEngine)
+	{
+		if (UGameUserSettings* GameUserSettings = GEngine->GetGameUserSettings())
+		{
+			CurrentResolution = GameUserSettings->GetScreenResolution();
+			CurrentWindowMode = GameUserSettings->GetFullscreenMode();
+		}
+	}
+
+	const FString WindowModeText = CurrentWindowMode == EWindowMode::Fullscreen
+		? TEXT("\uC804\uCCB4\uD654\uBA74")
+		: TEXT("\uCC3D\uBAA8\uB4DC");
+	SettingsStatusText->SetText(FText::FromString(FString::Printf(
+		TEXT("\uD604\uC7AC: %s / %dx%d"),
+		*WindowModeText,
+		CurrentResolution.X,
+		CurrentResolution.Y)));
+}
+
 void UTunaSweeperIntroMenuWidget::RefreshSaveSlotButton(int32 SaveSlotIndex, UButton* SlotButton, UTextBlock* SlotText)
 {
 	if (SlotText)
@@ -464,6 +667,36 @@ FText UTunaSweeperIntroMenuWidget::BuildSaveSlotButtonText(int32 SaveSlotIndex) 
 		*FormatPlayTime(Summary.TotalPlaySeconds)));
 }
 
+FString UTunaSweeperIntroMenuWidget::BuildCreditsRollText() const
+{
+	const FString CreditsFilePath = FPaths::Combine(
+		FPaths::ProjectContentDir(),
+		TEXT("UI"),
+		TEXT("Credits"),
+		TEXT("StaffRoll.txt"));
+
+	FString CreditsTextFromFile;
+	if (FFileHelper::LoadFileToString(CreditsTextFromFile, *CreditsFilePath) &&
+		!CreditsTextFromFile.TrimStartAndEnd().IsEmpty())
+	{
+		return CreditsTextFromFile;
+	}
+
+	return FString(
+		TEXT("Tuna Sweeper\n\n")
+		TEXT("A Game by BlenG\n\n\n")
+		TEXT("Direction\nBlenG\n\n")
+		TEXT("Game Design\nBlenG\n\n")
+		TEXT("Programming\nBlenG\n\n")
+		TEXT("Art Direction\nBlenG\n\n")
+		TEXT("UI Design\nBlenG\n\n")
+		TEXT("Scenario\nBlenG\n\n")
+		TEXT("Level Design\nBlenG\n\n")
+		TEXT("Audio Direction\nBlenG\n\n")
+		TEXT("QA\nBlenG\n\n\n")
+		TEXT("Thank you for playing.\n"));
+}
+
 FString UTunaSweeperIntroMenuWidget::FormatPlayTime(float TotalSeconds) const
 {
 	const int32 ClampedTotalSeconds = FMath::Max(0, FMath::RoundToInt(TotalSeconds));
@@ -488,6 +721,11 @@ bool UTunaSweeperIntroMenuWidget::IsSaveSlotSelectionVisible() const
 	return SaveSlotPanel && SaveSlotPanel->GetVisibility() == ESlateVisibility::Visible;
 }
 
+bool UTunaSweeperIntroMenuWidget::IsCreditsPanelVisible() const
+{
+	return CreditsPanel && CreditsPanel->GetVisibility() == ESlateVisibility::Visible;
+}
+
 bool UTunaSweeperIntroMenuWidget::CanDeleteSelectedSaveSlot() const
 {
 	if (SelectedSaveSlotIndex == INDEX_NONE)
@@ -501,6 +739,40 @@ bool UTunaSweeperIntroMenuWidget::CanDeleteSelectedSaveSlot() const
 	}
 
 	return false;
+}
+
+void UTunaSweeperIntroMenuWidget::ApplyDisplaySettings(EWindowMode::Type WindowMode)
+{
+	if (!GEngine)
+	{
+		return;
+	}
+
+	if (UGameUserSettings* GameUserSettings = GEngine->GetGameUserSettings())
+	{
+		GameUserSettings->SetFullscreenMode(WindowMode);
+		GameUserSettings->ApplySettings(false);
+		GameUserSettings->SaveSettings();
+	}
+
+	RefreshSettingsPanel();
+}
+
+void UTunaSweeperIntroMenuWidget::ApplyResolutionSetting(const FIntPoint& Resolution)
+{
+	if (!GEngine)
+	{
+		return;
+	}
+
+	if (UGameUserSettings* GameUserSettings = GEngine->GetGameUserSettings())
+	{
+		GameUserSettings->SetScreenResolution(Resolution);
+		GameUserSettings->ApplySettings(false);
+		GameUserSettings->SaveSettings();
+	}
+
+	RefreshSettingsPanel();
 }
 
 void UTunaSweeperIntroMenuWidget::ResetDeleteHoldProgress()
