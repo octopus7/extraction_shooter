@@ -24,6 +24,18 @@ void UTunaSweeperIntroMenuWidget::NativeConstruct()
 		SlotSelectButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleSlotSelectClicked);
 	}
 
+	if (SettingsButton)
+	{
+		SettingsButton->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleSettingsClicked);
+		SettingsButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleSettingsClicked);
+	}
+
+	if (CreditsButton)
+	{
+		CreditsButton->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleCreditsClicked);
+		CreditsButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleCreditsClicked);
+	}
+
 	if (QuitButton)
 	{
 		QuitButton->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleQuitClicked);
@@ -112,6 +124,16 @@ void UTunaSweeperIntroMenuWidget::HandleStartClicked()
 void UTunaSweeperIntroMenuWidget::HandleSlotSelectClicked()
 {
 	ShowSaveSlotSelection();
+}
+
+void UTunaSweeperIntroMenuWidget::HandleSettingsClicked()
+{
+	UE_LOG(LogTemp, Log, TEXT("Title settings button clicked."));
+}
+
+void UTunaSweeperIntroMenuWidget::HandleCreditsClicked()
+{
+	UE_LOG(LogTemp, Log, TEXT("Title credits button clicked."));
 }
 
 void UTunaSweeperIntroMenuWidget::HandleQuitClicked()
@@ -224,9 +246,7 @@ void UTunaSweeperIntroMenuWidget::RefreshMainMenu()
 
 	if (StartButtonText)
 	{
-		StartButtonText->SetText(Summary.bHasData
-			? FText::FromString(TEXT("\uC774\uC5B4\uC11C\uD558\uAE30"))
-			: FText::FromString(TEXT("\uC0C8\uB85C\uC2DC\uC791\uD558\uAE30")));
+		StartButtonText->SetText(FText::FromString(TEXT("\uC774\uC5B4\uAC00\uAE30")));
 	}
 }
 
@@ -299,14 +319,13 @@ FText UTunaSweeperIntroMenuWidget::BuildSaveSlotButtonText(int32 SaveSlotIndex) 
 
 	if (!Summary.bHasData)
 	{
-		return FText::FromString(FString::Printf(TEXT("\uC2AC\uB86F %d\n\uBE48 \uC2AC\uB86F"), SaveSlotIndex));
+		return FText::FromString(FString::Printf(TEXT("\uC2AC\uB86F %d - \uBE48 \uC2AC\uB86F"), SaveSlotIndex));
 	}
 
 	return FText::FromString(FString::Printf(
-		TEXT("\uC2AC\uB86F %d\n\uD50C\uB808\uC774 %s\n\uC800\uC7A5 %s"),
+		TEXT("\uC2AC\uB86F %d - %s"),
 		SaveSlotIndex,
-		*FormatPlayTime(Summary.TotalPlaySeconds),
-		*FormatSaveTime(Summary.LastSavedAtTicks)));
+		*FormatPlayTime(Summary.TotalPlaySeconds)));
 }
 
 FString UTunaSweeperIntroMenuWidget::FormatPlayTime(float TotalSeconds) const

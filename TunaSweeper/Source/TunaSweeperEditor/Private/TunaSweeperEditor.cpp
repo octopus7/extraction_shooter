@@ -100,7 +100,7 @@ namespace TunaSweeperEditorSetup
 	const FString LootContainerOccupancyHeaderTaskId = TEXT("2026-05-18_AddLootContainerOccupancyHeaderV1");
 	const FString CannedTunaIconImportTaskId = TEXT("2026-05-11_ImportCannedTunaIconV1");
 	const FString BackpackInventoryTaskId = TEXT("2026-05-16_CreateEquipmentInventoryAssetsV3");
-	const FString IntroMenuAndLevelTravelTaskId = TEXT("2026-05-17_CreateIntroMenuPersistentSaveSlotSelectionV1");
+	const FString IntroMenuAndLevelTravelTaskId = TEXT("2026-05-18_CreateTitleIntroMenuPersistentSaveSlotSelectionV2");
 	const FString LevelTransitionVideoTaskId = TEXT("2026-05-16_AddBidirectionalLevelTransitionVideoV3");
 	const FString FirstOutingQuestTaskId = TEXT("2026-05-15_CreateFirstOutingQuestNpcV2");
 	const FString SelfDestructInteractionTaskId = TEXT("2026-05-16_CreateSelfDestructInteractionV1");
@@ -133,6 +133,9 @@ namespace TunaSweeperEditorSetup
 	const FString MappingContextName = TEXT("IMC_Player");
 	const FString UIAssetPath = TEXT("/Game/UI");
 	const FString UIIconAssetPath = TEXT("/Game/UI/Icons");
+	const FString UITitleTextureAssetPath = TEXT("/Game/UI/Title");
+	const FString TitleBackgroundTextureAssetName = TEXT("Title_C1");
+	const FString TitleLogoTextureAssetName = TEXT("tuna_sweeper_logo_transparent");
 	const FString InteractionMarkerAssetName = TEXT("WBP_InteractionMarker");
 	const FString PickupItemIconWidgetAssetName = TEXT("WBP_PickupItemIcon");
 	const FString GameHudWidgetAssetName = TEXT("WBP_GameHud");
@@ -184,6 +187,14 @@ namespace TunaSweeperEditorSetup
 	const FString IntroMapPackagePath = TEXT("/Game/IntroMap");
 	const FString BunkerMapPackagePath = TEXT("/Game/BunkerMap");
 	const FString RaidMapPackagePath = TEXT("/Game/RaidMap");
+
+	struct FUiTextureImportArgs
+	{
+		FString SourceFile;
+		FString DestinationPath = UITitleTextureAssetPath;
+		FString AssetName;
+		bool bReplaceExisting = true;
+	};
 
 	FString GetGameInstanceObjectPath()
 	{
@@ -919,6 +930,22 @@ namespace TunaSweeperEditorSetup
 		return Brush;
 	}
 
+	FSlateBrush MakeRoundedBoxBrush(
+		const FVector2D& ImageSize,
+		const FLinearColor& FillColor,
+		const FLinearColor& OutlineColor,
+		float OutlineWidth,
+		float CornerRadius)
+	{
+		FSlateBrush Brush;
+		Brush.DrawAs = ESlateBrushDrawType::RoundedBox;
+		Brush.TintColor = FSlateColor(FillColor);
+		Brush.SetImageSize(ImageSize);
+		Brush.OutlineSettings = FSlateBrushOutlineSettings(CornerRadius, FSlateColor(OutlineColor), OutlineWidth);
+		Brush.OutlineSettings.bUseBrushTransparency = false;
+		return Brush;
+	}
+
 	FSlateBrush MakeCircularBrush(const FVector2D& ImageSize, const FLinearColor& FillColor, const FLinearColor& OutlineColor, float OutlineWidth)
 	{
 		FSlateBrush Brush;
@@ -1204,6 +1231,392 @@ namespace TunaSweeperEditorSetup
 		{
 			QuitSlot->SetHorizontalAlignment(HAlign_Center);
 			QuitSlot->SetVerticalAlignment(VAlign_Center);
+		}
+
+		RegisterAllWidgetsInTree(WidgetBlueprint);
+		WidgetBlueprint->MarkPackageDirty();
+		return true;
+	}
+
+	bool BuildTitleIntroMenuWidgetTree(UWidgetBlueprint* WidgetBlueprint)
+	{
+		if (!WidgetBlueprint || !WidgetBlueprint->WidgetTree)
+		{
+			return false;
+		}
+
+		WidgetBlueprint->Modify();
+		WidgetBlueprint->WidgetTree->Modify();
+		ClearWidgetTreeForRebuild(WidgetBlueprint);
+
+		UTexture2D* BackgroundTexture = LoadObject<UTexture2D>(
+			nullptr,
+			*GetAssetObjectPath(UITitleTextureAssetPath, TitleBackgroundTextureAssetName));
+		UTexture2D* LogoTexture = LoadObject<UTexture2D>(
+			nullptr,
+			*GetAssetObjectPath(UITitleTextureAssetPath, TitleLogoTextureAssetName));
+
+		UWidgetTree* WidgetTree = WidgetBlueprint->WidgetTree;
+		UCanvasPanel* RootCanvas = WidgetTree->ConstructWidget<UCanvasPanel>(UCanvasPanel::StaticClass(), TEXT("RootCanvas"));
+		UImage* BackgroundImage = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("BackgroundImage"));
+		UBorder* LeftScrim = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("LeftScrim"));
+		UImage* LogoImage = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("LogoImage"));
+		UVerticalBox* MainMenuPanel = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("MainMenuPanel"));
+		USizeBox* StartButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("StartButtonBox"));
+		UButton* StartButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("StartButton"));
+		UTextBlock* StartButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("StartButtonText"));
+		USizeBox* CurrentSaveSlotBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("CurrentSaveSlotBox"));
+		UBorder* CurrentSaveSlotBorder = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("CurrentSaveSlotBorder"));
+		UTextBlock* CurrentSaveSlotText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("CurrentSaveSlotText"));
+		USizeBox* SlotSelectButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("SlotSelectButtonBox"));
+		UButton* SlotSelectButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("SlotSelectButton"));
+		UTextBlock* SlotSelectButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("SlotSelectButtonText"));
+		USizeBox* SettingsButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("SettingsButtonBox"));
+		UButton* SettingsButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("SettingsButton"));
+		UTextBlock* SettingsButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("SettingsButtonText"));
+		USizeBox* CreditsButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("CreditsButtonBox"));
+		UButton* CreditsButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("CreditsButton"));
+		UTextBlock* CreditsButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("CreditsButtonText"));
+		USizeBox* QuitButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("QuitButtonBox"));
+		UButton* QuitButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("QuitButton"));
+		UTextBlock* QuitButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("QuitButtonText"));
+		UVerticalBox* SaveSlotPanel = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("SaveSlotPanel"));
+		UTextBlock* SaveSlotPanelTitleText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("SaveSlotPanelTitleText"));
+		USizeBox* SaveSlot1ButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("SaveSlot1ButtonBox"));
+		UButton* SaveSlot1Button = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("SaveSlot1Button"));
+		UTextBlock* SaveSlot1Text = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("SaveSlot1Text"));
+		USizeBox* SaveSlot2ButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("SaveSlot2ButtonBox"));
+		UButton* SaveSlot2Button = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("SaveSlot2Button"));
+		UTextBlock* SaveSlot2Text = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("SaveSlot2Text"));
+		USizeBox* SaveSlot3ButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("SaveSlot3ButtonBox"));
+		UButton* SaveSlot3Button = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("SaveSlot3Button"));
+		UTextBlock* SaveSlot3Text = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("SaveSlot3Text"));
+		UHorizontalBox* SaveSlotActionRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("SaveSlotActionRow"));
+		USizeBox* PrimarySaveSlotButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("PrimarySaveSlotButtonBox"));
+		UButton* PrimarySaveSlotButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("PrimarySaveSlotButton"));
+		UTextBlock* PrimarySaveSlotButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("PrimarySaveSlotButtonText"));
+		USizeBox* DeleteSaveSlotButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("DeleteSaveSlotButtonBox"));
+		UButton* DeleteSaveSlotButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("DeleteSaveSlotButton"));
+		UTextBlock* DeleteSaveSlotButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("DeleteSaveSlotButtonText"));
+		UTextBlock* VersionText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("VersionText"));
+
+		if (!RootCanvas || !BackgroundImage || !LeftScrim || !LogoImage || !MainMenuPanel || !StartButtonBox ||
+			!StartButton || !StartButtonText || !CurrentSaveSlotBox || !CurrentSaveSlotBorder || !CurrentSaveSlotText ||
+			!SlotSelectButtonBox || !SlotSelectButton || !SlotSelectButtonText || !SettingsButtonBox || !SettingsButton ||
+			!SettingsButtonText || !CreditsButtonBox || !CreditsButton || !CreditsButtonText || !QuitButtonBox ||
+			!QuitButton || !QuitButtonText || !SaveSlotPanel || !SaveSlotPanelTitleText || !SaveSlot1ButtonBox ||
+			!SaveSlot1Button || !SaveSlot1Text || !SaveSlot2ButtonBox || !SaveSlot2Button || !SaveSlot2Text ||
+			!SaveSlot3ButtonBox || !SaveSlot3Button || !SaveSlot3Text || !SaveSlotActionRow || !PrimarySaveSlotButtonBox ||
+			!PrimarySaveSlotButton || !PrimarySaveSlotButtonText || !DeleteSaveSlotButtonBox || !DeleteSaveSlotButton ||
+			!DeleteSaveSlotButtonText || !VersionText)
+		{
+			return false;
+		}
+
+		WidgetTree->RootWidget = RootCanvas;
+
+		auto FillCanvas = [](UCanvasPanelSlot* Slot)
+		{
+			if (!Slot)
+			{
+				return;
+			}
+
+			Slot->SetAnchors(FAnchors(0.0f, 0.0f, 1.0f, 1.0f));
+			Slot->SetOffsets(FMargin(0.0f));
+			Slot->SetAlignment(FVector2D::ZeroVector);
+		};
+
+		auto ConfigureButtonStyle = [](UButton* Button, const FVector2D& ButtonSize, bool bPrimary)
+		{
+			const FLinearColor FillColor = bPrimary
+				? FLinearColor(0.025f, 0.045f, 0.050f, 0.76f)
+				: FLinearColor(0.025f, 0.045f, 0.050f, 0.56f);
+			const FLinearColor HoveredColor = bPrimary
+				? FLinearColor(0.075f, 0.13f, 0.14f, 0.88f)
+				: FLinearColor(0.055f, 0.095f, 0.105f, 0.76f);
+			const float CornerRadius = bPrimary ? 14.0f : 11.0f;
+
+			FButtonStyle ButtonStyle;
+			ButtonStyle.SetNormal(MakeRoundedBoxBrush(ButtonSize, FillColor, FLinearColor(0.78f, 0.84f, 0.82f, 0.88f), 1.3f, CornerRadius));
+			ButtonStyle.SetHovered(MakeRoundedBoxBrush(ButtonSize, HoveredColor, FLinearColor(0.96f, 0.98f, 0.95f, 1.0f), 1.7f, CornerRadius));
+			ButtonStyle.SetPressed(MakeRoundedBoxBrush(ButtonSize, FillColor * 0.75f, FLinearColor(0.60f, 0.68f, 0.68f, 0.90f), 1.0f, CornerRadius));
+			ButtonStyle.SetNormalPadding(FMargin(0.0f));
+			ButtonStyle.SetPressedPadding(FMargin(0.0f, 1.0f, 0.0f, 0.0f));
+			Button->SetStyle(ButtonStyle);
+			Button->SetClickMethod(EButtonClickMethod::DownAndUp);
+		};
+
+		auto MakeButtonContent = [WidgetTree](
+			const FString& NamePrefix,
+			const FText& Icon,
+			UTextBlock* LabelText,
+			const FText& Label,
+			int32 LabelFontSize,
+			int32 IconFontSize)
+		{
+			UHorizontalBox* Content = WidgetTree->ConstructWidget<UHorizontalBox>(
+				UHorizontalBox::StaticClass(),
+				FName(*(NamePrefix + TEXT("Content"))));
+			UTextBlock* IconText = WidgetTree->ConstructWidget<UTextBlock>(
+				UTextBlock::StaticClass(),
+				FName(*(NamePrefix + TEXT("IconText"))));
+
+			ConfigureTextBlock(IconText, Icon, FLinearColor(0.94f, 0.92f, 0.84f, 1.0f), IconFontSize);
+			ConfigureTextBlockLeft(LabelText, Label, FLinearColor(0.94f, 0.92f, 0.84f, 1.0f), LabelFontSize);
+
+			UHorizontalBoxSlot* IconSlot = Content->AddChildToHorizontalBox(IconText);
+			if (IconSlot)
+			{
+				IconSlot->SetHorizontalAlignment(HAlign_Center);
+				IconSlot->SetVerticalAlignment(VAlign_Center);
+				IconSlot->SetPadding(FMargin(22.0f, 0.0f, 16.0f, 0.0f));
+				IconSlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
+			}
+
+			UHorizontalBoxSlot* LabelSlot = Content->AddChildToHorizontalBox(LabelText);
+			if (LabelSlot)
+			{
+				LabelSlot->SetHorizontalAlignment(HAlign_Fill);
+				LabelSlot->SetVerticalAlignment(VAlign_Center);
+				LabelSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+			}
+
+			return Content;
+		};
+
+		auto ConfigureMenuButton = [&ConfigureButtonStyle, &MakeButtonContent](
+			USizeBox* ButtonBox,
+			UButton* Button,
+			UTextBlock* ButtonText,
+			const FString& NamePrefix,
+			const FText& Icon,
+			const FText& Label,
+			const FVector2D& ButtonSize,
+			bool bPrimary)
+		{
+			ButtonBox->SetWidthOverride(ButtonSize.X);
+			ButtonBox->SetHeightOverride(ButtonSize.Y);
+			ButtonBox->SetContent(Button);
+			ConfigureButtonStyle(Button, ButtonSize, bPrimary);
+			Button->SetContent(MakeButtonContent(
+				NamePrefix,
+				Icon,
+				ButtonText,
+				Label,
+				bPrimary ? 28 : 20,
+				bPrimary ? 28 : 20));
+		};
+
+		if (BackgroundTexture)
+		{
+			BackgroundImage->SetBrushFromTexture(BackgroundTexture, true);
+		}
+		BackgroundImage->SetColorAndOpacity(FLinearColor::White);
+		FillCanvas(RootCanvas->AddChildToCanvas(BackgroundImage));
+
+		FSlateBrush ScrimBrush;
+		ScrimBrush.DrawAs = ESlateBrushDrawType::Box;
+		ScrimBrush.TintColor = FSlateColor(FLinearColor(0.0f, 0.0f, 0.0f, 0.42f));
+		LeftScrim->SetBrush(ScrimBrush);
+		UCanvasPanelSlot* ScrimSlot = RootCanvas->AddChildToCanvas(LeftScrim);
+		if (ScrimSlot)
+		{
+			ScrimSlot->SetAnchors(FAnchors(0.0f, 0.0f));
+			ScrimSlot->SetAlignment(FVector2D::ZeroVector);
+			ScrimSlot->SetPosition(FVector2D(0.0f, 0.0f));
+			ScrimSlot->SetSize(FVector2D(720.0f, 1080.0f));
+		}
+
+		if (LogoTexture)
+		{
+			LogoImage->SetBrushFromTexture(LogoTexture, true);
+		}
+		LogoImage->SetColorAndOpacity(FLinearColor::White);
+		UCanvasPanelSlot* LogoSlot = RootCanvas->AddChildToCanvas(LogoImage);
+		if (LogoSlot)
+		{
+			LogoSlot->SetAnchors(FAnchors(0.0f, 0.0f));
+			LogoSlot->SetAlignment(FVector2D::ZeroVector);
+			LogoSlot->SetPosition(FVector2D(80.0f, 86.0f));
+			LogoSlot->SetSize(FVector2D(400.0f, 162.0f));
+		}
+
+		ConfigureMenuButton(
+			StartButtonBox,
+			StartButton,
+			StartButtonText,
+			TEXT("StartButton"),
+			FText::FromString(TEXT("\u25B6")),
+			FText::FromString(TEXT("\uC774\uC5B4\uAC00\uAE30")),
+			FVector2D(440.0f, 72.0f),
+			true);
+
+		CurrentSaveSlotBox->SetWidthOverride(220.0f);
+		CurrentSaveSlotBox->SetHeightOverride(38.0f);
+		CurrentSaveSlotBox->SetContent(CurrentSaveSlotBorder);
+		CurrentSaveSlotBorder->SetPadding(FMargin(14.0f, 4.0f));
+		CurrentSaveSlotBorder->SetBrush(MakeRoundedBoxBrush(
+			FVector2D(220.0f, 38.0f),
+			FLinearColor(0.025f, 0.045f, 0.050f, 0.52f),
+			FLinearColor(0.78f, 0.84f, 0.82f, 0.74f),
+			1.0f,
+			8.0f));
+		ConfigureTextBlockLeft(
+			CurrentSaveSlotText,
+			FText::FromString(TEXT("\uC2AC\uB86F 1 - \uBE48 \uC2AC\uB86F")),
+			FLinearColor(0.82f, 0.86f, 0.84f, 1.0f),
+			14);
+		CurrentSaveSlotBorder->SetContent(CurrentSaveSlotText);
+
+		ConfigureMenuButton(
+			SlotSelectButtonBox,
+			SlotSelectButton,
+			SlotSelectButtonText,
+			TEXT("SlotSelectButton"),
+			FText::FromString(TEXT("\u25A6")),
+			FText::FromString(TEXT("\uC2AC\uB86F \uC120\uD0DD")),
+			FVector2D(380.0f, 52.0f),
+			false);
+		ConfigureMenuButton(
+			SettingsButtonBox,
+			SettingsButton,
+			SettingsButtonText,
+			TEXT("SettingsButton"),
+			FText::FromString(TEXT("\u2699")),
+			FText::FromString(TEXT("\uC124\uC815")),
+			FVector2D(380.0f, 52.0f),
+			false);
+		ConfigureMenuButton(
+			CreditsButtonBox,
+			CreditsButton,
+			CreditsButtonText,
+			TEXT("CreditsButton"),
+			FText::FromString(TEXT("\u24D8")),
+			FText::FromString(TEXT("\uD06C\uB808\uB527")),
+			FVector2D(380.0f, 52.0f),
+			false);
+		ConfigureMenuButton(
+			QuitButtonBox,
+			QuitButton,
+			QuitButtonText,
+			TEXT("QuitButton"),
+			FText::FromString(TEXT("\u00D7")),
+			FText::FromString(TEXT("\uC885\uB8CC")),
+			FVector2D(380.0f, 52.0f),
+			false);
+
+		for (UWidget* MenuItem : {
+				static_cast<UWidget*>(StartButtonBox),
+				static_cast<UWidget*>(CurrentSaveSlotBox),
+				static_cast<UWidget*>(SlotSelectButtonBox),
+				static_cast<UWidget*>(SettingsButtonBox),
+				static_cast<UWidget*>(CreditsButtonBox),
+				static_cast<UWidget*>(QuitButtonBox) })
+		{
+			UVerticalBoxSlot* ItemSlot = MainMenuPanel->AddChildToVerticalBox(MenuItem);
+			if (ItemSlot)
+			{
+				ItemSlot->SetHorizontalAlignment(HAlign_Left);
+				ItemSlot->SetVerticalAlignment(VAlign_Center);
+				ItemSlot->SetPadding(MenuItem == CurrentSaveSlotBox ? FMargin(0.0f, 12.0f, 0.0f, 22.0f) : FMargin(0.0f, 0.0f, 0.0f, 12.0f));
+			}
+		}
+
+		UCanvasPanelSlot* MainMenuSlot = RootCanvas->AddChildToCanvas(MainMenuPanel);
+		if (MainMenuSlot)
+		{
+			MainMenuSlot->SetAnchors(FAnchors(0.0f, 0.0f));
+			MainMenuSlot->SetAlignment(FVector2D::ZeroVector);
+			MainMenuSlot->SetPosition(FVector2D(92.0f, 310.0f));
+			MainMenuSlot->SetSize(FVector2D(460.0f, 440.0f));
+		}
+
+		ConfigureTextBlockLeft(
+			SaveSlotPanelTitleText,
+			FText::FromString(TEXT("\uC2AC\uB86F \uC120\uD0DD")),
+			FLinearColor(0.94f, 0.92f, 0.84f, 1.0f),
+			26);
+		UVerticalBoxSlot* SaveTitleSlot = SaveSlotPanel->AddChildToVerticalBox(SaveSlotPanelTitleText);
+		if (SaveTitleSlot)
+		{
+			SaveTitleSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 18.0f));
+		}
+
+		auto ConfigureSaveSlotButton = [&ConfigureButtonStyle](USizeBox* ButtonBox, UButton* Button, UTextBlock* TextBlock, int32 SlotIndex)
+		{
+			ButtonBox->SetWidthOverride(420.0f);
+			ButtonBox->SetHeightOverride(58.0f);
+			ButtonBox->SetContent(Button);
+			ConfigureButtonStyle(Button, FVector2D(420.0f, 58.0f), false);
+			ConfigureTextBlockLeft(
+				TextBlock,
+				FText::FromString(FString::Printf(TEXT("\uC2AC\uB86F %d - \uBE48 \uC2AC\uB86F"), SlotIndex)),
+				FLinearColor(0.82f, 0.86f, 0.84f, 1.0f),
+				18);
+			TextBlock->SetMargin(FMargin(22.0f, 0.0f));
+			Button->SetContent(TextBlock);
+		};
+
+		ConfigureSaveSlotButton(SaveSlot1ButtonBox, SaveSlot1Button, SaveSlot1Text, 1);
+		ConfigureSaveSlotButton(SaveSlot2ButtonBox, SaveSlot2Button, SaveSlot2Text, 2);
+		ConfigureSaveSlotButton(SaveSlot3ButtonBox, SaveSlot3Button, SaveSlot3Text, 3);
+
+		for (UWidget* SlotButtonBox : { static_cast<UWidget*>(SaveSlot1ButtonBox), static_cast<UWidget*>(SaveSlot2ButtonBox), static_cast<UWidget*>(SaveSlot3ButtonBox) })
+		{
+			UVerticalBoxSlot* SlotButtonSlot = SaveSlotPanel->AddChildToVerticalBox(SlotButtonBox);
+			if (SlotButtonSlot)
+			{
+				SlotButtonSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 12.0f));
+			}
+		}
+
+		PrimarySaveSlotButtonBox->SetWidthOverride(250.0f);
+		PrimarySaveSlotButtonBox->SetHeightOverride(50.0f);
+		PrimarySaveSlotButtonBox->SetContent(PrimarySaveSlotButton);
+		ConfigureButtonStyle(PrimarySaveSlotButton, FVector2D(250.0f, 50.0f), true);
+		ConfigureTextBlock(PrimarySaveSlotButtonText, FText::FromString(TEXT("\uC2AC\uB86F \uC120\uD0DD")), FLinearColor::White, 18);
+		PrimarySaveSlotButton->SetContent(PrimarySaveSlotButtonText);
+
+		DeleteSaveSlotButtonBox->SetWidthOverride(150.0f);
+		DeleteSaveSlotButtonBox->SetHeightOverride(50.0f);
+		DeleteSaveSlotButtonBox->SetContent(DeleteSaveSlotButton);
+		ConfigureButtonStyle(DeleteSaveSlotButton, FVector2D(150.0f, 50.0f), false);
+		ConfigureTextBlock(DeleteSaveSlotButtonText, FText::FromString(TEXT("\uC0AD\uC81C")), FLinearColor::White, 18);
+		DeleteSaveSlotButton->SetContent(DeleteSaveSlotButtonText);
+
+		UHorizontalBoxSlot* PrimarySlot = SaveSlotActionRow->AddChildToHorizontalBox(PrimarySaveSlotButtonBox);
+		if (PrimarySlot)
+		{
+			PrimarySlot->SetPadding(FMargin(0.0f, 0.0f, 14.0f, 0.0f));
+		}
+		SaveSlotActionRow->AddChildToHorizontalBox(DeleteSaveSlotButtonBox);
+		SaveSlotActionRow->SetVisibility(ESlateVisibility::Collapsed);
+
+		UVerticalBoxSlot* ActionSlot = SaveSlotPanel->AddChildToVerticalBox(SaveSlotActionRow);
+		if (ActionSlot)
+		{
+			ActionSlot->SetPadding(FMargin(0.0f, 8.0f, 0.0f, 0.0f));
+		}
+
+		SaveSlotPanel->SetVisibility(ESlateVisibility::Collapsed);
+		UCanvasPanelSlot* SavePanelSlot = RootCanvas->AddChildToCanvas(SaveSlotPanel);
+		if (SavePanelSlot)
+		{
+			SavePanelSlot->SetAnchors(FAnchors(0.0f, 0.0f));
+			SavePanelSlot->SetAlignment(FVector2D::ZeroVector);
+			SavePanelSlot->SetPosition(FVector2D(92.0f, 330.0f));
+			SavePanelSlot->SetSize(FVector2D(460.0f, 420.0f));
+		}
+
+		ConfigureTextBlock(VersionText, FText::FromString(TEXT("v0.1")), FLinearColor(1.0f, 1.0f, 1.0f, 0.86f), 14);
+		UCanvasPanelSlot* VersionSlot = RootCanvas->AddChildToCanvas(VersionText);
+		if (VersionSlot)
+		{
+			VersionSlot->SetAnchors(FAnchors(1.0f, 1.0f));
+			VersionSlot->SetAlignment(FVector2D(1.0f, 1.0f));
+			VersionSlot->SetPosition(FVector2D(-28.0f, -22.0f));
+			VersionSlot->SetSize(FVector2D(80.0f, 24.0f));
 		}
 
 		RegisterAllWidgetsInTree(WidgetBlueprint);
@@ -1584,6 +1997,172 @@ namespace TunaSweeperEditorSetup
 		Texture->PostEditChange();
 		Texture->MarkPackageDirty();
 		SaveAsset(Texture);
+	}
+
+	void ConfigureImportedUiTexture(UTexture2D* Texture)
+	{
+		if (!Texture)
+		{
+			return;
+		}
+
+		Texture->Modify();
+		Texture->CompressionSettings = TC_EditorIcon;
+		Texture->MipGenSettings = TMGS_NoMipmaps;
+		Texture->LODGroup = TEXTUREGROUP_UI;
+		Texture->SRGB = true;
+		Texture->UpdateResource();
+		Texture->PostEditChange();
+		Texture->MarkPackageDirty();
+		SaveAsset(Texture);
+	}
+
+	bool ImportUiTexture(const FUiTextureImportArgs& Args, UTexture2D** OutTexture = nullptr)
+	{
+		if (OutTexture)
+		{
+			*OutTexture = nullptr;
+		}
+
+		FString SourceFile = Args.SourceFile;
+		FPaths::NormalizeFilename(SourceFile);
+		SourceFile = FPaths::ConvertRelativePathToFull(SourceFile);
+		FPaths::CollapseRelativeDirectories(SourceFile);
+
+		if (!FPaths::FileExists(SourceFile))
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Missing UI texture source: %s"), *SourceFile);
+			return false;
+		}
+
+		const FString DestinationPath = Args.DestinationPath.IsEmpty() ? UITitleTextureAssetPath : Args.DestinationPath;
+		FString AssetName = Args.AssetName.IsEmpty() ? FPaths::GetBaseFilename(SourceFile) : Args.AssetName;
+		AssetName = FPaths::GetBaseFilename(AssetName);
+
+		if (AssetName.IsEmpty() || !FPackageName::IsValidLongPackageName(DestinationPath))
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Invalid UI texture destination: path=%s asset=%s"), *DestinationPath, *AssetName);
+			return false;
+		}
+
+		const FString ObjectPath = GetAssetObjectPath(DestinationPath, AssetName);
+		if (!Args.bReplaceExisting)
+		{
+			if (UTexture2D* ExistingTexture = LoadObject<UTexture2D>(nullptr, *ObjectPath))
+			{
+				ConfigureImportedUiTexture(ExistingTexture);
+				if (OutTexture)
+				{
+					*OutTexture = ExistingTexture;
+				}
+				return true;
+			}
+		}
+
+		FString ImportFile = SourceFile;
+		if (FPaths::GetBaseFilename(SourceFile) != AssetName)
+		{
+			const FString ImportDirectory = FPaths::Combine(FPaths::ProjectSavedDir(), TEXT("TunaSweeperUiTextureImport"));
+			IFileManager::Get().MakeDirectory(*ImportDirectory, true);
+			ImportFile = FPaths::Combine(ImportDirectory, AssetName + TEXT(".") + FPaths::GetExtension(SourceFile));
+			if (IFileManager::Get().Copy(*ImportFile, *SourceFile, true, true) != COPY_OK)
+			{
+				UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to stage UI texture import source: %s -> %s"), *SourceFile, *ImportFile);
+				return false;
+			}
+		}
+
+		UAutomatedAssetImportData* ImportData = NewObject<UAutomatedAssetImportData>();
+		ImportData->DestinationPath = DestinationPath;
+		ImportData->Filenames.Add(ImportFile);
+		ImportData->bReplaceExisting = Args.bReplaceExisting;
+		ImportData->bSkipReadOnly = true;
+
+		FAssetToolsModule& AssetToolsModule = FModuleManager::LoadModuleChecked<FAssetToolsModule>(TEXT("AssetTools"));
+		const TArray<UObject*> ImportedAssets = AssetToolsModule.Get().ImportAssetsAutomated(ImportData);
+		if (ImportedAssets.Num() == 0)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to import UI texture: %s"), *ImportFile);
+			return false;
+		}
+
+		UTexture2D* ImportedTexture = LoadObject<UTexture2D>(nullptr, *ObjectPath);
+		if (!ImportedTexture)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to load imported UI texture: %s"), *ObjectPath);
+			return false;
+		}
+
+		ConfigureImportedUiTexture(ImportedTexture);
+		if (OutTexture)
+		{
+			*OutTexture = ImportedTexture;
+		}
+		return true;
+	}
+
+	bool TryReadUiTextureImportArgsFromCommandLine(FUiTextureImportArgs& OutArgs)
+	{
+		FString SourceFile;
+		if (!FParse::Value(FCommandLine::Get(), TEXT("TunaSweeperImportUiTextureSource="), SourceFile))
+		{
+			return false;
+		}
+
+		OutArgs.SourceFile = SourceFile;
+		FParse::Value(FCommandLine::Get(), TEXT("TunaSweeperImportUiTextureDest="), OutArgs.DestinationPath);
+		FParse::Value(FCommandLine::Get(), TEXT("TunaSweeperImportUiTextureName="), OutArgs.AssetName);
+		OutArgs.bReplaceExisting = !FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperImportUiTextureNoReplace"));
+		return true;
+	}
+
+	bool ImportUiTextureFromCommandLineIfRequested()
+	{
+		FUiTextureImportArgs Args;
+		if (!TryReadUiTextureImportArgsFromCommandLine(Args))
+		{
+			return false;
+		}
+
+		const bool bImported = ImportUiTexture(Args);
+		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperImportUiTextureQuit")))
+		{
+			FPlatformMisc::RequestExit(false);
+		}
+		return bImported;
+	}
+
+	FString GetWorkspaceFilePath(const FString& RelativePath)
+	{
+		FString FilePath = FPaths::ConvertRelativePathToFull(FPaths::Combine(FPaths::ProjectDir(), TEXT(".."), RelativePath));
+		FPaths::CollapseRelativeDirectories(FilePath);
+		return FilePath;
+	}
+
+	bool EnsureTitleUiTextures()
+	{
+		UTexture2D* BackgroundTexture = nullptr;
+		UTexture2D* LogoTexture = nullptr;
+
+		const bool bBackgroundImported = ImportUiTexture(
+			FUiTextureImportArgs{
+				GetWorkspaceFilePath(TEXT("chatgpt/Title_C1.png")),
+				UITitleTextureAssetPath,
+				TitleBackgroundTextureAssetName,
+				true
+			},
+			&BackgroundTexture);
+
+		const bool bLogoImported = ImportUiTexture(
+			FUiTextureImportArgs{
+				GetWorkspaceFilePath(TEXT("Docs/Story/tuna_sweeper_logo_transparent.png")),
+				UITitleTextureAssetPath,
+				TitleLogoTextureAssetName,
+				true
+			},
+			&LogoTexture);
+
+		return bBackgroundImported && bLogoImported && BackgroundTexture && LogoTexture;
 	}
 
 	bool EnsureItemIconTextures()
@@ -3204,7 +3783,7 @@ namespace TunaSweeperEditorSetup
 
 	bool ConfigureIntroMenuWidgetBlueprint(UWidgetBlueprint* WidgetBlueprint)
 	{
-		if (!WidgetBlueprint || !BuildIntroMenuWidgetTree(WidgetBlueprint))
+		if (!WidgetBlueprint || !BuildTitleIntroMenuWidgetTree(WidgetBlueprint))
 		{
 			return false;
 		}
@@ -4169,6 +4748,7 @@ namespace TunaSweeperEditorSetup
 
 		const bool bConfigured =
 			SetProjectStartupMapsToIntro() &&
+			EnsureTitleUiTextures() &&
 			ConfigureIntroMenuWidgetBlueprint(IntroMenuWidgetBlueprint) &&
 			ConfigureLevelTravelBlueprint(LevelTravelBlueprint);
 
@@ -4455,6 +5035,16 @@ public:
 		if (IsRunningCommandlet())
 		{
 			return;
+		}
+
+		FString UiTextureImportSource;
+		if (FParse::Value(FCommandLine::Get(), TEXT("TunaSweeperImportUiTextureSource="), UiTextureImportSource))
+		{
+			TunaSweeperEditorSetup::ImportUiTextureFromCommandLineIfRequested();
+			if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperImportUiTextureQuit")))
+			{
+				return;
+			}
 		}
 
 		FTunaSweeperEditorRunOnce::Run(

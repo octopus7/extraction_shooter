@@ -42,6 +42,12 @@ protected:
 	TObjectPtr<UButton> SlotSelectButton;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UButton> SettingsButton;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UButton> CreditsButton;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
 	TObjectPtr<UButton> QuitButton;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
@@ -77,6 +83,12 @@ private:
 
 	UFUNCTION()
 	void HandleSlotSelectClicked();
+
+	UFUNCTION()
+	void HandleSettingsClicked();
+
+	UFUNCTION()
+	void HandleCreditsClicked();
 
 	UFUNCTION()
 	void HandleQuitClicked();
