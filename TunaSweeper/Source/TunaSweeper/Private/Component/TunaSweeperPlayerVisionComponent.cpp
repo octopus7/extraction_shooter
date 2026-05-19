@@ -2,12 +2,15 @@
 
 #include "Blueprint/UserWidget.h"
 #include "DrawDebugHelpers.h"
+#include "Engine/Engine.h"
 #include "Engine/Texture2D.h"
 #include "Engine/World.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
 #include "UI/TunaSweeperVisionMaskWidget.h"
+
+DEFINE_LOG_CATEGORY_STATIC(LogTunaSweeperPlayerVision, Log, All);
 
 UTunaSweeperPlayerVisionComponent::UTunaSweeperPlayerVisionComponent()
 {
@@ -39,6 +42,11 @@ void UTunaSweeperPlayerVisionComponent::TickComponent(
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	if (IsVisionDebugEnabled())
+	{
+		DrawVisionDebugRangeWires();
+	}
+
 	if (!ShouldUpdateVision())
 	{
 		if (VisionMaskWidget)
@@ -51,6 +59,10 @@ void UTunaSweeperPlayerVisionComponent::TickComponent(
 	APlayerController* PlayerController = ResolveLocalPlayerController();
 	if (!PlayerController)
 	{
+		if (IsVisionDebugEnabled())
+		{
+			ShowVisionDebugStatus(TEXT("[Vision] Debug enabled, but no local PlayerController was resolved."), FColor::Red);
+		}
 		return;
 	}
 
@@ -80,11 +92,19 @@ void UTunaSweeperPlayerVisionComponent::ForceRefreshVisionMask()
 	PlayerController->GetViewportSize(ViewportX, ViewportY);
 	if (ViewportX <= 0 || ViewportY <= 0)
 	{
+		if (IsVisionDebugEnabled())
+		{
+			ShowVisionDebugStatus(TEXT("[Vision] Debug enabled, but viewport size is zero."), FColor::Red);
+		}
 		return;
 	}
 
 	if (!EnsureMaskTexture(FIntPoint(ViewportX, ViewportY)))
 	{
+		if (IsVisionDebugEnabled())
+		{
+			ShowVisionDebugStatus(TEXT("[Vision] Debug enabled, but mask texture creation failed."), FColor::Red);
+		}
 		return;
 	}
 
@@ -101,7 +121,22 @@ void UTunaSweeperPlayerVisionComponent::ForceRefreshVisionMask()
 	TArray<FVector2D> VisiblePolygonPoints;
 	if (!BuildVisiblePolygonPoints(PlayerController, VisiblePolygonPoints))
 	{
+		if (IsVisionDebugEnabled())
+		{
+			ShowVisionDebugStatus(TEXT("[Vision] Debug enabled, but visible polygon projection failed."), FColor::Orange);
+		}
 		return;
+	}
+
+	if (IsVisionDebugEnabled())
+	{
+		ShowVisionDebugStatus(FString::Printf(
+			TEXT("[Vision] Debug active | viewport %dx%d | mask %dx%d | points %d"),
+			ViewportSize.X,
+			ViewportSize.Y,
+			MaskSize.X,
+			MaskSize.Y,
+			VisiblePolygonPoints.Num()));
 	}
 
 	RasterizeVisiblePolygon(VisiblePolygonPoints);
@@ -128,6 +163,11 @@ bool UTunaSweeperPlayerVisionComponent::ShouldUpdateVision() const
 
 bool UTunaSweeperPlayerVisionComponent::IsVisionDebugEnabled() const
 {
+	if (bEnableDebugOverride)
+	{
+		return true;
+	}
+
 	const UWorld* World = GetWorld();
 	const UTunaSweeperGameInstance* TunaGameInstance = World ? World->GetGameInstance<UTunaSweeperGameInstance>() : nullptr;
 	return TunaGameInstance && TunaGameInstance->IsVisionDebugEnabled();
@@ -472,13 +512,52 @@ void UTunaSweeperPlayerVisionComponent::DrawVisionDebug(
 		RayColor,
 		false,
 		DebugDrawLifeTime,
-		0,
+		1,
 		bInsideFieldOfView ? 1.5f : 0.75f);
 
 	if (Hit.bBlockingHit)
 	{
-		DrawDebugPoint(World, Hit.ImpactPoint, 6.0f, FColor::Red, false, DebugDrawLifeTime, 0);
+		DrawDebugPoint(World, Hit.ImpactPoint, 7.0f, FColor::Red, false, DebugDrawLifeTime, 1);
 	}
+}
+
+void UTunaSweeperPlayerVisionComponent::DrawVisionDebugRangeWires() const
+{
+	UWorld* World = GetWorld();
+	const AActor* OwnerActor = GetOwner();
+	if (!World || !OwnerActor)
+	{
+		return;
+	}
+
+	const FVector Center =
+		OwnerActor->GetActorLocation() + FVector(0.0f, 0.0f, FMath::Max(0.0f, VisionSettings.TraceHeight));
+	const float MinRadius = FMath::Max(0.0f, VisionSettings.AlwaysVisibleRadius);
+	const float MaxRadius = FMath::Max(MinRadius, VisionSettings.SightDistance);
+	constexpr int32 SegmentCount = 60;
+
+	auto DrawRangeWire = [this, World, Center](float Radius, FColor Color, float Thickness)
+	{
+		if (Radius <= 0.0f)
+		{
+			return;
+		}
+
+		FVector PreviousPoint = Center + FVector(Radius, 0.0f, 0.0f);
+		for (int32 SegmentIndex = 1; SegmentIndex <= SegmentCount; ++SegmentIndex)
+		{
+			const float AngleRadians = (static_cast<float>(SegmentIndex) / static_cast<float>(SegmentCount)) * 2.0f * PI;
+			const FVector CurrentPoint = Center + FVector(
+				FMath::Cos(AngleRadians) * Radius,
+				FMath::Sin(AngleRadians) * Radius,
+				0.0f);
+			DrawDebugLine(World, PreviousPoint, CurrentPoint, Color, false, DebugDrawLifeTime, 1, Thickness);
+			PreviousPoint = CurrentPoint;
+		}
+	};
+
+	DrawRangeWire(MinRadius, FColor::Cyan, 2.5f);
+	DrawRangeWire(MaxRadius, FColor::Yellow, 2.0f);
 }
 
 void UTunaSweeperPlayerVisionComponent::DrawVisionDebugBounds(
@@ -497,6 +576,7 @@ void UTunaSweeperPlayerVisionComponent::DrawVisionDebugBounds(
 	const FVector LeftBoundary = FacingDirection.RotateAngleAxis(-HalfFieldOfViewDegrees, FVector::UpVector).GetSafeNormal();
 	const FVector RightBoundary = FacingDirection.RotateAngleAxis(HalfFieldOfViewDegrees, FVector::UpVector).GetSafeNormal();
 
+	DrawDebugSphere(World, TraceOrigin, 18.0f, 12, FColor::Yellow, false, DebugDrawLifeTime, 1, 1.5f);
 	DrawDebugCircle(
 		World,
 		TraceOrigin,
@@ -505,11 +585,33 @@ void UTunaSweeperPlayerVisionComponent::DrawVisionDebugBounds(
 		FColor::Cyan,
 		false,
 		DebugDrawLifeTime,
-		0,
+		1,
 		1.5f,
 		FVector::ForwardVector,
 		FVector::RightVector,
 		false);
-	DrawDebugLine(World, TraceOrigin, TraceOrigin + LeftBoundary * SightDistance, FColor::Green, false, DebugDrawLifeTime, 0, 2.0f);
-	DrawDebugLine(World, TraceOrigin, TraceOrigin + RightBoundary * SightDistance, FColor::Green, false, DebugDrawLifeTime, 0, 2.0f);
+	DrawDebugLine(World, TraceOrigin, TraceOrigin + LeftBoundary * SightDistance, FColor::Green, false, DebugDrawLifeTime, 1, 2.0f);
+	DrawDebugLine(World, TraceOrigin, TraceOrigin + RightBoundary * SightDistance, FColor::Green, false, DebugDrawLifeTime, 1, 2.0f);
+}
+
+void UTunaSweeperPlayerVisionComponent::ShowVisionDebugStatus(const FString& StatusText, FColor TextColor) const
+{
+	if (!bShowDebugStatusMessage)
+	{
+		return;
+	}
+
+	const UWorld* World = GetWorld();
+	const double CurrentTimeSeconds = World ? World->GetTimeSeconds() : FPlatformTime::Seconds();
+	if (CurrentTimeSeconds - LastDebugStatusTimeSeconds < 0.5)
+	{
+		return;
+	}
+
+	LastDebugStatusTimeSeconds = CurrentTimeSeconds;
+	UE_LOG(LogTunaSweeperPlayerVision, Log, TEXT("%s"), *StatusText);
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 0.75f, TextColor, StatusText);
+	}
 }

@@ -77,7 +77,13 @@ protected:
 	int32 DebugRayStride = 6;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Vision|Debug", meta = (ClampMin = "0.0", UIMin = "0.0"))
-	float DebugDrawLifeTime = 0.06f;
+	float DebugDrawLifeTime = 0.25f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Vision|Debug")
+	bool bEnableDebugOverride = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Vision|Debug")
+	bool bShowDebugStatusMessage = true;
 
 private:
 	APlayerController* ResolveLocalPlayerController() const;
@@ -98,7 +104,9 @@ private:
 		bool bInsideFieldOfView,
 		int32 RayIndex,
 		const FHitResult& Hit) const;
+	void DrawVisionDebugRangeWires() const;
 	void DrawVisionDebugBounds(const FVector& TraceOrigin, const FVector& FacingDirection) const;
+	void ShowVisionDebugStatus(const FString& StatusText, FColor TextColor = FColor::Cyan) const;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UTexture2D> MaskTexture;
@@ -114,4 +122,5 @@ private:
 	FIntPoint MaskSize = FIntPoint::ZeroValue;
 	FIntPoint ViewportSize = FIntPoint::ZeroValue;
 	float TimeSinceLastMaskUpdate = 0.0f;
+	mutable double LastDebugStatusTimeSeconds = -100.0;
 };
