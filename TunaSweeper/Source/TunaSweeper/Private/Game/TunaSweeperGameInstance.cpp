@@ -30,6 +30,11 @@ namespace TunaSweeperDialogue
 	const FName CharactersPerSecondSettingKey(TEXT("dialogue.characters_per_second"));
 }
 
+namespace TunaSweeperDebug
+{
+	const FName VisionDebugSettingKey(TEXT("debug.vision"));
+}
+
 namespace TunaSweeperInventory
 {
 	constexpr int32 RequiredBareInventorySlots = 40;
@@ -252,6 +257,21 @@ float UTunaSweeperGameInstance::GetDialogueCharactersPerSecond() const
 	}
 
 	return FMath::Max(0.1f, GameplaySettings.DialogueCharactersPerSecond);
+}
+
+void UTunaSweeperGameInstance::SetVisionDebugEnabled(bool bEnabled)
+{
+	SetBoolSetting(TunaSweeperDebug::VisionDebugSettingKey, bEnabled);
+}
+
+bool UTunaSweeperGameInstance::IsVisionDebugEnabled() const
+{
+	if (const bool* RuntimeVisionDebug = BoolSettings.Find(TunaSweeperDebug::VisionDebugSettingKey))
+	{
+		return *RuntimeVisionDebug;
+	}
+
+	return GameplaySettings.bEnableVisionDebug;
 }
 
 void UTunaSweeperGameInstance::ClearRuntimeState()

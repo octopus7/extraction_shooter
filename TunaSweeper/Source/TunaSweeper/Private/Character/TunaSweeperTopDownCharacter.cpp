@@ -1,6 +1,7 @@
 #include "Character/TunaSweeperTopDownCharacter.h"
 
 #include "Camera/CameraComponent.h"
+#include "Component/TunaSweeperPlayerVisionComponent.h"
 #include "Component/TunaSweeperVitalsComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SceneComponent.h"
@@ -70,6 +71,7 @@ ATunaSweeperTopDownCharacter::ATunaSweeperTopDownCharacter()
 	TopDownCamera->FieldOfView = DefaultCameraFOV;
 
 	VitalsComponent = CreateDefaultSubobject<UTunaSweeperVitalsComponent>(TEXT("VitalsComponent"));
+	PlayerVisionComponent = CreateDefaultSubobject<UTunaSweeperPlayerVisionComponent>(TEXT("PlayerVisionComponent"));
 
 	DefaultMappingContext = TSoftObjectPtr<UInputMappingContext>(FSoftObjectPath(TEXT("/Game/Input/IMC_Player.IMC_Player")));
 	MoveAction = TSoftObjectPtr<UInputAction>(FSoftObjectPath(TEXT("/Game/Input/IA_Move.IA_Move")));

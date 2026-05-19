@@ -1,0 +1,117 @@
+#pragma once
+
+#include "Components/ActorComponent.h"
+#include "CoreMinimal.h"
+#include "Engine/EngineTypes.h"
+#include "TunaSweeperPlayerVisionComponent.generated.h"
+
+class APlayerController;
+class UTexture2D;
+class UTunaSweeperVisionMaskWidget;
+
+USTRUCT(BlueprintType)
+struct TUNASWEEPER_API FTunaSweeperPlayerVisionSettings
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Vision", meta = (ClampMin = "1.0", UIMin = "1.0"))
+	float SightDistance = 1800.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Vision", meta = (ClampMin = "1.0", ClampMax = "360.0", UIMin = "1.0", UIMax = "360.0"))
+	float FieldOfViewDegrees = 90.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Vision", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float AlwaysVisibleRadius = 200.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Vision", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float TraceHeight = 40.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Vision", meta = (ClampMin = "16", ClampMax = "720", UIMin = "16", UIMax = "720"))
+	int32 RayCount = 360;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Vision", meta = (ClampMin = "1", ClampMax = "16", UIMin = "1", UIMax = "16"))
+	int32 MaskDownsampleFactor = 4;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Vision", meta = (ClampMin = "0", ClampMax = "16", UIMin = "0", UIMax = "16"))
+	int32 BlurRadius = 2;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Vision", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float UpdateIntervalSeconds = 0.05f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Vision", meta = (ClampMin = "0", ClampMax = "255", UIMin = "0", UIMax = "255"))
+	int32 HiddenMaskAlpha = 220;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Vision")
+	TEnumAsByte<ECollisionChannel> TraceChannel = ECC_Visibility;
+};
+
+UCLASS(ClassGroup = (TunaSweeper), BlueprintType, Blueprintable, meta = (BlueprintSpawnableComponent))
+class TUNASWEEPER_API UTunaSweeperPlayerVisionComponent : public UActorComponent
+{
+	GENERATED_BODY()
+
+public:
+	UTunaSweeperPlayerVisionComponent();
+
+	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Vision")
+	void ForceRefreshVisionMask();
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Vision")
+	UTexture2D* GetMaskTexture() const { return MaskTexture; }
+
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Vision")
+	FTunaSweeperPlayerVisionSettings VisionSettings;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Vision")
+	bool bRenderVisionOverlay = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Vision")
+	int32 OverlayZOrder = -10;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Vision|Debug", meta = (ClampMin = "1", ClampMax = "360", UIMin = "1", UIMax = "360"))
+	int32 DebugRayStride = 6;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Vision|Debug", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float DebugDrawLifeTime = 0.06f;
+
+private:
+	APlayerController* ResolveLocalPlayerController() const;
+	bool ShouldUpdateVision() const;
+	bool IsVisionDebugEnabled() const;
+	void EnsureOverlayWidget(APlayerController* PlayerController);
+	bool EnsureMaskTexture(const FIntPoint& InViewportSize);
+	bool BuildVisiblePolygonPoints(APlayerController* PlayerController, TArray<FVector2D>& OutMaskPoints);
+	float TraceVisibleDistance(const FVector& TraceOrigin, const FVector& Direction, bool bInsideFieldOfView, FHitResult& OutHit) const;
+	void RasterizeVisiblePolygon(const TArray<FVector2D>& PolygonPoints);
+	void ApplyBlurToMask();
+	void RebuildTexturePixels();
+	void UploadMaskTexture();
+	void DrawVisionDebug(
+		const FVector& TraceOrigin,
+		const FVector& Direction,
+		float VisibleDistance,
+		bool bInsideFieldOfView,
+		int32 RayIndex,
+		const FHitResult& Hit) const;
+	void DrawVisionDebugBounds(const FVector& TraceOrigin, const FVector& FacingDirection) const;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTexture2D> MaskTexture;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTunaSweeperVisionMaskWidget> VisionMaskWidget;
+
+	TArray<uint8> VisibilityMask;
+	TArray<uint8> BlurScratchMask;
+	TArray<uint8> BlurredMask;
+	TArray<uint8> TexturePixels;
+	TArray<float> ScanlineIntersections;
+	FIntPoint MaskSize = FIntPoint::ZeroValue;
+	FIntPoint ViewportSize = FIntPoint::ZeroValue;
+	float TimeSinceLastMaskUpdate = 0.0f;
+};

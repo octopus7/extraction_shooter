@@ -13,6 +13,7 @@ class UMediaSource;
 class USceneComponent;
 class USpringArmComponent;
 class UStaticMeshComponent;
+class UTunaSweeperPlayerVisionComponent;
 class UTunaSweeperLevelTransitionWidget;
 struct FDamageEvent;
 struct FInputActionValue;
@@ -86,6 +87,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Vitals")
 	UTunaSweeperVitalsComponent* GetVitalsComponent() const { return VitalsComponent; }
 
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Vision")
+	UTunaSweeperPlayerVisionComponent* GetPlayerVisionComponent() const { return PlayerVisionComponent; }
+
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Death")
 	bool IsDead() const { return bIsDead; }
 
@@ -129,6 +133,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UTunaSweeperVitalsComponent> VitalsComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UTunaSweeperPlayerVisionComponent> PlayerVisionComponent;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	TSoftObjectPtr<UInputMappingContext> DefaultMappingContext;
