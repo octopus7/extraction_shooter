@@ -384,12 +384,18 @@ bool UTunaSweeperQuestSubsystem::TryResolveQuestForProvider(
 	EnsureSaveStateLoaded();
 
 	TArray<const FTunaSweeperQuestDefinition*> Candidates;
+	bool bHasProviderQuests = false;
 	for (const TPair<FName, FTunaSweeperQuestDefinition>& QuestPair : QuestDefinitions)
 	{
 		const FTunaSweeperQuestDefinition& Definition = QuestPair.Value;
+		if (!IsQuestForProvider(Definition, ProviderId))
+		{
+			continue;
+		}
+
+		bHasProviderQuests = true;
 		const ETunaSweeperQuestState State = GetQuestState(Definition.QuestId);
-		if (!IsQuestForProvider(Definition, ProviderId) ||
-			State == ETunaSweeperQuestState::RewardCompleted ||
+		if (State == ETunaSweeperQuestState::RewardCompleted ||
 			(State == ETunaSweeperQuestState::Available && !AreDefinitionPrerequisitesMet(Definition)))
 		{
 			continue;
@@ -425,14 +431,72 @@ bool UTunaSweeperQuestSubsystem::TryResolveQuestForProvider(
 		return true;
 	}
 
+	if (bHasProviderQuests)
+	{
+		return false;
+	}
+
 	const FTunaSweeperQuestDefinition* FallbackDefinition = FindQuestDefinition(FallbackQuestId);
-	if (FallbackDefinition && GetQuestState(FallbackQuestId) != ETunaSweeperQuestState::RewardCompleted)
+	if (FallbackDefinition &&
+		GetQuestState(FallbackQuestId) != ETunaSweeperQuestState::RewardCompleted &&
+		AreDefinitionPrerequisitesMet(*FallbackDefinition))
 	{
 		OutQuestId = FallbackQuestId;
 		return true;
 	}
 
 	return false;
+}
+
+bool UTunaSweeperQuestSubsystem::TryGetLatestQuestInProviderChain(
+	FName ProviderId,
+	FName& OutQuestId) const
+{
+	OutQuestId = NAME_None;
+	if (!EnsureQuestDataLoaded() || ProviderId.IsNone())
+	{
+		return false;
+	}
+
+	EnsureSaveStateLoaded();
+
+	TArray<const FTunaSweeperQuestDefinition*> Candidates;
+	for (const TPair<FName, FTunaSweeperQuestDefinition>& QuestPair : QuestDefinitions)
+	{
+		const FTunaSweeperQuestDefinition& Definition = QuestPair.Value;
+		if (!IsQuestForProvider(Definition, ProviderId))
+		{
+			continue;
+		}
+
+		const ETunaSweeperQuestState State = GetQuestState(Definition.QuestId);
+		if (State == ETunaSweeperQuestState::Accepted ||
+			State == ETunaSweeperQuestState::RewardAvailable ||
+			State == ETunaSweeperQuestState::RewardCompleted)
+		{
+			Candidates.Add(&Definition);
+		}
+	}
+
+	Candidates.Sort([](
+		const FTunaSweeperQuestDefinition& Left,
+		const FTunaSweeperQuestDefinition& Right)
+	{
+		if (Left.SortOrder != Right.SortOrder)
+		{
+			return Left.SortOrder > Right.SortOrder;
+		}
+
+		return Right.QuestId.LexicalLess(Left.QuestId);
+	});
+
+	if (Candidates.Num() <= 0)
+	{
+		return false;
+	}
+
+	OutQuestId = Candidates[0]->QuestId;
+	return true;
 }
 
 void UTunaSweeperQuestSubsystem::NotifyLevelTravelRequested(FName SourceLevelName, FName TargetLevelName)

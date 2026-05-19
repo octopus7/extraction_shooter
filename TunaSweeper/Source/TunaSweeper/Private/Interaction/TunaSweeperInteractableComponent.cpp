@@ -238,7 +238,15 @@ void UTunaSweeperInteractableComponent::EnsureMarkerWidgetClass()
 void UTunaSweeperInteractableComponent::UpdateMarker(float DeltaSeconds)
 {
 	const APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(this, 0);
-	const bool bCanInteract = InteractionType != ETunaSweeperInteractionType::None;
+	bool bCanInteract = InteractionType != ETunaSweeperInteractionType::None;
+	if (UWorld* World = GetWorld())
+	{
+		if (UTunaSweeperInteractionSubsystem* InteractionSubsystem = World->GetSubsystem<UTunaSweeperInteractionSubsystem>())
+		{
+			bCanInteract = InteractionSubsystem->CanOfferInteraction(this);
+		}
+	}
+
 	const bool bInsideVisibleDistance =
 		bCanInteract &&
 		PlayerPawn &&
@@ -253,6 +261,7 @@ void UTunaSweeperInteractableComponent::UpdateMarker(float DeltaSeconds)
 		if (UTunaSweeperInteractionSubsystem* InteractionSubsystem = World->GetSubsystem<UTunaSweeperInteractionSubsystem>())
 		{
 			bIsFocusedInteractable =
+				bCanInteract &&
 				InteractionSubsystem->GetFocusedInteractable() == this &&
 				PlayerPawn &&
 				IsWithinInteractionDistance(PlayerPawn);

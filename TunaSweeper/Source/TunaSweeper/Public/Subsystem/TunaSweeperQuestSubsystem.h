@@ -65,6 +65,8 @@ public:
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Quest")
 	bool TryResolveQuestForProvider(FName ProviderId, FName FallbackQuestId, FName& OutQuestId) const;
 
+	bool TryGetLatestQuestInProviderChain(FName ProviderId, FName& OutQuestId) const;
+
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Quest")
 	void NotifyLevelTravelRequested(FName SourceLevelName, FName TargetLevelName);
 

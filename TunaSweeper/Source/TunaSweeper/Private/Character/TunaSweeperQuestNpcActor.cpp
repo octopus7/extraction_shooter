@@ -49,6 +49,8 @@ FName ATunaSweeperQuestNpcActor::ResolveQuestId() const
 				{
 					return ResolvedQuestId;
 				}
+
+				return NAME_None;
 			}
 		}
 	}

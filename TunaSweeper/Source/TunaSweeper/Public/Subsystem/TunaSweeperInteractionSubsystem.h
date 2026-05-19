@@ -30,6 +30,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Interaction")
 	bool RequestInteraction(UTunaSweeperInteractableComponent* Interactable, APawn* InstigatorPawn);
 
+	bool CanOfferInteraction(const UTunaSweeperInteractableComponent* Interactable) const;
+
 private:
 	void RefreshFocusedInteractable();
 	bool HandlePickupItemInteraction(UTunaSweeperInteractableComponent* Interactable);

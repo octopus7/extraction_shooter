@@ -93,7 +93,10 @@ bool UTunaSweeperInteractionSubsystem::TryInteract(APawn* InstigatorPawn)
 
 bool UTunaSweeperInteractionSubsystem::RequestInteraction(UTunaSweeperInteractableComponent* Interactable, APawn* InstigatorPawn)
 {
-	if (!IsValid(Interactable) || !IsValid(InstigatorPawn) || !Interactable->IsWithinInteractionDistance(InstigatorPawn))
+	if (!IsValid(Interactable) ||
+		!IsValid(InstigatorPawn) ||
+		!CanOfferInteraction(Interactable) ||
+		!Interactable->IsWithinInteractionDistance(InstigatorPawn))
 	{
 		return false;
 	}
@@ -146,6 +149,22 @@ bool UTunaSweeperInteractionSubsystem::RequestInteraction(UTunaSweeperInteractab
 	}
 
 	return bHandled;
+}
+
+bool UTunaSweeperInteractionSubsystem::CanOfferInteraction(const UTunaSweeperInteractableComponent* Interactable) const
+{
+	if (!IsValid(Interactable) || Interactable->GetInteractionType() == ETunaSweeperInteractionType::None)
+	{
+		return false;
+	}
+
+	if (Interactable->GetInteractionType() != ETunaSweeperInteractionType::Quest)
+	{
+		return true;
+	}
+
+	const ATunaSweeperQuestNpcActor* QuestNpcActor = Cast<ATunaSweeperQuestNpcActor>(Interactable->GetOwner());
+	return QuestNpcActor && !QuestNpcActor->ResolveQuestId().IsNone();
 }
 
 bool UTunaSweeperInteractionSubsystem::HandlePickupItemInteraction(UTunaSweeperInteractableComponent* Interactable)
@@ -339,7 +358,7 @@ void UTunaSweeperInteractionSubsystem::RefreshFocusedInteractable()
 			continue;
 		}
 
-		if (!Interactable->IsWithinInteractionDistance(PlayerPawn))
+		if (!CanOfferInteraction(Interactable) || !Interactable->IsWithinInteractionDistance(PlayerPawn))
 		{
 			continue;
 		}
