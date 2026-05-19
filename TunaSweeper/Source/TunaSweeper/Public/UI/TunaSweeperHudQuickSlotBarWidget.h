@@ -62,6 +62,12 @@ private:
 	TArray<TObjectPtr<UWidget>> SlotAmmoTypeContainers;
 
 	UPROPERTY(Transient)
+	TArray<TObjectPtr<UWidget>> SlotAmmoKeyBackgrounds;
+
+	UPROPERTY(Transient)
+	TArray<TObjectPtr<UTextBlock>> SlotAmmoKeyTexts;
+
+	UPROPERTY(Transient)
 	TArray<TObjectPtr<UWidget>> AmmoSelectorOptionBackgrounds;
 
 	UPROPERTY(Transient)

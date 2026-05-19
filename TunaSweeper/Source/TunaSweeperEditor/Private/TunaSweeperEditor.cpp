@@ -96,7 +96,7 @@ namespace TunaSweeperEditorSetup
 	const FString InteractionInputTaskId = TEXT("2026-05-11_SetInteractInputToFKey");
 	const FString InteractionMarkerAlignmentTaskId = TEXT("2026-05-10_RebuildInteractionMarkerAlignmentV2");
 	const FString PickupItemAndSpawnerTaskId = TEXT("2026-05-11_CreatePickupItemAndSpawnerAssetsV3");
-	const FString CommonGameHudTaskId = TEXT("2026-05-19_RebuildAmmoReloadHudV9");
+	const FString CommonGameHudTaskId = TEXT("2026-05-19_RebuildAmmoReloadHudV10");
 	const FString InventoryInputTaskId = TEXT("2026-05-11_AddInventoryInput");
 	const FString QuickSlotInputTaskId = TEXT("2026-05-12_AddQuickSlotInputActions");
 	const FString DropInputTaskId = TEXT("2026-05-18_AddDropInputAction");
@@ -3471,12 +3471,27 @@ namespace TunaSweeperEditorSetup
 			USizeBox* SlotAmmoTypeContainer = WidgetTree->ConstructWidget<USizeBox>(
 				USizeBox::StaticClass(),
 				FName(*FString::Printf(TEXT("QuickSlot%dAmmoTypeContainer"), SlotNumber)));
+			UHorizontalBox* SlotAmmoTypeRow = WidgetTree->ConstructWidget<UHorizontalBox>(
+				UHorizontalBox::StaticClass(),
+				FName(*FString::Printf(TEXT("QuickSlot%dAmmoTypeRow"), SlotNumber)));
+			UBorder* SlotAmmoTypeBackground = WidgetTree->ConstructWidget<UBorder>(
+				UBorder::StaticClass(),
+				FName(*FString::Printf(TEXT("QuickSlot%dAmmoTypeBackground"), SlotNumber)));
 			UTextBlock* SlotAmmoTypeText = WidgetTree->ConstructWidget<UTextBlock>(
 				UTextBlock::StaticClass(),
 				FName(*FString::Printf(TEXT("QuickSlot%dAmmoTypeText"), SlotNumber)));
+			UBorder* SlotAmmoKeyBackground = WidgetTree->ConstructWidget<UBorder>(
+				UBorder::StaticClass(),
+				FName(*FString::Printf(TEXT("QuickSlot%dAmmoKeyBackground"), SlotNumber)));
+			UTextBlock* SlotAmmoKeyText = WidgetTree->ConstructWidget<UTextBlock>(
+				UTextBlock::StaticClass(),
+				FName(*FString::Printf(TEXT("QuickSlot%dAmmoKeyText"), SlotNumber)));
 			USizeBox* SlotAmmoTextContainer = WidgetTree->ConstructWidget<USizeBox>(
 				USizeBox::StaticClass(),
 				FName(*FString::Printf(TEXT("QuickSlot%dAmmoTextContainer"), SlotNumber)));
+			UBorder* SlotAmmoTextBackground = WidgetTree->ConstructWidget<UBorder>(
+				UBorder::StaticClass(),
+				FName(*FString::Printf(TEXT("QuickSlot%dAmmoTextBackground"), SlotNumber)));
 			UTextBlock* SlotAmmoText = WidgetTree->ConstructWidget<UTextBlock>(
 				UTextBlock::StaticClass(),
 				FName(*FString::Printf(TEXT("QuickSlot%dAmmoText"), SlotNumber)));
@@ -3499,19 +3514,52 @@ namespace TunaSweeperEditorSetup
 				UBorder::StaticClass(),
 				FName(*FString::Printf(TEXT("QuickSlot%dSelectionFrame"), SlotNumber)));
 
-			if (!SlotStack || !SlotAmmoTypeContainer || !SlotAmmoTypeText || !SlotAmmoTextContainer || !SlotAmmoText ||
+			if (!SlotStack || !SlotAmmoTypeContainer || !SlotAmmoTypeRow || !SlotAmmoTypeBackground || !SlotAmmoTypeText ||
+				!SlotAmmoKeyBackground || !SlotAmmoKeyText || !SlotAmmoTextContainer || !SlotAmmoTextBackground || !SlotAmmoText ||
 				!SlotSizeBox || !SlotBackground || !SlotOverlay || !SlotIcon || !SlotNumberText || !SelectionFrame)
 			{
 				return false;
 			}
 
 			SlotAmmoTypeContainer->SetWidthOverride(SlotSize);
-			SlotAmmoTypeContainer->SetHeightOverride(14.0f);
+			SlotAmmoTypeContainer->SetHeightOverride(18.0f);
 			SlotAmmoTypeContainer->SetVisibility(ESlateVisibility::Collapsed);
 			SlotAmmoTypeContainer->SetClipping(EWidgetClipping::ClipToBounds);
-			ConfigureTextBlock(SlotAmmoTypeText, FText::GetEmpty(), FLinearColor(0.76f, 0.92f, 0.64f, 1.0f), 10);
+			SlotAmmoTypeBackground->SetPadding(FMargin(5.0f, 2.0f));
+			SlotAmmoTypeBackground->SetBrush(MakeRoundedBoxBrush(
+				FVector2D(62.0f, 17.0f),
+				FLinearColor(0.018f, 0.022f, 0.028f, 0.92f),
+				FLinearColor(0.018f, 0.022f, 0.028f, 0.92f),
+				0.0f));
+			ConfigureTextBlock(SlotAmmoTypeText, FText::GetEmpty(), FLinearColor(0.92f, 0.96f, 0.88f, 1.0f), 8);
+			SlotAmmoTypeText->SetShadowOffset(FVector2D(0.0f, 1.0f));
+			SlotAmmoTypeText->SetShadowColorAndOpacity(FLinearColor(0.0f, 0.0f, 0.0f, 0.65f));
 			SlotAmmoTypeText->SetVisibility(ESlateVisibility::Collapsed);
-			SlotAmmoTypeContainer->SetContent(SlotAmmoTypeText);
+			SlotAmmoTypeBackground->SetContent(SlotAmmoTypeText);
+			UHorizontalBoxSlot* AmmoTypeTextSlot = SlotAmmoTypeRow->AddChildToHorizontalBox(SlotAmmoTypeBackground);
+			if (AmmoTypeTextSlot)
+			{
+				AmmoTypeTextSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+				AmmoTypeTextSlot->SetVerticalAlignment(VAlign_Center);
+			}
+			SlotAmmoKeyBackground->SetPadding(FMargin(4.0f, 1.0f));
+			SlotAmmoKeyBackground->SetVisibility(ESlateVisibility::Collapsed);
+			SlotAmmoKeyBackground->SetBrush(MakeRoundedBoxBrush(
+				FVector2D(15.0f, 15.0f),
+				FLinearColor(1.0f, 1.0f, 1.0f, 0.96f),
+				FLinearColor(1.0f, 1.0f, 1.0f, 0.96f),
+				0.0f));
+			ConfigureTextBlock(SlotAmmoKeyText, FText::FromString(TEXT("T")), FLinearColor(0.02f, 0.025f, 0.03f, 1.0f), 8);
+			SlotAmmoKeyText->SetVisibility(ESlateVisibility::Collapsed);
+			SlotAmmoKeyBackground->SetContent(SlotAmmoKeyText);
+			UHorizontalBoxSlot* AmmoKeySlot = SlotAmmoTypeRow->AddChildToHorizontalBox(SlotAmmoKeyBackground);
+			if (AmmoKeySlot)
+			{
+				AmmoKeySlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
+				AmmoKeySlot->SetVerticalAlignment(VAlign_Center);
+				AmmoKeySlot->SetPadding(FMargin(2.0f, 0.0f, 0.0f, 0.0f));
+			}
+			SlotAmmoTypeContainer->SetContent(SlotAmmoTypeRow);
 			UVerticalBoxSlot* AmmoTypeSlot = SlotStack->AddChildToVerticalBox(SlotAmmoTypeContainer);
 			if (AmmoTypeSlot)
 			{
@@ -3519,13 +3567,22 @@ namespace TunaSweeperEditorSetup
 				AmmoTypeSlot->SetPadding(FMargin(0.0f));
 			}
 
-			SlotAmmoTextContainer->SetWidthOverride(SlotSize);
-			SlotAmmoTextContainer->SetHeightOverride(15.0f);
+			SlotAmmoTextContainer->SetWidthOverride(bWeaponSlot ? 64.0f : SlotSize);
+			SlotAmmoTextContainer->SetHeightOverride(18.0f);
 			SlotAmmoTextContainer->SetVisibility(ESlateVisibility::Collapsed);
 			SlotAmmoTextContainer->SetClipping(EWidgetClipping::ClipToBounds);
-			ConfigureTextBlock(SlotAmmoText, FText::GetEmpty(), FLinearColor(0.92f, 0.96f, 1.0f, 1.0f), 12);
+			SlotAmmoTextBackground->SetPadding(FMargin(6.0f, 2.0f));
+			SlotAmmoTextBackground->SetBrush(MakeRoundedBoxBrush(
+				FVector2D(64.0f, 18.0f),
+				FLinearColor(0.018f, 0.022f, 0.028f, 0.92f),
+				FLinearColor(0.018f, 0.022f, 0.028f, 0.92f),
+				0.0f));
+			ConfigureTextBlock(SlotAmmoText, FText::GetEmpty(), FLinearColor(0.95f, 0.97f, 1.0f, 1.0f), 11);
+			SlotAmmoText->SetShadowOffset(FVector2D(0.0f, 1.0f));
+			SlotAmmoText->SetShadowColorAndOpacity(FLinearColor(0.0f, 0.0f, 0.0f, 0.65f));
 			SlotAmmoText->SetVisibility(ESlateVisibility::Collapsed);
-			SlotAmmoTextContainer->SetContent(SlotAmmoText);
+			SlotAmmoTextBackground->SetContent(SlotAmmoText);
+			SlotAmmoTextContainer->SetContent(SlotAmmoTextBackground);
 			UVerticalBoxSlot* AmmoTextSlot = SlotStack->AddChildToVerticalBox(SlotAmmoTextContainer);
 			if (AmmoTextSlot)
 			{
@@ -3596,8 +3653,13 @@ namespace TunaSweeperEditorSetup
 			}
 
 			RegisterWidgetVariable(WidgetBlueprint, SlotAmmoTypeContainer);
+			RegisterWidgetVariable(WidgetBlueprint, SlotAmmoTypeRow);
+			RegisterWidgetVariable(WidgetBlueprint, SlotAmmoTypeBackground);
 			RegisterWidgetVariable(WidgetBlueprint, SlotAmmoTypeText);
+			RegisterWidgetVariable(WidgetBlueprint, SlotAmmoKeyBackground);
+			RegisterWidgetVariable(WidgetBlueprint, SlotAmmoKeyText);
 			RegisterWidgetVariable(WidgetBlueprint, SlotAmmoTextContainer);
+			RegisterWidgetVariable(WidgetBlueprint, SlotAmmoTextBackground);
 			RegisterWidgetVariable(WidgetBlueprint, SlotAmmoText);
 			RegisterWidgetVariable(WidgetBlueprint, SlotIcon);
 			RegisterWidgetVariable(WidgetBlueprint, SelectionFrame);

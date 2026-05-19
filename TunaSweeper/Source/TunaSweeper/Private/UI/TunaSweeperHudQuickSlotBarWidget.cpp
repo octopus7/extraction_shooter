@@ -79,6 +79,17 @@ void UTunaSweeperHudQuickSlotBarWidget::SetSelectedQuickSlot(int32 SlotNumber)
 					? ESlateVisibility::HitTestInvisible
 					: ESlateVisibility::Hidden);
 		}
+
+		const bool bShowAmmoKey = Index == SelectedIndex && Index < 2;
+		if (SlotAmmoKeyBackgrounds.IsValidIndex(Index) && SlotAmmoKeyBackgrounds[Index])
+		{
+			SlotAmmoKeyBackgrounds[Index]->SetVisibility(bShowAmmoKey ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
+		}
+		if (SlotAmmoKeyTexts.IsValidIndex(Index) && SlotAmmoKeyTexts[Index])
+		{
+			SlotAmmoKeyTexts[Index]->SetVisibility(bShowAmmoKey ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
+			SlotAmmoKeyTexts[Index]->SetText(bShowAmmoKey ? FText::FromString(TEXT("T")) : FText::GetEmpty());
+		}
 	}
 }
 
@@ -224,6 +235,8 @@ void UTunaSweeperHudQuickSlotBarWidget::CacheNamedWidgets()
 	SlotAmmoTextContainers.SetNum(8);
 	SlotAmmoTypeTexts.SetNum(8);
 	SlotAmmoTypeContainers.SetNum(8);
+	SlotAmmoKeyBackgrounds.SetNum(8);
+	SlotAmmoKeyTexts.SetNum(8);
 	AmmoSelectorOptionBackgrounds.SetNum(6);
 	AmmoSelectorOptionTexts.SetNum(6);
 
@@ -234,6 +247,8 @@ void UTunaSweeperHudQuickSlotBarWidget::CacheNamedWidgets()
 		SlotSelectionFrames[SlotIndex] = WidgetTree->FindWidget(FName(*FString::Printf(TEXT("QuickSlot%dSelectionFrame"), SlotNumber)));
 		SlotAmmoTypeTexts[SlotIndex] = Cast<UTextBlock>(WidgetTree->FindWidget(FName(*FString::Printf(TEXT("QuickSlot%dAmmoTypeText"), SlotNumber))));
 		SlotAmmoTypeContainers[SlotIndex] = WidgetTree->FindWidget(FName(*FString::Printf(TEXT("QuickSlot%dAmmoTypeContainer"), SlotNumber)));
+		SlotAmmoKeyBackgrounds[SlotIndex] = WidgetTree->FindWidget(FName(*FString::Printf(TEXT("QuickSlot%dAmmoKeyBackground"), SlotNumber)));
+		SlotAmmoKeyTexts[SlotIndex] = Cast<UTextBlock>(WidgetTree->FindWidget(FName(*FString::Printf(TEXT("QuickSlot%dAmmoKeyText"), SlotNumber))));
 		SlotAmmoTexts[SlotIndex] = Cast<UTextBlock>(WidgetTree->FindWidget(FName(*FString::Printf(TEXT("QuickSlot%dAmmoText"), SlotNumber))));
 		SlotAmmoTextContainers[SlotIndex] = WidgetTree->FindWidget(FName(*FString::Printf(TEXT("QuickSlot%dAmmoTextContainer"), SlotNumber)));
 	}
