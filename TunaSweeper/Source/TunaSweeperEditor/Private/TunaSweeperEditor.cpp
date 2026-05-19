@@ -57,6 +57,7 @@
 #include "Factories/MaterialFactoryNew.h"
 #include "Materials/Material.h"
 #include "Materials/MaterialExpressionConstant3Vector.h"
+#include "Materials/MaterialExpressionVertexColor.h"
 #include "MeshDescription.h"
 #include "Misc/CommandLine.h"
 #include "Misc/ConfigCacheIni.h"
@@ -114,6 +115,7 @@ namespace TunaSweeperEditorSetup
 	const FString SelfDestructInteractionTaskId = TEXT("2026-05-16_CreateSelfDestructInteractionV1");
 	const FString WorldProgressInteractionTaskId = TEXT("2026-05-19_CreateWorldProgressObstacleAssetsV1");
 	const FString EnemyVisualMaterialTaskId = TEXT("2026-05-19_CreateEnemyAndContainerVisualMaterialsV3");
+	const FString VoxelMeshAssetTaskId = TEXT("2026-05-19_CreateSharedVoxelMeshAssetsV1");
 	const FString CoverPointAssetTaskId = TEXT("2026-05-16_CreateCoverPointBlueprintV1");
 	const FString GameInstanceAssetPath = TEXT("/Game/Core");
 	const FString GameInstanceAssetName = TEXT("BP_TunaSweeperGameInstance");
@@ -128,6 +130,8 @@ namespace TunaSweeperEditorSetup
 	const FString EnemyGreenMaterialAssetName = TEXT("M_Enemy_Green");
 	const FString EnemyBlueMaterialAssetName = TEXT("M_Enemy_Blue");
 	const FString EnemySightlineMaterialAssetName = TEXT("M_Enemy_Sightline");
+	const FString EnemyVoxelBodyMeshAssetName = TEXT("SM_Enemy_VoxelBody");
+	const FString EnemyVoxelForwardMarkerMeshAssetName = TEXT("SM_Enemy_VoxelForwardMarker");
 	const FString CoverAssetPath = TEXT("/Game/AI/Cover");
 	const FString CoverPointAssetName = TEXT("BP_TunaSweeperCoverPoint");
 	const FString WeaponAssetPath = TEXT("/Game/Weapons");
@@ -146,6 +150,8 @@ namespace TunaSweeperEditorSetup
 	const FString QuickSlotActionNamePrefix = TEXT("IA_QuickSlot");
 	const FString MappingContextName = TEXT("IMC_Player");
 	const FString UIAssetPath = TEXT("/Game/UI");
+	const FString VoxelAssetPath = TEXT("/Game/Prototype");
+	const FString VoxelVertexColorMaterialAssetName = TEXT("M_Voxel_VertexColor");
 	const FString UIIconAssetPath = TEXT("/Game/UI/Icons");
 	const FString UITitleTextureAssetPath = TEXT("/Game/UI/Title");
 	const FString UIStoryTextureAssetPath = TEXT("/Game/UI/Story");
@@ -208,6 +214,8 @@ namespace TunaSweeperEditorSetup
 	const FString TransparentObstacleAssetName = TEXT("BP_TransparentObstacle");
 	const FString WorldProgressBrokenBridgeAssetName = TEXT("BP_WorldProgress_BrokenBridge");
 	const FString WorldProgressRepairedBridgeAssetName = TEXT("BP_WorldProgress_RepairedBridge");
+	const FString BrokenBridgeVoxelMeshAssetName = TEXT("SM_Bridge_Broken_Voxel");
+	const FString RepairedBridgeVoxelMeshAssetName = TEXT("SM_Bridge_Repaired_Voxel");
 	const FString IntroMapPackagePath = TEXT("/Game/IntroMap");
 	const FString OpeningScenarioMapPackagePath = TEXT("/Game/OpeningScenarioMap");
 	const FString BunkerMapPackagePath = TEXT("/Game/BunkerMap");
@@ -342,6 +350,181 @@ namespace TunaSweeperEditorSetup
 			FVector3f(Max.X, Min.Y, Max.Z),
 			FVector3f(Min.X, Min.Y, Max.Z),
 			FVector3f(0.0f, -1.0f, 0.0f));
+	}
+
+	struct FEnemyVoxelBox
+	{
+		int32 X0 = 0;
+		int32 Y0 = 0;
+		int32 Z0 = 0;
+		int32 X1 = 0;
+		int32 Y1 = 0;
+		int32 Z1 = 0;
+		FLinearColor Color = FLinearColor::White;
+	};
+
+#include "EnemyVoxelBodyShape.inl"
+#include "EnemyVoxelForwardMarkerShape.inl"
+#include "BridgeVoxelBrokenShape.inl"
+#include "BridgeVoxelRepairedShape.inl"
+
+	void AddColoredBoxQuad(
+		FMeshDescription& MeshDescription,
+		FStaticMeshAttributes& Attributes,
+		FPolygonGroupID PolygonGroupId,
+		const FVector3f& A,
+		const FVector3f& B,
+		const FVector3f& C,
+		const FVector3f& D,
+		const FVector3f& Normal,
+		const FLinearColor& Color)
+	{
+		TVertexAttributesRef<FVector3f> VertexPositions = Attributes.GetVertexPositions();
+		TVertexInstanceAttributesRef<FVector3f> VertexInstanceNormals = Attributes.GetVertexInstanceNormals();
+		TVertexInstanceAttributesRef<FVector2f> VertexInstanceUVs = Attributes.GetVertexInstanceUVs();
+		TVertexInstanceAttributesRef<FVector4f> VertexInstanceColors = Attributes.GetVertexInstanceColors();
+
+		const FVector3f Positions[] = { A, B, C, D };
+		const FVector2f UVs[] = {
+			FVector2f(0.0f, 0.0f),
+			FVector2f(1.0f, 0.0f),
+			FVector2f(1.0f, 1.0f),
+			FVector2f(0.0f, 1.0f)
+		};
+		const FVector4f VertexColor(Color.R, Color.G, Color.B, Color.A);
+
+		TArray<FVertexInstanceID> VertexInstances;
+		VertexInstances.Reserve(UE_ARRAY_COUNT(Positions));
+		for (int32 Index = 0; Index < UE_ARRAY_COUNT(Positions); ++Index)
+		{
+			const FVertexID VertexId = MeshDescription.CreateVertex();
+			VertexPositions[VertexId] = Positions[Index];
+
+			const FVertexInstanceID VertexInstanceId = MeshDescription.CreateVertexInstance(VertexId);
+			VertexInstanceNormals[VertexInstanceId] = Normal;
+			VertexInstanceUVs.Set(VertexInstanceId, 0, UVs[Index]);
+			VertexInstanceColors[VertexInstanceId] = VertexColor;
+			VertexInstances.Add(VertexInstanceId);
+		}
+
+		MeshDescription.CreatePolygon(PolygonGroupId, VertexInstances);
+	}
+
+	FVector3f ConvertVoxelGridPointToMeshPosition(
+		int32 X,
+		int32 Y,
+		int32 Z,
+		const FVector3f& Dimensions)
+	{
+		constexpr float VoxelResolution = 32.0f;
+		return FVector3f(
+			(static_cast<float>(X) / VoxelResolution - 0.5f) * Dimensions.X,
+			(static_cast<float>(Y) / VoxelResolution - 0.5f) * Dimensions.Y,
+			(static_cast<float>(Z) / VoxelResolution - 0.5f) * Dimensions.Z);
+	}
+
+	void AddVoxelBoxToMesh(
+		FMeshDescription& MeshDescription,
+		FStaticMeshAttributes& Attributes,
+		FPolygonGroupID PolygonGroupId,
+		const FEnemyVoxelBox& Box,
+		const FVector3f& Dimensions)
+	{
+		const int32 X0 = FMath::Clamp(Box.X0, 0, 32);
+		const int32 Y0 = FMath::Clamp(Box.Y0, 0, 32);
+		const int32 Z0 = FMath::Clamp(Box.Z0, 0, 32);
+		const int32 X1 = FMath::Clamp(Box.X1, 0, 32);
+		const int32 Y1 = FMath::Clamp(Box.Y1, 0, 32);
+		const int32 Z1 = FMath::Clamp(Box.Z1, 0, 32);
+		if (X0 >= X1 || Y0 >= Y1 || Z0 >= Z1)
+		{
+			return;
+		}
+
+		const FVector3f Min = ConvertVoxelGridPointToMeshPosition(X0, Y0, Z0, Dimensions);
+		const FVector3f Max = ConvertVoxelGridPointToMeshPosition(X1, Y1, Z1, Dimensions);
+
+		AddColoredBoxQuad(
+			MeshDescription,
+			Attributes,
+			PolygonGroupId,
+			FVector3f(Min.X, Min.Y, Min.Z),
+			FVector3f(Min.X, Max.Y, Min.Z),
+			FVector3f(Max.X, Max.Y, Min.Z),
+			FVector3f(Max.X, Min.Y, Min.Z),
+			FVector3f(0.0f, 0.0f, -1.0f),
+			Box.Color);
+		AddColoredBoxQuad(
+			MeshDescription,
+			Attributes,
+			PolygonGroupId,
+			FVector3f(Min.X, Min.Y, Max.Z),
+			FVector3f(Max.X, Min.Y, Max.Z),
+			FVector3f(Max.X, Max.Y, Max.Z),
+			FVector3f(Min.X, Max.Y, Max.Z),
+			FVector3f(0.0f, 0.0f, 1.0f),
+			Box.Color);
+		AddColoredBoxQuad(
+			MeshDescription,
+			Attributes,
+			PolygonGroupId,
+			FVector3f(Max.X, Min.Y, Min.Z),
+			FVector3f(Max.X, Max.Y, Min.Z),
+			FVector3f(Max.X, Max.Y, Max.Z),
+			FVector3f(Max.X, Min.Y, Max.Z),
+			FVector3f(1.0f, 0.0f, 0.0f),
+			Box.Color);
+		AddColoredBoxQuad(
+			MeshDescription,
+			Attributes,
+			PolygonGroupId,
+			FVector3f(Min.X, Min.Y, Min.Z),
+			FVector3f(Min.X, Min.Y, Max.Z),
+			FVector3f(Min.X, Max.Y, Max.Z),
+			FVector3f(Min.X, Max.Y, Min.Z),
+			FVector3f(-1.0f, 0.0f, 0.0f),
+			Box.Color);
+		AddColoredBoxQuad(
+			MeshDescription,
+			Attributes,
+			PolygonGroupId,
+			FVector3f(Min.X, Max.Y, Min.Z),
+			FVector3f(Min.X, Max.Y, Max.Z),
+			FVector3f(Max.X, Max.Y, Max.Z),
+			FVector3f(Max.X, Max.Y, Min.Z),
+			FVector3f(0.0f, 1.0f, 0.0f),
+			Box.Color);
+		AddColoredBoxQuad(
+			MeshDescription,
+			Attributes,
+			PolygonGroupId,
+			FVector3f(Min.X, Min.Y, Min.Z),
+			FVector3f(Max.X, Min.Y, Min.Z),
+			FVector3f(Max.X, Min.Y, Max.Z),
+			FVector3f(Min.X, Min.Y, Max.Z),
+			FVector3f(0.0f, -1.0f, 0.0f),
+			Box.Color);
+	}
+
+	void BuildVoxelMeshDescription(
+		FMeshDescription& MeshDescription,
+		const FName& MaterialSlotName,
+		const FVector3f& Dimensions,
+		TFunctionRef<void(TArray<FEnemyVoxelBox>&)> AppendBoxes)
+	{
+		FStaticMeshAttributes Attributes(MeshDescription);
+		Attributes.Register();
+		Attributes.GetVertexInstanceUVs().SetNumChannels(1);
+
+		const FPolygonGroupID PolygonGroupId = MeshDescription.CreatePolygonGroup();
+		Attributes.GetPolygonGroupMaterialSlotNames()[PolygonGroupId] = MaterialSlotName;
+
+		TArray<FEnemyVoxelBox> Boxes;
+		AppendBoxes(Boxes);
+		for (const FEnemyVoxelBox& Box : Boxes)
+		{
+			AddVoxelBoxToMesh(MeshDescription, Attributes, PolygonGroupId, Box, Dimensions);
+		}
 	}
 
 	void BuildLevelTravelLadderMeshDescription(FMeshDescription& MeshDescription)
@@ -596,6 +779,123 @@ namespace TunaSweeperEditorSetup
 		}
 
 		return Material;
+	}
+
+	UMaterial* EnsureVoxelVertexColorMaterial()
+	{
+		const FString ObjectPath = GetAssetObjectPath(VoxelAssetPath, VoxelVertexColorMaterialAssetName);
+		UMaterial* Material = LoadObject<UMaterial>(nullptr, *ObjectPath);
+		if (!Material)
+		{
+			UMaterialFactoryNew* MaterialFactory = NewObject<UMaterialFactoryNew>();
+
+			FAssetToolsModule& AssetToolsModule = FModuleManager::LoadModuleChecked<FAssetToolsModule>(TEXT("AssetTools"));
+			UObject* CreatedAsset = AssetToolsModule.Get().CreateAsset(
+				VoxelVertexColorMaterialAssetName,
+				VoxelAssetPath,
+				UMaterial::StaticClass(),
+				MaterialFactory);
+
+			Material = Cast<UMaterial>(CreatedAsset);
+			if (!Material)
+			{
+				UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to create %s."), *ObjectPath);
+				return nullptr;
+			}
+
+			FAssetRegistryModule::AssetCreated(Material);
+		}
+
+		Material->Modify();
+		Material->GetExpressionCollection().Empty();
+
+		UMaterialEditorOnlyData* MaterialEditorOnly = Material->GetEditorOnlyData();
+		if (!MaterialEditorOnly)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to edit %s."), *ObjectPath);
+			return nullptr;
+		}
+
+		UMaterialExpressionVertexColor* VertexColorExpression = NewObject<UMaterialExpressionVertexColor>(Material);
+		VertexColorExpression->Material = Material;
+		VertexColorExpression->MaterialExpressionEditorX = -240;
+		VertexColorExpression->MaterialExpressionEditorY = 0;
+		Material->GetExpressionCollection().AddExpression(VertexColorExpression);
+		MaterialEditorOnly->BaseColor.Connect(0, VertexColorExpression);
+
+		MaterialEditorOnly->Roughness.UseConstant = true;
+		MaterialEditorOnly->Roughness.Constant = 0.8f;
+		MaterialEditorOnly->Metallic.UseConstant = true;
+		MaterialEditorOnly->Metallic.Constant = 0.0f;
+		MaterialEditorOnly->Specular.UseConstant = true;
+		MaterialEditorOnly->Specular.Constant = 0.2f;
+
+		Material->PostEditChange();
+		Material->MarkPackageDirty();
+
+		if (!SaveAsset(Material))
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to save %s."), *ObjectPath);
+			return nullptr;
+		}
+
+		return Material;
+	}
+
+	UStaticMesh* EnsureVoxelStaticMeshAsset(
+		const FString& AssetPath,
+		const FString& AssetName,
+		const FName& MaterialSlotName,
+		const FVector3f& Dimensions,
+		TFunctionRef<void(FMeshDescription&)> BuildMeshDescription,
+		UMaterialInterface* VoxelMaterial)
+	{
+		const FString ObjectPath = GetAssetObjectPath(AssetPath, AssetName);
+		UStaticMesh* StaticMesh = LoadObject<UStaticMesh>(nullptr, *ObjectPath);
+		if (!StaticMesh)
+		{
+			const FString PackageName = FString::Printf(TEXT("%s/%s"), *AssetPath, *AssetName);
+			UPackage* Package = CreatePackage(*PackageName);
+			if (!Package)
+			{
+				return nullptr;
+			}
+
+			StaticMesh = NewObject<UStaticMesh>(
+				Package,
+				*AssetName,
+				RF_Public | RF_Standalone | RF_Transactional);
+			if (!StaticMesh)
+			{
+				return nullptr;
+			}
+
+			FMeshDescription MeshDescription;
+			BuildMeshDescription(MeshDescription);
+
+			StaticMesh->GetStaticMaterials().Reset();
+			StaticMesh->GetStaticMaterials().Add(FStaticMaterial(VoxelMaterial, MaterialSlotName));
+
+			TArray<const FMeshDescription*> MeshDescriptions;
+			MeshDescriptions.Add(&MeshDescription);
+			StaticMesh->BuildFromMeshDescriptions(MeshDescriptions);
+			FAssetRegistryModule::AssetCreated(StaticMesh);
+		}
+		else
+		{
+			StaticMesh->Modify();
+			if (StaticMesh->GetStaticMaterials().Num() == 0)
+			{
+				StaticMesh->GetStaticMaterials().Add(FStaticMaterial(VoxelMaterial, MaterialSlotName));
+			}
+			else
+			{
+				StaticMesh->GetStaticMaterials()[0] = FStaticMaterial(VoxelMaterial, MaterialSlotName);
+			}
+		}
+
+		StaticMesh->MarkPackageDirty();
+		return SaveAsset(StaticMesh) ? StaticMesh : nullptr;
 	}
 
 	template <typename AssetType>
