@@ -61,11 +61,13 @@ void UTunaSweeperScreenFadeWidget::BuildFadeWidget()
 
 	WidgetTree->RootWidget = RootCanvas;
 	FadeBorder->SetBrushColor(FLinearColor::Black);
+	FadeBorder->SetRenderOpacity(1.0f);
+	FadeBorder->SetVisibility(ESlateVisibility::HitTestInvisible);
 
 	UCanvasPanelSlot* FadeSlot = RootCanvas->AddChildToCanvas(FadeBorder);
 	if (FadeSlot)
 	{
-		FadeSlot->SetAnchors(FAnchors(0.0f, 0.0f, 1.0f, 1.0f));
+		FadeSlot->SetAnchors(FAnchors(0.45f, 0.45f, 0.55f, 0.55f));
 		FadeSlot->SetOffsets(FMargin(0.0f));
 		FadeSlot->SetAlignment(FVector2D::ZeroVector);
 		FadeSlot->SetZOrder(0);
@@ -76,6 +78,11 @@ void UTunaSweeperScreenFadeWidget::SetFadeOpacity(float Opacity)
 {
 	if (FadeBorder)
 	{
-		FadeBorder->SetBrushColor(FLinearColor(0.0f, 0.0f, 0.0f, FMath::Clamp(Opacity, 0.0f, 1.0f)));
+		const float ClampedOpacity = FMath::Clamp(Opacity, 0.0f, 1.0f);
+		FadeBorder->SetBrushColor(FLinearColor::Black);
+		FadeBorder->SetRenderOpacity(ClampedOpacity);
+		FadeBorder->SetVisibility(ClampedOpacity > 0.01f
+			? ESlateVisibility::HitTestInvisible
+			: ESlateVisibility::Collapsed);
 	}
 }

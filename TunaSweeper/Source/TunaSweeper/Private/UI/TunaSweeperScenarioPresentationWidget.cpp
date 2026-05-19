@@ -184,7 +184,9 @@ void UTunaSweeperScenarioPresentationWidget::BuildPresentationWidget()
 	BackgroundImage->SetBrush(BackgroundBrush);
 	AddFullScreenChild(RootCanvas, BackgroundImage, 0);
 
-	VignetteOverlay->SetBrushColor(FLinearColor(0.0f, 0.0f, 0.0f, 0.38f));
+	VignetteOverlay->SetBrushColor(FLinearColor::Black);
+	VignetteOverlay->SetRenderOpacity(0.38f);
+	VignetteOverlay->SetVisibility(ESlateVisibility::HitTestInvisible);
 	AddFullScreenChild(RootCanvas, VignetteOverlay, 1);
 
 	TitleText->SetText(FText::FromString(TEXT("\uC7AC\uAE30\uB3D9 \uAE30\uB85D")));
@@ -246,7 +248,15 @@ void UTunaSweeperScenarioPresentationWidget::BuildPresentationWidget()
 	}
 
 	FadeOverlay->SetBrushColor(FLinearColor::Black);
-	AddFullScreenChild(RootCanvas, FadeOverlay, 10);
+	FadeOverlay->SetRenderOpacity(1.0f);
+	FadeOverlay->SetVisibility(ESlateVisibility::HitTestInvisible);
+	if (UCanvasPanelSlot* FadeSlot = RootCanvas->AddChildToCanvas(FadeOverlay))
+	{
+		FadeSlot->SetAnchors(FAnchors(0.45f, 0.45f, 0.55f, 0.55f));
+		FadeSlot->SetOffsets(FMargin(0.0f));
+		FadeSlot->SetAlignment(FVector2D::ZeroVector);
+		FadeSlot->SetZOrder(10);
+	}
 }
 
 void UTunaSweeperScenarioPresentationWidget::InitializeMonologueLines()
@@ -314,6 +324,11 @@ void UTunaSweeperScenarioPresentationWidget::SetFadeOverlayOpacity(float Opacity
 {
 	if (FadeOverlay)
 	{
-		FadeOverlay->SetBrushColor(FLinearColor(0.0f, 0.0f, 0.0f, FMath::Clamp(Opacity, 0.0f, 1.0f)));
+		const float ClampedOpacity = FMath::Clamp(Opacity, 0.0f, 1.0f);
+		FadeOverlay->SetBrushColor(FLinearColor::Black);
+		FadeOverlay->SetRenderOpacity(ClampedOpacity);
+		FadeOverlay->SetVisibility(ClampedOpacity > 0.01f
+			? ESlateVisibility::HitTestInvisible
+			: ESlateVisibility::Collapsed);
 	}
 }
