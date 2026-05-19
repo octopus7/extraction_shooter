@@ -445,9 +445,14 @@ void ATunaSweeperTopDownCharacter::FireWeapon()
 		return;
 	}
 
-	if (bIsDead || bIsReloading || !CanUseSelectedWeaponSlot())
+	if (bIsDead || !CanUseSelectedWeaponSlot())
 	{
 		return;
+	}
+
+	if (bIsReloading)
+	{
+		CancelReload();
 	}
 
 	EnsureEquippedWeaponActor();
@@ -640,9 +645,21 @@ void ATunaSweeperTopDownCharacter::ConfirmAmmoSelection()
 
 	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
 	{
-		TunaGameInstance->SetSelectedAmmoItemForWeaponSlot(
+		const bool bWasAmmoUnspecified = TunaGameInstance->GetWeaponSelectedAmmoItemId(SelectedWeaponSlotNumber) == INDEX_NONE;
+		const bool bAmmoSelected = TunaGameInstance->SetSelectedAmmoItemForWeaponSlot(
 			SelectedWeaponSlotNumber,
 			AmmoSelectionItemIds[AmmoSelectionFocusIndex]);
+		const bool bShouldAutoReload =
+			bWasAmmoUnspecified &&
+			bAmmoSelected &&
+			TunaGameInstance->GetWeaponInventoryAmmoCount(SelectedWeaponSlotNumber) > 0;
+
+		CloseAmmoSelection();
+		if (bShouldAutoReload)
+		{
+			StartReload();
+		}
+		return;
 	}
 
 	CloseAmmoSelection();
