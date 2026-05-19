@@ -18,5 +18,24 @@
       "coins": 100,
       "items": []
     }
+  },
+  {
+    "quest_id": "quest_lumberjack_first_kill",
+    "title": "\ubc8c\ubaa9\uae30 \uc81c\uac70",
+    "description": "\ub808\uc774\ub4dc \uad6c\uc5ed\uc5d0\uc11c \ubc8c\ubaa9\uae30\ub97c \ucc98\uce58\ud558\uace0 \uc0dd\ud658\ud574",
+    "auto_track_on_accept": true,
+    "objectives": [
+      {
+        "objective_id": "kill_lumberjack",
+        "type": "enemy_killed",
+        "text": "\ubc8c\ubaa9\uae30 \ucc98\uce58",
+        "required_count": 1,
+        "enemy_id": "enemy.lumberjack"
+      }
+    ],
+    "rewards": {
+      "coins": 150,
+      "items": []
+    }
   }
 ]

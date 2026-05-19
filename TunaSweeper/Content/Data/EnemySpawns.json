@@ -21,6 +21,7 @@
   },
   {
     "level_name": "RaidMap",
+    "enemy_id": "enemy.lumberjack",
     "enemy_class": "/Game/Characters/Enemy/BP_TunaSweeperEnemy.BP_TunaSweeperEnemy_C",
     "body_material": "/Game/Prototype/M_Voxel_VertexColor.M_Voxel_VertexColor",
     "drop_container_definition_id": 7002,
@@ -31,6 +32,7 @@
   },
   {
     "level_name": "RaidMap",
+    "enemy_id": "enemy.lumberjack",
     "enemy_class": "/Game/Characters/Enemy/BP_TunaSweeperEnemy.BP_TunaSweeperEnemy_C",
     "body_material": "/Game/Prototype/M_Voxel_VertexColor.M_Voxel_VertexColor",
     "drop_container_definition_id": 7007,

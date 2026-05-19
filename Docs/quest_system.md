@@ -29,6 +29,17 @@
 | 달성 조건 | `BunkerMap -> RaidMap` |
 | 보상 | 코인 100 |
 
+적 처치 목표 검증용 퀘스트:
+
+| 항목 | 값 |
+| --- | --- |
+| QuestId | `quest_lumberjack_first_kill` |
+| 제목 | `벌목기 제거` |
+| 목표 | `kill_lumberjack` |
+| 목표 타입 | `enemy_killed` |
+| 달성 조건 | `enemy.lumberjack` ID를 가진 적 처치 |
+| 보상 | 코인 150 |
+
 ## 런타임 상태
 
 런타임 소유자는 `UTunaSweeperQuestSubsystem`이다.
@@ -107,6 +118,6 @@ v1 목표 타입:
 ## 추가 규칙
 
 - 새 퀘스트를 추가할 때는 `QuestDefinitions.json`에 정의하고, 필요한 목표 이벤트 소스가 이미 연결되어 있는지 확인한다.
-- `enemy_killed` 목표에서 특정 적만 요구하려면 적 스폰 데이터에 `enemy_id`를 추가한다.
+- `enemy_killed` 목표에서 특정 적만 요구하려면 적 스폰 데이터에 `enemy_id`를 추가한다. 현재 벌목기 스폰은 `enemy.lumberjack`을 사용한다.
 - `interaction_completed` 목표에서 특정 상호작용만 요구하려면 해당 `UTunaSweeperInteractableComponent::ObjectiveEventId`를 설정한다.
 - 저장 필드를 변경하면 `Docs/save_persistence.md`도 같은 변경에서 갱신한다.
