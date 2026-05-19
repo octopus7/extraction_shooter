@@ -24,19 +24,25 @@ protected:
 	virtual TSharedRef<SWidget> RebuildWidget() override;
 	virtual void NativeConstruct() override;
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
+	virtual FReply NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent) override;
 	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 
 private:
 	void BuildPresentationWidget();
 	void InitializeMonologueLines();
-	void RefreshCurrentLine();
+	void BeginCurrentLine();
 	void UpdateMonologueTextPlacement();
+	void UpdateMonologueTypewriter(float DeltaTime);
+	void UpdateVisibleMonologueText();
 	void ResetSystemTextTypewriter();
 	void UpdateSystemTextTypewriter(float DeltaTime);
+	void AdvanceOrFillLine();
 	void AdvanceLine();
 	void StartFadeOut();
 	void TravelToBunker();
 	void SetFadeOverlayOpacity(float Opacity);
+	float GetCurrentLineAutoAdvanceSeconds() const;
+	bool IsCurrentLineFullyVisible() const;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UImage> BackgroundImage;
@@ -62,9 +68,12 @@ private:
 	TArray<FText> MonologueLines;
 	FString SystemTitleFullText;
 	FString SystemStatusFullText;
+	FString CurrentMonologueFullText;
 	float SystemTypewriterElapsedSeconds = 0.0f;
+	float MonologueTypewriterAccumulator = 0.0f;
 	int32 SystemTitleVisibleCharacters = 0;
 	int32 SystemStatusVisibleCharacters = 0;
+	int32 MonologueVisibleCharacterCount = 0;
 	int32 CurrentLineIndex = 0;
 	float PhaseElapsedSeconds = 0.0f;
 	ETunaSweeperScenarioPresentationPhase Phase = ETunaSweeperScenarioPresentationPhase::FadeIn;

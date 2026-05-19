@@ -18,10 +18,12 @@ namespace TunaSweeperScenarioPresentation
 	const FName BunkerLevelName(TEXT("BunkerMap"));
 	const TCHAR* OpeningBackgroundTexturePath = TEXT("/Game/UI/Story/T_Story_OpeningLightParticles.T_Story_OpeningLightParticles");
 	constexpr float FadeInSeconds = 1.2f;
-	constexpr float LineSeconds = 2.2f;
+	constexpr float MinimumLineSeconds = 2.2f;
 	constexpr float FadeOutSeconds = 1.25f;
 	constexpr float SystemTypewriterCharactersPerSecond = 13.0f;
 	constexpr float SystemStatusTypewriterDelaySeconds = 0.35f;
+	constexpr float MonologueTypewriterCharactersPerSecond = 15.0f;
+	constexpr float MonologueFullyVisibleHoldSeconds = 0.7f;
 	constexpr float MonologueFontSize = 34.0f;
 	constexpr float MonologueMinWidth = 280.0f;
 	constexpr float MonologueMaxWidth = 1120.0f;
@@ -108,7 +110,7 @@ void UTunaSweeperScenarioPresentationWidget::NativeConstruct()
 	Phase = ETunaSweeperScenarioPresentationPhase::FadeIn;
 	bTravelStarted = false;
 	ResetSystemTextTypewriter();
-	RefreshCurrentLine();
+	BeginCurrentLine();
 	SetFadeOverlayOpacity(1.0f);
 }
 
@@ -133,7 +135,8 @@ void UTunaSweeperScenarioPresentationWidget::NativeTick(const FGeometry& MyGeome
 	if (Phase == ETunaSweeperScenarioPresentationPhase::DisplayLine)
 	{
 		UpdateSystemTextTypewriter(InDeltaTime);
-		if (PhaseElapsedSeconds >= TunaSweeperScenarioPresentation::LineSeconds)
+		UpdateMonologueTypewriter(InDeltaTime);
+		if (IsCurrentLineFullyVisible() && PhaseElapsedSeconds >= GetCurrentLineAutoAdvanceSeconds())
 		{
 			AdvanceLine();
 		}
@@ -143,6 +146,7 @@ void UTunaSweeperScenarioPresentationWidget::NativeTick(const FGeometry& MyGeome
 	if (Phase == ETunaSweeperScenarioPresentationPhase::FadeOut)
 	{
 		UpdateSystemTextTypewriter(InDeltaTime);
+		UpdateMonologueTypewriter(InDeltaTime);
 		const float Alpha = FMath::Clamp(PhaseElapsedSeconds / TunaSweeperScenarioPresentation::FadeOutSeconds, 0.0f, 1.0f);
 		SetFadeOverlayOpacity(Alpha);
 		if (Alpha >= 1.0f)
@@ -152,6 +156,17 @@ void UTunaSweeperScenarioPresentationWidget::NativeTick(const FGeometry& MyGeome
 	}
 }
 
+FReply UTunaSweeperScenarioPresentationWidget::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
+{
+	if (InKeyEvent.IsRepeat())
+	{
+		return FReply::Handled();
+	}
+
+	AdvanceOrFillLine();
+	return FReply::Handled();
+}
+
 FReply UTunaSweeperScenarioPresentationWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
 	if (InMouseEvent.GetEffectingButton() != EKeys::LeftMouseButton)
@@ -159,27 +174,38 @@ FReply UTunaSweeperScenarioPresentationWidget::NativeOnMouseButtonDown(const FGe
 		return Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent);
 	}
 
+	AdvanceOrFillLine();
+	return FReply::Handled();
+}
+
+void UTunaSweeperScenarioPresentationWidget::AdvanceOrFillLine()
+{
 	if (Phase == ETunaSweeperScenarioPresentationPhase::FadeIn)
 	{
 		Phase = ETunaSweeperScenarioPresentationPhase::DisplayLine;
 		PhaseElapsedSeconds = 0.0f;
 		SetFadeOverlayOpacity(0.0f);
-		return FReply::Handled();
+		return;
 	}
 
 	if (Phase == ETunaSweeperScenarioPresentationPhase::DisplayLine)
 	{
+		if (!IsCurrentLineFullyVisible())
+		{
+			MonologueVisibleCharacterCount = CurrentMonologueFullText.Len();
+			MonologueTypewriterAccumulator = static_cast<float>(MonologueVisibleCharacterCount);
+			UpdateVisibleMonologueText();
+			return;
+		}
+
 		AdvanceLine();
-		return FReply::Handled();
+		return;
 	}
 
 	if (Phase == ETunaSweeperScenarioPresentationPhase::FadeOut)
 	{
 		TravelToBunker();
-		return FReply::Handled();
 	}
-
-	return FReply::Handled();
 }
 
 void UTunaSweeperScenarioPresentationWidget::BuildPresentationWidget()
@@ -326,7 +352,7 @@ void UTunaSweeperScenarioPresentationWidget::InitializeMonologueLines()
 	SystemStatusFullText = TEXT("B-07 \uBC99\uCEE4 / \uBE44\uC0C1 \uAE30\uC0C1");
 }
 
-void UTunaSweeperScenarioPresentationWidget::RefreshCurrentLine()
+void UTunaSweeperScenarioPresentationWidget::BeginCurrentLine()
 {
 	if (!MonologueText || MonologueLines.IsEmpty())
 	{
@@ -334,8 +360,11 @@ void UTunaSweeperScenarioPresentationWidget::RefreshCurrentLine()
 	}
 
 	CurrentLineIndex = FMath::Clamp(CurrentLineIndex, 0, MonologueLines.Num() - 1);
-	MonologueText->SetText(MonologueLines[CurrentLineIndex]);
+	CurrentMonologueFullText = MonologueLines[CurrentLineIndex].ToString();
+	MonologueTypewriterAccumulator = 0.0f;
+	MonologueVisibleCharacterCount = 0;
 	UpdateMonologueTextPlacement();
+	UpdateVisibleMonologueText();
 }
 
 void UTunaSweeperScenarioPresentationWidget::UpdateMonologueTextPlacement()
@@ -351,10 +380,47 @@ void UTunaSweeperScenarioPresentationWidget::UpdateMonologueTextPlacement()
 		return;
 	}
 
-	const FString CurrentLine = MonologueLines[CurrentLineIndex].ToString();
-	const float TextWidth = EstimateLeftAlignedTextWidth(CurrentLine, TunaSweeperScenarioPresentation::MonologueFontSize);
+	const float TextWidth = EstimateLeftAlignedTextWidth(CurrentMonologueFullText, TunaSweeperScenarioPresentation::MonologueFontSize);
 	MonologueSlot->SetPosition(FVector2D(TextWidth * -0.5f, 0.0f));
 	MonologueSlot->SetSize(FVector2D(TextWidth + 24.0f, 96.0f));
+}
+
+void UTunaSweeperScenarioPresentationWidget::UpdateMonologueTypewriter(float DeltaTime)
+{
+	if (IsCurrentLineFullyVisible())
+	{
+		return;
+	}
+
+	MonologueTypewriterAccumulator +=
+		FMath::Max(0.0f, DeltaTime) *
+		TunaSweeperScenarioPresentation::MonologueTypewriterCharactersPerSecond;
+
+	const int32 TargetVisibleCharacters = FMath::Clamp(
+		FMath::FloorToInt(MonologueTypewriterAccumulator),
+		0,
+		CurrentMonologueFullText.Len());
+
+	if (TargetVisibleCharacters != MonologueVisibleCharacterCount)
+	{
+		MonologueVisibleCharacterCount = TargetVisibleCharacters;
+		UpdateVisibleMonologueText();
+	}
+}
+
+void UTunaSweeperScenarioPresentationWidget::UpdateVisibleMonologueText()
+{
+	if (MonologueText)
+	{
+		MonologueText->SetText(FText::FromString(CurrentMonologueFullText.Left(MonologueVisibleCharacterCount)));
+	}
+
+	if (PromptText)
+	{
+		PromptText->SetVisibility(Phase == ETunaSweeperScenarioPresentationPhase::DisplayLine && IsCurrentLineFullyVisible()
+			? ESlateVisibility::HitTestInvisible
+			: ESlateVisibility::Collapsed);
+	}
 }
 
 void UTunaSweeperScenarioPresentationWidget::ResetSystemTextTypewriter()
@@ -410,7 +476,7 @@ void UTunaSweeperScenarioPresentationWidget::AdvanceLine()
 	{
 		++CurrentLineIndex;
 		PhaseElapsedSeconds = 0.0f;
-		RefreshCurrentLine();
+		BeginCurrentLine();
 		return;
 	}
 
@@ -454,4 +520,20 @@ void UTunaSweeperScenarioPresentationWidget::SetFadeOverlayOpacity(float Opacity
 			? ESlateVisibility::HitTestInvisible
 			: ESlateVisibility::Collapsed);
 	}
+}
+
+float UTunaSweeperScenarioPresentationWidget::GetCurrentLineAutoAdvanceSeconds() const
+{
+	const float TypewriterSeconds =
+		static_cast<float>(CurrentMonologueFullText.Len()) /
+		TunaSweeperScenarioPresentation::MonologueTypewriterCharactersPerSecond;
+
+	return FMath::Max(
+		TunaSweeperScenarioPresentation::MinimumLineSeconds,
+		TypewriterSeconds + TunaSweeperScenarioPresentation::MonologueFullyVisibleHoldSeconds);
+}
+
+bool UTunaSweeperScenarioPresentationWidget::IsCurrentLineFullyVisible() const
+{
+	return MonologueVisibleCharacterCount >= CurrentMonologueFullText.Len();
 }
