@@ -30,7 +30,7 @@ struct TUNASWEEPER_API FTunaSweeperGameplaySettings
 	bool bEnableDebugGameplay = false;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "TunaSweeper|Gameplay", meta = (ClampMin = "0.1", UIMin = "0.1"))
-	float DialogueCharactersPerSecond = 5.0f;
+	float DialogueCharactersPerSecond = 18.0f;
 };
 
 USTRUCT(BlueprintType)
