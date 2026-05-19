@@ -10,11 +10,18 @@ namespace TunaSweeperSave
 {
 	const TCHAR* SaveSlotNamePrefix = TEXT("TunaSweeperSave_Slot");
 	const TCHAR* SaveSettingsSlotName = TEXT("TunaSweeperSaveSettings");
-	constexpr int32 CurrentSaveVersion = 2;
+	constexpr int32 CurrentSaveVersion = 3;
 	constexpr int32 SaveUserIndex = 0;
 	constexpr int32 MinSaveSlotIndex = 1;
 	constexpr int32 MaxSaveSlotIndex = 3;
 	constexpr int32 MaxSaveGameBackupCount = 30;
+}
+
+namespace TunaSweeperScenario
+{
+	const FName OpeningScenarioFlag(TEXT("scenario.opening.awakening"));
+	const FName OpeningScenarioMapName(TEXT("OpeningScenarioMap"));
+	const FName BunkerMapName(TEXT("BunkerMap"));
 }
 
 namespace TunaSweeperInventory
@@ -316,6 +323,53 @@ bool UTunaSweeperGameInstance::DeleteSaveSlotAndStartNewGame(int32 SaveSlotIndex
 
 	ResetRuntimeStateForSaveSlotSelection();
 	return ActivateSaveSlot(SanitizedSlotIndex, true);
+}
+
+bool UTunaSweeperGameInstance::IsScenarioProgressFlagSet(FName ScenarioFlag) const
+{
+	return !ScenarioFlag.IsNone() && CompletedScenarioFlags.Contains(ScenarioFlag);
+}
+
+void UTunaSweeperGameInstance::MarkScenarioProgressFlag(FName ScenarioFlag, bool bSaveImmediately)
+{
+	if (ScenarioFlag.IsNone())
+	{
+		return;
+	}
+
+	EnsureInventoryStateInitialized();
+	CompletedScenarioFlags.Add(ScenarioFlag);
+
+	if (bSaveImmediately)
+	{
+		SaveGameStateInternal();
+	}
+}
+
+FName UTunaSweeperGameInstance::ResolveInitialGameplayLevelName()
+{
+	EnsureInventoryStateInitialized();
+	return IsScenarioProgressFlagSet(TunaSweeperScenario::OpeningScenarioFlag)
+		? TunaSweeperScenario::BunkerMapName
+		: TunaSweeperScenario::OpeningScenarioMapName;
+}
+
+void UTunaSweeperGameInstance::BeginScenarioBunkerEntry(FName ScenarioFlag)
+{
+	PendingScenarioCompletionFlag = ScenarioFlag;
+}
+
+bool UTunaSweeperGameInstance::CompletePendingScenarioBunkerEntryIfNeeded()
+{
+	if (PendingScenarioCompletionFlag.IsNone())
+	{
+		return false;
+	}
+
+	const FName ScenarioFlag = PendingScenarioCompletionFlag;
+	PendingScenarioCompletionFlag = NAME_None;
+	MarkScenarioProgressFlag(ScenarioFlag, true);
+	return true;
 }
 
 void UTunaSweeperGameInstance::SetPlayerHudState(const FTunaSweeperPlayerHudState& InHudState)
@@ -1204,6 +1258,16 @@ bool UTunaSweeperGameInstance::LoadGameState()
 
 	LoadedSlotTotalPlaySeconds = FMath::Max(0.0f, SaveGame->TotalPlaySeconds);
 	ActiveSlotStartTimeSeconds = FPlatformTime::Seconds();
+	CompletedScenarioFlags.Reset();
+	for (const FName& ScenarioFlag : SaveGame->CompletedScenarioFlags)
+	{
+		if (!ScenarioFlag.IsNone())
+		{
+			CompletedScenarioFlags.Add(ScenarioFlag);
+		}
+	}
+	PendingScenarioCompletionFlag = NAME_None;
+
 	ItemInstancesByUid.Reset();
 	for (const FTunaSweeperItemInstance& ItemInstance : SaveGame->ItemInstances)
 	{
@@ -1274,6 +1338,7 @@ bool UTunaSweeperGameInstance::SaveGameStateInternal() const
 	SaveGame->SaveSlotIndex = ActiveSaveSlotIndex;
 	SaveGame->TotalPlaySeconds = GetCurrentActiveSlotTotalPlaySeconds();
 	SaveGame->LastSavedAtTicks = FDateTime::Now().GetTicks();
+	SaveGame->CompletedScenarioFlags = CompletedScenarioFlags.Array();
 	SaveGame->InventorySlots = PlayerInventorySlots;
 	SaveGame->EquipmentSlots = EquipmentSlots;
 	SaveGame->AuxiliaryBagSlots = AuxiliaryBagSlots;
@@ -1314,11 +1379,15 @@ void UTunaSweeperGameInstance::ResetRuntimeStateForSaveSlotSelection()
 	bInventoryStateInitialized = false;
 	LoadedSlotTotalPlaySeconds = 0.0f;
 	ActiveSlotStartTimeSeconds = FPlatformTime::Seconds();
+	CompletedScenarioFlags.Reset();
+	PendingScenarioCompletionFlag = NAME_None;
 }
 
 void UTunaSweeperGameInstance::GenerateDefaultInventoryState()
 {
 	ItemInstancesByUid.Reset();
+	CompletedScenarioFlags.Reset();
+	PendingScenarioCompletionFlag = NAME_None;
 	ResetPlayerSlotArrays();
 	ActiveLootContainerSlots.Reset();
 	ActiveLootContainerOwner.Reset();

@@ -19,6 +19,8 @@
 #include "UI/TunaSweeperGameHudWidget.h"
 #include "UI/TunaSweeperIntroMenuWidget.h"
 #include "UI/TunaSweeperQuestWidget.h"
+#include "UI/TunaSweeperScenarioPresentationWidget.h"
+#include "UI/TunaSweeperScreenFadeWidget.h"
 
 namespace TunaSweeperDropPlacement
 {
@@ -203,9 +205,14 @@ void ATunaSweeperPlayerController::BeginPlay()
 	{
 		EnsureIntroMenuWidget();
 	}
+	else if (IsOpeningScenarioMap())
+	{
+		EnsureScenarioPresentationWidget();
+	}
 	else
 	{
 		EnsureGameHudWidget();
+		ShowBunkerEntryFadeIfNeeded();
 	}
 }
 
@@ -253,6 +260,11 @@ void ATunaSweeperPlayerController::PlayerTick(float DeltaTime)
 
 	ATunaSweeperTopDownCharacter* ControlledCharacter = Cast<ATunaSweeperTopDownCharacter>(GetPawn());
 	if (!ControlledCharacter || ControlledCharacter->IsDead())
+	{
+		return;
+	}
+
+	if (IsOpeningScenarioMap())
 	{
 		return;
 	}
@@ -315,6 +327,53 @@ void ATunaSweeperPlayerController::EnsureIntroMenuWidget()
 	}
 }
 
+void ATunaSweeperPlayerController::EnsureScenarioPresentationWidget()
+{
+	if (ScenarioPresentationWidget || !IsLocalController())
+	{
+		return;
+	}
+
+	ScenarioPresentationWidget = CreateWidget<UTunaSweeperScenarioPresentationWidget>(
+		this,
+		UTunaSweeperScenarioPresentationWidget::StaticClass());
+	if (ScenarioPresentationWidget)
+	{
+		ScenarioPresentationWidget->AddToViewport(60);
+
+		FInputModeUIOnly InputMode;
+		InputMode.SetWidgetToFocus(ScenarioPresentationWidget->TakeWidget());
+		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+		SetInputMode(InputMode);
+		bShowMouseCursor = true;
+		SetIgnoreMoveInput(true);
+		SetIgnoreLookInput(true);
+	}
+}
+
+void ATunaSweeperPlayerController::ShowBunkerEntryFadeIfNeeded()
+{
+	if (!IsBunkerMap() || !IsLocalController())
+	{
+		return;
+	}
+
+	UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+	if (!TunaGameInstance || !TunaGameInstance->CompletePendingScenarioBunkerEntryIfNeeded())
+	{
+		return;
+	}
+
+	ScreenFadeWidget = CreateWidget<UTunaSweeperScreenFadeWidget>(
+		this,
+		UTunaSweeperScreenFadeWidget::StaticClass());
+	if (ScreenFadeWidget)
+	{
+		ScreenFadeWidget->AddToViewport(100);
+		ScreenFadeWidget->StartFadeFromBlack(1.1f);
+	}
+}
+
 void ATunaSweeperPlayerController::CancelPawnGameplayActions() const
 {
 	if (ATunaSweeperTopDownCharacter* ControlledCharacter = Cast<ATunaSweeperTopDownCharacter>(GetPawn()))
@@ -327,6 +386,18 @@ bool ATunaSweeperPlayerController::IsIntroMap() const
 {
 	const UWorld* World = GetWorld();
 	return World && World->GetMapName().EndsWith(TEXT("IntroMap"));
+}
+
+bool ATunaSweeperPlayerController::IsOpeningScenarioMap() const
+{
+	const UWorld* World = GetWorld();
+	return World && World->GetMapName().EndsWith(TEXT("OpeningScenarioMap"));
+}
+
+bool ATunaSweeperPlayerController::IsBunkerMap() const
+{
+	const UWorld* World = GetWorld();
+	return World && World->GetMapName().EndsWith(TEXT("BunkerMap"));
 }
 
 bool ATunaSweeperPlayerController::FindDropLocationNearPlayer(FVector& OutDropLocation) const
@@ -416,7 +487,7 @@ ATunaSweeperPickupItemActor* ATunaSweeperPlayerController::SpawnDroppedPickupIte
 
 bool ATunaSweeperPlayerController::TryHandleHoveredItemInteract()
 {
-	if (IsIntroMap())
+	if (IsIntroMap() || IsOpeningScenarioMap())
 	{
 		return false;
 	}
@@ -465,6 +536,11 @@ bool ATunaSweeperPlayerController::TryHandleHoveredItemInteract()
 
 void ATunaSweeperPlayerController::HandleQuickSlot(int32 SlotNumber)
 {
+	if (IsOpeningScenarioMap())
+	{
+		return;
+	}
+
 	if (IsInventoryUiOpen())
 	{
 		return;
@@ -498,7 +574,7 @@ void ATunaSweeperPlayerController::HandleQuickSlot(int32 SlotNumber)
 
 void ATunaSweeperPlayerController::HandleDrop(const FInputActionValue&)
 {
-	if (IsIntroMap())
+	if (IsIntroMap() || IsOpeningScenarioMap())
 	{
 		return;
 	}

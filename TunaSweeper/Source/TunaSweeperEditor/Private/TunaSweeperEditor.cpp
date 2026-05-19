@@ -106,6 +106,7 @@ namespace TunaSweeperEditorSetup
 	const FString CannedTunaIconImportTaskId = TEXT("2026-05-11_ImportCannedTunaIconV1");
 	const FString BackpackInventoryTaskId = TEXT("2026-05-16_CreateEquipmentInventoryAssetsV3");
 	const FString IntroMenuAndLevelTravelTaskId = TEXT("2026-05-19_CreateTitleIntroMenuPersistentSaveSlotSelectionLevelTravelLadderV1");
+	const FString OpeningScenarioPresentationTaskId = TEXT("2026-05-19_CreateOpeningScenarioPresentationV1");
 	const FString LevelTransitionVideoTaskId = TEXT("2026-05-16_AddBidirectionalLevelTransitionVideoV3");
 	const FString FirstOutingQuestTaskId = TEXT("2026-05-15_CreateFirstOutingQuestNpcV2");
 	const FString SelfDestructInteractionTaskId = TEXT("2026-05-16_CreateSelfDestructInteractionV1");
@@ -144,8 +145,10 @@ namespace TunaSweeperEditorSetup
 	const FString UIAssetPath = TEXT("/Game/UI");
 	const FString UIIconAssetPath = TEXT("/Game/UI/Icons");
 	const FString UITitleTextureAssetPath = TEXT("/Game/UI/Title");
+	const FString UIStoryTextureAssetPath = TEXT("/Game/UI/Story");
 	const FString TitleBackgroundTextureAssetName = TEXT("Title_C1");
 	const FString TitleLogoTextureAssetName = TEXT("tuna_sweeper_logo_transparent");
+	const FString OpeningScenarioBackgroundTextureAssetName = TEXT("T_Story_OpeningAwakening");
 	const FString InteractionMarkerAssetName = TEXT("WBP_InteractionMarker");
 	const FString PickupItemIconWidgetAssetName = TEXT("WBP_PickupItemIcon");
 	const FString GameHudWidgetAssetName = TEXT("WBP_GameHud");
@@ -200,6 +203,7 @@ namespace TunaSweeperEditorSetup
 	const FString LevelTravelLadderMeshAssetName = TEXT("SM_LevelTravel_Ladder");
 	const FString SelfDestructInteractionAssetName = TEXT("BP_Interact_SelfDestruct");
 	const FString IntroMapPackagePath = TEXT("/Game/IntroMap");
+	const FString OpeningScenarioMapPackagePath = TEXT("/Game/OpeningScenarioMap");
 	const FString BunkerMapPackagePath = TEXT("/Game/BunkerMap");
 	const FString RaidMapPackagePath = TEXT("/Game/RaidMap");
 
@@ -2847,6 +2851,21 @@ namespace TunaSweeperEditorSetup
 		return bBackgroundImported && bLogoImported && BackgroundTexture && LogoTexture;
 	}
 
+	bool EnsureOpeningScenarioUiTextures()
+	{
+		UTexture2D* BackgroundTexture = nullptr;
+		const bool bBackgroundImported = ImportUiTexture(
+			FUiTextureImportArgs{
+				GetWorkspaceFilePath(TEXT("Docs/Story/tuna_dialogue/images/01_awakening.png")),
+				UIStoryTextureAssetPath,
+				OpeningScenarioBackgroundTextureAssetName,
+				true
+			},
+			&BackgroundTexture);
+
+		return bBackgroundImported && BackgroundTexture;
+	}
+
 	bool EnsureItemIconTextures()
 	{
 		TArray<FString> FilesToImport;
@@ -5345,6 +5364,39 @@ namespace TunaSweeperEditorSetup
 		return LoadedWorld;
 	}
 
+	bool EnsureOpeningScenarioMap()
+	{
+		const FString MapFilename = FPackageName::LongPackageNameToFilename(
+			OpeningScenarioMapPackagePath,
+			FPackageName::GetMapPackageExtension());
+		if (FPaths::FileExists(MapFilename))
+		{
+			return true;
+		}
+
+		UWorld* OpeningScenarioWorld = UEditorLoadingAndSavingUtils::NewBlankMap(false);
+		if (!OpeningScenarioWorld)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to create opening scenario map."));
+			return false;
+		}
+
+		const bool bSaved = UEditorLoadingAndSavingUtils::SaveMap(OpeningScenarioWorld, OpeningScenarioMapPackagePath);
+		if (!bSaved)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to save %s."), *OpeningScenarioMapPackagePath);
+			return false;
+		}
+
+		LoadEditorMapForSetup(IntroMapPackagePath);
+		return true;
+	}
+
+	bool EnsureOpeningScenarioPresentationSetup()
+	{
+		return EnsureOpeningScenarioUiTextures() && EnsureOpeningScenarioMap();
+	}
+
 	bool PlaceLevelTravelActor(
 		UWorld* World,
 		UBlueprint* ActorBlueprint,
@@ -6036,6 +6088,35 @@ namespace TunaSweeperEditorSetup
 			1.0f);
 	}
 
+	void ScheduleOpeningScenarioPresentationSetup()
+	{
+		if (FTunaSweeperEditorRunOnce::HasCompleted(OpeningScenarioPresentationTaskId))
+		{
+			return;
+		}
+
+		FTSTicker::GetCoreTicker().AddTicker(
+			FTickerDelegate::CreateLambda(
+				[](float)
+				{
+					UWorld* EditorWorld = GEditor ? GEditor->GetEditorWorldContext().World() : nullptr;
+					if (!EditorWorld)
+					{
+						return true;
+					}
+
+					FTunaSweeperEditorRunOnce::Run(
+						OpeningScenarioPresentationTaskId,
+						[]()
+						{
+							return EnsureOpeningScenarioPresentationSetup();
+						});
+
+					return !FTunaSweeperEditorRunOnce::HasCompleted(OpeningScenarioPresentationTaskId);
+				}),
+			1.0f);
+	}
+
 	void ScheduleBunkerToRaidTransitionVideoSetup()
 	{
 		if (FTunaSweeperEditorRunOnce::HasCompleted(LevelTransitionVideoTaskId))
@@ -6273,6 +6354,7 @@ public:
 		TunaSweeperEditorSetup::SchedulePickupItemAndSpawnerAssetsAndMapPlacement();
 		TunaSweeperEditorSetup::ScheduleLootContainerAndSpawnerAssetsAndMapPlacement();
 		TunaSweeperEditorSetup::ScheduleIntroMenuAndLevelTravelSetup();
+		TunaSweeperEditorSetup::ScheduleOpeningScenarioPresentationSetup();
 		TunaSweeperEditorSetup::ScheduleBunkerToRaidTransitionVideoSetup();
 		TunaSweeperEditorSetup::ScheduleFirstOutingQuestSetup();
 		TunaSweeperEditorSetup::ScheduleSelfDestructInteractionSetup();

@@ -139,6 +139,21 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Save")
 	bool DeleteSaveSlotAndStartNewGame(int32 SaveSlotIndex);
 
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Scenario")
+	bool IsScenarioProgressFlagSet(FName ScenarioFlag) const;
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Scenario")
+	void MarkScenarioProgressFlag(FName ScenarioFlag, bool bSaveImmediately = true);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Scenario")
+	FName ResolveInitialGameplayLevelName();
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Scenario")
+	void BeginScenarioBunkerEntry(FName ScenarioFlag);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Scenario")
+	bool CompletePendingScenarioBunkerEntryIfNeeded();
+
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
 	void SetPlayerHudState(const FTunaSweeperPlayerHudState& InHudState);
 
@@ -341,6 +356,12 @@ private:
 
 	UPROPERTY(Transient)
 	bool bInventoryStateInitialized = false;
+
+	UPROPERTY(Transient)
+	TSet<FName> CompletedScenarioFlags;
+
+	UPROPERTY(Transient)
+	FName PendingScenarioCompletionFlag;
 
 	UPROPERTY(Transient)
 	int32 ActiveSaveSlotIndex = 1;

@@ -262,16 +262,18 @@ void UTunaSweeperIntroMenuWidget::NativeTick(const FGeometry& MyGeometry, float 
 void UTunaSweeperIntroMenuWidget::HandleStartClicked()
 {
 	UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GetGameInstance());
+	FName TargetLevelName = StartTargetLevelName;
 	if (TunaGameInstance)
 	{
 		const int32 ActiveSaveSlotIndex = TunaGameInstance->GetActiveSaveSlotIndex();
 		const FTunaSweeperSaveSlotSummary Summary = TunaGameInstance->GetSaveSlotSummary(ActiveSaveSlotIndex);
 		TunaGameInstance->ActivateSaveSlot(ActiveSaveSlotIndex, !Summary.bHasData);
+		TargetLevelName = TunaGameInstance->ResolveInitialGameplayLevelName();
 	}
 
-	if (!StartTargetLevelName.IsNone())
+	if (!TargetLevelName.IsNone())
 	{
-		UGameplayStatics::OpenLevel(this, StartTargetLevelName);
+		UGameplayStatics::OpenLevel(this, TargetLevelName);
 	}
 }
 
@@ -298,6 +300,7 @@ void UTunaSweeperIntroMenuWidget::HandleQuitClicked()
 void UTunaSweeperIntroMenuWidget::HandleAlwaysNewStartClicked()
 {
 	UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GetGameInstance());
+	FName TargetLevelName = StartTargetLevelName;
 	if (TunaGameInstance)
 	{
 		const int32 TargetSaveSlotIndex = TunaGameInstance->GetActiveSaveSlotIndex();
@@ -305,11 +308,12 @@ void UTunaSweeperIntroMenuWidget::HandleAlwaysNewStartClicked()
 		{
 			return;
 		}
+		TargetLevelName = TunaGameInstance->ResolveInitialGameplayLevelName();
 	}
 
-	if (!StartTargetLevelName.IsNone())
+	if (!TargetLevelName.IsNone())
 	{
-		UGameplayStatics::OpenLevel(this, StartTargetLevelName);
+		UGameplayStatics::OpenLevel(this, TargetLevelName);
 	}
 }
 

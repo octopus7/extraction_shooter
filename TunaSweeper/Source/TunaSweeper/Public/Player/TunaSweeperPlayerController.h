@@ -8,6 +8,8 @@
 class UTunaSweeperGameHudWidget;
 class UTunaSweeperIntroMenuWidget;
 class UTunaSweeperQuestWidget;
+class UTunaSweeperScenarioPresentationWidget;
+class UTunaSweeperScreenFadeWidget;
 class UInputAction;
 class ATunaSweeperPickupItemActor;
 struct FInputActionValue;
@@ -57,6 +59,12 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Intro")
 	TObjectPtr<UTunaSweeperIntroMenuWidget> IntroMenuWidget;
 
+	UPROPERTY(BlueprintReadOnly, Category = "Scenario")
+	TObjectPtr<UTunaSweeperScenarioPresentationWidget> ScenarioPresentationWidget;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Scenario")
+	TObjectPtr<UTunaSweeperScreenFadeWidget> ScreenFadeWidget;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Quest")
 	TSoftClassPtr<UTunaSweeperQuestWidget> QuestWidgetClass;
 
@@ -75,8 +83,12 @@ protected:
 private:
 	void EnsureGameHudWidget();
 	void EnsureIntroMenuWidget();
+	void EnsureScenarioPresentationWidget();
+	void ShowBunkerEntryFadeIfNeeded();
 	void CancelPawnGameplayActions() const;
 	bool IsIntroMap() const;
+	bool IsOpeningScenarioMap() const;
+	bool IsBunkerMap() const;
 	bool GetMouseAimPointOnPlane(float PlaneZ, FVector& OutAimPoint) const;
 	bool FindDropLocationNearPlayer(FVector& OutDropLocation) const;
 	ATunaSweeperPickupItemActor* SpawnDroppedPickupItem(int32 ItemId, int32 Quantity);
