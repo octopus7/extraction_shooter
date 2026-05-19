@@ -12,6 +12,12 @@
 
 DEFINE_LOG_CATEGORY_STATIC(LogTunaSweeperPlayerVision, Log, All);
 
+namespace TunaSweeperVision
+{
+	constexpr float FramedDefaultSightDistance = 900.0f;
+	constexpr float LegacyDefaultSightDistance = 1800.0f;
+}
+
 UTunaSweeperPlayerVisionComponent::UTunaSweeperPlayerVisionComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
@@ -21,6 +27,10 @@ UTunaSweeperPlayerVisionComponent::UTunaSweeperPlayerVisionComponent()
 void UTunaSweeperPlayerVisionComponent::BeginPlay()
 {
 	Super::BeginPlay();
+	if (FMath::IsNearlyEqual(VisionSettings.SightDistance, TunaSweeperVision::LegacyDefaultSightDistance))
+	{
+		VisionSettings.SightDistance = TunaSweeperVision::FramedDefaultSightDistance;
+	}
 	TimeSinceLastMaskUpdate = VisionSettings.UpdateIntervalSeconds;
 }
 
@@ -61,14 +71,30 @@ void UTunaSweeperPlayerVisionComponent::TickComponent(
 	{
 		if (IsVisionDebugEnabled())
 		{
-			ShowVisionDebugStatus(TEXT("[Vision] Debug enabled, but no local PlayerController was resolved."), FColor::Red);
+			const APawn* OwnerPawn = Cast<APawn>(GetOwner());
+			const AController* OwnerController = OwnerPawn ? OwnerPawn->GetController() : nullptr;
+			const UWorld* World = GetWorld();
+			const APlayerController* FirstPlayerController = World ? World->GetFirstPlayerController() : nullptr;
+			const APawn* FirstPlayerPawn = FirstPlayerController ? FirstPlayerController->GetPawn() : nullptr;
+			ShowVisionDebugStatus(FString::Printf(
+				TEXT("[Vision v2] no player controller | owner=%s ownerClass=%s controller=%s controllerClass=%s isPC=%s firstPC=%s firstPawn=%s"),
+				GetOwner() ? *GetOwner()->GetName() : TEXT("None"),
+				GetOwner() ? *GetOwner()->GetClass()->GetName() : TEXT("None"),
+				OwnerController ? *OwnerController->GetName() : TEXT("None"),
+				OwnerController ? *OwnerController->GetClass()->GetName() : TEXT("None"),
+				OwnerController && OwnerController->IsPlayerController() ? TEXT("true") : TEXT("false"),
+				FirstPlayerController ? *FirstPlayerController->GetName() : TEXT("None"),
+				FirstPlayerPawn ? *FirstPlayerPawn->GetName() : TEXT("None")),
+				FColor::Red);
 		}
 		return;
 	}
 
 	EnsureOverlayWidget(PlayerController);
 
-	const float UpdateInterval = FMath::Max(0.0f, VisionSettings.UpdateIntervalSeconds);
+	const float UpdateInterval = IsVisionDebugEnabled()
+		? 0.0f
+		: FMath::Max(0.0f, VisionSettings.UpdateIntervalSeconds);
 	TimeSinceLastMaskUpdate += FMath::Max(0.0f, DeltaTime);
 	if (UpdateInterval > 0.0f && TimeSinceLastMaskUpdate < UpdateInterval)
 	{
@@ -99,6 +125,8 @@ void UTunaSweeperPlayerVisionComponent::ForceRefreshVisionMask()
 		return;
 	}
 
+	ConfigureOverlayWidgetForViewport(FIntPoint(ViewportX, ViewportY));
+
 	if (!EnsureMaskTexture(FIntPoint(ViewportX, ViewportY)))
 	{
 		if (IsVisionDebugEnabled())
@@ -118,28 +146,41 @@ void UTunaSweeperPlayerVisionComponent::ForceRefreshVisionMask()
 		}
 	}
 
-	TArray<FVector2D> VisiblePolygonPoints;
-	if (!BuildVisiblePolygonPoints(PlayerController, VisiblePolygonPoints))
+	TArray<float> RayDistances;
+	FVector TraceOrigin = FVector::ZeroVector;
+	float FacingYawDegrees = 0.0f;
+	float RayAngleStepDegrees = 1.0f;
+	if (!BuildVisibleRayDistances(RayDistances, TraceOrigin, FacingYawDegrees, RayAngleStepDegrees))
 	{
 		if (IsVisionDebugEnabled())
 		{
-			ShowVisionDebugStatus(TEXT("[Vision] Debug enabled, but visible polygon projection failed."), FColor::Orange);
+			ShowVisionDebugStatus(TEXT("[Vision v3] Debug enabled, but ray distance generation failed."), FColor::Orange);
 		}
 		return;
 	}
 
+	const int32 VisiblePixelCount = RasterizeVisionMaskFromView(
+		PlayerController,
+		RayDistances,
+		TraceOrigin,
+		FacingYawDegrees,
+		RayAngleStepDegrees);
 	if (IsVisionDebugEnabled())
 	{
 		ShowVisionDebugStatus(FString::Printf(
-			TEXT("[Vision] Debug active | viewport %dx%d | mask %dx%d | points %d"),
+			TEXT("[Vision v4] Debug active | viewport %dx%d | mask %dx%d | sight %.0fcm | rays %d | step %.2f | visible px %d | overlay %s z %d"),
 			ViewportSize.X,
 			ViewportSize.Y,
 			MaskSize.X,
 			MaskSize.Y,
-			VisiblePolygonPoints.Num()));
+			VisionSettings.SightDistance,
+			RayDistances.Num(),
+			RayAngleStepDegrees,
+			VisiblePixelCount,
+			VisionMaskWidget ? TEXT("yes") : TEXT("no"),
+			FMath::Max(OverlayZOrder, 1)));
 	}
 
-	RasterizeVisiblePolygon(VisiblePolygonPoints);
 	ApplyBlurToMask();
 	RebuildTexturePixels();
 	UploadMaskTexture();
@@ -148,17 +189,42 @@ void UTunaSweeperPlayerVisionComponent::ForceRefreshVisionMask()
 APlayerController* UTunaSweeperPlayerVisionComponent::ResolveLocalPlayerController() const
 {
 	const APawn* OwnerPawn = Cast<APawn>(GetOwner());
-	if (!OwnerPawn || !OwnerPawn->IsLocallyControlled())
+	if (!OwnerPawn)
 	{
 		return nullptr;
 	}
 
-	return Cast<APlayerController>(OwnerPawn->GetController());
+	AController* OwnerController = OwnerPawn->GetController();
+	if (APlayerController* OwnerPlayerController = Cast<APlayerController>(OwnerController))
+	{
+		return OwnerPlayerController;
+	}
+
+	const UWorld* World = GetWorld();
+	if (World)
+	{
+		for (FConstPlayerControllerIterator ControllerIt = World->GetPlayerControllerIterator(); ControllerIt; ++ControllerIt)
+		{
+			APlayerController* CandidatePlayerController = ControllerIt->Get();
+			if (CandidatePlayerController &&
+				(CandidatePlayerController == OwnerController || CandidatePlayerController->GetPawn() == OwnerPawn))
+			{
+				return CandidatePlayerController;
+			}
+		}
+	}
+
+	if (OwnerController && OwnerController->IsPlayerController())
+	{
+		return static_cast<APlayerController*>(OwnerController);
+	}
+
+	return nullptr;
 }
 
 bool UTunaSweeperPlayerVisionComponent::ShouldUpdateVision() const
 {
-	return IsActive() && ResolveLocalPlayerController() && (bRenderVisionOverlay || IsVisionDebugEnabled());
+	return IsActive() && (bRenderVisionOverlay || IsVisionDebugEnabled());
 }
 
 bool UTunaSweeperPlayerVisionComponent::IsVisionDebugEnabled() const
@@ -184,7 +250,7 @@ void UTunaSweeperPlayerVisionComponent::EnsureOverlayWidget(APlayerController* P
 		return;
 	}
 
-	if (VisionMaskWidget || !PlayerController || !PlayerController->IsLocalController())
+	if (VisionMaskWidget || !PlayerController)
 	{
 		return;
 	}
@@ -196,8 +262,24 @@ void UTunaSweeperPlayerVisionComponent::EnsureOverlayWidget(APlayerController* P
 	{
 		VisionMaskWidget->SetMaskTexture(MaskTexture);
 		VisionMaskWidget->SetMaskVisible(true);
-		VisionMaskWidget->AddToViewport(OverlayZOrder);
+		VisionMaskWidget->AddToViewport(FMath::Max(OverlayZOrder, 1));
+		ConfigureOverlayWidgetForViewport(ViewportSize);
 	}
+}
+
+void UTunaSweeperPlayerVisionComponent::ConfigureOverlayWidgetForViewport(const FIntPoint& InViewportSize)
+{
+	if (!VisionMaskWidget || InViewportSize.X <= 0 || InViewportSize.Y <= 0)
+	{
+		return;
+	}
+
+	VisionMaskWidget->SetAnchorsInViewport(FAnchors(0.0f, 0.0f, 1.0f, 1.0f));
+	VisionMaskWidget->SetAlignmentInViewport(FVector2D::ZeroVector);
+	VisionMaskWidget->SetPositionInViewport(FVector2D::ZeroVector, false);
+	VisionMaskWidget->SetDesiredSizeInViewport(FVector2D(
+		static_cast<float>(InViewportSize.X),
+		static_cast<float>(InViewportSize.Y)));
 }
 
 bool UTunaSweeperPlayerVisionComponent::EnsureMaskTexture(const FIntPoint& InViewportSize)
@@ -244,21 +326,26 @@ bool UTunaSweeperPlayerVisionComponent::EnsureMaskTexture(const FIntPoint& InVie
 	return true;
 }
 
-bool UTunaSweeperPlayerVisionComponent::BuildVisiblePolygonPoints(
-	APlayerController* PlayerController,
-	TArray<FVector2D>& OutMaskPoints)
+bool UTunaSweeperPlayerVisionComponent::BuildVisibleRayDistances(
+	TArray<float>& OutRayDistances,
+	FVector& OutTraceOrigin,
+	float& OutFacingYawDegrees,
+	float& OutRayAngleStepDegrees)
 {
 	const AActor* OwnerActor = GetOwner();
 	const UWorld* World = GetWorld();
-	if (!PlayerController || !OwnerActor || !World || MaskSize.X <= 0 || MaskSize.Y <= 0 ||
-		ViewportSize.X <= 0 || ViewportSize.Y <= 0)
+	if (!OwnerActor || !World)
 	{
 		return false;
 	}
 
-	const int32 RayCount = FMath::Clamp(VisionSettings.RayCount, 16, 720);
-	const float AngleStepDegrees = 360.0f / static_cast<float>(RayCount);
-	const float HalfFieldOfViewDegrees = FMath::Clamp(VisionSettings.FieldOfViewDegrees, 1.0f, 360.0f) * 0.5f;
+	const float FieldOfViewDegrees = FMath::Clamp(VisionSettings.FieldOfViewDegrees, 1.0f, 360.0f);
+	const float HalfFieldOfViewDegrees = FieldOfViewDegrees * 0.5f;
+	const float RequestedAngleStepDegrees = FMath::Clamp(VisionSettings.RayAngleStepDegrees, 0.1f, 45.0f);
+	const int32 RaySegmentCount = FMath::Max(1, FMath::CeilToInt(FieldOfViewDegrees / RequestedAngleStepDegrees));
+	const int32 RayCount = RaySegmentCount + 1;
+	const float ActualAngleStepDegrees = FieldOfViewDegrees / static_cast<float>(RaySegmentCount);
+	const float TraceDistance = FMath::Max(VisionSettings.AlwaysVisibleRadius, VisionSettings.SightDistance);
 	const FVector TraceOrigin = OwnerActor->GetActorLocation() + FVector(0.0f, 0.0f, FMath::Max(0.0f, VisionSettings.TraceHeight));
 	FVector FacingDirection = OwnerActor->GetActorForwardVector();
 	FacingDirection.Z = 0.0f;
@@ -268,39 +355,28 @@ bool UTunaSweeperPlayerVisionComponent::BuildVisiblePolygonPoints(
 	}
 
 	const float FacingYaw = FacingDirection.Rotation().Yaw;
-	const float MaskScaleX = static_cast<float>(MaskSize.X) / static_cast<float>(ViewportSize.X);
-	const float MaskScaleY = static_cast<float>(MaskSize.Y) / static_cast<float>(ViewportSize.Y);
 	const bool bDebugEnabled = IsVisionDebugEnabled();
 
-	OutMaskPoints.Reset(RayCount);
+	OutTraceOrigin = TraceOrigin;
+	OutFacingYawDegrees = FacingYaw;
+	OutRayAngleStepDegrees = ActualAngleStepDegrees;
+	OutRayDistances.Reset(RayCount);
 	for (int32 RayIndex = 0; RayIndex < RayCount; ++RayIndex)
 	{
-		const float AngleDegrees = static_cast<float>(RayIndex) * AngleStepDegrees;
-		FVector Direction = FVector::ForwardVector.RotateAngleAxis(AngleDegrees, FVector::UpVector);
+		const float RelativeAngleDegrees =
+			-HalfFieldOfViewDegrees + static_cast<float>(RayIndex) * ActualAngleStepDegrees;
+		FVector Direction = FacingDirection.RotateAngleAxis(RelativeAngleDegrees, FVector::UpVector);
 		Direction.Z = 0.0f;
 		Direction.Normalize();
 
-		const float DirectionYaw = Direction.Rotation().Yaw;
-		const bool bInsideFieldOfView =
-			FMath::Abs(FMath::FindDeltaAngleDegrees(FacingYaw, DirectionYaw)) <= HalfFieldOfViewDegrees;
-
 		FHitResult Hit;
-		const float VisibleDistance = TraceVisibleDistance(TraceOrigin, Direction, bInsideFieldOfView, Hit);
+		const float VisibleDistance = TraceVisibleDistance(TraceOrigin, Direction, true, Hit);
 		if (bDebugEnabled)
 		{
-			DrawVisionDebug(TraceOrigin, Direction, VisibleDistance, bInsideFieldOfView, RayIndex, Hit);
+			DrawVisionDebug(TraceOrigin, Direction, TraceDistance, Hit);
 		}
 
-		FVector2D ScreenPoint;
-		if (!PlayerController->ProjectWorldLocationToScreen(
-			TraceOrigin + Direction * VisibleDistance,
-			ScreenPoint,
-			true))
-		{
-			continue;
-		}
-
-		OutMaskPoints.Add(FVector2D(ScreenPoint.X * MaskScaleX, ScreenPoint.Y * MaskScaleY));
+		OutRayDistances.Add(VisibleDistance);
 	}
 
 	if (bDebugEnabled)
@@ -308,7 +384,7 @@ bool UTunaSweeperPlayerVisionComponent::BuildVisiblePolygonPoints(
 		DrawVisionDebugBounds(TraceOrigin, FacingDirection);
 	}
 
-	return OutMaskPoints.Num() >= 3;
+	return OutRayDistances.Num() == RayCount;
 }
 
 float UTunaSweeperPlayerVisionComponent::TraceVisibleDistance(
@@ -347,58 +423,93 @@ float UTunaSweeperPlayerVisionComponent::TraceVisibleDistance(
 	return FMath::Max(AlwaysVisibleRadius, BlockedDistance);
 }
 
-void UTunaSweeperPlayerVisionComponent::RasterizeVisiblePolygon(const TArray<FVector2D>& PolygonPoints)
+int32 UTunaSweeperPlayerVisionComponent::RasterizeVisionMaskFromView(
+	APlayerController* PlayerController,
+	const TArray<float>& RayDistances,
+	const FVector& TraceOrigin,
+	float FacingYawDegrees,
+	float RayAngleStepDegrees)
 {
 	const int32 Width = MaskSize.X;
 	const int32 Height = MaskSize.Y;
 	const uint8 HiddenAlpha = static_cast<uint8>(FMath::Clamp(VisionSettings.HiddenMaskAlpha, 0, 255));
 	VisibilityMask.Init(HiddenAlpha, Width * Height);
 
-	if (PolygonPoints.Num() < 3 || Width <= 0 || Height <= 0)
+	if (!PlayerController || RayDistances.IsEmpty() || Width <= 0 || Height <= 0 ||
+		ViewportSize.X <= 0 || ViewportSize.Y <= 0)
 	{
-		return;
+		return 0;
 	}
 
-	// The radial fan is converted to one screen-space polygon and filled once to avoid per-sector draw calls.
+	const int32 RayCount = RayDistances.Num();
+	const float HalfFieldOfViewDegrees = FMath::Clamp(VisionSettings.FieldOfViewDegrees, 1.0f, 360.0f) * 0.5f;
+	const float SafeRayAngleStepDegrees = FMath::Max(0.1f, RayAngleStepDegrees);
+	const float ViewScaleX = static_cast<float>(ViewportSize.X) / static_cast<float>(Width);
+	const float ViewScaleY = static_cast<float>(ViewportSize.Y) / static_cast<float>(Height);
+	const float EdgePadding = FMath::Max(
+		8.0f,
+		FMath::Max(VisionSettings.SightDistance, VisionSettings.AlwaysVisibleRadius) /
+			static_cast<float>(FMath::Max(Width, Height)));
+	int32 VisiblePixelCount = 0;
+
 	for (int32 Y = 0; Y < Height; ++Y)
 	{
-		const float ScanY = static_cast<float>(Y) + 0.5f;
-		ScanlineIntersections.Reset();
+		uint8* Row = VisibilityMask.GetData() + Y * Width;
+		const float ScreenY = (static_cast<float>(Y) + 0.5f) * ViewScaleY;
 
-		for (int32 PointIndex = 0; PointIndex < PolygonPoints.Num(); ++PointIndex)
+		for (int32 X = 0; X < Width; ++X)
 		{
-			const FVector2D& A = PolygonPoints[PointIndex];
-			const FVector2D& B = PolygonPoints[(PointIndex + 1) % PolygonPoints.Num()];
-			if ((A.Y <= ScanY && B.Y > ScanY) || (B.Y <= ScanY && A.Y > ScanY))
-			{
-				const float Denominator = B.Y - A.Y;
-				if (!FMath::IsNearlyZero(Denominator))
-				{
-					const float Alpha = (ScanY - A.Y) / Denominator;
-					ScanlineIntersections.Add(A.X + Alpha * (B.X - A.X));
-				}
-			}
-		}
-
-		ScanlineIntersections.Sort();
-		for (int32 IntersectionIndex = 0; IntersectionIndex + 1 < ScanlineIntersections.Num(); IntersectionIndex += 2)
-		{
-			const float Left = ScanlineIntersections[IntersectionIndex];
-			const float Right = ScanlineIntersections[IntersectionIndex + 1];
-			const int32 StartX = FMath::Clamp(FMath::CeilToInt(FMath::Min(Left, Right)), 0, Width - 1);
-			const int32 EndX = FMath::Clamp(FMath::FloorToInt(FMath::Max(Left, Right)), 0, Width - 1);
-			if (EndX < StartX)
+			const float ScreenX = (static_cast<float>(X) + 0.5f) * ViewScaleX;
+			FVector WorldOrigin;
+			FVector WorldDirection;
+			if (!PlayerController->DeprojectScreenPositionToWorld(ScreenX, ScreenY, WorldOrigin, WorldDirection) ||
+				FMath::IsNearlyZero(WorldDirection.Z))
 			{
 				continue;
 			}
 
-			uint8* Row = VisibilityMask.GetData() + Y * Width;
-			for (int32 X = StartX; X <= EndX; ++X)
+			const float PlaneIntersection =
+				(TraceOrigin.Z - WorldOrigin.Z) / WorldDirection.Z;
+			if (PlaneIntersection < 0.0f)
+			{
+				continue;
+			}
+
+			const FVector WorldPoint = WorldOrigin + WorldDirection * PlaneIntersection;
+			FVector Delta = WorldPoint - TraceOrigin;
+			Delta.Z = 0.0f;
+			const float Distance = Delta.Size();
+			if (Distance <= KINDA_SMALL_NUMBER)
 			{
 				Row[X] = 0;
+				++VisiblePixelCount;
+				continue;
+			}
+
+			const float AngleDegrees = FRotator::NormalizeAxis(Delta.Rotation().Yaw);
+			const float RelativeAngleDegrees = FMath::FindDeltaAngleDegrees(FacingYawDegrees, AngleDegrees);
+			if (Distance > VisionSettings.AlwaysVisibleRadius + EdgePadding &&
+				FMath::Abs(RelativeAngleDegrees) > HalfFieldOfViewDegrees)
+			{
+				continue;
+			}
+
+			const float RayPosition = (RelativeAngleDegrees + HalfFieldOfViewDegrees) / SafeRayAngleStepDegrees;
+			const int32 RayIndexA = FMath::Clamp(FMath::FloorToInt(RayPosition), 0, RayCount - 1);
+			const int32 RayIndexB = FMath::Clamp(RayIndexA + 1, 0, RayCount - 1);
+			const float RayAlpha = FMath::Frac(RayPosition);
+			const float VisibleDistance = FMath::Lerp(RayDistances[RayIndexA], RayDistances[RayIndexB], RayAlpha);
+
+			if (Distance <= VisionSettings.AlwaysVisibleRadius + EdgePadding ||
+				Distance <= VisibleDistance + EdgePadding)
+			{
+				Row[X] = 0;
+				++VisiblePixelCount;
 			}
 		}
 	}
+
+	return VisiblePixelCount;
 }
 
 void UTunaSweeperPlayerVisionComponent::ApplyBlurToMask()
@@ -493,31 +604,48 @@ void UTunaSweeperPlayerVisionComponent::UploadMaskTexture()
 void UTunaSweeperPlayerVisionComponent::DrawVisionDebug(
 	const FVector& TraceOrigin,
 	const FVector& Direction,
-	float VisibleDistance,
-	bool bInsideFieldOfView,
-	int32 RayIndex,
+	float TraceDistance,
 	const FHitResult& Hit) const
 {
 	UWorld* World = GetWorld();
-	if (!World || DebugRayStride <= 0 || RayIndex % DebugRayStride != 0)
+	if (!World)
 	{
 		return;
 	}
 
-	const FColor RayColor = bInsideFieldOfView ? FColor::Green : FColor::Cyan;
+	const float MaxDebugDistance = FMath::Max(0.0f, TraceDistance);
+	const bool bHitInRange = Hit.bBlockingHit && Hit.Distance > 0.0f && Hit.Distance < MaxDebugDistance;
+	const float GreenDistance = bHitInRange ? FMath::Clamp(Hit.Distance, 0.0f, MaxDebugDistance) : MaxDebugDistance;
+	const FVector DebugLift(0.0f, 0.0f, 22.0f);
+	const FVector DebugStart = TraceOrigin + DebugLift;
+	const float OneFrameLifeTime = 0.0f;
+
 	DrawDebugLine(
 		World,
-		TraceOrigin,
-		TraceOrigin + Direction * VisibleDistance,
-		RayColor,
+		DebugStart,
+		DebugStart + Direction * GreenDistance,
+		FColor::Green,
 		false,
-		DebugDrawLifeTime,
+		OneFrameLifeTime,
 		1,
-		bInsideFieldOfView ? 1.5f : 0.75f);
+		3.0f);
+
+	if (bHitInRange && GreenDistance < MaxDebugDistance)
+	{
+		DrawDebugLine(
+			World,
+			DebugStart + Direction * GreenDistance,
+			DebugStart + Direction * MaxDebugDistance,
+			FColor::Red,
+			false,
+			OneFrameLifeTime,
+			1,
+			2.0f);
+	}
 
 	if (Hit.bBlockingHit)
 	{
-		DrawDebugPoint(World, Hit.ImpactPoint, 7.0f, FColor::Red, false, DebugDrawLifeTime, 1);
+		DrawDebugPoint(World, Hit.ImpactPoint + DebugLift, 9.0f, FColor::Red, false, OneFrameLifeTime, 1);
 	}
 }
 
@@ -534,9 +662,10 @@ void UTunaSweeperPlayerVisionComponent::DrawVisionDebugRangeWires() const
 		OwnerActor->GetActorLocation() + FVector(0.0f, 0.0f, FMath::Max(0.0f, VisionSettings.TraceHeight));
 	const float MinRadius = FMath::Max(0.0f, VisionSettings.AlwaysVisibleRadius);
 	const float MaxRadius = FMath::Max(MinRadius, VisionSettings.SightDistance);
+	const float OneFrameLifeTime = 0.0f;
 	constexpr int32 SegmentCount = 60;
 
-	auto DrawRangeWire = [this, World, Center](float Radius, FColor Color, float Thickness)
+	auto DrawRangeWire = [World, Center, OneFrameLifeTime](float Radius, FColor Color, float Thickness)
 	{
 		if (Radius <= 0.0f)
 		{
@@ -551,7 +680,7 @@ void UTunaSweeperPlayerVisionComponent::DrawVisionDebugRangeWires() const
 				FMath::Cos(AngleRadians) * Radius,
 				FMath::Sin(AngleRadians) * Radius,
 				0.0f);
-			DrawDebugLine(World, PreviousPoint, CurrentPoint, Color, false, DebugDrawLifeTime, 1, Thickness);
+			DrawDebugLine(World, PreviousPoint, CurrentPoint, Color, false, OneFrameLifeTime, 1, Thickness);
 			PreviousPoint = CurrentPoint;
 		}
 	};
@@ -573,10 +702,11 @@ void UTunaSweeperPlayerVisionComponent::DrawVisionDebugBounds(
 	const float AlwaysVisibleRadius = FMath::Max(0.0f, VisionSettings.AlwaysVisibleRadius);
 	const float SightDistance = FMath::Max(AlwaysVisibleRadius, VisionSettings.SightDistance);
 	const float HalfFieldOfViewDegrees = FMath::Clamp(VisionSettings.FieldOfViewDegrees, 1.0f, 360.0f) * 0.5f;
+	const float OneFrameLifeTime = 0.0f;
 	const FVector LeftBoundary = FacingDirection.RotateAngleAxis(-HalfFieldOfViewDegrees, FVector::UpVector).GetSafeNormal();
 	const FVector RightBoundary = FacingDirection.RotateAngleAxis(HalfFieldOfViewDegrees, FVector::UpVector).GetSafeNormal();
 
-	DrawDebugSphere(World, TraceOrigin, 18.0f, 12, FColor::Yellow, false, DebugDrawLifeTime, 1, 1.5f);
+	DrawDebugSphere(World, TraceOrigin, 18.0f, 12, FColor::Yellow, false, OneFrameLifeTime, 1, 1.5f);
 	DrawDebugCircle(
 		World,
 		TraceOrigin,
@@ -584,14 +714,14 @@ void UTunaSweeperPlayerVisionComponent::DrawVisionDebugBounds(
 		64,
 		FColor::Cyan,
 		false,
-		DebugDrawLifeTime,
+		OneFrameLifeTime,
 		1,
 		1.5f,
 		FVector::ForwardVector,
 		FVector::RightVector,
 		false);
-	DrawDebugLine(World, TraceOrigin, TraceOrigin + LeftBoundary * SightDistance, FColor::Green, false, DebugDrawLifeTime, 1, 2.0f);
-	DrawDebugLine(World, TraceOrigin, TraceOrigin + RightBoundary * SightDistance, FColor::Green, false, DebugDrawLifeTime, 1, 2.0f);
+	DrawDebugLine(World, TraceOrigin, TraceOrigin + LeftBoundary * SightDistance, FColor::Green, false, OneFrameLifeTime, 1, 2.0f);
+	DrawDebugLine(World, TraceOrigin, TraceOrigin + RightBoundary * SightDistance, FColor::Green, false, OneFrameLifeTime, 1, 2.0f);
 }
 
 void UTunaSweeperPlayerVisionComponent::ShowVisionDebugStatus(const FString& StatusText, FColor TextColor) const

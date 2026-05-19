@@ -6,6 +6,7 @@
 #include "TunaSweeperVisionMaskWidget.generated.h"
 
 class UTexture2D;
+class UImage;
 
 UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API UTunaSweeperVisionMaskWidget : public UUserWidget
@@ -21,18 +22,13 @@ public:
 
 protected:
 	virtual void NativeConstruct() override;
-	virtual int32 NativePaint(
-		const FPaintArgs& Args,
-		const FGeometry& AllottedGeometry,
-		const FSlateRect& MyCullingRect,
-		FSlateWindowElementList& OutDrawElements,
-		int32 LayerId,
-		const FWidgetStyle& InWidgetStyle,
-		bool bParentEnabled) const override;
 
 private:
 	UPROPERTY(Transient)
 	TObjectPtr<UTexture2D> MaskTexture;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UImage> MaskImage;
 
 	mutable FSlateBrush MaskBrush;
 };

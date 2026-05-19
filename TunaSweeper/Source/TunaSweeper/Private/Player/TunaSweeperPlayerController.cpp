@@ -335,7 +335,7 @@ void ATunaSweeperPlayerController::EnsureGameHudWidget()
 	GameHudWidget = CreateWidget<UTunaSweeperGameHudWidget>(this, LoadedHudWidgetClass);
 	if (GameHudWidget)
 	{
-		GameHudWidget->AddToViewport(0);
+		GameHudWidget->AddToViewport(10);
 	}
 }
 

@@ -433,3 +433,21 @@ A. 적용한 게임 실행용 스플래시 파일은 `D:\github\extraction_shoot
 Q. 파일만 들어있으면 동작해?
 
 A. 에디터/PC 게임 스플래시는 콘텐츠 브라우저 import나 `.uasset` 변환 없이 `Content/Splash` 폴더에 정해진 파일명으로만 들어 있으면 동작한다. 게임 실행용은 `Splash.png`, 에디터 시작용은 `EdSplash.png`가 필요하며, 이미 실행 중인 에디터에는 적용되지 않으므로 재시작해야 한다. 패키징된 게임에서도 PNG가 들어가려면 `Content/Splash`가 NonUFS 스테이징 대상이어야 하는데, 프로젝트에는 `+DirectoriesToAlwaysStageAsNonUFS=(Path="Splash")`가 추가되어 있다.
+
+## 2026-05-20 02:48:17 (소요시간: 1분 미만)
+
+Q. 프로젝트 썸네일 사이즈는 192 정사각형인가?
+
+A. 맞다. UE 5.7 프로젝트 설정의 `Project Thumbnail`은 `RequiredSize(FIntPoint(192, 192))`로 192x192 정사각형을 요구한다. 에디터에서 뷰포트 캡처로 자동 생성할 때도 `AutoScreenshotSize = 192`를 사용한다. 파일 위치는 프로젝트 파일과 같은 폴더의 `프로젝트명.png`이므로 TunaSweeper 기준으로는 `D:\github\extraction_shooter\TunaSweeper\TunaSweeper.png`이다.
+
+## 2026-05-20 02:45:12 (소요시간: 1분 미만)
+
+Q. 지금 시야각이 좌우 45도인데 레이캐스트 수량이 1도에 하나씩 총 91개이고 월드상 디버그 라인으로 보여야 한다고 생각했는데, 구현이 다른가?
+
+A. 다르다. 현재 구현은 `RayCount=360`으로 360도 전체를 레이캐스트하고, `DebugRayStride=6` 때문에 디버그 라인은 6개 중 1개만 보여준다. 전방 90도만 1도 간격으로 보려면 `-45..+45` inclusive 기준 총 91개 레이만 쏘고, 후방/측면은 레이캐스트 없이 200cm 항상 시야 원만 마스크에 반영해야 한다.
+
+## 2026-05-20 02:51:06 (소요시간: 1분 미만)
+
+Q. 지금 시야거리 얼마야?
+
+A. 현재 `FTunaSweeperPlayerVisionSettings::SightDistance` 기본값은 `1800cm`이다.

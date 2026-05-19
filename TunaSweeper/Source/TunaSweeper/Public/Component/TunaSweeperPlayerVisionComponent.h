@@ -15,7 +15,7 @@ struct TUNASWEEPER_API FTunaSweeperPlayerVisionSettings
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Vision", meta = (ClampMin = "1.0", UIMin = "1.0"))
-	float SightDistance = 1800.0f;
+	float SightDistance = 900.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Vision", meta = (ClampMin = "1.0", ClampMax = "360.0", UIMin = "1.0", UIMax = "360.0"))
 	float FieldOfViewDegrees = 90.0f;
@@ -26,8 +26,11 @@ struct TUNASWEEPER_API FTunaSweeperPlayerVisionSettings
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Vision", meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float TraceHeight = 40.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Vision", meta = (ClampMin = "16", ClampMax = "720", UIMin = "16", UIMax = "720"))
+	UPROPERTY()
 	int32 RayCount = 360;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Vision", meta = (ClampMin = "0.1", ClampMax = "45.0", UIMin = "0.1", UIMax = "5.0"))
+	float RayAngleStepDegrees = 1.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Vision", meta = (ClampMin = "1", ClampMax = "16", UIMin = "1", UIMax = "16"))
 	int32 MaskDownsampleFactor = 4;
@@ -71,13 +74,13 @@ protected:
 	bool bRenderVisionOverlay = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Vision")
-	int32 OverlayZOrder = -10;
+	int32 OverlayZOrder = 1;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Vision|Debug", meta = (ClampMin = "1", ClampMax = "360", UIMin = "1", UIMax = "360"))
-	int32 DebugRayStride = 6;
+	UPROPERTY()
+	int32 DebugRayStride = 1;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Vision|Debug", meta = (ClampMin = "0.0", UIMin = "0.0"))
-	float DebugDrawLifeTime = 0.25f;
+	UPROPERTY()
+	float DebugDrawLifeTime = 0.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Vision|Debug")
 	bool bEnableDebugOverride = false;
@@ -90,19 +93,27 @@ private:
 	bool ShouldUpdateVision() const;
 	bool IsVisionDebugEnabled() const;
 	void EnsureOverlayWidget(APlayerController* PlayerController);
+	void ConfigureOverlayWidgetForViewport(const FIntPoint& InViewportSize);
 	bool EnsureMaskTexture(const FIntPoint& InViewportSize);
-	bool BuildVisiblePolygonPoints(APlayerController* PlayerController, TArray<FVector2D>& OutMaskPoints);
+	bool BuildVisibleRayDistances(
+		TArray<float>& OutRayDistances,
+		FVector& OutTraceOrigin,
+		float& OutFacingYawDegrees,
+		float& OutRayAngleStepDegrees);
 	float TraceVisibleDistance(const FVector& TraceOrigin, const FVector& Direction, bool bInsideFieldOfView, FHitResult& OutHit) const;
-	void RasterizeVisiblePolygon(const TArray<FVector2D>& PolygonPoints);
+	int32 RasterizeVisionMaskFromView(
+		APlayerController* PlayerController,
+		const TArray<float>& RayDistances,
+		const FVector& TraceOrigin,
+		float FacingYawDegrees,
+		float RayAngleStepDegrees);
 	void ApplyBlurToMask();
 	void RebuildTexturePixels();
 	void UploadMaskTexture();
 	void DrawVisionDebug(
 		const FVector& TraceOrigin,
 		const FVector& Direction,
-		float VisibleDistance,
-		bool bInsideFieldOfView,
-		int32 RayIndex,
+		float TraceDistance,
 		const FHitResult& Hit) const;
 	void DrawVisionDebugRangeWires() const;
 	void DrawVisionDebugBounds(const FVector& TraceOrigin, const FVector& FacingDirection) const;
@@ -118,7 +129,6 @@ private:
 	TArray<uint8> BlurScratchMask;
 	TArray<uint8> BlurredMask;
 	TArray<uint8> TexturePixels;
-	TArray<float> ScanlineIntersections;
 	FIntPoint MaskSize = FIntPoint::ZeroValue;
 	FIntPoint ViewportSize = FIntPoint::ZeroValue;
 	float TimeSinceLastMaskUpdate = 0.0f;
