@@ -106,7 +106,7 @@ namespace TunaSweeperEditorSetup
 	const FString CannedTunaIconImportTaskId = TEXT("2026-05-11_ImportCannedTunaIconV1");
 	const FString BackpackInventoryTaskId = TEXT("2026-05-16_CreateEquipmentInventoryAssetsV3");
 	const FString IntroMenuAndLevelTravelTaskId = TEXT("2026-05-19_CreateTitleIntroMenuPersistentSaveSlotSelectionLevelTravelLadderV1");
-	const FString OpeningScenarioPresentationTaskId = TEXT("2026-05-19_CreateOpeningScenarioPresentationV1");
+	const FString OpeningScenarioPresentationTaskId = TEXT("2026-05-19_CreateOpeningScenarioPresentationV2");
 	const FString LevelTransitionVideoTaskId = TEXT("2026-05-16_AddBidirectionalLevelTransitionVideoV3");
 	const FString FirstOutingQuestTaskId = TEXT("2026-05-15_CreateFirstOutingQuestNpcV2");
 	const FString SelfDestructInteractionTaskId = TEXT("2026-05-16_CreateSelfDestructInteractionV1");
@@ -148,7 +148,7 @@ namespace TunaSweeperEditorSetup
 	const FString UIStoryTextureAssetPath = TEXT("/Game/UI/Story");
 	const FString TitleBackgroundTextureAssetName = TEXT("Title_C1");
 	const FString TitleLogoTextureAssetName = TEXT("tuna_sweeper_logo_transparent");
-	const FString OpeningScenarioBackgroundTextureAssetName = TEXT("T_Story_OpeningAwakening");
+	const FString OpeningScenarioBackgroundTextureAssetName = TEXT("T_Story_OpeningLightParticles");
 	const FString InteractionMarkerAssetName = TEXT("WBP_InteractionMarker");
 	const FString PickupItemIconWidgetAssetName = TEXT("WBP_PickupItemIcon");
 	const FString GameHudWidgetAssetName = TEXT("WBP_GameHud");
@@ -2856,7 +2856,7 @@ namespace TunaSweeperEditorSetup
 		UTexture2D* BackgroundTexture = nullptr;
 		const bool bBackgroundImported = ImportUiTexture(
 			FUiTextureImportArgs{
-				GetWorkspaceFilePath(TEXT("Docs/Story/tuna_dialogue/images/01_awakening.png")),
+				GetWorkspaceFilePath(TEXT("chatgpt/opening_light_particles.png")),
 				UIStoryTextureAssetPath,
 				OpeningScenarioBackgroundTextureAssetName,
 				true

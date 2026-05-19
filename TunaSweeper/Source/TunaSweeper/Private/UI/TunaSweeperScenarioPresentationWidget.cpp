@@ -16,10 +16,15 @@ namespace TunaSweeperScenarioPresentation
 {
 	const FName OpeningScenarioFlag(TEXT("scenario.opening.awakening"));
 	const FName BunkerLevelName(TEXT("BunkerMap"));
-	const TCHAR* OpeningBackgroundTexturePath = TEXT("/Game/UI/Story/T_Story_OpeningAwakening.T_Story_OpeningAwakening");
+	const TCHAR* OpeningBackgroundTexturePath = TEXT("/Game/UI/Story/T_Story_OpeningLightParticles.T_Story_OpeningLightParticles");
 	constexpr float FadeInSeconds = 1.2f;
 	constexpr float LineSeconds = 2.2f;
 	constexpr float FadeOutSeconds = 1.25f;
+	constexpr float SystemTypewriterCharactersPerSecond = 13.0f;
+	constexpr float SystemStatusTypewriterDelaySeconds = 0.35f;
+	constexpr float MonologueFontSize = 34.0f;
+	constexpr float MonologueMinWidth = 280.0f;
+	constexpr float MonologueMaxWidth = 1120.0f;
 }
 
 namespace
@@ -47,6 +52,31 @@ namespace
 		FSlateFontInfo FontInfo = TextBlock ? TextBlock->GetFont() : FSlateFontInfo();
 		FontInfo.Size = Size;
 		return FontInfo;
+	}
+
+	float EstimateLeftAlignedTextWidth(const FString& Text, float FontSize)
+	{
+		float Width = 0.0f;
+		for (const TCHAR Character : Text)
+		{
+			if (FChar::IsWhitespace(Character))
+			{
+				Width += FontSize * 0.36f;
+			}
+			else if (Character < 0x80)
+			{
+				Width += FontSize * 0.54f;
+			}
+			else
+			{
+				Width += FontSize * 0.94f;
+			}
+		}
+
+		return FMath::Clamp(
+			Width,
+			TunaSweeperScenarioPresentation::MonologueMinWidth,
+			TunaSweeperScenarioPresentation::MonologueMaxWidth);
 	}
 }
 
@@ -77,6 +107,7 @@ void UTunaSweeperScenarioPresentationWidget::NativeConstruct()
 	PhaseElapsedSeconds = 0.0f;
 	Phase = ETunaSweeperScenarioPresentationPhase::FadeIn;
 	bTravelStarted = false;
+	ResetSystemTextTypewriter();
 	RefreshCurrentLine();
 	SetFadeOverlayOpacity(1.0f);
 }
@@ -101,6 +132,7 @@ void UTunaSweeperScenarioPresentationWidget::NativeTick(const FGeometry& MyGeome
 
 	if (Phase == ETunaSweeperScenarioPresentationPhase::DisplayLine)
 	{
+		UpdateSystemTextTypewriter(InDeltaTime);
 		if (PhaseElapsedSeconds >= TunaSweeperScenarioPresentation::LineSeconds)
 		{
 			AdvanceLine();
@@ -110,6 +142,7 @@ void UTunaSweeperScenarioPresentationWidget::NativeTick(const FGeometry& MyGeome
 
 	if (Phase == ETunaSweeperScenarioPresentationPhase::FadeOut)
 	{
+		UpdateSystemTextTypewriter(InDeltaTime);
 		const float Alpha = FMath::Clamp(PhaseElapsedSeconds / TunaSweeperScenarioPresentation::FadeOutSeconds, 0.0f, 1.0f);
 		SetFadeOverlayOpacity(Alpha);
 		if (Alpha >= 1.0f)
@@ -239,15 +272,15 @@ void UTunaSweeperScenarioPresentationWidget::BuildPresentationWidget()
 
 	MonologueText->SetFont(MakeFont(MonologueText, 34));
 	MonologueText->SetColorAndOpacity(FSlateColor(FLinearColor(0.96f, 0.98f, 1.0f, 0.95f)));
-	MonologueText->SetAutoWrapText(true);
-	MonologueText->SetWrapTextAt(980.0f);
+	MonologueText->SetJustification(ETextJustify::Left);
+	MonologueText->SetAutoWrapText(false);
 	MonologueText->SetShadowOffset(FVector2D(2.0f, 2.0f));
 	MonologueText->SetShadowColorAndOpacity(FLinearColor(0.0f, 0.0f, 0.0f, 0.84f));
 	if (UCanvasPanelSlot* MonologueSlot = RootCanvas->AddChildToCanvas(MonologueText))
 	{
-		MonologueSlot->SetAnchors(FAnchors(0.0f, 1.0f));
-		MonologueSlot->SetAlignment(FVector2D(0.0f, 1.0f));
-		MonologueSlot->SetPosition(FVector2D(76.0f, -160.0f));
+		MonologueSlot->SetAnchors(FAnchors(0.5f, 0.5f));
+		MonologueSlot->SetAlignment(FVector2D(0.0f, 0.5f));
+		MonologueSlot->SetPosition(FVector2D(-520.0f, 0.0f));
 		MonologueSlot->SetSize(FVector2D(1040.0f, 96.0f));
 		MonologueSlot->SetZOrder(3);
 	}
@@ -288,6 +321,9 @@ void UTunaSweeperScenarioPresentationWidget::InitializeMonologueLines()
 	MonologueLines.Add(FText::FromString(TEXT("\uC804\uB825 \uBD80\uC871. \uB0B4\uBD80 \uC2DC\uC2A4\uD15C \uBD88\uC548\uC815.")));
 	MonologueLines.Add(FText::FromString(TEXT("\uADF8\uB798\uB3C4 \uC6C0\uC9C1\uC77C \uC218 \uC788\uB2E4.")));
 	MonologueLines.Add(FText::FromString(TEXT("\uBA3C\uC800 \uC774 \uC7A5\uC18C\uB97C \uD655\uC778\uD574\uC57C \uD55C\uB2E4.")));
+
+	SystemTitleFullText = TEXT("\uC7AC\uAE30\uB3D9 \uAE30\uB85D");
+	SystemStatusFullText = TEXT("B-07 \uBC99\uCEE4 / \uBE44\uC0C1 \uAE30\uC0C1");
 }
 
 void UTunaSweeperScenarioPresentationWidget::RefreshCurrentLine()
@@ -299,6 +335,73 @@ void UTunaSweeperScenarioPresentationWidget::RefreshCurrentLine()
 
 	CurrentLineIndex = FMath::Clamp(CurrentLineIndex, 0, MonologueLines.Num() - 1);
 	MonologueText->SetText(MonologueLines[CurrentLineIndex]);
+	UpdateMonologueTextPlacement();
+}
+
+void UTunaSweeperScenarioPresentationWidget::UpdateMonologueTextPlacement()
+{
+	if (!MonologueText || MonologueLines.IsEmpty())
+	{
+		return;
+	}
+
+	UCanvasPanelSlot* MonologueSlot = Cast<UCanvasPanelSlot>(MonologueText->Slot);
+	if (!MonologueSlot)
+	{
+		return;
+	}
+
+	const FString CurrentLine = MonologueLines[CurrentLineIndex].ToString();
+	const float TextWidth = EstimateLeftAlignedTextWidth(CurrentLine, TunaSweeperScenarioPresentation::MonologueFontSize);
+	MonologueSlot->SetPosition(FVector2D(TextWidth * -0.5f, 0.0f));
+	MonologueSlot->SetSize(FVector2D(TextWidth + 24.0f, 96.0f));
+}
+
+void UTunaSweeperScenarioPresentationWidget::ResetSystemTextTypewriter()
+{
+	SystemTypewriterElapsedSeconds = 0.0f;
+	SystemTitleVisibleCharacters = 0;
+	SystemStatusVisibleCharacters = 0;
+
+	if (TitleText)
+	{
+		TitleText->SetText(FText::GetEmpty());
+	}
+	if (StatusText)
+	{
+		StatusText->SetText(FText::GetEmpty());
+	}
+}
+
+void UTunaSweeperScenarioPresentationWidget::UpdateSystemTextTypewriter(float DeltaTime)
+{
+	SystemTypewriterElapsedSeconds += DeltaTime;
+
+	const int32 TitleCharacters = SystemTitleFullText.Len();
+	const int32 StatusCharacters = SystemStatusFullText.Len();
+	SystemTitleVisibleCharacters = FMath::Clamp(
+		FMath::FloorToInt(SystemTypewriterElapsedSeconds * TunaSweeperScenarioPresentation::SystemTypewriterCharactersPerSecond),
+		0,
+		TitleCharacters);
+
+	const float StatusElapsedSeconds = FMath::Max(
+		0.0f,
+		SystemTypewriterElapsedSeconds -
+			static_cast<float>(TitleCharacters) / TunaSweeperScenarioPresentation::SystemTypewriterCharactersPerSecond -
+			TunaSweeperScenarioPresentation::SystemStatusTypewriterDelaySeconds);
+	SystemStatusVisibleCharacters = FMath::Clamp(
+		FMath::FloorToInt(StatusElapsedSeconds * TunaSweeperScenarioPresentation::SystemTypewriterCharactersPerSecond),
+		0,
+		StatusCharacters);
+
+	if (TitleText)
+	{
+		TitleText->SetText(FText::FromString(SystemTitleFullText.Left(SystemTitleVisibleCharacters)));
+	}
+	if (StatusText)
+	{
+		StatusText->SetText(FText::FromString(SystemStatusFullText.Left(SystemStatusVisibleCharacters)));
+	}
 }
 
 void UTunaSweeperScenarioPresentationWidget::AdvanceLine()

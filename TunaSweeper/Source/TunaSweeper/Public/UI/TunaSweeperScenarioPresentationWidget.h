@@ -30,6 +30,9 @@ private:
 	void BuildPresentationWidget();
 	void InitializeMonologueLines();
 	void RefreshCurrentLine();
+	void UpdateMonologueTextPlacement();
+	void ResetSystemTextTypewriter();
+	void UpdateSystemTextTypewriter(float DeltaTime);
 	void AdvanceLine();
 	void StartFadeOut();
 	void TravelToBunker();
@@ -57,6 +60,11 @@ private:
 	TObjectPtr<UTextBlock> PromptText;
 
 	TArray<FText> MonologueLines;
+	FString SystemTitleFullText;
+	FString SystemStatusFullText;
+	float SystemTypewriterElapsedSeconds = 0.0f;
+	int32 SystemTitleVisibleCharacters = 0;
+	int32 SystemStatusVisibleCharacters = 0;
 	int32 CurrentLineIndex = 0;
 	float PhaseElapsedSeconds = 0.0f;
 	ETunaSweeperScenarioPresentationPhase Phase = ETunaSweeperScenarioPresentationPhase::FadeIn;
