@@ -846,7 +846,6 @@ namespace TunaSweeperEditorSetup
 		const FString& AssetPath,
 		const FString& AssetName,
 		const FName& MaterialSlotName,
-		const FVector3f& Dimensions,
 		TFunctionRef<void(FMeshDescription&)> BuildMeshDescription,
 		UMaterialInterface* VoxelMaterial)
 	{
@@ -1399,6 +1398,85 @@ namespace TunaSweeperEditorSetup
 
 		return RedMaterial && GreenMaterial && BlueMaterial && SightlineMaterial &&
 			CardboardMaterial && WoodMaterial && MetalMaterial && SupplyMaterial;
+	}
+
+	bool EnsureSharedVoxelMeshAssets()
+	{
+		UMaterial* VoxelMaterial = EnsureVoxelVertexColorMaterial();
+		if (!VoxelMaterial)
+		{
+			return false;
+		}
+
+		UStaticMesh* EnemyBodyMesh = EnsureVoxelStaticMeshAsset(
+			EnemyAssetPath,
+			EnemyVoxelBodyMeshAssetName,
+			FName(TEXT("VoxelVertexColor")),
+			[](FMeshDescription& MeshDescription)
+			{
+				BuildVoxelMeshDescription(
+					MeshDescription,
+					FName(TEXT("VoxelVertexColor")),
+					FVector3f(100.0f, 100.0f, 100.0f),
+					[](TArray<FEnemyVoxelBox>& OutBoxes)
+					{
+						AppendEnemyBodyVoxelBoxes(OutBoxes);
+					});
+			},
+			VoxelMaterial);
+
+		UStaticMesh* EnemyForwardMarkerMesh = EnsureVoxelStaticMeshAsset(
+			EnemyAssetPath,
+			EnemyVoxelForwardMarkerMeshAssetName,
+			FName(TEXT("VoxelVertexColor")),
+			[](FMeshDescription& MeshDescription)
+			{
+				BuildVoxelMeshDescription(
+					MeshDescription,
+					FName(TEXT("VoxelVertexColor")),
+					FVector3f(70.0f, 28.0f, 18.0f),
+					[](TArray<FEnemyVoxelBox>& OutBoxes)
+					{
+						AppendEnemyForwardMarkerVoxelBoxes(OutBoxes);
+					});
+			},
+			VoxelMaterial);
+
+		UStaticMesh* BrokenBridgeMesh = EnsureVoxelStaticMeshAsset(
+			InteractionAssetPath,
+			BrokenBridgeVoxelMeshAssetName,
+			FName(TEXT("VoxelVertexColor")),
+			[](FMeshDescription& MeshDescription)
+			{
+				BuildVoxelMeshDescription(
+					MeshDescription,
+					FName(TEXT("VoxelVertexColor")),
+					FVector3f(540.0f, 110.0f, 80.0f),
+					[](TArray<FEnemyVoxelBox>& OutBoxes)
+					{
+						AppendBrokenBridgeVoxelBoxes(OutBoxes);
+					});
+			},
+			VoxelMaterial);
+
+		UStaticMesh* RepairedBridgeMesh = EnsureVoxelStaticMeshAsset(
+			InteractionAssetPath,
+			RepairedBridgeVoxelMeshAssetName,
+			FName(TEXT("VoxelVertexColor")),
+			[](FMeshDescription& MeshDescription)
+			{
+				BuildVoxelMeshDescription(
+					MeshDescription,
+					FName(TEXT("VoxelVertexColor")),
+					FVector3f(540.0f, 110.0f, 80.0f),
+					[](TArray<FEnemyVoxelBox>& OutBoxes)
+					{
+						AppendRepairedBridgeVoxelBoxes(OutBoxes);
+					});
+			},
+			VoxelMaterial);
+
+		return EnemyBodyMesh && EnemyForwardMarkerMesh && BrokenBridgeMesh && RepairedBridgeMesh;
 	}
 
 	bool EnsureCoverPointAssets()
@@ -6586,6 +6664,13 @@ public:
 			[]()
 			{
 				return TunaSweeperEditorSetup::EnsureEnemyVisualMaterialAssets();
+			});
+
+		FTunaSweeperEditorRunOnce::Run(
+			TunaSweeperEditorSetup::VoxelMeshAssetTaskId,
+			[]()
+			{
+				return TunaSweeperEditorSetup::EnsureSharedVoxelMeshAssets();
 			});
 
 		FTunaSweeperEditorRunOnce::Run(
