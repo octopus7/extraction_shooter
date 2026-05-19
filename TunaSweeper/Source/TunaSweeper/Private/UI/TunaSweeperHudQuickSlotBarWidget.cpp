@@ -11,7 +11,7 @@
 namespace
 {
 	constexpr float QuickSlotRootWidth = 620.0f;
-	constexpr float QuickSlotRowWidth = 556.0f;
+	constexpr float QuickSlotRowWidth = 616.0f;
 	constexpr float WeaponSlotWidth = 82.0f;
 	constexpr float SlotGapWidth = 8.0f;
 	constexpr float AmmoSelectorPanelOffsetY = 28.0f;

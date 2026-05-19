@@ -96,7 +96,7 @@ namespace TunaSweeperEditorSetup
 	const FString InteractionInputTaskId = TEXT("2026-05-11_SetInteractInputToFKey");
 	const FString InteractionMarkerAlignmentTaskId = TEXT("2026-05-10_RebuildInteractionMarkerAlignmentV2");
 	const FString PickupItemAndSpawnerTaskId = TEXT("2026-05-11_CreatePickupItemAndSpawnerAssetsV3");
-	const FString CommonGameHudTaskId = TEXT("2026-05-19_RebuildAmmoReloadHudV10");
+	const FString CommonGameHudTaskId = TEXT("2026-05-19_RebuildAmmoReloadHudV11");
 	const FString InventoryInputTaskId = TEXT("2026-05-11_AddInventoryInput");
 	const FString QuickSlotInputTaskId = TEXT("2026-05-12_AddQuickSlotInputActions");
 	const FString DropInputTaskId = TEXT("2026-05-18_AddDropInputAction");
@@ -3445,7 +3445,7 @@ namespace TunaSweeperEditorSetup
 			SlotRowCanvasSlot->SetAnchors(FAnchors(0.5f, 1.0f, 0.5f, 1.0f));
 			SlotRowCanvasSlot->SetAlignment(FVector2D(0.5f, 1.0f));
 			SlotRowCanvasSlot->SetPosition(FVector2D(0.0f, 0.0f));
-			SlotRowCanvasSlot->SetSize(FVector2D(556.0f, 126.0f));
+			SlotRowCanvasSlot->SetSize(FVector2D(616.0f, 126.0f));
 		}
 
 		const FString DefaultIconPaths[8] = {
@@ -3462,8 +3462,8 @@ namespace TunaSweeperEditorSetup
 		for (int32 SlotNumber = 1; SlotNumber <= 8; ++SlotNumber)
 		{
 			const bool bWeaponSlot = SlotNumber <= 2;
-			const float SlotSize = bWeaponSlot ? 82.0f : 56.0f;
-			const float IconSize = bWeaponSlot ? 68.0f : 42.0f;
+			const float SlotSize = bWeaponSlot ? 82.0f : 66.0f;
+			const float IconSize = bWeaponSlot ? 68.0f : 54.0f;
 
 			UVerticalBox* SlotStack = WidgetTree->ConstructWidget<UVerticalBox>(
 				UVerticalBox::StaticClass(),
