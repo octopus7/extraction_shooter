@@ -25,6 +25,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
 	void SetSelectedQuickSlot(int32 SlotNumber);
 
+	void SetWeaponAmmoTypeText(int32 SlotNumber, const FText& AmmoTypeText, bool bVisible);
 	void SetWeaponAmmoText(int32 SlotNumber, int32 LoadedAmmoCount, int32 InventoryAmmoCount, bool bVisible);
 	void SetReloadProgress(float Progress, bool bVisible);
 	void SetAmmoSelectorOptions(const TArray<FText>& OptionTexts, int32 FocusedOptionIndex, int32 WeaponSlotNumber, bool bVisible);
@@ -50,6 +51,15 @@ private:
 
 	UPROPERTY(Transient)
 	TArray<TObjectPtr<UTextBlock>> SlotAmmoTexts;
+
+	UPROPERTY(Transient)
+	TArray<TObjectPtr<UWidget>> SlotAmmoTextContainers;
+
+	UPROPERTY(Transient)
+	TArray<TObjectPtr<UTextBlock>> SlotAmmoTypeTexts;
+
+	UPROPERTY(Transient)
+	TArray<TObjectPtr<UWidget>> SlotAmmoTypeContainers;
 
 	UPROPERTY(Transient)
 	TArray<TObjectPtr<UWidget>> AmmoSelectorOptionBackgrounds;

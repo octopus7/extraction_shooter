@@ -82,6 +82,27 @@ void UTunaSweeperHudQuickSlotBarWidget::SetSelectedQuickSlot(int32 SlotNumber)
 	}
 }
 
+void UTunaSweeperHudQuickSlotBarWidget::SetWeaponAmmoTypeText(
+	int32 SlotNumber,
+	const FText& AmmoTypeText,
+	bool bVisible)
+{
+	CacheNamedWidgets();
+
+	const int32 SlotIndex = GetSlotIndex(SlotNumber);
+	if (!SlotAmmoTypeTexts.IsValidIndex(SlotIndex) || !SlotAmmoTypeTexts[SlotIndex])
+	{
+		return;
+	}
+
+	if (SlotAmmoTypeContainers.IsValidIndex(SlotIndex) && SlotAmmoTypeContainers[SlotIndex])
+	{
+		SlotAmmoTypeContainers[SlotIndex]->SetVisibility(bVisible ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
+	}
+	SlotAmmoTypeTexts[SlotIndex]->SetVisibility(bVisible ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
+	SlotAmmoTypeTexts[SlotIndex]->SetText(bVisible ? AmmoTypeText : FText::GetEmpty());
+}
+
 void UTunaSweeperHudQuickSlotBarWidget::SetWeaponAmmoText(
 	int32 SlotNumber,
 	int32 LoadedAmmoCount,
@@ -96,6 +117,10 @@ void UTunaSweeperHudQuickSlotBarWidget::SetWeaponAmmoText(
 		return;
 	}
 
+	if (SlotAmmoTextContainers.IsValidIndex(SlotIndex) && SlotAmmoTextContainers[SlotIndex])
+	{
+		SlotAmmoTextContainers[SlotIndex]->SetVisibility(bVisible ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
+	}
 	SlotAmmoTexts[SlotIndex]->SetVisibility(bVisible ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
 	SlotAmmoTexts[SlotIndex]->SetText(
 		bVisible
@@ -196,6 +221,9 @@ void UTunaSweeperHudQuickSlotBarWidget::CacheNamedWidgets()
 	SlotIconImages.SetNum(8);
 	SlotSelectionFrames.SetNum(8);
 	SlotAmmoTexts.SetNum(8);
+	SlotAmmoTextContainers.SetNum(8);
+	SlotAmmoTypeTexts.SetNum(8);
+	SlotAmmoTypeContainers.SetNum(8);
 	AmmoSelectorOptionBackgrounds.SetNum(6);
 	AmmoSelectorOptionTexts.SetNum(6);
 
@@ -204,7 +232,10 @@ void UTunaSweeperHudQuickSlotBarWidget::CacheNamedWidgets()
 		const int32 SlotIndex = SlotNumber - 1;
 		SlotIconImages[SlotIndex] = Cast<UImage>(WidgetTree->FindWidget(FName(*FString::Printf(TEXT("QuickSlot%dIcon"), SlotNumber))));
 		SlotSelectionFrames[SlotIndex] = WidgetTree->FindWidget(FName(*FString::Printf(TEXT("QuickSlot%dSelectionFrame"), SlotNumber)));
+		SlotAmmoTypeTexts[SlotIndex] = Cast<UTextBlock>(WidgetTree->FindWidget(FName(*FString::Printf(TEXT("QuickSlot%dAmmoTypeText"), SlotNumber))));
+		SlotAmmoTypeContainers[SlotIndex] = WidgetTree->FindWidget(FName(*FString::Printf(TEXT("QuickSlot%dAmmoTypeContainer"), SlotNumber)));
 		SlotAmmoTexts[SlotIndex] = Cast<UTextBlock>(WidgetTree->FindWidget(FName(*FString::Printf(TEXT("QuickSlot%dAmmoText"), SlotNumber))));
+		SlotAmmoTextContainers[SlotIndex] = WidgetTree->FindWidget(FName(*FString::Printf(TEXT("QuickSlot%dAmmoTextContainer"), SlotNumber)));
 	}
 
 	AmmoSelectorPanel = WidgetTree->FindWidget(FName(TEXT("AmmoSelectorPanel")));

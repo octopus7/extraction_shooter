@@ -233,6 +233,7 @@ void UTunaSweeperGameHudWidget::RefreshQuickSlotsFromGameState()
 			!TunaGameInstance->TryGetEquipmentWeaponSlotItem(SlotNumber, WeaponInstance, WeaponDefinition))
 		{
 			QuickSlotBarWidget->ClearQuickSlotIcon(SlotNumber);
+			QuickSlotBarWidget->SetWeaponAmmoTypeText(SlotNumber, FText::GetEmpty(), false);
 			QuickSlotBarWidget->SetWeaponAmmoText(SlotNumber, 0, 0, false);
 			continue;
 		}
@@ -247,6 +248,18 @@ void UTunaSweeperGameHudWidget::RefreshQuickSlotsFromGameState()
 			}
 		}
 		QuickSlotBarWidget->SetQuickSlotIcon(SlotNumber, IconTexture);
+
+		FText AmmoTypeText = FText::FromString(TEXT("\uD0C4\uC57D \uBBF8\uC9C0\uC815"));
+		const int32 AmmoItemId = TunaGameInstance->GetWeaponSelectedAmmoItemId(SlotNumber);
+		if (AmmoItemId != INDEX_NONE)
+		{
+			AmmoTypeText = FText::FromString(FString::Printf(TEXT("Ammo %d"), AmmoItemId));
+			if (ItemDataSubsystem)
+			{
+				ItemDataSubsystem->TryGetItemNameText(AmmoItemId, ETunaSweeperItemTextLanguage::Korean, AmmoTypeText);
+			}
+		}
+		QuickSlotBarWidget->SetWeaponAmmoTypeText(SlotNumber, AmmoTypeText, true);
 		QuickSlotBarWidget->SetWeaponAmmoText(
 			SlotNumber,
 			TunaGameInstance->GetWeaponLoadedAmmoCount(SlotNumber),
@@ -333,19 +346,7 @@ void UTunaSweeperGameHudWidget::RefreshReloadWidgets()
 		}
 		else
 		{
-			UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
-			FTunaSweeperItemInstance WeaponInstance;
-			FTunaSweeperItemDefinition WeaponDefinition;
-			const bool bShowUnspecifiedAmmoPrompt =
-				TunaGameInstance &&
-				TunaCharacter &&
-				SelectedWeaponSlotNumber > 0 &&
-				TunaGameInstance->TryGetEquipmentWeaponSlotItem(SelectedWeaponSlotNumber, WeaponInstance, WeaponDefinition) &&
-				TunaGameInstance->GetWeaponSelectedAmmoItemId(SelectedWeaponSlotNumber) == INDEX_NONE;
-			QuickSlotBarWidget->SetAmmoSelectorPrompt(
-				SelectedWeaponSlotNumber,
-				bShowUnspecifiedAmmoPrompt ? FText::FromString(TEXT("탄약 미지정")) : FText::GetEmpty(),
-				bShowUnspecifiedAmmoPrompt);
+			QuickSlotBarWidget->SetAmmoSelectorPrompt(SelectedWeaponSlotNumber, FText::GetEmpty(), false);
 		}
 	}
 }
