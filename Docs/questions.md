@@ -421,3 +421,15 @@ A. UE 5.7 Android Launch Portrait 기준 명목 해상도는 `360x640`이다. �
 Q. png 는 안되나?
 
 A. UE 5.7 PC 스플래시 로더는 `Splash.png`, `Splash.jpg`, `Splash.bmp` 순서로 찾으므로 PNG를 사용할 수 있다. 다만 Windows 패키징 코드에는 `Content/Splash/Splash.bmp` 스테이징이 명시되어 있어서, PNG를 우선 적용하려면 `Content/Splash` 폴더를 NonUFS 스테이징 대상으로 추가하는 편이 안전하다. 프로젝트에는 `Splash.png`를 추가하고 `Splash.bmp`는 fallback으로 남긴다.
+
+## 2026-05-20 02:40:33 (소요시간: 1분 미만)
+
+Q. PC 스플래시가 안 나오는데 수동으로 확인할 파일 위치가 어디인지?
+
+A. 적용한 게임 실행용 스플래시 파일은 `D:\github\extraction_shooter\TunaSweeper\Content\Splash\Splash.png`이다. 다만 스크린샷처럼 `Unreal Editor - TunaSweeper`라고 표시되는 화면은 게임 스플래시가 아니라 에디터 스플래시라서 `Splash.png`가 아니라 같은 폴더의 `EdSplash.png` 또는 `EdSplash.bmp`를 사용한다.
+
+## 2026-05-20 02:41:20 (소요시간: 1분 미만)
+
+Q. 파일만 들어있으면 동작해?
+
+A. 에디터/PC 게임 스플래시는 콘텐츠 브라우저 import나 `.uasset` 변환 없이 `Content/Splash` 폴더에 정해진 파일명으로만 들어 있으면 동작한다. 게임 실행용은 `Splash.png`, 에디터 시작용은 `EdSplash.png`가 필요하며, 이미 실행 중인 에디터에는 적용되지 않으므로 재시작해야 한다. 패키징된 게임에서도 PNG가 들어가려면 `Content/Splash`가 NonUFS 스테이징 대상이어야 하는데, 프로젝트에는 `+DirectoriesToAlwaysStageAsNonUFS=(Path="Splash")`가 추가되어 있다.
