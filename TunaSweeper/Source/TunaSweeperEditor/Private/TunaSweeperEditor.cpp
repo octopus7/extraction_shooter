@@ -56,7 +56,13 @@
 #include "MediaSource.h"
 #include "Factories/MaterialFactoryNew.h"
 #include "Materials/Material.h"
+#include "Materials/MaterialExpressionComponentMask.h"
 #include "Materials/MaterialExpressionConstant3Vector.h"
+#include "Materials/MaterialExpressionMultiply.h"
+#include "Materials/MaterialExpressionScalarParameter.h"
+#include "Materials/MaterialExpressionSaturate.h"
+#include "Materials/MaterialExpressionSubtract.h"
+#include "Materials/MaterialExpressionTextureCoordinate.h"
 #include "Materials/MaterialExpressionVertexColor.h"
 #include "MeshDescription.h"
 #include "Misc/CommandLine.h"
@@ -116,6 +122,7 @@ namespace TunaSweeperEditorSetup
 	const FString WorldProgressInteractionTaskId = TEXT("2026-05-19_CreateWorldProgressObstacleAssetsV1");
 	const FString EnemyVisualMaterialTaskId = TEXT("2026-05-19_CreateEnemyAndContainerVisualMaterialsV3");
 	const FString VoxelMeshAssetTaskId = TEXT("2026-05-19_CreateSharedVoxelMeshAssetsV1");
+	const FString LumberjackMeleeSwingArcAssetTaskId = TEXT("2026-05-20_CreateLumberjackMeleeSwingArcAssetsV2");
 	const FString CoverPointAssetTaskId = TEXT("2026-05-16_CreateCoverPointBlueprintV1");
 	const FString GameInstanceAssetPath = TEXT("/Game/Core");
 	const FString GameInstanceAssetName = TEXT("BP_TunaSweeperGameInstance");
@@ -152,6 +159,9 @@ namespace TunaSweeperEditorSetup
 	const FString UIAssetPath = TEXT("/Game/UI");
 	const FString VoxelAssetPath = TEXT("/Game/Prototype");
 	const FString VoxelVertexColorMaterialAssetName = TEXT("M_Voxel_VertexColor");
+	const FString EffectsAssetPath = TEXT("/Game/Effects");
+	const FString LumberjackMeleeSwingArcMaterialAssetName = TEXT("M_LumberjackMeleeSwingArc");
+	const FString LumberjackMeleeSwingArcMeshAssetName = TEXT("SM_LumberjackMeleeSwingArc");
 	const FString UIIconAssetPath = TEXT("/Game/UI/Icons");
 	const FString UITitleTextureAssetPath = TEXT("/Game/UI/Title");
 	const FString UIStoryTextureAssetPath = TEXT("/Game/UI/Story");
@@ -895,6 +905,304 @@ namespace TunaSweeperEditorSetup
 
 		StaticMesh->MarkPackageDirty();
 		return SaveAsset(StaticMesh) ? StaticMesh : nullptr;
+	}
+
+	float ComputeSwingArcVertexAlpha(float U, float V)
+	{
+		const float AlongArcFade = FMath::Pow(FMath::Clamp(FMath::Sin(U * PI), 0.0f, 1.0f), 0.55f);
+		const float WidthFade = FMath::Lerp(0.38f, 1.0f, FMath::Clamp(V, 0.0f, 1.0f));
+		return FMath::Clamp(AlongArcFade * WidthFade, 0.0f, 1.0f);
+	}
+
+	FVertexInstanceID AddSwingArcVertex(
+		FMeshDescription& MeshDescription,
+		FStaticMeshAttributes& Attributes,
+		const FVector3f& Position,
+		const FVector2f& UV,
+		const FLinearColor& Color)
+	{
+		TVertexAttributesRef<FVector3f> VertexPositions = Attributes.GetVertexPositions();
+		TVertexInstanceAttributesRef<FVector3f> VertexInstanceNormals = Attributes.GetVertexInstanceNormals();
+		TVertexInstanceAttributesRef<FVector2f> VertexInstanceUVs = Attributes.GetVertexInstanceUVs();
+		TVertexInstanceAttributesRef<FVector4f> VertexInstanceColors = Attributes.GetVertexInstanceColors();
+
+		const FVertexID VertexId = MeshDescription.CreateVertex();
+		VertexPositions[VertexId] = Position;
+
+		const FVertexInstanceID VertexInstanceId = MeshDescription.CreateVertexInstance(VertexId);
+		VertexInstanceNormals[VertexInstanceId] = FVector3f(0.0f, 0.0f, 1.0f);
+		VertexInstanceUVs.Set(VertexInstanceId, 0, UV);
+		VertexInstanceColors[VertexInstanceId] = FVector4f(Color.R, Color.G, Color.B, Color.A);
+		return VertexInstanceId;
+	}
+
+	void AddSwingArcQuad(
+		FMeshDescription& MeshDescription,
+		FStaticMeshAttributes& Attributes,
+		FPolygonGroupID PolygonGroupId,
+		const FVector3f& InnerA,
+		const FVector3f& OuterA,
+		const FVector3f& OuterB,
+		const FVector3f& InnerB,
+		float U0,
+		float U1)
+	{
+		const FLinearColor InnerColorA(0.0f, 0.95f, 1.0f, ComputeSwingArcVertexAlpha(U0, 0.0f));
+		const FLinearColor OuterColorA(0.0f, 0.95f, 1.0f, ComputeSwingArcVertexAlpha(U0, 1.0f));
+		const FLinearColor OuterColorB(0.0f, 0.95f, 1.0f, ComputeSwingArcVertexAlpha(U1, 1.0f));
+		const FLinearColor InnerColorB(0.0f, 0.95f, 1.0f, ComputeSwingArcVertexAlpha(U1, 0.0f));
+
+		TArray<FVertexInstanceID> VertexInstances;
+		VertexInstances.Reserve(4);
+		VertexInstances.Add(AddSwingArcVertex(MeshDescription, Attributes, InnerA, FVector2f(U0, 0.0f), InnerColorA));
+		VertexInstances.Add(AddSwingArcVertex(MeshDescription, Attributes, OuterA, FVector2f(U0, 1.0f), OuterColorA));
+		VertexInstances.Add(AddSwingArcVertex(MeshDescription, Attributes, OuterB, FVector2f(U1, 1.0f), OuterColorB));
+		VertexInstances.Add(AddSwingArcVertex(MeshDescription, Attributes, InnerB, FVector2f(U1, 0.0f), InnerColorB));
+		MeshDescription.CreatePolygon(PolygonGroupId, VertexInstances);
+	}
+
+	void BuildLumberjackMeleeSwingArcMeshDescription(FMeshDescription& MeshDescription)
+	{
+		FStaticMeshAttributes Attributes(MeshDescription);
+		Attributes.Register();
+		Attributes.GetVertexInstanceUVs().SetNumChannels(1);
+
+		const FPolygonGroupID PolygonGroupId = MeshDescription.CreatePolygonGroup();
+		constexpr int32 SegmentCount = 18;
+		constexpr float StartDegrees = -66.0f;
+		constexpr float EndDegrees = 66.0f;
+		constexpr float InnerRadius = 48.0f;
+		constexpr float OuterRadius = 118.0f;
+		constexpr float Height = 64.0f;
+		const FVector2f ArcCenter(18.0f, 0.0f);
+
+		for (int32 SegmentIndex = 0; SegmentIndex < SegmentCount; ++SegmentIndex)
+		{
+			const float U0 = static_cast<float>(SegmentIndex) / static_cast<float>(SegmentCount);
+			const float U1 = static_cast<float>(SegmentIndex + 1) / static_cast<float>(SegmentCount);
+			const float Angle0 = FMath::DegreesToRadians(FMath::Lerp(StartDegrees, EndDegrees, U0));
+			const float Angle1 = FMath::DegreesToRadians(FMath::Lerp(StartDegrees, EndDegrees, U1));
+			const FVector2f Direction0(FMath::Cos(Angle0), FMath::Sin(Angle0));
+			const FVector2f Direction1(FMath::Cos(Angle1), FMath::Sin(Angle1));
+
+			const FVector2f Inner0 = ArcCenter + Direction0 * InnerRadius;
+			const FVector2f Outer0 = ArcCenter + Direction0 * OuterRadius;
+			const FVector2f Outer1 = ArcCenter + Direction1 * OuterRadius;
+			const FVector2f Inner1 = ArcCenter + Direction1 * InnerRadius;
+
+			AddSwingArcQuad(
+				MeshDescription,
+				Attributes,
+				PolygonGroupId,
+				FVector3f(Inner0.X, Inner0.Y, Height),
+				FVector3f(Outer0.X, Outer0.Y, Height),
+				FVector3f(Outer1.X, Outer1.Y, Height),
+				FVector3f(Inner1.X, Inner1.Y, Height),
+				U0,
+				U1);
+		}
+	}
+
+	UMaterial* EnsureLumberjackMeleeSwingArcMaterial()
+	{
+		const FString ObjectPath = GetAssetObjectPath(EffectsAssetPath, LumberjackMeleeSwingArcMaterialAssetName);
+		UMaterial* Material = LoadObject<UMaterial>(nullptr, *ObjectPath);
+		if (!Material)
+		{
+			UMaterialFactoryNew* MaterialFactory = NewObject<UMaterialFactoryNew>();
+
+			FAssetToolsModule& AssetToolsModule = FModuleManager::LoadModuleChecked<FAssetToolsModule>(TEXT("AssetTools"));
+			UObject* CreatedAsset = AssetToolsModule.Get().CreateAsset(
+				LumberjackMeleeSwingArcMaterialAssetName,
+				EffectsAssetPath,
+				UMaterial::StaticClass(),
+				MaterialFactory);
+
+			Material = Cast<UMaterial>(CreatedAsset);
+			if (!Material)
+			{
+				UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to create %s."), *ObjectPath);
+				return nullptr;
+			}
+
+			FAssetRegistryModule::AssetCreated(Material);
+		}
+
+		Material->Modify();
+		Material->GetExpressionCollection().Empty();
+		Material->BlendMode = BLEND_Additive;
+		Material->SetShadingModel(MSM_Unlit);
+		Material->TwoSided = true;
+		Material->bUsedWithNiagaraMeshParticles = true;
+
+		UMaterialEditorOnlyData* MaterialEditorOnly = Material->GetEditorOnlyData();
+		if (!MaterialEditorOnly)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to edit %s."), *ObjectPath);
+			return nullptr;
+		}
+
+		UMaterialExpressionVertexColor* VertexColorExpression = NewObject<UMaterialExpressionVertexColor>(Material);
+		VertexColorExpression->Material = Material;
+		VertexColorExpression->MaterialExpressionEditorX = -520;
+		VertexColorExpression->MaterialExpressionEditorY = -20;
+		Material->GetExpressionCollection().AddExpression(VertexColorExpression);
+
+		UMaterialExpressionScalarParameter* IntensityParameter = NewObject<UMaterialExpressionScalarParameter>(Material);
+		IntensityParameter->Material = Material;
+		IntensityParameter->ParameterName = TEXT("Intensity");
+		IntensityParameter->DefaultValue = 5.2f;
+		IntensityParameter->MaterialExpressionEditorX = -520;
+		IntensityParameter->MaterialExpressionEditorY = 180;
+		Material->GetExpressionCollection().AddExpression(IntensityParameter);
+
+		UMaterialExpressionMultiply* EmissiveMultiply = NewObject<UMaterialExpressionMultiply>(Material);
+		EmissiveMultiply->Material = Material;
+		EmissiveMultiply->A.Connect(0, VertexColorExpression);
+		EmissiveMultiply->B.Connect(0, IntensityParameter);
+		EmissiveMultiply->MaterialExpressionEditorX = -220;
+		EmissiveMultiply->MaterialExpressionEditorY = 60;
+		Material->GetExpressionCollection().AddExpression(EmissiveMultiply);
+
+		UMaterialExpressionScalarParameter* OpacityParameter = NewObject<UMaterialExpressionScalarParameter>(Material);
+		OpacityParameter->Material = Material;
+		OpacityParameter->ParameterName = TEXT("Opacity");
+		OpacityParameter->DefaultValue = 1.0f;
+		OpacityParameter->MaterialExpressionEditorX = -520;
+		OpacityParameter->MaterialExpressionEditorY = 360;
+		Material->GetExpressionCollection().AddExpression(OpacityParameter);
+
+		UMaterialExpressionScalarParameter* DissolveParameter = NewObject<UMaterialExpressionScalarParameter>(Material);
+		DissolveParameter->Material = Material;
+		DissolveParameter->ParameterName = TEXT("Dissolve");
+		DissolveParameter->DefaultValue = 0.0f;
+		DissolveParameter->MaterialExpressionEditorX = -520;
+		DissolveParameter->MaterialExpressionEditorY = 520;
+		Material->GetExpressionCollection().AddExpression(DissolveParameter);
+
+		UMaterialExpressionTextureCoordinate* TextureCoordinateExpression = NewObject<UMaterialExpressionTextureCoordinate>(Material);
+		TextureCoordinateExpression->Material = Material;
+		TextureCoordinateExpression->CoordinateIndex = 0;
+		TextureCoordinateExpression->MaterialExpressionEditorX = -820;
+		TextureCoordinateExpression->MaterialExpressionEditorY = 600;
+		Material->GetExpressionCollection().AddExpression(TextureCoordinateExpression);
+
+		UMaterialExpressionComponentMask* UvUMask = NewObject<UMaterialExpressionComponentMask>(Material);
+		UvUMask->Material = Material;
+		UvUMask->Input.Connect(0, TextureCoordinateExpression);
+		UvUMask->R = 1;
+		UvUMask->G = 0;
+		UvUMask->B = 0;
+		UvUMask->A = 0;
+		UvUMask->MaterialExpressionEditorX = -640;
+		UvUMask->MaterialExpressionEditorY = 600;
+		Material->GetExpressionCollection().AddExpression(UvUMask);
+
+		UMaterialExpressionSubtract* UvDissolveSubtract = NewObject<UMaterialExpressionSubtract>(Material);
+		UvDissolveSubtract->Material = Material;
+		UvDissolveSubtract->A.Connect(0, UvUMask);
+		UvDissolveSubtract->B.Connect(0, DissolveParameter);
+		UvDissolveSubtract->MaterialExpressionEditorX = -340;
+		UvDissolveSubtract->MaterialExpressionEditorY = 520;
+		Material->GetExpressionCollection().AddExpression(UvDissolveSubtract);
+
+		UMaterialExpressionMultiply* UvWipeScale = NewObject<UMaterialExpressionMultiply>(Material);
+		UvWipeScale->Material = Material;
+		UvWipeScale->A.Connect(0, UvDissolveSubtract);
+		UvWipeScale->ConstB = 6.0f;
+		UvWipeScale->MaterialExpressionEditorX = -140;
+		UvWipeScale->MaterialExpressionEditorY = 520;
+		Material->GetExpressionCollection().AddExpression(UvWipeScale);
+
+		UMaterialExpressionSaturate* UvWipeMask = NewObject<UMaterialExpressionSaturate>(Material);
+		UvWipeMask->Material = Material;
+		UvWipeMask->Input.Connect(0, UvWipeScale);
+		UvWipeMask->MaterialExpressionEditorX = 60;
+		UvWipeMask->MaterialExpressionEditorY = 520;
+		Material->GetExpressionCollection().AddExpression(UvWipeMask);
+
+		UMaterialExpressionMultiply* VertexOpacityMultiply = NewObject<UMaterialExpressionMultiply>(Material);
+		VertexOpacityMultiply->Material = Material;
+		VertexOpacityMultiply->A.Connect(4, VertexColorExpression);
+		VertexOpacityMultiply->B.Connect(0, OpacityParameter);
+		VertexOpacityMultiply->MaterialExpressionEditorX = -220;
+		VertexOpacityMultiply->MaterialExpressionEditorY = 300;
+		Material->GetExpressionCollection().AddExpression(VertexOpacityMultiply);
+
+		UMaterialExpressionMultiply* FinalOpacityMultiply = NewObject<UMaterialExpressionMultiply>(Material);
+		FinalOpacityMultiply->Material = Material;
+		FinalOpacityMultiply->A.Connect(0, VertexOpacityMultiply);
+		FinalOpacityMultiply->B.Connect(0, UvWipeMask);
+		FinalOpacityMultiply->MaterialExpressionEditorX = 240;
+		FinalOpacityMultiply->MaterialExpressionEditorY = 360;
+		Material->GetExpressionCollection().AddExpression(FinalOpacityMultiply);
+
+		MaterialEditorOnly->BaseColor.Connect(0, VertexColorExpression);
+		MaterialEditorOnly->EmissiveColor.Connect(0, EmissiveMultiply);
+		MaterialEditorOnly->Opacity.Connect(0, FinalOpacityMultiply);
+
+		Material->PostEditChange();
+		Material->MarkPackageDirty();
+
+		if (!SaveAsset(Material))
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to save %s."), *ObjectPath);
+			return nullptr;
+		}
+
+		return Material;
+	}
+
+	UStaticMesh* EnsureLumberjackMeleeSwingArcMeshAsset(UMaterialInterface* SwingArcMaterial)
+	{
+		const FString ObjectPath = GetAssetObjectPath(EffectsAssetPath, LumberjackMeleeSwingArcMeshAssetName);
+		UStaticMesh* StaticMesh = LoadObject<UStaticMesh>(nullptr, *ObjectPath);
+		if (!StaticMesh)
+		{
+			const FString PackageName = FString::Printf(TEXT("%s/%s"), *EffectsAssetPath, *LumberjackMeleeSwingArcMeshAssetName);
+			UPackage* Package = CreatePackage(*PackageName);
+			if (!Package)
+			{
+				return nullptr;
+			}
+
+			StaticMesh = NewObject<UStaticMesh>(
+				Package,
+				*LumberjackMeleeSwingArcMeshAssetName,
+				RF_Public | RF_Standalone | RF_Transactional);
+			if (!StaticMesh)
+			{
+				return nullptr;
+			}
+
+			FAssetRegistryModule::AssetCreated(StaticMesh);
+		}
+
+		StaticMesh->Modify();
+
+		FMeshDescription MeshDescription;
+		BuildLumberjackMeleeSwingArcMeshDescription(MeshDescription);
+
+		StaticMesh->GetStaticMaterials().Reset();
+		StaticMesh->GetStaticMaterials().Add(FStaticMaterial(SwingArcMaterial, FName(TEXT("SwingArc"))));
+
+		TArray<const FMeshDescription*> MeshDescriptions;
+		MeshDescriptions.Add(&MeshDescription);
+		StaticMesh->BuildFromMeshDescriptions(MeshDescriptions);
+		StaticMesh->MarkPackageDirty();
+
+		return SaveAsset(StaticMesh) ? StaticMesh : nullptr;
+	}
+
+	bool EnsureLumberjackMeleeSwingArcAssets()
+	{
+		UMaterial* SwingArcMaterial = EnsureLumberjackMeleeSwingArcMaterial();
+		if (!SwingArcMaterial)
+		{
+			return false;
+		}
+
+		return EnsureLumberjackMeleeSwingArcMeshAsset(SwingArcMaterial) != nullptr;
 	}
 
 	template <typename AssetType>
@@ -6671,6 +6979,13 @@ public:
 			[]()
 			{
 				return TunaSweeperEditorSetup::EnsureSharedVoxelMeshAssets();
+			});
+
+		FTunaSweeperEditorRunOnce::Run(
+			TunaSweeperEditorSetup::LumberjackMeleeSwingArcAssetTaskId,
+			[]()
+			{
+				return TunaSweeperEditorSetup::EnsureLumberjackMeleeSwingArcAssets();
 			});
 
 		FTunaSweeperEditorRunOnce::Run(

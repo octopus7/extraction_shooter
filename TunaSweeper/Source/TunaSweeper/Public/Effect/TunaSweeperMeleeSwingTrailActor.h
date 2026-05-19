@@ -6,6 +6,7 @@
 
 class USceneComponent;
 class UStaticMeshComponent;
+class UMaterialInstanceDynamic;
 
 UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API ATunaSweeperMeleeSwingTrailActor : public AActor
@@ -15,6 +16,8 @@ class TUNASWEEPER_API ATunaSweeperMeleeSwingTrailActor : public AActor
 public:
 	ATunaSweeperMeleeSwingTrailActor();
 
+	virtual void Tick(float DeltaSeconds) override;
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -22,26 +25,12 @@ protected:
 	TObjectPtr<USceneComponent> SceneRoot;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<UStaticMeshComponent> TrailSegmentA;
+	TObjectPtr<UStaticMeshComponent> SwingArcMesh;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<UStaticMeshComponent> TrailSegmentB;
+private:
+	UPROPERTY(Transient)
+	TObjectPtr<UMaterialInstanceDynamic> SwingArcMaterial;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<UStaticMeshComponent> TrailSegmentC;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<UStaticMeshComponent> TrailSegmentD;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<UStaticMeshComponent> TrailSegmentE;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<UStaticMeshComponent> TrailSegmentF;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<UStaticMeshComponent> TrailSegmentG;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<UStaticMeshComponent> TrailSegmentH;
+	FVector BaseArcScale = FVector::OneVector;
+	float ElapsedLifetimeSeconds = 0.0f;
 };
