@@ -8,4 +8,5 @@
 - Record user instructions in `Docs/requests.md` with the current timestamp and elapsed duration next to the timestamp. Do not include a timezone suffix in request log timestamps.
 - Record user questions and their answers separately in `Docs/questions.md` with the current timestamp and elapsed duration next to the timestamp. Do not include a timezone suffix in question log timestamps. Do not duplicate questions in `Docs/requests.md`.
 - Use `Docs/game_conventions.md` for project-wide gameplay conventions such as direction, distance, units, and currency.
+- Use `Docs/save_persistence.md` to track gameplay/runtime state that must survive save/load. Update it whenever adding or changing persisted save data.
 - For project-local transparent icon or icon-sheet generation, use `.codex/skills/icon-alpha-from-solid-bg`: generate one muted mid-value solid-background source image, derive matched black/white background images locally, then extract alpha from their difference.

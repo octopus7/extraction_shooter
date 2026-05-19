@@ -10,6 +10,7 @@ namespace TunaSweeperSave
 {
 	const TCHAR* SaveSlotNamePrefix = TEXT("TunaSweeperSave_Slot");
 	const TCHAR* SaveSettingsSlotName = TEXT("TunaSweeperSaveSettings");
+	constexpr int32 CurrentSaveVersion = 2;
 	constexpr int32 SaveUserIndex = 0;
 	constexpr int32 MinSaveSlotIndex = 1;
 	constexpr int32 MaxSaveSlotIndex = 3;
@@ -94,6 +95,32 @@ namespace TunaSweeperInventory
 		}
 
 		return NAME_None;
+	}
+
+	void NormalizeLoadedAmmoPersistenceFields(FTunaSweeperItemInstance& ItemInstance)
+	{
+		ItemInstance.LoadedAmmoCount = FMath::Max(0, ItemInstance.LoadedAmmoCount);
+
+		if (ItemInstance.LoadedAmmoItemId == INDEX_NONE)
+		{
+			if (ItemInstance.SelectedAmmoItemId != INDEX_NONE)
+			{
+				ItemInstance.LoadedAmmoItemId = ItemInstance.SelectedAmmoItemId;
+			}
+			else
+			{
+				ItemInstance.LoadedAmmoCount = 0;
+			}
+		}
+
+		ItemInstance.SelectedAmmoItemId = ItemInstance.LoadedAmmoItemId;
+	}
+
+	FTunaSweeperItemInstance MakeItemInstanceForSave(const FTunaSweeperItemInstance& ItemInstance)
+	{
+		FTunaSweeperItemInstance SaveItemInstance = ItemInstance;
+		NormalizeLoadedAmmoPersistenceFields(SaveItemInstance);
+		return SaveItemInstance;
 	}
 }
 
@@ -1180,9 +1207,11 @@ bool UTunaSweeperGameInstance::LoadGameState()
 	ItemInstancesByUid.Reset();
 	for (const FTunaSweeperItemInstance& ItemInstance : SaveGame->ItemInstances)
 	{
-		if (ItemInstance.IsValid())
+		FTunaSweeperItemInstance LoadedItemInstance = ItemInstance;
+		TunaSweeperInventory::NormalizeLoadedAmmoPersistenceFields(LoadedItemInstance);
+		if (LoadedItemInstance.IsValid())
 		{
-			ItemInstancesByUid.Add(ItemInstance.Uid, ItemInstance);
+			ItemInstancesByUid.Add(LoadedItemInstance.Uid, LoadedItemInstance);
 		}
 	}
 
@@ -1237,10 +1266,11 @@ bool UTunaSweeperGameInstance::SaveGameStateInternal() const
 	{
 		if (const FTunaSweeperItemInstance* ItemInstance = ItemInstancesByUid.Find(ItemUid))
 		{
-			SaveGame->ItemInstances.Add(*ItemInstance);
+			SaveGame->ItemInstances.Add(TunaSweeperInventory::MakeItemInstanceForSave(*ItemInstance));
 		}
 	}
 
+	SaveGame->SaveVersion = TunaSweeperSave::CurrentSaveVersion;
 	SaveGame->SaveSlotIndex = ActiveSaveSlotIndex;
 	SaveGame->TotalPlaySeconds = GetCurrentActiveSlotTotalPlaySeconds();
 	SaveGame->LastSavedAtTicks = FDateTime::Now().GetTicks();
