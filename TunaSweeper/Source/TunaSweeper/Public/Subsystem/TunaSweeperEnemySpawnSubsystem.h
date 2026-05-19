@@ -72,6 +72,7 @@ private:
 		FRotator Rotation = FRotator::ZeroRotator;
 		int32 ContainerDefinitionId = INDEX_NONE;
 		int32 ContentsId = INDEX_NONE;
+		bool bEditorOnly = false;
 	};
 
 	struct FTransparentObstacleSpawnDefinition

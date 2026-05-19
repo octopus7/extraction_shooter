@@ -18,6 +18,7 @@
   {
     "level_name": "BunkerMap",
     "loot_container_class": "/Game/Interaction/BP_LootContainer.BP_LootContainer_C",
+    "editor_only": true,
     "container_definition_id": 7008,
     "contents_id": 8007,
     "location": [0.0, -1000.0, 40.0],

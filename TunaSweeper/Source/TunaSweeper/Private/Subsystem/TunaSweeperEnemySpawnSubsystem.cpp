@@ -71,6 +71,15 @@ namespace TunaSweeperEnemySpawn
 		return true;
 	}
 
+	bool ShouldIncludeEditorOnlySpawn(const UWorld* World)
+	{
+#if WITH_EDITOR
+		return World && World->IsGameWorld();
+#else
+		(void)World;
+		return false;
+#endif
+	}
 }
 
 void UTunaSweeperEnemySpawnSubsystem::Initialize(FSubsystemCollectionBase& Collection)
@@ -173,6 +182,10 @@ bool UTunaSweeperEnemySpawnSubsystem::EnsureRaidRuntimeActorsSpawnedForWorld(UWo
 		for (const FLootContainerSpawnDefinition& SpawnDefinition : LootContainerSpawnDefinitions)
 		{
 			if (!DoesLevelNameMatchWorld(SpawnDefinition.LevelName, World))
+			{
+				continue;
+			}
+			if (SpawnDefinition.bEditorOnly && !TunaSweeperEnemySpawn::ShouldIncludeEditorOnlySpawn(World))
 			{
 				continue;
 			}
@@ -451,6 +464,7 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadLootContainerSpawnData(bool bForceRelo
 		FString LootContainerClassPath;
 		FVector Location = FVector::ZeroVector;
 		FRotator Rotation = FRotator::ZeroRotator;
+		bool bEditorOnly = false;
 		double NumericContainerDefinitionId = INDEX_NONE;
 		double NumericContentsId = INDEX_NONE;
 		if (!JsonObject->TryGetStringField(TEXT("level_name"), LevelName) ||
@@ -463,6 +477,7 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadLootContainerSpawnData(bool bForceRelo
 		}
 
 		JsonObject->TryGetStringField(TEXT("loot_container_class"), LootContainerClassPath);
+		JsonObject->TryGetBoolField(TEXT("editor_only"), bEditorOnly);
 		TunaSweeperEnemySpawn::TryReadRotatorField(JsonObject, TEXT("rotation"), Rotation);
 
 		FLootContainerSpawnDefinition SpawnDefinition;
@@ -475,6 +490,7 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadLootContainerSpawnData(bool bForceRelo
 		SpawnDefinition.Rotation = Rotation;
 		SpawnDefinition.ContainerDefinitionId = static_cast<int32>(NumericContainerDefinitionId);
 		SpawnDefinition.ContentsId = static_cast<int32>(NumericContentsId);
+		SpawnDefinition.bEditorOnly = bEditorOnly;
 
 		if (SpawnDefinition.LevelName.IsNone() ||
 			SpawnDefinition.ContainerDefinitionId == INDEX_NONE ||
