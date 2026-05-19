@@ -19,7 +19,8 @@ enum class ETunaSweeperInteractionType : uint8
 	LootContainerSpawn = 6 UMETA(DisplayName = "Loot Container Spawn"),
 	LevelTravel = 7 UMETA(DisplayName = "Level Travel"),
 	Quest = 8 UMETA(DisplayName = "Quest"),
-	SelfDestruct = 9 UMETA(DisplayName = "Self Destruct")
+	SelfDestruct = 9 UMETA(DisplayName = "Self Destruct"),
+	WorldProgress = 10 UMETA(DisplayName = "World Progress")
 };
 
 UCLASS(BlueprintType, Blueprintable, ClassGroup=(TunaSweeper), meta=(BlueprintSpawnableComponent))

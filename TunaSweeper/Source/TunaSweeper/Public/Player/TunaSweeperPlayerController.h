@@ -13,8 +13,10 @@ class UTunaSweeperIntroMenuWidget;
 class UTunaSweeperQuestWidget;
 class UTunaSweeperScenarioPresentationWidget;
 class UTunaSweeperScreenFadeWidget;
+class UTunaSweeperWorldProgressWidget;
 class UInputAction;
 class ATunaSweeperPickupItemActor;
+class ATunaSweeperWorldProgressActor;
 struct FInputActionValue;
 
 UCLASS(BlueprintType, Blueprintable)
@@ -40,6 +42,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Quest")
 	void OpenQuestPanel(FName QuestId);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|World Progress")
+	void OpenWorldProgressPanel(ATunaSweeperWorldProgressActor* ProgressActor);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Input")
 	void ApplyDefaultGameInputMode();
@@ -91,6 +96,9 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, Category = "Quest")
 	TObjectPtr<UTunaSweeperQuestWidget> QuestWidget;
+
+	UPROPERTY(BlueprintReadOnly, Category = "World Progress")
+	TObjectPtr<UTunaSweeperWorldProgressWidget> WorldProgressWidget;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	TArray<TSoftObjectPtr<UInputAction>> QuickSlotActions;

@@ -10,6 +10,7 @@
 #include "Interaction/TunaSweeperLootContainerSpawnInteractableActor.h"
 #include "Interaction/TunaSweeperPickupItemActor.h"
 #include "Interaction/TunaSweeperSelfDestructInteractableActor.h"
+#include "Interaction/TunaSweeperWorldProgressActor.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/TunaSweeperPlayerController.h"
 #include "Stats/Stats.h"
@@ -81,6 +82,8 @@ bool UTunaSweeperInteractionSubsystem::RequestInteraction(UTunaSweeperInteractab
 		return HandleQuestInteraction(Interactable, InstigatorPawn);
 	case ETunaSweeperInteractionType::SelfDestruct:
 		return HandleSelfDestructInteraction(Interactable, InstigatorPawn);
+	case ETunaSweeperInteractionType::WorldProgress:
+		return HandleWorldProgressInteraction(Interactable, InstigatorPawn);
 	default:
 		return false;
 	}
@@ -217,6 +220,28 @@ bool UTunaSweeperInteractionSubsystem::HandleSelfDestructInteraction(
 		? Cast<ATunaSweeperSelfDestructInteractableActor>(Interactable->GetOwner())
 		: nullptr;
 	return SelfDestructActor && SelfDestructActor->StartSelfDestruct(InstigatorPawn);
+}
+
+bool UTunaSweeperInteractionSubsystem::HandleWorldProgressInteraction(
+	UTunaSweeperInteractableComponent* Interactable,
+	APawn* InstigatorPawn)
+{
+	ATunaSweeperWorldProgressActor* ProgressActor = Interactable
+		? Cast<ATunaSweeperWorldProgressActor>(Interactable->GetOwner())
+		: nullptr;
+	if (!ProgressActor || !InstigatorPawn)
+	{
+		return false;
+	}
+
+	ATunaSweeperPlayerController* TunaPlayerController = Cast<ATunaSweeperPlayerController>(InstigatorPawn->GetController());
+	if (!TunaPlayerController)
+	{
+		return false;
+	}
+
+	TunaPlayerController->OpenWorldProgressPanel(ProgressActor);
+	return true;
 }
 
 void UTunaSweeperInteractionSubsystem::RefreshFocusedInteractable()

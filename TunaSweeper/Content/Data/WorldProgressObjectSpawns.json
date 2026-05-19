@@ -1,0 +1,18 @@
+[
+  {
+    "level_name": "RaidMap",
+    "object_id": "raid_creek_broken_bridge_01",
+    "info_id": "obstacle.broken_bridge",
+    "progress_actor_class": "/Game/Interaction/BP_WorldProgress_BrokenBridge.BP_WorldProgress_BrokenBridge_C",
+    "completed_actor_class": "/Game/Interaction/BP_WorldProgress_RepairedBridge.BP_WorldProgress_RepairedBridge_C",
+    "display_name": "\ubd80\uc11c\uc9c4 \ub2e4\ub9ac",
+    "interaction_display_name": "\uc218\ub9ac\ud558\uae30",
+    "required_item_display_name": "\ubaa9\uc7ac",
+    "required_item_id": 6002,
+    "required_quantity": 2,
+    "initial_progress_quantity": 0,
+    "location": [1370.0, 850.0, 120.0],
+    "rotation": [0.0, 24.0, 0.0],
+    "box_extent": [270.0, 55.0, 150.0]
+  }
+]

@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
 #include "Inventory/TunaSweeperInventoryTypes.h"
+#include "Inventory/TunaSweeperSaveGame.h"
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
 #include "TunaSweeperGameInstance.generated.h"
 
@@ -232,7 +233,32 @@ public:
 	bool AddItemToFirstAvailableInventorySlot(int32 ItemId, int32 Quantity = 1);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Inventory")
+	int32 CountInventoryItemById(int32 ItemId);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Inventory")
+	int32 ConsumeInventoryItemById(int32 ItemId, int32 RequestedAmount);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Inventory")
 	void CompactInventorySlots();
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|World Progress")
+	FTunaSweeperWorldProgressSaveData GetOrCreateWorldProgressState(
+		FName ObjectId,
+		FName InfoId,
+		int32 InitialProgressQuantity,
+		int32 RequiredQuantity);
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|World Progress")
+	bool TryGetWorldProgressState(FName ObjectId, FTunaSweeperWorldProgressSaveData& OutState) const;
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|World Progress")
+	bool UpdateWorldProgressState(
+		FName ObjectId,
+		FName InfoId,
+		ETunaSweeperWorldProgressState State,
+		int32 ProgressQuantity,
+		int32 RequiredQuantity,
+		bool bSaveImmediately = false);
 
 	void SelectItemSlot(const FTunaSweeperItemSlotReference& SlotReference);
 	void ClearSelectedItemSelection();
@@ -365,6 +391,9 @@ private:
 
 	UPROPERTY(Transient)
 	TSet<FName> CompletedScenarioFlags;
+
+	UPROPERTY(Transient)
+	TMap<FName, FTunaSweeperWorldProgressSaveData> WorldProgressStatesById;
 
 	UPROPERTY(Transient)
 	FName PendingScenarioCompletionFlag;

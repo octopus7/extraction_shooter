@@ -4,6 +4,8 @@
 #include "Dom/JsonObject.h"
 #include "Engine/World.h"
 #include "Interaction/TunaSweeperLootContainerActor.h"
+#include "Interaction/TunaSweeperTransparentObstacleActor.h"
+#include "Interaction/TunaSweeperWorldProgressActor.h"
 #include "Kismet/GameplayStatics.h"
 #include "Misc/FileHelper.h"
 #include "Misc/PackageName.h"
@@ -18,8 +20,13 @@ namespace TunaSweeperEnemySpawn
 {
 	const TCHAR* EnemySpawnsJsonRelativePath = TEXT("Data/EnemySpawns.json");
 	const TCHAR* LootContainerSpawnsJsonRelativePath = TEXT("Data/LootContainerSpawns.json");
+	const TCHAR* TransparentObstacleSpawnsJsonRelativePath = TEXT("Data/TransparentObstacleSpawns.json");
+	const TCHAR* WorldProgressObjectSpawnsJsonRelativePath = TEXT("Data/WorldProgressObjectSpawns.json");
 	const TCHAR* DefaultEnemyClassPath = TEXT("/Game/Characters/Enemy/BP_TunaSweeperEnemy.BP_TunaSweeperEnemy_C");
 	const TCHAR* DefaultLootContainerClassPath = TEXT("/Game/Interaction/BP_LootContainer.BP_LootContainer_C");
+	const TCHAR* DefaultTransparentObstacleClassPath = TEXT("/Game/Interaction/BP_TransparentObstacle.BP_TransparentObstacle_C");
+	const TCHAR* DefaultWorldProgressActorClassPath = TEXT("/Game/Interaction/BP_WorldProgress_BrokenBridge.BP_WorldProgress_BrokenBridge_C");
+	const TCHAR* DefaultWorldProgressCompletedActorClassPath = TEXT("/Game/Interaction/BP_WorldProgress_RepairedBridge.BP_WorldProgress_RepairedBridge_C");
 
 	FString NormalizeLevelName(const FString& RawLevelName)
 	{
@@ -85,6 +92,8 @@ void UTunaSweeperEnemySpawnSubsystem::Deinitialize()
 
 	ResetLoadedEnemySpawnData();
 	ResetLoadedLootContainerSpawnData();
+	ResetLoadedTransparentObstacleSpawnData();
+	ResetLoadedWorldProgressObjectSpawnData();
 	LastSpawnedWorld.Reset();
 	Super::Deinitialize();
 }
@@ -108,7 +117,9 @@ bool UTunaSweeperEnemySpawnSubsystem::EnsureRaidRuntimeActorsSpawnedForWorld(UWo
 
 	const bool bLoadedEnemies = LoadEnemySpawnData(false);
 	const bool bLoadedLootContainers = LoadLootContainerSpawnData(false);
-	if (!bLoadedEnemies && !bLoadedLootContainers)
+	const bool bLoadedTransparentObstacles = LoadTransparentObstacleSpawnData(false);
+	const bool bLoadedWorldProgressObjects = LoadWorldProgressObjectSpawnData(false);
+	if (!bLoadedEnemies && !bLoadedLootContainers && !bLoadedTransparentObstacles && !bLoadedWorldProgressObjects)
 	{
 		return false;
 	}
@@ -195,12 +206,109 @@ bool UTunaSweeperEnemySpawnSubsystem::EnsureRaidRuntimeActorsSpawnedForWorld(UWo
 		}
 	}
 
+	int32 SpawnedTransparentObstacleCount = 0;
+	if (bLoadedTransparentObstacles)
+	{
+		for (const FTransparentObstacleSpawnDefinition& SpawnDefinition : TransparentObstacleSpawnDefinitions)
+		{
+			if (!DoesLevelNameMatchWorld(SpawnDefinition.LevelName, World))
+			{
+				continue;
+			}
+
+			TSubclassOf<ATunaSweeperTransparentObstacleActor> LoadedObstacleClass = SpawnDefinition.ObstacleClass.LoadSynchronous();
+			if (!LoadedObstacleClass)
+			{
+				UE_LOG(
+					LogTunaSweeperEnemySpawn,
+					Warning,
+					TEXT("Transparent obstacle class failed to load for level %s. Falling back to native transparent obstacle actor."),
+					*SpawnDefinition.LevelName.ToString());
+				LoadedObstacleClass = ATunaSweeperTransparentObstacleActor::StaticClass();
+			}
+
+			const FTransform SpawnTransform(SpawnDefinition.Rotation, SpawnDefinition.Location);
+			ATunaSweeperTransparentObstacleActor* SpawnedObstacle =
+				World->SpawnActorDeferred<ATunaSweeperTransparentObstacleActor>(
+					LoadedObstacleClass,
+					SpawnTransform,
+					nullptr,
+					nullptr,
+					ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+			if (SpawnedObstacle)
+			{
+				SpawnedObstacle->ConfigureObstacleDefaults(SpawnDefinition.ObstacleId, SpawnDefinition.BoxExtent);
+				if (!SpawnDefinition.ObstacleId.IsNone())
+				{
+					SpawnedObstacle->Tags.AddUnique(SpawnDefinition.ObstacleId);
+				}
+				UGameplayStatics::FinishSpawningActor(SpawnedObstacle, SpawnTransform);
+				++SpawnedTransparentObstacleCount;
+			}
+		}
+	}
+
+	int32 SpawnedWorldProgressObjectCount = 0;
+	if (bLoadedWorldProgressObjects)
+	{
+		for (const FWorldProgressObjectSpawnDefinition& SpawnDefinition : WorldProgressObjectSpawnDefinitions)
+		{
+			if (!DoesLevelNameMatchWorld(SpawnDefinition.LevelName, World))
+			{
+				continue;
+			}
+
+			TSubclassOf<ATunaSweeperWorldProgressActor> LoadedProgressActorClass =
+				SpawnDefinition.ProgressActorClass.LoadSynchronous();
+			if (!LoadedProgressActorClass)
+			{
+				UE_LOG(
+					LogTunaSweeperEnemySpawn,
+					Warning,
+					TEXT("World progress actor class failed to load for level %s. Falling back to native world progress actor."),
+					*SpawnDefinition.LevelName.ToString());
+				LoadedProgressActorClass = ATunaSweeperWorldProgressActor::StaticClass();
+			}
+
+			const FTransform SpawnTransform(SpawnDefinition.Rotation, SpawnDefinition.Location);
+			ATunaSweeperWorldProgressActor* SpawnedProgressActor =
+				World->SpawnActorDeferred<ATunaSweeperWorldProgressActor>(
+					LoadedProgressActorClass,
+					SpawnTransform,
+					nullptr,
+					nullptr,
+					ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+			if (SpawnedProgressActor)
+			{
+				SpawnedProgressActor->ConfigureWorldProgressDefaults(
+					SpawnDefinition.ObjectId,
+					SpawnDefinition.InfoId,
+					SpawnDefinition.DisplayName,
+					SpawnDefinition.InteractionDisplayName,
+					SpawnDefinition.RequiredItemId,
+					SpawnDefinition.RequiredQuantity,
+					SpawnDefinition.InitialProgressQuantity,
+					SpawnDefinition.RequiredItemDisplayName,
+					SpawnDefinition.BoxExtent,
+					SpawnDefinition.CompletedActorClass);
+				if (!SpawnDefinition.ObjectId.IsNone())
+				{
+					SpawnedProgressActor->Tags.AddUnique(SpawnDefinition.ObjectId);
+				}
+				UGameplayStatics::FinishSpawningActor(SpawnedProgressActor, SpawnTransform);
+				++SpawnedWorldProgressObjectCount;
+			}
+		}
+	}
+
 	UE_LOG(
 		LogTunaSweeperEnemySpawn,
 		Log,
-		TEXT("Spawned %d enemies and %d loot containers for level %s."),
+		TEXT("Spawned %d enemies, %d loot containers, %d transparent obstacles, and %d world progress objects for level %s."),
 		SpawnedCount,
 		SpawnedLootContainerCount,
+		SpawnedTransparentObstacleCount,
+		SpawnedWorldProgressObjectCount,
 		*TunaSweeperEnemySpawn::NormalizeLevelName(World->GetMapName()));
 	return true;
 }
@@ -390,6 +498,223 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadLootContainerSpawnData(bool bForceRelo
 	return true;
 }
 
+bool UTunaSweeperEnemySpawnSubsystem::LoadTransparentObstacleSpawnData(bool bForceReload)
+{
+	if (bTransparentObstacleSpawnDataLoaded && !bForceReload)
+	{
+		return true;
+	}
+
+	ResetLoadedTransparentObstacleSpawnData();
+
+	FString JsonContent;
+	const FString ObstacleSpawnJsonPath = GetTransparentObstacleSpawnJsonPath();
+	if (!FFileHelper::LoadFileToString(JsonContent, *ObstacleSpawnJsonPath))
+	{
+		UE_LOG(LogTunaSweeperEnemySpawn, Error, TEXT("Failed to read transparent obstacle spawn JSON: %s"), *ObstacleSpawnJsonPath);
+		return false;
+	}
+
+	TArray<TSharedPtr<FJsonValue>> JsonRows;
+	const TSharedRef<TJsonReader<>> JsonReader = TJsonReaderFactory<>::Create(JsonContent);
+	if (!FJsonSerializer::Deserialize(JsonReader, JsonRows))
+	{
+		UE_LOG(LogTunaSweeperEnemySpawn, Error, TEXT("Failed to parse transparent obstacle spawn JSON: %s"), *ObstacleSpawnJsonPath);
+		return false;
+	}
+
+	bool bHasValidRows = false;
+	for (int32 RowIndex = 0; RowIndex < JsonRows.Num(); ++RowIndex)
+	{
+		const TSharedPtr<FJsonObject>* JsonObjectPtr = nullptr;
+		if (!JsonRows[RowIndex].IsValid() || !JsonRows[RowIndex]->TryGetObject(JsonObjectPtr) ||
+			!JsonObjectPtr || !JsonObjectPtr->IsValid())
+		{
+			UE_LOG(LogTunaSweeperEnemySpawn, Warning, TEXT("Skipping transparent obstacle spawn row %d: row is not an object."), RowIndex);
+			continue;
+		}
+
+		const TSharedPtr<FJsonObject>& JsonObject = *JsonObjectPtr;
+		FString LevelName;
+		FString ObstacleId;
+		FString ObstacleClassPath;
+		FVector Location = FVector::ZeroVector;
+		FRotator Rotation = FRotator::ZeroRotator;
+		FVector BoxExtent(260.0f, 45.0f, 140.0f);
+		if (!JsonObject->TryGetStringField(TEXT("level_name"), LevelName) ||
+			!JsonObject->TryGetStringField(TEXT("obstacle_id"), ObstacleId) ||
+			!TunaSweeperEnemySpawn::TryReadVectorField(JsonObject, TEXT("location"), Location))
+		{
+			UE_LOG(LogTunaSweeperEnemySpawn, Warning, TEXT("Skipping transparent obstacle spawn row %d: required field is missing."), RowIndex);
+			continue;
+		}
+
+		JsonObject->TryGetStringField(TEXT("obstacle_class"), ObstacleClassPath);
+		TunaSweeperEnemySpawn::TryReadRotatorField(JsonObject, TEXT("rotation"), Rotation);
+		TunaSweeperEnemySpawn::TryReadVectorField(JsonObject, TEXT("box_extent"), BoxExtent);
+
+		FTransparentObstacleSpawnDefinition SpawnDefinition;
+		SpawnDefinition.LevelName = FName(*LevelName.TrimStartAndEnd());
+		SpawnDefinition.ObstacleId = FName(*ObstacleId.TrimStartAndEnd());
+		SpawnDefinition.ObstacleClass = TSoftClassPtr<ATunaSweeperTransparentObstacleActor>(
+			FSoftObjectPath(ObstacleClassPath.TrimStartAndEnd().IsEmpty()
+				? FString(TunaSweeperEnemySpawn::DefaultTransparentObstacleClassPath)
+				: ObstacleClassPath.TrimStartAndEnd()));
+		SpawnDefinition.Location = Location;
+		SpawnDefinition.Rotation = Rotation;
+		SpawnDefinition.BoxExtent = FVector(
+			FMath::Max(1.0f, BoxExtent.X),
+			FMath::Max(1.0f, BoxExtent.Y),
+			FMath::Max(1.0f, BoxExtent.Z));
+
+		if (SpawnDefinition.LevelName.IsNone() || SpawnDefinition.ObstacleId.IsNone())
+		{
+			UE_LOG(LogTunaSweeperEnemySpawn, Warning, TEXT("Skipping transparent obstacle spawn row %d: row has invalid identifiers."), RowIndex);
+			continue;
+		}
+
+		TransparentObstacleSpawnDefinitions.Add(SpawnDefinition);
+		bHasValidRows = true;
+	}
+
+	if (!bHasValidRows)
+	{
+		UE_LOG(LogTunaSweeperEnemySpawn, Error, TEXT("Transparent obstacle spawn JSON has no valid rows: %s"), *ObstacleSpawnJsonPath);
+		return false;
+	}
+
+	bTransparentObstacleSpawnDataLoaded = true;
+	return true;
+}
+
+bool UTunaSweeperEnemySpawnSubsystem::LoadWorldProgressObjectSpawnData(bool bForceReload)
+{
+	if (bWorldProgressObjectSpawnDataLoaded && !bForceReload)
+	{
+		return true;
+	}
+
+	ResetLoadedWorldProgressObjectSpawnData();
+
+	FString JsonContent;
+	const FString ProgressObjectSpawnJsonPath = GetWorldProgressObjectSpawnJsonPath();
+	if (!FFileHelper::LoadFileToString(JsonContent, *ProgressObjectSpawnJsonPath))
+	{
+		UE_LOG(LogTunaSweeperEnemySpawn, Error, TEXT("Failed to read world progress object spawn JSON: %s"), *ProgressObjectSpawnJsonPath);
+		return false;
+	}
+
+	TArray<TSharedPtr<FJsonValue>> JsonRows;
+	const TSharedRef<TJsonReader<>> JsonReader = TJsonReaderFactory<>::Create(JsonContent);
+	if (!FJsonSerializer::Deserialize(JsonReader, JsonRows))
+	{
+		UE_LOG(LogTunaSweeperEnemySpawn, Error, TEXT("Failed to parse world progress object spawn JSON: %s"), *ProgressObjectSpawnJsonPath);
+		return false;
+	}
+
+	bool bHasValidRows = false;
+	for (int32 RowIndex = 0; RowIndex < JsonRows.Num(); ++RowIndex)
+	{
+		const TSharedPtr<FJsonObject>* JsonObjectPtr = nullptr;
+		if (!JsonRows[RowIndex].IsValid() || !JsonRows[RowIndex]->TryGetObject(JsonObjectPtr) ||
+			!JsonObjectPtr || !JsonObjectPtr->IsValid())
+		{
+			UE_LOG(LogTunaSweeperEnemySpawn, Warning, TEXT("Skipping world progress object spawn row %d: row is not an object."), RowIndex);
+			continue;
+		}
+
+		const TSharedPtr<FJsonObject>& JsonObject = *JsonObjectPtr;
+		FString LevelName;
+		FString ObjectId;
+		FString InfoId;
+		FString ProgressActorClassPath;
+		FString CompletedActorClassPath;
+		FString DisplayName;
+		FString InteractionDisplayName;
+		FString RequiredItemDisplayName;
+		FVector Location = FVector::ZeroVector;
+		FRotator Rotation = FRotator::ZeroRotator;
+		FVector BoxExtent(260.0f, 55.0f, 140.0f);
+		double NumericRequiredItemId = 6002.0;
+		double NumericRequiredQuantity = 2.0;
+		double NumericInitialProgressQuantity = 0.0;
+		if (!JsonObject->TryGetStringField(TEXT("level_name"), LevelName) ||
+			!JsonObject->TryGetStringField(TEXT("object_id"), ObjectId) ||
+			!JsonObject->TryGetStringField(TEXT("info_id"), InfoId) ||
+			!TunaSweeperEnemySpawn::TryReadVectorField(JsonObject, TEXT("location"), Location))
+		{
+			UE_LOG(LogTunaSweeperEnemySpawn, Warning, TEXT("Skipping world progress object spawn row %d: required field is missing."), RowIndex);
+			continue;
+		}
+
+		JsonObject->TryGetStringField(TEXT("progress_actor_class"), ProgressActorClassPath);
+		JsonObject->TryGetStringField(TEXT("completed_actor_class"), CompletedActorClassPath);
+		JsonObject->TryGetStringField(TEXT("display_name"), DisplayName);
+		JsonObject->TryGetStringField(TEXT("interaction_display_name"), InteractionDisplayName);
+		JsonObject->TryGetStringField(TEXT("required_item_display_name"), RequiredItemDisplayName);
+		JsonObject->TryGetNumberField(TEXT("required_item_id"), NumericRequiredItemId);
+		JsonObject->TryGetNumberField(TEXT("required_quantity"), NumericRequiredQuantity);
+		JsonObject->TryGetNumberField(TEXT("initial_progress_quantity"), NumericInitialProgressQuantity);
+		TunaSweeperEnemySpawn::TryReadRotatorField(JsonObject, TEXT("rotation"), Rotation);
+		TunaSweeperEnemySpawn::TryReadVectorField(JsonObject, TEXT("box_extent"), BoxExtent);
+
+		FWorldProgressObjectSpawnDefinition SpawnDefinition;
+		SpawnDefinition.LevelName = FName(*LevelName.TrimStartAndEnd());
+		SpawnDefinition.ObjectId = FName(*ObjectId.TrimStartAndEnd());
+		SpawnDefinition.InfoId = FName(*InfoId.TrimStartAndEnd());
+		SpawnDefinition.ProgressActorClass = TSoftClassPtr<ATunaSweeperWorldProgressActor>(
+			FSoftObjectPath(ProgressActorClassPath.TrimStartAndEnd().IsEmpty()
+				? FString(TunaSweeperEnemySpawn::DefaultWorldProgressActorClassPath)
+				: ProgressActorClassPath.TrimStartAndEnd()));
+		SpawnDefinition.CompletedActorClass = TSoftClassPtr<AActor>(
+			FSoftObjectPath(CompletedActorClassPath.TrimStartAndEnd().IsEmpty()
+				? FString(TunaSweeperEnemySpawn::DefaultWorldProgressCompletedActorClassPath)
+				: CompletedActorClassPath.TrimStartAndEnd()));
+		SpawnDefinition.DisplayName = DisplayName.TrimStartAndEnd().IsEmpty()
+			? FText::FromString(TEXT("\uBD80\uC11C\uC9C4 \uB2E4\uB9AC"))
+			: FText::FromString(DisplayName.TrimStartAndEnd());
+		SpawnDefinition.InteractionDisplayName = InteractionDisplayName.TrimStartAndEnd().IsEmpty()
+			? FText::FromString(TEXT("\uC218\uB9AC\uD558\uAE30"))
+			: FText::FromString(InteractionDisplayName.TrimStartAndEnd());
+		SpawnDefinition.RequiredItemDisplayName = RequiredItemDisplayName.TrimStartAndEnd().IsEmpty()
+			? FText::FromString(TEXT("\uBAA9\uC7AC"))
+			: FText::FromString(RequiredItemDisplayName.TrimStartAndEnd());
+		SpawnDefinition.Location = Location;
+		SpawnDefinition.Rotation = Rotation;
+		SpawnDefinition.BoxExtent = FVector(
+			FMath::Max(1.0f, BoxExtent.X),
+			FMath::Max(1.0f, BoxExtent.Y),
+			FMath::Max(1.0f, BoxExtent.Z));
+		SpawnDefinition.RequiredItemId = static_cast<int32>(NumericRequiredItemId);
+		SpawnDefinition.RequiredQuantity = FMath::Max(1, static_cast<int32>(NumericRequiredQuantity));
+		SpawnDefinition.InitialProgressQuantity = FMath::Clamp(
+			static_cast<int32>(NumericInitialProgressQuantity),
+			0,
+			SpawnDefinition.RequiredQuantity);
+
+		if (SpawnDefinition.LevelName.IsNone() ||
+			SpawnDefinition.ObjectId.IsNone() ||
+			SpawnDefinition.InfoId.IsNone() ||
+			SpawnDefinition.RequiredItemId == INDEX_NONE)
+		{
+			UE_LOG(LogTunaSweeperEnemySpawn, Warning, TEXT("Skipping world progress object spawn row %d: row has invalid identifiers."), RowIndex);
+			continue;
+		}
+
+		WorldProgressObjectSpawnDefinitions.Add(SpawnDefinition);
+		bHasValidRows = true;
+	}
+
+	if (!bHasValidRows)
+	{
+		UE_LOG(LogTunaSweeperEnemySpawn, Error, TEXT("World progress object spawn JSON has no valid rows: %s"), *ProgressObjectSpawnJsonPath);
+		return false;
+	}
+
+	bWorldProgressObjectSpawnDataLoaded = true;
+	return true;
+}
+
 void UTunaSweeperEnemySpawnSubsystem::HandlePostLoadMapWithWorld(UWorld* LoadedWorld)
 {
 	EnsureRaidRuntimeActorsSpawnedForWorld(LoadedWorld);
@@ -407,6 +732,18 @@ void UTunaSweeperEnemySpawnSubsystem::ResetLoadedLootContainerSpawnData()
 	bLootContainerSpawnDataLoaded = false;
 }
 
+void UTunaSweeperEnemySpawnSubsystem::ResetLoadedTransparentObstacleSpawnData()
+{
+	TransparentObstacleSpawnDefinitions.Reset();
+	bTransparentObstacleSpawnDataLoaded = false;
+}
+
+void UTunaSweeperEnemySpawnSubsystem::ResetLoadedWorldProgressObjectSpawnData()
+{
+	WorldProgressObjectSpawnDefinitions.Reset();
+	bWorldProgressObjectSpawnDataLoaded = false;
+}
+
 FString UTunaSweeperEnemySpawnSubsystem::GetEnemySpawnJsonPath() const
 {
 	return FPaths::Combine(FPaths::ProjectContentDir(), TunaSweeperEnemySpawn::EnemySpawnsJsonRelativePath);
@@ -415,6 +752,16 @@ FString UTunaSweeperEnemySpawnSubsystem::GetEnemySpawnJsonPath() const
 FString UTunaSweeperEnemySpawnSubsystem::GetLootContainerSpawnJsonPath() const
 {
 	return FPaths::Combine(FPaths::ProjectContentDir(), TunaSweeperEnemySpawn::LootContainerSpawnsJsonRelativePath);
+}
+
+FString UTunaSweeperEnemySpawnSubsystem::GetTransparentObstacleSpawnJsonPath() const
+{
+	return FPaths::Combine(FPaths::ProjectContentDir(), TunaSweeperEnemySpawn::TransparentObstacleSpawnsJsonRelativePath);
+}
+
+FString UTunaSweeperEnemySpawnSubsystem::GetWorldProgressObjectSpawnJsonPath() const
+{
+	return FPaths::Combine(FPaths::ProjectContentDir(), TunaSweeperEnemySpawn::WorldProgressObjectSpawnsJsonRelativePath);
 }
 
 bool UTunaSweeperEnemySpawnSubsystem::DoesLevelNameMatchWorld(FName LevelName, const UWorld* World) const

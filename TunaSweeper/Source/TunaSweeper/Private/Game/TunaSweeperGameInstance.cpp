@@ -10,7 +10,7 @@ namespace TunaSweeperSave
 {
 	const TCHAR* SaveSlotNamePrefix = TEXT("TunaSweeperSave_Slot");
 	const TCHAR* SaveSettingsSlotName = TEXT("TunaSweeperSaveSettings");
-	constexpr int32 CurrentSaveVersion = 3;
+	constexpr int32 CurrentSaveVersion = 4;
 	constexpr int32 SaveUserIndex = 0;
 	constexpr int32 MinSaveSlotIndex = 1;
 	constexpr int32 MaxSaveSlotIndex = 3;
@@ -1076,6 +1076,24 @@ bool UTunaSweeperGameInstance::AddItemToFirstAvailableInventorySlot(int32 ItemId
 	return true;
 }
 
+int32 UTunaSweeperGameInstance::CountInventoryItemById(int32 ItemId)
+{
+	EnsureInventoryStateInitialized();
+	return CountInventoryAmmoByItemId(ItemId);
+}
+
+int32 UTunaSweeperGameInstance::ConsumeInventoryItemById(int32 ItemId, int32 RequestedAmount)
+{
+	EnsureInventoryStateInitialized();
+	const int32 ConsumedAmount = ConsumeInventoryAmmoByItemId(ItemId, RequestedAmount);
+	if (ConsumedAmount > 0)
+	{
+		ClearSelectedItemIfInvalid();
+		BroadcastInventoryStateChanged();
+	}
+	return ConsumedAmount;
+}
+
 void UTunaSweeperGameInstance::CompactInventorySlots()
 {
 	EnsureInventoryStateInitialized();
@@ -1100,6 +1118,100 @@ void UTunaSweeperGameInstance::CompactInventorySlots()
 	}
 
 	BroadcastInventoryStateChanged();
+}
+
+FTunaSweeperWorldProgressSaveData UTunaSweeperGameInstance::GetOrCreateWorldProgressState(
+	FName ObjectId,
+	FName InfoId,
+	int32 InitialProgressQuantity,
+	int32 RequiredQuantity)
+{
+	EnsureInventoryStateInitialized();
+
+	FTunaSweeperWorldProgressSaveData EmptyState;
+	if (ObjectId.IsNone())
+	{
+		return EmptyState;
+	}
+
+	FTunaSweeperWorldProgressSaveData* ExistingState = WorldProgressStatesById.Find(ObjectId);
+	if (!ExistingState)
+	{
+		FTunaSweeperWorldProgressSaveData NewState;
+		NewState.ObjectId = ObjectId;
+		NewState.InfoId = InfoId;
+		NewState.State = ETunaSweeperWorldProgressState::InProgress;
+		NewState.ProgressQuantity = FMath::Clamp(
+			InitialProgressQuantity,
+			0,
+			FMath::Max(0, RequiredQuantity));
+		ExistingState = &WorldProgressStatesById.Add(ObjectId, NewState);
+	}
+
+	if (!InfoId.IsNone())
+	{
+		ExistingState->InfoId = InfoId;
+	}
+
+	ExistingState->ProgressQuantity = FMath::Clamp(
+		ExistingState->ProgressQuantity,
+		0,
+		FMath::Max(0, RequiredQuantity));
+	if (ExistingState->State == ETunaSweeperWorldProgressState::Completed)
+	{
+		ExistingState->ProgressQuantity = FMath::Max(ExistingState->ProgressQuantity, FMath::Max(0, RequiredQuantity));
+	}
+
+	return *ExistingState;
+}
+
+bool UTunaSweeperGameInstance::TryGetWorldProgressState(
+	FName ObjectId,
+	FTunaSweeperWorldProgressSaveData& OutState) const
+{
+	if (const FTunaSweeperWorldProgressSaveData* FoundState = WorldProgressStatesById.Find(ObjectId))
+	{
+		OutState = *FoundState;
+		return true;
+	}
+
+	OutState = FTunaSweeperWorldProgressSaveData();
+	return false;
+}
+
+bool UTunaSweeperGameInstance::UpdateWorldProgressState(
+	FName ObjectId,
+	FName InfoId,
+	ETunaSweeperWorldProgressState State,
+	int32 ProgressQuantity,
+	int32 RequiredQuantity,
+	bool bSaveImmediately)
+{
+	EnsureInventoryStateInitialized();
+	if (ObjectId.IsNone())
+	{
+		return false;
+	}
+
+	FTunaSweeperWorldProgressSaveData NewState;
+	NewState.ObjectId = ObjectId;
+	NewState.InfoId = InfoId;
+	NewState.State = State;
+	NewState.ProgressQuantity = FMath::Clamp(
+		ProgressQuantity,
+		0,
+		FMath::Max(0, RequiredQuantity));
+	if (NewState.State == ETunaSweeperWorldProgressState::Completed)
+	{
+		NewState.ProgressQuantity = FMath::Max(NewState.ProgressQuantity, FMath::Max(0, RequiredQuantity));
+	}
+
+	WorldProgressStatesById.Add(ObjectId, NewState);
+	if (bSaveImmediately)
+	{
+		SaveGameStateInternal();
+	}
+	return true;
 }
 
 void UTunaSweeperGameInstance::SelectItemSlot(const FTunaSweeperItemSlotReference& SlotReference)
@@ -1281,6 +1393,18 @@ bool UTunaSweeperGameInstance::LoadGameState()
 			CompletedScenarioFlags.Add(ScenarioFlag);
 		}
 	}
+	WorldProgressStatesById.Reset();
+	for (const FTunaSweeperWorldProgressSaveData& SavedWorldProgressState : SaveGame->WorldProgressStates)
+	{
+		if (SavedWorldProgressState.ObjectId.IsNone())
+		{
+			continue;
+		}
+
+		FTunaSweeperWorldProgressSaveData LoadedWorldProgressState = SavedWorldProgressState;
+		LoadedWorldProgressState.ProgressQuantity = FMath::Max(0, LoadedWorldProgressState.ProgressQuantity);
+		WorldProgressStatesById.Add(LoadedWorldProgressState.ObjectId, LoadedWorldProgressState);
+	}
 	PendingScenarioCompletionFlag = NAME_None;
 
 	ItemInstancesByUid.Reset();
@@ -1354,6 +1478,13 @@ bool UTunaSweeperGameInstance::SaveGameStateInternal() const
 	SaveGame->TotalPlaySeconds = GetCurrentActiveSlotTotalPlaySeconds();
 	SaveGame->LastSavedAtTicks = FDateTime::Now().GetTicks();
 	SaveGame->CompletedScenarioFlags = CompletedScenarioFlags.Array();
+	WorldProgressStatesById.GenerateValueArray(SaveGame->WorldProgressStates);
+	SaveGame->WorldProgressStates.Sort([](
+		const FTunaSweeperWorldProgressSaveData& Left,
+		const FTunaSweeperWorldProgressSaveData& Right)
+	{
+		return Left.ObjectId.LexicalLess(Right.ObjectId);
+	});
 	SaveGame->InventorySlots = PlayerInventorySlots;
 	SaveGame->EquipmentSlots = EquipmentSlots;
 	SaveGame->AuxiliaryBagSlots = AuxiliaryBagSlots;
@@ -1395,6 +1526,7 @@ void UTunaSweeperGameInstance::ResetRuntimeStateForSaveSlotSelection()
 	LoadedSlotTotalPlaySeconds = 0.0f;
 	ActiveSlotStartTimeSeconds = FPlatformTime::Seconds();
 	CompletedScenarioFlags.Reset();
+	WorldProgressStatesById.Reset();
 	PendingScenarioCompletionFlag = NAME_None;
 }
 
@@ -1402,6 +1534,7 @@ void UTunaSweeperGameInstance::GenerateDefaultInventoryState()
 {
 	ItemInstancesByUid.Reset();
 	CompletedScenarioFlags.Reset();
+	WorldProgressStatesById.Reset();
 	PendingScenarioCompletionFlag = NAME_None;
 	ResetPlayerSlotArrays();
 	ActiveLootContainerSlots.Reset();

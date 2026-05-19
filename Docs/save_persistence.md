@@ -6,7 +6,7 @@ Update it whenever a new state field is expected to persist across save slots, l
 ## Current Save Container
 
 - Save object: `UTunaSweeperSaveGame`
-- Current save version: `3`
+- Current save version: `4`
 - Runtime owner: `UTunaSweeperGameInstance`
 - Save entry point: `UTunaSweeperGameInstance::SaveGameStateInternal()`
 - Load entry point: `UTunaSweeperGameInstance::LoadGameState()`
@@ -49,6 +49,19 @@ When a weapon is loaded from a save or equipped later, ammo type and loaded coun
 - `AuxiliaryBagSlots`
 
 Slot arrays store item UIDs. Any item UID referenced by these slots, including nested attachment UIDs, must also exist in `ItemInstances`.
+
+### World Progress Objects
+
+Stored through `UTunaSweeperSaveGame::WorldProgressStates`.
+
+Each `FTunaSweeperWorldProgressSaveData` preserves:
+
+- `ObjectId`: stable per-level object identifier from runtime spawn data.
+- `InfoId`: reusable progress-object information id, such as a broken bridge or blocked entrance type.
+- `State`: `InProgress` or `Completed`.
+- `ProgressQuantity`: contributed material count for in-progress objects.
+
+Raid world progress actors restore this state on spawn. Completed objects disable their blocking collision and spawn their configured completed replacement actor at the same transform.
 
 ## Loaded Ammo Rules
 

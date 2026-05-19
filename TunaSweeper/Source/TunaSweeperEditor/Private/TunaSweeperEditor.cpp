@@ -49,6 +49,8 @@
 #include "Interaction/TunaSweeperLootContainerSpawnInteractableActor.h"
 #include "Interaction/TunaSweeperPickupItemActor.h"
 #include "Interaction/TunaSweeperSelfDestructInteractableActor.h"
+#include "Interaction/TunaSweeperTransparentObstacleActor.h"
+#include "Interaction/TunaSweeperWorldProgressActor.h"
 #include "Kismet2/BlueprintEditorUtils.h"
 #include "Kismet2/KismetEditorUtilities.h"
 #include "MediaSource.h"
@@ -110,6 +112,7 @@ namespace TunaSweeperEditorSetup
 	const FString LevelTransitionVideoTaskId = TEXT("2026-05-16_AddBidirectionalLevelTransitionVideoV3");
 	const FString FirstOutingQuestTaskId = TEXT("2026-05-15_CreateFirstOutingQuestNpcV2");
 	const FString SelfDestructInteractionTaskId = TEXT("2026-05-16_CreateSelfDestructInteractionV1");
+	const FString WorldProgressInteractionTaskId = TEXT("2026-05-19_CreateWorldProgressObstacleAssetsV1");
 	const FString EnemyVisualMaterialTaskId = TEXT("2026-05-19_CreateEnemyAndContainerVisualMaterialsV3");
 	const FString CoverPointAssetTaskId = TEXT("2026-05-16_CreateCoverPointBlueprintV1");
 	const FString GameInstanceAssetPath = TEXT("/Game/Core");
@@ -202,6 +205,9 @@ namespace TunaSweeperEditorSetup
 	const FString LevelTravelInteractionAssetName = TEXT("BP_Interact_LevelTravel");
 	const FString LevelTravelLadderMeshAssetName = TEXT("SM_LevelTravel_Ladder");
 	const FString SelfDestructInteractionAssetName = TEXT("BP_Interact_SelfDestruct");
+	const FString TransparentObstacleAssetName = TEXT("BP_TransparentObstacle");
+	const FString WorldProgressBrokenBridgeAssetName = TEXT("BP_WorldProgress_BrokenBridge");
+	const FString WorldProgressRepairedBridgeAssetName = TEXT("BP_WorldProgress_RepairedBridge");
 	const FString IntroMapPackagePath = TEXT("/Game/IntroMap");
 	const FString OpeningScenarioMapPackagePath = TEXT("/Game/OpeningScenarioMap");
 	const FString BunkerMapPackagePath = TEXT("/Game/BunkerMap");
@@ -5993,6 +5999,24 @@ namespace TunaSweeperEditorSetup
 		return bConfigured && PlaceFirstOutingQuestNpcInBunkerMap(QuestNpcBlueprint);
 	}
 
+	bool EnsureWorldProgressInteractionAssets()
+	{
+		UBlueprint* TransparentObstacleBlueprint = EnsureBlueprint(
+			InteractionAssetPath,
+			TransparentObstacleAssetName,
+			ATunaSweeperTransparentObstacleActor::StaticClass());
+		UBlueprint* BrokenBridgeBlueprint = EnsureBlueprint(
+			InteractionAssetPath,
+			WorldProgressBrokenBridgeAssetName,
+			ATunaSweeperWorldProgressActor::StaticClass());
+		UBlueprint* RepairedBridgeBlueprint = EnsureBlueprint(
+			InteractionAssetPath,
+			WorldProgressRepairedBridgeAssetName,
+			ATunaSweeperWorldProgressCompletedActor::StaticClass());
+
+		return TransparentObstacleBlueprint && BrokenBridgeBlueprint && RepairedBridgeBlueprint;
+	}
+
 	void SchedulePickupItemAndSpawnerAssetsAndMapPlacement()
 	{
 		if (FTunaSweeperEditorRunOnce::HasCompleted(PickupItemAndSpawnerTaskId))
@@ -6309,6 +6333,13 @@ public:
 			[]()
 			{
 				return TunaSweeperEditorSetup::EnsureAmmoReloadInputAssets();
+			});
+
+		FTunaSweeperEditorRunOnce::Run(
+			TunaSweeperEditorSetup::WorldProgressInteractionTaskId,
+			[]()
+			{
+				return TunaSweeperEditorSetup::EnsureWorldProgressInteractionAssets();
 			});
 
 		FTunaSweeperEditorRunOnce::Run(
