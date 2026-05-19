@@ -272,7 +272,7 @@ void UTunaSweeperScenarioPresentationWidget::BuildPresentationWidget()
 	FadeOverlay->SetVisibility(ESlateVisibility::HitTestInvisible);
 	if (UCanvasPanelSlot* FadeSlot = RootCanvas->AddChildToCanvas(FadeOverlay))
 	{
-		FadeSlot->SetAnchors(FAnchors(0.45f, 0.45f, 0.55f, 0.55f));
+		FadeSlot->SetAnchors(FAnchors(0.0f, 0.0f, 1.0f, 1.0f));
 		FadeSlot->SetOffsets(FMargin(0.0f));
 		FadeSlot->SetAlignment(FVector2D::ZeroVector);
 		FadeSlot->SetZOrder(10);
