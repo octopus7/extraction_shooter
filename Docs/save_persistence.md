@@ -6,7 +6,7 @@ Update it whenever a new state field is expected to persist across save slots, l
 ## Current Save Container
 
 - Save object: `UTunaSweeperSaveGame`
-- Current save version: `2`
+- Current save version: `3`
 - Runtime owner: `UTunaSweeperGameInstance`
 - Save entry point: `UTunaSweeperGameInstance::SaveGameStateInternal()`
 - Load entry point: `UTunaSweeperGameInstance::LoadGameState()`
@@ -19,6 +19,11 @@ Update it whenever a new state field is expected to persist across save slots, l
 - `SaveSlotIndex`
 - `TotalPlaySeconds`
 - `LastSavedAtTicks`
+
+### Scenario Progress Flags
+
+Scenario progress is persisted per save slot through `UTunaSweeperSaveGame::CompletedScenarioFlags`.
+See [scenario_progress_flags.md](scenario_progress_flags.md) for the flag contract, routing rules, and reuse constraints.
 
 ### Player-Owned Item Instances
 
