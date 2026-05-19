@@ -8,7 +8,14 @@
 #include "Game/TunaSweeperGameInstance.h"
 #include "Interaction/TunaSweeperInteractableComponent.h"
 #include "Interaction/TunaSweeperTransparentObstacleActor.h"
+#include "Materials/MaterialInterface.h"
 #include "UObject/ConstructorHelpers.h"
+
+namespace
+{
+	const TCHAR* BrokenBridgeVoxelMeshPath = TEXT("/Game/Interaction/SM_Bridge_Broken_Voxel.SM_Bridge_Broken_Voxel");
+	const TCHAR* VoxelVertexColorMaterialPath = TEXT("/Game/Prototype/M_Voxel_VertexColor.M_Voxel_VertexColor");
+}
 
 ATunaSweeperWorldProgressActor::ATunaSweeperWorldProgressActor()
 {
@@ -32,6 +39,7 @@ ATunaSweeperWorldProgressActor::ATunaSweeperWorldProgressActor()
 	{
 		VisualMesh->SetStaticMesh(CubeMesh.Object);
 	}
+	ApplyBridgeVisualMesh();
 
 	InteractableComponent = CreateDefaultSubobject<UTunaSweeperInteractableComponent>(TEXT("Interactable"));
 	InteractableComponent->SetupAttachment(RootComponent);
@@ -44,6 +52,7 @@ ATunaSweeperWorldProgressActor::ATunaSweeperWorldProgressActor()
 void ATunaSweeperWorldProgressActor::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
+	ApplyBridgeVisualMesh();
 	ApplyCollisionDefaults();
 	RefreshPresentation();
 }
@@ -59,6 +68,7 @@ void ATunaSweeperWorldProgressActor::BeginPlay()
 	}
 
 	ApplySavedState();
+	ApplyBridgeVisualMesh();
 	RefreshPresentation();
 }
 
@@ -106,6 +116,26 @@ void ATunaSweeperWorldProgressActor::ConfigureWorldProgressDefaults(
 	CompletedReplacementActorClass = InCompletedReplacementActorClass;
 	ApplyCollisionDefaults();
 	RefreshPresentation();
+}
+
+void ATunaSweeperWorldProgressActor::ApplyBridgeVisualMesh()
+{
+	if (!VisualMesh)
+	{
+		return;
+	}
+
+	if (UStaticMesh* BridgeMesh = LoadObject<UStaticMesh>(nullptr, BrokenBridgeVoxelMeshPath))
+	{
+		VisualMesh->SetStaticMesh(BridgeMesh);
+		VisualMesh->SetRelativeLocation(FVector(0.0f, 0.0f, 40.0f));
+		VisualMesh->SetRelativeScale3D(FVector::OneVector);
+	}
+
+	if (UMaterialInterface* VoxelMaterial = LoadObject<UMaterialInterface>(nullptr, VoxelVertexColorMaterialPath))
+	{
+		VisualMesh->SetMaterial(0, VoxelMaterial);
+	}
 }
 
 int32 ATunaSweeperWorldProgressActor::GetProgressQuantity() const

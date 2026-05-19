@@ -48,10 +48,16 @@ class TUNASWEEPER_API ATunaSweeperWorldProgressCompletedActor : public AActor
 public:
 	ATunaSweeperWorldProgressCompletedActor();
 
+	virtual void OnConstruction(const FTransform& Transform) override;
+	virtual void BeginPlay() override;
+
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<USceneComponent> SceneRoot;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UStaticMeshComponent> VisualMesh;
+
+private:
+	void ApplyRepairedBridgeVisualMesh();
 };

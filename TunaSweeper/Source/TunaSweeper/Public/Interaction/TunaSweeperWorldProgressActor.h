@@ -114,6 +114,7 @@ protected:
 	TSoftClassPtr<AActor> CompletedReplacementActorClass;
 
 private:
+	void ApplyBridgeVisualMesh();
 	void ApplyCollisionDefaults();
 	void RefreshPresentation();
 	void ApplySavedState();

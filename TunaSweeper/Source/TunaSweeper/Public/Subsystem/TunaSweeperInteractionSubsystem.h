@@ -6,6 +6,7 @@
 #include "TunaSweeperInteractionSubsystem.generated.h"
 
 class ATunaSweeperLootContainerActor;
+class ATunaSweeperPersistentDoorActor;
 
 UCLASS()
 class TUNASWEEPER_API UTunaSweeperInteractionSubsystem : public UTickableWorldSubsystem
@@ -39,6 +40,7 @@ private:
 	bool HandleQuestInteraction(UTunaSweeperInteractableComponent* Interactable, APawn* InstigatorPawn);
 	bool HandleSelfDestructInteraction(UTunaSweeperInteractableComponent* Interactable, APawn* InstigatorPawn);
 	bool HandleWorldProgressInteraction(UTunaSweeperInteractableComponent* Interactable, APawn* InstigatorPawn);
+	bool HandlePersistentDoorInteraction(UTunaSweeperInteractableComponent* Interactable);
 
 	TSet<TWeakObjectPtr<UTunaSweeperInteractableComponent>> RegisteredInteractables;
 	TWeakObjectPtr<UTunaSweeperInteractableComponent> FocusedInteractable;

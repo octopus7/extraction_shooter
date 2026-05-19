@@ -3,6 +3,7 @@
 #include "AI/TunaSweeperEnemyAIController.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Engine/StaticMesh.h"
 #include "GameFramework/DamageType.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Interaction/TunaSweeperLootContainerActor.h"
@@ -26,6 +27,10 @@ namespace
 	constexpr float LumberjackMeleeApproachStopRange = 95.0f;
 	constexpr float LumberjackMeleeTrackingRange = 1800.0f;
 	constexpr float LumberjackMeleeAttackCooldownSeconds = 1.25f;
+	const TCHAR* EnemyVoxelBodyMeshPath = TEXT("/Game/Characters/Enemy/SM_Enemy_VoxelBody.SM_Enemy_VoxelBody");
+	const TCHAR* EnemyVoxelForwardMarkerMeshPath =
+		TEXT("/Game/Characters/Enemy/SM_Enemy_VoxelForwardMarker.SM_Enemy_VoxelForwardMarker");
+	const TCHAR* VoxelVertexColorMaterialPath = TEXT("/Game/Prototype/M_Voxel_VertexColor.M_Voxel_VertexColor");
 
 	float GetRandomizedEnemyValue(float BaseValue, const FVector2D& OffsetRange, float MinValue)
 	{
@@ -73,12 +78,14 @@ ATunaSweeperEnemyCharacter::ATunaSweeperEnemyCharacter()
 		ForwardMarkerMesh->SetStaticMesh(CylinderMesh.Object);
 	}
 
+	ApplyVoxelVisualMeshes();
+
 	ProjectileClass = TSoftClassPtr<ATunaSweeperProjectile>(
 		FSoftObjectPath(TEXT("/Game/Weapons/BP_TunaSweeperProjectile.BP_TunaSweeperProjectile_C")));
 	BodyMaterial = TSoftObjectPtr<UMaterialInterface>(
-		FSoftObjectPath(TEXT("/Game/Characters/Enemy/M_Enemy_Red.M_Enemy_Red")));
+		FSoftObjectPath(VoxelVertexColorMaterialPath));
 	ForwardMarkerMaterial = TSoftObjectPtr<UMaterialInterface>(
-		FSoftObjectPath(TEXT("/Game/Characters/Enemy/M_Enemy_Sightline.M_Enemy_Sightline")));
+		FSoftObjectPath(VoxelVertexColorMaterialPath));
 	LootContainerClass = TSoftClassPtr<ATunaSweeperLootContainerActor>(
 		FSoftObjectPath(TEXT("/Game/Interaction/BP_LootContainer.BP_LootContainer_C")));
 }
@@ -90,6 +97,7 @@ void ATunaSweeperEnemyCharacter::BeginPlay()
 	MaxHealth = FMath::Max(1.0f, MaxHealth);
 	CurrentHealth = MaxHealth;
 	GetCharacterMovement()->MaxWalkSpeed = GetRandomizedEnemyValue(MovementSpeed, MovementSpeedRandomOffset, 0.0f);
+	ApplyVoxelVisualMeshes();
 	ApplyVisualMaterials();
 }
 
@@ -134,6 +142,29 @@ void ATunaSweeperEnemyCharacter::ConfigureSpawnData(
 	DropContainerDefinitionId = InDropContainerDefinitionId;
 	DropContentsId = InDropContentsId;
 	ApplyVisualMaterials();
+}
+
+void ATunaSweeperEnemyCharacter::ApplyVoxelVisualMeshes()
+{
+	if (VisualMesh)
+	{
+		if (UStaticMesh* VoxelBodyMesh = LoadObject<UStaticMesh>(nullptr, EnemyVoxelBodyMeshPath))
+		{
+			VisualMesh->SetStaticMesh(VoxelBodyMesh);
+			VisualMesh->SetRelativeScale3D(FVector(0.65f, 0.65f, 1.6f));
+		}
+	}
+
+	if (ForwardMarkerMesh)
+	{
+		if (UStaticMesh* VoxelForwardMarkerMesh = LoadObject<UStaticMesh>(nullptr, EnemyVoxelForwardMarkerMeshPath))
+		{
+			ForwardMarkerMesh->SetStaticMesh(VoxelForwardMarkerMesh);
+			ForwardMarkerMesh->SetRelativeLocation(FVector(62.0f, 0.0f, 54.0f));
+			ForwardMarkerMesh->SetRelativeRotation(FRotator::ZeroRotator);
+			ForwardMarkerMesh->SetRelativeScale3D(FVector::OneVector);
+		}
+	}
 }
 
 bool ATunaSweeperEnemyCharacter::AttackTarget(AActor* TargetActor)

@@ -88,7 +88,9 @@ FVector UTunaSweeperInteractableComponent::GetInteractionLocation() const
 
 bool UTunaSweeperInteractableComponent::IsWithinInteractionDistance(const AActor* OtherActor) const
 {
-	return OtherActor && GetSquaredDistance2DTo(OtherActor) <= FMath::Square(InteractionDistance);
+	return InteractionType != ETunaSweeperInteractionType::None &&
+		OtherActor &&
+		GetSquaredDistance2DTo(OtherActor) <= FMath::Square(InteractionDistance);
 }
 
 float UTunaSweeperInteractableComponent::GetSquaredDistance2DTo(const AActor* OtherActor) const
@@ -236,7 +238,9 @@ void UTunaSweeperInteractableComponent::EnsureMarkerWidgetClass()
 void UTunaSweeperInteractableComponent::UpdateMarker(float DeltaSeconds)
 {
 	const APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(this, 0);
+	const bool bCanInteract = InteractionType != ETunaSweeperInteractionType::None;
 	const bool bInsideVisibleDistance =
+		bCanInteract &&
 		PlayerPawn &&
 		FVector::DistSquared2D(PlayerPawn->GetActorLocation(), GetInteractionLocation()) <= FMath::Square(MarkerVisibleDistance);
 

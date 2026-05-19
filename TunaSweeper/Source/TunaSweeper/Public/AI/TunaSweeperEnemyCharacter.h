@@ -83,6 +83,7 @@ protected:
 	int32 DropContentsId = INDEX_NONE;
 
 private:
+	void ApplyVoxelVisualMeshes();
 	void ApplyVisualMaterials();
 	void HandleDeath(AActor* DamageCauser);
 	bool ApplyMeleeDamageTo(AActor* TargetActor);

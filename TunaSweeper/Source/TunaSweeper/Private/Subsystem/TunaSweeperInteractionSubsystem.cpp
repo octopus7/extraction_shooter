@@ -8,6 +8,7 @@
 #include "Interaction/TunaSweeperLevelTravelInteractableActor.h"
 #include "Interaction/TunaSweeperLootContainerActor.h"
 #include "Interaction/TunaSweeperLootContainerSpawnInteractableActor.h"
+#include "Interaction/TunaSweeperPersistentDoorActor.h"
 #include "Interaction/TunaSweeperPickupItemActor.h"
 #include "Interaction/TunaSweeperSelfDestructInteractableActor.h"
 #include "Interaction/TunaSweeperWorldProgressActor.h"
@@ -84,6 +85,8 @@ bool UTunaSweeperInteractionSubsystem::RequestInteraction(UTunaSweeperInteractab
 		return HandleSelfDestructInteraction(Interactable, InstigatorPawn);
 	case ETunaSweeperInteractionType::WorldProgress:
 		return HandleWorldProgressInteraction(Interactable, InstigatorPawn);
+	case ETunaSweeperInteractionType::PersistentDoor:
+		return HandlePersistentDoorInteraction(Interactable);
 	default:
 		return false;
 	}
@@ -242,6 +245,14 @@ bool UTunaSweeperInteractionSubsystem::HandleWorldProgressInteraction(
 
 	TunaPlayerController->OpenWorldProgressPanel(ProgressActor);
 	return true;
+}
+
+bool UTunaSweeperInteractionSubsystem::HandlePersistentDoorInteraction(UTunaSweeperInteractableComponent* Interactable)
+{
+	ATunaSweeperPersistentDoorActor* DoorActor = Interactable
+		? Cast<ATunaSweeperPersistentDoorActor>(Interactable->GetOwner())
+		: nullptr;
+	return DoorActor && DoorActor->OpenDoor(true);
 }
 
 void UTunaSweeperInteractionSubsystem::RefreshFocusedInteractable()

@@ -4,7 +4,14 @@
 #include "Components/SceneComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMesh.h"
+#include "Materials/MaterialInterface.h"
 #include "UObject/ConstructorHelpers.h"
+
+namespace
+{
+	const TCHAR* RepairedBridgeVoxelMeshPath = TEXT("/Game/Interaction/SM_Bridge_Repaired_Voxel.SM_Bridge_Repaired_Voxel");
+	const TCHAR* VoxelVertexColorMaterialPath = TEXT("/Game/Prototype/M_Voxel_VertexColor.M_Voxel_VertexColor");
+}
 
 ATunaSweeperTransparentObstacleActor::ATunaSweeperTransparentObstacleActor()
 {
@@ -73,5 +80,38 @@ ATunaSweeperWorldProgressCompletedActor::ATunaSweeperWorldProgressCompletedActor
 	if (CubeMesh.Succeeded())
 	{
 		VisualMesh->SetStaticMesh(CubeMesh.Object);
+	}
+	ApplyRepairedBridgeVisualMesh();
+}
+
+void ATunaSweeperWorldProgressCompletedActor::OnConstruction(const FTransform& Transform)
+{
+	Super::OnConstruction(Transform);
+	ApplyRepairedBridgeVisualMesh();
+}
+
+void ATunaSweeperWorldProgressCompletedActor::BeginPlay()
+{
+	Super::BeginPlay();
+	ApplyRepairedBridgeVisualMesh();
+}
+
+void ATunaSweeperWorldProgressCompletedActor::ApplyRepairedBridgeVisualMesh()
+{
+	if (!VisualMesh)
+	{
+		return;
+	}
+
+	if (UStaticMesh* BridgeMesh = LoadObject<UStaticMesh>(nullptr, RepairedBridgeVoxelMeshPath))
+	{
+		VisualMesh->SetStaticMesh(BridgeMesh);
+		VisualMesh->SetRelativeLocation(FVector(0.0f, 0.0f, 40.0f));
+		VisualMesh->SetRelativeScale3D(FVector::OneVector);
+	}
+
+	if (UMaterialInterface* VoxelMaterial = LoadObject<UMaterialInterface>(nullptr, VoxelVertexColorMaterialPath))
+	{
+		VisualMesh->SetMaterial(0, VoxelMaterial);
 	}
 }
