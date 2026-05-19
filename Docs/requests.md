@@ -870,3 +870,7 @@
 ## 2026-05-19 23:25:48 (소요시간: 1분 미만)
 
 - `TunaSweeperEditor Win64 Development` 빌드를 실행하고, 성공하면 `TunaSweeper/TunaSweeper.uproject`를 Unreal Editor로 열 것.
+
+## 2026-05-19 23:29:44 (소요시간: 약 2분 08초)
+
+- 대화 모드 중에는 하단 퀵슬롯 UI가 대화창과 겹치지 않도록 숨길 것.

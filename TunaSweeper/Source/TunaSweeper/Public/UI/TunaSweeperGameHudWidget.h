@@ -82,9 +82,11 @@ private:
 	void RefreshBottomStatusFromGameInstance();
 	void RefreshQuickSlotsFromGameState();
 	void RefreshReloadWidgets();
+	void RefreshDialogueHudVisibility();
 	void CacheAmmoReloadWidgets();
 	void BuildAmmoSelectorOptionTexts(TArray<FText>& OutOptionTexts, int32& OutFocusedIndex) const;
 	void HandleSelectedInventoryItemChanged();
+	bool IsDialogueSequenceActive() const;
 
 	UPROPERTY(BlueprintReadOnly, Transient, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional, AllowPrivateAccess = "true"))
 	TObjectPtr<UWidget> CenterReloadGaugeRoot;

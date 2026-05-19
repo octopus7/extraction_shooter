@@ -10,6 +10,7 @@
 #include "Game/TunaSweeperGameInstance.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/Pawn.h"
+#include "Player/TunaSweeperPlayerController.h"
 #include "UI/TunaSweeperHudBottomStatusWidget.h"
 #include "UI/TunaSweeperHudExternalPanelWidget.h"
 #include "UI/TunaSweeperHudInventoryAreaWidget.h"
@@ -32,6 +33,7 @@ void UTunaSweeperGameHudWidget::NativeConstruct()
 	RefreshBottomStatusFromGameInstance();
 	RefreshQuickSlotsFromGameState();
 	RefreshReloadWidgets();
+	RefreshDialogueHudVisibility();
 }
 
 void UTunaSweeperGameHudWidget::NativeDestruct()
@@ -51,6 +53,7 @@ void UTunaSweeperGameHudWidget::NativeTick(const FGeometry& MyGeometry, float In
 	RefreshBottomStatusFromGameInstance();
 	RefreshQuickSlotsFromGameState();
 	RefreshReloadWidgets();
+	RefreshDialogueHudVisibility();
 }
 
 void UTunaSweeperGameHudWidget::SetCenterPanelsVisible(bool bVisible)
@@ -272,16 +275,17 @@ void UTunaSweeperGameHudWidget::RefreshReloadWidgets()
 {
 	CacheAmmoReloadWidgets();
 
+	const bool bDialogueActive = IsDialogueSequenceActive();
 	ATunaSweeperTopDownCharacter* TunaCharacter = nullptr;
 	if (const APlayerController* PlayerController = GetOwningPlayer())
 	{
 		TunaCharacter = Cast<ATunaSweeperTopDownCharacter>(PlayerController->GetPawn());
 	}
 
-	const bool bShowReload = TunaCharacter && TunaCharacter->IsWeaponReloading();
+	const bool bShowReload = !bDialogueActive && TunaCharacter && TunaCharacter->IsWeaponReloading();
 	const float ReloadProgress = bShowReload ? TunaCharacter->GetReloadProgress() : 0.0f;
 	bool bShowReloadPrompt = false;
-	if (!bShowReload && TunaCharacter && !TunaCharacter->IsAmmoSelectionOpen() && !IsInventoryUiOpen())
+	if (!bDialogueActive && !bShowReload && TunaCharacter && !TunaCharacter->IsAmmoSelectionOpen() && !IsInventoryUiOpen())
 	{
 		if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
 		{
@@ -369,6 +373,24 @@ void UTunaSweeperGameHudWidget::CacheAmmoReloadWidgets()
 	}
 }
 
+void UTunaSweeperGameHudWidget::RefreshDialogueHudVisibility()
+{
+	const bool bDialogueActive = IsDialogueSequenceActive();
+	const ESlateVisibility BottomHudVisibility = bDialogueActive
+		? ESlateVisibility::Collapsed
+		: ESlateVisibility::HitTestInvisible;
+
+	if (BottomStatusWidget)
+	{
+		BottomStatusWidget->SetVisibility(BottomHudVisibility);
+	}
+
+	if (QuickSlotBarWidget)
+	{
+		QuickSlotBarWidget->SetVisibility(BottomHudVisibility);
+	}
+}
+
 void UTunaSweeperGameHudWidget::BuildAmmoSelectorOptionTexts(TArray<FText>& OutOptionTexts, int32& OutFocusedIndex) const
 {
 	OutOptionTexts.Reset();
@@ -406,6 +428,12 @@ void UTunaSweeperGameHudWidget::BuildAmmoSelectorOptionTexts(TArray<FText>& OutO
 	}
 
 	OutFocusedIndex = TunaCharacter->GetAmmoSelectionFocusIndex();
+}
+
+bool UTunaSweeperGameHudWidget::IsDialogueSequenceActive() const
+{
+	const ATunaSweeperPlayerController* TunaPlayerController = Cast<ATunaSweeperPlayerController>(GetOwningPlayer());
+	return TunaPlayerController && TunaPlayerController->IsDialogueSequenceActive();
 }
 
 void UTunaSweeperGameHudWidget::HandleSelectedInventoryItemChanged()
