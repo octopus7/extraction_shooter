@@ -90,6 +90,9 @@ private:
 	TObjectPtr<UWidget> CenterReloadGaugeRoot;
 
 	UPROPERTY(BlueprintReadOnly, Transient, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional, AllowPrivateAccess = "true"))
+	TObjectPtr<UWidget> CenterReloadPromptRoot;
+
+	UPROPERTY(BlueprintReadOnly, Transient, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional, AllowPrivateAccess = "true"))
 	TObjectPtr<UTextBlock> CenterReloadPercentText;
 
 	UPROPERTY(Transient)

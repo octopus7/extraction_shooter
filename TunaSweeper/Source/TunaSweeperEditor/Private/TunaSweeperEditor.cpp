@@ -96,7 +96,7 @@ namespace TunaSweeperEditorSetup
 	const FString InteractionInputTaskId = TEXT("2026-05-11_SetInteractInputToFKey");
 	const FString InteractionMarkerAlignmentTaskId = TEXT("2026-05-10_RebuildInteractionMarkerAlignmentV2");
 	const FString PickupItemAndSpawnerTaskId = TEXT("2026-05-11_CreatePickupItemAndSpawnerAssetsV3");
-	const FString CommonGameHudTaskId = TEXT("2026-05-19_RebuildAmmoReloadHudV6");
+	const FString CommonGameHudTaskId = TEXT("2026-05-19_RebuildAmmoReloadHudV7");
 	const FString InventoryInputTaskId = TEXT("2026-05-11_AddInventoryInput");
 	const FString QuickSlotInputTaskId = TEXT("2026-05-12_AddQuickSlotInputActions");
 	const FString DropInputTaskId = TEXT("2026-05-18_AddDropInputAction");
@@ -4117,10 +4117,15 @@ namespace TunaSweeperEditorSetup
 		UCanvasPanel* CenterReloadGaugeCanvas = WidgetTree->ConstructWidget<UCanvasPanel>(UCanvasPanel::StaticClass(), TEXT("CenterReloadGaugeCanvas"));
 		UBorder* CenterReloadGaugeBackdrop = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("CenterReloadGaugeBackdrop"));
 		UTextBlock* CenterReloadPercentText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("CenterReloadPercentText"));
+		UHorizontalBox* CenterReloadPromptRoot = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("CenterReloadPromptRoot"));
+		UTextBlock* CenterReloadPromptText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("CenterReloadPromptText"));
+		UBorder* CenterReloadPromptKeyBackground = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("CenterReloadPromptKeyBackground"));
+		UTextBlock* CenterReloadPromptKeyText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("CenterReloadPromptKeyText"));
 
 		if (!RootCanvas || !TopStatusReserveWidget || !CenterContentPanel || !InventoryAreaWidget || !ItemInfoPanelWidget ||
 			!ExternalPanelWidget || !BottomRow || !BottomStatusWidget || !BottomGap || !QuickSlotBarWidget ||
-			!CenterReloadGaugeRoot || !CenterReloadGaugeCanvas || !CenterReloadGaugeBackdrop || !CenterReloadPercentText)
+			!CenterReloadGaugeRoot || !CenterReloadGaugeCanvas || !CenterReloadGaugeBackdrop || !CenterReloadPercentText ||
+			!CenterReloadPromptRoot || !CenterReloadPromptText || !CenterReloadPromptKeyBackground || !CenterReloadPromptKeyText)
 		{
 			return false;
 		}
@@ -4251,6 +4256,38 @@ namespace TunaSweeperEditorSetup
 			CenterReloadTextSlot->SetSize(FVector2D(54.0f, 24.0f));
 		}
 
+		CenterReloadPromptRoot->SetVisibility(ESlateVisibility::Collapsed);
+		UCanvasPanelSlot* CenterReloadPromptSlot = RootCanvas->AddChildToCanvas(CenterReloadPromptRoot);
+		if (CenterReloadPromptSlot)
+		{
+			CenterReloadPromptSlot->SetAnchors(FAnchors(0.5f, 0.5f, 0.5f, 0.5f));
+			CenterReloadPromptSlot->SetAlignment(FVector2D(0.5f, 0.5f));
+			CenterReloadPromptSlot->SetPosition(FVector2D(0.0f, 92.0f));
+			CenterReloadPromptSlot->SetAutoSize(true);
+		}
+
+		ConfigureTextBlock(CenterReloadPromptText, FText::FromString(TEXT("재장전")), FLinearColor(0.92f, 0.96f, 1.0f, 1.0f), 18);
+		UHorizontalBoxSlot* CenterReloadPromptTextSlot = CenterReloadPromptRoot->AddChildToHorizontalBox(CenterReloadPromptText);
+		if (CenterReloadPromptTextSlot)
+		{
+			CenterReloadPromptTextSlot->SetVerticalAlignment(VAlign_Center);
+		}
+
+		CenterReloadPromptKeyBackground->SetPadding(FMargin(8.0f, 2.0f));
+		CenterReloadPromptKeyBackground->SetBrush(MakeRoundedBoxBrush(
+			FVector2D(28.0f, 24.0f),
+			FLinearColor(1.0f, 1.0f, 1.0f, 0.96f),
+			FLinearColor(1.0f, 1.0f, 1.0f, 0.96f),
+			0.0f));
+		ConfigureTextBlock(CenterReloadPromptKeyText, FText::FromString(TEXT("R")), FLinearColor(0.02f, 0.025f, 0.03f, 1.0f), 13);
+		CenterReloadPromptKeyBackground->SetContent(CenterReloadPromptKeyText);
+		UHorizontalBoxSlot* CenterReloadPromptKeySlot = CenterReloadPromptRoot->AddChildToHorizontalBox(CenterReloadPromptKeyBackground);
+		if (CenterReloadPromptKeySlot)
+		{
+			CenterReloadPromptKeySlot->SetPadding(FMargin(8.0f, 0.0f, 0.0f, 0.0f));
+			CenterReloadPromptKeySlot->SetVerticalAlignment(VAlign_Center);
+		}
+
 		UHorizontalBoxSlot* BottomStatusSlot = BottomRow->AddChildToHorizontalBox(BottomStatusWidget);
 		if (BottomStatusSlot)
 		{
@@ -4274,6 +4311,7 @@ namespace TunaSweeperEditorSetup
 		RegisterWidgetVariable(WidgetBlueprint, BottomStatusWidget);
 		RegisterWidgetVariable(WidgetBlueprint, QuickSlotBarWidget);
 		RegisterWidgetVariable(WidgetBlueprint, CenterReloadGaugeRoot);
+		RegisterWidgetVariable(WidgetBlueprint, CenterReloadPromptRoot);
 		RegisterWidgetVariable(WidgetBlueprint, CenterReloadPercentText);
 		RegisterWidgetVariable(WidgetBlueprint, CenterContentPanel);
 		RegisterWidgetVariable(WidgetBlueprint, InventoryAreaWidget);

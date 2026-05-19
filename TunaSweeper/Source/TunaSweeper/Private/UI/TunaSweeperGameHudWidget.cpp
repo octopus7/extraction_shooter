@@ -267,6 +267,22 @@ void UTunaSweeperGameHudWidget::RefreshReloadWidgets()
 
 	const bool bShowReload = TunaCharacter && TunaCharacter->IsWeaponReloading();
 	const float ReloadProgress = bShowReload ? TunaCharacter->GetReloadProgress() : 0.0f;
+	bool bShowReloadPrompt = false;
+	if (!bShowReload && TunaCharacter && !TunaCharacter->IsAmmoSelectionOpen() && !IsInventoryUiOpen())
+	{
+		if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
+		{
+			const int32 SelectedWeaponSlotNumber = TunaCharacter->GetSelectedWeaponSlotNumber();
+			bShowReloadPrompt =
+				SelectedWeaponSlotNumber > 0 &&
+				TunaGameInstance->IsEquipmentWeaponSlotOccupied(SelectedWeaponSlotNumber) &&
+				TunaGameInstance->GetWeaponMagazineCapacity(SelectedWeaponSlotNumber) > 0 &&
+				TunaGameInstance->GetWeaponLoadedAmmoCount(SelectedWeaponSlotNumber) <= 0 &&
+				TunaGameInstance->GetWeaponSelectedAmmoItemId(SelectedWeaponSlotNumber) != INDEX_NONE &&
+				TunaGameInstance->GetWeaponInventoryAmmoCount(SelectedWeaponSlotNumber) > 0;
+		}
+	}
+
 	if (QuickSlotBarWidget)
 	{
 		QuickSlotBarWidget->SetReloadProgress(ReloadProgress, bShowReload);
@@ -275,6 +291,11 @@ void UTunaSweeperGameHudWidget::RefreshReloadWidgets()
 	if (CenterReloadGaugeRoot)
 	{
 		CenterReloadGaugeRoot->SetVisibility(bShowReload ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
+	}
+
+	if (CenterReloadPromptRoot)
+	{
+		CenterReloadPromptRoot->SetVisibility(bShowReloadPrompt ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
 	}
 
 	if (CenterReloadPercentText)
@@ -337,6 +358,7 @@ void UTunaSweeperGameHudWidget::CacheAmmoReloadWidgets()
 	}
 
 	CenterReloadGaugeRoot = WidgetTree->FindWidget(FName(TEXT("CenterReloadGaugeRoot")));
+	CenterReloadPromptRoot = WidgetTree->FindWidget(FName(TEXT("CenterReloadPromptRoot")));
 	CenterReloadPercentText = Cast<UTextBlock>(WidgetTree->FindWidget(FName(TEXT("CenterReloadPercentText"))));
 	CenterReloadSegments.SetNum(12);
 	for (int32 SegmentNumber = 1; SegmentNumber <= CenterReloadSegments.Num(); ++SegmentNumber)
