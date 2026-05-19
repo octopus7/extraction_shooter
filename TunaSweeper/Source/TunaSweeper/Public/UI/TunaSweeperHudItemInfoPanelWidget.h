@@ -9,6 +9,7 @@ class UTextBlock;
 class UTileView;
 class UWidget;
 class UDragDropOperation;
+class UButton;
 
 UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API UTunaSweeperHudItemInfoPanelWidget : public UUserWidget
@@ -43,6 +44,9 @@ protected:
 	TObjectPtr<UTextBlock> SelectedItemDescriptionText;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
+	TObjectPtr<UButton> CloseButton;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
 	TObjectPtr<UWidget> ModdingPanel;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
@@ -52,6 +56,9 @@ protected:
 	TObjectPtr<UTileView> AttachmentSlotTileView;
 
 private:
+	UFUNCTION()
+	void HandleCloseButtonClicked();
+
 	bool TryResolveAttachmentDropSlotFromCursor(
 		const FVector2D& ScreenSpacePosition,
 		FTunaSweeperItemSlotReference& OutSlotReference) const;

@@ -1,0 +1,18 @@
+[
+  {
+    "level_name": "RaidMap",
+    "loot_container_class": "/Game/Interaction/BP_LootContainer.BP_LootContainer_C",
+    "container_definition_id": 7005,
+    "contents_id": 8004,
+    "location": [1500.0, 220.0, 40.0],
+    "rotation": [0.0, 0.0, 0.0]
+  },
+  {
+    "level_name": "RaidMap",
+    "loot_container_class": "/Game/Interaction/BP_LootContainer.BP_LootContainer_C",
+    "container_definition_id": 7006,
+    "contents_id": 8005,
+    "location": [1750.0, 220.0, 40.0],
+    "rotation": [0.0, 0.0, 0.0]
+  }
+]
