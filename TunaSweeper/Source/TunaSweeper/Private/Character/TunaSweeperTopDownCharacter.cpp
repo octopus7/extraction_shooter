@@ -91,6 +91,9 @@ void ATunaSweeperTopDownCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	DefaultCameraFOV = TopDownCamera ? TopDownCamera->FieldOfView : DefaultCameraFOV;
+	CurrentCameraBaseFOV = DefaultCameraFOV;
+	DefaultCameraRelativeRotation = TopDownCamera ? TopDownCamera->GetRelativeRotation() : DefaultCameraRelativeRotation;
+	CurrentCameraAimOffset = CameraBoom ? CameraBoom->TargetOffset : FVector::ZeroVector;
 
 	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
 	{
@@ -166,6 +169,7 @@ float ATunaSweeperTopDownCharacter::TakeDamage(
 	FTunaSweeperVitalsDelta DamageDelta;
 	DamageDelta.Health = -DamageAmount;
 	VitalsComponent->ApplyVitalsDelta(DamageDelta);
+	TriggerDamageCameraReaction(DamageAmount, DamageEvent, DamageCauser);
 	return DamageAmount;
 }
 
@@ -814,6 +818,10 @@ void ATunaSweeperTopDownCharacter::StartRespawnTransition()
 
 void ATunaSweeperTopDownCharacter::UpdateAimingVisuals(float DeltaSeconds)
 {
+	float HitReactionRollDegrees = 0.0f;
+	float HitReactionFOVDegrees = 0.0f;
+	const FVector HitReactionOffset = UpdateDamageCameraReaction(DeltaSeconds, HitReactionRollDegrees, HitReactionFOVDegrees);
+
 	if (!AimDirection.IsNearlyZero())
 	{
 		const FRotator CurrentRotation = GetActorRotation();
@@ -824,14 +832,130 @@ void ATunaSweeperTopDownCharacter::UpdateAimingVisuals(float DeltaSeconds)
 	if (TopDownCamera)
 	{
 		const float TargetFOV = bIsAiming ? AimCameraFOV : DefaultCameraFOV;
-		TopDownCamera->SetFieldOfView(FMath::FInterpTo(TopDownCamera->FieldOfView, TargetFOV, DeltaSeconds, CameraInterpSpeed));
+		CurrentCameraBaseFOV = FMath::FInterpTo(CurrentCameraBaseFOV, TargetFOV, DeltaSeconds, CameraInterpSpeed);
+		TopDownCamera->SetFieldOfView(CurrentCameraBaseFOV + HitReactionFOVDegrees);
+
+		const FRotator TargetCameraRotation = DefaultCameraRelativeRotation + FRotator(0.0f, 0.0f, HitReactionRollDegrees);
+		TopDownCamera->SetRelativeRotation(TargetCameraRotation);
 	}
 
 	if (CameraBoom)
 	{
-		const FVector TargetOffset = bIsAiming ? AimDirection * AimCameraLeadDistance : FVector::ZeroVector;
-		CameraBoom->TargetOffset = FMath::VInterpTo(CameraBoom->TargetOffset, TargetOffset, DeltaSeconds, CameraInterpSpeed);
+		const FVector AimTargetOffset = bIsAiming ? AimDirection * AimCameraLeadDistance : FVector::ZeroVector;
+		CurrentCameraAimOffset = FMath::VInterpTo(CurrentCameraAimOffset, AimTargetOffset, DeltaSeconds, CameraInterpSpeed);
+		CameraBoom->TargetOffset = CurrentCameraAimOffset + HitReactionOffset;
 	}
+}
+
+void ATunaSweeperTopDownCharacter::TriggerDamageCameraReaction(
+	float DamageAmount,
+	FDamageEvent const& DamageEvent,
+	AActor* DamageCauser)
+{
+	if (DamageAmount <= 0.0f || (!CameraBoom && !TopDownCamera))
+	{
+		return;
+	}
+
+	ActiveCameraHitReaction = ResolveDamageCameraReactionSettings(DamageEvent, DamageCauser);
+	if (ActiveCameraHitReaction.Duration <= 0.0f ||
+		(ActiveCameraHitReaction.LocationAmplitude <= 0.0f && ActiveCameraHitReaction.RollAmplitudeDegrees <= 0.0f))
+	{
+		return;
+	}
+
+	const float DamageReference = FMath::Max(0.01f, ActiveCameraHitReaction.DamageScaleReference);
+	const float MinDamageScale = FMath::Min(ActiveCameraHitReaction.MinDamageScale, ActiveCameraHitReaction.MaxDamageScale);
+	const float MaxDamageScale = FMath::Max(ActiveCameraHitReaction.MinDamageScale, ActiveCameraHitReaction.MaxDamageScale);
+	CameraHitReactionScale = FMath::Clamp(
+		DamageAmount / DamageReference,
+		MinDamageScale,
+		MaxDamageScale);
+	CameraHitReactionDirection = ResolveDamageCameraReactionDirection(DamageCauser);
+	CameraHitReactionElapsed = 0.0f;
+	CameraHitReactionPhase = 0.0f;
+	bCameraHitReactionActive = true;
+}
+
+ETunaSweeperHitReactionType ATunaSweeperTopDownCharacter::ResolveDamageCameraReactionType(
+	FDamageEvent const& DamageEvent,
+	AActor* DamageCauser) const
+{
+	(void)DamageEvent;
+	(void)DamageCauser;
+
+	return ETunaSweeperHitReactionType::Default;
+}
+
+FTunaSweeperCameraHitReactionSettings ATunaSweeperTopDownCharacter::ResolveDamageCameraReactionSettings(
+	FDamageEvent const& DamageEvent,
+	AActor* DamageCauser) const
+{
+	const ETunaSweeperHitReactionType ReactionType = ResolveDamageCameraReactionType(DamageEvent, DamageCauser);
+	if (const FTunaSweeperCameraHitReactionSettings* OverrideSettings = CameraHitReactionOverrides.Find(ReactionType))
+	{
+		return *OverrideSettings;
+	}
+
+	return DefaultCameraHitReaction;
+}
+
+FVector ATunaSweeperTopDownCharacter::ResolveDamageCameraReactionDirection(AActor* DamageCauser) const
+{
+	FVector ReactionDirection = DamageCauser
+		? GetActorLocation() - DamageCauser->GetActorLocation()
+		: -GetActorForwardVector();
+	ReactionDirection.Z = 0.0f;
+
+	if (!ReactionDirection.Normalize())
+	{
+		ReactionDirection = -GetActorForwardVector();
+		ReactionDirection.Z = 0.0f;
+		ReactionDirection.Normalize();
+	}
+
+	return ReactionDirection.IsNearlyZero() ? FVector::ForwardVector : ReactionDirection;
+}
+
+FVector ATunaSweeperTopDownCharacter::UpdateDamageCameraReaction(
+	float DeltaSeconds,
+	float& OutRollDegrees,
+	float& OutFOVDegrees)
+{
+	OutRollDegrees = 0.0f;
+	OutFOVDegrees = 0.0f;
+	if (!bCameraHitReactionActive)
+	{
+		return FVector::ZeroVector;
+	}
+
+	const float Duration = FMath::Max(0.01f, ActiveCameraHitReaction.Duration);
+	CameraHitReactionElapsed += FMath::Max(0.0f, DeltaSeconds);
+
+	const float NormalizedTime = FMath::Clamp(CameraHitReactionElapsed / Duration, 0.0f, 1.0f);
+	if (NormalizedTime >= 1.0f)
+	{
+		bCameraHitReactionActive = false;
+		return FVector::ZeroVector;
+	}
+
+	const float Decay = FMath::Square(1.0f - NormalizedTime);
+	const float BaseRadians = (CameraHitReactionElapsed * ActiveCameraHitReaction.Frequency * 2.0f * PI) + CameraHitReactionPhase;
+	const float ForwardOscillation = FMath::Sin(BaseRadians);
+	const float SideOscillation = FMath::Cos(BaseRadians * 1.37f);
+	const FVector PlanarDirection = CameraHitReactionDirection.GetSafeNormal2D();
+	FVector SideDirection = FVector::CrossProduct(FVector::UpVector, PlanarDirection).GetSafeNormal();
+	if (SideDirection.IsNearlyZero())
+	{
+		SideDirection = FVector::RightVector;
+	}
+
+	const float ScaledDecay = CameraHitReactionScale * Decay;
+	OutRollDegrees = ActiveCameraHitReaction.RollAmplitudeDegrees * ScaledDecay * ForwardOscillation;
+	OutFOVDegrees = ActiveCameraHitReaction.FOVAmplitudeDegrees * ScaledDecay;
+	return (PlanarDirection * ForwardOscillation + SideDirection * 0.45f * SideOscillation) *
+		ActiveCameraHitReaction.LocationAmplitude *
+		ScaledDecay;
 }
 
 void ATunaSweeperTopDownCharacter::UpdateCarryWeightMovementSpeed()

@@ -14,7 +14,47 @@ class USceneComponent;
 class USpringArmComponent;
 class UStaticMeshComponent;
 class UTunaSweeperLevelTransitionWidget;
+struct FDamageEvent;
 struct FInputActionValue;
+
+UENUM(BlueprintType)
+enum class ETunaSweeperHitReactionType : uint8
+{
+	Default,
+	Melee,
+	Projectile,
+	Heavy
+};
+
+USTRUCT(BlueprintType)
+struct TUNASWEEPER_API FTunaSweeperCameraHitReactionSettings
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Camera", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float Duration = 0.32f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Camera", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float LocationAmplitude = 95.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Camera", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float RollAmplitudeDegrees = 1.35f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Camera", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float FOVAmplitudeDegrees = 1.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Camera", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float Frequency = 9.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Camera", meta = (ClampMin = "0.01", UIMin = "0.01"))
+	float DamageScaleReference = 5.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Camera", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float MinDamageScale = 0.9f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Camera", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float MaxDamageScale = 1.25f;
+};
 
 UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API ATunaSweeperTopDownCharacter : public ACharacter
@@ -138,6 +178,12 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Camera")
 	float CameraInterpSpeed = 10.0f;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Camera|Hit Reaction")
+	FTunaSweeperCameraHitReactionSettings DefaultCameraHitReaction;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Camera|Hit Reaction")
+	TMap<ETunaSweeperHitReactionType, FTunaSweeperCameraHitReactionSettings> CameraHitReactionOverrides;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Death", meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float RespawnDelaySeconds = 2.0f;
 
@@ -185,6 +231,11 @@ private:
 	void RefreshSelectedWeaponAfterInventoryChanged();
 	void UpdateAimingVisuals(float DeltaSeconds);
 	void UpdateCarryWeightMovementSpeed();
+	void TriggerDamageCameraReaction(float DamageAmount, FDamageEvent const& DamageEvent, AActor* DamageCauser);
+	ETunaSweeperHitReactionType ResolveDamageCameraReactionType(FDamageEvent const& DamageEvent, AActor* DamageCauser) const;
+	FTunaSweeperCameraHitReactionSettings ResolveDamageCameraReactionSettings(FDamageEvent const& DamageEvent, AActor* DamageCauser) const;
+	FVector ResolveDamageCameraReactionDirection(AActor* DamageCauser) const;
+	FVector UpdateDamageCameraReaction(float DeltaSeconds, float& OutRollDegrees, float& OutFOVDegrees);
 	void HandleDeath();
 	void StartRespawnTransition();
 
@@ -196,15 +247,24 @@ private:
 	FTimerHandle RespawnTransitionTimerHandle;
 	FVector AimWorldPoint = FVector::ZeroVector;
 	FVector AimDirection = FVector::ForwardVector;
+	FRotator DefaultCameraRelativeRotation = FRotator::ZeroRotator;
+	FVector CurrentCameraAimOffset = FVector::ZeroVector;
 	TArray<int32> AmmoSelectionItemIds;
+	FTunaSweeperCameraHitReactionSettings ActiveCameraHitReaction;
+	FVector CameraHitReactionDirection = FVector::ForwardVector;
 	int32 SelectedWeaponSlotNumber = 0;
 	int32 PendingReloadAmmoItemId = INDEX_NONE;
 	int32 AmmoSelectionFocusIndex = INDEX_NONE;
 	float ReloadStartWorldSeconds = 0.0f;
 	float ReloadDurationSeconds = 0.0f;
+	float CurrentCameraBaseFOV = 0.0f;
+	float CameraHitReactionElapsed = 0.0f;
+	float CameraHitReactionScale = 1.0f;
+	float CameraHitReactionPhase = 0.0f;
 	bool bFireHeld = false;
 	bool bIsAiming = false;
 	bool bIsDead = false;
 	bool bIsReloading = false;
 	bool bAmmoSelectionOpen = false;
+	bool bCameraHitReactionActive = false;
 };
