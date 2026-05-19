@@ -191,7 +191,7 @@ void ATunaSweeperEnemyAIController::MoveTowardCurrentTarget(float DeltaSeconds)
 float ATunaSweeperEnemyAIController::ResolveTrackingRange() const
 {
 	const ATunaSweeperEnemyCharacter* EnemyCharacter = Cast<ATunaSweeperEnemyCharacter>(GetPawn());
-	return EnemyCharacter && EnemyCharacter->GetAttackMode() == ETunaSweeperEnemyAttackMode::Melee
+	return EnemyCharacter && EnemyCharacter->UsesMeleeAttack()
 		? EnemyCharacter->GetMeleeTrackingRange()
 		: EffectiveTrackingRange;
 }
@@ -199,7 +199,7 @@ float ATunaSweeperEnemyAIController::ResolveTrackingRange() const
 float ATunaSweeperEnemyAIController::ResolveAttackRange() const
 {
 	const ATunaSweeperEnemyCharacter* EnemyCharacter = Cast<ATunaSweeperEnemyCharacter>(GetPawn());
-	return EnemyCharacter && EnemyCharacter->GetAttackMode() == ETunaSweeperEnemyAttackMode::Melee
+	return EnemyCharacter && EnemyCharacter->UsesMeleeAttack()
 		? EnemyCharacter->GetMeleeAttackRange()
 		: EffectiveAttackRange;
 }
@@ -207,7 +207,7 @@ float ATunaSweeperEnemyAIController::ResolveAttackRange() const
 float ATunaSweeperEnemyAIController::ResolveApproachStartRange() const
 {
 	const ATunaSweeperEnemyCharacter* EnemyCharacter = Cast<ATunaSweeperEnemyCharacter>(GetPawn());
-	return EnemyCharacter && EnemyCharacter->GetAttackMode() == ETunaSweeperEnemyAttackMode::Melee
+	return EnemyCharacter && EnemyCharacter->UsesMeleeAttack()
 		? EnemyCharacter->GetMeleeApproachStartRange()
 		: EffectiveApproachStartRange;
 }
@@ -215,7 +215,7 @@ float ATunaSweeperEnemyAIController::ResolveApproachStartRange() const
 float ATunaSweeperEnemyAIController::ResolveApproachStopRange() const
 {
 	const ATunaSweeperEnemyCharacter* EnemyCharacter = Cast<ATunaSweeperEnemyCharacter>(GetPawn());
-	return EnemyCharacter && EnemyCharacter->GetAttackMode() == ETunaSweeperEnemyAttackMode::Melee
+	return EnemyCharacter && EnemyCharacter->UsesMeleeAttack()
 		? EnemyCharacter->GetMeleeApproachStopRange()
 		: EffectiveApproachStopRange;
 }
@@ -223,7 +223,7 @@ float ATunaSweeperEnemyAIController::ResolveApproachStopRange() const
 float ATunaSweeperEnemyAIController::ResolveAttackCooldownSeconds() const
 {
 	const ATunaSweeperEnemyCharacter* EnemyCharacter = Cast<ATunaSweeperEnemyCharacter>(GetPawn());
-	return EnemyCharacter && EnemyCharacter->GetAttackMode() == ETunaSweeperEnemyAttackMode::Melee
+	return EnemyCharacter && EnemyCharacter->UsesMeleeAttack()
 		? EnemyCharacter->GetMeleeAttackCooldownSeconds()
 		: EffectiveAttackCooldownSeconds;
 }

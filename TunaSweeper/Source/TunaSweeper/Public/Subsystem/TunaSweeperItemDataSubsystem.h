@@ -84,18 +84,12 @@ struct TUNASWEEPER_API FTunaSweeperItemStack
 	int32 Quantity = 1;
 };
 
-USTRUCT(BlueprintType)
 struct TUNASWEEPER_API FTunaSweeperLootContainerItemQuantity
 {
-	GENERATED_BODY()
-
-	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Loot Container")
 	int32 ItemId = INDEX_NONE;
 
-	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Loot Container", meta = (ClampMin = "1", UIMin = "1"))
 	int32 QuantityMin = 1;
 
-	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Loot Container", meta = (ClampMin = "1", UIMin = "1"))
 	int32 QuantityMax = 1;
 };
 
@@ -152,7 +146,6 @@ struct TUNASWEEPER_API FTunaSweeperLootContainerContents
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Loot Container")
 	TArray<FTunaSweeperItemStack> Items;
 
-	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Loot Container")
 	TArray<FTunaSweeperLootContainerItemQuantity> ItemQuantities;
 };
 

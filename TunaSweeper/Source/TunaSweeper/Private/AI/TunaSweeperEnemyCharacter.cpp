@@ -18,6 +18,14 @@ namespace
 	constexpr float LootDropGroundTraceDown = 900.0f;
 	constexpr float LootContainerRootHeight = 40.0f;
 	constexpr float MinLootDropGroundNormalZ = 0.72f;
+	constexpr int32 LumberjackDropContainerDefinitionId = 7007;
+	constexpr int32 LumberjackDropContentsId = 8006;
+	constexpr float LumberjackMeleeDamage = 1.0f;
+	constexpr float LumberjackMeleeAttackRange = 150.0f;
+	constexpr float LumberjackMeleeApproachStartRange = 130.0f;
+	constexpr float LumberjackMeleeApproachStopRange = 95.0f;
+	constexpr float LumberjackMeleeTrackingRange = 1800.0f;
+	constexpr float LumberjackMeleeAttackCooldownSeconds = 1.25f;
 
 	float GetRandomizedEnemyValue(float BaseValue, const FVector2D& OffsetRange, float MinValue)
 	{
@@ -81,12 +89,6 @@ void ATunaSweeperEnemyCharacter::BeginPlay()
 
 	MaxHealth = FMath::Max(1.0f, MaxHealth);
 	CurrentHealth = MaxHealth;
-	MeleeDamage = FMath::Max(0.0f, MeleeDamage);
-	MeleeAttackRange = FMath::Max(1.0f, MeleeAttackRange);
-	MeleeApproachStartRange = FMath::Max(0.0f, MeleeApproachStartRange);
-	MeleeApproachStopRange = FMath::Clamp(MeleeApproachStopRange, 0.0f, MeleeApproachStartRange);
-	MeleeTrackingRange = FMath::Max(MeleeAttackRange, MeleeTrackingRange);
-	MeleeAttackCooldownSeconds = FMath::Max(0.05f, MeleeAttackCooldownSeconds);
 	GetCharacterMovement()->MaxWalkSpeed = GetRandomizedEnemyValue(MovementSpeed, MovementSpeedRandomOffset, 0.0f);
 	ApplyVisualMaterials();
 }
@@ -134,64 +136,9 @@ void ATunaSweeperEnemyCharacter::ConfigureSpawnData(
 	ApplyVisualMaterials();
 }
 
-void ATunaSweeperEnemyCharacter::ConfigureAttackData(
-	ETunaSweeperEnemyAttackMode InAttackMode,
-	float InAttackDamage,
-	float InAttackRange,
-	float InApproachStartRange,
-	float InApproachStopRange,
-	float InTrackingRange,
-	float InAttackCooldownSeconds)
-{
-	AttackMode = InAttackMode;
-
-	if (InAttackDamage >= 0.0f)
-	{
-		if (AttackMode == ETunaSweeperEnemyAttackMode::Melee)
-		{
-			MeleeDamage = InAttackDamage;
-		}
-		else
-		{
-			ProjectileDamage = InAttackDamage;
-		}
-	}
-
-	if (AttackMode == ETunaSweeperEnemyAttackMode::Melee)
-	{
-		if (InAttackRange > 0.0f)
-		{
-			MeleeAttackRange = InAttackRange;
-		}
-		if (InApproachStartRange >= 0.0f)
-		{
-			MeleeApproachStartRange = InApproachStartRange;
-		}
-		if (InApproachStopRange >= 0.0f)
-		{
-			MeleeApproachStopRange = InApproachStopRange;
-		}
-		if (InTrackingRange > 0.0f)
-		{
-			MeleeTrackingRange = InTrackingRange;
-		}
-		if (InAttackCooldownSeconds > 0.0f)
-		{
-			MeleeAttackCooldownSeconds = InAttackCooldownSeconds;
-		}
-
-		MeleeDamage = FMath::Max(0.0f, MeleeDamage);
-		MeleeAttackRange = FMath::Max(1.0f, MeleeAttackRange);
-		MeleeApproachStartRange = FMath::Max(0.0f, MeleeApproachStartRange);
-		MeleeApproachStopRange = FMath::Clamp(MeleeApproachStopRange, 0.0f, MeleeApproachStartRange);
-		MeleeTrackingRange = FMath::Max(MeleeAttackRange, MeleeTrackingRange);
-		MeleeAttackCooldownSeconds = FMath::Max(0.05f, MeleeAttackCooldownSeconds);
-	}
-}
-
 bool ATunaSweeperEnemyCharacter::AttackTarget(AActor* TargetActor)
 {
-	if (AttackMode == ETunaSweeperEnemyAttackMode::Melee)
+	if (UsesMeleeAttack())
 	{
 		return ApplyMeleeDamageTo(TargetActor);
 	}
@@ -199,10 +146,41 @@ bool ATunaSweeperEnemyCharacter::AttackTarget(AActor* TargetActor)
 	return FireProjectileAt(TargetActor);
 }
 
+bool ATunaSweeperEnemyCharacter::UsesMeleeAttack() const
+{
+	return DropContainerDefinitionId == LumberjackDropContainerDefinitionId ||
+		DropContentsId == LumberjackDropContentsId;
+}
+
+float ATunaSweeperEnemyCharacter::GetMeleeAttackRange() const
+{
+	return LumberjackMeleeAttackRange;
+}
+
+float ATunaSweeperEnemyCharacter::GetMeleeApproachStartRange() const
+{
+	return LumberjackMeleeApproachStartRange;
+}
+
+float ATunaSweeperEnemyCharacter::GetMeleeApproachStopRange() const
+{
+	return LumberjackMeleeApproachStopRange;
+}
+
+float ATunaSweeperEnemyCharacter::GetMeleeTrackingRange() const
+{
+	return LumberjackMeleeTrackingRange;
+}
+
+float ATunaSweeperEnemyCharacter::GetMeleeAttackCooldownSeconds() const
+{
+	return LumberjackMeleeAttackCooldownSeconds;
+}
+
 bool ATunaSweeperEnemyCharacter::FireProjectileAt(AActor* TargetActor)
 {
 	UWorld* World = GetWorld();
-	if (!World || !TargetActor || bIsDead)
+	if (!World || !TargetActor || bIsDead || UsesMeleeAttack())
 	{
 		return false;
 	}
@@ -248,14 +226,14 @@ bool ATunaSweeperEnemyCharacter::FireProjectileAt(AActor* TargetActor)
 
 bool ATunaSweeperEnemyCharacter::ApplyMeleeDamageTo(AActor* TargetActor)
 {
-	if (!TargetActor || TargetActor == this || bIsDead || MeleeDamage <= 0.0f)
+	if (!TargetActor || TargetActor == this || bIsDead || LumberjackMeleeDamage <= 0.0f)
 	{
 		return false;
 	}
 
 	const FVector ActorLocation = GetActorLocation();
 	const FVector TargetLocation = TargetActor->GetActorLocation();
-	const float AttackRange = FMath::Max(1.0f, MeleeAttackRange);
+	const float AttackRange = FMath::Max(1.0f, GetMeleeAttackRange());
 	if (FVector::DistSquared2D(ActorLocation, TargetLocation) > FMath::Square(AttackRange))
 	{
 		return false;
@@ -268,7 +246,7 @@ bool ATunaSweeperEnemyCharacter::ApplyMeleeDamageTo(AActor* TargetActor)
 		SetActorRotation(FRotator(0.0f, AttackDirection.Rotation().Yaw, 0.0f));
 	}
 
-	UGameplayStatics::ApplyDamage(TargetActor, MeleeDamage, GetController(), this, UDamageType::StaticClass());
+	UGameplayStatics::ApplyDamage(TargetActor, LumberjackMeleeDamage, GetController(), this, UDamageType::StaticClass());
 	return true;
 }
 

@@ -64,17 +64,6 @@ namespace TunaSweeperEnemySpawn
 		return true;
 	}
 
-	ETunaSweeperEnemyAttackMode ParseEnemyAttackMode(const FString& RawAttackMode)
-	{
-		const FString AttackMode = RawAttackMode.TrimStartAndEnd();
-		if (AttackMode.Equals(TEXT("melee"), ESearchCase::IgnoreCase) ||
-			AttackMode.Equals(TEXT("close"), ESearchCase::IgnoreCase))
-		{
-			return ETunaSweeperEnemyAttackMode::Melee;
-		}
-
-		return ETunaSweeperEnemyAttackMode::Projectile;
-	}
 }
 
 void UTunaSweeperEnemySpawnSubsystem::Initialize(FSubsystemCollectionBase& Collection)
@@ -161,14 +150,6 @@ bool UTunaSweeperEnemySpawnSubsystem::EnsureRaidRuntimeActorsSpawnedForWorld(UWo
 					SpawnDefinition.DropContainerDefinitionId,
 					SpawnDefinition.DropContentsId,
 					SpawnDefinition.MaxHealth);
-				SpawnedEnemy->ConfigureAttackData(
-					SpawnDefinition.AttackMode,
-					SpawnDefinition.AttackDamage,
-					SpawnDefinition.AttackRange,
-					SpawnDefinition.ApproachStartRange,
-					SpawnDefinition.ApproachStopRange,
-					SpawnDefinition.TrackingRange,
-					SpawnDefinition.AttackCooldownSeconds);
 				UGameplayStatics::FinishSpawningActor(SpawnedEnemy, SpawnTransform);
 				++SpawnedCount;
 			}
@@ -264,18 +245,11 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadEnemySpawnData(bool bForceReload)
 		FString LevelName;
 		FString EnemyClassPath;
 		FString BodyMaterialPath;
-		FString AttackModeString;
 		FVector Location = FVector::ZeroVector;
 		FRotator Rotation = FRotator::ZeroRotator;
 		double NumericDropContainerDefinitionId = INDEX_NONE;
 		double NumericDropContentsId = INDEX_NONE;
 		double NumericMaxHealth = 30.0;
-		double NumericAttackDamage = -1.0;
-		double NumericAttackRange = -1.0;
-		double NumericApproachStartRange = -1.0;
-		double NumericApproachStopRange = -1.0;
-		double NumericTrackingRange = -1.0;
-		double NumericAttackCooldownSeconds = -1.0;
 		if (!JsonObject->TryGetStringField(TEXT("level_name"), LevelName) ||
 			!TunaSweeperEnemySpawn::TryReadVectorField(JsonObject, TEXT("location"), Location))
 		{
@@ -285,16 +259,9 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadEnemySpawnData(bool bForceReload)
 
 		JsonObject->TryGetStringField(TEXT("enemy_class"), EnemyClassPath);
 		JsonObject->TryGetStringField(TEXT("body_material"), BodyMaterialPath);
-		JsonObject->TryGetStringField(TEXT("attack_mode"), AttackModeString);
 		JsonObject->TryGetNumberField(TEXT("drop_container_definition_id"), NumericDropContainerDefinitionId);
 		JsonObject->TryGetNumberField(TEXT("drop_contents_id"), NumericDropContentsId);
 		JsonObject->TryGetNumberField(TEXT("max_health"), NumericMaxHealth);
-		JsonObject->TryGetNumberField(TEXT("attack_damage"), NumericAttackDamage);
-		JsonObject->TryGetNumberField(TEXT("attack_range"), NumericAttackRange);
-		JsonObject->TryGetNumberField(TEXT("approach_start_range"), NumericApproachStartRange);
-		JsonObject->TryGetNumberField(TEXT("approach_stop_range"), NumericApproachStopRange);
-		JsonObject->TryGetNumberField(TEXT("tracking_range"), NumericTrackingRange);
-		JsonObject->TryGetNumberField(TEXT("attack_cooldown_seconds"), NumericAttackCooldownSeconds);
 		TunaSweeperEnemySpawn::TryReadRotatorField(JsonObject, TEXT("rotation"), Rotation);
 
 		FEnemySpawnDefinition SpawnDefinition;
@@ -314,13 +281,6 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadEnemySpawnData(bool bForceReload)
 		SpawnDefinition.DropContainerDefinitionId = static_cast<int32>(NumericDropContainerDefinitionId);
 		SpawnDefinition.DropContentsId = static_cast<int32>(NumericDropContentsId);
 		SpawnDefinition.MaxHealth = FMath::Max(1.0f, static_cast<float>(NumericMaxHealth));
-		SpawnDefinition.AttackMode = TunaSweeperEnemySpawn::ParseEnemyAttackMode(AttackModeString);
-		SpawnDefinition.AttackDamage = static_cast<float>(NumericAttackDamage);
-		SpawnDefinition.AttackRange = static_cast<float>(NumericAttackRange);
-		SpawnDefinition.ApproachStartRange = static_cast<float>(NumericApproachStartRange);
-		SpawnDefinition.ApproachStopRange = static_cast<float>(NumericApproachStopRange);
-		SpawnDefinition.TrackingRange = static_cast<float>(NumericTrackingRange);
-		SpawnDefinition.AttackCooldownSeconds = static_cast<float>(NumericAttackCooldownSeconds);
 
 		if (SpawnDefinition.LevelName.IsNone())
 		{

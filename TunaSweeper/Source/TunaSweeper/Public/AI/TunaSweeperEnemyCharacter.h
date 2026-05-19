@@ -9,13 +9,6 @@ class UMaterialInterface;
 class ATunaSweeperProjectile;
 class ATunaSweeperLootContainerActor;
 
-UENUM(BlueprintType)
-enum class ETunaSweeperEnemyAttackMode : uint8
-{
-	Projectile UMETA(DisplayName = "Projectile"),
-	Melee UMETA(DisplayName = "Melee")
-};
-
 UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API ATunaSweeperEnemyCharacter : public ACharacter
 {
@@ -33,30 +26,19 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Combat")
 	bool FireProjectileAt(AActor* TargetActor);
 
-	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Combat")
 	bool AttackTarget(AActor* TargetActor);
+	bool UsesMeleeAttack() const;
+	float GetMeleeAttackRange() const;
+	float GetMeleeApproachStartRange() const;
+	float GetMeleeApproachStopRange() const;
+	float GetMeleeTrackingRange() const;
+	float GetMeleeAttackCooldownSeconds() const;
 
 	void ConfigureSpawnData(
 		const TSoftObjectPtr<UMaterialInterface>& InBodyMaterial,
 		int32 InDropContainerDefinitionId,
 		int32 InDropContentsId,
 		float InMaxHealth);
-
-	void ConfigureAttackData(
-		ETunaSweeperEnemyAttackMode InAttackMode,
-		float InAttackDamage,
-		float InAttackRange,
-		float InApproachStartRange,
-		float InApproachStopRange,
-		float InTrackingRange,
-		float InAttackCooldownSeconds);
-
-	ETunaSweeperEnemyAttackMode GetAttackMode() const { return AttackMode; }
-	float GetMeleeAttackRange() const { return MeleeAttackRange; }
-	float GetMeleeApproachStartRange() const { return MeleeApproachStartRange; }
-	float GetMeleeApproachStopRange() const { return MeleeApproachStopRange; }
-	float GetMeleeTrackingRange() const { return MeleeTrackingRange; }
-	float GetMeleeAttackCooldownSeconds() const { return MeleeAttackCooldownSeconds; }
 
 protected:
 	virtual void BeginPlay() override;
@@ -75,27 +57,6 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat", meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float ProjectileDamage = 10.0f;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat")
-	ETunaSweeperEnemyAttackMode AttackMode = ETunaSweeperEnemyAttackMode::Projectile;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat|Melee", meta = (ClampMin = "0.0", UIMin = "0.0"))
-	float MeleeDamage = 1.0f;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat|Melee", meta = (ClampMin = "1.0", UIMin = "1.0"))
-	float MeleeAttackRange = 150.0f;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat|Melee", meta = (ClampMin = "0.0", UIMin = "0.0"))
-	float MeleeApproachStartRange = 130.0f;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat|Melee", meta = (ClampMin = "0.0", UIMin = "0.0"))
-	float MeleeApproachStopRange = 95.0f;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat|Melee", meta = (ClampMin = "0.0", UIMin = "0.0"))
-	float MeleeTrackingRange = 1800.0f;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat|Melee", meta = (ClampMin = "0.05", UIMin = "0.05"))
-	float MeleeAttackCooldownSeconds = 1.25f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat", meta = (ClampMin = "1.0", UIMin = "1.0"))
 	float MaxHealth = 30.0f;
