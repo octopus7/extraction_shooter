@@ -96,7 +96,7 @@ namespace TunaSweeperEditorSetup
 	const FString InteractionInputTaskId = TEXT("2026-05-11_SetInteractInputToFKey");
 	const FString InteractionMarkerAlignmentTaskId = TEXT("2026-05-10_RebuildInteractionMarkerAlignmentV2");
 	const FString PickupItemAndSpawnerTaskId = TEXT("2026-05-11_CreatePickupItemAndSpawnerAssetsV3");
-	const FString CommonGameHudTaskId = TEXT("2026-05-19_RebuildAmmoReloadHudV4");
+	const FString CommonGameHudTaskId = TEXT("2026-05-19_RebuildAmmoReloadHudV6");
 	const FString InventoryInputTaskId = TEXT("2026-05-11_AddInventoryInput");
 	const FString QuickSlotInputTaskId = TEXT("2026-05-12_AddQuickSlotInputActions");
 	const FString DropInputTaskId = TEXT("2026-05-18_AddDropInputAction");
@@ -3330,10 +3330,15 @@ namespace TunaSweeperEditorSetup
 		USizeBox* RootSizeBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("RootSizeBox"));
 		UCanvasPanel* RootCanvas = WidgetTree->ConstructWidget<UCanvasPanel>(UCanvasPanel::StaticClass(), TEXT("RootCanvas"));
 		UHorizontalBox* AmmoSelectorPanel = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("AmmoSelectorPanel"));
+		UBorder* AmmoSelectorPromptBackground = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("AmmoSelectorPromptBackground"));
+		UTextBlock* AmmoSelectorPromptText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("AmmoSelectorPromptText"));
+		UBorder* AmmoSelectorKeyBackground = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("AmmoSelectorKeyBackground"));
+		UTextBlock* AmmoSelectorKeyText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("AmmoSelectorKeyText"));
 		USizeBox* ReloadProgressPanel = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("ReloadProgressPanel"));
 		UProgressBar* ReloadProgressBar = WidgetTree->ConstructWidget<UProgressBar>(UProgressBar::StaticClass(), TEXT("ReloadProgressBar"));
 		UHorizontalBox* SlotRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("SlotRow"));
-		if (!RootSizeBox || !RootCanvas || !AmmoSelectorPanel || !ReloadProgressPanel || !ReloadProgressBar || !SlotRow)
+		if (!RootSizeBox || !RootCanvas || !AmmoSelectorPanel || !AmmoSelectorPromptBackground || !AmmoSelectorPromptText ||
+			!AmmoSelectorKeyBackground || !AmmoSelectorKeyText || !ReloadProgressPanel || !ReloadProgressBar || !SlotRow)
 		{
 			return false;
 		}
@@ -3350,7 +3355,23 @@ namespace TunaSweeperEditorSetup
 			AmmoSelectorSlot->SetAnchors(FAnchors(0.5f, 0.0f, 0.5f, 0.0f));
 			AmmoSelectorSlot->SetAlignment(FVector2D(0.5f, 0.0f));
 			AmmoSelectorSlot->SetPosition(FVector2D(0.0f, 0.0f));
-			AmmoSelectorSlot->SetSize(FVector2D(596.0f, 26.0f));
+			AmmoSelectorSlot->SetAutoSize(true);
+			AmmoSelectorSlot->SetSize(FVector2D(0.0f, 26.0f));
+		}
+
+		AmmoSelectorPromptBackground->SetPadding(FMargin(8.0f, 3.0f));
+		AmmoSelectorPromptBackground->SetVisibility(ESlateVisibility::Collapsed);
+		AmmoSelectorPromptBackground->SetBrush(MakeRoundedBoxBrush(
+			FVector2D(98.0f, 24.0f),
+			FLinearColor(0.018f, 0.022f, 0.028f, 0.92f),
+			FLinearColor(0.7f, 0.85f, 0.55f, 1.0f),
+			1.0f));
+		ConfigureTextBlock(AmmoSelectorPromptText, FText::FromString(TEXT("탄약 미지정")), FLinearColor(0.9f, 0.96f, 0.88f, 1.0f), 11);
+		AmmoSelectorPromptBackground->SetContent(AmmoSelectorPromptText);
+		UHorizontalBoxSlot* PromptSlot = AmmoSelectorPanel->AddChildToHorizontalBox(AmmoSelectorPromptBackground);
+		if (PromptSlot)
+		{
+			PromptSlot->SetVerticalAlignment(VAlign_Center);
 		}
 
 		for (int32 OptionNumber = 1; OptionNumber <= 6; ++OptionNumber)
@@ -3385,6 +3406,22 @@ namespace TunaSweeperEditorSetup
 
 			RegisterWidgetVariable(WidgetBlueprint, OptionBackground);
 			RegisterWidgetVariable(WidgetBlueprint, OptionText);
+		}
+
+		AmmoSelectorKeyBackground->SetPadding(FMargin(7.0f, 2.0f));
+		AmmoSelectorKeyBackground->SetVisibility(ESlateVisibility::Collapsed);
+		AmmoSelectorKeyBackground->SetBrush(MakeRoundedBoxBrush(
+			FVector2D(22.0f, 22.0f),
+			FLinearColor(1.0f, 1.0f, 1.0f, 0.96f),
+			FLinearColor(1.0f, 1.0f, 1.0f, 0.96f),
+			0.0f));
+		ConfigureTextBlock(AmmoSelectorKeyText, FText::FromString(TEXT("T")), FLinearColor(0.02f, 0.025f, 0.03f, 1.0f), 11);
+		AmmoSelectorKeyBackground->SetContent(AmmoSelectorKeyText);
+		UHorizontalBoxSlot* KeySlot = AmmoSelectorPanel->AddChildToHorizontalBox(AmmoSelectorKeyBackground);
+		if (KeySlot)
+		{
+			KeySlot->SetPadding(FMargin(5.0f, 0.0f, 0.0f, 0.0f));
+			KeySlot->SetVerticalAlignment(VAlign_Center);
 		}
 
 		ReloadProgressPanel->SetWidthOverride(420.0f);
@@ -3536,6 +3573,10 @@ namespace TunaSweeperEditorSetup
 
 		RegisterWidgetVariable(WidgetBlueprint, RootSizeBox);
 		RegisterWidgetVariable(WidgetBlueprint, AmmoSelectorPanel);
+		RegisterWidgetVariable(WidgetBlueprint, AmmoSelectorPromptBackground);
+		RegisterWidgetVariable(WidgetBlueprint, AmmoSelectorPromptText);
+		RegisterWidgetVariable(WidgetBlueprint, AmmoSelectorKeyBackground);
+		RegisterWidgetVariable(WidgetBlueprint, AmmoSelectorKeyText);
 		RegisterWidgetVariable(WidgetBlueprint, ReloadProgressPanel);
 		RegisterWidgetVariable(WidgetBlueprint, ReloadProgressBar);
 		WidgetBlueprint->MarkPackageDirty();

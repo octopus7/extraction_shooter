@@ -27,7 +27,8 @@ public:
 
 	void SetWeaponAmmoText(int32 SlotNumber, int32 LoadedAmmoCount, int32 InventoryAmmoCount, bool bVisible);
 	void SetReloadProgress(float Progress, bool bVisible);
-	void SetAmmoSelectorOptions(const TArray<FText>& OptionTexts, int32 FocusedOptionIndex, bool bVisible);
+	void SetAmmoSelectorOptions(const TArray<FText>& OptionTexts, int32 FocusedOptionIndex, int32 WeaponSlotNumber, bool bVisible);
+	void SetAmmoSelectorPrompt(int32 WeaponSlotNumber, const FText& PromptText, bool bVisible);
 
 protected:
 	virtual void NativeConstruct() override;
@@ -36,6 +37,10 @@ protected:
 private:
 	void CacheNamedWidgets();
 	int32 GetSlotIndex(int32 SlotNumber) const;
+	float GetWeaponSlotCenterOffsetX(int32 WeaponSlotNumber) const;
+	void SetAmmoSelectorPanelPosition(int32 WeaponSlotNumber);
+	void SetAmmoSelectorPromptVisible(const FText& PromptText, bool bVisible);
+	void SetAmmoSelectorKeyHintVisible(bool bVisible);
 
 	UPROPERTY(Transient)
 	TArray<TObjectPtr<UImage>> SlotIconImages;
@@ -51,6 +56,18 @@ private:
 
 	UPROPERTY(Transient)
 	TArray<TObjectPtr<UTextBlock>> AmmoSelectorOptionTexts;
+
+	UPROPERTY(BlueprintReadOnly, Transient, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional, AllowPrivateAccess = "true"))
+	TObjectPtr<UWidget> AmmoSelectorPromptBackground;
+
+	UPROPERTY(BlueprintReadOnly, Transient, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional, AllowPrivateAccess = "true"))
+	TObjectPtr<UTextBlock> AmmoSelectorPromptText;
+
+	UPROPERTY(BlueprintReadOnly, Transient, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional, AllowPrivateAccess = "true"))
+	TObjectPtr<UWidget> AmmoSelectorKeyBackground;
+
+	UPROPERTY(BlueprintReadOnly, Transient, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional, AllowPrivateAccess = "true"))
+	TObjectPtr<UTextBlock> AmmoSelectorKeyText;
 
 	UPROPERTY(BlueprintReadOnly, Transient, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional, AllowPrivateAccess = "true"))
 	TObjectPtr<UWidget> AmmoSelectorPanel;

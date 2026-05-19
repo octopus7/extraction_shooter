@@ -1,11 +1,20 @@
 #include "UI/TunaSweeperHudQuickSlotBarWidget.h"
 
 #include "Blueprint/WidgetTree.h"
+#include "Components/CanvasPanelSlot.h"
 #include "Components/Image.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
 #include "Components/Widget.h"
 #include "Engine/Texture2D.h"
+
+namespace
+{
+	constexpr float QuickSlotRootWidth = 620.0f;
+	constexpr float QuickSlotRowWidth = 556.0f;
+	constexpr float WeaponSlotWidth = 82.0f;
+	constexpr float SlotGapWidth = 8.0f;
+}
 
 void UTunaSweeperHudQuickSlotBarWidget::NativeConstruct()
 {
@@ -13,7 +22,7 @@ void UTunaSweeperHudQuickSlotBarWidget::NativeConstruct()
 	CacheNamedWidgets();
 	SetSelectedQuickSlot(0);
 	SetReloadProgress(0.0f, false);
-	SetAmmoSelectorOptions(TArray<FText>(), INDEX_NONE, false);
+	SetAmmoSelectorOptions(TArray<FText>(), INDEX_NONE, 0, false);
 }
 
 void UTunaSweeperHudQuickSlotBarWidget::NativePreConstruct()
@@ -111,21 +120,25 @@ void UTunaSweeperHudQuickSlotBarWidget::SetReloadProgress(float Progress, bool b
 void UTunaSweeperHudQuickSlotBarWidget::SetAmmoSelectorOptions(
 	const TArray<FText>& OptionTexts,
 	int32 FocusedOptionIndex,
+	int32 WeaponSlotNumber,
 	bool bVisible)
 {
 	CacheNamedWidgets();
 
+	const int32 OptionCount = FMath::Min(OptionTexts.Num(), AmmoSelectorOptionTexts.Num());
+	const bool bShowPanel = bVisible && OptionCount > 0;
 	if (AmmoSelectorPanel)
 	{
-		AmmoSelectorPanel->SetVisibility(bVisible && OptionTexts.Num() > 0
-			? ESlateVisibility::HitTestInvisible
-			: ESlateVisibility::Collapsed);
+		SetAmmoSelectorPanelPosition(WeaponSlotNumber);
+		AmmoSelectorPanel->SetVisibility(bShowPanel ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
 	}
 
-	const int32 OptionCount = FMath::Min(OptionTexts.Num(), AmmoSelectorOptionTexts.Num());
+	SetAmmoSelectorPromptVisible(FText::GetEmpty(), false);
+	SetAmmoSelectorKeyHintVisible(bShowPanel);
+
 	for (int32 OptionIndex = 0; OptionIndex < AmmoSelectorOptionTexts.Num(); ++OptionIndex)
 	{
-		const bool bShowOption = bVisible && OptionIndex < OptionCount;
+		const bool bShowOption = bShowPanel && OptionIndex < OptionCount;
 		if (AmmoSelectorOptionTexts[OptionIndex])
 		{
 			AmmoSelectorOptionTexts[OptionIndex]->SetVisibility(bShowOption ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
@@ -136,6 +149,38 @@ void UTunaSweeperHudQuickSlotBarWidget::SetAmmoSelectorOptions(
 		{
 			AmmoSelectorOptionBackgrounds[OptionIndex]->SetVisibility(bShowOption ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
 			AmmoSelectorOptionBackgrounds[OptionIndex]->SetRenderOpacity(OptionIndex == FocusedOptionIndex ? 1.0f : 0.62f);
+		}
+	}
+}
+
+void UTunaSweeperHudQuickSlotBarWidget::SetAmmoSelectorPrompt(
+	int32 WeaponSlotNumber,
+	const FText& PromptText,
+	bool bVisible)
+{
+	CacheNamedWidgets();
+
+	const bool bShowPanel = bVisible && !PromptText.IsEmpty();
+	if (AmmoSelectorPanel)
+	{
+		SetAmmoSelectorPanelPosition(WeaponSlotNumber);
+		AmmoSelectorPanel->SetVisibility(bShowPanel ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
+	}
+
+	SetAmmoSelectorPromptVisible(PromptText, bShowPanel);
+	SetAmmoSelectorKeyHintVisible(bShowPanel);
+
+	for (int32 OptionIndex = 0; OptionIndex < AmmoSelectorOptionTexts.Num(); ++OptionIndex)
+	{
+		if (AmmoSelectorOptionTexts[OptionIndex])
+		{
+			AmmoSelectorOptionTexts[OptionIndex]->SetVisibility(ESlateVisibility::Collapsed);
+			AmmoSelectorOptionTexts[OptionIndex]->SetText(FText::GetEmpty());
+		}
+
+		if (AmmoSelectorOptionBackgrounds.IsValidIndex(OptionIndex) && AmmoSelectorOptionBackgrounds[OptionIndex])
+		{
+			AmmoSelectorOptionBackgrounds[OptionIndex]->SetVisibility(ESlateVisibility::Collapsed);
 		}
 	}
 }
@@ -162,6 +207,10 @@ void UTunaSweeperHudQuickSlotBarWidget::CacheNamedWidgets()
 	}
 
 	AmmoSelectorPanel = WidgetTree->FindWidget(FName(TEXT("AmmoSelectorPanel")));
+	AmmoSelectorPromptBackground = WidgetTree->FindWidget(FName(TEXT("AmmoSelectorPromptBackground")));
+	AmmoSelectorPromptText = Cast<UTextBlock>(WidgetTree->FindWidget(FName(TEXT("AmmoSelectorPromptText"))));
+	AmmoSelectorKeyBackground = WidgetTree->FindWidget(FName(TEXT("AmmoSelectorKeyBackground")));
+	AmmoSelectorKeyText = Cast<UTextBlock>(WidgetTree->FindWidget(FName(TEXT("AmmoSelectorKeyText"))));
 	ReloadProgressPanel = WidgetTree->FindWidget(FName(TEXT("ReloadProgressPanel")));
 	ReloadProgressBar = Cast<UProgressBar>(WidgetTree->FindWidget(FName(TEXT("ReloadProgressBar"))));
 
@@ -178,4 +227,63 @@ void UTunaSweeperHudQuickSlotBarWidget::CacheNamedWidgets()
 int32 UTunaSweeperHudQuickSlotBarWidget::GetSlotIndex(int32 SlotNumber) const
 {
 	return SlotNumber - 1;
+}
+
+float UTunaSweeperHudQuickSlotBarWidget::GetWeaponSlotCenterOffsetX(int32 WeaponSlotNumber) const
+{
+	if (WeaponSlotNumber < 1 || WeaponSlotNumber > 2)
+	{
+		return 0.0f;
+	}
+
+	const float SlotRowLeft = (QuickSlotRootWidth - QuickSlotRowWidth) * 0.5f;
+	const float SlotCenterX = SlotRowLeft + (WeaponSlotWidth * 0.5f) + ((WeaponSlotNumber - 1) * (WeaponSlotWidth + SlotGapWidth));
+	return SlotCenterX - (QuickSlotRootWidth * 0.5f);
+}
+
+void UTunaSweeperHudQuickSlotBarWidget::SetAmmoSelectorPanelPosition(int32 WeaponSlotNumber)
+{
+	if (!AmmoSelectorPanel)
+	{
+		return;
+	}
+
+	UCanvasPanelSlot* CanvasSlot = Cast<UCanvasPanelSlot>(AmmoSelectorPanel->Slot);
+	if (!CanvasSlot)
+	{
+		return;
+	}
+
+	CanvasSlot->SetAutoSize(true);
+	CanvasSlot->SetAnchors(FAnchors(0.5f, 0.0f, 0.5f, 0.0f));
+	CanvasSlot->SetAlignment(FVector2D(0.5f, 0.0f));
+	CanvasSlot->SetPosition(FVector2D(GetWeaponSlotCenterOffsetX(WeaponSlotNumber), 0.0f));
+}
+
+void UTunaSweeperHudQuickSlotBarWidget::SetAmmoSelectorPromptVisible(const FText& PromptText, bool bVisible)
+{
+	if (AmmoSelectorPromptBackground)
+	{
+		AmmoSelectorPromptBackground->SetVisibility(bVisible ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
+	}
+
+	if (AmmoSelectorPromptText)
+	{
+		AmmoSelectorPromptText->SetVisibility(bVisible ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
+		AmmoSelectorPromptText->SetText(bVisible ? PromptText : FText::GetEmpty());
+	}
+}
+
+void UTunaSweeperHudQuickSlotBarWidget::SetAmmoSelectorKeyHintVisible(bool bVisible)
+{
+	if (AmmoSelectorKeyBackground)
+	{
+		AmmoSelectorKeyBackground->SetVisibility(bVisible ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
+	}
+
+	if (AmmoSelectorKeyText)
+	{
+		AmmoSelectorKeyText->SetVisibility(bVisible ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
+		AmmoSelectorKeyText->SetText(bVisible ? FText::FromString(TEXT("T")) : FText::GetEmpty());
+	}
 }

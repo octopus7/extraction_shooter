@@ -300,10 +300,32 @@ void UTunaSweeperGameHudWidget::RefreshReloadWidgets()
 	BuildAmmoSelectorOptionTexts(AmmoOptionTexts, FocusedOptionIndex);
 	if (QuickSlotBarWidget)
 	{
-		QuickSlotBarWidget->SetAmmoSelectorOptions(
-			AmmoOptionTexts,
-			FocusedOptionIndex,
-			TunaCharacter && TunaCharacter->IsAmmoSelectionOpen());
+		const int32 SelectedWeaponSlotNumber = TunaCharacter ? TunaCharacter->GetSelectedWeaponSlotNumber() : 0;
+		const bool bAmmoSelectionOpen = TunaCharacter && TunaCharacter->IsAmmoSelectionOpen();
+		if (bAmmoSelectionOpen)
+		{
+			QuickSlotBarWidget->SetAmmoSelectorOptions(
+				AmmoOptionTexts,
+				FocusedOptionIndex,
+				SelectedWeaponSlotNumber,
+				true);
+		}
+		else
+		{
+			UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+			FTunaSweeperItemInstance WeaponInstance;
+			FTunaSweeperItemDefinition WeaponDefinition;
+			const bool bShowUnspecifiedAmmoPrompt =
+				TunaGameInstance &&
+				TunaCharacter &&
+				SelectedWeaponSlotNumber > 0 &&
+				TunaGameInstance->TryGetEquipmentWeaponSlotItem(SelectedWeaponSlotNumber, WeaponInstance, WeaponDefinition) &&
+				TunaGameInstance->GetWeaponSelectedAmmoItemId(SelectedWeaponSlotNumber) == INDEX_NONE;
+			QuickSlotBarWidget->SetAmmoSelectorPrompt(
+				SelectedWeaponSlotNumber,
+				bShowUnspecifiedAmmoPrompt ? FText::FromString(TEXT("탄약 미지정")) : FText::GetEmpty(),
+				bShowUnspecifiedAmmoPrompt);
+		}
 	}
 }
 

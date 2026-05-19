@@ -476,7 +476,21 @@ int32 UTunaSweeperGameInstance::GetWeaponInventoryAmmoCount(int32 WeaponSlotNumb
 
 	int32 AmmoItemId = MutableWeaponInstance->LoadedAmmoCount > 0 && MutableWeaponInstance->LoadedAmmoItemId != INDEX_NONE
 		? MutableWeaponInstance->LoadedAmmoItemId
-		: ResolveSelectedAmmoItemIdForWeapon(*MutableWeaponInstance, WeaponDefinition);
+		: MutableWeaponInstance->SelectedAmmoItemId;
+	if (AmmoItemId == INDEX_NONE)
+	{
+		return 0;
+	}
+
+	UTunaSweeperItemDataSubsystem* ItemDataSubsystem = GetSubsystem<UTunaSweeperItemDataSubsystem>();
+	FTunaSweeperItemDefinition AmmoDefinition;
+	if (!ItemDataSubsystem ||
+		!ItemDataSubsystem->TryGetItemDefinition(AmmoItemId, AmmoDefinition) ||
+		!IsAmmoDefinitionCompatibleWithWeapon(WeaponDefinition, AmmoDefinition))
+	{
+		return 0;
+	}
+
 	return CountInventoryAmmoByItemId(AmmoItemId);
 }
 
@@ -491,10 +505,28 @@ int32 UTunaSweeperGameInstance::GetWeaponSelectedAmmoItemId(int32 WeaponSlotNumb
 		return INDEX_NONE;
 	}
 
-	FTunaSweeperItemInstance* MutableWeaponInstance = ItemInstancesByUid.Find(WeaponInstance.Uid);
-	return MutableWeaponInstance
-		? ResolveSelectedAmmoItemIdForWeapon(*MutableWeaponInstance, WeaponDefinition)
-		: INDEX_NONE;
+	const FTunaSweeperItemInstance* WeaponInstanceState = ItemInstancesByUid.Find(WeaponInstance.Uid);
+	if (!WeaponInstanceState)
+	{
+		return INDEX_NONE;
+	}
+
+	const int32 SelectedAmmoItemId =
+		WeaponInstanceState->SelectedAmmoItemId != INDEX_NONE
+			? WeaponInstanceState->SelectedAmmoItemId
+			: (WeaponInstanceState->LoadedAmmoCount > 0 ? WeaponInstanceState->LoadedAmmoItemId : INDEX_NONE);
+	if (SelectedAmmoItemId == INDEX_NONE)
+	{
+		return INDEX_NONE;
+	}
+
+	UTunaSweeperItemDataSubsystem* ItemDataSubsystem = GetSubsystem<UTunaSweeperItemDataSubsystem>();
+	FTunaSweeperItemDefinition AmmoDefinition;
+	return ItemDataSubsystem &&
+		ItemDataSubsystem->TryGetItemDefinition(SelectedAmmoItemId, AmmoDefinition) &&
+		IsAmmoDefinitionCompatibleWithWeapon(WeaponDefinition, AmmoDefinition)
+			? SelectedAmmoItemId
+			: INDEX_NONE;
 }
 
 float UTunaSweeperGameInstance::GetWeaponReloadSeconds(int32 WeaponSlotNumber)
@@ -640,7 +672,7 @@ bool UTunaSweeperGameInstance::TryReloadWeaponSlot(int32 WeaponSlotNumber, int32
 		: AmmoItemId;
 	if (ReloadAmmoItemId == INDEX_NONE)
 	{
-		ReloadAmmoItemId = ResolveSelectedAmmoItemIdForWeapon(*MutableWeaponInstance, WeaponDefinition);
+		ReloadAmmoItemId = MutableWeaponInstance->SelectedAmmoItemId;
 	}
 
 	UTunaSweeperItemDataSubsystem* ItemDataSubsystem = GetSubsystem<UTunaSweeperItemDataSubsystem>();
