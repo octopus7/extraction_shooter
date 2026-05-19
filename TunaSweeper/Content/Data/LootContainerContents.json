@@ -51,5 +51,12 @@
     "items": [
       { "item_id": 6002, "quantity_min": 1, "quantity_max": 2 }
     ]
+  },
+  {
+    "id": 8007,
+    "items": [
+      { "item_id": 1001, "quantity": 1 },
+      { "item_id": 2001, "quantity": 100 }
+    ]
   }
 ]

@@ -14,5 +14,13 @@
     "contents_id": 8005,
     "location": [1750.0, 220.0, 40.0],
     "rotation": [0.0, 0.0, 0.0]
+  },
+  {
+    "level_name": "BunkerMap",
+    "loot_container_class": "/Game/Interaction/BP_LootContainer.BP_LootContainer_C",
+    "container_definition_id": 7008,
+    "contents_id": 8007,
+    "location": [0.0, -1000.0, 40.0],
+    "rotation": [0.0, 0.0, 0.0]
   }
 ]

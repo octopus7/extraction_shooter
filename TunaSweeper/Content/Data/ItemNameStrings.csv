@@ -66,3 +66,4 @@ item.backpack_tier4.desc,인벤토리를 40칸에서 100칸으로 확장한다,E
 item.wood,목재,Wood,木材
 item.wood.desc,벌목기에게서 얻는 거친 목재다,Rough wood recovered from a lumberjack,伐採機から得た荒い木材
 container.lumber_crate,목재 상자,Lumber Crate,木材箱
+container.developer_crate,개발자의 상자,Developer Crate,Developer Crate
