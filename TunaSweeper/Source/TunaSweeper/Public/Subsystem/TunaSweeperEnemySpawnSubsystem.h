@@ -55,6 +55,7 @@ private:
 	struct FEnemySpawnDefinition
 	{
 		FName LevelName;
+		FName EnemyId;
 		TSoftClassPtr<ATunaSweeperEnemyCharacter> EnemyClass;
 		TSoftObjectPtr<UMaterialInterface> BodyMaterial;
 		FVector Location = FVector::ZeroVector;

@@ -5,12 +5,13 @@
 #include "Kismet/GameplayStatics.h"
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
+#include "Subsystem/TunaSweeperQuestSubsystem.h"
 
 namespace TunaSweeperSave
 {
 	const TCHAR* SaveSlotNamePrefix = TEXT("TunaSweeperSave_Slot");
 	const TCHAR* SaveSettingsSlotName = TEXT("TunaSweeperSaveSettings");
-	constexpr int32 CurrentSaveVersion = 4;
+	constexpr int32 CurrentSaveVersion = 5;
 	constexpr int32 SaveUserIndex = 0;
 	constexpr int32 MinSaveSlotIndex = 1;
 	constexpr int32 MaxSaveSlotIndex = 3;
@@ -961,6 +962,20 @@ bool UTunaSweeperGameInstance::MoveItemBetweenSlots(
 
 	const FGuid SourceUid = (*SourceSlots)[SourceSlot.SlotIndex].ItemUid;
 	const FGuid TargetUid = (*TargetSlots)[TargetSlot.SlotIndex].ItemUid;
+	const bool bAcquiredFromLootContainer =
+		SourceSlot.Source == ETunaSweeperItemSlotSource::LootContainer &&
+		TargetSlot.Source != ETunaSweeperItemSlotSource::LootContainer;
+	int32 AcquiredItemId = INDEX_NONE;
+	int32 AcquiredQuantity = 0;
+	if (bAcquiredFromLootContainer)
+	{
+		if (const FTunaSweeperItemInstance* AcquiredItemInstance = ItemInstancesByUid.Find(SourceUid))
+		{
+			AcquiredItemId = AcquiredItemInstance->ItemId;
+			AcquiredQuantity = AcquiredItemInstance->Quantity;
+		}
+	}
+
 	(*SourceSlots)[SourceSlot.SlotIndex].ItemUid = TargetUid;
 	(*TargetSlots)[TargetSlot.SlotIndex].ItemUid = SourceUid;
 	if (SourceSlot.Source == ETunaSweeperItemSlotSource::SelectedWeaponAttachment ||
@@ -972,6 +987,13 @@ bool UTunaSweeperGameInstance::MoveItemBetweenSlots(
 	const int32 NewInventoryCapacity = CalculateInventoryCapacityForEquipmentSlots(EquipmentSlots);
 	EnsureSlotArraySize(PlayerInventorySlots, NewInventoryCapacity);
 	BroadcastInventoryStateChanged();
+	if (bAcquiredFromLootContainer && AcquiredItemId != INDEX_NONE && AcquiredQuantity > 0)
+	{
+		if (UTunaSweeperQuestSubsystem* QuestSubsystem = GetSubsystem<UTunaSweeperQuestSubsystem>())
+		{
+			QuestSubsystem->NotifyItemAcquired(AcquiredItemId, AcquiredQuantity);
+		}
+	}
 	return true;
 }
 
@@ -1073,6 +1095,10 @@ bool UTunaSweeperGameInstance::AddItemToFirstAvailableInventorySlot(int32 ItemId
 	}
 
 	BroadcastInventoryStateChanged();
+	if (UTunaSweeperQuestSubsystem* QuestSubsystem = GetSubsystem<UTunaSweeperQuestSubsystem>())
+	{
+		QuestSubsystem->NotifyItemAcquired(ItemId, Quantity);
+	}
 	return true;
 }
 
@@ -1093,6 +1119,10 @@ bool UTunaSweeperGameInstance::AddItemToPreferredAvailableSlot(int32 ItemId, int
 	}
 
 	BroadcastInventoryStateChanged();
+	if (UTunaSweeperQuestSubsystem* QuestSubsystem = GetSubsystem<UTunaSweeperQuestSubsystem>())
+	{
+		QuestSubsystem->NotifyItemAcquired(ItemId, Quantity);
+	}
 	return true;
 }
 
@@ -1112,6 +1142,50 @@ int32 UTunaSweeperGameInstance::ConsumeInventoryItemById(int32 ItemId, int32 Req
 		BroadcastInventoryStateChanged();
 	}
 	return ConsumedAmount;
+}
+
+bool UTunaSweeperGameInstance::GrantQuestItemRewards(const TArray<FTunaSweeperItemStack>& ItemRewards)
+{
+	EnsureInventoryStateInitialized();
+	if (!CanGrantQuestItemRewards(ItemRewards))
+	{
+		return false;
+	}
+
+	TArray<FGuid> CreatedItemUids;
+	for (const FTunaSweeperItemStack& ItemReward : ItemRewards)
+	{
+		if (ItemReward.ItemId == INDEX_NONE || ItemReward.Quantity <= 0)
+		{
+			continue;
+		}
+
+		const FGuid ItemUid = CreateItemInstance(ItemReward.ItemId, ItemReward.Quantity);
+		if (!AddItemUidToFirstEmptySlot(ItemUid, PlayerInventorySlots))
+		{
+			ItemInstancesByUid.Remove(ItemUid);
+			for (const FGuid& CreatedItemUid : CreatedItemUids)
+			{
+				ItemInstancesByUid.Remove(CreatedItemUid);
+				for (FTunaSweeperInventorySlot& InventorySlot : PlayerInventorySlots)
+				{
+					if (InventorySlot.ItemUid == CreatedItemUid)
+					{
+						InventorySlot.Clear();
+					}
+				}
+			}
+			return false;
+		}
+
+		CreatedItemUids.Add(ItemUid);
+	}
+
+	if (CreatedItemUids.Num() > 0)
+	{
+		BroadcastInventoryStateChanged();
+	}
+	return true;
 }
 
 void UTunaSweeperGameInstance::CompactInventorySlots()
@@ -1425,6 +1499,13 @@ bool UTunaSweeperGameInstance::LoadGameState()
 		LoadedWorldProgressState.ProgressQuantity = FMath::Max(0, LoadedWorldProgressState.ProgressQuantity);
 		WorldProgressStatesById.Add(LoadedWorldProgressState.ObjectId, LoadedWorldProgressState);
 	}
+	if (UTunaSweeperQuestSubsystem* QuestSubsystem = GetSubsystem<UTunaSweeperQuestSubsystem>())
+	{
+		QuestSubsystem->LoadQuestProgressFromSave(
+			SaveGame->QuestProgressStates,
+			SaveGame->TrackedQuestId,
+			SaveGame->QuestCoinBalance);
+	}
 	PendingScenarioCompletionFlag = NAME_None;
 
 	ItemInstancesByUid.Reset();
@@ -1505,6 +1586,13 @@ bool UTunaSweeperGameInstance::SaveGameStateInternal() const
 	{
 		return Left.ObjectId.LexicalLess(Right.ObjectId);
 	});
+	if (const UTunaSweeperQuestSubsystem* QuestSubsystem = GetSubsystem<UTunaSweeperQuestSubsystem>())
+	{
+		QuestSubsystem->ExportQuestProgressForSave(
+			SaveGame->QuestProgressStates,
+			SaveGame->TrackedQuestId,
+			SaveGame->QuestCoinBalance);
+	}
 	SaveGame->InventorySlots = PlayerInventorySlots;
 	SaveGame->EquipmentSlots = EquipmentSlots;
 	SaveGame->AuxiliaryBagSlots = AuxiliaryBagSlots;
@@ -1548,6 +1636,10 @@ void UTunaSweeperGameInstance::ResetRuntimeStateForSaveSlotSelection()
 	CompletedScenarioFlags.Reset();
 	WorldProgressStatesById.Reset();
 	PendingScenarioCompletionFlag = NAME_None;
+	if (UTunaSweeperQuestSubsystem* QuestSubsystem = GetSubsystem<UTunaSweeperQuestSubsystem>())
+	{
+		QuestSubsystem->ResetQuestProgressForNewGame();
+	}
 }
 
 void UTunaSweeperGameInstance::GenerateDefaultInventoryState()
@@ -1556,6 +1648,10 @@ void UTunaSweeperGameInstance::GenerateDefaultInventoryState()
 	CompletedScenarioFlags.Reset();
 	WorldProgressStatesById.Reset();
 	PendingScenarioCompletionFlag = NAME_None;
+	if (UTunaSweeperQuestSubsystem* QuestSubsystem = GetSubsystem<UTunaSweeperQuestSubsystem>())
+	{
+		QuestSubsystem->ResetQuestProgressForNewGame();
+	}
 	ResetPlayerSlotArrays();
 	ActiveLootContainerSlots.Reset();
 	ActiveLootContainerOwner.Reset();
@@ -1855,6 +1951,34 @@ bool UTunaSweeperGameInstance::IsAmmoDefinitionCompatibleWithWeapon(
 	}
 
 	return TunaSweeperInventory::GetDefaultAmmoTypeTagForWeaponType(WeaponDefinition.WeaponTypeTag) == AmmoDefinition.AmmoTypeTag;
+}
+
+bool UTunaSweeperGameInstance::CanGrantQuestItemRewards(const TArray<FTunaSweeperItemStack>& ItemRewards) const
+{
+	int32 RequiredInventorySlots = 0;
+	for (const FTunaSweeperItemStack& ItemReward : ItemRewards)
+	{
+		if (ItemReward.ItemId != INDEX_NONE && ItemReward.Quantity > 0)
+		{
+			++RequiredInventorySlots;
+		}
+	}
+
+	if (RequiredInventorySlots <= 0)
+	{
+		return true;
+	}
+
+	int32 EmptyInventorySlots = 0;
+	for (const FTunaSweeperInventorySlot& InventorySlot : PlayerInventorySlots)
+	{
+		if (InventorySlot.IsEmpty())
+		{
+			++EmptyInventorySlots;
+		}
+	}
+
+	return EmptyInventorySlots >= RequiredInventorySlots;
 }
 
 int32 UTunaSweeperGameInstance::CalculateWeaponMagazineCapacity(

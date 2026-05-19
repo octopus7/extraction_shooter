@@ -6,7 +6,7 @@ Update it whenever a new state field is expected to persist across save slots, l
 ## Current Save Container
 
 - Save object: `UTunaSweeperSaveGame`
-- Current save version: `4`
+- Current save version: `5`
 - Runtime owner: `UTunaSweeperGameInstance`
 - Save entry point: `UTunaSweeperGameInstance::SaveGameStateInternal()`
 - Load entry point: `UTunaSweeperGameInstance::LoadGameState()`
@@ -64,6 +64,18 @@ Each `FTunaSweeperWorldProgressSaveData` preserves:
 Raid world progress actors restore this state on spawn. Completed repair objects disable their blocking collision and spawn their configured completed replacement actor at the same transform.
 
 Persistent door actors also use `WorldProgressStates`: once opened, they write `Completed` for their stable door `ObjectId`, then later restore by applying the open transform and disabling their blocking collision in the same save slot.
+
+### Quest Progress
+
+Stored through `UTunaSweeperSaveGame::QuestProgressStates`, `TrackedQuestId`, and `QuestCoinBalance`.
+
+Each `FTunaSweeperQuestProgressSaveData` preserves:
+
+- `QuestId`: stable quest identifier from `Content/Data/QuestDefinitions.json`.
+- `State`: `Available`, `Accepted`, `RewardAvailable`, or `RewardCompleted`.
+- `ObjectiveProgress`: per-objective `ObjectiveId` and `CurrentCount`.
+
+`TrackedQuestId` stores the HUD-tracked quest for the active save slot. `QuestCoinBalance` stores quest reward currency separately from item instances. New save slots initialize with no quest progress, no tracked quest, and zero quest coins.
 
 ## Loaded Ammo Rules
 

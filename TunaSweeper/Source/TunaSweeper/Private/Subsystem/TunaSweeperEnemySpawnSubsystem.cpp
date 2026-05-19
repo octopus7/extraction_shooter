@@ -167,6 +167,7 @@ bool UTunaSweeperEnemySpawnSubsystem::EnsureRaidRuntimeActorsSpawnedForWorld(UWo
 			{
 				SpawnedEnemy->ConfigureSpawnData(
 					SpawnDefinition.BodyMaterial,
+					SpawnDefinition.EnemyId,
 					SpawnDefinition.DropContainerDefinitionId,
 					SpawnDefinition.DropContentsId,
 					SpawnDefinition.MaxHealth);
@@ -364,6 +365,7 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadEnemySpawnData(bool bForceReload)
 
 		const TSharedPtr<FJsonObject>& JsonObject = *JsonObjectPtr;
 		FString LevelName;
+		FString EnemyId;
 		FString EnemyClassPath;
 		FString BodyMaterialPath;
 		FVector Location = FVector::ZeroVector;
@@ -378,6 +380,7 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadEnemySpawnData(bool bForceReload)
 			continue;
 		}
 
+		JsonObject->TryGetStringField(TEXT("enemy_id"), EnemyId);
 		JsonObject->TryGetStringField(TEXT("enemy_class"), EnemyClassPath);
 		JsonObject->TryGetStringField(TEXT("body_material"), BodyMaterialPath);
 		JsonObject->TryGetNumberField(TEXT("drop_container_definition_id"), NumericDropContainerDefinitionId);
@@ -387,6 +390,9 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadEnemySpawnData(bool bForceReload)
 
 		FEnemySpawnDefinition SpawnDefinition;
 		SpawnDefinition.LevelName = FName(*LevelName.TrimStartAndEnd());
+		SpawnDefinition.EnemyId = EnemyId.TrimStartAndEnd().IsEmpty()
+			? NAME_None
+			: FName(*EnemyId.TrimStartAndEnd());
 		SpawnDefinition.EnemyClass = TSoftClassPtr<ATunaSweeperEnemyCharacter>(
 			FSoftObjectPath(EnemyClassPath.TrimStartAndEnd().IsEmpty()
 				? FString(TunaSweeperEnemySpawn::DefaultEnemyClassPath)

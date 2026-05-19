@@ -83,9 +83,12 @@ private:
 	void RefreshQuickSlotsFromGameState();
 	void RefreshReloadWidgets();
 	void RefreshDialogueHudVisibility();
+	void EnsureQuestTrackerWidgets();
+	void RefreshQuestTrackerFromQuestSubsystem();
 	void CacheAmmoReloadWidgets();
 	void BuildAmmoSelectorOptionTexts(TArray<FText>& OutOptionTexts, int32& OutFocusedIndex) const;
 	void HandleSelectedInventoryItemChanged();
+	void HandleQuestProgressChanged();
 	bool IsDialogueSequenceActive() const;
 
 	UPROPERTY(BlueprintReadOnly, Transient, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional, AllowPrivateAccess = "true"))
@@ -96,6 +99,15 @@ private:
 
 	UPROPERTY(BlueprintReadOnly, Transient, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional, AllowPrivateAccess = "true"))
 	TObjectPtr<UTextBlock> CenterReloadPercentText;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UBorder> QuestTrackerRoot;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTextBlock> QuestTrackerTitleText;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTextBlock> QuestTrackerObjectiveText;
 
 	UPROPERTY(Transient)
 	TArray<TObjectPtr<UBorder>> CenterReloadSegments;

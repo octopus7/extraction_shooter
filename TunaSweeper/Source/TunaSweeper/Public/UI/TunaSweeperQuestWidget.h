@@ -6,6 +6,7 @@
 
 class UButton;
 class UTextBlock;
+class UTunaSweeperQuestSubsystem;
 
 UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API UTunaSweeperQuestWidget : public UUserWidget
@@ -56,6 +57,8 @@ private:
 	void RefreshQuestView();
 	FText GetStateText() const;
 	FText GetPrimaryButtonText() const;
+	FText BuildObjectiveText(const UTunaSweeperQuestSubsystem& QuestSubsystem) const;
+	FText BuildRewardText(const UTunaSweeperQuestSubsystem& QuestSubsystem) const;
 	bool IsPrimaryButtonEnabled() const;
 
 	FName QuestId = NAME_None;

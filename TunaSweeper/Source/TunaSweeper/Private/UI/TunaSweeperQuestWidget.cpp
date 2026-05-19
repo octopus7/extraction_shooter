@@ -98,16 +98,12 @@ void UTunaSweeperQuestWidget::RefreshQuestView()
 
 	if (QuestObjectiveText)
 	{
-		QuestObjectiveText->SetText(FText::Format(
-			FText::FromString(TEXT("\uBAA9\uD45C: {0}")),
-			QuestDefinition.ObjectiveText));
+		QuestObjectiveText->SetText(BuildObjectiveText(*QuestSubsystem));
 	}
 
 	if (QuestRewardText)
 	{
-		QuestRewardText->SetText(FText::Format(
-			FText::FromString(TEXT("\uBCF4\uC0C1: \uCF54\uC778 {0}")),
-			FText::AsNumber(QuestDefinition.CoinReward)));
+		QuestRewardText->SetText(BuildRewardText(*QuestSubsystem));
 	}
 
 	if (QuestStateText)
@@ -174,6 +170,55 @@ FText UTunaSweeperQuestWidget::GetPrimaryButtonText() const
 	default:
 		return FText::GetEmpty();
 	}
+}
+
+FText UTunaSweeperQuestWidget::BuildObjectiveText(const UTunaSweeperQuestSubsystem& QuestSubsystem) const
+{
+	TArray<FTunaSweeperObjectiveProgressView> ObjectiveProgress;
+	if (!QuestSubsystem.GetQuestObjectiveProgress(QuestId, ObjectiveProgress) || ObjectiveProgress.Num() <= 0)
+	{
+		return FText::FromString(TEXT("\uBAA9\uD45C: -"));
+	}
+
+	FString ObjectiveText(TEXT("\uBAA9\uD45C"));
+	for (const FTunaSweeperObjectiveProgressView& Progress : ObjectiveProgress)
+	{
+		ObjectiveText += LINE_TERMINATOR;
+		ObjectiveText += FString::Printf(
+			TEXT("- %s (%d/%d)"),
+			*Progress.Text.ToString(),
+			FMath::Clamp(Progress.CurrentCount, 0, FMath::Max(1, Progress.RequiredCount)),
+			FMath::Max(1, Progress.RequiredCount));
+	}
+
+	return FText::FromString(ObjectiveText);
+}
+
+FText UTunaSweeperQuestWidget::BuildRewardText(const UTunaSweeperQuestSubsystem& QuestSubsystem) const
+{
+	FTunaSweeperQuestDefinition QuestDefinition;
+	if (!QuestSubsystem.TryGetQuestDefinition(QuestId, QuestDefinition))
+	{
+		return FText::GetEmpty();
+	}
+
+	TArray<FString> RewardParts;
+	if (QuestDefinition.Rewards.Coins > 0)
+	{
+		RewardParts.Add(FString::Printf(TEXT("\uCF54\uC778 %d"), QuestDefinition.Rewards.Coins));
+	}
+
+	for (const FTunaSweeperItemStack& ItemReward : QuestDefinition.Rewards.Items)
+	{
+		if (ItemReward.ItemId != INDEX_NONE && ItemReward.Quantity > 0)
+		{
+			RewardParts.Add(FString::Printf(TEXT("Item %d x%d"), ItemReward.ItemId, ItemReward.Quantity));
+		}
+	}
+
+	return FText::FromString(FString::Printf(
+		TEXT("\uBCF4\uC0C1: %s"),
+		RewardParts.Num() > 0 ? *FString::Join(RewardParts, TEXT(", ")) : TEXT("-")));
 }
 
 bool UTunaSweeperQuestWidget::IsPrimaryButtonEnabled() const

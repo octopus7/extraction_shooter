@@ -39,6 +39,7 @@ public:
 
 	void ConfigureSpawnData(
 		const TSoftObjectPtr<UMaterialInterface>& InBodyMaterial,
+		FName InEnemyId,
 		int32 InDropContainerDefinitionId,
 		int32 InDropContentsId,
 		float InMaxHealth);
@@ -88,6 +89,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Loot")
 	TSoftClassPtr<ATunaSweeperLootContainerActor> LootContainerClass;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Quest")
+	FName EnemyId = NAME_None;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Loot")
 	int32 DropContainerDefinitionId = INDEX_NONE;
 
@@ -97,7 +101,7 @@ protected:
 private:
 	void ApplyVoxelVisualMeshes();
 	void ApplyVisualMaterials();
-	void HandleDeath(AActor* DamageCauser);
+	void HandleDeath(AController* KillerController, AActor* DamageCauser);
 	bool ApplyMeleeDamageTo(AActor* TargetActor);
 	void ApplyMeleeKnockbackTo(AActor* TargetActor, const FVector& AttackDirection) const;
 	void SpawnMeleeSwingEffect(const FVector& AttackDirection);

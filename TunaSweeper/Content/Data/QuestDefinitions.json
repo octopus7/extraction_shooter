@@ -1,0 +1,22 @@
+[
+  {
+    "quest_id": "quest_first_outing",
+    "title": "\uccab \uc678\ucd9c",
+    "description": "\uc774\uc81c \ub4e4\uc5b4\uc654\uc73c\ub2c8 \ub098\uac00\uc11c \ud55c\ubc88 \uc0b0\ucc45\ud558\uace0 \ub4e4\uc5b4\uc640",
+    "auto_track_on_accept": true,
+    "objectives": [
+      {
+        "objective_id": "leave_bunker",
+        "type": "level_travel",
+        "text": "\ubc99\ucee4 \ubc16\uc73c\ub85c \uc774\ub3d9",
+        "required_count": 1,
+        "source_level": "BunkerMap",
+        "target_level": "RaidMap"
+      }
+    ],
+    "rewards": {
+      "coins": 100,
+      "items": []
+    }
+  }
+]
