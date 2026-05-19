@@ -202,7 +202,7 @@ void ATunaSweeperWorldProgressActor::RefreshPresentation()
 			FText::FromString(TEXT("{0}    {1} {2}/{3}")),
 			InteractionDisplayName,
 			RequiredItemDisplayName,
-			FText::AsNumber(GetOwnedRequiredItemCount()),
+			FText::AsNumber(GetProgressQuantity()),
 			FText::AsNumber(FMath::Max(1, RequiredQuantity)));
 		InteractableComponent->SetInteractionTypeAndDisplayName(
 			bCompleted ? ETunaSweeperInteractionType::None : ETunaSweeperInteractionType::WorldProgress,
