@@ -35,13 +35,13 @@ struct TUNASWEEPER_API FTunaSweeperCameraHitReactionSettings
 	float Duration = 0.32f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Camera", meta = (ClampMin = "0.0", UIMin = "0.0"))
-	float LocationAmplitude = 95.0f;
+	float LocationAmplitude = 48.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Camera", meta = (ClampMin = "0.0", UIMin = "0.0"))
-	float RollAmplitudeDegrees = 1.35f;
+	float RollAmplitudeDegrees = 0.68f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Camera", meta = (ClampMin = "0.0", UIMin = "0.0"))
-	float FOVAmplitudeDegrees = 1.0f;
+	float FOVAmplitudeDegrees = 0.5f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Camera", meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float Frequency = 9.0f;
