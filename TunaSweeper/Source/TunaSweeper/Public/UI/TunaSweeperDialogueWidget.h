@@ -61,10 +61,19 @@ private:
 	TObjectPtr<UBorder> DialoguePanel;
 
 	UPROPERTY(Transient)
+	TObjectPtr<UBorder> SpeakerNamePanel;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UBorder> SpeakerAccentBar;
+
+	UPROPERTY(Transient)
 	TObjectPtr<UTextBlock> SpeakerNameText;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UTextBlock> DialogueBodyText;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTextBlock> ContinuePromptText;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UTextBlock> ContinueMarkerText;

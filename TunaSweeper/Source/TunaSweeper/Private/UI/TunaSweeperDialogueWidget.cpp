@@ -6,19 +6,43 @@
 #include "Components/CanvasPanelSlot.h"
 #include "Components/TextBlock.h"
 #include "InputCoreTypes.h"
+#include "Styling/SlateBrush.h"
 
 namespace TunaSweeperDialogueWidget
 {
-	constexpr float PanelWidth = 1180.0f;
-	constexpr float PanelHeight = 188.0f;
-	constexpr float PanelBottomMargin = 56.0f;
-	constexpr float SpeakerFontSize = 22.0f;
-	constexpr float BodyFontSize = 25.0f;
-	constexpr float ContinueFontSize = 28.0f;
+	constexpr float PanelWidth = 1120.0f;
+	constexpr float PanelHeight = 214.0f;
+	constexpr float PanelBottomMargin = 58.0f;
+	constexpr float PanelCornerRadius = 8.0f;
+	constexpr float SpeakerTagWidth = 224.0f;
+	constexpr float SpeakerTagHeight = 52.0f;
+	constexpr float SpeakerTagLeftOffset = 20.0f;
+	constexpr float SpeakerTagBottomGap = 6.0f;
+	constexpr float SpeakerFontSize = 26.0f;
+	constexpr float BodyFontSize = 27.0f;
+	constexpr float ContinueFontSize = 21.0f;
+	constexpr float ContinueMarkerFontSize = 24.0f;
+	constexpr float PanelHorizontalPadding = 58.0f;
 }
 
 namespace
 {
+	FSlateBrush MakeRoundedBoxBrush(
+		const FVector2D& ImageSize,
+		const FLinearColor& FillColor,
+		float Radius,
+		const FLinearColor& OutlineColor,
+		float OutlineWidth)
+	{
+		FSlateBrush Brush;
+		Brush.DrawAs = ESlateBrushDrawType::RoundedBox;
+		Brush.TintColor = FSlateColor(FillColor);
+		Brush.SetImageSize(ImageSize);
+		Brush.OutlineSettings = FSlateBrushOutlineSettings(Radius, FSlateColor(OutlineColor), OutlineWidth);
+		Brush.OutlineSettings.bUseBrushTransparency = false;
+		return Brush;
+	}
+
 	FSlateFontInfo MakeDialogueFont(UTextBlock* TextBlock, int32 Size)
 	{
 		FSlateFontInfo FontInfo = TextBlock ? TextBlock->GetFont() : FSlateFontInfo();
@@ -133,17 +157,33 @@ void UTunaSweeperDialogueWidget::BuildDialogueWidget()
 	DialoguePanel = WidgetTree->ConstructWidget<UBorder>(
 		UBorder::StaticClass(),
 		TEXT("DialoguePanel"));
+	SpeakerNamePanel = WidgetTree->ConstructWidget<UBorder>(
+		UBorder::StaticClass(),
+		TEXT("SpeakerNamePanel"));
+	SpeakerAccentBar = WidgetTree->ConstructWidget<UBorder>(
+		UBorder::StaticClass(),
+		TEXT("SpeakerAccentBar"));
 	SpeakerNameText = WidgetTree->ConstructWidget<UTextBlock>(
 		UTextBlock::StaticClass(),
 		TEXT("SpeakerNameText"));
 	DialogueBodyText = WidgetTree->ConstructWidget<UTextBlock>(
 		UTextBlock::StaticClass(),
 		TEXT("DialogueBodyText"));
+	ContinuePromptText = WidgetTree->ConstructWidget<UTextBlock>(
+		UTextBlock::StaticClass(),
+		TEXT("ContinuePromptText"));
 	ContinueMarkerText = WidgetTree->ConstructWidget<UTextBlock>(
 		UTextBlock::StaticClass(),
 		TEXT("ContinueMarkerText"));
 
-	if (!RootCanvas || !DialoguePanel || !SpeakerNameText || !DialogueBodyText || !ContinueMarkerText)
+	if (!RootCanvas ||
+		!DialoguePanel ||
+		!SpeakerNamePanel ||
+		!SpeakerAccentBar ||
+		!SpeakerNameText ||
+		!DialogueBodyText ||
+		!ContinuePromptText ||
+		!ContinueMarkerText)
 	{
 		return;
 	}
@@ -151,8 +191,13 @@ void UTunaSweeperDialogueWidget::BuildDialogueWidget()
 	WidgetTree->RootWidget = RootCanvas;
 	RootCanvas->SetVisibility(ESlateVisibility::Visible);
 
-	DialoguePanel->SetBrushColor(FLinearColor(0.015f, 0.018f, 0.022f, 0.86f));
-	DialoguePanel->SetPadding(FMargin(26.0f, 20.0f, 26.0f, 20.0f));
+	DialoguePanel->SetBrush(MakeRoundedBoxBrush(
+		FVector2D(TunaSweeperDialogueWidget::PanelWidth, TunaSweeperDialogueWidget::PanelHeight),
+		FLinearColor(0.095f, 0.105f, 0.118f, 0.94f),
+		TunaSweeperDialogueWidget::PanelCornerRadius,
+		FLinearColor(0.48f, 0.51f, 0.54f, 0.58f),
+		1.25f));
+	DialoguePanel->SetPadding(FMargin(0.0f));
 	DialoguePanel->SetVisibility(ESlateVisibility::HitTestInvisible);
 	if (UCanvasPanelSlot* PanelSlot = RootCanvas->AddChildToCanvas(DialoguePanel))
 	{
@@ -163,29 +208,77 @@ void UTunaSweeperDialogueWidget::BuildDialogueWidget()
 		PanelSlot->SetZOrder(1);
 	}
 
+	const float PanelLeftX = -TunaSweeperDialogueWidget::PanelWidth * 0.5f;
+	const float SpeakerTagX = PanelLeftX + TunaSweeperDialogueWidget::SpeakerTagLeftOffset;
+	const float SpeakerTagBottomY =
+		-TunaSweeperDialogueWidget::PanelBottomMargin -
+		TunaSweeperDialogueWidget::PanelHeight -
+		TunaSweeperDialogueWidget::SpeakerTagBottomGap;
+
+	SpeakerNamePanel->SetBrush(MakeRoundedBoxBrush(
+		FVector2D(TunaSweeperDialogueWidget::SpeakerTagWidth, TunaSweeperDialogueWidget::SpeakerTagHeight),
+		FLinearColor(0.105f, 0.115f, 0.128f, 0.96f),
+		TunaSweeperDialogueWidget::PanelCornerRadius,
+		FLinearColor(0.48f, 0.51f, 0.54f, 0.60f),
+		1.25f));
+	SpeakerNamePanel->SetPadding(FMargin(0.0f));
+	SpeakerNamePanel->SetVisibility(ESlateVisibility::HitTestInvisible);
+	if (UCanvasPanelSlot* SpeakerPanelSlot = RootCanvas->AddChildToCanvas(SpeakerNamePanel))
+	{
+		SpeakerPanelSlot->SetAnchors(FAnchors(0.5f, 1.0f));
+		SpeakerPanelSlot->SetAlignment(FVector2D(0.0f, 1.0f));
+		SpeakerPanelSlot->SetPosition(FVector2D(SpeakerTagX, SpeakerTagBottomY));
+		SpeakerPanelSlot->SetSize(FVector2D(
+			TunaSweeperDialogueWidget::SpeakerTagWidth,
+			TunaSweeperDialogueWidget::SpeakerTagHeight));
+		SpeakerPanelSlot->SetZOrder(2);
+	}
+
+	SpeakerAccentBar->SetBrush(MakeRoundedBoxBrush(
+		FVector2D(5.0f, 36.0f),
+		FLinearColor(0.45f, 0.90f, 0.92f, 1.0f),
+		2.0f,
+		FLinearColor::Transparent,
+		0.0f));
+	SpeakerAccentBar->SetPadding(FMargin(0.0f));
+	SpeakerAccentBar->SetVisibility(ESlateVisibility::HitTestInvisible);
+	if (UCanvasPanelSlot* AccentSlot = RootCanvas->AddChildToCanvas(SpeakerAccentBar))
+	{
+		AccentSlot->SetAnchors(FAnchors(0.5f, 1.0f));
+		AccentSlot->SetAlignment(FVector2D(0.0f, 0.5f));
+		AccentSlot->SetPosition(FVector2D(
+			SpeakerTagX + 18.0f,
+			SpeakerTagBottomY - TunaSweeperDialogueWidget::SpeakerTagHeight * 0.5f));
+		AccentSlot->SetSize(FVector2D(5.0f, 36.0f));
+		AccentSlot->SetZOrder(3);
+	}
+
 	SpeakerNameText->SetFont(MakeDialogueFont(SpeakerNameText, TunaSweeperDialogueWidget::SpeakerFontSize));
-	SpeakerNameText->SetColorAndOpacity(FSlateColor(FLinearColor(0.70f, 0.92f, 1.0f, 0.98f)));
-	SpeakerNameText->SetShadowOffset(FVector2D(1.0f, 1.0f));
-	SpeakerNameText->SetShadowColorAndOpacity(FLinearColor(0.0f, 0.0f, 0.0f, 0.75f));
-	SpeakerNameText->SetJustification(ETextJustify::Left);
+	SpeakerNameText->SetColorAndOpacity(FSlateColor(FLinearColor(0.96f, 0.98f, 1.0f, 0.98f)));
+	SpeakerNameText->SetShadowOffset(FVector2D::ZeroVector);
+	SpeakerNameText->SetShadowColorAndOpacity(FLinearColor::Transparent);
+	SpeakerNameText->SetJustification(ETextJustify::Center);
 	SpeakerNameText->SetVisibility(ESlateVisibility::HitTestInvisible);
 	if (UCanvasPanelSlot* SpeakerSlot = RootCanvas->AddChildToCanvas(SpeakerNameText))
 	{
 		SpeakerSlot->SetAnchors(FAnchors(0.5f, 1.0f));
 		SpeakerSlot->SetAlignment(FVector2D(0.0f, 1.0f));
-		SpeakerSlot->SetPosition(FVector2D(
-			-TunaSweeperDialogueWidget::PanelWidth * 0.5f + 34.0f,
-			-TunaSweeperDialogueWidget::PanelBottomMargin - TunaSweeperDialogueWidget::PanelHeight + 24.0f));
-		SpeakerSlot->SetSize(FVector2D(360.0f, 34.0f));
-		SpeakerSlot->SetZOrder(2);
+		SpeakerSlot->SetPosition(FVector2D(SpeakerTagX, SpeakerTagBottomY - 9.0f));
+		SpeakerSlot->SetSize(FVector2D(
+			TunaSweeperDialogueWidget::SpeakerTagWidth,
+			TunaSweeperDialogueWidget::SpeakerTagHeight - 12.0f));
+		SpeakerSlot->SetZOrder(4);
 	}
 
 	DialogueBodyText->SetFont(MakeDialogueFont(DialogueBodyText, TunaSweeperDialogueWidget::BodyFontSize));
-	DialogueBodyText->SetColorAndOpacity(FSlateColor(FLinearColor(0.94f, 0.97f, 1.0f, 0.98f)));
-	DialogueBodyText->SetShadowOffset(FVector2D(1.2f, 1.2f));
-	DialogueBodyText->SetShadowColorAndOpacity(FLinearColor(0.0f, 0.0f, 0.0f, 0.82f));
+	DialogueBodyText->SetColorAndOpacity(FSlateColor(FLinearColor(0.96f, 0.98f, 1.0f, 0.98f)));
+	DialogueBodyText->SetShadowOffset(FVector2D::ZeroVector);
+	DialogueBodyText->SetShadowColorAndOpacity(FLinearColor::Transparent);
 	DialogueBodyText->SetAutoWrapText(true);
-	DialogueBodyText->SetWrapTextAt(TunaSweeperDialogueWidget::PanelWidth - 96.0f);
+	DialogueBodyText->SetWrapTextAt(
+		TunaSweeperDialogueWidget::PanelWidth -
+		TunaSweeperDialogueWidget::PanelHorizontalPadding * 2.0f -
+		120.0f);
 	DialogueBodyText->SetJustification(ETextJustify::Left);
 	DialogueBodyText->SetVisibility(ESlateVisibility::HitTestInvisible);
 	if (UCanvasPanelSlot* BodySlot = RootCanvas->AddChildToCanvas(DialogueBodyText))
@@ -193,15 +286,35 @@ void UTunaSweeperDialogueWidget::BuildDialogueWidget()
 		BodySlot->SetAnchors(FAnchors(0.5f, 1.0f));
 		BodySlot->SetAlignment(FVector2D(0.0f, 1.0f));
 		BodySlot->SetPosition(FVector2D(
-			-TunaSweeperDialogueWidget::PanelWidth * 0.5f + 34.0f,
-			-TunaSweeperDialogueWidget::PanelBottomMargin - 36.0f));
-		BodySlot->SetSize(FVector2D(TunaSweeperDialogueWidget::PanelWidth - 92.0f, 116.0f));
+			PanelLeftX + TunaSweeperDialogueWidget::PanelHorizontalPadding,
+			-TunaSweeperDialogueWidget::PanelBottomMargin - 68.0f));
+		BodySlot->SetSize(FVector2D(
+			TunaSweeperDialogueWidget::PanelWidth -
+			TunaSweeperDialogueWidget::PanelHorizontalPadding * 2.0f -
+			120.0f,
+			116.0f));
 		BodySlot->SetZOrder(2);
 	}
 
-	ContinueMarkerText->SetText(FText::FromString(TEXT(">")));
-	ContinueMarkerText->SetFont(MakeDialogueFont(ContinueMarkerText, TunaSweeperDialogueWidget::ContinueFontSize));
-	ContinueMarkerText->SetColorAndOpacity(FSlateColor(FLinearColor(0.70f, 0.92f, 1.0f, 0.85f)));
+	ContinuePromptText->SetText(FText::FromString(TEXT("\uACC4\uC18D")));
+	ContinuePromptText->SetFont(MakeDialogueFont(ContinuePromptText, TunaSweeperDialogueWidget::ContinueFontSize));
+	ContinuePromptText->SetColorAndOpacity(FSlateColor(FLinearColor(0.96f, 0.98f, 1.0f, 0.92f)));
+	ContinuePromptText->SetJustification(ETextJustify::Right);
+	ContinuePromptText->SetVisibility(ESlateVisibility::Collapsed);
+	if (UCanvasPanelSlot* PromptSlot = RootCanvas->AddChildToCanvas(ContinuePromptText))
+	{
+		PromptSlot->SetAnchors(FAnchors(0.5f, 1.0f));
+		PromptSlot->SetAlignment(FVector2D(1.0f, 1.0f));
+		PromptSlot->SetPosition(FVector2D(
+			TunaSweeperDialogueWidget::PanelWidth * 0.5f - 78.0f,
+			-TunaSweeperDialogueWidget::PanelBottomMargin - 38.0f));
+		PromptSlot->SetSize(FVector2D(56.0f, 30.0f));
+		PromptSlot->SetZOrder(2);
+	}
+
+	ContinueMarkerText->SetText(FText::FromString(TEXT("\u25BE")));
+	ContinueMarkerText->SetFont(MakeDialogueFont(ContinueMarkerText, TunaSweeperDialogueWidget::ContinueMarkerFontSize));
+	ContinueMarkerText->SetColorAndOpacity(FSlateColor(FLinearColor(0.45f, 0.90f, 0.92f, 0.95f)));
 	ContinueMarkerText->SetJustification(ETextJustify::Right);
 	ContinueMarkerText->SetVisibility(ESlateVisibility::Collapsed);
 	if (UCanvasPanelSlot* MarkerSlot = RootCanvas->AddChildToCanvas(ContinueMarkerText))
@@ -209,9 +322,9 @@ void UTunaSweeperDialogueWidget::BuildDialogueWidget()
 		MarkerSlot->SetAnchors(FAnchors(0.5f, 1.0f));
 		MarkerSlot->SetAlignment(FVector2D(1.0f, 1.0f));
 		MarkerSlot->SetPosition(FVector2D(
-			TunaSweeperDialogueWidget::PanelWidth * 0.5f - 32.0f,
-			-TunaSweeperDialogueWidget::PanelBottomMargin - 18.0f));
-		MarkerSlot->SetSize(FVector2D(40.0f, 36.0f));
+			TunaSweeperDialogueWidget::PanelWidth * 0.5f - 34.0f,
+			-TunaSweeperDialogueWidget::PanelBottomMargin - 35.0f));
+		MarkerSlot->SetSize(FVector2D(30.0f, 30.0f));
 		MarkerSlot->SetZOrder(2);
 	}
 }
@@ -251,6 +364,13 @@ void UTunaSweeperDialogueWidget::UpdateVisibleDialogueText()
 	if (ContinueMarkerText)
 	{
 		ContinueMarkerText->SetVisibility(IsCurrentLineFullyVisible()
+			? ESlateVisibility::HitTestInvisible
+			: ESlateVisibility::Collapsed);
+	}
+
+	if (ContinuePromptText)
+	{
+		ContinuePromptText->SetVisibility(IsCurrentLineFullyVisible()
 			? ESlateVisibility::HitTestInvisible
 			: ESlateVisibility::Collapsed);
 	}
