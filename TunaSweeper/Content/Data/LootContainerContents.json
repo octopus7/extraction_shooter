@@ -45,5 +45,11 @@
     "items": [
       { "item_id": 2002, "quantity": 90 }
     ]
+  },
+  {
+    "id": 8006,
+    "items": [
+      { "item_id": 6002, "quantity_min": 1, "quantity_max": 2 }
+    ]
   }
 ]

@@ -22,6 +22,44 @@ namespace TunaSweeperItemDataFiles
 			? FString(Row[CellIndex]).TrimStartAndEnd()
 			: FString();
 	}
+
+	void BuildLootItemQuantityEntry(
+		int32 ItemId,
+		int32 QuantityMin,
+		int32 QuantityMax,
+		FTunaSweeperLootContainerItemQuantity& OutEntry)
+	{
+		OutEntry.ItemId = ItemId;
+		OutEntry.QuantityMin = FMath::Max(1, FMath::Min(QuantityMin, QuantityMax));
+		OutEntry.QuantityMax = FMath::Max(OutEntry.QuantityMin, FMath::Max(QuantityMin, QuantityMax));
+	}
+
+	TArray<FTunaSweeperItemStack> ResolveLootContainerItems(const FTunaSweeperLootContainerContents& Contents)
+	{
+		TArray<FTunaSweeperItemStack> ResolvedItems;
+		if (Contents.ItemQuantities.Num() > 0)
+		{
+			ResolvedItems.Reserve(Contents.ItemQuantities.Num());
+			for (const FTunaSweeperLootContainerItemQuantity& ItemQuantity : Contents.ItemQuantities)
+			{
+				if (ItemQuantity.ItemId == INDEX_NONE)
+				{
+					continue;
+				}
+
+				FTunaSweeperItemStack ItemStack;
+				ItemStack.ItemId = ItemQuantity.ItemId;
+				ItemStack.Quantity = ItemQuantity.QuantityMin == ItemQuantity.QuantityMax
+					? ItemQuantity.QuantityMin
+					: FMath::RandRange(ItemQuantity.QuantityMin, ItemQuantity.QuantityMax);
+				ResolvedItems.Add(ItemStack);
+			}
+
+			return ResolvedItems;
+		}
+
+		return Contents.Items;
+	}
 }
 
 bool UTunaSweeperItemDataSubsystem::LoadItemData(bool bForceReload)
@@ -229,14 +267,15 @@ bool UTunaSweeperItemDataSubsystem::TryBuildLootContainerInstance(
 		return false;
 	}
 
-	if (Contents.Items.Num() > ContainerDefinition.Capacity)
+	TArray<FTunaSweeperItemStack> ResolvedItems = TunaSweeperItemDataFiles::ResolveLootContainerItems(Contents);
+	if (ResolvedItems.Num() > ContainerDefinition.Capacity)
 	{
 		UE_LOG(
 			LogTunaSweeperItemData,
 			Warning,
 			TEXT("Loot contents %d has %d stacks, exceeding container %d capacity %d."),
 			Contents.Id,
-			Contents.Items.Num(),
+			ResolvedItems.Num(),
 			ContainerDefinition.Id,
 			ContainerDefinition.Capacity);
 		OutInstance = FTunaSweeperLootContainerInstance();
@@ -253,7 +292,7 @@ bool UTunaSweeperItemDataSubsystem::TryBuildLootContainerInstance(
 	OutInstance.ContentsId = Contents.Id;
 	OutInstance.DisplayName = DisplayName;
 	OutInstance.Capacity = ContainerDefinition.Capacity;
-	OutInstance.Items = Contents.Items;
+	OutInstance.Items = MoveTemp(ResolvedItems);
 	return true;
 }
 
@@ -686,8 +725,17 @@ bool UTunaSweeperItemDataSubsystem::LoadLootContainerContentsJson()
 
 			double NumericItemId = 0.0;
 			double NumericQuantity = 0.0;
+			double NumericQuantityMin = 0.0;
+			double NumericQuantityMax = 0.0;
+			const bool bHasFixedQuantity = (*ItemObject)->TryGetNumberField(TEXT("quantity"), NumericQuantity);
+			const bool bHasQuantityMin =
+				(*ItemObject)->TryGetNumberField(TEXT("quantity_min"), NumericQuantityMin) ||
+				(*ItemObject)->TryGetNumberField(TEXT("min_quantity"), NumericQuantityMin);
+			const bool bHasQuantityMax =
+				(*ItemObject)->TryGetNumberField(TEXT("quantity_max"), NumericQuantityMax) ||
+				(*ItemObject)->TryGetNumberField(TEXT("max_quantity"), NumericQuantityMax);
 			if (!(*ItemObject)->TryGetNumberField(TEXT("item_id"), NumericItemId) ||
-				!(*ItemObject)->TryGetNumberField(TEXT("quantity"), NumericQuantity))
+				(!bHasFixedQuantity && (!bHasQuantityMin || !bHasQuantityMax)))
 			{
 				continue;
 			}
@@ -699,9 +747,24 @@ bool UTunaSweeperItemDataSubsystem::LoadLootContainerContentsJson()
 				continue;
 			}
 
+			const int32 QuantityMin = bHasFixedQuantity
+				? static_cast<int32>(NumericQuantity)
+				: static_cast<int32>(NumericQuantityMin);
+			const int32 QuantityMax = bHasFixedQuantity
+				? static_cast<int32>(NumericQuantity)
+				: static_cast<int32>(NumericQuantityMax);
+
+			FTunaSweeperLootContainerItemQuantity QuantityEntry;
+			TunaSweeperItemDataFiles::BuildLootItemQuantityEntry(
+				ItemId,
+				QuantityMin,
+				QuantityMax,
+				QuantityEntry);
+			Contents.ItemQuantities.Add(QuantityEntry);
+
 			FTunaSweeperItemStack ItemStack;
 			ItemStack.ItemId = ItemId;
-			ItemStack.Quantity = FMath::Max(1, static_cast<int32>(NumericQuantity));
+			ItemStack.Quantity = QuantityEntry.QuantityMin;
 			Contents.Items.Add(ItemStack);
 		}
 

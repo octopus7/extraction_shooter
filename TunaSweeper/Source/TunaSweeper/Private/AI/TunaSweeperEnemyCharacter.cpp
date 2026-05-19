@@ -3,8 +3,10 @@
 #include "AI/TunaSweeperEnemyAIController.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "GameFramework/DamageType.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Interaction/TunaSweeperLootContainerActor.h"
+#include "Kismet/GameplayStatics.h"
 #include "Materials/MaterialInterface.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "UObject/ConstructorHelpers.h"
@@ -79,6 +81,12 @@ void ATunaSweeperEnemyCharacter::BeginPlay()
 
 	MaxHealth = FMath::Max(1.0f, MaxHealth);
 	CurrentHealth = MaxHealth;
+	MeleeDamage = FMath::Max(0.0f, MeleeDamage);
+	MeleeAttackRange = FMath::Max(1.0f, MeleeAttackRange);
+	MeleeApproachStartRange = FMath::Max(0.0f, MeleeApproachStartRange);
+	MeleeApproachStopRange = FMath::Clamp(MeleeApproachStopRange, 0.0f, MeleeApproachStartRange);
+	MeleeTrackingRange = FMath::Max(MeleeAttackRange, MeleeTrackingRange);
+	MeleeAttackCooldownSeconds = FMath::Max(0.05f, MeleeAttackCooldownSeconds);
 	GetCharacterMovement()->MaxWalkSpeed = GetRandomizedEnemyValue(MovementSpeed, MovementSpeedRandomOffset, 0.0f);
 	ApplyVisualMaterials();
 }
@@ -126,6 +134,71 @@ void ATunaSweeperEnemyCharacter::ConfigureSpawnData(
 	ApplyVisualMaterials();
 }
 
+void ATunaSweeperEnemyCharacter::ConfigureAttackData(
+	ETunaSweeperEnemyAttackMode InAttackMode,
+	float InAttackDamage,
+	float InAttackRange,
+	float InApproachStartRange,
+	float InApproachStopRange,
+	float InTrackingRange,
+	float InAttackCooldownSeconds)
+{
+	AttackMode = InAttackMode;
+
+	if (InAttackDamage >= 0.0f)
+	{
+		if (AttackMode == ETunaSweeperEnemyAttackMode::Melee)
+		{
+			MeleeDamage = InAttackDamage;
+		}
+		else
+		{
+			ProjectileDamage = InAttackDamage;
+		}
+	}
+
+	if (AttackMode == ETunaSweeperEnemyAttackMode::Melee)
+	{
+		if (InAttackRange > 0.0f)
+		{
+			MeleeAttackRange = InAttackRange;
+		}
+		if (InApproachStartRange >= 0.0f)
+		{
+			MeleeApproachStartRange = InApproachStartRange;
+		}
+		if (InApproachStopRange >= 0.0f)
+		{
+			MeleeApproachStopRange = InApproachStopRange;
+		}
+		if (InTrackingRange > 0.0f)
+		{
+			MeleeTrackingRange = InTrackingRange;
+		}
+		if (InAttackCooldownSeconds > 0.0f)
+		{
+			MeleeAttackCooldownSeconds = InAttackCooldownSeconds;
+		}
+
+		MeleeDamage = FMath::Max(0.0f, MeleeDamage);
+		MeleeAttackRange = FMath::Max(1.0f, MeleeAttackRange);
+		MeleeApproachStartRange = FMath::Max(0.0f, MeleeApproachStartRange);
+		MeleeApproachStopRange = FMath::Clamp(MeleeApproachStopRange, 0.0f, MeleeApproachStartRange);
+		MeleeTrackingRange = FMath::Max(MeleeAttackRange, MeleeTrackingRange);
+		MeleeAttackCooldownSeconds = FMath::Max(0.05f, MeleeAttackCooldownSeconds);
+	}
+}
+
+bool ATunaSweeperEnemyCharacter::AttackTarget(AActor* TargetActor)
+{
+	if (AttackMode == ETunaSweeperEnemyAttackMode::Melee)
+	{
+		return ApplyMeleeDamageTo(TargetActor);
+	}
+
+	return FireProjectileAt(TargetActor);
+}
+
 bool ATunaSweeperEnemyCharacter::FireProjectileAt(AActor* TargetActor)
 {
 	UWorld* World = GetWorld();
@@ -170,6 +243,32 @@ bool ATunaSweeperEnemyCharacter::FireProjectileAt(AActor* TargetActor)
 	}
 
 	SpawnedProjectile->SetDamageAmount(ProjectileDamage);
+	return true;
+}
+
+bool ATunaSweeperEnemyCharacter::ApplyMeleeDamageTo(AActor* TargetActor)
+{
+	if (!TargetActor || TargetActor == this || bIsDead || MeleeDamage <= 0.0f)
+	{
+		return false;
+	}
+
+	const FVector ActorLocation = GetActorLocation();
+	const FVector TargetLocation = TargetActor->GetActorLocation();
+	const float AttackRange = FMath::Max(1.0f, MeleeAttackRange);
+	if (FVector::DistSquared2D(ActorLocation, TargetLocation) > FMath::Square(AttackRange))
+	{
+		return false;
+	}
+
+	const FVector ToTarget = FVector(TargetLocation.X - ActorLocation.X, TargetLocation.Y - ActorLocation.Y, 0.0f);
+	const FVector AttackDirection = ToTarget.GetSafeNormal();
+	if (!AttackDirection.IsNearlyZero())
+	{
+		SetActorRotation(FRotator(0.0f, AttackDirection.Rotation().Yaw, 0.0f));
+	}
+
+	UGameplayStatics::ApplyDamage(TargetActor, MeleeDamage, GetController(), this, UDamageType::StaticClass());
 	return true;
 }
 

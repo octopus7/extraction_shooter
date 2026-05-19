@@ -59,9 +59,14 @@ protected:
 private:
 	void RandomizeCombatTuning();
 	void UpdateAttackTarget();
-	void UpdateApproachState(float DistanceToTarget);
+	void UpdateApproachState(float DistanceToTarget, float InApproachStartRange, float InApproachStopRange);
 	void MoveTowardCurrentTarget(float DeltaSeconds);
 	void ClearCombatTarget();
+	float ResolveTrackingRange() const;
+	float ResolveAttackRange() const;
+	float ResolveApproachStartRange() const;
+	float ResolveApproachStopRange() const;
+	float ResolveAttackCooldownSeconds() const;
 
 	FTimerHandle UpdateTimerHandle;
 	TWeakObjectPtr<AActor> CurrentTargetActor;

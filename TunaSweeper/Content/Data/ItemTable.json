@@ -267,5 +267,14 @@
     "description_string_key": "item.valuables_crate.desc",
     "shop_sell_price": 250,
     "icon_file_name": "T_UIIcon_ValuablesCrate.uasset"
+  },
+  {
+    "id": 6002,
+    "name_string_key": "item.wood",
+    "description_string_key": "item.wood.desc",
+    "shop_sell_price": 3,
+    "icon_file_name": "T_UIIcon_ValuablesCrate.uasset",
+    "category_tag": "item.category.material",
+    "weight_kg": 0.8
   }
 ]

@@ -100,7 +100,7 @@ void ATunaSweeperEnemyAIController::UpdateAttackTarget()
 	}
 
 	const float DistanceToPlayer = FMath::Sqrt(FVector::DistSquared2D(ControlledPawn->GetActorLocation(), PlayerPawn->GetActorLocation()));
-	if (DistanceToPlayer > EffectiveTrackingRange)
+	if (DistanceToPlayer > ResolveTrackingRange())
 	{
 		ClearCombatTarget();
 		return;
@@ -108,32 +108,36 @@ void ATunaSweeperEnemyAIController::UpdateAttackTarget()
 
 	CurrentTargetActor = PlayerPawn;
 	SetFocus(PlayerPawn, EAIFocusPriority::Gameplay);
-	UpdateApproachState(DistanceToPlayer);
+	UpdateApproachState(DistanceToPlayer, ResolveApproachStartRange(), ResolveApproachStopRange());
 
-	if (bIsClosingDistance || DistanceToPlayer > EffectiveAttackRange)
+	if (bIsClosingDistance || DistanceToPlayer > ResolveAttackRange())
 	{
 		return;
 	}
 
 	UWorld* World = GetWorld();
 	const double CurrentTimeSeconds = World ? World->GetTimeSeconds() : 0.0;
-	if (CurrentTimeSeconds - LastAttackTimeSeconds < EffectiveAttackCooldownSeconds)
+	const float ResolvedAttackCooldownSeconds = ResolveAttackCooldownSeconds();
+	if (CurrentTimeSeconds - LastAttackTimeSeconds < ResolvedAttackCooldownSeconds)
 	{
 		return;
 	}
 
 	ATunaSweeperEnemyCharacter* EnemyCharacter = Cast<ATunaSweeperEnemyCharacter>(ControlledPawn);
-	if (EnemyCharacter && EnemyCharacter->FireProjectileAt(PlayerPawn))
+	if (EnemyCharacter && EnemyCharacter->AttackTarget(PlayerPawn))
 	{
 		LastAttackTimeSeconds = CurrentTimeSeconds;
 	}
 }
 
-void ATunaSweeperEnemyAIController::UpdateApproachState(float DistanceToTarget)
+void ATunaSweeperEnemyAIController::UpdateApproachState(
+	float DistanceToTarget,
+	float InApproachStartRange,
+	float InApproachStopRange)
 {
 	if (bIsClosingDistance)
 	{
-		if (DistanceToTarget <= EffectiveApproachStopRange)
+		if (DistanceToTarget <= InApproachStopRange)
 		{
 			bIsClosingDistance = false;
 			StopMovement();
@@ -142,7 +146,7 @@ void ATunaSweeperEnemyAIController::UpdateApproachState(float DistanceToTarget)
 		return;
 	}
 
-	if (DistanceToTarget > EffectiveApproachStartRange)
+	if (DistanceToTarget > InApproachStartRange)
 	{
 		bIsClosingDistance = true;
 	}
@@ -167,7 +171,7 @@ void ATunaSweeperEnemyAIController::MoveTowardCurrentTarget(float DeltaSeconds)
 	ToTarget.Z = 0.0f;
 
 	const float DistanceToTarget = ToTarget.Size();
-	if (DistanceToTarget <= EffectiveApproachStopRange)
+	if (DistanceToTarget <= ResolveApproachStopRange())
 	{
 		bIsClosingDistance = false;
 		StopMovement();
@@ -182,6 +186,46 @@ void ATunaSweeperEnemyAIController::MoveTowardCurrentTarget(float DeltaSeconds)
 
 	ControlledPawn->SetActorRotation(FRotator(0.0f, MoveDirection.Rotation().Yaw, 0.0f));
 	ControlledPawn->AddMovementInput(MoveDirection, 1.0f);
+}
+
+float ATunaSweeperEnemyAIController::ResolveTrackingRange() const
+{
+	const ATunaSweeperEnemyCharacter* EnemyCharacter = Cast<ATunaSweeperEnemyCharacter>(GetPawn());
+	return EnemyCharacter && EnemyCharacter->GetAttackMode() == ETunaSweeperEnemyAttackMode::Melee
+		? EnemyCharacter->GetMeleeTrackingRange()
+		: EffectiveTrackingRange;
+}
+
+float ATunaSweeperEnemyAIController::ResolveAttackRange() const
+{
+	const ATunaSweeperEnemyCharacter* EnemyCharacter = Cast<ATunaSweeperEnemyCharacter>(GetPawn());
+	return EnemyCharacter && EnemyCharacter->GetAttackMode() == ETunaSweeperEnemyAttackMode::Melee
+		? EnemyCharacter->GetMeleeAttackRange()
+		: EffectiveAttackRange;
+}
+
+float ATunaSweeperEnemyAIController::ResolveApproachStartRange() const
+{
+	const ATunaSweeperEnemyCharacter* EnemyCharacter = Cast<ATunaSweeperEnemyCharacter>(GetPawn());
+	return EnemyCharacter && EnemyCharacter->GetAttackMode() == ETunaSweeperEnemyAttackMode::Melee
+		? EnemyCharacter->GetMeleeApproachStartRange()
+		: EffectiveApproachStartRange;
+}
+
+float ATunaSweeperEnemyAIController::ResolveApproachStopRange() const
+{
+	const ATunaSweeperEnemyCharacter* EnemyCharacter = Cast<ATunaSweeperEnemyCharacter>(GetPawn());
+	return EnemyCharacter && EnemyCharacter->GetAttackMode() == ETunaSweeperEnemyAttackMode::Melee
+		? EnemyCharacter->GetMeleeApproachStopRange()
+		: EffectiveApproachStopRange;
+}
+
+float ATunaSweeperEnemyAIController::ResolveAttackCooldownSeconds() const
+{
+	const ATunaSweeperEnemyCharacter* EnemyCharacter = Cast<ATunaSweeperEnemyCharacter>(GetPawn());
+	return EnemyCharacter && EnemyCharacter->GetAttackMode() == ETunaSweeperEnemyAttackMode::Melee
+		? EnemyCharacter->GetMeleeAttackCooldownSeconds()
+		: EffectiveAttackCooldownSeconds;
 }
 
 void ATunaSweeperEnemyAIController::ClearCombatTarget()

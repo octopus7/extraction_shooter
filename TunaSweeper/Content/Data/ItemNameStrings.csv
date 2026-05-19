@@ -63,3 +63,6 @@ item.backpack_tier1.desc,인벤토리를 40칸에서 50칸으로 확장한다,Ex
 item.backpack_tier2.desc,인벤토리를 40칸에서 60칸으로 확장한다,Expands inventory from 40 to 60 slots,インベントリを40スロットから60スロットへ拡張する
 item.backpack_tier3.desc,인벤토리를 40칸에서 80칸으로 확장한다,Expands inventory from 40 to 80 slots,インベントリを40スロットから80スロットへ拡張する
 item.backpack_tier4.desc,인벤토리를 40칸에서 100칸으로 확장한다,Expands inventory from 40 to 100 slots,インベントリを40スロットから100スロットへ拡張する
+item.wood,목재,Wood,木材
+item.wood.desc,벌목기에게서 얻는 거친 목재다,Rough wood recovered from a lumberjack,伐採機から得た荒い木材
+container.lumber_crate,목재 상자,Lumber Crate,木材箱

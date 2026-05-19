@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AI/TunaSweeperEnemyCharacter.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "TunaSweeperEnemySpawnSubsystem.generated.h"
 
@@ -47,6 +48,13 @@ private:
 		int32 DropContainerDefinitionId = INDEX_NONE;
 		int32 DropContentsId = INDEX_NONE;
 		float MaxHealth = 30.0f;
+		ETunaSweeperEnemyAttackMode AttackMode = ETunaSweeperEnemyAttackMode::Projectile;
+		float AttackDamage = -1.0f;
+		float AttackRange = -1.0f;
+		float ApproachStartRange = -1.0f;
+		float ApproachStopRange = -1.0f;
+		float TrackingRange = -1.0f;
+		float AttackCooldownSeconds = -1.0f;
 	};
 
 	struct FLootContainerSpawnDefinition
