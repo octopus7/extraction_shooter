@@ -16,6 +16,7 @@
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraSystem.h"
+#include "Subsystem/TunaSweeperQuestSubsystem.h"
 #include "TimerManager.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Weapon/TunaSweeperProjectile.h"
@@ -131,7 +132,7 @@ float ATunaSweeperEnemyCharacter::TakeDamage(
 	CurrentHealth = FMath::Max(0.0f, CurrentHealth - DamageAmount);
 	if (CurrentHealth <= 0.0f)
 	{
-		HandleDeath(DamageCauser);
+		HandleDeath(EventInstigator, DamageCauser);
 	}
 
 	return AppliedDamage;
@@ -139,6 +140,7 @@ float ATunaSweeperEnemyCharacter::TakeDamage(
 
 void ATunaSweeperEnemyCharacter::ConfigureSpawnData(
 	const TSoftObjectPtr<UMaterialInterface>& InBodyMaterial,
+	FName InEnemyId,
 	int32 InDropContainerDefinitionId,
 	int32 InDropContentsId,
 	float InMaxHealth)
@@ -154,6 +156,7 @@ void ATunaSweeperEnemyCharacter::ConfigureSpawnData(
 		CurrentHealth = MaxHealth;
 	}
 
+	EnemyId = InEnemyId;
 	DropContainerDefinitionId = InDropContainerDefinitionId;
 	DropContentsId = InDropContentsId;
 	ApplyVisualMaterials();
@@ -426,7 +429,7 @@ void ATunaSweeperEnemyCharacter::SpawnMeleeImpactBurst(
 		SpawnParameters);
 }
 
-void ATunaSweeperEnemyCharacter::HandleDeath(AActor* DamageCauser)
+void ATunaSweeperEnemyCharacter::HandleDeath(AController* KillerController, AActor* DamageCauser)
 {
 	if (bIsDead)
 	{
@@ -449,6 +452,16 @@ void ATunaSweeperEnemyCharacter::HandleDeath(AActor* DamageCauser)
 
 	SetActorEnableCollision(false);
 	DetachFromControllerPendingDestroy();
+	if (KillerController && KillerController->IsPlayerController())
+	{
+		if (UGameInstance* GameInstance = GetGameInstance())
+		{
+			if (UTunaSweeperQuestSubsystem* QuestSubsystem = GameInstance->GetSubsystem<UTunaSweeperQuestSubsystem>())
+			{
+				QuestSubsystem->NotifyEnemyKilled(EnemyId);
+			}
+		}
+	}
 	SpawnDeathLootContainer(DamageCauser);
 	Destroy();
 }

@@ -15,6 +15,37 @@
 #include "Kismet/GameplayStatics.h"
 #include "Player/TunaSweeperPlayerController.h"
 #include "Stats/Stats.h"
+#include "Subsystem/TunaSweeperQuestSubsystem.h"
+
+namespace TunaSweeperInteractionQuestEvents
+{
+	FName GetInteractionTypeName(ETunaSweeperInteractionType InteractionType)
+	{
+		switch (InteractionType)
+		{
+		case ETunaSweeperInteractionType::ItemPickup:
+			return FName(TEXT("item_pickup"));
+		case ETunaSweeperInteractionType::ItemSpawn:
+			return FName(TEXT("item_spawn"));
+		case ETunaSweeperInteractionType::LootContainerOpen:
+			return FName(TEXT("loot_container_open"));
+		case ETunaSweeperInteractionType::LootContainerSpawn:
+			return FName(TEXT("loot_container_spawn"));
+		case ETunaSweeperInteractionType::LevelTravel:
+			return FName(TEXT("level_travel"));
+		case ETunaSweeperInteractionType::Quest:
+			return FName(TEXT("quest"));
+		case ETunaSweeperInteractionType::SelfDestruct:
+			return FName(TEXT("self_destruct"));
+		case ETunaSweeperInteractionType::WorldProgress:
+			return FName(TEXT("world_progress"));
+		case ETunaSweeperInteractionType::PersistentDoor:
+			return FName(TEXT("persistent_door"));
+		default:
+			return NAME_None;
+		}
+	}
+}
 
 void UTunaSweeperInteractionSubsystem::Tick(float DeltaTime)
 {
@@ -67,29 +98,54 @@ bool UTunaSweeperInteractionSubsystem::RequestInteraction(UTunaSweeperInteractab
 		return false;
 	}
 
+	bool bHandled = false;
 	switch (Interactable->GetInteractionType())
 	{
 	case ETunaSweeperInteractionType::ItemPickup:
-		return HandlePickupItemInteraction(Interactable);
+		bHandled = HandlePickupItemInteraction(Interactable);
+		break;
 	case ETunaSweeperInteractionType::ItemSpawn:
-		return HandleItemSpawnInteraction(Interactable, InstigatorPawn);
+		bHandled = HandleItemSpawnInteraction(Interactable, InstigatorPawn);
+		break;
 	case ETunaSweeperInteractionType::LootContainerOpen:
-		return HandleLootContainerOpenInteraction(Interactable, InstigatorPawn);
+		bHandled = HandleLootContainerOpenInteraction(Interactable, InstigatorPawn);
+		break;
 	case ETunaSweeperInteractionType::LootContainerSpawn:
-		return HandleLootContainerSpawnInteraction(Interactable, InstigatorPawn);
+		bHandled = HandleLootContainerSpawnInteraction(Interactable, InstigatorPawn);
+		break;
 	case ETunaSweeperInteractionType::LevelTravel:
-		return HandleLevelTravelInteraction(Interactable, InstigatorPawn);
+		bHandled = HandleLevelTravelInteraction(Interactable, InstigatorPawn);
+		break;
 	case ETunaSweeperInteractionType::Quest:
-		return HandleQuestInteraction(Interactable, InstigatorPawn);
+		bHandled = HandleQuestInteraction(Interactable, InstigatorPawn);
+		break;
 	case ETunaSweeperInteractionType::SelfDestruct:
-		return HandleSelfDestructInteraction(Interactable, InstigatorPawn);
+		bHandled = HandleSelfDestructInteraction(Interactable, InstigatorPawn);
+		break;
 	case ETunaSweeperInteractionType::WorldProgress:
-		return HandleWorldProgressInteraction(Interactable, InstigatorPawn);
+		bHandled = HandleWorldProgressInteraction(Interactable, InstigatorPawn);
+		break;
 	case ETunaSweeperInteractionType::PersistentDoor:
-		return HandlePersistentDoorInteraction(Interactable);
+		bHandled = HandlePersistentDoorInteraction(Interactable);
+		break;
 	default:
 		return false;
 	}
+
+	if (bHandled)
+	{
+		if (UGameInstance* GameInstance = GetWorld() ? GetWorld()->GetGameInstance() : nullptr)
+		{
+			if (UTunaSweeperQuestSubsystem* QuestSubsystem = GameInstance->GetSubsystem<UTunaSweeperQuestSubsystem>())
+			{
+				QuestSubsystem->NotifyInteractionCompleted(
+					Interactable->GetObjectiveEventId(),
+					TunaSweeperInteractionQuestEvents::GetInteractionTypeName(Interactable->GetInteractionType()));
+			}
+		}
+	}
+
+	return bHandled;
 }
 
 bool UTunaSweeperInteractionSubsystem::HandlePickupItemInteraction(UTunaSweeperInteractableComponent* Interactable)

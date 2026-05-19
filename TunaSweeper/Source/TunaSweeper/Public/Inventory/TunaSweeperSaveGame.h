@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/SaveGame.h"
 #include "Inventory/TunaSweeperInventoryTypes.h"
+#include "Quest/TunaSweeperQuestTypes.h"
 #include "TunaSweeperSaveGame.generated.h"
 
 UENUM(BlueprintType)
@@ -37,7 +38,7 @@ class TUNASWEEPER_API UTunaSweeperSaveGame : public USaveGame
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Save")
-	int32 SaveVersion = 4;
+	int32 SaveVersion = 5;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Save")
 	int32 SaveSlotIndex = 1;
@@ -65,6 +66,15 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|World Progress")
 	TArray<FTunaSweeperWorldProgressSaveData> WorldProgressStates;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
+	TArray<FTunaSweeperQuestProgressSaveData> QuestProgressStates;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
+	FName TrackedQuestId;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest", meta = (ClampMin = "0", UIMin = "0"))
+	int32 QuestCoinBalance = 0;
 };
 
 UCLASS()

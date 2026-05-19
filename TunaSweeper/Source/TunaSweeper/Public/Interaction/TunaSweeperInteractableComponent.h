@@ -45,6 +45,9 @@ public:
 	FText GetInteractionDisplayName() const { return InteractionDisplayName; }
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Interaction")
+	FName GetObjectiveEventId() const { return ObjectiveEventId; }
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Interaction")
 	float GetInteractionDistance() const { return InteractionDistance; }
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Interaction")
@@ -77,6 +80,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
 	FText InteractionDisplayName = FText::FromString(TEXT("Interact"));
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
+	FName ObjectiveEventId = NAME_None;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction", meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float InteractionDistance = 250.0f;

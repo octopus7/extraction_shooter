@@ -241,6 +241,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Inventory")
 	int32 ConsumeInventoryItemById(int32 ItemId, int32 RequestedAmount);
 
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Quest")
+	bool GrantQuestItemRewards(const TArray<FTunaSweeperItemStack>& ItemRewards);
+
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Inventory")
 	void CompactInventorySlots();
 
@@ -310,6 +313,7 @@ private:
 	bool IsAmmoDefinitionCompatibleWithWeapon(
 		const FTunaSweeperItemDefinition& WeaponDefinition,
 		const FTunaSweeperItemDefinition& AmmoDefinition) const;
+	bool CanGrantQuestItemRewards(const TArray<FTunaSweeperItemStack>& ItemRewards) const;
 	int32 CalculateWeaponMagazineCapacity(
 		const FTunaSweeperItemInstance& WeaponInstance,
 		const FTunaSweeperItemDefinition& WeaponDefinition) const;
