@@ -9,6 +9,7 @@ class UMaterialInterface;
 class UNiagaraSystem;
 class ATunaSweeperProjectile;
 class ATunaSweeperLootContainerActor;
+class ATunaSweeperMeleeImpactBurstActor;
 class ATunaSweeperMeleeSwingTrailActor;
 
 UCLASS(BlueprintType, Blueprintable)
@@ -60,8 +61,11 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat", meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float ProjectileDamage = 10.0f;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat|Melee")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat|Melee", meta = (DisplayName = "Melee Impact Niagara Effect"))
 	TSoftObjectPtr<UNiagaraSystem> MeleeSwingEffect;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat|Melee")
+	TSoftClassPtr<ATunaSweeperMeleeImpactBurstActor> MeleeImpactBurstActorClass;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat|Melee")
 	TSoftClassPtr<ATunaSweeperMeleeSwingTrailActor> MeleeSwingTrailActorClass;
@@ -97,6 +101,7 @@ private:
 	bool ApplyMeleeDamageTo(AActor* TargetActor);
 	void ApplyMeleeKnockbackTo(AActor* TargetActor, const FVector& AttackDirection) const;
 	void SpawnMeleeSwingEffect(const FVector& AttackDirection);
+	void SpawnMeleeImpactBurst(const FVector& HitLocation, const FVector& BurstDirection);
 	bool SpawnDeathLootContainer(AActor* DamageCauser);
 	FVector ResolveLootDropLocation(AActor* IgnoredActor) const;
 
