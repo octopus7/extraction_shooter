@@ -24,6 +24,11 @@ namespace TunaSweeperScenario
 	const FName BunkerMapName(TEXT("BunkerMap"));
 }
 
+namespace TunaSweeperDialogue
+{
+	const FName CharactersPerSecondSettingKey(TEXT("dialogue.characters_per_second"));
+}
+
 namespace TunaSweeperInventory
 {
 	constexpr int32 RequiredBareInventorySlots = 40;
@@ -236,6 +241,16 @@ bool UTunaSweeperGameInstance::TryGetBoolSetting(FName Key, bool& bOutValue) con
 
 	bOutValue = false;
 	return false;
+}
+
+float UTunaSweeperGameInstance::GetDialogueCharactersPerSecond() const
+{
+	if (const float* RuntimeCharactersPerSecond = NumberSettings.Find(TunaSweeperDialogue::CharactersPerSecondSettingKey))
+	{
+		return FMath::Max(0.1f, *RuntimeCharactersPerSecond);
+	}
+
+	return FMath::Max(0.1f, GameplaySettings.DialogueCharactersPerSecond);
 }
 
 void UTunaSweeperGameInstance::ClearRuntimeState()

@@ -390,6 +390,11 @@ void ATunaSweeperTopDownCharacter::HandleInventory(const FInputActionValue& Valu
 
 	if (ATunaSweeperPlayerController* TunaPlayerController = Cast<ATunaSweeperPlayerController>(GetController()))
 	{
+		if (TunaPlayerController->IsDialogueSequenceActive())
+		{
+			return;
+		}
+
 		TunaPlayerController->ToggleInventoryOnlyPanel();
 	}
 }
@@ -709,7 +714,8 @@ void ATunaSweeperTopDownCharacter::RefreshSelectedWeaponAfterInventoryChanged()
 bool ATunaSweeperTopDownCharacter::IsGameplayActionInputLocked() const
 {
 	const ATunaSweeperPlayerController* TunaPlayerController = Cast<ATunaSweeperPlayerController>(GetController());
-	return TunaPlayerController && TunaPlayerController->IsInventoryUiOpen();
+	return TunaPlayerController &&
+		(TunaPlayerController->IsInventoryUiOpen() || TunaPlayerController->IsDialogueSequenceActive());
 }
 
 void ATunaSweeperTopDownCharacter::CancelActiveGameplayActions()

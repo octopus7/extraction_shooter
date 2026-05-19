@@ -23,7 +23,7 @@ Update it whenever a new state field is expected to persist across save slots, l
 ### Scenario Progress Flags
 
 Scenario progress is persisted per save slot through `UTunaSweeperSaveGame::CompletedScenarioFlags`.
-See [scenario_progress_flags.md](scenario_progress_flags.md) for the flag contract, routing rules, and reuse constraints.
+See [Docs/scenario_progress_flags.md](scenario_progress_flags.md) for the flag contract, routing rules, and reuse constraints.
 
 ### Player-Owned Item Instances
 

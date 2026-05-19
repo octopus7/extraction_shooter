@@ -1,6 +1,8 @@
 #include "Player/TunaSweeperPlayerController.h"
 
 #include "Blueprint/UserWidget.h"
+#include "Camera/CameraActor.h"
+#include "Camera/CameraComponent.h"
 #include "Character/TunaSweeperTopDownCharacter.h"
 #include "CollisionQueryParams.h"
 #include "CollisionShape.h"
@@ -21,6 +23,7 @@
 #include "UI/TunaSweeperQuestWidget.h"
 #include "UI/TunaSweeperScenarioPresentationWidget.h"
 #include "UI/TunaSweeperScreenFadeWidget.h"
+#include "TimerManager.h"
 
 namespace TunaSweeperDropPlacement
 {
@@ -171,6 +174,22 @@ namespace TunaSweeperHoveredItemInteraction
 	}
 }
 
+namespace TunaSweeperCanBotIntro
+{
+	const FName DialogueCompletionFlag(TEXT("dialogue.canbot.bunker_intro"));
+	const FText SpeakerName = FText::FromString(TEXT("캔봇"));
+	constexpr float StartDelayAfterBunkerFadeSeconds = 1.15f;
+	constexpr float CameraReturnBlendSeconds = 0.9f;
+	constexpr float DialogueCameraDistance = 1200.0f;
+	const FRotator DialogueCameraRotation(-60.0f, 0.0f, 0.0f);
+	const FVector DeployLadderFocusLocation(220.0f, -220.0f, 4.0f);
+
+	FVector CalculateCameraLocationForFocus(const FVector& FocusLocation)
+	{
+		return FocusLocation - DialogueCameraRotation.Vector() * DialogueCameraDistance;
+	}
+}
+
 ATunaSweeperPlayerController::ATunaSweeperPlayerController()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -212,7 +231,20 @@ void ATunaSweeperPlayerController::BeginPlay()
 	else
 	{
 		EnsureGameHudWidget();
-		ShowBunkerEntryFadeIfNeeded();
+		const bool bShowingBunkerEntryFade = ShowBunkerEntryFadeIfNeeded();
+		if (bShowingBunkerEntryFade && GetWorld())
+		{
+			GetWorldTimerManager().SetTimer(
+				CanBotIntroDialogueTimerHandle,
+				this,
+				&ATunaSweeperPlayerController::MaybeStartCanBotIntroDialogue,
+				TunaSweeperCanBotIntro::StartDelayAfterBunkerFadeSeconds,
+				false);
+		}
+		else
+		{
+			MaybeStartCanBotIntroDialogue();
+		}
 	}
 }
 
@@ -270,6 +302,11 @@ void ATunaSweeperPlayerController::PlayerTick(float DeltaTime)
 	}
 
 	if (IsInventoryUiOpen())
+	{
+		return;
+	}
+
+	if (bDialogueSequenceActive)
 	{
 		return;
 	}
@@ -351,17 +388,17 @@ void ATunaSweeperPlayerController::EnsureScenarioPresentationWidget()
 	}
 }
 
-void ATunaSweeperPlayerController::ShowBunkerEntryFadeIfNeeded()
+bool ATunaSweeperPlayerController::ShowBunkerEntryFadeIfNeeded()
 {
 	if (!IsBunkerMap() || !IsLocalController())
 	{
-		return;
+		return false;
 	}
 
 	UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
 	if (!TunaGameInstance || !TunaGameInstance->CompletePendingScenarioBunkerEntryIfNeeded())
 	{
-		return;
+		return false;
 	}
 
 	ScreenFadeWidget = CreateWidget<UTunaSweeperScreenFadeWidget>(
@@ -372,6 +409,208 @@ void ATunaSweeperPlayerController::ShowBunkerEntryFadeIfNeeded()
 		ScreenFadeWidget->AddToViewport(100);
 		ScreenFadeWidget->StartFadeFromBlack(1.1f);
 	}
+
+	return true;
+}
+
+void ATunaSweeperPlayerController::MaybeStartCanBotIntroDialogue()
+{
+	if (!IsBunkerMap() || !IsLocalController() || bDialogueSequenceActive)
+	{
+		return;
+	}
+
+	UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+	if (!TunaGameInstance ||
+		TunaGameInstance->IsScenarioProgressFlagSet(TunaSweeperCanBotIntro::DialogueCompletionFlag))
+	{
+		return;
+	}
+
+	TArray<FTunaSweeperDialogueLine> DialogueLines;
+	BuildCanBotIntroDialogueLines(DialogueLines);
+	StartDialogueSequence(DialogueLines, TunaSweeperCanBotIntro::DialogueCompletionFlag);
+}
+
+void ATunaSweeperPlayerController::BuildCanBotIntroDialogueLines(TArray<FTunaSweeperDialogueLine>& OutDialogueLines) const
+{
+	OutDialogueLines.Reset();
+
+	auto AddCanBotLine = [&OutDialogueLines](const FText& DialogueText)
+	{
+		FTunaSweeperDialogueLine Line;
+		Line.SpeakerName = TunaSweeperCanBotIntro::SpeakerName;
+		Line.DialogueText = DialogueText;
+		OutDialogueLines.Add(Line);
+	};
+
+	AddCanBotLine(FText::FromString(TEXT("생존자 확인. 신경 반응 정상. 캔봇이 응답합니다.")));
+	AddCanBotLine(FText::FromString(TEXT("이곳은 B-07 벙커입니다. 방금 깨어난 당신의 임시 거점입니다.")));
+
+	FTunaSweeperDialogueLine CameraLine;
+	CameraLine.SpeakerName = TunaSweeperCanBotIntro::SpeakerName;
+	CameraLine.DialogueText = FText::FromString(TEXT("저쪽 이동 사다리를 사용하면 외부 구역으로 출동할 수 있습니다. 준비 전에는 접근하지 않는 편이 안전합니다."));
+	CameraLine.bUseCameraFocus = true;
+	CameraLine.CameraFocusLocation = TunaSweeperCanBotIntro::DeployLadderFocusLocation;
+	CameraLine.CameraBlendSeconds = 0.8f;
+	OutDialogueLines.Add(CameraLine);
+
+	AddCanBotLine(FText::FromString(TEXT("기본 생체 수치와 장비 상태를 확인했습니다. 조작 권한을 돌려드리겠습니다.")));
+	AddCanBotLine(FText::FromString(TEXT("필요하면 다시 말을 걸어 안내를 요청하십시오.")));
+}
+
+bool ATunaSweeperPlayerController::StartDialogueSequence(
+	const TArray<FTunaSweeperDialogueLine>& DialogueLines,
+	FName CompletionFlag)
+{
+	if (!IsLocalController() || bDialogueSequenceActive || DialogueLines.IsEmpty())
+	{
+		return false;
+	}
+
+	if (!DialogueWidget)
+	{
+		DialogueWidget = CreateWidget<UTunaSweeperDialogueWidget>(
+			this,
+			UTunaSweeperDialogueWidget::StaticClass());
+	}
+
+	if (!DialogueWidget)
+	{
+		return false;
+	}
+
+	CancelPawnGameplayActions();
+	bDialogueSequenceActive = true;
+	bDialogueCameraHasFocus = false;
+	ActiveDialogueCompletionFlag = CompletionFlag;
+	SetIgnoreMoveInput(true);
+	SetIgnoreLookInput(true);
+	bShowMouseCursor = true;
+
+	DialogueWidget->SetLineActivatedDelegate(FTunaSweeperDialogueLineActivatedDelegate::CreateUObject(
+		this,
+		&ATunaSweeperPlayerController::HandleDialogueLineActivated));
+	DialogueWidget->SetFinishedDelegate(FTunaSweeperDialogueFinishedDelegate::CreateUObject(
+		this,
+		&ATunaSweeperPlayerController::HandleDialogueFinished));
+
+	if (!DialogueWidget->IsInViewport())
+	{
+		DialogueWidget->AddToViewport(90);
+	}
+
+	const UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+	const float CharactersPerSecond = TunaGameInstance
+		? TunaGameInstance->GetDialogueCharactersPerSecond()
+		: 5.0f;
+	DialogueWidget->StartDialogue(DialogueLines, CharactersPerSecond);
+
+	FInputModeUIOnly InputMode;
+	InputMode.SetWidgetToFocus(DialogueWidget->TakeWidget());
+	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+	SetInputMode(InputMode);
+	DialogueWidget->SetKeyboardFocus();
+	return true;
+}
+
+void ATunaSweeperPlayerController::HandleDialogueLineActivated(const FTunaSweeperDialogueLine& DialogueLine)
+{
+	if (DialogueLine.bUseCameraFocus)
+	{
+		MoveDialogueCameraToFocusLocation(DialogueLine.CameraFocusLocation, DialogueLine.CameraBlendSeconds);
+	}
+}
+
+void ATunaSweeperPlayerController::HandleDialogueFinished()
+{
+	if (DialogueWidget)
+	{
+		DialogueWidget->RemoveFromParent();
+		DialogueWidget = nullptr;
+	}
+
+	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
+	{
+		TunaGameInstance->MarkScenarioProgressFlag(ActiveDialogueCompletionFlag, true);
+	}
+
+	const float ReturnBlendSeconds = bDialogueCameraHasFocus
+		? TunaSweeperCanBotIntro::CameraReturnBlendSeconds
+		: 0.0f;
+	ReturnDialogueCameraToPlayer(ReturnBlendSeconds);
+
+	if (ReturnBlendSeconds > 0.0f && GetWorld())
+	{
+		GetWorldTimerManager().SetTimer(
+			DialogueCameraReturnTimerHandle,
+			this,
+			&ATunaSweeperPlayerController::FinishDialogueCameraReturn,
+			ReturnBlendSeconds,
+			false);
+	}
+	else
+	{
+		FinishDialogueCameraReturn();
+	}
+}
+
+void ATunaSweeperPlayerController::MoveDialogueCameraToFocusLocation(FVector FocusLocation, float BlendSeconds)
+{
+	UWorld* World = GetWorld();
+	if (!World || !IsLocalController())
+	{
+		return;
+	}
+
+	if (!DialogueCameraActor)
+	{
+		FActorSpawnParameters SpawnParameters;
+		SpawnParameters.Owner = this;
+		SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		DialogueCameraActor = World->SpawnActor<ACameraActor>(
+			ACameraActor::StaticClass(),
+			FTransform::Identity,
+			SpawnParameters);
+	}
+
+	if (!DialogueCameraActor)
+	{
+		return;
+	}
+
+	DialogueCameraActor->SetActorLocationAndRotation(
+		TunaSweeperCanBotIntro::CalculateCameraLocationForFocus(FocusLocation),
+		TunaSweeperCanBotIntro::DialogueCameraRotation);
+	if (UCameraComponent* CameraComponent = DialogueCameraActor->GetCameraComponent())
+	{
+		CameraComponent->SetFieldOfView(70.0f);
+	}
+
+	SetViewTargetWithBlend(DialogueCameraActor, FMath::Max(0.0f, BlendSeconds), VTBlend_Cubic);
+	bDialogueCameraHasFocus = true;
+}
+
+void ATunaSweeperPlayerController::ReturnDialogueCameraToPlayer(float BlendSeconds)
+{
+	if (APawn* ControlledPawn = GetPawn())
+	{
+		SetViewTargetWithBlend(ControlledPawn, FMath::Max(0.0f, BlendSeconds), VTBlend_Cubic);
+	}
+}
+
+void ATunaSweeperPlayerController::FinishDialogueCameraReturn()
+{
+	if (DialogueCameraActor)
+	{
+		DialogueCameraActor->Destroy();
+		DialogueCameraActor = nullptr;
+	}
+
+	ActiveDialogueCompletionFlag = NAME_None;
+	bDialogueCameraHasFocus = false;
+	bDialogueSequenceActive = false;
+	ApplyDefaultGameInputMode();
 }
 
 void ATunaSweeperPlayerController::CancelPawnGameplayActions() const
@@ -492,6 +731,11 @@ bool ATunaSweeperPlayerController::TryHandleHoveredItemInteract()
 		return false;
 	}
 
+	if (bDialogueSequenceActive)
+	{
+		return true;
+	}
+
 	if (const ATunaSweeperTopDownCharacter* ControlledCharacter = Cast<ATunaSweeperTopDownCharacter>(GetPawn()))
 	{
 		if (ControlledCharacter->IsDead())
@@ -541,6 +785,11 @@ void ATunaSweeperPlayerController::HandleQuickSlot(int32 SlotNumber)
 		return;
 	}
 
+	if (bDialogueSequenceActive)
+	{
+		return;
+	}
+
 	if (IsInventoryUiOpen())
 	{
 		return;
@@ -575,6 +824,11 @@ void ATunaSweeperPlayerController::HandleQuickSlot(int32 SlotNumber)
 void ATunaSweeperPlayerController::HandleDrop(const FInputActionValue&)
 {
 	if (IsIntroMap() || IsOpeningScenarioMap())
+	{
+		return;
+	}
+
+	if (bDialogueSequenceActive)
 	{
 		return;
 	}

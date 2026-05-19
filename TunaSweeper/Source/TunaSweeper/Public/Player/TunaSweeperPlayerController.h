@@ -3,8 +3,11 @@
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
+#include "TimerManager.h"
+#include "UI/TunaSweeperDialogueWidget.h"
 #include "TunaSweeperPlayerController.generated.h"
 
+class ACameraActor;
 class UTunaSweeperGameHudWidget;
 class UTunaSweeperIntroMenuWidget;
 class UTunaSweeperQuestWidget;
@@ -44,6 +47,18 @@ public:
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Input")
 	bool IsInventoryUiOpen() const;
 
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Dialogue")
+	bool IsDialogueSequenceActive() const { return bDialogueSequenceActive; }
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Dialogue")
+	bool StartDialogueSequence(const TArray<FTunaSweeperDialogueLine>& DialogueLines, FName CompletionFlag);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Dialogue")
+	void MoveDialogueCameraToFocusLocation(FVector FocusLocation, float BlendSeconds = 0.75f);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Dialogue")
+	void ReturnDialogueCameraToPlayer(float BlendSeconds = 0.9f);
+
 	bool TryHandleHoveredItemInteract();
 
 protected:
@@ -65,6 +80,12 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Scenario")
 	TObjectPtr<UTunaSweeperScreenFadeWidget> ScreenFadeWidget;
 
+	UPROPERTY(BlueprintReadOnly, Category = "Dialogue")
+	TObjectPtr<UTunaSweeperDialogueWidget> DialogueWidget;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Dialogue")
+	TObjectPtr<ACameraActor> DialogueCameraActor;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Quest")
 	TSoftClassPtr<UTunaSweeperQuestWidget> QuestWidgetClass;
 
@@ -84,7 +105,12 @@ private:
 	void EnsureGameHudWidget();
 	void EnsureIntroMenuWidget();
 	void EnsureScenarioPresentationWidget();
-	void ShowBunkerEntryFadeIfNeeded();
+	bool ShowBunkerEntryFadeIfNeeded();
+	void MaybeStartCanBotIntroDialogue();
+	void BuildCanBotIntroDialogueLines(TArray<FTunaSweeperDialogueLine>& OutDialogueLines) const;
+	void HandleDialogueLineActivated(const FTunaSweeperDialogueLine& DialogueLine);
+	void HandleDialogueFinished();
+	void FinishDialogueCameraReturn();
 	void CancelPawnGameplayActions() const;
 	bool IsIntroMap() const;
 	bool IsOpeningScenarioMap() const;
@@ -102,4 +128,10 @@ private:
 	void HandleQuickSlot6(const FInputActionValue& Value);
 	void HandleQuickSlot7(const FInputActionValue& Value);
 	void HandleQuickSlot8(const FInputActionValue& Value);
+
+	FTimerHandle CanBotIntroDialogueTimerHandle;
+	FTimerHandle DialogueCameraReturnTimerHandle;
+	FName ActiveDialogueCompletionFlag;
+	bool bDialogueSequenceActive = false;
+	bool bDialogueCameraHasFocus = false;
 };

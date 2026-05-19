@@ -22,6 +22,7 @@ Scenario levels themselves are reusable presentation spaces. Do not block entry 
 | Flag | Meaning |
 | --- | --- |
 | `scenario.opening.awakening` | The first-start opening presentation has completed and the player successfully entered the bunker. |
+| `dialogue.canbot.bunker_intro` | The first bunker-entry CanBot dialogue tutorial has completed for the save slot. |
 
 ## Current Routing
 
@@ -30,7 +31,7 @@ The intro menu asks `UTunaSweeperGameInstance::ResolveInitialGameplayLevelName()
 - If `scenario.opening.awakening` is not completed, route to `OpeningScenarioMap`.
 - If `scenario.opening.awakening` is completed, route directly to `BunkerMap`.
 
-This applies to normal start and the debug `항상새로시작` path after the selected save slot has been reset.
+This applies to normal start and the Always New Start debug path after the selected save slot has been reset.
 
 ## Completion Timing
 
@@ -42,11 +43,13 @@ The opening scenario does not mark its flag immediately when the presentation st
 
 This means the flag represents successful bunker entry after the presentation, not merely seeing part of the presentation.
 
+The CanBot bunker intro dialogue flag is marked when the dialogue sequence finishes. The camera may still be blending back to the player, but the dialogue content has reached completion and the save slot should not replay it on the next bunker entry.
+
 ## Reset Behavior
 
 Starting a new save slot initializes an empty scenario flag set.
 
-Deleting a selected slot through `항상새로시작` removes that slot's save data and starts a new slot state, so scenario flags for that slot are cleared. Other slots are unaffected.
+Deleting a selected slot through the Always New Start debug button removes that slot's save data and starts a new slot state, so scenario flags for that slot are cleared. Other slots are unaffected.
 
 ## Adding A New Scenario Flag
 
