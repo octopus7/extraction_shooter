@@ -14,7 +14,7 @@
 namespace
 {
 	const TCHAR* BrokenBridgeVoxelMeshPath = TEXT("/Game/Interaction/SM_Bridge_Broken_Voxel.SM_Bridge_Broken_Voxel");
-	const TCHAR* VoxelVertexColorMaterialPath = TEXT("/Game/Prototype/M_Voxel_VertexColor.M_Voxel_VertexColor");
+	const TCHAR* BrokenBridgeVoxelMaterialPath = TEXT("/Game/Prototype/M_Voxel_VertexColor.M_Voxel_VertexColor");
 }
 
 ATunaSweeperWorldProgressActor::ATunaSweeperWorldProgressActor()
@@ -132,7 +132,7 @@ void ATunaSweeperWorldProgressActor::ApplyBridgeVisualMesh()
 		VisualMesh->SetRelativeScale3D(FVector::OneVector);
 	}
 
-	if (UMaterialInterface* VoxelMaterial = LoadObject<UMaterialInterface>(nullptr, VoxelVertexColorMaterialPath))
+	if (UMaterialInterface* VoxelMaterial = LoadObject<UMaterialInterface>(nullptr, BrokenBridgeVoxelMaterialPath))
 	{
 		VisualMesh->SetMaterial(0, VoxelMaterial);
 	}

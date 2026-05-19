@@ -10,7 +10,7 @@
 namespace
 {
 	const TCHAR* RepairedBridgeVoxelMeshPath = TEXT("/Game/Interaction/SM_Bridge_Repaired_Voxel.SM_Bridge_Repaired_Voxel");
-	const TCHAR* VoxelVertexColorMaterialPath = TEXT("/Game/Prototype/M_Voxel_VertexColor.M_Voxel_VertexColor");
+	const TCHAR* RepairedBridgeVoxelMaterialPath = TEXT("/Game/Prototype/M_Voxel_VertexColor.M_Voxel_VertexColor");
 }
 
 ATunaSweeperTransparentObstacleActor::ATunaSweeperTransparentObstacleActor()
@@ -110,7 +110,7 @@ void ATunaSweeperWorldProgressCompletedActor::ApplyRepairedBridgeVisualMesh()
 		VisualMesh->SetRelativeScale3D(FVector::OneVector);
 	}
 
-	if (UMaterialInterface* VoxelMaterial = LoadObject<UMaterialInterface>(nullptr, VoxelVertexColorMaterialPath))
+	if (UMaterialInterface* VoxelMaterial = LoadObject<UMaterialInterface>(nullptr, RepairedBridgeVoxelMaterialPath))
 	{
 		VisualMesh->SetMaterial(0, VoxelMaterial);
 	}

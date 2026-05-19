@@ -6,8 +6,10 @@
 
 class UStaticMeshComponent;
 class UMaterialInterface;
+class UNiagaraSystem;
 class ATunaSweeperProjectile;
 class ATunaSweeperLootContainerActor;
+class ATunaSweeperMeleeSwingTrailActor;
 
 UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API ATunaSweeperEnemyCharacter : public ACharacter
@@ -58,6 +60,12 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat", meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float ProjectileDamage = 10.0f;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat|Melee")
+	TSoftObjectPtr<UNiagaraSystem> MeleeSwingEffect;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat|Melee")
+	TSoftClassPtr<ATunaSweeperMeleeSwingTrailActor> MeleeSwingTrailActorClass;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat", meta = (ClampMin = "1.0", UIMin = "1.0"))
 	float MaxHealth = 30.0f;
 
@@ -87,6 +95,8 @@ private:
 	void ApplyVisualMaterials();
 	void HandleDeath(AActor* DamageCauser);
 	bool ApplyMeleeDamageTo(AActor* TargetActor);
+	void ApplyMeleeKnockbackTo(AActor* TargetActor, const FVector& AttackDirection) const;
+	void SpawnMeleeSwingEffect(const FVector& AttackDirection);
 	bool SpawnDeathLootContainer(AActor* DamageCauser);
 	FVector ResolveLootDropLocation(AActor* IgnoredActor) const;
 

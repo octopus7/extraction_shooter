@@ -2,7 +2,9 @@
 
 #include "AI/TunaSweeperEnemyAIController.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/PrimitiveComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Effect/TunaSweeperMeleeSwingTrailActor.h"
 #include "Engine/StaticMesh.h"
 #include "GameFramework/DamageType.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -10,6 +12,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "Materials/MaterialInterface.h"
 #include "Materials/MaterialInstanceDynamic.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraSystem.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Weapon/TunaSweeperProjectile.h"
 
@@ -27,10 +31,13 @@ namespace
 	constexpr float LumberjackMeleeApproachStopRange = 95.0f;
 	constexpr float LumberjackMeleeTrackingRange = 1800.0f;
 	constexpr float LumberjackMeleeAttackCooldownSeconds = 1.25f;
+	constexpr float LumberjackMeleeKnockbackVelocity = 680.0f;
+	const FVector LumberjackMeleeSwingEffectOffset(72.0f, 0.0f, 54.0f);
 	const TCHAR* EnemyVoxelBodyMeshPath = TEXT("/Game/Characters/Enemy/SM_Enemy_VoxelBody.SM_Enemy_VoxelBody");
 	const TCHAR* EnemyVoxelForwardMarkerMeshPath =
 		TEXT("/Game/Characters/Enemy/SM_Enemy_VoxelForwardMarker.SM_Enemy_VoxelForwardMarker");
-	const TCHAR* VoxelVertexColorMaterialPath = TEXT("/Game/Prototype/M_Voxel_VertexColor.M_Voxel_VertexColor");
+	const TCHAR* EnemyVoxelMaterialPath = TEXT("/Game/Prototype/M_Voxel_VertexColor.M_Voxel_VertexColor");
+	const TCHAR* DefaultMeleeSwingEffectPath = TEXT("/Niagara/DefaultAssets/DefaultSystem.DefaultSystem");
 
 	float GetRandomizedEnemyValue(float BaseValue, const FVector2D& OffsetRange, float MinValue)
 	{
@@ -83,11 +90,15 @@ ATunaSweeperEnemyCharacter::ATunaSweeperEnemyCharacter()
 	ProjectileClass = TSoftClassPtr<ATunaSweeperProjectile>(
 		FSoftObjectPath(TEXT("/Game/Weapons/BP_TunaSweeperProjectile.BP_TunaSweeperProjectile_C")));
 	BodyMaterial = TSoftObjectPtr<UMaterialInterface>(
-		FSoftObjectPath(VoxelVertexColorMaterialPath));
+		FSoftObjectPath(EnemyVoxelMaterialPath));
 	ForwardMarkerMaterial = TSoftObjectPtr<UMaterialInterface>(
-		FSoftObjectPath(VoxelVertexColorMaterialPath));
+		FSoftObjectPath(EnemyVoxelMaterialPath));
 	LootContainerClass = TSoftClassPtr<ATunaSweeperLootContainerActor>(
 		FSoftObjectPath(TEXT("/Game/Interaction/BP_LootContainer.BP_LootContainer_C")));
+	MeleeSwingEffect = TSoftObjectPtr<UNiagaraSystem>(
+		FSoftObjectPath(DefaultMeleeSwingEffectPath));
+	MeleeSwingTrailActorClass = TSoftClassPtr<ATunaSweeperMeleeSwingTrailActor>(
+		FSoftObjectPath(TEXT("/Script/TunaSweeper.TunaSweeperMeleeSwingTrailActor")));
 }
 
 void ATunaSweeperEnemyCharacter::BeginPlay()
@@ -277,8 +288,87 @@ bool ATunaSweeperEnemyCharacter::ApplyMeleeDamageTo(AActor* TargetActor)
 		SetActorRotation(FRotator(0.0f, AttackDirection.Rotation().Yaw, 0.0f));
 	}
 
-	UGameplayStatics::ApplyDamage(TargetActor, LumberjackMeleeDamage, GetController(), this, UDamageType::StaticClass());
+	SpawnMeleeSwingEffect(AttackDirection);
+
+	const float AppliedDamage = UGameplayStatics::ApplyDamage(
+		TargetActor,
+		LumberjackMeleeDamage,
+		GetController(),
+		this,
+		UDamageType::StaticClass());
+	if (AppliedDamage <= 0.0f)
+	{
+		return false;
+	}
+
+	ApplyMeleeKnockbackTo(TargetActor, AttackDirection);
 	return true;
+}
+
+void ATunaSweeperEnemyCharacter::ApplyMeleeKnockbackTo(
+	AActor* TargetActor,
+	const FVector& AttackDirection) const
+{
+	if (!TargetActor || AttackDirection.IsNearlyZero())
+	{
+		return;
+	}
+
+	const FVector KnockbackVelocity = AttackDirection.GetSafeNormal2D() * LumberjackMeleeKnockbackVelocity;
+	if (ACharacter* TargetCharacter = Cast<ACharacter>(TargetActor))
+	{
+		if (UCharacterMovementComponent* TargetMovement = TargetCharacter->GetCharacterMovement())
+		{
+			TargetMovement->AddImpulse(KnockbackVelocity, true);
+			return;
+		}
+	}
+
+	if (UPrimitiveComponent* RootPrimitive = Cast<UPrimitiveComponent>(TargetActor->GetRootComponent()))
+	{
+		RootPrimitive->AddImpulse(KnockbackVelocity, NAME_None, true);
+	}
+}
+
+void ATunaSweeperEnemyCharacter::SpawnMeleeSwingEffect(const FVector& AttackDirection)
+{
+	UWorld* World = GetWorld();
+	if (!World || AttackDirection.IsNearlyZero())
+	{
+		return;
+	}
+
+	const FRotator EffectRotation(0.0f, AttackDirection.Rotation().Yaw, 0.0f);
+	const FVector NiagaraEffectLocation =
+		GetActorLocation() + EffectRotation.RotateVector(LumberjackMeleeSwingEffectOffset);
+
+	if (UNiagaraSystem* LoadedSwingEffect = MeleeSwingEffect.LoadSynchronous())
+	{
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			World,
+			LoadedSwingEffect,
+			NiagaraEffectLocation,
+			EffectRotation,
+			FVector(0.75f),
+			true,
+			true);
+	}
+
+	TSubclassOf<ATunaSweeperMeleeSwingTrailActor> LoadedTrailClass = MeleeSwingTrailActorClass.LoadSynchronous();
+	if (!LoadedTrailClass)
+	{
+		LoadedTrailClass = ATunaSweeperMeleeSwingTrailActor::StaticClass();
+	}
+
+	FActorSpawnParameters SpawnParameters;
+	SpawnParameters.Owner = this;
+	SpawnParameters.Instigator = this;
+	SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	World->SpawnActor<ATunaSweeperMeleeSwingTrailActor>(
+		LoadedTrailClass,
+		GetActorLocation(),
+		EffectRotation,
+		SpawnParameters);
 }
 
 void ATunaSweeperEnemyCharacter::HandleDeath(AActor* DamageCauser)
