@@ -50,6 +50,21 @@ namespace
 	}
 }
 
+TSharedRef<SWidget> UTunaSweeperScenarioPresentationWidget::RebuildWidget()
+{
+	if (!WidgetTree)
+	{
+		WidgetTree = NewObject<UWidgetTree>(this, TEXT("WidgetTree"), RF_Transient);
+	}
+
+	if (WidgetTree && !WidgetTree->RootWidget)
+	{
+		BuildPresentationWidget();
+	}
+
+	return Super::RebuildWidget();
+}
+
 void UTunaSweeperScenarioPresentationWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
@@ -137,6 +152,11 @@ FReply UTunaSweeperScenarioPresentationWidget::NativeOnMouseButtonDown(const FGe
 void UTunaSweeperScenarioPresentationWidget::BuildPresentationWidget()
 {
 	if (!WidgetTree)
+	{
+		return;
+	}
+
+	if (WidgetTree->RootWidget)
 	{
 		return;
 	}

@@ -5,6 +5,21 @@
 #include "Components/CanvasPanel.h"
 #include "Components/CanvasPanelSlot.h"
 
+TSharedRef<SWidget> UTunaSweeperScreenFadeWidget::RebuildWidget()
+{
+	if (!WidgetTree)
+	{
+		WidgetTree = NewObject<UWidgetTree>(this, TEXT("WidgetTree"), RF_Transient);
+	}
+
+	if (WidgetTree && !WidgetTree->RootWidget)
+	{
+		BuildFadeWidget();
+	}
+
+	return Super::RebuildWidget();
+}
+
 void UTunaSweeperScreenFadeWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
@@ -42,7 +57,7 @@ void UTunaSweeperScreenFadeWidget::StartFadeFromBlack(float DurationSeconds)
 
 void UTunaSweeperScreenFadeWidget::BuildFadeWidget()
 {
-	if (!WidgetTree || FadeBorder)
+	if (!WidgetTree || FadeBorder || WidgetTree->RootWidget)
 	{
 		return;
 	}
