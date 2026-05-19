@@ -36,7 +36,7 @@ namespace
 	constexpr float LumberjackMeleeAttackCooldownSeconds = 1.25f;
 	constexpr float LumberjackMeleeKnockbackVelocity = 680.0f;
 	constexpr float LumberjackMeleeImpactHeight = 55.0f;
-	constexpr float LumberjackMeleeImpactLifetimeSeconds = 0.22f;
+	constexpr float LumberjackMeleeImpactLifetimeSeconds = 0.55f;
 	const FLinearColor LumberjackMeleeImpactColor(0.0f, 0.92f, 1.0f, 1.0f);
 	const TCHAR* EnemyVoxelBodyMeshPath = TEXT("/Game/Characters/Enemy/SM_Enemy_VoxelBody.SM_Enemy_VoxelBody");
 	const TCHAR* EnemyVoxelForwardMarkerMeshPath =
@@ -383,7 +383,7 @@ void ATunaSweeperEnemyCharacter::SpawnMeleeImpactBurst(
 			LoadedImpactEffect,
 			HitLocation,
 			BurstRotation,
-			FVector(0.65f),
+			FVector(1.15f),
 			true,
 			true);
 		if (ImpactComponent)

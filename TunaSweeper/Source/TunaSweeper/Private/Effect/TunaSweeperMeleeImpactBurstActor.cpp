@@ -9,9 +9,9 @@
 
 namespace
 {
-	constexpr float BurstLifetimeSeconds = 0.24f;
+	constexpr float BurstLifetimeSeconds = 0.55f;
 	const TCHAR* BurstMaterialPath = TEXT("/Game/Prototype/M_Voxel_VertexColor.M_Voxel_VertexColor");
-	const FLinearColor BurstColor(0.0f, 0.92f, 1.0f, 1.0f);
+	const FLinearColor BurstColor(0.0f, 1.0f, 1.0f, 1.0f);
 
 	struct FMeleeImpactBurstParticleConfig
 	{
@@ -21,13 +21,16 @@ namespace
 
 	const FMeleeImpactBurstParticleConfig BurstParticleConfigs[] =
 	{
-		{ FVector(18.0f, 0.0f, 0.0f), FVector(0.055f, 0.055f, 0.055f) },
-		{ FVector(34.0f, -10.0f, 7.0f), FVector(0.042f, 0.042f, 0.042f) },
-		{ FVector(42.0f, 12.0f, -5.0f), FVector(0.038f, 0.038f, 0.038f) },
-		{ FVector(58.0f, -18.0f, 12.0f), FVector(0.032f, 0.032f, 0.032f) },
-		{ FVector(66.0f, 16.0f, 5.0f), FVector(0.034f, 0.034f, 0.034f) },
-		{ FVector(80.0f, -8.0f, -10.0f), FVector(0.026f, 0.026f, 0.026f) },
-		{ FVector(88.0f, 8.0f, 14.0f), FVector(0.028f, 0.028f, 0.028f) }
+		{ FVector(12.0f, 0.0f, 0.0f), FVector(0.18f, 0.18f, 0.18f) },
+		{ FVector(34.0f, -14.0f, 8.0f), FVector(0.14f, 0.14f, 0.14f) },
+		{ FVector(44.0f, 16.0f, -6.0f), FVector(0.13f, 0.13f, 0.13f) },
+		{ FVector(68.0f, -26.0f, 18.0f), FVector(0.11f, 0.11f, 0.11f) },
+		{ FVector(78.0f, 28.0f, 8.0f), FVector(0.115f, 0.115f, 0.115f) },
+		{ FVector(98.0f, -18.0f, -14.0f), FVector(0.095f, 0.095f, 0.095f) },
+		{ FVector(112.0f, 20.0f, 22.0f), FVector(0.10f, 0.10f, 0.10f) },
+		{ FVector(126.0f, -34.0f, 6.0f), FVector(0.085f, 0.085f, 0.085f) },
+		{ FVector(138.0f, 30.0f, -18.0f), FVector(0.09f, 0.09f, 0.09f) },
+		{ FVector(148.0f, -6.0f, 28.0f), FVector(0.08f, 0.08f, 0.08f) }
 	};
 
 	void ConfigureBurstParticle(
@@ -70,7 +73,7 @@ ATunaSweeperMeleeImpactBurstActor::ATunaSweeperMeleeImpactBurstActor()
 		BurstParticle->SetupAttachment(RootComponent);
 
 		const FMeleeImpactBurstParticleConfig& Config = BurstParticleConfigs[Index];
-		ConfigureBurstParticle(BurstParticle, BurstMesh, Config.TargetLocation * 0.25f, Config.Scale * 1.2f);
+		ConfigureBurstParticle(BurstParticle, BurstMesh, Config.TargetLocation * 0.18f, Config.Scale * 1.65f);
 		BurstParticles.Add(BurstParticle);
 		BurstTargetLocations.Add(Config.TargetLocation);
 		BurstBaseScales.Add(Config.Scale);
@@ -110,8 +113,8 @@ void ATunaSweeperMeleeImpactBurstActor::Tick(float DeltaSeconds)
 
 	ElapsedLifetimeSeconds += DeltaSeconds;
 	const float Alpha = FMath::Clamp(ElapsedLifetimeSeconds / BurstLifetimeSeconds, 0.0f, 1.0f);
-	const float LocationScale = FMath::Lerp(0.25f, 1.15f, Alpha);
-	const float ParticleScale = FMath::Lerp(1.2f, 0.15f, Alpha);
+	const float LocationScale = FMath::Lerp(0.18f, 1.35f, Alpha);
+	const float ParticleScale = FMath::Lerp(1.65f, 0.35f, Alpha);
 
 	for (int32 Index = 0; Index < BurstParticles.Num(); ++Index)
 	{
