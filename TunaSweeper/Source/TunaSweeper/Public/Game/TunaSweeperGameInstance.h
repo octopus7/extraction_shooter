@@ -136,6 +136,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Save")
 	bool DeleteSaveSlot(int32 SaveSlotIndex);
 
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Save")
+	bool DeleteSaveSlotAndStartNewGame(int32 SaveSlotIndex);
+
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
 	void SetPlayerHudState(const FTunaSweeperPlayerHudState& InHudState);
 

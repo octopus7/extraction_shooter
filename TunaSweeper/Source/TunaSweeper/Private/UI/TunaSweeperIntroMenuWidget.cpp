@@ -1,8 +1,12 @@
 #include "UI/TunaSweeperIntroMenuWidget.h"
 
+#include "Blueprint/WidgetTree.h"
 #include "Components/Button.h"
+#include "Components/CanvasPanel.h"
+#include "Components/CanvasPanelSlot.h"
 #include "Components/Image.h"
 #include "Components/ScrollBox.h"
+#include "Components/SizeBox.h"
 #include "Components/TextBlock.h"
 #include "Components/Widget.h"
 #include "Engine/Engine.h"
@@ -46,6 +50,13 @@ void UTunaSweeperIntroMenuWidget::NativeConstruct()
 	{
 		QuitButton->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleQuitClicked);
 		QuitButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleQuitClicked);
+	}
+
+	EnsureAlwaysNewStartButton();
+	if (AlwaysNewStartButton)
+	{
+		AlwaysNewStartButton->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleAlwaysNewStartClicked);
+		AlwaysNewStartButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleAlwaysNewStartClicked);
 	}
 
 	if (SaveSlot1Button)
@@ -284,6 +295,24 @@ void UTunaSweeperIntroMenuWidget::HandleQuitClicked()
 	UKismetSystemLibrary::QuitGame(this, GetOwningPlayer(), EQuitPreference::Quit, false);
 }
 
+void UTunaSweeperIntroMenuWidget::HandleAlwaysNewStartClicked()
+{
+	UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GetGameInstance());
+	if (TunaGameInstance)
+	{
+		const int32 TargetSaveSlotIndex = TunaGameInstance->GetActiveSaveSlotIndex();
+		if (!TunaGameInstance->DeleteSaveSlotAndStartNewGame(TargetSaveSlotIndex))
+		{
+			return;
+		}
+	}
+
+	if (!StartTargetLevelName.IsNone())
+	{
+		UGameplayStatics::OpenLevel(this, StartTargetLevelName);
+	}
+}
+
 void UTunaSweeperIntroMenuWidget::HandleSaveSlot1Focused()
 {
 	SelectSaveSlot(1);
@@ -406,6 +435,7 @@ void UTunaSweeperIntroMenuWidget::HandleResolution2560Clicked()
 void UTunaSweeperIntroMenuWidget::HandleBackFromSettingsClicked()
 {
 	HideOverlayPanels();
+	SetAlwaysNewStartButtonVisible(true);
 }
 
 void UTunaSweeperIntroMenuWidget::HandleBackFromCreditsClicked()
@@ -429,6 +459,7 @@ void UTunaSweeperIntroMenuWidget::ShowMainMenu()
 	}
 
 	SelectedSaveSlotIndex = INDEX_NONE;
+	SetAlwaysNewStartButtonVisible(true);
 	RefreshMainMenu();
 	RefreshSaveSlotMenu();
 }
@@ -449,6 +480,7 @@ void UTunaSweeperIntroMenuWidget::ShowSaveSlotSelection()
 	}
 
 	SelectedSaveSlotIndex = INDEX_NONE;
+	SetAlwaysNewStartButtonVisible(false);
 	RefreshSaveSlotMenu();
 }
 
@@ -470,6 +502,7 @@ void UTunaSweeperIntroMenuWidget::ShowSettingsPanel()
 		SettingsPanel->SetVisibility(ESlateVisibility::Visible);
 	}
 
+	SetAlwaysNewStartButtonVisible(false);
 	RefreshSettingsPanel();
 }
 
@@ -506,6 +539,7 @@ void UTunaSweeperIntroMenuWidget::ShowCreditsPanel()
 	{
 		CreditsPanel->SetVisibility(ESlateVisibility::Visible);
 	}
+	SetAlwaysNewStartButtonVisible(false);
 	if (CreditsScrollBox)
 	{
 		CreditsScrollOffset = 0.0f;
@@ -660,6 +694,101 @@ void UTunaSweeperIntroMenuWidget::RefreshSaveSlotButton(int32 SaveSlotIndex, UBu
 	if (SlotButton)
 	{
 		SlotButton->SetIsEnabled(true);
+	}
+}
+
+void UTunaSweeperIntroMenuWidget::EnsureAlwaysNewStartButton()
+{
+	if (AlwaysNewStartButton)
+	{
+		if (!AlwaysNewStartButtonContainer)
+		{
+			AlwaysNewStartButtonContainer = AlwaysNewStartButton;
+		}
+		if (AlwaysNewStartButtonText)
+		{
+			AlwaysNewStartButtonText->SetText(FText::FromString(TEXT("\uD56D\uC0C1\uC0C8\uB85C\uC2DC\uC791")));
+		}
+		return;
+	}
+
+	if (!WidgetTree)
+	{
+		return;
+	}
+
+	UCanvasPanel* RootCanvas = Cast<UCanvasPanel>(WidgetTree->RootWidget);
+	if (!RootCanvas)
+	{
+		return;
+	}
+
+	USizeBox* AlwaysNewStartButtonBox = WidgetTree->ConstructWidget<USizeBox>(
+		USizeBox::StaticClass(),
+		TEXT("AlwaysNewStartButtonBox"));
+	AlwaysNewStartButton = WidgetTree->ConstructWidget<UButton>(
+		UButton::StaticClass(),
+		TEXT("AlwaysNewStartButton"));
+	AlwaysNewStartButtonText = WidgetTree->ConstructWidget<UTextBlock>(
+		UTextBlock::StaticClass(),
+		TEXT("AlwaysNewStartButtonText"));
+
+	if (!AlwaysNewStartButtonBox || !AlwaysNewStartButton || !AlwaysNewStartButtonText)
+	{
+		return;
+	}
+
+	auto MakeBoxBrush = [](const FLinearColor& Color)
+	{
+		FSlateBrush Brush;
+		Brush.DrawAs = ESlateBrushDrawType::Box;
+		Brush.TintColor = FSlateColor(Color);
+		return Brush;
+	};
+
+	FButtonStyle DebugButtonStyle;
+	DebugButtonStyle.SetNormal(MakeBoxBrush(FLinearColor(0.34f, 0.03f, 0.02f, 0.76f)));
+	DebugButtonStyle.SetHovered(MakeBoxBrush(FLinearColor(0.58f, 0.06f, 0.04f, 0.90f)));
+	DebugButtonStyle.SetPressed(MakeBoxBrush(FLinearColor(0.22f, 0.02f, 0.015f, 0.95f)));
+	DebugButtonStyle.SetNormalPadding(FMargin(0.0f));
+	DebugButtonStyle.SetPressedPadding(FMargin(0.0f, 1.0f, 0.0f, 0.0f));
+	AlwaysNewStartButton->SetStyle(DebugButtonStyle);
+	AlwaysNewStartButton->SetClickMethod(EButtonClickMethod::DownAndUp);
+
+	AlwaysNewStartButtonText->SetText(FText::FromString(TEXT("\uD56D\uC0C1\uC0C8\uB85C\uC2DC\uC791")));
+	AlwaysNewStartButtonText->SetColorAndOpacity(FSlateColor(FLinearColor(1.0f, 0.92f, 0.88f, 1.0f)));
+	AlwaysNewStartButtonText->SetJustification(ETextJustify::Center);
+	FSlateFontInfo FontInfo = AlwaysNewStartButtonText->GetFont();
+	FontInfo.Size = 16;
+	AlwaysNewStartButtonText->SetFont(FontInfo);
+
+	AlwaysNewStartButtonBox->SetWidthOverride(180.0f);
+	AlwaysNewStartButtonBox->SetHeightOverride(42.0f);
+	AlwaysNewStartButton->SetContent(AlwaysNewStartButtonText);
+	AlwaysNewStartButtonBox->SetContent(AlwaysNewStartButton);
+	AlwaysNewStartButtonContainer = AlwaysNewStartButtonBox;
+
+	UCanvasPanelSlot* DebugButtonSlot = RootCanvas->AddChildToCanvas(AlwaysNewStartButtonBox);
+	if (DebugButtonSlot)
+	{
+		DebugButtonSlot->SetAnchors(FAnchors(1.0f, 0.0f));
+		DebugButtonSlot->SetAlignment(FVector2D(1.0f, 0.0f));
+		DebugButtonSlot->SetPosition(FVector2D(-36.0f, 36.0f));
+		DebugButtonSlot->SetSize(FVector2D(180.0f, 42.0f));
+		DebugButtonSlot->SetZOrder(200);
+	}
+}
+
+void UTunaSweeperIntroMenuWidget::SetAlwaysNewStartButtonVisible(bool bVisible)
+{
+	EnsureAlwaysNewStartButton();
+	if (AlwaysNewStartButtonContainer)
+	{
+		AlwaysNewStartButtonContainer->SetVisibility(bVisible ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
+	}
+	if (AlwaysNewStartButton)
+	{
+		AlwaysNewStartButton->SetVisibility(bVisible ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
 	}
 }
 

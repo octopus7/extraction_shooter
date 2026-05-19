@@ -277,6 +277,20 @@ bool UTunaSweeperGameInstance::DeleteSaveSlot(int32 SaveSlotIndex)
 	return bDeleted;
 }
 
+bool UTunaSweeperGameInstance::DeleteSaveSlotAndStartNewGame(int32 SaveSlotIndex)
+{
+	const int32 SanitizedSlotIndex = SanitizeSaveSlotIndex(SaveSlotIndex);
+	const FString SlotName = GetSaveGameSlotName(SanitizedSlotIndex);
+	if (UGameplayStatics::DoesSaveGameExist(SlotName, TunaSweeperSave::SaveUserIndex) &&
+		!UGameplayStatics::DeleteGameInSlot(SlotName, TunaSweeperSave::SaveUserIndex))
+	{
+		return false;
+	}
+
+	ResetRuntimeStateForSaveSlotSelection();
+	return ActivateSaveSlot(SanitizedSlotIndex, true);
+}
+
 void UTunaSweeperGameInstance::SetPlayerHudState(const FTunaSweeperPlayerHudState& InHudState)
 {
 	PlayerHudState = InHudState;

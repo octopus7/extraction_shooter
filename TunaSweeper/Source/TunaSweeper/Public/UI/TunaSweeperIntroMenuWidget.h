@@ -54,6 +54,12 @@ protected:
 	TObjectPtr<UButton> QuitButton;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UButton> AlwaysNewStartButton;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UTextBlock> AlwaysNewStartButtonText;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
 	TObjectPtr<UButton> SaveSlot1Button;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
@@ -166,6 +172,9 @@ private:
 	void HandleQuitClicked();
 
 	UFUNCTION()
+	void HandleAlwaysNewStartClicked();
+
+	UFUNCTION()
 	void HandleSaveSlot1Focused();
 
 	UFUNCTION()
@@ -229,6 +238,8 @@ private:
 	void RefreshSaveSlotMenu();
 	void RefreshSettingsPanel();
 	void RefreshSaveSlotButton(int32 SaveSlotIndex, UButton* SlotButton, UTextBlock* SlotText);
+	void EnsureAlwaysNewStartButton();
+	void SetAlwaysNewStartButtonVisible(bool bVisible);
 	FText BuildCurrentSaveSlotText(int32 SaveSlotIndex) const;
 	FText BuildSaveSlotButtonText(int32 SaveSlotIndex) const;
 	FString BuildCreditsRollText() const;
@@ -250,6 +261,9 @@ private:
 	float CreditsScrollOffset = 0.0f;
 	bool bDeleteHoldActive = false;
 	bool bDeleteConfirmVisible = false;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UWidget> AlwaysNewStartButtonContainer;
 
 	static constexpr float DeleteHoldDurationSeconds = 3.0f;
 	static constexpr float CreditsScrollSpeed = 34.0f;
