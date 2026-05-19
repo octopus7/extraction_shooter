@@ -8,6 +8,11 @@
     "category_tag": "item.category.weapon.gun",
     "equipment_slot_tag": "equipment.slot.gun",
     "weapon_type_tag": "weapon.type.pistol",
+    "compatible_ammo_type_tags": [
+      "ammo.type.pistol"
+    ],
+    "magazine_capacity": 12,
+    "reload_seconds": 1.6,
     "attachment_slot_tags": []
   },
   {
@@ -19,6 +24,11 @@
     "category_tag": "item.category.weapon.gun",
     "equipment_slot_tag": "equipment.slot.gun",
     "weapon_type_tag": "weapon.type.rifle",
+    "compatible_ammo_type_tags": [
+      "ammo.type.rifle"
+    ],
+    "magazine_capacity": 30,
+    "reload_seconds": 2.2,
     "attachment_slot_tags": [
       "attachment.slot.magazine",
       "attachment.slot.optic"
@@ -33,6 +43,11 @@
     "category_tag": "item.category.weapon.gun",
     "equipment_slot_tag": "equipment.slot.gun",
     "weapon_type_tag": "weapon.type.shotgun",
+    "compatible_ammo_type_tags": [
+      "ammo.type.shotgun"
+    ],
+    "magazine_capacity": 6,
+    "reload_seconds": 2.6,
     "attachment_slot_tags": []
   },
   {
@@ -49,21 +64,27 @@
     "name_string_key": "item.pistol_ammo",
     "description_string_key": "item.pistol_ammo.desc",
     "shop_sell_price": 12,
-    "icon_file_name": "T_UIIcon_PistolAmmo.uasset"
+    "icon_file_name": "T_UIIcon_PistolAmmo.uasset",
+    "category_tag": "item.category.ammo",
+    "ammo_type_tag": "ammo.type.pistol"
   },
   {
     "id": 2002,
     "name_string_key": "item.rifle_ammo",
     "description_string_key": "item.rifle_ammo.desc",
     "shop_sell_price": 18,
-    "icon_file_name": "T_UIIcon_RifleAmmo.uasset"
+    "icon_file_name": "T_UIIcon_RifleAmmo.uasset",
+    "category_tag": "item.category.ammo",
+    "ammo_type_tag": "ammo.type.rifle"
   },
   {
     "id": 2003,
     "name_string_key": "item.shotgun_ammo",
     "description_string_key": "item.shotgun_ammo.desc",
     "shop_sell_price": 16,
-    "icon_file_name": "T_UIIcon_ShotgunAmmo.uasset"
+    "icon_file_name": "T_UIIcon_ShotgunAmmo.uasset",
+    "category_tag": "item.category.ammo",
+    "ammo_type_tag": "ammo.type.shotgun"
   },
   {
     "id": 2004,
@@ -75,7 +96,8 @@
     "attachment_slot_tag": "attachment.slot.magazine",
     "compatible_weapon_type_tags": [
       "weapon.type.rifle"
-    ]
+    ],
+    "magazine_capacity_bonus": 15
   },
   {
     "id": 2005,

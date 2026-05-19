@@ -47,6 +47,15 @@ struct TUNASWEEPER_API FTunaSweeperItemInstance
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Inventory")
 	TMap<FName, FGuid> AttachmentSlots;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Inventory")
+	int32 LoadedAmmoItemId = INDEX_NONE;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Inventory", meta = (ClampMin = "0", UIMin = "0"))
+	int32 LoadedAmmoCount = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Inventory")
+	int32 SelectedAmmoItemId = INDEX_NONE;
+
 	bool IsValid() const
 	{
 		return Uid.IsValid() && ItemId != INDEX_NONE && Quantity > 0;

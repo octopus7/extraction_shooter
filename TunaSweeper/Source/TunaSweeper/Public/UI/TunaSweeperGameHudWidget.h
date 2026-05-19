@@ -12,6 +12,8 @@ class UTunaSweeperHudInventoryAreaWidget;
 class UTunaSweeperHudItemInfoPanelWidget;
 class UTunaSweeperHudQuickSlotBarWidget;
 class UTunaSweeperHudTopReserveWidget;
+class UBorder;
+class UTextBlock;
 class UWidget;
 
 UCLASS(BlueprintType, Blueprintable)
@@ -78,5 +80,18 @@ protected:
 
 private:
 	void RefreshBottomStatusFromGameInstance();
+	void RefreshQuickSlotsFromGameState();
+	void RefreshReloadWidgets();
+	void CacheAmmoReloadWidgets();
+	void BuildAmmoSelectorOptionTexts(TArray<FText>& OutOptionTexts, int32& OutFocusedIndex) const;
 	void HandleSelectedInventoryItemChanged();
+
+	UPROPERTY(BlueprintReadOnly, Transient, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional, AllowPrivateAccess = "true"))
+	TObjectPtr<UWidget> CenterReloadGaugeRoot;
+
+	UPROPERTY(BlueprintReadOnly, Transient, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional, AllowPrivateAccess = "true"))
+	TObjectPtr<UTextBlock> CenterReloadPercentText;
+
+	UPROPERTY(Transient)
+	TArray<TObjectPtr<UBorder>> CenterReloadSegments;
 };

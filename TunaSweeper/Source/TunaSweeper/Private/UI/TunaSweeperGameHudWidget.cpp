@@ -1,8 +1,12 @@
 #include "UI/TunaSweeperGameHudWidget.h"
 
+#include "Blueprint/WidgetTree.h"
 #include "Character/TunaSweeperTopDownCharacter.h"
 #include "Component/TunaSweeperVitalsComponent.h"
+#include "Components/Border.h"
+#include "Components/TextBlock.h"
 #include "Components/Widget.h"
+#include "Engine/Texture2D.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/Pawn.h"
@@ -10,6 +14,7 @@
 #include "UI/TunaSweeperHudExternalPanelWidget.h"
 #include "UI/TunaSweeperHudInventoryAreaWidget.h"
 #include "UI/TunaSweeperHudItemInfoPanelWidget.h"
+#include "UI/TunaSweeperHudQuickSlotBarWidget.h"
 
 void UTunaSweeperGameHudWidget::NativeConstruct()
 {
@@ -21,9 +26,12 @@ void UTunaSweeperGameHudWidget::NativeConstruct()
 		TunaGameInstance->OnSelectedInventoryItemChanged.AddUObject(this, &UTunaSweeperGameHudWidget::HandleSelectedInventoryItemChanged);
 	}
 
+	CacheAmmoReloadWidgets();
 	SetCenterPanelsVisible(false);
 	SetItemInfoPanelVisible(false);
 	RefreshBottomStatusFromGameInstance();
+	RefreshQuickSlotsFromGameState();
+	RefreshReloadWidgets();
 }
 
 void UTunaSweeperGameHudWidget::NativeDestruct()
@@ -41,6 +49,8 @@ void UTunaSweeperGameHudWidget::NativeTick(const FGeometry& MyGeometry, float In
 	Super::NativeTick(MyGeometry, InDeltaTime);
 
 	RefreshBottomStatusFromGameInstance();
+	RefreshQuickSlotsFromGameState();
+	RefreshReloadWidgets();
 }
 
 void UTunaSweeperGameHudWidget::SetCenterPanelsVisible(bool bVisible)
@@ -191,6 +201,166 @@ void UTunaSweeperGameHudWidget::RefreshBottomStatusFromGameInstance()
 	}
 
 	BottomStatusWidget->SetHudState(HudState);
+}
+
+void UTunaSweeperGameHudWidget::RefreshQuickSlotsFromGameState()
+{
+	if (!QuickSlotBarWidget)
+	{
+		return;
+	}
+
+	UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+	UTunaSweeperItemDataSubsystem* ItemDataSubsystem = TunaGameInstance
+		? TunaGameInstance->GetSubsystem<UTunaSweeperItemDataSubsystem>()
+		: nullptr;
+
+	int32 SelectedSlotNumber = 0;
+	if (const APlayerController* PlayerController = GetOwningPlayer())
+	{
+		if (const ATunaSweeperTopDownCharacter* TunaCharacter = Cast<ATunaSweeperTopDownCharacter>(PlayerController->GetPawn()))
+		{
+			SelectedSlotNumber = TunaCharacter->GetSelectedWeaponSlotNumber();
+		}
+	}
+	QuickSlotBarWidget->SetSelectedQuickSlot(SelectedSlotNumber);
+
+	for (int32 SlotNumber = 1; SlotNumber <= 2; ++SlotNumber)
+	{
+		FTunaSweeperItemInstance WeaponInstance;
+		FTunaSweeperItemDefinition WeaponDefinition;
+		if (!TunaGameInstance ||
+			!TunaGameInstance->TryGetEquipmentWeaponSlotItem(SlotNumber, WeaponInstance, WeaponDefinition))
+		{
+			QuickSlotBarWidget->ClearQuickSlotIcon(SlotNumber);
+			QuickSlotBarWidget->SetWeaponAmmoText(SlotNumber, 0, 0, false);
+			continue;
+		}
+
+		UTexture2D* IconTexture = nullptr;
+		if (ItemDataSubsystem)
+		{
+			const FString IconObjectPath = ItemDataSubsystem->BuildItemIconObjectPath(WeaponDefinition);
+			if (!IconObjectPath.IsEmpty())
+			{
+				IconTexture = LoadObject<UTexture2D>(nullptr, *IconObjectPath);
+			}
+		}
+		QuickSlotBarWidget->SetQuickSlotIcon(SlotNumber, IconTexture);
+		QuickSlotBarWidget->SetWeaponAmmoText(
+			SlotNumber,
+			TunaGameInstance->GetWeaponLoadedAmmoCount(SlotNumber),
+			TunaGameInstance->GetWeaponInventoryAmmoCount(SlotNumber),
+			true);
+	}
+}
+
+void UTunaSweeperGameHudWidget::RefreshReloadWidgets()
+{
+	CacheAmmoReloadWidgets();
+
+	ATunaSweeperTopDownCharacter* TunaCharacter = nullptr;
+	if (const APlayerController* PlayerController = GetOwningPlayer())
+	{
+		TunaCharacter = Cast<ATunaSweeperTopDownCharacter>(PlayerController->GetPawn());
+	}
+
+	const bool bShowReload = TunaCharacter && TunaCharacter->IsWeaponReloading();
+	const float ReloadProgress = bShowReload ? TunaCharacter->GetReloadProgress() : 0.0f;
+	if (QuickSlotBarWidget)
+	{
+		QuickSlotBarWidget->SetReloadProgress(ReloadProgress, bShowReload);
+	}
+
+	if (CenterReloadGaugeRoot)
+	{
+		CenterReloadGaugeRoot->SetVisibility(bShowReload ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
+	}
+
+	if (CenterReloadPercentText)
+	{
+		CenterReloadPercentText->SetText(
+			bShowReload
+				? FText::FromString(FString::Printf(TEXT("%d%%"), FMath::RoundToInt(ReloadProgress * 100.0f)))
+				: FText::GetEmpty());
+	}
+
+	const int32 FilledSegmentCount = FMath::CeilToInt(ReloadProgress * CenterReloadSegments.Num());
+	for (int32 SegmentIndex = 0; SegmentIndex < CenterReloadSegments.Num(); ++SegmentIndex)
+	{
+		if (CenterReloadSegments[SegmentIndex])
+		{
+			CenterReloadSegments[SegmentIndex]->SetRenderOpacity(
+				bShowReload && SegmentIndex < FilledSegmentCount ? 1.0f : 0.18f);
+		}
+	}
+
+	TArray<FText> AmmoOptionTexts;
+	int32 FocusedOptionIndex = INDEX_NONE;
+	BuildAmmoSelectorOptionTexts(AmmoOptionTexts, FocusedOptionIndex);
+	if (QuickSlotBarWidget)
+	{
+		QuickSlotBarWidget->SetAmmoSelectorOptions(
+			AmmoOptionTexts,
+			FocusedOptionIndex,
+			TunaCharacter && TunaCharacter->IsAmmoSelectionOpen());
+	}
+}
+
+void UTunaSweeperGameHudWidget::CacheAmmoReloadWidgets()
+{
+	if (!WidgetTree)
+	{
+		return;
+	}
+
+	CenterReloadGaugeRoot = WidgetTree->FindWidget(FName(TEXT("CenterReloadGaugeRoot")));
+	CenterReloadPercentText = Cast<UTextBlock>(WidgetTree->FindWidget(FName(TEXT("CenterReloadPercentText"))));
+	CenterReloadSegments.SetNum(12);
+	for (int32 SegmentNumber = 1; SegmentNumber <= CenterReloadSegments.Num(); ++SegmentNumber)
+	{
+		CenterReloadSegments[SegmentNumber - 1] = Cast<UBorder>(WidgetTree->FindWidget(
+			FName(*FString::Printf(TEXT("CenterReloadSegment%02d"), SegmentNumber))));
+	}
+}
+
+void UTunaSweeperGameHudWidget::BuildAmmoSelectorOptionTexts(TArray<FText>& OutOptionTexts, int32& OutFocusedIndex) const
+{
+	OutOptionTexts.Reset();
+	OutFocusedIndex = INDEX_NONE;
+
+	const APlayerController* PlayerController = GetOwningPlayer();
+	const ATunaSweeperTopDownCharacter* TunaCharacter = PlayerController
+		? Cast<ATunaSweeperTopDownCharacter>(PlayerController->GetPawn())
+		: nullptr;
+	if (!TunaCharacter || !TunaCharacter->IsAmmoSelectionOpen())
+	{
+		return;
+	}
+
+	TArray<int32> AmmoItemIds;
+	TunaCharacter->GetAmmoSelectionItemIds(AmmoItemIds);
+	if (AmmoItemIds.Num() <= 0)
+	{
+		return;
+	}
+
+	UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+	UTunaSweeperItemDataSubsystem* ItemDataSubsystem = TunaGameInstance
+		? TunaGameInstance->GetSubsystem<UTunaSweeperItemDataSubsystem>()
+		: nullptr;
+
+	for (int32 AmmoItemId : AmmoItemIds)
+	{
+		FText AmmoName = FText::FromString(FString::Printf(TEXT("Ammo %d"), AmmoItemId));
+		if (ItemDataSubsystem)
+		{
+			ItemDataSubsystem->TryGetItemNameText(AmmoItemId, ETunaSweeperItemTextLanguage::Korean, AmmoName);
+		}
+		OutOptionTexts.Add(AmmoName);
+	}
+
+	OutFocusedIndex = TunaCharacter->GetAmmoSelectionFocusIndex();
 }
 
 void UTunaSweeperGameHudWidget::HandleSelectedInventoryItemChanged()

@@ -48,10 +48,25 @@ struct TUNASWEEPER_API FTunaSweeperItemDefinition
 	FName AttachmentSlotTag;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
+	FName AmmoTypeTag;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
 	TArray<FName> AttachmentSlotTags;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
 	TArray<FName> CompatibleWeaponTypeTags;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
+	TArray<FName> CompatibleAmmoTypeTags;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
+	int32 MagazineCapacity = 0;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
+	int32 MagazineCapacityBonus = 0;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
+	float ReloadSeconds = 0.0f;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
 	int32 InventorySlotCapacity = 0;

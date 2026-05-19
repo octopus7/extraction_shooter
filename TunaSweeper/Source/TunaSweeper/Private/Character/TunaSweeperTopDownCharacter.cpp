@@ -77,6 +77,9 @@ ATunaSweeperTopDownCharacter::ATunaSweeperTopDownCharacter()
 	AimAction = TSoftObjectPtr<UInputAction>(FSoftObjectPath(TEXT("/Game/Input/IA_Aim.IA_Aim")));
 	InteractAction = TSoftObjectPtr<UInputAction>(FSoftObjectPath(TEXT("/Game/Input/IA_Interact.IA_Interact")));
 	InventoryAction = TSoftObjectPtr<UInputAction>(FSoftObjectPath(TEXT("/Game/Input/IA_Inventory.IA_Inventory")));
+	ReloadAction = TSoftObjectPtr<UInputAction>(FSoftObjectPath(TEXT("/Game/Input/IA_Reload.IA_Reload")));
+	AmmoSelectAction = TSoftObjectPtr<UInputAction>(FSoftObjectPath(TEXT("/Game/Input/IA_AmmoSelect.IA_AmmoSelect")));
+	AmmoFocusAction = TSoftObjectPtr<UInputAction>(FSoftObjectPath(TEXT("/Game/Input/IA_AmmoFocus.IA_AmmoFocus")));
 	DefaultWeaponClass = TSoftClassPtr<ATunaSweeperWeapon>(FSoftObjectPath(TEXT("/Game/Weapons/BP_TunaSweeperWeapon.BP_TunaSweeperWeapon_C")));
 	RespawnMediaSource = TSoftObjectPtr<UMediaSource>(FSoftObjectPath(TEXT("/Game/Movies/MS_Respawn.MS_Respawn")));
 	RespawnTransitionWidgetClass = TSoftClassPtr<UTunaSweeperLevelTransitionWidget>(
@@ -88,12 +91,22 @@ void ATunaSweeperTopDownCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	DefaultCameraFOV = TopDownCamera ? TopDownCamera->FieldOfView : DefaultCameraFOV;
-	SpawnDefaultWeapon();
+
+	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
+	{
+		TunaGameInstance->OnInventoryStateChanged.RemoveAll(this);
+		TunaGameInstance->OnInventoryStateChanged.AddUObject(this, &ATunaSweeperTopDownCharacter::RefreshSelectedWeaponAfterInventoryChanged);
+	}
 
 	if (VitalsComponent)
 	{
 		VitalsComponent->OnVitalsChanged.AddDynamic(this, &ATunaSweeperTopDownCharacter::HandleVitalsChanged);
 		HandleVitalsChanged(VitalsComponent->GetVitalsState());
+	}
+
+	if (!SelectWeaponSlot(1))
+	{
+		SelectWeaponSlot(2);
 	}
 }
 
@@ -115,12 +128,18 @@ void ATunaSweeperTopDownCharacter::EndPlay(const EEndPlayReason::Type EndPlayRea
 	if (GetWorld())
 	{
 		GetWorldTimerManager().ClearTimer(FireTimerHandle);
+		GetWorldTimerManager().ClearTimer(ReloadTimerHandle);
 		GetWorldTimerManager().ClearTimer(RespawnTransitionTimerHandle);
 	}
 
 	if (VitalsComponent)
 	{
 		VitalsComponent->OnVitalsChanged.RemoveDynamic(this, &ATunaSweeperTopDownCharacter::HandleVitalsChanged);
+	}
+
+	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
+	{
+		TunaGameInstance->OnInventoryStateChanged.RemoveAll(this);
 	}
 
 	Super::EndPlay(EndPlayReason);
@@ -188,6 +207,21 @@ void ATunaSweeperTopDownCharacter::SetupPlayerInputComponent(UInputComponent* Pl
 	{
 		EnhancedInputComponent->BindAction(LoadedInventoryAction, ETriggerEvent::Started, this, &ATunaSweeperTopDownCharacter::HandleInventory);
 	}
+
+	if (UInputAction* LoadedReloadAction = ReloadAction.LoadSynchronous())
+	{
+		EnhancedInputComponent->BindAction(LoadedReloadAction, ETriggerEvent::Started, this, &ATunaSweeperTopDownCharacter::HandleReload);
+	}
+
+	if (UInputAction* LoadedAmmoSelectAction = AmmoSelectAction.LoadSynchronous())
+	{
+		EnhancedInputComponent->BindAction(LoadedAmmoSelectAction, ETriggerEvent::Started, this, &ATunaSweeperTopDownCharacter::HandleAmmoSelect);
+	}
+
+	if (UInputAction* LoadedAmmoFocusAction = AmmoFocusAction.LoadSynchronous())
+	{
+		EnhancedInputComponent->BindAction(LoadedAmmoFocusAction, ETriggerEvent::Triggered, this, &ATunaSweeperTopDownCharacter::HandleAmmoFocus);
+	}
 }
 
 void ATunaSweeperTopDownCharacter::SetAimWorldPoint(const FVector& WorldPoint)
@@ -225,7 +259,7 @@ void ATunaSweeperTopDownCharacter::AddDefaultInputMapping() const
 	}
 }
 
-void ATunaSweeperTopDownCharacter::SpawnDefaultWeapon()
+void ATunaSweeperTopDownCharacter::EnsureEquippedWeaponActor()
 {
 	if (EquippedWeapon || !GetWorld())
 	{
@@ -247,6 +281,15 @@ void ATunaSweeperTopDownCharacter::SpawnDefaultWeapon()
 	if (EquippedWeapon && WeaponAttachPoint)
 	{
 		EquippedWeapon->AttachToComponent(WeaponAttachPoint, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+	}
+}
+
+void ATunaSweeperTopDownCharacter::ClearEquippedWeaponActor()
+{
+	if (EquippedWeapon)
+	{
+		EquippedWeapon->Destroy();
+		EquippedWeapon = nullptr;
 	}
 }
 
@@ -351,6 +394,49 @@ void ATunaSweeperTopDownCharacter::HandleInventory(const FInputActionValue& Valu
 	}
 }
 
+void ATunaSweeperTopDownCharacter::HandleReload(const FInputActionValue& Value)
+{
+	if (bIsDead || IsGameplayActionInputLocked())
+	{
+		return;
+	}
+
+	StartReload();
+}
+
+void ATunaSweeperTopDownCharacter::HandleAmmoSelect(const FInputActionValue& Value)
+{
+	if (bIsDead || IsGameplayActionInputLocked())
+	{
+		return;
+	}
+
+	if (bAmmoSelectionOpen)
+	{
+		ConfirmAmmoSelection();
+	}
+	else
+	{
+		OpenAmmoSelection();
+	}
+}
+
+void ATunaSweeperTopDownCharacter::HandleAmmoFocus(const FInputActionValue& Value)
+{
+	if (!bAmmoSelectionOpen || AmmoSelectionItemIds.Num() <= 0)
+	{
+		return;
+	}
+
+	const float AxisValue = Value.Get<float>();
+	if (FMath::Abs(AxisValue) <= KINDA_SMALL_NUMBER)
+	{
+		return;
+	}
+
+	MoveAmmoSelectionFocus(AxisValue > 0.0f ? -1 : 1);
+}
+
 void ATunaSweeperTopDownCharacter::FireWeapon()
 {
 	if (IsGameplayActionInputLocked())
@@ -359,10 +445,248 @@ void ATunaSweeperTopDownCharacter::FireWeapon()
 		return;
 	}
 
-	if (!bIsDead && EquippedWeapon)
+	if (bIsDead || bIsReloading || !CanUseSelectedWeaponSlot())
 	{
-		EquippedWeapon->Fire(AimDirection, this);
+		return;
 	}
+
+	EnsureEquippedWeaponActor();
+	if (!EquippedWeapon)
+	{
+		return;
+	}
+
+	UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+	if (!TunaGameInstance || !TunaGameInstance->TryConsumeLoadedAmmoForWeaponSlot(SelectedWeaponSlotNumber))
+	{
+		return;
+	}
+
+	EquippedWeapon->Fire(AimDirection, this);
+}
+
+bool ATunaSweeperTopDownCharacter::CanUseSelectedWeaponSlot()
+{
+	if (SelectedWeaponSlotNumber <= 0)
+	{
+		return false;
+	}
+
+	UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+	return TunaGameInstance && TunaGameInstance->IsEquipmentWeaponSlotOccupied(SelectedWeaponSlotNumber);
+}
+
+bool ATunaSweeperTopDownCharacter::SelectWeaponSlot(int32 SlotNumber)
+{
+	if (bIsDead || SlotNumber < 1 || SlotNumber > 2)
+	{
+		return false;
+	}
+
+	UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+	if (!TunaGameInstance || !TunaGameInstance->IsEquipmentWeaponSlotOccupied(SlotNumber))
+	{
+		return false;
+	}
+
+	if (SelectedWeaponSlotNumber != SlotNumber)
+	{
+		CancelReload();
+		CloseAmmoSelection();
+	}
+
+	SelectedWeaponSlotNumber = SlotNumber;
+	EnsureEquippedWeaponActor();
+	return true;
+}
+
+float ATunaSweeperTopDownCharacter::GetReloadProgress() const
+{
+	if (!bIsReloading || ReloadDurationSeconds <= 0.0f)
+	{
+		return 0.0f;
+	}
+
+	const UWorld* World = GetWorld();
+	const float CurrentTime = World ? World->GetTimeSeconds() : ReloadStartWorldSeconds;
+	return FMath::Clamp((CurrentTime - ReloadStartWorldSeconds) / ReloadDurationSeconds, 0.0f, 1.0f);
+}
+
+void ATunaSweeperTopDownCharacter::GetAmmoSelectionItemIds(TArray<int32>& OutAmmoItemIds) const
+{
+	OutAmmoItemIds = AmmoSelectionItemIds;
+}
+
+void ATunaSweeperTopDownCharacter::StartReload()
+{
+	if (bIsReloading || !CanUseSelectedWeaponSlot())
+	{
+		return;
+	}
+
+	UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+	if (!TunaGameInstance)
+	{
+		return;
+	}
+
+	const int32 MagazineCapacity = TunaGameInstance->GetWeaponMagazineCapacity(SelectedWeaponSlotNumber);
+	const int32 LoadedAmmoCount = TunaGameInstance->GetWeaponLoadedAmmoCount(SelectedWeaponSlotNumber);
+	if (MagazineCapacity <= 0 || LoadedAmmoCount >= MagazineCapacity)
+	{
+		return;
+	}
+
+	int32 ReloadAmmoItemId = TunaGameInstance->GetWeaponSelectedAmmoItemId(SelectedWeaponSlotNumber);
+	if (LoadedAmmoCount > 0)
+	{
+		FTunaSweeperItemInstance WeaponInstance;
+		FTunaSweeperItemDefinition WeaponDefinition;
+		if (TunaGameInstance->TryGetEquipmentWeaponSlotItem(SelectedWeaponSlotNumber, WeaponInstance, WeaponDefinition) &&
+			WeaponInstance.LoadedAmmoItemId != INDEX_NONE)
+		{
+			ReloadAmmoItemId = WeaponInstance.LoadedAmmoItemId;
+		}
+	}
+
+	if (ReloadAmmoItemId == INDEX_NONE || TunaGameInstance->GetWeaponInventoryAmmoCount(SelectedWeaponSlotNumber) <= 0)
+	{
+		return;
+	}
+
+	PendingReloadAmmoItemId = ReloadAmmoItemId;
+	ReloadDurationSeconds = FMath::Max(0.01f, TunaGameInstance->GetWeaponReloadSeconds(SelectedWeaponSlotNumber));
+	ReloadStartWorldSeconds = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.0f;
+	bIsReloading = true;
+	CloseAmmoSelection();
+
+	if (GetWorld())
+	{
+		GetWorldTimerManager().SetTimer(
+			ReloadTimerHandle,
+			this,
+			&ATunaSweeperTopDownCharacter::CompleteReload,
+			ReloadDurationSeconds,
+			false);
+	}
+}
+
+void ATunaSweeperTopDownCharacter::CompleteReload()
+{
+	const int32 ReloadSlotNumber = SelectedWeaponSlotNumber;
+	const int32 ReloadAmmoItemId = PendingReloadAmmoItemId;
+	CancelReload();
+
+	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
+	{
+		int32 LoadedAmmoCount = 0;
+		TunaGameInstance->TryReloadWeaponSlot(ReloadSlotNumber, ReloadAmmoItemId, LoadedAmmoCount);
+	}
+}
+
+void ATunaSweeperTopDownCharacter::CancelReload()
+{
+	if (GetWorld())
+	{
+		GetWorldTimerManager().ClearTimer(ReloadTimerHandle);
+	}
+
+	bIsReloading = false;
+	PendingReloadAmmoItemId = INDEX_NONE;
+	ReloadStartWorldSeconds = 0.0f;
+	ReloadDurationSeconds = 0.0f;
+}
+
+void ATunaSweeperTopDownCharacter::OpenAmmoSelection()
+{
+	if (!CanUseSelectedWeaponSlot())
+	{
+		return;
+	}
+
+	UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+	if (!TunaGameInstance)
+	{
+		return;
+	}
+
+	TunaGameInstance->GetCompatibleAmmoItemIdsForWeaponSlot(
+		SelectedWeaponSlotNumber,
+		AmmoSelectionItemIds,
+		false);
+	if (AmmoSelectionItemIds.Num() <= 0)
+	{
+		CloseAmmoSelection();
+		return;
+	}
+
+	const int32 CurrentAmmoItemId = TunaGameInstance->GetWeaponSelectedAmmoItemId(SelectedWeaponSlotNumber);
+	AmmoSelectionFocusIndex = AmmoSelectionItemIds.IndexOfByKey(CurrentAmmoItemId);
+	if (!AmmoSelectionItemIds.IsValidIndex(AmmoSelectionFocusIndex))
+	{
+		AmmoSelectionFocusIndex = 0;
+	}
+
+	bAmmoSelectionOpen = true;
+}
+
+void ATunaSweeperTopDownCharacter::ConfirmAmmoSelection()
+{
+	if (!bAmmoSelectionOpen || !AmmoSelectionItemIds.IsValidIndex(AmmoSelectionFocusIndex))
+	{
+		CloseAmmoSelection();
+		return;
+	}
+
+	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
+	{
+		TunaGameInstance->SetSelectedAmmoItemForWeaponSlot(
+			SelectedWeaponSlotNumber,
+			AmmoSelectionItemIds[AmmoSelectionFocusIndex]);
+	}
+
+	CloseAmmoSelection();
+}
+
+void ATunaSweeperTopDownCharacter::CloseAmmoSelection()
+{
+	bAmmoSelectionOpen = false;
+	AmmoSelectionItemIds.Reset();
+	AmmoSelectionFocusIndex = INDEX_NONE;
+}
+
+void ATunaSweeperTopDownCharacter::MoveAmmoSelectionFocus(int32 FocusDelta)
+{
+	if (!bAmmoSelectionOpen || AmmoSelectionItemIds.Num() <= 0 || FocusDelta == 0)
+	{
+		return;
+	}
+
+	if (!AmmoSelectionItemIds.IsValidIndex(AmmoSelectionFocusIndex))
+	{
+		AmmoSelectionFocusIndex = 0;
+		return;
+	}
+
+	const int32 OptionCount = AmmoSelectionItemIds.Num();
+	AmmoSelectionFocusIndex = (AmmoSelectionFocusIndex + FocusDelta) % OptionCount;
+	if (AmmoSelectionFocusIndex < 0)
+	{
+		AmmoSelectionFocusIndex += OptionCount;
+	}
+}
+
+void ATunaSweeperTopDownCharacter::RefreshSelectedWeaponAfterInventoryChanged()
+{
+	if (SelectedWeaponSlotNumber > 0 && CanUseSelectedWeaponSlot())
+	{
+		return;
+	}
+
+	CancelReload();
+	CloseAmmoSelection();
+	SelectedWeaponSlotNumber = 0;
+	ClearEquippedWeaponActor();
 }
 
 bool ATunaSweeperTopDownCharacter::IsGameplayActionInputLocked() const
@@ -375,6 +699,8 @@ void ATunaSweeperTopDownCharacter::CancelActiveGameplayActions()
 {
 	bFireHeld = false;
 	bIsAiming = false;
+	CancelReload();
+	CloseAmmoSelection();
 
 	if (GetWorld())
 	{
@@ -405,6 +731,8 @@ void ATunaSweeperTopDownCharacter::HandleDeath()
 	bIsDead = true;
 	bFireHeld = false;
 	bIsAiming = false;
+	CancelReload();
+	CloseAmmoSelection();
 	GetWorldTimerManager().ClearTimer(FireTimerHandle);
 
 	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())

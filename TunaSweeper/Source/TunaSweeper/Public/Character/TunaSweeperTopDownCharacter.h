@@ -52,6 +52,26 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Input")
 	void CancelActiveGameplayActions();
 
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Weapon")
+	bool SelectWeaponSlot(int32 SlotNumber);
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Weapon")
+	int32 GetSelectedWeaponSlotNumber() const { return SelectedWeaponSlotNumber; }
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Weapon")
+	bool IsWeaponReloading() const { return bIsReloading; }
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Weapon")
+	float GetReloadProgress() const;
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Weapon")
+	bool IsAmmoSelectionOpen() const { return bAmmoSelectionOpen; }
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Weapon")
+	int32 GetAmmoSelectionFocusIndex() const { return AmmoSelectionFocusIndex; }
+
+	void GetAmmoSelectionItemIds(TArray<int32>& OutAmmoItemIds) const;
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -87,6 +107,15 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	TSoftObjectPtr<UInputAction> InventoryAction;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+	TSoftObjectPtr<UInputAction> ReloadAction;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+	TSoftObjectPtr<UInputAction> AmmoSelectAction;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+	TSoftObjectPtr<UInputAction> AmmoFocusAction;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat")
 	TSoftClassPtr<ATunaSweeperWeapon> DefaultWeaponClass;
@@ -129,7 +158,8 @@ protected:
 
 private:
 	void AddDefaultInputMapping() const;
-	void SpawnDefaultWeapon();
+	void EnsureEquippedWeaponActor();
+	void ClearEquippedWeaponActor();
 	UFUNCTION()
 	void HandleVitalsChanged(const FTunaSweeperVitalsState& VitalsState);
 	void HandleMove(const FInputActionValue& Value);
@@ -139,8 +169,20 @@ private:
 	void EndAim(const FInputActionValue& Value);
 	void HandleInteract(const FInputActionValue& Value);
 	void HandleInventory(const FInputActionValue& Value);
+	void HandleReload(const FInputActionValue& Value);
+	void HandleAmmoSelect(const FInputActionValue& Value);
+	void HandleAmmoFocus(const FInputActionValue& Value);
 	void FireWeapon();
 	bool IsGameplayActionInputLocked() const;
+	bool CanUseSelectedWeaponSlot();
+	void StartReload();
+	void CompleteReload();
+	void CancelReload();
+	void OpenAmmoSelection();
+	void ConfirmAmmoSelection();
+	void CloseAmmoSelection();
+	void MoveAmmoSelectionFocus(int32 FocusDelta);
+	void RefreshSelectedWeaponAfterInventoryChanged();
 	void UpdateAimingVisuals(float DeltaSeconds);
 	void UpdateCarryWeightMovementSpeed();
 	void HandleDeath();
@@ -150,10 +192,19 @@ private:
 	TObjectPtr<ATunaSweeperWeapon> EquippedWeapon;
 
 	FTimerHandle FireTimerHandle;
+	FTimerHandle ReloadTimerHandle;
 	FTimerHandle RespawnTransitionTimerHandle;
 	FVector AimWorldPoint = FVector::ZeroVector;
 	FVector AimDirection = FVector::ForwardVector;
+	TArray<int32> AmmoSelectionItemIds;
+	int32 SelectedWeaponSlotNumber = 0;
+	int32 PendingReloadAmmoItemId = INDEX_NONE;
+	int32 AmmoSelectionFocusIndex = INDEX_NONE;
+	float ReloadStartWorldSeconds = 0.0f;
+	float ReloadDurationSeconds = 0.0f;
 	bool bFireHeld = false;
 	bool bIsAiming = false;
 	bool bIsDead = false;
+	bool bIsReloading = false;
+	bool bAmmoSelectionOpen = false;
 };

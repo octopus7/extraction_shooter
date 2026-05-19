@@ -22,6 +22,7 @@ namespace TunaSweeperInventory
 	constexpr int32 RequiredMaxInventorySlots = 100;
 	constexpr int32 RequiredEquipmentSlots = 8;
 	constexpr int32 BackpackSlotIndex = 7;
+	constexpr int32 WeaponEquipmentSlotCount = 2;
 	const FName GunCategoryTag(TEXT("item.category.weapon.gun"));
 	const FName GunEquipmentSlotTag(TEXT("equipment.slot.gun"));
 	const FName MeleeCategoryTag(TEXT("item.category.weapon.melee"));
@@ -36,9 +37,17 @@ namespace TunaSweeperInventory
 	const FName EarEquipmentSlotTag(TEXT("equipment.slot.ear"));
 	const FName BackpackCategoryTag(TEXT("item.category.bag"));
 	const FName BackpackEquipmentSlotTag(TEXT("equipment.slot.backpack"));
+	const FName AmmoCategoryTag(TEXT("item.category.ammo"));
+	const FName PistolWeaponTypeTag(TEXT("weapon.type.pistol"));
 	const FName RifleWeaponTypeTag(TEXT("weapon.type.rifle"));
+	const FName ShotgunWeaponTypeTag(TEXT("weapon.type.shotgun"));
+	const FName PistolAmmoTypeTag(TEXT("ammo.type.pistol"));
+	const FName RifleAmmoTypeTag(TEXT("ammo.type.rifle"));
+	const FName ShotgunAmmoTypeTag(TEXT("ammo.type.shotgun"));
 	const FName MagazineAttachmentSlotTag(TEXT("attachment.slot.magazine"));
 	const FName OpticAttachmentSlotTag(TEXT("attachment.slot.optic"));
+	constexpr int32 DefaultWeaponMagazineCapacity = 12;
+	constexpr float DefaultWeaponReloadSeconds = 1.8f;
 
 	struct FEquipmentSlotRule
 	{
@@ -65,6 +74,26 @@ namespace TunaSweeperInventory
 	int32 ClampSlotCount(int32 SlotCount, int32 MinSlots, int32 MaxSlots)
 	{
 		return FMath::Clamp(SlotCount, FMath::Max(1, MinSlots), FMath::Max(MinSlots, MaxSlots));
+	}
+
+	FName GetDefaultAmmoTypeTagForWeaponType(FName WeaponTypeTag)
+	{
+		if (WeaponTypeTag == PistolWeaponTypeTag)
+		{
+			return PistolAmmoTypeTag;
+		}
+
+		if (WeaponTypeTag == RifleWeaponTypeTag)
+		{
+			return RifleAmmoTypeTag;
+		}
+
+		if (WeaponTypeTag == ShotgunWeaponTypeTag)
+		{
+			return ShotgunAmmoTypeTag;
+		}
+
+		return NAME_None;
 	}
 }
 
@@ -373,6 +402,272 @@ bool UTunaSweeperGameInstance::TryGetSelectedItemDefinition(FTunaSweeperItemDefi
 
 	UTunaSweeperItemDataSubsystem* ItemDataSubsystem = GetSubsystem<UTunaSweeperItemDataSubsystem>();
 	return ItemDataSubsystem && ItemDataSubsystem->TryGetItemDefinition(SelectedItemInstance.ItemId, OutItemDefinition);
+}
+
+bool UTunaSweeperGameInstance::IsEquipmentWeaponSlotOccupied(int32 WeaponSlotNumber)
+{
+	FTunaSweeperItemInstance WeaponInstance;
+	FTunaSweeperItemDefinition WeaponDefinition;
+	return TryGetEquipmentWeaponSlotItem(WeaponSlotNumber, WeaponInstance, WeaponDefinition);
+}
+
+bool UTunaSweeperGameInstance::TryGetEquipmentWeaponSlotItem(
+	int32 WeaponSlotNumber,
+	FTunaSweeperItemInstance& OutItemInstance,
+	FTunaSweeperItemDefinition& OutItemDefinition)
+{
+	EnsureInventoryStateInitialized();
+
+	OutItemInstance = FTunaSweeperItemInstance();
+	OutItemDefinition = FTunaSweeperItemDefinition();
+
+	const int32 EquipmentSlotIndex = GetEquipmentSlotIndexForWeaponSlotNumber(WeaponSlotNumber);
+	if (!EquipmentSlots.IsValidIndex(EquipmentSlotIndex))
+	{
+		return false;
+	}
+
+	const FGuid& WeaponUid = EquipmentSlots[EquipmentSlotIndex].ItemUid;
+	if (!TryGetItemInstance(WeaponUid, OutItemInstance))
+	{
+		return false;
+	}
+
+	UTunaSweeperItemDataSubsystem* ItemDataSubsystem = GetSubsystem<UTunaSweeperItemDataSubsystem>();
+	return ItemDataSubsystem &&
+		ItemDataSubsystem->TryGetItemDefinition(OutItemInstance.ItemId, OutItemDefinition) &&
+		IsGunItemDefinition(OutItemDefinition);
+}
+
+int32 UTunaSweeperGameInstance::GetWeaponLoadedAmmoCount(int32 WeaponSlotNumber)
+{
+	FTunaSweeperItemInstance WeaponInstance;
+	FTunaSweeperItemDefinition WeaponDefinition;
+	return TryGetEquipmentWeaponSlotItem(WeaponSlotNumber, WeaponInstance, WeaponDefinition)
+		? FMath::Clamp(WeaponInstance.LoadedAmmoCount, 0, CalculateWeaponMagazineCapacity(WeaponInstance, WeaponDefinition))
+		: 0;
+}
+
+int32 UTunaSweeperGameInstance::GetWeaponMagazineCapacity(int32 WeaponSlotNumber)
+{
+	FTunaSweeperItemInstance WeaponInstance;
+	FTunaSweeperItemDefinition WeaponDefinition;
+	return TryGetEquipmentWeaponSlotItem(WeaponSlotNumber, WeaponInstance, WeaponDefinition)
+		? CalculateWeaponMagazineCapacity(WeaponInstance, WeaponDefinition)
+		: 0;
+}
+
+int32 UTunaSweeperGameInstance::GetWeaponInventoryAmmoCount(int32 WeaponSlotNumber)
+{
+	EnsureInventoryStateInitialized();
+
+	FTunaSweeperItemInstance WeaponInstance;
+	FTunaSweeperItemDefinition WeaponDefinition;
+	if (!TryGetEquipmentWeaponSlotItem(WeaponSlotNumber, WeaponInstance, WeaponDefinition))
+	{
+		return 0;
+	}
+
+	FTunaSweeperItemInstance* MutableWeaponInstance = ItemInstancesByUid.Find(WeaponInstance.Uid);
+	if (!MutableWeaponInstance)
+	{
+		return 0;
+	}
+
+	int32 AmmoItemId = MutableWeaponInstance->LoadedAmmoCount > 0 && MutableWeaponInstance->LoadedAmmoItemId != INDEX_NONE
+		? MutableWeaponInstance->LoadedAmmoItemId
+		: ResolveSelectedAmmoItemIdForWeapon(*MutableWeaponInstance, WeaponDefinition);
+	return CountInventoryAmmoByItemId(AmmoItemId);
+}
+
+int32 UTunaSweeperGameInstance::GetWeaponSelectedAmmoItemId(int32 WeaponSlotNumber)
+{
+	EnsureInventoryStateInitialized();
+
+	FTunaSweeperItemInstance WeaponInstance;
+	FTunaSweeperItemDefinition WeaponDefinition;
+	if (!TryGetEquipmentWeaponSlotItem(WeaponSlotNumber, WeaponInstance, WeaponDefinition))
+	{
+		return INDEX_NONE;
+	}
+
+	FTunaSweeperItemInstance* MutableWeaponInstance = ItemInstancesByUid.Find(WeaponInstance.Uid);
+	return MutableWeaponInstance
+		? ResolveSelectedAmmoItemIdForWeapon(*MutableWeaponInstance, WeaponDefinition)
+		: INDEX_NONE;
+}
+
+float UTunaSweeperGameInstance::GetWeaponReloadSeconds(int32 WeaponSlotNumber)
+{
+	FTunaSweeperItemInstance WeaponInstance;
+	FTunaSweeperItemDefinition WeaponDefinition;
+	if (!TryGetEquipmentWeaponSlotItem(WeaponSlotNumber, WeaponInstance, WeaponDefinition))
+	{
+		return TunaSweeperInventory::DefaultWeaponReloadSeconds;
+	}
+
+	return WeaponDefinition.ReloadSeconds > 0.0f
+		? WeaponDefinition.ReloadSeconds
+		: TunaSweeperInventory::DefaultWeaponReloadSeconds;
+}
+
+void UTunaSweeperGameInstance::GetCompatibleAmmoItemIdsForWeaponSlot(
+	int32 WeaponSlotNumber,
+	TArray<int32>& OutAmmoItemIds,
+	bool bRequireInventoryAmmo)
+{
+	OutAmmoItemIds.Reset();
+
+	FTunaSweeperItemInstance WeaponInstance;
+	FTunaSweeperItemDefinition WeaponDefinition;
+	if (!TryGetEquipmentWeaponSlotItem(WeaponSlotNumber, WeaponInstance, WeaponDefinition))
+	{
+		return;
+	}
+
+	UTunaSweeperItemDataSubsystem* ItemDataSubsystem = GetSubsystem<UTunaSweeperItemDataSubsystem>();
+	TArray<FTunaSweeperItemDefinition> ItemDefinitions;
+	if (!ItemDataSubsystem || !ItemDataSubsystem->GetAllItemDefinitions(ItemDefinitions))
+	{
+		return;
+	}
+
+	for (const FTunaSweeperItemDefinition& ItemDefinition : ItemDefinitions)
+	{
+		if (IsAmmoDefinitionCompatibleWithWeapon(WeaponDefinition, ItemDefinition) &&
+			(!bRequireInventoryAmmo || CountInventoryAmmoByItemId(ItemDefinition.Id) > 0))
+		{
+			OutAmmoItemIds.Add(ItemDefinition.Id);
+		}
+	}
+}
+
+bool UTunaSweeperGameInstance::SetSelectedAmmoItemForWeaponSlot(int32 WeaponSlotNumber, int32 AmmoItemId)
+{
+	EnsureInventoryStateInitialized();
+
+	FTunaSweeperItemInstance WeaponInstance;
+	FTunaSweeperItemDefinition WeaponDefinition;
+	if (!TryGetEquipmentWeaponSlotItem(WeaponSlotNumber, WeaponInstance, WeaponDefinition))
+	{
+		return false;
+	}
+
+	UTunaSweeperItemDataSubsystem* ItemDataSubsystem = GetSubsystem<UTunaSweeperItemDataSubsystem>();
+	FTunaSweeperItemDefinition AmmoDefinition;
+	if (!ItemDataSubsystem ||
+		!ItemDataSubsystem->TryGetItemDefinition(AmmoItemId, AmmoDefinition) ||
+		!IsAmmoDefinitionCompatibleWithWeapon(WeaponDefinition, AmmoDefinition))
+	{
+		return false;
+	}
+
+	FTunaSweeperItemInstance* MutableWeaponInstance = ItemInstancesByUid.Find(WeaponInstance.Uid);
+	if (!MutableWeaponInstance)
+	{
+		return false;
+	}
+
+	if (MutableWeaponInstance->SelectedAmmoItemId == AmmoItemId)
+	{
+		return true;
+	}
+
+	MutableWeaponInstance->SelectedAmmoItemId = AmmoItemId;
+	BroadcastInventoryStateChanged();
+	return true;
+}
+
+bool UTunaSweeperGameInstance::TryConsumeLoadedAmmoForWeaponSlot(int32 WeaponSlotNumber)
+{
+	EnsureInventoryStateInitialized();
+
+	FTunaSweeperItemInstance WeaponInstance;
+	FTunaSweeperItemDefinition WeaponDefinition;
+	if (!TryGetEquipmentWeaponSlotItem(WeaponSlotNumber, WeaponInstance, WeaponDefinition))
+	{
+		return false;
+	}
+
+	FTunaSweeperItemInstance* MutableWeaponInstance = ItemInstancesByUid.Find(WeaponInstance.Uid);
+	if (!MutableWeaponInstance)
+	{
+		return false;
+	}
+
+	const int32 MagazineCapacity = CalculateWeaponMagazineCapacity(*MutableWeaponInstance, WeaponDefinition);
+	MutableWeaponInstance->LoadedAmmoCount = FMath::Clamp(MutableWeaponInstance->LoadedAmmoCount, 0, MagazineCapacity);
+	if (MutableWeaponInstance->LoadedAmmoCount <= 0)
+	{
+		return false;
+	}
+
+	MutableWeaponInstance->LoadedAmmoCount = FMath::Max(0, MutableWeaponInstance->LoadedAmmoCount - 1);
+	BroadcastInventoryStateChanged();
+	return true;
+}
+
+bool UTunaSweeperGameInstance::TryReloadWeaponSlot(int32 WeaponSlotNumber, int32 AmmoItemId, int32& OutLoadedAmmoCount)
+{
+	EnsureInventoryStateInitialized();
+	OutLoadedAmmoCount = 0;
+
+	FTunaSweeperItemInstance WeaponInstance;
+	FTunaSweeperItemDefinition WeaponDefinition;
+	if (!TryGetEquipmentWeaponSlotItem(WeaponSlotNumber, WeaponInstance, WeaponDefinition))
+	{
+		return false;
+	}
+
+	FTunaSweeperItemInstance* MutableWeaponInstance = ItemInstancesByUid.Find(WeaponInstance.Uid);
+	if (!MutableWeaponInstance)
+	{
+		return false;
+	}
+
+	const int32 MagazineCapacity = CalculateWeaponMagazineCapacity(*MutableWeaponInstance, WeaponDefinition);
+	MutableWeaponInstance->LoadedAmmoCount = FMath::Clamp(MutableWeaponInstance->LoadedAmmoCount, 0, MagazineCapacity);
+	if (MagazineCapacity <= 0 || MutableWeaponInstance->LoadedAmmoCount >= MagazineCapacity)
+	{
+		return false;
+	}
+
+	const int32 ExistingLoadedAmmoItemId = MutableWeaponInstance->LoadedAmmoCount > 0
+		? MutableWeaponInstance->LoadedAmmoItemId
+		: INDEX_NONE;
+	int32 ReloadAmmoItemId = ExistingLoadedAmmoItemId != INDEX_NONE
+		? ExistingLoadedAmmoItemId
+		: AmmoItemId;
+	if (ReloadAmmoItemId == INDEX_NONE)
+	{
+		ReloadAmmoItemId = ResolveSelectedAmmoItemIdForWeapon(*MutableWeaponInstance, WeaponDefinition);
+	}
+
+	UTunaSweeperItemDataSubsystem* ItemDataSubsystem = GetSubsystem<UTunaSweeperItemDataSubsystem>();
+	FTunaSweeperItemDefinition AmmoDefinition;
+	if (!ItemDataSubsystem ||
+		!ItemDataSubsystem->TryGetItemDefinition(ReloadAmmoItemId, AmmoDefinition) ||
+		!IsAmmoDefinitionCompatibleWithWeapon(WeaponDefinition, AmmoDefinition))
+	{
+		return false;
+	}
+
+	const int32 RequestedAmmo = MagazineCapacity - MutableWeaponInstance->LoadedAmmoCount;
+	const int32 ConsumedAmmo = ConsumeInventoryAmmoByItemId(ReloadAmmoItemId, RequestedAmmo);
+	if (ConsumedAmmo <= 0)
+	{
+		return false;
+	}
+
+	MutableWeaponInstance->LoadedAmmoItemId = ReloadAmmoItemId;
+	MutableWeaponInstance->SelectedAmmoItemId = ReloadAmmoItemId;
+	MutableWeaponInstance->LoadedAmmoCount = FMath::Clamp(
+		MutableWeaponInstance->LoadedAmmoCount + ConsumedAmmo,
+		0,
+		MagazineCapacity);
+	OutLoadedAmmoCount = MutableWeaponInstance->LoadedAmmoCount;
+	BroadcastInventoryStateChanged();
+	return true;
 }
 
 bool UTunaSweeperGameInstance::CanSlotAcceptItem(const FTunaSweeperItemSlotReference& SlotReference, const FGuid& ItemUid)
@@ -1188,6 +1483,197 @@ bool UTunaSweeperGameInstance::IsBackpackItemDefinition(const FTunaSweeperItemDe
 	return ItemDefinition.CategoryTag == TunaSweeperInventory::BackpackCategoryTag ||
 		ItemDefinition.EquipmentSlotTag == TunaSweeperInventory::BackpackEquipmentSlotTag ||
 		ItemDefinition.InventorySlotCapacity > FMath::Max(TunaSweeperInventory::RequiredBareInventorySlots, GameplaySettings.BareInventorySlots);
+}
+
+bool UTunaSweeperGameInstance::IsEquipmentWeaponSlotNumberValid(int32 WeaponSlotNumber) const
+{
+	return WeaponSlotNumber >= 1 && WeaponSlotNumber <= TunaSweeperInventory::WeaponEquipmentSlotCount;
+}
+
+int32 UTunaSweeperGameInstance::GetEquipmentSlotIndexForWeaponSlotNumber(int32 WeaponSlotNumber) const
+{
+	return IsEquipmentWeaponSlotNumberValid(WeaponSlotNumber)
+		? WeaponSlotNumber - 1
+		: INDEX_NONE;
+}
+
+bool UTunaSweeperGameInstance::IsGunItemDefinition(const FTunaSweeperItemDefinition& ItemDefinition) const
+{
+	return ItemDefinition.CategoryTag == TunaSweeperInventory::GunCategoryTag ||
+		ItemDefinition.EquipmentSlotTag == TunaSweeperInventory::GunEquipmentSlotTag;
+}
+
+bool UTunaSweeperGameInstance::IsAmmoItemDefinition(const FTunaSweeperItemDefinition& ItemDefinition) const
+{
+	return ItemDefinition.CategoryTag == TunaSweeperInventory::AmmoCategoryTag && !ItemDefinition.AmmoTypeTag.IsNone();
+}
+
+bool UTunaSweeperGameInstance::IsAmmoDefinitionCompatibleWithWeapon(
+	const FTunaSweeperItemDefinition& WeaponDefinition,
+	const FTunaSweeperItemDefinition& AmmoDefinition) const
+{
+	if (!IsGunItemDefinition(WeaponDefinition) || !IsAmmoItemDefinition(AmmoDefinition))
+	{
+		return false;
+	}
+
+	if (WeaponDefinition.CompatibleAmmoTypeTags.Num() > 0)
+	{
+		return WeaponDefinition.CompatibleAmmoTypeTags.Contains(AmmoDefinition.AmmoTypeTag);
+	}
+
+	return TunaSweeperInventory::GetDefaultAmmoTypeTagForWeaponType(WeaponDefinition.WeaponTypeTag) == AmmoDefinition.AmmoTypeTag;
+}
+
+int32 UTunaSweeperGameInstance::CalculateWeaponMagazineCapacity(
+	const FTunaSweeperItemInstance& WeaponInstance,
+	const FTunaSweeperItemDefinition& WeaponDefinition) const
+{
+	int32 MagazineCapacity = WeaponDefinition.MagazineCapacity > 0
+		? WeaponDefinition.MagazineCapacity
+		: TunaSweeperInventory::DefaultWeaponMagazineCapacity;
+
+	UTunaSweeperItemDataSubsystem* ItemDataSubsystem = GetSubsystem<UTunaSweeperItemDataSubsystem>();
+	if (ItemDataSubsystem)
+	{
+		for (const TPair<FName, FGuid>& AttachmentSlot : WeaponInstance.AttachmentSlots)
+		{
+			const FTunaSweeperItemInstance* AttachmentInstance = ItemInstancesByUid.Find(AttachmentSlot.Value);
+			if (!AttachmentInstance)
+			{
+				continue;
+			}
+
+			FTunaSweeperItemDefinition AttachmentDefinition;
+			if (ItemDataSubsystem->TryGetItemDefinition(AttachmentInstance->ItemId, AttachmentDefinition))
+			{
+				MagazineCapacity += FMath::Max(0, AttachmentDefinition.MagazineCapacityBonus);
+			}
+		}
+	}
+
+	return FMath::Max(1, MagazineCapacity);
+}
+
+int32 UTunaSweeperGameInstance::ResolveSelectedAmmoItemIdForWeapon(
+	FTunaSweeperItemInstance& WeaponInstance,
+	const FTunaSweeperItemDefinition& WeaponDefinition)
+{
+	UTunaSweeperItemDataSubsystem* ItemDataSubsystem = GetSubsystem<UTunaSweeperItemDataSubsystem>();
+	if (!ItemDataSubsystem)
+	{
+		return INDEX_NONE;
+	}
+
+	auto IsCompatibleAmmoItemId = [this, ItemDataSubsystem, &WeaponDefinition](int32 AmmoItemId)
+	{
+		FTunaSweeperItemDefinition AmmoDefinition;
+		return ItemDataSubsystem->TryGetItemDefinition(AmmoItemId, AmmoDefinition) &&
+			IsAmmoDefinitionCompatibleWithWeapon(WeaponDefinition, AmmoDefinition);
+	};
+
+	if (WeaponInstance.SelectedAmmoItemId != INDEX_NONE && IsCompatibleAmmoItemId(WeaponInstance.SelectedAmmoItemId))
+	{
+		return WeaponInstance.SelectedAmmoItemId;
+	}
+
+	if (WeaponInstance.LoadedAmmoItemId != INDEX_NONE && IsCompatibleAmmoItemId(WeaponInstance.LoadedAmmoItemId))
+	{
+		WeaponInstance.SelectedAmmoItemId = WeaponInstance.LoadedAmmoItemId;
+		return WeaponInstance.SelectedAmmoItemId;
+	}
+
+	TArray<FTunaSweeperItemDefinition> ItemDefinitions;
+	if (!ItemDataSubsystem->GetAllItemDefinitions(ItemDefinitions))
+	{
+		return INDEX_NONE;
+	}
+
+	for (const FTunaSweeperItemDefinition& ItemDefinition : ItemDefinitions)
+	{
+		if (IsAmmoDefinitionCompatibleWithWeapon(WeaponDefinition, ItemDefinition) &&
+			CountInventoryAmmoByItemId(ItemDefinition.Id) > 0)
+		{
+			WeaponInstance.SelectedAmmoItemId = ItemDefinition.Id;
+			return WeaponInstance.SelectedAmmoItemId;
+		}
+	}
+
+	for (const FTunaSweeperItemDefinition& ItemDefinition : ItemDefinitions)
+	{
+		if (IsAmmoDefinitionCompatibleWithWeapon(WeaponDefinition, ItemDefinition))
+		{
+			WeaponInstance.SelectedAmmoItemId = ItemDefinition.Id;
+			return WeaponInstance.SelectedAmmoItemId;
+		}
+	}
+
+	return INDEX_NONE;
+}
+
+int32 UTunaSweeperGameInstance::CountInventoryAmmoByItemId(int32 AmmoItemId) const
+{
+	if (AmmoItemId == INDEX_NONE)
+	{
+		return 0;
+	}
+
+	int32 AmmoCount = 0;
+	auto CountAmmoInSlots = [this, AmmoItemId, &AmmoCount](const TArray<FTunaSweeperInventorySlot>& Slots)
+	{
+		for (const FTunaSweeperInventorySlot& Slot : Slots)
+		{
+			const FTunaSweeperItemInstance* ItemInstance = ItemInstancesByUid.Find(Slot.ItemUid);
+			if (ItemInstance && ItemInstance->ItemId == AmmoItemId)
+			{
+				AmmoCount += FMath::Max(0, ItemInstance->Quantity);
+			}
+		}
+	};
+
+	CountAmmoInSlots(PlayerInventorySlots);
+	CountAmmoInSlots(AuxiliaryBagSlots);
+	return AmmoCount;
+}
+
+int32 UTunaSweeperGameInstance::ConsumeInventoryAmmoByItemId(int32 AmmoItemId, int32 RequestedAmount)
+{
+	if (AmmoItemId == INDEX_NONE || RequestedAmount <= 0)
+	{
+		return 0;
+	}
+
+	int32 RemainingAmount = RequestedAmount;
+	auto ConsumeAmmoInSlots = [this, AmmoItemId, &RemainingAmount](TArray<FTunaSweeperInventorySlot>& Slots)
+	{
+		for (FTunaSweeperInventorySlot& Slot : Slots)
+		{
+			if (RemainingAmount <= 0)
+			{
+				break;
+			}
+
+			FTunaSweeperItemInstance* ItemInstance = ItemInstancesByUid.Find(Slot.ItemUid);
+			if (!ItemInstance || ItemInstance->ItemId != AmmoItemId)
+			{
+				continue;
+			}
+
+			const int32 ConsumedAmount = FMath::Min(RemainingAmount, FMath::Max(0, ItemInstance->Quantity));
+			ItemInstance->Quantity -= ConsumedAmount;
+			RemainingAmount -= ConsumedAmount;
+
+			if (ItemInstance->Quantity <= 0)
+			{
+				ItemInstancesByUid.Remove(Slot.ItemUid);
+				Slot.Clear();
+			}
+		}
+	};
+
+	ConsumeAmmoInSlots(PlayerInventorySlots);
+	ConsumeAmmoInSlots(AuxiliaryBagSlots);
+	return RequestedAmount - RemainingAmount;
 }
 
 void UTunaSweeperGameInstance::MigrateLegacyEquipmentSlots()

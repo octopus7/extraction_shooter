@@ -342,6 +342,9 @@ bool UTunaSweeperItemDataSubsystem::LoadItemTableJson()
 		double NumericShopSellPrice = 0.0;
 		double NumericWeightKg = 0.0;
 		double NumericInventorySlotCapacity = 0.0;
+		double NumericMagazineCapacity = 0.0;
+		double NumericMagazineCapacityBonus = 0.0;
+		double NumericReloadSeconds = 0.0;
 		FString NameStringKey;
 		FString DescriptionStringKey;
 		FString IconFileName;
@@ -349,6 +352,7 @@ bool UTunaSweeperItemDataSubsystem::LoadItemTableJson()
 		FString EquipmentSlotTag;
 		FString WeaponTypeTag;
 		FString AttachmentSlotTag;
+		FString AmmoTypeTag;
 		if (!(*JsonObject)->TryGetNumberField(TEXT("id"), NumericId) ||
 			!(*JsonObject)->TryGetStringField(TEXT("name_string_key"), NameStringKey) ||
 			!(*JsonObject)->TryGetStringField(TEXT("description_string_key"), DescriptionStringKey) ||
@@ -386,6 +390,10 @@ bool UTunaSweeperItemDataSubsystem::LoadItemTableJson()
 		{
 			ItemDefinition.AttachmentSlotTag = FName(*AttachmentSlotTag.TrimStartAndEnd());
 		}
+		if ((*JsonObject)->TryGetStringField(TEXT("ammo_type_tag"), AmmoTypeTag))
+		{
+			ItemDefinition.AmmoTypeTag = FName(*AmmoTypeTag.TrimStartAndEnd());
+		}
 		const TArray<TSharedPtr<FJsonValue>>* AttachmentSlotTagsArray = nullptr;
 		if ((*JsonObject)->TryGetArrayField(TEXT("attachment_slot_tags"), AttachmentSlotTagsArray) && AttachmentSlotTagsArray)
 		{
@@ -413,6 +421,32 @@ bool UTunaSweeperItemDataSubsystem::LoadItemTableJson()
 					ItemDefinition.CompatibleWeaponTypeTags.Add(FName(*WeaponTypeTagString));
 				}
 			}
+		}
+		const TArray<TSharedPtr<FJsonValue>>* CompatibleAmmoTypeTagsArray = nullptr;
+		if ((*JsonObject)->TryGetArrayField(TEXT("compatible_ammo_type_tags"), CompatibleAmmoTypeTagsArray) && CompatibleAmmoTypeTagsArray)
+		{
+			for (const TSharedPtr<FJsonValue>& AmmoTypeTagValue : *CompatibleAmmoTypeTagsArray)
+			{
+				const FString AmmoTypeTagString = AmmoTypeTagValue.IsValid()
+					? AmmoTypeTagValue->AsString().TrimStartAndEnd()
+					: FString();
+				if (!AmmoTypeTagString.IsEmpty())
+				{
+					ItemDefinition.CompatibleAmmoTypeTags.Add(FName(*AmmoTypeTagString));
+				}
+			}
+		}
+		if ((*JsonObject)->TryGetNumberField(TEXT("magazine_capacity"), NumericMagazineCapacity))
+		{
+			ItemDefinition.MagazineCapacity = FMath::Max(0, static_cast<int32>(NumericMagazineCapacity));
+		}
+		if ((*JsonObject)->TryGetNumberField(TEXT("magazine_capacity_bonus"), NumericMagazineCapacityBonus))
+		{
+			ItemDefinition.MagazineCapacityBonus = FMath::Max(0, static_cast<int32>(NumericMagazineCapacityBonus));
+		}
+		if ((*JsonObject)->TryGetNumberField(TEXT("reload_seconds"), NumericReloadSeconds))
+		{
+			ItemDefinition.ReloadSeconds = FMath::Max(0.0f, static_cast<float>(NumericReloadSeconds));
 		}
 		if ((*JsonObject)->TryGetNumberField(TEXT("inventory_slot_capacity"), NumericInventorySlotCapacity))
 		{

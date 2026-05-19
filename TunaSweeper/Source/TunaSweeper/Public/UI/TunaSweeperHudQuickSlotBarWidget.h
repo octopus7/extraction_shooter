@@ -5,6 +5,8 @@
 #include "TunaSweeperHudQuickSlotBarWidget.generated.h"
 
 class UImage;
+class UProgressBar;
+class UTextBlock;
 class UTexture2D;
 class UWidget;
 
@@ -23,6 +25,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
 	void SetSelectedQuickSlot(int32 SlotNumber);
 
+	void SetWeaponAmmoText(int32 SlotNumber, int32 LoadedAmmoCount, int32 InventoryAmmoCount, bool bVisible);
+	void SetReloadProgress(float Progress, bool bVisible);
+	void SetAmmoSelectorOptions(const TArray<FText>& OptionTexts, int32 FocusedOptionIndex, bool bVisible);
+
 protected:
 	virtual void NativeConstruct() override;
 	virtual void NativePreConstruct() override;
@@ -36,5 +42,22 @@ private:
 
 	UPROPERTY(Transient)
 	TArray<TObjectPtr<UWidget>> SlotSelectionFrames;
-};
 
+	UPROPERTY(Transient)
+	TArray<TObjectPtr<UTextBlock>> SlotAmmoTexts;
+
+	UPROPERTY(Transient)
+	TArray<TObjectPtr<UWidget>> AmmoSelectorOptionBackgrounds;
+
+	UPROPERTY(Transient)
+	TArray<TObjectPtr<UTextBlock>> AmmoSelectorOptionTexts;
+
+	UPROPERTY(BlueprintReadOnly, Transient, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional, AllowPrivateAccess = "true"))
+	TObjectPtr<UWidget> AmmoSelectorPanel;
+
+	UPROPERTY(BlueprintReadOnly, Transient, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional, AllowPrivateAccess = "true"))
+	TObjectPtr<UWidget> ReloadProgressPanel;
+
+	UPROPERTY(BlueprintReadOnly, Transient, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional, AllowPrivateAccess = "true"))
+	TObjectPtr<UProgressBar> ReloadProgressBar;
+};

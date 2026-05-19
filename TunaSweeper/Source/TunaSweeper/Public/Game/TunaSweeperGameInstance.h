@@ -175,6 +175,23 @@ public:
 	bool TryGetSlotItemInstance(const FTunaSweeperItemSlotReference& SlotReference, FTunaSweeperItemInstance& OutItemInstance);
 	bool TryGetSelectedItemInstance(FTunaSweeperItemInstance& OutItemInstance);
 	bool TryGetSelectedItemDefinition(FTunaSweeperItemDefinition& OutItemDefinition);
+	bool IsEquipmentWeaponSlotOccupied(int32 WeaponSlotNumber);
+	bool TryGetEquipmentWeaponSlotItem(
+		int32 WeaponSlotNumber,
+		FTunaSweeperItemInstance& OutItemInstance,
+		FTunaSweeperItemDefinition& OutItemDefinition);
+	int32 GetWeaponLoadedAmmoCount(int32 WeaponSlotNumber);
+	int32 GetWeaponMagazineCapacity(int32 WeaponSlotNumber);
+	int32 GetWeaponInventoryAmmoCount(int32 WeaponSlotNumber);
+	int32 GetWeaponSelectedAmmoItemId(int32 WeaponSlotNumber);
+	float GetWeaponReloadSeconds(int32 WeaponSlotNumber);
+	void GetCompatibleAmmoItemIdsForWeaponSlot(
+		int32 WeaponSlotNumber,
+		TArray<int32>& OutAmmoItemIds,
+		bool bRequireInventoryAmmo);
+	bool SetSelectedAmmoItemForWeaponSlot(int32 WeaponSlotNumber, int32 AmmoItemId);
+	bool TryConsumeLoadedAmmoForWeaponSlot(int32 WeaponSlotNumber);
+	bool TryReloadWeaponSlot(int32 WeaponSlotNumber, int32 AmmoItemId, int32& OutLoadedAmmoCount);
 	bool CanSlotAcceptItem(const FTunaSweeperItemSlotReference& SlotReference, const FGuid& ItemUid);
 	bool CanMoveItemBetweenSlots(
 		const FTunaSweeperItemSlotReference& SourceSlot,
@@ -232,6 +249,21 @@ private:
 	bool DoesItemDefinitionMatchEquipmentSlot(int32 SlotIndex, const FTunaSweeperItemDefinition& ItemDefinition) const;
 	bool IsBackpackItemUid(const FGuid& ItemUid);
 	bool IsBackpackItemDefinition(const FTunaSweeperItemDefinition& ItemDefinition) const;
+	bool IsEquipmentWeaponSlotNumberValid(int32 WeaponSlotNumber) const;
+	int32 GetEquipmentSlotIndexForWeaponSlotNumber(int32 WeaponSlotNumber) const;
+	bool IsGunItemDefinition(const FTunaSweeperItemDefinition& ItemDefinition) const;
+	bool IsAmmoItemDefinition(const FTunaSweeperItemDefinition& ItemDefinition) const;
+	bool IsAmmoDefinitionCompatibleWithWeapon(
+		const FTunaSweeperItemDefinition& WeaponDefinition,
+		const FTunaSweeperItemDefinition& AmmoDefinition) const;
+	int32 CalculateWeaponMagazineCapacity(
+		const FTunaSweeperItemInstance& WeaponInstance,
+		const FTunaSweeperItemDefinition& WeaponDefinition) const;
+	int32 ResolveSelectedAmmoItemIdForWeapon(
+		FTunaSweeperItemInstance& WeaponInstance,
+		const FTunaSweeperItemDefinition& WeaponDefinition);
+	int32 CountInventoryAmmoByItemId(int32 AmmoItemId) const;
+	int32 ConsumeInventoryAmmoByItemId(int32 AmmoItemId, int32 RequestedAmount);
 	void MigrateLegacyEquipmentSlots();
 	void RefreshSelectedWeaponAttachmentSlots();
 	bool CommitSelectedWeaponAttachmentSlotsToSelectedItem();

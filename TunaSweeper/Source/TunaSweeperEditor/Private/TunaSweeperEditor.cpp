@@ -93,10 +93,11 @@ namespace TunaSweeperEditorSetup
 	const FString InteractionInputTaskId = TEXT("2026-05-11_SetInteractInputToFKey");
 	const FString InteractionMarkerAlignmentTaskId = TEXT("2026-05-10_RebuildInteractionMarkerAlignmentV2");
 	const FString PickupItemAndSpawnerTaskId = TEXT("2026-05-11_CreatePickupItemAndSpawnerAssetsV3");
-	const FString CommonGameHudTaskId = TEXT("2026-05-16_RebuildInventoryLayoutAndModdingPanelV1");
+	const FString CommonGameHudTaskId = TEXT("2026-05-19_RebuildAmmoReloadHudV2");
 	const FString InventoryInputTaskId = TEXT("2026-05-11_AddInventoryInput");
 	const FString QuickSlotInputTaskId = TEXT("2026-05-12_AddQuickSlotInputActions");
 	const FString DropInputTaskId = TEXT("2026-05-18_AddDropInputAction");
+	const FString AmmoReloadInputTaskId = TEXT("2026-05-19_AddAmmoReloadInputActionsV1");
 	const FString LootContainerAndSpawnerTaskId = TEXT("2026-05-11_CreateLootContainerAndSpawnerAssetsV1");
 	const FString LootContainerOccupancyHeaderTaskId = TEXT("2026-05-18_AddLootContainerOccupancyHeaderV1");
 	const FString CannedTunaIconImportTaskId = TEXT("2026-05-11_ImportCannedTunaIconV1");
@@ -130,6 +131,9 @@ namespace TunaSweeperEditorSetup
 	const FString InteractActionName = TEXT("IA_Interact");
 	const FString InventoryActionName = TEXT("IA_Inventory");
 	const FString DropActionName = TEXT("IA_Drop");
+	const FString ReloadActionName = TEXT("IA_Reload");
+	const FString AmmoSelectActionName = TEXT("IA_AmmoSelect");
+	const FString AmmoFocusActionName = TEXT("IA_AmmoFocus");
 	const FString QuickSlotActionNamePrefix = TEXT("IA_QuickSlot");
 	const FString MappingContextName = TEXT("IMC_Player");
 	const FString UIAssetPath = TEXT("/Game/UI");
@@ -620,6 +624,50 @@ namespace TunaSweeperEditorSetup
 		}
 
 		MappingContext->ContextDescription = FText::FromString(TEXT("TunaSweeper player movement, combat, interaction, inventory, quick slot, and item drop input."));
+		MappingContext->MarkPackageDirty();
+		return SaveAsset(MappingContext);
+	}
+
+	bool EnsureAmmoReloadInputAssets()
+	{
+		UInputAction* ReloadAction = EnsureInputAction(
+			ReloadActionName,
+			EInputActionValueType::Boolean,
+			EInputActionAccumulationBehavior::TakeHighestAbsoluteValue);
+		UInputAction* AmmoSelectAction = EnsureInputAction(
+			AmmoSelectActionName,
+			EInputActionValueType::Boolean,
+			EInputActionAccumulationBehavior::TakeHighestAbsoluteValue);
+		UInputAction* AmmoFocusAction = EnsureInputAction(
+			AmmoFocusActionName,
+			EInputActionValueType::Axis1D,
+			EInputActionAccumulationBehavior::Cumulative);
+
+		UInputMappingContext* MappingContext = LoadObject<UInputMappingContext>(
+			nullptr,
+			*GetAssetObjectPath(InputAssetPath, MappingContextName));
+
+		if (!ReloadAction || !AmmoSelectAction || !AmmoFocusAction || !MappingContext)
+		{
+			return false;
+		}
+
+		if (!HasInputMapping(MappingContext, ReloadAction, EKeys::R))
+		{
+			MappingContext->MapKey(ReloadAction, EKeys::R);
+		}
+
+		if (!HasInputMapping(MappingContext, AmmoSelectAction, EKeys::T))
+		{
+			MappingContext->MapKey(AmmoSelectAction, EKeys::T);
+		}
+
+		if (!HasInputMapping(MappingContext, AmmoFocusAction, EKeys::MouseWheelAxis))
+		{
+			MappingContext->MapKey(AmmoFocusAction, EKeys::MouseWheelAxis);
+		}
+
+		MappingContext->ContextDescription = FText::FromString(TEXT("TunaSweeper player movement, combat, interaction, inventory, quick slot, ammo, and reload input."));
 		MappingContext->MarkPackageDirty();
 		return SaveAsset(MappingContext);
 	}
@@ -3053,15 +3101,83 @@ namespace TunaSweeperEditorSetup
 
 		UWidgetTree* WidgetTree = WidgetBlueprint->WidgetTree;
 		USizeBox* RootSizeBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("RootSizeBox"));
+		UVerticalBox* RootStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("RootStack"));
+		UHorizontalBox* AmmoSelectorPanel = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("AmmoSelectorPanel"));
+		USizeBox* ReloadProgressPanel = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("ReloadProgressPanel"));
+		UProgressBar* ReloadProgressBar = WidgetTree->ConstructWidget<UProgressBar>(UProgressBar::StaticClass(), TEXT("ReloadProgressBar"));
 		UHorizontalBox* SlotRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("SlotRow"));
-		if (!RootSizeBox || !SlotRow)
+		if (!RootSizeBox || !RootStack || !AmmoSelectorPanel || !ReloadProgressPanel || !ReloadProgressBar || !SlotRow)
 		{
 			return false;
 		}
 
 		WidgetTree->RootWidget = RootSizeBox;
-		RootSizeBox->SetHeightOverride(118.0f);
-		RootSizeBox->SetContent(SlotRow);
+		RootSizeBox->SetHeightOverride(156.0f);
+		RootSizeBox->SetContent(RootStack);
+
+		AmmoSelectorPanel->SetVisibility(ESlateVisibility::Collapsed);
+		UVerticalBoxSlot* AmmoSelectorSlot = RootStack->AddChildToVerticalBox(AmmoSelectorPanel);
+		if (AmmoSelectorSlot)
+		{
+			AmmoSelectorSlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
+			AmmoSelectorSlot->SetHorizontalAlignment(HAlign_Center);
+			AmmoSelectorSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 4.0f));
+		}
+
+		for (int32 OptionNumber = 1; OptionNumber <= 6; ++OptionNumber)
+		{
+			UBorder* OptionBackground = WidgetTree->ConstructWidget<UBorder>(
+				UBorder::StaticClass(),
+				FName(*FString::Printf(TEXT("AmmoOption%dBackground"), OptionNumber)));
+			UTextBlock* OptionText = WidgetTree->ConstructWidget<UTextBlock>(
+				UTextBlock::StaticClass(),
+				FName(*FString::Printf(TEXT("AmmoOption%dText"), OptionNumber)));
+			if (!OptionBackground || !OptionText)
+			{
+				return false;
+			}
+
+			OptionBackground->SetPadding(FMargin(8.0f, 3.0f));
+			OptionBackground->SetVisibility(ESlateVisibility::Collapsed);
+			OptionBackground->SetBrush(MakeRoundedBoxBrush(
+				FVector2D(96.0f, 24.0f),
+				FLinearColor(0.018f, 0.022f, 0.028f, 0.92f),
+				FLinearColor(0.7f, 0.85f, 0.55f, 1.0f),
+				1.0f));
+			ConfigureTextBlock(OptionText, FText::GetEmpty(), FLinearColor(0.9f, 0.96f, 0.88f, 1.0f), 11);
+			OptionBackground->SetContent(OptionText);
+
+			UHorizontalBoxSlot* OptionSlot = AmmoSelectorPanel->AddChildToHorizontalBox(OptionBackground);
+			if (OptionSlot)
+			{
+				OptionSlot->SetPadding(FMargin(OptionNumber == 1 ? 0.0f : 4.0f, 0.0f, 0.0f, 0.0f));
+				OptionSlot->SetVerticalAlignment(VAlign_Center);
+			}
+
+			RegisterWidgetVariable(WidgetBlueprint, OptionBackground);
+			RegisterWidgetVariable(WidgetBlueprint, OptionText);
+		}
+
+		ReloadProgressPanel->SetWidthOverride(420.0f);
+		ReloadProgressPanel->SetHeightOverride(10.0f);
+		ReloadProgressPanel->SetVisibility(ESlateVisibility::Collapsed);
+		ReloadProgressBar->SetPercent(0.0f);
+		ReloadProgressBar->SetFillColorAndOpacity(FLinearColor(0.62f, 0.98f, 0.62f, 1.0f));
+		ReloadProgressPanel->SetContent(ReloadProgressBar);
+		UVerticalBoxSlot* ReloadProgressSlot = RootStack->AddChildToVerticalBox(ReloadProgressPanel);
+		if (ReloadProgressSlot)
+		{
+			ReloadProgressSlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
+			ReloadProgressSlot->SetHorizontalAlignment(HAlign_Center);
+			ReloadProgressSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 6.0f));
+		}
+
+		UVerticalBoxSlot* SlotRowStackSlot = RootStack->AddChildToVerticalBox(SlotRow);
+		if (SlotRowStackSlot)
+		{
+			SlotRowStackSlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
+			SlotRowStackSlot->SetHorizontalAlignment(HAlign_Center);
+		}
 
 		const FString DefaultIconPaths[8] = {
 			TEXT("/Game/UI/Icons/T_UIIcon_Pistol.T_UIIcon_Pistol"),
@@ -3080,6 +3196,12 @@ namespace TunaSweeperEditorSetup
 			const float SlotSize = bWeaponSlot ? 82.0f : 56.0f;
 			const float IconSize = bWeaponSlot ? 68.0f : 42.0f;
 
+			UVerticalBox* SlotStack = WidgetTree->ConstructWidget<UVerticalBox>(
+				UVerticalBox::StaticClass(),
+				FName(*FString::Printf(TEXT("QuickSlot%dStack"), SlotNumber)));
+			UTextBlock* SlotAmmoText = WidgetTree->ConstructWidget<UTextBlock>(
+				UTextBlock::StaticClass(),
+				FName(*FString::Printf(TEXT("QuickSlot%dAmmoText"), SlotNumber)));
 			USizeBox* SlotSizeBox = WidgetTree->ConstructWidget<USizeBox>(
 				USizeBox::StaticClass(),
 				FName(*FString::Printf(TEXT("QuickSlot%dSizeBox"), SlotNumber)));
@@ -3099,9 +3221,18 @@ namespace TunaSweeperEditorSetup
 				UBorder::StaticClass(),
 				FName(*FString::Printf(TEXT("QuickSlot%dSelectionFrame"), SlotNumber)));
 
-			if (!SlotSizeBox || !SlotBackground || !SlotOverlay || !SlotIcon || !SlotNumberText || !SelectionFrame)
+			if (!SlotStack || !SlotAmmoText || !SlotSizeBox || !SlotBackground || !SlotOverlay || !SlotIcon || !SlotNumberText || !SelectionFrame)
 			{
 				return false;
+			}
+
+			ConfigureTextBlock(SlotAmmoText, FText::GetEmpty(), FLinearColor(0.92f, 0.96f, 1.0f, 1.0f), 12);
+			SlotAmmoText->SetVisibility(ESlateVisibility::Collapsed);
+			UVerticalBoxSlot* AmmoTextSlot = SlotStack->AddChildToVerticalBox(SlotAmmoText);
+			if (AmmoTextSlot)
+			{
+				AmmoTextSlot->SetHorizontalAlignment(HAlign_Center);
+				AmmoTextSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 3.0f));
 			}
 
 			SlotSizeBox->SetWidthOverride(SlotSize);
@@ -3153,18 +3284,28 @@ namespace TunaSweeperEditorSetup
 				SelectionSlot->SetVerticalAlignment(VAlign_Fill);
 			}
 
-			UHorizontalBoxSlot* SlotRowSlot = SlotRow->AddChildToHorizontalBox(SlotSizeBox);
+			UVerticalBoxSlot* SlotBoxStackSlot = SlotStack->AddChildToVerticalBox(SlotSizeBox);
+			if (SlotBoxStackSlot)
+			{
+				SlotBoxStackSlot->SetHorizontalAlignment(HAlign_Center);
+			}
+
+			UHorizontalBoxSlot* SlotRowSlot = SlotRow->AddChildToHorizontalBox(SlotStack);
 			if (SlotRowSlot)
 			{
 				SlotRowSlot->SetPadding(FMargin(SlotNumber == 1 ? 0.0f : 8.0f, 0.0f, 0.0f, 0.0f));
 				SlotRowSlot->SetVerticalAlignment(VAlign_Bottom);
 			}
 
+			RegisterWidgetVariable(WidgetBlueprint, SlotAmmoText);
 			RegisterWidgetVariable(WidgetBlueprint, SlotIcon);
 			RegisterWidgetVariable(WidgetBlueprint, SelectionFrame);
 		}
 
 		RegisterWidgetVariable(WidgetBlueprint, RootSizeBox);
+		RegisterWidgetVariable(WidgetBlueprint, AmmoSelectorPanel);
+		RegisterWidgetVariable(WidgetBlueprint, ReloadProgressPanel);
+		RegisterWidgetVariable(WidgetBlueprint, ReloadProgressBar);
 		WidgetBlueprint->MarkPackageDirty();
 		return true;
 	}
@@ -3654,9 +3795,14 @@ namespace TunaSweeperEditorSetup
 		UUserWidget* BottomStatusWidget = WidgetTree->ConstructWidget<UUserWidget>(BottomStatusWidgetClass, TEXT("BottomStatusWidget"));
 		USizeBox* BottomGap = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("BottomGap"));
 		UUserWidget* QuickSlotBarWidget = WidgetTree->ConstructWidget<UUserWidget>(QuickSlotBarWidgetClass, TEXT("QuickSlotBarWidget"));
+		USizeBox* CenterReloadGaugeRoot = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("CenterReloadGaugeRoot"));
+		UCanvasPanel* CenterReloadGaugeCanvas = WidgetTree->ConstructWidget<UCanvasPanel>(UCanvasPanel::StaticClass(), TEXT("CenterReloadGaugeCanvas"));
+		UBorder* CenterReloadGaugeBackdrop = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("CenterReloadGaugeBackdrop"));
+		UTextBlock* CenterReloadPercentText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("CenterReloadPercentText"));
 
 		if (!RootCanvas || !TopStatusReserveWidget || !CenterContentPanel || !InventoryAreaWidget || !ItemInfoPanelWidget ||
-			!ExternalPanelWidget || !BottomRow || !BottomStatusWidget || !BottomGap || !QuickSlotBarWidget)
+			!ExternalPanelWidget || !BottomRow || !BottomStatusWidget || !BottomGap || !QuickSlotBarWidget ||
+			!CenterReloadGaugeRoot || !CenterReloadGaugeCanvas || !CenterReloadGaugeBackdrop || !CenterReloadPercentText)
 		{
 			return false;
 		}
@@ -3714,7 +3860,77 @@ namespace TunaSweeperEditorSetup
 			BottomSlot->SetAnchors(FAnchors(0.5f, 1.0f, 0.5f, 1.0f));
 			BottomSlot->SetAlignment(FVector2D(0.5f, 1.0f));
 			BottomSlot->SetPosition(FVector2D(0.0f, -20.0f));
-			BottomSlot->SetSize(FVector2D(980.0f, 124.0f));
+			BottomSlot->SetSize(FVector2D(980.0f, 172.0f));
+		}
+
+		CenterReloadGaugeRoot->SetWidthOverride(96.0f);
+		CenterReloadGaugeRoot->SetHeightOverride(96.0f);
+		CenterReloadGaugeRoot->SetContent(CenterReloadGaugeCanvas);
+		CenterReloadGaugeRoot->SetVisibility(ESlateVisibility::Collapsed);
+		UCanvasPanelSlot* CenterReloadSlot = RootCanvas->AddChildToCanvas(CenterReloadGaugeRoot);
+		if (CenterReloadSlot)
+		{
+			CenterReloadSlot->SetAnchors(FAnchors(0.5f, 0.5f, 0.5f, 0.5f));
+			CenterReloadSlot->SetAlignment(FVector2D(0.5f, 0.5f));
+			CenterReloadSlot->SetPosition(FVector2D(0.0f, 0.0f));
+			CenterReloadSlot->SetSize(FVector2D(96.0f, 96.0f));
+		}
+
+		CenterReloadGaugeBackdrop->SetBrush(MakeRoundedBoxBrush(
+			FVector2D(58.0f, 58.0f),
+			FLinearColor(0.012f, 0.016f, 0.018f, 0.68f),
+			FLinearColor(0.48f, 0.66f, 0.46f, 0.3f),
+			1.0f));
+		UCanvasPanelSlot* CenterReloadBackdropSlot = CenterReloadGaugeCanvas->AddChildToCanvas(CenterReloadGaugeBackdrop);
+		if (CenterReloadBackdropSlot)
+		{
+			CenterReloadBackdropSlot->SetAnchors(FAnchors(0.5f, 0.5f, 0.5f, 0.5f));
+			CenterReloadBackdropSlot->SetAlignment(FVector2D(0.5f, 0.5f));
+			CenterReloadBackdropSlot->SetPosition(FVector2D(0.0f, 0.0f));
+			CenterReloadBackdropSlot->SetSize(FVector2D(58.0f, 58.0f));
+		}
+
+		for (int32 SegmentNumber = 1; SegmentNumber <= 12; ++SegmentNumber)
+		{
+			UBorder* Segment = WidgetTree->ConstructWidget<UBorder>(
+				UBorder::StaticClass(),
+				FName(*FString::Printf(TEXT("CenterReloadSegment%02d"), SegmentNumber)));
+			if (!Segment)
+			{
+				return false;
+			}
+
+			Segment->SetBrush(MakeRoundedBoxBrush(
+				FVector2D(9.0f, 14.0f),
+				FLinearColor(0.62f, 0.98f, 0.62f, 1.0f),
+				FLinearColor::Transparent,
+				0.0f));
+			Segment->SetRenderOpacity(0.18f);
+			const float AngleRadians = FMath::DegreesToRadians((SegmentNumber - 1) * 30.0f - 90.0f);
+			const FVector2D SegmentPosition(
+				FMath::Cos(AngleRadians) * 36.0f,
+				FMath::Sin(AngleRadians) * 36.0f);
+			UCanvasPanelSlot* SegmentSlot = CenterReloadGaugeCanvas->AddChildToCanvas(Segment);
+			if (SegmentSlot)
+			{
+				SegmentSlot->SetAnchors(FAnchors(0.5f, 0.5f, 0.5f, 0.5f));
+				SegmentSlot->SetAlignment(FVector2D(0.5f, 0.5f));
+				SegmentSlot->SetPosition(SegmentPosition);
+				SegmentSlot->SetSize(FVector2D(9.0f, 14.0f));
+			}
+			Segment->SetRenderTransformPivot(FVector2D(0.5f, 0.5f));
+			Segment->SetRenderTransformAngle((SegmentNumber - 1) * 30.0f);
+			RegisterWidgetVariable(WidgetBlueprint, Segment);
+		}
+
+		ConfigureTextBlock(CenterReloadPercentText, FText::GetEmpty(), FLinearColor(0.9f, 1.0f, 0.88f, 1.0f), 13);
+		UCanvasPanelSlot* CenterReloadTextSlot = CenterReloadGaugeCanvas->AddChildToCanvas(CenterReloadPercentText);
+		if (CenterReloadTextSlot)
+		{
+			CenterReloadTextSlot->SetAnchors(FAnchors(0.5f, 0.5f, 0.5f, 0.5f));
+			CenterReloadTextSlot->SetAlignment(FVector2D(0.5f, 0.5f));
+			CenterReloadTextSlot->SetPosition(FVector2D(0.0f, 0.0f));
+			CenterReloadTextSlot->SetSize(FVector2D(54.0f, 24.0f));
 		}
 
 		UHorizontalBoxSlot* BottomStatusSlot = BottomRow->AddChildToHorizontalBox(BottomStatusWidget);
@@ -3739,6 +3955,8 @@ namespace TunaSweeperEditorSetup
 		RegisterWidgetVariable(WidgetBlueprint, TopStatusReserveWidget);
 		RegisterWidgetVariable(WidgetBlueprint, BottomStatusWidget);
 		RegisterWidgetVariable(WidgetBlueprint, QuickSlotBarWidget);
+		RegisterWidgetVariable(WidgetBlueprint, CenterReloadGaugeRoot);
+		RegisterWidgetVariable(WidgetBlueprint, CenterReloadPercentText);
 		RegisterWidgetVariable(WidgetBlueprint, CenterContentPanel);
 		RegisterWidgetVariable(WidgetBlueprint, InventoryAreaWidget);
 		RegisterWidgetVariable(WidgetBlueprint, ItemInfoPanelWidget);
@@ -5513,6 +5731,13 @@ public:
 			[]()
 			{
 				return TunaSweeperEditorSetup::EnsureDropInputAssets();
+			});
+
+		FTunaSweeperEditorRunOnce::Run(
+			TunaSweeperEditorSetup::AmmoReloadInputTaskId,
+			[]()
+			{
+				return TunaSweeperEditorSetup::EnsureAmmoReloadInputAssets();
 			});
 
 		FTunaSweeperEditorRunOnce::Run(

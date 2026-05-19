@@ -470,10 +470,16 @@ void ATunaSweeperPlayerController::HandleQuickSlot(int32 SlotNumber)
 		return;
 	}
 
-	if (const ATunaSweeperTopDownCharacter* ControlledCharacter = Cast<ATunaSweeperTopDownCharacter>(GetPawn()))
+	if (ATunaSweeperTopDownCharacter* ControlledCharacter = Cast<ATunaSweeperTopDownCharacter>(GetPawn()))
 	{
 		if (ControlledCharacter->IsDead())
 		{
+			return;
+		}
+
+		if (SlotNumber == 1 || SlotNumber == 2)
+		{
+			ControlledCharacter->SelectWeaponSlot(SlotNumber);
 			return;
 		}
 	}
