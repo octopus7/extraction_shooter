@@ -267,7 +267,13 @@ bool UTunaSweeperInteractionSubsystem::HandleQuestInteraction(
 		return false;
 	}
 
-	TunaPlayerController->OpenQuestPanel(QuestNpcActor->GetQuestId());
+	const FName ResolvedQuestId = QuestNpcActor->ResolveQuestId();
+	if (ResolvedQuestId.IsNone())
+	{
+		return false;
+	}
+
+	TunaPlayerController->OpenQuestPanel(ResolvedQuestId);
 	return true;
 }
 

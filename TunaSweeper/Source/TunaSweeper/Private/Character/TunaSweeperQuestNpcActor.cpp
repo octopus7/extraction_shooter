@@ -1,6 +1,8 @@
 #include "Character/TunaSweeperQuestNpcActor.h"
 
 #include "Components/StaticMeshComponent.h"
+#include "Engine/GameInstance.h"
+#include "Engine/World.h"
 #include "Interaction/TunaSweeperInteractableComponent.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
 #include "UObject/ConstructorHelpers.h"
@@ -8,6 +10,7 @@
 ATunaSweeperQuestNpcActor::ATunaSweeperQuestNpcActor()
 {
 	QuestId = UTunaSweeperQuestSubsystem::GetFirstOutingQuestId();
+	ProviderId = UTunaSweeperQuestSubsystem::GetInstructorProviderId();
 	NpcDisplayName = FText::FromString(TEXT("\uAD50\uAD00"));
 
 	if (VisualMesh)
@@ -29,13 +32,39 @@ ATunaSweeperQuestNpcActor::ATunaSweeperQuestNpcActor()
 	}
 }
 
+FName ATunaSweeperQuestNpcActor::ResolveQuestId() const
+{
+	const FName EffectiveProviderId = ProviderId.IsNone()
+		? UTunaSweeperQuestSubsystem::GetInstructorProviderId()
+		: ProviderId;
+
+	if (UWorld* World = GetWorld())
+	{
+		if (UGameInstance* GameInstance = World->GetGameInstance())
+		{
+			if (const UTunaSweeperQuestSubsystem* QuestSubsystem = GameInstance->GetSubsystem<UTunaSweeperQuestSubsystem>())
+			{
+				FName ResolvedQuestId = NAME_None;
+				if (QuestSubsystem->TryResolveQuestForProvider(EffectiveProviderId, QuestId, ResolvedQuestId))
+				{
+					return ResolvedQuestId;
+				}
+			}
+		}
+	}
+
+	return QuestId;
+}
+
 void ATunaSweeperQuestNpcActor::ConfigureQuestNpcDefaults(
 	FName InQuestId,
 	const FText& InNpcDisplayName,
-	TSoftClassPtr<UTunaSweeperInteractionMarkerWidget> InMarkerWidgetClass)
+	TSoftClassPtr<UTunaSweeperInteractionMarkerWidget> InMarkerWidgetClass,
+	FName InProviderId)
 {
 	Modify();
 	QuestId = InQuestId;
+	ProviderId = InProviderId.IsNone() ? UTunaSweeperQuestSubsystem::GetInstructorProviderId() : InProviderId;
 	NpcDisplayName = InNpcDisplayName;
 	ConfigureInteractionDefaults(
 		ETunaSweeperInteractionType::Quest,

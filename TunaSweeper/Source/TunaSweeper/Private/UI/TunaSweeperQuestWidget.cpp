@@ -135,7 +135,9 @@ FText UTunaSweeperQuestWidget::GetStateText() const
 	switch (QuestSubsystem->GetQuestState(QuestId))
 	{
 	case ETunaSweeperQuestState::Available:
-		return FText::FromString(TEXT("\uC0C1\uD0DC: \uBC1B\uAE30 \uAC00\uB2A5"));
+		return QuestSubsystem->CanAcceptQuest(QuestId)
+			? FText::FromString(TEXT("\uC0C1\uD0DC: \uBC1B\uAE30 \uAC00\uB2A5"))
+			: FText::FromString(TEXT("\uC0C1\uD0DC: \uC7A0\uAE40"));
 	case ETunaSweeperQuestState::Accepted:
 		return FText::FromString(TEXT("\uC0C1\uD0DC: \uC218\uB77D\uB428"));
 	case ETunaSweeperQuestState::RewardAvailable:
@@ -160,7 +162,9 @@ FText UTunaSweeperQuestWidget::GetPrimaryButtonText() const
 	switch (QuestSubsystem->GetQuestState(QuestId))
 	{
 	case ETunaSweeperQuestState::Available:
-		return FText::FromString(TEXT("\uC218\uB77D"));
+		return QuestSubsystem->CanAcceptQuest(QuestId)
+			? FText::FromString(TEXT("\uC218\uB77D"))
+			: FText::FromString(TEXT("\uC7A0\uAE40"));
 	case ETunaSweeperQuestState::Accepted:
 		return FText::FromString(TEXT("\uC9C4\uD589 \uC911"));
 	case ETunaSweeperQuestState::RewardAvailable:
@@ -232,5 +236,5 @@ bool UTunaSweeperQuestWidget::IsPrimaryButtonEnabled() const
 	}
 
 	const ETunaSweeperQuestState State = QuestSubsystem->GetQuestState(QuestId);
-	return State == ETunaSweeperQuestState::Available || State == ETunaSweeperQuestState::RewardAvailable;
+	return QuestSubsystem->CanAcceptQuest(QuestId) || State == ETunaSweeperQuestState::RewardAvailable;
 }

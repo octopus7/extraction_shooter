@@ -1,6 +1,8 @@
 [
   {
     "quest_id": "quest_first_outing",
+    "provider_id": "provider.instructor",
+    "sort_order": 10,
     "title": "\uccab \uc678\ucd9c",
     "description": "\uc774\uc81c \ub4e4\uc5b4\uc654\uc73c\ub2c8 \ub098\uac00\uc11c \ud55c\ubc88 \uc0b0\ucc45\ud558\uace0 \ub4e4\uc5b4\uc640",
     "auto_track_on_accept": true,
@@ -21,6 +23,11 @@
   },
   {
     "quest_id": "quest_lumberjack_first_kill",
+    "provider_id": "provider.instructor",
+    "sort_order": 20,
+    "required_completed_quest_ids": [
+      "quest_first_outing"
+    ],
     "title": "\ubc8c\ubaa9\uae30 \uc81c\uac70",
     "description": "\ub808\uc774\ub4dc \uad6c\uc5ed\uc5d0\uc11c \ubc8c\ubaa9\uae30\ub97c \ucc98\uce58\ud558\uace0 \uc0dd\ud658\ud574",
     "auto_track_on_accept": true,

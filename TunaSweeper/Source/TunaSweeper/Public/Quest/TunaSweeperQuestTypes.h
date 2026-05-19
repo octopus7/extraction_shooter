@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Inventory/TunaSweeperInventoryTypes.h"
+#include "Subsystem/TunaSweeperItemDataSubsystem.h"
 #include "TunaSweeperQuestTypes.generated.h"
 
 UENUM(BlueprintType)
@@ -79,6 +79,12 @@ struct TUNASWEEPER_API FTunaSweeperQuestDefinition
 	FName QuestId = NAME_None;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
+	FName ProviderId = NAME_None;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
+	int32 SortOrder = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
 	FText Title;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
@@ -86,6 +92,9 @@ struct TUNASWEEPER_API FTunaSweeperQuestDefinition
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
 	bool bAutoTrackOnAccept = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
+	TArray<FName> RequiredCompletedQuestIds;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
 	TArray<FTunaSweeperObjectiveDefinition> Objectives;

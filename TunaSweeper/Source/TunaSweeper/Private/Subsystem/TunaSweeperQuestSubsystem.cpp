@@ -14,6 +14,11 @@ namespace TunaSweeperQuestIds
 	const FName FirstOuting(TEXT("quest_first_outing"));
 }
 
+namespace TunaSweeperQuestProviders
+{
+	const FName Instructor(TEXT("provider.instructor"));
+}
+
 namespace TunaSweeperQuestData
 {
 	const TCHAR* QuestDefinitionsJsonRelativePath = TEXT("Data/QuestDefinitions.json");
@@ -24,6 +29,29 @@ namespace TunaSweeperQuestData
 		return JsonObject.IsValid() && JsonObject->TryGetStringField(FieldName, Value) && !Value.TrimStartAndEnd().IsEmpty()
 			? FName(*Value.TrimStartAndEnd())
 			: NAME_None;
+	}
+
+	void ReadNameArrayField(const TSharedPtr<FJsonObject>& JsonObject, const TCHAR* FieldName, TArray<FName>& OutNames)
+	{
+		OutNames.Reset();
+		const TArray<TSharedPtr<FJsonValue>>* Values = nullptr;
+		if (!JsonObject.IsValid() || !JsonObject->TryGetArrayField(FieldName, Values) || !Values)
+		{
+			return;
+		}
+
+		for (const TSharedPtr<FJsonValue>& Value : *Values)
+		{
+			FString RawName;
+			if (Value.IsValid() && Value->TryGetString(RawName))
+			{
+				const FString TrimmedName = RawName.TrimStartAndEnd();
+				if (!TrimmedName.IsEmpty())
+				{
+					OutNames.AddUnique(FName(*TrimmedName));
+				}
+			}
+		}
 	}
 
 	FText ReadTextField(const TSharedPtr<FJsonObject>& JsonObject, const TCHAR* FieldName)
@@ -62,6 +90,21 @@ namespace TunaSweeperQuestData
 		}
 
 		return false;
+	}
+
+	int32 GetQuestProviderStateRank(ETunaSweeperQuestState State)
+	{
+		switch (State)
+		{
+		case ETunaSweeperQuestState::RewardAvailable:
+			return 0;
+		case ETunaSweeperQuestState::Accepted:
+			return 1;
+		case ETunaSweeperQuestState::Available:
+			return 2;
+		default:
+			return 3;
+		}
 	}
 
 	FName NormalizeTypeName(const FString& RawTypeName)
@@ -143,6 +186,11 @@ FName UTunaSweeperQuestSubsystem::GetFirstOutingQuestId()
 	return TunaSweeperQuestIds::FirstOuting;
 }
 
+FName UTunaSweeperQuestSubsystem::GetInstructorProviderId()
+{
+	return TunaSweeperQuestProviders::Instructor;
+}
+
 bool UTunaSweeperQuestSubsystem::LoadQuestData(bool bForceReload)
 {
 	if (bQuestDataLoaded && !bForceReload)
@@ -191,7 +239,16 @@ ETunaSweeperQuestState UTunaSweeperQuestSubsystem::GetQuestState(FName QuestId) 
 
 bool UTunaSweeperQuestSubsystem::CanAcceptQuest(FName QuestId) const
 {
-	return FindQuestDefinition(QuestId) && GetQuestState(QuestId) == ETunaSweeperQuestState::Available;
+	const FTunaSweeperQuestDefinition* Definition = FindQuestDefinition(QuestId);
+	return Definition &&
+		GetQuestState(QuestId) == ETunaSweeperQuestState::Available &&
+		AreDefinitionPrerequisitesMet(*Definition);
+}
+
+bool UTunaSweeperQuestSubsystem::AreQuestPrerequisitesMet(FName QuestId) const
+{
+	const FTunaSweeperQuestDefinition* Definition = FindQuestDefinition(QuestId);
+	return Definition && AreDefinitionPrerequisitesMet(*Definition);
 }
 
 bool UTunaSweeperQuestSubsystem::AcceptQuest(FName QuestId)
@@ -311,6 +368,71 @@ bool UTunaSweeperQuestSubsystem::GetQuestObjectiveProgress(
 	}
 
 	return true;
+}
+
+bool UTunaSweeperQuestSubsystem::TryResolveQuestForProvider(
+	FName ProviderId,
+	FName FallbackQuestId,
+	FName& OutQuestId) const
+{
+	OutQuestId = NAME_None;
+	if (!EnsureQuestDataLoaded())
+	{
+		return false;
+	}
+
+	EnsureSaveStateLoaded();
+
+	TArray<const FTunaSweeperQuestDefinition*> Candidates;
+	for (const TPair<FName, FTunaSweeperQuestDefinition>& QuestPair : QuestDefinitions)
+	{
+		const FTunaSweeperQuestDefinition& Definition = QuestPair.Value;
+		const ETunaSweeperQuestState State = GetQuestState(Definition.QuestId);
+		if (!IsQuestForProvider(Definition, ProviderId) ||
+			State == ETunaSweeperQuestState::RewardCompleted ||
+			(State == ETunaSweeperQuestState::Available && !AreDefinitionPrerequisitesMet(Definition)))
+		{
+			continue;
+		}
+
+		Candidates.Add(&Definition);
+	}
+
+	Candidates.Sort([this](
+		const FTunaSweeperQuestDefinition& Left,
+		const FTunaSweeperQuestDefinition& Right)
+	{
+		const ETunaSweeperQuestState LeftState = GetQuestState(Left.QuestId);
+		const ETunaSweeperQuestState RightState = GetQuestState(Right.QuestId);
+		const int32 LeftRank = TunaSweeperQuestData::GetQuestProviderStateRank(LeftState);
+		const int32 RightRank = TunaSweeperQuestData::GetQuestProviderStateRank(RightState);
+		if (LeftRank != RightRank)
+		{
+			return LeftRank < RightRank;
+		}
+
+		if (Left.SortOrder != Right.SortOrder)
+		{
+			return Left.SortOrder < Right.SortOrder;
+		}
+
+		return Left.QuestId.LexicalLess(Right.QuestId);
+	});
+
+	if (Candidates.Num() > 0)
+	{
+		OutQuestId = Candidates[0]->QuestId;
+		return true;
+	}
+
+	const FTunaSweeperQuestDefinition* FallbackDefinition = FindQuestDefinition(FallbackQuestId);
+	if (FallbackDefinition && GetQuestState(FallbackQuestId) != ETunaSweeperQuestState::RewardCompleted)
+	{
+		OutQuestId = FallbackQuestId;
+		return true;
+	}
+
+	return false;
 }
 
 void UTunaSweeperQuestSubsystem::NotifyLevelTravelRequested(FName SourceLevelName, FName TargetLevelName)
@@ -473,6 +595,14 @@ bool UTunaSweeperQuestSubsystem::LoadQuestDefinitionsJson()
 
 		Definition.Title = TunaSweeperQuestData::ReadTextField(QuestObject, TEXT("title"));
 		Definition.Description = TunaSweeperQuestData::ReadTextField(QuestObject, TEXT("description"));
+		Definition.ProviderId = TunaSweeperQuestData::ReadNameField(QuestObject, TEXT("provider_id"));
+		double SortOrder = 0.0;
+		QuestObject->TryGetNumberField(TEXT("sort_order"), SortOrder);
+		Definition.SortOrder = FMath::RoundToInt(SortOrder);
+		TunaSweeperQuestData::ReadNameArrayField(
+			QuestObject,
+			TEXT("required_completed_quest_ids"),
+			Definition.RequiredCompletedQuestIds);
 		QuestObject->TryGetBoolField(TEXT("auto_track_on_accept"), Definition.bAutoTrackOnAccept);
 
 		const TArray<TSharedPtr<FJsonValue>>* ObjectiveValues = nullptr;
@@ -530,6 +660,8 @@ void UTunaSweeperQuestSubsystem::RegisterFallbackQuest()
 
 	FTunaSweeperQuestDefinition FirstOuting;
 	FirstOuting.QuestId = GetFirstOutingQuestId();
+	FirstOuting.ProviderId = GetInstructorProviderId();
+	FirstOuting.SortOrder = 10;
 	FirstOuting.Title = FText::FromString(TEXT("\uCCAB \uC678\uCD9C"));
 	FirstOuting.Description = FText::FromString(TEXT("\uC774\uC81C \uB4E4\uC5B4\uC654\uC73C\uB2C8 \uB098\uAC00\uC11C \uD55C\uBC88 \uC0B0\uCC45\uD558\uACE0 \uB4E4\uC5B4\uC640"));
 	FirstOuting.Objectives.Add(FirstObjective);
@@ -680,6 +812,26 @@ void UTunaSweeperQuestSubsystem::SetQuestState(FName QuestId, ETunaSweeperQuestS
 	{
 		GetOrCreateQuestProgress(QuestId).State = NewState;
 	}
+}
+
+bool UTunaSweeperQuestSubsystem::AreDefinitionPrerequisitesMet(const FTunaSweeperQuestDefinition& Definition) const
+{
+	for (const FName RequiredQuestId : Definition.RequiredCompletedQuestIds)
+	{
+		if (!RequiredQuestId.IsNone() && GetQuestState(RequiredQuestId) != ETunaSweeperQuestState::RewardCompleted)
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool UTunaSweeperQuestSubsystem::IsQuestForProvider(
+	const FTunaSweeperQuestDefinition& Definition,
+	FName ProviderId) const
+{
+	return !ProviderId.IsNone() && Definition.ProviderId == ProviderId;
 }
 
 bool UTunaSweeperQuestSubsystem::AreAllObjectivesComplete(FName QuestId) const

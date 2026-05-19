@@ -18,16 +18,26 @@ public:
 	FName GetQuestId() const { return QuestId; }
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Quest")
+	FName GetProviderId() const { return ProviderId; }
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Quest")
+	FName ResolveQuestId() const;
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Quest")
 	FText GetNpcDisplayName() const { return NpcDisplayName; }
 
 	void ConfigureQuestNpcDefaults(
 		FName InQuestId,
 		const FText& InNpcDisplayName,
-		TSoftClassPtr<UTunaSweeperInteractionMarkerWidget> InMarkerWidgetClass);
+		TSoftClassPtr<UTunaSweeperInteractionMarkerWidget> InMarkerWidgetClass,
+		FName InProviderId = NAME_None);
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Quest")
 	FName QuestId;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Quest")
+	FName ProviderId;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NPC")
 	FText NpcDisplayName;

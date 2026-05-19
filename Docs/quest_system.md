@@ -13,6 +13,9 @@
 기본 필드:
 
 - `quest_id`: 저장과 이벤트 매칭에 쓰는 안정적인 퀘스트 ID.
+- `provider_id`: 퀘스트를 제공하는 NPC/소스 ID. 현재 교관은 `provider.instructor`를 쓴다.
+- `sort_order`: 같은 제공자 안에서 새 퀘스트 후보를 고를 때 쓰는 낮은 값 우선 순서.
+- `required_completed_quest_ids`: 수락 가능해지기 전에 보상 수령까지 끝나야 하는 선행 퀘스트 ID 목록.
 - `title`, `description`: 퀘스트 UI와 HUD 추적에 표시할 텍스트.
 - `auto_track_on_accept`: 수락 시 HUD 추적 대상으로 자동 설정할지 여부.
 - `objectives`: 목표 목록.
@@ -23,22 +26,27 @@
 | 항목 | 값 |
 | --- | --- |
 | QuestId | `quest_first_outing` |
+| ProviderId | `provider.instructor` |
 | 제목 | `첫 외출` |
 | 목표 | `leave_bunker` |
 | 목표 타입 | `level_travel` |
 | 달성 조건 | `BunkerMap -> RaidMap` |
 | 보상 | 코인 100 |
 
-적 처치 목표 검증용 퀘스트:
+교관 후속 적 처치 퀘스트:
 
 | 항목 | 값 |
 | --- | --- |
 | QuestId | `quest_lumberjack_first_kill` |
+| ProviderId | `provider.instructor` |
+| 선행 조건 | `quest_first_outing` 보상 완료 |
 | 제목 | `벌목기 제거` |
 | 목표 | `kill_lumberjack` |
 | 목표 타입 | `enemy_killed` |
 | 달성 조건 | `enemy.lumberjack` ID를 가진 적 처치 |
 | 보상 | 코인 150 |
+
+교관 NPC는 고정된 퀘스트 하나만 열지 않고 `provider.instructor`에 연결된 퀘스트 중 현재 플레이어 상태에 맞는 항목을 선택한다. 보상 수령 가능 퀘스트가 가장 우선이고, 진행 중 퀘스트, 선행 조건을 만족한 신규 퀘스트 순서로 선택한다.
 
 ## 런타임 상태
 

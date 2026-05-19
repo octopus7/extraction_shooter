@@ -18,6 +18,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Quest")
 	static FName GetFirstOutingQuestId();
 
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Quest")
+	static FName GetInstructorProviderId();
+
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Quest")
 	bool LoadQuestData(bool bForceReload = false);
 
@@ -31,6 +34,9 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Quest")
 	ETunaSweeperQuestState GetQuestState(FName QuestId) const;
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Quest")
+	bool AreQuestPrerequisitesMet(FName QuestId) const;
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Quest")
 	bool CanAcceptQuest(FName QuestId) const;
@@ -55,6 +61,9 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Quest")
 	bool GetQuestObjectiveProgress(FName QuestId, TArray<FTunaSweeperObjectiveProgressView>& OutProgress) const;
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Quest")
+	bool TryResolveQuestForProvider(FName ProviderId, FName FallbackQuestId, FName& OutQuestId) const;
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Quest")
 	void NotifyLevelTravelRequested(FName SourceLevelName, FName TargetLevelName);
@@ -95,6 +104,8 @@ private:
 	bool AdvanceObjectiveProgress(FName QuestId, FName ObjectiveId, int32 Amount);
 	void AdvanceMatchingObjectives(TFunctionRef<bool(const FTunaSweeperObjectiveDefinition&)> Predicate, int32 Amount);
 	void SetQuestState(FName QuestId, ETunaSweeperQuestState NewState);
+	bool AreDefinitionPrerequisitesMet(const FTunaSweeperQuestDefinition& Definition) const;
+	bool IsQuestForProvider(const FTunaSweeperQuestDefinition& Definition, FName ProviderId) const;
 	bool AreAllObjectivesComplete(FName QuestId) const;
 	int32 GetObjectiveProgressCount(FName QuestId, FName ObjectiveId) const;
 	FTunaSweeperQuestProgressSaveData& GetOrCreateQuestProgress(FName QuestId);

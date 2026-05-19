@@ -5763,7 +5763,8 @@ namespace TunaSweeperEditorSetup
 			UTunaSweeperQuestSubsystem::GetFirstOutingQuestId(),
 			FText::FromString(TEXT("\uAD50\uAD00")),
 			TSoftClassPtr<UTunaSweeperInteractionMarkerWidget>(
-				FSoftObjectPath(GetAssetClassPath(UIAssetPath, InteractionMarkerAssetName))));
+				FSoftObjectPath(GetAssetClassPath(UIAssetPath, InteractionMarkerAssetName))),
+			UTunaSweeperQuestSubsystem::GetInstructorProviderId());
 		FBlueprintEditorUtils::MarkBlueprintAsModified(QuestNpcBlueprint);
 		FKismetEditorUtilities::CompileBlueprint(QuestNpcBlueprint);
 		QuestNpcBlueprint->MarkPackageDirty();
@@ -5784,7 +5785,8 @@ namespace TunaSweeperEditorSetup
 			UTunaSweeperQuestSubsystem::GetFirstOutingQuestId(),
 			FText::FromString(TEXT("\uAD50\uAD00")),
 			TSoftClassPtr<UTunaSweeperInteractionMarkerWidget>(
-				FSoftObjectPath(GetAssetClassPath(UIAssetPath, InteractionMarkerAssetName))));
+				FSoftObjectPath(GetAssetClassPath(UIAssetPath, InteractionMarkerAssetName))),
+			UTunaSweeperQuestSubsystem::GetInstructorProviderId());
 		QuestNpcActor->MarkPackageDirty();
 		return true;
 	}
