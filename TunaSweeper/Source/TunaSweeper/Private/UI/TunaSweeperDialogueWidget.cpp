@@ -5,7 +5,10 @@
 #include "Components/CanvasPanel.h"
 #include "Components/CanvasPanelSlot.h"
 #include "Components/TextBlock.h"
+#include "Fonts/FontMeasure.h"
+#include "Framework/Application/SlateApplication.h"
 #include "InputCoreTypes.h"
+#include "Rendering/SlateRenderer.h"
 #include "Styling/SlateBrush.h"
 
 namespace TunaSweeperDialogueWidget
@@ -48,6 +51,140 @@ namespace
 		FSlateFontInfo FontInfo = TextBlock ? TextBlock->GetFont() : FSlateFontInfo();
 		FontInfo.Size = Size;
 		return FontInfo;
+	}
+
+	float EstimateTextWidth(const FString& Text, float FontSize)
+	{
+		float Width = 0.0f;
+		for (const TCHAR Character : Text)
+		{
+			if (FChar::IsWhitespace(Character))
+			{
+				Width += FontSize * 0.36f;
+			}
+			else if (Character < 0x80)
+			{
+				Width += FontSize * 0.54f;
+			}
+			else
+			{
+				Width += FontSize * 0.94f;
+			}
+		}
+
+		return Width;
+	}
+
+	float MeasureDialogueTextWidth(const FString& Text, const FSlateFontInfo& FontInfo)
+	{
+		if (Text.IsEmpty())
+		{
+			return 0.0f;
+		}
+
+		if (FSlateApplication::IsInitialized())
+		{
+			if (FSlateRenderer* Renderer = FSlateApplication::Get().GetRenderer())
+			{
+				return Renderer->GetFontMeasureService()->Measure(Text, FontInfo).X;
+			}
+		}
+
+		return EstimateTextWidth(Text, static_cast<float>(FontInfo.Size));
+	}
+
+	int32 FindLastWhitespaceIndex(const FString& Text)
+	{
+		for (int32 Index = Text.Len() - 1; Index >= 0; --Index)
+		{
+			if (FChar::IsWhitespace(Text[Index]))
+			{
+				return Index;
+			}
+		}
+
+		return INDEX_NONE;
+	}
+
+	void AppendWrappedLine(FString& WrappedText, const FString& Line)
+	{
+		if (!WrappedText.IsEmpty())
+		{
+			WrappedText.AppendChar(TEXT('\n'));
+		}
+
+		WrappedText += Line.TrimEnd();
+	}
+
+	FString PreWrapDialogueText(const FString& SourceText, const FSlateFontInfo& FontInfo, float WrapWidth)
+	{
+		if (SourceText.IsEmpty() || WrapWidth <= 0.0f)
+		{
+			return SourceText;
+		}
+
+		FString WrappedText;
+		FString CurrentLine;
+		int32 LastWhitespaceIndex = INDEX_NONE;
+
+		for (int32 SourceIndex = 0; SourceIndex < SourceText.Len(); ++SourceIndex)
+		{
+			const TCHAR Character = SourceText[SourceIndex];
+			if (Character == TEXT('\r'))
+			{
+				continue;
+			}
+
+			if (Character == TEXT('\n'))
+			{
+				AppendWrappedLine(WrappedText, CurrentLine);
+				CurrentLine.Reset();
+				LastWhitespaceIndex = INDEX_NONE;
+				continue;
+			}
+
+			if (FChar::IsWhitespace(Character) && CurrentLine.IsEmpty())
+			{
+				continue;
+			}
+
+			FString CandidateLine = CurrentLine;
+			CandidateLine.AppendChar(Character);
+			if (CurrentLine.IsEmpty() || MeasureDialogueTextWidth(CandidateLine, FontInfo) <= WrapWidth)
+			{
+				CurrentLine = MoveTemp(CandidateLine);
+				if (FChar::IsWhitespace(Character))
+				{
+					LastWhitespaceIndex = CurrentLine.Len() - 1;
+				}
+				continue;
+			}
+
+			if (FChar::IsWhitespace(Character))
+			{
+				AppendWrappedLine(WrappedText, CurrentLine);
+				CurrentLine.Reset();
+				LastWhitespaceIndex = INDEX_NONE;
+				continue;
+			}
+
+			if (LastWhitespaceIndex != INDEX_NONE)
+			{
+				AppendWrappedLine(WrappedText, CurrentLine.Left(LastWhitespaceIndex));
+				CurrentLine = CurrentLine.Mid(LastWhitespaceIndex + 1).TrimStart();
+				LastWhitespaceIndex = FindLastWhitespaceIndex(CurrentLine);
+				--SourceIndex;
+				continue;
+			}
+
+			AppendWrappedLine(WrappedText, CurrentLine);
+			CurrentLine.Reset();
+			LastWhitespaceIndex = INDEX_NONE;
+			--SourceIndex;
+		}
+
+		AppendWrappedLine(WrappedText, CurrentLine);
+		return WrappedText;
 	}
 }
 
@@ -274,11 +411,8 @@ void UTunaSweeperDialogueWidget::BuildDialogueWidget()
 	DialogueBodyText->SetColorAndOpacity(FSlateColor(FLinearColor(0.96f, 0.98f, 1.0f, 0.98f)));
 	DialogueBodyText->SetShadowOffset(FVector2D::ZeroVector);
 	DialogueBodyText->SetShadowColorAndOpacity(FLinearColor::Transparent);
-	DialogueBodyText->SetAutoWrapText(true);
-	DialogueBodyText->SetWrapTextAt(
-		TunaSweeperDialogueWidget::PanelWidth -
-		TunaSweeperDialogueWidget::PanelHorizontalPadding * 2.0f -
-		120.0f);
+	DialogueBodyText->SetAutoWrapText(false);
+	DialogueBodyText->SetWrapTextAt(0.0f);
 	DialogueBodyText->SetJustification(ETextJustify::Left);
 	DialogueBodyText->SetVisibility(ESlateVisibility::HitTestInvisible);
 	if (UCanvasPanelSlot* BodySlot = RootCanvas->AddChildToCanvas(DialogueBodyText))
@@ -338,7 +472,12 @@ void UTunaSweeperDialogueWidget::BeginCurrentLine()
 	}
 
 	const FTunaSweeperDialogueLine& CurrentLine = DialogueLines[CurrentLineIndex];
-	CurrentFullText = CurrentLine.DialogueText.ToString();
+	CurrentFullText = PreWrapDialogueText(
+		CurrentLine.DialogueText.ToString(),
+		DialogueBodyText ? DialogueBodyText->GetFont() : FSlateFontInfo(),
+		TunaSweeperDialogueWidget::PanelWidth -
+		TunaSweeperDialogueWidget::PanelHorizontalPadding * 2.0f -
+		120.0f);
 	TypewriterAccumulator = 0.0f;
 	VisibleCharacterCount = 0;
 
