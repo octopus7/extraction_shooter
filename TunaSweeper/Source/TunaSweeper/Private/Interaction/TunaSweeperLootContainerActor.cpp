@@ -7,6 +7,7 @@
 #include "Engine/World.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "Interaction/TunaSweeperInteractableComponent.h"
+#include "Materials/MaterialInterface.h"
 #include "UObject/ConstructorHelpers.h"
 
 ATunaSweeperLootContainerActor::ATunaSweeperLootContainerActor()
@@ -172,6 +173,15 @@ void ATunaSweeperLootContainerActor::RefreshContainerPresentation()
 	{
 		VisualMesh->SetStaticMesh(LoadedMesh);
 	}
+
+	if (!Definition.MaterialPath.IsEmpty())
+	{
+		if (UMaterialInterface* LoadedMaterial = Cast<UMaterialInterface>(FSoftObjectPath(Definition.MaterialPath).TryLoad()))
+		{
+			VisualMesh->SetMaterial(0, LoadedMaterial);
+		}
+	}
+
 	VisualMesh->SetRelativeScale3D(Definition.MeshScale);
 }
 

@@ -7,6 +7,7 @@
 class UStaticMeshComponent;
 class UMaterialInterface;
 class ATunaSweeperProjectile;
+class ATunaSweeperLootContainerActor;
 
 UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API ATunaSweeperEnemyCharacter : public ACharacter
@@ -16,8 +17,20 @@ class TUNASWEEPER_API ATunaSweeperEnemyCharacter : public ACharacter
 public:
 	ATunaSweeperEnemyCharacter();
 
+	virtual float TakeDamage(
+		float DamageAmount,
+		struct FDamageEvent const& DamageEvent,
+		AController* EventInstigator,
+		AActor* DamageCauser) override;
+
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Combat")
 	bool FireProjectileAt(AActor* TargetActor);
+
+	void ConfigureSpawnData(
+		const TSoftObjectPtr<UMaterialInterface>& InBodyMaterial,
+		int32 InDropContainerDefinitionId,
+		int32 InDropContentsId,
+		float InMaxHealth);
 
 protected:
 	virtual void BeginPlay() override;
@@ -37,6 +50,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat", meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float ProjectileDamage = 10.0f;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat", meta = (ClampMin = "1.0", UIMin = "1.0"))
+	float MaxHealth = 30.0f;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement", meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float MovementSpeed = 260.0f;
 
@@ -49,6 +65,21 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Visual")
 	TSoftObjectPtr<UMaterialInterface> ForwardMarkerMaterial;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Loot")
+	TSoftClassPtr<ATunaSweeperLootContainerActor> LootContainerClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Loot")
+	int32 DropContainerDefinitionId = INDEX_NONE;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Loot")
+	int32 DropContentsId = INDEX_NONE;
+
 private:
 	void ApplyVisualMaterials();
+	void HandleDeath(AActor* DamageCauser);
+	bool SpawnDeathLootContainer(AActor* DamageCauser);
+	FVector ResolveLootDropLocation(AActor* IgnoredActor) const;
+
+	float CurrentHealth = 30.0f;
+	bool bIsDead = false;
 };

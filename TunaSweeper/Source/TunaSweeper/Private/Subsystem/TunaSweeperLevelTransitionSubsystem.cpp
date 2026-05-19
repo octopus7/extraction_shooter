@@ -183,7 +183,7 @@ void UTunaSweeperLevelTransitionSubsystem::HandlePostLoadMapWithWorld(UWorld* Lo
 	{
 		if (UTunaSweeperEnemySpawnSubsystem* EnemySpawnSubsystem = GameInstance->GetSubsystem<UTunaSweeperEnemySpawnSubsystem>())
 		{
-			EnemySpawnSubsystem->EnsureEnemiesSpawnedForWorld(LoadedWorld);
+			EnemySpawnSubsystem->EnsureRaidRuntimeActorsSpawnedForWorld(LoadedWorld);
 		}
 	}
 

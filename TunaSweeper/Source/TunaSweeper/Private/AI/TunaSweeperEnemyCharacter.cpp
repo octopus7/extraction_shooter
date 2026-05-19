@@ -4,6 +4,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Interaction/TunaSweeperLootContainerActor.h"
 #include "Materials/MaterialInterface.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "UObject/ConstructorHelpers.h"
@@ -11,6 +12,11 @@
 
 namespace
 {
+	constexpr float LootDropGroundTraceUp = 500.0f;
+	constexpr float LootDropGroundTraceDown = 900.0f;
+	constexpr float LootContainerRootHeight = 40.0f;
+	constexpr float MinLootDropGroundNormalZ = 0.72f;
+
 	float GetRandomizedEnemyValue(float BaseValue, const FVector2D& OffsetRange, float MinValue)
 	{
 		const float MinOffset = FMath::Min(OffsetRange.X, OffsetRange.Y);
@@ -63,20 +69,67 @@ ATunaSweeperEnemyCharacter::ATunaSweeperEnemyCharacter()
 		FSoftObjectPath(TEXT("/Game/Characters/Enemy/M_Enemy_Red.M_Enemy_Red")));
 	ForwardMarkerMaterial = TSoftObjectPtr<UMaterialInterface>(
 		FSoftObjectPath(TEXT("/Game/Characters/Enemy/M_Enemy_Sightline.M_Enemy_Sightline")));
+	LootContainerClass = TSoftClassPtr<ATunaSweeperLootContainerActor>(
+		FSoftObjectPath(TEXT("/Game/Interaction/BP_LootContainer.BP_LootContainer_C")));
 }
 
 void ATunaSweeperEnemyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	MaxHealth = FMath::Max(1.0f, MaxHealth);
+	CurrentHealth = MaxHealth;
 	GetCharacterMovement()->MaxWalkSpeed = GetRandomizedEnemyValue(MovementSpeed, MovementSpeedRandomOffset, 0.0f);
+	ApplyVisualMaterials();
+}
+
+float ATunaSweeperEnemyCharacter::TakeDamage(
+	float DamageAmount,
+	FDamageEvent const& DamageEvent,
+	AController* EventInstigator,
+	AActor* DamageCauser)
+{
+	if (bIsDead || DamageAmount <= 0.0f)
+	{
+		return 0.0f;
+	}
+
+	const float AppliedDamage = FMath::Min(CurrentHealth, DamageAmount);
+	CurrentHealth = FMath::Max(0.0f, CurrentHealth - DamageAmount);
+	if (CurrentHealth <= 0.0f)
+	{
+		HandleDeath(DamageCauser);
+	}
+
+	return AppliedDamage;
+}
+
+void ATunaSweeperEnemyCharacter::ConfigureSpawnData(
+	const TSoftObjectPtr<UMaterialInterface>& InBodyMaterial,
+	int32 InDropContainerDefinitionId,
+	int32 InDropContentsId,
+	float InMaxHealth)
+{
+	if (!InBodyMaterial.IsNull())
+	{
+		BodyMaterial = InBodyMaterial;
+	}
+
+	if (InMaxHealth > 0.0f)
+	{
+		MaxHealth = InMaxHealth;
+		CurrentHealth = MaxHealth;
+	}
+
+	DropContainerDefinitionId = InDropContainerDefinitionId;
+	DropContentsId = InDropContentsId;
 	ApplyVisualMaterials();
 }
 
 bool ATunaSweeperEnemyCharacter::FireProjectileAt(AActor* TargetActor)
 {
 	UWorld* World = GetWorld();
-	if (!World || !TargetActor)
+	if (!World || !TargetActor || bIsDead)
 	{
 		return false;
 	}
@@ -118,6 +171,97 @@ bool ATunaSweeperEnemyCharacter::FireProjectileAt(AActor* TargetActor)
 
 	SpawnedProjectile->SetDamageAmount(ProjectileDamage);
 	return true;
+}
+
+void ATunaSweeperEnemyCharacter::HandleDeath(AActor* DamageCauser)
+{
+	if (bIsDead)
+	{
+		return;
+	}
+
+	bIsDead = true;
+	CurrentHealth = 0.0f;
+
+	if (UCharacterMovementComponent* MovementComponent = GetCharacterMovement())
+	{
+		MovementComponent->StopMovementImmediately();
+		MovementComponent->DisableMovement();
+	}
+
+	if (UCapsuleComponent* Capsule = GetCapsuleComponent())
+	{
+		Capsule->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+
+	SetActorEnableCollision(false);
+	DetachFromControllerPendingDestroy();
+	SpawnDeathLootContainer(DamageCauser);
+	Destroy();
+}
+
+bool ATunaSweeperEnemyCharacter::SpawnDeathLootContainer(AActor* DamageCauser)
+{
+	if (DropContainerDefinitionId == INDEX_NONE || DropContentsId == INDEX_NONE)
+	{
+		return false;
+	}
+
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		return false;
+	}
+
+	TSubclassOf<ATunaSweeperLootContainerActor> LoadedLootContainerClass = LootContainerClass.LoadSynchronous();
+	if (!LoadedLootContainerClass)
+	{
+		LoadedLootContainerClass = ATunaSweeperLootContainerActor::StaticClass();
+	}
+
+	FActorSpawnParameters SpawnParameters;
+	SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+	ATunaSweeperLootContainerActor* SpawnedContainer = World->SpawnActor<ATunaSweeperLootContainerActor>(
+		LoadedLootContainerClass,
+		ResolveLootDropLocation(DamageCauser),
+		FRotator::ZeroRotator,
+		SpawnParameters);
+	if (!SpawnedContainer)
+	{
+		return false;
+	}
+
+	SpawnedContainer->SetContainerDataIds(DropContainerDefinitionId, DropContentsId);
+	return true;
+}
+
+FVector ATunaSweeperEnemyCharacter::ResolveLootDropLocation(AActor* IgnoredActor) const
+{
+	UWorld* World = GetWorld();
+	const FVector ActorLocation = GetActorLocation();
+	if (!World)
+	{
+		return ActorLocation;
+	}
+
+	const FVector TraceStart = ActorLocation + FVector(0.0f, 0.0f, LootDropGroundTraceUp);
+	const FVector TraceEnd = ActorLocation - FVector(0.0f, 0.0f, LootDropGroundTraceDown);
+	FCollisionQueryParams QueryParams(SCENE_QUERY_STAT(TunaSweeperEnemyLootDropGroundTrace), false, this);
+	if (IgnoredActor)
+	{
+		QueryParams.AddIgnoredActor(IgnoredActor);
+	}
+
+	FHitResult GroundHit;
+	if (World->LineTraceSingleByChannel(GroundHit, TraceStart, TraceEnd, ECC_Visibility, QueryParams) &&
+		GroundHit.bBlockingHit &&
+		GroundHit.ImpactNormal.Z >= MinLootDropGroundNormalZ)
+	{
+		return GroundHit.ImpactPoint + FVector(0.0f, 0.0f, LootContainerRootHeight);
+	}
+
+	return ActorLocation;
 }
 
 void ATunaSweeperEnemyCharacter::ApplyVisualMaterials()

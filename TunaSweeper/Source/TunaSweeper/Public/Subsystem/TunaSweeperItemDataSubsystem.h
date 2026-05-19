@@ -120,6 +120,9 @@ struct TUNASWEEPER_API FTunaSweeperLootContainerDefinition
 	FString StaticMeshPath;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Loot Container")
+	FString MaterialPath;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Loot Container")
 	FVector MeshScale = FVector::OneVector;
 };
 

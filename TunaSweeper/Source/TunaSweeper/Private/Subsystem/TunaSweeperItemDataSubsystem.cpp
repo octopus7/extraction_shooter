@@ -583,6 +583,7 @@ bool UTunaSweeperItemDataSubsystem::LoadLootContainerTableJson()
 		double NumericCapacity = 0.0;
 		FString NameStringKey;
 		FString StaticMeshPath;
+		FString MaterialPath;
 		if (!(*JsonObject)->TryGetNumberField(TEXT("id"), NumericId) ||
 			!(*JsonObject)->TryGetStringField(TEXT("name_string_key"), NameStringKey) ||
 			!(*JsonObject)->TryGetNumberField(TEXT("capacity"), NumericCapacity) ||
@@ -597,6 +598,10 @@ bool UTunaSweeperItemDataSubsystem::LoadLootContainerTableJson()
 		Definition.NameStringKey = FName(*NameStringKey.TrimStartAndEnd());
 		Definition.Capacity = static_cast<int32>(NumericCapacity);
 		Definition.StaticMeshPath = StaticMeshPath.TrimStartAndEnd();
+		if ((*JsonObject)->TryGetStringField(TEXT("material_path"), MaterialPath))
+		{
+			Definition.MaterialPath = MaterialPath.TrimStartAndEnd();
+		}
 
 		const TArray<TSharedPtr<FJsonValue>>* MeshScaleArray = nullptr;
 		if ((*JsonObject)->TryGetArrayField(TEXT("mesh_scale"), MeshScaleArray) && MeshScaleArray && MeshScaleArray->Num() >= 3)

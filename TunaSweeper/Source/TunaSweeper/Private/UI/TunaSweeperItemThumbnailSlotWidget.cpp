@@ -88,16 +88,36 @@ FReply UTunaSweeperItemThumbnailSlotWidget::NativeOnMouseButtonDown(
 {
 	if (!CachedTileData.bIsEmpty)
 	{
+		bSuppressNextMouseButtonUpSelection = false;
+		return UWidgetBlueprintLibrary::DetectDragIfPressed(InMouseEvent, this, EKeys::LeftMouseButton).NativeReply;
+	}
+
+	return Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent);
+}
+
+FReply UTunaSweeperItemThumbnailSlotWidget::NativeOnMouseButtonUp(
+	const FGeometry& InGeometry,
+	const FPointerEvent& InMouseEvent)
+{
+	if (!CachedTileData.bIsEmpty && InMouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
+	{
+		if (bSuppressNextMouseButtonUpSelection)
+		{
+			bSuppressNextMouseButtonUpSelection = false;
+			return FReply::Handled();
+		}
+
 		if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
 			TunaGameInstance && CachedTileData.Source != ETunaSweeperItemSlotSource::SelectedWeaponAttachment)
 		{
 			TunaGameInstance->SelectItemSlot(GetCachedSlotReference());
 		}
 
-		return UWidgetBlueprintLibrary::DetectDragIfPressed(InMouseEvent, this, EKeys::LeftMouseButton).NativeReply;
+		return FReply::Handled();
 	}
 
-	return Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent);
+	bSuppressNextMouseButtonUpSelection = false;
+	return Super::NativeOnMouseButtonUp(InGeometry, InMouseEvent);
 }
 
 void UTunaSweeperItemThumbnailSlotWidget::NativeOnDragDetected(
@@ -105,6 +125,8 @@ void UTunaSweeperItemThumbnailSlotWidget::NativeOnDragDetected(
 	const FPointerEvent& InMouseEvent,
 	UDragDropOperation*& OutOperation)
 {
+	bSuppressNextMouseButtonUpSelection = true;
+
 	if (CachedTileData.bIsEmpty)
 	{
 		OutOperation = nullptr;

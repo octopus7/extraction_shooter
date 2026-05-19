@@ -22,8 +22,10 @@ public class TunaSweeperEditor : ModuleRules
 			"UMG",
 			"UMGEditor",
 			"MediaAssets",
+			"MeshDescription",
 			"Slate",
 			"SlateCore",
+			"StaticMeshDescription",
 			"TunaSweeper"
 		});
 	}

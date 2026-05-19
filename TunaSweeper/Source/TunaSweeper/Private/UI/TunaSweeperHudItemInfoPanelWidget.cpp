@@ -1,6 +1,7 @@
 #include "UI/TunaSweeperHudItemInfoPanelWidget.h"
 
 #include "Blueprint/DragDropOperation.h"
+#include "Components/Button.h"
 #include "Components/TextBlock.h"
 #include "Components/TileView.h"
 #include "Components/Widget.h"
@@ -123,11 +124,22 @@ void UTunaSweeperHudItemInfoPanelWidget::NativeConstruct()
 		TunaGameInstance->OnInventoryStateChanged.AddUObject(this, &UTunaSweeperHudItemInfoPanelWidget::RefreshSelectedItemInfo);
 	}
 
+	if (CloseButton)
+	{
+		CloseButton->OnClicked.RemoveDynamic(this, &UTunaSweeperHudItemInfoPanelWidget::HandleCloseButtonClicked);
+		CloseButton->OnClicked.AddDynamic(this, &UTunaSweeperHudItemInfoPanelWidget::HandleCloseButtonClicked);
+	}
+
 	RefreshSelectedItemInfo();
 }
 
 void UTunaSweeperHudItemInfoPanelWidget::NativeDestruct()
 {
+	if (CloseButton)
+	{
+		CloseButton->OnClicked.RemoveDynamic(this, &UTunaSweeperHudItemInfoPanelWidget::HandleCloseButtonClicked);
+	}
+
 	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
 	{
 		TunaGameInstance->OnSelectedInventoryItemChanged.RemoveAll(this);
@@ -307,4 +319,12 @@ bool UTunaSweeperHudItemInfoPanelWidget::TryResolveAttachmentDropSlotFromCursor(
 		SlotCount,
 		ScreenSpacePosition,
 		OutSlotReference);
+}
+
+void UTunaSweeperHudItemInfoPanelWidget::HandleCloseButtonClicked()
+{
+	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
+	{
+		TunaGameInstance->ClearSelectedItemSelection();
+	}
 }

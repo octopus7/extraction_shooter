@@ -3,6 +3,7 @@
 #include "AI/TunaSweeperEnemyCharacter.h"
 #include "Dom/JsonObject.h"
 #include "Engine/World.h"
+#include "Interaction/TunaSweeperLootContainerActor.h"
 #include "Misc/FileHelper.h"
 #include "Misc/PackageName.h"
 #include "Misc/Paths.h"
@@ -15,7 +16,9 @@ DEFINE_LOG_CATEGORY_STATIC(LogTunaSweeperEnemySpawn, Log, All);
 namespace TunaSweeperEnemySpawn
 {
 	const TCHAR* EnemySpawnsJsonRelativePath = TEXT("Data/EnemySpawns.json");
+	const TCHAR* LootContainerSpawnsJsonRelativePath = TEXT("Data/LootContainerSpawns.json");
 	const TCHAR* DefaultEnemyClassPath = TEXT("/Game/Characters/Enemy/BP_TunaSweeperEnemy.BP_TunaSweeperEnemy_C");
+	const TCHAR* DefaultLootContainerClassPath = TEXT("/Game/Interaction/BP_LootContainer.BP_LootContainer_C");
 
 	FString NormalizeLevelName(const FString& RawLevelName)
 	{
@@ -79,11 +82,17 @@ void UTunaSweeperEnemySpawnSubsystem::Deinitialize()
 	}
 
 	ResetLoadedEnemySpawnData();
+	ResetLoadedLootContainerSpawnData();
 	LastSpawnedWorld.Reset();
 	Super::Deinitialize();
 }
 
 bool UTunaSweeperEnemySpawnSubsystem::EnsureEnemiesSpawnedForWorld(UWorld* World)
+{
+	return EnsureRaidRuntimeActorsSpawnedForWorld(World);
+}
+
+bool UTunaSweeperEnemySpawnSubsystem::EnsureRaidRuntimeActorsSpawnedForWorld(UWorld* World)
 {
 	if (!World || !World->IsGameWorld())
 	{
@@ -95,7 +104,9 @@ bool UTunaSweeperEnemySpawnSubsystem::EnsureEnemiesSpawnedForWorld(UWorld* World
 		return true;
 	}
 
-	if (!LoadEnemySpawnData(false))
+	const bool bLoadedEnemies = LoadEnemySpawnData(false);
+	const bool bLoadedLootContainers = LoadLootContainerSpawnData(false);
+	if (!bLoadedEnemies && !bLoadedLootContainers)
 	{
 		return false;
 	}
@@ -103,43 +114,91 @@ bool UTunaSweeperEnemySpawnSubsystem::EnsureEnemiesSpawnedForWorld(UWorld* World
 	LastSpawnedWorld = World;
 
 	int32 SpawnedCount = 0;
-	for (const FEnemySpawnDefinition& SpawnDefinition : EnemySpawnDefinitions)
+	if (bLoadedEnemies)
 	{
-		if (!DoesSpawnMatchWorld(SpawnDefinition, World))
+		for (const FEnemySpawnDefinition& SpawnDefinition : EnemySpawnDefinitions)
 		{
-			continue;
+			if (!DoesLevelNameMatchWorld(SpawnDefinition.LevelName, World))
+			{
+				continue;
+			}
+
+			TSubclassOf<ATunaSweeperEnemyCharacter> LoadedEnemyClass = SpawnDefinition.EnemyClass.LoadSynchronous();
+			if (!LoadedEnemyClass)
+			{
+				UE_LOG(
+					LogTunaSweeperEnemySpawn,
+					Warning,
+					TEXT("Enemy class failed to load for level %s. Falling back to native enemy character."),
+					*SpawnDefinition.LevelName.ToString());
+				LoadedEnemyClass = ATunaSweeperEnemyCharacter::StaticClass();
+			}
+
+			FActorSpawnParameters SpawnParameters;
+			SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+			ATunaSweeperEnemyCharacter* SpawnedEnemy = World->SpawnActor<ATunaSweeperEnemyCharacter>(
+				LoadedEnemyClass,
+				SpawnDefinition.Location,
+				SpawnDefinition.Rotation,
+				SpawnParameters);
+			if (SpawnedEnemy)
+			{
+				SpawnedEnemy->ConfigureSpawnData(
+					SpawnDefinition.BodyMaterial,
+					SpawnDefinition.DropContainerDefinitionId,
+					SpawnDefinition.DropContentsId,
+					SpawnDefinition.MaxHealth);
+				++SpawnedCount;
+			}
 		}
+	}
 
-		TSubclassOf<ATunaSweeperEnemyCharacter> LoadedEnemyClass = SpawnDefinition.EnemyClass.LoadSynchronous();
-		if (!LoadedEnemyClass)
+	int32 SpawnedLootContainerCount = 0;
+	if (bLoadedLootContainers)
+	{
+		for (const FLootContainerSpawnDefinition& SpawnDefinition : LootContainerSpawnDefinitions)
 		{
-			UE_LOG(
-				LogTunaSweeperEnemySpawn,
-				Warning,
-				TEXT("Enemy class failed to load for level %s. Falling back to native enemy character."),
-				*SpawnDefinition.LevelName.ToString());
-			LoadedEnemyClass = ATunaSweeperEnemyCharacter::StaticClass();
-		}
+			if (!DoesLevelNameMatchWorld(SpawnDefinition.LevelName, World))
+			{
+				continue;
+			}
 
-		FActorSpawnParameters SpawnParameters;
-		SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+			TSubclassOf<ATunaSweeperLootContainerActor> LoadedContainerClass = SpawnDefinition.LootContainerClass.LoadSynchronous();
+			if (!LoadedContainerClass)
+			{
+				UE_LOG(
+					LogTunaSweeperEnemySpawn,
+					Warning,
+					TEXT("Loot container class failed to load for level %s. Falling back to native loot container actor."),
+					*SpawnDefinition.LevelName.ToString());
+				LoadedContainerClass = ATunaSweeperLootContainerActor::StaticClass();
+			}
 
-		ATunaSweeperEnemyCharacter* SpawnedEnemy = World->SpawnActor<ATunaSweeperEnemyCharacter>(
-			LoadedEnemyClass,
-			SpawnDefinition.Location,
-			SpawnDefinition.Rotation,
-			SpawnParameters);
-		if (SpawnedEnemy)
-		{
-			++SpawnedCount;
+			FActorSpawnParameters SpawnParameters;
+			SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+			ATunaSweeperLootContainerActor* SpawnedContainer = World->SpawnActor<ATunaSweeperLootContainerActor>(
+				LoadedContainerClass,
+				SpawnDefinition.Location,
+				SpawnDefinition.Rotation,
+				SpawnParameters);
+			if (SpawnedContainer)
+			{
+				SpawnedContainer->SetContainerDataIds(
+					SpawnDefinition.ContainerDefinitionId,
+					SpawnDefinition.ContentsId);
+				++SpawnedLootContainerCount;
+			}
 		}
 	}
 
 	UE_LOG(
 		LogTunaSweeperEnemySpawn,
 		Log,
-		TEXT("Spawned %d enemies for level %s."),
+		TEXT("Spawned %d enemies and %d loot containers for level %s."),
 		SpawnedCount,
+		SpawnedLootContainerCount,
 		*TunaSweeperEnemySpawn::NormalizeLevelName(World->GetMapName()));
 	return true;
 }
@@ -183,8 +242,12 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadEnemySpawnData(bool bForceReload)
 		const TSharedPtr<FJsonObject>& JsonObject = *JsonObjectPtr;
 		FString LevelName;
 		FString EnemyClassPath;
+		FString BodyMaterialPath;
 		FVector Location = FVector::ZeroVector;
 		FRotator Rotation = FRotator::ZeroRotator;
+		double NumericDropContainerDefinitionId = INDEX_NONE;
+		double NumericDropContentsId = INDEX_NONE;
+		double NumericMaxHealth = 30.0;
 		if (!JsonObject->TryGetStringField(TEXT("level_name"), LevelName) ||
 			!TunaSweeperEnemySpawn::TryReadVectorField(JsonObject, TEXT("location"), Location))
 		{
@@ -193,6 +256,10 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadEnemySpawnData(bool bForceReload)
 		}
 
 		JsonObject->TryGetStringField(TEXT("enemy_class"), EnemyClassPath);
+		JsonObject->TryGetStringField(TEXT("body_material"), BodyMaterialPath);
+		JsonObject->TryGetNumberField(TEXT("drop_container_definition_id"), NumericDropContainerDefinitionId);
+		JsonObject->TryGetNumberField(TEXT("drop_contents_id"), NumericDropContentsId);
+		JsonObject->TryGetNumberField(TEXT("max_health"), NumericMaxHealth);
 		TunaSweeperEnemySpawn::TryReadRotatorField(JsonObject, TEXT("rotation"), Rotation);
 
 		FEnemySpawnDefinition SpawnDefinition;
@@ -201,8 +268,17 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadEnemySpawnData(bool bForceReload)
 			FSoftObjectPath(EnemyClassPath.TrimStartAndEnd().IsEmpty()
 				? FString(TunaSweeperEnemySpawn::DefaultEnemyClassPath)
 				: EnemyClassPath.TrimStartAndEnd()));
+		const FString TrimmedBodyMaterialPath = BodyMaterialPath.TrimStartAndEnd();
+		if (!TrimmedBodyMaterialPath.IsEmpty())
+		{
+			SpawnDefinition.BodyMaterial = TSoftObjectPtr<UMaterialInterface>(
+				FSoftObjectPath(TrimmedBodyMaterialPath));
+		}
 		SpawnDefinition.Location = Location;
 		SpawnDefinition.Rotation = Rotation;
+		SpawnDefinition.DropContainerDefinitionId = static_cast<int32>(NumericDropContainerDefinitionId);
+		SpawnDefinition.DropContentsId = static_cast<int32>(NumericDropContentsId);
+		SpawnDefinition.MaxHealth = FMath::Max(1.0f, static_cast<float>(NumericMaxHealth));
 
 		if (SpawnDefinition.LevelName.IsNone())
 		{
@@ -224,9 +300,97 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadEnemySpawnData(bool bForceReload)
 	return true;
 }
 
+bool UTunaSweeperEnemySpawnSubsystem::LoadLootContainerSpawnData(bool bForceReload)
+{
+	if (bLootContainerSpawnDataLoaded && !bForceReload)
+	{
+		return true;
+	}
+
+	ResetLoadedLootContainerSpawnData();
+
+	FString JsonContent;
+	const FString LootContainerSpawnJsonPath = GetLootContainerSpawnJsonPath();
+	if (!FFileHelper::LoadFileToString(JsonContent, *LootContainerSpawnJsonPath))
+	{
+		UE_LOG(LogTunaSweeperEnemySpawn, Error, TEXT("Failed to read loot container spawn JSON: %s"), *LootContainerSpawnJsonPath);
+		return false;
+	}
+
+	TArray<TSharedPtr<FJsonValue>> JsonRows;
+	const TSharedRef<TJsonReader<>> JsonReader = TJsonReaderFactory<>::Create(JsonContent);
+	if (!FJsonSerializer::Deserialize(JsonReader, JsonRows))
+	{
+		UE_LOG(LogTunaSweeperEnemySpawn, Error, TEXT("Failed to parse loot container spawn JSON: %s"), *LootContainerSpawnJsonPath);
+		return false;
+	}
+
+	bool bHasValidRows = false;
+	for (int32 RowIndex = 0; RowIndex < JsonRows.Num(); ++RowIndex)
+	{
+		const TSharedPtr<FJsonObject>* JsonObjectPtr = nullptr;
+		if (!JsonRows[RowIndex].IsValid() || !JsonRows[RowIndex]->TryGetObject(JsonObjectPtr) ||
+			!JsonObjectPtr || !JsonObjectPtr->IsValid())
+		{
+			UE_LOG(LogTunaSweeperEnemySpawn, Warning, TEXT("Skipping loot container spawn row %d: row is not an object."), RowIndex);
+			continue;
+		}
+
+		const TSharedPtr<FJsonObject>& JsonObject = *JsonObjectPtr;
+		FString LevelName;
+		FString LootContainerClassPath;
+		FVector Location = FVector::ZeroVector;
+		FRotator Rotation = FRotator::ZeroRotator;
+		double NumericContainerDefinitionId = INDEX_NONE;
+		double NumericContentsId = INDEX_NONE;
+		if (!JsonObject->TryGetStringField(TEXT("level_name"), LevelName) ||
+			!TunaSweeperEnemySpawn::TryReadVectorField(JsonObject, TEXT("location"), Location) ||
+			!JsonObject->TryGetNumberField(TEXT("container_definition_id"), NumericContainerDefinitionId) ||
+			!JsonObject->TryGetNumberField(TEXT("contents_id"), NumericContentsId))
+		{
+			UE_LOG(LogTunaSweeperEnemySpawn, Warning, TEXT("Skipping loot container spawn row %d: required field is missing."), RowIndex);
+			continue;
+		}
+
+		JsonObject->TryGetStringField(TEXT("loot_container_class"), LootContainerClassPath);
+		TunaSweeperEnemySpawn::TryReadRotatorField(JsonObject, TEXT("rotation"), Rotation);
+
+		FLootContainerSpawnDefinition SpawnDefinition;
+		SpawnDefinition.LevelName = FName(*LevelName.TrimStartAndEnd());
+		SpawnDefinition.LootContainerClass = TSoftClassPtr<ATunaSweeperLootContainerActor>(
+			FSoftObjectPath(LootContainerClassPath.TrimStartAndEnd().IsEmpty()
+				? FString(TunaSweeperEnemySpawn::DefaultLootContainerClassPath)
+				: LootContainerClassPath.TrimStartAndEnd()));
+		SpawnDefinition.Location = Location;
+		SpawnDefinition.Rotation = Rotation;
+		SpawnDefinition.ContainerDefinitionId = static_cast<int32>(NumericContainerDefinitionId);
+		SpawnDefinition.ContentsId = static_cast<int32>(NumericContentsId);
+
+		if (SpawnDefinition.LevelName.IsNone() ||
+			SpawnDefinition.ContainerDefinitionId == INDEX_NONE ||
+			SpawnDefinition.ContentsId == INDEX_NONE)
+		{
+			UE_LOG(LogTunaSweeperEnemySpawn, Warning, TEXT("Skipping loot container spawn row %d: row has invalid identifiers."), RowIndex);
+			continue;
+		}
+
+		LootContainerSpawnDefinitions.Add(SpawnDefinition);
+		bHasValidRows = true;
+	}
+
+	if (!bHasValidRows)
+	{
+		UE_LOG(LogTunaSweeperEnemySpawn, Error, TEXT("Loot container spawn JSON has no valid rows: %s"), *LootContainerSpawnJsonPath);
+		return false;
+	}
+
+	bLootContainerSpawnDataLoaded = true;
+	return true;
+}
+
 void UTunaSweeperEnemySpawnSubsystem::HandlePostLoadMapWithWorld(UWorld* LoadedWorld)
 {
-	EnsureEnemiesSpawnedForWorld(LoadedWorld);
+	EnsureRaidRuntimeActorsSpawnedForWorld(LoadedWorld);
 }
 
 void UTunaSweeperEnemySpawnSubsystem::ResetLoadedEnemySpawnData()
@@ -235,21 +399,30 @@ void UTunaSweeperEnemySpawnSubsystem::ResetLoadedEnemySpawnData()
 	bEnemySpawnDataLoaded = false;
 }
 
+void UTunaSweeperEnemySpawnSubsystem::ResetLoadedLootContainerSpawnData()
+{
+	LootContainerSpawnDefinitions.Reset();
+	bLootContainerSpawnDataLoaded = false;
+}
+
 FString UTunaSweeperEnemySpawnSubsystem::GetEnemySpawnJsonPath() const
 {
 	return FPaths::Combine(FPaths::ProjectContentDir(), TunaSweeperEnemySpawn::EnemySpawnsJsonRelativePath);
 }
 
-bool UTunaSweeperEnemySpawnSubsystem::DoesSpawnMatchWorld(
-	const FEnemySpawnDefinition& SpawnDefinition,
-	const UWorld* World) const
+FString UTunaSweeperEnemySpawnSubsystem::GetLootContainerSpawnJsonPath() const
 {
-	if (!World || SpawnDefinition.LevelName.IsNone())
+	return FPaths::Combine(FPaths::ProjectContentDir(), TunaSweeperEnemySpawn::LootContainerSpawnsJsonRelativePath);
+}
+
+bool UTunaSweeperEnemySpawnSubsystem::DoesLevelNameMatchWorld(FName LevelName, const UWorld* World) const
+{
+	if (!World || LevelName.IsNone())
 	{
 		return false;
 	}
 
-	const FString SpawnLevelName = TunaSweeperEnemySpawn::NormalizeLevelName(SpawnDefinition.LevelName.ToString());
+	const FString SpawnLevelName = TunaSweeperEnemySpawn::NormalizeLevelName(LevelName.ToString());
 	const FString WorldMapName = TunaSweeperEnemySpawn::NormalizeLevelName(World->GetMapName());
 	const FString WorldPackageName = TunaSweeperEnemySpawn::NormalizeLevelName(World->GetOutermost()->GetName());
 	return SpawnLevelName.Equals(WorldMapName, ESearchCase::IgnoreCase) ||

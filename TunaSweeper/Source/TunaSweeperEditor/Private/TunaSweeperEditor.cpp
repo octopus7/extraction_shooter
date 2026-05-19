@@ -27,6 +27,7 @@
 #include "Components/VerticalBoxSlot.h"
 #include "Containers/Ticker.h"
 #include "Engine/Blueprint.h"
+#include "Engine/StaticMesh.h"
 #include "Engine/Texture2D.h"
 #include "EngineUtils.h"
 #include "Editor.h"
@@ -54,12 +55,14 @@
 #include "Factories/MaterialFactoryNew.h"
 #include "Materials/Material.h"
 #include "Materials/MaterialExpressionConstant3Vector.h"
+#include "MeshDescription.h"
 #include "Misc/CommandLine.h"
 #include "Misc/ConfigCacheIni.h"
 #include "Misc/PackageName.h"
 #include "Misc/Parse.h"
 #include "Misc/Paths.h"
 #include "Player/TunaSweeperPlayerController.h"
+#include "StaticMeshAttributes.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
 #include "TunaSweeperEditorRunOnce.h"
 #include "UI/TunaSweeperInteractionMarkerWidget.h"
@@ -93,7 +96,7 @@ namespace TunaSweeperEditorSetup
 	const FString InteractionInputTaskId = TEXT("2026-05-11_SetInteractInputToFKey");
 	const FString InteractionMarkerAlignmentTaskId = TEXT("2026-05-10_RebuildInteractionMarkerAlignmentV2");
 	const FString PickupItemAndSpawnerTaskId = TEXT("2026-05-11_CreatePickupItemAndSpawnerAssetsV3");
-	const FString CommonGameHudTaskId = TEXT("2026-05-19_RebuildAmmoReloadHudV2");
+	const FString CommonGameHudTaskId = TEXT("2026-05-19_RebuildAmmoReloadHudV3");
 	const FString InventoryInputTaskId = TEXT("2026-05-11_AddInventoryInput");
 	const FString QuickSlotInputTaskId = TEXT("2026-05-12_AddQuickSlotInputActions");
 	const FString DropInputTaskId = TEXT("2026-05-18_AddDropInputAction");
@@ -102,11 +105,11 @@ namespace TunaSweeperEditorSetup
 	const FString LootContainerOccupancyHeaderTaskId = TEXT("2026-05-18_AddLootContainerOccupancyHeaderV1");
 	const FString CannedTunaIconImportTaskId = TEXT("2026-05-11_ImportCannedTunaIconV1");
 	const FString BackpackInventoryTaskId = TEXT("2026-05-16_CreateEquipmentInventoryAssetsV3");
-	const FString IntroMenuAndLevelTravelTaskId = TEXT("2026-05-18_CreateTitleIntroMenuPersistentSaveSlotSelectionV7");
+	const FString IntroMenuAndLevelTravelTaskId = TEXT("2026-05-19_CreateTitleIntroMenuPersistentSaveSlotSelectionLevelTravelLadderV1");
 	const FString LevelTransitionVideoTaskId = TEXT("2026-05-16_AddBidirectionalLevelTransitionVideoV3");
 	const FString FirstOutingQuestTaskId = TEXT("2026-05-15_CreateFirstOutingQuestNpcV2");
 	const FString SelfDestructInteractionTaskId = TEXT("2026-05-16_CreateSelfDestructInteractionV1");
-	const FString EnemyVisualMaterialTaskId = TEXT("2026-05-16_CreateEnemyVisualMaterialsV2");
+	const FString EnemyVisualMaterialTaskId = TEXT("2026-05-19_CreateEnemyAndContainerVisualMaterialsV3");
 	const FString CoverPointAssetTaskId = TEXT("2026-05-16_CreateCoverPointBlueprintV1");
 	const FString GameInstanceAssetPath = TEXT("/Game/Core");
 	const FString GameInstanceAssetName = TEXT("BP_TunaSweeperGameInstance");
@@ -118,6 +121,8 @@ namespace TunaSweeperEditorSetup
 	const FString EnemyAssetPath = TEXT("/Game/Characters/Enemy");
 	const FString EnemyAssetName = TEXT("BP_TunaSweeperEnemy");
 	const FString EnemyBodyMaterialAssetName = TEXT("M_Enemy_Red");
+	const FString EnemyGreenMaterialAssetName = TEXT("M_Enemy_Green");
+	const FString EnemyBlueMaterialAssetName = TEXT("M_Enemy_Blue");
 	const FString EnemySightlineMaterialAssetName = TEXT("M_Enemy_Sightline");
 	const FString CoverAssetPath = TEXT("/Game/AI/Cover");
 	const FString CoverPointAssetName = TEXT("BP_TunaSweeperCoverPoint");
@@ -187,7 +192,12 @@ namespace TunaSweeperEditorSetup
 	const FString ItemSpawnInteractionAssetName = TEXT("BP_Interact_ItemSpawn");
 	const FString LootContainerAssetName = TEXT("BP_LootContainer");
 	const FString LootContainerSpawnInteractionAssetName = TEXT("BP_Interact_LootContainerSpawn");
+	const FString CardboardContainerMaterialAssetName = TEXT("M_Container_Cardboard");
+	const FString WoodContainerMaterialAssetName = TEXT("M_Container_Wood");
+	const FString MetalContainerMaterialAssetName = TEXT("M_Container_Metal");
+	const FString SupplyContainerMaterialAssetName = TEXT("M_Container_Supply");
 	const FString LevelTravelInteractionAssetName = TEXT("BP_Interact_LevelTravel");
+	const FString LevelTravelLadderMeshAssetName = TEXT("SM_LevelTravel_Ladder");
 	const FString SelfDestructInteractionAssetName = TEXT("BP_Interact_SelfDestruct");
 	const FString IntroMapPackagePath = TEXT("/Game/IntroMap");
 	const FString BunkerMapPackagePath = TEXT("/Game/BunkerMap");
@@ -219,6 +229,190 @@ namespace TunaSweeperEditorSetup
 	FString GetAssetClassPath(const FString& AssetPath, const FString& AssetName)
 	{
 		return FString::Printf(TEXT("%s_C"), *GetAssetObjectPath(AssetPath, AssetName));
+	}
+
+	bool SaveAsset(UObject* Asset);
+
+	void AddBoxQuad(
+		FMeshDescription& MeshDescription,
+		FStaticMeshAttributes& Attributes,
+		FPolygonGroupID PolygonGroupId,
+		const FVector3f& A,
+		const FVector3f& B,
+		const FVector3f& C,
+		const FVector3f& D,
+		const FVector3f& Normal)
+	{
+		TVertexAttributesRef<FVector3f> VertexPositions = Attributes.GetVertexPositions();
+		TVertexInstanceAttributesRef<FVector3f> VertexInstanceNormals = Attributes.GetVertexInstanceNormals();
+		TVertexInstanceAttributesRef<FVector2f> VertexInstanceUVs = Attributes.GetVertexInstanceUVs();
+
+		const FVector3f Positions[] = { A, B, C, D };
+		const FVector2f UVs[] = {
+			FVector2f(0.0f, 0.0f),
+			FVector2f(1.0f, 0.0f),
+			FVector2f(1.0f, 1.0f),
+			FVector2f(0.0f, 1.0f)
+		};
+
+		TArray<FVertexInstanceID> VertexInstances;
+		VertexInstances.Reserve(UE_ARRAY_COUNT(Positions));
+		for (int32 Index = 0; Index < UE_ARRAY_COUNT(Positions); ++Index)
+		{
+			const FVertexID VertexId = MeshDescription.CreateVertex();
+			VertexPositions[VertexId] = Positions[Index];
+
+			const FVertexInstanceID VertexInstanceId = MeshDescription.CreateVertexInstance(VertexId);
+			VertexInstanceNormals[VertexInstanceId] = Normal;
+			VertexInstanceUVs.Set(VertexInstanceId, 0, UVs[Index]);
+			VertexInstances.Add(VertexInstanceId);
+		}
+
+		MeshDescription.CreatePolygon(PolygonGroupId, VertexInstances);
+	}
+
+	void AddBoxToMesh(
+		FMeshDescription& MeshDescription,
+		FStaticMeshAttributes& Attributes,
+		FPolygonGroupID PolygonGroupId,
+		const FVector3f& Min,
+		const FVector3f& Max)
+	{
+		AddBoxQuad(
+			MeshDescription,
+			Attributes,
+			PolygonGroupId,
+			FVector3f(Min.X, Min.Y, Min.Z),
+			FVector3f(Min.X, Max.Y, Min.Z),
+			FVector3f(Max.X, Max.Y, Min.Z),
+			FVector3f(Max.X, Min.Y, Min.Z),
+			FVector3f(0.0f, 0.0f, -1.0f));
+		AddBoxQuad(
+			MeshDescription,
+			Attributes,
+			PolygonGroupId,
+			FVector3f(Min.X, Min.Y, Max.Z),
+			FVector3f(Max.X, Min.Y, Max.Z),
+			FVector3f(Max.X, Max.Y, Max.Z),
+			FVector3f(Min.X, Max.Y, Max.Z),
+			FVector3f(0.0f, 0.0f, 1.0f));
+		AddBoxQuad(
+			MeshDescription,
+			Attributes,
+			PolygonGroupId,
+			FVector3f(Max.X, Min.Y, Min.Z),
+			FVector3f(Max.X, Max.Y, Min.Z),
+			FVector3f(Max.X, Max.Y, Max.Z),
+			FVector3f(Max.X, Min.Y, Max.Z),
+			FVector3f(1.0f, 0.0f, 0.0f));
+		AddBoxQuad(
+			MeshDescription,
+			Attributes,
+			PolygonGroupId,
+			FVector3f(Min.X, Min.Y, Min.Z),
+			FVector3f(Min.X, Min.Y, Max.Z),
+			FVector3f(Min.X, Max.Y, Max.Z),
+			FVector3f(Min.X, Max.Y, Min.Z),
+			FVector3f(-1.0f, 0.0f, 0.0f));
+		AddBoxQuad(
+			MeshDescription,
+			Attributes,
+			PolygonGroupId,
+			FVector3f(Min.X, Max.Y, Min.Z),
+			FVector3f(Min.X, Max.Y, Max.Z),
+			FVector3f(Max.X, Max.Y, Max.Z),
+			FVector3f(Max.X, Max.Y, Min.Z),
+			FVector3f(0.0f, 1.0f, 0.0f));
+		AddBoxQuad(
+			MeshDescription,
+			Attributes,
+			PolygonGroupId,
+			FVector3f(Min.X, Min.Y, Min.Z),
+			FVector3f(Max.X, Min.Y, Min.Z),
+			FVector3f(Max.X, Min.Y, Max.Z),
+			FVector3f(Min.X, Min.Y, Max.Z),
+			FVector3f(0.0f, -1.0f, 0.0f));
+	}
+
+	void BuildLevelTravelLadderMeshDescription(FMeshDescription& MeshDescription)
+	{
+		FStaticMeshAttributes Attributes(MeshDescription);
+		Attributes.Register();
+		Attributes.GetVertexInstanceUVs().SetNumChannels(1);
+
+		const FPolygonGroupID PolygonGroupId = MeshDescription.CreatePolygonGroup();
+		Attributes.GetPolygonGroupMaterialSlotNames()[PolygonGroupId] = FName(TEXT("Ladder"));
+
+		constexpr float HalfLength = 130.0f;
+		constexpr float RailHalfWidth = 5.0f;
+		constexpr float RailCenterOffset = 38.0f;
+		constexpr float RungHalfLength = 34.0f;
+		constexpr float RungHalfWidth = 5.0f;
+		constexpr float Thickness = 8.0f;
+
+		AddBoxToMesh(
+			MeshDescription,
+			Attributes,
+			PolygonGroupId,
+			FVector3f(-HalfLength, -RailCenterOffset - RailHalfWidth, 0.0f),
+			FVector3f(HalfLength, -RailCenterOffset + RailHalfWidth, Thickness));
+		AddBoxToMesh(
+			MeshDescription,
+			Attributes,
+			PolygonGroupId,
+			FVector3f(-HalfLength, RailCenterOffset - RailHalfWidth, 0.0f),
+			FVector3f(HalfLength, RailCenterOffset + RailHalfWidth, Thickness));
+
+		constexpr int32 RungCount = 7;
+		for (int32 RungIndex = 0; RungIndex < RungCount; ++RungIndex)
+		{
+			const float Alpha = RungCount == 1 ? 0.5f : static_cast<float>(RungIndex) / static_cast<float>(RungCount - 1);
+			const float X = FMath::Lerp(-HalfLength + 24.0f, HalfLength - 24.0f, Alpha);
+			AddBoxToMesh(
+				MeshDescription,
+				Attributes,
+				PolygonGroupId,
+				FVector3f(X - RungHalfWidth, -RungHalfLength, Thickness),
+				FVector3f(X + RungHalfWidth, RungHalfLength, Thickness * 2.0f));
+		}
+	}
+
+	UStaticMesh* EnsureLevelTravelLadderMeshAsset()
+	{
+		const FString AssetObjectPath = GetAssetObjectPath(InteractionAssetPath, LevelTravelLadderMeshAssetName);
+		if (UStaticMesh* ExistingMesh = LoadObject<UStaticMesh>(nullptr, *AssetObjectPath))
+		{
+			return ExistingMesh;
+		}
+
+		const FString PackageName = FString::Printf(TEXT("%s/%s"), *InteractionAssetPath, *LevelTravelLadderMeshAssetName);
+		UPackage* Package = CreatePackage(*PackageName);
+		if (!Package)
+		{
+			return nullptr;
+		}
+
+		UStaticMesh* StaticMesh = NewObject<UStaticMesh>(
+			Package,
+			*LevelTravelLadderMeshAssetName,
+			RF_Public | RF_Standalone | RF_Transactional);
+		if (!StaticMesh)
+		{
+			return nullptr;
+		}
+
+		FMeshDescription MeshDescription;
+		BuildLevelTravelLadderMeshDescription(MeshDescription);
+
+		StaticMesh->GetStaticMaterials().Add(FStaticMaterial());
+
+		TArray<const FMeshDescription*> MeshDescriptions;
+		MeshDescriptions.Add(&MeshDescription);
+		StaticMesh->BuildFromMeshDescriptions(MeshDescriptions);
+		StaticMesh->MarkPackageDirty();
+
+		FAssetRegistryModule::AssetCreated(StaticMesh);
+		return SaveAsset(StaticMesh) ? StaticMesh : nullptr;
 	}
 
 	bool SaveAsset(UObject* Asset)
@@ -331,7 +525,8 @@ namespace TunaSweeperEditorSetup
 		const FString& AssetPath,
 		const FString& AssetName,
 		const FLinearColor& BaseColor,
-		float Roughness = 0.65f)
+		float Roughness = 0.65f,
+		float Metallic = 0.0f)
 	{
 		const FString ObjectPath = GetAssetObjectPath(AssetPath, AssetName);
 		UMaterial* Material = LoadObject<UMaterial>(nullptr, *ObjectPath);
@@ -377,7 +572,7 @@ namespace TunaSweeperEditorSetup
 		MaterialEditorOnly->Roughness.UseConstant = true;
 		MaterialEditorOnly->Roughness.Constant = Roughness;
 		MaterialEditorOnly->Metallic.UseConstant = true;
-		MaterialEditorOnly->Metallic.Constant = 0.0f;
+		MaterialEditorOnly->Metallic.Constant = Metallic;
 		MaterialEditorOnly->Specular.UseConstant = true;
 		MaterialEditorOnly->Specular.Constant = 0.25f;
 
@@ -850,18 +1045,50 @@ namespace TunaSweeperEditorSetup
 
 	bool EnsureEnemyVisualMaterialAssets()
 	{
-		UMaterial* BodyMaterial = EnsureSolidColorMaterial(
+		UMaterial* RedMaterial = EnsureSolidColorMaterial(
 			EnemyAssetPath,
 			EnemyBodyMaterialAssetName,
 			FLinearColor(0.9f, 0.02f, 0.015f, 1.0f),
+			0.7f);
+		UMaterial* GreenMaterial = EnsureSolidColorMaterial(
+			EnemyAssetPath,
+			EnemyGreenMaterialAssetName,
+			FLinearColor(0.05f, 0.72f, 0.16f, 1.0f),
+			0.7f);
+		UMaterial* BlueMaterial = EnsureSolidColorMaterial(
+			EnemyAssetPath,
+			EnemyBlueMaterialAssetName,
+			FLinearColor(0.04f, 0.24f, 0.95f, 1.0f),
 			0.7f);
 		UMaterial* SightlineMaterial = EnsureSolidColorMaterial(
 			EnemyAssetPath,
 			EnemySightlineMaterialAssetName,
 			FLinearColor(0.35f, 0.0f, 0.0f, 1.0f),
 			0.75f);
+		UMaterial* CardboardMaterial = EnsureSolidColorMaterial(
+			InteractionAssetPath,
+			CardboardContainerMaterialAssetName,
+			FLinearColor(0.64f, 0.42f, 0.22f, 1.0f),
+			0.85f);
+		UMaterial* WoodMaterial = EnsureSolidColorMaterial(
+			InteractionAssetPath,
+			WoodContainerMaterialAssetName,
+			FLinearColor(0.45f, 0.24f, 0.11f, 1.0f),
+			0.8f);
+		UMaterial* MetalMaterial = EnsureSolidColorMaterial(
+			InteractionAssetPath,
+			MetalContainerMaterialAssetName,
+			FLinearColor(0.55f, 0.57f, 0.6f, 1.0f),
+			0.35f,
+			0.65f);
+		UMaterial* SupplyMaterial = EnsureSolidColorMaterial(
+			InteractionAssetPath,
+			SupplyContainerMaterialAssetName,
+			FLinearColor(0.22f, 0.32f, 0.24f, 1.0f),
+			0.85f);
 
-		return BodyMaterial && SightlineMaterial;
+		return RedMaterial && GreenMaterial && BlueMaterial && SightlineMaterial &&
+			CardboardMaterial && WoodMaterial && MetalMaterial && SupplyMaterial;
 	}
 
 	bool EnsureCoverPointAssets()
@@ -3527,15 +3754,19 @@ namespace TunaSweeperEditorSetup
 		USizeBox* RootSizeBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("RootSizeBox"));
 		UBorder* PanelBackground = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("PanelBackground"));
 		UVerticalBox* PanelStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("PanelStack"));
+		UHorizontalBox* HeaderRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("HeaderRow"));
 		UTextBlock* SelectedItemNameText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("SelectedItemNameText"));
+		UButton* CloseButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("CloseButton"));
+		UTextBlock* CloseButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("CloseButtonText"));
 		UTextBlock* SelectedItemDescriptionText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("SelectedItemDescriptionText"));
 		UBorder* ModdingPanel = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("ModdingPanel"));
 		UVerticalBox* ModdingStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("ModdingStack"));
 		UTextBlock* ModdingText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("ModdingText"));
 		UTileView* AttachmentSlotTileView = WidgetTree->ConstructWidget<UTileView>(UTileView::StaticClass(), TEXT("AttachmentSlotTileView"));
 
-		if (!RootSizeBox || !PanelBackground || !PanelStack || !SelectedItemNameText || !SelectedItemDescriptionText ||
-			!ModdingPanel || !ModdingStack || !ModdingText || !AttachmentSlotTileView)
+		if (!RootSizeBox || !PanelBackground || !PanelStack || !HeaderRow || !SelectedItemNameText || !CloseButton ||
+			!CloseButtonText || !SelectedItemDescriptionText || !ModdingPanel || !ModdingStack || !ModdingText ||
+			!AttachmentSlotTileView)
 		{
 			return false;
 		}
@@ -3553,11 +3784,49 @@ namespace TunaSweeperEditorSetup
 		PanelBackground->SetContent(PanelStack);
 
 		ConfigureTextBlockLeft(SelectedItemNameText, FText::FromString(TEXT("No Item")), FLinearColor::White, 20);
-		UVerticalBoxSlot* NameSlot = PanelStack->AddChildToVerticalBox(SelectedItemNameText);
+		UHorizontalBoxSlot* NameSlot = HeaderRow->AddChildToHorizontalBox(SelectedItemNameText);
 		if (NameSlot)
 		{
 			NameSlot->SetHorizontalAlignment(HAlign_Fill);
-			NameSlot->SetVerticalAlignment(VAlign_Top);
+			NameSlot->SetVerticalAlignment(VAlign_Center);
+			NameSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+		}
+
+		FButtonStyle CloseButtonStyle;
+		CloseButtonStyle.SetNormal(MakeRoundedBoxBrush(
+			FVector2D(58.0f, 28.0f),
+			FLinearColor(0.10f, 0.12f, 0.16f, 0.96f),
+			FLinearColor(0.42f, 0.42f, 0.58f, 1.0f),
+			1.0f));
+		CloseButtonStyle.SetHovered(MakeRoundedBoxBrush(
+			FVector2D(58.0f, 28.0f),
+			FLinearColor(0.18f, 0.20f, 0.28f, 0.98f),
+			FLinearColor(0.72f, 0.72f, 0.90f, 1.0f),
+			1.5f));
+		CloseButtonStyle.SetPressed(MakeRoundedBoxBrush(
+			FVector2D(58.0f, 28.0f),
+			FLinearColor(0.07f, 0.08f, 0.12f, 1.0f),
+			FLinearColor(0.34f, 0.34f, 0.48f, 1.0f),
+			1.0f));
+		CloseButtonStyle.SetNormalPadding(FMargin(8.0f, 2.0f));
+		CloseButtonStyle.SetPressedPadding(FMargin(8.0f, 3.0f, 8.0f, 1.0f));
+		CloseButton->SetStyle(CloseButtonStyle);
+		CloseButton->SetClickMethod(EButtonClickMethod::DownAndUp);
+		ConfigureTextBlock(CloseButtonText, FText::FromString(TEXT("\uB2EB\uAE30")), FLinearColor(0.90f, 0.94f, 0.96f, 1.0f), 13);
+		CloseButton->SetContent(CloseButtonText);
+		UHorizontalBoxSlot* CloseSlot = HeaderRow->AddChildToHorizontalBox(CloseButton);
+		if (CloseSlot)
+		{
+			CloseSlot->SetPadding(FMargin(8.0f, 0.0f, 0.0f, 0.0f));
+			CloseSlot->SetHorizontalAlignment(HAlign_Right);
+			CloseSlot->SetVerticalAlignment(VAlign_Center);
+		}
+
+		UVerticalBoxSlot* HeaderSlot = PanelStack->AddChildToVerticalBox(HeaderRow);
+		if (HeaderSlot)
+		{
+			HeaderSlot->SetHorizontalAlignment(HAlign_Fill);
+			HeaderSlot->SetVerticalAlignment(VAlign_Top);
 		}
 
 		ConfigureTextBlockLeft(SelectedItemDescriptionText, FText::GetEmpty(), FLinearColor(0.75f, 0.8f, 0.86f, 1.0f), 15);
@@ -3604,7 +3873,10 @@ namespace TunaSweeperEditorSetup
 			ModdingSlot->SetVerticalAlignment(VAlign_Bottom);
 		}
 
+		RegisterWidgetVariable(WidgetBlueprint, HeaderRow);
 		RegisterWidgetVariable(WidgetBlueprint, SelectedItemNameText);
+		RegisterWidgetVariable(WidgetBlueprint, CloseButton);
+		RegisterWidgetVariable(WidgetBlueprint, CloseButtonText);
 		RegisterWidgetVariable(WidgetBlueprint, SelectedItemDescriptionText);
 		RegisterWidgetVariable(WidgetBlueprint, ModdingPanel);
 		RegisterWidgetVariable(WidgetBlueprint, ModdingText);
@@ -4483,6 +4755,10 @@ namespace TunaSweeperEditorSetup
 			TSoftClassPtr<UTunaSweeperLevelTransitionWidget>(
 				FSoftObjectPath(GetAssetClassPath(UIAssetPath, LevelTransitionVideoWidgetAssetName))),
 			FText::GetEmpty());
+		Defaults->ConfigureLevelTravelVisualDefaults(
+			TSoftObjectPtr<UStaticMesh>(),
+			FVector(0.75f, 0.75f, 0.75f),
+			FVector::ZeroVector);
 		FBlueprintEditorUtils::MarkBlueprintAsModified(LevelTravelBlueprint);
 		FKismetEditorUtilities::CompileBlueprint(LevelTravelBlueprint);
 		LevelTravelBlueprint->MarkPackageDirty();
@@ -4494,7 +4770,10 @@ namespace TunaSweeperEditorSetup
 		FName TargetLevelName,
 		const FText& DisplayName,
 		TSoftObjectPtr<UMediaSource> TransitionMediaSource = TSoftObjectPtr<UMediaSource>(),
-		const FText& TransitionMessage = FText::GetEmpty())
+		const FText& TransitionMessage = FText::GetEmpty(),
+		TSoftObjectPtr<UStaticMesh> VisualMeshOverride = TSoftObjectPtr<UStaticMesh>(),
+		const FVector& VisualMeshScale = FVector(0.75f, 0.75f, 0.75f),
+		const FVector& VisualMeshRelativeLocation = FVector::ZeroVector)
 	{
 		ATunaSweeperLevelTravelInteractableActor* LevelTravelActor = Cast<ATunaSweeperLevelTravelInteractableActor>(Actor);
 		if (!LevelTravelActor)
@@ -4513,6 +4792,10 @@ namespace TunaSweeperEditorSetup
 			TSoftClassPtr<UTunaSweeperLevelTransitionWidget>(
 				FSoftObjectPath(GetAssetClassPath(UIAssetPath, LevelTransitionVideoWidgetAssetName))),
 			TransitionMessage);
+		LevelTravelActor->ConfigureLevelTravelVisualDefaults(
+			VisualMeshOverride,
+			VisualMeshScale,
+			VisualMeshRelativeLocation);
 		LevelTravelActor->MarkPackageDirty();
 		return true;
 	}
@@ -4892,7 +5175,10 @@ namespace TunaSweeperEditorSetup
 		FName TargetLevelName,
 		const FText& DisplayName,
 		TSoftObjectPtr<UMediaSource> TransitionMediaSource = TSoftObjectPtr<UMediaSource>(),
-		const FText& TransitionMessage = FText::GetEmpty())
+		const FText& TransitionMessage = FText::GetEmpty(),
+		TSoftObjectPtr<UStaticMesh> VisualMeshOverride = TSoftObjectPtr<UStaticMesh>(),
+		const FVector& VisualMeshScale = FVector(0.75f, 0.75f, 0.75f),
+		const FVector& VisualMeshRelativeLocation = FVector::ZeroVector)
 	{
 		if (!World || !ActorBlueprint || !ActorBlueprint->GeneratedClass)
 		{
@@ -4904,7 +5190,15 @@ namespace TunaSweeperEditorSetup
 			ExistingActor->Modify();
 			ExistingActor->SetActorLocation(Location);
 			ExistingActor->SetActorRotation(FRotator::ZeroRotator);
-			return ConfigureLevelTravelActorInstance(ExistingActor, TargetLevelName, DisplayName, TransitionMediaSource, TransitionMessage);
+			return ConfigureLevelTravelActorInstance(
+				ExistingActor,
+				TargetLevelName,
+				DisplayName,
+				TransitionMediaSource,
+				TransitionMessage,
+				VisualMeshOverride,
+				VisualMeshScale,
+				VisualMeshRelativeLocation);
 		}
 
 		World->PersistentLevel->Modify();
@@ -4921,7 +5215,15 @@ namespace TunaSweeperEditorSetup
 		}
 
 		SpawnedActor->SetActorLabel(ActorLabel);
-		if (!ConfigureLevelTravelActorInstance(SpawnedActor, TargetLevelName, DisplayName, TransitionMediaSource, TransitionMessage))
+		if (!ConfigureLevelTravelActorInstance(
+			SpawnedActor,
+			TargetLevelName,
+			DisplayName,
+			TransitionMediaSource,
+			TransitionMessage,
+			VisualMeshOverride,
+			VisualMeshScale,
+			VisualMeshRelativeLocation))
 		{
 			return false;
 		}
@@ -5322,6 +5624,13 @@ namespace TunaSweeperEditorSetup
 			FSoftObjectPath(GetAssetObjectPath(VideoAssetPath, BunkerToRaidMediaSourceAssetName)));
 		const TSoftObjectPtr<UMediaSource> RaidToBunkerMediaSource(
 			FSoftObjectPath(GetAssetObjectPath(VideoAssetPath, RaidToBunkerMediaSourceAssetName)));
+		if (!EnsureLevelTravelLadderMeshAsset())
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to create %s."), *LevelTravelLadderMeshAssetName);
+			return false;
+		}
+		const TSoftObjectPtr<UStaticMesh> LevelTravelLadderMesh(
+			FSoftObjectPath(GetAssetObjectPath(InteractionAssetPath, LevelTravelLadderMeshAssetName)));
 
 		UWorld* BunkerWorld = LoadEditorMapForSetup(BunkerMapPackagePath);
 		const bool bBunkerPlaced =
@@ -5330,11 +5639,14 @@ namespace TunaSweeperEditorSetup
 				BunkerWorld,
 				LevelTravelBlueprint,
 				TEXT("TS_Travel_DeployToRaid"),
-				FVector(220.0f, -220.0f, 80.0f),
+				FVector(220.0f, -220.0f, 4.0f),
 				FName(TEXT("RaidMap")),
 				FText::FromString(TEXT("Deploy")),
 				BunkerToRaidMediaSource,
-				FText::FromString(TEXT("Deploying to Raid"))) &&
+				FText::FromString(TEXT("Deploying to Raid")),
+				LevelTravelLadderMesh,
+				FVector::OneVector,
+				FVector::ZeroVector) &&
 			UEditorLoadingAndSavingUtils::SaveMap(BunkerWorld, BunkerMapPackagePath);
 
 		UWorld* RaidWorld = LoadEditorMapForSetup(RaidMapPackagePath);

@@ -6,6 +6,7 @@
 
 class APawn;
 class UMediaSource;
+class UStaticMesh;
 class UTunaSweeperLevelTransitionWidget;
 class UTunaSweeperInteractionMarkerWidget;
 
@@ -32,9 +33,29 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Level Travel")
 	bool TravelToTargetLevel(APawn* InstigatorPawn);
 
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Level Travel|Visual")
+	void ConfigureLevelTravelVisualDefaults(
+		TSoftObjectPtr<UStaticMesh> InVisualMesh,
+		FVector InVisualMeshScale,
+		FVector InVisualMeshRelativeLocation);
+
 protected:
+	virtual void OnConstruction(const FTransform& Transform) override;
+	virtual void BeginPlay() override;
+
+	void RefreshLevelTravelVisual();
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Travel")
 	FName TargetLevelName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Travel|Visual")
+	TSoftObjectPtr<UStaticMesh> VisualMeshOverride;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Travel|Visual")
+	FVector LevelTravelVisualScale = FVector(0.75f, 0.75f, 0.75f);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Travel|Visual")
+	FVector LevelTravelVisualRelativeLocation = FVector::ZeroVector;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Travel|Transition Video")
 	TSoftObjectPtr<UMediaSource> TransitionMediaSource;

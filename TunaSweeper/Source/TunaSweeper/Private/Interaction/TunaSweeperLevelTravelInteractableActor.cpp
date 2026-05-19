@@ -3,12 +3,15 @@
 #include "Game/TunaSweeperGameInstance.h"
 #include "Interaction/TunaSweeperInteractableComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Engine/StaticMesh.h"
 #include "Subsystem/TunaSweeperLevelTransitionSubsystem.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
 
 ATunaSweeperLevelTravelInteractableActor::ATunaSweeperLevelTravelInteractableActor()
 {
 	TargetLevelName = NAME_None;
+	LevelTravelVisualScale = FVector(0.75f, 0.75f, 0.75f);
+	LevelTravelVisualRelativeLocation = FVector::ZeroVector;
 	FadeToBlackDuration = 0.2f;
 	FadeFromBlackDuration = 0.2f;
 	TransitionMessage = FText::GetEmpty();
@@ -42,6 +45,50 @@ void ATunaSweeperLevelTravelInteractableActor::ConfigureLevelTravelDefaults(
 		TransitionWidgetClass = InTransitionWidgetClass;
 	}
 	ConfigureInteractionDefaults(ETunaSweeperInteractionType::LevelTravel, InInteractionDisplayName, InMarkerWidgetClass);
+}
+
+void ATunaSweeperLevelTravelInteractableActor::ConfigureLevelTravelVisualDefaults(
+	TSoftObjectPtr<UStaticMesh> InVisualMesh,
+	FVector InVisualMeshScale,
+	FVector InVisualMeshRelativeLocation)
+{
+	Modify();
+	VisualMeshOverride = InVisualMesh;
+	LevelTravelVisualScale = InVisualMeshScale;
+	LevelTravelVisualRelativeLocation = InVisualMeshRelativeLocation;
+	RefreshLevelTravelVisual();
+}
+
+void ATunaSweeperLevelTravelInteractableActor::OnConstruction(const FTransform& Transform)
+{
+	Super::OnConstruction(Transform);
+	RefreshLevelTravelVisual();
+}
+
+void ATunaSweeperLevelTravelInteractableActor::BeginPlay()
+{
+	Super::BeginPlay();
+	RefreshLevelTravelVisual();
+}
+
+void ATunaSweeperLevelTravelInteractableActor::RefreshLevelTravelVisual()
+{
+	if (!VisualMesh)
+	{
+		return;
+	}
+
+	UStaticMesh* MeshToUse = VisualMeshOverride.IsNull()
+		? LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Cube.Cube"))
+		: VisualMeshOverride.LoadSynchronous();
+
+	if (MeshToUse)
+	{
+		VisualMesh->SetStaticMesh(MeshToUse);
+	}
+
+	VisualMesh->SetRelativeScale3D(LevelTravelVisualScale);
+	VisualMesh->SetRelativeLocation(LevelTravelVisualRelativeLocation);
 }
 
 bool ATunaSweeperLevelTravelInteractableActor::TravelToTargetLevel(APawn* InstigatorPawn)
