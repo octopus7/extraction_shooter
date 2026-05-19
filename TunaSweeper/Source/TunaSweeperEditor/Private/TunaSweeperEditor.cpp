@@ -96,7 +96,7 @@ namespace TunaSweeperEditorSetup
 	const FString InteractionInputTaskId = TEXT("2026-05-11_SetInteractInputToFKey");
 	const FString InteractionMarkerAlignmentTaskId = TEXT("2026-05-10_RebuildInteractionMarkerAlignmentV2");
 	const FString PickupItemAndSpawnerTaskId = TEXT("2026-05-11_CreatePickupItemAndSpawnerAssetsV3");
-	const FString CommonGameHudTaskId = TEXT("2026-05-19_RebuildAmmoReloadHudV3");
+	const FString CommonGameHudTaskId = TEXT("2026-05-19_RebuildAmmoReloadHudV4");
 	const FString InventoryInputTaskId = TEXT("2026-05-11_AddInventoryInput");
 	const FString QuickSlotInputTaskId = TEXT("2026-05-12_AddQuickSlotInputActions");
 	const FString DropInputTaskId = TEXT("2026-05-18_AddDropInputAction");
@@ -3328,27 +3328,29 @@ namespace TunaSweeperEditorSetup
 
 		UWidgetTree* WidgetTree = WidgetBlueprint->WidgetTree;
 		USizeBox* RootSizeBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("RootSizeBox"));
-		UVerticalBox* RootStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("RootStack"));
+		UCanvasPanel* RootCanvas = WidgetTree->ConstructWidget<UCanvasPanel>(UCanvasPanel::StaticClass(), TEXT("RootCanvas"));
 		UHorizontalBox* AmmoSelectorPanel = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("AmmoSelectorPanel"));
 		USizeBox* ReloadProgressPanel = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("ReloadProgressPanel"));
 		UProgressBar* ReloadProgressBar = WidgetTree->ConstructWidget<UProgressBar>(UProgressBar::StaticClass(), TEXT("ReloadProgressBar"));
 		UHorizontalBox* SlotRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("SlotRow"));
-		if (!RootSizeBox || !RootStack || !AmmoSelectorPanel || !ReloadProgressPanel || !ReloadProgressBar || !SlotRow)
+		if (!RootSizeBox || !RootCanvas || !AmmoSelectorPanel || !ReloadProgressPanel || !ReloadProgressBar || !SlotRow)
 		{
 			return false;
 		}
 
 		WidgetTree->RootWidget = RootSizeBox;
+		RootSizeBox->SetWidthOverride(620.0f);
 		RootSizeBox->SetHeightOverride(156.0f);
-		RootSizeBox->SetContent(RootStack);
+		RootSizeBox->SetContent(RootCanvas);
 
 		AmmoSelectorPanel->SetVisibility(ESlateVisibility::Collapsed);
-		UVerticalBoxSlot* AmmoSelectorSlot = RootStack->AddChildToVerticalBox(AmmoSelectorPanel);
+		UCanvasPanelSlot* AmmoSelectorSlot = RootCanvas->AddChildToCanvas(AmmoSelectorPanel);
 		if (AmmoSelectorSlot)
 		{
-			AmmoSelectorSlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
-			AmmoSelectorSlot->SetHorizontalAlignment(HAlign_Center);
-			AmmoSelectorSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 4.0f));
+			AmmoSelectorSlot->SetAnchors(FAnchors(0.5f, 0.0f, 0.5f, 0.0f));
+			AmmoSelectorSlot->SetAlignment(FVector2D(0.5f, 0.0f));
+			AmmoSelectorSlot->SetPosition(FVector2D(0.0f, 0.0f));
+			AmmoSelectorSlot->SetSize(FVector2D(596.0f, 26.0f));
 		}
 
 		for (int32 OptionNumber = 1; OptionNumber <= 6; ++OptionNumber)
@@ -3391,19 +3393,22 @@ namespace TunaSweeperEditorSetup
 		ReloadProgressBar->SetPercent(0.0f);
 		ReloadProgressBar->SetFillColorAndOpacity(FLinearColor(0.62f, 0.98f, 0.62f, 1.0f));
 		ReloadProgressPanel->SetContent(ReloadProgressBar);
-		UVerticalBoxSlot* ReloadProgressSlot = RootStack->AddChildToVerticalBox(ReloadProgressPanel);
+		UCanvasPanelSlot* ReloadProgressSlot = RootCanvas->AddChildToCanvas(ReloadProgressPanel);
 		if (ReloadProgressSlot)
 		{
-			ReloadProgressSlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
-			ReloadProgressSlot->SetHorizontalAlignment(HAlign_Center);
-			ReloadProgressSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 6.0f));
+			ReloadProgressSlot->SetAnchors(FAnchors(0.5f, 0.0f, 0.5f, 0.0f));
+			ReloadProgressSlot->SetAlignment(FVector2D(0.5f, 0.0f));
+			ReloadProgressSlot->SetPosition(FVector2D(0.0f, 34.0f));
+			ReloadProgressSlot->SetSize(FVector2D(420.0f, 10.0f));
 		}
 
-		UVerticalBoxSlot* SlotRowStackSlot = RootStack->AddChildToVerticalBox(SlotRow);
-		if (SlotRowStackSlot)
+		UCanvasPanelSlot* SlotRowCanvasSlot = RootCanvas->AddChildToCanvas(SlotRow);
+		if (SlotRowCanvasSlot)
 		{
-			SlotRowStackSlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
-			SlotRowStackSlot->SetHorizontalAlignment(HAlign_Center);
+			SlotRowCanvasSlot->SetAnchors(FAnchors(0.5f, 1.0f, 0.5f, 1.0f));
+			SlotRowCanvasSlot->SetAlignment(FVector2D(0.5f, 1.0f));
+			SlotRowCanvasSlot->SetPosition(FVector2D(0.0f, 0.0f));
+			SlotRowCanvasSlot->SetSize(FVector2D(556.0f, 104.0f));
 		}
 
 		const FString DefaultIconPaths[8] = {
