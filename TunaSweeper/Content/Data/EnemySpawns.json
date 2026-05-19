@@ -2,7 +2,7 @@
   {
     "level_name": "RaidMap",
     "enemy_class": "/Game/Characters/Enemy/BP_TunaSweeperEnemy.BP_TunaSweeperEnemy_C",
-    "body_material": "/Game/Characters/Enemy/M_Enemy_Green.M_Enemy_Green",
+    "body_material": "/Game/Prototype/M_Voxel_VertexColor.M_Voxel_VertexColor",
     "drop_container_definition_id": 7004,
     "drop_contents_id": 8001,
     "max_health": 30.0,
@@ -12,7 +12,7 @@
   {
     "level_name": "RaidMap",
     "enemy_class": "/Game/Characters/Enemy/BP_TunaSweeperEnemy.BP_TunaSweeperEnemy_C",
-    "body_material": "/Game/Characters/Enemy/M_Enemy_Blue.M_Enemy_Blue",
+    "body_material": "/Game/Prototype/M_Voxel_VertexColor.M_Voxel_VertexColor",
     "drop_container_definition_id": 7001,
     "drop_contents_id": 8002,
     "max_health": 30.0,
@@ -22,7 +22,7 @@
   {
     "level_name": "RaidMap",
     "enemy_class": "/Game/Characters/Enemy/BP_TunaSweeperEnemy.BP_TunaSweeperEnemy_C",
-    "body_material": "/Game/Characters/Enemy/M_Enemy_Red.M_Enemy_Red",
+    "body_material": "/Game/Prototype/M_Voxel_VertexColor.M_Voxel_VertexColor",
     "drop_container_definition_id": 7002,
     "drop_contents_id": 8003,
     "max_health": 30.0,
@@ -32,7 +32,7 @@
   {
     "level_name": "RaidMap",
     "enemy_class": "/Game/Characters/Enemy/BP_TunaSweeperEnemy.BP_TunaSweeperEnemy_C",
-    "body_material": "/Game/Interaction/M_Container_Wood.M_Container_Wood",
+    "body_material": "/Game/Prototype/M_Voxel_VertexColor.M_Voxel_VertexColor",
     "drop_container_definition_id": 7007,
     "drop_contents_id": 8006,
     "max_health": 24.0,
@@ -49,7 +49,7 @@
   {
     "level_name": "RaidMap",
     "enemy_class": "/Game/Characters/Enemy/BP_TunaSweeperEnemy.BP_TunaSweeperEnemy_C",
-    "body_material": "/Game/Interaction/M_Container_Wood.M_Container_Wood",
+    "body_material": "/Game/Prototype/M_Voxel_VertexColor.M_Voxel_VertexColor",
     "drop_container_definition_id": 7007,
     "drop_contents_id": 8006,
     "max_health": 24.0,
