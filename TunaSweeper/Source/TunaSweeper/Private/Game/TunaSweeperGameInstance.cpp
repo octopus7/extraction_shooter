@@ -1076,6 +1076,26 @@ bool UTunaSweeperGameInstance::AddItemToFirstAvailableInventorySlot(int32 ItemId
 	return true;
 }
 
+bool UTunaSweeperGameInstance::AddItemToPreferredAvailableSlot(int32 ItemId, int32 Quantity)
+{
+	EnsureInventoryStateInitialized();
+	if (ItemId == INDEX_NONE || Quantity <= 0)
+	{
+		return false;
+	}
+
+	const FGuid ItemUid = CreateItemInstance(ItemId, Quantity);
+	if (!AddItemUidToFirstEmptyCompatibleEquipmentSlot(ItemUid) &&
+		!AddItemUidToFirstEmptySlot(ItemUid, PlayerInventorySlots))
+	{
+		ItemInstancesByUid.Remove(ItemUid);
+		return false;
+	}
+
+	BroadcastInventoryStateChanged();
+	return true;
+}
+
 int32 UTunaSweeperGameInstance::CountInventoryItemById(int32 ItemId)
 {
 	EnsureInventoryStateInitialized();
@@ -1614,6 +1634,28 @@ bool UTunaSweeperGameInstance::AddItemUidToFirstEmptySlot(
 			Slot.ItemUid = ItemUid;
 			return true;
 		}
+	}
+
+	return false;
+}
+
+bool UTunaSweeperGameInstance::AddItemUidToFirstEmptyCompatibleEquipmentSlot(const FGuid& ItemUid)
+{
+	if (!ItemUid.IsValid())
+	{
+		return false;
+	}
+
+	for (int32 SlotIndex = 0; SlotIndex < EquipmentSlots.Num(); ++SlotIndex)
+	{
+		if (!EquipmentSlots[SlotIndex].IsEmpty() ||
+			!IsItemCompatibleWithEquipmentSlot(SlotIndex, ItemUid))
+		{
+			continue;
+		}
+
+		EquipmentSlots[SlotIndex].ItemUid = ItemUid;
+		return true;
 	}
 
 	return false;

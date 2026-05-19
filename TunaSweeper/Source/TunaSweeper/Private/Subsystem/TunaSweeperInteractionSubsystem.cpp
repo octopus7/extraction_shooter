@@ -104,7 +104,7 @@ bool UTunaSweeperInteractionSubsystem::HandlePickupItemInteraction(UTunaSweeperI
 
 	const FString ItemName = PickupItemActor->GetItemDisplayName().ToString();
 	UTunaSweeperGameInstance* TunaGameInstance = GetWorld() ? GetWorld()->GetGameInstance<UTunaSweeperGameInstance>() : nullptr;
-	if (!TunaGameInstance || !TunaGameInstance->AddItemToFirstAvailableInventorySlot(PickupItemActor->GetItemId(), PickupItemActor->GetQuantity()))
+	if (!TunaGameInstance || !TunaGameInstance->AddItemToPreferredAvailableSlot(PickupItemActor->GetItemId(), PickupItemActor->GetQuantity()))
 	{
 		if (GEngine)
 		{

@@ -233,6 +233,9 @@ public:
 	bool AddItemToFirstAvailableInventorySlot(int32 ItemId, int32 Quantity = 1);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Inventory")
+	bool AddItemToPreferredAvailableSlot(int32 ItemId, int32 Quantity = 1);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Inventory")
 	int32 CountInventoryItemById(int32 ItemId);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Inventory")
@@ -289,6 +292,7 @@ private:
 	void BroadcastInventoryStateChanged();
 	FGuid CreateItemInstance(int32 ItemId, int32 Quantity);
 	bool AddItemUidToFirstEmptySlot(const FGuid& ItemUid, TArray<FTunaSweeperInventorySlot>& Slots);
+	bool AddItemUidToFirstEmptyCompatibleEquipmentSlot(const FGuid& ItemUid);
 	void RemoveInvalidSlotReferences(TArray<FTunaSweeperInventorySlot>& Slots) const;
 	void EnsureSlotArraySize(TArray<FTunaSweeperInventorySlot>& Slots, int32 DesiredSize) const;
 	TArray<FTunaSweeperInventorySlot>* GetMutableSlotsForSource(ETunaSweeperItemSlotSource Source);
