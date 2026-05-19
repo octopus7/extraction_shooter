@@ -96,7 +96,7 @@ namespace TunaSweeperEditorSetup
 	const FString InteractionInputTaskId = TEXT("2026-05-11_SetInteractInputToFKey");
 	const FString InteractionMarkerAlignmentTaskId = TEXT("2026-05-10_RebuildInteractionMarkerAlignmentV2");
 	const FString PickupItemAndSpawnerTaskId = TEXT("2026-05-11_CreatePickupItemAndSpawnerAssetsV3");
-	const FString CommonGameHudTaskId = TEXT("2026-05-19_RebuildAmmoReloadHudV7");
+	const FString CommonGameHudTaskId = TEXT("2026-05-19_RebuildAmmoReloadHudV8");
 	const FString InventoryInputTaskId = TEXT("2026-05-11_AddInventoryInput");
 	const FString QuickSlotInputTaskId = TEXT("2026-05-12_AddQuickSlotInputActions");
 	const FString DropInputTaskId = TEXT("2026-05-18_AddDropInputAction");
@@ -3354,7 +3354,7 @@ namespace TunaSweeperEditorSetup
 		{
 			AmmoSelectorSlot->SetAnchors(FAnchors(0.5f, 0.0f, 0.5f, 0.0f));
 			AmmoSelectorSlot->SetAlignment(FVector2D(0.5f, 0.0f));
-			AmmoSelectorSlot->SetPosition(FVector2D(0.0f, 0.0f));
+			AmmoSelectorSlot->SetPosition(FVector2D(0.0f, 28.0f));
 			AmmoSelectorSlot->SetAutoSize(true);
 			AmmoSelectorSlot->SetSize(FVector2D(0.0f, 26.0f));
 		}
@@ -3420,7 +3420,7 @@ namespace TunaSweeperEditorSetup
 		UHorizontalBoxSlot* KeySlot = AmmoSelectorPanel->AddChildToHorizontalBox(AmmoSelectorKeyBackground);
 		if (KeySlot)
 		{
-			KeySlot->SetPadding(FMargin(5.0f, 0.0f, 0.0f, 0.0f));
+			KeySlot->SetPadding(FMargin(2.0f, 0.0f, 0.0f, 0.0f));
 			KeySlot->SetVerticalAlignment(VAlign_Center);
 		}
 

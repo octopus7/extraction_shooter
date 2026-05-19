@@ -14,6 +14,7 @@ namespace
 	constexpr float QuickSlotRowWidth = 556.0f;
 	constexpr float WeaponSlotWidth = 82.0f;
 	constexpr float SlotGapWidth = 8.0f;
+	constexpr float AmmoSelectorPanelOffsetY = 28.0f;
 }
 
 void UTunaSweeperHudQuickSlotBarWidget::NativeConstruct()
@@ -257,7 +258,7 @@ void UTunaSweeperHudQuickSlotBarWidget::SetAmmoSelectorPanelPosition(int32 Weapo
 	CanvasSlot->SetAutoSize(true);
 	CanvasSlot->SetAnchors(FAnchors(0.5f, 0.0f, 0.5f, 0.0f));
 	CanvasSlot->SetAlignment(FVector2D(0.5f, 0.0f));
-	CanvasSlot->SetPosition(FVector2D(GetWeaponSlotCenterOffsetX(WeaponSlotNumber), 0.0f));
+	CanvasSlot->SetPosition(FVector2D(GetWeaponSlotCenterOffsetX(WeaponSlotNumber), AmmoSelectorPanelOffsetY));
 }
 
 void UTunaSweeperHudQuickSlotBarWidget::SetAmmoSelectorPromptVisible(const FText& PromptText, bool bVisible)

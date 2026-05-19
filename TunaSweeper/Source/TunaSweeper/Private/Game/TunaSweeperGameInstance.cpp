@@ -474,9 +474,7 @@ int32 UTunaSweeperGameInstance::GetWeaponInventoryAmmoCount(int32 WeaponSlotNumb
 		return 0;
 	}
 
-	int32 AmmoItemId = MutableWeaponInstance->LoadedAmmoCount > 0 && MutableWeaponInstance->LoadedAmmoItemId != INDEX_NONE
-		? MutableWeaponInstance->LoadedAmmoItemId
-		: MutableWeaponInstance->SelectedAmmoItemId;
+	const int32 AmmoItemId = MutableWeaponInstance->LoadedAmmoItemId;
 	if (AmmoItemId == INDEX_NONE)
 	{
 		return 0;
@@ -511,10 +509,7 @@ int32 UTunaSweeperGameInstance::GetWeaponSelectedAmmoItemId(int32 WeaponSlotNumb
 		return INDEX_NONE;
 	}
 
-	const int32 SelectedAmmoItemId =
-		WeaponInstanceState->SelectedAmmoItemId != INDEX_NONE
-			? WeaponInstanceState->SelectedAmmoItemId
-			: (WeaponInstanceState->LoadedAmmoCount > 0 ? WeaponInstanceState->LoadedAmmoItemId : INDEX_NONE);
+	const int32 SelectedAmmoItemId = WeaponInstanceState->LoadedAmmoItemId;
 	if (SelectedAmmoItemId == INDEX_NONE)
 	{
 		return INDEX_NONE;
@@ -600,11 +595,13 @@ bool UTunaSweeperGameInstance::SetSelectedAmmoItemForWeaponSlot(int32 WeaponSlot
 		return false;
 	}
 
-	if (MutableWeaponInstance->SelectedAmmoItemId == AmmoItemId)
+	if (MutableWeaponInstance->LoadedAmmoItemId == AmmoItemId &&
+		MutableWeaponInstance->SelectedAmmoItemId == AmmoItemId)
 	{
 		return true;
 	}
 
+	MutableWeaponInstance->LoadedAmmoItemId = AmmoItemId;
 	MutableWeaponInstance->SelectedAmmoItemId = AmmoItemId;
 	BroadcastInventoryStateChanged();
 	return true;
@@ -672,7 +669,7 @@ bool UTunaSweeperGameInstance::TryReloadWeaponSlot(int32 WeaponSlotNumber, int32
 		: AmmoItemId;
 	if (ReloadAmmoItemId == INDEX_NONE)
 	{
-		ReloadAmmoItemId = MutableWeaponInstance->SelectedAmmoItemId;
+		ReloadAmmoItemId = MutableWeaponInstance->LoadedAmmoItemId;
 	}
 
 	UTunaSweeperItemDataSubsystem* ItemDataSubsystem = GetSubsystem<UTunaSweeperItemDataSubsystem>();
@@ -1604,42 +1601,19 @@ int32 UTunaSweeperGameInstance::ResolveSelectedAmmoItemIdForWeapon(
 			IsAmmoDefinitionCompatibleWithWeapon(WeaponDefinition, AmmoDefinition);
 	};
 
-	if (WeaponInstance.SelectedAmmoItemId != INDEX_NONE && IsCompatibleAmmoItemId(WeaponInstance.SelectedAmmoItemId))
-	{
-		return WeaponInstance.SelectedAmmoItemId;
-	}
-
 	if (WeaponInstance.LoadedAmmoItemId != INDEX_NONE && IsCompatibleAmmoItemId(WeaponInstance.LoadedAmmoItemId))
 	{
 		WeaponInstance.SelectedAmmoItemId = WeaponInstance.LoadedAmmoItemId;
-		return WeaponInstance.SelectedAmmoItemId;
+		return WeaponInstance.LoadedAmmoItemId;
 	}
 
-	TArray<FTunaSweeperItemDefinition> ItemDefinitions;
-	if (!ItemDataSubsystem->GetAllItemDefinitions(ItemDefinitions))
+	if (WeaponInstance.SelectedAmmoItemId != INDEX_NONE && IsCompatibleAmmoItemId(WeaponInstance.SelectedAmmoItemId))
 	{
-		return INDEX_NONE;
+		WeaponInstance.LoadedAmmoItemId = WeaponInstance.SelectedAmmoItemId;
+		return WeaponInstance.LoadedAmmoItemId;
 	}
 
-	for (const FTunaSweeperItemDefinition& ItemDefinition : ItemDefinitions)
-	{
-		if (IsAmmoDefinitionCompatibleWithWeapon(WeaponDefinition, ItemDefinition) &&
-			CountInventoryAmmoByItemId(ItemDefinition.Id) > 0)
-		{
-			WeaponInstance.SelectedAmmoItemId = ItemDefinition.Id;
-			return WeaponInstance.SelectedAmmoItemId;
-		}
-	}
-
-	for (const FTunaSweeperItemDefinition& ItemDefinition : ItemDefinitions)
-	{
-		if (IsAmmoDefinitionCompatibleWithWeapon(WeaponDefinition, ItemDefinition))
-		{
-			WeaponInstance.SelectedAmmoItemId = ItemDefinition.Id;
-			return WeaponInstance.SelectedAmmoItemId;
-		}
-	}
-
+	WeaponInstance.SelectedAmmoItemId = INDEX_NONE;
 	return INDEX_NONE;
 }
 
