@@ -25,13 +25,25 @@ public:
 	void SetBlackOpacity(float InOpacity);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Level Transition")
+	void SetLetterboxEnabled(bool bEnabled);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Level Transition")
 	void SetTransitionMessage(const FText& InMessage);
 
 protected:
 	virtual void NativeConstruct() override;
 
+	void EnsureLetterboxPanels();
+	void UpdateLetterboxVisibility();
+
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Level Transition", meta = (BindWidgetOptional))
 	TObjectPtr<UImage> VideoImage;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Level Transition", meta = (BindWidgetOptional))
+	TObjectPtr<UBorder> LetterboxTopPanel;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Level Transition", meta = (BindWidgetOptional))
+	TObjectPtr<UBorder> LetterboxBottomPanel;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Level Transition", meta = (BindWidgetOptional))
 	TObjectPtr<UBorder> BlackFadePanel;
@@ -41,4 +53,7 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Level Transition", meta = (BindWidgetOptional))
 	TObjectPtr<UTextBlock> TransitionMessageText;
+
+	bool bVideoVisible = false;
+	bool bLetterboxEnabled = false;
 };

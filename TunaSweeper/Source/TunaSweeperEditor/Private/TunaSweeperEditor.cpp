@@ -3028,11 +3028,13 @@ namespace TunaSweeperEditorSetup
 		UWidgetTree* WidgetTree = WidgetBlueprint->WidgetTree;
 		UCanvasPanel* RootCanvas = WidgetTree->ConstructWidget<UCanvasPanel>(UCanvasPanel::StaticClass(), TEXT("RootCanvas"));
 		UImage* VideoImage = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("VideoImage"));
+		UBorder* LetterboxTopPanel = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("LetterboxTopPanel"));
+		UBorder* LetterboxBottomPanel = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("LetterboxBottomPanel"));
 		UBorder* MessageBackground = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("MessageBackground"));
 		UTextBlock* TransitionMessageText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("TransitionMessageText"));
 		UBorder* BlackFadePanel = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("BlackFadePanel"));
 
-		if (!RootCanvas || !VideoImage || !MessageBackground || !TransitionMessageText || !BlackFadePanel)
+		if (!RootCanvas || !VideoImage || !LetterboxTopPanel || !LetterboxBottomPanel || !MessageBackground || !TransitionMessageText || !BlackFadePanel)
 		{
 			return false;
 		}
@@ -3049,6 +3051,21 @@ namespace TunaSweeperEditorSetup
 			Slot->SetAlignment(FVector2D(0.0f, 0.0f));
 		};
 
+		auto ConfigureLetterboxSlot = [](UCanvasPanelSlot* Slot, bool bTop)
+		{
+			if (!Slot)
+			{
+				return;
+			}
+
+			Slot->SetAnchors(bTop
+				? FAnchors(0.0f, 0.0f, 1.0f, 0.10f)
+				: FAnchors(0.0f, 0.90f, 1.0f, 1.0f));
+			Slot->SetOffsets(FMargin(0.0f));
+			Slot->SetAlignment(FVector2D(0.0f, 0.0f));
+			Slot->SetZOrder(10);
+		};
+
 		FSlateBrush VideoBrush;
 		VideoBrush.DrawAs = ESlateBrushDrawType::Image;
 		VideoBrush.TintColor = FSlateColor(FLinearColor::White);
@@ -3062,7 +3079,19 @@ namespace TunaSweeperEditorSetup
 		WidgetTree->RootWidget = RootCanvas;
 		VideoImage->SetBrush(VideoBrush);
 		VideoImage->SetVisibility(ESlateVisibility::Collapsed);
-		FillCanvas(RootCanvas->AddChildToCanvas(VideoImage));
+		if (UCanvasPanelSlot* VideoSlot = RootCanvas->AddChildToCanvas(VideoImage))
+		{
+			FillCanvas(VideoSlot);
+			VideoSlot->SetZOrder(0);
+		}
+
+		LetterboxTopPanel->SetBrush(BlackBrush);
+		LetterboxTopPanel->SetVisibility(ESlateVisibility::Collapsed);
+		ConfigureLetterboxSlot(RootCanvas->AddChildToCanvas(LetterboxTopPanel), true);
+
+		LetterboxBottomPanel->SetBrush(BlackBrush);
+		LetterboxBottomPanel->SetVisibility(ESlateVisibility::Collapsed);
+		ConfigureLetterboxSlot(RootCanvas->AddChildToCanvas(LetterboxBottomPanel), false);
 
 		MessageBackground->SetPadding(FMargin(18.0f, 7.0f));
 		MessageBackground->SetBrush(MakeRoundedBoxBrush(
@@ -3081,12 +3110,17 @@ namespace TunaSweeperEditorSetup
 			MessageSlot->SetAlignment(FVector2D(0.5f, 1.0f));
 			MessageSlot->SetPosition(FVector2D(0.0f, -58.0f));
 			MessageSlot->SetSize(FVector2D(520.0f, 48.0f));
+			MessageSlot->SetZOrder(20);
 		}
 
 		BlackFadePanel->SetBrush(BlackBrush);
 		BlackFadePanel->SetRenderOpacity(0.0f);
 		BlackFadePanel->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
-		FillCanvas(RootCanvas->AddChildToCanvas(BlackFadePanel));
+		if (UCanvasPanelSlot* FadeSlot = RootCanvas->AddChildToCanvas(BlackFadePanel))
+		{
+			FillCanvas(FadeSlot);
+			FadeSlot->SetZOrder(30);
+		}
 
 		RegisterAllWidgetsInTree(WidgetBlueprint);
 		WidgetBlueprint->MarkPackageDirty();

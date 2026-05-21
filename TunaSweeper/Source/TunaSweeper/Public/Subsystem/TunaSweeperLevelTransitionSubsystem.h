@@ -80,5 +80,6 @@ private:
 	float MinimumVideoDisplaySeconds = 1.0f;
 	double VideoVisibleStartSeconds = 0.0;
 	bool bOpenLevelRequested = false;
+	bool bUseLetterbox = false;
 	FDelegateHandle PostLoadMapHandle;
 };

@@ -16,6 +16,16 @@
 #include "UI/TunaSweeperLevelTransitionWidget.h"
 #include "UObject/UObjectGlobals.h"
 
+namespace
+{
+	bool ShouldUseLetterboxForMediaSource(UMediaSource* MediaSource, const TSoftObjectPtr<UMediaSource>& MediaSourceReference)
+	{
+		const FString MediaSourceName = MediaSource ? MediaSource->GetName() : FString();
+		const FString MediaSourcePath = MediaSourceReference.ToSoftObjectPath().ToString();
+		return MediaSourceName.Contains(TEXT("BunkerToRaid")) || MediaSourcePath.Contains(TEXT("BunkerToRaid"));
+	}
+}
+
 void UTunaSweeperLevelTransitionSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
@@ -105,6 +115,7 @@ bool UTunaSweeperLevelTransitionSubsystem::StartTransition(
 	FadeElapsedSeconds = 0.0f;
 	VideoVisibleStartSeconds = 0.0;
 	bOpenLevelRequested = false;
+	bUseLetterbox = false;
 	LastWorldContextObject = WorldContextObject;
 
 	if (!EnsureTransitionWidget(WorldContextObject))
@@ -119,6 +130,7 @@ bool UTunaSweeperLevelTransitionSubsystem::StartTransition(
 		FinishTransition();
 		return false;
 	}
+	bUseLetterbox = ShouldUseLetterboxForMediaSource(MediaSource, InMediaSource);
 
 	MediaPlayer = NewObject<UMediaPlayer>(this, TEXT("LevelTransitionMediaPlayer"));
 	MediaTexture = NewObject<UMediaTexture>(this, TEXT("LevelTransitionMediaTexture"));
@@ -138,6 +150,7 @@ bool UTunaSweeperLevelTransitionSubsystem::StartTransition(
 
 	ActiveWidget->SetVideoTexture(MediaTexture);
 	ActiveWidget->SetTransitionMessage(TransitionMessage);
+	ActiveWidget->SetLetterboxEnabled(bUseLetterbox);
 	ActiveWidget->SetVideoVisible(false);
 	ActiveWidget->SetBlackOpacity(0.0f);
 
@@ -204,6 +217,7 @@ void UTunaSweeperLevelTransitionSubsystem::HandlePostLoadMapWithWorld(UWorld* Lo
 			ActiveWidget->SetVideoTexture(MediaTexture);
 		}
 		ActiveWidget->SetTransitionMessage(TransitionMessage);
+		ActiveWidget->SetLetterboxEnabled(bUseLetterbox);
 		ActiveWidget->SetVideoVisible(true);
 		ActiveWidget->SetBlackOpacity(0.0f);
 	}
@@ -239,6 +253,7 @@ bool UTunaSweeperLevelTransitionSubsystem::EnsureTransitionWidget(UObject* World
 
 	ActiveWidget->AddToViewport(1000);
 	ActiveWidget->SetVideoVisible(false);
+	ActiveWidget->SetLetterboxEnabled(false);
 	ActiveWidget->SetTransitionMessage(TransitionMessage);
 	ActiveWidget->SetBlackOpacity(0.0f);
 
@@ -268,6 +283,7 @@ void UTunaSweeperLevelTransitionSubsystem::BeginVideoReveal()
 			ActiveWidget->SetVideoTexture(MediaTexture);
 		}
 		ActiveWidget->SetTransitionMessage(TransitionMessage);
+		ActiveWidget->SetLetterboxEnabled(bUseLetterbox);
 		ActiveWidget->SetVideoVisible(true);
 		ActiveWidget->SetBlackOpacity(1.0f);
 	}
@@ -334,6 +350,7 @@ void UTunaSweeperLevelTransitionSubsystem::FinishTransition()
 	FadeElapsedSeconds = 0.0f;
 	VideoVisibleStartSeconds = 0.0;
 	bOpenLevelRequested = false;
+	bUseLetterbox = false;
 }
 
 void UTunaSweeperLevelTransitionSubsystem::SetBlackOpacity(float InOpacity)
