@@ -42,6 +42,7 @@ bool UTunaSweeperBgmSubsystem::PlayBgm(
 		bFadeOutStopRequested = false;
 		bLoopActiveBgm = bLoop;
 		ActiveBgmVolume = ClampedVolume;
+		ActiveBgmComponent->SetVolumeMultiplier(ActiveBgmVolume);
 		if (ClampedFadeInDuration > 0.0f)
 		{
 			ActiveBgmComponent->FadeIn(ClampedFadeInDuration, ActiveBgmVolume);
@@ -62,7 +63,7 @@ bool UTunaSweeperBgmSubsystem::PlayBgm(
 	ActiveBgmComponent = UGameplayStatics::CreateSound2D(
 		GameInstance,
 		LoadedSound,
-		ClampedFadeInDuration > 0.0f ? 0.0f : ClampedVolume,
+		ClampedVolume,
 		1.0f,
 		0.0f,
 		nullptr,
