@@ -14,6 +14,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "MediaPlayer.h"
 #include "MediaTexture.h"
+#include "Subsystem/TunaSweeperBgmSubsystem.h"
 #include "UI/TunaSweeperUIFont.h"
 
 namespace TunaSweeperScenarioPresentation
@@ -118,6 +119,7 @@ void UTunaSweeperScenarioPresentationWidget::NativeConstruct()
 	PhaseElapsedSeconds = 0.0f;
 	Phase = ETunaSweeperScenarioPresentationPhase::FadeIn;
 	bTravelStarted = false;
+	bOpeningScenarioBgmStarted = false;
 	ResetSystemTextTypewriter();
 	BeginCurrentLine();
 	SetPresentationTextVisible(true);
@@ -145,6 +147,7 @@ void UTunaSweeperScenarioPresentationWidget::NativeTick(const FGeometry& MyGeome
 		{
 			Phase = ETunaSweeperScenarioPresentationPhase::DisplayLine;
 			PhaseElapsedSeconds = 0.0f;
+			StartOpeningScenarioBgm();
 		}
 		return;
 	}
@@ -261,6 +264,7 @@ void UTunaSweeperScenarioPresentationWidget::AdvanceOrFillLine()
 		Phase = ETunaSweeperScenarioPresentationPhase::DisplayLine;
 		PhaseElapsedSeconds = 0.0f;
 		SetFadeOverlayOpacity(0.0f);
+		StartOpeningScenarioBgm();
 		return;
 	}
 
@@ -584,6 +588,23 @@ void UTunaSweeperScenarioPresentationWidget::AdvanceLine()
 	}
 
 	StartFadeOut();
+}
+
+void UTunaSweeperScenarioPresentationWidget::StartOpeningScenarioBgm()
+{
+	if (bOpeningScenarioBgmStarted)
+	{
+		return;
+	}
+
+	bOpeningScenarioBgmStarted = true;
+	if (UGameInstance* GameInstance = GetGameInstance())
+	{
+		if (UTunaSweeperBgmSubsystem* BgmSubsystem = GameInstance->GetSubsystem<UTunaSweeperBgmSubsystem>())
+		{
+			BgmSubsystem->PlayOpeningScenarioBgm();
+		}
+	}
 }
 
 void UTunaSweeperScenarioPresentationWidget::StartFadeOut()

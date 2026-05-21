@@ -24,6 +24,12 @@ public:
 	bool PlayTitleBgm(float FadeInDuration = 0.75f);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|BGM")
+	bool PlayOpeningScenarioBgm(float FadeInDuration = 0.75f);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|BGM")
+	bool PlayBunkerBgm(float FadeInDuration = 0.75f);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|BGM")
 	void FadeOutAndStop(float FadeOutDuration = 0.5f);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|BGM")
@@ -41,6 +47,21 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TunaSweeper|BGM")
 	bool bTitleBgmLooping = true;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TunaSweeper|BGM")
+	TSoftObjectPtr<USoundBase> OpeningScenarioBgmSound;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TunaSweeper|BGM", meta = (ClampMin = "0.0", UIMin = "0.0", UIMax = "1.0"))
+	float OpeningScenarioBgmVolume = 0.65f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TunaSweeper|BGM")
+	TSoftObjectPtr<USoundBase> BunkerBgmSound;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TunaSweeper|BGM", meta = (ClampMin = "0.0", UIMin = "0.0", UIMax = "1.0"))
+	float BunkerBgmVolume = 0.55f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TunaSweeper|BGM")
+	bool bBunkerBgmLooping = true;
 
 private:
 	UFUNCTION()

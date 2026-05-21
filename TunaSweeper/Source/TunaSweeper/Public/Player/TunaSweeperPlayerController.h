@@ -113,6 +113,7 @@ private:
 	void EnsureGameHudWidget();
 	void EnsureIntroMenuWidget();
 	void EnsureScenarioPresentationWidget();
+	void ApplyLevelBgmState();
 	bool ShowBunkerEntryFadeIfNeeded();
 	void MaybeStartCanBotIntroDialogue();
 	void BuildCanBotIntroDialogueLines(TArray<FTunaSweeperDialogueLine>& OutDialogueLines) const;
@@ -123,6 +124,7 @@ private:
 	bool IsIntroMap() const;
 	bool IsOpeningScenarioMap() const;
 	bool IsBunkerMap() const;
+	bool IsRaidMap() const;
 	bool GetMouseAimPointOnPlane(float PlaneZ, FVector& OutAimPoint) const;
 	bool FindDropLocationNearPlayer(FVector& OutDropLocation) const;
 	ATunaSweeperPickupItemActor* SpawnDroppedPickupItem(int32 ItemId, int32 Quantity);

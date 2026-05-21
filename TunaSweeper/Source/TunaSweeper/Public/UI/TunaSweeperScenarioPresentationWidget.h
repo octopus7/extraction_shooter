@@ -47,6 +47,7 @@ private:
 	void UpdateSystemTextTypewriter(float DeltaTime);
 	void AdvanceOrFillLine();
 	void AdvanceLine();
+	void StartOpeningScenarioBgm();
 	void StartFadeOut();
 	void StartIntroVideo();
 	void BeginIntroVideoFadeOut();
@@ -118,4 +119,5 @@ private:
 	float PhaseElapsedSeconds = 0.0f;
 	ETunaSweeperScenarioPresentationPhase Phase = ETunaSweeperScenarioPresentationPhase::FadeIn;
 	bool bTravelStarted = false;
+	bool bOpeningScenarioBgmStarted = false;
 };

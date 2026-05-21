@@ -232,6 +232,7 @@ void ATunaSweeperPlayerController::BeginPlay()
 	}
 	else
 	{
+		ApplyLevelBgmState();
 		EnsureGameHudWidget();
 		const bool bShowingBunkerEntryFade = ShowBunkerEntryFadeIfNeeded();
 		if (bShowingBunkerEntryFade && GetWorld())
@@ -247,6 +248,32 @@ void ATunaSweeperPlayerController::BeginPlay()
 		{
 			MaybeStartCanBotIntroDialogue();
 		}
+	}
+}
+
+void ATunaSweeperPlayerController::ApplyLevelBgmState()
+{
+	if (!IsLocalController())
+	{
+		return;
+	}
+
+	UGameInstance* GameInstance = GetGameInstance();
+	UTunaSweeperBgmSubsystem* BgmSubsystem = GameInstance
+		? GameInstance->GetSubsystem<UTunaSweeperBgmSubsystem>()
+		: nullptr;
+	if (!BgmSubsystem)
+	{
+		return;
+	}
+
+	if (IsBunkerMap())
+	{
+		BgmSubsystem->PlayBunkerBgm();
+	}
+	else if (IsRaidMap())
+	{
+		BgmSubsystem->StopBgm();
 	}
 }
 
@@ -646,6 +673,12 @@ bool ATunaSweeperPlayerController::IsBunkerMap() const
 {
 	const UWorld* World = GetWorld();
 	return World && World->GetMapName().EndsWith(TEXT("BunkerMap"));
+}
+
+bool ATunaSweeperPlayerController::IsRaidMap() const
+{
+	const UWorld* World = GetWorld();
+	return World && World->GetMapName().EndsWith(TEXT("RaidMap"));
 }
 
 bool ATunaSweeperPlayerController::FindDropLocationNearPlayer(FVector& OutDropLocation) const

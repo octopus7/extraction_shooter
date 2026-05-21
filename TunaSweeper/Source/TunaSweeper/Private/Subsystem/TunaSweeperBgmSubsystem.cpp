@@ -8,6 +8,10 @@ UTunaSweeperBgmSubsystem::UTunaSweeperBgmSubsystem()
 {
 	TitleBgmSound = TSoftObjectPtr<USoundBase>(
 		FSoftObjectPath(TEXT("/Game/Audio/BGM/Where_the_Birds_Still_Sing.Where_the_Birds_Still_Sing")));
+	OpeningScenarioBgmSound = TSoftObjectPtr<USoundBase>(
+		FSoftObjectPath(TEXT("/Game/Audio/BGM/Sun_Through_Glass.Sun_Through_Glass")));
+	BunkerBgmSound = TSoftObjectPtr<USoundBase>(
+		FSoftObjectPath(TEXT("/Game/Audio/BGM/Glass_Towers_at_Dawn.Glass_Towers_at_Dawn")));
 }
 
 void UTunaSweeperBgmSubsystem::Deinitialize()
@@ -95,6 +99,16 @@ bool UTunaSweeperBgmSubsystem::PlayBgm(
 bool UTunaSweeperBgmSubsystem::PlayTitleBgm(float FadeInDuration)
 {
 	return PlayBgm(TitleBgmSound, FadeInDuration, TitleBgmVolume, bTitleBgmLooping);
+}
+
+bool UTunaSweeperBgmSubsystem::PlayOpeningScenarioBgm(float FadeInDuration)
+{
+	return PlayBgm(OpeningScenarioBgmSound, FadeInDuration, OpeningScenarioBgmVolume, false);
+}
+
+bool UTunaSweeperBgmSubsystem::PlayBunkerBgm(float FadeInDuration)
+{
+	return PlayBgm(BunkerBgmSound, FadeInDuration, BunkerBgmVolume, bBunkerBgmLooping);
 }
 
 void UTunaSweeperBgmSubsystem::FadeOutAndStop(float FadeOutDuration)
