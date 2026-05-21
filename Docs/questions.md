@@ -485,3 +485,8 @@ A. 있다. UE 5.7 기준으로 Take Recorder를 사용하면 PIE 세션에서 �
 Q. 풀화면 녹화하고 싶으면 패키징 하고 윈도우 빌드로 플레이 해야겠네?
 
 A. 최종 공개용 풀화면 영상이면 패키징한 Windows 빌드로 실행해서 녹화하는 쪽이 가장 깔끔하다. 에디터/PIE 오버헤드, 포커스 문제, PIE 표시, 에디터 UI 노출 위험이 줄고 실제 플레이어 환경과도 더 가깝다. 다만 반드시 패키징해야만 하는 것은 아니며 빠른 확인용이면 Standalone Game이나 새 PIE 창을 크게 띄워 OBS로 잡을 수 있다. HUD와 실제 화면을 그대로 녹화하려면 Take Recorder보다 OBS, Xbox Game Bar, NVIDIA 녹화 같은 화면 캡처 도구가 적합하다.
+## 2026-05-22 03:45:14 (소요시간: 1분 미만)
+
+Q. 애니 루프 지정 어디서 하지? ABP 야 아님 애님애셋
+
+A. 둘 다 가능하지만, 실제 게임에서 어떤 상태가 반복될지를 정하는 것은 보통 ABP 쪽이다. 걷기/대기처럼 상태별로 반복 재생되는 동작은 ABP의 AnimGraph 또는 State Machine 안에 있는 Sequence Player 노드에서 Loop Animation을 켜는 방식이 일반적이다. Animation Sequence 애셋 자체의 루프 관련 설정은 에디터 미리보기, 단독 재생, Montage/Sequence 직접 사용 같은 경우에 영향을 주며, ABP 안의 Sequence Player가 별도 루프 설정을 가지고 있으면 그 노드 설정이 실제 재생에 더 직접적이다.
