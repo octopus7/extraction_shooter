@@ -1,0 +1,88 @@
+{
+  "SourceImage": "mask_digits_0_9_001.png",
+  "SourceWidth": 2172,
+  "SourceHeight": 724,
+  "GeneratedAt": "2026-05-22 07:53:15",
+  "Digits": [
+    {
+      "Digit": "0",
+      "X": 39,
+      "Y": 244,
+      "Width": 201,
+      "Height": 241,
+      "Advance": 211
+    },
+    {
+      "Digit": "1",
+      "X": 278,
+      "Y": 243,
+      "Width": 128,
+      "Height": 242,
+      "Advance": 138
+    },
+    {
+      "Digit": "2",
+      "X": 473,
+      "Y": 244,
+      "Width": 173,
+      "Height": 242,
+      "Advance": 183
+    },
+    {
+      "Digit": "3",
+      "X": 690,
+      "Y": 242,
+      "Width": 171,
+      "Height": 243,
+      "Advance": 181
+    },
+    {
+      "Digit": "4",
+      "X": 901,
+      "Y": 244,
+      "Width": 202,
+      "Height": 241,
+      "Advance": 212
+    },
+    {
+      "Digit": "5",
+      "X": 1140,
+      "Y": 243,
+      "Width": 167,
+      "Height": 242,
+      "Advance": 177
+    },
+    {
+      "Digit": "6",
+      "X": 1346,
+      "Y": 244,
+      "Width": 181,
+      "Height": 241,
+      "Advance": 191
+    },
+    {
+      "Digit": "7",
+      "X": 1555,
+      "Y": 243,
+      "Width": 163,
+      "Height": 242,
+      "Advance": 173
+    },
+    {
+      "Digit": "8",
+      "X": 1746,
+      "Y": 242,
+      "Width": 177,
+      "Height": 243,
+      "Advance": 187
+    },
+    {
+      "Digit": "9",
+      "X": 1953,
+      "Y": 243,
+      "Width": 180,
+      "Height": 242,
+      "Advance": 190
+    }
+  ]
+}
