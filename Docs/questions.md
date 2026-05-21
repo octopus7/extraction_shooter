@@ -451,3 +451,9 @@ A. 다르다. 현재 구현은 `RayCount=360`으로 360도 전체를 레이캐�
 Q. 지금 시야거리 얼마야?
 
 A. 현재 `FTunaSweeperPlayerVisionSettings::SightDistance` 기본값은 `1800cm`이다.
+
+## 2026-05-22 01:40:29 (소요시간: 1분 미만)
+
+Q. 임포트된 인트로 영상 이름을 `intro.mp4`로 바꾸려면 파일명을 직접 고치고 미디어 링크만 고치면 되는가?
+
+A. 현재 인트로 영상 구현은 별도 `FileMediaSource` `.uasset`을 참조하지 않고, 코드에서 `UFileMediaSource`를 생성해 `./Movies/intro.mp4`를 직접 지정한다. 따라서 실제 파일명과 `UTunaSweeperScenarioPresentationWidget`의 `IntroVideoFilePath` 상수만 일치하면 된다. 만약 나중에 콘텐츠 브라우저의 `FileMediaSource` 에셋을 쓰는 구조로 바꾸면 그 에셋의 `FilePath`도 함께 수정해야 한다.

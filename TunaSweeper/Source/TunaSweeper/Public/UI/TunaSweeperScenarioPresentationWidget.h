@@ -5,14 +5,22 @@
 #include "TunaSweeperScenarioPresentationWidget.generated.h"
 
 class UBorder;
+class UFileMediaSource;
 class UImage;
+class UMediaPlayer;
+class UMediaTexture;
 class UTextBlock;
 
 enum class ETunaSweeperScenarioPresentationPhase : uint8
 {
 	FadeIn,
 	DisplayLine,
-	FadeOut
+	FadeOutBeforeVideo,
+	OpeningVideo,
+	VideoFadeIn,
+	PlayingVideo,
+	VideoFadeToBlack,
+	WaitingForVideoEnd
 };
 
 UCLASS(BlueprintType, Blueprintable)
@@ -23,6 +31,7 @@ class TUNASWEEPER_API UTunaSweeperScenarioPresentationWidget : public UUserWidge
 protected:
 	virtual TSharedRef<SWidget> RebuildWidget() override;
 	virtual void NativeConstruct() override;
+	virtual void NativeDestruct() override;
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 	virtual FReply NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent) override;
 	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
@@ -39,13 +48,35 @@ private:
 	void AdvanceOrFillLine();
 	void AdvanceLine();
 	void StartFadeOut();
+	void StartIntroVideo();
+	void BeginIntroVideoFadeOut();
+	void FinishIntroVideoAndTravel();
+	void ClearIntroVideo();
+	void SetIntroVideoVisible(bool bVisible);
+	void SetPresentationTextVisible(bool bVisible);
+	bool ShouldStartIntroVideoFadeOut() const;
 	void TravelToBunker();
 	void SetFadeOverlayOpacity(float Opacity);
 	float GetCurrentLineAutoAdvanceSeconds() const;
 	bool IsCurrentLineFullyVisible() const;
 
+	UFUNCTION()
+	void HandleIntroVideoOpened(FString OpenedUrl);
+
+	UFUNCTION()
+	void HandleIntroVideoOpenFailed(FString FailedUrl);
+
+	UFUNCTION()
+	void HandleIntroVideoEndReached();
+
 	UPROPERTY(Transient)
 	TObjectPtr<UImage> BackgroundImage;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UImage> IntroVideoImage;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UImage> IntroVideoMaskImage;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UBorder> VignetteOverlay;
@@ -64,6 +95,15 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<UTextBlock> PromptText;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UMediaPlayer> IntroVideoMediaPlayer;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UMediaTexture> IntroVideoMediaTexture;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UFileMediaSource> IntroVideoMediaSource;
 
 	TArray<FText> MonologueLines;
 	FString SystemTitleFullText;

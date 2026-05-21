@@ -8,18 +8,26 @@
 #include "Components/TextBlock.h"
 #include "Components/Widget.h"
 #include "Engine/Texture2D.h"
+#include "FileMediaSource.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "InputCoreTypes.h"
 #include "Kismet/GameplayStatics.h"
+#include "MediaPlayer.h"
+#include "MediaTexture.h"
 
 namespace TunaSweeperScenarioPresentation
 {
 	const FName OpeningScenarioFlag(TEXT("scenario.opening.awakening"));
 	const FName BunkerLevelName(TEXT("BunkerMap"));
 	const TCHAR* OpeningBackgroundTexturePath = TEXT("/Game/UI/Story/T_Story_OpeningLightParticles.T_Story_OpeningLightParticles");
+	const TCHAR* IntroVideoMaskTexturePath = TEXT("/Game/UI/Story/IntroVedeoMask.IntroVedeoMask");
+	const TCHAR* IntroVideoFilePath = TEXT("./Movies/intro.mp4");
 	constexpr float FadeInSeconds = 1.2f;
 	constexpr float MinimumLineSeconds = 2.2f;
-	constexpr float FadeOutSeconds = 1.25f;
+	constexpr float FadeOutSeconds = 1.0f;
+	constexpr float IntroVideoFadeInSeconds = 1.0f;
+	constexpr float IntroVideoFadeOutLeadSeconds = 1.0f;
+	constexpr float IntroVideoFadeOutSeconds = 0.5f;
 	constexpr float SystemTypewriterCharactersPerSecond = 13.0f;
 	constexpr float SystemStatusTypewriterDelaySeconds = 0.35f;
 	constexpr float MonologueTypewriterCharactersPerSecond = 15.0f;
@@ -102,6 +110,7 @@ void UTunaSweeperScenarioPresentationWidget::NativeConstruct()
 	Super::NativeConstruct();
 
 	SetIsFocusable(true);
+	ClearIntroVideo();
 	InitializeMonologueLines();
 	BuildPresentationWidget();
 
@@ -111,7 +120,15 @@ void UTunaSweeperScenarioPresentationWidget::NativeConstruct()
 	bTravelStarted = false;
 	ResetSystemTextTypewriter();
 	BeginCurrentLine();
+	SetPresentationTextVisible(true);
+	SetIntroVideoVisible(false);
 	SetFadeOverlayOpacity(1.0f);
+}
+
+void UTunaSweeperScenarioPresentationWidget::NativeDestruct()
+{
+	ClearIntroVideo();
+	Super::NativeDestruct();
 }
 
 void UTunaSweeperScenarioPresentationWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
@@ -143,7 +160,7 @@ void UTunaSweeperScenarioPresentationWidget::NativeTick(const FGeometry& MyGeome
 		return;
 	}
 
-	if (Phase == ETunaSweeperScenarioPresentationPhase::FadeOut)
+	if (Phase == ETunaSweeperScenarioPresentationPhase::FadeOutBeforeVideo)
 	{
 		UpdateSystemTextTypewriter(InDeltaTime);
 		UpdateMonologueTypewriter(InDeltaTime);
@@ -151,8 +168,67 @@ void UTunaSweeperScenarioPresentationWidget::NativeTick(const FGeometry& MyGeome
 		SetFadeOverlayOpacity(Alpha);
 		if (Alpha >= 1.0f)
 		{
-			TravelToBunker();
+			StartIntroVideo();
 		}
+		return;
+	}
+
+	if (Phase == ETunaSweeperScenarioPresentationPhase::OpeningVideo)
+	{
+		return;
+	}
+
+	if (Phase == ETunaSweeperScenarioPresentationPhase::VideoFadeIn)
+	{
+		if (ShouldStartIntroVideoFadeOut())
+		{
+			BeginIntroVideoFadeOut();
+			return;
+		}
+
+		const float Alpha = FMath::Clamp(1.0f - PhaseElapsedSeconds / TunaSweeperScenarioPresentation::IntroVideoFadeInSeconds, 0.0f, 1.0f);
+		SetFadeOverlayOpacity(Alpha);
+		if (Alpha <= 0.0f)
+		{
+			Phase = ETunaSweeperScenarioPresentationPhase::PlayingVideo;
+			PhaseElapsedSeconds = 0.0f;
+		}
+		return;
+	}
+
+	if (Phase == ETunaSweeperScenarioPresentationPhase::PlayingVideo)
+	{
+		if (ShouldStartIntroVideoFadeOut())
+		{
+			BeginIntroVideoFadeOut();
+		}
+		return;
+	}
+
+	if (Phase == ETunaSweeperScenarioPresentationPhase::VideoFadeToBlack)
+	{
+		const float Alpha = FMath::Clamp(PhaseElapsedSeconds / TunaSweeperScenarioPresentation::IntroVideoFadeOutSeconds, 0.0f, 1.0f);
+		SetFadeOverlayOpacity(Alpha);
+		if (Alpha >= 1.0f)
+		{
+			Phase = ETunaSweeperScenarioPresentationPhase::WaitingForVideoEnd;
+			PhaseElapsedSeconds = 0.0f;
+		}
+		return;
+	}
+
+	if (Phase == ETunaSweeperScenarioPresentationPhase::WaitingForVideoEnd)
+	{
+		if (ShouldStartIntroVideoFadeOut())
+		{
+			const FTimespan Duration = IntroVideoMediaPlayer ? IntroVideoMediaPlayer->GetDuration() : FTimespan::Zero();
+			const FTimespan CurrentTime = IntroVideoMediaPlayer ? IntroVideoMediaPlayer->GetTime() : FTimespan::Zero();
+			if (Duration > FTimespan::Zero() && (Duration - CurrentTime).GetTotalSeconds() <= 0.03)
+			{
+				FinishIntroVideoAndTravel();
+			}
+		}
+		return;
 	}
 }
 
@@ -202,9 +278,10 @@ void UTunaSweeperScenarioPresentationWidget::AdvanceOrFillLine()
 		return;
 	}
 
-	if (Phase == ETunaSweeperScenarioPresentationPhase::FadeOut)
+	if (Phase == ETunaSweeperScenarioPresentationPhase::FadeOutBeforeVideo)
 	{
-		TravelToBunker();
+		SetFadeOverlayOpacity(1.0f);
+		StartIntroVideo();
 	}
 }
 
@@ -226,6 +303,12 @@ void UTunaSweeperScenarioPresentationWidget::BuildPresentationWidget()
 	BackgroundImage = WidgetTree->ConstructWidget<UImage>(
 		UImage::StaticClass(),
 		TEXT("ScenarioBackgroundImage"));
+	IntroVideoImage = WidgetTree->ConstructWidget<UImage>(
+		UImage::StaticClass(),
+		TEXT("ScenarioIntroVideoImage"));
+	IntroVideoMaskImage = WidgetTree->ConstructWidget<UImage>(
+		UImage::StaticClass(),
+		TEXT("ScenarioIntroVideoMaskImage"));
 	VignetteOverlay = WidgetTree->ConstructWidget<UBorder>(
 		UBorder::StaticClass(),
 		TEXT("ScenarioVignetteOverlay"));
@@ -245,7 +328,7 @@ void UTunaSweeperScenarioPresentationWidget::BuildPresentationWidget()
 		UBorder::StaticClass(),
 		TEXT("ScenarioFadeOverlay"));
 
-	if (!RootCanvas || !BackgroundImage || !VignetteOverlay || !TitleText || !StatusText || !MonologueText || !PromptText || !FadeOverlay)
+	if (!RootCanvas || !BackgroundImage || !IntroVideoImage || !IntroVideoMaskImage || !VignetteOverlay || !TitleText || !StatusText || !MonologueText || !PromptText || !FadeOverlay)
 	{
 		return;
 	}
@@ -263,6 +346,26 @@ void UTunaSweeperScenarioPresentationWidget::BuildPresentationWidget()
 	BackgroundImage->SetBrush(BackgroundBrush);
 	AddFullScreenChild(RootCanvas, BackgroundImage, 0);
 
+	FSlateBrush IntroVideoBrush;
+	IntroVideoBrush.DrawAs = ESlateBrushDrawType::Image;
+	IntroVideoBrush.TintColor = FSlateColor(FLinearColor::White);
+	IntroVideoBrush.ImageSize = FVector2D(1920.0f, 1080.0f);
+	IntroVideoImage->SetBrush(IntroVideoBrush);
+	IntroVideoImage->SetVisibility(ESlateVisibility::Collapsed);
+	AddFullScreenChild(RootCanvas, IntroVideoImage, 2);
+
+	FSlateBrush IntroVideoMaskBrush;
+	IntroVideoMaskBrush.DrawAs = ESlateBrushDrawType::Image;
+	IntroVideoMaskBrush.TintColor = FSlateColor(FLinearColor::White);
+	IntroVideoMaskBrush.ImageSize = FVector2D(1920.0f, 1080.0f);
+	if (UTexture2D* IntroVideoMaskTexture = LoadObject<UTexture2D>(nullptr, TunaSweeperScenarioPresentation::IntroVideoMaskTexturePath))
+	{
+		IntroVideoMaskBrush.SetResourceObject(IntroVideoMaskTexture);
+	}
+	IntroVideoMaskImage->SetBrush(IntroVideoMaskBrush);
+	IntroVideoMaskImage->SetVisibility(ESlateVisibility::Collapsed);
+	AddFullScreenChild(RootCanvas, IntroVideoMaskImage, 3);
+
 	VignetteOverlay->SetBrushColor(FLinearColor::Black);
 	VignetteOverlay->SetRenderOpacity(0.38f);
 	VignetteOverlay->SetVisibility(ESlateVisibility::HitTestInvisible);
@@ -279,7 +382,7 @@ void UTunaSweeperScenarioPresentationWidget::BuildPresentationWidget()
 		TitleSlot->SetAlignment(FVector2D::ZeroVector);
 		TitleSlot->SetPosition(FVector2D(72.0f, 62.0f));
 		TitleSlot->SetSize(FVector2D(520.0f, 42.0f));
-		TitleSlot->SetZOrder(3);
+		TitleSlot->SetZOrder(4);
 	}
 
 	StatusText->SetText(FText::FromString(TEXT("B-07 \uBC99\uCEE4 / \uBE44\uC0C1 \uAE30\uC0C1")));
@@ -293,7 +396,7 @@ void UTunaSweeperScenarioPresentationWidget::BuildPresentationWidget()
 		StatusSlot->SetAlignment(FVector2D::ZeroVector);
 		StatusSlot->SetPosition(FVector2D(72.0f, 100.0f));
 		StatusSlot->SetSize(FVector2D(620.0f, 34.0f));
-		StatusSlot->SetZOrder(3);
+		StatusSlot->SetZOrder(4);
 	}
 
 	MonologueText->SetFont(MakeFont(MonologueText, 34));
@@ -308,7 +411,7 @@ void UTunaSweeperScenarioPresentationWidget::BuildPresentationWidget()
 		MonologueSlot->SetAlignment(FVector2D(0.0f, 0.5f));
 		MonologueSlot->SetPosition(FVector2D(-520.0f, 0.0f));
 		MonologueSlot->SetSize(FVector2D(1040.0f, 96.0f));
-		MonologueSlot->SetZOrder(3);
+		MonologueSlot->SetZOrder(4);
 	}
 
 	PromptText->SetText(FText::FromString(TEXT("\uD074\uB9AD\uD574\uC11C \uACC4\uC18D")));
@@ -323,7 +426,7 @@ void UTunaSweeperScenarioPresentationWidget::BuildPresentationWidget()
 		PromptSlot->SetAlignment(FVector2D(1.0f, 1.0f));
 		PromptSlot->SetPosition(FVector2D(-70.0f, -70.0f));
 		PromptSlot->SetSize(FVector2D(360.0f, 34.0f));
-		PromptSlot->SetZOrder(3);
+		PromptSlot->SetZOrder(4);
 	}
 
 	FadeOverlay->SetBrushColor(FLinearColor::Black);
@@ -485,12 +588,183 @@ void UTunaSweeperScenarioPresentationWidget::AdvanceLine()
 
 void UTunaSweeperScenarioPresentationWidget::StartFadeOut()
 {
-	Phase = ETunaSweeperScenarioPresentationPhase::FadeOut;
+	Phase = ETunaSweeperScenarioPresentationPhase::FadeOutBeforeVideo;
 	PhaseElapsedSeconds = 0.0f;
 	if (PromptText)
 	{
 		PromptText->SetVisibility(ESlateVisibility::Collapsed);
 	}
+}
+
+void UTunaSweeperScenarioPresentationWidget::StartIntroVideo()
+{
+	if (bTravelStarted)
+	{
+		return;
+	}
+
+	if (!IntroVideoImage)
+	{
+		TravelToBunker();
+		return;
+	}
+
+	ClearIntroVideo();
+	SetPresentationTextVisible(false);
+	SetIntroVideoVisible(true);
+	SetFadeOverlayOpacity(1.0f);
+
+	IntroVideoMediaPlayer = NewObject<UMediaPlayer>(this, TEXT("ScenarioIntroVideoMediaPlayer"));
+	IntroVideoMediaTexture = NewObject<UMediaTexture>(this, TEXT("ScenarioIntroVideoMediaTexture"));
+	IntroVideoMediaSource = NewObject<UFileMediaSource>(this, TEXT("ScenarioIntroVideoMediaSource"));
+	if (!IntroVideoMediaPlayer || !IntroVideoMediaTexture || !IntroVideoMediaSource)
+	{
+		FinishIntroVideoAndTravel();
+		return;
+	}
+
+	IntroVideoMediaSource->SetFilePath(TunaSweeperScenarioPresentation::IntroVideoFilePath);
+	IntroVideoMediaPlayer->OnMediaOpened.AddDynamic(this, &UTunaSweeperScenarioPresentationWidget::HandleIntroVideoOpened);
+	IntroVideoMediaPlayer->OnMediaOpenFailed.AddDynamic(this, &UTunaSweeperScenarioPresentationWidget::HandleIntroVideoOpenFailed);
+	IntroVideoMediaPlayer->OnEndReached.AddDynamic(this, &UTunaSweeperScenarioPresentationWidget::HandleIntroVideoEndReached);
+	IntroVideoMediaPlayer->SetLooping(false);
+
+	IntroVideoMediaTexture->SetMediaPlayer(IntroVideoMediaPlayer);
+	IntroVideoMediaTexture->UpdateResource();
+
+	FSlateBrush VideoBrush;
+	VideoBrush.DrawAs = ESlateBrushDrawType::Image;
+	VideoBrush.SetResourceObject(IntroVideoMediaTexture);
+	VideoBrush.SetImageSize(FVector2D(1920.0f, 1080.0f));
+	IntroVideoImage->SetBrush(VideoBrush);
+
+	Phase = ETunaSweeperScenarioPresentationPhase::OpeningVideo;
+	PhaseElapsedSeconds = 0.0f;
+	if (!IntroVideoMediaPlayer->OpenSource(IntroVideoMediaSource))
+	{
+		FinishIntroVideoAndTravel();
+	}
+}
+
+void UTunaSweeperScenarioPresentationWidget::HandleIntroVideoOpened(FString)
+{
+	if (!IntroVideoMediaPlayer || Phase == ETunaSweeperScenarioPresentationPhase::WaitingForVideoEnd)
+	{
+		return;
+	}
+
+	SetIntroVideoVisible(true);
+	SetFadeOverlayOpacity(1.0f);
+	Phase = ETunaSweeperScenarioPresentationPhase::VideoFadeIn;
+	PhaseElapsedSeconds = 0.0f;
+	if (!IntroVideoMediaPlayer->Play())
+	{
+		FinishIntroVideoAndTravel();
+	}
+}
+
+void UTunaSweeperScenarioPresentationWidget::HandleIntroVideoOpenFailed(FString)
+{
+	FinishIntroVideoAndTravel();
+}
+
+void UTunaSweeperScenarioPresentationWidget::HandleIntroVideoEndReached()
+{
+	FinishIntroVideoAndTravel();
+}
+
+void UTunaSweeperScenarioPresentationWidget::BeginIntroVideoFadeOut()
+{
+	if (Phase == ETunaSweeperScenarioPresentationPhase::VideoFadeToBlack ||
+		Phase == ETunaSweeperScenarioPresentationPhase::WaitingForVideoEnd)
+	{
+		return;
+	}
+
+	Phase = ETunaSweeperScenarioPresentationPhase::VideoFadeToBlack;
+	PhaseElapsedSeconds = 0.0f;
+}
+
+void UTunaSweeperScenarioPresentationWidget::FinishIntroVideoAndTravel()
+{
+	SetFadeOverlayOpacity(1.0f);
+	ClearIntroVideo();
+	TravelToBunker();
+}
+
+void UTunaSweeperScenarioPresentationWidget::ClearIntroVideo()
+{
+	if (IntroVideoMediaPlayer)
+	{
+		IntroVideoMediaPlayer->OnMediaOpened.RemoveDynamic(this, &UTunaSweeperScenarioPresentationWidget::HandleIntroVideoOpened);
+		IntroVideoMediaPlayer->OnMediaOpenFailed.RemoveDynamic(this, &UTunaSweeperScenarioPresentationWidget::HandleIntroVideoOpenFailed);
+		IntroVideoMediaPlayer->OnEndReached.RemoveDynamic(this, &UTunaSweeperScenarioPresentationWidget::HandleIntroVideoEndReached);
+		IntroVideoMediaPlayer->Close();
+	}
+
+	SetIntroVideoVisible(false);
+	IntroVideoMediaPlayer = nullptr;
+	IntroVideoMediaTexture = nullptr;
+	IntroVideoMediaSource = nullptr;
+}
+
+void UTunaSweeperScenarioPresentationWidget::SetIntroVideoVisible(bool bVisible)
+{
+	if (IntroVideoImage)
+	{
+		IntroVideoImage->SetVisibility(bVisible
+			? ESlateVisibility::SelfHitTestInvisible
+			: ESlateVisibility::Collapsed);
+	}
+	if (IntroVideoMaskImage)
+	{
+		IntroVideoMaskImage->SetVisibility(bVisible
+			? ESlateVisibility::SelfHitTestInvisible
+			: ESlateVisibility::Collapsed);
+	}
+}
+
+void UTunaSweeperScenarioPresentationWidget::SetPresentationTextVisible(bool bVisible)
+{
+	const ESlateVisibility TextVisibility = bVisible
+		? ESlateVisibility::HitTestInvisible
+		: ESlateVisibility::Collapsed;
+
+	if (TitleText)
+	{
+		TitleText->SetVisibility(TextVisibility);
+	}
+	if (StatusText)
+	{
+		StatusText->SetVisibility(TextVisibility);
+	}
+	if (MonologueText)
+	{
+		MonologueText->SetVisibility(TextVisibility);
+	}
+	if (PromptText)
+	{
+		PromptText->SetVisibility(bVisible && Phase == ETunaSweeperScenarioPresentationPhase::DisplayLine && IsCurrentLineFullyVisible()
+			? ESlateVisibility::HitTestInvisible
+			: ESlateVisibility::Collapsed);
+	}
+}
+
+bool UTunaSweeperScenarioPresentationWidget::ShouldStartIntroVideoFadeOut() const
+{
+	if (!IntroVideoMediaPlayer)
+	{
+		return false;
+	}
+
+	const FTimespan Duration = IntroVideoMediaPlayer->GetDuration();
+	if (Duration <= FTimespan::Zero())
+	{
+		return false;
+	}
+
+	const FTimespan CurrentTime = IntroVideoMediaPlayer->GetTime();
+	return (Duration - CurrentTime).GetTotalSeconds() <= TunaSweeperScenarioPresentation::IntroVideoFadeOutLeadSeconds;
 }
 
 void UTunaSweeperScenarioPresentationWidget::TravelToBunker()
