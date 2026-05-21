@@ -12,6 +12,7 @@ class UScrollBox;
 class UTextBlock;
 class UWidget;
 class UTunaSweeperScreenFadeWidget;
+class UTunaSweeperTitleWindParticleWidget;
 
 UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API UTunaSweeperIntroMenuWidget : public UUserWidget
@@ -260,6 +261,7 @@ private:
 	void SetDeleteHoldProgress(float Progress);
 	void ShowDeleteConfirmDialog();
 	void HideDeleteConfirmDialog();
+	void EnsureTitleWindParticleOverlay();
 	void BeginStartTravel(bool bAlwaysNewStart);
 	void OpenPendingStartTargetLevel();
 	void SetStartTravelControlsEnabled(bool bEnabled);
@@ -278,6 +280,9 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<UTunaSweeperScreenFadeWidget> StartTravelFadeWidget;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTunaSweeperTitleWindParticleWidget> TitleWindParticleOverlay;
 
 	static constexpr float DeleteHoldDurationSeconds = 3.0f;
 	static constexpr float CreditsScrollSpeed = 34.0f;

@@ -20,12 +20,14 @@
 #include "Subsystem/TunaSweeperBgmSubsystem.h"
 #include "TimerManager.h"
 #include "UI/TunaSweeperScreenFadeWidget.h"
+#include "UI/TunaSweeperTitleWindParticleWidget.h"
 #include "UI/TunaSweeperUIFont.h"
 
 void UTunaSweeperIntroMenuWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
+	EnsureTitleWindParticleOverlay();
 
 	if (StartButton)
 	{
@@ -1066,6 +1068,59 @@ void UTunaSweeperIntroMenuWidget::HideDeleteConfirmDialog()
 	{
 		DeleteConfirmPanel->SetVisibility(ESlateVisibility::Collapsed);
 	}
+}
+
+void UTunaSweeperIntroMenuWidget::EnsureTitleWindParticleOverlay()
+{
+	if (TitleWindParticleOverlay || !WidgetTree)
+	{
+		return;
+	}
+
+	UCanvasPanel* RootCanvas = Cast<UCanvasPanel>(WidgetTree->RootWidget);
+	if (!RootCanvas)
+	{
+		return;
+	}
+
+	auto SetCanvasZOrder = [](UWidget* Widget, int32 ZOrder)
+	{
+		if (UCanvasPanelSlot* CanvasSlot = Widget ? Cast<UCanvasPanelSlot>(Widget->Slot) : nullptr)
+		{
+			CanvasSlot->SetZOrder(ZOrder);
+		}
+	};
+
+	SetCanvasZOrder(WidgetTree->FindWidget(TEXT("BackgroundImage")), 0);
+	SetCanvasZOrder(WidgetTree->FindWidget(TEXT("LeftScrim")), 2);
+	SetCanvasZOrder(WidgetTree->FindWidget(TEXT("LogoImage")), 3);
+	SetCanvasZOrder(MainMenuPanel, 4);
+	SetCanvasZOrder(WidgetTree->FindWidget(TEXT("VersionText")), 4);
+	SetCanvasZOrder(SaveSlotPanel, 10);
+	SetCanvasZOrder(SettingsPanel, 10);
+	SetCanvasZOrder(CreditsPanel, 10);
+
+	TitleWindParticleOverlay = WidgetTree->ConstructWidget<UTunaSweeperTitleWindParticleWidget>(
+		UTunaSweeperTitleWindParticleWidget::StaticClass(),
+		TEXT("TitleWindParticleOverlay"));
+	if (!TitleWindParticleOverlay)
+	{
+		return;
+	}
+
+	TitleWindParticleOverlay->SetVisibility(ESlateVisibility::HitTestInvisible);
+
+	UCanvasPanelSlot* ParticleSlot = RootCanvas->AddChildToCanvas(TitleWindParticleOverlay);
+	if (!ParticleSlot)
+	{
+		TitleWindParticleOverlay = nullptr;
+		return;
+	}
+
+	ParticleSlot->SetAnchors(FAnchors(0.0f, 0.0f, 1.0f, 1.0f));
+	ParticleSlot->SetOffsets(FMargin(0.0f));
+	ParticleSlot->SetAlignment(FVector2D::ZeroVector);
+	ParticleSlot->SetZOrder(1);
 }
 
 void UTunaSweeperIntroMenuWidget::OpenPendingStartTargetLevel()
