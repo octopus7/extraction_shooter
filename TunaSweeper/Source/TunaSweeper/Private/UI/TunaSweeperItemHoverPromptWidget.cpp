@@ -10,6 +10,7 @@
 #include "Components/VerticalBox.h"
 #include "Components/VerticalBoxSlot.h"
 #include "Styling/SlateBrush.h"
+#include "UI/TunaSweeperUIFont.h"
 #include "Widgets/SWidget.h"
 
 namespace TunaSweeperItemHoverPrompt
@@ -46,9 +47,7 @@ namespace TunaSweeperItemHoverPrompt
 			return;
 		}
 
-		FSlateFontInfo FontInfo = TextBlock->GetFont();
-		FontInfo.Size = FontSize;
-		TextBlock->SetFont(FontInfo);
+		TunaSweeperUIFont::ApplyFont(TextBlock, FontSize);
 		TextBlock->SetText(Text);
 		TextBlock->SetColorAndOpacity(FSlateColor(Color));
 		TextBlock->SetJustification(ETextJustify::Left);

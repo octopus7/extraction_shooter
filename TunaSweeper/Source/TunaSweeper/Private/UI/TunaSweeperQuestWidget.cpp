@@ -4,6 +4,7 @@
 #include "Components/TextBlock.h"
 #include "Player/TunaSweeperPlayerController.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
+#include "UI/TunaSweeperUIFont.h"
 
 void UTunaSweeperQuestWidget::InitializeQuest(FName InQuestId)
 {
@@ -14,6 +15,7 @@ void UTunaSweeperQuestWidget::InitializeQuest(FName InQuestId)
 void UTunaSweeperQuestWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
+	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
 
 	if (QuestPrimaryButton)
 	{

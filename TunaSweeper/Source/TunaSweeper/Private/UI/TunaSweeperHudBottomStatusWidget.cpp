@@ -3,6 +3,7 @@
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
 #include "Components/Widget.h"
+#include "UI/TunaSweeperUIFont.h"
 
 namespace TunaSweeperHudStatus
 {
@@ -25,6 +26,7 @@ namespace TunaSweeperHudStatus
 void UTunaSweeperHudBottomStatusWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
+	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
 
 	if (PreviewHudState.MaxCarryWeight <= 0.0f)
 	{
@@ -37,6 +39,7 @@ void UTunaSweeperHudBottomStatusWidget::NativeConstruct()
 void UTunaSweeperHudBottomStatusWidget::NativePreConstruct()
 {
 	Super::NativePreConstruct();
+	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
 
 	if (PreviewHudState.MaxCarryWeight <= 0.0f)
 	{

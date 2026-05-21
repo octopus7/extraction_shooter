@@ -11,6 +11,7 @@
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
 #include "UI/TunaSweeperItemDragDropOperation.h"
 #include "UI/TunaSweeperItemStackTileItemObject.h"
+#include "UI/TunaSweeperUIFont.h"
 
 namespace TunaSweeperInventoryArea
 {
@@ -292,6 +293,7 @@ bool UTunaSweeperHudInventoryAreaWidget::TryResolveDropSlotFromCursor(
 void UTunaSweeperHudInventoryAreaWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
+	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
 
 	if (SortInventoryButton)
 	{

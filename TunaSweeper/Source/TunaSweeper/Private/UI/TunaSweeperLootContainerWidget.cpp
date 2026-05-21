@@ -9,6 +9,7 @@
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
 #include "UI/TunaSweeperItemDragDropOperation.h"
 #include "UI/TunaSweeperItemStackTileItemObject.h"
+#include "UI/TunaSweeperUIFont.h"
 
 namespace TunaSweeperLootContainerUi
 {
@@ -188,6 +189,7 @@ namespace TunaSweeperLootContainerUi
 void UTunaSweeperLootContainerWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
+	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
 
 	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
 	{

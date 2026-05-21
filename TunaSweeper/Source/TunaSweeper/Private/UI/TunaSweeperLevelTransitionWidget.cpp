@@ -7,6 +7,7 @@
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
 #include "MediaTexture.h"
+#include "UI/TunaSweeperUIFont.h"
 
 namespace
 {
@@ -43,6 +44,7 @@ namespace
 void UTunaSweeperLevelTransitionWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
+	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
 
 	EnsureLetterboxPanels();
 	SetCanvasZOrder(VideoImage, VideoZOrder);

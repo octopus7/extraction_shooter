@@ -83,6 +83,7 @@
 #include "UI/TunaSweeperHudItemInfoPanelWidget.h"
 #include "UI/TunaSweeperHudQuickSlotBarWidget.h"
 #include "UI/TunaSweeperHudTopReserveWidget.h"
+#include "UI/TunaSweeperUIFont.h"
 #include "UI/TunaSweeperItemThumbnailSlotWidget.h"
 #include "UI/TunaSweeperIntroMenuWidget.h"
 #include "UI/TunaSweeperLevelTransitionWidget.h"
@@ -1885,11 +1886,8 @@ namespace TunaSweeperEditorSetup
 			return;
 		}
 
-		FSlateFontInfo FontInfo = TextBlock->GetFont();
-		FontInfo.Size = FontSize;
-
 		TextBlock->SetText(Text);
-		TextBlock->SetFont(FontInfo);
+		TunaSweeperUIFont::ApplyFont(TextBlock, FontSize);
 		TextBlock->SetColorAndOpacity(FSlateColor(Color));
 		TextBlock->SetJustification(ETextJustify::Center);
 	}

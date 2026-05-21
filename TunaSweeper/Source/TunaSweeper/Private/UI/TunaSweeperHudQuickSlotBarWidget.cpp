@@ -7,6 +7,7 @@
 #include "Components/TextBlock.h"
 #include "Components/Widget.h"
 #include "Engine/Texture2D.h"
+#include "UI/TunaSweeperUIFont.h"
 
 namespace
 {
@@ -21,6 +22,7 @@ void UTunaSweeperHudQuickSlotBarWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 	CacheNamedWidgets();
+	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
 	SetSelectedQuickSlot(0);
 	SetReloadProgress(0.0f, false);
 	SetAmmoSelectorOptions(TArray<FText>(), INDEX_NONE, 0, false);

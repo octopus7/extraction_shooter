@@ -16,3 +16,10 @@ UE5 익스트랙션 슈터
 
 - [Tuna Sweeper story summary](Docs/Story/tuna_sweeper_story_summary.md)
 - [Tuna Sweeper dialogue book](Docs/Story/tuna_dialogue/tuna_sweeper_dialogue_book.md)
+
+## Fonts
+
+- TunaSweeper uses Naver NanumSquareRound as the default UI font.
+- Runtime font files live in `TunaSweeper/Content/Slate/Fonts`.
+- Source: official Naver Hangeul Nanum font page (`https://hangeul.naver.com/font/nanum`).
+- Keep only `NanumSquareRoundR.ttf` and `NanumSquareRoundB.ttf` in the project unless more weights are explicitly needed.

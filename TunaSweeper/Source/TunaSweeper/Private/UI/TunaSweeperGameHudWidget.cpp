@@ -21,6 +21,7 @@
 #include "UI/TunaSweeperHudInventoryAreaWidget.h"
 #include "UI/TunaSweeperHudItemInfoPanelWidget.h"
 #include "UI/TunaSweeperHudQuickSlotBarWidget.h"
+#include "UI/TunaSweeperUIFont.h"
 
 void UTunaSweeperGameHudWidget::NativeConstruct()
 {
@@ -40,6 +41,7 @@ void UTunaSweeperGameHudWidget::NativeConstruct()
 	}
 
 	EnsureQuestTrackerWidgets();
+	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
 	CacheAmmoReloadWidgets();
 	SetCenterPanelsVisible(false);
 	SetItemInfoPanelVisible(false);
@@ -468,16 +470,12 @@ void UTunaSweeperGameHudWidget::EnsureQuestTrackerWidgets()
 
 	QuestTrackerTitleText->SetColorAndOpacity(FSlateColor(FLinearColor(0.95f, 0.98f, 1.0f, 1.0f)));
 	QuestTrackerTitleText->SetAutoWrapText(false);
-	FSlateFontInfo TitleFont = QuestTrackerTitleText->GetFont();
-	TitleFont.Size = 18;
-	QuestTrackerTitleText->SetFont(TitleFont);
+	TunaSweeperUIFont::ApplyFont(QuestTrackerTitleText, 18, ETunaSweeperUIFontWeight::Bold);
 
 	QuestTrackerObjectiveText->SetColorAndOpacity(FSlateColor(FLinearColor(0.78f, 0.86f, 0.90f, 1.0f)));
 	QuestTrackerObjectiveText->SetAutoWrapText(true);
 	QuestTrackerObjectiveText->SetWrapTextAt(320.0f);
-	FSlateFontInfo ObjectiveFont = QuestTrackerObjectiveText->GetFont();
-	ObjectiveFont.Size = 15;
-	QuestTrackerObjectiveText->SetFont(ObjectiveFont);
+	TunaSweeperUIFont::ApplyFont(QuestTrackerObjectiveText, 15);
 
 	UVerticalBoxSlot* TitleSlot = TrackerStack->AddChildToVerticalBox(QuestTrackerTitleText);
 	if (TitleSlot)

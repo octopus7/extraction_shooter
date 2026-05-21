@@ -20,10 +20,12 @@
 #include "Subsystem/TunaSweeperBgmSubsystem.h"
 #include "TimerManager.h"
 #include "UI/TunaSweeperScreenFadeWidget.h"
+#include "UI/TunaSweeperUIFont.h"
 
 void UTunaSweeperIntroMenuWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
+	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
 
 	if (StartButton)
 	{
@@ -809,9 +811,7 @@ void UTunaSweeperIntroMenuWidget::EnsureAlwaysNewStartButton()
 	AlwaysNewStartButtonText->SetText(FText::FromString(TEXT("\uD56D\uC0C1\uC0C8\uB85C\uC2DC\uC791")));
 	AlwaysNewStartButtonText->SetColorAndOpacity(FSlateColor(FLinearColor(1.0f, 0.92f, 0.88f, 1.0f)));
 	AlwaysNewStartButtonText->SetJustification(ETextJustify::Center);
-	FSlateFontInfo FontInfo = AlwaysNewStartButtonText->GetFont();
-	FontInfo.Size = 16;
-	AlwaysNewStartButtonText->SetFont(FontInfo);
+	TunaSweeperUIFont::ApplyFont(AlwaysNewStartButtonText, 16, ETunaSweeperUIFontWeight::Bold);
 
 	AlwaysNewStartButtonBox->SetWidthOverride(180.0f);
 	AlwaysNewStartButtonBox->SetHeightOverride(42.0f);

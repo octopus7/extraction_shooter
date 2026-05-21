@@ -463,3 +463,25 @@ A. 현재 인트로 영상 구현은 별도 `FileMediaSource` `.uasset`을 참�
 Q. ABP 에서 스레드 안전하게 스피드 얻어보는법 노드 이름 뭐지
 
 A. ABP의 스레드 세이프 업데이트에서는 `Property Access` 노드로 `Try Get Pawn Owner > Movement Component > Velocity`를 읽고, 그 벡터를 `Vector Length XY`에 넣어서 지면 기준 Speed/GroundSpeed를 만든다. 이벤트 이름은 `Blueprint Thread Safe Update Animation`이고, 일반 `Get Velocity`/캐스트 체인 대신 Property Access 경로를 쓰는 쪽이 스레드 세이프한 방식이다.
+
+## 2026-05-22 03:28:10 (소요시간: 1분 미만)
+
+Q. 네이버 나눔고딕 파일을 다운받아서 기본 폰트로 지정 가능한가?
+
+A. 가능하다. 폰트 파일을 프로젝트에 넣고 UE 폰트 에셋으로 만들거나 런타임 코드에서 `FSlateFontInfo`의 `FontObject`로 지정하면 된다. 현재 프로젝트는 대부분 `TextBlock->GetFont()`에서 크기만 바꾸는 방식이라, 진짜 전역 기본 폰트처럼 쓰려면 공용 폰트 로더/헬퍼를 만들고 UI 생성 코드가 그 폰트를 사용하도록 바꾸는 방식이 가장 확실하다. `DefaultEngine.ini`의 `UserInterfaceSettings`에는 현재 `FontDPIPreset`/`FontDPI`만 있고 기본 폰트 지정은 없다.
+
+## 2026-05-22 03:29:16 (소요시간: 1분 미만)
+
+Q. 나눔고딕 다운로드도 Codex가 할 수 있는가?
+
+A. 가능하다. 다만 외부 네트워크 접근이 필요하므로 다운로드 명령은 권한 승인이 필요할 수 있다. 진행할 때는 공식 배포처에서 폰트 파일을 받아 프로젝트 폴더에 넣고, 이후 UE 폰트 에셋 import와 기본 UI 폰트 적용까지 이어서 처리하면 된다.
+## 2026-05-22 03:38:35 (소요시간: 1분 미만)
+
+Q. 언리얼에 PIE 화면 녹화 기능있어?
+
+A. 있다. UE 5.7 기준으로 Take Recorder를 사용하면 PIE 세션에서 플레이어/액터의 게임플레이 동작을 녹화해 Sequencer 테이크로 저장할 수 있다. 다만 이 기능은 OBS처럼 현재 PIE 뷰포트 픽셀과 HUD를 그대로 MP4로 녹화하는 기능이라기보다, 플레이어/액터 움직임과 애니메이션 등 소스를 기록하는 기능이다. 영상 파일이 필요하면 녹화된 Level Sequence를 Movie Render Queue로 렌더링하거나, PIE 화면 자체/HUD/디버그 오버레이까지 그대로 필요할 때는 OBS, Xbox Game Bar 같은 외부 화면 녹화 도구를 쓰는 쪽이 더 적합하다.
+## 2026-05-22 03:39:53 (소요시간: 1분 미만)
+
+Q. 풀화면 녹화하고 싶으면 패키징 하고 윈도우 빌드로 플레이 해야겠네?
+
+A. 최종 공개용 풀화면 영상이면 패키징한 Windows 빌드로 실행해서 녹화하는 쪽이 가장 깔끔하다. 에디터/PIE 오버헤드, 포커스 문제, PIE 표시, 에디터 UI 노출 위험이 줄고 실제 플레이어 환경과도 더 가깝다. 다만 반드시 패키징해야만 하는 것은 아니며 빠른 확인용이면 Standalone Game이나 새 PIE 창을 크게 띄워 OBS로 잡을 수 있다. HUD와 실제 화면을 그대로 녹화하려면 Take Recorder보다 OBS, Xbox Game Bar, NVIDIA 녹화 같은 화면 캡처 도구가 적합하다.

@@ -12,6 +12,7 @@
 #include "UI/TunaSweeperItemDragDropOperation.h"
 #include "UI/TunaSweeperItemHoverPromptWidget.h"
 #include "UI/TunaSweeperItemStackTileItemObject.h"
+#include "UI/TunaSweeperUIFont.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
 
 void UTunaSweeperItemThumbnailSlotWidget::NativeOnListItemObjectSet(UObject* ListItemObject)
@@ -20,6 +21,7 @@ void UTunaSweeperItemThumbnailSlotWidget::NativeOnListItemObjectSet(UObject* Lis
 
 	const UTunaSweeperItemStackTileItemObject* TileItemObject = Cast<UTunaSweeperItemStackTileItemObject>(ListItemObject);
 	CachedTileData = TileItemObject ? TileItemObject->GetTileData() : FTunaSweeperItemStackTileData();
+	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
 	ApplyTileData();
 
 	if (ActiveHoverPrompt)

@@ -14,6 +14,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "MediaPlayer.h"
 #include "MediaTexture.h"
+#include "UI/TunaSweeperUIFont.h"
 
 namespace TunaSweeperScenarioPresentation
 {
@@ -59,9 +60,7 @@ namespace
 
 	FSlateFontInfo MakeFont(UTextBlock* TextBlock, int32 Size)
 	{
-		FSlateFontInfo FontInfo = TextBlock ? TextBlock->GetFont() : FSlateFontInfo();
-		FontInfo.Size = Size;
-		return FontInfo;
+		return TunaSweeperUIFont::MakeFont(TextBlock, Size);
 	}
 
 	float EstimateLeftAlignedTextWidth(const FString& Text, float FontSize)
@@ -113,6 +112,7 @@ void UTunaSweeperScenarioPresentationWidget::NativeConstruct()
 	ClearIntroVideo();
 	InitializeMonologueLines();
 	BuildPresentationWidget();
+	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
 
 	CurrentLineIndex = 0;
 	PhaseElapsedSeconds = 0.0f;

@@ -2,10 +2,12 @@
 
 #include "Components/Widget.h"
 #include "UI/TunaSweeperLootContainerWidget.h"
+#include "UI/TunaSweeperUIFont.h"
 
 void UTunaSweeperHudExternalPanelWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
+	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
 	ApplyPanelMode();
 }
 

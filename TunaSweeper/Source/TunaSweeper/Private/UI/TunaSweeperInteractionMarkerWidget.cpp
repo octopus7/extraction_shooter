@@ -4,12 +4,14 @@
 #include "Components/Border.h"
 #include "Components/TextBlock.h"
 #include "Components/Widget.h"
+#include "UI/TunaSweeperUIFont.h"
 
 void UTunaSweeperInteractionMarkerWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
 	CacheNamedWidgets();
+	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
 	ApplyState();
 }
 

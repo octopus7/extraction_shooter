@@ -14,6 +14,7 @@
 #include "Interaction/TunaSweeperWorldProgressActor.h"
 #include "Player/TunaSweeperPlayerController.h"
 #include "Styling/SlateBrush.h"
+#include "UI/TunaSweeperUIFont.h"
 
 namespace TunaSweeperWorldProgressWidget
 {
@@ -42,9 +43,7 @@ namespace
 
 	FSlateFontInfo MakeProgressFont(UTextBlock* TextBlock, int32 Size)
 	{
-		FSlateFontInfo FontInfo = TextBlock ? TextBlock->GetFont() : FSlateFontInfo();
-		FontInfo.Size = Size;
-		return FontInfo;
+		return TunaSweeperUIFont::MakeFont(TextBlock, Size);
 	}
 }
 
@@ -75,6 +74,7 @@ void UTunaSweeperWorldProgressWidget::NativeConstruct()
 
 	SetIsFocusable(true);
 	BuildProgressWidget();
+	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
 
 	if (UseItemButton)
 	{

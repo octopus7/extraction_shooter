@@ -10,6 +10,7 @@
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
 #include "UI/TunaSweeperItemDragDropOperation.h"
 #include "UI/TunaSweeperItemStackTileItemObject.h"
+#include "UI/TunaSweeperUIFont.h"
 
 namespace TunaSweeperItemInfoPanel
 {
@@ -115,6 +116,7 @@ namespace TunaSweeperItemInfoPanel
 void UTunaSweeperHudItemInfoPanelWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
+	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
 
 	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
 	{

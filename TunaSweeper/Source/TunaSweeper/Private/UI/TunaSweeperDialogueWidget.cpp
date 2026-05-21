@@ -10,6 +10,7 @@
 #include "InputCoreTypes.h"
 #include "Rendering/SlateRenderer.h"
 #include "Styling/SlateBrush.h"
+#include "UI/TunaSweeperUIFont.h"
 
 namespace TunaSweeperDialogueWidget
 {
@@ -48,9 +49,7 @@ namespace
 
 	FSlateFontInfo MakeDialogueFont(UTextBlock* TextBlock, int32 Size)
 	{
-		FSlateFontInfo FontInfo = TextBlock ? TextBlock->GetFont() : FSlateFontInfo();
-		FontInfo.Size = Size;
-		return FontInfo;
+		return TunaSweeperUIFont::MakeFont(TextBlock, Size);
 	}
 
 	float EstimateTextWidth(const FString& Text, float FontSize)
@@ -209,6 +208,7 @@ void UTunaSweeperDialogueWidget::NativeConstruct()
 
 	SetIsFocusable(true);
 	BuildDialogueWidget();
+	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
 }
 
 void UTunaSweeperDialogueWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
