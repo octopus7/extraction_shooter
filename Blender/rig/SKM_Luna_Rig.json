@@ -1,0 +1,459 @@
+{
+    "SKM_Luna_Rig": {
+        "Version": "1.10.1822.1",
+        "Scene": {
+            "Name": true,
+            "SupportShaderSelect": true
+        },
+        "Export Directory": "D:/github/extraction_shooter/Blender/rig",
+        "Object": {
+            "SKM_Luna_Rig": {
+                "Generation": "AccuRig",
+                "Physics": {
+                    "Collision Shapes": {
+                        "root": {},
+                        "pelvis": {},
+                        "cc_base_pelvis": {},
+                        "spine_01": {},
+                        "spine_02": {},
+                        "spine_03": {},
+                        "spine_04": {},
+                        "spine_05": {},
+                        "clavicle_l": {},
+                        "upperarm_l": {},
+                        "lowerarm_l": {},
+                        "cc_base_l_forearmtwist01": {},
+                        "cc_base_l_forearmtwist02": {},
+                        "cc_base_l_elbowsharebone": {},
+                        "hand_l": {},
+                        "middle_metacarpal_l": {},
+                        "middle_01_l": {},
+                        "middle_02_l": {},
+                        "middle_03_l": {},
+                        "index_metacarpal_l": {},
+                        "index_01_l": {},
+                        "index_02_l": {},
+                        "index_03_l": {},
+                        "ring_metacarpal_l": {},
+                        "ring_01_l": {},
+                        "ring_02_l": {},
+                        "ring_03_l": {},
+                        "pinky_metacarpal_l": {},
+                        "pinky_01_l": {},
+                        "pinky_02_l": {},
+                        "pinky_03_l": {},
+                        "thumb_01_l": {},
+                        "thumb_02_l": {},
+                        "thumb_03_l": {},
+                        "cc_base_l_upperarmtwist01": {},
+                        "cc_base_l_upperarmtwist02": {},
+                        "neck_01": {},
+                        "neck_02": {},
+                        "head": {},
+                        "cc_base_facialbone": {},
+                        "cc_base_jawroot": {},
+                        "cc_base_tongue01": {},
+                        "cc_base_tongue02": {},
+                        "cc_base_tongue03": {},
+                        "cc_base_teeth02": {},
+                        "cc_base_r_eye": {},
+                        "cc_base_l_eye": {},
+                        "cc_base_upperjaw": {},
+                        "cc_base_teeth01": {},
+                        "clavicle_r": {},
+                        "upperarm_r": {},
+                        "cc_base_r_upperarmtwist01": {},
+                        "cc_base_r_upperarmtwist02": {},
+                        "lowerarm_r": {},
+                        "cc_base_r_forearmtwist01": {},
+                        "cc_base_r_forearmtwist02": {},
+                        "cc_base_r_elbowsharebone": {},
+                        "hand_r": {},
+                        "middle_metacarpal_r": {},
+                        "middle_01_r": {},
+                        "middle_02_r": {},
+                        "middle_03_r": {},
+                        "ring_metacarpal_r": {},
+                        "ring_01_r": {},
+                        "ring_02_r": {},
+                        "ring_03_r": {},
+                        "thumb_01_r": {},
+                        "thumb_02_r": {},
+                        "thumb_03_r": {},
+                        "index_metacarpal_r": {},
+                        "index_01_r": {},
+                        "index_02_r": {},
+                        "index_03_r": {},
+                        "pinky_metacarpal_r": {},
+                        "pinky_01_r": {},
+                        "pinky_02_r": {},
+                        "pinky_03_r": {},
+                        "cc_base_l_ribstwist": {},
+                        "cc_base_l_breast": {},
+                        "cc_base_r_ribstwist": {},
+                        "cc_base_r_breast": {},
+                        "thigh_l": {},
+                        "calf_l": {},
+                        "foot_l": {},
+                        "cc_base_l_toebasesharebone": {},
+                        "ball_l": {},
+                        "cc_base_l_pinkytoe1": {},
+                        "cc_base_l_ringtoe1": {},
+                        "cc_base_l_midtoe1": {},
+                        "cc_base_l_indextoe1": {},
+                        "cc_base_l_bigtoe1": {},
+                        "cc_base_l_calftwist01": {},
+                        "cc_base_l_calftwist02": {},
+                        "cc_base_l_kneesharebone": {},
+                        "cc_base_l_thightwist01": {},
+                        "cc_base_l_thightwist02": {},
+                        "thigh_r": {},
+                        "cc_base_r_thightwist01": {},
+                        "cc_base_r_thightwist02": {},
+                        "calf_r": {},
+                        "foot_r": {},
+                        "ball_r": {},
+                        "cc_base_r_pinkytoe1": {},
+                        "cc_base_r_bigtoe1": {},
+                        "cc_base_r_indextoe1": {},
+                        "cc_base_r_midtoe1": {},
+                        "cc_base_r_ringtoe1": {},
+                        "cc_base_r_toebasesharebone": {},
+                        "cc_base_r_kneesharebone": {},
+                        "cc_base_r_calftwist01": {},
+                        "cc_base_r_calftwist02": {},
+                        "ik_foot_root": {},
+                        "ik_foot_r": {},
+                        "ik_foot_l": {},
+                        "ik_hand_root": {},
+                        "ik_hand_gun": {},
+                        "ik_hand_r": {},
+                        "ik_hand_l": {},
+                        "part_0000": {}
+                    }
+                },
+                "ExpressionSet": "4",
+                "Expression": {
+                    "V_None": {
+                        "Bones": {}
+                    },
+                    "V_Open": {
+                        "Bones": {}
+                    },
+                    "V_Explosive": {
+                        "Bones": {}
+                    },
+                    "V_Dental_Lip": {
+                        "Bones": {}
+                    },
+                    "V_Tight_O": {
+                        "Bones": {}
+                    },
+                    "V_Tight": {
+                        "Bones": {}
+                    },
+                    "V_Wide": {
+                        "Bones": {}
+                    },
+                    "V_Affricate": {
+                        "Bones": {}
+                    },
+                    "V_Lip_Open": {
+                        "Bones": {}
+                    },
+                    "V_Tongue_up": {
+                        "Bones": {}
+                    },
+                    "V_Tongue_Raise": {
+                        "Bones": {}
+                    },
+                    "V_Tongue_Out": {
+                        "Bones": {}
+                    },
+                    "V_Tongue_Narrow": {
+                        "Bones": {}
+                    },
+                    "V_Tongue_Lower": {
+                        "Bones": {}
+                    },
+                    "V_Tongue_Curl_U": {
+                        "Bones": {}
+                    },
+                    "V_Tongue_Curl_D": {
+                        "Bones": {}
+                    },
+                    "Brow_Raise_Inner_L": {
+                        "Bones": {}
+                    },
+                    "Brow_Raise_Inner_R": {
+                        "Bones": {}
+                    },
+                    "Brow_Raise_Outer_L": {
+                        "Bones": {}
+                    },
+                    "Brow_Raise_Outer_R": {
+                        "Bones": {}
+                    },
+                    "Brow_Drop_L": {
+                        "Bones": {}
+                    },
+                    "Brow_Drop_R": {
+                        "Bones": {}
+                    },
+                    "Nose_Sneer_L": {
+                        "Bones": {}
+                    },
+                    "Nose_Sneer_R": {
+                        "Bones": {}
+                    },
+                    "Cheek_Raise_L": {
+                        "Bones": {}
+                    },
+                    "Cheek_Raise_R": {
+                        "Bones": {}
+                    },
+                    "Cheek_Puff_L": {
+                        "Bones": {}
+                    },
+                    "Cheek_Puff_R": {
+                        "Bones": {}
+                    },
+                    "Head_Turn_Up": {
+                        "Bones": {}
+                    },
+                    "Head_Turn_Down": {
+                        "Bones": {}
+                    },
+                    "Head_Turn_L": {
+                        "Bones": {}
+                    },
+                    "Head_Turn_R": {
+                        "Bones": {}
+                    },
+                    "Head_Tilt_L": {
+                        "Bones": {}
+                    },
+                    "Head_Tilt_R": {
+                        "Bones": {}
+                    },
+                    "Head_L": {
+                        "Bones": {}
+                    },
+                    "Head_R": {
+                        "Bones": {}
+                    },
+                    "Head_Forward": {
+                        "Bones": {}
+                    },
+                    "Head_Backward": {
+                        "Bones": {}
+                    },
+                    "Jaw_Open": {
+                        "Bones": {}
+                    },
+                    "Jaw_Forward": {
+                        "Bones": {}
+                    },
+                    "Jaw_L": {
+                        "Bones": {}
+                    },
+                    "Jaw_R": {
+                        "Bones": {}
+                    },
+                    "Tongue_Out": {
+                        "Bones": {}
+                    },
+                    "Tongue_Up": {
+                        "Bones": {}
+                    },
+                    "Tongue_Down": {
+                        "Bones": {}
+                    },
+                    "Tongue_Tip_Up": {
+                        "Bones": {}
+                    },
+                    "Tongue_Tip_Down": {
+                        "Bones": {}
+                    },
+                    "Tongue_Narrow": {
+                        "Bones": {}
+                    },
+                    "Tongue_Wide": {
+                        "Bones": {}
+                    },
+                    "Tongue_Roll": {
+                        "Bones": {}
+                    },
+                    "Tongue_L": {
+                        "Bones": {}
+                    },
+                    "Tongue_R": {
+                        "Bones": {}
+                    },
+                    "Tongue_Bulge_L": {
+                        "Bones": {}
+                    },
+                    "Tongue_Bulge_R": {
+                        "Bones": {}
+                    },
+                    "Eye_Blink_L": {
+                        "Bones": {}
+                    },
+                    "Eye_Blink_R": {
+                        "Bones": {}
+                    },
+                    "Eye_Squint_L": {
+                        "Bones": {}
+                    },
+                    "Eye_Squint_R": {
+                        "Bones": {}
+                    },
+                    "Eye_Wide_L": {
+                        "Bones": {}
+                    },
+                    "Eye_Wide_R": {
+                        "Bones": {}
+                    },
+                    "Eye_L_Look_L": {
+                        "Bones": {}
+                    },
+                    "Eye_R_Look_L": {
+                        "Bones": {}
+                    },
+                    "Eye_L_Look_R": {
+                        "Bones": {}
+                    },
+                    "Eye_R_Look_R": {
+                        "Bones": {}
+                    },
+                    "Eye_L_Look_Up": {
+                        "Bones": {}
+                    },
+                    "Eye_R_Look_Up": {
+                        "Bones": {}
+                    },
+                    "Eye_L_Look_Down": {
+                        "Bones": {}
+                    },
+                    "Eye_R_Look_Down": {
+                        "Bones": {}
+                    },
+                    "Mouth_Smile_L": {
+                        "Bones": {}
+                    },
+                    "Mouth_Smile_R": {
+                        "Bones": {}
+                    },
+                    "Mouth_Frown_L": {
+                        "Bones": {}
+                    },
+                    "Mouth_Frown_R": {
+                        "Bones": {}
+                    },
+                    "Mouth_Stretch_L": {
+                        "Bones": {}
+                    },
+                    "Mouth_Stretch_R": {
+                        "Bones": {}
+                    },
+                    "Mouth_Dimple_L": {
+                        "Bones": {}
+                    },
+                    "Mouth_Dimple_R": {
+                        "Bones": {}
+                    },
+                    "Mouth_Press_L": {
+                        "Bones": {}
+                    },
+                    "Mouth_Press_R": {
+                        "Bones": {}
+                    },
+                    "Mouth_Pucker": {
+                        "Bones": {}
+                    },
+                    "Mouth_Funnel": {
+                        "Bones": {}
+                    },
+                    "Mouth_Roll_In_Upper": {
+                        "Bones": {}
+                    },
+                    "Mouth_Roll_In_Lower": {
+                        "Bones": {}
+                    },
+                    "Mouth_L": {
+                        "Bones": {}
+                    },
+                    "Mouth_R": {
+                        "Bones": {}
+                    },
+                    "Mouth_Shrug_Upper": {
+                        "Bones": {}
+                    },
+                    "Mouth_Shrug_Lower": {
+                        "Bones": {}
+                    },
+                    "Mouth_Up_Upper_L": {
+                        "Bones": {}
+                    },
+                    "Mouth_Up_Upper_R": {
+                        "Bones": {}
+                    },
+                    "Mouth_Down_Lower_L": {
+                        "Bones": {}
+                    },
+                    "Mouth_Down_Lower_R": {
+                        "Bones": {}
+                    },
+                    "Mouth_Close": {
+                        "Bones": {}
+                    }
+                },
+                "Constraint": {},
+                "Meshes": {
+                    "part_0000": {
+                        "SubD Level": 0,
+                        "Materials": {
+                            "M_Luna": {
+                                "Material Type": "Pbr",
+                                "MultiUV Index": 0,
+                                "Two Side": true,
+                                "Diffuse Color": [
+                                    255.0,
+                                    255.0,
+                                    255.0
+                                ],
+                                "Ambient Color": [
+                                    255.0,
+                                    255.0,
+                                    255.0
+                                ],
+                                "Specular Color": [
+                                    255.0,
+                                    255.0,
+                                    255.0
+                                ],
+                                "Opacity": 1.0,
+                                "Self Illumination": 0.0,
+                                "Textures": {
+                                    "Base Color": {
+                                        "Texture Path": "./SKM_Luna_Rig.fbm/M_Luna_Diffuse.png",
+                                        "Strength": 100.0,
+                                        "Offset": [
+                                            0.0,
+                                            0.0
+                                        ],
+                                        "Tiling": [
+                                            1.0,
+                                            1.0
+                                        ]
+                                    }
+                                },
+                                "Resource Textures": {}
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
