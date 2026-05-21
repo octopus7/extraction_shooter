@@ -490,3 +490,9 @@ A. 최종 공개용 풀화면 영상이면 패키징한 Windows 빌드로 실행
 Q. 애니 루프 지정 어디서 하지? ABP 야 아님 애님애셋
 
 A. 둘 다 가능하지만, 실제 게임에서 어떤 상태가 반복될지를 정하는 것은 보통 ABP 쪽이다. 걷기/대기처럼 상태별로 반복 재생되는 동작은 ABP의 AnimGraph 또는 State Machine 안에 있는 Sequence Player 노드에서 Loop Animation을 켜는 방식이 일반적이다. Animation Sequence 애셋 자체의 루프 관련 설정은 에디터 미리보기, 단독 재생, Montage/Sequence 직접 사용 같은 경우에 영향을 주며, ABP 안의 Sequence Player가 별도 루프 설정을 가지고 있으면 그 노드 설정이 실제 재생에 더 직접적이다.
+
+## 2026-05-22 03:55:38 (소요시간: 1분 미만)
+
+Q. 무기 BP에 넣은 메시 스케일이 너무 큰데 코드로 제어하고 있는지, 스케일 조정이 없다면 BP에서 직접 조정하면 되는지
+
+A. 무기 런타임에서 계속 스케일을 덮는 로직은 없다. 다만 `ATunaSweeperWeapon` 생성자에서 기본 `WeaponMesh`에 프로토타입 큐브용 `SetRelativeScale3D(FVector(0.7f, 0.15f, 0.15f))`가 지정되어 있다. 장착 시에는 `SnapToTargetNotIncludingScale`로 붙기 때문에 부모 부착점 스케일을 강제로 따라가지는 않는다. 따라서 `BP_TunaSweeperWeapon`에서 `WeaponMesh`의 Relative Scale을 직접 줄여도 되고, 메시를 크게 줄이면 `MuzzlePoint` 위치도 같이 맞추는 것이 좋다.
