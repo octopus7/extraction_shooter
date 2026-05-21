@@ -537,3 +537,19 @@ A. 새 패키지 기준으로는 해결된 것으로 본다. 이전 증상은 �
 Q. 프로젝트에 적용할게 아니고 그냥 물어만 보는거야. DLSS 지원하지 않는게임 강제로 적용하는법 있어?
 
 A. 진짜 DLSS를 완전히 미지원 게임에 드라이버처럼 강제로 켜는 방법은 없다. DLSS는 게임/엔진이 낮은 해상도 컬러 프레임, 모션 벡터, 깊이, 이전 프레임 피드백 같은 렌더링 정보를 DLSS에 넘겨줘야 하므로 게임 쪽 통합이 필요하다. 다만 FSR2/XeSS 같은 temporal upscaler를 이미 지원하는 게임은 그 경로를 DLSS로 바꿔 끼우는 모드가 가능한 경우가 있고, DLSS를 이미 지원하는 게임은 DLSS Swapper 같은 도구로 DLL 버전만 바꿀 수 있다. 완전 미지원 게임에서는 NVIDIA Image Scaling, Lossless Scaling, Magpie 같은 외부 업스케일러를 쓸 수 있지만 이것은 진짜 DLSS가 아니라 화면 후처리/공간 업스케일에 가깝다. 온라인/안티치트 게임에서는 이런 모드가 차단이나 제재 위험이 있으므로 피하는 것이 맞다.
+## 2026-05-22 05:27:56 (소요시간: 1분 미만)
+
+Q. UE 5.7 프로젝트에서 DLSS를 지원하려면 뭘 해야 해?
+
+A. UE 5.7이면 NVIDIA 공식 DLSS 페이지에서 UE 5.7용 DLSS 4.5 Unreal Engine 플러그인을 받아 설치하는 것이 출발점이다. 플러그인 패키지를 엔진의 Marketplace 플러그인 위치 또는 패키지 안내에 맞는 위치에 넣고, Unreal Editor의 Plugins에서 NVIDIA DLSS/Streamline/Reflex 관련 플러그인을 켠 뒤 재시작한다. 이후 Project Settings와 Blueprint 또는 r.ngx 계열 콘솔 명령으로 DLSS Super Resolution, DLAA, Frame Generation, Reflex 옵션을 사용자 그래픽 설정에 연결한다. 지원 범위는 하드웨어별로 다르므로 Super Resolution은 RTX 계열, Frame Generation은 RTX 40 계열 이상, Dynamic/Multi Frame Generation은 RTX 50/Blackwell 계열처럼 기능별 지원 GPU를 나눠 UI와 fallback을 설계해야 한다. 비지원 GPU에는 TSR, FSR, XeSS, NVIDIA Image Scaling 같은 대체 옵션을 남기는 것이 좋다. 마지막으로 RTX GPU 실기기에서 PIE/Standalone/패키징 빌드를 모두 확인하고, DLSS debug overlay와 로그로 실제 활성화 여부를 검증해야 한다.
+
+## 2026-05-22 05:29:01 (소요시간: 5분)
+
+Q. 무기 박스 표기가 여전한데 패키징을 안 해서 그런가?
+
+A. 패키징만의 문제는 아니다. 기본 무기 클래스가 `BP_TunaSweeperWeapon`으로 남아 있으면 C++ 생성자의 기본 Cube 메시가 스폰되어 박스로 보일 수 있다. 장착한 총기 아이템은 `BP_AssaultRifle` 클래스를 스폰하도록 캐릭터 무기 클래스 해석 로직을 고쳤고, Shipping 빌드와 Windows 패키징도 다시 완료했다. 새 `Release\Windows` 빌드를 실행하거나 에디터/PIE를 재시작해야 반영되며, 이전 실행 파일이나 이미 떠 있는 프로세스에서는 계속 박스로 보일 수 있다.
+## 2026-05-22 05:31:30 (소요시간: 1분 미만)
+
+Q. UE 5.7 엔진에 DLSS 플러그인을 설치하는 방법을 안내해줘.
+
+A. Unreal Editor를 닫고 NVIDIA 공식 DLSS 페이지에서 UE 5.7용 DLSS 4.5 플러그인을 받은 뒤, 압축 내부 구조에 따라 플러그인 폴더들을 UE 5.7 엔진의 `Engine/Plugins/Marketplace` 아래에 복사한다. 일반 Launcher 설치 엔진이면 예시 경로는 `C:\Program Files\Epic Games\UE_5.7\Engine\Plugins\Marketplace`이고, source/커스텀 엔진이면 해당 엔진 루트의 같은 상대 경로를 사용한다. 압축에 `Engine` 폴더가 들어 있으면 엔진 루트에 병합하고, 플러그인 폴더들이 직접 들어 있으면 `Marketplace` 아래에 각각 둔다. 이후 UE 5.7 Editor를 열어 Plugins에서 NVIDIA/DLSS/Streamline/Reflex 관련 플러그인을 활성화하고 재시작한다. Frame Generation은 selected viewport가 아니라 새 PIE 창이나 Standalone에서 검증해야 하며, wrong engine version/rebuild 오류가 나면 UE 5.7용 패키지를 다시 확인해야 한다.
