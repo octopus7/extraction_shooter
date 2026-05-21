@@ -262,6 +262,13 @@ private:
 	void ShowDeleteConfirmDialog();
 	void HideDeleteConfirmDialog();
 	void EnsureTitleWindParticleOverlay();
+	void ApplyTitleMenuButtonContentLayout();
+	UWidget* BuildTitleMenuButtonContent(
+		const FText& Icon,
+		UTextBlock* LabelText,
+		const FText& Label,
+		int32 LabelFontSize,
+		int32 IconFontSize);
 	void BeginStartTravel(bool bAlwaysNewStart);
 	void OpenPendingStartTargetLevel();
 	void SetStartTravelControlsEnabled(bool bEnabled);

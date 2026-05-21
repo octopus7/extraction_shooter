@@ -4,6 +4,8 @@
 #include "Components/Button.h"
 #include "Components/CanvasPanel.h"
 #include "Components/CanvasPanelSlot.h"
+#include "Components/HorizontalBox.h"
+#include "Components/HorizontalBoxSlot.h"
 #include "Components/Image.h"
 #include "Components/ScrollBox.h"
 #include "Components/SizeBox.h"
@@ -170,6 +172,8 @@ void UTunaSweeperIntroMenuWidget::NativeConstruct()
 		BackFromCreditsButton->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleBackFromCreditsClicked);
 		BackFromCreditsButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleBackFromCreditsClicked);
 	}
+
+	ApplyTitleMenuButtonContentLayout();
 
 	if (CreditsText)
 	{
@@ -1068,6 +1072,139 @@ void UTunaSweeperIntroMenuWidget::HideDeleteConfirmDialog()
 	{
 		DeleteConfirmPanel->SetVisibility(ESlateVisibility::Collapsed);
 	}
+}
+
+void UTunaSweeperIntroMenuWidget::ApplyTitleMenuButtonContentLayout()
+{
+	if (!WidgetTree)
+	{
+		return;
+	}
+
+	auto ApplyContent = [this](
+		UButton* Button,
+		const FText& Icon,
+		UTextBlock* ExistingLabelText,
+		const FText& Label,
+		bool bPrimary)
+	{
+		if (!Button)
+		{
+			return;
+		}
+
+		UTextBlock* LabelText = ExistingLabelText;
+		if (!LabelText)
+		{
+			LabelText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass());
+		}
+		if (!LabelText)
+		{
+			return;
+		}
+
+		Button->SetContent(BuildTitleMenuButtonContent(
+			Icon,
+			LabelText,
+			Label,
+			bPrimary ? 28 : 20,
+			bPrimary ? 28 : 20));
+	};
+
+	ApplyContent(
+		StartButton,
+		FText::FromString(TEXT("\u25B6")),
+		StartButtonText,
+		FText::FromString(TEXT("\uC774\uC5B4\uAC00\uAE30")),
+		true);
+	ApplyContent(
+		SlotSelectButton,
+		FText::FromString(TEXT("\u25A6")),
+		nullptr,
+		FText::FromString(TEXT("\uC2AC\uB86F \uC120\uD0DD")),
+		false);
+	ApplyContent(
+		SettingsButton,
+		FText::FromString(TEXT("\u2699")),
+		nullptr,
+		FText::FromString(TEXT("\uC124\uC815")),
+		false);
+	ApplyContent(
+		CreditsButton,
+		FText::FromString(TEXT("\u24D8")),
+		nullptr,
+		FText::FromString(TEXT("\uD06C\uB808\uB527")),
+		false);
+	ApplyContent(
+		QuitButton,
+		FText::FromString(TEXT("\u00D7")),
+		nullptr,
+		FText::FromString(TEXT("\uC885\uB8CC")),
+		false);
+}
+
+UWidget* UTunaSweeperIntroMenuWidget::BuildTitleMenuButtonContent(
+	const FText& Icon,
+	UTextBlock* LabelText,
+	const FText& Label,
+	int32 LabelFontSize,
+	int32 IconFontSize)
+{
+	if (!WidgetTree || !LabelText)
+	{
+		return LabelText;
+	}
+
+	UHorizontalBox* Content = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass());
+	USizeBox* IconBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass());
+	UTextBlock* IconText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass());
+	USizeBox* BalanceBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass());
+	if (!Content || !IconBox || !IconText || !BalanceBox)
+	{
+		return LabelText;
+	}
+
+	const FLinearColor MenuTextColor(0.94f, 0.92f, 0.84f, 1.0f);
+	IconText->SetText(Icon);
+	TunaSweeperUIFont::ApplyFont(IconText, IconFontSize);
+	IconText->SetColorAndOpacity(FSlateColor(MenuTextColor));
+	IconText->SetJustification(ETextJustify::Center);
+
+	LabelText->RemoveFromParent();
+	LabelText->SetText(Label);
+	TunaSweeperUIFont::ApplyFont(LabelText, LabelFontSize);
+	LabelText->SetColorAndOpacity(FSlateColor(MenuTextColor));
+	LabelText->SetJustification(ETextJustify::Center);
+
+	const float IconLaneWidth = IconFontSize >= 28 ? 58.0f : 46.0f;
+	IconBox->SetWidthOverride(IconLaneWidth);
+	IconBox->SetHeightOverride(IconFontSize + 8.0f);
+	IconBox->SetContent(IconText);
+	BalanceBox->SetWidthOverride(IconLaneWidth);
+	BalanceBox->SetHeightOverride(IconFontSize + 8.0f);
+
+	if (UHorizontalBoxSlot* IconSlot = Content->AddChildToHorizontalBox(IconBox))
+	{
+		IconSlot->SetHorizontalAlignment(HAlign_Center);
+		IconSlot->SetVerticalAlignment(VAlign_Center);
+		IconSlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
+	}
+
+	if (UHorizontalBoxSlot* LabelSlot = Content->AddChildToHorizontalBox(LabelText))
+	{
+		LabelSlot->SetHorizontalAlignment(HAlign_Center);
+		LabelSlot->SetVerticalAlignment(VAlign_Center);
+		LabelSlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
+	}
+
+	if (UHorizontalBoxSlot* BalanceSlot = Content->AddChildToHorizontalBox(BalanceBox))
+	{
+		BalanceSlot->SetHorizontalAlignment(HAlign_Center);
+		BalanceSlot->SetVerticalAlignment(VAlign_Center);
+		BalanceSlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
+	}
+
+	return Content;
 }
 
 void UTunaSweeperIntroMenuWidget::EnsureTitleWindParticleOverlay()

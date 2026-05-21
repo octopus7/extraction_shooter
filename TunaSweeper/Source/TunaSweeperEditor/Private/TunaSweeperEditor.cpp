@@ -2424,31 +2424,56 @@ namespace TunaSweeperEditorSetup
 			UHorizontalBox* Content = WidgetTree->ConstructWidget<UHorizontalBox>(
 				UHorizontalBox::StaticClass(),
 				FName(*(NamePrefix + TEXT("Content"))));
+			USizeBox* IconBox = WidgetTree->ConstructWidget<USizeBox>(
+				USizeBox::StaticClass(),
+				FName(*(NamePrefix + TEXT("IconBox"))));
 			UTextBlock* IconText = WidgetTree->ConstructWidget<UTextBlock>(
 				UTextBlock::StaticClass(),
 				FName(*(NamePrefix + TEXT("IconText"))));
+			USizeBox* BalanceBox = WidgetTree->ConstructWidget<USizeBox>(
+				USizeBox::StaticClass(),
+				FName(*(NamePrefix + TEXT("BalanceBox"))));
+
+			if (!Content || !IconBox || !IconText || !BalanceBox)
+			{
+				return static_cast<UWidget*>(LabelText);
+			}
 
 			ConfigureTextBlock(IconText, Icon, FLinearColor(0.94f, 0.92f, 0.84f, 1.0f), IconFontSize);
-			ConfigureTextBlockLeft(LabelText, Label, FLinearColor(0.94f, 0.92f, 0.84f, 1.0f), LabelFontSize);
+			ConfigureTextBlock(LabelText, Label, FLinearColor(0.94f, 0.92f, 0.84f, 1.0f), LabelFontSize);
 
-			UHorizontalBoxSlot* IconSlot = Content->AddChildToHorizontalBox(IconText);
+			const float IconLaneWidth = IconFontSize >= 28 ? 58.0f : 46.0f;
+			IconBox->SetWidthOverride(IconLaneWidth);
+			IconBox->SetHeightOverride(IconFontSize + 8.0f);
+			IconBox->SetContent(IconText);
+			BalanceBox->SetWidthOverride(IconLaneWidth);
+			BalanceBox->SetHeightOverride(IconFontSize + 8.0f);
+
+			UHorizontalBoxSlot* IconSlot = Content->AddChildToHorizontalBox(IconBox);
 			if (IconSlot)
 			{
 				IconSlot->SetHorizontalAlignment(HAlign_Center);
 				IconSlot->SetVerticalAlignment(VAlign_Center);
-				IconSlot->SetPadding(FMargin(22.0f, 0.0f, 16.0f, 0.0f));
 				IconSlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
 			}
 
 			UHorizontalBoxSlot* LabelSlot = Content->AddChildToHorizontalBox(LabelText);
 			if (LabelSlot)
 			{
-				LabelSlot->SetHorizontalAlignment(HAlign_Fill);
+				LabelSlot->SetHorizontalAlignment(HAlign_Center);
 				LabelSlot->SetVerticalAlignment(VAlign_Center);
-				LabelSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+				LabelSlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
 			}
 
-			return Content;
+			UHorizontalBoxSlot* BalanceSlot = Content->AddChildToHorizontalBox(BalanceBox);
+			if (BalanceSlot)
+			{
+				BalanceSlot->SetHorizontalAlignment(HAlign_Center);
+				BalanceSlot->SetVerticalAlignment(VAlign_Center);
+				BalanceSlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
+			}
+
+			return static_cast<UWidget*>(Content);
 		};
 
 		auto ConfigureMenuButton = [&ConfigureButtonStyle, &MakeButtonContent](
