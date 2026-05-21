@@ -2,7 +2,10 @@
 
 #include "Blueprint/UserWidget.h"
 #include "CoreMinimal.h"
+#include "Styling/SlateBrush.h"
 #include "TunaSweeperTitleWindParticleWidget.generated.h"
+
+class UTexture2D;
 
 UCLASS()
 class TUNASWEEPER_API UTunaSweeperTitleWindParticleWidget : public UUserWidget
@@ -10,6 +13,7 @@ class TUNASWEEPER_API UTunaSweeperTitleWindParticleWidget : public UUserWidget
 	GENERATED_BODY()
 
 protected:
+	virtual void NativeConstruct() override;
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 	virtual int32 NativePaint(
 		const FPaintArgs& Args,
@@ -21,5 +25,11 @@ protected:
 		bool bParentEnabled) const override;
 
 private:
+	void EnsureParticleTexture();
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTexture2D> ParticleTexture;
+
+	FSlateBrush ParticleBrush;
 	float AnimationSeconds = 0.0f;
 };
