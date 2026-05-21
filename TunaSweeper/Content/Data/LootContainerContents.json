@@ -56,7 +56,9 @@
     "id": 8007,
     "items": [
       { "item_id": 1001, "quantity": 1 },
-      { "item_id": 2001, "quantity": 100 }
+      { "item_id": 2001, "quantity": 100 },
+      { "item_id": 1002, "quantity": 1 },
+      { "item_id": 2002, "quantity": 100 }
     ]
   }
 ]

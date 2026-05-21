@@ -496,3 +496,9 @@ A. 둘 다 가능하지만, 실제 게임에서 어떤 상태가 반복될지를
 Q. 무기 BP에 넣은 메시 스케일이 너무 큰데 코드로 제어하고 있는지, 스케일 조정이 없다면 BP에서 직접 조정하면 되는지
 
 A. 무기 런타임에서 계속 스케일을 덮는 로직은 없다. 다만 `ATunaSweeperWeapon` 생성자에서 기본 `WeaponMesh`에 프로토타입 큐브용 `SetRelativeScale3D(FVector(0.7f, 0.15f, 0.15f))`가 지정되어 있다. 장착 시에는 `SnapToTargetNotIncludingScale`로 붙기 때문에 부모 부착점 스케일을 강제로 따라가지는 않는다. 따라서 `BP_TunaSweeperWeapon`에서 `WeaponMesh`의 Relative Scale을 직접 줄여도 되고, 메시를 크게 줄이면 `MuzzlePoint` 위치도 같이 맞추는 것이 좋다.
+
+## 2026-05-22 04:06:25 (소요시간: 1분 미만)
+
+Q. 패키징 때 3개의 레벨 포함 세팅해야 하지?
+
+A. 맞다. `OpenLevel`을 FName/문자열 기반으로 호출하는 구조라 패키징에서 맵이 누락되지 않도록 `MapsToCook`에 명시하는 것이 안전하다. 현재 프로젝트에는 `IntroMap`, `OpeningScenarioMap`, `BunkerMap`, `RaidMap` 총 4개의 `.umap`이 있고, 첫 시작 흐름에서 `OpeningScenarioMap`도 사용되므로 3개가 아니라 4개 모두 포함하도록 설정했다.
