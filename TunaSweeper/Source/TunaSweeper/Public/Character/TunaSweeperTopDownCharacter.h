@@ -214,6 +214,7 @@ private:
 	void AddDefaultInputMapping() const;
 	void EnsureEquippedWeaponActor();
 	void ClearEquippedWeaponActor();
+	TSubclassOf<ATunaSweeperWeapon> ResolveEquippedWeaponClass() const;
 	UFUNCTION()
 	void HandleVitalsChanged(const FTunaSweeperVitalsState& VitalsState);
 	void HandleMove(const FInputActionValue& Value);

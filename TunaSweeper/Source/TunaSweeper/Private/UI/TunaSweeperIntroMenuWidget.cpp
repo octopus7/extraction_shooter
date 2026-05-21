@@ -656,7 +656,9 @@ void UTunaSweeperIntroMenuWidget::RefreshMainMenu()
 
 	if (StartButtonText)
 	{
-		StartButtonText->SetText(FText::FromString(TEXT("\uC774\uC5B4\uAC00\uAE30")));
+		StartButtonText->SetText(Summary.bHasData
+			? FText::FromString(TEXT("\uACC4\uC18D\uD558\uAE30"))
+			: FText::FromString(TEXT("\uC0C8\uAC8C\uC784 \uC2DC\uC791")));
 	}
 }
 
@@ -1115,7 +1117,7 @@ void UTunaSweeperIntroMenuWidget::ApplyTitleMenuButtonContentLayout()
 		StartButton,
 		FText::FromString(TEXT("\u25B6")),
 		StartButtonText,
-		FText::FromString(TEXT("\uC774\uC5B4\uAC00\uAE30")),
+		FText::FromString(TEXT("\uACC4\uC18D\uD558\uAE30")),
 		true);
 	ApplyContent(
 		SlotSelectButton,

@@ -142,7 +142,6 @@ void UTunaSweeperPlayerVisionComponent::ForceRefreshVisionMask()
 		if (VisionMaskWidget)
 		{
 			VisionMaskWidget->SetMaskTexture(MaskTexture);
-			VisionMaskWidget->SetMaskVisible(true);
 		}
 	}
 
@@ -155,6 +154,10 @@ void UTunaSweeperPlayerVisionComponent::ForceRefreshVisionMask()
 		if (IsVisionDebugEnabled())
 		{
 			ShowVisionDebugStatus(TEXT("[Vision v3] Debug enabled, but ray distance generation failed."), FColor::Orange);
+		}
+		if (VisionMaskWidget)
+		{
+			VisionMaskWidget->SetMaskVisible(false);
 		}
 		return;
 	}
@@ -180,10 +183,26 @@ void UTunaSweeperPlayerVisionComponent::ForceRefreshVisionMask()
 			VisionMaskWidget ? TEXT("yes") : TEXT("no"),
 			FMath::Max(OverlayZOrder, 1)));
 	}
+	if (VisiblePixelCount <= 0)
+	{
+		if (IsVisionDebugEnabled())
+		{
+			ShowVisionDebugStatus(TEXT("[Vision] No visible pixels generated; hiding mask fail-open."), FColor::Orange);
+		}
+		if (VisionMaskWidget)
+		{
+			VisionMaskWidget->SetMaskVisible(false);
+		}
+		return;
+	}
 
 	ApplyBlurToMask();
 	RebuildTexturePixels();
 	UploadMaskTexture();
+	if (bRenderVisionOverlay && VisionMaskWidget)
+	{
+		VisionMaskWidget->SetMaskVisible(true);
+	}
 }
 
 APlayerController* UTunaSweeperPlayerVisionComponent::ResolveLocalPlayerController() const
@@ -229,6 +248,9 @@ bool UTunaSweeperPlayerVisionComponent::ShouldUpdateVision() const
 
 bool UTunaSweeperPlayerVisionComponent::IsVisionDebugEnabled() const
 {
+#if !WITH_EDITOR
+	return false;
+#else
 	if (bEnableDebugOverride)
 	{
 		return true;
@@ -237,6 +259,7 @@ bool UTunaSweeperPlayerVisionComponent::IsVisionDebugEnabled() const
 	const UWorld* World = GetWorld();
 	const UTunaSweeperGameInstance* TunaGameInstance = World ? World->GetGameInstance<UTunaSweeperGameInstance>() : nullptr;
 	return TunaGameInstance && TunaGameInstance->IsVisionDebugEnabled();
+#endif
 }
 
 void UTunaSweeperPlayerVisionComponent::EnsureOverlayWidget(APlayerController* PlayerController)
@@ -261,7 +284,7 @@ void UTunaSweeperPlayerVisionComponent::EnsureOverlayWidget(APlayerController* P
 	if (VisionMaskWidget)
 	{
 		VisionMaskWidget->SetMaskTexture(MaskTexture);
-		VisionMaskWidget->SetMaskVisible(true);
+		VisionMaskWidget->SetMaskVisible(false);
 		VisionMaskWidget->AddToViewport(FMath::Max(OverlayZOrder, 1));
 		ConfigureOverlayWidgetForViewport(ViewportSize);
 	}
@@ -296,7 +319,9 @@ bool UTunaSweeperPlayerVisionComponent::EnsureMaskTexture(const FIntPoint& InVie
 
 	ViewportSize = InViewportSize;
 	MaskSize = NewMaskSize;
-	MaskTexture = UTexture2D::CreateTransient(MaskSize.X, MaskSize.Y, PF_B8G8R8A8);
+	TArray<uint8> InitialPixels;
+	InitialPixels.SetNumZeroed(MaskSize.X * MaskSize.Y * 4);
+	MaskTexture = UTexture2D::CreateTransient(MaskSize.X, MaskSize.Y, PF_B8G8R8A8, NAME_None, InitialPixels);
 	if (!MaskTexture)
 	{
 		return false;

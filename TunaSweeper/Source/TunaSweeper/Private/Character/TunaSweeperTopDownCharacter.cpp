@@ -25,6 +25,12 @@
 #include "UObject/ConstructorHelpers.h"
 #include "Weapon/TunaSweeperWeapon.h"
 
+namespace TunaSweeperEquippedWeaponVisual
+{
+	const FName GunCategoryTag(TEXT("item.category.weapon.gun"));
+	const FSoftObjectPath AssaultRifleClassPath(TEXT("/Game/Weapons/BP_AssaultRifle.BP_AssaultRifle_C"));
+}
+
 ATunaSweeperTopDownCharacter::ATunaSweeperTopDownCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -83,7 +89,7 @@ ATunaSweeperTopDownCharacter::ATunaSweeperTopDownCharacter()
 	ReloadAction = TSoftObjectPtr<UInputAction>(FSoftObjectPath(TEXT("/Game/Input/IA_Reload.IA_Reload")));
 	AmmoSelectAction = TSoftObjectPtr<UInputAction>(FSoftObjectPath(TEXT("/Game/Input/IA_AmmoSelect.IA_AmmoSelect")));
 	AmmoFocusAction = TSoftObjectPtr<UInputAction>(FSoftObjectPath(TEXT("/Game/Input/IA_AmmoFocus.IA_AmmoFocus")));
-	DefaultWeaponClass = TSoftClassPtr<ATunaSweeperWeapon>(FSoftObjectPath(TEXT("/Game/Weapons/BP_TunaSweeperWeapon.BP_TunaSweeperWeapon_C")));
+	DefaultWeaponClass = TSoftClassPtr<ATunaSweeperWeapon>(TunaSweeperEquippedWeaponVisual::AssaultRifleClassPath);
 	RespawnMediaSource = TSoftObjectPtr<UMediaSource>(FSoftObjectPath(TEXT("/Game/Movies/MS_Respawn.MS_Respawn")));
 	RespawnTransitionWidgetClass = TSoftClassPtr<UTunaSweeperLevelTransitionWidget>(
 		FSoftObjectPath(TEXT("/Game/UI/WBP_LevelTransitionVideo.WBP_LevelTransitionVideo_C")));
@@ -282,7 +288,7 @@ void ATunaSweeperTopDownCharacter::EnsureEquippedWeaponActor()
 		return;
 	}
 
-	TSubclassOf<ATunaSweeperWeapon> LoadedWeaponClass = DefaultWeaponClass.LoadSynchronous();
+	TSubclassOf<ATunaSweeperWeapon> LoadedWeaponClass = ResolveEquippedWeaponClass();
 	if (!LoadedWeaponClass)
 	{
 		LoadedWeaponClass = ATunaSweeperWeapon::StaticClass();
@@ -298,6 +304,29 @@ void ATunaSweeperTopDownCharacter::EnsureEquippedWeaponActor()
 	{
 		EquippedWeapon->AttachToComponent(WeaponAttachPoint, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 	}
+}
+
+TSubclassOf<ATunaSweeperWeapon> ATunaSweeperTopDownCharacter::ResolveEquippedWeaponClass() const
+{
+	TSoftClassPtr<ATunaSweeperWeapon> WeaponClassToLoad = DefaultWeaponClass;
+
+	FTunaSweeperItemInstance WeaponInstance;
+	FTunaSweeperItemDefinition WeaponDefinition;
+	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+		TunaGameInstance &&
+		SelectedWeaponSlotNumber > 0 &&
+		TunaGameInstance->TryGetEquipmentWeaponSlotItem(SelectedWeaponSlotNumber, WeaponInstance, WeaponDefinition) &&
+		WeaponDefinition.CategoryTag == TunaSweeperEquippedWeaponVisual::GunCategoryTag)
+	{
+		WeaponClassToLoad = TSoftClassPtr<ATunaSweeperWeapon>(TunaSweeperEquippedWeaponVisual::AssaultRifleClassPath);
+	}
+
+	if (TSubclassOf<ATunaSweeperWeapon> LoadedWeaponClass = WeaponClassToLoad.LoadSynchronous())
+	{
+		return LoadedWeaponClass;
+	}
+
+	return DefaultWeaponClass.LoadSynchronous();
 }
 
 void ATunaSweeperTopDownCharacter::ClearEquippedWeaponActor()

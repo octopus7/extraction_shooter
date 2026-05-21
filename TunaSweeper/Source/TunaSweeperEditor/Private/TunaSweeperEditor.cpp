@@ -2053,7 +2053,7 @@ namespace TunaSweeperEditorSetup
 			FVector2D(230.0f, 120.0f),
 			FLinearColor(0.10f, 0.18f, 0.22f, 0.96f),
 			FLinearColor(0.14f, 0.27f, 0.33f, 0.98f));
-		ConfigureTextBlock(StartButtonText, FText::FromString(TEXT("\uC774\uC5B4\uC11C\uD558\uAE30")), FLinearColor::White, 26);
+		ConfigureTextBlock(StartButtonText, FText::FromString(TEXT("\uACC4\uC18D\uD558\uAE30")), FLinearColor::White, 26);
 		StartButton->SetContent(StartButtonText);
 
 		SlotSelectButtonBox->SetWidthOverride(210.0f);
@@ -2555,7 +2555,7 @@ namespace TunaSweeperEditorSetup
 			StartButtonText,
 			TEXT("StartButton"),
 			FText::FromString(TEXT("\u25B6")),
-			FText::FromString(TEXT("\uC774\uC5B4\uAC00\uAE30")),
+			FText::FromString(TEXT("\uACC4\uC18D\uD558\uAE30")),
 			FVector2D(440.0f, 72.0f),
 			true);
 
