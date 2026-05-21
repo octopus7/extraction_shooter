@@ -16,7 +16,7 @@ ATunaSweeperWeapon::ATunaSweeperWeapon()
 	WeaponMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WeaponMesh"));
 	WeaponMesh->SetupAttachment(RootComponent);
 	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	WeaponMesh->SetRelativeLocation(FVector(35.0f, 0.0f, 0.0f));
+	WeaponMesh->SetRelativeLocation(FVector::ZeroVector);
 	WeaponMesh->SetRelativeScale3D(FVector(0.7f, 0.15f, 0.15f));
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> CubeMesh(TEXT("/Engine/BasicShapes/Cube.Cube"));

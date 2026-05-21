@@ -54,7 +54,7 @@ ATunaSweeperTopDownCharacter::ATunaSweeperTopDownCharacter()
 
 	WeaponAttachPoint = CreateDefaultSubobject<USceneComponent>(TEXT("WeaponAttachPoint"));
 	WeaponAttachPoint->SetupAttachment(RootComponent);
-	WeaponAttachPoint->SetRelativeLocation(FVector(60.0f, 0.0f, 35.0f));
+	WeaponAttachPoint->SetRelativeLocation(FVector(35.0f, 0.0f, 38.0f));
 
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
