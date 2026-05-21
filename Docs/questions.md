@@ -553,3 +553,36 @@ A. 패키징만의 문제는 아니다. 기본 무기 클래스가 `BP_TunaSweep
 Q. UE 5.7 엔진에 DLSS 플러그인을 설치하는 방법을 안내해줘.
 
 A. Unreal Editor를 닫고 NVIDIA 공식 DLSS 페이지에서 UE 5.7용 DLSS 4.5 플러그인을 받은 뒤, 압축 내부 구조에 따라 플러그인 폴더들을 UE 5.7 엔진의 `Engine/Plugins/Marketplace` 아래에 복사한다. 일반 Launcher 설치 엔진이면 예시 경로는 `C:\Program Files\Epic Games\UE_5.7\Engine\Plugins\Marketplace`이고, source/커스텀 엔진이면 해당 엔진 루트의 같은 상대 경로를 사용한다. 압축에 `Engine` 폴더가 들어 있으면 엔진 루트에 병합하고, 플러그인 폴더들이 직접 들어 있으면 `Marketplace` 아래에 각각 둔다. 이후 UE 5.7 Editor를 열어 Plugins에서 NVIDIA/DLSS/Streamline/Reflex 관련 플러그인을 활성화하고 재시작한다. Frame Generation은 selected viewport가 아니라 새 PIE 창이나 Standalone에서 검증해야 하며, wrong engine version/rebuild 오류가 나면 UE 5.7용 패키지를 다시 확인해야 한다.
+## 2026-05-22 05:55:32 (소요시간: 1분 미만)
+
+Q. DLSS 플러그인이 활성된 것 같은데 더 조치가 필요한가? 실행 해상도를 안 올려서 그런 걸까?
+
+A. 스크린샷 기준으로 DLSS 플러그인과 기본 DLL 경로는 정상으로 보인다. `Generic DLSS-SR Binary Path`와 `DLSS-RR Binary Path`의 `Exists`가 체크되어 있고, `Custom ... Path`가 체크되지 않은 것은 커스텀 오버라이드 DLL을 쓰지 않는다는 뜻이라 일반 설치에서는 문제가 아니다. 다만 플러그인 활성화는 DLSS를 사용할 수 있게 만든 것일 뿐, 게임 런타임에서 실제 DLSS 모드가 켜졌다는 뜻은 아니다. 추가로 그래픽 옵션이나 Blueprint/콘솔 명령을 통해 DLSS Quality/Balanced/Performance/DLAA 같은 모드를 선택해야 하고, `stat gpu`, DLSS/Streamline debug overlay, 화면 로그로 실제 적용 여부를 확인해야 한다. 실행 해상도를 올리지 않아도 DLSS 활성 자체는 가능하지만, 1080p 이하나 CPU 병목 상황에서는 성능 향상이 거의 안 보이거나 오히려 작게 보일 수 있다. 효과 확인은 1440p/4K 출력, Standalone/패키징 빌드, GPU 병목 상황에서 보는 것이 적절하다.
+
+## 2026-05-22 06:01:36 (소요시간: 4분 25초)
+
+Q. 4K 데스크탑 해상도에서 DLSS를 네이티브 1920x1080 기반으로 쓰려면 50% 설정인가?
+
+A. 맞다. UE의 screen percentage는 가로/세로 축 기준이라 3840x2160 출력에서 50%는 1920x1080 내부 렌더가 된다. DLSS 기준으로는 보통 4K Performance 계열에 해당하며, 프로젝트에는 데스크탑 해상도 출력과 `DesiredScreenHeight=1080`, `sg.ResolutionQuality=50` 기본값으로 반영했다.
+## 2026-05-22 06:16:22 (소요시간: 1분 6초)
+
+Q. 4K로 실행 중인지 무엇으로 판단할 수 있으며, 화면이 흐리면 DLSS 프리셋을 해상도 위주로 바꿔야 하는가?
+
+A. 패키지 기본 설정은 `ResolutionSizeX=3840`, `ResolutionSizeY=2160`, `FullscreenMode=0`, `sg.ResolutionQuality=50`이라 4K 출력에 1080p 내부 렌더 기반 DLSS Performance 계열로 맞춰져 있다. 다만 현재 PC의 `%LOCALAPPDATA%\TunaSweeper\Saved\Config\Windows\GameUserSettings.ini`에는 `ResolutionSizeX=1682`, `ResolutionSizeY=946`, `FullscreenMode=2`, `sg.ResolutionQuality=0`이 남아 있어 실제 실행은 4K가 아닐 가능성이 높다. 4K 여부는 실행 후 `Shot`/스크린샷 파일 해상도가 3840x2160인지, 실행 사용자 설정 파일과 로그에 3840x2160이 찍히는지, UI까지 흐린지로 판단한다. UI는 선명하고 3D 장면만 흐리면 출력 4K에 내부 렌더 50%가 원인일 수 있으므로 4K Quality 계열인 약 66.7%(2560x1440 내부 렌더)나 Balanced 계열로 올리는 편이 맞다.
+
+## 2026-05-22 06:17:06 (소요시간: 1분 미만)
+
+Q. PIE는 선명한데 패키지 실행 화면이 흐린 이유는 무엇인가?
+
+A. PIE가 선명하면 프로젝트 렌더링이나 에셋 자체보다 패키지 실행 시 적용되는 사용자 설정 차이가 원인일 가능성이 높다. PIE는 에디터 뷰포트/PIE 설정을 따르고, 패키지 실행은 `%LOCALAPPDATA%\TunaSweeper\Saved\Config\Windows\GameUserSettings.ini`가 우선될 수 있다. 현재 로컬 실행 설정은 `1682x946`, `FullscreenMode=2`, `sg.ResolutionQuality=0`으로 남아 있어 패키지 기본 4K 설정과 다르다. 이 경우 로컬 설정 파일을 지우거나 4K 값으로 갱신한 뒤 패키지 실행을 다시 확인해야 한다.
+
+## 2026-05-22 06:17:30 (소요시간: 1분 미만)
+
+Q. 이전 기록은 무엇을 지우면 되는가?
+
+A. 패키지 실행 해상도와 그래픽 품질을 초기화하려면 `%LOCALAPPDATA%\TunaSweeper\Saved\Config\Windows\GameUserSettings.ini`만 지우면 된다. 전체 설정을 더 강하게 초기화하려면 `%LOCALAPPDATA%\TunaSweeper\Saved\Config\Windows` 폴더를 지울 수 있지만, 저장 데이터까지 초기화하려는 목적이 아니라면 `%LOCALAPPDATA%\TunaSweeper\Saved\SaveGames`는 지우지 않는다.
+## 2026-05-22 08:11:26 (소요시간: 1분 미만)
+
+Q. DLSS 적용이 잘된다.
+
+A. DLSS 플러그인 활성화와 런타임 적용이 정상 동작하는 것으로 확인했다. 이후에는 그래픽 옵션 UI에 DLSS 모드 선택, 비지원 GPU fallback, Standalone/패키징 빌드 검증을 붙이면 된다.

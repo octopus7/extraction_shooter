@@ -2,3 +2,8 @@
 /chatgpt/Candidates
 *.blend1
 /Release
+**/bin/
+**/obj/
+YT/thumb_dev_a_001.png
+YT/thumb_dev_b_001.png
+YT/thumb_dev_c_001.png
