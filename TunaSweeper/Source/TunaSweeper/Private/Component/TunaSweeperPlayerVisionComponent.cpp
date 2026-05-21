@@ -303,7 +303,9 @@ bool UTunaSweeperPlayerVisionComponent::EnsureMaskTexture(const FIntPoint& InVie
 	}
 
 	MaskTexture->CompressionSettings = TC_EditorIcon;
+#if WITH_EDITORONLY_DATA
 	MaskTexture->MipGenSettings = TMGS_NoMipmaps;
+#endif
 	MaskTexture->LODGroup = TEXTUREGROUP_UI;
 	MaskTexture->SRGB = false;
 	MaskTexture->NeverStream = true;

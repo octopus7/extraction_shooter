@@ -72,7 +72,9 @@ void UTunaSweeperTitleWindParticleWidget::EnsureParticleTexture()
 	}
 
 	ParticleTexture->CompressionSettings = TC_EditorIcon;
+#if WITH_EDITORONLY_DATA
 	ParticleTexture->MipGenSettings = TMGS_NoMipmaps;
+#endif
 	ParticleTexture->LODGroup = TEXTUREGROUP_UI;
 	ParticleTexture->SRGB = true;
 	ParticleTexture->NeverStream = true;
