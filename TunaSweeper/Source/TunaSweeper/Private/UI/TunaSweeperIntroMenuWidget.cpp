@@ -15,6 +15,7 @@
 #include "Game/TunaSweeperGameInstance.h"
 #include "GameFramework/GameUserSettings.h"
 #include "GameFramework/PlayerController.h"
+#include "InputCoreTypes.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Misc/FileHelper.h"
@@ -28,6 +29,7 @@
 void UTunaSweeperIntroMenuWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
+	SetIsFocusable(true);
 	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
 	EnsureTitleWindParticleOverlay();
 
@@ -193,6 +195,19 @@ void UTunaSweeperIntroMenuWidget::NativeConstruct()
 	HideDeleteConfirmDialog();
 	HideOverlayPanels();
 	ShowMainMenu();
+}
+
+FReply UTunaSweeperIntroMenuWidget::NativeOnPreviewKeyDown(
+	const FGeometry& InGeometry,
+	const FKeyEvent& InKeyEvent)
+{
+	if (!InKeyEvent.IsRepeat() && InKeyEvent.GetKey() == EKeys::R)
+	{
+		ReloadIntroLevel();
+		return FReply::Handled();
+	}
+
+	return Super::NativeOnPreviewKeyDown(InGeometry, InKeyEvent);
 }
 
 void UTunaSweeperIntroMenuWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
@@ -370,6 +385,19 @@ void UTunaSweeperIntroMenuWidget::BeginStartTravel(bool bAlwaysNewStart)
 	{
 		OpenPendingStartTargetLevel();
 	}
+}
+
+void UTunaSweeperIntroMenuWidget::ReloadIntroLevel()
+{
+	if (bStartTravelPending)
+	{
+		return;
+	}
+
+	bStartTravelPending = true;
+	PendingStartTargetLevelName = NAME_None;
+	SetStartTravelControlsEnabled(false);
+	UGameplayStatics::OpenLevel(this, FName(TEXT("IntroMap")));
 }
 
 void UTunaSweeperIntroMenuWidget::HandleSaveSlot1Focused()

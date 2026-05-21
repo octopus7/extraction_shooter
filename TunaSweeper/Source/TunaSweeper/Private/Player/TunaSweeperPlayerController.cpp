@@ -176,6 +176,11 @@ namespace TunaSweeperHoveredItemInteraction
 	}
 }
 
+namespace TunaSweeperIntroMap
+{
+	constexpr float EntryFadeFromBlackSeconds = 0.5f;
+}
+
 namespace TunaSweeperCanBotIntro
 {
 	const FName DialogueCompletionFlag(TEXT("dialogue.canbot.bunker_intro"));
@@ -384,6 +389,15 @@ void ATunaSweeperPlayerController::EnsureIntroMenuWidget()
 	if (IntroMenuWidget)
 	{
 		IntroMenuWidget->AddToViewport(50);
+		ScreenFadeWidget = CreateWidget<UTunaSweeperScreenFadeWidget>(
+			this,
+			UTunaSweeperScreenFadeWidget::StaticClass());
+		if (ScreenFadeWidget)
+		{
+			ScreenFadeWidget->AddToViewport(1000);
+			ScreenFadeWidget->StartFadeFromBlack(TunaSweeperIntroMap::EntryFadeFromBlackSeconds);
+		}
+
 		if (UGameInstance* GameInstance = GetGameInstance())
 		{
 			if (UTunaSweeperBgmSubsystem* BgmSubsystem = GameInstance->GetSubsystem<UTunaSweeperBgmSubsystem>())
@@ -397,6 +411,7 @@ void ATunaSweeperPlayerController::EnsureIntroMenuWidget()
 		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
 		SetInputMode(InputMode);
 		bShowMouseCursor = true;
+		IntroMenuWidget->SetKeyboardFocus();
 	}
 }
 

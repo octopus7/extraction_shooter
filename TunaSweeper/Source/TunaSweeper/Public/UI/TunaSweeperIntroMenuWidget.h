@@ -22,6 +22,7 @@ class TUNASWEEPER_API UTunaSweeperIntroMenuWidget : public UUserWidget
 protected:
 	virtual void NativeConstruct() override;
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
+	virtual FReply NativeOnPreviewKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent) override;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Intro")
 	FName StartTargetLevelName = FName(TEXT("BunkerMap"));
@@ -270,6 +271,7 @@ private:
 		int32 LabelFontSize,
 		int32 IconFontSize);
 	void BeginStartTravel(bool bAlwaysNewStart);
+	void ReloadIntroLevel();
 	void OpenPendingStartTargetLevel();
 	void SetStartTravelControlsEnabled(bool bEnabled);
 
