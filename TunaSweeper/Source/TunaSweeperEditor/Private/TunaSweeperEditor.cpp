@@ -71,6 +71,7 @@
 #include "Misc/Parse.h"
 #include "Misc/Paths.h"
 #include "Player/TunaSweeperPlayerController.h"
+#include "Sound/SoundWave.h"
 #include "StaticMeshAttributes.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
 #include "TunaSweeperEditorRunOnce.h"
@@ -208,8 +209,10 @@ namespace TunaSweeperEditorSetup
 		LootContainerPanelPadding * 2.0f + LootContainerTileColumnCount * LootContainerTileWidth + LootContainerTileViewScrollbarReserveWidth;
 	const FString InteractionAssetPath = TEXT("/Game/Interaction");
 	const FString VideoAssetPath = TEXT("/Game/Movies");
+	const FString AudioBgmAssetPath = TEXT("/Game/Audio/BGM");
 	const FString BunkerToRaidMediaSourceAssetName = TEXT("MS_BunkerToRaid");
 	const FString RaidToBunkerMediaSourceAssetName = TEXT("MS_BunkerToRaid");
+	const FString TitleBgmAssetName = TEXT("Where_the_Birds_Still_Sing");
 	const FString PickupItemAssetName = TEXT("BP_PickupItem");
 	const FString ItemSpawnInteractionAssetName = TEXT("BP_Interact_ItemSpawn");
 	const FString LootContainerAssetName = TEXT("BP_LootContainer");
@@ -237,6 +240,15 @@ namespace TunaSweeperEditorSetup
 		FString DestinationPath = UITitleTextureAssetPath;
 		FString AssetName;
 		bool bReplaceExisting = true;
+	};
+
+	struct FAudioImportArgs
+	{
+		FString SourceFile;
+		FString DestinationPath = AudioBgmAssetPath;
+		FString AssetName = TitleBgmAssetName;
+		bool bReplaceExisting = true;
+		bool bLooping = true;
 	};
 
 	FString GetGameInstanceObjectPath()
@@ -3506,6 +3518,138 @@ namespace TunaSweeperEditorSetup
 		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperImportUiTextureQuit")))
 		{
 			FPlatformMisc::RequestExit(false);
+		}
+		return bImported;
+	}
+
+	void ConfigureImportedBgmSound(USoundWave* SoundWave, bool bLooping)
+	{
+		if (!SoundWave)
+		{
+			return;
+		}
+
+		SoundWave->Modify();
+		SoundWave->bLooping = bLooping;
+		SoundWave->PostEditChange();
+		SoundWave->MarkPackageDirty();
+		SaveAsset(SoundWave);
+	}
+
+	bool ImportAudioAsset(const FAudioImportArgs& Args, USoundWave** OutSoundWave = nullptr)
+	{
+		if (OutSoundWave)
+		{
+			*OutSoundWave = nullptr;
+		}
+
+		FString SourceFile = Args.SourceFile;
+		FPaths::NormalizeFilename(SourceFile);
+		SourceFile = FPaths::ConvertRelativePathToFull(SourceFile);
+		FPaths::CollapseRelativeDirectories(SourceFile);
+
+		if (!FPaths::FileExists(SourceFile))
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Missing audio source: %s"), *SourceFile);
+			return false;
+		}
+
+		const FString DestinationPath = Args.DestinationPath.IsEmpty() ? AudioBgmAssetPath : Args.DestinationPath;
+		FString AssetName = Args.AssetName.IsEmpty() ? FPaths::GetBaseFilename(SourceFile) : Args.AssetName;
+		AssetName = FPaths::GetBaseFilename(AssetName);
+
+		if (AssetName.IsEmpty() || !FPackageName::IsValidLongPackageName(DestinationPath))
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Invalid audio destination: path=%s asset=%s"), *DestinationPath, *AssetName);
+			return false;
+		}
+
+		const FString ObjectPath = GetAssetObjectPath(DestinationPath, AssetName);
+		if (!Args.bReplaceExisting)
+		{
+			if (USoundWave* ExistingSoundWave = LoadObject<USoundWave>(nullptr, *ObjectPath))
+			{
+				ConfigureImportedBgmSound(ExistingSoundWave, Args.bLooping);
+				if (OutSoundWave)
+				{
+					*OutSoundWave = ExistingSoundWave;
+				}
+				return true;
+			}
+		}
+
+		FString ImportFile = SourceFile;
+		if (FPaths::GetBaseFilename(SourceFile) != AssetName)
+		{
+			const FString ImportDirectory = FPaths::Combine(FPaths::ProjectSavedDir(), TEXT("TunaSweeperAudioImport"));
+			IFileManager::Get().MakeDirectory(*ImportDirectory, true);
+			ImportFile = FPaths::Combine(ImportDirectory, AssetName + TEXT(".") + FPaths::GetExtension(SourceFile));
+			if (IFileManager::Get().Copy(*ImportFile, *SourceFile, true, true) != COPY_OK)
+			{
+				UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to stage audio import source: %s -> %s"), *SourceFile, *ImportFile);
+				return false;
+			}
+		}
+
+		FModuleManager::Get().LoadModule(TEXT("AudioEditor"));
+
+		UAutomatedAssetImportData* ImportData = NewObject<UAutomatedAssetImportData>();
+		ImportData->DestinationPath = DestinationPath;
+		ImportData->Filenames.Add(ImportFile);
+		ImportData->bReplaceExisting = Args.bReplaceExisting;
+		ImportData->bSkipReadOnly = true;
+
+		FAssetToolsModule& AssetToolsModule = FModuleManager::LoadModuleChecked<FAssetToolsModule>(TEXT("AssetTools"));
+		const TArray<UObject*> ImportedAssets = AssetToolsModule.Get().ImportAssetsAutomated(ImportData);
+		if (ImportedAssets.Num() == 0)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to import audio: %s"), *ImportFile);
+			return false;
+		}
+
+		USoundWave* ImportedSoundWave = LoadObject<USoundWave>(nullptr, *ObjectPath);
+		if (!ImportedSoundWave)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to load imported audio: %s"), *ObjectPath);
+			return false;
+		}
+
+		ConfigureImportedBgmSound(ImportedSoundWave, Args.bLooping);
+		if (OutSoundWave)
+		{
+			*OutSoundWave = ImportedSoundWave;
+		}
+		return true;
+	}
+
+	bool TryReadAudioImportArgsFromCommandLine(FAudioImportArgs& OutArgs)
+	{
+		FString SourceFile;
+		if (!FParse::Value(FCommandLine::Get(), TEXT("TunaSweeperImportAudioSource="), SourceFile))
+		{
+			return false;
+		}
+
+		OutArgs.SourceFile = SourceFile;
+		FParse::Value(FCommandLine::Get(), TEXT("TunaSweeperImportAudioDest="), OutArgs.DestinationPath);
+		FParse::Value(FCommandLine::Get(), TEXT("TunaSweeperImportAudioName="), OutArgs.AssetName);
+		OutArgs.bReplaceExisting = !FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperImportAudioNoReplace"));
+		OutArgs.bLooping = !FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperImportAudioNoLoop"));
+		return true;
+	}
+
+	bool ImportAudioFromCommandLineIfRequested()
+	{
+		FAudioImportArgs Args;
+		if (!TryReadAudioImportArgsFromCommandLine(Args))
+		{
+			return false;
+		}
+
+		const bool bImported = ImportAudioAsset(Args);
+		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperImportAudioQuit")))
+		{
+			FPlatformMisc::RequestExit(true);
 		}
 		return bImported;
 	}
@@ -7003,6 +7147,16 @@ public:
 		{
 			TunaSweeperEditorSetup::ImportUiTextureFromCommandLineIfRequested();
 			if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperImportUiTextureQuit")))
+			{
+				return;
+			}
+		}
+
+		FString AudioImportSource;
+		if (FParse::Value(FCommandLine::Get(), TEXT("TunaSweeperImportAudioSource="), AudioImportSource))
+		{
+			TunaSweeperEditorSetup::ImportAudioFromCommandLineIfRequested();
+			if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperImportAudioQuit")))
 			{
 				return;
 			}

@@ -10,6 +10,7 @@
 #include "MediaSource.h"
 #include "MediaTexture.h"
 #include "Player/TunaSweeperPlayerController.h"
+#include "Subsystem/TunaSweeperBgmSubsystem.h"
 #include "Subsystem/TunaSweeperEnemySpawnSubsystem.h"
 #include "Stats/Stats.h"
 #include "UI/TunaSweeperLevelTransitionWidget.h"
@@ -139,6 +140,14 @@ bool UTunaSweeperLevelTransitionSubsystem::StartTransition(
 	ActiveWidget->SetTransitionMessage(TransitionMessage);
 	ActiveWidget->SetVideoVisible(false);
 	ActiveWidget->SetBlackOpacity(0.0f);
+
+	if (UGameInstance* GameInstance = GetGameInstance())
+	{
+		if (UTunaSweeperBgmSubsystem* BgmSubsystem = GameInstance->GetSubsystem<UTunaSweeperBgmSubsystem>())
+		{
+			BgmSubsystem->FadeOutAndStop(FadeToBlackDuration);
+		}
+	}
 
 	Phase = ETransitionPhase::FadingToBlackBeforeVideo;
 	if (!MediaPlayer->OpenSource(MediaSource))

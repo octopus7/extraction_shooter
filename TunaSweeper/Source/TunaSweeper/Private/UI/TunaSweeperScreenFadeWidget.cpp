@@ -36,23 +36,46 @@ void UTunaSweeperScreenFadeWidget::NativeTick(const FGeometry& MyGeometry, float
 	}
 
 	FadeElapsedSeconds += InDeltaTime;
-	const float Alpha = FMath::Clamp(1.0f - FadeElapsedSeconds / FMath::Max(0.01f, FadeDurationSeconds), 0.0f, 1.0f);
+	const float Progress = FMath::Clamp(FadeElapsedSeconds / FMath::Max(0.01f, FadeDurationSeconds), 0.0f, 1.0f);
+	const float Alpha = FadeDirection == EFadeDirection::FromBlack ? 1.0f - Progress : Progress;
 	SetFadeOpacity(Alpha);
 
-	if (Alpha <= 0.0f)
+	if (Progress >= 1.0f)
 	{
 		bFadeActive = false;
-		RemoveFromParent();
+		FSimpleDelegate FinishedDelegate = FadeFinishedDelegate;
+		FadeFinishedDelegate.Unbind();
+		if (FadeDirection == EFadeDirection::FromBlack)
+		{
+			RemoveFromParent();
+		}
+		if (FinishedDelegate.IsBound())
+		{
+			FinishedDelegate.Execute();
+		}
 	}
 }
 
 void UTunaSweeperScreenFadeWidget::StartFadeFromBlack(float DurationSeconds)
 {
 	BuildFadeWidget();
+	FadeDirection = EFadeDirection::FromBlack;
+	FadeFinishedDelegate.Unbind();
 	FadeDurationSeconds = FMath::Max(0.01f, DurationSeconds);
 	FadeElapsedSeconds = 0.0f;
 	bFadeActive = true;
 	SetFadeOpacity(1.0f);
+}
+
+void UTunaSweeperScreenFadeWidget::StartFadeToBlack(float DurationSeconds, FSimpleDelegate InFadeFinishedDelegate)
+{
+	BuildFadeWidget();
+	FadeDirection = EFadeDirection::ToBlack;
+	FadeFinishedDelegate = InFadeFinishedDelegate;
+	FadeDurationSeconds = FMath::Max(0.01f, DurationSeconds);
+	FadeElapsedSeconds = 0.0f;
+	bFadeActive = true;
+	SetFadeOpacity(0.0f);
 }
 
 void UTunaSweeperScreenFadeWidget::BuildFadeWidget()

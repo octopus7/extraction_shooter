@@ -18,6 +18,7 @@
 #include "InputAction.h"
 #include "InputActionValue.h"
 #include "Subsystem/TunaSweeperKeyboardInputSubsystem.h"
+#include "Subsystem/TunaSweeperBgmSubsystem.h"
 #include "UI/TunaSweeperGameHudWidget.h"
 #include "UI/TunaSweeperIntroMenuWidget.h"
 #include "UI/TunaSweeperQuestWidget.h"
@@ -356,6 +357,13 @@ void ATunaSweeperPlayerController::EnsureIntroMenuWidget()
 	if (IntroMenuWidget)
 	{
 		IntroMenuWidget->AddToViewport(50);
+		if (UGameInstance* GameInstance = GetGameInstance())
+		{
+			if (UTunaSweeperBgmSubsystem* BgmSubsystem = GameInstance->GetSubsystem<UTunaSweeperBgmSubsystem>())
+			{
+				BgmSubsystem->PlayTitleBgm();
+			}
+		}
 
 		FInputModeUIOnly InputMode;
 		InputMode.SetWidgetToFocus(IntroMenuWidget->TakeWidget());

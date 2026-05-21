@@ -3,6 +3,7 @@
 #include "Blueprint/UserWidget.h"
 #include "CoreMinimal.h"
 #include "GenericPlatform/GenericWindow.h"
+#include "TimerManager.h"
 #include "TunaSweeperIntroMenuWidget.generated.h"
 
 class UButton;
@@ -10,6 +11,7 @@ class UImage;
 class UScrollBox;
 class UTextBlock;
 class UWidget;
+class UTunaSweeperScreenFadeWidget;
 
 UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API UTunaSweeperIntroMenuWidget : public UUserWidget
@@ -22,6 +24,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Intro")
 	FName StartTargetLevelName = FName(TEXT("BunkerMap"));
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Intro", meta = (ClampMin = "0.01", UIMin = "0.01"))
+	float StartTransitionFadeSeconds = 0.8f;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
 	TObjectPtr<UWidget> MainMenuPanel;
@@ -255,15 +260,24 @@ private:
 	void SetDeleteHoldProgress(float Progress);
 	void ShowDeleteConfirmDialog();
 	void HideDeleteConfirmDialog();
+	void BeginStartTravel(bool bAlwaysNewStart);
+	void OpenPendingStartTargetLevel();
+	void SetStartTravelControlsEnabled(bool bEnabled);
 
 	int32 SelectedSaveSlotIndex = INDEX_NONE;
 	float DeleteHoldElapsedSeconds = 0.0f;
 	float CreditsScrollOffset = 0.0f;
 	bool bDeleteHoldActive = false;
 	bool bDeleteConfirmVisible = false;
+	bool bStartTravelPending = false;
+	FName PendingStartTargetLevelName = NAME_None;
+	FTimerHandle StartTravelTimerHandle;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UWidget> AlwaysNewStartButtonContainer;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTunaSweeperScreenFadeWidget> StartTravelFadeWidget;
 
 	static constexpr float DeleteHoldDurationSeconds = 3.0f;
 	static constexpr float CreditsScrollSpeed = 34.0f;
