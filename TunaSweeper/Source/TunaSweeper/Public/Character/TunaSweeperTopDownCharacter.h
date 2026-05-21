@@ -66,6 +66,7 @@ public:
 	ATunaSweeperTopDownCharacter();
 
 	virtual void Tick(float DeltaSeconds) override;
+	virtual void OnConstruction(const FTransform& Transform) override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void PawnClientRestart() override;
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
@@ -236,6 +237,7 @@ private:
 	void CloseAmmoSelection();
 	void MoveAmmoSelectionFocus(int32 FocusDelta);
 	void RefreshSelectedWeaponAfterInventoryChanged();
+	void RefreshCharacterVisualVisibility();
 	void UpdateAimingVisuals(float DeltaSeconds);
 	void UpdateCarryWeightMovementSpeed();
 	void TriggerDamageCameraReaction(float DamageAmount, FDamageEvent const& DamageEvent, AActor* DamageCauser);

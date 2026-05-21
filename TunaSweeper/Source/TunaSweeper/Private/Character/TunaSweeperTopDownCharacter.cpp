@@ -5,6 +5,7 @@
 #include "Component/TunaSweeperVitalsComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SceneComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
@@ -37,7 +38,7 @@ ATunaSweeperTopDownCharacter::ATunaSweeperTopDownCharacter()
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 720.0f, 0.0f);
 	GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
 
-	GetMesh()->SetHiddenInGame(true);
+	GetMesh()->SetHiddenInGame(false);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	VisualMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("VisualMesh"));
@@ -88,9 +89,18 @@ ATunaSweeperTopDownCharacter::ATunaSweeperTopDownCharacter()
 		FSoftObjectPath(TEXT("/Game/UI/WBP_LevelTransitionVideo.WBP_LevelTransitionVideo_C")));
 }
 
+void ATunaSweeperTopDownCharacter::OnConstruction(const FTransform& Transform)
+{
+	Super::OnConstruction(Transform);
+
+	RefreshCharacterVisualVisibility();
+}
+
 void ATunaSweeperTopDownCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	RefreshCharacterVisualVisibility();
 
 	DefaultCameraFOV = TopDownCamera ? TopDownCamera->FieldOfView : DefaultCameraFOV;
 	CurrentCameraBaseFOV = DefaultCameraFOV;
@@ -715,6 +725,23 @@ void ATunaSweeperTopDownCharacter::RefreshSelectedWeaponAfterInventoryChanged()
 	CloseAmmoSelection();
 	SelectedWeaponSlotNumber = 0;
 	ClearEquippedWeaponActor();
+}
+
+void ATunaSweeperTopDownCharacter::RefreshCharacterVisualVisibility()
+{
+	USkeletalMeshComponent* CharacterMesh = GetMesh();
+	if (CharacterMesh)
+	{
+		CharacterMesh->SetHiddenInGame(false);
+		CharacterMesh->SetVisibility(true, true);
+	}
+
+	const bool bHasCharacterMesh = CharacterMesh && CharacterMesh->GetSkeletalMeshAsset();
+	if (VisualMesh)
+	{
+		VisualMesh->SetHiddenInGame(bHasCharacterMesh);
+		VisualMesh->SetVisibility(!bHasCharacterMesh, true);
+	}
 }
 
 bool ATunaSweeperTopDownCharacter::IsGameplayActionInputLocked() const

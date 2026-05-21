@@ -457,3 +457,9 @@ A. 현재 `FTunaSweeperPlayerVisionSettings::SightDistance` 기본값은 `1800cm
 Q. 임포트된 인트로 영상 이름을 `intro.mp4`로 바꾸려면 파일명을 직접 고치고 미디어 링크만 고치면 되는가?
 
 A. 현재 인트로 영상 구현은 별도 `FileMediaSource` `.uasset`을 참조하지 않고, 코드에서 `UFileMediaSource`를 생성해 `./Movies/intro.mp4`를 직접 지정한다. 따라서 실제 파일명과 `UTunaSweeperScenarioPresentationWidget`의 `IntroVideoFilePath` 상수만 일치하면 된다. 만약 나중에 콘텐츠 브라우저의 `FileMediaSource` 에셋을 쓰는 구조로 바꾸면 그 에셋의 `FilePath`도 함께 수정해야 한다.
+
+## 2026-05-22 03:03:55 (소요시간: 1분 미만)
+
+Q. ABP 에서 스레드 안전하게 스피드 얻어보는법 노드 이름 뭐지
+
+A. ABP의 스레드 세이프 업데이트에서는 `Property Access` 노드로 `Try Get Pawn Owner > Movement Component > Velocity`를 읽고, 그 벡터를 `Vector Length XY`에 넣어서 지면 기준 Speed/GroundSpeed를 만든다. 이벤트 이름은 `Blueprint Thread Safe Update Animation`이고, 일반 `Get Velocity`/캐스트 체인 대신 Property Access 경로를 쓰는 쪽이 스레드 세이프한 방식이다.
