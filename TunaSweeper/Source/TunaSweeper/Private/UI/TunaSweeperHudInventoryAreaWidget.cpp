@@ -2,6 +2,8 @@
 
 #include "Blueprint/DragDropOperation.h"
 #include "Components/Button.h"
+#include "Components/ProgressBar.h"
+#include "Components/TextBlock.h"
 #include "Components/TileView.h"
 #include "Components/Widget.h"
 #include "Engine/Texture2D.h"
@@ -21,6 +23,14 @@ namespace TunaSweeperInventoryArea
 	constexpr float EquipmentReserveEntryWidth = InventoryTileViewWidth / EquipmentReserveColumnCount;
 	constexpr float AuxiliaryBagTileWidth = 96.0f;
 	constexpr float AuxiliaryBagTileHeight = 96.0f;
+
+	FText MakeRoundedFloatText(float Value)
+	{
+		FNumberFormattingOptions NumberFormat;
+		NumberFormat.MinimumFractionalDigits = 0;
+		NumberFormat.MaximumFractionalDigits = 1;
+		return FText::AsNumber(Value, &NumberFormat);
+	}
 
 	FText GetEquipmentSlotDisplayName(int32 SlotIndex)
 	{
@@ -296,6 +306,7 @@ void UTunaSweeperHudInventoryAreaWidget::NativeConstruct()
 	}
 
 	RefreshInventoryItems();
+	ApplyHudState();
 }
 
 void UTunaSweeperHudInventoryAreaWidget::NativeDestruct()
@@ -318,6 +329,53 @@ void UTunaSweeperHudInventoryAreaWidget::SetInventoryVisible(bool bVisible)
 	if (InventoryPanel)
 	{
 		InventoryPanel->SetVisibility(bVisible ? ESlateVisibility::SelfHitTestInvisible : ESlateVisibility::Collapsed);
+	}
+
+	if (InventoryWeightPanel)
+	{
+		InventoryWeightPanel->SetVisibility(bVisible ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
+	}
+}
+
+void UTunaSweeperHudInventoryAreaWidget::SetHudState(const FTunaSweeperPlayerHudState& InHudState)
+{
+	PreviewHudState = InHudState;
+	PreviewHudState.NormalizeWeightLimits();
+	ApplyHudState();
+}
+
+void UTunaSweeperHudInventoryAreaWidget::ApplyHudState()
+{
+	PreviewHudState.NormalizeWeightLimits();
+
+	if (InventoryWeightText)
+	{
+		InventoryWeightText->SetText(FText::Format(
+			FText::FromString(TEXT("{0}/{1}kg")),
+			TunaSweeperInventoryArea::MakeRoundedFloatText(PreviewHudState.CurrentCarryWeight),
+			TunaSweeperInventoryArea::MakeRoundedFloatText(PreviewHudState.MaxCarryWeight)));
+	}
+
+	if (InventoryWeightGauge)
+	{
+		const float GaugePercent = PreviewHudState.MovementBlockedWeight > 0.0f
+			? PreviewHudState.CurrentCarryWeight / PreviewHudState.MovementBlockedWeight
+			: 0.0f;
+		InventoryWeightGauge->SetPercent(FMath::Clamp(GaugePercent, 0.0f, 1.0f));
+		InventoryWeightGauge->SetFillColorAndOpacity(
+			PreviewHudState.IsCarryWeightMovementBlocked()
+				? FLinearColor(0.92f, 0.16f, 0.10f, 1.0f)
+				: PreviewHudState.IsCarryWeightOverLimit()
+					? FLinearColor(0.96f, 0.74f, 0.18f, 1.0f)
+					: FLinearColor(0.60f, 0.84f, 0.36f, 1.0f));
+	}
+
+	if (InventoryWeightWarningIcon)
+	{
+		InventoryWeightWarningIcon->SetVisibility(
+			PreviewHudState.IsCarryWeightOverLimit()
+				? ESlateVisibility::HitTestInvisible
+				: ESlateVisibility::Hidden);
 	}
 }
 

@@ -95,6 +95,7 @@ void UTunaSweeperGameHudWidget::SetInventoryAreaVisible(bool bVisible)
 	if (InventoryAreaWidget)
 	{
 		InventoryAreaWidget->SetVisibility(bVisible ? ESlateVisibility::SelfHitTestInvisible : ESlateVisibility::Collapsed);
+		InventoryAreaWidget->SetInventoryVisible(bVisible);
 	}
 }
 
@@ -194,7 +195,7 @@ bool UTunaSweeperGameHudWidget::IsInventoryUiOpen() const
 
 void UTunaSweeperGameHudWidget::RefreshBottomStatusFromGameInstance()
 {
-	if (!BottomStatusWidget)
+	if (!BottomStatusWidget && !InventoryAreaWidget)
 	{
 		return;
 	}
@@ -219,12 +220,23 @@ void UTunaSweeperGameHudWidget::RefreshBottomStatusFromGameInstance()
 		{
 			const FTunaSweeperVitalsState& VitalsState = VitalsComponent->GetVitalsState();
 			HudState.Health = VitalsState.Health;
+			HudState.MaxHealth = VitalsState.MaxHealth;
 			HudState.Food = VitalsState.Food;
+			HudState.MaxFood = VitalsState.MaxFood;
 			HudState.Hydration = VitalsState.Hydration;
+			HudState.MaxHydration = VitalsState.MaxHydration;
 		}
 	}
 
-	BottomStatusWidget->SetHudState(HudState);
+	if (BottomStatusWidget)
+	{
+		BottomStatusWidget->SetHudState(HudState);
+	}
+
+	if (InventoryAreaWidget)
+	{
+		InventoryAreaWidget->SetHudState(HudState);
+	}
 }
 
 void UTunaSweeperGameHudWidget::RefreshQuickSlotsFromGameState()
@@ -397,18 +409,22 @@ void UTunaSweeperGameHudWidget::CacheAmmoReloadWidgets()
 void UTunaSweeperGameHudWidget::RefreshDialogueHudVisibility()
 {
 	const bool bDialogueActive = IsDialogueSequenceActive();
-	const ESlateVisibility BottomHudVisibility = bDialogueActive
+	const bool bInventoryUiOpen = IsInventoryUiOpen();
+	const ESlateVisibility BottomStatusVisibility = bDialogueActive || bInventoryUiOpen
+		? ESlateVisibility::Collapsed
+		: ESlateVisibility::HitTestInvisible;
+	const ESlateVisibility QuickSlotVisibility = bDialogueActive
 		? ESlateVisibility::Collapsed
 		: ESlateVisibility::HitTestInvisible;
 
 	if (BottomStatusWidget)
 	{
-		BottomStatusWidget->SetVisibility(BottomHudVisibility);
+		BottomStatusWidget->SetVisibility(BottomStatusVisibility);
 	}
 
 	if (QuickSlotBarWidget)
 	{
-		QuickSlotBarWidget->SetVisibility(BottomHudVisibility);
+		QuickSlotBarWidget->SetVisibility(QuickSlotVisibility);
 	}
 }
 

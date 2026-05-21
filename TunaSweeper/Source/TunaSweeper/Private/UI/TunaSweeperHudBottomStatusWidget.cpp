@@ -6,12 +6,19 @@
 
 namespace TunaSweeperHudStatus
 {
-	FText MakeRoundedFloatText(float Value)
+	FText MakeVitalsText(float Value)
 	{
 		FNumberFormattingOptions NumberFormat;
 		NumberFormat.MinimumFractionalDigits = 0;
 		NumberFormat.MaximumFractionalDigits = 1;
 		return FText::AsNumber(Value, &NumberFormat);
+	}
+
+	float MakeVitalsPercent(float Value, float MaxValue)
+	{
+		return MaxValue > 0.0f
+			? FMath::Clamp(Value / MaxValue, 0.0f, 1.0f)
+			: 0.0f;
 	}
 }
 
@@ -50,42 +57,69 @@ void UTunaSweeperHudBottomStatusWidget::ApplyHudState()
 {
 	PreviewHudState.NormalizeWeightLimits();
 
+	auto CollapseLegacyWeightWidget = [](UWidget* Widget)
+	{
+		if (Widget)
+		{
+			Widget->SetVisibility(ESlateVisibility::Collapsed);
+		}
+	};
+
+	CollapseLegacyWeightWidget(WeightText.Get());
+	CollapseLegacyWeightWidget(WeightRow.Get());
+	CollapseLegacyWeightWidget(GaugeOverlay.Get());
+	CollapseLegacyWeightWidget(CarryWeightGauge.Get());
+	CollapseLegacyWeightWidget(WeightWarningIcon.Get());
+
 	if (WeightText)
 	{
-		WeightText->SetText(FText::Format(
-			FText::FromString(TEXT("{0}/{1} kg")),
-			TunaSweeperHudStatus::MakeRoundedFloatText(PreviewHudState.CurrentCarryWeight),
-			TunaSweeperHudStatus::MakeRoundedFloatText(PreviewHudState.MaxCarryWeight)));
+		WeightText->SetText(FText::GetEmpty());
 	}
 
 	if (HealthText)
 	{
-		HealthText->SetText(FText::Format(FText::FromString(TEXT("HP {0}")), FText::AsNumber(FMath::RoundToInt(PreviewHudState.Health))));
+		HealthText->SetText(FText::Format(
+			FText::FromString(TEXT("HP {0} / {1}")),
+			TunaSweeperHudStatus::MakeVitalsText(PreviewHudState.Health),
+			TunaSweeperHudStatus::MakeVitalsText(PreviewHudState.MaxHealth)));
 	}
 
 	if (HungerText)
 	{
-		HungerText->SetText(FText::Format(FText::FromString(TEXT("Food {0}")), FText::AsNumber(FMath::RoundToInt(PreviewHudState.Food))));
+		HungerText->SetText(FText::Format(
+			FText::FromString(TEXT("배부름 {0}")),
+			TunaSweeperHudStatus::MakeVitalsText(PreviewHudState.Food)));
 	}
 
 	if (HydrationText)
 	{
-		HydrationText->SetText(FText::Format(FText::FromString(TEXT("Water {0}")), FText::AsNumber(FMath::RoundToInt(PreviewHudState.Hydration))));
+		HydrationText->SetText(FText::Format(
+			FText::FromString(TEXT("수분 {0}")),
+			TunaSweeperHudStatus::MakeVitalsText(PreviewHudState.Hydration)));
+	}
+
+	if (HealthGauge)
+	{
+		HealthGauge->SetPercent(TunaSweeperHudStatus::MakeVitalsPercent(PreviewHudState.Health, PreviewHudState.MaxHealth));
+	}
+
+	if (HungerGauge)
+	{
+		HungerGauge->SetPercent(TunaSweeperHudStatus::MakeVitalsPercent(PreviewHudState.Food, PreviewHudState.MaxFood));
+	}
+
+	if (HydrationGauge)
+	{
+		HydrationGauge->SetPercent(TunaSweeperHudStatus::MakeVitalsPercent(PreviewHudState.Hydration, PreviewHudState.MaxHydration));
 	}
 
 	if (CarryWeightGauge)
 	{
-		const float GaugePercent = PreviewHudState.MovementBlockedWeight > 0.0f
-			? PreviewHudState.CurrentCarryWeight / PreviewHudState.MovementBlockedWeight
-			: 0.0f;
-		CarryWeightGauge->SetPercent(FMath::Clamp(GaugePercent, 0.0f, 1.0f));
+		CarryWeightGauge->SetPercent(0.0f);
 	}
 
 	if (WeightWarningIcon)
 	{
-		WeightWarningIcon->SetVisibility(
-			PreviewHudState.IsCarryWeightOverLimit()
-				? ESlateVisibility::HitTestInvisible
-				: ESlateVisibility::Hidden);
+		WeightWarningIcon->SetVisibility(ESlateVisibility::Collapsed);
 	}
 }

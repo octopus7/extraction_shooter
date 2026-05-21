@@ -2,12 +2,15 @@
 
 #include "Blueprint/UserWidget.h"
 #include "CoreMinimal.h"
+#include "Game/TunaSweeperGameInstance.h"
 #include "TunaSweeperHudInventoryAreaWidget.generated.h"
 
 class UWidget;
 class UTileView;
 class UDragDropOperation;
 class UButton;
+class UProgressBar;
+class UTextBlock;
 struct FTunaSweeperItemSlotReference;
 
 UCLASS(BlueprintType, Blueprintable)
@@ -24,6 +27,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
 	void RefreshInventoryItems();
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
+	void SetHudState(const FTunaSweeperPlayerHudState& InHudState);
 
 protected:
 	virtual void NativeConstruct() override;
@@ -51,7 +57,21 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
 	TObjectPtr<UButton> SortInventoryButton;
 
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
+	TObjectPtr<UWidget> InventoryWeightPanel;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
+	TObjectPtr<UTextBlock> InventoryWeightText;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
+	TObjectPtr<UProgressBar> InventoryWeightGauge;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
+	TObjectPtr<UWidget> InventoryWeightWarningIcon;
+
 private:
+	void ApplyHudState();
+
 	bool TryResolveDropSlotFromCursor(
 		const FVector2D& ScreenSpacePosition,
 		FTunaSweeperItemSlotReference& OutSlotReference);
@@ -61,4 +81,7 @@ private:
 
 	UPROPERTY(Transient)
 	TArray<TObjectPtr<UObject>> TileObjects;
+
+	UPROPERTY(EditAnywhere, Category = "TunaSweeper|HUD")
+	FTunaSweeperPlayerHudState PreviewHudState;
 };

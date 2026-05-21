@@ -105,7 +105,7 @@ namespace TunaSweeperEditorSetup
 	const FString InteractionInputTaskId = TEXT("2026-05-11_SetInteractInputToFKey");
 	const FString InteractionMarkerAlignmentTaskId = TEXT("2026-05-10_RebuildInteractionMarkerAlignmentV2");
 	const FString PickupItemAndSpawnerTaskId = TEXT("2026-05-11_CreatePickupItemAndSpawnerAssetsV3");
-	const FString CommonGameHudTaskId = TEXT("2026-05-19_RebuildAmmoReloadHudV11");
+	const FString CommonGameHudTaskId = TEXT("2026-05-21_RebuildInventoryWeightHudV1");
 	const FString InventoryInputTaskId = TEXT("2026-05-11_AddInventoryInput");
 	const FString QuickSlotInputTaskId = TEXT("2026-05-12_AddQuickSlotInputActions");
 	const FString DropInputTaskId = TEXT("2026-05-18_AddDropInputAction");
@@ -3891,136 +3891,114 @@ namespace TunaSweeperEditorSetup
 
 		UWidgetTree* WidgetTree = WidgetBlueprint->WidgetTree;
 		USizeBox* RootSizeBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("RootSizeBox"));
-		UBorder* PanelBackground = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("PanelBackground"));
-		UVerticalBox* StatusStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("StatusStack"));
-		UHorizontalBox* WeightRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("WeightRow"));
-		UTextBlock* WeightText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("WeightText"));
-		UBorder* WeightWarningIcon = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("WeightWarningIcon"));
-		UTextBlock* WeightWarningText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("WeightWarningText"));
-		UOverlay* GaugeOverlay = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), TEXT("GaugeOverlay"));
-		UProgressBar* CarryWeightGauge = WidgetTree->ConstructWidget<UProgressBar>(UProgressBar::StaticClass(), TEXT("CarryWeightGauge"));
-		USizeBox* MaxWeightTick = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("MaxWeightTick"));
-		UBorder* MaxWeightTickLine = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("MaxWeightTickLine"));
 		UHorizontalBox* VitalsRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("VitalsRow"));
+		USizeBox* HealthBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("HealthBox"));
+		UOverlay* HealthOverlay = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), TEXT("HealthOverlay"));
+		UProgressBar* HealthGauge = WidgetTree->ConstructWidget<UProgressBar>(UProgressBar::StaticClass(), TEXT("HealthGauge"));
 		UTextBlock* HealthText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("HealthText"));
-		UTextBlock* HungerText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("HungerText"));
+		USizeBox* HydrationBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("HydrationBox"));
+		UOverlay* HydrationOverlay = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), TEXT("HydrationOverlay"));
+		UProgressBar* HydrationGauge = WidgetTree->ConstructWidget<UProgressBar>(UProgressBar::StaticClass(), TEXT("HydrationGauge"));
 		UTextBlock* HydrationText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("HydrationText"));
+		USizeBox* HungerBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("HungerBox"));
+		UOverlay* HungerOverlay = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), TEXT("HungerOverlay"));
+		UProgressBar* HungerGauge = WidgetTree->ConstructWidget<UProgressBar>(UProgressBar::StaticClass(), TEXT("HungerGauge"));
+		UTextBlock* HungerText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("HungerText"));
 
-		if (!RootSizeBox || !PanelBackground || !StatusStack || !WeightRow || !WeightText || !WeightWarningIcon || !WeightWarningText ||
-			!GaugeOverlay || !CarryWeightGauge || !MaxWeightTick || !MaxWeightTickLine || !VitalsRow || !HealthText || !HungerText || !HydrationText)
+		if (!RootSizeBox || !VitalsRow || !HealthBox || !HealthOverlay || !HealthGauge || !HealthText ||
+			!HydrationBox || !HydrationOverlay || !HydrationGauge || !HydrationText ||
+			!HungerBox || !HungerOverlay || !HungerGauge || !HungerText)
 		{
 			return false;
 		}
 
 		WidgetTree->RootWidget = RootSizeBox;
-		RootSizeBox->SetWidthOverride(300.0f);
-		RootSizeBox->SetHeightOverride(118.0f);
-		RootSizeBox->SetContent(PanelBackground);
+		RootSizeBox->SetWidthOverride(430.0f);
+		RootSizeBox->SetHeightOverride(42.0f);
+		RootSizeBox->SetContent(VitalsRow);
 
-		PanelBackground->SetPadding(FMargin(14.0f, 10.0f));
-		PanelBackground->SetBrush(MakeRoundedBoxBrush(
-			FVector2D(300.0f, 118.0f),
-			FLinearColor(0.01f, 0.012f, 0.014f, 0.82f),
-			FLinearColor(0.22f, 0.25f, 0.29f, 0.85f),
-			1.0f));
-		PanelBackground->SetContent(StatusStack);
-
-		ConfigureTextBlockLeft(WeightText, FText::FromString(TEXT("0/50 kg")), FLinearColor::White, 18);
-		UHorizontalBoxSlot* WeightTextSlot = WeightRow->AddChildToHorizontalBox(WeightText);
-		if (WeightTextSlot)
+		HealthBox->SetWidthOverride(210.0f);
+		HealthBox->SetHeightOverride(34.0f);
+		HealthBox->SetContent(HealthOverlay);
+		HealthGauge->SetPercent(1.0f);
+		HealthGauge->SetFillColorAndOpacity(FLinearColor(0.96f, 0.32f, 0.36f, 1.0f));
+		UOverlaySlot* HealthGaugeSlot = HealthOverlay->AddChildToOverlay(HealthGauge);
+		if (HealthGaugeSlot)
 		{
-			WeightTextSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
-			WeightTextSlot->SetVerticalAlignment(VAlign_Center);
+			HealthGaugeSlot->SetHorizontalAlignment(HAlign_Fill);
+			HealthGaugeSlot->SetVerticalAlignment(VAlign_Fill);
+		}
+		ConfigureTextBlock(HealthText, FText::FromString(TEXT("HP 100 / 100")), FLinearColor::White, 16);
+		UOverlaySlot* HealthTextSlot = HealthOverlay->AddChildToOverlay(HealthText);
+		if (HealthTextSlot)
+		{
+			HealthTextSlot->SetHorizontalAlignment(HAlign_Center);
+			HealthTextSlot->SetVerticalAlignment(VAlign_Center);
 		}
 
-		WeightWarningIcon->SetVisibility(ESlateVisibility::Hidden);
-		WeightWarningIcon->SetPadding(FMargin(5.0f, 2.0f));
-		WeightWarningIcon->SetBrush(MakeRoundedBoxBrush(
-			FVector2D(34.0f, 24.0f),
-			FLinearColor(0.9f, 0.18f, 0.08f, 0.95f),
-			FLinearColor(1.0f, 0.75f, 0.25f, 1.0f),
-			1.0f));
-		ConfigureTextBlock(WeightWarningText, FText::FromString(TEXT("KG")), FLinearColor::White, 12);
-		WeightWarningIcon->SetContent(WeightWarningText);
-		UHorizontalBoxSlot* WarningSlot = WeightRow->AddChildToHorizontalBox(WeightWarningIcon);
-		if (WarningSlot)
+		HydrationBox->SetWidthOverride(96.0f);
+		HydrationBox->SetHeightOverride(34.0f);
+		HydrationBox->SetContent(HydrationOverlay);
+		HydrationGauge->SetPercent(1.0f);
+		HydrationGauge->SetFillColorAndOpacity(FLinearColor(0.30f, 0.65f, 0.98f, 1.0f));
+		UOverlaySlot* HydrationGaugeSlot = HydrationOverlay->AddChildToOverlay(HydrationGauge);
+		if (HydrationGaugeSlot)
 		{
-			WarningSlot->SetHorizontalAlignment(HAlign_Right);
-			WarningSlot->SetVerticalAlignment(VAlign_Center);
+			HydrationGaugeSlot->SetHorizontalAlignment(HAlign_Fill);
+			HydrationGaugeSlot->SetVerticalAlignment(VAlign_Fill);
+		}
+		ConfigureTextBlock(HydrationText, FText::FromString(TEXT("수분 100")), FLinearColor::White, 14);
+		UOverlaySlot* HydrationTextSlot = HydrationOverlay->AddChildToOverlay(HydrationText);
+		if (HydrationTextSlot)
+		{
+			HydrationTextSlot->SetHorizontalAlignment(HAlign_Center);
+			HydrationTextSlot->SetVerticalAlignment(VAlign_Center);
 		}
 
-		UVerticalBoxSlot* WeightRowSlot = StatusStack->AddChildToVerticalBox(WeightRow);
-		if (WeightRowSlot)
+		HungerBox->SetWidthOverride(112.0f);
+		HungerBox->SetHeightOverride(34.0f);
+		HungerBox->SetContent(HungerOverlay);
+		HungerGauge->SetPercent(1.0f);
+		HungerGauge->SetFillColorAndOpacity(FLinearColor(0.92f, 0.58f, 0.22f, 1.0f));
+		UOverlaySlot* HungerGaugeSlot = HungerOverlay->AddChildToOverlay(HungerGauge);
+		if (HungerGaugeSlot)
 		{
-			WeightRowSlot->SetHorizontalAlignment(HAlign_Fill);
-			WeightRowSlot->SetVerticalAlignment(VAlign_Top);
+			HungerGaugeSlot->SetHorizontalAlignment(HAlign_Fill);
+			HungerGaugeSlot->SetVerticalAlignment(VAlign_Fill);
+		}
+		ConfigureTextBlock(HungerText, FText::FromString(TEXT("배부름 100")), FLinearColor::White, 14);
+		UOverlaySlot* HungerTextSlot = HungerOverlay->AddChildToOverlay(HungerText);
+		if (HungerTextSlot)
+		{
+			HungerTextSlot->SetHorizontalAlignment(HAlign_Center);
+			HungerTextSlot->SetVerticalAlignment(VAlign_Center);
 		}
 
-		CarryWeightGauge->SetPercent(0.0f);
-		CarryWeightGauge->SetFillColorAndOpacity(FLinearColor(0.95f, 0.82f, 0.18f, 1.0f));
-		UOverlaySlot* GaugeSlot = GaugeOverlay->AddChildToOverlay(CarryWeightGauge);
-		if (GaugeSlot)
+		UHorizontalBoxSlot* HealthBoxSlot = VitalsRow->AddChildToHorizontalBox(HealthBox);
+		if (HealthBoxSlot)
 		{
-			GaugeSlot->SetHorizontalAlignment(HAlign_Fill);
-			GaugeSlot->SetVerticalAlignment(VAlign_Fill);
+			HealthBoxSlot->SetVerticalAlignment(VAlign_Center);
+		}
+		UHorizontalBoxSlot* HydrationBoxSlot = VitalsRow->AddChildToHorizontalBox(HydrationBox);
+		if (HydrationBoxSlot)
+		{
+			HydrationBoxSlot->SetPadding(FMargin(12.0f, 0.0f, 0.0f, 0.0f));
+			HydrationBoxSlot->SetVerticalAlignment(VAlign_Center);
+		}
+		UHorizontalBoxSlot* HungerBoxSlot = VitalsRow->AddChildToHorizontalBox(HungerBox);
+		if (HungerBoxSlot)
+		{
+			HungerBoxSlot->SetPadding(FMargin(12.0f, 0.0f, 0.0f, 0.0f));
+			HungerBoxSlot->SetVerticalAlignment(VAlign_Center);
 		}
 
-		MaxWeightTick->SetWidthOverride(2.0f);
-		MaxWeightTick->SetHeightOverride(18.0f);
-		MaxWeightTickLine->SetBrush(MakeRoundedBoxBrush(
-			FVector2D(2.0f, 18.0f),
-			FLinearColor(1.0f, 1.0f, 1.0f, 0.8f),
-			FLinearColor::Transparent,
-			0.0f));
-		MaxWeightTick->SetContent(MaxWeightTickLine);
-		UOverlaySlot* TickSlot = GaugeOverlay->AddChildToOverlay(MaxWeightTick);
-		if (TickSlot)
-		{
-			TickSlot->SetHorizontalAlignment(HAlign_Center);
-			TickSlot->SetVerticalAlignment(VAlign_Center);
-		}
-
-		UVerticalBoxSlot* GaugeOverlaySlot = StatusStack->AddChildToVerticalBox(GaugeOverlay);
-		if (GaugeOverlaySlot)
-		{
-			GaugeOverlaySlot->SetPadding(FMargin(0.0f, 8.0f, 0.0f, 10.0f));
-			GaugeOverlaySlot->SetHorizontalAlignment(HAlign_Fill);
-			GaugeOverlaySlot->SetVerticalAlignment(VAlign_Top);
-		}
-
-		ConfigureTextBlockLeft(HealthText, FText::FromString(TEXT("HP 100")), FLinearColor(0.98f, 0.38f, 0.32f, 1.0f), 15);
-		ConfigureTextBlockLeft(HungerText, FText::FromString(TEXT("Food 100")), FLinearColor(0.95f, 0.72f, 0.28f, 1.0f), 15);
-		ConfigureTextBlockLeft(HydrationText, FText::FromString(TEXT("Water 100")), FLinearColor(0.35f, 0.72f, 0.98f, 1.0f), 15);
-
-		for (UTextBlock* VitalsText : { HealthText, HungerText, HydrationText })
-		{
-			UHorizontalBoxSlot* VitalsSlot = VitalsRow->AddChildToHorizontalBox(VitalsText);
-			if (VitalsSlot)
-			{
-				VitalsSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
-				VitalsSlot->SetVerticalAlignment(VAlign_Center);
-			}
-		}
-
-		UVerticalBoxSlot* VitalsRowSlot = StatusStack->AddChildToVerticalBox(VitalsRow);
-		if (VitalsRowSlot)
-		{
-			VitalsRowSlot->SetHorizontalAlignment(HAlign_Fill);
-			VitalsRowSlot->SetVerticalAlignment(VAlign_Bottom);
-		}
-
-		RegisterWidgetVariable(WidgetBlueprint, WeightText);
 		RegisterWidgetVariable(WidgetBlueprint, HealthText);
 		RegisterWidgetVariable(WidgetBlueprint, HungerText);
 		RegisterWidgetVariable(WidgetBlueprint, HydrationText);
-		RegisterWidgetVariable(WidgetBlueprint, CarryWeightGauge);
-		RegisterWidgetVariable(WidgetBlueprint, WeightWarningIcon);
+		RegisterWidgetVariable(WidgetBlueprint, HealthGauge);
+		RegisterWidgetVariable(WidgetBlueprint, HungerGauge);
+		RegisterWidgetVariable(WidgetBlueprint, HydrationGauge);
 		RegisterWidgetVariable(WidgetBlueprint, RootSizeBox);
-		RegisterWidgetVariable(WidgetBlueprint, PanelBackground);
-		RegisterWidgetVariable(WidgetBlueprint, StatusStack);
-		RegisterWidgetVariable(WidgetBlueprint, WeightRow);
-		RegisterWidgetVariable(WidgetBlueprint, GaugeOverlay);
-		RegisterWidgetVariable(WidgetBlueprint, MaxWeightTick);
 		RegisterWidgetVariable(WidgetBlueprint, VitalsRow);
 		WidgetBlueprint->MarkPackageDirty();
 		return true;
@@ -4454,10 +4432,20 @@ namespace TunaSweeperEditorSetup
 		UBorder* AuxiliaryBagBackground = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("AuxiliaryBagBackground"));
 		UTileView* AuxiliaryBagTileView = WidgetTree->ConstructWidget<UTileView>(UTileView::StaticClass(), TEXT("AuxiliaryBagTileView"));
 		UTileView* InventoryTileView = WidgetTree->ConstructWidget<UTileView>(UTileView::StaticClass(), TEXT("InventoryTileView"));
+		UBorder* InventoryWeightPanel = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("InventoryWeightPanel"));
+		UHorizontalBox* InventoryWeightRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("InventoryWeightRow"));
+		UTextBlock* InventoryWeightLabelText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("InventoryWeightLabelText"));
+		USizeBox* InventoryWeightGaugeBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("InventoryWeightGaugeBox"));
+		UProgressBar* InventoryWeightGauge = WidgetTree->ConstructWidget<UProgressBar>(UProgressBar::StaticClass(), TEXT("InventoryWeightGauge"));
+		UTextBlock* InventoryWeightText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("InventoryWeightText"));
+		UBorder* InventoryWeightWarningIcon = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("InventoryWeightWarningIcon"));
+		UTextBlock* InventoryWeightWarningText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("InventoryWeightWarningText"));
 
 		if (!RootSizeBox || !RootRow || !MainInventorySizeBox || !InventoryPanel || !InventoryStack || !InventoryHeaderRow ||
 			!InventoryTitleText || !SortInventoryButton || !SortInventoryButtonText || !EquipmentReserveSizeBox ||
-			!EquipmentReserveTileView || !AuxiliaryBagPanel || !AuxiliaryBagBackground || !AuxiliaryBagTileView || !InventoryTileView)
+			!EquipmentReserveTileView || !AuxiliaryBagPanel || !AuxiliaryBagBackground || !AuxiliaryBagTileView || !InventoryTileView ||
+			!InventoryWeightPanel || !InventoryWeightRow || !InventoryWeightLabelText || !InventoryWeightGaugeBox ||
+			!InventoryWeightGauge || !InventoryWeightText || !InventoryWeightWarningIcon || !InventoryWeightWarningText)
 		{
 			return false;
 		}
@@ -4571,6 +4559,67 @@ namespace TunaSweeperEditorSetup
 			InventoryTileSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
 		}
 
+		InventoryWeightPanel->SetPadding(FMargin(10.0f, 6.0f));
+		InventoryWeightPanel->SetBrush(MakeRoundedBoxBrush(
+			FVector2D(InventoryTileViewWidth, 36.0f),
+			FLinearColor(0.005f, 0.008f, 0.010f, 0.72f),
+			FLinearColor(0.18f, 0.24f, 0.26f, 0.85f),
+			1.0f));
+		InventoryWeightPanel->SetContent(InventoryWeightRow);
+
+		ConfigureTextBlockLeft(InventoryWeightLabelText, FText::FromString(TEXT("소지 중량")), FLinearColor(0.92f, 0.96f, 0.94f, 1.0f), 13);
+		UHorizontalBoxSlot* WeightLabelSlot = InventoryWeightRow->AddChildToHorizontalBox(InventoryWeightLabelText);
+		if (WeightLabelSlot)
+		{
+			WeightLabelSlot->SetVerticalAlignment(VAlign_Center);
+			WeightLabelSlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
+		}
+
+		InventoryWeightGauge->SetPercent(0.0f);
+		InventoryWeightGauge->SetFillColorAndOpacity(FLinearColor(0.60f, 0.84f, 0.36f, 1.0f));
+		InventoryWeightGaugeBox->SetHeightOverride(16.0f);
+		InventoryWeightGaugeBox->SetContent(InventoryWeightGauge);
+		UHorizontalBoxSlot* WeightGaugeSlot = InventoryWeightRow->AddChildToHorizontalBox(InventoryWeightGaugeBox);
+		if (WeightGaugeSlot)
+		{
+			WeightGaugeSlot->SetPadding(FMargin(10.0f, 0.0f, 10.0f, 0.0f));
+			WeightGaugeSlot->SetVerticalAlignment(VAlign_Center);
+			WeightGaugeSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+		}
+
+		ConfigureTextBlock(InventoryWeightText, FText::FromString(TEXT("0/50kg")), FLinearColor::White, 13);
+		UHorizontalBoxSlot* WeightTextSlot = InventoryWeightRow->AddChildToHorizontalBox(InventoryWeightText);
+		if (WeightTextSlot)
+		{
+			WeightTextSlot->SetVerticalAlignment(VAlign_Center);
+			WeightTextSlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
+		}
+
+		InventoryWeightWarningIcon->SetVisibility(ESlateVisibility::Hidden);
+		InventoryWeightWarningIcon->SetPadding(FMargin(6.0f, 2.0f));
+		InventoryWeightWarningIcon->SetBrush(MakeRoundedBoxBrush(
+			FVector2D(58.0f, 22.0f),
+			FLinearColor(0.86f, 0.18f, 0.08f, 0.95f),
+			FLinearColor(1.0f, 0.70f, 0.20f, 1.0f),
+			1.0f));
+		ConfigureTextBlock(InventoryWeightWarningText, FText::FromString(TEXT("과중량")), FLinearColor::White, 11);
+		InventoryWeightWarningIcon->SetContent(InventoryWeightWarningText);
+		UHorizontalBoxSlot* WeightWarningSlot = InventoryWeightRow->AddChildToHorizontalBox(InventoryWeightWarningIcon);
+		if (WeightWarningSlot)
+		{
+			WeightWarningSlot->SetPadding(FMargin(8.0f, 0.0f, 0.0f, 0.0f));
+			WeightWarningSlot->SetVerticalAlignment(VAlign_Center);
+			WeightWarningSlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
+		}
+
+		UVerticalBoxSlot* WeightPanelSlot = InventoryStack->AddChildToVerticalBox(InventoryWeightPanel);
+		if (WeightPanelSlot)
+		{
+			WeightPanelSlot->SetPadding(FMargin(0.0f, 10.0f, 0.0f, 0.0f));
+			WeightPanelSlot->SetHorizontalAlignment(HAlign_Fill);
+			WeightPanelSlot->SetVerticalAlignment(VAlign_Bottom);
+		}
+
 		RegisterWidgetVariable(WidgetBlueprint, RootSizeBox);
 		RegisterWidgetVariable(WidgetBlueprint, RootRow);
 		RegisterWidgetVariable(WidgetBlueprint, MainInventorySizeBox);
@@ -4586,6 +4635,10 @@ namespace TunaSweeperEditorSetup
 		RegisterWidgetVariable(WidgetBlueprint, EquipmentReserveTileView);
 		RegisterWidgetVariable(WidgetBlueprint, AuxiliaryBagTileView);
 		RegisterWidgetVariable(WidgetBlueprint, InventoryTileView);
+		RegisterWidgetVariable(WidgetBlueprint, InventoryWeightPanel);
+		RegisterWidgetVariable(WidgetBlueprint, InventoryWeightText);
+		RegisterWidgetVariable(WidgetBlueprint, InventoryWeightGauge);
+		RegisterWidgetVariable(WidgetBlueprint, InventoryWeightWarningIcon);
 		WidgetBlueprint->MarkPackageDirty();
 		return true;
 	}

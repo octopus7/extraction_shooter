@@ -26,6 +26,12 @@ protected:
 	TObjectPtr<UTextBlock> WeightText;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
+	TObjectPtr<UWidget> WeightRow;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
+	TObjectPtr<UWidget> GaugeOverlay;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
 	TObjectPtr<UTextBlock> HealthText;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
@@ -33,6 +39,15 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
 	TObjectPtr<UTextBlock> HydrationText;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
+	TObjectPtr<UProgressBar> HealthGauge;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
+	TObjectPtr<UProgressBar> HungerGauge;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
+	TObjectPtr<UProgressBar> HydrationGauge;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
 	TObjectPtr<UProgressBar> CarryWeightGauge;
@@ -46,4 +61,3 @@ private:
 	UPROPERTY(EditAnywhere, Category = "TunaSweeper|HUD")
 	FTunaSweeperPlayerHudState PreviewHudState;
 };
-
