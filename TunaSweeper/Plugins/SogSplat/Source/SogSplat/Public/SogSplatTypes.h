@@ -31,6 +31,9 @@ struct FSogDecodeOptions
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SOG")
 	bool bFlipVerticalAxis = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SOG")
+	bool bFlipHorizontalAxis = true;
 };
 
 USTRUCT(BlueprintType)

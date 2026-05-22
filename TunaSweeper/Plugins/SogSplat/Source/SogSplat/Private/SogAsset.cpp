@@ -8,7 +8,7 @@
 namespace
 {
 	constexpr int32 LegacyPackedSplatCacheVersion = 1;
-	constexpr int32 TextureSplatCacheVersion = 2;
+	constexpr int32 TextureSplatCacheVersion = 3;
 	constexpr int32 TransformTexelsPerSplat = 2;
 	constexpr int32 TransformChannelsPerTexel = 4;
 	constexpr int32 ColorChannelsPerTexel = 4;
@@ -356,12 +356,22 @@ void USogAsset::PostLoad()
 	Super::PostLoad();
 
 #if WITH_EDITOR
-	if (IsRunningCommandlet()
-		&& CachedSplatDataVersion == LegacyPackedSplatCacheVersion
-		&& !CachedSplatDataBytes.IsEmpty())
+	if (IsRunningCommandlet() && CachedSplatDataVersion != TextureSplatCacheVersion)
 	{
-		FText CacheLoadError;
-		if (TryLoadSplatsFromDecodedCache(CacheLoadError) && BuildDecodedSplatCache())
+		DecodeOptions.bFlipHorizontalAxis = true;
+
+		FText CacheMigrationError;
+		if (!SourceArchiveBytes.IsEmpty())
+		{
+			if (FSogDecoder::DecodeArchiveBytesToAsset(SourceFilePath, SourceArchiveBytes, DecodeOptions, this, CacheMigrationError))
+			{
+				MarkPackageDirty();
+			}
+		}
+		else if (CachedSplatDataVersion == LegacyPackedSplatCacheVersion
+			&& !CachedSplatDataBytes.IsEmpty()
+			&& TryLoadSplatsFromDecodedCache(CacheMigrationError)
+			&& BuildDecodedSplatCache())
 		{
 			MarkPackageDirty();
 		}

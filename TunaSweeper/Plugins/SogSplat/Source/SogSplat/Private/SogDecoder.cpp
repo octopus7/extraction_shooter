@@ -447,10 +447,11 @@ namespace
 		return DecodeUnlog(FMath::Lerp(MinValue, MaxValue, Alpha));
 	}
 
-	FVector ConvertSogVectorToUnreal(const FVector& SogVector, bool bFlipVerticalAxis)
+	FVector ConvertSogVectorToUnreal(const FVector& SogVector, bool bFlipVerticalAxis, bool bFlipHorizontalAxis)
 	{
 		const double UnrealZ = bFlipVerticalAxis ? -SogVector.Y : SogVector.Y;
-		return FVector(-SogVector.Z, SogVector.X, UnrealZ);
+		const double UnrealY = bFlipHorizontalAxis ? -SogVector.X : SogVector.X;
+		return FVector(-SogVector.Z, UnrealY, UnrealZ);
 	}
 
 	FVector GetSogBasisAxis(int32 AxisIndex)
@@ -538,12 +539,12 @@ namespace
 		return Quat;
 	}
 
-	FQuat ConvertSogQuaternionToUnrealPlaneRotation(const FQuat& SogQuat, int32 PlaneXAxis, int32 PlaneYAxis, bool bFlipVerticalAxis)
+	FQuat ConvertSogQuaternionToUnrealPlaneRotation(const FQuat& SogQuat, int32 PlaneXAxis, int32 PlaneYAxis, const FSogDecodeOptions& Options)
 	{
 		const FVector SogXAxis = SogQuat.RotateVector(GetSogBasisAxis(PlaneXAxis));
 		const FVector SogYAxis = SogQuat.RotateVector(GetSogBasisAxis(PlaneYAxis));
-		const FVector UnrealXAxis = ConvertSogVectorToUnreal(SogXAxis, bFlipVerticalAxis).GetSafeNormal();
-		const FVector UnrealYAxis = ConvertSogVectorToUnreal(SogYAxis, bFlipVerticalAxis).GetSafeNormal();
+		const FVector UnrealXAxis = ConvertSogVectorToUnreal(SogXAxis, Options.bFlipVerticalAxis, Options.bFlipHorizontalAxis).GetSafeNormal();
+		const FVector UnrealYAxis = ConvertSogVectorToUnreal(SogYAxis, Options.bFlipVerticalAxis, Options.bFlipHorizontalAxis).GetSafeNormal();
 
 		if (UnrealXAxis.IsNearlyZero() || UnrealYAxis.IsNearlyZero())
 		{
@@ -581,7 +582,7 @@ namespace
 				DecodeQuantizedAxis(MeansLow.G, MeansHigh.G, Meta.MeansMins[1], Meta.MeansMaxs[1]),
 				DecodeQuantizedAxis(MeansLow.B, MeansHigh.B, Meta.MeansMins[2], Meta.MeansMaxs[2]));
 
-			const FVector UnrealPosition = ConvertSogVectorToUnreal(SogPosition, Options.bFlipVerticalAxis) * Options.UnitsPerSogUnit;
+			const FVector UnrealPosition = ConvertSogVectorToUnreal(SogPosition, Options.bFlipVerticalAxis, Options.bFlipHorizontalAxis) * Options.UnitsPerSogUnit;
 			const FVector DecodedScales(
 				DecodeSogScale(Meta.ScaleCodebook[ScaleIndices.R]),
 				DecodeSogScale(Meta.ScaleCodebook[ScaleIndices.G]),
@@ -595,7 +596,7 @@ namespace
 				DecodeSogQuaternion(EncodedQuat),
 				PlaneXAxis,
 				PlaneYAxis,
-				Options.bFlipVerticalAxis);
+				Options);
 
 			const float AxisScales[3] = { DecodedScales.X, DecodedScales.Y, DecodedScales.Z };
 			float DiameterX = FMath::Max(Options.MinCardDiameterCm, AxisScales[PlaneXAxis] * Options.UnitsPerSogUnit * Options.GaussianRadiusMultiplier * 2.0f);
