@@ -1,16 +1,16 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/InstancedStaticMeshComponent.h"
+#include "Components/MeshComponent.h"
 #include "SogSplatTypes.h"
 #include "SogSplatComponent.generated.h"
 
 class UMaterialInterface;
 class USogAsset;
-class UStaticMesh;
+struct FSogSplatRenderData;
 
 UCLASS(ClassGroup = (Rendering), meta = (BlueprintSpawnableComponent))
-class SOGSPLAT_API USogSplatComponent : public UInstancedStaticMeshComponent
+class SOGSPLAT_API USogSplatComponent : public UMeshComponent
 {
 	GENERATED_BODY()
 
@@ -29,9 +29,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SOG|Rendering")
 	TObjectPtr<UMaterialInterface> MaterialOverride;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SOG|Rendering")
-	TSoftObjectPtr<UStaticMesh> CardMesh;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "SOG")
 	int32 RenderedInstanceCount = 0;
 
@@ -48,13 +45,19 @@ public:
 	bool LoadSogFile(const FString& FilePath, FSogDecodeOptions Options);
 
 	virtual void OnRegister() override;
+	virtual FPrimitiveSceneProxy* CreateSceneProxy() override;
+	virtual FBoxSphereBounds CalcBounds(const FTransform& LocalToWorld) const override;
+	virtual int32 GetNumMaterials() const override;
 
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif
 
 private:
-	void ApplyDefaultMeshAndMaterial();
+	void ApplyDefaultMaterial();
+	UMaterialInterface* ResolveMaterial() const;
 
 	bool bInstancesBuilt = false;
+	FBoxSphereBounds CachedLocalBounds = FBoxSphereBounds(EForceInit::ForceInit);
+	TSharedPtr<FSogSplatRenderData, ESPMode::ThreadSafe> RenderData;
 };

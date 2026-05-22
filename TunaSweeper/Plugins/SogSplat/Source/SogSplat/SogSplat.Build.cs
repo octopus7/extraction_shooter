@@ -17,7 +17,9 @@ public class SogSplat : ModuleRules
 		{
 			"FreeImage",
 			"Json",
-			"libzip"
+			"libzip",
+			"RenderCore",
+			"RHI"
 		});
 	}
 }

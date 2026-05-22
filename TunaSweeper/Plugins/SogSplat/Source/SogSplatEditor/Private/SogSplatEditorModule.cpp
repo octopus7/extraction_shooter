@@ -8,9 +8,9 @@
 #include "Materials/Material.h"
 #include "Materials/MaterialExpressionCustom.h"
 #include "Materials/MaterialExpressionMultiply.h"
-#include "Materials/MaterialExpressionPerInstanceCustomData.h"
 #include "Materials/MaterialExpressionScalarParameter.h"
 #include "Materials/MaterialExpressionTextureCoordinate.h"
+#include "Materials/MaterialExpressionVertexColor.h"
 #include "Misc/PackageName.h"
 #include "Misc/Paths.h"
 #include "Modules/ModuleManager.h"
@@ -118,7 +118,7 @@ UMaterialInterface* SogSplatEditorUtils::EnsureDefaultSogMaterial()
 	Material->BlendMode = BLEND_Translucent;
 	Material->SetShadingModel(MSM_Unlit);
 	Material->TwoSided = true;
-	Material->bUsedWithInstancedStaticMeshes = true;
+	Material->bUsedWithInstancedStaticMeshes = false;
 
 	UMaterialEditorOnlyData* MaterialEditorOnly = Material->GetEditorOnlyData();
 	if (!MaterialEditorOnly)
@@ -126,13 +126,11 @@ UMaterialInterface* SogSplatEditorUtils::EnsureDefaultSogMaterial()
 		return Material;
 	}
 
-	UMaterialExpressionPerInstanceCustomData3Vector* InstanceColor = NewObject<UMaterialExpressionPerInstanceCustomData3Vector>(Material);
-	InstanceColor->Material = Material;
-	InstanceColor->DataIndex = 0;
-	InstanceColor->ConstDefaultValue = FLinearColor::White;
-	InstanceColor->MaterialExpressionEditorX = -680;
-	InstanceColor->MaterialExpressionEditorY = -120;
-	Material->GetExpressionCollection().AddExpression(InstanceColor);
+	UMaterialExpressionVertexColor* VertexColor = NewObject<UMaterialExpressionVertexColor>(Material);
+	VertexColor->Material = Material;
+	VertexColor->MaterialExpressionEditorX = -680;
+	VertexColor->MaterialExpressionEditorY = -120;
+	Material->GetExpressionCollection().AddExpression(VertexColor);
 
 	UMaterialExpressionScalarParameter* Intensity = NewObject<UMaterialExpressionScalarParameter>(Material);
 	Intensity->Material = Material;
@@ -144,19 +142,11 @@ UMaterialInterface* SogSplatEditorUtils::EnsureDefaultSogMaterial()
 
 	UMaterialExpressionMultiply* Emissive = NewObject<UMaterialExpressionMultiply>(Material);
 	Emissive->Material = Material;
-	Emissive->A.Connect(0, InstanceColor);
+	Emissive->A.Connect(0, VertexColor);
 	Emissive->B.Connect(0, Intensity);
 	Emissive->MaterialExpressionEditorX = -360;
 	Emissive->MaterialExpressionEditorY = -20;
 	Material->GetExpressionCollection().AddExpression(Emissive);
-
-	UMaterialExpressionPerInstanceCustomData* InstanceAlpha = NewObject<UMaterialExpressionPerInstanceCustomData>(Material);
-	InstanceAlpha->Material = Material;
-	InstanceAlpha->DataIndex = 3;
-	InstanceAlpha->ConstDefaultValue = 1.0f;
-	InstanceAlpha->MaterialExpressionEditorX = -680;
-	InstanceAlpha->MaterialExpressionEditorY = 260;
-	Material->GetExpressionCollection().AddExpression(InstanceAlpha);
 
 	UMaterialExpressionTextureCoordinate* TextureCoordinate = NewObject<UMaterialExpressionTextureCoordinate>(Material);
 	TextureCoordinate->Material = Material;
@@ -201,7 +191,7 @@ UMaterialInterface* SogSplatEditorUtils::EnsureDefaultSogMaterial()
 
 	FCustomInput AlphaInput;
 	AlphaInput.InputName = TEXT("Alpha");
-	AlphaInput.Input.Connect(0, InstanceAlpha);
+	AlphaInput.Input.Connect(4, VertexColor);
 	SoftEllipseOpacity->Inputs.Add(AlphaInput);
 
 	FCustomInput SigmaRadiusInput;
@@ -218,7 +208,7 @@ UMaterialInterface* SogSplatEditorUtils::EnsureDefaultSogMaterial()
 	SoftEllipseOpacity->MaterialExpressionEditorY = 380;
 	Material->GetExpressionCollection().AddExpression(SoftEllipseOpacity);
 
-	MaterialEditorOnly->BaseColor.Connect(0, InstanceColor);
+	MaterialEditorOnly->BaseColor.Connect(0, VertexColor);
 	MaterialEditorOnly->EmissiveColor.Connect(0, Emissive);
 	MaterialEditorOnly->Opacity.Connect(0, SoftEllipseOpacity);
 
