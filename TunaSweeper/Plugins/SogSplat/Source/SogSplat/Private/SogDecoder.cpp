@@ -471,7 +471,7 @@ namespace
 
 	float DecodeSogScale(float EncodedScale)
 	{
-		return FMath::Max(FMath::Exp(FMath::Clamp(EncodedScale, -20.0f, 20.0f)), KINDA_SMALL_NUMBER);
+		return FMath::Max(EncodedScale, KINDA_SMALL_NUMBER);
 	}
 
 	void SelectPlaneAxes(const FVector& DecodedScales, int32& OutMajorAxis, int32& OutMinorAxis)
