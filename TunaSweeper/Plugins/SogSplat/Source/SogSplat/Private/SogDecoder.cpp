@@ -705,6 +705,7 @@ bool FSogDecoder::DecodeArchiveBytesToAsset(const FString& SourcePath, const TAr
 	TargetAsset->SourceGaussianCount = Meta.Count;
 	TargetAsset->DecodeOptions = Options;
 	TargetAsset->SetSplats(MoveTemp(Splats));
+	TargetAsset->BuildDecodedSplatCache();
 
 	return true;
 }

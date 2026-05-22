@@ -26,6 +26,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SOG|Rendering", meta = (ClampMin = "0"))
 	int32 MaxRenderedInstances = 0;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SOG|Performance")
+	bool bBuildHierarchicalTreeOnRebuild = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SOG|Performance")
+	bool bBuildHierarchicalTreeAtRuntime = true;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SOG|Rendering")
 	TObjectPtr<UMaterialInterface> MaterialOverride;
 
@@ -47,7 +53,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "SOG")
 	bool LoadSogFile(const FString& FilePath, FSogDecodeOptions Options);
 
+	UFUNCTION(BlueprintCallable, Category = "SOG|Performance")
+	bool BuildSogHierarchy(bool bAsync);
+
 	virtual void OnRegister() override;
+	virtual void BeginPlay() override;
 
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;

@@ -42,6 +42,11 @@ void USogActorFactory::PostSpawnActor(UObject* Asset, AActor* NewActor)
 		return;
 	}
 
+	if (SogActor->bIsEditorPreviewActor)
+	{
+		return;
+	}
+
 	if (SogAsset->DefaultMaterial.IsNull())
 	{
 		if (UMaterialInterface* DefaultMaterial = SogSplatEditorUtils::EnsureDefaultSogMaterial())
