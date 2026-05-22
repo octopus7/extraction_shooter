@@ -40,13 +40,6 @@ namespace
 {
 	const TCHAR* DefaultSogMaterialPath = TEXT("/SogSplat/Materials/M_SogSoftEllipse.M_SogSoftEllipse");
 
-	const FVector BaseCardCorners[4] = {
-		FVector(-50.0, -50.0, 0.0),
-		FVector(50.0, -50.0, 0.0),
-		FVector(50.0, 50.0, 0.0),
-		FVector(-50.0, 50.0, 0.0)
-	};
-
 	const FVector2f BaseCardUvs[4] = {
 		FVector2f(0.0f, 0.0f),
 		FVector2f(1.0f, 0.0f),
@@ -59,6 +52,87 @@ namespace
 		int32 SplatIndex = INDEX_NONE;
 		double SortKey = 0.0;
 	};
+
+	double ClampHalfAxisLength(double HalfAxisLength, const FSogDecodeOptions& DecodeOptions)
+	{
+		double Result = HalfAxisLength;
+		if (DecodeOptions.MinCardDiameterCm > 0.0f)
+		{
+			Result = FMath::Max(Result, static_cast<double>(DecodeOptions.MinCardDiameterCm) * 0.5);
+		}
+		if (DecodeOptions.MaxCardDiameterCm > 0.0f)
+		{
+			Result = FMath::Min(Result, static_cast<double>(DecodeOptions.MaxCardDiameterCm) * 0.5);
+		}
+		return Result;
+	}
+
+	void BuildViewPlaneBasis(const FVector& ViewDirection, FVector& OutPlaneX, FVector& OutPlaneY)
+	{
+		const FVector SafeViewDirection = ViewDirection.GetSafeNormal(UE_SMALL_NUMBER, FVector(0.0, 0.0, -1.0));
+		const FVector ReferenceUp = FMath::Abs(FVector::DotProduct(SafeViewDirection, FVector::UpVector)) < 0.95
+			? FVector::UpVector
+			: FVector::RightVector;
+
+		OutPlaneX = FVector::CrossProduct(ReferenceUp, SafeViewDirection).GetSafeNormal(UE_SMALL_NUMBER, FVector::RightVector);
+		OutPlaneY = FVector::CrossProduct(SafeViewDirection, OutPlaneX).GetSafeNormal(UE_SMALL_NUMBER, FVector::UpVector);
+	}
+
+	void BuildProjectedCovarianceCard(
+		const FSogSplatInstance& Splat,
+		const FVector& ViewDirection,
+		const FSogDecodeOptions& DecodeOptions,
+		FVector OutCorners[4])
+	{
+		FVector PlaneX = FVector::RightVector;
+		FVector PlaneY = FVector::UpVector;
+		BuildViewPlaneBasis(ViewDirection, PlaneX, PlaneY);
+
+		const FQuat Rotation = Splat.Transform.GetRotation().GetNormalized();
+		const FVector Scale = Splat.Transform.GetScale3D();
+		const FVector ScaledAxes[3] = {
+			Rotation.RotateVector(FVector::ForwardVector) * FMath::Abs(Scale.X),
+			Rotation.RotateVector(FVector::RightVector) * FMath::Abs(Scale.Y),
+			Rotation.RotateVector(FVector::UpVector) * FMath::Abs(Scale.Z)
+		};
+
+		double CovXX = 0.0;
+		double CovXY = 0.0;
+		double CovYY = 0.0;
+		for (const FVector& Axis : ScaledAxes)
+		{
+			const double X = FVector::DotProduct(Axis, PlaneX);
+			const double Y = FVector::DotProduct(Axis, PlaneY);
+			CovXX += X * X;
+			CovXY += X * Y;
+			CovYY += Y * Y;
+		}
+
+		const double Mid = 0.5 * (CovXX + CovYY);
+		const double Radius = FMath::Sqrt(FMath::Square(0.5 * (CovXX - CovYY)) + CovXY * CovXY);
+		const double Lambda1 = FMath::Max(Mid + Radius, static_cast<double>(UE_SMALL_NUMBER));
+		const double Lambda2 = FMath::Max(Mid - Radius, static_cast<double>(UE_SMALL_NUMBER));
+
+		FVector2D Eigen1(CovXY, Lambda1 - CovXX);
+		if (!Eigen1.Normalize())
+		{
+			Eigen1 = CovXX >= CovYY ? FVector2D(1.0, 0.0) : FVector2D(0.0, 1.0);
+		}
+
+		const FVector Axis1Direction = (PlaneX * Eigen1.X + PlaneY * Eigen1.Y).GetSafeNormal(UE_SMALL_NUMBER, PlaneX);
+		const FVector Axis2Direction = (PlaneX * -Eigen1.Y + PlaneY * Eigen1.X).GetSafeNormal(UE_SMALL_NUMBER, PlaneY);
+		const double RadiusMultiplier = FMath::Max(static_cast<double>(DecodeOptions.GaussianRadiusMultiplier), 0.01);
+		const double HalfAxis1Length = ClampHalfAxisLength(FMath::Sqrt(Lambda1) * RadiusMultiplier, DecodeOptions);
+		const double HalfAxis2Length = ClampHalfAxisLength(FMath::Sqrt(Lambda2) * RadiusMultiplier, DecodeOptions);
+		const FVector Axis1 = Axis1Direction * HalfAxis1Length;
+		const FVector Axis2 = Axis2Direction * HalfAxis2Length;
+		const FVector Center = Splat.Transform.GetLocation();
+
+		OutCorners[0] = Center - Axis1 - Axis2;
+		OutCorners[1] = Center + Axis1 - Axis2;
+		OutCorners[2] = Center + Axis1 + Axis2;
+		OutCorners[3] = Center - Axis1 + Axis2;
+	}
 
 	class FSogSplatSceneProxy final : public FPrimitiveSceneProxy
 	{
@@ -324,6 +398,7 @@ bool USogSplatComponent::RebuildInstances()
 		return false;
 	}
 
+	const FSogDecodeOptions& DecodeOptions = SourceAsset->DecodeOptions;
 	const int32 Stride = FMath::Max(1, InstanceStride);
 	const int32 MaxCount = FMath::Max(0, MaxRenderedInstances);
 	const int32 AvailableSplatCount = FMath::DivideAndRoundUp(Splats.Num(), Stride);
@@ -338,6 +413,7 @@ bool USogSplatComponent::RebuildInstances()
 	}
 
 	const FTransform ComponentTransform = GetComponentTransform();
+	const FVector LocalViewDirection = ComponentTransform.InverseTransformVectorNoScale(SortDirection).GetSafeNormal(UE_SMALL_NUMBER, FVector(0.0, 0.0, -1.0));
 	for (int32 SplatIndex = 0; SplatIndex < Splats.Num(); SplatIndex += Stride)
 	{
 		if (MaxCount > 0 && SplatOrder.Num() >= MaxCount)
@@ -397,15 +473,16 @@ bool USogSplatComponent::RebuildInstances()
 		const FSogSplatInstance& Splat = Splats[SortEntry.SplatIndex];
 		const FColor VertexColor = Splat.Color.ToFColor(false);
 		const uint32 BaseVertexIndex = static_cast<uint32>(NewRenderData->Vertices.Num());
+		FVector CardCorners[4];
+		BuildProjectedCovarianceCard(Splat, LocalViewDirection, DecodeOptions, CardCorners);
 
 		for (int32 CornerIndex = 0; CornerIndex < 4; ++CornerIndex)
 		{
-			const FVector CornerPosition = Splat.Transform.TransformPosition(BaseCardCorners[CornerIndex]);
 			FSogSplatRenderVertex& Vertex = NewRenderData->Vertices.AddDefaulted_GetRef();
-			Vertex.Position = FVector3f(CornerPosition);
+			Vertex.Position = FVector3f(CardCorners[CornerIndex]);
 			Vertex.UV = BaseCardUvs[CornerIndex];
 			Vertex.Color = VertexColor;
-			NewRenderData->LocalBox += CornerPosition;
+			NewRenderData->LocalBox += CardCorners[CornerIndex];
 		}
 
 		NewRenderData->Indices.Add(BaseVertexIndex + 0);

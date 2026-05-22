@@ -25,7 +25,6 @@ THIRD_PARTY_INCLUDES_END
 namespace
 {
 	constexpr double SH_C0 = 0.28209479177387814;
-	constexpr double SourcePlaneWidthCm = 100.0;
 
 	struct FDecodedImage
 	{
@@ -454,50 +453,12 @@ namespace
 		return FVector(-SogVector.Z, UnrealY, UnrealZ);
 	}
 
-	FVector GetSogBasisAxis(int32 AxisIndex)
-	{
-		switch (AxisIndex)
-		{
-		case 0:
-			return FVector(1.0, 0.0, 0.0);
-		case 1:
-			return FVector(0.0, 1.0, 0.0);
-		case 2:
-			return FVector(0.0, 0.0, 1.0);
-		default:
-			return FVector::ForwardVector;
-		}
-	}
-
 	float DecodeSogScale(float EncodedScale)
 	{
 		// SplatTransform SOG stores the PLY scale columns, which are log-space.
 		constexpr float MinLogScale = -20.0f;
 		constexpr float MaxLogScale = 20.0f;
 		return FMath::Max(FMath::Abs(FMath::Exp(FMath::Clamp(EncodedScale, MinLogScale, MaxLogScale))), KINDA_SMALL_NUMBER);
-	}
-
-	void SelectPlaneAxes(const FVector& DecodedScales, int32& OutMajorAxis, int32& OutMinorAxis)
-	{
-		const float AxisScales[3] = { DecodedScales.X, DecodedScales.Y, DecodedScales.Z };
-
-		OutMajorAxis = 0;
-		for (int32 AxisIndex = 1; AxisIndex < 3; ++AxisIndex)
-		{
-			if (AxisScales[AxisIndex] > AxisScales[OutMajorAxis])
-			{
-				OutMajorAxis = AxisIndex;
-			}
-		}
-
-		OutMinorAxis = OutMajorAxis == 0 ? 1 : 0;
-		for (int32 AxisIndex = 0; AxisIndex < 3; ++AxisIndex)
-		{
-			if (AxisIndex != OutMajorAxis && AxisScales[AxisIndex] > AxisScales[OutMinorAxis])
-			{
-				OutMinorAxis = AxisIndex;
-			}
-		}
 	}
 
 	FQuat DecodeSogQuaternion(const FColor& EncodedQuat)
@@ -542,10 +503,10 @@ namespace
 		return Quat;
 	}
 
-	FQuat ConvertSogQuaternionToUnrealPlaneRotation(const FQuat& SogQuat, int32 PlaneXAxis, int32 PlaneYAxis, const FSogDecodeOptions& Options)
+	FQuat ConvertSogQuaternionToUnrealRotation(const FQuat& SogQuat, const FSogDecodeOptions& Options)
 	{
-		const FVector SogXAxis = SogQuat.RotateVector(GetSogBasisAxis(PlaneXAxis));
-		const FVector SogYAxis = SogQuat.RotateVector(GetSogBasisAxis(PlaneYAxis));
+		const FVector SogXAxis = SogQuat.RotateVector(FVector(1.0, 0.0, 0.0));
+		const FVector SogYAxis = SogQuat.RotateVector(FVector(0.0, 1.0, 0.0));
 		const FVector UnrealXAxis = ConvertSogVectorToUnreal(SogXAxis, Options.bFlipVerticalAxis, Options.bFlipHorizontalAxis).GetSafeNormal();
 		const FVector UnrealYAxis = ConvertSogVectorToUnreal(SogYAxis, Options.bFlipVerticalAxis, Options.bFlipHorizontalAxis).GetSafeNormal();
 
@@ -590,26 +551,8 @@ namespace
 				DecodeSogScale(Meta.ScaleCodebook[ScaleIndices.R]),
 				DecodeSogScale(Meta.ScaleCodebook[ScaleIndices.G]),
 				DecodeSogScale(Meta.ScaleCodebook[ScaleIndices.B]));
-
-			int32 PlaneXAxis = 0;
-			int32 PlaneYAxis = 1;
-			SelectPlaneAxes(DecodedScales, PlaneXAxis, PlaneYAxis);
-
-			const FQuat UnrealRotation = ConvertSogQuaternionToUnrealPlaneRotation(
-				DecodeSogQuaternion(EncodedQuat),
-				PlaneXAxis,
-				PlaneYAxis,
-				Options);
-
-			const float AxisScales[3] = { DecodedScales.X, DecodedScales.Y, DecodedScales.Z };
-			float DiameterX = FMath::Max(Options.MinCardDiameterCm, AxisScales[PlaneXAxis] * Options.UnitsPerSogUnit * Options.GaussianRadiusMultiplier * 2.0f);
-			float DiameterY = FMath::Max(Options.MinCardDiameterCm, AxisScales[PlaneYAxis] * Options.UnitsPerSogUnit * Options.GaussianRadiusMultiplier * 2.0f);
-			if (Options.MaxCardDiameterCm > 0.0f)
-			{
-				DiameterX = FMath::Min(DiameterX, Options.MaxCardDiameterCm);
-				DiameterY = FMath::Min(DiameterY, Options.MaxCardDiameterCm);
-			}
-			const FVector UnrealScale(DiameterX / SourcePlaneWidthCm, DiameterY / SourcePlaneWidthCm, 1.0f);
+			const FQuat UnrealRotation = ConvertSogQuaternionToUnrealRotation(DecodeSogQuaternion(EncodedQuat), Options);
+			const FVector UnrealScale = DecodedScales * Options.UnitsPerSogUnit;
 
 			const float GammaR = 0.5f + Meta.Sh0Codebook[Sh0Value.R] * static_cast<float>(SH_C0);
 			const float GammaG = 0.5f + Meta.Sh0Codebook[Sh0Value.G] * static_cast<float>(SH_C0);

@@ -1312,3 +1312,6 @@
 ## 2026-05-23 05:20:00 (소요시간: 1분 미만)
 
 - SOG에서 균일하게 하얀 스플랫이 삐져나오는 현상이 가우시안 마스크/sRGB/계산식 문제인지 분석하고 UnityGaussianSplatting shader와 비교해 필요한 수정을 진행할 것
+## 2026-05-23 06:48:30 (소요시간: 1분 미만)
+
+- SOG 렌더링을 UnityGaussianSplatting 쪽 구현에 최대한 근접하게 개선하고, 우선 원본 3D rotation quaternion과 scale.xyz를 보존한 뒤 고정 뷰 기준 covariance 투영형 카드 생성으로 변경할 것

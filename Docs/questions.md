@@ -611,3 +611,13 @@ A. shelter.sog의 scale codebook은 -10..2.125 범위이고 256개 중 244개가
 Q. SOG 렌더링에 GPU 소팅 구현이 가능한가?
 
 A. 가능하다. 다만 현재 UMeshComponent가 고정 vertex/index buffer로 모든 스플랫을 한 메시 배치에 넣는 구조라 작은 패치가 아니라 렌더 경로 재구성이 필요하다. 구현 방향은 transform/color 텍스처 또는 SRV buffer를 유지하고, RDG compute shader에서 카메라 기준 depth key와 splat index를 만들고 GPU radix sort 또는 UE GPU sort 유틸을 통해 정렬한 뒤, 정렬된 index buffer를 instanced/indirect draw shader가 읽어 그리는 방식이다. UnityGaussianSplatting과 동일하게 premultiplied alpha 누적 블렌딩도 같이 맞춰야 한다.
+## 2026-05-23 06:45:25 (소요시간: 1분 미만)
+
+Q. Unreal 쪽도 Gaussian splat의 3D covariance를 카메라 화면에 투영하는 방식으로 구현 가능한가?
+
+A. 가능하다. 다만 현재 fixed-card 렌더러는 디코드 단계에서 원본 3D scale xyz와 전체 quaternion을 카드용 2축 transform으로 축약하므로, 먼저 asset/cache가 원본 position + rotation quaternion + scale xyz + color를 보존하도록 바꿔야 한다. 그 다음 커스텀 vertex/global shader 또는 RDG 기반 렌더 경로에서 카메라별로 3D covariance를 2D screen ellipse로 투영하고, 정렬은 고정 1회 정렬 또는 GPU sort로 연결해야 한다. 완전한 UnityGaussianSplatting 수준은 렌더러 재구성 작업이다.
+## 2026-05-23 07:09:13 (소요시간: 1분 미만)
+
+Q. 중단인가?
+
+A. 중단이 아니며, 에디터 타깃 빌드가 통과한 상태에서 게임 타깃 빌드와 SOG 샘플 애셋 캐시 재저장을 이어서 진행한다.

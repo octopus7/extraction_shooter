@@ -10,8 +10,8 @@
 namespace
 {
 	constexpr int32 LegacyPackedSplatCacheVersion = 1;
-	constexpr int32 TextureSplatCacheVersion = 6;
-	constexpr int32 TransformTexelsPerSplat = 2;
+	constexpr int32 TextureSplatCacheVersion = 7;
+	constexpr int32 TransformTexelsPerSplat = 3;
 	constexpr int32 TransformChannelsPerTexel = 4;
 	constexpr int32 ColorChannelsPerTexel = 4;
 	constexpr int32 MaxCacheTextureWidth = 2048;
@@ -113,6 +113,7 @@ namespace
 			const int32 TransformTexelIndex = SplatTexelIndex * TransformTexelsPerSplat;
 			const FLinearColor Transform0 = LoadTransformTexel(TransformHalfData, TransformTexelIndex);
 			const FLinearColor Transform1 = LoadTransformTexel(TransformHalfData, TransformTexelIndex + 1);
+			const FLinearColor Transform2 = LoadTransformTexel(TransformHalfData, TransformTexelIndex + 2);
 
 			const FVector Location = PositionMin + FVector(Transform0.R, Transform0.G, Transform0.B) * PositionExtent;
 			const double QuatW = FMath::Sqrt(FMath::Max(0.0, 1.0 - Transform1.R * Transform1.R - Transform1.G * Transform1.G - Transform1.B * Transform1.B));
@@ -123,7 +124,7 @@ namespace
 			DecodedSplat.Transform = FTransform(
 				Rotation,
 				Location,
-				FVector(Transform0.A, Transform1.A, 1.0));
+				FVector(Transform0.A, Transform1.A, Transform2.R));
 			DecodedSplat.Color = LinearColorFromBgraBytes(ColorByteData, SplatTexelIndex);
 		}
 
@@ -339,7 +340,8 @@ void USogAsset::SetSplats(TArray<FSogSplatInstance>&& InSplats)
 	{
 		const FVector Location = Splat.Transform.GetLocation();
 		const FVector Scale = Splat.Transform.GetScale3D();
-		const double RadiusCm = FMath::Max3(FMath::Abs(Scale.X), FMath::Abs(Scale.Y), FMath::Abs(Scale.Z)) * 50.0;
+		const double RadiusCm = FMath::Max3(FMath::Abs(Scale.X), FMath::Abs(Scale.Y), FMath::Abs(Scale.Z))
+			* FMath::Max(DecodeOptions.GaussianRadiusMultiplier, 1.0f);
 		Bounds += Location - FVector(RadiusCm);
 		Bounds += Location + FVector(RadiusCm);
 	}
@@ -439,6 +441,13 @@ bool USogAsset::BuildDecodedSplatCache()
 			static_cast<float>(SourceRotation.Y),
 			static_cast<float>(SourceRotation.Z),
 			static_cast<float>(SourceScale.Y));
+		StoreTransformTexel(
+			TransformHalfData,
+			TransformTexelIndex + 2,
+			static_cast<float>(SourceScale.Z),
+			0.0f,
+			0.0f,
+			0.0f);
 
 		const FColor PackedColor = SourceSplat.Color.ToFColor(false);
 		const int32 ColorBaseIndex = SplatTexelIndex * ColorChannelsPerTexel;
