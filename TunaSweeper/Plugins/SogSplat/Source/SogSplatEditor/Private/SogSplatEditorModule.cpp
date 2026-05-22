@@ -10,7 +10,6 @@
 #include "Materials/MaterialExpressionMultiply.h"
 #include "Materials/MaterialExpressionScalarParameter.h"
 #include "Materials/MaterialExpressionTextureCoordinate.h"
-#include "Materials/MaterialExpressionVertexColor.h"
 #include "Misc/PackageName.h"
 #include "Misc/Paths.h"
 #include "Modules/ModuleManager.h"
@@ -126,12 +125,6 @@ UMaterialInterface* SogSplatEditorUtils::EnsureDefaultSogMaterial()
 		return Material;
 	}
 
-	UMaterialExpressionVertexColor* VertexColor = NewObject<UMaterialExpressionVertexColor>(Material);
-	VertexColor->Material = Material;
-	VertexColor->MaterialExpressionEditorX = -680;
-	VertexColor->MaterialExpressionEditorY = -120;
-	Material->GetExpressionCollection().AddExpression(VertexColor);
-
 	UMaterialExpressionScalarParameter* Intensity = NewObject<UMaterialExpressionScalarParameter>(Material);
 	Intensity->Material = Material;
 	Intensity->ParameterName = TEXT("Intensity");
@@ -147,42 +140,55 @@ UMaterialInterface* SogSplatEditorUtils::EnsureDefaultSogMaterial()
 	TextureCoordinate->MaterialExpressionEditorY = 420;
 	Material->GetExpressionCollection().AddExpression(TextureCoordinate);
 
-	UMaterialExpressionScalarParameter* GaussianSigmaRadius = NewObject<UMaterialExpressionScalarParameter>(Material);
-	GaussianSigmaRadius->Material = Material;
-	GaussianSigmaRadius->ParameterName = TEXT("GaussianSigmaRadius");
-	GaussianSigmaRadius->DefaultValue = 3.0f;
-	GaussianSigmaRadius->MaterialExpressionEditorX = -680;
-	GaussianSigmaRadius->MaterialExpressionEditorY = 580;
-	Material->GetExpressionCollection().AddExpression(GaussianSigmaRadius);
+	UMaterialExpressionTextureCoordinate* ColorRGCoordinate = NewObject<UMaterialExpressionTextureCoordinate>(Material);
+	ColorRGCoordinate->Material = Material;
+	ColorRGCoordinate->CoordinateIndex = 1;
+	ColorRGCoordinate->MaterialExpressionEditorX = -680;
+	ColorRGCoordinate->MaterialExpressionEditorY = -120;
+	Material->GetExpressionCollection().AddExpression(ColorRGCoordinate);
 
-	UMaterialExpressionScalarParameter* EdgeFade = NewObject<UMaterialExpressionScalarParameter>(Material);
-	EdgeFade->Material = Material;
-	EdgeFade->ParameterName = TEXT("EdgeFade");
-	EdgeFade->DefaultValue = 0.18f;
-	EdgeFade->MaterialExpressionEditorX = -680;
-	EdgeFade->MaterialExpressionEditorY = 720;
-	Material->GetExpressionCollection().AddExpression(EdgeFade);
+	UMaterialExpressionTextureCoordinate* ColorBACoordinate = NewObject<UMaterialExpressionTextureCoordinate>(Material);
+	ColorBACoordinate->Material = Material;
+	ColorBACoordinate->CoordinateIndex = 2;
+	ColorBACoordinate->MaterialExpressionEditorX = -680;
+	ColorBACoordinate->MaterialExpressionEditorY = 20;
+	Material->GetExpressionCollection().AddExpression(ColorBACoordinate);
 
 	UMaterialExpressionScalarParameter* OpacityClipThreshold = NewObject<UMaterialExpressionScalarParameter>(Material);
 	OpacityClipThreshold->Material = Material;
 	OpacityClipThreshold->ParameterName = TEXT("OpacityClipThreshold");
 	OpacityClipThreshold->DefaultValue = 1.0f / 255.0f;
 	OpacityClipThreshold->MaterialExpressionEditorX = -680;
-	OpacityClipThreshold->MaterialExpressionEditorY = 860;
+	OpacityClipThreshold->MaterialExpressionEditorY = 580;
 	Material->GetExpressionCollection().AddExpression(OpacityClipThreshold);
+
+	UMaterialExpressionCustom* SogColor = NewObject<UMaterialExpressionCustom>(Material);
+	SogColor->Material = Material;
+	SogColor->Description = TEXT("SOG linear color");
+	SogColor->OutputType = CMOT_Float3;
+	SogColor->Code = TEXT("return float3(ColorRG.x, ColorRG.y, ColorBA.x);");
+
+	FCustomInput ColorRGInput;
+	ColorRGInput.InputName = TEXT("ColorRG");
+	ColorRGInput.Input.Connect(0, ColorRGCoordinate);
+	SogColor->Inputs.Add(ColorRGInput);
+
+	FCustomInput ColorBAInput;
+	ColorBAInput.InputName = TEXT("ColorBA");
+	ColorBAInput.Input.Connect(0, ColorBACoordinate);
+	SogColor->Inputs.Add(ColorBAInput);
+
+	SogColor->MaterialExpressionEditorX = -320;
+	SogColor->MaterialExpressionEditorY = -80;
+	Material->GetExpressionCollection().AddExpression(SogColor);
 
 	UMaterialExpressionCustom* SoftEllipseOpacity = NewObject<UMaterialExpressionCustom>(Material);
 	SoftEllipseOpacity->Material = Material;
 	SoftEllipseOpacity->Description = TEXT("Soft ellipse opacity");
 	SoftEllipseOpacity->OutputType = CMOT_Float1;
 	SoftEllipseOpacity->Code =
-		TEXT("float2 p = UV * 2.0f - 1.0f;\n")
-		TEXT("float radiusSq = dot(p, p);\n")
-		TEXT("float sigmaRadius = max(GaussianSigmaRadius, 0.0001f);\n")
-		TEXT("float gaussian = exp(-0.5f * radiusSq * sigmaRadius * sigmaRadius);\n")
-		TEXT("float edge = saturate((1.0f - radiusSq) / max(EdgeFade, 0.0001f));\n")
-		TEXT("edge = edge * edge * (3.0f - 2.0f * edge);\n")
-		TEXT("float alpha = saturate(Alpha * gaussian * edge);\n")
+		TEXT("float2 p = (UV * 2.0f - 1.0f) * 2.0f;\n")
+		TEXT("float alpha = saturate(ColorBA.y * exp(-dot(p, p)));\n")
 		TEXT("return alpha < OpacityClipThreshold ? 0.0f : alpha;");
 
 	FCustomInput UvInput;
@@ -190,20 +196,10 @@ UMaterialInterface* SogSplatEditorUtils::EnsureDefaultSogMaterial()
 	UvInput.Input.Connect(0, TextureCoordinate);
 	SoftEllipseOpacity->Inputs.Add(UvInput);
 
-	FCustomInput AlphaInput;
-	AlphaInput.InputName = TEXT("Alpha");
-	AlphaInput.Input.Connect(4, VertexColor);
-	SoftEllipseOpacity->Inputs.Add(AlphaInput);
-
-	FCustomInput SigmaRadiusInput;
-	SigmaRadiusInput.InputName = TEXT("GaussianSigmaRadius");
-	SigmaRadiusInput.Input.Connect(0, GaussianSigmaRadius);
-	SoftEllipseOpacity->Inputs.Add(SigmaRadiusInput);
-
-	FCustomInput EdgeInput;
-	EdgeInput.InputName = TEXT("EdgeFade");
-	EdgeInput.Input.Connect(0, EdgeFade);
-	SoftEllipseOpacity->Inputs.Add(EdgeInput);
+	FCustomInput OpacityColorBAInput;
+	OpacityColorBAInput.InputName = TEXT("ColorBA");
+	OpacityColorBAInput.Input.Connect(0, ColorBACoordinate);
+	SoftEllipseOpacity->Inputs.Add(OpacityColorBAInput);
 
 	FCustomInput OpacityClipThresholdInput;
 	OpacityClipThresholdInput.InputName = TEXT("OpacityClipThreshold");
@@ -216,7 +212,7 @@ UMaterialInterface* SogSplatEditorUtils::EnsureDefaultSogMaterial()
 
 	UMaterialExpressionMultiply* PremultipliedColor = NewObject<UMaterialExpressionMultiply>(Material);
 	PremultipliedColor->Material = Material;
-	PremultipliedColor->A.Connect(0, VertexColor);
+	PremultipliedColor->A.Connect(0, SogColor);
 	PremultipliedColor->B.Connect(0, SoftEllipseOpacity);
 	PremultipliedColor->MaterialExpressionEditorX = -40;
 	PremultipliedColor->MaterialExpressionEditorY = 40;
@@ -230,7 +226,7 @@ UMaterialInterface* SogSplatEditorUtils::EnsureDefaultSogMaterial()
 	Emissive->MaterialExpressionEditorY = -20;
 	Material->GetExpressionCollection().AddExpression(Emissive);
 
-	MaterialEditorOnly->BaseColor.Connect(0, VertexColor);
+	MaterialEditorOnly->BaseColor.Connect(0, SogColor);
 	MaterialEditorOnly->EmissiveColor.Connect(0, Emissive);
 	MaterialEditorOnly->Opacity.Connect(0, SoftEllipseOpacity);
 

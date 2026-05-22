@@ -87,6 +87,9 @@ private:
 	TArray<uint8> CachedColorTextureByteData;
 
 	UPROPERTY()
+	TArray<uint16> CachedColorTextureHalfData;
+
+	UPROPERTY()
 	int32 CachedSplatDataVersion = 0;
 
 	UPROPERTY()

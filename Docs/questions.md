@@ -621,3 +621,13 @@ A. 가능하다. 다만 현재 fixed-card 렌더러는 디코드 단계에서 �
 Q. 중단인가?
 
 A. 중단이 아니며, 에디터 타깃 빌드가 통과한 상태에서 게임 타깃 빌드와 SOG 샘플 애셋 캐시 재저장을 이어서 진행한다.
+## 2026-05-23 07:37:26 (소요시간: 1분 미만)
+
+Q. 백그라운드가 영어에서도 배경으로 쓰여?
+
+A. 쓰이지만 게임 개발 맥락에서는 의미가 조금 좁거나 2D처럼 들릴 수 있다. `background`는 이미지/영상/무대 뒤쪽 배경에는 자연스럽지만, 플레이어가 둘러보는 3D 게임 공간이나 맵 배경에는 `environment`, `game environment`, `scene`, `level environment`가 더 자연스럽다. `가우시안 스플래팅으로 게임 배경 적용`은 유튜브 제목으로 `Applying Gaussian Splatting to Game Environments`가 더 전문적으로 들린다.
+## 2026-05-23 07:39:22 (소요시간: 1분 미만)
+
+Q. 같은 SOG 파일을 Unity에서 렌더링하면 선명한데 UE 쪽은 왜 뭉개지고 흰 찌꺼기가 보이는가?
+
+A. SOG scale decode 자체는 Unity-SOG plugin과 동일하게 log-scale에 exp를 적용하는 방식이 맞다. 차이는 UE 기본 머티리얼이 UV 원형 마스크에 `GaussianSigmaRadius`/`EdgeFade`를 적용해 UnityGaussianSplatting의 `exp(-dot(pos,pos))` 방식보다 넓고 흐린 알파를 만들던 점이다. 따라서 기본 머티리얼을 Unity 방식의 premultiplied alpha 마스크와 `1/255` clip으로 재생성하도록 수정했다.

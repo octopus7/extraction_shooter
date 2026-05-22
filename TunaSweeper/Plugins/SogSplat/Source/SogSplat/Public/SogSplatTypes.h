@@ -27,7 +27,7 @@ struct FSogDecodeOptions
 	int32 MaxImportedSplats = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SOG")
-	bool bConvertGammaColorToLinear = true;
+	bool bConvertGammaColorToLinear = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SOG")
 	bool bFlipVerticalAxis = true;

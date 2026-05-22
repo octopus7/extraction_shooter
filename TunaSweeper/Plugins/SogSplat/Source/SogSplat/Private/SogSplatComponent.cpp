@@ -15,6 +15,8 @@ struct FSogSplatRenderVertex
 {
 	FVector3f Position = FVector3f::ZeroVector;
 	FVector2f UV = FVector2f::ZeroVector;
+	FVector2f ColorRG = FVector2f::ZeroVector;
+	FVector2f ColorBA = FVector2f::ZeroVector;
 	FColor Color = FColor::White;
 };
 
@@ -157,7 +159,8 @@ namespace
 
 			const int32 NumVertices = InRenderData->Vertices.Num();
 			VertexBuffers.PositionVertexBuffer.Init(NumVertices);
-			VertexBuffers.StaticMeshVertexBuffer.Init(NumVertices, 1);
+			VertexBuffers.StaticMeshVertexBuffer.SetUseFullPrecisionUVs(true);
+			VertexBuffers.StaticMeshVertexBuffer.Init(NumVertices, 3);
 			VertexBuffers.ColorVertexBuffer.Init(NumVertices);
 
 			const FVector3f TangentX(1.0f, 0.0f, 0.0f);
@@ -169,6 +172,8 @@ namespace
 				VertexBuffers.PositionVertexBuffer.VertexPosition(VertexIndex) = SourceVertex.Position;
 				VertexBuffers.StaticMeshVertexBuffer.SetVertexTangents(VertexIndex, TangentX, TangentY, TangentZ);
 				VertexBuffers.StaticMeshVertexBuffer.SetVertexUV(VertexIndex, 0, SourceVertex.UV);
+				VertexBuffers.StaticMeshVertexBuffer.SetVertexUV(VertexIndex, 1, SourceVertex.ColorRG);
+				VertexBuffers.StaticMeshVertexBuffer.SetVertexUV(VertexIndex, 2, SourceVertex.ColorBA);
 				VertexBuffers.ColorVertexBuffer.VertexColor(VertexIndex) = SourceVertex.Color;
 			}
 
@@ -471,7 +476,8 @@ bool USogSplatComponent::RebuildInstances()
 		}
 
 		const FSogSplatInstance& Splat = Splats[SortEntry.SplatIndex];
-		const FColor VertexColor = Splat.Color.ToFColor(false);
+		const FVector2f ColorRG(static_cast<float>(Splat.Color.R), static_cast<float>(Splat.Color.G));
+		const FVector2f ColorBA(static_cast<float>(Splat.Color.B), static_cast<float>(Splat.Color.A));
 		const uint32 BaseVertexIndex = static_cast<uint32>(NewRenderData->Vertices.Num());
 		FVector CardCorners[4];
 		BuildProjectedCovarianceCard(Splat, LocalViewDirection, DecodeOptions, CardCorners);
@@ -481,7 +487,9 @@ bool USogSplatComponent::RebuildInstances()
 			FSogSplatRenderVertex& Vertex = NewRenderData->Vertices.AddDefaulted_GetRef();
 			Vertex.Position = FVector3f(CardCorners[CornerIndex]);
 			Vertex.UV = BaseCardUvs[CornerIndex];
-			Vertex.Color = VertexColor;
+			Vertex.ColorRG = ColorRG;
+			Vertex.ColorBA = ColorBA;
+			Vertex.Color = FColor::White;
 			NewRenderData->LocalBox += CardCorners[CornerIndex];
 		}
 
