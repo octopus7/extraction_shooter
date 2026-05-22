@@ -10,7 +10,7 @@
 namespace
 {
 	constexpr int32 LegacyPackedSplatCacheVersion = 1;
-	constexpr int32 TextureSplatCacheVersion = 5;
+	constexpr int32 TextureSplatCacheVersion = 6;
 	constexpr int32 TransformTexelsPerSplat = 2;
 	constexpr int32 TransformChannelsPerTexel = 4;
 	constexpr int32 ColorChannelsPerTexel = 4;

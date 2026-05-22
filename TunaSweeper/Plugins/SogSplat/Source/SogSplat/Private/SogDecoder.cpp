@@ -471,7 +471,10 @@ namespace
 
 	float DecodeSogScale(float EncodedScale)
 	{
-		return FMath::Max(EncodedScale, KINDA_SMALL_NUMBER);
+		// SplatTransform SOG stores the PLY scale columns, which are log-space.
+		constexpr float MinLogScale = -20.0f;
+		constexpr float MaxLogScale = 20.0f;
+		return FMath::Max(FMath::Abs(FMath::Exp(FMath::Clamp(EncodedScale, MinLogScale, MaxLogScale))), KINDA_SMALL_NUMBER);
 	}
 
 	void SelectPlaneAxes(const FVector& DecodedScales, int32& OutMajorAxis, int32& OutMinorAxis)
@@ -520,16 +523,16 @@ namespace
 		switch (Mode)
 		{
 		case 0:
-			Quat = FQuat(Missing, A, B, C);
+			Quat = FQuat(A, B, C, Missing);
 			break;
 		case 1:
-			Quat = FQuat(A, Missing, B, C);
+			Quat = FQuat(Missing, B, C, A);
 			break;
 		case 2:
-			Quat = FQuat(A, B, Missing, C);
+			Quat = FQuat(B, Missing, C, A);
 			break;
 		case 3:
-			Quat = FQuat(A, B, C, Missing);
+			Quat = FQuat(B, C, Missing, A);
 			break;
 		default:
 			break;

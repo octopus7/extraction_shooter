@@ -601,3 +601,8 @@ A. 맞다. 현재 20MB 수준은 렌더 버퍼가 저장되어서가 아니라, 
 Q. 텍스처 캐시는 왜 내부 배열로 구현했으며, 실제 텍스처로 분리해야 하지 않는가?
 
 A. 현재 구현은 CPU에서 정점 버퍼를 한 번 생성하는 렌더 경로라 CPU가 트랜스폼/컬러를 빠르게 읽어야 해서, 별도 `UTexture2D` 자산 관리와 CPU readback 없이 텍스처형 배열로 먼저 패킹했다. 하지만 장기적으로 GPU가 텍스처를 직접 샘플링해 스플랫을 생성/변형하는 구조라면 실제 `UTexture2D` 또는 별도 bulk-data 자산으로 분리하는 것이 맞다.
+## 2026-05-23 04:53:36 (소요시간: 9분)
+
+Q. Unity-SOG_plugin과 UnityGaussianSplatting 기준으로 UE 구현에 누락 데이터, 회전, 스케일 차이가 있는가?
+
+A. shelter.sog의 scale codebook은 -10..2.125 범위이고 256개 중 244개가 음수라 선형 스케일이 아니라 log scale이다. Unity-SOG 변환 코드도 Aras 포맷으로 넘길 때 exp(logScale)를 적용하므로 UE 디코더도 exp(logScale)를 적용해야 한다. 또한 SOG quats.webp의 alpha mode는 PlayCanvas/PLY quaternion component 순서 기준이어서 기존 UE FQuat x/y/z/w dropped 해석이 틀렸고, dropped component mapping을 SOG 순서에 맞게 수정했다. shN 고차 SH는 아직 미사용이지만 크기/방향 문제의 직접 원인은 아니다. Aras renderer는 full 3D covariance를 화면으로 투영하므로 현재 UE fixed-card 근사와는 렌더링 방식 차이가 남는다.
