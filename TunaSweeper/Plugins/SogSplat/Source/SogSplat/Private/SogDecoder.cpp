@@ -447,9 +447,53 @@ namespace
 		return DecodeUnlog(FMath::Lerp(MinValue, MaxValue, Alpha));
 	}
 
-	FVector ConvertSogVectorToUnreal(const FVector& SogVector)
+	FVector ConvertSogVectorToUnreal(const FVector& SogVector, bool bFlipVerticalAxis)
 	{
-		return FVector(-SogVector.Z, SogVector.X, SogVector.Y);
+		const double UnrealZ = bFlipVerticalAxis ? -SogVector.Y : SogVector.Y;
+		return FVector(-SogVector.Z, SogVector.X, UnrealZ);
+	}
+
+	FVector GetSogBasisAxis(int32 AxisIndex)
+	{
+		switch (AxisIndex)
+		{
+		case 0:
+			return FVector(1.0, 0.0, 0.0);
+		case 1:
+			return FVector(0.0, 1.0, 0.0);
+		case 2:
+			return FVector(0.0, 0.0, 1.0);
+		default:
+			return FVector::ForwardVector;
+		}
+	}
+
+	float DecodeSogScale(float EncodedScale)
+	{
+		return FMath::Max(FMath::Exp(FMath::Clamp(EncodedScale, -20.0f, 20.0f)), KINDA_SMALL_NUMBER);
+	}
+
+	void SelectPlaneAxes(const FVector& DecodedScales, int32& OutMajorAxis, int32& OutMinorAxis)
+	{
+		const float AxisScales[3] = { DecodedScales.X, DecodedScales.Y, DecodedScales.Z };
+
+		OutMajorAxis = 0;
+		for (int32 AxisIndex = 1; AxisIndex < 3; ++AxisIndex)
+		{
+			if (AxisScales[AxisIndex] > AxisScales[OutMajorAxis])
+			{
+				OutMajorAxis = AxisIndex;
+			}
+		}
+
+		OutMinorAxis = OutMajorAxis == 0 ? 1 : 0;
+		for (int32 AxisIndex = 0; AxisIndex < 3; ++AxisIndex)
+		{
+			if (AxisIndex != OutMajorAxis && AxisScales[AxisIndex] > AxisScales[OutMinorAxis])
+			{
+				OutMinorAxis = AxisIndex;
+			}
+		}
 	}
 
 	FQuat DecodeSogQuaternion(const FColor& EncodedQuat)
@@ -494,12 +538,12 @@ namespace
 		return Quat;
 	}
 
-	FQuat ConvertSogQuaternionToUnrealPlaneRotation(const FQuat& SogQuat)
+	FQuat ConvertSogQuaternionToUnrealPlaneRotation(const FQuat& SogQuat, int32 PlaneXAxis, int32 PlaneYAxis, bool bFlipVerticalAxis)
 	{
-		const FVector SogXAxis = SogQuat.RotateVector(FVector(1.0, 0.0, 0.0));
-		const FVector SogYAxis = SogQuat.RotateVector(FVector(0.0, 1.0, 0.0));
-		const FVector UnrealXAxis = ConvertSogVectorToUnreal(SogXAxis).GetSafeNormal();
-		const FVector UnrealYAxis = ConvertSogVectorToUnreal(SogYAxis).GetSafeNormal();
+		const FVector SogXAxis = SogQuat.RotateVector(GetSogBasisAxis(PlaneXAxis));
+		const FVector SogYAxis = SogQuat.RotateVector(GetSogBasisAxis(PlaneYAxis));
+		const FVector UnrealXAxis = ConvertSogVectorToUnreal(SogXAxis, bFlipVerticalAxis).GetSafeNormal();
+		const FVector UnrealYAxis = ConvertSogVectorToUnreal(SogYAxis, bFlipVerticalAxis).GetSafeNormal();
 
 		if (UnrealXAxis.IsNearlyZero() || UnrealYAxis.IsNearlyZero())
 		{
@@ -537,13 +581,30 @@ namespace
 				DecodeQuantizedAxis(MeansLow.G, MeansHigh.G, Meta.MeansMins[1], Meta.MeansMaxs[1]),
 				DecodeQuantizedAxis(MeansLow.B, MeansHigh.B, Meta.MeansMins[2], Meta.MeansMaxs[2]));
 
-			const FVector UnrealPosition = ConvertSogVectorToUnreal(SogPosition) * Options.UnitsPerSogUnit;
-			const FQuat UnrealRotation = ConvertSogQuaternionToUnrealPlaneRotation(DecodeSogQuaternion(EncodedQuat));
+			const FVector UnrealPosition = ConvertSogVectorToUnreal(SogPosition, Options.bFlipVerticalAxis) * Options.UnitsPerSogUnit;
+			const FVector DecodedScales(
+				DecodeSogScale(Meta.ScaleCodebook[ScaleIndices.R]),
+				DecodeSogScale(Meta.ScaleCodebook[ScaleIndices.G]),
+				DecodeSogScale(Meta.ScaleCodebook[ScaleIndices.B]));
 
-			const float Sx = FMath::Max(0.0f, Meta.ScaleCodebook[ScaleIndices.R]);
-			const float Sy = FMath::Max(0.0f, Meta.ScaleCodebook[ScaleIndices.G]);
-			const float DiameterX = FMath::Max(Options.MinCardDiameterCm, Sx * Options.UnitsPerSogUnit * Options.GaussianRadiusMultiplier * 2.0f);
-			const float DiameterY = FMath::Max(Options.MinCardDiameterCm, Sy * Options.UnitsPerSogUnit * Options.GaussianRadiusMultiplier * 2.0f);
+			int32 PlaneXAxis = 0;
+			int32 PlaneYAxis = 1;
+			SelectPlaneAxes(DecodedScales, PlaneXAxis, PlaneYAxis);
+
+			const FQuat UnrealRotation = ConvertSogQuaternionToUnrealPlaneRotation(
+				DecodeSogQuaternion(EncodedQuat),
+				PlaneXAxis,
+				PlaneYAxis,
+				Options.bFlipVerticalAxis);
+
+			const float AxisScales[3] = { DecodedScales.X, DecodedScales.Y, DecodedScales.Z };
+			float DiameterX = FMath::Max(Options.MinCardDiameterCm, AxisScales[PlaneXAxis] * Options.UnitsPerSogUnit * Options.GaussianRadiusMultiplier * 2.0f);
+			float DiameterY = FMath::Max(Options.MinCardDiameterCm, AxisScales[PlaneYAxis] * Options.UnitsPerSogUnit * Options.GaussianRadiusMultiplier * 2.0f);
+			if (Options.MaxCardDiameterCm > 0.0f)
+			{
+				DiameterX = FMath::Min(DiameterX, Options.MaxCardDiameterCm);
+				DiameterY = FMath::Min(DiameterY, Options.MaxCardDiameterCm);
+			}
 			const FVector UnrealScale(DiameterX / SourcePlaneWidthCm, DiameterY / SourcePlaneWidthCm, 1.0f);
 
 			const float GammaR = 0.5f + Meta.Sh0Codebook[Sh0Value.R] * static_cast<float>(SH_C0);

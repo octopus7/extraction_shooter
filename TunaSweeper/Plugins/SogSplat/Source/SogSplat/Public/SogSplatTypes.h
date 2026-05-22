@@ -17,6 +17,9 @@ struct FSogDecodeOptions
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SOG", meta = (ClampMin = "0.0"))
 	float MinCardDiameterCm = 1.0f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SOG", meta = (ClampMin = "0.0"))
+	float MaxCardDiameterCm = 0.0f;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SOG", meta = (ClampMin = "1"))
 	int32 ImportStride = 1;
 
@@ -25,6 +28,9 @@ struct FSogDecodeOptions
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SOG")
 	bool bConvertGammaColorToLinear = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SOG")
+	bool bFlipVerticalAxis = true;
 };
 
 USTRUCT(BlueprintType)
