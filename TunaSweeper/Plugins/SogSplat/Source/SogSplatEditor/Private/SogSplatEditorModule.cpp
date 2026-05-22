@@ -115,7 +115,7 @@ UMaterialInterface* SogSplatEditorUtils::EnsureDefaultSogMaterial()
 
 	Material->Modify();
 	Material->GetExpressionCollection().Empty();
-	Material->BlendMode = BLEND_Translucent;
+	Material->BlendMode = BLEND_AlphaComposite;
 	Material->SetShadingModel(MSM_Unlit);
 	Material->TwoSided = true;
 	Material->bUsedWithInstancedStaticMeshes = false;
@@ -140,14 +140,6 @@ UMaterialInterface* SogSplatEditorUtils::EnsureDefaultSogMaterial()
 	Intensity->MaterialExpressionEditorY = 80;
 	Material->GetExpressionCollection().AddExpression(Intensity);
 
-	UMaterialExpressionMultiply* Emissive = NewObject<UMaterialExpressionMultiply>(Material);
-	Emissive->Material = Material;
-	Emissive->A.Connect(0, VertexColor);
-	Emissive->B.Connect(0, Intensity);
-	Emissive->MaterialExpressionEditorX = -360;
-	Emissive->MaterialExpressionEditorY = -20;
-	Material->GetExpressionCollection().AddExpression(Emissive);
-
 	UMaterialExpressionTextureCoordinate* TextureCoordinate = NewObject<UMaterialExpressionTextureCoordinate>(Material);
 	TextureCoordinate->Material = Material;
 	TextureCoordinate->CoordinateIndex = 0;
@@ -171,6 +163,14 @@ UMaterialInterface* SogSplatEditorUtils::EnsureDefaultSogMaterial()
 	EdgeFade->MaterialExpressionEditorY = 720;
 	Material->GetExpressionCollection().AddExpression(EdgeFade);
 
+	UMaterialExpressionScalarParameter* OpacityClipThreshold = NewObject<UMaterialExpressionScalarParameter>(Material);
+	OpacityClipThreshold->Material = Material;
+	OpacityClipThreshold->ParameterName = TEXT("OpacityClipThreshold");
+	OpacityClipThreshold->DefaultValue = 1.0f / 255.0f;
+	OpacityClipThreshold->MaterialExpressionEditorX = -680;
+	OpacityClipThreshold->MaterialExpressionEditorY = 860;
+	Material->GetExpressionCollection().AddExpression(OpacityClipThreshold);
+
 	UMaterialExpressionCustom* SoftEllipseOpacity = NewObject<UMaterialExpressionCustom>(Material);
 	SoftEllipseOpacity->Material = Material;
 	SoftEllipseOpacity->Description = TEXT("Soft ellipse opacity");
@@ -182,7 +182,8 @@ UMaterialInterface* SogSplatEditorUtils::EnsureDefaultSogMaterial()
 		TEXT("float gaussian = exp(-0.5f * radiusSq * sigmaRadius * sigmaRadius);\n")
 		TEXT("float edge = saturate((1.0f - radiusSq) / max(EdgeFade, 0.0001f));\n")
 		TEXT("edge = edge * edge * (3.0f - 2.0f * edge);\n")
-		TEXT("return Alpha * gaussian * edge;");
+		TEXT("float alpha = saturate(Alpha * gaussian * edge);\n")
+		TEXT("return alpha < OpacityClipThreshold ? 0.0f : alpha;");
 
 	FCustomInput UvInput;
 	UvInput.InputName = TEXT("UV");
@@ -204,9 +205,30 @@ UMaterialInterface* SogSplatEditorUtils::EnsureDefaultSogMaterial()
 	EdgeInput.Input.Connect(0, EdgeFade);
 	SoftEllipseOpacity->Inputs.Add(EdgeInput);
 
+	FCustomInput OpacityClipThresholdInput;
+	OpacityClipThresholdInput.InputName = TEXT("OpacityClipThreshold");
+	OpacityClipThresholdInput.Input.Connect(0, OpacityClipThreshold);
+	SoftEllipseOpacity->Inputs.Add(OpacityClipThresholdInput);
+
 	SoftEllipseOpacity->MaterialExpressionEditorX = -320;
 	SoftEllipseOpacity->MaterialExpressionEditorY = 380;
 	Material->GetExpressionCollection().AddExpression(SoftEllipseOpacity);
+
+	UMaterialExpressionMultiply* PremultipliedColor = NewObject<UMaterialExpressionMultiply>(Material);
+	PremultipliedColor->Material = Material;
+	PremultipliedColor->A.Connect(0, VertexColor);
+	PremultipliedColor->B.Connect(0, SoftEllipseOpacity);
+	PremultipliedColor->MaterialExpressionEditorX = -40;
+	PremultipliedColor->MaterialExpressionEditorY = 40;
+	Material->GetExpressionCollection().AddExpression(PremultipliedColor);
+
+	UMaterialExpressionMultiply* Emissive = NewObject<UMaterialExpressionMultiply>(Material);
+	Emissive->Material = Material;
+	Emissive->A.Connect(0, PremultipliedColor);
+	Emissive->B.Connect(0, Intensity);
+	Emissive->MaterialExpressionEditorX = 220;
+	Emissive->MaterialExpressionEditorY = -20;
+	Material->GetExpressionCollection().AddExpression(Emissive);
 
 	MaterialEditorOnly->BaseColor.Connect(0, VertexColor);
 	MaterialEditorOnly->EmissiveColor.Connect(0, Emissive);
