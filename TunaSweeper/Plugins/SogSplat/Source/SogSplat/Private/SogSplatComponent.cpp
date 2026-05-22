@@ -83,6 +83,12 @@ bool USogSplatComponent::RebuildInstances()
 		return false;
 	}
 
+	if (!SourceAsset->EnsureSplatsDecoded(LastError))
+	{
+		bInstancesBuilt = true;
+		return false;
+	}
+
 	const TArray<FSogSplatInstance>& Splats = SourceAsset->GetSplats();
 	if (Splats.IsEmpty())
 	{

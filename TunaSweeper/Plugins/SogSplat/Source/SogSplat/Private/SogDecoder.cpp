@@ -642,6 +642,24 @@ bool FSogDecoder::DecodeFileToAsset(const FString& FilePath, const FSogDecodeOpt
 		return false;
 	}
 
+	TargetAsset->Modify();
+	if (!DecodeArchiveBytesToAsset(FilePath, FileBytes, Options, TargetAsset, OutError))
+	{
+		return false;
+	}
+
+	TargetAsset->SetSourceArchiveBytes(MoveTemp(FileBytes));
+	return true;
+}
+
+bool FSogDecoder::DecodeArchiveBytesToAsset(const FString& SourcePath, const TArray<uint8>& FileBytes, const FSogDecodeOptions& Options, USogAsset* TargetAsset, FText& OutError)
+{
+	if (!TargetAsset)
+	{
+		OutError = LOCTEXT("NullTargetAsset", "Target SOG asset is null.");
+		return false;
+	}
+
 	TMap<FString, TArray<uint8>> ArchiveFiles;
 	if (!ReadZipArchive(FileBytes, ArchiveFiles, OutError))
 	{
@@ -683,8 +701,7 @@ bool FSogDecoder::DecodeFileToAsset(const FString& FilePath, const FSogDecodeOpt
 	TArray<FSogSplatInstance> Splats;
 	DecodeSplats(Meta, Options, MeansL, MeansU, Scales, Quats, Sh0, Splats);
 
-	TargetAsset->Modify();
-	TargetAsset->SourceFilePath = FilePath;
+	TargetAsset->SourceFilePath = SourcePath;
 	TargetAsset->SourceGaussianCount = Meta.Count;
 	TargetAsset->DecodeOptions = Options;
 	TargetAsset->SetSplats(MoveTemp(Splats));

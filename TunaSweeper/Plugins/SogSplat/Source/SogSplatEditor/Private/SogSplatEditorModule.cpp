@@ -257,7 +257,7 @@ public:
 private:
 	void RegisterActorFactory()
 	{
-		if (!GEditor || SogActorFactory)
+		if (IsRunningCommandlet() || !GEditor || SogActorFactory)
 		{
 			return;
 		}
@@ -281,7 +281,6 @@ private:
 			return;
 		}
 
-		SogActorFactory->AddToRoot();
 		GEditor->ActorFactories.AddUnique(SogActorFactory);
 
 		if (UPlacementSubsystem* PlacementSubsystem = GEditor->GetEditorSubsystem<UPlacementSubsystem>())
@@ -301,6 +300,12 @@ private:
 			return;
 		}
 
+		if (IsEngineExitRequested())
+		{
+			SogActorFactory = nullptr;
+			return;
+		}
+
 		if (GEditor)
 		{
 			if (UPlacementSubsystem* PlacementSubsystem = GEditor->GetEditorSubsystem<UPlacementSubsystem>())
@@ -312,10 +317,6 @@ private:
 			GEditor->ActorFactories.Remove(SogActorFactory);
 		}
 
-		if (SogActorFactory->IsRooted())
-		{
-			SogActorFactory->RemoveFromRoot();
-		}
 		SogActorFactory = nullptr;
 	}
 

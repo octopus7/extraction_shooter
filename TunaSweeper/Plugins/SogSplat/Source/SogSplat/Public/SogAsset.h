@@ -23,6 +23,9 @@ public:
 	int32 ImportedSplatCount = 0;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "SOG")
+	int32 StoredSourceSizeBytes = 0;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "SOG")
 	FSogDecodeOptions DecodeOptions;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "SOG")
@@ -34,11 +37,19 @@ public:
 	UFUNCTION(BlueprintPure, Category = "SOG")
 	int32 GetSplatCount() const;
 
+	bool EnsureSplatsDecoded(FText& OutError);
 	const TArray<FSogSplatInstance>& GetSplats() const;
 	void SetSplats(TArray<FSogSplatInstance>&& InSplats);
+	void SetSourceArchiveBytes(TArray<uint8>&& InSourceArchiveBytes);
+	const TArray<uint8>& GetSourceArchiveBytes() const;
 	void ClearSplats();
+
+	virtual void PostLoad() override;
 
 private:
 	UPROPERTY()
+	TArray<uint8> SourceArchiveBytes;
+
+	UPROPERTY(Transient)
 	TArray<FSogSplatInstance> Splats;
 };
