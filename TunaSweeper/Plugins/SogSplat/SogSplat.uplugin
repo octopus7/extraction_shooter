@@ -1,0 +1,22 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "0.1.0",
+	"FriendlyName": "SOG Splat",
+	"Description": "Imports Spatially Ordered Gaussians (.sog) and renders them as fixed soft ellipse instances.",
+	"Category": "Rendering",
+	"CanContainContent": true,
+	"EnabledByDefault": true,
+	"Modules": [
+		{
+			"Name": "SogSplat",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "SogSplatEditor",
+			"Type": "Editor",
+			"LoadingPhase": "PostEngineInit"
+		}
+	]
+}
