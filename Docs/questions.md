@@ -606,3 +606,8 @@ A. 현재 구현은 CPU에서 정점 버퍼를 한 번 생성하는 렌더 경�
 Q. Unity-SOG_plugin과 UnityGaussianSplatting 기준으로 UE 구현에 누락 데이터, 회전, 스케일 차이가 있는가?
 
 A. shelter.sog의 scale codebook은 -10..2.125 범위이고 256개 중 244개가 음수라 선형 스케일이 아니라 log scale이다. Unity-SOG 변환 코드도 Aras 포맷으로 넘길 때 exp(logScale)를 적용하므로 UE 디코더도 exp(logScale)를 적용해야 한다. 또한 SOG quats.webp의 alpha mode는 PlayCanvas/PLY quaternion component 순서 기준이어서 기존 UE FQuat x/y/z/w dropped 해석이 틀렸고, dropped component mapping을 SOG 순서에 맞게 수정했다. shN 고차 SH는 아직 미사용이지만 크기/방향 문제의 직접 원인은 아니다. Aras renderer는 full 3D covariance를 화면으로 투영하므로 현재 UE fixed-card 근사와는 렌더링 방식 차이가 남는다.
+## 2026-05-23 05:02:05 (소요시간: 1분 미만)
+
+Q. SOG 렌더링에 GPU 소팅 구현이 가능한가?
+
+A. 가능하다. 다만 현재 UMeshComponent가 고정 vertex/index buffer로 모든 스플랫을 한 메시 배치에 넣는 구조라 작은 패치가 아니라 렌더 경로 재구성이 필요하다. 구현 방향은 transform/color 텍스처 또는 SRV buffer를 유지하고, RDG compute shader에서 카메라 기준 depth key와 splat index를 만들고 GPU radix sort 또는 UE GPU sort 유틸을 통해 정렬한 뒤, 정렬된 index buffer를 instanced/indirect draw shader가 읽어 그리는 방식이다. UnityGaussianSplatting과 동일하게 premultiplied alpha 누적 블렌딩도 같이 맞춰야 한다.

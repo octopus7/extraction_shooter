@@ -54,6 +54,12 @@ namespace
 		FVector2f(0.0f, 1.0f)
 	};
 
+	struct FSogSplatSortEntry
+	{
+		int32 SplatIndex = INDEX_NONE;
+		double SortKey = 0.0;
+	};
+
 	class FSogSplatSceneProxy final : public FPrimitiveSceneProxy
 	{
 	public:
@@ -321,7 +327,43 @@ bool USogSplatComponent::RebuildInstances()
 	const int32 Stride = FMath::Max(1, InstanceStride);
 	const int32 MaxCount = FMath::Max(0, MaxRenderedInstances);
 	const int32 AvailableSplatCount = FMath::DivideAndRoundUp(Splats.Num(), Stride);
-	const int32 EstimatedSplatCount = MaxCount > 0 ? FMath::Min(MaxCount, AvailableSplatCount) : AvailableSplatCount;
+
+	TArray<FSogSplatSortEntry> SplatOrder;
+	SplatOrder.Reserve(MaxCount > 0 ? FMath::Min(MaxCount, AvailableSplatCount) : AvailableSplatCount);
+
+	FVector SortDirection = FixedSortDirectionWorld.GetSafeNormal();
+	if (SortDirection.IsNearlyZero())
+	{
+		SortDirection = FVector(0.522026, 0.575714, -0.629319).GetSafeNormal();
+	}
+
+	const FTransform ComponentTransform = GetComponentTransform();
+	for (int32 SplatIndex = 0; SplatIndex < Splats.Num(); SplatIndex += Stride)
+	{
+		if (MaxCount > 0 && SplatOrder.Num() >= MaxCount)
+		{
+			break;
+		}
+
+		FSogSplatSortEntry& Entry = SplatOrder.AddDefaulted_GetRef();
+		Entry.SplatIndex = SplatIndex;
+		if (bUseFixedSortDirection)
+		{
+			const FVector WorldLocation = ComponentTransform.TransformPosition(Splats[SplatIndex].Transform.GetLocation());
+			Entry.SortKey = FVector::DotProduct(WorldLocation, SortDirection);
+		}
+	}
+
+	if (bUseFixedSortDirection)
+	{
+		SplatOrder.Sort(
+			[](const FSogSplatSortEntry& A, const FSogSplatSortEntry& B)
+			{
+				return A.SortKey > B.SortKey;
+			});
+	}
+
+	const int32 EstimatedSplatCount = SplatOrder.Num();
 	if (EstimatedSplatCount <= 0)
 	{
 		bInstancesBuilt = true;
@@ -345,14 +387,14 @@ bool USogSplatComponent::RebuildInstances()
 	NewRenderData->Vertices.Reserve(static_cast<int32>(EstimatedVertexCount));
 	NewRenderData->Indices.Reserve(static_cast<int32>(EstimatedIndexCount));
 
-	for (int32 SplatIndex = 0; SplatIndex < Splats.Num(); SplatIndex += Stride)
+	for (const FSogSplatSortEntry& SortEntry : SplatOrder)
 	{
-		if (MaxCount > 0 && NewRenderData->SplatCount >= MaxCount)
+		if (!Splats.IsValidIndex(SortEntry.SplatIndex))
 		{
-			break;
+			continue;
 		}
 
-		const FSogSplatInstance& Splat = Splats[SplatIndex];
+		const FSogSplatInstance& Splat = Splats[SortEntry.SplatIndex];
 		const FColor VertexColor = Splat.Color.ToFColor(false);
 		const uint32 BaseVertexIndex = static_cast<uint32>(NewRenderData->Vertices.Num());
 
@@ -462,6 +504,8 @@ void USogSplatComponent::PostEditChangeProperty(FPropertyChangedEvent& PropertyC
 	if (PropertyName == GET_MEMBER_NAME_CHECKED(USogSplatComponent, SourceAsset)
 		|| PropertyName == GET_MEMBER_NAME_CHECKED(USogSplatComponent, InstanceStride)
 		|| PropertyName == GET_MEMBER_NAME_CHECKED(USogSplatComponent, MaxRenderedInstances)
+		|| PropertyName == GET_MEMBER_NAME_CHECKED(USogSplatComponent, bUseFixedSortDirection)
+		|| PropertyName == GET_MEMBER_NAME_CHECKED(USogSplatComponent, FixedSortDirectionWorld)
 		|| PropertyName == GET_MEMBER_NAME_CHECKED(USogSplatComponent, MaterialOverride))
 	{
 		bInstancesBuilt = false;

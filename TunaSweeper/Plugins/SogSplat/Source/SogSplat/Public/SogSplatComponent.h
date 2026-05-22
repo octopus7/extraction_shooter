@@ -27,6 +27,12 @@ public:
 	int32 MaxRenderedInstances = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SOG|Rendering")
+	bool bUseFixedSortDirection = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SOG|Rendering", meta = (EditCondition = "bUseFixedSortDirection"))
+	FVector FixedSortDirectionWorld = FVector(0.522026, 0.575714, -0.629319);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SOG|Rendering")
 	TObjectPtr<UMaterialInterface> MaterialOverride;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "SOG")
