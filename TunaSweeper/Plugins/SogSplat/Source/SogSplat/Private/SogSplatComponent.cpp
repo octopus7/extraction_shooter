@@ -16,10 +16,12 @@ USogSplatComponent::USogSplatComponent()
 	SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	SetCanEverAffectNavigation(false);
 	SetGenerateOverlapEvents(false);
+	bHasPerInstanceHitProxies = false;
+	bSelectable = false;
+	bWantsEditorEffects = false;
 	bCastDynamicShadow = false;
 	bAffectDistanceFieldLighting = false;
 	bReceivesDecals = false;
-	bAutoRebuildTreeOnInstanceChanges = false;
 	NumCustomDataFloats = 4;
 	CardMesh = TSoftObjectPtr<UStaticMesh>(FSoftObjectPath(DefaultCardMeshPath));
 }
@@ -66,16 +68,6 @@ void USogSplatComponent::OnRegister()
 	if (!bInstancesBuilt)
 	{
 		RebuildInstances();
-	}
-}
-
-void USogSplatComponent::BeginPlay()
-{
-	Super::BeginPlay();
-
-	if (bBuildHierarchicalTreeAtRuntime && bInstancesBuilt && GetInstanceCount() > 0)
-	{
-		BuildTreeIfOutdated(true, false);
 	}
 }
 
@@ -133,12 +125,8 @@ bool USogSplatComponent::RebuildInstances()
 		return false;
 	}
 
-	const bool bPreviousAutoRebuild = bAutoRebuildTreeOnInstanceChanges;
-	bAutoRebuildTreeOnInstanceChanges = false;
-
 	PreAllocateInstancesMemory(InstanceTransforms.Num());
 	AddInstances(InstanceTransforms, false, false, false);
-	bAutoRebuildTreeOnInstanceChanges = bPreviousAutoRebuild;
 
 	PerInstanceSMCustomData.SetNumUninitialized(InstanceColors.Num() * 4);
 	for (int32 InstanceIndex = 0; InstanceIndex < InstanceColors.Num(); ++InstanceIndex)
@@ -152,18 +140,9 @@ bool USogSplatComponent::RebuildInstances()
 	}
 
 	RenderedInstanceCount = InstanceTransforms.Num();
-	if (bBuildHierarchicalTreeOnRebuild)
-	{
-		BuildTreeIfOutdated(false, true);
-	}
 	MarkRenderStateDirty();
 	bInstancesBuilt = true;
 	return true;
-}
-
-bool USogSplatComponent::BuildSogHierarchy(bool bAsync)
-{
-	return BuildTreeIfOutdated(bAsync, true);
 }
 
 void USogSplatComponent::ApplyDefaultMeshAndMaterial()
@@ -208,7 +187,6 @@ void USogSplatComponent::PostEditChangeProperty(FPropertyChangedEvent& PropertyC
 	if (PropertyName == GET_MEMBER_NAME_CHECKED(USogSplatComponent, SourceAsset)
 		|| PropertyName == GET_MEMBER_NAME_CHECKED(USogSplatComponent, InstanceStride)
 		|| PropertyName == GET_MEMBER_NAME_CHECKED(USogSplatComponent, MaxRenderedInstances)
-		|| PropertyName == GET_MEMBER_NAME_CHECKED(USogSplatComponent, bBuildHierarchicalTreeOnRebuild)
 		|| PropertyName == GET_MEMBER_NAME_CHECKED(USogSplatComponent, MaterialOverride)
 		|| PropertyName == GET_MEMBER_NAME_CHECKED(USogSplatComponent, CardMesh))
 	{

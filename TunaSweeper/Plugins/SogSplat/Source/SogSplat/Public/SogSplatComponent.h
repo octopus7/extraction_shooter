@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/HierarchicalInstancedStaticMeshComponent.h"
+#include "Components/InstancedStaticMeshComponent.h"
 #include "SogSplatTypes.h"
 #include "SogSplatComponent.generated.h"
 
@@ -10,7 +10,7 @@ class USogAsset;
 class UStaticMesh;
 
 UCLASS(ClassGroup = (Rendering), meta = (BlueprintSpawnableComponent))
-class SOGSPLAT_API USogSplatComponent : public UHierarchicalInstancedStaticMeshComponent
+class SOGSPLAT_API USogSplatComponent : public UInstancedStaticMeshComponent
 {
 	GENERATED_BODY()
 
@@ -25,12 +25,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SOG|Rendering", meta = (ClampMin = "0"))
 	int32 MaxRenderedInstances = 0;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SOG|Performance")
-	bool bBuildHierarchicalTreeOnRebuild = false;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SOG|Performance")
-	bool bBuildHierarchicalTreeAtRuntime = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SOG|Rendering")
 	TObjectPtr<UMaterialInterface> MaterialOverride;
@@ -53,11 +47,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "SOG")
 	bool LoadSogFile(const FString& FilePath, FSogDecodeOptions Options);
 
-	UFUNCTION(BlueprintCallable, Category = "SOG|Performance")
-	bool BuildSogHierarchy(bool bAsync);
-
 	virtual void OnRegister() override;
-	virtual void BeginPlay() override;
 
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
