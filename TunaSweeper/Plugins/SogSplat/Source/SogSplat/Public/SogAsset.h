@@ -6,6 +6,7 @@
 #include "SogAsset.generated.h"
 
 class UMaterialInterface;
+class UTexture2D;
 
 UCLASS(BlueprintType)
 class SOGSPLAT_API USogAsset : public UObject
@@ -51,6 +52,12 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SOG|Rendering")
 	TSoftObjectPtr<UMaterialInterface> DefaultMaterial;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "SOG|Cache")
+	TObjectPtr<UTexture2D> TransformTexture;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "SOG|Cache")
+	TObjectPtr<UTexture2D> ColorTexture;
 
 	UFUNCTION(BlueprintPure, Category = "SOG")
 	int32 GetSplatCount() const;

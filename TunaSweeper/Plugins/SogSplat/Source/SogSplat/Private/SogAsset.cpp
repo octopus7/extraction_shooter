@@ -1,18 +1,22 @@
 #include "SogAsset.h"
 
+#include "Engine/Texture2D.h"
 #include "Math/Float16.h"
 #include "Math/Float16Color.h"
 #include "Misc/Compression.h"
 #include "SogDecoder.h"
+#include "TextureResource.h"
 
 namespace
 {
 	constexpr int32 LegacyPackedSplatCacheVersion = 1;
-	constexpr int32 TextureSplatCacheVersion = 3;
+	constexpr int32 TextureSplatCacheVersion = 4;
 	constexpr int32 TransformTexelsPerSplat = 2;
 	constexpr int32 TransformChannelsPerTexel = 4;
 	constexpr int32 ColorChannelsPerTexel = 4;
 	constexpr int32 MaxCacheTextureWidth = 2048;
+	const FName TransformTextureObjectName(TEXT("SogTransformTexture"));
+	const FName ColorTextureObjectName(TEXT("SogColorTexture"));
 
 	struct FLegacySogPackedSplat
 	{
@@ -55,14 +59,218 @@ namespace
 			HalfBitsToFloat(HalfData[BaseIndex + 3]));
 	}
 
-	FLinearColor LinearColorFromPackedBytes(const TArray<uint8>& Bytes, int32 TexelIndex)
+	FLinearColor LinearColorFromBgraBytes(const TArray<uint8>& Bytes, int32 TexelIndex)
 	{
 		const int32 BaseIndex = TexelIndex * ColorChannelsPerTexel;
 		return FLinearColor(
-			static_cast<float>(Bytes[BaseIndex + 0]) / 255.0f,
-			static_cast<float>(Bytes[BaseIndex + 1]) / 255.0f,
 			static_cast<float>(Bytes[BaseIndex + 2]) / 255.0f,
+			static_cast<float>(Bytes[BaseIndex + 1]) / 255.0f,
+			static_cast<float>(Bytes[BaseIndex + 0]) / 255.0f,
 			static_cast<float>(Bytes[BaseIndex + 3]) / 255.0f);
+	}
+
+	int32 GetTransformTextureWidth(int32 SplatTextureWidth)
+	{
+		return SplatTextureWidth * TransformTexelsPerSplat;
+	}
+
+	int32 GetExpectedTransformHalfCount(int32 SplatTextureWidth, int32 SplatTextureHeight)
+	{
+		return SplatTextureWidth * SplatTextureHeight * TransformTexelsPerSplat * TransformChannelsPerTexel;
+	}
+
+	int32 GetExpectedColorByteCount(int32 SplatTextureWidth, int32 SplatTextureHeight)
+	{
+		return SplatTextureWidth * SplatTextureHeight * ColorChannelsPerTexel;
+	}
+
+	bool DecodeTextureCacheData(
+		int32 SplatCount,
+		int32 SplatTextureWidth,
+		int32 SplatTextureHeight,
+		const FVector& PositionMin,
+		const FVector& PositionExtent,
+		const TArray<uint16>& TransformHalfData,
+		const TArray<uint8>& ColorByteData,
+		TArray<FSogSplatInstance>& OutSplats)
+	{
+		if (SplatCount <= 0
+			|| SplatTextureWidth <= 0
+			|| SplatTextureHeight <= 0
+			|| SplatTextureWidth * SplatTextureHeight < SplatCount
+			|| TransformHalfData.Num() != GetExpectedTransformHalfCount(SplatTextureWidth, SplatTextureHeight)
+			|| ColorByteData.Num() != GetExpectedColorByteCount(SplatTextureWidth, SplatTextureHeight))
+		{
+			return false;
+		}
+
+		OutSplats.SetNumUninitialized(SplatCount);
+		for (int32 SplatIndex = 0; SplatIndex < SplatCount; ++SplatIndex)
+		{
+			const int32 SplatX = SplatIndex % SplatTextureWidth;
+			const int32 SplatY = SplatIndex / SplatTextureWidth;
+			const int32 SplatTexelIndex = SplatY * SplatTextureWidth + SplatX;
+			const int32 TransformTexelIndex = SplatTexelIndex * TransformTexelsPerSplat;
+			const FLinearColor Transform0 = LoadTransformTexel(TransformHalfData, TransformTexelIndex);
+			const FLinearColor Transform1 = LoadTransformTexel(TransformHalfData, TransformTexelIndex + 1);
+
+			const FVector Location = PositionMin + FVector(Transform0.R, Transform0.G, Transform0.B) * PositionExtent;
+			const double QuatW = FMath::Sqrt(FMath::Max(0.0, 1.0 - Transform1.R * Transform1.R - Transform1.G * Transform1.G - Transform1.B * Transform1.B));
+			FQuat Rotation(Transform1.R, Transform1.G, Transform1.B, QuatW);
+			Rotation.Normalize();
+
+			FSogSplatInstance& DecodedSplat = OutSplats[SplatIndex];
+			DecodedSplat.Transform = FTransform(
+				Rotation,
+				Location,
+				FVector(Transform0.A, Transform1.A, 1.0));
+			DecodedSplat.Color = LinearColorFromBgraBytes(ColorByteData, SplatTexelIndex);
+		}
+
+		return true;
+	}
+
+#if WITH_EDITORONLY_DATA
+	UTexture2D* CreateOrUpdateCacheTexture(
+		UObject* Outer,
+		UTexture2D* ExistingTexture,
+		FName TextureName,
+		int32 SizeX,
+		int32 SizeY,
+		ETextureSourceFormat SourceFormat,
+		TextureCompressionSettings CompressionSettings,
+		TextureGroup LODGroup,
+		const uint8* SourceData)
+	{
+		if (!Outer || SizeX <= 0 || SizeY <= 0 || !SourceData)
+		{
+			return nullptr;
+		}
+
+		UTexture2D* Texture = ExistingTexture;
+		if (!Texture || Texture->GetOuter() != Outer)
+		{
+			Texture = FindObject<UTexture2D>(Outer, *TextureName.ToString());
+		}
+		if (!Texture)
+		{
+			Texture = NewObject<UTexture2D>(Outer, TextureName, RF_Public | RF_Transactional);
+		}
+
+#if WITH_EDITOR
+		Texture->Modify();
+		Texture->PreEditChange(nullptr);
+#endif
+		Texture->Source.Init(SizeX, SizeY, 1, 1, SourceFormat, SourceData);
+		Texture->CompressionSettings = CompressionSettings;
+		Texture->CompressionNone = true;
+		Texture->LossyCompressionAmount = TLCA_None;
+		Texture->Filter = TF_Nearest;
+		Texture->LODGroup = LODGroup;
+		Texture->MipGenSettings = TMGS_NoMipmaps;
+		Texture->MipLoadOptions = ETextureMipLoadOptions::AllMips;
+		Texture->SRGB = false;
+		Texture->VirtualTextureStreaming = false;
+		Texture->AddressX = TA_Clamp;
+		Texture->AddressY = TA_Clamp;
+#if WITH_EDITOR
+		Texture->PostEditChange();
+#endif
+		Texture->UpdateResource();
+		Texture->MarkPackageDirty();
+		return Texture;
+	}
+
+	bool ReadTextureSourceBytes(
+		const UTexture2D* Texture,
+		int32 ExpectedSizeX,
+		int32 ExpectedSizeY,
+		ETextureSourceFormat ExpectedFormat,
+		int32 ExpectedByteCount,
+		TArray<uint8>& OutBytes)
+	{
+		UTexture2D* MutableTexture = const_cast<UTexture2D*>(Texture);
+		if (!MutableTexture
+			|| !MutableTexture->Source.IsValid()
+			|| MutableTexture->Source.GetSizeX() != ExpectedSizeX
+			|| MutableTexture->Source.GetSizeY() != ExpectedSizeY
+			|| MutableTexture->Source.GetFormat() != ExpectedFormat
+			|| MutableTexture->Source.CalcMipSize(0) != ExpectedByteCount)
+		{
+			return false;
+		}
+
+		const uint8* MipData = MutableTexture->Source.LockMipReadOnly(0);
+		if (!MipData)
+		{
+			return false;
+		}
+
+		OutBytes.SetNumUninitialized(ExpectedByteCount);
+		FMemory::Memcpy(OutBytes.GetData(), MipData, ExpectedByteCount);
+		MutableTexture->Source.UnlockMip(0);
+		return true;
+	}
+#endif
+
+	bool ReadTexturePlatformBytes(
+		const UTexture2D* Texture,
+		int32 ExpectedSizeX,
+		int32 ExpectedSizeY,
+		EPixelFormat ExpectedPixelFormat,
+		int32 ExpectedByteCount,
+		TArray<uint8>& OutBytes)
+	{
+		const FTexturePlatformData* PlatformData = Texture ? Texture->GetPlatformData() : nullptr;
+		if (!PlatformData
+			|| PlatformData->SizeX != ExpectedSizeX
+			|| PlatformData->SizeY != ExpectedSizeY
+			|| PlatformData->PixelFormat != ExpectedPixelFormat
+			|| PlatformData->Mips.IsEmpty())
+		{
+			return false;
+		}
+
+		const FTexture2DMipMap& Mip = PlatformData->Mips[0];
+		if (Mip.SizeX != ExpectedSizeX || Mip.SizeY != ExpectedSizeY)
+		{
+			return false;
+		}
+
+		FByteBulkData& BulkData = const_cast<FByteBulkData&>(Mip.BulkData);
+		if (BulkData.GetBulkDataSize() < ExpectedByteCount)
+		{
+			return false;
+		}
+
+		const void* MipData = BulkData.LockReadOnly();
+		if (!MipData)
+		{
+			return false;
+		}
+
+		OutBytes.SetNumUninitialized(ExpectedByteCount);
+		FMemory::Memcpy(OutBytes.GetData(), MipData, ExpectedByteCount);
+		BulkData.Unlock();
+		return true;
+	}
+
+	bool ReadTextureBytes(
+		const UTexture2D* Texture,
+		int32 ExpectedSizeX,
+		int32 ExpectedSizeY,
+		ETextureSourceFormat ExpectedSourceFormat,
+		EPixelFormat ExpectedPixelFormat,
+		int32 ExpectedByteCount,
+		TArray<uint8>& OutBytes)
+	{
+#if WITH_EDITORONLY_DATA
+		if (ReadTextureSourceBytes(Texture, ExpectedSizeX, ExpectedSizeY, ExpectedSourceFormat, ExpectedByteCount, OutBytes))
+		{
+			return true;
+		}
+#endif
+		return ReadTexturePlatformBytes(Texture, ExpectedSizeX, ExpectedSizeY, ExpectedPixelFormat, ExpectedByteCount, OutBytes);
 	}
 
 	int32 ChooseCacheTextureWidth(int32 SplatCount)
@@ -144,6 +352,8 @@ bool USogAsset::BuildDecodedSplatCache()
 	CachedSplatDataBytes.Reset();
 	CachedTransformTextureHalfData.Reset();
 	CachedColorTextureByteData.Reset();
+	TransformTexture = nullptr;
+	ColorTexture = nullptr;
 	CachedSplatDataVersion = 0;
 	CachedSplatCount = 0;
 	CachedSplatDataSizeBytes = 0;
@@ -189,8 +399,10 @@ bool USogAsset::BuildDecodedSplatCache()
 	CachedTextureWidth = ChooseCacheTextureWidth(Splats.Num());
 	CachedTextureHeight = FMath::DivideAndRoundUp(Splats.Num(), CachedTextureWidth);
 	const int32 PaddedTexelCount = CachedTextureWidth * CachedTextureHeight;
-	CachedTransformTextureHalfData.SetNumZeroed(PaddedTexelCount * TransformTexelsPerSplat * TransformChannelsPerTexel);
-	CachedColorTextureByteData.SetNumZeroed(PaddedTexelCount * ColorChannelsPerTexel);
+	TArray<uint16> TransformHalfData;
+	TArray<uint8> ColorByteData;
+	TransformHalfData.SetNumZeroed(PaddedTexelCount * TransformTexelsPerSplat * TransformChannelsPerTexel);
+	ColorByteData.SetNumZeroed(PaddedTexelCount * ColorChannelsPerTexel);
 
 	for (int32 SplatIndex = 0; SplatIndex < Splats.Num(); ++SplatIndex)
 	{
@@ -214,14 +426,14 @@ bool USogAsset::BuildDecodedSplatCache()
 		const int32 TransformTexelIndex = SplatTexelIndex * TransformTexelsPerSplat;
 
 		StoreTransformTexel(
-			CachedTransformTextureHalfData,
+			TransformHalfData,
 			TransformTexelIndex,
 			static_cast<float>(NormalizedLocation.X),
 			static_cast<float>(NormalizedLocation.Y),
 			static_cast<float>(NormalizedLocation.Z),
 			static_cast<float>(SourceScale.X));
 		StoreTransformTexel(
-			CachedTransformTextureHalfData,
+			TransformHalfData,
 			TransformTexelIndex + 1,
 			static_cast<float>(SourceRotation.X),
 			static_cast<float>(SourceRotation.Y),
@@ -230,18 +442,51 @@ bool USogAsset::BuildDecodedSplatCache()
 
 		const FColor PackedColor = SourceSplat.Color.ToFColor(false);
 		const int32 ColorBaseIndex = SplatTexelIndex * ColorChannelsPerTexel;
-		CachedColorTextureByteData[ColorBaseIndex + 0] = PackedColor.R;
-		CachedColorTextureByteData[ColorBaseIndex + 1] = PackedColor.G;
-		CachedColorTextureByteData[ColorBaseIndex + 2] = PackedColor.B;
-		CachedColorTextureByteData[ColorBaseIndex + 3] = PackedColor.A;
+		ColorByteData[ColorBaseIndex + 0] = PackedColor.B;
+		ColorByteData[ColorBaseIndex + 1] = PackedColor.G;
+		ColorByteData[ColorBaseIndex + 2] = PackedColor.R;
+		ColorByteData[ColorBaseIndex + 3] = PackedColor.A;
 	}
 
 	CachedSplatDataVersion = TextureSplatCacheVersion;
 	CachedSplatCount = Splats.Num();
-	CachedTransformTextureSizeBytes = CachedTransformTextureHalfData.Num() * sizeof(uint16);
-	CachedColorTextureSizeBytes = CachedColorTextureByteData.Num() * sizeof(uint8);
+	CachedTransformTextureSizeBytes = TransformHalfData.Num() * sizeof(uint16);
+	CachedColorTextureSizeBytes = ColorByteData.Num() * sizeof(uint8);
 	CachedSplatDataSizeBytes = CachedTransformTextureSizeBytes + CachedColorTextureSizeBytes;
 	CachedSplatDataUncompressedSizeBytes = CachedSplatDataSizeBytes;
+
+#if WITH_EDITORONLY_DATA
+	const int32 TransformTextureWidth = GetTransformTextureWidth(CachedTextureWidth);
+	TransformTexture = CreateOrUpdateCacheTexture(
+		this,
+		TransformTexture,
+		TransformTextureObjectName,
+		TransformTextureWidth,
+		CachedTextureHeight,
+		TSF_RGBA16F,
+		TC_HDR,
+		TEXTUREGROUP_16BitData,
+		reinterpret_cast<const uint8*>(TransformHalfData.GetData()));
+	ColorTexture = CreateOrUpdateCacheTexture(
+		this,
+		ColorTexture,
+		ColorTextureObjectName,
+		CachedTextureWidth,
+		CachedTextureHeight,
+		TSF_BGRA8,
+		TC_VectorDisplacementmap,
+		TEXTUREGROUP_8BitData,
+		ColorByteData.GetData());
+
+	if (!TransformTexture || !ColorTexture)
+	{
+		CachedTransformTextureHalfData = MoveTemp(TransformHalfData);
+		CachedColorTextureByteData = MoveTemp(ColorByteData);
+	}
+#else
+	CachedTransformTextureHalfData = MoveTemp(TransformHalfData);
+	CachedColorTextureByteData = MoveTemp(ColorByteData);
+#endif
 	return true;
 }
 
@@ -255,36 +500,57 @@ bool USogAsset::TryLoadSplatsFromDecodedCache(FText& OutError)
 		if (CachedSplatCount <= 0
 			|| CachedTextureWidth <= 0
 			|| CachedTextureHeight <= 0
-			|| CachedTextureWidth * CachedTextureHeight < CachedSplatCount
-			|| CachedTransformTextureHalfData.Num() != ExpectedTransformHalfCount
-			|| CachedColorTextureByteData.Num() != ExpectedColorByteCount)
+			|| CachedTextureWidth * CachedTextureHeight < CachedSplatCount)
 		{
 			OutError = NSLOCTEXT("SogAsset", "DecodedTextureCacheInvalid", "Cached SOG texture data is invalid.");
 			return false;
 		}
 
-		TArray<FSogSplatInstance> DecodedSplats;
-		DecodedSplats.SetNumUninitialized(CachedSplatCount);
-		for (int32 SplatIndex = 0; SplatIndex < CachedSplatCount; ++SplatIndex)
+		TArray<uint16> TextureTransformHalfData;
+		TArray<uint8> TextureColorByteData;
+		const TArray<uint16>* TransformHalfData = nullptr;
+		const TArray<uint8>* ColorByteData = nullptr;
+
+		TArray<uint8> TransformTextureBytes;
+		TArray<uint8> ColorTextureBytes;
+		const int32 TransformTextureWidth = GetTransformTextureWidth(CachedTextureWidth);
+		if (TransformTexture
+			&& ColorTexture
+			&& ReadTextureBytes(TransformTexture, TransformTextureWidth, CachedTextureHeight, TSF_RGBA16F, PF_FloatRGBA, ExpectedTransformHalfCount * static_cast<int32>(sizeof(uint16)), TransformTextureBytes)
+			&& ReadTextureBytes(ColorTexture, CachedTextureWidth, CachedTextureHeight, TSF_BGRA8, PF_B8G8R8A8, ExpectedColorByteCount, ColorTextureBytes))
 		{
-			const int32 SplatX = SplatIndex % CachedTextureWidth;
-			const int32 SplatY = SplatIndex / CachedTextureWidth;
-			const int32 SplatTexelIndex = SplatY * CachedTextureWidth + SplatX;
-			const int32 TransformTexelIndex = SplatTexelIndex * TransformTexelsPerSplat;
-			const FLinearColor Transform0 = LoadTransformTexel(CachedTransformTextureHalfData, TransformTexelIndex);
-			const FLinearColor Transform1 = LoadTransformTexel(CachedTransformTextureHalfData, TransformTexelIndex + 1);
+			TextureTransformHalfData.SetNumUninitialized(ExpectedTransformHalfCount);
+			FMemory::Memcpy(TextureTransformHalfData.GetData(), TransformTextureBytes.GetData(), TransformTextureBytes.Num());
+			TextureColorByteData = MoveTemp(ColorTextureBytes);
+			TransformHalfData = &TextureTransformHalfData;
+			ColorByteData = &TextureColorByteData;
+		}
+		else if (CachedTransformTextureHalfData.Num() == ExpectedTransformHalfCount
+			&& CachedColorTextureByteData.Num() == ExpectedColorByteCount)
+		{
+			TransformHalfData = &CachedTransformTextureHalfData;
+			ColorByteData = &CachedColorTextureByteData;
+		}
 
-			const FVector Location = CachedPositionMin + FVector(Transform0.R, Transform0.G, Transform0.B) * CachedPositionExtent;
-			const double QuatW = FMath::Sqrt(FMath::Max(0.0, 1.0 - Transform1.R * Transform1.R - Transform1.G * Transform1.G - Transform1.B * Transform1.B));
-			FQuat Rotation(Transform1.R, Transform1.G, Transform1.B, QuatW);
-			Rotation.Normalize();
+		if (!TransformHalfData || !ColorByteData)
+		{
+			OutError = NSLOCTEXT("SogAsset", "DecodedTextureCacheMissing", "Cached SOG texture assets are missing or invalid.");
+			return false;
+		}
 
-			FSogSplatInstance& DecodedSplat = DecodedSplats[SplatIndex];
-			DecodedSplat.Transform = FTransform(
-				Rotation,
-				Location,
-				FVector(Transform0.A, Transform1.A, 1.0));
-			DecodedSplat.Color = LinearColorFromPackedBytes(CachedColorTextureByteData, SplatTexelIndex);
+		TArray<FSogSplatInstance> DecodedSplats;
+		if (!DecodeTextureCacheData(
+			CachedSplatCount,
+			CachedTextureWidth,
+			CachedTextureHeight,
+			CachedPositionMin,
+			CachedPositionExtent,
+			*TransformHalfData,
+			*ColorByteData,
+			DecodedSplats))
+		{
+			OutError = NSLOCTEXT("SogAsset", "DecodedTextureCacheDecodeFailed", "Failed to decode cached SOG texture assets.");
+			return false;
 		}
 
 		SetSplats(MoveTemp(DecodedSplats));
@@ -379,8 +645,16 @@ void USogAsset::PostLoad()
 #endif
 
 	StoredSourceSizeBytes = SourceArchiveBytes.Num();
-	CachedTransformTextureSizeBytes = CachedTransformTextureHalfData.Num() * sizeof(uint16);
-	CachedColorTextureSizeBytes = CachedColorTextureByteData.Num() * sizeof(uint8);
+	if (CachedSplatDataVersion == TextureSplatCacheVersion && CachedTextureWidth > 0 && CachedTextureHeight > 0)
+	{
+		CachedTransformTextureSizeBytes = GetExpectedTransformHalfCount(CachedTextureWidth, CachedTextureHeight) * static_cast<int32>(sizeof(uint16));
+		CachedColorTextureSizeBytes = GetExpectedColorByteCount(CachedTextureWidth, CachedTextureHeight) * static_cast<int32>(sizeof(uint8));
+	}
+	else
+	{
+		CachedTransformTextureSizeBytes = CachedTransformTextureHalfData.Num() * sizeof(uint16);
+		CachedColorTextureSizeBytes = CachedColorTextureByteData.Num() * sizeof(uint8);
+	}
 	CachedSplatDataSizeBytes = CachedSplatDataVersion == TextureSplatCacheVersion
 		? CachedTransformTextureSizeBytes + CachedColorTextureSizeBytes
 		: CachedSplatDataBytes.Num();
