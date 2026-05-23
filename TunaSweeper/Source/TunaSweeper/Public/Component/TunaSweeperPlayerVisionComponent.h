@@ -15,13 +15,13 @@ struct TUNASWEEPER_API FTunaSweeperPlayerVisionSettings
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Vision", meta = (ClampMin = "1.0", UIMin = "1.0"))
-	float SightDistance = 900.0f;
+	float SightDistance = 450.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Vision", meta = (ClampMin = "1.0", ClampMax = "360.0", UIMin = "1.0", UIMax = "360.0"))
 	float FieldOfViewDegrees = 90.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Vision", meta = (ClampMin = "0.0", UIMin = "0.0"))
-	float AlwaysVisibleRadius = 200.0f;
+	float AlwaysVisibleRadius = 100.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Vision", meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float TraceHeight = 40.0f;
@@ -115,6 +115,7 @@ private:
 		const FVector& Direction,
 		float TraceDistance,
 		const FHitResult& Hit) const;
+	void DrawVisionDebugOutsideFieldOfView() const;
 	void DrawVisionDebugRangeWires() const;
 	void DrawVisionDebugBounds(const FVector& TraceOrigin, const FVector& FacingDirection) const;
 	void ShowVisionDebugStatus(const FString& StatusText, FColor TextColor = FColor::Cyan) const;
