@@ -14,7 +14,8 @@ DEFINE_LOG_CATEGORY_STATIC(LogTunaSweeperPlayerVision, Log, All);
 
 namespace TunaSweeperVision
 {
-	constexpr float FramedDefaultSightDistance = 450.0f;
+	constexpr float FramedDefaultSightDistance = 810.0f;
+	constexpr float CompactDefaultSightDistance = 450.0f;
 	constexpr float RecentDefaultSightDistance = 900.0f;
 	constexpr float LegacyDefaultSightDistance = 1800.0f;
 	constexpr float FramedDefaultAlwaysVisibleRadius = 100.0f;
@@ -30,7 +31,8 @@ UTunaSweeperPlayerVisionComponent::UTunaSweeperPlayerVisionComponent()
 void UTunaSweeperPlayerVisionComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	if (FMath::IsNearlyEqual(VisionSettings.SightDistance, TunaSweeperVision::LegacyDefaultSightDistance) ||
+	if (FMath::IsNearlyEqual(VisionSettings.SightDistance, TunaSweeperVision::CompactDefaultSightDistance) ||
+		FMath::IsNearlyEqual(VisionSettings.SightDistance, TunaSweeperVision::LegacyDefaultSightDistance) ||
 		FMath::IsNearlyEqual(VisionSettings.SightDistance, TunaSweeperVision::RecentDefaultSightDistance))
 	{
 		VisionSettings.SightDistance = TunaSweeperVision::FramedDefaultSightDistance;
@@ -719,61 +721,6 @@ void UTunaSweeperPlayerVisionComponent::DrawVisionDebugInsideFieldOfView() const
 	}
 
 	DrawVisionDebugBounds(TraceOrigin, FacingDirection);
-}
-
-void UTunaSweeperPlayerVisionComponent::DrawVisionDebugOutsideFieldOfView() const
-{
-	UWorld* World = GetWorld();
-	const AActor* OwnerActor = GetOwner();
-	if (!World || !OwnerActor)
-	{
-		return;
-	}
-
-	FVector FacingDirection = OwnerActor->GetActorForwardVector();
-	FacingDirection.Z = 0.0f;
-	if (!FacingDirection.Normalize())
-	{
-		FacingDirection = FVector::ForwardVector;
-	}
-
-	const float FieldOfViewDegrees = FMath::Clamp(VisionSettings.FieldOfViewDegrees, 1.0f, 360.0f);
-	if (FieldOfViewDegrees >= 360.0f)
-	{
-		return;
-	}
-
-	const FVector TraceOrigin =
-		OwnerActor->GetActorLocation() + FVector(0.0f, 0.0f, FMath::Max(0.0f, VisionSettings.TraceHeight));
-	const FVector DebugStart = TraceOrigin + FVector(0.0f, 0.0f, 22.0f);
-	const float SightDistance = FMath::Max(VisionSettings.AlwaysVisibleRadius, VisionSettings.SightDistance);
-	const float HalfFieldOfViewDegrees = FieldOfViewDegrees * 0.5f;
-	const float AngleStepDegrees = FMath::Clamp(VisionSettings.RayAngleStepDegrees, 0.1f, 45.0f);
-	const int32 SegmentCount = FMath::Max(1, FMath::CeilToInt((360.0f - FieldOfViewDegrees) / AngleStepDegrees));
-	const float OutsideAngleStepDegrees = (360.0f - FieldOfViewDegrees) / static_cast<float>(SegmentCount);
-	const float OneFrameLifeTime = 0.0f;
-
-	for (int32 SegmentIndex = 0; SegmentIndex <= SegmentCount; ++SegmentIndex)
-	{
-		const float RelativeAngleDegrees =
-			HalfFieldOfViewDegrees + static_cast<float>(SegmentIndex) * OutsideAngleStepDegrees;
-		FVector Direction = FacingDirection.RotateAngleAxis(RelativeAngleDegrees, FVector::UpVector);
-		Direction.Z = 0.0f;
-		if (!Direction.Normalize())
-		{
-			continue;
-		}
-
-		DrawDebugLine(
-			World,
-			DebugStart,
-			DebugStart + Direction * SightDistance,
-			FColor::Red,
-			false,
-			OneFrameLifeTime,
-			1,
-			1.0f);
-	}
 }
 
 void UTunaSweeperPlayerVisionComponent::DrawVisionDebugRangeWires() const

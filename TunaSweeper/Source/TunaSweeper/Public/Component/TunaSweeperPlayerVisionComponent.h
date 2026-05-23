@@ -15,7 +15,7 @@ struct TUNASWEEPER_API FTunaSweeperPlayerVisionSettings
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Vision", meta = (ClampMin = "1.0", UIMin = "1.0"))
-	float SightDistance = 450.0f;
+	float SightDistance = 810.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Vision", meta = (ClampMin = "1.0", ClampMax = "360.0", UIMin = "1.0", UIMax = "360.0"))
 	float FieldOfViewDegrees = 90.0f;
