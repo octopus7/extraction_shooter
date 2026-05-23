@@ -85,16 +85,12 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Vision|Debug")
 	bool bEnableDebugOverride = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Vision|Debug")
-	bool bShowDebugStatusMessage = true;
-
 private:
 	APlayerController* ResolveLocalPlayerController() const;
 	bool IsVisionWorldEnabled() const;
 	bool ShouldUpdateVision() const;
 	bool IsVisionDebugEnabled() const;
 	void EnsureOverlayWidget(APlayerController* PlayerController);
-	void ConfigureOverlayWidgetForViewport(const FIntPoint& InViewportSize);
 	bool EnsureMaskTexture(const FIntPoint& InViewportSize);
 	bool BuildVisibleRayDistances(
 		TArray<float>& OutRayDistances,
@@ -119,7 +115,6 @@ private:
 	void DrawVisionDebugInsideFieldOfView() const;
 	void DrawVisionDebugRangeWires() const;
 	void DrawVisionDebugBounds(const FVector& TraceOrigin, const FVector& FacingDirection) const;
-	void ShowVisionDebugStatus(const FString& StatusText, FColor TextColor = FColor::Cyan) const;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UTexture2D> MaskTexture;
@@ -134,5 +129,4 @@ private:
 	FIntPoint MaskSize = FIntPoint::ZeroValue;
 	FIntPoint ViewportSize = FIntPoint::ZeroValue;
 	float TimeSinceLastMaskUpdate = 0.0f;
-	mutable double LastDebugStatusTimeSeconds = -100.0;
 };

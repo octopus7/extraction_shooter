@@ -2,15 +2,12 @@
 
 #include "Blueprint/UserWidget.h"
 #include "DrawDebugHelpers.h"
-#include "Engine/Engine.h"
 #include "Engine/Texture2D.h"
 #include "Engine/World.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
 #include "UI/TunaSweeperVisionMaskWidget.h"
-
-DEFINE_LOG_CATEGORY_STATIC(LogTunaSweeperPlayerVision, Log, All);
 
 namespace TunaSweeperVision
 {
@@ -107,7 +104,7 @@ namespace TunaSweeperVision
 		const FVector BoundaryWorldPoint = TraceOrigin + WorldDirection * FMath::Max(0.0f, VisibleDistance);
 
 		FVector2D BoundaryScreenPosition;
-		if (!PlayerController->ProjectWorldLocationToScreen(BoundaryWorldPoint, BoundaryScreenPosition, true))
+		if (!PlayerController->ProjectWorldLocationToScreen(BoundaryWorldPoint, BoundaryScreenPosition, false))
 		{
 			return BoundaryPoint;
 		}
@@ -182,7 +179,7 @@ namespace TunaSweeperVision
 		}
 
 		FVector2D PlayerScreenPosition;
-		if (!PlayerController->ProjectWorldLocationToScreen(TraceOrigin, PlayerScreenPosition, true))
+		if (!PlayerController->ProjectWorldLocationToScreen(TraceOrigin, PlayerScreenPosition, false))
 		{
 			return 0;
 		}
@@ -324,23 +321,6 @@ void UTunaSweeperPlayerVisionComponent::TickComponent(
 		{
 			VisionMaskWidget->SetMaskVisible(false);
 		}
-		if (IsVisionDebugEnabled())
-		{
-			const APawn* OwnerPawn = Cast<APawn>(GetOwner());
-			const AController* OwnerController = OwnerPawn ? OwnerPawn->GetController() : nullptr;
-			const UWorld* World = GetWorld();
-			const APlayerController* FirstPlayerController = World ? World->GetFirstPlayerController() : nullptr;
-			const APawn* FirstPlayerPawn = FirstPlayerController ? FirstPlayerController->GetPawn() : nullptr;
-			ShowVisionDebugStatus(FString::Printf(
-				TEXT("[Vision] v2 no local gameplay pawn | owner=%s ownerClass=%s controller=%s controllerClass=%s firstPC=%s firstPawn=%s"),
-				GetOwner() ? *GetOwner()->GetName() : TEXT("None"),
-				GetOwner() ? *GetOwner()->GetClass()->GetName() : TEXT("None"),
-				OwnerController ? *OwnerController->GetName() : TEXT("None"),
-				OwnerController ? *OwnerController->GetClass()->GetName() : TEXT("None"),
-				FirstPlayerController ? *FirstPlayerController->GetName() : TEXT("None"),
-				FirstPlayerPawn ? *FirstPlayerPawn->GetName() : TEXT("None")),
-				FColor::Red);
-		}
 		return;
 	}
 
@@ -352,15 +332,6 @@ void UTunaSweeperPlayerVisionComponent::TickComponent(
 
 	if (!ShouldUpdateVision())
 	{
-		if (IsVisionDebugEnabled())
-		{
-			ShowVisionDebugStatus(FString::Printf(
-				TEXT("[Vision] v1 update skipped | active %s | overlay %s | debug %s"),
-				IsActive() ? TEXT("true") : TEXT("false"),
-				bRenderVisionOverlay ? TEXT("true") : TEXT("false"),
-				IsVisionDebugEnabled() ? TEXT("true") : TEXT("false")),
-				FColor::Orange);
-		}
 		if (VisionMaskWidget)
 		{
 			VisionMaskWidget->SetMaskVisible(false);
@@ -395,10 +366,6 @@ void UTunaSweeperPlayerVisionComponent::ForceRefreshVisionMask()
 	APlayerController* PlayerController = ResolveLocalPlayerController();
 	if (!PlayerController)
 	{
-		if (IsVisionDebugEnabled())
-		{
-			ShowVisionDebugStatus(TEXT("[Vision] force refresh skipped | no player controller"), FColor::Red);
-		}
 		return;
 	}
 
@@ -407,15 +374,10 @@ void UTunaSweeperPlayerVisionComponent::ForceRefreshVisionMask()
 	PlayerController->GetViewportSize(ViewportX, ViewportY);
 	if (ViewportX <= 0 || ViewportY <= 0)
 	{
-		if (IsVisionDebugEnabled())
-		{
-			ShowVisionDebugStatus(TEXT("[Vision] Debug enabled, but viewport size is zero."), FColor::Red);
-		}
 		return;
 	}
 
 	ViewportSize = FIntPoint(ViewportX, ViewportY);
-	ConfigureOverlayWidgetForViewport(ViewportSize);
 
 	if (bRenderVisionOverlay)
 	{
@@ -428,10 +390,6 @@ void UTunaSweeperPlayerVisionComponent::ForceRefreshVisionMask()
 	float RayAngleStepDegrees = 1.0f;
 	if (!BuildVisibleRayDistances(RayDistances, TraceOrigin, FacingYawDegrees, RayAngleStepDegrees))
 	{
-		if (IsVisionDebugEnabled())
-		{
-			ShowVisionDebugStatus(TEXT("[Vision] v3 Debug enabled, but ray distance generation failed."), FColor::Orange);
-		}
 		if (VisionMaskWidget)
 		{
 			VisionMaskWidget->SetMaskVisible(false);
@@ -451,27 +409,8 @@ void UTunaSweeperPlayerVisionComponent::ForceRefreshVisionMask()
 		ViewportSize,
 		MaskVertices,
 		MaskIndices);
-	if (IsVisionDebugEnabled())
-	{
-		ShowVisionDebugStatus(FString::Printf(
-			TEXT("[Vision] v4 Debug active | viewport %dx%d | alpha %d | near %.0fcm | sight %.0fcm | rays %d | step %.2f | mask tris %d | overlay %s z %d"),
-			ViewportSize.X,
-			ViewportSize.Y,
-			VisionSettings.HiddenMaskAlpha,
-			VisionSettings.AlwaysVisibleRadius,
-			VisionSettings.SightDistance,
-			RayDistances.Num(),
-			RayAngleStepDegrees,
-			MaskTriangleCount,
-			VisionMaskWidget ? TEXT("yes") : TEXT("no"),
-			FMath::Max(OverlayZOrder, 1)));
-	}
 	if (MaskTriangleCount <= 0)
 	{
-		if (IsVisionDebugEnabled())
-		{
-			ShowVisionDebugStatus(TEXT("[Vision] No mask triangles generated; hiding mask fail-open."), FColor::Orange);
-		}
 		if (VisionMaskWidget)
 		{
 			VisionMaskWidget->ClearMaskMesh();
@@ -482,7 +421,7 @@ void UTunaSweeperPlayerVisionComponent::ForceRefreshVisionMask()
 
 	if (bRenderVisionOverlay && VisionMaskWidget)
 	{
-		VisionMaskWidget->SetMaskMesh(MoveTemp(MaskVertices), MoveTemp(MaskIndices));
+		VisionMaskWidget->SetMaskMesh(MoveTemp(MaskVertices), MoveTemp(MaskIndices), ViewportSize);
 		VisionMaskWidget->SetMaskVisible(true);
 	}
 }
@@ -581,23 +520,7 @@ void UTunaSweeperPlayerVisionComponent::EnsureOverlayWidget(APlayerController* P
 		VisionMaskWidget->SetMaskTexture(MaskTexture);
 		VisionMaskWidget->SetMaskVisible(false);
 		VisionMaskWidget->AddToViewport(FMath::Max(OverlayZOrder, 1));
-		ConfigureOverlayWidgetForViewport(ViewportSize);
 	}
-}
-
-void UTunaSweeperPlayerVisionComponent::ConfigureOverlayWidgetForViewport(const FIntPoint& InViewportSize)
-{
-	if (!VisionMaskWidget || InViewportSize.X <= 0 || InViewportSize.Y <= 0)
-	{
-		return;
-	}
-
-	VisionMaskWidget->SetAnchorsInViewport(FAnchors(0.0f, 0.0f, 1.0f, 1.0f));
-	VisionMaskWidget->SetAlignmentInViewport(FVector2D::ZeroVector);
-	VisionMaskWidget->SetPositionInViewport(FVector2D::ZeroVector, false);
-	VisionMaskWidget->SetDesiredSizeInViewport(FVector2D(
-		static_cast<float>(InViewportSize.X),
-		static_cast<float>(InViewportSize.Y)));
 }
 
 bool UTunaSweeperPlayerVisionComponent::EnsureMaskTexture(const FIntPoint& InViewportSize)
@@ -1079,21 +1002,4 @@ void UTunaSweeperPlayerVisionComponent::DrawVisionDebugBounds(
 		false);
 	DrawDebugLine(World, TraceOrigin, TraceOrigin + LeftBoundary * SightDistance, FColor::Green, false, OneFrameLifeTime, 1, 2.0f);
 	DrawDebugLine(World, TraceOrigin, TraceOrigin + RightBoundary * SightDistance, FColor::Green, false, OneFrameLifeTime, 1, 2.0f);
-}
-
-void UTunaSweeperPlayerVisionComponent::ShowVisionDebugStatus(const FString& StatusText, FColor TextColor) const
-{
-	const UWorld* World = GetWorld();
-	const double CurrentTimeSeconds = World ? World->GetTimeSeconds() : FPlatformTime::Seconds();
-	if (CurrentTimeSeconds - LastDebugStatusTimeSeconds < 0.5)
-	{
-		return;
-	}
-
-	LastDebugStatusTimeSeconds = CurrentTimeSeconds;
-	UE_LOG(LogTunaSweeperPlayerVision, Log, TEXT("%s"), *StatusText);
-	if (bShowDebugStatusMessage && GEngine)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 0.75f, TextColor, StatusText);
-	}
 }

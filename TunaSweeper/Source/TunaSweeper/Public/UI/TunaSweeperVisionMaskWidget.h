@@ -23,7 +23,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Vision")
 	void SetMaskTexture(UTexture2D* InMaskTexture);
 
-	void SetMaskMesh(TArray<FTunaSweeperVisionMaskVertex>&& InVertices, TArray<SlateIndex>&& InIndices);
+	void SetMaskMesh(
+		TArray<FTunaSweeperVisionMaskVertex>&& InVertices,
+		TArray<SlateIndex>&& InIndices,
+		const FIntPoint& InSourceViewportSize);
 	void ClearMaskMesh();
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Vision")
@@ -46,6 +49,7 @@ private:
 
 	TArray<FTunaSweeperVisionMaskVertex> MaskVertices;
 	TArray<SlateIndex> MaskIndices;
+	FIntPoint SourceViewportSize = FIntPoint::ZeroValue;
 	mutable TArray<FSlateVertex> PaintVertices;
 	mutable FSlateBrush MaskBrush;
 };

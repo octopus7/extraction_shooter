@@ -24,16 +24,19 @@ void UTunaSweeperVisionMaskWidget::SetMaskTexture(UTexture2D* InMaskTexture)
 
 void UTunaSweeperVisionMaskWidget::SetMaskMesh(
 	TArray<FTunaSweeperVisionMaskVertex>&& InVertices,
-	TArray<SlateIndex>&& InIndices)
+	TArray<SlateIndex>&& InIndices,
+	const FIntPoint& InSourceViewportSize)
 {
 	MaskVertices = MoveTemp(InVertices);
 	MaskIndices = MoveTemp(InIndices);
+	SourceViewportSize = InSourceViewportSize;
 }
 
 void UTunaSweeperVisionMaskWidget::ClearMaskMesh()
 {
 	MaskVertices.Reset();
 	MaskIndices.Reset();
+	SourceViewportSize = FIntPoint::ZeroValue;
 }
 
 void UTunaSweeperVisionMaskWidget::SetMaskVisible(bool bVisible)
@@ -64,7 +67,11 @@ int32 UTunaSweeperVisionMaskWidget::NativePaint(
 		return PaintedLayerId;
 	}
 
-	if (MaskVertices.Num() >= 3 && MaskIndices.Num() >= 3 && FSlateApplication::IsInitialized())
+	if (MaskVertices.Num() >= 3 &&
+		MaskIndices.Num() >= 3 &&
+		SourceViewportSize.X > 0 &&
+		SourceViewportSize.Y > 0 &&
+		FSlateApplication::IsInitialized())
 	{
 		const FSlateBrush* WhiteBrush = FCoreStyle::Get().GetBrush(TEXT("WhiteBrush"));
 		if (WhiteBrush && FSlateApplication::Get().GetRenderer())
@@ -72,12 +79,19 @@ int32 UTunaSweeperVisionMaskWidget::NativePaint(
 			PaintVertices.Reset(MaskVertices.Num());
 			PaintVertices.Reserve(MaskVertices.Num());
 
+			const FVector2D LocalSize = AllottedGeometry.GetLocalSize();
+			const FVector2D ViewportToLocalScale(
+				LocalSize.X / static_cast<float>(SourceViewportSize.X),
+				LocalSize.Y / static_cast<float>(SourceViewportSize.Y));
 			const FSlateRenderTransform& SlateRenderTransform = AllottedGeometry.GetAccumulatedRenderTransform();
 			for (const FTunaSweeperVisionMaskVertex& MaskVertex : MaskVertices)
 			{
+				const FVector2D LocalPosition(
+					MaskVertex.Position.X * ViewportToLocalScale.X,
+					MaskVertex.Position.Y * ViewportToLocalScale.Y);
 				PaintVertices.Add(FSlateVertex::Make<ESlateVertexRounding::Disabled>(
 					SlateRenderTransform,
-					FVector2f(MaskVertex.Position),
+					FVector2f(LocalPosition),
 					FVector2f::ZeroVector,
 					MaskVertex.Color));
 			}
