@@ -117,7 +117,7 @@ namespace TunaSweeperEditorSetup
 	const FString LootContainerOccupancyHeaderTaskId = TEXT("2026-05-18_AddLootContainerOccupancyHeaderV1");
 	const FString CannedTunaIconImportTaskId = TEXT("2026-05-11_ImportCannedTunaIconV1");
 	const FString BackpackInventoryTaskId = TEXT("2026-05-16_CreateEquipmentInventoryAssetsV3");
-	const FString IntroMenuAndLevelTravelTaskId = TEXT("2026-05-19_CreateTitleIntroMenuPersistentSaveSlotSelectionLevelTravelLadderV1");
+	const FString IntroMenuAndLevelTravelTaskId = TEXT("2026-05-24_CreateTitleIntroMenuPersistentSaveSlotSelectionLevelTravelLadderInitialScaleV1");
 	const FString OpeningScenarioPresentationTaskId = TEXT("2026-05-19_CreateOpeningScenarioPresentationV2");
 	const FString LevelTransitionVideoTaskId = TEXT("2026-05-16_AddBidirectionalLevelTransitionVideoV3");
 	const FString FirstOutingQuestTaskId = TEXT("2026-05-15_CreateFirstOutingQuestNpcV2");
@@ -2519,7 +2519,10 @@ namespace TunaSweeperEditorSetup
 
 		if (BackgroundTexture)
 		{
-			BackgroundImage->SetBrushFromTexture(BackgroundTexture, true);
+			BackgroundImage->SetBrushFromTexture(BackgroundTexture, false);
+			FSlateBrush BackgroundBrush = BackgroundImage->GetBrush();
+			BackgroundBrush.SetImageSize(FVector2D(1920.0f, 1080.0f));
+			BackgroundImage->SetBrush(BackgroundBrush);
 		}
 		BackgroundImage->SetColorAndOpacity(FLinearColor::White);
 		FillCanvas(RootCanvas->AddChildToCanvas(BackgroundImage));
@@ -2539,7 +2542,10 @@ namespace TunaSweeperEditorSetup
 
 		if (LogoTexture)
 		{
-			LogoImage->SetBrushFromTexture(LogoTexture, true);
+			LogoImage->SetBrushFromTexture(LogoTexture, false);
+			FSlateBrush LogoBrush = LogoImage->GetBrush();
+			LogoBrush.SetImageSize(FVector2D(400.0f, 162.0f));
+			LogoImage->SetBrush(LogoBrush);
 		}
 		LogoImage->SetColorAndOpacity(FLinearColor::White);
 		UCanvasPanelSlot* LogoSlot = RootCanvas->AddChildToCanvas(LogoImage);
@@ -7221,7 +7227,9 @@ public:
 			}
 		}
 
-		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperRebuildExperimentalVegetation")))
+		FString ExperimentalVegetationPaintSource;
+		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperRebuildExperimentalVegetation")) ||
+			FParse::Value(FCommandLine::Get(), TEXT("TunaSweeperExperimentalVegetationPaintSource="), ExperimentalVegetationPaintSource))
 		{
 			if (TunaSweeperExperimentalVegetation::EnsureExperimentalVegetationAssets())
 			{

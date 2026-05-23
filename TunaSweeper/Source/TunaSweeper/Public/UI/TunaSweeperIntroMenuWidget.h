@@ -19,7 +19,11 @@ class TUNASWEEPER_API UTunaSweeperIntroMenuWidget : public UUserWidget
 {
 	GENERATED_BODY()
 
+public:
+	void PrepareForInitialViewport();
+
 protected:
+	virtual void NativePreConstruct() override;
 	virtual void NativeConstruct() override;
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 	virtual FReply NativeOnPreviewKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent) override;
@@ -262,6 +266,7 @@ private:
 	void SetDeleteHoldProgress(float Progress);
 	void ShowDeleteConfirmDialog();
 	void HideDeleteConfirmDialog();
+	void ResetTitleViewportLayoutState();
 	void EnsureTitleWindParticleOverlay();
 	void ApplyTitleMenuButtonContentLayout();
 	UWidget* BuildTitleMenuButtonContent(
@@ -281,6 +286,7 @@ private:
 	bool bDeleteHoldActive = false;
 	bool bDeleteConfirmVisible = false;
 	bool bStartTravelPending = false;
+	bool bTitleMenuButtonContentLayoutApplied = false;
 	FName PendingStartTargetLevelName = NAME_None;
 	FTimerHandle StartTravelTimerHandle;
 

@@ -113,6 +113,7 @@ private:
 	void EnsureGameHudWidget();
 	void EnsureIntroMenuWidget();
 	void EnsureScenarioPresentationWidget();
+	void ApplyInitialTitleDisplaySettings();
 	void ApplyLevelBgmState();
 	bool ShowBunkerEntryFadeIfNeeded();
 	void MaybeStartCanBotIntroDialogue();

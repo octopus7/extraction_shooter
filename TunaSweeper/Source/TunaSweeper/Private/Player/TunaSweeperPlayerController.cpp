@@ -9,10 +9,12 @@
 #include "Components/PrimitiveComponent.h"
 #include "EnhancedInputComponent.h"
 #include "Engine/GameInstance.h"
+#include "Engine/Engine.h"
 #include "Engine/OverlapResult.h"
 #include "Engine/World.h"
 #include "EngineUtils.h"
 #include "Game/TunaSweeperGameInstance.h"
+#include "GameFramework/GameUserSettings.h"
 #include "GameFramework/Pawn.h"
 #include "Interaction/TunaSweeperPickupItemActor.h"
 #include "InputAction.h"
@@ -229,7 +231,16 @@ void ATunaSweeperPlayerController::BeginPlay()
 
 	if (IsIntroMap())
 	{
-		EnsureIntroMenuWidget();
+		ApplyInitialTitleDisplaySettings();
+		if (GetWorld())
+		{
+			GetWorldTimerManager().SetTimerForNextTick(
+				FTimerDelegate::CreateUObject(this, &ATunaSweeperPlayerController::EnsureIntroMenuWidget));
+		}
+		else
+		{
+			EnsureIntroMenuWidget();
+		}
 	}
 	else if (IsOpeningScenarioMap())
 	{
@@ -254,6 +265,23 @@ void ATunaSweeperPlayerController::BeginPlay()
 			MaybeStartCanBotIntroDialogue();
 		}
 	}
+}
+
+void ATunaSweeperPlayerController::ApplyInitialTitleDisplaySettings()
+{
+	if (!IsLocalController() || !GEngine)
+	{
+		return;
+	}
+
+	UGameUserSettings* GameUserSettings = GEngine->GetGameUserSettings();
+	if (!GameUserSettings)
+	{
+		return;
+	}
+
+	GameUserSettings->LoadSettings(false);
+	GameUserSettings->ApplySettings(false);
 }
 
 void ATunaSweeperPlayerController::ApplyLevelBgmState()
@@ -388,7 +416,9 @@ void ATunaSweeperPlayerController::EnsureIntroMenuWidget()
 	IntroMenuWidget = CreateWidget<UTunaSweeperIntroMenuWidget>(this, LoadedIntroMenuWidgetClass);
 	if (IntroMenuWidget)
 	{
+		IntroMenuWidget->PrepareForInitialViewport();
 		IntroMenuWidget->AddToViewport(50);
+		IntroMenuWidget->ForceLayoutPrepass();
 		ScreenFadeWidget = CreateWidget<UTunaSweeperScreenFadeWidget>(
 			this,
 			UTunaSweeperScreenFadeWidget::StaticClass());

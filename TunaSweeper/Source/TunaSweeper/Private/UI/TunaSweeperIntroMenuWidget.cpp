@@ -20,15 +20,34 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
+#include "Slate/WidgetTransform.h"
 #include "Subsystem/TunaSweeperBgmSubsystem.h"
 #include "TimerManager.h"
 #include "UI/TunaSweeperScreenFadeWidget.h"
 #include "UI/TunaSweeperTitleWindParticleWidget.h"
 #include "UI/TunaSweeperUIFont.h"
 
+void UTunaSweeperIntroMenuWidget::PrepareForInitialViewport()
+{
+	ResetTitleViewportLayoutState();
+	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
+	ApplyTitleMenuButtonContentLayout();
+	EnsureAlwaysNewStartButton();
+	EnsureTitleWindParticleOverlay();
+	InvalidateLayoutAndVolatility();
+	ForceLayoutPrepass();
+}
+
+void UTunaSweeperIntroMenuWidget::NativePreConstruct()
+{
+	Super::NativePreConstruct();
+	ResetTitleViewportLayoutState();
+}
+
 void UTunaSweeperIntroMenuWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
+	ResetTitleViewportLayoutState();
 	SetIsFocusable(true);
 	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
 	EnsureTitleWindParticleOverlay();
@@ -195,6 +214,8 @@ void UTunaSweeperIntroMenuWidget::NativeConstruct()
 	HideDeleteConfirmDialog();
 	HideOverlayPanels();
 	ShowMainMenu();
+	InvalidateLayoutAndVolatility();
+	ForceLayoutPrepass();
 }
 
 FReply UTunaSweeperIntroMenuWidget::NativeOnPreviewKeyDown(
@@ -1104,9 +1125,33 @@ void UTunaSweeperIntroMenuWidget::HideDeleteConfirmDialog()
 	}
 }
 
+void UTunaSweeperIntroMenuWidget::ResetTitleViewportLayoutState()
+{
+	auto ResetWidgetTransform = [](UWidget* Widget)
+	{
+		if (!Widget)
+		{
+			return;
+		}
+
+		Widget->SetRenderTransform(FWidgetTransform());
+		Widget->SetRenderTransformPivot(FVector2D::ZeroVector);
+		Widget->SetRenderScale(FVector2D::UnitVector);
+	};
+
+	ResetWidgetTransform(this);
+	ResetWidgetTransform(GetRootWidget());
+	ResetWidgetTransform(MainMenuPanel.Get());
+	ResetWidgetTransform(SaveSlotPanel.Get());
+	ResetWidgetTransform(SettingsPanel.Get());
+	ResetWidgetTransform(CreditsPanel.Get());
+
+	InvalidateLayoutAndVolatility();
+}
+
 void UTunaSweeperIntroMenuWidget::ApplyTitleMenuButtonContentLayout()
 {
-	if (!WidgetTree)
+	if (bTitleMenuButtonContentLayoutApplied || !WidgetTree)
 	{
 		return;
 	}
@@ -1171,6 +1216,8 @@ void UTunaSweeperIntroMenuWidget::ApplyTitleMenuButtonContentLayout()
 		nullptr,
 		FText::FromString(TEXT("\uC885\uB8CC")),
 		false);
+
+	bTitleMenuButtonContentLayoutApplied = true;
 }
 
 UWidget* UTunaSweeperIntroMenuWidget::BuildTitleMenuButtonContent(

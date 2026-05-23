@@ -648,3 +648,9 @@ A. 먼저 화면의 `[Vision v4] Debug active` 메시지에서 `mask`, `alpha`, 
 Q. 애초에 플레이어가 없는데 왜 시야 컴포넌트가 호출되는가?
 
 A. `DefaultEngine.ini`의 `GlobalDefaultGameMode`가 모든 맵에서 같은 `BP_TunaSweeperGameMode`를 쓰고, 네이티브 `ATunaSweeperGameMode` 기본값이 `DefaultPawnClass = ATunaSweeperTopDownCharacter`라서 `IntroMap`에서도 기본 Pawn과 그 컴포넌트가 생성될 수 있다. 따라서 시야 시스템은 Pawn 존재 여부만 보지 말고 `BunkerMap`/`RaidMap`인지, 그리고 로컬 PlayerController가 실제로 Possess 중인 Pawn인지까지 확인해야 한다.
+
+## 2026-05-24 03:04:00 (소요시간: 1분 미만)
+
+Q. 코드로 생성된 이미지를 텍스처로 가져올 수 있는가? 식생 생성은 모델로 마스크를 먼저 만들고 그걸 기반으로 Imagegen을 하는 방식과, Imagegen 결과를 기반으로 모델 셰이프를 검출하는 방식 중 어느 쪽이 좋은가?
+
+A. 코드 생성 이미지는 텍스처로 가져올 수 있다. 현재 방식처럼 에디터 코드에서 `UTexture2D::Source.Init`로 바로 에셋을 만들 수도 있고, PNG로 저장한 뒤 임포트할 수도 있다. 품질과 제어를 모두 보려면 모델/절차 skeleton에서 깨끗한 마스크와 UV 가이드를 먼저 만들고, Imagegen은 그 안의 잎 결, 색, 미세 형태를 채우게 한 다음, 최종 메시 셰이프는 원본 절차 마스크 또는 정리된 alpha에서 검출하는 하이브리드가 가장 안정적이다. Imagegen 결과만으로 셰이프를 검출하면 자연스러운 실루엣은 얻기 쉽지만 구멍, 노이즈, 끊어진 잎, 비결정성이 생겨 메시 품질 관리가 어렵다.
