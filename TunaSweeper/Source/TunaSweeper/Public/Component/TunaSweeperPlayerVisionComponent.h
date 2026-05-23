@@ -33,7 +33,7 @@ struct TUNASWEEPER_API FTunaSweeperPlayerVisionSettings
 	float RayAngleStepDegrees = 1.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Vision", meta = (ClampMin = "1", ClampMax = "16", UIMin = "1", UIMax = "16"))
-	int32 MaskDownsampleFactor = 4;
+	int32 MaskDownsampleFactor = 2;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Vision", meta = (ClampMin = "0", ClampMax = "16", UIMin = "0", UIMax = "16"))
 	int32 BlurRadius = 2;
@@ -42,7 +42,7 @@ struct TUNASWEEPER_API FTunaSweeperPlayerVisionSettings
 	float UpdateIntervalSeconds = 0.05f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Vision", meta = (ClampMin = "0", ClampMax = "255", UIMin = "0", UIMax = "255"))
-	int32 HiddenMaskAlpha = 220;
+	int32 HiddenMaskAlpha = 77;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Vision")
 	TEnumAsByte<ECollisionChannel> TraceChannel = ECC_Visibility;
@@ -90,6 +90,7 @@ protected:
 
 private:
 	APlayerController* ResolveLocalPlayerController() const;
+	bool IsVisionWorldEnabled() const;
 	bool ShouldUpdateVision() const;
 	bool IsVisionDebugEnabled() const;
 	void EnsureOverlayWidget(APlayerController* PlayerController);

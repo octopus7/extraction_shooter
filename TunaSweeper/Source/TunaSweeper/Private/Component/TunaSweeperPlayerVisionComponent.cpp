@@ -20,11 +20,249 @@ namespace TunaSweeperVision
 	constexpr float LegacyDefaultSightDistance = 1800.0f;
 	constexpr float FramedDefaultAlwaysVisibleRadius = 100.0f;
 	constexpr float LegacyDefaultAlwaysVisibleRadius = 200.0f;
+	constexpr int32 FramedMaskDownsampleFactor = 2;
+	constexpr int32 LegacyMaskDownsampleFactor = 4;
+	constexpr int32 FramedHiddenMaskAlpha = 77;
+	constexpr int32 LegacyHiddenMaskAlpha = 220;
+	constexpr float MaskFeatherPixels = 18.0f;
+
+	struct FMaskBoundaryPoint
+	{
+		FVector2D Visible = FVector2D::ZeroVector;
+		FVector2D Feather = FVector2D::ZeroVector;
+		FVector2D Border = FVector2D::ZeroVector;
+		bool bValid = false;
+	};
+
+	FVector2D FindViewportRayBorderPoint(const FVector2D& Origin, const FVector2D& Direction, const FIntPoint& InViewportSize)
+	{
+		float BestT = TNumericLimits<float>::Max();
+
+		auto TestT = [&BestT](float T)
+		{
+			if (T >= 0.0f)
+			{
+				BestT = FMath::Min(BestT, T);
+			}
+		};
+
+		if (!FMath::IsNearlyZero(Direction.X))
+		{
+			TestT((0.0f - Origin.X) / Direction.X);
+			TestT((static_cast<float>(InViewportSize.X) - Origin.X) / Direction.X);
+		}
+		if (!FMath::IsNearlyZero(Direction.Y))
+		{
+			TestT((0.0f - Origin.Y) / Direction.Y);
+			TestT((static_cast<float>(InViewportSize.Y) - Origin.Y) / Direction.Y);
+		}
+
+		if (BestT == TNumericLimits<float>::Max())
+		{
+			return Origin;
+		}
+
+		const FVector2D BorderPoint = Origin + Direction * BestT;
+		return FVector2D(
+			FMath::Clamp(BorderPoint.X, 0.0f, static_cast<float>(InViewportSize.X)),
+			FMath::Clamp(BorderPoint.Y, 0.0f, static_cast<float>(InViewportSize.Y)));
+	}
+
+	float SampleVisibleDistanceForRelativeAngle(
+		float RelativeAngleDegrees,
+		float HalfFieldOfViewDegrees,
+		float RayAngleStepDegrees,
+		float AlwaysVisibleRadius,
+		const TArray<float>& RayDistances)
+	{
+		if (FMath::Abs(RelativeAngleDegrees) > HalfFieldOfViewDegrees || RayDistances.IsEmpty())
+		{
+			return AlwaysVisibleRadius;
+		}
+
+		const float RayPosition =
+			(RelativeAngleDegrees + HalfFieldOfViewDegrees) / FMath::Max(0.1f, RayAngleStepDegrees);
+		const int32 RayIndexA = FMath::Clamp(FMath::FloorToInt(RayPosition), 0, RayDistances.Num() - 1);
+		const int32 RayIndexB = FMath::Clamp(RayIndexA + 1, 0, RayDistances.Num() - 1);
+		const float RayAlpha = FMath::Frac(RayPosition);
+		return FMath::Max(AlwaysVisibleRadius, FMath::Lerp(RayDistances[RayIndexA], RayDistances[RayIndexB], RayAlpha));
+	}
+
+	FMaskBoundaryPoint BuildMaskBoundaryPoint(
+		APlayerController* PlayerController,
+		const FVector& TraceOrigin,
+		const FVector2D& PlayerScreenPosition,
+		float WorldYawDegrees,
+		float VisibleDistance,
+		const FIntPoint& InViewportSize)
+	{
+		FMaskBoundaryPoint BoundaryPoint;
+		if (!PlayerController || InViewportSize.X <= 0 || InViewportSize.Y <= 0)
+		{
+			return BoundaryPoint;
+		}
+
+		const float WorldYawRadians = FMath::DegreesToRadians(WorldYawDegrees);
+		const FVector WorldDirection(FMath::Cos(WorldYawRadians), FMath::Sin(WorldYawRadians), 0.0f);
+		const FVector BoundaryWorldPoint = TraceOrigin + WorldDirection * FMath::Max(0.0f, VisibleDistance);
+
+		FVector2D BoundaryScreenPosition;
+		if (!PlayerController->ProjectWorldLocationToScreen(BoundaryWorldPoint, BoundaryScreenPosition, true))
+		{
+			return BoundaryPoint;
+		}
+
+		FVector2D ScreenDirection = BoundaryScreenPosition - PlayerScreenPosition;
+		if (!ScreenDirection.Normalize())
+		{
+			return BoundaryPoint;
+		}
+
+		const FVector2D BorderPoint = FindViewportRayBorderPoint(PlayerScreenPosition, ScreenDirection, InViewportSize);
+		const float BoundaryDistance = FVector2D::Distance(PlayerScreenPosition, BoundaryScreenPosition);
+		const float BorderDistance = FVector2D::Distance(PlayerScreenPosition, BorderPoint);
+		const float VisibleScreenDistance = FMath::Min(BoundaryDistance, BorderDistance);
+		const float FeatherScreenDistance = FMath::Min(BorderDistance, VisibleScreenDistance + MaskFeatherPixels);
+
+		BoundaryPoint.Visible = PlayerScreenPosition + ScreenDirection * VisibleScreenDistance;
+		BoundaryPoint.Feather = PlayerScreenPosition + ScreenDirection * FeatherScreenDistance;
+		BoundaryPoint.Border = BorderPoint;
+		BoundaryPoint.bValid = true;
+		return BoundaryPoint;
+	}
+
+	void AddMaskQuad(
+		const FVector2D& A,
+		const FVector2D& B,
+		const FVector2D& C,
+		const FVector2D& D,
+		const FColor& ColorA,
+		const FColor& ColorB,
+		const FColor& ColorC,
+		const FColor& ColorD,
+		TArray<FTunaSweeperVisionMaskVertex>& OutVertices,
+		TArray<SlateIndex>& OutIndices)
+	{
+		const int32 BaseIndex = OutVertices.Num();
+		const int64 MaxSlateIndex = static_cast<int64>(TNumericLimits<SlateIndex>::Max());
+		if (static_cast<int64>(BaseIndex) > MaxSlateIndex - 4)
+		{
+			return;
+		}
+
+		OutVertices.Add({ A, ColorA });
+		OutVertices.Add({ B, ColorB });
+		OutVertices.Add({ C, ColorC });
+		OutVertices.Add({ D, ColorD });
+
+		OutIndices.Add(static_cast<SlateIndex>(BaseIndex + 0));
+		OutIndices.Add(static_cast<SlateIndex>(BaseIndex + 1));
+		OutIndices.Add(static_cast<SlateIndex>(BaseIndex + 2));
+		OutIndices.Add(static_cast<SlateIndex>(BaseIndex + 0));
+		OutIndices.Add(static_cast<SlateIndex>(BaseIndex + 2));
+		OutIndices.Add(static_cast<SlateIndex>(BaseIndex + 3));
+	}
+
+	int32 BuildHiddenMaskMeshFromView(
+		APlayerController* PlayerController,
+		const FTunaSweeperPlayerVisionSettings& VisionSettings,
+		const TArray<float>& RayDistances,
+		const FVector& TraceOrigin,
+		float FacingYawDegrees,
+		float RayAngleStepDegrees,
+		const FIntPoint& InViewportSize,
+		TArray<FTunaSweeperVisionMaskVertex>& OutVertices,
+		TArray<SlateIndex>& OutIndices)
+	{
+		OutVertices.Reset();
+		OutIndices.Reset();
+		if (!PlayerController || RayDistances.IsEmpty() || InViewportSize.X <= 0 || InViewportSize.Y <= 0)
+		{
+			return 0;
+		}
+
+		FVector2D PlayerScreenPosition;
+		if (!PlayerController->ProjectWorldLocationToScreen(TraceOrigin, PlayerScreenPosition, true))
+		{
+			return 0;
+		}
+
+		const float AlwaysVisibleRadius = FMath::Max(0.0f, VisionSettings.AlwaysVisibleRadius);
+		const float HalfFieldOfViewDegrees = FMath::Clamp(VisionSettings.FieldOfViewDegrees, 1.0f, 360.0f) * 0.5f;
+		const int32 BoundarySegmentCount = FMath::Clamp(
+			FMath::CeilToInt(360.0f / FMath::Max(1.0f, RayAngleStepDegrees)),
+			72,
+			360);
+		const float BoundaryAngleStepDegrees = 360.0f / static_cast<float>(BoundarySegmentCount);
+		const uint8 HiddenAlpha = static_cast<uint8>(FMath::Clamp(VisionSettings.HiddenMaskAlpha, 0, 255));
+		const FColor MaskColor(0, 0, 0, HiddenAlpha);
+		const FColor TransparentColor(0, 0, 0, 0);
+
+		TArray<FMaskBoundaryPoint> BoundaryPoints;
+		BoundaryPoints.SetNum(BoundarySegmentCount);
+		for (int32 BoundaryIndex = 0; BoundaryIndex < BoundarySegmentCount; ++BoundaryIndex)
+		{
+			const float RelativeAngleDegrees =
+				-180.0f + static_cast<float>(BoundaryIndex) * BoundaryAngleStepDegrees;
+			const float VisibleDistance = SampleVisibleDistanceForRelativeAngle(
+				RelativeAngleDegrees,
+				HalfFieldOfViewDegrees,
+				RayAngleStepDegrees,
+				AlwaysVisibleRadius,
+				RayDistances);
+			BoundaryPoints[BoundaryIndex] = BuildMaskBoundaryPoint(
+				PlayerController,
+				TraceOrigin,
+				PlayerScreenPosition,
+				FacingYawDegrees + RelativeAngleDegrees,
+				VisibleDistance,
+				InViewportSize);
+		}
+
+		OutVertices.Reserve(BoundarySegmentCount * 8);
+		OutIndices.Reserve(BoundarySegmentCount * 12);
+		for (int32 BoundaryIndex = 0; BoundaryIndex < BoundarySegmentCount; ++BoundaryIndex)
+		{
+			const FMaskBoundaryPoint& Current = BoundaryPoints[BoundaryIndex];
+			const FMaskBoundaryPoint& Next = BoundaryPoints[(BoundaryIndex + 1) % BoundarySegmentCount];
+			if (!Current.bValid || !Next.bValid)
+			{
+				continue;
+			}
+
+			AddMaskQuad(
+				Current.Visible,
+				Next.Visible,
+				Next.Feather,
+				Current.Feather,
+				TransparentColor,
+				TransparentColor,
+				MaskColor,
+				MaskColor,
+				OutVertices,
+				OutIndices);
+			AddMaskQuad(
+				Current.Feather,
+				Next.Feather,
+				Next.Border,
+				Current.Border,
+				MaskColor,
+				MaskColor,
+				MaskColor,
+				MaskColor,
+				OutVertices,
+				OutIndices);
+		}
+
+		return OutIndices.Num() / 3;
+	}
 }
 
 UTunaSweeperPlayerVisionComponent::UTunaSweeperPlayerVisionComponent()
 {
+	bAutoActivate = true;
 	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bStartWithTickEnabled = true;
 	PrimaryComponentTick.TickGroup = TG_PostUpdateWork;
 }
 
@@ -40,6 +278,14 @@ void UTunaSweeperPlayerVisionComponent::BeginPlay()
 	if (FMath::IsNearlyEqual(VisionSettings.AlwaysVisibleRadius, TunaSweeperVision::LegacyDefaultAlwaysVisibleRadius))
 	{
 		VisionSettings.AlwaysVisibleRadius = TunaSweeperVision::FramedDefaultAlwaysVisibleRadius;
+	}
+	if (VisionSettings.MaskDownsampleFactor == TunaSweeperVision::LegacyMaskDownsampleFactor)
+	{
+		VisionSettings.MaskDownsampleFactor = TunaSweeperVision::FramedMaskDownsampleFactor;
+	}
+	if (VisionSettings.HiddenMaskAlpha == TunaSweeperVision::LegacyHiddenMaskAlpha)
+	{
+		VisionSettings.HiddenMaskAlpha = TunaSweeperVision::FramedHiddenMaskAlpha;
 	}
 	TimeSinceLastMaskUpdate = VisionSettings.UpdateIntervalSeconds;
 }
@@ -62,6 +308,42 @@ void UTunaSweeperPlayerVisionComponent::TickComponent(
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	if (!IsVisionWorldEnabled())
+	{
+		if (VisionMaskWidget)
+		{
+			VisionMaskWidget->SetMaskVisible(false);
+		}
+		return;
+	}
+
+	APlayerController* PlayerController = ResolveLocalPlayerController();
+	if (!PlayerController)
+	{
+		if (VisionMaskWidget)
+		{
+			VisionMaskWidget->SetMaskVisible(false);
+		}
+		if (IsVisionDebugEnabled())
+		{
+			const APawn* OwnerPawn = Cast<APawn>(GetOwner());
+			const AController* OwnerController = OwnerPawn ? OwnerPawn->GetController() : nullptr;
+			const UWorld* World = GetWorld();
+			const APlayerController* FirstPlayerController = World ? World->GetFirstPlayerController() : nullptr;
+			const APawn* FirstPlayerPawn = FirstPlayerController ? FirstPlayerController->GetPawn() : nullptr;
+			ShowVisionDebugStatus(FString::Printf(
+				TEXT("[Vision] v2 no local gameplay pawn | owner=%s ownerClass=%s controller=%s controllerClass=%s firstPC=%s firstPawn=%s"),
+				GetOwner() ? *GetOwner()->GetName() : TEXT("None"),
+				GetOwner() ? *GetOwner()->GetClass()->GetName() : TEXT("None"),
+				OwnerController ? *OwnerController->GetName() : TEXT("None"),
+				OwnerController ? *OwnerController->GetClass()->GetName() : TEXT("None"),
+				FirstPlayerController ? *FirstPlayerController->GetName() : TEXT("None"),
+				FirstPlayerPawn ? *FirstPlayerPawn->GetName() : TEXT("None")),
+				FColor::Red);
+		}
+		return;
+	}
+
 	if (IsVisionDebugEnabled())
 	{
 		DrawVisionDebugRangeWires();
@@ -69,6 +351,39 @@ void UTunaSweeperPlayerVisionComponent::TickComponent(
 	}
 
 	if (!ShouldUpdateVision())
+	{
+		if (IsVisionDebugEnabled())
+		{
+			ShowVisionDebugStatus(FString::Printf(
+				TEXT("[Vision] v1 update skipped | active %s | overlay %s | debug %s"),
+				IsActive() ? TEXT("true") : TEXT("false"),
+				bRenderVisionOverlay ? TEXT("true") : TEXT("false"),
+				IsVisionDebugEnabled() ? TEXT("true") : TEXT("false")),
+				FColor::Orange);
+		}
+		if (VisionMaskWidget)
+		{
+			VisionMaskWidget->SetMaskVisible(false);
+		}
+		return;
+	}
+
+	EnsureOverlayWidget(PlayerController);
+
+	const float UpdateInterval = FMath::Max(0.0f, VisionSettings.UpdateIntervalSeconds);
+	TimeSinceLastMaskUpdate += FMath::Max(0.0f, DeltaTime);
+	if (UpdateInterval > 0.0f && TimeSinceLastMaskUpdate < UpdateInterval)
+	{
+		return;
+	}
+
+	TimeSinceLastMaskUpdate = 0.0f;
+	ForceRefreshVisionMask();
+}
+
+void UTunaSweeperPlayerVisionComponent::ForceRefreshVisionMask()
+{
+	if (!IsVisionWorldEnabled())
 	{
 		if (VisionMaskWidget)
 		{
@@ -82,45 +397,8 @@ void UTunaSweeperPlayerVisionComponent::TickComponent(
 	{
 		if (IsVisionDebugEnabled())
 		{
-			const APawn* OwnerPawn = Cast<APawn>(GetOwner());
-			const AController* OwnerController = OwnerPawn ? OwnerPawn->GetController() : nullptr;
-			const UWorld* World = GetWorld();
-			const APlayerController* FirstPlayerController = World ? World->GetFirstPlayerController() : nullptr;
-			const APawn* FirstPlayerPawn = FirstPlayerController ? FirstPlayerController->GetPawn() : nullptr;
-			ShowVisionDebugStatus(FString::Printf(
-				TEXT("[Vision v2] no player controller | owner=%s ownerClass=%s controller=%s controllerClass=%s isPC=%s firstPC=%s firstPawn=%s"),
-				GetOwner() ? *GetOwner()->GetName() : TEXT("None"),
-				GetOwner() ? *GetOwner()->GetClass()->GetName() : TEXT("None"),
-				OwnerController ? *OwnerController->GetName() : TEXT("None"),
-				OwnerController ? *OwnerController->GetClass()->GetName() : TEXT("None"),
-				OwnerController && OwnerController->IsPlayerController() ? TEXT("true") : TEXT("false"),
-				FirstPlayerController ? *FirstPlayerController->GetName() : TEXT("None"),
-				FirstPlayerPawn ? *FirstPlayerPawn->GetName() : TEXT("None")),
-				FColor::Red);
+			ShowVisionDebugStatus(TEXT("[Vision] force refresh skipped | no player controller"), FColor::Red);
 		}
-		return;
-	}
-
-	EnsureOverlayWidget(PlayerController);
-
-	const float UpdateInterval = IsVisionDebugEnabled()
-		? 0.0f
-		: FMath::Max(0.0f, VisionSettings.UpdateIntervalSeconds);
-	TimeSinceLastMaskUpdate += FMath::Max(0.0f, DeltaTime);
-	if (UpdateInterval > 0.0f && TimeSinceLastMaskUpdate < UpdateInterval)
-	{
-		return;
-	}
-
-	TimeSinceLastMaskUpdate = 0.0f;
-	ForceRefreshVisionMask();
-}
-
-void UTunaSweeperPlayerVisionComponent::ForceRefreshVisionMask()
-{
-	APlayerController* PlayerController = ResolveLocalPlayerController();
-	if (!PlayerController)
-	{
 		return;
 	}
 
@@ -136,24 +414,12 @@ void UTunaSweeperPlayerVisionComponent::ForceRefreshVisionMask()
 		return;
 	}
 
-	ConfigureOverlayWidgetForViewport(FIntPoint(ViewportX, ViewportY));
-
-	if (!EnsureMaskTexture(FIntPoint(ViewportX, ViewportY)))
-	{
-		if (IsVisionDebugEnabled())
-		{
-			ShowVisionDebugStatus(TEXT("[Vision] Debug enabled, but mask texture creation failed."), FColor::Red);
-		}
-		return;
-	}
+	ViewportSize = FIntPoint(ViewportX, ViewportY);
+	ConfigureOverlayWidgetForViewport(ViewportSize);
 
 	if (bRenderVisionOverlay)
 	{
 		EnsureOverlayWidget(PlayerController);
-		if (VisionMaskWidget)
-		{
-			VisionMaskWidget->SetMaskTexture(MaskTexture);
-		}
 	}
 
 	TArray<float> RayDistances;
@@ -164,7 +430,7 @@ void UTunaSweeperPlayerVisionComponent::ForceRefreshVisionMask()
 	{
 		if (IsVisionDebugEnabled())
 		{
-			ShowVisionDebugStatus(TEXT("[Vision v3] Debug enabled, but ray distance generation failed."), FColor::Orange);
+			ShowVisionDebugStatus(TEXT("[Vision] v3 Debug enabled, but ray distance generation failed."), FColor::Orange);
 		}
 		if (VisionMaskWidget)
 		{
@@ -173,46 +439,50 @@ void UTunaSweeperPlayerVisionComponent::ForceRefreshVisionMask()
 		return;
 	}
 
-	const int32 VisiblePixelCount = RasterizeVisionMaskFromView(
+	TArray<FTunaSweeperVisionMaskVertex> MaskVertices;
+	TArray<SlateIndex> MaskIndices;
+	const int32 MaskTriangleCount = TunaSweeperVision::BuildHiddenMaskMeshFromView(
 		PlayerController,
+		VisionSettings,
 		RayDistances,
 		TraceOrigin,
 		FacingYawDegrees,
-		RayAngleStepDegrees);
+		RayAngleStepDegrees,
+		ViewportSize,
+		MaskVertices,
+		MaskIndices);
 	if (IsVisionDebugEnabled())
 	{
 		ShowVisionDebugStatus(FString::Printf(
-			TEXT("[Vision v4] Debug active | viewport %dx%d | mask %dx%d | near %.0fcm | sight %.0fcm | rays %d | step %.2f | visible px %d | overlay %s z %d"),
+			TEXT("[Vision] v4 Debug active | viewport %dx%d | alpha %d | near %.0fcm | sight %.0fcm | rays %d | step %.2f | mask tris %d | overlay %s z %d"),
 			ViewportSize.X,
 			ViewportSize.Y,
-			MaskSize.X,
-			MaskSize.Y,
+			VisionSettings.HiddenMaskAlpha,
 			VisionSettings.AlwaysVisibleRadius,
 			VisionSettings.SightDistance,
 			RayDistances.Num(),
 			RayAngleStepDegrees,
-			VisiblePixelCount,
+			MaskTriangleCount,
 			VisionMaskWidget ? TEXT("yes") : TEXT("no"),
 			FMath::Max(OverlayZOrder, 1)));
 	}
-	if (VisiblePixelCount <= 0)
+	if (MaskTriangleCount <= 0)
 	{
 		if (IsVisionDebugEnabled())
 		{
-			ShowVisionDebugStatus(TEXT("[Vision] No visible pixels generated; hiding mask fail-open."), FColor::Orange);
+			ShowVisionDebugStatus(TEXT("[Vision] No mask triangles generated; hiding mask fail-open."), FColor::Orange);
 		}
 		if (VisionMaskWidget)
 		{
+			VisionMaskWidget->ClearMaskMesh();
 			VisionMaskWidget->SetMaskVisible(false);
 		}
 		return;
 	}
 
-	ApplyBlurToMask();
-	RebuildTexturePixels();
-	UploadMaskTexture();
 	if (bRenderVisionOverlay && VisionMaskWidget)
 	{
+		VisionMaskWidget->SetMaskMesh(MoveTemp(MaskVertices), MoveTemp(MaskIndices));
 		VisionMaskWidget->SetMaskVisible(true);
 	}
 }
@@ -225,10 +495,17 @@ APlayerController* UTunaSweeperPlayerVisionComponent::ResolveLocalPlayerControll
 		return nullptr;
 	}
 
+	auto IsLocalGameplayControllerForOwner = [OwnerPawn](const APlayerController* CandidatePlayerController)
+	{
+		return CandidatePlayerController &&
+			CandidatePlayerController->IsLocalController() &&
+			CandidatePlayerController->GetPawn() == OwnerPawn;
+	};
+
 	AController* OwnerController = OwnerPawn->GetController();
 	if (APlayerController* OwnerPlayerController = Cast<APlayerController>(OwnerController))
 	{
-		return OwnerPlayerController;
+		return IsLocalGameplayControllerForOwner(OwnerPlayerController) ? OwnerPlayerController : nullptr;
 	}
 
 	const UWorld* World = GetWorld();
@@ -237,25 +514,31 @@ APlayerController* UTunaSweeperPlayerVisionComponent::ResolveLocalPlayerControll
 		for (FConstPlayerControllerIterator ControllerIt = World->GetPlayerControllerIterator(); ControllerIt; ++ControllerIt)
 		{
 			APlayerController* CandidatePlayerController = ControllerIt->Get();
-			if (CandidatePlayerController &&
-				(CandidatePlayerController == OwnerController || CandidatePlayerController->GetPawn() == OwnerPawn))
+			if (IsLocalGameplayControllerForOwner(CandidatePlayerController))
 			{
 				return CandidatePlayerController;
 			}
 		}
 	}
 
-	if (OwnerController && OwnerController->IsPlayerController())
+	return nullptr;
+}
+
+bool UTunaSweeperPlayerVisionComponent::IsVisionWorldEnabled() const
+{
+	const UWorld* World = GetWorld();
+	if (!World || !World->IsGameWorld())
 	{
-		return static_cast<APlayerController*>(OwnerController);
+		return false;
 	}
 
-	return nullptr;
+	const FString MapName = World->GetMapName();
+	return MapName.EndsWith(TEXT("BunkerMap")) || MapName.EndsWith(TEXT("RaidMap"));
 }
 
 bool UTunaSweeperPlayerVisionComponent::ShouldUpdateVision() const
 {
-	return IsActive() && (bRenderVisionOverlay || IsVisionDebugEnabled());
+	return bRenderVisionOverlay || IsVisionDebugEnabled();
 }
 
 bool UTunaSweeperPlayerVisionComponent::IsVisionDebugEnabled() const
@@ -800,11 +1083,6 @@ void UTunaSweeperPlayerVisionComponent::DrawVisionDebugBounds(
 
 void UTunaSweeperPlayerVisionComponent::ShowVisionDebugStatus(const FString& StatusText, FColor TextColor) const
 {
-	if (!bShowDebugStatusMessage)
-	{
-		return;
-	}
-
 	const UWorld* World = GetWorld();
 	const double CurrentTimeSeconds = World ? World->GetTimeSeconds() : FPlatformTime::Seconds();
 	if (CurrentTimeSeconds - LastDebugStatusTimeSeconds < 0.5)
@@ -814,7 +1092,7 @@ void UTunaSweeperPlayerVisionComponent::ShowVisionDebugStatus(const FString& Sta
 
 	LastDebugStatusTimeSeconds = CurrentTimeSeconds;
 	UE_LOG(LogTunaSweeperPlayerVision, Log, TEXT("%s"), *StatusText);
-	if (GEngine)
+	if (bShowDebugStatusMessage && GEngine)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 0.75f, TextColor, StatusText);
 	}

@@ -636,3 +636,15 @@ A. SOG scale decode 자체는 Unity-SOG plugin과 동일하게 log-scale에 exp�
 Q. 선명해지긴 했지만 UE SOG 색이 왜 붕 뜨고 밝아졌는가?
 
 A. 색 캐시를 float로 바꾸면서 `sh0 * SH_C0 + 0.5` 값을 Unity shader 입력값처럼 그대로 UE unlit/emissive에 넣었기 때문이다. UE의 AlphaComposite/emissive 경로에서는 이 값이 선형 방출색으로 처리되어 더 밝고 떠 보일 수 있으므로, 색 정밀도는 유지하되 렌더 색은 다시 UE 선형 렌더링에 맞게 조정해야 한다.
+
+## 2026-05-24 02:02:52 (소요시간: 1분 미만)
+
+Q. 시야 마스크 오버레이가 여전히 안 보이는데 무엇을 확인해야 하나?
+
+A. 먼저 화면의 `[Vision v4] Debug active` 메시지에서 `mask`, `alpha`, `visible px`, `overlay yes/no` 값을 확인해야 한다. `visible px`가 0이면 마스크 계산 문제이고, `overlay no`면 위젯 생성 문제다. 값이 정상인데도 안 보이면 위젯 paint/texture upload 경로 문제이므로 강제 테스트 텍스처나 전체 화면 반투명 박스를 먼저 그려 위젯 렌더링 자체를 확인해야 한다.
+
+## 2026-05-24 02:24:11 (소요시간: 1분 미만)
+
+Q. 애초에 플레이어가 없는데 왜 시야 컴포넌트가 호출되는가?
+
+A. `DefaultEngine.ini`의 `GlobalDefaultGameMode`가 모든 맵에서 같은 `BP_TunaSweeperGameMode`를 쓰고, 네이티브 `ATunaSweeperGameMode` 기본값이 `DefaultPawnClass = ATunaSweeperTopDownCharacter`라서 `IntroMap`에서도 기본 Pawn과 그 컴포넌트가 생성될 수 있다. 따라서 시야 시스템은 Pawn 존재 여부만 보지 말고 `BunkerMap`/`RaidMap`인지, 그리고 로컬 PlayerController가 실제로 Possess 중인 Pawn인지까지 확인해야 한다.
