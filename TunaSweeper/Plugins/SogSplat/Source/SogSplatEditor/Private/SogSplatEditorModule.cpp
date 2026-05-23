@@ -133,6 +133,14 @@ UMaterialInterface* SogSplatEditorUtils::EnsureDefaultSogMaterial()
 	Intensity->MaterialExpressionEditorY = 80;
 	Material->GetExpressionCollection().AddExpression(Intensity);
 
+	UMaterialExpressionScalarParameter* ColorGamma = NewObject<UMaterialExpressionScalarParameter>(Material);
+	ColorGamma->Material = Material;
+	ColorGamma->ParameterName = TEXT("ColorGamma");
+	ColorGamma->DefaultValue = 2.2f;
+	ColorGamma->MaterialExpressionEditorX = -680;
+	ColorGamma->MaterialExpressionEditorY = 220;
+	Material->GetExpressionCollection().AddExpression(ColorGamma);
+
 	UMaterialExpressionTextureCoordinate* TextureCoordinate = NewObject<UMaterialExpressionTextureCoordinate>(Material);
 	TextureCoordinate->Material = Material;
 	TextureCoordinate->CoordinateIndex = 0;
@@ -166,7 +174,9 @@ UMaterialInterface* SogSplatEditorUtils::EnsureDefaultSogMaterial()
 	SogColor->Material = Material;
 	SogColor->Description = TEXT("SOG linear color");
 	SogColor->OutputType = CMOT_Float3;
-	SogColor->Code = TEXT("return float3(ColorRG.x, ColorRG.y, ColorBA.x);");
+	SogColor->Code =
+		TEXT("float3 color = saturate(float3(ColorRG.x, ColorRG.y, ColorBA.x));\n")
+		TEXT("return pow(color, max(ColorGamma, 0.0001f));");
 
 	FCustomInput ColorRGInput;
 	ColorRGInput.InputName = TEXT("ColorRG");
@@ -177,6 +187,11 @@ UMaterialInterface* SogSplatEditorUtils::EnsureDefaultSogMaterial()
 	ColorBAInput.InputName = TEXT("ColorBA");
 	ColorBAInput.Input.Connect(0, ColorBACoordinate);
 	SogColor->Inputs.Add(ColorBAInput);
+
+	FCustomInput ColorGammaInput;
+	ColorGammaInput.InputName = TEXT("ColorGamma");
+	ColorGammaInput.Input.Connect(0, ColorGamma);
+	SogColor->Inputs.Add(ColorGammaInput);
 
 	SogColor->MaterialExpressionEditorX = -320;
 	SogColor->MaterialExpressionEditorY = -80;

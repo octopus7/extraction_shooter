@@ -631,3 +631,8 @@ A. 쓰이지만 게임 개발 맥락에서는 의미가 조금 좁거나 2D처�
 Q. 같은 SOG 파일을 Unity에서 렌더링하면 선명한데 UE 쪽은 왜 뭉개지고 흰 찌꺼기가 보이는가?
 
 A. SOG scale decode 자체는 Unity-SOG plugin과 동일하게 log-scale에 exp를 적용하는 방식이 맞다. 차이는 UE 기본 머티리얼이 UV 원형 마스크에 `GaussianSigmaRadius`/`EdgeFade`를 적용해 UnityGaussianSplatting의 `exp(-dot(pos,pos))` 방식보다 넓고 흐린 알파를 만들던 점이다. 따라서 기본 머티리얼을 Unity 방식의 premultiplied alpha 마스크와 `1/255` clip으로 재생성하도록 수정했다.
+## 2026-05-23 08:06:33 (소요시간: 1분 미만)
+
+Q. 선명해지긴 했지만 UE SOG 색이 왜 붕 뜨고 밝아졌는가?
+
+A. 색 캐시를 float로 바꾸면서 `sh0 * SH_C0 + 0.5` 값을 Unity shader 입력값처럼 그대로 UE unlit/emissive에 넣었기 때문이다. UE의 AlphaComposite/emissive 경로에서는 이 값이 선형 방출색으로 처리되어 더 밝고 떠 보일 수 있으므로, 색 정밀도는 유지하되 렌더 색은 다시 UE 선형 렌더링에 맞게 조정해야 한다.
