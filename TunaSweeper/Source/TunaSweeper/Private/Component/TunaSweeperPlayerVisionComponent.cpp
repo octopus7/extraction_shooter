@@ -34,12 +34,60 @@ namespace TunaSweeperVision
 		bool bValid = false;
 	};
 
+	struct FWorldLockedRayAngle
+	{
+		float WorldYawDegrees = 0.0f;
+		float RelativeAngleDegrees = 0.0f;
+	};
+
 	float GetDebugVisibleRayPulseFraction(const UWorld* World)
 	{
 		const float TimeSeconds = World ? World->GetTimeSeconds() : 0.0f;
 		const float PulseAlpha = 0.5f + 0.5f * FMath::Sin(
 			TimeSeconds * (2.0f * PI / DebugVisibleRayPulsePeriodSeconds));
 		return FMath::Lerp(DebugVisibleRayMinFraction, 1.0f, PulseAlpha);
+	}
+
+	FVector DirectionFromWorldYaw(float WorldYawDegrees)
+	{
+		const float YawRadians = FMath::DegreesToRadians(WorldYawDegrees);
+		return FVector(FMath::Cos(YawRadians), FMath::Sin(YawRadians), 0.0f);
+	}
+
+	void BuildWorldLockedRayAngles(
+		float FacingYawDegrees,
+		float FieldOfViewDegrees,
+		float RayAngleStepDegrees,
+		TArray<FWorldLockedRayAngle>& OutAngles)
+	{
+		const float HalfFieldOfViewDegrees = FMath::Clamp(FieldOfViewDegrees, 1.0f, 360.0f) * 0.5f;
+		const float SafeRayAngleStepDegrees = FMath::Clamp(RayAngleStepDegrees, 0.1f, 45.0f);
+		const float LeftYawDegrees = FacingYawDegrees - HalfFieldOfViewDegrees;
+		const float RightYawDegrees = FacingYawDegrees + HalfFieldOfViewDegrees;
+		constexpr float AngleEpsilonDegrees = 0.001f;
+		const int32 FirstGridIndex = FMath::CeilToInt((LeftYawDegrees - AngleEpsilonDegrees) / SafeRayAngleStepDegrees);
+		const int32 LastGridIndex = FMath::FloorToInt((RightYawDegrees + AngleEpsilonDegrees) / SafeRayAngleStepDegrees);
+
+		OutAngles.Reset(FMath::Max(0, LastGridIndex - FirstGridIndex + 1));
+		for (int32 GridIndex = FirstGridIndex; GridIndex <= LastGridIndex; ++GridIndex)
+		{
+			const float WorldYawDegrees = static_cast<float>(GridIndex) * SafeRayAngleStepDegrees;
+			const float RelativeAngleDegrees = FMath::FindDeltaAngleDegrees(FacingYawDegrees, WorldYawDegrees);
+			if (FMath::Abs(RelativeAngleDegrees) > HalfFieldOfViewDegrees + AngleEpsilonDegrees)
+			{
+				continue;
+			}
+
+			OutAngles.Add({
+				static_cast<float>(FRotator::NormalizeAxis(WorldYawDegrees)),
+				RelativeAngleDegrees
+			});
+		}
+
+		OutAngles.Sort([](const FWorldLockedRayAngle& A, const FWorldLockedRayAngle& B)
+		{
+			return A.RelativeAngleDegrees < B.RelativeAngleDegrees;
+		});
 	}
 
 	FVector2D FindViewportRayBorderPoint(const FVector2D& Origin, const FVector2D& Direction, const FIntPoint& InViewportSize)
@@ -79,21 +127,40 @@ namespace TunaSweeperVision
 	float SampleVisibleDistanceForRelativeAngle(
 		float RelativeAngleDegrees,
 		float HalfFieldOfViewDegrees,
-		float RayAngleStepDegrees,
 		float AlwaysVisibleRadius,
-		const TArray<float>& RayDistances)
+		const TArray<FTunaSweeperVisionRaySample>& RaySamples)
 	{
-		if (FMath::Abs(RelativeAngleDegrees) > HalfFieldOfViewDegrees || RayDistances.IsEmpty())
+		if (FMath::Abs(RelativeAngleDegrees) > HalfFieldOfViewDegrees || RaySamples.IsEmpty())
 		{
 			return AlwaysVisibleRadius;
 		}
 
-		const float RayPosition =
-			(RelativeAngleDegrees + HalfFieldOfViewDegrees) / FMath::Max(0.1f, RayAngleStepDegrees);
-		const int32 RayIndexA = FMath::Clamp(FMath::FloorToInt(RayPosition), 0, RayDistances.Num() - 1);
-		const int32 RayIndexB = FMath::Clamp(RayIndexA + 1, 0, RayDistances.Num() - 1);
-		const float RayAlpha = FMath::Frac(RayPosition);
-		return FMath::Max(AlwaysVisibleRadius, FMath::Lerp(RayDistances[RayIndexA], RayDistances[RayIndexB], RayAlpha));
+		if (RaySamples.Num() == 1 || RelativeAngleDegrees <= RaySamples[0].RelativeAngleDegrees)
+		{
+			return FMath::Max(AlwaysVisibleRadius, RaySamples[0].VisibleDistance);
+		}
+
+		const int32 LastSampleIndex = RaySamples.Num() - 1;
+		if (RelativeAngleDegrees >= RaySamples[LastSampleIndex].RelativeAngleDegrees)
+		{
+			return FMath::Max(AlwaysVisibleRadius, RaySamples[LastSampleIndex].VisibleDistance);
+		}
+
+		for (int32 SampleIndex = 0; SampleIndex < LastSampleIndex; ++SampleIndex)
+		{
+			const FTunaSweeperVisionRaySample& A = RaySamples[SampleIndex];
+			const FTunaSweeperVisionRaySample& B = RaySamples[SampleIndex + 1];
+			if (RelativeAngleDegrees < A.RelativeAngleDegrees || RelativeAngleDegrees > B.RelativeAngleDegrees)
+			{
+				continue;
+			}
+
+			const float SampleSpan = FMath::Max(KINDA_SMALL_NUMBER, B.RelativeAngleDegrees - A.RelativeAngleDegrees);
+			const float SampleAlpha = (RelativeAngleDegrees - A.RelativeAngleDegrees) / SampleSpan;
+			return FMath::Max(AlwaysVisibleRadius, FMath::Lerp(A.VisibleDistance, B.VisibleDistance, SampleAlpha));
+		}
+
+		return AlwaysVisibleRadius;
 	}
 
 	FMaskBoundaryPoint BuildMaskBoundaryPoint(
@@ -174,7 +241,7 @@ namespace TunaSweeperVision
 	int32 BuildHiddenMaskMeshFromView(
 		APlayerController* PlayerController,
 		const FTunaSweeperPlayerVisionSettings& VisionSettings,
-		const TArray<float>& RayDistances,
+		const TArray<FTunaSweeperVisionRaySample>& RaySamples,
 		const FVector& TraceOrigin,
 		float FacingYawDegrees,
 		float RayAngleStepDegrees,
@@ -184,7 +251,7 @@ namespace TunaSweeperVision
 	{
 		OutVertices.Reset();
 		OutIndices.Reset();
-		if (!PlayerController || RayDistances.IsEmpty() || InViewportSize.X <= 0 || InViewportSize.Y <= 0)
+		if (!PlayerController || RaySamples.IsEmpty() || InViewportSize.X <= 0 || InViewportSize.Y <= 0)
 		{
 			return 0;
 		}
@@ -215,9 +282,8 @@ namespace TunaSweeperVision
 			const float VisibleDistance = SampleVisibleDistanceForRelativeAngle(
 				RelativeAngleDegrees,
 				HalfFieldOfViewDegrees,
-				RayAngleStepDegrees,
 				AlwaysVisibleRadius,
-				RayDistances);
+				RaySamples);
 			BoundaryPoints[BoundaryIndex] = BuildMaskBoundaryPoint(
 				PlayerController,
 				TraceOrigin,
@@ -395,11 +461,11 @@ void UTunaSweeperPlayerVisionComponent::ForceRefreshVisionMask()
 		EnsureOverlayWidget(PlayerController);
 	}
 
-	TArray<float> RayDistances;
+	TArray<FTunaSweeperVisionRaySample> RaySamples;
 	FVector TraceOrigin = FVector::ZeroVector;
 	float FacingYawDegrees = 0.0f;
 	float RayAngleStepDegrees = 1.0f;
-	if (!BuildVisibleRayDistances(RayDistances, TraceOrigin, FacingYawDegrees, RayAngleStepDegrees))
+	if (!BuildVisibleRaySamples(RaySamples, TraceOrigin, FacingYawDegrees, RayAngleStepDegrees))
 	{
 		if (VisionMaskWidget)
 		{
@@ -413,7 +479,7 @@ void UTunaSweeperPlayerVisionComponent::ForceRefreshVisionMask()
 	const int32 MaskTriangleCount = TunaSweeperVision::BuildHiddenMaskMeshFromView(
 		PlayerController,
 		VisionSettings,
-		RayDistances,
+		RaySamples,
 		TraceOrigin,
 		FacingYawDegrees,
 		RayAngleStepDegrees,
@@ -493,7 +559,7 @@ bool UTunaSweeperPlayerVisionComponent::ShouldUpdateVision() const
 
 bool UTunaSweeperPlayerVisionComponent::IsVisionDebugEnabled() const
 {
-#if !WITH_EDITOR
+#if !ENABLE_DRAW_DEBUG
 	return false;
 #else
 	if (bEnableDebugOverride)
@@ -582,8 +648,8 @@ bool UTunaSweeperPlayerVisionComponent::EnsureMaskTexture(const FIntPoint& InVie
 	return true;
 }
 
-bool UTunaSweeperPlayerVisionComponent::BuildVisibleRayDistances(
-	TArray<float>& OutRayDistances,
+bool UTunaSweeperPlayerVisionComponent::BuildVisibleRaySamples(
+	TArray<FTunaSweeperVisionRaySample>& OutRaySamples,
 	FVector& OutTraceOrigin,
 	float& OutFacingYawDegrees,
 	float& OutRayAngleStepDegrees)
@@ -596,12 +662,7 @@ bool UTunaSweeperPlayerVisionComponent::BuildVisibleRayDistances(
 	}
 
 	const float FieldOfViewDegrees = FMath::Clamp(VisionSettings.FieldOfViewDegrees, 1.0f, 360.0f);
-	const float HalfFieldOfViewDegrees = FieldOfViewDegrees * 0.5f;
 	const float RequestedAngleStepDegrees = FMath::Clamp(VisionSettings.RayAngleStepDegrees, 0.1f, 45.0f);
-	const int32 RaySegmentCount = FMath::Max(1, FMath::CeilToInt(FieldOfViewDegrees / RequestedAngleStepDegrees));
-	const int32 RayCount = RaySegmentCount + 1;
-	const float ActualAngleStepDegrees = FieldOfViewDegrees / static_cast<float>(RaySegmentCount);
-	const float TraceDistance = FMath::Max(VisionSettings.AlwaysVisibleRadius, VisionSettings.SightDistance);
 	const FVector TraceOrigin = OwnerActor->GetActorLocation() + FVector(0.0f, 0.0f, FMath::Max(0.0f, VisionSettings.TraceHeight));
 	FVector FacingDirection = OwnerActor->GetActorForwardVector();
 	FacingDirection.Z = 0.0f;
@@ -611,26 +672,32 @@ bool UTunaSweeperPlayerVisionComponent::BuildVisibleRayDistances(
 	}
 
 	const float FacingYaw = FacingDirection.Rotation().Yaw;
+	TArray<TunaSweeperVision::FWorldLockedRayAngle> RayAngles;
+	TunaSweeperVision::BuildWorldLockedRayAngles(
+		FacingYaw,
+		FieldOfViewDegrees,
+		RequestedAngleStepDegrees,
+		RayAngles);
 
 	OutTraceOrigin = TraceOrigin;
 	OutFacingYawDegrees = FacingYaw;
-	OutRayAngleStepDegrees = ActualAngleStepDegrees;
-	OutRayDistances.Reset(RayCount);
-	for (int32 RayIndex = 0; RayIndex < RayCount; ++RayIndex)
+	OutRayAngleStepDegrees = RequestedAngleStepDegrees;
+	OutRaySamples.Reset(RayAngles.Num());
+	for (const TunaSweeperVision::FWorldLockedRayAngle& RayAngle : RayAngles)
 	{
-		const float RelativeAngleDegrees =
-			-HalfFieldOfViewDegrees + static_cast<float>(RayIndex) * ActualAngleStepDegrees;
-		FVector Direction = FacingDirection.RotateAngleAxis(RelativeAngleDegrees, FVector::UpVector);
-		Direction.Z = 0.0f;
-		Direction.Normalize();
+		const FVector Direction = TunaSweeperVision::DirectionFromWorldYaw(RayAngle.WorldYawDegrees);
 
 		FHitResult Hit;
 		const float VisibleDistance = TraceVisibleDistance(TraceOrigin, Direction, true, Hit);
 
-		OutRayDistances.Add(VisibleDistance);
+		OutRaySamples.Add({
+			RayAngle.WorldYawDegrees,
+			RayAngle.RelativeAngleDegrees,
+			VisibleDistance
+		});
 	}
 
-	return OutRayDistances.Num() == RayCount;
+	return !OutRaySamples.IsEmpty();
 }
 
 float UTunaSweeperPlayerVisionComponent::TraceVisibleDistance(
@@ -671,7 +738,7 @@ float UTunaSweeperPlayerVisionComponent::TraceVisibleDistance(
 
 int32 UTunaSweeperPlayerVisionComponent::RasterizeVisionMaskFromView(
 	APlayerController* PlayerController,
-	const TArray<float>& RayDistances,
+	const TArray<FTunaSweeperVisionRaySample>& RaySamples,
 	const FVector& TraceOrigin,
 	float FacingYawDegrees,
 	float RayAngleStepDegrees)
@@ -681,15 +748,13 @@ int32 UTunaSweeperPlayerVisionComponent::RasterizeVisionMaskFromView(
 	const uint8 HiddenAlpha = static_cast<uint8>(FMath::Clamp(VisionSettings.HiddenMaskAlpha, 0, 255));
 	VisibilityMask.Init(HiddenAlpha, Width * Height);
 
-	if (!PlayerController || RayDistances.IsEmpty() || Width <= 0 || Height <= 0 ||
+	if (!PlayerController || RaySamples.IsEmpty() || Width <= 0 || Height <= 0 ||
 		ViewportSize.X <= 0 || ViewportSize.Y <= 0)
 	{
 		return 0;
 	}
 
-	const int32 RayCount = RayDistances.Num();
 	const float HalfFieldOfViewDegrees = FMath::Clamp(VisionSettings.FieldOfViewDegrees, 1.0f, 360.0f) * 0.5f;
-	const float SafeRayAngleStepDegrees = FMath::Max(0.1f, RayAngleStepDegrees);
 	const float ViewScaleX = static_cast<float>(ViewportSize.X) / static_cast<float>(Width);
 	const float ViewScaleY = static_cast<float>(ViewportSize.Y) / static_cast<float>(Height);
 	const float EdgePadding = FMath::Max(
@@ -740,11 +805,11 @@ int32 UTunaSweeperPlayerVisionComponent::RasterizeVisionMaskFromView(
 				continue;
 			}
 
-			const float RayPosition = (RelativeAngleDegrees + HalfFieldOfViewDegrees) / SafeRayAngleStepDegrees;
-			const int32 RayIndexA = FMath::Clamp(FMath::FloorToInt(RayPosition), 0, RayCount - 1);
-			const int32 RayIndexB = FMath::Clamp(RayIndexA + 1, 0, RayCount - 1);
-			const float RayAlpha = FMath::Frac(RayPosition);
-			const float VisibleDistance = FMath::Lerp(RayDistances[RayIndexA], RayDistances[RayIndexB], RayAlpha);
+			const float VisibleDistance = TunaSweeperVision::SampleVisibleDistanceForRelativeAngle(
+				RelativeAngleDegrees,
+				HalfFieldOfViewDegrees,
+				VisionSettings.AlwaysVisibleRadius,
+				RaySamples);
 
 			if (Distance <= VisionSettings.AlwaysVisibleRadius + EdgePadding ||
 				Distance <= VisibleDistance + EdgePadding)
@@ -921,25 +986,20 @@ void UTunaSweeperPlayerVisionComponent::DrawVisionDebugInsideFieldOfView() const
 	}
 
 	const float FieldOfViewDegrees = FMath::Clamp(VisionSettings.FieldOfViewDegrees, 1.0f, 360.0f);
-	const float HalfFieldOfViewDegrees = FieldOfViewDegrees * 0.5f;
 	const float RequestedAngleStepDegrees = FMath::Clamp(VisionSettings.RayAngleStepDegrees, 0.1f, 45.0f);
-	const int32 RaySegmentCount = FMath::Max(1, FMath::CeilToInt(FieldOfViewDegrees / RequestedAngleStepDegrees));
-	const int32 RayCount = RaySegmentCount + 1;
-	const float ActualAngleStepDegrees = FieldOfViewDegrees / static_cast<float>(RaySegmentCount);
 	const float TraceDistance = FMath::Max(VisionSettings.AlwaysVisibleRadius, VisionSettings.SightDistance);
 	const FVector TraceOrigin =
 		OwnerActor->GetActorLocation() + FVector(0.0f, 0.0f, FMath::Max(0.0f, VisionSettings.TraceHeight));
+	TArray<TunaSweeperVision::FWorldLockedRayAngle> RayAngles;
+	TunaSweeperVision::BuildWorldLockedRayAngles(
+		FacingDirection.Rotation().Yaw,
+		FieldOfViewDegrees,
+		RequestedAngleStepDegrees,
+		RayAngles);
 
-	for (int32 RayIndex = 0; RayIndex < RayCount; ++RayIndex)
+	for (const TunaSweeperVision::FWorldLockedRayAngle& RayAngle : RayAngles)
 	{
-		const float RelativeAngleDegrees =
-			-HalfFieldOfViewDegrees + static_cast<float>(RayIndex) * ActualAngleStepDegrees;
-		FVector Direction = FacingDirection.RotateAngleAxis(RelativeAngleDegrees, FVector::UpVector);
-		Direction.Z = 0.0f;
-		if (!Direction.Normalize())
-		{
-			continue;
-		}
+		const FVector Direction = TunaSweeperVision::DirectionFromWorldYaw(RayAngle.WorldYawDegrees);
 
 		FHitResult Hit;
 		TraceVisibleDistance(TraceOrigin, Direction, true, Hit);

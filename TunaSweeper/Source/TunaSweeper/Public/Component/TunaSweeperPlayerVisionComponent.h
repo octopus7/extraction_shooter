@@ -9,6 +9,13 @@ class APlayerController;
 class UTexture2D;
 class UTunaSweeperVisionMaskWidget;
 
+struct FTunaSweeperVisionRaySample
+{
+	float WorldYawDegrees = 0.0f;
+	float RelativeAngleDegrees = 0.0f;
+	float VisibleDistance = 0.0f;
+};
+
 USTRUCT(BlueprintType)
 struct TUNASWEEPER_API FTunaSweeperPlayerVisionSettings
 {
@@ -92,15 +99,15 @@ private:
 	bool IsVisionDebugEnabled() const;
 	void EnsureOverlayWidget(APlayerController* PlayerController);
 	bool EnsureMaskTexture(const FIntPoint& InViewportSize);
-	bool BuildVisibleRayDistances(
-		TArray<float>& OutRayDistances,
+	bool BuildVisibleRaySamples(
+		TArray<FTunaSweeperVisionRaySample>& OutRaySamples,
 		FVector& OutTraceOrigin,
 		float& OutFacingYawDegrees,
 		float& OutRayAngleStepDegrees);
 	float TraceVisibleDistance(const FVector& TraceOrigin, const FVector& Direction, bool bInsideFieldOfView, FHitResult& OutHit) const;
 	int32 RasterizeVisionMaskFromView(
 		APlayerController* PlayerController,
-		const TArray<float>& RayDistances,
+		const TArray<FTunaSweeperVisionRaySample>& RaySamples,
 		const FVector& TraceOrigin,
 		float FacingYawDegrees,
 		float RayAngleStepDegrees);
