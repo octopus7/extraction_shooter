@@ -115,7 +115,7 @@ private:
 		const FVector& Direction,
 		float TraceDistance,
 		const FHitResult& Hit) const;
-	void DrawVisionDebugOutsideFieldOfView() const;
+	void DrawVisionDebugInsideFieldOfView() const;
 	void DrawVisionDebugRangeWires() const;
 	void DrawVisionDebugBounds(const FVector& TraceOrigin, const FVector& FacingDirection) const;
 	void ShowVisionDebugStatus(const FString& StatusText, FColor TextColor = FColor::Cyan) const;

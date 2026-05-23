@@ -63,7 +63,7 @@ void UTunaSweeperPlayerVisionComponent::TickComponent(
 	if (IsVisionDebugEnabled())
 	{
 		DrawVisionDebugRangeWires();
-		DrawVisionDebugOutsideFieldOfView();
+		DrawVisionDebugInsideFieldOfView();
 	}
 
 	if (!ShouldUpdateVision())
@@ -392,7 +392,6 @@ bool UTunaSweeperPlayerVisionComponent::BuildVisibleRayDistances(
 	}
 
 	const float FacingYaw = FacingDirection.Rotation().Yaw;
-	const bool bDebugEnabled = IsVisionDebugEnabled();
 
 	OutTraceOrigin = TraceOrigin;
 	OutFacingYawDegrees = FacingYaw;
@@ -408,17 +407,8 @@ bool UTunaSweeperPlayerVisionComponent::BuildVisibleRayDistances(
 
 		FHitResult Hit;
 		const float VisibleDistance = TraceVisibleDistance(TraceOrigin, Direction, true, Hit);
-		if (bDebugEnabled)
-		{
-			DrawVisionDebug(TraceOrigin, Direction, TraceDistance, Hit);
-		}
 
 		OutRayDistances.Add(VisibleDistance);
-	}
-
-	if (bDebugEnabled)
-	{
-		DrawVisionDebugBounds(TraceOrigin, FacingDirection);
 	}
 
 	return OutRayDistances.Num() == RayCount;
@@ -684,6 +674,51 @@ void UTunaSweeperPlayerVisionComponent::DrawVisionDebug(
 	{
 		DrawDebugPoint(World, Hit.ImpactPoint + DebugLift, 9.0f, FColor::Red, false, OneFrameLifeTime, 1);
 	}
+}
+
+void UTunaSweeperPlayerVisionComponent::DrawVisionDebugInsideFieldOfView() const
+{
+	UWorld* World = GetWorld();
+	const AActor* OwnerActor = GetOwner();
+	if (!World || !OwnerActor)
+	{
+		return;
+	}
+
+	FVector FacingDirection = OwnerActor->GetActorForwardVector();
+	FacingDirection.Z = 0.0f;
+	if (!FacingDirection.Normalize())
+	{
+		FacingDirection = FVector::ForwardVector;
+	}
+
+	const float FieldOfViewDegrees = FMath::Clamp(VisionSettings.FieldOfViewDegrees, 1.0f, 360.0f);
+	const float HalfFieldOfViewDegrees = FieldOfViewDegrees * 0.5f;
+	const float RequestedAngleStepDegrees = FMath::Clamp(VisionSettings.RayAngleStepDegrees, 0.1f, 45.0f);
+	const int32 RaySegmentCount = FMath::Max(1, FMath::CeilToInt(FieldOfViewDegrees / RequestedAngleStepDegrees));
+	const int32 RayCount = RaySegmentCount + 1;
+	const float ActualAngleStepDegrees = FieldOfViewDegrees / static_cast<float>(RaySegmentCount);
+	const float TraceDistance = FMath::Max(VisionSettings.AlwaysVisibleRadius, VisionSettings.SightDistance);
+	const FVector TraceOrigin =
+		OwnerActor->GetActorLocation() + FVector(0.0f, 0.0f, FMath::Max(0.0f, VisionSettings.TraceHeight));
+
+	for (int32 RayIndex = 0; RayIndex < RayCount; ++RayIndex)
+	{
+		const float RelativeAngleDegrees =
+			-HalfFieldOfViewDegrees + static_cast<float>(RayIndex) * ActualAngleStepDegrees;
+		FVector Direction = FacingDirection.RotateAngleAxis(RelativeAngleDegrees, FVector::UpVector);
+		Direction.Z = 0.0f;
+		if (!Direction.Normalize())
+		{
+			continue;
+		}
+
+		FHitResult Hit;
+		TraceVisibleDistance(TraceOrigin, Direction, true, Hit);
+		DrawVisionDebug(TraceOrigin, Direction, TraceDistance, Hit);
+	}
+
+	DrawVisionDebugBounds(TraceOrigin, FacingDirection);
 }
 
 void UTunaSweeperPlayerVisionComponent::DrawVisionDebugOutsideFieldOfView() const
