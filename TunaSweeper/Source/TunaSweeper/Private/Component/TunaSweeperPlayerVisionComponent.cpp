@@ -22,6 +22,9 @@ namespace TunaSweeperVision
 	constexpr int32 FramedHiddenMaskAlpha = 77;
 	constexpr int32 LegacyHiddenMaskAlpha = 220;
 	constexpr float MaskFeatherPixels = 18.0f;
+	constexpr float DebugVisibleRaySegmentLength = 30.0f;
+	constexpr float DebugVisibleRayMinFraction = 0.5f;
+	constexpr float DebugVisibleRayPulsePeriodSeconds = 1.0f;
 
 	struct FMaskBoundaryPoint
 	{
@@ -30,6 +33,14 @@ namespace TunaSweeperVision
 		FVector2D Border = FVector2D::ZeroVector;
 		bool bValid = false;
 	};
+
+	float GetDebugVisibleRayPulseFraction(const UWorld* World)
+	{
+		const float TimeSeconds = World ? World->GetTimeSeconds() : 0.0f;
+		const float PulseAlpha = 0.5f + 0.5f * FMath::Sin(
+			TimeSeconds * (2.0f * PI / DebugVisibleRayPulsePeriodSeconds));
+		return FMath::Lerp(DebugVisibleRayMinFraction, 1.0f, PulseAlpha);
+	}
 
 	FVector2D FindViewportRayBorderPoint(const FVector2D& Origin, const FVector2D& Direction, const FIntPoint& InViewportSize)
 	{
@@ -851,19 +862,28 @@ void UTunaSweeperPlayerVisionComponent::DrawVisionDebug(
 	const float MaxDebugDistance = FMath::Max(0.0f, TraceDistance);
 	const bool bHitInRange = Hit.bBlockingHit && Hit.Distance > 0.0f && Hit.Distance < MaxDebugDistance;
 	const float GreenDistance = bHitInRange ? FMath::Clamp(Hit.Distance, 0.0f, MaxDebugDistance) : MaxDebugDistance;
+	const float GreenSegmentLength = FMath::Min(TunaSweeperVision::DebugVisibleRaySegmentLength, GreenDistance);
+	const float GreenEndDistance = FMath::Clamp(
+		GreenDistance * TunaSweeperVision::GetDebugVisibleRayPulseFraction(World),
+		GreenSegmentLength,
+		GreenDistance);
+	const float GreenStartDistance = FMath::Max(0.0f, GreenEndDistance - GreenSegmentLength);
 	const FVector DebugLift(0.0f, 0.0f, 22.0f);
 	const FVector DebugStart = TraceOrigin + DebugLift;
 	const float OneFrameLifeTime = 0.0f;
 
-	DrawDebugLine(
-		World,
-		DebugStart,
-		DebugStart + Direction * GreenDistance,
-		FColor::Green,
-		false,
-		OneFrameLifeTime,
-		1,
-		3.0f);
+	if (GreenSegmentLength > 0.0f)
+	{
+		DrawDebugLine(
+			World,
+			DebugStart + Direction * GreenStartDistance,
+			DebugStart + Direction * GreenEndDistance,
+			FColor::Green,
+			false,
+			OneFrameLifeTime,
+			1,
+			3.0f);
+	}
 
 	if (bHitInRange && GreenDistance < MaxDebugDistance)
 	{
@@ -985,6 +1005,12 @@ void UTunaSweeperPlayerVisionComponent::DrawVisionDebugBounds(
 	const float OneFrameLifeTime = 0.0f;
 	const FVector LeftBoundary = FacingDirection.RotateAngleAxis(-HalfFieldOfViewDegrees, FVector::UpVector).GetSafeNormal();
 	const FVector RightBoundary = FacingDirection.RotateAngleAxis(HalfFieldOfViewDegrees, FVector::UpVector).GetSafeNormal();
+	const float BoundarySegmentLength = FMath::Min(TunaSweeperVision::DebugVisibleRaySegmentLength, SightDistance);
+	const float BoundaryLineEndDistance = FMath::Clamp(
+		SightDistance * TunaSweeperVision::GetDebugVisibleRayPulseFraction(World),
+		BoundarySegmentLength,
+		SightDistance);
+	const float BoundaryLineStartDistance = FMath::Max(0.0f, BoundaryLineEndDistance - BoundarySegmentLength);
 
 	DrawDebugSphere(World, TraceOrigin, 18.0f, 12, FColor::Yellow, false, OneFrameLifeTime, 1, 1.5f);
 	DrawDebugCircle(
@@ -1000,6 +1026,22 @@ void UTunaSweeperPlayerVisionComponent::DrawVisionDebugBounds(
 		FVector::ForwardVector,
 		FVector::RightVector,
 		false);
-	DrawDebugLine(World, TraceOrigin, TraceOrigin + LeftBoundary * SightDistance, FColor::Green, false, OneFrameLifeTime, 1, 2.0f);
-	DrawDebugLine(World, TraceOrigin, TraceOrigin + RightBoundary * SightDistance, FColor::Green, false, OneFrameLifeTime, 1, 2.0f);
+	DrawDebugLine(
+		World,
+		TraceOrigin + LeftBoundary * BoundaryLineStartDistance,
+		TraceOrigin + LeftBoundary * BoundaryLineEndDistance,
+		FColor::Green,
+		false,
+		OneFrameLifeTime,
+		1,
+		2.0f);
+	DrawDebugLine(
+		World,
+		TraceOrigin + RightBoundary * BoundaryLineStartDistance,
+		TraceOrigin + RightBoundary * BoundaryLineEndDistance,
+		FColor::Green,
+		false,
+		OneFrameLifeTime,
+		1,
+		2.0f);
 }
