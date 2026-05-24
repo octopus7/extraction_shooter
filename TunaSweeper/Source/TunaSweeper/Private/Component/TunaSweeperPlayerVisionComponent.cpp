@@ -1063,7 +1063,6 @@ void UTunaSweeperPlayerVisionComponent::DrawVisionDebugBounds(
 		SightDistance);
 	const float BoundaryLineStartDistance = FMath::Max(0.0f, BoundaryLineEndDistance - BoundarySegmentLength);
 
-	DrawDebugSphere(World, TraceOrigin, 18.0f, 12, FColor::Yellow, false, OneFrameLifeTime, 1, 1.5f);
 	DrawDebugCircle(
 		World,
 		TraceOrigin,
