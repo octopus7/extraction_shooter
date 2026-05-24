@@ -362,7 +362,6 @@ void UTunaSweeperPlayerVisionComponent::BeginPlay()
 	{
 		VisionSettings.HiddenMaskAlpha = TunaSweeperVision::FramedHiddenMaskAlpha;
 	}
-	TimeSinceLastMaskUpdate = VisionSettings.UpdateIntervalSeconds;
 }
 
 void UTunaSweeperPlayerVisionComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -418,15 +417,6 @@ void UTunaSweeperPlayerVisionComponent::TickComponent(
 	}
 
 	EnsureOverlayWidget(PlayerController);
-
-	const float UpdateInterval = FMath::Max(0.0f, VisionSettings.UpdateIntervalSeconds);
-	TimeSinceLastMaskUpdate += FMath::Max(0.0f, DeltaTime);
-	if (UpdateInterval > 0.0f && TimeSinceLastMaskUpdate < UpdateInterval)
-	{
-		return;
-	}
-
-	TimeSinceLastMaskUpdate = 0.0f;
 	ForceRefreshVisionMask();
 }
 
