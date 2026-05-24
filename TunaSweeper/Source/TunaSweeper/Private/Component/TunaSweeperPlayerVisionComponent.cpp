@@ -277,8 +277,9 @@ namespace TunaSweeperVision
 		BoundaryPoints.SetNum(BoundarySegmentCount);
 		for (int32 BoundaryIndex = 0; BoundaryIndex < BoundarySegmentCount; ++BoundaryIndex)
 		{
-			const float RelativeAngleDegrees =
+			const float WorldYawDegrees =
 				-180.0f + static_cast<float>(BoundaryIndex) * BoundaryAngleStepDegrees;
+			const float RelativeAngleDegrees = FMath::FindDeltaAngleDegrees(FacingYawDegrees, WorldYawDegrees);
 			const float VisibleDistance = SampleVisibleDistanceForRelativeAngle(
 				RelativeAngleDegrees,
 				HalfFieldOfViewDegrees,
@@ -288,7 +289,7 @@ namespace TunaSweeperVision
 				PlayerController,
 				TraceOrigin,
 				PlayerScreenPosition,
-				FacingYawDegrees + RelativeAngleDegrees,
+				WorldYawDegrees,
 				VisibleDistance,
 				InViewportSize);
 		}

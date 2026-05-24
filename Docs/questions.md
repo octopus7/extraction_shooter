@@ -666,3 +666,21 @@ A. 메시와 텍스처가 서로 다른 실루엣을 소유하면 불일치는 �
 Q. Windows 빌드에서도 시야 디버그 라인을 보이게 할 수 있는가?
 
 A. 가능하다. 기존 시야 컴포넌트는 `WITH_EDITOR`가 아니면 디버그를 무조건 꺼서 패키지 빌드에서 보이지 않았고, 이를 엔진의 `ENABLE_DRAW_DEBUG` 기준으로 바꾸면 Development/DebugGame처럼 디버그 드로우가 살아 있는 Windows 빌드에서는 게임인스턴스 시야 디버그 플래그로 표시할 수 있다. Shipping처럼 엔진이 디버그 드로우를 제거한 빌드에서는 자동으로 꺼진다.
+
+## 2026-05-25 00:12:00 (소요시간: 5분 24초)
+
+Q. 각도가 정해진 레이를 사용하는 것은 확인했지만 마스크는 여전히 떨리므로, 마스크를 그릴 때 캐릭터 포워드 기준으로 그리고 있는지 확인해야 한다.
+
+A. 맞다. 레이 샘플은 월드 고정 각도로 바뀌었지만 마스크 경계 생성은 여전히 `FacingYaw + RelativeAngle`로 월드 방향을 만들고 있어서 캐릭터 시선 회전에 따라 마스크 버텍스가 계속 미끄러졌다. 마스크 경계도 고정 월드 yaw 격자에서 만들고, 그 yaw가 현재 FOV 안에 있는지 상대각으로만 판정하도록 수정했다.
+
+## 2026-05-25 00:16:06 (소요시간: 1분 미만)
+
+Q. 지금 퀘스트 구현의 퀘스트 조건에 레이드 진입, 적 처치 외에 또 무엇이 있는가?
+
+A. 코드 기준 목표 타입은 `level_travel`, `item_acquired`, `enemy_killed`, `interaction_completed` 네 가지다. 현재 `QuestDefinitions.json`에 실제로 들어간 퀘스트는 `quest_first_outing`의 `level_travel`과 `quest_lumberjack_first_kill`의 `enemy_killed` 두 개뿐이며, `item_acquired`와 `interaction_completed`는 프레임워크와 이벤트 연결은 있지만 아직 데이터 퀘스트로 쓰이지 않았다.
+
+## 2026-05-25 00:23:10 (소요시간: 1분 미만)
+
+Q. 중앙의 노란 디버그 구체는 무엇인가?
+
+A. 시야 디버그에서 `TraceOrigin`을 표시하기 위해 그린 `DrawDebugSphere`다. 플레이어 위치에 `TraceHeight` 40cm를 더한 레이캐스트 시작점을 보여주는 용도이며, 시야 판정 자체에는 영향을 주지 않는다.
