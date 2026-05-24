@@ -112,6 +112,19 @@ WAKE AUTHORITY: NONE
 
 이 세트는 오프닝, 미스터리, 초반 보상, 중반 위협, 최종 해결, 엔딩 감정을 모두 포함한다.
 
+## 생성된 첫 저녁 엔딩 6컷
+
+첫 저녁 엔딩 컷은 아래 6개 PNG로 생성했다.
+
+| 컷 | 파일 | 내용 |
+|---:|---|---|
+| 1 | [first_dinner_01_bunker_exterior.png](../../chatgpt/FirstDinnerEnding/first_dinner_01_bunker_exterior.png) | 밤의 숲과 따뜻한 벙커 입구 |
+| 2 | [first_dinner_02_tuna_shelf.png](../../chatgpt/FirstDinnerEnding/first_dinner_02_tuna_shelf.png) | 복구된 벙커 내부와 가득 찬 참치 선반 |
+| 3 | [first_dinner_03_table_setup.png](../../chatgpt/FirstDinnerEnding/first_dinner_03_table_setup.png) | 캔봇의 식탁 준비 |
+| 4 | [first_dinner_04_premium_tuna_open.png](../../chatgpt/FirstDinnerEnding/first_dinner_04_premium_tuna_open.png) | 프리미엄 참치 개봉과 간단한 식사 준비 |
+| 5 | [first_dinner_05_empty_plate_pod02.png](../../chatgpt/FirstDinnerEnding/first_dinner_05_empty_plate_pod02.png) | POD-02 방향에 놓는 빈 접시 |
+| 6 | [first_dinner_06_final_tableau.png](../../chatgpt/FirstDinnerEnding/first_dinner_06_final_tableau.png) | 루나, 캔봇, 식탁, POD-02 상태등이 함께 보이는 마지막 컷 |
+
 ## 확장 제작 세트
 
 챕터 전환마다 짧은 보상 컷을 넣고 싶다면 아래 4개를 추가한다.
