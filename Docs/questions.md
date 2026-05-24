@@ -720,3 +720,9 @@ A. 그렇다. 현재 구성은 6컷 이미지를 순서대로 첨부해 10초짜
 Q. 시야 관련 디버그 드로우를 모두 끄려면 어디를 건드리면 되는가?
 
 A. 런타임에서는 `UTunaSweeperGameInstance::SetVisionDebugEnabled(false)` 또는 GameInstance 설정의 `bEnableVisionDebug=false`가 기본 토글이다. 컴포넌트별 강제 디버그인 `UTunaSweeperPlayerVisionComponent::bEnableDebugOverride`도 false여야 한다. 코드에서 완전히 막으려면 `UTunaSweeperPlayerVisionComponent::IsVisionDebugEnabled()`가 항상 false를 반환하게 하거나, `TickComponent`의 `if (IsVisionDebugEnabled())` 블록을 제거하면 된다.
+
+## 2026-05-25 01:15:38 (소요시간: 1분 미만)
+
+Q. 시야 경계가 굉장히 선명하고 1도 차이로 벽에 다가갈 때 떨림이 보일 정도인데, 어떻게 부드럽게 뭉개는 것이 좋은가?
+
+A. 현재 커스텀 Slate 메시 경로는 기존 텍스처 `BlurRadius`를 쓰지 않고 `MaskFeatherPixels=18`짜리 화면 공간 페더만 쓰므로 경계가 선명하다. 우선 페더를 48~80px 정도로 키우고, 필요하면 월드 고정 ray distance에 3~5탭 각도 방향 필터를 visual-only로 적용하는 것이 좋다. 더 안정적으로 숨기려면 이전 프레임 distance를 월드 yaw 키로 보관해 가까워지는 차폐는 즉시 반영하고, 멀어지는 경계만 짧게 보간하는 비대칭 temporal smoothing을 추가한다.

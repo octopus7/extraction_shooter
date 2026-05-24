@@ -21,7 +21,6 @@ namespace TunaSweeperVision
 	constexpr int32 LegacyMaskDownsampleFactor = 4;
 	constexpr int32 FramedHiddenMaskAlpha = 77;
 	constexpr int32 LegacyHiddenMaskAlpha = 220;
-	constexpr float MaskFeatherPixels = 18.0f;
 	constexpr float DebugVisibleRaySegmentLength = 30.0f;
 	constexpr float DebugVisibleRayMinFraction = 0.5f;
 	constexpr float DebugVisibleRayPulsePeriodSeconds = 1.0f;
@@ -169,6 +168,7 @@ namespace TunaSweeperVision
 		const FVector2D& PlayerScreenPosition,
 		float WorldYawDegrees,
 		float VisibleDistance,
+		float MaskFeatherPixels,
 		const FIntPoint& InViewportSize)
 	{
 		FMaskBoundaryPoint BoundaryPoint;
@@ -291,6 +291,7 @@ namespace TunaSweeperVision
 				PlayerScreenPosition,
 				WorldYawDegrees,
 				VisibleDistance,
+				FMath::Max(0.0f, VisionSettings.MaskFeatherPixels),
 				InViewportSize);
 		}
 
