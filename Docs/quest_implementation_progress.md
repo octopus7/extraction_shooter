@@ -1,6 +1,6 @@
 # Quest Implementation Progress
 
-Last updated: 2026-05-25 00:33:31
+Last updated: 2026-05-25 00:46:42
 
 이 문서는 TunaSweeper 퀘스트 시스템 구현 진행상황을 추적한다. 상세 설계는 `Docs/quest_system.md`를 기준으로 보고, 이 문서는 완료/남은 작업/결정 필요 항목만 정리한다.
 
@@ -23,12 +23,15 @@ Last updated: 2026-05-25 00:33:31
 - 목표 타입 `item_acquired`가 구현되어 있고 `item_id` 필터를 지원한다.
 - 목표 타입 `enemy_killed`가 구현되어 있고 `enemy_id` 필터를 지원한다.
 - 목표 타입 `interaction_completed`가 구현되어 있고 `interaction_event_id`, `interaction_type` 필터를 지원한다.
+- 목표 타입 `bunker_rescue_return`이 구현되어 있고 `source_level`, `target_level` 필터를 지원한다.
 - 레벨 이동 목표는 `ATunaSweeperLevelTravelInteractableActor::TravelToTargetLevel`에 연결되어 있다.
 - 아이템 획득 목표는 `UTunaSweeperGameInstance`의 인벤토리 추가 경로에 연결되어 있다.
 - 적 처치 목표는 `ATunaSweeperEnemyCharacter::HandleDeath`에 연결되어 있다.
 - 상호작용 완료 목표는 `UTunaSweeperInteractionSubsystem::RequestInteraction`에 연결되어 있다.
+- 구급 카트 후송 복귀 목표는 `ATunaSweeperTopDownCharacter::HandleDeath`에 연결되어 있다.
 - 현재 퀘스트 데이터에는 `quest_first_outing`이 있다.
 - 현재 퀘스트 데이터에는 `quest_lumberjack_first_kill`이 있다.
+- 현재 퀘스트 데이터에는 제공자에 연결하지 않은 `quest_rescue_cart_return`이 있다.
 - 벌목기 처치 퀘스트는 `quest_first_outing` 보상 완료 후 진행되도록 체인 연결되어 있다.
 - 벌목기 스폰 데이터는 `enemy.lumberjack`과 연결되어 있다.
 
@@ -60,6 +63,7 @@ Last updated: 2026-05-25 00:33:31
 - 방문 목표의 기본 반경 값을 결정한다. 예: 정확한 오브젝트 조사, 작은 지역 도착, 넓은 구역 발견.
 - 방문 판정에 시야 확보, 전투 중 제외 같은 조건이 필요한지 결정한다.
 - `RaidMap -> BunkerMap` 레벨 이동만으로 귀환 목표를 처리할지, 생환 추출 전용 이벤트가 필요한지 결정한다.
+- 구급 카트 후송 복귀 목표를 어떤 실제 퀘스트 체인에서 사용할지 결정한다.
 - 수리 목표를 범용 `interaction_completed`로 처리할지, `world_progress_completed` 또는 `repair_completed` 같은 새 타입으로 분리할지 결정한다.
 - 아이템 수집 퀘스트의 기준을 인벤토리 추가 시점으로 볼지, 루팅 컨테이너에서 루트 인벤토리로 이동한 시점을 계속 획득 기준으로 볼지 결정한다.
 - 반납/등록 목표가 아이템을 소모할지, 인벤토리에 보유만 요구할지, 벙커 영구 상태로 이동시킬지 결정한다.

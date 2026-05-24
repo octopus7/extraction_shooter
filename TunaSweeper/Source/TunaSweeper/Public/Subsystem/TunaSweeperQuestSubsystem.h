@@ -71,6 +71,9 @@ public:
 	void NotifyLevelTravelRequested(FName SourceLevelName, FName TargetLevelName);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Quest")
+	void NotifyBunkerRescueReturn(FName SourceLevelName, FName TargetLevelName);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Quest")
 	void NotifyItemAcquired(int32 ItemId, int32 Quantity);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Quest")
@@ -100,6 +103,7 @@ private:
 	FString GetQuestDefinitionsJsonPath() const;
 	bool IsMapNameMatch(FName ActualMapName, const TCHAR* ExpectedMapName) const;
 	bool DoesObjectiveMatchLevelTravel(const FTunaSweeperObjectiveDefinition& Objective, FName SourceLevelName, FName TargetLevelName) const;
+	bool DoesObjectiveMatchBunkerRescueReturn(const FTunaSweeperObjectiveDefinition& Objective, FName SourceLevelName, FName TargetLevelName) const;
 	bool DoesObjectiveMatchItemAcquired(const FTunaSweeperObjectiveDefinition& Objective, int32 ItemId) const;
 	bool DoesObjectiveMatchEnemyKilled(const FTunaSweeperObjectiveDefinition& Objective, FName EnemyId) const;
 	bool DoesObjectiveMatchInteractionCompleted(const FTunaSweeperObjectiveDefinition& Objective, FName InteractionEventId, FName InteractionTypeName) const;

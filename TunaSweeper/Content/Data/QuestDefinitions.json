@@ -44,5 +44,26 @@
       "coins": 150,
       "items": []
     }
+  },
+  {
+    "quest_id": "quest_rescue_cart_return",
+    "sort_order": 9000,
+    "title": "구조 복귀 확인",
+    "description": "작전 중 이상 상태가 감지되면 구급 카트 후송 절차에 따라 벙커로 돌아온다.",
+    "auto_track_on_accept": false,
+    "objectives": [
+      {
+        "objective_id": "return_by_rescue_cart",
+        "type": "bunker_rescue_return",
+        "text": "구급 카트에 실려 벙커로 돌아오기",
+        "required_count": 1,
+        "source_level": "RaidMap",
+        "target_level": "BunkerMap"
+      }
+    ],
+    "rewards": {
+      "coins": 50,
+      "items": []
+    }
   }
 ]

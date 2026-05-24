@@ -89,6 +89,15 @@ namespace TunaSweeperQuestData
 			return true;
 		}
 
+		if (Type == TEXT("bunker_rescue_return") ||
+			Type == TEXT("bunkerrescuereturn") ||
+			Type == TEXT("rescue_return") ||
+			Type == TEXT("rescuereturn"))
+		{
+			OutType = ETunaSweeperObjectiveType::BunkerRescueReturn;
+			return true;
+		}
+
 		return false;
 	}
 
@@ -509,6 +518,16 @@ void UTunaSweeperQuestSubsystem::NotifyLevelTravelRequested(FName SourceLevelNam
 		1);
 }
 
+void UTunaSweeperQuestSubsystem::NotifyBunkerRescueReturn(FName SourceLevelName, FName TargetLevelName)
+{
+	AdvanceMatchingObjectives(
+		[this, SourceLevelName, TargetLevelName](const FTunaSweeperObjectiveDefinition& Objective)
+		{
+			return DoesObjectiveMatchBunkerRescueReturn(Objective, SourceLevelName, TargetLevelName);
+		},
+		1);
+}
+
 void UTunaSweeperQuestSubsystem::NotifyItemAcquired(int32 ItemId, int32 Quantity)
 {
 	if (ItemId == INDEX_NONE || Quantity <= 0)
@@ -762,6 +781,16 @@ bool UTunaSweeperQuestSubsystem::DoesObjectiveMatchLevelTravel(
 	FName TargetLevelName) const
 {
 	return Objective.Type == ETunaSweeperObjectiveType::LevelTravel &&
+		(Objective.SourceLevelName.IsNone() || IsMapNameMatch(SourceLevelName, *Objective.SourceLevelName.ToString())) &&
+		(Objective.TargetLevelName.IsNone() || IsMapNameMatch(TargetLevelName, *Objective.TargetLevelName.ToString()));
+}
+
+bool UTunaSweeperQuestSubsystem::DoesObjectiveMatchBunkerRescueReturn(
+	const FTunaSweeperObjectiveDefinition& Objective,
+	FName SourceLevelName,
+	FName TargetLevelName) const
+{
+	return Objective.Type == ETunaSweeperObjectiveType::BunkerRescueReturn &&
 		(Objective.SourceLevelName.IsNone() || IsMapNameMatch(SourceLevelName, *Objective.SourceLevelName.ToString())) &&
 		(Objective.TargetLevelName.IsNone() || IsMapNameMatch(TargetLevelName, *Objective.TargetLevelName.ToString()));
 }

@@ -19,7 +19,8 @@ enum class ETunaSweeperObjectiveType : uint8
 	LevelTravel UMETA(DisplayName = "Level Travel"),
 	ItemAcquired UMETA(DisplayName = "Item Acquired"),
 	EnemyKilled UMETA(DisplayName = "Enemy Killed"),
-	InteractionCompleted UMETA(DisplayName = "Interaction Completed")
+	InteractionCompleted UMETA(DisplayName = "Interaction Completed"),
+	BunkerRescueReturn UMETA(DisplayName = "Bunker Rescue Return")
 };
 
 USTRUCT(BlueprintType)

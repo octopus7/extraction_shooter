@@ -20,6 +20,7 @@
 #include "Player/TunaSweeperPlayerController.h"
 #include "Subsystem/TunaSweeperInteractionSubsystem.h"
 #include "Subsystem/TunaSweeperLevelTransitionSubsystem.h"
+#include "Subsystem/TunaSweeperQuestSubsystem.h"
 #include "TimerManager.h"
 #include "UI/TunaSweeperLevelTransitionWidget.h"
 #include "UObject/ConstructorHelpers.h"
@@ -822,6 +823,12 @@ void ATunaSweeperTopDownCharacter::HandleDeath()
 
 	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
 	{
+		const FName SourceLevelName = GetWorld() ? FName(*GetWorld()->GetMapName()) : NAME_None;
+		if (UTunaSweeperQuestSubsystem* QuestSubsystem = TunaGameInstance->GetSubsystem<UTunaSweeperQuestSubsystem>())
+		{
+			QuestSubsystem->NotifyBunkerRescueReturn(SourceLevelName, RespawnTargetLevelName);
+		}
+
 		TunaGameInstance->ClearInventoryAndSave();
 	}
 
@@ -864,7 +871,7 @@ void ATunaSweeperTopDownCharacter::StartRespawnTransition()
 				RespawnTransitionWidgetClass,
 				RespawnFadeToBlackDuration,
 				RespawnFadeFromBlackDuration,
-				FText::FromString(TEXT("Respawning"))))
+				FText::FromString(TEXT("구급 카트 후송 중"))))
 			{
 				return;
 			}

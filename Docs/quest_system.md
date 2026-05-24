@@ -99,6 +99,10 @@ v1 목표 타입:
 - `enemy_killed`: 플레이어가 적을 처치했을 때. `enemy_id`가 비어 있으면 모든 적 처치를 허용한다.
 - `interaction_completed`: 상호작용 처리가 성공했을 때. `interaction_event_id`나 `interaction_type`으로 필터링한다.
 
+후송 복귀 목표 타입:
+
+- `bunker_rescue_return`: 작전 중 이상 상태 후 구급 카트 후송 절차로 벙커에 돌아온 상황을 표현한다. `source_level`, `target_level`로 필터링한다. 현재 플레이어 체력이 0이 되어 벙커 복귀 전환을 시작하는 시점에 `ATunaSweeperTopDownCharacter::HandleDeath`에서 감지 이벤트를 보낸다. UI 문구와 퀘스트 설명에서는 직접적인 실패 표현을 쓰지 않고 `구급 카트에 실려 벙커로 돌아오기`, `후송 절차로 복귀`처럼 완곡하게 표현한다.
+
 현재 연결 지점:
 
 - `ATunaSweeperLevelTravelInteractableActor::TravelToTargetLevel`
@@ -107,6 +111,7 @@ v1 목표 타입:
 - `UTunaSweeperGameInstance::MoveItemBetweenSlots`의 루트 컨테이너 획득 경로
 - `ATunaSweeperEnemyCharacter::HandleDeath`
 - `UTunaSweeperInteractionSubsystem::RequestInteraction`
+- `ATunaSweeperTopDownCharacter::HandleDeath`의 구급 카트 후송 복귀 경로
 
 이벤트는 `Accepted` 상태의 퀘스트에만 진행도를 반영한다. 목표 진행도는 목표별 `RequiredCount`까지만 증가하고, 모든 목표가 완료되면 상태가 `RewardAvailable`로 바뀐다.
 
@@ -132,4 +137,5 @@ v1 목표 타입:
 - 새 퀘스트를 추가할 때는 `QuestDefinitions.json`에 정의하고, 필요한 목표 이벤트 소스가 이미 연결되어 있는지 확인한다.
 - `enemy_killed` 목표에서 특정 적만 요구하려면 적 스폰 데이터에 `enemy_id`를 추가한다. 현재 벌목기 스폰은 `enemy.lumberjack`을 사용한다.
 - `interaction_completed` 목표에서 특정 상호작용만 요구하려면 해당 `UTunaSweeperInteractableComponent::ObjectiveEventId`를 설정한다.
+- `bunker_rescue_return`은 직접적인 실패 표현 대신 구급 카트 후송/복귀 표현을 사용한다.
 - 저장 필드를 변경하면 `Docs/save_persistence.md`도 같은 변경에서 갱신한다.
