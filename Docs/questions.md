@@ -714,3 +714,9 @@ A. 10초 기준 기본안은 6컷이 적당하다. 밤의 벙커 외부, 따뜻�
 Q. 첫 저녁 엔딩 영상은 10초짜리인가?
 
 A. 그렇다. 현재 구성은 6컷 이미지를 순서대로 첨부해 10초짜리 무대사 이미지-투-비디오로 만드는 기준이다. 컷별 권장 타이밍은 1컷 0.0~1.4초, 2컷 1.4~2.8초, 3컷 2.8~4.2초, 4컷 4.2~5.8초, 5컷 5.8~7.4초, 6컷 7.4~10.0초다.
+
+## 2026-05-25 01:10:42 (소요시간: 1분 미만)
+
+Q. 시야 관련 디버그 드로우를 모두 끄려면 어디를 건드리면 되는가?
+
+A. 런타임에서는 `UTunaSweeperGameInstance::SetVisionDebugEnabled(false)` 또는 GameInstance 설정의 `bEnableVisionDebug=false`가 기본 토글이다. 컴포넌트별 강제 디버그인 `UTunaSweeperPlayerVisionComponent::bEnableDebugOverride`도 false여야 한다. 코드에서 완전히 막으려면 `UTunaSweeperPlayerVisionComponent::IsVisionDebugEnabled()`가 항상 false를 반환하게 하거나, `TickComponent`의 `if (IsVisionDebugEnabled())` 블록을 제거하면 된다.
