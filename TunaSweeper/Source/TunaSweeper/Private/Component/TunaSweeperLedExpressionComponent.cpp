@@ -118,6 +118,7 @@ void UTunaSweeperLedExpressionComponent::RebuildLedMesh()
 	LedPitch = FMath::Max(0.1f, LedPitch);
 	LedRadius = FMath::Max(0.01f, LedRadius);
 	CircleSegments = FMath::Clamp(CircleSegments, 3, 24);
+	HorizontalCurvatureDegrees = FMath::Clamp(HorizontalCurvatureDegrees, 0.0f, 160.0f);
 
 	const int32 LedCount = GetLedCount();
 	const int32 VerticesPerLed = CircleSegments + 1;
@@ -144,13 +145,16 @@ void UTunaSweeperLedExpressionComponent::RebuildLedMesh()
 			const int32 CenterVertexIndex = CachedVertices.Num();
 			const float CenterY = (static_cast<float>(Column) - HalfColumns) * LedPitch;
 			const float CenterZ = (HalfRows - static_cast<float>(Row)) * LedPitch;
-			const FVector Center(0.0f, CenterY, CenterZ);
 			const FLinearColor VertexColor = ResolveLedVertexColor(LedStates.IsValidIndex(LedIndex) && LedStates[LedIndex] != 0);
+			FVector Center = FVector::ZeroVector;
+			FVector CenterNormal = FVector::ForwardVector;
+			FProcMeshTangent CenterTangent(0.0f, 1.0f, 0.0f);
+			BuildCurvedLedVertex(CenterY, CenterZ, Center, CenterNormal, CenterTangent);
 
 			CachedVertices.Add(Center);
-			CachedNormals.Add(FVector::ForwardVector);
+			CachedNormals.Add(CenterNormal);
 			CachedUVs.Add(FVector2D(0.5f, 0.5f));
-			CachedTangents.Add(FProcMeshTangent(0.0f, 1.0f, 0.0f));
+			CachedTangents.Add(CenterTangent);
 			CachedVertexColors.Add(VertexColor);
 
 			for (int32 SegmentIndex = 0; SegmentIndex < CircleSegments; ++SegmentIndex)
@@ -158,11 +162,15 @@ void UTunaSweeperLedExpressionComponent::RebuildLedMesh()
 				const float Angle = 2.0f * PI * static_cast<float>(SegmentIndex) / static_cast<float>(CircleSegments);
 				const float OffsetY = FMath::Cos(Angle) * LedRadius;
 				const float OffsetZ = FMath::Sin(Angle) * LedRadius;
+				FVector RingVertex = FVector::ZeroVector;
+				FVector RingNormal = FVector::ForwardVector;
+				FProcMeshTangent RingTangent(0.0f, 1.0f, 0.0f);
+				BuildCurvedLedVertex(CenterY + OffsetY, CenterZ + OffsetZ, RingVertex, RingNormal, RingTangent);
 
-				CachedVertices.Add(Center + FVector(0.0f, OffsetY, OffsetZ));
-				CachedNormals.Add(FVector::ForwardVector);
+				CachedVertices.Add(RingVertex);
+				CachedNormals.Add(RingNormal);
 				CachedUVs.Add(FVector2D(0.5f + FMath::Cos(Angle) * 0.5f, 0.5f + FMath::Sin(Angle) * 0.5f));
-				CachedTangents.Add(FProcMeshTangent(0.0f, 1.0f, 0.0f));
+				CachedTangents.Add(RingTangent);
 				CachedVertexColors.Add(VertexColor);
 			}
 
@@ -221,6 +229,16 @@ bool UTunaSweeperLedExpressionComponent::SetExpressionByName(FName ExpressionNam
 
 	CurrentExpressionName = ExpressionName;
 	return true;
+}
+
+void UTunaSweeperLedExpressionComponent::SetHorizontalCurvatureDegrees(float InHorizontalCurvatureDegrees)
+{
+	HorizontalCurvatureDegrees = FMath::Clamp(InHorizontalCurvatureDegrees, 0.0f, 160.0f);
+	RebuildLedMesh();
+	if (!CurrentExpressionName.IsNone())
+	{
+		SetExpressionByName(CurrentExpressionName);
+	}
 }
 
 bool UTunaSweeperLedExpressionComponent::SetExpressionPattern(FName ExpressionName, const FString& Pattern)
@@ -488,6 +506,39 @@ void UTunaSweeperLedExpressionComponent::ApplyLedMaterial()
 	DynamicLedMaterial->SetScalarParameterValue(TEXT("EmissiveIntensity"), EmissiveIntensity);
 	DynamicLedMaterial->SetScalarParameterValue(TEXT("Intensity"), EmissiveIntensity);
 	SetMaterial(0, DynamicLedMaterial);
+}
+
+void UTunaSweeperLedExpressionComponent::BuildCurvedLedVertex(
+	float SourceY,
+	float SourceZ,
+	FVector& OutPosition,
+	FVector& OutNormal,
+	FProcMeshTangent& OutTangent) const
+{
+	const float ClampedCurvatureDegrees = FMath::Clamp(HorizontalCurvatureDegrees, 0.0f, 160.0f);
+	if (ClampedCurvatureDegrees <= KINDA_SMALL_NUMBER)
+	{
+		OutPosition = FVector(0.0f, SourceY, SourceZ);
+		OutNormal = FVector::ForwardVector;
+		OutTangent = FProcMeshTangent(0.0f, 1.0f, 0.0f);
+		return;
+	}
+
+	const float MatrixWidth = FMath::Max(
+		LedPitch,
+		static_cast<float>(FMath::Max(1, MatrixColumns - 1)) * LedPitch);
+	const float ArcRadians = FMath::DegreesToRadians(ClampedCurvatureDegrees);
+	const float Radius = MatrixWidth / FMath::Max(ArcRadians, KINDA_SMALL_NUMBER);
+	const float Theta = SourceY / Radius;
+	const float SinTheta = FMath::Sin(Theta);
+	const float CosTheta = FMath::Cos(Theta);
+
+	OutPosition = FVector(
+		Radius * (CosTheta - 1.0f),
+		Radius * SinTheta,
+		SourceZ);
+	OutNormal = FVector(CosTheta, SinTheta, 0.0f).GetSafeNormal(KINDA_SMALL_NUMBER, FVector::ForwardVector);
+	OutTangent = FProcMeshTangent(-SinTheta, CosTheta, 0.0f);
 }
 
 FLinearColor UTunaSweeperLedExpressionComponent::ResolveLedVertexColor(bool bEnabled) const

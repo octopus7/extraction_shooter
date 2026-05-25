@@ -44,6 +44,9 @@ public:
 	void RebuildLedMesh();
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|LED Expression")
+	void SetHorizontalCurvatureDegrees(float InHorizontalCurvatureDegrees);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|LED Expression")
 	bool SetExpressionByName(FName ExpressionName);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|LED Expression")
@@ -87,11 +90,14 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LED Expression|Matrix", meta = (ClampMin = "3", ClampMax = "24"))
 	int32 CircleSegments = 10;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LED Expression|Matrix", meta = (ClampMin = "0.0", ClampMax = "160.0", UIMin = "0.0", UIMax = "80.0"))
+	float HorizontalCurvatureDegrees = 28.0f;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LED Expression|Color")
 	FLinearColor LedColor = FLinearColor(1.0f, 0.78f, 0.06f, 1.0f);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LED Expression|Color")
-	FLinearColor OffColor = FLinearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	FLinearColor OffColor = FLinearColor(0.003f, 0.003f, 0.003f, 1.0f);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LED Expression|Color", meta = (ClampMin = "0.0"))
 	float EmissiveIntensity = 3.0f;
@@ -121,6 +127,7 @@ private:
 	bool ApplyPatternToStates(const FString& Pattern);
 	void RefreshVertexColors();
 	void ApplyLedMaterial();
+	void BuildCurvedLedVertex(float SourceY, float SourceZ, FVector& OutPosition, FVector& OutNormal, FProcMeshTangent& OutTangent) const;
 	FLinearColor ResolveLedVertexColor(bool bEnabled) const;
 	bool IsOnCharacter(TCHAR Character) const;
 
