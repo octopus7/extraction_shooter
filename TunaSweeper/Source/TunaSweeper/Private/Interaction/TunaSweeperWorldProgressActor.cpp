@@ -4,11 +4,13 @@
 #include "Components/SceneComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMesh.h"
+#include "Engine/Texture2D.h"
 #include "Engine/World.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "Interaction/TunaSweeperInteractableComponent.h"
 #include "Interaction/TunaSweeperTransparentObstacleActor.h"
 #include "Materials/MaterialInterface.h"
+#include "Subsystem/TunaSweeperItemDataSubsystem.h"
 #include "UObject/ConstructorHelpers.h"
 
 namespace
@@ -143,6 +145,11 @@ int32 ATunaSweeperWorldProgressActor::GetProgressQuantity() const
 	return FMath::Clamp(GetOrCreateProgressState().ProgressQuantity, 0, FMath::Max(0, RequiredQuantity));
 }
 
+int32 ATunaSweeperWorldProgressActor::GetRemainingRequiredQuantity() const
+{
+	return FMath::Max(0, FMath::Max(1, RequiredQuantity) - GetProgressQuantity());
+}
+
 int32 ATunaSweeperWorldProgressActor::GetOwnedRequiredItemCount() const
 {
 	UTunaSweeperGameInstance* TunaGameInstance = GetTunaGameInstance();
@@ -168,7 +175,7 @@ int32 ATunaSweeperWorldProgressActor::UseAvailableRequiredItems(bool bSaveImmedi
 	}
 
 	const int32 CurrentProgressQuantity = GetProgressQuantity();
-	const int32 RemainingQuantity = FMath::Max(0, RequiredQuantity - CurrentProgressQuantity);
+	const int32 RemainingQuantity = GetRemainingRequiredQuantity();
 	if (RemainingQuantity <= 0)
 	{
 		RefreshPresentation();
@@ -205,6 +212,35 @@ bool ATunaSweeperWorldProgressActor::Repair(bool bSaveImmediately)
 	return true;
 }
 
+bool ATunaSweeperWorldProgressActor::RepairUsingAvailableRequiredItems(bool bSaveImmediately)
+{
+	if (bCompleted)
+	{
+		return false;
+	}
+
+	const int32 RemainingQuantity = GetRemainingRequiredQuantity();
+	if (RemainingQuantity > 0)
+	{
+		UTunaSweeperGameInstance* TunaGameInstance = GetTunaGameInstance();
+		if (!TunaGameInstance || TunaGameInstance->CountInventoryItemById(RequiredItemId) < RemainingQuantity)
+		{
+			RefreshPresentation();
+			return false;
+		}
+
+		const int32 ConsumedQuantity = TunaGameInstance->ConsumeInventoryItemById(RequiredItemId, RemainingQuantity);
+		if (ConsumedQuantity != RemainingQuantity)
+		{
+			RefreshPresentation();
+			return false;
+		}
+	}
+
+	CompleteAndReplace(bSaveImmediately);
+	return true;
+}
+
 void ATunaSweeperWorldProgressActor::ApplyCollisionDefaults()
 {
 	if (!BlockingCollision)
@@ -228,15 +264,13 @@ void ATunaSweeperWorldProgressActor::RefreshPresentation()
 {
 	if (InteractableComponent)
 	{
-		const FText MarkerText = FText::Format(
-			FText::FromString(TEXT("{0}    {1} {2}/{3}")),
-			InteractionDisplayName,
-			RequiredItemDisplayName,
-			FText::AsNumber(GetProgressQuantity()),
-			FText::AsNumber(FMath::Max(1, RequiredQuantity)));
 		InteractableComponent->SetInteractionTypeAndDisplayName(
 			bCompleted ? ETunaSweeperInteractionType::None : ETunaSweeperInteractionType::WorldProgress,
-			bCompleted ? FText::GetEmpty() : MarkerText);
+			bCompleted ? FText::GetEmpty() : InteractionDisplayName);
+		InteractableComponent->SetInteractionRequirementPreview(
+			LoadRequiredItemIconTexture(),
+			GetRemainingRequiredQuantity(),
+			!bCompleted && GetRemainingRequiredQuantity() > 0);
 	}
 
 	if (BlockingCollision)
@@ -296,6 +330,29 @@ void ATunaSweeperWorldProgressActor::CompleteAndReplace(bool bSaveImmediately)
 	}
 
 	Destroy();
+}
+
+UTexture2D* ATunaSweeperWorldProgressActor::LoadRequiredItemIconTexture() const
+{
+	UGameInstance* GameInstance = GetGameInstance();
+	UTunaSweeperItemDataSubsystem* ItemDataSubsystem = GameInstance
+		? GameInstance->GetSubsystem<UTunaSweeperItemDataSubsystem>()
+		: nullptr;
+	if (!ItemDataSubsystem)
+	{
+		return nullptr;
+	}
+
+	FTunaSweeperItemDefinition ItemDefinition;
+	if (!ItemDataSubsystem->TryGetItemDefinition(RequiredItemId, ItemDefinition))
+	{
+		return nullptr;
+	}
+
+	const FString IconObjectPath = ItemDataSubsystem->BuildItemIconObjectPath(ItemDefinition);
+	return IconObjectPath.IsEmpty()
+		? nullptr
+		: LoadObject<UTexture2D>(nullptr, *IconObjectPath);
 }
 
 FName ATunaSweeperWorldProgressActor::GetEffectiveProgressObjectId() const

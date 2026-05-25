@@ -9,6 +9,7 @@ class ATunaSweeperWorldProgressCompletedActor;
 class UBoxComponent;
 class USceneComponent;
 class UStaticMeshComponent;
+class UTexture2D;
 class UTunaSweeperGameInstance;
 class UTunaSweeperInteractableComponent;
 
@@ -56,6 +57,9 @@ public:
 	int32 GetProgressQuantity() const;
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|World Progress")
+	int32 GetRemainingRequiredQuantity() const;
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|World Progress")
 	int32 GetOwnedRequiredItemCount() const;
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|World Progress")
@@ -69,6 +73,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|World Progress")
 	bool Repair(bool bSaveImmediately = true);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|World Progress")
+	bool RepairUsingAvailableRequiredItems(bool bSaveImmediately = true);
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
@@ -119,6 +126,7 @@ private:
 	void RefreshPresentation();
 	void ApplySavedState();
 	void CompleteAndReplace(bool bSaveImmediately);
+	UTexture2D* LoadRequiredItemIconTexture() const;
 	FName GetEffectiveProgressObjectId() const;
 	FTunaSweeperWorldProgressSaveData GetOrCreateProgressState() const;
 	UTunaSweeperGameInstance* GetTunaGameInstance() const;

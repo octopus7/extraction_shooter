@@ -7,6 +7,8 @@
 class UTextBlock;
 class UWidget;
 class UBorder;
+class UImage;
+class UTexture2D;
 
 UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API UTunaSweeperInteractionMarkerWidget : public UUserWidget
@@ -16,6 +18,9 @@ class TUNASWEEPER_API UTunaSweeperInteractionMarkerWidget : public UUserWidget
 public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Interaction")
 	void SetMarkerText(const FText& InText);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Interaction")
+	void SetRequirementPreview(UTexture2D* InIconTexture, int32 InRequiredQuantity, bool bInShowRequirement);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Interaction")
 	void SetMarkerPresentation(float InAlpha, float InRingScale, float InLabelAlpha);
@@ -39,11 +44,25 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Interaction", meta = (BindWidgetOptional))
 	TObjectPtr<UTextBlock> DisplayNameText;
 
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Interaction", meta = (BindWidgetOptional))
+	TObjectPtr<UWidget> RequirementRoot;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Interaction", meta = (BindWidgetOptional))
+	TObjectPtr<UImage> RequirementIconImage;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Interaction", meta = (BindWidgetOptional))
+	TObjectPtr<UTextBlock> RequirementQuantityText;
+
 private:
 	void CacheNamedWidgets();
+	void EnsureRequirementWidgets();
 	void ApplyState();
 
 	FText CachedDisplayText = FText::FromString(TEXT("Interact"));
+	UPROPERTY(Transient)
+	TObjectPtr<UTexture2D> CachedRequirementIconTexture;
+	int32 CachedRequiredQuantity = 0;
+	bool bCachedShowRequirement = false;
 	float CachedAlpha = 0.0f;
 	float CachedRingScale = 3.0f;
 	float CachedLabelAlpha = 0.0f;

@@ -26,7 +26,6 @@
 #include "UI/TunaSweeperQuestWidget.h"
 #include "UI/TunaSweeperScenarioPresentationWidget.h"
 #include "UI/TunaSweeperScreenFadeWidget.h"
-#include "UI/TunaSweeperWorldProgressWidget.h"
 #include "TimerManager.h"
 
 namespace TunaSweeperDropPlacement
@@ -1054,41 +1053,6 @@ void ATunaSweeperPlayerController::OpenQuestPanel(FName QuestId)
 
 	FInputModeGameAndUI InputMode;
 	InputMode.SetWidgetToFocus(QuestWidget->TakeWidget());
-	InputMode.SetHideCursorDuringCapture(false);
-	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-	SetInputMode(InputMode);
-	bShowMouseCursor = true;
-}
-
-void ATunaSweeperPlayerController::OpenWorldProgressPanel(ATunaSweeperWorldProgressActor* ProgressActor)
-{
-	if (!IsLocalController() || !ProgressActor)
-	{
-		return;
-	}
-
-	if (!WorldProgressWidget)
-	{
-		WorldProgressWidget = CreateWidget<UTunaSweeperWorldProgressWidget>(
-			this,
-			UTunaSweeperWorldProgressWidget::StaticClass());
-	}
-
-	if (!WorldProgressWidget)
-	{
-		return;
-	}
-
-	WorldProgressWidget->SetProgressActor(ProgressActor);
-	if (!WorldProgressWidget->IsInViewport())
-	{
-		WorldProgressWidget->AddToViewport(40);
-	}
-
-	CancelPawnGameplayActions();
-
-	FInputModeGameAndUI InputMode;
-	InputMode.SetWidgetToFocus(WorldProgressWidget->TakeWidget());
 	InputMode.SetHideCursorDuringCapture(false);
 	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
 	SetInputMode(InputMode);

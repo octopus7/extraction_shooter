@@ -30,6 +30,15 @@ public:
 		TSoftClassPtr<UTunaSweeperInteractionMarkerWidget> InMarkerWidgetClass,
 		TSoftClassPtr<UTunaSweeperSpeechBubbleWidget> InSpeechBubbleWidgetClass);
 
+	void ConfigureSelfDestructDefaults(
+		TSoftClassPtr<UTunaSweeperInteractionMarkerWidget> InMarkerWidgetClass,
+		TSoftClassPtr<UTunaSweeperSpeechBubbleWidget> InSpeechBubbleWidgetClass,
+		int32 InCountdownStartNumber,
+		float InCountdownStepSeconds,
+		float InBoomDisplaySeconds,
+		float InExplosionRadius,
+		float InExplosionDamage);
+
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<USceneComponent> SceneRoot;
