@@ -78,6 +78,18 @@ ATunaSweeperTopDownCharacter::ATunaSweeperTopDownCharacter()
 	TopDownCamera->bUsePawnControlRotation = false;
 	TopDownCamera->FieldOfView = DefaultCameraFOV;
 
+	TopDownCameraModeSettings.TargetArmLength = 1500.0f;
+	TopDownCameraModeSettings.BoomRotation = FRotator(-88.0f, 0.0f, 0.0f);
+	TopDownCameraModeSettings.TargetOffset = FVector::ZeroVector;
+	TopDownCameraModeSettings.DefaultFOV = 70.0f;
+	TopDownCameraModeSettings.AimFOV = 60.0f;
+
+	LowFrontCameraModeSettings.TargetArmLength = 650.0f;
+	LowFrontCameraModeSettings.BoomRotation = FRotator(-18.0f, 0.0f, 0.0f);
+	LowFrontCameraModeSettings.TargetOffset = FVector(0.0f, 0.0f, 88.0f);
+	LowFrontCameraModeSettings.DefaultFOV = 65.0f;
+	LowFrontCameraModeSettings.AimFOV = 60.0f;
+
 	VitalsComponent = CreateDefaultSubobject<UTunaSweeperVitalsComponent>(TEXT("VitalsComponent"));
 	PlayerVisionComponent = CreateDefaultSubobject<UTunaSweeperPlayerVisionComponent>(TEXT("PlayerVisionComponent"));
 
@@ -90,6 +102,7 @@ ATunaSweeperTopDownCharacter::ATunaSweeperTopDownCharacter()
 	ReloadAction = TSoftObjectPtr<UInputAction>(FSoftObjectPath(TEXT("/Game/Input/IA_Reload.IA_Reload")));
 	AmmoSelectAction = TSoftObjectPtr<UInputAction>(FSoftObjectPath(TEXT("/Game/Input/IA_AmmoSelect.IA_AmmoSelect")));
 	AmmoFocusAction = TSoftObjectPtr<UInputAction>(FSoftObjectPath(TEXT("/Game/Input/IA_AmmoFocus.IA_AmmoFocus")));
+	CameraModeAction = TSoftObjectPtr<UInputAction>(FSoftObjectPath(TEXT("/Game/Input/IA_CameraMode.IA_CameraMode")));
 	DefaultWeaponClass = TSoftClassPtr<ATunaSweeperWeapon>(TunaSweeperEquippedWeaponVisual::AssaultRifleClassPath);
 	RespawnMediaSource = TSoftObjectPtr<UMediaSource>(FSoftObjectPath(TEXT("/Game/Movies/MS_Respawn.MS_Respawn")));
 	RespawnTransitionWidgetClass = TSoftClassPtr<UTunaSweeperLevelTransitionWidget>(
@@ -112,7 +125,13 @@ void ATunaSweeperTopDownCharacter::BeginPlay()
 	DefaultCameraFOV = TopDownCamera ? TopDownCamera->FieldOfView : DefaultCameraFOV;
 	CurrentCameraBaseFOV = DefaultCameraFOV;
 	DefaultCameraRelativeRotation = TopDownCamera ? TopDownCamera->GetRelativeRotation() : DefaultCameraRelativeRotation;
-	CurrentCameraAimOffset = CameraBoom ? CameraBoom->TargetOffset : FVector::ZeroVector;
+	DefaultCameraArmLength = CameraBoom ? CameraBoom->TargetArmLength : DefaultCameraArmLength;
+	CurrentCameraArmLength = DefaultCameraArmLength;
+	DefaultCameraBoomRotation = CameraBoom ? CameraBoom->GetRelativeRotation() : DefaultCameraBoomRotation;
+	CurrentCameraBoomRotation = DefaultCameraBoomRotation;
+	DefaultCameraTargetOffset = CameraBoom ? CameraBoom->TargetOffset : DefaultCameraTargetOffset;
+	CurrentCameraModeOffset = DefaultCameraTargetOffset;
+	CurrentCameraAimOffset = FVector::ZeroVector;
 
 	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
 	{
@@ -244,6 +263,11 @@ void ATunaSweeperTopDownCharacter::SetupPlayerInputComponent(UInputComponent* Pl
 	if (UInputAction* LoadedAmmoFocusAction = AmmoFocusAction.LoadSynchronous())
 	{
 		EnhancedInputComponent->BindAction(LoadedAmmoFocusAction, ETriggerEvent::Triggered, this, &ATunaSweeperTopDownCharacter::HandleAmmoFocus);
+	}
+
+	if (UInputAction* LoadedCameraModeAction = CameraModeAction.LoadSynchronous())
+	{
+		EnhancedInputComponent->BindAction(LoadedCameraModeAction, ETriggerEvent::Started, this, &ATunaSweeperTopDownCharacter::HandleCameraMode);
 	}
 }
 
@@ -486,6 +510,33 @@ void ATunaSweeperTopDownCharacter::HandleAmmoFocus(const FInputActionValue& Valu
 	}
 
 	MoveAmmoSelectionFocus(AxisValue > 0.0f ? -1 : 1);
+}
+
+void ATunaSweeperTopDownCharacter::HandleCameraMode(const FInputActionValue& Value)
+{
+	if (bIsDead || IsGameplayActionInputLocked())
+	{
+		return;
+	}
+
+	CyclePlayerCameraMode();
+}
+
+void ATunaSweeperTopDownCharacter::CyclePlayerCameraMode()
+{
+	switch (CurrentCameraMode)
+	{
+	case ETunaSweeperPlayerCameraMode::Default:
+		CurrentCameraMode = ETunaSweeperPlayerCameraMode::TopDown;
+		break;
+	case ETunaSweeperPlayerCameraMode::TopDown:
+		CurrentCameraMode = ETunaSweeperPlayerCameraMode::LowFront;
+		break;
+	case ETunaSweeperPlayerCameraMode::LowFront:
+	default:
+		CurrentCameraMode = ETunaSweeperPlayerCameraMode::Default;
+		break;
+	}
 }
 
 void ATunaSweeperTopDownCharacter::FireWeapon()
@@ -886,6 +937,7 @@ void ATunaSweeperTopDownCharacter::UpdateAimingVisuals(float DeltaSeconds)
 	float HitReactionRollDegrees = 0.0f;
 	float HitReactionFOVDegrees = 0.0f;
 	const FVector HitReactionOffset = UpdateDamageCameraReaction(DeltaSeconds, HitReactionRollDegrees, HitReactionFOVDegrees);
+	const FTunaSweeperPlayerCameraModeSettings CameraModeSettings = ResolveCurrentCameraModeSettings();
 
 	if (!AimDirection.IsNearlyZero())
 	{
@@ -896,7 +948,7 @@ void ATunaSweeperTopDownCharacter::UpdateAimingVisuals(float DeltaSeconds)
 
 	if (TopDownCamera)
 	{
-		const float TargetFOV = bIsAiming ? AimCameraFOV : DefaultCameraFOV;
+		const float TargetFOV = bIsAiming ? CameraModeSettings.AimFOV : CameraModeSettings.DefaultFOV;
 		CurrentCameraBaseFOV = FMath::FInterpTo(CurrentCameraBaseFOV, TargetFOV, DeltaSeconds, CameraInterpSpeed);
 		TopDownCamera->SetFieldOfView(CurrentCameraBaseFOV + HitReactionFOVDegrees);
 
@@ -906,10 +958,52 @@ void ATunaSweeperTopDownCharacter::UpdateAimingVisuals(float DeltaSeconds)
 
 	if (CameraBoom)
 	{
+		CurrentCameraArmLength = FMath::FInterpTo(
+			CurrentCameraArmLength,
+			CameraModeSettings.TargetArmLength,
+			DeltaSeconds,
+			CameraInterpSpeed);
+		CameraBoom->TargetArmLength = CurrentCameraArmLength;
+
+		CurrentCameraBoomRotation = FMath::RInterpTo(
+			CurrentCameraBoomRotation,
+			CameraModeSettings.BoomRotation,
+			DeltaSeconds,
+			CameraInterpSpeed);
+		CameraBoom->SetRelativeRotation(CurrentCameraBoomRotation);
+
+		CurrentCameraModeOffset = FMath::VInterpTo(
+			CurrentCameraModeOffset,
+			CameraModeSettings.TargetOffset,
+			DeltaSeconds,
+			CameraInterpSpeed);
+
 		const FVector AimTargetOffset = bIsAiming ? AimDirection * AimCameraLeadDistance : FVector::ZeroVector;
 		CurrentCameraAimOffset = FMath::VInterpTo(CurrentCameraAimOffset, AimTargetOffset, DeltaSeconds, CameraInterpSpeed);
-		CameraBoom->TargetOffset = CurrentCameraAimOffset + HitReactionOffset;
+		CameraBoom->TargetOffset = CurrentCameraModeOffset + CurrentCameraAimOffset + HitReactionOffset;
 	}
+}
+
+FTunaSweeperPlayerCameraModeSettings ATunaSweeperTopDownCharacter::ResolveCurrentCameraModeSettings() const
+{
+	switch (CurrentCameraMode)
+	{
+	case ETunaSweeperPlayerCameraMode::TopDown:
+		return TopDownCameraModeSettings;
+	case ETunaSweeperPlayerCameraMode::LowFront:
+		return LowFrontCameraModeSettings;
+	case ETunaSweeperPlayerCameraMode::Default:
+	default:
+		break;
+	}
+
+	FTunaSweeperPlayerCameraModeSettings DefaultSettings;
+	DefaultSettings.TargetArmLength = DefaultCameraArmLength;
+	DefaultSettings.BoomRotation = DefaultCameraBoomRotation;
+	DefaultSettings.TargetOffset = DefaultCameraTargetOffset;
+	DefaultSettings.DefaultFOV = DefaultCameraFOV;
+	DefaultSettings.AimFOV = AimCameraFOV;
+	return DefaultSettings;
 }
 
 void ATunaSweeperTopDownCharacter::TriggerDamageCameraReaction(

@@ -27,6 +27,35 @@ enum class ETunaSweeperHitReactionType : uint8
 	Heavy
 };
 
+UENUM(BlueprintType)
+enum class ETunaSweeperPlayerCameraMode : uint8
+{
+	Default,
+	TopDown,
+	LowFront
+};
+
+USTRUCT(BlueprintType)
+struct TUNASWEEPER_API FTunaSweeperPlayerCameraModeSettings
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Camera", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float TargetArmLength = 1200.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Camera")
+	FRotator BoomRotation = FRotator(-60.0f, 0.0f, 0.0f);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Camera")
+	FVector TargetOffset = FVector::ZeroVector;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Camera", meta = (ClampMin = "5.0", ClampMax = "170.0", UIMin = "5.0", UIMax = "170.0"))
+	float DefaultFOV = 70.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Camera", meta = (ClampMin = "5.0", ClampMax = "170.0", UIMin = "5.0", UIMax = "170.0"))
+	float AimFOV = 55.0f;
+};
+
 USTRUCT(BlueprintType)
 struct TUNASWEEPER_API FTunaSweeperCameraHitReactionSettings
 {
@@ -90,6 +119,12 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Vision")
 	UTunaSweeperPlayerVisionComponent* GetPlayerVisionComponent() const { return PlayerVisionComponent; }
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Camera")
+	ETunaSweeperPlayerCameraMode GetPlayerCameraMode() const { return CurrentCameraMode; }
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Camera")
+	void CyclePlayerCameraMode();
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Death")
 	bool IsDead() const { return bIsDead; }
@@ -165,6 +200,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	TSoftObjectPtr<UInputAction> AmmoFocusAction;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+	TSoftObjectPtr<UInputAction> CameraModeAction;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat")
 	TSoftClassPtr<ATunaSweeperWeapon> DefaultWeaponClass;
 
@@ -185,6 +223,12 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Camera")
 	float CameraInterpSpeed = 10.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Camera|Modes")
+	FTunaSweeperPlayerCameraModeSettings TopDownCameraModeSettings;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Camera|Modes")
+	FTunaSweeperPlayerCameraModeSettings LowFrontCameraModeSettings;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Camera|Hit Reaction")
 	FTunaSweeperCameraHitReactionSettings DefaultCameraHitReaction;
@@ -227,6 +271,7 @@ private:
 	void HandleReload(const FInputActionValue& Value);
 	void HandleAmmoSelect(const FInputActionValue& Value);
 	void HandleAmmoFocus(const FInputActionValue& Value);
+	void HandleCameraMode(const FInputActionValue& Value);
 	void FireWeapon();
 	bool IsGameplayActionInputLocked() const;
 	bool CanUseSelectedWeaponSlot();
@@ -241,6 +286,7 @@ private:
 	void RefreshCharacterVisualVisibility();
 	void UpdateAimingVisuals(float DeltaSeconds);
 	void UpdateCarryWeightMovementSpeed();
+	FTunaSweeperPlayerCameraModeSettings ResolveCurrentCameraModeSettings() const;
 	void TriggerDamageCameraReaction(float DamageAmount, FDamageEvent const& DamageEvent, AActor* DamageCauser);
 	ETunaSweeperHitReactionType ResolveDamageCameraReactionType(FDamageEvent const& DamageEvent, AActor* DamageCauser) const;
 	FTunaSweeperCameraHitReactionSettings ResolveDamageCameraReactionSettings(FDamageEvent const& DamageEvent, AActor* DamageCauser) const;
@@ -258,13 +304,20 @@ private:
 	FVector AimWorldPoint = FVector::ZeroVector;
 	FVector AimDirection = FVector::ForwardVector;
 	FRotator DefaultCameraRelativeRotation = FRotator::ZeroRotator;
+	FRotator DefaultCameraBoomRotation = FRotator(-60.0f, 0.0f, 0.0f);
+	FRotator CurrentCameraBoomRotation = FRotator(-60.0f, 0.0f, 0.0f);
+	FVector DefaultCameraTargetOffset = FVector::ZeroVector;
+	FVector CurrentCameraModeOffset = FVector::ZeroVector;
 	FVector CurrentCameraAimOffset = FVector::ZeroVector;
 	TArray<int32> AmmoSelectionItemIds;
 	FTunaSweeperCameraHitReactionSettings ActiveCameraHitReaction;
+	ETunaSweeperPlayerCameraMode CurrentCameraMode = ETunaSweeperPlayerCameraMode::Default;
 	FVector CameraHitReactionDirection = FVector::ForwardVector;
 	int32 SelectedWeaponSlotNumber = 0;
 	int32 PendingReloadAmmoItemId = INDEX_NONE;
 	int32 AmmoSelectionFocusIndex = INDEX_NONE;
+	float DefaultCameraArmLength = 1200.0f;
+	float CurrentCameraArmLength = 1200.0f;
 	float ReloadStartWorldSeconds = 0.0f;
 	float ReloadDurationSeconds = 0.0f;
 	float CurrentCameraBaseFOV = 0.0f;
