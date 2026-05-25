@@ -1,0 +1,15 @@
+[
+  {
+    "level_name": "BunkerMap",
+    "spawn_id": "TS_Bunker_LED_Robot",
+    "location": [700.0, -320.0, 0.0],
+    "rotation": [0.0, 180.0, 0.0],
+    "scale": [1.0, 1.0, 1.0],
+    "expression_preset_file": "Data/LedExpressionPresets.txt",
+    "initial_expression": "Smile",
+    "led_color": [1.0, 0.78, 0.06, 1.0],
+    "off_color": [0.0, 0.0, 0.0, 0.0],
+    "led_pitch": 2.0,
+    "led_radius": 0.68
+  }
+]
