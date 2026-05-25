@@ -8,6 +8,7 @@ class AActor;
 class ATunaSweeperEnemyCharacter;
 class ATunaSweeperLootContainerActor;
 class ATunaSweeperTransparentObstacleActor;
+class ATunaSweeperWarpPointActor;
 class ATunaSweeperWorldProgressActor;
 class UMaterialInterface;
 class UWorld;
@@ -39,6 +40,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Raid Runtime Spawn")
 	bool LoadWorldProgressObjectSpawnData(bool bForceReload = false);
 
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Raid Runtime Spawn")
+	bool LoadWarpPointSpawnData(bool bForceReload = false);
+
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Enemy Spawn")
 	bool IsEnemySpawnDataLoaded() const { return bEnemySpawnDataLoaded; }
 
@@ -50,6 +54,9 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Raid Runtime Spawn")
 	bool IsWorldProgressObjectSpawnDataLoaded() const { return bWorldProgressObjectSpawnDataLoaded; }
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Raid Runtime Spawn")
+	bool IsWarpPointSpawnDataLoaded() const { return bWarpPointSpawnDataLoaded; }
 
 private:
 	struct FEnemySpawnDefinition
@@ -104,21 +111,38 @@ private:
 		int32 InitialProgressQuantity = 0;
 	};
 
+	struct FWarpPointSpawnDefinition
+	{
+		FName LevelName;
+		FName WarpPointId;
+		FName TargetWarpPointId;
+		TSoftClassPtr<ATunaSweeperWarpPointActor> WarpPointClass;
+		FVector Location = FVector::ZeroVector;
+		FRotator Rotation = FRotator::ZeroRotator;
+		FVector VisualScale = FVector(1.2f, 1.2f, 1.2f);
+		FVector VisualRelativeLocation = FVector::ZeroVector;
+		FVector ExitOffset = FVector(160.0f, 0.0f, 0.0f);
+		bool bUseTargetRotation = true;
+	};
+
 	void HandlePostLoadMapWithWorld(UWorld* LoadedWorld);
 	void ResetLoadedEnemySpawnData();
 	void ResetLoadedLootContainerSpawnData();
 	void ResetLoadedTransparentObstacleSpawnData();
 	void ResetLoadedWorldProgressObjectSpawnData();
+	void ResetLoadedWarpPointSpawnData();
 	FString GetEnemySpawnJsonPath() const;
 	FString GetLootContainerSpawnJsonPath() const;
 	FString GetTransparentObstacleSpawnJsonPath() const;
 	FString GetWorldProgressObjectSpawnJsonPath() const;
+	FString GetWarpPointSpawnJsonPath() const;
 	bool DoesLevelNameMatchWorld(FName LevelName, const UWorld* World) const;
 
 	TArray<FEnemySpawnDefinition> EnemySpawnDefinitions;
 	TArray<FLootContainerSpawnDefinition> LootContainerSpawnDefinitions;
 	TArray<FTransparentObstacleSpawnDefinition> TransparentObstacleSpawnDefinitions;
 	TArray<FWorldProgressObjectSpawnDefinition> WorldProgressObjectSpawnDefinitions;
+	TArray<FWarpPointSpawnDefinition> WarpPointSpawnDefinitions;
 
 	TWeakObjectPtr<UWorld> LastSpawnedWorld;
 	FDelegateHandle PostLoadMapHandle;
@@ -126,4 +150,5 @@ private:
 	bool bLootContainerSpawnDataLoaded = false;
 	bool bTransparentObstacleSpawnDataLoaded = false;
 	bool bWorldProgressObjectSpawnDataLoaded = false;
+	bool bWarpPointSpawnDataLoaded = false;
 };

@@ -2,16 +2,20 @@
 
 #include "AI/TunaSweeperEnemyCharacter.h"
 #include "Dom/JsonObject.h"
+#include "Engine/StaticMesh.h"
 #include "Engine/World.h"
 #include "Interaction/TunaSweeperLootContainerActor.h"
 #include "Interaction/TunaSweeperTransparentObstacleActor.h"
+#include "Interaction/TunaSweeperWarpPointActor.h"
 #include "Interaction/TunaSweeperWorldProgressActor.h"
 #include "Kismet/GameplayStatics.h"
+#include "Materials/MaterialInterface.h"
 #include "Misc/FileHelper.h"
 #include "Misc/PackageName.h"
 #include "Misc/Paths.h"
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
+#include "UI/TunaSweeperInteractionMarkerWidget.h"
 #include "UObject/UObjectGlobals.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogTunaSweeperEnemySpawn, Log, All);
@@ -22,11 +26,15 @@ namespace TunaSweeperEnemySpawn
 	const TCHAR* LootContainerSpawnsJsonRelativePath = TEXT("Data/LootContainerSpawns.json");
 	const TCHAR* TransparentObstacleSpawnsJsonRelativePath = TEXT("Data/TransparentObstacleSpawns.json");
 	const TCHAR* WorldProgressObjectSpawnsJsonRelativePath = TEXT("Data/WorldProgressObjectSpawns.json");
+	const TCHAR* WarpPointSpawnsJsonRelativePath = TEXT("Data/WarpPointSpawns.json");
 	const TCHAR* DefaultEnemyClassPath = TEXT("/Game/Characters/Enemy/BP_TunaSweeperEnemy.BP_TunaSweeperEnemy_C");
 	const TCHAR* DefaultLootContainerClassPath = TEXT("/Game/Interaction/BP_LootContainer.BP_LootContainer_C");
 	const TCHAR* DefaultTransparentObstacleClassPath = TEXT("/Game/Interaction/BP_TransparentObstacle.BP_TransparentObstacle_C");
 	const TCHAR* DefaultWorldProgressActorClassPath = TEXT("/Game/Interaction/BP_WorldProgress_BrokenBridge.BP_WorldProgress_BrokenBridge_C");
 	const TCHAR* DefaultWorldProgressCompletedActorClassPath = TEXT("/Game/Interaction/BP_WorldProgress_RepairedBridge.BP_WorldProgress_RepairedBridge_C");
+	const TCHAR* DefaultWarpPointClassPath = TEXT("/Game/Interaction/BP_WarpPoint.BP_WarpPoint_C");
+	const TCHAR* DefaultWarpPointMaterialPath = TEXT("/Game/Interaction/M_WarpPointEnergy.M_WarpPointEnergy");
+	const TCHAR* DefaultWarpPointSphereMeshPath = TEXT("/Engine/BasicShapes/Sphere.Sphere");
 
 	FString NormalizeLevelName(const FString& RawLevelName)
 	{
@@ -103,6 +111,7 @@ void UTunaSweeperEnemySpawnSubsystem::Deinitialize()
 	ResetLoadedLootContainerSpawnData();
 	ResetLoadedTransparentObstacleSpawnData();
 	ResetLoadedWorldProgressObjectSpawnData();
+	ResetLoadedWarpPointSpawnData();
 	LastSpawnedWorld.Reset();
 	Super::Deinitialize();
 }
@@ -128,7 +137,8 @@ bool UTunaSweeperEnemySpawnSubsystem::EnsureRaidRuntimeActorsSpawnedForWorld(UWo
 	const bool bLoadedLootContainers = LoadLootContainerSpawnData(false);
 	const bool bLoadedTransparentObstacles = LoadTransparentObstacleSpawnData(false);
 	const bool bLoadedWorldProgressObjects = LoadWorldProgressObjectSpawnData(false);
-	if (!bLoadedEnemies && !bLoadedLootContainers && !bLoadedTransparentObstacles && !bLoadedWorldProgressObjects)
+	const bool bLoadedWarpPoints = LoadWarpPointSpawnData(false);
+	if (!bLoadedEnemies && !bLoadedLootContainers && !bLoadedTransparentObstacles && !bLoadedWorldProgressObjects && !bLoadedWarpPoints)
 	{
 		return false;
 	}
@@ -315,14 +325,69 @@ bool UTunaSweeperEnemySpawnSubsystem::EnsureRaidRuntimeActorsSpawnedForWorld(UWo
 		}
 	}
 
+	int32 SpawnedWarpPointCount = 0;
+	if (bLoadedWarpPoints)
+	{
+		for (const FWarpPointSpawnDefinition& SpawnDefinition : WarpPointSpawnDefinitions)
+		{
+			if (!DoesLevelNameMatchWorld(SpawnDefinition.LevelName, World))
+			{
+				continue;
+			}
+
+			TSubclassOf<ATunaSweeperWarpPointActor> LoadedWarpPointClass =
+				SpawnDefinition.WarpPointClass.LoadSynchronous();
+			if (!LoadedWarpPointClass)
+			{
+				UE_LOG(
+					LogTunaSweeperEnemySpawn,
+					Warning,
+					TEXT("Warp point class failed to load for level %s. Falling back to native warp point actor."),
+					*SpawnDefinition.LevelName.ToString());
+				LoadedWarpPointClass = ATunaSweeperWarpPointActor::StaticClass();
+			}
+
+			const FTransform SpawnTransform(SpawnDefinition.Rotation, SpawnDefinition.Location);
+			ATunaSweeperWarpPointActor* SpawnedWarpPoint =
+				World->SpawnActorDeferred<ATunaSweeperWarpPointActor>(
+					LoadedWarpPointClass,
+					SpawnTransform,
+					nullptr,
+					nullptr,
+					ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+			if (SpawnedWarpPoint)
+			{
+				SpawnedWarpPoint->ConfigureWarpPointDefaults(
+					SpawnDefinition.WarpPointId,
+					SpawnDefinition.TargetWarpPointId,
+					FText::FromString(TEXT("\uC0C1\uD638\uC791\uC6A9")),
+					TSoftClassPtr<UTunaSweeperInteractionMarkerWidget>(
+						FSoftObjectPath(TEXT("/Game/UI/WBP_InteractionMarker.WBP_InteractionMarker_C"))),
+					TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath(TunaSweeperEnemySpawn::DefaultWarpPointMaterialPath)),
+					TSoftObjectPtr<UStaticMesh>(FSoftObjectPath(TunaSweeperEnemySpawn::DefaultWarpPointSphereMeshPath)),
+					SpawnDefinition.VisualScale,
+					SpawnDefinition.VisualRelativeLocation,
+					SpawnDefinition.ExitOffset,
+					SpawnDefinition.bUseTargetRotation);
+				if (!SpawnDefinition.WarpPointId.IsNone())
+				{
+					SpawnedWarpPoint->Tags.AddUnique(SpawnDefinition.WarpPointId);
+				}
+				UGameplayStatics::FinishSpawningActor(SpawnedWarpPoint, SpawnTransform);
+				++SpawnedWarpPointCount;
+			}
+		}
+	}
+
 	UE_LOG(
 		LogTunaSweeperEnemySpawn,
 		Log,
-		TEXT("Spawned %d enemies, %d loot containers, %d transparent obstacles, and %d world progress objects for level %s."),
+		TEXT("Spawned %d enemies, %d loot containers, %d transparent obstacles, %d world progress objects, and %d warp points for level %s."),
 		SpawnedCount,
 		SpawnedLootContainerCount,
 		SpawnedTransparentObstacleCount,
 		SpawnedWorldProgressObjectCount,
+		SpawnedWarpPointCount,
 		*TunaSweeperEnemySpawn::NormalizeLevelName(World->GetMapName()));
 	return true;
 }
@@ -737,6 +802,109 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadWorldProgressObjectSpawnData(bool bFor
 	return true;
 }
 
+bool UTunaSweeperEnemySpawnSubsystem::LoadWarpPointSpawnData(bool bForceReload)
+{
+	if (bWarpPointSpawnDataLoaded && !bForceReload)
+	{
+		return true;
+	}
+
+	ResetLoadedWarpPointSpawnData();
+
+	FString JsonContent;
+	const FString WarpPointSpawnJsonPath = GetWarpPointSpawnJsonPath();
+	if (!FFileHelper::LoadFileToString(JsonContent, *WarpPointSpawnJsonPath))
+	{
+		UE_LOG(LogTunaSweeperEnemySpawn, Error, TEXT("Failed to read warp point spawn JSON: %s"), *WarpPointSpawnJsonPath);
+		return false;
+	}
+
+	TArray<TSharedPtr<FJsonValue>> JsonRows;
+	const TSharedRef<TJsonReader<>> JsonReader = TJsonReaderFactory<>::Create(JsonContent);
+	if (!FJsonSerializer::Deserialize(JsonReader, JsonRows))
+	{
+		UE_LOG(LogTunaSweeperEnemySpawn, Error, TEXT("Failed to parse warp point spawn JSON: %s"), *WarpPointSpawnJsonPath);
+		return false;
+	}
+
+	bool bHasValidRows = false;
+	for (int32 RowIndex = 0; RowIndex < JsonRows.Num(); ++RowIndex)
+	{
+		const TSharedPtr<FJsonObject>* JsonObjectPtr = nullptr;
+		if (!JsonRows[RowIndex].IsValid() || !JsonRows[RowIndex]->TryGetObject(JsonObjectPtr) ||
+			!JsonObjectPtr || !JsonObjectPtr->IsValid())
+		{
+			UE_LOG(LogTunaSweeperEnemySpawn, Warning, TEXT("Skipping warp point spawn row %d: row is not an object."), RowIndex);
+			continue;
+		}
+
+		const TSharedPtr<FJsonObject>& JsonObject = *JsonObjectPtr;
+		FString LevelName;
+		FString WarpPointId;
+		FString TargetWarpPointId;
+		FString WarpPointClassPath;
+		FVector Location = FVector::ZeroVector;
+		FRotator Rotation = FRotator::ZeroRotator;
+		FVector VisualScale(1.2f, 1.2f, 1.2f);
+		FVector VisualRelativeLocation = FVector::ZeroVector;
+		FVector ExitOffset(160.0f, 0.0f, 0.0f);
+		bool bUseTargetRotation = true;
+		if (!JsonObject->TryGetStringField(TEXT("level_name"), LevelName) ||
+			!JsonObject->TryGetStringField(TEXT("warp_point_id"), WarpPointId) ||
+			!JsonObject->TryGetStringField(TEXT("target_warp_point_id"), TargetWarpPointId) ||
+			!TunaSweeperEnemySpawn::TryReadVectorField(JsonObject, TEXT("location"), Location))
+		{
+			UE_LOG(LogTunaSweeperEnemySpawn, Warning, TEXT("Skipping warp point spawn row %d: required field is missing."), RowIndex);
+			continue;
+		}
+
+		JsonObject->TryGetStringField(TEXT("warp_point_class"), WarpPointClassPath);
+		JsonObject->TryGetBoolField(TEXT("use_target_rotation"), bUseTargetRotation);
+		TunaSweeperEnemySpawn::TryReadRotatorField(JsonObject, TEXT("rotation"), Rotation);
+		TunaSweeperEnemySpawn::TryReadVectorField(JsonObject, TEXT("visual_scale"), VisualScale);
+		TunaSweeperEnemySpawn::TryReadVectorField(JsonObject, TEXT("visual_relative_location"), VisualRelativeLocation);
+		TunaSweeperEnemySpawn::TryReadVectorField(JsonObject, TEXT("exit_offset"), ExitOffset);
+
+		FWarpPointSpawnDefinition SpawnDefinition;
+		SpawnDefinition.LevelName = FName(*LevelName.TrimStartAndEnd());
+		SpawnDefinition.WarpPointId = FName(*WarpPointId.TrimStartAndEnd());
+		SpawnDefinition.TargetWarpPointId = FName(*TargetWarpPointId.TrimStartAndEnd());
+		SpawnDefinition.WarpPointClass = TSoftClassPtr<ATunaSweeperWarpPointActor>(
+			FSoftObjectPath(WarpPointClassPath.TrimStartAndEnd().IsEmpty()
+				? FString(TunaSweeperEnemySpawn::DefaultWarpPointClassPath)
+				: WarpPointClassPath.TrimStartAndEnd()));
+		SpawnDefinition.Location = Location;
+		SpawnDefinition.Rotation = Rotation;
+		SpawnDefinition.VisualScale = FVector(
+			FMath::Max(0.01f, VisualScale.X),
+			FMath::Max(0.01f, VisualScale.Y),
+			FMath::Max(0.01f, VisualScale.Z));
+		SpawnDefinition.VisualRelativeLocation = VisualRelativeLocation;
+		SpawnDefinition.ExitOffset = ExitOffset;
+		SpawnDefinition.bUseTargetRotation = bUseTargetRotation;
+
+		if (SpawnDefinition.LevelName.IsNone() ||
+			SpawnDefinition.WarpPointId.IsNone() ||
+			SpawnDefinition.TargetWarpPointId.IsNone())
+		{
+			UE_LOG(LogTunaSweeperEnemySpawn, Warning, TEXT("Skipping warp point spawn row %d: row has invalid identifiers."), RowIndex);
+			continue;
+		}
+
+		WarpPointSpawnDefinitions.Add(SpawnDefinition);
+		bHasValidRows = true;
+	}
+
+	if (!bHasValidRows)
+	{
+		UE_LOG(LogTunaSweeperEnemySpawn, Error, TEXT("Warp point spawn JSON has no valid rows: %s"), *WarpPointSpawnJsonPath);
+		return false;
+	}
+
+	bWarpPointSpawnDataLoaded = true;
+	return true;
+}
+
 void UTunaSweeperEnemySpawnSubsystem::HandlePostLoadMapWithWorld(UWorld* LoadedWorld)
 {
 	EnsureRaidRuntimeActorsSpawnedForWorld(LoadedWorld);
@@ -766,6 +934,12 @@ void UTunaSweeperEnemySpawnSubsystem::ResetLoadedWorldProgressObjectSpawnData()
 	bWorldProgressObjectSpawnDataLoaded = false;
 }
 
+void UTunaSweeperEnemySpawnSubsystem::ResetLoadedWarpPointSpawnData()
+{
+	WarpPointSpawnDefinitions.Reset();
+	bWarpPointSpawnDataLoaded = false;
+}
+
 FString UTunaSweeperEnemySpawnSubsystem::GetEnemySpawnJsonPath() const
 {
 	return FPaths::Combine(FPaths::ProjectContentDir(), TunaSweeperEnemySpawn::EnemySpawnsJsonRelativePath);
@@ -784,6 +958,11 @@ FString UTunaSweeperEnemySpawnSubsystem::GetTransparentObstacleSpawnJsonPath() c
 FString UTunaSweeperEnemySpawnSubsystem::GetWorldProgressObjectSpawnJsonPath() const
 {
 	return FPaths::Combine(FPaths::ProjectContentDir(), TunaSweeperEnemySpawn::WorldProgressObjectSpawnsJsonRelativePath);
+}
+
+FString UTunaSweeperEnemySpawnSubsystem::GetWarpPointSpawnJsonPath() const
+{
+	return FPaths::Combine(FPaths::ProjectContentDir(), TunaSweeperEnemySpawn::WarpPointSpawnsJsonRelativePath);
 }
 
 bool UTunaSweeperEnemySpawnSubsystem::DoesLevelNameMatchWorld(FName LevelName, const UWorld* World) const

@@ -11,6 +11,7 @@
 #include "Interaction/TunaSweeperPersistentDoorActor.h"
 #include "Interaction/TunaSweeperPickupItemActor.h"
 #include "Interaction/TunaSweeperSelfDestructInteractableActor.h"
+#include "Interaction/TunaSweeperWarpPointActor.h"
 #include "Interaction/TunaSweeperWorldProgressActor.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/TunaSweeperPlayerController.h"
@@ -41,6 +42,8 @@ namespace TunaSweeperInteractionQuestEvents
 			return FName(TEXT("world_progress"));
 		case ETunaSweeperInteractionType::PersistentDoor:
 			return FName(TEXT("persistent_door"));
+		case ETunaSweeperInteractionType::WarpPoint:
+			return FName(TEXT("warp_point"));
 		default:
 			return NAME_None;
 		}
@@ -130,6 +133,9 @@ bool UTunaSweeperInteractionSubsystem::RequestInteraction(UTunaSweeperInteractab
 		break;
 	case ETunaSweeperInteractionType::PersistentDoor:
 		bHandled = HandlePersistentDoorInteraction(Interactable);
+		break;
+	case ETunaSweeperInteractionType::WarpPoint:
+		bHandled = HandleWarpPointInteraction(Interactable, InstigatorPawn);
 		break;
 	default:
 		return false;
@@ -334,6 +340,16 @@ bool UTunaSweeperInteractionSubsystem::HandlePersistentDoorInteraction(UTunaSwee
 		? Cast<ATunaSweeperPersistentDoorActor>(Interactable->GetOwner())
 		: nullptr;
 	return DoorActor && DoorActor->OpenDoor(true);
+}
+
+bool UTunaSweeperInteractionSubsystem::HandleWarpPointInteraction(
+	UTunaSweeperInteractableComponent* Interactable,
+	APawn* InstigatorPawn)
+{
+	ATunaSweeperWarpPointActor* WarpPointActor = Interactable
+		? Cast<ATunaSweeperWarpPointActor>(Interactable->GetOwner())
+		: nullptr;
+	return WarpPointActor && WarpPointActor->WarpInstigator(InstigatorPawn);
 }
 
 void UTunaSweeperInteractionSubsystem::RefreshFocusedInteractable()
