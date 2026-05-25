@@ -1,6 +1,7 @@
 #include "Character/TunaSweeperLedRobotCharacterActor.h"
 
 #include "Component/TunaSweeperLedExpressionComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "Components/SceneComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMesh.h"
@@ -19,6 +20,17 @@ ATunaSweeperLedRobotCharacterActor::ATunaSweeperLedRobotCharacterActor()
 	BodyMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	BodyMesh->SetGenerateOverlapEvents(false);
 	BodyMesh->SetCastShadow(true);
+
+	BodyCollision = CreateDefaultSubobject<UCapsuleComponent>(TEXT("BodyCollision"));
+	BodyCollision->SetupAttachment(SceneRoot);
+	BodyCollision->SetCapsuleSize(BodyCollisionRadius, BodyCollisionHalfHeight);
+	BodyCollision->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	BodyCollision->SetCollisionObjectType(ECC_WorldDynamic);
+	BodyCollision->SetCollisionResponseToAllChannels(ECR_Ignore);
+	BodyCollision->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
+	BodyCollision->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
+	BodyCollision->SetGenerateOverlapEvents(false);
+	BodyCollision->CanCharacterStepUpOn = ECB_No;
 
 	ExpressionComponent = CreateDefaultSubobject<UTunaSweeperLedExpressionComponent>(TEXT("ExpressionComponent"));
 	ExpressionComponent->SetupAttachment(SceneRoot);
@@ -109,6 +121,21 @@ void ATunaSweeperLedRobotCharacterActor::RefreshRobotVisuals()
 		BodyMesh->SetRelativeScale3D(BodyScale);
 		BodyMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		BodyMesh->SetGenerateOverlapEvents(false);
+	}
+
+	if (BodyCollision)
+	{
+		BodyCollision->SetRelativeLocation(BodyRelativeLocation);
+		BodyCollision->SetCapsuleSize(
+			FMath::Max(1.0f, BodyCollisionRadius),
+			FMath::Max(1.0f, BodyCollisionHalfHeight));
+		BodyCollision->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		BodyCollision->SetCollisionObjectType(ECC_WorldDynamic);
+		BodyCollision->SetCollisionResponseToAllChannels(ECR_Ignore);
+		BodyCollision->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
+		BodyCollision->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
+		BodyCollision->SetGenerateOverlapEvents(false);
+		BodyCollision->CanCharacterStepUpOn = ECB_No;
 	}
 
 	if (ExpressionComponent)

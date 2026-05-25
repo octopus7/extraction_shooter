@@ -5,6 +5,7 @@
 #include "TunaSweeperLedRobotCharacterActor.generated.h"
 
 class UMaterialInterface;
+class UCapsuleComponent;
 class USceneComponent;
 class UStaticMesh;
 class UStaticMeshComponent;
@@ -52,6 +53,9 @@ private:
 	TObjectPtr<UStaticMeshComponent> BodyMesh;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LED Robot", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UCapsuleComponent> BodyCollision;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LED Robot", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UTunaSweeperLedExpressionComponent> ExpressionComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LED Robot", meta = (AllowPrivateAccess = "true"))
@@ -71,6 +75,12 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LED Robot|Body", meta = (AllowPrivateAccess = "true"))
 	FVector BodyScale = FVector(0.82f, 1.70f, 1.80f);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LED Robot|Collision", meta = (AllowPrivateAccess = "true", ClampMin = "1.0"))
+	float BodyCollisionRadius = 86.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LED Robot|Collision", meta = (AllowPrivateAccess = "true", ClampMin = "1.0"))
+	float BodyCollisionHalfHeight = 90.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LED Robot|Face", meta = (AllowPrivateAccess = "true"))
 	FVector FaceRelativeLocation = FVector(52.0f, 0.0f, 122.0f);
