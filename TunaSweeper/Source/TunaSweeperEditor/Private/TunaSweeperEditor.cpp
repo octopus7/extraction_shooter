@@ -7,6 +7,7 @@
 #include "AutomatedAssetImportData.h"
 #include "Blueprint/WidgetTree.h"
 #include "Character/TunaSweeperQuestNpcActor.h"
+#include "Character/TunaSweeperLedRobotCharacterActor.h"
 #include "Character/TunaSweeperTopDownCharacter.h"
 #include "Components/Border.h"
 #include "Components/Button.h"
@@ -135,6 +136,7 @@ namespace TunaSweeperEditorSetup
 	const FString LumberjackMeleeSwingArcAssetTaskId = TEXT("2026-05-20_CreateLumberjackMeleeSwingArcAssetsV2");
 	const FString ExperimentalVegetationAssetTaskId = TEXT("2026-05-24_CreateExperimentalVegetationStaticMeshV4");
 	const FString CoverPointAssetTaskId = TEXT("2026-05-16_CreateCoverPointBlueprintV1");
+	const FString CanBotBlueprintTaskId = TEXT("2026-05-25_CreateCanBotBlueprintV1");
 	const FString GameInstanceAssetPath = TEXT("/Game/Core");
 	const FString GameInstanceAssetName = TEXT("BP_TunaSweeperGameInstance");
 	const FString GameModeAssetName = TEXT("BP_TunaSweeperGameMode");
@@ -142,6 +144,8 @@ namespace TunaSweeperEditorSetup
 	const FString PlayerAssetName = TEXT("BP_TunaSweeperPlayerCharacter");
 	const FString NpcAssetPath = TEXT("/Game/Characters/NPC");
 	const FString InstructorQuestNpcAssetName = TEXT("BP_NPC_InstructorQuest");
+	const FString CanBotAssetPath = TEXT("/Game/Characters/CanBot");
+	const FString CanBotAssetName = TEXT("BP_CanBot");
 	const FString EnemyAssetPath = TEXT("/Game/Characters/Enemy");
 	const FString EnemyAssetName = TEXT("BP_TunaSweeperEnemy");
 	const FString EnemyBodyMaterialAssetName = TEXT("M_Enemy_Red");
@@ -1682,6 +1686,11 @@ namespace TunaSweeperEditorSetup
 		}
 
 		return ConfigureGameModeBlueprint(GameModeBlueprint, PlayerBlueprint) && SetProjectGameModeToBlueprint();
+	}
+
+	bool EnsureCanBotBlueprint()
+	{
+		return EnsureBlueprint(CanBotAssetPath, CanBotAssetName, ATunaSweeperLedRobotCharacterActor::StaticClass()) != nullptr;
 	}
 
 	bool EnsureEnemyVisualMaterialAssets()
@@ -7538,6 +7547,19 @@ public:
 			{
 				return TunaSweeperEditorSetup::EnsureTopDownShooterAssets();
 			});
+
+		const bool bCanBotBlueprintTaskRan = FTunaSweeperEditorRunOnce::Run(
+			TunaSweeperEditorSetup::CanBotBlueprintTaskId,
+			[]()
+			{
+				return TunaSweeperEditorSetup::EnsureCanBotBlueprint();
+			});
+		if ((bCanBotBlueprintTaskRan || FTunaSweeperEditorRunOnce::HasCompleted(TunaSweeperEditorSetup::CanBotBlueprintTaskId)) &&
+			FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperCanBotSetupQuit")))
+		{
+			FPlatformMisc::RequestExit(false);
+			return;
+		}
 
 		FTunaSweeperEditorRunOnce::Run(
 			TunaSweeperEditorSetup::EnemyVisualMaterialTaskId,

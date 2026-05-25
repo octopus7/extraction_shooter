@@ -42,7 +42,9 @@ private:
 		float LedPitch = 2.0f;
 		float LedRadius = 0.68f;
 		bool bExpressionDemoMode = false;
+		bool bHasExpressionDemoModeOverride = false;
 		float ExpressionDemoIntervalSeconds = 2.0f;
+		bool bHasExpressionDemoIntervalOverride = false;
 		TSoftObjectPtr<UMaterialInterface> BodyMaterial;
 	};
 

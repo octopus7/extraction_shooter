@@ -42,7 +42,7 @@ public:
 	void SetExpressionDemoModeEnabled(bool bEnabled);
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|LED Robot")
-	bool IsExpressionDemoModeEnabled() const { return bExpressionDemoMode; }
+	bool IsExpressionDemoModeEnabled() const;
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|LED Robot")
 	FName GetRobotId() const { return RobotId; }
@@ -56,6 +56,7 @@ protected:
 
 private:
 	void RefreshRobotVisuals();
+	void RefreshExpressionDemoSettings();
 	void UpdatePlayerLookAt(float DeltaSeconds);
 	bool TryGetPlayerLookYaw(float& OutYaw, float& OutDistance2D) const;
 	float ResolveNonMechanicalYawOffset(float DeltaSeconds);

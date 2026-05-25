@@ -732,3 +732,15 @@ A. 현재 커스텀 Slate 메시 경로는 기존 텍스처 `BlurRadius`를 쓰�
 Q. 64x16 매트릭스로 구성된 로봇 LED 표정 제어용 컴포넌트는 어떤 구현이 좋은가? 1D 텍스트 프리셋으로 표정을 넣고, 스페이스나 `.`은 꺼짐, `O`, `*`, `#` 같은 예약 문자는 켜짐인 2상태 구조이며, 색상값은 변수로 조정 가능해야 한다. 코드로 메시를 만들고 버텍스 컬러로 제어하는 방식이 가장 무난한가?
 
 A. 64x16이면 총 1024셀이라 코드 생성 메시와 버텍스 컬러 방식이 가장 단순하고 안정적이다. LED 하나를 원형 또는 라운드 사각 쿼드로 만들고, 전체를 단일 커스텀/프로시저럴 메시 섹션으로 묶은 뒤 켜진 셀은 `LedColor * Intensity`, 꺼진 셀은 거의 검정 또는 낮은 알파로 vertex color를 넣는 구조가 좋다. 프리셋은 `FName ExpressionName -> FString Pattern` 맵으로 들고, 파서는 64*16 길이의 1D 문자열을 row-major로 읽어 `.`과 공백만 off, 예약된 on 문자 집합은 on으로 처리하면 된다. 블룸과 발광은 버텍스 컬러를 Emissive에 연결한 Unlit 머티리얼에서 처리하고, 색상/강도/셀 간격/셀 크기/패널 크기는 컴포넌트 UPROPERTY로 노출하는 것이 적당하다.
+
+## 2026-05-25 23:02:46 (소요시간: 1분 미만)
+
+Q. `TS_`는 BP가 없다는 뜻인가?
+
+A. 아니다. 현재 `TS_`는 TunaSweeper 또는 프로젝트 고유 런타임 식별자/태그 프리픽스로 쓰는 것이 맞고, Blueprint 유무를 뜻하지 않는다. Blueprint 클래스/애셋은 보통 `BP_` 프리픽스를 쓰며, 벙커 스폰 JSON에서 `actor_class`가 비어 있으면 `TS_` 때문이 아니라 코드가 네이티브 `ATunaSweeperLedRobotCharacterActor`로 폴백한다.
+
+## 2026-05-25 23:03:18 (소요시간: 1분 미만)
+
+Q. 캔봇 BP는 어디에 있는가?
+
+A. 현재 프로젝트에는 캔봇 전용 BP 애셋이 없다. 벙커 캔봇은 `ATunaSweeperLedRobotCharacterActor` 네이티브 C++ 액터가 `TunaSweeperBunkerRuntimeSpawnSubsystem`에서 JSON 런타임 스폰으로 올라가는 구조다. `BunkerCharacterSpawns.json`의 `actor_class`를 비워두면 네이티브 클래스로 스폰되고, 별도 BP를 만들면 해당 BP 클래스 경로를 `actor_class`에 넣어 사용할 수 있다.

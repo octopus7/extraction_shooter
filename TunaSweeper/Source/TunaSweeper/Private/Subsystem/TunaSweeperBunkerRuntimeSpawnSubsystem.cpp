@@ -161,9 +161,12 @@ bool UTunaSweeperBunkerRuntimeSpawnSubsystem::EnsureBunkerRuntimeActorsSpawnedFo
 			SpawnDefinition.LedPitch,
 			SpawnDefinition.LedRadius,
 			SpawnDefinition.BodyMaterial);
-		SpawnedRobot->ConfigureExpressionDemo(
-			SpawnDefinition.bExpressionDemoMode,
-			SpawnDefinition.ExpressionDemoIntervalSeconds);
+		if (SpawnDefinition.bHasExpressionDemoModeOverride || SpawnDefinition.bHasExpressionDemoIntervalOverride)
+		{
+			SpawnedRobot->ConfigureExpressionDemo(
+				SpawnDefinition.bExpressionDemoMode,
+				SpawnDefinition.ExpressionDemoIntervalSeconds);
+		}
 
 		if (!SpawnDefinition.SpawnId.IsNone())
 		{
@@ -266,13 +269,19 @@ bool UTunaSweeperBunkerRuntimeSpawnSubsystem::LoadBunkerCharacterSpawnData(bool 
 		TunaSweeperBunkerRuntimeSpawn::TryReadColorField(JsonObject, TEXT("off_color"), SpawnDefinition.OffColor);
 		JsonObject->TryGetNumberField(TEXT("led_pitch"), NumericLedPitch);
 		JsonObject->TryGetNumberField(TEXT("led_radius"), NumericLedRadius);
-		if (!JsonObject->TryGetBoolField(TEXT("expression_demo_mode"), SpawnDefinition.bExpressionDemoMode))
+		SpawnDefinition.bHasExpressionDemoModeOverride =
+			JsonObject->TryGetBoolField(TEXT("expression_demo_mode"), SpawnDefinition.bExpressionDemoMode);
+		if (!SpawnDefinition.bHasExpressionDemoModeOverride)
 		{
-			JsonObject->TryGetBoolField(TEXT("demo_mode"), SpawnDefinition.bExpressionDemoMode);
+			SpawnDefinition.bHasExpressionDemoModeOverride =
+				JsonObject->TryGetBoolField(TEXT("demo_mode"), SpawnDefinition.bExpressionDemoMode);
 		}
-		if (!JsonObject->TryGetNumberField(TEXT("expression_demo_interval"), NumericExpressionDemoIntervalSeconds))
+		SpawnDefinition.bHasExpressionDemoIntervalOverride =
+			JsonObject->TryGetNumberField(TEXT("expression_demo_interval"), NumericExpressionDemoIntervalSeconds);
+		if (!SpawnDefinition.bHasExpressionDemoIntervalOverride)
 		{
-			JsonObject->TryGetNumberField(TEXT("demo_expression_interval"), NumericExpressionDemoIntervalSeconds);
+			SpawnDefinition.bHasExpressionDemoIntervalOverride =
+				JsonObject->TryGetNumberField(TEXT("demo_expression_interval"), NumericExpressionDemoIntervalSeconds);
 		}
 
 		const FString TrimmedActorClassPath = ActorClassPath.TrimStartAndEnd();
@@ -296,9 +305,12 @@ bool UTunaSweeperBunkerRuntimeSpawnSubsystem::LoadBunkerCharacterSpawnData(bool 
 		}
 		SpawnDefinition.LedPitch = FMath::Max(0.1f, static_cast<float>(NumericLedPitch));
 		SpawnDefinition.LedRadius = FMath::Max(0.01f, static_cast<float>(NumericLedRadius));
-		SpawnDefinition.ExpressionDemoIntervalSeconds = FMath::Max(
-			0.1f,
-			static_cast<float>(NumericExpressionDemoIntervalSeconds));
+		if (SpawnDefinition.bHasExpressionDemoIntervalOverride)
+		{
+			SpawnDefinition.ExpressionDemoIntervalSeconds = FMath::Max(
+				0.1f,
+				static_cast<float>(NumericExpressionDemoIntervalSeconds));
+		}
 
 		const FString TrimmedBodyMaterialPath = BodyMaterialPath.TrimStartAndEnd();
 		if (!TrimmedBodyMaterialPath.IsEmpty())
