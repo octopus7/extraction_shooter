@@ -541,7 +541,18 @@ bool UTunaSweeperPlayerVisionComponent::IsVisionWorldEnabled() const
 	}
 
 	const FString MapName = World->GetMapName();
-	return MapName.EndsWith(TEXT("BunkerMap")) || MapName.EndsWith(TEXT("RaidMap"));
+	if (MapName.EndsWith(TEXT("RaidMap")))
+	{
+		return true;
+	}
+
+	if (MapName.EndsWith(TEXT("BunkerMap")))
+	{
+		const UTunaSweeperGameInstance* TunaGameInstance = World->GetGameInstance<UTunaSweeperGameInstance>();
+		return TunaGameInstance && TunaGameInstance->IsBunkerVisionDebugEnabled();
+	}
+
+	return false;
 }
 
 bool UTunaSweeperPlayerVisionComponent::ShouldUpdateVision() const

@@ -33,6 +33,7 @@ namespace TunaSweeperDialogue
 namespace TunaSweeperDebug
 {
 	const FName VisionDebugSettingKey(TEXT("debug.vision"));
+	const FName BunkerVisionDebugSettingKey(TEXT("debug.bunker_vision"));
 }
 
 namespace TunaSweeperInventory
@@ -272,6 +273,21 @@ bool UTunaSweeperGameInstance::IsVisionDebugEnabled() const
 	}
 
 	return GameplaySettings.bEnableVisionDebug;
+}
+
+void UTunaSweeperGameInstance::SetBunkerVisionDebugEnabled(bool bEnabled)
+{
+	SetBoolSetting(TunaSweeperDebug::BunkerVisionDebugSettingKey, bEnabled);
+}
+
+bool UTunaSweeperGameInstance::IsBunkerVisionDebugEnabled() const
+{
+	if (const bool* RuntimeBunkerVisionDebug = BoolSettings.Find(TunaSweeperDebug::BunkerVisionDebugSettingKey))
+	{
+		return *RuntimeBunkerVisionDebug;
+	}
+
+	return GameplaySettings.bEnableBunkerVisionDebug;
 }
 
 void UTunaSweeperGameInstance::ClearRuntimeState()
