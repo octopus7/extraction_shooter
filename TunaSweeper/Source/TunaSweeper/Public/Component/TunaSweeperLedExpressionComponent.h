@@ -29,6 +29,10 @@ public:
 
 	virtual void OnRegister() override;
 	virtual void BeginPlay() override;
+	virtual void TickComponent(
+		float DeltaTime,
+		ELevelTick TickType,
+		FActorComponentTickFunction* ThisTickFunction) override;
 
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
@@ -64,6 +68,21 @@ public:
 		FLinearColor InOffColor,
 		float InLedPitch,
 		float InLedRadius);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|LED Expression|Demo")
+	void SetDemoModeEnabled(bool bEnabled);
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|LED Expression|Demo")
+	bool IsDemoModeEnabled() const { return bDemoModeEnabled; }
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|LED Expression|Demo")
+	void SetDemoExpressionIntervalSeconds(float InIntervalSeconds);
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|LED Expression|Demo")
+	float GetDemoExpressionIntervalSeconds() const { return DemoExpressionIntervalSeconds; }
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|LED Expression|Demo")
+	bool AdvanceDemoExpression();
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|LED Expression")
 	bool DoesExpressionExist(FName ExpressionName) const;
@@ -120,6 +139,12 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LED Expression|Preset")
 	TArray<FTunaSweeperLedExpressionPreset> BlueprintPresets;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LED Expression|Demo")
+	bool bDemoModeEnabled = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LED Expression|Demo", meta = (ClampMin = "0.1", UIMin = "0.1"))
+	float DemoExpressionIntervalSeconds = 2.0f;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LED Expression|Material")
 	TSoftObjectPtr<UMaterialInterface> LedMaterial;
 
@@ -129,6 +154,7 @@ protected:
 private:
 	FString ResolvePresetFilePath() const;
 	bool LoadPresetFileIntoMap();
+	void AddExpressionPresetToCache(FName ExpressionName, const FString& NormalizedPattern);
 	FString NormalizePattern(const FString& RawPattern) const;
 	bool ApplyPatternToStates(const FString& Pattern);
 	void RefreshVertexColors();
@@ -136,8 +162,11 @@ private:
 	void BuildCurvedLedVertex(float SourceY, float SourceZ, FVector& OutPosition, FVector& OutNormal, FProcMeshTangent& OutTangent) const;
 	FLinearColor ResolveLedVertexColor(bool bEnabled) const;
 	bool IsOnCharacter(TCHAR Character) const;
+	void RefreshDemoTickEnabled();
+	int32 FindExpressionPresetOrderIndex(FName ExpressionName) const;
 
 	TMap<FName, FString> ExpressionPresets;
+	TArray<FName> ExpressionPresetOrder;
 	TArray<FVector> CachedVertices;
 	TArray<FVector> CachedNormals;
 	TArray<FVector2D> CachedUVs;
@@ -148,6 +177,7 @@ private:
 	UPROPERTY(Transient)
 	TObjectPtr<UMaterialInstanceDynamic> DynamicLedMaterial;
 	FName CurrentExpressionName = NAME_None;
+	float DemoExpressionElapsedSeconds = 0.0f;
 	bool bPresetFileLoaded = false;
 	bool bMeshBuilt = false;
 };

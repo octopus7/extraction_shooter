@@ -10,7 +10,8 @@ DEFINE_LOG_CATEGORY_STATIC(LogTunaSweeperLedExpression, Log, All);
 UTunaSweeperLedExpressionComponent::UTunaSweeperLedExpressionComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	PrimaryComponentTick.bCanEverTick = false;
+	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bStartWithTickEnabled = false;
 	bUseAsyncCooking = true;
 
 	SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -35,19 +36,20 @@ void UTunaSweeperLedExpressionComponent::OnRegister()
 	RefreshExpressionPresets();
 	RebuildLedMesh();
 
-	if (!DefaultExpressionName.IsNone() && SetExpressionByName(DefaultExpressionName))
+	bool bExpressionApplied = !DefaultExpressionName.IsNone() && SetExpressionByName(DefaultExpressionName);
+	if (!bExpressionApplied && !ExpressionPresets.IsEmpty())
 	{
-		return;
-	}
-
-	if (!ExpressionPresets.IsEmpty())
-	{
-		for (const TPair<FName, FString>& PresetPair : ExpressionPresets)
+		for (const FName& PresetName : ExpressionPresetOrder)
 		{
-			SetExpressionByName(PresetPair.Key);
-			break;
+			if (SetExpressionByName(PresetName))
+			{
+				bExpressionApplied = true;
+				break;
+			}
 		}
 	}
+
+	RefreshDemoTickEnabled();
 }
 
 void UTunaSweeperLedExpressionComponent::BeginPlay()
@@ -67,6 +69,32 @@ void UTunaSweeperLedExpressionComponent::BeginPlay()
 	{
 		SetExpressionByName(DefaultExpressionName);
 	}
+
+	DemoExpressionElapsedSeconds = 0.0f;
+	RefreshDemoTickEnabled();
+}
+
+void UTunaSweeperLedExpressionComponent::TickComponent(
+	float DeltaTime,
+	ELevelTick TickType,
+	FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	if (!bDemoModeEnabled || DeltaTime <= 0.0f)
+	{
+		return;
+	}
+
+	DemoExpressionElapsedSeconds += DeltaTime;
+	const float IntervalSeconds = FMath::Max(0.1f, DemoExpressionIntervalSeconds);
+	if (DemoExpressionElapsedSeconds < IntervalSeconds)
+	{
+		return;
+	}
+
+	DemoExpressionElapsedSeconds = 0.0f;
+	AdvanceDemoExpression();
 }
 
 #if WITH_EDITOR
@@ -78,6 +106,8 @@ void UTunaSweeperLedExpressionComponent::PostEditChangeProperty(FPropertyChanged
 	RefreshExpressionPresets();
 	RebuildLedMesh();
 	SetExpressionByName(CurrentExpressionName.IsNone() ? DefaultExpressionName : CurrentExpressionName);
+	DemoExpressionIntervalSeconds = FMath::Max(0.1f, DemoExpressionIntervalSeconds);
+	RefreshDemoTickEnabled();
 }
 #endif
 
@@ -94,6 +124,7 @@ bool UTunaSweeperLedExpressionComponent::LoadExpressionPresetFile(bool bForceRel
 bool UTunaSweeperLedExpressionComponent::RefreshExpressionPresets()
 {
 	ExpressionPresets.Reset();
+	ExpressionPresetOrder.Reset();
 	bPresetFileLoaded = LoadPresetFileIntoMap();
 
 	for (const FTunaSweeperLedExpressionPreset& BlueprintPreset : BlueprintPresets)
@@ -106,7 +137,7 @@ bool UTunaSweeperLedExpressionComponent::RefreshExpressionPresets()
 		const FString NormalizedPattern = NormalizePattern(BlueprintPreset.Pattern);
 		if (!NormalizedPattern.IsEmpty())
 		{
-			ExpressionPresets.Add(BlueprintPreset.ExpressionName, NormalizedPattern);
+			AddExpressionPresetToCache(BlueprintPreset.ExpressionName, NormalizedPattern);
 		}
 	}
 
@@ -308,7 +339,7 @@ bool UTunaSweeperLedExpressionComponent::SetExpressionPattern(FName ExpressionNa
 		return false;
 	}
 
-	ExpressionPresets.Add(ExpressionName, NormalizedPattern);
+	AddExpressionPresetToCache(ExpressionName, NormalizedPattern);
 	if (CurrentExpressionName == ExpressionName)
 	{
 		ApplyPatternToStates(NormalizedPattern);
@@ -380,6 +411,47 @@ void UTunaSweeperLedExpressionComponent::ConfigureLedAppearance(
 	{
 		SetExpressionByName(CurrentExpressionName);
 	}
+}
+
+void UTunaSweeperLedExpressionComponent::SetDemoModeEnabled(bool bEnabled)
+{
+	bDemoModeEnabled = bEnabled;
+	DemoExpressionElapsedSeconds = 0.0f;
+	RefreshDemoTickEnabled();
+}
+
+void UTunaSweeperLedExpressionComponent::SetDemoExpressionIntervalSeconds(float InIntervalSeconds)
+{
+	DemoExpressionIntervalSeconds = FMath::Max(0.1f, InIntervalSeconds);
+	DemoExpressionElapsedSeconds = 0.0f;
+	RefreshDemoTickEnabled();
+}
+
+bool UTunaSweeperLedExpressionComponent::AdvanceDemoExpression()
+{
+	if (ExpressionPresetOrder.IsEmpty())
+	{
+		RefreshExpressionPresets();
+	}
+
+	const int32 PresetCount = ExpressionPresetOrder.Num();
+	if (PresetCount <= 0)
+	{
+		return false;
+	}
+
+	const int32 CurrentIndex = FindExpressionPresetOrderIndex(CurrentExpressionName);
+	const int32 StartIndex = CurrentIndex == INDEX_NONE ? 0 : (CurrentIndex + 1) % PresetCount;
+	for (int32 AttemptIndex = 0; AttemptIndex < PresetCount; ++AttemptIndex)
+	{
+		const int32 CandidateIndex = (StartIndex + AttemptIndex) % PresetCount;
+		if (SetExpressionByName(ExpressionPresetOrder[CandidateIndex]))
+		{
+			return true;
+		}
+	}
+
+	return false;
 }
 
 bool UTunaSweeperLedExpressionComponent::DoesExpressionExist(FName ExpressionName) const
@@ -464,11 +536,25 @@ bool UTunaSweeperLedExpressionComponent::LoadPresetFileIntoMap()
 				ExpectedPatternLength);
 		}
 
-		ExpressionPresets.Add(FName(*ExpressionNameText), NormalizedPattern);
+		AddExpressionPresetToCache(FName(*ExpressionNameText), NormalizedPattern);
 		bLoadedAnyPreset = true;
 	}
 
 	return bLoadedAnyPreset;
+}
+
+void UTunaSweeperLedExpressionComponent::AddExpressionPresetToCache(FName ExpressionName, const FString& NormalizedPattern)
+{
+	if (ExpressionName.IsNone() || NormalizedPattern.IsEmpty())
+	{
+		return;
+	}
+
+	if (!ExpressionPresets.Contains(ExpressionName))
+	{
+		ExpressionPresetOrder.Add(ExpressionName);
+	}
+	ExpressionPresets.Add(ExpressionName, NormalizedPattern);
 }
 
 FString UTunaSweeperLedExpressionComponent::NormalizePattern(const FString& RawPattern) const
@@ -591,4 +677,22 @@ bool UTunaSweeperLedExpressionComponent::IsOnCharacter(TCHAR Character) const
 	}
 
 	return OnCharacters.FindChar(Character, UnusedIndex);
+}
+
+void UTunaSweeperLedExpressionComponent::RefreshDemoTickEnabled()
+{
+	SetComponentTickEnabled(bDemoModeEnabled);
+}
+
+int32 UTunaSweeperLedExpressionComponent::FindExpressionPresetOrderIndex(FName ExpressionName) const
+{
+	for (int32 PresetIndex = 0; PresetIndex < ExpressionPresetOrder.Num(); ++PresetIndex)
+	{
+		if (ExpressionPresetOrder[PresetIndex] == ExpressionName)
+		{
+			return PresetIndex;
+		}
+	}
+
+	return INDEX_NONE;
 }

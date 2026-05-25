@@ -161,6 +161,9 @@ bool UTunaSweeperBunkerRuntimeSpawnSubsystem::EnsureBunkerRuntimeActorsSpawnedFo
 			SpawnDefinition.LedPitch,
 			SpawnDefinition.LedRadius,
 			SpawnDefinition.BodyMaterial);
+		SpawnedRobot->ConfigureExpressionDemo(
+			SpawnDefinition.bExpressionDemoMode,
+			SpawnDefinition.ExpressionDemoIntervalSeconds);
 
 		if (!SpawnDefinition.SpawnId.IsNone())
 		{
@@ -247,6 +250,7 @@ bool UTunaSweeperBunkerRuntimeSpawnSubsystem::LoadBunkerCharacterSpawnData(bool 
 		FRotator Rotation = FRotator::ZeroRotator;
 		double NumericLedPitch = SpawnDefinition.LedPitch;
 		double NumericLedRadius = SpawnDefinition.LedRadius;
+		double NumericExpressionDemoIntervalSeconds = SpawnDefinition.ExpressionDemoIntervalSeconds;
 
 		JsonObject->TryGetStringField(TEXT("actor_class"), ActorClassPath);
 		JsonObject->TryGetStringField(TEXT("expression_preset_file"), ExpressionPresetFilePath);
@@ -262,6 +266,14 @@ bool UTunaSweeperBunkerRuntimeSpawnSubsystem::LoadBunkerCharacterSpawnData(bool 
 		TunaSweeperBunkerRuntimeSpawn::TryReadColorField(JsonObject, TEXT("off_color"), SpawnDefinition.OffColor);
 		JsonObject->TryGetNumberField(TEXT("led_pitch"), NumericLedPitch);
 		JsonObject->TryGetNumberField(TEXT("led_radius"), NumericLedRadius);
+		if (!JsonObject->TryGetBoolField(TEXT("expression_demo_mode"), SpawnDefinition.bExpressionDemoMode))
+		{
+			JsonObject->TryGetBoolField(TEXT("demo_mode"), SpawnDefinition.bExpressionDemoMode);
+		}
+		if (!JsonObject->TryGetNumberField(TEXT("expression_demo_interval"), NumericExpressionDemoIntervalSeconds))
+		{
+			JsonObject->TryGetNumberField(TEXT("demo_expression_interval"), NumericExpressionDemoIntervalSeconds);
+		}
 
 		const FString TrimmedActorClassPath = ActorClassPath.TrimStartAndEnd();
 		if (!TrimmedActorClassPath.IsEmpty())
@@ -284,6 +296,9 @@ bool UTunaSweeperBunkerRuntimeSpawnSubsystem::LoadBunkerCharacterSpawnData(bool 
 		}
 		SpawnDefinition.LedPitch = FMath::Max(0.1f, static_cast<float>(NumericLedPitch));
 		SpawnDefinition.LedRadius = FMath::Max(0.01f, static_cast<float>(NumericLedRadius));
+		SpawnDefinition.ExpressionDemoIntervalSeconds = FMath::Max(
+			0.1f,
+			static_cast<float>(NumericExpressionDemoIntervalSeconds));
 
 		const FString TrimmedBodyMaterialPath = BodyMaterialPath.TrimStartAndEnd();
 		if (!TrimmedBodyMaterialPath.IsEmpty())

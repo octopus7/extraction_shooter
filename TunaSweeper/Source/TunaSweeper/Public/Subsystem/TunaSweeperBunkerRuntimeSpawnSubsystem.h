@@ -41,6 +41,8 @@ private:
 		FLinearColor OffColor = FLinearColor(0.03f, 0.03f, 0.03f, 1.0f);
 		float LedPitch = 2.0f;
 		float LedRadius = 0.68f;
+		bool bExpressionDemoMode = false;
+		float ExpressionDemoIntervalSeconds = 2.0f;
 		TSoftObjectPtr<UMaterialInterface> BodyMaterial;
 	};
 

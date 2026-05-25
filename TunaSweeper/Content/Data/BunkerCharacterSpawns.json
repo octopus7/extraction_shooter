@@ -10,6 +10,8 @@
     "led_color": [1.0, 0.78, 0.06, 1.0],
     "off_color": [0.03, 0.03, 0.03, 1.0],
     "led_pitch": 2.0,
-    "led_radius": 0.68
+    "led_radius": 0.68,
+    "demo_mode": false,
+    "demo_expression_interval": 2.0
   }
 ]

@@ -91,6 +91,22 @@ bool ATunaSweeperLedRobotCharacterActor::SetExpressionByName(FName ExpressionNam
 	return ExpressionComponent ? ExpressionComponent->SetExpressionByName(ExpressionName) : false;
 }
 
+void ATunaSweeperLedRobotCharacterActor::ConfigureExpressionDemo(bool bEnabled, float InIntervalSeconds)
+{
+	bExpressionDemoMode = bEnabled;
+	ExpressionDemoIntervalSeconds = FMath::Max(0.1f, InIntervalSeconds);
+	if (ExpressionComponent)
+	{
+		ExpressionComponent->SetDemoExpressionIntervalSeconds(ExpressionDemoIntervalSeconds);
+		ExpressionComponent->SetDemoModeEnabled(bExpressionDemoMode);
+	}
+}
+
+void ATunaSweeperLedRobotCharacterActor::SetExpressionDemoModeEnabled(bool bEnabled)
+{
+	ConfigureExpressionDemo(bEnabled, ExpressionDemoIntervalSeconds);
+}
+
 void ATunaSweeperLedRobotCharacterActor::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
@@ -153,6 +169,8 @@ void ATunaSweeperLedRobotCharacterActor::RefreshRobotVisuals()
 		ExpressionComponent->SetRelativeLocation(FaceRelativeLocation);
 		ExpressionComponent->SetRelativeRotation(FaceRelativeRotation);
 		ExpressionComponent->ConfigureExpressionSource(ExpressionPresetFilePath, InitialExpressionName);
+		ExpressionComponent->SetDemoExpressionIntervalSeconds(ExpressionDemoIntervalSeconds);
+		ExpressionComponent->SetDemoModeEnabled(bExpressionDemoMode);
 	}
 }
 

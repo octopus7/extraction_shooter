@@ -35,6 +35,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|LED Robot")
 	bool SetExpressionByName(FName ExpressionName);
 
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|LED Robot")
+	void ConfigureExpressionDemo(bool bEnabled, float InIntervalSeconds);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|LED Robot")
+	void SetExpressionDemoModeEnabled(bool bEnabled);
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|LED Robot")
+	bool IsExpressionDemoModeEnabled() const { return bExpressionDemoMode; }
+
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|LED Robot")
 	FName GetRobotId() const { return RobotId; }
 
@@ -95,6 +104,12 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LED Robot|Face", meta = (AllowPrivateAccess = "true"))
 	FString ExpressionPresetFilePath = TEXT("Data/LedExpressionPresets.txt");
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LED Robot|Face", meta = (AllowPrivateAccess = "true"))
+	bool bExpressionDemoMode = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LED Robot|Face", meta = (AllowPrivateAccess = "true", ClampMin = "0.1", UIMin = "0.1"))
+	float ExpressionDemoIntervalSeconds = 2.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LED Robot|Look At", meta = (AllowPrivateAccess = "true"))
 	bool bLookAtNearbyPlayer = true;
