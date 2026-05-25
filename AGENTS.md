@@ -5,6 +5,7 @@
 - Version check: `TunaSweeper.uproject` has `"EngineAssociation": "5.7"`, and both `TunaSweeper.Target.cs` and `TunaSweeperEditor.Target.cs` use `EngineIncludeOrderVersion.Unreal5_7`.
 - Prefer UE 5.7-compatible APIs and build settings when editing C++ or project configuration.
 - After a build finishes and Unreal Editor can be launched, open the editor for `TunaSweeper/TunaSweeper.uproject` unless the user says not to.
+- For Windows packaging with `RunUAT BuildCookRun`, request escalated permissions up front because AutomationTool writes AppData logs/caches and fails under the sandbox.
 - Record user instructions in `Docs/requests.md` with the current timestamp and elapsed duration next to the timestamp. Do not include a timezone suffix in request log timestamps.
 - Record user questions and their answers separately in `Docs/questions.md` with the current timestamp and elapsed duration next to the timestamp. Do not include a timezone suffix in question log timestamps. Do not duplicate questions in `Docs/requests.md`.
 - Use `Docs/game_conventions.md` for project-wide gameplay conventions such as direction, distance, units, and currency.
