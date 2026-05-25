@@ -50,6 +50,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|LED Expression")
 	void SetHorizontalCurvatureDegrees(float InHorizontalCurvatureDegrees);
 
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|LED Expression|Render")
+	void SetRenderLocalTransform(FVector InRenderLocalLocation, FRotator InRenderLocalRotation);
+
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|LED Expression")
 	bool SetExpressionByName(FName ExpressionName);
 
@@ -109,7 +112,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LED Expression|Matrix", meta = (ClampMin = "3", ClampMax = "24"))
 	int32 CircleSegments = 10;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LED Expression|Matrix", meta = (ClampMin = "0.0", ClampMax = "160.0", UIMin = "0.0", UIMax = "80.0"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LED Expression|Matrix", meta = (ClampMin = "0.0", ClampMax = "240.0", UIMin = "0.0", UIMax = "240.0"))
 	float HorizontalCurvatureDegrees = 28.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LED Expression|Color")
@@ -123,6 +126,12 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LED Expression|Render", meta = (ClampMin = "0.0"))
 	float ActiveLedSurfaceOffset = 0.08f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LED Expression|Render", meta = (MakeEditWidget = "true"))
+	FVector RenderLocalLocation = FVector::ZeroVector;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LED Expression|Render")
+	FRotator RenderLocalRotation = FRotator::ZeroRotator;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LED Expression|Preset")
 	FString PresetFilePath = TEXT("Data/LedExpressionPresets.txt");
@@ -160,6 +169,7 @@ private:
 	void RefreshVertexColors();
 	void ApplyLedMaterial();
 	void BuildCurvedLedVertex(float SourceY, float SourceZ, FVector& OutPosition, FVector& OutNormal, FProcMeshTangent& OutTangent) const;
+	void ApplyRenderLocalTransform(FVector& InOutPosition, FVector& InOutNormal, FProcMeshTangent& InOutTangent) const;
 	FLinearColor ResolveLedVertexColor(bool bEnabled) const;
 	bool IsOnCharacter(TCHAR Character) const;
 	void RefreshDemoTickEnabled();

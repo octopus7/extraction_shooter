@@ -98,12 +98,6 @@ private:
 	float BodyCollisionHalfHeight = 90.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LED Robot|Face", meta = (AllowPrivateAccess = "true"))
-	FVector FaceRelativeLocation = FVector(52.0f, 0.0f, 122.0f);
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LED Robot|Face", meta = (AllowPrivateAccess = "true"))
-	FRotator FaceRelativeRotation = FRotator::ZeroRotator;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LED Robot|Face", meta = (AllowPrivateAccess = "true"))
 	FString ExpressionPresetFilePath = TEXT("Data/LedExpressionPresets.txt");
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LED Robot|Face", meta = (AllowPrivateAccess = "true"))

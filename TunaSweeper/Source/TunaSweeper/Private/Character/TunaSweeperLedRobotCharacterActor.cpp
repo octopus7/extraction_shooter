@@ -24,6 +24,8 @@ ATunaSweeperLedRobotCharacterActor::ATunaSweeperLedRobotCharacterActor()
 
 	BodyCollision = CreateDefaultSubobject<UCapsuleComponent>(TEXT("BodyCollision"));
 	BodyCollision->SetupAttachment(SceneRoot);
+	BodyCollision->SetMobility(EComponentMobility::Movable);
+	BodyCollision->SetRelativeLocation(BodyRelativeLocation);
 	BodyCollision->SetCapsuleSize(BodyCollisionRadius, BodyCollisionHalfHeight);
 	BodyCollision->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	BodyCollision->SetCollisionObjectType(ECC_WorldDynamic);
@@ -32,9 +34,14 @@ ATunaSweeperLedRobotCharacterActor::ATunaSweeperLedRobotCharacterActor()
 	BodyCollision->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
 	BodyCollision->SetGenerateOverlapEvents(false);
 	BodyCollision->CanCharacterStepUpOn = ECB_No;
+	BodyCollision->bEditableWhenInherited = true;
 
 	ExpressionComponent = CreateDefaultSubobject<UTunaSweeperLedExpressionComponent>(TEXT("ExpressionComponent"));
 	ExpressionComponent->SetupAttachment(SceneRoot);
+	ExpressionComponent->SetMobility(EComponentMobility::Movable);
+	ExpressionComponent->SetRelativeLocation(FVector(52.0f, 0.0f, 122.0f));
+	ExpressionComponent->SetRelativeRotation(FRotator::ZeroRotator);
+	ExpressionComponent->bEditableWhenInherited = true;
 
 	BodyMeshOverride = TSoftObjectPtr<UStaticMesh>(FSoftObjectPath(TEXT("/Engine/BasicShapes/Cylinder.Cylinder")));
 	ExpressionPresetFilePath = TEXT("Data/LedExpressionPresets.txt");
@@ -107,6 +114,11 @@ void ATunaSweeperLedRobotCharacterActor::SetExpressionDemoModeEnabled(bool bEnab
 	ConfigureExpressionDemo(bEnabled, ExpressionDemoIntervalSeconds);
 }
 
+bool ATunaSweeperLedRobotCharacterActor::IsExpressionDemoModeEnabled() const
+{
+	return bExpressionDemoMode || (ExpressionComponent && ExpressionComponent->IsDemoModeEnabled());
+}
+
 void ATunaSweeperLedRobotCharacterActor::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
@@ -149,29 +161,28 @@ void ATunaSweeperLedRobotCharacterActor::RefreshRobotVisuals()
 		BodyMesh->SetGenerateOverlapEvents(false);
 	}
 
-	if (BodyCollision)
-	{
-		BodyCollision->SetRelativeLocation(BodyRelativeLocation);
-		BodyCollision->SetCapsuleSize(
-			FMath::Max(1.0f, BodyCollisionRadius),
-			FMath::Max(1.0f, BodyCollisionHalfHeight));
-		BodyCollision->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-		BodyCollision->SetCollisionObjectType(ECC_WorldDynamic);
-		BodyCollision->SetCollisionResponseToAllChannels(ECR_Ignore);
-		BodyCollision->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
-		BodyCollision->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
-		BodyCollision->SetGenerateOverlapEvents(false);
-		BodyCollision->CanCharacterStepUpOn = ECB_No;
-	}
-
 	if (ExpressionComponent)
 	{
-		ExpressionComponent->SetRelativeLocation(FaceRelativeLocation);
-		ExpressionComponent->SetRelativeRotation(FaceRelativeRotation);
 		ExpressionComponent->ConfigureExpressionSource(ExpressionPresetFilePath, InitialExpressionName);
-		ExpressionComponent->SetDemoExpressionIntervalSeconds(ExpressionDemoIntervalSeconds);
-		ExpressionComponent->SetDemoModeEnabled(bExpressionDemoMode);
+		RefreshExpressionDemoSettings();
 	}
+}
+
+void ATunaSweeperLedRobotCharacterActor::RefreshExpressionDemoSettings()
+{
+	if (!ExpressionComponent)
+	{
+		return;
+	}
+
+	const bool bComponentDemoModeEnabled = ExpressionComponent->IsDemoModeEnabled();
+	const bool bResolvedDemoModeEnabled = bExpressionDemoMode || bComponentDemoModeEnabled;
+	const float ResolvedIntervalSeconds = bExpressionDemoMode
+		? ExpressionDemoIntervalSeconds
+		: ExpressionComponent->GetDemoExpressionIntervalSeconds();
+
+	ExpressionComponent->SetDemoExpressionIntervalSeconds(FMath::Max(0.1f, ResolvedIntervalSeconds));
+	ExpressionComponent->SetDemoModeEnabled(bResolvedDemoModeEnabled);
 }
 
 void ATunaSweeperLedRobotCharacterActor::UpdatePlayerLookAt(float DeltaSeconds)

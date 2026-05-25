@@ -151,8 +151,9 @@ void UTunaSweeperLedExpressionComponent::RebuildLedMesh()
 	LedPitch = FMath::Max(0.1f, LedPitch);
 	LedRadius = FMath::Max(0.01f, LedRadius);
 	CircleSegments = FMath::Clamp(CircleSegments, 3, 24);
-	HorizontalCurvatureDegrees = FMath::Clamp(HorizontalCurvatureDegrees, 0.0f, 160.0f);
+	HorizontalCurvatureDegrees = FMath::Clamp(HorizontalCurvatureDegrees, 0.0f, 240.0f);
 	ActiveLedSurfaceOffset = FMath::Max(0.0f, ActiveLedSurfaceOffset);
+	RenderLocalRotation.Normalize();
 
 	const int32 LedCount = GetLedCount();
 	const int32 VerticesPerLed = CircleSegments + 1;
@@ -208,6 +209,7 @@ void UTunaSweeperLedExpressionComponent::RebuildLedMesh()
 		FProcMeshTangent CenterTangent(0.0f, 1.0f, 0.0f);
 		BuildCurvedLedVertex(CenterY, CenterZ, Center, CenterNormal, CenterTangent);
 		Center += CenterNormal * SurfaceOffset;
+		ApplyRenderLocalTransform(Center, CenterNormal, CenterTangent);
 
 		Vertices.Add(Center);
 		Normals.Add(CenterNormal);
@@ -225,6 +227,7 @@ void UTunaSweeperLedExpressionComponent::RebuildLedMesh()
 			FProcMeshTangent RingTangent(0.0f, 1.0f, 0.0f);
 			BuildCurvedLedVertex(CenterY + OffsetY, CenterZ + OffsetZ, RingVertex, RingNormal, RingTangent);
 			RingVertex += RingNormal * SurfaceOffset;
+			ApplyRenderLocalTransform(RingVertex, RingNormal, RingTangent);
 
 			Vertices.Add(RingVertex);
 			Normals.Add(RingNormal);
@@ -318,7 +321,18 @@ bool UTunaSweeperLedExpressionComponent::SetExpressionByName(FName ExpressionNam
 
 void UTunaSweeperLedExpressionComponent::SetHorizontalCurvatureDegrees(float InHorizontalCurvatureDegrees)
 {
-	HorizontalCurvatureDegrees = FMath::Clamp(InHorizontalCurvatureDegrees, 0.0f, 160.0f);
+	HorizontalCurvatureDegrees = FMath::Clamp(InHorizontalCurvatureDegrees, 0.0f, 240.0f);
+	RebuildLedMesh();
+	if (!CurrentExpressionName.IsNone())
+	{
+		SetExpressionByName(CurrentExpressionName);
+	}
+}
+
+void UTunaSweeperLedExpressionComponent::SetRenderLocalTransform(FVector InRenderLocalLocation, FRotator InRenderLocalRotation)
+{
+	RenderLocalLocation = InRenderLocalLocation;
+	RenderLocalRotation = InRenderLocalRotation.GetNormalized();
 	RebuildLedMesh();
 	if (!CurrentExpressionName.IsNone())
 	{
@@ -637,7 +651,7 @@ void UTunaSweeperLedExpressionComponent::BuildCurvedLedVertex(
 	FVector& OutNormal,
 	FProcMeshTangent& OutTangent) const
 {
-	const float ClampedCurvatureDegrees = FMath::Clamp(HorizontalCurvatureDegrees, 0.0f, 160.0f);
+	const float ClampedCurvatureDegrees = FMath::Clamp(HorizontalCurvatureDegrees, 0.0f, 240.0f);
 	if (ClampedCurvatureDegrees <= KINDA_SMALL_NUMBER)
 	{
 		OutPosition = FVector(0.0f, SourceY, SourceZ);
@@ -661,6 +675,18 @@ void UTunaSweeperLedExpressionComponent::BuildCurvedLedVertex(
 		SourceZ);
 	OutNormal = FVector(CosTheta, SinTheta, 0.0f).GetSafeNormal(KINDA_SMALL_NUMBER, FVector::ForwardVector);
 	OutTangent = FProcMeshTangent(-SinTheta, CosTheta, 0.0f);
+}
+
+void UTunaSweeperLedExpressionComponent::ApplyRenderLocalTransform(
+	FVector& InOutPosition,
+	FVector& InOutNormal,
+	FProcMeshTangent& InOutTangent) const
+{
+	const FQuat RenderLocalQuat = RenderLocalRotation.Quaternion();
+	InOutPosition = RenderLocalQuat.RotateVector(InOutPosition) + RenderLocalLocation;
+	InOutNormal = RenderLocalQuat.RotateVector(InOutNormal).GetSafeNormal(KINDA_SMALL_NUMBER, FVector::ForwardVector);
+	const FVector TangentX = RenderLocalQuat.RotateVector(InOutTangent.TangentX).GetSafeNormal(KINDA_SMALL_NUMBER, FVector::RightVector);
+	InOutTangent = FProcMeshTangent(TangentX, InOutTangent.bFlipTangentY);
 }
 
 FLinearColor UTunaSweeperLedExpressionComponent::ResolveLedVertexColor(bool bEnabled) const
