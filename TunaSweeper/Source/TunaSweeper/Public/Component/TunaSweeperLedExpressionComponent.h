@@ -97,10 +97,13 @@ protected:
 	FLinearColor LedColor = FLinearColor(1.0f, 0.78f, 0.06f, 1.0f);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LED Expression|Color")
-	FLinearColor OffColor = FLinearColor(0.003f, 0.003f, 0.003f, 1.0f);
+	FLinearColor OffColor = FLinearColor(0.03f, 0.03f, 0.03f, 1.0f);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LED Expression|Color", meta = (ClampMin = "0.0"))
 	float EmissiveIntensity = 3.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LED Expression|Render", meta = (ClampMin = "0.0"))
+	float ActiveLedSurfaceOffset = 0.08f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LED Expression|Preset")
 	FString PresetFilePath = TEXT("Data/LedExpressionPresets.txt");
@@ -119,6 +122,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LED Expression|Material")
 	TSoftObjectPtr<UMaterialInterface> LedMaterial;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LED Expression|Material")
+	TSoftObjectPtr<UMaterialInterface> OffLedMaterial;
 
 private:
 	FString ResolvePresetFilePath() const;

@@ -19,6 +19,8 @@ UTunaSweeperLedExpressionComponent::UTunaSweeperLedExpressionComponent(const FOb
 
 	LedMaterial = TSoftObjectPtr<UMaterialInterface>(
 		FSoftObjectPath(TEXT("/Game/Effects/M_LumberjackMeleeSwingArc.M_LumberjackMeleeSwingArc")));
+	OffLedMaterial = TSoftObjectPtr<UMaterialInterface>(
+		FSoftObjectPath(TEXT("/Game/Prototype/M_Voxel_VertexColor.M_Voxel_VertexColor")));
 }
 
 void UTunaSweeperLedExpressionComponent::OnRegister()
@@ -119,6 +121,7 @@ void UTunaSweeperLedExpressionComponent::RebuildLedMesh()
 	LedRadius = FMath::Max(0.01f, LedRadius);
 	CircleSegments = FMath::Clamp(CircleSegments, 3, 24);
 	HorizontalCurvatureDegrees = FMath::Clamp(HorizontalCurvatureDegrees, 0.0f, 160.0f);
+	ActiveLedSurfaceOffset = FMath::Max(0.0f, ActiveLedSurfaceOffset);
 
 	const int32 LedCount = GetLedCount();
 	const int32 VerticesPerLed = CircleSegments + 1;
@@ -127,63 +130,103 @@ void UTunaSweeperLedExpressionComponent::RebuildLedMesh()
 		LedStates.SetNumZeroed(LedCount);
 	}
 
-	CachedVertices.Reset(LedCount * VerticesPerLed);
-	CachedNormals.Reset(LedCount * VerticesPerLed);
-	CachedUVs.Reset(LedCount * VerticesPerLed);
-	CachedTangents.Reset(LedCount * VerticesPerLed);
-	CachedVertexColors.Reset(LedCount * VerticesPerLed);
-	CachedTriangles.Reset(LedCount * CircleSegments * 6);
+	TArray<FVector> OffVertices;
+	TArray<FVector> OffNormals;
+	TArray<FVector2D> OffUVs;
+	TArray<FProcMeshTangent> OffTangents;
+	TArray<FLinearColor> OffVertexColors;
+	TArray<int32> OffTriangles;
+	TArray<FVector> ActiveVertices;
+	TArray<FVector> ActiveNormals;
+	TArray<FVector2D> ActiveUVs;
+	TArray<FProcMeshTangent> ActiveTangents;
+	TArray<FLinearColor> ActiveVertexColors;
+	TArray<int32> ActiveTriangles;
+
+	OffVertices.Reserve(LedCount * VerticesPerLed);
+	OffNormals.Reserve(LedCount * VerticesPerLed);
+	OffUVs.Reserve(LedCount * VerticesPerLed);
+	OffTangents.Reserve(LedCount * VerticesPerLed);
+	OffVertexColors.Reserve(LedCount * VerticesPerLed);
+	OffTriangles.Reserve(LedCount * CircleSegments * 6);
+	ActiveVertices.Reserve(LedCount * VerticesPerLed);
+	ActiveNormals.Reserve(LedCount * VerticesPerLed);
+	ActiveUVs.Reserve(LedCount * VerticesPerLed);
+	ActiveTangents.Reserve(LedCount * VerticesPerLed);
+	ActiveVertexColors.Reserve(LedCount * VerticesPerLed);
+	ActiveTriangles.Reserve(LedCount * CircleSegments * 6);
 
 	const float HalfColumns = static_cast<float>(MatrixColumns - 1) * 0.5f;
 	const float HalfRows = static_cast<float>(MatrixRows - 1) * 0.5f;
+
+	auto AddLedDisc = [this](
+		float CenterY,
+		float CenterZ,
+		const FLinearColor& VertexColor,
+		float SurfaceOffset,
+		TArray<FVector>& Vertices,
+		TArray<FVector>& Normals,
+		TArray<FVector2D>& UVs,
+		TArray<FProcMeshTangent>& Tangents,
+		TArray<FLinearColor>& VertexColors,
+		TArray<int32>& Triangles)
+	{
+		const int32 CenterVertexIndex = Vertices.Num();
+		FVector Center = FVector::ZeroVector;
+		FVector CenterNormal = FVector::ForwardVector;
+		FProcMeshTangent CenterTangent(0.0f, 1.0f, 0.0f);
+		BuildCurvedLedVertex(CenterY, CenterZ, Center, CenterNormal, CenterTangent);
+		Center += CenterNormal * SurfaceOffset;
+
+		Vertices.Add(Center);
+		Normals.Add(CenterNormal);
+		UVs.Add(FVector2D(0.5f, 0.5f));
+		Tangents.Add(CenterTangent);
+		VertexColors.Add(VertexColor);
+
+		for (int32 SegmentIndex = 0; SegmentIndex < CircleSegments; ++SegmentIndex)
+		{
+			const float Angle = 2.0f * PI * static_cast<float>(SegmentIndex) / static_cast<float>(CircleSegments);
+			const float OffsetY = FMath::Cos(Angle) * LedRadius;
+			const float OffsetZ = FMath::Sin(Angle) * LedRadius;
+			FVector RingVertex = FVector::ZeroVector;
+			FVector RingNormal = FVector::ForwardVector;
+			FProcMeshTangent RingTangent(0.0f, 1.0f, 0.0f);
+			BuildCurvedLedVertex(CenterY + OffsetY, CenterZ + OffsetZ, RingVertex, RingNormal, RingTangent);
+			RingVertex += RingNormal * SurfaceOffset;
+
+			Vertices.Add(RingVertex);
+			Normals.Add(RingNormal);
+			UVs.Add(FVector2D(0.5f + FMath::Cos(Angle) * 0.5f, 0.5f + FMath::Sin(Angle) * 0.5f));
+			Tangents.Add(RingTangent);
+			VertexColors.Add(VertexColor);
+		}
+
+		for (int32 SegmentIndex = 0; SegmentIndex < CircleSegments; ++SegmentIndex)
+		{
+			const int32 CurrentRingVertex = CenterVertexIndex + 1 + SegmentIndex;
+			const int32 NextRingVertex = CenterVertexIndex + 1 + ((SegmentIndex + 1) % CircleSegments);
+			Triangles.Add(CenterVertexIndex);
+			Triangles.Add(CurrentRingVertex);
+			Triangles.Add(NextRingVertex);
+			Triangles.Add(CenterVertexIndex);
+			Triangles.Add(NextRingVertex);
+			Triangles.Add(CurrentRingVertex);
+		}
+	};
 
 	for (int32 Row = 0; Row < MatrixRows; ++Row)
 	{
 		for (int32 Column = 0; Column < MatrixColumns; ++Column)
 		{
 			const int32 LedIndex = Row * MatrixColumns + Column;
-			const int32 CenterVertexIndex = CachedVertices.Num();
 			const float CenterY = (static_cast<float>(Column) - HalfColumns) * LedPitch;
 			const float CenterZ = (HalfRows - static_cast<float>(Row)) * LedPitch;
-			const FLinearColor VertexColor = ResolveLedVertexColor(LedStates.IsValidIndex(LedIndex) && LedStates[LedIndex] != 0);
-			FVector Center = FVector::ZeroVector;
-			FVector CenterNormal = FVector::ForwardVector;
-			FProcMeshTangent CenterTangent(0.0f, 1.0f, 0.0f);
-			BuildCurvedLedVertex(CenterY, CenterZ, Center, CenterNormal, CenterTangent);
+			AddLedDisc(CenterY, CenterZ, OffColor, 0.0f, OffVertices, OffNormals, OffUVs, OffTangents, OffVertexColors, OffTriangles);
 
-			CachedVertices.Add(Center);
-			CachedNormals.Add(CenterNormal);
-			CachedUVs.Add(FVector2D(0.5f, 0.5f));
-			CachedTangents.Add(CenterTangent);
-			CachedVertexColors.Add(VertexColor);
-
-			for (int32 SegmentIndex = 0; SegmentIndex < CircleSegments; ++SegmentIndex)
+			if (LedStates.IsValidIndex(LedIndex) && LedStates[LedIndex] != 0)
 			{
-				const float Angle = 2.0f * PI * static_cast<float>(SegmentIndex) / static_cast<float>(CircleSegments);
-				const float OffsetY = FMath::Cos(Angle) * LedRadius;
-				const float OffsetZ = FMath::Sin(Angle) * LedRadius;
-				FVector RingVertex = FVector::ZeroVector;
-				FVector RingNormal = FVector::ForwardVector;
-				FProcMeshTangent RingTangent(0.0f, 1.0f, 0.0f);
-				BuildCurvedLedVertex(CenterY + OffsetY, CenterZ + OffsetZ, RingVertex, RingNormal, RingTangent);
-
-				CachedVertices.Add(RingVertex);
-				CachedNormals.Add(RingNormal);
-				CachedUVs.Add(FVector2D(0.5f + FMath::Cos(Angle) * 0.5f, 0.5f + FMath::Sin(Angle) * 0.5f));
-				CachedTangents.Add(RingTangent);
-				CachedVertexColors.Add(VertexColor);
-			}
-
-			for (int32 SegmentIndex = 0; SegmentIndex < CircleSegments; ++SegmentIndex)
-			{
-				const int32 CurrentRingVertex = CenterVertexIndex + 1 + SegmentIndex;
-				const int32 NextRingVertex = CenterVertexIndex + 1 + ((SegmentIndex + 1) % CircleSegments);
-				CachedTriangles.Add(CenterVertexIndex);
-				CachedTriangles.Add(CurrentRingVertex);
-				CachedTriangles.Add(NextRingVertex);
-				CachedTriangles.Add(CenterVertexIndex);
-				CachedTriangles.Add(NextRingVertex);
-				CachedTriangles.Add(CurrentRingVertex);
+				AddLedDisc(CenterY, CenterZ, LedColor, ActiveLedSurfaceOffset, ActiveVertices, ActiveNormals, ActiveUVs, ActiveTangents, ActiveVertexColors, ActiveTriangles);
 			}
 		}
 	}
@@ -191,17 +234,28 @@ void UTunaSweeperLedExpressionComponent::RebuildLedMesh()
 	ClearAllMeshSections();
 	CreateMeshSection_LinearColor(
 		0,
-		CachedVertices,
-		CachedTriangles,
-		CachedNormals,
-		CachedUVs,
-		CachedVertexColors,
-		CachedTangents,
+		OffVertices,
+		OffTriangles,
+		OffNormals,
+		OffUVs,
+		OffVertexColors,
+		OffTangents,
 		false);
+	if (!ActiveVertices.IsEmpty())
+	{
+		CreateMeshSection_LinearColor(
+			1,
+			ActiveVertices,
+			ActiveTriangles,
+			ActiveNormals,
+			ActiveUVs,
+			ActiveVertexColors,
+			ActiveTangents,
+			false);
+	}
 
 	bMeshBuilt = true;
 	ApplyLedMaterial();
-	RefreshVertexColors();
 }
 
 bool UTunaSweeperLedExpressionComponent::SetExpressionByName(FName ExpressionName)
@@ -456,37 +510,19 @@ bool UTunaSweeperLedExpressionComponent::ApplyPatternToStates(const FString& Pat
 
 void UTunaSweeperLedExpressionComponent::RefreshVertexColors()
 {
-	if (!bMeshBuilt || CachedVertexColors.IsEmpty())
-	{
-		return;
-	}
-
-	const int32 VerticesPerLed = CircleSegments + 1;
-	for (int32 LedIndex = 0; LedIndex < LedStates.Num(); ++LedIndex)
-	{
-		const FLinearColor VertexColor = ResolveLedVertexColor(LedStates[LedIndex] != 0);
-		const int32 VertexStart = LedIndex * VerticesPerLed;
-		for (int32 VertexOffset = 0; VertexOffset < VerticesPerLed; ++VertexOffset)
-		{
-			const int32 VertexIndex = VertexStart + VertexOffset;
-			if (CachedVertexColors.IsValidIndex(VertexIndex))
-			{
-				CachedVertexColors[VertexIndex] = VertexColor;
-			}
-		}
-	}
-
-	UpdateMeshSection_LinearColor(
-		0,
-		CachedVertices,
-		CachedNormals,
-		CachedUVs,
-		CachedVertexColors,
-		CachedTangents);
+	RebuildLedMesh();
 }
 
 void UTunaSweeperLedExpressionComponent::ApplyLedMaterial()
 {
+	if (!OffLedMaterial.IsNull())
+	{
+		if (UMaterialInterface* LoadedOffMaterial = OffLedMaterial.LoadSynchronous())
+		{
+			SetMaterial(0, LoadedOffMaterial);
+		}
+	}
+
 	UMaterialInterface* LoadedMaterial = LedMaterial.IsNull() ? nullptr : LedMaterial.LoadSynchronous();
 	if (!LoadedMaterial)
 	{
@@ -496,7 +532,7 @@ void UTunaSweeperLedExpressionComponent::ApplyLedMaterial()
 	DynamicLedMaterial = UMaterialInstanceDynamic::Create(LoadedMaterial, this);
 	if (!DynamicLedMaterial)
 	{
-		SetMaterial(0, LoadedMaterial);
+		SetMaterial(1, LoadedMaterial);
 		return;
 	}
 
@@ -505,7 +541,7 @@ void UTunaSweeperLedExpressionComponent::ApplyLedMaterial()
 	DynamicLedMaterial->SetVectorParameterValue(TEXT("EmissiveColor"), LedColor);
 	DynamicLedMaterial->SetScalarParameterValue(TEXT("EmissiveIntensity"), EmissiveIntensity);
 	DynamicLedMaterial->SetScalarParameterValue(TEXT("Intensity"), EmissiveIntensity);
-	SetMaterial(0, DynamicLedMaterial);
+	SetMaterial(1, DynamicLedMaterial);
 }
 
 void UTunaSweeperLedExpressionComponent::BuildCurvedLedVertex(

@@ -38,7 +38,7 @@ private:
 		FString ExpressionPresetFilePath;
 		FName InitialExpressionName = TEXT("Smile");
 		FLinearColor LedColor = FLinearColor(1.0f, 0.78f, 0.06f, 1.0f);
-		FLinearColor OffColor = FLinearColor(0.003f, 0.003f, 0.003f, 1.0f);
+		FLinearColor OffColor = FLinearColor(0.03f, 0.03f, 0.03f, 1.0f);
 		float LedPitch = 2.0f;
 		float LedRadius = 0.68f;
 		TSoftObjectPtr<UMaterialInterface> BodyMaterial;
