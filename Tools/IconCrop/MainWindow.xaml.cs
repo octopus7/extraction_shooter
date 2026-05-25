@@ -1,0 +1,670 @@
+using Microsoft.Win32;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Globalization;
+using System.IO;
+using System.Runtime.CompilerServices;
+using System.Text.Json;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using Rectangle = System.Windows.Shapes.Rectangle;
+
+namespace IconCropTool;
+
+public partial class MainWindow : Window
+{
+    private const double MinCropSize = 4;
+
+    private readonly ObservableCollection<IconPreviewItem> _iconPreviews = [];
+    private CropDocument? _document;
+    private string? _jsonPath;
+    private BitmapSource? _sheetBitmap;
+    private IconEntry? _selectedIcon;
+    private bool _updatingFields;
+
+    private bool _isDragging;
+    private DragMode _dragMode;
+    private Point _dragStartPoint;
+    private IconEntry? _dragIcon;
+    private CropRect? _dragSelectedOriginalRect;
+    private Dictionary<IconEntry, CropRect> _dragOriginalRects = [];
+
+    public MainWindow()
+    {
+        InitializeComponent();
+        IconGrid.ItemsSource = _iconPreviews;
+        OverlayCanvas.MouseMove += OverlayCanvas_MouseMove;
+        OverlayCanvas.MouseLeftButtonUp += OverlayCanvas_MouseLeftButtonUp;
+        Loaded += MainWindow_Loaded;
+    }
+
+    private double Zoom => Math.Max(0.05, ZoomSlider.Value);
+
+    private bool UseSharedMode => SharedModeCheckBox.IsChecked == true;
+
+    private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+    {
+        string? defaultDirectory = FindDefaultDataDirectory();
+        if (defaultDirectory is null)
+        {
+            StatusText.Text = "No *_cropInfo.json found. Use Load JSON.";
+            return;
+        }
+
+        string? firstJson = Directory.GetFiles(defaultDirectory, "*_cropInfo.json")
+            .OrderBy(static path => path, StringComparer.OrdinalIgnoreCase)
+            .FirstOrDefault();
+        if (firstJson is not null)
+        {
+            LoadDocument(firstJson);
+        }
+    }
+
+    private void LoadJson_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new OpenFileDialog
+        {
+            Filter = "Crop info JSON (*_cropInfo.json)|*_cropInfo.json|JSON (*.json)|*.json|All files (*.*)|*.*",
+            InitialDirectory = GetCurrentDocumentDirectory() ?? FindDefaultDataDirectory() ?? Directory.GetCurrentDirectory()
+        };
+
+        if (dialog.ShowDialog(this) == true)
+        {
+            LoadDocument(dialog.FileName);
+        }
+    }
+
+    private void SaveJson_Click(object sender, RoutedEventArgs e)
+    {
+        if (_document is null || string.IsNullOrWhiteSpace(_jsonPath))
+        {
+            StatusText.Text = "No crop JSON is loaded.";
+            return;
+        }
+
+        try
+        {
+            IconCropRenderer.NormalizeDocument(_document);
+            string json = JsonSerializer.Serialize(_document, IconCropRenderer.JsonOptions);
+            File.WriteAllText(_jsonPath, json);
+            StatusText.Text = $"Saved {Path.GetFileName(_jsonPath)}";
+            RefreshViews(refreshPreviews: true);
+        }
+        catch (Exception ex)
+        {
+            StatusText.Text = $"Save failed: {ex.Message}";
+        }
+    }
+
+    private void RunCrop_Click(object sender, RoutedEventArgs e)
+    {
+        if (_document is null || _jsonPath is null)
+        {
+            StatusText.Text = "No crop JSON is loaded.";
+            return;
+        }
+
+        try
+        {
+            string documentDirectory = Path.GetDirectoryName(_jsonPath) ?? Directory.GetCurrentDirectory();
+            string outputDirectory = string.IsNullOrWhiteSpace(OutputDirectoryText.Text)
+                ? documentDirectory
+                : OutputDirectoryText.Text.Trim();
+
+            IconCropRenderer.NormalizeDocument(_document);
+            int saved = IconCropRenderer.CropAll(_document, documentDirectory, outputDirectory);
+            StatusText.Text = $"Cropped {saved} icons to {outputDirectory}";
+            RefreshViews(refreshPreviews: true);
+        }
+        catch (Exception ex)
+        {
+            StatusText.Text = $"Crop failed: {ex.Message}";
+        }
+    }
+
+    private void ZoomSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    {
+        if (OverlayCanvas is null)
+        {
+            return;
+        }
+
+        RenderOverlays();
+    }
+
+    private void IconPreview_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (sender is FrameworkElement { DataContext: IconPreviewItem item })
+        {
+            SelectIcon(item.Icon);
+            e.Handled = true;
+        }
+    }
+
+    private void OverlayCanvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        Keyboard.ClearFocus();
+    }
+
+    private void OverlayElement_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (sender is not FrameworkElement { Tag: OverlayTag tag } || _document is null)
+        {
+            return;
+        }
+
+        SelectIcon(tag.Icon);
+        Keyboard.ClearFocus();
+
+        _isDragging = true;
+        _dragMode = tag.Mode;
+        _dragIcon = tag.Icon;
+        _dragStartPoint = e.GetPosition(OverlayCanvas);
+        _dragSelectedOriginalRect = tag.Icon.SourceCropRect.Clone();
+        _dragOriginalRects = _document.Icons.ToDictionary(static icon => icon, static icon => icon.SourceCropRect.Clone());
+
+        OverlayCanvas.CaptureMouse();
+        e.Handled = true;
+    }
+
+    private void OverlayCanvas_MouseMove(object sender, MouseEventArgs e)
+    {
+        if (!_isDragging || _dragIcon is null || _dragSelectedOriginalRect is null || e.LeftButton != MouseButtonState.Pressed)
+        {
+            return;
+        }
+
+        Point current = e.GetPosition(OverlayCanvas);
+        double dx = (current.X - _dragStartPoint.X) / Zoom;
+        double dy = (current.Y - _dragStartPoint.Y) / Zoom;
+        CropRect proposed = _dragSelectedOriginalRect.Clone();
+
+        if (_dragMode == DragMode.Move)
+        {
+            proposed.X += dx;
+            proposed.Y += dy;
+        }
+        else
+        {
+            proposed.Width = Math.Max(MinCropSize, proposed.Width + dx);
+            proposed.Height = Math.Max(MinCropSize, proposed.Height + dy);
+        }
+
+        ApplyRectChange(_dragIcon, proposed, _dragOriginalRects, _dragSelectedOriginalRect);
+        RefreshViews(refreshPreviews: true);
+    }
+
+    private void OverlayCanvas_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        if (!_isDragging)
+        {
+            return;
+        }
+
+        _isDragging = false;
+        _dragIcon = null;
+        _dragSelectedOriginalRect = null;
+        _dragOriginalRects = [];
+        OverlayCanvas.ReleaseMouseCapture();
+        RefreshViews(refreshPreviews: true);
+        e.Handled = true;
+    }
+
+    private void CropField_LostFocus(object sender, RoutedEventArgs e)
+    {
+        if (!_updatingFields)
+        {
+            ApplyCropFields();
+        }
+    }
+
+    private void CropField_KeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Enter)
+        {
+            ApplyCropFields();
+            Keyboard.ClearFocus();
+            e.Handled = true;
+        }
+    }
+
+    private void ApplyCropFields_Click(object sender, RoutedEventArgs e)
+    {
+        ApplyCropFields();
+    }
+
+    private void LoadDocument(string path)
+    {
+        try
+        {
+            string json = File.ReadAllText(path);
+            CropDocument document = JsonSerializer.Deserialize<CropDocument>(json, IconCropRenderer.JsonOptions)
+                ?? throw new InvalidOperationException("The crop JSON file is empty.");
+            if (document.Icons.Count == 0)
+            {
+                throw new InvalidOperationException("The crop JSON does not contain any icons.");
+            }
+
+            string documentDirectory = Path.GetDirectoryName(path) ?? Directory.GetCurrentDirectory();
+            string sheetPath = Path.Combine(documentDirectory, document.SheetImageFilename);
+            if (!File.Exists(sheetPath))
+            {
+                throw new FileNotFoundException("Sheet image not found.", sheetPath);
+            }
+
+            _document = document;
+            _jsonPath = path;
+            _sheetBitmap = IconCropRenderer.LoadBitmap(sheetPath);
+            _document.SheetSize ??= new SheetSize();
+            _document.SheetSize.Width = _sheetBitmap.PixelWidth;
+            _document.SheetSize.Height = _sheetBitmap.PixelHeight;
+
+            OutputDirectoryText.Text = documentDirectory;
+            JsonPathText.Text = path;
+            SheetImage.Source = _sheetBitmap;
+            SheetInfoText.Text = $"{Path.GetFileName(sheetPath)} ({_sheetBitmap.PixelWidth}x{_sheetBitmap.PixelHeight})";
+
+            _iconPreviews.Clear();
+            foreach (IconEntry icon in _document.Icons.OrderBy(static icon => icon.Index))
+            {
+                _iconPreviews.Add(new IconPreviewItem(icon));
+            }
+
+            SelectIcon(_document.Icons.OrderBy(static icon => icon.Index).First());
+            StatusText.Text = $"Loaded {Path.GetFileName(path)}";
+            RefreshViews(refreshPreviews: true);
+        }
+        catch (Exception ex)
+        {
+            StatusText.Text = $"Load failed: {ex.Message}";
+        }
+    }
+
+    private void SelectIcon(IconEntry? icon)
+    {
+        _selectedIcon = icon;
+        foreach (IconPreviewItem item in _iconPreviews)
+        {
+            item.SetSelected(ReferenceEquals(item.Icon, icon));
+        }
+
+        UpdateSelectedFields();
+        RenderOverlays();
+    }
+
+    private void ApplyCropFields()
+    {
+        if (_selectedIcon is null)
+        {
+            return;
+        }
+
+        if (!TryReadCropFields(out CropRect proposed))
+        {
+            StatusText.Text = "Crop fields must be numeric.";
+            return;
+        }
+
+        Dictionary<IconEntry, CropRect> originals = _document?.Icons.ToDictionary(static icon => icon, static icon => icon.SourceCropRect.Clone()) ?? [];
+        CropRect selectedOriginal = _selectedIcon.SourceCropRect.Clone();
+        ApplyRectChange(_selectedIcon, proposed, originals, selectedOriginal);
+        RefreshViews(refreshPreviews: true);
+    }
+
+    private void ApplyRectChange(
+        IconEntry editedIcon,
+        CropRect proposedRect,
+        IReadOnlyDictionary<IconEntry, CropRect> originalRects,
+        CropRect editedOriginalRect)
+    {
+        if (_document is null)
+        {
+            return;
+        }
+
+        CropRect clampedProposed = ClampRectToSheet(proposedRect);
+        double dx = clampedProposed.X - editedOriginalRect.X;
+        double dy = clampedProposed.Y - editedOriginalRect.Y;
+        double dw = clampedProposed.Width - editedOriginalRect.Width;
+        double dh = clampedProposed.Height - editedOriginalRect.Height;
+
+        foreach (IconEntry icon in _document.Icons)
+        {
+            CropRect original = originalRects.TryGetValue(icon, out CropRect? rect)
+                ? rect
+                : icon.SourceCropRect.Clone();
+            CropRect next = original.Clone();
+
+            if (UseSharedMode)
+            {
+                if (icon.Column == editedIcon.Column)
+                {
+                    next.X = original.X + dx;
+                    next.Width = original.Width + dw;
+                }
+
+                if (icon.Row == editedIcon.Row)
+                {
+                    next.Y = original.Y + dy;
+                    next.Height = original.Height + dh;
+                }
+            }
+            else if (ReferenceEquals(icon, editedIcon))
+            {
+                next = clampedProposed.Clone();
+            }
+
+            icon.SourceCropRect.CopyFrom(ClampRectToSheet(next));
+        }
+
+        IconCropRenderer.NormalizeDocument(_document);
+    }
+
+    private void RefreshViews(bool refreshPreviews)
+    {
+        UpdateSelectedFields();
+        RenderOverlays();
+        if (refreshPreviews)
+        {
+            RenderAllPreviews();
+        }
+    }
+
+    private void RenderAllPreviews()
+    {
+        if (_document is null || _sheetBitmap is null)
+        {
+            return;
+        }
+
+        try
+        {
+            foreach (IconPreviewItem item in _iconPreviews)
+            {
+                item.Preview = IconCropRenderer.RenderPreview(_document, _sheetBitmap, item.Icon);
+            }
+
+            PreviewInfoText.Text = $"{_iconPreviews.Count} icons";
+        }
+        catch (Exception ex)
+        {
+            StatusText.Text = $"Preview failed: {ex.Message}";
+        }
+    }
+
+    private void RenderOverlays()
+    {
+        OverlayCanvas.Children.Clear();
+
+        if (_document is null || _sheetBitmap is null)
+        {
+            return;
+        }
+
+        double scaledWidth = _sheetBitmap.PixelWidth * Zoom;
+        double scaledHeight = _sheetBitmap.PixelHeight * Zoom;
+        SheetHost.Width = scaledWidth;
+        SheetHost.Height = scaledHeight;
+        SheetImage.Width = scaledWidth;
+        SheetImage.Height = scaledHeight;
+        OverlayCanvas.Width = scaledWidth;
+        OverlayCanvas.Height = scaledHeight;
+
+        foreach (IconEntry icon in _document.Icons.Where(icon => !ReferenceEquals(icon, _selectedIcon)))
+        {
+            AddOverlayForIcon(icon, isSelected: false);
+        }
+
+        if (_selectedIcon is not null)
+        {
+            AddOverlayForIcon(_selectedIcon, isSelected: true);
+            AddResizeHandle(_selectedIcon);
+        }
+    }
+
+    private void AddOverlayForIcon(IconEntry icon, bool isSelected)
+    {
+        CropRect rect = icon.SourceCropRect;
+        var border = new Rectangle
+        {
+            Width = Math.Max(1, rect.Width * Zoom),
+            Height = Math.Max(1, rect.Height * Zoom),
+            StrokeThickness = isSelected ? 2.5 : 1.4,
+            Stroke = isSelected ? Brushes.Orange : Brushes.DeepSkyBlue,
+            Fill = isSelected
+                ? new SolidColorBrush(Color.FromArgb(26, 255, 174, 42))
+                : new SolidColorBrush(Color.FromArgb(18, 0, 191, 255)),
+            Cursor = Cursors.SizeAll,
+            Tag = new OverlayTag(icon, DragMode.Move),
+            ToolTip = $"{icon.Index}: {icon.IconFilename}"
+        };
+        border.MouseLeftButtonDown += OverlayElement_MouseLeftButtonDown;
+        Canvas.SetLeft(border, rect.X * Zoom);
+        Canvas.SetTop(border, rect.Y * Zoom);
+        OverlayCanvas.Children.Add(border);
+
+        var label = new TextBlock
+        {
+            Text = icon.Index.ToString(CultureInfo.InvariantCulture),
+            Foreground = Brushes.White,
+            Background = isSelected ? Brushes.OrangeRed : Brushes.DodgerBlue,
+            FontSize = 11,
+            FontWeight = FontWeights.SemiBold,
+            Padding = new Thickness(3, 1, 3, 1),
+            IsHitTestVisible = false
+        };
+        Canvas.SetLeft(label, rect.X * Zoom + 3);
+        Canvas.SetTop(label, rect.Y * Zoom + 3);
+        OverlayCanvas.Children.Add(label);
+    }
+
+    private void AddResizeHandle(IconEntry icon)
+    {
+        const double handleSize = 13;
+        CropRect rect = icon.SourceCropRect;
+        var handle = new Rectangle
+        {
+            Width = handleSize,
+            Height = handleSize,
+            Fill = Brushes.Orange,
+            Stroke = Brushes.White,
+            StrokeThickness = 1,
+            Cursor = Cursors.SizeNWSE,
+            Tag = new OverlayTag(icon, DragMode.Resize)
+        };
+        handle.MouseLeftButtonDown += OverlayElement_MouseLeftButtonDown;
+        Canvas.SetLeft(handle, ((rect.X + rect.Width) * Zoom) - (handleSize / 2));
+        Canvas.SetTop(handle, ((rect.Y + rect.Height) * Zoom) - (handleSize / 2));
+        OverlayCanvas.Children.Add(handle);
+    }
+
+    private void UpdateSelectedFields()
+    {
+        _updatingFields = true;
+        try
+        {
+            if (_selectedIcon is null)
+            {
+                CropXText.Text = "";
+                CropYText.Text = "";
+                CropWidthText.Text = "";
+                CropHeightText.Text = "";
+                SelectedInfoText.Text = "";
+                return;
+            }
+
+            CropRect rect = _selectedIcon.SourceCropRect;
+            CropXText.Text = IconCropRenderer.FormatNumber(rect.X);
+            CropYText.Text = IconCropRenderer.FormatNumber(rect.Y);
+            CropWidthText.Text = IconCropRenderer.FormatNumber(rect.Width);
+            CropHeightText.Text = IconCropRenderer.FormatNumber(rect.Height);
+            SelectedInfoText.Text = $"{_selectedIcon.Index}  row {_selectedIcon.Row}, col {_selectedIcon.Column}  {_selectedIcon.IconFilename}";
+        }
+        finally
+        {
+            _updatingFields = false;
+        }
+    }
+
+    private bool TryReadCropFields(out CropRect rect)
+    {
+        rect = new CropRect();
+        if (!TryParseNumber(CropXText.Text, out double x) ||
+            !TryParseNumber(CropYText.Text, out double y) ||
+            !TryParseNumber(CropWidthText.Text, out double width) ||
+            !TryParseNumber(CropHeightText.Text, out double height))
+        {
+            return false;
+        }
+
+        rect.X = x;
+        rect.Y = y;
+        rect.Width = Math.Max(MinCropSize, width);
+        rect.Height = Math.Max(MinCropSize, height);
+        return true;
+    }
+
+    private CropRect ClampRectToSheet(CropRect rect)
+    {
+        double maxWidth = _sheetBitmap?.PixelWidth ?? _document?.SheetSize?.Width ?? Math.Max(rect.X + rect.Width, 1);
+        double maxHeight = _sheetBitmap?.PixelHeight ?? _document?.SheetSize?.Height ?? Math.Max(rect.Y + rect.Height, 1);
+
+        double width = Math.Clamp(rect.Width, MinCropSize, Math.Max(MinCropSize, maxWidth));
+        double height = Math.Clamp(rect.Height, MinCropSize, Math.Max(MinCropSize, maxHeight));
+        double x = Math.Clamp(rect.X, 0, Math.Max(0, maxWidth - width));
+        double y = Math.Clamp(rect.Y, 0, Math.Max(0, maxHeight - height));
+
+        return new CropRect
+        {
+            X = x,
+            Y = y,
+            Width = width,
+            Height = height
+        };
+    }
+
+    private string? GetCurrentDocumentDirectory()
+    {
+        return string.IsNullOrWhiteSpace(_jsonPath) ? null : Path.GetDirectoryName(_jsonPath);
+    }
+
+    private static bool TryParseNumber(string text, out double value)
+    {
+        return double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out value) ||
+               double.TryParse(text, NumberStyles.Float, CultureInfo.CurrentCulture, out value);
+    }
+
+    private static string? FindDefaultDataDirectory()
+    {
+        var candidates = new List<string>
+        {
+            Directory.GetCurrentDirectory(),
+            Path.Combine(Directory.GetCurrentDirectory(), "Tools", "IconCrop", "Icons"),
+            Path.Combine(Directory.GetCurrentDirectory(), "Tools", "IconCrop"),
+            AppContext.BaseDirectory
+        };
+
+        candidates.AddRange(EnumerateParents(AppContext.BaseDirectory).Select(static path => Path.Combine(path, "Tools", "IconCrop", "Icons")));
+        candidates.AddRange(EnumerateParents(AppContext.BaseDirectory).Select(static path => Path.Combine(path, "Tools", "IconCrop")));
+        candidates.AddRange(EnumerateParents(AppContext.BaseDirectory));
+        candidates.AddRange(EnumerateParents(Directory.GetCurrentDirectory()).Select(static path => Path.Combine(path, "Tools", "IconCrop", "Icons")));
+        candidates.AddRange(EnumerateParents(Directory.GetCurrentDirectory()).Select(static path => Path.Combine(path, "Tools", "IconCrop")));
+
+        return candidates
+            .Where(Directory.Exists)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .FirstOrDefault(static path => Directory.GetFiles(path, "*_cropInfo.json").Length > 0);
+    }
+
+    private static IEnumerable<string> EnumerateParents(string path)
+    {
+        DirectoryInfo? directory = new DirectoryInfo(path);
+        while (directory is not null)
+        {
+            yield return directory.FullName;
+            directory = directory.Parent;
+        }
+    }
+
+    private sealed record OverlayTag(IconEntry Icon, DragMode Mode);
+
+    private enum DragMode
+    {
+        Move,
+        Resize
+    }
+}
+
+public sealed class IconPreviewItem : INotifyPropertyChanged
+{
+    private static readonly Brush NormalBackground = CreateBrush("#1d232b");
+    private static readonly Brush SelectedBackground = CreateBrush("#2d3a4a");
+    private static readonly Brush NormalBorder = CreateBrush("#303846");
+    private static readonly Brush SelectedBorder = CreateBrush("#ffb24a");
+
+    private BitmapSource? _preview;
+    private Brush _backgroundBrush = NormalBackground;
+    private Brush _borderBrush = NormalBorder;
+
+    public IconPreviewItem(IconEntry icon)
+    {
+        Icon = icon;
+    }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    public IconEntry Icon { get; }
+
+    public string Label => $"{Icon.Index}: {Icon.IconFilename}";
+
+    public BitmapSource? Preview
+    {
+        get => _preview;
+        set
+        {
+            _preview = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public Brush BackgroundBrush
+    {
+        get => _backgroundBrush;
+        private set
+        {
+            _backgroundBrush = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public Brush BorderBrush
+    {
+        get => _borderBrush;
+        private set
+        {
+            _borderBrush = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public void SetSelected(bool selected)
+    {
+        BackgroundBrush = selected ? SelectedBackground : NormalBackground;
+        BorderBrush = selected ? SelectedBorder : NormalBorder;
+    }
+
+    private static Brush CreateBrush(string hex)
+    {
+        var brush = (SolidColorBrush)new BrushConverter().ConvertFromString(hex)!;
+        brush.Freeze();
+        return brush;
+    }
+
+    private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+}
