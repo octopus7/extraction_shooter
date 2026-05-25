@@ -324,14 +324,7 @@ bool UTunaSweeperInteractionSubsystem::HandleWorldProgressInteraction(
 		return false;
 	}
 
-	ATunaSweeperPlayerController* TunaPlayerController = Cast<ATunaSweeperPlayerController>(InstigatorPawn->GetController());
-	if (!TunaPlayerController)
-	{
-		return false;
-	}
-
-	TunaPlayerController->OpenWorldProgressPanel(ProgressActor);
-	return true;
+	return ProgressActor->RepairUsingAvailableRequiredItems(true);
 }
 
 bool UTunaSweeperInteractionSubsystem::HandlePersistentDoorInteraction(UTunaSweeperInteractableComponent* Interactable)

@@ -4,7 +4,14 @@
 #include "Dom/JsonObject.h"
 #include "Engine/StaticMesh.h"
 #include "Engine/World.h"
+#include "GameFramework/Actor.h"
+#include "Interaction/TunaSweeperInteractableComponent.h"
+#include "Interaction/TunaSweeperItemSpawnInteractableActor.h"
+#include "Interaction/TunaSweeperLevelTravelInteractableActor.h"
 #include "Interaction/TunaSweeperLootContainerActor.h"
+#include "Interaction/TunaSweeperLootContainerSpawnInteractableActor.h"
+#include "Interaction/TunaSweeperPickupItemActor.h"
+#include "Interaction/TunaSweeperSelfDestructInteractableActor.h"
 #include "Interaction/TunaSweeperTransparentObstacleActor.h"
 #include "Interaction/TunaSweeperWarpPointActor.h"
 #include "Interaction/TunaSweeperWorldProgressActor.h"
@@ -27,14 +34,24 @@ namespace TunaSweeperEnemySpawn
 	const TCHAR* TransparentObstacleSpawnsJsonRelativePath = TEXT("Data/TransparentObstacleSpawns.json");
 	const TCHAR* WorldProgressObjectSpawnsJsonRelativePath = TEXT("Data/WorldProgressObjectSpawns.json");
 	const TCHAR* WarpPointSpawnsJsonRelativePath = TEXT("Data/WarpPointSpawns.json");
+	const TCHAR* GameplayInteractionActorSpawnsJsonRelativePath = TEXT("Data/GameplayInteractionSpawns.json");
 	const TCHAR* DefaultEnemyClassPath = TEXT("/Game/Characters/Enemy/BP_TunaSweeperEnemy.BP_TunaSweeperEnemy_C");
+	const TCHAR* DefaultLevelTravelClassPath = TEXT("/Game/Interaction/BP_Interact_LevelTravel.BP_Interact_LevelTravel_C");
+	const TCHAR* DefaultPickupItemClassPath = TEXT("/Game/Interaction/BP_PickupItem.BP_PickupItem_C");
+	const TCHAR* DefaultItemSpawnClassPath = TEXT("/Game/Interaction/BP_Interact_ItemSpawn.BP_Interact_ItemSpawn_C");
 	const TCHAR* DefaultLootContainerClassPath = TEXT("/Game/Interaction/BP_LootContainer.BP_LootContainer_C");
+	const TCHAR* DefaultLootContainerSpawnClassPath = TEXT("/Game/Interaction/BP_Interact_LootContainerSpawn.BP_Interact_LootContainerSpawn_C");
+	const TCHAR* DefaultSelfDestructClassPath = TEXT("/Game/Interaction/BP_Interact_SelfDestruct.BP_Interact_SelfDestruct_C");
 	const TCHAR* DefaultTransparentObstacleClassPath = TEXT("/Game/Interaction/BP_TransparentObstacle.BP_TransparentObstacle_C");
 	const TCHAR* DefaultWorldProgressActorClassPath = TEXT("/Game/Interaction/BP_WorldProgress_BrokenBridge.BP_WorldProgress_BrokenBridge_C");
 	const TCHAR* DefaultWorldProgressCompletedActorClassPath = TEXT("/Game/Interaction/BP_WorldProgress_RepairedBridge.BP_WorldProgress_RepairedBridge_C");
 	const TCHAR* DefaultWarpPointClassPath = TEXT("/Game/Interaction/BP_WarpPoint.BP_WarpPoint_C");
 	const TCHAR* DefaultWarpPointMaterialPath = TEXT("/Game/Interaction/M_WarpPointEnergy.M_WarpPointEnergy");
 	const TCHAR* DefaultWarpPointSphereMeshPath = TEXT("/Engine/BasicShapes/Sphere.Sphere");
+	const TCHAR* DefaultInteractionMarkerWidgetClassPath = TEXT("/Game/UI/WBP_InteractionMarker.WBP_InteractionMarker_C");
+	const TCHAR* DefaultLevelTransitionWidgetClassPath = TEXT("/Game/UI/WBP_LevelTransitionVideo.WBP_LevelTransitionVideo_C");
+	const TCHAR* DefaultPickupItemIconWidgetClassPath = TEXT("/Game/UI/WBP_PickupItemIcon.WBP_PickupItemIcon_C");
+	const TCHAR* DefaultSpeechBubbleWidgetClassPath = TEXT("/Game/UI/WBP_SpeechBubble.WBP_SpeechBubble_C");
 
 	FString NormalizeLevelName(const FString& RawLevelName)
 	{
@@ -88,6 +105,80 @@ namespace TunaSweeperEnemySpawn
 		return false;
 #endif
 	}
+
+	UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType ReadGameplayInteractionActorSpawnType(
+		const FString& RawSpawnType)
+	{
+		FString SpawnType = RawSpawnType.TrimStartAndEnd().ToLower();
+		SpawnType.ReplaceInline(TEXT("-"), TEXT("_"));
+
+		if (SpawnType == TEXT("level_travel") || SpawnType == TEXT("leveltravel"))
+		{
+			return UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::LevelTravel;
+		}
+		if (SpawnType == TEXT("pickup_item") || SpawnType == TEXT("pickupitem") || SpawnType == TEXT("item_pickup"))
+		{
+			return UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::PickupItem;
+		}
+		if (SpawnType == TEXT("item_spawn") || SpawnType == TEXT("itemspawn"))
+		{
+			return UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::ItemSpawn;
+		}
+		if (SpawnType == TEXT("loot_container") || SpawnType == TEXT("lootcontainer"))
+		{
+			return UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::LootContainer;
+		}
+		if (SpawnType == TEXT("loot_container_spawn") || SpawnType == TEXT("lootcontainerspawn"))
+		{
+			return UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::LootContainerSpawn;
+		}
+		if (SpawnType == TEXT("self_destruct") || SpawnType == TEXT("selfdestruct"))
+		{
+			return UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::SelfDestruct;
+		}
+
+		return UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::Unknown;
+	}
+
+	const TCHAR* GetDefaultGameplayInteractionActorClassPath(
+		UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType SpawnType)
+	{
+		switch (SpawnType)
+		{
+		case UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::LevelTravel:
+			return DefaultLevelTravelClassPath;
+		case UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::PickupItem:
+			return DefaultPickupItemClassPath;
+		case UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::ItemSpawn:
+			return DefaultItemSpawnClassPath;
+		case UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::LootContainer:
+			return DefaultLootContainerClassPath;
+		case UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::LootContainerSpawn:
+			return DefaultLootContainerSpawnClassPath;
+		case UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::SelfDestruct:
+			return DefaultSelfDestructClassPath;
+		default:
+			return nullptr;
+		}
+	}
+
+	FText GetDefaultGameplayInteractionDisplayName(
+		UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType SpawnType)
+	{
+		switch (SpawnType)
+		{
+		case UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::LevelTravel:
+			return FText::FromString(TEXT("Travel"));
+		case UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::ItemSpawn:
+			return FText::FromString(TEXT("\uC544\uC774\uD15C\uC2A4\uD3F0"));
+		case UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::LootContainerSpawn:
+			return FText::FromString(TEXT("\uC0C1\uC790\uC2A4\uD3F0"));
+		case UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::SelfDestruct:
+			return FText::FromString(TEXT("\uC790\uD3ED"));
+		default:
+			return FText::GetEmpty();
+		}
+	}
 }
 
 void UTunaSweeperEnemySpawnSubsystem::Initialize(FSubsystemCollectionBase& Collection)
@@ -112,6 +203,7 @@ void UTunaSweeperEnemySpawnSubsystem::Deinitialize()
 	ResetLoadedTransparentObstacleSpawnData();
 	ResetLoadedWorldProgressObjectSpawnData();
 	ResetLoadedWarpPointSpawnData();
+	ResetLoadedGameplayInteractionActorSpawnData();
 	LastSpawnedWorld.Reset();
 	Super::Deinitialize();
 }
@@ -138,7 +230,8 @@ bool UTunaSweeperEnemySpawnSubsystem::EnsureRaidRuntimeActorsSpawnedForWorld(UWo
 	const bool bLoadedTransparentObstacles = LoadTransparentObstacleSpawnData(false);
 	const bool bLoadedWorldProgressObjects = LoadWorldProgressObjectSpawnData(false);
 	const bool bLoadedWarpPoints = LoadWarpPointSpawnData(false);
-	if (!bLoadedEnemies && !bLoadedLootContainers && !bLoadedTransparentObstacles && !bLoadedWorldProgressObjects && !bLoadedWarpPoints)
+	const bool bLoadedGameplayInteractionActors = LoadGameplayInteractionActorSpawnData(false);
+	if (!bLoadedEnemies && !bLoadedLootContainers && !bLoadedTransparentObstacles && !bLoadedWorldProgressObjects && !bLoadedWarpPoints && !bLoadedGameplayInteractionActors)
 	{
 		return false;
 	}
@@ -379,15 +472,61 @@ bool UTunaSweeperEnemySpawnSubsystem::EnsureRaidRuntimeActorsSpawnedForWorld(UWo
 		}
 	}
 
+	int32 SpawnedGameplayInteractionActorCount = 0;
+	if (bLoadedGameplayInteractionActors)
+	{
+		for (const FGameplayInteractionActorSpawnDefinition& SpawnDefinition : GameplayInteractionActorSpawnDefinitions)
+		{
+			if (!DoesLevelNameMatchWorld(SpawnDefinition.LevelName, World))
+			{
+				continue;
+			}
+
+			UClass* LoadedActorClass = SpawnDefinition.ActorClass.LoadSynchronous();
+			if (!LoadedActorClass || !LoadedActorClass->IsChildOf(AActor::StaticClass()))
+			{
+				UE_LOG(
+					LogTunaSweeperEnemySpawn,
+					Warning,
+					TEXT("Gameplay interaction actor class failed to load for %s. Skipping spawn %s."),
+					*SpawnDefinition.LevelName.ToString(),
+					*SpawnDefinition.SpawnId.ToString());
+				continue;
+			}
+
+			const FTransform SpawnTransform(SpawnDefinition.Rotation, SpawnDefinition.Location, SpawnDefinition.Scale);
+			AActor* SpawnedActor = World->SpawnActorDeferred<AActor>(
+				LoadedActorClass,
+				SpawnTransform,
+				nullptr,
+				nullptr,
+				ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+			if (SpawnedActor)
+			{
+				ConfigureGameplayInteractionActor(SpawnedActor, SpawnDefinition);
+				if (!SpawnDefinition.SpawnId.IsNone())
+				{
+					SpawnedActor->Tags.AddUnique(SpawnDefinition.SpawnId);
+#if WITH_EDITOR
+					SpawnedActor->SetActorLabel(SpawnDefinition.SpawnId.ToString());
+#endif
+				}
+				UGameplayStatics::FinishSpawningActor(SpawnedActor, SpawnTransform);
+				++SpawnedGameplayInteractionActorCount;
+			}
+		}
+	}
+
 	UE_LOG(
 		LogTunaSweeperEnemySpawn,
 		Log,
-		TEXT("Spawned %d enemies, %d loot containers, %d transparent obstacles, %d world progress objects, and %d warp points for level %s."),
+		TEXT("Spawned %d enemies, %d loot containers, %d transparent obstacles, %d world progress objects, %d warp points, and %d gameplay interaction actors for level %s."),
 		SpawnedCount,
 		SpawnedLootContainerCount,
 		SpawnedTransparentObstacleCount,
 		SpawnedWorldProgressObjectCount,
 		SpawnedWarpPointCount,
+		SpawnedGameplayInteractionActorCount,
 		*TunaSweeperEnemySpawn::NormalizeLevelName(World->GetMapName()));
 	return true;
 }
@@ -905,6 +1044,247 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadWarpPointSpawnData(bool bForceReload)
 	return true;
 }
 
+bool UTunaSweeperEnemySpawnSubsystem::LoadGameplayInteractionActorSpawnData(bool bForceReload)
+{
+	if (bGameplayInteractionActorSpawnDataLoaded && !bForceReload)
+	{
+		return true;
+	}
+
+	ResetLoadedGameplayInteractionActorSpawnData();
+
+	FString JsonContent;
+	const FString GameplayInteractionActorSpawnJsonPath = GetGameplayInteractionActorSpawnJsonPath();
+	if (!FFileHelper::LoadFileToString(JsonContent, *GameplayInteractionActorSpawnJsonPath))
+	{
+		UE_LOG(LogTunaSweeperEnemySpawn, Error, TEXT("Failed to read gameplay interaction actor spawn JSON: %s"), *GameplayInteractionActorSpawnJsonPath);
+		return false;
+	}
+
+	TArray<TSharedPtr<FJsonValue>> JsonRows;
+	const TSharedRef<TJsonReader<>> JsonReader = TJsonReaderFactory<>::Create(JsonContent);
+	if (!FJsonSerializer::Deserialize(JsonReader, JsonRows))
+	{
+		UE_LOG(LogTunaSweeperEnemySpawn, Error, TEXT("Failed to parse gameplay interaction actor spawn JSON: %s"), *GameplayInteractionActorSpawnJsonPath);
+		return false;
+	}
+
+	bool bHasValidRows = false;
+	for (int32 RowIndex = 0; RowIndex < JsonRows.Num(); ++RowIndex)
+	{
+		const TSharedPtr<FJsonObject>* JsonObjectPtr = nullptr;
+		if (!JsonRows[RowIndex].IsValid() || !JsonRows[RowIndex]->TryGetObject(JsonObjectPtr) ||
+			!JsonObjectPtr || !JsonObjectPtr->IsValid())
+		{
+			UE_LOG(LogTunaSweeperEnemySpawn, Warning, TEXT("Skipping gameplay interaction actor spawn row %d: row is not an object."), RowIndex);
+			continue;
+		}
+
+		const TSharedPtr<FJsonObject>& JsonObject = *JsonObjectPtr;
+		FString LevelName;
+		FString SpawnId;
+		FString SpawnTypeText;
+		FString ActorClassPath;
+		FString InteractionDisplayName;
+		FString MarkerWidgetClassPath;
+		FVector Location = FVector::ZeroVector;
+		FRotator Rotation = FRotator::ZeroRotator;
+		FVector Scale = FVector::OneVector;
+		if (!JsonObject->TryGetStringField(TEXT("level_name"), LevelName) ||
+			!JsonObject->TryGetStringField(TEXT("spawn_id"), SpawnId) ||
+			!JsonObject->TryGetStringField(TEXT("spawn_type"), SpawnTypeText) ||
+			!TunaSweeperEnemySpawn::TryReadVectorField(JsonObject, TEXT("location"), Location))
+		{
+			UE_LOG(LogTunaSweeperEnemySpawn, Warning, TEXT("Skipping gameplay interaction actor spawn row %d: required field is missing."), RowIndex);
+			continue;
+		}
+
+		FGameplayInteractionActorSpawnDefinition SpawnDefinition;
+		SpawnDefinition.LevelName = FName(*LevelName.TrimStartAndEnd());
+		SpawnDefinition.SpawnId = FName(*SpawnId.TrimStartAndEnd());
+		SpawnDefinition.SpawnType = TunaSweeperEnemySpawn::ReadGameplayInteractionActorSpawnType(SpawnTypeText);
+		if (SpawnDefinition.LevelName.IsNone() ||
+			SpawnDefinition.SpawnId.IsNone() ||
+			SpawnDefinition.SpawnType == EGameplayInteractionActorSpawnType::Unknown)
+		{
+			UE_LOG(LogTunaSweeperEnemySpawn, Warning, TEXT("Skipping gameplay interaction actor spawn row %d: row has invalid identifiers."), RowIndex);
+			continue;
+		}
+
+		const TCHAR* DefaultActorClassPath =
+			TunaSweeperEnemySpawn::GetDefaultGameplayInteractionActorClassPath(SpawnDefinition.SpawnType);
+		if (!DefaultActorClassPath)
+		{
+			UE_LOG(LogTunaSweeperEnemySpawn, Warning, TEXT("Skipping gameplay interaction actor spawn row %d: no default class for spawn type."), RowIndex);
+			continue;
+		}
+
+		JsonObject->TryGetStringField(TEXT("actor_class"), ActorClassPath);
+		JsonObject->TryGetStringField(TEXT("interaction_display_name"), InteractionDisplayName);
+		JsonObject->TryGetStringField(TEXT("marker_widget_class"), MarkerWidgetClassPath);
+		TunaSweeperEnemySpawn::TryReadRotatorField(JsonObject, TEXT("rotation"), Rotation);
+		TunaSweeperEnemySpawn::TryReadVectorField(JsonObject, TEXT("scale"), Scale);
+
+		const FString TrimmedActorClassPath = ActorClassPath.TrimStartAndEnd();
+		const FString TrimmedMarkerWidgetClassPath = MarkerWidgetClassPath.TrimStartAndEnd();
+		SpawnDefinition.ActorClass = TSoftClassPtr<AActor>(
+			FSoftObjectPath(TrimmedActorClassPath.IsEmpty()
+				? FString(DefaultActorClassPath)
+				: TrimmedActorClassPath));
+		SpawnDefinition.Location = Location;
+		SpawnDefinition.Rotation = Rotation;
+		SpawnDefinition.Scale = FVector(
+			FMath::Max(0.01f, Scale.X),
+			FMath::Max(0.01f, Scale.Y),
+			FMath::Max(0.01f, Scale.Z));
+		SpawnDefinition.InteractionDisplayName = InteractionDisplayName.TrimStartAndEnd().IsEmpty()
+			? TunaSweeperEnemySpawn::GetDefaultGameplayInteractionDisplayName(SpawnDefinition.SpawnType)
+			: FText::FromString(InteractionDisplayName.TrimStartAndEnd());
+		SpawnDefinition.MarkerWidgetClass = TSoftClassPtr<UTunaSweeperInteractionMarkerWidget>(
+			FSoftObjectPath(TrimmedMarkerWidgetClassPath.IsEmpty()
+				? FString(TunaSweeperEnemySpawn::DefaultInteractionMarkerWidgetClassPath)
+				: TrimmedMarkerWidgetClassPath));
+
+		FString TargetLevelName;
+		FString TransitionMediaSourcePath;
+		FString TransitionWidgetClassPath;
+		FString TransitionMessage;
+		FString LevelTravelVisualMeshPath;
+		FVector LevelTravelVisualScale(0.75f, 0.75f, 0.75f);
+		FVector LevelTravelVisualRelativeLocation = FVector::ZeroVector;
+		JsonObject->TryGetStringField(TEXT("target_level_name"), TargetLevelName);
+		JsonObject->TryGetStringField(TEXT("transition_media_source"), TransitionMediaSourcePath);
+		JsonObject->TryGetStringField(TEXT("transition_widget_class"), TransitionWidgetClassPath);
+		JsonObject->TryGetStringField(TEXT("transition_message"), TransitionMessage);
+		JsonObject->TryGetStringField(TEXT("level_travel_visual_mesh"), LevelTravelVisualMeshPath);
+		TunaSweeperEnemySpawn::TryReadVectorField(JsonObject, TEXT("level_travel_visual_scale"), LevelTravelVisualScale);
+		TunaSweeperEnemySpawn::TryReadVectorField(JsonObject, TEXT("level_travel_visual_relative_location"), LevelTravelVisualRelativeLocation);
+		SpawnDefinition.TargetLevelName = TargetLevelName.TrimStartAndEnd().IsEmpty()
+			? NAME_None
+			: FName(*TargetLevelName.TrimStartAndEnd());
+		const FString TrimmedTransitionMediaSourcePath = TransitionMediaSourcePath.TrimStartAndEnd();
+		if (!TrimmedTransitionMediaSourcePath.IsEmpty())
+		{
+			SpawnDefinition.TransitionMediaSource = TSoftObjectPtr<UMediaSource>(
+				FSoftObjectPath(TrimmedTransitionMediaSourcePath));
+		}
+		const FString TrimmedTransitionWidgetClassPath = TransitionWidgetClassPath.TrimStartAndEnd();
+		SpawnDefinition.TransitionWidgetClass = TSoftClassPtr<UTunaSweeperLevelTransitionWidget>(
+			FSoftObjectPath(TrimmedTransitionWidgetClassPath.IsEmpty()
+				? FString(TunaSweeperEnemySpawn::DefaultLevelTransitionWidgetClassPath)
+				: TrimmedTransitionWidgetClassPath));
+		SpawnDefinition.TransitionMessage = TransitionMessage.TrimStartAndEnd().IsEmpty()
+			? FText::GetEmpty()
+			: FText::FromString(TransitionMessage.TrimStartAndEnd());
+		const FString TrimmedLevelTravelVisualMeshPath = LevelTravelVisualMeshPath.TrimStartAndEnd();
+		if (!TrimmedLevelTravelVisualMeshPath.IsEmpty())
+		{
+			SpawnDefinition.LevelTravelVisualMesh = TSoftObjectPtr<UStaticMesh>(
+				FSoftObjectPath(TrimmedLevelTravelVisualMeshPath));
+		}
+		SpawnDefinition.LevelTravelVisualScale = FVector(
+			FMath::Max(0.01f, LevelTravelVisualScale.X),
+			FMath::Max(0.01f, LevelTravelVisualScale.Y),
+			FMath::Max(0.01f, LevelTravelVisualScale.Z));
+		SpawnDefinition.LevelTravelVisualRelativeLocation = LevelTravelVisualRelativeLocation;
+
+		double NumericItemId = 1001.0;
+		double NumericItemQuantity = 1.0;
+		bool bDestroyOnPickup = true;
+		FString PickupItemIconWidgetClassPath;
+		FString PickupItemActorClassPath;
+		JsonObject->TryGetNumberField(TEXT("item_id"), NumericItemId);
+		JsonObject->TryGetNumberField(TEXT("item_quantity"), NumericItemQuantity);
+		JsonObject->TryGetBoolField(TEXT("destroy_on_pickup"), bDestroyOnPickup);
+		JsonObject->TryGetStringField(TEXT("pickup_item_icon_widget_class"), PickupItemIconWidgetClassPath);
+		JsonObject->TryGetStringField(TEXT("pickup_item_actor_class"), PickupItemActorClassPath);
+		SpawnDefinition.ItemId = static_cast<int32>(NumericItemId);
+		SpawnDefinition.ItemQuantity = FMath::Max(1, static_cast<int32>(NumericItemQuantity));
+		SpawnDefinition.bDestroyOnPickup = bDestroyOnPickup;
+		const FString TrimmedPickupItemIconWidgetClassPath = PickupItemIconWidgetClassPath.TrimStartAndEnd();
+		SpawnDefinition.PickupItemIconWidgetClass = TSoftClassPtr<UTunaSweeperPickupItemIconWidget>(
+			FSoftObjectPath(TrimmedPickupItemIconWidgetClassPath.IsEmpty()
+				? FString(TunaSweeperEnemySpawn::DefaultPickupItemIconWidgetClassPath)
+				: TrimmedPickupItemIconWidgetClassPath));
+		const FString TrimmedPickupItemActorClassPath = PickupItemActorClassPath.TrimStartAndEnd();
+		SpawnDefinition.PickupItemActorClass = TSoftClassPtr<ATunaSweeperPickupItemActor>(
+			FSoftObjectPath(TrimmedPickupItemActorClassPath.IsEmpty()
+				? FString(TunaSweeperEnemySpawn::DefaultPickupItemClassPath)
+				: TrimmedPickupItemActorClassPath));
+
+		double NumericContainerDefinitionId = INDEX_NONE;
+		double NumericContentsId = INDEX_NONE;
+		double NumericMinSpawnRadius = SpawnDefinition.SpawnType == EGameplayInteractionActorSpawnType::LootContainerSpawn ? 180.0 : 160.0;
+		double NumericMaxSpawnRadius = SpawnDefinition.SpawnType == EGameplayInteractionActorSpawnType::LootContainerSpawn ? 440.0 : 420.0;
+		double NumericSpawnTraceHeight = 800.0;
+		FString LootContainerActorClassPath;
+		JsonObject->TryGetNumberField(TEXT("container_definition_id"), NumericContainerDefinitionId);
+		JsonObject->TryGetNumberField(TEXT("contents_id"), NumericContentsId);
+		JsonObject->TryGetNumberField(TEXT("min_spawn_radius"), NumericMinSpawnRadius);
+		JsonObject->TryGetNumberField(TEXT("max_spawn_radius"), NumericMaxSpawnRadius);
+		JsonObject->TryGetNumberField(TEXT("spawn_trace_height"), NumericSpawnTraceHeight);
+		JsonObject->TryGetStringField(TEXT("loot_container_actor_class"), LootContainerActorClassPath);
+		SpawnDefinition.ContainerDefinitionId = static_cast<int32>(NumericContainerDefinitionId);
+		SpawnDefinition.ContentsId = static_cast<int32>(NumericContentsId);
+		SpawnDefinition.MinSpawnRadius = FMath::Max(0.0f, static_cast<float>(NumericMinSpawnRadius));
+		SpawnDefinition.MaxSpawnRadius = FMath::Max(0.0f, static_cast<float>(NumericMaxSpawnRadius));
+		SpawnDefinition.SpawnTraceHeight = FMath::Max(0.0f, static_cast<float>(NumericSpawnTraceHeight));
+		const FString TrimmedLootContainerActorClassPath = LootContainerActorClassPath.TrimStartAndEnd();
+		SpawnDefinition.LootContainerActorClass = TSoftClassPtr<ATunaSweeperLootContainerActor>(
+			FSoftObjectPath(TrimmedLootContainerActorClassPath.IsEmpty()
+				? FString(TunaSweeperEnemySpawn::DefaultLootContainerClassPath)
+				: TrimmedLootContainerActorClassPath));
+
+		FString SpeechBubbleWidgetClassPath;
+		double NumericCountdownStartNumber = 3.0;
+		double NumericCountdownStepSeconds = 1.0;
+		double NumericBoomDisplaySeconds = 0.2;
+		double NumericExplosionRadius = 200.0;
+		double NumericExplosionDamage = 100.0;
+		JsonObject->TryGetStringField(TEXT("speech_bubble_widget_class"), SpeechBubbleWidgetClassPath);
+		JsonObject->TryGetNumberField(TEXT("countdown_start_number"), NumericCountdownStartNumber);
+		JsonObject->TryGetNumberField(TEXT("countdown_step_seconds"), NumericCountdownStepSeconds);
+		JsonObject->TryGetNumberField(TEXT("boom_display_seconds"), NumericBoomDisplaySeconds);
+		JsonObject->TryGetNumberField(TEXT("explosion_radius"), NumericExplosionRadius);
+		JsonObject->TryGetNumberField(TEXT("explosion_damage"), NumericExplosionDamage);
+		const FString TrimmedSpeechBubbleWidgetClassPath = SpeechBubbleWidgetClassPath.TrimStartAndEnd();
+		SpawnDefinition.SpeechBubbleWidgetClass = TSoftClassPtr<UTunaSweeperSpeechBubbleWidget>(
+			FSoftObjectPath(TrimmedSpeechBubbleWidgetClassPath.IsEmpty()
+				? FString(TunaSweeperEnemySpawn::DefaultSpeechBubbleWidgetClassPath)
+				: TrimmedSpeechBubbleWidgetClassPath));
+		SpawnDefinition.CountdownStartNumber = FMath::Max(1, static_cast<int32>(NumericCountdownStartNumber));
+		SpawnDefinition.CountdownStepSeconds = FMath::Max(0.01f, static_cast<float>(NumericCountdownStepSeconds));
+		SpawnDefinition.BoomDisplaySeconds = FMath::Max(0.0f, static_cast<float>(NumericBoomDisplaySeconds));
+		SpawnDefinition.ExplosionRadius = FMath::Max(0.0f, static_cast<float>(NumericExplosionRadius));
+		SpawnDefinition.ExplosionDamage = FMath::Max(0.0f, static_cast<float>(NumericExplosionDamage));
+
+		if (SpawnDefinition.SpawnType == EGameplayInteractionActorSpawnType::LevelTravel &&
+			SpawnDefinition.TargetLevelName.IsNone())
+		{
+			UE_LOG(LogTunaSweeperEnemySpawn, Warning, TEXT("Skipping gameplay interaction actor spawn row %d: level travel target is missing."), RowIndex);
+			continue;
+		}
+		if (SpawnDefinition.SpawnType == EGameplayInteractionActorSpawnType::LootContainer &&
+			(SpawnDefinition.ContainerDefinitionId == INDEX_NONE || SpawnDefinition.ContentsId == INDEX_NONE))
+		{
+			UE_LOG(LogTunaSweeperEnemySpawn, Warning, TEXT("Skipping gameplay interaction actor spawn row %d: loot container identifiers are missing."), RowIndex);
+			continue;
+		}
+
+		GameplayInteractionActorSpawnDefinitions.Add(SpawnDefinition);
+		bHasValidRows = true;
+	}
+
+	if (!bHasValidRows)
+	{
+		UE_LOG(LogTunaSweeperEnemySpawn, Error, TEXT("Gameplay interaction actor spawn JSON has no valid rows: %s"), *GameplayInteractionActorSpawnJsonPath);
+		return false;
+	}
+
+	bGameplayInteractionActorSpawnDataLoaded = true;
+	return true;
+}
+
 void UTunaSweeperEnemySpawnSubsystem::HandlePostLoadMapWithWorld(UWorld* LoadedWorld)
 {
 	EnsureRaidRuntimeActorsSpawnedForWorld(LoadedWorld);
@@ -940,6 +1320,12 @@ void UTunaSweeperEnemySpawnSubsystem::ResetLoadedWarpPointSpawnData()
 	bWarpPointSpawnDataLoaded = false;
 }
 
+void UTunaSweeperEnemySpawnSubsystem::ResetLoadedGameplayInteractionActorSpawnData()
+{
+	GameplayInteractionActorSpawnDefinitions.Reset();
+	bGameplayInteractionActorSpawnDataLoaded = false;
+}
+
 FString UTunaSweeperEnemySpawnSubsystem::GetEnemySpawnJsonPath() const
 {
 	return FPaths::Combine(FPaths::ProjectContentDir(), TunaSweeperEnemySpawn::EnemySpawnsJsonRelativePath);
@@ -965,6 +1351,11 @@ FString UTunaSweeperEnemySpawnSubsystem::GetWarpPointSpawnJsonPath() const
 	return FPaths::Combine(FPaths::ProjectContentDir(), TunaSweeperEnemySpawn::WarpPointSpawnsJsonRelativePath);
 }
 
+FString UTunaSweeperEnemySpawnSubsystem::GetGameplayInteractionActorSpawnJsonPath() const
+{
+	return FPaths::Combine(FPaths::ProjectContentDir(), TunaSweeperEnemySpawn::GameplayInteractionActorSpawnsJsonRelativePath);
+}
+
 bool UTunaSweeperEnemySpawnSubsystem::DoesLevelNameMatchWorld(FName LevelName, const UWorld* World) const
 {
 	if (!World || LevelName.IsNone())
@@ -977,4 +1368,108 @@ bool UTunaSweeperEnemySpawnSubsystem::DoesLevelNameMatchWorld(FName LevelName, c
 	const FString WorldPackageName = TunaSweeperEnemySpawn::NormalizeLevelName(World->GetOutermost()->GetName());
 	return SpawnLevelName.Equals(WorldMapName, ESearchCase::IgnoreCase) ||
 		SpawnLevelName.Equals(WorldPackageName, ESearchCase::IgnoreCase);
+}
+
+void UTunaSweeperEnemySpawnSubsystem::ConfigureGameplayInteractionActor(
+	AActor* SpawnedActor,
+	const FGameplayInteractionActorSpawnDefinition& SpawnDefinition) const
+{
+	if (!SpawnedActor)
+	{
+		return;
+	}
+
+	switch (SpawnDefinition.SpawnType)
+	{
+	case EGameplayInteractionActorSpawnType::LevelTravel:
+		if (ATunaSweeperLevelTravelInteractableActor* LevelTravelActor = Cast<ATunaSweeperLevelTravelInteractableActor>(SpawnedActor))
+		{
+			LevelTravelActor->ConfigureLevelTravelDefaults(
+				SpawnDefinition.TargetLevelName,
+				SpawnDefinition.InteractionDisplayName,
+				SpawnDefinition.MarkerWidgetClass,
+				SpawnDefinition.TransitionMediaSource,
+				SpawnDefinition.TransitionWidgetClass,
+				SpawnDefinition.TransitionMessage);
+			LevelTravelActor->ConfigureLevelTravelVisualDefaults(
+				SpawnDefinition.LevelTravelVisualMesh,
+				SpawnDefinition.LevelTravelVisualScale,
+				SpawnDefinition.LevelTravelVisualRelativeLocation);
+		}
+		break;
+	case EGameplayInteractionActorSpawnType::PickupItem:
+		if (ATunaSweeperPickupItemActor* PickupItemActor = Cast<ATunaSweeperPickupItemActor>(SpawnedActor))
+		{
+			PickupItemActor->ConfigurePickupItemDefaults(
+				SpawnDefinition.ItemId,
+				SpawnDefinition.ItemQuantity,
+				SpawnDefinition.bDestroyOnPickup,
+				SpawnDefinition.PickupItemIconWidgetClass);
+		}
+		break;
+	case EGameplayInteractionActorSpawnType::ItemSpawn:
+		if (ATunaSweeperItemSpawnInteractableActor* ItemSpawnActor = Cast<ATunaSweeperItemSpawnInteractableActor>(SpawnedActor))
+		{
+			ItemSpawnActor->ConfigureItemSpawnDefaults(
+				SpawnDefinition.PickupItemActorClass,
+				SpawnDefinition.MinSpawnRadius,
+				SpawnDefinition.MaxSpawnRadius,
+				SpawnDefinition.SpawnTraceHeight);
+			if (UTunaSweeperInteractableComponent* InteractableComponent = ItemSpawnActor->GetInteractableComponent())
+			{
+				InteractableComponent->ConfigureInteractionDefaults(
+					ETunaSweeperInteractionType::ItemSpawn,
+					SpawnDefinition.InteractionDisplayName,
+					SpawnDefinition.MarkerWidgetClass);
+			}
+		}
+		break;
+	case EGameplayInteractionActorSpawnType::LootContainer:
+		if (ATunaSweeperLootContainerActor* LootContainerActor = Cast<ATunaSweeperLootContainerActor>(SpawnedActor))
+		{
+			LootContainerActor->ConfigureLootContainerDefaults(
+				SpawnDefinition.ContainerDefinitionId,
+				SpawnDefinition.ContentsId);
+		}
+		break;
+	case EGameplayInteractionActorSpawnType::LootContainerSpawn:
+		if (ATunaSweeperLootContainerSpawnInteractableActor* LootContainerSpawnActor = Cast<ATunaSweeperLootContainerSpawnInteractableActor>(SpawnedActor))
+		{
+			LootContainerSpawnActor->ConfigureLootContainerSpawnDefaults(
+				SpawnDefinition.LootContainerActorClass,
+				SpawnDefinition.MinSpawnRadius,
+				SpawnDefinition.MaxSpawnRadius,
+				SpawnDefinition.SpawnTraceHeight);
+			if (UTunaSweeperInteractableComponent* InteractableComponent = LootContainerSpawnActor->GetInteractableComponent())
+			{
+				InteractableComponent->ConfigureInteractionDefaults(
+					ETunaSweeperInteractionType::LootContainerSpawn,
+					SpawnDefinition.InteractionDisplayName,
+					SpawnDefinition.MarkerWidgetClass);
+			}
+		}
+		break;
+	case EGameplayInteractionActorSpawnType::SelfDestruct:
+		if (ATunaSweeperSelfDestructInteractableActor* SelfDestructActor = Cast<ATunaSweeperSelfDestructInteractableActor>(SpawnedActor))
+		{
+			SelfDestructActor->ConfigureSelfDestructDefaults(
+				SpawnDefinition.MarkerWidgetClass,
+				SpawnDefinition.SpeechBubbleWidgetClass,
+				SpawnDefinition.CountdownStartNumber,
+				SpawnDefinition.CountdownStepSeconds,
+				SpawnDefinition.BoomDisplaySeconds,
+				SpawnDefinition.ExplosionRadius,
+				SpawnDefinition.ExplosionDamage);
+			if (UTunaSweeperInteractableComponent* InteractableComponent = SelfDestructActor->GetInteractableComponent())
+			{
+				InteractableComponent->ConfigureInteractionDefaults(
+					ETunaSweeperInteractionType::SelfDestruct,
+					SpawnDefinition.InteractionDisplayName,
+					SpawnDefinition.MarkerWidgetClass);
+			}
+		}
+		break;
+	default:
+		break;
+	}
 }

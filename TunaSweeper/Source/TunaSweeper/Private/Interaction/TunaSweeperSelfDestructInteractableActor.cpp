@@ -79,7 +79,31 @@ void ATunaSweeperSelfDestructInteractableActor::ConfigureSelfDestructDefaults(
 	TSoftClassPtr<UTunaSweeperInteractionMarkerWidget> InMarkerWidgetClass,
 	TSoftClassPtr<UTunaSweeperSpeechBubbleWidget> InSpeechBubbleWidgetClass)
 {
+	ConfigureSelfDestructDefaults(
+		InMarkerWidgetClass,
+		InSpeechBubbleWidgetClass,
+		CountdownStartNumber,
+		CountdownStepSeconds,
+		BoomDisplaySeconds,
+		ExplosionRadius,
+		ExplosionDamage);
+}
+
+void ATunaSweeperSelfDestructInteractableActor::ConfigureSelfDestructDefaults(
+	TSoftClassPtr<UTunaSweeperInteractionMarkerWidget> InMarkerWidgetClass,
+	TSoftClassPtr<UTunaSweeperSpeechBubbleWidget> InSpeechBubbleWidgetClass,
+	int32 InCountdownStartNumber,
+	float InCountdownStepSeconds,
+	float InBoomDisplaySeconds,
+	float InExplosionRadius,
+	float InExplosionDamage)
+{
 	Modify();
+	CountdownStartNumber = FMath::Max(1, InCountdownStartNumber);
+	CountdownStepSeconds = FMath::Max(0.01f, InCountdownStepSeconds);
+	BoomDisplaySeconds = FMath::Max(0.0f, InBoomDisplaySeconds);
+	ExplosionRadius = FMath::Max(0.0f, InExplosionRadius);
+	ExplosionDamage = FMath::Max(0.0f, InExplosionDamage);
 	if (InteractableComponent)
 	{
 		InteractableComponent->ConfigureInteractionDefaults(

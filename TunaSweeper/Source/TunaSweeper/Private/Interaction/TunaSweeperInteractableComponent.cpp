@@ -7,9 +7,9 @@
 
 namespace TunaSweeperInteractionMarkerLayout
 {
-	constexpr float DrawWidth = 360.0f;
+	constexpr float DrawWidth = 430.0f;
 	constexpr float DrawHeight = 80.0f;
-	constexpr float MarkerRootWidth = 300.0f;
+	constexpr float MarkerRootWidth = 360.0f;
 	constexpr float MarkerBoxWidth = 56.0f;
 
 	FVector2D GetDrawSize()
@@ -135,6 +135,17 @@ void UTunaSweeperInteractableComponent::SetInteractionTypeAndDisplayName(
 	Modify();
 	InteractionType = InInteractionType;
 	InteractionDisplayName = InInteractionDisplayName;
+	ApplyMarkerState();
+}
+
+void UTunaSweeperInteractableComponent::SetInteractionRequirementPreview(
+	UTexture2D* InIconTexture,
+	int32 InRequiredQuantity,
+	bool bInShowRequirement)
+{
+	RequirementIconTexture = InIconTexture;
+	RequirementQuantity = FMath::Max(0, InRequiredQuantity);
+	bShowRequirementPreview = bInShowRequirement;
 	ApplyMarkerState();
 }
 
@@ -290,6 +301,7 @@ void UTunaSweeperInteractableComponent::ApplyMarkerState()
 	if (UTunaSweeperInteractionMarkerWidget* MarkerWidget = Cast<UTunaSweeperInteractionMarkerWidget>(MarkerWidgetComponent->GetUserWidgetObject()))
 	{
 		MarkerWidget->SetMarkerText(InteractionDisplayName);
+		MarkerWidget->SetRequirementPreview(RequirementIconTexture, RequirementQuantity, bShowRequirementPreview);
 		MarkerWidget->SetMarkerPresentation(MarkerAlpha, MarkerRingScale, LabelAlpha);
 	}
 }

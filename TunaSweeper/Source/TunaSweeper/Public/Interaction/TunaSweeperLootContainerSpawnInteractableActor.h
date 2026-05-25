@@ -26,6 +26,12 @@ public:
 
 	void ConfigureLootContainerSpawnDefaults(TSoftClassPtr<ATunaSweeperLootContainerActor> InLootContainerActorClass);
 
+	void ConfigureLootContainerSpawnDefaults(
+		TSoftClassPtr<ATunaSweeperLootContainerActor> InLootContainerActorClass,
+		float InMinSpawnRadius,
+		float InMaxSpawnRadius,
+		float InSpawnTraceHeight);
+
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<USceneComponent> SceneRoot;
@@ -52,4 +58,3 @@ private:
 	bool PickRandomContainerData(int32& OutContainerDefinitionId, int32& OutContentsId) const;
 	FVector BuildRandomSpawnLocation() const;
 };
-

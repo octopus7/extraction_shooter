@@ -98,8 +98,24 @@ bool ATunaSweeperLootContainerSpawnInteractableActor::SpawnRandomLootContainer(A
 void ATunaSweeperLootContainerSpawnInteractableActor::ConfigureLootContainerSpawnDefaults(
 	TSoftClassPtr<ATunaSweeperLootContainerActor> InLootContainerActorClass)
 {
+	ConfigureLootContainerSpawnDefaults(
+		InLootContainerActorClass,
+		MinSpawnRadius,
+		MaxSpawnRadius,
+		SpawnTraceHeight);
+}
+
+void ATunaSweeperLootContainerSpawnInteractableActor::ConfigureLootContainerSpawnDefaults(
+	TSoftClassPtr<ATunaSweeperLootContainerActor> InLootContainerActorClass,
+	float InMinSpawnRadius,
+	float InMaxSpawnRadius,
+	float InSpawnTraceHeight)
+{
 	Modify();
 	LootContainerActorClass = InLootContainerActorClass;
+	MinSpawnRadius = FMath::Max(0.0f, InMinSpawnRadius);
+	MaxSpawnRadius = FMath::Max(0.0f, InMaxSpawnRadius);
+	SpawnTraceHeight = FMath::Max(0.0f, InSpawnTraceHeight);
 }
 
 bool ATunaSweeperLootContainerSpawnInteractableActor::PickRandomContainerData(
@@ -175,4 +191,3 @@ FVector ATunaSweeperLootContainerSpawnInteractableActor::BuildRandomSpawnLocatio
 
 	return CandidateLocation;
 }
-

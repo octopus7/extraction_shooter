@@ -26,6 +26,12 @@ public:
 
 	void ConfigureItemSpawnDefaults(TSoftClassPtr<ATunaSweeperPickupItemActor> InPickupItemActorClass);
 
+	void ConfigureItemSpawnDefaults(
+		TSoftClassPtr<ATunaSweeperPickupItemActor> InPickupItemActorClass,
+		float InMinSpawnRadius,
+		float InMaxSpawnRadius,
+		float InSpawnTraceHeight);
+
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<USceneComponent> SceneRoot;

@@ -112,7 +112,7 @@ namespace TunaSweeperEditorSetup
 	const FString GameInstanceTaskId = TEXT("2026-05-10_CreateGameInstanceBlueprint");
 	const FString TopDownShooterTaskId = TEXT("2026-05-10_CreateTopDownShooterAssets");
 	const FString InteractionInputTaskId = TEXT("2026-05-11_SetInteractInputToFKey");
-	const FString InteractionMarkerAlignmentTaskId = TEXT("2026-05-10_RebuildInteractionMarkerAlignmentV2");
+	const FString InteractionMarkerAlignmentTaskId = TEXT("2026-05-25_RebuildInteractionMarkerRequirementPreviewV1");
 	const FString PickupItemAndSpawnerTaskId = TEXT("2026-05-11_CreatePickupItemAndSpawnerAssetsV3");
 	const FString CommonGameHudTaskId = TEXT("2026-05-21_RebuildInventoryWeightHudV1");
 	const FString InventoryInputTaskId = TEXT("2026-05-11_AddInventoryInput");
@@ -221,7 +221,6 @@ namespace TunaSweeperEditorSetup
 	const FString VideoAssetPath = TEXT("/Game/Movies");
 	const FString AudioBgmAssetPath = TEXT("/Game/Audio/BGM");
 	const FString BunkerToRaidMediaSourceAssetName = TEXT("MS_BunkerToRaid");
-	const FString RaidToBunkerMediaSourceAssetName = TEXT("MS_BunkerToRaid");
 	const FString TitleBgmAssetName = TEXT("Where_the_Birds_Still_Sing");
 	const FString PickupItemAssetName = TEXT("BP_PickupItem");
 	const FString ItemSpawnInteractionAssetName = TEXT("BP_Interact_ItemSpawn");
@@ -5667,9 +5666,16 @@ namespace TunaSweeperEditorSetup
 		USizeBox* FilledImage = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("FilledImage"));
 		UImage* FilledBrushImage = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("FilledBrushImage"));
 		UBorder* LabelBackground = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("LabelBackground"));
+		UHorizontalBox* LabelContentRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("LabelContentRow"));
 		UTextBlock* DisplayNameText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("DisplayNameText"));
+		UHorizontalBox* RequirementRoot = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("RequirementRoot"));
+		USizeBox* RequirementIconBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("RequirementIconBox"));
+		UImage* RequirementIconImage = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("RequirementIconImage"));
+		UTextBlock* RequirementQuantityText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("RequirementQuantityText"));
 
-		if (!RootCanvas || !MarkerRoot || !MarkerSizeBox || !MarkerOverlay || !RingImage || !RingBrushImage || !FilledImage || !FilledBrushImage || !LabelBackground || !DisplayNameText)
+		if (!RootCanvas || !MarkerRoot || !MarkerSizeBox || !MarkerOverlay || !RingImage || !RingBrushImage ||
+			!FilledImage || !FilledBrushImage || !LabelBackground || !LabelContentRow || !DisplayNameText ||
+			!RequirementRoot || !RequirementIconBox || !RequirementIconImage || !RequirementQuantityText)
 		{
 			return false;
 		}
@@ -5682,7 +5688,7 @@ namespace TunaSweeperEditorSetup
 			RootSlot->SetAnchors(FAnchors(0.5f, 0.5f, 0.5f, 0.5f));
 			RootSlot->SetAlignment(FVector2D(0.5f, 0.5f));
 			RootSlot->SetPosition(FVector2D::ZeroVector);
-			RootSlot->SetSize(FVector2D(300.0f, 56.0f));
+			RootSlot->SetSize(FVector2D(360.0f, 56.0f));
 		}
 
 		MarkerRoot->SetRenderOpacity(0.0f);
@@ -5724,10 +5730,45 @@ namespace TunaSweeperEditorSetup
 		}
 
 		LabelBackground->SetBrushColor(FLinearColor::White);
-		LabelBackground->SetPadding(FMargin(12.0f, 4.0f));
+		LabelBackground->SetPadding(FMargin(12.0f, 4.0f, 10.0f, 4.0f));
 
 		ConfigureTextBlock(DisplayNameText, FText::FromString(TEXT("Interact")), FLinearColor::Black, 18);
-		LabelBackground->SetContent(DisplayNameText);
+		LabelBackground->SetContent(LabelContentRow);
+
+		if (UHorizontalBoxSlot* DisplayNameSlot = LabelContentRow->AddChildToHorizontalBox(DisplayNameText))
+		{
+			DisplayNameSlot->SetHorizontalAlignment(HAlign_Left);
+			DisplayNameSlot->SetVerticalAlignment(VAlign_Center);
+		}
+
+		RequirementIconBox->SetWidthOverride(22.0f);
+		RequirementIconBox->SetHeightOverride(22.0f);
+		RequirementIconBox->SetContent(RequirementIconImage);
+		RequirementIconImage->SetColorAndOpacity(FLinearColor::White);
+		RequirementIconImage->SetBrushTintColor(FSlateColor(FLinearColor::White));
+		RequirementIconImage->SetOpacity(0.0f);
+
+		if (UHorizontalBoxSlot* RequirementIconSlot = RequirementRoot->AddChildToHorizontalBox(RequirementIconBox))
+		{
+			RequirementIconSlot->SetHorizontalAlignment(HAlign_Center);
+			RequirementIconSlot->SetVerticalAlignment(VAlign_Center);
+		}
+
+		ConfigureTextBlock(RequirementQuantityText, FText::FromString(TEXT("x0")), FLinearColor::Black, 17);
+		if (UHorizontalBoxSlot* RequirementQuantitySlot = RequirementRoot->AddChildToHorizontalBox(RequirementQuantityText))
+		{
+			RequirementQuantitySlot->SetPadding(FMargin(4.0f, 0.0f, 0.0f, 0.0f));
+			RequirementQuantitySlot->SetHorizontalAlignment(HAlign_Left);
+			RequirementQuantitySlot->SetVerticalAlignment(VAlign_Center);
+		}
+
+		RequirementRoot->SetVisibility(ESlateVisibility::Collapsed);
+		if (UHorizontalBoxSlot* RequirementSlot = LabelContentRow->AddChildToHorizontalBox(RequirementRoot))
+		{
+			RequirementSlot->SetPadding(FMargin(10.0f, 0.0f, 0.0f, 0.0f));
+			RequirementSlot->SetHorizontalAlignment(HAlign_Left);
+			RequirementSlot->SetVerticalAlignment(VAlign_Center);
+		}
 
 		UHorizontalBoxSlot* LabelSlot = MarkerRoot->AddChildToHorizontalBox(LabelBackground);
 		if (LabelSlot)
@@ -5737,11 +5778,7 @@ namespace TunaSweeperEditorSetup
 			LabelSlot->SetVerticalAlignment(VAlign_Center);
 		}
 
-		RegisterWidgetVariable(WidgetBlueprint, MarkerRoot);
-		RegisterWidgetVariable(WidgetBlueprint, RingImage);
-		RegisterWidgetVariable(WidgetBlueprint, FilledImage);
-		RegisterWidgetVariable(WidgetBlueprint, LabelBackground);
-		RegisterWidgetVariable(WidgetBlueprint, DisplayNameText);
+		RegisterAllWidgetsInTree(WidgetBlueprint);
 
 		WidgetBlueprint->MarkPackageDirty();
 		return true;
@@ -6948,7 +6985,7 @@ namespace TunaSweeperEditorSetup
 			ConfigurePickupItemBlueprint(PickupItemBlueprint, 1001) &&
 			ConfigureItemSpawnBlueprint(ItemSpawnBlueprint);
 
-		return bConfigured && PlacePickupItemAndSpawnerActorsInRaidMap(PickupItemBlueprint, ItemSpawnBlueprint);
+		return bConfigured;
 	}
 
 	bool PlaceLootContainerAndSpawnerActorsInRaidMap(UBlueprint* LootContainerBlueprint, UBlueprint* LootContainerSpawnBlueprint)
@@ -7001,7 +7038,7 @@ namespace TunaSweeperEditorSetup
 			ConfigureLootContainerBlueprint(LootContainerBlueprint, 7001, 8001) &&
 			ConfigureLootContainerSpawnBlueprint(LootContainerSpawnBlueprint);
 
-		return bConfigured && PlaceLootContainerAndSpawnerActorsInRaidMap(LootContainerBlueprint, LootContainerSpawnBlueprint);
+		return bConfigured;
 	}
 
 	bool PlaceSelfDestructActorInRaidMap(UBlueprint* SelfDestructBlueprint)
@@ -7045,7 +7082,7 @@ namespace TunaSweeperEditorSetup
 			ConfigureSpeechBubbleWidgetBlueprint(SpeechBubbleWidgetBlueprint) &&
 			ConfigureSelfDestructBlueprint(SelfDestructBlueprint);
 
-		return bConfigured && PlaceSelfDestructActorInRaidMap(SelfDestructBlueprint);
+		return bConfigured;
 	}
 
 	bool PlaceLevelTravelActorsInBunkerAndRaidMaps(UBlueprint* LevelTravelBlueprint)
@@ -7057,8 +7094,6 @@ namespace TunaSweeperEditorSetup
 
 		const TSoftObjectPtr<UMediaSource> BunkerToRaidMediaSource(
 			FSoftObjectPath(GetAssetObjectPath(VideoAssetPath, BunkerToRaidMediaSourceAssetName)));
-		const TSoftObjectPtr<UMediaSource> RaidToBunkerMediaSource(
-			FSoftObjectPath(GetAssetObjectPath(VideoAssetPath, RaidToBunkerMediaSourceAssetName)));
 		if (!EnsureLevelTravelLadderMeshAsset())
 		{
 			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to create %s."), *LevelTravelLadderMeshAssetName);
@@ -7084,22 +7119,8 @@ namespace TunaSweeperEditorSetup
 				FVector::ZeroVector) &&
 			UEditorLoadingAndSavingUtils::SaveMap(BunkerWorld, BunkerMapPackagePath);
 
-		UWorld* RaidWorld = LoadEditorMapForSetup(RaidMapPackagePath);
-		const bool bRaidPlaced =
-			RaidWorld &&
-			PlaceLevelTravelActor(
-				RaidWorld,
-				LevelTravelBlueprint,
-				TEXT("TS_Travel_ToBunker"),
-				FVector(220.0f, 220.0f, 80.0f),
-				FName(TEXT("BunkerMap")),
-				FText::FromString(TEXT("To Bunker")),
-				RaidToBunkerMediaSource,
-				FText::FromString(TEXT("Returning to Bunker"))) &&
-			UEditorLoadingAndSavingUtils::SaveMap(RaidWorld, RaidMapPackagePath);
-
 		LoadEditorMapForSetup(IntroMapPackagePath);
-		return bBunkerPlaced && bRaidPlaced;
+		return bBunkerPlaced;
 	}
 
 	bool EnsureIntroMenuAndLevelTravelSetup()

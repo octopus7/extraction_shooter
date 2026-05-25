@@ -97,8 +97,24 @@ bool ATunaSweeperItemSpawnInteractableActor::SpawnRandomPickupItem(APawn* Instig
 void ATunaSweeperItemSpawnInteractableActor::ConfigureItemSpawnDefaults(
 	TSoftClassPtr<ATunaSweeperPickupItemActor> InPickupItemActorClass)
 {
+	ConfigureItemSpawnDefaults(
+		InPickupItemActorClass,
+		MinSpawnRadius,
+		MaxSpawnRadius,
+		SpawnTraceHeight);
+}
+
+void ATunaSweeperItemSpawnInteractableActor::ConfigureItemSpawnDefaults(
+	TSoftClassPtr<ATunaSweeperPickupItemActor> InPickupItemActorClass,
+	float InMinSpawnRadius,
+	float InMaxSpawnRadius,
+	float InSpawnTraceHeight)
+{
 	Modify();
 	PickupItemActorClass = InPickupItemActorClass;
+	MinSpawnRadius = FMath::Max(0.0f, InMinSpawnRadius);
+	MaxSpawnRadius = FMath::Max(0.0f, InMaxSpawnRadius);
+	SpawnTraceHeight = FMath::Max(0.0f, InSpawnTraceHeight);
 }
 
 bool ATunaSweeperItemSpawnInteractableActor::PickRandomItemDefinition(FTunaSweeperItemDefinition& OutItemDefinition) const

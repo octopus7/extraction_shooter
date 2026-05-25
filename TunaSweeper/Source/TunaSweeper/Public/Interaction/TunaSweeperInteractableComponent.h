@@ -6,6 +6,7 @@
 
 class UTunaSweeperInteractionMarkerWidget;
 class UWidgetComponent;
+class UTexture2D;
 class AActor;
 class APawn;
 
@@ -75,6 +76,11 @@ public:
 		ETunaSweeperInteractionType InInteractionType,
 		const FText& InInteractionDisplayName);
 
+	void SetInteractionRequirementPreview(
+		UTexture2D* InIconTexture,
+		int32 InRequiredQuantity,
+		bool bInShowRequirement);
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
 	ETunaSweeperInteractionType InteractionType = ETunaSweeperInteractionType::None;
@@ -114,6 +120,12 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<UWidgetComponent> MarkerWidgetComponent;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTexture2D> RequirementIconTexture;
+
+	int32 RequirementQuantity = 0;
+	bool bShowRequirementPreview = false;
 
 	float MarkerAlpha = 0.0f;
 	float MarkerRingScale = 3.0f;

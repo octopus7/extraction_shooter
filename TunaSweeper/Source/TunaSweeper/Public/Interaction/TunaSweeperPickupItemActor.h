@@ -48,6 +48,12 @@ public:
 		int32 InItemId,
 		TSoftClassPtr<UTunaSweeperPickupItemIconWidget> InFloorIconWidgetClass);
 
+	void ConfigurePickupItemDefaults(
+		int32 InItemId,
+		int32 InQuantity,
+		bool bInDestroyOnPickup,
+		TSoftClassPtr<UTunaSweeperPickupItemIconWidget> InFloorIconWidgetClass);
+
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<USceneComponent> SceneRoot;

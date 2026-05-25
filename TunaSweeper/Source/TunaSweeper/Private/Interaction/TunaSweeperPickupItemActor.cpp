@@ -106,9 +106,19 @@ void ATunaSweeperPickupItemActor::ConfigurePickupItemDefaults(
 	int32 InItemId,
 	TSoftClassPtr<UTunaSweeperPickupItemIconWidget> InFloorIconWidgetClass)
 {
+	ConfigurePickupItemDefaults(InItemId, 1, true, InFloorIconWidgetClass);
+}
+
+void ATunaSweeperPickupItemActor::ConfigurePickupItemDefaults(
+	int32 InItemId,
+	int32 InQuantity,
+	bool bInDestroyOnPickup,
+	TSoftClassPtr<UTunaSweeperPickupItemIconWidget> InFloorIconWidgetClass)
+{
 	Modify();
 	ItemId = InItemId;
-	ItemQuantity = 1;
+	ItemQuantity = FMath::Max(1, InQuantity);
+	bDestroyOnPickup = bInDestroyOnPickup;
 	FloorIconWidgetClass = InFloorIconWidgetClass;
 	EnsureFloorIconWidgetClass();
 	RefreshItemPresentation();

@@ -6,12 +6,23 @@
 
 class AActor;
 class ATunaSweeperEnemyCharacter;
+class ATunaSweeperItemSpawnInteractableActor;
+class ATunaSweeperLevelTravelInteractableActor;
 class ATunaSweeperLootContainerActor;
+class ATunaSweeperLootContainerSpawnInteractableActor;
+class ATunaSweeperPickupItemActor;
+class ATunaSweeperSelfDestructInteractableActor;
 class ATunaSweeperTransparentObstacleActor;
 class ATunaSweeperWarpPointActor;
 class ATunaSweeperWorldProgressActor;
 class UMaterialInterface;
+class UMediaSource;
 class UWorld;
+class UStaticMesh;
+class UTunaSweeperInteractionMarkerWidget;
+class UTunaSweeperLevelTransitionWidget;
+class UTunaSweeperPickupItemIconWidget;
+class UTunaSweeperSpeechBubbleWidget;
 
 UCLASS()
 class TUNASWEEPER_API UTunaSweeperEnemySpawnSubsystem : public UGameInstanceSubsystem
@@ -43,6 +54,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Raid Runtime Spawn")
 	bool LoadWarpPointSpawnData(bool bForceReload = false);
 
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Raid Runtime Spawn")
+	bool LoadGameplayInteractionActorSpawnData(bool bForceReload = false);
+
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Enemy Spawn")
 	bool IsEnemySpawnDataLoaded() const { return bEnemySpawnDataLoaded; }
 
@@ -57,6 +71,21 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Raid Runtime Spawn")
 	bool IsWarpPointSpawnDataLoaded() const { return bWarpPointSpawnDataLoaded; }
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Raid Runtime Spawn")
+	bool IsGameplayInteractionActorSpawnDataLoaded() const { return bGameplayInteractionActorSpawnDataLoaded; }
+
+public:
+	enum class EGameplayInteractionActorSpawnType : uint8
+	{
+		Unknown,
+		LevelTravel,
+		PickupItem,
+		ItemSpawn,
+		LootContainer,
+		LootContainerSpawn,
+		SelfDestruct
+	};
 
 private:
 	struct FEnemySpawnDefinition
@@ -125,24 +154,71 @@ private:
 		bool bUseTargetRotation = true;
 	};
 
+	struct FGameplayInteractionActorSpawnDefinition
+	{
+		FName LevelName;
+		FName SpawnId;
+		EGameplayInteractionActorSpawnType SpawnType = EGameplayInteractionActorSpawnType::Unknown;
+		TSoftClassPtr<AActor> ActorClass;
+		FVector Location = FVector::ZeroVector;
+		FRotator Rotation = FRotator::ZeroRotator;
+		FVector Scale = FVector::OneVector;
+		FText InteractionDisplayName;
+		TSoftClassPtr<UTunaSweeperInteractionMarkerWidget> MarkerWidgetClass;
+
+		FName TargetLevelName;
+		TSoftObjectPtr<UMediaSource> TransitionMediaSource;
+		TSoftClassPtr<UTunaSweeperLevelTransitionWidget> TransitionWidgetClass;
+		FText TransitionMessage;
+		TSoftObjectPtr<UStaticMesh> LevelTravelVisualMesh;
+		FVector LevelTravelVisualScale = FVector(0.75f, 0.75f, 0.75f);
+		FVector LevelTravelVisualRelativeLocation = FVector::ZeroVector;
+
+		int32 ItemId = 1001;
+		int32 ItemQuantity = 1;
+		bool bDestroyOnPickup = true;
+		TSoftClassPtr<UTunaSweeperPickupItemIconWidget> PickupItemIconWidgetClass;
+
+		TSoftClassPtr<ATunaSweeperPickupItemActor> PickupItemActorClass;
+		TSoftClassPtr<ATunaSweeperLootContainerActor> LootContainerActorClass;
+		int32 ContainerDefinitionId = INDEX_NONE;
+		int32 ContentsId = INDEX_NONE;
+		float MinSpawnRadius = 160.0f;
+		float MaxSpawnRadius = 420.0f;
+		float SpawnTraceHeight = 800.0f;
+
+		TSoftClassPtr<UTunaSweeperSpeechBubbleWidget> SpeechBubbleWidgetClass;
+		int32 CountdownStartNumber = 3;
+		float CountdownStepSeconds = 1.0f;
+		float BoomDisplaySeconds = 0.2f;
+		float ExplosionRadius = 200.0f;
+		float ExplosionDamage = 100.0f;
+	};
+
 	void HandlePostLoadMapWithWorld(UWorld* LoadedWorld);
 	void ResetLoadedEnemySpawnData();
 	void ResetLoadedLootContainerSpawnData();
 	void ResetLoadedTransparentObstacleSpawnData();
 	void ResetLoadedWorldProgressObjectSpawnData();
 	void ResetLoadedWarpPointSpawnData();
+	void ResetLoadedGameplayInteractionActorSpawnData();
 	FString GetEnemySpawnJsonPath() const;
 	FString GetLootContainerSpawnJsonPath() const;
 	FString GetTransparentObstacleSpawnJsonPath() const;
 	FString GetWorldProgressObjectSpawnJsonPath() const;
 	FString GetWarpPointSpawnJsonPath() const;
+	FString GetGameplayInteractionActorSpawnJsonPath() const;
 	bool DoesLevelNameMatchWorld(FName LevelName, const UWorld* World) const;
+	void ConfigureGameplayInteractionActor(
+		AActor* SpawnedActor,
+		const FGameplayInteractionActorSpawnDefinition& SpawnDefinition) const;
 
 	TArray<FEnemySpawnDefinition> EnemySpawnDefinitions;
 	TArray<FLootContainerSpawnDefinition> LootContainerSpawnDefinitions;
 	TArray<FTransparentObstacleSpawnDefinition> TransparentObstacleSpawnDefinitions;
 	TArray<FWorldProgressObjectSpawnDefinition> WorldProgressObjectSpawnDefinitions;
 	TArray<FWarpPointSpawnDefinition> WarpPointSpawnDefinitions;
+	TArray<FGameplayInteractionActorSpawnDefinition> GameplayInteractionActorSpawnDefinitions;
 
 	TWeakObjectPtr<UWorld> LastSpawnedWorld;
 	FDelegateHandle PostLoadMapHandle;
@@ -151,4 +227,5 @@ private:
 	bool bTransparentObstacleSpawnDataLoaded = false;
 	bool bWorldProgressObjectSpawnDataLoaded = false;
 	bool bWarpPointSpawnDataLoaded = false;
+	bool bGameplayInteractionActorSpawnDataLoaded = false;
 };
