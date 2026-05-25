@@ -73,14 +73,16 @@
                            VerticalAlignment="Center"
                            FontWeight="SemiBold"
                            Margin="0,0,8,0" />
-                <TextBox x:Name="OutputDirectoryText"
-                         DockPanel.Dock="Left"
-                         MinWidth="360"
-                         Margin="0,0,12,0" />
-                <TextBlock x:Name="JsonPathText"
+                <Button Content="Use JSON Folder"
+                        DockPanel.Dock="Left"
+                        Click="UseJsonFolderForOutput_Click" />
+                <Button Content="Choose Output"
+                        DockPanel.Dock="Left"
+                        Click="ChooseOutput_Click" />
+                <TextBlock x:Name="OutputInfoText"
                            Foreground="#8792a3"
                            VerticalAlignment="Center"
-                           TextTrimming="CharacterEllipsis" />
+                           Text="JSON folder" />
             </DockPanel>
         </Grid>
 
@@ -105,8 +107,7 @@
                                DockPanel.Dock="Left" />
                     <TextBlock x:Name="SheetInfoText"
                                TextAlignment="Right"
-                               Foreground="#8792a3"
-                               TextTrimming="CharacterEllipsis" />
+                               Foreground="#8792a3" />
                 </DockPanel>
 
                 <Border Grid.Row="1"
@@ -162,11 +163,19 @@
                                      Text="8"
                                      MinWidth="44"
                                      Width="48" />
-                            <CheckBox x:Name="TrimFromEdgeGapCheckBox"
-                                      Content="Edge gap trim"
-                                      Foreground="#d7dde8"
-                                      VerticalAlignment="Center"
-                                      Margin="4,0,0,0" />
+                            <TextBlock Text="Mode"
+                                       VerticalAlignment="Center"
+                                       Foreground="#9aa6b8"
+                                       Margin="4,0,0,0" />
+                            <ComboBox x:Name="AutoTrimModeComboBox"
+                                      SelectedIndex="0"
+                                      Width="170"
+                                      Margin="4,0,0,0"
+                                      VerticalAlignment="Center">
+                                <ComboBoxItem Content="1 Center clean" />
+                                <ComboBoxItem Content="2 Edge recover" />
+                                <ComboBoxItem Content="3 Edge off" />
+                            </ComboBox>
                         </StackPanel>
                         <TextBlock x:Name="SelectedInfoText"
                                    TextAlignment="Right"

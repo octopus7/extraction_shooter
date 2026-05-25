@@ -21,6 +21,7 @@ public partial class MainWindow : Window
     private readonly ObservableCollection<IconPreviewItem> _iconPreviews = [];
     private CropDocument? _document;
     private string? _jsonPath;
+    private string? _outputDirectory;
     private BitmapSource? _sheetBitmap;
     private IconEntry? _selectedIcon;
     private bool _updatingFields;
@@ -45,7 +46,12 @@ public partial class MainWindow : Window
 
     private bool UseSharedMode => SharedModeCheckBox.IsChecked == true;
 
-    private bool TrimFromEdgeGap => TrimFromEdgeGapCheckBox.IsChecked == true;
+    private AutoTrimMode SelectedAutoTrimMode => AutoTrimModeComboBox.SelectedIndex switch
+    {
+        1 => AutoTrimMode.EdgeRecover,
+        2 => AutoTrimMode.EdgeOff,
+        _ => AutoTrimMode.CenterClean
+    };
 
     private byte AlphaTrimThreshold
     {
@@ -125,13 +131,13 @@ public partial class MainWindow : Window
         try
         {
             string documentDirectory = Path.GetDirectoryName(_jsonPath) ?? Directory.GetCurrentDirectory();
-            string outputDirectory = string.IsNullOrWhiteSpace(OutputDirectoryText.Text)
+            string outputDirectory = string.IsNullOrWhiteSpace(_outputDirectory)
                 ? documentDirectory
-                : OutputDirectoryText.Text.Trim();
+                : _outputDirectory;
 
             IconCropRenderer.NormalizeDocument(_document);
             int saved = IconCropRenderer.CropAll(_document, documentDirectory, outputDirectory);
-            StatusText.Text = $"Cropped {saved} icons to {outputDirectory}";
+            StatusText.Text = $"Cropped {saved} icons.";
             RefreshViews(refreshPreviews: true);
         }
         catch (Exception ex)
@@ -251,6 +257,27 @@ public partial class MainWindow : Window
         ApplyCropFields();
     }
 
+    private void UseJsonFolderForOutput_Click(object sender, RoutedEventArgs e)
+    {
+        _outputDirectory = GetCurrentDocumentDirectory();
+        OutputInfoText.Text = "JSON folder";
+    }
+
+    private void ChooseOutput_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new OpenFolderDialog
+        {
+            Title = "Choose output folder",
+            InitialDirectory = _outputDirectory ?? GetCurrentDocumentDirectory() ?? FindDefaultDataDirectory() ?? Directory.GetCurrentDirectory()
+        };
+
+        if (dialog.ShowDialog(this) == true)
+        {
+            _outputDirectory = dialog.FolderName;
+            OutputInfoText.Text = "Custom folder";
+        }
+    }
+
     private void AutoTrimSelected_Click(object sender, RoutedEventArgs e)
     {
         if (_document is null || _selectedIcon is null)
@@ -261,23 +288,44 @@ public partial class MainWindow : Window
 
         SharedModeCheckBox.IsChecked = false;
         var alphaMasks = new Dictionary<string, IconCropRenderer.AlphaMask>(StringComparer.OrdinalIgnoreCase);
+        byte threshold = AlphaTrimThreshold;
+        AutoTrimMode mode = SelectedAutoTrimMode;
+        var trace = new List<string>
+        {
+            $"Auto trim trace {DateTime.Now:yyyy-MM-dd HH:mm:ss}",
+            $"Json={Path.GetFileName(_jsonPath)}",
+            $"Icon index={_selectedIcon.Index}",
+            $"Icon file={_selectedIcon.IconFilename}",
+            $"Icon row={_selectedIcon.Row}, column={_selectedIcon.Column}",
+            $"Alpha threshold>{threshold}",
+            $"Auto trim mode={GetAutoTrimModeLabel(mode)}",
+            $"Shared mode after auto-disable={UseSharedMode}",
+            $"Selected rect before={FormatCropRect(_selectedIcon.SourceCropRect)}"
+        };
+
         try
         {
-            byte threshold = AlphaTrimThreshold;
-            if (TryAutoTrimIcon(_selectedIcon, alphaMasks))
+            bool trimmed = TryAutoTrimIcon(_selectedIcon, alphaMasks, mode, threshold, trace);
+            trace.Add($"Selected rect after={FormatCropRect(_selectedIcon.SourceCropRect)}");
+            trace.Add($"Trimmed={trimmed}");
+            WriteTrimTrace(_selectedIcon, trace);
+
+            if (trimmed)
             {
                 IconCropRenderer.NormalizeDocument(_document);
                 RefreshViews(refreshPreviews: true);
-                StatusText.Text = $"Auto trimmed {_selectedIcon.IconFilename} with alpha > {threshold}";
+                StatusText.Text = $"Auto trimmed {_selectedIcon.IconFilename} with {GetAutoTrimModeLabel(mode)}. Trace written.";
             }
             else
             {
-                StatusText.Text = $"No pixels above alpha {threshold} found inside selected crop.";
+                StatusText.Text = $"No pixels above alpha {threshold} found. Trace written.";
             }
         }
         catch (Exception ex)
         {
-            StatusText.Text = $"Auto trim failed: {ex.Message}";
+            trace.Add($"Exception={ex}");
+            TryWriteTrimTrace(_selectedIcon, trace);
+            StatusText.Text = $"Auto trim failed: {ex.Message}. Trace written.";
         }
     }
 
@@ -297,9 +345,10 @@ public partial class MainWindow : Window
         try
         {
             byte threshold = AlphaTrimThreshold;
+            AutoTrimMode mode = SelectedAutoTrimMode;
             foreach (IconEntry icon in _document.Icons)
             {
-                if (TryAutoTrimIcon(icon, alphaMasks))
+                if (TryAutoTrimIcon(icon, alphaMasks, mode, threshold))
                 {
                     trimmed++;
                 }
@@ -311,7 +360,7 @@ public partial class MainWindow : Window
 
             IconCropRenderer.NormalizeDocument(_document);
             RefreshViews(refreshPreviews: true);
-            StatusText.Text = $"Auto trimmed {trimmed} icons with alpha > {threshold}, skipped {skipped}.";
+            StatusText.Text = $"Auto trimmed {trimmed} icons with {GetAutoTrimModeLabel(mode)}, skipped {skipped}.";
         }
         catch (Exception ex)
         {
@@ -345,8 +394,9 @@ public partial class MainWindow : Window
             _document.SheetSize.Width = _sheetBitmap.PixelWidth;
             _document.SheetSize.Height = _sheetBitmap.PixelHeight;
 
-            OutputDirectoryText.Text = documentDirectory;
-            JsonPathText.Text = path;
+            _outputDirectory = documentDirectory;
+            Title = $"Icon Crop Tool - {Path.GetFileName(path)}";
+            OutputInfoText.Text = "JSON folder";
             SheetImage.Source = _sheetBitmap;
             SheetInfoText.Text = $"{Path.GetFileName(sheetPath)} ({_sheetBitmap.PixelWidth}x{_sheetBitmap.PixelHeight})";
 
@@ -446,21 +496,115 @@ public partial class MainWindow : Window
         IconCropRenderer.NormalizeDocument(_document);
     }
 
-    private bool TryAutoTrimIcon(IconEntry icon, Dictionary<string, IconCropRenderer.AlphaMask> alphaMasks)
+    private bool TryAutoTrimIcon(
+        IconEntry icon,
+        Dictionary<string, IconCropRenderer.AlphaMask> alphaMasks,
+        AutoTrimMode mode,
+        byte threshold,
+        IList<string>? trace = null)
     {
+        trace?.Add($"TryAutoTrimIcon begin rect={FormatCropRect(icon.SourceCropRect)}");
+        trace?.Add($"Source sheet={icon.SourceSheetFilename}");
+        trace?.Add($"Mode={GetAutoTrimModeLabel(mode)}");
         IconCropRenderer.AlphaMask alphaMask = GetAlphaMaskForIcon(icon, alphaMasks);
-        CropRect? trimmedRect = IconCropRenderer.FindAlphaTrimRect(
-            alphaMask,
-            icon.SourceCropRect,
-            TrimFromEdgeGap,
-            AlphaTrimThreshold);
+        CropRect? trimmedRect = mode switch
+        {
+            AutoTrimMode.CenterClean => IconCropRenderer.FindCenterOutCleanTrimRect(
+                alphaMask,
+                icon.SourceCropRect,
+                threshold,
+                trace),
+            AutoTrimMode.EdgeRecover => IconCropRenderer.FindAlphaTrimRect(
+                alphaMask,
+                icon.SourceCropRect,
+                trimFromFirstEmptyAfterEdgeContent: true,
+                threshold,
+                trace),
+            AutoTrimMode.EdgeOff => IconCropRenderer.FindAlphaTrimRect(
+                alphaMask,
+                icon.SourceCropRect,
+                trimFromFirstEmptyAfterEdgeContent: false,
+                threshold,
+                trace),
+            _ => throw new InvalidOperationException($"Unknown auto trim mode: {mode}")
+        };
         if (trimmedRect is null)
         {
+            trace?.Add("Renderer returned null trim rect.");
             return false;
         }
 
-        icon.SourceCropRect.CopyFrom(ClampRectToSheet(trimmedRect));
+        CropRect clampedRect = ClampRectToSheet(trimmedRect);
+        trace?.Add($"Renderer raw rect={FormatCropRect(trimmedRect)}");
+        trace?.Add($"Clamped rect={FormatCropRect(clampedRect)}");
+        icon.SourceCropRect.CopyFrom(clampedRect);
         return true;
+    }
+
+    private void WriteTrimTrace(IconEntry icon, IReadOnlyList<string> trace)
+    {
+        string directory = GetTrimLogDirectory();
+        Directory.CreateDirectory(directory);
+
+        string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss", CultureInfo.InvariantCulture);
+        string iconName = Path.GetFileNameWithoutExtension(icon.IconFilename);
+        if (string.IsNullOrWhiteSpace(iconName))
+        {
+            iconName = $"icon_{icon.Index:000}";
+        }
+
+        string filename = $"{timestamp}_{icon.Index:000}_{SanitizeFileName(iconName)}.log";
+        File.WriteAllLines(Path.Combine(directory, filename), trace);
+    }
+
+    private void TryWriteTrimTrace(IconEntry icon, IReadOnlyList<string> trace)
+    {
+        try
+        {
+            WriteTrimTrace(icon, trace);
+        }
+        catch
+        {
+            // Avoid hiding the original trim failure behind a logging failure.
+        }
+    }
+
+    private string GetTrimLogDirectory()
+    {
+        string documentDirectory = GetCurrentDocumentDirectory() ?? Directory.GetCurrentDirectory();
+        DirectoryInfo? directory = new(documentDirectory);
+        if (string.Equals(directory.Name, "Icons", StringComparison.OrdinalIgnoreCase) && directory.Parent is not null)
+        {
+            return Path.Combine(directory.Parent.FullName, "TrimLogs");
+        }
+
+        return Path.Combine(documentDirectory, "TrimLogs");
+    }
+
+    private static string SanitizeFileName(string value)
+    {
+        foreach (char invalidChar in Path.GetInvalidFileNameChars())
+        {
+            value = value.Replace(invalidChar, '_');
+        }
+
+        return value;
+    }
+
+    private static string FormatCropRect(CropRect rect)
+    {
+        return $"x={IconCropRenderer.FormatNumber(rect.X)}, y={IconCropRenderer.FormatNumber(rect.Y)}, w={IconCropRenderer.FormatNumber(rect.Width)}, h={IconCropRenderer.FormatNumber(rect.Height)}, r={IconCropRenderer.FormatNumber(rect.X + rect.Width)}, b={IconCropRenderer.FormatNumber(rect.Y + rect.Height)}";
+    }
+
+    private static string GetAutoTrimModeLabel(AutoTrimMode mode)
+    {
+        return mode switch
+        {
+            AutoTrimMode.CenterClean => "1 Center clean",
+            AutoTrimMode.EdgeRecover => "2 Edge recover",
+            AutoTrimMode.EdgeOff => "3 Edge off",
+            _ => mode.ToString()
+        };
     }
 
     private IconCropRenderer.AlphaMask GetAlphaMaskForIcon(
@@ -744,6 +888,13 @@ public partial class MainWindow : Window
     {
         Move,
         Resize
+    }
+
+    private enum AutoTrimMode
+    {
+        CenterClean = 1,
+        EdgeRecover = 2,
+        EdgeOff = 3
     }
 }
 

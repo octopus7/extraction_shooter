@@ -744,3 +744,9 @@ A. 아니다. 현재 `TS_`는 TunaSweeper 또는 프로젝트 고유 런타임 �
 Q. 캔봇 BP는 어디에 있는가?
 
 A. 현재 프로젝트에는 캔봇 전용 BP 애셋이 없다. 벙커 캔봇은 `ATunaSweeperLedRobotCharacterActor` 네이티브 C++ 액터가 `TunaSweeperBunkerRuntimeSpawnSubsystem`에서 JSON 런타임 스폰으로 올라가는 구조다. `BunkerCharacterSpawns.json`의 `actor_class`를 비워두면 네이티브 클래스로 스폰되고, 별도 BP를 만들면 해당 BP 클래스 경로를 `actor_class`에 넣어 사용할 수 있다.
+
+## 2026-05-26 00:12:05 (소요시간: 6분)
+
+Q. 오토트림을 누를 때마다 영역이 바뀌는데 현재 로그로 원인을 파악할 수 있는가?
+
+A. 가능하다. 13번 `waterfilter` 로그에서 첫 번째 트림은 `x=377, y=959, w=159, h=258`로 정상화됐지만, 두 번째 트림이 오른쪽 엣지에서 내부 빈 열 `x=382`와 다음 채워진 열 `x=381`을 엣지 갭 성공으로 오인해 scan region을 `w=5`까지 줄였다. 원인은 완료된 본체 엣지를 다시 edge-gap 기준으로 해석한 것이며, 중앙을 넘는 내부 갭은 바깥쪽에 임계값 이상 픽셀이 있을 때만 확장하고, 없으면 완료된 엣지로 유지해야 한다.

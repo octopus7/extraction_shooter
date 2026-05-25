@@ -10,6 +10,8 @@ namespace IconCropTool;
 
 public static class IconCropRenderer
 {
+    private const int CompletedEdgeGapTolerance = 4;
+
     public static readonly JsonSerializerOptions JsonOptions = new()
     {
         AllowTrailingCommas = true,
@@ -148,22 +150,29 @@ public static class IconCropRenderer
         AlphaMask alphaMask,
         CropRect searchRect,
         bool trimFromFirstEmptyAfterEdgeContent,
-        byte alphaThreshold = 0)
+        byte alphaThreshold = 0,
+        IList<string>? trace = null)
     {
         Int32Rect region = ToSafeInt32Rect(searchRect, alphaMask.Width, alphaMask.Height);
+        trace?.Add($"FindAlphaTrimRect search={FormatRect(region)} alphaThreshold>{alphaThreshold} edgeGap={trimFromFirstEmptyAfterEdgeContent}");
         if (region.Width <= 0 || region.Height <= 0)
         {
+            trace?.Add("Search region is empty.");
             return null;
         }
 
-        Int32Rect scanRegion = trimFromFirstEmptyAfterEdgeContent
-            ? MovePastEdgeConnectedContent(alphaMask, region, alphaThreshold)
-            : region;
+        EdgeScanResult scanResult = trimFromFirstEmptyAfterEdgeContent
+            ? MovePastEdgeConnectedContent(alphaMask, region, alphaThreshold, trace)
+            : new EdgeScanResult(region);
+        Int32Rect scanRegion = scanResult.Region;
+        trace?.Add($"Scan region={FormatRect(scanRegion)}");
 
         if (!alphaMask.TryFindOpaqueBounds(scanRegion, alphaThreshold, out Int32Rect bounds))
         {
+            trace?.Add("No opaque bounds found in scan region.");
             if (scanRegion != region && alphaMask.TryFindOpaqueBounds(region, alphaThreshold, out bounds))
             {
+                trace?.Add($"Fallback original region bounds={FormatRect(bounds)}");
                 return new CropRect
                 {
                     X = bounds.X,
@@ -176,12 +185,124 @@ public static class IconCropRenderer
             return null;
         }
 
+        trace?.Add($"Opaque bounds before edge expansion={FormatRect(bounds)}");
+
+        if (trimFromFirstEmptyAfterEdgeContent)
+        {
+            bounds = ExpandBoundsPastSearchEdges(alphaMask, bounds, region, alphaThreshold, trace);
+            bounds = PreserveCompletedEdges(alphaMask, bounds, region, scanResult, alphaThreshold, trace);
+            trace?.Add($"Opaque bounds after edge expansion={FormatRect(bounds)}");
+        }
+
         return new CropRect
         {
             X = bounds.X,
             Y = bounds.Y,
             Width = bounds.Width,
             Height = bounds.Height
+        };
+    }
+
+    public static CropRect? FindCenterOutCleanTrimRect(
+        AlphaMask alphaMask,
+        CropRect searchRect,
+        byte alphaThreshold = 0,
+        IList<string>? trace = null)
+    {
+        Int32Rect region = ToSafeInt32Rect(searchRect, alphaMask.Width, alphaMask.Height);
+        trace?.Add($"FindCenterOutCleanTrimRect search={FormatRect(region)} alphaThreshold>{alphaThreshold}");
+        if (region.Width <= 0 || region.Height <= 0)
+        {
+            trace?.Add("Search region is empty.");
+            return null;
+        }
+
+        int centerX = region.X + ((region.Width - 1) / 2);
+        int centerY = region.Y + ((region.Height - 1) / 2);
+        int left = centerX;
+        int right = centerX;
+        int top = centerY;
+        int bottom = centerY;
+        bool leftSawOpaque = false;
+        bool rightSawOpaque = false;
+        bool topSawOpaque = false;
+        bool bottomSawOpaque = false;
+
+        trace?.Add($"Center-out seed center=({centerX}, {centerY})");
+        while (true)
+        {
+            bool leftHasOpaque = alphaMask.ColumnHasOpaque(left, top, bottom + 1, alphaThreshold);
+            bool rightHasOpaque = alphaMask.ColumnHasOpaque(right, top, bottom + 1, alphaThreshold);
+            bool topHasOpaque = alphaMask.RowHasOpaque(top, left, right + 1, alphaThreshold);
+            bool bottomHasOpaque = alphaMask.RowHasOpaque(bottom, left, right + 1, alphaThreshold);
+            leftSawOpaque |= leftHasOpaque;
+            rightSawOpaque |= rightHasOpaque;
+            topSawOpaque |= topHasOpaque;
+            bottomSawOpaque |= bottomHasOpaque;
+
+            bool leftDone = leftSawOpaque && !leftHasOpaque;
+            bool rightDone = rightSawOpaque && !rightHasOpaque;
+            bool topDone = topSawOpaque && !topHasOpaque;
+            bool bottomDone = bottomSawOpaque && !bottomHasOpaque;
+
+            if (leftDone && rightDone && topDone && bottomDone)
+            {
+                var result = new Int32Rect(left, top, right - left + 1, bottom - top + 1);
+                trace?.Add($"Center-out found clean edge rect={FormatRect(result)}");
+                return new CropRect
+                {
+                    X = result.X,
+                    Y = result.Y,
+                    Width = result.Width,
+                    Height = result.Height
+                };
+            }
+
+            bool expanded = false;
+            if (!leftDone && left > 0)
+            {
+                left--;
+                expanded = true;
+            }
+
+            if (!rightDone && right + 1 < alphaMask.Width)
+            {
+                right++;
+                expanded = true;
+            }
+
+            if (!topDone && top > 0)
+            {
+                top--;
+                expanded = true;
+            }
+
+            if (!bottomDone && bottom + 1 < alphaMask.Height)
+            {
+                bottom++;
+                expanded = true;
+            }
+
+            if (!expanded)
+            {
+                break;
+            }
+        }
+
+        trace?.Add("Center-out reached sheet bounds before all edges became clean.");
+        if (!alphaMask.TryFindOpaqueBounds(region, alphaThreshold, out Int32Rect fallbackBounds))
+        {
+            trace?.Add("No opaque bounds found in original region.");
+            return null;
+        }
+
+        trace?.Add($"Center-out fallback original region bounds={FormatRect(fallbackBounds)}");
+        return new CropRect
+        {
+            X = fallbackBounds.X,
+            Y = fallbackBounds.Y,
+            Width = fallbackBounds.Width,
+            Height = fallbackBounds.Height
         };
     }
 
@@ -219,37 +340,209 @@ public static class IconCropRenderer
         return new Int32Rect(x, y, width, height);
     }
 
-    private static Int32Rect MovePastEdgeConnectedContent(AlphaMask alphaMask, Int32Rect region, byte alphaThreshold)
+    private static string FormatRect(Int32Rect rect)
+    {
+        return $"x={rect.X}, y={rect.Y}, w={rect.Width}, h={rect.Height}, r={rect.X + rect.Width - 1}, b={rect.Y + rect.Height - 1}";
+    }
+
+    private static EdgeScanResult MovePastEdgeConnectedContent(
+        AlphaMask alphaMask,
+        Int32Rect region,
+        byte alphaThreshold,
+        IList<string>? trace)
     {
         int left = region.X;
         int top = region.Y;
         int right = region.X + region.Width - 1;
         int bottom = region.Y + region.Height - 1;
 
-        left = ResolveLeftEdge(alphaMask, left, right, top, bottom + 1, alphaThreshold);
-        right = ResolveRightEdge(alphaMask, left, right, top, bottom + 1, alphaThreshold);
+        trace?.Add($"MovePastEdgeConnectedContent start L={left}, T={top}, R={right}, B={bottom}");
+        EdgeResolveResult leftResult = ResolveLeftEdge(alphaMask, left, right, top, bottom + 1, alphaThreshold, trace);
+        left = leftResult.Value;
+        EdgeResolveResult rightResult = ResolveRightEdge(alphaMask, left, right, top, bottom + 1, alphaThreshold, trace);
+        right = rightResult.Value;
 
         if (left > right)
         {
-            return region;
+            trace?.Add("Horizontal edge resolution inverted bounds; using original region.");
+            return new EdgeScanResult(region);
         }
 
-        top = ResolveTopEdge(alphaMask, top, bottom, left, right + 1, alphaThreshold);
-        bottom = ResolveBottomEdge(alphaMask, top, bottom, left, right + 1, alphaThreshold);
+        EdgeResolveResult topResult = ResolveTopEdge(alphaMask, top, bottom, left, right + 1, alphaThreshold, trace);
+        top = topResult.Value;
+        EdgeResolveResult bottomResult = ResolveBottomEdge(alphaMask, top, bottom, left, right + 1, alphaThreshold, trace);
+        bottom = bottomResult.Value;
 
         if (top > bottom)
         {
-            return region;
+            trace?.Add("Vertical edge resolution inverted bounds; using original region.");
+            return new EdgeScanResult(region);
+        }
+
+        trace?.Add($"MovePastEdgeConnectedContent result L={left}, T={top}, R={right}, B={bottom}");
+        return new EdgeScanResult(
+            new Int32Rect(left, top, right - left + 1, bottom - top + 1),
+            leftResult.PreserveOriginalEdge,
+            rightResult.PreserveOriginalEdge,
+            topResult.PreserveOriginalEdge,
+            bottomResult.PreserveOriginalEdge);
+    }
+
+    private static Int32Rect PreserveCompletedEdges(
+        AlphaMask alphaMask,
+        Int32Rect bounds,
+        Int32Rect originalRegion,
+        EdgeScanResult scanResult,
+        byte alphaThreshold,
+        IList<string>? trace)
+    {
+        int originalRight = originalRegion.X + originalRegion.Width - 1;
+        int originalBottom = originalRegion.Y + originalRegion.Height - 1;
+
+        int left = bounds.X;
+        int top = bounds.Y;
+        int right = bounds.X + bounds.Width - 1;
+        int bottom = bounds.Y + bounds.Height - 1;
+
+        if (scanResult.PreserveLeft)
+        {
+            int before = left;
+            if (left > originalRegion.X ||
+                (left < originalRegion.X && !AnyOpaqueColumnInRange(alphaMask, left, originalRegion.X - 1, top, bottom + 1, alphaThreshold)))
+            {
+                left = originalRegion.X;
+            }
+
+            if (left != before)
+            {
+                trace?.Add($"Preserve completed left edge from {before} to {left}.");
+            }
+        }
+
+        if (scanResult.PreserveRight)
+        {
+            int before = right;
+            if (right < originalRight ||
+                (right > originalRight && !AnyOpaqueColumnInRange(alphaMask, originalRight + 1, right, top, bottom + 1, alphaThreshold)))
+            {
+                right = originalRight;
+            }
+
+            if (right != before)
+            {
+                trace?.Add($"Preserve completed right edge from {before} to {right}.");
+            }
+        }
+
+        if (scanResult.PreserveTop)
+        {
+            int before = top;
+            if (top > originalRegion.Y ||
+                (top < originalRegion.Y && !AnyOpaqueRowInRange(alphaMask, top, originalRegion.Y - 1, left, right + 1, alphaThreshold)))
+            {
+                top = originalRegion.Y;
+            }
+
+            if (top != before)
+            {
+                trace?.Add($"Preserve completed top edge from {before} to {top}.");
+            }
+        }
+
+        if (scanResult.PreserveBottom)
+        {
+            int before = bottom;
+            if (bottom < originalBottom ||
+                (bottom > originalBottom && !AnyOpaqueRowInRange(alphaMask, originalBottom + 1, bottom, left, right + 1, alphaThreshold)))
+            {
+                bottom = originalBottom;
+            }
+
+            if (bottom != before)
+            {
+                trace?.Add($"Preserve completed bottom edge from {before} to {bottom}.");
+            }
         }
 
         return new Int32Rect(left, top, right - left + 1, bottom - top + 1);
     }
 
-    private static int ResolveLeftEdge(AlphaMask alphaMask, int left, int right, int top, int bottomExclusive, byte alphaThreshold)
+    private static Int32Rect ExpandBoundsPastSearchEdges(
+        AlphaMask alphaMask,
+        Int32Rect bounds,
+        Int32Rect searchRegion,
+        byte alphaThreshold,
+        IList<string>? trace)
+    {
+        const int EmptyEdgeTolerance = 1;
+        int searchRight = searchRegion.X + searchRegion.Width - 1;
+        int searchBottom = searchRegion.Y + searchRegion.Height - 1;
+
+        int left = bounds.X;
+        int top = bounds.Y;
+        int right = bounds.X + bounds.Width - 1;
+        int bottom = bounds.Y + bounds.Height - 1;
+
+        for (int iteration = 0; iteration < 4; iteration++)
+        {
+            int previousLeft = left;
+            int previousTop = top;
+            int previousRight = right;
+            int previousBottom = bottom;
+
+            if (left <= searchRegion.X + EmptyEdgeTolerance)
+            {
+                int before = left;
+                left = ExpandLeftToOuterGap(alphaMask, left, top, bottom + 1, alphaThreshold);
+                trace?.Add($"Expand left from {before} to {left}");
+            }
+
+            if (right >= searchRight - EmptyEdgeTolerance)
+            {
+                int before = right;
+                right = ExpandRightToOuterGap(alphaMask, right, top, bottom + 1, alphaThreshold);
+                trace?.Add($"Expand right from {before} to {right}");
+            }
+
+            if (top <= searchRegion.Y + EmptyEdgeTolerance)
+            {
+                int before = top;
+                top = ExpandTopToOuterGap(alphaMask, top, left, right + 1, alphaThreshold);
+                trace?.Add($"Expand top from {before} to {top}");
+            }
+
+            if (bottom >= searchBottom - EmptyEdgeTolerance)
+            {
+                int before = bottom;
+                bottom = ExpandBottomToOuterGap(alphaMask, bottom, left, right + 1, alphaThreshold);
+                trace?.Add($"Expand bottom from {before} to {bottom}");
+            }
+
+            if (left == previousLeft && top == previousTop && right == previousRight && bottom == previousBottom)
+            {
+                break;
+            }
+        }
+
+        return new Int32Rect(left, top, right - left + 1, bottom - top + 1);
+    }
+
+    private static EdgeResolveResult ResolveLeftEdge(
+        AlphaMask alphaMask,
+        int left,
+        int right,
+        int top,
+        int bottomExclusive,
+        byte alphaThreshold,
+        IList<string>? trace)
     {
         if (!alphaMask.ColumnHasOpaque(left, top, bottomExclusive, alphaThreshold))
         {
-            return left;
+            bool preserve = HasNearOpaqueColumnFromLeft(alphaMask, left, right, top, bottomExclusive, alphaThreshold);
+            trace?.Add(preserve
+                ? $"Left edge column {left} is empty with nearby content; preserve completed empty edge."
+                : $"Left edge column {left} is empty.");
+            return new EdgeResolveResult(left, preserve);
         }
 
         for (int x = left + 1; x <= right; x++)
@@ -259,25 +552,65 @@ public static class IconCropRenderer
                 continue;
             }
 
+            trace?.Add($"Left edge found inner empty column {x}.");
+            double centerX = (left + right) * 0.5;
+            if (x > centerX)
+            {
+                return ResolveLeftOutwardOrPreserve(
+                    alphaMask,
+                    left,
+                    top,
+                    bottomExclusive,
+                    alphaThreshold,
+                    trace,
+                    $"Left edge inner empty column {x} crossed center {centerX:0.##}");
+            }
+
             for (int nextX = x + 1; nextX <= right; nextX++)
             {
                 if (alphaMask.ColumnHasOpaque(nextX, top, bottomExclusive, alphaThreshold))
                 {
-                    return nextX;
+                    trace?.Add($"Left edge found next filled column {nextX}; trim starts there.");
+                    return new EdgeResolveResult(nextX, false);
                 }
             }
 
-            return ExpandLeftToOuterGap(alphaMask, left, top, bottomExclusive, alphaThreshold);
+            return ResolveLeftOutwardOrPreserve(
+                alphaMask,
+                left,
+                top,
+                bottomExclusive,
+                alphaThreshold,
+                trace,
+                "Left edge found no next filled column");
         }
 
-        return ExpandLeftToOuterGap(alphaMask, left, top, bottomExclusive, alphaThreshold);
+        return ResolveLeftOutwardOrPreserve(
+            alphaMask,
+            left,
+            top,
+            bottomExclusive,
+            alphaThreshold,
+            trace,
+            "Left edge found no inner empty column");
     }
 
-    private static int ResolveRightEdge(AlphaMask alphaMask, int left, int right, int top, int bottomExclusive, byte alphaThreshold)
+    private static EdgeResolveResult ResolveRightEdge(
+        AlphaMask alphaMask,
+        int left,
+        int right,
+        int top,
+        int bottomExclusive,
+        byte alphaThreshold,
+        IList<string>? trace)
     {
         if (!alphaMask.ColumnHasOpaque(right, top, bottomExclusive, alphaThreshold))
         {
-            return right;
+            bool preserve = HasNearOpaqueColumnFromRight(alphaMask, left, right, top, bottomExclusive, alphaThreshold);
+            trace?.Add(preserve
+                ? $"Right edge column {right} is empty with nearby content; preserve completed empty edge."
+                : $"Right edge column {right} is empty.");
+            return new EdgeResolveResult(right, preserve);
         }
 
         for (int x = right - 1; x >= left; x--)
@@ -287,25 +620,65 @@ public static class IconCropRenderer
                 continue;
             }
 
+            trace?.Add($"Right edge found inner empty column {x}.");
+            double centerX = (left + right) * 0.5;
+            if (x < centerX)
+            {
+                return ResolveRightOutwardOrPreserve(
+                    alphaMask,
+                    right,
+                    top,
+                    bottomExclusive,
+                    alphaThreshold,
+                    trace,
+                    $"Right edge inner empty column {x} crossed center {centerX:0.##}");
+            }
+
             for (int nextX = x - 1; nextX >= left; nextX--)
             {
                 if (alphaMask.ColumnHasOpaque(nextX, top, bottomExclusive, alphaThreshold))
                 {
-                    return nextX;
+                    trace?.Add($"Right edge found next filled column {nextX}; trim ends there.");
+                    return new EdgeResolveResult(nextX, false);
                 }
             }
 
-            return ExpandRightToOuterGap(alphaMask, right, top, bottomExclusive, alphaThreshold);
+            return ResolveRightOutwardOrPreserve(
+                alphaMask,
+                right,
+                top,
+                bottomExclusive,
+                alphaThreshold,
+                trace,
+                "Right edge found no next filled column");
         }
 
-        return ExpandRightToOuterGap(alphaMask, right, top, bottomExclusive, alphaThreshold);
+        return ResolveRightOutwardOrPreserve(
+            alphaMask,
+            right,
+            top,
+            bottomExclusive,
+            alphaThreshold,
+            trace,
+            "Right edge found no inner empty column");
     }
 
-    private static int ResolveTopEdge(AlphaMask alphaMask, int top, int bottom, int left, int rightExclusive, byte alphaThreshold)
+    private static EdgeResolveResult ResolveTopEdge(
+        AlphaMask alphaMask,
+        int top,
+        int bottom,
+        int left,
+        int rightExclusive,
+        byte alphaThreshold,
+        IList<string>? trace)
     {
         if (!alphaMask.RowHasOpaque(top, left, rightExclusive, alphaThreshold))
         {
-            return top;
+            bool preserve = HasNearOpaqueRowFromTop(alphaMask, top, bottom, left, rightExclusive, alphaThreshold);
+            trace?.Add(preserve
+                ? $"Top edge row {top} is empty with nearby content; preserve completed empty edge."
+                : $"Top edge row {top} is empty.");
+            return new EdgeResolveResult(top, preserve);
         }
 
         for (int y = top + 1; y <= bottom; y++)
@@ -315,25 +688,65 @@ public static class IconCropRenderer
                 continue;
             }
 
+            trace?.Add($"Top edge found inner empty row {y}.");
+            double centerY = (top + bottom) * 0.5;
+            if (y > centerY)
+            {
+                return ResolveTopOutwardOrPreserve(
+                    alphaMask,
+                    top,
+                    left,
+                    rightExclusive,
+                    alphaThreshold,
+                    trace,
+                    $"Top edge inner empty row {y} crossed center {centerY:0.##}");
+            }
+
             for (int nextY = y + 1; nextY <= bottom; nextY++)
             {
                 if (alphaMask.RowHasOpaque(nextY, left, rightExclusive, alphaThreshold))
                 {
-                    return nextY;
+                    trace?.Add($"Top edge found next filled row {nextY}; trim starts there.");
+                    return new EdgeResolveResult(nextY, false);
                 }
             }
 
-            return ExpandTopToOuterGap(alphaMask, top, left, rightExclusive, alphaThreshold);
+            return ResolveTopOutwardOrPreserve(
+                alphaMask,
+                top,
+                left,
+                rightExclusive,
+                alphaThreshold,
+                trace,
+                "Top edge found no next filled row");
         }
 
-        return ExpandTopToOuterGap(alphaMask, top, left, rightExclusive, alphaThreshold);
+        return ResolveTopOutwardOrPreserve(
+            alphaMask,
+            top,
+            left,
+            rightExclusive,
+            alphaThreshold,
+            trace,
+            "Top edge found no inner empty row");
     }
 
-    private static int ResolveBottomEdge(AlphaMask alphaMask, int top, int bottom, int left, int rightExclusive, byte alphaThreshold)
+    private static EdgeResolveResult ResolveBottomEdge(
+        AlphaMask alphaMask,
+        int top,
+        int bottom,
+        int left,
+        int rightExclusive,
+        byte alphaThreshold,
+        IList<string>? trace)
     {
         if (!alphaMask.RowHasOpaque(bottom, left, rightExclusive, alphaThreshold))
         {
-            return bottom;
+            bool preserve = HasNearOpaqueRowFromBottom(alphaMask, top, bottom, left, rightExclusive, alphaThreshold);
+            trace?.Add(preserve
+                ? $"Bottom edge row {bottom} is empty with nearby content; preserve completed empty edge."
+                : $"Bottom edge row {bottom} is empty.");
+            return new EdgeResolveResult(bottom, preserve);
         }
 
         for (int y = bottom - 1; y >= top; y--)
@@ -343,18 +756,247 @@ public static class IconCropRenderer
                 continue;
             }
 
+            trace?.Add($"Bottom edge found inner empty row {y}.");
+            double centerY = (top + bottom) * 0.5;
+            if (y < centerY)
+            {
+                return ResolveBottomOutwardOrPreserve(
+                    alphaMask,
+                    bottom,
+                    left,
+                    rightExclusive,
+                    alphaThreshold,
+                    trace,
+                    $"Bottom edge inner empty row {y} crossed center {centerY:0.##}");
+            }
+
             for (int nextY = y - 1; nextY >= top; nextY--)
             {
                 if (alphaMask.RowHasOpaque(nextY, left, rightExclusive, alphaThreshold))
                 {
-                    return nextY;
+                    trace?.Add($"Bottom edge found next filled row {nextY}; trim ends there.");
+                    return new EdgeResolveResult(nextY, false);
                 }
             }
 
-            return ExpandBottomToOuterGap(alphaMask, bottom, left, rightExclusive, alphaThreshold);
+            return ResolveBottomOutwardOrPreserve(
+                alphaMask,
+                bottom,
+                left,
+                rightExclusive,
+                alphaThreshold,
+                trace,
+                "Bottom edge found no next filled row");
         }
 
-        return ExpandBottomToOuterGap(alphaMask, bottom, left, rightExclusive, alphaThreshold);
+        return ResolveBottomOutwardOrPreserve(
+            alphaMask,
+            bottom,
+            left,
+            rightExclusive,
+            alphaThreshold,
+            trace,
+            "Bottom edge found no inner empty row");
+    }
+
+    private static EdgeResolveResult ResolveLeftOutwardOrPreserve(
+        AlphaMask alphaMask,
+        int left,
+        int top,
+        int bottomExclusive,
+        byte alphaThreshold,
+        IList<string>? trace,
+        string reason)
+    {
+        if (left > 0 && alphaMask.ColumnHasOpaque(left - 1, top, bottomExclusive, alphaThreshold))
+        {
+            int expanded = ExpandLeftToOuterGap(alphaMask, left, top, bottomExclusive, alphaThreshold);
+            trace?.Add($"{reason}; outside column has alpha, expand outward to {expanded}.");
+            return new EdgeResolveResult(expanded, false);
+        }
+
+        trace?.Add($"{reason}; outside is empty, keep completed edge {left}.");
+        return new EdgeResolveResult(left, true);
+    }
+
+    private static EdgeResolveResult ResolveRightOutwardOrPreserve(
+        AlphaMask alphaMask,
+        int right,
+        int top,
+        int bottomExclusive,
+        byte alphaThreshold,
+        IList<string>? trace,
+        string reason)
+    {
+        if (right + 1 < alphaMask.Width && alphaMask.ColumnHasOpaque(right + 1, top, bottomExclusive, alphaThreshold))
+        {
+            int expanded = ExpandRightToOuterGap(alphaMask, right, top, bottomExclusive, alphaThreshold);
+            trace?.Add($"{reason}; outside column has alpha, expand outward to {expanded}.");
+            return new EdgeResolveResult(expanded, false);
+        }
+
+        trace?.Add($"{reason}; outside is empty, keep completed edge {right}.");
+        return new EdgeResolveResult(right, true);
+    }
+
+    private static EdgeResolveResult ResolveTopOutwardOrPreserve(
+        AlphaMask alphaMask,
+        int top,
+        int left,
+        int rightExclusive,
+        byte alphaThreshold,
+        IList<string>? trace,
+        string reason)
+    {
+        if (top > 0 && alphaMask.RowHasOpaque(top - 1, left, rightExclusive, alphaThreshold))
+        {
+            int expanded = ExpandTopToOuterGap(alphaMask, top, left, rightExclusive, alphaThreshold);
+            trace?.Add($"{reason}; outside row has alpha, expand outward to {expanded}.");
+            return new EdgeResolveResult(expanded, false);
+        }
+
+        trace?.Add($"{reason}; outside is empty, keep completed edge {top}.");
+        return new EdgeResolveResult(top, true);
+    }
+
+    private static EdgeResolveResult ResolveBottomOutwardOrPreserve(
+        AlphaMask alphaMask,
+        int bottom,
+        int left,
+        int rightExclusive,
+        byte alphaThreshold,
+        IList<string>? trace,
+        string reason)
+    {
+        if (bottom + 1 < alphaMask.Height && alphaMask.RowHasOpaque(bottom + 1, left, rightExclusive, alphaThreshold))
+        {
+            int expanded = ExpandBottomToOuterGap(alphaMask, bottom, left, rightExclusive, alphaThreshold);
+            trace?.Add($"{reason}; outside row has alpha, expand outward to {expanded}.");
+            return new EdgeResolveResult(expanded, false);
+        }
+
+        trace?.Add($"{reason}; outside is empty, keep completed edge {bottom}.");
+        return new EdgeResolveResult(bottom, true);
+    }
+
+    private static bool HasNearOpaqueColumnFromLeft(
+        AlphaMask alphaMask,
+        int left,
+        int right,
+        int top,
+        int bottomExclusive,
+        byte alphaThreshold)
+    {
+        return AnyOpaqueColumnInRange(
+            alphaMask,
+            left + 1,
+            Math.Min(right, left + CompletedEdgeGapTolerance),
+            top,
+            bottomExclusive,
+            alphaThreshold);
+    }
+
+    private static bool HasNearOpaqueColumnFromRight(
+        AlphaMask alphaMask,
+        int left,
+        int right,
+        int top,
+        int bottomExclusive,
+        byte alphaThreshold)
+    {
+        return AnyOpaqueColumnInRange(
+            alphaMask,
+            Math.Max(left, right - CompletedEdgeGapTolerance),
+            right - 1,
+            top,
+            bottomExclusive,
+            alphaThreshold);
+    }
+
+    private static bool HasNearOpaqueRowFromTop(
+        AlphaMask alphaMask,
+        int top,
+        int bottom,
+        int left,
+        int rightExclusive,
+        byte alphaThreshold)
+    {
+        return AnyOpaqueRowInRange(
+            alphaMask,
+            top + 1,
+            Math.Min(bottom, top + CompletedEdgeGapTolerance),
+            left,
+            rightExclusive,
+            alphaThreshold);
+    }
+
+    private static bool HasNearOpaqueRowFromBottom(
+        AlphaMask alphaMask,
+        int top,
+        int bottom,
+        int left,
+        int rightExclusive,
+        byte alphaThreshold)
+    {
+        return AnyOpaqueRowInRange(
+            alphaMask,
+            Math.Max(top, bottom - CompletedEdgeGapTolerance),
+            bottom - 1,
+            left,
+            rightExclusive,
+            alphaThreshold);
+    }
+
+    private static bool AnyOpaqueColumnInRange(
+        AlphaMask alphaMask,
+        int startInclusive,
+        int endInclusive,
+        int top,
+        int bottomExclusive,
+        byte alphaThreshold)
+    {
+        if (startInclusive > endInclusive || endInclusive < 0 || startInclusive >= alphaMask.Width)
+        {
+            return false;
+        }
+
+        int start = Math.Clamp(startInclusive, 0, alphaMask.Width - 1);
+        int end = Math.Clamp(endInclusive, 0, alphaMask.Width - 1);
+        for (int x = start; x <= end; x++)
+        {
+            if (alphaMask.ColumnHasOpaque(x, top, bottomExclusive, alphaThreshold))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool AnyOpaqueRowInRange(
+        AlphaMask alphaMask,
+        int startInclusive,
+        int endInclusive,
+        int left,
+        int rightExclusive,
+        byte alphaThreshold)
+    {
+        if (startInclusive > endInclusive || endInclusive < 0 || startInclusive >= alphaMask.Height)
+        {
+            return false;
+        }
+
+        int start = Math.Clamp(startInclusive, 0, alphaMask.Height - 1);
+        int end = Math.Clamp(endInclusive, 0, alphaMask.Height - 1);
+        for (int y = start; y <= end; y++)
+        {
+            if (alphaMask.RowHasOpaque(y, left, rightExclusive, alphaThreshold))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static int ExpandLeftToOuterGap(AlphaMask alphaMask, int left, int top, int bottomExclusive, byte alphaThreshold)
@@ -365,7 +1007,7 @@ public static class IconCropRenderer
             x--;
         }
 
-        return x + 1;
+        return Math.Max(0, x);
     }
 
     private static int ExpandRightToOuterGap(AlphaMask alphaMask, int right, int top, int bottomExclusive, byte alphaThreshold)
@@ -376,7 +1018,7 @@ public static class IconCropRenderer
             x++;
         }
 
-        return x - 1;
+        return Math.Min(alphaMask.Width - 1, x);
     }
 
     private static int ExpandTopToOuterGap(AlphaMask alphaMask, int top, int left, int rightExclusive, byte alphaThreshold)
@@ -387,7 +1029,7 @@ public static class IconCropRenderer
             y--;
         }
 
-        return y + 1;
+        return Math.Max(0, y);
     }
 
     private static int ExpandBottomToOuterGap(AlphaMask alphaMask, int bottom, int left, int rightExclusive, byte alphaThreshold)
@@ -398,7 +1040,7 @@ public static class IconCropRenderer
             y++;
         }
 
-        return y - 1;
+        return Math.Min(alphaMask.Height - 1, y);
     }
 
     private static void SavePng(BitmapSource source, string path)
@@ -417,6 +1059,46 @@ public static class IconCropRenderer
         }
 
         return $"icon_{icon.Index:000}.png";
+    }
+
+    private readonly struct EdgeScanResult
+    {
+        public EdgeScanResult(
+            Int32Rect region,
+            bool preserveLeft = false,
+            bool preserveRight = false,
+            bool preserveTop = false,
+            bool preserveBottom = false)
+        {
+            Region = region;
+            PreserveLeft = preserveLeft;
+            PreserveRight = preserveRight;
+            PreserveTop = preserveTop;
+            PreserveBottom = preserveBottom;
+        }
+
+        public Int32Rect Region { get; }
+
+        public bool PreserveLeft { get; }
+
+        public bool PreserveRight { get; }
+
+        public bool PreserveTop { get; }
+
+        public bool PreserveBottom { get; }
+    }
+
+    private readonly struct EdgeResolveResult
+    {
+        public EdgeResolveResult(int value, bool preserveOriginalEdge)
+        {
+            Value = value;
+            PreserveOriginalEdge = preserveOriginalEdge;
+        }
+
+        public int Value { get; }
+
+        public bool PreserveOriginalEdge { get; }
     }
 
     public sealed class AlphaMask
