@@ -36,6 +36,7 @@ public:
 
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+	virtual void PostEditChangeChainProperty(FPropertyChangedChainEvent& PropertyChangedEvent) override;
 #endif
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|LED Expression")
@@ -71,6 +72,18 @@ public:
 		FLinearColor InOffColor,
 		float InLedPitch,
 		float InLedRadius);
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|LED Expression")
+	FLinearColor GetLedColor() const { return LedColor; }
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|LED Expression")
+	FLinearColor GetOffColor() const { return OffColor; }
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|LED Expression")
+	float GetLedPitch() const { return LedPitch; }
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|LED Expression")
+	float GetLedRadius() const { return LedRadius; }
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|LED Expression|Demo")
 	void SetDemoModeEnabled(bool bEnabled);
@@ -119,7 +132,7 @@ protected:
 	FLinearColor LedColor = FLinearColor(1.0f, 0.78f, 0.06f, 1.0f);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LED Expression|Color")
-	FLinearColor OffColor = FLinearColor(0.03f, 0.03f, 0.03f, 1.0f);
+	FLinearColor OffColor = FLinearColor::Transparent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LED Expression|Color", meta = (ClampMin = "0.0"))
 	float EmissiveIntensity = 3.0f;
@@ -168,6 +181,9 @@ private:
 	bool ApplyPatternToStates(const FString& Pattern);
 	void RefreshVertexColors();
 	void ApplyLedMaterial();
+#if WITH_EDITOR
+	void RefreshEditorPreviewAfterPropertyChange(const FPropertyChangedEvent& PropertyChangedEvent);
+#endif
 	void BuildCurvedLedVertex(float SourceY, float SourceZ, FVector& OutPosition, FVector& OutNormal, FProcMeshTangent& OutTangent) const;
 	void ApplyRenderLocalTransform(FVector& InOutPosition, FVector& InOutNormal, FProcMeshTangent& InOutTangent) const;
 	FLinearColor ResolveLedVertexColor(bool bEnabled) const;

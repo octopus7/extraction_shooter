@@ -135,6 +135,7 @@ namespace TunaSweeperEditorSetup
 	const FString EnemyVisualMaterialTaskId = TEXT("2026-05-19_CreateEnemyAndContainerVisualMaterialsV3");
 	const FString VoxelMeshAssetTaskId = TEXT("2026-05-19_CreateSharedVoxelMeshAssetsV1");
 	const FString LumberjackMeleeSwingArcAssetTaskId = TEXT("2026-05-20_CreateLumberjackMeleeSwingArcAssetsV2");
+	const FString LedExpressionMaterialTaskId = TEXT("2026-05-26_CreateLedExpressionMaterialV1");
 	const FString ExperimentalVegetationAssetTaskId = TEXT("2026-05-24_CreateExperimentalVegetationStaticMeshV4");
 	const FString CoverPointAssetTaskId = TEXT("2026-05-16_CreateCoverPointBlueprintV1");
 	const FString CanBotBlueprintTaskId = TEXT("2026-05-25_CreateCanBotBlueprintV1");
@@ -179,6 +180,7 @@ namespace TunaSweeperEditorSetup
 	const FString EffectsAssetPath = TEXT("/Game/Effects");
 	const FString LumberjackMeleeSwingArcMaterialAssetName = TEXT("M_LumberjackMeleeSwingArc");
 	const FString LumberjackMeleeSwingArcMeshAssetName = TEXT("SM_LumberjackMeleeSwingArc");
+	const FString LedExpressionMaterialAssetName = TEXT("M_LedExpression_VertexColorEmissive");
 	const FString UIIconAssetPath = TEXT("/Game/UI/Icons");
 	const FString UITitleTextureAssetPath = TEXT("/Game/UI/Title");
 	const FString UIStoryTextureAssetPath = TEXT("/Game/UI/Story");
@@ -290,6 +292,7 @@ namespace TunaSweeperEditorSetup
 	}
 
 	bool SaveAsset(UObject* Asset);
+	UMaterial* EnsureLedExpressionMaterial();
 
 	void AddBoxQuad(
 		FMeshDescription& MeshDescription,
@@ -1233,6 +1236,81 @@ namespace TunaSweeperEditorSetup
 		}
 
 		return EnsureLumberjackMeleeSwingArcMeshAsset(SwingArcMaterial) != nullptr;
+	}
+
+	UMaterial* EnsureLedExpressionMaterial()
+	{
+		const FString ObjectPath = GetAssetObjectPath(EffectsAssetPath, LedExpressionMaterialAssetName);
+		UMaterial* Material = LoadObject<UMaterial>(nullptr, *ObjectPath);
+		if (!Material)
+		{
+			UMaterialFactoryNew* MaterialFactory = NewObject<UMaterialFactoryNew>();
+
+			FAssetToolsModule& AssetToolsModule = FModuleManager::LoadModuleChecked<FAssetToolsModule>(TEXT("AssetTools"));
+			UObject* CreatedAsset = AssetToolsModule.Get().CreateAsset(
+				LedExpressionMaterialAssetName,
+				EffectsAssetPath,
+				UMaterial::StaticClass(),
+				MaterialFactory);
+
+			Material = Cast<UMaterial>(CreatedAsset);
+			if (!Material)
+			{
+				UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to create %s."), *ObjectPath);
+				return nullptr;
+			}
+
+			FAssetRegistryModule::AssetCreated(Material);
+		}
+
+		Material->Modify();
+		Material->GetExpressionCollection().Empty();
+		Material->BlendMode = BLEND_Additive;
+		Material->SetShadingModel(MSM_Unlit);
+		Material->TwoSided = true;
+
+		UMaterialEditorOnlyData* MaterialEditorOnly = Material->GetEditorOnlyData();
+		if (!MaterialEditorOnly)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to edit %s."), *ObjectPath);
+			return nullptr;
+		}
+
+		UMaterialExpressionVertexColor* VertexColorExpression = NewObject<UMaterialExpressionVertexColor>(Material);
+		VertexColorExpression->Material = Material;
+		VertexColorExpression->MaterialExpressionEditorX = -520;
+		VertexColorExpression->MaterialExpressionEditorY = -20;
+		Material->GetExpressionCollection().AddExpression(VertexColorExpression);
+
+		UMaterialExpressionScalarParameter* IntensityParameter = NewObject<UMaterialExpressionScalarParameter>(Material);
+		IntensityParameter->Material = Material;
+		IntensityParameter->ParameterName = TEXT("Intensity");
+		IntensityParameter->DefaultValue = 3.0f;
+		IntensityParameter->MaterialExpressionEditorX = -520;
+		IntensityParameter->MaterialExpressionEditorY = 180;
+		Material->GetExpressionCollection().AddExpression(IntensityParameter);
+
+		UMaterialExpressionMultiply* EmissiveMultiply = NewObject<UMaterialExpressionMultiply>(Material);
+		EmissiveMultiply->Material = Material;
+		EmissiveMultiply->A.Connect(0, VertexColorExpression);
+		EmissiveMultiply->B.Connect(0, IntensityParameter);
+		EmissiveMultiply->MaterialExpressionEditorX = -220;
+		EmissiveMultiply->MaterialExpressionEditorY = 60;
+		Material->GetExpressionCollection().AddExpression(EmissiveMultiply);
+
+		MaterialEditorOnly->BaseColor.Connect(0, VertexColorExpression);
+		MaterialEditorOnly->EmissiveColor.Connect(0, EmissiveMultiply);
+
+		Material->PostEditChange();
+		Material->MarkPackageDirty();
+
+		if (!SaveAsset(Material))
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to save %s."), *ObjectPath);
+			return nullptr;
+		}
+
+		return Material;
 	}
 
 	template <typename AssetType>
@@ -7609,6 +7687,19 @@ public:
 			{
 				return TunaSweeperEditorSetup::EnsureLumberjackMeleeSwingArcAssets();
 			});
+
+		const bool bLedExpressionMaterialTaskRan = FTunaSweeperEditorRunOnce::Run(
+			TunaSweeperEditorSetup::LedExpressionMaterialTaskId,
+			[]()
+			{
+				return TunaSweeperEditorSetup::EnsureLedExpressionMaterial() != nullptr;
+			});
+		if ((bLedExpressionMaterialTaskRan || FTunaSweeperEditorRunOnce::HasCompleted(TunaSweeperEditorSetup::LedExpressionMaterialTaskId)) &&
+			FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperLedExpressionMaterialSetupQuit")))
+		{
+			FPlatformMisc::RequestExit(false);
+			return;
+		}
 
 		FTunaSweeperEditorRunOnce::Run(
 			TunaSweeperEditorSetup::ExperimentalVegetationAssetTaskId,

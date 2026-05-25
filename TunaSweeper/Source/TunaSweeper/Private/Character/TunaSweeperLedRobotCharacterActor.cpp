@@ -67,7 +67,11 @@ void ATunaSweeperLedRobotCharacterActor::ConfigureRobotDefaults(
 	FLinearColor InOffColor,
 	float InLedPitch,
 	float InLedRadius,
-	TSoftObjectPtr<UMaterialInterface> InBodyMaterial)
+	TSoftObjectPtr<UMaterialInterface> InBodyMaterial,
+	bool bOverrideLedColor,
+	bool bOverrideOffColor,
+	bool bOverrideLedPitch,
+	bool bOverrideLedRadius)
 {
 	RobotId = InRobotId.IsNone() ? RobotId : InRobotId;
 	if (!InExpressionPresetFilePath.TrimStartAndEnd().IsEmpty())
@@ -86,7 +90,14 @@ void ATunaSweeperLedRobotCharacterActor::ConfigureRobotDefaults(
 	if (ExpressionComponent)
 	{
 		ExpressionComponent->ConfigureExpressionSource(ExpressionPresetFilePath, InitialExpressionName);
-		ExpressionComponent->ConfigureLedAppearance(InLedColor, InOffColor, InLedPitch, InLedRadius);
+		if (bOverrideLedColor || bOverrideOffColor || bOverrideLedPitch || bOverrideLedRadius)
+		{
+			ExpressionComponent->ConfigureLedAppearance(
+				bOverrideLedColor ? InLedColor : ExpressionComponent->GetLedColor(),
+				bOverrideOffColor ? InOffColor : ExpressionComponent->GetOffColor(),
+				bOverrideLedPitch ? InLedPitch : ExpressionComponent->GetLedPitch(),
+				bOverrideLedRadius ? InLedRadius : ExpressionComponent->GetLedRadius());
+		}
 		ExpressionComponent->SetExpressionByName(InitialExpressionName);
 	}
 

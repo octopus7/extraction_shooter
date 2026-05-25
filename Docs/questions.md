@@ -750,3 +750,9 @@ A. 현재 프로젝트에는 캔봇 전용 BP 애셋이 없다. 벙커 캔봇은
 Q. 오토트림을 누를 때마다 영역이 바뀌는데 현재 로그로 원인을 파악할 수 있는가?
 
 A. 가능하다. 13번 `waterfilter` 로그에서 첫 번째 트림은 `x=377, y=959, w=159, h=258`로 정상화됐지만, 두 번째 트림이 오른쪽 엣지에서 내부 빈 열 `x=382`와 다음 채워진 열 `x=381`을 엣지 갭 성공으로 오인해 scan region을 `w=5`까지 줄였다. 원인은 완료된 본체 엣지를 다시 edge-gap 기준으로 해석한 것이며, 중앙을 넘는 내부 갭은 바깥쪽에 임계값 이상 픽셀이 있을 때만 확장하고, 없으면 완료된 엣지로 유지해야 한다.
+
+## 2026-05-26 00:55:21 (소요시간: 1분 미만)
+
+Q. 캔봇은 패키징 전에 쿠킹 대상에 넣어야 하는가?
+
+A. `BP_CanBot`은 JSON 문자열 soft class path로 참조되므로 원칙적으로 쿠커가 자동 추적한다고 기대하면 안 된다. 현재 `DefaultGame.ini`에 `/Game/Characters`가 `DirectoriesToAlwaysCook`으로 등록되어 있어서 `/Game/Characters/CanBot/BP_CanBot`은 이미 쿠킹 대상이다. 런타임 스폰 JSON이 있는 `Content/Data`도 `DirectoriesToAlwaysStageAsNonUFS`에 등록되어 있어 패키징 후 파일 로드 경로에 포함된다.

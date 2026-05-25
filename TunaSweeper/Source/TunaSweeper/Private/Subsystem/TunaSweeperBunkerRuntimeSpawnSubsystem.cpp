@@ -160,7 +160,11 @@ bool UTunaSweeperBunkerRuntimeSpawnSubsystem::EnsureBunkerRuntimeActorsSpawnedFo
 			SpawnDefinition.OffColor,
 			SpawnDefinition.LedPitch,
 			SpawnDefinition.LedRadius,
-			SpawnDefinition.BodyMaterial);
+			SpawnDefinition.BodyMaterial,
+			SpawnDefinition.bHasLedColorOverride,
+			SpawnDefinition.bHasOffColorOverride,
+			SpawnDefinition.bHasLedPitchOverride,
+			SpawnDefinition.bHasLedRadiusOverride);
 		if (SpawnDefinition.bHasExpressionDemoModeOverride || SpawnDefinition.bHasExpressionDemoIntervalOverride)
 		{
 			SpawnedRobot->ConfigureExpressionDemo(
@@ -265,10 +269,12 @@ bool UTunaSweeperBunkerRuntimeSpawnSubsystem::LoadBunkerCharacterSpawnData(bool 
 		JsonObject->TryGetStringField(TEXT("body_material"), BodyMaterialPath);
 		TunaSweeperBunkerRuntimeSpawn::TryReadRotatorField(JsonObject, TEXT("rotation"), Rotation);
 		TunaSweeperBunkerRuntimeSpawn::TryReadVectorField(JsonObject, TEXT("scale"), Scale);
-		TunaSweeperBunkerRuntimeSpawn::TryReadColorField(JsonObject, TEXT("led_color"), SpawnDefinition.LedColor);
-		TunaSweeperBunkerRuntimeSpawn::TryReadColorField(JsonObject, TEXT("off_color"), SpawnDefinition.OffColor);
-		JsonObject->TryGetNumberField(TEXT("led_pitch"), NumericLedPitch);
-		JsonObject->TryGetNumberField(TEXT("led_radius"), NumericLedRadius);
+		SpawnDefinition.bHasLedColorOverride =
+			TunaSweeperBunkerRuntimeSpawn::TryReadColorField(JsonObject, TEXT("led_color"), SpawnDefinition.LedColor);
+		SpawnDefinition.bHasOffColorOverride =
+			TunaSweeperBunkerRuntimeSpawn::TryReadColorField(JsonObject, TEXT("off_color"), SpawnDefinition.OffColor);
+		SpawnDefinition.bHasLedPitchOverride = JsonObject->TryGetNumberField(TEXT("led_pitch"), NumericLedPitch);
+		SpawnDefinition.bHasLedRadiusOverride = JsonObject->TryGetNumberField(TEXT("led_radius"), NumericLedRadius);
 		SpawnDefinition.bHasExpressionDemoModeOverride =
 			JsonObject->TryGetBoolField(TEXT("expression_demo_mode"), SpawnDefinition.bExpressionDemoMode);
 		if (!SpawnDefinition.bHasExpressionDemoModeOverride)
@@ -303,8 +309,14 @@ bool UTunaSweeperBunkerRuntimeSpawnSubsystem::LoadBunkerCharacterSpawnData(bool 
 		{
 			SpawnDefinition.InitialExpressionName = FName(*InitialExpressionName.TrimStartAndEnd());
 		}
-		SpawnDefinition.LedPitch = FMath::Max(0.1f, static_cast<float>(NumericLedPitch));
-		SpawnDefinition.LedRadius = FMath::Max(0.01f, static_cast<float>(NumericLedRadius));
+		if (SpawnDefinition.bHasLedPitchOverride)
+		{
+			SpawnDefinition.LedPitch = FMath::Max(0.1f, static_cast<float>(NumericLedPitch));
+		}
+		if (SpawnDefinition.bHasLedRadiusOverride)
+		{
+			SpawnDefinition.LedRadius = FMath::Max(0.01f, static_cast<float>(NumericLedRadius));
+		}
 		if (SpawnDefinition.bHasExpressionDemoIntervalOverride)
 		{
 			SpawnDefinition.ExpressionDemoIntervalSeconds = FMath::Max(

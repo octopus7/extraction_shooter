@@ -38,9 +38,13 @@ private:
 		FString ExpressionPresetFilePath;
 		FName InitialExpressionName = TEXT("Smile");
 		FLinearColor LedColor = FLinearColor(1.0f, 0.78f, 0.06f, 1.0f);
-		FLinearColor OffColor = FLinearColor(0.03f, 0.03f, 0.03f, 1.0f);
+		bool bHasLedColorOverride = false;
+		FLinearColor OffColor = FLinearColor::Transparent;
+		bool bHasOffColorOverride = false;
 		float LedPitch = 2.0f;
+		bool bHasLedPitchOverride = false;
 		float LedRadius = 0.68f;
+		bool bHasLedRadiusOverride = false;
 		bool bExpressionDemoMode = false;
 		bool bHasExpressionDemoModeOverride = false;
 		float ExpressionDemoIntervalSeconds = 2.0f;

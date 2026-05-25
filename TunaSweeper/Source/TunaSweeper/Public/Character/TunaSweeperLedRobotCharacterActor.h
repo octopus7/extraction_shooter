@@ -30,7 +30,11 @@ public:
 		FLinearColor InOffColor,
 		float InLedPitch,
 		float InLedRadius,
-		TSoftObjectPtr<UMaterialInterface> InBodyMaterial);
+		TSoftObjectPtr<UMaterialInterface> InBodyMaterial,
+		bool bOverrideLedColor = true,
+		bool bOverrideOffColor = true,
+		bool bOverrideLedPitch = true,
+		bool bOverrideLedRadius = true);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|LED Robot")
 	bool SetExpressionByName(FName ExpressionName);

@@ -7,6 +7,12 @@
 
 DEFINE_LOG_CATEGORY_STATIC(LogTunaSweeperLedExpression, Log, All);
 
+namespace TunaSweeperLedExpression
+{
+	const TCHAR* DefaultLedMaterialPath = TEXT("/Game/Effects/M_LedExpression_VertexColorEmissive.M_LedExpression_VertexColorEmissive");
+	const TCHAR* LegacyLedMaterialPath = TEXT("/Game/Effects/M_LumberjackMeleeSwingArc.M_LumberjackMeleeSwingArc");
+}
+
 UTunaSweeperLedExpressionComponent::UTunaSweeperLedExpressionComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
@@ -19,7 +25,7 @@ UTunaSweeperLedExpressionComponent::UTunaSweeperLedExpressionComponent(const FOb
 	SetCastShadow(false);
 
 	LedMaterial = TSoftObjectPtr<UMaterialInterface>(
-		FSoftObjectPath(TEXT("/Game/Effects/M_LumberjackMeleeSwingArc.M_LumberjackMeleeSwingArc")));
+		FSoftObjectPath(TunaSweeperLedExpression::DefaultLedMaterialPath));
 	OffLedMaterial = TSoftObjectPtr<UMaterialInterface>(
 		FSoftObjectPath(TEXT("/Game/Prototype/M_Voxel_VertexColor.M_Voxel_VertexColor")));
 }
@@ -100,14 +106,28 @@ void UTunaSweeperLedExpressionComponent::TickComponent(
 #if WITH_EDITOR
 void UTunaSweeperLedExpressionComponent::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
+	RefreshEditorPreviewAfterPropertyChange(PropertyChangedEvent);
 	Super::PostEditChangeProperty(PropertyChangedEvent);
+}
 
+void UTunaSweeperLedExpressionComponent::PostEditChangeChainProperty(FPropertyChangedChainEvent& PropertyChangedEvent)
+{
+	RefreshEditorPreviewAfterPropertyChange(PropertyChangedEvent);
+	Super::PostEditChangeChainProperty(PropertyChangedEvent);
+}
+
+void UTunaSweeperLedExpressionComponent::RefreshEditorPreviewAfterPropertyChange(const FPropertyChangedEvent& PropertyChangedEvent)
+{
+	DemoExpressionIntervalSeconds = FMath::Max(0.1f, DemoExpressionIntervalSeconds);
 	ApplyLedMaterial();
 	RefreshExpressionPresets();
 	RebuildLedMesh();
 	SetExpressionByName(CurrentExpressionName.IsNone() ? DefaultExpressionName : CurrentExpressionName);
-	DemoExpressionIntervalSeconds = FMath::Max(0.1f, DemoExpressionIntervalSeconds);
 	RefreshDemoTickEnabled();
+
+	MarkRenderDynamicDataDirty();
+	MarkRenderStateDirty();
+	UpdateBounds();
 }
 #endif
 
@@ -190,6 +210,7 @@ void UTunaSweeperLedExpressionComponent::RebuildLedMesh()
 
 	const float HalfColumns = static_cast<float>(MatrixColumns - 1) * 0.5f;
 	const float HalfRows = static_cast<float>(MatrixRows - 1) * 0.5f;
+	const bool bDrawOffLeds = OffColor.A > KINDA_SMALL_NUMBER;
 
 	auto AddLedDisc = [this](
 		float CenterY,
@@ -256,7 +277,10 @@ void UTunaSweeperLedExpressionComponent::RebuildLedMesh()
 			const int32 LedIndex = Row * MatrixColumns + Column;
 			const float CenterY = (static_cast<float>(Column) - HalfColumns) * LedPitch;
 			const float CenterZ = (HalfRows - static_cast<float>(Row)) * LedPitch;
-			AddLedDisc(CenterY, CenterZ, OffColor, 0.0f, OffVertices, OffNormals, OffUVs, OffTangents, OffVertexColors, OffTriangles);
+			if (bDrawOffLeds)
+			{
+				AddLedDisc(CenterY, CenterZ, OffColor, 0.0f, OffVertices, OffNormals, OffUVs, OffTangents, OffVertexColors, OffTriangles);
+			}
 
 			if (LedStates.IsValidIndex(LedIndex) && LedStates[LedIndex] != 0)
 			{
@@ -266,15 +290,18 @@ void UTunaSweeperLedExpressionComponent::RebuildLedMesh()
 	}
 
 	ClearAllMeshSections();
-	CreateMeshSection_LinearColor(
-		0,
-		OffVertices,
-		OffTriangles,
-		OffNormals,
-		OffUVs,
-		OffVertexColors,
-		OffTangents,
-		false);
+	if (bDrawOffLeds)
+	{
+		CreateMeshSection_LinearColor(
+			0,
+			OffVertices,
+			OffTriangles,
+			OffNormals,
+			OffUVs,
+			OffVertexColors,
+			OffTangents,
+			false);
+	}
 	if (!ActiveVertices.IsEmpty())
 	{
 		CreateMeshSection_LinearColor(
@@ -615,6 +642,12 @@ void UTunaSweeperLedExpressionComponent::RefreshVertexColors()
 
 void UTunaSweeperLedExpressionComponent::ApplyLedMaterial()
 {
+	if (LedMaterial.ToSoftObjectPath().ToString().Equals(TunaSweeperLedExpression::LegacyLedMaterialPath, ESearchCase::IgnoreCase))
+	{
+		LedMaterial = TSoftObjectPtr<UMaterialInterface>(
+			FSoftObjectPath(TunaSweeperLedExpression::DefaultLedMaterialPath));
+	}
+
 	if (!OffLedMaterial.IsNull())
 	{
 		if (UMaterialInterface* LoadedOffMaterial = OffLedMaterial.LoadSynchronous())
