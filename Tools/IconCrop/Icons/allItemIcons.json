@@ -1,0 +1,470 @@
+[
+  {
+    "koreanName": "공구상자",
+    "englishName": "Tool Box",
+    "iconFilename": "toolbox.png",
+    "descriptionKo": "시설 수리와 제작에 필요한 기본 공구상자."
+  },
+  {
+    "koreanName": "절단공구",
+    "englishName": "Cutting Tool",
+    "iconFilename": "cuttingtool.png",
+    "descriptionKo": "잠긴 구조물이나 장애물을 절단하는 전동 공구."
+  },
+  {
+    "koreanName": "발전 코어",
+    "englishName": "Power Core",
+    "iconFilename": "powercore.png",
+    "descriptionKo": "시설 전력을 복구하는 핵심 동력 코어."
+  },
+  {
+    "koreanName": "변압기",
+    "englishName": "Transformer",
+    "iconFilename": "transformer.png",
+    "descriptionKo": "전력 설비를 안정적으로 연결하는 변압 장치."
+  },
+  {
+    "koreanName": "통신 모듈",
+    "englishName": "Communication Module",
+    "iconFilename": "communicationmodule.png",
+    "descriptionKo": "통신 장비를 복구할 때 필요한 핵심 모듈."
+  },
+  {
+    "koreanName": "안테나 부품",
+    "englishName": "Antenna Parts",
+    "iconFilename": "antennaparts.png",
+    "descriptionKo": "신호 수신 범위를 넓히는 안테나 구성품."
+  },
+  {
+    "koreanName": "위치 송신기",
+    "englishName": "Location Transmitter",
+    "iconFilename": "locationtransmitter.png",
+    "descriptionKo": "워프나 위치 표시에 쓰는 소형 송신기."
+  },
+  {
+    "koreanName": "보안키",
+    "englishName": "Security Key",
+    "iconFilename": "securitykey.png",
+    "descriptionKo": "보안이 걸린 문이나 장치를 여는 오래된 열쇠."
+  },
+  {
+    "koreanName": "게이트 카드",
+    "englishName": "Gate Card",
+    "iconFilename": "gatecard.png",
+    "descriptionKo": "특정 출입 게이트를 열 수 있는 인증 카드."
+  },
+  {
+    "koreanName": "보스 신호키",
+    "englishName": "Boss Signal Key",
+    "iconFilename": "bosssignalkey.png",
+    "descriptionKo": "보스 구역의 신호 장치를 활성화하는 키."
+  },
+  {
+    "koreanName": "중앙 제어 코어",
+    "englishName": "Central Control Core",
+    "iconFilename": "centralcontrolcore.png",
+    "descriptionKo": "시설 전체를 제어하는 핵심 코어 장치."
+  },
+  {
+    "koreanName": "생활설비 부품",
+    "englishName": "Living Facility Parts",
+    "iconFilename": "livingfacilityparts.png",
+    "descriptionKo": "생활 편의 시설을 복구하는 데 쓰는 부품 묶음."
+  },
+  {
+    "koreanName": "순환펌프",
+    "englishName": "Circulation Pump",
+    "iconFilename": "circulationpump.png",
+    "descriptionKo": "물과 자원을 순환시키는 소형 펌프."
+  },
+  {
+    "koreanName": "정수필터",
+    "englishName": "Water Filter",
+    "iconFilename": "waterfilter.png",
+    "descriptionKo": "오염된 물을 걸러내는 정수용 필터."
+  },
+  {
+    "koreanName": "설계도",
+    "englishName": "Blueprint",
+    "iconFilename": "blueprint.png",
+    "descriptionKo": "제작법과 구조 정보가 담긴 설계도 묶음."
+  },
+  {
+    "koreanName": "낡은 방탄판",
+    "englishName": "Old Armor Plate",
+    "iconFilename": "oldarmorplate.png",
+    "descriptionKo": "오래됐지만 방호 성능이 남아 있는 장갑판."
+  },
+  {
+    "koreanName": "세라믹 장갑재",
+    "englishName": "Ceramic Armor",
+    "iconFilename": "ceramicarmor.png",
+    "descriptionKo": "방어구 강화에 쓰이는 세라믹 재료."
+  },
+  {
+    "koreanName": "전술 장갑판",
+    "englishName": "Tactical Plate",
+    "iconFilename": "tacticalplate.png",
+    "descriptionKo": "전투용 방어구의 핵심이 되는 장갑판."
+  },
+  {
+    "koreanName": "방탄섬유",
+    "englishName": "Ballistic Fiber",
+    "iconFilename": "ballisticfiber.png",
+    "descriptionKo": "방어구와 장비 보강에 쓰이는 질긴 섬유 묶음."
+  },
+  {
+    "koreanName": "고무패드",
+    "englishName": "Rubber Pad",
+    "iconFilename": "rubberpad.png",
+    "descriptionKo": "충격 완화와 미끄럼 방지에 쓰는 고무 패드."
+  },
+  {
+    "koreanName": "정밀부품",
+    "englishName": "Precision Parts",
+    "iconFilename": "precisionparts.png",
+    "descriptionKo": "기계 장비를 세밀하게 조정하는 정밀 부품."
+  },
+  {
+    "koreanName": "탄창 부품",
+    "englishName": "Magazine Parts",
+    "iconFilename": "magazineparts.png",
+    "descriptionKo": "탄창 개조와 수리에 쓰는 부품."
+  },
+  {
+    "koreanName": "스프링",
+    "englishName": "Spring",
+    "iconFilename": "spring.png",
+    "descriptionKo": "무기와 장비 내부에 들어가는 탄성 부품."
+  },
+  {
+    "koreanName": "필터",
+    "englishName": "Filter Cartridge",
+    "iconFilename": "filtercartridge.png",
+    "descriptionKo": "장비 내부를 정화하거나 걸러내는 필터 부품."
+  },
+  {
+    "koreanName": "파이프폭탄",
+    "englishName": "Pipe Bomb",
+    "iconFilename": "pipebomb.png",
+    "descriptionKo": "간단한 재료로 만든 폭발성 투척 장비."
+  },
+  {
+    "koreanName": "탄약",
+    "englishName": "Ammunition",
+    "iconFilename": "ammunition.png",
+    "descriptionKo": "전투에 사용하는 기본 탄약 묶음."
+  },
+  {
+    "koreanName": "보스 소재",
+    "englishName": "Boss Crystal",
+    "iconFilename": "bosscrystal.png",
+    "descriptionKo": "강한 적에게서 얻는 희귀 강화 소재."
+  },
+  {
+    "koreanName": "붕대 뭉치",
+    "englishName": "Rolled Bandage",
+    "iconFilename": "rolledbandage.png",
+    "descriptionKo": "응급 처치에 쓰는 붕대 뭉치."
+  },
+  {
+    "koreanName": "회복키트",
+    "englishName": "Recovery Kit",
+    "iconFilename": "recoverykit.png",
+    "descriptionKo": "전투 후 상태를 정비하는 회복용 키트."
+  },
+  {
+    "koreanName": "무기 개조킷",
+    "englishName": "Weapon Mod Kit",
+    "iconFilename": "weaponmodkit.png",
+    "descriptionKo": "무기 부착물과 개조 도구가 들어 있는 키트."
+  },
+  {
+    "koreanName": "폐철",
+    "englishName": "Scrap Metal",
+    "iconFilename": "scrapmetal.png",
+    "descriptionKo": "여러 제작과 수리에 폭넓게 쓰이는 금속 고철."
+  },
+  {
+    "koreanName": "나사",
+    "englishName": "Screws",
+    "iconFilename": "screws.png",
+    "descriptionKo": "부품을 단단히 고정하는 기본 체결 재료."
+  },
+  {
+    "koreanName": "전선",
+    "englishName": "Electric Wire",
+    "iconFilename": "electricwire.png",
+    "descriptionKo": "전기 장비와 회로 연결에 쓰이는 전선."
+  },
+  {
+    "koreanName": "퓨즈",
+    "englishName": "Fuse",
+    "iconFilename": "fuse.png",
+    "descriptionKo": "전력 장치의 과부하를 막아 주는 퓨즈."
+  },
+  {
+    "koreanName": "배터리",
+    "englishName": "Battery",
+    "iconFilename": "battery.png",
+    "descriptionKo": "휴대 장비와 소형 설비에 전력을 공급하는 배터리."
+  },
+  {
+    "koreanName": "회로기판",
+    "englishName": "Circuit Board",
+    "iconFilename": "circuitboard.png",
+    "descriptionKo": "전자 장비의 핵심이 되는 회로 기판."
+  },
+  {
+    "koreanName": "파이프",
+    "englishName": "Metal Pipe",
+    "iconFilename": "metalpipe.png",
+    "descriptionKo": "제작 재료와 구조 보강에 쓰이는 금속 파이프."
+  },
+  {
+    "koreanName": "윤활유",
+    "englishName": "Lubricant Oil",
+    "iconFilename": "lubricantoil.png",
+    "descriptionKo": "기계 부품의 마찰을 줄여 주는 윤활유."
+  },
+  {
+    "koreanName": "천조각",
+    "englishName": "Cloth Scrap",
+    "iconFilename": "clothscrap.png",
+    "descriptionKo": "붕대나 장비 보수에 쓰는 낡은 천 조각."
+  },
+  {
+    "koreanName": "접착제",
+    "englishName": "Adhesive",
+    "iconFilename": "adhesive.png",
+    "descriptionKo": "부품과 재료를 단단히 붙이는 접착제."
+  },
+  {
+    "koreanName": "화약",
+    "englishName": "Gunpowder",
+    "iconFilename": "gunpowder.png",
+    "descriptionKo": "폭발물과 탄약 제작에 필요한 화약."
+  },
+  {
+    "koreanName": "테이프",
+    "englishName": "Tape",
+    "iconFilename": "tape.png",
+    "descriptionKo": "응급 수리와 고정 작업에 유용한 테이프."
+  },
+  {
+    "koreanName": "캔참치",
+    "englishName": "Tuna Can",
+    "iconFilename": "tunacan.png",
+    "descriptionKo": "간편하게 먹을 수 있는 보존 식량용 참치 캔."
+  },
+  {
+    "koreanName": "물",
+    "englishName": "Water Bottle",
+    "iconFilename": "waterbottle.png",
+    "descriptionKo": "갈증을 해소하고 상태를 회복시키는 물병."
+  },
+  {
+    "koreanName": "식량 봉투",
+    "englishName": "Food Pack",
+    "iconFilename": "foodpack.png",
+    "descriptionKo": "간단한 식사를 대신할 수 있는 식량 팩."
+  },
+  {
+    "koreanName": "골판지 상자",
+    "englishName": "Cardboard Box",
+    "iconFilename": "cardboardbox.png",
+    "descriptionKo": "보관과 운반에 사용하는 기본 상자."
+  },
+  {
+    "koreanName": "참치캔",
+    "englishName": "Canned Tuna",
+    "iconFilename": "cannedtuna.png",
+    "descriptionKo": "든든하게 먹을 수 있는 참치 통조림."
+  },
+  {
+    "koreanName": "즉석밥",
+    "englishName": "Instant Rice",
+    "iconFilename": "instantrice.png",
+    "descriptionKo": "빠르게 한 끼를 해결할 수 있는 즉석밥."
+  },
+  {
+    "koreanName": "통조림 스튜",
+    "englishName": "Canned Stew",
+    "iconFilename": "cannedstew.png",
+    "descriptionKo": "따뜻한 식사 느낌을 주는 스튜 통조림."
+  },
+  {
+    "koreanName": "컵수프",
+    "englishName": "Cup Soup",
+    "iconFilename": "cupsoup.png",
+    "descriptionKo": "간단히 데워 먹는 따뜻한 컵수프."
+  },
+  {
+    "koreanName": "생수병",
+    "englishName": "Bottled Water",
+    "iconFilename": "bottledwater.png",
+    "descriptionKo": "기본 수분 보충에 적합한 생수병."
+  },
+  {
+    "koreanName": "우유팩",
+    "englishName": "Milk Carton",
+    "iconFilename": "milkcarton.png",
+    "descriptionKo": "영양 보충에 좋은 우유 팩."
+  },
+  {
+    "koreanName": "에너지 드링크",
+    "englishName": "Energy Drink",
+    "iconFilename": "energydrink.png",
+    "descriptionKo": "기운을 빠르게 끌어올려 주는 에너지 음료."
+  },
+  {
+    "koreanName": "주스팩",
+    "englishName": "Juice Box",
+    "iconFilename": "juicebox.png",
+    "descriptionKo": "달콤하게 마실 수 있는 과일 주스 팩."
+  },
+  {
+    "koreanName": "감자",
+    "englishName": "Potato",
+    "iconFilename": "potato.png",
+    "descriptionKo": "여러 요리에 활용할 수 있는 기본 식재료."
+  },
+  {
+    "koreanName": "당근",
+    "englishName": "Carrot",
+    "iconFilename": "carrot.png",
+    "descriptionKo": "아삭한 식감의 대표적인 채소 재료."
+  },
+  {
+    "koreanName": "버섯",
+    "englishName": "Mushroom",
+    "iconFilename": "mushroom.png",
+    "descriptionKo": "향과 식감을 더해 주는 식재료."
+  },
+  {
+    "koreanName": "달걀",
+    "englishName": "Egg",
+    "iconFilename": "egg.png",
+    "descriptionKo": "다양한 조리에 쓰이는 기본 식재료."
+  },
+  {
+    "koreanName": "초코바",
+    "englishName": "Chocolate Bar",
+    "iconFilename": "chocolatebar.png",
+    "descriptionKo": "달콤하게 에너지를 보충하는 간식."
+  },
+  {
+    "koreanName": "크래커",
+    "englishName": "Crackers",
+    "iconFilename": "crackers.png",
+    "descriptionKo": "가볍게 먹기 좋은 바삭한 간식."
+  },
+  {
+    "koreanName": "사탕봉지",
+    "englishName": "Candy Bag",
+    "iconFilename": "candybag.png",
+    "descriptionKo": "알록달록한 사탕이 담긴 작은 간식 봉지."
+  },
+  {
+    "koreanName": "푸딩",
+    "englishName": "Pudding",
+    "iconFilename": "pudding.png",
+    "descriptionKo": "부드럽고 달콤한 디저트 간식."
+  },
+  {
+    "koreanName": "통증 완화제",
+    "englishName": "Pain Reliever",
+    "iconFilename": "painreliever.png",
+    "descriptionKo": "통증을 줄여 주는 기본 의약품."
+  },
+  {
+    "koreanName": "감염 억제제",
+    "englishName": "Infection Suppressant",
+    "iconFilename": "infectionsuppressant.png",
+    "descriptionKo": "상처 감염 위험을 낮추는 약품."
+  },
+  {
+    "koreanName": "열내림약",
+    "englishName": "Fever Reducer",
+    "iconFilename": "feverreducer.png",
+    "descriptionKo": "체온을 안정시키는 해열용 약."
+  },
+  {
+    "koreanName": "정화 앰플",
+    "englishName": "Purifying Ampoule",
+    "iconFilename": "purifyingampoule.png",
+    "descriptionKo": "오염과 독성 상태를 정화하는 앰플."
+  },
+  {
+    "koreanName": "붕대",
+    "englishName": "Bandage",
+    "iconFilename": "bandage.png",
+    "descriptionKo": "상처를 감싸 출혈을 줄이는 붕대."
+  },
+  {
+    "koreanName": "살균 스프레이",
+    "englishName": "Sterilizing Spray",
+    "iconFilename": "sterilizingspray.png",
+    "descriptionKo": "상처 부위를 빠르게 살균하는 스프레이."
+  },
+  {
+    "koreanName": "응급키트",
+    "englishName": "First Aid Kit",
+    "iconFilename": "firstaidkit.png",
+    "descriptionKo": "기본 치료 도구가 들어 있는 응급 세트."
+  },
+  {
+    "koreanName": "응급 패드",
+    "englishName": "Emergency Pad",
+    "iconFilename": "emergencypad.png",
+    "descriptionKo": "즉시 붙여 상처를 보호하는 의료 패드."
+  },
+  {
+    "koreanName": "회복젤",
+    "englishName": "Recovery Gel",
+    "iconFilename": "recoverygel.png",
+    "descriptionKo": "빠른 회복을 돕는 젤 타입 보조제."
+  },
+  {
+    "koreanName": "영양팩",
+    "englishName": "Nutrition Pack",
+    "iconFilename": "nutritionpack.png",
+    "descriptionKo": "영양을 보충해 컨디션을 회복시키는 팩."
+  },
+  {
+    "koreanName": "회복 수액",
+    "englishName": "Recovery IV",
+    "iconFilename": "recoveryiv.png",
+    "descriptionKo": "수분과 영양을 공급하는 회복용 수액."
+  },
+  {
+    "koreanName": "진정 캡슐",
+    "englishName": "Calming Capsule",
+    "iconFilename": "calmingcapsule.png",
+    "descriptionKo": "긴장을 가라앉히고 상태를 안정시키는 캡슐."
+  },
+  {
+    "koreanName": "천가방 원단",
+    "englishName": "Bag Fabric",
+    "iconFilename": "bagfabric.png",
+    "descriptionKo": "가방과 수납 장비를 확장할 때 쓰는 튼튼한 원단."
+  },
+  {
+    "koreanName": "지퍼 부품",
+    "englishName": "Zipper Parts",
+    "iconFilename": "zipperparts.png",
+    "descriptionKo": "수납 장비 제작과 보수에 필요한 지퍼 부품."
+  },
+  {
+    "koreanName": "수납 프레임",
+    "englishName": "Storage Frame",
+    "iconFilename": "storageframe.png",
+    "descriptionKo": "가방이나 보관함의 구조를 확장하는 프레임."
+  },
+  {
+    "koreanName": "압축팩",
+    "englishName": "Compression Pack",
+    "iconFilename": "compressionpack.png",
+    "descriptionKo": "공간을 효율적으로 쓰기 위한 압축 보관 팩."
+  }
+]

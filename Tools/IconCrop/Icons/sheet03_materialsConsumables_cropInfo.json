@@ -1,0 +1,454 @@
+{
+  "sheetImageFilename": "sheet03_materialsConsumables_transparent.png",
+  "sheetSize": {
+    "width": 1254,
+    "height": 1254
+  },
+  "grid": {
+    "columns": 4,
+    "rows": 4,
+    "cellWidth": 313,
+    "cellHeight": 313,
+    "cellInset": 2
+  },
+  "cropMethod": "cell_area_from_transparent_sheet",
+  "outputIconCanvas": {
+    "width": 512,
+    "height": 512,
+    "margin": 16
+  },
+  "icons": [
+    {
+      "index": 0,
+      "row": 0,
+      "column": 0,
+      "iconFilename": "scrapmetal.png",
+      "koreanName": "\uD3D0\uCCA0",
+      "englishName": "Scrap Metal",
+      "sourceSheetFilename": "sheet03_materialsConsumables_transparent.png",
+      "sourceCropRect": {
+        "x": 23.333333333333332,
+        "y": 26.666666666666668,
+        "width": 283.6666666666667,
+        "height": 309
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.5533980582524272,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    },
+    {
+      "index": 1,
+      "row": 0,
+      "column": 1,
+      "iconFilename": "screws.png",
+      "koreanName": "\uB098\uC0AC",
+      "englishName": "Screws",
+      "sourceSheetFilename": "sheet03_materialsConsumables_transparent.png",
+      "sourceCropRect": {
+        "x": 315,
+        "y": 26.666666666666668,
+        "width": 312.3333333333333,
+        "height": 309
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.536819637139808,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    },
+    {
+      "index": 2,
+      "row": 0,
+      "column": 2,
+      "iconFilename": "electricwire.png",
+      "koreanName": "\uC804\uC120",
+      "englishName": "Electric Wire",
+      "sourceSheetFilename": "sheet03_materialsConsumables_transparent.png",
+      "sourceCropRect": {
+        "x": 630,
+        "y": 26.666666666666668,
+        "width": 287,
+        "height": 309
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.5533980582524272,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    },
+    {
+      "index": 3,
+      "row": 0,
+      "column": 3,
+      "iconFilename": "fuse.png",
+      "koreanName": "\uD4E8\uC988",
+      "englishName": "Fuse",
+      "sourceSheetFilename": "sheet03_materialsConsumables_transparent.png",
+      "sourceCropRect": {
+        "x": 905.6666666666666,
+        "y": 26.666666666666668,
+        "width": 310.3333333333333,
+        "height": 309
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.5467239527389904,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    },
+    {
+      "index": 4,
+      "row": 1,
+      "column": 0,
+      "iconFilename": "battery.png",
+      "koreanName": "\uBC30\uD130\uB9AC",
+      "englishName": "Battery",
+      "sourceSheetFilename": "sheet03_materialsConsumables_transparent.png",
+      "sourceCropRect": {
+        "x": 23.333333333333332,
+        "y": 314.3333333333333,
+        "width": 283.6666666666667,
+        "height": 315.6666666666667
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.5205913410770855,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    },
+    {
+      "index": 5,
+      "row": 1,
+      "column": 1,
+      "iconFilename": "circuitboard.png",
+      "koreanName": "\uD68C\uB85C\uAE30\uD310",
+      "englishName": "Circuit Board",
+      "sourceSheetFilename": "sheet03_materialsConsumables_transparent.png",
+      "sourceCropRect": {
+        "x": 315,
+        "y": 314.3333333333333,
+        "width": 312.3333333333333,
+        "height": 315.6666666666667
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.5205913410770855,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    },
+    {
+      "index": 6,
+      "row": 1,
+      "column": 2,
+      "iconFilename": "metalpipe.png",
+      "koreanName": "\uD30C\uC774\uD504",
+      "englishName": "Metal Pipe",
+      "sourceSheetFilename": "sheet03_materialsConsumables_transparent.png",
+      "sourceCropRect": {
+        "x": 630,
+        "y": 314.3333333333333,
+        "width": 287,
+        "height": 315.6666666666667
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.5205913410770855,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    },
+    {
+      "index": 7,
+      "row": 1,
+      "column": 3,
+      "iconFilename": "lubricantoil.png",
+      "koreanName": "\uC724\uD65C\uC720",
+      "englishName": "Lubricant Oil",
+      "sourceSheetFilename": "sheet03_materialsConsumables_transparent.png",
+      "sourceCropRect": {
+        "x": 924.3333333333333,
+        "y": 324.3333333333333,
+        "width": 310.3333333333333,
+        "height": 315.6666666666667
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.5205913410770855,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    },
+    {
+      "index": 8,
+      "row": 2,
+      "column": 0,
+      "iconFilename": "clothscrap.png",
+      "koreanName": "\uCC9C\uC870\uAC01",
+      "englishName": "Cloth Scrap",
+      "sourceSheetFilename": "sheet03_materialsConsumables_transparent.png",
+      "sourceCropRect": {
+        "x": 23.333333333333332,
+        "y": 624,
+        "width": 283.6666666666667,
+        "height": 273.6666666666667
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.6921269095182137,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    },
+    {
+      "index": 9,
+      "row": 2,
+      "column": 1,
+      "iconFilename": "adhesive.png",
+      "koreanName": "\uC811\uCC29\uC81C",
+      "englishName": "Adhesive",
+      "sourceSheetFilename": "sheet03_materialsConsumables_transparent.png",
+      "sourceCropRect": {
+        "x": 315,
+        "y": 624,
+        "width": 312.3333333333333,
+        "height": 273.6666666666667
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.536819637139808,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    },
+    {
+      "index": 10,
+      "row": 2,
+      "column": 2,
+      "iconFilename": "gunpowder.png",
+      "koreanName": "\uD654\uC57D",
+      "englishName": "Gunpowder",
+      "sourceSheetFilename": "sheet03_materialsConsumables_transparent.png",
+      "sourceCropRect": {
+        "x": 630,
+        "y": 624,
+        "width": 287,
+        "height": 273.6666666666667
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.6724738675958188,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    },
+    {
+      "index": 11,
+      "row": 2,
+      "column": 3,
+      "iconFilename": "tape.png",
+      "koreanName": "\uD14C\uC774\uD504",
+      "englishName": "Tape",
+      "sourceSheetFilename": "sheet03_materialsConsumables_transparent.png",
+      "sourceCropRect": {
+        "x": 905.6666666666666,
+        "y": 624,
+        "width": 310.3333333333333,
+        "height": 273.6666666666667
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.5467239527389904,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    },
+    {
+      "index": 12,
+      "row": 3,
+      "column": 0,
+      "iconFilename": "tunacan.png",
+      "koreanName": "\uCE94\uCC38\uCE58",
+      "englishName": "Tuna Can",
+      "sourceSheetFilename": "sheet03_materialsConsumables_transparent.png",
+      "sourceCropRect": {
+        "x": 23.333333333333332,
+        "y": 910.3333333333334,
+        "width": 283.6666666666667,
+        "height": 309
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.5533980582524272,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    },
+    {
+      "index": 13,
+      "row": 3,
+      "column": 1,
+      "iconFilename": "waterbottle.png",
+      "koreanName": "\uBB3C",
+      "englishName": "Water Bottle",
+      "sourceSheetFilename": "sheet03_materialsConsumables_transparent.png",
+      "sourceCropRect": {
+        "x": 310.3333333333333,
+        "y": 899,
+        "width": 312.3333333333333,
+        "height": 309
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.536819637139808,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    },
+    {
+      "index": 14,
+      "row": 3,
+      "column": 2,
+      "iconFilename": "foodpack.png",
+      "koreanName": "\uC2DD\uB7C9 \uBD09\uD22C",
+      "englishName": "Food Pack",
+      "sourceSheetFilename": "sheet03_materialsConsumables_transparent.png",
+      "sourceCropRect": {
+        "x": 608.6666666666666,
+        "y": 913,
+        "width": 287,
+        "height": 309
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.5533980582524272,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    },
+    {
+      "index": 15,
+      "row": 3,
+      "column": 3,
+      "iconFilename": "cardboardbox.png",
+      "koreanName": "\uACE8\uD310\uC9C0 \uC0C1\uC790",
+      "englishName": "Cardboard Box",
+      "sourceSheetFilename": "sheet03_materialsConsumables_transparent.png",
+      "sourceCropRect": {
+        "x": 905.6666666666666,
+        "y": 910.3333333333334,
+        "width": 310.3333333333333,
+        "height": 309
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.5467239527389904,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    }
+  ]
+}

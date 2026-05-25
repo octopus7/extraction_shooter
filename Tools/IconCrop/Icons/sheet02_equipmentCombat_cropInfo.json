@@ -1,0 +1,427 @@
+{
+  "sheetImageFilename": "sheet02_equipmentCombat_transparent.png",
+  "sheetSize": {
+    "width": 1254,
+    "height": 1254
+  },
+  "grid": {
+    "columns": 4,
+    "rows": 4,
+    "cellWidth": 313,
+    "cellHeight": 313,
+    "cellInset": 2
+  },
+  "cropMethod": "cell_area_from_transparent_sheet",
+  "outputIconCanvas": {
+    "width": 512,
+    "height": 512,
+    "margin": 16
+  },
+  "icons": [
+    {
+      "index": 0,
+      "row": 0,
+      "column": 0,
+      "iconFilename": "oldarmorplate.png",
+      "koreanName": "\uB0A1\uC740 \uBC29\uD0C4\uD310",
+      "englishName": "Old Armor Plate",
+      "sourceSheetFilename": "sheet02_equipmentCombat_transparent.png",
+      "sourceCropRect": {
+        "x": 18,
+        "y": 19.333333333333332,
+        "width": 293.6666666666667,
+        "height": 309
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.5533980582524272,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    },
+    {
+      "index": 1,
+      "row": 0,
+      "column": 1,
+      "iconFilename": "ceramicarmor.png",
+      "koreanName": "\uC138\uB77C\uBBF9 \uC7A5\uAC11\uC7AC",
+      "englishName": "Ceramic Armor",
+      "sourceSheetFilename": "sheet02_equipmentCombat_transparent.png",
+      "sourceCropRect": {
+        "x": 315,
+        "y": 19.333333333333332,
+        "width": 309,
+        "height": 309
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.5533980582524272,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    },
+    {
+      "index": 2,
+      "row": 0,
+      "column": 2,
+      "iconFilename": "tacticalplate.png",
+      "koreanName": "\uC804\uC220 \uC7A5\uAC11\uD310",
+      "englishName": "Tactical Plate",
+      "sourceSheetFilename": "sheet02_equipmentCombat_transparent.png",
+      "sourceCropRect": {
+        "x": 638.67,
+        "y": 22,
+        "width": 288.33,
+        "height": 309
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.5533980582524272,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    },
+    {
+      "index": 3,
+      "row": 0,
+      "column": 3,
+      "iconFilename": "ballisticfiber.png",
+      "koreanName": "\uBC29\uD0C4\uC12C\uC720",
+      "englishName": "Ballistic Fiber",
+      "sourceSheetFilename": "sheet02_equipmentCombat_transparent.png",
+      "sourceCropRect": {
+        "x": 923.6666666666666,
+        "y": 19.333333333333332,
+        "width": 309,
+        "height": 309
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.5533980582524272,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    },
+    {
+      "index": 4,
+      "row": 1,
+      "column": 0,
+      "iconFilename": "rubberpad.png",
+      "koreanName": "\uACE0\uBB34\uD328\uB4DC",
+      "englishName": "Rubber Pad",
+      "sourceSheetFilename": "sheet02_equipmentCombat_transparent.png",
+      "sourceCropRect": {
+        "x": 18,
+        "y": 313,
+        "width": 293.6666666666667,
+        "height": 309
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.5533980582524272,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    },
+    {
+      "index": 5,
+      "row": 1,
+      "column": 1,
+      "iconFilename": "precisionparts.png",
+      "koreanName": "\uC815\uBC00\uBD80\uD488",
+      "englishName": "Precision Parts",
+      "sourceSheetFilename": "sheet02_equipmentCombat_transparent.png",
+      "sourceCropRect": {
+        "x": 315,
+        "y": 313,
+        "width": 309,
+        "height": 309
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.5533980582524272,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    },
+    {
+      "index": 6,
+      "row": 1,
+      "column": 2,
+      "iconFilename": "magazineparts.png",
+      "koreanName": "\uD0C4\uCC3D \uBD80\uD488",
+      "englishName": "Magazine Parts",
+      "sourceSheetFilename": "sheet02_equipmentCombat_transparent.png",
+      "sourceCropRect": {
+        "x": 606.67,
+        "y": 313,
+        "width": 288.33,
+        "height": 309
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.5533980582524272,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    },
+    {
+      "index": 7,
+      "row": 1,
+      "column": 3,
+      "iconFilename": "spring.png",
+      "koreanName": "\uC2A4\uD504\uB9C1",
+      "englishName": "Spring",
+      "sourceSheetFilename": "sheet02_equipmentCombat_transparent.png",
+      "sourceCropRect": {
+        "x": 923.6666666666666,
+        "y": 313,
+        "width": 309,
+        "height": 309
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.5533980582524272,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    },
+    {
+      "index": 8,
+      "row": 2,
+      "column": 0,
+      "iconFilename": "filtercartridge.png",
+      "koreanName": "\uD544\uD130",
+      "englishName": "Filter Cartridge",
+      "sourceSheetFilename": "sheet02_equipmentCombat_transparent.png",
+      "sourceCropRect": {
+        "x": 18,
+        "y": 607.3333333333334,
+        "width": 293.6666666666667,
+        "height": 310.3333333333333
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.5467239527389904,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    },
+    {
+      "index": 9,
+      "row": 2,
+      "column": 1,
+      "iconFilename": "pipebomb.png",
+      "koreanName": "\uD30C\uC774\uD504\uD3ED\uD0C4",
+      "englishName": "Pipe Bomb",
+      "sourceSheetFilename": "sheet02_equipmentCombat_transparent.png",
+      "sourceCropRect": {
+        "x": 315,
+        "y": 607.3333333333334,
+        "width": 309,
+        "height": 310.3333333333333
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.5467239527389904,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    },
+    {
+      "index": 10,
+      "row": 2,
+      "column": 2,
+      "iconFilename": "ammunition.png",
+      "koreanName": "\uD0C4\uC57D",
+      "englishName": "Ammunition",
+      "sourceSheetFilename": "sheet02_equipmentCombat_transparent.png",
+      "sourceCropRect": {
+        "x": 606.67,
+        "y": 607.3333333333334,
+        "width": 288.33,
+        "height": 310.3333333333333
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.5467239527389904,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    },
+    {
+      "index": 11,
+      "row": 2,
+      "column": 3,
+      "iconFilename": "bosscrystal.png",
+      "koreanName": "\uBCF4\uC2A4 \uC18C\uC7AC",
+      "englishName": "Boss Crystal",
+      "sourceSheetFilename": "sheet02_equipmentCombat_transparent.png",
+      "sourceCropRect": {
+        "x": 923.6666666666666,
+        "y": 607.3333333333334,
+        "width": 309,
+        "height": 310.3333333333333
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.5467239527389904,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    },
+    {
+      "index": 12,
+      "row": 3,
+      "column": 0,
+      "iconFilename": "rolledbandage.png",
+      "koreanName": "\uBD95\uB300 \uBB49\uCE58",
+      "englishName": "Rolled Bandage",
+      "sourceSheetFilename": "sheet02_equipmentCombat_transparent.png",
+      "sourceCropRect": {
+        "x": 18,
+        "y": 897,
+        "width": 293.6666666666667,
+        "height": 309
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.5533980582524272,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    },
+    {
+      "index": 13,
+      "row": 3,
+      "column": 1,
+      "iconFilename": "recoverykit.png",
+      "koreanName": "\uD68C\uBCF5\uD0A4\uD2B8",
+      "englishName": "Recovery Kit",
+      "sourceSheetFilename": "sheet02_equipmentCombat_transparent.png",
+      "sourceCropRect": {
+        "x": 298.3333333333333,
+        "y": 903.6666666666666,
+        "width": 309,
+        "height": 309
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.5533980582524272,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    },
+    {
+      "index": 14,
+      "row": 3,
+      "column": 2,
+      "iconFilename": "weaponmodkit.png",
+      "koreanName": "\uBB34\uAE30 \uAC1C\uC870\uD0B7",
+      "englishName": "Weapon Mod Kit",
+      "sourceSheetFilename": "sheet02_equipmentCombat_transparent.png",
+      "sourceCropRect": {
+        "x": 601.3366666666666,
+        "y": 901,
+        "width": 298.99666666666667,
+        "height": 306.3333333333333
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.5669205658324266,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    }
+  ]
+}

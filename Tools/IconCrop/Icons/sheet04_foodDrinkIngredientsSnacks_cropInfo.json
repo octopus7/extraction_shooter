@@ -1,0 +1,454 @@
+{
+  "sheetImageFilename": "sheet04_foodDrinkIngredientsSnacks_transparent.png",
+  "sheetSize": {
+    "width": 1254,
+    "height": 1254
+  },
+  "grid": {
+    "columns": 4,
+    "rows": 4,
+    "cellWidth": 313,
+    "cellHeight": 313,
+    "cellInset": 2
+  },
+  "cropMethod": "cell_area_from_transparent_sheet",
+  "outputIconCanvas": {
+    "width": 512,
+    "height": 512,
+    "margin": 16
+  },
+  "icons": [
+    {
+      "index": 0,
+      "row": 0,
+      "column": 0,
+      "iconFilename": "cannedtuna.png",
+      "koreanName": "\uCC38\uCE58\uCE94",
+      "englishName": "Canned Tuna",
+      "sourceSheetFilename": "sheet04_foodDrinkIngredientsSnacks_transparent.png",
+      "sourceCropRect": {
+        "x": 8.666666666666668,
+        "y": 31.333333333333332,
+        "width": 309,
+        "height": 297
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.5533980582524272,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    },
+    {
+      "index": 1,
+      "row": 0,
+      "column": 1,
+      "iconFilename": "instantrice.png",
+      "koreanName": "\uC989\uC11D\uBC25",
+      "englishName": "Instant Rice",
+      "sourceSheetFilename": "sheet04_foodDrinkIngredientsSnacks_transparent.png",
+      "sourceCropRect": {
+        "x": 332.3333333333333,
+        "y": 31.333333333333332,
+        "width": 299,
+        "height": 297
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.605351170568562,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    },
+    {
+      "index": 2,
+      "row": 0,
+      "column": 2,
+      "iconFilename": "cannedstew.png",
+      "koreanName": "\uD1B5\uC870\uB9BC \uC2A4\uD29C",
+      "englishName": "Canned Stew",
+      "sourceSheetFilename": "sheet04_foodDrinkIngredientsSnacks_transparent.png",
+      "sourceCropRect": {
+        "x": 619.3333333333334,
+        "y": 31.333333333333332,
+        "width": 303.6666666666667,
+        "height": 297
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.5806805708013172,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    },
+    {
+      "index": 3,
+      "row": 0,
+      "column": 3,
+      "iconFilename": "cupsoup.png",
+      "koreanName": "\uCEF5\uC218\uD504",
+      "englishName": "Cup Soup",
+      "sourceSheetFilename": "sheet04_foodDrinkIngredientsSnacks_transparent.png",
+      "sourceCropRect": {
+        "x": 939.6666666666666,
+        "y": 31.333333333333332,
+        "width": 272.33333333333337,
+        "height": 297
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.6161616161616161,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    },
+    {
+      "index": 4,
+      "row": 1,
+      "column": 0,
+      "iconFilename": "bottledwater.png",
+      "koreanName": "\uC0DD\uC218\uBCD1",
+      "englishName": "Bottled Water",
+      "sourceSheetFilename": "sheet04_foodDrinkIngredientsSnacks_transparent.png",
+      "sourceCropRect": {
+        "x": 8.666666666666668,
+        "y": 338.33333333333337,
+        "width": 309,
+        "height": 329.6666666666667
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.4560161779575327,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    },
+    {
+      "index": 5,
+      "row": 1,
+      "column": 1,
+      "iconFilename": "milkcarton.png",
+      "koreanName": "\uC6B0\uC720\uD329",
+      "englishName": "Milk Carton",
+      "sourceSheetFilename": "sheet04_foodDrinkIngredientsSnacks_transparent.png",
+      "sourceCropRect": {
+        "x": 332.3333333333333,
+        "y": 338.33333333333337,
+        "width": 299,
+        "height": 329.6666666666667
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.4560161779575327,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    },
+    {
+      "index": 6,
+      "row": 1,
+      "column": 2,
+      "iconFilename": "energydrink.png",
+      "koreanName": "\uC5D0\uB108\uC9C0 \uB4DC\uB9C1\uD06C",
+      "englishName": "Energy Drink",
+      "sourceSheetFilename": "sheet04_foodDrinkIngredientsSnacks_transparent.png",
+      "sourceCropRect": {
+        "x": 619.3333333333334,
+        "y": 338.33333333333337,
+        "width": 303.6666666666667,
+        "height": 329.6666666666667
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.4560161779575327,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    },
+    {
+      "index": 7,
+      "row": 1,
+      "column": 3,
+      "iconFilename": "juicebox.png",
+      "koreanName": "\uC8FC\uC2A4\uD329",
+      "englishName": "Juice Box",
+      "sourceSheetFilename": "sheet04_foodDrinkIngredientsSnacks_transparent.png",
+      "sourceCropRect": {
+        "x": 939.6666666666666,
+        "y": 338.33333333333337,
+        "width": 272.33333333333337,
+        "height": 329.6666666666667
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.4560161779575327,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    },
+    {
+      "index": 8,
+      "row": 2,
+      "column": 0,
+      "iconFilename": "potato.png",
+      "koreanName": "\uAC10\uC790",
+      "englishName": "Potato",
+      "sourceSheetFilename": "sheet04_foodDrinkIngredientsSnacks_transparent.png",
+      "sourceCropRect": {
+        "x": 8.666666666666668,
+        "y": 665.3333333333334,
+        "width": 309,
+        "height": 266.3333333333333
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.5533980582524272,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    },
+    {
+      "index": 9,
+      "row": 2,
+      "column": 1,
+      "iconFilename": "carrot.png",
+      "koreanName": "\uB2F9\uADFC",
+      "englishName": "Carrot",
+      "sourceSheetFilename": "sheet04_foodDrinkIngredientsSnacks_transparent.png",
+      "sourceCropRect": {
+        "x": 332.3333333333333,
+        "y": 665.3333333333334,
+        "width": 299,
+        "height": 266.3333333333333
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.605351170568562,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    },
+    {
+      "index": 10,
+      "row": 2,
+      "column": 2,
+      "iconFilename": "mushroom.png",
+      "koreanName": "\uBC84\uC12F",
+      "englishName": "Mushroom",
+      "sourceSheetFilename": "sheet04_foodDrinkIngredientsSnacks_transparent.png",
+      "sourceCropRect": {
+        "x": 619.3333333333334,
+        "y": 665.3333333333334,
+        "width": 303.6666666666667,
+        "height": 266.3333333333333
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.5806805708013172,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    },
+    {
+      "index": 11,
+      "row": 2,
+      "column": 3,
+      "iconFilename": "egg.png",
+      "koreanName": "\uB2EC\uAC40",
+      "englishName": "Egg",
+      "sourceSheetFilename": "sheet04_foodDrinkIngredientsSnacks_transparent.png",
+      "sourceCropRect": {
+        "x": 939.6666666666666,
+        "y": 665.3333333333334,
+        "width": 272.33333333333337,
+        "height": 266.3333333333333
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.7625458996328027,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    },
+    {
+      "index": 12,
+      "row": 3,
+      "column": 0,
+      "iconFilename": "chocolatebar.png",
+      "koreanName": "\uCD08\uCF54\uBC14",
+      "englishName": "Chocolate Bar",
+      "sourceSheetFilename": "sheet04_foodDrinkIngredientsSnacks_transparent.png",
+      "sourceCropRect": {
+        "x": 8.666666666666668,
+        "y": 929,
+        "width": 309,
+        "height": 287
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.5533980582524272,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    },
+    {
+      "index": 13,
+      "row": 3,
+      "column": 1,
+      "iconFilename": "crackers.png",
+      "koreanName": "\uD06C\uB798\uCEE4",
+      "englishName": "Crackers",
+      "sourceSheetFilename": "sheet04_foodDrinkIngredientsSnacks_transparent.png",
+      "sourceCropRect": {
+        "x": 332.3333333333333,
+        "y": 929,
+        "width": 299,
+        "height": 287
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.605351170568562,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    },
+    {
+      "index": 14,
+      "row": 3,
+      "column": 2,
+      "iconFilename": "candybag.png",
+      "koreanName": "\uC0AC\uD0D5\uBD09\uC9C0",
+      "englishName": "Candy Bag",
+      "sourceSheetFilename": "sheet04_foodDrinkIngredientsSnacks_transparent.png",
+      "sourceCropRect": {
+        "x": 619.3333333333334,
+        "y": 929,
+        "width": 303.6666666666667,
+        "height": 287
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.5806805708013172,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    },
+    {
+      "index": 15,
+      "row": 3,
+      "column": 3,
+      "iconFilename": "pudding.png",
+      "koreanName": "\uD478\uB529",
+      "englishName": "Pudding",
+      "sourceSheetFilename": "sheet04_foodDrinkIngredientsSnacks_transparent.png",
+      "sourceCropRect": {
+        "x": 939.6666666666666,
+        "y": 929,
+        "width": 272.33333333333337,
+        "height": 287
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.6724738675958188,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    }
+  ]
+}

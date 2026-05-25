@@ -1,0 +1,427 @@
+{
+  "sheetImageFilename": "sheet01_facilityUnlock_transparent.png",
+  "sheetSize": {
+    "width": 1254,
+    "height": 1254
+  },
+  "grid": {
+    "columns": 4,
+    "rows": 4,
+    "cellWidth": 313,
+    "cellHeight": 313,
+    "cellInset": 2
+  },
+  "cropMethod": "cell_area_from_transparent_sheet",
+  "outputIconCanvas": {
+    "width": 512,
+    "height": 512,
+    "margin": 16
+  },
+  "icons": [
+    {
+      "index": 0,
+      "row": 0,
+      "column": 0,
+      "iconFilename": "toolbox.png",
+      "koreanName": "\uACF5\uAD6C\uC0C1\uC790",
+      "englishName": "Tool Box",
+      "sourceSheetFilename": "sheet01_facilityUnlock_transparent.png",
+      "sourceCropRect": {
+        "x": 8,
+        "y": 31.999999999999996,
+        "width": 309,
+        "height": 309
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.5533980582524272,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    },
+    {
+      "index": 1,
+      "row": 0,
+      "column": 1,
+      "iconFilename": "cuttingtool.png",
+      "koreanName": "\uC808\uB2E8\uACF5\uAD6C",
+      "englishName": "Cutting Tool",
+      "sourceSheetFilename": "sheet01_facilityUnlock_transparent.png",
+      "sourceCropRect": {
+        "x": 316.33333333333337,
+        "y": 31.999999999999996,
+        "width": 291.6666666666667,
+        "height": 309
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.5533980582524272,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    },
+    {
+      "index": 2,
+      "row": 0,
+      "column": 2,
+      "iconFilename": "powercore.png",
+      "koreanName": "\uBC1C\uC804 \uCF54\uC5B4",
+      "englishName": "Power Core",
+      "sourceSheetFilename": "sheet01_facilityUnlock_transparent.png",
+      "sourceCropRect": {
+        "x": 626.6666666666667,
+        "y": 31.999999999999996,
+        "width": 287,
+        "height": 309
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.5533980582524272,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    },
+    {
+      "index": 3,
+      "row": 0,
+      "column": 3,
+      "iconFilename": "transformer.png",
+      "koreanName": "\uBCC0\uC555\uAE30",
+      "englishName": "Transformer",
+      "sourceSheetFilename": "sheet01_facilityUnlock_transparent.png",
+      "sourceCropRect": {
+        "x": 931.6666666666666,
+        "y": 31.999999999999996,
+        "width": 309,
+        "height": 309
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.5533980582524272,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    },
+    {
+      "index": 4,
+      "row": 1,
+      "column": 0,
+      "iconFilename": "communicationmodule.png",
+      "koreanName": "\uD1B5\uC2E0 \uBAA8\uB4C8",
+      "englishName": "Communication Module",
+      "sourceSheetFilename": "sheet01_facilityUnlock_transparent.png",
+      "sourceCropRect": {
+        "x": 8,
+        "y": 350.33333333333337,
+        "width": 309,
+        "height": 309
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.5533980582524272,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    },
+    {
+      "index": 5,
+      "row": 1,
+      "column": 1,
+      "iconFilename": "antennaparts.png",
+      "koreanName": "\uC548\uD14C\uB098 \uBD80\uD488",
+      "englishName": "Antenna Parts",
+      "sourceSheetFilename": "sheet01_facilityUnlock_transparent.png",
+      "sourceCropRect": {
+        "x": 316.33333333333337,
+        "y": 350.33333333333337,
+        "width": 291.6666666666667,
+        "height": 309
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.5533980582524272,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    },
+    {
+      "index": 6,
+      "row": 1,
+      "column": 2,
+      "iconFilename": "locationtransmitter.png",
+      "koreanName": "\uC704\uCE58 \uC1A1\uC2E0\uAE30",
+      "englishName": "Location Transmitter",
+      "sourceSheetFilename": "sheet01_facilityUnlock_transparent.png",
+      "sourceCropRect": {
+        "x": 626.6666666666667,
+        "y": 350.33333333333337,
+        "width": 287,
+        "height": 309
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.5533980582524272,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    },
+    {
+      "index": 7,
+      "row": 1,
+      "column": 3,
+      "iconFilename": "securitykey.png",
+      "koreanName": "\uBCF4\uC548\uD0A4",
+      "englishName": "Security Key",
+      "sourceSheetFilename": "sheet01_facilityUnlock_transparent.png",
+      "sourceCropRect": {
+        "x": 931.6666666666666,
+        "y": 350.33333333333337,
+        "width": 309,
+        "height": 309
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.5533980582524272,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    },
+    {
+      "index": 8,
+      "row": 2,
+      "column": 0,
+      "iconFilename": "gatecard.png",
+      "koreanName": "\uAC8C\uC774\uD2B8 \uCE74\uB4DC",
+      "englishName": "Gate Card",
+      "sourceSheetFilename": "sheet01_facilityUnlock_transparent.png",
+      "sourceCropRect": {
+        "x": 8,
+        "y": 652.6666666666667,
+        "width": 309,
+        "height": 292.3333333333333
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.5533980582524272,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    },
+    {
+      "index": 9,
+      "row": 2,
+      "column": 1,
+      "iconFilename": "bosssignalkey.png",
+      "koreanName": "\uBCF4\uC2A4 \uC2E0\uD638\uD0A4",
+      "englishName": "Boss Signal Key",
+      "sourceSheetFilename": "sheet01_facilityUnlock_transparent.png",
+      "sourceCropRect": {
+        "x": 316.33333333333337,
+        "y": 652.6666666666667,
+        "width": 291.6666666666667,
+        "height": 292.3333333333333
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.6419612314709238,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    },
+    {
+      "index": 10,
+      "row": 2,
+      "column": 2,
+      "iconFilename": "centralcontrolcore.png",
+      "koreanName": "\uC911\uC559 \uC81C\uC5B4 \uCF54\uC5B4",
+      "englishName": "Central Control Core",
+      "sourceSheetFilename": "sheet01_facilityUnlock_transparent.png",
+      "sourceCropRect": {
+        "x": 626.6666666666667,
+        "y": 652.6666666666667,
+        "width": 287,
+        "height": 292.3333333333333
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.6419612314709238,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    },
+    {
+      "index": 11,
+      "row": 2,
+      "column": 3,
+      "iconFilename": "livingfacilityparts.png",
+      "koreanName": "\uC0DD\uD65C\uC124\uBE44 \uBD80\uD488",
+      "englishName": "Living Facility Parts",
+      "sourceSheetFilename": "sheet01_facilityUnlock_transparent.png",
+      "sourceCropRect": {
+        "x": 931.6666666666666,
+        "y": 652.6666666666667,
+        "width": 309,
+        "height": 292.3333333333333
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.5533980582524272,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    },
+    {
+      "index": 12,
+      "row": 3,
+      "column": 0,
+      "iconFilename": "circulationpump.png",
+      "koreanName": "\uC21C\uD658\uD38C\uD504",
+      "englishName": "Circulation Pump",
+      "sourceSheetFilename": "sheet01_facilityUnlock_transparent.png",
+      "sourceCropRect": {
+        "x": 8,
+        "y": 940.9999999999999,
+        "width": 309,
+        "height": 309
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.5533980582524272,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    },
+    {
+      "index": 13,
+      "row": 3,
+      "column": 1,
+      "iconFilename": "waterfilter.png",
+      "koreanName": "\uC815\uC218\uD544\uD130",
+      "englishName": "Water Filter",
+      "sourceSheetFilename": "sheet01_facilityUnlock_transparent.png",
+      "sourceCropRect": {
+        "x": 316.33333333333337,
+        "y": 940.9999999999999,
+        "width": 291.6666666666667,
+        "height": 309
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.5533980582524272,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    },
+    {
+      "index": 14,
+      "row": 3,
+      "column": 2,
+      "iconFilename": "blueprint.png",
+      "koreanName": "\uC124\uACC4\uB3C4",
+      "englishName": "Blueprint",
+      "sourceSheetFilename": "sheet01_facilityUnlock_transparent.png",
+      "sourceCropRect": {
+        "x": 626.6666666666667,
+        "y": 940.9999999999999,
+        "width": 287,
+        "height": 309
+      },
+      "outputCanvas": {
+        "width": 512,
+        "height": 512
+      },
+      "outputPlacedRect": {
+        "x": 16,
+        "y": 16,
+        "width": 480,
+        "height": 480
+      },
+      "scale": 1.5533980582524272,
+      "notes": "sourceCropRect is the 4x4 cell-area crop from the transparent sheet, with a 2 px inset from each cell edge."
+    }
+  ]
+}
