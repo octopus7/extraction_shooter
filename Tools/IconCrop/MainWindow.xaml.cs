@@ -45,6 +45,21 @@ public partial class MainWindow : Window
 
     private bool UseSharedMode => SharedModeCheckBox.IsChecked == true;
 
+    private bool TrimFromEdgeGap => TrimFromEdgeGapCheckBox.IsChecked == true;
+
+    private byte AlphaTrimThreshold
+    {
+        get
+        {
+            if (!TryParseNumber(AlphaThresholdText.Text, out double value))
+            {
+                return 8;
+            }
+
+            return (byte)Math.Clamp((int)Math.Round(value), 0, 254);
+        }
+    }
+
     private void MainWindow_Loaded(object sender, RoutedEventArgs e)
     {
         string? defaultDirectory = FindDefaultDataDirectory();
@@ -236,6 +251,74 @@ public partial class MainWindow : Window
         ApplyCropFields();
     }
 
+    private void AutoTrimSelected_Click(object sender, RoutedEventArgs e)
+    {
+        if (_document is null || _selectedIcon is null)
+        {
+            StatusText.Text = "No icon is selected.";
+            return;
+        }
+
+        SharedModeCheckBox.IsChecked = false;
+        var alphaMasks = new Dictionary<string, IconCropRenderer.AlphaMask>(StringComparer.OrdinalIgnoreCase);
+        try
+        {
+            byte threshold = AlphaTrimThreshold;
+            if (TryAutoTrimIcon(_selectedIcon, alphaMasks))
+            {
+                IconCropRenderer.NormalizeDocument(_document);
+                RefreshViews(refreshPreviews: true);
+                StatusText.Text = $"Auto trimmed {_selectedIcon.IconFilename} with alpha > {threshold}";
+            }
+            else
+            {
+                StatusText.Text = $"No pixels above alpha {threshold} found inside selected crop.";
+            }
+        }
+        catch (Exception ex)
+        {
+            StatusText.Text = $"Auto trim failed: {ex.Message}";
+        }
+    }
+
+    private void AutoTrimAll_Click(object sender, RoutedEventArgs e)
+    {
+        if (_document is null)
+        {
+            StatusText.Text = "No crop JSON is loaded.";
+            return;
+        }
+
+        SharedModeCheckBox.IsChecked = false;
+        var alphaMasks = new Dictionary<string, IconCropRenderer.AlphaMask>(StringComparer.OrdinalIgnoreCase);
+        int trimmed = 0;
+        int skipped = 0;
+
+        try
+        {
+            byte threshold = AlphaTrimThreshold;
+            foreach (IconEntry icon in _document.Icons)
+            {
+                if (TryAutoTrimIcon(icon, alphaMasks))
+                {
+                    trimmed++;
+                }
+                else
+                {
+                    skipped++;
+                }
+            }
+
+            IconCropRenderer.NormalizeDocument(_document);
+            RefreshViews(refreshPreviews: true);
+            StatusText.Text = $"Auto trimmed {trimmed} icons with alpha > {threshold}, skipped {skipped}.";
+        }
+        catch (Exception ex)
+        {
+            StatusText.Text = $"Auto trim failed: {ex.Message}";
+        }
+    }
+
     private void LoadDocument(string path)
     {
         try
@@ -361,6 +444,72 @@ public partial class MainWindow : Window
         }
 
         IconCropRenderer.NormalizeDocument(_document);
+    }
+
+    private bool TryAutoTrimIcon(IconEntry icon, Dictionary<string, IconCropRenderer.AlphaMask> alphaMasks)
+    {
+        IconCropRenderer.AlphaMask alphaMask = GetAlphaMaskForIcon(icon, alphaMasks);
+        CropRect? trimmedRect = IconCropRenderer.FindAlphaTrimRect(
+            alphaMask,
+            icon.SourceCropRect,
+            TrimFromEdgeGap,
+            AlphaTrimThreshold);
+        if (trimmedRect is null)
+        {
+            return false;
+        }
+
+        icon.SourceCropRect.CopyFrom(ClampRectToSheet(trimmedRect));
+        return true;
+    }
+
+    private IconCropRenderer.AlphaMask GetAlphaMaskForIcon(
+        IconEntry icon,
+        Dictionary<string, IconCropRenderer.AlphaMask> alphaMasks)
+    {
+        string sheetPath = GetSheetPathForIcon(icon);
+        if (alphaMasks.TryGetValue(sheetPath, out IconCropRenderer.AlphaMask? alphaMask))
+        {
+            return alphaMask;
+        }
+
+        BitmapSource sheet = IsLoadedDocumentSheet(icon, sheetPath) && _sheetBitmap is not null
+            ? _sheetBitmap
+            : IconCropRenderer.LoadBitmap(sheetPath);
+        alphaMask = IconCropRenderer.CreateAlphaMask(sheet);
+        alphaMasks[sheetPath] = alphaMask;
+        return alphaMask;
+    }
+
+    private string GetSheetPathForIcon(IconEntry icon)
+    {
+        if (_document is null || _jsonPath is null)
+        {
+            throw new InvalidOperationException("No crop JSON is loaded.");
+        }
+
+        string documentDirectory = Path.GetDirectoryName(_jsonPath) ?? Directory.GetCurrentDirectory();
+        string sheetFilename = string.IsNullOrWhiteSpace(icon.SourceSheetFilename)
+            ? _document.SheetImageFilename
+            : icon.SourceSheetFilename!;
+        return Path.GetFullPath(Path.Combine(documentDirectory, sheetFilename));
+    }
+
+    private bool IsLoadedDocumentSheet(IconEntry icon, string sheetPath)
+    {
+        if (_document is null || _jsonPath is null)
+        {
+            return false;
+        }
+
+        string sheetFilename = string.IsNullOrWhiteSpace(icon.SourceSheetFilename)
+            ? _document.SheetImageFilename
+            : icon.SourceSheetFilename!;
+        string documentDirectory = Path.GetDirectoryName(_jsonPath) ?? Directory.GetCurrentDirectory();
+        string documentSheetPath = Path.GetFullPath(Path.Combine(documentDirectory, _document.SheetImageFilename));
+        string iconSheetPath = Path.GetFullPath(Path.Combine(documentDirectory, sheetFilename));
+        return string.Equals(sheetPath, documentSheetPath, StringComparison.OrdinalIgnoreCase) &&
+               string.Equals(iconSheetPath, documentSheetPath, StringComparison.OrdinalIgnoreCase);
     }
 
     private void RefreshViews(bool refreshPreviews)

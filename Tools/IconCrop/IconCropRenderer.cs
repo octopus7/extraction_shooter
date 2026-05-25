@@ -139,6 +139,52 @@ public static class IconCropRenderer
         return value.ToString("0.##", CultureInfo.InvariantCulture);
     }
 
+    public static AlphaMask CreateAlphaMask(BitmapSource source)
+    {
+        return AlphaMask.Create(source);
+    }
+
+    public static CropRect? FindAlphaTrimRect(
+        AlphaMask alphaMask,
+        CropRect searchRect,
+        bool trimFromFirstEmptyAfterEdgeContent,
+        byte alphaThreshold = 0)
+    {
+        Int32Rect region = ToSafeInt32Rect(searchRect, alphaMask.Width, alphaMask.Height);
+        if (region.Width <= 0 || region.Height <= 0)
+        {
+            return null;
+        }
+
+        Int32Rect scanRegion = trimFromFirstEmptyAfterEdgeContent
+            ? MovePastEdgeConnectedContent(alphaMask, region, alphaThreshold)
+            : region;
+
+        if (!alphaMask.TryFindOpaqueBounds(scanRegion, alphaThreshold, out Int32Rect bounds))
+        {
+            if (scanRegion != region && alphaMask.TryFindOpaqueBounds(region, alphaThreshold, out bounds))
+            {
+                return new CropRect
+                {
+                    X = bounds.X,
+                    Y = bounds.Y,
+                    Width = bounds.Width,
+                    Height = bounds.Height
+                };
+            }
+
+            return null;
+        }
+
+        return new CropRect
+        {
+            X = bounds.X,
+            Y = bounds.Y,
+            Width = bounds.Width,
+            Height = bounds.Height
+        };
+    }
+
     private static void UpdateIconScale(CropDocument document, IconEntry icon)
     {
         CanvasSize canvas = GetOutputCanvas(document, icon);
@@ -173,6 +219,188 @@ public static class IconCropRenderer
         return new Int32Rect(x, y, width, height);
     }
 
+    private static Int32Rect MovePastEdgeConnectedContent(AlphaMask alphaMask, Int32Rect region, byte alphaThreshold)
+    {
+        int left = region.X;
+        int top = region.Y;
+        int right = region.X + region.Width - 1;
+        int bottom = region.Y + region.Height - 1;
+
+        left = ResolveLeftEdge(alphaMask, left, right, top, bottom + 1, alphaThreshold);
+        right = ResolveRightEdge(alphaMask, left, right, top, bottom + 1, alphaThreshold);
+
+        if (left > right)
+        {
+            return region;
+        }
+
+        top = ResolveTopEdge(alphaMask, top, bottom, left, right + 1, alphaThreshold);
+        bottom = ResolveBottomEdge(alphaMask, top, bottom, left, right + 1, alphaThreshold);
+
+        if (top > bottom)
+        {
+            return region;
+        }
+
+        return new Int32Rect(left, top, right - left + 1, bottom - top + 1);
+    }
+
+    private static int ResolveLeftEdge(AlphaMask alphaMask, int left, int right, int top, int bottomExclusive, byte alphaThreshold)
+    {
+        if (!alphaMask.ColumnHasOpaque(left, top, bottomExclusive, alphaThreshold))
+        {
+            return left;
+        }
+
+        for (int x = left + 1; x <= right; x++)
+        {
+            if (alphaMask.ColumnHasOpaque(x, top, bottomExclusive, alphaThreshold))
+            {
+                continue;
+            }
+
+            for (int nextX = x + 1; nextX <= right; nextX++)
+            {
+                if (alphaMask.ColumnHasOpaque(nextX, top, bottomExclusive, alphaThreshold))
+                {
+                    return nextX;
+                }
+            }
+
+            return ExpandLeftToOuterGap(alphaMask, left, top, bottomExclusive, alphaThreshold);
+        }
+
+        return ExpandLeftToOuterGap(alphaMask, left, top, bottomExclusive, alphaThreshold);
+    }
+
+    private static int ResolveRightEdge(AlphaMask alphaMask, int left, int right, int top, int bottomExclusive, byte alphaThreshold)
+    {
+        if (!alphaMask.ColumnHasOpaque(right, top, bottomExclusive, alphaThreshold))
+        {
+            return right;
+        }
+
+        for (int x = right - 1; x >= left; x--)
+        {
+            if (alphaMask.ColumnHasOpaque(x, top, bottomExclusive, alphaThreshold))
+            {
+                continue;
+            }
+
+            for (int nextX = x - 1; nextX >= left; nextX--)
+            {
+                if (alphaMask.ColumnHasOpaque(nextX, top, bottomExclusive, alphaThreshold))
+                {
+                    return nextX;
+                }
+            }
+
+            return ExpandRightToOuterGap(alphaMask, right, top, bottomExclusive, alphaThreshold);
+        }
+
+        return ExpandRightToOuterGap(alphaMask, right, top, bottomExclusive, alphaThreshold);
+    }
+
+    private static int ResolveTopEdge(AlphaMask alphaMask, int top, int bottom, int left, int rightExclusive, byte alphaThreshold)
+    {
+        if (!alphaMask.RowHasOpaque(top, left, rightExclusive, alphaThreshold))
+        {
+            return top;
+        }
+
+        for (int y = top + 1; y <= bottom; y++)
+        {
+            if (alphaMask.RowHasOpaque(y, left, rightExclusive, alphaThreshold))
+            {
+                continue;
+            }
+
+            for (int nextY = y + 1; nextY <= bottom; nextY++)
+            {
+                if (alphaMask.RowHasOpaque(nextY, left, rightExclusive, alphaThreshold))
+                {
+                    return nextY;
+                }
+            }
+
+            return ExpandTopToOuterGap(alphaMask, top, left, rightExclusive, alphaThreshold);
+        }
+
+        return ExpandTopToOuterGap(alphaMask, top, left, rightExclusive, alphaThreshold);
+    }
+
+    private static int ResolveBottomEdge(AlphaMask alphaMask, int top, int bottom, int left, int rightExclusive, byte alphaThreshold)
+    {
+        if (!alphaMask.RowHasOpaque(bottom, left, rightExclusive, alphaThreshold))
+        {
+            return bottom;
+        }
+
+        for (int y = bottom - 1; y >= top; y--)
+        {
+            if (alphaMask.RowHasOpaque(y, left, rightExclusive, alphaThreshold))
+            {
+                continue;
+            }
+
+            for (int nextY = y - 1; nextY >= top; nextY--)
+            {
+                if (alphaMask.RowHasOpaque(nextY, left, rightExclusive, alphaThreshold))
+                {
+                    return nextY;
+                }
+            }
+
+            return ExpandBottomToOuterGap(alphaMask, bottom, left, rightExclusive, alphaThreshold);
+        }
+
+        return ExpandBottomToOuterGap(alphaMask, bottom, left, rightExclusive, alphaThreshold);
+    }
+
+    private static int ExpandLeftToOuterGap(AlphaMask alphaMask, int left, int top, int bottomExclusive, byte alphaThreshold)
+    {
+        int x = left - 1;
+        while (x >= 0 && alphaMask.ColumnHasOpaque(x, top, bottomExclusive, alphaThreshold))
+        {
+            x--;
+        }
+
+        return x + 1;
+    }
+
+    private static int ExpandRightToOuterGap(AlphaMask alphaMask, int right, int top, int bottomExclusive, byte alphaThreshold)
+    {
+        int x = right + 1;
+        while (x < alphaMask.Width && alphaMask.ColumnHasOpaque(x, top, bottomExclusive, alphaThreshold))
+        {
+            x++;
+        }
+
+        return x - 1;
+    }
+
+    private static int ExpandTopToOuterGap(AlphaMask alphaMask, int top, int left, int rightExclusive, byte alphaThreshold)
+    {
+        int y = top - 1;
+        while (y >= 0 && alphaMask.RowHasOpaque(y, left, rightExclusive, alphaThreshold))
+        {
+            y--;
+        }
+
+        return y + 1;
+    }
+
+    private static int ExpandBottomToOuterGap(AlphaMask alphaMask, int bottom, int left, int rightExclusive, byte alphaThreshold)
+    {
+        int y = bottom + 1;
+        while (y < alphaMask.Height && alphaMask.RowHasOpaque(y, left, rightExclusive, alphaThreshold))
+        {
+            y++;
+        }
+
+        return y - 1;
+    }
+
     private static void SavePng(BitmapSource source, string path)
     {
         using var stream = File.Create(path);
@@ -189,5 +417,115 @@ public static class IconCropRenderer
         }
 
         return $"icon_{icon.Index:000}.png";
+    }
+
+    public sealed class AlphaMask
+    {
+        private const int BytesPerPixel = 4;
+
+        private readonly byte[] _pixels;
+        private readonly int _stride;
+
+        private AlphaMask(byte[] pixels, int width, int height, int stride)
+        {
+            _pixels = pixels;
+            Width = width;
+            Height = height;
+            _stride = stride;
+        }
+
+        public int Width { get; }
+
+        public int Height { get; }
+
+        public static AlphaMask Create(BitmapSource source)
+        {
+            BitmapSource readable = source;
+            if (source.Format != PixelFormats.Bgra32 && source.Format != PixelFormats.Pbgra32)
+            {
+                readable = new FormatConvertedBitmap(source, PixelFormats.Pbgra32, null, 0);
+                readable.Freeze();
+            }
+
+            int stride = readable.PixelWidth * BytesPerPixel;
+            var pixels = new byte[stride * readable.PixelHeight];
+            readable.CopyPixels(pixels, stride, 0);
+            return new AlphaMask(pixels, readable.PixelWidth, readable.PixelHeight, stride);
+        }
+
+        public bool TryFindOpaqueBounds(Int32Rect region, byte alphaThreshold, out Int32Rect bounds)
+        {
+            int left = region.X + region.Width;
+            int top = region.Y + region.Height;
+            int right = region.X - 1;
+            int bottom = region.Y - 1;
+
+            for (int y = region.Y; y < region.Y + region.Height; y++)
+            {
+                int rowOffset = y * _stride;
+                for (int x = region.X; x < region.X + region.Width; x++)
+                {
+                    if (_pixels[rowOffset + (x * BytesPerPixel) + 3] <= alphaThreshold)
+                    {
+                        continue;
+                    }
+
+                    left = Math.Min(left, x);
+                    top = Math.Min(top, y);
+                    right = Math.Max(right, x);
+                    bottom = Math.Max(bottom, y);
+                }
+            }
+
+            if (right < left || bottom < top)
+            {
+                bounds = new Int32Rect();
+                return false;
+            }
+
+            bounds = new Int32Rect(left, top, right - left + 1, bottom - top + 1);
+            return true;
+        }
+
+        public bool ColumnHasOpaque(int x, int topInclusive, int bottomExclusive, byte alphaThreshold)
+        {
+            if (x < 0 || x >= Width)
+            {
+                return false;
+            }
+
+            int top = Math.Clamp(topInclusive, 0, Height);
+            int bottom = Math.Clamp(bottomExclusive, top, Height);
+            for (int y = top; y < bottom; y++)
+            {
+                if (_pixels[(y * _stride) + (x * BytesPerPixel) + 3] > alphaThreshold)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public bool RowHasOpaque(int y, int leftInclusive, int rightExclusive, byte alphaThreshold)
+        {
+            if (y < 0 || y >= Height)
+            {
+                return false;
+            }
+
+            int left = Math.Clamp(leftInclusive, 0, Width);
+            int right = Math.Clamp(rightExclusive, left, Width);
+            int rowOffset = y * _stride;
+            for (int x = left; x < right; x++)
+            {
+                if (_pixels[rowOffset + (x * BytesPerPixel) + 3] > alphaThreshold)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
     }
 }
