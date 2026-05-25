@@ -52,6 +52,18 @@ provider 체인에 보상 수령 가능, 진행 중, 신규 수락 가능 퀘스
 
 `UTunaSweeperQuestSubsystem::TryGetLatestQuestInProviderChain`은 진행 중이거나 보상 가능하거나 이미 보상 완료된 provider 체인의 최종 퀘스트를 조회하는 내부용 함수다. 현재 UI/상호작용 흐름에서는 호출하지 않고, 나중에 퀘스트 로그나 회상 UI가 필요할 때 사용할 수 있도록 둔다.
 
+워프 포인트 사용 목표 검증용 데이터:
+
+| 항목 | 값 |
+| --- | --- |
+| QuestId | `quest_warp_point_used_test` |
+| ProviderId | 없음 |
+| 제목 | `워프 포인트 사용 확인` |
+| 목표 | `use_raid_warp_point_a` |
+| 목표 타입 | `warp_point_used` |
+| 달성 조건 | `RaidMap`에서 `raid_warp_point_a -> raid_warp_point_b` 워프 성공 |
+| 실제 사용 여부 | 제공자에 연결하지 않아 현재 플레이 흐름에서는 제공되지 않음 |
+
 ## 런타임 상태
 
 런타임 소유자는 `UTunaSweeperQuestSubsystem`이다.
@@ -98,6 +110,7 @@ v1 목표 타입:
 - `item_acquired`: 플레이어가 아이템을 획득했을 때. `item_id`가 비어 있으면 모든 아이템을 허용한다.
 - `enemy_killed`: 플레이어가 적을 처치했을 때. `enemy_id`가 비어 있으면 모든 적 처치를 허용한다.
 - `interaction_completed`: 상호작용 처리가 성공했을 때. `interaction_event_id`나 `interaction_type`으로 필터링한다.
+- `warp_point_used`: 워프 포인트 액터가 플레이어 워프를 성공시켰을 때. `source_level`, `warp_point_id`, `target_warp_point_id`로 필터링한다. `source_level`은 워프가 발생한 현재 맵을 의미한다.
 
 후송 복귀 목표 타입:
 
@@ -112,6 +125,7 @@ v1 목표 타입:
 - `ATunaSweeperEnemyCharacter::HandleDeath`
 - `UTunaSweeperInteractionSubsystem::RequestInteraction`
 - `ATunaSweeperTopDownCharacter::HandleDeath`의 구급 카트 후송 복귀 경로
+- `ATunaSweeperWarpPointActor::WarpInstigator`
 
 이벤트는 `Accepted` 상태의 퀘스트에만 진행도를 반영한다. 목표 진행도는 목표별 `RequiredCount`까지만 증가하고, 모든 목표가 완료되면 상태가 `RewardAvailable`로 바뀐다.
 
@@ -137,5 +151,6 @@ v1 목표 타입:
 - 새 퀘스트를 추가할 때는 `QuestDefinitions.json`에 정의하고, 필요한 목표 이벤트 소스가 이미 연결되어 있는지 확인한다.
 - `enemy_killed` 목표에서 특정 적만 요구하려면 적 스폰 데이터에 `enemy_id`를 추가한다. 현재 벌목기 스폰은 `enemy.lumberjack`을 사용한다.
 - `interaction_completed` 목표에서 특정 상호작용만 요구하려면 해당 `UTunaSweeperInteractableComponent::ObjectiveEventId`를 설정한다.
+- `warp_point_used` 목표에서 특정 워프만 요구하려면 워프 포인트 스폰 데이터의 `id`와 `target_id`를 각각 `warp_point_id`, `target_warp_point_id`에 설정한다.
 - `bunker_rescue_return`은 직접적인 실패 표현 대신 구급 카트 후송/복귀 표현을 사용한다.
 - 저장 필드를 변경하면 `Docs/save_persistence.md`도 같은 변경에서 갱신한다.

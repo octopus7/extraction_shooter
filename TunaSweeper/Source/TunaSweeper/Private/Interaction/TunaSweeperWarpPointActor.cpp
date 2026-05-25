@@ -7,6 +7,7 @@
 #include "GameFramework/PawnMovementComponent.h"
 #include "Interaction/TunaSweeperInteractableComponent.h"
 #include "Materials/MaterialInterface.h"
+#include "Subsystem/TunaSweeperQuestSubsystem.h"
 
 ATunaSweeperWarpPointActor::ATunaSweeperWarpPointActor()
 {
@@ -159,10 +160,10 @@ bool ATunaSweeperWarpPointActor::WarpInstigator(APawn* InstigatorPawn)
 		TargetWarpPoint->GetActorLocation() +
 		TargetWarpPoint->GetActorRotation().RotateVector(TargetWarpPoint->ExitOffset);
 
-	const bool bTeleported = InstigatorPawn->TeleportTo(TargetLocation, TargetRotation, false, true);
-	if (!bTeleported)
+	bool bWarped = InstigatorPawn->TeleportTo(TargetLocation, TargetRotation, false, true);
+	if (!bWarped)
 	{
-		InstigatorPawn->SetActorLocationAndRotation(
+		bWarped = InstigatorPawn->SetActorLocationAndRotation(
 			TargetLocation,
 			TargetRotation,
 			false,
@@ -170,11 +171,27 @@ bool ATunaSweeperWarpPointActor::WarpInstigator(APawn* InstigatorPawn)
 			ETeleportType::TeleportPhysics);
 	}
 
+	if (!bWarped)
+	{
+		return false;
+	}
+
 	if (bUseTargetRotation)
 	{
 		if (AController* Controller = InstigatorPawn->GetController())
 		{
 			Controller->SetControlRotation(TargetRotation);
+		}
+	}
+
+	if (UGameInstance* GameInstance = GetGameInstance())
+	{
+		if (UTunaSweeperQuestSubsystem* QuestSubsystem = GameInstance->GetSubsystem<UTunaSweeperQuestSubsystem>())
+		{
+			QuestSubsystem->NotifyWarpPointUsed(
+				GetWorld() ? FName(*GetWorld()->GetMapName()) : NAME_None,
+				WarpPointId,
+				TargetWarpPoint->GetWarpPointId());
 		}
 	}
 

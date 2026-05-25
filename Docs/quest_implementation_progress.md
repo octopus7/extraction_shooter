@@ -1,6 +1,6 @@
 # Quest Implementation Progress
 
-Last updated: 2026-05-25 16:41:27
+Last updated: 2026-05-25 17:34:26
 
 이 문서는 TunaSweeper 퀘스트 시스템 구현 진행상황을 추적한다. 상세 설계는 `Docs/quest_system.md`를 기준으로 보고, 이 문서는 완료/남은 작업/결정 필요 항목만 정리한다.
 
@@ -24,14 +24,17 @@ Last updated: 2026-05-25 16:41:27
 - 목표 타입 `enemy_killed`가 구현되어 있고 `enemy_id` 필터를 지원한다.
 - 목표 타입 `interaction_completed`가 구현되어 있고 `interaction_event_id`, `interaction_type` 필터를 지원한다.
 - 목표 타입 `bunker_rescue_return`이 구현되어 있고 `source_level`, `target_level` 필터를 지원한다.
+- 목표 타입 `warp_point_used`가 구현되어 있고 `source_level`, `warp_point_id`, `target_warp_point_id` 필터를 지원한다.
 - 레벨 이동 목표는 `ATunaSweeperLevelTravelInteractableActor::TravelToTargetLevel`에 연결되어 있다.
 - 아이템 획득 목표는 `UTunaSweeperGameInstance`의 인벤토리 추가 경로에 연결되어 있다.
 - 적 처치 목표는 `ATunaSweeperEnemyCharacter::HandleDeath`에 연결되어 있다.
 - 상호작용 완료 목표는 `UTunaSweeperInteractionSubsystem::RequestInteraction`에 연결되어 있다.
 - 구급 카트 후송 복귀 목표는 `ATunaSweeperTopDownCharacter::HandleDeath`에 연결되어 있다.
+- 워프 포인트 사용 목표는 `ATunaSweeperWarpPointActor::WarpInstigator`의 워프 성공 경로에 연결되어 있다.
 - 현재 퀘스트 데이터에는 `quest_first_outing`이 있다.
 - 현재 퀘스트 데이터에는 `quest_lumberjack_first_kill`이 있다.
 - 현재 퀘스트 데이터에는 제공자에 연결하지 않은 `quest_rescue_cart_return`이 있다.
+- 현재 퀘스트 데이터에는 제공자에 연결하지 않은 `quest_warp_point_used_test`가 있다.
 - 벌목기 처치 퀘스트는 `quest_first_outing` 보상 완료 후 진행되도록 체인 연결되어 있다.
 - 벌목기 스폰 데이터는 `enemy.lumberjack`과 연결되어 있다.
 

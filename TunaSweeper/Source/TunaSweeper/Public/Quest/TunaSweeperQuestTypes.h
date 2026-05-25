@@ -20,7 +20,8 @@ enum class ETunaSweeperObjectiveType : uint8
 	ItemAcquired UMETA(DisplayName = "Item Acquired"),
 	EnemyKilled UMETA(DisplayName = "Enemy Killed"),
 	InteractionCompleted UMETA(DisplayName = "Interaction Completed"),
-	BunkerRescueReturn UMETA(DisplayName = "Bunker Rescue Return")
+	BunkerRescueReturn UMETA(DisplayName = "Bunker Rescue Return"),
+	WarpPointUsed UMETA(DisplayName = "Warp Point Used")
 };
 
 USTRUCT(BlueprintType)
@@ -57,6 +58,12 @@ struct TUNASWEEPER_API FTunaSweeperObjectiveDefinition
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
 	FName InteractionTypeName = NAME_None;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
+	FName WarpPointId = NAME_None;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
+	FName TargetWarpPointId = NAME_None;
 };
 
 USTRUCT(BlueprintType)

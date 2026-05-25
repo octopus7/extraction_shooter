@@ -98,6 +98,15 @@ namespace TunaSweeperQuestData
 			return true;
 		}
 
+		if (Type == TEXT("warp_point_used") ||
+			Type == TEXT("warppointused") ||
+			Type == TEXT("warp_used") ||
+			Type == TEXT("warpused"))
+		{
+			OutType = ETunaSweeperObjectiveType::WarpPointUsed;
+			return true;
+		}
+
 		return false;
 	}
 
@@ -151,6 +160,8 @@ namespace TunaSweeperQuestData
 		OutObjective.TargetLevelName = ReadNameField(JsonObject, TEXT("target_level"));
 		OutObjective.EnemyId = ReadNameField(JsonObject, TEXT("enemy_id"));
 		OutObjective.InteractionEventId = ReadNameField(JsonObject, TEXT("interaction_event_id"));
+		OutObjective.WarpPointId = ReadNameField(JsonObject, TEXT("warp_point_id"));
+		OutObjective.TargetWarpPointId = ReadNameField(JsonObject, TEXT("target_warp_point_id"));
 
 		double ItemId = INDEX_NONE;
 		JsonObject->TryGetNumberField(TEXT("item_id"), ItemId);
@@ -528,6 +539,16 @@ void UTunaSweeperQuestSubsystem::NotifyBunkerRescueReturn(FName SourceLevelName,
 		1);
 }
 
+void UTunaSweeperQuestSubsystem::NotifyWarpPointUsed(FName LevelName, FName WarpPointId, FName TargetWarpPointId)
+{
+	AdvanceMatchingObjectives(
+		[this, LevelName, WarpPointId, TargetWarpPointId](const FTunaSweeperObjectiveDefinition& Objective)
+		{
+			return DoesObjectiveMatchWarpPointUsed(Objective, LevelName, WarpPointId, TargetWarpPointId);
+		},
+		1);
+}
+
 void UTunaSweeperQuestSubsystem::NotifyItemAcquired(int32 ItemId, int32 Quantity)
 {
 	if (ItemId == INDEX_NONE || Quantity <= 0)
@@ -793,6 +814,18 @@ bool UTunaSweeperQuestSubsystem::DoesObjectiveMatchBunkerRescueReturn(
 	return Objective.Type == ETunaSweeperObjectiveType::BunkerRescueReturn &&
 		(Objective.SourceLevelName.IsNone() || IsMapNameMatch(SourceLevelName, *Objective.SourceLevelName.ToString())) &&
 		(Objective.TargetLevelName.IsNone() || IsMapNameMatch(TargetLevelName, *Objective.TargetLevelName.ToString()));
+}
+
+bool UTunaSweeperQuestSubsystem::DoesObjectiveMatchWarpPointUsed(
+	const FTunaSweeperObjectiveDefinition& Objective,
+	FName LevelName,
+	FName WarpPointId,
+	FName TargetWarpPointId) const
+{
+	return Objective.Type == ETunaSweeperObjectiveType::WarpPointUsed &&
+		(Objective.SourceLevelName.IsNone() || IsMapNameMatch(LevelName, *Objective.SourceLevelName.ToString())) &&
+		(Objective.WarpPointId.IsNone() || Objective.WarpPointId == WarpPointId) &&
+		(Objective.TargetWarpPointId.IsNone() || Objective.TargetWarpPointId == TargetWarpPointId);
 }
 
 bool UTunaSweeperQuestSubsystem::DoesObjectiveMatchItemAcquired(

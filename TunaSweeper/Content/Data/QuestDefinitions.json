@@ -65,5 +65,27 @@
       "coins": 50,
       "items": []
     }
+  },
+  {
+    "quest_id": "quest_warp_point_used_test",
+    "sort_order": 9100,
+    "title": "워프 포인트 사용 확인",
+    "description": "워프 포인트 사용 목표 타입 검증용 데이터다. 아직 실제 제공자나 진행 흐름에는 연결하지 않는다.",
+    "auto_track_on_accept": false,
+    "objectives": [
+      {
+        "objective_id": "use_raid_warp_point_a",
+        "type": "warp_point_used",
+        "text": "워프 포인트 사용",
+        "required_count": 1,
+        "source_level": "RaidMap",
+        "warp_point_id": "raid_warp_point_a",
+        "target_warp_point_id": "raid_warp_point_b"
+      }
+    ],
+    "rewards": {
+      "coins": 0,
+      "items": []
+    }
   }
 ]
