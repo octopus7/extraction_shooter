@@ -5,12 +5,13 @@
 #include "Components/SceneComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMesh.h"
+#include "Kismet/GameplayStatics.h"
 #include "Materials/MaterialInterface.h"
 #include "UObject/ConstructorHelpers.h"
 
 ATunaSweeperLedRobotCharacterActor::ATunaSweeperLedRobotCharacterActor()
 {
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 
 	SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("SceneRoot"));
 	SetRootComponent(SceneRoot);
@@ -43,6 +44,12 @@ ATunaSweeperLedRobotCharacterActor::ATunaSweeperLedRobotCharacterActor()
 	{
 		BodyMesh->SetStaticMesh(CylinderMesh.Object);
 	}
+}
+
+void ATunaSweeperLedRobotCharacterActor::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+	UpdatePlayerLookAt(DeltaSeconds);
 }
 
 void ATunaSweeperLedRobotCharacterActor::ConfigureRobotDefaults(
@@ -93,6 +100,9 @@ void ATunaSweeperLedRobotCharacterActor::OnConstruction(const FTransform& Transf
 void ATunaSweeperLedRobotCharacterActor::BeginPlay()
 {
 	Super::BeginPlay();
+	IdleActorRotation = GetActorRotation();
+	PendingLookAtYaw = IdleActorRotation.Yaw;
+	LookAtReactionDelay = FMath::FRandRange(LookAtMinReactionDelay, FMath::Max(LookAtMinReactionDelay, LookAtMaxReactionDelay));
 	RefreshRobotVisuals();
 	SetExpressionByName(InitialExpressionName);
 }
@@ -144,4 +154,123 @@ void ATunaSweeperLedRobotCharacterActor::RefreshRobotVisuals()
 		ExpressionComponent->SetRelativeRotation(FaceRelativeRotation);
 		ExpressionComponent->ConfigureExpressionSource(ExpressionPresetFilePath, InitialExpressionName);
 	}
+}
+
+void ATunaSweeperLedRobotCharacterActor::UpdatePlayerLookAt(float DeltaSeconds)
+{
+	if (!bLookAtNearbyPlayer || DeltaSeconds <= 0.0f)
+	{
+		return;
+	}
+
+	float PlayerYaw = 0.0f;
+	float PlayerDistance2D = 0.0f;
+	const bool bHasPlayer = TryGetPlayerLookYaw(PlayerYaw, PlayerDistance2D);
+	const float StartDistance = FMath::Max(0.0f, LookAtStartDistance);
+	const float StopDistance = FMath::Max(StartDistance, LookAtStopDistance);
+
+	if (!bIsLookingAtPlayer)
+	{
+		if (bHasPlayer && PlayerDistance2D <= StartDistance)
+		{
+			if (!bLookAtReactionPending)
+			{
+				bLookAtReactionPending = true;
+				LookAtReactionElapsed = 0.0f;
+				LookAtReactionDelay = FMath::FRandRange(
+					FMath::Max(0.0f, LookAtMinReactionDelay),
+					FMath::Max(LookAtMinReactionDelay, LookAtMaxReactionDelay));
+			}
+
+			LookAtReactionElapsed += DeltaSeconds;
+			if (LookAtReactionElapsed >= LookAtReactionDelay)
+			{
+				bIsLookingAtPlayer = true;
+				bLookAtReactionPending = false;
+				LookAtRefreshElapsed = LookAtTargetRefreshInterval;
+			}
+		}
+		else
+		{
+			bLookAtReactionPending = false;
+			LookAtReactionElapsed = 0.0f;
+		}
+	}
+	else if (!bHasPlayer || PlayerDistance2D >= StopDistance)
+	{
+		bIsLookingAtPlayer = false;
+		bLookAtReactionPending = false;
+		LookAtReactionElapsed = 0.0f;
+	}
+
+	float DesiredYaw = IdleActorRotation.Yaw;
+	float InterpSpeed = LookAtReturnInterpolationSpeed;
+	if (bIsLookingAtPlayer && bHasPlayer)
+	{
+		LookAtRefreshElapsed += DeltaSeconds;
+		if (LookAtRefreshElapsed >= FMath::Max(0.01f, LookAtTargetRefreshInterval))
+		{
+			PendingLookAtYaw = PlayerYaw;
+			LookAtRefreshElapsed = 0.0f;
+		}
+
+		DesiredYaw = PendingLookAtYaw + ResolveNonMechanicalYawOffset(DeltaSeconds);
+		InterpSpeed = LookAtInterpolationSpeed;
+	}
+
+	const FRotator CurrentRotation = GetActorRotation();
+	const FRotator TargetRotation(CurrentRotation.Pitch, DesiredYaw, CurrentRotation.Roll);
+	const FRotator NewRotation = FMath::RInterpTo(
+		CurrentRotation,
+		TargetRotation,
+		DeltaSeconds,
+		FMath::Max(0.0f, InterpSpeed));
+	SetActorRotation(NewRotation);
+}
+
+bool ATunaSweeperLedRobotCharacterActor::TryGetPlayerLookYaw(float& OutYaw, float& OutDistance2D) const
+{
+	const UWorld* World = GetWorld();
+	if (!World)
+	{
+		return false;
+	}
+
+	const APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(World, 0);
+	if (!PlayerPawn)
+	{
+		return false;
+	}
+
+	const FVector ToPlayer = PlayerPawn->GetActorLocation() - GetActorLocation();
+	const FVector ToPlayer2D(ToPlayer.X, ToPlayer.Y, 0.0f);
+	OutDistance2D = ToPlayer2D.Size();
+	if (OutDistance2D <= KINDA_SMALL_NUMBER)
+	{
+		return false;
+	}
+
+	OutYaw = ToPlayer2D.Rotation().Yaw;
+	return true;
+}
+
+float ATunaSweeperLedRobotCharacterActor::ResolveNonMechanicalYawOffset(float DeltaSeconds)
+{
+	const float MaxOffset = FMath::Max(0.0f, LookAtYawOffsetDegrees);
+	if (MaxOffset <= 0.0f)
+	{
+		LookAtYawOffset = 0.0f;
+		LookAtYawOffsetTarget = 0.0f;
+		return 0.0f;
+	}
+
+	LookAtYawOffsetRefreshElapsed += DeltaSeconds;
+	if (LookAtYawOffsetRefreshElapsed >= 1.2f)
+	{
+		LookAtYawOffsetTarget = FMath::FRandRange(-MaxOffset, MaxOffset);
+		LookAtYawOffsetRefreshElapsed = 0.0f;
+	}
+
+	LookAtYawOffset = FMath::FInterpTo(LookAtYawOffset, LookAtYawOffsetTarget, DeltaSeconds, 1.2f);
+	return LookAtYawOffset;
 }

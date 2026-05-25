@@ -19,6 +19,8 @@ class TUNASWEEPER_API ATunaSweeperLedRobotCharacterActor : public AActor
 public:
 	ATunaSweeperLedRobotCharacterActor();
 
+	virtual void Tick(float DeltaSeconds) override;
+
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|LED Robot")
 	void ConfigureRobotDefaults(
 		FName InRobotId,
@@ -45,6 +47,9 @@ protected:
 
 private:
 	void RefreshRobotVisuals();
+	void UpdatePlayerLookAt(float DeltaSeconds);
+	bool TryGetPlayerLookYaw(float& OutYaw, float& OutDistance2D) const;
+	float ResolveNonMechanicalYawOffset(float DeltaSeconds);
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LED Robot", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<USceneComponent> SceneRoot;
@@ -90,4 +95,42 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LED Robot|Face", meta = (AllowPrivateAccess = "true"))
 	FString ExpressionPresetFilePath = TEXT("Data/LedExpressionPresets.txt");
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LED Robot|Look At", meta = (AllowPrivateAccess = "true"))
+	bool bLookAtNearbyPlayer = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LED Robot|Look At", meta = (AllowPrivateAccess = "true", ClampMin = "0.0"))
+	float LookAtStartDistance = 650.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LED Robot|Look At", meta = (AllowPrivateAccess = "true", ClampMin = "0.0"))
+	float LookAtStopDistance = 850.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LED Robot|Look At", meta = (AllowPrivateAccess = "true", ClampMin = "0.0"))
+	float LookAtInterpolationSpeed = 2.8f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LED Robot|Look At", meta = (AllowPrivateAccess = "true", ClampMin = "0.0"))
+	float LookAtReturnInterpolationSpeed = 1.8f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LED Robot|Look At", meta = (AllowPrivateAccess = "true", ClampMin = "0.0"))
+	float LookAtMinReactionDelay = 0.18f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LED Robot|Look At", meta = (AllowPrivateAccess = "true", ClampMin = "0.0"))
+	float LookAtMaxReactionDelay = 0.38f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LED Robot|Look At", meta = (AllowPrivateAccess = "true", ClampMin = "0.0"))
+	float LookAtTargetRefreshInterval = 0.16f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LED Robot|Look At", meta = (AllowPrivateAccess = "true", ClampMin = "0.0"))
+	float LookAtYawOffsetDegrees = 3.0f;
+
+	FRotator IdleActorRotation = FRotator::ZeroRotator;
+	float PendingLookAtYaw = 0.0f;
+	float LookAtReactionElapsed = 0.0f;
+	float LookAtReactionDelay = 0.0f;
+	float LookAtRefreshElapsed = 0.0f;
+	float LookAtYawOffset = 0.0f;
+	float LookAtYawOffsetTarget = 0.0f;
+	float LookAtYawOffsetRefreshElapsed = 0.0f;
+	bool bIsLookingAtPlayer = false;
+	bool bLookAtReactionPending = false;
 };
