@@ -1,6 +1,8 @@
 #include "Subsystem/TunaSweeperEnemySpawnSubsystem.h"
 
 #include "AI/TunaSweeperEnemyCharacter.h"
+#include "AI/TunaSweeperRollingBomber.h"
+#include "AI/TunaSweeperRollingBomberSpawner.h"
 #include "Dom/JsonObject.h"
 #include "Engine/StaticMesh.h"
 #include "Engine/World.h"
@@ -22,6 +24,7 @@
 #include "Misc/Paths.h"
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
+#include "Sound/SoundBase.h"
 #include "UI/TunaSweeperInteractionMarkerWidget.h"
 #include "UObject/UObjectGlobals.h"
 
@@ -42,6 +45,10 @@ namespace TunaSweeperEnemySpawn
 	const TCHAR* DefaultLootContainerClassPath = TEXT("/Game/Interaction/BP_LootContainer.BP_LootContainer_C");
 	const TCHAR* DefaultLootContainerSpawnClassPath = TEXT("/Game/Interaction/BP_Interact_LootContainerSpawn.BP_Interact_LootContainerSpawn_C");
 	const TCHAR* DefaultSelfDestructClassPath = TEXT("/Game/Interaction/BP_Interact_SelfDestruct.BP_Interact_SelfDestruct_C");
+	const TCHAR* DefaultRollingBomberSpawnerClassPath = TEXT("/Script/TunaSweeper.TunaSweeperRollingBomberSpawner");
+	const TCHAR* DefaultRollingBomberClassPath = TEXT("/Script/TunaSweeper.TunaSweeperRollingBomber");
+	const TCHAR* DefaultRollingBomberLaunchSoundPath =
+		TEXT("/Game/Audio/SFX/SFX_RollingBomberSpawnerLaunch_FM.SFX_RollingBomberSpawnerLaunch_FM");
 	const TCHAR* DefaultTransparentObstacleClassPath = TEXT("/Game/Interaction/BP_TransparentObstacle.BP_TransparentObstacle_C");
 	const TCHAR* DefaultWorldProgressActorClassPath = TEXT("/Game/Interaction/BP_WorldProgress_BrokenBridge.BP_WorldProgress_BrokenBridge_C");
 	const TCHAR* DefaultWorldProgressCompletedActorClassPath = TEXT("/Game/Interaction/BP_WorldProgress_RepairedBridge.BP_WorldProgress_RepairedBridge_C");
@@ -136,6 +143,12 @@ namespace TunaSweeperEnemySpawn
 		{
 			return UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::SelfDestruct;
 		}
+		if (SpawnType == TEXT("rolling_bomber_spawner") ||
+			SpawnType == TEXT("rollingbomberspawner") ||
+			SpawnType == TEXT("rolling_bomber_spawn"))
+		{
+			return UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::RollingBomberSpawner;
+		}
 
 		return UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::Unknown;
 	}
@@ -157,6 +170,8 @@ namespace TunaSweeperEnemySpawn
 			return DefaultLootContainerSpawnClassPath;
 		case UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::SelfDestruct:
 			return DefaultSelfDestructClassPath;
+		case UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::RollingBomberSpawner:
+			return DefaultRollingBomberSpawnerClassPath;
 		default:
 			return nullptr;
 		}
@@ -175,6 +190,8 @@ namespace TunaSweeperEnemySpawn
 			return FText::FromString(TEXT("\uC0C1\uC790\uC2A4\uD3F0"));
 		case UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::SelfDestruct:
 			return FText::FromString(TEXT("\uC790\uD3ED"));
+		case UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::RollingBomberSpawner:
+			return FText::FromString(TEXT("Rolling Bomber Spawner"));
 		default:
 			return FText::GetEmpty();
 		}
@@ -1258,6 +1275,58 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadGameplayInteractionActorSpawnData(bool
 		SpawnDefinition.ExplosionRadius = FMath::Max(0.0f, static_cast<float>(NumericExplosionRadius));
 		SpawnDefinition.ExplosionDamage = FMath::Max(0.0f, static_cast<float>(NumericExplosionDamage));
 
+		FString RollingBomberClassPath;
+		FString RollingBomberLaunchSoundPath;
+		double NumericRollingBomberInitialSpawnCount = 2.0;
+		double NumericRollingBomberMaxSpawnCount = 8.0;
+		double NumericRollingBomberWaveIntervalSeconds = 10.0;
+		double NumericRollingBomberSpawnIntervalSeconds = 0.2;
+		double NumericRollingBomberLaunchSpeedMin = 850.0;
+		double NumericRollingBomberLaunchSpeedMax = 1100.0;
+		double NumericRollingBomberLaunchPitchMinDegrees = 38.0;
+		double NumericRollingBomberLaunchPitchMaxDegrees = 58.0;
+		double NumericRollingBomberSpawnerMaxHealth = 80.0;
+		JsonObject->TryGetStringField(TEXT("rolling_bomber_class"), RollingBomberClassPath);
+		JsonObject->TryGetStringField(TEXT("launch_sound"), RollingBomberLaunchSoundPath);
+		JsonObject->TryGetNumberField(TEXT("initial_spawn_count"), NumericRollingBomberInitialSpawnCount);
+		JsonObject->TryGetNumberField(TEXT("max_spawn_count"), NumericRollingBomberMaxSpawnCount);
+		JsonObject->TryGetNumberField(TEXT("wave_interval_seconds"), NumericRollingBomberWaveIntervalSeconds);
+		JsonObject->TryGetNumberField(TEXT("spawn_interval_seconds"), NumericRollingBomberSpawnIntervalSeconds);
+		JsonObject->TryGetNumberField(TEXT("launch_speed_min"), NumericRollingBomberLaunchSpeedMin);
+		JsonObject->TryGetNumberField(TEXT("launch_speed_max"), NumericRollingBomberLaunchSpeedMax);
+		JsonObject->TryGetNumberField(TEXT("launch_pitch_min_degrees"), NumericRollingBomberLaunchPitchMinDegrees);
+		JsonObject->TryGetNumberField(TEXT("launch_pitch_max_degrees"), NumericRollingBomberLaunchPitchMaxDegrees);
+		JsonObject->TryGetNumberField(TEXT("spawner_max_health"), NumericRollingBomberSpawnerMaxHealth);
+		const FString TrimmedRollingBomberClassPath = RollingBomberClassPath.TrimStartAndEnd();
+		const FString TrimmedRollingBomberLaunchSoundPath = RollingBomberLaunchSoundPath.TrimStartAndEnd();
+		SpawnDefinition.RollingBomberClass = TSoftClassPtr<ATunaSweeperRollingBomber>(
+			FSoftObjectPath(TrimmedRollingBomberClassPath.IsEmpty()
+				? FString(TunaSweeperEnemySpawn::DefaultRollingBomberClassPath)
+				: TrimmedRollingBomberClassPath));
+		SpawnDefinition.RollingBomberLaunchSound = TSoftObjectPtr<USoundBase>(
+			FSoftObjectPath(TrimmedRollingBomberLaunchSoundPath.IsEmpty()
+				? FString(TunaSweeperEnemySpawn::DefaultRollingBomberLaunchSoundPath)
+				: TrimmedRollingBomberLaunchSoundPath));
+		SpawnDefinition.RollingBomberInitialSpawnCount = FMath::Max(1, static_cast<int32>(NumericRollingBomberInitialSpawnCount));
+		SpawnDefinition.RollingBomberMaxSpawnCount = FMath::Max(
+			SpawnDefinition.RollingBomberInitialSpawnCount,
+			static_cast<int32>(NumericRollingBomberMaxSpawnCount));
+		SpawnDefinition.RollingBomberWaveIntervalSeconds = FMath::Max(0.01f, static_cast<float>(NumericRollingBomberWaveIntervalSeconds));
+		SpawnDefinition.RollingBomberSpawnIntervalSeconds = FMath::Max(0.01f, static_cast<float>(NumericRollingBomberSpawnIntervalSeconds));
+		SpawnDefinition.RollingBomberLaunchSpeedMin = FMath::Max(0.0f, static_cast<float>(NumericRollingBomberLaunchSpeedMin));
+		SpawnDefinition.RollingBomberLaunchSpeedMax = FMath::Max(
+			SpawnDefinition.RollingBomberLaunchSpeedMin,
+			static_cast<float>(NumericRollingBomberLaunchSpeedMax));
+		SpawnDefinition.RollingBomberLaunchPitchMinDegrees = FMath::Clamp(
+			static_cast<float>(NumericRollingBomberLaunchPitchMinDegrees),
+			0.0f,
+			89.0f);
+		SpawnDefinition.RollingBomberLaunchPitchMaxDegrees = FMath::Clamp(
+			static_cast<float>(NumericRollingBomberLaunchPitchMaxDegrees),
+			SpawnDefinition.RollingBomberLaunchPitchMinDegrees,
+			89.0f);
+		SpawnDefinition.RollingBomberSpawnerMaxHealth = FMath::Max(1.0f, static_cast<float>(NumericRollingBomberSpawnerMaxHealth));
+
 		if (SpawnDefinition.SpawnType == EGameplayInteractionActorSpawnType::LevelTravel &&
 			SpawnDefinition.TargetLevelName.IsNone())
 		{
@@ -1467,6 +1536,23 @@ void UTunaSweeperEnemySpawnSubsystem::ConfigureGameplayInteractionActor(
 					SpawnDefinition.InteractionDisplayName,
 					SpawnDefinition.MarkerWidgetClass);
 			}
+		}
+		break;
+	case EGameplayInteractionActorSpawnType::RollingBomberSpawner:
+		if (ATunaSweeperRollingBomberSpawner* RollingBomberSpawner = Cast<ATunaSweeperRollingBomberSpawner>(SpawnedActor))
+		{
+			RollingBomberSpawner->ConfigureSpawnerDefaults(
+				SpawnDefinition.RollingBomberClass,
+				SpawnDefinition.RollingBomberLaunchSound,
+				SpawnDefinition.RollingBomberInitialSpawnCount,
+				SpawnDefinition.RollingBomberMaxSpawnCount,
+				SpawnDefinition.RollingBomberWaveIntervalSeconds,
+				SpawnDefinition.RollingBomberSpawnIntervalSeconds,
+				SpawnDefinition.RollingBomberLaunchSpeedMin,
+				SpawnDefinition.RollingBomberLaunchSpeedMax,
+				SpawnDefinition.RollingBomberLaunchPitchMinDegrees,
+				SpawnDefinition.RollingBomberLaunchPitchMaxDegrees,
+				SpawnDefinition.RollingBomberSpawnerMaxHealth);
 		}
 		break;
 	default:

@@ -82,5 +82,25 @@
     "location": [1520.0, -220.0, 80.0],
     "rotation": [0.0, 0.0, 0.0],
     "scale": [1.0, 1.0, 1.0]
+  },
+  {
+    "level_name": "RaidMap",
+    "spawn_id": "TS_RollingBomberSpawner_West",
+    "spawn_type": "rolling_bomber_spawner",
+    "actor_class": "/Script/TunaSweeper.TunaSweeperRollingBomberSpawner",
+    "rolling_bomber_class": "/Script/TunaSweeper.TunaSweeperRollingBomber",
+    "launch_sound": "/Game/Audio/SFX/SFX_RollingBomberSpawnerLaunch_FM.SFX_RollingBomberSpawnerLaunch_FM",
+    "initial_spawn_count": 2,
+    "max_spawn_count": 8,
+    "wave_interval_seconds": 10.0,
+    "spawn_interval_seconds": 0.2,
+    "launch_speed_min": 850.0,
+    "launch_speed_max": 1100.0,
+    "launch_pitch_min_degrees": 38.0,
+    "launch_pitch_max_degrees": 58.0,
+    "spawner_max_health": 80.0,
+    "location": [220.0, -3600.0, 90.0],
+    "rotation": [0.0, 0.0, 0.0],
+    "scale": [1.0, 1.0, 1.0]
   }
 ]
