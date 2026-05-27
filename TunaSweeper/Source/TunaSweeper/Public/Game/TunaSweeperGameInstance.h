@@ -341,10 +341,17 @@ public:
 	FSimpleMulticastDelegate OnMapMarkersChanged;
 
 private:
+	enum class EUsableQuickSlotSaveMode : uint8
+	{
+		PreserveExisting,
+		PersistRuntime,
+		Clear
+	};
+
 	void GeneratePlayerInventoryItems();
 	void EnsureInventoryStateInitialized();
 	bool LoadGameState();
-	bool SaveGameStateInternal() const;
+	bool SaveGameStateInternal(EUsableQuickSlotSaveMode UsableQuickSlotSaveMode = EUsableQuickSlotSaveMode::PreserveExisting) const;
 	void ResetRuntimeStateForSaveSlotSelection();
 	void GenerateDefaultInventoryState();
 	void ResetPlayerSlotArrays();
@@ -390,7 +397,7 @@ private:
 	bool HasOccupiedInventorySlotsBeyondCapacity(
 		const TArray<FTunaSweeperInventorySlot>& InInventorySlots,
 		int32 Capacity) const;
-	void CollectPlayerOwnedItemUids(TSet<FGuid>& OutItemUids) const;
+	void CollectPlayerOwnedItemUids(TSet<FGuid>& OutItemUids, bool bIncludeUsableQuickSlots = true) const;
 	bool BackupExistingSaveGame(const FString& ExistingSlotName) const;
 	void TrimSaveGameBackups() const;
 	bool LoadActiveSaveSlotSelection(int32& OutSaveSlotIndex) const;

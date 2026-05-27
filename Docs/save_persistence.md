@@ -72,6 +72,8 @@ Slot arrays store item UIDs. Any item UID referenced by these slots, including n
 
 `UsableQuickSlots` stores the 3-8 quick-slot layout shown in inventory mode and reflected in the gameplay quick-slot bar. Slots 1, 2, and melee are equipment slots and are not duplicated here. Only usable items can occupy these slots; currently that means item definitions tagged `item.category.consumable` or `item.category.throwable`.
 
+Unlike memo unlocks and map markers, usable quick slots are item-possession state. Generic saves preserve the previously saved quick-slot payload without rewriting it, successful RaidMap-to-BunkerMap extraction saves write the current runtime quick slots, and death saves clear all usable quick slots.
+
 ### World Progress Objects
 
 Stored through `UTunaSweeperSaveGame::WorldProgressStates`.

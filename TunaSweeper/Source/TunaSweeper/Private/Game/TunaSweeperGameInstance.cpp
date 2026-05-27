@@ -357,7 +357,7 @@ bool UTunaSweeperGameInstance::ActivateSaveSlot(int32 SaveSlotIndex, bool bStart
 		GenerateDefaultInventoryState();
 		bInventoryStateInitialized = true;
 		RefreshLegacyPlayerInventoryItems();
-		SaveGameStateInternal();
+		SaveGameStateInternal(EUsableQuickSlotSaveMode::Clear);
 		return true;
 	}
 
@@ -1613,14 +1613,20 @@ void UTunaSweeperGameInstance::ClearInventoryAndSave()
 	ActiveLootContainerDisplayName = FText::GetEmpty();
 	ActiveLootContainerCapacity = 0;
 	bHasActiveLootContainer = false;
-	SaveGameStateInternal();
+	SaveGameStateInternal(EUsableQuickSlotSaveMode::Clear);
 	BroadcastInventoryStateChanged();
 }
 
 void UTunaSweeperGameInstance::HandleLevelTravelPersistence(FName SourceLevelName, FName TargetLevelName)
 {
-	if (IsBunkerToRaidTravel(SourceLevelName, TargetLevelName) ||
-		IsRaidToBunkerTravel(SourceLevelName, TargetLevelName))
+	if (IsRaidToBunkerTravel(SourceLevelName, TargetLevelName))
+	{
+		EnsureInventoryStateInitialized();
+		SaveGameStateInternal(EUsableQuickSlotSaveMode::PersistRuntime);
+		return;
+	}
+
+	if (IsBunkerToRaidTravel(SourceLevelName, TargetLevelName))
 	{
 		SaveGameState();
 	}
@@ -1783,8 +1789,18 @@ bool UTunaSweeperGameInstance::LoadGameState()
 	return true;
 }
 
-bool UTunaSweeperGameInstance::SaveGameStateInternal() const
+bool UTunaSweeperGameInstance::SaveGameStateInternal(
+	UTunaSweeperGameInstance::EUsableQuickSlotSaveMode UsableQuickSlotSaveMode) const
 {
+	const FString ExistingSlotName = GetExistingSaveGameSlotName(ActiveSaveSlotIndex);
+	UTunaSweeperSaveGame* ExistingSaveGame = nullptr;
+	if (UsableQuickSlotSaveMode == EUsableQuickSlotSaveMode::PreserveExisting && !ExistingSlotName.IsEmpty())
+	{
+		ExistingSaveGame = Cast<UTunaSweeperSaveGame>(UGameplayStatics::LoadGameFromSlot(
+			ExistingSlotName,
+			TunaSweeperSave::SaveUserIndex));
+	}
+
 	UTunaSweeperSaveGame* SaveGame = Cast<UTunaSweeperSaveGame>(
 		UGameplayStatics::CreateSaveGameObject(UTunaSweeperSaveGame::StaticClass()));
 	if (!SaveGame)
@@ -1793,7 +1809,9 @@ bool UTunaSweeperGameInstance::SaveGameStateInternal() const
 	}
 
 	TSet<FGuid> PlayerOwnedItemUids;
-	CollectPlayerOwnedItemUids(PlayerOwnedItemUids);
+	CollectPlayerOwnedItemUids(
+		PlayerOwnedItemUids,
+		UsableQuickSlotSaveMode == EUsableQuickSlotSaveMode::PersistRuntime);
 	for (const FGuid& ItemUid : PlayerOwnedItemUids)
 	{
 		if (const FTunaSweeperItemInstance* ItemInstance = ItemInstancesByUid.Find(ItemUid))
@@ -1833,9 +1851,87 @@ bool UTunaSweeperGameInstance::SaveGameStateInternal() const
 	SaveGame->InventorySlots = PlayerInventorySlots;
 	SaveGame->EquipmentSlots = EquipmentSlots;
 	SaveGame->AuxiliaryBagSlots = AuxiliaryBagSlots;
-	SaveGame->UsableQuickSlots = UsableQuickSlots;
 
-	const FString ExistingSlotName = GetExistingSaveGameSlotName(ActiveSaveSlotIndex);
+	switch (UsableQuickSlotSaveMode)
+	{
+	case EUsableQuickSlotSaveMode::PersistRuntime:
+		SaveGame->UsableQuickSlots = UsableQuickSlots;
+		break;
+	case EUsableQuickSlotSaveMode::PreserveExisting:
+		if (ExistingSaveGame)
+		{
+			TMap<FGuid, FTunaSweeperItemInstance> ExistingItemInstancesByUid;
+			for (const FTunaSweeperItemInstance& ExistingItemInstance : ExistingSaveGame->ItemInstances)
+			{
+				FTunaSweeperItemInstance NormalizedItemInstance = ExistingItemInstance;
+				TunaSweeperInventory::NormalizeLoadedAmmoPersistenceFields(NormalizedItemInstance);
+				if (NormalizedItemInstance.IsValid())
+				{
+					ExistingItemInstancesByUid.Add(NormalizedItemInstance.Uid, NormalizedItemInstance);
+				}
+			}
+
+			TSet<FGuid> SavedItemUids;
+			for (const FTunaSweeperItemInstance& SavedItemInstance : SaveGame->ItemInstances)
+			{
+				if (SavedItemInstance.Uid.IsValid())
+				{
+					SavedItemUids.Add(SavedItemInstance.Uid);
+				}
+			}
+
+			TFunction<void(const FGuid&)> AppendExistingItemUid;
+			AppendExistingItemUid = [
+				&AppendExistingItemUid,
+				&ExistingItemInstancesByUid,
+				&SavedItemUids,
+				SaveGame](const FGuid& ItemUid)
+			{
+				if (!ItemUid.IsValid() || SavedItemUids.Contains(ItemUid))
+				{
+					return;
+				}
+
+				const FTunaSweeperItemInstance* ExistingItemInstance = ExistingItemInstancesByUid.Find(ItemUid);
+				if (!ExistingItemInstance)
+				{
+					return;
+				}
+
+				SavedItemUids.Add(ItemUid);
+				SaveGame->ItemInstances.Add(TunaSweeperInventory::MakeItemInstanceForSave(*ExistingItemInstance));
+				for (const TPair<FName, FGuid>& AttachmentSlot : ExistingItemInstance->AttachmentSlots)
+				{
+					AppendExistingItemUid(AttachmentSlot.Value);
+				}
+			};
+
+			SaveGame->UsableQuickSlots = ExistingSaveGame->UsableQuickSlots;
+			EnsureSlotArraySize(SaveGame->UsableQuickSlots, TunaSweeperInventory::UsableQuickSlotCount);
+			for (FTunaSweeperInventorySlot& UsableQuickSlot : SaveGame->UsableQuickSlots)
+			{
+				if (!UsableQuickSlot.ItemUid.IsValid())
+				{
+					continue;
+				}
+
+				if (!ExistingItemInstancesByUid.Contains(UsableQuickSlot.ItemUid))
+				{
+					UsableQuickSlot.Clear();
+					continue;
+				}
+
+				AppendExistingItemUid(UsableQuickSlot.ItemUid);
+			}
+		}
+		break;
+	case EUsableQuickSlotSaveMode::Clear:
+	default:
+		SaveGame->UsableQuickSlots.Reset();
+		break;
+	}
+	EnsureSlotArraySize(SaveGame->UsableQuickSlots, TunaSweeperInventory::UsableQuickSlotCount);
+
 	if (!ExistingSlotName.IsEmpty() && !BackupExistingSaveGame(ExistingSlotName))
 	{
 		return false;
@@ -2527,7 +2623,9 @@ bool UTunaSweeperGameInstance::HasOccupiedInventorySlotsBeyondCapacity(
 	return false;
 }
 
-void UTunaSweeperGameInstance::CollectPlayerOwnedItemUids(TSet<FGuid>& OutItemUids) const
+void UTunaSweeperGameInstance::CollectPlayerOwnedItemUids(
+	TSet<FGuid>& OutItemUids,
+	bool bIncludeUsableQuickSlots) const
 {
 	TFunction<void(const FGuid&)> CollectItemUid = [this, &OutItemUids, &CollectItemUid](const FGuid& ItemUid)
 	{
@@ -2557,7 +2655,10 @@ void UTunaSweeperGameInstance::CollectPlayerOwnedItemUids(TSet<FGuid>& OutItemUi
 	CollectSlots(PlayerInventorySlots);
 	CollectSlots(EquipmentSlots);
 	CollectSlots(AuxiliaryBagSlots);
-	CollectSlots(UsableQuickSlots);
+	if (bIncludeUsableQuickSlots)
+	{
+		CollectSlots(UsableQuickSlots);
+	}
 }
 
 bool UTunaSweeperGameInstance::BackupExistingSaveGame(const FString& ExistingSlotName) const
