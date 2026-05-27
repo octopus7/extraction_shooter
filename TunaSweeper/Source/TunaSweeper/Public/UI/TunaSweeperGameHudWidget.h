@@ -12,6 +12,7 @@ class UTunaSweeperHudInventoryAreaWidget;
 class UTunaSweeperHudItemInfoPanelWidget;
 class UTunaSweeperHudQuickSlotBarWidget;
 class UTunaSweeperHudTopReserveWidget;
+class UTunaSweeperMemoWidget;
 class UBorder;
 class UTextBlock;
 class UWidget;
@@ -42,6 +43,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
 	void ShowLootContainerPanel(const FTunaSweeperLootContainerInstance& ContainerInstance);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
+	void ShowMemoPanel(int32 MemoId);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
 	void SetHudMode(ETunaSweeperHudMode InHudMode);
@@ -92,6 +96,7 @@ protected:
 
 private:
 	void ApplyHudModeVisibility();
+	void EnsureMemoPanelWidget();
 	void RefreshBottomStatusFromGameInstance();
 	void RefreshQuickSlotsFromGameState();
 	void RefreshReloadWidgets();
@@ -127,6 +132,9 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<UTextBlock> QuestTrackerObjectiveText;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTunaSweeperMemoWidget> MemoPanelWidget;
 
 	UPROPERTY(Transient)
 	TArray<TObjectPtr<UBorder>> CenterReloadSegments;

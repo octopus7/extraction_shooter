@@ -8,6 +8,7 @@
 #include "Interaction/TunaSweeperLevelTravelInteractableActor.h"
 #include "Interaction/TunaSweeperLootContainerActor.h"
 #include "Interaction/TunaSweeperLootContainerSpawnInteractableActor.h"
+#include "Interaction/TunaSweeperMemoActor.h"
 #include "Interaction/TunaSweeperPersistentDoorActor.h"
 #include "Interaction/TunaSweeperPickupItemActor.h"
 #include "Interaction/TunaSweeperSelfDestructInteractableActor.h"
@@ -17,6 +18,7 @@
 #include "Player/TunaSweeperPlayerController.h"
 #include "Stats/Stats.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
+#include "Subsystem/TunaSweeperMemoSubsystem.h"
 
 namespace TunaSweeperInteractionQuestEvents
 {
@@ -44,6 +46,8 @@ namespace TunaSweeperInteractionQuestEvents
 			return FName(TEXT("persistent_door"));
 		case ETunaSweeperInteractionType::WarpPoint:
 			return FName(TEXT("warp_point"));
+		case ETunaSweeperInteractionType::Memo:
+			return FName(TEXT("memo"));
 		default:
 			return NAME_None;
 		}
@@ -137,6 +141,9 @@ bool UTunaSweeperInteractionSubsystem::RequestInteraction(UTunaSweeperInteractab
 	case ETunaSweeperInteractionType::WarpPoint:
 		bHandled = HandleWarpPointInteraction(Interactable, InstigatorPawn);
 		break;
+	case ETunaSweeperInteractionType::Memo:
+		bHandled = HandleMemoInteraction(Interactable, InstigatorPawn);
+		break;
 	default:
 		return false;
 	}
@@ -162,6 +169,16 @@ bool UTunaSweeperInteractionSubsystem::CanOfferInteraction(const UTunaSweeperInt
 	if (!IsValid(Interactable) || Interactable->GetInteractionType() == ETunaSweeperInteractionType::None)
 	{
 		return false;
+	}
+
+	if (Interactable->GetInteractionType() == ETunaSweeperInteractionType::Memo)
+	{
+		const ATunaSweeperMemoActor* MemoActor = Cast<ATunaSweeperMemoActor>(Interactable->GetOwner());
+		UTunaSweeperGameInstance* TunaGameInstance = GetWorld() ? GetWorld()->GetGameInstance<UTunaSweeperGameInstance>() : nullptr;
+		return MemoActor &&
+			TunaGameInstance &&
+			MemoActor->GetMemoId() > 0 &&
+			!TunaGameInstance->IsMemoAcquired(MemoActor->GetMemoId());
 	}
 
 	if (Interactable->GetInteractionType() != ETunaSweeperInteractionType::Quest)
@@ -343,6 +360,45 @@ bool UTunaSweeperInteractionSubsystem::HandleWarpPointInteraction(
 		? Cast<ATunaSweeperWarpPointActor>(Interactable->GetOwner())
 		: nullptr;
 	return WarpPointActor && WarpPointActor->WarpInstigator(InstigatorPawn);
+}
+
+bool UTunaSweeperInteractionSubsystem::HandleMemoInteraction(
+	UTunaSweeperInteractableComponent* Interactable,
+	APawn* InstigatorPawn)
+{
+	ATunaSweeperMemoActor* MemoActor = Interactable
+		? Cast<ATunaSweeperMemoActor>(Interactable->GetOwner())
+		: nullptr;
+	if (!MemoActor || !InstigatorPawn)
+	{
+		return false;
+	}
+
+	const int32 MemoId = MemoActor->GetMemoId();
+	UTunaSweeperGameInstance* TunaGameInstance = GetWorld() ? GetWorld()->GetGameInstance<UTunaSweeperGameInstance>() : nullptr;
+	if (!TunaGameInstance || TunaGameInstance->IsMemoAcquired(MemoId))
+	{
+		return false;
+	}
+
+	FTunaSweeperMemoDefinition MemoDefinition;
+	UTunaSweeperMemoSubsystem* MemoSubsystem = GetWorld() && GetWorld()->GetGameInstance()
+		? GetWorld()->GetGameInstance()->GetSubsystem<UTunaSweeperMemoSubsystem>()
+		: nullptr;
+	if (!MemoSubsystem || !MemoSubsystem->TryGetMemoDefinition(MemoId, MemoDefinition))
+	{
+		return false;
+	}
+
+	TunaGameInstance->MarkMemoAcquired(MemoId, false);
+
+	if (ATunaSweeperPlayerController* TunaPlayerController = Cast<ATunaSweeperPlayerController>(InstigatorPawn->GetController()))
+	{
+		TunaPlayerController->OpenMemoPanel(MemoId);
+	}
+
+	MemoActor->Destroy();
+	return true;
 }
 
 void UTunaSweeperInteractionSubsystem::RefreshFocusedInteractable()

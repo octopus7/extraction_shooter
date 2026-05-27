@@ -188,6 +188,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Scenario")
 	bool CompletePendingScenarioBunkerEntryIfNeeded();
 
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Memo")
+	bool IsMemoAcquired(int32 MemoId);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Memo")
+	bool MarkMemoAcquired(int32 MemoId, bool bSaveImmediately = false);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Memo")
+	void GetAcquiredMemoIds(TArray<int32>& OutMemoIds);
+
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
 	void SetPlayerHudState(const FTunaSweeperPlayerHudState& InHudState);
 
@@ -309,6 +318,7 @@ public:
 
 	FSimpleMulticastDelegate OnInventoryStateChanged;
 	FSimpleMulticastDelegate OnSelectedInventoryItemChanged;
+	FSimpleMulticastDelegate OnMemoStateChanged;
 
 private:
 	void GeneratePlayerInventoryItems();
@@ -429,6 +439,9 @@ private:
 
 	UPROPERTY(Transient)
 	TMap<FName, FTunaSweeperWorldProgressSaveData> WorldProgressStatesById;
+
+	UPROPERTY(Transient)
+	TSet<int32> AcquiredMemoIds;
 
 	UPROPERTY(Transient)
 	FName PendingScenarioCompletionFlag;

@@ -756,3 +756,8 @@ A. 가능하다. 13번 `waterfilter` 로그에서 첫 번째 트림은 `x=377, y
 Q. 캔봇은 패키징 전에 쿠킹 대상에 넣어야 하는가?
 
 A. `BP_CanBot`은 JSON 문자열 soft class path로 참조되므로 원칙적으로 쿠커가 자동 추적한다고 기대하면 안 된다. 현재 `DefaultGame.ini`에 `/Game/Characters`가 `DirectoriesToAlwaysCook`으로 등록되어 있어서 `/Game/Characters/CanBot/BP_CanBot`은 이미 쿠킹 대상이다. 런타임 스폰 JSON이 있는 `Content/Data`도 `DirectoriesToAlwaysStageAsNonUFS`에 등록되어 있어 패키징 후 파일 로드 경로에 포함된다.
+## 2026-05-28 00:13:02 (소요시간: 3분 미만)
+
+Q. 게임 화면 상단의 어두운 블럭은 예약된 영역이지?
+
+A. 맞다. 게임 HUD 상단의 어두운 블럭은 `WBP_HudTopReserve` / `TopStatusReserveWidget`로 생성되는 예약 영역이다. `BuildHudTopReserveWidgetTree`에서 높이 88px의 반투명 어두운 배경만 만들고, 실제 표시 내용은 아직 넣지 않은 상태다. 기존 요청에도 “상단에는 상시 표시 정보를 위해 일정 높이 공간을 예약할 것”으로 기록되어 있다.

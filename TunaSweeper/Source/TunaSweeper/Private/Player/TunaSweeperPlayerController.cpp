@@ -1059,6 +1059,24 @@ void ATunaSweeperPlayerController::OpenQuestPanel(FName QuestId)
 	bShowMouseCursor = true;
 }
 
+void ATunaSweeperPlayerController::OpenMemoPanel(int32 MemoId)
+{
+	if (!IsLocalController())
+	{
+		return;
+	}
+
+	EnsureGameHudWidget();
+	if (!GameHudWidget)
+	{
+		return;
+	}
+
+	GameHudWidget->ShowMemoPanel(MemoId);
+	CancelPawnGameplayActions();
+	ApplyDefaultGameInputMode();
+}
+
 void ATunaSweeperPlayerController::ApplyDefaultGameInputMode()
 {
 	FInputModeGameAndUI InputMode;

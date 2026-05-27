@@ -6,7 +6,7 @@ Update it whenever a new state field is expected to persist across save slots, l
 ## Current Save Container
 
 - Save object: `UTunaSweeperSaveGame`
-- Current save version: `5`
+- Current save version: `6`
 - Runtime owner: `UTunaSweeperGameInstance`
 - Save entry point: `UTunaSweeperGameInstance::SaveGameStateInternal()`
 - Load entry point: `UTunaSweeperGameInstance::LoadGameState()`
@@ -24,6 +24,12 @@ Update it whenever a new state field is expected to persist across save slots, l
 
 Scenario progress is persisted per save slot through `UTunaSweeperSaveGame::CompletedScenarioFlags`.
 See [Docs/scenario_progress_flags.md](scenario_progress_flags.md) for the flag contract, routing rules, and reuse constraints.
+
+### Memo Unlocks
+
+Collected memo ids are persisted per save slot through `UTunaSweeperSaveGame::AcquiredMemoIds`.
+
+Memo interaction marks the id as acquired in `UTunaSweeperGameInstance` memory immediately and destroys the spawned memo actor. It does not force an immediate save by default; the acquired ids are written on the next normal save, level-travel save, death save, or any other call to `SaveGameStateInternal()`. Runtime memo spawns must query this in-memory set so a collected memo stays hidden after death/respawn even before the next disk write.
 
 ### Player-Owned Item Instances
 

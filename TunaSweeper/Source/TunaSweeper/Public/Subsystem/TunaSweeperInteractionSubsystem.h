@@ -6,6 +6,7 @@
 #include "TunaSweeperInteractionSubsystem.generated.h"
 
 class ATunaSweeperLootContainerActor;
+class ATunaSweeperMemoActor;
 class ATunaSweeperPersistentDoorActor;
 
 UCLASS()
@@ -44,6 +45,7 @@ private:
 	bool HandleWorldProgressInteraction(UTunaSweeperInteractableComponent* Interactable, APawn* InstigatorPawn);
 	bool HandlePersistentDoorInteraction(UTunaSweeperInteractableComponent* Interactable);
 	bool HandleWarpPointInteraction(UTunaSweeperInteractableComponent* Interactable, APawn* InstigatorPawn);
+	bool HandleMemoInteraction(UTunaSweeperInteractableComponent* Interactable, APawn* InstigatorPawn);
 
 	TSet<TWeakObjectPtr<UTunaSweeperInteractableComponent>> RegisteredInteractables;
 	TWeakObjectPtr<UTunaSweeperInteractableComponent> FocusedInteractable;

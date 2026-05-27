@@ -11,7 +11,7 @@ namespace TunaSweeperSave
 {
 	const TCHAR* SaveSlotNamePrefix = TEXT("TunaSweeperSave_Slot");
 	const TCHAR* SaveSettingsSlotName = TEXT("TunaSweeperSaveSettings");
-	constexpr int32 CurrentSaveVersion = 5;
+	constexpr int32 CurrentSaveVersion = 6;
 	constexpr int32 SaveUserIndex = 0;
 	constexpr int32 MinSaveSlotIndex = 1;
 	constexpr int32 MaxSaveSlotIndex = 3;
@@ -422,6 +422,42 @@ bool UTunaSweeperGameInstance::CompletePendingScenarioBunkerEntryIfNeeded()
 	PendingScenarioCompletionFlag = NAME_None;
 	MarkScenarioProgressFlag(ScenarioFlag, true);
 	return true;
+}
+
+bool UTunaSweeperGameInstance::IsMemoAcquired(int32 MemoId)
+{
+	EnsureInventoryStateInitialized();
+	return MemoId > 0 && AcquiredMemoIds.Contains(MemoId);
+}
+
+bool UTunaSweeperGameInstance::MarkMemoAcquired(int32 MemoId, bool bSaveImmediately)
+{
+	if (MemoId <= 0)
+	{
+		return false;
+	}
+
+	EnsureInventoryStateInitialized();
+	const int32 PreviousCount = AcquiredMemoIds.Num();
+	AcquiredMemoIds.Add(MemoId);
+	if (AcquiredMemoIds.Num() == PreviousCount)
+	{
+		return false;
+	}
+
+	OnMemoStateChanged.Broadcast();
+	if (bSaveImmediately)
+	{
+		SaveGameStateInternal();
+	}
+	return true;
+}
+
+void UTunaSweeperGameInstance::GetAcquiredMemoIds(TArray<int32>& OutMemoIds)
+{
+	EnsureInventoryStateInitialized();
+	OutMemoIds = AcquiredMemoIds.Array();
+	OutMemoIds.Sort();
 }
 
 void UTunaSweeperGameInstance::SetPlayerHudState(const FTunaSweeperPlayerHudState& InHudState)
@@ -1523,6 +1559,14 @@ bool UTunaSweeperGameInstance::LoadGameState()
 			CompletedScenarioFlags.Add(ScenarioFlag);
 		}
 	}
+	AcquiredMemoIds.Reset();
+	for (int32 MemoId : SaveGame->AcquiredMemoIds)
+	{
+		if (MemoId > 0)
+		{
+			AcquiredMemoIds.Add(MemoId);
+		}
+	}
 	WorldProgressStatesById.Reset();
 	for (const FTunaSweeperWorldProgressSaveData& SavedWorldProgressState : SaveGame->WorldProgressStates)
 	{
@@ -1615,6 +1659,8 @@ bool UTunaSweeperGameInstance::SaveGameStateInternal() const
 	SaveGame->TotalPlaySeconds = GetCurrentActiveSlotTotalPlaySeconds();
 	SaveGame->LastSavedAtTicks = FDateTime::Now().GetTicks();
 	SaveGame->CompletedScenarioFlags = CompletedScenarioFlags.Array();
+	SaveGame->AcquiredMemoIds = AcquiredMemoIds.Array();
+	SaveGame->AcquiredMemoIds.Sort();
 	WorldProgressStatesById.GenerateValueArray(SaveGame->WorldProgressStates);
 	SaveGame->WorldProgressStates.Sort([](
 		const FTunaSweeperWorldProgressSaveData& Left,
@@ -1670,6 +1716,7 @@ void UTunaSweeperGameInstance::ResetRuntimeStateForSaveSlotSelection()
 	LoadedSlotTotalPlaySeconds = 0.0f;
 	ActiveSlotStartTimeSeconds = FPlatformTime::Seconds();
 	CompletedScenarioFlags.Reset();
+	AcquiredMemoIds.Reset();
 	WorldProgressStatesById.Reset();
 	PendingScenarioCompletionFlag = NAME_None;
 	if (UTunaSweeperQuestSubsystem* QuestSubsystem = GetSubsystem<UTunaSweeperQuestSubsystem>())
@@ -1682,6 +1729,7 @@ void UTunaSweeperGameInstance::GenerateDefaultInventoryState()
 {
 	ItemInstancesByUid.Reset();
 	CompletedScenarioFlags.Reset();
+	AcquiredMemoIds.Reset();
 	WorldProgressStatesById.Reset();
 	PendingScenarioCompletionFlag = NAME_None;
 	if (UTunaSweeperQuestSubsystem* QuestSubsystem = GetSubsystem<UTunaSweeperQuestSubsystem>())

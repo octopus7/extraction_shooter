@@ -22,6 +22,7 @@
 #include "UI/TunaSweeperHudItemInfoPanelWidget.h"
 #include "UI/TunaSweeperHudQuickSlotBarWidget.h"
 #include "UI/TunaSweeperHudTopReserveWidget.h"
+#include "UI/TunaSweeperMemoWidget.h"
 #include "UI/TunaSweeperUIFont.h"
 
 void UTunaSweeperGameHudWidget::NativeConstruct()
@@ -47,6 +48,7 @@ void UTunaSweeperGameHudWidget::NativeConstruct()
 	}
 
 	EnsureQuestTrackerWidgets();
+	EnsureMemoPanelWidget();
 	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
 	CacheAmmoReloadWidgets();
 	SetHudMode(ETunaSweeperHudMode::None);
@@ -185,6 +187,16 @@ void UTunaSweeperGameHudWidget::ShowLootContainerPanel(const FTunaSweeperLootCon
 	HandleSelectedInventoryItemChanged();
 }
 
+void UTunaSweeperGameHudWidget::ShowMemoPanel(int32 MemoId)
+{
+	SetHudMode(ETunaSweeperHudMode::Memo);
+	EnsureMemoPanelWidget();
+	if (MemoPanelWidget)
+	{
+		MemoPanelWidget->OpenMemo(MemoId);
+	}
+}
+
 void UTunaSweeperGameHudWidget::SetHudMode(ETunaSweeperHudMode InHudMode)
 {
 	ActiveHudMode = InHudMode;
@@ -222,6 +234,7 @@ void UTunaSweeperGameHudWidget::ApplyHudModeVisibility()
 {
 	const bool bUtilityModeOpen = ActiveHudMode != ETunaSweeperHudMode::None;
 	const bool bInventoryMode = ActiveHudMode == ETunaSweeperHudMode::Inventory;
+	const bool bMemoMode = ActiveHudMode == ETunaSweeperHudMode::Memo;
 
 	if (TopStatusReserveWidget)
 	{
@@ -245,6 +258,16 @@ void UTunaSweeperGameHudWidget::ApplyHudModeVisibility()
 		ItemInfoPanelWidget->SetVisibility(ESlateVisibility::Collapsed);
 	}
 
+	EnsureMemoPanelWidget();
+	if (MemoPanelWidget)
+	{
+		MemoPanelWidget->SetVisibility(bUtilityModeOpen && bMemoMode ? ESlateVisibility::SelfHitTestInvisible : ESlateVisibility::Collapsed);
+		if (bUtilityModeOpen && bMemoMode)
+		{
+			MemoPanelWidget->RefreshMemoView();
+		}
+	}
+
 	if (ExternalPanelWidget)
 	{
 		const bool bShowExternalPanel =
@@ -256,12 +279,45 @@ void UTunaSweeperGameHudWidget::ApplyHudModeVisibility()
 
 	if (UnsupportedModePanel)
 	{
-		UnsupportedModePanel->SetVisibility(bUtilityModeOpen && !bInventoryMode ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
+		UnsupportedModePanel->SetVisibility(bUtilityModeOpen && !bInventoryMode && !bMemoMode ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
 	}
 
 	if (UnsupportedModeText)
 	{
 		UnsupportedModeText->SetText(FText::FromString(TEXT("\uBBF8\uAD6C\uD604")));
+	}
+}
+
+void UTunaSweeperGameHudWidget::EnsureMemoPanelWidget()
+{
+	if (MemoPanelWidget || !WidgetTree)
+	{
+		return;
+	}
+
+	UCanvasPanel* RootCanvas = Cast<UCanvasPanel>(WidgetTree->RootWidget);
+	if (!RootCanvas)
+	{
+		return;
+	}
+
+	MemoPanelWidget = CreateWidget<UTunaSweeperMemoWidget>(
+		GetOwningPlayer(),
+		UTunaSweeperMemoWidget::StaticClass());
+	if (!MemoPanelWidget)
+	{
+		return;
+	}
+
+	MemoPanelWidget->SetVisibility(ESlateVisibility::Collapsed);
+	UCanvasPanelSlot* CanvasSlot = RootCanvas->AddChildToCanvas(MemoPanelWidget);
+	if (CanvasSlot)
+	{
+		CanvasSlot->SetAnchors(FAnchors(0.5f, 0.5f));
+		CanvasSlot->SetAlignment(FVector2D(0.5f, 0.5f));
+		CanvasSlot->SetPosition(FVector2D(0.0f, 34.0f));
+		CanvasSlot->SetSize(FVector2D(1180.0f, 640.0f));
+		CanvasSlot->SetZOrder(20);
 	}
 }
 

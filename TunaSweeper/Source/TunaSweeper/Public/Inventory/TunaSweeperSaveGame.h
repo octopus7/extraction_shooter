@@ -38,7 +38,7 @@ class TUNASWEEPER_API UTunaSweeperSaveGame : public USaveGame
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Save")
-	int32 SaveVersion = 5;
+	int32 SaveVersion = 6;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Save")
 	int32 SaveSlotIndex = 1;
@@ -51,6 +51,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Scenario")
 	TArray<FName> CompletedScenarioFlags;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Memo")
+	TArray<int32> AcquiredMemoIds;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Inventory")
 	TArray<FTunaSweeperItemInstance> ItemInstances;

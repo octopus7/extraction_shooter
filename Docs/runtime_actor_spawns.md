@@ -31,3 +31,12 @@
 - `TransparentObstacleSpawns.json`: 반투명 장애물 초기 배치.
 - `WorldProgressObjectSpawns.json`: 월드 진행 오브젝트 초기 배치.
 - `WarpPointSpawns.json`: 워프 포인트 초기 배치.
+## MemoSpawns.json
+
+File: `TunaSweeper/Content/Data/MemoSpawns.json`
+
+Memo actors are spawned by `UTunaSweeperMemoSubsystem` after map load. Each row uses `level_name`, `location`, and `memo_id`; optional fields include `actor_class`, `visual_mesh`, `visual_material`, `visual_scale`, `visual_relative_location`, `rotation`, `scale`, `spawn_id`, `interaction_display_name`, and `marker_widget_class`.
+
+The subsystem skips rows whose `memo_id` is already present in `UTunaSweeperGameInstance::AcquiredMemoIds`, so collected memos do not respawn in the same runtime session or after a saved reload.
+
+Definitions are read from `TunaSweeper/Content/Data/MemoDefinitions.json`.
