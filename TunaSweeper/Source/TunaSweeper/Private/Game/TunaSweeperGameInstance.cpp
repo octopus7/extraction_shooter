@@ -3174,6 +3174,13 @@ ETunaSweeperItemTextLanguage UTunaSweeperGameInstance::DetectDefaultLanguageFrom
 
 void UTunaSweeperGameInstance::ApplyCurrentLanguageCulture() const
 {
+#if WITH_EDITOR
+	if (GIsEditor)
+	{
+		return;
+	}
+#endif
+
 	FInternationalization::Get().SetCurrentCulture(TunaSweeperLanguage::ToLanguageCode(CurrentTextLanguage));
 }
 
