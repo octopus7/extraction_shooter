@@ -123,6 +123,7 @@ namespace TunaSweeperEditorSetup
 	const FString CameraModeInputTaskId = TEXT("2026-05-26_AddCameraModeInputV1");
 	const FString SprintInputTaskId = TEXT("2026-05-28_AddSprintInputV1");
 	const FString RollInputTaskId = TEXT("2026-05-28_AddRollInputV1");
+	const FString MapInputTaskId = TEXT("2026-05-28_AddMapInputV1");
 	const FString LootContainerAndSpawnerTaskId = TEXT("2026-05-11_CreateLootContainerAndSpawnerAssetsV1");
 	const FString LootContainerOccupancyHeaderTaskId = TEXT("2026-05-18_AddLootContainerOccupancyHeaderV1");
 	const FString CannedTunaIconImportTaskId = TEXT("2026-05-11_ImportCannedTunaIconV1");
@@ -176,6 +177,7 @@ namespace TunaSweeperEditorSetup
 	const FString CameraModeActionName = TEXT("IA_CameraMode");
 	const FString SprintActionName = TEXT("IA_Sprint");
 	const FString RollActionName = TEXT("IA_Roll");
+	const FString MapActionName = TEXT("IA_Map");
 	const FString QuickSlotActionNamePrefix = TEXT("IA_QuickSlot");
 	const FString MappingContextName = TEXT("IMC_Player");
 	const FString UIAssetPath = TEXT("/Game/UI");
@@ -256,6 +258,8 @@ namespace TunaSweeperEditorSetup
 	const FString WarpPointInteractionAssetName = TEXT("BP_WarpPoint");
 	const FString WarpPointEnergyMaterialAssetName = TEXT("M_WarpPointEnergy");
 	const FString WarpPointNoiseTextureAssetName = TEXT("T_WarpPointNoise");
+	const FString MemoStorageDeviceTextureAssetName = TEXT("T_MemoStorageDevice");
+	const FString MemoStorageDeviceMaterialAssetName = TEXT("M_MemoStorageDevice");
 	const FString TransparentObstacleAssetName = TEXT("BP_TransparentObstacle");
 	const FString WorldProgressBrokenBridgeAssetName = TEXT("BP_WorldProgress_BrokenBridge");
 	const FString WorldProgressRepairedBridgeAssetName = TEXT("BP_WorldProgress_RepairedBridge");
@@ -1678,6 +1682,32 @@ namespace TunaSweeperEditorSetup
 		}
 
 		MappingContext->ContextDescription = FText::FromString(TEXT("TunaSweeper player movement, combat, interaction, inventory, quick slot, ammo, reload, camera mode, sprint, and roll input."));
+		MappingContext->MarkPackageDirty();
+		return SaveAsset(MappingContext);
+	}
+
+	bool EnsureMapInputAssets()
+	{
+		UInputAction* MapAction = EnsureInputAction(
+			MapActionName,
+			EInputActionValueType::Boolean,
+			EInputActionAccumulationBehavior::TakeHighestAbsoluteValue);
+
+		UInputMappingContext* MappingContext = LoadObject<UInputMappingContext>(
+			nullptr,
+			*GetAssetObjectPath(InputAssetPath, MappingContextName));
+
+		if (!MapAction || !MappingContext)
+		{
+			return false;
+		}
+
+		if (!HasInputMapping(MappingContext, MapAction, EKeys::M))
+		{
+			MappingContext->MapKey(MapAction, EKeys::M);
+		}
+
+		MappingContext->ContextDescription = FText::FromString(TEXT("TunaSweeper player movement, combat, interaction, inventory, quick slot, ammo, reload, camera mode, sprint, roll, and map input."));
 		MappingContext->MarkPackageDirty();
 		return SaveAsset(MappingContext);
 	}
@@ -3658,6 +3688,222 @@ namespace TunaSweeperEditorSetup
 		Texture->PostEditChange();
 		Texture->MarkPackageDirty();
 		SaveAsset(Texture);
+	}
+
+	void ConfigureImportedWorldTexture(UTexture2D* Texture)
+	{
+		if (!Texture)
+		{
+			return;
+		}
+
+		Texture->Modify();
+		Texture->CompressionSettings = TC_Default;
+		Texture->MipGenSettings = TMGS_FromTextureGroup;
+		Texture->LODGroup = TEXTUREGROUP_World;
+		Texture->SRGB = true;
+		Texture->UpdateResource();
+		Texture->PostEditChange();
+		Texture->MarkPackageDirty();
+		SaveAsset(Texture);
+	}
+
+	bool ImportWorldTexture(
+		const FString& InSourceFile,
+		const FString& DestinationPath,
+		const FString& AssetName,
+		UTexture2D** OutTexture = nullptr)
+	{
+		if (OutTexture)
+		{
+			*OutTexture = nullptr;
+		}
+
+		FString SourceFile = InSourceFile;
+		FPaths::NormalizeFilename(SourceFile);
+		SourceFile = FPaths::ConvertRelativePathToFull(SourceFile);
+		FPaths::CollapseRelativeDirectories(SourceFile);
+
+		if (!FPaths::FileExists(SourceFile))
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Missing world texture source: %s"), *SourceFile);
+			return false;
+		}
+
+		if (AssetName.IsEmpty() || !FPackageName::IsValidLongPackageName(DestinationPath))
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Invalid world texture destination: path=%s asset=%s"), *DestinationPath, *AssetName);
+			return false;
+		}
+
+		const FString ObjectPath = GetAssetObjectPath(DestinationPath, AssetName);
+		FString ImportFile = SourceFile;
+		if (FPaths::GetBaseFilename(SourceFile) != AssetName)
+		{
+			const FString ImportDirectory = FPaths::Combine(FPaths::ProjectSavedDir(), TEXT("TunaSweeperWorldTextureImport"));
+			IFileManager::Get().MakeDirectory(*ImportDirectory, true);
+			ImportFile = FPaths::Combine(ImportDirectory, AssetName + TEXT(".") + FPaths::GetExtension(SourceFile));
+			if (IFileManager::Get().Copy(*ImportFile, *SourceFile, true, true) != COPY_OK)
+			{
+				UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to stage world texture import source: %s -> %s"), *SourceFile, *ImportFile);
+				return false;
+			}
+		}
+
+		UAutomatedAssetImportData* ImportData = NewObject<UAutomatedAssetImportData>();
+		ImportData->DestinationPath = DestinationPath;
+		ImportData->Filenames.Add(ImportFile);
+		ImportData->bReplaceExisting = true;
+		ImportData->bSkipReadOnly = true;
+
+		FAssetToolsModule& AssetToolsModule = FModuleManager::LoadModuleChecked<FAssetToolsModule>(TEXT("AssetTools"));
+		const TArray<UObject*> ImportedAssets = AssetToolsModule.Get().ImportAssetsAutomated(ImportData);
+		if (ImportedAssets.Num() == 0)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to import world texture: %s"), *ImportFile);
+			return false;
+		}
+
+		UTexture2D* ImportedTexture = LoadObject<UTexture2D>(nullptr, *ObjectPath);
+		if (!ImportedTexture)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to load imported world texture: %s"), *ObjectPath);
+			return false;
+		}
+
+		ConfigureImportedWorldTexture(ImportedTexture);
+		if (OutTexture)
+		{
+			*OutTexture = ImportedTexture;
+		}
+		return true;
+	}
+
+	UMaterial* EnsureMemoStorageDeviceMaterial(UTexture2D* StorageTexture)
+	{
+		if (!StorageTexture)
+		{
+			return nullptr;
+		}
+
+		const FString ObjectPath = GetAssetObjectPath(InteractionAssetPath, MemoStorageDeviceMaterialAssetName);
+		UMaterial* Material = LoadObject<UMaterial>(nullptr, *ObjectPath);
+		if (!Material)
+		{
+			UMaterialFactoryNew* MaterialFactory = NewObject<UMaterialFactoryNew>();
+
+			FAssetToolsModule& AssetToolsModule = FModuleManager::LoadModuleChecked<FAssetToolsModule>(TEXT("AssetTools"));
+			UObject* CreatedAsset = AssetToolsModule.Get().CreateAsset(
+				MemoStorageDeviceMaterialAssetName,
+				InteractionAssetPath,
+				UMaterial::StaticClass(),
+				MaterialFactory);
+
+			Material = Cast<UMaterial>(CreatedAsset);
+			if (!Material)
+			{
+				UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to create %s."), *ObjectPath);
+				return nullptr;
+			}
+
+			FAssetRegistryModule::AssetCreated(Material);
+		}
+
+		Material->Modify();
+		Material->GetExpressionCollection().Empty();
+		Material->BlendMode = BLEND_Opaque;
+		Material->SetShadingModel(MSM_DefaultLit);
+		Material->TwoSided = false;
+
+		UMaterialEditorOnlyData* MaterialEditorOnly = Material->GetEditorOnlyData();
+		if (!MaterialEditorOnly)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to edit %s."), *ObjectPath);
+			return nullptr;
+		}
+
+		UMaterialExpressionTextureCoordinate* TextureCoordinateExpression = NewObject<UMaterialExpressionTextureCoordinate>(Material);
+		TextureCoordinateExpression->Material = Material;
+		TextureCoordinateExpression->CoordinateIndex = 0;
+		TextureCoordinateExpression->MaterialExpressionEditorX = -620;
+		TextureCoordinateExpression->MaterialExpressionEditorY = 120;
+		Material->GetExpressionCollection().AddExpression(TextureCoordinateExpression);
+
+		UMaterialExpressionTextureSampleParameter2D* TextureSample = NewObject<UMaterialExpressionTextureSampleParameter2D>(Material);
+		TextureSample->Material = Material;
+		TextureSample->ParameterName = TEXT("StorageDeviceTexture");
+		TextureSample->Texture = StorageTexture;
+		TextureSample->SamplerType = SAMPLERTYPE_Color;
+		TextureSample->Coordinates.Connect(0, TextureCoordinateExpression);
+		TextureSample->MaterialExpressionEditorX = -360;
+		TextureSample->MaterialExpressionEditorY = 40;
+		TextureSample->AutoSetSampleType();
+		Material->GetExpressionCollection().AddExpression(TextureSample);
+
+		UMaterialExpressionScalarParameter* EmissiveStrengthParameter = NewObject<UMaterialExpressionScalarParameter>(Material);
+		EmissiveStrengthParameter->Material = Material;
+		EmissiveStrengthParameter->ParameterName = TEXT("EmissiveStrength");
+		EmissiveStrengthParameter->DefaultValue = 0.14f;
+		EmissiveStrengthParameter->MaterialExpressionEditorX = -360;
+		EmissiveStrengthParameter->MaterialExpressionEditorY = 260;
+		Material->GetExpressionCollection().AddExpression(EmissiveStrengthParameter);
+
+		UMaterialExpressionMultiply* EmissiveMultiply = NewObject<UMaterialExpressionMultiply>(Material);
+		EmissiveMultiply->Material = Material;
+		EmissiveMultiply->A.Connect(0, TextureSample);
+		EmissiveMultiply->B.Connect(0, EmissiveStrengthParameter);
+		EmissiveMultiply->MaterialExpressionEditorX = -80;
+		EmissiveMultiply->MaterialExpressionEditorY = 170;
+		Material->GetExpressionCollection().AddExpression(EmissiveMultiply);
+
+		MaterialEditorOnly->BaseColor.Connect(0, TextureSample);
+		MaterialEditorOnly->EmissiveColor.Connect(0, EmissiveMultiply);
+		MaterialEditorOnly->Roughness.UseConstant = true;
+		MaterialEditorOnly->Roughness.Constant = 0.78f;
+		MaterialEditorOnly->Metallic.UseConstant = true;
+		MaterialEditorOnly->Metallic.Constant = 0.0f;
+		MaterialEditorOnly->Specular.UseConstant = true;
+		MaterialEditorOnly->Specular.Constant = 0.25f;
+
+		Material->PostEditChange();
+		Material->MarkPackageDirty();
+
+		if (!SaveAsset(Material))
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to save %s."), *ObjectPath);
+			return nullptr;
+		}
+
+		return Material;
+	}
+
+	bool ImportMemoStorageDeviceTextureFromCommandLineIfRequested()
+	{
+		FString SourceFile;
+		if (!FParse::Value(FCommandLine::Get(), TEXT("TunaSweeperImportMemoStorageTextureSource="), SourceFile))
+		{
+			return false;
+		}
+
+		UTexture2D* ImportedTexture = nullptr;
+		const bool bImported = ImportWorldTexture(
+			SourceFile,
+			InteractionAssetPath,
+			MemoStorageDeviceTextureAssetName,
+			&ImportedTexture);
+		UMaterial* Material = bImported ? EnsureMemoStorageDeviceMaterial(ImportedTexture) : nullptr;
+		const bool bSucceeded = ImportedTexture && Material;
+		if (!bSucceeded)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to import memo storage device texture/material."));
+		}
+
+		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperImportMemoStorageTextureQuit")))
+		{
+			FPlatformMisc::RequestExit(false);
+		}
+
+		return bSucceeded;
 	}
 
 	bool ImportUiTexture(const FUiTextureImportArgs& Args, UTexture2D** OutTexture = nullptr)
@@ -7783,6 +8029,16 @@ public:
 			}
 		}
 
+		FString MemoStorageTextureSource;
+		if (FParse::Value(FCommandLine::Get(), TEXT("TunaSweeperImportMemoStorageTextureSource="), MemoStorageTextureSource))
+		{
+			TunaSweeperEditorSetup::ImportMemoStorageDeviceTextureFromCommandLineIfRequested();
+			if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperImportMemoStorageTextureQuit")))
+			{
+				return;
+			}
+		}
+
 		FString ExperimentalVegetationPaintSource;
 		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperRebuildExperimentalVegetation")) ||
 			FParse::Value(FCommandLine::Get(), TEXT("TunaSweeperExperimentalVegetationPaintSource="), ExperimentalVegetationPaintSource))
@@ -7933,6 +8189,13 @@ public:
 			[]()
 			{
 				return TunaSweeperEditorSetup::EnsureRollInputAssets();
+			});
+
+		FTunaSweeperEditorRunOnce::Run(
+			TunaSweeperEditorSetup::MapInputTaskId,
+			[]()
+			{
+				return TunaSweeperEditorSetup::EnsureMapInputAssets();
 			});
 
 		FTunaSweeperEditorRunOnce::Run(
