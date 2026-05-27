@@ -121,6 +121,7 @@ namespace TunaSweeperEditorSetup
 	const FString DropInputTaskId = TEXT("2026-05-18_AddDropInputAction");
 	const FString AmmoReloadInputTaskId = TEXT("2026-05-19_AddAmmoReloadInputActionsV1");
 	const FString CameraModeInputTaskId = TEXT("2026-05-26_AddCameraModeInputV1");
+	const FString SprintInputTaskId = TEXT("2026-05-28_AddSprintInputV1");
 	const FString LootContainerAndSpawnerTaskId = TEXT("2026-05-11_CreateLootContainerAndSpawnerAssetsV1");
 	const FString LootContainerOccupancyHeaderTaskId = TEXT("2026-05-18_AddLootContainerOccupancyHeaderV1");
 	const FString CannedTunaIconImportTaskId = TEXT("2026-05-11_ImportCannedTunaIconV1");
@@ -172,6 +173,7 @@ namespace TunaSweeperEditorSetup
 	const FString AmmoSelectActionName = TEXT("IA_AmmoSelect");
 	const FString AmmoFocusActionName = TEXT("IA_AmmoFocus");
 	const FString CameraModeActionName = TEXT("IA_CameraMode");
+	const FString SprintActionName = TEXT("IA_Sprint");
 	const FString QuickSlotActionNamePrefix = TEXT("IA_QuickSlot");
 	const FString MappingContextName = TEXT("IMC_Player");
 	const FString UIAssetPath = TEXT("/Game/UI");
@@ -1622,6 +1624,32 @@ namespace TunaSweeperEditorSetup
 		}
 
 		MappingContext->ContextDescription = FText::FromString(TEXT("TunaSweeper player movement, combat, interaction, inventory, quick slot, ammo, reload, and camera mode input."));
+		MappingContext->MarkPackageDirty();
+		return SaveAsset(MappingContext);
+	}
+
+	bool EnsureSprintInputAssets()
+	{
+		UInputAction* SprintAction = EnsureInputAction(
+			SprintActionName,
+			EInputActionValueType::Boolean,
+			EInputActionAccumulationBehavior::TakeHighestAbsoluteValue);
+
+		UInputMappingContext* MappingContext = LoadObject<UInputMappingContext>(
+			nullptr,
+			*GetAssetObjectPath(InputAssetPath, MappingContextName));
+
+		if (!SprintAction || !MappingContext)
+		{
+			return false;
+		}
+
+		if (!HasInputMapping(MappingContext, SprintAction, EKeys::LeftShift))
+		{
+			MappingContext->MapKey(SprintAction, EKeys::LeftShift);
+		}
+
+		MappingContext->ContextDescription = FText::FromString(TEXT("TunaSweeper player movement, combat, interaction, inventory, quick slot, ammo, reload, camera mode, and sprint input."));
 		MappingContext->MarkPackageDirty();
 		return SaveAsset(MappingContext);
 	}
@@ -7863,6 +7891,13 @@ public:
 			[]()
 			{
 				return TunaSweeperEditorSetup::EnsureCameraModeInputAssets();
+			});
+
+		FTunaSweeperEditorRunOnce::Run(
+			TunaSweeperEditorSetup::SprintInputTaskId,
+			[]()
+			{
+				return TunaSweeperEditorSetup::EnsureSprintInputAssets();
 			});
 
 		FTunaSweeperEditorRunOnce::Run(

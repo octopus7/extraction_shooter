@@ -7,6 +7,7 @@
 #include "Components/SceneComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/WidgetComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Game/TunaSweeperGameInstance.h"
@@ -23,6 +24,7 @@
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
 #include "TimerManager.h"
 #include "UI/TunaSweeperLevelTransitionWidget.h"
+#include "UI/TunaSweeperStaminaGaugeWidget.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Weapon/TunaSweeperWeapon.h"
 
@@ -30,6 +32,12 @@ namespace TunaSweeperEquippedWeaponVisual
 {
 	const FName GunCategoryTag(TEXT("item.category.weapon.gun"));
 	const FSoftObjectPath AssaultRifleClassPath(TEXT("/Game/Weapons/BP_AssaultRifle.BP_AssaultRifle_C"));
+}
+
+namespace TunaSweeperStaminaGauge
+{
+	constexpr float DrawSize = 70.0f;
+	const FVector RelativeLocation(0.0f, 0.0f, -92.0f);
 }
 
 ATunaSweeperTopDownCharacter::ATunaSweeperTopDownCharacter()
@@ -92,6 +100,17 @@ ATunaSweeperTopDownCharacter::ATunaSweeperTopDownCharacter()
 
 	VitalsComponent = CreateDefaultSubobject<UTunaSweeperVitalsComponent>(TEXT("VitalsComponent"));
 	PlayerVisionComponent = CreateDefaultSubobject<UTunaSweeperPlayerVisionComponent>(TEXT("PlayerVisionComponent"));
+	StaminaGaugeWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("StaminaGaugeWidget"));
+	StaminaGaugeWidgetComponent->SetupAttachment(RootComponent);
+	StaminaGaugeWidgetComponent->SetRelativeLocation(TunaSweeperStaminaGauge::RelativeLocation);
+	StaminaGaugeWidgetComponent->SetWidgetSpace(EWidgetSpace::Screen);
+	StaminaGaugeWidgetComponent->SetWidgetClass(UTunaSweeperStaminaGaugeWidget::StaticClass());
+	StaminaGaugeWidgetComponent->SetDrawSize(FVector2D(TunaSweeperStaminaGauge::DrawSize, TunaSweeperStaminaGauge::DrawSize));
+	StaminaGaugeWidgetComponent->SetPivot(FVector2D(0.5f, 0.5f));
+	StaminaGaugeWidgetComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	StaminaGaugeWidgetComponent->SetWindowFocusable(false);
+	StaminaGaugeWidgetComponent->SetHiddenInGame(false);
+	StaminaGaugeWidgetComponent->SetVisibility(false);
 
 	DefaultMappingContext = TSoftObjectPtr<UInputMappingContext>(FSoftObjectPath(TEXT("/Game/Input/IMC_Player.IMC_Player")));
 	MoveAction = TSoftObjectPtr<UInputAction>(FSoftObjectPath(TEXT("/Game/Input/IA_Move.IA_Move")));
@@ -103,6 +122,7 @@ ATunaSweeperTopDownCharacter::ATunaSweeperTopDownCharacter()
 	AmmoSelectAction = TSoftObjectPtr<UInputAction>(FSoftObjectPath(TEXT("/Game/Input/IA_AmmoSelect.IA_AmmoSelect")));
 	AmmoFocusAction = TSoftObjectPtr<UInputAction>(FSoftObjectPath(TEXT("/Game/Input/IA_AmmoFocus.IA_AmmoFocus")));
 	CameraModeAction = TSoftObjectPtr<UInputAction>(FSoftObjectPath(TEXT("/Game/Input/IA_CameraMode.IA_CameraMode")));
+	SprintAction = TSoftObjectPtr<UInputAction>(FSoftObjectPath(TEXT("/Game/Input/IA_Sprint.IA_Sprint")));
 	DefaultWeaponClass = TSoftClassPtr<ATunaSweeperWeapon>(TunaSweeperEquippedWeaponVisual::AssaultRifleClassPath);
 	RespawnMediaSource = TSoftObjectPtr<UMediaSource>(FSoftObjectPath(TEXT("/Game/Movies/MS_Respawn.MS_Respawn")));
 	RespawnTransitionWidgetClass = TSoftClassPtr<UTunaSweeperLevelTransitionWidget>(
@@ -132,6 +152,8 @@ void ATunaSweeperTopDownCharacter::BeginPlay()
 	DefaultCameraTargetOffset = CameraBoom ? CameraBoom->TargetOffset : DefaultCameraTargetOffset;
 	CurrentCameraModeOffset = DefaultCameraTargetOffset;
 	CurrentCameraAimOffset = FVector::ZeroVector;
+	CurrentStamina = FMath::Max(0.0f, MaxStamina);
+	StaminaGaugeOpacity = 0.0f;
 
 	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
 	{
@@ -149,6 +171,9 @@ void ATunaSweeperTopDownCharacter::BeginPlay()
 	{
 		SelectWeaponSlot(2);
 	}
+
+	UpdateMovementSpeed();
+	UpdateStaminaGauge(0.0f);
 }
 
 void ATunaSweeperTopDownCharacter::Tick(float DeltaSeconds)
@@ -160,7 +185,9 @@ void ATunaSweeperTopDownCharacter::Tick(float DeltaSeconds)
 		return;
 	}
 
-	UpdateCarryWeightMovementSpeed();
+	UpdateSprintAndStamina(DeltaSeconds);
+	UpdateMovementSpeed();
+	UpdateStaminaGauge(DeltaSeconds);
 	UpdateAimingVisuals(DeltaSeconds);
 }
 
@@ -224,6 +251,8 @@ void ATunaSweeperTopDownCharacter::SetupPlayerInputComponent(UInputComponent* Pl
 	if (UInputAction* LoadedMoveAction = MoveAction.LoadSynchronous())
 	{
 		EnhancedInputComponent->BindAction(LoadedMoveAction, ETriggerEvent::Triggered, this, &ATunaSweeperTopDownCharacter::HandleMove);
+		EnhancedInputComponent->BindAction(LoadedMoveAction, ETriggerEvent::Completed, this, &ATunaSweeperTopDownCharacter::HandleMoveStopped);
+		EnhancedInputComponent->BindAction(LoadedMoveAction, ETriggerEvent::Canceled, this, &ATunaSweeperTopDownCharacter::HandleMoveStopped);
 	}
 
 	if (UInputAction* LoadedFireAction = FireAction.LoadSynchronous())
@@ -269,6 +298,13 @@ void ATunaSweeperTopDownCharacter::SetupPlayerInputComponent(UInputComponent* Pl
 	{
 		EnhancedInputComponent->BindAction(LoadedCameraModeAction, ETriggerEvent::Started, this, &ATunaSweeperTopDownCharacter::HandleCameraMode);
 	}
+
+	if (UInputAction* LoadedSprintAction = SprintAction.LoadSynchronous())
+	{
+		EnhancedInputComponent->BindAction(LoadedSprintAction, ETriggerEvent::Started, this, &ATunaSweeperTopDownCharacter::BeginSprint);
+		EnhancedInputComponent->BindAction(LoadedSprintAction, ETriggerEvent::Completed, this, &ATunaSweeperTopDownCharacter::EndSprint);
+		EnhancedInputComponent->BindAction(LoadedSprintAction, ETriggerEvent::Canceled, this, &ATunaSweeperTopDownCharacter::EndSprint);
+	}
 }
 
 void ATunaSweeperTopDownCharacter::SetAimWorldPoint(const FVector& WorldPoint)
@@ -281,6 +317,13 @@ void ATunaSweeperTopDownCharacter::SetAimWorldPoint(const FVector& WorldPoint)
 	{
 		AimDirection = NewAimDirection;
 	}
+}
+
+float ATunaSweeperTopDownCharacter::GetStaminaPercent() const
+{
+	return MaxStamina > 0.0f
+		? FMath::Clamp(CurrentStamina / MaxStamina, 0.0f, 1.0f)
+		: 0.0f;
 }
 
 void ATunaSweeperTopDownCharacter::AddDefaultInputMapping() const
@@ -367,10 +410,12 @@ void ATunaSweeperTopDownCharacter::HandleMove(const FInputActionValue& Value)
 {
 	if (bIsDead || IsGameplayActionInputLocked())
 	{
+		CurrentMoveInput = FVector2D::ZeroVector;
 		return;
 	}
 
 	const FVector2D MoveVector = Value.Get<FVector2D>();
+	CurrentMoveInput = MoveVector.GetClampedToMaxSize(1.0f);
 	if (!FMath::IsNearlyZero(MoveVector.Y))
 	{
 		AddMovementInput(FVector::ForwardVector, MoveVector.Y);
@@ -380,6 +425,12 @@ void ATunaSweeperTopDownCharacter::HandleMove(const FInputActionValue& Value)
 	{
 		AddMovementInput(FVector::RightVector, MoveVector.X);
 	}
+}
+
+void ATunaSweeperTopDownCharacter::HandleMoveStopped(const FInputActionValue& Value)
+{
+	(void)Value;
+	CurrentMoveInput = FVector2D::ZeroVector;
 }
 
 void ATunaSweeperTopDownCharacter::BeginFire(const FInputActionValue& Value)
@@ -520,6 +571,25 @@ void ATunaSweeperTopDownCharacter::HandleCameraMode(const FInputActionValue& Val
 	}
 
 	CyclePlayerCameraMode();
+}
+
+void ATunaSweeperTopDownCharacter::BeginSprint(const FInputActionValue& Value)
+{
+	(void)Value;
+	if (bIsDead || IsGameplayActionInputLocked())
+	{
+		return;
+	}
+
+	bSprintInputHeld = true;
+}
+
+void ATunaSweeperTopDownCharacter::EndSprint(const FInputActionValue& Value)
+{
+	(void)Value;
+	bSprintInputHeld = false;
+	bIsSprinting = false;
+	bSprintLockedUntilReleased = false;
 }
 
 void ATunaSweeperTopDownCharacter::CyclePlayerCameraMode()
@@ -836,6 +906,10 @@ void ATunaSweeperTopDownCharacter::CancelActiveGameplayActions()
 {
 	bFireHeld = false;
 	bIsAiming = false;
+	bSprintInputHeld = false;
+	bIsSprinting = false;
+	bSprintLockedUntilReleased = false;
+	CurrentMoveInput = FVector2D::ZeroVector;
 	CancelReload();
 	CloseAmmoSelection();
 
@@ -868,6 +942,10 @@ void ATunaSweeperTopDownCharacter::HandleDeath()
 	bIsDead = true;
 	bFireHeld = false;
 	bIsAiming = false;
+	bSprintInputHeld = false;
+	bIsSprinting = false;
+	bSprintLockedUntilReleased = false;
+	CurrentMoveInput = FVector2D::ZeroVector;
 	CancelReload();
 	CloseAmmoSelection();
 	GetWorldTimerManager().ClearTimer(FireTimerHandle);
@@ -1117,7 +1195,43 @@ FVector ATunaSweeperTopDownCharacter::UpdateDamageCameraReaction(
 		ScaledDecay;
 }
 
-void ATunaSweeperTopDownCharacter::UpdateCarryWeightMovementSpeed()
+void ATunaSweeperTopDownCharacter::UpdateSprintAndStamina(float DeltaSeconds)
+{
+	const float ClampedDeltaSeconds = FMath::Max(0.0f, DeltaSeconds);
+	const float EffectiveMaxStamina = FMath::Max(0.0f, MaxStamina);
+	if (EffectiveMaxStamina <= 0.0f)
+	{
+		CurrentStamina = 0.0f;
+		bIsSprinting = false;
+		return;
+	}
+
+	CurrentStamina = FMath::Clamp(CurrentStamina, 0.0f, EffectiveMaxStamina);
+
+	const bool bCanSprint =
+		bSprintInputHeld &&
+		!bSprintLockedUntilReleased &&
+		HasActiveMoveInput() &&
+		!IsGameplayActionInputLocked();
+	bIsSprinting = bCanSprint && CurrentStamina > 0.0f;
+
+	if (bIsSprinting)
+	{
+		CurrentStamina = FMath::Max(0.0f, CurrentStamina - FMath::Max(0.0f, SprintStaminaDrainPerSecond) * ClampedDeltaSeconds);
+		if (CurrentStamina <= KINDA_SMALL_NUMBER)
+		{
+			CurrentStamina = 0.0f;
+			bIsSprinting = false;
+			bSprintLockedUntilReleased = true;
+		}
+	}
+	else
+	{
+		CurrentStamina = FMath::Min(EffectiveMaxStamina, CurrentStamina + FMath::Max(0.0f, StaminaRegenPerSecond) * ClampedDeltaSeconds);
+	}
+}
+
+void ATunaSweeperTopDownCharacter::UpdateMovementSpeed()
 {
 	UCharacterMovementComponent* MovementComponent = GetCharacterMovement();
 	if (!MovementComponent)
@@ -1129,6 +1243,55 @@ void ATunaSweeperTopDownCharacter::UpdateCarryWeightMovementSpeed()
 	const float CarryWeightSpeedMultiplier = TunaGameInstance
 		? TunaGameInstance->GetCarryWeightMovementSpeedMultiplier()
 		: 1.0f;
+	const float SprintMultiplier = bIsSprinting ? FMath::Max(1.0f, SprintSpeedMultiplier) : 1.0f;
 
-	MovementComponent->MaxWalkSpeed = BaseWalkSpeed * FMath::Clamp(CarryWeightSpeedMultiplier, 0.0f, 1.0f);
+	MovementComponent->MaxWalkSpeed =
+		BaseWalkSpeed *
+		FMath::Clamp(CarryWeightSpeedMultiplier, 0.0f, 1.0f) *
+		SprintMultiplier;
+}
+
+void ATunaSweeperTopDownCharacter::UpdateStaminaGauge(float DeltaSeconds)
+{
+	if (!StaminaGaugeWidgetComponent)
+	{
+		return;
+	}
+
+	const float TargetOpacity = GetStaminaPercent() < 0.999f ? 1.0f : 0.0f;
+	if (DeltaSeconds <= 0.0f)
+	{
+		StaminaGaugeOpacity = TargetOpacity;
+	}
+	else
+	{
+		StaminaGaugeOpacity = FMath::FInterpTo(
+			StaminaGaugeOpacity,
+			TargetOpacity,
+			DeltaSeconds,
+			FMath::Max(0.0f, StaminaGaugeFadeInterpSpeed));
+	}
+
+	if (FMath::IsNearlyEqual(StaminaGaugeOpacity, TargetOpacity, 0.01f))
+	{
+		StaminaGaugeOpacity = TargetOpacity;
+	}
+
+	const bool bVisible = StaminaGaugeOpacity > 0.01f;
+	StaminaGaugeWidgetComponent->SetVisibility(bVisible);
+	if (!bVisible)
+	{
+		return;
+	}
+
+	StaminaGaugeWidgetComponent->InitWidget();
+	if (UTunaSweeperStaminaGaugeWidget* StaminaGaugeWidget = Cast<UTunaSweeperStaminaGaugeWidget>(StaminaGaugeWidgetComponent->GetUserWidgetObject()))
+	{
+		StaminaGaugeWidget->SetStaminaGauge(GetStaminaPercent(), StaminaGaugeOpacity);
+	}
+}
+
+bool ATunaSweeperTopDownCharacter::HasActiveMoveInput() const
+{
+	return CurrentMoveInput.SizeSquared() > KINDA_SMALL_NUMBER;
 }

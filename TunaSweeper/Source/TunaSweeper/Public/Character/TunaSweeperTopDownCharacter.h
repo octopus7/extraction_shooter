@@ -13,8 +13,10 @@ class UMediaSource;
 class USceneComponent;
 class USpringArmComponent;
 class UStaticMeshComponent;
+class UTunaSweeperStaminaGaugeWidget;
 class UTunaSweeperPlayerVisionComponent;
 class UTunaSweeperLevelTransitionWidget;
+class UWidgetComponent;
 struct FDamageEvent;
 struct FInputActionValue;
 
@@ -129,6 +131,18 @@ public:
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Death")
 	bool IsDead() const { return bIsDead; }
 
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Stamina")
+	float GetStamina() const { return CurrentStamina; }
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Stamina")
+	float GetMaxStamina() const { return MaxStamina; }
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Stamina")
+	float GetStaminaPercent() const;
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Stamina")
+	bool IsSprinting() const { return bIsSprinting; }
+
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Input")
 	void CancelActiveGameplayActions();
 
@@ -173,6 +187,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UTunaSweeperPlayerVisionComponent> PlayerVisionComponent;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UWidgetComponent> StaminaGaugeWidgetComponent;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	TSoftObjectPtr<UInputMappingContext> DefaultMappingContext;
 
@@ -203,6 +220,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	TSoftObjectPtr<UInputAction> CameraModeAction;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+	TSoftObjectPtr<UInputAction> SprintAction;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat")
 	TSoftClassPtr<ATunaSweeperWeapon> DefaultWeaponClass;
 
@@ -211,6 +231,21 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement")
 	float BaseWalkSpeed = 600.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement|Sprint", meta = (ClampMin = "1.0", UIMin = "1.0"))
+	float SprintSpeedMultiplier = 1.55f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement|Sprint", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float MaxStamina = 100.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement|Sprint", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float SprintStaminaDrainPerSecond = 25.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement|Sprint", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float StaminaRegenPerSecond = 18.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement|Sprint", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float StaminaGaugeFadeInterpSpeed = 8.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Camera")
 	float DefaultCameraFOV = 70.0f;
@@ -272,6 +307,9 @@ private:
 	void HandleAmmoSelect(const FInputActionValue& Value);
 	void HandleAmmoFocus(const FInputActionValue& Value);
 	void HandleCameraMode(const FInputActionValue& Value);
+	void BeginSprint(const FInputActionValue& Value);
+	void EndSprint(const FInputActionValue& Value);
+	void HandleMoveStopped(const FInputActionValue& Value);
 	void FireWeapon();
 	bool IsGameplayActionInputLocked() const;
 	bool CanUseSelectedWeaponSlot();
@@ -285,7 +323,10 @@ private:
 	void RefreshSelectedWeaponAfterInventoryChanged();
 	void RefreshCharacterVisualVisibility();
 	void UpdateAimingVisuals(float DeltaSeconds);
-	void UpdateCarryWeightMovementSpeed();
+	void UpdateSprintAndStamina(float DeltaSeconds);
+	void UpdateMovementSpeed();
+	void UpdateStaminaGauge(float DeltaSeconds);
+	bool HasActiveMoveInput() const;
 	FTunaSweeperPlayerCameraModeSettings ResolveCurrentCameraModeSettings() const;
 	void TriggerDamageCameraReaction(float DamageAmount, FDamageEvent const& DamageEvent, AActor* DamageCauser);
 	ETunaSweeperHitReactionType ResolveDamageCameraReactionType(FDamageEvent const& DamageEvent, AActor* DamageCauser) const;
@@ -321,13 +362,19 @@ private:
 	float ReloadStartWorldSeconds = 0.0f;
 	float ReloadDurationSeconds = 0.0f;
 	float CurrentCameraBaseFOV = 0.0f;
+	float CurrentStamina = 100.0f;
+	float StaminaGaugeOpacity = 0.0f;
 	float CameraHitReactionElapsed = 0.0f;
 	float CameraHitReactionScale = 1.0f;
 	float CameraHitReactionPhase = 0.0f;
+	FVector2D CurrentMoveInput = FVector2D::ZeroVector;
 	bool bFireHeld = false;
 	bool bIsAiming = false;
 	bool bIsDead = false;
 	bool bIsReloading = false;
 	bool bAmmoSelectionOpen = false;
 	bool bCameraHitReactionActive = false;
+	bool bSprintInputHeld = false;
+	bool bIsSprinting = false;
+	bool bSprintLockedUntilReleased = false;
 };
