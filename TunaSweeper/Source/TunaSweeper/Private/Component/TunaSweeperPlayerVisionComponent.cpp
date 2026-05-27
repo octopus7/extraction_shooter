@@ -18,7 +18,7 @@ namespace TunaSweeperVision
 	constexpr float FramedDefaultAlwaysVisibleRadius = 100.0f;
 	constexpr float LegacyDefaultAlwaysVisibleRadius = 200.0f;
 	constexpr int32 FramedMaskDownsampleFactor = 2;
-	constexpr int32 LegacyMaskDownsampleFactor = 4;
+	constexpr int32 FramedMaskBlurRadius = 4;
 	constexpr int32 FramedHiddenMaskAlpha = 77;
 	constexpr int32 LegacyHiddenMaskAlpha = 220;
 	constexpr float DebugVisibleRaySegmentLength = 30.0f;
@@ -355,9 +355,13 @@ void UTunaSweeperPlayerVisionComponent::BeginPlay()
 	{
 		VisionSettings.AlwaysVisibleRadius = TunaSweeperVision::FramedDefaultAlwaysVisibleRadius;
 	}
-	if (VisionSettings.MaskDownsampleFactor == TunaSweeperVision::LegacyMaskDownsampleFactor)
+	if (VisionSettings.MaskDownsampleFactor != TunaSweeperVision::FramedMaskDownsampleFactor)
 	{
 		VisionSettings.MaskDownsampleFactor = TunaSweeperVision::FramedMaskDownsampleFactor;
+	}
+	if (VisionSettings.BlurRadius < TunaSweeperVision::FramedMaskBlurRadius)
+	{
+		VisionSettings.BlurRadius = TunaSweeperVision::FramedMaskBlurRadius;
 	}
 	if (VisionSettings.HiddenMaskAlpha == TunaSweeperVision::LegacyHiddenMaskAlpha)
 	{
@@ -466,31 +470,24 @@ void UTunaSweeperPlayerVisionComponent::ForceRefreshVisionMask()
 		return;
 	}
 
-	TArray<FTunaSweeperVisionMaskVertex> MaskVertices;
-	TArray<SlateIndex> MaskIndices;
-	const int32 MaskTriangleCount = TunaSweeperVision::BuildHiddenMaskMeshFromView(
-		PlayerController,
-		VisionSettings,
-		RaySamples,
-		TraceOrigin,
-		FacingYawDegrees,
-		RayAngleStepDegrees,
-		ViewportSize,
-		MaskVertices,
-		MaskIndices);
-	if (MaskTriangleCount <= 0)
+	if (!EnsureMaskTexture(ViewportSize))
 	{
 		if (VisionMaskWidget)
 		{
-			VisionMaskWidget->ClearMaskMesh();
 			VisionMaskWidget->SetMaskVisible(false);
 		}
 		return;
 	}
 
+	RasterizeVisionMaskFromView(PlayerController, RaySamples, TraceOrigin, FacingYawDegrees, RayAngleStepDegrees);
+	ApplyBlurToMask();
+	RebuildTexturePixels();
+	UploadMaskTexture();
+
 	if (bRenderVisionOverlay && VisionMaskWidget)
 	{
-		VisionMaskWidget->SetMaskMesh(MoveTemp(MaskVertices), MoveTemp(MaskIndices), ViewportSize);
+		VisionMaskWidget->ClearMaskMesh();
+		VisionMaskWidget->SetMaskTexture(MaskTexture);
 		VisionMaskWidget->SetMaskVisible(true);
 	}
 }
@@ -557,7 +554,7 @@ bool UTunaSweeperPlayerVisionComponent::IsVisionWorldEnabled() const
 
 bool UTunaSweeperPlayerVisionComponent::ShouldUpdateVision() const
 {
-	return bRenderVisionOverlay || IsVisionDebugEnabled();
+	return bRenderVisionOverlay;
 }
 
 bool UTunaSweeperPlayerVisionComponent::IsVisionDebugEnabled() const
@@ -605,7 +602,7 @@ void UTunaSweeperPlayerVisionComponent::EnsureOverlayWidget(APlayerController* P
 
 bool UTunaSweeperPlayerVisionComponent::EnsureMaskTexture(const FIntPoint& InViewportSize)
 {
-	const int32 DownsampleFactor = FMath::Clamp(VisionSettings.MaskDownsampleFactor, 1, 16);
+	const int32 DownsampleFactor = TunaSweeperVision::FramedMaskDownsampleFactor;
 	const FIntPoint NewMaskSize(
 		FMath::Max(2, FMath::DivideAndRoundUp(InViewportSize.X, DownsampleFactor)),
 		FMath::Max(2, FMath::DivideAndRoundUp(InViewportSize.Y, DownsampleFactor)));

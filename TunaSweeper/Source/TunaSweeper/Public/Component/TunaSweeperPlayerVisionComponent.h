@@ -43,7 +43,7 @@ struct TUNASWEEPER_API FTunaSweeperPlayerVisionSettings
 	int32 MaskDownsampleFactor = 2;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Vision", meta = (ClampMin = "0", ClampMax = "16", UIMin = "0", UIMax = "16"))
-	int32 BlurRadius = 2;
+	int32 BlurRadius = 4;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Vision", meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float MaskFeatherPixels = 64.0f;
