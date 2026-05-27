@@ -58,6 +58,7 @@ void ATunaSweeperProjectile::ApplyProjectileCollisionDefaults()
 	CollisionComponent->SetCollisionObjectType(TunaSweeperCollisionChannels::Projectile);
 	CollisionComponent->SetCollisionResponseToAllChannels(ECR_Block);
 	CollisionComponent->SetCollisionResponseToChannel(TunaSweeperCollisionChannels::Projectile, ECR_Ignore);
+	CollisionComponent->SetCollisionResponseToChannel(TunaSweeperCollisionChannels::VisionOccluder, ECR_Ignore);
 }
 
 void ATunaSweeperProjectile::HandleHit(

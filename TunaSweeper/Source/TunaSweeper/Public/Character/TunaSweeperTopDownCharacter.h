@@ -182,6 +182,9 @@ protected:
 	TObjectPtr<USceneComponent> WeaponAttachPoint;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<USceneComponent> RollWeaponHandAttachPoint;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<USpringArmComponent> CameraBoom;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
@@ -213,6 +216,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	TSoftObjectPtr<UInputAction> InventoryAction;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+	TSoftObjectPtr<UInputAction> MapAction;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	TSoftObjectPtr<UInputAction> ReloadAction;
@@ -262,11 +268,17 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement|Roll", meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float RollDistance = 420.0f;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement|Roll", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float RollStaminaCost = 30.0f;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement|Roll")
 	bool bUseTemporaryRollVisualRotation = true;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement|Roll")
-	float TemporaryRollVisualRightAxisDegrees = -360.0f;
+	float TemporaryRollVisualRightAxisDegrees = 360.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement|Roll")
+	FName RollWeaponHandSocketName = FName(TEXT("hand_r"));
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Camera")
 	float DefaultCameraFOV = 70.0f;
@@ -324,6 +336,7 @@ private:
 	void EndAim(const FInputActionValue& Value);
 	void HandleInteract(const FInputActionValue& Value);
 	void HandleInventory(const FInputActionValue& Value);
+	void HandleMap(const FInputActionValue& Value);
 	void HandleReload(const FInputActionValue& Value);
 	void HandleAmmoSelect(const FInputActionValue& Value);
 	void HandleAmmoFocus(const FInputActionValue& Value);
@@ -351,6 +364,9 @@ private:
 	void UpdateStaminaGauge(float DeltaSeconds);
 	void FinishRoll();
 	void SetRollProjectileCollisionPassthrough(bool bEnabled);
+	void AttachWeaponForRoll();
+	void RestoreWeaponAfterRoll();
+	USceneComponent* ResolveRollWeaponAttachParent(FName& OutSocketName) const;
 	void ApplyTemporaryRollVisualRotation(float NormalizedRollTime);
 	void RestoreTemporaryRollVisualRotation();
 	FVector ResolveRollDirection() const;
@@ -400,6 +416,9 @@ private:
 	FVector2D CurrentMoveInput = FVector2D::ZeroVector;
 	FRotator DefaultSkeletalMeshRelativeRotation = FRotator::ZeroRotator;
 	FRotator DefaultVisualMeshRelativeRotation = FRotator::ZeroRotator;
+	TWeakObjectPtr<USceneComponent> SavedWeaponAttachParent;
+	FName SavedWeaponAttachSocketName = NAME_None;
+	FTransform SavedWeaponRelativeTransform = FTransform::Identity;
 	TEnumAsByte<ECollisionResponse> SavedProjectileCollisionResponse = ECR_Block;
 	bool bFireHeld = false;
 	bool bIsAiming = false;
@@ -413,4 +432,5 @@ private:
 	bool bIsRolling = false;
 	bool bHasSavedProjectileCollisionResponse = false;
 	bool bRollVisualRotationApplied = false;
+	bool bWeaponAttachedForRoll = false;
 };

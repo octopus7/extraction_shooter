@@ -3,6 +3,7 @@
 #include "Components/ActorComponent.h"
 #include "CoreMinimal.h"
 #include "Engine/EngineTypes.h"
+#include "TunaSweeperCollisionChannels.h"
 #include "TunaSweeperPlayerVisionComponent.generated.h"
 
 class APlayerController;
@@ -52,7 +53,7 @@ struct TUNASWEEPER_API FTunaSweeperPlayerVisionSettings
 	int32 HiddenMaskAlpha = 77;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Vision")
-	TEnumAsByte<ECollisionChannel> TraceChannel = ECC_Visibility;
+	TEnumAsByte<ECollisionChannel> TraceChannel = TunaSweeperCollisionChannels::VisionOccluder;
 };
 
 UCLASS(ClassGroup = (TunaSweeper), BlueprintType, Blueprintable, meta = (BlueprintSpawnableComponent))

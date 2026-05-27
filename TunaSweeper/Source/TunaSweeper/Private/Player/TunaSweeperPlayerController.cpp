@@ -22,6 +22,7 @@
 #include "InputCoreTypes.h"
 #include "Subsystem/TunaSweeperKeyboardInputSubsystem.h"
 #include "Subsystem/TunaSweeperBgmSubsystem.h"
+#include "Subsystem/TunaSweeperQuestSubsystem.h"
 #include "UI/TunaSweeperGameHudWidget.h"
 #include "UI/TunaSweeperIntroMenuWidget.h"
 #include "UI/TunaSweeperQuestWidget.h"
@@ -600,6 +601,51 @@ bool ATunaSweeperPlayerController::StartDialogueSequence(
 	return true;
 }
 
+bool ATunaSweeperPlayerController::PlayQuestPresentation(
+	FName QuestId,
+	ETunaSweeperQuestPresentationTrigger Trigger)
+{
+	if (!IsLocalController() || QuestId.IsNone() || bDialogueSequenceActive)
+	{
+		return false;
+	}
+
+	UGameInstance* GameInstance = GetGameInstance();
+	const UTunaSweeperQuestSubsystem* QuestSubsystem = GameInstance
+		? GameInstance->GetSubsystem<UTunaSweeperQuestSubsystem>()
+		: nullptr;
+	if (!QuestSubsystem)
+	{
+		return false;
+	}
+
+	TArray<FTunaSweeperQuestPresentationLineView> LineViews;
+	if (!QuestSubsystem->GetQuestPresentationLines(QuestId, Trigger, LineViews))
+	{
+		return false;
+	}
+
+	TArray<FTunaSweeperDialogueLine> DialogueLines;
+	DialogueLines.Reserve(LineViews.Num());
+	for (const FTunaSweeperQuestPresentationLineView& LineView : LineViews)
+	{
+		FTunaSweeperDialogueLine DialogueLine;
+		DialogueLine.SpeakerName = LineView.SpeakerName;
+		DialogueLine.DialogueText = LineView.DialogueText;
+		DialogueLine.bUseCameraFocus = LineView.bUseCameraFocus;
+		DialogueLine.CameraFocusLocation = LineView.CameraFocusLocation;
+		DialogueLine.CameraBlendSeconds = LineView.CameraBlendSeconds;
+		DialogueLines.Add(DialogueLine);
+	}
+
+	if (GameHudWidget)
+	{
+		GameHudWidget->SetHudMode(ETunaSweeperHudMode::None);
+	}
+
+	return StartDialogueSequence(DialogueLines, NAME_None);
+}
+
 void ATunaSweeperPlayerController::HandleDialogueLineActivated(const FTunaSweeperDialogueLine& DialogueLine)
 {
 	if (DialogueLine.bUseCameraFocus)
@@ -1043,6 +1089,27 @@ void ATunaSweeperPlayerController::ToggleInventoryOnlyPanel()
 	}
 }
 
+void ATunaSweeperPlayerController::ToggleMapPanel()
+{
+	if (IsIntroMap() || IsOpeningScenarioMap() || bDialogueSequenceActive)
+	{
+		return;
+	}
+
+	EnsureGameHudWidget();
+	if (!GameHudWidget)
+	{
+		return;
+	}
+
+	const bool bMapAlreadyOpen = GameHudWidget->GetHudMode() == ETunaSweeperHudMode::Map;
+	GameHudWidget->SetHudMode(bMapAlreadyOpen ? ETunaSweeperHudMode::None : ETunaSweeperHudMode::Map);
+	if (!bMapAlreadyOpen)
+	{
+		CancelPawnGameplayActions();
+	}
+}
+
 void ATunaSweeperPlayerController::OpenLootContainerPanel(const FTunaSweeperLootContainerInstance& ContainerInstance)
 {
 	EnsureGameHudWidget();
@@ -1061,33 +1128,15 @@ void ATunaSweeperPlayerController::OpenQuestPanel(FName QuestId)
 		return;
 	}
 
-	if (!QuestWidget)
-	{
-		TSubclassOf<UTunaSweeperQuestWidget> LoadedQuestWidgetClass = QuestWidgetClass.LoadSynchronous();
-		if (!LoadedQuestWidgetClass)
-		{
-			return;
-		}
-
-		QuestWidget = CreateWidget<UTunaSweeperQuestWidget>(this, LoadedQuestWidgetClass);
-	}
-
-	if (!QuestWidget)
+	EnsureGameHudWidget();
+	if (!GameHudWidget)
 	{
 		return;
 	}
 
-	QuestWidget->InitializeQuest(QuestId);
-	if (!QuestWidget->IsInViewport())
-	{
-		QuestWidget->AddToViewport(30);
-	}
-
-	FInputModeGameAndUI InputMode;
-	InputMode.SetWidgetToFocus(QuestWidget->TakeWidget());
-	InputMode.SetHideCursorDuringCapture(false);
-	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-	SetInputMode(InputMode);
+	GameHudWidget->ShowQuestPanel(QuestId);
+	CancelPawnGameplayActions();
+	ApplyDefaultGameInputMode();
 	bShowMouseCursor = true;
 }
 

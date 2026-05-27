@@ -6,6 +6,7 @@
 #include "Engine/StaticMesh.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "Interaction/TunaSweeperInteractableComponent.h"
+#include "TunaSweeperCollisionChannels.h"
 #include "UObject/ConstructorHelpers.h"
 
 ATunaSweeperPersistentDoorActor::ATunaSweeperPersistentDoorActor()
@@ -130,6 +131,7 @@ void ATunaSweeperPersistentDoorActor::ApplyCollisionDefaults()
 	BlockingCollision->SetCollisionResponseToAllChannels(ECR_Ignore);
 	BlockingCollision->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
 	BlockingCollision->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Block);
+	BlockingCollision->SetCollisionResponseToChannel(TunaSweeperCollisionChannels::VisionOccluder, ECR_Block);
 	BlockingCollision->SetGenerateOverlapEvents(false);
 	BlockingCollision->CanCharacterStepUpOn = ECB_No;
 	BlockingCollision->SetHiddenInGame(true);

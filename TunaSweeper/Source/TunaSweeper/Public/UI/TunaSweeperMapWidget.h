@@ -2,6 +2,7 @@
 
 #include "Blueprint/UserWidget.h"
 #include "CoreMinimal.h"
+#include "InputCoreTypes.h"
 #include "Inventory/TunaSweeperSaveGame.h"
 #include "TunaSweeperMapWidget.generated.h"
 
@@ -32,6 +33,8 @@ protected:
 	virtual FReply NativeOnMouseButtonUp(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 	virtual FReply NativeOnMouseMove(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 	virtual FReply NativeOnMouseWheel(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+	virtual FReply NativeOnPreviewKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent) override;
+	virtual FReply NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent) override;
 
 private:
 	void BuildMapWidget();
@@ -44,6 +47,7 @@ private:
 	void SetMarkerColorIndex(int32 InMarkerColorIndex);
 	void SetMapZoom(float InMapZoom, const FVector2D* ZoomAnchorLocalPosition = nullptr);
 	void ClampMapPan();
+	bool TryCloseMapFromKey(const FKey& Key);
 	void AddOrRemoveMarkerAtLocalPosition(const FVector2D& MapViewportLocalPosition);
 	bool TryGetMapPositionFromLocal(const FVector2D& MapViewportLocalPosition, FVector2D& OutMapPosition) const;
 	FVector2D MapPositionToLocal(const FVector2D& MapPosition) const;

@@ -33,6 +33,18 @@ public:
 	const FTunaSweeperQuestDefinition* FindQuestDefinition(FName QuestId) const;
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Quest")
+	bool GetAllQuestDefinitions(TArray<FTunaSweeperQuestDefinition>& OutDefinitions) const;
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Quest")
+	bool TryGetQuestTextByKey(FName StringKey, ETunaSweeperItemTextLanguage Language, FText& OutText) const;
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Quest")
+	bool GetQuestPresentationLines(
+		FName QuestId,
+		ETunaSweeperQuestPresentationTrigger Trigger,
+		TArray<FTunaSweeperQuestPresentationLineView>& OutLines) const;
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Quest")
 	ETunaSweeperQuestState GetQuestState(FName QuestId) const;
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Quest")
@@ -101,9 +113,13 @@ public:
 private:
 	bool EnsureQuestDataLoaded() const;
 	bool LoadQuestDefinitionsJson();
+	bool LoadQuestTextStringsCsv();
 	void RegisterFallbackQuest();
 	void ResetLoadedQuestData();
 	FString GetQuestDefinitionsJsonPath() const;
+	FString GetQuestTextStringsCsvPath() const;
+	void ResolveDefinitionText(FTunaSweeperQuestDefinition& Definition) const;
+	FText ResolveQuestText(FName StringKey, const FText& FallbackText = FText::GetEmpty()) const;
 	bool IsMapNameMatch(FName ActualMapName, const TCHAR* ExpectedMapName) const;
 	bool DoesObjectiveMatchLevelTravel(const FTunaSweeperObjectiveDefinition& Objective, FName SourceLevelName, FName TargetLevelName) const;
 	bool DoesObjectiveMatchBunkerRescueReturn(const FTunaSweeperObjectiveDefinition& Objective, FName SourceLevelName, FName TargetLevelName) const;
@@ -125,6 +141,7 @@ private:
 	bool IsQuestTrackable(FName QuestId) const;
 
 	TMap<FName, FTunaSweeperQuestDefinition> QuestDefinitions;
+	TMap<FName, FTunaSweeperQuestTextString> QuestTextStringsByKey;
 	TMap<FName, FTunaSweeperQuestProgressSaveData> QuestProgressById;
 	FName TrackedQuestId = NAME_None;
 	int32 CoinBalance = 0;

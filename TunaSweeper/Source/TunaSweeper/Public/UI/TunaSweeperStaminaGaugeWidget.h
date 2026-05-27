@@ -28,6 +28,12 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Stamina", meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float RingThickness = 7.0f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Stamina", meta = (ClampMin = "1.0", ClampMax = "360.0", UIMin = "1.0", UIMax = "360.0"))
+	float GaugeSweepDegrees = 270.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Stamina")
+	float GaugeStartAngleDegrees = 135.0f;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Stamina")
 	FLinearColor BackgroundColor = FLinearColor(0.02f, 0.03f, 0.035f, 0.54f);
 

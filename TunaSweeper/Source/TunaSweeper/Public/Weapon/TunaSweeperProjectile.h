@@ -22,6 +22,8 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	void ApplyProjectileCollisionDefaults();
+
 	UFUNCTION()
 	void HandleHit(
 		UPrimitiveComponent* HitComponent,

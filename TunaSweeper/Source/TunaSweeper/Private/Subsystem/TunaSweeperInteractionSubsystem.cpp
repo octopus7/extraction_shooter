@@ -3,6 +3,7 @@
 #include "Engine/Engine.h"
 #include "Character/TunaSweeperQuestNpcActor.h"
 #include "Game/TunaSweeperGameInstance.h"
+#include "Interaction/TunaSweeperDoorActor.h"
 #include "Interaction/TunaSweeperItemSpawnInteractableActor.h"
 #include "Interaction/TunaSweeperInteractableComponent.h"
 #include "Interaction/TunaSweeperLevelTravelInteractableActor.h"
@@ -48,6 +49,8 @@ namespace TunaSweeperInteractionQuestEvents
 			return FName(TEXT("warp_point"));
 		case ETunaSweeperInteractionType::Memo:
 			return FName(TEXT("memo"));
+		case ETunaSweeperInteractionType::DoorOpen:
+			return FName(TEXT("door_open"));
 		default:
 			return NAME_None;
 		}
@@ -143,6 +146,9 @@ bool UTunaSweeperInteractionSubsystem::RequestInteraction(UTunaSweeperInteractab
 		break;
 	case ETunaSweeperInteractionType::Memo:
 		bHandled = HandleMemoInteraction(Interactable, InstigatorPawn);
+		break;
+	case ETunaSweeperInteractionType::DoorOpen:
+		bHandled = HandleDoorOpenInteraction(Interactable);
 		break;
 	default:
 		return false;
@@ -351,6 +357,14 @@ bool UTunaSweeperInteractionSubsystem::HandlePersistentDoorInteraction(UTunaSwee
 		? Cast<ATunaSweeperPersistentDoorActor>(Interactable->GetOwner())
 		: nullptr;
 	return DoorActor && DoorActor->OpenDoor(true);
+}
+
+bool UTunaSweeperInteractionSubsystem::HandleDoorOpenInteraction(UTunaSweeperInteractableComponent* Interactable)
+{
+	ATunaSweeperDoorActor* DoorActor = Interactable
+		? Cast<ATunaSweeperDoorActor>(Interactable->GetOwner())
+		: nullptr;
+	return DoorActor && DoorActor->ToggleDoor();
 }
 
 bool UTunaSweeperInteractionSubsystem::HandleWarpPointInteraction(

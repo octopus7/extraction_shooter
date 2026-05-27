@@ -18,7 +18,9 @@
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
 #include "InputCoreTypes.h"
+#include "Player/TunaSweeperPlayerController.h"
 #include "Styling/SlateBrush.h"
+#include "UI/TunaSweeperGameHudWidget.h"
 #include "UI/TunaSweeperUIFont.h"
 
 namespace TunaSweeperMap
@@ -268,6 +270,26 @@ FReply UTunaSweeperMapWidget::NativeOnMouseWheel(const FGeometry& InGeometry, co
 	}
 
 	return Super::NativeOnMouseWheel(InGeometry, InMouseEvent);
+}
+
+FReply UTunaSweeperMapWidget::NativeOnPreviewKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
+{
+	if (TryCloseMapFromKey(InKeyEvent.GetKey()))
+	{
+		return FReply::Handled();
+	}
+
+	return Super::NativeOnPreviewKeyDown(InGeometry, InKeyEvent);
+}
+
+FReply UTunaSweeperMapWidget::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
+{
+	if (TryCloseMapFromKey(InKeyEvent.GetKey()))
+	{
+		return FReply::Handled();
+	}
+
+	return Super::NativeOnKeyDown(InGeometry, InKeyEvent);
 }
 
 void UTunaSweeperMapWidget::BuildMapWidget()
@@ -687,6 +709,26 @@ void UTunaSweeperMapWidget::SetMapZoom(float InMapZoom, const FVector2D* ZoomAnc
 void UTunaSweeperMapWidget::ClampMapPan()
 {
 	// Intentionally unbounded: the map can move past the visible viewport and is clipped only by the screen.
+}
+
+bool UTunaSweeperMapWidget::TryCloseMapFromKey(const FKey& Key)
+{
+	if (Key != EKeys::M && Key != EKeys::Tab)
+	{
+		return false;
+	}
+
+	if (ATunaSweeperPlayerController* TunaPlayerController = Cast<ATunaSweeperPlayerController>(GetOwningPlayer()))
+	{
+		if (UTunaSweeperGameHudWidget* GameHudWidget = TunaPlayerController->GetGameHudWidget())
+		{
+			GameHudWidget->SetHudMode(ETunaSweeperHudMode::None);
+		}
+
+		TunaPlayerController->ApplyDefaultGameInputMode();
+	}
+
+	return true;
 }
 
 void UTunaSweeperMapWidget::AddOrRemoveMarkerAtLocalPosition(const FVector2D& MapViewportLocalPosition)

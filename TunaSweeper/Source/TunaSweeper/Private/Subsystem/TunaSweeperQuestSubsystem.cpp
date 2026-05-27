@@ -4,6 +4,7 @@
 #include "Game/TunaSweeperGameInstance.h"
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
+#include "Serialization/Csv/CsvParser.h"
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
 
@@ -22,6 +23,14 @@ namespace TunaSweeperQuestProviders
 namespace TunaSweeperQuestData
 {
 	const TCHAR* QuestDefinitionsJsonRelativePath = TEXT("Data/QuestDefinitions.json");
+	const TCHAR* QuestTextStringsCsvRelativePath = TEXT("Data/QuestTextStrings.csv");
+
+	FString GetCsvCell(const TArray<const TCHAR*>& Row, int32 CellIndex)
+	{
+		return Row.IsValidIndex(CellIndex)
+			? FString(Row[CellIndex]).TrimStartAndEnd()
+			: FString();
+	}
 
 	FName ReadNameField(const TSharedPtr<FJsonObject>& JsonObject, const TCHAR* FieldName)
 	{
@@ -151,6 +160,7 @@ namespace TunaSweeperQuestData
 			return false;
 		}
 
+		OutObjective.TextStringKey = ReadNameField(JsonObject, TEXT("text_string_key"));
 		OutObjective.Text = ReadTextField(JsonObject, TEXT("text"));
 		double RequiredCount = 1.0;
 		JsonObject->TryGetNumberField(TEXT("required_count"), RequiredCount);
@@ -174,6 +184,77 @@ namespace TunaSweeperQuestData
 		}
 
 		return true;
+	}
+
+	bool ReadVectorField(const TSharedPtr<FJsonObject>& JsonObject, const TCHAR* FieldName, FVector& OutVector)
+	{
+		const TArray<TSharedPtr<FJsonValue>>* Values = nullptr;
+		if (!JsonObject.IsValid() || !JsonObject->TryGetArrayField(FieldName, Values) || !Values || Values->Num() < 3)
+		{
+			return false;
+		}
+
+		double X = 0.0;
+		double Y = 0.0;
+		double Z = 0.0;
+		if (!(*Values)[0].IsValid() ||
+			!(*Values)[1].IsValid() ||
+			!(*Values)[2].IsValid() ||
+			!(*Values)[0]->TryGetNumber(X) ||
+			!(*Values)[1]->TryGetNumber(Y) ||
+			!(*Values)[2]->TryGetNumber(Z))
+		{
+			return false;
+		}
+
+		OutVector = FVector(X, Y, Z);
+		return true;
+	}
+
+	bool ParsePresentationStep(const TSharedPtr<FJsonObject>& JsonObject, FTunaSweeperQuestPresentationStep& OutStep)
+	{
+		if (!JsonObject.IsValid())
+		{
+			return false;
+		}
+
+		OutStep.SpeakerNameStringKey = ReadNameField(JsonObject, TEXT("speaker_name_string_key"));
+		OutStep.DialogueTextStringKey = ReadNameField(JsonObject, TEXT("dialogue_text_string_key"));
+		if (OutStep.DialogueTextStringKey.IsNone())
+		{
+			return false;
+		}
+
+		JsonObject->TryGetBoolField(TEXT("use_camera_focus"), OutStep.bUseCameraFocus);
+		ReadVectorField(JsonObject, TEXT("camera_focus_location"), OutStep.CameraFocusLocation);
+
+		double CameraBlendSeconds = OutStep.CameraBlendSeconds;
+		JsonObject->TryGetNumberField(TEXT("camera_blend_seconds"), CameraBlendSeconds);
+		OutStep.CameraBlendSeconds = FMath::Max(0.0f, static_cast<float>(CameraBlendSeconds));
+		return true;
+	}
+
+	void ParsePresentationSteps(
+		const TSharedPtr<FJsonObject>& QuestObject,
+		const TCHAR* FieldName,
+		TArray<FTunaSweeperQuestPresentationStep>& OutSteps)
+	{
+		OutSteps.Reset();
+
+		const TArray<TSharedPtr<FJsonValue>>* StepValues = nullptr;
+		if (!QuestObject.IsValid() || !QuestObject->TryGetArrayField(FieldName, StepValues))
+		{
+			return;
+		}
+
+		for (const TSharedPtr<FJsonValue>& StepValue : *StepValues)
+		{
+			FTunaSweeperQuestPresentationStep Step;
+			if (ParsePresentationStep(StepValue.IsValid() ? StepValue->AsObject() : nullptr, Step))
+			{
+				OutSteps.Add(Step);
+			}
+		}
 	}
 
 	bool ParseItemReward(const TSharedPtr<FJsonObject>& JsonObject, FTunaSweeperItemStack& OutItemReward)
@@ -219,7 +300,8 @@ bool UTunaSweeperQuestSubsystem::LoadQuestData(bool bForceReload)
 	}
 
 	ResetLoadedQuestData();
-	if (!LoadQuestDefinitionsJson())
+	const bool bLoadedQuestTextStrings = LoadQuestTextStringsCsv();
+	if (!bLoadedQuestTextStrings || !LoadQuestDefinitionsJson())
 	{
 		RegisterFallbackQuest();
 	}
@@ -245,6 +327,98 @@ bool UTunaSweeperQuestSubsystem::TryGetQuestDefinition(
 const FTunaSweeperQuestDefinition* UTunaSweeperQuestSubsystem::FindQuestDefinition(FName QuestId) const
 {
 	return QuestDefinitions.Find(QuestId);
+}
+
+bool UTunaSweeperQuestSubsystem::GetAllQuestDefinitions(TArray<FTunaSweeperQuestDefinition>& OutDefinitions) const
+{
+	OutDefinitions.Reset();
+	if (!EnsureQuestDataLoaded())
+	{
+		return false;
+	}
+
+	QuestDefinitions.GenerateValueArray(OutDefinitions);
+	OutDefinitions.Sort([](
+		const FTunaSweeperQuestDefinition& Left,
+		const FTunaSweeperQuestDefinition& Right)
+	{
+		if (Left.SortOrder != Right.SortOrder)
+		{
+			return Left.SortOrder < Right.SortOrder;
+		}
+
+		return Left.QuestId.LexicalLess(Right.QuestId);
+	});
+	return true;
+}
+
+bool UTunaSweeperQuestSubsystem::TryGetQuestTextByKey(
+	FName StringKey,
+	ETunaSweeperItemTextLanguage Language,
+	FText& OutText) const
+{
+	const FTunaSweeperQuestTextString* QuestTextString = QuestTextStringsByKey.Find(StringKey);
+	if (!QuestTextString)
+	{
+		OutText = FText::GetEmpty();
+		return false;
+	}
+
+	switch (Language)
+	{
+	case ETunaSweeperItemTextLanguage::Korean:
+		OutText = QuestTextString->Korean;
+		break;
+	case ETunaSweeperItemTextLanguage::English:
+		OutText = QuestTextString->English;
+		break;
+	case ETunaSweeperItemTextLanguage::Japanese:
+		OutText = QuestTextString->Japanese;
+		break;
+	default:
+		OutText = FText::GetEmpty();
+		break;
+	}
+
+	return !OutText.IsEmpty();
+}
+
+bool UTunaSweeperQuestSubsystem::GetQuestPresentationLines(
+	FName QuestId,
+	ETunaSweeperQuestPresentationTrigger Trigger,
+	TArray<FTunaSweeperQuestPresentationLineView>& OutLines) const
+{
+	OutLines.Reset();
+
+	const FTunaSweeperQuestDefinition* Definition = FindQuestDefinition(QuestId);
+	if (!Definition)
+	{
+		return false;
+	}
+
+	const TArray<FTunaSweeperQuestPresentationStep>& Steps =
+		Trigger == ETunaSweeperQuestPresentationTrigger::OnRewardClaim
+			? Definition->RewardPresentationSteps
+			: Definition->AcceptPresentationSteps;
+	OutLines.Reserve(Steps.Num());
+	for (const FTunaSweeperQuestPresentationStep& Step : Steps)
+	{
+		FText DialogueText = ResolveQuestText(Step.DialogueTextStringKey);
+		if (DialogueText.IsEmpty())
+		{
+			continue;
+		}
+
+		FTunaSweeperQuestPresentationLineView LineView;
+		LineView.SpeakerName = ResolveQuestText(Step.SpeakerNameStringKey);
+		LineView.DialogueText = DialogueText;
+		LineView.bUseCameraFocus = Step.bUseCameraFocus;
+		LineView.CameraFocusLocation = Step.CameraFocusLocation;
+		LineView.CameraBlendSeconds = Step.CameraBlendSeconds;
+		OutLines.Add(LineView);
+	}
+
+	return OutLines.Num() > 0;
 }
 
 ETunaSweeperQuestState UTunaSweeperQuestSubsystem::GetQuestState(FName QuestId) const
@@ -697,7 +871,9 @@ bool UTunaSweeperQuestSubsystem::LoadQuestDefinitionsJson()
 			continue;
 		}
 
+		Definition.TitleStringKey = TunaSweeperQuestData::ReadNameField(QuestObject, TEXT("title_string_key"));
 		Definition.Title = TunaSweeperQuestData::ReadTextField(QuestObject, TEXT("title"));
+		Definition.DescriptionStringKey = TunaSweeperQuestData::ReadNameField(QuestObject, TEXT("description_string_key"));
 		Definition.Description = TunaSweeperQuestData::ReadTextField(QuestObject, TEXT("description"));
 		Definition.ProviderId = TunaSweeperQuestData::ReadNameField(QuestObject, TEXT("provider_id"));
 		double SortOrder = 0.0;
@@ -743,8 +919,18 @@ bool UTunaSweeperQuestSubsystem::LoadQuestDefinitionsJson()
 			}
 		}
 
+		TunaSweeperQuestData::ParsePresentationSteps(
+			QuestObject,
+			TEXT("accept_presentation"),
+			Definition.AcceptPresentationSteps);
+		TunaSweeperQuestData::ParsePresentationSteps(
+			QuestObject,
+			TEXT("reward_presentation"),
+			Definition.RewardPresentationSteps);
+
 		if (Definition.Objectives.Num() > 0)
 		{
+			ResolveDefinitionText(Definition);
 			QuestDefinitions.Add(Definition.QuestId, Definition);
 		}
 	}
@@ -752,11 +938,85 @@ bool UTunaSweeperQuestSubsystem::LoadQuestDefinitionsJson()
 	return QuestDefinitions.Num() > 0;
 }
 
+bool UTunaSweeperQuestSubsystem::LoadQuestTextStringsCsv()
+{
+	FString CsvContent;
+	const FString QuestTextStringsCsvPath = GetQuestTextStringsCsvPath();
+	if (!FFileHelper::LoadFileToString(CsvContent, *QuestTextStringsCsvPath))
+	{
+		UE_LOG(LogTunaSweeperQuest, Warning, TEXT("Could not load quest text strings: %s"), *QuestTextStringsCsvPath);
+		return false;
+	}
+
+	FCsvParser CsvParser(CsvContent);
+	const FCsvParser::FRows& Rows = CsvParser.GetRows();
+	if (Rows.Num() < 2)
+	{
+		UE_LOG(LogTunaSweeperQuest, Warning, TEXT("Quest text strings CSV has no data rows: %s"), *QuestTextStringsCsvPath);
+		return false;
+	}
+
+	const TArray<const TCHAR*>& HeaderRow = Rows[0];
+	const bool bHeaderIsValid =
+		TunaSweeperQuestData::GetCsvCell(HeaderRow, 0).Equals(TEXT("string_key"), ESearchCase::IgnoreCase) &&
+		TunaSweeperQuestData::GetCsvCell(HeaderRow, 1).Equals(TEXT("ko"), ESearchCase::IgnoreCase) &&
+		TunaSweeperQuestData::GetCsvCell(HeaderRow, 2).Equals(TEXT("en"), ESearchCase::IgnoreCase) &&
+		TunaSweeperQuestData::GetCsvCell(HeaderRow, 3).Equals(TEXT("ja"), ESearchCase::IgnoreCase);
+	if (!bHeaderIsValid)
+	{
+		UE_LOG(LogTunaSweeperQuest, Warning, TEXT("Quest text strings CSV header must be string_key,ko,en,ja: %s"), *QuestTextStringsCsvPath);
+		return false;
+	}
+
+	bool bHasValidRows = false;
+	for (int32 RowIndex = 1; RowIndex < Rows.Num(); ++RowIndex)
+	{
+		const TArray<const TCHAR*>& Row = Rows[RowIndex];
+		if (Row.Num() < 4)
+		{
+			UE_LOG(LogTunaSweeperQuest, Warning, TEXT("Skipping quest text row %d: expected 4 columns."), RowIndex);
+			continue;
+		}
+
+		const FString StringKey = TunaSweeperQuestData::GetCsvCell(Row, 0);
+		const FString Korean = TunaSweeperQuestData::GetCsvCell(Row, 1);
+		const FString English = TunaSweeperQuestData::GetCsvCell(Row, 2);
+		const FString Japanese = TunaSweeperQuestData::GetCsvCell(Row, 3);
+		if (StringKey.IsEmpty() || Korean.IsEmpty() || English.IsEmpty() || Japanese.IsEmpty())
+		{
+			UE_LOG(LogTunaSweeperQuest, Warning, TEXT("Skipping quest text row %d: required cell is empty."), RowIndex);
+			continue;
+		}
+
+		FTunaSweeperQuestTextString QuestTextString;
+		QuestTextString.StringKey = FName(*StringKey);
+		QuestTextString.Korean = FText::FromString(Korean);
+		QuestTextString.English = FText::FromString(English);
+		QuestTextString.Japanese = FText::FromString(Japanese);
+
+		if (QuestTextStringsByKey.Contains(QuestTextString.StringKey))
+		{
+			UE_LOG(LogTunaSweeperQuest, Warning, TEXT("Duplicate quest text string key %s found. The later row will replace the earlier row."), *StringKey);
+		}
+
+		QuestTextStringsByKey.Add(QuestTextString.StringKey, QuestTextString);
+		bHasValidRows = true;
+	}
+
+	if (!bHasValidRows)
+	{
+		UE_LOG(LogTunaSweeperQuest, Warning, TEXT("Quest text strings CSV has no valid rows: %s"), *QuestTextStringsCsvPath);
+	}
+
+	return bHasValidRows;
+}
+
 void UTunaSweeperQuestSubsystem::RegisterFallbackQuest()
 {
 	FTunaSweeperObjectiveDefinition FirstObjective;
 	FirstObjective.ObjectiveId = FName(TEXT("leave_bunker"));
 	FirstObjective.Type = ETunaSweeperObjectiveType::LevelTravel;
+	FirstObjective.TextStringKey = FName(TEXT("quest.first_outing.objective.leave_bunker"));
 	FirstObjective.Text = FText::FromString(TEXT("\uBC99\uCEE4 \uBC16\uC73C\uB85C \uC774\uB3D9"));
 	FirstObjective.RequiredCount = 1;
 	FirstObjective.SourceLevelName = FName(TEXT("BunkerMap"));
@@ -766,7 +1026,9 @@ void UTunaSweeperQuestSubsystem::RegisterFallbackQuest()
 	FirstOuting.QuestId = GetFirstOutingQuestId();
 	FirstOuting.ProviderId = GetInstructorProviderId();
 	FirstOuting.SortOrder = 10;
+	FirstOuting.TitleStringKey = FName(TEXT("quest.first_outing.title"));
 	FirstOuting.Title = FText::FromString(TEXT("\uCCAB \uC678\uCD9C"));
+	FirstOuting.DescriptionStringKey = FName(TEXT("quest.first_outing.description"));
 	FirstOuting.Description = FText::FromString(TEXT("\uC774\uC81C \uB4E4\uC5B4\uC654\uC73C\uB2C8 \uB098\uAC00\uC11C \uD55C\uBC88 \uC0B0\uCC45\uD558\uACE0 \uB4E4\uC5B4\uC640"));
 	FirstOuting.Objectives.Add(FirstObjective);
 	FirstOuting.Rewards.Coins = 100;
@@ -777,12 +1039,44 @@ void UTunaSweeperQuestSubsystem::RegisterFallbackQuest()
 void UTunaSweeperQuestSubsystem::ResetLoadedQuestData()
 {
 	QuestDefinitions.Reset();
+	QuestTextStringsByKey.Reset();
 	bQuestDataLoaded = false;
 }
 
 FString UTunaSweeperQuestSubsystem::GetQuestDefinitionsJsonPath() const
 {
 	return FPaths::Combine(FPaths::ProjectContentDir(), TunaSweeperQuestData::QuestDefinitionsJsonRelativePath);
+}
+
+FString UTunaSweeperQuestSubsystem::GetQuestTextStringsCsvPath() const
+{
+	return FPaths::Combine(FPaths::ProjectContentDir(), TunaSweeperQuestData::QuestTextStringsCsvRelativePath);
+}
+
+void UTunaSweeperQuestSubsystem::ResolveDefinitionText(FTunaSweeperQuestDefinition& Definition) const
+{
+	Definition.Title = ResolveQuestText(Definition.TitleStringKey, Definition.Title);
+	Definition.Description = ResolveQuestText(Definition.DescriptionStringKey, Definition.Description);
+	for (FTunaSweeperObjectiveDefinition& Objective : Definition.Objectives)
+	{
+		Objective.Text = ResolveQuestText(Objective.TextStringKey, Objective.Text);
+	}
+}
+
+FText UTunaSweeperQuestSubsystem::ResolveQuestText(FName StringKey, const FText& FallbackText) const
+{
+	if (StringKey.IsNone())
+	{
+		return FallbackText;
+	}
+
+	FText Text;
+	if (TryGetQuestTextByKey(StringKey, ETunaSweeperItemTextLanguage::Korean, Text))
+	{
+		return Text;
+	}
+
+	return FallbackText.IsEmpty() ? FText::FromString(StringKey.ToString()) : FallbackText;
 }
 
 bool UTunaSweeperQuestSubsystem::IsMapNameMatch(FName ActualMapName, const TCHAR* ExpectedMapName) const

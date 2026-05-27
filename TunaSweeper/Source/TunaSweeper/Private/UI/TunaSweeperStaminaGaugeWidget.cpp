@@ -60,12 +60,12 @@ int32 UTunaSweeperStaminaGaugeWidget::NativePaint(
 	PaintVertices.Reserve(292);
 	PaintIndices.Reserve(438);
 
-	constexpr float FullCircleRadians = 2.0f * PI;
-	constexpr float StartAngleRadians = -0.5f * PI;
+	const float GaugeSweepRadians = FMath::DegreesToRadians(FMath::Clamp(GaugeSweepDegrees, 1.0f, 360.0f));
+	const float StartAngleRadians = FMath::DegreesToRadians(GaugeStartAngleDegrees);
 	const FLinearColor EffectiveBackgroundColor = BackgroundColor.CopyWithNewOpacity(BackgroundColor.A * GaugeOpacity);
 	AddRingSegment(
 		StartAngleRadians,
-		FullCircleRadians,
+		GaugeSweepRadians,
 		InnerRadius,
 		OuterRadius,
 		EffectiveBackgroundColor,
@@ -80,7 +80,7 @@ int32 UTunaSweeperStaminaGaugeWidget::NativePaint(
 		const FLinearColor EffectiveFillColor = BaseFillColor.CopyWithNewOpacity(BaseFillColor.A * GaugeOpacity);
 		AddRingSegment(
 			StartAngleRadians,
-			FullCircleRadians * StaminaPercent,
+			GaugeSweepRadians * StaminaPercent,
 			InnerRadius,
 			OuterRadius,
 			EffectiveFillColor,

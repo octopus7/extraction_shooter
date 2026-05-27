@@ -7,6 +7,7 @@
 
 class ATunaSweeperLootContainerActor;
 class ATunaSweeperMemoActor;
+class ATunaSweeperDoorActor;
 class ATunaSweeperPersistentDoorActor;
 
 UCLASS()
@@ -44,6 +45,7 @@ private:
 	bool HandleSelfDestructInteraction(UTunaSweeperInteractableComponent* Interactable, APawn* InstigatorPawn);
 	bool HandleWorldProgressInteraction(UTunaSweeperInteractableComponent* Interactable, APawn* InstigatorPawn);
 	bool HandlePersistentDoorInteraction(UTunaSweeperInteractableComponent* Interactable);
+	bool HandleDoorOpenInteraction(UTunaSweeperInteractableComponent* Interactable);
 	bool HandleWarpPointInteraction(UTunaSweeperInteractableComponent* Interactable, APawn* InstigatorPawn);
 	bool HandleMemoInteraction(UTunaSweeperInteractableComponent* Interactable, APawn* InstigatorPawn);
 

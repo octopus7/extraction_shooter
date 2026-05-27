@@ -15,6 +15,7 @@ class UTunaSweeperHudTopReserveWidget;
 class UTunaSweeperItemThumbnailSlotWidget;
 class UTunaSweeperMapWidget;
 class UTunaSweeperMemoWidget;
+class UTunaSweeperQuestWidget;
 class UBorder;
 class UHorizontalBox;
 class UTextBlock;
@@ -49,6 +50,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
 	void ShowMemoPanel(int32 MemoId);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
+	void ShowQuestPanel(FName QuestId);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
 	void SetHudMode(ETunaSweeperHudMode InHudMode);
@@ -103,6 +107,7 @@ private:
 	void EnsureInventoryQuickSlotPanelWidget();
 	void EnsureMapPanelWidget();
 	void EnsureMemoPanelWidget();
+	void EnsureQuestPanelWidget();
 	void RefreshBottomStatusFromGameInstance();
 	void RefreshQuickSlotsFromGameState();
 	void RefreshInventoryQuickSlotPanel();
@@ -154,6 +159,9 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<UTunaSweeperMemoWidget> MemoPanelWidget;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTunaSweeperQuestWidget> QuestPanelWidget;
 
 	UPROPERTY(Transient)
 	TArray<TObjectPtr<UBorder>> CenterReloadSegments;

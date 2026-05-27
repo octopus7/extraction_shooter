@@ -25,10 +25,10 @@ ATunaSweeperMemoActor::ATunaSweeperMemoActor()
 		VisualMesh->SetStaticMesh(CubeMesh.Object);
 	}
 
-	static ConstructorHelpers::FObjectFinder<UMaterialInterface> BlueMaterial(TEXT("/Game/Characters/Enemy/M_Enemy_Blue.M_Enemy_Blue"));
-	if (BlueMaterial.Succeeded())
+	static ConstructorHelpers::FObjectFinder<UMaterialInterface> MemoStorageMaterial(TEXT("/Game/Interaction/M_MemoStorageDevice.M_MemoStorageDevice"));
+	if (MemoStorageMaterial.Succeeded())
 	{
-		VisualMesh->SetMaterial(0, BlueMaterial.Object);
+		VisualMesh->SetMaterial(0, MemoStorageMaterial.Object);
 	}
 
 	InteractableComponent = CreateDefaultSubobject<UTunaSweeperInteractableComponent>(TEXT("Interactable"));

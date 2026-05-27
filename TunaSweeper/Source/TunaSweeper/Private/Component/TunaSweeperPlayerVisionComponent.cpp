@@ -7,6 +7,7 @@
 #include "Game/TunaSweeperGameInstance.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
+#include "TunaSweeperCollisionChannels.h"
 #include "UI/TunaSweeperVisionMaskWidget.h"
 
 namespace TunaSweeperVision
@@ -361,6 +362,10 @@ void UTunaSweeperPlayerVisionComponent::BeginPlay()
 	if (VisionSettings.HiddenMaskAlpha == TunaSweeperVision::LegacyHiddenMaskAlpha)
 	{
 		VisionSettings.HiddenMaskAlpha = TunaSweeperVision::FramedHiddenMaskAlpha;
+	}
+	if (VisionSettings.TraceChannel.GetValue() == ECC_Visibility)
+	{
+		VisionSettings.TraceChannel = TunaSweeperCollisionChannels::VisionOccluder;
 	}
 }
 

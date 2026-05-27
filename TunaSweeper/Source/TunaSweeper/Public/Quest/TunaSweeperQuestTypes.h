@@ -24,6 +24,73 @@ enum class ETunaSweeperObjectiveType : uint8
 	WarpPointUsed UMETA(DisplayName = "Warp Point Used")
 };
 
+UENUM(BlueprintType)
+enum class ETunaSweeperQuestPresentationTrigger : uint8
+{
+	OnAccept UMETA(DisplayName = "On Accept"),
+	OnRewardClaim UMETA(DisplayName = "On Reward Claim")
+};
+
+USTRUCT(BlueprintType)
+struct TUNASWEEPER_API FTunaSweeperQuestPresentationStep
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
+	FName SpeakerNameStringKey = NAME_None;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
+	FName DialogueTextStringKey = NAME_None;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
+	bool bUseCameraFocus = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
+	FVector CameraFocusLocation = FVector::ZeroVector;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float CameraBlendSeconds = 0.75f;
+};
+
+USTRUCT(BlueprintType)
+struct TUNASWEEPER_API FTunaSweeperQuestPresentationLineView
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Quest")
+	FText SpeakerName;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Quest")
+	FText DialogueText;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Quest")
+	bool bUseCameraFocus = false;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Quest")
+	FVector CameraFocusLocation = FVector::ZeroVector;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Quest")
+	float CameraBlendSeconds = 0.75f;
+};
+
+USTRUCT(BlueprintType)
+struct TUNASWEEPER_API FTunaSweeperQuestTextString
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Quest")
+	FName StringKey = NAME_None;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Quest")
+	FText Korean;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Quest")
+	FText English;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Quest")
+	FText Japanese;
+};
+
 USTRUCT(BlueprintType)
 struct TUNASWEEPER_API FTunaSweeperObjectiveDefinition
 {
@@ -34,6 +101,9 @@ struct TUNASWEEPER_API FTunaSweeperObjectiveDefinition
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
 	ETunaSweeperObjectiveType Type = ETunaSweeperObjectiveType::LevelTravel;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
+	FName TextStringKey = NAME_None;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
 	FText Text;
@@ -93,7 +163,13 @@ struct TUNASWEEPER_API FTunaSweeperQuestDefinition
 	int32 SortOrder = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
+	FName TitleStringKey = NAME_None;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
 	FText Title;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
+	FName DescriptionStringKey = NAME_None;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
 	FText Description;
@@ -109,6 +185,12 @@ struct TUNASWEEPER_API FTunaSweeperQuestDefinition
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
 	FTunaSweeperQuestRewardDefinition Rewards;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
+	TArray<FTunaSweeperQuestPresentationStep> AcceptPresentationSteps;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
+	TArray<FTunaSweeperQuestPresentationStep> RewardPresentationSteps;
 };
 
 USTRUCT(BlueprintType)

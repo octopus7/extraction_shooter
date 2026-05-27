@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "Quest/TunaSweeperQuestTypes.h"
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
 #include "TimerManager.h"
 #include "UI/TunaSweeperDialogueWidget.h"
@@ -36,6 +37,9 @@ public:
 	void ToggleInventoryOnlyPanel();
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
+	void ToggleMapPanel();
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
 	void OpenLootContainerPanel(const FTunaSweeperLootContainerInstance& ContainerInstance);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Quest")
@@ -55,6 +59,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Dialogue")
 	bool StartDialogueSequence(const TArray<FTunaSweeperDialogueLine>& DialogueLines, FName CompletionFlag);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Quest")
+	bool PlayQuestPresentation(FName QuestId, ETunaSweeperQuestPresentationTrigger Trigger);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Dialogue")
 	void MoveDialogueCameraToFocusLocation(FVector FocusLocation, float BlendSeconds = 0.75f);

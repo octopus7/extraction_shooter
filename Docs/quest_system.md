@@ -154,3 +154,13 @@ v1 목표 타입:
 - `warp_point_used` 목표에서 특정 워프만 요구하려면 워프 포인트 스폰 데이터의 `id`와 `target_id`를 각각 `warp_point_id`, `target_warp_point_id`에 설정한다.
 - `bunker_rescue_return`은 직접적인 실패 표현 대신 구급 카트 후송/복귀 표현을 사용한다.
 - 저장 필드를 변경하면 `Docs/save_persistence.md`도 같은 변경에서 갱신한다.
+
+## Quest UI and Presentation Update
+
+- Quest panel display now uses the shared HUD `Quest` mode instead of a standalone popup widget.
+- The panel shows a detail view on the left and a quest list on the right.
+- The right list is split into `Available`, `InProgress`, and `RewardCompleted` tabs.
+- Quest text is string-key based. `Content/Data/QuestDefinitions.json` stores keys such as `title_string_key`, `description_string_key`, and objective `text_string_key`; localized text lives in `Content/Data/QuestTextStrings.csv`.
+- Quest presentation steps can be attached to a quest through `accept_presentation` or `reward_presentation`.
+- A presentation step uses `speaker_name_string_key` and `dialogue_text_string_key`; optional `use_camera_focus`, `camera_focus_location`, and `camera_blend_seconds` reuse the existing dialogue camera flow.
+- Accepting a quest calls `PlayQuestPresentation(..., OnAccept)` after the quest is accepted. Claiming rewards can similarly call `OnRewardClaim` when reward presentation data exists.

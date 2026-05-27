@@ -1,0 +1,41 @@
+string_key,ko,en,ja
+quest.ui.title,퀘스트,Quests,クエスト
+quest.ui.list_title,퀘스트 목록,Quest List,クエスト一覧
+quest.ui.tab.available,수락가능,Available,受注可能
+quest.ui.tab.in_progress,진행중,In Progress,進行中
+quest.ui.tab.completed,보상완료,Reward Complete,報酬完了
+quest.ui.select_prompt,우측 목록에서 퀘스트를 선택하세요.,Select a quest from the right list.,右の一覧からクエストを選択してください
+quest.ui.empty.available,수락 가능한 퀘스트가 없습니다.,No available quests.,受注可能なクエストはありません
+quest.ui.empty.in_progress,진행 중인 퀘스트가 없습니다.,No active quests.,進行中のクエストはありません
+quest.ui.empty.completed,보상을 완료한 퀘스트가 없습니다.,No completed reward quests.,報酬完了のクエストはありません
+quest.ui.objectives,목표,Objectives,目標
+quest.ui.rewards,보상,Rewards,報酬
+quest.ui.no_reward,없음,None,なし
+quest.ui.coins,코인,Coins,コイン
+quest.ui.item_fallback,아이템,Item,アイテム
+quest.ui.state.available,수락 가능,Available,受注可能
+quest.ui.state.locked,잠김,Locked,ロック中
+quest.ui.state.accepted,진행 중,In Progress,進行中
+quest.ui.state.reward_available,보상 가능,Reward Available,報酬受取可能
+quest.ui.state.reward_completed,보상 완료,Reward Complete,報酬完了
+quest.ui.button.accept,수락,Accept,受注
+quest.ui.button.locked,잠김,Locked,ロック中
+quest.ui.button.in_progress,진행 중,In Progress,進行中
+quest.ui.button.claim_reward,보상 받기,Claim Reward,報酬を受け取る
+quest.ui.button.completed,완료,Complete,完了
+quest.ui.tracker.reward_available,보상 수령 가능,Reward available,報酬受取可能
+quest.speaker.canbot,캔봇,Canbot,キャンボット
+quest.first_outing.title,첫 외출,First Outing,初めての外出
+quest.first_outing.description,벙커 밖으로 나가 레이드 구역을 확인하고 돌아올 준비를 하세요.,Step outside the bunker and confirm the raid zone.,バンカーの外へ出てレイド区域を確認しましょう
+quest.first_outing.objective.leave_bunker,벙커 밖으로 이동,Move outside the bunker,バンカーの外へ移動
+quest.first_outing.accept.line1,기본 생체 수치와 장비 상태를 확인했습니다. 이제 외부 구역 이동 권한을 열겠습니다.,Vitals and equipment status are confirmed. I will unlock exterior access.,基本生体値と装備状態を確認しました。外部区域への移動権限を開放します
+quest.first_outing.accept.line2,왼쪽 이동 사다리를 사용하면 레이드 구역으로 출동할 수 있습니다. 준비가 끝나면 접근하세요.,Use the left transfer ladder to deploy into the raid zone. Approach it when ready.,左側の移動はしごからレイド区域へ出動できます。準備ができたら近づいてください
+quest.lumberjack_first_kill.title,벌목기 제거,Remove the Lumberjack,伐採機の排除
+quest.lumberjack_first_kill.description,레이드 구역에서 벌목기를 처치하고 생환하세요.,Eliminate a lumberjack in the raid zone and return alive.,レイド区域で伐採機を排除して生還しましょう
+quest.lumberjack_first_kill.objective.kill_lumberjack,벌목기 처치,Eliminate a lumberjack,伐採機を排除
+quest.rescue_cart_return.title,구조 복귀 확인,Rescue Return Check,救助帰還確認
+quest.rescue_cart_return.description,작전 중 이상 상태가 감지되면 구급 카트 전송 절차에 따라 벙커로 돌아옵니다.,If abnormal status is detected during a sortie the rescue cart returns you to the bunker.,作戦中に異常状態を検知すると救急カート転送手順でバンカーへ戻ります
+quest.rescue_cart_return.objective.return_by_rescue_cart,구급 카트에 실려 벙커로 돌아오기,Return to the bunker by rescue cart,救急カートでバンカーへ戻る
+quest.warp_point_used_test.title,워프 포인트 사용 확인,Warp Point Use Check,ワープポイント使用確認
+quest.warp_point_used_test.description,워프 포인트 사용 목표 검증용 데이터입니다. 실제 제공자나 진행 흐름에는 연결되지 않습니다.,Validation data for the warp point objective. It is not connected to a real provider flow.,ワープポイント使用目標の検証用データです。実際の提供者や進行には接続されません
+quest.warp_point_used_test.objective.use_raid_warp_point_a,워프 포인트 사용,Use a warp point,ワープポイントを使用

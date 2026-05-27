@@ -72,6 +72,10 @@ ATunaSweeperTopDownCharacter::ATunaSweeperTopDownCharacter()
 	WeaponAttachPoint->SetupAttachment(RootComponent);
 	WeaponAttachPoint->SetRelativeLocation(FVector(35.0f, 0.0f, 38.0f));
 
+	RollWeaponHandAttachPoint = CreateDefaultSubobject<USceneComponent>(TEXT("RollWeaponHandAttachPoint"));
+	RollWeaponHandAttachPoint->SetupAttachment(GetMesh());
+	RollWeaponHandAttachPoint->SetRelativeLocation(FVector(35.0f, 0.0f, 38.0f));
+
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
 	CameraBoom->TargetArmLength = 1200.0f;
@@ -119,6 +123,7 @@ ATunaSweeperTopDownCharacter::ATunaSweeperTopDownCharacter()
 	AimAction = TSoftObjectPtr<UInputAction>(FSoftObjectPath(TEXT("/Game/Input/IA_Aim.IA_Aim")));
 	InteractAction = TSoftObjectPtr<UInputAction>(FSoftObjectPath(TEXT("/Game/Input/IA_Interact.IA_Interact")));
 	InventoryAction = TSoftObjectPtr<UInputAction>(FSoftObjectPath(TEXT("/Game/Input/IA_Inventory.IA_Inventory")));
+	MapAction = TSoftObjectPtr<UInputAction>(FSoftObjectPath(TEXT("/Game/Input/IA_Map.IA_Map")));
 	ReloadAction = TSoftObjectPtr<UInputAction>(FSoftObjectPath(TEXT("/Game/Input/IA_Reload.IA_Reload")));
 	AmmoSelectAction = TSoftObjectPtr<UInputAction>(FSoftObjectPath(TEXT("/Game/Input/IA_AmmoSelect.IA_AmmoSelect")));
 	AmmoFocusAction = TSoftObjectPtr<UInputAction>(FSoftObjectPath(TEXT("/Game/Input/IA_AmmoFocus.IA_AmmoFocus")));
@@ -291,6 +296,11 @@ void ATunaSweeperTopDownCharacter::SetupPlayerInputComponent(UInputComponent* Pl
 		EnhancedInputComponent->BindAction(LoadedInventoryAction, ETriggerEvent::Started, this, &ATunaSweeperTopDownCharacter::HandleInventory);
 	}
 
+	if (UInputAction* LoadedMapAction = MapAction.LoadSynchronous())
+	{
+		EnhancedInputComponent->BindAction(LoadedMapAction, ETriggerEvent::Started, this, &ATunaSweeperTopDownCharacter::HandleMap);
+	}
+
 	if (UInputAction* LoadedReloadAction = ReloadAction.LoadSynchronous())
 	{
 		EnhancedInputComponent->BindAction(LoadedReloadAction, ETriggerEvent::Started, this, &ATunaSweeperTopDownCharacter::HandleReload);
@@ -421,6 +431,11 @@ void ATunaSweeperTopDownCharacter::ClearEquippedWeaponActor()
 		EquippedWeapon->Destroy();
 		EquippedWeapon = nullptr;
 	}
+
+	bWeaponAttachedForRoll = false;
+	SavedWeaponAttachParent.Reset();
+	SavedWeaponAttachSocketName = NAME_None;
+	SavedWeaponRelativeTransform = FTransform::Identity;
 }
 
 void ATunaSweeperTopDownCharacter::HandleMove(const FInputActionValue& Value)
@@ -542,6 +557,24 @@ void ATunaSweeperTopDownCharacter::HandleInventory(const FInputActionValue& Valu
 	}
 }
 
+void ATunaSweeperTopDownCharacter::HandleMap(const FInputActionValue& Value)
+{
+	if (bIsDead)
+	{
+		return;
+	}
+
+	if (ATunaSweeperPlayerController* TunaPlayerController = Cast<ATunaSweeperPlayerController>(GetController()))
+	{
+		if (TunaPlayerController->IsDialogueSequenceActive())
+		{
+			return;
+		}
+
+		TunaPlayerController->ToggleMapPanel();
+	}
+}
+
 void ATunaSweeperTopDownCharacter::HandleReload(const FInputActionValue& Value)
 {
 	if (bIsDead || IsGameplayActionInputLocked())
@@ -628,6 +661,13 @@ void ATunaSweeperTopDownCharacter::BeginRoll(const FInputActionValue& Value)
 		return;
 	}
 
+	const float EffectiveRollStaminaCost = FMath::Max(0.0f, RollStaminaCost);
+	CurrentStamina = FMath::Clamp(CurrentStamina, 0.0f, FMath::Max(0.0f, MaxStamina));
+	if (CurrentStamina < EffectiveRollStaminaCost)
+	{
+		return;
+	}
+
 	bIsRolling = true;
 	bIsSprinting = false;
 	bSprintInputHeld = false;
@@ -635,6 +675,7 @@ void ATunaSweeperTopDownCharacter::BeginRoll(const FInputActionValue& Value)
 	bFireHeld = false;
 	bIsAiming = false;
 	RollElapsedSeconds = 0.0f;
+	CurrentStamina = FMath::Max(0.0f, CurrentStamina - EffectiveRollStaminaCost);
 	DefaultSkeletalMeshRelativeRotation = GetMesh() ? GetMesh()->GetRelativeRotation() : DefaultSkeletalMeshRelativeRotation;
 	DefaultVisualMeshRelativeRotation = VisualMesh ? VisualMesh->GetRelativeRotation() : DefaultVisualMeshRelativeRotation;
 
@@ -644,9 +685,15 @@ void ATunaSweeperTopDownCharacter::BeginRoll(const FInputActionValue& Value)
 	{
 		GetWorldTimerManager().ClearTimer(FireTimerHandle);
 	}
+	if (UCharacterMovementComponent* MovementComponent = GetCharacterMovement())
+	{
+		MovementComponent->StopMovementImmediately();
+	}
+	ConsumeMovementInputVector();
 
 	SetActorRotation(FRotator(0.0f, RollDirection.Rotation().Yaw, 0.0f));
 	SetRollProjectileCollisionPassthrough(true);
+	AttachWeaponForRoll();
 	UpdateMovementSpeed();
 	ApplyTemporaryRollVisualRotation(0.0f);
 }
@@ -1287,11 +1334,15 @@ void ATunaSweeperTopDownCharacter::UpdateSprintAndStamina(float DeltaSeconds)
 	}
 
 	CurrentStamina = FMath::Clamp(CurrentStamina, 0.0f, EffectiveMaxStamina);
+	if (bIsRolling)
+	{
+		bIsSprinting = false;
+		return;
+	}
 
 	const bool bCanSprint =
 		bSprintInputHeld &&
 		!bSprintLockedUntilReleased &&
-		!bIsRolling &&
 		HasActiveMoveInput() &&
 		!IsGameplayActionInputLocked();
 	bIsSprinting = bCanSprint && CurrentStamina > 0.0f;
@@ -1381,7 +1432,7 @@ bool ATunaSweeperTopDownCharacter::HasActiveMoveInput() const
 
 void ATunaSweeperTopDownCharacter::FinishRoll()
 {
-	if (!bIsRolling && !bHasSavedProjectileCollisionResponse)
+	if (!bIsRolling && !bHasSavedProjectileCollisionResponse && !bWeaponAttachedForRoll)
 	{
 		return;
 	}
@@ -1390,6 +1441,7 @@ void ATunaSweeperTopDownCharacter::FinishRoll()
 	RollElapsedSeconds = 0.0f;
 	SetRollProjectileCollisionPassthrough(false);
 	RestoreTemporaryRollVisualRotation();
+	RestoreWeaponAfterRoll();
 	UpdateMovementSpeed();
 }
 
@@ -1418,6 +1470,94 @@ void ATunaSweeperTopDownCharacter::SetRollProjectileCollisionPassthrough(bool bE
 		Capsule->SetCollisionResponseToChannel(TunaSweeperCollisionChannels::Projectile, SavedProjectileCollisionResponse);
 		bHasSavedProjectileCollisionResponse = false;
 	}
+}
+
+void ATunaSweeperTopDownCharacter::AttachWeaponForRoll()
+{
+	if (!EquippedWeapon || bWeaponAttachedForRoll)
+	{
+		return;
+	}
+
+	USceneComponent* WeaponRoot = EquippedWeapon->GetRootComponent();
+	if (!WeaponRoot)
+	{
+		return;
+	}
+
+	FName RollSocketName = NAME_None;
+	USceneComponent* RollAttachParent = ResolveRollWeaponAttachParent(RollSocketName);
+	if (!RollAttachParent)
+	{
+		return;
+	}
+
+	SavedWeaponAttachParent = WeaponRoot->GetAttachParent();
+	SavedWeaponAttachSocketName = WeaponRoot->GetAttachSocketName();
+	SavedWeaponRelativeTransform = WeaponRoot->GetRelativeTransform();
+	bWeaponAttachedForRoll = true;
+
+	EquippedWeapon->AttachToComponent(
+		RollAttachParent,
+		FAttachmentTransformRules::SnapToTargetNotIncludingScale,
+		RollSocketName);
+}
+
+void ATunaSweeperTopDownCharacter::RestoreWeaponAfterRoll()
+{
+	if (!bWeaponAttachedForRoll)
+	{
+		return;
+	}
+
+	USceneComponent* WeaponRoot = EquippedWeapon ? EquippedWeapon->GetRootComponent() : nullptr;
+	USceneComponent* RestoreParent = SavedWeaponAttachParent.Get();
+	if (WeaponRoot)
+	{
+		if (!RestoreParent)
+		{
+			RestoreParent = WeaponAttachPoint;
+		}
+
+		if (RestoreParent)
+		{
+			EquippedWeapon->AttachToComponent(
+				RestoreParent,
+				FAttachmentTransformRules::KeepRelativeTransform,
+				SavedWeaponAttachSocketName);
+			WeaponRoot->SetRelativeTransform(SavedWeaponRelativeTransform);
+		}
+		else
+		{
+			EquippedWeapon->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+		}
+	}
+
+	bWeaponAttachedForRoll = false;
+	SavedWeaponAttachParent.Reset();
+	SavedWeaponAttachSocketName = NAME_None;
+	SavedWeaponRelativeTransform = FTransform::Identity;
+}
+
+USceneComponent* ATunaSweeperTopDownCharacter::ResolveRollWeaponAttachParent(FName& OutSocketName) const
+{
+	OutSocketName = NAME_None;
+
+	if (USkeletalMeshComponent* CharacterMesh = GetMesh())
+	{
+		if (!RollWeaponHandSocketName.IsNone() && CharacterMesh->DoesSocketExist(RollWeaponHandSocketName))
+		{
+			OutSocketName = RollWeaponHandSocketName;
+			return CharacterMesh;
+		}
+	}
+
+	if (RollWeaponHandAttachPoint)
+	{
+		return RollWeaponHandAttachPoint;
+	}
+
+	return GetMesh();
 }
 
 void ATunaSweeperTopDownCharacter::ApplyTemporaryRollVisualRotation(float NormalizedRollTime)

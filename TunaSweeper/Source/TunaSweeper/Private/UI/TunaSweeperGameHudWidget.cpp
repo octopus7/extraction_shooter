@@ -29,6 +29,7 @@
 #include "UI/TunaSweeperItemThumbnailSlotWidget.h"
 #include "UI/TunaSweeperMapWidget.h"
 #include "UI/TunaSweeperMemoWidget.h"
+#include "UI/TunaSweeperQuestWidget.h"
 #include "UI/TunaSweeperUIFont.h"
 #include "Styling/SlateBrush.h"
 
@@ -146,6 +147,7 @@ void UTunaSweeperGameHudWidget::NativeConstruct()
 	EnsureInventoryQuickSlotPanelWidget();
 	EnsureMapPanelWidget();
 	EnsureMemoPanelWidget();
+	EnsureQuestPanelWidget();
 	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
 	CacheAmmoReloadWidgets();
 	SetHudMode(ETunaSweeperHudMode::None);
@@ -303,6 +305,16 @@ void UTunaSweeperGameHudWidget::ShowMemoPanel(int32 MemoId)
 	}
 }
 
+void UTunaSweeperGameHudWidget::ShowQuestPanel(FName QuestId)
+{
+	SetHudMode(ETunaSweeperHudMode::Quest);
+	EnsureQuestPanelWidget();
+	if (QuestPanelWidget)
+	{
+		QuestPanelWidget->InitializeQuest(QuestId);
+	}
+}
+
 void UTunaSweeperGameHudWidget::SetHudMode(ETunaSweeperHudMode InHudMode)
 {
 	if (InHudMode != ETunaSweeperHudMode::Inventory)
@@ -347,6 +359,7 @@ void UTunaSweeperGameHudWidget::ApplyHudModeVisibility()
 	const bool bInventoryMode = ActiveHudMode == ETunaSweeperHudMode::Inventory;
 	const bool bMapMode = ActiveHudMode == ETunaSweeperHudMode::Map;
 	const bool bMemoMode = ActiveHudMode == ETunaSweeperHudMode::Memo;
+	const bool bQuestMode = ActiveHudMode == ETunaSweeperHudMode::Quest;
 
 	if (TopStatusReserveWidget)
 	{
@@ -390,6 +403,7 @@ void UTunaSweeperGameHudWidget::ApplyHudModeVisibility()
 		if (bUtilityModeOpen && bMapMode)
 		{
 			MapPanelWidget->RefreshMapView();
+			MapPanelWidget->SetUserFocus(GetOwningPlayer());
 		}
 	}
 
@@ -400,6 +414,16 @@ void UTunaSweeperGameHudWidget::ApplyHudModeVisibility()
 		if (bUtilityModeOpen && bMemoMode)
 		{
 			MemoPanelWidget->RefreshMemoView();
+		}
+	}
+
+	EnsureQuestPanelWidget();
+	if (QuestPanelWidget)
+	{
+		QuestPanelWidget->SetVisibility(bUtilityModeOpen && bQuestMode ? ESlateVisibility::SelfHitTestInvisible : ESlateVisibility::Collapsed);
+		if (bUtilityModeOpen && bQuestMode)
+		{
+			QuestPanelWidget->RefreshQuestView();
 		}
 	}
 
@@ -415,7 +439,7 @@ void UTunaSweeperGameHudWidget::ApplyHudModeVisibility()
 	if (UnsupportedModePanel)
 	{
 		UnsupportedModePanel->SetVisibility(
-			bUtilityModeOpen && !bInventoryMode && !bMapMode && !bMemoMode
+			bUtilityModeOpen && !bInventoryMode && !bMapMode && !bMemoMode && !bQuestMode
 				? ESlateVisibility::HitTestInvisible
 				: ESlateVisibility::Collapsed);
 	}
@@ -635,6 +659,39 @@ void UTunaSweeperGameHudWidget::EnsureMemoPanelWidget()
 
 	MemoPanelWidget->SetVisibility(ESlateVisibility::Collapsed);
 	UCanvasPanelSlot* CanvasSlot = RootCanvas->AddChildToCanvas(MemoPanelWidget);
+	if (CanvasSlot)
+	{
+		CanvasSlot->SetAnchors(FAnchors(0.5f, 0.5f));
+		CanvasSlot->SetAlignment(FVector2D(0.5f, 0.5f));
+		CanvasSlot->SetPosition(FVector2D(0.0f, 34.0f));
+		CanvasSlot->SetSize(FVector2D(1180.0f, 640.0f));
+		CanvasSlot->SetZOrder(20);
+	}
+}
+
+void UTunaSweeperGameHudWidget::EnsureQuestPanelWidget()
+{
+	if (QuestPanelWidget || !WidgetTree)
+	{
+		return;
+	}
+
+	UCanvasPanel* RootCanvas = Cast<UCanvasPanel>(WidgetTree->RootWidget);
+	if (!RootCanvas)
+	{
+		return;
+	}
+
+	QuestPanelWidget = CreateWidget<UTunaSweeperQuestWidget>(
+		GetOwningPlayer(),
+		UTunaSweeperQuestWidget::StaticClass());
+	if (!QuestPanelWidget)
+	{
+		return;
+	}
+
+	QuestPanelWidget->SetVisibility(ESlateVisibility::Collapsed);
+	UCanvasPanelSlot* CanvasSlot = RootCanvas->AddChildToCanvas(QuestPanelWidget);
 	if (CanvasSlot)
 	{
 		CanvasSlot->SetAnchors(FAnchors(0.5f, 0.5f));
@@ -1063,7 +1120,15 @@ void UTunaSweeperGameHudWidget::RefreshQuestTrackerFromQuestSubsystem()
 
 		if (QuestSubsystem->GetQuestState(TrackedQuestId) == ETunaSweeperQuestState::RewardAvailable)
 		{
-			ObjectiveLines.Add(TEXT("\uBCF4\uC0C1 \uC218\uB839 \uAC00\uB2A5"));
+			FText RewardAvailableText;
+			if (!QuestSubsystem->TryGetQuestTextByKey(
+				FName(TEXT("quest.ui.tracker.reward_available")),
+				ETunaSweeperItemTextLanguage::Korean,
+				RewardAvailableText))
+			{
+				RewardAvailableText = FText::FromString(TEXT("\uBCF4\uC0C1 \uC218\uB839 \uAC00\uB2A5"));
+			}
+			ObjectiveLines.Add(RewardAvailableText.ToString());
 		}
 
 		QuestTrackerObjectiveText->SetText(FText::FromString(FString::Join(ObjectiveLines, LINE_TERMINATOR)));
@@ -1137,6 +1202,10 @@ void UTunaSweeperGameHudWidget::HandleSelectedInventoryItemChanged()
 void UTunaSweeperGameHudWidget::HandleQuestProgressChanged()
 {
 	RefreshQuestTrackerFromQuestSubsystem();
+	if (QuestPanelWidget)
+	{
+		QuestPanelWidget->RefreshQuestView();
+	}
 }
 
 void UTunaSweeperGameHudWidget::HandleHudModeTabSelected(ETunaSweeperHudMode SelectedMode)

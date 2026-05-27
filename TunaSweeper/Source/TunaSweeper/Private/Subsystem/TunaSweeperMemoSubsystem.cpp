@@ -20,7 +20,7 @@ namespace TunaSweeperMemo
 	const TCHAR* MemoDefinitionsJsonRelativePath = TEXT("Data/MemoDefinitions.json");
 	const TCHAR* MemoSpawnsJsonRelativePath = TEXT("Data/MemoSpawns.json");
 	const TCHAR* DefaultInteractionMarkerWidgetClassPath = TEXT("/Game/UI/WBP_InteractionMarker.WBP_InteractionMarker_C");
-	const TCHAR* DefaultMemoVisualMaterialPath = TEXT("/Game/Characters/Enemy/M_Enemy_Blue.M_Enemy_Blue");
+	const TCHAR* DefaultMemoVisualMaterialPath = TEXT("/Game/Interaction/M_MemoStorageDevice.M_MemoStorageDevice");
 
 	FString NormalizeLevelName(const FString& RawLevelName)
 	{
