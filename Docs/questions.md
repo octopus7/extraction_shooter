@@ -869,3 +869,13 @@ A. 프로젝트에는 아직 별도 `EditorOnly` 콘텐츠 폴더 규칙이 없�
 ### 답변
 
 기존 구현은 기본 Cylinder 정적 메시 위에 `/Game/Effects/M_LumberjackMeleeSwingArc`를 얹고 `Color`, `Opacity`, `Dissolve` 같은 파라미터를 넣고 있었다. 그런데 해당 머티리얼은 `Color` 파라미터가 아니라 vertex color를 색으로 쓰고, opacity도 vertex alpha와 UV U 좌표를 사용한다. 기본 Cylinder는 이 머티리얼이 기대하는 vertex color/alpha/UV 구성이 아니어서 푸른색과 끝부분 흐림이 화면에 보장되지 않았다. 수정으로 트레일을 `UProceduralMeshComponent` 리본으로 바꾸고, 앞쪽 vertex color는 푸른색 alpha 0.5, 뒤쪽 vertex color는 alpha 0, UV는 tail 0부터 head 1까지 들어가도록 생성했다. 이제 끝 흐림은 머티리얼 파라미터가 아니라 메시 데이터 자체로 확인할 수 있다.
+
+## 2026-05-28 06:16:59 (elapsed: 00:00:06)
+
+### 질문
+
+`RollingBomber` 다리가 길게 스트레치되는 것이 다리 길이와 보폭 수치가 맞지 않아서인지?
+
+### 답변
+
+가능성이 높다. 현재 임시 다리 메시는 고정 길이 뼈/IK 솔버가 아니라 `Hip -> Knee`, `Knee -> Foot` 두 구간을 cylinder 메시로 잇고, 각 구간 길이에 맞춰 `SetWorldScale3D(..., SegmentLength / 100.0f)`로 그대로 늘리는 구조다. `LeftHipLocalOffset`/`RightHipLocalOffset`, `FootHomeLocalOffset`, `Knee*Offset`, `FootMoveLeadDistance`, 지면 보정 결과가 만든 hip-knee-foot 거리가 시각적으로 의도한 다리 길이보다 길어지면 제한 없이 스트레치된다. 따라서 보폭만의 문제라기보다 다리 세그먼트 최대 길이 제한이 없고 후보 발 위치/무릎 타깃이 길이 예산 밖으로 나가는 것이 원인이다.

@@ -291,25 +291,34 @@ protected:
 	FVector RightHipLocalOffset = FVector(-1.0f, 5.5f, -4.5f);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|IK", meta = (ClampMin = "0.0", UIMin = "0.0"))
-	float FootStepTriggerDistance = 11.5f;
+	float FootStepTriggerDistance = 3.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|IK", meta = (ClampMin = "0.01", UIMin = "0.01"))
 	float FootStepDurationSeconds = 0.16f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|IK", meta = (ClampMin = "0.0", UIMin = "0.0"))
-	float FootStepHeight = 5.5f;
+	float FootStepHeight = 2.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|IK")
-	float FootMoveLeadDistance = 7.0f;
+	float FootMoveLeadDistance = 2.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|IK")
-	float KneeForwardOffset = 4.5f;
+	float KneeForwardOffset = 3.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|IK")
-	float KneeSideOffset = 4.0f;
+	float KneeSideOffset = 2.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|IK")
-	float KneeHeightOffset = 11.0f;
+	float KneeHeightOffset = 2.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|IK", meta = (ClampMin = "0.1", UIMin = "0.1"))
+	float UpperLegLengthCm = 6.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|IK", meta = (ClampMin = "0.1", UIMin = "0.1"))
+	float LowerLegLengthCm = 6.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|IK", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float LegReachSlackCm = 0.25f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|IK")
 	float FootGroundTraceUp = 40.0f;
@@ -321,10 +330,10 @@ protected:
 	float FootGroundClearance = 0.75f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|Leg Mesh", meta = (ClampMin = "0.1", UIMin = "0.1"))
-	float UpperLegThicknessCm = 1.15f;
+	float UpperLegThicknessCm = 3.45f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|Leg Mesh", meta = (ClampMin = "0.1", UIMin = "0.1"))
-	float LowerLegThicknessCm = 0.95f;
+	float LowerLegThicknessCm = 2.85f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|Leg Mesh", meta = (ClampMin = "0.1", UIMin = "0.1"))
 	float FootVisualLengthCm = 5.0f;
@@ -334,6 +343,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|Leg Mesh", meta = (ClampMin = "0.1", UIMin = "0.1"))
 	float FootVisualHeightCm = 1.1f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|Leg Mesh")
+	TSoftObjectPtr<UMaterialInterface> LegMetalMaterial;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|Visual")
 	bool bUseBodyRollVisualRotation = true;
@@ -446,6 +458,7 @@ private:
 	void ApplyExplosionDamage();
 	void ApplyBodyRollVisualRotation(float DeltaDistance);
 	void ResetBodyRollVisualRotation();
+	void ApplyLegVisualMaterial();
 	void ApplyEyeVisualDefaults();
 	void SetEyeChargeWarningActive(bool bActive, bool bInstant);
 	void UpdateEyeVisualState(float DeltaSeconds);
@@ -453,11 +466,18 @@ private:
 	float CalculateEyeChargeAlpha(float EmissiveStrength) const;
 
 	void InitializeLegIKTargets();
-	void InitializeFootRuntime(FFootRuntime& FootRuntime, const FVector& FootHomeLocalOffset);
+	void InitializeFootRuntime(
+		FFootRuntime& FootRuntime,
+		const FVector& FootHomeLocalOffset,
+		const FVector& HipLocalOffset);
 	void BeginFootStep(FFootRuntime& FootRuntime, const FVector& PlannedFootWorldLocation);
 	void AdvanceFootStep(FFootRuntime& FootRuntime, float DeltaSeconds);
 	FVector CalculatePlannedFootLocation(const FVector& FootHomeLocalOffset, const FVector& PlanarMoveDirection) const;
-	FVector CalculateJointTargetLocation(const FVector& FootWorldLocation, float SideSign) const;
+	FVector ClampFootLocationToLegReach(const FVector& HipWorldLocation, const FVector& DesiredFootWorldLocation) const;
+	FVector CalculateJointTargetLocation(
+		const FVector& HipWorldLocation,
+		const FVector& FootWorldLocation,
+		float SideSign) const;
 	FVector ResolveGroundedFootLocation(const FVector& DesiredWorldLocation) const;
 	void UpdateFootSceneComponents();
 	void UpdateFoldedLegSceneComponents();
@@ -472,7 +492,8 @@ private:
 		UStaticMeshComponent* SegmentMesh,
 		const FVector& StartWorldLocation,
 		const FVector& EndWorldLocation,
-		float ThicknessCm) const;
+		float ThicknessCm,
+		float TargetLengthCm) const;
 	void PositionFootMesh(UStaticMeshComponent* FootMesh, const FVector& FootWorldLocation) const;
 	FTunaSweeperRollingBomberFootIKState BuildFootIKState(const FFootRuntime& FootRuntime) const;
 

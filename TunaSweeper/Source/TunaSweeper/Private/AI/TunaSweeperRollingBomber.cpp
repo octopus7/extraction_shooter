@@ -23,6 +23,8 @@ namespace TunaSweeperRollingBomber
 	const TCHAR* SphereMeshPath = TEXT("/Engine/BasicShapes/Sphere.Sphere");
 	const TCHAR* CylinderMeshPath = TEXT("/Engine/BasicShapes/Cylinder.Cylinder");
 	const TCHAR* CubeMeshPath = TEXT("/Engine/BasicShapes/Cube.Cube");
+	const TCHAR* LegMetalMaterialPath = TEXT("/Game/Characters/Enemy/M_RollingBomberLegMetal.M_RollingBomberLegMetal");
+	const TCHAR* LegMetalFallbackMaterialPath = TEXT("/Game/Interaction/M_Container_Metal.M_Container_Metal");
 	constexpr float MinFootGroundNormalZ = 0.25f;
 	constexpr float SpawnGroundTraceExtraDistance = 9.0f;
 	constexpr float SpawnPhysicsLinearDamping = 0.18f;
@@ -50,6 +52,8 @@ ATunaSweeperRollingBomber::ATunaSweeperRollingBomber()
 	ExplosionDamageType = UDamageType::StaticClass();
 	EyeMaterial = TSoftObjectPtr<UMaterialInterface>(
 		FSoftObjectPath(TEXT("/Engine/BasicShapes/BasicShapeMaterial.BasicShapeMaterial")));
+	LegMetalMaterial = TSoftObjectPtr<UMaterialInterface>(
+		FSoftObjectPath(TunaSweeperRollingBomber::LegMetalMaterialPath));
 	RollingBomberProjectileMaterial = TSoftObjectPtr<UMaterialInterface>(
 		FSoftObjectPath(TEXT("/Game/Effects/M_LedExpression_VertexColorEmissive.M_LedExpression_VertexColorEmissive")));
 	RollingBomberProjectileTrailMaterial = TSoftObjectPtr<UMaterialInterface>(
@@ -170,6 +174,7 @@ void ATunaSweeperRollingBomber::BeginPlay()
 	Super::BeginPlay();
 
 	ApplyRollingBomberVisualDefaults();
+	ApplyLegVisualMaterial();
 	ApplyEyeVisualDefaults();
 	SetEyeChargeWarningActive(false, true);
 	LastActorLocation = GetActorLocation();
@@ -674,8 +679,21 @@ void ATunaSweeperRollingBomber::UpdateLegIK(float DeltaSeconds, const FVector& P
 	}
 
 	const FVector SafeMoveDirection = PlanarMoveDirection.GetSafeNormal2D();
-	const FVector LeftPlannedLocation = CalculatePlannedFootLocation(LeftFootHomeLocalOffset, SafeMoveDirection);
-	const FVector RightPlannedLocation = CalculatePlannedFootLocation(RightFootHomeLocalOffset, SafeMoveDirection);
+	const FTransform ActorTransform = GetActorTransform();
+	const FVector LeftHipWorldLocation = ActorTransform.TransformPosition(LeftHipLocalOffset);
+	const FVector RightHipWorldLocation = ActorTransform.TransformPosition(RightHipLocalOffset);
+	LeftFootRuntime.EffectorWorldLocation = ClampFootLocationToLegReach(
+		LeftHipWorldLocation,
+		LeftFootRuntime.EffectorWorldLocation);
+	RightFootRuntime.EffectorWorldLocation = ClampFootLocationToLegReach(
+		RightHipWorldLocation,
+		RightFootRuntime.EffectorWorldLocation);
+	const FVector LeftPlannedLocation = ClampFootLocationToLegReach(
+		LeftHipWorldLocation,
+		CalculatePlannedFootLocation(LeftFootHomeLocalOffset, SafeMoveDirection));
+	const FVector RightPlannedLocation = ClampFootLocationToLegReach(
+		RightHipWorldLocation,
+		CalculatePlannedFootLocation(RightFootHomeLocalOffset, SafeMoveDirection));
 	LeftFootRuntime.PlannedFootWorldLocation = LeftPlannedLocation;
 	RightFootRuntime.PlannedFootWorldLocation = RightPlannedLocation;
 
@@ -718,8 +736,20 @@ void ATunaSweeperRollingBomber::UpdateLegIK(float DeltaSeconds, const FVector& P
 
 	AdvanceFootStep(LeftFootRuntime, DeltaSeconds);
 	AdvanceFootStep(RightFootRuntime, DeltaSeconds);
-	LeftFootRuntime.JointTargetWorldLocation = CalculateJointTargetLocation(LeftFootRuntime.EffectorWorldLocation, -1.0f);
-	RightFootRuntime.JointTargetWorldLocation = CalculateJointTargetLocation(RightFootRuntime.EffectorWorldLocation, 1.0f);
+	LeftFootRuntime.EffectorWorldLocation = ClampFootLocationToLegReach(
+		LeftHipWorldLocation,
+		LeftFootRuntime.EffectorWorldLocation);
+	RightFootRuntime.EffectorWorldLocation = ClampFootLocationToLegReach(
+		RightHipWorldLocation,
+		RightFootRuntime.EffectorWorldLocation);
+	LeftFootRuntime.JointTargetWorldLocation = CalculateJointTargetLocation(
+		LeftHipWorldLocation,
+		LeftFootRuntime.EffectorWorldLocation,
+		-1.0f);
+	RightFootRuntime.JointTargetWorldLocation = CalculateJointTargetLocation(
+		RightHipWorldLocation,
+		RightFootRuntime.EffectorWorldLocation,
+		1.0f);
 	UpdateFootSceneComponents();
 }
 
@@ -1135,6 +1165,35 @@ void ATunaSweeperRollingBomber::ResetBodyRollVisualRotation()
 	}
 }
 
+void ATunaSweeperRollingBomber::ApplyLegVisualMaterial()
+{
+	UMaterialInterface* LoadedMaterial = LegMetalMaterial.LoadSynchronous();
+	if (!LoadedMaterial)
+	{
+		LoadedMaterial = LoadObject<UMaterialInterface>(nullptr, TunaSweeperRollingBomber::LegMetalFallbackMaterialPath);
+	}
+
+	if (!LoadedMaterial)
+	{
+		return;
+	}
+
+	auto ApplyMaterial = [LoadedMaterial](UStaticMeshComponent* MeshComponent)
+	{
+		if (MeshComponent)
+		{
+			MeshComponent->SetMaterial(0, LoadedMaterial);
+		}
+	};
+
+	ApplyMaterial(LeftUpperLegMesh);
+	ApplyMaterial(LeftLowerLegMesh);
+	ApplyMaterial(LeftFootMesh);
+	ApplyMaterial(RightUpperLegMesh);
+	ApplyMaterial(RightLowerLegMesh);
+	ApplyMaterial(RightFootMesh);
+}
+
 void ATunaSweeperRollingBomber::ApplyEyeVisualDefaults()
 {
 	if (EyeMesh)
@@ -1247,19 +1306,24 @@ float ATunaSweeperRollingBomber::CalculateEyeChargeAlpha(float EmissiveStrength)
 
 void ATunaSweeperRollingBomber::InitializeLegIKTargets()
 {
-	InitializeFootRuntime(LeftFootRuntime, LeftFootHomeLocalOffset);
-	InitializeFootRuntime(RightFootRuntime, RightFootHomeLocalOffset);
+	InitializeFootRuntime(LeftFootRuntime, LeftFootHomeLocalOffset, LeftHipLocalOffset);
+	InitializeFootRuntime(RightFootRuntime, RightFootHomeLocalOffset, RightHipLocalOffset);
 	UpdateFootSceneComponents();
 }
 
 void ATunaSweeperRollingBomber::InitializeFootRuntime(
 	FFootRuntime& FootRuntime,
-	const FVector& FootHomeLocalOffset)
+	const FVector& FootHomeLocalOffset,
+	const FVector& HipLocalOffset)
 {
-	FootRuntime.EffectorWorldLocation = CalculatePlannedFootLocation(FootHomeLocalOffset, FVector::ZeroVector);
+	const FVector HipWorldLocation = GetActorTransform().TransformPosition(HipLocalOffset);
+	FootRuntime.EffectorWorldLocation = ClampFootLocationToLegReach(
+		HipWorldLocation,
+		CalculatePlannedFootLocation(FootHomeLocalOffset, FVector::ZeroVector));
 	FootRuntime.PlannedFootWorldLocation = FootRuntime.EffectorWorldLocation;
 	FootRuntime.StepStartWorldLocation = FootRuntime.EffectorWorldLocation;
 	FootRuntime.JointTargetWorldLocation = CalculateJointTargetLocation(
+		HipWorldLocation,
 		FootRuntime.EffectorWorldLocation,
 		FootHomeLocalOffset.Y >= 0.0f ? 1.0f : -1.0f);
 	FootRuntime.StepElapsedSeconds = 0.0f;
@@ -1322,16 +1386,78 @@ FVector ATunaSweeperRollingBomber::CalculatePlannedFootLocation(
 	return ResolveGroundedFootLocation(PlannedWorldLocation);
 }
 
+FVector ATunaSweeperRollingBomber::ClampFootLocationToLegReach(
+	const FVector& HipWorldLocation,
+	const FVector& DesiredFootWorldLocation) const
+{
+	const float UpperLength = FMath::Max(0.1f, UpperLegLengthCm);
+	const float LowerLength = FMath::Max(0.1f, LowerLegLengthCm);
+	const float Slack = FMath::Max(0.0f, LegReachSlackCm);
+	const float MaxReach = FMath::Max(0.1f, UpperLength + LowerLength - Slack);
+	const float MinReach = FMath::Max(0.0f, FMath::Abs(UpperLength - LowerLength) + Slack);
+	const FVector HipToFoot = DesiredFootWorldLocation - HipWorldLocation;
+	const float Distance = HipToFoot.Size();
+
+	if (Distance <= KINDA_SMALL_NUMBER)
+	{
+		return HipWorldLocation - FVector(0.0f, 0.0f, MinReach);
+	}
+
+	const FVector Direction = HipToFoot / Distance;
+	if (Distance > MaxReach)
+	{
+		return HipWorldLocation + Direction * MaxReach;
+	}
+
+	if (MinReach > 0.0f && Distance < MinReach)
+	{
+		return HipWorldLocation + Direction * MinReach;
+	}
+
+	return DesiredFootWorldLocation;
+}
+
 FVector ATunaSweeperRollingBomber::CalculateJointTargetLocation(
+	const FVector& HipWorldLocation,
 	const FVector& FootWorldLocation,
 	float SideSign) const
 {
 	const FVector Forward = GetActorForwardVector().GetSafeNormal2D();
 	const FVector Right = GetActorRightVector().GetSafeNormal2D();
-	return FootWorldLocation +
+	const float UpperLength = FMath::Max(0.1f, UpperLegLengthCm);
+	const float LowerLength = FMath::Max(0.1f, LowerLegLengthCm);
+
+	const FVector HipToFoot = FootWorldLocation - HipWorldLocation;
+	const float RawDistance = HipToFoot.Size();
+	const FVector LegAxis = RawDistance > KINDA_SMALL_NUMBER
+		? HipToFoot / RawDistance
+		: -FVector::UpVector;
+	const float MinDistance = FMath::Max(0.01f, FMath::Abs(UpperLength - LowerLength) + 0.01f);
+	const float MaxDistance = FMath::Max(MinDistance, UpperLength + LowerLength - 0.01f);
+	const float Distance = FMath::Clamp(RawDistance, MinDistance, MaxDistance);
+	const float KneeAlongAxis = FMath::Clamp(
+		(FMath::Square(UpperLength) - FMath::Square(LowerLength) + FMath::Square(Distance)) / (2.0f * Distance),
+		0.0f,
+		UpperLength);
+	const float KneeBendHeight = FMath::Sqrt(FMath::Max(0.0f, FMath::Square(UpperLength) - FMath::Square(KneeAlongAxis)));
+
+	const FVector DesiredPole =
 		Forward * KneeForwardOffset +
 		Right * (SideSign * KneeSideOffset) +
-		FVector(0.0f, 0.0f, KneeHeightOffset);
+		FVector::UpVector * KneeHeightOffset;
+	FVector BendDirection = DesiredPole - LegAxis * FVector::DotProduct(DesiredPole, LegAxis);
+	if (BendDirection.IsNearlyZero())
+	{
+		BendDirection = Right * SideSign;
+		BendDirection -= LegAxis * FVector::DotProduct(BendDirection, LegAxis);
+	}
+	if (BendDirection.IsNearlyZero())
+	{
+		BendDirection = FVector::CrossProduct(LegAxis, FVector::UpVector);
+	}
+	BendDirection = BendDirection.GetSafeNormal();
+
+	return HipWorldLocation + LegAxis * KneeAlongAxis + BendDirection * KneeBendHeight;
 }
 
 FVector ATunaSweeperRollingBomber::ResolveGroundedFootLocation(
@@ -1437,12 +1563,18 @@ void ATunaSweeperRollingBomber::UpdateVisibleLegMeshForFoot(
 	const FVector& HipWorldLocation,
 	const FFootRuntime& FootRuntime) const
 {
-	PositionLegSegmentMesh(UpperLegMesh, HipWorldLocation, FootRuntime.JointTargetWorldLocation, UpperLegThicknessCm);
+	PositionLegSegmentMesh(
+		UpperLegMesh,
+		HipWorldLocation,
+		FootRuntime.JointTargetWorldLocation,
+		UpperLegThicknessCm,
+		UpperLegLengthCm);
 	PositionLegSegmentMesh(
 		LowerLegMesh,
 		FootRuntime.JointTargetWorldLocation,
 		FootRuntime.EffectorWorldLocation,
-		LowerLegThicknessCm);
+		LowerLegThicknessCm,
+		LowerLegLengthCm);
 	PositionFootMesh(FootMesh, FootRuntime.EffectorWorldLocation);
 }
 
@@ -1450,7 +1582,8 @@ void ATunaSweeperRollingBomber::PositionLegSegmentMesh(
 	UStaticMeshComponent* SegmentMesh,
 	const FVector& StartWorldLocation,
 	const FVector& EndWorldLocation,
-	float ThicknessCm) const
+	float ThicknessCm,
+	float TargetLengthCm) const
 {
 	if (!SegmentMesh)
 	{
@@ -1465,11 +1598,17 @@ void ATunaSweeperRollingBomber::PositionLegSegmentMesh(
 		return;
 	}
 
+	const float VisualLength = TargetLengthCm > 0.0f
+		? FMath::Min(SegmentLength, TargetLengthCm)
+		: SegmentLength;
+	const FVector Direction = SegmentVector / SegmentLength;
+	const FVector VisualEndLocation = StartWorldLocation + Direction * VisualLength;
+
 	SegmentMesh->SetVisibility(true);
-	SegmentMesh->SetWorldLocation((StartWorldLocation + EndWorldLocation) * 0.5f);
-	SegmentMesh->SetWorldRotation(FRotationMatrix::MakeFromZ(SegmentVector / SegmentLength).Rotator());
+	SegmentMesh->SetWorldLocation((StartWorldLocation + VisualEndLocation) * 0.5f);
+	SegmentMesh->SetWorldRotation(FRotationMatrix::MakeFromZ(Direction).Rotator());
 	const float RadiusScale = FMath::Max(0.1f, ThicknessCm) / 50.0f;
-	SegmentMesh->SetWorldScale3D(FVector(RadiusScale, RadiusScale, SegmentLength / 100.0f));
+	SegmentMesh->SetWorldScale3D(FVector(RadiusScale, RadiusScale, VisualLength / 100.0f));
 }
 
 void ATunaSweeperRollingBomber::PositionFootMesh(

@@ -140,6 +140,7 @@ namespace TunaSweeperEditorSetup
 	const FString WorldProgressInteractionTaskId = TEXT("2026-05-19_CreateWorldProgressObstacleAssetsV1");
 	const FString WarpPointInteractionTaskId = TEXT("2026-05-25_CreateWarpPointInteractionAssetsV1");
 	const FString EnemyVisualMaterialTaskId = TEXT("2026-05-19_CreateEnemyAndContainerVisualMaterialsV3");
+	const FString RollingBomberLegMaterialTaskId = TEXT("2026-05-28_CreateRollingBomberLegMetalMaterialV1");
 	const FString VoxelMeshAssetTaskId = TEXT("2026-05-19_CreateSharedVoxelMeshAssetsV1");
 	const FString LumberjackMeleeSwingArcAssetTaskId = TEXT("2026-05-20_CreateLumberjackMeleeSwingArcAssetsV2");
 	const FString LedExpressionMaterialTaskId = TEXT("2026-05-26_CreateLedExpressionMaterialV1");
@@ -161,6 +162,7 @@ namespace TunaSweeperEditorSetup
 	const FString EnemyGreenMaterialAssetName = TEXT("M_Enemy_Green");
 	const FString EnemyBlueMaterialAssetName = TEXT("M_Enemy_Blue");
 	const FString EnemySightlineMaterialAssetName = TEXT("M_Enemy_Sightline");
+	const FString RollingBomberLegMetalMaterialAssetName = TEXT("M_RollingBomberLegMetal");
 	const FString EnemyVoxelBodyMeshAssetName = TEXT("SM_Enemy_VoxelBody");
 	const FString EnemyVoxelForwardMarkerMeshAssetName = TEXT("SM_Enemy_VoxelForwardMarker");
 	const FString CoverAssetPath = TEXT("/Game/AI/Cover");
@@ -1952,6 +1954,16 @@ namespace TunaSweeperEditorSetup
 
 		return RedMaterial && GreenMaterial && BlueMaterial && SightlineMaterial &&
 			CardboardMaterial && WoodMaterial && MetalMaterial && SupplyMaterial;
+	}
+
+	bool EnsureRollingBomberLegMetalMaterial()
+	{
+		return EnsureSolidColorMaterial(
+			EnemyAssetPath,
+			RollingBomberLegMetalMaterialAssetName,
+			FLinearColor(0.48f, 0.52f, 0.54f, 1.0f),
+			0.32f,
+			1.0f) != nullptr;
 	}
 
 	bool EnsureSharedVoxelMeshAssets()
@@ -8621,6 +8633,13 @@ public:
 			[]()
 			{
 				return TunaSweeperEditorSetup::EnsureEnemyVisualMaterialAssets();
+			});
+
+		FTunaSweeperEditorRunOnce::Run(
+			TunaSweeperEditorSetup::RollingBomberLegMaterialTaskId,
+			[]()
+			{
+				return TunaSweeperEditorSetup::EnsureRollingBomberLegMetalMaterial();
 			});
 
 		FTunaSweeperEditorRunOnce::Run(

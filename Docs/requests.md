@@ -2166,3 +2166,28 @@
 - `RollingBomber` 이동 시 다음 후보 발 위치를 정하고 그 사이를 보간하는 기능이 실제 동작하는지 분석할 것.
 - `RollingBomber`가 투사체 공격 모드에서 이동하지 않는 원인을 분석하고 수정할 것.
 - Burst 파티클 emit count 밀도를 3배로 늘릴 것.
+
+## 2026-05-28 06:01:19 (elapsed: 00:02:31)
+
+- 새로 추가된 BP 중 Windows cook 누락 가능성이 있는 자산을 찾아 필요하면 cook 대상에 포함할 것.
+- Windows용 패키징을 실행할 것.
+
+## 2026-05-28 06:16:59 (elapsed: 00:03:16)
+
+- `RollingBomber` 기립 시점의 다리 길이가 실제 다리뼈 길이로 보이도록 다리 IK/보폭 수치를 조정할 것.
+
+## 2026-05-28 06:22:59 (elapsed: 00:00:30)
+
+- `RollingBomber` 다리 굵기를 3배로 키울 것.
+
+## 2026-05-28 06:31:47 (elapsed: 00:01:17)
+
+- `RollingBomber` 보폭을 더 줄이고 다리 본/메시가 실제 뼈 길이보다 늘어나 보이지 않게 수정할 것.
+
+## 2026-05-28 06:37:11 (elapsed: 00:03:31)
+
+- Assign a dedicated metal material to `RollingBomber` leg meshes instead of using missing/default material.
+
+## 2026-05-28 06:41:58 (elapsed: 00:01:18)
+
+- Package the project for Windows.
