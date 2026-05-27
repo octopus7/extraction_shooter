@@ -2,7 +2,6 @@
 
 #include "Blueprint/WidgetTree.h"
 #include "Components/BackgroundBlur.h"
-#include "Components/Border.h"
 #include "Components/Button.h"
 #include "Components/CanvasPanel.h"
 #include "Components/CanvasPanelSlot.h"
@@ -14,8 +13,6 @@
 #include "Components/SizeBox.h"
 #include "Components/Slider.h"
 #include "Components/TextBlock.h"
-#include "Components/VerticalBox.h"
-#include "Components/VerticalBoxSlot.h"
 #include "Engine/Texture2D.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "GameFramework/Pawn.h"
@@ -28,12 +25,9 @@ namespace TunaSweeperMap
 {
 	const TCHAR* PlaceholderMapTexturePath = TEXT("/Game/UI/Map/T_UIMap_PlaceholderAlpha.T_UIMap_PlaceholderAlpha");
 	const TCHAR* PlayerIconTexturePath = TEXT("/Game/UI/Map/T_UIMap_PlayerLocation_Transparent.T_UIMap_PlayerLocation_Transparent");
-	constexpr float PanelWidth = 1180.0f;
-	constexpr float PanelHeight = 660.0f;
 	constexpr float MinZoom = 0.65f;
 	constexpr float MaxZoom = 2.75f;
 	constexpr float MarkerHitDistance = 26.0f;
-	constexpr float MapPanOverscroll = 80.0f;
 	constexpr int32 FallbackMapWidth = 768;
 	constexpr int32 FallbackMapHeight = 512;
 	const FVector2D WorldMin(-3000.0, -3000.0);
@@ -55,13 +49,6 @@ namespace TunaSweeperMap
 		return Brush;
 	}
 
-	FSlateChildSize MakeChildSize(ESlateSizeRule::Type SizeRule, float Value = 1.0f)
-	{
-		FSlateChildSize ChildSize;
-		ChildSize.SizeRule = SizeRule;
-		ChildSize.Value = Value;
-		return ChildSize;
-	}
 }
 
 void UTunaSweeperMapWidget::RefreshMapView()
@@ -197,9 +184,9 @@ void UTunaSweeperMapWidget::NativeTick(const FGeometry& MyGeometry, float InDelt
 	}
 
 	bool bNeedsCanvasRefresh = UpdatePlayerMapPosition();
-	if (MapViewportBorder)
+	if (MapCanvas)
 	{
-		const FVector2D CurrentViewportSize = MapViewportBorder->GetCachedGeometry().GetLocalSize();
+		const FVector2D CurrentViewportSize = MapCanvas->GetCachedGeometry().GetLocalSize();
 		if (!CurrentViewportSize.Equals(LastMapViewportSize, 0.5))
 		{
 			LastMapViewportSize = CurrentViewportSize;
@@ -251,13 +238,13 @@ FReply UTunaSweeperMapWidget::NativeOnMouseButtonUp(const FGeometry& InGeometry,
 
 FReply UTunaSweeperMapWidget::NativeOnMouseMove(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
-	if (!bIsPanningMap || !InMouseEvent.IsMouseButtonDown(EKeys::LeftMouseButton) || !MapViewportBorder)
+	if (!bIsPanningMap || !InMouseEvent.IsMouseButtonDown(EKeys::LeftMouseButton) || !MapCanvas)
 	{
 		return Super::NativeOnMouseMove(InGeometry, InMouseEvent);
 	}
 
 	const FVector2D CurrentMouseLocalPosition =
-		MapViewportBorder->GetCachedGeometry().AbsoluteToLocal(InMouseEvent.GetScreenSpacePosition());
+		MapCanvas->GetCachedGeometry().AbsoluteToLocal(InMouseEvent.GetScreenSpacePosition());
 	MapPan += CurrentMouseLocalPosition - LastPanMouseLocalPosition;
 	LastPanMouseLocalPosition = CurrentMouseLocalPosition;
 	ClampMapPan();
@@ -292,22 +279,13 @@ void UTunaSweeperMapWidget::BuildMapWidget()
 
 	RootOverlay = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), TEXT("MapRootOverlay"));
 	BackgroundBlur = WidgetTree->ConstructWidget<UBackgroundBlur>(UBackgroundBlur::StaticClass(), TEXT("MapBackgroundBlur"));
-	UBorder* DimLayer = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("MapDimLayer"));
-	USizeBox* PanelSizeBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("MapPanelSizeBox"));
-	MapPanel = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("MapPanel"));
-	UVerticalBox* PanelStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("MapPanelStack"));
-	UHorizontalBox* MapRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("MapRow"));
-	MapViewportBorder = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("MapViewportBorder"));
 	MapCanvas = WidgetTree->ConstructWidget<UCanvasPanel>(UCanvasPanel::StaticClass(), TEXT("MapCanvas"));
 	USizeBox* ZoomSliderBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("MapZoomSliderBox"));
 	ZoomSlider = WidgetTree->ConstructWidget<USlider>(USlider::StaticClass(), TEXT("MapZoomSlider"));
-	UBorder* PalettePanel = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("MapMarkerPalettePanel"));
 	UHorizontalBox* PaletteRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("MapMarkerPaletteRow"));
 	USizeBox* PaletteGap = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("MapMarkerPaletteGap"));
 
-	if (!RootOverlay || !BackgroundBlur || !DimLayer || !PanelSizeBox || !MapPanel || !PanelStack ||
-		!MapRow || !MapViewportBorder || !MapCanvas || !ZoomSliderBox || !ZoomSlider ||
-		!PalettePanel || !PaletteRow || !PaletteGap)
+	if (!RootOverlay || !BackgroundBlur || !MapCanvas || !ZoomSliderBox || !ZoomSlider || !PaletteRow || !PaletteGap)
 	{
 		return;
 	}
@@ -322,81 +300,26 @@ void UTunaSweeperMapWidget::BuildMapWidget()
 		BlurSlot->SetVerticalAlignment(VAlign_Fill);
 	}
 
-	DimLayer->SetBrush(TunaSweeperMap::MakeMapBoxBrush(
-		FVector2D(64.0f, 64.0f),
-		FLinearColor(0.0f, 0.0f, 0.0f, 0.34f),
-		FLinearColor::Transparent,
-		0.0f));
-	UOverlaySlot* DimSlot = RootOverlay->AddChildToOverlay(DimLayer);
-	if (DimSlot)
+	UOverlaySlot* CanvasSlot = RootOverlay->AddChildToOverlay(MapCanvas);
+	if (CanvasSlot)
 	{
-		DimSlot->SetHorizontalAlignment(HAlign_Fill);
-		DimSlot->SetVerticalAlignment(VAlign_Fill);
+		CanvasSlot->SetHorizontalAlignment(HAlign_Fill);
+		CanvasSlot->SetVerticalAlignment(VAlign_Fill);
 	}
 
-	PanelSizeBox->SetWidthOverride(TunaSweeperMap::PanelWidth);
-	PanelSizeBox->SetHeightOverride(TunaSweeperMap::PanelHeight);
-	PanelSizeBox->SetRenderTranslation(FVector2D(0.0f, 26.0f));
-	PanelSizeBox->SetContent(MapPanel);
-	UOverlaySlot* PanelSlot = RootOverlay->AddChildToOverlay(PanelSizeBox);
-	if (PanelSlot)
-	{
-		PanelSlot->SetHorizontalAlignment(HAlign_Center);
-		PanelSlot->SetVerticalAlignment(VAlign_Center);
-	}
-
-	MapPanel->SetPadding(FMargin(14.0f));
-	MapPanel->SetBrush(TunaSweeperMap::MakeMapBoxBrush(
-		FVector2D(TunaSweeperMap::PanelWidth, TunaSweeperMap::PanelHeight),
-		FLinearColor(0.018f, 0.022f, 0.025f, 0.90f),
-		FLinearColor(0.28f, 0.36f, 0.38f, 0.72f),
-		1.0f));
-	MapPanel->SetContent(PanelStack);
-
-	if (UVerticalBoxSlot* MapRowSlot = PanelStack->AddChildToVerticalBox(MapRow))
-	{
-		MapRowSlot->SetSize(TunaSweeperMap::MakeChildSize(ESlateSizeRule::Fill));
-	}
-	if (UVerticalBoxSlot* PaletteSlot = PanelStack->AddChildToVerticalBox(PalettePanel))
-	{
-		PaletteSlot->SetPadding(FMargin(0.0f, 12.0f, 0.0f, 0.0f));
-		PaletteSlot->SetSize(TunaSweeperMap::MakeChildSize(ESlateSizeRule::Automatic));
-	}
-
-	MapViewportBorder->SetPadding(FMargin(0.0f));
-	MapViewportBorder->SetBrush(TunaSweeperMap::MakeMapBoxBrush(
-		FVector2D(1052.0f, 568.0f),
-		FLinearColor(0.006f, 0.008f, 0.010f, 0.88f),
-		FLinearColor(0.18f, 0.25f, 0.26f, 0.78f),
-		1.0f,
-		4.0f));
-	MapCanvas->SetClipping(EWidgetClipping::ClipToBounds);
-	MapViewportBorder->SetContent(MapCanvas);
-	if (UHorizontalBoxSlot* ViewportSlot = MapRow->AddChildToHorizontalBox(MapViewportBorder))
-	{
-		ViewportSlot->SetSize(TunaSweeperMap::MakeChildSize(ESlateSizeRule::Fill));
-	}
-
-	ZoomSliderBox->SetWidthOverride(34.0f);
+	ZoomSliderBox->SetWidthOverride(28.0f);
 	ZoomSliderBox->SetContent(ZoomSlider);
 	ZoomSlider->SetOrientation(Orient_Vertical);
 	ZoomSlider->SetMinValue(0.0f);
 	ZoomSlider->SetMaxValue(1.0f);
 	ZoomSlider->SetValue((MapZoom - TunaSweeperMap::MinZoom) / (TunaSweeperMap::MaxZoom - TunaSweeperMap::MinZoom));
-	if (UHorizontalBoxSlot* SliderSlot = MapRow->AddChildToHorizontalBox(ZoomSliderBox))
+	UOverlaySlot* SliderSlot = RootOverlay->AddChildToOverlay(ZoomSliderBox);
+	if (SliderSlot)
 	{
-		SliderSlot->SetPadding(FMargin(12.0f, 0.0f, 0.0f, 0.0f));
-		SliderSlot->SetSize(TunaSweeperMap::MakeChildSize(ESlateSizeRule::Automatic));
+		SliderSlot->SetHorizontalAlignment(HAlign_Right);
+		SliderSlot->SetVerticalAlignment(VAlign_Fill);
+		SliderSlot->SetPadding(FMargin(0.0f, 8.0f, 4.0f, 8.0f));
 	}
-
-	PalettePanel->SetPadding(FMargin(10.0f, 8.0f));
-	PalettePanel->SetBrush(TunaSweeperMap::MakeMapBoxBrush(
-		FVector2D(1120.0f, 54.0f),
-		FLinearColor(0.04f, 0.048f, 0.052f, 0.88f),
-		FLinearColor(0.20f, 0.28f, 0.29f, 0.68f),
-		1.0f,
-		4.0f));
-	PalettePanel->SetContent(PaletteRow);
 
 	auto AddSizedWidget = [this, PaletteRow](UWidget* Widget, float Width, float Height, float RightPadding)
 	{
@@ -459,6 +382,14 @@ void UTunaSweeperMapWidget::BuildMapWidget()
 	CyanMarkerColorButton = MakeColorButton(TEXT("CyanMarkerColorButton"));
 	VioletMarkerColorButton = MakeColorButton(TEXT("VioletMarkerColorButton"));
 	WhiteMarkerColorButton = MakeColorButton(TEXT("WhiteMarkerColorButton"));
+
+	UOverlaySlot* PaletteSlot = RootOverlay->AddChildToOverlay(PaletteRow);
+	if (PaletteSlot)
+	{
+		PaletteSlot->SetHorizontalAlignment(HAlign_Left);
+		PaletteSlot->SetVerticalAlignment(VAlign_Bottom);
+		PaletteSlot->SetPadding(FMargin(6.0f, 0.0f, 0.0f, 6.0f));
+	}
 
 	RefreshMarkerIconButtons();
 	RefreshMarkerColorButtons();
@@ -583,7 +514,7 @@ void UTunaSweeperMapWidget::RefreshMapCanvas()
 	EnsureMapTextures();
 	MapCanvas->ClearChildren();
 
-	const FVector2D ViewportSize = MapViewportBorder ? MapViewportBorder->GetCachedGeometry().GetLocalSize() : FVector2D::ZeroVector;
+	const FVector2D ViewportSize = MapCanvas ? MapCanvas->GetCachedGeometry().GetLocalSize() : FVector2D::ZeroVector;
 	if (ViewportSize.X <= 1.0 || ViewportSize.Y <= 1.0)
 	{
 		return;
@@ -736,7 +667,7 @@ void UTunaSweeperMapWidget::SetMapZoom(float InMapZoom, const FVector2D* ZoomAnc
 	MapZoom = NewZoom;
 	if (ZoomAnchorLocalPosition)
 	{
-		const FVector2D ViewportSize = MapViewportBorder ? MapViewportBorder->GetCachedGeometry().GetLocalSize() : FVector2D::ZeroVector;
+		const FVector2D ViewportSize = MapCanvas ? MapCanvas->GetCachedGeometry().GetLocalSize() : FVector2D::ZeroVector;
 		const FVector2D NewScaledSize = GetMapScaledDrawSize();
 		const FVector2D NewBaseTopLeft = (ViewportSize - NewScaledSize) * 0.5;
 		MapPan = *ZoomAnchorLocalPosition - FVector2D(AnchorMapPosition.X * NewScaledSize.X, AnchorMapPosition.Y * NewScaledSize.Y) - NewBaseTopLeft;
@@ -755,19 +686,7 @@ void UTunaSweeperMapWidget::SetMapZoom(float InMapZoom, const FVector2D* ZoomAnc
 
 void UTunaSweeperMapWidget::ClampMapPan()
 {
-	if (!MapViewportBorder)
-	{
-		MapPan = FVector2D::ZeroVector;
-		return;
-	}
-
-	const FVector2D ViewportSize = MapViewportBorder->GetCachedGeometry().GetLocalSize();
-	const FVector2D ScaledSize = GetMapScaledDrawSize();
-	const FVector2D Limit(
-		FMath::Max(0.0, (ScaledSize.X - ViewportSize.X) * 0.5) + TunaSweeperMap::MapPanOverscroll,
-		FMath::Max(0.0, (ScaledSize.Y - ViewportSize.Y) * 0.5) + TunaSweeperMap::MapPanOverscroll);
-	MapPan.X = FMath::Clamp(MapPan.X, -Limit.X, Limit.X);
-	MapPan.Y = FMath::Clamp(MapPan.Y, -Limit.Y, Limit.Y);
+	// Intentionally unbounded: the map can move past the visible viewport and is clipped only by the screen.
 }
 
 void UTunaSweeperMapWidget::AddOrRemoveMarkerAtLocalPosition(const FVector2D& MapViewportLocalPosition)
@@ -832,7 +751,7 @@ FVector2D UTunaSweeperMapWidget::MapPositionToLocal(const FVector2D& MapPosition
 
 FVector2D UTunaSweeperMapWidget::GetMapBaseDrawSize() const
 {
-	const FVector2D ViewportSize = MapViewportBorder ? MapViewportBorder->GetCachedGeometry().GetLocalSize() : FVector2D::ZeroVector;
+	const FVector2D ViewportSize = MapCanvas ? MapCanvas->GetCachedGeometry().GetLocalSize() : FVector2D::ZeroVector;
 	if (ViewportSize.X <= 1.0 || ViewportSize.Y <= 1.0)
 	{
 		return FVector2D::ZeroVector;
@@ -855,19 +774,19 @@ FVector2D UTunaSweeperMapWidget::GetMapScaledDrawSize() const
 
 FVector2D UTunaSweeperMapWidget::GetMapDrawTopLeft() const
 {
-	const FVector2D ViewportSize = MapViewportBorder ? MapViewportBorder->GetCachedGeometry().GetLocalSize() : FVector2D::ZeroVector;
+	const FVector2D ViewportSize = MapCanvas ? MapCanvas->GetCachedGeometry().GetLocalSize() : FVector2D::ZeroVector;
 	const FVector2D ScaledSize = GetMapScaledDrawSize();
 	return (ViewportSize - ScaledSize) * 0.5 + MapPan;
 }
 
 bool UTunaSweeperMapWidget::IsMouseInsideMapViewport(const FPointerEvent& InMouseEvent, FVector2D* OutMapViewportLocalPosition) const
 {
-	if (!MapViewportBorder)
+	if (!MapCanvas)
 	{
 		return false;
 	}
 
-	const FGeometry& ViewportGeometry = MapViewportBorder->GetCachedGeometry();
+	const FGeometry& ViewportGeometry = MapCanvas->GetCachedGeometry();
 	const FVector2D LocalPosition = ViewportGeometry.AbsoluteToLocal(InMouseEvent.GetScreenSpacePosition());
 	const FVector2D LocalSize = ViewportGeometry.GetLocalSize();
 	const bool bInside =
@@ -955,8 +874,10 @@ void UTunaSweeperMapWidget::ConfigureChoiceButton(UButton* Button, const FLinear
 		return;
 	}
 
+	Button->SetRenderOpacity(OutlineColor.A >= 0.95f ? 1.0f : 0.72f);
+
 	FButtonStyle ButtonStyle;
-	ButtonStyle.SetNormal(TunaSweeperMap::MakeMapBoxBrush(FVector2D(38.0f, 38.0f), FillColor, OutlineColor, 1.4f, 4.0f));
+	ButtonStyle.SetNormal(TunaSweeperMap::MakeMapBoxBrush(FVector2D(38.0f, 38.0f), FillColor, FLinearColor::Transparent, 0.0f, 4.0f));
 	ButtonStyle.SetHovered(TunaSweeperMap::MakeMapBoxBrush(
 		FVector2D(38.0f, 38.0f),
 		FLinearColor(
@@ -964,8 +885,8 @@ void UTunaSweeperMapWidget::ConfigureChoiceButton(UButton* Button, const FLinear
 			FMath::Min(FillColor.G + 0.08f, 1.0f),
 			FMath::Min(FillColor.B + 0.08f, 1.0f),
 			FillColor.A),
-		OutlineColor,
-		2.0f,
+		FLinearColor::Transparent,
+		0.0f,
 		4.0f));
 	ButtonStyle.SetPressed(TunaSweeperMap::MakeMapBoxBrush(
 		FVector2D(38.0f, 38.0f),
@@ -974,8 +895,8 @@ void UTunaSweeperMapWidget::ConfigureChoiceButton(UButton* Button, const FLinear
 			FMath::Max(FillColor.G - 0.05f, 0.0f),
 			FMath::Max(FillColor.B - 0.05f, 0.0f),
 			FillColor.A),
-		OutlineColor,
-		1.6f,
+		FLinearColor::Transparent,
+		0.0f,
 		4.0f));
 	Button->SetStyle(ButtonStyle);
 }

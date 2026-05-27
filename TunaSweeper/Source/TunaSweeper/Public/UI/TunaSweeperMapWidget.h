@@ -6,7 +6,6 @@
 #include "TunaSweeperMapWidget.generated.h"
 
 class UBackgroundBlur;
-class UBorder;
 class UButton;
 class UCanvasPanel;
 class UImage;
@@ -14,7 +13,6 @@ class UOverlay;
 class USlider;
 class UTextBlock;
 class UTexture2D;
-class UVerticalBox;
 
 UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API UTunaSweeperMapWidget : public UUserWidget
@@ -98,12 +96,6 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<UBackgroundBlur> BackgroundBlur;
-
-	UPROPERTY(Transient)
-	TObjectPtr<UBorder> MapPanel;
-
-	UPROPERTY(Transient)
-	TObjectPtr<UBorder> MapViewportBorder;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UCanvasPanel> MapCanvas;
