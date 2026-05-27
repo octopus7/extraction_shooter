@@ -115,7 +115,7 @@ namespace TunaSweeperEditorSetup
 	const FString InteractionInputTaskId = TEXT("2026-05-11_SetInteractInputToFKey");
 	const FString InteractionMarkerAlignmentTaskId = TEXT("2026-05-25_RebuildInteractionMarkerRequirementPreviewV1");
 	const FString PickupItemAndSpawnerTaskId = TEXT("2026-05-11_CreatePickupItemAndSpawnerAssetsV3");
-	const FString CommonGameHudTaskId = TEXT("2026-05-28_AddHudModeTabsV1");
+	const FString CommonGameHudTaskId = TEXT("2026-05-28_CenterHudModeTabsV1");
 	const FString InventoryInputTaskId = TEXT("2026-05-11_AddInventoryInput");
 	const FString QuickSlotInputTaskId = TEXT("2026-05-12_AddQuickSlotInputActions");
 	const FString DropInputTaskId = TEXT("2026-05-18_AddDropInputAction");
@@ -202,6 +202,14 @@ namespace TunaSweeperEditorSetup
 	const FString LevelTransitionVideoWidgetAssetName = TEXT("WBP_LevelTransitionVideo");
 	const FString QuestWidgetAssetName = TEXT("WBP_Quest");
 	const FString SpeechBubbleWidgetAssetName = TEXT("WBP_SpeechBubble");
+	constexpr float HudTopModeTabButtonWidth = 156.0f;
+	constexpr float HudTopModeTabButtonHeight = 46.0f;
+	constexpr float HudTopModeTabGap = 8.0f;
+	constexpr float HudTopModeTabPaddingX = 18.0f;
+	constexpr float HudTopModeTabPaddingY = 12.0f;
+	constexpr float HudTopModeTabPanelWidth =
+		4.0f * HudTopModeTabButtonWidth + 3.0f * HudTopModeTabGap + 2.0f * HudTopModeTabPaddingX;
+	constexpr float HudTopModeTabPanelHeight = HudTopModeTabButtonHeight + 2.0f * HudTopModeTabPaddingY;
 	constexpr int32 InventoryTileColumnCount = 5;
 	constexpr int32 EquipmentReserveColumnCount = 4;
 	constexpr float InventoryTileWidth = 96.0f;
@@ -4207,35 +4215,36 @@ namespace TunaSweeperEditorSetup
 		}
 
 		WidgetTree->RootWidget = RootSizeBox;
-		RootSizeBox->SetHeightOverride(88.0f);
+		RootSizeBox->SetWidthOverride(HudTopModeTabPanelWidth);
+		RootSizeBox->SetHeightOverride(HudTopModeTabPanelHeight);
 		RootSizeBox->SetContent(ReservedBackground);
 
-		ReservedBackground->SetPadding(FMargin(18.0f, 12.0f));
+		ReservedBackground->SetPadding(FMargin(HudTopModeTabPaddingX, HudTopModeTabPaddingY));
 		ReservedBackground->SetBrush(MakeRoundedBoxBrush(
-			FVector2D(1280.0f, 88.0f),
+			FVector2D(HudTopModeTabPanelWidth, HudTopModeTabPanelHeight),
 			FLinearColor(0.005f, 0.006f, 0.008f, 0.48f),
 			FLinearColor(0.15f, 0.17f, 0.19f, 0.42f),
 			1.0f,
 			5.0f));
 		ReservedBackground->SetContent(ModeTabRow);
 
-		auto ConfigureModeButton = [](UButton* Button)
+		auto ConfigureModeButton = [=](UButton* Button)
 		{
 			FButtonStyle ButtonStyle;
 			ButtonStyle.SetNormal(MakeRoundedBoxBrush(
-				FVector2D(156.0f, 46.0f),
+				FVector2D(HudTopModeTabButtonWidth, HudTopModeTabButtonHeight),
 				FLinearColor(0.030f, 0.036f, 0.038f, 0.76f),
 				FLinearColor(0.20f, 0.24f, 0.25f, 0.82f),
 				1.0f,
 				4.0f));
 			ButtonStyle.SetHovered(MakeRoundedBoxBrush(
-				FVector2D(156.0f, 46.0f),
+				FVector2D(HudTopModeTabButtonWidth, HudTopModeTabButtonHeight),
 				FLinearColor(0.070f, 0.085f, 0.083f, 0.90f),
 				FLinearColor(0.58f, 0.70f, 0.62f, 0.92f),
 				1.5f,
 				4.0f));
 			ButtonStyle.SetPressed(MakeRoundedBoxBrush(
-				FVector2D(156.0f, 46.0f),
+				FVector2D(HudTopModeTabButtonWidth, HudTopModeTabButtonHeight),
 				FLinearColor(0.020f, 0.026f, 0.028f, 0.96f),
 				FLinearColor(0.48f, 0.64f, 0.54f, 0.94f),
 				1.0f,
@@ -4255,7 +4264,7 @@ namespace TunaSweeperEditorSetup
 			UHorizontalBoxSlot* Slot = ModeTabRow->AddChildToHorizontalBox(Button);
 			if (Slot)
 			{
-				Slot->SetPadding(FMargin(bFirst ? 0.0f : 8.0f, 0.0f, 0.0f, 0.0f));
+				Slot->SetPadding(FMargin(bFirst ? 0.0f : HudTopModeTabGap, 0.0f, 0.0f, 0.0f));
 				Slot->SetVerticalAlignment(VAlign_Center);
 			}
 		};
@@ -5399,9 +5408,9 @@ namespace TunaSweeperEditorSetup
 		UCanvasPanelSlot* TopSlot = RootCanvas->AddChildToCanvas(TopStatusReserveWidget);
 		if (TopSlot)
 		{
-			TopSlot->SetAnchors(FAnchors(0.0f, 0.0f, 1.0f, 0.0f));
-			TopSlot->SetOffsets(FMargin(24.0f, 16.0f, 24.0f, 88.0f));
-			TopSlot->SetAlignment(FVector2D(0.0f, 0.0f));
+			TopSlot->SetAnchors(FAnchors(0.5f, 0.0f, 0.5f, 0.0f));
+			TopSlot->SetOffsets(FMargin(0.0f, 16.0f, HudTopModeTabPanelWidth, HudTopModeTabPanelHeight));
+			TopSlot->SetAlignment(FVector2D(0.5f, 0.0f));
 		}
 
 		CenterContentPanel->SetVisibility(ESlateVisibility::Collapsed);
