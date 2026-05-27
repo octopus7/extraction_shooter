@@ -6,6 +6,9 @@
 #include "Components/Border.h"
 #include "Components/CanvasPanel.h"
 #include "Components/CanvasPanelSlot.h"
+#include "Components/HorizontalBox.h"
+#include "Components/HorizontalBoxSlot.h"
+#include "Components/SizeBox.h"
 #include "Components/TextBlock.h"
 #include "Components/VerticalBox.h"
 #include "Components/VerticalBoxSlot.h"
@@ -22,8 +25,100 @@
 #include "UI/TunaSweeperHudItemInfoPanelWidget.h"
 #include "UI/TunaSweeperHudQuickSlotBarWidget.h"
 #include "UI/TunaSweeperHudTopReserveWidget.h"
+#include "UI/TunaSweeperItemStackTileItemObject.h"
+#include "UI/TunaSweeperItemThumbnailSlotWidget.h"
+#include "UI/TunaSweeperMapWidget.h"
 #include "UI/TunaSweeperMemoWidget.h"
 #include "UI/TunaSweeperUIFont.h"
+#include "Styling/SlateBrush.h"
+
+namespace
+{
+	constexpr int32 InventoryQuickSlotFirstNumber = 3;
+	constexpr int32 InventoryQuickSlotLastNumber = 8;
+	constexpr float InventoryQuickSlotPanelWidth = 760.0f;
+	constexpr float InventoryQuickSlotPanelHeight = 168.0f;
+	constexpr float InventoryQuickSlotTileSize = 112.0f;
+	constexpr float InventoryQuickSlotTileScale = 1.12f;
+
+	FSlateBrush MakeHudRoundedBoxBrush(
+		const FVector2D& ImageSize,
+		const FLinearColor& FillColor,
+		float Radius,
+		const FLinearColor& OutlineColor,
+		float OutlineWidth)
+	{
+		FSlateBrush Brush;
+		Brush.DrawAs = ESlateBrushDrawType::RoundedBox;
+		Brush.TintColor = FSlateColor(FillColor);
+		Brush.SetImageSize(ImageSize);
+		Brush.OutlineSettings = FSlateBrushOutlineSettings(Radius, FSlateColor(OutlineColor), OutlineWidth);
+		Brush.OutlineSettings.bUseBrushTransparency = false;
+		return Brush;
+	}
+
+	FTunaSweeperItemStackTileData BuildQuickSlotTileData(
+		UTunaSweeperGameInstance* TunaGameInstance,
+		UTunaSweeperItemDataSubsystem* ItemDataSubsystem,
+		const FTunaSweeperInventorySlot& Slot,
+		int32 SlotIndex)
+	{
+		FTunaSweeperItemStackTileData TileData;
+		TileData.Source = ETunaSweeperItemSlotSource::UsableQuickSlot;
+		TileData.SourceIndex = SlotIndex;
+		TileData.SlotReference.Source = ETunaSweeperItemSlotSource::UsableQuickSlot;
+		TileData.SlotReference.SlotIndex = SlotIndex;
+		TileData.bIsEmpty = true;
+
+		FTunaSweeperItemInstance ItemInstance;
+		if (!TunaGameInstance || !Slot.ItemUid.IsValid() || !TunaGameInstance->TryGetItemInstance(Slot.ItemUid, ItemInstance))
+		{
+			return TileData;
+		}
+
+		TileData.ItemInstance = ItemInstance;
+		TileData.ItemStack.ItemId = ItemInstance.ItemId;
+		TileData.ItemStack.Quantity = FMath::Max(1, ItemInstance.Quantity);
+		TileData.bIsEmpty = false;
+
+		if (!ItemDataSubsystem)
+		{
+			TileData.DisplayName = FText::FromString(FString::Printf(TEXT("Item %d"), ItemInstance.ItemId));
+			return TileData;
+		}
+
+		FTunaSweeperItemDefinition ItemDefinition;
+		if (ItemDataSubsystem->TryGetItemDefinition(ItemInstance.ItemId, ItemDefinition))
+		{
+			TileData.ItemDefinition = ItemDefinition;
+			TileData.bHasItemDefinition = true;
+
+			FText DisplayName;
+			if (ItemDataSubsystem->TryGetItemNameTextByKey(ItemDefinition.NameStringKey, ETunaSweeperItemTextLanguage::Korean, DisplayName))
+			{
+				TileData.DisplayName = DisplayName;
+			}
+			else
+			{
+				TileData.DisplayName = FText::FromString(FString::Printf(TEXT("Item %d"), ItemInstance.ItemId));
+			}
+
+			const FString IconObjectPath = ItemDataSubsystem->BuildItemIconObjectPath(ItemDefinition);
+			if (!IconObjectPath.IsEmpty())
+			{
+				TileData.IconTexture = TSoftObjectPtr<UTexture2D>(FSoftObjectPath(IconObjectPath));
+			}
+
+			FText DescriptionText;
+			if (ItemDataSubsystem->TryGetItemTextByKey(ItemDefinition.DescriptionStringKey, ETunaSweeperItemTextLanguage::Korean, DescriptionText))
+			{
+				TileData.DescriptionText = DescriptionText;
+			}
+		}
+
+		return TileData;
+	}
+}
 
 void UTunaSweeperGameHudWidget::NativeConstruct()
 {
@@ -48,6 +143,8 @@ void UTunaSweeperGameHudWidget::NativeConstruct()
 	}
 
 	EnsureQuestTrackerWidgets();
+	EnsureInventoryQuickSlotPanelWidget();
+	EnsureMapPanelWidget();
 	EnsureMemoPanelWidget();
 	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
 	CacheAmmoReloadWidgets();
@@ -56,6 +153,7 @@ void UTunaSweeperGameHudWidget::NativeConstruct()
 	RefreshBottomStatusFromGameInstance();
 	RefreshQuestTrackerFromQuestSubsystem();
 	RefreshQuickSlotsFromGameState();
+	RefreshInventoryQuickSlotPanel();
 	RefreshReloadWidgets();
 	RefreshDialogueHudVisibility();
 }
@@ -87,12 +185,18 @@ void UTunaSweeperGameHudWidget::NativeTick(const FGeometry& MyGeometry, float In
 	RefreshBottomStatusFromGameInstance();
 	RefreshQuestTrackerFromQuestSubsystem();
 	RefreshQuickSlotsFromGameState();
+	RefreshInventoryQuickSlotPanel();
 	RefreshReloadWidgets();
 	RefreshDialogueHudVisibility();
 }
 
 void UTunaSweeperGameHudWidget::SetCenterPanelsVisible(bool bVisible)
 {
+	if (!bVisible)
+	{
+		CloseLootContainerPanelIfOpen();
+	}
+
 	ActiveHudMode = bVisible && ActiveHudMode == ETunaSweeperHudMode::None
 		? ETunaSweeperHudMode::Inventory
 		: (bVisible ? ActiveHudMode : ETunaSweeperHudMode::None);
@@ -133,6 +237,11 @@ void UTunaSweeperGameHudWidget::SetItemInfoPanelVisible(bool bVisible)
 
 void UTunaSweeperGameHudWidget::ShowExternalPanel(ETunaSweeperHudExternalPanelMode PanelMode)
 {
+	if (PanelMode != ETunaSweeperHudExternalPanelMode::LootingBox)
+	{
+		CloseLootContainerPanelIfOpen();
+	}
+
 	if (PanelMode != ETunaSweeperHudExternalPanelMode::None)
 	{
 		ActiveHudMode = ETunaSweeperHudMode::Inventory;
@@ -166,10 +275,7 @@ void UTunaSweeperGameHudWidget::ToggleInventoryOnlyPanel()
 			TunaGameInstance->ClearSelectedItemSelection();
 		}
 
-		if (ExternalPanelWidget)
-		{
-			ExternalPanelWidget->SetExternalPanelMode(ETunaSweeperHudExternalPanelMode::None);
-		}
+		CloseLootContainerPanelIfOpen();
 		SetHudMode(ETunaSweeperHudMode::None);
 	}
 }
@@ -199,6 +305,11 @@ void UTunaSweeperGameHudWidget::ShowMemoPanel(int32 MemoId)
 
 void UTunaSweeperGameHudWidget::SetHudMode(ETunaSweeperHudMode InHudMode)
 {
+	if (InHudMode != ETunaSweeperHudMode::Inventory)
+	{
+		CloseLootContainerPanelIfOpen();
+	}
+
 	ActiveHudMode = InHudMode;
 	ApplyHudModeVisibility();
 	HandleSelectedInventoryItemChanged();
@@ -234,6 +345,7 @@ void UTunaSweeperGameHudWidget::ApplyHudModeVisibility()
 {
 	const bool bUtilityModeOpen = ActiveHudMode != ETunaSweeperHudMode::None;
 	const bool bInventoryMode = ActiveHudMode == ETunaSweeperHudMode::Inventory;
+	const bool bMapMode = ActiveHudMode == ETunaSweeperHudMode::Map;
 	const bool bMemoMode = ActiveHudMode == ETunaSweeperHudMode::Memo;
 
 	if (TopStatusReserveWidget)
@@ -253,9 +365,32 @@ void UTunaSweeperGameHudWidget::ApplyHudModeVisibility()
 		InventoryAreaWidget->SetInventoryVisible(bUtilityModeOpen && bInventoryMode);
 	}
 
+	EnsureInventoryQuickSlotPanelWidget();
+	if (InventoryQuickSlotPanel)
+	{
+		InventoryQuickSlotPanel->SetVisibility(
+			bUtilityModeOpen && bInventoryMode
+				? ESlateVisibility::SelfHitTestInvisible
+				: ESlateVisibility::Collapsed);
+		if (bUtilityModeOpen && bInventoryMode)
+		{
+			RefreshInventoryQuickSlotPanel();
+		}
+	}
+
 	if (ItemInfoPanelWidget && !bInventoryMode)
 	{
 		ItemInfoPanelWidget->SetVisibility(ESlateVisibility::Collapsed);
+	}
+
+	EnsureMapPanelWidget();
+	if (MapPanelWidget)
+	{
+		MapPanelWidget->SetVisibility(bUtilityModeOpen && bMapMode ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
+		if (bUtilityModeOpen && bMapMode)
+		{
+			MapPanelWidget->RefreshMapView();
+		}
 	}
 
 	EnsureMemoPanelWidget();
@@ -279,12 +414,201 @@ void UTunaSweeperGameHudWidget::ApplyHudModeVisibility()
 
 	if (UnsupportedModePanel)
 	{
-		UnsupportedModePanel->SetVisibility(bUtilityModeOpen && !bInventoryMode && !bMemoMode ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
+		UnsupportedModePanel->SetVisibility(
+			bUtilityModeOpen && !bInventoryMode && !bMapMode && !bMemoMode
+				? ESlateVisibility::HitTestInvisible
+				: ESlateVisibility::Collapsed);
 	}
 
 	if (UnsupportedModeText)
 	{
 		UnsupportedModeText->SetText(FText::FromString(TEXT("\uBBF8\uAD6C\uD604")));
+	}
+}
+
+void UTunaSweeperGameHudWidget::CloseLootContainerPanelIfOpen()
+{
+	if (!ExternalPanelWidget ||
+		ExternalPanelWidget->GetExternalPanelMode() != ETunaSweeperHudExternalPanelMode::LootingBox)
+	{
+		return;
+	}
+
+	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
+	{
+		TunaGameInstance->NotifyActiveLootContainerUiClosed();
+	}
+
+	ExternalPanelWidget->SetExternalPanelMode(ETunaSweeperHudExternalPanelMode::None);
+}
+
+void UTunaSweeperGameHudWidget::EnsureInventoryQuickSlotPanelWidget()
+{
+	if (InventoryQuickSlotPanel || !WidgetTree)
+	{
+		return;
+	}
+
+	UCanvasPanel* RootCanvas = Cast<UCanvasPanel>(WidgetTree->RootWidget);
+	if (!RootCanvas)
+	{
+		return;
+	}
+
+	TSubclassOf<UTunaSweeperItemThumbnailSlotWidget> EntryWidgetClass =
+		LoadClass<UTunaSweeperItemThumbnailSlotWidget>(
+			nullptr,
+			TEXT("/Game/UI/WBP_ItemThumbnailSlot.WBP_ItemThumbnailSlot_C"));
+	if (!EntryWidgetClass)
+	{
+		return;
+	}
+
+	InventoryQuickSlotPanel = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("InventoryQuickSlotPanel"));
+	UVerticalBox* PanelStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("InventoryQuickSlotStack"));
+	UTextBlock* GuideText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("InventoryQuickSlotGuideText"));
+	InventoryQuickSlotRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("InventoryQuickSlotRow"));
+	if (!InventoryQuickSlotPanel || !PanelStack || !GuideText || !InventoryQuickSlotRow)
+	{
+		return;
+	}
+
+	InventoryQuickSlotPanel->SetVisibility(ESlateVisibility::Collapsed);
+	InventoryQuickSlotPanel->SetPadding(FMargin(18.0f, 12.0f, 18.0f, 12.0f));
+	InventoryQuickSlotPanel->SetBrush(MakeHudRoundedBoxBrush(
+		FVector2D(InventoryQuickSlotPanelWidth, InventoryQuickSlotPanelHeight),
+		FLinearColor(0.015f, 0.018f, 0.018f, 0.68f),
+		8.0f,
+		FLinearColor(0.48f, 0.54f, 0.52f, 0.48f),
+		1.0f));
+	InventoryQuickSlotPanel->SetContent(PanelStack);
+
+	GuideText->SetText(FText::FromString(TEXT("\uC544\uC774\uD15C\uC744 \uC2AC\uB86F\uC73C\uB85C \uB4DC\uB798\uADF8\uD558\uC5EC \uD035\uC2AC\uB86F\uC744 \uC124\uC815\uD558\uC138\uC694")));
+	GuideText->SetColorAndOpacity(FSlateColor(FLinearColor(0.94f, 0.94f, 0.90f, 1.0f)));
+	GuideText->SetJustification(ETextJustify::Center);
+	TunaSweeperUIFont::ApplyFont(GuideText, 24, ETunaSweeperUIFontWeight::Bold);
+	UVerticalBoxSlot* GuideSlot = PanelStack->AddChildToVerticalBox(GuideText);
+	if (GuideSlot)
+	{
+		GuideSlot->SetHorizontalAlignment(HAlign_Fill);
+		GuideSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 8.0f));
+	}
+
+	UVerticalBoxSlot* RowStackSlot = PanelStack->AddChildToVerticalBox(InventoryQuickSlotRow);
+	if (RowStackSlot)
+	{
+		RowStackSlot->SetHorizontalAlignment(HAlign_Center);
+	}
+
+	InventoryQuickSlotWidgets.Reset();
+	for (int32 SlotNumber = InventoryQuickSlotFirstNumber; SlotNumber <= InventoryQuickSlotLastNumber; ++SlotNumber)
+	{
+		UVerticalBox* SlotStack = WidgetTree->ConstructWidget<UVerticalBox>(
+			UVerticalBox::StaticClass(),
+			FName(*FString::Printf(TEXT("InventoryQuickSlot%dStack"), SlotNumber)));
+		USizeBox* SlotSizeBox = WidgetTree->ConstructWidget<USizeBox>(
+			USizeBox::StaticClass(),
+			FName(*FString::Printf(TEXT("InventoryQuickSlot%dSizeBox"), SlotNumber)));
+		UTunaSweeperItemThumbnailSlotWidget* SlotWidget = WidgetTree->ConstructWidget<UTunaSweeperItemThumbnailSlotWidget>(
+			EntryWidgetClass,
+			FName(*FString::Printf(TEXT("InventoryQuickSlot%dWidget"), SlotNumber)));
+		USizeBox* KeySizeBox = WidgetTree->ConstructWidget<USizeBox>(
+			USizeBox::StaticClass(),
+			FName(*FString::Printf(TEXT("InventoryQuickSlot%dKeySizeBox"), SlotNumber)));
+		UBorder* KeyBackground = WidgetTree->ConstructWidget<UBorder>(
+			UBorder::StaticClass(),
+			FName(*FString::Printf(TEXT("InventoryQuickSlot%dKeyBackground"), SlotNumber)));
+		UTextBlock* KeyText = WidgetTree->ConstructWidget<UTextBlock>(
+			UTextBlock::StaticClass(),
+			FName(*FString::Printf(TEXT("InventoryQuickSlot%dKeyText"), SlotNumber)));
+		if (!SlotStack || !SlotSizeBox || !SlotWidget || !KeySizeBox || !KeyBackground || !KeyText)
+		{
+			continue;
+		}
+
+		SlotSizeBox->SetWidthOverride(InventoryQuickSlotTileSize);
+		SlotSizeBox->SetHeightOverride(InventoryQuickSlotTileSize);
+		SlotWidget->SetRenderTransformPivot(FVector2D(0.5f, 0.5f));
+		SlotWidget->SetRenderScale(FVector2D(InventoryQuickSlotTileScale, InventoryQuickSlotTileScale));
+		SlotSizeBox->SetContent(SlotWidget);
+		UVerticalBoxSlot* SlotWidgetStackSlot = SlotStack->AddChildToVerticalBox(SlotSizeBox);
+		if (SlotWidgetStackSlot)
+		{
+			SlotWidgetStackSlot->SetHorizontalAlignment(HAlign_Center);
+		}
+
+		KeySizeBox->SetWidthOverride(34.0f);
+		KeySizeBox->SetHeightOverride(28.0f);
+		KeyBackground->SetPadding(FMargin(8.0f, 1.0f));
+		KeyBackground->SetBrush(MakeHudRoundedBoxBrush(
+			FVector2D(34.0f, 28.0f),
+			FLinearColor(0.96f, 0.96f, 0.96f, 0.98f),
+			5.0f,
+			FLinearColor(1.0f, 1.0f, 1.0f, 0.98f),
+			0.0f));
+		KeyText->SetText(FText::AsNumber(SlotNumber));
+		KeyText->SetColorAndOpacity(FSlateColor(FLinearColor(0.02f, 0.024f, 0.028f, 1.0f)));
+		KeyText->SetJustification(ETextJustify::Center);
+		TunaSweeperUIFont::ApplyFont(KeyText, 17, ETunaSweeperUIFontWeight::Bold);
+		KeyBackground->SetContent(KeyText);
+		KeySizeBox->SetContent(KeyBackground);
+		UVerticalBoxSlot* KeyStackSlot = SlotStack->AddChildToVerticalBox(KeySizeBox);
+		if (KeyStackSlot)
+		{
+			KeyStackSlot->SetHorizontalAlignment(HAlign_Center);
+			KeyStackSlot->SetPadding(FMargin(0.0f, 3.0f, 0.0f, 0.0f));
+		}
+
+		UHorizontalBoxSlot* RowSlot = InventoryQuickSlotRow->AddChildToHorizontalBox(SlotStack);
+		if (RowSlot)
+		{
+			RowSlot->SetPadding(FMargin(SlotNumber == InventoryQuickSlotFirstNumber ? 0.0f : 12.0f, 0.0f, 0.0f, 0.0f));
+			RowSlot->SetVerticalAlignment(VAlign_Bottom);
+		}
+
+		InventoryQuickSlotWidgets.Add(SlotWidget);
+	}
+
+	UCanvasPanelSlot* CanvasSlot = RootCanvas->AddChildToCanvas(InventoryQuickSlotPanel);
+	if (CanvasSlot)
+	{
+		CanvasSlot->SetAnchors(FAnchors(0.5f, 1.0f, 0.5f, 1.0f));
+		CanvasSlot->SetAlignment(FVector2D(0.5f, 1.0f));
+		CanvasSlot->SetPosition(FVector2D(0.0f, -34.0f));
+		CanvasSlot->SetSize(FVector2D(InventoryQuickSlotPanelWidth, InventoryQuickSlotPanelHeight));
+		CanvasSlot->SetZOrder(35);
+	}
+}
+
+void UTunaSweeperGameHudWidget::EnsureMapPanelWidget()
+{
+	if (MapPanelWidget || !WidgetTree)
+	{
+		return;
+	}
+
+	UCanvasPanel* RootCanvas = Cast<UCanvasPanel>(WidgetTree->RootWidget);
+	if (!RootCanvas)
+	{
+		return;
+	}
+
+	MapPanelWidget = CreateWidget<UTunaSweeperMapWidget>(
+		GetOwningPlayer(),
+		UTunaSweeperMapWidget::StaticClass());
+	if (!MapPanelWidget)
+	{
+		return;
+	}
+
+	MapPanelWidget->SetVisibility(ESlateVisibility::Collapsed);
+	UCanvasPanelSlot* CanvasSlot = RootCanvas->AddChildToCanvas(MapPanelWidget);
+	if (CanvasSlot)
+	{
+		CanvasSlot->SetAnchors(FAnchors(0.0f, 0.0f, 1.0f, 1.0f));
+		CanvasSlot->SetOffsets(FMargin(0.0f));
+		CanvasSlot->SetAlignment(FVector2D(0.0f, 0.0f));
+		CanvasSlot->SetZOrder(-5);
 	}
 }
 
@@ -430,6 +754,73 @@ void UTunaSweeperGameHudWidget::RefreshQuickSlotsFromGameState()
 			TunaGameInstance->GetWeaponInventoryAmmoCount(SlotNumber),
 			true);
 	}
+
+	static const TArray<FTunaSweeperInventorySlot> EmptyQuickSlots;
+	const TArray<FTunaSweeperInventorySlot>& UsableQuickSlots = TunaGameInstance
+		? TunaGameInstance->GetUsableQuickSlots()
+		: EmptyQuickSlots;
+	for (int32 SlotNumber = InventoryQuickSlotFirstNumber; SlotNumber <= InventoryQuickSlotLastNumber; ++SlotNumber)
+	{
+		const int32 SlotIndex = SlotNumber - InventoryQuickSlotFirstNumber;
+		FTunaSweeperItemInstance ItemInstance;
+		FTunaSweeperItemDefinition ItemDefinition;
+		if (!UsableQuickSlots.IsValidIndex(SlotIndex) ||
+			!TunaGameInstance ||
+			!TunaGameInstance->TryGetItemInstance(UsableQuickSlots[SlotIndex].ItemUid, ItemInstance) ||
+			!ItemDataSubsystem ||
+			!ItemDataSubsystem->TryGetItemDefinition(ItemInstance.ItemId, ItemDefinition))
+		{
+			QuickSlotBarWidget->ClearQuickSlotIcon(SlotNumber);
+			QuickSlotBarWidget->SetWeaponAmmoTypeText(SlotNumber, FText::GetEmpty(), false);
+			QuickSlotBarWidget->SetWeaponAmmoText(SlotNumber, 0, 0, false);
+			continue;
+		}
+
+		UTexture2D* IconTexture = nullptr;
+		const FString IconObjectPath = ItemDataSubsystem->BuildItemIconObjectPath(ItemDefinition);
+		if (!IconObjectPath.IsEmpty())
+		{
+			IconTexture = LoadObject<UTexture2D>(nullptr, *IconObjectPath);
+		}
+
+		QuickSlotBarWidget->SetQuickSlotIcon(SlotNumber, IconTexture);
+		QuickSlotBarWidget->SetWeaponAmmoTypeText(SlotNumber, FText::GetEmpty(), false);
+		QuickSlotBarWidget->SetWeaponAmmoText(SlotNumber, 0, 0, false);
+	}
+}
+
+void UTunaSweeperGameHudWidget::RefreshInventoryQuickSlotPanel()
+{
+	if (InventoryQuickSlotWidgets.Num() <= 0)
+	{
+		return;
+	}
+
+	UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+	UTunaSweeperItemDataSubsystem* ItemDataSubsystem = TunaGameInstance
+		? TunaGameInstance->GetSubsystem<UTunaSweeperItemDataSubsystem>()
+		: nullptr;
+	static const TArray<FTunaSweeperInventorySlot> EmptyQuickSlots;
+	const TArray<FTunaSweeperInventorySlot>& UsableQuickSlots = TunaGameInstance
+		? TunaGameInstance->GetUsableQuickSlots()
+		: EmptyQuickSlots;
+
+	for (int32 SlotIndex = 0; SlotIndex < InventoryQuickSlotWidgets.Num(); ++SlotIndex)
+	{
+		if (!InventoryQuickSlotWidgets[SlotIndex])
+		{
+			continue;
+		}
+
+		const FTunaSweeperInventorySlot& QuickSlot = UsableQuickSlots.IsValidIndex(SlotIndex)
+			? UsableQuickSlots[SlotIndex]
+			: FTunaSweeperInventorySlot();
+		InventoryQuickSlotWidgets[SlotIndex]->SetTileData(BuildQuickSlotTileData(
+			TunaGameInstance,
+			ItemDataSubsystem,
+			QuickSlot,
+			SlotIndex));
+	}
 }
 
 void UTunaSweeperGameHudWidget::RefreshReloadWidgets()
@@ -541,7 +932,7 @@ void UTunaSweeperGameHudWidget::RefreshDialogueHudVisibility()
 	const ESlateVisibility BottomStatusVisibility = bDialogueActive || bInventoryUiOpen
 		? ESlateVisibility::Collapsed
 		: ESlateVisibility::HitTestInvisible;
-	const ESlateVisibility QuickSlotVisibility = bDialogueActive
+	const ESlateVisibility QuickSlotVisibility = bDialogueActive || bInventoryUiOpen
 		? ESlateVisibility::Collapsed
 		: ESlateVisibility::HitTestInvisible;
 

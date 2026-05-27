@@ -116,56 +116,64 @@
     "name_string_key": "item.canned_food",
     "description_string_key": "item.canned_food.desc",
     "shop_sell_price": 8,
-    "icon_file_name": "T_UIIcon_CannedFood.uasset"
+    "icon_file_name": "T_UIIcon_CannedFood.uasset",
+    "category_tag": "item.category.consumable"
   },
   {
     "id": 3002,
     "name_string_key": "item.water_bottle",
     "description_string_key": "item.water_bottle.desc",
     "shop_sell_price": 6,
-    "icon_file_name": "T_UIIcon_WaterBottle.uasset"
+    "icon_file_name": "T_UIIcon_WaterBottle.uasset",
+    "category_tag": "item.category.consumable"
   },
   {
     "id": 3003,
     "name_string_key": "item.energy_bar",
     "description_string_key": "item.energy_bar.desc",
     "shop_sell_price": 10,
-    "icon_file_name": "T_UIIcon_EnergyBar.uasset"
+    "icon_file_name": "T_UIIcon_EnergyBar.uasset",
+    "category_tag": "item.category.consumable"
   },
   {
     "id": 3004,
     "name_string_key": "item.canned_tuna",
     "description_string_key": "item.canned_tuna.desc",
     "shop_sell_price": 12,
-    "icon_file_name": "T_UIIcon_CannedTuna.uasset"
+    "icon_file_name": "T_UIIcon_CannedTuna.uasset",
+    "category_tag": "item.category.consumable"
   },
   {
     "id": 4001,
     "name_string_key": "item.bandage",
     "description_string_key": "item.bandage.desc",
     "shop_sell_price": 15,
-    "icon_file_name": "T_UIIcon_Bandage.uasset"
+    "icon_file_name": "T_UIIcon_Bandage.uasset",
+    "category_tag": "item.category.consumable"
   },
   {
     "id": 4002,
     "name_string_key": "item.first_aid_kit",
     "description_string_key": "item.first_aid_kit.desc",
     "shop_sell_price": 45,
-    "icon_file_name": "T_UIIcon_FirstAidKit.uasset"
+    "icon_file_name": "T_UIIcon_FirstAidKit.uasset",
+    "category_tag": "item.category.consumable"
   },
   {
     "id": 4003,
     "name_string_key": "item.painkillers",
     "description_string_key": "item.painkillers.desc",
     "shop_sell_price": 22,
-    "icon_file_name": "T_UIIcon_Painkillers.uasset"
+    "icon_file_name": "T_UIIcon_Painkillers.uasset",
+    "category_tag": "item.category.consumable"
   },
   {
     "id": 4004,
     "name_string_key": "item.antibiotics",
     "description_string_key": "item.antibiotics.desc",
     "shop_sell_price": 32,
-    "icon_file_name": "T_UIIcon_Antibiotics.uasset"
+    "icon_file_name": "T_UIIcon_Antibiotics.uasset",
+    "category_tag": "item.category.consumable"
   },
   {
     "id": 5001,

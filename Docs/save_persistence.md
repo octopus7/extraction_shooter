@@ -6,7 +6,7 @@ Update it whenever a new state field is expected to persist across save slots, l
 ## Current Save Container
 
 - Save object: `UTunaSweeperSaveGame`
-- Current save version: `6`
+- Current save version: `8`
 - Runtime owner: `UTunaSweeperGameInstance`
 - Save entry point: `UTunaSweeperGameInstance::SaveGameStateInternal()`
 - Load entry point: `UTunaSweeperGameInstance::LoadGameState()`
@@ -31,6 +31,19 @@ Collected memo ids are persisted per save slot through `UTunaSweeperSaveGame::Ac
 
 Memo interaction marks the id as acquired in `UTunaSweeperGameInstance` memory immediately and destroys the spawned memo actor. It does not force an immediate save by default; the acquired ids are written on the next normal save, level-travel save, death save, or any other call to `SaveGameStateInternal()`. Runtime memo spawns must query this in-memory set so a collected memo stays hidden after death/respawn even before the next disk write.
 
+### Map Markers
+
+Player-created map markers are persisted per save slot through `UTunaSweeperSaveGame::MapMarkers`.
+
+Each `FTunaSweeperMapMarkerSaveData` preserves:
+
+- `MarkerId`: stable runtime id used for delete/update targeting.
+- `MapPosition`: normalized map-space position where `(0, 0)` is the top-left of the current map image and `(1, 1)` is the bottom-right.
+- `MarkerIconIndex`: fixed marker icon palette index.
+- `MarkerColorIndex`: fixed marker color palette index.
+
+Marker add/delete actions update `UTunaSweeperGameInstance` memory immediately and broadcast `OnMapMarkersChanged`. They do not force an immediate save by default; the marker array is written on the next normal save, level-travel save, death save, or any other call to `SaveGameStateInternal()`.
+
 ### Player-Owned Item Instances
 
 Stored through `UTunaSweeperSaveGame::ItemInstances`.
@@ -53,8 +66,11 @@ When a weapon is loaded from a save or equipped later, ammo type and loaded coun
 - `InventorySlots`
 - `EquipmentSlots`
 - `AuxiliaryBagSlots`
+- `UsableQuickSlots`
 
 Slot arrays store item UIDs. Any item UID referenced by these slots, including nested attachment UIDs, must also exist in `ItemInstances`.
+
+`UsableQuickSlots` stores the 3-8 quick-slot layout shown in inventory mode and reflected in the gameplay quick-slot bar. Slots 1, 2, and melee are equipment slots and are not duplicated here. Only usable items can occupy these slots; currently that means item definitions tagged `item.category.consumable` or `item.category.throwable`.
 
 ### World Progress Objects
 

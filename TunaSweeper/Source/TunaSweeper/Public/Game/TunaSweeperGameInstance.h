@@ -7,6 +7,8 @@
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
 #include "TunaSweeperGameInstance.generated.h"
 
+class APawn;
+
 USTRUCT(BlueprintType)
 struct TUNASWEEPER_API FTunaSweeperGameplaySettings
 {
@@ -197,6 +199,19 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Memo")
 	void GetAcquiredMemoIds(TArray<int32>& OutMemoIds);
 
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Map")
+	void GetMapMarkers(TArray<FTunaSweeperMapMarkerSaveData>& OutMapMarkers);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Map")
+	int32 AddMapMarker(
+		const FVector2D& MapPosition,
+		int32 MarkerIconIndex,
+		int32 MarkerColorIndex,
+		bool bSaveImmediately = false);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Map")
+	bool RemoveMapMarker(int32 MarkerId, bool bSaveImmediately = false);
+
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
 	void SetPlayerHudState(const FTunaSweeperPlayerHudState& InHudState);
 
@@ -220,6 +235,7 @@ public:
 	const TArray<FTunaSweeperInventorySlot>& GetInventorySlots();
 	const TArray<FTunaSweeperInventorySlot>& GetEquipmentSlots();
 	const TArray<FTunaSweeperInventorySlot>& GetAuxiliaryBagSlots();
+	const TArray<FTunaSweeperInventorySlot>& GetUsableQuickSlots();
 	const TArray<FTunaSweeperInventorySlot>& GetActiveLootContainerSlots();
 	const TArray<FTunaSweeperInventorySlot>& GetSelectedWeaponAttachmentSlots();
 	const TArray<FName>& GetSelectedWeaponAttachmentSlotTags() const { return SelectedWeaponAttachmentSlotTags; }
@@ -312,13 +328,17 @@ public:
 		const FTunaSweeperLootContainerInstance& InContainerInstance,
 		const TArray<FTunaSweeperInventorySlot>& InRuntimeSlots,
 		UObject* InOwner = nullptr);
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Inventory")
+	void NotifyActiveLootContainerUiClosed();
 	void SaveGameState();
 	void ClearInventoryAndSave();
 	void HandleLevelTravelPersistence(FName SourceLevelName, FName TargetLevelName);
 
 	FSimpleMulticastDelegate OnInventoryStateChanged;
 	FSimpleMulticastDelegate OnSelectedInventoryItemChanged;
+	FSimpleMulticastDelegate OnActiveLootContainerUiClosed;
 	FSimpleMulticastDelegate OnMemoStateChanged;
+	FSimpleMulticastDelegate OnMapMarkersChanged;
 
 private:
 	void GeneratePlayerInventoryItems();
@@ -341,6 +361,8 @@ private:
 	int32 GetInventoryCapacityForItemUid(const FGuid& ItemUid);
 	bool IsItemCompatibleWithEquipmentSlot(int32 SlotIndex, const FGuid& ItemUid);
 	bool DoesItemDefinitionMatchEquipmentSlot(int32 SlotIndex, const FTunaSweeperItemDefinition& ItemDefinition) const;
+	bool IsItemCompatibleWithUsableQuickSlot(const FGuid& ItemUid);
+	bool IsUsableQuickSlotItemDefinition(const FTunaSweeperItemDefinition& ItemDefinition) const;
 	bool IsBackpackItemUid(const FGuid& ItemUid);
 	bool IsBackpackItemDefinition(const FTunaSweeperItemDefinition& ItemDefinition) const;
 	bool IsEquipmentWeaponSlotNumberValid(int32 WeaponSlotNumber) const;
@@ -405,6 +427,9 @@ private:
 	TArray<FTunaSweeperInventorySlot> AuxiliaryBagSlots;
 
 	UPROPERTY(Transient)
+	TArray<FTunaSweeperInventorySlot> UsableQuickSlots;
+
+	UPROPERTY(Transient)
 	TArray<FTunaSweeperInventorySlot> ActiveLootContainerSlots;
 
 	UPROPERTY(Transient)
@@ -442,6 +467,12 @@ private:
 
 	UPROPERTY(Transient)
 	TSet<int32> AcquiredMemoIds;
+
+	UPROPERTY(Transient)
+	TArray<FTunaSweeperMapMarkerSaveData> MapMarkers;
+
+	UPROPERTY(Transient)
+	int32 NextMapMarkerId = 1;
 
 	UPROPERTY(Transient)
 	FName PendingScenarioCompletionFlag;
