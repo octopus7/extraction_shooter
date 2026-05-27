@@ -1,5 +1,7 @@
 #include "Game/TunaSweeperGameInstance.h"
 
+#include "Component/TunaSweeperVitalsComponent.h"
+#include "GameFramework/Pawn.h"
 #include "HAL/FileManager.h"
 #include "Inventory/TunaSweeperSaveGame.h"
 #include "Kismet/GameplayStatics.h"
@@ -1005,6 +1007,84 @@ bool UTunaSweeperGameInstance::CanSlotAcceptItem(const FTunaSweeperItemSlotRefer
 	}
 
 	return true;
+}
+
+bool UTunaSweeperGameInstance::TryUseItemInSlot(const FTunaSweeperItemSlotReference& SlotReference, APawn* InstigatorPawn)
+{
+	EnsureInventoryStateInitialized();
+	if (!SlotReference.IsValid() || !InstigatorPawn)
+	{
+		return false;
+	}
+
+	TArray<FTunaSweeperInventorySlot>* Slots = GetMutableSlotsForSource(SlotReference.Source);
+	if (!Slots || !Slots->IsValidIndex(SlotReference.SlotIndex))
+	{
+		return false;
+	}
+
+	const FGuid ItemUid = (*Slots)[SlotReference.SlotIndex].ItemUid;
+	FTunaSweeperItemInstance* ItemInstance = ItemInstancesByUid.Find(ItemUid);
+	if (!ItemInstance || !ItemInstance->IsValid())
+	{
+		return false;
+	}
+
+	UTunaSweeperItemDataSubsystem* ItemDataSubsystem = GetSubsystem<UTunaSweeperItemDataSubsystem>();
+	FTunaSweeperItemDefinition ItemDefinition;
+	if (!ItemDataSubsystem ||
+		!ItemDataSubsystem->TryGetItemDefinition(ItemInstance->ItemId, ItemDefinition) ||
+		ItemDefinition.CategoryTag != TunaSweeperInventory::ConsumableCategoryTag ||
+		!DoesItemDefinitionHaveUseEffect(ItemDefinition))
+	{
+		return false;
+	}
+
+	UTunaSweeperVitalsComponent* VitalsComponent = InstigatorPawn->FindComponentByClass<UTunaSweeperVitalsComponent>();
+	if (!VitalsComponent)
+	{
+		return false;
+	}
+
+	FTunaSweeperVitalsDelta Effect;
+	Effect.Health = ItemDefinition.UseHealthDelta;
+	Effect.Food = ItemDefinition.UseFoodDelta;
+	Effect.Hydration = ItemDefinition.UseHydrationDelta;
+	VitalsComponent->ApplyConsumableVitalsEffect(Effect);
+
+	ItemInstance->Quantity -= 1;
+	if (ItemInstance->Quantity <= 0)
+	{
+		ItemInstancesByUid.Remove(ItemUid);
+		(*Slots)[SlotReference.SlotIndex].Clear();
+		RemoveInvalidSlotReferences(PlayerInventorySlots);
+		RemoveInvalidSlotReferences(EquipmentSlots);
+		RemoveInvalidSlotReferences(AuxiliaryBagSlots);
+		RemoveInvalidSlotReferences(UsableQuickSlots);
+		RemoveInvalidSlotReferences(ActiveLootContainerSlots);
+	}
+
+	ClearSelectedItemIfInvalid();
+	BroadcastInventoryStateChanged();
+	return true;
+}
+
+bool UTunaSweeperGameInstance::TryUseHoveredItem(APawn* InstigatorPawn)
+{
+	EnsureInventoryStateInitialized();
+	if (!HoveredItemSlotReference.IsValid())
+	{
+		return false;
+	}
+
+	const FTunaSweeperItemSlotReference SlotReference = HoveredItemSlotReference;
+	const bool bUsedItem = TryUseItemInSlot(SlotReference, InstigatorPawn);
+	if (bUsedItem)
+	{
+		ClearHoveredItemSlot(SlotReference);
+	}
+
+	return bUsedItem;
 }
 
 bool UTunaSweeperGameInstance::CanMoveItemBetweenSlots(
@@ -2258,6 +2338,14 @@ bool UTunaSweeperGameInstance::IsUsableQuickSlotItemDefinition(
 {
 	return ItemDefinition.CategoryTag == TunaSweeperInventory::ConsumableCategoryTag ||
 		ItemDefinition.CategoryTag == TunaSweeperInventory::ThrowableCategoryTag;
+}
+
+bool UTunaSweeperGameInstance::DoesItemDefinitionHaveUseEffect(
+	const FTunaSweeperItemDefinition& ItemDefinition) const
+{
+	return !FMath::IsNearlyZero(ItemDefinition.UseHealthDelta) ||
+		!FMath::IsNearlyZero(ItemDefinition.UseFoodDelta) ||
+		!FMath::IsNearlyZero(ItemDefinition.UseHydrationDelta);
 }
 
 bool UTunaSweeperGameInstance::IsBackpackItemUid(const FGuid& ItemUid)

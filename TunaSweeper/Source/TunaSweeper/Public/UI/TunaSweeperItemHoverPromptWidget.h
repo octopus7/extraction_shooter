@@ -58,6 +58,15 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Hover Prompt", meta = (BindWidgetOptional))
 	TObjectPtr<UTextBlock> DropActionText;
 
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Hover Prompt", meta = (BindWidgetOptional))
+	TObjectPtr<UWidget> UseActionRow;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Hover Prompt", meta = (BindWidgetOptional))
+	TObjectPtr<UTextBlock> UseKeyText;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Hover Prompt", meta = (BindWidgetOptional))
+	TObjectPtr<UTextBlock> UseActionText;
+
 private:
 	void BuildNativeWidgetTree();
 	void CacheNamedWidgets();
@@ -66,6 +75,7 @@ private:
 	FText BuildNameText() const;
 	FText BuildWeightText() const;
 	FText BuildPriceText() const;
+	bool CanUseCachedItem() const;
 
 	UPROPERTY(Transient)
 	FTunaSweeperItemStackTileData CachedTileData;

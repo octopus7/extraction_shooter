@@ -19,6 +19,7 @@
 #include "Interaction/TunaSweeperPickupItemActor.h"
 #include "InputAction.h"
 #include "InputActionValue.h"
+#include "InputCoreTypes.h"
 #include "Subsystem/TunaSweeperKeyboardInputSubsystem.h"
 #include "Subsystem/TunaSweeperBgmSubsystem.h"
 #include "UI/TunaSweeperGameHudWidget.h"
@@ -312,6 +313,11 @@ void ATunaSweeperPlayerController::ApplyLevelBgmState()
 void ATunaSweeperPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
+
+	if (InputComponent)
+	{
+		InputComponent->BindKey(EKeys::U, IE_Pressed, this, &ATunaSweeperPlayerController::HandleUseHoveredItem);
+	}
 
 	UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent);
 	if (!EnhancedInputComponent)
@@ -904,6 +910,32 @@ void ATunaSweeperPlayerController::HandleQuickSlot(int32 SlotNumber)
 	if (UTunaSweeperKeyboardInputSubsystem* KeyboardInputSubsystem = GameInstance->GetSubsystem<UTunaSweeperKeyboardInputSubsystem>())
 	{
 		KeyboardInputSubsystem->ReceiveQuickSlotKeyInput(SlotNumber, GetPawn());
+	}
+}
+
+void ATunaSweeperPlayerController::HandleUseHoveredItem()
+{
+	if (IsIntroMap() || IsOpeningScenarioMap())
+	{
+		return;
+	}
+
+	if (bDialogueSequenceActive)
+	{
+		return;
+	}
+
+	if (const ATunaSweeperTopDownCharacter* ControlledCharacter = Cast<ATunaSweeperTopDownCharacter>(GetPawn()))
+	{
+		if (ControlledCharacter->IsDead())
+		{
+			return;
+		}
+	}
+
+	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
+	{
+		TunaGameInstance->TryUseHoveredItem(GetPawn());
 	}
 }
 

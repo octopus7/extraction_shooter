@@ -125,6 +125,7 @@ private:
 	bool FindDropLocationNearPlayer(FVector& OutDropLocation) const;
 	ATunaSweeperPickupItemActor* SpawnDroppedPickupItem(int32 ItemId, int32 Quantity);
 	void HandleQuickSlot(int32 SlotNumber);
+	void HandleUseHoveredItem();
 	void HandleDrop(const FInputActionValue& Value);
 	void HandleQuickSlot1(const FInputActionValue& Value);
 	void HandleQuickSlot2(const FInputActionValue& Value);

@@ -117,7 +117,10 @@
     "description_string_key": "item.canned_food.desc",
     "shop_sell_price": 8,
     "icon_file_name": "T_UIIcon_CannedFood.uasset",
-    "category_tag": "item.category.consumable"
+    "category_tag": "item.category.consumable",
+    "use_health_delta": 0,
+    "use_food_delta": 35,
+    "use_hydration_delta": -5
   },
   {
     "id": 3002,
@@ -125,7 +128,10 @@
     "description_string_key": "item.water_bottle.desc",
     "shop_sell_price": 6,
     "icon_file_name": "T_UIIcon_WaterBottle.uasset",
-    "category_tag": "item.category.consumable"
+    "category_tag": "item.category.consumable",
+    "use_health_delta": 0,
+    "use_food_delta": 0,
+    "use_hydration_delta": 40
   },
   {
     "id": 3003,
@@ -133,7 +139,10 @@
     "description_string_key": "item.energy_bar.desc",
     "shop_sell_price": 10,
     "icon_file_name": "T_UIIcon_EnergyBar.uasset",
-    "category_tag": "item.category.consumable"
+    "category_tag": "item.category.consumable",
+    "use_health_delta": 0,
+    "use_food_delta": 18,
+    "use_hydration_delta": -8
   },
   {
     "id": 3004,
@@ -141,7 +150,10 @@
     "description_string_key": "item.canned_tuna.desc",
     "shop_sell_price": 12,
     "icon_file_name": "T_UIIcon_CannedTuna.uasset",
-    "category_tag": "item.category.consumable"
+    "category_tag": "item.category.consumable",
+    "use_health_delta": 2,
+    "use_food_delta": 28,
+    "use_hydration_delta": -3
   },
   {
     "id": 4001,
@@ -149,7 +161,10 @@
     "description_string_key": "item.bandage.desc",
     "shop_sell_price": 15,
     "icon_file_name": "T_UIIcon_Bandage.uasset",
-    "category_tag": "item.category.consumable"
+    "category_tag": "item.category.consumable",
+    "use_health_delta": 18,
+    "use_food_delta": 0,
+    "use_hydration_delta": 0
   },
   {
     "id": 4002,
@@ -157,7 +172,10 @@
     "description_string_key": "item.first_aid_kit.desc",
     "shop_sell_price": 45,
     "icon_file_name": "T_UIIcon_FirstAidKit.uasset",
-    "category_tag": "item.category.consumable"
+    "category_tag": "item.category.consumable",
+    "use_health_delta": 45,
+    "use_food_delta": -3,
+    "use_hydration_delta": -3
   },
   {
     "id": 4003,
@@ -165,7 +183,10 @@
     "description_string_key": "item.painkillers.desc",
     "shop_sell_price": 22,
     "icon_file_name": "T_UIIcon_Painkillers.uasset",
-    "category_tag": "item.category.consumable"
+    "category_tag": "item.category.consumable",
+    "use_health_delta": 12,
+    "use_food_delta": 0,
+    "use_hydration_delta": -4
   },
   {
     "id": 4004,
@@ -173,7 +194,10 @@
     "description_string_key": "item.antibiotics.desc",
     "shop_sell_price": 32,
     "icon_file_name": "T_UIIcon_Antibiotics.uasset",
-    "category_tag": "item.category.consumable"
+    "category_tag": "item.category.consumable",
+    "use_health_delta": 20,
+    "use_food_delta": -4,
+    "use_hydration_delta": -4
   },
   {
     "id": 5001,

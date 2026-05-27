@@ -70,6 +70,15 @@ struct TUNASWEEPER_API FTunaSweeperItemDefinition
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
 	int32 InventorySlotCapacity = 0;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
+	float UseHealthDelta = 0.0f;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
+	float UseFoodDelta = 0.0f;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
+	float UseHydrationDelta = 0.0f;
 };
 
 USTRUCT(BlueprintType)

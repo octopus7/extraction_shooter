@@ -103,7 +103,7 @@ namespace TunaSweeperItemHoverPrompt
 		return KeySizeBox;
 	}
 
-	void AddActionRow(
+	UHorizontalBox* AddActionRow(
 		UWidgetTree* WidgetTree,
 		UVerticalBox* Stack,
 		const TCHAR* Prefix,
@@ -117,7 +117,7 @@ namespace TunaSweeperItemHoverPrompt
 		OutActionText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), FName(FString::Printf(TEXT("%sActionText"), Prefix)));
 		if (!Row || !KeyBox || !OutActionText)
 		{
-			return;
+			return nullptr;
 		}
 
 		ConfigureTextBlock(OutKeyText, KeyText, FLinearColor(0.02f, 0.025f, 0.03f, 1.0f), 16);
@@ -145,6 +145,8 @@ namespace TunaSweeperItemHoverPrompt
 			RowSlot->SetVerticalAlignment(VAlign_Top);
 			RowSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 8.0f));
 		}
+
+		return Row;
 	}
 }
 
@@ -281,6 +283,19 @@ void UTunaSweeperItemHoverPromptWidget::BuildNativeWidgetTree()
 	TakeKeyText = RawTakeKeyText;
 	TakeActionText = RawTakeActionText;
 
+	UTextBlock* RawUseKeyText = nullptr;
+	UTextBlock* RawUseActionText = nullptr;
+	UseActionRow = TunaSweeperItemHoverPrompt::AddActionRow(
+		WidgetTree,
+		ActionHintsStack,
+		TEXT("Use"),
+		FText::FromString(TEXT("U")),
+		FText::FromString(TEXT("\uC0AC\uC6A9")),
+		RawUseKeyText,
+		RawUseActionText);
+	UseKeyText = RawUseKeyText;
+	UseActionText = RawUseActionText;
+
 	UTextBlock* RawDropKeyText = nullptr;
 	UTextBlock* RawDropActionText = nullptr;
 	TunaSweeperItemHoverPrompt::AddActionRow(
@@ -361,6 +376,18 @@ void UTunaSweeperItemHoverPromptWidget::CacheNamedWidgets()
 	{
 		DropActionText = Cast<UTextBlock>(WidgetTree->FindWidget(FName(TEXT("DropActionText"))));
 	}
+	if (!UseActionRow)
+	{
+		UseActionRow = WidgetTree->FindWidget(FName(TEXT("UseActionRow")));
+	}
+	if (!UseKeyText)
+	{
+		UseKeyText = Cast<UTextBlock>(WidgetTree->FindWidget(FName(TEXT("UseKeyText"))));
+	}
+	if (!UseActionText)
+	{
+		UseActionText = Cast<UTextBlock>(WidgetTree->FindWidget(FName(TEXT("UseActionText"))));
+	}
 }
 
 void UTunaSweeperItemHoverPromptWidget::ApplyTileData()
@@ -405,6 +432,18 @@ void UTunaSweeperItemHoverPromptWidget::ApplyTileData()
 	if (DropActionText)
 	{
 		DropActionText->SetText(FText::FromString(TEXT("\uBC84\uB9AC\uAE30")));
+	}
+	if (UseActionRow)
+	{
+		UseActionRow->SetVisibility(CanUseCachedItem() ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
+	}
+	if (UseKeyText)
+	{
+		UseKeyText->SetText(FText::FromString(TEXT("U")));
+	}
+	if (UseActionText)
+	{
+		UseActionText->SetText(FText::FromString(TEXT("\uC0AC\uC6A9")));
 	}
 
 	RefreshPromptHeight();
@@ -470,4 +509,16 @@ FText UTunaSweeperItemHoverPromptWidget::BuildPriceText() const
 		? FMath::Max(0, CachedTileData.ItemDefinition.ShopSellPrice)
 		: 0;
 	return FText::FromString(FString::Printf(TEXT("$%d"), Price));
+}
+
+bool UTunaSweeperItemHoverPromptWidget::CanUseCachedItem() const
+{
+	if (!CachedTileData.bHasItemDefinition)
+	{
+		return false;
+	}
+
+	return !FMath::IsNearlyZero(CachedTileData.ItemDefinition.UseHealthDelta) ||
+		!FMath::IsNearlyZero(CachedTileData.ItemDefinition.UseFoodDelta) ||
+		!FMath::IsNearlyZero(CachedTileData.ItemDefinition.UseHydrationDelta);
 }

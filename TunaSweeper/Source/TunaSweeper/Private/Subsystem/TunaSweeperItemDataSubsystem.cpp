@@ -384,6 +384,9 @@ bool UTunaSweeperItemDataSubsystem::LoadItemTableJson()
 		double NumericMagazineCapacity = 0.0;
 		double NumericMagazineCapacityBonus = 0.0;
 		double NumericReloadSeconds = 0.0;
+		double NumericUseHealthDelta = 0.0;
+		double NumericUseFoodDelta = 0.0;
+		double NumericUseHydrationDelta = 0.0;
 		FString NameStringKey;
 		FString DescriptionStringKey;
 		FString IconFileName;
@@ -490,6 +493,18 @@ bool UTunaSweeperItemDataSubsystem::LoadItemTableJson()
 		if ((*JsonObject)->TryGetNumberField(TEXT("inventory_slot_capacity"), NumericInventorySlotCapacity))
 		{
 			ItemDefinition.InventorySlotCapacity = FMath::Max(0, static_cast<int32>(NumericInventorySlotCapacity));
+		}
+		if ((*JsonObject)->TryGetNumberField(TEXT("use_health_delta"), NumericUseHealthDelta))
+		{
+			ItemDefinition.UseHealthDelta = static_cast<float>(NumericUseHealthDelta);
+		}
+		if ((*JsonObject)->TryGetNumberField(TEXT("use_food_delta"), NumericUseFoodDelta))
+		{
+			ItemDefinition.UseFoodDelta = static_cast<float>(NumericUseFoodDelta);
+		}
+		if ((*JsonObject)->TryGetNumberField(TEXT("use_hydration_delta"), NumericUseHydrationDelta))
+		{
+			ItemDefinition.UseHydrationDelta = static_cast<float>(NumericUseHydrationDelta);
 		}
 
 		if (ItemDefinition.Id == INDEX_NONE || ItemDefinition.NameStringKey.IsNone() ||

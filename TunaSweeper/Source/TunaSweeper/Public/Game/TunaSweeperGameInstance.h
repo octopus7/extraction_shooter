@@ -270,6 +270,8 @@ public:
 	bool TryConsumeLoadedAmmoForWeaponSlot(int32 WeaponSlotNumber);
 	bool TryReloadWeaponSlot(int32 WeaponSlotNumber, int32 AmmoItemId, int32& OutLoadedAmmoCount);
 	bool CanSlotAcceptItem(const FTunaSweeperItemSlotReference& SlotReference, const FGuid& ItemUid);
+	bool TryUseItemInSlot(const FTunaSweeperItemSlotReference& SlotReference, APawn* InstigatorPawn);
+	bool TryUseHoveredItem(APawn* InstigatorPawn);
 	bool CanMoveItemBetweenSlots(
 		const FTunaSweeperItemSlotReference& SourceSlot,
 		const FTunaSweeperItemSlotReference& TargetSlot,
@@ -370,6 +372,7 @@ private:
 	bool DoesItemDefinitionMatchEquipmentSlot(int32 SlotIndex, const FTunaSweeperItemDefinition& ItemDefinition) const;
 	bool IsItemCompatibleWithUsableQuickSlot(const FGuid& ItemUid);
 	bool IsUsableQuickSlotItemDefinition(const FTunaSweeperItemDefinition& ItemDefinition) const;
+	bool DoesItemDefinitionHaveUseEffect(const FTunaSweeperItemDefinition& ItemDefinition) const;
 	bool IsBackpackItemUid(const FGuid& ItemUid);
 	bool IsBackpackItemDefinition(const FTunaSweeperItemDefinition& ItemDefinition) const;
 	bool IsEquipmentWeaponSlotNumberValid(int32 WeaponSlotNumber) const;
