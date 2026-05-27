@@ -25,6 +25,8 @@ namespace TunaSweeperRollingBomber
 	const TCHAR* CubeMeshPath = TEXT("/Engine/BasicShapes/Cube.Cube");
 	const TCHAR* LegMetalMaterialPath = TEXT("/Game/Characters/Enemy/M_RollingBomberLegMetal.M_RollingBomberLegMetal");
 	const TCHAR* LegMetalFallbackMaterialPath = TEXT("/Game/Interaction/M_Container_Metal.M_Container_Metal");
+	const TCHAR* RollChargeCylinderMeshPath = TEXT("/Game/Effects/SM_RollingBomberChargeCylinder_Open.SM_RollingBomberChargeCylinder_Open");
+	const TCHAR* RollChargeCylinderMaterialPath = TEXT("/Game/Effects/M_RollingBomberChargeCylinder.M_RollingBomberChargeCylinder");
 	constexpr float MinFootGroundNormalZ = 0.25f;
 	constexpr float SpawnGroundTraceExtraDistance = 9.0f;
 	constexpr float SpawnPhysicsLinearDamping = 0.18f;
@@ -54,6 +56,10 @@ ATunaSweeperRollingBomber::ATunaSweeperRollingBomber()
 		FSoftObjectPath(TEXT("/Engine/BasicShapes/BasicShapeMaterial.BasicShapeMaterial")));
 	LegMetalMaterial = TSoftObjectPtr<UMaterialInterface>(
 		FSoftObjectPath(TunaSweeperRollingBomber::LegMetalMaterialPath));
+	RollChargeCylinderMeshAsset = TSoftObjectPtr<UStaticMesh>(
+		FSoftObjectPath(TunaSweeperRollingBomber::RollChargeCylinderMeshPath));
+	RollChargeCylinderMaterial = TSoftObjectPtr<UMaterialInterface>(
+		FSoftObjectPath(TunaSweeperRollingBomber::RollChargeCylinderMaterialPath));
 	RollingBomberProjectileMaterial = TSoftObjectPtr<UMaterialInterface>(
 		FSoftObjectPath(TEXT("/Game/Effects/M_LedExpression_VertexColorEmissive.M_LedExpression_VertexColorEmissive")));
 	RollingBomberProjectileTrailMaterial = TSoftObjectPtr<UMaterialInterface>(
@@ -63,6 +69,14 @@ ATunaSweeperRollingBomber::ATunaSweeperRollingBomber()
 
 	BodyVisualPivot = CreateDefaultSubobject<USceneComponent>(TEXT("BodyVisualPivot"));
 	BodyVisualPivot->SetupAttachment(RootComponent);
+
+	RollChargeCylinderMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("RollChargeCylinderMesh"));
+	RollChargeCylinderMesh->SetupAttachment(RootComponent);
+	RollChargeCylinderMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	RollChargeCylinderMesh->SetGenerateOverlapEvents(false);
+	RollChargeCylinderMesh->SetCastShadow(false);
+	RollChargeCylinderMesh->SetVisibility(false);
+	RollChargeCylinderMesh->SetHiddenInGame(true);
 
 	if (VisualMesh)
 	{
@@ -174,6 +188,7 @@ void ATunaSweeperRollingBomber::BeginPlay()
 	Super::BeginPlay();
 
 	ApplyRollingBomberVisualDefaults();
+	ApplyRollChargeCylinderVisualDefaults();
 	ApplyLegVisualMaterial();
 	ApplyEyeVisualDefaults();
 	SetEyeChargeWarningActive(false, true);
@@ -275,6 +290,7 @@ void ATunaSweeperRollingBomber::ApplyRollingBomberVisualDefaults()
 	{
 		BodyVisualPivot->SetRelativeLocation(FVector::ZeroVector);
 		BodyVisualPivot->SetRelativeRotation(FRotator::ZeroRotator);
+		BodyVisualPivotBaseRelativeLocation = BodyVisualPivot->GetRelativeLocation();
 		BodyVisualPivotBaseRelativeRotation = BodyVisualPivot->GetRelativeRotation();
 	}
 
@@ -300,6 +316,36 @@ void ATunaSweeperRollingBomber::ApplyRollingBomberVisualDefaults()
 	}
 }
 
+void ATunaSweeperRollingBomber::ApplyRollChargeCylinderVisualDefaults()
+{
+	if (!RollChargeCylinderMesh)
+	{
+		return;
+	}
+
+	RollChargeCylinderMesh->SetRelativeLocation(RollChargeCylinderLocalOffset);
+	RollChargeCylinderMesh->SetRelativeRotation(FRotator::ZeroRotator);
+	RollChargeCylinderMesh->SetRelativeScale3D(RollChargeCylinderLocalScale);
+	RollChargeCylinderMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	RollChargeCylinderMesh->SetGenerateOverlapEvents(false);
+	RollChargeCylinderMesh->SetCastShadow(false);
+
+	if (UStaticMesh* ChargeMesh = RollChargeCylinderMeshAsset.LoadSynchronous())
+	{
+		RollChargeCylinderMesh->SetStaticMesh(ChargeMesh);
+	}
+
+	UMaterialInterface* ChargeMaterial = RollChargeCylinderMaterial.LoadSynchronous();
+	if (ChargeMaterial)
+	{
+		RollChargeCylinderDynamicMaterial = UMaterialInstanceDynamic::Create(ChargeMaterial, this);
+		RollChargeCylinderMesh->SetMaterial(0, RollChargeCylinderDynamicMaterial);
+	}
+
+	UpdateRollChargeCylinderEffect(0.0f);
+	SetRollChargeCylinderEffectActive(false);
+}
+
 void ATunaSweeperRollingBomber::EnterSpawnPhysicsMode(const FVector& LaunchVelocity)
 {
 	CurrentMode = ETunaSweeperRollingBomberMode::SpawnPhysics;
@@ -316,6 +362,7 @@ void ATunaSweeperRollingBomber::EnterSpawnPhysicsMode(const FVector& LaunchVeloc
 	BodyRollDegrees = 0.0f;
 
 	SetEyeChargeWarningActive(false, false);
+	SetRollChargeCylinderEffectActive(false);
 	ResetBodyRollVisualRotation();
 	UpdateFoldedLegSceneComponents();
 
@@ -369,6 +416,7 @@ void ATunaSweeperRollingBomber::EnterStandingUpFromSpawnMode()
 	bProjectileModeClosingDistance = false;
 
 	SetEyeChargeWarningActive(false, false);
+	SetRollChargeCylinderEffectActive(false);
 	ResetBodyRollVisualRotation();
 	UpdateFoldedLegSceneComponents();
 }
@@ -392,6 +440,7 @@ void ATunaSweeperRollingBomber::EnterProjectileAttackMode()
 	RollDistanceTraveled = 0.0f;
 
 	SetEyeChargeWarningActive(false, false);
+	SetRollChargeCylinderEffectActive(false);
 	ResetBodyRollVisualRotation();
 	InitializeLegIKTargets();
 
@@ -402,15 +451,24 @@ void ATunaSweeperRollingBomber::EnterProjectileAttackMode()
 	}
 }
 
-void ATunaSweeperRollingBomber::EnterFoldingLegsMode()
+void ATunaSweeperRollingBomber::EnterFoldingLegsMode(ATunaSweeperTopDownCharacter* TargetCharacter)
 {
 	CurrentMode = ETunaSweeperRollingBomberMode::FoldingLegs;
 	ModeElapsedSeconds = 0.0f;
 	LegFoldAlpha = 0.0f;
 	bLegIKEnabled = false;
 	bProjectileModeClosingDistance = false;
+	BodyRollDegrees = 0.0f;
+	LockedRollDirection = ResolveRollDirection(TargetCharacter);
 
 	SetEyeChargeWarningActive(true, false);
+	SetRollChargeCylinderEffectActive(true);
+	UpdateRollChargeCylinderEffect(0.0f);
+	if (!LockedRollDirection.IsNearlyZero())
+	{
+		SetActorRotation(FRotator(0.0f, LockedRollDirection.Rotation().Yaw, 0.0f));
+	}
+
 	if (UCharacterMovementComponent* MovementComponent = GetCharacterMovement())
 	{
 		MovementComponent->StopMovementImmediately();
@@ -425,10 +483,17 @@ void ATunaSweeperRollingBomber::EnterRollingMode(ATunaSweeperTopDownCharacter* T
 	LegFoldAlpha = 1.0f;
 	bLegIKEnabled = false;
 	RollDistanceTraveled = 0.0f;
-	BodyRollDegrees = 0.0f;
-	LockedRollDirection = ResolveRollDirection(TargetCharacter);
+	if (LockedRollDirection.IsNearlyZero())
+	{
+		LockedRollDirection = ResolveRollDirection(TargetCharacter);
+	}
+	else
+	{
+		LockedRollDirection = LockedRollDirection.GetSafeNormal2D();
+	}
 
 	SetEyeChargeWarningActive(true, false);
+	SetRollChargeCylinderEffectActive(false);
 	if (!LockedRollDirection.IsNearlyZero())
 	{
 		SetActorRotation(FRotator(0.0f, LockedRollDirection.Rotation().Yaw, 0.0f));
@@ -449,10 +514,16 @@ void ATunaSweeperRollingBomber::EnterRecoveringLegsMode()
 	bLegIKEnabled = false;
 
 	SetEyeChargeWarningActive(true, false);
+	SetRollChargeCylinderEffectActive(false);
 	if (UCharacterMovementComponent* MovementComponent = GetCharacterMovement())
 	{
 		MovementComponent->StopMovementImmediately();
 		MovementComponent->DisableMovement();
+	}
+
+	if (BodyVisualPivot)
+	{
+		BodyVisualPivot->SetRelativeLocation(BodyVisualPivotBaseRelativeLocation);
 	}
 }
 
@@ -474,6 +545,7 @@ void ATunaSweeperRollingBomber::SelfDestruct()
 	}
 
 	SetEyeChargeWarningActive(true, true);
+	SetRollChargeCylinderEffectActive(false);
 	if (UCharacterMovementComponent* MovementComponent = GetCharacterMovement())
 	{
 		MovementComponent->StopMovementImmediately();
@@ -536,7 +608,7 @@ void ATunaSweeperRollingBomber::UpdateProjectileAttackMode(
 
 	if (ProjectileModeElapsedSeconds >= ProjectileAttackDurationSeconds)
 	{
-		EnterFoldingLegsMode();
+		EnterFoldingLegsMode(TargetCharacter);
 	}
 }
 
@@ -596,7 +668,17 @@ void ATunaSweeperRollingBomber::UpdateFoldingLegsMode(
 	ATunaSweeperTopDownCharacter* TargetCharacter)
 {
 	ModeElapsedSeconds += DeltaSeconds;
-	LegFoldAlpha = FMath::Clamp(ModeElapsedSeconds / FMath::Max(0.01f, LegFoldDurationSeconds), 0.0f, 1.0f);
+	const float ChargeAlpha = FMath::Clamp(ModeElapsedSeconds / FMath::Max(0.01f, LegFoldDurationSeconds), 0.0f, 1.0f);
+	LegFoldAlpha = ChargeAlpha;
+	UpdateRollChargeCylinderEffect(ChargeAlpha);
+
+	const float SpinAlpha = ChargeAlpha * ChargeAlpha;
+	const float SpinSpeedDegreesPerSecond = FMath::Lerp(
+		FMath::Max(0.0f, RollChargeSpinStartDegreesPerSecond),
+		FMath::Max(0.0f, RollChargeSpinEndDegreesPerSecond),
+		SpinAlpha);
+	ApplyBodyRollVisualRotationDegrees(SpinSpeedDegreesPerSecond * DeltaSeconds);
+
 	if (LegFoldAlpha >= 1.0f)
 	{
 		EnterRollingMode(TargetCharacter);
@@ -629,6 +711,7 @@ void ATunaSweeperRollingBomber::UpdateRollingMode(
 	const float ActualDistance = FVector::Dist2D(PreviousLocation, GetActorLocation());
 	RollDistanceTraveled += ActualDistance;
 	ApplyBodyRollVisualRotation(ActualDistance);
+	ApplyRollLaunchVisualHop();
 
 	if (Hit.bBlockingHit)
 	{
@@ -1137,7 +1220,17 @@ void ATunaSweeperRollingBomber::ApplyBodyRollVisualRotation(float DeltaDistance)
 	}
 
 	const float Circumference = 2.0f * UE_PI * BodyVisualRadiusCm;
-	BodyRollDegrees += (DeltaDistance / Circumference) * 360.0f;
+	ApplyBodyRollVisualRotationDegrees((DeltaDistance / Circumference) * 360.0f);
+}
+
+void ATunaSweeperRollingBomber::ApplyBodyRollVisualRotationDegrees(float DeltaDegrees)
+{
+	if (!bUseBodyRollVisualRotation || DeltaDegrees <= 0.0f)
+	{
+		return;
+	}
+
+	BodyRollDegrees += DeltaDegrees;
 	const float WobbleDegrees = BodyRollWobbleDegrees *
 		FMath::Sin(FMath::DegreesToRadians(BodyRollDegrees * 0.5f));
 	const FRotator RollingRotation(BodyRollDegrees, 0.0f, WobbleDegrees);
@@ -1152,11 +1245,63 @@ void ATunaSweeperRollingBomber::ApplyBodyRollVisualRotation(float DeltaDistance)
 	}
 }
 
+void ATunaSweeperRollingBomber::ApplyRollLaunchVisualHop()
+{
+	if (!BodyVisualPivot || RollLaunchVisualHopHeightCm <= 0.0f || RollLaunchVisualHopDurationSeconds <= 0.0f)
+	{
+		return;
+	}
+
+	const float HopAlpha = FMath::Clamp(
+		ModeElapsedSeconds / FMath::Max(0.01f, RollLaunchVisualHopDurationSeconds),
+		0.0f,
+		1.0f);
+	const float HopHeight = FMath::Sin(HopAlpha * UE_PI) * RollLaunchVisualHopHeightCm;
+	BodyVisualPivot->SetRelativeLocation(BodyVisualPivotBaseRelativeLocation + FVector(0.0f, 0.0f, HopHeight));
+}
+
+void ATunaSweeperRollingBomber::SetRollChargeCylinderEffectActive(bool bActive)
+{
+	if (!RollChargeCylinderMesh)
+	{
+		return;
+	}
+
+	RollChargeCylinderMesh->SetVisibility(bActive, true);
+	RollChargeCylinderMesh->SetHiddenInGame(!bActive, true);
+}
+
+void ATunaSweeperRollingBomber::UpdateRollChargeCylinderEffect(float ChargeAlpha)
+{
+	if (!RollChargeCylinderMesh)
+	{
+		return;
+	}
+
+	const float SafeChargeAlpha = FMath::Clamp(ChargeAlpha, 0.0f, 1.0f);
+	const float Pulse = 1.0f +
+		FMath::Sin(SafeChargeAlpha * UE_PI * 6.0f) *
+		FMath::Max(0.0f, RollChargeCylinderPulseScale) *
+		SafeChargeAlpha;
+	RollChargeCylinderMesh->SetRelativeLocation(RollChargeCylinderLocalOffset);
+	RollChargeCylinderMesh->SetRelativeScale3D(RollChargeCylinderLocalScale * Pulse);
+
+	if (RollChargeCylinderDynamicMaterial)
+	{
+		const float Opacity = FMath::Lerp(
+			FMath::Max(0.0f, RollChargeCylinderMinOpacity),
+			FMath::Max(0.0f, RollChargeCylinderMaxOpacity),
+			SafeChargeAlpha);
+		RollChargeCylinderDynamicMaterial->SetScalarParameterValue(TEXT("Opacity"), Opacity);
+	}
+}
+
 void ATunaSweeperRollingBomber::ResetBodyRollVisualRotation()
 {
 	BodyRollDegrees = 0.0f;
 	if (BodyVisualPivot)
 	{
+		BodyVisualPivot->SetRelativeLocation(BodyVisualPivotBaseRelativeLocation);
 		BodyVisualPivot->SetRelativeRotation(BodyVisualPivotBaseRelativeRotation);
 	}
 	if (VisualMesh)

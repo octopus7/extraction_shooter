@@ -2184,18 +2184,33 @@
 
 - `RollingBomber` 보폭을 더 줄이고 다리 본/메시가 실제 뼈 길이보다 늘어나 보이지 않게 수정할 것.
 
-## 2026-05-28 06:37:11 (elapsed: 00:03:31)
+## 2026-05-28 06:37:11 (소요시간: 00:03:31)
 
-- Assign a dedicated metal material to `RollingBomber` leg meshes instead of using missing/default material.
+- `RollingBomber` 다리 메시에 누락/기본 머터리얼 대신 전용 금속 머터리얼을 할당할 것.
 
-## 2026-05-28 06:41:58 (elapsed: 00:01:18)
+## 2026-05-28 06:41:58 (소요시간: 00:01:18)
 
-- Package the project for Windows.
+- 프로젝트를 Windows용으로 패키징할 것.
 
-## 2026-05-28 06:47:54 (elapsed: 00:00:30)
+## 2026-05-28 07:07:39 (소요시간: 00:02:23)
 
-- Investigate whether `WM_SogSoftEllipse.uasset` is regenerated whenever the editor opens, and why it reappears after discard.
+- `RollingBomber` 차지업 가독성 1차 개선으로 돌진 전 예열 중 제자리 회전과 돌진 시작 시 짧은 홉을 추가할 것.
 
-## 2026-05-28 07:03:32 (elapsed: 00:00:30)
+## 2026-05-28 06:47:54 (소요시간: 00:00:30)
 
-- Prevent `M_SogSoftEllipse.uasset` from being modified on editor startup unless the SogSplat editor path actually creates the missing material asset, and document the source-control dirtying issue in code.
+- `WM_SogSoftEllipse.uasset`가 에디터를 열 때마다 다시 생성되는지, discard 후에도 왜 다시 나타나는지 조사할 것.
+
+## 2026-05-28 07:03:32 (소요시간: 00:00:30)
+
+- SogSplat 에디터 경로에서 누락된 머터리얼 에셋을 실제로 새로 생성하는 경우가 아니면, 에디터 시작 시 `M_SogSoftEllipse.uasset`가 수정되지 않게 막고 해당 소스컨트롤 dirty 이슈를 코드 주석으로 남길 것.
+
+## 2026-05-28 07:09:37 (소요시간: 00:00:30)
+
+- `Docs/questions.md`에 영어로 적힌 질문/답변 항목을 한국어로 번역할 것.
+
+## 2026-05-28 07:10:50 (소요시간: 00:00:30)
+
+- `Docs/requests.md`에 영어로 적힌 요청 항목을 한국어로 고칠 것.
+## 2026-05-28 07:16:05 (elapsed: 00:08:52)
+
+- Add a larger cartoon-style capless rolling cylinder charge effect to `RollingBomber`, using an imagegen-created 256x256 alpha-mask texture, red material color, and UV scrolling during the pre-roll windup.

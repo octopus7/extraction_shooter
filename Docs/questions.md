@@ -879,3 +879,33 @@ A. 프로젝트에는 아직 별도 `EditorOnly` 콘텐츠 폴더 규칙이 없�
 ### 답변
 
 가능성이 높다. 현재 임시 다리 메시는 고정 길이 뼈/IK 솔버가 아니라 `Hip -> Knee`, `Knee -> Foot` 두 구간을 cylinder 메시로 잇고, 각 구간 길이에 맞춰 `SetWorldScale3D(..., SegmentLength / 100.0f)`로 그대로 늘리는 구조다. `LeftHipLocalOffset`/`RightHipLocalOffset`, `FootHomeLocalOffset`, `Knee*Offset`, `FootMoveLeadDistance`, 지면 보정 결과가 만든 hip-knee-foot 거리가 시각적으로 의도한 다리 길이보다 길어지면 제한 없이 스트레치된다. 따라서 보폭만의 문제라기보다 다리 세그먼트 최대 길이 제한이 없고 후보 발 위치/무릎 타깃이 길이 예산 밖으로 나가는 것이 원인이다.
+
+## 2026-05-28 07:04:40 (소요시간: 00:00:30)
+
+### 질문
+
+기존 SogSplat 기본 머터리얼을 수정하는 것이 `M_SogSoftEllipse.uasset`가 계속 변경된 파일로 다시 나타나는 원인인가?
+
+### 답변
+
+맞다. `SogSplatEditorUtils::EnsureDefaultSogMaterial()`가 에디터 모듈 시작 경로에서 기존 머터리얼을 다시 구성하고 저장하면서, 에디터를 열 때마다 해당 에셋이 dirty 상태가 됐다. 해결은 기존 머터리얼이 있으면 변경하지 않고 그대로 반환하고, SogSplat 에디터 경로에서 머터리얼이 없어서 새로 생성하는 경우에만 구성 및 저장하는 것이다.
+
+## 2026-05-28 07:06:08 (소요시간: 00:00:40)
+
+### 질문
+
+`RollingBomber`가 돌진 전에 제자리에서 회전하는 차지업 애니메이션을 넣으면 가독성이 좋아지는가, 그리고 추가 회전 보호막 이펙트를 넣을 가치가 있는가?
+
+### 답변
+
+그렇다. 차지업 중 짧은 제자리 회전은 시각적 노이즈를 크게 늘리지 않으면서 공격 타이밍과 굴러가는 정체성을 명확히 전달하므로 먼저 적용할 개선안이다. 회전 보호막 이펙트는 보조 텔레그래프로는 유용하지만, 얇은 빨강/주황 계열로 차지 단계에만 묶어야 한다. 그렇지 않으면 작은 몸체를 가리고 실제 돌진 방향을 읽기 어렵게 만들 수 있다.
+
+## 2026-05-28 07:23:36 (소요시간: 00:00:30)
+
+### 질문
+
+시야 마스크를 항상 끄고 싶은데 그런 불린값이 노출되어 있는지?
+
+### 답변
+
+`UTunaSweeperPlayerVisionComponent`에 `bRenderVisionOverlay`가 `EditAnywhere, BlueprintReadWrite`로 노출되어 있다. 이 값을 false로 두면 `ShouldUpdateVision()`이 false를 반환하고, 기존 마스크 위젯도 숨겨져 오버레이 렌더링이 꺼진다. 단, 시야 디버그 라인은 별도 경로라서 `bEnableDebugOverride` 또는 GameInstance의 vision debug 값도 꺼야 완전히 조용해진다.

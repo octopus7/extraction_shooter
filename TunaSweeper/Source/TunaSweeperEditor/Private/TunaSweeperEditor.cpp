@@ -141,6 +141,7 @@ namespace TunaSweeperEditorSetup
 	const FString WarpPointInteractionTaskId = TEXT("2026-05-25_CreateWarpPointInteractionAssetsV1");
 	const FString EnemyVisualMaterialTaskId = TEXT("2026-05-19_CreateEnemyAndContainerVisualMaterialsV3");
 	const FString RollingBomberLegMaterialTaskId = TEXT("2026-05-28_CreateRollingBomberLegMetalMaterialV1");
+	const FString RollingBomberChargeCylinderEffectTaskId = TEXT("2026-05-28_CreateRollingBomberChargeCylinderEffectV1");
 	const FString VoxelMeshAssetTaskId = TEXT("2026-05-19_CreateSharedVoxelMeshAssetsV1");
 	const FString LumberjackMeleeSwingArcAssetTaskId = TEXT("2026-05-20_CreateLumberjackMeleeSwingArcAssetsV2");
 	const FString LedExpressionMaterialTaskId = TEXT("2026-05-26_CreateLedExpressionMaterialV1");
@@ -190,6 +191,9 @@ namespace TunaSweeperEditorSetup
 	const FString VoxelAssetPath = TEXT("/Game/Prototype");
 	const FString VoxelVertexColorMaterialAssetName = TEXT("M_Voxel_VertexColor");
 	const FString EffectsAssetPath = TEXT("/Game/Effects");
+	const FString RollingBomberChargeCylinderMaskTextureAssetName = TEXT("T_RollingBomberChargeCylinderMask");
+	const FString RollingBomberChargeCylinderMaterialAssetName = TEXT("M_RollingBomberChargeCylinder");
+	const FString RollingBomberChargeCylinderMeshAssetName = TEXT("SM_RollingBomberChargeCylinder_Open");
 	const FString LumberjackMeleeSwingArcMaterialAssetName = TEXT("M_LumberjackMeleeSwingArc");
 	const FString LumberjackMeleeSwingArcMeshAssetName = TEXT("SM_LumberjackMeleeSwingArc");
 	const FString LedExpressionMaterialAssetName = TEXT("M_LedExpression_VertexColorEmissive");
@@ -3912,6 +3916,24 @@ namespace TunaSweeperEditorSetup
 		SaveAsset(Texture);
 	}
 
+	void ConfigureImportedMaskTexture(UTexture2D* Texture)
+	{
+		if (!Texture)
+		{
+			return;
+		}
+
+		Texture->Modify();
+		Texture->CompressionSettings = TC_Masks;
+		Texture->MipGenSettings = TMGS_FromTextureGroup;
+		Texture->LODGroup = TEXTUREGROUP_Effects;
+		Texture->SRGB = false;
+		Texture->UpdateResource();
+		Texture->PostEditChange();
+		Texture->MarkPackageDirty();
+		SaveAsset(Texture);
+	}
+
 	bool ImportWorldTexture(
 		const FString& InSourceFile,
 		const FString& DestinationPath,
@@ -3981,6 +4003,299 @@ namespace TunaSweeperEditorSetup
 			*OutTexture = ImportedTexture;
 		}
 		return true;
+	}
+
+	FString GetRollingBomberChargeCylinderMaskSourcePath()
+	{
+		FString SourcePath = FPaths::ConvertRelativePathToFull(FPaths::Combine(
+			FPaths::ProjectDir(),
+			TEXT(".."),
+			TEXT("GeneratedImages"),
+			TEXT("Effects"),
+			TEXT("T_RollingBomberChargeCylinderMask.png")));
+		FPaths::CollapseRelativeDirectories(SourcePath);
+		return SourcePath;
+	}
+
+	void AddRollingBomberChargeCylinderQuad(
+		FMeshDescription& MeshDescription,
+		FStaticMeshAttributes& Attributes,
+		FPolygonGroupID PolygonGroupId,
+		float Angle0,
+		float Angle1,
+		float U0,
+		float U1)
+	{
+		TVertexAttributesRef<FVector3f> VertexPositions = Attributes.GetVertexPositions();
+		TVertexInstanceAttributesRef<FVector3f> VertexInstanceNormals = Attributes.GetVertexInstanceNormals();
+		TVertexInstanceAttributesRef<FVector2f> VertexInstanceUVs = Attributes.GetVertexInstanceUVs();
+
+		constexpr float HalfLength = 50.0f;
+		constexpr float Radius = 50.0f;
+		const FVector3f Radial0(0.0f, FMath::Cos(Angle0), FMath::Sin(Angle0));
+		const FVector3f Radial1(0.0f, FMath::Cos(Angle1), FMath::Sin(Angle1));
+		const FVector3f Positions[] = {
+			FVector3f(-HalfLength, Radial0.Y * Radius, Radial0.Z * Radius),
+			FVector3f(-HalfLength, Radial1.Y * Radius, Radial1.Z * Radius),
+			FVector3f(HalfLength, Radial1.Y * Radius, Radial1.Z * Radius),
+			FVector3f(HalfLength, Radial0.Y * Radius, Radial0.Z * Radius)
+		};
+		const FVector3f Normals[] = { Radial0, Radial1, Radial1, Radial0 };
+		const FVector2f UVs[] = {
+			FVector2f(U0, 0.0f),
+			FVector2f(U1, 0.0f),
+			FVector2f(U1, 1.0f),
+			FVector2f(U0, 1.0f)
+		};
+
+		TArray<FVertexInstanceID> VertexInstances;
+		VertexInstances.Reserve(UE_ARRAY_COUNT(Positions));
+		for (int32 Index = 0; Index < UE_ARRAY_COUNT(Positions); ++Index)
+		{
+			const FVertexID VertexId = MeshDescription.CreateVertex();
+			VertexPositions[VertexId] = Positions[Index];
+
+			const FVertexInstanceID VertexInstanceId = MeshDescription.CreateVertexInstance(VertexId);
+			VertexInstanceNormals[VertexInstanceId] = Normals[Index];
+			VertexInstanceUVs.Set(VertexInstanceId, 0, UVs[Index]);
+			VertexInstances.Add(VertexInstanceId);
+		}
+
+		MeshDescription.CreatePolygon(PolygonGroupId, VertexInstances);
+	}
+
+	void BuildRollingBomberChargeCylinderMeshDescription(FMeshDescription& MeshDescription)
+	{
+		FStaticMeshAttributes Attributes(MeshDescription);
+		Attributes.Register();
+		Attributes.GetVertexInstanceUVs().SetNumChannels(1);
+
+		const FPolygonGroupID PolygonGroupId = MeshDescription.CreatePolygonGroup();
+		Attributes.GetPolygonGroupMaterialSlotNames()[PolygonGroupId] = FName(TEXT("ChargeCylinder"));
+
+		constexpr int32 SegmentCount = 32;
+		for (int32 SegmentIndex = 0; SegmentIndex < SegmentCount; ++SegmentIndex)
+		{
+			const float U0 = static_cast<float>(SegmentIndex) / static_cast<float>(SegmentCount);
+			const float U1 = static_cast<float>(SegmentIndex + 1) / static_cast<float>(SegmentCount);
+			const float Angle0 = U0 * 2.0f * UE_PI;
+			const float Angle1 = U1 * 2.0f * UE_PI;
+			AddRollingBomberChargeCylinderQuad(MeshDescription, Attributes, PolygonGroupId, Angle0, Angle1, U0, U1);
+		}
+	}
+
+	UMaterial* EnsureRollingBomberChargeCylinderMaterial(UTexture2D* MaskTexture)
+	{
+		if (!MaskTexture)
+		{
+			return nullptr;
+		}
+
+		const FString ObjectPath = GetAssetObjectPath(EffectsAssetPath, RollingBomberChargeCylinderMaterialAssetName);
+		UMaterial* Material = LoadObject<UMaterial>(nullptr, *ObjectPath);
+		if (!Material)
+		{
+			UMaterialFactoryNew* MaterialFactory = NewObject<UMaterialFactoryNew>();
+
+			FAssetToolsModule& AssetToolsModule = FModuleManager::LoadModuleChecked<FAssetToolsModule>(TEXT("AssetTools"));
+			UObject* CreatedAsset = AssetToolsModule.Get().CreateAsset(
+				RollingBomberChargeCylinderMaterialAssetName,
+				EffectsAssetPath,
+				UMaterial::StaticClass(),
+				MaterialFactory);
+
+			Material = Cast<UMaterial>(CreatedAsset);
+			if (!Material)
+			{
+				UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to create %s."), *ObjectPath);
+				return nullptr;
+			}
+
+			FAssetRegistryModule::AssetCreated(Material);
+		}
+
+		Material->Modify();
+		Material->GetExpressionCollection().Empty();
+		Material->BlendMode = BLEND_Additive;
+		Material->SetShadingModel(MSM_Unlit);
+		Material->TwoSided = true;
+
+		UMaterialEditorOnlyData* MaterialEditorOnly = Material->GetEditorOnlyData();
+		if (!MaterialEditorOnly)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to edit %s."), *ObjectPath);
+			return nullptr;
+		}
+
+		UMaterialExpressionTextureCoordinate* TextureCoordinateExpression = NewObject<UMaterialExpressionTextureCoordinate>(Material);
+		TextureCoordinateExpression->Material = Material;
+		TextureCoordinateExpression->CoordinateIndex = 0;
+		TextureCoordinateExpression->MaterialExpressionEditorX = -900;
+		TextureCoordinateExpression->MaterialExpressionEditorY = 80;
+		Material->GetExpressionCollection().AddExpression(TextureCoordinateExpression);
+
+		UMaterialExpressionPanner* PannerExpression = NewObject<UMaterialExpressionPanner>(Material);
+		PannerExpression->Material = Material;
+		PannerExpression->SpeedX = 2.8f;
+		PannerExpression->SpeedY = 0.0f;
+		PannerExpression->Coordinate.Connect(0, TextureCoordinateExpression);
+		PannerExpression->MaterialExpressionEditorX = -680;
+		PannerExpression->MaterialExpressionEditorY = 80;
+		Material->GetExpressionCollection().AddExpression(PannerExpression);
+
+		UMaterialExpressionTextureSampleParameter2D* MaskSample = NewObject<UMaterialExpressionTextureSampleParameter2D>(Material);
+		MaskSample->Material = Material;
+		MaskSample->ParameterName = TEXT("MaskTexture");
+		MaskSample->Texture = MaskTexture;
+		MaskSample->SamplerType = SAMPLERTYPE_Masks;
+		MaskSample->Coordinates.Connect(0, PannerExpression);
+		MaskSample->MaterialExpressionEditorX = -440;
+		MaskSample->MaterialExpressionEditorY = 80;
+		Material->GetExpressionCollection().AddExpression(MaskSample);
+
+		UMaterialExpressionComponentMask* MaskRedChannel = NewObject<UMaterialExpressionComponentMask>(Material);
+		MaskRedChannel->Material = Material;
+		MaskRedChannel->Input.Connect(0, MaskSample);
+		MaskRedChannel->R = 1;
+		MaskRedChannel->G = 0;
+		MaskRedChannel->B = 0;
+		MaskRedChannel->A = 0;
+		MaskRedChannel->MaterialExpressionEditorX = -180;
+		MaskRedChannel->MaterialExpressionEditorY = 80;
+		Material->GetExpressionCollection().AddExpression(MaskRedChannel);
+
+		UMaterialExpressionVectorParameter* ColorParameter = NewObject<UMaterialExpressionVectorParameter>(Material);
+		ColorParameter->Material = Material;
+		ColorParameter->ParameterName = TEXT("ChargeColor");
+		ColorParameter->DefaultValue = FLinearColor(1.0f, 0.035f, 0.0f, 1.0f);
+		ColorParameter->MaterialExpressionEditorX = -440;
+		ColorParameter->MaterialExpressionEditorY = -180;
+		Material->GetExpressionCollection().AddExpression(ColorParameter);
+
+		UMaterialExpressionScalarParameter* IntensityParameter = NewObject<UMaterialExpressionScalarParameter>(Material);
+		IntensityParameter->Material = Material;
+		IntensityParameter->ParameterName = TEXT("Intensity");
+		IntensityParameter->DefaultValue = 7.0f;
+		IntensityParameter->MaterialExpressionEditorX = -440;
+		IntensityParameter->MaterialExpressionEditorY = -20;
+		Material->GetExpressionCollection().AddExpression(IntensityParameter);
+
+		UMaterialExpressionMultiply* ColorIntensityMultiply = NewObject<UMaterialExpressionMultiply>(Material);
+		ColorIntensityMultiply->Material = Material;
+		ColorIntensityMultiply->A.Connect(0, ColorParameter);
+		ColorIntensityMultiply->B.Connect(0, IntensityParameter);
+		ColorIntensityMultiply->MaterialExpressionEditorX = -180;
+		ColorIntensityMultiply->MaterialExpressionEditorY = -120;
+		Material->GetExpressionCollection().AddExpression(ColorIntensityMultiply);
+
+		UMaterialExpressionMultiply* EmissiveMaskMultiply = NewObject<UMaterialExpressionMultiply>(Material);
+		EmissiveMaskMultiply->Material = Material;
+		EmissiveMaskMultiply->A.Connect(0, ColorIntensityMultiply);
+		EmissiveMaskMultiply->B.Connect(0, MaskRedChannel);
+		EmissiveMaskMultiply->MaterialExpressionEditorX = 100;
+		EmissiveMaskMultiply->MaterialExpressionEditorY = -80;
+		Material->GetExpressionCollection().AddExpression(EmissiveMaskMultiply);
+
+		UMaterialExpressionScalarParameter* OpacityParameter = NewObject<UMaterialExpressionScalarParameter>(Material);
+		OpacityParameter->Material = Material;
+		OpacityParameter->ParameterName = TEXT("Opacity");
+		OpacityParameter->DefaultValue = 0.7f;
+		OpacityParameter->MaterialExpressionEditorX = -180;
+		OpacityParameter->MaterialExpressionEditorY = 260;
+		Material->GetExpressionCollection().AddExpression(OpacityParameter);
+
+		UMaterialExpressionMultiply* OpacityMultiply = NewObject<UMaterialExpressionMultiply>(Material);
+		OpacityMultiply->Material = Material;
+		OpacityMultiply->A.Connect(0, MaskRedChannel);
+		OpacityMultiply->B.Connect(0, OpacityParameter);
+		OpacityMultiply->MaterialExpressionEditorX = 100;
+		OpacityMultiply->MaterialExpressionEditorY = 180;
+		Material->GetExpressionCollection().AddExpression(OpacityMultiply);
+
+		MaterialEditorOnly->BaseColor.Connect(0, ColorParameter);
+		MaterialEditorOnly->EmissiveColor.Connect(0, EmissiveMaskMultiply);
+		MaterialEditorOnly->Opacity.Connect(0, OpacityMultiply);
+
+		Material->PostEditChange();
+		Material->MarkPackageDirty();
+
+		if (!SaveAsset(Material))
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to save %s."), *ObjectPath);
+			return nullptr;
+		}
+
+		return Material;
+	}
+
+	UStaticMesh* EnsureRollingBomberChargeCylinderMesh(UMaterialInterface* ChargeMaterial)
+	{
+		const FString ObjectPath = GetAssetObjectPath(EffectsAssetPath, RollingBomberChargeCylinderMeshAssetName);
+		UStaticMesh* StaticMesh = LoadObject<UStaticMesh>(nullptr, *ObjectPath);
+		if (!StaticMesh)
+		{
+			const FString PackageName = FString::Printf(TEXT("%s/%s"), *EffectsAssetPath, *RollingBomberChargeCylinderMeshAssetName);
+			UPackage* Package = CreatePackage(*PackageName);
+			if (!Package)
+			{
+				return nullptr;
+			}
+
+			StaticMesh = NewObject<UStaticMesh>(
+				Package,
+				*RollingBomberChargeCylinderMeshAssetName,
+				RF_Public | RF_Standalone | RF_Transactional);
+			if (!StaticMesh)
+			{
+				return nullptr;
+			}
+
+			FAssetRegistryModule::AssetCreated(StaticMesh);
+		}
+
+		StaticMesh->Modify();
+
+		FMeshDescription MeshDescription;
+		BuildRollingBomberChargeCylinderMeshDescription(MeshDescription);
+
+		StaticMesh->GetStaticMaterials().Reset();
+		StaticMesh->GetStaticMaterials().Add(FStaticMaterial(ChargeMaterial, FName(TEXT("ChargeCylinder"))));
+
+		TArray<const FMeshDescription*> MeshDescriptions;
+		MeshDescriptions.Add(&MeshDescription);
+		StaticMesh->BuildFromMeshDescriptions(MeshDescriptions);
+		StaticMesh->MarkPackageDirty();
+
+		return SaveAsset(StaticMesh) ? StaticMesh : nullptr;
+	}
+
+	bool EnsureRollingBomberChargeCylinderEffectAssets()
+	{
+		UTexture2D* MaskTexture = nullptr;
+		const FString SourcePath = GetRollingBomberChargeCylinderMaskSourcePath();
+		if (FPaths::FileExists(SourcePath))
+		{
+			if (!ImportWorldTexture(SourcePath, EffectsAssetPath, RollingBomberChargeCylinderMaskTextureAssetName, &MaskTexture))
+			{
+				return false;
+			}
+		}
+		else
+		{
+			MaskTexture = LoadObject<UTexture2D>(
+				nullptr,
+				*GetAssetObjectPath(EffectsAssetPath, RollingBomberChargeCylinderMaskTextureAssetName));
+		}
+
+		if (!MaskTexture)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Missing RollingBomber charge cylinder mask source: %s"), *SourcePath);
+			return false;
+		}
+
+		ConfigureImportedMaskTexture(MaskTexture);
+		UMaterial* ChargeMaterial = EnsureRollingBomberChargeCylinderMaterial(MaskTexture);
+		return ChargeMaterial && EnsureRollingBomberChargeCylinderMesh(ChargeMaterial);
 	}
 
 	UMaterial* EnsureMemoStorageDeviceMaterial(UTexture2D* StorageTexture)
@@ -8654,6 +8969,13 @@ public:
 			[]()
 			{
 				return TunaSweeperEditorSetup::EnsureLumberjackMeleeSwingArcAssets();
+			});
+
+		FTunaSweeperEditorRunOnce::Run(
+			TunaSweeperEditorSetup::RollingBomberChargeCylinderEffectTaskId,
+			[]()
+			{
+				return TunaSweeperEditorSetup::EnsureRollingBomberChargeCylinderEffectAssets();
 			});
 
 		const bool bLedExpressionMaterialTaskRan = FTunaSweeperEditorRunOnce::Run(

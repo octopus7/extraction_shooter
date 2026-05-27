@@ -13,6 +13,7 @@ class UMaterialInstanceDynamic;
 class UPhysicalMaterial;
 class UPointLightComponent;
 class USceneComponent;
+class UStaticMesh;
 class UStaticMeshComponent;
 
 UENUM(BlueprintType)
@@ -124,6 +125,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<USceneComponent> BodyVisualPivot;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UStaticMeshComponent> RollChargeCylinderMesh;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UStaticMeshComponent> LeftUpperLegMesh;
@@ -246,7 +250,7 @@ protected:
 	float RollingBomberProjectileCameraHitReactionScale = 0.06f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|Legs", meta = (ClampMin = "0.01", UIMin = "0.01"))
-	float LegFoldDurationSeconds = 0.35f;
+	float LegFoldDurationSeconds = 0.65f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|Legs", meta = (ClampMin = "0.01", UIMin = "0.01"))
 	float LegUnfoldDurationSeconds = 0.3f;
@@ -262,6 +266,39 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|Roll", meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float RollContactRadius = 10.5f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|Roll", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float RollChargeSpinStartDegreesPerSecond = 540.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|Roll", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float RollChargeSpinEndDegreesPerSecond = 2160.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|Roll", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float RollLaunchVisualHopHeightCm = 7.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|Roll", meta = (ClampMin = "0.01", UIMin = "0.01"))
+	float RollLaunchVisualHopDurationSeconds = 0.18f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|Roll")
+	TSoftObjectPtr<UStaticMesh> RollChargeCylinderMeshAsset;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|Roll")
+	TSoftObjectPtr<UMaterialInterface> RollChargeCylinderMaterial;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|Roll")
+	FVector RollChargeCylinderLocalOffset = FVector(0.0f, 0.0f, 3.0f);
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|Roll")
+	FVector RollChargeCylinderLocalScale = FVector(0.46f, 0.36f, 0.36f);
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|Roll", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float RollChargeCylinderMinOpacity = 0.22f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|Roll", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float RollChargeCylinderMaxOpacity = 0.82f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|Roll", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float RollChargeCylinderPulseScale = 0.06f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|Self Destruct", meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float ExplosionRadius = 240.0f;
@@ -427,10 +464,11 @@ private:
 	};
 
 	void ApplyRollingBomberVisualDefaults();
+	void ApplyRollChargeCylinderVisualDefaults();
 	void EnterSpawnPhysicsMode(const FVector& LaunchVelocity);
 	void EnterStandingUpFromSpawnMode();
 	void EnterProjectileAttackMode();
-	void EnterFoldingLegsMode();
+	void EnterFoldingLegsMode(ATunaSweeperTopDownCharacter* TargetCharacter);
 	void EnterRollingMode(ATunaSweeperTopDownCharacter* TargetCharacter);
 	void EnterRecoveringLegsMode();
 	void SelfDestruct();
@@ -457,6 +495,10 @@ private:
 	void SpawnSelfDestructBurst();
 	void ApplyExplosionDamage();
 	void ApplyBodyRollVisualRotation(float DeltaDistance);
+	void ApplyBodyRollVisualRotationDegrees(float DeltaDegrees);
+	void ApplyRollLaunchVisualHop();
+	void SetRollChargeCylinderEffectActive(bool bActive);
+	void UpdateRollChargeCylinderEffect(float ChargeAlpha);
 	void ResetBodyRollVisualRotation();
 	void ApplyLegVisualMaterial();
 	void ApplyEyeVisualDefaults();
@@ -503,10 +545,14 @@ private:
 	ETunaSweeperRollingBomberFoot NextStepFoot = ETunaSweeperRollingBomberFoot::Left;
 	FVector LockedRollDirection = FVector::ForwardVector;
 	FVector LastActorLocation = FVector::ZeroVector;
+	FVector BodyVisualPivotBaseRelativeLocation = FVector::ZeroVector;
 	FRotator BodyVisualBaseRelativeRotation = FRotator::ZeroRotator;
 	FRotator BodyVisualPivotBaseRelativeRotation = FRotator::ZeroRotator;
 	UPROPERTY(Transient)
 	TObjectPtr<UMaterialInstanceDynamic> EyeDynamicMaterial;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UMaterialInstanceDynamic> RollChargeCylinderDynamicMaterial;
 
 	FLinearColor CurrentEyeColor = FLinearColor(0.05f, 0.45f, 1.0f, 1.0f);
 	float ProjectileModeElapsedSeconds = 0.0f;
