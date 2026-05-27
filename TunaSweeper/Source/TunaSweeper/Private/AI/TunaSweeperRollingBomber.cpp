@@ -5,6 +5,7 @@
 #include "Components/PointLightComponent.h"
 #include "Components/SceneComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Effect/TunaSweeperMeleeImpactBurstActor.h"
 #include "Engine/OverlapResult.h"
 #include "Engine/StaticMesh.h"
 #include "Engine/World.h"
@@ -13,13 +14,19 @@
 #include "Kismet/GameplayStatics.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Materials/MaterialInterface.h"
+#include "PhysicalMaterials/PhysicalMaterial.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Weapon/TunaSweeperProjectile.h"
 
 namespace TunaSweeperRollingBomber
 {
 	const TCHAR* SphereMeshPath = TEXT("/Engine/BasicShapes/Sphere.Sphere");
+	const TCHAR* CylinderMeshPath = TEXT("/Engine/BasicShapes/Cylinder.Cylinder");
+	const TCHAR* CubeMeshPath = TEXT("/Engine/BasicShapes/Cube.Cube");
 	constexpr float MinFootGroundNormalZ = 0.25f;
+	constexpr float SpawnGroundTraceExtraDistance = 9.0f;
+	constexpr float SpawnPhysicsLinearDamping = 0.18f;
+	constexpr float SpawnPhysicsAngularDamping = 0.35f;
 }
 
 ATunaSweeperRollingBomber::ATunaSweeperRollingBomber()
@@ -29,24 +36,35 @@ ATunaSweeperRollingBomber::ATunaSweeperRollingBomber()
 	AIControllerClass = nullptr;
 	AutoPossessAI = EAutoPossessAI::Disabled;
 
-	GetCapsuleComponent()->InitCapsuleSize(42.0f, 56.0f);
+	GetCapsuleComponent()->InitCapsuleSize(10.5f, 14.0f);
 	GetCharacterMovement()->MaxWalkSpeed = ProjectileModeWalkSpeed;
+	GetCharacterMovement()->bRunPhysicsWithNoController = true;
 	GetCharacterMovement()->bOrientRotationToMovement = false;
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 640.0f, 0.0f);
 
 	MaxHealth = 45.0f;
 	MovementSpeed = ProjectileModeWalkSpeed;
 	MovementSpeedRandomOffset = FVector2D::ZeroVector;
-	ProjectileSpawnOffset = FVector(58.0f, 0.0f, 42.0f);
-	ProjectileDamage = 8.0f;
+	ProjectileSpawnOffset = FVector(14.5f, 0.0f, 10.5f);
+	ProjectileDamage = 1.0f;
 	ExplosionDamageType = UDamageType::StaticClass();
 	EyeMaterial = TSoftObjectPtr<UMaterialInterface>(
 		FSoftObjectPath(TEXT("/Engine/BasicShapes/BasicShapeMaterial.BasicShapeMaterial")));
+	RollingBomberProjectileMaterial = TSoftObjectPtr<UMaterialInterface>(
+		FSoftObjectPath(TEXT("/Game/Effects/M_LedExpression_VertexColorEmissive.M_LedExpression_VertexColorEmissive")));
+	RollingBomberProjectileTrailMaterial = TSoftObjectPtr<UMaterialInterface>(
+		FSoftObjectPath(TEXT("/Game/Effects/M_LumberjackMeleeSwingArc.M_LumberjackMeleeSwingArc")));
+	SelfDestructBurstActorClass = TSoftClassPtr<ATunaSweeperMeleeImpactBurstActor>(
+		FSoftObjectPath(TEXT("/Script/TunaSweeper.TunaSweeperMeleeImpactBurstActor")));
+
+	BodyVisualPivot = CreateDefaultSubobject<USceneComponent>(TEXT("BodyVisualPivot"));
+	BodyVisualPivot->SetupAttachment(RootComponent);
 
 	if (VisualMesh)
 	{
-		VisualMesh->SetRelativeLocation(FVector(0.0f, 0.0f, 12.0f));
-		VisualMesh->SetRelativeScale3D(FVector(0.8f));
+		VisualMesh->SetupAttachment(BodyVisualPivot);
+		VisualMesh->SetRelativeLocation(FVector(0.0f, 0.0f, 3.0f));
+		VisualMesh->SetRelativeScale3D(FVector(0.2f));
 		VisualMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 		static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereMesh(TunaSweeperRollingBomber::SphereMeshPath);
@@ -73,14 +91,53 @@ ATunaSweeperRollingBomber::ATunaSweeperRollingBomber()
 
 	LeftKneeIKTarget = CreateDefaultSubobject<USceneComponent>(TEXT("LeftKneeIKTarget"));
 	LeftKneeIKTarget->SetupAttachment(RootComponent);
-	LeftKneeIKTarget->SetRelativeLocation(FVector(12.0f, -42.0f, -6.0f));
+	LeftKneeIKTarget->SetRelativeLocation(FVector(3.0f, -10.5f, -1.5f));
 
 	RightKneeIKTarget = CreateDefaultSubobject<USceneComponent>(TEXT("RightKneeIKTarget"));
 	RightKneeIKTarget->SetupAttachment(RootComponent);
-	RightKneeIKTarget->SetRelativeLocation(FVector(12.0f, 42.0f, -6.0f));
+	RightKneeIKTarget->SetRelativeLocation(FVector(3.0f, 10.5f, -1.5f));
+
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> LegSegmentMesh(TunaSweeperRollingBomber::CylinderMeshPath);
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> FootPadMesh(TunaSweeperRollingBomber::CubeMeshPath);
+	auto ConfigureLegMesh = [this](UStaticMeshComponent* MeshComponent, bool bUseFootPad)
+	{
+		if (!MeshComponent)
+		{
+			return;
+		}
+
+		MeshComponent->SetupAttachment(RootComponent);
+		MeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		MeshComponent->SetGenerateOverlapEvents(false);
+		MeshComponent->SetRelativeScale3D(FVector(0.03f));
+		if (bUseFootPad)
+		{
+			if (FootPadMesh.Succeeded())
+			{
+				MeshComponent->SetStaticMesh(FootPadMesh.Object);
+			}
+		}
+		else if (LegSegmentMesh.Succeeded())
+		{
+			MeshComponent->SetStaticMesh(LegSegmentMesh.Object);
+		}
+	};
+
+	LeftUpperLegMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("LeftUpperLegMesh"));
+	ConfigureLegMesh(LeftUpperLegMesh, false);
+	LeftLowerLegMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("LeftLowerLegMesh"));
+	ConfigureLegMesh(LeftLowerLegMesh, false);
+	LeftFootMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("LeftFootMesh"));
+	ConfigureLegMesh(LeftFootMesh, true);
+	RightUpperLegMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("RightUpperLegMesh"));
+	ConfigureLegMesh(RightUpperLegMesh, false);
+	RightLowerLegMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("RightLowerLegMesh"));
+	ConfigureLegMesh(RightLowerLegMesh, false);
+	RightFootMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("RightFootMesh"));
+	ConfigureLegMesh(RightFootMesh, true);
 
 	EyeMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("EyeMesh"));
-	EyeMesh->SetupAttachment(RootComponent);
+	EyeMesh->SetupAttachment(BodyVisualPivot);
 	EyeMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	EyeMesh->SetRelativeLocation(EyeLocalOffset);
 	EyeMesh->SetRelativeScale3D(EyeLocalScale);
@@ -93,12 +150,19 @@ ATunaSweeperRollingBomber::ATunaSweeperRollingBomber()
 	}
 
 	EyeLight = CreateDefaultSubobject<UPointLightComponent>(TEXT("EyeLight"));
-	EyeLight->SetupAttachment(RootComponent);
-	EyeLight->SetRelativeLocation(EyeLocalOffset + FVector(18.0f, 0.0f, 0.0f));
+	EyeLight->SetupAttachment(BodyVisualPivot);
+	EyeLight->SetRelativeLocation(EyeLocalOffset + FVector(4.5f, 0.0f, 0.0f));
 	EyeLight->SetCastShadows(false);
 	EyeLight->SetLightColor(NormalEyeColor);
 	EyeLight->SetIntensity(NormalEyeLightIntensity);
 	EyeLight->SetAttenuationRadius(NormalEyeLightRadius);
+
+	SpawnBouncePhysicalMaterial = CreateDefaultSubobject<UPhysicalMaterial>(TEXT("SpawnBouncePhysicalMaterial"));
+	if (SpawnBouncePhysicalMaterial)
+	{
+		SpawnBouncePhysicalMaterial->Friction = SpawnBounceFriction;
+		SpawnBouncePhysicalMaterial->Restitution = SpawnBounceRestitution;
+	}
 }
 
 void ATunaSweeperRollingBomber::BeginPlay()
@@ -109,7 +173,7 @@ void ATunaSweeperRollingBomber::BeginPlay()
 	ApplyEyeVisualDefaults();
 	SetEyeChargeWarningActive(false, true);
 	LastActorLocation = GetActorLocation();
-	ProjectileFireElapsedSeconds = ProjectileFireIntervalSeconds;
+	ProjectileFireElapsedSeconds = 0.0f;
 	InitializeLegIKTargets();
 	EnterProjectileAttackMode();
 }
@@ -123,12 +187,16 @@ void ATunaSweeperRollingBomber::Tick(float DeltaSeconds)
 		return;
 	}
 
-	UpdateSpawnerLaunchState(DeltaSeconds);
-
 	ATunaSweeperTopDownCharacter* TargetCharacter = ResolvePlayerTarget();
 
 	switch (CurrentMode)
 	{
+	case ETunaSweeperRollingBomberMode::SpawnPhysics:
+		UpdateSpawnPhysicsMode(DeltaSeconds);
+		break;
+	case ETunaSweeperRollingBomberMode::StandingUpFromSpawn:
+		UpdateStandingUpFromSpawnMode(DeltaSeconds);
+		break;
 	case ETunaSweeperRollingBomberMode::ProjectileAttack:
 		UpdateProjectileAttackMode(DeltaSeconds, TargetCharacter);
 		break;
@@ -166,6 +234,10 @@ void ATunaSweeperRollingBomber::Tick(float DeltaSeconds)
 
 		UpdateLegIK(DeltaSeconds, PlanarMoveDirection);
 	}
+	else if (CurrentMode == ETunaSweeperRollingBomberMode::StandingUpFromSpawn && bLegIKEnabled)
+	{
+		UpdateLegIK(DeltaSeconds, FVector::ZeroVector);
+	}
 	else
 	{
 		UpdateFoldedLegSceneComponents();
@@ -181,19 +253,7 @@ void ATunaSweeperRollingBomber::LaunchFromSpawner(const FVector& LaunchVelocity)
 		return;
 	}
 
-	bSpawnerLaunchActive = true;
-	SpawnerLaunchControlRemainingSeconds = FMath::Max(0.0f, SpawnerLaunchControlGraceSeconds);
-	ProjectileModeElapsedSeconds = 0.0f;
-	ProjectileFireElapsedSeconds = ProjectileFireIntervalSeconds;
-	bProjectileModeClosingDistance = false;
-
-	if (UCharacterMovementComponent* MovementComponent = GetCharacterMovement())
-	{
-		MovementComponent->StopMovementImmediately();
-		MovementComponent->SetMovementMode(MOVE_Falling);
-	}
-
-	LaunchCharacter(LaunchVelocity, true, true);
+	EnterSpawnPhysicsMode(LaunchVelocity);
 }
 
 FTunaSweeperRollingBomberFootIKState ATunaSweeperRollingBomber::GetFootIKState(
@@ -206,6 +266,13 @@ FTunaSweeperRollingBomberFootIKState ATunaSweeperRollingBomber::GetFootIKState(
 
 void ATunaSweeperRollingBomber::ApplyRollingBomberVisualDefaults()
 {
+	if (BodyVisualPivot)
+	{
+		BodyVisualPivot->SetRelativeLocation(FVector::ZeroVector);
+		BodyVisualPivot->SetRelativeRotation(FRotator::ZeroRotator);
+		BodyVisualPivotBaseRelativeRotation = BodyVisualPivot->GetRelativeRotation();
+	}
+
 	if (VisualMesh)
 	{
 		if (UStaticMesh* SphereMesh = LoadObject<UStaticMesh>(nullptr, TunaSweeperRollingBomber::SphereMeshPath))
@@ -213,8 +280,8 @@ void ATunaSweeperRollingBomber::ApplyRollingBomberVisualDefaults()
 			VisualMesh->SetStaticMesh(SphereMesh);
 		}
 
-		VisualMesh->SetRelativeLocation(FVector(0.0f, 0.0f, 12.0f));
-		VisualMesh->SetRelativeScale3D(FVector(0.8f));
+		VisualMesh->SetRelativeLocation(FVector(0.0f, 0.0f, 3.0f));
+		VisualMesh->SetRelativeScale3D(FVector(0.2f));
 		VisualMesh->SetRelativeRotation(FRotator::ZeroRotator);
 		VisualMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		BodyVisualBaseRelativeRotation = VisualMesh->GetRelativeRotation();
@@ -228,15 +295,95 @@ void ATunaSweeperRollingBomber::ApplyRollingBomberVisualDefaults()
 	}
 }
 
+void ATunaSweeperRollingBomber::EnterSpawnPhysicsMode(const FVector& LaunchVelocity)
+{
+	CurrentMode = ETunaSweeperRollingBomberMode::SpawnPhysics;
+	ProjectileModeElapsedSeconds = 0.0f;
+	ProjectileFireElapsedSeconds = 0.0f;
+	ModeElapsedSeconds = 0.0f;
+	SpawnerLaunchControlRemainingSeconds = FMath::Max(0.0f, SpawnerLaunchControlGraceSeconds);
+	SpawnPhysicsElapsedSeconds = 0.0f;
+	SpawnStandUpAlpha = 0.0f;
+	LegFoldAlpha = 1.0f;
+	bLegIKEnabled = false;
+	bProjectileModeClosingDistance = false;
+	RollDistanceTraveled = 0.0f;
+	BodyRollDegrees = 0.0f;
+
+	SetEyeChargeWarningActive(false, false);
+	ResetBodyRollVisualRotation();
+	UpdateFoldedLegSceneComponents();
+
+	if (UCharacterMovementComponent* MovementComponent = GetCharacterMovement())
+	{
+		MovementComponent->StopMovementImmediately();
+		MovementComponent->DisableMovement();
+	}
+
+	UCapsuleComponent* Capsule = GetCapsuleComponent();
+	if (!Capsule)
+	{
+		EnterStandingUpFromSpawnMode();
+		return;
+	}
+
+	if (SpawnBouncePhysicalMaterial)
+	{
+		SpawnBouncePhysicalMaterial->Friction = FMath::Max(0.0f, SpawnBounceFriction);
+		SpawnBouncePhysicalMaterial->Restitution = FMath::Clamp(SpawnBounceRestitution, 0.0f, 1.0f);
+		Capsule->SetPhysMaterialOverride(SpawnBouncePhysicalMaterial);
+	}
+
+	Capsule->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	Capsule->SetCollisionObjectType(ECC_PhysicsBody);
+	Capsule->SetSimulatePhysics(true);
+	Capsule->SetEnableGravity(true);
+	Capsule->SetLinearDamping(TunaSweeperRollingBomber::SpawnPhysicsLinearDamping);
+	Capsule->SetAngularDamping(TunaSweeperRollingBomber::SpawnPhysicsAngularDamping);
+	Capsule->SetPhysicsLinearVelocity(LaunchVelocity, false);
+
+	FVector AngularAxis = FVector::CrossProduct(LaunchVelocity.GetSafeNormal(), FVector::UpVector).GetSafeNormal();
+	if (AngularAxis.IsNearlyZero())
+	{
+		AngularAxis = GetActorRightVector().GetSafeNormal();
+	}
+	Capsule->SetPhysicsAngularVelocityInDegrees(
+		AngularAxis * FMath::Max(0.0f, SpawnPhysicsAngularVelocityDegrees),
+		false);
+	Capsule->WakeRigidBody();
+	bSpawnPhysicsSimulationActive = true;
+}
+
+void ATunaSweeperRollingBomber::EnterStandingUpFromSpawnMode()
+{
+	CurrentMode = ETunaSweeperRollingBomberMode::StandingUpFromSpawn;
+	ModeElapsedSeconds = 0.0f;
+	SpawnStandUpAlpha = 0.0f;
+	LegFoldAlpha = 1.0f;
+	bLegIKEnabled = false;
+	bProjectileModeClosingDistance = false;
+
+	SetEyeChargeWarningActive(false, false);
+	ResetBodyRollVisualRotation();
+	UpdateFoldedLegSceneComponents();
+}
+
 void ATunaSweeperRollingBomber::EnterProjectileAttackMode()
 {
+	if (bSpawnPhysicsSimulationActive)
+	{
+		FinishSpawnPhysicsSimulation();
+	}
+
 	CurrentMode = ETunaSweeperRollingBomberMode::ProjectileAttack;
 	ProjectileModeElapsedSeconds = 0.0f;
-	ProjectileFireElapsedSeconds = ProjectileFireIntervalSeconds;
+	ResetProjectileFireTimer(true);
 	ModeElapsedSeconds = 0.0f;
 	LegFoldAlpha = 0.0f;
+	SpawnStandUpAlpha = 1.0f;
 	bLegIKEnabled = true;
 	bProjectileModeClosingDistance = false;
+	ProjectileOrbitDirectionSign = FMath::RandBool() ? 1.0f : -1.0f;
 	RollDistanceTraveled = 0.0f;
 
 	SetEyeChargeWarningActive(false, false);
@@ -316,6 +463,11 @@ void ATunaSweeperRollingBomber::SelfDestruct()
 	bLegIKEnabled = false;
 	LegFoldAlpha = 1.0f;
 
+	if (bSpawnPhysicsSimulationActive)
+	{
+		FinishSpawnPhysicsSimulation();
+	}
+
 	SetEyeChargeWarningActive(true, true);
 	if (UCharacterMovementComponent* MovementComponent = GetCharacterMovement())
 	{
@@ -324,6 +476,7 @@ void ATunaSweeperRollingBomber::SelfDestruct()
 	}
 
 	SetActorEnableCollision(false);
+	SpawnSelfDestructBurst();
 	ApplyExplosionDamage();
 	Destroy();
 }
@@ -332,14 +485,6 @@ void ATunaSweeperRollingBomber::UpdateProjectileAttackMode(
 	float DeltaSeconds,
 	ATunaSweeperTopDownCharacter* TargetCharacter)
 {
-	if (bSpawnerLaunchActive)
-	{
-		ProjectileModeElapsedSeconds = 0.0f;
-		ProjectileFireElapsedSeconds = ProjectileFireIntervalSeconds;
-		bProjectileModeClosingDistance = false;
-		return;
-	}
-
 	if (!TargetCharacter)
 	{
 		ProjectileModeElapsedSeconds = 0.0f;
@@ -372,16 +517,16 @@ void ATunaSweeperRollingBomber::UpdateProjectileAttackMode(
 	if (DistanceToTarget > ProjectileAttackRange)
 	{
 		ProjectileModeElapsedSeconds = 0.0f;
-		ProjectileFireElapsedSeconds = ProjectileFireIntervalSeconds;
+		ProjectileFireElapsedSeconds = 0.0f;
 		return;
 	}
 
 	ProjectileModeElapsedSeconds += DeltaSeconds;
 	ProjectileFireElapsedSeconds += DeltaSeconds;
-	if (ProjectileFireElapsedSeconds >= ProjectileFireIntervalSeconds)
+	if (ProjectileFireElapsedSeconds >= CurrentProjectileFireIntervalSeconds)
 	{
 		FireRollingBomberProjectileAt(TargetCharacter);
-		ProjectileFireElapsedSeconds = 0.0f;
+		ResetProjectileFireTimer(false);
 	}
 
 	if (ProjectileModeElapsedSeconds >= ProjectileAttackDurationSeconds)
@@ -394,31 +539,50 @@ void ATunaSweeperRollingBomber::UpdateProjectileModeMovement(
 	float DistanceToTarget,
 	const FVector& DirectionToTarget)
 {
-	if (bProjectileModeClosingDistance)
-	{
-		if (DistanceToTarget <= ProjectileApproachStopRange)
-		{
-			bProjectileModeClosingDistance = false;
-		}
-	}
-	else if (DistanceToTarget > ProjectileApproachStartRange)
-	{
-		bProjectileModeClosingDistance = true;
-	}
-
 	if (UCharacterMovementComponent* MovementComponent = GetCharacterMovement())
 	{
 		MovementComponent->SetMovementMode(MOVE_Walking);
 		MovementComponent->MaxWalkSpeed = ProjectileModeWalkSpeed;
-		if (!bProjectileModeClosingDistance)
-		{
-			MovementComponent->StopMovementImmediately();
-		}
 	}
 
-	if (bProjectileModeClosingDistance && !DirectionToTarget.IsNearlyZero())
+	if (DirectionToTarget.IsNearlyZero())
 	{
-		AddMovementInput(DirectionToTarget, 1.0f, true);
+		bProjectileModeClosingDistance = false;
+		return;
+	}
+
+	const FVector StrafeDirection =
+		FVector::CrossProduct(FVector::UpVector, DirectionToTarget).GetSafeNormal() * ProjectileOrbitDirectionSign;
+	const float PreferredRange = FMath::Max(0.0f, ProjectileOrbitPreferredRange);
+	const float MinimumRange = FMath::Clamp(ProjectileOrbitMinimumRange, 0.0f, PreferredRange);
+	const float ApproachRange = FMath::Max(1.0f, ProjectileAttackRange - PreferredRange);
+
+	float ApproachWeight = 0.0f;
+	if (DistanceToTarget <= MinimumRange)
+	{
+		ApproachWeight = -FMath::Max(0.0f, ProjectileOrbitRetreatWeight);
+	}
+	else if (DistanceToTarget <= PreferredRange)
+	{
+		ApproachWeight = FMath::Max(0.0f, ProjectileOrbitCloseApproachWeight);
+	}
+	else
+	{
+		const float ApproachAlpha = FMath::Clamp((DistanceToTarget - PreferredRange) / ApproachRange, 0.0f, 1.0f);
+		ApproachWeight = FMath::Lerp(
+			FMath::Max(0.0f, ProjectileOrbitCloseApproachWeight),
+			FMath::Max(0.0f, ProjectileOrbitApproachWeight),
+			ApproachAlpha);
+	}
+
+	const FVector MoveDirection = (
+		StrafeDirection * FMath::Max(0.0f, ProjectileOrbitStrafeWeight) +
+		DirectionToTarget * ApproachWeight).GetSafeNormal();
+	bProjectileModeClosingDistance = ApproachWeight > 0.0f;
+
+	if (!MoveDirection.IsNearlyZero())
+	{
+		AddMovementInput(MoveDirection, 1.0f, true);
 	}
 }
 
@@ -559,30 +723,124 @@ void ATunaSweeperRollingBomber::UpdateLegIK(float DeltaSeconds, const FVector& P
 	UpdateFootSceneComponents();
 }
 
-void ATunaSweeperRollingBomber::UpdateSpawnerLaunchState(float DeltaSeconds)
+void ATunaSweeperRollingBomber::UpdateSpawnPhysicsMode(float DeltaSeconds)
 {
-	if (!bSpawnerLaunchActive)
-	{
-		return;
-	}
-
+	ModeElapsedSeconds += DeltaSeconds;
+	SpawnPhysicsElapsedSeconds += DeltaSeconds;
 	SpawnerLaunchControlRemainingSeconds = FMath::Max(
 		0.0f,
 		SpawnerLaunchControlRemainingSeconds - DeltaSeconds);
 
-	UCharacterMovementComponent* MovementComponent = GetCharacterMovement();
-	const bool bIsStillAirborne = MovementComponent && MovementComponent->IsFalling();
-	if (SpawnerLaunchControlRemainingSeconds > 0.0f || bIsStillAirborne)
+	const bool bMinimumTimeElapsed =
+		SpawnPhysicsElapsedSeconds >= FMath::Max(0.0f, SpawnerPhysicsMinimumSeconds);
+	if (!bMinimumTimeElapsed)
 	{
 		return;
 	}
 
-	bSpawnerLaunchActive = false;
-	if (MovementComponent)
+	const bool bGraceElapsed = SpawnerLaunchControlRemainingSeconds <= 0.0f;
+	const bool bGrounded = IsSpawnPhysicsGrounded();
+	if (IsSpawnPhysicsSettled() || (bGraceElapsed && bGrounded))
 	{
+		FinishSpawnPhysicsSimulation();
+		EnterStandingUpFromSpawnMode();
+	}
+}
+
+void ATunaSweeperRollingBomber::UpdateStandingUpFromSpawnMode(float DeltaSeconds)
+{
+	ModeElapsedSeconds += DeltaSeconds;
+	SpawnStandUpAlpha = FMath::Clamp(
+		ModeElapsedSeconds / FMath::Max(0.01f, SpawnStandUpDurationSeconds),
+		0.0f,
+		1.0f);
+	LegFoldAlpha = 1.0f - SpawnStandUpAlpha;
+
+	if (!bLegIKEnabled && SpawnStandUpAlpha >= 0.65f)
+	{
+		bLegIKEnabled = true;
+		InitializeLegIKTargets();
+	}
+
+	if (SpawnStandUpAlpha >= 1.0f)
+	{
+		EnterProjectileAttackMode();
+	}
+}
+
+void ATunaSweeperRollingBomber::FinishSpawnPhysicsSimulation()
+{
+	UCapsuleComponent* Capsule = GetCapsuleComponent();
+	if (!Capsule)
+	{
+		bSpawnPhysicsSimulationActive = false;
+		return;
+	}
+
+	const FVector StopLocation = GetActorLocation();
+	FVector PlanarVelocity = Capsule->GetPhysicsLinearVelocity();
+	PlanarVelocity.Z = 0.0f;
+	const float TargetYaw = PlanarVelocity.IsNearlyZero()
+		? GetActorRotation().Yaw
+		: PlanarVelocity.Rotation().Yaw;
+
+	if (Capsule->IsSimulatingPhysics())
+	{
+		Capsule->SetPhysicsLinearVelocity(FVector::ZeroVector, false);
+		Capsule->SetPhysicsAngularVelocityInDegrees(FVector::ZeroVector, false);
+		Capsule->SetSimulatePhysics(false);
+	}
+
+	Capsule->SetPhysMaterialOverride(nullptr);
+	Capsule->SetCollisionObjectType(ECC_Pawn);
+	Capsule->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	SetActorLocation(StopLocation, false, nullptr, ETeleportType::TeleportPhysics);
+	SetActorRotation(FRotator(0.0f, TargetYaw, 0.0f), ETeleportType::TeleportPhysics);
+
+	if (UCharacterMovementComponent* MovementComponent = GetCharacterMovement())
+	{
+		MovementComponent->StopMovementImmediately();
 		MovementComponent->SetMovementMode(MOVE_Walking);
 		MovementComponent->MaxWalkSpeed = ProjectileModeWalkSpeed;
 	}
+
+	bSpawnPhysicsSimulationActive = false;
+}
+
+bool ATunaSweeperRollingBomber::IsSpawnPhysicsGrounded() const
+{
+	UWorld* World = GetWorld();
+	const UCapsuleComponent* Capsule = GetCapsuleComponent();
+	if (!World || !Capsule)
+	{
+		return false;
+	}
+
+	const FVector TraceStart = GetActorLocation();
+	const FVector TraceEnd = TraceStart - FVector(
+		0.0f,
+		0.0f,
+		Capsule->GetScaledCapsuleHalfHeight() + TunaSweeperRollingBomber::SpawnGroundTraceExtraDistance);
+
+	FCollisionQueryParams QueryParams(SCENE_QUERY_STAT(TunaSweeperRollingBomberSpawnGroundTrace), false, this);
+	QueryParams.AddIgnoredActor(this);
+
+	FHitResult GroundHit;
+	return World->LineTraceSingleByChannel(GroundHit, TraceStart, TraceEnd, ECC_Visibility, QueryParams) &&
+		GroundHit.bBlockingHit &&
+		GroundHit.ImpactNormal.Z >= TunaSweeperRollingBomber::MinFootGroundNormalZ;
+}
+
+bool ATunaSweeperRollingBomber::IsSpawnPhysicsSettled() const
+{
+	UCapsuleComponent* Capsule = GetCapsuleComponent();
+	if (!Capsule || !IsSpawnPhysicsGrounded())
+	{
+		return false;
+	}
+
+	const FVector LinearVelocity = Capsule->GetPhysicsLinearVelocity();
+	return LinearVelocity.Size() <= FMath::Max(0.0f, SpawnPhysicsSettleSpeed);
 }
 
 ATunaSweeperTopDownCharacter* ATunaSweeperRollingBomber::ResolvePlayerTarget() const
@@ -595,6 +853,32 @@ ATunaSweeperTopDownCharacter* ATunaSweeperRollingBomber::ResolvePlayerTarget() c
 	}
 
 	return PlayerCharacter;
+}
+
+float ATunaSweeperRollingBomber::ResolveProjectileFireIntervalSeconds() const
+{
+	const float JitterSeconds = FMath::Max(0.0f, ProjectileFireIntervalJitterSeconds);
+	return FMath::Max(
+		0.05f,
+		ProjectileFireIntervalSeconds + FMath::FRandRange(-JitterSeconds, JitterSeconds));
+}
+
+void ATunaSweeperRollingBomber::ResetProjectileFireTimer(bool bUseInitialDelay)
+{
+	CurrentProjectileFireIntervalSeconds = ResolveProjectileFireIntervalSeconds();
+	if (!bUseInitialDelay)
+	{
+		ProjectileFireElapsedSeconds = 0.0f;
+		return;
+	}
+
+	const float MinDelay = FMath::Max(0.0f, ProjectileInitialFireDelayMinSeconds);
+	const float MaxDelay = FMath::Max(MinDelay, ProjectileInitialFireDelayMaxSeconds);
+	const float InitialDelay = FMath::Clamp(
+		FMath::FRandRange(MinDelay, MaxDelay),
+		0.0f,
+		CurrentProjectileFireIntervalSeconds);
+	ProjectileFireElapsedSeconds = CurrentProjectileFireIntervalSeconds - InitialDelay;
 }
 
 bool ATunaSweeperRollingBomber::FireRollingBomberProjectileAt(AActor* TargetActor)
@@ -622,7 +906,16 @@ bool ATunaSweeperRollingBomber::FireRollingBomberProjectileAt(AActor* TargetActo
 
 	const FRotator FireRotation = FireDirection.Rotation();
 	SetActorRotation(FRotator(0.0f, FireRotation.Yaw, 0.0f));
-	const FVector SpawnLocation = ActorLocation + GetActorRotation().RotateVector(ProjectileSpawnOffset);
+
+	const float SafeProjectileScale = FMath::Max(0.05f, RollingBomberProjectileScale);
+	const float ProjectileCollisionRadius = 12.0f * SafeProjectileScale;
+	const float CapsuleRadius = GetCapsuleComponent() ? GetCapsuleComponent()->GetScaledCapsuleRadius() : 0.0f;
+	FVector EffectiveProjectileSpawnOffset = ProjectileSpawnOffset;
+	EffectiveProjectileSpawnOffset.X = FMath::Max(
+		EffectiveProjectileSpawnOffset.X,
+		CapsuleRadius + ProjectileCollisionRadius + FMath::Max(0.0f, ProjectileSpawnClearance));
+	const FVector SpawnLocation = ActorLocation + GetActorRotation().RotateVector(EffectiveProjectileSpawnOffset);
+	const FTransform SpawnTransform(FireRotation, SpawnLocation, FVector(SafeProjectileScale));
 
 	FActorSpawnParameters SpawnParameters;
 	SpawnParameters.Owner = this;
@@ -631,15 +924,43 @@ bool ATunaSweeperRollingBomber::FireRollingBomberProjectileAt(AActor* TargetActo
 
 	ATunaSweeperProjectile* SpawnedProjectile = World->SpawnActor<ATunaSweeperProjectile>(
 		LoadedProjectileClass,
-		SpawnLocation,
-		FireRotation,
+		SpawnTransform,
 		SpawnParameters);
 	if (!SpawnedProjectile)
 	{
 		return false;
 	}
 
-	SpawnedProjectile->SetDamageAmount(ProjectileDamage);
+	SpawnedProjectile->IgnoreActor(this);
+	SpawnedProjectile->SetSpeedMultiplier(RollingBomberProjectileSpeedMultiplier);
+	UMaterialInterface* ProjectileMaterial = RollingBomberProjectileMaterial.LoadSynchronous();
+	if (ProjectileMaterial)
+	{
+		SpawnedProjectile->ApplyVisualMaterial(
+			ProjectileMaterial,
+			RollingBomberProjectileColor,
+			RollingBomberProjectileEmissiveStrength);
+	}
+
+	UMaterialInterface* TrailMaterial = RollingBomberProjectileTrailMaterial.LoadSynchronous();
+	if (!TrailMaterial)
+	{
+		TrailMaterial = ProjectileMaterial;
+	}
+	if (TrailMaterial)
+	{
+		const float TrailScaleCompensation = 1.0f / SafeProjectileScale;
+		SpawnedProjectile->ApplyTrailVisual(
+			TrailMaterial,
+			RollingBomberProjectileTrailColor,
+			RollingBomberProjectileTrailEmissiveStrength,
+			RollingBomberProjectileTrailLengthCm * TrailScaleCompensation,
+			RollingBomberProjectileTrailRadiusCm * TrailScaleCompensation,
+			RollingBomberProjectileTrailOpacity,
+			RollingBomberProjectileTrailEndFade);
+	}
+	SpawnedProjectile->SetCameraHitReactionScale(RollingBomberProjectileCameraHitReactionScale);
+	SpawnedProjectile->SetDamageAmount(FMath::Min(ProjectileDamage, ProjectileDamageCap));
 	return true;
 }
 
@@ -690,6 +1011,48 @@ bool ATunaSweeperRollingBomber::IsActorInRollContact(const AActor* Actor) const
 		FVector::DistSquared2D(Actor->GetActorLocation(), GetActorLocation()) <= FMath::Square(CombinedRadius);
 }
 
+void ATunaSweeperRollingBomber::SpawnSelfDestructBurst()
+{
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		return;
+	}
+
+	TSubclassOf<ATunaSweeperMeleeImpactBurstActor> LoadedBurstClass = SelfDestructBurstActorClass.LoadSynchronous();
+	if (!LoadedBurstClass)
+	{
+		LoadedBurstClass = ATunaSweeperMeleeImpactBurstActor::StaticClass();
+	}
+
+	FVector BurstLocation = GetActorLocation();
+	if (const UCapsuleComponent* Capsule = GetCapsuleComponent())
+	{
+		BurstLocation.Z += Capsule->GetScaledCapsuleHalfHeight() * 0.2f;
+	}
+
+	FRotator BurstRotation = LockedRollDirection.IsNearlyZero()
+		? GetActorRotation()
+		: LockedRollDirection.Rotation();
+	BurstRotation.Pitch = 0.0f;
+	BurstRotation.Roll = 0.0f;
+
+	FActorSpawnParameters SpawnParameters;
+	SpawnParameters.Owner = this;
+	SpawnParameters.Instigator = this;
+	SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+	ATunaSweeperMeleeImpactBurstActor* BurstActor = World->SpawnActor<ATunaSweeperMeleeImpactBurstActor>(
+		LoadedBurstClass,
+		BurstLocation,
+		BurstRotation,
+		SpawnParameters);
+	if (BurstActor)
+	{
+		BurstActor->SetBurstColor(SelfDestructBurstColor);
+	}
+}
+
 void ATunaSweeperRollingBomber::ApplyExplosionDamage()
 {
 	UWorld* World = GetWorld();
@@ -738,19 +1101,34 @@ void ATunaSweeperRollingBomber::ApplyExplosionDamage()
 
 void ATunaSweeperRollingBomber::ApplyBodyRollVisualRotation(float DeltaDistance)
 {
-	if (!bUseBodyRollVisualRotation || !VisualMesh || BodyVisualRadiusCm <= 0.0f || DeltaDistance <= 0.0f)
+	if (!bUseBodyRollVisualRotation || BodyVisualRadiusCm <= 0.0f || DeltaDistance <= 0.0f)
 	{
 		return;
 	}
 
 	const float Circumference = 2.0f * UE_PI * BodyVisualRadiusCm;
 	BodyRollDegrees += (DeltaDistance / Circumference) * 360.0f;
-	VisualMesh->SetRelativeRotation(BodyVisualBaseRelativeRotation + FRotator(BodyRollDegrees, 0.0f, 0.0f));
+	const float WobbleDegrees = BodyRollWobbleDegrees *
+		FMath::Sin(FMath::DegreesToRadians(BodyRollDegrees * 0.5f));
+	const FRotator RollingRotation(BodyRollDegrees, 0.0f, WobbleDegrees);
+
+	if (BodyVisualPivot)
+	{
+		BodyVisualPivot->SetRelativeRotation(BodyVisualPivotBaseRelativeRotation + RollingRotation);
+	}
+	else if (VisualMesh)
+	{
+		VisualMesh->SetRelativeRotation(BodyVisualBaseRelativeRotation + RollingRotation);
+	}
 }
 
 void ATunaSweeperRollingBomber::ResetBodyRollVisualRotation()
 {
 	BodyRollDegrees = 0.0f;
+	if (BodyVisualPivot)
+	{
+		BodyVisualPivot->SetRelativeRotation(BodyVisualPivotBaseRelativeRotation);
+	}
 	if (VisualMesh)
 	{
 		VisualMesh->SetRelativeRotation(BodyVisualBaseRelativeRotation);
@@ -786,7 +1164,7 @@ void ATunaSweeperRollingBomber::ApplyEyeVisualDefaults()
 
 	if (EyeLight)
 	{
-		EyeLight->SetRelativeLocation(EyeLocalOffset + FVector(18.0f, 0.0f, 0.0f));
+		EyeLight->SetRelativeLocation(EyeLocalOffset + FVector(4.5f, 0.0f, 0.0f));
 		EyeLight->SetCastShadows(false);
 		EyeLight->SetVisibility(true);
 	}
@@ -1006,15 +1384,17 @@ void ATunaSweeperRollingBomber::UpdateFootSceneComponents()
 	{
 		RightKneeIKTarget->SetWorldLocation(RightFootRuntime.JointTargetWorldLocation);
 	}
+
+	UpdateVisibleLegMeshes();
 }
 
 void ATunaSweeperRollingBomber::UpdateFoldedLegSceneComponents()
 {
 	const FTransform ActorTransform = GetActorTransform();
-	const FVector LeftFoldedFootLocation = ActorTransform.TransformPosition(FVector(8.0f, -17.0f, -8.0f));
-	const FVector RightFoldedFootLocation = ActorTransform.TransformPosition(FVector(8.0f, 17.0f, -8.0f));
-	const FVector LeftFoldedKneeLocation = ActorTransform.TransformPosition(FVector(0.0f, -24.0f, 10.0f));
-	const FVector RightFoldedKneeLocation = ActorTransform.TransformPosition(FVector(0.0f, 24.0f, 10.0f));
+	const FVector LeftFoldedFootLocation = ActorTransform.TransformPosition(FVector(2.0f, -4.25f, -2.0f));
+	const FVector RightFoldedFootLocation = ActorTransform.TransformPosition(FVector(2.0f, 4.25f, -2.0f));
+	const FVector LeftFoldedKneeLocation = ActorTransform.TransformPosition(FVector(0.0f, -6.0f, 2.5f));
+	const FVector RightFoldedKneeLocation = ActorTransform.TransformPosition(FVector(0.0f, 6.0f, 2.5f));
 
 	LeftFootRuntime.EffectorWorldLocation = LeftFoldedFootLocation;
 	LeftFootRuntime.PlannedFootWorldLocation = LeftFoldedFootLocation;
@@ -1031,6 +1411,83 @@ void ATunaSweeperRollingBomber::UpdateFoldedLegSceneComponents()
 	RightFootRuntime.bInitialized = true;
 
 	UpdateFootSceneComponents();
+}
+
+void ATunaSweeperRollingBomber::UpdateVisibleLegMeshes()
+{
+	const FTransform ActorTransform = GetActorTransform();
+	UpdateVisibleLegMeshForFoot(
+		LeftUpperLegMesh,
+		LeftLowerLegMesh,
+		LeftFootMesh,
+		ActorTransform.TransformPosition(LeftHipLocalOffset),
+		LeftFootRuntime);
+	UpdateVisibleLegMeshForFoot(
+		RightUpperLegMesh,
+		RightLowerLegMesh,
+		RightFootMesh,
+		ActorTransform.TransformPosition(RightHipLocalOffset),
+		RightFootRuntime);
+}
+
+void ATunaSweeperRollingBomber::UpdateVisibleLegMeshForFoot(
+	UStaticMeshComponent* UpperLegMesh,
+	UStaticMeshComponent* LowerLegMesh,
+	UStaticMeshComponent* FootMesh,
+	const FVector& HipWorldLocation,
+	const FFootRuntime& FootRuntime) const
+{
+	PositionLegSegmentMesh(UpperLegMesh, HipWorldLocation, FootRuntime.JointTargetWorldLocation, UpperLegThicknessCm);
+	PositionLegSegmentMesh(
+		LowerLegMesh,
+		FootRuntime.JointTargetWorldLocation,
+		FootRuntime.EffectorWorldLocation,
+		LowerLegThicknessCm);
+	PositionFootMesh(FootMesh, FootRuntime.EffectorWorldLocation);
+}
+
+void ATunaSweeperRollingBomber::PositionLegSegmentMesh(
+	UStaticMeshComponent* SegmentMesh,
+	const FVector& StartWorldLocation,
+	const FVector& EndWorldLocation,
+	float ThicknessCm) const
+{
+	if (!SegmentMesh)
+	{
+		return;
+	}
+
+	const FVector SegmentVector = EndWorldLocation - StartWorldLocation;
+	const float SegmentLength = SegmentVector.Size();
+	if (SegmentLength <= KINDA_SMALL_NUMBER)
+	{
+		SegmentMesh->SetVisibility(false);
+		return;
+	}
+
+	SegmentMesh->SetVisibility(true);
+	SegmentMesh->SetWorldLocation((StartWorldLocation + EndWorldLocation) * 0.5f);
+	SegmentMesh->SetWorldRotation(FRotationMatrix::MakeFromZ(SegmentVector / SegmentLength).Rotator());
+	const float RadiusScale = FMath::Max(0.1f, ThicknessCm) / 50.0f;
+	SegmentMesh->SetWorldScale3D(FVector(RadiusScale, RadiusScale, SegmentLength / 100.0f));
+}
+
+void ATunaSweeperRollingBomber::PositionFootMesh(
+	UStaticMeshComponent* FootMesh,
+	const FVector& FootWorldLocation) const
+{
+	if (!FootMesh)
+	{
+		return;
+	}
+
+	FootMesh->SetVisibility(true);
+	FootMesh->SetWorldLocation(FootWorldLocation + FVector(0.0f, 0.0f, FootVisualHeightCm * 0.5f));
+	FootMesh->SetWorldRotation(FRotator(0.0f, GetActorRotation().Yaw, 0.0f));
+	FootMesh->SetWorldScale3D(FVector(
+		FMath::Max(0.1f, FootVisualLengthCm) / 100.0f,
+		FMath::Max(0.1f, FootVisualWidthCm) / 100.0f,
+		FMath::Max(0.1f, FootVisualHeightCm) / 100.0f));
 }
 
 FTunaSweeperRollingBomberFootIKState ATunaSweeperRollingBomber::BuildFootIKState(

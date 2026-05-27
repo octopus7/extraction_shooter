@@ -800,3 +800,72 @@ A. 맞다. 에디터 전용 액터는 레벨 제작 데이터로 존재해도 �
 Q. 다른 동료가 오해하지 않게 이 액터의 BP를 어느 경로에 만들어 둬야 하는가? 에디터용이라는 규칙이 있는가?
 
 A. 프로젝트에는 아직 별도 `EditorOnly` 콘텐츠 폴더 규칙이 없으므로, `/Game/EditorOnly/Map/BP_Editor_MapCapture`처럼 경로와 이름 모두에서 에디터 전용임이 드러나는 규칙을 새로 쓰는 것이 좋다. 더 확실하게 하려면 `/Game/EditorOnly`를 packaging 설정의 `DirectoriesToNeverCook`에 넣어 실수로 런타임 참조가 생겨도 cook 대상에서 제외되게 한다. 실제 런타임에서 쓸 지도 텍스처/메타데이터는 `/Game/UI/Map` 또는 `/Game/Data/Map` 같은 패키징 대상 경로에 따로 두고, `EditorOnly` 폴더의 BP는 제작 도구로만 취급해야 한다.
+## 2026-05-28 04:05:35 (소요시간: 1분 미만)
+
+### 질문
+
+에디터 시작 크래시 원인이 뭐였어?
+
+### 답변
+
+원인은 `TunaSweeperEditor` 모듈의 `StartupModule()` 안에서 `RaidMap`을 너무 이른 시점에 로드한 것이었다. 에디터 시작 직후 현재 월드가 아직 `/Temp/Untitled_0` 임시 startup world인 상태에서 지도 캡처 BP 배치 작업이 `LoadEditorMapForSetup(RaidMapPackagePath)`로 맵 전환을 시도했고, UE가 기존 `/Temp/Untitled_0` 월드와 패키지를 정리하지 못해 `World Memory Leaks: 2 leaks objects and packages` fatal을 냈다. 실제 `RaidMap` 액터 누수라기보다 startup 단계의 맵 전환 타이밍 문제였고, 수정은 지도 캡처 배치 작업을 ticker로 지연시키고 현재 월드 패키지가 `/Temp/`가 아닐 때만 실행하게 한 것이다.
+
+## 2026-05-28 04:05:35 (소요시간: 1분 미만)
+
+### 질문
+
+질문 md 에도 기록했어?
+
+### 답변
+
+기록되어 있지 않았으므로, 직전 크래시 원인 질문과 이 확인 질문을 `Docs/questions.md`에 별도로 기록했다.
+
+## 2026-05-28 04:16:48 (소요시간: 00:02:30)
+
+### 질문
+
+지금 UI 컴파일 에러 있나?
+
+### 답변
+
+있다. `TunaSweeperEditor Win64 Development` 빌드가 실패했고, 주 원인은 익명 namespace 함수 `ResolveUiText(...)`가 `TunaSweeperDialogueWidget.cpp`와 `TunaSweeperGameHudWidget.cpp`에서 같은 Unity 컴파일 단위에 중복 정의된 것이다. 이 때문에 `TunaSweeperGameHudWidget.cpp`의 여러 호출과 `TunaSweeperMemoWidget.cpp`의 호출들이 `C2264`로 연쇄 실패했다. 해결은 헬퍼 함수 이름을 파일별로 유니크하게 바꾸거나 공용 유틸로 분리하는 쪽이 맞다.
+
+## 2026-05-28 04:26:56 (소요시간: 1분 미만)
+
+### 질문
+
+`RollingBomber`를 2족 보행이라고 했는데 다리 메시가 없어서 안 보이는 것인지, 아니면 구현이 안 된 것인지?
+
+### 답변
+
+현재는 다리의 IK 타깃/상태값만 구현되어 있고, 화면에 보이는 다리 메시나 스켈레탈 본 구조는 아직 구현되어 있지 않다. `ATunaSweeperRollingBomber`는 구체 몸체 `VisualMesh`, 외눈 `EyeMesh`, IK용 `USceneComponent` 타깃들을 갖지만 실제 다리를 렌더링하는 `UStaticMeshComponent`나 다리 본이 있는 Skeletal Mesh/ABP 그래프는 아직 없다. 따라서 보이지 않는 이유는 메시가 없어서이며, 2족 보행 연출은 다음 단계에서 임시 다리 메시 컴포넌트 또는 전용 Skeletal Mesh/ABP로 연결해야 한다.
+
+## 2026-05-28 04:43:38 (소요시간: 00:02:17)
+
+### 질문
+
+회색구가 투사체인지, 멈춘 것처럼 보이는 원인이 지면에 먹힌 것인지 자기 자신이나 눈에 먹힌 것인지?
+
+### 답변
+
+작은 회색 구체는 공용 `ATunaSweeperProjectile` 기본 구체 메시일 가능성이 높고, 큰 회색 구체는 `RollingBomber` 몸체다. 눈 메시는 `NoCollision`이라 막는 원인은 아니었다. 더 가능성 높은 원인은 `RollingBomber`를 1/4로 줄인 뒤에도 투사체 충돌 반경은 12cm였고, 발사 오프셋 14.5cm가 캡슐 반경 10.5cm와 투사체 반경을 합친 거리보다 짧아서 자기 캡슐과 겹쳐 생성되는 구조였다. 기존 코드는 자기 자신에게 맞으면 파괴도 이동 무시 등록도 없이 반환해, 투사체가 잠깐 멈춘 회색 구처럼 남을 수 있었다. 수정으로 투사체가 소유자/발사자를 이동 무시하도록 하고, `RollingBomber` 전용 투사체를 0.35배 스케일로 줄이며 안전 이격 거리 밖에서 생성되게 했다.
+
+## 2026-05-28 04:51:46 (소요시간: 1분 미만)
+
+### 질문
+
+게임 화면 내 위젯들이 켜질 때 가장자리에 있는 경우 밖에서 슬라이드해서 들어오며 opacity가 페이드되고, 꺼질 때는 그 반대 연출을 원하는데 공용으로 처리할 방법이 있는지 아니면 일일이 달아줘야 하는지?
+
+### 답변
+
+공용으로 처리하는 것이 맞다. TunaSweeper는 HUD 패널 표시 전환이 `UTunaSweeperGameHudWidget::ApplyHudModeVisibility()`와 각 패널 `SetVisibility()` 호출에 모여 있으므로, 각 WBP에 애니메이션을 따로 만들기보다 공용 UI 트랜지션 헬퍼나 베이스 클래스를 두고 `ShowWithTransition` / `HideWithTransition`로 감싸는 구조가 적합하다. 패널별로 필요한 최소 설정은 방향 정도이며, 방향은 명시 설정을 우선하고 없으면 Canvas 슬롯의 anchor/alignment를 보고 왼쪽/오른쪽/위/아래 가장자리 여부를 추론할 수 있다. 구현은 표시 시작 시 `Visible` 또는 `SelfHitTestInvisible`로 바꾸고 render translation과 render opacity를 시작값에서 원래값으로 보간하며, 숨김은 반대로 보간한 뒤 완료 시 `Collapsed` 처리하면 된다. 지도/퀘스트처럼 중앙 패널은 기본 fade/scale, 인벤토리나 외부 패널처럼 가장자리 패널은 edge slide+fade를 쓰는 식으로 프리셋을 나누면 반복 작업을 크게 줄일 수 있다.
+
+## 2026-05-28 05:27:59 (소요시간: 00:01:44)
+
+### 질문
+
+`RollingBomber` 투사체 트레일이 여전히 막대처럼 보이는데 끝부분 흐림 적용 여부는 어떻게 확인하는지, 그리고 왜 푸른색처럼 보이지 않는지?
+
+### 답변
+
+기존 구현은 기본 Cylinder 정적 메시 위에 `/Game/Effects/M_LumberjackMeleeSwingArc`를 얹고 `Color`, `Opacity`, `Dissolve` 같은 파라미터를 넣고 있었다. 그런데 해당 머티리얼은 `Color` 파라미터가 아니라 vertex color를 색으로 쓰고, opacity도 vertex alpha와 UV U 좌표를 사용한다. 기본 Cylinder는 이 머티리얼이 기대하는 vertex color/alpha/UV 구성이 아니어서 푸른색과 끝부분 흐림이 화면에 보장되지 않았다. 수정으로 트레일을 `UProceduralMeshComponent` 리본으로 바꾸고, 앞쪽 vertex color는 푸른색 alpha 0.5, 뒤쪽 vertex color는 alpha 0, UV는 tail 0부터 head 1까지 들어가도록 생성했다. 이제 끝 흐림은 머티리얼 파라미터가 아니라 메시 데이터 자체로 확인할 수 있다.

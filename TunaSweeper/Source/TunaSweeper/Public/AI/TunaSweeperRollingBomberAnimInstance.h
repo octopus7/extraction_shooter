@@ -52,6 +52,15 @@ protected:
 	bool bHasRollingBomberOwner = false;
 
 	UPROPERTY(BlueprintReadOnly, Transient, Category = "TunaSweeper|Rolling Bomber")
+	bool bIsSpawnPhysicsMode = false;
+
+	UPROPERTY(BlueprintReadOnly, Transient, Category = "TunaSweeper|Rolling Bomber")
+	bool bIsStandingUpFromSpawnMode = false;
+
+	UPROPERTY(BlueprintReadOnly, Transient, Category = "TunaSweeper|Rolling Bomber")
+	bool bIsSpawnTransitionMode = false;
+
+	UPROPERTY(BlueprintReadOnly, Transient, Category = "TunaSweeper|Rolling Bomber")
 	bool bIsProjectileAttackMode = false;
 
 	UPROPERTY(BlueprintReadOnly, Transient, Category = "TunaSweeper|Rolling Bomber")
@@ -83,6 +92,9 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, Transient, Category = "TunaSweeper|Rolling Bomber|IK", meta = (ClampMin = "0.0", ClampMax = "1.0"))
 	float LegFoldAlpha = 0.0f;
+
+	UPROPERTY(BlueprintReadOnly, Transient, Category = "TunaSweeper|Rolling Bomber|IK", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+	float SpawnStandUpAlpha = 0.0f;
 
 	UPROPERTY(BlueprintReadOnly, Transient, Category = "TunaSweeper|Rolling Bomber|IK")
 	FTunaSweeperRollingBomberAnimFootIKState LeftFootIK;

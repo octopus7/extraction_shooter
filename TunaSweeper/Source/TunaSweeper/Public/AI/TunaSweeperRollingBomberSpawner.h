@@ -5,6 +5,7 @@
 #include "TunaSweeperRollingBomberSpawner.generated.h"
 
 class ATunaSweeperRollingBomber;
+class ATunaSweeperTopDownCharacter;
 class UMaterialInterface;
 class UProceduralMeshComponent;
 class USceneComponent;
@@ -77,25 +78,36 @@ protected:
 	float SpawnIntervalSeconds = 0.2f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber Spawner|Launch", meta = (ClampMin = "0.0", UIMin = "0.0"))
-	float LaunchSpeedMin = 850.0f;
+	float LaunchSpeedMin = 425.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber Spawner|Launch", meta = (ClampMin = "0.0", UIMin = "0.0"))
-	float LaunchSpeedMax = 1100.0f;
+	float LaunchSpeedMax = 550.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber Spawner|Launch", meta = (ClampMin = "0.0", ClampMax = "89.0", UIMin = "0.0", UIMax = "89.0"))
-	float LaunchPitchMinDegrees = 38.0f;
+	float LaunchPitchMinDegrees = 22.8f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber Spawner|Launch", meta = (ClampMin = "0.0", ClampMax = "89.0", UIMin = "0.0", UIMax = "89.0"))
-	float LaunchPitchMaxDegrees = 58.0f;
+	float LaunchPitchMaxDegrees = 34.8f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber Spawner|Health", meta = (ClampMin = "1.0", UIMin = "1.0"))
 	float MaxHealth = 80.0f;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber Spawner|Activation", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float ActivationRangeCm = 500.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber Spawner|Activation", meta = (ClampMin = "0.01", UIMin = "0.01"))
+	float ActivationCheckIntervalSeconds = 0.2f;
+
 private:
+	void StartActivationCheck();
+	void CheckActivationRange();
+	void ActivateSpawner();
 	void StartWave();
 	void SpawnNextQueuedRollingBomber();
 	void StopSpawning();
 	void DestroySpawner();
+	ATunaSweeperTopDownCharacter* ResolvePlayerTarget() const;
+	bool IsPlayerWithinActivationRange() const;
 	void BuildSpawnerMeshes();
 	void BuildPillarMesh();
 	void BuildHexHeadMesh();
@@ -108,6 +120,7 @@ private:
 
 	FTimerHandle WaveTimerHandle;
 	FTimerHandle BurstTimerHandle;
+	FTimerHandle ActivationTimerHandle;
 
 	UPROPERTY(Transient)
 	TArray<TObjectPtr<USoundWaveProcedural>> ActiveProceduralLaunchSounds;
@@ -116,4 +129,5 @@ private:
 	int32 PendingSpawnCount = 0;
 	float CurrentHealth = 80.0f;
 	bool bSpawnerDestroyed = false;
+	bool bSpawnerActivated = false;
 };

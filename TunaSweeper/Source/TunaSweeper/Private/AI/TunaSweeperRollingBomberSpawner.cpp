@@ -1,6 +1,7 @@
 #include "AI/TunaSweeperRollingBomberSpawner.h"
 
 #include "AI/TunaSweeperRollingBomber.h"
+#include "Character/TunaSweeperTopDownCharacter.h"
 #include "Components/SceneComponent.h"
 #include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
@@ -21,11 +22,16 @@ namespace TunaSweeperRollingBomberSpawner
 	constexpr int32 ProceduralSampleRate = 48000;
 	constexpr int32 ProceduralChannelCount = 1;
 	constexpr float ProceduralSoundDurationSeconds = 0.42f;
-	constexpr float PillarHeight = 132.0f;
-	constexpr float PillarHalfExtent = 34.0f;
-	constexpr float HexHeadBottomZ = 108.0f;
-	constexpr float HexHeadTopZ = 208.0f;
-	constexpr float HexHeadRadius = 88.0f;
+	constexpr float VisualScale = 0.25f;
+	constexpr float LaunchSpeedScale = 0.5f;
+	constexpr float LaunchPitchScale = 0.6f;
+	constexpr float PillarHeight = 132.0f * VisualScale;
+	constexpr float PillarHalfExtent = 34.0f * VisualScale;
+	constexpr float HexHeadBottomZ = 108.0f * VisualScale;
+	constexpr float HexHeadTopZ = 208.0f * VisualScale;
+	constexpr float HexHeadRadius = 88.0f * VisualScale;
+	constexpr float LaunchPointHeight = 220.0f * VisualScale;
+	constexpr float FallbackSpawnHeight = 140.0f * VisualScale;
 	constexpr int32 VerticalSegments = 18;
 
 	float CalculateEnvelope(float TimeSeconds, float DurationSeconds)
@@ -84,11 +90,11 @@ namespace TunaSweeperRollingBomberSpawner
 		Tangents.Add(Tangent);
 
 		Triangles.Add(BaseIndex);
+		Triangles.Add(BaseIndex + 2);
 		Triangles.Add(BaseIndex + 1);
-		Triangles.Add(BaseIndex + 2);
 		Triangles.Add(BaseIndex);
-		Triangles.Add(BaseIndex + 2);
 		Triangles.Add(BaseIndex + 3);
+		Triangles.Add(BaseIndex + 2);
 	}
 
 	void AddTriangle(
@@ -127,8 +133,8 @@ namespace TunaSweeperRollingBomberSpawner
 		Tangents.Add(Tangent);
 		Tangents.Add(Tangent);
 		Triangles.Add(BaseIndex);
-		Triangles.Add(BaseIndex + 1);
 		Triangles.Add(BaseIndex + 2);
+		Triangles.Add(BaseIndex + 1);
 	}
 }
 
@@ -154,7 +160,7 @@ ATunaSweeperRollingBomberSpawner::ATunaSweeperRollingBomberSpawner()
 
 	LaunchPoint = CreateDefaultSubobject<USceneComponent>(TEXT("LaunchPoint"));
 	LaunchPoint->SetupAttachment(SceneRoot);
-	LaunchPoint->SetRelativeLocation(FVector(0.0f, 0.0f, 220.0f));
+	LaunchPoint->SetRelativeLocation(FVector(0.0f, 0.0f, TunaSweeperRollingBomberSpawner::LaunchPointHeight));
 
 	RollingBomberClass = TSoftClassPtr<ATunaSweeperRollingBomber>(
 		FSoftObjectPath(TunaSweeperRollingBomberSpawner::DefaultRollingBomberClassPath));
@@ -171,26 +177,24 @@ void ATunaSweeperRollingBomberSpawner::BeginPlay()
 	Super::BeginPlay();
 
 	bSpawnerDestroyed = false;
+	bSpawnerActivated = false;
 	CurrentHealth = FMath::Max(1.0f, MaxHealth);
 	InitialSpawnCount = FMath::Max(1, InitialSpawnCount);
 	MaxSpawnCount = FMath::Max(InitialSpawnCount, MaxSpawnCount);
 	WaveIntervalSeconds = FMath::Max(0.01f, WaveIntervalSeconds);
 	SpawnIntervalSeconds = FMath::Max(0.01f, SpawnIntervalSeconds);
+	ActivationCheckIntervalSeconds = FMath::Max(0.01f, ActivationCheckIntervalSeconds);
 	CurrentWaveSpawnCount = FMath::Clamp(InitialSpawnCount, 1, MaxSpawnCount);
 	BuildSpawnerMeshes();
 	ApplySpawnerMaterial();
 
-	StartWave();
-
-	if (UWorld* World = GetWorld())
+	if (IsPlayerWithinActivationRange())
 	{
-		World->GetTimerManager().SetTimer(
-			WaveTimerHandle,
-			this,
-			&ATunaSweeperRollingBomberSpawner::StartWave,
-			WaveIntervalSeconds,
-			true,
-			WaveIntervalSeconds);
+		ActivateSpawner();
+	}
+	else
+	{
+		StartActivationCheck();
 	}
 }
 
@@ -249,18 +253,99 @@ void ATunaSweeperRollingBomberSpawner::ConfigureSpawnerDefaults(
 	MaxSpawnCount = FMath::Max(InitialSpawnCount, InMaxSpawnCount);
 	WaveIntervalSeconds = FMath::Max(0.01f, InWaveIntervalSeconds);
 	SpawnIntervalSeconds = FMath::Max(0.01f, InSpawnIntervalSeconds);
-	LaunchSpeedMin = FMath::Max(0.0f, InLaunchSpeedMin);
-	LaunchSpeedMax = FMath::Max(LaunchSpeedMin, InLaunchSpeedMax);
-	LaunchPitchMinDegrees = FMath::Clamp(InLaunchPitchMinDegrees, 0.0f, 89.0f);
-	LaunchPitchMaxDegrees = FMath::Clamp(InLaunchPitchMaxDegrees, LaunchPitchMinDegrees, 89.0f);
+	LaunchSpeedMin = FMath::Max(0.0f, InLaunchSpeedMin * TunaSweeperRollingBomberSpawner::LaunchSpeedScale);
+	LaunchSpeedMax = FMath::Max(
+		LaunchSpeedMin,
+		InLaunchSpeedMax * TunaSweeperRollingBomberSpawner::LaunchSpeedScale);
+	LaunchPitchMinDegrees = FMath::Clamp(
+		InLaunchPitchMinDegrees * TunaSweeperRollingBomberSpawner::LaunchPitchScale,
+		0.0f,
+		89.0f);
+	LaunchPitchMaxDegrees = FMath::Clamp(
+		InLaunchPitchMaxDegrees * TunaSweeperRollingBomberSpawner::LaunchPitchScale,
+		LaunchPitchMinDegrees,
+		89.0f);
 	MaxHealth = FMath::Max(1.0f, InMaxHealth);
 	CurrentHealth = MaxHealth;
 	CurrentWaveSpawnCount = FMath::Clamp(InitialSpawnCount, 1, MaxSpawnCount);
 }
 
+void ATunaSweeperRollingBomberSpawner::StartActivationCheck()
+{
+	if (bSpawnerDestroyed || bSpawnerActivated)
+	{
+		return;
+	}
+
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		return;
+	}
+
+	World->GetTimerManager().SetTimer(
+		ActivationTimerHandle,
+		this,
+		&ATunaSweeperRollingBomberSpawner::CheckActivationRange,
+		ActivationCheckIntervalSeconds,
+		true,
+		0.0f);
+}
+
+void ATunaSweeperRollingBomberSpawner::CheckActivationRange()
+{
+	if (bSpawnerDestroyed)
+	{
+		StopSpawning();
+		return;
+	}
+
+	if (bSpawnerActivated)
+	{
+		if (UWorld* World = GetWorld())
+		{
+			World->GetTimerManager().ClearTimer(ActivationTimerHandle);
+		}
+		return;
+	}
+
+	if (IsPlayerWithinActivationRange())
+	{
+		ActivateSpawner();
+	}
+}
+
+void ATunaSweeperRollingBomberSpawner::ActivateSpawner()
+{
+	if (bSpawnerDestroyed || bSpawnerActivated)
+	{
+		return;
+	}
+
+	bSpawnerActivated = true;
+
+	if (UWorld* World = GetWorld())
+	{
+		World->GetTimerManager().ClearTimer(ActivationTimerHandle);
+	}
+
+	StartWave();
+
+	if (UWorld* World = GetWorld())
+	{
+		World->GetTimerManager().SetTimer(
+			WaveTimerHandle,
+			this,
+			&ATunaSweeperRollingBomberSpawner::StartWave,
+			WaveIntervalSeconds,
+			true,
+			WaveIntervalSeconds);
+	}
+}
+
 void ATunaSweeperRollingBomberSpawner::StartWave()
 {
-	if (bSpawnerDestroyed || PendingSpawnCount > 0)
+	if (bSpawnerDestroyed || !bSpawnerActivated || PendingSpawnCount > 0)
 	{
 		return;
 	}
@@ -272,7 +357,7 @@ void ATunaSweeperRollingBomberSpawner::StartWave()
 
 void ATunaSweeperRollingBomberSpawner::SpawnNextQueuedRollingBomber()
 {
-	if (bSpawnerDestroyed)
+	if (bSpawnerDestroyed || !bSpawnerActivated)
 	{
 		StopSpawning();
 		return;
@@ -296,7 +381,9 @@ void ATunaSweeperRollingBomberSpawner::SpawnNextQueuedRollingBomber()
 
 	float LaunchYawDegrees = 0.0f;
 	const FVector LaunchVelocity = BuildLaunchVelocity(LaunchYawDegrees);
-	const FVector SpawnLocation = LaunchPoint ? LaunchPoint->GetComponentLocation() : GetActorLocation() + FVector(0.0f, 0.0f, 140.0f);
+	const FVector SpawnLocation = LaunchPoint
+		? LaunchPoint->GetComponentLocation()
+		: GetActorLocation() + FVector(0.0f, 0.0f, TunaSweeperRollingBomberSpawner::FallbackSpawnHeight);
 	const FRotator SpawnRotation(0.0f, LaunchYawDegrees, 0.0f);
 
 	FActorSpawnParameters SpawnParameters;
@@ -334,6 +421,7 @@ void ATunaSweeperRollingBomberSpawner::StopSpawning()
 {
 	if (UWorld* World = GetWorld())
 	{
+		World->GetTimerManager().ClearTimer(ActivationTimerHandle);
 		World->GetTimerManager().ClearTimer(WaveTimerHandle);
 		World->GetTimerManager().ClearTimer(BurstTimerHandle);
 	}
@@ -352,6 +440,30 @@ void ATunaSweeperRollingBomberSpawner::DestroySpawner()
 	StopSpawning();
 	SetActorEnableCollision(false);
 	Destroy();
+}
+
+ATunaSweeperTopDownCharacter* ATunaSweeperRollingBomberSpawner::ResolvePlayerTarget() const
+{
+	APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(this, 0);
+	ATunaSweeperTopDownCharacter* PlayerCharacter = Cast<ATunaSweeperTopDownCharacter>(PlayerPawn);
+	if (!PlayerCharacter || PlayerCharacter->IsDead())
+	{
+		return nullptr;
+	}
+
+	return PlayerCharacter;
+}
+
+bool ATunaSweeperRollingBomberSpawner::IsPlayerWithinActivationRange() const
+{
+	const ATunaSweeperTopDownCharacter* PlayerCharacter = ResolvePlayerTarget();
+	if (!PlayerCharacter)
+	{
+		return false;
+	}
+
+	return FVector::DistSquared2D(PlayerCharacter->GetActorLocation(), GetActorLocation()) <=
+		FMath::Square(FMath::Max(0.0f, ActivationRangeCm));
 }
 
 void ATunaSweeperRollingBomberSpawner::BuildSpawnerMeshes()

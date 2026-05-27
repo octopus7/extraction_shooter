@@ -10,8 +10,8 @@
 namespace
 {
 	constexpr float BurstLifetimeSeconds = 0.55f;
+	constexpr int32 BurstParticleDensityMultiplier = 3;
 	const TCHAR* BurstMaterialPath = TEXT("/Game/Prototype/M_Voxel_VertexColor.M_Voxel_VertexColor");
-	const FLinearColor BurstColor(0.0f, 1.0f, 1.0f, 1.0f);
 
 	struct FMeleeImpactBurstParticleConfig
 	{
@@ -32,6 +32,30 @@ namespace
 		{ FVector(138.0f, 30.0f, -18.0f), FVector(0.09f, 0.09f, 0.09f) },
 		{ FVector(148.0f, -6.0f, 28.0f), FVector(0.08f, 0.08f, 0.08f) }
 	};
+
+	FMeleeImpactBurstParticleConfig BuildBurstParticleVariant(
+		const FMeleeImpactBurstParticleConfig& Config,
+		int32 VariantIndex)
+	{
+		if (VariantIndex <= 0)
+		{
+			return Config;
+		}
+
+		const float VariantSign = VariantIndex % 2 == 0 ? -1.0f : 1.0f;
+		const float VariantStrength = static_cast<float>((VariantIndex + 1) / 2);
+		const FVector SpreadOffset(
+			0.0f,
+			VariantSign * (8.0f + VariantStrength * 3.0f),
+			-VariantSign * (5.0f + VariantStrength * 2.0f));
+		const float ScaleMultiplier = FMath::Max(0.65f, 1.0f - VariantStrength * 0.08f);
+
+		return FMeleeImpactBurstParticleConfig
+		{
+			Config.TargetLocation + SpreadOffset,
+			Config.Scale * ScaleMultiplier
+		};
+	}
 
 	void ConfigureBurstParticle(
 		UStaticMeshComponent* Particle,
@@ -68,21 +92,27 @@ ATunaSweeperMeleeImpactBurstActor::ATunaSweeperMeleeImpactBurstActor()
 
 	for (int32 Index = 0; Index < UE_ARRAY_COUNT(BurstParticleConfigs); ++Index)
 	{
-		const FName ComponentName(*FString::Printf(TEXT("BurstParticle%d"), Index));
-		UStaticMeshComponent* BurstParticle = CreateDefaultSubobject<UStaticMeshComponent>(ComponentName);
-		BurstParticle->SetupAttachment(RootComponent);
+		for (int32 VariantIndex = 0; VariantIndex < BurstParticleDensityMultiplier; ++VariantIndex)
+		{
+			const FName ComponentName(*FString::Printf(TEXT("BurstParticle%d_%d"), Index, VariantIndex));
+			UStaticMeshComponent* BurstParticle = CreateDefaultSubobject<UStaticMeshComponent>(ComponentName);
+			BurstParticle->SetupAttachment(RootComponent);
 
-		const FMeleeImpactBurstParticleConfig& Config = BurstParticleConfigs[Index];
-		ConfigureBurstParticle(BurstParticle, BurstMesh, Config.TargetLocation * 0.18f, Config.Scale * 1.65f);
-		BurstParticles.Add(BurstParticle);
-		BurstTargetLocations.Add(Config.TargetLocation);
-		BurstBaseScales.Add(Config.Scale);
+			const FMeleeImpactBurstParticleConfig Config =
+				BuildBurstParticleVariant(BurstParticleConfigs[Index], VariantIndex);
+			ConfigureBurstParticle(BurstParticle, BurstMesh, Config.TargetLocation * 0.18f, Config.Scale * 1.65f);
+			BurstParticles.Add(BurstParticle);
+			BurstTargetLocations.Add(Config.TargetLocation);
+			BurstBaseScales.Add(Config.Scale);
+		}
 	}
 }
 
 void ATunaSweeperMeleeImpactBurstActor::BeginPlay()
 {
 	Super::BeginPlay();
+
+	BurstDynamicMaterials.Reset();
 
 	UMaterialInterface* BurstMaterial = LoadObject<UMaterialInterface>(nullptr, BurstMaterialPath);
 	for (UStaticMeshComponent* Particle : BurstParticles)
@@ -100,10 +130,31 @@ void ATunaSweeperMeleeImpactBurstActor::BeginPlay()
 		UMaterialInstanceDynamic* DynamicMaterial = Particle->CreateAndSetMaterialInstanceDynamic(0);
 		if (DynamicMaterial)
 		{
-			DynamicMaterial->SetVectorParameterValue(TEXT("Color"), BurstColor);
-			DynamicMaterial->SetVectorParameterValue(TEXT("BaseColor"), BurstColor);
-			DynamicMaterial->SetVectorParameterValue(TEXT("EmissiveColor"), BurstColor);
+			BurstDynamicMaterials.Add(DynamicMaterial);
 		}
+	}
+
+	ApplyBurstColorToMaterials();
+}
+
+void ATunaSweeperMeleeImpactBurstActor::SetBurstColor(const FLinearColor& InBurstColor)
+{
+	BurstColor = InBurstColor;
+	ApplyBurstColorToMaterials();
+}
+
+void ATunaSweeperMeleeImpactBurstActor::ApplyBurstColorToMaterials()
+{
+	for (UMaterialInstanceDynamic* DynamicMaterial : BurstDynamicMaterials)
+	{
+		if (!DynamicMaterial)
+		{
+			continue;
+		}
+
+		DynamicMaterial->SetVectorParameterValue(TEXT("Color"), BurstColor);
+		DynamicMaterial->SetVectorParameterValue(TEXT("BaseColor"), BurstColor);
+		DynamicMaterial->SetVectorParameterValue(TEXT("EmissiveColor"), BurstColor);
 	}
 }
 

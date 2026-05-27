@@ -25,6 +25,9 @@ void UTunaSweeperRollingBomberAnimInstance::NativeUpdateAnimation(float DeltaSec
 
 	bHasRollingBomberOwner = true;
 	Mode = RollingBomber->GetRollingBomberMode();
+	bIsSpawnPhysicsMode = Mode == ETunaSweeperRollingBomberMode::SpawnPhysics;
+	bIsStandingUpFromSpawnMode = Mode == ETunaSweeperRollingBomberMode::StandingUpFromSpawn;
+	bIsSpawnTransitionMode = bIsSpawnPhysicsMode || bIsStandingUpFromSpawnMode;
 	bIsProjectileAttackMode = Mode == ETunaSweeperRollingBomberMode::ProjectileAttack;
 	bIsFoldingLegsMode = Mode == ETunaSweeperRollingBomberMode::FoldingLegs;
 	bIsRollingMode = Mode == ETunaSweeperRollingBomberMode::Rolling;
@@ -40,6 +43,7 @@ void UTunaSweeperRollingBomberAnimInstance::NativeUpdateAnimation(float DeltaSec
 
 	bLegIKEnabled = RollingBomber->IsLegIKEnabled();
 	LegFoldAlpha = RollingBomber->GetLegFoldAlpha();
+	SpawnStandUpAlpha = RollingBomber->GetSpawnStandUpAlpha();
 	UpdateFootIKState(LeftFootIK, RollingBomber->GetFootIKState(ETunaSweeperRollingBomberFoot::Left));
 	UpdateFootIKState(RightFootIK, RollingBomber->GetFootIKState(ETunaSweeperRollingBomberFoot::Right));
 
@@ -67,6 +71,9 @@ void UTunaSweeperRollingBomberAnimInstance::ResetAnimState()
 	RollingBomberOwner = nullptr;
 	bHasRollingBomberOwner = false;
 	Mode = ETunaSweeperRollingBomberMode::ProjectileAttack;
+	bIsSpawnPhysicsMode = false;
+	bIsStandingUpFromSpawnMode = false;
+	bIsSpawnTransitionMode = false;
 	bIsProjectileAttackMode = false;
 	bIsFoldingLegsMode = false;
 	bIsRollingMode = false;
@@ -78,6 +85,7 @@ void UTunaSweeperRollingBomberAnimInstance::ResetAnimState()
 	BodyRollDegrees = 0.0f;
 	bLegIKEnabled = false;
 	LegFoldAlpha = 0.0f;
+	SpawnStandUpAlpha = 0.0f;
 	LeftFootIK = FTunaSweeperRollingBomberAnimFootIKState();
 	RightFootIK = FTunaSweeperRollingBomberAnimFootIKState();
 	bEyeChargeWarningActive = false;

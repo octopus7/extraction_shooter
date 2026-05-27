@@ -322,6 +322,18 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Death")
 	TSoftClassPtr<UTunaSweeperLevelTransitionWidget> RespawnTransitionWidgetClass;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Death|Ragdoll")
+	bool bEnableDeathRagdoll = true;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Death|Ragdoll")
+	FName DeathRagdollCollisionProfileName = FName(TEXT("Ragdoll"));
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Death|Ragdoll", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float DeathRagdollHorizontalImpulse = 12000.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Death|Ragdoll", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float DeathRagdollUpwardImpulse = 1800.0f;
+
 private:
 	void AddDefaultInputMapping() const;
 	void EnsureEquippedWeaponActor();
@@ -378,6 +390,8 @@ private:
 	FVector ResolveDamageCameraReactionDirection(AActor* DamageCauser) const;
 	FVector UpdateDamageCameraReaction(float DeltaSeconds, float& OutRollDegrees, float& OutFOVDegrees);
 	void HandleDeath();
+	void ApplyDeathRagdoll();
+	FVector ResolveDeathRagdollImpulse() const;
 	void StartRespawnTransition();
 
 	UPROPERTY(Transient)
@@ -398,6 +412,7 @@ private:
 	FTunaSweeperCameraHitReactionSettings ActiveCameraHitReaction;
 	ETunaSweeperPlayerCameraMode CurrentCameraMode = ETunaSweeperPlayerCameraMode::Default;
 	FVector CameraHitReactionDirection = FVector::ForwardVector;
+	FVector LastDamageImpulseDirection = FVector::ZeroVector;
 	int32 SelectedWeaponSlotNumber = 0;
 	int32 PendingReloadAmmoItemId = INDEX_NONE;
 	int32 AmmoSelectionFocusIndex = INDEX_NONE;

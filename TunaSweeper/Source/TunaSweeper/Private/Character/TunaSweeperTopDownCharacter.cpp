@@ -26,6 +26,7 @@
 #include "TunaSweeperCollisionChannels.h"
 #include "UI/TunaSweeperLevelTransitionWidget.h"
 #include "UI/TunaSweeperStaminaGaugeWidget.h"
+#include "Weapon/TunaSweeperProjectile.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Weapon/TunaSweeperWeapon.h"
 
@@ -134,6 +135,17 @@ ATunaSweeperTopDownCharacter::ATunaSweeperTopDownCharacter()
 	RespawnMediaSource = TSoftObjectPtr<UMediaSource>(FSoftObjectPath(TEXT("/Game/Movies/MS_Respawn.MS_Respawn")));
 	RespawnTransitionWidgetClass = TSoftClassPtr<UTunaSweeperLevelTransitionWidget>(
 		FSoftObjectPath(TEXT("/Game/UI/WBP_LevelTransitionVideo.WBP_LevelTransitionVideo_C")));
+
+	FTunaSweeperCameraHitReactionSettings ProjectileCameraHitReaction;
+	ProjectileCameraHitReaction.Duration = 0.18f;
+	ProjectileCameraHitReaction.LocationAmplitude = 10.0f;
+	ProjectileCameraHitReaction.RollAmplitudeDegrees = 0.08f;
+	ProjectileCameraHitReaction.FOVAmplitudeDegrees = 0.0f;
+	ProjectileCameraHitReaction.Frequency = 8.0f;
+	ProjectileCameraHitReaction.DamageScaleReference = 5.0f;
+	ProjectileCameraHitReaction.MinDamageScale = 0.0f;
+	ProjectileCameraHitReaction.MaxDamageScale = 1.0f;
+	CameraHitReactionOverrides.Add(ETunaSweeperHitReactionType::Projectile, ProjectileCameraHitReaction);
 }
 
 void ATunaSweeperTopDownCharacter::OnConstruction(const FTransform& Transform)
@@ -247,6 +259,8 @@ float ATunaSweeperTopDownCharacter::TakeDamage(
 	{
 		return 0.0f;
 	}
+
+	LastDamageImpulseDirection = ResolveDamageCameraReactionDirection(DamageCauser);
 
 	FTunaSweeperVitalsDelta DamageDelta;
 	DamageDelta.Health = -DamageAmount;
@@ -1056,7 +1070,12 @@ void ATunaSweeperTopDownCharacter::HandleDeath()
 	CurrentMoveInput = FVector2D::ZeroVector;
 	CancelReload();
 	CloseAmmoSelection();
+	ClearEquippedWeaponActor();
 	GetWorldTimerManager().ClearTimer(FireTimerHandle);
+	if (StaminaGaugeWidgetComponent)
+	{
+		StaminaGaugeWidgetComponent->SetVisibility(false);
+	}
 
 	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
 	{
@@ -1075,6 +1094,8 @@ void ATunaSweeperTopDownCharacter::HandleDeath()
 		MovementComponent->DisableMovement();
 	}
 
+	ApplyDeathRagdoll();
+
 	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
 	{
 		PlayerController->SetIgnoreMoveInput(true);
@@ -1088,6 +1109,82 @@ void ATunaSweeperTopDownCharacter::HandleDeath()
 		&ATunaSweeperTopDownCharacter::StartRespawnTransition,
 		FMath::Max(0.0f, RespawnDelaySeconds),
 		false);
+}
+
+void ATunaSweeperTopDownCharacter::ApplyDeathRagdoll()
+{
+	if (!bEnableDeathRagdoll)
+	{
+		return;
+	}
+
+	const FVector RagdollImpulse = ResolveDeathRagdollImpulse();
+
+	if (UCapsuleComponent* Capsule = GetCapsuleComponent())
+	{
+		Capsule->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		Capsule->SetGenerateOverlapEvents(false);
+	}
+
+	if (USkeletalMeshComponent* CharacterMesh = GetMesh();
+		CharacterMesh && CharacterMesh->GetSkeletalMeshAsset())
+	{
+		CharacterMesh->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+		if (!DeathRagdollCollisionProfileName.IsNone())
+		{
+			CharacterMesh->SetCollisionProfileName(DeathRagdollCollisionProfileName);
+		}
+		CharacterMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		CharacterMesh->SetEnableGravity(true);
+		CharacterMesh->SetAllBodiesSimulatePhysics(true);
+		CharacterMesh->SetSimulatePhysics(true);
+		CharacterMesh->WakeAllRigidBodies();
+		CharacterMesh->bBlendPhysics = true;
+		if (!RagdollImpulse.IsNearlyZero())
+		{
+			CharacterMesh->AddImpulse(RagdollImpulse);
+		}
+		return;
+	}
+
+	if (VisualMesh)
+	{
+		VisualMesh->SetHiddenInGame(false);
+		VisualMesh->SetVisibility(true, true);
+		VisualMesh->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+		if (!DeathRagdollCollisionProfileName.IsNone())
+		{
+			VisualMesh->SetCollisionProfileName(DeathRagdollCollisionProfileName);
+		}
+		VisualMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		VisualMesh->SetEnableGravity(true);
+		VisualMesh->SetSimulatePhysics(true);
+		VisualMesh->WakeRigidBody();
+		if (!RagdollImpulse.IsNearlyZero())
+		{
+			VisualMesh->AddImpulse(RagdollImpulse);
+		}
+	}
+}
+
+FVector ATunaSweeperTopDownCharacter::ResolveDeathRagdollImpulse() const
+{
+	FVector HorizontalDirection = LastDamageImpulseDirection;
+	HorizontalDirection.Z = 0.0f;
+	if (!HorizontalDirection.Normalize())
+	{
+		HorizontalDirection = -GetActorForwardVector();
+		HorizontalDirection.Z = 0.0f;
+		HorizontalDirection.Normalize();
+	}
+
+	if (HorizontalDirection.IsNearlyZero())
+	{
+		HorizontalDirection = -FVector::ForwardVector;
+	}
+
+	return HorizontalDirection * FMath::Max(0.0f, DeathRagdollHorizontalImpulse) +
+		FVector::UpVector * FMath::Max(0.0f, DeathRagdollUpwardImpulse);
 }
 
 void ATunaSweeperTopDownCharacter::StartRespawnTransition()
@@ -1208,6 +1305,13 @@ void ATunaSweeperTopDownCharacter::TriggerDamageCameraReaction(
 	}
 
 	ActiveCameraHitReaction = ResolveDamageCameraReactionSettings(DamageEvent, DamageCauser);
+	if (const ATunaSweeperProjectile* ProjectileCauser = Cast<ATunaSweeperProjectile>(DamageCauser))
+	{
+		const float ProjectileReactionScale = ProjectileCauser->GetCameraHitReactionScale();
+		ActiveCameraHitReaction.LocationAmplitude *= ProjectileReactionScale;
+		ActiveCameraHitReaction.RollAmplitudeDegrees *= ProjectileReactionScale;
+		ActiveCameraHitReaction.FOVAmplitudeDegrees *= ProjectileReactionScale;
+	}
 	if (ActiveCameraHitReaction.Duration <= 0.0f ||
 		(ActiveCameraHitReaction.LocationAmplitude <= 0.0f && ActiveCameraHitReaction.RollAmplitudeDegrees <= 0.0f))
 	{
@@ -1232,7 +1336,11 @@ ETunaSweeperHitReactionType ATunaSweeperTopDownCharacter::ResolveDamageCameraRea
 	AActor* DamageCauser) const
 {
 	(void)DamageEvent;
-	(void)DamageCauser;
+
+	if (Cast<ATunaSweeperProjectile>(DamageCauser))
+	{
+		return ETunaSweeperHitReactionType::Projectile;
+	}
 
 	return ETunaSweeperHitReactionType::Default;
 }
