@@ -2191,3 +2191,11 @@
 ## 2026-05-28 06:41:58 (elapsed: 00:01:18)
 
 - Package the project for Windows.
+
+## 2026-05-28 06:47:54 (elapsed: 00:00:30)
+
+- Investigate whether `WM_SogSoftEllipse.uasset` is regenerated whenever the editor opens, and why it reappears after discard.
+
+## 2026-05-28 07:03:32 (elapsed: 00:00:30)
+
+- Prevent `M_SogSoftEllipse.uasset` from being modified on editor startup unless the SogSplat editor path actually creates the missing material asset, and document the source-control dirtying issue in code.

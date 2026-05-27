@@ -92,25 +92,29 @@ const TCHAR* SogSplatEditorUtils::GetDefaultMaterialObjectPath()
 UMaterialInterface* SogSplatEditorUtils::EnsureDefaultSogMaterial()
 {
 	UMaterial* Material = LoadObject<UMaterial>(nullptr, *DefaultMaterialObjectPath);
+	if (Material)
+	{
+		// Do not rebuild an existing plugin material during editor startup. Re-saving it here dirties
+		// M_SogSoftEllipse.uasset every time the editor opens, even after the user discards the asset.
+		return Material;
+	}
+
+	UMaterialFactoryNew* MaterialFactory = NewObject<UMaterialFactoryNew>();
+	FAssetToolsModule& AssetToolsModule = FModuleManager::LoadModuleChecked<FAssetToolsModule>(TEXT("AssetTools"));
+	UObject* CreatedAsset = AssetToolsModule.Get().CreateAsset(
+		DefaultMaterialName,
+		DefaultMaterialPath,
+		UMaterial::StaticClass(),
+		MaterialFactory);
+
+	Material = Cast<UMaterial>(CreatedAsset);
 	if (!Material)
 	{
-		UMaterialFactoryNew* MaterialFactory = NewObject<UMaterialFactoryNew>();
-		FAssetToolsModule& AssetToolsModule = FModuleManager::LoadModuleChecked<FAssetToolsModule>(TEXT("AssetTools"));
-		UObject* CreatedAsset = AssetToolsModule.Get().CreateAsset(
-			DefaultMaterialName,
-			DefaultMaterialPath,
-			UMaterial::StaticClass(),
-			MaterialFactory);
-
-		Material = Cast<UMaterial>(CreatedAsset);
-		if (!Material)
-		{
-			UE_LOG(LogTemp, Error, TEXT("Failed to create default SOG material at %s."), *DefaultMaterialObjectPath);
-			return nullptr;
-		}
-
-		FAssetRegistryModule::AssetCreated(Material);
+		UE_LOG(LogTemp, Error, TEXT("Failed to create default SOG material at %s."), *DefaultMaterialObjectPath);
+		return nullptr;
 	}
+
+	FAssetRegistryModule::AssetCreated(Material);
 
 	Material->Modify();
 	Material->GetExpressionCollection().Empty();
