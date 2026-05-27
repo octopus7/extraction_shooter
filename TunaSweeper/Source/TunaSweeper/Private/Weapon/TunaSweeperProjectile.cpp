@@ -1,10 +1,12 @@
 #include "Weapon/TunaSweeperProjectile.h"
 
+#include "Character/TunaSweeperTopDownCharacter.h"
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/DamageType.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "TunaSweeperCollisionChannels.h"
 #include "UObject/ConstructorHelpers.h"
 
 ATunaSweeperProjectile::ATunaSweeperProjectile()
@@ -13,7 +15,7 @@ ATunaSweeperProjectile::ATunaSweeperProjectile()
 
 	CollisionComponent = CreateDefaultSubobject<USphereComponent>(TEXT("CollisionComponent"));
 	CollisionComponent->InitSphereRadius(12.0f);
-	CollisionComponent->SetCollisionProfileName(TEXT("BlockAllDynamic"));
+	ApplyProjectileCollisionDefaults();
 	CollisionComponent->SetNotifyRigidBodyCollision(true);
 	CollisionComponent->OnComponentHit.AddDynamic(this, &ATunaSweeperProjectile::HandleHit);
 	RootComponent = CollisionComponent;
@@ -41,7 +43,21 @@ void ATunaSweeperProjectile::BeginPlay()
 {
 	Super::BeginPlay();
 
+	ApplyProjectileCollisionDefaults();
 	SetLifeSpan(LifeSeconds);
+}
+
+void ATunaSweeperProjectile::ApplyProjectileCollisionDefaults()
+{
+	if (!CollisionComponent)
+	{
+		return;
+	}
+
+	CollisionComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	CollisionComponent->SetCollisionObjectType(TunaSweeperCollisionChannels::Projectile);
+	CollisionComponent->SetCollisionResponseToAllChannels(ECR_Block);
+	CollisionComponent->SetCollisionResponseToChannel(TunaSweeperCollisionChannels::Projectile, ECR_Ignore);
 }
 
 void ATunaSweeperProjectile::HandleHit(
@@ -53,6 +69,16 @@ void ATunaSweeperProjectile::HandleHit(
 {
 	if (!OtherActor || OtherActor == this || OtherActor == GetOwner() || OtherActor == GetInstigator())
 	{
+		return;
+	}
+
+	if (const ATunaSweeperTopDownCharacter* TunaCharacter = Cast<ATunaSweeperTopDownCharacter>(OtherActor);
+		TunaCharacter && TunaCharacter->IsDamageInvulnerable())
+	{
+		if (HitComponent)
+		{
+			HitComponent->IgnoreActorWhenMoving(OtherActor, true);
+		}
 		return;
 	}
 

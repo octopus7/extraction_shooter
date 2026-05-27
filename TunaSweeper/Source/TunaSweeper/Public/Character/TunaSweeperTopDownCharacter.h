@@ -143,6 +143,12 @@ public:
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Stamina")
 	bool IsSprinting() const { return bIsSprinting; }
 
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Roll")
+	bool IsRolling() const { return bIsRolling; }
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Combat")
+	bool IsDamageInvulnerable() const { return bIsRolling; }
+
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Input")
 	void CancelActiveGameplayActions();
 
@@ -223,6 +229,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	TSoftObjectPtr<UInputAction> SprintAction;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+	TSoftObjectPtr<UInputAction> RollAction;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat")
 	TSoftClassPtr<ATunaSweeperWeapon> DefaultWeaponClass;
 
@@ -246,6 +255,18 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement|Sprint", meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float StaminaGaugeFadeInterpSpeed = 8.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement|Roll", meta = (ClampMin = "0.01", UIMin = "0.01"))
+	float RollDurationSeconds = 0.55f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement|Roll", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float RollDistance = 420.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement|Roll")
+	bool bUseTemporaryRollVisualRotation = true;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement|Roll")
+	float TemporaryRollVisualRightAxisDegrees = -360.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Camera")
 	float DefaultCameraFOV = 70.0f;
@@ -309,6 +330,7 @@ private:
 	void HandleCameraMode(const FInputActionValue& Value);
 	void BeginSprint(const FInputActionValue& Value);
 	void EndSprint(const FInputActionValue& Value);
+	void BeginRoll(const FInputActionValue& Value);
 	void HandleMoveStopped(const FInputActionValue& Value);
 	void FireWeapon();
 	bool IsGameplayActionInputLocked() const;
@@ -324,8 +346,14 @@ private:
 	void RefreshCharacterVisualVisibility();
 	void UpdateAimingVisuals(float DeltaSeconds);
 	void UpdateSprintAndStamina(float DeltaSeconds);
+	void UpdateRoll(float DeltaSeconds);
 	void UpdateMovementSpeed();
 	void UpdateStaminaGauge(float DeltaSeconds);
+	void FinishRoll();
+	void SetRollProjectileCollisionPassthrough(bool bEnabled);
+	void ApplyTemporaryRollVisualRotation(float NormalizedRollTime);
+	void RestoreTemporaryRollVisualRotation();
+	FVector ResolveRollDirection() const;
 	bool HasActiveMoveInput() const;
 	FTunaSweeperPlayerCameraModeSettings ResolveCurrentCameraModeSettings() const;
 	void TriggerDamageCameraReaction(float DamageAmount, FDamageEvent const& DamageEvent, AActor* DamageCauser);
@@ -364,10 +392,15 @@ private:
 	float CurrentCameraBaseFOV = 0.0f;
 	float CurrentStamina = 100.0f;
 	float StaminaGaugeOpacity = 0.0f;
+	float RollElapsedSeconds = 0.0f;
 	float CameraHitReactionElapsed = 0.0f;
 	float CameraHitReactionScale = 1.0f;
 	float CameraHitReactionPhase = 0.0f;
+	FVector RollDirection = FVector::ForwardVector;
 	FVector2D CurrentMoveInput = FVector2D::ZeroVector;
+	FRotator DefaultSkeletalMeshRelativeRotation = FRotator::ZeroRotator;
+	FRotator DefaultVisualMeshRelativeRotation = FRotator::ZeroRotator;
+	TEnumAsByte<ECollisionResponse> SavedProjectileCollisionResponse = ECR_Block;
 	bool bFireHeld = false;
 	bool bIsAiming = false;
 	bool bIsDead = false;
@@ -377,4 +410,7 @@ private:
 	bool bSprintInputHeld = false;
 	bool bIsSprinting = false;
 	bool bSprintLockedUntilReleased = false;
+	bool bIsRolling = false;
+	bool bHasSavedProjectileCollisionResponse = false;
+	bool bRollVisualRotationApplied = false;
 };

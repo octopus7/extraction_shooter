@@ -23,6 +23,7 @@
 #include "Subsystem/TunaSweeperLevelTransitionSubsystem.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
 #include "TimerManager.h"
+#include "TunaSweeperCollisionChannels.h"
 #include "UI/TunaSweeperLevelTransitionWidget.h"
 #include "UI/TunaSweeperStaminaGaugeWidget.h"
 #include "UObject/ConstructorHelpers.h"
@@ -123,6 +124,7 @@ ATunaSweeperTopDownCharacter::ATunaSweeperTopDownCharacter()
 	AmmoFocusAction = TSoftObjectPtr<UInputAction>(FSoftObjectPath(TEXT("/Game/Input/IA_AmmoFocus.IA_AmmoFocus")));
 	CameraModeAction = TSoftObjectPtr<UInputAction>(FSoftObjectPath(TEXT("/Game/Input/IA_CameraMode.IA_CameraMode")));
 	SprintAction = TSoftObjectPtr<UInputAction>(FSoftObjectPath(TEXT("/Game/Input/IA_Sprint.IA_Sprint")));
+	RollAction = TSoftObjectPtr<UInputAction>(FSoftObjectPath(TEXT("/Game/Input/IA_Roll.IA_Roll")));
 	DefaultWeaponClass = TSoftClassPtr<ATunaSweeperWeapon>(TunaSweeperEquippedWeaponVisual::AssaultRifleClassPath);
 	RespawnMediaSource = TSoftObjectPtr<UMediaSource>(FSoftObjectPath(TEXT("/Game/Movies/MS_Respawn.MS_Respawn")));
 	RespawnTransitionWidgetClass = TSoftClassPtr<UTunaSweeperLevelTransitionWidget>(
@@ -152,6 +154,8 @@ void ATunaSweeperTopDownCharacter::BeginPlay()
 	DefaultCameraTargetOffset = CameraBoom ? CameraBoom->TargetOffset : DefaultCameraTargetOffset;
 	CurrentCameraModeOffset = DefaultCameraTargetOffset;
 	CurrentCameraAimOffset = FVector::ZeroVector;
+	DefaultSkeletalMeshRelativeRotation = GetMesh() ? GetMesh()->GetRelativeRotation() : FRotator::ZeroRotator;
+	DefaultVisualMeshRelativeRotation = VisualMesh ? VisualMesh->GetRelativeRotation() : FRotator::ZeroRotator;
 	CurrentStamina = FMath::Max(0.0f, MaxStamina);
 	StaminaGaugeOpacity = 0.0f;
 
@@ -185,6 +189,7 @@ void ATunaSweeperTopDownCharacter::Tick(float DeltaSeconds)
 		return;
 	}
 
+	UpdateRoll(DeltaSeconds);
 	UpdateSprintAndStamina(DeltaSeconds);
 	UpdateMovementSpeed();
 	UpdateStaminaGauge(DeltaSeconds);
@@ -204,6 +209,8 @@ void ATunaSweeperTopDownCharacter::EndPlay(const EEndPlayReason::Type EndPlayRea
 	{
 		VitalsComponent->OnVitalsChanged.RemoveDynamic(this, &ATunaSweeperTopDownCharacter::HandleVitalsChanged);
 	}
+
+	FinishRoll();
 
 	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
 	{
@@ -227,6 +234,11 @@ float ATunaSweeperTopDownCharacter::TakeDamage(
 	AActor* DamageCauser)
 {
 	if (bIsDead || DamageAmount <= 0.0f || !VitalsComponent)
+	{
+		return 0.0f;
+	}
+
+	if (IsDamageInvulnerable())
 	{
 		return 0.0f;
 	}
@@ -304,6 +316,11 @@ void ATunaSweeperTopDownCharacter::SetupPlayerInputComponent(UInputComponent* Pl
 		EnhancedInputComponent->BindAction(LoadedSprintAction, ETriggerEvent::Started, this, &ATunaSweeperTopDownCharacter::BeginSprint);
 		EnhancedInputComponent->BindAction(LoadedSprintAction, ETriggerEvent::Completed, this, &ATunaSweeperTopDownCharacter::EndSprint);
 		EnhancedInputComponent->BindAction(LoadedSprintAction, ETriggerEvent::Canceled, this, &ATunaSweeperTopDownCharacter::EndSprint);
+	}
+
+	if (UInputAction* LoadedRollAction = RollAction.LoadSynchronous())
+	{
+		EnhancedInputComponent->BindAction(LoadedRollAction, ETriggerEvent::Started, this, &ATunaSweeperTopDownCharacter::BeginRoll);
 	}
 }
 
@@ -416,6 +433,11 @@ void ATunaSweeperTopDownCharacter::HandleMove(const FInputActionValue& Value)
 
 	const FVector2D MoveVector = Value.Get<FVector2D>();
 	CurrentMoveInput = MoveVector.GetClampedToMaxSize(1.0f);
+	if (bIsRolling)
+	{
+		return;
+	}
+
 	if (!FMath::IsNearlyZero(MoveVector.Y))
 	{
 		AddMovementInput(FVector::ForwardVector, MoveVector.Y);
@@ -590,6 +612,43 @@ void ATunaSweeperTopDownCharacter::EndSprint(const FInputActionValue& Value)
 	bSprintInputHeld = false;
 	bIsSprinting = false;
 	bSprintLockedUntilReleased = false;
+}
+
+void ATunaSweeperTopDownCharacter::BeginRoll(const FInputActionValue& Value)
+{
+	(void)Value;
+	if (bIsDead || bIsRolling || IsGameplayActionInputLocked())
+	{
+		return;
+	}
+
+	RollDirection = ResolveRollDirection();
+	if (RollDirection.IsNearlyZero())
+	{
+		return;
+	}
+
+	bIsRolling = true;
+	bIsSprinting = false;
+	bSprintInputHeld = false;
+	bSprintLockedUntilReleased = false;
+	bFireHeld = false;
+	bIsAiming = false;
+	RollElapsedSeconds = 0.0f;
+	DefaultSkeletalMeshRelativeRotation = GetMesh() ? GetMesh()->GetRelativeRotation() : DefaultSkeletalMeshRelativeRotation;
+	DefaultVisualMeshRelativeRotation = VisualMesh ? VisualMesh->GetRelativeRotation() : DefaultVisualMeshRelativeRotation;
+
+	CancelReload();
+	CloseAmmoSelection();
+	if (GetWorld())
+	{
+		GetWorldTimerManager().ClearTimer(FireTimerHandle);
+	}
+
+	SetActorRotation(FRotator(0.0f, RollDirection.Rotation().Yaw, 0.0f));
+	SetRollProjectileCollisionPassthrough(true);
+	UpdateMovementSpeed();
+	ApplyTemporaryRollVisualRotation(0.0f);
 }
 
 void ATunaSweeperTopDownCharacter::CyclePlayerCameraMode()
@@ -904,6 +963,7 @@ bool ATunaSweeperTopDownCharacter::IsGameplayActionInputLocked() const
 
 void ATunaSweeperTopDownCharacter::CancelActiveGameplayActions()
 {
+	FinishRoll();
 	bFireHeld = false;
 	bIsAiming = false;
 	bSprintInputHeld = false;
@@ -940,6 +1000,7 @@ void ATunaSweeperTopDownCharacter::HandleDeath()
 	}
 
 	bIsDead = true;
+	FinishRoll();
 	bFireHeld = false;
 	bIsAiming = false;
 	bSprintInputHeld = false;
@@ -1017,7 +1078,7 @@ void ATunaSweeperTopDownCharacter::UpdateAimingVisuals(float DeltaSeconds)
 	const FVector HitReactionOffset = UpdateDamageCameraReaction(DeltaSeconds, HitReactionRollDegrees, HitReactionFOVDegrees);
 	const FTunaSweeperPlayerCameraModeSettings CameraModeSettings = ResolveCurrentCameraModeSettings();
 
-	if (!AimDirection.IsNearlyZero())
+	if (!bIsRolling && !AimDirection.IsNearlyZero())
 	{
 		const FRotator CurrentRotation = GetActorRotation();
 		const FRotator TargetRotation(0.0f, AimDirection.Rotation().Yaw, 0.0f);
@@ -1195,6 +1256,25 @@ FVector ATunaSweeperTopDownCharacter::UpdateDamageCameraReaction(
 		ScaledDecay;
 }
 
+void ATunaSweeperTopDownCharacter::UpdateRoll(float DeltaSeconds)
+{
+	if (!bIsRolling)
+	{
+		return;
+	}
+
+	const float EffectiveRollDuration = FMath::Max(0.01f, RollDurationSeconds);
+	RollElapsedSeconds += FMath::Max(0.0f, DeltaSeconds);
+
+	AddMovementInput(RollDirection, 1.0f);
+	ApplyTemporaryRollVisualRotation(FMath::Clamp(RollElapsedSeconds / EffectiveRollDuration, 0.0f, 1.0f));
+
+	if (RollElapsedSeconds >= EffectiveRollDuration)
+	{
+		FinishRoll();
+	}
+}
+
 void ATunaSweeperTopDownCharacter::UpdateSprintAndStamina(float DeltaSeconds)
 {
 	const float ClampedDeltaSeconds = FMath::Max(0.0f, DeltaSeconds);
@@ -1211,6 +1291,7 @@ void ATunaSweeperTopDownCharacter::UpdateSprintAndStamina(float DeltaSeconds)
 	const bool bCanSprint =
 		bSprintInputHeld &&
 		!bSprintLockedUntilReleased &&
+		!bIsRolling &&
 		HasActiveMoveInput() &&
 		!IsGameplayActionInputLocked();
 	bIsSprinting = bCanSprint && CurrentStamina > 0.0f;
@@ -1243,12 +1324,14 @@ void ATunaSweeperTopDownCharacter::UpdateMovementSpeed()
 	const float CarryWeightSpeedMultiplier = TunaGameInstance
 		? TunaGameInstance->GetCarryWeightMovementSpeedMultiplier()
 		: 1.0f;
-	const float SprintMultiplier = bIsSprinting ? FMath::Max(1.0f, SprintSpeedMultiplier) : 1.0f;
+	const float ActionSpeedMultiplier = bIsRolling
+		? FMath::Max(0.0f, RollDistance) / FMath::Max(0.01f, RollDurationSeconds) / FMath::Max(1.0f, BaseWalkSpeed)
+		: (bIsSprinting ? FMath::Max(1.0f, SprintSpeedMultiplier) : 1.0f);
 
 	MovementComponent->MaxWalkSpeed =
 		BaseWalkSpeed *
 		FMath::Clamp(CarryWeightSpeedMultiplier, 0.0f, 1.0f) *
-		SprintMultiplier;
+		ActionSpeedMultiplier;
 }
 
 void ATunaSweeperTopDownCharacter::UpdateStaminaGauge(float DeltaSeconds)
@@ -1294,4 +1377,107 @@ void ATunaSweeperTopDownCharacter::UpdateStaminaGauge(float DeltaSeconds)
 bool ATunaSweeperTopDownCharacter::HasActiveMoveInput() const
 {
 	return CurrentMoveInput.SizeSquared() > KINDA_SMALL_NUMBER;
+}
+
+void ATunaSweeperTopDownCharacter::FinishRoll()
+{
+	if (!bIsRolling && !bHasSavedProjectileCollisionResponse)
+	{
+		return;
+	}
+
+	bIsRolling = false;
+	RollElapsedSeconds = 0.0f;
+	SetRollProjectileCollisionPassthrough(false);
+	RestoreTemporaryRollVisualRotation();
+	UpdateMovementSpeed();
+}
+
+void ATunaSweeperTopDownCharacter::SetRollProjectileCollisionPassthrough(bool bEnabled)
+{
+	UCapsuleComponent* Capsule = GetCapsuleComponent();
+	if (!Capsule)
+	{
+		return;
+	}
+
+	if (bEnabled)
+	{
+		if (!bHasSavedProjectileCollisionResponse)
+		{
+			SavedProjectileCollisionResponse = Capsule->GetCollisionResponseToChannel(TunaSweeperCollisionChannels::Projectile);
+			bHasSavedProjectileCollisionResponse = true;
+		}
+
+		Capsule->SetCollisionResponseToChannel(TunaSweeperCollisionChannels::Projectile, ECR_Ignore);
+		return;
+	}
+
+	if (bHasSavedProjectileCollisionResponse)
+	{
+		Capsule->SetCollisionResponseToChannel(TunaSweeperCollisionChannels::Projectile, SavedProjectileCollisionResponse);
+		bHasSavedProjectileCollisionResponse = false;
+	}
+}
+
+void ATunaSweeperTopDownCharacter::ApplyTemporaryRollVisualRotation(float NormalizedRollTime)
+{
+	if (!bUseTemporaryRollVisualRotation)
+	{
+		return;
+	}
+
+	bRollVisualRotationApplied = true;
+	const float RollAngleRadians = FMath::DegreesToRadians(
+		TemporaryRollVisualRightAxisDegrees * FMath::Clamp(NormalizedRollTime, 0.0f, 1.0f));
+	const FQuat RightAxisRoll(FVector::RightVector, RollAngleRadians);
+	if (USkeletalMeshComponent* CharacterMesh = GetMesh())
+	{
+		CharacterMesh->SetRelativeRotation((RightAxisRoll * DefaultSkeletalMeshRelativeRotation.Quaternion()).Rotator());
+	}
+
+	if (VisualMesh)
+	{
+		VisualMesh->SetRelativeRotation((RightAxisRoll * DefaultVisualMeshRelativeRotation.Quaternion()).Rotator());
+	}
+}
+
+void ATunaSweeperTopDownCharacter::RestoreTemporaryRollVisualRotation()
+{
+	if (!bRollVisualRotationApplied)
+	{
+		return;
+	}
+
+	if (USkeletalMeshComponent* CharacterMesh = GetMesh())
+	{
+		CharacterMesh->SetRelativeRotation(DefaultSkeletalMeshRelativeRotation);
+	}
+
+	if (VisualMesh)
+	{
+		VisualMesh->SetRelativeRotation(DefaultVisualMeshRelativeRotation);
+	}
+
+	bRollVisualRotationApplied = false;
+}
+
+FVector ATunaSweeperTopDownCharacter::ResolveRollDirection() const
+{
+	FVector ResolvedDirection(CurrentMoveInput.Y, CurrentMoveInput.X, 0.0f);
+	if (!ResolvedDirection.Normalize())
+	{
+		ResolvedDirection = AimDirection;
+		ResolvedDirection.Z = 0.0f;
+		ResolvedDirection.Normalize();
+	}
+
+	if (ResolvedDirection.IsNearlyZero())
+	{
+		ResolvedDirection = GetActorForwardVector();
+		ResolvedDirection.Z = 0.0f;
+		ResolvedDirection.Normalize();
+	}
+
+	return ResolvedDirection.IsNearlyZero() ? FVector::ForwardVector : ResolvedDirection;
 }
