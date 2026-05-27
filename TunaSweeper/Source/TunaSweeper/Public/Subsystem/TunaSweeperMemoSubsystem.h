@@ -47,6 +47,8 @@ public:
 private:
 	struct FMemoSpawnDefinition
 	{
+		// Future extension: map-placed marker actors can be matched by MemoId and used as the source
+		// for the runtime spawn transform and visual mesh/material fields below.
 		FName LevelName;
 		FName SpawnId;
 		int32 MemoId = INDEX_NONE;
