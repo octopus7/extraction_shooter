@@ -42,7 +42,8 @@ public:
 	void ConfigureInteractionDefaults(
 		ETunaSweeperInteractionType InInteractionType,
 		const FText& InInteractionDisplayName,
-		TSoftClassPtr<UTunaSweeperInteractionMarkerWidget> InMarkerWidgetClass);
+		TSoftClassPtr<UTunaSweeperInteractionMarkerWidget> InMarkerWidgetClass,
+		FName InInteractionDisplayNameStringKey = NAME_None);
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")

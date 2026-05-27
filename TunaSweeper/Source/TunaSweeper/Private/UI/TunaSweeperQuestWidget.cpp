@@ -10,6 +10,7 @@
 #include "Components/TextBlock.h"
 #include "Components/VerticalBox.h"
 #include "Components/VerticalBoxSlot.h"
+#include "Game/TunaSweeperGameInstance.h"
 #include "Player/TunaSweeperPlayerController.h"
 #include "Styling/SlateBrush.h"
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
@@ -34,7 +35,7 @@ namespace
 		return Brush;
 	}
 
-	FSlateChildSize MakeSlateChildSize(ESlateSizeRule::Type SizeRule, float Value = 1.0f)
+	FSlateChildSize MakeQuestSlateChildSize(ESlateSizeRule::Type SizeRule, float Value = 1.0f)
 	{
 		FSlateChildSize ChildSize;
 		ChildSize.SizeRule = SizeRule;
@@ -412,7 +413,7 @@ void UTunaSweeperQuestWidget::BuildQuestWidget()
 	DetailPanel->SetContent(DetailStack);
 	if (UHorizontalBoxSlot* DetailColumnSlot = RootColumns->AddChildToHorizontalBox(DetailPanel))
 	{
-		DetailColumnSlot->SetSize(MakeSlateChildSize(ESlateSizeRule::Fill));
+		DetailColumnSlot->SetSize(MakeQuestSlateChildSize(ESlateSizeRule::Fill));
 		DetailColumnSlot->SetPadding(FMargin(0.0f, 0.0f, 14.0f, 0.0f));
 	}
 
@@ -422,7 +423,7 @@ void UTunaSweeperQuestWidget::BuildQuestWidget()
 	TunaSweeperUIFont::ApplyFont(DetailTitleText, 26, ETunaSweeperUIFontWeight::Bold);
 	if (UHorizontalBoxSlot* TitleSlot = DetailHeaderRow->AddChildToHorizontalBox(DetailTitleText))
 	{
-		TitleSlot->SetSize(MakeSlateChildSize(ESlateSizeRule::Fill));
+		TitleSlot->SetSize(MakeQuestSlateChildSize(ESlateSizeRule::Fill));
 		TitleSlot->SetVerticalAlignment(VAlign_Center);
 	}
 
@@ -431,7 +432,7 @@ void UTunaSweeperQuestWidget::BuildQuestWidget()
 	TunaSweeperUIFont::ApplyFont(DetailStateText, 16, ETunaSweeperUIFontWeight::Bold);
 	if (UHorizontalBoxSlot* StateSlot = DetailHeaderRow->AddChildToHorizontalBox(DetailStateText))
 	{
-		StateSlot->SetSize(MakeSlateChildSize(ESlateSizeRule::Automatic));
+		StateSlot->SetSize(MakeQuestSlateChildSize(ESlateSizeRule::Automatic));
 		StateSlot->SetVerticalAlignment(VAlign_Center);
 		StateSlot->SetPadding(FMargin(16.0f, 0.0f, 0.0f, 0.0f));
 	}
@@ -484,7 +485,7 @@ void UTunaSweeperQuestWidget::BuildQuestWidget()
 	DetailScrollBox->AddChild(DetailBodyStack);
 	if (UVerticalBoxSlot* ScrollSlot = DetailStack->AddChildToVerticalBox(DetailScrollBox))
 	{
-		ScrollSlot->SetSize(MakeSlateChildSize(ESlateSizeRule::Fill));
+		ScrollSlot->SetSize(MakeQuestSlateChildSize(ESlateSizeRule::Fill));
 	}
 
 	PrimaryButton->SetContent(PrimaryButtonText);
@@ -510,7 +511,7 @@ void UTunaSweeperQuestWidget::BuildQuestWidget()
 	ListSizeBox->SetContent(ListPanel);
 	if (UHorizontalBoxSlot* ListColumnSlot = RootColumns->AddChildToHorizontalBox(ListSizeBox))
 	{
-		ListColumnSlot->SetSize(MakeSlateChildSize(ESlateSizeRule::Automatic));
+		ListColumnSlot->SetSize(MakeQuestSlateChildSize(ESlateSizeRule::Automatic));
 	}
 
 	ListTitleText->SetText(GetQuestText(FName(TEXT("quest.ui.list_title"))));
@@ -529,7 +530,7 @@ void UTunaSweeperQuestWidget::BuildQuestWidget()
 		TunaSweeperUIFont::ApplyFont(Text, 13, ETunaSweeperUIFontWeight::Bold);
 		if (UHorizontalBoxSlot* TabSlot = TabRow->AddChildToHorizontalBox(Button))
 		{
-			TabSlot->SetSize(MakeSlateChildSize(ESlateSizeRule::Fill));
+			TabSlot->SetSize(MakeQuestSlateChildSize(ESlateSizeRule::Fill));
 			TabSlot->SetPadding(FMargin(0.0f, 0.0f, 6.0f, 0.0f));
 		}
 	};
@@ -544,7 +545,7 @@ void UTunaSweeperQuestWidget::BuildQuestWidget()
 
 	if (UVerticalBoxSlot* ScrollSlot = ListStack->AddChildToVerticalBox(QuestListScrollBox))
 	{
-		ScrollSlot->SetSize(MakeSlateChildSize(ESlateSizeRule::Fill));
+		ScrollSlot->SetSize(MakeQuestSlateChildSize(ESlateSizeRule::Fill));
 	}
 }
 
@@ -752,12 +753,13 @@ bool UTunaSweeperQuestWidget::IsQuestVisibleInActiveFilter(
 
 FText UTunaSweeperQuestWidget::GetQuestText(FName StringKey, const FText& FallbackText) const
 {
-	if (const UTunaSweeperQuestSubsystem* QuestSubsystem = GetGameInstance()
-		? GetGameInstance()->GetSubsystem<UTunaSweeperQuestSubsystem>()
+	const UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+	if (const UTunaSweeperQuestSubsystem* QuestSubsystem = TunaGameInstance
+		? TunaGameInstance->GetSubsystem<UTunaSweeperQuestSubsystem>()
 		: nullptr)
 	{
 		FText Text;
-		if (QuestSubsystem->TryGetQuestTextByKey(StringKey, ETunaSweeperItemTextLanguage::Korean, Text))
+		if (QuestSubsystem->TryGetQuestTextByKey(StringKey, TunaGameInstance->GetCurrentTextLanguage(), Text))
 		{
 			return Text;
 		}
@@ -877,9 +879,13 @@ FText UTunaSweeperQuestWidget::BuildRewardText(
 			QuestDefinition.Rewards.Coins));
 	}
 
-	UTunaSweeperItemDataSubsystem* ItemDataSubsystem = GetGameInstance()
-		? GetGameInstance()->GetSubsystem<UTunaSweeperItemDataSubsystem>()
+	const UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+	UTunaSweeperItemDataSubsystem* ItemDataSubsystem = TunaGameInstance
+		? TunaGameInstance->GetSubsystem<UTunaSweeperItemDataSubsystem>()
 		: nullptr;
+	const ETunaSweeperItemTextLanguage Language = TunaGameInstance
+		? TunaGameInstance->GetCurrentTextLanguage()
+		: ETunaSweeperItemTextLanguage::English;
 	for (const FTunaSweeperItemStack& ItemReward : QuestDefinition.Rewards.Items)
 	{
 		if (ItemReward.ItemId == INDEX_NONE || ItemReward.Quantity <= 0)
@@ -889,7 +895,7 @@ FText UTunaSweeperQuestWidget::BuildRewardText(
 
 		FText ItemName;
 		if (!ItemDataSubsystem ||
-			!ItemDataSubsystem->TryGetItemNameText(ItemReward.ItemId, ETunaSweeperItemTextLanguage::Korean, ItemName))
+			!ItemDataSubsystem->TryGetItemNameText(ItemReward.ItemId, Language, ItemName))
 		{
 			ItemName = FText::FromString(FString::Printf(
 				TEXT("%s %d"),

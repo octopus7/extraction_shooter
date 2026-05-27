@@ -4,6 +4,7 @@
 #include "Components/Button.h"
 #include "Components/CanvasPanel.h"
 #include "Components/CanvasPanelSlot.h"
+#include "DLSSLibrary.h"
 #include "Components/HorizontalBox.h"
 #include "Components/HorizontalBoxSlot.h"
 #include "Components/Image.h"
@@ -15,9 +16,11 @@
 #include "Game/TunaSweeperGameInstance.h"
 #include "GameFramework/GameUserSettings.h"
 #include "GameFramework/PlayerController.h"
+#include "HAL/IConsoleManager.h"
 #include "InputCoreTypes.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Misc/ConfigCacheIni.h"
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
 #include "Slate/WidgetTransform.h"
@@ -26,6 +29,60 @@
 #include "UI/TunaSweeperScreenFadeWidget.h"
 #include "UI/TunaSweeperTitleWindParticleWidget.h"
 #include "UI/TunaSweeperUIFont.h"
+
+namespace TunaSweeperTitleGraphicsSettings
+{
+	const TCHAR* SectionName = TEXT("TunaSweeper.GraphicsSettings");
+	const TCHAR* DLSSModeKey = TEXT("DLSSMode");
+
+	UDLSSMode ToDLSSMode(ETunaSweeperTitleDLSSMode Mode)
+	{
+		switch (Mode)
+		{
+		case ETunaSweeperTitleDLSSMode::Quality:
+			return UDLSSMode::Quality;
+		case ETunaSweeperTitleDLSSMode::Balanced:
+			return UDLSSMode::Balanced;
+		case ETunaSweeperTitleDLSSMode::Performance:
+			return UDLSSMode::Performance;
+		case ETunaSweeperTitleDLSSMode::Off:
+		default:
+			return UDLSSMode::Off;
+		}
+	}
+
+	ETunaSweeperTitleDLSSMode ToTitleDLSSMode(int32 ConfigValue)
+	{
+		switch (ConfigValue)
+		{
+		case 1:
+			return ETunaSweeperTitleDLSSMode::Quality;
+		case 2:
+			return ETunaSweeperTitleDLSSMode::Balanced;
+		case 3:
+			return ETunaSweeperTitleDLSSMode::Performance;
+		case 0:
+		default:
+			return ETunaSweeperTitleDLSSMode::Off;
+		}
+	}
+
+	int32 ToConfigValue(ETunaSweeperTitleDLSSMode Mode)
+	{
+		switch (Mode)
+		{
+		case ETunaSweeperTitleDLSSMode::Quality:
+			return 1;
+		case ETunaSweeperTitleDLSSMode::Balanced:
+			return 2;
+		case ETunaSweeperTitleDLSSMode::Performance:
+			return 3;
+		case ETunaSweeperTitleDLSSMode::Off:
+		default:
+			return 0;
+		}
+	}
+}
 
 void UTunaSweeperIntroMenuWidget::PrepareForInitialViewport()
 {
@@ -146,10 +203,28 @@ void UTunaSweeperIntroMenuWidget::NativeConstruct()
 		CancelDeleteButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleCancelDeleteClicked);
 	}
 
+	if (SettingsGraphicsTabButton)
+	{
+		SettingsGraphicsTabButton->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleSettingsGraphicsTabClicked);
+		SettingsGraphicsTabButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleSettingsGraphicsTabClicked);
+	}
+
+	if (SettingsInterfaceTabButton)
+	{
+		SettingsInterfaceTabButton->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleSettingsInterfaceTabClicked);
+		SettingsInterfaceTabButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleSettingsInterfaceTabClicked);
+	}
+
 	if (WindowedModeButton)
 	{
 		WindowedModeButton->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleWindowedModeClicked);
 		WindowedModeButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleWindowedModeClicked);
+	}
+
+	if (BorderlessWindowModeButton)
+	{
+		BorderlessWindowModeButton->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleBorderlessWindowModeClicked);
+		BorderlessWindowModeButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleBorderlessWindowModeClicked);
 	}
 
 	if (FullscreenModeButton)
@@ -182,10 +257,70 @@ void UTunaSweeperIntroMenuWidget::NativeConstruct()
 		Resolution2560Button->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleResolution2560Clicked);
 	}
 
+	if (Resolution3840Button)
+	{
+		Resolution3840Button->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleResolution3840Clicked);
+		Resolution3840Button->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleResolution3840Clicked);
+	}
+
+	if (DLSSOffButton)
+	{
+		DLSSOffButton->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleDLSSOffClicked);
+		DLSSOffButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleDLSSOffClicked);
+	}
+
+	if (DLSSQualityButton)
+	{
+		DLSSQualityButton->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleDLSSQualityClicked);
+		DLSSQualityButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleDLSSQualityClicked);
+	}
+
+	if (DLSSBalancedButton)
+	{
+		DLSSBalancedButton->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleDLSSBalancedClicked);
+		DLSSBalancedButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleDLSSBalancedClicked);
+	}
+
+	if (DLSSPerformanceButton)
+	{
+		DLSSPerformanceButton->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleDLSSPerformanceClicked);
+		DLSSPerformanceButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleDLSSPerformanceClicked);
+	}
+
 	if (BackFromSettingsButton)
 	{
 		BackFromSettingsButton->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleBackFromSettingsClicked);
 		BackFromSettingsButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleBackFromSettingsClicked);
+	}
+
+	if (LanguageEnglishButton)
+	{
+		LanguageEnglishButton->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleLanguageEnglishClicked);
+		LanguageEnglishButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleLanguageEnglishClicked);
+	}
+
+	if (LanguageKoreanButton)
+	{
+		LanguageKoreanButton->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleLanguageKoreanClicked);
+		LanguageKoreanButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleLanguageKoreanClicked);
+	}
+
+	if (LanguageJapaneseButton)
+	{
+		LanguageJapaneseButton->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleLanguageJapaneseClicked);
+		LanguageJapaneseButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleLanguageJapaneseClicked);
+	}
+
+	if (ConfirmInterfaceSettingsButton)
+	{
+		ConfirmInterfaceSettingsButton->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleConfirmInterfaceSettingsClicked);
+		ConfirmInterfaceSettingsButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleConfirmInterfaceSettingsClicked);
+	}
+
+	if (CancelInterfaceSettingsButton)
+	{
+		CancelInterfaceSettingsButton->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleCancelInterfaceSettingsClicked);
+		CancelInterfaceSettingsButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleCancelInterfaceSettingsClicked);
 	}
 
 	if (BackFromCreditsButton)
@@ -194,7 +329,16 @@ void UTunaSweeperIntroMenuWidget::NativeConstruct()
 		BackFromCreditsButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleBackFromCreditsClicked);
 	}
 
+	if (UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GetGameInstance()))
+	{
+		TunaGameInstance->OnLanguageChanged.RemoveAll(this);
+		TunaGameInstance->OnLanguageChanged.AddUObject(this, &UTunaSweeperIntroMenuWidget::HandleLanguageChanged);
+	}
+
 	ApplyTitleMenuButtonContentLayout();
+	RefreshLocalizedTexts();
+	LoadTitleGraphicsSettings();
+	ApplyDLSSModeToRuntime(PreferredDLSSMode);
 
 	if (CreditsText)
 	{
@@ -216,6 +360,16 @@ void UTunaSweeperIntroMenuWidget::NativeConstruct()
 	ShowMainMenu();
 	InvalidateLayoutAndVolatility();
 	ForceLayoutPrepass();
+}
+
+void UTunaSweeperIntroMenuWidget::NativeDestruct()
+{
+	if (UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GetGameInstance()))
+	{
+		TunaGameInstance->OnLanguageChanged.RemoveAll(this);
+	}
+
+	Super::NativeDestruct();
 }
 
 FReply UTunaSweeperIntroMenuWidget::NativeOnPreviewKeyDown(
@@ -510,9 +664,24 @@ void UTunaSweeperIntroMenuWidget::HandleCancelDeleteClicked()
 	ResetDeleteHoldProgress();
 }
 
+void UTunaSweeperIntroMenuWidget::HandleSettingsGraphicsTabClicked()
+{
+	ShowGraphicsSettingsTab();
+}
+
+void UTunaSweeperIntroMenuWidget::HandleSettingsInterfaceTabClicked()
+{
+	ShowInterfaceSettingsTab();
+}
+
 void UTunaSweeperIntroMenuWidget::HandleWindowedModeClicked()
 {
 	ApplyDisplaySettings(EWindowMode::Windowed);
+}
+
+void UTunaSweeperIntroMenuWidget::HandleBorderlessWindowModeClicked()
+{
+	ApplyDisplaySettings(EWindowMode::WindowedFullscreen);
 }
 
 void UTunaSweeperIntroMenuWidget::HandleFullscreenModeClicked()
@@ -540,15 +709,88 @@ void UTunaSweeperIntroMenuWidget::HandleResolution2560Clicked()
 	ApplyResolutionSetting(FIntPoint(2560, 1440));
 }
 
+void UTunaSweeperIntroMenuWidget::HandleResolution3840Clicked()
+{
+	ApplyResolutionSetting(FIntPoint(3840, 2160));
+}
+
+void UTunaSweeperIntroMenuWidget::HandleDLSSOffClicked()
+{
+	ApplyDLSSSetting(ETunaSweeperTitleDLSSMode::Off);
+}
+
+void UTunaSweeperIntroMenuWidget::HandleDLSSQualityClicked()
+{
+	ApplyDLSSSetting(ETunaSweeperTitleDLSSMode::Quality);
+}
+
+void UTunaSweeperIntroMenuWidget::HandleDLSSBalancedClicked()
+{
+	ApplyDLSSSetting(ETunaSweeperTitleDLSSMode::Balanced);
+}
+
+void UTunaSweeperIntroMenuWidget::HandleDLSSPerformanceClicked()
+{
+	ApplyDLSSSetting(ETunaSweeperTitleDLSSMode::Performance);
+}
+
 void UTunaSweeperIntroMenuWidget::HandleBackFromSettingsClicked()
 {
-	HideOverlayPanels();
-	SetAlwaysNewStartButtonVisible(true);
+	ShowMainMenu();
+}
+
+void UTunaSweeperIntroMenuWidget::HandleLanguageEnglishClicked()
+{
+	PendingInterfaceLanguage = ETunaSweeperItemTextLanguage::English;
+	RefreshInterfaceSettingsPanel();
+}
+
+void UTunaSweeperIntroMenuWidget::HandleLanguageKoreanClicked()
+{
+	PendingInterfaceLanguage = ETunaSweeperItemTextLanguage::Korean;
+	RefreshInterfaceSettingsPanel();
+}
+
+void UTunaSweeperIntroMenuWidget::HandleLanguageJapaneseClicked()
+{
+	PendingInterfaceLanguage = ETunaSweeperItemTextLanguage::Japanese;
+	RefreshInterfaceSettingsPanel();
+}
+
+void UTunaSweeperIntroMenuWidget::HandleConfirmInterfaceSettingsClicked()
+{
+	if (UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GetGameInstance()))
+	{
+		TunaGameInstance->SetCurrentTextLanguage(PendingInterfaceLanguage, true);
+	}
+
+	ShowMainMenu();
+}
+
+void UTunaSweeperIntroMenuWidget::HandleCancelInterfaceSettingsClicked()
+{
+	ShowMainMenu();
 }
 
 void UTunaSweeperIntroMenuWidget::HandleBackFromCreditsClicked()
 {
 	ShowMainMenu();
+}
+
+void UTunaSweeperIntroMenuWidget::HandleLanguageChanged()
+{
+	bTitleMenuButtonContentLayoutApplied = false;
+	ApplyTitleMenuButtonContentLayout();
+	RefreshLocalizedTexts();
+	RefreshMainMenu();
+	if (IsSaveSlotSelectionVisible())
+	{
+		RefreshSaveSlotMenu();
+	}
+	if (SettingsPanel && SettingsPanel->GetVisibility() == ESlateVisibility::Visible)
+	{
+		RefreshSettingsPanel();
+	}
 }
 
 void UTunaSweeperIntroMenuWidget::ShowMainMenu()
@@ -561,6 +803,7 @@ void UTunaSweeperIntroMenuWidget::ShowMainMenu()
 	{
 		MainMenuPanel->SetVisibility(ESlateVisibility::Visible);
 	}
+	SetTitleLogoVisible(true);
 	if (SaveSlotPanel)
 	{
 		SaveSlotPanel->SetVisibility(ESlateVisibility::Collapsed);
@@ -582,6 +825,7 @@ void UTunaSweeperIntroMenuWidget::ShowSaveSlotSelection()
 	{
 		MainMenuPanel->SetVisibility(ESlateVisibility::Collapsed);
 	}
+	SetTitleLogoVisible(true);
 	if (SaveSlotPanel)
 	{
 		SaveSlotPanel->SetVisibility(ESlateVisibility::Visible);
@@ -601,6 +845,11 @@ void UTunaSweeperIntroMenuWidget::ShowSettingsPanel()
 	{
 		SaveSlotPanel->SetVisibility(ESlateVisibility::Collapsed);
 	}
+	if (MainMenuPanel)
+	{
+		MainMenuPanel->SetVisibility(ESlateVisibility::Collapsed);
+	}
+	SetTitleLogoVisible(false);
 	if (CreditsPanel)
 	{
 		CreditsPanel->SetVisibility(ESlateVisibility::Collapsed);
@@ -611,7 +860,63 @@ void UTunaSweeperIntroMenuWidget::ShowSettingsPanel()
 	}
 
 	SetAlwaysNewStartButtonVisible(false);
+	if (const UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GetGameInstance()))
+	{
+		PendingInterfaceLanguage = TunaGameInstance->GetCurrentTextLanguage();
+	}
+	ShowGraphicsSettingsTab();
+}
+
+void UTunaSweeperIntroMenuWidget::ShowGraphicsSettingsTab()
+{
+	bShowingInterfaceSettingsTab = false;
+
+	if (GraphicsSettingsPanel)
+	{
+		GraphicsSettingsPanel->SetVisibility(ESlateVisibility::Visible);
+	}
+	if (InterfaceSettingsPanel)
+	{
+		InterfaceSettingsPanel->SetVisibility(ESlateVisibility::Collapsed);
+	}
+	if (SettingsGraphicsTabButton)
+	{
+		SettingsGraphicsTabButton->SetIsEnabled(false);
+	}
+	if (SettingsInterfaceTabButton)
+	{
+		SettingsInterfaceTabButton->SetIsEnabled(true);
+	}
+
 	RefreshSettingsPanel();
+}
+
+void UTunaSweeperIntroMenuWidget::ShowInterfaceSettingsTab()
+{
+	bShowingInterfaceSettingsTab = true;
+
+	if (const UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GetGameInstance()))
+	{
+		PendingInterfaceLanguage = TunaGameInstance->GetCurrentTextLanguage();
+	}
+	if (GraphicsSettingsPanel)
+	{
+		GraphicsSettingsPanel->SetVisibility(ESlateVisibility::Collapsed);
+	}
+	if (InterfaceSettingsPanel)
+	{
+		InterfaceSettingsPanel->SetVisibility(ESlateVisibility::Visible);
+	}
+	if (SettingsGraphicsTabButton)
+	{
+		SettingsGraphicsTabButton->SetIsEnabled(true);
+	}
+	if (SettingsInterfaceTabButton)
+	{
+		SettingsInterfaceTabButton->SetIsEnabled(false);
+	}
+
+	RefreshInterfaceSettingsPanel();
 }
 
 void UTunaSweeperIntroMenuWidget::ShowCreditsPanel()
@@ -631,6 +936,7 @@ void UTunaSweeperIntroMenuWidget::ShowCreditsPanel()
 	{
 		SettingsPanel->SetVisibility(ESlateVisibility::Collapsed);
 	}
+	SetTitleLogoVisible(true);
 	if (CreditsText)
 	{
 		CreditsText->SetText(FText::FromString(BuildCreditsColumnText(0)));
@@ -673,8 +979,22 @@ void UTunaSweeperIntroMenuWidget::HideOverlayPanels()
 	{
 		CreditsPanel->SetVisibility(ESlateVisibility::Collapsed);
 	}
+	SetTitleLogoVisible(true);
 
 	CreditsScrollOffset = 0.0f;
+}
+
+void UTunaSweeperIntroMenuWidget::SetTitleLogoVisible(bool bVisible)
+{
+	if (!WidgetTree)
+	{
+		return;
+	}
+
+	if (UWidget* LogoWidget = WidgetTree->FindWidget(FName(TEXT("LogoImage"))))
+	{
+		LogoWidget->SetVisibility(bVisible ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
+	}
 }
 
 void UTunaSweeperIntroMenuWidget::SelectSaveSlot(int32 SaveSlotIndex)
@@ -706,8 +1026,8 @@ void UTunaSweeperIntroMenuWidget::RefreshMainMenu()
 	if (StartButtonText)
 	{
 		StartButtonText->SetText(Summary.bHasData
-			? FText::FromString(TEXT("\uACC4\uC18D\uD558\uAE30"))
-			: FText::FromString(TEXT("\uC0C8\uAC8C\uC784 \uC2DC\uC791")));
+			? ResolveUiText(FName(TEXT("ui.title.continue")), FText::FromString(TEXT("\uACC4\uC18D\uD558\uAE30")))
+			: ResolveUiText(FName(TEXT("ui.title.new_game")), FText::FromString(TEXT("\uC0C8\uAC8C\uC784 \uC2DC\uC791"))));
 	}
 }
 
@@ -741,7 +1061,9 @@ void UTunaSweeperIntroMenuWidget::RefreshSaveSlotMenu()
 
 	if (PrimarySaveSlotButtonText)
 	{
-		PrimarySaveSlotButtonText->SetText(FText::FromString(TEXT("\uC138\uC774\uBE0C \uC2AC\uB86F \uC120\uD0DD")));
+		PrimarySaveSlotButtonText->SetText(ResolveUiText(
+			FName(TEXT("ui.title.primary_save_slot")),
+			FText::FromString(TEXT("\uC138\uC774\uBE0C \uC2AC\uB86F \uC120\uD0DD"))));
 	}
 
 	if (DeleteSaveSlotButton)
@@ -751,7 +1073,9 @@ void UTunaSweeperIntroMenuWidget::RefreshSaveSlotMenu()
 
 	if (DeleteSaveSlotButtonText)
 	{
-		DeleteSaveSlotButtonText->SetText(FText::FromString(TEXT("\uAE38\uAC8C \uB20C\uB7EC \uC0AD\uC81C\uD558\uAE30")));
+		DeleteSaveSlotButtonText->SetText(ResolveUiText(
+			FName(TEXT("ui.title.delete_hold")),
+			FText::FromString(TEXT("\uAE38\uAC8C \uB20C\uB7EC \uC0AD\uC81C\uD558\uAE30"))));
 		DeleteSaveSlotButtonText->SetColorAndOpacity(FSlateColor(Summary.bHasData
 			? FLinearColor::White
 			: FLinearColor(0.55f, 0.60f, 0.62f, 1.0f)));
@@ -765,8 +1089,9 @@ void UTunaSweeperIntroMenuWidget::RefreshSaveSlotMenu()
 
 void UTunaSweeperIntroMenuWidget::RefreshSettingsPanel()
 {
-	if (!SettingsStatusText)
+	if (bShowingInterfaceSettingsTab)
 	{
+		RefreshInterfaceSettingsPanel();
 		return;
 	}
 
@@ -781,14 +1106,180 @@ void UTunaSweeperIntroMenuWidget::RefreshSettingsPanel()
 		}
 	}
 
-	const FString WindowModeText = CurrentWindowMode == EWindowMode::Fullscreen
-		? TEXT("\uC804\uCCB4\uD654\uBA74")
-		: TEXT("\uCC3D\uBAA8\uB4DC");
-	SettingsStatusText->SetText(FText::FromString(FString::Printf(
-		TEXT("\uD604\uC7AC: %s / %dx%d"),
-		*WindowModeText,
-		CurrentResolution.X,
-		CurrentResolution.Y)));
+	if (SettingsStatusText)
+	{
+		const bool bDLSSSupported = UDLSSLibrary::IsDLSSSupported();
+		const FText DLSSStatusText = bDLSSSupported
+			? BuildDLSSModeText(PreferredDLSSMode)
+			: ResolveUiText(
+				FName(TEXT("ui.settings.dlss.unavailable")),
+				FText::FromString(TEXT("\uC0AC\uC6A9 \uBD88\uAC00")));
+		SettingsStatusText->SetText(FText::Format(
+			ResolveUiText(
+				FName(TEXT("ui.settings.current_graphics")),
+				FText::FromString(TEXT("\uD604\uC7AC: {0} / {1}x{2} / DLSS {3}"))),
+			BuildWindowModeText(CurrentWindowMode),
+			FText::AsNumber(CurrentResolution.X),
+			FText::AsNumber(CurrentResolution.Y),
+			DLSSStatusText));
+	}
+
+	if (DLSSOffButton)
+	{
+		DLSSOffButton->SetIsEnabled(true);
+	}
+	if (DLSSQualityButton)
+	{
+		DLSSQualityButton->SetIsEnabled(IsDLSSModeAvailable(ETunaSweeperTitleDLSSMode::Quality));
+	}
+	if (DLSSBalancedButton)
+	{
+		DLSSBalancedButton->SetIsEnabled(IsDLSSModeAvailable(ETunaSweeperTitleDLSSMode::Balanced));
+	}
+	if (DLSSPerformanceButton)
+	{
+		DLSSPerformanceButton->SetIsEnabled(IsDLSSModeAvailable(ETunaSweeperTitleDLSSMode::Performance));
+	}
+}
+
+void UTunaSweeperIntroMenuWidget::RefreshInterfaceSettingsPanel()
+{
+	const UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GetGameInstance());
+	const ETunaSweeperItemTextLanguage CurrentLanguage = TunaGameInstance
+		? TunaGameInstance->GetCurrentTextLanguage()
+		: ETunaSweeperItemTextLanguage::English;
+
+	if (SettingsStatusText)
+	{
+		SettingsStatusText->SetText(FText::Format(
+			ResolveUiText(
+				FName(TEXT("ui.settings.current_language")),
+				FText::FromString(TEXT("\uD604\uC7AC \uC5B8\uC5B4: {0}"))),
+			BuildLanguageNameText(CurrentLanguage)));
+	}
+
+	if (LanguageEnglishButtonText)
+	{
+		LanguageEnglishButtonText->SetText(BuildLanguageOptionText(
+			ETunaSweeperItemTextLanguage::English,
+			PendingInterfaceLanguage == ETunaSweeperItemTextLanguage::English));
+	}
+	if (LanguageKoreanButtonText)
+	{
+		LanguageKoreanButtonText->SetText(BuildLanguageOptionText(
+			ETunaSweeperItemTextLanguage::Korean,
+			PendingInterfaceLanguage == ETunaSweeperItemTextLanguage::Korean));
+	}
+	if (LanguageJapaneseButtonText)
+	{
+		LanguageJapaneseButtonText->SetText(BuildLanguageOptionText(
+			ETunaSweeperItemTextLanguage::Japanese,
+			PendingInterfaceLanguage == ETunaSweeperItemTextLanguage::Japanese));
+	}
+
+	if (LanguageEnglishButton)
+	{
+		LanguageEnglishButton->SetIsEnabled(true);
+	}
+	if (LanguageKoreanButton)
+	{
+		LanguageKoreanButton->SetIsEnabled(true);
+	}
+	if (LanguageJapaneseButton)
+	{
+		LanguageJapaneseButton->SetIsEnabled(true);
+	}
+	if (ConfirmInterfaceSettingsButton)
+	{
+		ConfirmInterfaceSettingsButton->SetIsEnabled(true);
+	}
+	if (CancelInterfaceSettingsButton)
+	{
+		CancelInterfaceSettingsButton->SetIsEnabled(true);
+	}
+}
+
+void UTunaSweeperIntroMenuWidget::RefreshLocalizedTexts()
+{
+	SetNamedText(
+		FName(TEXT("SaveSlotPanelTitleText")),
+		ResolveUiText(FName(TEXT("ui.title.slot_select")), FText::FromString(TEXT("\uC2AC\uB86F \uC120\uD0DD"))));
+	SetNamedText(
+		FName(TEXT("BackToMainMenuButtonText")),
+		ResolveUiText(FName(TEXT("ui.common.back")), FText::FromString(TEXT("\uB3CC\uC544\uAC00\uAE30"))));
+	SetNamedText(
+		FName(TEXT("DeleteConfirmTitleText")),
+		ResolveUiText(FName(TEXT("ui.title.delete_confirm_title")), FText::FromString(TEXT("\uC2AC\uB86F \uC0AD\uC81C"))));
+	SetNamedText(
+		FName(TEXT("DeleteConfirmMessageText")),
+		ResolveUiText(FName(TEXT("ui.title.delete_confirm_message")), FText::FromString(TEXT("\uC120\uD0DD\uD55C \uC800\uC7A5 \uB370\uC774\uD130\uB97C \uC0AD\uC81C\uD560\uAE4C\uC694?"))));
+	SetNamedText(
+		FName(TEXT("ConfirmDeleteButtonText")),
+		ResolveUiText(FName(TEXT("ui.common.delete")), FText::FromString(TEXT("\uC0AD\uC81C\uD558\uAE30"))));
+	SetNamedText(
+		FName(TEXT("CancelDeleteButtonText")),
+		ResolveUiText(FName(TEXT("ui.common.cancel")), FText::FromString(TEXT("\uCDE8\uC18C"))));
+	SetNamedText(
+		FName(TEXT("SettingsTitleText")),
+		ResolveUiText(FName(TEXT("ui.title.settings")), FText::FromString(TEXT("\uC124\uC815"))));
+	SetNamedText(
+		FName(TEXT("SettingsGraphicsTabButtonText")),
+		ResolveUiText(FName(TEXT("ui.settings.graphics")), FText::FromString(TEXT("\uADF8\uB798\uD53D"))));
+	SetNamedText(
+		FName(TEXT("SettingsInterfaceTabButtonText")),
+		ResolveUiText(FName(TEXT("ui.settings.interface")), FText::FromString(TEXT("\uC778\uD130\uD398\uC774\uC2A4"))));
+	SetNamedText(
+		FName(TEXT("WindowModeLabelText")),
+		ResolveUiText(FName(TEXT("ui.settings.window_mode")), FText::FromString(TEXT("\uD654\uBA74 \uBAA8\uB4DC"))));
+	SetNamedText(
+		FName(TEXT("WindowedModeButtonText")),
+		BuildWindowModeText(EWindowMode::Windowed));
+	SetNamedText(
+		FName(TEXT("BorderlessWindowModeButtonText")),
+		BuildWindowModeText(EWindowMode::WindowedFullscreen));
+	SetNamedText(
+		FName(TEXT("FullscreenModeButtonText")),
+		BuildWindowModeText(EWindowMode::Fullscreen));
+	SetNamedText(
+		FName(TEXT("ResolutionLabelText")),
+		ResolveUiText(FName(TEXT("ui.settings.resolution")), FText::FromString(TEXT("\uD574\uC0C1\uB3C4"))));
+	SetNamedText(
+		FName(TEXT("DLSSLabelText")),
+		ResolveUiText(FName(TEXT("ui.settings.dlss")), FText::FromString(TEXT("DLSS"))));
+	SetNamedText(
+		FName(TEXT("DLSSOffButtonText")),
+		BuildDLSSModeText(ETunaSweeperTitleDLSSMode::Off));
+	SetNamedText(
+		FName(TEXT("DLSSQualityButtonText")),
+		BuildDLSSModeText(ETunaSweeperTitleDLSSMode::Quality));
+	SetNamedText(
+		FName(TEXT("DLSSBalancedButtonText")),
+		BuildDLSSModeText(ETunaSweeperTitleDLSSMode::Balanced));
+	SetNamedText(
+		FName(TEXT("DLSSPerformanceButtonText")),
+		BuildDLSSModeText(ETunaSweeperTitleDLSSMode::Performance));
+	SetNamedText(
+		FName(TEXT("LanguageLabelText")),
+		ResolveUiText(FName(TEXT("ui.settings.language")), FText::FromString(TEXT("\uC5B8\uC5B4"))));
+	SetNamedText(
+		FName(TEXT("ConfirmInterfaceSettingsButtonText")),
+		ResolveUiText(FName(TEXT("ui.common.confirm")), FText::FromString(TEXT("\uACB0\uC815"))));
+	SetNamedText(
+		FName(TEXT("CancelInterfaceSettingsButtonText")),
+		ResolveUiText(FName(TEXT("ui.common.cancel")), FText::FromString(TEXT("\uCDE8\uC18C"))));
+	SetNamedText(
+		FName(TEXT("CreditsTitleText")),
+		ResolveUiText(FName(TEXT("ui.title.credits")), FText::FromString(TEXT("\uD06C\uB808\uB527"))));
+	SetNamedText(
+		FName(TEXT("BackFromCreditsButtonText")),
+		ResolveUiText(FName(TEXT("ui.common.back")), FText::FromString(TEXT("\uB3CC\uC544\uAC00\uAE30"))));
+
+	if (AlwaysNewStartButtonText)
+	{
+		AlwaysNewStartButtonText->SetText(ResolveUiText(
+			FName(TEXT("ui.title.always_new_start")),
+			FText::FromString(TEXT("\uD56D\uC0C1\uC0C8\uB85C\uC2DC\uC791"))));
+	}
 }
 
 void UTunaSweeperIntroMenuWidget::RefreshSaveSlotButton(int32 SaveSlotIndex, UButton* SlotButton, UTextBlock* SlotText)
@@ -807,6 +1298,146 @@ void UTunaSweeperIntroMenuWidget::RefreshSaveSlotButton(int32 SaveSlotIndex, UBu
 	}
 }
 
+void UTunaSweeperIntroMenuWidget::LoadTitleGraphicsSettings()
+{
+	int32 DLSSModeValue = TunaSweeperTitleGraphicsSettings::ToConfigValue(PreferredDLSSMode);
+	if (GConfig)
+	{
+		GConfig->GetInt(
+			TunaSweeperTitleGraphicsSettings::SectionName,
+			TunaSweeperTitleGraphicsSettings::DLSSModeKey,
+			DLSSModeValue,
+			GGameUserSettingsIni);
+	}
+
+	PreferredDLSSMode = TunaSweeperTitleGraphicsSettings::ToTitleDLSSMode(DLSSModeValue);
+}
+
+void UTunaSweeperIntroMenuWidget::SaveTitleGraphicsSettings() const
+{
+	if (!GConfig)
+	{
+		return;
+	}
+
+	GConfig->SetInt(
+		TunaSweeperTitleGraphicsSettings::SectionName,
+		TunaSweeperTitleGraphicsSettings::DLSSModeKey,
+		TunaSweeperTitleGraphicsSettings::ToConfigValue(PreferredDLSSMode),
+		GGameUserSettingsIni);
+	GConfig->Flush(false, GGameUserSettingsIni);
+}
+
+void UTunaSweeperIntroMenuWidget::ApplyDLSSSetting(ETunaSweeperTitleDLSSMode DLSSMode)
+{
+	PreferredDLSSMode = DLSSMode;
+	ApplyDLSSModeToRuntime(PreferredDLSSMode);
+	SaveTitleGraphicsSettings();
+	RefreshSettingsPanel();
+}
+
+void UTunaSweeperIntroMenuWidget::ApplyDLSSModeToRuntime(ETunaSweeperTitleDLSSMode DLSSMode) const
+{
+	if (DLSSMode == ETunaSweeperTitleDLSSMode::Off || !IsDLSSModeAvailable(DLSSMode))
+	{
+		UDLSSLibrary::SetDLSSMode(GetWorld(), UDLSSMode::Off);
+		if (IConsoleVariable* ScreenPercentageCVar = IConsoleManager::Get().FindConsoleVariable(TEXT("r.ScreenPercentage")))
+		{
+			ScreenPercentageCVar->Set(100.0f, ECVF_SetByGameSetting);
+		}
+		return;
+	}
+
+	const UDLSSMode RuntimeDLSSMode = TunaSweeperTitleGraphicsSettings::ToDLSSMode(DLSSMode);
+	UDLSSLibrary::SetDLSSMode(GetWorld(), RuntimeDLSSMode);
+}
+
+bool UTunaSweeperIntroMenuWidget::IsDLSSModeAvailable(ETunaSweeperTitleDLSSMode DLSSMode) const
+{
+	if (DLSSMode == ETunaSweeperTitleDLSSMode::Off)
+	{
+		return true;
+	}
+
+	return UDLSSLibrary::IsDLSSSupported() &&
+		UDLSSLibrary::IsDLSSModeSupported(TunaSweeperTitleGraphicsSettings::ToDLSSMode(DLSSMode));
+}
+
+FText UTunaSweeperIntroMenuWidget::BuildWindowModeText(EWindowMode::Type WindowMode) const
+{
+	switch (WindowMode)
+	{
+	case EWindowMode::Fullscreen:
+		return ResolveUiText(FName(TEXT("ui.settings.fullscreen")), FText::FromString(TEXT("\uC804\uCCB4\uD654\uBA74\uBAA8\uB4DC")));
+	case EWindowMode::WindowedFullscreen:
+		return ResolveUiText(FName(TEXT("ui.settings.borderless")), FText::FromString(TEXT("\uD14C\uB450\uB9AC \uC5C6\uB294 \uCC3D\uBAA8\uB4DC")));
+	case EWindowMode::Windowed:
+	default:
+		return ResolveUiText(FName(TEXT("ui.settings.windowed")), FText::FromString(TEXT("\uCC3D\uBAA8\uB4DC")));
+	}
+}
+
+FText UTunaSweeperIntroMenuWidget::BuildDLSSModeText(ETunaSweeperTitleDLSSMode DLSSMode) const
+{
+	switch (DLSSMode)
+	{
+	case ETunaSweeperTitleDLSSMode::Quality:
+		return ResolveUiText(FName(TEXT("ui.settings.dlss.quality")), FText::FromString(TEXT("\uD488\uC9C8")));
+	case ETunaSweeperTitleDLSSMode::Balanced:
+		return ResolveUiText(FName(TEXT("ui.settings.dlss.balanced")), FText::FromString(TEXT("\uADE0\uD615")));
+	case ETunaSweeperTitleDLSSMode::Performance:
+		return ResolveUiText(FName(TEXT("ui.settings.dlss.performance")), FText::FromString(TEXT("\uC131\uB2A5")));
+	case ETunaSweeperTitleDLSSMode::Off:
+	default:
+		return ResolveUiText(FName(TEXT("ui.settings.dlss.off")), FText::FromString(TEXT("\uB044\uAE30")));
+	}
+}
+
+FText UTunaSweeperIntroMenuWidget::BuildLanguageNameText(ETunaSweeperItemTextLanguage Language) const
+{
+	switch (Language)
+	{
+	case ETunaSweeperItemTextLanguage::Korean:
+		return FText::FromString(TEXT("\uD55C\uAD6D\uC5B4"));
+	case ETunaSweeperItemTextLanguage::Japanese:
+		return FText::FromString(TEXT("\u65E5\u672C\u8A9E"));
+	case ETunaSweeperItemTextLanguage::English:
+	default:
+		return FText::FromString(TEXT("English"));
+	}
+}
+
+FText UTunaSweeperIntroMenuWidget::BuildLanguageOptionText(
+	ETunaSweeperItemTextLanguage Language,
+	bool bSelected) const
+{
+	return FText::FromString(FString::Printf(
+		TEXT("%s %s"),
+		bSelected ? TEXT("[x]") : TEXT("[ ]"),
+		*BuildLanguageNameText(Language).ToString()));
+}
+
+FText UTunaSweeperIntroMenuWidget::ResolveUiText(FName StringKey, const FText& FallbackText) const
+{
+	const UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GetGameInstance());
+	return TunaGameInstance
+		? TunaGameInstance->ResolveLocalizedText(StringKey, FallbackText)
+		: FallbackText;
+}
+
+void UTunaSweeperIntroMenuWidget::SetNamedText(FName WidgetName, const FText& Text) const
+{
+	if (!WidgetTree || WidgetName.IsNone())
+	{
+		return;
+	}
+
+	if (UTextBlock* TextBlock = Cast<UTextBlock>(WidgetTree->FindWidget(WidgetName)))
+	{
+		TextBlock->SetText(Text);
+	}
+}
+
 void UTunaSweeperIntroMenuWidget::EnsureAlwaysNewStartButton()
 {
 	if (AlwaysNewStartButton)
@@ -817,7 +1448,9 @@ void UTunaSweeperIntroMenuWidget::EnsureAlwaysNewStartButton()
 		}
 		if (AlwaysNewStartButtonText)
 		{
-			AlwaysNewStartButtonText->SetText(FText::FromString(TEXT("\uD56D\uC0C1\uC0C8\uB85C\uC2DC\uC791")));
+			AlwaysNewStartButtonText->SetText(ResolveUiText(
+				FName(TEXT("ui.title.always_new_start")),
+				FText::FromString(TEXT("\uD56D\uC0C1\uC0C8\uB85C\uC2DC\uC791"))));
 		}
 		return;
 	}
@@ -865,7 +1498,9 @@ void UTunaSweeperIntroMenuWidget::EnsureAlwaysNewStartButton()
 	AlwaysNewStartButton->SetStyle(DebugButtonStyle);
 	AlwaysNewStartButton->SetClickMethod(EButtonClickMethod::DownAndUp);
 
-	AlwaysNewStartButtonText->SetText(FText::FromString(TEXT("\uD56D\uC0C1\uC0C8\uB85C\uC2DC\uC791")));
+	AlwaysNewStartButtonText->SetText(ResolveUiText(
+		FName(TEXT("ui.title.always_new_start")),
+		FText::FromString(TEXT("\uD56D\uC0C1\uC0C8\uB85C\uC2DC\uC791"))));
 	AlwaysNewStartButtonText->SetColorAndOpacity(FSlateColor(FLinearColor(1.0f, 0.92f, 0.88f, 1.0f)));
 	AlwaysNewStartButtonText->SetJustification(ETextJustify::Center);
 	TunaSweeperUIFont::ApplyFont(AlwaysNewStartButtonText, 16, ETunaSweeperUIFontWeight::Bold);
@@ -914,13 +1549,22 @@ FText UTunaSweeperIntroMenuWidget::BuildCurrentSaveSlotText(int32 SaveSlotIndex)
 
 	if (!Summary.bHasData)
 	{
-		return FText::FromString(FString::Printf(TEXT("\uC2AC\uB86F %d - \uBE48 \uC2AC\uB86F"), SaveSlotIndex));
+		return FText::Format(
+			FText::FromString(TEXT("{0} - {1}")),
+			FText::Format(
+				ResolveUiText(FName(TEXT("ui.title.slot_label")), FText::FromString(TEXT("\uC2AC\uB86F {0}"))),
+				FText::AsNumber(SaveSlotIndex)),
+			ResolveUiText(FName(TEXT("ui.title.empty_slot")), FText::FromString(TEXT("\uBE48 \uC2AC\uB86F"))));
 	}
 
-	return FText::FromString(FString::Printf(
-		TEXT("\uC2AC\uB86F %d - %s"),
-		SaveSlotIndex,
-		*FormatPlayTime(Summary.TotalPlaySeconds)));
+	return FText::Format(
+		FText::FromString(TEXT("{0} - {1}")),
+		FText::Format(
+			ResolveUiText(FName(TEXT("ui.title.slot_label")), FText::FromString(TEXT("\uC2AC\uB86F {0}"))),
+			FText::AsNumber(SaveSlotIndex)),
+		FText::Format(
+			ResolveUiText(FName(TEXT("ui.title.play_time")), FText::FromString(TEXT("\uD50C\uB808\uC774 \uC2DC\uAC04 {0}"))),
+			FText::FromString(FormatPlayTime(Summary.TotalPlaySeconds))));
 }
 
 FText UTunaSweeperIntroMenuWidget::BuildSaveSlotButtonText(int32 SaveSlotIndex) const
@@ -937,15 +1581,26 @@ FText UTunaSweeperIntroMenuWidget::BuildSaveSlotButtonText(int32 SaveSlotIndex) 
 
 	if (!Summary.bHasData)
 	{
-		return FText::FromString(FString::Printf(
-			TEXT("\uC2AC\uB86F %d\n\uBE48 \uC2AC\uB86F\n\uC0C8 \uAC8C\uC784 \uC2DC\uC791"),
-			SaveSlotIndex));
+		const TArray<FString> Lines = {
+			FText::Format(
+				ResolveUiText(FName(TEXT("ui.title.slot_label")), FText::FromString(TEXT("\uC2AC\uB86F {0}"))),
+				FText::AsNumber(SaveSlotIndex)).ToString(),
+			ResolveUiText(FName(TEXT("ui.title.empty_slot")), FText::FromString(TEXT("\uBE48 \uC2AC\uB86F"))).ToString(),
+			ResolveUiText(FName(TEXT("ui.title.start_new_game")), FText::FromString(TEXT("\uC0C8 \uAC8C\uC784 \uC2DC\uC791"))).ToString()
+		};
+		return FText::FromString(FString::Join(Lines, LINE_TERMINATOR));
 	}
 
-	return FText::FromString(FString::Printf(
-		TEXT("\uC2AC\uB86F %d\n\uD50C\uB808\uC774 \uC2DC\uAC04 %s\n\uC9C4\uD589 \uB370\uC774\uD130 \uC788\uC74C"),
-		SaveSlotIndex,
-		*FormatPlayTime(Summary.TotalPlaySeconds)));
+	const TArray<FString> Lines = {
+		FText::Format(
+			ResolveUiText(FName(TEXT("ui.title.slot_label")), FText::FromString(TEXT("\uC2AC\uB86F {0}"))),
+			FText::AsNumber(SaveSlotIndex)).ToString(),
+		FText::Format(
+			ResolveUiText(FName(TEXT("ui.title.play_time")), FText::FromString(TEXT("\uD50C\uB808\uC774 \uC2DC\uAC04 {0}"))),
+			FText::FromString(FormatPlayTime(Summary.TotalPlaySeconds))).ToString(),
+		ResolveUiText(FName(TEXT("ui.title.has_progress_data")), FText::FromString(TEXT("\uC9C4\uD589 \uB370\uC774\uD130 \uC788\uC74C"))).ToString()
+	};
+	return FText::FromString(FString::Join(Lines, LINE_TERMINATOR));
 }
 
 FString UTunaSweeperIntroMenuWidget::BuildCreditsRollText() const
@@ -1190,31 +1845,31 @@ void UTunaSweeperIntroMenuWidget::ApplyTitleMenuButtonContentLayout()
 		StartButton,
 		FText::FromString(TEXT("\u25B6")),
 		StartButtonText,
-		FText::FromString(TEXT("\uACC4\uC18D\uD558\uAE30")),
+		ResolveUiText(FName(TEXT("ui.title.continue")), FText::FromString(TEXT("\uACC4\uC18D\uD558\uAE30"))),
 		true);
 	ApplyContent(
 		SlotSelectButton,
 		FText::FromString(TEXT("\u25A6")),
 		nullptr,
-		FText::FromString(TEXT("\uC2AC\uB86F \uC120\uD0DD")),
+		ResolveUiText(FName(TEXT("ui.title.slot_select")), FText::FromString(TEXT("\uC2AC\uB86F \uC120\uD0DD"))),
 		false);
 	ApplyContent(
 		SettingsButton,
 		FText::FromString(TEXT("\u2699")),
 		nullptr,
-		FText::FromString(TEXT("\uC124\uC815")),
+		ResolveUiText(FName(TEXT("ui.title.settings")), FText::FromString(TEXT("\uC124\uC815"))),
 		false);
 	ApplyContent(
 		CreditsButton,
 		FText::FromString(TEXT("\u24D8")),
 		nullptr,
-		FText::FromString(TEXT("\uD06C\uB808\uB527")),
+		ResolveUiText(FName(TEXT("ui.title.credits")), FText::FromString(TEXT("\uD06C\uB808\uB527"))),
 		false);
 	ApplyContent(
 		QuitButton,
 		FText::FromString(TEXT("\u00D7")),
 		nullptr,
-		FText::FromString(TEXT("\uC885\uB8CC")),
+		ResolveUiText(FName(TEXT("ui.title.quit")), FText::FromString(TEXT("\uC885\uB8CC"))),
 		false);
 
 	bTitleMenuButtonContentLayoutApplied = true;
@@ -1364,13 +2019,26 @@ void UTunaSweeperIntroMenuWidget::SetStartTravelControlsEnabled(bool bEnabled)
 		BackToMainMenuButton.Get(),
 		ConfirmDeleteButton.Get(),
 		CancelDeleteButton.Get(),
+		SettingsGraphicsTabButton.Get(),
+		SettingsInterfaceTabButton.Get(),
 		WindowedModeButton.Get(),
+		BorderlessWindowModeButton.Get(),
 		FullscreenModeButton.Get(),
 		Resolution1280Button.Get(),
 		Resolution1600Button.Get(),
 		Resolution1920Button.Get(),
 		Resolution2560Button.Get(),
+		Resolution3840Button.Get(),
+		DLSSOffButton.Get(),
+		DLSSQualityButton.Get(),
+		DLSSBalancedButton.Get(),
+		DLSSPerformanceButton.Get(),
 		BackFromSettingsButton.Get(),
+		LanguageEnglishButton.Get(),
+		LanguageKoreanButton.Get(),
+		LanguageJapaneseButton.Get(),
+		ConfirmInterfaceSettingsButton.Get(),
+		CancelInterfaceSettingsButton.Get(),
 		BackFromCreditsButton.Get()
 	};
 

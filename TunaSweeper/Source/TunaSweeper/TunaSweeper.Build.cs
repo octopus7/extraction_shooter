@@ -10,7 +10,7 @@ public class TunaSweeper : ModuleRules
 	
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "AIModule", "UMG", "Slate", "SlateCore", "MediaAssets", "Niagara", "ProceduralMeshComponent" });
 
-		PrivateDependencyModuleNames.AddRange(new string[] { "Json" });
+		PrivateDependencyModuleNames.AddRange(new string[] { "DLSSBlueprint", "ImageWrapper", "Json", "RenderCore" });
 
 		// Uncomment if you are using Slate UI
 		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });

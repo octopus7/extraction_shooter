@@ -142,6 +142,15 @@ public:
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Dialogue")
 	float GetDialogueCharactersPerSecond() const;
 
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Interface")
+	ETunaSweeperItemTextLanguage GetCurrentTextLanguage() const { return CurrentTextLanguage; }
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Interface")
+	void SetCurrentTextLanguage(ETunaSweeperItemTextLanguage Language, bool bSaveImmediately = true);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Interface")
+	FText ResolveLocalizedText(FName StringKey, const FText& FallbackText) const;
+
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Debug")
 	void SetVisionDebugEnabled(bool bEnabled);
 
@@ -279,6 +288,16 @@ public:
 	bool MoveItemBetweenSlots(
 		const FTunaSweeperItemSlotReference& SourceSlot,
 		const FTunaSweeperItemSlotReference& TargetSlot);
+	bool CanSplitItemStackBetweenSlots(
+		const FTunaSweeperItemSlotReference& SourceSlot,
+		const FTunaSweeperItemSlotReference& TargetSlot,
+		int32& OutDefaultSplitQuantity,
+		int32& OutMaxSplitQuantity,
+		FString* OutFailureReason = nullptr);
+	bool SplitItemStackBetweenSlots(
+		const FTunaSweeperItemSlotReference& SourceSlot,
+		const FTunaSweeperItemSlotReference& TargetSlot,
+		int32 SplitQuantity);
 	bool RemoveItemFromSlot(
 		const FTunaSweeperItemSlotReference& SlotReference,
 		FTunaSweeperItemInstance& OutRemovedItemInstance);
@@ -341,6 +360,7 @@ public:
 	FSimpleMulticastDelegate OnActiveLootContainerUiClosed;
 	FSimpleMulticastDelegate OnMemoStateChanged;
 	FSimpleMulticastDelegate OnMapMarkersChanged;
+	FSimpleMulticastDelegate OnLanguageChanged;
 
 private:
 	enum class EUsableQuickSlotSaveMode : uint8
@@ -405,6 +425,11 @@ private:
 	void TrimSaveGameBackups() const;
 	bool LoadActiveSaveSlotSelection(int32& OutSaveSlotIndex) const;
 	bool SaveActiveSaveSlotSelection() const;
+	void InitializeGlobalLanguageSetting();
+	bool LoadGlobalLanguageSetting(ETunaSweeperItemTextLanguage& OutLanguage) const;
+	void SaveGlobalLanguageSetting() const;
+	ETunaSweeperItemTextLanguage DetectDefaultLanguageFromOS() const;
+	void ApplyCurrentLanguageCulture() const;
 	int32 FindFirstExistingSaveSlotIndex() const;
 	int32 SanitizeSaveSlotIndex(int32 SaveSlotIndex) const;
 	FString GetSaveGameSlotName(int32 SaveSlotIndex) const;
@@ -489,6 +514,9 @@ private:
 
 	UPROPERTY(Transient)
 	int32 ActiveSaveSlotIndex = 1;
+
+	UPROPERTY(Transient)
+	ETunaSweeperItemTextLanguage CurrentTextLanguage = ETunaSweeperItemTextLanguage::English;
 
 	UPROPERTY(Transient)
 	float LoadedSlotTotalPlaySeconds = 0.0f;

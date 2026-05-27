@@ -7,6 +7,7 @@
 #include "Components/TextBlock.h"
 #include "Fonts/FontMeasure.h"
 #include "Framework/Application/SlateApplication.h"
+#include "Game/TunaSweeperGameInstance.h"
 #include "InputCoreTypes.h"
 #include "Rendering/SlateRenderer.h"
 #include "Styling/SlateBrush.h"
@@ -31,6 +32,13 @@ namespace TunaSweeperDialogueWidget
 
 namespace
 {
+	FText ResolveUiText(const UTunaSweeperGameInstance* TunaGameInstance, const TCHAR* StringKey, const TCHAR* Fallback)
+	{
+		return TunaGameInstance
+			? TunaGameInstance->ResolveLocalizedText(FName(StringKey), FText::FromString(Fallback))
+			: FText::FromString(Fallback);
+	}
+
 	FSlateBrush MakeRoundedBoxBrush(
 		const FVector2D& ImageSize,
 		const FLinearColor& FillColor,
@@ -430,7 +438,10 @@ void UTunaSweeperDialogueWidget::BuildDialogueWidget()
 		BodySlot->SetZOrder(2);
 	}
 
-	ContinuePromptText->SetText(FText::FromString(TEXT("\uACC4\uC18D")));
+	ContinuePromptText->SetText(ResolveUiText(
+		GetGameInstance<UTunaSweeperGameInstance>(),
+		TEXT("ui.dialogue.continue"),
+		TEXT("\uACC4\uC18D")));
 	ContinuePromptText->SetFont(MakeDialogueFont(ContinuePromptText, TunaSweeperDialogueWidget::ContinueFontSize));
 	ContinuePromptText->SetColorAndOpacity(FSlateColor(FLinearColor(0.96f, 0.98f, 1.0f, 0.92f)));
 	ContinuePromptText->SetJustification(ETextJustify::Right);

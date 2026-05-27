@@ -126,10 +126,15 @@ bool ATunaSweeperLootContainerActor::BuildContainerInstance(FTunaSweeperLootCont
 		return false;
 	}
 
+	const UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GetGameInstance());
+	const ETunaSweeperItemTextLanguage Language = TunaGameInstance
+		? TunaGameInstance->GetCurrentTextLanguage()
+		: DisplayLanguage;
+
 	return ItemDataSubsystem->TryBuildLootContainerInstance(
 		ContainerDefinitionId,
 		ContentsId,
-		DisplayLanguage,
+		Language,
 		OutInstance);
 }
 

@@ -18,15 +18,22 @@ namespace TunaSweeperItemInfoPanel
 	constexpr float AttachmentSlotTileWidth = 96.0f;
 	constexpr float AttachmentSlotTileHeight = 96.0f;
 
-	FText GetAttachmentSlotDisplayName(FName AttachmentSlotTag)
+	FText ResolveUiText(const UTunaSweeperGameInstance* TunaGameInstance, const TCHAR* StringKey, const TCHAR* Fallback)
+	{
+		return TunaGameInstance
+			? TunaGameInstance->ResolveLocalizedText(FName(StringKey), FText::FromString(Fallback))
+			: FText::FromString(Fallback);
+	}
+
+	FText GetAttachmentSlotDisplayName(FName AttachmentSlotTag, const UTunaSweeperGameInstance* TunaGameInstance)
 	{
 		if (AttachmentSlotTag == TEXT("attachment.slot.magazine"))
 		{
-			return FText::FromString(TEXT("\uD0C4\uCC3D"));
+			return ResolveUiText(TunaGameInstance, TEXT("ui.item_info.attachment_magazine"), TEXT("\uD0C4\uCC3D"));
 		}
 		if (AttachmentSlotTag == TEXT("attachment.slot.optic"))
 		{
-			return FText::FromString(TEXT("\uAD11\uD559"));
+			return ResolveUiText(TunaGameInstance, TEXT("ui.item_info.attachment_optic"), TEXT("\uAD11\uD559"));
 		}
 
 		return FText::FromName(AttachmentSlotTag);
@@ -124,6 +131,8 @@ void UTunaSweeperHudItemInfoPanelWidget::NativeConstruct()
 		TunaGameInstance->OnSelectedInventoryItemChanged.AddUObject(this, &UTunaSweeperHudItemInfoPanelWidget::RefreshSelectedItemInfo);
 		TunaGameInstance->OnInventoryStateChanged.RemoveAll(this);
 		TunaGameInstance->OnInventoryStateChanged.AddUObject(this, &UTunaSweeperHudItemInfoPanelWidget::RefreshSelectedItemInfo);
+		TunaGameInstance->OnLanguageChanged.RemoveAll(this);
+		TunaGameInstance->OnLanguageChanged.AddUObject(this, &UTunaSweeperHudItemInfoPanelWidget::RefreshSelectedItemInfo);
 	}
 
 	if (CloseButton)
@@ -146,6 +155,7 @@ void UTunaSweeperHudItemInfoPanelWidget::NativeDestruct()
 	{
 		TunaGameInstance->OnSelectedInventoryItemChanged.RemoveAll(this);
 		TunaGameInstance->OnInventoryStateChanged.RemoveAll(this);
+		TunaGameInstance->OnLanguageChanged.RemoveAll(this);
 	}
 
 	Super::NativeDestruct();
@@ -195,14 +205,15 @@ void UTunaSweeperHudItemInfoPanelWidget::RefreshSelectedItemInfo()
 		return;
 	}
 
+	const ETunaSweeperItemTextLanguage Language = TunaGameInstance->GetCurrentTextLanguage();
 	FText DisplayName;
-	if (!ItemDataSubsystem->TryGetItemNameTextByKey(SelectedItemDefinition.NameStringKey, ETunaSweeperItemTextLanguage::Korean, DisplayName))
+	if (!ItemDataSubsystem->TryGetItemNameTextByKey(SelectedItemDefinition.NameStringKey, Language, DisplayName))
 	{
 		DisplayName = FText::FromString(FString::Printf(TEXT("Item %d"), SelectedItemInstance.ItemId));
 	}
 
 	FText Description;
-	ItemDataSubsystem->TryGetItemDescriptionText(SelectedItemInstance.ItemId, ETunaSweeperItemTextLanguage::Korean, Description);
+	ItemDataSubsystem->TryGetItemDescriptionText(SelectedItemInstance.ItemId, Language, Description);
 
 	const TArray<FTunaSweeperInventorySlot>& AttachmentSlots = TunaGameInstance->GetSelectedWeaponAttachmentSlots();
 	const TArray<FName>& AttachmentSlotTags = TunaGameInstance->GetSelectedWeaponAttachmentSlotTags();
@@ -225,8 +236,8 @@ void UTunaSweeperHudItemInfoPanelWidget::RefreshSelectedItemInfo()
 			TileData.bIsEmpty = true;
 			TileData.bShowEmptySlotLabel = true;
 			TileData.DisplayName = AttachmentSlotTags.IsValidIndex(SlotIndex)
-				? TunaSweeperItemInfoPanel::GetAttachmentSlotDisplayName(AttachmentSlotTags[SlotIndex])
-				: FText::FromString(TEXT("Mod"));
+				? TunaSweeperItemInfoPanel::GetAttachmentSlotDisplayName(AttachmentSlotTags[SlotIndex], TunaGameInstance)
+				: TunaSweeperItemInfoPanel::ResolveUiText(TunaGameInstance, TEXT("ui.item_info.mod"), TEXT("Mod"));
 
 			if (AttachmentSlots.IsValidIndex(SlotIndex) && AttachmentSlots[SlotIndex].ItemUid.IsValid() &&
 				TunaGameInstance->TryGetItemInstance(AttachmentSlots[SlotIndex].ItemUid, TileData.ItemInstance))
@@ -238,7 +249,7 @@ void UTunaSweeperHudItemInfoPanelWidget::RefreshSelectedItemInfo()
 				FTunaSweeperItemDefinition AttachmentDefinition;
 				if (ItemDataSubsystem->TryGetItemDefinition(TileData.ItemInstance.ItemId, AttachmentDefinition))
 				{
-					ItemDataSubsystem->TryGetItemNameTextByKey(AttachmentDefinition.NameStringKey, ETunaSweeperItemTextLanguage::Korean, TileData.DisplayName);
+					ItemDataSubsystem->TryGetItemNameTextByKey(AttachmentDefinition.NameStringKey, Language, TileData.DisplayName);
 					const FString IconObjectPath = ItemDataSubsystem->BuildItemIconObjectPath(AttachmentDefinition);
 					if (!IconObjectPath.IsEmpty())
 					{
@@ -261,8 +272,14 @@ void UTunaSweeperHudItemInfoPanelWidget::RefreshSelectedItemInfo()
 	{
 		const bool bHasRifleModding = SelectedItemDefinition.WeaponTypeTag == TEXT("weapon.type.rifle") && AttachmentSlots.Num() > 0;
 		ModdingText->SetText(bHasRifleModding
-			? FText::FromString(TEXT("\uC18C\uCD1D \uBAA8\uB529: \uB300\uC6A9\uB7C9 \uD0C4\uCC3D / \uAD11\uD559 \uC7A5\uBE44"))
-			: FText::FromString(TEXT("\uBD80\uCC29\uBB3C")));
+			? TunaSweeperItemInfoPanel::ResolveUiText(
+				TunaGameInstance,
+				TEXT("ui.item_info.rifle_modding"),
+				TEXT("\uC18C\uCD1D \uBAA8\uB529: \uB300\uC6A9\uB7C9 \uD0C4\uCC3D / \uAD11\uD559 \uC7A5\uBE44"))
+			: TunaSweeperItemInfoPanel::ResolveUiText(
+				TunaGameInstance,
+				TEXT("ui.item_info.attachments"),
+				TEXT("\uBD80\uCC29\uBB3C")));
 	}
 }
 
@@ -291,7 +308,11 @@ void UTunaSweeperHudItemInfoPanelWidget::ClearSelectedItemInfo()
 
 	if (SelectedItemNameText)
 	{
-		SelectedItemNameText->SetText(FText::FromString(TEXT("No Item")));
+		const UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+		SelectedItemNameText->SetText(TunaSweeperItemInfoPanel::ResolveUiText(
+			TunaGameInstance,
+			TEXT("ui.common.no_item"),
+			TEXT("No Item")));
 	}
 
 	if (SelectedItemDescriptionText)

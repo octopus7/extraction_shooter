@@ -3,6 +3,7 @@
 #include "Blueprint/UserWidget.h"
 #include "CoreMinimal.h"
 #include "GenericPlatform/GenericWindow.h"
+#include "Subsystem/TunaSweeperItemDataSubsystem.h"
 #include "TimerManager.h"
 #include "TunaSweeperIntroMenuWidget.generated.h"
 
@@ -13,6 +14,14 @@ class UTextBlock;
 class UWidget;
 class UTunaSweeperScreenFadeWidget;
 class UTunaSweeperTitleWindParticleWidget;
+
+enum class ETunaSweeperTitleDLSSMode : uint8
+{
+	Off = 0,
+	Quality,
+	Balanced,
+	Performance
+};
 
 UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API UTunaSweeperIntroMenuWidget : public UUserWidget
@@ -25,6 +34,7 @@ public:
 protected:
 	virtual void NativePreConstruct() override;
 	virtual void NativeConstruct() override;
+	virtual void NativeDestruct() override;
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 	virtual FReply NativeOnPreviewKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent) override;
 
@@ -122,7 +132,22 @@ protected:
 	TObjectPtr<UTextBlock> SettingsStatusText;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UButton> SettingsGraphicsTabButton;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UButton> SettingsInterfaceTabButton;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UWidget> GraphicsSettingsPanel;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UWidget> InterfaceSettingsPanel;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
 	TObjectPtr<UButton> WindowedModeButton;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UButton> BorderlessWindowModeButton;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
 	TObjectPtr<UButton> FullscreenModeButton;
@@ -140,7 +165,46 @@ protected:
 	TObjectPtr<UButton> Resolution2560Button;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UButton> Resolution3840Button;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UButton> DLSSOffButton;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UButton> DLSSQualityButton;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UButton> DLSSBalancedButton;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UButton> DLSSPerformanceButton;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
 	TObjectPtr<UButton> BackFromSettingsButton;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UButton> LanguageEnglishButton;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UTextBlock> LanguageEnglishButtonText;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UButton> LanguageKoreanButton;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UTextBlock> LanguageKoreanButtonText;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UButton> LanguageJapaneseButton;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UTextBlock> LanguageJapaneseButtonText;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UButton> ConfirmInterfaceSettingsButton;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UButton> CancelInterfaceSettingsButton;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
 	TObjectPtr<UWidget> CreditsPanel;
@@ -216,7 +280,16 @@ private:
 	void HandleCancelDeleteClicked();
 
 	UFUNCTION()
+	void HandleSettingsGraphicsTabClicked();
+
+	UFUNCTION()
+	void HandleSettingsInterfaceTabClicked();
+
+	UFUNCTION()
 	void HandleWindowedModeClicked();
+
+	UFUNCTION()
+	void HandleBorderlessWindowModeClicked();
 
 	UFUNCTION()
 	void HandleFullscreenModeClicked();
@@ -234,21 +307,69 @@ private:
 	void HandleResolution2560Clicked();
 
 	UFUNCTION()
+	void HandleResolution3840Clicked();
+
+	UFUNCTION()
+	void HandleDLSSOffClicked();
+
+	UFUNCTION()
+	void HandleDLSSQualityClicked();
+
+	UFUNCTION()
+	void HandleDLSSBalancedClicked();
+
+	UFUNCTION()
+	void HandleDLSSPerformanceClicked();
+
+	UFUNCTION()
 	void HandleBackFromSettingsClicked();
+
+	UFUNCTION()
+	void HandleLanguageEnglishClicked();
+
+	UFUNCTION()
+	void HandleLanguageKoreanClicked();
+
+	UFUNCTION()
+	void HandleLanguageJapaneseClicked();
+
+	UFUNCTION()
+	void HandleConfirmInterfaceSettingsClicked();
+
+	UFUNCTION()
+	void HandleCancelInterfaceSettingsClicked();
 
 	UFUNCTION()
 	void HandleBackFromCreditsClicked();
 
+	void HandleLanguageChanged();
+
 	void ShowMainMenu();
 	void ShowSaveSlotSelection();
 	void ShowSettingsPanel();
+	void ShowGraphicsSettingsTab();
+	void ShowInterfaceSettingsTab();
 	void ShowCreditsPanel();
 	void HideOverlayPanels();
+	void SetTitleLogoVisible(bool bVisible);
 	void SelectSaveSlot(int32 SaveSlotIndex);
 	void RefreshMainMenu();
 	void RefreshSaveSlotMenu();
 	void RefreshSettingsPanel();
+	void RefreshInterfaceSettingsPanel();
+	void RefreshLocalizedTexts();
 	void RefreshSaveSlotButton(int32 SaveSlotIndex, UButton* SlotButton, UTextBlock* SlotText);
+	void LoadTitleGraphicsSettings();
+	void SaveTitleGraphicsSettings() const;
+	void ApplyDLSSSetting(ETunaSweeperTitleDLSSMode DLSSMode);
+	void ApplyDLSSModeToRuntime(ETunaSweeperTitleDLSSMode DLSSMode) const;
+	bool IsDLSSModeAvailable(ETunaSweeperTitleDLSSMode DLSSMode) const;
+	FText BuildWindowModeText(EWindowMode::Type WindowMode) const;
+	FText BuildDLSSModeText(ETunaSweeperTitleDLSSMode DLSSMode) const;
+	FText BuildLanguageNameText(ETunaSweeperItemTextLanguage Language) const;
+	FText BuildLanguageOptionText(ETunaSweeperItemTextLanguage Language, bool bSelected) const;
+	FText ResolveUiText(FName StringKey, const FText& FallbackText) const;
+	void SetNamedText(FName WidgetName, const FText& Text) const;
 	void EnsureAlwaysNewStartButton();
 	void SetAlwaysNewStartButtonVisible(bool bVisible);
 	FText BuildCurrentSaveSlotText(int32 SaveSlotIndex) const;
@@ -287,6 +408,9 @@ private:
 	bool bDeleteConfirmVisible = false;
 	bool bStartTravelPending = false;
 	bool bTitleMenuButtonContentLayoutApplied = false;
+	bool bShowingInterfaceSettingsTab = false;
+	ETunaSweeperTitleDLSSMode PreferredDLSSMode = ETunaSweeperTitleDLSSMode::Performance;
+	ETunaSweeperItemTextLanguage PendingInterfaceLanguage = ETunaSweeperItemTextLanguage::English;
 	FName PendingStartTargetLevelName = NAME_None;
 	FTimerHandle StartTravelTimerHandle;
 

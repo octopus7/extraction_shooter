@@ -11,6 +11,7 @@
 #include "Input/Reply.h"
 #include "UI/TunaSweeperItemDragDropOperation.h"
 #include "UI/TunaSweeperItemHoverPromptWidget.h"
+#include "UI/TunaSweeperItemStackSplitPopupWidget.h"
 #include "UI/TunaSweeperItemStackTileItemObject.h"
 #include "UI/TunaSweeperUIFont.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
@@ -196,7 +197,7 @@ bool UTunaSweeperItemThumbnailSlotWidget::NativeOnDrop(
 {
 	ApplyDropHighlight(false);
 
-	const UTunaSweeperItemDragDropOperation* ItemDragOperation = Cast<UTunaSweeperItemDragDropOperation>(InOperation);
+	UTunaSweeperItemDragDropOperation* ItemDragOperation = Cast<UTunaSweeperItemDragDropOperation>(InOperation);
 	UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
 	if (!ItemDragOperation || !TunaGameInstance)
 	{
@@ -210,11 +211,21 @@ bool UTunaSweeperItemThumbnailSlotWidget::NativeOnDrop(
 		SourceSlot.SlotIndex = ItemDragOperation->TileData.SourceIndex;
 	}
 	const FTunaSweeperItemSlotReference TargetSlot = GetCachedSlotReference();
-	const bool bMoved = TunaGameInstance->MoveItemBetweenSlots(SourceSlot, TargetSlot);
-	if (UTunaSweeperItemDragDropOperation* MutableItemDragOperation = Cast<UTunaSweeperItemDragDropOperation>(InOperation))
+	if (InDragDropEvent.GetModifierKeys().IsControlDown() &&
+		UTunaSweeperItemStackSplitPopupWidget::TryOpenStackSplitPopup(
+			GetOwningPlayer(),
+			TunaGameInstance,
+			SourceSlot,
+			TargetSlot,
+			InDragDropEvent.GetScreenSpacePosition()))
 	{
-		MutableItemDragOperation->bHasHoveredSlotReference = false;
+		ItemDragOperation->bHasHoveredSlotReference = false;
+		ItemDragOperation->HoveredSlotReference = FTunaSweeperItemSlotReference();
+		return true;
 	}
+
+	const bool bMoved = TunaGameInstance->MoveItemBetweenSlots(SourceSlot, TargetSlot);
+	ItemDragOperation->bHasHoveredSlotReference = false;
 
 	return bMoved || Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
 }

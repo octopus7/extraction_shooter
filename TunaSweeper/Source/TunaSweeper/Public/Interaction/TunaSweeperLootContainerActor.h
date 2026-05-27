@@ -97,7 +97,7 @@ protected:
 	int32 ContentsId = 8001;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Loot Container")
-	ETunaSweeperItemTextLanguage DisplayLanguage = ETunaSweeperItemTextLanguage::Korean;
+	ETunaSweeperItemTextLanguage DisplayLanguage = ETunaSweeperItemTextLanguage::English;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Loot Container|Meshes", meta = (DisplayName = "Body Mesh"))
 	TObjectPtr<UStaticMesh> BodyMeshOverride;

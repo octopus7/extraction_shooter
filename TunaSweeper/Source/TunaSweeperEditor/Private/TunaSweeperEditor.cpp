@@ -11,6 +11,7 @@
 #include "Character/TunaSweeperTopDownCharacter.h"
 #include "Components/Border.h"
 #include "Components/Button.h"
+#include "Components/ButtonSlot.h"
 #include "Components/CanvasPanel.h"
 #include "Components/CanvasPanelSlot.h"
 #include "Components/HorizontalBox.h"
@@ -55,6 +56,7 @@
 #include "Interaction/TunaSweeperWorldProgressActor.h"
 #include "Kismet2/BlueprintEditorUtils.h"
 #include "Kismet2/KismetEditorUtilities.h"
+#include "Map/TunaSweeperMapCaptureActor.h"
 #include "MediaSource.h"
 #include "Factories/MaterialFactoryNew.h"
 #include "Materials/Material.h"
@@ -115,7 +117,7 @@ namespace TunaSweeperEditorSetup
 	const FString InteractionInputTaskId = TEXT("2026-05-11_SetInteractInputToFKey");
 	const FString InteractionMarkerAlignmentTaskId = TEXT("2026-05-25_RebuildInteractionMarkerRequirementPreviewV1");
 	const FString PickupItemAndSpawnerTaskId = TEXT("2026-05-11_CreatePickupItemAndSpawnerAssetsV3");
-	const FString CommonGameHudTaskId = TEXT("2026-05-28_CenterHudModeTabsV1");
+	const FString CommonGameHudTaskId = TEXT("2026-05-28_ModeTabIconButtonsV1");
 	const FString InventoryInputTaskId = TEXT("2026-05-11_AddInventoryInput");
 	const FString QuickSlotInputTaskId = TEXT("2026-05-12_AddQuickSlotInputActions");
 	const FString DropInputTaskId = TEXT("2026-05-18_AddDropInputAction");
@@ -124,11 +126,13 @@ namespace TunaSweeperEditorSetup
 	const FString SprintInputTaskId = TEXT("2026-05-28_AddSprintInputV1");
 	const FString RollInputTaskId = TEXT("2026-05-28_AddRollInputV1");
 	const FString MapInputTaskId = TEXT("2026-05-28_AddMapInputV1");
+	const FString EditorMapCaptureTaskId = TEXT("2026-05-28_CreateEditorMapCaptureBlueprintAndRaidPlacementV1");
 	const FString LootContainerAndSpawnerTaskId = TEXT("2026-05-11_CreateLootContainerAndSpawnerAssetsV1");
 	const FString LootContainerOccupancyHeaderTaskId = TEXT("2026-05-18_AddLootContainerOccupancyHeaderV1");
 	const FString CannedTunaIconImportTaskId = TEXT("2026-05-11_ImportCannedTunaIconV1");
 	const FString BackpackInventoryTaskId = TEXT("2026-05-16_CreateEquipmentInventoryAssetsV3");
 	const FString IntroMenuAndLevelTravelTaskId = TEXT("2026-05-24_CreateTitleIntroMenuPersistentSaveSlotSelectionLevelTravelLadderInitialScaleV1");
+	const FString IntroMenuGraphicsSettingsTaskId = TEXT("2026-05-28_AddTitleFullscreenSettingsLayoutV1");
 	const FString OpeningScenarioPresentationTaskId = TEXT("2026-05-19_CreateOpeningScenarioPresentationV2");
 	const FString LevelTransitionVideoTaskId = TEXT("2026-05-16_AddBidirectionalLevelTransitionVideoV3");
 	const FString FirstOutingQuestTaskId = TEXT("2026-05-15_CreateFirstOutingQuestNpcV2");
@@ -188,6 +192,10 @@ namespace TunaSweeperEditorSetup
 	const FString LumberjackMeleeSwingArcMeshAssetName = TEXT("SM_LumberjackMeleeSwingArc");
 	const FString LedExpressionMaterialAssetName = TEXT("M_LedExpression_VertexColorEmissive");
 	const FString UIIconAssetPath = TEXT("/Game/UI/Icons");
+	const FString HudModeInventoryIconAssetName = TEXT("T_UI_Mode_Inventory");
+	const FString HudModeQuestIconAssetName = TEXT("T_UI_Mode_Quest");
+	const FString HudModeMapIconAssetName = TEXT("T_UI_Mode_Map");
+	const FString HudModeMemoIconAssetName = TEXT("T_UI_Mode_Memo");
 	const FString UITitleTextureAssetPath = TEXT("/Game/UI/Title");
 	const FString UIStoryTextureAssetPath = TEXT("/Game/UI/Story");
 	const FString TitleBackgroundTextureAssetName = TEXT("Title_C1");
@@ -208,11 +216,11 @@ namespace TunaSweeperEditorSetup
 	const FString LevelTransitionVideoWidgetAssetName = TEXT("WBP_LevelTransitionVideo");
 	const FString QuestWidgetAssetName = TEXT("WBP_Quest");
 	const FString SpeechBubbleWidgetAssetName = TEXT("WBP_SpeechBubble");
-	constexpr float HudTopModeTabButtonWidth = 156.0f;
+	constexpr float HudTopModeTabButtonWidth = 52.0f;
 	constexpr float HudTopModeTabButtonHeight = 46.0f;
 	constexpr float HudTopModeTabGap = 8.0f;
-	constexpr float HudTopModeTabPaddingX = 18.0f;
-	constexpr float HudTopModeTabPaddingY = 12.0f;
+	constexpr float HudTopModeTabPaddingX = 12.0f;
+	constexpr float HudTopModeTabPaddingY = 10.0f;
 	constexpr float HudTopModeTabPanelWidth =
 		4.0f * HudTopModeTabButtonWidth + 3.0f * HudTopModeTabGap + 2.0f * HudTopModeTabPaddingX;
 	constexpr float HudTopModeTabPanelHeight = HudTopModeTabButtonHeight + 2.0f * HudTopModeTabPaddingY;
@@ -240,6 +248,9 @@ namespace TunaSweeperEditorSetup
 	constexpr float LootContainerPanelWidth =
 		LootContainerPanelPadding * 2.0f + LootContainerTileColumnCount * LootContainerTileWidth + LootContainerTileViewScrollbarReserveWidth;
 	const FString InteractionAssetPath = TEXT("/Game/Interaction");
+	const FString EditorMapCaptureAssetPath = TEXT("/Game/EditorOnly/MapCapture");
+	const FString EditorMapCaptureBlueprintAssetName = TEXT("BP_Editor_MapCaptureActor");
+	const FString EditorMapCaptureActorLabel = TEXT("TS_Editor_MapCapture_Raid");
 	const FString VideoAssetPath = TEXT("/Game/Movies");
 	const FString AudioBgmAssetPath = TEXT("/Game/Audio/BGM");
 	const FString BunkerToRaidMediaSourceAssetName = TEXT("MS_BunkerToRaid");
@@ -260,6 +271,8 @@ namespace TunaSweeperEditorSetup
 	const FString WarpPointNoiseTextureAssetName = TEXT("T_WarpPointNoise");
 	const FString MemoStorageDeviceTextureAssetName = TEXT("T_MemoStorageDevice");
 	const FString MemoStorageDeviceMaterialAssetName = TEXT("M_MemoStorageDevice");
+	const FString RollingBomberSpawnerTextureAssetName = TEXT("T_RollingBomberSpawner_Mechanic");
+	const FString RollingBomberSpawnerMaterialAssetName = TEXT("M_RollingBomberSpawner_Mechanic");
 	const FString TransparentObstacleAssetName = TEXT("BP_TransparentObstacle");
 	const FString WorldProgressBrokenBridgeAssetName = TEXT("BP_WorldProgress_BrokenBridge");
 	const FString WorldProgressRepairedBridgeAssetName = TEXT("BP_WorldProgress_RepairedBridge");
@@ -2528,13 +2541,27 @@ namespace TunaSweeperEditorSetup
 		UVerticalBox* SettingsContentStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("SettingsContentStack"));
 		UTextBlock* SettingsTitleText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("SettingsTitleText"));
 		UTextBlock* SettingsStatusText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("SettingsStatusText"));
+		UHorizontalBox* SettingsTabRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("SettingsTabRow"));
+		USizeBox* GraphicsTabButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("GraphicsTabButtonBox"));
+		UButton* SettingsGraphicsTabButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("SettingsGraphicsTabButton"));
+		UTextBlock* SettingsGraphicsTabButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("SettingsGraphicsTabButtonText"));
+		USizeBox* InterfaceTabButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("InterfaceTabButtonBox"));
+		UButton* SettingsInterfaceTabButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("SettingsInterfaceTabButton"));
+		UTextBlock* SettingsInterfaceTabButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("SettingsInterfaceTabButtonText"));
+		UVerticalBox* GraphicsSettingsPanel = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("GraphicsSettingsPanel"));
+		UVerticalBox* InterfaceSettingsPanel = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("InterfaceSettingsPanel"));
+		UTextBlock* WindowModeLabelText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("WindowModeLabelText"));
 		UHorizontalBox* WindowModeRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("WindowModeRow"));
 		USizeBox* WindowedModeButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("WindowedModeButtonBox"));
 		UButton* WindowedModeButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("WindowedModeButton"));
 		UTextBlock* WindowedModeButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("WindowedModeButtonText"));
+		USizeBox* BorderlessWindowModeButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("BorderlessWindowModeButtonBox"));
+		UButton* BorderlessWindowModeButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("BorderlessWindowModeButton"));
+		UTextBlock* BorderlessWindowModeButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("BorderlessWindowModeButtonText"));
 		USizeBox* FullscreenModeButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("FullscreenModeButtonBox"));
 		UButton* FullscreenModeButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("FullscreenModeButton"));
 		UTextBlock* FullscreenModeButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("FullscreenModeButtonText"));
+		UTextBlock* ResolutionLabelText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("ResolutionLabelText"));
 		UVerticalBox* ResolutionButtonStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("ResolutionButtonStack"));
 		USizeBox* Resolution1280ButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("Resolution1280ButtonBox"));
 		UButton* Resolution1280Button = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("Resolution1280Button"));
@@ -2548,9 +2575,44 @@ namespace TunaSweeperEditorSetup
 		USizeBox* Resolution2560ButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("Resolution2560ButtonBox"));
 		UButton* Resolution2560Button = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("Resolution2560Button"));
 		UTextBlock* Resolution2560ButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("Resolution2560ButtonText"));
+		USizeBox* Resolution3840ButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("Resolution3840ButtonBox"));
+		UButton* Resolution3840Button = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("Resolution3840Button"));
+		UTextBlock* Resolution3840ButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("Resolution3840ButtonText"));
+		UTextBlock* DLSSLabelText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("DLSSLabelText"));
+		UHorizontalBox* DLSSButtonRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("DLSSButtonRow"));
+		USizeBox* DLSSOffButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("DLSSOffButtonBox"));
+		UButton* DLSSOffButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("DLSSOffButton"));
+		UTextBlock* DLSSOffButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("DLSSOffButtonText"));
+		USizeBox* DLSSQualityButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("DLSSQualityButtonBox"));
+		UButton* DLSSQualityButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("DLSSQualityButton"));
+		UTextBlock* DLSSQualityButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("DLSSQualityButtonText"));
+		USizeBox* DLSSBalancedButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("DLSSBalancedButtonBox"));
+		UButton* DLSSBalancedButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("DLSSBalancedButton"));
+		UTextBlock* DLSSBalancedButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("DLSSBalancedButtonText"));
+		USizeBox* DLSSPerformanceButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("DLSSPerformanceButtonBox"));
+		UButton* DLSSPerformanceButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("DLSSPerformanceButton"));
+		UTextBlock* DLSSPerformanceButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("DLSSPerformanceButtonText"));
 		USizeBox* BackFromSettingsButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("BackFromSettingsButtonBox"));
 		UButton* BackFromSettingsButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("BackFromSettingsButton"));
 		UTextBlock* BackFromSettingsButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("BackFromSettingsButtonText"));
+		UTextBlock* LanguageLabelText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("LanguageLabelText"));
+		UVerticalBox* LanguageButtonStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("LanguageButtonStack"));
+		USizeBox* LanguageEnglishButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("LanguageEnglishButtonBox"));
+		UButton* LanguageEnglishButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("LanguageEnglishButton"));
+		UTextBlock* LanguageEnglishButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("LanguageEnglishButtonText"));
+		USizeBox* LanguageKoreanButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("LanguageKoreanButtonBox"));
+		UButton* LanguageKoreanButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("LanguageKoreanButton"));
+		UTextBlock* LanguageKoreanButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("LanguageKoreanButtonText"));
+		USizeBox* LanguageJapaneseButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("LanguageJapaneseButtonBox"));
+		UButton* LanguageJapaneseButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("LanguageJapaneseButton"));
+		UTextBlock* LanguageJapaneseButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("LanguageJapaneseButtonText"));
+		UHorizontalBox* InterfaceActionButtonRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("InterfaceActionButtonRow"));
+		USizeBox* ConfirmInterfaceSettingsButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("ConfirmInterfaceSettingsButtonBox"));
+		UButton* ConfirmInterfaceSettingsButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("ConfirmInterfaceSettingsButton"));
+		UTextBlock* ConfirmInterfaceSettingsButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("ConfirmInterfaceSettingsButtonText"));
+		USizeBox* CancelInterfaceSettingsButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("CancelInterfaceSettingsButtonBox"));
+		UButton* CancelInterfaceSettingsButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("CancelInterfaceSettingsButton"));
+		UTextBlock* CancelInterfaceSettingsButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("CancelInterfaceSettingsButtonText"));
 		UCanvasPanel* CreditsPanel = WidgetTree->ConstructWidget<UCanvasPanel>(UCanvasPanel::StaticClass(), TEXT("CreditsPanel"));
 		UBorder* CreditsBackdrop = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("CreditsBackdrop"));
 		UVerticalBox* CreditsContentStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("CreditsContentStack"));
@@ -2584,13 +2646,28 @@ namespace TunaSweeperEditorSetup
 			!DeleteConfirmMessageText || !DeleteConfirmButtonRow || !ConfirmDeleteButtonBox || !ConfirmDeleteButton ||
 			!ConfirmDeleteButtonText || !CancelDeleteButtonBox || !CancelDeleteButton || !CancelDeleteButtonText ||
 			!SettingsPanel || !SettingsBackdrop || !SettingsContentBackground || !SettingsContentStack ||
-			!SettingsTitleText || !SettingsStatusText || !WindowModeRow || !WindowedModeButtonBox ||
-			!WindowedModeButton || !WindowedModeButtonText || !FullscreenModeButtonBox || !FullscreenModeButton ||
-			!FullscreenModeButtonText || !ResolutionButtonStack || !Resolution1280ButtonBox || !Resolution1280Button ||
+			!SettingsTitleText || !SettingsStatusText || !SettingsTabRow || !GraphicsTabButtonBox ||
+			!SettingsGraphicsTabButton || !SettingsGraphicsTabButtonText || !InterfaceTabButtonBox ||
+			!SettingsInterfaceTabButton || !SettingsInterfaceTabButtonText || !GraphicsSettingsPanel ||
+			!InterfaceSettingsPanel || !WindowModeLabelText || !WindowModeRow ||
+			!WindowedModeButtonBox || !WindowedModeButton || !WindowedModeButtonText ||
+			!BorderlessWindowModeButtonBox || !BorderlessWindowModeButton || !BorderlessWindowModeButtonText ||
+			!FullscreenModeButtonBox || !FullscreenModeButton || !FullscreenModeButtonText ||
+			!ResolutionLabelText || !ResolutionButtonStack || !Resolution1280ButtonBox || !Resolution1280Button ||
 			!Resolution1280ButtonText || !Resolution1600ButtonBox || !Resolution1600Button || !Resolution1600ButtonText ||
 			!Resolution1920ButtonBox || !Resolution1920Button || !Resolution1920ButtonText || !Resolution2560ButtonBox ||
-			!Resolution2560Button || !Resolution2560ButtonText || !BackFromSettingsButtonBox || !BackFromSettingsButton ||
-			!BackFromSettingsButtonText || !CreditsPanel || !CreditsBackdrop || !CreditsContentStack || !CreditsTitleText ||
+			!Resolution2560Button || !Resolution2560ButtonText || !Resolution3840ButtonBox || !Resolution3840Button ||
+			!Resolution3840ButtonText || !DLSSLabelText || !DLSSButtonRow || !DLSSOffButtonBox || !DLSSOffButton ||
+			!DLSSOffButtonText || !DLSSQualityButtonBox || !DLSSQualityButton || !DLSSQualityButtonText ||
+			!DLSSBalancedButtonBox || !DLSSBalancedButton || !DLSSBalancedButtonText ||
+			!DLSSPerformanceButtonBox || !DLSSPerformanceButton || !DLSSPerformanceButtonText ||
+			!BackFromSettingsButtonBox || !BackFromSettingsButton ||
+			!BackFromSettingsButtonText || !LanguageLabelText || !LanguageButtonStack || !LanguageEnglishButtonBox ||
+			!LanguageEnglishButton || !LanguageEnglishButtonText || !LanguageKoreanButtonBox || !LanguageKoreanButton ||
+			!LanguageKoreanButtonText || !LanguageJapaneseButtonBox || !LanguageJapaneseButton || !LanguageJapaneseButtonText ||
+			!InterfaceActionButtonRow || !ConfirmInterfaceSettingsButtonBox || !ConfirmInterfaceSettingsButton ||
+			!ConfirmInterfaceSettingsButtonText || !CancelInterfaceSettingsButtonBox || !CancelInterfaceSettingsButton ||
+			!CancelInterfaceSettingsButtonText || !CreditsPanel || !CreditsBackdrop || !CreditsContentStack || !CreditsTitleText ||
 			!CreditsColumnRow || !CreditsScrollBoxFrame || !CreditsScrollBox || !CreditsText ||
 			!CreditsScrollBoxFrame2 || !CreditsScrollBox2 || !CreditsText2 || !CreditsScrollBoxFrame3 ||
 			!CreditsScrollBox3 || !CreditsText3 ||
@@ -3086,83 +3163,198 @@ namespace TunaSweeperEditorSetup
 		FillCanvas(RootCanvas->AddChildToCanvas(SettingsPanel));
 		SettingsBackdrop->SetBrush(MakeRoundedBoxBrush(
 			FVector2D(1920.0f, 1080.0f),
-			FLinearColor(0.0f, 0.0f, 0.0f, 0.62f),
+			FLinearColor(0.006f, 0.010f, 0.012f, 0.96f),
 			FLinearColor::Transparent,
 			0.0f,
 			0.0f));
 		FillCanvas(SettingsPanel->AddChildToCanvas(SettingsBackdrop));
 
-		SettingsContentBackground->SetPadding(FMargin(34.0f, 30.0f));
+		SettingsContentBackground->SetPadding(FMargin(72.0f, 42.0f, 56.0f, 44.0f));
 		SettingsContentBackground->SetBrush(MakeRoundedBoxBrush(
-			FVector2D(560.0f, 520.0f),
-			FLinearColor(0.018f, 0.030f, 0.034f, 0.92f),
-			FLinearColor(0.70f, 0.78f, 0.76f, 0.74f),
-			1.2f,
-			16.0f));
+			FVector2D(1920.0f, 1080.0f),
+			FLinearColor::Transparent,
+			FLinearColor::Transparent,
+			0.0f,
+			0.0f));
 		SettingsContentBackground->SetContent(SettingsContentStack);
 		UCanvasPanelSlot* SettingsContentSlot = SettingsPanel->AddChildToCanvas(SettingsContentBackground);
 		if (SettingsContentSlot)
 		{
-			SettingsContentSlot->SetAnchors(FAnchors(0.0f, 0.5f));
-			SettingsContentSlot->SetAlignment(FVector2D(0.0f, 0.5f));
-			SettingsContentSlot->SetPosition(FVector2D(88.0f, 0.0f));
-			SettingsContentSlot->SetSize(FVector2D(560.0f, 520.0f));
+			FillCanvas(SettingsContentSlot);
+		}
+
+		ConfigurePlainButton(BackFromSettingsButtonBox, BackFromSettingsButton, BackFromSettingsButtonText, FText::FromString(TEXT("\u2190")), FVector2D(52.0f, 52.0f), false);
+		UVerticalBoxSlot* SettingsBackSlot = SettingsContentStack->AddChildToVerticalBox(BackFromSettingsButtonBox);
+		if (SettingsBackSlot)
+		{
+			SettingsBackSlot->SetHorizontalAlignment(HAlign_Left);
+			SettingsBackSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 18.0f));
 		}
 
 		ConfigureTextBlockLeft(SettingsTitleText, FText::FromString(TEXT("\uC124\uC815")), FLinearColor::White, 30);
 		UVerticalBoxSlot* SettingsTitleSlot = SettingsContentStack->AddChildToVerticalBox(SettingsTitleText);
 		if (SettingsTitleSlot)
 		{
-			SettingsTitleSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 16.0f));
+			SettingsTitleSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 10.0f));
 		}
 		ConfigureTextBlockLeft(SettingsStatusText, FText::FromString(TEXT("\uD604\uC7AC: --")), FLinearColor(0.82f, 0.86f, 0.84f, 1.0f), 17);
 		UVerticalBoxSlot* SettingsStatusSlot = SettingsContentStack->AddChildToVerticalBox(SettingsStatusText);
 		if (SettingsStatusSlot)
 		{
-			SettingsStatusSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 18.0f));
+			SettingsStatusSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 12.0f));
 		}
 
-		ConfigurePlainButton(WindowedModeButtonBox, WindowedModeButton, WindowedModeButtonText, FText::FromString(TEXT("\uCC3D\uBAA8\uB4DC")), FVector2D(236.0f, 52.0f), false);
-		ConfigurePlainButton(FullscreenModeButtonBox, FullscreenModeButton, FullscreenModeButtonText, FText::FromString(TEXT("\uC804\uCCB4\uD654\uBA74")), FVector2D(236.0f, 52.0f), false);
-		UHorizontalBoxSlot* WindowedSlot = WindowModeRow->AddChildToHorizontalBox(WindowedModeButtonBox);
-		if (WindowedSlot)
+		ConfigurePlainButton(GraphicsTabButtonBox, SettingsGraphicsTabButton, SettingsGraphicsTabButtonText, FText::FromString(TEXT("\uADF8\uB798\uD53D")), FVector2D(158.0f, 44.0f), true);
+		ConfigurePlainButton(InterfaceTabButtonBox, SettingsInterfaceTabButton, SettingsInterfaceTabButtonText, FText::FromString(TEXT("\uC778\uD130\uD398\uC774\uC2A4")), FVector2D(158.0f, 44.0f), false);
+		for (UWidget* TabButtonBox : { static_cast<UWidget*>(GraphicsTabButtonBox), static_cast<UWidget*>(InterfaceTabButtonBox) })
 		{
-			WindowedSlot->SetPadding(FMargin(0.0f, 0.0f, 12.0f, 0.0f));
+			UHorizontalBoxSlot* TabButtonSlot = SettingsTabRow->AddChildToHorizontalBox(TabButtonBox);
+			if (TabButtonSlot)
+			{
+				TabButtonSlot->SetPadding(FMargin(0.0f, 0.0f, 10.0f, 0.0f));
+			}
 		}
-		WindowModeRow->AddChildToHorizontalBox(FullscreenModeButtonBox);
-		UVerticalBoxSlot* WindowModeSlot = SettingsContentStack->AddChildToVerticalBox(WindowModeRow);
+		UVerticalBoxSlot* SettingsTabSlot = SettingsContentStack->AddChildToVerticalBox(SettingsTabRow);
+		if (SettingsTabSlot)
+		{
+			SettingsTabSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 14.0f));
+		}
+		UVerticalBoxSlot* GraphicsSettingsSlot = SettingsContentStack->AddChildToVerticalBox(GraphicsSettingsPanel);
+		if (GraphicsSettingsSlot)
+		{
+			GraphicsSettingsSlot->SetPadding(FMargin(0.0f));
+		}
+
+		ConfigureTextBlockLeft(WindowModeLabelText, FText::FromString(TEXT("\uD654\uBA74 \uBAA8\uB4DC")), FLinearColor(0.72f, 0.80f, 0.78f, 1.0f), 15);
+		UVerticalBoxSlot* WindowModeLabelSlot = GraphicsSettingsPanel->AddChildToVerticalBox(WindowModeLabelText);
+		if (WindowModeLabelSlot)
+		{
+			WindowModeLabelSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 6.0f));
+		}
+		ConfigurePlainButton(WindowedModeButtonBox, WindowedModeButton, WindowedModeButtonText, FText::FromString(TEXT("\uCC3D\uBAA8\uB4DC")), FVector2D(160.0f, 48.0f), false);
+		ConfigurePlainButton(BorderlessWindowModeButtonBox, BorderlessWindowModeButton, BorderlessWindowModeButtonText, FText::FromString(TEXT("\uD14C\uB450\uB9AC \uC5C6\uB294 \uCC3D\uBAA8\uB4DC")), FVector2D(252.0f, 48.0f), false);
+		ConfigurePlainButton(FullscreenModeButtonBox, FullscreenModeButton, FullscreenModeButtonText, FText::FromString(TEXT("\uC804\uCCB4\uD654\uBA74\uBAA8\uB4DC")), FVector2D(190.0f, 48.0f), false);
+		for (UWidget* WindowModeButtonBox : {
+				static_cast<UWidget*>(WindowedModeButtonBox),
+				static_cast<UWidget*>(BorderlessWindowModeButtonBox),
+				static_cast<UWidget*>(FullscreenModeButtonBox) })
+		{
+			UHorizontalBoxSlot* ModeSlot = WindowModeRow->AddChildToHorizontalBox(WindowModeButtonBox);
+			if (ModeSlot)
+			{
+				ModeSlot->SetPadding(FMargin(0.0f, 0.0f, 10.0f, 0.0f));
+			}
+		}
+		UVerticalBoxSlot* WindowModeSlot = GraphicsSettingsPanel->AddChildToVerticalBox(WindowModeRow);
 		if (WindowModeSlot)
 		{
-			WindowModeSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 18.0f));
+			WindowModeSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 14.0f));
 		}
 
-		ConfigurePlainButton(Resolution1280ButtonBox, Resolution1280Button, Resolution1280ButtonText, FText::FromString(TEXT("1280 x 720")), FVector2D(484.0f, 48.0f), false);
-		ConfigurePlainButton(Resolution1600ButtonBox, Resolution1600Button, Resolution1600ButtonText, FText::FromString(TEXT("1600 x 900")), FVector2D(484.0f, 48.0f), false);
-		ConfigurePlainButton(Resolution1920ButtonBox, Resolution1920Button, Resolution1920ButtonText, FText::FromString(TEXT("1920 x 1080")), FVector2D(484.0f, 48.0f), false);
-		ConfigurePlainButton(Resolution2560ButtonBox, Resolution2560Button, Resolution2560ButtonText, FText::FromString(TEXT("2560 x 1440")), FVector2D(484.0f, 48.0f), false);
+		ConfigureTextBlockLeft(ResolutionLabelText, FText::FromString(TEXT("\uD574\uC0C1\uB3C4")), FLinearColor(0.72f, 0.80f, 0.78f, 1.0f), 15);
+		UVerticalBoxSlot* ResolutionLabelSlot = GraphicsSettingsPanel->AddChildToVerticalBox(ResolutionLabelText);
+		if (ResolutionLabelSlot)
+		{
+			ResolutionLabelSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 6.0f));
+		}
+		ConfigurePlainButton(Resolution1280ButtonBox, Resolution1280Button, Resolution1280ButtonText, FText::FromString(TEXT("1280 x 720")), FVector2D(940.0f, 40.0f), false);
+		ConfigurePlainButton(Resolution1600ButtonBox, Resolution1600Button, Resolution1600ButtonText, FText::FromString(TEXT("1600 x 900")), FVector2D(940.0f, 40.0f), false);
+		ConfigurePlainButton(Resolution1920ButtonBox, Resolution1920Button, Resolution1920ButtonText, FText::FromString(TEXT("1920 x 1080")), FVector2D(940.0f, 40.0f), false);
+		ConfigurePlainButton(Resolution2560ButtonBox, Resolution2560Button, Resolution2560ButtonText, FText::FromString(TEXT("2560 x 1440")), FVector2D(940.0f, 40.0f), false);
+		ConfigurePlainButton(Resolution3840ButtonBox, Resolution3840Button, Resolution3840ButtonText, FText::FromString(TEXT("3840 x 2160")), FVector2D(940.0f, 40.0f), false);
 		for (UWidget* ResolutionButtonBox : {
 				static_cast<UWidget*>(Resolution1280ButtonBox),
 				static_cast<UWidget*>(Resolution1600ButtonBox),
 				static_cast<UWidget*>(Resolution1920ButtonBox),
-				static_cast<UWidget*>(Resolution2560ButtonBox) })
+				static_cast<UWidget*>(Resolution2560ButtonBox),
+				static_cast<UWidget*>(Resolution3840ButtonBox) })
 		{
 			UVerticalBoxSlot* ResolutionSlot = ResolutionButtonStack->AddChildToVerticalBox(ResolutionButtonBox);
 			if (ResolutionSlot)
 			{
-				ResolutionSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 10.0f));
+				ResolutionSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 8.0f));
 			}
 		}
-		UVerticalBoxSlot* ResolutionStackSlot = SettingsContentStack->AddChildToVerticalBox(ResolutionButtonStack);
+		UVerticalBoxSlot* ResolutionStackSlot = GraphicsSettingsPanel->AddChildToVerticalBox(ResolutionButtonStack);
 		if (ResolutionStackSlot)
 		{
-			ResolutionStackSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 8.0f));
+			ResolutionStackSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 14.0f));
 		}
 
-		ConfigurePlainButton(BackFromSettingsButtonBox, BackFromSettingsButton, BackFromSettingsButtonText, FText::FromString(TEXT("\uB3CC\uC544\uAC00\uAE30")), FVector2D(236.0f, 52.0f), false);
-		UVerticalBoxSlot* BackFromSettingsSlot = SettingsContentStack->AddChildToVerticalBox(BackFromSettingsButtonBox);
-		if (BackFromSettingsSlot)
+		ConfigureTextBlockLeft(DLSSLabelText, FText::FromString(TEXT("DLSS")), FLinearColor(0.72f, 0.80f, 0.78f, 1.0f), 15);
+		UVerticalBoxSlot* DLSSLabelSlot = GraphicsSettingsPanel->AddChildToVerticalBox(DLSSLabelText);
+		if (DLSSLabelSlot)
 		{
-			BackFromSettingsSlot->SetHorizontalAlignment(HAlign_Left);
+			DLSSLabelSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 6.0f));
+		}
+		ConfigurePlainButton(DLSSOffButtonBox, DLSSOffButton, DLSSOffButtonText, FText::FromString(TEXT("\uB044\uAE30")), FVector2D(142.0f, 44.0f), false);
+		ConfigurePlainButton(DLSSQualityButtonBox, DLSSQualityButton, DLSSQualityButtonText, FText::FromString(TEXT("\uD488\uC9C8")), FVector2D(142.0f, 44.0f), false);
+		ConfigurePlainButton(DLSSBalancedButtonBox, DLSSBalancedButton, DLSSBalancedButtonText, FText::FromString(TEXT("\uADE0\uD615")), FVector2D(142.0f, 44.0f), false);
+		ConfigurePlainButton(DLSSPerformanceButtonBox, DLSSPerformanceButton, DLSSPerformanceButtonText, FText::FromString(TEXT("\uC131\uB2A5")), FVector2D(142.0f, 44.0f), false);
+		for (UWidget* DLSSButtonBox : {
+				static_cast<UWidget*>(DLSSOffButtonBox),
+				static_cast<UWidget*>(DLSSQualityButtonBox),
+				static_cast<UWidget*>(DLSSBalancedButtonBox),
+				static_cast<UWidget*>(DLSSPerformanceButtonBox) })
+		{
+			UHorizontalBoxSlot* DLSSSlot = DLSSButtonRow->AddChildToHorizontalBox(DLSSButtonBox);
+			if (DLSSSlot)
+			{
+				DLSSSlot->SetPadding(FMargin(0.0f, 0.0f, 10.0f, 0.0f));
+			}
+		}
+		UVerticalBoxSlot* DLSSRowSlot = GraphicsSettingsPanel->AddChildToVerticalBox(DLSSButtonRow);
+		if (DLSSRowSlot)
+		{
+			DLSSRowSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 18.0f));
+		}
+
+		InterfaceSettingsPanel->SetVisibility(ESlateVisibility::Collapsed);
+		UVerticalBoxSlot* InterfaceSettingsSlot = SettingsContentStack->AddChildToVerticalBox(InterfaceSettingsPanel);
+		if (InterfaceSettingsSlot)
+		{
+			InterfaceSettingsSlot->SetPadding(FMargin(0.0f));
+		}
+
+		ConfigureTextBlockLeft(LanguageLabelText, FText::FromString(TEXT("\uC5B8\uC5B4")), FLinearColor(0.72f, 0.80f, 0.78f, 1.0f), 15);
+		UVerticalBoxSlot* LanguageLabelSlot = InterfaceSettingsPanel->AddChildToVerticalBox(LanguageLabelText);
+		if (LanguageLabelSlot)
+		{
+			LanguageLabelSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 8.0f));
+		}
+
+		ConfigurePlainButton(LanguageEnglishButtonBox, LanguageEnglishButton, LanguageEnglishButtonText, FText::FromString(TEXT("[x] English")), FVector2D(940.0f, 48.0f), false);
+		ConfigurePlainButton(LanguageKoreanButtonBox, LanguageKoreanButton, LanguageKoreanButtonText, FText::FromString(TEXT("[ ] \uD55C\uAD6D\uC5B4")), FVector2D(940.0f, 48.0f), false);
+		ConfigurePlainButton(LanguageJapaneseButtonBox, LanguageJapaneseButton, LanguageJapaneseButtonText, FText::FromString(TEXT("[ ] \u65E5\u672C\u8A9E")), FVector2D(940.0f, 48.0f), false);
+		for (UWidget* LanguageButtonBox : {
+				static_cast<UWidget*>(LanguageEnglishButtonBox),
+				static_cast<UWidget*>(LanguageKoreanButtonBox),
+				static_cast<UWidget*>(LanguageJapaneseButtonBox) })
+		{
+			UVerticalBoxSlot* LanguageButtonSlot = LanguageButtonStack->AddChildToVerticalBox(LanguageButtonBox);
+			if (LanguageButtonSlot)
+			{
+				LanguageButtonSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 10.0f));
+			}
+		}
+		UVerticalBoxSlot* LanguageStackSlot = InterfaceSettingsPanel->AddChildToVerticalBox(LanguageButtonStack);
+		if (LanguageStackSlot)
+		{
+			LanguageStackSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 22.0f));
+		}
+
+		ConfigurePlainButton(ConfirmInterfaceSettingsButtonBox, ConfirmInterfaceSettingsButton, ConfirmInterfaceSettingsButtonText, FText::FromString(TEXT("\uACB0\uC815")), FVector2D(180.0f, 50.0f), true);
+		ConfigurePlainButton(CancelInterfaceSettingsButtonBox, CancelInterfaceSettingsButton, CancelInterfaceSettingsButtonText, FText::FromString(TEXT("\uCDE8\uC18C")), FVector2D(180.0f, 50.0f), false);
+		UHorizontalBoxSlot* ConfirmInterfaceSlot = InterfaceActionButtonRow->AddChildToHorizontalBox(ConfirmInterfaceSettingsButtonBox);
+		if (ConfirmInterfaceSlot)
+		{
+			ConfirmInterfaceSlot->SetPadding(FMargin(0.0f, 0.0f, 12.0f, 0.0f));
+		}
+		InterfaceActionButtonRow->AddChildToHorizontalBox(CancelInterfaceSettingsButtonBox);
+		UVerticalBoxSlot* InterfaceActionSlot = InterfaceSettingsPanel->AddChildToVerticalBox(InterfaceActionButtonRow);
+		if (InterfaceActionSlot)
+		{
+			InterfaceActionSlot->SetHorizontalAlignment(HAlign_Left);
 		}
 
 		CreditsPanel->SetVisibility(ESlateVisibility::Collapsed);
@@ -3906,6 +4098,130 @@ namespace TunaSweeperEditorSetup
 		return bSucceeded;
 	}
 
+	UMaterial* EnsureRollingBomberSpawnerMaterial(UTexture2D* SpawnerTexture)
+	{
+		if (!SpawnerTexture)
+		{
+			return nullptr;
+		}
+
+		const FString ObjectPath = GetAssetObjectPath(InteractionAssetPath, RollingBomberSpawnerMaterialAssetName);
+		UMaterial* Material = LoadObject<UMaterial>(nullptr, *ObjectPath);
+		if (!Material)
+		{
+			UMaterialFactoryNew* MaterialFactory = NewObject<UMaterialFactoryNew>();
+
+			FAssetToolsModule& AssetToolsModule = FModuleManager::LoadModuleChecked<FAssetToolsModule>(TEXT("AssetTools"));
+			UObject* CreatedAsset = AssetToolsModule.Get().CreateAsset(
+				RollingBomberSpawnerMaterialAssetName,
+				InteractionAssetPath,
+				UMaterial::StaticClass(),
+				MaterialFactory);
+
+			Material = Cast<UMaterial>(CreatedAsset);
+			if (!Material)
+			{
+				UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to create %s."), *ObjectPath);
+				return nullptr;
+			}
+
+			FAssetRegistryModule::AssetCreated(Material);
+		}
+
+		Material->Modify();
+		Material->GetExpressionCollection().Empty();
+		Material->BlendMode = BLEND_Opaque;
+		Material->SetShadingModel(MSM_DefaultLit);
+		Material->TwoSided = false;
+
+		UMaterialEditorOnlyData* MaterialEditorOnly = Material->GetEditorOnlyData();
+		if (!MaterialEditorOnly)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to edit %s."), *ObjectPath);
+			return nullptr;
+		}
+
+		UMaterialExpressionTextureCoordinate* TextureCoordinateExpression = NewObject<UMaterialExpressionTextureCoordinate>(Material);
+		TextureCoordinateExpression->Material = Material;
+		TextureCoordinateExpression->CoordinateIndex = 0;
+		TextureCoordinateExpression->MaterialExpressionEditorX = -760;
+		TextureCoordinateExpression->MaterialExpressionEditorY = 60;
+		Material->GetExpressionCollection().AddExpression(TextureCoordinateExpression);
+
+		UMaterialExpressionTextureSampleParameter2D* TextureSample = NewObject<UMaterialExpressionTextureSampleParameter2D>(Material);
+		TextureSample->Material = Material;
+		TextureSample->ParameterName = TEXT("SpawnerMechanicTexture");
+		TextureSample->Texture = SpawnerTexture;
+		TextureSample->SamplerType = SAMPLERTYPE_Color;
+		TextureSample->Coordinates.Connect(0, TextureCoordinateExpression);
+		TextureSample->MaterialExpressionEditorX = -500;
+		TextureSample->MaterialExpressionEditorY = -20;
+		TextureSample->AutoSetSampleType();
+		Material->GetExpressionCollection().AddExpression(TextureSample);
+
+		UMaterialExpressionVertexColor* VertexColorExpression = NewObject<UMaterialExpressionVertexColor>(Material);
+		VertexColorExpression->Material = Material;
+		VertexColorExpression->MaterialExpressionEditorX = -500;
+		VertexColorExpression->MaterialExpressionEditorY = 210;
+		Material->GetExpressionCollection().AddExpression(VertexColorExpression);
+
+		UMaterialExpressionMultiply* BaseColorMultiply = NewObject<UMaterialExpressionMultiply>(Material);
+		BaseColorMultiply->Material = Material;
+		BaseColorMultiply->A.Connect(0, TextureSample);
+		BaseColorMultiply->B.Connect(0, VertexColorExpression);
+		BaseColorMultiply->MaterialExpressionEditorX = -180;
+		BaseColorMultiply->MaterialExpressionEditorY = 80;
+		Material->GetExpressionCollection().AddExpression(BaseColorMultiply);
+
+		MaterialEditorOnly->BaseColor.Connect(0, BaseColorMultiply);
+		MaterialEditorOnly->Roughness.UseConstant = true;
+		MaterialEditorOnly->Roughness.Constant = 0.72f;
+		MaterialEditorOnly->Metallic.UseConstant = true;
+		MaterialEditorOnly->Metallic.Constant = 0.12f;
+		MaterialEditorOnly->Specular.UseConstant = true;
+		MaterialEditorOnly->Specular.Constant = 0.35f;
+
+		Material->PostEditChange();
+		Material->MarkPackageDirty();
+
+		if (!SaveAsset(Material))
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to save %s."), *ObjectPath);
+			return nullptr;
+		}
+
+		return Material;
+	}
+
+	bool ImportRollingBomberSpawnerTextureFromCommandLineIfRequested()
+	{
+		FString SourceFile;
+		if (!FParse::Value(FCommandLine::Get(), TEXT("TunaSweeperImportRollingBomberSpawnerTextureSource="), SourceFile))
+		{
+			return false;
+		}
+
+		UTexture2D* ImportedTexture = nullptr;
+		const bool bImported = ImportWorldTexture(
+			SourceFile,
+			InteractionAssetPath,
+			RollingBomberSpawnerTextureAssetName,
+			&ImportedTexture);
+		UMaterial* Material = bImported ? EnsureRollingBomberSpawnerMaterial(ImportedTexture) : nullptr;
+		const bool bSucceeded = ImportedTexture && Material;
+		if (!bSucceeded)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to import rolling bomber spawner texture/material."));
+		}
+
+		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperImportRollingBomberSpawnerTextureQuit")))
+		{
+			FPlatformMisc::RequestExit(false);
+		}
+
+		return bSucceeded;
+	}
+
 	bool ImportUiTexture(const FUiTextureImportArgs& Args, UTexture2D** OutTexture = nullptr)
 	{
 		if (OutTexture)
@@ -4505,16 +4821,34 @@ namespace TunaSweeperEditorSetup
 		UButton* QuestModeButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("QuestModeButton"));
 		UButton* MapModeButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("MapModeButton"));
 		UButton* MemoModeButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("MemoModeButton"));
-		UTextBlock* InventoryModeText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("InventoryModeText"));
-		UTextBlock* QuestModeText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("QuestModeText"));
-		UTextBlock* MapModeText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("MapModeText"));
-		UTextBlock* MemoModeText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("MemoModeText"));
+		USizeBox* InventoryModeButtonFrame = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("InventoryModeButtonFrame"));
+		USizeBox* QuestModeButtonFrame = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("QuestModeButtonFrame"));
+		USizeBox* MapModeButtonFrame = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("MapModeButtonFrame"));
+		USizeBox* MemoModeButtonFrame = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("MemoModeButtonFrame"));
+		UImage* InventoryModeIcon = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("InventoryModeIcon"));
+		UImage* QuestModeIcon = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("QuestModeIcon"));
+		UImage* MapModeIcon = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("MapModeIcon"));
+		UImage* MemoModeIcon = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("MemoModeIcon"));
 		if (!RootSizeBox || !ReservedBackground || !ModeTabRow ||
 			!InventoryModeButton || !QuestModeButton || !MapModeButton || !MemoModeButton ||
-			!InventoryModeText || !QuestModeText || !MapModeText || !MemoModeText)
+			!InventoryModeButtonFrame || !QuestModeButtonFrame || !MapModeButtonFrame || !MemoModeButtonFrame ||
+			!InventoryModeIcon || !QuestModeIcon || !MapModeIcon || !MemoModeIcon)
 		{
 			return false;
 		}
+
+		UTexture2D* InventoryModeTexture = LoadObject<UTexture2D>(
+			nullptr,
+			*GetAssetObjectPath(UIIconAssetPath, HudModeInventoryIconAssetName));
+		UTexture2D* QuestModeTexture = LoadObject<UTexture2D>(
+			nullptr,
+			*GetAssetObjectPath(UIIconAssetPath, HudModeQuestIconAssetName));
+		UTexture2D* MapModeTexture = LoadObject<UTexture2D>(
+			nullptr,
+			*GetAssetObjectPath(UIIconAssetPath, HudModeMapIconAssetName));
+		UTexture2D* MemoModeTexture = LoadObject<UTexture2D>(
+			nullptr,
+			*GetAssetObjectPath(UIIconAssetPath, HudModeMemoIconAssetName));
 
 		WidgetTree->RootWidget = RootSizeBox;
 		RootSizeBox->SetWidthOverride(HudTopModeTabPanelWidth);
@@ -4554,16 +4888,36 @@ namespace TunaSweeperEditorSetup
 			Button->SetStyle(ButtonStyle);
 		};
 
-		auto AddModeTab = [&ModeTabRow, &ConfigureModeButton](
+		auto ConfigureModeIcon = [](UImage* Icon, UTexture2D* Texture)
+		{
+			if (Texture)
+			{
+				Icon->SetBrushFromTexture(Texture, true);
+			}
+			Icon->SetDesiredSizeOverride(FVector2D(28.0f, 28.0f));
+			Icon->SetColorAndOpacity(FLinearColor(0.74f, 0.80f, 0.82f, 1.0f));
+		};
+
+		auto AddModeTab = [&ModeTabRow, &ConfigureModeButton, &ConfigureModeIcon](
+			USizeBox* Frame,
 			UButton* Button,
-			UTextBlock* TextBlock,
-			const FText& Label,
+			UImage* Icon,
+			UTexture2D* Texture,
 			bool bFirst)
 		{
+			Frame->SetWidthOverride(HudTopModeTabButtonWidth);
+			Frame->SetHeightOverride(HudTopModeTabButtonHeight);
+			Frame->SetContent(Button);
 			ConfigureModeButton(Button);
-			ConfigureTextBlock(TextBlock, Label, FLinearColor(0.74f, 0.80f, 0.82f, 1.0f), 17);
-			Button->SetContent(TextBlock);
-			UHorizontalBoxSlot* Slot = ModeTabRow->AddChildToHorizontalBox(Button);
+			ConfigureModeIcon(Icon, Texture);
+			Button->SetContent(Icon);
+			if (UButtonSlot* ButtonSlot = Cast<UButtonSlot>(Icon->Slot))
+			{
+				ButtonSlot->SetHorizontalAlignment(HAlign_Center);
+				ButtonSlot->SetVerticalAlignment(VAlign_Center);
+				ButtonSlot->SetPadding(FMargin(0.0f));
+			}
+			UHorizontalBoxSlot* Slot = ModeTabRow->AddChildToHorizontalBox(Frame);
 			if (Slot)
 			{
 				Slot->SetPadding(FMargin(bFirst ? 0.0f : HudTopModeTabGap, 0.0f, 0.0f, 0.0f));
@@ -4571,10 +4925,10 @@ namespace TunaSweeperEditorSetup
 			}
 		};
 
-		AddModeTab(InventoryModeButton, InventoryModeText, FText::FromString(TEXT("\uC778\uBCA4\uD1A0\uB9AC")), true);
-		AddModeTab(QuestModeButton, QuestModeText, FText::FromString(TEXT("\uD018\uC2A4\uD2B8")), false);
-		AddModeTab(MapModeButton, MapModeText, FText::FromString(TEXT("\uC9C0\uB3C4")), false);
-		AddModeTab(MemoModeButton, MemoModeText, FText::FromString(TEXT("\uBA54\uBAA8")), false);
+		AddModeTab(InventoryModeButtonFrame, InventoryModeButton, InventoryModeIcon, InventoryModeTexture, true);
+		AddModeTab(QuestModeButtonFrame, QuestModeButton, QuestModeIcon, QuestModeTexture, false);
+		AddModeTab(MapModeButtonFrame, MapModeButton, MapModeIcon, MapModeTexture, false);
+		AddModeTab(MemoModeButtonFrame, MemoModeButton, MemoModeIcon, MemoModeTexture, false);
 
 		RegisterWidgetVariable(WidgetBlueprint, RootSizeBox);
 		RegisterWidgetVariable(WidgetBlueprint, ReservedBackground);
@@ -4583,10 +4937,14 @@ namespace TunaSweeperEditorSetup
 		RegisterWidgetVariable(WidgetBlueprint, QuestModeButton);
 		RegisterWidgetVariable(WidgetBlueprint, MapModeButton);
 		RegisterWidgetVariable(WidgetBlueprint, MemoModeButton);
-		RegisterWidgetVariable(WidgetBlueprint, InventoryModeText);
-		RegisterWidgetVariable(WidgetBlueprint, QuestModeText);
-		RegisterWidgetVariable(WidgetBlueprint, MapModeText);
-		RegisterWidgetVariable(WidgetBlueprint, MemoModeText);
+		RegisterWidgetVariable(WidgetBlueprint, InventoryModeButtonFrame);
+		RegisterWidgetVariable(WidgetBlueprint, QuestModeButtonFrame);
+		RegisterWidgetVariable(WidgetBlueprint, MapModeButtonFrame);
+		RegisterWidgetVariable(WidgetBlueprint, MemoModeButtonFrame);
+		RegisterWidgetVariable(WidgetBlueprint, InventoryModeIcon);
+		RegisterWidgetVariable(WidgetBlueprint, QuestModeIcon);
+		RegisterWidgetVariable(WidgetBlueprint, MapModeIcon);
+		RegisterWidgetVariable(WidgetBlueprint, MemoModeIcon);
 		WidgetBlueprint->MarkPackageDirty();
 		return true;
 	}
@@ -5682,6 +6040,7 @@ namespace TunaSweeperEditorSetup
 		UUserWidget* ExternalPanelWidget = WidgetTree->ConstructWidget<UUserWidget>(ExternalPanelWidgetClass, TEXT("ExternalPanelWidget"));
 		UBorder* UnsupportedModePanel = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("UnsupportedModePanel"));
 		UTextBlock* UnsupportedModeText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("UnsupportedModeText"));
+		UTextBlock* ModeTitleText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("ModeTitleText"));
 		UHorizontalBox* BottomRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("BottomRow"));
 		UUserWidget* BottomStatusWidget = WidgetTree->ConstructWidget<UUserWidget>(BottomStatusWidgetClass, TEXT("BottomStatusWidget"));
 		USizeBox* BottomGap = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("BottomGap"));
@@ -5696,7 +6055,7 @@ namespace TunaSweeperEditorSetup
 		UTextBlock* CenterReloadPromptKeyText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("CenterReloadPromptKeyText"));
 
 		if (!RootCanvas || !TopStatusReserveWidget || !CenterContentPanel || !InventoryAreaWidget || !ItemInfoPanelWidget ||
-			!ExternalPanelWidget || !UnsupportedModePanel || !UnsupportedModeText ||
+			!ExternalPanelWidget || !UnsupportedModePanel || !UnsupportedModeText || !ModeTitleText ||
 			!BottomRow || !BottomStatusWidget || !BottomGap || !QuickSlotBarWidget ||
 			!CenterReloadGaugeRoot || !CenterReloadGaugeCanvas || !CenterReloadGaugeBackdrop || !CenterReloadPercentText ||
 			!CenterReloadPromptRoot || !CenterReloadPromptText || !CenterReloadPromptKeyBackground || !CenterReloadPromptKeyText)
@@ -5713,6 +6072,21 @@ namespace TunaSweeperEditorSetup
 			TopSlot->SetAnchors(FAnchors(0.5f, 0.0f, 0.5f, 0.0f));
 			TopSlot->SetOffsets(FMargin(0.0f, 16.0f, HudTopModeTabPanelWidth, HudTopModeTabPanelHeight));
 			TopSlot->SetAlignment(FVector2D(0.5f, 0.0f));
+		}
+
+		ModeTitleText->SetVisibility(ESlateVisibility::Collapsed);
+		ConfigureTextBlockLeft(ModeTitleText, FText::GetEmpty(), FLinearColor(0.92f, 0.98f, 1.0f, 0.96f), 52);
+		TunaSweeperUIFont::ApplyFont(ModeTitleText, 52.0f, ETunaSweeperUIFontWeight::Bold);
+		ModeTitleText->SetShadowOffset(FVector2D(2.0f, 2.0f));
+		ModeTitleText->SetShadowColorAndOpacity(FLinearColor(0.0f, 0.0f, 0.0f, 0.86f));
+		UCanvasPanelSlot* ModeTitleSlot = RootCanvas->AddChildToCanvas(ModeTitleText);
+		if (ModeTitleSlot)
+		{
+			ModeTitleSlot->SetAnchors(FAnchors(0.0f, 0.0f, 0.0f, 0.0f));
+			ModeTitleSlot->SetAlignment(FVector2D(0.0f, 0.0f));
+			ModeTitleSlot->SetPosition(FVector2D(42.0f, 92.0f));
+			ModeTitleSlot->SetSize(FVector2D(420.0f, 84.0f));
+			ModeTitleSlot->SetZOrder(20);
 		}
 
 		CenterContentPanel->SetVisibility(ESlateVisibility::Collapsed);
@@ -5913,6 +6287,7 @@ namespace TunaSweeperEditorSetup
 		RegisterWidgetVariable(WidgetBlueprint, ExternalPanelWidget);
 		RegisterWidgetVariable(WidgetBlueprint, UnsupportedModePanel);
 		RegisterWidgetVariable(WidgetBlueprint, UnsupportedModeText);
+		RegisterWidgetVariable(WidgetBlueprint, ModeTitleText);
 		WidgetBlueprint->MarkPackageDirty();
 		return true;
 	}
@@ -7126,6 +7501,95 @@ namespace TunaSweeperEditorSetup
 		return LoadedWorld;
 	}
 
+	bool IsEditorWorldReadyForMapSetup()
+	{
+		UWorld* EditorWorld = GEditor ? GEditor->GetEditorWorldContext().World() : nullptr;
+		if (!EditorWorld || !EditorWorld->GetPackage())
+		{
+			return false;
+		}
+
+		return !EditorWorld->GetPackage()->GetName().StartsWith(TEXT("/Temp/"));
+	}
+
+	bool ConfigureEditorMapCaptureActorInstance(AActor* Actor, bool bAutoDetectBounds)
+	{
+		ATunaSweeperMapCaptureActor* MapCaptureActor = Cast<ATunaSweeperMapCaptureActor>(Actor);
+		if (!MapCaptureActor)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("%s is not an ATunaSweeperMapCaptureActor."), *GetNameSafe(Actor));
+			return false;
+		}
+
+		MapCaptureActor->Modify();
+		MapCaptureActor->SetActorRotation(FRotator::ZeroRotator);
+		if (bAutoDetectBounds)
+		{
+			MapCaptureActor->AutoDetectCaptureBounds();
+		}
+		MapCaptureActor->MarkPackageDirty();
+		return true;
+	}
+
+	bool PlaceEditorMapCaptureActorInRaidMap(UBlueprint* MapCaptureBlueprint)
+	{
+		if (!MapCaptureBlueprint || !MapCaptureBlueprint->GeneratedClass)
+		{
+			return false;
+		}
+
+		UWorld* RaidWorld = LoadEditorMapForSetup(RaidMapPackagePath);
+		if (!RaidWorld)
+		{
+			return false;
+		}
+
+		bool bPlacedOrUpdated = false;
+		if (AActor* ExistingActor = FindActorByLabel(RaidWorld, EditorMapCaptureActorLabel))
+		{
+			bPlacedOrUpdated = ConfigureEditorMapCaptureActorInstance(ExistingActor, false);
+		}
+		else
+		{
+			RaidWorld->PersistentLevel->Modify();
+
+			FActorSpawnParameters SpawnParameters;
+			SpawnParameters.OverrideLevel = RaidWorld->PersistentLevel;
+			SpawnParameters.Name = MakeUniqueObjectName(
+				RaidWorld->PersistentLevel,
+				MapCaptureBlueprint->GeneratedClass,
+				FName(*EditorMapCaptureActorLabel));
+			SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+			AActor* SpawnedActor = RaidWorld->SpawnActor<AActor>(
+				MapCaptureBlueprint->GeneratedClass,
+				FVector::ZeroVector,
+				FRotator::ZeroRotator,
+				SpawnParameters);
+			if (!SpawnedActor)
+			{
+				return false;
+			}
+
+			SpawnedActor->SetActorLabel(EditorMapCaptureActorLabel);
+			bPlacedOrUpdated = ConfigureEditorMapCaptureActorInstance(SpawnedActor, true);
+		}
+
+		const bool bSaved = bPlacedOrUpdated && UEditorLoadingAndSavingUtils::SaveMap(RaidWorld, RaidMapPackagePath);
+		LoadEditorMapForSetup(IntroMapPackagePath);
+		return bSaved;
+	}
+
+	bool EnsureEditorMapCaptureBlueprintAndRaidPlacement()
+	{
+		UBlueprint* MapCaptureBlueprint = EnsureBlueprint(
+			EditorMapCaptureAssetPath,
+			EditorMapCaptureBlueprintAssetName,
+			ATunaSweeperMapCaptureActor::StaticClass());
+
+		return MapCaptureBlueprint && PlaceEditorMapCaptureActorInRaidMap(MapCaptureBlueprint);
+	}
+
 	bool EnsureOpeningScenarioMap()
 	{
 		const FString MapFilename = FPackageName::LongPackageNameToFilename(
@@ -7668,6 +8132,16 @@ namespace TunaSweeperEditorSetup
 		return bConfigured && PlaceLevelTravelActorsInBunkerAndRaidMaps(LevelTravelBlueprint);
 	}
 
+	bool EnsureIntroMenuGraphicsSettingsSetup()
+	{
+		UWidgetBlueprint* IntroMenuWidgetBlueprint = EnsureWidgetBlueprint(
+			UIAssetPath,
+			IntroMenuWidgetAssetName,
+			UTunaSweeperIntroMenuWidget::StaticClass());
+
+		return ConfigureIntroMenuWidgetBlueprint(IntroMenuWidgetBlueprint);
+	}
+
 	bool EnsureBunkerToRaidTransitionVideoSetup()
 	{
 		UWidgetBlueprint* LevelTransitionWidgetBlueprint = EnsureWidgetBlueprint(
@@ -7823,6 +8297,44 @@ namespace TunaSweeperEditorSetup
 						});
 
 					return !FTunaSweeperEditorRunOnce::HasCompleted(LootContainerAndSpawnerTaskId);
+				}),
+			1.0f);
+	}
+
+	void ScheduleEditorMapCaptureSetup()
+	{
+		if (FTunaSweeperEditorRunOnce::HasCompleted(EditorMapCaptureTaskId))
+		{
+			if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperMapCaptureSetupQuit")))
+			{
+				FPlatformMisc::RequestExit(false);
+			}
+			return;
+		}
+
+		FTSTicker::GetCoreTicker().AddTicker(
+			FTickerDelegate::CreateLambda(
+				[](float)
+				{
+					if (!IsEditorWorldReadyForMapSetup())
+					{
+						return true;
+					}
+
+					FTunaSweeperEditorRunOnce::Run(
+						EditorMapCaptureTaskId,
+						[]()
+						{
+							return EnsureEditorMapCaptureBlueprintAndRaidPlacement();
+						});
+
+					const bool bCompleted = FTunaSweeperEditorRunOnce::HasCompleted(EditorMapCaptureTaskId);
+					if (bCompleted && FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperMapCaptureSetupQuit")))
+					{
+						FPlatformMisc::RequestExit(false);
+					}
+
+					return !bCompleted;
 				}),
 			1.0f);
 	}
@@ -8039,6 +8551,28 @@ public:
 			}
 		}
 
+		FString RollingBomberSpawnerTextureSource;
+		if (FParse::Value(FCommandLine::Get(), TEXT("TunaSweeperImportRollingBomberSpawnerTextureSource="), RollingBomberSpawnerTextureSource))
+		{
+			TunaSweeperEditorSetup::ImportRollingBomberSpawnerTextureFromCommandLineIfRequested();
+			if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperImportRollingBomberSpawnerTextureQuit")))
+			{
+				return;
+			}
+		}
+
+		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperCommonHudSetupQuit")))
+		{
+			FTunaSweeperEditorRunOnce::Run(
+				TunaSweeperEditorSetup::CommonGameHudTaskId,
+				[]()
+				{
+					return TunaSweeperEditorSetup::EnsureCommonGameHudAssets();
+				});
+			FPlatformMisc::RequestExit(false);
+			return;
+		}
+
 		FString ExperimentalVegetationPaintSource;
 		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperRebuildExperimentalVegetation")) ||
 			FParse::Value(FCommandLine::Get(), TEXT("TunaSweeperExperimentalVegetationPaintSource="), ExperimentalVegetationPaintSource))
@@ -8252,8 +8786,16 @@ public:
 			FPlatformMisc::RequestExit(false);
 		}
 
+		FTunaSweeperEditorRunOnce::Run(
+			TunaSweeperEditorSetup::IntroMenuGraphicsSettingsTaskId,
+			[]()
+			{
+				return TunaSweeperEditorSetup::EnsureIntroMenuGraphicsSettingsSetup();
+			});
+
 		TunaSweeperEditorSetup::SchedulePickupItemAndSpawnerAssetsAndMapPlacement();
 		TunaSweeperEditorSetup::ScheduleLootContainerAndSpawnerAssetsAndMapPlacement();
+		TunaSweeperEditorSetup::ScheduleEditorMapCaptureSetup();
 		TunaSweeperEditorSetup::ScheduleIntroMenuAndLevelTravelSetup();
 		TunaSweeperEditorSetup::ScheduleOpeningScenarioPresentationSetup();
 		TunaSweeperEditorSetup::ScheduleBunkerToRaidTransitionVideoSetup();

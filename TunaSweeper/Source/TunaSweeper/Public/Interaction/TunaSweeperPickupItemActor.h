@@ -71,7 +71,7 @@ protected:
 	int32 ItemQuantity = 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pickup Item")
-	ETunaSweeperItemTextLanguage DisplayLanguage = ETunaSweeperItemTextLanguage::Korean;
+	ETunaSweeperItemTextLanguage DisplayLanguage = ETunaSweeperItemTextLanguage::English;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pickup Item")
 	bool bDestroyOnPickup = true;

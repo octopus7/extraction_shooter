@@ -22,10 +22,19 @@ namespace TunaSweeperLootContainerUi
 	constexpr float ContainerPanelWidth =
 		ContainerPanelPadding * 2.0f + ContainerTileColumnCount * ContainerTileWidth + ContainerTileViewScrollbarReserveWidth;
 
+	FText ResolveUiText(const UTunaSweeperGameInstance* TunaGameInstance, const TCHAR* StringKey, const TCHAR* Fallback)
+	{
+		return TunaGameInstance
+			? TunaGameInstance->ResolveLocalizedText(FName(StringKey), FText::FromString(Fallback))
+			: FText::FromString(Fallback);
+	}
+
 	FTunaSweeperItemStackTileData BuildTileData(
+		const UTunaSweeperGameInstance* TunaGameInstance,
 		UTunaSweeperItemDataSubsystem* ItemDataSubsystem,
 		const FTunaSweeperItemInstance& ItemInstance,
-		int32 SourceIndex)
+		int32 SourceIndex,
+		ETunaSweeperItemTextLanguage Language)
 	{
 		FTunaSweeperItemStackTileData TileData;
 		TileData.ItemInstance = ItemInstance;
@@ -46,13 +55,15 @@ namespace TunaSweeperLootContainerUi
 				TileData.bHasItemDefinition = true;
 
 				FText DisplayName;
-				if (ItemDataSubsystem->TryGetItemNameTextByKey(ItemDefinition.NameStringKey, ETunaSweeperItemTextLanguage::Korean, DisplayName))
+				if (ItemDataSubsystem->TryGetItemNameTextByKey(ItemDefinition.NameStringKey, Language, DisplayName))
 				{
 					TileData.DisplayName = DisplayName;
 				}
 				else
 				{
-					TileData.DisplayName = FText::FromString(FString::Printf(TEXT("Item %d"), ItemInstance.ItemId));
+					TileData.DisplayName = FText::Format(
+						ResolveUiText(TunaGameInstance, TEXT("ui.common.item_fallback"), TEXT("Item {0}")),
+						FText::AsNumber(ItemInstance.ItemId));
 				}
 
 				const FString IconObjectPath = ItemDataSubsystem->BuildItemIconObjectPath(ItemDefinition);
@@ -62,11 +73,18 @@ namespace TunaSweeperLootContainerUi
 				}
 
 				FText DescriptionText;
-				if (ItemDataSubsystem->TryGetItemTextByKey(ItemDefinition.DescriptionStringKey, ETunaSweeperItemTextLanguage::Korean, DescriptionText))
+				if (ItemDataSubsystem->TryGetItemTextByKey(ItemDefinition.DescriptionStringKey, Language, DescriptionText))
 				{
 					TileData.DescriptionText = DescriptionText;
 				}
 			}
+		}
+
+		if (!TileData.bIsEmpty && TileData.DisplayName.IsEmpty())
+		{
+			TileData.DisplayName = FText::Format(
+				ResolveUiText(TunaGameInstance, TEXT("ui.common.item_fallback"), TEXT("Item {0}")),
+				FText::AsNumber(ItemInstance.ItemId));
 		}
 
 		return TileData;
@@ -195,6 +213,8 @@ void UTunaSweeperLootContainerWidget::NativeConstruct()
 	{
 		TunaGameInstance->OnInventoryStateChanged.RemoveAll(this);
 		TunaGameInstance->OnInventoryStateChanged.AddUObject(this, &UTunaSweeperLootContainerWidget::PopulateContainerItems);
+		TunaGameInstance->OnLanguageChanged.RemoveAll(this);
+		TunaGameInstance->OnLanguageChanged.AddUObject(this, &UTunaSweeperLootContainerWidget::PopulateContainerItems);
 	}
 
 	PopulateContainerItems();
@@ -205,6 +225,7 @@ void UTunaSweeperLootContainerWidget::NativeDestruct()
 	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
 	{
 		TunaGameInstance->OnInventoryStateChanged.RemoveAll(this);
+		TunaGameInstance->OnLanguageChanged.RemoveAll(this);
 	}
 
 	Super::NativeDestruct();
@@ -288,7 +309,10 @@ void UTunaSweeperLootContainerWidget::PopulateContainerItems()
 			? TunaGameInstance->GetActiveLootContainerDisplayName()
 			: ContainerInstance.DisplayName;
 		ContainerTitleText->SetText(DisplayName.IsEmpty()
-			? FText::FromString(TEXT("Container"))
+			? TunaSweeperLootContainerUi::ResolveUiText(
+				TunaGameInstance,
+				TEXT("ui.common.container_fallback"),
+				TEXT("Container"))
 			: DisplayName);
 	}
 	if (ContainerOccupancyText)
@@ -299,6 +323,9 @@ void UTunaSweeperLootContainerWidget::PopulateContainerItems()
 	UTunaSweeperItemDataSubsystem* ItemDataSubsystem = GetGameInstance()
 		? GetGameInstance()->GetSubsystem<UTunaSweeperItemDataSubsystem>()
 		: nullptr;
+	const ETunaSweeperItemTextLanguage Language = TunaGameInstance
+		? TunaGameInstance->GetCurrentTextLanguage()
+		: ETunaSweeperItemTextLanguage::English;
 
 	TileObjects.Reset();
 	ContainerTileView->ClearListItems();
@@ -319,7 +346,12 @@ void UTunaSweeperLootContainerWidget::PopulateContainerItems()
 			continue;
 		}
 
-		TileObject->Initialize(TunaSweeperLootContainerUi::BuildTileData(ItemDataSubsystem, ItemInstance, SlotIndex));
+		TileObject->Initialize(TunaSweeperLootContainerUi::BuildTileData(
+			TunaGameInstance,
+			ItemDataSubsystem,
+			ItemInstance,
+			SlotIndex,
+			Language));
 		TileObjects.Add(TileObject);
 		ContainerTileView->AddItem(TileObject);
 	}

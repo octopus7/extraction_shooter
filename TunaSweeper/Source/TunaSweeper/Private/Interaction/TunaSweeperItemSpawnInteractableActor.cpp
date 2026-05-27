@@ -30,7 +30,7 @@ ATunaSweeperItemSpawnInteractableActor::ATunaSweeperItemSpawnInteractableActor()
 	InteractableComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 120.0f));
 	InteractableComponent->SetInteractionTypeAndDisplayName(
 		ETunaSweeperInteractionType::ItemSpawn,
-		FText::FromString(TEXT("아이템스폰")));
+		FText::FromString(TEXT("Item Spawn")));
 
 	PickupItemActorClass = TSoftClassPtr<ATunaSweeperPickupItemActor>(
 		FSoftObjectPath(TEXT("/Game/Interaction/BP_PickupItem.BP_PickupItem_C")));
@@ -88,7 +88,7 @@ bool ATunaSweeperItemSpawnInteractableActor::SpawnRandomPickupItem(APawn* Instig
 			-1,
 			2.0f,
 			FColor::Cyan,
-			FString::Printf(TEXT("[Interaction] 아이템 스폰: %s"), *SpawnedItem->GetItemDisplayName().ToString()));
+			FString::Printf(TEXT("[Interaction] Item spawned: %s"), *SpawnedItem->GetItemDisplayName().ToString()));
 	}
 
 	return true;

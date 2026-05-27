@@ -59,6 +59,13 @@ void UTunaSweeperHudBottomStatusWidget::SetHudState(const FTunaSweeperPlayerHudS
 void UTunaSweeperHudBottomStatusWidget::ApplyHudState()
 {
 	PreviewHudState.NormalizeWeightLimits();
+	const UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+	auto ResolveText = [TunaGameInstance](const TCHAR* StringKey, const TCHAR* Fallback)
+	{
+		return TunaGameInstance
+			? TunaGameInstance->ResolveLocalizedText(FName(StringKey), FText::FromString(Fallback))
+			: FText::FromString(Fallback);
+	};
 
 	auto CollapseLegacyWeightWidget = [](UWidget* Widget)
 	{
@@ -82,7 +89,7 @@ void UTunaSweeperHudBottomStatusWidget::ApplyHudState()
 	if (HealthText)
 	{
 		HealthText->SetText(FText::Format(
-			FText::FromString(TEXT("HP {0} / {1}")),
+			ResolveText(TEXT("ui.hud.health_pattern"), TEXT("HP {0} / {1}")),
 			TunaSweeperHudStatus::MakeVitalsText(PreviewHudState.Health),
 			TunaSweeperHudStatus::MakeVitalsText(PreviewHudState.MaxHealth)));
 	}
@@ -90,14 +97,14 @@ void UTunaSweeperHudBottomStatusWidget::ApplyHudState()
 	if (HungerText)
 	{
 		HungerText->SetText(FText::Format(
-			FText::FromString(TEXT("배부름 {0}")),
+			ResolveText(TEXT("ui.hud.food_pattern"), TEXT("\uBC30\uBD80\uB984 {0}")),
 			TunaSweeperHudStatus::MakeVitalsText(PreviewHudState.Food)));
 	}
 
 	if (HydrationText)
 	{
 		HydrationText->SetText(FText::Format(
-			FText::FromString(TEXT("수분 {0}")),
+			ResolveText(TEXT("ui.hud.hydration_pattern"), TEXT("\uC218\uBD84 {0}")),
 			TunaSweeperHudStatus::MakeVitalsText(PreviewHudState.Hydration)));
 	}
 

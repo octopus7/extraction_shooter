@@ -227,7 +227,7 @@ bool UTunaSweeperInteractionSubsystem::HandlePickupItemInteraction(UTunaSweeperI
 			-1,
 			2.0f,
 			FColor::Green,
-			FString::Printf(TEXT("[Interaction] 획득: %s"), *ItemName));
+			FString::Printf(TEXT("[Interaction] Acquired: %s"), *ItemName));
 	}
 
 	if (PickupItemActor->ShouldDestroyOnPickup())

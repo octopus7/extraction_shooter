@@ -17,6 +17,13 @@
 
 namespace
 {
+	FText ResolveUiText(const UTunaSweeperGameInstance* TunaGameInstance, const TCHAR* StringKey, const TCHAR* Fallback)
+	{
+		return TunaGameInstance
+			? TunaGameInstance->ResolveLocalizedText(FName(StringKey), FText::FromString(Fallback))
+			: FText::FromString(Fallback);
+	}
+
 	FSlateBrush MakeMemoBoxBrush(
 		const FVector2D& ImageSize,
 		const FLinearColor& FillColor,
@@ -140,6 +147,13 @@ void UTunaSweeperMemoWidget::OpenMemo(int32 MemoId)
 void UTunaSweeperMemoWidget::RefreshMemoView()
 {
 	BuildMemoWidget();
+	if (MemoListTitleText)
+	{
+		MemoListTitleText->SetText(ResolveUiText(
+			GetGameInstance<UTunaSweeperGameInstance>(),
+			TEXT("ui.memo.list_title"),
+			TEXT("\uBA54\uBAA8 \uBAA9\uB85D")));
+	}
 
 	UTunaSweeperMemoSubsystem* MemoSubsystem = GetGameInstance()
 		? GetGameInstance()->GetSubsystem<UTunaSweeperMemoSubsystem>()
@@ -148,7 +162,10 @@ void UTunaSweeperMemoWidget::RefreshMemoView()
 	{
 		if (DetailTitleText)
 		{
-			DetailTitleText->SetText(FText::FromString(TEXT("\uBA54\uBAA8")));
+			DetailTitleText->SetText(ResolveUiText(
+				GetGameInstance<UTunaSweeperGameInstance>(),
+				TEXT("ui.memo.title"),
+				TEXT("\uBA54\uBAA8")));
 		}
 		if (DetailBodyText)
 		{
@@ -185,6 +202,8 @@ void UTunaSweeperMemoWidget::NativeConstruct()
 	{
 		TunaGameInstance->OnMemoStateChanged.RemoveAll(this);
 		TunaGameInstance->OnMemoStateChanged.AddUObject(this, &UTunaSweeperMemoWidget::HandleMemoStateChanged);
+		TunaGameInstance->OnLanguageChanged.RemoveAll(this);
+		TunaGameInstance->OnLanguageChanged.AddUObject(this, &UTunaSweeperMemoWidget::RefreshMemoView);
 	}
 
 	RefreshMemoView();
@@ -195,6 +214,7 @@ void UTunaSweeperMemoWidget::NativeDestruct()
 	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
 	{
 		TunaGameInstance->OnMemoStateChanged.RemoveAll(this);
+		TunaGameInstance->OnLanguageChanged.RemoveAll(this);
 	}
 
 	Super::NativeDestruct();
@@ -263,7 +283,11 @@ void UTunaSweeperMemoWidget::BuildMemoWidget()
 		ListColumnSlot->SetSize(MakeSlateChildSize(ESlateSizeRule::Automatic));
 	}
 
-	ListTitleText->SetText(FText::FromString(TEXT("\uBA54\uBAA8 \uBAA9\uB85D")));
+	MemoListTitleText = ListTitleText;
+	ListTitleText->SetText(ResolveUiText(
+		GetGameInstance<UTunaSweeperGameInstance>(),
+		TEXT("ui.memo.list_title"),
+		TEXT("\uBA54\uBAA8 \uBAA9\uB85D")));
 	ListTitleText->SetColorAndOpacity(FSlateColor(FLinearColor(0.92f, 0.96f, 0.96f, 1.0f)));
 	TunaSweeperUIFont::ApplyFont(ListTitleText, 20, ETunaSweeperUIFontWeight::Bold);
 	if (UVerticalBoxSlot* ListTitleSlot = ListStack->AddChildToVerticalBox(ListTitleText))
@@ -372,11 +396,17 @@ void UTunaSweeperMemoWidget::ApplySelectedMemo(const TArray<FTunaSweeperMemoList
 		SelectedMemoId = INDEX_NONE;
 		if (DetailTitleText)
 		{
-			DetailTitleText->SetText(FText::FromString(TEXT("\uBA54\uBAA8")));
+			DetailTitleText->SetText(ResolveUiText(
+				GetGameInstance<UTunaSweeperGameInstance>(),
+				TEXT("ui.memo.title"),
+				TEXT("\uBA54\uBAA8")));
 		}
 		if (DetailBodyText)
 		{
-			DetailBodyText->SetText(FText::FromString(TEXT("\uD68D\uB4DD\uD55C \uBA54\uBAA8\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4.")));
+			DetailBodyText->SetText(ResolveUiText(
+				GetGameInstance<UTunaSweeperGameInstance>(),
+				TEXT("ui.memo.none"),
+				TEXT("\uD68D\uB4DD\uD55C \uBA54\uBAA8\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4.")));
 		}
 		return;
 	}

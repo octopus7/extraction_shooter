@@ -2,12 +2,16 @@
 
 #include "Component/TunaSweeperVitalsComponent.h"
 #include "GameFramework/Pawn.h"
+#include "HAL/PlatformMisc.h"
 #include "HAL/FileManager.h"
 #include "Inventory/TunaSweeperSaveGame.h"
+#include "Internationalization/Internationalization.h"
 #include "Kismet/GameplayStatics.h"
+#include "Misc/ConfigCacheIni.h"
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
+#include "Subsystem/TunaSweeperTextSubsystem.h"
 
 namespace TunaSweeperSave
 {
@@ -36,6 +40,53 @@ namespace TunaSweeperDebug
 {
 	const FName VisionDebugSettingKey(TEXT("debug.vision"));
 	const FName BunkerVisionDebugSettingKey(TEXT("debug.bunker_vision"));
+}
+
+namespace TunaSweeperLanguage
+{
+	const TCHAR* SectionName = TEXT("TunaSweeper.InterfaceSettings");
+	const TCHAR* LanguageKey = TEXT("Language");
+	const TCHAR* EnglishCode = TEXT("en");
+	const TCHAR* KoreanCode = TEXT("ko");
+	const TCHAR* JapaneseCode = TEXT("ja");
+
+	const TCHAR* ToLanguageCode(ETunaSweeperItemTextLanguage Language)
+	{
+		switch (Language)
+		{
+		case ETunaSweeperItemTextLanguage::Korean:
+			return KoreanCode;
+		case ETunaSweeperItemTextLanguage::Japanese:
+			return JapaneseCode;
+		case ETunaSweeperItemTextLanguage::English:
+		default:
+			return EnglishCode;
+		}
+	}
+
+	bool TryParseLanguageCode(const FString& LanguageCode, ETunaSweeperItemTextLanguage& OutLanguage)
+	{
+		const FString NormalizedCode = LanguageCode.TrimStartAndEnd().ToLower();
+		if (NormalizedCode.StartsWith(KoreanCode))
+		{
+			OutLanguage = ETunaSweeperItemTextLanguage::Korean;
+			return true;
+		}
+
+		if (NormalizedCode.StartsWith(JapaneseCode))
+		{
+			OutLanguage = ETunaSweeperItemTextLanguage::Japanese;
+			return true;
+		}
+
+		if (NormalizedCode.StartsWith(EnglishCode))
+		{
+			OutLanguage = ETunaSweeperItemTextLanguage::English;
+			return true;
+		}
+
+		return false;
+	}
 }
 
 namespace TunaSweeperMapMarkers
@@ -203,6 +254,8 @@ float FTunaSweeperPlayerHudState::GetCarryWeightMovementSpeedMultiplier() const
 void UTunaSweeperGameInstance::Init()
 {
 	Super::Init();
+	InitializeGlobalLanguageSetting();
+
 	int32 LoadedSaveSlotIndex = 1;
 	if (LoadActiveSaveSlotSelection(LoadedSaveSlotIndex))
 	{
@@ -285,6 +338,38 @@ float UTunaSweeperGameInstance::GetDialogueCharactersPerSecond() const
 	}
 
 	return FMath::Max(0.1f, GameplaySettings.DialogueCharactersPerSecond);
+}
+
+void UTunaSweeperGameInstance::SetCurrentTextLanguage(ETunaSweeperItemTextLanguage Language, bool bSaveImmediately)
+{
+	const bool bLanguageChanged = CurrentTextLanguage != Language;
+	CurrentTextLanguage = Language;
+	ApplyCurrentLanguageCulture();
+
+	if (bSaveImmediately)
+	{
+		SaveGlobalLanguageSetting();
+	}
+
+	if (bLanguageChanged)
+	{
+		OnLanguageChanged.Broadcast();
+	}
+}
+
+FText UTunaSweeperGameInstance::ResolveLocalizedText(FName StringKey, const FText& FallbackText) const
+{
+	if (StringKey.IsNone())
+	{
+		return FallbackText;
+	}
+
+	if (const UTunaSweeperTextSubsystem* TextSubsystem = GetSubsystem<UTunaSweeperTextSubsystem>())
+	{
+		return TextSubsystem->ResolveText(StringKey, CurrentTextLanguage, FallbackText);
+	}
+
+	return FallbackText;
 }
 
 void UTunaSweeperGameInstance::SetVisionDebugEnabled(bool bEnabled)
@@ -1251,6 +1336,161 @@ bool UTunaSweeperGameInstance::MoveItemBetweenSlots(
 		if (UTunaSweeperQuestSubsystem* QuestSubsystem = GetSubsystem<UTunaSweeperQuestSubsystem>())
 		{
 			QuestSubsystem->NotifyItemAcquired(AcquiredItemId, AcquiredQuantity);
+		}
+	}
+	return true;
+}
+
+bool UTunaSweeperGameInstance::CanSplitItemStackBetweenSlots(
+	const FTunaSweeperItemSlotReference& SourceSlot,
+	const FTunaSweeperItemSlotReference& TargetSlot,
+	int32& OutDefaultSplitQuantity,
+	int32& OutMaxSplitQuantity,
+	FString* OutFailureReason)
+{
+	EnsureInventoryStateInitialized();
+	RefreshSelectedWeaponAttachmentSlots();
+
+	OutDefaultSplitQuantity = 0;
+	OutMaxSplitQuantity = 0;
+
+	auto SetFailure = [OutFailureReason](const TCHAR* Reason)
+	{
+		if (OutFailureReason)
+		{
+			*OutFailureReason = Reason;
+		}
+		return false;
+	};
+
+	if (!SourceSlot.IsValid() || !TargetSlot.IsValid())
+	{
+		return SetFailure(TEXT("Invalid slot."));
+	}
+
+	if (SourceSlot.Source == TargetSlot.Source && SourceSlot.SlotIndex == TargetSlot.SlotIndex)
+	{
+		return SetFailure(TEXT("Same slot."));
+	}
+
+	const TArray<FTunaSweeperInventorySlot>* SourceSlots = GetSlotsForSource(SourceSlot.Source);
+	const TArray<FTunaSweeperInventorySlot>* TargetSlots = GetSlotsForSource(TargetSlot.Source);
+	if (!SourceSlots || !TargetSlots ||
+		!SourceSlots->IsValidIndex(SourceSlot.SlotIndex) ||
+		!TargetSlots->IsValidIndex(TargetSlot.SlotIndex))
+	{
+		return SetFailure(TEXT("Slot is out of range."));
+	}
+
+	const FGuid SourceUid = (*SourceSlots)[SourceSlot.SlotIndex].ItemUid;
+	const FGuid TargetUid = (*TargetSlots)[TargetSlot.SlotIndex].ItemUid;
+	if (!SourceUid.IsValid())
+	{
+		return SetFailure(TEXT("Source slot is empty."));
+	}
+
+	if (TargetUid.IsValid())
+	{
+		return SetFailure(TEXT("Target slot is not empty."));
+	}
+
+	const FTunaSweeperItemInstance* SourceItemInstance = ItemInstancesByUid.Find(SourceUid);
+	if (!SourceItemInstance || !SourceItemInstance->IsValid())
+	{
+		return SetFailure(TEXT("Source item is invalid."));
+	}
+
+	if (SourceItemInstance->Quantity <= 1)
+	{
+		return SetFailure(TEXT("Source item is not stackable."));
+	}
+
+	if (!SourceItemInstance->AttachmentSlots.IsEmpty() ||
+		SourceItemInstance->LoadedAmmoItemId != INDEX_NONE ||
+		SourceItemInstance->LoadedAmmoCount > 0 ||
+		SourceItemInstance->SelectedAmmoItemId != INDEX_NONE)
+	{
+		return SetFailure(TEXT("Source item has per-instance state."));
+	}
+
+	if (!CanSlotAcceptItem(TargetSlot, SourceUid))
+	{
+		return SetFailure(TEXT("Target slot does not accept this item."));
+	}
+
+	OutMaxSplitQuantity = FMath::Max(0, SourceItemInstance->Quantity - 1);
+	OutDefaultSplitQuantity = FMath::FloorToInt(static_cast<float>(SourceItemInstance->Quantity) * 0.5f);
+	if (OutDefaultSplitQuantity <= 0 || OutMaxSplitQuantity <= 0)
+	{
+		OutDefaultSplitQuantity = 0;
+		OutMaxSplitQuantity = 0;
+		return SetFailure(TEXT("Split quantity is empty."));
+	}
+
+	OutDefaultSplitQuantity = FMath::Clamp(OutDefaultSplitQuantity, 1, OutMaxSplitQuantity);
+	if (OutFailureReason)
+	{
+		OutFailureReason->Reset();
+	}
+	return true;
+}
+
+bool UTunaSweeperGameInstance::SplitItemStackBetweenSlots(
+	const FTunaSweeperItemSlotReference& SourceSlot,
+	const FTunaSweeperItemSlotReference& TargetSlot,
+	int32 SplitQuantity)
+{
+	int32 DefaultSplitQuantity = 0;
+	int32 MaxSplitQuantity = 0;
+	FString FailureReason;
+	if (!CanSplitItemStackBetweenSlots(SourceSlot, TargetSlot, DefaultSplitQuantity, MaxSplitQuantity, &FailureReason))
+	{
+		return false;
+	}
+
+	SplitQuantity = FMath::Clamp(SplitQuantity, 1, MaxSplitQuantity);
+
+	TArray<FTunaSweeperInventorySlot>* SourceSlots = GetMutableSlotsForSource(SourceSlot.Source);
+	TArray<FTunaSweeperInventorySlot>* TargetSlots = GetMutableSlotsForSource(TargetSlot.Source);
+	if (!SourceSlots || !TargetSlots ||
+		!SourceSlots->IsValidIndex(SourceSlot.SlotIndex) ||
+		!TargetSlots->IsValidIndex(TargetSlot.SlotIndex) ||
+		!(*TargetSlots)[TargetSlot.SlotIndex].IsEmpty())
+	{
+		return false;
+	}
+
+	const FGuid SourceUid = (*SourceSlots)[SourceSlot.SlotIndex].ItemUid;
+	FTunaSweeperItemInstance* SourceItemInstance = ItemInstancesByUid.Find(SourceUid);
+	if (!SourceItemInstance || !SourceItemInstance->IsValid() || SourceItemInstance->Quantity <= SplitQuantity)
+	{
+		return false;
+	}
+
+	const int32 SplitItemId = SourceItemInstance->ItemId;
+	SourceItemInstance->Quantity -= SplitQuantity;
+	const FGuid SplitItemUid = CreateItemInstance(SplitItemId, SplitQuantity);
+	if (!SplitItemUid.IsValid())
+	{
+		SourceItemInstance->Quantity += SplitQuantity;
+		return false;
+	}
+
+	(*TargetSlots)[TargetSlot.SlotIndex].ItemUid = SplitItemUid;
+	if (TargetSlot.Source == ETunaSweeperItemSlotSource::SelectedWeaponAttachment)
+	{
+		CommitSelectedWeaponAttachmentSlotsToSelectedItem();
+	}
+
+	ClearSelectedItemIfInvalid();
+	BroadcastInventoryStateChanged();
+
+	if (SourceSlot.Source == ETunaSweeperItemSlotSource::LootContainer &&
+		TargetSlot.Source != ETunaSweeperItemSlotSource::LootContainer)
+	{
+		if (UTunaSweeperQuestSubsystem* QuestSubsystem = GetSubsystem<UTunaSweeperQuestSubsystem>())
+		{
+			QuestSubsystem->NotifyItemAcquired(SplitItemId, SplitQuantity);
 		}
 	}
 	return true;
@@ -2864,6 +3104,77 @@ bool UTunaSweeperGameInstance::SaveActiveSaveSlotSelection() const
 		SaveSettings,
 		GetSaveSettingsSlotName(),
 		TunaSweeperSave::SaveUserIndex);
+}
+
+void UTunaSweeperGameInstance::InitializeGlobalLanguageSetting()
+{
+	ETunaSweeperItemTextLanguage LoadedLanguage = ETunaSweeperItemTextLanguage::English;
+	if (LoadGlobalLanguageSetting(LoadedLanguage))
+	{
+		CurrentTextLanguage = LoadedLanguage;
+		ApplyCurrentLanguageCulture();
+		return;
+	}
+
+	CurrentTextLanguage = DetectDefaultLanguageFromOS();
+	ApplyCurrentLanguageCulture();
+	SaveGlobalLanguageSetting();
+}
+
+bool UTunaSweeperGameInstance::LoadGlobalLanguageSetting(ETunaSweeperItemTextLanguage& OutLanguage) const
+{
+	if (!GConfig)
+	{
+		return false;
+	}
+
+	FString SavedLanguageCode;
+	if (!GConfig->GetString(
+		TunaSweeperLanguage::SectionName,
+		TunaSweeperLanguage::LanguageKey,
+		SavedLanguageCode,
+		GGameUserSettingsIni))
+	{
+		return false;
+	}
+
+	return TunaSweeperLanguage::TryParseLanguageCode(SavedLanguageCode, OutLanguage);
+}
+
+void UTunaSweeperGameInstance::SaveGlobalLanguageSetting() const
+{
+	if (!GConfig)
+	{
+		return;
+	}
+
+	GConfig->SetString(
+		TunaSweeperLanguage::SectionName,
+		TunaSweeperLanguage::LanguageKey,
+		TunaSweeperLanguage::ToLanguageCode(CurrentTextLanguage),
+		GGameUserSettingsIni);
+	GConfig->Flush(false, GGameUserSettingsIni);
+}
+
+ETunaSweeperItemTextLanguage UTunaSweeperGameInstance::DetectDefaultLanguageFromOS() const
+{
+	ETunaSweeperItemTextLanguage DetectedLanguage = ETunaSweeperItemTextLanguage::English;
+	if (TunaSweeperLanguage::TryParseLanguageCode(FPlatformMisc::GetDefaultLanguage(), DetectedLanguage))
+	{
+		return DetectedLanguage;
+	}
+
+	if (TunaSweeperLanguage::TryParseLanguageCode(FPlatformMisc::GetDefaultLocale(), DetectedLanguage))
+	{
+		return DetectedLanguage;
+	}
+
+	return ETunaSweeperItemTextLanguage::English;
+}
+
+void UTunaSweeperGameInstance::ApplyCurrentLanguageCulture() const
+{
+	FInternationalization::Get().SetCurrentCulture(TunaSweeperLanguage::ToLanguageCode(CurrentTextLanguage));
 }
 
 int32 UTunaSweeperGameInstance::FindFirstExistingSaveSlotIndex() const

@@ -41,6 +41,13 @@ namespace TunaSweeperScenarioPresentation
 
 namespace
 {
+	FText ResolveUiText(const UTunaSweeperGameInstance* TunaGameInstance, const TCHAR* StringKey, const TCHAR* Fallback)
+	{
+		return TunaGameInstance
+			? TunaGameInstance->ResolveLocalizedText(FName(StringKey), FText::FromString(Fallback))
+			: FText::FromString(Fallback);
+	}
+
 	UCanvasPanelSlot* AddFullScreenChild(UCanvasPanel* RootCanvas, UWidget* Widget, int32 ZOrder)
 	{
 		if (!RootCanvas || !Widget)
@@ -375,7 +382,10 @@ void UTunaSweeperScenarioPresentationWidget::BuildPresentationWidget()
 	VignetteOverlay->SetVisibility(ESlateVisibility::HitTestInvisible);
 	AddFullScreenChild(RootCanvas, VignetteOverlay, 1);
 
-	TitleText->SetText(FText::FromString(TEXT("\uC7AC\uAE30\uB3D9 \uAE30\uB85D")));
+	TitleText->SetText(ResolveUiText(
+		GetGameInstance<UTunaSweeperGameInstance>(),
+		TEXT("ui.scenario.title"),
+		TEXT("\uC7AC\uAE30\uB3D9 \uAE30\uB85D")));
 	TitleText->SetFont(MakeFont(TitleText, 22));
 	TitleText->SetColorAndOpacity(FSlateColor(FLinearColor(0.86f, 0.94f, 1.0f, 0.88f)));
 	TitleText->SetShadowOffset(FVector2D(1.5f, 1.5f));
@@ -389,7 +399,10 @@ void UTunaSweeperScenarioPresentationWidget::BuildPresentationWidget()
 		TitleSlot->SetZOrder(4);
 	}
 
-	StatusText->SetText(FText::FromString(TEXT("B-07 \uBC99\uCEE4 / \uBE44\uC0C1 \uAE30\uC0C1")));
+	StatusText->SetText(ResolveUiText(
+		GetGameInstance<UTunaSweeperGameInstance>(),
+		TEXT("ui.scenario.status"),
+		TEXT("B-07 \uBC99\uCEE4 / \uBE44\uC0C1 \uAE30\uC0C1")));
 	StatusText->SetFont(MakeFont(StatusText, 18));
 	StatusText->SetColorAndOpacity(FSlateColor(FLinearColor(0.62f, 0.76f, 0.86f, 0.84f)));
 	StatusText->SetShadowOffset(FVector2D(1.0f, 1.0f));
@@ -418,7 +431,10 @@ void UTunaSweeperScenarioPresentationWidget::BuildPresentationWidget()
 		MonologueSlot->SetZOrder(4);
 	}
 
-	PromptText->SetText(FText::FromString(TEXT("\uD074\uB9AD\uD574\uC11C \uACC4\uC18D")));
+	PromptText->SetText(ResolveUiText(
+		GetGameInstance<UTunaSweeperGameInstance>(),
+		TEXT("ui.scenario.prompt"),
+		TEXT("\uD074\uB9AD\uD574\uC11C \uACC4\uC18D")));
 	PromptText->SetFont(MakeFont(PromptText, 17));
 	PromptText->SetColorAndOpacity(FSlateColor(FLinearColor(0.70f, 0.82f, 0.90f, 0.78f)));
 	PromptText->SetJustification(ETextJustify::Right);
@@ -448,15 +464,16 @@ void UTunaSweeperScenarioPresentationWidget::BuildPresentationWidget()
 void UTunaSweeperScenarioPresentationWidget::InitializeMonologueLines()
 {
 	MonologueLines.Reset();
-	MonologueLines.Add(FText::FromString(TEXT("\uAE30\uC5B5 \uB370\uC774\uD130 \uC190\uC0C1.")));
-	MonologueLines.Add(FText::FromString(TEXT("\uC704\uCE58 \uD655\uC778... B-07 \uBC99\uCEE4.")));
-	MonologueLines.Add(FText::FromString(TEXT("\uC0DD\uC874 \uAE30\uB2A5 \uC7AC\uC2DC\uB3D9.")));
-	MonologueLines.Add(FText::FromString(TEXT("\uC804\uB825 \uBD80\uC871. \uB0B4\uBD80 \uC2DC\uC2A4\uD15C \uBD88\uC548\uC815.")));
-	MonologueLines.Add(FText::FromString(TEXT("\uADF8\uB798\uB3C4 \uC6C0\uC9C1\uC77C \uC218 \uC788\uB2E4.")));
-	MonologueLines.Add(FText::FromString(TEXT("\uBA3C\uC800 \uC774 \uC7A5\uC18C\uB97C \uD655\uC778\uD574\uC57C \uD55C\uB2E4.")));
+	const UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+	MonologueLines.Add(ResolveUiText(TunaGameInstance, TEXT("ui.scenario.monologue1"), TEXT("\uAE30\uC5B5 \uB370\uC774\uD130 \uC190\uC0C1.")));
+	MonologueLines.Add(ResolveUiText(TunaGameInstance, TEXT("ui.scenario.monologue2"), TEXT("\uC704\uCE58 \uD655\uC778... B-07 \uBC99\uCEE4.")));
+	MonologueLines.Add(ResolveUiText(TunaGameInstance, TEXT("ui.scenario.monologue3"), TEXT("\uC0DD\uC874 \uAE30\uB2A5 \uC7AC\uC2DC\uB3D9.")));
+	MonologueLines.Add(ResolveUiText(TunaGameInstance, TEXT("ui.scenario.monologue4"), TEXT("\uC804\uB825 \uBD80\uC871. \uB0B4\uBD80 \uC2DC\uC2A4\uD15C \uBD88\uC548\uC815.")));
+	MonologueLines.Add(ResolveUiText(TunaGameInstance, TEXT("ui.scenario.monologue5"), TEXT("\uADF8\uB798\uB3C4 \uC6C0\uC9C1\uC77C \uC218 \uC788\uB2E4.")));
+	MonologueLines.Add(ResolveUiText(TunaGameInstance, TEXT("ui.scenario.monologue6"), TEXT("\uBA3C\uC800 \uC774 \uC7A5\uC18C\uB97C \uD655\uC778\uD574\uC57C \uD55C\uB2E4.")));
 
-	SystemTitleFullText = TEXT("\uC7AC\uAE30\uB3D9 \uAE30\uB85D");
-	SystemStatusFullText = TEXT("B-07 \uBC99\uCEE4 / \uBE44\uC0C1 \uAE30\uC0C1");
+	SystemTitleFullText = ResolveUiText(TunaGameInstance, TEXT("ui.scenario.title"), TEXT("\uC7AC\uAE30\uB3D9 \uAE30\uB85D")).ToString();
+	SystemStatusFullText = ResolveUiText(TunaGameInstance, TEXT("ui.scenario.status"), TEXT("B-07 \uBC99\uCEE4 / \uBE44\uC0C1 \uAE30\uC0C1")).ToString();
 }
 
 void UTunaSweeperScenarioPresentationWidget::BeginCurrentLine()

@@ -6,7 +6,7 @@
 #include "TunaSweeperHudTopReserveWidget.generated.h"
 
 class UButton;
-class UTextBlock;
+class UImage;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FTunaSweeperHudModeSelectedSignature, ETunaSweeperHudMode, SelectedMode);
 
@@ -39,20 +39,20 @@ protected:
 	TObjectPtr<UButton> MemoModeButton;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
-	TObjectPtr<UTextBlock> InventoryModeText;
+	TObjectPtr<UImage> InventoryModeIcon;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
-	TObjectPtr<UTextBlock> QuestModeText;
+	TObjectPtr<UImage> QuestModeIcon;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
-	TObjectPtr<UTextBlock> MapModeText;
+	TObjectPtr<UImage> MapModeIcon;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
-	TObjectPtr<UTextBlock> MemoModeText;
+	TObjectPtr<UImage> MemoModeIcon;
 
 private:
 	void RefreshTabVisuals();
-	void SetTabVisual(ETunaSweeperHudMode Mode, UButton* Button, UTextBlock* TextBlock);
+	void SetTabVisual(ETunaSweeperHudMode Mode, UButton* Button, UImage* Icon);
 
 	UFUNCTION()
 	void HandleInventoryModeClicked();

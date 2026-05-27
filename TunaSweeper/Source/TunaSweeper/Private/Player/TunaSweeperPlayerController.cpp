@@ -187,7 +187,7 @@ namespace TunaSweeperIntroMap
 namespace TunaSweeperCanBotIntro
 {
 	const FName DialogueCompletionFlag(TEXT("dialogue.canbot.bunker_intro"));
-	const FText SpeakerName = FText::FromString(TEXT("캔봇"));
+	const FName SpeakerNameStringKey(TEXT("ui.dialogue.canbot.speaker"));
 	constexpr float StartDelayAfterBunkerFadeSeconds = 1.15f;
 	constexpr float CameraReturnBlendSeconds = 0.9f;
 	constexpr float DialogueCameraDistance = 1200.0f;
@@ -523,27 +523,49 @@ void ATunaSweeperPlayerController::BuildCanBotIntroDialogueLines(TArray<FTunaSwe
 {
 	OutDialogueLines.Reset();
 
-	auto AddCanBotLine = [&OutDialogueLines](const FText& DialogueText)
+	const UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+	auto ResolveDialogueText = [TunaGameInstance](FName StringKey, const FText& FallbackText)
+	{
+		return TunaGameInstance
+			? TunaGameInstance->ResolveLocalizedText(StringKey, FallbackText)
+			: FallbackText;
+	};
+
+	const FText SpeakerName = ResolveDialogueText(
+		TunaSweeperCanBotIntro::SpeakerNameStringKey,
+		FText::FromString(TEXT("\uCE94\uBD07")));
+
+	auto AddCanBotLine = [&OutDialogueLines, &SpeakerName](const FText& DialogueText)
 	{
 		FTunaSweeperDialogueLine Line;
-		Line.SpeakerName = TunaSweeperCanBotIntro::SpeakerName;
+		Line.SpeakerName = SpeakerName;
 		Line.DialogueText = DialogueText;
 		OutDialogueLines.Add(Line);
 	};
 
-	AddCanBotLine(FText::FromString(TEXT("생존자 확인. 신경 반응 정상. 캔봇이 응답합니다.")));
-	AddCanBotLine(FText::FromString(TEXT("이곳은 B-07 벙커입니다. 방금 깨어난 당신의 임시 거점입니다.")));
+	AddCanBotLine(ResolveDialogueText(
+		FName(TEXT("ui.dialogue.canbot.intro1")),
+		FText::FromString(TEXT("Survivor confirmed. Neural response normal. Canbot responding."))));
+	AddCanBotLine(ResolveDialogueText(
+		FName(TEXT("ui.dialogue.canbot.intro2")),
+		FText::FromString(TEXT("This is B-07 bunker. It is your temporary base after waking."))));
 
 	FTunaSweeperDialogueLine CameraLine;
-	CameraLine.SpeakerName = TunaSweeperCanBotIntro::SpeakerName;
-	CameraLine.DialogueText = FText::FromString(TEXT("저쪽 이동 사다리를 사용하면 외부 구역으로 출동할 수 있습니다. 준비 전에는 접근하지 않는 편이 안전합니다."));
+	CameraLine.SpeakerName = SpeakerName;
+	CameraLine.DialogueText = ResolveDialogueText(
+		FName(TEXT("ui.dialogue.canbot.intro3")),
+		FText::FromString(TEXT("Use that travel ladder to deploy to the outside area. It is safer not to approach before you are ready.")));
 	CameraLine.bUseCameraFocus = true;
 	CameraLine.CameraFocusLocation = TunaSweeperCanBotIntro::DeployLadderFocusLocation;
 	CameraLine.CameraBlendSeconds = 0.8f;
 	OutDialogueLines.Add(CameraLine);
 
-	AddCanBotLine(FText::FromString(TEXT("기본 생체 수치와 장비 상태를 확인했습니다. 조작 권한을 돌려드리겠습니다.")));
-	AddCanBotLine(FText::FromString(TEXT("필요하면 다시 말을 걸어 안내를 요청하십시오.")));
+	AddCanBotLine(ResolveDialogueText(
+		FName(TEXT("ui.dialogue.canbot.intro4")),
+		FText::FromString(TEXT("Basic vitals and equipment state confirmed. Returning control authority."))));
+	AddCanBotLine(ResolveDialogueText(
+		FName(TEXT("ui.dialogue.canbot.intro5")),
+		FText::FromString(TEXT("Speak to me again if you need guidance."))));
 }
 
 bool ATunaSweeperPlayerController::StartDialogueSequence(

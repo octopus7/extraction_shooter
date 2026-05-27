@@ -1,7 +1,7 @@
 #include "UI/TunaSweeperHudTopReserveWidget.h"
 
 #include "Components/Button.h"
-#include "Components/TextBlock.h"
+#include "Components/Image.h"
 #include "UI/TunaSweeperUIFont.h"
 
 void UTunaSweeperHudTopReserveWidget::NativeConstruct()
@@ -69,13 +69,13 @@ void UTunaSweeperHudTopReserveWidget::SetActiveMode(ETunaSweeperHudMode InActive
 
 void UTunaSweeperHudTopReserveWidget::RefreshTabVisuals()
 {
-	SetTabVisual(ETunaSweeperHudMode::Inventory, InventoryModeButton, InventoryModeText);
-	SetTabVisual(ETunaSweeperHudMode::Quest, QuestModeButton, QuestModeText);
-	SetTabVisual(ETunaSweeperHudMode::Map, MapModeButton, MapModeText);
-	SetTabVisual(ETunaSweeperHudMode::Memo, MemoModeButton, MemoModeText);
+	SetTabVisual(ETunaSweeperHudMode::Inventory, InventoryModeButton, InventoryModeIcon);
+	SetTabVisual(ETunaSweeperHudMode::Quest, QuestModeButton, QuestModeIcon);
+	SetTabVisual(ETunaSweeperHudMode::Map, MapModeButton, MapModeIcon);
+	SetTabVisual(ETunaSweeperHudMode::Memo, MemoModeButton, MemoModeIcon);
 }
 
-void UTunaSweeperHudTopReserveWidget::SetTabVisual(ETunaSweeperHudMode Mode, UButton* Button, UTextBlock* TextBlock)
+void UTunaSweeperHudTopReserveWidget::SetTabVisual(ETunaSweeperHudMode Mode, UButton* Button, UImage* Icon)
 {
 	const bool bActive = ActiveMode == Mode;
 
@@ -84,12 +84,12 @@ void UTunaSweeperHudTopReserveWidget::SetTabVisual(ETunaSweeperHudMode Mode, UBu
 		Button->SetRenderOpacity(bActive ? 1.0f : 0.72f);
 	}
 
-	if (TextBlock)
+	if (Icon)
 	{
-		TextBlock->SetColorAndOpacity(FSlateColor(
+		Icon->SetColorAndOpacity(
 			bActive
 				? FLinearColor(0.82f, 0.98f, 0.88f, 1.0f)
-				: FLinearColor(0.74f, 0.80f, 0.82f, 1.0f)));
+				: FLinearColor(0.74f, 0.80f, 0.82f, 1.0f));
 	}
 }
 
@@ -112,4 +112,3 @@ void UTunaSweeperHudTopReserveWidget::HandleMemoModeClicked()
 {
 	OnHudModeSelected.Broadcast(ETunaSweeperHudMode::Memo);
 }
-

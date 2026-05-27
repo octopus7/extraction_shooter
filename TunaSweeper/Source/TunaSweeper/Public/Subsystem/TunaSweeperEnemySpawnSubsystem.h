@@ -11,12 +11,15 @@ class ATunaSweeperLevelTravelInteractableActor;
 class ATunaSweeperLootContainerActor;
 class ATunaSweeperLootContainerSpawnInteractableActor;
 class ATunaSweeperPickupItemActor;
+class ATunaSweeperRollingBomber;
+class ATunaSweeperRollingBomberSpawner;
 class ATunaSweeperSelfDestructInteractableActor;
 class ATunaSweeperTransparentObstacleActor;
 class ATunaSweeperWarpPointActor;
 class ATunaSweeperWorldProgressActor;
 class UMaterialInterface;
 class UMediaSource;
+class USoundBase;
 class UWorld;
 class UStaticMesh;
 class UTunaSweeperInteractionMarkerWidget;
@@ -84,7 +87,8 @@ public:
 		ItemSpawn,
 		LootContainer,
 		LootContainerSpawn,
-		SelfDestruct
+		SelfDestruct,
+		RollingBomberSpawner
 	};
 
 private:
@@ -193,6 +197,18 @@ private:
 		float BoomDisplaySeconds = 0.2f;
 		float ExplosionRadius = 200.0f;
 		float ExplosionDamage = 100.0f;
+
+		TSoftClassPtr<ATunaSweeperRollingBomber> RollingBomberClass;
+		TSoftObjectPtr<USoundBase> RollingBomberLaunchSound;
+		int32 RollingBomberInitialSpawnCount = 2;
+		int32 RollingBomberMaxSpawnCount = 8;
+		float RollingBomberWaveIntervalSeconds = 10.0f;
+		float RollingBomberSpawnIntervalSeconds = 0.2f;
+		float RollingBomberLaunchSpeedMin = 850.0f;
+		float RollingBomberLaunchSpeedMax = 1100.0f;
+		float RollingBomberLaunchPitchMinDegrees = 38.0f;
+		float RollingBomberLaunchPitchMaxDegrees = 58.0f;
+		float RollingBomberSpawnerMaxHealth = 80.0f;
 	};
 
 	void HandlePostLoadMapWithWorld(UWorld* LoadedWorld);

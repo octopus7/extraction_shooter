@@ -46,7 +46,7 @@ public:
 	ETunaSweeperInteractionType GetInteractionType() const { return InteractionType; }
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Interaction")
-	FText GetInteractionDisplayName() const { return InteractionDisplayName; }
+	FText GetInteractionDisplayName() const;
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Interaction")
 	FName GetObjectiveEventId() const { return ObjectiveEventId; }
@@ -72,11 +72,19 @@ public:
 	void ConfigureInteractionDefaults(
 		ETunaSweeperInteractionType InInteractionType,
 		const FText& InInteractionDisplayName,
-		TSoftClassPtr<UTunaSweeperInteractionMarkerWidget> InMarkerWidgetClass);
+		TSoftClassPtr<UTunaSweeperInteractionMarkerWidget> InMarkerWidgetClass,
+		FName InInteractionDisplayNameStringKey = NAME_None);
 
 	void SetInteractionTypeAndDisplayName(
 		ETunaSweeperInteractionType InInteractionType,
 		const FText& InInteractionDisplayName);
+
+	void SetInteractionTypeDisplayNameAndStringKey(
+		ETunaSweeperInteractionType InInteractionType,
+		const FText& InInteractionDisplayName,
+		FName InInteractionDisplayNameStringKey);
+
+	void SetInteractionDisplayNameStringKey(FName InInteractionDisplayNameStringKey);
 
 	void SetInteractionRequirementPreview(
 		UTexture2D* InIconTexture,
@@ -89,6 +97,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
 	FText InteractionDisplayName = FText::FromString(TEXT("Interact"));
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
+	FName InteractionDisplayNameStringKey = NAME_None;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
 	FName ObjectiveEventId = NAME_None;
@@ -119,6 +130,7 @@ private:
 	void EnsureMarkerWidgetClass();
 	void UpdateMarker(float DeltaSeconds);
 	void ApplyMarkerState();
+	FText ResolveInteractionDisplayName() const;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UWidgetComponent> MarkerWidgetComponent;

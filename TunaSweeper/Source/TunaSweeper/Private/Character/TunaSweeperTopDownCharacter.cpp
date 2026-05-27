@@ -1099,6 +1099,7 @@ void ATunaSweeperTopDownCharacter::StartRespawnTransition()
 
 	if (UGameInstance* GameInstance = GetGameInstance())
 	{
+		const UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GameInstance);
 		if (UTunaSweeperLevelTransitionSubsystem* TransitionSubsystem = GameInstance->GetSubsystem<UTunaSweeperLevelTransitionSubsystem>())
 		{
 			if (TransitionSubsystem->StartTransition(
@@ -1108,7 +1109,11 @@ void ATunaSweeperTopDownCharacter::StartRespawnTransition()
 				RespawnTransitionWidgetClass,
 				RespawnFadeToBlackDuration,
 				RespawnFadeFromBlackDuration,
-				FText::FromString(TEXT("구급 카트 후송 중"))))
+				TunaGameInstance
+					? TunaGameInstance->ResolveLocalizedText(
+						FName(TEXT("ui.notification.rescue_cart")),
+						FText::FromString(TEXT("\uAD6C\uAE09 \uCE74\uD2B8 \uD6C4\uC1A1 \uC911")))
+					: FText::FromString(TEXT("\uAD6C\uAE09 \uCE74\uD2B8 \uD6C4\uC1A1 \uC911"))))
 			{
 				return;
 			}

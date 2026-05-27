@@ -317,6 +317,7 @@ bool UTunaSweeperQuestSubsystem::TryGetQuestDefinition(
 	if (const FTunaSweeperQuestDefinition* Definition = FindQuestDefinition(QuestId))
 	{
 		OutDefinition = *Definition;
+		ResolveDefinitionText(OutDefinition);
 		return true;
 	}
 
@@ -338,6 +339,10 @@ bool UTunaSweeperQuestSubsystem::GetAllQuestDefinitions(TArray<FTunaSweeperQuest
 	}
 
 	QuestDefinitions.GenerateValueArray(OutDefinitions);
+	for (FTunaSweeperQuestDefinition& Definition : OutDefinitions)
+	{
+		ResolveDefinitionText(Definition);
+	}
 	OutDefinitions.Sort([](
 		const FTunaSweeperQuestDefinition& Left,
 		const FTunaSweeperQuestDefinition& Right)
@@ -551,7 +556,7 @@ bool UTunaSweeperQuestSubsystem::GetQuestObjectiveProgress(
 	{
 		FTunaSweeperObjectiveProgressView ProgressView;
 		ProgressView.ObjectiveId = Objective.ObjectiveId;
-		ProgressView.Text = Objective.Text;
+		ProgressView.Text = ResolveQuestText(Objective.TextStringKey, Objective.Text);
 		ProgressView.RequiredCount = FMath::Max(1, Objective.RequiredCount);
 		ProgressView.CurrentCount = FMath::Clamp(
 			GetObjectiveProgressCount(QuestId, Objective.ObjectiveId),
@@ -1071,7 +1076,11 @@ FText UTunaSweeperQuestSubsystem::ResolveQuestText(FName StringKey, const FText&
 	}
 
 	FText Text;
-	if (TryGetQuestTextByKey(StringKey, ETunaSweeperItemTextLanguage::Korean, Text))
+	const UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GetGameInstance());
+	const ETunaSweeperItemTextLanguage Language = TunaGameInstance
+		? TunaGameInstance->GetCurrentTextLanguage()
+		: ETunaSweeperItemTextLanguage::English;
+	if (TryGetQuestTextByKey(StringKey, Language, Text))
 	{
 		return Text;
 	}

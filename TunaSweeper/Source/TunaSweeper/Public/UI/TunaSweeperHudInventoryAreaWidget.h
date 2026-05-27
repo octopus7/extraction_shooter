@@ -58,7 +58,13 @@ protected:
 	TObjectPtr<UButton> SortInventoryButton;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
+	TObjectPtr<UTextBlock> SortInventoryButtonText;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
 	TObjectPtr<UWidget> InventoryWeightPanel;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
+	TObjectPtr<UTextBlock> InventoryWeightLabelText;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
 	TObjectPtr<UTextBlock> InventoryWeightText;
@@ -68,6 +74,9 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
 	TObjectPtr<UWidget> InventoryWeightWarningIcon;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
+	TObjectPtr<UTextBlock> InventoryWeightWarningText;
 
 private:
 	void ApplyHudState();

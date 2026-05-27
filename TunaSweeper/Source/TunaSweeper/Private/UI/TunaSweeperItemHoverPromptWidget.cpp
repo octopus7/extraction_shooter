@@ -9,6 +9,7 @@
 #include "Components/TextBlock.h"
 #include "Components/VerticalBox.h"
 #include "Components/VerticalBoxSlot.h"
+#include "Game/TunaSweeperGameInstance.h"
 #include "Styling/SlateBrush.h"
 #include "UI/TunaSweeperUIFont.h"
 #include "Widgets/SWidget.h"
@@ -24,6 +25,13 @@ namespace TunaSweeperItemHoverPrompt
 	constexpr float MinPromptHeight = 124.0f;
 	constexpr float ItemInfoHorizontalPadding = 32.0f;
 	constexpr float DescriptionWrapWidth = InfoBoxWidth - ItemInfoHorizontalPadding;
+
+	FText ResolveUiText(const UTunaSweeperGameInstance* TunaGameInstance, const TCHAR* StringKey, const TCHAR* Fallback)
+	{
+		return TunaGameInstance
+			? TunaGameInstance->ResolveLocalizedText(FName(StringKey), FText::FromString(Fallback))
+			: FText::FromString(Fallback);
+	}
 
 	FSlateBrush MakeRoundedBoxBrush(
 		const FVector2D& ImageSize,
@@ -277,7 +285,10 @@ void UTunaSweeperItemHoverPromptWidget::BuildNativeWidgetTree()
 		ActionHintsStack,
 		TEXT("Take"),
 		FText::FromString(TEXT("F")),
-		FText::FromString(TEXT("\uC90D\uAE30/\uBC30\uCE58")),
+		TunaSweeperItemHoverPrompt::ResolveUiText(
+			GetGameInstance<UTunaSweeperGameInstance>(),
+			TEXT("ui.item_hover.take"),
+			TEXT("\uC90D\uAE30/\uBC30\uCE58")),
 		RawTakeKeyText,
 		RawTakeActionText);
 	TakeKeyText = RawTakeKeyText;
@@ -290,7 +301,10 @@ void UTunaSweeperItemHoverPromptWidget::BuildNativeWidgetTree()
 		ActionHintsStack,
 		TEXT("Use"),
 		FText::FromString(TEXT("U")),
-		FText::FromString(TEXT("\uC0AC\uC6A9")),
+		TunaSweeperItemHoverPrompt::ResolveUiText(
+			GetGameInstance<UTunaSweeperGameInstance>(),
+			TEXT("ui.item_hover.use"),
+			TEXT("\uC0AC\uC6A9")),
 		RawUseKeyText,
 		RawUseActionText);
 	UseKeyText = RawUseKeyText;
@@ -303,7 +317,10 @@ void UTunaSweeperItemHoverPromptWidget::BuildNativeWidgetTree()
 		ActionHintsStack,
 		TEXT("Drop"),
 		FText::FromString(TEXT("X")),
-		FText::FromString(TEXT("\uBC84\uB9AC\uAE30")),
+		TunaSweeperItemHoverPrompt::ResolveUiText(
+			GetGameInstance<UTunaSweeperGameInstance>(),
+			TEXT("ui.item_hover.drop"),
+			TEXT("\uBC84\uB9AC\uAE30")),
 		RawDropKeyText,
 		RawDropActionText);
 	DropKeyText = RawDropKeyText;
@@ -423,7 +440,10 @@ void UTunaSweeperItemHoverPromptWidget::ApplyTileData()
 	}
 	if (TakeActionText)
 	{
-		TakeActionText->SetText(FText::FromString(TEXT("\uC90D\uAE30/\uBC30\uCE58")));
+		TakeActionText->SetText(TunaSweeperItemHoverPrompt::ResolveUiText(
+			GetGameInstance<UTunaSweeperGameInstance>(),
+			TEXT("ui.item_hover.take"),
+			TEXT("\uC90D\uAE30/\uBC30\uCE58")));
 	}
 	if (DropKeyText)
 	{
@@ -431,7 +451,10 @@ void UTunaSweeperItemHoverPromptWidget::ApplyTileData()
 	}
 	if (DropActionText)
 	{
-		DropActionText->SetText(FText::FromString(TEXT("\uBC84\uB9AC\uAE30")));
+		DropActionText->SetText(TunaSweeperItemHoverPrompt::ResolveUiText(
+			GetGameInstance<UTunaSweeperGameInstance>(),
+			TEXT("ui.item_hover.drop"),
+			TEXT("\uBC84\uB9AC\uAE30")));
 	}
 	if (UseActionRow)
 	{
@@ -443,7 +466,10 @@ void UTunaSweeperItemHoverPromptWidget::ApplyTileData()
 	}
 	if (UseActionText)
 	{
-		UseActionText->SetText(FText::FromString(TEXT("\uC0AC\uC6A9")));
+		UseActionText->SetText(TunaSweeperItemHoverPrompt::ResolveUiText(
+			GetGameInstance<UTunaSweeperGameInstance>(),
+			TEXT("ui.item_hover.use"),
+			TEXT("\uC0AC\uC6A9")));
 	}
 
 	RefreshPromptHeight();
@@ -482,11 +508,23 @@ FText UTunaSweeperItemHoverPromptWidget::BuildNameText() const
 	const int32 ItemId = CachedTileData.bHasItemDefinition
 		? CachedTileData.ItemDefinition.Id
 		: CachedTileData.ItemInstance.ItemId;
-	const FString DisplayName = CachedTileData.DisplayName.IsEmpty()
-		? FString::Printf(TEXT("Item %d"), ItemId)
-		: CachedTileData.DisplayName.ToString();
+	const UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+	const FText DisplayName = CachedTileData.DisplayName.IsEmpty()
+		? FText::Format(
+			TunaSweeperItemHoverPrompt::ResolveUiText(
+				TunaGameInstance,
+				TEXT("ui.common.item_fallback"),
+				TEXT("Item {0}")),
+			FText::AsNumber(ItemId))
+		: CachedTileData.DisplayName;
 
-	return FText::FromString(FString::Printf(TEXT("%s #%d"), *DisplayName, ItemId));
+	return FText::Format(
+		TunaSweeperItemHoverPrompt::ResolveUiText(
+			TunaGameInstance,
+			TEXT("ui.item_hover.name_pattern"),
+			TEXT("{0} #{1}")),
+		DisplayName,
+		FText::AsNumber(ItemId));
 }
 
 FText UTunaSweeperItemHoverPromptWidget::BuildWeightText() const
@@ -497,10 +535,23 @@ FText UTunaSweeperItemHoverPromptWidget::BuildWeightText() const
 
 	if (FMath::IsNearlyEqual(WeightKg, FMath::RoundToFloat(WeightKg), 0.01f))
 	{
-		return FText::FromString(FString::Printf(TEXT("%.0f kg"), WeightKg));
+		return FText::Format(
+			TunaSweeperItemHoverPrompt::ResolveUiText(
+				GetGameInstance<UTunaSweeperGameInstance>(),
+				TEXT("ui.item_hover.weight_kg_pattern"),
+				TEXT("{0} kg")),
+			FText::AsNumber(FMath::RoundToInt(WeightKg)));
 	}
 
-	return FText::FromString(FString::Printf(TEXT("%.1f kg"), WeightKg));
+	FNumberFormattingOptions NumberFormat;
+	NumberFormat.MinimumFractionalDigits = 1;
+	NumberFormat.MaximumFractionalDigits = 1;
+	return FText::Format(
+		TunaSweeperItemHoverPrompt::ResolveUiText(
+			GetGameInstance<UTunaSweeperGameInstance>(),
+			TEXT("ui.item_hover.weight_kg_pattern"),
+			TEXT("{0} kg")),
+		FText::AsNumber(WeightKg, &NumberFormat));
 }
 
 FText UTunaSweeperItemHoverPromptWidget::BuildPriceText() const
@@ -508,7 +559,12 @@ FText UTunaSweeperItemHoverPromptWidget::BuildPriceText() const
 	const int32 Price = CachedTileData.bHasItemDefinition
 		? FMath::Max(0, CachedTileData.ItemDefinition.ShopSellPrice)
 		: 0;
-	return FText::FromString(FString::Printf(TEXT("$%d"), Price));
+	return FText::Format(
+		TunaSweeperItemHoverPrompt::ResolveUiText(
+			GetGameInstance<UTunaSweeperGameInstance>(),
+			TEXT("ui.item_hover.price_pattern"),
+			TEXT("${0}")),
+		FText::AsNumber(Price));
 }
 
 bool UTunaSweeperItemHoverPromptWidget::CanUseCachedItem() const

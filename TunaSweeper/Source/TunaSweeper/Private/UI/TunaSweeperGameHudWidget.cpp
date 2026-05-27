@@ -42,6 +42,13 @@ namespace
 	constexpr float InventoryQuickSlotTileSize = 112.0f;
 	constexpr float InventoryQuickSlotTileScale = 1.12f;
 
+	FText ResolveUiText(const UTunaSweeperGameInstance* TunaGameInstance, const TCHAR* StringKey, const TCHAR* Fallback)
+	{
+		return TunaGameInstance
+			? TunaGameInstance->ResolveLocalizedText(FName(StringKey), FText::FromString(Fallback))
+			: FText::FromString(Fallback);
+	}
+
 	FSlateBrush MakeHudRoundedBoxBrush(
 		const FVector2D& ImageSize,
 		const FLinearColor& FillColor,
@@ -81,10 +88,15 @@ namespace
 		TileData.ItemStack.ItemId = ItemInstance.ItemId;
 		TileData.ItemStack.Quantity = FMath::Max(1, ItemInstance.Quantity);
 		TileData.bIsEmpty = false;
+		const ETunaSweeperItemTextLanguage Language = TunaGameInstance
+			? TunaGameInstance->GetCurrentTextLanguage()
+			: ETunaSweeperItemTextLanguage::English;
 
 		if (!ItemDataSubsystem)
 		{
-			TileData.DisplayName = FText::FromString(FString::Printf(TEXT("Item %d"), ItemInstance.ItemId));
+			TileData.DisplayName = FText::Format(
+				ResolveUiText(TunaGameInstance, TEXT("ui.common.item_fallback"), TEXT("Item {0}")),
+				FText::AsNumber(ItemInstance.ItemId));
 			return TileData;
 		}
 
@@ -95,13 +107,15 @@ namespace
 			TileData.bHasItemDefinition = true;
 
 			FText DisplayName;
-			if (ItemDataSubsystem->TryGetItemNameTextByKey(ItemDefinition.NameStringKey, ETunaSweeperItemTextLanguage::Korean, DisplayName))
+			if (ItemDataSubsystem->TryGetItemNameTextByKey(ItemDefinition.NameStringKey, Language, DisplayName))
 			{
 				TileData.DisplayName = DisplayName;
 			}
 			else
 			{
-				TileData.DisplayName = FText::FromString(FString::Printf(TEXT("Item %d"), ItemInstance.ItemId));
+				TileData.DisplayName = FText::Format(
+					ResolveUiText(TunaGameInstance, TEXT("ui.common.item_fallback"), TEXT("Item {0}")),
+					FText::AsNumber(ItemInstance.ItemId));
 			}
 
 			const FString IconObjectPath = ItemDataSubsystem->BuildItemIconObjectPath(ItemDefinition);
@@ -111,7 +125,7 @@ namespace
 			}
 
 			FText DescriptionText;
-			if (ItemDataSubsystem->TryGetItemTextByKey(ItemDefinition.DescriptionStringKey, ETunaSweeperItemTextLanguage::Korean, DescriptionText))
+			if (ItemDataSubsystem->TryGetItemTextByKey(ItemDefinition.DescriptionStringKey, Language, DescriptionText))
 			{
 				TileData.DescriptionText = DescriptionText;
 			}
@@ -129,6 +143,8 @@ void UTunaSweeperGameHudWidget::NativeConstruct()
 	{
 		TunaGameInstance->OnSelectedInventoryItemChanged.RemoveAll(this);
 		TunaGameInstance->OnSelectedInventoryItemChanged.AddUObject(this, &UTunaSweeperGameHudWidget::HandleSelectedInventoryItemChanged);
+		TunaGameInstance->OnLanguageChanged.RemoveAll(this);
+		TunaGameInstance->OnLanguageChanged.AddUObject(this, &UTunaSweeperGameHudWidget::HandleLanguageChanged);
 	}
 	if (UTunaSweeperQuestSubsystem* QuestSubsystem = GetGameInstance()
 		? GetGameInstance()->GetSubsystem<UTunaSweeperQuestSubsystem>()
@@ -150,6 +166,7 @@ void UTunaSweeperGameHudWidget::NativeConstruct()
 	EnsureQuestPanelWidget();
 	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
 	CacheAmmoReloadWidgets();
+	RefreshLocalizedTexts();
 	SetHudMode(ETunaSweeperHudMode::None);
 	SetItemInfoPanelVisible(false);
 	RefreshBottomStatusFromGameInstance();
@@ -165,6 +182,7 @@ void UTunaSweeperGameHudWidget::NativeDestruct()
 	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
 	{
 		TunaGameInstance->OnSelectedInventoryItemChanged.RemoveAll(this);
+		TunaGameInstance->OnLanguageChanged.RemoveAll(this);
 	}
 	if (UTunaSweeperQuestSubsystem* QuestSubsystem = GetGameInstance()
 		? GetGameInstance()->GetSubsystem<UTunaSweeperQuestSubsystem>()
@@ -446,7 +464,23 @@ void UTunaSweeperGameHudWidget::ApplyHudModeVisibility()
 
 	if (UnsupportedModeText)
 	{
-		UnsupportedModeText->SetText(FText::FromString(TEXT("\uBBF8\uAD6C\uD604")));
+		UnsupportedModeText->SetText(ResolveUiText(
+			GetGameInstance<UTunaSweeperGameInstance>(),
+			TEXT("ui.common.unimplemented"),
+			TEXT("\uBBF8\uAD6C\uD604")));
+	}
+
+	if (ModeTitleText)
+	{
+		const bool bShowModeTitle = bUtilityModeOpen && (bQuestMode || bMemoMode);
+		const UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+		ModeTitleText->SetVisibility(bShowModeTitle ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
+		ModeTitleText->SetText(
+			bQuestMode
+				? ResolveUiText(TunaGameInstance, TEXT("ui.hud.mode.quest"), TEXT("\uD018\uC2A4\uD2B8"))
+				: bMemoMode
+					? ResolveUiText(TunaGameInstance, TEXT("ui.hud.mode.memo"), TEXT("\uBA54\uBAA8"))
+					: FText::GetEmpty());
 	}
 }
 
@@ -507,7 +541,11 @@ void UTunaSweeperGameHudWidget::EnsureInventoryQuickSlotPanelWidget()
 		1.0f));
 	InventoryQuickSlotPanel->SetContent(PanelStack);
 
-	GuideText->SetText(FText::FromString(TEXT("\uC544\uC774\uD15C\uC744 \uC2AC\uB86F\uC73C\uB85C \uB4DC\uB798\uADF8\uD558\uC5EC \uD035\uC2AC\uB86F\uC744 \uC124\uC815\uD558\uC138\uC694")));
+	InventoryQuickSlotGuideText = GuideText;
+	GuideText->SetText(ResolveUiText(
+		GetGameInstance<UTunaSweeperGameInstance>(),
+		TEXT("ui.hud.quick_slot_guide"),
+		TEXT("\uC544\uC774\uD15C\uC744 \uC2AC\uB86F\uC73C\uB85C \uB4DC\uB798\uADF8\uD558\uC5EC \uD035\uC2AC\uB86F\uC744 \uC124\uC815\uD558\uC138\uC694")));
 	GuideText->SetColorAndOpacity(FSlateColor(FLinearColor(0.94f, 0.94f, 0.90f, 1.0f)));
 	GuideText->SetJustification(ETextJustify::Center);
 	TunaSweeperUIFont::ApplyFont(GuideText, 24, ETunaSweeperUIFontWeight::Bold);
@@ -759,6 +797,9 @@ void UTunaSweeperGameHudWidget::RefreshQuickSlotsFromGameState()
 	UTunaSweeperItemDataSubsystem* ItemDataSubsystem = TunaGameInstance
 		? TunaGameInstance->GetSubsystem<UTunaSweeperItemDataSubsystem>()
 		: nullptr;
+	const ETunaSweeperItemTextLanguage Language = TunaGameInstance
+		? TunaGameInstance->GetCurrentTextLanguage()
+		: ETunaSweeperItemTextLanguage::English;
 
 	int32 SelectedSlotNumber = 0;
 	if (const APlayerController* PlayerController = GetOwningPlayer())
@@ -794,14 +835,16 @@ void UTunaSweeperGameHudWidget::RefreshQuickSlotsFromGameState()
 		}
 		QuickSlotBarWidget->SetQuickSlotIcon(SlotNumber, IconTexture);
 
-		FText AmmoTypeText = FText::FromString(TEXT("\uD0C4\uC57D \uBBF8\uC9C0\uC815"));
+		FText AmmoTypeText = ResolveUiText(TunaGameInstance, TEXT("ui.hud.ammo_unset"), TEXT("\uD0C4\uC57D \uBBF8\uC9C0\uC815"));
 		const int32 AmmoItemId = TunaGameInstance->GetWeaponSelectedAmmoItemId(SlotNumber);
 		if (AmmoItemId != INDEX_NONE)
 		{
-			AmmoTypeText = FText::FromString(FString::Printf(TEXT("Ammo %d"), AmmoItemId));
+			AmmoTypeText = FText::Format(
+				ResolveUiText(TunaGameInstance, TEXT("ui.common.item_fallback"), TEXT("Item {0}")),
+				FText::AsNumber(AmmoItemId));
 			if (ItemDataSubsystem)
 			{
-				ItemDataSubsystem->TryGetItemNameText(AmmoItemId, ETunaSweeperItemTextLanguage::Korean, AmmoTypeText);
+				ItemDataSubsystem->TryGetItemNameText(AmmoItemId, Language, AmmoTypeText);
 			}
 		}
 		QuickSlotBarWidget->SetWeaponAmmoTypeText(SlotNumber, AmmoTypeText, true);
@@ -877,6 +920,26 @@ void UTunaSweeperGameHudWidget::RefreshInventoryQuickSlotPanel()
 			ItemDataSubsystem,
 			QuickSlot,
 			SlotIndex));
+	}
+}
+
+void UTunaSweeperGameHudWidget::RefreshLocalizedTexts()
+{
+	UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+	if (InventoryQuickSlotGuideText)
+	{
+		InventoryQuickSlotGuideText->SetText(ResolveUiText(
+			TunaGameInstance,
+			TEXT("ui.hud.quick_slot_guide"),
+			TEXT("\uC544\uC774\uD15C\uC744 \uC2AC\uB86F\uC73C\uB85C \uB4DC\uB798\uADF8\uD558\uC5EC \uD035\uC2AC\uB86F\uC744 \uC124\uC815\uD558\uC138\uC694")));
+	}
+
+	if (UnsupportedModeText)
+	{
+		UnsupportedModeText->SetText(ResolveUiText(
+			TunaGameInstance,
+			TEXT("ui.common.unimplemented"),
+			TEXT("\uBBF8\uAD6C\uD604")));
 	}
 }
 
@@ -1108,6 +1171,9 @@ void UTunaSweeperGameHudWidget::RefreshQuestTrackerFromQuestSubsystem()
 
 	if (QuestTrackerObjectiveText)
 	{
+		const ETunaSweeperItemTextLanguage Language = GetGameInstance<UTunaSweeperGameInstance>()
+			? GetGameInstance<UTunaSweeperGameInstance>()->GetCurrentTextLanguage()
+			: ETunaSweeperItemTextLanguage::English;
 		TArray<FString> ObjectiveLines;
 		for (const FTunaSweeperObjectiveProgressView& Progress : ObjectiveProgress)
 		{
@@ -1123,7 +1189,7 @@ void UTunaSweeperGameHudWidget::RefreshQuestTrackerFromQuestSubsystem()
 			FText RewardAvailableText;
 			if (!QuestSubsystem->TryGetQuestTextByKey(
 				FName(TEXT("quest.ui.tracker.reward_available")),
-				ETunaSweeperItemTextLanguage::Korean,
+				Language,
 				RewardAvailableText))
 			{
 				RewardAvailableText = FText::FromString(TEXT("\uBCF4\uC0C1 \uC218\uB839 \uAC00\uB2A5"));
@@ -1162,13 +1228,18 @@ void UTunaSweeperGameHudWidget::BuildAmmoSelectorOptionTexts(TArray<FText>& OutO
 	UTunaSweeperItemDataSubsystem* ItemDataSubsystem = TunaGameInstance
 		? TunaGameInstance->GetSubsystem<UTunaSweeperItemDataSubsystem>()
 		: nullptr;
+	const ETunaSweeperItemTextLanguage Language = TunaGameInstance
+		? TunaGameInstance->GetCurrentTextLanguage()
+		: ETunaSweeperItemTextLanguage::English;
 
 	for (int32 AmmoItemId : AmmoItemIds)
 	{
-		FText AmmoName = FText::FromString(FString::Printf(TEXT("Ammo %d"), AmmoItemId));
+		FText AmmoName = FText::Format(
+			ResolveUiText(TunaGameInstance, TEXT("ui.common.item_fallback"), TEXT("Item {0}")),
+			FText::AsNumber(AmmoItemId));
 		if (ItemDataSubsystem)
 		{
-			ItemDataSubsystem->TryGetItemNameText(AmmoItemId, ETunaSweeperItemTextLanguage::Korean, AmmoName);
+			ItemDataSubsystem->TryGetItemNameText(AmmoItemId, Language, AmmoName);
 		}
 		OutOptionTexts.Add(AmmoName);
 	}
@@ -1202,6 +1273,28 @@ void UTunaSweeperGameHudWidget::HandleSelectedInventoryItemChanged()
 void UTunaSweeperGameHudWidget::HandleQuestProgressChanged()
 {
 	RefreshQuestTrackerFromQuestSubsystem();
+	if (QuestPanelWidget)
+	{
+		QuestPanelWidget->RefreshQuestView();
+	}
+}
+
+void UTunaSweeperGameHudWidget::HandleLanguageChanged()
+{
+	RefreshLocalizedTexts();
+	ApplyHudModeVisibility();
+	RefreshBottomStatusFromGameInstance();
+	RefreshQuestTrackerFromQuestSubsystem();
+	RefreshQuickSlotsFromGameState();
+	RefreshInventoryQuickSlotPanel();
+	if (ItemInfoPanelWidget)
+	{
+		ItemInfoPanelWidget->RefreshSelectedItemInfo();
+	}
+	if (MemoPanelWidget)
+	{
+		MemoPanelWidget->RefreshMemoView();
+	}
 	if (QuestPanelWidget)
 	{
 		QuestPanelWidget->RefreshQuestView();

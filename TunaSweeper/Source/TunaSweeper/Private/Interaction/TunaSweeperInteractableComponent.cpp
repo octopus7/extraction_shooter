@@ -1,6 +1,7 @@
 #include "Interaction/TunaSweeperInteractableComponent.h"
 
 #include "Components/WidgetComponent.h"
+#include "Game/TunaSweeperGameInstance.h"
 #include "Kismet/GameplayStatics.h"
 #include "Subsystem/TunaSweeperInteractionSubsystem.h"
 #include "UI/TunaSweeperInteractionMarkerWidget.h"
@@ -21,6 +22,34 @@ namespace TunaSweeperInteractionMarkerLayout
 	{
 		const float MarkerCenterX = ((DrawWidth - MarkerRootWidth) * 0.5f) + (MarkerBoxWidth * 0.5f);
 		return FVector2D(MarkerCenterX / DrawWidth, 0.5f);
+	}
+
+	FName GetDefaultInteractionTextKey(ETunaSweeperInteractionType InteractionType)
+	{
+		switch (InteractionType)
+		{
+		case ETunaSweeperInteractionType::ItemSpawn:
+			return FName(TEXT("ui.interaction.item_spawn"));
+		case ETunaSweeperInteractionType::LootContainerSpawn:
+			return FName(TEXT("ui.interaction.container_spawn"));
+		case ETunaSweeperInteractionType::LevelTravel:
+			return FName(TEXT("ui.interaction.travel"));
+		case ETunaSweeperInteractionType::Quest:
+			return FName(TEXT("ui.quest.interaction_name"));
+		case ETunaSweeperInteractionType::SelfDestruct:
+			return FName(TEXT("ui.interaction.self_destruct"));
+		case ETunaSweeperInteractionType::WorldProgress:
+			return FName(TEXT("ui.interaction.repair"));
+		case ETunaSweeperInteractionType::PersistentDoor:
+		case ETunaSweeperInteractionType::DoorOpen:
+			return FName(TEXT("ui.interaction.open"));
+		case ETunaSweeperInteractionType::WarpPoint:
+			return FName(TEXT("ui.interaction.default"));
+		case ETunaSweeperInteractionType::Memo:
+			return FName(TEXT("ui.interaction.memo"));
+		default:
+			return NAME_None;
+		}
 	}
 }
 
@@ -116,14 +145,21 @@ bool UTunaSweeperInteractableComponent::RequestInteraction(APawn* InstigatorPawn
 	return false;
 }
 
+FText UTunaSweeperInteractableComponent::GetInteractionDisplayName() const
+{
+	return ResolveInteractionDisplayName();
+}
+
 void UTunaSweeperInteractableComponent::ConfigureInteractionDefaults(
 	ETunaSweeperInteractionType InInteractionType,
 	const FText& InInteractionDisplayName,
-	TSoftClassPtr<UTunaSweeperInteractionMarkerWidget> InMarkerWidgetClass)
+	TSoftClassPtr<UTunaSweeperInteractionMarkerWidget> InMarkerWidgetClass,
+	FName InInteractionDisplayNameStringKey)
 {
 	Modify();
 	InteractionType = InInteractionType;
 	InteractionDisplayName = InInteractionDisplayName;
+	InteractionDisplayNameStringKey = InInteractionDisplayNameStringKey;
 	MarkerWidgetClass = InMarkerWidgetClass;
 	ApplyMarkerState();
 }
@@ -135,6 +171,26 @@ void UTunaSweeperInteractableComponent::SetInteractionTypeAndDisplayName(
 	Modify();
 	InteractionType = InInteractionType;
 	InteractionDisplayName = InInteractionDisplayName;
+	InteractionDisplayNameStringKey = NAME_None;
+	ApplyMarkerState();
+}
+
+void UTunaSweeperInteractableComponent::SetInteractionTypeDisplayNameAndStringKey(
+	ETunaSweeperInteractionType InInteractionType,
+	const FText& InInteractionDisplayName,
+	FName InInteractionDisplayNameStringKey)
+{
+	Modify();
+	InteractionType = InInteractionType;
+	InteractionDisplayName = InInteractionDisplayName;
+	InteractionDisplayNameStringKey = InInteractionDisplayNameStringKey;
+	ApplyMarkerState();
+}
+
+void UTunaSweeperInteractableComponent::SetInteractionDisplayNameStringKey(FName InInteractionDisplayNameStringKey)
+{
+	Modify();
+	InteractionDisplayNameStringKey = InInteractionDisplayNameStringKey;
 	ApplyMarkerState();
 }
 
@@ -300,8 +356,27 @@ void UTunaSweeperInteractableComponent::ApplyMarkerState()
 
 	if (UTunaSweeperInteractionMarkerWidget* MarkerWidget = Cast<UTunaSweeperInteractionMarkerWidget>(MarkerWidgetComponent->GetUserWidgetObject()))
 	{
-		MarkerWidget->SetMarkerText(InteractionDisplayName);
+		MarkerWidget->SetMarkerText(ResolveInteractionDisplayName());
 		MarkerWidget->SetRequirementPreview(RequirementIconTexture, RequirementQuantity, bShowRequirementPreview);
 		MarkerWidget->SetMarkerPresentation(MarkerAlpha, MarkerRingScale, LabelAlpha);
 	}
+}
+
+FText UTunaSweeperInteractableComponent::ResolveInteractionDisplayName() const
+{
+	const FName TextKey = InteractionDisplayNameStringKey.IsNone()
+		? TunaSweeperInteractionMarkerLayout::GetDefaultInteractionTextKey(InteractionType)
+		: InteractionDisplayNameStringKey;
+	if (TextKey.IsNone())
+	{
+		return InteractionDisplayName;
+	}
+
+	const UWorld* World = GetWorld();
+	const UTunaSweeperGameInstance* TunaGameInstance = World
+		? Cast<UTunaSweeperGameInstance>(World->GetGameInstance())
+		: nullptr;
+	return TunaGameInstance
+		? TunaGameInstance->ResolveLocalizedText(TextKey, InteractionDisplayName)
+		: InteractionDisplayName;
 }

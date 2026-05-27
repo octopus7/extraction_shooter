@@ -6,6 +6,7 @@
 #include "Engine/GameInstance.h"
 #include "Engine/Texture2D.h"
 #include "Engine/World.h"
+#include "Game/TunaSweeperGameInstance.h"
 #include "GameFramework/PlayerController.h"
 #include "Interaction/TunaSweeperInteractableComponent.h"
 #include "Misc/Paths.h"
@@ -174,8 +175,12 @@ void ATunaSweeperPickupItemActor::RefreshItemPresentation()
 			FTunaSweeperItemDefinition ItemDefinition;
 			if (ItemDataSubsystem->TryGetItemDefinition(ItemId, ItemDefinition))
 			{
+				const UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GameInstance);
+				const ETunaSweeperItemTextLanguage Language = TunaGameInstance
+					? TunaGameInstance->GetCurrentTextLanguage()
+					: DisplayLanguage;
 				FText LocalizedName;
-				if (ItemDataSubsystem->TryGetItemNameTextByKey(ItemDefinition.NameStringKey, DisplayLanguage, LocalizedName))
+				if (ItemDataSubsystem->TryGetItemNameTextByKey(ItemDefinition.NameStringKey, Language, LocalizedName))
 				{
 					CachedItemDisplayName = LocalizedName;
 				}

@@ -101,6 +101,9 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
 	TObjectPtr<UTextBlock> UnsupportedModeText;
 
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
+	TObjectPtr<UTextBlock> ModeTitleText;
+
 private:
 	void ApplyHudModeVisibility();
 	void CloseLootContainerPanelIfOpen();
@@ -111,6 +114,7 @@ private:
 	void RefreshBottomStatusFromGameInstance();
 	void RefreshQuickSlotsFromGameState();
 	void RefreshInventoryQuickSlotPanel();
+	void RefreshLocalizedTexts();
 	void RefreshReloadWidgets();
 	void RefreshDialogueHudVisibility();
 	void EnsureQuestTrackerWidgets();
@@ -119,6 +123,7 @@ private:
 	void BuildAmmoSelectorOptionTexts(TArray<FText>& OutOptionTexts, int32& OutFocusedIndex) const;
 	void HandleSelectedInventoryItemChanged();
 	void HandleQuestProgressChanged();
+	void HandleLanguageChanged();
 	bool IsDialogueSequenceActive() const;
 
 	UFUNCTION()
@@ -150,6 +155,9 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<UHorizontalBox> InventoryQuickSlotRow;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTextBlock> InventoryQuickSlotGuideText;
 
 	UPROPERTY(Transient)
 	TArray<TObjectPtr<UTunaSweeperItemThumbnailSlotWidget>> InventoryQuickSlotWidgets;

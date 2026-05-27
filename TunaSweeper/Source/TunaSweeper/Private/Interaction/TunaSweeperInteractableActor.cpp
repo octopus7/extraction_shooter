@@ -64,10 +64,15 @@ bool ATunaSweeperInteractableActor::RequestInteraction(APawn* InstigatorPawn)
 void ATunaSweeperInteractableActor::ConfigureInteractionDefaults(
 	ETunaSweeperInteractionType InInteractionType,
 	const FText& InInteractionDisplayName,
-	TSoftClassPtr<UTunaSweeperInteractionMarkerWidget> InMarkerWidgetClass)
+	TSoftClassPtr<UTunaSweeperInteractionMarkerWidget> InMarkerWidgetClass,
+	FName InInteractionDisplayNameStringKey)
 {
 	if (InteractableComponent)
 	{
-		InteractableComponent->ConfigureInteractionDefaults(InInteractionType, InInteractionDisplayName, InMarkerWidgetClass);
+		InteractableComponent->ConfigureInteractionDefaults(
+			InInteractionType,
+			InInteractionDisplayName,
+			InMarkerWidgetClass,
+			InInteractionDisplayNameStringKey);
 	}
 }

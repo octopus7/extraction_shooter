@@ -24,7 +24,7 @@ void UTunaSweeperKeyboardInputSubsystem::ReceiveQuickSlotKeyInput(int32 SlotNumb
 				FText ItemName = FText::FromString(FString::Printf(TEXT("Item %d"), ItemInstance.ItemId));
 				if (UTunaSweeperItemDataSubsystem* ItemDataSubsystem = TunaGameInstance->GetSubsystem<UTunaSweeperItemDataSubsystem>())
 				{
-					ItemDataSubsystem->TryGetItemNameText(ItemInstance.ItemId, ETunaSweeperItemTextLanguage::Korean, ItemName);
+					ItemDataSubsystem->TryGetItemNameText(ItemInstance.ItemId, TunaGameInstance->GetCurrentTextLanguage(), ItemName);
 				}
 				if (TunaGameInstance->TryUseItemInSlot(QuickSlotReference, InstigatorPawn))
 				{

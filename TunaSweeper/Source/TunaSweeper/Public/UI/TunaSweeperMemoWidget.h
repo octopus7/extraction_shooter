@@ -85,6 +85,9 @@ private:
 	TObjectPtr<UScrollBox> MemoListScrollBox;
 
 	UPROPERTY(Transient)
+	TObjectPtr<UTextBlock> MemoListTitleText;
+
+	UPROPERTY(Transient)
 	TObjectPtr<UTextBlock> DetailTitleText;
 
 	UPROPERTY(Transient)

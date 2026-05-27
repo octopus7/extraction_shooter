@@ -8,8 +8,10 @@
 #include "Components/Widget.h"
 #include "Engine/Texture2D.h"
 #include "Game/TunaSweeperGameInstance.h"
+#include "GameFramework/PlayerController.h"
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
 #include "UI/TunaSweeperItemDragDropOperation.h"
+#include "UI/TunaSweeperItemStackSplitPopupWidget.h"
 #include "UI/TunaSweeperItemStackTileItemObject.h"
 #include "UI/TunaSweeperUIFont.h"
 
@@ -33,29 +35,49 @@ namespace TunaSweeperInventoryArea
 		return FText::AsNumber(Value, &NumberFormat);
 	}
 
-	FText GetEquipmentSlotDisplayName(int32 SlotIndex)
+	FText ResolveUiText(const UTunaSweeperGameInstance* TunaGameInstance, const TCHAR* StringKey, const TCHAR* Fallback)
 	{
-		static const FText SlotNames[] = {
-			FText::FromString(TEXT("\uCD1D\uAE30 1")),
-			FText::FromString(TEXT("\uCD1D\uAE30 2")),
-			FText::FromString(TEXT("\uADFC\uC811")),
-			FText::FromString(TEXT("\uBA38\uB9AC")),
-			FText::FromString(TEXT("\uC2E0\uCCB4")),
-			FText::FromString(TEXT("\uC5BC\uAD74")),
-			FText::FromString(TEXT("\uC774\uC5B4\uD3F0")),
-			FText::FromString(TEXT("\uAC00\uBC29"))
+		return TunaGameInstance
+			? TunaGameInstance->ResolveLocalizedText(FName(StringKey), FText::FromString(Fallback))
+			: FText::FromString(Fallback);
+	}
+
+	FText GetEquipmentSlotDisplayName(int32 SlotIndex, const UTunaSweeperGameInstance* TunaGameInstance)
+	{
+		struct FEquipmentSlotText
+		{
+			const TCHAR* StringKey;
+			const TCHAR* Fallback;
 		};
 
-		return SlotIndex >= 0 && SlotIndex < UE_ARRAY_COUNT(SlotNames)
-			? SlotNames[SlotIndex]
-			: FText::FromString(FString::Printf(TEXT("Slot %d"), SlotIndex + 1));
+		static const FEquipmentSlotText SlotNames[] = {
+			{ TEXT("ui.inventory.slot.gun1"), TEXT("\uCD1D\uAE30 1") },
+			{ TEXT("ui.inventory.slot.gun2"), TEXT("\uCD1D\uAE30 2") },
+			{ TEXT("ui.inventory.slot.melee"), TEXT("\uADFC\uC811") },
+			{ TEXT("ui.inventory.slot.head"), TEXT("\uBA38\uB9AC") },
+			{ TEXT("ui.inventory.slot.body"), TEXT("\uC2E0\uCCB4") },
+			{ TEXT("ui.inventory.slot.face"), TEXT("\uC5BC\uAD74") },
+			{ TEXT("ui.inventory.slot.ear"), TEXT("\uC774\uC5B4\uD3F0") },
+			{ TEXT("ui.inventory.slot.bag"), TEXT("\uAC00\uBC29") }
+		};
+
+		if (SlotIndex >= 0 && SlotIndex < UE_ARRAY_COUNT(SlotNames))
+		{
+			return ResolveUiText(TunaGameInstance, SlotNames[SlotIndex].StringKey, SlotNames[SlotIndex].Fallback);
+		}
+
+		return FText::Format(
+			ResolveUiText(TunaGameInstance, TEXT("ui.inventory.slot.generic"), TEXT("Slot {0}")),
+			FText::AsNumber(SlotIndex + 1));
 	}
 
 	FTunaSweeperItemStackTileData BuildTileData(
+		const UTunaSweeperGameInstance* TunaGameInstance,
 		UTunaSweeperItemDataSubsystem* ItemDataSubsystem,
 		const FTunaSweeperItemInstance& ItemInstance,
 		ETunaSweeperItemSlotSource Source,
-		int32 SourceIndex)
+		int32 SourceIndex,
+		ETunaSweeperItemTextLanguage Language)
 	{
 		FTunaSweeperItemStackTileData TileData;
 		TileData.ItemInstance = ItemInstance;
@@ -70,7 +92,7 @@ namespace TunaSweeperInventoryArea
 
 		if (TileData.bIsEmpty && TileData.bShowEmptySlotLabel)
 		{
-			TileData.DisplayName = GetEquipmentSlotDisplayName(SourceIndex);
+			TileData.DisplayName = GetEquipmentSlotDisplayName(SourceIndex, TunaGameInstance);
 		}
 
 		if (!TileData.bIsEmpty && ItemDataSubsystem)
@@ -82,7 +104,7 @@ namespace TunaSweeperInventoryArea
 				TileData.bHasItemDefinition = true;
 
 				FText DisplayName;
-				if (ItemDataSubsystem->TryGetItemNameTextByKey(ItemDefinition.NameStringKey, ETunaSweeperItemTextLanguage::Korean, DisplayName))
+				if (ItemDataSubsystem->TryGetItemNameTextByKey(ItemDefinition.NameStringKey, Language, DisplayName))
 				{
 					TileData.DisplayName = DisplayName;
 				}
@@ -98,7 +120,7 @@ namespace TunaSweeperInventoryArea
 				}
 
 				FText DescriptionText;
-				if (ItemDataSubsystem->TryGetItemTextByKey(ItemDefinition.DescriptionStringKey, ETunaSweeperItemTextLanguage::Korean, DescriptionText))
+				if (ItemDataSubsystem->TryGetItemTextByKey(ItemDefinition.DescriptionStringKey, Language, DescriptionText))
 				{
 					TileData.DescriptionText = DescriptionText;
 				}
@@ -140,6 +162,10 @@ namespace TunaSweeperInventoryArea
 		TileView->SetEntryWidth(TileWidth);
 		TileView->SetEntryHeight(TileHeight);
 
+		const ETunaSweeperItemTextLanguage Language = TunaGameInstance
+			? TunaGameInstance->GetCurrentTextLanguage()
+			: ETunaSweeperItemTextLanguage::English;
+
 		for (int32 Index = 0; Index < Slots.Num(); ++Index)
 		{
 			FTunaSweeperItemInstance ItemInstance;
@@ -150,7 +176,7 @@ namespace TunaSweeperInventoryArea
 
 			UTunaSweeperItemStackTileItemObject* TileObject = CreateTileObject(
 				Outer,
-				BuildTileData(ItemDataSubsystem, ItemInstance, Source, Index));
+				BuildTileData(TunaGameInstance, ItemDataSubsystem, ItemInstance, Source, Index, Language));
 			if (TileObject)
 			{
 				TileObjects.Add(TileObject);
@@ -180,6 +206,50 @@ namespace TunaSweeperInventoryArea
 		ItemDragOperation->bHasHoveredSlotReference = false;
 		ItemDragOperation->HoveredSlotReference = FTunaSweeperItemSlotReference();
 		return bMoved;
+	}
+
+	FTunaSweeperItemSlotReference ResolveSourceSlot(const UTunaSweeperItemDragDropOperation* ItemDragOperation)
+	{
+		FTunaSweeperItemSlotReference SourceSlot;
+		if (!ItemDragOperation)
+		{
+			return SourceSlot;
+		}
+
+		SourceSlot = ItemDragOperation->TileData.SlotReference;
+		if (!SourceSlot.IsValid())
+		{
+			SourceSlot.Source = ItemDragOperation->TileData.Source;
+			SourceSlot.SlotIndex = ItemDragOperation->TileData.SourceIndex;
+		}
+		return SourceSlot;
+	}
+
+	bool TryOpenStackSplitPopupForDrop(
+		APlayerController* OwningPlayer,
+		UTunaSweeperGameInstance* TunaGameInstance,
+		UTunaSweeperItemDragDropOperation* ItemDragOperation,
+		const FTunaSweeperItemSlotReference& TargetSlot,
+		const FVector2D& ScreenSpacePosition)
+	{
+		if (!OwningPlayer || !TunaGameInstance || !ItemDragOperation || ItemDragOperation->TileData.bIsEmpty)
+		{
+			return false;
+		}
+
+		const bool bOpenedPopup = UTunaSweeperItemStackSplitPopupWidget::TryOpenStackSplitPopup(
+			OwningPlayer,
+			TunaGameInstance,
+			ResolveSourceSlot(ItemDragOperation),
+			TargetSlot,
+			ScreenSpacePosition);
+		if (bOpenedPopup)
+		{
+			ItemDragOperation->bHasHoveredSlotReference = false;
+			ItemDragOperation->HoveredSlotReference = FTunaSweeperItemSlotReference();
+		}
+
+		return bOpenedPopup;
 	}
 
 	bool TryResolveSlotFromTileView(
@@ -305,6 +375,9 @@ void UTunaSweeperHudInventoryAreaWidget::NativeConstruct()
 	{
 		TunaGameInstance->OnInventoryStateChanged.RemoveAll(this);
 		TunaGameInstance->OnInventoryStateChanged.AddUObject(this, &UTunaSweeperHudInventoryAreaWidget::RefreshInventoryItems);
+		TunaGameInstance->OnLanguageChanged.RemoveAll(this);
+		TunaGameInstance->OnLanguageChanged.AddUObject(this, &UTunaSweeperHudInventoryAreaWidget::RefreshInventoryItems);
+		TunaGameInstance->OnLanguageChanged.AddUObject(this, &UTunaSweeperHudInventoryAreaWidget::ApplyHudState);
 	}
 
 	RefreshInventoryItems();
@@ -316,6 +389,7 @@ void UTunaSweeperHudInventoryAreaWidget::NativeDestruct()
 	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
 	{
 		TunaGameInstance->OnInventoryStateChanged.RemoveAll(this);
+		TunaGameInstance->OnLanguageChanged.RemoveAll(this);
 	}
 
 	if (SortInventoryButton)
@@ -349,11 +423,39 @@ void UTunaSweeperHudInventoryAreaWidget::SetHudState(const FTunaSweeperPlayerHud
 void UTunaSweeperHudInventoryAreaWidget::ApplyHudState()
 {
 	PreviewHudState.NormalizeWeightLimits();
+	const UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+
+	if (SortInventoryButtonText)
+	{
+		SortInventoryButtonText->SetText(TunaSweeperInventoryArea::ResolveUiText(
+			TunaGameInstance,
+			TEXT("ui.inventory.sort"),
+			TEXT("\uC815\uB9AC")));
+	}
+
+	if (InventoryWeightLabelText)
+	{
+		InventoryWeightLabelText->SetText(TunaSweeperInventoryArea::ResolveUiText(
+			TunaGameInstance,
+			TEXT("ui.inventory.weight_label"),
+			TEXT("\uC18C\uC9C0 \uC911\uB7C9")));
+	}
+
+	if (InventoryWeightWarningText)
+	{
+		InventoryWeightWarningText->SetText(TunaSweeperInventoryArea::ResolveUiText(
+			TunaGameInstance,
+			TEXT("ui.inventory.overweight"),
+			TEXT("\uACFC\uC911\uB7C9")));
+	}
 
 	if (InventoryWeightText)
 	{
 		InventoryWeightText->SetText(FText::Format(
-			FText::FromString(TEXT("{0}/{1}kg")),
+			TunaSweeperInventoryArea::ResolveUiText(
+				TunaGameInstance,
+				TEXT("ui.inventory.weight_pattern"),
+				TEXT("{0}/{1}kg")),
 			TunaSweeperInventoryArea::MakeRoundedFloatText(PreviewHudState.CurrentCarryWeight),
 			TunaSweeperInventoryArea::MakeRoundedFloatText(PreviewHudState.MaxCarryWeight)));
 	}
@@ -439,7 +541,26 @@ bool UTunaSweeperHudInventoryAreaWidget::NativeOnDrop(
 	UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
 	FTunaSweeperItemSlotReference CursorSlotReference;
 	if (TryResolveDropSlotFromCursor(InDragDropEvent.GetScreenSpacePosition(), CursorSlotReference) &&
-		TunaSweeperInventoryArea::TryMoveFromDropSlot(TunaGameInstance, ItemDragOperation, CursorSlotReference))
+		((InDragDropEvent.GetModifierKeys().IsControlDown() &&
+			TunaSweeperInventoryArea::TryOpenStackSplitPopupForDrop(
+				GetOwningPlayer(),
+				TunaGameInstance,
+				ItemDragOperation,
+				CursorSlotReference,
+				InDragDropEvent.GetScreenSpacePosition())) ||
+			TunaSweeperInventoryArea::TryMoveFromDropSlot(TunaGameInstance, ItemDragOperation, CursorSlotReference)))
+	{
+		return true;
+	}
+
+	if (InDragDropEvent.GetModifierKeys().IsControlDown() &&
+		ItemDragOperation->bHasHoveredSlotReference &&
+		TunaSweeperInventoryArea::TryOpenStackSplitPopupForDrop(
+			GetOwningPlayer(),
+			TunaGameInstance,
+			ItemDragOperation,
+			ItemDragOperation->HoveredSlotReference,
+			InDragDropEvent.GetScreenSpacePosition()))
 	{
 		return true;
 	}
