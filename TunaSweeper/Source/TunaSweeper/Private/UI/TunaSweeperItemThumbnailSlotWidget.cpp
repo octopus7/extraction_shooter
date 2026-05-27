@@ -20,7 +20,12 @@ void UTunaSweeperItemThumbnailSlotWidget::NativeOnListItemObjectSet(UObject* Lis
 	IUserObjectListEntry::NativeOnListItemObjectSet(ListItemObject);
 
 	const UTunaSweeperItemStackTileItemObject* TileItemObject = Cast<UTunaSweeperItemStackTileItemObject>(ListItemObject);
-	CachedTileData = TileItemObject ? TileItemObject->GetTileData() : FTunaSweeperItemStackTileData();
+	SetTileData(TileItemObject ? TileItemObject->GetTileData() : FTunaSweeperItemStackTileData());
+}
+
+void UTunaSweeperItemThumbnailSlotWidget::SetTileData(const FTunaSweeperItemStackTileData& InTileData)
+{
+	CachedTileData = InTileData;
 	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
 	ApplyTileData();
 

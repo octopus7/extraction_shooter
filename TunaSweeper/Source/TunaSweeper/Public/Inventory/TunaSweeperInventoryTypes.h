@@ -10,7 +10,8 @@ enum class ETunaSweeperItemSlotSource : uint8
 	AuxiliaryBag UMETA(DisplayName = "Auxiliary Bag"),
 	Inventory UMETA(DisplayName = "Inventory"),
 	LootContainer UMETA(DisplayName = "Loot Container"),
-	SelectedWeaponAttachment UMETA(DisplayName = "Selected Weapon Attachment")
+	SelectedWeaponAttachment UMETA(DisplayName = "Selected Weapon Attachment"),
+	UsableQuickSlot UMETA(DisplayName = "Usable Quick Slot")
 };
 
 USTRUCT(BlueprintType)
