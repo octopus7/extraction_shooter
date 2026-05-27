@@ -12,18 +12,33 @@
 
 ATunaSweeperLootContainerActor::ATunaSweeperLootContainerActor()
 {
+	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bStartWithTickEnabled = false;
+
 	SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("SceneRoot"));
 	RootComponent = SceneRoot;
 
 	VisualMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("VisualMesh"));
 	VisualMesh->SetupAttachment(RootComponent);
-	VisualMesh->SetRelativeScale3D(FVector(1.1f, 0.8f, 0.55f));
+	VisualMesh->SetRelativeLocation(FVector(0.0f, 0.0f, 25.0f));
+	VisualMesh->SetRelativeScale3D(FVector(1.1f, 0.8f, 0.5f));
 	VisualMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+
+	LidPivot = CreateDefaultSubobject<USceneComponent>(TEXT("LidPivot"));
+	LidPivot->SetupAttachment(RootComponent);
+	LidPivot->SetRelativeLocation(FVector(0.0f, -40.0f, 55.0f));
+
+	LidMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("LidMesh"));
+	LidMesh->SetupAttachment(LidPivot);
+	LidMesh->SetRelativeLocation(FVector(0.0f, 40.0f, 0.0f));
+	LidMesh->SetRelativeScale3D(FVector(1.1f, 0.8f, 0.08f));
+	LidMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> CubeMesh(TEXT("/Engine/BasicShapes/Cube.Cube"));
 	if (CubeMesh.Succeeded())
 	{
 		VisualMesh->SetStaticMesh(CubeMesh.Object);
+		LidMesh->SetStaticMesh(CubeMesh.Object);
 	}
 
 	InteractableComponent = CreateDefaultSubobject<UTunaSweeperInteractableComponent>(TEXT("Interactable"));
@@ -38,12 +53,44 @@ void ATunaSweeperLootContainerActor::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 	RefreshContainerPresentation();
+	ApplyLidRotation(bLidOpen ? OpenLidRelativeRotation : ClosedLidRelativeRotation);
 }
 
 void ATunaSweeperLootContainerActor::BeginPlay()
 {
 	Super::BeginPlay();
 	RefreshContainerPresentation();
+	ApplyLidRotation(bLidOpen ? OpenLidRelativeRotation : ClosedLidRelativeRotation);
+	SetActorTickEnabled(false);
+}
+
+void ATunaSweeperLootContainerActor::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	if (!bAnimatingLid)
+	{
+		SetActorTickEnabled(false);
+		return;
+	}
+
+	LidAnimationElapsed += FMath::Max(0.0f, DeltaSeconds);
+	const float RawAlpha = LidAnimationDuration > KINDA_SMALL_NUMBER
+		? FMath::Clamp(LidAnimationElapsed / LidAnimationDuration, 0.0f, 1.0f)
+		: 1.0f;
+	const float EasedAlpha = EvaluateLidAnimationAlpha(RawAlpha, ActiveLidEasing);
+	ApplyLidRotation(FQuat::Slerp(
+		LidAnimationStartRotation.Quaternion(),
+		LidAnimationTargetRotation.Quaternion(),
+		EasedAlpha).Rotator());
+
+	if (RawAlpha >= 1.0f)
+	{
+		bAnimatingLid = false;
+		bLidOpen = bLidAnimationTargetOpen;
+		ApplyLidRotation(LidAnimationTargetRotation);
+		SetActorTickEnabled(false);
+	}
 }
 
 void ATunaSweeperLootContainerActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -51,6 +98,7 @@ void ATunaSweeperLootContainerActor::EndPlay(const EEndPlayReason::Type EndPlayR
 	if (RuntimeGameInstance.IsValid())
 	{
 		RuntimeGameInstance->OnInventoryStateChanged.RemoveAll(this);
+		RuntimeGameInstance->OnActiveLootContainerUiClosed.RemoveAll(this);
 	}
 
 	Super::EndPlay(EndPlayReason);
@@ -100,11 +148,14 @@ bool ATunaSweeperLootContainerActor::OpenRuntimeContainer(
 		if (RuntimeGameInstance.IsValid())
 		{
 			RuntimeGameInstance->OnInventoryStateChanged.RemoveAll(this);
+			RuntimeGameInstance->OnActiveLootContainerUiClosed.RemoveAll(this);
 		}
 
 		RuntimeGameInstance = TunaGameInstance;
 		TunaGameInstance->OnInventoryStateChanged.RemoveAll(this);
 		TunaGameInstance->OnInventoryStateChanged.AddUObject(this, &ATunaSweeperLootContainerActor::CaptureRuntimeContentsFromActiveContainer);
+		TunaGameInstance->OnActiveLootContainerUiClosed.RemoveAll(this);
+		TunaGameInstance->OnActiveLootContainerUiClosed.AddUObject(this, &ATunaSweeperLootContainerActor::HandleActiveLootContainerUiClosed);
 	}
 
 	if (bHasRuntimeContainerState && !IsRuntimeContainerStateValid(TunaGameInstance))
@@ -148,6 +199,30 @@ void ATunaSweeperLootContainerActor::ConfigureLootContainerDefaults(int32 InCont
 	RefreshContainerPresentation();
 }
 
+void ATunaSweeperLootContainerActor::PlayOpenAnimation()
+{
+	SetLidOpen(true, false);
+}
+
+void ATunaSweeperLootContainerActor::PlayCloseAnimation()
+{
+	SetLidOpen(false, false);
+}
+
+void ATunaSweeperLootContainerActor::SetLidOpen(bool bInOpen, bool bInstant)
+{
+	if (bInstant)
+	{
+		bAnimatingLid = false;
+		bLidOpen = bInOpen;
+		ApplyLidRotation(bLidOpen ? OpenLidRelativeRotation : ClosedLidRelativeRotation);
+		SetActorTickEnabled(false);
+		return;
+	}
+
+	StartLidAnimation(bInOpen);
+}
+
 void ATunaSweeperLootContainerActor::RefreshContainerPresentation()
 {
 	if (InteractableComponent)
@@ -157,21 +232,42 @@ void ATunaSweeperLootContainerActor::RefreshContainerPresentation()
 			FText::FromString(TEXT("\uC5F4\uAE30")));
 	}
 
-	UTunaSweeperItemDataSubsystem* ItemDataSubsystem = GetItemDataSubsystem();
-	if (!ItemDataSubsystem || !VisualMesh)
+	if (!VisualMesh)
 	{
+		return;
+	}
+
+	if (BodyMeshOverride)
+	{
+		VisualMesh->SetStaticMesh(BodyMeshOverride);
+	}
+
+	if (LidMesh && LidMeshOverride)
+	{
+		LidMesh->SetStaticMesh(LidMeshOverride);
+	}
+
+	UTunaSweeperItemDataSubsystem* ItemDataSubsystem = GetItemDataSubsystem();
+	if (!ItemDataSubsystem)
+	{
+		ApplyLidRotation(bLidOpen ? OpenLidRelativeRotation : ClosedLidRelativeRotation);
 		return;
 	}
 
 	FTunaSweeperLootContainerDefinition Definition;
-	if (!ItemDataSubsystem->TryGetLootContainerDefinition(ContainerDefinitionId, Definition))
+	const bool bHasDefinition = ItemDataSubsystem->TryGetLootContainerDefinition(ContainerDefinitionId, Definition);
+	if (!bHasDefinition)
 	{
+		ApplyLidRotation(bLidOpen ? OpenLidRelativeRotation : ClosedLidRelativeRotation);
 		return;
 	}
 
-	if (UStaticMesh* LoadedMesh = Cast<UStaticMesh>(FSoftObjectPath(Definition.StaticMeshPath).TryLoad()))
+	if (!BodyMeshOverride)
 	{
-		VisualMesh->SetStaticMesh(LoadedMesh);
+		if (UStaticMesh* LoadedMesh = Cast<UStaticMesh>(FSoftObjectPath(Definition.StaticMeshPath).TryLoad()))
+		{
+			VisualMesh->SetStaticMesh(LoadedMesh);
+		}
 	}
 
 	if (!Definition.MaterialPath.IsEmpty())
@@ -179,10 +275,15 @@ void ATunaSweeperLootContainerActor::RefreshContainerPresentation()
 		if (UMaterialInterface* LoadedMaterial = Cast<UMaterialInterface>(FSoftObjectPath(Definition.MaterialPath).TryLoad()))
 		{
 			VisualMesh->SetMaterial(0, LoadedMaterial);
+			if (LidMesh)
+			{
+				LidMesh->SetMaterial(0, LoadedMaterial);
+			}
 		}
 	}
 
 	VisualMesh->SetRelativeScale3D(Definition.MeshScale);
+	ApplyLidRotation(bLidOpen ? OpenLidRelativeRotation : ClosedLidRelativeRotation);
 }
 
 void ATunaSweeperLootContainerActor::ResetRuntimeContainerState()
@@ -211,6 +312,19 @@ void ATunaSweeperLootContainerActor::CaptureRuntimeContentsFromActiveContainer()
 	RuntimeCapacity = TunaGameInstance->GetActiveLootContainerCapacity();
 	RuntimeSlots = TunaGameInstance->GetActiveLootContainerSlots();
 	bHasRuntimeContainerState = true;
+}
+
+void ATunaSweeperLootContainerActor::HandleActiveLootContainerUiClosed()
+{
+	CaptureRuntimeContentsFromActiveContainer();
+
+	const UTunaSweeperGameInstance* TunaGameInstance = RuntimeGameInstance.Get();
+	if (!TunaGameInstance || TunaGameInstance->GetActiveLootContainerOwner() != this)
+	{
+		return;
+	}
+
+	PlayCloseAnimation();
 }
 
 bool ATunaSweeperLootContainerActor::IsRuntimeContainerStateValid(const UTunaSweeperGameInstance* TunaGameInstance) const
@@ -259,4 +373,60 @@ UTunaSweeperItemDataSubsystem* ATunaSweeperLootContainerActor::GetItemDataSubsys
 	return GameInstance
 		? GameInstance->GetSubsystem<UTunaSweeperItemDataSubsystem>()
 		: nullptr;
+}
+
+void ATunaSweeperLootContainerActor::StartLidAnimation(bool bOpenTarget)
+{
+	const float Duration = bOpenTarget || !bUseSeparateCloseTiming
+		? OpenAnimationDuration
+		: CloseAnimationDuration;
+	const ETunaSweeperLootContainerLidEasing Easing = bOpenTarget || !bUseSeparateCloseTiming
+		? OpenEasing
+		: CloseEasing;
+
+	bLidAnimationTargetOpen = bOpenTarget;
+	LidAnimationStartRotation = LidPivot ? LidPivot->GetRelativeRotation() : ClosedLidRelativeRotation;
+	LidAnimationTargetRotation = bOpenTarget ? OpenLidRelativeRotation : ClosedLidRelativeRotation;
+	LidAnimationDuration = FMath::Max(0.0f, Duration);
+	LidAnimationElapsed = 0.0f;
+	ActiveLidEasing = Easing;
+
+	if (LidAnimationDuration <= KINDA_SMALL_NUMBER)
+	{
+		bAnimatingLid = false;
+		bLidOpen = bOpenTarget;
+		ApplyLidRotation(LidAnimationTargetRotation);
+		SetActorTickEnabled(false);
+		return;
+	}
+
+	bAnimatingLid = true;
+	SetActorTickEnabled(true);
+}
+
+void ATunaSweeperLootContainerActor::ApplyLidRotation(const FRotator& Rotation)
+{
+	if (LidPivot)
+	{
+		LidPivot->SetRelativeRotation(Rotation);
+	}
+}
+
+float ATunaSweeperLootContainerActor::EvaluateLidAnimationAlpha(
+	float Alpha,
+	ETunaSweeperLootContainerLidEasing Easing) const
+{
+	const float ClampedAlpha = FMath::Clamp(Alpha, 0.0f, 1.0f);
+	switch (Easing)
+	{
+	case ETunaSweeperLootContainerLidEasing::EaseIn:
+		return FMath::InterpEaseIn(0.0f, 1.0f, ClampedAlpha, 2.0f);
+	case ETunaSweeperLootContainerLidEasing::EaseOut:
+		return FMath::InterpEaseOut(0.0f, 1.0f, ClampedAlpha, 2.0f);
+	case ETunaSweeperLootContainerLidEasing::EaseInOut:
+		return FMath::InterpEaseInOut(0.0f, 1.0f, ClampedAlpha, 2.0f);
+	case ETunaSweeperLootContainerLidEasing::Linear:
+	default:
+		return ClampedAlpha;
+	}
 }

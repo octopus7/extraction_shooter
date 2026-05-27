@@ -12,8 +12,11 @@ class UTunaSweeperHudInventoryAreaWidget;
 class UTunaSweeperHudItemInfoPanelWidget;
 class UTunaSweeperHudQuickSlotBarWidget;
 class UTunaSweeperHudTopReserveWidget;
+class UTunaSweeperItemThumbnailSlotWidget;
+class UTunaSweeperMapWidget;
 class UTunaSweeperMemoWidget;
 class UBorder;
+class UHorizontalBox;
 class UTextBlock;
 class UWidget;
 
@@ -96,9 +99,13 @@ protected:
 
 private:
 	void ApplyHudModeVisibility();
+	void CloseLootContainerPanelIfOpen();
+	void EnsureInventoryQuickSlotPanelWidget();
+	void EnsureMapPanelWidget();
 	void EnsureMemoPanelWidget();
 	void RefreshBottomStatusFromGameInstance();
 	void RefreshQuickSlotsFromGameState();
+	void RefreshInventoryQuickSlotPanel();
 	void RefreshReloadWidgets();
 	void RefreshDialogueHudVisibility();
 	void EnsureQuestTrackerWidgets();
@@ -132,6 +139,18 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<UTextBlock> QuestTrackerObjectiveText;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UBorder> InventoryQuickSlotPanel;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UHorizontalBox> InventoryQuickSlotRow;
+
+	UPROPERTY(Transient)
+	TArray<TObjectPtr<UTunaSweeperItemThumbnailSlotWidget>> InventoryQuickSlotWidgets;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTunaSweeperMapWidget> MapPanelWidget;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UTunaSweeperMemoWidget> MemoPanelWidget;

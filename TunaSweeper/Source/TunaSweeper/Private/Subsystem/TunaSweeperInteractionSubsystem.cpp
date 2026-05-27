@@ -267,6 +267,7 @@ bool UTunaSweeperInteractionSubsystem::HandleLootContainerOpenInteraction(
 		return false;
 	}
 
+	LootContainerActor->PlayOpenAnimation();
 	TunaPlayerController->OpenLootContainerPanel(ContainerInstance);
 	return true;
 }

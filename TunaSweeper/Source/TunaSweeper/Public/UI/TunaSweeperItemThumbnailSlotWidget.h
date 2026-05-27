@@ -17,6 +17,9 @@ class TUNASWEEPER_API UTunaSweeperItemThumbnailSlotWidget : public UUserWidget, 
 {
 	GENERATED_BODY()
 
+public:
+	void SetTileData(const FTunaSweeperItemStackTileData& InTileData);
+
 protected:
 	virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override;
 	virtual void NativeDestruct() override;
