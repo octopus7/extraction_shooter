@@ -21,6 +21,7 @@
 #include "UI/TunaSweeperHudInventoryAreaWidget.h"
 #include "UI/TunaSweeperHudItemInfoPanelWidget.h"
 #include "UI/TunaSweeperHudQuickSlotBarWidget.h"
+#include "UI/TunaSweeperHudTopReserveWidget.h"
 #include "UI/TunaSweeperUIFont.h"
 
 void UTunaSweeperGameHudWidget::NativeConstruct()
@@ -39,11 +40,16 @@ void UTunaSweeperGameHudWidget::NativeConstruct()
 		QuestSubsystem->OnQuestProgressChanged.RemoveAll(this);
 		QuestSubsystem->OnQuestProgressChanged.AddUObject(this, &UTunaSweeperGameHudWidget::HandleQuestProgressChanged);
 	}
+	if (TopStatusReserveWidget)
+	{
+		TopStatusReserveWidget->OnHudModeSelected.RemoveDynamic(this, &UTunaSweeperGameHudWidget::HandleHudModeTabSelected);
+		TopStatusReserveWidget->OnHudModeSelected.AddDynamic(this, &UTunaSweeperGameHudWidget::HandleHudModeTabSelected);
+	}
 
 	EnsureQuestTrackerWidgets();
 	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
 	CacheAmmoReloadWidgets();
-	SetCenterPanelsVisible(false);
+	SetHudMode(ETunaSweeperHudMode::None);
 	SetItemInfoPanelVisible(false);
 	RefreshBottomStatusFromGameInstance();
 	RefreshQuestTrackerFromQuestSubsystem();
@@ -64,6 +70,10 @@ void UTunaSweeperGameHudWidget::NativeDestruct()
 	{
 		QuestSubsystem->OnQuestProgressChanged.RemoveAll(this);
 	}
+	if (TopStatusReserveWidget)
+	{
+		TopStatusReserveWidget->OnHudModeSelected.RemoveDynamic(this, &UTunaSweeperGameHudWidget::HandleHudModeTabSelected);
+	}
 
 	Super::NativeDestruct();
 }
@@ -81,17 +91,18 @@ void UTunaSweeperGameHudWidget::NativeTick(const FGeometry& MyGeometry, float In
 
 void UTunaSweeperGameHudWidget::SetCenterPanelsVisible(bool bVisible)
 {
-	if (CenterContentPanel)
-	{
-		CenterContentPanel->SetVisibility(bVisible ? ESlateVisibility::SelfHitTestInvisible : ESlateVisibility::Collapsed);
-	}
+	ActiveHudMode = bVisible && ActiveHudMode == ETunaSweeperHudMode::None
+		? ETunaSweeperHudMode::Inventory
+		: (bVisible ? ActiveHudMode : ETunaSweeperHudMode::None);
+	ApplyHudModeVisibility();
 }
 
 void UTunaSweeperGameHudWidget::SetInventoryAreaVisible(bool bVisible)
 {
 	if (bVisible)
 	{
-		SetCenterPanelsVisible(true);
+		ActiveHudMode = ETunaSweeperHudMode::Inventory;
+		ApplyHudModeVisibility();
 	}
 
 	if (InventoryAreaWidget)
@@ -105,12 +116,16 @@ void UTunaSweeperGameHudWidget::SetItemInfoPanelVisible(bool bVisible)
 {
 	if (bVisible)
 	{
-		SetCenterPanelsVisible(true);
+		ActiveHudMode = ETunaSweeperHudMode::Inventory;
+		ApplyHudModeVisibility();
 	}
 
 	if (ItemInfoPanelWidget)
 	{
-		ItemInfoPanelWidget->SetVisibility(bVisible ? ESlateVisibility::SelfHitTestInvisible : ESlateVisibility::Collapsed);
+		ItemInfoPanelWidget->SetVisibility(
+			bVisible && ActiveHudMode == ETunaSweeperHudMode::Inventory
+				? ESlateVisibility::SelfHitTestInvisible
+				: ESlateVisibility::Collapsed);
 	}
 }
 
@@ -118,32 +133,27 @@ void UTunaSweeperGameHudWidget::ShowExternalPanel(ETunaSweeperHudExternalPanelMo
 {
 	if (PanelMode != ETunaSweeperHudExternalPanelMode::None)
 	{
-		SetCenterPanelsVisible(true);
+		ActiveHudMode = ETunaSweeperHudMode::Inventory;
 	}
 
 	if (ExternalPanelWidget)
 	{
-		ExternalPanelWidget->SetVisibility(
-			PanelMode == ETunaSweeperHudExternalPanelMode::None
-				? ESlateVisibility::Collapsed
-				: ESlateVisibility::SelfHitTestInvisible);
 		ExternalPanelWidget->SetExternalPanelMode(PanelMode);
 	}
+
+	ApplyHudModeVisibility();
 }
 
 void UTunaSweeperGameHudWidget::ShowInventoryOnlyPanel()
 {
-	SetCenterPanelsVisible(true);
-	SetInventoryAreaVisible(true);
-	HandleSelectedInventoryItemChanged();
+	SetHudMode(ETunaSweeperHudMode::Inventory);
 	ShowExternalPanel(ETunaSweeperHudExternalPanelMode::None);
+	HandleSelectedInventoryItemChanged();
 }
 
 void UTunaSweeperGameHudWidget::ToggleInventoryOnlyPanel()
 {
-	const bool bCenterVisible = CenterContentPanel && CenterContentPanel->GetVisibility() != ESlateVisibility::Collapsed;
-
-	if (!bCenterVisible)
+	if (ActiveHudMode == ETunaSweeperHudMode::None)
 	{
 		ShowInventoryOnlyPanel();
 	}
@@ -154,28 +164,41 @@ void UTunaSweeperGameHudWidget::ToggleInventoryOnlyPanel()
 			TunaGameInstance->ClearSelectedItemSelection();
 		}
 
-		SetInventoryAreaVisible(false);
-		SetItemInfoPanelVisible(false);
-		ShowExternalPanel(ETunaSweeperHudExternalPanelMode::None);
-		SetCenterPanelsVisible(false);
+		if (ExternalPanelWidget)
+		{
+			ExternalPanelWidget->SetExternalPanelMode(ETunaSweeperHudExternalPanelMode::None);
+		}
+		SetHudMode(ETunaSweeperHudMode::None);
 	}
 }
 
 void UTunaSweeperGameHudWidget::ShowLootContainerPanel(const FTunaSweeperLootContainerInstance& ContainerInstance)
 {
-	SetCenterPanelsVisible(true);
-	SetInventoryAreaVisible(true);
-	HandleSelectedInventoryItemChanged();
+	ActiveHudMode = ETunaSweeperHudMode::Inventory;
 
 	if (ExternalPanelWidget)
 	{
-		ExternalPanelWidget->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 		ExternalPanelWidget->SetLootContainerInstance(ContainerInstance);
 	}
+
+	ApplyHudModeVisibility();
+	HandleSelectedInventoryItemChanged();
+}
+
+void UTunaSweeperGameHudWidget::SetHudMode(ETunaSweeperHudMode InHudMode)
+{
+	ActiveHudMode = InHudMode;
+	ApplyHudModeVisibility();
+	HandleSelectedInventoryItemChanged();
 }
 
 bool UTunaSweeperGameHudWidget::IsInventoryUiOpen() const
 {
+	if (ActiveHudMode != ETunaSweeperHudMode::None)
+	{
+		return true;
+	}
+
 	auto IsWidgetVisible = [](const UWidget* Widget)
 	{
 		if (!Widget)
@@ -193,6 +216,53 @@ bool UTunaSweeperGameHudWidget::IsInventoryUiOpen() const
 	}
 
 	return IsWidgetVisible(InventoryAreaWidget) || IsWidgetVisible(ExternalPanelWidget);
+}
+
+void UTunaSweeperGameHudWidget::ApplyHudModeVisibility()
+{
+	const bool bUtilityModeOpen = ActiveHudMode != ETunaSweeperHudMode::None;
+	const bool bInventoryMode = ActiveHudMode == ETunaSweeperHudMode::Inventory;
+
+	if (TopStatusReserveWidget)
+	{
+		TopStatusReserveWidget->SetVisibility(bUtilityModeOpen ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
+		TopStatusReserveWidget->SetActiveMode(ActiveHudMode);
+	}
+
+	if (CenterContentPanel)
+	{
+		CenterContentPanel->SetVisibility(bUtilityModeOpen ? ESlateVisibility::SelfHitTestInvisible : ESlateVisibility::Collapsed);
+	}
+
+	if (InventoryAreaWidget)
+	{
+		InventoryAreaWidget->SetVisibility(bUtilityModeOpen && bInventoryMode ? ESlateVisibility::SelfHitTestInvisible : ESlateVisibility::Collapsed);
+		InventoryAreaWidget->SetInventoryVisible(bUtilityModeOpen && bInventoryMode);
+	}
+
+	if (ItemInfoPanelWidget && !bInventoryMode)
+	{
+		ItemInfoPanelWidget->SetVisibility(ESlateVisibility::Collapsed);
+	}
+
+	if (ExternalPanelWidget)
+	{
+		const bool bShowExternalPanel =
+			bUtilityModeOpen &&
+			bInventoryMode &&
+			ExternalPanelWidget->GetExternalPanelMode() != ETunaSweeperHudExternalPanelMode::None;
+		ExternalPanelWidget->SetVisibility(bShowExternalPanel ? ESlateVisibility::SelfHitTestInvisible : ESlateVisibility::Collapsed);
+	}
+
+	if (UnsupportedModePanel)
+	{
+		UnsupportedModePanel->SetVisibility(bUtilityModeOpen && !bInventoryMode ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
+	}
+
+	if (UnsupportedModeText)
+	{
+		UnsupportedModeText->SetText(FText::FromString(TEXT("\uBBF8\uAD6C\uD604")));
+	}
 }
 
 void UTunaSweeperGameHudWidget::RefreshBottomStatusFromGameInstance()
@@ -602,7 +672,10 @@ bool UTunaSweeperGameHudWidget::IsDialogueSequenceActive() const
 
 void UTunaSweeperGameHudWidget::HandleSelectedInventoryItemChanged()
 {
-	const bool bCenterVisible = CenterContentPanel && CenterContentPanel->GetVisibility() != ESlateVisibility::Collapsed;
+	const bool bCenterVisible =
+		ActiveHudMode == ETunaSweeperHudMode::Inventory &&
+		CenterContentPanel &&
+		CenterContentPanel->GetVisibility() != ESlateVisibility::Collapsed;
 	const bool bHasSelection = bCenterVisible &&
 		GetGameInstance<UTunaSweeperGameInstance>() &&
 		GetGameInstance<UTunaSweeperGameInstance>()->HasSelectedInventoryItem();
@@ -617,4 +690,9 @@ void UTunaSweeperGameHudWidget::HandleSelectedInventoryItemChanged()
 void UTunaSweeperGameHudWidget::HandleQuestProgressChanged()
 {
 	RefreshQuestTrackerFromQuestSubsystem();
+}
+
+void UTunaSweeperGameHudWidget::HandleHudModeTabSelected(ETunaSweeperHudMode SelectedMode)
+{
+	SetHudMode(SelectedMode);
 }

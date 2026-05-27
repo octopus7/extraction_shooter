@@ -12,3 +12,12 @@ enum class ETunaSweeperHudExternalPanelMode : uint8
 	Storage UMETA(DisplayName = "Storage")
 };
 
+UENUM(BlueprintType)
+enum class ETunaSweeperHudMode : uint8
+{
+	None UMETA(DisplayName = "None"),
+	Inventory UMETA(DisplayName = "Inventory"),
+	Quest UMETA(DisplayName = "Quest"),
+	Map UMETA(DisplayName = "Map"),
+	Memo UMETA(DisplayName = "Memo")
+};

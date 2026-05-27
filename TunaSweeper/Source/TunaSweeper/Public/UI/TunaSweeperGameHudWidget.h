@@ -43,6 +43,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
 	void ShowLootContainerPanel(const FTunaSweeperLootContainerInstance& ContainerInstance);
 
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
+	void SetHudMode(ETunaSweeperHudMode InHudMode);
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|HUD")
+	ETunaSweeperHudMode GetHudMode() const { return ActiveHudMode; }
+
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|HUD")
 	bool IsInventoryUiOpen() const;
 
@@ -78,7 +84,14 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
 	TObjectPtr<UTunaSweeperHudExternalPanelWidget> ExternalPanelWidget;
 
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
+	TObjectPtr<UWidget> UnsupportedModePanel;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
+	TObjectPtr<UTextBlock> UnsupportedModeText;
+
 private:
+	void ApplyHudModeVisibility();
 	void RefreshBottomStatusFromGameInstance();
 	void RefreshQuickSlotsFromGameState();
 	void RefreshReloadWidgets();
@@ -90,6 +103,12 @@ private:
 	void HandleSelectedInventoryItemChanged();
 	void HandleQuestProgressChanged();
 	bool IsDialogueSequenceActive() const;
+
+	UFUNCTION()
+	void HandleHudModeTabSelected(ETunaSweeperHudMode SelectedMode);
+
+	UPROPERTY(Transient)
+	ETunaSweeperHudMode ActiveHudMode = ETunaSweeperHudMode::None;
 
 	UPROPERTY(BlueprintReadOnly, Transient, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional, AllowPrivateAccess = "true"))
 	TObjectPtr<UWidget> CenterReloadGaugeRoot;

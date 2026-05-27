@@ -115,7 +115,7 @@ namespace TunaSweeperEditorSetup
 	const FString InteractionInputTaskId = TEXT("2026-05-11_SetInteractInputToFKey");
 	const FString InteractionMarkerAlignmentTaskId = TEXT("2026-05-25_RebuildInteractionMarkerRequirementPreviewV1");
 	const FString PickupItemAndSpawnerTaskId = TEXT("2026-05-11_CreatePickupItemAndSpawnerAssetsV3");
-	const FString CommonGameHudTaskId = TEXT("2026-05-21_RebuildInventoryWeightHudV1");
+	const FString CommonGameHudTaskId = TEXT("2026-05-28_AddHudModeTabsV1");
 	const FString InventoryInputTaskId = TEXT("2026-05-11_AddInventoryInput");
 	const FString QuickSlotInputTaskId = TEXT("2026-05-12_AddQuickSlotInputActions");
 	const FString DropInputTaskId = TEXT("2026-05-18_AddDropInputAction");
@@ -4190,7 +4190,18 @@ namespace TunaSweeperEditorSetup
 		UWidgetTree* WidgetTree = WidgetBlueprint->WidgetTree;
 		USizeBox* RootSizeBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("RootSizeBox"));
 		UBorder* ReservedBackground = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("ReservedBackground"));
-		if (!RootSizeBox || !ReservedBackground)
+		UHorizontalBox* ModeTabRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("ModeTabRow"));
+		UButton* InventoryModeButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("InventoryModeButton"));
+		UButton* QuestModeButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("QuestModeButton"));
+		UButton* MapModeButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("MapModeButton"));
+		UButton* MemoModeButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("MemoModeButton"));
+		UTextBlock* InventoryModeText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("InventoryModeText"));
+		UTextBlock* QuestModeText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("QuestModeText"));
+		UTextBlock* MapModeText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("MapModeText"));
+		UTextBlock* MemoModeText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("MemoModeText"));
+		if (!RootSizeBox || !ReservedBackground || !ModeTabRow ||
+			!InventoryModeButton || !QuestModeButton || !MapModeButton || !MemoModeButton ||
+			!InventoryModeText || !QuestModeText || !MapModeText || !MemoModeText)
 		{
 			return false;
 		}
@@ -4199,14 +4210,72 @@ namespace TunaSweeperEditorSetup
 		RootSizeBox->SetHeightOverride(88.0f);
 		RootSizeBox->SetContent(ReservedBackground);
 
-		ReservedBackground->SetPadding(FMargin(24.0f, 10.0f));
+		ReservedBackground->SetPadding(FMargin(18.0f, 12.0f));
 		ReservedBackground->SetBrush(MakeRoundedBoxBrush(
 			FVector2D(1280.0f, 88.0f),
-			FLinearColor(0.005f, 0.006f, 0.008f, 0.35f),
-			FLinearColor(0.15f, 0.17f, 0.19f, 0.35f),
-			1.0f));
+			FLinearColor(0.005f, 0.006f, 0.008f, 0.48f),
+			FLinearColor(0.15f, 0.17f, 0.19f, 0.42f),
+			1.0f,
+			5.0f));
+		ReservedBackground->SetContent(ModeTabRow);
+
+		auto ConfigureModeButton = [](UButton* Button)
+		{
+			FButtonStyle ButtonStyle;
+			ButtonStyle.SetNormal(MakeRoundedBoxBrush(
+				FVector2D(156.0f, 46.0f),
+				FLinearColor(0.030f, 0.036f, 0.038f, 0.76f),
+				FLinearColor(0.20f, 0.24f, 0.25f, 0.82f),
+				1.0f,
+				4.0f));
+			ButtonStyle.SetHovered(MakeRoundedBoxBrush(
+				FVector2D(156.0f, 46.0f),
+				FLinearColor(0.070f, 0.085f, 0.083f, 0.90f),
+				FLinearColor(0.58f, 0.70f, 0.62f, 0.92f),
+				1.5f,
+				4.0f));
+			ButtonStyle.SetPressed(MakeRoundedBoxBrush(
+				FVector2D(156.0f, 46.0f),
+				FLinearColor(0.020f, 0.026f, 0.028f, 0.96f),
+				FLinearColor(0.48f, 0.64f, 0.54f, 0.94f),
+				1.0f,
+				4.0f));
+			Button->SetStyle(ButtonStyle);
+		};
+
+		auto AddModeTab = [&ModeTabRow, &ConfigureModeButton](
+			UButton* Button,
+			UTextBlock* TextBlock,
+			const FText& Label,
+			bool bFirst)
+		{
+			ConfigureModeButton(Button);
+			ConfigureTextBlock(TextBlock, Label, FLinearColor(0.74f, 0.80f, 0.82f, 1.0f), 17);
+			Button->SetContent(TextBlock);
+			UHorizontalBoxSlot* Slot = ModeTabRow->AddChildToHorizontalBox(Button);
+			if (Slot)
+			{
+				Slot->SetPadding(FMargin(bFirst ? 0.0f : 8.0f, 0.0f, 0.0f, 0.0f));
+				Slot->SetVerticalAlignment(VAlign_Center);
+			}
+		};
+
+		AddModeTab(InventoryModeButton, InventoryModeText, FText::FromString(TEXT("\uC778\uBCA4\uD1A0\uB9AC")), true);
+		AddModeTab(QuestModeButton, QuestModeText, FText::FromString(TEXT("\uD018\uC2A4\uD2B8")), false);
+		AddModeTab(MapModeButton, MapModeText, FText::FromString(TEXT("\uC9C0\uB3C4")), false);
+		AddModeTab(MemoModeButton, MemoModeText, FText::FromString(TEXT("\uBA54\uBAA8")), false);
 
 		RegisterWidgetVariable(WidgetBlueprint, RootSizeBox);
+		RegisterWidgetVariable(WidgetBlueprint, ReservedBackground);
+		RegisterWidgetVariable(WidgetBlueprint, ModeTabRow);
+		RegisterWidgetVariable(WidgetBlueprint, InventoryModeButton);
+		RegisterWidgetVariable(WidgetBlueprint, QuestModeButton);
+		RegisterWidgetVariable(WidgetBlueprint, MapModeButton);
+		RegisterWidgetVariable(WidgetBlueprint, MemoModeButton);
+		RegisterWidgetVariable(WidgetBlueprint, InventoryModeText);
+		RegisterWidgetVariable(WidgetBlueprint, QuestModeText);
+		RegisterWidgetVariable(WidgetBlueprint, MapModeText);
+		RegisterWidgetVariable(WidgetBlueprint, MemoModeText);
 		WidgetBlueprint->MarkPackageDirty();
 		return true;
 	}
@@ -5300,6 +5369,8 @@ namespace TunaSweeperEditorSetup
 		UUserWidget* InventoryAreaWidget = WidgetTree->ConstructWidget<UUserWidget>(InventoryAreaWidgetClass, TEXT("InventoryAreaWidget"));
 		UUserWidget* ItemInfoPanelWidget = WidgetTree->ConstructWidget<UUserWidget>(ItemInfoPanelWidgetClass, TEXT("ItemInfoPanelWidget"));
 		UUserWidget* ExternalPanelWidget = WidgetTree->ConstructWidget<UUserWidget>(ExternalPanelWidgetClass, TEXT("ExternalPanelWidget"));
+		UBorder* UnsupportedModePanel = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("UnsupportedModePanel"));
+		UTextBlock* UnsupportedModeText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("UnsupportedModeText"));
 		UHorizontalBox* BottomRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("BottomRow"));
 		UUserWidget* BottomStatusWidget = WidgetTree->ConstructWidget<UUserWidget>(BottomStatusWidgetClass, TEXT("BottomStatusWidget"));
 		USizeBox* BottomGap = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("BottomGap"));
@@ -5314,7 +5385,8 @@ namespace TunaSweeperEditorSetup
 		UTextBlock* CenterReloadPromptKeyText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("CenterReloadPromptKeyText"));
 
 		if (!RootCanvas || !TopStatusReserveWidget || !CenterContentPanel || !InventoryAreaWidget || !ItemInfoPanelWidget ||
-			!ExternalPanelWidget || !BottomRow || !BottomStatusWidget || !BottomGap || !QuickSlotBarWidget ||
+			!ExternalPanelWidget || !UnsupportedModePanel || !UnsupportedModeText ||
+			!BottomRow || !BottomStatusWidget || !BottomGap || !QuickSlotBarWidget ||
 			!CenterReloadGaugeRoot || !CenterReloadGaugeCanvas || !CenterReloadGaugeBackdrop || !CenterReloadPercentText ||
 			!CenterReloadPromptRoot || !CenterReloadPromptText || !CenterReloadPromptKeyBackground || !CenterReloadPromptKeyText)
 		{
@@ -5323,6 +5395,7 @@ namespace TunaSweeperEditorSetup
 
 		WidgetTree->RootWidget = RootCanvas;
 
+		TopStatusReserveWidget->SetVisibility(ESlateVisibility::Collapsed);
 		UCanvasPanelSlot* TopSlot = RootCanvas->AddChildToCanvas(TopStatusReserveWidget);
 		if (TopSlot)
 		{
@@ -5366,6 +5439,25 @@ namespace TunaSweeperEditorSetup
 			ExternalSlot->SetAlignment(FVector2D(1.0f, 0.0f));
 			ExternalSlot->SetPosition(FVector2D(0.0f, 0.0f));
 			ExternalSlot->SetSize(FVector2D(LootContainerPanelWidth, 620.0f));
+		}
+
+		UnsupportedModePanel->SetVisibility(ESlateVisibility::Collapsed);
+		UnsupportedModePanel->SetPadding(FMargin(24.0f, 12.0f));
+		UnsupportedModePanel->SetBrush(MakeRoundedBoxBrush(
+			FVector2D(144.0f, 52.0f),
+			FLinearColor(0.0f, 0.0f, 0.0f, 0.62f),
+			FLinearColor(0.28f, 0.32f, 0.34f, 0.52f),
+			1.0f,
+			6.0f));
+		ConfigureTextBlock(UnsupportedModeText, FText::FromString(TEXT("\uBBF8\uAD6C\uD604")), FLinearColor(0.88f, 0.92f, 0.94f, 0.96f), 18);
+		UnsupportedModePanel->SetContent(UnsupportedModeText);
+		UCanvasPanelSlot* UnsupportedSlot = CenterContentPanel->AddChildToCanvas(UnsupportedModePanel);
+		if (UnsupportedSlot)
+		{
+			UnsupportedSlot->SetAnchors(FAnchors(0.5f, 0.5f, 0.5f, 0.5f));
+			UnsupportedSlot->SetAlignment(FVector2D(0.5f, 0.5f));
+			UnsupportedSlot->SetPosition(FVector2D(0.0f, 0.0f));
+			UnsupportedSlot->SetSize(FVector2D(144.0f, 52.0f));
 		}
 
 		UCanvasPanelSlot* BottomSlot = RootCanvas->AddChildToCanvas(BottomRow);
@@ -5508,6 +5600,8 @@ namespace TunaSweeperEditorSetup
 		RegisterWidgetVariable(WidgetBlueprint, InventoryAreaWidget);
 		RegisterWidgetVariable(WidgetBlueprint, ItemInfoPanelWidget);
 		RegisterWidgetVariable(WidgetBlueprint, ExternalPanelWidget);
+		RegisterWidgetVariable(WidgetBlueprint, UnsupportedModePanel);
+		RegisterWidgetVariable(WidgetBlueprint, UnsupportedModeText);
 		WidgetBlueprint->MarkPackageDirty();
 		return true;
 	}
