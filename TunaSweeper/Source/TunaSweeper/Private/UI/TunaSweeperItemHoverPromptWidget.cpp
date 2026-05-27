@@ -12,6 +12,7 @@
 #include "Game/TunaSweeperGameInstance.h"
 #include "Styling/SlateBrush.h"
 #include "UI/TunaSweeperUIFont.h"
+#include "UI/TunaSweeperUiText.h"
 #include "Widgets/SWidget.h"
 
 namespace TunaSweeperItemHoverPrompt
@@ -26,12 +27,7 @@ namespace TunaSweeperItemHoverPrompt
 	constexpr float ItemInfoHorizontalPadding = 32.0f;
 	constexpr float DescriptionWrapWidth = InfoBoxWidth - ItemInfoHorizontalPadding;
 
-	FText ResolveUiText(const UTunaSweeperGameInstance* TunaGameInstance, const TCHAR* StringKey, const TCHAR* Fallback)
-	{
-		return TunaGameInstance
-			? TunaGameInstance->ResolveLocalizedText(FName(StringKey), FText::FromString(Fallback))
-			: FText::FromString(Fallback);
-	}
+	using TunaSweeperUiText::ResolveUiText;
 
 	FSlateBrush MakeRoundedBoxBrush(
 		const FVector2D& ImageSize,

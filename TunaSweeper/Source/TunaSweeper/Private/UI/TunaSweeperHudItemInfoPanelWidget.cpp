@@ -11,6 +11,7 @@
 #include "UI/TunaSweeperItemDragDropOperation.h"
 #include "UI/TunaSweeperItemStackTileItemObject.h"
 #include "UI/TunaSweeperUIFont.h"
+#include "UI/TunaSweeperUiText.h"
 
 namespace TunaSweeperItemInfoPanel
 {
@@ -18,12 +19,7 @@ namespace TunaSweeperItemInfoPanel
 	constexpr float AttachmentSlotTileWidth = 96.0f;
 	constexpr float AttachmentSlotTileHeight = 96.0f;
 
-	FText ResolveUiText(const UTunaSweeperGameInstance* TunaGameInstance, const TCHAR* StringKey, const TCHAR* Fallback)
-	{
-		return TunaGameInstance
-			? TunaGameInstance->ResolveLocalizedText(FName(StringKey), FText::FromString(Fallback))
-			: FText::FromString(Fallback);
-	}
+	using TunaSweeperUiText::ResolveUiText;
 
 	FText GetAttachmentSlotDisplayName(FName AttachmentSlotTag, const UTunaSweeperGameInstance* TunaGameInstance)
 	{

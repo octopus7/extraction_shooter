@@ -107,7 +107,7 @@ void UTunaSweeperQuestListEntryWidget::BuildEntryWidget()
 
 	EntryLabelText->SetJustification(ETextJustify::Left);
 	EntryLabelText->SetAutoWrapText(true);
-	EntryLabelText->SetWrapTextAt(288.0f);
+	EntryLabelText->SetWrapTextAt(320.0f);
 	TunaSweeperUIFont::ApplyFont(EntryLabelText, 17, ETunaSweeperUIFontWeight::Bold);
 	if (UVerticalBoxSlot* LabelSlot = EntryStack->AddChildToVerticalBox(EntryLabelText))
 	{
@@ -395,7 +395,7 @@ void UTunaSweeperQuestWidget::BuildQuestWidget()
 
 	WidgetTree->RootWidget = RootPanel;
 	RootPanel->SetBrush(MakeQuestBoxBrush(
-		FVector2D(1180.0f, 640.0f),
+		FVector2D(1220.0f, 672.0f),
 		FLinearColor(0.035f, 0.04f, 0.045f, 0.94f),
 		6.0f,
 		FLinearColor(0.42f, 0.48f, 0.50f, 0.56f),
@@ -404,22 +404,17 @@ void UTunaSweeperQuestWidget::BuildQuestWidget()
 	RootPanel->SetContent(RootColumns);
 
 	DetailPanel->SetBrush(MakeQuestBoxBrush(
-		FVector2D(782.0f, 608.0f),
+		FVector2D(792.0f, 640.0f),
 		FLinearColor(0.063f, 0.067f, 0.072f, 0.96f),
 		4.0f,
 		FLinearColor(0.27f, 0.31f, 0.32f, 0.62f),
 		1.0f));
 	DetailPanel->SetPadding(FMargin(22.0f, 18.0f));
 	DetailPanel->SetContent(DetailStack);
-	if (UHorizontalBoxSlot* DetailColumnSlot = RootColumns->AddChildToHorizontalBox(DetailPanel))
-	{
-		DetailColumnSlot->SetSize(MakeQuestSlateChildSize(ESlateSizeRule::Fill));
-		DetailColumnSlot->SetPadding(FMargin(0.0f, 0.0f, 14.0f, 0.0f));
-	}
 
 	DetailTitleText->SetColorAndOpacity(FSlateColor(FLinearColor(0.94f, 0.98f, 0.98f, 1.0f)));
 	DetailTitleText->SetAutoWrapText(true);
-	DetailTitleText->SetWrapTextAt(610.0f);
+	DetailTitleText->SetWrapTextAt(650.0f);
 	TunaSweeperUIFont::ApplyFont(DetailTitleText, 26, ETunaSweeperUIFontWeight::Bold);
 	if (UHorizontalBoxSlot* TitleSlot = DetailHeaderRow->AddChildToHorizontalBox(DetailTitleText))
 	{
@@ -444,7 +439,7 @@ void UTunaSweeperQuestWidget::BuildQuestWidget()
 
 	DetailDescriptionText->SetColorAndOpacity(FSlateColor(FLinearColor(0.80f, 0.86f, 0.85f, 1.0f)));
 	DetailDescriptionText->SetAutoWrapText(true);
-	DetailDescriptionText->SetWrapTextAt(720.0f);
+	DetailDescriptionText->SetWrapTextAt(748.0f);
 	DetailDescriptionText->SetLineHeightPercentage(1.12f);
 	TunaSweeperUIFont::ApplyFont(DetailDescriptionText, 18);
 	if (UVerticalBoxSlot* DescriptionSlot = DetailStack->AddChildToVerticalBox(DetailDescriptionText))
@@ -461,7 +456,7 @@ void UTunaSweeperQuestWidget::BuildQuestWidget()
 
 	DetailObjectiveText->SetColorAndOpacity(FSlateColor(FLinearColor(0.82f, 0.88f, 0.86f, 1.0f)));
 	DetailObjectiveText->SetAutoWrapText(true);
-	DetailObjectiveText->SetWrapTextAt(710.0f);
+	DetailObjectiveText->SetWrapTextAt(748.0f);
 	DetailObjectiveText->SetLineHeightPercentage(1.12f);
 	TunaSweeperUIFont::ApplyFont(DetailObjectiveText, 17);
 	if (UVerticalBoxSlot* ObjectiveSlot = DetailBodyStack->AddChildToVerticalBox(DetailObjectiveText))
@@ -478,7 +473,7 @@ void UTunaSweeperQuestWidget::BuildQuestWidget()
 
 	DetailRewardText->SetColorAndOpacity(FSlateColor(FLinearColor(0.82f, 0.88f, 0.86f, 1.0f)));
 	DetailRewardText->SetAutoWrapText(true);
-	DetailRewardText->SetWrapTextAt(710.0f);
+	DetailRewardText->SetWrapTextAt(748.0f);
 	TunaSweeperUIFont::ApplyFont(DetailRewardText, 17);
 	DetailBodyStack->AddChildToVerticalBox(DetailRewardText);
 
@@ -499,9 +494,9 @@ void UTunaSweeperQuestWidget::BuildQuestWidget()
 		PrimaryButtonSlot->SetPadding(FMargin(0.0f, 18.0f, 0.0f, 0.0f));
 	}
 
-	ListSizeBox->SetWidthOverride(360.0f);
+	ListSizeBox->SetWidthOverride(380.0f);
 	ListPanel->SetBrush(MakeQuestBoxBrush(
-		FVector2D(360.0f, 608.0f),
+		FVector2D(380.0f, 640.0f),
 		FLinearColor(0.07f, 0.078f, 0.085f, 0.96f),
 		4.0f,
 		FLinearColor(0.24f, 0.30f, 0.33f, 0.65f),
@@ -512,6 +507,12 @@ void UTunaSweeperQuestWidget::BuildQuestWidget()
 	if (UHorizontalBoxSlot* ListColumnSlot = RootColumns->AddChildToHorizontalBox(ListSizeBox))
 	{
 		ListColumnSlot->SetSize(MakeQuestSlateChildSize(ESlateSizeRule::Automatic));
+		ListColumnSlot->SetPadding(FMargin(0.0f, 0.0f, 14.0f, 0.0f));
+	}
+
+	if (UHorizontalBoxSlot* DetailColumnSlot = RootColumns->AddChildToHorizontalBox(DetailPanel))
+	{
+		DetailColumnSlot->SetSize(MakeQuestSlateChildSize(ESlateSizeRule::Fill));
 	}
 
 	ListTitleText->SetText(GetQuestText(FName(TEXT("quest.ui.list_title"))));
@@ -566,7 +567,7 @@ void UTunaSweeperQuestWidget::RebuildQuestList(const TArray<FTunaSweeperQuestDef
 		{
 			EmptyText->SetText(GetEmptyListText());
 			EmptyText->SetAutoWrapText(true);
-			EmptyText->SetWrapTextAt(310.0f);
+			EmptyText->SetWrapTextAt(336.0f);
 			EmptyText->SetColorAndOpacity(FSlateColor(FLinearColor(0.62f, 0.68f, 0.68f, 1.0f)));
 			TunaSweeperUIFont::ApplyFont(EmptyText, 16);
 			QuestListScrollBox->AddChild(EmptyText);

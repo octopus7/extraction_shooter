@@ -21,6 +21,17 @@ class UHorizontalBox;
 class UTextBlock;
 class UWidget;
 
+UENUM(BlueprintType)
+enum class ETunaSweeperHudTransitionEdge : uint8
+{
+	Auto UMETA(DisplayName = "Auto"),
+	FadeOnly UMETA(DisplayName = "Fade Only"),
+	Left UMETA(DisplayName = "Left Edge"),
+	Right UMETA(DisplayName = "Right Edge"),
+	Top UMETA(DisplayName = "Top Edge"),
+	Bottom UMETA(DisplayName = "Bottom Edge")
+};
+
 UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API UTunaSweeperGameHudWidget : public UUserWidget
 {
@@ -104,13 +115,67 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
 	TObjectPtr<UTextBlock> ModeTitleText;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Transitions", meta = (DisplayName = "Top Status Direction Override"))
+	ETunaSweeperHudTransitionEdge TopStatusReserveTransitionEdge = ETunaSweeperHudTransitionEdge::Auto;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Transitions", meta = (DisplayName = "Mode Title Direction Override"))
+	ETunaSweeperHudTransitionEdge ModeTitleTransitionEdge = ETunaSweeperHudTransitionEdge::Auto;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Transitions", meta = (DisplayName = "Inventory Area Direction Override"))
+	ETunaSweeperHudTransitionEdge InventoryAreaTransitionEdge = ETunaSweeperHudTransitionEdge::Auto;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Transitions", meta = (DisplayName = "Item Info Direction Override"))
+	ETunaSweeperHudTransitionEdge ItemInfoPanelTransitionEdge = ETunaSweeperHudTransitionEdge::Auto;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Transitions", meta = (DisplayName = "External Panel Direction Override"))
+	ETunaSweeperHudTransitionEdge ExternalPanelTransitionEdge = ETunaSweeperHudTransitionEdge::Auto;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Transitions", meta = (DisplayName = "Unsupported Mode Direction Override"))
+	ETunaSweeperHudTransitionEdge UnsupportedModePanelTransitionEdge = ETunaSweeperHudTransitionEdge::Auto;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Transitions", meta = (DisplayName = "Inventory Quick Slot Direction Override"))
+	ETunaSweeperHudTransitionEdge InventoryQuickSlotPanelTransitionEdge = ETunaSweeperHudTransitionEdge::Auto;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Transitions", meta = (DisplayName = "Map Panel Direction Override"))
+	ETunaSweeperHudTransitionEdge MapPanelTransitionEdge = ETunaSweeperHudTransitionEdge::Auto;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Transitions", meta = (DisplayName = "Memo Panel Direction Override"))
+	ETunaSweeperHudTransitionEdge MemoPanelTransitionEdge = ETunaSweeperHudTransitionEdge::Auto;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Transitions", meta = (DisplayName = "Quest Panel Direction Override"))
+	ETunaSweeperHudTransitionEdge QuestPanelTransitionEdge = ETunaSweeperHudTransitionEdge::Auto;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Transitions", meta = (DisplayName = "Quest Tracker Direction Override"))
+	ETunaSweeperHudTransitionEdge QuestTrackerTransitionEdge = ETunaSweeperHudTransitionEdge::Auto;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Transitions", meta = (DisplayName = "Bottom Status Direction Override"))
+	ETunaSweeperHudTransitionEdge BottomStatusTransitionEdge = ETunaSweeperHudTransitionEdge::Bottom;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Transitions", meta = (DisplayName = "Quick Slot Bar Direction Override"))
+	ETunaSweeperHudTransitionEdge QuickSlotBarTransitionEdge = ETunaSweeperHudTransitionEdge::Bottom;
+
 private:
+	struct FHudWidgetTransition
+	{
+		TWeakObjectPtr<UWidget> Widget;
+		FWidgetTransform StartTransform;
+		FWidgetTransform EndTransform;
+		float StartOpacity = 1.0f;
+		float EndOpacity = 1.0f;
+		float ElapsedSeconds = 0.0f;
+		float DurationSeconds = 0.0f;
+		ESlateVisibility FinalVisibility = ESlateVisibility::Collapsed;
+		bool bShow = false;
+	};
+
 	void ApplyHudModeVisibility();
+	void CacheHudTransitionBaseline(UWidget* Widget);
 	void CloseLootContainerPanelIfOpen();
 	void EnsureInventoryQuickSlotPanelWidget();
 	void EnsureMapPanelWidget();
 	void EnsureMemoPanelWidget();
 	void EnsureQuestPanelWidget();
+	ETunaSweeperHudTransitionEdge ResolveHudTransitionEdge(const UWidget* Widget, ETunaSweeperHudTransitionEdge DirectionOverride) const;
 	void RefreshBottomStatusFromGameInstance();
 	void RefreshQuickSlotsFromGameState();
 	void RefreshInventoryQuickSlotPanel();
@@ -119,6 +184,10 @@ private:
 	void RefreshDialogueHudVisibility();
 	void EnsureQuestTrackerWidgets();
 	void RefreshQuestTrackerFromQuestSubsystem();
+	FVector2D GetHudTransitionHiddenTranslation(const UWidget* Widget, ETunaSweeperHudTransitionEdge Edge) const;
+	bool HasActiveHudTransition(const UWidget* Widget) const;
+	void SetTransitionedWidgetVisibility(UWidget* Widget, ESlateVisibility TargetVisibility, ETunaSweeperHudTransitionEdge DirectionOverride);
+	void TickHudTransitions(float InDeltaTime);
 	void CacheAmmoReloadWidgets();
 	void BuildAmmoSelectorOptionTexts(TArray<FText>& OutOptionTexts, int32& OutFocusedIndex) const;
 	void HandleSelectedInventoryItemChanged();
@@ -173,4 +242,9 @@ private:
 
 	UPROPERTY(Transient)
 	TArray<TObjectPtr<UBorder>> CenterReloadSegments;
+
+	bool bClearExternalPanelModeAfterHide = false;
+	TArray<FHudWidgetTransition> ActiveHudTransitions;
+	TMap<TWeakObjectPtr<UWidget>, FWidgetTransform> HudTransitionBaseTransforms;
+	TMap<TWeakObjectPtr<UWidget>, float> HudTransitionBaseOpacities;
 };

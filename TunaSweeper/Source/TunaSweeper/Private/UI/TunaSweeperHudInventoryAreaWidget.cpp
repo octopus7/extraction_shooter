@@ -14,6 +14,7 @@
 #include "UI/TunaSweeperItemStackSplitPopupWidget.h"
 #include "UI/TunaSweeperItemStackTileItemObject.h"
 #include "UI/TunaSweeperUIFont.h"
+#include "UI/TunaSweeperUiText.h"
 
 namespace TunaSweeperInventoryArea
 {
@@ -35,12 +36,7 @@ namespace TunaSweeperInventoryArea
 		return FText::AsNumber(Value, &NumberFormat);
 	}
 
-	FText ResolveUiText(const UTunaSweeperGameInstance* TunaGameInstance, const TCHAR* StringKey, const TCHAR* Fallback)
-	{
-		return TunaGameInstance
-			? TunaGameInstance->ResolveLocalizedText(FName(StringKey), FText::FromString(Fallback))
-			: FText::FromString(Fallback);
-	}
+	using TunaSweeperUiText::ResolveUiText;
 
 	FText GetEquipmentSlotDisplayName(int32 SlotIndex, const UTunaSweeperGameInstance* TunaGameInstance)
 	{

@@ -31,6 +31,7 @@
 #include "UI/TunaSweeperMemoWidget.h"
 #include "UI/TunaSweeperQuestWidget.h"
 #include "UI/TunaSweeperUIFont.h"
+#include "UI/TunaSweeperUiText.h"
 #include "Styling/SlateBrush.h"
 
 namespace
@@ -41,13 +42,12 @@ namespace
 	constexpr float InventoryQuickSlotPanelHeight = 168.0f;
 	constexpr float InventoryQuickSlotTileSize = 112.0f;
 	constexpr float InventoryQuickSlotTileScale = 1.12f;
+	constexpr float HudWidgetTransitionDurationSeconds = 0.18f;
+	constexpr float HudWidgetTransitionDistancePadding = 36.0f;
+	constexpr float HudWidgetTransitionFallbackHorizontalDistance = 420.0f;
+	constexpr float HudWidgetTransitionFallbackVerticalDistance = 220.0f;
 
-	FText ResolveUiText(const UTunaSweeperGameInstance* TunaGameInstance, const TCHAR* StringKey, const TCHAR* Fallback)
-	{
-		return TunaGameInstance
-			? TunaGameInstance->ResolveLocalizedText(FName(StringKey), FText::FromString(Fallback))
-			: FText::FromString(Fallback);
-	}
+	using TunaSweeperUiText::ResolveUiText;
 
 	FSlateBrush MakeHudRoundedBoxBrush(
 		const FVector2D& ImageSize,
@@ -63,6 +63,24 @@ namespace
 		Brush.OutlineSettings = FSlateBrushOutlineSettings(Radius, FSlateColor(OutlineColor), OutlineWidth);
 		Brush.OutlineSettings.bUseBrushTransparency = false;
 		return Brush;
+	}
+
+	bool IsSlateVisibilityShown(ESlateVisibility Visibility)
+	{
+		return Visibility != ESlateVisibility::Collapsed && Visibility != ESlateVisibility::Hidden;
+	}
+
+	FWidgetTransform WithAddedTranslation(const FWidgetTransform& BaseTransform, const FVector2D& AddedTranslation)
+	{
+		FWidgetTransform Result = BaseTransform;
+		Result.Translation = BaseTransform.Translation + AddedTranslation;
+		return Result;
+	}
+
+	float SmoothTransitionAlpha(float Alpha)
+	{
+		const float ClampedAlpha = FMath::Clamp(Alpha, 0.0f, 1.0f);
+		return ClampedAlpha * ClampedAlpha * (3.0f - 2.0f * ClampedAlpha);
 	}
 
 	FTunaSweeperItemStackTileData BuildQuickSlotTileData(
@@ -208,6 +226,7 @@ void UTunaSweeperGameHudWidget::NativeTick(const FGeometry& MyGeometry, float In
 	RefreshInventoryQuickSlotPanel();
 	RefreshReloadWidgets();
 	RefreshDialogueHudVisibility();
+	TickHudTransitions(InDeltaTime);
 }
 
 void UTunaSweeperGameHudWidget::SetCenterPanelsVisible(bool bVisible)
@@ -233,7 +252,10 @@ void UTunaSweeperGameHudWidget::SetInventoryAreaVisible(bool bVisible)
 
 	if (InventoryAreaWidget)
 	{
-		InventoryAreaWidget->SetVisibility(bVisible ? ESlateVisibility::SelfHitTestInvisible : ESlateVisibility::Collapsed);
+		SetTransitionedWidgetVisibility(
+			InventoryAreaWidget,
+			bVisible ? ESlateVisibility::SelfHitTestInvisible : ESlateVisibility::Collapsed,
+			InventoryAreaTransitionEdge);
 		InventoryAreaWidget->SetInventoryVisible(bVisible);
 	}
 }
@@ -248,10 +270,12 @@ void UTunaSweeperGameHudWidget::SetItemInfoPanelVisible(bool bVisible)
 
 	if (ItemInfoPanelWidget)
 	{
-		ItemInfoPanelWidget->SetVisibility(
+		SetTransitionedWidgetVisibility(
+			ItemInfoPanelWidget,
 			bVisible && ActiveHudMode == ETunaSweeperHudMode::Inventory
 				? ESlateVisibility::SelfHitTestInvisible
-				: ESlateVisibility::Collapsed);
+				: ESlateVisibility::Collapsed,
+			ItemInfoPanelTransitionEdge);
 	}
 }
 
@@ -269,7 +293,17 @@ void UTunaSweeperGameHudWidget::ShowExternalPanel(ETunaSweeperHudExternalPanelMo
 
 	if (ExternalPanelWidget)
 	{
-		ExternalPanelWidget->SetExternalPanelMode(PanelMode);
+		if (PanelMode != ETunaSweeperHudExternalPanelMode::None)
+		{
+			bClearExternalPanelModeAfterHide = false;
+			ExternalPanelWidget->SetExternalPanelMode(PanelMode);
+		}
+		else if (!bClearExternalPanelModeAfterHide ||
+			(!IsSlateVisibilityShown(ExternalPanelWidget->GetVisibility()) && !HasActiveHudTransition(ExternalPanelWidget)))
+		{
+			bClearExternalPanelModeAfterHide = false;
+			ExternalPanelWidget->SetExternalPanelMode(ETunaSweeperHudExternalPanelMode::None);
+		}
 	}
 
 	ApplyHudModeVisibility();
@@ -363,12 +397,267 @@ bool UTunaSweeperGameHudWidget::IsInventoryUiOpen() const
 		return Visibility != ESlateVisibility::Collapsed && Visibility != ESlateVisibility::Hidden;
 	};
 
-	if (CenterContentPanel)
+	return
+		IsWidgetVisible(InventoryAreaWidget) ||
+		IsWidgetVisible(ItemInfoPanelWidget) ||
+		IsWidgetVisible(ExternalPanelWidget) ||
+		IsWidgetVisible(InventoryQuickSlotPanel);
+}
+
+void UTunaSweeperGameHudWidget::CacheHudTransitionBaseline(UWidget* Widget)
+{
+	if (!Widget)
 	{
-		return IsWidgetVisible(CenterContentPanel);
+		return;
 	}
 
-	return IsWidgetVisible(InventoryAreaWidget) || IsWidgetVisible(ExternalPanelWidget);
+	const TWeakObjectPtr<UWidget> WidgetKey(Widget);
+	if (!HudTransitionBaseTransforms.Contains(WidgetKey))
+	{
+		HudTransitionBaseTransforms.Add(WidgetKey, Widget->GetRenderTransform());
+		HudTransitionBaseOpacities.Add(WidgetKey, Widget->GetRenderOpacity());
+	}
+}
+
+bool UTunaSweeperGameHudWidget::HasActiveHudTransition(const UWidget* Widget) const
+{
+	if (!Widget)
+	{
+		return false;
+	}
+
+	for (const FHudWidgetTransition& Transition : ActiveHudTransitions)
+	{
+		if (Transition.Widget.Get() == Widget)
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+ETunaSweeperHudTransitionEdge UTunaSweeperGameHudWidget::ResolveHudTransitionEdge(
+	const UWidget* Widget,
+	ETunaSweeperHudTransitionEdge DirectionOverride) const
+{
+	if (!Widget || DirectionOverride != ETunaSweeperHudTransitionEdge::Auto)
+	{
+		return DirectionOverride;
+	}
+
+	const UCanvasPanelSlot* CanvasSlot = Cast<UCanvasPanelSlot>(Widget->Slot);
+	if (!CanvasSlot)
+	{
+		return ETunaSweeperHudTransitionEdge::FadeOnly;
+	}
+
+	const FAnchors Anchors = CanvasSlot->GetAnchors();
+	const FVector2D Alignment = CanvasSlot->GetAlignment();
+	const FVector2D Position = CanvasSlot->GetPosition();
+	const bool bInsideCenterContentPanel = CenterContentPanel && Widget->GetParent() == CenterContentPanel;
+
+	ETunaSweeperHudTransitionEdge BestEdge = ETunaSweeperHudTransitionEdge::FadeOnly;
+	float BestScore = TNumericLimits<float>::Max();
+	auto ConsiderEdge = [&BestEdge, &BestScore](ETunaSweeperHudTransitionEdge Edge, bool bCandidate, float Score)
+	{
+		if (bCandidate && Score < BestScore)
+		{
+			BestEdge = Edge;
+			BestScore = Score;
+		}
+	};
+
+	const bool bPinnedLeft = Anchors.Minimum.X <= 0.05f && Anchors.Maximum.X <= 0.05f && Alignment.X <= 0.5f;
+	const bool bPinnedRight = Anchors.Minimum.X >= 0.95f && Anchors.Maximum.X >= 0.95f && Alignment.X >= 0.5f;
+	ConsiderEdge(ETunaSweeperHudTransitionEdge::Left, bPinnedLeft, FMath::Abs(Position.X));
+	ConsiderEdge(ETunaSweeperHudTransitionEdge::Right, bPinnedRight, FMath::Abs(Position.X));
+
+	if (!bInsideCenterContentPanel)
+	{
+		const bool bPinnedTop = Anchors.Minimum.Y <= 0.05f && Anchors.Maximum.Y <= 0.05f && Alignment.Y <= 0.5f;
+		const bool bPinnedBottom = Anchors.Minimum.Y >= 0.95f && Anchors.Maximum.Y >= 0.95f && Alignment.Y >= 0.5f;
+		ConsiderEdge(ETunaSweeperHudTransitionEdge::Top, bPinnedTop, FMath::Abs(Position.Y));
+		ConsiderEdge(ETunaSweeperHudTransitionEdge::Bottom, bPinnedBottom, FMath::Abs(Position.Y));
+	}
+
+	return BestEdge;
+}
+
+FVector2D UTunaSweeperGameHudWidget::GetHudTransitionHiddenTranslation(
+	const UWidget* Widget,
+	ETunaSweeperHudTransitionEdge Edge) const
+{
+	if (Edge == ETunaSweeperHudTransitionEdge::Auto || Edge == ETunaSweeperHudTransitionEdge::FadeOnly || !Widget)
+	{
+		return FVector2D::ZeroVector;
+	}
+
+	const bool bHorizontalEdge = Edge == ETunaSweeperHudTransitionEdge::Left || Edge == ETunaSweeperHudTransitionEdge::Right;
+	float Distance = bHorizontalEdge
+		? HudWidgetTransitionFallbackHorizontalDistance
+		: HudWidgetTransitionFallbackVerticalDistance;
+
+	if (const UCanvasPanelSlot* CanvasSlot = Cast<UCanvasPanelSlot>(Widget->Slot))
+	{
+		const FVector2D SlotSize = CanvasSlot->GetSize();
+		const float SlotDistance = bHorizontalEdge ? SlotSize.X : SlotSize.Y;
+		if (SlotDistance > 1.0f)
+		{
+			Distance = FMath::Max(Distance, SlotDistance + HudWidgetTransitionDistancePadding);
+		}
+	}
+
+	switch (Edge)
+	{
+	case ETunaSweeperHudTransitionEdge::Left:
+		return FVector2D(-Distance, 0.0f);
+	case ETunaSweeperHudTransitionEdge::Right:
+		return FVector2D(Distance, 0.0f);
+	case ETunaSweeperHudTransitionEdge::Top:
+		return FVector2D(0.0f, -Distance);
+	case ETunaSweeperHudTransitionEdge::Bottom:
+		return FVector2D(0.0f, Distance);
+	default:
+		return FVector2D::ZeroVector;
+	}
+}
+
+void UTunaSweeperGameHudWidget::SetTransitionedWidgetVisibility(
+	UWidget* Widget,
+	ESlateVisibility TargetVisibility,
+	ETunaSweeperHudTransitionEdge DirectionOverride)
+{
+	if (!Widget)
+	{
+		return;
+	}
+
+	const bool bTargetShown = IsSlateVisibilityShown(TargetVisibility);
+	const bool bCurrentlyShown = IsSlateVisibilityShown(Widget->GetVisibility());
+	if (!bTargetShown && !bCurrentlyShown && !HasActiveHudTransition(Widget))
+	{
+		Widget->SetVisibility(ESlateVisibility::Collapsed);
+		return;
+	}
+
+	if (bTargetShown && bCurrentlyShown && !HasActiveHudTransition(Widget))
+	{
+		Widget->SetVisibility(TargetVisibility);
+		return;
+	}
+
+	for (const FHudWidgetTransition& Transition : ActiveHudTransitions)
+	{
+		if (Transition.Widget.Get() == Widget &&
+			Transition.bShow == bTargetShown &&
+			Transition.FinalVisibility == (bTargetShown ? TargetVisibility : ESlateVisibility::Collapsed))
+		{
+			return;
+		}
+	}
+
+	CacheHudTransitionBaseline(Widget);
+
+	const TWeakObjectPtr<UWidget> WidgetKey(Widget);
+	const FWidgetTransform BaseTransform = HudTransitionBaseTransforms.FindRef(WidgetKey);
+	const float BaseOpacity = HudTransitionBaseOpacities.Contains(WidgetKey)
+		? HudTransitionBaseOpacities.FindRef(WidgetKey)
+		: 1.0f;
+	const ETunaSweeperHudTransitionEdge ResolvedEdge = ResolveHudTransitionEdge(Widget, DirectionOverride);
+	const FVector2D HiddenTranslation = GetHudTransitionHiddenTranslation(Widget, ResolvedEdge);
+	const FWidgetTransform HiddenTransform = WithAddedTranslation(BaseTransform, HiddenTranslation);
+
+	for (int32 Index = ActiveHudTransitions.Num() - 1; Index >= 0; --Index)
+	{
+		if (ActiveHudTransitions[Index].Widget.Get() == Widget)
+		{
+			ActiveHudTransitions.RemoveAtSwap(Index);
+		}
+	}
+
+	if (bTargetShown)
+	{
+		if (!bCurrentlyShown)
+		{
+			Widget->SetRenderTransform(HiddenTransform);
+			Widget->SetRenderOpacity(0.0f);
+		}
+		Widget->SetVisibility(TargetVisibility);
+	}
+
+	FHudWidgetTransition Transition;
+	Transition.Widget = Widget;
+	Transition.StartTransform = Widget->GetRenderTransform();
+	Transition.EndTransform = bTargetShown ? BaseTransform : HiddenTransform;
+	Transition.StartOpacity = Widget->GetRenderOpacity();
+	Transition.EndOpacity = bTargetShown ? BaseOpacity : 0.0f;
+	Transition.DurationSeconds = HudWidgetTransitionDurationSeconds;
+	Transition.FinalVisibility = bTargetShown ? TargetVisibility : ESlateVisibility::Collapsed;
+	Transition.bShow = bTargetShown;
+	ActiveHudTransitions.Add(Transition);
+}
+
+void UTunaSweeperGameHudWidget::TickHudTransitions(float InDeltaTime)
+{
+	for (int32 Index = ActiveHudTransitions.Num() - 1; Index >= 0; --Index)
+	{
+		FHudWidgetTransition& Transition = ActiveHudTransitions[Index];
+		UWidget* Widget = Transition.Widget.Get();
+		if (!Widget)
+		{
+			ActiveHudTransitions.RemoveAtSwap(Index);
+			continue;
+		}
+
+		Transition.ElapsedSeconds += FMath::Max(0.0f, InDeltaTime);
+		const float RawAlpha = Transition.DurationSeconds > KINDA_SMALL_NUMBER
+			? Transition.ElapsedSeconds / Transition.DurationSeconds
+			: 1.0f;
+		const float Alpha = SmoothTransitionAlpha(RawAlpha);
+
+		FWidgetTransform CurrentTransform = Transition.StartTransform;
+		CurrentTransform.Translation = FMath::Lerp(Transition.StartTransform.Translation, Transition.EndTransform.Translation, Alpha);
+		CurrentTransform.Scale = FMath::Lerp(Transition.StartTransform.Scale, Transition.EndTransform.Scale, Alpha);
+		CurrentTransform.Shear = FMath::Lerp(Transition.StartTransform.Shear, Transition.EndTransform.Shear, Alpha);
+		CurrentTransform.Angle = FMath::Lerp(Transition.StartTransform.Angle, Transition.EndTransform.Angle, Alpha);
+		Widget->SetRenderTransform(CurrentTransform);
+		Widget->SetRenderOpacity(FMath::Lerp(Transition.StartOpacity, Transition.EndOpacity, Alpha));
+
+		if (RawAlpha >= 1.0f)
+		{
+			const bool bCompletedExternalPanelHide =
+				!Transition.bShow &&
+				bClearExternalPanelModeAfterHide &&
+				ExternalPanelWidget &&
+				Widget == ExternalPanelWidget;
+
+			Widget->SetRenderTransform(Transition.EndTransform);
+			Widget->SetRenderOpacity(Transition.EndOpacity);
+			Widget->SetVisibility(Transition.FinalVisibility);
+
+			if (!Transition.bShow)
+			{
+				const TWeakObjectPtr<UWidget> WidgetKey(Widget);
+				if (const FWidgetTransform* BaseTransform = HudTransitionBaseTransforms.Find(WidgetKey))
+				{
+					Widget->SetRenderTransform(*BaseTransform);
+				}
+				if (const float* BaseOpacity = HudTransitionBaseOpacities.Find(WidgetKey))
+				{
+					Widget->SetRenderOpacity(*BaseOpacity);
+				}
+			}
+
+			if (bCompletedExternalPanelHide)
+			{
+				ExternalPanelWidget->SetExternalPanelMode(ETunaSweeperHudExternalPanelMode::None);
+				bClearExternalPanelModeAfterHide = false;
+			}
+
+			ActiveHudTransitions.RemoveAtSwap(Index);
+		}
+	}
 }
 
 void UTunaSweeperGameHudWidget::ApplyHudModeVisibility()
@@ -381,28 +670,36 @@ void UTunaSweeperGameHudWidget::ApplyHudModeVisibility()
 
 	if (TopStatusReserveWidget)
 	{
-		TopStatusReserveWidget->SetVisibility(bUtilityModeOpen ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
+		SetTransitionedWidgetVisibility(
+			TopStatusReserveWidget,
+			bUtilityModeOpen ? ESlateVisibility::Visible : ESlateVisibility::Collapsed,
+			TopStatusReserveTransitionEdge);
 		TopStatusReserveWidget->SetActiveMode(ActiveHudMode);
 	}
 
 	if (CenterContentPanel)
 	{
-		CenterContentPanel->SetVisibility(bUtilityModeOpen ? ESlateVisibility::SelfHitTestInvisible : ESlateVisibility::Collapsed);
+		CenterContentPanel->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 	}
 
 	if (InventoryAreaWidget)
 	{
-		InventoryAreaWidget->SetVisibility(bUtilityModeOpen && bInventoryMode ? ESlateVisibility::SelfHitTestInvisible : ESlateVisibility::Collapsed);
+		SetTransitionedWidgetVisibility(
+			InventoryAreaWidget,
+			bUtilityModeOpen && bInventoryMode ? ESlateVisibility::SelfHitTestInvisible : ESlateVisibility::Collapsed,
+			InventoryAreaTransitionEdge);
 		InventoryAreaWidget->SetInventoryVisible(bUtilityModeOpen && bInventoryMode);
 	}
 
 	EnsureInventoryQuickSlotPanelWidget();
 	if (InventoryQuickSlotPanel)
 	{
-		InventoryQuickSlotPanel->SetVisibility(
+		SetTransitionedWidgetVisibility(
+			InventoryQuickSlotPanel,
 			bUtilityModeOpen && bInventoryMode
 				? ESlateVisibility::SelfHitTestInvisible
-				: ESlateVisibility::Collapsed);
+				: ESlateVisibility::Collapsed,
+			InventoryQuickSlotPanelTransitionEdge);
 		if (bUtilityModeOpen && bInventoryMode)
 		{
 			RefreshInventoryQuickSlotPanel();
@@ -411,13 +708,16 @@ void UTunaSweeperGameHudWidget::ApplyHudModeVisibility()
 
 	if (ItemInfoPanelWidget && !bInventoryMode)
 	{
-		ItemInfoPanelWidget->SetVisibility(ESlateVisibility::Collapsed);
+		SetTransitionedWidgetVisibility(ItemInfoPanelWidget, ESlateVisibility::Collapsed, ItemInfoPanelTransitionEdge);
 	}
 
 	EnsureMapPanelWidget();
 	if (MapPanelWidget)
 	{
-		MapPanelWidget->SetVisibility(bUtilityModeOpen && bMapMode ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
+		SetTransitionedWidgetVisibility(
+			MapPanelWidget,
+			bUtilityModeOpen && bMapMode ? ESlateVisibility::Visible : ESlateVisibility::Collapsed,
+			MapPanelTransitionEdge);
 		if (bUtilityModeOpen && bMapMode)
 		{
 			MapPanelWidget->RefreshMapView();
@@ -428,7 +728,10 @@ void UTunaSweeperGameHudWidget::ApplyHudModeVisibility()
 	EnsureMemoPanelWidget();
 	if (MemoPanelWidget)
 	{
-		MemoPanelWidget->SetVisibility(bUtilityModeOpen && bMemoMode ? ESlateVisibility::SelfHitTestInvisible : ESlateVisibility::Collapsed);
+		SetTransitionedWidgetVisibility(
+			MemoPanelWidget,
+			bUtilityModeOpen && bMemoMode ? ESlateVisibility::SelfHitTestInvisible : ESlateVisibility::Collapsed,
+			MemoPanelTransitionEdge);
 		if (bUtilityModeOpen && bMemoMode)
 		{
 			MemoPanelWidget->RefreshMemoView();
@@ -438,7 +741,10 @@ void UTunaSweeperGameHudWidget::ApplyHudModeVisibility()
 	EnsureQuestPanelWidget();
 	if (QuestPanelWidget)
 	{
-		QuestPanelWidget->SetVisibility(bUtilityModeOpen && bQuestMode ? ESlateVisibility::SelfHitTestInvisible : ESlateVisibility::Collapsed);
+		SetTransitionedWidgetVisibility(
+			QuestPanelWidget,
+			bUtilityModeOpen && bQuestMode ? ESlateVisibility::SelfHitTestInvisible : ESlateVisibility::Collapsed,
+			QuestPanelTransitionEdge);
 		if (bUtilityModeOpen && bQuestMode)
 		{
 			QuestPanelWidget->RefreshQuestView();
@@ -450,16 +756,29 @@ void UTunaSweeperGameHudWidget::ApplyHudModeVisibility()
 		const bool bShowExternalPanel =
 			bUtilityModeOpen &&
 			bInventoryMode &&
+			!bClearExternalPanelModeAfterHide &&
 			ExternalPanelWidget->GetExternalPanelMode() != ETunaSweeperHudExternalPanelMode::None;
-		ExternalPanelWidget->SetVisibility(bShowExternalPanel ? ESlateVisibility::SelfHitTestInvisible : ESlateVisibility::Collapsed);
+		SetTransitionedWidgetVisibility(
+			ExternalPanelWidget,
+			bShowExternalPanel ? ESlateVisibility::SelfHitTestInvisible : ESlateVisibility::Collapsed,
+			ExternalPanelTransitionEdge);
+		if (bClearExternalPanelModeAfterHide &&
+			!IsSlateVisibilityShown(ExternalPanelWidget->GetVisibility()) &&
+			!HasActiveHudTransition(ExternalPanelWidget))
+		{
+			ExternalPanelWidget->SetExternalPanelMode(ETunaSweeperHudExternalPanelMode::None);
+			bClearExternalPanelModeAfterHide = false;
+		}
 	}
 
 	if (UnsupportedModePanel)
 	{
-		UnsupportedModePanel->SetVisibility(
+		SetTransitionedWidgetVisibility(
+			UnsupportedModePanel,
 			bUtilityModeOpen && !bInventoryMode && !bMapMode && !bMemoMode && !bQuestMode
 				? ESlateVisibility::HitTestInvisible
-				: ESlateVisibility::Collapsed);
+				: ESlateVisibility::Collapsed,
+			UnsupportedModePanelTransitionEdge);
 	}
 
 	if (UnsupportedModeText)
@@ -474,7 +793,10 @@ void UTunaSweeperGameHudWidget::ApplyHudModeVisibility()
 	{
 		const bool bShowModeTitle = bUtilityModeOpen && (bQuestMode || bMemoMode);
 		const UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
-		ModeTitleText->SetVisibility(bShowModeTitle ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
+		SetTransitionedWidgetVisibility(
+			ModeTitleText,
+			bShowModeTitle ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed,
+			ModeTitleTransitionEdge);
 		ModeTitleText->SetText(
 			bQuestMode
 				? ResolveUiText(TunaGameInstance, TEXT("ui.hud.mode.quest"), TEXT("\uD018\uC2A4\uD2B8"))
@@ -487,17 +809,20 @@ void UTunaSweeperGameHudWidget::ApplyHudModeVisibility()
 void UTunaSweeperGameHudWidget::CloseLootContainerPanelIfOpen()
 {
 	if (!ExternalPanelWidget ||
-		ExternalPanelWidget->GetExternalPanelMode() != ETunaSweeperHudExternalPanelMode::LootingBox)
+		ExternalPanelWidget->GetExternalPanelMode() == ETunaSweeperHudExternalPanelMode::None)
 	{
 		return;
 	}
 
-	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
+	if (ExternalPanelWidget->GetExternalPanelMode() == ETunaSweeperHudExternalPanelMode::LootingBox)
 	{
-		TunaGameInstance->NotifyActiveLootContainerUiClosed();
+		if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
+		{
+			TunaGameInstance->NotifyActiveLootContainerUiClosed();
+		}
 	}
 
-	ExternalPanelWidget->SetExternalPanelMode(ETunaSweeperHudExternalPanelMode::None);
+	bClearExternalPanelModeAfterHide = true;
 }
 
 void UTunaSweeperGameHudWidget::EnsureInventoryQuickSlotPanelWidget()
@@ -702,7 +1027,7 @@ void UTunaSweeperGameHudWidget::EnsureMemoPanelWidget()
 		CanvasSlot->SetAnchors(FAnchors(0.5f, 0.5f));
 		CanvasSlot->SetAlignment(FVector2D(0.5f, 0.5f));
 		CanvasSlot->SetPosition(FVector2D(0.0f, 34.0f));
-		CanvasSlot->SetSize(FVector2D(1180.0f, 640.0f));
+		CanvasSlot->SetSize(FVector2D(1220.0f, 672.0f));
 		CanvasSlot->SetZOrder(20);
 	}
 }
@@ -1058,12 +1383,12 @@ void UTunaSweeperGameHudWidget::RefreshDialogueHudVisibility()
 
 	if (BottomStatusWidget)
 	{
-		BottomStatusWidget->SetVisibility(BottomStatusVisibility);
+		SetTransitionedWidgetVisibility(BottomStatusWidget, BottomStatusVisibility, BottomStatusTransitionEdge);
 	}
 
 	if (QuickSlotBarWidget)
 	{
-		QuickSlotBarWidget->SetVisibility(QuickSlotVisibility);
+		SetTransitionedWidgetVisibility(QuickSlotBarWidget, QuickSlotVisibility, QuickSlotBarTransitionEdge);
 	}
 }
 
@@ -1145,7 +1470,7 @@ void UTunaSweeperGameHudWidget::RefreshQuestTrackerFromQuestSubsystem()
 		: nullptr;
 	if (!QuestSubsystem || QuestSubsystem->GetTrackedQuestId().IsNone())
 	{
-		QuestTrackerRoot->SetVisibility(ESlateVisibility::Collapsed);
+		SetTransitionedWidgetVisibility(QuestTrackerRoot, ESlateVisibility::Collapsed, QuestTrackerTransitionEdge);
 		return;
 	}
 
@@ -1153,14 +1478,14 @@ void UTunaSweeperGameHudWidget::RefreshQuestTrackerFromQuestSubsystem()
 	const FName TrackedQuestId = QuestSubsystem->GetTrackedQuestId();
 	if (!QuestSubsystem->TryGetQuestDefinition(TrackedQuestId, QuestDefinition))
 	{
-		QuestTrackerRoot->SetVisibility(ESlateVisibility::Collapsed);
+		SetTransitionedWidgetVisibility(QuestTrackerRoot, ESlateVisibility::Collapsed, QuestTrackerTransitionEdge);
 		return;
 	}
 
 	TArray<FTunaSweeperObjectiveProgressView> ObjectiveProgress;
 	if (!QuestSubsystem->GetQuestObjectiveProgress(TrackedQuestId, ObjectiveProgress))
 	{
-		QuestTrackerRoot->SetVisibility(ESlateVisibility::Collapsed);
+		SetTransitionedWidgetVisibility(QuestTrackerRoot, ESlateVisibility::Collapsed, QuestTrackerTransitionEdge);
 		return;
 	}
 
@@ -1200,7 +1525,7 @@ void UTunaSweeperGameHudWidget::RefreshQuestTrackerFromQuestSubsystem()
 		QuestTrackerObjectiveText->SetText(FText::FromString(FString::Join(ObjectiveLines, LINE_TERMINATOR)));
 	}
 
-	QuestTrackerRoot->SetVisibility(ESlateVisibility::HitTestInvisible);
+	SetTransitionedWidgetVisibility(QuestTrackerRoot, ESlateVisibility::HitTestInvisible, QuestTrackerTransitionEdge);
 }
 
 void UTunaSweeperGameHudWidget::BuildAmmoSelectorOptionTexts(TArray<FText>& OutOptionTexts, int32& OutFocusedIndex) const

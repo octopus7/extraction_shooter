@@ -10,6 +10,7 @@
 #include "UI/TunaSweeperItemDragDropOperation.h"
 #include "UI/TunaSweeperItemStackTileItemObject.h"
 #include "UI/TunaSweeperUIFont.h"
+#include "UI/TunaSweeperUiText.h"
 
 namespace TunaSweeperLootContainerUi
 {
@@ -22,12 +23,7 @@ namespace TunaSweeperLootContainerUi
 	constexpr float ContainerPanelWidth =
 		ContainerPanelPadding * 2.0f + ContainerTileColumnCount * ContainerTileWidth + ContainerTileViewScrollbarReserveWidth;
 
-	FText ResolveUiText(const UTunaSweeperGameInstance* TunaGameInstance, const TCHAR* StringKey, const TCHAR* Fallback)
-	{
-		return TunaGameInstance
-			? TunaGameInstance->ResolveLocalizedText(FName(StringKey), FText::FromString(Fallback))
-			: FText::FromString(Fallback);
-	}
+	using TunaSweeperUiText::ResolveUiText;
 
 	FTunaSweeperItemStackTileData BuildTileData(
 		const UTunaSweeperGameInstance* TunaGameInstance,

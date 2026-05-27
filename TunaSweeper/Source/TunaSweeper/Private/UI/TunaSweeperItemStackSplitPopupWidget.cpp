@@ -15,6 +15,7 @@
 #include "InputCoreTypes.h"
 #include "Styling/SlateBrush.h"
 #include "UI/TunaSweeperUIFont.h"
+#include "UI/TunaSweeperUiText.h"
 
 namespace TunaSweeperStackSplitPopup
 {
@@ -56,12 +57,7 @@ namespace TunaSweeperStackSplitPopup
 		return ScreenSpacePosition + PopupCursorOffset;
 	}
 
-	FText ResolveUiText(const UTunaSweeperGameInstance* TunaGameInstance, const TCHAR* StringKey, const TCHAR* Fallback)
-	{
-		return TunaGameInstance
-			? TunaGameInstance->ResolveLocalizedText(FName(StringKey), FText::FromString(Fallback))
-			: FText::FromString(Fallback);
-	}
+	using TunaSweeperUiText::ResolveUiText;
 }
 
 bool UTunaSweeperItemStackSplitPopupWidget::TryOpenStackSplitPopup(
