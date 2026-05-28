@@ -157,6 +157,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Input")
 	void CancelActiveGameplayActions();
 
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Housing")
+	void SetHousingModeVisualHidden(bool bShouldHide);
+
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Weapon")
 	bool SelectWeaponSlot(int32 SlotNumber);
 
@@ -510,4 +513,5 @@ private:
 	bool bHasSavedProjectileCollisionResponse = false;
 	bool bRollVisualRotationApplied = false;
 	bool bWeaponAttachedForRoll = false;
+	bool bHousingModeVisualHidden = false;
 };

@@ -55,7 +55,10 @@
     ],
     "rewards": {
       "coins": 150,
-      "items": []
+      "items": [],
+      "housing_facilities": [
+        "housing_workbench"
+      ]
     }
   },
   {

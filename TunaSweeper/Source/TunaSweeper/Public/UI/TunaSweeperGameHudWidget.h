@@ -8,6 +8,7 @@
 
 class UTunaSweeperHudBottomStatusWidget;
 class UTunaSweeperHudExternalPanelWidget;
+class UTunaSweeperHousingPanelWidget;
 class UTunaSweeperHudInventoryAreaWidget;
 class UTunaSweeperHudItemInfoPanelWidget;
 class UTunaSweeperHudQuickSlotBarWidget;
@@ -217,6 +218,7 @@ private:
 	void CacheHudTransitionBaseline(UWidget* Widget);
 	void CloseLootContainerPanelIfOpen();
 	void EnsureInventoryQuickSlotPanelWidget();
+	void EnsureHousingPanelWidget();
 	void EnsureMapPanelWidget();
 	void EnsureMemoPanelWidget();
 	void EnsureQuestPanelWidget();
@@ -227,6 +229,7 @@ private:
 	void RefreshLocalizedTexts();
 	void RefreshReloadWidgets();
 	void RefreshDialogueHudVisibility();
+	void ForceCollapseHudWidget(UWidget* Widget);
 	void EnsureQuestTrackerWidgets();
 	void RefreshQuestTrackerFromQuestSubsystem();
 	FVector2D GetHudTransitionHiddenTranslation(const UWidget* Widget, ETunaSweeperHudTransitionEdge Edge) const;
@@ -237,8 +240,12 @@ private:
 	void BuildAmmoSelectorOptionTexts(TArray<FText>& OutOptionTexts, int32& OutFocusedIndex) const;
 	void HandleSelectedInventoryItemChanged();
 	void HandleQuestProgressChanged();
+	void HandleHousingStateChanged();
 	void HandleLanguageChanged();
 	bool IsDialogueSequenceActive() const;
+	bool IsHousingModeActive() const;
+	bool IsGameplayBottomHudSuppressed() const;
+	bool IsBunkerMap() const;
 	FName GetSelectedWeaponTypeTag() const;
 	bool IsWeaponCrosshairSuppressed() const;
 	void UpdateCrosshairState(float InDeltaTime);
@@ -281,6 +288,9 @@ private:
 
 	UPROPERTY(Transient)
 	TArray<TObjectPtr<UTunaSweeperItemThumbnailSlotWidget>> InventoryQuickSlotWidgets;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTunaSweeperHousingPanelWidget> HousingPanelWidget;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UTunaSweeperMapWidget> MapPanelWidget;

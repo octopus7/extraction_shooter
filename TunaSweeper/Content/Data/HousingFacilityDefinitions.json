@@ -1,0 +1,15 @@
+[
+  {
+    "facility_id": "housing_workbench",
+    "display_name_key": "ui.housing.facility.workbench",
+    "description_key": "ui.housing.facility.workbench.desc",
+    "display_name": "Workbench",
+    "description": "A functional work surface for future crafting and repairs.",
+    "size_cells": [4, 3],
+    "required_materials": [
+      { "item_id": 6002, "quantity": 12 }
+    ],
+    "sort_order": 10,
+    "function_unlocked": false
+  }
+]

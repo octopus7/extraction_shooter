@@ -146,6 +146,9 @@ struct TUNASWEEPER_API FTunaSweeperQuestRewardDefinition
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
 	TArray<FTunaSweeperItemStack> Items;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
+	TArray<FName> HousingFacilityUnlocks;
 };
 
 USTRUCT(BlueprintType)

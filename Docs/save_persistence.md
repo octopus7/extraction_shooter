@@ -6,7 +6,7 @@ Update it whenever a new state field is expected to persist across save slots, l
 ## Current Save Container
 
 - Save object: `UTunaSweeperSaveGame`
-- Current save version: `9`
+- Current save version: `11`
 - Runtime owner: `UTunaSweeperGameInstance`
 - Save entry point: `UTunaSweeperGameInstance::SaveGameStateInternal()`
 - Load entry point: `UTunaSweeperGameInstance::LoadGameState()`
@@ -88,6 +88,24 @@ Each `FTunaSweeperWorldProgressSaveData` preserves:
 Raid world progress actors restore this state on spawn. Completed repair objects disable their blocking collision and spawn their configured completed replacement actor at the same transform.
 
 Persistent door actors also use `WorldProgressStates`: once opened, they write `Completed` for their stable door `ObjectId`, then later restore by applying the open transform and disabling their blocking collision in the same save slot.
+
+### Bunker Housing Facilities
+
+Placed/stored facilities are saved through `UTunaSweeperSaveGame::HousingFacilities`.
+
+Each `FTunaSweeperHousingPlacedFacilitySaveData` preserves:
+
+- `InstanceId`: stable owned facility instance id used for placement, respawn, and storage targeting.
+- `FacilityId`: stable facility definition id from `Content/Data/HousingFacilityDefinitions.json`.
+- `AnchorCell`: top-left grid cell in the active bunker housing area.
+- `RotationQuarterTurns`: Q/E rotation in 90 degree steps.
+- `bStored`: whether the owned facility is in storage instead of placed in the bunker grid.
+
+Housing placement state is owned at runtime by `UTunaSweeperHousingSubsystem`. Changes are copied into `UTunaSweeperGameInstance` and written on the next normal save; placement and storage actions currently request an immediate save.
+
+Unlocked housing facility functions are saved through `UTunaSweeperSaveGame::UnlockedHousingFacilityIds`.
+
+Each entry is a stable facility definition id from `Content/Data/HousingFacilityDefinitions.json`. Quest rewards can add ids to this set, and older saves also derive missing unlocks from already completed quest rewards during load.
 
 ### Quest Progress
 

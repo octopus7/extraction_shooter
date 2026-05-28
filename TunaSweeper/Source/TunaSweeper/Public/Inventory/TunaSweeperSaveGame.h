@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/SaveGame.h"
+#include "Housing/TunaSweeperHousingTypes.h"
 #include "Inventory/TunaSweeperInventoryTypes.h"
 #include "Quest/TunaSweeperQuestTypes.h"
 #include "TunaSweeperSaveGame.generated.h"
@@ -56,7 +57,7 @@ class TUNASWEEPER_API UTunaSweeperSaveGame : public USaveGame
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Save")
-	int32 SaveVersion = 9;
+	int32 SaveVersion = 11;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Save")
 	int32 SaveSlotIndex = 1;
@@ -96,6 +97,12 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|World Progress")
 	TArray<FTunaSweeperWorldProgressSaveData> WorldProgressStates;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Housing")
+	TArray<FTunaSweeperHousingPlacedFacilitySaveData> HousingFacilities;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Housing")
+	TArray<FName> UnlockedHousingFacilityIds;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
 	TArray<FTunaSweeperQuestProgressSaveData> QuestProgressStates;

@@ -164,3 +164,4 @@ v1 목표 타입:
 - Quest presentation steps can be attached to a quest through `accept_presentation` or `reward_presentation`.
 - A presentation step uses `speaker_name_string_key` and `dialogue_text_string_key`; optional `use_camera_focus`, `camera_focus_location`, and `camera_blend_seconds` reuse the existing dialogue camera flow.
 - Accepting a quest calls `PlayQuestPresentation(..., OnAccept)` after the quest is accepted. Claiming rewards can similarly call `OnRewardClaim` when reward presentation data exists.
+- Quest rewards can include `housing_facilities` or `housing_facility_unlocks` arrays. Reward claim unlocks those facility ids in `UTunaSweeperGameInstance`, and the housing UI only shows locked facilities after their ids are unlocked.

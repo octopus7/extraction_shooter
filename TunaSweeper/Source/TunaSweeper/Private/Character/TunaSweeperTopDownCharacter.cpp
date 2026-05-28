@@ -390,6 +390,18 @@ float ATunaSweeperTopDownCharacter::GetStaminaPercent() const
 		: 0.0f;
 }
 
+void ATunaSweeperTopDownCharacter::SetHousingModeVisualHidden(bool bShouldHide)
+{
+	if (bHousingModeVisualHidden == bShouldHide)
+	{
+		RefreshCharacterVisualVisibility();
+		return;
+	}
+
+	bHousingModeVisualHidden = bShouldHide;
+	RefreshCharacterVisualVisibility();
+}
+
 void ATunaSweeperTopDownCharacter::AddDefaultInputMapping() const
 {
 	const APlayerController* PlayerController = Cast<APlayerController>(GetController());
@@ -447,6 +459,7 @@ void ATunaSweeperTopDownCharacter::EnsureEquippedWeaponActor()
 				EquippedWeapon->ConfigureGunVisual();
 			}
 		}
+		EquippedWeapon->SetActorHiddenInGame(bHousingModeVisualHidden);
 	}
 }
 
@@ -528,6 +541,15 @@ void ATunaSweeperTopDownCharacter::HandleMoveStopped(const FInputActionValue& Va
 
 void ATunaSweeperTopDownCharacter::BeginFire(const FInputActionValue& Value)
 {
+	if (ATunaSweeperPlayerController* TunaPlayerController = Cast<ATunaSweeperPlayerController>(GetController()))
+	{
+		if (TunaPlayerController->IsHousingPlacementActive())
+		{
+			TunaPlayerController->TryCommitHousingPlacement();
+			return;
+		}
+	}
+
 	if (bIsDead || IsGameplayActionInputLocked())
 	{
 		return;
@@ -579,6 +601,11 @@ void ATunaSweeperTopDownCharacter::HandleInteract(const FInputActionValue& Value
 	if (ATunaSweeperPlayerController* TunaPlayerController = Cast<ATunaSweeperPlayerController>(GetController()))
 	{
 		if (TunaPlayerController->TryHandleHoveredItemInteract())
+		{
+			return;
+		}
+
+		if (TunaPlayerController->IsHousingModeOpen())
 		{
 			return;
 		}
@@ -1398,15 +1425,29 @@ void ATunaSweeperTopDownCharacter::RefreshCharacterVisualVisibility()
 	USkeletalMeshComponent* CharacterMesh = GetMesh();
 	if (CharacterMesh)
 	{
-		CharacterMesh->SetHiddenInGame(false);
-		CharacterMesh->SetVisibility(true, true);
+		CharacterMesh->SetHiddenInGame(bHousingModeVisualHidden);
+		CharacterMesh->SetVisibility(!bHousingModeVisualHidden, true);
 	}
 
 	const bool bHasCharacterMesh = CharacterMesh && CharacterMesh->GetSkeletalMeshAsset();
 	if (VisualMesh)
 	{
-		VisualMesh->SetHiddenInGame(bHasCharacterMesh);
-		VisualMesh->SetVisibility(!bHasCharacterMesh, true);
+		VisualMesh->SetHiddenInGame(bHousingModeVisualHidden || bHasCharacterMesh);
+		VisualMesh->SetVisibility(!bHousingModeVisualHidden && !bHasCharacterMesh, true);
+	}
+
+	if (EquippedWeapon)
+	{
+		EquippedWeapon->SetActorHiddenInGame(bHousingModeVisualHidden);
+	}
+
+	if (StaminaGaugeWidgetComponent)
+	{
+		StaminaGaugeWidgetComponent->SetHiddenInGame(bHousingModeVisualHidden);
+		if (bHousingModeVisualHidden)
+		{
+			StaminaGaugeWidgetComponent->SetVisibility(false);
+		}
 	}
 }
 
@@ -1414,7 +1455,9 @@ bool ATunaSweeperTopDownCharacter::IsGameplayActionInputLocked() const
 {
 	const ATunaSweeperPlayerController* TunaPlayerController = Cast<ATunaSweeperPlayerController>(GetController());
 	return TunaPlayerController &&
-		(TunaPlayerController->IsInventoryUiOpen() || TunaPlayerController->IsDialogueSequenceActive());
+		(TunaPlayerController->IsInventoryUiOpen() ||
+			TunaPlayerController->IsDialogueSequenceActive() ||
+			TunaPlayerController->IsHousingModeOpen());
 }
 
 void ATunaSweeperTopDownCharacter::CancelActiveGameplayActions()
@@ -1901,6 +1944,14 @@ void ATunaSweeperTopDownCharacter::UpdateStaminaGauge(float DeltaSeconds)
 		return;
 	}
 
+	if (bHousingModeVisualHidden)
+	{
+		StaminaGaugeWidgetComponent->SetHiddenInGame(true);
+		StaminaGaugeWidgetComponent->SetVisibility(false);
+		return;
+	}
+
+	StaminaGaugeWidgetComponent->SetHiddenInGame(false);
 	const float TargetOpacity = GetStaminaPercent() < 0.999f ? 1.0f : 0.0f;
 	if (DeltaSeconds <= 0.0f)
 	{

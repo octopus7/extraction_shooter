@@ -491,12 +491,25 @@ bool UTunaSweeperQuestSubsystem::ClaimQuestReward(FName QuestId)
 		return false;
 	}
 
+	UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GetGameInstance());
 	if (Definition->Rewards.Items.Num() > 0)
 	{
-		UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GetGameInstance());
 		if (!TunaGameInstance || !TunaGameInstance->GrantQuestItemRewards(Definition->Rewards.Items))
 		{
 			return false;
+		}
+	}
+
+	if (Definition->Rewards.HousingFacilityUnlocks.Num() > 0)
+	{
+		if (!TunaGameInstance)
+		{
+			return false;
+		}
+
+		for (const FName& FacilityId : Definition->Rewards.HousingFacilityUnlocks)
+		{
+			TunaGameInstance->UnlockHousingFacility(FacilityId, false);
 		}
 	}
 
@@ -921,6 +934,24 @@ bool UTunaSweeperQuestSubsystem::LoadQuestDefinitionsJson()
 						Definition.Rewards.Items.Add(ItemReward);
 					}
 				}
+			}
+
+			TArray<FName> HousingFacilityUnlocks;
+			TunaSweeperQuestData::ReadNameArrayField(
+				*RewardObject,
+				TEXT("housing_facilities"),
+				HousingFacilityUnlocks);
+			for (const FName& FacilityId : HousingFacilityUnlocks)
+			{
+				Definition.Rewards.HousingFacilityUnlocks.AddUnique(FacilityId);
+			}
+			TunaSweeperQuestData::ReadNameArrayField(
+				*RewardObject,
+				TEXT("housing_facility_unlocks"),
+				HousingFacilityUnlocks);
+			for (const FName& FacilityId : HousingFacilityUnlocks)
+			{
+				Definition.Rewards.HousingFacilityUnlocks.AddUnique(FacilityId);
 			}
 		}
 

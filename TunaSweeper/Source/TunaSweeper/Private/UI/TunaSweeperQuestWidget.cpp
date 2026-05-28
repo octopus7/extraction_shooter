@@ -13,6 +13,7 @@
 #include "Game/TunaSweeperGameInstance.h"
 #include "Player/TunaSweeperPlayerController.h"
 #include "Styling/SlateBrush.h"
+#include "Subsystem/TunaSweeperHousingSubsystem.h"
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
 #include "UI/TunaSweeperUIFont.h"
@@ -905,6 +906,31 @@ FText UTunaSweeperQuestWidget::BuildRewardText(
 		}
 
 		RewardParts.Add(FString::Printf(TEXT("%s x%d"), *ItemName.ToString(), FMath::Max(1, ItemReward.Quantity)));
+	}
+
+	UTunaSweeperHousingSubsystem* HousingSubsystem = TunaGameInstance
+		? TunaGameInstance->GetSubsystem<UTunaSweeperHousingSubsystem>()
+		: nullptr;
+	for (const FName& FacilityId : QuestDefinition.Rewards.HousingFacilityUnlocks)
+	{
+		if (FacilityId.IsNone())
+		{
+			continue;
+		}
+
+		FText FacilityName = FText::FromName(FacilityId);
+		FTunaSweeperHousingFacilityDefinition FacilityDefinition;
+		if (HousingSubsystem && HousingSubsystem->TryGetFacilityDefinition(FacilityId, FacilityDefinition))
+		{
+			FacilityName = TunaGameInstance && !FacilityDefinition.DisplayNameStringKey.IsNone()
+				? TunaGameInstance->ResolveLocalizedText(FacilityDefinition.DisplayNameStringKey, FacilityDefinition.FallbackDisplayName)
+				: FacilityDefinition.FallbackDisplayName;
+		}
+
+		RewardParts.Add(FString::Printf(
+			TEXT("%s: %s"),
+			*GetQuestText(FName(TEXT("quest.ui.facility_unlock")), FText::FromString(TEXT("Facility Unlock"))).ToString(),
+			*FacilityName.ToString()));
 	}
 
 	return RewardParts.Num() > 0

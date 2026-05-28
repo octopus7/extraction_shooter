@@ -13,6 +13,7 @@ quest.ui.rewards,보상,Rewards,報酬
 quest.ui.no_reward,없음,None,なし
 quest.ui.coins,코인,Coins,コイン
 quest.ui.item_fallback,아이템,Item,アイテム
+quest.ui.facility_unlock,시설 해금,Facility Unlock,施設解放
 quest.ui.state.available,수락 가능,Available,受注可能
 quest.ui.state.locked,잠김,Locked,ロック中
 quest.ui.state.accepted,진행 중,In Progress,進行中

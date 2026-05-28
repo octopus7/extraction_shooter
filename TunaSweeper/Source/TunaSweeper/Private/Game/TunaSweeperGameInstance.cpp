@@ -17,7 +17,7 @@ namespace TunaSweeperSave
 {
 	const TCHAR* SaveSlotNamePrefix = TEXT("TunaSweeperSave_Slot");
 	const TCHAR* SaveSettingsSlotName = TEXT("TunaSweeperSaveSettings");
-	constexpr int32 CurrentSaveVersion = 9;
+	constexpr int32 CurrentSaveVersion = 11;
 	constexpr int32 SaveUserIndex = 0;
 	constexpr int32 MinSaveSlotIndex = 1;
 	constexpr int32 MaxSaveSlotIndex = 3;
@@ -2114,6 +2114,72 @@ bool UTunaSweeperGameInstance::UpdateWorldProgressState(
 	return true;
 }
 
+void UTunaSweeperGameInstance::GetHousingFacilities(
+	TArray<FTunaSweeperHousingPlacedFacilitySaveData>& OutFacilities)
+{
+	EnsureInventoryStateInitialized();
+	OutFacilities = HousingFacilities;
+}
+
+void UTunaSweeperGameInstance::SetHousingFacilities(
+	const TArray<FTunaSweeperHousingPlacedFacilitySaveData>& InFacilities,
+	bool bSaveImmediately)
+{
+	EnsureInventoryStateInitialized();
+	HousingFacilities.Reset();
+	TSet<FGuid> SeenInstanceIds;
+	for (FTunaSweeperHousingPlacedFacilitySaveData HousingFacility : InFacilities)
+	{
+		if (!HousingFacility.IsValid() || SeenInstanceIds.Contains(HousingFacility.InstanceId))
+		{
+			continue;
+		}
+
+		HousingFacility.RotationQuarterTurns = FMath::Clamp(HousingFacility.RotationQuarterTurns, 0, 3);
+		HousingFacilities.Add(HousingFacility);
+		SeenInstanceIds.Add(HousingFacility.InstanceId);
+	}
+
+	if (bSaveImmediately)
+	{
+		SaveGameStateInternal();
+	}
+}
+
+bool UTunaSweeperGameInstance::IsHousingFacilityUnlocked(FName FacilityId)
+{
+	EnsureInventoryStateInitialized();
+	return !FacilityId.IsNone() && UnlockedHousingFacilityIds.Contains(FacilityId);
+}
+
+bool UTunaSweeperGameInstance::UnlockHousingFacility(FName FacilityId, bool bSaveImmediately)
+{
+	if (FacilityId.IsNone())
+	{
+		return false;
+	}
+
+	EnsureInventoryStateInitialized();
+	const int32 PreviousCount = UnlockedHousingFacilityIds.Num();
+	UnlockedHousingFacilityIds.Add(FacilityId);
+	const bool bChanged = UnlockedHousingFacilityIds.Num() != PreviousCount;
+	if (bChanged && bSaveImmediately)
+	{
+		SaveGameStateInternal();
+	}
+	return bChanged;
+}
+
+void UTunaSweeperGameInstance::GetUnlockedHousingFacilityIds(TArray<FName>& OutFacilityIds)
+{
+	EnsureInventoryStateInitialized();
+	OutFacilityIds = UnlockedHousingFacilityIds.Array();
+	OutFacilityIds.Sort([](const FName& Left, const FName& Right)
+	{
+		return Left.LexicalLess(Right);
+	});
+}
+
 void UTunaSweeperGameInstance::SelectItemSlot(const FTunaSweeperItemSlotReference& SlotReference)
 {
 	EnsureInventoryStateInitialized();
@@ -2360,12 +2426,54 @@ bool UTunaSweeperGameInstance::LoadGameState()
 		LoadedWorldProgressState.ProgressQuantity = FMath::Max(0, LoadedWorldProgressState.ProgressQuantity);
 		WorldProgressStatesById.Add(LoadedWorldProgressState.ObjectId, LoadedWorldProgressState);
 	}
+	HousingFacilities.Reset();
+	TSet<FGuid> LoadedHousingFacilityIds;
+	for (const FTunaSweeperHousingPlacedFacilitySaveData& SavedHousingFacility : SaveGame->HousingFacilities)
+	{
+		if (!SavedHousingFacility.IsValid() || LoadedHousingFacilityIds.Contains(SavedHousingFacility.InstanceId))
+		{
+			continue;
+		}
+
+		FTunaSweeperHousingPlacedFacilitySaveData LoadedHousingFacility = SavedHousingFacility;
+		LoadedHousingFacility.RotationQuarterTurns = FMath::Clamp(LoadedHousingFacility.RotationQuarterTurns, 0, 3);
+		HousingFacilities.Add(LoadedHousingFacility);
+		LoadedHousingFacilityIds.Add(LoadedHousingFacility.InstanceId);
+	}
+	UnlockedHousingFacilityIds.Reset();
+	for (const FName& FacilityId : SaveGame->UnlockedHousingFacilityIds)
+	{
+		if (!FacilityId.IsNone())
+		{
+			UnlockedHousingFacilityIds.Add(FacilityId);
+		}
+	}
 	if (UTunaSweeperQuestSubsystem* QuestSubsystem = GetSubsystem<UTunaSweeperQuestSubsystem>())
 	{
 		QuestSubsystem->LoadQuestProgressFromSave(
 			SaveGame->QuestProgressStates,
 			SaveGame->TrackedQuestId,
 			SaveGame->QuestCoinBalance);
+
+		TArray<FTunaSweeperQuestDefinition> QuestDefinitions;
+		if (QuestSubsystem->GetAllQuestDefinitions(QuestDefinitions))
+		{
+			for (const FTunaSweeperQuestDefinition& QuestDefinition : QuestDefinitions)
+			{
+				if (QuestSubsystem->GetQuestState(QuestDefinition.QuestId) != ETunaSweeperQuestState::RewardCompleted)
+				{
+					continue;
+				}
+
+				for (const FName& FacilityId : QuestDefinition.Rewards.HousingFacilityUnlocks)
+				{
+					if (!FacilityId.IsNone())
+					{
+						UnlockedHousingFacilityIds.Add(FacilityId);
+					}
+				}
+			}
+		}
 	}
 	PendingScenarioCompletionFlag = NAME_None;
 
@@ -2478,6 +2586,19 @@ bool UTunaSweeperGameInstance::SaveGameStateInternal(
 		const FTunaSweeperWorldProgressSaveData& Right)
 	{
 		return Left.ObjectId.LexicalLess(Right.ObjectId);
+	});
+	SaveGame->HousingFacilities = HousingFacilities;
+	SaveGame->HousingFacilities.Sort([](
+		const FTunaSweeperHousingPlacedFacilitySaveData& Left,
+		const FTunaSweeperHousingPlacedFacilitySaveData& Right)
+	{
+		return Left.FacilityId.LexicalLess(Right.FacilityId) ||
+			(Left.FacilityId == Right.FacilityId && Left.InstanceId.ToString() < Right.InstanceId.ToString());
+	});
+	SaveGame->UnlockedHousingFacilityIds = UnlockedHousingFacilityIds.Array();
+	SaveGame->UnlockedHousingFacilityIds.Sort([](const FName& Left, const FName& Right)
+	{
+		return Left.LexicalLess(Right);
 	});
 	if (const UTunaSweeperQuestSubsystem* QuestSubsystem = GetSubsystem<UTunaSweeperQuestSubsystem>())
 	{
@@ -2617,6 +2738,8 @@ void UTunaSweeperGameInstance::ResetRuntimeStateForSaveSlotSelection()
 	MapMarkers.Reset();
 	NextMapMarkerId = 1;
 	WorldProgressStatesById.Reset();
+	HousingFacilities.Reset();
+	UnlockedHousingFacilityIds.Reset();
 	PendingScenarioCompletionFlag = NAME_None;
 	if (UTunaSweeperQuestSubsystem* QuestSubsystem = GetSubsystem<UTunaSweeperQuestSubsystem>())
 	{
@@ -2638,6 +2761,8 @@ void UTunaSweeperGameInstance::GenerateDefaultInventoryState()
 	MapMarkers.Reset();
 	NextMapMarkerId = 1;
 	WorldProgressStatesById.Reset();
+	HousingFacilities.Reset();
+	UnlockedHousingFacilityIds.Reset();
 	PendingScenarioCompletionFlag = NAME_None;
 	if (UTunaSweeperQuestSubsystem* QuestSubsystem = GetSubsystem<UTunaSweeperQuestSubsystem>())
 	{

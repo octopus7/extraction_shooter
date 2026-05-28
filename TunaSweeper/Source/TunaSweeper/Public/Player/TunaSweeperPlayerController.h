@@ -54,6 +54,21 @@ public:
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Input")
 	bool IsInventoryUiOpen() const;
 
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Housing")
+	bool IsHousingPlacementActive() const;
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Housing")
+	bool IsHousingModeOpen() const;
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Housing")
+	bool OpenHousingMode();
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Housing")
+	bool StartHousingFacilityPlacement(FName FacilityId, FGuid ExistingInstanceId);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Housing")
+	bool TryCommitHousingPlacement();
+
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Dialogue")
 	bool IsDialogueSequenceActive() const { return bDialogueSequenceActive; }
 
@@ -147,10 +162,38 @@ private:
 	void HandleQuickSlot6(const FInputActionValue& Value);
 	void HandleQuickSlot7(const FInputActionValue& Value);
 	void HandleQuickSlot8(const FInputActionValue& Value);
+	void HandleHousingRotateLeft();
+	void HandleHousingRotateRight();
+	void HandleHousingCancel();
+	void BeginHousingCameraMode();
+	void EndHousingCameraMode(float BlendSeconds);
+	void UpdateHousingCamera(float DeltaTime);
+	void SetHousingCharacterVisualHidden(bool bShouldHide) const;
+	FVector ResolveHousingCameraFocusLocation() const;
+	FRotator ResolveHousingCameraRotation() const;
+	FVector CalculateHousingCameraLocation(const FVector& FocusLocation, const FRotator& CameraRotation) const;
+	void ClampHousingCameraFocusLocation(FVector& InOutFocusLocation) const;
+	FVector2D GetHousingCameraMoveInput() const;
+	void HandleHousingMoveForwardPressed();
+	void HandleHousingMoveForwardReleased();
+	void HandleHousingMoveBackwardPressed();
+	void HandleHousingMoveBackwardReleased();
+	void HandleHousingMoveRightPressed();
+	void HandleHousingMoveRightReleased();
+	void HandleHousingMoveLeftPressed();
+	void HandleHousingMoveLeftReleased();
 
 	FTimerHandle CanBotIntroDialogueTimerHandle;
 	FTimerHandle DialogueCameraReturnTimerHandle;
 	FName ActiveDialogueCompletionFlag;
+	UPROPERTY(Transient)
+	TObjectPtr<ACameraActor> HousingCameraActor;
+	FVector HousingCameraFocusLocation = FVector::ZeroVector;
 	bool bDialogueSequenceActive = false;
 	bool bDialogueCameraHasFocus = false;
+	bool bHousingCameraActive = false;
+	bool bHousingMoveForwardHeld = false;
+	bool bHousingMoveBackwardHeld = false;
+	bool bHousingMoveRightHeld = false;
+	bool bHousingMoveLeftHeld = false;
 };

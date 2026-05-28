@@ -20,9 +20,11 @@
 #include "Framework/Application/SlateApplication.h"
 #include "Player/TunaSweeperPlayerController.h"
 #include "Rendering/DrawElements.h"
+#include "Subsystem/TunaSweeperHousingSubsystem.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
 #include "UI/TunaSweeperHudBottomStatusWidget.h"
 #include "UI/TunaSweeperHudExternalPanelWidget.h"
+#include "UI/TunaSweeperHousingPanelWidget.h"
 #include "UI/TunaSweeperHudInventoryAreaWidget.h"
 #include "UI/TunaSweeperHudItemInfoPanelWidget.h"
 #include "UI/TunaSweeperHudQuickSlotBarWidget.h"
@@ -182,6 +184,13 @@ void UTunaSweeperGameHudWidget::NativeConstruct()
 		QuestSubsystem->OnQuestProgressChanged.RemoveAll(this);
 		QuestSubsystem->OnQuestProgressChanged.AddUObject(this, &UTunaSweeperGameHudWidget::HandleQuestProgressChanged);
 	}
+	if (UTunaSweeperHousingSubsystem* HousingSubsystem = GetGameInstance()
+		? GetGameInstance()->GetSubsystem<UTunaSweeperHousingSubsystem>()
+		: nullptr)
+	{
+		HousingSubsystem->OnHousingStateChanged.RemoveAll(this);
+		HousingSubsystem->OnHousingStateChanged.AddUObject(this, &UTunaSweeperGameHudWidget::HandleHousingStateChanged);
+	}
 	if (TopStatusReserveWidget)
 	{
 		TopStatusReserveWidget->OnHudModeSelected.RemoveDynamic(this, &UTunaSweeperGameHudWidget::HandleHudModeTabSelected);
@@ -190,6 +199,7 @@ void UTunaSweeperGameHudWidget::NativeConstruct()
 
 	EnsureQuestTrackerWidgets();
 	EnsureInventoryQuickSlotPanelWidget();
+	EnsureHousingPanelWidget();
 	EnsureMapPanelWidget();
 	EnsureMemoPanelWidget();
 	EnsureQuestPanelWidget();
@@ -218,6 +228,12 @@ void UTunaSweeperGameHudWidget::NativeDestruct()
 		: nullptr)
 	{
 		QuestSubsystem->OnQuestProgressChanged.RemoveAll(this);
+	}
+	if (UTunaSweeperHousingSubsystem* HousingSubsystem = GetGameInstance()
+		? GetGameInstance()->GetSubsystem<UTunaSweeperHousingSubsystem>()
+		: nullptr)
+	{
+		HousingSubsystem->OnHousingStateChanged.RemoveAll(this);
 	}
 	if (TopStatusReserveWidget)
 	{
@@ -549,6 +565,16 @@ void UTunaSweeperGameHudWidget::SetHudMode(ETunaSweeperHudMode InHudMode)
 	if (InHudMode != ETunaSweeperHudMode::Inventory)
 	{
 		CloseLootContainerPanelIfOpen();
+	}
+
+	if (InHudMode != ETunaSweeperHudMode::None)
+	{
+		if (UTunaSweeperHousingSubsystem* HousingSubsystem = GetGameInstance()
+			? GetGameInstance()->GetSubsystem<UTunaSweeperHousingSubsystem>()
+			: nullptr)
+		{
+			HousingSubsystem->CloseHousingMode();
+		}
 	}
 
 	ActiveHudMode = InHudMode;
@@ -888,6 +914,27 @@ void UTunaSweeperGameHudWidget::ApplyHudModeVisibility()
 		SetTransitionedWidgetVisibility(ItemInfoPanelWidget, ESlateVisibility::Collapsed, ItemInfoPanelTransitionEdge);
 	}
 
+	EnsureHousingPanelWidget();
+	if (HousingPanelWidget)
+	{
+		const UTunaSweeperHousingSubsystem* HousingSubsystem = GetGameInstance()
+			? GetGameInstance()->GetSubsystem<UTunaSweeperHousingSubsystem>()
+			: nullptr;
+		const bool bShowHousingPanel =
+			!bUtilityModeOpen &&
+			HousingSubsystem &&
+			HousingSubsystem->IsHousingModeOpen() &&
+			!IsDialogueSequenceActive();
+		SetTransitionedWidgetVisibility(
+			HousingPanelWidget,
+			bShowHousingPanel ? ESlateVisibility::SelfHitTestInvisible : ESlateVisibility::Collapsed,
+			ETunaSweeperHudTransitionEdge::Right);
+		if (bShowHousingPanel)
+		{
+			HousingPanelWidget->RefreshHousingPanel();
+		}
+	}
+
 	EnsureMapPanelWidget();
 	if (MapPanelWidget)
 	{
@@ -1141,6 +1188,40 @@ void UTunaSweeperGameHudWidget::EnsureInventoryQuickSlotPanelWidget()
 		CanvasSlot->SetPosition(FVector2D(0.0f, -34.0f));
 		CanvasSlot->SetSize(FVector2D(InventoryQuickSlotPanelWidth, InventoryQuickSlotPanelHeight));
 		CanvasSlot->SetZOrder(35);
+	}
+}
+
+void UTunaSweeperGameHudWidget::EnsureHousingPanelWidget()
+{
+	if (HousingPanelWidget || !WidgetTree)
+	{
+		return;
+	}
+
+	UCanvasPanel* RootCanvas = Cast<UCanvasPanel>(WidgetTree->RootWidget);
+	if (!RootCanvas)
+	{
+		return;
+	}
+
+	HousingPanelWidget = CreateWidget<UTunaSweeperHousingPanelWidget>(
+		GetOwningPlayer(),
+		UTunaSweeperHousingPanelWidget::StaticClass());
+	if (!HousingPanelWidget)
+	{
+		return;
+	}
+
+	HousingPanelWidget->SetVisibility(ESlateVisibility::Collapsed);
+	UCanvasPanelSlot* CanvasSlot = RootCanvas->AddChildToCanvas(HousingPanelWidget);
+	if (CanvasSlot)
+	{
+		constexpr float PanelWidth = 360.0f;
+		constexpr float EdgeMargin = 24.0f;
+		CanvasSlot->SetAnchors(FAnchors(1.0f, 0.0f, 1.0f, 1.0f));
+		CanvasSlot->SetAlignment(FVector2D(0.0f, 0.0f));
+		CanvasSlot->SetOffsets(FMargin(-(PanelWidth + EdgeMargin), EdgeMargin, PanelWidth, EdgeMargin));
+		CanvasSlot->SetZOrder(42);
 	}
 }
 
@@ -1478,16 +1559,17 @@ void UTunaSweeperGameHudWidget::RefreshReloadWidgets()
 	CacheAmmoReloadWidgets();
 
 	const bool bDialogueActive = IsDialogueSequenceActive();
+	const bool bHousingModeActive = IsHousingModeActive();
 	ATunaSweeperTopDownCharacter* TunaCharacter = nullptr;
 	if (const APlayerController* PlayerController = GetOwningPlayer())
 	{
 		TunaCharacter = Cast<ATunaSweeperTopDownCharacter>(PlayerController->GetPawn());
 	}
 
-	const bool bShowReload = !bDialogueActive && TunaCharacter && TunaCharacter->IsWeaponReloading();
+	const bool bShowReload = !bDialogueActive && !bHousingModeActive && TunaCharacter && TunaCharacter->IsWeaponReloading();
 	const float ReloadProgress = bShowReload ? TunaCharacter->GetReloadProgress() : 0.0f;
 	bool bShowReloadPrompt = false;
-	if (!bDialogueActive && !bShowReload && TunaCharacter && !TunaCharacter->IsAmmoSelectionOpen() && !IsInventoryUiOpen())
+	if (!bDialogueActive && !bHousingModeActive && !bShowReload && TunaCharacter && !TunaCharacter->IsAmmoSelectionOpen() && !IsInventoryUiOpen())
 	{
 		if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
 		{
@@ -1601,12 +1683,18 @@ void UTunaSweeperGameHudWidget::CacheAmmoReloadWidgets()
 
 void UTunaSweeperGameHudWidget::RefreshDialogueHudVisibility()
 {
-	const bool bDialogueActive = IsDialogueSequenceActive();
-	const bool bInventoryUiOpen = IsInventoryUiOpen();
-	const ESlateVisibility BottomStatusVisibility = bDialogueActive || bInventoryUiOpen
+	if (IsHousingModeActive())
+	{
+		ForceCollapseHudWidget(BottomStatusWidget);
+		ForceCollapseHudWidget(QuickSlotBarWidget);
+		return;
+	}
+
+	const bool bSuppressBottomHud = IsGameplayBottomHudSuppressed();
+	const ESlateVisibility BottomStatusVisibility = bSuppressBottomHud
 		? ESlateVisibility::Collapsed
 		: ESlateVisibility::HitTestInvisible;
-	const ESlateVisibility QuickSlotVisibility = bDialogueActive || bInventoryUiOpen
+	const ESlateVisibility QuickSlotVisibility = bSuppressBottomHud
 		? ESlateVisibility::Collapsed
 		: ESlateVisibility::HitTestInvisible;
 
@@ -1619,6 +1707,31 @@ void UTunaSweeperGameHudWidget::RefreshDialogueHudVisibility()
 	{
 		SetTransitionedWidgetVisibility(QuickSlotBarWidget, QuickSlotVisibility, QuickSlotBarTransitionEdge);
 	}
+}
+
+void UTunaSweeperGameHudWidget::ForceCollapseHudWidget(UWidget* Widget)
+{
+	if (!Widget)
+	{
+		return;
+	}
+
+	CacheHudTransitionBaseline(Widget);
+	ActiveHudTransitions.RemoveAll([Widget](const FHudWidgetTransition& Transition)
+	{
+		return Transition.Widget.Get() == Widget;
+	});
+
+	const TWeakObjectPtr<UWidget> WidgetKey(Widget);
+	if (const FWidgetTransform* BaseTransform = HudTransitionBaseTransforms.Find(WidgetKey))
+	{
+		Widget->SetRenderTransform(*BaseTransform);
+	}
+	if (const float* BaseOpacity = HudTransitionBaseOpacities.Find(WidgetKey))
+	{
+		Widget->SetRenderOpacity(*BaseOpacity);
+	}
+	Widget->SetVisibility(ESlateVisibility::Collapsed);
 }
 
 void UTunaSweeperGameHudWidget::EnsureQuestTrackerWidgets()
@@ -1807,6 +1920,25 @@ bool UTunaSweeperGameHudWidget::IsDialogueSequenceActive() const
 	return TunaPlayerController && TunaPlayerController->IsDialogueSequenceActive();
 }
 
+bool UTunaSweeperGameHudWidget::IsHousingModeActive() const
+{
+	const UTunaSweeperHousingSubsystem* HousingSubsystem = GetGameInstance()
+		? GetGameInstance()->GetSubsystem<UTunaSweeperHousingSubsystem>()
+		: nullptr;
+	return HousingSubsystem && HousingSubsystem->IsHousingModeOpen();
+}
+
+bool UTunaSweeperGameHudWidget::IsGameplayBottomHudSuppressed() const
+{
+	return IsDialogueSequenceActive() || IsInventoryUiOpen() || IsHousingModeActive();
+}
+
+bool UTunaSweeperGameHudWidget::IsBunkerMap() const
+{
+	const UWorld* World = GetWorld();
+	return World && World->GetMapName().EndsWith(TEXT("BunkerMap"));
+}
+
 FName UTunaSweeperGameHudWidget::GetSelectedWeaponTypeTag() const
 {
 	const APlayerController* PlayerController = GetOwningPlayer();
@@ -1842,7 +1974,9 @@ FName UTunaSweeperGameHudWidget::GetSelectedWeaponTypeTag() const
 
 bool UTunaSweeperGameHudWidget::IsWeaponCrosshairSuppressed() const
 {
-	return IsInventoryUiOpen() || IsDialogueSequenceActive();
+	return IsInventoryUiOpen() ||
+		IsDialogueSequenceActive() ||
+		IsHousingModeActive();
 }
 
 void UTunaSweeperGameHudWidget::UpdateCrosshairState(float InDeltaTime)
@@ -1892,6 +2026,14 @@ void UTunaSweeperGameHudWidget::HandleQuestProgressChanged()
 	{
 		QuestPanelWidget->RefreshQuestView();
 	}
+}
+
+void UTunaSweeperGameHudWidget::HandleHousingStateChanged()
+{
+	ApplyHudModeVisibility();
+	RefreshDialogueHudVisibility();
+	RefreshReloadWidgets();
+	Invalidate(EInvalidateWidgetReason::LayoutAndVolatility);
 }
 
 void UTunaSweeperGameHudWidget::HandleLanguageChanged()

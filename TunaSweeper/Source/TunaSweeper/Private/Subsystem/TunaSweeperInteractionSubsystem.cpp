@@ -4,6 +4,7 @@
 #include "Character/TunaSweeperQuestNpcActor.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "Interaction/TunaSweeperDoorActor.h"
+#include "Interaction/TunaSweeperHousingManagementActor.h"
 #include "Interaction/TunaSweeperItemSpawnInteractableActor.h"
 #include "Interaction/TunaSweeperInteractableComponent.h"
 #include "Interaction/TunaSweeperLevelTravelInteractableActor.h"
@@ -51,6 +52,8 @@ namespace TunaSweeperInteractionQuestEvents
 			return FName(TEXT("memo"));
 		case ETunaSweeperInteractionType::DoorOpen:
 			return FName(TEXT("door_open"));
+		case ETunaSweeperInteractionType::HousingManagement:
+			return FName(TEXT("housing_management"));
 		default:
 			return NAME_None;
 		}
@@ -149,6 +152,9 @@ bool UTunaSweeperInteractionSubsystem::RequestInteraction(UTunaSweeperInteractab
 		break;
 	case ETunaSweeperInteractionType::DoorOpen:
 		bHandled = HandleDoorOpenInteraction(Interactable);
+		break;
+	case ETunaSweeperInteractionType::HousingManagement:
+		bHandled = HandleHousingManagementInteraction(Interactable, InstigatorPawn);
 		break;
 	default:
 		return false;
@@ -414,6 +420,22 @@ bool UTunaSweeperInteractionSubsystem::HandleMemoInteraction(
 
 	MemoActor->Destroy();
 	return true;
+}
+
+bool UTunaSweeperInteractionSubsystem::HandleHousingManagementInteraction(
+	UTunaSweeperInteractableComponent* Interactable,
+	APawn* InstigatorPawn)
+{
+	const ATunaSweeperHousingManagementActor* ManagementActor = Interactable
+		? Cast<ATunaSweeperHousingManagementActor>(Interactable->GetOwner())
+		: nullptr;
+	if (!ManagementActor || !InstigatorPawn)
+	{
+		return false;
+	}
+
+	ATunaSweeperPlayerController* TunaPlayerController = Cast<ATunaSweeperPlayerController>(InstigatorPawn->GetController());
+	return TunaPlayerController && TunaPlayerController->OpenHousingMode();
 }
 
 void UTunaSweeperInteractionSubsystem::RefreshFocusedInteractable()

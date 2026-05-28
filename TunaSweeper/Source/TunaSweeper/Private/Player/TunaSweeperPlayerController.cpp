@@ -16,12 +16,14 @@
 #include "Game/TunaSweeperGameInstance.h"
 #include "GameFramework/GameUserSettings.h"
 #include "GameFramework/Pawn.h"
+#include "Housing/TunaSweeperHousingAreaActor.h"
 #include "Interaction/TunaSweeperPickupItemActor.h"
 #include "InputAction.h"
 #include "InputActionValue.h"
 #include "InputCoreTypes.h"
 #include "Subsystem/TunaSweeperKeyboardInputSubsystem.h"
 #include "Subsystem/TunaSweeperBgmSubsystem.h"
+#include "Subsystem/TunaSweeperHousingSubsystem.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
 #include "UI/TunaSweeperGameHudWidget.h"
 #include "UI/TunaSweeperIntroMenuWidget.h"
@@ -212,6 +214,17 @@ namespace TunaSweeperCanBotIntro
 	}
 }
 
+namespace TunaSweeperHousingCamera
+{
+	constexpr float BlendSeconds = 0.35f;
+	constexpr float Distance = 1900.0f;
+	constexpr float PitchDegrees = -68.0f;
+	constexpr float FOV = 70.0f;
+	constexpr float MoveSpeed = 900.0f;
+}
+
+DEFINE_LOG_CATEGORY_STATIC(LogTunaSweeperHousingInput, Log, All);
+
 ATunaSweeperPlayerController::ATunaSweeperPlayerController()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -332,6 +345,17 @@ void ATunaSweeperPlayerController::SetupInputComponent()
 	{
 		InputComponent->BindKey(EKeys::U, IE_Pressed, this, &ATunaSweeperPlayerController::HandleUseHoveredItem);
 		InputComponent->BindKey(EKeys::V, IE_Pressed, this, &ATunaSweeperPlayerController::HandleMeleeQuickSlotPressed);
+		InputComponent->BindKey(EKeys::Q, IE_Pressed, this, &ATunaSweeperPlayerController::HandleHousingRotateLeft);
+		InputComponent->BindKey(EKeys::E, IE_Pressed, this, &ATunaSweeperPlayerController::HandleHousingRotateRight);
+		InputComponent->BindKey(EKeys::Escape, IE_Pressed, this, &ATunaSweeperPlayerController::HandleHousingCancel);
+		InputComponent->BindKey(EKeys::W, IE_Pressed, this, &ATunaSweeperPlayerController::HandleHousingMoveForwardPressed);
+		InputComponent->BindKey(EKeys::W, IE_Released, this, &ATunaSweeperPlayerController::HandleHousingMoveForwardReleased);
+		InputComponent->BindKey(EKeys::S, IE_Pressed, this, &ATunaSweeperPlayerController::HandleHousingMoveBackwardPressed);
+		InputComponent->BindKey(EKeys::S, IE_Released, this, &ATunaSweeperPlayerController::HandleHousingMoveBackwardReleased);
+		InputComponent->BindKey(EKeys::D, IE_Pressed, this, &ATunaSweeperPlayerController::HandleHousingMoveRightPressed);
+		InputComponent->BindKey(EKeys::D, IE_Released, this, &ATunaSweeperPlayerController::HandleHousingMoveRightReleased);
+		InputComponent->BindKey(EKeys::A, IE_Pressed, this, &ATunaSweeperPlayerController::HandleHousingMoveLeftPressed);
+		InputComponent->BindKey(EKeys::A, IE_Released, this, &ATunaSweeperPlayerController::HandleHousingMoveLeftReleased);
 	}
 
 	UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent);
@@ -377,6 +401,11 @@ void ATunaSweeperPlayerController::PlayerTick(float DeltaTime)
 {
 	Super::PlayerTick(DeltaTime);
 
+	if (bHousingCameraActive && !IsHousingModeOpen())
+	{
+		EndHousingCameraMode(TunaSweeperHousingCamera::BlendSeconds);
+	}
+
 	ATunaSweeperTopDownCharacter* ControlledCharacter = Cast<ATunaSweeperTopDownCharacter>(GetPawn());
 	if (!ControlledCharacter || ControlledCharacter->IsDead())
 	{
@@ -395,6 +424,18 @@ void ATunaSweeperPlayerController::PlayerTick(float DeltaTime)
 
 	if (bDialogueSequenceActive)
 	{
+		return;
+	}
+
+	if (IsHousingModeOpen())
+	{
+		UpdateHousingCamera(DeltaTime);
+		if (UTunaSweeperHousingSubsystem* HousingSubsystem = GetGameInstance()
+			? GetGameInstance()->GetSubsystem<UTunaSweeperHousingSubsystem>()
+			: nullptr)
+		{
+			HousingSubsystem->UpdateHousingMode(this);
+		}
 		return;
 	}
 
@@ -1148,6 +1189,271 @@ void ATunaSweeperPlayerController::HandleQuickSlot8(const FInputActionValue&)
 	HandleQuickSlot(8);
 }
 
+void ATunaSweeperPlayerController::HandleHousingRotateLeft()
+{
+	if (UTunaSweeperHousingSubsystem* HousingSubsystem = GetGameInstance()
+		? GetGameInstance()->GetSubsystem<UTunaSweeperHousingSubsystem>()
+		: nullptr)
+	{
+		HousingSubsystem->RotateActivePlacement(-1);
+	}
+}
+
+void ATunaSweeperPlayerController::HandleHousingRotateRight()
+{
+	if (UTunaSweeperHousingSubsystem* HousingSubsystem = GetGameInstance()
+		? GetGameInstance()->GetSubsystem<UTunaSweeperHousingSubsystem>()
+		: nullptr)
+	{
+		HousingSubsystem->RotateActivePlacement(1);
+	}
+}
+
+void ATunaSweeperPlayerController::HandleHousingCancel()
+{
+	if (UTunaSweeperHousingSubsystem* HousingSubsystem = GetGameInstance()
+		? GetGameInstance()->GetSubsystem<UTunaSweeperHousingSubsystem>()
+		: nullptr)
+	{
+		if (HousingSubsystem->HasActivePlacement())
+		{
+			HousingSubsystem->CancelPlacement();
+		}
+		else
+		{
+			HousingSubsystem->CloseHousingMode();
+			EndHousingCameraMode(TunaSweeperHousingCamera::BlendSeconds);
+		}
+	}
+}
+
+void ATunaSweeperPlayerController::BeginHousingCameraMode()
+{
+	UWorld* World = GetWorld();
+	if (!World || !IsLocalController())
+	{
+		return;
+	}
+
+	if (!HousingCameraActor)
+	{
+		FActorSpawnParameters SpawnParameters;
+		SpawnParameters.Owner = this;
+		SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		HousingCameraActor = World->SpawnActor<ACameraActor>(
+			ACameraActor::StaticClass(),
+			FTransform::Identity,
+			SpawnParameters);
+	}
+
+	if (!HousingCameraActor)
+	{
+		return;
+	}
+
+	HousingCameraFocusLocation = ResolveHousingCameraFocusLocation();
+	ClampHousingCameraFocusLocation(HousingCameraFocusLocation);
+	const FRotator CameraRotation = ResolveHousingCameraRotation();
+	HousingCameraActor->SetActorLocationAndRotation(
+		CalculateHousingCameraLocation(HousingCameraFocusLocation, CameraRotation),
+		CameraRotation);
+	if (UCameraComponent* CameraComponent = HousingCameraActor->GetCameraComponent())
+	{
+		CameraComponent->SetFieldOfView(TunaSweeperHousingCamera::FOV);
+	}
+
+	SetHousingCharacterVisualHidden(true);
+	SetViewTargetWithBlend(HousingCameraActor, TunaSweeperHousingCamera::BlendSeconds, VTBlend_Cubic);
+	bHousingCameraActive = true;
+}
+
+void ATunaSweeperPlayerController::EndHousingCameraMode(float BlendSeconds)
+{
+	if (!bHousingCameraActive)
+	{
+		SetHousingCharacterVisualHidden(false);
+		return;
+	}
+
+	SetHousingCharacterVisualHidden(false);
+	if (APawn* ControlledPawn = GetPawn())
+	{
+		SetViewTargetWithBlend(ControlledPawn, FMath::Max(0.0f, BlendSeconds), VTBlend_Cubic);
+	}
+
+	bHousingCameraActive = false;
+	bHousingMoveForwardHeld = false;
+	bHousingMoveBackwardHeld = false;
+	bHousingMoveRightHeld = false;
+	bHousingMoveLeftHeld = false;
+}
+
+void ATunaSweeperPlayerController::UpdateHousingCamera(float DeltaTime)
+{
+	if (!bHousingCameraActive)
+	{
+		BeginHousingCameraMode();
+	}
+
+	if (!HousingCameraActor)
+	{
+		return;
+	}
+
+	const FVector2D MoveInput = GetHousingCameraMoveInput();
+	if (!MoveInput.IsNearlyZero())
+	{
+		const FRotator AreaYawRotation(0.0f, ResolveHousingCameraRotation().Yaw, 0.0f);
+		const FVector Forward = FRotationMatrix(AreaYawRotation).GetScaledAxis(EAxis::X).GetSafeNormal2D();
+		const FVector Right = FRotationMatrix(AreaYawRotation).GetScaledAxis(EAxis::Y).GetSafeNormal2D();
+		FVector MoveDirection = Forward * MoveInput.Y + Right * MoveInput.X;
+		if (!MoveDirection.Normalize())
+		{
+			MoveDirection = FVector::ZeroVector;
+		}
+		HousingCameraFocusLocation += MoveDirection * TunaSweeperHousingCamera::MoveSpeed * FMath::Max(0.0f, DeltaTime);
+		ClampHousingCameraFocusLocation(HousingCameraFocusLocation);
+	}
+
+	const FRotator CameraRotation = ResolveHousingCameraRotation();
+	HousingCameraActor->SetActorLocationAndRotation(
+		CalculateHousingCameraLocation(HousingCameraFocusLocation, CameraRotation),
+		CameraRotation);
+}
+
+void ATunaSweeperPlayerController::SetHousingCharacterVisualHidden(bool bShouldHide) const
+{
+	if (ATunaSweeperTopDownCharacter* ControlledCharacter = Cast<ATunaSweeperTopDownCharacter>(GetPawn()))
+	{
+		ControlledCharacter->SetHousingModeVisualHidden(bShouldHide);
+	}
+}
+
+FVector ATunaSweeperPlayerController::ResolveHousingCameraFocusLocation() const
+{
+	const UTunaSweeperHousingSubsystem* HousingSubsystem = GetGameInstance()
+		? GetGameInstance()->GetSubsystem<UTunaSweeperHousingSubsystem>()
+		: nullptr;
+	if (const ATunaSweeperHousingAreaActor* HousingArea = HousingSubsystem
+		? HousingSubsystem->GetActiveHousingArea()
+		: nullptr)
+	{
+		return HousingArea->GetWorldLocationForFootprintCenter(
+			FIntPoint::ZeroValue,
+			FIntPoint(
+				FMath::Max(1, HousingArea->GetGridSizeX()),
+				FMath::Max(1, HousingArea->GetGridSizeY())));
+	}
+
+	if (const APawn* ControlledPawn = GetPawn())
+	{
+		return ControlledPawn->GetActorLocation();
+	}
+
+	return FVector::ZeroVector;
+}
+
+FRotator ATunaSweeperPlayerController::ResolveHousingCameraRotation() const
+{
+	const UTunaSweeperHousingSubsystem* HousingSubsystem = GetGameInstance()
+		? GetGameInstance()->GetSubsystem<UTunaSweeperHousingSubsystem>()
+		: nullptr;
+	if (const ATunaSweeperHousingAreaActor* HousingArea = HousingSubsystem
+		? HousingSubsystem->GetActiveHousingArea()
+		: nullptr)
+	{
+		return FRotator(TunaSweeperHousingCamera::PitchDegrees, HousingArea->GetAreaYawRotation().Yaw, 0.0f);
+	}
+
+	const APawn* ControlledPawn = GetPawn();
+	return FRotator(
+		TunaSweeperHousingCamera::PitchDegrees,
+		ControlledPawn ? ControlledPawn->GetActorRotation().Yaw : 0.0f,
+		0.0f);
+}
+
+FVector ATunaSweeperPlayerController::CalculateHousingCameraLocation(
+	const FVector& FocusLocation,
+	const FRotator& CameraRotation) const
+{
+	return FocusLocation - CameraRotation.Vector() * TunaSweeperHousingCamera::Distance;
+}
+
+void ATunaSweeperPlayerController::ClampHousingCameraFocusLocation(FVector& InOutFocusLocation) const
+{
+	const UTunaSweeperHousingSubsystem* HousingSubsystem = GetGameInstance()
+		? GetGameInstance()->GetSubsystem<UTunaSweeperHousingSubsystem>()
+		: nullptr;
+	const ATunaSweeperHousingAreaActor* HousingArea = HousingSubsystem
+		? HousingSubsystem->GetActiveHousingArea()
+		: nullptr;
+	if (!HousingArea)
+	{
+		return;
+	}
+
+	const float CellSize = FMath::Max(1.0f, HousingArea->GetCellSize());
+	const float HalfWidth = static_cast<float>(FMath::Max(1, HousingArea->GetGridSizeX())) * CellSize * 0.5f;
+	const float HalfHeight = static_cast<float>(FMath::Max(1, HousingArea->GetGridSizeY())) * CellSize * 0.5f;
+	FVector LocalLocation = HousingArea->GetActorTransform().InverseTransformPosition(InOutFocusLocation);
+	LocalLocation.X = FMath::Clamp(LocalLocation.X, -HalfWidth, HalfWidth);
+	LocalLocation.Y = FMath::Clamp(LocalLocation.Y, -HalfHeight, HalfHeight);
+	LocalLocation.Z = 0.0f;
+	InOutFocusLocation = HousingArea->GetActorTransform().TransformPosition(LocalLocation);
+}
+
+FVector2D ATunaSweeperPlayerController::GetHousingCameraMoveInput() const
+{
+	if (!IsHousingModeOpen())
+	{
+		return FVector2D::ZeroVector;
+	}
+
+	const float RightValue = (bHousingMoveRightHeld ? 1.0f : 0.0f) - (bHousingMoveLeftHeld ? 1.0f : 0.0f);
+	const float ForwardValue = (bHousingMoveForwardHeld ? 1.0f : 0.0f) - (bHousingMoveBackwardHeld ? 1.0f : 0.0f);
+	return FVector2D(RightValue, ForwardValue).GetClampedToMaxSize(1.0f);
+}
+
+void ATunaSweeperPlayerController::HandleHousingMoveForwardPressed()
+{
+	bHousingMoveForwardHeld = IsHousingModeOpen();
+}
+
+void ATunaSweeperPlayerController::HandleHousingMoveForwardReleased()
+{
+	bHousingMoveForwardHeld = false;
+}
+
+void ATunaSweeperPlayerController::HandleHousingMoveBackwardPressed()
+{
+	bHousingMoveBackwardHeld = IsHousingModeOpen();
+}
+
+void ATunaSweeperPlayerController::HandleHousingMoveBackwardReleased()
+{
+	bHousingMoveBackwardHeld = false;
+}
+
+void ATunaSweeperPlayerController::HandleHousingMoveRightPressed()
+{
+	bHousingMoveRightHeld = IsHousingModeOpen();
+}
+
+void ATunaSweeperPlayerController::HandleHousingMoveRightReleased()
+{
+	bHousingMoveRightHeld = false;
+}
+
+void ATunaSweeperPlayerController::HandleHousingMoveLeftPressed()
+{
+	bHousingMoveLeftHeld = IsHousingModeOpen();
+}
+
+void ATunaSweeperPlayerController::HandleHousingMoveLeftReleased()
+{
+	bHousingMoveLeftHeld = false;
+}
+
 void ATunaSweeperPlayerController::ToggleInventoryOnlyPanel()
 {
 	EnsureGameHudWidget();
@@ -1231,6 +1537,89 @@ void ATunaSweeperPlayerController::OpenMemoPanel(int32 MemoId)
 	ApplyDefaultGameInputMode();
 }
 
+bool ATunaSweeperPlayerController::OpenHousingMode()
+{
+	if (!IsLocalController() || IsIntroMap() || IsOpeningScenarioMap() || bDialogueSequenceActive)
+	{
+		return false;
+	}
+
+	UTunaSweeperHousingSubsystem* HousingSubsystem = GetGameInstance()
+		? GetGameInstance()->GetSubsystem<UTunaSweeperHousingSubsystem>()
+		: nullptr;
+	if (!HousingSubsystem)
+	{
+		return false;
+	}
+
+	EnsureGameHudWidget();
+	if (GameHudWidget)
+	{
+		GameHudWidget->SetHudMode(ETunaSweeperHudMode::None);
+	}
+
+	if (!HousingSubsystem->OpenHousingMode(this))
+	{
+		return false;
+	}
+
+	CancelPawnGameplayActions();
+	BeginHousingCameraMode();
+	ApplyDefaultGameInputMode();
+	bShowMouseCursor = true;
+	return true;
+}
+
+bool ATunaSweeperPlayerController::StartHousingFacilityPlacement(FName FacilityId, FGuid ExistingInstanceId)
+{
+	if (FacilityId.IsNone())
+	{
+		UE_LOG(LogTunaSweeperHousingInput, Warning, TEXT("StartHousingFacilityPlacement failed: facility id is none."));
+		return false;
+	}
+
+	UTunaSweeperHousingSubsystem* HousingSubsystem = GetGameInstance()
+		? GetGameInstance()->GetSubsystem<UTunaSweeperHousingSubsystem>()
+		: nullptr;
+	if (!HousingSubsystem)
+	{
+		UE_LOG(LogTunaSweeperHousingInput, Warning, TEXT("StartHousingFacilityPlacement failed for %s: housing subsystem is missing."), *FacilityId.ToString());
+		return false;
+	}
+
+	if (!HousingSubsystem->IsHousingModeOpen())
+	{
+		if (!OpenHousingMode())
+		{
+			UE_LOG(LogTunaSweeperHousingInput, Warning, TEXT("StartHousingFacilityPlacement failed for %s: could not open housing mode."), *FacilityId.ToString());
+			return false;
+		}
+	}
+	else if (!bHousingCameraActive)
+	{
+		BeginHousingCameraMode();
+	}
+
+	const bool bStartedPlacement = HousingSubsystem->StartPlacement(FacilityId, ExistingInstanceId);
+	if (bStartedPlacement)
+	{
+		UpdateHousingCamera(0.0f);
+		ApplyDefaultGameInputMode();
+		bShowMouseCursor = true;
+	}
+	else
+	{
+		UE_LOG(
+			LogTunaSweeperHousingInput,
+			Warning,
+			TEXT("StartHousingFacilityPlacement failed for %s: subsystem rejected placement start. ExistingInstanceId=%s"),
+			*FacilityId.ToString(),
+			*ExistingInstanceId.ToString());
+	}
+
+	return bStartedPlacement;
+}
+
 void ATunaSweeperPlayerController::ApplyDefaultGameInputMode()
 {
 	FInputModeGameAndUI InputMode;
@@ -1245,6 +1634,34 @@ void ATunaSweeperPlayerController::ApplyDefaultGameInputMode()
 bool ATunaSweeperPlayerController::IsInventoryUiOpen() const
 {
 	return GameHudWidget && GameHudWidget->IsInventoryUiOpen();
+}
+
+bool ATunaSweeperPlayerController::IsHousingPlacementActive() const
+{
+	const UTunaSweeperHousingSubsystem* HousingSubsystem = GetGameInstance()
+		? GetGameInstance()->GetSubsystem<UTunaSweeperHousingSubsystem>()
+		: nullptr;
+	return HousingSubsystem && HousingSubsystem->HasActivePlacement();
+}
+
+bool ATunaSweeperPlayerController::IsHousingModeOpen() const
+{
+	const UTunaSweeperHousingSubsystem* HousingSubsystem = GetGameInstance()
+		? GetGameInstance()->GetSubsystem<UTunaSweeperHousingSubsystem>()
+		: nullptr;
+	return HousingSubsystem && HousingSubsystem->IsHousingModeOpen();
+}
+
+bool ATunaSweeperPlayerController::TryCommitHousingPlacement()
+{
+	if (UTunaSweeperHousingSubsystem* HousingSubsystem = GetGameInstance()
+		? GetGameInstance()->GetSubsystem<UTunaSweeperHousingSubsystem>()
+		: nullptr)
+	{
+		return HousingSubsystem->TryCommitPlacement(this);
+	}
+
+	return false;
 }
 
 bool ATunaSweeperPlayerController::GetMouseAimPointOnPlane(

@@ -424,6 +424,23 @@ public:
 		int32 RequiredQuantity,
 		bool bSaveImmediately = false);
 
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Housing")
+	void GetHousingFacilities(TArray<FTunaSweeperHousingPlacedFacilitySaveData>& OutFacilities);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Housing")
+	void SetHousingFacilities(
+		const TArray<FTunaSweeperHousingPlacedFacilitySaveData>& InFacilities,
+		bool bSaveImmediately = false);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Housing")
+	bool IsHousingFacilityUnlocked(FName FacilityId);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Housing")
+	bool UnlockHousingFacility(FName FacilityId, bool bSaveImmediately = false);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Housing")
+	void GetUnlockedHousingFacilityIds(TArray<FName>& OutFacilityIds);
+
 	void SelectItemSlot(const FTunaSweeperItemSlotReference& SlotReference);
 	void ClearSelectedItemSelection();
 	void SetHoveredItemSlot(const FTunaSweeperItemSlotReference& SlotReference);
@@ -590,6 +607,12 @@ private:
 
 	UPROPERTY(Transient)
 	TMap<FName, FTunaSweeperWorldProgressSaveData> WorldProgressStatesById;
+
+	UPROPERTY(Transient)
+	TArray<FTunaSweeperHousingPlacedFacilitySaveData> HousingFacilities;
+
+	UPROPERTY(Transient)
+	TSet<FName> UnlockedHousingFacilityIds;
 
 	UPROPERTY(Transient)
 	TSet<int32> AcquiredMemoIds;
