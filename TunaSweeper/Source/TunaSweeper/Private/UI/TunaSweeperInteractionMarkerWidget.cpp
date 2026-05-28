@@ -9,7 +9,54 @@
 #include "Components/TextBlock.h"
 #include "Components/Widget.h"
 #include "Engine/Texture2D.h"
+#include "Styling/SlateBrush.h"
 #include "UI/TunaSweeperUIFont.h"
+
+namespace
+{
+	const TCHAR* OpenedCheckTexturePath = TEXT("/Game/UI/Interaction/T_InteractionMarkerOpenedCheck.T_InteractionMarkerOpenedCheck");
+
+	void ApplyPaintOpacity(UWidget* Widget, float Opacity)
+	{
+		if (!Widget)
+		{
+			return;
+		}
+
+		const float ClampedOpacity = FMath::Clamp(Opacity, 0.0f, 1.0f);
+
+		if (UImage* Image = Cast<UImage>(Widget))
+		{
+			Image->SetRenderOpacity(1.0f);
+			Image->SetOpacity(ClampedOpacity);
+			return;
+		}
+
+		if (UTextBlock* TextBlock = Cast<UTextBlock>(Widget))
+		{
+			FLinearColor TextColor = TextBlock->GetColorAndOpacity().GetSpecifiedColor();
+			TextColor.A = ClampedOpacity;
+			TextBlock->SetColorAndOpacity(FSlateColor(TextColor));
+
+			FLinearColor ShadowColor = TextBlock->GetShadowColorAndOpacity();
+			ShadowColor.A = ClampedOpacity;
+			TextBlock->SetShadowColorAndOpacity(ShadowColor);
+			TextBlock->SetRenderOpacity(1.0f);
+			return;
+		}
+
+		if (UBorder* Border = Cast<UBorder>(Widget))
+		{
+			FLinearColor BrushColor = Border->GetBrushColor();
+			BrushColor.A = ClampedOpacity;
+			Border->SetBrushColor(BrushColor);
+			Border->SetRenderOpacity(1.0f);
+			return;
+		}
+
+		Widget->SetRenderOpacity(ClampedOpacity);
+	}
+}
 
 void UTunaSweeperInteractionMarkerWidget::NativeConstruct()
 {
@@ -61,6 +108,12 @@ void UTunaSweeperInteractionMarkerWidget::SetMarkerPresentation(float InAlpha, f
 	ApplyState();
 }
 
+void UTunaSweeperInteractionMarkerWidget::SetMarkerOpened(bool bInOpened)
+{
+	bCachedOpened = bInOpened;
+	ApplyState();
+}
+
 void UTunaSweeperInteractionMarkerWidget::CacheNamedWidgets()
 {
 	if (!WidgetTree)
@@ -81,6 +134,14 @@ void UTunaSweeperInteractionMarkerWidget::CacheNamedWidgets()
 			RingImage = WidgetTree->FindWidget(TEXT("RingText"));
 		}
 	}
+	if (!RingBrushImage)
+	{
+		RingBrushImage = Cast<UImage>(WidgetTree->FindWidget(TEXT("RingBrushImage")));
+		if (!RingBrushImage)
+		{
+			RingBrushImage = Cast<UImage>(RingImage);
+		}
+	}
 
 	if (!FilledImage)
 	{
@@ -88,6 +149,22 @@ void UTunaSweeperInteractionMarkerWidget::CacheNamedWidgets()
 		if (!FilledImage)
 		{
 			FilledImage = WidgetTree->FindWidget(TEXT("FilledText"));
+		}
+	}
+	if (!FilledBrushImage)
+	{
+		FilledBrushImage = Cast<UImage>(WidgetTree->FindWidget(TEXT("FilledBrushImage")));
+		if (!FilledBrushImage)
+		{
+			FilledBrushImage = Cast<UImage>(FilledImage);
+		}
+	}
+	if (!bHasCachedFilledBrush)
+	{
+		if (FilledBrushImage)
+		{
+			CachedFilledBrush = FilledBrushImage->GetBrush();
+			bHasCachedFilledBrush = true;
 		}
 	}
 
@@ -117,6 +194,16 @@ void UTunaSweeperInteractionMarkerWidget::CacheNamedWidgets()
 	}
 
 	EnsureRequirementWidgets();
+}
+
+UTexture2D* UTunaSweeperInteractionMarkerWidget::ResolveOpenedCheckTexture()
+{
+	if (!CachedOpenedCheckTexture)
+	{
+		CachedOpenedCheckTexture = LoadObject<UTexture2D>(nullptr, OpenedCheckTexturePath);
+	}
+
+	return CachedOpenedCheckTexture;
 }
 
 void UTunaSweeperInteractionMarkerWidget::EnsureRequirementWidgets()
@@ -220,40 +307,73 @@ void UTunaSweeperInteractionMarkerWidget::EnsureRequirementWidgets()
 
 void UTunaSweeperInteractionMarkerWidget::ApplyState()
 {
-	SetRenderOpacity(CachedAlpha);
+	SetRenderOpacity(1.0f);
 
 	if (MarkerRoot)
 	{
-		MarkerRoot->SetRenderOpacity(CachedAlpha);
+		MarkerRoot->SetRenderOpacity(1.0f);
 	}
 
 	if (RingImage)
 	{
 		RingImage->SetRenderScale(FVector2D(CachedRingScale));
-		RingImage->SetRenderOpacity(CachedAlpha);
+		RingImage->SetRenderOpacity(1.0f);
+	}
+	if (RingBrushImage)
+	{
+		ApplyPaintOpacity(RingBrushImage, CachedAlpha);
+	}
+	else if (RingImage)
+	{
+		ApplyPaintOpacity(RingImage, CachedAlpha);
 	}
 
 	if (FilledImage)
 	{
-		FilledImage->SetRenderOpacity(CachedAlpha);
+		FilledImage->SetRenderOpacity(1.0f);
+	}
+	if (FilledBrushImage)
+	{
+		if (!bHasCachedFilledBrush)
+		{
+			CachedFilledBrush = FilledBrushImage->GetBrush();
+			bHasCachedFilledBrush = true;
+		}
+
+		if (bCachedOpened)
+		{
+			if (UTexture2D* OpenedCheckTexture = ResolveOpenedCheckTexture())
+			{
+				FilledBrushImage->SetBrushFromTexture(OpenedCheckTexture, false);
+			}
+		}
+		else if (bHasCachedFilledBrush)
+		{
+			FilledBrushImage->SetBrush(CachedFilledBrush);
+		}
+		ApplyPaintOpacity(FilledBrushImage, CachedAlpha);
+	}
+	else if (FilledImage)
+	{
+		ApplyPaintOpacity(FilledImage, CachedAlpha);
 	}
 
 	if (DisplayNameText)
 	{
 		DisplayNameText->SetText(CachedDisplayText);
-		DisplayNameText->SetRenderOpacity(CachedLabelAlpha);
+		ApplyPaintOpacity(DisplayNameText, CachedLabelAlpha);
 	}
 
 	if (LabelBackground)
 	{
-		LabelBackground->SetRenderOpacity(CachedLabelAlpha);
+		ApplyPaintOpacity(LabelBackground, CachedLabelAlpha);
 	}
 
 	const bool bShowRequirement = bCachedShowRequirement && CachedRequiredQuantity > 0;
 	if (RequirementRoot)
 	{
 		RequirementRoot->SetVisibility(bShowRequirement ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
-		RequirementRoot->SetRenderOpacity(CachedLabelAlpha);
+		ApplyPaintOpacity(RequirementRoot, CachedLabelAlpha);
 	}
 
 	if (RequirementIconImage)
@@ -268,7 +388,7 @@ void UTunaSweeperInteractionMarkerWidget::ApplyState()
 			RequirementIconImage->SetBrushFromTexture(nullptr, false);
 			RequirementIconImage->SetOpacity(0.0f);
 		}
-		RequirementIconImage->SetRenderOpacity(CachedLabelAlpha);
+		ApplyPaintOpacity(RequirementIconImage, CachedLabelAlpha);
 	}
 
 	if (RequirementQuantityText)
@@ -277,6 +397,6 @@ void UTunaSweeperInteractionMarkerWidget::ApplyState()
 			bShowRequirement
 				? FText::Format(FText::FromString(TEXT("x{0}")), FText::AsNumber(CachedRequiredQuantity))
 				: FText::GetEmpty());
-		RequirementQuantityText->SetRenderOpacity(CachedLabelAlpha);
+		ApplyPaintOpacity(RequirementQuantityText, CachedLabelAlpha);
 	}
 }

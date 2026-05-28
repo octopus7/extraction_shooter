@@ -1,8 +1,12 @@
 #include "Weapon/TunaSweeperProjectile.h"
 
+#include "AI/TunaSweeperEnemyCharacter.h"
 #include "Character/TunaSweeperTopDownCharacter.h"
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Effect/TunaSweeperProjectileHitBurstActor.h"
+#include "Effect/TunaSweeperProjectileHitEffectDataAsset.h"
+#include "Game/TunaSweeperGameInstance.h"
 #include "GameFramework/DamageType.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -280,6 +284,88 @@ void ATunaSweeperProjectile::ApplyProjectileCollisionDefaults()
 	CollisionComponent->SetCollisionResponseToChannel(TunaSweeperCollisionChannels::VisionOccluder, ECR_Ignore);
 }
 
+void ATunaSweeperProjectile::SpawnHitEffect(
+	const FHitResult& Hit,
+	AActor* OtherActor,
+	UPrimitiveComponent* OtherComp) const
+{
+	if (HitEffectId.IsNone())
+	{
+		return;
+	}
+
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		return;
+	}
+
+	FTunaSweeperProjectileHitEffectDefinition HitEffectDefinition;
+	if (const UTunaSweeperGameInstance* TunaGameInstance = World->GetGameInstance<UTunaSweeperGameInstance>())
+	{
+		TunaGameInstance->TryGetProjectileHitEffectDefinition(HitEffectId, HitEffectDefinition);
+	}
+
+	TSubclassOf<ATunaSweeperProjectileHitBurstActor> HitEffectClass =
+		HitEffectDefinition.EffectActorClass.LoadSynchronous();
+	if (!HitEffectClass && HitEffectId == FName(TEXT("hit.red_burst")))
+	{
+		HitEffectClass = ATunaSweeperProjectileHitBurstActor::StaticClass();
+		HitEffectDefinition.BurstColor = FLinearColor(1.0f, 0.03f, 0.0f, 1.0f);
+		HitEffectDefinition.SpawnScale = FVector::OneVector;
+		HitEffectDefinition.SurfaceOffsetCm = 1.0f;
+	}
+
+	if (!HitEffectClass)
+	{
+		return;
+	}
+
+	FVector EffectNormal = Hit.ImpactNormal.GetSafeNormal();
+	if (EffectNormal.IsNearlyZero())
+	{
+		EffectNormal = -GetVelocity().GetSafeNormal();
+	}
+	if (EffectNormal.IsNearlyZero())
+	{
+		EffectNormal = -GetActorForwardVector();
+	}
+
+	const FVector EffectLocation =
+		ResolveHitEffectLocation(Hit, OtherActor) +
+		EffectNormal * FMath::Max(0.0f, HitEffectDefinition.SurfaceOffsetCm);
+	const FRotator EffectRotation = EffectNormal.Rotation();
+	const FVector EffectScale = HitEffectDefinition.SpawnScale.IsNearlyZero()
+		? FVector::OneVector
+		: HitEffectDefinition.SpawnScale;
+
+	FActorSpawnParameters SpawnParameters;
+	SpawnParameters.Owner = GetOwner();
+	SpawnParameters.Instigator = GetInstigator();
+	SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+	ATunaSweeperProjectileHitBurstActor* HitEffectActor = World->SpawnActor<ATunaSweeperProjectileHitBurstActor>(
+		HitEffectClass,
+		EffectLocation,
+		EffectRotation,
+		SpawnParameters);
+	if (HitEffectActor)
+	{
+		HitEffectActor->SetActorScale3D(EffectScale);
+		HitEffectActor->SetBurstColor(HitEffectDefinition.BurstColor);
+	}
+}
+
+FVector ATunaSweeperProjectile::ResolveHitEffectLocation(const FHitResult& Hit, AActor* OtherActor) const
+{
+	if (const ATunaSweeperEnemyCharacter* EnemyCharacter = Cast<ATunaSweeperEnemyCharacter>(OtherActor))
+	{
+		return EnemyCharacter->ResolveProjectileHitEffectLocation(Hit);
+	}
+
+	return Hit.ImpactPoint;
+}
+
 void ATunaSweeperProjectile::HandleHit(
 	UPrimitiveComponent* HitComponent,
 	AActor* OtherActor,
@@ -308,9 +394,20 @@ void ATunaSweeperProjectile::HandleHit(
 		return;
 	}
 
+	float AppliedDamage = 0.0f;
 	if (DamageAmount > 0.0f)
 	{
-		UGameplayStatics::ApplyDamage(OtherActor, DamageAmount, GetInstigatorController(), this, UDamageType::StaticClass());
+		AppliedDamage = UGameplayStatics::ApplyDamage(
+			OtherActor,
+			DamageAmount,
+			GetInstigatorController(),
+			this,
+			UDamageType::StaticClass());
+	}
+
+	if (AppliedDamage > 0.0f)
+	{
+		SpawnHitEffect(Hit, OtherActor, OtherComp);
 	}
 
 	Destroy();

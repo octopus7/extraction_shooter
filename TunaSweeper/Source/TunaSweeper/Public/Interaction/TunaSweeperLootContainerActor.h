@@ -129,6 +129,7 @@ protected:
 private:
 	void RefreshContainerPresentation();
 	void ResetRuntimeContainerState();
+	void ApplyOpenedMarkerState();
 	void CaptureRuntimeContentsFromActiveContainer();
 	void HandleActiveLootContainerUiClosed();
 	bool IsRuntimeContainerStateValid(const UTunaSweeperGameInstance* TunaGameInstance) const;

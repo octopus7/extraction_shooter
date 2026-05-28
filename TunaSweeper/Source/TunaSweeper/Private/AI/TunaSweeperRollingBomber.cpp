@@ -15,6 +15,7 @@
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Materials/MaterialInterface.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
+#include "TunaSweeperCollisionChannels.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Weapon/TunaSweeperProjectile.h"
 
@@ -45,6 +46,17 @@ ATunaSweeperRollingBomber::ATunaSweeperRollingBomber()
 	GetCharacterMovement()->bRunPhysicsWithNoController = true;
 	GetCharacterMovement()->bOrientRotationToMovement = false;
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 640.0f, 0.0f);
+
+	ProjectileHurtbox = CreateDefaultSubobject<UCapsuleComponent>(TEXT("ProjectileHurtbox"));
+	ProjectileHurtbox->SetupAttachment(RootComponent);
+	ProjectileHurtbox->InitCapsuleSize(ProjectileHurtboxRadiusCm, ProjectileHurtboxHalfHeightCm);
+	ProjectileHurtbox->SetRelativeLocation(ProjectileHurtboxLocalOffset);
+	ProjectileHurtbox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	ProjectileHurtbox->SetCollisionObjectType(ECC_Pawn);
+	ProjectileHurtbox->SetCollisionResponseToAllChannels(ECR_Ignore);
+	ProjectileHurtbox->SetCollisionResponseToChannel(TunaSweeperCollisionChannels::Projectile, ECR_Block);
+	ProjectileHurtbox->SetGenerateOverlapEvents(false);
+	ProjectileHurtbox->SetCanEverAffectNavigation(false);
 
 	MaxHealth = 45.0f;
 	MovementSpeed = ProjectileModeWalkSpeed;
@@ -284,6 +296,30 @@ FTunaSweeperRollingBomberFootIKState ATunaSweeperRollingBomber::GetFootIKState(
 		: BuildFootIKState(RightFootRuntime);
 }
 
+FVector ATunaSweeperRollingBomber::ResolveProjectileHitEffectLocation(const FHitResult& Hit) const
+{
+	FVector EffectLocation = Hit.ImpactPoint;
+	if (!VisualMesh)
+	{
+		return EffectLocation;
+	}
+
+	const FBoxSphereBounds VisualBounds = VisualMesh->Bounds;
+	const FVector VisualCenter = VisualBounds.Origin;
+	const float MaxPlanarDistance = FMath::Max(1.0f, BodyVisualRadiusCm * 0.9f);
+	FVector PlanarOffset = EffectLocation - VisualCenter;
+	PlanarOffset.Z = 0.0f;
+	if (PlanarOffset.SizeSquared() > FMath::Square(MaxPlanarDistance))
+	{
+		PlanarOffset = PlanarOffset.GetSafeNormal2D() * MaxPlanarDistance;
+		EffectLocation.X = VisualCenter.X + PlanarOffset.X;
+		EffectLocation.Y = VisualCenter.Y + PlanarOffset.Y;
+	}
+
+	EffectLocation.Z = VisualCenter.Z;
+	return EffectLocation;
+}
+
 void ATunaSweeperRollingBomber::ApplyRollingBomberVisualDefaults()
 {
 	if (BodyVisualPivot)
@@ -313,6 +349,18 @@ void ATunaSweeperRollingBomber::ApplyRollingBomberVisualDefaults()
 		ForwardMarkerMesh->SetVisibility(false);
 		ForwardMarkerMesh->SetHiddenInGame(true);
 		ForwardMarkerMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+
+	if (ProjectileHurtbox)
+	{
+		ProjectileHurtbox->SetCapsuleSize(
+			FMath::Max(0.0f, ProjectileHurtboxRadiusCm),
+			FMath::Max(0.0f, ProjectileHurtboxHalfHeightCm),
+			true);
+		ProjectileHurtbox->SetRelativeLocation(ProjectileHurtboxLocalOffset);
+		ProjectileHurtbox->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		ProjectileHurtbox->SetCollisionResponseToAllChannels(ECR_Ignore);
+		ProjectileHurtbox->SetCollisionResponseToChannel(TunaSweeperCollisionChannels::Projectile, ECR_Block);
 	}
 }
 
@@ -1074,6 +1122,7 @@ bool ATunaSweeperRollingBomber::FireRollingBomberProjectileAt(AActor* TargetActo
 	}
 	SpawnedProjectile->SetCameraHitReactionScale(RollingBomberProjectileCameraHitReactionScale);
 	SpawnedProjectile->SetDamageAmount(FMath::Min(ProjectileDamage, ProjectileDamageCap));
+	SpawnedProjectile->SetHitEffectId(ProjectileHitEffectId);
 	return true;
 }
 

@@ -42,6 +42,11 @@ namespace TunaSweeperDebug
 	const FName BunkerVisionDebugSettingKey(TEXT("debug.bunker_vision"));
 }
 
+namespace TunaSweeperProjectileHitEffects
+{
+	const TCHAR* DefaultDataAssetPath = TEXT("/Game/Effects/DA_ProjectileHitEffects.DA_ProjectileHitEffects");
+}
+
 namespace TunaSweeperLanguage
 {
 	const TCHAR* SectionName = TEXT("TunaSweeper.InterfaceSettings");
@@ -400,6 +405,27 @@ bool UTunaSweeperGameInstance::IsBunkerVisionDebugEnabled() const
 	}
 
 	return GameplaySettings.bEnableBunkerVisionDebug;
+}
+
+bool UTunaSweeperGameInstance::TryGetProjectileHitEffectDefinition(
+	FName EffectId,
+	FTunaSweeperProjectileHitEffectDefinition& OutDefinition) const
+{
+	OutDefinition = FTunaSweeperProjectileHitEffectDefinition();
+	if (EffectId.IsNone())
+	{
+		return false;
+	}
+
+	const UTunaSweeperProjectileHitEffectDataAsset* DataAsset = ProjectileHitEffectDataAsset.LoadSynchronous();
+	if (!DataAsset)
+	{
+		DataAsset = LoadObject<UTunaSweeperProjectileHitEffectDataAsset>(
+			nullptr,
+			TunaSweeperProjectileHitEffects::DefaultDataAssetPath);
+	}
+
+	return DataAsset && DataAsset->TryGetHitEffect(EffectId, OutDefinition);
 }
 
 void UTunaSweeperGameInstance::ClearRuntimeState()

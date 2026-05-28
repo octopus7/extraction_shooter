@@ -30,6 +30,7 @@
 #include "UI/TunaSweeperMapWidget.h"
 #include "UI/TunaSweeperMemoWidget.h"
 #include "UI/TunaSweeperQuestWidget.h"
+#include "UI/TunaSweeperReloadRingWidget.h"
 #include "UI/TunaSweeperUIFont.h"
 #include "UI/TunaSweeperUiText.h"
 #include "Styling/SlateBrush.h"
@@ -1320,6 +1321,11 @@ void UTunaSweeperGameHudWidget::RefreshReloadWidgets()
 				: FText::GetEmpty());
 	}
 
+	if (CenterReloadRingWidget)
+	{
+		CenterReloadRingWidget->SetReloadProgress(ReloadProgress, bShowReload);
+	}
+
 	const int32 FilledSegmentCount = FMath::CeilToInt(ReloadProgress * CenterReloadSegments.Num());
 	for (int32 SegmentIndex = 0; SegmentIndex < CenterReloadSegments.Num(); ++SegmentIndex)
 	{
@@ -1360,13 +1366,32 @@ void UTunaSweeperGameHudWidget::CacheAmmoReloadWidgets()
 	}
 
 	CenterReloadGaugeRoot = WidgetTree->FindWidget(FName(TEXT("CenterReloadGaugeRoot")));
+	CenterReloadRingWidget = Cast<UTunaSweeperReloadRingWidget>(WidgetTree->FindWidget(FName(TEXT("CenterReloadRingWidget"))));
 	CenterReloadPromptRoot = WidgetTree->FindWidget(FName(TEXT("CenterReloadPromptRoot")));
 	CenterReloadPercentText = Cast<UTextBlock>(WidgetTree->FindWidget(FName(TEXT("CenterReloadPercentText"))));
 	CenterReloadSegments.SetNum(12);
 	for (int32 SegmentNumber = 1; SegmentNumber <= CenterReloadSegments.Num(); ++SegmentNumber)
 	{
-		CenterReloadSegments[SegmentNumber - 1] = Cast<UBorder>(WidgetTree->FindWidget(
+		UBorder* Segment = Cast<UBorder>(WidgetTree->FindWidget(
 			FName(*FString::Printf(TEXT("CenterReloadSegment%02d"), SegmentNumber))));
+		CenterReloadSegments[SegmentNumber - 1] = Segment;
+		if (!Segment)
+		{
+			continue;
+		}
+
+		const float AngleDegrees = (SegmentNumber - 1) * 30.0f - 90.0f;
+		const float AngleRadians = FMath::DegreesToRadians(AngleDegrees);
+		const FVector2D SegmentPosition(
+			FMath::Cos(AngleRadians) * 36.0f,
+			FMath::Sin(AngleRadians) * 36.0f);
+		if (UCanvasPanelSlot* SegmentSlot = Cast<UCanvasPanelSlot>(Segment->Slot))
+		{
+			SegmentSlot->SetPosition(SegmentPosition);
+			SegmentSlot->SetSize(FVector2D(12.0f, 5.0f));
+		}
+		Segment->SetRenderTransformPivot(FVector2D(0.5f, 0.5f));
+		Segment->SetRenderTransformAngle(AngleDegrees + 90.0f);
 	}
 }
 

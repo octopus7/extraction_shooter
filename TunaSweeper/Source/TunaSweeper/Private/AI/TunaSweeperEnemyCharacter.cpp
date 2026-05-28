@@ -138,6 +138,11 @@ float ATunaSweeperEnemyCharacter::TakeDamage(
 	return AppliedDamage;
 }
 
+FVector ATunaSweeperEnemyCharacter::ResolveProjectileHitEffectLocation(const FHitResult& Hit) const
+{
+	return Hit.ImpactPoint;
+}
+
 void ATunaSweeperEnemyCharacter::ConfigureSpawnData(
 	const TSoftObjectPtr<UMaterialInterface>& InBodyMaterial,
 	FName InEnemyId,
@@ -270,6 +275,7 @@ bool ATunaSweeperEnemyCharacter::FireProjectileAt(AActor* TargetActor)
 	}
 
 	SpawnedProjectile->SetDamageAmount(ProjectileDamage);
+	SpawnedProjectile->SetHitEffectId(ProjectileHitEffectId);
 	return true;
 }
 

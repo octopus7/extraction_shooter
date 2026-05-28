@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
+#include "Effect/TunaSweeperProjectileHitEffectDataAsset.h"
 #include "Inventory/TunaSweeperInventoryTypes.h"
 #include "Inventory/TunaSweeperSaveGame.h"
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
@@ -121,6 +122,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD")
 	FTunaSweeperPlayerHudState PlayerHudState;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TunaSweeper|Projectile Hit Effect")
+	TSoftObjectPtr<UTunaSweeperProjectileHitEffectDataAsset> ProjectileHitEffectDataAsset;
+
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Gameplay Info")
 	void SetGameplayInfo(FName Key, const FString& Value);
 
@@ -162,6 +166,11 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Debug")
 	bool IsBunkerVisionDebugEnabled() const;
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Projectile Hit Effect")
+	bool TryGetProjectileHitEffectDefinition(
+		FName EffectId,
+		FTunaSweeperProjectileHitEffectDefinition& OutDefinition) const;
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|State")
 	void ClearRuntimeState();

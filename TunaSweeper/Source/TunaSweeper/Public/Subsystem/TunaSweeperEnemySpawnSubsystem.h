@@ -6,6 +6,7 @@
 
 class AActor;
 class ATunaSweeperEnemyCharacter;
+class ATunaSweeperExtractionPointActor;
 class ATunaSweeperItemSpawnInteractableActor;
 class ATunaSweeperLevelTravelInteractableActor;
 class ATunaSweeperLootContainerActor;
@@ -19,9 +20,11 @@ class ATunaSweeperWarpPointActor;
 class ATunaSweeperWorldProgressActor;
 class UMaterialInterface;
 class UMediaSource;
+class UNiagaraSystem;
 class USoundBase;
 class UWorld;
 class UStaticMesh;
+class UTunaSweeperExtractionProgressWidget;
 class UTunaSweeperInteractionMarkerWidget;
 class UTunaSweeperLevelTransitionWidget;
 class UTunaSweeperPickupItemIconWidget;
@@ -88,7 +91,8 @@ public:
 		LootContainer,
 		LootContainerSpawn,
 		SelfDestruct,
-		RollingBomberSpawner
+		RollingBomberSpawner,
+		ExtractionPoint
 	};
 
 private:
@@ -177,6 +181,13 @@ private:
 		TSoftObjectPtr<UStaticMesh> LevelTravelVisualMesh;
 		FVector LevelTravelVisualScale = FVector(0.75f, 0.75f, 0.75f);
 		FVector LevelTravelVisualRelativeLocation = FVector::ZeroVector;
+
+		float ExtractionRadius = 300.0f;
+		float ExtractionHoldSeconds = 4.0f;
+		float ExtractionRadiusRingWidth = 4.8f;
+		TSoftClassPtr<UTunaSweeperExtractionProgressWidget> ExtractionProgressWidgetClass;
+		TSoftObjectPtr<UNiagaraSystem> ExtractionParticleSystem;
+		TSoftObjectPtr<UMaterialInterface> ExtractionRadiusVisualMaterial;
 
 		int32 ItemId = 1001;
 		int32 ItemQuantity = 1;

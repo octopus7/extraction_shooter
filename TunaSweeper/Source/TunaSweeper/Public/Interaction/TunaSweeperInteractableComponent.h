@@ -91,6 +91,8 @@ public:
 		int32 InRequiredQuantity,
 		bool bInShowRequirement);
 
+	void SetMarkerCompleted(bool bInMarkerCompleted);
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
 	ETunaSweeperInteractionType InteractionType = ETunaSweeperInteractionType::None;
@@ -105,13 +107,13 @@ protected:
 	FName ObjectiveEventId = NAME_None;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction", meta = (ClampMin = "0.0", UIMin = "0.0"))
-	float InteractionDistance = 250.0f;
+	float InteractionDistance = 200.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction|Marker")
 	TSoftClassPtr<UTunaSweeperInteractionMarkerWidget> MarkerWidgetClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction|Marker", meta = (ClampMin = "0.0", UIMin = "0.0"))
-	float MarkerVisibleDistance = 1000.0f;
+	float MarkerVisibleDistance = 400.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction|Marker", meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float MarkerFadeInterpSpeed = 8.0f;
@@ -140,6 +142,7 @@ private:
 
 	int32 RequirementQuantity = 0;
 	bool bShowRequirementPreview = false;
+	bool bMarkerCompleted = false;
 
 	float MarkerAlpha = 0.0f;
 	float MarkerRingScale = 3.0f;

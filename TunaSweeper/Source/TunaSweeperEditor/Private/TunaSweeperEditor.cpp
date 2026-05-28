@@ -28,6 +28,8 @@
 #include "Components/VerticalBox.h"
 #include "Components/VerticalBoxSlot.h"
 #include "Containers/Ticker.h"
+#include "Effect/TunaSweeperProjectileHitBurstActor.h"
+#include "Effect/TunaSweeperProjectileHitEffectDataAsset.h"
 #include "Engine/Blueprint.h"
 #include "Engine/StaticMesh.h"
 #include "Engine/Texture2D.h"
@@ -100,6 +102,7 @@
 #include "UI/TunaSweeperLootContainerWidget.h"
 #include "UI/TunaSweeperPickupItemIconWidget.h"
 #include "UI/TunaSweeperQuestWidget.h"
+#include "UI/TunaSweeperReloadRingWidget.h"
 #include "UI/TunaSweeperSpeechBubbleWidget.h"
 #include "UObject/SavePackage.h"
 #include "UObject/UnrealType.h"
@@ -117,7 +120,7 @@ namespace TunaSweeperEditorSetup
 	const FString InteractionInputTaskId = TEXT("2026-05-11_SetInteractInputToFKey");
 	const FString InteractionMarkerAlignmentTaskId = TEXT("2026-05-25_RebuildInteractionMarkerRequirementPreviewV1");
 	const FString PickupItemAndSpawnerTaskId = TEXT("2026-05-11_CreatePickupItemAndSpawnerAssetsV3");
-	const FString CommonGameHudTaskId = TEXT("2026-05-28_ModeTabIconButtonsV1");
+	const FString CommonGameHudTaskId = TEXT("2026-05-28_ReloadRingGaugeV1");
 	const FString InventoryInputTaskId = TEXT("2026-05-11_AddInventoryInput");
 	const FString QuickSlotInputTaskId = TEXT("2026-05-12_AddQuickSlotInputActions");
 	const FString DropInputTaskId = TEXT("2026-05-18_AddDropInputAction");
@@ -142,6 +145,7 @@ namespace TunaSweeperEditorSetup
 	const FString EnemyVisualMaterialTaskId = TEXT("2026-05-19_CreateEnemyAndContainerVisualMaterialsV3");
 	const FString RollingBomberLegMaterialTaskId = TEXT("2026-05-28_CreateRollingBomberLegMetalMaterialV1");
 	const FString RollingBomberChargeCylinderEffectTaskId = TEXT("2026-05-28_CreateRollingBomberChargeCylinderEffectV1");
+	const FString ProjectileHitEffectAssetTaskId = TEXT("2026-05-28_CreateProjectileHitEffectAssetsV1");
 	const FString VoxelMeshAssetTaskId = TEXT("2026-05-19_CreateSharedVoxelMeshAssetsV1");
 	const FString LumberjackMeleeSwingArcAssetTaskId = TEXT("2026-05-20_CreateLumberjackMeleeSwingArcAssetsV2");
 	const FString LedExpressionMaterialTaskId = TEXT("2026-05-26_CreateLedExpressionMaterialV1");
@@ -194,6 +198,8 @@ namespace TunaSweeperEditorSetup
 	const FString RollingBomberChargeCylinderMaskTextureAssetName = TEXT("T_RollingBomberChargeCylinderMask");
 	const FString RollingBomberChargeCylinderMaterialAssetName = TEXT("M_RollingBomberChargeCylinder");
 	const FString RollingBomberChargeCylinderMeshAssetName = TEXT("SM_RollingBomberChargeCylinder_Open");
+	const FString ProjectileHitEffectDataAssetName = TEXT("DA_ProjectileHitEffects");
+	const FString ProjectileHitRedBurstActorAssetName = TEXT("BP_ProjectileHit_RedBurst");
 	const FString LumberjackMeleeSwingArcMaterialAssetName = TEXT("M_LumberjackMeleeSwingArc");
 	const FString LumberjackMeleeSwingArcMeshAssetName = TEXT("SM_LumberjackMeleeSwingArc");
 	const FString LedExpressionMaterialAssetName = TEXT("M_LedExpression_VertexColorEmissive");
@@ -1873,6 +1879,77 @@ namespace TunaSweeperEditorSetup
 		}
 
 		return SetProjectGameInstanceToBlueprint();
+	}
+
+	bool EnsureProjectileHitEffectAssets()
+	{
+		UBlueprint* HitEffectBlueprint = EnsureBlueprint(
+			EffectsAssetPath,
+			ProjectileHitRedBurstActorAssetName,
+			ATunaSweeperProjectileHitBurstActor::StaticClass());
+		UTunaSweeperProjectileHitEffectDataAsset* HitEffectDataAsset =
+			EnsureDataAsset<UTunaSweeperProjectileHitEffectDataAsset>(
+				EffectsAssetPath,
+				ProjectileHitEffectDataAssetName);
+		if (!HitEffectBlueprint || !HitEffectDataAsset)
+		{
+			return false;
+		}
+
+		HitEffectDataAsset->Modify();
+		HitEffectDataAsset->HitEffects.Reset();
+
+		FTunaSweeperProjectileHitEffectDefinition RedBurstDefinition;
+		RedBurstDefinition.EffectId = FName(TEXT("hit.red_burst"));
+		RedBurstDefinition.EffectActorClass =
+			TSoftClassPtr<ATunaSweeperProjectileHitBurstActor>(
+				FSoftObjectPath(GetAssetClassPath(EffectsAssetPath, ProjectileHitRedBurstActorAssetName)));
+		RedBurstDefinition.BurstColor = FLinearColor(1.0f, 0.03f, 0.0f, 1.0f);
+		RedBurstDefinition.SpawnScale = FVector::OneVector;
+		RedBurstDefinition.SurfaceOffsetCm = 1.0f;
+		HitEffectDataAsset->HitEffects.Add(RedBurstDefinition);
+		HitEffectDataAsset->MarkPackageDirty();
+		if (!SaveAsset(HitEffectDataAsset))
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to save %s."), *GetAssetObjectPath(EffectsAssetPath, ProjectileHitEffectDataAssetName));
+			return false;
+		}
+
+		UBlueprint* GameInstanceBlueprint = LoadObject<UBlueprint>(nullptr, *GetGameInstanceObjectPath());
+		if (!GameInstanceBlueprint && !EnsureGameInstanceBlueprint())
+		{
+			return false;
+		}
+
+		GameInstanceBlueprint = LoadObject<UBlueprint>(nullptr, *GetGameInstanceObjectPath());
+		if (!GameInstanceBlueprint)
+		{
+			return false;
+		}
+
+		if (!GameInstanceBlueprint->GeneratedClass)
+		{
+			FKismetEditorUtilities::CompileBlueprint(GameInstanceBlueprint);
+		}
+
+		UTunaSweeperGameInstance* GameInstanceDefaults = GameInstanceBlueprint->GeneratedClass
+			? Cast<UTunaSweeperGameInstance>(GameInstanceBlueprint->GeneratedClass->GetDefaultObject())
+			: nullptr;
+		if (!GameInstanceDefaults)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to configure projectile hit effect mapping on %s."), *GetGameInstanceObjectPath());
+			return false;
+		}
+
+		GameInstanceBlueprint->Modify();
+		GameInstanceDefaults->Modify();
+		GameInstanceDefaults->ProjectileHitEffectDataAsset =
+			TSoftObjectPtr<UTunaSweeperProjectileHitEffectDataAsset>(
+				FSoftObjectPath(GetAssetObjectPath(EffectsAssetPath, ProjectileHitEffectDataAssetName)));
+		GameInstanceBlueprint->MarkPackageDirty();
+		FKismetEditorUtilities::CompileBlueprint(GameInstanceBlueprint);
+
+		return SaveAsset(GameInstanceBlueprint);
 	}
 
 	bool EnsureTopDownShooterAssets()
@@ -6375,6 +6452,9 @@ namespace TunaSweeperEditorSetup
 		USizeBox* CenterReloadGaugeRoot = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("CenterReloadGaugeRoot"));
 		UCanvasPanel* CenterReloadGaugeCanvas = WidgetTree->ConstructWidget<UCanvasPanel>(UCanvasPanel::StaticClass(), TEXT("CenterReloadGaugeCanvas"));
 		UBorder* CenterReloadGaugeBackdrop = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("CenterReloadGaugeBackdrop"));
+		UTunaSweeperReloadRingWidget* CenterReloadRingWidget = WidgetTree->ConstructWidget<UTunaSweeperReloadRingWidget>(
+			UTunaSweeperReloadRingWidget::StaticClass(),
+			TEXT("CenterReloadRingWidget"));
 		UTextBlock* CenterReloadPercentText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("CenterReloadPercentText"));
 		UHorizontalBox* CenterReloadPromptRoot = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("CenterReloadPromptRoot"));
 		UTextBlock* CenterReloadPromptText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("CenterReloadPromptText"));
@@ -6384,7 +6464,7 @@ namespace TunaSweeperEditorSetup
 		if (!RootCanvas || !TopStatusReserveWidget || !CenterContentPanel || !InventoryAreaWidget || !ItemInfoPanelWidget ||
 			!ExternalPanelWidget || !UnsupportedModePanel || !UnsupportedModeText || !ModeTitleText ||
 			!BottomRow || !BottomStatusWidget || !BottomGap || !QuickSlotBarWidget ||
-			!CenterReloadGaugeRoot || !CenterReloadGaugeCanvas || !CenterReloadGaugeBackdrop || !CenterReloadPercentText ||
+			!CenterReloadGaugeRoot || !CenterReloadGaugeCanvas || !CenterReloadGaugeBackdrop || !CenterReloadRingWidget || !CenterReloadPercentText ||
 			!CenterReloadPromptRoot || !CenterReloadPromptText || !CenterReloadPromptKeyBackground || !CenterReloadPromptKeyText)
 		{
 			return false;
@@ -6508,37 +6588,14 @@ namespace TunaSweeperEditorSetup
 			CenterReloadBackdropSlot->SetSize(FVector2D(58.0f, 58.0f));
 		}
 
-		for (int32 SegmentNumber = 1; SegmentNumber <= 12; ++SegmentNumber)
+		CenterReloadRingWidget->SetReloadProgress(0.0f, true);
+		UCanvasPanelSlot* CenterReloadRingSlot = CenterReloadGaugeCanvas->AddChildToCanvas(CenterReloadRingWidget);
+		if (CenterReloadRingSlot)
 		{
-			UBorder* Segment = WidgetTree->ConstructWidget<UBorder>(
-				UBorder::StaticClass(),
-				FName(*FString::Printf(TEXT("CenterReloadSegment%02d"), SegmentNumber)));
-			if (!Segment)
-			{
-				return false;
-			}
-
-			Segment->SetBrush(MakeRoundedBoxBrush(
-				FVector2D(9.0f, 14.0f),
-				FLinearColor(0.62f, 0.98f, 0.62f, 1.0f),
-				FLinearColor::Transparent,
-				0.0f));
-			Segment->SetRenderOpacity(0.18f);
-			const float AngleRadians = FMath::DegreesToRadians((SegmentNumber - 1) * 30.0f - 90.0f);
-			const FVector2D SegmentPosition(
-				FMath::Cos(AngleRadians) * 36.0f,
-				FMath::Sin(AngleRadians) * 36.0f);
-			UCanvasPanelSlot* SegmentSlot = CenterReloadGaugeCanvas->AddChildToCanvas(Segment);
-			if (SegmentSlot)
-			{
-				SegmentSlot->SetAnchors(FAnchors(0.5f, 0.5f, 0.5f, 0.5f));
-				SegmentSlot->SetAlignment(FVector2D(0.5f, 0.5f));
-				SegmentSlot->SetPosition(SegmentPosition);
-				SegmentSlot->SetSize(FVector2D(9.0f, 14.0f));
-			}
-			Segment->SetRenderTransformPivot(FVector2D(0.5f, 0.5f));
-			Segment->SetRenderTransformAngle((SegmentNumber - 1) * 30.0f);
-			RegisterWidgetVariable(WidgetBlueprint, Segment);
+			CenterReloadRingSlot->SetAnchors(FAnchors(0.5f, 0.5f, 0.5f, 0.5f));
+			CenterReloadRingSlot->SetAlignment(FVector2D(0.5f, 0.5f));
+			CenterReloadRingSlot->SetPosition(FVector2D(0.0f, 0.0f));
+			CenterReloadRingSlot->SetSize(FVector2D(90.0f, 90.0f));
 		}
 
 		ConfigureTextBlock(CenterReloadPercentText, FText::GetEmpty(), FLinearColor(0.9f, 1.0f, 0.88f, 1.0f), 13);
@@ -6606,6 +6663,7 @@ namespace TunaSweeperEditorSetup
 		RegisterWidgetVariable(WidgetBlueprint, BottomStatusWidget);
 		RegisterWidgetVariable(WidgetBlueprint, QuickSlotBarWidget);
 		RegisterWidgetVariable(WidgetBlueprint, CenterReloadGaugeRoot);
+		RegisterWidgetVariable(WidgetBlueprint, CenterReloadRingWidget);
 		RegisterWidgetVariable(WidgetBlueprint, CenterReloadPromptRoot);
 		RegisterWidgetVariable(WidgetBlueprint, CenterReloadPercentText);
 		RegisterWidgetVariable(WidgetBlueprint, CenterContentPanel);
@@ -8976,6 +9034,13 @@ public:
 			[]()
 			{
 				return TunaSweeperEditorSetup::EnsureRollingBomberChargeCylinderEffectAssets();
+			});
+
+		FTunaSweeperEditorRunOnce::Run(
+			TunaSweeperEditorSetup::ProjectileHitEffectAssetTaskId,
+			[]()
+			{
+				return TunaSweeperEditorSetup::EnsureProjectileHitEffectAssets();
 			});
 
 		const bool bLedExpressionMaterialTaskRan = FTunaSweeperEditorRunOnce::Run(

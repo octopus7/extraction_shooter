@@ -173,6 +173,7 @@ bool ATunaSweeperLootContainerActor::OpenRuntimeContainer(
 		OutInstance = BuildRuntimeContainerInstance();
 		TunaGameInstance->SetActiveLootContainerRuntimeSlots(OutInstance, RuntimeSlots, this);
 		CaptureRuntimeContentsFromActiveContainer();
+		ApplyOpenedMarkerState();
 		return true;
 	}
 
@@ -188,6 +189,7 @@ bool ATunaSweeperLootContainerActor::OpenRuntimeContainer(
 	RuntimeCapacity = FMath::Max(0, OutInstance.Capacity);
 	RuntimeSlots = TunaGameInstance->GetActiveLootContainerSlots();
 	bHasRuntimeContainerState = true;
+	ApplyOpenedMarkerState();
 	return true;
 }
 
@@ -235,6 +237,7 @@ void ATunaSweeperLootContainerActor::RefreshContainerPresentation()
 		InteractableComponent->SetInteractionTypeAndDisplayName(
 			ETunaSweeperInteractionType::LootContainerOpen,
 			FText::FromString(TEXT("\uC5F4\uAE30")));
+		ApplyOpenedMarkerState();
 	}
 
 	if (!VisualMesh)
@@ -299,6 +302,15 @@ void ATunaSweeperLootContainerActor::ResetRuntimeContainerState()
 	RuntimeContainerDefinitionId = INDEX_NONE;
 	RuntimeContentsId = INDEX_NONE;
 	bHasRuntimeContainerState = false;
+	ApplyOpenedMarkerState();
+}
+
+void ATunaSweeperLootContainerActor::ApplyOpenedMarkerState()
+{
+	if (InteractableComponent)
+	{
+		InteractableComponent->SetMarkerCompleted(bHasRuntimeContainerState);
+	}
 }
 
 void ATunaSweeperLootContainerActor::CaptureRuntimeContentsFromActiveContainer()
@@ -317,6 +329,7 @@ void ATunaSweeperLootContainerActor::CaptureRuntimeContentsFromActiveContainer()
 	RuntimeCapacity = TunaGameInstance->GetActiveLootContainerCapacity();
 	RuntimeSlots = TunaGameInstance->GetActiveLootContainerSlots();
 	bHasRuntimeContainerState = true;
+	ApplyOpenedMarkerState();
 }
 
 void ATunaSweeperLootContainerActor::HandleActiveLootContainerUiClosed()

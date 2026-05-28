@@ -754,12 +754,38 @@ void ATunaSweeperTopDownCharacter::FireWeapon()
 	}
 
 	UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
-	if (!TunaGameInstance || !TunaGameInstance->TryConsumeLoadedAmmoForWeaponSlot(SelectedWeaponSlotNumber))
+	if (!TunaGameInstance)
 	{
 		return;
 	}
 
-	EquippedWeapon->Fire(AimDirection, this);
+	FName ProjectileHitEffectId = NAME_None;
+	FTunaSweeperItemInstance WeaponInstance;
+	FTunaSweeperItemDefinition WeaponDefinition;
+	if (TunaGameInstance->TryGetEquipmentWeaponSlotItem(SelectedWeaponSlotNumber, WeaponInstance, WeaponDefinition))
+	{
+		const int32 LoadedAmmoItemId = WeaponInstance.LoadedAmmoItemId != INDEX_NONE
+			? WeaponInstance.LoadedAmmoItemId
+			: WeaponInstance.SelectedAmmoItemId;
+		if (LoadedAmmoItemId != INDEX_NONE)
+		{
+			if (UTunaSweeperItemDataSubsystem* ItemDataSubsystem = TunaGameInstance->GetSubsystem<UTunaSweeperItemDataSubsystem>())
+			{
+				FTunaSweeperItemDefinition AmmoDefinition;
+				if (ItemDataSubsystem->TryGetItemDefinition(LoadedAmmoItemId, AmmoDefinition))
+				{
+					ProjectileHitEffectId = AmmoDefinition.ProjectileHitEffectId;
+				}
+			}
+		}
+	}
+
+	if (!TunaGameInstance->TryConsumeLoadedAmmoForWeaponSlot(SelectedWeaponSlotNumber))
+	{
+		return;
+	}
+
+	EquippedWeapon->Fire(AimDirection, this, ProjectileHitEffectId);
 }
 
 bool ATunaSweeperTopDownCharacter::CanUseSelectedWeaponSlot()
@@ -1236,7 +1262,7 @@ void ATunaSweeperTopDownCharacter::UpdateAimingVisuals(float DeltaSeconds)
 
 	if (TopDownCamera)
 	{
-		const float TargetFOV = bIsAiming ? CameraModeSettings.AimFOV : CameraModeSettings.DefaultFOV;
+		const float TargetFOV = CameraModeSettings.DefaultFOV;
 		CurrentCameraBaseFOV = FMath::FInterpTo(CurrentCameraBaseFOV, TargetFOV, DeltaSeconds, CameraInterpSpeed);
 		TopDownCamera->SetFieldOfView(CurrentCameraBaseFOV + HitReactionFOVDegrees);
 
@@ -1266,7 +1292,7 @@ void ATunaSweeperTopDownCharacter::UpdateAimingVisuals(float DeltaSeconds)
 			DeltaSeconds,
 			CameraInterpSpeed);
 
-		const FVector AimTargetOffset = bIsAiming ? AimDirection * AimCameraLeadDistance : FVector::ZeroVector;
+		const FVector AimTargetOffset = AimDirection.GetSafeNormal2D() * AimCameraLeadDistance;
 		CurrentCameraAimOffset = FMath::VInterpTo(CurrentCameraAimOffset, AimTargetOffset, DeltaSeconds, CameraInterpSpeed);
 		CameraBoom->TargetOffset = CurrentCameraModeOffset + CurrentCameraAimOffset + HitReactionOffset;
 	}

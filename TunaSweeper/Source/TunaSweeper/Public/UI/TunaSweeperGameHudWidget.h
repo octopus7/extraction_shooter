@@ -16,6 +16,7 @@ class UTunaSweeperItemThumbnailSlotWidget;
 class UTunaSweeperMapWidget;
 class UTunaSweeperMemoWidget;
 class UTunaSweeperQuestWidget;
+class UTunaSweeperReloadRingWidget;
 class UBorder;
 class UHorizontalBox;
 class UTextBlock;
@@ -203,6 +204,9 @@ private:
 
 	UPROPERTY(BlueprintReadOnly, Transient, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional, AllowPrivateAccess = "true"))
 	TObjectPtr<UWidget> CenterReloadGaugeRoot;
+
+	UPROPERTY(BlueprintReadOnly, Transient, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional, AllowPrivateAccess = "true"))
+	TObjectPtr<UTunaSweeperReloadRingWidget> CenterReloadRingWidget;
 
 	UPROPERTY(BlueprintReadOnly, Transient, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional, AllowPrivateAccess = "true"))
 	TObjectPtr<UWidget> CenterReloadPromptRoot;

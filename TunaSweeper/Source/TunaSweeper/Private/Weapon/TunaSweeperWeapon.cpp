@@ -32,7 +32,7 @@ ATunaSweeperWeapon::ATunaSweeperWeapon()
 	ProjectileClass = TSoftClassPtr<ATunaSweeperProjectile>(FSoftObjectPath(TEXT("/Game/Weapons/BP_TunaSweeperProjectile.BP_TunaSweeperProjectile_C")));
 }
 
-void ATunaSweeperWeapon::Fire(const FVector& AimDirection, APawn* InstigatorPawn)
+void ATunaSweeperWeapon::Fire(const FVector& AimDirection, APawn* InstigatorPawn, FName ProjectileHitEffectId)
 {
 	UWorld* World = GetWorld();
 	if (!World)
@@ -65,7 +65,12 @@ void ATunaSweeperWeapon::Fire(const FVector& AimDirection, APawn* InstigatorPawn
 
 	const FVector SpawnLocation = MuzzlePoint ? MuzzlePoint->GetComponentLocation() : GetActorLocation();
 	const FRotator SpawnRotation = ShotDirection.Rotation();
-	World->SpawnActor<ATunaSweeperProjectile>(LoadedProjectileClass, SpawnLocation, SpawnRotation, SpawnParameters);
+	ATunaSweeperProjectile* SpawnedProjectile =
+		World->SpawnActor<ATunaSweeperProjectile>(LoadedProjectileClass, SpawnLocation, SpawnRotation, SpawnParameters);
+	if (SpawnedProjectile)
+	{
+		SpawnedProjectile->SetHitEffectId(ProjectileHitEffectId);
+	}
 
 	LastFireTimeSeconds = CurrentTime;
 }

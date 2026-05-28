@@ -66,7 +66,8 @@
     "shop_sell_price": 12,
     "icon_file_name": "T_UIIcon_PistolAmmo.uasset",
     "category_tag": "item.category.ammo",
-    "ammo_type_tag": "ammo.type.pistol"
+    "ammo_type_tag": "ammo.type.pistol",
+    "projectile_hit_effect_id": "hit.red_burst"
   },
   {
     "id": 2002,
@@ -75,7 +76,8 @@
     "shop_sell_price": 18,
     "icon_file_name": "T_UIIcon_RifleAmmo.uasset",
     "category_tag": "item.category.ammo",
-    "ammo_type_tag": "ammo.type.rifle"
+    "ammo_type_tag": "ammo.type.rifle",
+    "projectile_hit_effect_id": "hit.red_burst"
   },
   {
     "id": 2003,
@@ -84,7 +86,8 @@
     "shop_sell_price": 16,
     "icon_file_name": "T_UIIcon_ShotgunAmmo.uasset",
     "category_tag": "item.category.ammo",
-    "ammo_type_tag": "ammo.type.shotgun"
+    "ammo_type_tag": "ammo.type.shotgun",
+    "projectile_hit_effect_id": "hit.red_burst"
   },
   {
     "id": 2004,

@@ -21,6 +21,8 @@ public:
 	ATunaSweeperProjectile();
 
 	void SetDamageAmount(float InDamageAmount) { DamageAmount = FMath::Max(0.0f, InDamageAmount); }
+	void SetHitEffectId(FName InHitEffectId) { HitEffectId = InHitEffectId; }
+	FName GetHitEffectId() const { return HitEffectId; }
 	void IgnoreActor(AActor* ActorToIgnore);
 	void ApplyVisualMaterial(
 		UMaterialInterface* Material,
@@ -42,6 +44,8 @@ protected:
 	virtual void BeginPlay() override;
 
 	void ApplyProjectileCollisionDefaults();
+	void SpawnHitEffect(const FHitResult& Hit, AActor* OtherActor, UPrimitiveComponent* OtherComp) const;
+	FVector ResolveHitEffectLocation(const FHitResult& Hit, AActor* OtherActor) const;
 
 	UFUNCTION()
 	void HandleHit(
@@ -77,4 +81,7 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Projectile|Camera", meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float CameraHitReactionScale = 1.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Projectile|Hit Effect")
+	FName HitEffectId = NAME_None;
 };

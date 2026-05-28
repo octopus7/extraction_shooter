@@ -26,6 +26,8 @@ public:
 		AController* EventInstigator,
 		AActor* DamageCauser) override;
 
+	virtual FVector ResolveProjectileHitEffectLocation(const FHitResult& Hit) const;
+
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Combat")
 	bool FireProjectileAt(AActor* TargetActor);
 
@@ -61,6 +63,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat", meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float ProjectileDamage = 10.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat")
+	FName ProjectileHitEffectId = FName(TEXT("hit.red_burst"));
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat|Melee", meta = (DisplayName = "Melee Impact Niagara Effect"))
 	TSoftObjectPtr<UNiagaraSystem> MeleeSwingEffect;

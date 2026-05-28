@@ -12,6 +12,8 @@ namespace TunaSweeperInteractionMarkerLayout
 	constexpr float DrawHeight = 80.0f;
 	constexpr float MarkerRootWidth = 360.0f;
 	constexpr float MarkerBoxWidth = 56.0f;
+	constexpr float VisibleRingScale = 1.0f;
+	constexpr float HiddenRingScale = 3.0f;
 
 	FVector2D GetDrawSize()
 	{
@@ -205,6 +207,12 @@ void UTunaSweeperInteractableComponent::SetInteractionRequirementPreview(
 	ApplyMarkerState();
 }
 
+void UTunaSweeperInteractableComponent::SetMarkerCompleted(bool bInMarkerCompleted)
+{
+	bMarkerCompleted = bInMarkerCompleted;
+	ApplyMarkerState();
+}
+
 void UTunaSweeperInteractableComponent::RegisterWithInteractionSubsystem()
 {
 	if (bRegisteredWithInteractionSubsystem)
@@ -319,8 +327,9 @@ void UTunaSweeperInteractableComponent::UpdateMarker(float DeltaSeconds)
 		PlayerPawn &&
 		FVector::DistSquared2D(PlayerPawn->GetActorLocation(), GetInteractionLocation()) <= FMath::Square(MarkerVisibleDistance);
 
-	const float TargetAlpha = bInsideVisibleDistance ? 1.0f : 0.0f;
-	const float TargetScale = bInsideVisibleDistance ? 1.0f : 3.0f;
+	const float TargetScale = bInsideVisibleDistance
+		? TunaSweeperInteractionMarkerLayout::VisibleRingScale
+		: TunaSweeperInteractionMarkerLayout::HiddenRingScale;
 	bool bIsFocusedInteractable = false;
 
 	if (UWorld* World = GetWorld())
@@ -337,8 +346,12 @@ void UTunaSweeperInteractableComponent::UpdateMarker(float DeltaSeconds)
 
 	const float TargetLabelAlpha = bIsFocusedInteractable ? 1.0f : 0.0f;
 
-	MarkerAlpha = FMath::FInterpTo(MarkerAlpha, TargetAlpha, DeltaSeconds, MarkerFadeInterpSpeed);
 	MarkerRingScale = FMath::FInterpTo(MarkerRingScale, TargetScale, DeltaSeconds, MarkerScaleInterpSpeed);
+	MarkerAlpha = FMath::Clamp(
+		(TunaSweeperInteractionMarkerLayout::HiddenRingScale - MarkerRingScale) /
+			(TunaSweeperInteractionMarkerLayout::HiddenRingScale - TunaSweeperInteractionMarkerLayout::VisibleRingScale),
+		0.0f,
+		1.0f);
 	LabelAlpha = FMath::FInterpTo(LabelAlpha, TargetLabelAlpha, DeltaSeconds, LabelFadeInterpSpeed);
 
 	ApplyMarkerState();
@@ -358,6 +371,7 @@ void UTunaSweeperInteractableComponent::ApplyMarkerState()
 	{
 		MarkerWidget->SetMarkerText(ResolveInteractionDisplayName());
 		MarkerWidget->SetRequirementPreview(RequirementIconTexture, RequirementQuantity, bShowRequirementPreview);
+		MarkerWidget->SetMarkerOpened(bMarkerCompleted);
 		MarkerWidget->SetMarkerPresentation(MarkerAlpha, MarkerRingScale, LabelAlpha);
 	}
 }

@@ -177,6 +177,18 @@ namespace TunaSweeperHoveredItemInteraction
 
 		return false;
 	}
+
+	void ShowInsufficientSpaceMessage()
+	{
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(
+				-1,
+				2.0f,
+				FColor::Red,
+				TEXT("\uACF5\uAC04\uC774 \uBD80\uC871\uD569\uB2C8\uB2E4"));
+		}
+	}
 }
 
 namespace TunaSweeperIntroMap
@@ -919,19 +931,29 @@ bool ATunaSweeperPlayerController::TryHandleHoveredItemInteract()
 	}
 
 	FTunaSweeperItemSlotReference TargetSlot;
-	if (TunaSweeperHoveredItemInteraction::TryFindEquipmentTarget(TunaGameInstance, HoveredSlot, true, TargetSlot) ||
-		TunaSweeperHoveredItemInteraction::TryFindEquipmentTarget(TunaGameInstance, HoveredSlot, false, TargetSlot))
+	if (HoveredSlot.Source == ETunaSweeperItemSlotSource::Inventory)
 	{
-		TunaGameInstance->MoveItemBetweenSlots(HoveredSlot, TargetSlot);
-		TunaGameInstance->ClearHoveredItemSlot(HoveredSlot);
+		if (TunaSweeperHoveredItemInteraction::TryFindEquipmentTarget(TunaGameInstance, HoveredSlot, true, TargetSlot) ||
+			TunaSweeperHoveredItemInteraction::TryFindEquipmentTarget(TunaGameInstance, HoveredSlot, false, TargetSlot))
+		{
+			TunaGameInstance->MoveItemBetweenSlots(HoveredSlot, TargetSlot);
+			TunaGameInstance->ClearHoveredItemSlot(HoveredSlot);
+		}
 		return true;
 	}
 
-	if (HoveredSlot.Source == ETunaSweeperItemSlotSource::LootContainer &&
-		TunaSweeperHoveredItemInteraction::TryFindFirstInventoryTarget(TunaGameInstance, HoveredSlot, TargetSlot))
+	if (HoveredSlot.Source == ETunaSweeperItemSlotSource::LootContainer)
 	{
-		TunaGameInstance->MoveItemBetweenSlots(HoveredSlot, TargetSlot);
-		TunaGameInstance->ClearHoveredItemSlot(HoveredSlot);
+		if (TunaSweeperHoveredItemInteraction::TryFindEquipmentTarget(TunaGameInstance, HoveredSlot, true, TargetSlot) ||
+			TunaSweeperHoveredItemInteraction::TryFindFirstInventoryTarget(TunaGameInstance, HoveredSlot, TargetSlot))
+		{
+			TunaGameInstance->MoveItemBetweenSlots(HoveredSlot, TargetSlot);
+			TunaGameInstance->ClearHoveredItemSlot(HoveredSlot);
+		}
+		else
+		{
+			TunaSweeperHoveredItemInteraction::ShowInsufficientSpaceMessage();
+		}
 		return true;
 	}
 

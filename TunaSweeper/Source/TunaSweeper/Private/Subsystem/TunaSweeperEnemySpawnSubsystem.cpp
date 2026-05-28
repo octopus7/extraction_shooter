@@ -7,6 +7,7 @@
 #include "Engine/StaticMesh.h"
 #include "Engine/World.h"
 #include "GameFramework/Actor.h"
+#include "Interaction/TunaSweeperExtractionPointActor.h"
 #include "Interaction/TunaSweeperInteractableComponent.h"
 #include "Interaction/TunaSweeperItemSpawnInteractableActor.h"
 #include "Interaction/TunaSweeperLevelTravelInteractableActor.h"
@@ -22,9 +23,11 @@
 #include "Misc/FileHelper.h"
 #include "Misc/PackageName.h"
 #include "Misc/Paths.h"
+#include "NiagaraSystem.h"
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
 #include "Sound/SoundBase.h"
+#include "UI/TunaSweeperExtractionProgressWidget.h"
 #include "UI/TunaSweeperInteractionMarkerWidget.h"
 #include "UObject/UObjectGlobals.h"
 
@@ -46,6 +49,7 @@ namespace TunaSweeperEnemySpawn
 	const TCHAR* DefaultLootContainerSpawnClassPath = TEXT("/Game/Interaction/BP_Interact_LootContainerSpawn.BP_Interact_LootContainerSpawn_C");
 	const TCHAR* DefaultSelfDestructClassPath = TEXT("/Game/Interaction/BP_Interact_SelfDestruct.BP_Interact_SelfDestruct_C");
 	const TCHAR* DefaultRollingBomberSpawnerClassPath = TEXT("/Script/TunaSweeper.TunaSweeperRollingBomberSpawner");
+	const TCHAR* DefaultExtractionPointClassPath = TEXT("/Script/TunaSweeper.TunaSweeperExtractionPointActor");
 	const TCHAR* DefaultRollingBomberClassPath = TEXT("/Script/TunaSweeper.TunaSweeperRollingBomber");
 	const TCHAR* DefaultRollingBomberLaunchSoundPath =
 		TEXT("/Game/Audio/SFX/SFX_RollingBomberSpawnerLaunch_FM.SFX_RollingBomberSpawnerLaunch_FM");
@@ -149,6 +153,12 @@ namespace TunaSweeperEnemySpawn
 		{
 			return UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::RollingBomberSpawner;
 		}
+		if (SpawnType == TEXT("extraction_point") ||
+			SpawnType == TEXT("extractionpoint") ||
+			SpawnType == TEXT("extraction"))
+		{
+			return UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::ExtractionPoint;
+		}
 
 		return UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::Unknown;
 	}
@@ -172,6 +182,8 @@ namespace TunaSweeperEnemySpawn
 			return DefaultSelfDestructClassPath;
 		case UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::RollingBomberSpawner:
 			return DefaultRollingBomberSpawnerClassPath;
+		case UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::ExtractionPoint:
+			return DefaultExtractionPointClassPath;
 		default:
 			return nullptr;
 		}
@@ -192,6 +204,8 @@ namespace TunaSweeperEnemySpawn
 			return FText::FromString(TEXT("\uC790\uD3ED"));
 		case UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::RollingBomberSpawner:
 			return FText::FromString(TEXT("Rolling Bomber Spawner"));
+		case UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::ExtractionPoint:
+			return FText::FromString(TEXT("Extraction"));
 		default:
 			return FText::GetEmpty();
 		}
@@ -1205,6 +1219,46 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadGameplayInteractionActorSpawnData(bool
 			FMath::Max(0.01f, LevelTravelVisualScale.Z));
 		SpawnDefinition.LevelTravelVisualRelativeLocation = LevelTravelVisualRelativeLocation;
 
+		double NumericExtractionRadius = 300.0;
+		double NumericExtractionRadiusMeters = 0.0;
+		double NumericExtractionHoldSeconds = 4.0;
+		double NumericExtractionRadiusRingWidth = 4.8;
+		FString ExtractionProgressWidgetClassPath;
+		FString ExtractionParticleSystemPath;
+		FString ExtractionRadiusVisualMaterialPath;
+		JsonObject->TryGetNumberField(TEXT("extraction_radius"), NumericExtractionRadius);
+		if (JsonObject->TryGetNumberField(TEXT("extraction_radius_meters"), NumericExtractionRadiusMeters) &&
+			NumericExtractionRadiusMeters > 0.0)
+		{
+			NumericExtractionRadius = NumericExtractionRadiusMeters * 100.0;
+		}
+		JsonObject->TryGetNumberField(TEXT("extraction_hold_seconds"), NumericExtractionHoldSeconds);
+		JsonObject->TryGetNumberField(TEXT("extraction_radius_ring_width"), NumericExtractionRadiusRingWidth);
+		JsonObject->TryGetStringField(TEXT("extraction_progress_widget_class"), ExtractionProgressWidgetClassPath);
+		JsonObject->TryGetStringField(TEXT("extraction_particle_system"), ExtractionParticleSystemPath);
+		JsonObject->TryGetStringField(TEXT("extraction_radius_visual_material"), ExtractionRadiusVisualMaterialPath);
+		SpawnDefinition.ExtractionRadius = FMath::Max(1.0f, static_cast<float>(NumericExtractionRadius));
+		SpawnDefinition.ExtractionHoldSeconds = FMath::Max(0.1f, static_cast<float>(NumericExtractionHoldSeconds));
+		SpawnDefinition.ExtractionRadiusRingWidth = FMath::Max(1.0f, static_cast<float>(NumericExtractionRadiusRingWidth));
+		const FString TrimmedExtractionProgressWidgetClassPath = ExtractionProgressWidgetClassPath.TrimStartAndEnd();
+		if (!TrimmedExtractionProgressWidgetClassPath.IsEmpty())
+		{
+			SpawnDefinition.ExtractionProgressWidgetClass = TSoftClassPtr<UTunaSweeperExtractionProgressWidget>(
+				FSoftObjectPath(TrimmedExtractionProgressWidgetClassPath));
+		}
+		const FString TrimmedExtractionParticleSystemPath = ExtractionParticleSystemPath.TrimStartAndEnd();
+		if (!TrimmedExtractionParticleSystemPath.IsEmpty())
+		{
+			SpawnDefinition.ExtractionParticleSystem = TSoftObjectPtr<UNiagaraSystem>(
+				FSoftObjectPath(TrimmedExtractionParticleSystemPath));
+		}
+		const FString TrimmedExtractionRadiusVisualMaterialPath = ExtractionRadiusVisualMaterialPath.TrimStartAndEnd();
+		if (!TrimmedExtractionRadiusVisualMaterialPath.IsEmpty())
+		{
+			SpawnDefinition.ExtractionRadiusVisualMaterial = TSoftObjectPtr<UMaterialInterface>(
+				FSoftObjectPath(TrimmedExtractionRadiusVisualMaterialPath));
+		}
+
 		double NumericItemId = 1001.0;
 		double NumericItemQuantity = 1.0;
 		bool bDestroyOnPickup = true;
@@ -1331,6 +1385,12 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadGameplayInteractionActorSpawnData(bool
 			SpawnDefinition.TargetLevelName.IsNone())
 		{
 			UE_LOG(LogTunaSweeperEnemySpawn, Warning, TEXT("Skipping gameplay interaction actor spawn row %d: level travel target is missing."), RowIndex);
+			continue;
+		}
+		if (SpawnDefinition.SpawnType == EGameplayInteractionActorSpawnType::ExtractionPoint &&
+			SpawnDefinition.TargetLevelName.IsNone())
+		{
+			UE_LOG(LogTunaSweeperEnemySpawn, Warning, TEXT("Skipping gameplay interaction actor spawn row %d: extraction target is missing."), RowIndex);
 			continue;
 		}
 		if (SpawnDefinition.SpawnType == EGameplayInteractionActorSpawnType::LootContainer &&
@@ -1464,6 +1524,22 @@ void UTunaSweeperEnemySpawnSubsystem::ConfigureGameplayInteractionActor(
 				SpawnDefinition.LevelTravelVisualMesh,
 				SpawnDefinition.LevelTravelVisualScale,
 				SpawnDefinition.LevelTravelVisualRelativeLocation);
+		}
+		break;
+	case EGameplayInteractionActorSpawnType::ExtractionPoint:
+		if (ATunaSweeperExtractionPointActor* ExtractionPointActor = Cast<ATunaSweeperExtractionPointActor>(SpawnedActor))
+		{
+			ExtractionPointActor->ConfigureExtractionPointDefaults(
+				SpawnDefinition.TargetLevelName,
+				SpawnDefinition.ExtractionRadius,
+				SpawnDefinition.ExtractionHoldSeconds,
+				SpawnDefinition.ExtractionRadiusRingWidth,
+				SpawnDefinition.ExtractionProgressWidgetClass,
+				SpawnDefinition.ExtractionParticleSystem,
+				SpawnDefinition.ExtractionRadiusVisualMaterial,
+				SpawnDefinition.TransitionMediaSource,
+				SpawnDefinition.TransitionWidgetClass,
+				SpawnDefinition.TransitionMessage);
 		}
 		break;
 	case EGameplayInteractionActorSpawnType::PickupItem:

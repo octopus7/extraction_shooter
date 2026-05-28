@@ -51,6 +51,9 @@ struct TUNASWEEPER_API FTunaSweeperItemDefinition
 	FName AmmoTypeTag;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
+	FName ProjectileHitEffectId;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
 	TArray<FName> AttachmentSlotTags;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")

@@ -2,6 +2,7 @@
 
 #include "Blueprint/UserWidget.h"
 #include "CoreMinimal.h"
+#include "Styling/SlateBrush.h"
 #include "TunaSweeperInteractionMarkerWidget.generated.h"
 
 class UTextBlock;
@@ -24,6 +25,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Interaction")
 	void SetMarkerPresentation(float InAlpha, float InRingScale, float InLabelAlpha);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Interaction")
+	void SetMarkerOpened(bool bInOpened);
 
 protected:
 	virtual void NativeConstruct() override;
@@ -57,12 +61,22 @@ private:
 	void CacheNamedWidgets();
 	void EnsureRequirementWidgets();
 	void ApplyState();
+	UTexture2D* ResolveOpenedCheckTexture();
 
 	FText CachedDisplayText = FText::FromString(TEXT("Interact"));
 	UPROPERTY(Transient)
 	TObjectPtr<UTexture2D> CachedRequirementIconTexture;
+	UPROPERTY(Transient)
+	TObjectPtr<UTexture2D> CachedOpenedCheckTexture;
+	UPROPERTY(Transient)
+	TObjectPtr<UImage> RingBrushImage;
+	UPROPERTY(Transient)
+	TObjectPtr<UImage> FilledBrushImage;
 	int32 CachedRequiredQuantity = 0;
 	bool bCachedShowRequirement = false;
+	bool bCachedOpened = false;
+	bool bHasCachedFilledBrush = false;
+	FSlateBrush CachedFilledBrush;
 	float CachedAlpha = 0.0f;
 	float CachedRingScale = 3.0f;
 	float CachedLabelAlpha = 0.0f;

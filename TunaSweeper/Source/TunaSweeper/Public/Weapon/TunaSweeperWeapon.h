@@ -17,7 +17,7 @@ public:
 	ATunaSweeperWeapon();
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Weapon")
-	void Fire(const FVector& AimDirection, APawn* InstigatorPawn);
+	void Fire(const FVector& AimDirection, APawn* InstigatorPawn, FName ProjectileHitEffectId = NAME_None);
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")

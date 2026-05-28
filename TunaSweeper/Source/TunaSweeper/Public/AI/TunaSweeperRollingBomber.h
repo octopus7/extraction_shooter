@@ -12,6 +12,7 @@ class UMaterialInterface;
 class UMaterialInstanceDynamic;
 class UPhysicalMaterial;
 class UPointLightComponent;
+class UCapsuleComponent;
 class USceneComponent;
 class UStaticMesh;
 class UStaticMeshComponent;
@@ -65,6 +66,7 @@ public:
 	ATunaSweeperRollingBomber();
 
 	virtual void Tick(float DeltaSeconds) override;
+	virtual FVector ResolveProjectileHitEffectLocation(const FHitResult& Hit) const override;
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Rolling Bomber|Spawner")
 	void LaunchFromSpawner(const FVector& LaunchVelocity);
@@ -152,6 +154,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UPointLightComponent> EyeLight;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UCapsuleComponent> ProjectileHurtbox;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UPhysicalMaterial> SpawnBouncePhysicalMaterial;
@@ -248,6 +253,15 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|Projectile", meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float RollingBomberProjectileCameraHitReactionScale = 0.06f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|Hitbox", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float ProjectileHurtboxRadiusCm = 22.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|Hitbox", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float ProjectileHurtboxHalfHeightCm = 88.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|Hitbox")
+	FVector ProjectileHurtboxLocalOffset = FVector(0.0f, 0.0f, 38.0f);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|Legs", meta = (ClampMin = "0.01", UIMin = "0.01"))
 	float LegFoldDurationSeconds = 0.65f;
