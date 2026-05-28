@@ -30,6 +30,9 @@ struct TUNASWEEPER_API FTunaSweeperItemDefinition
 	int32 ShopSellPrice = 0;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
+	int32 ExperienceValue = 0;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
 	float WeightKg = 0.0f;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")

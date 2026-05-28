@@ -1,6 +1,23 @@
 [
   {
     "level_name": "RaidMap",
+    "spawn_id": "TS_Travel_ToBunker",
+    "spawn_type": "level_travel",
+    "actor_class": "/Game/Interaction/BP_Interact_LevelTravel.BP_Interact_LevelTravel_C",
+    "target_level_name": "BunkerMap",
+    "interaction_display_name": "To Bunker",
+    "transition_media_source": "/Game/Movies/MS_BunkerToRaid.MS_BunkerToRaid",
+    "transition_widget_class": "/Game/UI/WBP_LevelTransitionVideo.WBP_LevelTransitionVideo_C",
+    "transition_message": "Returning to Bunker",
+    "location": [220.0, 220.0, 80.0],
+    "rotation": [0.0, 0.0, 0.0],
+    "scale": [1.0, 1.0, 1.0],
+    "level_travel_visual_mesh": "/Game/Interaction/SM_LevelTravel_Ladder.SM_LevelTravel_Ladder",
+    "level_travel_visual_scale": [0.75, 0.75, 0.75],
+    "level_travel_visual_relative_location": [0.0, 0.0, 0.0]
+  },
+  {
+    "level_name": "RaidMap",
     "spawn_id": "TS_ExtractionPoint_East",
     "spawn_type": "extraction_point",
     "actor_class": "/Game/Interaction/BP_ExtractionPoint.BP_ExtractionPoint_C",
@@ -100,6 +117,7 @@
     "launch_pitch_min_degrees": 38.0,
     "launch_pitch_max_degrees": 58.0,
     "spawner_max_health": 80.0,
+    "experience_value": 120,
     "location": [220.0, -3600.0, 90.0],
     "rotation": [0.0, 0.0, 0.0],
     "scale": [1.0, 1.0, 1.0]

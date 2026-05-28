@@ -38,7 +38,8 @@ public:
 		float InLaunchSpeedMax,
 		float InLaunchPitchMinDegrees,
 		float InLaunchPitchMaxDegrees,
-		float InMaxHealth);
+		float InMaxHealth,
+		int32 InExperienceValue);
 
 protected:
 	virtual void BeginPlay() override;
@@ -91,6 +92,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber Spawner|Health", meta = (ClampMin = "1.0", UIMin = "1.0"))
 	float MaxHealth = 80.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber Spawner|Experience", meta = (ClampMin = "0", UIMin = "0"))
+	int32 ExperienceValue = 120;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber Spawner|Activation", meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float ActivationRangeCm = 500.0f;

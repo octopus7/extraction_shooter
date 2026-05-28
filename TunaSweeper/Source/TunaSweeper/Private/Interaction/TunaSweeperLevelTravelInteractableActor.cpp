@@ -6,6 +6,7 @@
 #include "Engine/StaticMesh.h"
 #include "Subsystem/TunaSweeperLevelTransitionSubsystem.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
+#include "Subsystem/TunaSweeperRaidExperienceReturnSubsystem.h"
 
 ATunaSweeperLevelTravelInteractableActor::ATunaSweeperLevelTravelInteractableActor()
 {
@@ -100,9 +101,11 @@ bool ATunaSweeperLevelTravelInteractableActor::TravelToTargetLevel(APawn* Instig
 
 	UObject* WorldContextObject = InstigatorPawn ? Cast<UObject>(InstigatorPawn) : Cast<UObject>(this);
 	const FName SourceLevelName = GetWorld() ? FName(*GetWorld()->GetMapName()) : NAME_None;
+	UTunaSweeperGameInstance* TunaGameInstance = nullptr;
 	if (UGameInstance* GameInstance = GetGameInstance())
 	{
-		if (UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GameInstance))
+		TunaGameInstance = Cast<UTunaSweeperGameInstance>(GameInstance);
+		if (TunaGameInstance)
 		{
 			TunaGameInstance->HandleLevelTravelPersistence(SourceLevelName, TargetLevelName);
 		}
@@ -110,6 +113,28 @@ bool ATunaSweeperLevelTravelInteractableActor::TravelToTargetLevel(APawn* Instig
 		if (UTunaSweeperQuestSubsystem* QuestSubsystem = GameInstance->GetSubsystem<UTunaSweeperQuestSubsystem>())
 		{
 			QuestSubsystem->NotifyLevelTravelRequested(SourceLevelName, TargetLevelName);
+		}
+	}
+
+	if (TunaGameInstance && TunaGameInstance->HasPendingRaidExperienceAnimationState())
+	{
+		if (UGameInstance* GameInstance = GetGameInstance())
+		{
+			if (UTunaSweeperRaidExperienceReturnSubsystem* ExperienceReturnSubsystem =
+				GameInstance->GetSubsystem<UTunaSweeperRaidExperienceReturnSubsystem>())
+			{
+				if (ExperienceReturnSubsystem->StartReturnPresentation(
+					WorldContextObject,
+					TargetLevelName,
+					TransitionMediaSource,
+					TransitionWidgetClass,
+					FadeToBlackDuration,
+					FadeFromBlackDuration,
+					TransitionMessage))
+				{
+					return true;
+				}
+			}
 		}
 	}
 

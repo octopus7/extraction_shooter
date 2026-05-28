@@ -28,6 +28,8 @@ namespace
 		if (UImage* Image = Cast<UImage>(Widget))
 		{
 			Image->SetRenderOpacity(1.0f);
+			Image->SetColorAndOpacity(FLinearColor(1.0f, 1.0f, 1.0f, ClampedOpacity));
+			Image->SetBrushTintColor(FSlateColor(FLinearColor(1.0f, 1.0f, 1.0f, ClampedOpacity)));
 			Image->SetOpacity(ClampedOpacity);
 			return;
 		}
@@ -55,6 +57,22 @@ namespace
 		}
 
 		Widget->SetRenderOpacity(ClampedOpacity);
+	}
+
+	FSlateBrush BuildBrushWithPaintOpacity(const FSlateBrush& SourceBrush, float Opacity)
+	{
+		FSlateBrush Brush = SourceBrush;
+		const float ClampedOpacity = FMath::Clamp(Opacity, 0.0f, 1.0f);
+
+		FLinearColor TintColor = Brush.TintColor.GetSpecifiedColor();
+		TintColor.A *= ClampedOpacity;
+		Brush.TintColor = FSlateColor(TintColor);
+
+		FLinearColor OutlineColor = Brush.OutlineSettings.Color.GetSpecifiedColor();
+		OutlineColor.A *= ClampedOpacity;
+		Brush.OutlineSettings.Color = FSlateColor(OutlineColor);
+
+		return Brush;
 	}
 }
 
@@ -140,6 +158,14 @@ void UTunaSweeperInteractionMarkerWidget::CacheNamedWidgets()
 		if (!RingBrushImage)
 		{
 			RingBrushImage = Cast<UImage>(RingImage);
+		}
+	}
+	if (!bHasCachedRingBrush)
+	{
+		if (RingBrushImage)
+		{
+			CachedRingBrush = RingBrushImage->GetBrush();
+			bHasCachedRingBrush = true;
 		}
 	}
 
@@ -321,7 +347,14 @@ void UTunaSweeperInteractionMarkerWidget::ApplyState()
 	}
 	if (RingBrushImage)
 	{
-		ApplyPaintOpacity(RingBrushImage, CachedAlpha);
+		if (!bHasCachedRingBrush)
+		{
+			CachedRingBrush = RingBrushImage->GetBrush();
+			bHasCachedRingBrush = true;
+		}
+		RingBrushImage->SetBrush(BuildBrushWithPaintOpacity(CachedRingBrush, CachedAlpha));
+		RingBrushImage->SetRenderOpacity(1.0f);
+		RingBrushImage->SetColorAndOpacity(FLinearColor::White);
 	}
 	else if (RingImage)
 	{
@@ -349,9 +382,14 @@ void UTunaSweeperInteractionMarkerWidget::ApplyState()
 		}
 		else if (bHasCachedFilledBrush)
 		{
-			FilledBrushImage->SetBrush(CachedFilledBrush);
+			FilledBrushImage->SetBrush(BuildBrushWithPaintOpacity(CachedFilledBrush, CachedAlpha));
+			FilledBrushImage->SetRenderOpacity(1.0f);
+			FilledBrushImage->SetColorAndOpacity(FLinearColor::White);
 		}
-		ApplyPaintOpacity(FilledBrushImage, CachedAlpha);
+		if (bCachedOpened)
+		{
+			ApplyPaintOpacity(FilledBrushImage, CachedAlpha);
+		}
 	}
 	else if (FilledImage)
 	{

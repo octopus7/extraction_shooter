@@ -5,6 +5,7 @@
     "body_material": "/Game/Prototype/M_Voxel_VertexColor.M_Voxel_VertexColor",
     "drop_container_definition_id": 7004,
     "drop_contents_id": 8001,
+    "experience_value": 45,
     "max_health": 30.0,
     "location": [5200.0, 1040.0, 90.0],
     "rotation": [0.0, 180.0, 0.0]
@@ -15,6 +16,7 @@
     "body_material": "/Game/Prototype/M_Voxel_VertexColor.M_Voxel_VertexColor",
     "drop_container_definition_id": 7001,
     "drop_contents_id": 8002,
+    "experience_value": 45,
     "max_health": 30.0,
     "location": [6200.0, 1520.0, 90.0],
     "rotation": [0.0, 180.0, 0.0]
@@ -26,6 +28,7 @@
     "body_material": "/Game/Prototype/M_Voxel_VertexColor.M_Voxel_VertexColor",
     "drop_container_definition_id": 7002,
     "drop_contents_id": 8003,
+    "experience_value": 65,
     "max_health": 30.0,
     "location": [7200.0, 1040.0, 90.0],
     "rotation": [0.0, 180.0, 0.0]
@@ -37,6 +40,7 @@
     "body_material": "/Game/Prototype/M_Voxel_VertexColor.M_Voxel_VertexColor",
     "drop_container_definition_id": 7007,
     "drop_contents_id": 8006,
+    "experience_value": 80,
     "max_health": 24.0,
     "attack_mode": "melee",
     "attack_damage": 1.0,
@@ -54,6 +58,7 @@
     "body_material": "/Game/Prototype/M_Voxel_VertexColor.M_Voxel_VertexColor",
     "drop_container_definition_id": 7007,
     "drop_contents_id": 8006,
+    "experience_value": 80,
     "max_health": 24.0,
     "attack_mode": "melee",
     "attack_damage": 1.0,

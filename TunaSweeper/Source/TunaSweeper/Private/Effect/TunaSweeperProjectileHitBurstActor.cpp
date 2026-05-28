@@ -9,8 +9,8 @@
 
 namespace
 {
-	constexpr float BurstLifetimeSeconds = 0.42f;
-	const TCHAR* BurstMaterialPath = TEXT("/Game/Effects/M_LedExpression_VertexColorEmissive.M_LedExpression_VertexColorEmissive");
+	constexpr float ProjectileHitBurstLifetimeSeconds = 0.42f;
+	const TCHAR* ProjectileHitBurstMaterialPath = TEXT("/Game/Effects/M_LedExpression_VertexColorEmissive.M_LedExpression_VertexColorEmissive");
 
 	struct FProjectileHitBurstParticleConfig
 	{
@@ -18,7 +18,7 @@ namespace
 		FVector Scale;
 	};
 
-	const FProjectileHitBurstParticleConfig BurstParticleConfigs[] =
+	const FProjectileHitBurstParticleConfig ProjectileHitBurstParticleConfigs[] =
 	{
 		{ FVector(18.0f, 0.0f, 0.0f), FVector(0.09f, 0.09f, 0.09f) },
 		{ FVector(24.0f, 8.0f, 4.0f), FVector(0.075f, 0.075f, 0.075f) },
@@ -30,7 +30,7 @@ namespace
 		{ FVector(40.0f, -5.0f, 11.0f), FVector(0.052f, 0.052f, 0.052f) }
 	};
 
-	void ConfigureBurstParticle(
+	void ConfigureProjectileHitBurstParticle(
 		UStaticMeshComponent* Particle,
 		UStaticMesh* Mesh,
 		const FVector& RelativeLocation,
@@ -56,7 +56,7 @@ namespace
 ATunaSweeperProjectileHitBurstActor::ATunaSweeperProjectileHitBurstActor()
 {
 	PrimaryActorTick.bCanEverTick = true;
-	InitialLifeSpan = BurstLifetimeSeconds;
+	InitialLifeSpan = ProjectileHitBurstLifetimeSeconds;
 
 	SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("SceneRoot"));
 	RootComponent = SceneRoot;
@@ -64,19 +64,19 @@ ATunaSweeperProjectileHitBurstActor::ATunaSweeperProjectileHitBurstActor()
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereMesh(TEXT("/Engine/BasicShapes/Sphere.Sphere"));
 	UStaticMesh* BurstMesh = SphereMesh.Succeeded() ? SphereMesh.Object : nullptr;
 
-	for (int32 Index = 0; Index < UE_ARRAY_COUNT(BurstParticleConfigs); ++Index)
+	for (int32 Index = 0; Index < UE_ARRAY_COUNT(ProjectileHitBurstParticleConfigs); ++Index)
 	{
 		const FName ComponentName(*FString::Printf(TEXT("HitBurstParticle%d"), Index));
 		UStaticMeshComponent* BurstParticle = CreateDefaultSubobject<UStaticMeshComponent>(ComponentName);
 		BurstParticle->SetupAttachment(RootComponent);
-		ConfigureBurstParticle(
+		ConfigureProjectileHitBurstParticle(
 			BurstParticle,
 			BurstMesh,
-			BurstParticleConfigs[Index].TargetLocation * 0.2f,
-			BurstParticleConfigs[Index].Scale * 1.45f);
+			ProjectileHitBurstParticleConfigs[Index].TargetLocation * 0.2f,
+			ProjectileHitBurstParticleConfigs[Index].Scale * 1.45f);
 		BurstParticles.Add(BurstParticle);
-		BurstTargetLocations.Add(BurstParticleConfigs[Index].TargetLocation);
-		BurstBaseScales.Add(BurstParticleConfigs[Index].Scale);
+		BurstTargetLocations.Add(ProjectileHitBurstParticleConfigs[Index].TargetLocation);
+		BurstBaseScales.Add(ProjectileHitBurstParticleConfigs[Index].Scale);
 	}
 }
 
@@ -86,7 +86,7 @@ void ATunaSweeperProjectileHitBurstActor::BeginPlay()
 
 	BurstDynamicMaterials.Reset();
 
-	UMaterialInterface* BurstMaterial = LoadObject<UMaterialInterface>(nullptr, BurstMaterialPath);
+	UMaterialInterface* BurstMaterial = LoadObject<UMaterialInterface>(nullptr, ProjectileHitBurstMaterialPath);
 	for (UStaticMeshComponent* Particle : BurstParticles)
 	{
 		if (!Particle)
@@ -141,7 +141,7 @@ void ATunaSweeperProjectileHitBurstActor::Tick(float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 
 	ElapsedLifetimeSeconds += DeltaSeconds;
-	const float Alpha = FMath::Clamp(ElapsedLifetimeSeconds / BurstLifetimeSeconds, 0.0f, 1.0f);
+	const float Alpha = FMath::Clamp(ElapsedLifetimeSeconds / ProjectileHitBurstLifetimeSeconds, 0.0f, 1.0f);
 	const float LocationScale = FMath::Lerp(0.2f, 1.2f, Alpha);
 	const float ParticleScale = FMath::Lerp(1.45f, 0.25f, Alpha);
 

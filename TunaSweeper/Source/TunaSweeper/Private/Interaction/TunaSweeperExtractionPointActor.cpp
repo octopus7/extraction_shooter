@@ -18,6 +18,7 @@
 #include "ProceduralMeshComponent.h"
 #include "Subsystem/TunaSweeperLevelTransitionSubsystem.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
+#include "Subsystem/TunaSweeperRaidExperienceReturnSubsystem.h"
 #include "UI/TunaSweeperExtractionProgressWidget.h"
 #include "UI/TunaSweeperLevelTransitionWidget.h"
 #include "UObject/ConstructorHelpers.h"
@@ -192,7 +193,8 @@ bool ATunaSweeperExtractionPointActor::ExtractPawn(APawn* InstigatorPawn)
 	UObject* WorldContextObject = InstigatorPawn ? Cast<UObject>(InstigatorPawn) : Cast<UObject>(this);
 	if (UGameInstance* GameInstance = GetGameInstance())
 	{
-		if (UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GameInstance))
+		UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GameInstance);
+		if (TunaGameInstance)
 		{
 			TunaGameInstance->HandleLevelTravelPersistence(SourceLevelName, TargetLevelName);
 		}
@@ -200,6 +202,25 @@ bool ATunaSweeperExtractionPointActor::ExtractPawn(APawn* InstigatorPawn)
 		if (UTunaSweeperQuestSubsystem* QuestSubsystem = GameInstance->GetSubsystem<UTunaSweeperQuestSubsystem>())
 		{
 			QuestSubsystem->NotifyLevelTravelRequested(SourceLevelName, TargetLevelName);
+		}
+
+		if (TunaGameInstance && TunaGameInstance->HasPendingRaidExperienceAnimationState())
+		{
+			if (UTunaSweeperRaidExperienceReturnSubsystem* ExperienceReturnSubsystem =
+				GameInstance->GetSubsystem<UTunaSweeperRaidExperienceReturnSubsystem>())
+			{
+				if (ExperienceReturnSubsystem->StartReturnPresentation(
+					WorldContextObject,
+					TargetLevelName,
+					TransitionMediaSource,
+					TransitionWidgetClass,
+					FadeToBlackDuration,
+					FadeFromBlackDuration,
+					TransitionMessage))
+				{
+					return true;
+				}
+			}
 		}
 
 		if (!TransitionMediaSource.IsNull() && !TransitionWidgetClass.IsNull())

@@ -11,8 +11,8 @@
 
 namespace
 {
-	constexpr float QuickSlotRootWidth = 620.0f;
-	constexpr float QuickSlotRowWidth = 616.0f;
+	constexpr float QuickSlotRootWidth = 694.0f;
+	constexpr float QuickSlotRowWidth = 690.0f;
 	constexpr float WeaponSlotWidth = 82.0f;
 	constexpr float SlotGapWidth = 8.0f;
 	constexpr float AmmoSelectorPanelOffsetY = 28.0f;
@@ -67,11 +67,47 @@ void UTunaSweeperHudQuickSlotBarWidget::ClearQuickSlotIcon(int32 SlotNumber)
 	}
 }
 
+void UTunaSweeperHudQuickSlotBarWidget::SetMeleeQuickSlotIcon(UTexture2D* IconTexture)
+{
+	CacheNamedWidgets();
+
+	if (!QuickSlotMeleeIcon)
+	{
+		return;
+	}
+
+	if (IconTexture)
+	{
+		QuickSlotMeleeIcon->SetBrushFromTexture(IconTexture, true);
+		QuickSlotMeleeIcon->SetOpacity(1.0f);
+	}
+	else
+	{
+		ClearMeleeQuickSlotIcon();
+	}
+}
+
+void UTunaSweeperHudQuickSlotBarWidget::ClearMeleeQuickSlotIcon()
+{
+	CacheNamedWidgets();
+
+	if (QuickSlotMeleeIcon)
+	{
+		QuickSlotMeleeIcon->SetBrushFromTexture(nullptr, false);
+		QuickSlotMeleeIcon->SetOpacity(0.0f);
+	}
+}
+
 void UTunaSweeperHudQuickSlotBarWidget::SetSelectedQuickSlot(int32 SlotNumber)
 {
 	CacheNamedWidgets();
 
 	const int32 SelectedIndex = GetSlotIndex(SlotNumber);
+	if (QuickSlotMeleeSelectionFrame)
+	{
+		QuickSlotMeleeSelectionFrame->SetVisibility(ESlateVisibility::Hidden);
+	}
+
 	for (int32 Index = 0; Index < SlotSelectionFrames.Num(); ++Index)
 	{
 		if (SlotSelectionFrames[Index])
@@ -92,6 +128,41 @@ void UTunaSweeperHudQuickSlotBarWidget::SetSelectedQuickSlot(int32 SlotNumber)
 			SlotAmmoKeyTexts[Index]->SetVisibility(bShowAmmoKey ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
 			SlotAmmoKeyTexts[Index]->SetText(bShowAmmoKey ? FText::FromString(TEXT("T")) : FText::GetEmpty());
 		}
+	}
+}
+
+void UTunaSweeperHudQuickSlotBarWidget::SetSelectedMeleeQuickSlot()
+{
+	CacheNamedWidgets();
+
+	for (const TObjectPtr<UWidget>& SelectionFrame : SlotSelectionFrames)
+	{
+		if (SelectionFrame)
+		{
+			SelectionFrame->SetVisibility(ESlateVisibility::Hidden);
+		}
+	}
+
+	for (const TObjectPtr<UWidget>& AmmoKeyBackground : SlotAmmoKeyBackgrounds)
+	{
+		if (AmmoKeyBackground)
+		{
+			AmmoKeyBackground->SetVisibility(ESlateVisibility::Collapsed);
+		}
+	}
+
+	for (const TObjectPtr<UTextBlock>& AmmoKeyText : SlotAmmoKeyTexts)
+	{
+		if (AmmoKeyText)
+		{
+			AmmoKeyText->SetVisibility(ESlateVisibility::Collapsed);
+			AmmoKeyText->SetText(FText::GetEmpty());
+		}
+	}
+
+	if (QuickSlotMeleeSelectionFrame)
+	{
+		QuickSlotMeleeSelectionFrame->SetVisibility(ESlateVisibility::HitTestInvisible);
 	}
 }
 
@@ -262,6 +333,8 @@ void UTunaSweeperHudQuickSlotBarWidget::CacheNamedWidgets()
 	AmmoSelectorKeyText = Cast<UTextBlock>(WidgetTree->FindWidget(FName(TEXT("AmmoSelectorKeyText"))));
 	ReloadProgressPanel = WidgetTree->FindWidget(FName(TEXT("ReloadProgressPanel")));
 	ReloadProgressBar = Cast<UProgressBar>(WidgetTree->FindWidget(FName(TEXT("ReloadProgressBar"))));
+	QuickSlotMeleeIcon = Cast<UImage>(WidgetTree->FindWidget(FName(TEXT("QuickSlotMeleeIcon"))));
+	QuickSlotMeleeSelectionFrame = WidgetTree->FindWidget(FName(TEXT("QuickSlotMeleeSelectionFrame")));
 
 	for (int32 OptionNumber = 1; OptionNumber <= AmmoSelectorOptionTexts.Num(); ++OptionNumber)
 	{

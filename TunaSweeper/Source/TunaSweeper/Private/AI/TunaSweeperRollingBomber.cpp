@@ -59,6 +59,7 @@ ATunaSweeperRollingBomber::ATunaSweeperRollingBomber()
 	ProjectileHurtbox->SetCanEverAffectNavigation(false);
 
 	MaxHealth = 45.0f;
+	ExperienceValue = 35;
 	MovementSpeed = ProjectileModeWalkSpeed;
 	MovementSpeedRandomOffset = FVector2D::ZeroVector;
 	ProjectileSpawnOffset = FVector(14.5f, 0.0f, 10.5f);

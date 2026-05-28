@@ -17,7 +17,9 @@
 #include "Game/TunaSweeperGameInstance.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/Pawn.h"
+#include "Framework/Application/SlateApplication.h"
 #include "Player/TunaSweeperPlayerController.h"
+#include "Rendering/DrawElements.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
 #include "UI/TunaSweeperHudBottomStatusWidget.h"
 #include "UI/TunaSweeperHudExternalPanelWidget.h"
@@ -47,6 +49,9 @@ namespace
 	constexpr float HudWidgetTransitionDistancePadding = 36.0f;
 	constexpr float HudWidgetTransitionFallbackHorizontalDistance = 420.0f;
 	constexpr float HudWidgetTransitionFallbackVerticalDistance = 220.0f;
+	const FName PistolWeaponTypeTag(TEXT("weapon.type.pistol"));
+	const FName RifleWeaponTypeTag(TEXT("weapon.type.rifle"));
+	const FName ShotgunWeaponTypeTag(TEXT("weapon.type.shotgun"));
 
 	using TunaSweeperUiText::ResolveUiText;
 
@@ -82,6 +87,11 @@ namespace
 	{
 		const float ClampedAlpha = FMath::Clamp(Alpha, 0.0f, 1.0f);
 		return ClampedAlpha * ClampedAlpha * (3.0f - 2.0f * ClampedAlpha);
+	}
+
+	bool IsPrecisionCrosshairWeaponType(FName WeaponTypeTag)
+	{
+		return WeaponTypeTag == PistolWeaponTypeTag || WeaponTypeTag == RifleWeaponTypeTag;
 	}
 
 	FTunaSweeperItemStackTileData BuildQuickSlotTileData(
@@ -228,6 +238,172 @@ void UTunaSweeperGameHudWidget::NativeTick(const FGeometry& MyGeometry, float In
 	RefreshReloadWidgets();
 	RefreshDialogueHudVisibility();
 	TickHudTransitions(InDeltaTime);
+	UpdateCrosshairState(InDeltaTime);
+	Invalidate(EInvalidateWidgetReason::Paint);
+}
+
+int32 UTunaSweeperGameHudWidget::NativePaint(
+	const FPaintArgs& Args,
+	const FGeometry& AllottedGeometry,
+	const FSlateRect& MyCullingRect,
+	FSlateWindowElementList& OutDrawElements,
+	int32 LayerId,
+	const FWidgetStyle& InWidgetStyle,
+	bool bParentEnabled) const
+{
+	const int32 PaintedLayerId = Super::NativePaint(
+		Args,
+		AllottedGeometry,
+		MyCullingRect,
+		OutDrawElements,
+		LayerId,
+		InWidgetStyle,
+		bParentEnabled);
+
+	if (IsWeaponCrosshairSuppressed() || !FSlateApplication::IsInitialized())
+	{
+		return PaintedLayerId;
+	}
+
+	const FName WeaponTypeTag = GetSelectedWeaponTypeTag();
+	const bool bShotgunCrosshair = WeaponTypeTag == ShotgunWeaponTypeTag;
+	const bool bPrecisionCrosshair = IsPrecisionCrosshairWeaponType(WeaponTypeTag);
+	if (!bShotgunCrosshair && !bPrecisionCrosshair)
+	{
+		return PaintedLayerId;
+	}
+
+	const FVector2D CursorAbsolutePosition = FSlateApplication::Get().GetCursorPos();
+	const FVector2D CursorLocalPosition = AllottedGeometry.AbsoluteToLocal(CursorAbsolutePosition);
+	const FVector2D LocalSize = AllottedGeometry.GetLocalSize();
+	if (CursorLocalPosition.X < 0.0f ||
+		CursorLocalPosition.Y < 0.0f ||
+		CursorLocalPosition.X > LocalSize.X ||
+		CursorLocalPosition.Y > LocalSize.Y)
+	{
+		return PaintedLayerId;
+	}
+
+	FVector2D CrosshairLocalPosition = CursorLocalPosition;
+	if (const APlayerController* PlayerController = GetOwningPlayer())
+	{
+		if (const ATunaSweeperTopDownCharacter* TunaCharacter = Cast<ATunaSweeperTopDownCharacter>(PlayerController->GetPawn()))
+		{
+			CrosshairLocalPosition += TunaCharacter->GetWeaponRecoilCrosshairScreenOffset();
+		}
+	}
+
+	auto DrawLineStrip = [&](
+		const TArray<FVector2D>& Points,
+		const FLinearColor& Color,
+		float Thickness,
+		int32 DrawLayerId)
+	{
+		if (Points.Num() < 2 || Color.A <= 0.0f)
+		{
+			return;
+		}
+
+		FSlateDrawElement::MakeLines(
+			OutDrawElements,
+			DrawLayerId,
+			AllottedGeometry.ToPaintGeometry(),
+			Points,
+			ESlateDrawEffect::None,
+			Color,
+			true,
+			FMath::Max(1.0f, Thickness));
+	};
+
+	auto BuildArcPoints = [](
+		const FVector2D& Center,
+		float Radius,
+		float StartAngleDegrees,
+		float EndAngleDegrees,
+		int32 SegmentCount,
+		TArray<FVector2D>& OutPoints)
+	{
+		OutPoints.Reset();
+		OutPoints.Reserve(SegmentCount + 1);
+		for (int32 SegmentIndex = 0; SegmentIndex <= SegmentCount; ++SegmentIndex)
+		{
+			const float Alpha = static_cast<float>(SegmentIndex) / static_cast<float>(SegmentCount);
+			const float AngleDegrees = FMath::Lerp(StartAngleDegrees, EndAngleDegrees, Alpha);
+			const float AngleRadians = FMath::DegreesToRadians(AngleDegrees);
+			OutPoints.Add(Center + FVector2D(FMath::Cos(AngleRadians), FMath::Sin(AngleRadians)) * Radius);
+		}
+	};
+
+	if (bShotgunCrosshair)
+	{
+		const int32 SegmentCount = FMath::Clamp(ShotgunCrosshairSegmentCount, 8, 128);
+		TArray<FVector2D> CirclePoints;
+		BuildArcPoints(CrosshairLocalPosition, FMath::Max(1.0f, ShotgunCrosshairRadius), 0.0f, 360.0f, SegmentCount, CirclePoints);
+		DrawLineStrip(CirclePoints, ShotgunCrosshairColor, ShotgunCrosshairThickness, PaintedLayerId + 1);
+		return PaintedLayerId + 1;
+	}
+
+	const float AimAlpha = SmoothTransitionAlpha(PrecisionCrosshairAimAlpha);
+	const float ParenthesisAlpha = 1.0f - AimAlpha;
+	if (ParenthesisAlpha > 0.01f)
+	{
+		FLinearColor ParenthesisColor = PrecisionCrosshairColor;
+		ParenthesisColor.A *= ParenthesisAlpha;
+
+		const int32 ParenthesisSegments = 18;
+		const float ParenthesisOffset = FMath::Max(1.0f, PrecisionCrosshairParenthesisOffset);
+		const float ParenthesisRadius = FMath::Max(1.0f, PrecisionCrosshairParenthesisRadius);
+		TArray<FVector2D> ParenthesisPoints;
+		BuildArcPoints(
+			CrosshairLocalPosition + FVector2D(-ParenthesisOffset, 0.0f),
+			ParenthesisRadius,
+			110.0f,
+			250.0f,
+			ParenthesisSegments,
+			ParenthesisPoints);
+		DrawLineStrip(ParenthesisPoints, ParenthesisColor, PrecisionCrosshairThickness, PaintedLayerId + 1);
+
+		BuildArcPoints(
+			CrosshairLocalPosition + FVector2D(ParenthesisOffset, 0.0f),
+			ParenthesisRadius,
+			-70.0f,
+			70.0f,
+			ParenthesisSegments,
+			ParenthesisPoints);
+		DrawLineStrip(ParenthesisPoints, ParenthesisColor, PrecisionCrosshairThickness, PaintedLayerId + 1);
+	}
+
+	if (AimAlpha > 0.01f)
+	{
+		FLinearColor BarColor = PrecisionCrosshairColor;
+		BarColor.A *= AimAlpha;
+
+		const float BarDistance = FMath::Lerp(
+			FMath::Max(1.0f, PrecisionCrosshairAimBarStartDistance),
+			FMath::Max(1.0f, PrecisionCrosshairAimBarEndDistance),
+			AimAlpha);
+		const float BarLength = FMath::Max(1.0f, PrecisionCrosshairAimBarLength);
+
+		TArray<FVector2D> SegmentPoints;
+		SegmentPoints.SetNum(2);
+		SegmentPoints[0] = CrosshairLocalPosition + FVector2D(-BarDistance - BarLength, 0.0f);
+		SegmentPoints[1] = CrosshairLocalPosition + FVector2D(-BarDistance, 0.0f);
+		DrawLineStrip(SegmentPoints, BarColor, PrecisionCrosshairThickness, PaintedLayerId + 2);
+
+		SegmentPoints[0] = CrosshairLocalPosition + FVector2D(BarDistance, 0.0f);
+		SegmentPoints[1] = CrosshairLocalPosition + FVector2D(BarDistance + BarLength, 0.0f);
+		DrawLineStrip(SegmentPoints, BarColor, PrecisionCrosshairThickness, PaintedLayerId + 2);
+
+		SegmentPoints[0] = CrosshairLocalPosition + FVector2D(0.0f, -BarDistance - BarLength);
+		SegmentPoints[1] = CrosshairLocalPosition + FVector2D(0.0f, -BarDistance);
+		DrawLineStrip(SegmentPoints, BarColor, PrecisionCrosshairThickness, PaintedLayerId + 2);
+
+		SegmentPoints[0] = CrosshairLocalPosition + FVector2D(0.0f, BarDistance);
+		SegmentPoints[1] = CrosshairLocalPosition + FVector2D(0.0f, BarDistance + BarLength);
+		DrawLineStrip(SegmentPoints, BarColor, PrecisionCrosshairThickness, PaintedLayerId + 2);
+	}
+
+	return PaintedLayerId + 2;
 }
 
 void UTunaSweeperGameHudWidget::SetCenterPanelsVisible(bool bVisible)
@@ -1128,14 +1304,23 @@ void UTunaSweeperGameHudWidget::RefreshQuickSlotsFromGameState()
 		: ETunaSweeperItemTextLanguage::English;
 
 	int32 SelectedSlotNumber = 0;
+	bool bMeleeQuickSlotSelected = false;
 	if (const APlayerController* PlayerController = GetOwningPlayer())
 	{
 		if (const ATunaSweeperTopDownCharacter* TunaCharacter = Cast<ATunaSweeperTopDownCharacter>(PlayerController->GetPawn()))
 		{
 			SelectedSlotNumber = TunaCharacter->GetSelectedWeaponSlotNumber();
+			bMeleeQuickSlotSelected = TunaCharacter->IsMeleeWeaponSelected();
 		}
 	}
-	QuickSlotBarWidget->SetSelectedQuickSlot(SelectedSlotNumber);
+	if (bMeleeQuickSlotSelected)
+	{
+		QuickSlotBarWidget->SetSelectedMeleeQuickSlot();
+	}
+	else
+	{
+		QuickSlotBarWidget->SetSelectedQuickSlot(SelectedSlotNumber);
+	}
 
 	for (int32 SlotNumber = 1; SlotNumber <= 2; ++SlotNumber)
 	{
@@ -1179,6 +1364,25 @@ void UTunaSweeperGameHudWidget::RefreshQuickSlotsFromGameState()
 			TunaGameInstance->GetWeaponLoadedAmmoCount(SlotNumber),
 			TunaGameInstance->GetWeaponInventoryAmmoCount(SlotNumber),
 			true);
+	}
+
+	FTunaSweeperItemInstance MeleeInstance;
+	FTunaSweeperItemDefinition MeleeDefinition;
+	if (!TunaGameInstance ||
+		!TunaGameInstance->TryGetEquipmentMeleeSlotItem(MeleeInstance, MeleeDefinition) ||
+		!ItemDataSubsystem)
+	{
+		QuickSlotBarWidget->ClearMeleeQuickSlotIcon();
+	}
+	else
+	{
+		UTexture2D* IconTexture = nullptr;
+		const FString IconObjectPath = ItemDataSubsystem->BuildItemIconObjectPath(MeleeDefinition);
+		if (!IconObjectPath.IsEmpty())
+		{
+			IconTexture = LoadObject<UTexture2D>(nullptr, *IconObjectPath);
+		}
+		QuickSlotBarWidget->SetMeleeQuickSlotIcon(IconTexture);
 	}
 
 	static const TArray<FTunaSweeperInventorySlot> EmptyQuickSlots;
@@ -1601,6 +1805,67 @@ bool UTunaSweeperGameHudWidget::IsDialogueSequenceActive() const
 {
 	const ATunaSweeperPlayerController* TunaPlayerController = Cast<ATunaSweeperPlayerController>(GetOwningPlayer());
 	return TunaPlayerController && TunaPlayerController->IsDialogueSequenceActive();
+}
+
+FName UTunaSweeperGameHudWidget::GetSelectedWeaponTypeTag() const
+{
+	const APlayerController* PlayerController = GetOwningPlayer();
+	const ATunaSweeperTopDownCharacter* TunaCharacter = PlayerController
+		? Cast<ATunaSweeperTopDownCharacter>(PlayerController->GetPawn())
+		: nullptr;
+	if (!TunaCharacter || TunaCharacter->IsDead())
+	{
+		return NAME_None;
+	}
+
+	const int32 SelectedWeaponSlotNumber = TunaCharacter->GetSelectedWeaponSlotNumber();
+	if (SelectedWeaponSlotNumber <= 0)
+	{
+		return NAME_None;
+	}
+
+	UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+	if (!TunaGameInstance)
+	{
+		return NAME_None;
+	}
+
+	FTunaSweeperItemInstance WeaponInstance;
+	FTunaSweeperItemDefinition WeaponDefinition;
+	if (!TunaGameInstance->TryGetEquipmentWeaponSlotItem(SelectedWeaponSlotNumber, WeaponInstance, WeaponDefinition))
+	{
+		return NAME_None;
+	}
+
+	return WeaponDefinition.WeaponTypeTag;
+}
+
+bool UTunaSweeperGameHudWidget::IsWeaponCrosshairSuppressed() const
+{
+	return IsInventoryUiOpen() || IsDialogueSequenceActive();
+}
+
+void UTunaSweeperGameHudWidget::UpdateCrosshairState(float InDeltaTime)
+{
+	float TargetAimAlpha = 0.0f;
+	if (!IsWeaponCrosshairSuppressed() && IsPrecisionCrosshairWeaponType(GetSelectedWeaponTypeTag()))
+	{
+		const APlayerController* PlayerController = GetOwningPlayer();
+		const ATunaSweeperTopDownCharacter* TunaCharacter = PlayerController
+			? Cast<ATunaSweeperTopDownCharacter>(PlayerController->GetPawn())
+			: nullptr;
+		TargetAimAlpha = TunaCharacter && TunaCharacter->IsAiming() ? 1.0f : 0.0f;
+	}
+
+	PrecisionCrosshairAimAlpha = FMath::FInterpTo(
+		PrecisionCrosshairAimAlpha,
+		TargetAimAlpha,
+		FMath::Max(0.0f, InDeltaTime),
+		FMath::Max(0.0f, PrecisionCrosshairAimInterpSpeed));
+	if (FMath::IsNearlyEqual(PrecisionCrosshairAimAlpha, TargetAimAlpha, 0.001f))
+	{
+		PrecisionCrosshairAimAlpha = TargetAimAlpha;
+	}
 }
 
 void UTunaSweeperGameHudWidget::HandleSelectedInventoryItemChanged()

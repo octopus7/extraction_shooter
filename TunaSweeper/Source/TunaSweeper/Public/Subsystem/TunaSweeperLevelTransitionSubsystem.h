@@ -38,7 +38,10 @@ private:
 		FadingToBlackBeforeVideo,
 		FadingFromBlackToVideo,
 		LoadingLevel,
-		WaitingForMinimumVideoTime
+		WaitingForMinimumVideoTime,
+		CircularRevealInitialElastic,
+		CircularRevealHold,
+		CircularRevealFinalExpand
 	};
 
 	UFUNCTION()
@@ -53,10 +56,14 @@ private:
 	void HandlePostLoadMapWithWorld(UWorld* LoadedWorld);
 	bool EnsureTransitionWidget(UObject* WorldContextObject);
 	void BeginVideoReveal();
+	void BeginCircularReveal();
+	void UpdateCircularReveal(float DeltaTime);
 	void OpenTargetLevel();
 	void FinishTransition();
 	void SetBlackOpacity(float InOpacity);
+	void SetCircularRevealMask(float HoleRadiusPixels, bool bVisible);
 	float GetVideoVisibleElapsedSeconds() const;
+	float GetFullscreenRevealRadius() const;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UTunaSweeperLevelTransitionWidget> ActiveWidget;
@@ -78,6 +85,7 @@ private:
 	float FadeToBlackDuration = 0.45f;
 	float FadeFromBlackDuration = 0.55f;
 	float MinimumVideoDisplaySeconds = 1.0f;
+	float CircularRevealFinalRadius = 0.0f;
 	double VideoVisibleStartSeconds = 0.0;
 	bool bOpenLevelRequested = false;
 	bool bUseLetterbox = false;

@@ -108,6 +108,7 @@
 #include "UObject/UnrealType.h"
 #include "Weapon/TunaSweeperProjectile.h"
 #include "Weapon/TunaSweeperWeapon.h"
+#include "Weapon/TunaSweeperWeaponSpreadRecoilDataAsset.h"
 #include "WidgetBlueprint.h"
 #include "WidgetBlueprintFactory.h"
 
@@ -120,9 +121,9 @@ namespace TunaSweeperEditorSetup
 	const FString InteractionInputTaskId = TEXT("2026-05-11_SetInteractInputToFKey");
 	const FString InteractionMarkerAlignmentTaskId = TEXT("2026-05-25_RebuildInteractionMarkerRequirementPreviewV1");
 	const FString PickupItemAndSpawnerTaskId = TEXT("2026-05-11_CreatePickupItemAndSpawnerAssetsV3");
-	const FString CommonGameHudTaskId = TEXT("2026-05-28_ReloadRingGaugeV1");
+	const FString CommonGameHudTaskId = TEXT("2026-05-28_AddMeleeQuickSlotHudV1");
 	const FString InventoryInputTaskId = TEXT("2026-05-11_AddInventoryInput");
-	const FString QuickSlotInputTaskId = TEXT("2026-05-12_AddQuickSlotInputActions");
+	const FString QuickSlotInputTaskId = TEXT("2026-05-28_AddMeleeQuickSlotInputV1");
 	const FString DropInputTaskId = TEXT("2026-05-18_AddDropInputAction");
 	const FString AmmoReloadInputTaskId = TEXT("2026-05-19_AddAmmoReloadInputActionsV1");
 	const FString CameraModeInputTaskId = TEXT("2026-05-26_AddCameraModeInputV1");
@@ -146,6 +147,8 @@ namespace TunaSweeperEditorSetup
 	const FString RollingBomberLegMaterialTaskId = TEXT("2026-05-28_CreateRollingBomberLegMetalMaterialV1");
 	const FString RollingBomberChargeCylinderEffectTaskId = TEXT("2026-05-28_CreateRollingBomberChargeCylinderEffectV1");
 	const FString ProjectileHitEffectAssetTaskId = TEXT("2026-05-28_CreateProjectileHitEffectAssetsV1");
+	const FString WeaponSpreadRecoilAssetTaskId = TEXT("2026-05-28_CreateWeaponSpreadRecoilAssetsV1");
+	const FString BaseballBatAssetTaskId = TEXT("2026-05-28_CreateBaseballBatStaticMeshAssetsV1");
 	const FString VoxelMeshAssetTaskId = TEXT("2026-05-19_CreateSharedVoxelMeshAssetsV1");
 	const FString LumberjackMeleeSwingArcAssetTaskId = TEXT("2026-05-20_CreateLumberjackMeleeSwingArcAssetsV2");
 	const FString LedExpressionMaterialTaskId = TEXT("2026-05-26_CreateLedExpressionMaterialV1");
@@ -175,6 +178,10 @@ namespace TunaSweeperEditorSetup
 	const FString WeaponAssetPath = TEXT("/Game/Weapons");
 	const FString WeaponAssetName = TEXT("BP_TunaSweeperWeapon");
 	const FString ProjectileAssetName = TEXT("BP_TunaSweeperProjectile");
+	const FString WeaponSpreadRecoilDataAssetName = TEXT("DA_WeaponSpreadRecoil");
+	const FString BaseballBatWoodTextureAssetName = TEXT("T_BaseballBat_WoodGrain");
+	const FString BaseballBatMaterialAssetName = TEXT("M_BaseballBat_Wood");
+	const FString BaseballBatMeshAssetName = TEXT("SM_BaseballBat");
 	const FString InputAssetPath = TEXT("/Game/Input");
 	const FString MoveActionName = TEXT("IA_Move");
 	const FString FireActionName = TEXT("IA_Fire");
@@ -190,6 +197,7 @@ namespace TunaSweeperEditorSetup
 	const FString RollActionName = TEXT("IA_Roll");
 	const FString MapActionName = TEXT("IA_Map");
 	const FString QuickSlotActionNamePrefix = TEXT("IA_QuickSlot");
+	const FString MeleeQuickSlotActionName = TEXT("IA_MeleeQuickSlot");
 	const FString MappingContextName = TEXT("IMC_Player");
 	const FString UIAssetPath = TEXT("/Game/UI");
 	const FString VoxelAssetPath = TEXT("/Game/Prototype");
@@ -1279,6 +1287,377 @@ namespace TunaSweeperEditorSetup
 		return EnsureLumberjackMeleeSwingArcMeshAsset(SwingArcMaterial) != nullptr;
 	}
 
+	struct FBaseballBatRing
+	{
+		float X = 0.0f;
+		float Radius = 0.0f;
+	};
+
+	FVertexInstanceID AddBaseballBatVertex(
+		FMeshDescription& MeshDescription,
+		FStaticMeshAttributes& Attributes,
+		const FVector3f& Position,
+		const FVector3f& Normal,
+		const FVector2f& UV)
+	{
+		TVertexAttributesRef<FVector3f> VertexPositions = Attributes.GetVertexPositions();
+		TVertexInstanceAttributesRef<FVector3f> VertexInstanceNormals = Attributes.GetVertexInstanceNormals();
+		TVertexInstanceAttributesRef<FVector2f> VertexInstanceUVs = Attributes.GetVertexInstanceUVs();
+
+		const FVertexID VertexId = MeshDescription.CreateVertex();
+		VertexPositions[VertexId] = Position;
+
+		const FVector3f SafeNormal = Normal.IsNearlyZero() ? FVector3f(0.0f, 0.0f, 1.0f) : Normal.GetSafeNormal();
+		const FVertexInstanceID VertexInstanceId = MeshDescription.CreateVertexInstance(VertexId);
+		VertexInstanceNormals[VertexInstanceId] = SafeNormal;
+		VertexInstanceUVs.Set(VertexInstanceId, 0, UV);
+		return VertexInstanceId;
+	}
+
+	void AddBaseballBatSideQuad(
+		FMeshDescription& MeshDescription,
+		FStaticMeshAttributes& Attributes,
+		FPolygonGroupID PolygonGroupId,
+		const FBaseballBatRing& LeftRing,
+		const FBaseballBatRing& RightRing,
+		float Angle0,
+		float Angle1,
+		float U0,
+		float U1,
+		float V0,
+		float V1)
+	{
+		const FVector3f Left0(LeftRing.X, FMath::Cos(Angle0) * LeftRing.Radius, FMath::Sin(Angle0) * LeftRing.Radius);
+		const FVector3f Left1(LeftRing.X, FMath::Cos(Angle1) * LeftRing.Radius, FMath::Sin(Angle1) * LeftRing.Radius);
+		const FVector3f Right0(RightRing.X, FMath::Cos(Angle0) * RightRing.Radius, FMath::Sin(Angle0) * RightRing.Radius);
+		const FVector3f Right1(RightRing.X, FMath::Cos(Angle1) * RightRing.Radius, FMath::Sin(Angle1) * RightRing.Radius);
+		const FVector3f Normal0(0.0f, FMath::Cos(Angle0), FMath::Sin(Angle0));
+		const FVector3f Normal1(0.0f, FMath::Cos(Angle1), FMath::Sin(Angle1));
+
+		TArray<FVertexInstanceID> VertexInstances;
+		VertexInstances.Reserve(4);
+		VertexInstances.Add(AddBaseballBatVertex(MeshDescription, Attributes, Left0, Normal0, FVector2f(U0, V0)));
+		VertexInstances.Add(AddBaseballBatVertex(MeshDescription, Attributes, Left1, Normal1, FVector2f(U0, V1)));
+		VertexInstances.Add(AddBaseballBatVertex(MeshDescription, Attributes, Right1, Normal1, FVector2f(U1, V1)));
+		VertexInstances.Add(AddBaseballBatVertex(MeshDescription, Attributes, Right0, Normal0, FVector2f(U1, V0)));
+		MeshDescription.CreatePolygon(PolygonGroupId, VertexInstances);
+	}
+
+	void AddBaseballBatCap(
+		FMeshDescription& MeshDescription,
+		FStaticMeshAttributes& Attributes,
+		FPolygonGroupID PolygonGroupId,
+		const FBaseballBatRing& Ring,
+		bool bRightCap)
+	{
+		constexpr int32 SegmentCount = 24;
+		const FVector3f CapNormal = bRightCap ? FVector3f(1.0f, 0.0f, 0.0f) : FVector3f(-1.0f, 0.0f, 0.0f);
+		const FVector3f Center(Ring.X, 0.0f, 0.0f);
+
+		for (int32 SegmentIndex = 0; SegmentIndex < SegmentCount; ++SegmentIndex)
+		{
+			const float V0 = static_cast<float>(SegmentIndex) / static_cast<float>(SegmentCount);
+			const float V1 = static_cast<float>(SegmentIndex + 1) / static_cast<float>(SegmentCount);
+			const float Angle0 = V0 * 2.0f * UE_PI;
+			const float Angle1 = V1 * 2.0f * UE_PI;
+			const FVector3f Edge0(Ring.X, FMath::Cos(Angle0) * Ring.Radius, FMath::Sin(Angle0) * Ring.Radius);
+			const FVector3f Edge1(Ring.X, FMath::Cos(Angle1) * Ring.Radius, FMath::Sin(Angle1) * Ring.Radius);
+			const FVector2f CenterUV(0.5f, 0.5f);
+			const FVector2f EdgeUV0(0.5f + FMath::Cos(Angle0) * 0.5f, 0.5f + FMath::Sin(Angle0) * 0.5f);
+			const FVector2f EdgeUV1(0.5f + FMath::Cos(Angle1) * 0.5f, 0.5f + FMath::Sin(Angle1) * 0.5f);
+
+			TArray<FVertexInstanceID> VertexInstances;
+			VertexInstances.Reserve(3);
+			VertexInstances.Add(AddBaseballBatVertex(MeshDescription, Attributes, Center, CapNormal, CenterUV));
+			if (bRightCap)
+			{
+				VertexInstances.Add(AddBaseballBatVertex(MeshDescription, Attributes, Edge0, CapNormal, EdgeUV0));
+				VertexInstances.Add(AddBaseballBatVertex(MeshDescription, Attributes, Edge1, CapNormal, EdgeUV1));
+			}
+			else
+			{
+				VertexInstances.Add(AddBaseballBatVertex(MeshDescription, Attributes, Edge1, CapNormal, EdgeUV1));
+				VertexInstances.Add(AddBaseballBatVertex(MeshDescription, Attributes, Edge0, CapNormal, EdgeUV0));
+			}
+			MeshDescription.CreatePolygon(PolygonGroupId, VertexInstances);
+		}
+	}
+
+	void BuildBaseballBatMeshDescription(FMeshDescription& MeshDescription)
+	{
+		FStaticMeshAttributes Attributes(MeshDescription);
+		Attributes.Register();
+		Attributes.GetVertexInstanceUVs().SetNumChannels(1);
+
+		const FPolygonGroupID PolygonGroupId = MeshDescription.CreatePolygonGroup();
+		Attributes.GetPolygonGroupMaterialSlotNames()[PolygonGroupId] = FName(TEXT("Wood"));
+
+		const TArray<FBaseballBatRing> Rings = {
+			{ -62.0f, 5.2f },
+			{ -57.0f, 8.0f },
+			{ -50.0f, 5.4f },
+			{ -38.0f, 3.1f },
+			{ 20.0f, 3.6f },
+			{ 35.0f, 5.4f },
+			{ 50.0f, 7.4f },
+			{ 89.0f, 8.8f },
+			{ 99.0f, 8.1f }
+		};
+		const float MinX = Rings[0].X;
+		const float Length = FMath::Max(1.0f, Rings.Last().X - MinX);
+
+		constexpr int32 SegmentCount = 24;
+		for (int32 RingIndex = 0; RingIndex < Rings.Num() - 1; ++RingIndex)
+		{
+			const FBaseballBatRing& LeftRing = Rings[RingIndex];
+			const FBaseballBatRing& RightRing = Rings[RingIndex + 1];
+			const float U0 = (LeftRing.X - MinX) / Length;
+			const float U1 = (RightRing.X - MinX) / Length;
+
+			for (int32 SegmentIndex = 0; SegmentIndex < SegmentCount; ++SegmentIndex)
+			{
+				const float V0 = static_cast<float>(SegmentIndex) / static_cast<float>(SegmentCount);
+				const float V1 = static_cast<float>(SegmentIndex + 1) / static_cast<float>(SegmentCount);
+				const float Angle0 = V0 * 2.0f * UE_PI;
+				const float Angle1 = V1 * 2.0f * UE_PI;
+				AddBaseballBatSideQuad(
+					MeshDescription,
+					Attributes,
+					PolygonGroupId,
+					LeftRing,
+					RightRing,
+					Angle0,
+					Angle1,
+					U0,
+					U1,
+					V0,
+					V1);
+			}
+		}
+
+		AddBaseballBatCap(MeshDescription, Attributes, PolygonGroupId, Rings[0], false);
+		AddBaseballBatCap(MeshDescription, Attributes, PolygonGroupId, Rings.Last(), true);
+	}
+
+	UTexture2D* EnsureBaseballBatWoodTexture()
+	{
+		const FString ObjectPath = GetAssetObjectPath(WeaponAssetPath, BaseballBatWoodTextureAssetName);
+		UTexture2D* Texture = LoadObject<UTexture2D>(nullptr, *ObjectPath);
+		if (!Texture)
+		{
+			const FString PackageName = FString::Printf(TEXT("%s/%s"), *WeaponAssetPath, *BaseballBatWoodTextureAssetName);
+			UPackage* Package = CreatePackage(*PackageName);
+			if (!Package)
+			{
+				return nullptr;
+			}
+
+			Texture = NewObject<UTexture2D>(
+				Package,
+				*BaseballBatWoodTextureAssetName,
+				RF_Public | RF_Standalone | RF_Transactional);
+			if (!Texture)
+			{
+				return nullptr;
+			}
+
+			FAssetRegistryModule::AssetCreated(Texture);
+		}
+
+		constexpr int32 TextureSize = 256;
+		TArray<uint8> Pixels;
+		Pixels.SetNumZeroed(TextureSize * TextureSize * 4);
+		for (int32 Y = 0; Y < TextureSize; ++Y)
+		{
+			for (int32 X = 0; X < TextureSize; ++X)
+			{
+				const float U = static_cast<float>(X) / static_cast<float>(TextureSize - 1);
+				const float V = static_cast<float>(Y) / static_cast<float>(TextureSize - 1);
+				const float GrainNoise = FMath::PerlinNoise2D(FVector2D(U * 7.0f, V * 5.5f)) * 0.5f + 0.5f;
+				const float FineNoise = FMath::PerlinNoise2D(FVector2D(U * 44.0f + 31.0f, V * 12.0f - 17.0f)) * 0.5f + 0.5f;
+				const float GrainWave = FMath::Sin((V * 17.0f + GrainNoise * 1.7f + U * 0.8f) * 2.0f * UE_PI) * 0.5f + 0.5f;
+				const float RingLine = FMath::Clamp((GrainWave - 0.72f) / 0.28f, 0.0f, 1.0f);
+				const float Shade = FMath::Clamp(0.54f + GrainWave * 0.25f + FineNoise * 0.15f, 0.0f, 1.0f);
+
+				float Red = FMath::Lerp(132.0f, 236.0f, Shade);
+				float Green = FMath::Lerp(76.0f, 174.0f, Shade);
+				float Blue = FMath::Lerp(34.0f, 82.0f, Shade);
+				Red = FMath::Lerp(Red, 92.0f, RingLine * 0.28f);
+				Green = FMath::Lerp(Green, 48.0f, RingLine * 0.28f);
+				Blue = FMath::Lerp(Blue, 20.0f, RingLine * 0.28f);
+
+				const int32 PixelIndex = (Y * TextureSize + X) * 4;
+				Pixels[PixelIndex + 0] = static_cast<uint8>(FMath::Clamp(FMath::RoundToInt(Blue), 0, 255));
+				Pixels[PixelIndex + 1] = static_cast<uint8>(FMath::Clamp(FMath::RoundToInt(Green), 0, 255));
+				Pixels[PixelIndex + 2] = static_cast<uint8>(FMath::Clamp(FMath::RoundToInt(Red), 0, 255));
+				Pixels[PixelIndex + 3] = 255;
+			}
+		}
+
+		Texture->Modify();
+		Texture->Source.Init(TextureSize, TextureSize, 1, 1, TSF_BGRA8, Pixels.GetData());
+		Texture->SRGB = true;
+		Texture->CompressionSettings = TC_Default;
+		Texture->LODGroup = TEXTUREGROUP_World;
+		Texture->PostEditChange();
+		Texture->MarkPackageDirty();
+
+		if (!SaveAsset(Texture))
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to save %s."), *ObjectPath);
+			return nullptr;
+		}
+
+		return Texture;
+	}
+
+	UMaterial* EnsureBaseballBatWoodMaterial(UTexture2D* WoodTexture)
+	{
+		if (!WoodTexture)
+		{
+			return nullptr;
+		}
+
+		const FString ObjectPath = GetAssetObjectPath(WeaponAssetPath, BaseballBatMaterialAssetName);
+		UMaterial* Material = LoadObject<UMaterial>(nullptr, *ObjectPath);
+		if (!Material)
+		{
+			UMaterialFactoryNew* MaterialFactory = NewObject<UMaterialFactoryNew>();
+
+			FAssetToolsModule& AssetToolsModule = FModuleManager::LoadModuleChecked<FAssetToolsModule>(TEXT("AssetTools"));
+			UObject* CreatedAsset = AssetToolsModule.Get().CreateAsset(
+				BaseballBatMaterialAssetName,
+				WeaponAssetPath,
+				UMaterial::StaticClass(),
+				MaterialFactory);
+
+			Material = Cast<UMaterial>(CreatedAsset);
+			if (!Material)
+			{
+				UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to create %s."), *ObjectPath);
+				return nullptr;
+			}
+
+			FAssetRegistryModule::AssetCreated(Material);
+		}
+
+		Material->Modify();
+		Material->GetExpressionCollection().Empty();
+		Material->BlendMode = BLEND_Opaque;
+		Material->SetShadingModel(MSM_DefaultLit);
+		Material->TwoSided = true;
+
+		UMaterialEditorOnlyData* MaterialEditorOnly = Material->GetEditorOnlyData();
+		if (!MaterialEditorOnly)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to edit %s."), *ObjectPath);
+			return nullptr;
+		}
+
+		UMaterialExpressionTextureCoordinate* TextureCoordinateExpression = NewObject<UMaterialExpressionTextureCoordinate>(Material);
+		TextureCoordinateExpression->Material = Material;
+		TextureCoordinateExpression->CoordinateIndex = 0;
+		TextureCoordinateExpression->UTiling = 1.6f;
+		TextureCoordinateExpression->VTiling = 1.0f;
+		TextureCoordinateExpression->MaterialExpressionEditorX = -720;
+		TextureCoordinateExpression->MaterialExpressionEditorY = 0;
+		Material->GetExpressionCollection().AddExpression(TextureCoordinateExpression);
+
+		UMaterialExpressionTextureSampleParameter2D* WoodSample = NewObject<UMaterialExpressionTextureSampleParameter2D>(Material);
+		WoodSample->Material = Material;
+		WoodSample->ParameterName = TEXT("WoodTexture");
+		WoodSample->Texture = WoodTexture;
+		WoodSample->SamplerType = SAMPLERTYPE_Color;
+		WoodSample->Coordinates.Connect(0, TextureCoordinateExpression);
+		WoodSample->MaterialExpressionEditorX = -460;
+		WoodSample->MaterialExpressionEditorY = 0;
+		Material->GetExpressionCollection().AddExpression(WoodSample);
+
+		UMaterialExpressionScalarParameter* RoughnessParameter = NewObject<UMaterialExpressionScalarParameter>(Material);
+		RoughnessParameter->Material = Material;
+		RoughnessParameter->ParameterName = TEXT("Roughness");
+		RoughnessParameter->DefaultValue = 0.68f;
+		RoughnessParameter->MaterialExpressionEditorX = -460;
+		RoughnessParameter->MaterialExpressionEditorY = 220;
+		Material->GetExpressionCollection().AddExpression(RoughnessParameter);
+
+		UMaterialExpressionScalarParameter* SpecularParameter = NewObject<UMaterialExpressionScalarParameter>(Material);
+		SpecularParameter->Material = Material;
+		SpecularParameter->ParameterName = TEXT("Specular");
+		SpecularParameter->DefaultValue = 0.24f;
+		SpecularParameter->MaterialExpressionEditorX = -460;
+		SpecularParameter->MaterialExpressionEditorY = 360;
+		Material->GetExpressionCollection().AddExpression(SpecularParameter);
+
+		MaterialEditorOnly->BaseColor.Connect(0, WoodSample);
+		MaterialEditorOnly->Roughness.Connect(0, RoughnessParameter);
+		MaterialEditorOnly->Specular.Connect(0, SpecularParameter);
+
+		Material->PostEditChange();
+		Material->MarkPackageDirty();
+
+		if (!SaveAsset(Material))
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to save %s."), *ObjectPath);
+			return nullptr;
+		}
+
+		return Material;
+	}
+
+	UStaticMesh* EnsureBaseballBatStaticMeshAsset(UMaterialInterface* WoodMaterial)
+	{
+		const FString ObjectPath = GetAssetObjectPath(WeaponAssetPath, BaseballBatMeshAssetName);
+		UStaticMesh* StaticMesh = LoadObject<UStaticMesh>(nullptr, *ObjectPath);
+		if (!StaticMesh)
+		{
+			const FString PackageName = FString::Printf(TEXT("%s/%s"), *WeaponAssetPath, *BaseballBatMeshAssetName);
+			UPackage* Package = CreatePackage(*PackageName);
+			if (!Package)
+			{
+				return nullptr;
+			}
+
+			StaticMesh = NewObject<UStaticMesh>(
+				Package,
+				*BaseballBatMeshAssetName,
+				RF_Public | RF_Standalone | RF_Transactional);
+			if (!StaticMesh)
+			{
+				return nullptr;
+			}
+
+			FAssetRegistryModule::AssetCreated(StaticMesh);
+		}
+
+		StaticMesh->Modify();
+
+		FMeshDescription MeshDescription;
+		BuildBaseballBatMeshDescription(MeshDescription);
+
+		StaticMesh->GetStaticMaterials().Reset();
+		StaticMesh->GetStaticMaterials().Add(FStaticMaterial(WoodMaterial, FName(TEXT("Wood"))));
+
+		TArray<const FMeshDescription*> MeshDescriptions;
+		MeshDescriptions.Add(&MeshDescription);
+		StaticMesh->BuildFromMeshDescriptions(MeshDescriptions);
+		StaticMesh->MarkPackageDirty();
+
+		return SaveAsset(StaticMesh) ? StaticMesh : nullptr;
+	}
+
+	bool EnsureBaseballBatAssets()
+	{
+		UTexture2D* WoodTexture = EnsureBaseballBatWoodTexture();
+		UMaterial* WoodMaterial = EnsureBaseballBatWoodMaterial(WoodTexture);
+		if (!WoodTexture || !WoodMaterial)
+		{
+			return false;
+		}
+
+		return EnsureBaseballBatStaticMeshAsset(WoodMaterial) != nullptr;
+	}
+
 	UMaterial* EnsureLedExpressionMaterial()
 	{
 		const FString ObjectPath = GetAssetObjectPath(EffectsAssetPath, LedExpressionMaterialAssetName);
@@ -1556,6 +1935,16 @@ namespace TunaSweeperEditorSetup
 			{
 				MappingContext->MapKey(QuickSlotAction, QuickSlotKeys[SlotIndex]);
 			}
+		}
+
+		UInputAction* MeleeQuickSlotAction = EnsureInputAction(
+			MeleeQuickSlotActionName,
+			EInputActionValueType::Boolean,
+			EInputActionAccumulationBehavior::TakeHighestAbsoluteValue);
+		bAllActionsCreated = bAllActionsCreated && MeleeQuickSlotAction;
+		if (MeleeQuickSlotAction && !HasInputMapping(MappingContext, MeleeQuickSlotAction, EKeys::V))
+		{
+			MappingContext->MapKey(MeleeQuickSlotAction, EKeys::V);
 		}
 
 		MappingContext->ContextDescription = FText::FromString(TEXT("TunaSweeper player movement, combat, interaction, inventory, and quick slot input."));
@@ -1946,6 +2335,83 @@ namespace TunaSweeperEditorSetup
 		GameInstanceDefaults->ProjectileHitEffectDataAsset =
 			TSoftObjectPtr<UTunaSweeperProjectileHitEffectDataAsset>(
 				FSoftObjectPath(GetAssetObjectPath(EffectsAssetPath, ProjectileHitEffectDataAssetName)));
+		GameInstanceBlueprint->MarkPackageDirty();
+		FKismetEditorUtilities::CompileBlueprint(GameInstanceBlueprint);
+
+		return SaveAsset(GameInstanceBlueprint);
+	}
+
+	bool EnsureWeaponSpreadRecoilAssets()
+	{
+		UTunaSweeperWeaponSpreadRecoilDataAsset* RecoilDataAsset =
+			EnsureDataAsset<UTunaSweeperWeaponSpreadRecoilDataAsset>(
+				WeaponAssetPath,
+				WeaponSpreadRecoilDataAssetName);
+		if (!RecoilDataAsset)
+		{
+			return false;
+		}
+
+		RecoilDataAsset->Modify();
+		RecoilDataAsset->WeaponTypeDefinitions.Reset();
+		auto AddRecoilDefinition = [RecoilDataAsset](
+			const TCHAR* WeaponTypeTag,
+			float IncreasePerShot,
+			float MinimumSpreadHalfAngleDegrees,
+			float MaximumSpreadHalfAngleDegrees,
+			float DecreasePerSecond)
+		{
+			FTunaSweeperWeaponSpreadRecoilDefinition Definition;
+			Definition.WeaponTypeTag = FName(WeaponTypeTag);
+			Definition.IncreasePerShot = IncreasePerShot;
+			Definition.MinimumSpreadHalfAngleDegrees = MinimumSpreadHalfAngleDegrees;
+			Definition.MaximumSpreadHalfAngleDegrees = MaximumSpreadHalfAngleDegrees;
+			Definition.DecreasePerSecond = DecreasePerSecond;
+			RecoilDataAsset->WeaponTypeDefinitions.Add(Definition);
+		};
+
+		AddRecoilDefinition(TEXT("weapon.type.pistol"), 1.2f, 1.4f, 7.0f, 5.0f);
+		AddRecoilDefinition(TEXT("weapon.type.rifle"), 0.8f, 1.0f, 6.0f, 6.5f);
+		AddRecoilDefinition(TEXT("weapon.type.shotgun"), 2.0f, 4.5f, 12.0f, 4.5f);
+
+		RecoilDataAsset->MarkPackageDirty();
+		if (!SaveAsset(RecoilDataAsset))
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to save %s."), *GetAssetObjectPath(WeaponAssetPath, WeaponSpreadRecoilDataAssetName));
+			return false;
+		}
+
+		UBlueprint* GameInstanceBlueprint = LoadObject<UBlueprint>(nullptr, *GetGameInstanceObjectPath());
+		if (!GameInstanceBlueprint && !EnsureGameInstanceBlueprint())
+		{
+			return false;
+		}
+
+		GameInstanceBlueprint = LoadObject<UBlueprint>(nullptr, *GetGameInstanceObjectPath());
+		if (!GameInstanceBlueprint)
+		{
+			return false;
+		}
+
+		if (!GameInstanceBlueprint->GeneratedClass)
+		{
+			FKismetEditorUtilities::CompileBlueprint(GameInstanceBlueprint);
+		}
+
+		UTunaSweeperGameInstance* GameInstanceDefaults = GameInstanceBlueprint->GeneratedClass
+			? Cast<UTunaSweeperGameInstance>(GameInstanceBlueprint->GeneratedClass->GetDefaultObject())
+			: nullptr;
+		if (!GameInstanceDefaults)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to configure weapon spread recoil mapping on %s."), *GetGameInstanceObjectPath());
+			return false;
+		}
+
+		GameInstanceBlueprint->Modify();
+		GameInstanceDefaults->Modify();
+		GameInstanceDefaults->WeaponSpreadRecoilDataAsset =
+			TSoftObjectPtr<UTunaSweeperWeaponSpreadRecoilDataAsset>(
+				FSoftObjectPath(GetAssetObjectPath(WeaponAssetPath, WeaponSpreadRecoilDataAssetName)));
 		GameInstanceBlueprint->MarkPackageDirty();
 		FKismetEditorUtilities::CompileBlueprint(GameInstanceBlueprint);
 
@@ -5508,7 +5974,7 @@ namespace TunaSweeperEditorSetup
 		}
 
 		WidgetTree->RootWidget = RootSizeBox;
-		RootSizeBox->SetWidthOverride(620.0f);
+		RootSizeBox->SetWidthOverride(694.0f);
 		RootSizeBox->SetHeightOverride(174.0f);
 		RootSizeBox->SetContent(RootCanvas);
 
@@ -5609,7 +6075,7 @@ namespace TunaSweeperEditorSetup
 			SlotRowCanvasSlot->SetAnchors(FAnchors(0.5f, 1.0f, 0.5f, 1.0f));
 			SlotRowCanvasSlot->SetAlignment(FVector2D(0.5f, 1.0f));
 			SlotRowCanvasSlot->SetPosition(FVector2D(0.0f, 0.0f));
-			SlotRowCanvasSlot->SetSize(FVector2D(616.0f, 126.0f));
+			SlotRowCanvasSlot->SetSize(FVector2D(690.0f, 126.0f));
 		}
 
 		const FString DefaultIconPaths[8] = {
@@ -5622,61 +6088,69 @@ namespace TunaSweeperEditorSetup
 			TEXT("/Game/UI/Icons/T_UIIcon_Painkillers.T_UIIcon_Painkillers"),
 			TEXT("/Game/UI/Icons/T_UIIcon_EnergyBar.T_UIIcon_EnergyBar")
 		};
+		const FString MeleeDefaultIconPath = TEXT("/Game/UI/Icons/T_UIIcon_CombatKnife.T_UIIcon_CombatKnife");
 
-		for (int32 SlotNumber = 1; SlotNumber <= 8; ++SlotNumber)
+		for (int32 DisplaySlotIndex = 0; DisplaySlotIndex < 9; ++DisplaySlotIndex)
 		{
-			const bool bWeaponSlot = SlotNumber <= 2;
+			const bool bMeleeSlot = DisplaySlotIndex == 2;
+			const int32 SlotNumber = bMeleeSlot ? INDEX_NONE : (DisplaySlotIndex < 2 ? DisplaySlotIndex + 1 : DisplaySlotIndex);
+			const FString SlotWidgetPrefix = bMeleeSlot
+				? FString(TEXT("QuickSlotMelee"))
+				: FString::Printf(TEXT("QuickSlot%d"), SlotNumber);
+			const bool bWeaponSlot = !bMeleeSlot && SlotNumber <= 2;
 			const float SlotSize = bWeaponSlot ? 82.0f : 66.0f;
 			const float IconSize = bWeaponSlot ? 68.0f : 54.0f;
+			const FString DefaultIconPath = bMeleeSlot ? MeleeDefaultIconPath : DefaultIconPaths[SlotNumber - 1];
+			const FText SlotLabelText = bMeleeSlot ? FText::FromString(TEXT("V")) : FText::AsNumber(SlotNumber);
 
 			UVerticalBox* SlotStack = WidgetTree->ConstructWidget<UVerticalBox>(
 				UVerticalBox::StaticClass(),
-				FName(*FString::Printf(TEXT("QuickSlot%dStack"), SlotNumber)));
+				FName(*(SlotWidgetPrefix + TEXT("Stack"))));
 			USizeBox* SlotAmmoTypeContainer = WidgetTree->ConstructWidget<USizeBox>(
 				USizeBox::StaticClass(),
-				FName(*FString::Printf(TEXT("QuickSlot%dAmmoTypeContainer"), SlotNumber)));
+				FName(*(SlotWidgetPrefix + TEXT("AmmoTypeContainer"))));
 			UHorizontalBox* SlotAmmoTypeRow = WidgetTree->ConstructWidget<UHorizontalBox>(
 				UHorizontalBox::StaticClass(),
-				FName(*FString::Printf(TEXT("QuickSlot%dAmmoTypeRow"), SlotNumber)));
+				FName(*(SlotWidgetPrefix + TEXT("AmmoTypeRow"))));
 			UBorder* SlotAmmoTypeBackground = WidgetTree->ConstructWidget<UBorder>(
 				UBorder::StaticClass(),
-				FName(*FString::Printf(TEXT("QuickSlot%dAmmoTypeBackground"), SlotNumber)));
+				FName(*(SlotWidgetPrefix + TEXT("AmmoTypeBackground"))));
 			UTextBlock* SlotAmmoTypeText = WidgetTree->ConstructWidget<UTextBlock>(
 				UTextBlock::StaticClass(),
-				FName(*FString::Printf(TEXT("QuickSlot%dAmmoTypeText"), SlotNumber)));
+				FName(*(SlotWidgetPrefix + TEXT("AmmoTypeText"))));
 			UBorder* SlotAmmoKeyBackground = WidgetTree->ConstructWidget<UBorder>(
 				UBorder::StaticClass(),
-				FName(*FString::Printf(TEXT("QuickSlot%dAmmoKeyBackground"), SlotNumber)));
+				FName(*(SlotWidgetPrefix + TEXT("AmmoKeyBackground"))));
 			UTextBlock* SlotAmmoKeyText = WidgetTree->ConstructWidget<UTextBlock>(
 				UTextBlock::StaticClass(),
-				FName(*FString::Printf(TEXT("QuickSlot%dAmmoKeyText"), SlotNumber)));
+				FName(*(SlotWidgetPrefix + TEXT("AmmoKeyText"))));
 			USizeBox* SlotAmmoTextContainer = WidgetTree->ConstructWidget<USizeBox>(
 				USizeBox::StaticClass(),
-				FName(*FString::Printf(TEXT("QuickSlot%dAmmoTextContainer"), SlotNumber)));
+				FName(*(SlotWidgetPrefix + TEXT("AmmoTextContainer"))));
 			UBorder* SlotAmmoTextBackground = WidgetTree->ConstructWidget<UBorder>(
 				UBorder::StaticClass(),
-				FName(*FString::Printf(TEXT("QuickSlot%dAmmoTextBackground"), SlotNumber)));
+				FName(*(SlotWidgetPrefix + TEXT("AmmoTextBackground"))));
 			UTextBlock* SlotAmmoText = WidgetTree->ConstructWidget<UTextBlock>(
 				UTextBlock::StaticClass(),
-				FName(*FString::Printf(TEXT("QuickSlot%dAmmoText"), SlotNumber)));
+				FName(*(SlotWidgetPrefix + TEXT("AmmoText"))));
 			USizeBox* SlotSizeBox = WidgetTree->ConstructWidget<USizeBox>(
 				USizeBox::StaticClass(),
-				FName(*FString::Printf(TEXT("QuickSlot%dSizeBox"), SlotNumber)));
+				FName(*(SlotWidgetPrefix + TEXT("SizeBox"))));
 			UBorder* SlotBackground = WidgetTree->ConstructWidget<UBorder>(
 				UBorder::StaticClass(),
-				FName(*FString::Printf(TEXT("QuickSlot%dBackground"), SlotNumber)));
+				FName(*(SlotWidgetPrefix + TEXT("Background"))));
 			UOverlay* SlotOverlay = WidgetTree->ConstructWidget<UOverlay>(
 				UOverlay::StaticClass(),
-				FName(*FString::Printf(TEXT("QuickSlot%dOverlay"), SlotNumber)));
+				FName(*(SlotWidgetPrefix + TEXT("Overlay"))));
 			UImage* SlotIcon = WidgetTree->ConstructWidget<UImage>(
 				UImage::StaticClass(),
-				FName(*FString::Printf(TEXT("QuickSlot%dIcon"), SlotNumber)));
+				FName(*(SlotWidgetPrefix + TEXT("Icon"))));
 			UTextBlock* SlotNumberText = WidgetTree->ConstructWidget<UTextBlock>(
 				UTextBlock::StaticClass(),
-				FName(*FString::Printf(TEXT("QuickSlot%dNumberText"), SlotNumber)));
+				FName(*(SlotWidgetPrefix + TEXT("NumberText"))));
 			UBorder* SelectionFrame = WidgetTree->ConstructWidget<UBorder>(
 				UBorder::StaticClass(),
-				FName(*FString::Printf(TEXT("QuickSlot%dSelectionFrame"), SlotNumber)));
+				FName(*(SlotWidgetPrefix + TEXT("SelectionFrame"))));
 
 			if (!SlotStack || !SlotAmmoTypeContainer || !SlotAmmoTypeRow || !SlotAmmoTypeBackground || !SlotAmmoTypeText ||
 				!SlotAmmoKeyBackground || !SlotAmmoKeyText || !SlotAmmoTextContainer || !SlotAmmoTextBackground || !SlotAmmoText ||
@@ -5766,7 +6240,7 @@ namespace TunaSweeperEditorSetup
 				1.0f));
 			SlotBackground->SetContent(SlotOverlay);
 
-			if (UTexture2D* DefaultIcon = LoadObject<UTexture2D>(nullptr, *DefaultIconPaths[SlotNumber - 1]))
+			if (UTexture2D* DefaultIcon = LoadObject<UTexture2D>(nullptr, *DefaultIconPath))
 			{
 				SlotIcon->SetBrushFromTexture(DefaultIcon, true);
 			}
@@ -5781,7 +6255,7 @@ namespace TunaSweeperEditorSetup
 				IconSlot->SetPadding(FMargin((SlotSize - IconSize) * 0.25f));
 			}
 
-			ConfigureTextBlock(SlotNumberText, FText::AsNumber(SlotNumber), FLinearColor(0.82f, 0.88f, 0.94f, 1.0f), bWeaponSlot ? 16 : 13);
+			ConfigureTextBlock(SlotNumberText, SlotLabelText, FLinearColor(0.82f, 0.88f, 0.94f, 1.0f), bWeaponSlot ? 16 : 13);
 			UOverlaySlot* NumberSlot = SlotOverlay->AddChildToOverlay(SlotNumberText);
 			if (NumberSlot)
 			{
@@ -5790,7 +6264,7 @@ namespace TunaSweeperEditorSetup
 				NumberSlot->SetPadding(FMargin(3.0f, 1.0f, 0.0f, 0.0f));
 			}
 
-			SelectionFrame->SetVisibility(SlotNumber == 1 ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Hidden);
+			SelectionFrame->SetVisibility(!bMeleeSlot && SlotNumber == 1 ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Hidden);
 			SelectionFrame->SetBrush(MakeRoundedBoxBrush(
 				FVector2D(SlotSize, SlotSize),
 				FLinearColor::Transparent,
@@ -5812,7 +6286,7 @@ namespace TunaSweeperEditorSetup
 			UHorizontalBoxSlot* SlotRowSlot = SlotRow->AddChildToHorizontalBox(SlotStack);
 			if (SlotRowSlot)
 			{
-				SlotRowSlot->SetPadding(FMargin(SlotNumber == 1 ? 0.0f : 8.0f, 0.0f, 0.0f, 0.0f));
+				SlotRowSlot->SetPadding(FMargin(DisplaySlotIndex == 0 ? 0.0f : 8.0f, 0.0f, 0.0f, 0.0f));
 				SlotRowSlot->SetVerticalAlignment(VAlign_Bottom);
 			}
 
@@ -9041,6 +9515,20 @@ public:
 			[]()
 			{
 				return TunaSweeperEditorSetup::EnsureProjectileHitEffectAssets();
+			});
+
+		FTunaSweeperEditorRunOnce::Run(
+			TunaSweeperEditorSetup::WeaponSpreadRecoilAssetTaskId,
+			[]()
+			{
+				return TunaSweeperEditorSetup::EnsureWeaponSpreadRecoilAssets();
+			});
+
+		FTunaSweeperEditorRunOnce::Run(
+			TunaSweeperEditorSetup::BaseballBatAssetTaskId,
+			[]()
+			{
+				return TunaSweeperEditorSetup::EnsureBaseballBatAssets();
 			});
 
 		const bool bLedExpressionMaterialTaskRan = FTunaSweeperEditorRunOnce::Run(

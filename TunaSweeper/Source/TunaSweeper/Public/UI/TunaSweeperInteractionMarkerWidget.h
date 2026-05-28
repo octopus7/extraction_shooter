@@ -75,7 +75,9 @@ private:
 	int32 CachedRequiredQuantity = 0;
 	bool bCachedShowRequirement = false;
 	bool bCachedOpened = false;
+	bool bHasCachedRingBrush = false;
 	bool bHasCachedFilledBrush = false;
+	FSlateBrush CachedRingBrush;
 	FSlateBrush CachedFilledBrush;
 	float CachedAlpha = 0.0f;
 	float CachedRingScale = 3.0f;

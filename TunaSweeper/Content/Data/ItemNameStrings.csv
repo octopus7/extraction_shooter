@@ -3,6 +3,7 @@ item.pistol,권총,Pistol,ピストル
 item.rifle,소총,Rifle,ライフル
 item.shotgun,산탄총,Shotgun,ショットガン
 item.combat_knife,전투 나이프,Combat Knife,コンバットナイフ
+item.baseball_bat,야구방망이,Baseball Bat,野球バット
 item.pistol_ammo,권총 탄약,Pistol Ammo,ピストル弾薬
 item.rifle_ammo,소총 탄약,Rifle Ammo,ライフル弾薬
 item.shotgun_ammo,산탄총 탄약,Shotgun Ammo,ショットガン弾薬
@@ -34,6 +35,7 @@ item.pistol.desc,가까운 거리 방어에 쓰기 좋은 기본 권총이다,A 
 item.rifle.desc,중거리 교전에 적합한 안정적인 소총이다,A reliable rifle suited for mid range fights,中距離戦に適した安定したライフル
 item.shotgun.desc,좁은 공간에서 강한 화력을 내는 산탄총이다,A shotgun with strong close quarters impact,狭い場所で強い火力を出すショットガン
 item.combat_knife.desc,가까운 거리에서 쓰는 기본 근접무기다,A basic melee weapon for close range use,近距離で使う基本的な近接武器
+item.baseball_bat.desc,단단한 목재로 만든 휘두르기 좋은 근접무기다,A sturdy wooden melee weapon built for heavy swings,重いスイングに向いた丈夫な木製近接武器
 item.pistol_ammo.desc,권총에 사용하는 소형 탄약 묶음이다,A small bundle of pistol rounds,ピストル用の小型弾薬の束
 item.rifle_ammo.desc,소총에 사용하는 표준 탄약 묶음이다,A standard bundle of rifle rounds,ライフル用の標準弾薬の束
 item.shotgun_ammo.desc,산탄총에 사용하는 산탄 탄약이다,Shells used by shotguns,ショットガンで使う散弾

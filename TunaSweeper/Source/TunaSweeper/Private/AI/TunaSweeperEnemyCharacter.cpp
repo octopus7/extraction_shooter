@@ -7,6 +7,7 @@
 #include "Effect/TunaSweeperMeleeImpactBurstActor.h"
 #include "Effect/TunaSweeperMeleeSwingTrailActor.h"
 #include "Engine/StaticMesh.h"
+#include "Game/TunaSweeperGameInstance.h"
 #include "GameFramework/DamageType.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Interaction/TunaSweeperLootContainerActor.h"
@@ -148,7 +149,8 @@ void ATunaSweeperEnemyCharacter::ConfigureSpawnData(
 	FName InEnemyId,
 	int32 InDropContainerDefinitionId,
 	int32 InDropContentsId,
-	float InMaxHealth)
+	float InMaxHealth,
+	int32 InExperienceValue)
 {
 	if (!InBodyMaterial.IsNull())
 	{
@@ -164,6 +166,7 @@ void ATunaSweeperEnemyCharacter::ConfigureSpawnData(
 	EnemyId = InEnemyId;
 	DropContainerDefinitionId = InDropContainerDefinitionId;
 	DropContentsId = InDropContentsId;
+	ExperienceValue = FMath::Max(0, InExperienceValue);
 	ApplyVisualMaterials();
 }
 
@@ -465,6 +468,10 @@ void ATunaSweeperEnemyCharacter::HandleDeath(AController* KillerController, AAct
 			if (UTunaSweeperQuestSubsystem* QuestSubsystem = GameInstance->GetSubsystem<UTunaSweeperQuestSubsystem>())
 			{
 				QuestSubsystem->NotifyEnemyKilled(EnemyId);
+			}
+			if (UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GameInstance))
+			{
+				TunaGameInstance->AddRaidExperience(ExperienceValue);
 			}
 		}
 	}

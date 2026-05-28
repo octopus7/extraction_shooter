@@ -106,6 +106,7 @@ private:
 		FRotator Rotation = FRotator::ZeroRotator;
 		int32 DropContainerDefinitionId = INDEX_NONE;
 		int32 DropContentsId = INDEX_NONE;
+		int32 ExperienceValue = 30;
 		float MaxHealth = 30.0f;
 	};
 
@@ -220,6 +221,7 @@ private:
 		float RollingBomberLaunchPitchMinDegrees = 38.0f;
 		float RollingBomberLaunchPitchMaxDegrees = 58.0f;
 		float RollingBomberSpawnerMaxHealth = 80.0f;
+		int32 RollingBomberSpawnerExperienceValue = 120;
 	};
 
 	void HandlePostLoadMapWithWorld(UWorld* LoadedWorld);

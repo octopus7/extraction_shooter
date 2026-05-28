@@ -23,7 +23,16 @@ public:
 	void ClearQuickSlotIcon(int32 SlotNumber);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
+	void SetMeleeQuickSlotIcon(UTexture2D* IconTexture);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
+	void ClearMeleeQuickSlotIcon();
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
 	void SetSelectedQuickSlot(int32 SlotNumber);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
+	void SetSelectedMeleeQuickSlot();
 
 	void SetWeaponAmmoTypeText(int32 SlotNumber, const FText& AmmoTypeText, bool bVisible);
 	void SetWeaponAmmoText(int32 SlotNumber, int32 LoadedAmmoCount, int32 InventoryAmmoCount, bool bVisible);
@@ -66,6 +75,12 @@ private:
 
 	UPROPERTY(Transient)
 	TArray<TObjectPtr<UTextBlock>> SlotAmmoKeyTexts;
+
+	UPROPERTY(BlueprintReadOnly, Transient, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional, AllowPrivateAccess = "true"))
+	TObjectPtr<UImage> QuickSlotMeleeIcon;
+
+	UPROPERTY(BlueprintReadOnly, Transient, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional, AllowPrivateAccess = "true"))
+	TObjectPtr<UWidget> QuickSlotMeleeSelectionFrame;
 
 	UPROPERTY(Transient)
 	TArray<TObjectPtr<UWidget>> AmmoSelectorOptionBackgrounds;

@@ -4,6 +4,7 @@
 #include "Character/TunaSweeperTopDownCharacter.h"
 #include "Components/SceneComponent.h"
 #include "Engine/World.h"
+#include "Game/TunaSweeperGameInstance.h"
 #include "Kismet/GameplayStatics.h"
 #include "Materials/MaterialInterface.h"
 #include "ProceduralMeshComponent.h"
@@ -221,6 +222,13 @@ float ATunaSweeperRollingBomberSpawner::TakeDamage(
 	CurrentHealth = FMath::Max(0.0f, CurrentHealth - DamageAmount);
 	if (CurrentHealth <= 0.0f)
 	{
+		if (EventInstigator && EventInstigator->IsPlayerController())
+		{
+			if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
+			{
+				TunaGameInstance->AddRaidExperience(ExperienceValue);
+			}
+		}
 		DestroySpawner();
 	}
 
@@ -238,7 +246,8 @@ void ATunaSweeperRollingBomberSpawner::ConfigureSpawnerDefaults(
 	float InLaunchSpeedMax,
 	float InLaunchPitchMinDegrees,
 	float InLaunchPitchMaxDegrees,
-	float InMaxHealth)
+	float InMaxHealth,
+	int32 InExperienceValue)
 {
 	if (!InRollingBomberClass.IsNull())
 	{
@@ -267,6 +276,7 @@ void ATunaSweeperRollingBomberSpawner::ConfigureSpawnerDefaults(
 		89.0f);
 	MaxHealth = FMath::Max(1.0f, InMaxHealth);
 	CurrentHealth = MaxHealth;
+	ExperienceValue = FMath::Max(0, InExperienceValue);
 	CurrentWaveSpawnCount = FMath::Clamp(InitialSpawnCount, 1, MaxSpawnCount);
 }
 

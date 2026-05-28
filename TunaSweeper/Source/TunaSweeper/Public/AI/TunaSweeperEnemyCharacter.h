@@ -44,7 +44,8 @@ public:
 		FName InEnemyId,
 		int32 InDropContainerDefinitionId,
 		int32 InDropContentsId,
-		float InMaxHealth);
+		float InMaxHealth,
+		int32 InExperienceValue);
 
 protected:
 	virtual void BeginPlay() override;
@@ -102,6 +103,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Loot")
 	int32 DropContentsId = INDEX_NONE;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Experience", meta = (ClampMin = "0", UIMin = "0"))
+	int32 ExperienceValue = 30;
 
 private:
 	void ApplyVoxelVisualMeshes();

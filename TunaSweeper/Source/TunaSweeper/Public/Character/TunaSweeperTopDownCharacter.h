@@ -6,6 +6,8 @@
 #include "TunaSweeperTopDownCharacter.generated.h"
 
 class ATunaSweeperWeapon;
+class ATunaSweeperMeleeImpactBurstActor;
+class ATunaSweeperMeleeSwingTrailActor;
 class UCameraComponent;
 class UInputAction;
 class UInputMappingContext;
@@ -114,6 +116,9 @@ public:
 	FVector GetAimDirection() const { return AimDirection; }
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Aiming")
+	FVector2D GetWeaponRecoilCrosshairScreenOffset() const;
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Aiming")
 	bool IsAiming() const { return bIsAiming; }
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Vitals")
@@ -155,8 +160,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Weapon")
 	bool SelectWeaponSlot(int32 SlotNumber);
 
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Weapon")
+	bool SelectMeleeWeapon();
+
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Weapon")
 	int32 GetSelectedWeaponSlotNumber() const { return SelectedWeaponSlotNumber; }
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Weapon")
+	bool IsMeleeWeaponSelected() const { return bMeleeWeaponSelected; }
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Weapon")
 	bool IsWeaponReloading() const { return bIsReloading; }
@@ -241,8 +252,38 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat")
 	TSoftClassPtr<ATunaSweeperWeapon> DefaultWeaponClass;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat|Melee")
+	TSoftClassPtr<ATunaSweeperMeleeSwingTrailActor> MeleeSwingTrailActorClass;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat|Melee")
+	TSoftClassPtr<ATunaSweeperMeleeImpactBurstActor> MeleeImpactBurstActorClass;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat")
 	float FireInterval = 0.1f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat|Spread Recoil", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float WeaponRecoilScreenPixelsPerDegree = 5.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat|Melee", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float MeleeAttackDamage = 8.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat|Melee", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float MeleeAttackRange = 165.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat|Melee", meta = (ClampMin = "0.0", ClampMax = "180.0", UIMin = "0.0", UIMax = "180.0"))
+	float MeleeAttackHalfAngleDegrees = 55.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat|Melee", meta = (ClampMin = "0.01", UIMin = "0.01"))
+	float MeleeAttackCooldownSeconds = 0.58f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat|Melee", meta = (ClampMin = "0.01", UIMin = "0.01"))
+	float MeleeSwingDurationSeconds = 0.28f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat|Melee", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float MeleeJudgementTimeSeconds = 0.11f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat|Melee", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float MeleeImpactHeight = 55.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement")
 	float BaseWalkSpeed = 600.0f;
@@ -360,6 +401,15 @@ private:
 	void FireWeapon();
 	bool IsGameplayActionInputLocked() const;
 	bool CanUseSelectedWeaponSlot();
+	bool CanUseSelectedMeleeWeapon();
+	void StartMeleeAttack();
+	void UpdateMeleeSwing(float DeltaSeconds);
+	void CancelMeleeSwing();
+	void ResetEquippedWeaponRelativeTransform();
+	void ApplyEquippedMeleeWeaponVisual();
+	void ApplyMeleeAttackJudgement();
+	void SpawnMeleeSwingEffect(const FVector& AttackDirection);
+	void SpawnMeleeImpactBurst(const FVector& HitLocation, const FVector& BurstDirection);
 	void StartReload();
 	void CompleteReload();
 	void CancelReload();
@@ -374,6 +424,11 @@ private:
 	void UpdateRoll(float DeltaSeconds);
 	void UpdateMovementSpeed();
 	void UpdateStaminaGauge(float DeltaSeconds);
+	void UpdateWeaponSpreadRecoil(float DeltaSeconds);
+	void ResetWeaponSpreadRecoil();
+	bool TryGetSelectedWeaponTypeTag(FName& OutWeaponTypeTag) const;
+	FVector ApplyWeaponSpreadToAimDirection(const FVector& BaseAimDirection, FName WeaponTypeTag) const;
+	void AddWeaponSpreadRecoilShot(FName WeaponTypeTag);
 	void FinishRoll();
 	void SetRollProjectileCollisionPassthrough(bool bEnabled);
 	void AttachWeaponForRoll();
@@ -424,15 +479,19 @@ private:
 	float CurrentStamina = 100.0f;
 	float StaminaGaugeOpacity = 0.0f;
 	float RollElapsedSeconds = 0.0f;
+	float MeleeSwingElapsedSeconds = 0.0f;
+	float LastMeleeAttackWorldSeconds = -1000.0f;
 	float CameraHitReactionElapsed = 0.0f;
 	float CameraHitReactionScale = 1.0f;
 	float CameraHitReactionPhase = 0.0f;
 	FVector RollDirection = FVector::ForwardVector;
+	FVector2D WeaponRecoilOffsetDegrees = FVector2D::ZeroVector;
 	FVector2D CurrentMoveInput = FVector2D::ZeroVector;
 	FRotator DefaultSkeletalMeshRelativeRotation = FRotator::ZeroRotator;
 	FRotator DefaultVisualMeshRelativeRotation = FRotator::ZeroRotator;
 	TWeakObjectPtr<USceneComponent> SavedWeaponAttachParent;
 	FName SavedWeaponAttachSocketName = NAME_None;
+	FName WeaponRecoilTypeTag = NAME_None;
 	FTransform SavedWeaponRelativeTransform = FTransform::Identity;
 	TEnumAsByte<ECollisionResponse> SavedProjectileCollisionResponse = ECR_Block;
 	bool bFireHeld = false;
@@ -440,6 +499,9 @@ private:
 	bool bIsDead = false;
 	bool bIsReloading = false;
 	bool bAmmoSelectionOpen = false;
+	bool bMeleeWeaponSelected = false;
+	bool bMeleeSwingActive = false;
+	bool bMeleeJudgementApplied = false;
 	bool bCameraHitReactionActive = false;
 	bool bSprintInputHeld = false;
 	bool bIsSprinting = false;

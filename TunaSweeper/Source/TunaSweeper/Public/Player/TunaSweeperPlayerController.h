@@ -106,6 +106,9 @@ protected:
 	TArray<TSoftObjectPtr<UInputAction>> QuickSlotActions;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+	TSoftObjectPtr<UInputAction> MeleeQuickSlotAction;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	TSoftObjectPtr<UInputAction> DropAction;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Loot")
@@ -128,12 +131,14 @@ private:
 	bool IsOpeningScenarioMap() const;
 	bool IsBunkerMap() const;
 	bool IsRaidMap() const;
-	bool GetMouseAimPointOnPlane(float PlaneZ, FVector& OutAimPoint) const;
+	bool GetMouseAimPointOnPlane(float PlaneZ, const FVector2D& ScreenOffset, FVector& OutAimPoint) const;
 	bool FindDropLocationNearPlayer(FVector& OutDropLocation) const;
 	ATunaSweeperPickupItemActor* SpawnDroppedPickupItem(int32 ItemId, int32 Quantity);
 	void HandleQuickSlot(int32 SlotNumber);
+	void HandleMeleeQuickSlotPressed();
 	void HandleUseHoveredItem();
 	void HandleDrop(const FInputActionValue& Value);
+	void HandleMeleeQuickSlot(const FInputActionValue& Value);
 	void HandleQuickSlot1(const FInputActionValue& Value);
 	void HandleQuickSlot2(const FInputActionValue& Value);
 	void HandleQuickSlot3(const FInputActionValue& Value);

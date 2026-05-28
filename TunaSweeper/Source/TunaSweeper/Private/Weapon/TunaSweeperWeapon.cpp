@@ -3,8 +3,14 @@
 #include "Components/SceneComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/World.h"
+#include "Materials/MaterialInterface.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Weapon/TunaSweeperProjectile.h"
+
+namespace TunaSweeperWeaponTags
+{
+	const FName ShotgunWeaponTypeTag(TEXT("weapon.type.shotgun"));
+}
 
 ATunaSweeperWeapon::ATunaSweeperWeapon()
 {
@@ -16,14 +22,13 @@ ATunaSweeperWeapon::ATunaSweeperWeapon()
 	WeaponMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WeaponMesh"));
 	WeaponMesh->SetupAttachment(RootComponent);
 	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	WeaponMesh->SetRelativeLocation(FVector::ZeroVector);
-	WeaponMesh->SetRelativeScale3D(FVector(0.7f, 0.15f, 0.15f));
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> CubeMesh(TEXT("/Engine/BasicShapes/Cube.Cube"));
 	if (CubeMesh.Succeeded())
 	{
 		WeaponMesh->SetStaticMesh(CubeMesh.Object);
 	}
+	ConfigureGunVisual();
 
 	MuzzlePoint = CreateDefaultSubobject<USceneComponent>(TEXT("MuzzlePoint"));
 	MuzzlePoint->SetupAttachment(RootComponent);
@@ -32,7 +37,60 @@ ATunaSweeperWeapon::ATunaSweeperWeapon()
 	ProjectileClass = TSoftClassPtr<ATunaSweeperProjectile>(FSoftObjectPath(TEXT("/Game/Weapons/BP_TunaSweeperProjectile.BP_TunaSweeperProjectile_C")));
 }
 
-void ATunaSweeperWeapon::Fire(const FVector& AimDirection, APawn* InstigatorPawn, FName ProjectileHitEffectId)
+void ATunaSweeperWeapon::ConfigureGunVisual()
+{
+	if (!WeaponMesh)
+	{
+		return;
+	}
+
+	WeaponMesh->SetRelativeLocation(FVector::ZeroVector);
+	WeaponMesh->SetRelativeRotation(FRotator::ZeroRotator);
+	WeaponMesh->SetRelativeScale3D(FVector(0.7f, 0.15f, 0.15f));
+}
+
+void ATunaSweeperWeapon::ConfigureMeleeVisual()
+{
+	if (!WeaponMesh)
+	{
+		return;
+	}
+
+	WeaponMesh->SetRelativeLocation(FVector(26.0f, 0.0f, 0.0f));
+	WeaponMesh->SetRelativeRotation(FRotator::ZeroRotator);
+	WeaponMesh->SetRelativeScale3D(FVector(0.52f, 0.075f, 0.075f));
+}
+
+void ATunaSweeperWeapon::SetWeaponMeshOverride(
+	UStaticMesh* Mesh,
+	UMaterialInterface* Material,
+	FVector RelativeLocation,
+	FRotator RelativeRotation,
+	FVector RelativeScale)
+{
+	if (!WeaponMesh)
+	{
+		return;
+	}
+
+	if (Mesh)
+	{
+		WeaponMesh->SetStaticMesh(Mesh);
+	}
+	if (Material)
+	{
+		WeaponMesh->SetMaterial(0, Material);
+	}
+	WeaponMesh->SetRelativeLocation(RelativeLocation);
+	WeaponMesh->SetRelativeRotation(RelativeRotation);
+	WeaponMesh->SetRelativeScale3D(RelativeScale);
+}
+
+void ATunaSweeperWeapon::Fire(
+	const FVector& AimDirection,
+	APawn* InstigatorPawn,
+	FName ProjectileHitEffectId,
+	FName WeaponTypeTag)
 {
 	UWorld* World = GetWorld();
 	if (!World)
@@ -58,6 +116,38 @@ void ATunaSweeperWeapon::Fire(const FVector& AimDirection, APawn* InstigatorPawn
 		LoadedProjectileClass = ATunaSweeperProjectile::StaticClass();
 	}
 
+	if (WeaponTypeTag == TunaSweeperWeaponTags::ShotgunWeaponTypeTag)
+	{
+		const int32 ProjectileCount = FMath::Max(1, ShotgunProjectileCount);
+		const float SpreadHalfAngle = FMath::Max(0.0f, ShotgunSpreadAngleDegrees) * 0.5f;
+		for (int32 ProjectileIndex = 0; ProjectileIndex < ProjectileCount; ++ProjectileIndex)
+		{
+			const float YawOffset = SpreadHalfAngle > 0.0f
+				? FMath::FRandRange(-SpreadHalfAngle, SpreadHalfAngle)
+				: 0.0f;
+			FVector SpreadDirection = ShotDirection.RotateAngleAxis(YawOffset, FVector::UpVector).GetSafeNormal2D();
+			if (SpreadDirection.IsNearlyZero())
+			{
+				SpreadDirection = ShotDirection;
+			}
+			SpawnProjectile(*World, LoadedProjectileClass, SpreadDirection, InstigatorPawn, ProjectileHitEffectId);
+		}
+	}
+	else
+	{
+		SpawnProjectile(*World, LoadedProjectileClass, ShotDirection, InstigatorPawn, ProjectileHitEffectId);
+	}
+
+	LastFireTimeSeconds = CurrentTime;
+}
+
+ATunaSweeperProjectile* ATunaSweeperWeapon::SpawnProjectile(
+	UWorld& World,
+	TSubclassOf<ATunaSweeperProjectile> ProjectileClassToSpawn,
+	const FVector& ShotDirection,
+	APawn* InstigatorPawn,
+	FName ProjectileHitEffectId)
+{
 	FActorSpawnParameters SpawnParameters;
 	SpawnParameters.Owner = this;
 	SpawnParameters.Instigator = InstigatorPawn;
@@ -66,11 +156,11 @@ void ATunaSweeperWeapon::Fire(const FVector& AimDirection, APawn* InstigatorPawn
 	const FVector SpawnLocation = MuzzlePoint ? MuzzlePoint->GetComponentLocation() : GetActorLocation();
 	const FRotator SpawnRotation = ShotDirection.Rotation();
 	ATunaSweeperProjectile* SpawnedProjectile =
-		World->SpawnActor<ATunaSweeperProjectile>(LoadedProjectileClass, SpawnLocation, SpawnRotation, SpawnParameters);
+		World.SpawnActor<ATunaSweeperProjectile>(ProjectileClassToSpawn, SpawnLocation, SpawnRotation, SpawnParameters);
 	if (SpawnedProjectile)
 	{
 		SpawnedProjectile->SetHitEffectId(ProjectileHitEffectId);
 	}
 
-	LastFireTimeSeconds = CurrentTime;
+	return SpawnedProjectile;
 }

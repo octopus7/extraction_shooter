@@ -6,7 +6,10 @@
 #include "Components/CanvasPanelSlot.h"
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
+#include "Framework/Application/SlateApplication.h"
 #include "MediaTexture.h"
+#include "Rendering/DrawElements.h"
+#include "Styling/CoreStyle.h"
 #include "UI/TunaSweeperUIFont.h"
 
 namespace
@@ -16,6 +19,7 @@ namespace
 	constexpr int32 LetterboxZOrder = 10;
 	constexpr int32 MessageZOrder = 20;
 	constexpr int32 BlackFadeZOrder = 30;
+	constexpr int32 CircularRevealSegmentCount = 192;
 
 	void ConfigureLetterboxSlot(UCanvasPanelSlot* Slot, bool bTop)
 	{
@@ -53,6 +57,7 @@ void UTunaSweeperLevelTransitionWidget::NativeConstruct()
 
 	SetVideoVisible(false);
 	SetBlackOpacity(0.0f);
+	SetCircularRevealMask(0.0f, false);
 	SetLetterboxEnabled(false);
 	SetTransitionMessage(FText::GetEmpty());
 }
@@ -92,6 +97,13 @@ void UTunaSweeperLevelTransitionWidget::SetBlackOpacity(float InOpacity)
 	BlackFadePanel->SetRenderOpacity(FMath::Clamp(InOpacity, 0.0f, 1.0f));
 }
 
+void UTunaSweeperLevelTransitionWidget::SetCircularRevealMask(float HoleRadiusPixels, bool bVisible)
+{
+	CircularRevealHoleRadiusPixels = FMath::Max(0.0f, HoleRadiusPixels);
+	bCircularRevealMaskVisible = bVisible;
+	InvalidateLayoutAndVolatility();
+}
+
 void UTunaSweeperLevelTransitionWidget::SetLetterboxEnabled(bool bEnabled)
 {
 	bLetterboxEnabled = bEnabled;
@@ -116,6 +128,33 @@ void UTunaSweeperLevelTransitionWidget::SetTransitionMessage(const FText& InMess
 	{
 		MessageBackground->SetVisibility(MessageVisibility);
 	}
+}
+
+int32 UTunaSweeperLevelTransitionWidget::NativePaint(
+	const FPaintArgs& Args,
+	const FGeometry& AllottedGeometry,
+	const FSlateRect& MyCullingRect,
+	FSlateWindowElementList& OutDrawElements,
+	int32 LayerId,
+	const FWidgetStyle& InWidgetStyle,
+	bool bParentEnabled) const
+{
+	const int32 PaintedLayerId = Super::NativePaint(
+		Args,
+		AllottedGeometry,
+		MyCullingRect,
+		OutDrawElements,
+		LayerId,
+		InWidgetStyle,
+		bParentEnabled);
+
+	if (!bCircularRevealMaskVisible)
+	{
+		return PaintedLayerId;
+	}
+
+	DrawCircularRevealMask(AllottedGeometry, OutDrawElements, PaintedLayerId + 1);
+	return PaintedLayerId + 1;
 }
 
 void UTunaSweeperLevelTransitionWidget::EnsureLetterboxPanels()
@@ -166,6 +205,101 @@ void UTunaSweeperLevelTransitionWidget::EnsureLetterboxPanels()
 			ConfigureLetterboxSlot(RootCanvas->AddChildToCanvas(LetterboxBottomPanel), false);
 		}
 	}
+}
+
+void UTunaSweeperLevelTransitionWidget::DrawCircularRevealMask(
+	const FGeometry& AllottedGeometry,
+	FSlateWindowElementList& OutDrawElements,
+	int32 LayerId) const
+{
+	if (!FSlateApplication::IsInitialized())
+	{
+		return;
+	}
+
+	const FSlateBrush* WhiteBrush = FCoreStyle::Get().GetBrush(TEXT("WhiteBrush"));
+	if (!WhiteBrush || !FSlateApplication::Get().GetRenderer())
+	{
+		return;
+	}
+
+	const FVector2D LocalSize = AllottedGeometry.GetLocalSize();
+	if (LocalSize.X <= 0.0f || LocalSize.Y <= 0.0f)
+	{
+		return;
+	}
+
+	const FColor MaskColor = FLinearColor::Black.ToFColor(true);
+	if (CircularRevealHoleRadiusPixels <= KINDA_SMALL_NUMBER)
+	{
+		FSlateDrawElement::MakeBox(
+			OutDrawElements,
+			LayerId,
+			AllottedGeometry.ToPaintGeometry(),
+			WhiteBrush,
+			ESlateDrawEffect::None,
+			FLinearColor::Black);
+		return;
+	}
+
+	const FVector2D Center(LocalSize.X * 0.5f, LocalSize.Y * 0.5f);
+	const float OuterRadius = FMath::Sqrt(FMath::Square(LocalSize.X) + FMath::Square(LocalSize.Y)) * 0.5f + 96.0f;
+	const float InnerRadius = FMath::Min(CircularRevealHoleRadiusPixels, OuterRadius);
+	if (InnerRadius >= OuterRadius - KINDA_SMALL_NUMBER)
+	{
+		return;
+	}
+
+	CircularRevealVertices.Reset();
+	CircularRevealIndices.Reset();
+	CircularRevealVertices.Reserve((CircularRevealSegmentCount + 1) * 2);
+	CircularRevealIndices.Reserve(CircularRevealSegmentCount * 6);
+
+	const FSlateRenderTransform& AccumulatedRenderTransform = AllottedGeometry.GetAccumulatedRenderTransform();
+	for (int32 SegmentIndex = 0; SegmentIndex <= CircularRevealSegmentCount; ++SegmentIndex)
+	{
+		const float Alpha = static_cast<float>(SegmentIndex) / static_cast<float>(CircularRevealSegmentCount);
+		const float Angle = Alpha * 2.0f * PI;
+		const FVector2D Direction(FMath::Cos(Angle), FMath::Sin(Angle));
+		const FVector2D OuterPoint = Center + Direction * OuterRadius;
+		const FVector2D InnerPoint = Center + Direction * InnerRadius;
+
+		CircularRevealVertices.Add(FSlateVertex::Make<ESlateVertexRounding::Disabled>(
+			AccumulatedRenderTransform,
+			FVector2f(OuterPoint),
+			FVector2f::ZeroVector,
+			MaskColor));
+		CircularRevealVertices.Add(FSlateVertex::Make<ESlateVertexRounding::Disabled>(
+			AccumulatedRenderTransform,
+			FVector2f(InnerPoint),
+			FVector2f::ZeroVector,
+			MaskColor));
+	}
+
+	for (int32 SegmentIndex = 0; SegmentIndex < CircularRevealSegmentCount; ++SegmentIndex)
+	{
+		const SlateIndex A = static_cast<SlateIndex>(SegmentIndex * 2);
+		const SlateIndex B = static_cast<SlateIndex>(A + 1);
+		const SlateIndex C = static_cast<SlateIndex>(A + 2);
+		const SlateIndex D = static_cast<SlateIndex>(A + 3);
+
+		CircularRevealIndices.Add(A);
+		CircularRevealIndices.Add(C);
+		CircularRevealIndices.Add(B);
+		CircularRevealIndices.Add(C);
+		CircularRevealIndices.Add(D);
+		CircularRevealIndices.Add(B);
+	}
+
+	FSlateDrawElement::MakeCustomVerts(
+		OutDrawElements,
+		LayerId,
+		FSlateApplication::Get().GetRenderer()->GetResourceHandle(*WhiteBrush),
+		CircularRevealVertices,
+		CircularRevealIndices,
+		nullptr,
+		0,
+		0);
 }
 
 void UTunaSweeperLevelTransitionWidget::UpdateLetterboxVisibility()

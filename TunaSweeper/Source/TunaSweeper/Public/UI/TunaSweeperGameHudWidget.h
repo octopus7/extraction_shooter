@@ -85,6 +85,14 @@ protected:
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
+	virtual int32 NativePaint(
+		const FPaintArgs& Args,
+		const FGeometry& AllottedGeometry,
+		const FSlateRect& MyCullingRect,
+		FSlateWindowElementList& OutDrawElements,
+		int32 LayerId,
+		const FWidgetStyle& InWidgetStyle,
+		bool bParentEnabled) const override;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
 	TObjectPtr<UTunaSweeperHudTopReserveWidget> TopStatusReserveWidget;
@@ -155,6 +163,42 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Transitions", meta = (DisplayName = "Quick Slot Bar Direction Override"))
 	ETunaSweeperHudTransitionEdge QuickSlotBarTransitionEdge = ETunaSweeperHudTransitionEdge::Bottom;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Crosshair", meta = (ClampMin = "1.0", UIMin = "1.0"))
+	float ShotgunCrosshairRadius = 44.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Crosshair", meta = (ClampMin = "1.0", UIMin = "1.0"))
+	float ShotgunCrosshairThickness = 2.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Crosshair", meta = (ClampMin = "8", UIMin = "8"))
+	int32 ShotgunCrosshairSegmentCount = 64;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Crosshair")
+	FLinearColor ShotgunCrosshairColor = FLinearColor(1.0f, 1.0f, 1.0f, 0.78f);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Crosshair", meta = (ClampMin = "1.0", UIMin = "1.0"))
+	float PrecisionCrosshairParenthesisOffset = 32.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Crosshair", meta = (ClampMin = "1.0", UIMin = "1.0"))
+	float PrecisionCrosshairParenthesisRadius = 18.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Crosshair", meta = (ClampMin = "1.0", UIMin = "1.0"))
+	float PrecisionCrosshairThickness = 2.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Crosshair", meta = (ClampMin = "1.0", UIMin = "1.0"))
+	float PrecisionCrosshairAimBarLength = 18.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Crosshair", meta = (ClampMin = "1.0", UIMin = "1.0"))
+	float PrecisionCrosshairAimBarStartDistance = 54.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Crosshair", meta = (ClampMin = "1.0", UIMin = "1.0"))
+	float PrecisionCrosshairAimBarEndDistance = 24.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Crosshair", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float PrecisionCrosshairAimInterpSpeed = 12.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Crosshair")
+	FLinearColor PrecisionCrosshairColor = FLinearColor(1.0f, 1.0f, 1.0f, 0.82f);
+
 private:
 	struct FHudWidgetTransition
 	{
@@ -195,6 +239,9 @@ private:
 	void HandleQuestProgressChanged();
 	void HandleLanguageChanged();
 	bool IsDialogueSequenceActive() const;
+	FName GetSelectedWeaponTypeTag() const;
+	bool IsWeaponCrosshairSuppressed() const;
+	void UpdateCrosshairState(float InDeltaTime);
 
 	UFUNCTION()
 	void HandleHudModeTabSelected(ETunaSweeperHudMode SelectedMode);
@@ -248,6 +295,7 @@ private:
 	TArray<TObjectPtr<UBorder>> CenterReloadSegments;
 
 	bool bClearExternalPanelModeAfterHide = false;
+	float PrecisionCrosshairAimAlpha = 0.0f;
 	TArray<FHudWidgetTransition> ActiveHudTransitions;
 	TMap<TWeakObjectPtr<UWidget>, FWidgetTransform> HudTransitionBaseTransforms;
 	TMap<TWeakObjectPtr<UWidget>, float> HudTransitionBaseOpacities;

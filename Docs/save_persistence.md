@@ -6,7 +6,7 @@ Update it whenever a new state field is expected to persist across save slots, l
 ## Current Save Container
 
 - Save object: `UTunaSweeperSaveGame`
-- Current save version: `8`
+- Current save version: `9`
 - Runtime owner: `UTunaSweeperGameInstance`
 - Save entry point: `UTunaSweeperGameInstance::SaveGameStateInternal()`
 - Load entry point: `UTunaSweeperGameInstance::LoadGameState()`
@@ -100,6 +100,14 @@ Each `FTunaSweeperQuestProgressSaveData` preserves:
 - `ObjectiveProgress`: per-objective `ObjectiveId` and `CurrentCount`.
 
 `TrackedQuestId` stores the HUD-tracked quest for the active save slot. `QuestCoinBalance` stores quest reward currency separately from item instances. New save slots initialize with no quest progress, no tracked quest, and zero quest coins.
+
+### Experience Progress
+
+Stored through `UTunaSweeperSaveGame::TotalExperiencePoints`.
+
+`TotalExperiencePoints` is the source of truth for the bunker/player experience level. Raid item and enemy experience is accumulated only in runtime pending state while the player is in `RaidMap`; it is copied into `TotalExperiencePoints` only during successful `RaidMap` to `BunkerMap` survival persistence, before the save is written. The pending raid gain and raid-start baseline are not saved.
+
+Death persistence calls clear the pending raid gain before saving, so failed raids keep the previously saved `TotalExperiencePoints` unchanged.
 
 ## Loaded Ammo Rules
 

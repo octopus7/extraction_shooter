@@ -6,6 +6,7 @@
 #include "Inventory/TunaSweeperInventoryTypes.h"
 #include "Inventory/TunaSweeperSaveGame.h"
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
+#include "Weapon/TunaSweeperWeaponSpreadRecoilDataAsset.h"
 #include "TunaSweeperGameInstance.generated.h"
 
 class APawn;
@@ -59,6 +60,30 @@ struct TUNASWEEPER_API FTunaSweeperSaveSlotSummary
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Save")
 	int64 LastSavedAtTicks = 0;
+};
+
+USTRUCT(BlueprintType)
+struct TUNASWEEPER_API FTunaSweeperExperienceAnimationState
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Experience")
+	int64 StartExperiencePoints = 0;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Experience")
+	int64 TargetExperiencePoints = 0;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Experience")
+	int64 GainedExperiencePoints = 0;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Experience")
+	int32 StartLevel = 1;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Experience")
+	int32 TargetLevel = 1;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Experience")
+	float AnimationDurationSeconds = 3.2f;
 };
 
 USTRUCT(BlueprintType)
@@ -125,6 +150,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TunaSweeper|Projectile Hit Effect")
 	TSoftObjectPtr<UTunaSweeperProjectileHitEffectDataAsset> ProjectileHitEffectDataAsset;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TunaSweeper|Weapon Spread Recoil")
+	TSoftObjectPtr<UTunaSweeperWeaponSpreadRecoilDataAsset> WeaponSpreadRecoilDataAsset;
+
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Gameplay Info")
 	void SetGameplayInfo(FName Key, const FString& Value);
 
@@ -171,6 +199,11 @@ public:
 	bool TryGetProjectileHitEffectDefinition(
 		FName EffectId,
 		FTunaSweeperProjectileHitEffectDefinition& OutDefinition) const;
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Weapon Spread Recoil")
+	bool TryGetWeaponSpreadRecoilDefinition(
+		FName WeaponTypeTag,
+		FTunaSweeperWeaponSpreadRecoilDefinition& OutDefinition) const;
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|State")
 	void ClearRuntimeState();
@@ -230,6 +263,45 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Map")
 	bool RemoveMapMarker(int32 MarkerId, bool bSaveImmediately = false);
 
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Experience")
+	int64 GetTotalExperiencePoints() const { return TotalExperiencePoints; }
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Experience")
+	int32 GetCurrentExperienceLevel() const;
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Experience")
+	int32 GetExperienceLevelForTotal(int64 ExperiencePoints) const;
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Experience")
+	int64 GetExperienceForLevel(int32 Level) const;
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Experience")
+	int64 GetExperienceForNextLevel(int32 Level) const;
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Experience")
+	float GetExperienceProgressForTotal(int64 ExperiencePoints) const;
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Experience")
+	bool HasPendingRaidExperienceAnimationState() const { return bHasPendingRaidExperienceAnimationState; }
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Experience")
+	void BeginRaidExperienceSession();
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Experience")
+	int32 AddRaidExperience(int32 ExperienceAmount);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Experience")
+	int32 AddRaidExperienceForItem(int32 ItemId, int32 Quantity = 1);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Experience")
+	void ClearRaidExperienceGain();
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Experience")
+	bool CommitRaidExperienceGain(FTunaSweeperExperienceAnimationState& OutAnimationState);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Experience")
+	bool ConsumePendingRaidExperienceAnimationState(FTunaSweeperExperienceAnimationState& OutAnimationState);
+
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
 	void SetPlayerHudState(const FTunaSweeperPlayerHudState& InHudState);
 
@@ -273,6 +345,10 @@ public:
 	bool IsEquipmentWeaponSlotOccupied(int32 WeaponSlotNumber);
 	bool TryGetEquipmentWeaponSlotItem(
 		int32 WeaponSlotNumber,
+		FTunaSweeperItemInstance& OutItemInstance,
+		FTunaSweeperItemDefinition& OutItemDefinition);
+	bool IsEquipmentMeleeSlotOccupied();
+	bool TryGetEquipmentMeleeSlotItem(
 		FTunaSweeperItemInstance& OutItemInstance,
 		FTunaSweeperItemDefinition& OutItemDefinition);
 	int32 GetWeaponLoadedAmmoCount(int32 WeaponSlotNumber);
@@ -387,6 +463,11 @@ private:
 	void GenerateDefaultInventoryState();
 	void ResetPlayerSlotArrays();
 	void RefreshLegacyPlayerInventoryItems();
+	int32 ResolveItemExperienceValue(int32 ItemId);
+	FTunaSweeperExperienceAnimationState BuildExperienceAnimationState(
+		int64 StartExperiencePoints,
+		int64 TargetExperiencePoints,
+		int64 GainedExperiencePoints) const;
 	void BroadcastInventoryStateChanged();
 	FGuid CreateItemInstance(int32 ItemId, int32 Quantity);
 	bool AddItemUidToFirstEmptySlot(const FGuid& ItemUid, TArray<FTunaSweeperInventorySlot>& Slots);
@@ -407,6 +488,7 @@ private:
 	bool IsEquipmentWeaponSlotNumberValid(int32 WeaponSlotNumber) const;
 	int32 GetEquipmentSlotIndexForWeaponSlotNumber(int32 WeaponSlotNumber) const;
 	bool IsGunItemDefinition(const FTunaSweeperItemDefinition& ItemDefinition) const;
+	bool IsMeleeItemDefinition(const FTunaSweeperItemDefinition& ItemDefinition) const;
 	bool IsAmmoItemDefinition(const FTunaSweeperItemDefinition& ItemDefinition) const;
 	bool IsAmmoDefinitionCompatibleWithWeapon(
 		const FTunaSweeperItemDefinition& WeaponDefinition,
@@ -517,6 +599,24 @@ private:
 
 	UPROPERTY(Transient)
 	int32 NextMapMarkerId = 1;
+
+	UPROPERTY(Transient)
+	int64 TotalExperiencePoints = 0;
+
+	UPROPERTY(Transient)
+	int64 RaidStartExperiencePoints = 0;
+
+	UPROPERTY(Transient)
+	int64 PendingRaidExperiencePoints = 0;
+
+	UPROPERTY(Transient)
+	FTunaSweeperExperienceAnimationState PendingRaidExperienceAnimationState;
+
+	UPROPERTY(Transient)
+	bool bRaidExperienceSessionActive = false;
+
+	UPROPERTY(Transient)
+	bool bHasPendingRaidExperienceAnimationState = false;
 
 	UPROPERTY(Transient)
 	FName PendingScenarioCompletionFlag;

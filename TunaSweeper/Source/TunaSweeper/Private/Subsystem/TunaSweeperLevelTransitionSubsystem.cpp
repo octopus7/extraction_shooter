@@ -2,6 +2,7 @@
 
 #include "Blueprint/UserWidget.h"
 #include "Engine/Engine.h"
+#include "Engine/GameViewportClient.h"
 #include "Engine/GameInstance.h"
 #include "GameFramework/PlayerController.h"
 #include "HAL/PlatformTime.h"
@@ -18,11 +19,35 @@
 
 namespace
 {
+	constexpr float CircularRevealInitialRadiusPixels = 72.0f;
+	constexpr float CircularRevealInitialDurationSeconds = 0.2f;
+	constexpr float CircularRevealHoldDurationSeconds = 0.1f;
+	constexpr float CircularRevealFinalDurationSeconds = 0.3f;
+
 	bool ShouldUseLetterboxForMediaSource(UMediaSource* MediaSource, const TSoftObjectPtr<UMediaSource>& MediaSourceReference)
 	{
 		const FString MediaSourceName = MediaSource ? MediaSource->GetName() : FString();
 		const FString MediaSourcePath = MediaSourceReference.ToSoftObjectPath().ToString();
 		return MediaSourceName.Contains(TEXT("BunkerToRaid")) || MediaSourcePath.Contains(TEXT("BunkerToRaid"));
+	}
+
+	float EaseOutElastic(float Alpha)
+	{
+		const float ClampedAlpha = FMath::Clamp(Alpha, 0.0f, 1.0f);
+		if (ClampedAlpha <= 0.0f || ClampedAlpha >= 1.0f)
+		{
+			return ClampedAlpha;
+		}
+
+		constexpr float Period = (2.0f * PI) / 3.0f;
+		return FMath::Pow(2.0f, -10.0f * ClampedAlpha) *
+			FMath::Sin((ClampedAlpha * 10.0f - 0.75f) * Period) + 1.0f;
+	}
+
+	float SmoothStep(float Alpha)
+	{
+		const float ClampedAlpha = FMath::Clamp(Alpha, 0.0f, 1.0f);
+		return ClampedAlpha * ClampedAlpha * (3.0f - 2.0f * ClampedAlpha);
 	}
 }
 
@@ -76,6 +101,12 @@ void UTunaSweeperLevelTransitionSubsystem::Tick(float DeltaTime)
 		{
 			FinishTransition();
 		}
+		break;
+
+	case ETransitionPhase::CircularRevealInitialElastic:
+	case ETransitionPhase::CircularRevealHold:
+	case ETransitionPhase::CircularRevealFinalExpand:
+		UpdateCircularReveal(DeltaTime);
 		break;
 
 	default:
@@ -153,6 +184,7 @@ bool UTunaSweeperLevelTransitionSubsystem::StartTransition(
 	ActiveWidget->SetLetterboxEnabled(bUseLetterbox);
 	ActiveWidget->SetVideoVisible(false);
 	ActiveWidget->SetBlackOpacity(0.0f);
+	ActiveWidget->SetCircularRevealMask(0.0f, false);
 
 	if (UGameInstance* GameInstance = GetGameInstance())
 	{
@@ -216,19 +248,13 @@ void UTunaSweeperLevelTransitionSubsystem::HandlePostLoadMapWithWorld(UWorld* Lo
 		{
 			ActiveWidget->SetVideoTexture(MediaTexture);
 		}
-		ActiveWidget->SetTransitionMessage(TransitionMessage);
+		ActiveWidget->SetTransitionMessage(FText::GetEmpty());
 		ActiveWidget->SetLetterboxEnabled(bUseLetterbox);
-		ActiveWidget->SetVideoVisible(true);
+		ActiveWidget->SetVideoVisible(false);
 		ActiveWidget->SetBlackOpacity(0.0f);
 	}
 
-	if (GetVideoVisibleElapsedSeconds() >= MinimumVideoDisplaySeconds)
-	{
-		FinishTransition();
-		return;
-	}
-
-	Phase = ETransitionPhase::WaitingForMinimumVideoTime;
+	BeginCircularReveal();
 }
 
 bool UTunaSweeperLevelTransitionSubsystem::EnsureTransitionWidget(UObject* WorldContextObject)
@@ -256,6 +282,7 @@ bool UTunaSweeperLevelTransitionSubsystem::EnsureTransitionWidget(UObject* World
 	ActiveWidget->SetLetterboxEnabled(false);
 	ActiveWidget->SetTransitionMessage(TransitionMessage);
 	ActiveWidget->SetBlackOpacity(0.0f);
+	ActiveWidget->SetCircularRevealMask(0.0f, false);
 
 	if (APlayerController* PlayerController = UGameplayStatics::GetPlayerController(WorldContextObject ? WorldContextObject : GameInstance, 0))
 	{
@@ -293,6 +320,74 @@ void UTunaSweeperLevelTransitionSubsystem::BeginVideoReveal()
 	Phase = ETransitionPhase::FadingFromBlackToVideo;
 }
 
+void UTunaSweeperLevelTransitionSubsystem::BeginCircularReveal()
+{
+	if (!ActiveWidget)
+	{
+		FinishTransition();
+		return;
+	}
+
+	CircularRevealFinalRadius = GetFullscreenRevealRadius();
+	FadeElapsedSeconds = 0.0f;
+	SetBlackOpacity(0.0f);
+	SetCircularRevealMask(0.0f, true);
+	Phase = ETransitionPhase::CircularRevealInitialElastic;
+}
+
+void UTunaSweeperLevelTransitionSubsystem::UpdateCircularReveal(float DeltaTime)
+{
+	FadeElapsedSeconds += FMath::Max(0.0f, DeltaTime);
+
+	switch (Phase)
+	{
+	case ETransitionPhase::CircularRevealInitialElastic:
+	{
+		const float Alpha = CircularRevealInitialDurationSeconds > 0.0f
+			? FadeElapsedSeconds / CircularRevealInitialDurationSeconds
+			: 1.0f;
+		SetCircularRevealMask(CircularRevealInitialRadiusPixels * FMath::Max(0.0f, EaseOutElastic(Alpha)), true);
+		if (FadeElapsedSeconds >= CircularRevealInitialDurationSeconds)
+		{
+			FadeElapsedSeconds = 0.0f;
+			SetCircularRevealMask(CircularRevealInitialRadiusPixels, true);
+			Phase = ETransitionPhase::CircularRevealHold;
+		}
+		break;
+	}
+
+	case ETransitionPhase::CircularRevealHold:
+		SetCircularRevealMask(CircularRevealInitialRadiusPixels, true);
+		if (FadeElapsedSeconds >= CircularRevealHoldDurationSeconds)
+		{
+			FadeElapsedSeconds = 0.0f;
+			Phase = ETransitionPhase::CircularRevealFinalExpand;
+		}
+		break;
+
+	case ETransitionPhase::CircularRevealFinalExpand:
+	{
+		const float Alpha = CircularRevealFinalDurationSeconds > 0.0f
+			? FadeElapsedSeconds / CircularRevealFinalDurationSeconds
+			: 1.0f;
+		const float Radius = FMath::Lerp(
+			CircularRevealInitialRadiusPixels,
+			FMath::Max(CircularRevealInitialRadiusPixels, CircularRevealFinalRadius),
+			SmoothStep(Alpha));
+		SetCircularRevealMask(Radius, true);
+		if (FadeElapsedSeconds >= CircularRevealFinalDurationSeconds)
+		{
+			SetCircularRevealMask(0.0f, false);
+			FinishTransition();
+		}
+		break;
+	}
+
+	default:
+		break;
+	}
+}
+
 void UTunaSweeperLevelTransitionSubsystem::OpenTargetLevel()
 {
 	if (bOpenLevelRequested || TargetLevelName.IsNone())
@@ -319,6 +414,7 @@ void UTunaSweeperLevelTransitionSubsystem::FinishTransition()
 
 	if (ActiveWidget)
 	{
+		ActiveWidget->SetCircularRevealMask(0.0f, false);
 		ActiveWidget->RemoveFromParent();
 	}
 
@@ -348,6 +444,7 @@ void UTunaSweeperLevelTransitionSubsystem::FinishTransition()
 	TransitionMessage = FText::GetEmpty();
 	Phase = ETransitionPhase::Idle;
 	FadeElapsedSeconds = 0.0f;
+	CircularRevealFinalRadius = 0.0f;
 	VideoVisibleStartSeconds = 0.0;
 	bOpenLevelRequested = false;
 	bUseLetterbox = false;
@@ -361,9 +458,34 @@ void UTunaSweeperLevelTransitionSubsystem::SetBlackOpacity(float InOpacity)
 	}
 }
 
+void UTunaSweeperLevelTransitionSubsystem::SetCircularRevealMask(float HoleRadiusPixels, bool bVisible)
+{
+	if (ActiveWidget)
+	{
+		ActiveWidget->SetCircularRevealMask(HoleRadiusPixels, bVisible);
+	}
+}
+
 float UTunaSweeperLevelTransitionSubsystem::GetVideoVisibleElapsedSeconds() const
 {
 	return VideoVisibleStartSeconds > 0.0
 		? static_cast<float>(FPlatformTime::Seconds() - VideoVisibleStartSeconds)
 		: 0.0f;
+}
+
+float UTunaSweeperLevelTransitionSubsystem::GetFullscreenRevealRadius() const
+{
+	FVector2D ViewportSize(1920.0f, 1080.0f);
+	if (GEngine && GEngine->GameViewport && GEngine->GameViewport->Viewport)
+	{
+		const FIntPoint ViewportIntSize = GEngine->GameViewport->Viewport->GetSizeXY();
+		if (ViewportIntSize.X > 0 && ViewportIntSize.Y > 0)
+		{
+			ViewportSize = FVector2D(
+				static_cast<float>(ViewportIntSize.X),
+				static_cast<float>(ViewportIntSize.Y));
+		}
+	}
+
+	return FMath::Sqrt(FMath::Square(ViewportSize.X) + FMath::Square(ViewportSize.Y)) * 0.5f + 96.0f;
 }

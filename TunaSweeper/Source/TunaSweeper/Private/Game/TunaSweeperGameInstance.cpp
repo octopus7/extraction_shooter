@@ -17,7 +17,7 @@ namespace TunaSweeperSave
 {
 	const TCHAR* SaveSlotNamePrefix = TEXT("TunaSweeperSave_Slot");
 	const TCHAR* SaveSettingsSlotName = TEXT("TunaSweeperSaveSettings");
-	constexpr int32 CurrentSaveVersion = 8;
+	constexpr int32 CurrentSaveVersion = 9;
 	constexpr int32 SaveUserIndex = 0;
 	constexpr int32 MinSaveSlotIndex = 1;
 	constexpr int32 MaxSaveSlotIndex = 3;
@@ -40,6 +40,13 @@ namespace TunaSweeperDebug
 {
 	const FName VisionDebugSettingKey(TEXT("debug.vision"));
 	const FName BunkerVisionDebugSettingKey(TEXT("debug.bunker_vision"));
+}
+
+namespace TunaSweeperExperience
+{
+	constexpr int64 BaseExperienceForNextLevel = 100;
+	constexpr int64 ExperienceIncreasePerLevel = 50;
+	constexpr float RaidReturnAnimationDurationSeconds = 3.2f;
 }
 
 namespace TunaSweeperProjectileHitEffects
@@ -123,6 +130,7 @@ namespace TunaSweeperInventory
 	constexpr int32 RequiredEquipmentSlots = 8;
 	constexpr int32 BackpackSlotIndex = 7;
 	constexpr int32 WeaponEquipmentSlotCount = 2;
+	constexpr int32 MeleeEquipmentSlotIndex = 2;
 	constexpr int32 UsableQuickSlotCount = 6;
 	const FName GunCategoryTag(TEXT("item.category.weapon.gun"));
 	const FName GunEquipmentSlotTag(TEXT("equipment.slot.gun"));
@@ -223,6 +231,60 @@ namespace TunaSweeperInventory
 		FTunaSweeperItemInstance SaveItemInstance = ItemInstance;
 		NormalizeLoadedAmmoPersistenceFields(SaveItemInstance);
 		return SaveItemInstance;
+	}
+}
+
+namespace TunaSweeperWeaponSpreadRecoil
+{
+	const TCHAR* DefaultDataAssetPath = TEXT("/Game/Weapons/DA_WeaponSpreadRecoil.DA_WeaponSpreadRecoil");
+
+	void NormalizeDefinition(FTunaSweeperWeaponSpreadRecoilDefinition& Definition)
+	{
+		Definition.IncreasePerShot = FMath::Max(0.0f, Definition.IncreasePerShot);
+		Definition.MinimumSpreadHalfAngleDegrees = FMath::Max(0.01f, Definition.MinimumSpreadHalfAngleDegrees);
+		Definition.MaximumSpreadHalfAngleDegrees = FMath::Max(
+			Definition.MinimumSpreadHalfAngleDegrees,
+			Definition.MaximumSpreadHalfAngleDegrees);
+		Definition.DecreasePerSecond = FMath::Max(0.0f, Definition.DecreasePerSecond);
+	}
+
+	bool TryGetFallbackDefinition(FName WeaponTypeTag, FTunaSweeperWeaponSpreadRecoilDefinition& OutDefinition)
+	{
+		OutDefinition = FTunaSweeperWeaponSpreadRecoilDefinition();
+		OutDefinition.WeaponTypeTag = WeaponTypeTag;
+
+		if (WeaponTypeTag == TunaSweeperInventory::PistolWeaponTypeTag)
+		{
+			OutDefinition.IncreasePerShot = 1.2f;
+			OutDefinition.MinimumSpreadHalfAngleDegrees = 1.4f;
+			OutDefinition.MaximumSpreadHalfAngleDegrees = 7.0f;
+			OutDefinition.DecreasePerSecond = 5.0f;
+			return true;
+		}
+
+		if (WeaponTypeTag == TunaSweeperInventory::RifleWeaponTypeTag)
+		{
+			OutDefinition.IncreasePerShot = 0.8f;
+			OutDefinition.MinimumSpreadHalfAngleDegrees = 1.0f;
+			OutDefinition.MaximumSpreadHalfAngleDegrees = 6.0f;
+			OutDefinition.DecreasePerSecond = 6.5f;
+			return true;
+		}
+
+		if (WeaponTypeTag == TunaSweeperInventory::ShotgunWeaponTypeTag)
+		{
+			OutDefinition.IncreasePerShot = 2.0f;
+			OutDefinition.MinimumSpreadHalfAngleDegrees = 4.5f;
+			OutDefinition.MaximumSpreadHalfAngleDegrees = 12.0f;
+			OutDefinition.DecreasePerSecond = 4.5f;
+			return true;
+		}
+
+		OutDefinition.IncreasePerShot = 1.0f;
+		OutDefinition.MinimumSpreadHalfAngleDegrees = 1.0f;
+		OutDefinition.MaximumSpreadHalfAngleDegrees = 8.0f;
+		OutDefinition.DecreasePerSecond = 5.0f;
+		return true;
 	}
 }
 
@@ -426,6 +488,39 @@ bool UTunaSweeperGameInstance::TryGetProjectileHitEffectDefinition(
 	}
 
 	return DataAsset && DataAsset->TryGetHitEffect(EffectId, OutDefinition);
+}
+
+bool UTunaSweeperGameInstance::TryGetWeaponSpreadRecoilDefinition(
+	FName WeaponTypeTag,
+	FTunaSweeperWeaponSpreadRecoilDefinition& OutDefinition) const
+{
+	OutDefinition = FTunaSweeperWeaponSpreadRecoilDefinition();
+	if (WeaponTypeTag.IsNone())
+	{
+		return false;
+	}
+
+	const UTunaSweeperWeaponSpreadRecoilDataAsset* DataAsset = WeaponSpreadRecoilDataAsset.LoadSynchronous();
+	if (!DataAsset)
+	{
+		DataAsset = LoadObject<UTunaSweeperWeaponSpreadRecoilDataAsset>(
+			nullptr,
+			TunaSweeperWeaponSpreadRecoil::DefaultDataAssetPath);
+	}
+
+	if (DataAsset && DataAsset->TryGetDefinition(WeaponTypeTag, OutDefinition))
+	{
+		TunaSweeperWeaponSpreadRecoil::NormalizeDefinition(OutDefinition);
+		return true;
+	}
+
+	if (TunaSweeperWeaponSpreadRecoil::TryGetFallbackDefinition(WeaponTypeTag, OutDefinition))
+	{
+		TunaSweeperWeaponSpreadRecoil::NormalizeDefinition(OutDefinition);
+		return true;
+	}
+
+	return false;
 }
 
 void UTunaSweeperGameInstance::ClearRuntimeState()
@@ -660,6 +755,155 @@ bool UTunaSweeperGameInstance::RemoveMapMarker(int32 MarkerId, bool bSaveImmedia
 	return true;
 }
 
+int32 UTunaSweeperGameInstance::GetCurrentExperienceLevel() const
+{
+	return GetExperienceLevelForTotal(TotalExperiencePoints);
+}
+
+int32 UTunaSweeperGameInstance::GetExperienceLevelForTotal(int64 ExperiencePoints) const
+{
+	const int64 ClampedExperience = FMath::Max<int64>(0, ExperiencePoints);
+	int32 Level = 1;
+	while (ClampedExperience >= GetExperienceForLevel(Level + 1))
+	{
+		++Level;
+	}
+
+	return Level;
+}
+
+int64 UTunaSweeperGameInstance::GetExperienceForLevel(int32 Level) const
+{
+	if (Level <= 1)
+	{
+		return 0;
+	}
+
+	const int64 CompletedLevels = static_cast<int64>(Level - 1);
+	return CompletedLevels *
+		((2 * TunaSweeperExperience::BaseExperienceForNextLevel) +
+			((CompletedLevels - 1) * TunaSweeperExperience::ExperienceIncreasePerLevel)) /
+		2;
+}
+
+int64 UTunaSweeperGameInstance::GetExperienceForNextLevel(int32 Level) const
+{
+	const int64 SafeLevel = FMath::Max<int64>(1, Level);
+	return TunaSweeperExperience::BaseExperienceForNextLevel +
+		((SafeLevel - 1) * TunaSweeperExperience::ExperienceIncreasePerLevel);
+}
+
+float UTunaSweeperGameInstance::GetExperienceProgressForTotal(int64 ExperiencePoints) const
+{
+	const int64 ClampedExperience = FMath::Max<int64>(0, ExperiencePoints);
+	const int32 Level = GetExperienceLevelForTotal(ClampedExperience);
+	const int64 LevelStartExperience = GetExperienceForLevel(Level);
+	const int64 NextLevelExperience = GetExperienceForLevel(Level + 1);
+	const int64 LevelSpan = FMath::Max<int64>(1, NextLevelExperience - LevelStartExperience);
+	return static_cast<float>(ClampedExperience - LevelStartExperience) / static_cast<float>(LevelSpan);
+}
+
+void UTunaSweeperGameInstance::BeginRaidExperienceSession()
+{
+	EnsureInventoryStateInitialized();
+	RaidStartExperiencePoints = FMath::Max<int64>(0, TotalExperiencePoints);
+	PendingRaidExperiencePoints = 0;
+	bRaidExperienceSessionActive = true;
+	bHasPendingRaidExperienceAnimationState = false;
+	PendingRaidExperienceAnimationState = FTunaSweeperExperienceAnimationState();
+}
+
+int32 UTunaSweeperGameInstance::AddRaidExperience(int32 ExperienceAmount)
+{
+	if (ExperienceAmount <= 0)
+	{
+		return 0;
+	}
+
+	EnsureInventoryStateInitialized();
+	if (!bRaidExperienceSessionActive)
+	{
+		const UWorld* World = GetWorld();
+		if (!World || !IsMapNameMatch(FName(*World->GetMapName()), TEXT("RaidMap")))
+		{
+			return 0;
+		}
+
+		RaidStartExperiencePoints = FMath::Max<int64>(0, TotalExperiencePoints);
+		PendingRaidExperiencePoints = 0;
+		bRaidExperienceSessionActive = true;
+	}
+
+	PendingRaidExperiencePoints += ExperienceAmount;
+	return ExperienceAmount;
+}
+
+int32 UTunaSweeperGameInstance::AddRaidExperienceForItem(int32 ItemId, int32 Quantity)
+{
+	const int32 ExperienceValue = ResolveItemExperienceValue(ItemId);
+	const int32 SafeQuantity = FMath::Max(0, Quantity);
+	if (ExperienceValue <= 0 || SafeQuantity <= 0)
+	{
+		return 0;
+	}
+
+	return AddRaidExperience(ExperienceValue * SafeQuantity);
+}
+
+void UTunaSweeperGameInstance::ClearRaidExperienceGain()
+{
+	PendingRaidExperiencePoints = 0;
+	RaidStartExperiencePoints = FMath::Max<int64>(0, TotalExperiencePoints);
+	bRaidExperienceSessionActive = false;
+	bHasPendingRaidExperienceAnimationState = false;
+	PendingRaidExperienceAnimationState = FTunaSweeperExperienceAnimationState();
+}
+
+bool UTunaSweeperGameInstance::CommitRaidExperienceGain(FTunaSweeperExperienceAnimationState& OutAnimationState)
+{
+	EnsureInventoryStateInitialized();
+
+	const int64 StartExperience = bRaidExperienceSessionActive
+		? FMath::Max<int64>(0, RaidStartExperiencePoints)
+		: FMath::Max<int64>(0, TotalExperiencePoints);
+	const int64 GainedExperience = FMath::Max<int64>(0, PendingRaidExperiencePoints);
+	TotalExperiencePoints = FMath::Max<int64>(StartExperience, TotalExperiencePoints) + GainedExperience;
+	OutAnimationState = BuildExperienceAnimationState(
+		StartExperience,
+		TotalExperiencePoints,
+		GainedExperience);
+	if (GainedExperience > 0)
+	{
+		PendingRaidExperienceAnimationState = OutAnimationState;
+		bHasPendingRaidExperienceAnimationState = true;
+	}
+	else
+	{
+		PendingRaidExperienceAnimationState = FTunaSweeperExperienceAnimationState();
+		bHasPendingRaidExperienceAnimationState = false;
+	}
+
+	PendingRaidExperiencePoints = 0;
+	RaidStartExperiencePoints = TotalExperiencePoints;
+	bRaidExperienceSessionActive = false;
+	return GainedExperience > 0;
+}
+
+bool UTunaSweeperGameInstance::ConsumePendingRaidExperienceAnimationState(
+	FTunaSweeperExperienceAnimationState& OutAnimationState)
+{
+	if (!bHasPendingRaidExperienceAnimationState)
+	{
+		OutAnimationState = FTunaSweeperExperienceAnimationState();
+		return false;
+	}
+
+	OutAnimationState = PendingRaidExperienceAnimationState;
+	PendingRaidExperienceAnimationState = FTunaSweeperExperienceAnimationState();
+	bHasPendingRaidExperienceAnimationState = false;
+	return true;
+}
+
 void UTunaSweeperGameInstance::SetPlayerHudState(const FTunaSweeperPlayerHudState& InHudState)
 {
 	PlayerHudState = InHudState;
@@ -826,6 +1070,39 @@ bool UTunaSweeperGameInstance::TryGetEquipmentWeaponSlotItem(
 	return ItemDataSubsystem &&
 		ItemDataSubsystem->TryGetItemDefinition(OutItemInstance.ItemId, OutItemDefinition) &&
 		IsGunItemDefinition(OutItemDefinition);
+}
+
+bool UTunaSweeperGameInstance::IsEquipmentMeleeSlotOccupied()
+{
+	FTunaSweeperItemInstance MeleeInstance;
+	FTunaSweeperItemDefinition MeleeDefinition;
+	return TryGetEquipmentMeleeSlotItem(MeleeInstance, MeleeDefinition);
+}
+
+bool UTunaSweeperGameInstance::TryGetEquipmentMeleeSlotItem(
+	FTunaSweeperItemInstance& OutItemInstance,
+	FTunaSweeperItemDefinition& OutItemDefinition)
+{
+	EnsureInventoryStateInitialized();
+
+	OutItemInstance = FTunaSweeperItemInstance();
+	OutItemDefinition = FTunaSweeperItemDefinition();
+
+	if (!EquipmentSlots.IsValidIndex(TunaSweeperInventory::MeleeEquipmentSlotIndex))
+	{
+		return false;
+	}
+
+	const FGuid& MeleeUid = EquipmentSlots[TunaSweeperInventory::MeleeEquipmentSlotIndex].ItemUid;
+	if (!TryGetItemInstance(MeleeUid, OutItemInstance))
+	{
+		return false;
+	}
+
+	UTunaSweeperItemDataSubsystem* ItemDataSubsystem = GetSubsystem<UTunaSweeperItemDataSubsystem>();
+	return ItemDataSubsystem &&
+		ItemDataSubsystem->TryGetItemDefinition(OutItemInstance.ItemId, OutItemDefinition) &&
+		IsMeleeItemDefinition(OutItemDefinition);
 }
 
 int32 UTunaSweeperGameInstance::GetWeaponLoadedAmmoCount(int32 WeaponSlotNumber)
@@ -1363,6 +1640,7 @@ bool UTunaSweeperGameInstance::MoveItemBetweenSlots(
 		{
 			QuestSubsystem->NotifyItemAcquired(AcquiredItemId, AcquiredQuantity);
 		}
+		AddRaidExperienceForItem(AcquiredItemId, AcquiredQuantity);
 	}
 	return true;
 }
@@ -1518,6 +1796,7 @@ bool UTunaSweeperGameInstance::SplitItemStackBetweenSlots(
 		{
 			QuestSubsystem->NotifyItemAcquired(SplitItemId, SplitQuantity);
 		}
+		AddRaidExperienceForItem(SplitItemId, SplitQuantity);
 	}
 	return true;
 }
@@ -1624,6 +1903,7 @@ bool UTunaSweeperGameInstance::AddItemToFirstAvailableInventorySlot(int32 ItemId
 	{
 		QuestSubsystem->NotifyItemAcquired(ItemId, Quantity);
 	}
+	AddRaidExperienceForItem(ItemId, Quantity);
 	return true;
 }
 
@@ -1648,6 +1928,7 @@ bool UTunaSweeperGameInstance::AddItemToPreferredAvailableSlot(int32 ItemId, int
 	{
 		QuestSubsystem->NotifyItemAcquired(ItemId, Quantity);
 	}
+	AddRaidExperienceForItem(ItemId, Quantity);
 	return true;
 }
 
@@ -1959,6 +2240,7 @@ void UTunaSweeperGameInstance::ClearInventoryAndSave()
 	ActiveLootContainerDisplayName = FText::GetEmpty();
 	ActiveLootContainerCapacity = 0;
 	bHasActiveLootContainer = false;
+	ClearRaidExperienceGain();
 	SaveGameStateInternal(EUsableQuickSlotSaveMode::Clear);
 	BroadcastInventoryStateChanged();
 }
@@ -1968,6 +2250,8 @@ void UTunaSweeperGameInstance::HandleLevelTravelPersistence(FName SourceLevelNam
 	if (IsRaidToBunkerTravel(SourceLevelName, TargetLevelName))
 	{
 		EnsureInventoryStateInitialized();
+		FTunaSweeperExperienceAnimationState ExperienceAnimationState;
+		CommitRaidExperienceGain(ExperienceAnimationState);
 		SaveGameStateInternal(EUsableQuickSlotSaveMode::PersistRuntime);
 		return;
 	}
@@ -1975,6 +2259,7 @@ void UTunaSweeperGameInstance::HandleLevelTravelPersistence(FName SourceLevelNam
 	if (IsBunkerToRaidTravel(SourceLevelName, TargetLevelName))
 	{
 		SaveGameState();
+		BeginRaidExperienceSession();
 	}
 }
 
@@ -2020,6 +2305,12 @@ bool UTunaSweeperGameInstance::LoadGameState()
 
 	LoadedSlotTotalPlaySeconds = FMath::Max(0.0f, SaveGame->TotalPlaySeconds);
 	ActiveSlotStartTimeSeconds = FPlatformTime::Seconds();
+	TotalExperiencePoints = FMath::Max<int64>(0, SaveGame->TotalExperiencePoints);
+	RaidStartExperiencePoints = TotalExperiencePoints;
+	PendingRaidExperiencePoints = 0;
+	bRaidExperienceSessionActive = false;
+	bHasPendingRaidExperienceAnimationState = false;
+	PendingRaidExperienceAnimationState = FTunaSweeperExperienceAnimationState();
 	CompletedScenarioFlags.Reset();
 	for (const FName& ScenarioFlag : SaveGame->CompletedScenarioFlags)
 	{
@@ -2170,6 +2461,7 @@ bool UTunaSweeperGameInstance::SaveGameStateInternal(
 	SaveGame->SaveSlotIndex = ActiveSaveSlotIndex;
 	SaveGame->TotalPlaySeconds = GetCurrentActiveSlotTotalPlaySeconds();
 	SaveGame->LastSavedAtTicks = FDateTime::Now().GetTicks();
+	SaveGame->TotalExperiencePoints = FMath::Max<int64>(0, TotalExperiencePoints);
 	SaveGame->CompletedScenarioFlags = CompletedScenarioFlags.Array();
 	SaveGame->AcquiredMemoIds = AcquiredMemoIds.Array();
 	SaveGame->AcquiredMemoIds.Sort();
@@ -2314,6 +2606,12 @@ void UTunaSweeperGameInstance::ResetRuntimeStateForSaveSlotSelection()
 	bInventoryStateInitialized = false;
 	LoadedSlotTotalPlaySeconds = 0.0f;
 	ActiveSlotStartTimeSeconds = FPlatformTime::Seconds();
+	TotalExperiencePoints = 0;
+	RaidStartExperiencePoints = 0;
+	PendingRaidExperiencePoints = 0;
+	PendingRaidExperienceAnimationState = FTunaSweeperExperienceAnimationState();
+	bRaidExperienceSessionActive = false;
+	bHasPendingRaidExperienceAnimationState = false;
 	CompletedScenarioFlags.Reset();
 	AcquiredMemoIds.Reset();
 	MapMarkers.Reset();
@@ -2329,6 +2627,12 @@ void UTunaSweeperGameInstance::ResetRuntimeStateForSaveSlotSelection()
 void UTunaSweeperGameInstance::GenerateDefaultInventoryState()
 {
 	ItemInstancesByUid.Reset();
+	TotalExperiencePoints = 0;
+	RaidStartExperiencePoints = 0;
+	PendingRaidExperiencePoints = 0;
+	PendingRaidExperienceAnimationState = FTunaSweeperExperienceAnimationState();
+	bRaidExperienceSessionActive = false;
+	bHasPendingRaidExperienceAnimationState = false;
 	CompletedScenarioFlags.Reset();
 	AcquiredMemoIds.Reset();
 	MapMarkers.Reset();
@@ -2383,6 +2687,42 @@ void UTunaSweeperGameInstance::RefreshLegacyPlayerInventoryItems()
 	}
 
 	bHasGeneratedPlayerInventoryItems = true;
+}
+
+int32 UTunaSweeperGameInstance::ResolveItemExperienceValue(int32 ItemId)
+{
+	if (ItemId == INDEX_NONE)
+	{
+		return 0;
+	}
+
+	UTunaSweeperItemDataSubsystem* ItemDataSubsystem = GetSubsystem<UTunaSweeperItemDataSubsystem>();
+	FTunaSweeperItemDefinition ItemDefinition;
+	if (!ItemDataSubsystem || !ItemDataSubsystem->TryGetItemDefinition(ItemId, ItemDefinition))
+	{
+		return 0;
+	}
+
+	return FMath::Max(0, ItemDefinition.ExperienceValue);
+}
+
+FTunaSweeperExperienceAnimationState UTunaSweeperGameInstance::BuildExperienceAnimationState(
+	int64 StartExperiencePoints,
+	int64 TargetExperiencePoints,
+	int64 GainedExperiencePoints) const
+{
+	FTunaSweeperExperienceAnimationState AnimationState;
+	AnimationState.StartExperiencePoints = FMath::Max<int64>(0, StartExperiencePoints);
+	AnimationState.TargetExperiencePoints = FMath::Max<int64>(
+		AnimationState.StartExperiencePoints,
+		TargetExperiencePoints);
+	AnimationState.GainedExperiencePoints = FMath::Max<int64>(
+		0,
+		FMath::Max<int64>(GainedExperiencePoints, AnimationState.TargetExperiencePoints - AnimationState.StartExperiencePoints));
+	AnimationState.StartLevel = GetExperienceLevelForTotal(AnimationState.StartExperiencePoints);
+	AnimationState.TargetLevel = GetExperienceLevelForTotal(AnimationState.TargetExperiencePoints);
+	AnimationState.AnimationDurationSeconds = TunaSweeperExperience::RaidReturnAnimationDurationSeconds;
+	return AnimationState;
 }
 
 void UTunaSweeperGameInstance::BroadcastInventoryStateChanged()
@@ -2652,6 +2992,12 @@ bool UTunaSweeperGameInstance::IsGunItemDefinition(const FTunaSweeperItemDefinit
 {
 	return ItemDefinition.CategoryTag == TunaSweeperInventory::GunCategoryTag ||
 		ItemDefinition.EquipmentSlotTag == TunaSweeperInventory::GunEquipmentSlotTag;
+}
+
+bool UTunaSweeperGameInstance::IsMeleeItemDefinition(const FTunaSweeperItemDefinition& ItemDefinition) const
+{
+	return ItemDefinition.CategoryTag == TunaSweeperInventory::MeleeCategoryTag ||
+		ItemDefinition.EquipmentSlotTag == TunaSweeperInventory::MeleeEquipmentSlotTag;
 }
 
 bool UTunaSweeperGameInstance::IsAmmoItemDefinition(const FTunaSweeperItemDefinition& ItemDefinition) const

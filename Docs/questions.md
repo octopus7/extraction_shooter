@@ -106,7 +106,7 @@ UE에서는 보편적으로 북쪽이 +Y 방향인가?
 
 ### 답변
 
-맞다. 현재 구현상 레이드에서 벙커로 돌아오는 명시적 경로는 `RaidMap`에 배치되는 `TS_Travel_ToBunker` 레벨 이동 액터뿐이다. 이 액터는 상호작용 표시명 `To Bunker`로 `BunkerMap`을 대상으로 열며, 별도의 추출 지점, 귀환 메뉴, 사망/탈출 처리, 자동 귀환 루트는 아직 구현되어 있지 않다.
+당시 구현상 레이드에서 벙커로 돌아오는 명시적 경로는 `RaidMap`에 배치되는 `TS_Travel_ToBunker` 레벨 이동 액터뿐이었다. 이 액터는 상호작용 표시명 `To Bunker`로 `BunkerMap`을 대상으로 열며, 별도의 추출 지점, 귀환 메뉴, 사망/탈출 처리, 자동 귀환 루트는 아직 구현되어 있지 않았다. 이후 요구사항이 바뀌어 현재는 `TS_Travel_ToBunker` 직접 진입 복귀와 `TS_ExtractionPoint_East` 추출 포인트 복귀를 모두 지원한다.
 
 ## 2026-05-16 15:36:40 (소요시간: 1분 미만)
 
@@ -949,3 +949,43 @@ A. 프로젝트에는 아직 별도 `EditorOnly` 콘텐츠 폴더 규칙이 없�
 ### 답변
 
 그렇다. `WBP_InteractionMarker`에서 `FilledImage`는 크기를 잡는 `SizeBox` 컨테이너이고, 실제 중앙 채워진 원은 그 안의 `UImage`인 `FilledBrushImage`가 가진 `FSlateBrush`로 그려진다. 그래서 열린 상자 체크 아이콘도 `FilledImage`가 아니라 `FilledBrushImage`의 브러시를 바꿔야 적용된다.
+
+## 2026-05-28 12:11:34 (소요시간: 00:02:00)
+
+### 질문
+
+샷건 아이템이 있지만 플레이어 투사체는 모두 동일한 방식으로 발사되고있지?
+
+### 답변
+
+맞다. 현재 샷건은 `ItemTable.json`에 `weapon.type.shotgun`, `ammo.type.shotgun`, 탄창 6발, 재장전 2.6초 같은 데이터만 있고, 플레이어 발사 로직은 무기 타입별 분기 없이 공통 경로를 탄다. `ATunaSweeperTopDownCharacter::FireWeapon()`은 선택 무기의 장전 탄약 1발을 소비한 뒤 `EquippedWeapon->Fire(AimDirection, this, ProjectileHitEffectId)`를 한 번 호출하고, `ATunaSweeperWeapon::Fire()`는 같은 `ProjectileClass`를 같은 조준 방향으로 단일 투사체 1개만 스폰한다. `ResolveEquippedWeaponClass()`도 총기 카테고리면 전부 `/Game/Weapons/BP_AssaultRifle` 클래스를 사용하므로, 현재 기준 샷건 전용 산탄/펠릿/스프레드/다중 투사체 처리는 없다.
+
+## 2026-05-28 12:49:38 (소요시간: 00:07:00)
+
+### 질문
+
+레이드 시작 위치에 벙커로 가는 액터가 있었는데 지금 안 보이는 원인은?
+
+### 답변
+
+당시 분석상 기존 레이드 시작 위치의 `TS_Travel_ToBunker` 레벨 이동 액터는 맵/에디터 생성 경로에 배치되어 있지 않았다. `PlaceLevelTravelActorsInBunkerAndRaidMaps()`는 이름과 달리 `BunkerMap`만 열고 `TS_Travel_DeployToRaid`만 배치하며, `RaidMap`에 `TS_Travel_ToBunker`를 배치하는 호출은 없다. 당시 레이드에서 벙커로 돌아가는 런타임 경로는 `GameplayInteractionSpawns.json`의 `TS_ExtractionPoint_East` 추출 지점으로 보였고, 위치도 시작 위치가 아니라 `[220, 3600, 90]`이었다. 이후 요구사항을 정정해 `TS_Travel_ToBunker`와 `TS_ExtractionPoint_East`를 둘 다 `BunkerMap` 복귀 루트로 지원하도록 복구했다.
+
+## 2026-05-28 12:51:08 (소요시간: 00:01:00)
+
+### 질문
+
+추출 포인트가 `To Bunker` 대신 갈아끼워진 것인가?
+
+### 답변
+
+당시 데이터와 코드 기준으로는 맞다. 예전 문서에는 `TS_Travel_ToBunker` 레벨 이동 액터가 `RaidMap`에 있다고 남아 있지만, 실제 `GameplayInteractionSpawns.json`의 첫 복귀 경로는 `TS_ExtractionPoint_East` 추출 지점이고, 맵/에디터 자동 배치 코드에도 `TS_Travel_ToBunker`를 다시 배치하는 경로가 없었다. 이후 요구사항을 정정해 `To Bunker` 직접 진입 액터와 추출 포인트를 모두 `BunkerMap` 복귀 루트로 지원하도록 복구했다.
+
+## 2026-05-28 13:13:57 (elapsed: 00:00:00)
+
+### 질문
+
+개발자의 상자가 열리지 않는 것이 capacity를 비허용값으로 잡아서 그런 것인가?
+
+### 답변
+
+맞다. `LootContainerTable.json`에서 개발자 상자 `7008` capacity를 `7`로 바꿨는데, `UTunaSweeperItemDataSubsystem::LoadLootContainerTableJson()`은 capacity를 `5`, `10`, `15`만 지원값으로 인정한다. 로그에도 `Skipping loot container row 7: field value is invalid.`가 찍혀 개발자 상자 정의가 로드되지 않았고, 그래서 마커는 보여도 컨테이너 인스턴스 생성이 실패해 열리지 않았다. capacity를 `10`으로 수정했다.

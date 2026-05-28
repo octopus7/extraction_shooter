@@ -6,8 +6,8 @@
 
 - 런타임 배치 소유자는 `UTunaSweeperEnemySpawnSubsystem`이다.
 - 맵 로드 후 `EnsureRaidRuntimeActorsSpawnedForWorld`에서 현재 월드 이름과 각 JSON의 `level_name`을 비교해 스폰한다.
-- `RaidMap`에 직접 배치되어 있던 게임플레이/상호작용 `TS_` 액터 6개는 `GameplayInteractionSpawns.json`으로 옮겼다.
-- 이 6개는 레벨 자산에 직접 배치하지 않는다.
+- `RaidMap`에 직접 배치되어 있던 게임플레이/상호작용 `TS_` 액터와 추가 런타임 액터는 `GameplayInteractionSpawns.json`으로 옮겼다.
+- 이 런타임 액터들은 레벨 자산에 직접 배치하지 않는다.
 
 ## GameplayInteractionSpawns.json
 
@@ -17,12 +17,16 @@
 
 | spawn_id | spawn_type | 주요 데이터 |
 | --- | --- | --- |
-| `TS_Travel_ToBunker` | `level_travel` | `BunkerMap` 이동, `To Bunker`, 전환 영상/문구 |
+| `TS_Travel_ToBunker` | `level_travel` | 레이드 시작 위치의 직접 진입 복귀 루트. `BunkerMap` 이동, `To Bunker`, 전환 영상/문구 |
+| `TS_ExtractionPoint_East` | `extraction_point` | 추출 포인트 복귀 루트. `BunkerMap` 이동, 4초 체류, 반경 `300` |
 | `TS_PickupItem_Sample` | `pickup_item` | `item_id=1001`, `item_quantity=1` |
 | `TS_Interact_ItemSpawn` | `item_spawn` | `BP_PickupItem` 랜덤 스폰, 반경 `160~420` |
 | `TS_LootContainer_Sample` | `loot_container` | `container_definition_id=7001`, `contents_id=8001` |
 | `TS_Interact_LootContainerSpawn` | `loot_container_spawn` | `BP_LootContainer` 랜덤 스폰, 반경 `180~440` |
 | `TS_Interact_SelfDestruct` | `self_destruct` | 3초 카운트다운, 반경 `200`, 피해 `100` |
+| `TS_RollingBomberSpawner_West` | `rolling_bomber_spawner` | 서쪽 롤링 봄버 스포너, 웨이브 스폰 |
+
+`TS_Travel_ToBunker`와 `TS_ExtractionPoint_East`는 서로 대체 관계가 아니다. 둘 다 `RaidMap`에서 `BunkerMap`으로 연결되는 복귀 루트이며, 직접 상호작용 복귀와 추출 지점 복귀를 동시에 지원한다.
 
 ## 기존 데이터 파일
 

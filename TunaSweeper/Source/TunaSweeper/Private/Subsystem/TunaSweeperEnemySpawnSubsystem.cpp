@@ -304,7 +304,8 @@ bool UTunaSweeperEnemySpawnSubsystem::EnsureRaidRuntimeActorsSpawnedForWorld(UWo
 					SpawnDefinition.EnemyId,
 					SpawnDefinition.DropContainerDefinitionId,
 					SpawnDefinition.DropContentsId,
-					SpawnDefinition.MaxHealth);
+					SpawnDefinition.MaxHealth,
+					SpawnDefinition.ExperienceValue);
 				UGameplayStatics::FinishSpawningActor(SpawnedEnemy, SpawnTransform);
 				++SpawnedCount;
 			}
@@ -608,6 +609,7 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadEnemySpawnData(bool bForceReload)
 		double NumericDropContainerDefinitionId = INDEX_NONE;
 		double NumericDropContentsId = INDEX_NONE;
 		double NumericMaxHealth = 30.0;
+		double NumericExperienceValue = 30.0;
 		if (!JsonObject->TryGetStringField(TEXT("level_name"), LevelName) ||
 			!TunaSweeperEnemySpawn::TryReadVectorField(JsonObject, TEXT("location"), Location))
 		{
@@ -621,6 +623,7 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadEnemySpawnData(bool bForceReload)
 		JsonObject->TryGetNumberField(TEXT("drop_container_definition_id"), NumericDropContainerDefinitionId);
 		JsonObject->TryGetNumberField(TEXT("drop_contents_id"), NumericDropContentsId);
 		JsonObject->TryGetNumberField(TEXT("max_health"), NumericMaxHealth);
+		JsonObject->TryGetNumberField(TEXT("experience_value"), NumericExperienceValue);
 		TunaSweeperEnemySpawn::TryReadRotatorField(JsonObject, TEXT("rotation"), Rotation);
 
 		FEnemySpawnDefinition SpawnDefinition;
@@ -642,6 +645,7 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadEnemySpawnData(bool bForceReload)
 		SpawnDefinition.Rotation = Rotation;
 		SpawnDefinition.DropContainerDefinitionId = static_cast<int32>(NumericDropContainerDefinitionId);
 		SpawnDefinition.DropContentsId = static_cast<int32>(NumericDropContentsId);
+		SpawnDefinition.ExperienceValue = FMath::Max(0, static_cast<int32>(NumericExperienceValue));
 		SpawnDefinition.MaxHealth = FMath::Max(1.0f, static_cast<float>(NumericMaxHealth));
 
 		if (SpawnDefinition.LevelName.IsNone())
@@ -1340,6 +1344,7 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadGameplayInteractionActorSpawnData(bool
 		double NumericRollingBomberLaunchPitchMinDegrees = 38.0;
 		double NumericRollingBomberLaunchPitchMaxDegrees = 58.0;
 		double NumericRollingBomberSpawnerMaxHealth = 80.0;
+		double NumericRollingBomberSpawnerExperienceValue = 120.0;
 		JsonObject->TryGetStringField(TEXT("rolling_bomber_class"), RollingBomberClassPath);
 		JsonObject->TryGetStringField(TEXT("launch_sound"), RollingBomberLaunchSoundPath);
 		JsonObject->TryGetNumberField(TEXT("initial_spawn_count"), NumericRollingBomberInitialSpawnCount);
@@ -1351,6 +1356,7 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadGameplayInteractionActorSpawnData(bool
 		JsonObject->TryGetNumberField(TEXT("launch_pitch_min_degrees"), NumericRollingBomberLaunchPitchMinDegrees);
 		JsonObject->TryGetNumberField(TEXT("launch_pitch_max_degrees"), NumericRollingBomberLaunchPitchMaxDegrees);
 		JsonObject->TryGetNumberField(TEXT("spawner_max_health"), NumericRollingBomberSpawnerMaxHealth);
+		JsonObject->TryGetNumberField(TEXT("experience_value"), NumericRollingBomberSpawnerExperienceValue);
 		const FString TrimmedRollingBomberClassPath = RollingBomberClassPath.TrimStartAndEnd();
 		const FString TrimmedRollingBomberLaunchSoundPath = RollingBomberLaunchSoundPath.TrimStartAndEnd();
 		SpawnDefinition.RollingBomberClass = TSoftClassPtr<ATunaSweeperRollingBomber>(
@@ -1380,6 +1386,9 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadGameplayInteractionActorSpawnData(bool
 			SpawnDefinition.RollingBomberLaunchPitchMinDegrees,
 			89.0f);
 		SpawnDefinition.RollingBomberSpawnerMaxHealth = FMath::Max(1.0f, static_cast<float>(NumericRollingBomberSpawnerMaxHealth));
+		SpawnDefinition.RollingBomberSpawnerExperienceValue = FMath::Max(
+			0,
+			static_cast<int32>(NumericRollingBomberSpawnerExperienceValue));
 
 		if (SpawnDefinition.SpawnType == EGameplayInteractionActorSpawnType::LevelTravel &&
 			SpawnDefinition.TargetLevelName.IsNone())
@@ -1628,7 +1637,8 @@ void UTunaSweeperEnemySpawnSubsystem::ConfigureGameplayInteractionActor(
 				SpawnDefinition.RollingBomberLaunchSpeedMax,
 				SpawnDefinition.RollingBomberLaunchPitchMinDegrees,
 				SpawnDefinition.RollingBomberLaunchPitchMaxDegrees,
-				SpawnDefinition.RollingBomberSpawnerMaxHealth);
+				SpawnDefinition.RollingBomberSpawnerMaxHealth,
+				SpawnDefinition.RollingBomberSpawnerExperienceValue);
 		}
 		break;
 	default:

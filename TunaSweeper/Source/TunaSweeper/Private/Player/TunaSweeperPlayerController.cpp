@@ -220,6 +220,7 @@ ATunaSweeperPlayerController::ATunaSweeperPlayerController()
 	GameHudWidgetClass = TSoftClassPtr<UTunaSweeperGameHudWidget>(FSoftObjectPath(TEXT("/Game/UI/WBP_GameHud.WBP_GameHud_C")));
 	IntroMenuWidgetClass = TSoftClassPtr<UTunaSweeperIntroMenuWidget>(FSoftObjectPath(TEXT("/Game/UI/WBP_IntroMenu.WBP_IntroMenu_C")));
 	QuestWidgetClass = TSoftClassPtr<UTunaSweeperQuestWidget>(FSoftObjectPath(TEXT("/Game/UI/WBP_Quest.WBP_Quest_C")));
+	MeleeQuickSlotAction = TSoftObjectPtr<UInputAction>(FSoftObjectPath(TEXT("/Game/Input/IA_MeleeQuickSlot.IA_MeleeQuickSlot")));
 	DropAction = TSoftObjectPtr<UInputAction>(FSoftObjectPath(TEXT("/Game/Input/IA_Drop.IA_Drop")));
 	PickupItemActorClass = TSoftClassPtr<ATunaSweeperPickupItemActor>(
 		FSoftObjectPath(TEXT("/Game/Interaction/BP_PickupItem.BP_PickupItem_C")));
@@ -330,6 +331,7 @@ void ATunaSweeperPlayerController::SetupInputComponent()
 	if (InputComponent)
 	{
 		InputComponent->BindKey(EKeys::U, IE_Pressed, this, &ATunaSweeperPlayerController::HandleUseHoveredItem);
+		InputComponent->BindKey(EKeys::V, IE_Pressed, this, &ATunaSweeperPlayerController::HandleMeleeQuickSlotPressed);
 	}
 
 	UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent);
@@ -359,6 +361,11 @@ void ATunaSweeperPlayerController::SetupInputComponent()
 	BindQuickSlotInputAction(5, &ATunaSweeperPlayerController::HandleQuickSlot6);
 	BindQuickSlotInputAction(6, &ATunaSweeperPlayerController::HandleQuickSlot7);
 	BindQuickSlotInputAction(7, &ATunaSweeperPlayerController::HandleQuickSlot8);
+
+	if (UInputAction* LoadedMeleeQuickSlotAction = MeleeQuickSlotAction.LoadSynchronous())
+	{
+		EnhancedInputComponent->BindAction(LoadedMeleeQuickSlotAction, ETriggerEvent::Started, this, &ATunaSweeperPlayerController::HandleMeleeQuickSlot);
+	}
 
 	if (UInputAction* LoadedDropAction = DropAction.LoadSynchronous())
 	{
@@ -392,7 +399,8 @@ void ATunaSweeperPlayerController::PlayerTick(float DeltaTime)
 	}
 
 	FVector AimPoint;
-	if (GetMouseAimPointOnPlane(ControlledCharacter->GetActorLocation().Z, AimPoint))
+	const FVector2D AimScreenOffset = ControlledCharacter->GetWeaponRecoilCrosshairScreenOffset();
+	if (GetMouseAimPointOnPlane(ControlledCharacter->GetActorLocation().Z, AimScreenOffset, AimPoint))
 	{
 		ControlledCharacter->SetAimWorldPoint(AimPoint);
 	}
@@ -1003,6 +1011,22 @@ void ATunaSweeperPlayerController::HandleQuickSlot(int32 SlotNumber)
 	}
 }
 
+void ATunaSweeperPlayerController::HandleMeleeQuickSlotPressed()
+{
+	if (IsOpeningScenarioMap() || bDialogueSequenceActive || IsInventoryUiOpen())
+	{
+		return;
+	}
+
+	ATunaSweeperTopDownCharacter* ControlledCharacter = Cast<ATunaSweeperTopDownCharacter>(GetPawn());
+	if (!ControlledCharacter || ControlledCharacter->IsDead())
+	{
+		return;
+	}
+
+	ControlledCharacter->SelectMeleeWeapon();
+}
+
 void ATunaSweeperPlayerController::HandleUseHoveredItem()
 {
 	if (IsIntroMap() || IsOpeningScenarioMap())
@@ -1077,6 +1101,11 @@ void ATunaSweeperPlayerController::HandleDrop(const FInputActionValue&)
 	}
 
 	SpawnedPickupItem->SetItemStack(RemovedItemInstance.ItemId, RemovedItemInstance.Quantity);
+}
+
+void ATunaSweeperPlayerController::HandleMeleeQuickSlot(const FInputActionValue&)
+{
+	HandleMeleeQuickSlotPressed();
 }
 
 void ATunaSweeperPlayerController::HandleQuickSlot1(const FInputActionValue&)
@@ -1218,11 +1247,21 @@ bool ATunaSweeperPlayerController::IsInventoryUiOpen() const
 	return GameHudWidget && GameHudWidget->IsInventoryUiOpen();
 }
 
-bool ATunaSweeperPlayerController::GetMouseAimPointOnPlane(float PlaneZ, FVector& OutAimPoint) const
+bool ATunaSweeperPlayerController::GetMouseAimPointOnPlane(
+	float PlaneZ,
+	const FVector2D& ScreenOffset,
+	FVector& OutAimPoint) const
 {
 	FVector WorldLocation;
 	FVector WorldDirection;
-	if (!DeprojectMousePositionToWorld(WorldLocation, WorldDirection))
+	float MouseX = 0.0f;
+	float MouseY = 0.0f;
+	if (!GetMousePosition(MouseX, MouseY) ||
+		!DeprojectScreenPositionToWorld(
+			MouseX + ScreenOffset.X,
+			MouseY + ScreenOffset.Y,
+			WorldLocation,
+			WorldDirection))
 	{
 		return false;
 	}
