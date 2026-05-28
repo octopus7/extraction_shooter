@@ -442,7 +442,10 @@ void ATunaSweeperTopDownCharacter::EnsureEquippedWeaponActor()
 		}
 		else
 		{
-			EquippedWeapon->ConfigureGunVisual();
+			if (EquippedWeapon->GetClass() == ATunaSweeperWeapon::StaticClass())
+			{
+				EquippedWeapon->ConfigureGunVisual();
+			}
 		}
 	}
 }

@@ -14,7 +14,12 @@
     "scale": [1.0, 1.0, 1.0],
     "level_travel_visual_mesh": "/Game/Interaction/SM_LevelTravel_Ladder.SM_LevelTravel_Ladder",
     "level_travel_visual_scale": [0.75, 0.75, 0.75],
-    "level_travel_visual_relative_location": [0.0, 0.0, 0.0]
+    "level_travel_visual_relative_location": [0.0, 0.0, 0.0],
+    "mapOverlay": {
+      "text_string_key": "ui.map_overlay.start_location",
+      "world_offset": [0.0, 0.0, 0.0],
+      "text_offset": [0.0, 0.0]
+    }
   },
   {
     "level_name": "RaidMap",
@@ -31,7 +36,14 @@
     "extraction_radius_visual_material": "/Game/Effects/M_LedExpression_VertexColorEmissive.M_LedExpression_VertexColorEmissive",
     "location": [220.0, 3600.0, 90.0],
     "rotation": [0.0, 0.0, 0.0],
-    "scale": [1.0, 1.0, 1.0]
+    "scale": [1.0, 1.0, 1.0],
+    "mapOverlay": {
+      "text_string_key": "ui.map_overlay.extraction_point",
+      "icon": "green_inverted_triangle",
+      "world_offset": [0.0, 0.0, 0.0],
+      "icon_offset": [0.0, 0.0],
+      "text_offset": [0.0, -34.0]
+    }
   },
   {
     "level_name": "RaidMap",
@@ -51,7 +63,6 @@
     "spawn_id": "TS_Interact_ItemSpawn",
     "spawn_type": "item_spawn",
     "actor_class": "/Game/Interaction/BP_Interact_ItemSpawn.BP_Interact_ItemSpawn_C",
-    "interaction_display_name": "아이템스폰",
     "pickup_item_actor_class": "/Game/Interaction/BP_PickupItem.BP_PickupItem_C",
     "min_spawn_radius": 160.0,
     "max_spawn_radius": 420.0,
@@ -76,7 +87,6 @@
     "spawn_id": "TS_Interact_LootContainerSpawn",
     "spawn_type": "loot_container_spawn",
     "actor_class": "/Game/Interaction/BP_Interact_LootContainerSpawn.BP_Interact_LootContainerSpawn_C",
-    "interaction_display_name": "상자스폰",
     "loot_container_actor_class": "/Game/Interaction/BP_LootContainer.BP_LootContainer_C",
     "min_spawn_radius": 180.0,
     "max_spawn_radius": 440.0,
@@ -90,7 +100,6 @@
     "spawn_id": "TS_Interact_SelfDestruct",
     "spawn_type": "self_destruct",
     "actor_class": "/Game/Interaction/BP_Interact_SelfDestruct.BP_Interact_SelfDestruct_C",
-    "interaction_display_name": "자폭",
     "speech_bubble_widget_class": "/Game/UI/WBP_SpeechBubble.WBP_SpeechBubble_C",
     "countdown_start_number": 3,
     "countdown_step_seconds": 1.0,

@@ -950,6 +950,16 @@ A. 프로젝트에는 아직 별도 `EditorOnly` 콘텐츠 폴더 규칙이 없�
 
 그렇다. `WBP_InteractionMarker`에서 `FilledImage`는 크기를 잡는 `SizeBox` 컨테이너이고, 실제 중앙 채워진 원은 그 안의 `UImage`인 `FilledBrushImage`가 가진 `FSlateBrush`로 그려진다. 그래서 열린 상자 체크 아이콘도 `FilledImage`가 아니라 `FilledBrushImage`의 브러시를 바꿔야 적용된다.
 
+## 2026-05-28 14:52:46 (소요시간: 00:00:00)
+
+### 질문
+
+열렸던 상자의 V 표시 이미지 원본 경로는 무엇인가?
+
+### 답변
+
+편집해야 하는 투명 PNG 원본은 `D:\github\extraction_shooter\GeneratedImages\UI\T_InteractionMarkerOpenedCheck.png`이다. 최초 이미지 생성/크로마 소스는 `D:\github\extraction_shooter\GeneratedImages\UI\T_InteractionMarkerOpenedCheck_Source.png`이고, Unreal에서 실제로 로드하는 텍스처 애셋은 `/Game/UI/Interaction/T_InteractionMarkerOpenedCheck` 및 `D:\github\extraction_shooter\TunaSweeper\Content\UI\Interaction\T_InteractionMarkerOpenedCheck.uasset`이다.
+
 ## 2026-05-28 12:11:34 (소요시간: 00:02:00)
 
 ### 질문
@@ -989,3 +999,32 @@ A. 프로젝트에는 아직 별도 `EditorOnly` 콘텐츠 폴더 규칙이 없�
 ### 답변
 
 맞다. `LootContainerTable.json`에서 개발자 상자 `7008` capacity를 `7`로 바꿨는데, `UTunaSweeperItemDataSubsystem::LoadLootContainerTableJson()`은 capacity를 `5`, `10`, `15`만 지원값으로 인정한다. 로그에도 `Skipping loot container row 7: field value is invalid.`가 찍혀 개발자 상자 정의가 로드되지 않았고, 그래서 마커는 보여도 컨테이너 인스턴스 생성이 실패해 열리지 않았다. capacity를 `10`으로 수정했다.
+## 2026-05-28 14:44:03 (elapsed: 00:00:30)
+
+### 질문
+
+`mapOverlay` 선택 필드 하위로 오버레이 정보를 넣는 구조가 맞는지, 아니면 `mapOverlay`가 켜지면 별도 오버레이 정보들이 사용되는 구조가 맞는지. 구조상은 전자가 좋아 보이지만 엑셀에서 원본을 얻을 거면 후자가 맞아 보인다는 의견.
+
+### 답변
+
+런타임 JSON 구조는 `mapOverlay` 선택 객체 하위에 오버레이 정보를 넣는 전자가 맞다. `mapOverlay` 객체가 존재하면 오버레이를 사용하고, 없으면 사용하지 않는 방식이 가장 단순하다. 엑셀 원본은 평면 컬럼이 편하므로 `mapOverlayTextKey`, `mapOverlayIcon`, `mapOverlayOffsetX`, `mapOverlayOffsetY` 같은 컬럼을 두고, 익스포터가 값이 있는 행만 JSON의 `mapOverlay` 객체로 묶어주면 된다. 명시적으로 켜고 끄면서 데이터를 보존해야 하는 경우에만 `mapOverlay.enabled`를 추가한다.
+
+## 2026-05-28 15:04:01 (elapsed: 00:00:30)
+
+### 질문
+
+임시 효과음용 FM 사운드 컴포저는 2-op 정도로 처리하고, 목적별 프리셋에서 약간 튜닝하는 사용법이면 충분한가?
+
+### 답변
+
+충분하다. 임시 효과음과 고전게임식 SFX 제작 목적이라면 2-op FM에 노이즈, 피치 엔벨로프, 볼륨 엔벨로프, 간단한 필터/디스토션, 랜덤 편차를 붙이는 구성이 가장 실용적이다. 폭발, 총성, 피격음, UI음, 도탄음, 짧은 생물 소리는 목적별 프리셋을 만든 뒤 사용자가 Decay, Pitch Sweep, Noise Amount, FM Amount, Brightness 정도만 조정해도 빠르게 변형할 수 있다. 다만 고양이 울음처럼 포먼트가 중요한 소리는 완성도 한계가 있으므로 2-op 음색 레이어 2개를 겹치거나 나중에 샘플/PCM 레이어를 추가할 수 있게 구조를 열어두는 편이 좋다.
+
+## 2026-05-28 15:07:18 (elapsed: 00:00:30)
+
+### 질문
+
+FM 사운드 컴포저의 설정 원본 파일을 별도 JSON으로 저장하고 내부에서 export하면 WAV 파일로 뽑는 방식이 좋은가, 아니면 JSON이나 원본 설정 애셋을 저장하고 그것을 사운드 소스로 쓰는 방법이 좋은가?
+
+### 답변
+
+이번 목적에는 JSON 원본 설정을 보관하고, 에디터에서 WAV로 bake한 뒤 SoundWave 애셋으로 import하는 방식이 가장 적합하다. Unreal의 일반 사운드 재생, 패키징, 레퍼런스, 볼륨/믹싱/큐 처리와 바로 맞물리고, 임시 효과음 목적에서도 반복 렌더링 비용이 없다. JSON이나 설정 애셋을 런타임 사운드 소스로 직접 쓰려면 별도의 `USoundWaveProcedural`/SynthComponent 재생 계층과 패키징 대상 데이터 관리가 필요하므로, 실시간 변조가 중요한 단계가 되기 전까지는 과하다. 따라서 에디터 preview는 절차적으로 재생하고, 실제 게임 사용은 WAV/SoundWave로 bake하는 구조로 둔다.

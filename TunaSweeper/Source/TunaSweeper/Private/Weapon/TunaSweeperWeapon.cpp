@@ -46,7 +46,7 @@ void ATunaSweeperWeapon::ConfigureGunVisual()
 
 	WeaponMesh->SetRelativeLocation(FVector::ZeroVector);
 	WeaponMesh->SetRelativeRotation(FRotator::ZeroRotator);
-	WeaponMesh->SetRelativeScale3D(FVector(0.7f, 0.15f, 0.15f));
+	WeaponMesh->SetRelativeScale3D(FVector::OneVector);
 }
 
 void ATunaSweeperWeapon::ConfigureMeleeVisual()

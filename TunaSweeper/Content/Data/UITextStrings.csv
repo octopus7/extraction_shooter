@@ -110,3 +110,5 @@ ui.interaction.boom,Boom!,Boom!,Boom!
 ui.notification.rescue_cart,구급 카트 후송 중,Rescue cart returning,救急カート搬送中
 ui.npc.instructor,교관,Instructor,教官
 ui.quest.interaction_name,퀘스트,Quest,クエスト
+ui.map_overlay.start_location,시작 위치,Start Position,開始位置
+ui.map_overlay.extraction_point,추출 포인트,Extraction Point,抽出地点

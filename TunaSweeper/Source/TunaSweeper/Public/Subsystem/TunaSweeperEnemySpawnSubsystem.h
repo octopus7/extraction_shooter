@@ -30,6 +30,17 @@ class UTunaSweeperLevelTransitionWidget;
 class UTunaSweeperPickupItemIconWidget;
 class UTunaSweeperSpeechBubbleWidget;
 
+struct TUNASWEEPER_API FTunaSweeperMapOverlayDefinition
+{
+	FName LevelName = NAME_None;
+	FName SpawnId = NAME_None;
+	FVector WorldLocation = FVector::ZeroVector;
+	FName TextStringKey = NAME_None;
+	FName IconId = NAME_None;
+	FVector2D TextOffset = FVector2D::ZeroVector;
+	FVector2D IconOffset = FVector2D::ZeroVector;
+};
+
 UCLASS()
 class TUNASWEEPER_API UTunaSweeperEnemySpawnSubsystem : public UGameInstanceSubsystem
 {
@@ -62,6 +73,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Raid Runtime Spawn")
 	bool LoadGameplayInteractionActorSpawnData(bool bForceReload = false);
+
+	bool GetMapOverlaysForWorld(const UWorld* World, TArray<FTunaSweeperMapOverlayDefinition>& OutMapOverlays);
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Enemy Spawn")
 	bool IsEnemySpawnDataLoaded() const { return bEnemySpawnDataLoaded; }
@@ -222,6 +235,9 @@ private:
 		float RollingBomberLaunchPitchMaxDegrees = 58.0f;
 		float RollingBomberSpawnerMaxHealth = 80.0f;
 		int32 RollingBomberSpawnerExperienceValue = 120;
+
+		FTunaSweeperMapOverlayDefinition MapOverlay;
+		bool bHasMapOverlay = false;
 	};
 
 	void HandlePostLoadMapWithWorld(UWorld* LoadedWorld);

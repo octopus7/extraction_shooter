@@ -67,6 +67,7 @@ void UTunaSweeperMapWidget::RefreshMapView()
 		CachedMapMarkers.Reset();
 	}
 
+	RefreshMapOverlayData();
 	UpdatePlayerMapPosition();
 	RefreshMapCanvas();
 	RefreshMarkerIconButtons();
@@ -590,6 +591,11 @@ void UTunaSweeperMapWidget::RefreshMapCanvas()
 		}
 	}
 
+	for (const FTunaSweeperMapOverlayDefinition& MapOverlay : CachedMapOverlays)
+	{
+		AddMapOverlayToCanvas(MapOverlay);
+	}
+
 	if (bHasPlayerMapPosition)
 	{
 		const FVector2D PlayerLocalPosition = MapPositionToLocal(CachedPlayerMapPosition);
@@ -630,6 +636,80 @@ void UTunaSweeperMapWidget::RefreshMapCanvas()
 					PlayerFallbackSlot->SetPosition(PlayerLocalPosition);
 					PlayerFallbackSlot->SetSize(FVector2D(PlayerIconSize, PlayerIconSize));
 				}
+			}
+		}
+	}
+}
+
+void UTunaSweeperMapWidget::RefreshMapOverlayData()
+{
+	CachedMapOverlays.Reset();
+
+	UGameInstance* GameInstance = GetGameInstance();
+	UTunaSweeperEnemySpawnSubsystem* SpawnSubsystem = GameInstance
+		? GameInstance->GetSubsystem<UTunaSweeperEnemySpawnSubsystem>()
+		: nullptr;
+	if (!SpawnSubsystem)
+	{
+		return;
+	}
+
+	SpawnSubsystem->GetMapOverlaysForWorld(GetWorld(), CachedMapOverlays);
+}
+
+void UTunaSweeperMapWidget::AddMapOverlayToCanvas(const FTunaSweeperMapOverlayDefinition& MapOverlay)
+{
+	if (!WidgetTree || !MapCanvas)
+	{
+		return;
+	}
+
+	const FVector2D AnchorLocalPosition = MapPositionToLocal(ProjectWorldLocationToMapPosition(MapOverlay.WorldLocation));
+	if (!MapOverlay.IconId.IsNone())
+	{
+		UTextBlock* IconText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass());
+		if (IconText)
+		{
+			const FVector2D IconSize(42.0f, 42.0f);
+			IconText->SetText(GetMapOverlayIconGlyph(MapOverlay.IconId));
+			IconText->SetColorAndOpacity(FSlateColor(GetMapOverlayIconColor(MapOverlay.IconId)));
+			IconText->SetJustification(ETextJustify::Center);
+			IconText->SetShadowOffset(FVector2D(1.0f, 1.0f));
+			IconText->SetShadowColorAndOpacity(FLinearColor(0.0f, 0.0f, 0.0f, 0.82f));
+			IconText->SetVisibility(ESlateVisibility::HitTestInvisible);
+			TunaSweeperUIFont::ApplyFont(IconText, 34, ETunaSweeperUIFontWeight::Bold);
+
+			if (UCanvasPanelSlot* IconSlot = MapCanvas->AddChildToCanvas(IconText))
+			{
+				IconSlot->SetAnchors(FAnchors(0.0f, 0.0f));
+				IconSlot->SetAlignment(FVector2D(0.5f, 0.5f));
+				IconSlot->SetPosition(AnchorLocalPosition + MapOverlay.IconOffset);
+				IconSlot->SetSize(IconSize);
+			}
+		}
+	}
+
+	if (!MapOverlay.TextStringKey.IsNone())
+	{
+		UTextBlock* LabelText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass());
+		if (LabelText)
+		{
+			const bool bHasIcon = !MapOverlay.IconId.IsNone();
+			const FVector2D LabelSize(220.0f, 34.0f);
+			LabelText->SetText(ResolveMapOverlayText(MapOverlay));
+			LabelText->SetColorAndOpacity(FSlateColor(FLinearColor(0.94f, 1.0f, 0.92f, 1.0f)));
+			LabelText->SetJustification(ETextJustify::Center);
+			LabelText->SetShadowOffset(FVector2D(1.0f, 1.0f));
+			LabelText->SetShadowColorAndOpacity(FLinearColor(0.0f, 0.0f, 0.0f, 0.88f));
+			LabelText->SetVisibility(ESlateVisibility::HitTestInvisible);
+			TunaSweeperUIFont::ApplyFont(LabelText, 17, ETunaSweeperUIFontWeight::Bold);
+
+			if (UCanvasPanelSlot* LabelSlot = MapCanvas->AddChildToCanvas(LabelText))
+			{
+				LabelSlot->SetAnchors(FAnchors(0.0f, 0.0f));
+				LabelSlot->SetAlignment(bHasIcon ? FVector2D(0.5f, 1.0f) : FVector2D(0.5f, 0.5f));
+				LabelSlot->SetPosition(AnchorLocalPosition + MapOverlay.TextOffset);
+				LabelSlot->SetSize(LabelSize);
 			}
 		}
 	}
@@ -871,6 +951,50 @@ FVector2D UTunaSweeperMapWidget::ProjectWorldLocationToMapPosition(const FVector
 void UTunaSweeperMapWidget::HandleMapMarkersChanged()
 {
 	RefreshMapView();
+}
+
+FText UTunaSweeperMapWidget::ResolveMapOverlayText(const FTunaSweeperMapOverlayDefinition& MapOverlay) const
+{
+	if (MapOverlay.TextStringKey.IsNone())
+	{
+		return FText::GetEmpty();
+	}
+
+	const FText FallbackText = FText::FromString(MapOverlay.TextStringKey.ToString());
+	const UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+	return TunaGameInstance
+		? TunaGameInstance->ResolveLocalizedText(MapOverlay.TextStringKey, FallbackText)
+		: FallbackText;
+}
+
+FText UTunaSweeperMapWidget::GetMapOverlayIconGlyph(FName IconId) const
+{
+	FString NormalizedIconId = IconId.ToString().TrimStartAndEnd().ToLower();
+	NormalizedIconId.ReplaceInline(TEXT("-"), TEXT("_"));
+
+	if (NormalizedIconId == TEXT("green_inverted_triangle") ||
+		NormalizedIconId == TEXT("inverted_triangle") ||
+		NormalizedIconId == TEXT("down_triangle"))
+	{
+		return FText::FromString(TEXT("\u25BC"));
+	}
+
+	return FText::FromString(TEXT("\u25CF"));
+}
+
+FLinearColor UTunaSweeperMapWidget::GetMapOverlayIconColor(FName IconId) const
+{
+	FString NormalizedIconId = IconId.ToString().TrimStartAndEnd().ToLower();
+	NormalizedIconId.ReplaceInline(TEXT("-"), TEXT("_"));
+
+	if (NormalizedIconId == TEXT("green_inverted_triangle") ||
+		NormalizedIconId == TEXT("inverted_triangle") ||
+		NormalizedIconId == TEXT("down_triangle"))
+	{
+		return FLinearColor(0.22f, 0.96f, 0.34f, 1.0f);
+	}
+
+	return FLinearColor(0.94f, 0.96f, 0.92f, 1.0f);
 }
 
 FText UTunaSweeperMapWidget::GetMarkerGlyph(int32 MarkerIconIndex) const

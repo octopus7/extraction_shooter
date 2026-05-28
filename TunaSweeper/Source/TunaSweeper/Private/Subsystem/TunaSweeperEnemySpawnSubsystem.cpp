@@ -107,6 +107,118 @@ namespace TunaSweeperEnemySpawn
 		return true;
 	}
 
+	bool TryReadVector2DField(const TSharedPtr<FJsonObject>& JsonObject, const TCHAR* FieldName, FVector2D& OutVector)
+	{
+		const TArray<TSharedPtr<FJsonValue>>* VectorArray = nullptr;
+		if (!JsonObject.IsValid() || !JsonObject->TryGetArrayField(FieldName, VectorArray) || !VectorArray || VectorArray->Num() < 2)
+		{
+			return false;
+		}
+
+		OutVector = FVector2D(
+			static_cast<float>((*VectorArray)[0]->AsNumber()),
+			static_cast<float>((*VectorArray)[1]->AsNumber()));
+		return true;
+	}
+
+	FString ReadFirstStringField(
+		const TSharedPtr<FJsonObject>& JsonObject,
+		const TCHAR* FieldNameA,
+		const TCHAR* FieldNameB = nullptr,
+		const TCHAR* FieldNameC = nullptr)
+	{
+		if (!JsonObject.IsValid())
+		{
+			return FString();
+		}
+
+		const TCHAR* FieldNames[] = { FieldNameA, FieldNameB, FieldNameC };
+		for (const TCHAR* FieldName : FieldNames)
+		{
+			if (!FieldName)
+			{
+				continue;
+			}
+
+			FString Value;
+			if (JsonObject->TryGetStringField(FieldName, Value))
+			{
+				return Value.TrimStartAndEnd();
+			}
+		}
+
+		return FString();
+	}
+
+	bool TryReadMapOverlayDefinition(
+		const TSharedPtr<FJsonObject>& JsonObject,
+		FName LevelName,
+		FName SpawnId,
+		const FVector& SpawnLocation,
+		FTunaSweeperMapOverlayDefinition& OutMapOverlay)
+	{
+		const TSharedPtr<FJsonObject>* MapOverlayObjectPtr = nullptr;
+		if (!JsonObject.IsValid() ||
+			(!JsonObject->TryGetObjectField(TEXT("mapOverlay"), MapOverlayObjectPtr) &&
+				!JsonObject->TryGetObjectField(TEXT("map_overlay"), MapOverlayObjectPtr)) ||
+			!MapOverlayObjectPtr ||
+			!MapOverlayObjectPtr->IsValid())
+		{
+			return false;
+		}
+
+		const TSharedPtr<FJsonObject>& MapOverlayObject = *MapOverlayObjectPtr;
+		bool bEnabled = true;
+		if (MapOverlayObject->TryGetBoolField(TEXT("enabled"), bEnabled) && !bEnabled)
+		{
+			return false;
+		}
+
+		const FString TextStringKey = ReadFirstStringField(
+			MapOverlayObject,
+			TEXT("text_string_key"),
+			TEXT("text_key"),
+			TEXT("textKey"));
+		const FString IconId = ReadFirstStringField(
+			MapOverlayObject,
+			TEXT("icon"),
+			TEXT("icon_id"),
+			TEXT("iconId"));
+		if (TextStringKey.IsEmpty() && IconId.IsEmpty())
+		{
+			return false;
+		}
+
+		FVector WorldOffset = FVector::ZeroVector;
+		if (!TryReadVectorField(MapOverlayObject, TEXT("world_offset"), WorldOffset))
+		{
+			TryReadVectorField(MapOverlayObject, TEXT("location_offset"), WorldOffset);
+		}
+
+		FVector2D TextOffset = IconId.IsEmpty() ? FVector2D::ZeroVector : FVector2D(0.0f, -34.0f);
+		if (!TryReadVector2DField(MapOverlayObject, TEXT("text_offset"), TextOffset) &&
+			!TryReadVector2DField(MapOverlayObject, TEXT("text_screen_offset"), TextOffset))
+		{
+			TryReadVector2DField(MapOverlayObject, TEXT("textOffset"), TextOffset);
+		}
+
+		FVector2D IconOffset = FVector2D::ZeroVector;
+		if (!TryReadVector2DField(MapOverlayObject, TEXT("icon_offset"), IconOffset) &&
+			!TryReadVector2DField(MapOverlayObject, TEXT("icon_screen_offset"), IconOffset))
+		{
+			TryReadVector2DField(MapOverlayObject, TEXT("iconOffset"), IconOffset);
+		}
+
+		OutMapOverlay.LevelName = LevelName;
+		OutMapOverlay.SpawnId = SpawnId;
+		OutMapOverlay.WorldLocation = SpawnLocation + WorldOffset;
+		OutMapOverlay.TextStringKey = TextStringKey.IsEmpty() ? NAME_None : FName(*TextStringKey);
+		OutMapOverlay.IconId = IconId.IsEmpty() ? NAME_None : FName(*IconId);
+		OutMapOverlay.TextOffset = TextOffset;
+		OutMapOverlay.IconOffset = IconOffset;
+		return true;
+	}
+
 	bool ShouldIncludeEditorOnlySpawn(const UWorld* World)
 	{
 #if WITH_EDITOR
@@ -1179,6 +1291,12 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadGameplayInteractionActorSpawnData(bool
 			FSoftObjectPath(TrimmedMarkerWidgetClassPath.IsEmpty()
 				? FString(TunaSweeperEnemySpawn::DefaultInteractionMarkerWidgetClassPath)
 				: TrimmedMarkerWidgetClassPath));
+		SpawnDefinition.bHasMapOverlay = TunaSweeperEnemySpawn::TryReadMapOverlayDefinition(
+			JsonObject,
+			SpawnDefinition.LevelName,
+			SpawnDefinition.SpawnId,
+			SpawnDefinition.Location,
+			SpawnDefinition.MapOverlay);
 
 		FString TargetLevelName;
 		FString TransitionMediaSourcePath;
@@ -1421,6 +1539,30 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadGameplayInteractionActorSpawnData(bool
 
 	bGameplayInteractionActorSpawnDataLoaded = true;
 	return true;
+}
+
+bool UTunaSweeperEnemySpawnSubsystem::GetMapOverlaysForWorld(
+	const UWorld* World,
+	TArray<FTunaSweeperMapOverlayDefinition>& OutMapOverlays)
+{
+	OutMapOverlays.Reset();
+
+	if (!World || !LoadGameplayInteractionActorSpawnData(false))
+	{
+		return false;
+	}
+
+	for (const FGameplayInteractionActorSpawnDefinition& SpawnDefinition : GameplayInteractionActorSpawnDefinitions)
+	{
+		if (!SpawnDefinition.bHasMapOverlay || !DoesLevelNameMatchWorld(SpawnDefinition.LevelName, World))
+		{
+			continue;
+		}
+
+		OutMapOverlays.Add(SpawnDefinition.MapOverlay);
+	}
+
+	return OutMapOverlays.Num() > 0;
 }
 
 void UTunaSweeperEnemySpawnSubsystem::HandlePostLoadMapWithWorld(UWorld* LoadedWorld)
