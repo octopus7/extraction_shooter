@@ -145,6 +145,7 @@ namespace TunaSweeperEditorSetup
 	const FString WorldProgressInteractionTaskId = TEXT("2026-05-19_CreateWorldProgressObstacleAssetsV1");
 	const FString WarpPointInteractionTaskId = TEXT("2026-05-25_CreateWarpPointInteractionAssetsV1");
 	const FString EnemyVisualMaterialTaskId = TEXT("2026-05-19_CreateEnemyAndContainerVisualMaterialsV3");
+	const FString RollingBomberBodyMaterialTaskId = TEXT("2026-05-28_CreateRollingBomberBodyGrayMaterialV1");
 	const FString RollingBomberLegMaterialTaskId = TEXT("2026-05-28_CreateRollingBomberLegMetalMaterialV1");
 	const FString RollingBomberChargeCylinderEffectTaskId = TEXT("2026-05-28_CreateRollingBomberChargeCylinderEffectV1");
 	const FString ProjectileHitEffectAssetTaskId = TEXT("2026-05-28_CreateProjectileHitEffectAssetsV1");
@@ -171,6 +172,7 @@ namespace TunaSweeperEditorSetup
 	const FString EnemyGreenMaterialAssetName = TEXT("M_Enemy_Green");
 	const FString EnemyBlueMaterialAssetName = TEXT("M_Enemy_Blue");
 	const FString EnemySightlineMaterialAssetName = TEXT("M_Enemy_Sightline");
+	const FString RollingBomberBodyGrayMaterialAssetName = TEXT("M_RollingBomberBodyGray");
 	const FString RollingBomberLegMetalMaterialAssetName = TEXT("M_RollingBomberLegMetal");
 	const FString EnemyVoxelBodyMeshAssetName = TEXT("SM_Enemy_VoxelBody");
 	const FString EnemyVoxelForwardMarkerMeshAssetName = TEXT("SM_Enemy_VoxelForwardMarker");
@@ -2502,6 +2504,16 @@ namespace TunaSweeperEditorSetup
 
 		return RedMaterial && GreenMaterial && BlueMaterial && SightlineMaterial &&
 			CardboardMaterial && WoodMaterial && MetalMaterial && SupplyMaterial;
+	}
+
+	bool EnsureRollingBomberBodyGrayMaterial()
+	{
+		return EnsureSolidColorMaterial(
+			EnemyAssetPath,
+			RollingBomberBodyGrayMaterialAssetName,
+			FLinearColor(0.5f, 0.5f, 0.5f, 1.0f),
+			0.82f,
+			0.0f) != nullptr;
 	}
 
 	bool EnsureRollingBomberLegMetalMaterial()
@@ -9484,6 +9496,13 @@ public:
 			[]()
 			{
 				return TunaSweeperEditorSetup::EnsureEnemyVisualMaterialAssets();
+			});
+
+		FTunaSweeperEditorRunOnce::Run(
+			TunaSweeperEditorSetup::RollingBomberBodyMaterialTaskId,
+			[]()
+			{
+				return TunaSweeperEditorSetup::EnsureRollingBomberBodyGrayMaterial();
 			});
 
 		FTunaSweeperEditorRunOnce::Run(

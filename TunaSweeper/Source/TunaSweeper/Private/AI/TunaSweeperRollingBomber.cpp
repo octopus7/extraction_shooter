@@ -24,6 +24,7 @@ namespace TunaSweeperRollingBomber
 	const TCHAR* SphereMeshPath = TEXT("/Engine/BasicShapes/Sphere.Sphere");
 	const TCHAR* CylinderMeshPath = TEXT("/Engine/BasicShapes/Cylinder.Cylinder");
 	const TCHAR* CubeMeshPath = TEXT("/Engine/BasicShapes/Cube.Cube");
+	const TCHAR* BodyMaterialPath = TEXT("/Game/Characters/Enemy/M_RollingBomberBodyGray.M_RollingBomberBodyGray");
 	const TCHAR* LegMetalMaterialPath = TEXT("/Game/Characters/Enemy/M_RollingBomberLegMetal.M_RollingBomberLegMetal");
 	const TCHAR* LegMetalFallbackMaterialPath = TEXT("/Game/Interaction/M_Container_Metal.M_Container_Metal");
 	const TCHAR* RollChargeCylinderMeshPath = TEXT("/Game/Effects/SM_RollingBomberChargeCylinder_Open.SM_RollingBomberChargeCylinder_Open");
@@ -41,7 +42,7 @@ ATunaSweeperRollingBomber::ATunaSweeperRollingBomber()
 	AIControllerClass = nullptr;
 	AutoPossessAI = EAutoPossessAI::Disabled;
 
-	GetCapsuleComponent()->InitCapsuleSize(10.5f, 14.0f);
+	GetCapsuleComponent()->InitCapsuleSize(21.0f, 28.0f);
 	GetCharacterMovement()->MaxWalkSpeed = ProjectileModeWalkSpeed;
 	GetCharacterMovement()->bRunPhysicsWithNoController = true;
 	GetCharacterMovement()->bOrientRotationToMovement = false;
@@ -58,13 +59,15 @@ ATunaSweeperRollingBomber::ATunaSweeperRollingBomber()
 	ProjectileHurtbox->SetGenerateOverlapEvents(false);
 	ProjectileHurtbox->SetCanEverAffectNavigation(false);
 
-	MaxHealth = 45.0f;
+	MaxHealth = 20.0f;
 	ExperienceValue = 35;
 	MovementSpeed = ProjectileModeWalkSpeed;
 	MovementSpeedRandomOffset = FVector2D::ZeroVector;
-	ProjectileSpawnOffset = FVector(14.5f, 0.0f, 10.5f);
+	ProjectileSpawnOffset = FVector(29.0f, 0.0f, 21.0f);
 	ProjectileDamage = 1.0f;
 	ExplosionDamageType = UDamageType::StaticClass();
+	BodyMaterial = TSoftObjectPtr<UMaterialInterface>(
+		FSoftObjectPath(TunaSweeperRollingBomber::BodyMaterialPath));
 	EyeMaterial = TSoftObjectPtr<UMaterialInterface>(
 		FSoftObjectPath(TEXT("/Engine/BasicShapes/BasicShapeMaterial.BasicShapeMaterial")));
 	LegMetalMaterial = TSoftObjectPtr<UMaterialInterface>(
@@ -94,8 +97,8 @@ ATunaSweeperRollingBomber::ATunaSweeperRollingBomber()
 	if (VisualMesh)
 	{
 		VisualMesh->SetupAttachment(BodyVisualPivot);
-		VisualMesh->SetRelativeLocation(FVector(0.0f, 0.0f, 3.0f));
-		VisualMesh->SetRelativeScale3D(FVector(0.2f));
+		VisualMesh->SetRelativeLocation(FVector(0.0f, 0.0f, 6.0f));
+		VisualMesh->SetRelativeScale3D(FVector(0.4f));
 		VisualMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 		static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereMesh(TunaSweeperRollingBomber::SphereMeshPath);
@@ -122,11 +125,11 @@ ATunaSweeperRollingBomber::ATunaSweeperRollingBomber()
 
 	LeftKneeIKTarget = CreateDefaultSubobject<USceneComponent>(TEXT("LeftKneeIKTarget"));
 	LeftKneeIKTarget->SetupAttachment(RootComponent);
-	LeftKneeIKTarget->SetRelativeLocation(FVector(3.0f, -10.5f, -1.5f));
+	LeftKneeIKTarget->SetRelativeLocation(FVector(6.0f, -21.0f, -3.0f));
 
 	RightKneeIKTarget = CreateDefaultSubobject<USceneComponent>(TEXT("RightKneeIKTarget"));
 	RightKneeIKTarget->SetupAttachment(RootComponent);
-	RightKneeIKTarget->SetRelativeLocation(FVector(3.0f, 10.5f, -1.5f));
+	RightKneeIKTarget->SetRelativeLocation(FVector(6.0f, 21.0f, -3.0f));
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> LegSegmentMesh(TunaSweeperRollingBomber::CylinderMeshPath);
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> FootPadMesh(TunaSweeperRollingBomber::CubeMeshPath);
@@ -182,7 +185,7 @@ ATunaSweeperRollingBomber::ATunaSweeperRollingBomber()
 
 	EyeLight = CreateDefaultSubobject<UPointLightComponent>(TEXT("EyeLight"));
 	EyeLight->SetupAttachment(BodyVisualPivot);
-	EyeLight->SetRelativeLocation(EyeLocalOffset + FVector(4.5f, 0.0f, 0.0f));
+	EyeLight->SetRelativeLocation(EyeLocalOffset + FVector(9.0f, 0.0f, 0.0f));
 	EyeLight->SetCastShadows(false);
 	EyeLight->SetLightColor(NormalEyeColor);
 	EyeLight->SetIntensity(NormalEyeLightIntensity);
@@ -338,10 +341,14 @@ void ATunaSweeperRollingBomber::ApplyRollingBomberVisualDefaults()
 			VisualMesh->SetStaticMesh(SphereMesh);
 		}
 
-		VisualMesh->SetRelativeLocation(FVector(0.0f, 0.0f, 3.0f));
-		VisualMesh->SetRelativeScale3D(FVector(0.2f));
+		VisualMesh->SetRelativeLocation(FVector(0.0f, 0.0f, 6.0f));
+		VisualMesh->SetRelativeScale3D(FVector(0.4f));
 		VisualMesh->SetRelativeRotation(FRotator::ZeroRotator);
 		VisualMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		if (UMaterialInterface* LoadedBodyMaterial = BodyMaterial.LoadSynchronous())
+		{
+			VisualMesh->SetMaterial(0, LoadedBodyMaterial);
+		}
 		BodyVisualBaseRelativeRotation = VisualMesh->GetRelativeRotation();
 	}
 
@@ -1213,6 +1220,7 @@ void ATunaSweeperRollingBomber::SpawnSelfDestructBurst()
 	if (BurstActor)
 	{
 		BurstActor->SetBurstColor(SelfDestructBurstColor);
+		BurstActor->SetActorScale3D(FVector(FMath::Max(0.0f, SelfDestructBurstVisualScale)));
 	}
 }
 
@@ -1418,7 +1426,7 @@ void ATunaSweeperRollingBomber::ApplyEyeVisualDefaults()
 
 	if (EyeLight)
 	{
-		EyeLight->SetRelativeLocation(EyeLocalOffset + FVector(4.5f, 0.0f, 0.0f));
+		EyeLight->SetRelativeLocation(EyeLocalOffset + FVector(9.0f, 0.0f, 0.0f));
 		EyeLight->SetCastShadows(false);
 		EyeLight->SetVisibility(true);
 	}
@@ -1712,10 +1720,10 @@ void ATunaSweeperRollingBomber::UpdateFootSceneComponents()
 void ATunaSweeperRollingBomber::UpdateFoldedLegSceneComponents()
 {
 	const FTransform ActorTransform = GetActorTransform();
-	const FVector LeftFoldedFootLocation = ActorTransform.TransformPosition(FVector(2.0f, -4.25f, -2.0f));
-	const FVector RightFoldedFootLocation = ActorTransform.TransformPosition(FVector(2.0f, 4.25f, -2.0f));
-	const FVector LeftFoldedKneeLocation = ActorTransform.TransformPosition(FVector(0.0f, -6.0f, 2.5f));
-	const FVector RightFoldedKneeLocation = ActorTransform.TransformPosition(FVector(0.0f, 6.0f, 2.5f));
+	const FVector LeftFoldedFootLocation = ActorTransform.TransformPosition(FVector(4.0f, -8.5f, -4.0f));
+	const FVector RightFoldedFootLocation = ActorTransform.TransformPosition(FVector(4.0f, 8.5f, -4.0f));
+	const FVector LeftFoldedKneeLocation = ActorTransform.TransformPosition(FVector(0.0f, -12.0f, 5.0f));
+	const FVector RightFoldedKneeLocation = ActorTransform.TransformPosition(FVector(0.0f, 12.0f, 5.0f));
 
 	LeftFootRuntime.EffectorWorldLocation = LeftFoldedFootLocation;
 	LeftFootRuntime.PlannedFootWorldLocation = LeftFoldedFootLocation;

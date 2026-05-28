@@ -2458,3 +2458,12 @@
 - 2번 총기나 V 근접 무기를 고른 상태라면 레이드 이동 후에도 선택을 유지할 것.
 - 레이드에서 벙커로 생환할 때도 같은 방식으로 활성 무기 선택을 유지할 것.
 - 게임을 완전히 재실행해서 타이틀에서 들어온 경우에는 세이브에서 유지하지 말고 기존처럼 1번 선택으로 시작할 것.
+## 2026-05-28 18:24:03 (elapsed: 00:03:27)
+
+- Scale `RollingBomber` up by 2x and review related body visuals, collision, roll contact, legs, eye placement, charge effect, projectile spawn offset, and self-destruct burst visual scale.
+## 2026-05-28 18:29:53 (elapsed: 00:02:57)
+
+- Change the `RollingBomber` body from overexposed white to a dedicated 50% gray material.
+## 2026-05-28 18:41:14 (elapsed: 00:00:20)
+
+- Set `RollingBomber` max health to 20 so it dies from 2 player rifle projectile hits at 10 damage each.

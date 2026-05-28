@@ -279,7 +279,7 @@ protected:
 	float RollMaxDistance = 950.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|Roll", meta = (ClampMin = "0.0", UIMin = "0.0"))
-	float RollContactRadius = 10.5f;
+	float RollContactRadius = 21.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|Roll", meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float RollChargeSpinStartDegreesPerSecond = 540.0f;
@@ -288,7 +288,7 @@ protected:
 	float RollChargeSpinEndDegreesPerSecond = 2160.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|Roll", meta = (ClampMin = "0.0", UIMin = "0.0"))
-	float RollLaunchVisualHopHeightCm = 7.0f;
+	float RollLaunchVisualHopHeightCm = 14.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|Roll", meta = (ClampMin = "0.01", UIMin = "0.01"))
 	float RollLaunchVisualHopDurationSeconds = 0.18f;
@@ -300,10 +300,10 @@ protected:
 	TSoftObjectPtr<UMaterialInterface> RollChargeCylinderMaterial;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|Roll")
-	FVector RollChargeCylinderLocalOffset = FVector(0.0f, 0.0f, 3.0f);
+	FVector RollChargeCylinderLocalOffset = FVector(0.0f, 0.0f, 6.0f);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|Roll")
-	FVector RollChargeCylinderLocalScale = FVector(0.46f, 0.36f, 0.36f);
+	FVector RollChargeCylinderLocalScale = FVector(0.92f, 0.72f, 0.72f);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|Roll", meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float RollChargeCylinderMinOpacity = 0.22f;
@@ -329,71 +329,74 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|Self Destruct")
 	FLinearColor SelfDestructBurstColor = FLinearColor(1.0f, 0.03f, 0.0f, 1.0f);
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|IK")
-	FVector LeftFootHomeLocalOffset = FVector(-2.0f, -7.5f, -12.5f);
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|Self Destruct", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float SelfDestructBurstVisualScale = 2.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|IK")
-	FVector RightFootHomeLocalOffset = FVector(-2.0f, 7.5f, -12.5f);
+	FVector LeftFootHomeLocalOffset = FVector(-4.0f, -15.0f, -25.0f);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|IK")
-	FVector LeftHipLocalOffset = FVector(-1.0f, -5.5f, -4.5f);
+	FVector RightFootHomeLocalOffset = FVector(-4.0f, 15.0f, -25.0f);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|IK")
-	FVector RightHipLocalOffset = FVector(-1.0f, 5.5f, -4.5f);
+	FVector LeftHipLocalOffset = FVector(-2.0f, -11.0f, -9.0f);
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|IK")
+	FVector RightHipLocalOffset = FVector(-2.0f, 11.0f, -9.0f);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|IK", meta = (ClampMin = "0.0", UIMin = "0.0"))
-	float FootStepTriggerDistance = 3.0f;
+	float FootStepTriggerDistance = 6.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|IK", meta = (ClampMin = "0.01", UIMin = "0.01"))
 	float FootStepDurationSeconds = 0.16f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|IK", meta = (ClampMin = "0.0", UIMin = "0.0"))
-	float FootStepHeight = 2.0f;
+	float FootStepHeight = 4.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|IK")
-	float FootMoveLeadDistance = 2.0f;
+	float FootMoveLeadDistance = 4.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|IK")
-	float KneeForwardOffset = 3.0f;
+	float KneeForwardOffset = 6.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|IK")
-	float KneeSideOffset = 2.0f;
+	float KneeSideOffset = 4.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|IK")
-	float KneeHeightOffset = 2.0f;
+	float KneeHeightOffset = 4.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|IK", meta = (ClampMin = "0.1", UIMin = "0.1"))
-	float UpperLegLengthCm = 6.0f;
+	float UpperLegLengthCm = 12.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|IK", meta = (ClampMin = "0.1", UIMin = "0.1"))
-	float LowerLegLengthCm = 6.0f;
+	float LowerLegLengthCm = 12.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|IK", meta = (ClampMin = "0.0", UIMin = "0.0"))
-	float LegReachSlackCm = 0.25f;
+	float LegReachSlackCm = 0.5f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|IK")
-	float FootGroundTraceUp = 40.0f;
+	float FootGroundTraceUp = 80.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|IK")
-	float FootGroundTraceDown = 70.0f;
+	float FootGroundTraceDown = 140.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|IK")
-	float FootGroundClearance = 0.75f;
+	float FootGroundClearance = 1.5f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|Leg Mesh", meta = (ClampMin = "0.1", UIMin = "0.1"))
-	float UpperLegThicknessCm = 3.45f;
+	float UpperLegThicknessCm = 6.9f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|Leg Mesh", meta = (ClampMin = "0.1", UIMin = "0.1"))
-	float LowerLegThicknessCm = 2.85f;
+	float LowerLegThicknessCm = 5.7f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|Leg Mesh", meta = (ClampMin = "0.1", UIMin = "0.1"))
-	float FootVisualLengthCm = 5.0f;
+	float FootVisualLengthCm = 10.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|Leg Mesh", meta = (ClampMin = "0.1", UIMin = "0.1"))
-	float FootVisualWidthCm = 2.8f;
+	float FootVisualWidthCm = 5.6f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|Leg Mesh", meta = (ClampMin = "0.1", UIMin = "0.1"))
-	float FootVisualHeightCm = 1.1f;
+	float FootVisualHeightCm = 2.2f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|Leg Mesh")
 	TSoftObjectPtr<UMaterialInterface> LegMetalMaterial;
@@ -402,7 +405,7 @@ protected:
 	bool bUseBodyRollVisualRotation = true;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|Visual", meta = (ClampMin = "1.0", UIMin = "1.0"))
-	float BodyVisualRadiusCm = 10.5f;
+	float BodyVisualRadiusCm = 21.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|Visual", meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float BodyRollWobbleDegrees = 4.0f;
@@ -411,10 +414,10 @@ protected:
 	TSoftObjectPtr<UMaterialInterface> EyeMaterial;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|Eye")
-	FVector EyeLocalOffset = FVector(10.75f, 0.0f, 4.5f);
+	FVector EyeLocalOffset = FVector(21.5f, 0.0f, 9.0f);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|Eye")
-	FVector EyeLocalScale = FVector(0.0275f, 0.06f, 0.06f);
+	FVector EyeLocalScale = FVector(0.055f, 0.12f, 0.12f);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|Eye")
 	FLinearColor NormalEyeColor = FLinearColor(0.05f, 0.45f, 1.0f, 1.0f);
@@ -435,10 +438,10 @@ protected:
 	float ChargeWarningEyeLightIntensity = 1400.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|Eye", meta = (ClampMin = "0.0", UIMin = "0.0"))
-	float NormalEyeLightRadius = 30.0f;
+	float NormalEyeLightRadius = 60.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|Eye", meta = (ClampMin = "0.0", UIMin = "0.0"))
-	float ChargeWarningEyeLightRadius = 80.0f;
+	float ChargeWarningEyeLightRadius = 160.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|Eye", meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float EyeWarningInterpSpeed = 10.0f;
