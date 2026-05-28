@@ -15,10 +15,14 @@ public class TunaSweeperEditor : ModuleRules
 			"InputCore",
 			"EnhancedInput",
 			"ImageCore",
+			"Json",
+			"JsonUtilities",
 			"UnrealEd",
 			"AssetTools",
 			"AssetRegistry",
+			"AudioEditor",
 			"KismetCompiler",
+			"LevelEditor",
 			"BlueprintGraph",
 			"UMG",
 			"UMGEditor",
@@ -27,6 +31,7 @@ public class TunaSweeperEditor : ModuleRules
 			"Slate",
 			"SlateCore",
 			"StaticMeshDescription",
+			"ToolMenus",
 			"TunaSweeper"
 		});
 	}

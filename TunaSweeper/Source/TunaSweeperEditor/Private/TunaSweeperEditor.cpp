@@ -85,6 +85,7 @@
 #include "Sound/SoundWave.h"
 #include "StaticMeshAttributes.h"
 #include "TunaSweeperExperimentalVegetation.h"
+#include "TunaSweeperFMSoundTool.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
 #include "TunaSweeperEditorRunOnce.h"
 #include "UI/TunaSweeperInteractionMarkerWidget.h"
@@ -9420,6 +9421,9 @@ public:
 			}
 		}
 
+		FMSoundTool = MakeUnique<FTunaSweeperFMSoundTool>();
+		FMSoundTool->Startup();
+
 		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperCommonHudSetupQuit")))
 		{
 			FTunaSweeperEditorRunOnce::Run(
@@ -9696,6 +9700,18 @@ public:
 		TunaSweeperEditorSetup::ScheduleFirstOutingQuestSetup();
 		TunaSweeperEditorSetup::ScheduleSelfDestructInteractionSetup();
 	}
+
+	virtual void ShutdownModule() override
+	{
+		if (FMSoundTool)
+		{
+			FMSoundTool->Shutdown();
+			FMSoundTool.Reset();
+		}
+	}
+
+private:
+	TUniquePtr<FTunaSweeperFMSoundTool> FMSoundTool;
 };
 
 IMPLEMENT_MODULE(FTunaSweeperEditorModule, TunaSweeperEditor)
