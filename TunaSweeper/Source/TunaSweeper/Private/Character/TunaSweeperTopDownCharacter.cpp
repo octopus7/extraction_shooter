@@ -203,7 +203,7 @@ void ATunaSweeperTopDownCharacter::BeginPlay()
 		HandleVitalsChanged(VitalsComponent->GetVitalsState());
 	}
 
-	if (!SelectWeaponSlot(1) && !SelectWeaponSlot(2))
+	if (!RestoreRuntimeSelectedWeaponSelection() && !SelectWeaponSlot(1) && !SelectWeaponSlot(2))
 	{
 		SelectMeleeWeapon();
 	}
@@ -907,6 +907,7 @@ bool ATunaSweeperTopDownCharacter::SelectWeaponSlot(int32 SlotNumber)
 
 	SelectedWeaponSlotNumber = SlotNumber;
 	bMeleeWeaponSelected = false;
+	TunaGameInstance->SetRuntimeSelectedWeaponSlotNumber(SlotNumber);
 	EnsureEquippedWeaponActor();
 	return true;
 }
@@ -929,8 +930,32 @@ bool ATunaSweeperTopDownCharacter::SelectMeleeWeapon()
 
 	SelectedWeaponSlotNumber = 0;
 	bMeleeWeaponSelected = true;
+	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
+	{
+		TunaGameInstance->SetRuntimeSelectedMeleeWeapon();
+	}
 	EnsureEquippedWeaponActor();
 	return true;
+}
+
+bool ATunaSweeperTopDownCharacter::RestoreRuntimeSelectedWeaponSelection()
+{
+	UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+	if (!TunaGameInstance)
+	{
+		return false;
+	}
+
+	bool bRestoreMeleeWeapon = false;
+	int32 RestoreWeaponSlotNumber = 1;
+	if (!TunaGameInstance->TryGetRuntimeSelectedWeaponSelection(bRestoreMeleeWeapon, RestoreWeaponSlotNumber))
+	{
+		return false;
+	}
+
+	return bRestoreMeleeWeapon
+		? SelectMeleeWeapon()
+		: SelectWeaponSlot(RestoreWeaponSlotNumber);
 }
 
 void ATunaSweeperTopDownCharacter::StartMeleeAttack()

@@ -1105,6 +1105,36 @@ bool UTunaSweeperGameInstance::TryGetEquipmentMeleeSlotItem(
 		IsMeleeItemDefinition(OutItemDefinition);
 }
 
+void UTunaSweeperGameInstance::SetRuntimeSelectedWeaponSlotNumber(int32 WeaponSlotNumber)
+{
+	RuntimeSelectedWeaponSlotNumber = FMath::Clamp(WeaponSlotNumber, 1, 2);
+	bRuntimeSelectedMeleeWeapon = false;
+	bHasRuntimeSelectedWeaponSelection = true;
+}
+
+void UTunaSweeperGameInstance::SetRuntimeSelectedMeleeWeapon()
+{
+	RuntimeSelectedWeaponSlotNumber = 0;
+	bRuntimeSelectedMeleeWeapon = true;
+	bHasRuntimeSelectedWeaponSelection = true;
+}
+
+bool UTunaSweeperGameInstance::TryGetRuntimeSelectedWeaponSelection(
+	bool& bOutMeleeWeaponSelected,
+	int32& OutWeaponSlotNumber) const
+{
+	if (!bHasRuntimeSelectedWeaponSelection)
+	{
+		bOutMeleeWeaponSelected = false;
+		OutWeaponSlotNumber = 1;
+		return false;
+	}
+
+	bOutMeleeWeaponSelected = bRuntimeSelectedMeleeWeapon;
+	OutWeaponSlotNumber = RuntimeSelectedWeaponSlotNumber;
+	return true;
+}
+
 int32 UTunaSweeperGameInstance::GetWeaponLoadedAmmoCount(int32 WeaponSlotNumber)
 {
 	FTunaSweeperItemInstance WeaponInstance;

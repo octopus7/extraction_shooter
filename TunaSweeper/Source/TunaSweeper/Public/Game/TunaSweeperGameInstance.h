@@ -351,6 +351,9 @@ public:
 	bool TryGetEquipmentMeleeSlotItem(
 		FTunaSweeperItemInstance& OutItemInstance,
 		FTunaSweeperItemDefinition& OutItemDefinition);
+	void SetRuntimeSelectedWeaponSlotNumber(int32 WeaponSlotNumber);
+	void SetRuntimeSelectedMeleeWeapon();
+	bool TryGetRuntimeSelectedWeaponSelection(bool& bOutMeleeWeaponSelected, int32& OutWeaponSlotNumber) const;
 	int32 GetWeaponLoadedAmmoCount(int32 WeaponSlotNumber);
 	int32 GetWeaponMagazineCapacity(int32 WeaponSlotNumber);
 	int32 GetWeaponInventoryAmmoCount(int32 WeaponSlotNumber);
@@ -571,6 +574,15 @@ private:
 
 	UPROPERTY(Transient)
 	TArray<FTunaSweeperInventorySlot> UsableQuickSlots;
+
+	UPROPERTY(Transient)
+	int32 RuntimeSelectedWeaponSlotNumber = 1;
+
+	UPROPERTY(Transient)
+	bool bRuntimeSelectedMeleeWeapon = false;
+
+	UPROPERTY(Transient)
+	bool bHasRuntimeSelectedWeaponSelection = false;
 
 	UPROPERTY(Transient)
 	TArray<FTunaSweeperInventorySlot> ActiveLootContainerSlots;

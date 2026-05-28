@@ -405,6 +405,7 @@ private:
 	bool IsGameplayActionInputLocked() const;
 	bool CanUseSelectedWeaponSlot();
 	bool CanUseSelectedMeleeWeapon();
+	bool RestoreRuntimeSelectedWeaponSelection();
 	void StartMeleeAttack();
 	void UpdateMeleeSwing(float DeltaSeconds);
 	void CancelMeleeSwing();
