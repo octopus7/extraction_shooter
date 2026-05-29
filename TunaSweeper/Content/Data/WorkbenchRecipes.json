@@ -1,0 +1,34 @@
+[
+  {
+    "recipe_id": "recipe.large_water_bottle",
+    "workbench_id": 1,
+    "name_string_key": "item.large_water_bottle",
+    "output_item_id": 3005,
+    "output_quantity": 1,
+    "auto_unlocked": true,
+    "ingredients": [
+      {
+        "item_id": 3002,
+        "quantity": 2
+      }
+    ]
+  },
+  {
+    "recipe_id": "recipe.king_water_bottle",
+    "workbench_id": 1,
+    "name_string_key": "item.king_water_bottle",
+    "output_item_id": 3006,
+    "output_quantity": 1,
+    "auto_unlocked": false,
+    "ingredients": [
+      {
+        "item_id": 3002,
+        "quantity": 1
+      },
+      {
+        "item_id": 3005,
+        "quantity": 1
+      }
+    ]
+  }
+]
