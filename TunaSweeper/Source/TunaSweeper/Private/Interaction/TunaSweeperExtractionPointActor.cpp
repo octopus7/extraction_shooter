@@ -4,7 +4,6 @@
 #include "Components/SceneComponent.h"
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
-#include "Components/WidgetComponent.h"
 #include "Engine/StaticMesh.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "GameFramework/Controller.h"
@@ -15,11 +14,12 @@
 #include "Materials/MaterialInterface.h"
 #include "NiagaraComponent.h"
 #include "NiagaraSystem.h"
+#include "Player/TunaSweeperPlayerController.h"
 #include "ProceduralMeshComponent.h"
 #include "Subsystem/TunaSweeperLevelTransitionSubsystem.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
 #include "Subsystem/TunaSweeperRaidExperienceReturnSubsystem.h"
-#include "UI/TunaSweeperExtractionProgressWidget.h"
+#include "UI/TunaSweeperGameHudWidget.h"
 #include "UI/TunaSweeperLevelTransitionWidget.h"
 #include "UObject/ConstructorHelpers.h"
 
@@ -95,16 +95,6 @@ ATunaSweeperExtractionPointActor::ATunaSweeperExtractionPointActor()
 	ExtractionEffectComponent->SetRelativeRotation(ExtractionNiagaraRelativeRotation);
 	ExtractionEffectComponent->SetRelativeScale3D(ExtractionNiagaraRelativeScale);
 
-	ProgressWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("ExtractionProgressWidget"));
-	ProgressWidgetComponent->SetupAttachment(RootComponent);
-	ProgressWidgetComponent->SetWidgetSpace(EWidgetSpace::Screen);
-	ProgressWidgetComponent->SetWidgetClass(UTunaSweeperExtractionProgressWidget::StaticClass());
-	ProgressWidgetComponent->SetDrawSize(ProgressWidgetDrawSize);
-	ProgressWidgetComponent->SetPivot(FVector2D(0.5f, 0.5f));
-	ProgressWidgetComponent->SetRelativeLocation(FVector(0.0f, 0.0f, ProgressWidgetHeightOffset));
-	ProgressWidgetComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	ProgressWidgetComponent->SetGenerateOverlapEvents(false);
-
 	RadiusVisualMaterial = TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath(ExtractionVisualMaterialPath));
 	SmokeSignalSpriteMaterial = TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath(SmokeSignalMaterialPath));
 	TransitionWidgetClass = TSoftClassPtr<UTunaSweeperLevelTransitionWidget>(FSoftObjectPath(LevelTransitionWidgetClassPath));
@@ -159,7 +149,6 @@ void ATunaSweeperExtractionPointActor::OnConstruction(const FTransform& Transfor
 
 	RefreshExtractionComponents();
 	ApplySmokeSignalMaterials();
-	UpdateProgressWidget();
 	UpdateFallbackParticleEffect(0.0f);
 	UpdateSmokeSignalEffect(0.0f);
 }
@@ -171,8 +160,16 @@ void ATunaSweeperExtractionPointActor::BeginPlay()
 	RefreshExtractionComponents();
 	ApplyFallbackParticleMaterials();
 	ApplySmokeSignalMaterials();
-	UpdateProgressWidget();
+	UpdateHudProgressWidget();
 	UpdateSmokeSignalEffect(0.0f);
+}
+
+void ATunaSweeperExtractionPointActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	CurrentHoldSeconds = 0.0f;
+	UpdateHudProgressWidget();
+
+	Super::EndPlay(EndPlayReason);
 }
 
 void ATunaSweeperExtractionPointActor::Tick(float DeltaSeconds)
@@ -189,7 +186,6 @@ void ATunaSweeperExtractionPointActor::ConfigureExtractionPointDefaults(
 	float InExtractionRadius,
 	float InExtractionHoldSeconds,
 	float InRadiusRingWidth,
-	TSoftClassPtr<UTunaSweeperExtractionProgressWidget> InProgressWidgetClass,
 	TSoftObjectPtr<UNiagaraSystem> InExtractionParticleSystem,
 	TSoftObjectPtr<UMaterialInterface> InRadiusVisualMaterial,
 	TSoftObjectPtr<UMediaSource> InTransitionMediaSource,
@@ -201,7 +197,6 @@ void ATunaSweeperExtractionPointActor::ConfigureExtractionPointDefaults(
 	ExtractionRadius = FMath::Max(1.0f, InExtractionRadius);
 	ExtractionHoldSeconds = FMath::Max(0.1f, InExtractionHoldSeconds);
 	RadiusRingWidth = FMath::Max(1.0f, InRadiusRingWidth);
-	ProgressWidgetClass = InProgressWidgetClass;
 	ExtractionParticleSystem = InExtractionParticleSystem;
 	if (!InRadiusVisualMaterial.IsNull())
 	{
@@ -214,7 +209,7 @@ void ATunaSweeperExtractionPointActor::ConfigureExtractionPointDefaults(
 	}
 	TransitionMessage = InTransitionMessage;
 	RefreshExtractionComponents();
-	UpdateProgressWidget();
+	UpdateHudProgressWidget();
 }
 
 void ATunaSweeperExtractionPointActor::SetSmokeSignalWind(FVector2D InWindDirection, float InWindSpeedCmPerSecond)
@@ -245,10 +240,8 @@ bool ATunaSweeperExtractionPointActor::ExtractPawn(APawn* InstigatorPawn)
 
 	bExtractionTriggered = true;
 	StopPawnForExtraction(InstigatorPawn);
-	if (ProgressWidgetComponent)
-	{
-		ProgressWidgetComponent->SetVisibility(false);
-	}
+	CurrentHoldSeconds = 0.0f;
+	UpdateHudProgressWidget();
 
 	const FName SourceLevelName = GetWorld() ? FName(*GetWorld()->GetMapName()) : NAME_None;
 	UObject* WorldContextObject = InstigatorPawn ? Cast<UObject>(InstigatorPawn) : Cast<UObject>(this);
@@ -320,7 +313,6 @@ void ATunaSweeperExtractionPointActor::RefreshExtractionComponents()
 	RebuildRadiusVisualMesh();
 	ApplyRadiusVisualMaterial();
 	RefreshEffectComponent();
-	RefreshProgressWidgetComponent();
 }
 
 void ATunaSweeperExtractionPointActor::RebuildRadiusVisualMesh()
@@ -462,6 +454,35 @@ void ATunaSweeperExtractionPointActor::ApplyExtractionNiagaraParameters()
 	const FQuat NiagaraRotation = ExtractionNiagaraRelativeRotation.Quaternion();
 	const FVector NiagaraUpAxis = NiagaraRotation.RotateVector(FVector::UpVector).GetSafeNormal();
 	const FVector NiagaraForwardAxis = NiagaraRotation.RotateVector(FVector::ForwardVector).GetSafeNormal();
+	const FVector FlatSourceScale(
+		FMath::Max(0.05f, ExtractionNiagaraSourceNonUniformScale.X),
+		FMath::Max(0.05f, ExtractionNiagaraSourceNonUniformScale.Y),
+		FMath::Max(0.01f, ExtractionNiagaraSourceNonUniformScale.Z));
+	const FVector SourceVelocity(
+		WindVelocity.X * 0.55f,
+		WindVelocity.Y * 0.55f,
+		FMath::Max(0.0f, ExtractionNiagaraSourceUpVelocity));
+	const FVector WorldSpaceSize(
+		FMath::Max(220.0f, SmokeSignalTopDiameter * 1.55f),
+		FMath::Max(180.0f, SmokeSignalTopDiameter * 1.15f),
+		FMath::Max(260.0f, SmokeSignalColumnHeight + 100.0f));
+
+	auto SetFluidEmitterVec3 = [this](const TCHAR* ParameterName, const FVector& Value)
+	{
+		ExtractionEffectComponent->SetVariableVec3(FName(ParameterName), Value);
+	};
+	auto SetFluidEmitterFloat = [this](const TCHAR* ParameterName, float Value)
+	{
+		ExtractionEffectComponent->SetVariableFloat(FName(ParameterName), Value);
+	};
+	auto SetFluidEmitterBool = [this](const TCHAR* ParameterName, bool bValue)
+	{
+		ExtractionEffectComponent->SetVariableBool(FName(ParameterName), bValue);
+	};
+	auto SetFluidEmitterColor = [this](const TCHAR* ParameterName, const FLinearColor& Value)
+	{
+		ExtractionEffectComponent->SetVariableLinearColor(FName(ParameterName), Value);
+	};
 
 	ExtractionEffectComponent->SetVariableLinearColor(FName(TEXT("User.Color")), SmokeSignalBaseColor);
 	ExtractionEffectComponent->SetVariableLinearColor(FName(TEXT("User.BaseColor")), SmokeSignalBaseColor);
@@ -472,6 +493,9 @@ void ATunaSweeperExtractionPointActor::ApplyExtractionNiagaraParameters()
 	ExtractionEffectComponent->SetVariableLinearColor(FName(TEXT("User.TopColor")), SmokeSignalTopColor);
 	ExtractionEffectComponent->SetVariableLinearColor(FName(TEXT("User.Albedo")), SmokeSignalTopColor);
 	ExtractionEffectComponent->SetVariableLinearColor(FName(TEXT("User.TintColor")), SmokeSignalTopColor);
+	ExtractionEffectComponent->SetVariableBool(FName(TEXT("User.DrawBounds")), !bHideExtractionNiagaraDebugBounds);
+	ExtractionEffectComponent->SetVariableVec3(FName(TEXT("User.WorldSpaceSize")), WorldSpaceSize);
+	ExtractionEffectComponent->SetVariableFloat(FName(TEXT("User.ResolutionMaxAxis")), 96.0f);
 	ExtractionEffectComponent->SetVariableVec3(FName(TEXT("User.Wind")), WindVelocity);
 	ExtractionEffectComponent->SetVariableVec3(FName(TEXT("User.WindVelocity")), WindVelocity);
 	ExtractionEffectComponent->SetVariableVec3(FName(TEXT("User.Wind Direction")), FVector(WindDirection.X, WindDirection.Y, 0.0f));
@@ -490,31 +514,27 @@ void ATunaSweeperExtractionPointActor::ApplyExtractionNiagaraParameters()
 	ExtractionEffectComponent->SetVariableFloat(FName(TEXT("User.DensityScale")), 1.35f);
 	ExtractionEffectComponent->SetVariableFloat(FName(TEXT("User.Temperature")), 0.18f);
 	ExtractionEffectComponent->SetVariableFloat(FName(TEXT("User.Buoyancy")), 1.1f);
-}
 
-void ATunaSweeperExtractionPointActor::RefreshProgressWidgetComponent()
-{
-	if (!ProgressWidgetComponent)
-	{
-		return;
-	}
-
-	TSubclassOf<UTunaSweeperExtractionProgressWidget> LoadedWidgetClass = ProgressWidgetClass.IsNull()
-		? UTunaSweeperExtractionProgressWidget::StaticClass()
-		: ProgressWidgetClass.LoadSynchronous();
-	if (!LoadedWidgetClass)
-	{
-		LoadedWidgetClass = UTunaSweeperExtractionProgressWidget::StaticClass();
-	}
-
-	ProgressWidgetComponent->SetWidgetClass(LoadedWidgetClass);
-	ProgressWidgetComponent->SetWidgetSpace(EWidgetSpace::Screen);
-	ProgressWidgetComponent->SetDrawSize(ProgressWidgetDrawSize);
-	ProgressWidgetComponent->SetPivot(FVector2D(0.5f, 0.5f));
-	ProgressWidgetComponent->SetRelativeLocation(FVector(0.0f, 0.0f, ProgressWidgetHeightOffset));
-	ProgressWidgetComponent->SetVisibility(bShowProgressWidget && !bExtractionTriggered && CurrentHoldSeconds > 0.0f);
-	ProgressWidgetComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	ProgressWidgetComponent->SetGenerateOverlapEvents(false);
+	SetFluidEmitterBool(TEXT("Grid3D_Gas_Master_Emitter.Debug Draw"), false);
+	SetFluidEmitterBool(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_InitializeEmitter.Debug Collision Volume"), false);
+	SetFluidEmitterBool(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_DebugDisplay.Debug Collision Volume"), false);
+	SetFluidEmitterVec3(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_InitializeEmitter.World Size"), WorldSpaceSize);
+	SetFluidEmitterBool(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_SphereSource.Enable"), true);
+	SetFluidEmitterVec3(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_SphereSource.Emit Position"), ExtractionNiagaraSourceOffset);
+	SetFluidEmitterVec3(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_SphereSource.Non Uniform Scale"), FlatSourceScale);
+	SetFluidEmitterVec3(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_SphereSource.Velocity"), SourceVelocity);
+	SetFluidEmitterFloat(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_SphereSource.Emit Radius"), SourceRadius);
+	SetFluidEmitterFloat(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_SphereSource.Density"), 1.35f);
+	SetFluidEmitterFloat(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_SphereSource.Temperature"), 0.18f);
+	SetFluidEmitterColor(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_SphereSource.Color"), SmokeSignalBaseColor);
+	SetFluidEmitterFloat(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_Buoyancy.TemperatureBuoyancy"), 1.1f);
+	SetFluidEmitterFloat(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_Buoyancy.DensityBuoyancy"), 0.05f);
+	SetFluidEmitterColor(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_MaterialControls.Smoke Color"), SmokeSignalTopColor);
+	SetFluidEmitterVec3(TEXT("Emitter.Grid3D_Gas_SphereSource.Emit Position"), ExtractionNiagaraSourceOffset);
+	SetFluidEmitterVec3(TEXT("Emitter.Grid3D_Gas_SphereSource.Non Uniform Scale"), FlatSourceScale);
+	SetFluidEmitterVec3(TEXT("Emitter.Grid3D_Gas_SphereSource.Velocity"), SourceVelocity);
+	SetFluidEmitterFloat(TEXT("Emitter.Grid3D_Gas_SphereSource.Emit Radius"), SourceRadius);
+	SetFluidEmitterBool(TEXT("Emitter.Debug Draw"), false);
 }
 
 void ATunaSweeperExtractionPointActor::UpdateExtractionProgress(float DeltaSeconds)
@@ -528,14 +548,14 @@ void ATunaSweeperExtractionPointActor::UpdateExtractionProgress(float DeltaSecon
 	if (!CanExtractPawn(PlayerPawn) || !IsPawnInsideExtractionArea(PlayerPawn))
 	{
 		ResetHoldProgress();
-		UpdateProgressWidget();
+		UpdateHudProgressWidget();
 		return;
 	}
 
 	CurrentHoldSeconds = FMath::Min(
 		CurrentHoldSeconds + FMath::Max(0.0f, DeltaSeconds),
 		ExtractionHoldSeconds);
-	UpdateProgressWidget();
+	UpdateHudProgressWidget();
 
 	if (CurrentHoldSeconds >= ExtractionHoldSeconds)
 	{
@@ -543,23 +563,20 @@ void ATunaSweeperExtractionPointActor::UpdateExtractionProgress(float DeltaSecon
 	}
 }
 
-void ATunaSweeperExtractionPointActor::UpdateProgressWidget()
+void ATunaSweeperExtractionPointActor::UpdateHudProgressWidget()
 {
-	if (!ProgressWidgetComponent)
+	const APlayerController* PlayerController = UGameplayStatics::GetPlayerController(this, 0);
+	const ATunaSweeperPlayerController* TunaPlayerController = Cast<ATunaSweeperPlayerController>(PlayerController);
+	UTunaSweeperGameHudWidget* GameHudWidget = TunaPlayerController
+		? TunaPlayerController->GetGameHudWidget()
+		: nullptr;
+	if (!GameHudWidget)
 	{
 		return;
 	}
 
-	const bool bShouldShowProgress = bShowProgressWidget && !bExtractionTriggered && CurrentHoldSeconds > 0.0f;
-	ProgressWidgetComponent->SetVisibility(bShouldShowProgress);
-	if (UTunaSweeperExtractionProgressWidget* ProgressWidget =
-		Cast<UTunaSweeperExtractionProgressWidget>(ProgressWidgetComponent->GetUserWidgetObject()))
-	{
-		ProgressWidget->SetExtractionProgress(
-			CurrentHoldSeconds,
-			ExtractionHoldSeconds,
-			bShouldShowProgress);
-	}
+	const bool bShouldShowProgress = !bExtractionTriggered && CurrentHoldSeconds > 0.0f;
+	GameHudWidget->SetExtractionProgress(CurrentHoldSeconds, ExtractionHoldSeconds, bShouldShowProgress);
 }
 
 void ATunaSweeperExtractionPointActor::ResetHoldProgress()

@@ -13,6 +13,7 @@ class UTunaSweeperHudInventoryAreaWidget;
 class UTunaSweeperHudItemInfoPanelWidget;
 class UTunaSweeperHudQuickSlotBarWidget;
 class UTunaSweeperHudTopReserveWidget;
+class UTunaSweeperExtractionProgressWidget;
 class UTunaSweeperItemThumbnailSlotWidget;
 class UTunaSweeperMapWidget;
 class UTunaSweeperMemoWidget;
@@ -32,6 +33,14 @@ enum class ETunaSweeperHudTransitionEdge : uint8
 	Right UMETA(DisplayName = "Right Edge"),
 	Top UMETA(DisplayName = "Top Edge"),
 	Bottom UMETA(DisplayName = "Bottom Edge")
+};
+
+UENUM(BlueprintType)
+enum class ETunaSweeperDamageNumberType : uint8
+{
+	Normal UMETA(DisplayName = "Normal"),
+	Critical UMETA(DisplayName = "Critical"),
+	Headshot UMETA(DisplayName = "Headshot")
 };
 
 UCLASS(BlueprintType, Blueprintable)
@@ -70,11 +79,17 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
 	void SetHudMode(ETunaSweeperHudMode InHudMode);
 
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD|Extraction")
+	void SetExtractionProgress(float CurrentSeconds, float RequiredSeconds, bool bActive);
+
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|HUD")
 	ETunaSweeperHudMode GetHudMode() const { return ActiveHudMode; }
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|HUD")
 	bool IsInventoryUiOpen() const;
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD|Damage")
+	void ShowDamageNumber(float DamageAmount, FVector WorldLocation, ETunaSweeperDamageNumberType DamageNumberType);
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|HUD")
 	UTunaSweeperHudQuickSlotBarWidget* GetQuickSlotBarWidget() const { return QuickSlotBarWidget; }
@@ -200,7 +215,27 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Crosshair")
 	FLinearColor PrecisionCrosshairColor = FLinearColor(1.0f, 1.0f, 1.0f, 0.82f);
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Extraction", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float ExtractionProgressTopOffset = 72.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Extraction")
+	FVector2D ExtractionProgressWidgetSize = FVector2D(180.0f, 36.0f);
+
 private:
+	struct FDamageNumberPopup
+	{
+		TWeakObjectPtr<UTextBlock> TextWidget;
+		FVector WorldLocation = FVector::ZeroVector;
+		FVector2D ScreenDrift = FVector2D::ZeroVector;
+		float ElapsedSeconds = 0.0f;
+		float DurationSeconds = 0.75f;
+		float RiseDistance = 48.0f;
+		float PeakScale = 1.25f;
+		float SettleScale = 1.0f;
+		float FadeStartAlpha = 0.5f;
+		ETunaSweeperDamageNumberType DamageNumberType = ETunaSweeperDamageNumberType::Normal;
+	};
+
 	struct FHudWidgetTransition
 	{
 		TWeakObjectPtr<UWidget> Widget;
@@ -217,6 +252,7 @@ private:
 	void ApplyHudModeVisibility();
 	void CacheHudTransitionBaseline(UWidget* Widget);
 	void CloseLootContainerPanelIfOpen();
+	void EnsureExtractionProgressWidget();
 	void EnsureInventoryQuickSlotPanelWidget();
 	void EnsureHousingPanelWidget();
 	void EnsureMapPanelWidget();
@@ -229,6 +265,7 @@ private:
 	void RefreshLocalizedTexts();
 	void RefreshReloadWidgets();
 	void RefreshDialogueHudVisibility();
+	void RefreshExtractionProgressWidget();
 	void ForceCollapseHudWidget(UWidget* Widget);
 	void EnsureQuestTrackerWidgets();
 	void RefreshQuestTrackerFromQuestSubsystem();
@@ -249,6 +286,8 @@ private:
 	FName GetSelectedWeaponTypeTag() const;
 	bool IsWeaponCrosshairSuppressed() const;
 	void UpdateCrosshairState(float InDeltaTime);
+	void TickDamageNumberPopups(float InDeltaTime);
+	void RemoveDamageNumberPopupAt(int32 PopupIndex);
 
 	UFUNCTION()
 	void HandleHudModeTabSelected(ETunaSweeperHudMode SelectedMode);
@@ -287,6 +326,9 @@ private:
 	TObjectPtr<UTextBlock> InventoryQuickSlotGuideText;
 
 	UPROPERTY(Transient)
+	TObjectPtr<UTunaSweeperExtractionProgressWidget> ExtractionProgressWidget;
+
+	UPROPERTY(Transient)
 	TArray<TObjectPtr<UTunaSweeperItemThumbnailSlotWidget>> InventoryQuickSlotWidgets;
 
 	UPROPERTY(Transient)
@@ -305,7 +347,11 @@ private:
 	TArray<TObjectPtr<UBorder>> CenterReloadSegments;
 
 	bool bClearExternalPanelModeAfterHide = false;
+	float ExtractionProgressCurrentSeconds = 0.0f;
+	float ExtractionProgressRequiredSeconds = 4.0f;
+	bool bExtractionProgressActive = false;
 	float PrecisionCrosshairAimAlpha = 0.0f;
+	TArray<FDamageNumberPopup> DamageNumberPopups;
 	TArray<FHudWidgetTransition> ActiveHudTransitions;
 	TMap<TWeakObjectPtr<UWidget>, FWidgetTransform> HudTransitionBaseTransforms;
 	TMap<TWeakObjectPtr<UWidget>, float> HudTransitionBaseOpacities;

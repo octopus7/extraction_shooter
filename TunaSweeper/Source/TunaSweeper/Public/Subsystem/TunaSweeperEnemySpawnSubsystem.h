@@ -27,7 +27,6 @@ class UNiagaraSystem;
 class USoundBase;
 class UWorld;
 class UStaticMesh;
-class UTunaSweeperExtractionProgressWidget;
 class UTunaSweeperInteractionMarkerWidget;
 class UTunaSweeperLevelTransitionWidget;
 class UTunaSweeperPickupItemIconWidget;
@@ -111,7 +110,8 @@ public:
 		ExtractionPoint,
 		SandbagCover,
 		ExplosiveBarrel,
-		StaticMeshProp
+		StaticMeshProp,
+		ShootingPracticeDummy
 	};
 
 private:
@@ -205,7 +205,6 @@ private:
 		float ExtractionRadius = 300.0f;
 		float ExtractionHoldSeconds = 4.0f;
 		float ExtractionRadiusRingWidth = 4.8f;
-		TSoftClassPtr<UTunaSweeperExtractionProgressWidget> ExtractionProgressWidgetClass;
 		TSoftObjectPtr<UNiagaraSystem> ExtractionParticleSystem;
 		TSoftObjectPtr<UMaterialInterface> ExtractionRadiusVisualMaterial;
 
@@ -260,6 +259,11 @@ private:
 		FRotator StaticMeshPropRelativeRotation = FRotator::ZeroRotator;
 		FVector StaticMeshPropRelativeScale = FVector::OneVector;
 		bool bStaticMeshPropCollisionEnabled = true;
+
+		float PracticeDummyMaxHealth = 100.0f;
+		float PracticeDummyCriticalDamageMultiplier = 3.0f;
+		float PracticeDummyHeadshotDamageMultiplier = 6.0f;
+		float PracticeDummyHealthRecoverySeconds = 2.0f;
 
 		FTunaSweeperMapOverlayDefinition MapOverlay;
 		bool bHasMapOverlay = false;

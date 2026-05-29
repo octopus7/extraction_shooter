@@ -53,6 +53,11 @@ namespace TunaSweeperStaminaGauge
 	const FVector RelativeLocation(0.0f, 0.0f, -92.0f);
 }
 
+namespace TunaSweeperSandbagCoverOutline
+{
+	const TCHAR* PostProcessMaterialPath = TEXT("/Game/Interaction/M_SandbagCover_Outline.M_SandbagCover_Outline");
+}
+
 ATunaSweeperTopDownCharacter::ATunaSweeperTopDownCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -175,6 +180,7 @@ void ATunaSweeperTopDownCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	RefreshCharacterVisualVisibility();
+	ApplySandbagCoverOutlinePostProcess();
 
 	DefaultCameraFOV = TopDownCamera ? TopDownCamera->FieldOfView : DefaultCameraFOV;
 	CurrentCameraBaseFOV = DefaultCameraFOV;
@@ -210,6 +216,22 @@ void ATunaSweeperTopDownCharacter::BeginPlay()
 
 	UpdateMovementSpeed();
 	UpdateStaminaGauge(0.0f);
+}
+
+void ATunaSweeperTopDownCharacter::ApplySandbagCoverOutlinePostProcess()
+{
+	if (!TopDownCamera)
+	{
+		return;
+	}
+
+	UMaterialInterface* OutlineMaterial = LoadObject<UMaterialInterface>(
+		nullptr,
+		TunaSweeperSandbagCoverOutline::PostProcessMaterialPath);
+	if (OutlineMaterial)
+	{
+		TopDownCamera->AddOrUpdateBlendable(OutlineMaterial, 1.0f);
+	}
 }
 
 void ATunaSweeperTopDownCharacter::Tick(float DeltaSeconds)
@@ -369,6 +391,7 @@ void ATunaSweeperTopDownCharacter::SetupPlayerInputComponent(UInputComponent* Pl
 void ATunaSweeperTopDownCharacter::SetAimWorldPoint(const FVector& WorldPoint)
 {
 	AimWorldPoint = WorldPoint;
+	bHasAimWorldPoint = true;
 
 	const FVector ToAimPoint = FVector(WorldPoint.X - GetActorLocation().X, WorldPoint.Y - GetActorLocation().Y, 0.0f);
 	const FVector NewAimDirection = ToAimPoint.GetSafeNormal();
@@ -856,7 +879,17 @@ void ATunaSweeperTopDownCharacter::FireWeapon()
 		}
 	}
 
-	if (!TunaGameInstance->TryConsumeLoadedAmmoForWeaponSlot(SelectedWeaponSlotNumber))
+	const UWorld* World = GetWorld();
+	const bool bIsBunkerMap = World &&
+		World->GetMapName().EndsWith(TEXT("BunkerMap"));
+	if (bIsBunkerMap)
+	{
+		if (TunaGameInstance->GetWeaponLoadedAmmoCount(SelectedWeaponSlotNumber) <= 0)
+		{
+			return;
+		}
+	}
+	else if (!TunaGameInstance->TryConsumeLoadedAmmoForWeaponSlot(SelectedWeaponSlotNumber))
 	{
 		return;
 	}
@@ -1684,6 +1717,80 @@ void ATunaSweeperTopDownCharacter::StartRespawnTransition()
 	UGameplayStatics::OpenLevel(this, RespawnTargetLevelName);
 }
 
+float ATunaSweeperTopDownCharacter::ResolveCameraCursorLeadRatio() const
+{
+	const APlayerController* PlayerController = Cast<APlayerController>(GetController());
+	if (!PlayerController)
+	{
+		return 0.0f;
+	}
+
+	int32 ViewportSizeX = 0;
+	int32 ViewportSizeY = 0;
+	PlayerController->GetViewportSize(ViewportSizeX, ViewportSizeY);
+	if (ViewportSizeX <= 0 || ViewportSizeY <= 0)
+	{
+		return 0.0f;
+	}
+
+	float MouseX = 0.0f;
+	float MouseY = 0.0f;
+	if (!PlayerController->GetMousePosition(MouseX, MouseY))
+	{
+		return 0.0f;
+	}
+
+	const FVector2D ClampedMousePosition(
+		FMath::Clamp(MouseX, 0.0f, static_cast<float>(ViewportSizeX)),
+		FMath::Clamp(MouseY, 0.0f, static_cast<float>(ViewportSizeY)));
+	FVector2D CharacterScreenPosition(
+		static_cast<float>(ViewportSizeX) * 0.5f,
+		static_cast<float>(ViewportSizeY) * 0.5f);
+	PlayerController->ProjectWorldLocationToScreen(GetActorLocation(), CharacterScreenPosition, true);
+
+	const FVector2D CursorDelta = ClampedMousePosition - CharacterScreenPosition;
+	const float CursorDistance = CursorDelta.Size();
+	if (CursorDistance <= KINDA_SMALL_NUMBER)
+	{
+		return 0.0f;
+	}
+
+	const FVector2D CursorDirection = CursorDelta / CursorDistance;
+	float DistanceToViewportEdge = TNumericLimits<float>::Max();
+	auto ConsiderEdgeDistance = [&DistanceToViewportEdge](float CandidateDistance)
+	{
+		if (CandidateDistance > KINDA_SMALL_NUMBER)
+		{
+			DistanceToViewportEdge = FMath::Min(DistanceToViewportEdge, CandidateDistance);
+		}
+	};
+
+	if (CursorDirection.X > KINDA_SMALL_NUMBER)
+	{
+		ConsiderEdgeDistance((static_cast<float>(ViewportSizeX) - CharacterScreenPosition.X) / CursorDirection.X);
+	}
+	else if (CursorDirection.X < -KINDA_SMALL_NUMBER)
+	{
+		ConsiderEdgeDistance((0.0f - CharacterScreenPosition.X) / CursorDirection.X);
+	}
+
+	if (CursorDirection.Y > KINDA_SMALL_NUMBER)
+	{
+		ConsiderEdgeDistance((static_cast<float>(ViewportSizeY) - CharacterScreenPosition.Y) / CursorDirection.Y);
+	}
+	else if (CursorDirection.Y < -KINDA_SMALL_NUMBER)
+	{
+		ConsiderEdgeDistance((0.0f - CharacterScreenPosition.Y) / CursorDirection.Y);
+	}
+
+	if (DistanceToViewportEdge == TNumericLimits<float>::Max() || DistanceToViewportEdge <= KINDA_SMALL_NUMBER)
+	{
+		return 0.0f;
+	}
+
+	return FMath::Clamp(CursorDistance / DistanceToViewportEdge, 0.0f, 1.0f);
+}
+
 void ATunaSweeperTopDownCharacter::UpdateAimingVisuals(float DeltaSeconds)
 {
 	float HitReactionRollDegrees = 0.0f;
@@ -1730,7 +1837,18 @@ void ATunaSweeperTopDownCharacter::UpdateAimingVisuals(float DeltaSeconds)
 			DeltaSeconds,
 			CameraInterpSpeed);
 
-		const FVector AimTargetOffset = AimDirection.GetSafeNormal2D() * AimCameraLeadDistance;
+		FVector AimTargetOffset = FVector::ZeroVector;
+		if (bHasAimWorldPoint)
+		{
+			const FVector AimLeadDirection = AimDirection.GetSafeNormal2D();
+			if (!AimLeadDirection.IsNearlyZero())
+			{
+				AimTargetOffset =
+					AimLeadDirection *
+					FMath::Max(0.0f, AimCameraLeadDistance) *
+					ResolveCameraCursorLeadRatio();
+			}
+		}
 		CurrentCameraAimOffset = FMath::VInterpTo(CurrentCameraAimOffset, AimTargetOffset, DeltaSeconds, CameraInterpSpeed);
 		CameraBoom->TargetOffset = CurrentCameraModeOffset + CurrentCameraAimOffset + HitReactionOffset;
 	}

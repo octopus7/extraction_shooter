@@ -1,6 +1,7 @@
 #include "UI/TunaSweeperGameHudWidget.h"
 
 #include "Blueprint/WidgetTree.h"
+#include "Blueprint/WidgetLayoutLibrary.h"
 #include "Character/TunaSweeperTopDownCharacter.h"
 #include "Component/TunaSweeperVitalsComponent.h"
 #include "Components/Border.h"
@@ -22,6 +23,7 @@
 #include "Rendering/DrawElements.h"
 #include "Subsystem/TunaSweeperHousingSubsystem.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
+#include "UI/TunaSweeperExtractionProgressWidget.h"
 #include "UI/TunaSweeperHudBottomStatusWidget.h"
 #include "UI/TunaSweeperHudExternalPanelWidget.h"
 #include "UI/TunaSweeperHousingPanelWidget.h"
@@ -38,6 +40,7 @@
 #include "UI/TunaSweeperUIFont.h"
 #include "UI/TunaSweeperUiText.h"
 #include "Styling/SlateBrush.h"
+#include "UObject/UObjectGlobals.h"
 
 namespace
 {
@@ -51,6 +54,9 @@ namespace
 	constexpr float HudWidgetTransitionDistancePadding = 36.0f;
 	constexpr float HudWidgetTransitionFallbackHorizontalDistance = 420.0f;
 	constexpr float HudWidgetTransitionFallbackVerticalDistance = 220.0f;
+	constexpr int32 MaxActiveDamageNumberPopups = 64;
+	constexpr float DamageNumberGrowDurationAlpha = 0.14f / 3.0f;
+	constexpr float DamageNumberSettleDurationAlpha = 0.28f / 2.0f;
 	const FName PistolWeaponTypeTag(TEXT("weapon.type.pistol"));
 	const FName RifleWeaponTypeTag(TEXT("weapon.type.rifle"));
 	const FName ShotgunWeaponTypeTag(TEXT("weapon.type.shotgun"));
@@ -89,6 +95,62 @@ namespace
 	{
 		const float ClampedAlpha = FMath::Clamp(Alpha, 0.0f, 1.0f);
 		return ClampedAlpha * ClampedAlpha * (3.0f - 2.0f * ClampedAlpha);
+	}
+
+	float EaseOutCubic(float Alpha)
+	{
+		const float ClampedAlpha = FMath::Clamp(Alpha, 0.0f, 1.0f);
+		const float InverseAlpha = 1.0f - ClampedAlpha;
+		return 1.0f - InverseAlpha * InverseAlpha * InverseAlpha;
+	}
+
+	FLinearColor GetDamageNumberColor(ETunaSweeperDamageNumberType DamageNumberType)
+	{
+		switch (DamageNumberType)
+		{
+		case ETunaSweeperDamageNumberType::Critical:
+			return FLinearColor(1.0f, 0.78f, 0.08f, 1.0f);
+		case ETunaSweeperDamageNumberType::Headshot:
+			return FLinearColor(1.0f, 0.18f, 0.06f, 1.0f);
+		default:
+			return FLinearColor(0.95f, 0.98f, 1.0f, 1.0f);
+		}
+	}
+
+	float GetDamageNumberFontSize(ETunaSweeperDamageNumberType DamageNumberType)
+	{
+		switch (DamageNumberType)
+		{
+		case ETunaSweeperDamageNumberType::Critical:
+			return 60.0f;
+		case ETunaSweeperDamageNumberType::Headshot:
+			return 72.0f;
+		default:
+			return 46.0f;
+		}
+	}
+
+	int32 GetDamageNumberOutlineSize(ETunaSweeperDamageNumberType DamageNumberType)
+	{
+		switch (DamageNumberType)
+		{
+		case ETunaSweeperDamageNumberType::Critical:
+		case ETunaSweeperDamageNumberType::Headshot:
+			return 4;
+		default:
+			return 3;
+		}
+	}
+
+	FString FormatDamageNumber(float DamageAmount)
+	{
+		const float RoundedDamage = FMath::RoundToFloat(DamageAmount);
+		if (FMath::IsNearlyEqual(DamageAmount, RoundedDamage, 0.05f))
+		{
+			return FString::Printf(TEXT("%d"), FMath::RoundToInt(DamageAmount));
+		}
+
+		return FString::Printf(TEXT("%.1f"), DamageAmount);
 	}
 
 	bool IsPrecisionCrosshairWeaponType(FName WeaponTypeTag)
@@ -198,6 +260,7 @@ void UTunaSweeperGameHudWidget::NativeConstruct()
 	}
 
 	EnsureQuestTrackerWidgets();
+	EnsureExtractionProgressWidget();
 	EnsureInventoryQuickSlotPanelWidget();
 	EnsureHousingPanelWidget();
 	EnsureMapPanelWidget();
@@ -253,8 +316,10 @@ void UTunaSweeperGameHudWidget::NativeTick(const FGeometry& MyGeometry, float In
 	RefreshInventoryQuickSlotPanel();
 	RefreshReloadWidgets();
 	RefreshDialogueHudVisibility();
+	RefreshExtractionProgressWidget();
 	TickHudTransitions(InDeltaTime);
 	UpdateCrosshairState(InDeltaTime);
+	TickDamageNumberPopups(InDeltaTime);
 	Invalidate(EInvalidateWidgetReason::Paint);
 }
 
@@ -582,6 +647,17 @@ void UTunaSweeperGameHudWidget::SetHudMode(ETunaSweeperHudMode InHudMode)
 	HandleSelectedInventoryItemChanged();
 }
 
+void UTunaSweeperGameHudWidget::SetExtractionProgress(
+	float CurrentSeconds,
+	float RequiredSeconds,
+	bool bActive)
+{
+	ExtractionProgressCurrentSeconds = FMath::Max(0.0f, CurrentSeconds);
+	ExtractionProgressRequiredSeconds = FMath::Max(0.1f, RequiredSeconds);
+	bExtractionProgressActive = bActive && ExtractionProgressCurrentSeconds > 0.0f;
+	RefreshExtractionProgressWidget();
+}
+
 bool UTunaSweeperGameHudWidget::IsInventoryUiOpen() const
 {
 	if (ActiveHudMode != ETunaSweeperHudMode::None)
@@ -605,6 +681,97 @@ bool UTunaSweeperGameHudWidget::IsInventoryUiOpen() const
 		IsWidgetVisible(ItemInfoPanelWidget) ||
 		IsWidgetVisible(ExternalPanelWidget) ||
 		IsWidgetVisible(InventoryQuickSlotPanel);
+}
+
+void UTunaSweeperGameHudWidget::ShowDamageNumber(
+	float DamageAmount,
+	FVector WorldLocation,
+	ETunaSweeperDamageNumberType DamageNumberType)
+{
+	if (DamageAmount <= 0.0f || !WidgetTree)
+	{
+		return;
+	}
+
+	UCanvasPanel* RootCanvas = Cast<UCanvasPanel>(WidgetTree->RootWidget);
+	if (!RootCanvas)
+	{
+		return;
+	}
+
+	while (DamageNumberPopups.Num() >= MaxActiveDamageNumberPopups)
+	{
+		RemoveDamageNumberPopupAt(0);
+	}
+
+	UTextBlock* DamageText = WidgetTree->ConstructWidget<UTextBlock>(
+		UTextBlock::StaticClass(),
+		MakeUniqueObjectName(WidgetTree, UTextBlock::StaticClass(), TEXT("DamageNumberText")));
+	if (!DamageText)
+	{
+		return;
+	}
+
+	DamageText->SetText(FText::FromString(FormatDamageNumber(DamageAmount)));
+	DamageText->SetColorAndOpacity(FSlateColor(GetDamageNumberColor(DamageNumberType)));
+	DamageText->SetJustification(ETextJustify::Center);
+	DamageText->SetVisibility(ESlateVisibility::HitTestInvisible);
+	DamageText->SetRenderTransformPivot(FVector2D(0.5f, 0.5f));
+	DamageText->SetShadowOffset(FVector2D::ZeroVector);
+	DamageText->SetShadowColorAndOpacity(FLinearColor::Transparent);
+	FSlateFontInfo DamageFont = TunaSweeperUIFont::MakeFont(
+		DamageText,
+		GetDamageNumberFontSize(DamageNumberType),
+		ETunaSweeperUIFontWeight::Bold);
+	DamageFont.OutlineSettings = FFontOutlineSettings(
+		GetDamageNumberOutlineSize(DamageNumberType),
+		FLinearColor(0.0f, 0.0f, 0.0f, 0.92f));
+	DamageText->SetFont(DamageFont);
+
+	UCanvasPanelSlot* CanvasSlot = RootCanvas->AddChildToCanvas(DamageText);
+	if (!CanvasSlot)
+	{
+		return;
+	}
+
+	CanvasSlot->SetAutoSize(true);
+	CanvasSlot->SetAlignment(FVector2D(0.5f, 0.5f));
+	CanvasSlot->SetZOrder(950);
+
+	FDamageNumberPopup Popup;
+	Popup.TextWidget = DamageText;
+	Popup.WorldLocation = WorldLocation;
+	Popup.DamageNumberType = DamageNumberType;
+	switch (DamageNumberType)
+	{
+	case ETunaSweeperDamageNumberType::Critical:
+		Popup.DurationSeconds = 0.92f;
+		Popup.RiseDistance = 76.0f;
+		Popup.PeakScale = 3.0f;
+		Popup.SettleScale = 1.5f;
+		Popup.FadeStartAlpha = 0.48f;
+		Popup.ScreenDrift = FVector2D(FMath::FRandRange(-24.0f, 24.0f), FMath::FRandRange(-8.0f, 2.0f));
+		break;
+	case ETunaSweeperDamageNumberType::Headshot:
+		Popup.DurationSeconds = 1.08f;
+		Popup.RiseDistance = 104.0f;
+		Popup.PeakScale = 3.0f;
+		Popup.SettleScale = 1.5f;
+		Popup.FadeStartAlpha = 0.56f;
+		Popup.ScreenDrift = FVector2D(FMath::FRandRange(-34.0f, 34.0f), FMath::FRandRange(-14.0f, 0.0f));
+		break;
+	default:
+		Popup.DurationSeconds = 0.72f;
+		Popup.RiseDistance = 46.0f;
+		Popup.PeakScale = 1.28f;
+		Popup.SettleScale = 1.0f;
+		Popup.FadeStartAlpha = 0.42f;
+		Popup.ScreenDrift = FVector2D(FMath::FRandRange(-14.0f, 14.0f), FMath::FRandRange(-4.0f, 4.0f));
+		break;
+	}
+
+	DamageNumberPopups.Add(MoveTemp(Popup));
+	TickDamageNumberPopups(0.0f);
 }
 
 void UTunaSweeperGameHudWidget::CacheHudTransitionBaseline(UWidget* Widget)
@@ -863,6 +1030,93 @@ void UTunaSweeperGameHudWidget::TickHudTransitions(float InDeltaTime)
 	}
 }
 
+void UTunaSweeperGameHudWidget::TickDamageNumberPopups(float InDeltaTime)
+{
+	APlayerController* PlayerController = GetOwningPlayer();
+	if (!PlayerController)
+	{
+		return;
+	}
+
+	for (int32 Index = DamageNumberPopups.Num() - 1; Index >= 0; --Index)
+	{
+		FDamageNumberPopup& Popup = DamageNumberPopups[Index];
+		UTextBlock* TextWidget = Popup.TextWidget.Get();
+		if (!TextWidget)
+		{
+			DamageNumberPopups.RemoveAt(Index);
+			continue;
+		}
+
+		Popup.ElapsedSeconds += FMath::Max(0.0f, InDeltaTime);
+		const float DurationSeconds = FMath::Max(0.01f, Popup.DurationSeconds);
+		const float Alpha = FMath::Clamp(Popup.ElapsedSeconds / DurationSeconds, 0.0f, 1.0f);
+		if (Alpha >= 1.0f)
+		{
+			RemoveDamageNumberPopupAt(Index);
+			continue;
+		}
+
+		FVector2D ScreenPosition = FVector2D::ZeroVector;
+		if (!UWidgetLayoutLibrary::ProjectWorldLocationToWidgetPosition(
+			PlayerController,
+			Popup.WorldLocation,
+			ScreenPosition,
+			false))
+		{
+			TextWidget->SetRenderOpacity(0.0f);
+			continue;
+		}
+
+		if (UCanvasPanelSlot* CanvasSlot = Cast<UCanvasPanelSlot>(TextWidget->Slot))
+		{
+			const float Rise = EaseOutCubic(Alpha) * Popup.RiseDistance;
+			CanvasSlot->SetPosition(ScreenPosition + Popup.ScreenDrift * Alpha + FVector2D(0.0f, -Rise));
+		}
+
+		float Scale = Popup.SettleScale;
+		if (Alpha <= DamageNumberGrowDurationAlpha)
+		{
+			Scale = FMath::Lerp(0.72f, Popup.PeakScale, EaseOutCubic(Alpha / DamageNumberGrowDurationAlpha));
+		}
+		else
+		{
+			const float SettleAlpha = SmoothTransitionAlpha(
+				(Alpha - DamageNumberGrowDurationAlpha) / DamageNumberSettleDurationAlpha);
+			Scale = FMath::Lerp(Popup.PeakScale, Popup.SettleScale, SettleAlpha);
+		}
+
+		FWidgetTransform Transform;
+		Transform.Scale = FVector2D(Scale, Scale);
+		if (Popup.DamageNumberType != ETunaSweeperDamageNumberType::Normal)
+		{
+			const float ShakeStrength = Popup.DamageNumberType == ETunaSweeperDamageNumberType::Headshot ? 3.2f : 1.6f;
+			Transform.Angle = FMath::Sin(Popup.ElapsedSeconds * 42.0f) * ShakeStrength * (1.0f - Alpha);
+		}
+		TextWidget->SetRenderTransform(Transform);
+
+		const float FadeStartAlpha = FMath::Clamp(Popup.FadeStartAlpha, 0.0f, 0.95f);
+		const float Opacity = Alpha <= FadeStartAlpha
+			? 1.0f
+			: 1.0f - FMath::Clamp((Alpha - FadeStartAlpha) / (1.0f - FadeStartAlpha), 0.0f, 1.0f);
+		TextWidget->SetRenderOpacity(Opacity);
+	}
+}
+
+void UTunaSweeperGameHudWidget::RemoveDamageNumberPopupAt(int32 PopupIndex)
+{
+	if (!DamageNumberPopups.IsValidIndex(PopupIndex))
+	{
+		return;
+	}
+
+	if (UTextBlock* TextWidget = DamageNumberPopups[PopupIndex].TextWidget.Get())
+	{
+		TextWidget->RemoveFromParent();
+	}
+	DamageNumberPopups.RemoveAt(PopupIndex);
+}
+
 void UTunaSweeperGameHudWidget::ApplyHudModeVisibility()
 {
 	const bool bUtilityModeOpen = ActiveHudMode != ETunaSweeperHudMode::None;
@@ -1028,6 +1282,8 @@ void UTunaSweeperGameHudWidget::ApplyHudModeVisibility()
 					? ResolveUiText(TunaGameInstance, TEXT("ui.hud.mode.memo"), TEXT("\uBA54\uBAA8"))
 					: FText::GetEmpty());
 	}
+
+	RefreshExtractionProgressWidget();
 }
 
 void UTunaSweeperGameHudWidget::CloseLootContainerPanelIfOpen()
@@ -1047,6 +1303,42 @@ void UTunaSweeperGameHudWidget::CloseLootContainerPanelIfOpen()
 	}
 
 	bClearExternalPanelModeAfterHide = true;
+}
+
+void UTunaSweeperGameHudWidget::EnsureExtractionProgressWidget()
+{
+	if (ExtractionProgressWidget || !WidgetTree)
+	{
+		return;
+	}
+
+	UCanvasPanel* RootCanvas = Cast<UCanvasPanel>(WidgetTree->RootWidget);
+	if (!RootCanvas)
+	{
+		return;
+	}
+
+	ExtractionProgressWidget = WidgetTree->ConstructWidget<UTunaSweeperExtractionProgressWidget>(
+		UTunaSweeperExtractionProgressWidget::StaticClass(),
+		TEXT("ExtractionProgressWidget_Runtime"));
+	if (!ExtractionProgressWidget)
+	{
+		return;
+	}
+
+	ExtractionProgressWidget->SetVisibility(ESlateVisibility::Collapsed);
+
+	UCanvasPanelSlot* CanvasSlot = RootCanvas->AddChildToCanvas(ExtractionProgressWidget);
+	if (CanvasSlot)
+	{
+		CanvasSlot->SetAnchors(FAnchors(0.5f, 0.0f, 0.5f, 0.0f));
+		CanvasSlot->SetAlignment(FVector2D(0.5f, 0.0f));
+		CanvasSlot->SetPosition(FVector2D(0.0f, FMath::Max(0.0f, ExtractionProgressTopOffset)));
+		CanvasSlot->SetSize(FVector2D(
+			FMath::Max(1.0, ExtractionProgressWidgetSize.X),
+			FMath::Max(1.0, ExtractionProgressWidgetSize.Y)));
+		CanvasSlot->SetZOrder(45);
+	}
 }
 
 void UTunaSweeperGameHudWidget::EnsureInventoryQuickSlotPanelWidget()
@@ -1707,6 +1999,32 @@ void UTunaSweeperGameHudWidget::RefreshDialogueHudVisibility()
 	{
 		SetTransitionedWidgetVisibility(QuickSlotBarWidget, QuickSlotVisibility, QuickSlotBarTransitionEdge);
 	}
+}
+
+void UTunaSweeperGameHudWidget::RefreshExtractionProgressWidget()
+{
+	EnsureExtractionProgressWidget();
+	if (!ExtractionProgressWidget)
+	{
+		return;
+	}
+
+	if (UCanvasPanelSlot* CanvasSlot = Cast<UCanvasPanelSlot>(ExtractionProgressWidget->Slot))
+	{
+		CanvasSlot->SetPosition(FVector2D(0.0f, FMath::Max(0.0f, ExtractionProgressTopOffset)));
+		CanvasSlot->SetSize(FVector2D(
+			FMath::Max(1.0, ExtractionProgressWidgetSize.X),
+			FMath::Max(1.0, ExtractionProgressWidgetSize.Y)));
+	}
+
+	const bool bShouldShowProgress =
+		bExtractionProgressActive &&
+		ExtractionProgressCurrentSeconds > 0.0f &&
+		!IsGameplayBottomHudSuppressed();
+	ExtractionProgressWidget->SetExtractionProgress(
+		ExtractionProgressCurrentSeconds,
+		ExtractionProgressRequiredSeconds,
+		bShouldShowProgress);
 }
 
 void UTunaSweeperGameHudWidget::ForceCollapseHudWidget(UWidget* Widget)

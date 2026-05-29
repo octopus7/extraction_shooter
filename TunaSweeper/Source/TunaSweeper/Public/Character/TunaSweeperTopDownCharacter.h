@@ -330,8 +330,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Camera")
 	float AimCameraFOV = 55.0f;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Camera")
-	float AimCameraLeadDistance = 260.0f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Camera", meta = (DisplayName = "Camera Cursor Lead Max Distance", ClampMin = "0.0", UIMin = "0.0"))
+	float AimCameraLeadDistance = 200.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Camera")
 	float CameraInterpSpeed = 10.0f;
@@ -423,6 +423,8 @@ private:
 	void MoveAmmoSelectionFocus(int32 FocusDelta);
 	void RefreshSelectedWeaponAfterInventoryChanged();
 	void RefreshCharacterVisualVisibility();
+	void ApplySandbagCoverOutlinePostProcess();
+	float ResolveCameraCursorLeadRatio() const;
 	void UpdateAimingVisuals(float DeltaSeconds);
 	void UpdateSprintAndStamina(float DeltaSeconds);
 	void UpdateRoll(float DeltaSeconds);
@@ -461,6 +463,7 @@ private:
 	FTimerHandle RespawnTransitionTimerHandle;
 	FVector AimWorldPoint = FVector::ZeroVector;
 	FVector AimDirection = FVector::ForwardVector;
+	bool bHasAimWorldPoint = false;
 	FRotator DefaultCameraRelativeRotation = FRotator::ZeroRotator;
 	FRotator DefaultCameraBoomRotation = FRotator(-60.0f, 0.0f, 0.0f);
 	FRotator CurrentCameraBoomRotation = FRotator(-60.0f, 0.0f, 0.0f);

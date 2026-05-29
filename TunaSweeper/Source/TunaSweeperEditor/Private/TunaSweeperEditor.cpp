@@ -63,6 +63,7 @@
 #include "Map/TunaSweeperMapCaptureActor.h"
 #include "MediaSource.h"
 #include "Factories/MaterialFactoryNew.h"
+#include "Engine/BlendableInterface.h"
 #include "Materials/Material.h"
 #include "Materials/MaterialInterface.h"
 #include "Materials/MaterialExpressionAbs.h"
@@ -72,6 +73,7 @@
 #include "Materials/MaterialExpressionConstant2Vector.h"
 #include "Materials/MaterialExpressionComponentMask.h"
 #include "Materials/MaterialExpressionConstant3Vector.h"
+#include "Materials/MaterialExpressionCustom.h"
 #include "Materials/MaterialExpressionDivide.h"
 #include "Materials/MaterialExpressionFresnel.h"
 #include "Materials/MaterialExpressionLength.h"
@@ -93,6 +95,13 @@
 #include "Misc/PackageName.h"
 #include "Misc/Parse.h"
 #include "Misc/Paths.h"
+#include "NiagaraEmitter.h"
+#include "NiagaraParameterStore.h"
+#include "NiagaraScript.h"
+#include "NiagaraSystem.h"
+#include "NiagaraSystemImpl.h"
+#include "NiagaraTypes.h"
+#include "ObjectTools.h"
 #include "Player/TunaSweeperPlayerController.h"
 #include "Sound/SoundWave.h"
 #include "StaticMeshAttributes.h"
@@ -157,12 +166,12 @@ namespace TunaSweeperEditorSetup
 	const FString WorldProgressInteractionTaskId = TEXT("2026-05-19_CreateWorldProgressObstacleAssetsV1");
 	const FString WarpPointInteractionTaskId = TEXT("2026-05-25_CreateWarpPointInteractionAssetsV1");
 	const FString EnemyVisualMaterialTaskId = TEXT("2026-05-19_CreateEnemyAndContainerVisualMaterialsV3");
-	const FString ExplosiveBarrelTaskId = TEXT("2026-05-29_CreateExplosiveBarrelAssetsV3");
+	const FString ExplosiveBarrelTaskId = TEXT("2026-05-29_CreateExplosiveBarrelAssetsV8");
 	const FString RollingBomberBodyMaterialTaskId = TEXT("2026-05-28_CreateRollingBomberBodyGrayMaterialV1");
 	const FString RollingBomberLegMaterialTaskId = TEXT("2026-05-28_CreateRollingBomberLegMetalMaterialV1");
 	const FString RollingBomberChargeCylinderEffectTaskId = TEXT("2026-05-28_CreateRollingBomberChargeCylinderEffectV1");
 	const FString LocalExplosionEffectTaskId = TEXT("2026-05-29_CreateLocalExplosionFlipbookEffectV3");
-	const FString ExtractionSmokeSignalNiagaraSystemTaskId = TEXT("2026-05-29_CreateExtractionSmokeSignalNiagaraSystemV1");
+	const FString ExtractionSmokeSignalNiagaraSystemTaskId = TEXT("2026-05-29_CreateExtractionSmokeSignalNiagaraSystemV4");
 	const FString ProjectileHitEffectAssetTaskId = TEXT("2026-05-28_CreateProjectileHitEffectAssetsV1");
 	const FString WeaponSpreadRecoilAssetTaskId = TEXT("2026-05-28_CreateWeaponSpreadRecoilAssetsV1");
 	const FString BaseballBatAssetTaskId = TEXT("2026-05-28_CreateBaseballBatStaticMeshAssetsV1");
@@ -1147,7 +1156,9 @@ namespace TunaSweeperEditorSetup
 
 		Material->Modify();
 		Material->GetExpressionCollection().Empty();
-		Material->BlendMode = BLEND_Additive;
+		Material->MaterialDomain = MD_PostProcess;
+		Material->BlendableLocation = BL_SceneColorAfterTonemapping;
+		Material->BlendMode = BLEND_Opaque;
 		Material->SetShadingModel(MSM_Unlit);
 		Material->TwoSided = false;
 		Material->bUsedWithNiagaraMeshParticles = true;
@@ -2572,6 +2583,26 @@ namespace TunaSweeperEditorSetup
 		return Radial.IsNearlyZero() ? FVector3f(1.0f, 0.0f, 0.0f) : Radial.GetSafeNormal();
 	}
 
+	FVector3f MakeBarrelRadialTangent(const FVector3f& Position)
+	{
+		const FVector3f Tangent(-Position.Y, Position.X, 0.0f);
+		return Tangent.IsNearlyZero() ? FVector3f(0.0f, 1.0f, 0.0f) : Tangent.GetSafeNormal();
+	}
+
+	FVector3f MakeBarrelSafeTangent(const FVector3f& Normal, const FVector3f& PreferredTangent)
+	{
+		FVector3f Tangent = PreferredTangent - Normal * FVector3f::DotProduct(Normal, PreferredTangent);
+		if (Tangent.IsNearlyZero())
+		{
+			const FVector3f FallbackTangent = FMath::Abs(Normal.Z) < 0.8f
+				? FVector3f(0.0f, 0.0f, 1.0f)
+				: FVector3f(1.0f, 0.0f, 0.0f);
+			Tangent = FallbackTangent - Normal * FVector3f::DotProduct(Normal, FallbackTangent);
+		}
+
+		return Tangent.IsNearlyZero() ? FVector3f(1.0f, 0.0f, 0.0f) : Tangent.GetSafeNormal();
+	}
+
 	void AddBarrelTriangle(
 		FMeshDescription& MeshDescription,
 		FStaticMeshAttributes& Attributes,
@@ -2586,10 +2617,13 @@ namespace TunaSweeperEditorSetup
 	{
 		TVertexAttributesRef<FVector3f> VertexPositions = Attributes.GetVertexPositions();
 		TVertexInstanceAttributesRef<FVector3f> VertexInstanceNormals = Attributes.GetVertexInstanceNormals();
+		TVertexInstanceAttributesRef<FVector3f> VertexInstanceTangents = Attributes.GetVertexInstanceTangents();
+		TVertexInstanceAttributesRef<float> VertexInstanceBinormalSigns = Attributes.GetVertexInstanceBinormalSigns();
 		TVertexInstanceAttributesRef<FVector2f> VertexInstanceUVs = Attributes.GetVertexInstanceUVs();
 
-		const FVector3f Positions[] = { A, B, C };
-		const FVector2f UVs[] = { UvA, UvB, UvC };
+		const FVector3f Positions[] = { A, C, B };
+		const FVector2f UVs[] = { UvA, UvC, UvB };
+		const FVector3f SurfaceTangent = MakeBarrelSafeTangent(SurfaceNormal, FVector3f(1.0f, 0.0f, 0.0f));
 
 		TArray<FVertexInstanceID> VertexInstances;
 		VertexInstances.Reserve(UE_ARRAY_COUNT(Positions));
@@ -2600,6 +2634,8 @@ namespace TunaSweeperEditorSetup
 
 			const FVertexInstanceID VertexInstanceId = MeshDescription.CreateVertexInstance(VertexId);
 			VertexInstanceNormals[VertexInstanceId] = SurfaceNormal;
+			VertexInstanceTangents[VertexInstanceId] = SurfaceTangent;
+			VertexInstanceBinormalSigns[VertexInstanceId] = 1.0f;
 			VertexInstanceUVs.Set(VertexInstanceId, 0, UVs[Index]);
 			VertexInstances.Add(VertexInstanceId);
 		}
@@ -2622,20 +2658,28 @@ namespace TunaSweeperEditorSetup
 	{
 		TVertexAttributesRef<FVector3f> VertexPositions = Attributes.GetVertexPositions();
 		TVertexInstanceAttributesRef<FVector3f> VertexInstanceNormals = Attributes.GetVertexInstanceNormals();
+		TVertexInstanceAttributesRef<FVector3f> VertexInstanceTangents = Attributes.GetVertexInstanceTangents();
+		TVertexInstanceAttributesRef<float> VertexInstanceBinormalSigns = Attributes.GetVertexInstanceBinormalSigns();
 		TVertexInstanceAttributesRef<FVector2f> VertexInstanceUVs = Attributes.GetVertexInstanceUVs();
 
-		const FVector3f Positions[] = { A, B, C, D };
+		const FVector3f Positions[] = { A, D, C, B };
 		const FVector3f Normals[] = {
 			MakeBarrelRadialNormal(A),
-			MakeBarrelRadialNormal(B),
+			MakeBarrelRadialNormal(D),
 			MakeBarrelRadialNormal(C),
-			MakeBarrelRadialNormal(D)
+			MakeBarrelRadialNormal(B)
+		};
+		const FVector3f Tangents[] = {
+			MakeBarrelRadialTangent(A),
+			MakeBarrelRadialTangent(D),
+			MakeBarrelRadialTangent(C),
+			MakeBarrelRadialTangent(B)
 		};
 		const FVector2f UVs[] = {
 			FVector2f(U0, V0),
-			FVector2f(U1, V0),
+			FVector2f(U0, V1),
 			FVector2f(U1, V1),
-			FVector2f(U0, V1)
+			FVector2f(U1, V0)
 		};
 
 		TArray<FVertexInstanceID> VertexInstances;
@@ -2647,6 +2691,8 @@ namespace TunaSweeperEditorSetup
 
 			const FVertexInstanceID VertexInstanceId = MeshDescription.CreateVertexInstance(VertexId);
 			VertexInstanceNormals[VertexInstanceId] = Normals[Index];
+			VertexInstanceTangents[VertexInstanceId] = MakeBarrelSafeTangent(Normals[Index], Tangents[Index]);
+			VertexInstanceBinormalSigns[VertexInstanceId] = 1.0f;
 			VertexInstanceUVs.Set(VertexInstanceId, 0, UVs[Index]);
 			VertexInstances.Add(VertexInstanceId);
 		}
@@ -2693,51 +2739,6 @@ namespace TunaSweeperEditorSetup
 					V1);
 			}
 		}
-
-		for (int32 SegmentIndex = 0; SegmentIndex < SegmentCount; ++SegmentIndex)
-		{
-			const float U0 = static_cast<float>(SegmentIndex) / static_cast<float>(SegmentCount);
-			const float U1 = static_cast<float>(SegmentIndex + 1) / static_cast<float>(SegmentCount);
-			const float Angle0 = U0 * 2.0f * UE_PI;
-			const float Angle1 = U1 * 2.0f * UE_PI;
-			AddBarrelQuad(
-				MeshDescription,
-				Attributes,
-				DetailPolygonGroupId,
-				MakeBarrelVertex(Angle0, 35.8f, 13.0f),
-				MakeBarrelVertex(Angle1, 35.8f, 13.0f),
-				MakeBarrelVertex(Angle1, 35.8f, 18.5f),
-				MakeBarrelVertex(Angle0, 35.8f, 18.5f),
-				U0,
-				U1,
-				0.0f,
-				0.1f);
-			AddBarrelQuad(
-				MeshDescription,
-				Attributes,
-				DetailPolygonGroupId,
-				MakeBarrelVertex(Angle0, 35.8f, 101.5f),
-				MakeBarrelVertex(Angle1, 35.8f, 101.5f),
-				MakeBarrelVertex(Angle1, 35.8f, 107.0f),
-				MakeBarrelVertex(Angle0, 35.8f, 107.0f),
-				U0,
-				U1,
-				0.9f,
-				1.0f);
-		}
-
-		AddBarrelQuad(
-			MeshDescription,
-			Attributes,
-			DetailPolygonGroupId,
-			MakeBarrelVertex(-0.055f, 36.4f, 22.0f),
-			MakeBarrelVertex(0.055f, 36.4f, 22.0f),
-			MakeBarrelVertex(0.055f, 36.4f, 99.0f),
-			MakeBarrelVertex(-0.055f, 36.4f, 99.0f),
-			0.0f,
-			1.0f,
-			0.0f,
-			1.0f);
 
 		const FVector3f BottomCenter(0.0f, 0.0f, Heights[0]);
 		const FVector3f TopCenter(0.0f, 0.0f, Heights[RingCount - 1]);
@@ -2815,19 +2816,6 @@ namespace TunaSweeperEditorSetup
 				1.0f);
 		}
 
-		AddBarrelQuad(
-			MeshDescription,
-			Attributes,
-			DetailPolygonGroupId,
-			MakeBarrelVertex(-0.07f, 36.0f, 2.0f),
-			MakeBarrelVertex(0.07f, 36.0f, 2.0f),
-			MakeBarrelVertex(0.07f, 36.0f, 24.0f),
-			MakeBarrelVertex(-0.07f, 36.0f, 22.0f),
-			0.0f,
-			1.0f,
-			0.0f,
-			1.0f);
-
 		const FVector3f BottomCenter(0.0f, 0.0f, BottomHeight);
 		for (int32 SegmentIndex = 0; SegmentIndex < SegmentCount; ++SegmentIndex)
 		{
@@ -2896,7 +2884,13 @@ namespace TunaSweeperEditorSetup
 
 		TArray<const FMeshDescription*> MeshDescriptions;
 		MeshDescriptions.Add(&MeshDescription);
-		StaticMesh->BuildFromMeshDescriptions(MeshDescriptions);
+		UStaticMesh::FBuildMeshDescriptionsParams BuildParams;
+		BuildParams.bFastBuild = true;
+		BuildParams.bCommitMeshDescription = true;
+		BuildParams.bMarkPackageDirty = true;
+		BuildParams.bUseHashAsGuid = false;
+		StaticMesh->BuildFromMeshDescriptions(MeshDescriptions, BuildParams);
+		StaticMesh->PostEditChange();
 		StaticMesh->MarkPackageDirty();
 
 		return SaveAsset(StaticMesh) ? StaticMesh : nullptr;
@@ -5864,35 +5858,233 @@ namespace TunaSweeperEditorSetup
 			&& EnsureLocalExplosionDistortionMaterial() != nullptr;
 	}
 
-	bool EnsureExtractionSmokeSignalNiagaraSystem()
+	bool SetNiagaraStoreBoolByName(FNiagaraParameterStore& Store, FName ParameterName, bool bValue)
 	{
-		const FString ObjectPath = GetAssetObjectPath(EffectsAssetPath, ExtractionSmokeSignalNiagaraSystemAssetName);
-		if (UObject* ExistingSystem = LoadObject<UObject>(nullptr, *ObjectPath))
+		bool bApplied = false;
+		TArray<FNiagaraVariable> Parameters;
+		Store.GetParameters(Parameters);
+		for (const FNiagaraVariable& Parameter : Parameters)
 		{
-			return SaveAsset(ExistingSystem);
+			if (Parameter.GetName() == ParameterName &&
+				Parameter.GetType() == FNiagaraTypeDefinition::GetBoolDef())
+			{
+				bApplied |= Store.SetParameterValue(FNiagaraBool(bValue), Parameter);
+			}
+		}
+		return bApplied;
+	}
+
+	bool SetNiagaraStoreFloatByName(FNiagaraParameterStore& Store, FName ParameterName, float Value)
+	{
+		bool bApplied = false;
+		TArray<FNiagaraVariable> Parameters;
+		Store.GetParameters(Parameters);
+		for (const FNiagaraVariable& Parameter : Parameters)
+		{
+			if (Parameter.GetName() == ParameterName &&
+				Parameter.GetType() == FNiagaraTypeDefinition::GetFloatDef())
+			{
+				bApplied |= Store.SetParameterValue(Value, Parameter);
+			}
+		}
+		return bApplied;
+	}
+
+	bool SetNiagaraStoreVec3ByName(FNiagaraParameterStore& Store, FName ParameterName, const FVector& Value)
+	{
+		bool bApplied = false;
+		TArray<FNiagaraVariable> Parameters;
+		Store.GetParameters(Parameters);
+		for (const FNiagaraVariable& Parameter : Parameters)
+		{
+			if (Parameter.GetName() != ParameterName)
+			{
+				continue;
+			}
+
+			if (Parameter.GetType() == FNiagaraTypeDefinition::GetPositionDef())
+			{
+				bApplied |= Store.SetPositionParameterValue(Value, ParameterName);
+			}
+			else if (Parameter.GetType() == FNiagaraTypeDefinition::GetVec3Def())
+			{
+				bApplied |= Store.SetParameterValue(FVector3f(Value), Parameter);
+			}
+		}
+		return bApplied;
+	}
+
+	bool SetNiagaraStoreColorByName(FNiagaraParameterStore& Store, FName ParameterName, const FLinearColor& Value)
+	{
+		bool bApplied = false;
+		TArray<FNiagaraVariable> Parameters;
+		Store.GetParameters(Parameters);
+		for (const FNiagaraVariable& Parameter : Parameters)
+		{
+			if (Parameter.GetName() == ParameterName &&
+				Parameter.GetType() == FNiagaraTypeDefinition::GetColorDef())
+			{
+				bApplied |= Store.SetParameterValue(Value, Parameter);
+			}
+		}
+		return bApplied;
+	}
+
+	int32 ConfigureExtractionSmokeSignalNiagaraScript(UNiagaraScript* Script)
+	{
+		if (!Script)
+		{
+			return 0;
 		}
 
-		const TCHAR* SourceSystemPaths[] = {
-			TEXT("/NiagaraFluids/Templates/Gas/3D/Systems/Grid3D_Gas_ColoredSmoke.Grid3D_Gas_ColoredSmoke"),
-			TEXT("/NiagaraFluids/Templates/Gas/3D/Systems/Grid3D_Gas_Smoke.Grid3D_Gas_Smoke")
+		FNiagaraParameterStore& Store = Script->RapidIterationParameters;
+		const FVector WorldSpaceSize(420.0f, 305.0f, 460.0f);
+		const FVector SourceOffset(0.0f, 0.0f, 8.0f);
+		const FVector SourceScale(2.8f, 1.45f, 0.16f);
+		const FVector SourceVelocity(30.0f, 11.0f, 185.0f);
+		const FLinearColor SmokeBaseColor(0.02f, 1.0f, 0.18f, 1.0f);
+		const FLinearColor SmokeTopColor(0.035f, 0.04f, 0.035f, 1.0f);
+
+		int32 AppliedCount = 0;
+		auto ApplyBool = [&Store, &AppliedCount](const TCHAR* Name, bool bValue)
+		{
+			AppliedCount += SetNiagaraStoreBoolByName(Store, FName(Name), bValue) ? 1 : 0;
+		};
+		auto ApplyFloat = [&Store, &AppliedCount](const TCHAR* Name, float Value)
+		{
+			AppliedCount += SetNiagaraStoreFloatByName(Store, FName(Name), Value) ? 1 : 0;
+		};
+		auto ApplyVec3 = [&Store, &AppliedCount](const TCHAR* Name, const FVector& Value)
+		{
+			AppliedCount += SetNiagaraStoreVec3ByName(Store, FName(Name), Value) ? 1 : 0;
+		};
+		auto ApplyColor = [&Store, &AppliedCount](const TCHAR* Name, const FLinearColor& Value)
+		{
+			AppliedCount += SetNiagaraStoreColorByName(Store, FName(Name), Value) ? 1 : 0;
 		};
 
-		UObject* SourceSystem = nullptr;
-		for (const TCHAR* SourceSystemPath : SourceSystemPaths)
+		ApplyBool(TEXT("Grid3D_Gas_Master_Emitter.Debug Draw"), false);
+		ApplyBool(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_InitializeEmitter.Debug Collision Volume"), false);
+		ApplyBool(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_DebugDisplay.Debug Collision Volume"), false);
+		ApplyVec3(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_InitializeEmitter.World Size"), WorldSpaceSize);
+		ApplyBool(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_SphereSource.Enable"), true);
+		ApplyVec3(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_SphereSource.Emit Position"), SourceOffset);
+		ApplyVec3(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_SphereSource.Non Uniform Scale"), SourceScale);
+		ApplyVec3(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_SphereSource.Velocity"), SourceVelocity);
+		ApplyFloat(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_SphereSource.Emit Radius"), 27.0f);
+		ApplyFloat(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_SphereSource.Density"), 1.35f);
+		ApplyFloat(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_SphereSource.Temperature"), 0.18f);
+		ApplyColor(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_SphereSource.Color"), SmokeBaseColor);
+		ApplyFloat(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_Buoyancy.TemperatureBuoyancy"), 1.1f);
+		ApplyFloat(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_Buoyancy.DensityBuoyancy"), 0.05f);
+		ApplyColor(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_MaterialControls.Smoke Color"), SmokeTopColor);
+
+		if (AppliedCount > 0)
 		{
-			SourceSystem = LoadObject<UObject>(nullptr, SourceSystemPath);
-			if (SourceSystem)
+			Script->Modify();
+		}
+
+		return AppliedCount;
+	}
+
+	bool ConfigureExtractionSmokeSignalNiagaraSystem(UNiagaraSystem* System)
+	{
+		if (!System)
+		{
+			return false;
+		}
+
+		System->Modify();
+
+		FNiagaraUserRedirectionParameterStore& UserParameters = System->GetExposedParameters();
+		SetNiagaraStoreBoolByName(UserParameters, FName(TEXT("User.DrawBounds")), false);
+		SetNiagaraStoreVec3ByName(UserParameters, FName(TEXT("User.WorldSpaceSize")), FVector(420.0f, 305.0f, 460.0f));
+		SetNiagaraStoreFloatByName(UserParameters, FName(TEXT("User.ResolutionMaxAxis")), 96.0f);
+
+		for (FNiagaraEmitterHandle& EmitterHandle : System->GetEmitterHandles())
+		{
+			EmitterHandle.SetDebugShowBounds(false);
+			if (FVersionedNiagaraEmitterData* EmitterData = EmitterHandle.GetEmitterData())
 			{
-				break;
+				EmitterData->bLocalSpace = false;
+				EmitterData->CalculateBoundsMode = ENiagaraEmitterCalculateBoundMode::Fixed;
+				EmitterData->FixedBounds = FBox(FVector(-230.0f, -170.0f, 0.0f), FVector(230.0f, 170.0f, 460.0f));
 			}
 		}
 
+		int32 AppliedScriptParameterCount = 0;
+		System->ForEachScript(
+			[&AppliedScriptParameterCount](UNiagaraScript* Script)
+			{
+				AppliedScriptParameterCount += ConfigureExtractionSmokeSignalNiagaraScript(Script);
+			});
+
+		System->InvalidateCachedData();
+		System->RequestCompile(true);
+		System->PollForCompilationComplete(true);
+		System->PostEditChange();
+		System->MarkPackageDirty();
+
+		UE_LOG(
+			LogTunaSweeperEditor,
+			Log,
+			TEXT("Configured extraction smoke Niagara system. Applied %d rapid iteration parameter updates."),
+			AppliedScriptParameterCount);
+		return true;
+	}
+
+	UObject* LoadExtractionSmokeSignalSourceTemplate()
+	{
+		const TCHAR* SourceSystemPath =
+			TEXT("/NiagaraFluids/Templates/Gas/3D/Systems/Grid3D_Gas_SimpleParticleSource.Grid3D_Gas_SimpleParticleSource");
+		UObject* SourceSystem = LoadObject<UObject>(nullptr, SourceSystemPath);
 		if (!SourceSystem)
 		{
 			UE_LOG(
 				LogTunaSweeperEditor,
 				Error,
-				TEXT("Failed to load Niagara Fluids smoke template. Enable the NiagaraFluids plugin and ensure its content is available."));
+				TEXT("Failed to load extraction smoke source template: %s"),
+				SourceSystemPath);
+		}
+		return SourceSystem;
+	}
+
+	bool DeleteExistingExtractionSmokeSignalNiagaraSystem(const FString& ObjectPath)
+	{
+		UObject* ExistingSystem = LoadObject<UObject>(nullptr, *ObjectPath);
+		if (!ExistingSystem)
+		{
+			return true;
+		}
+
+		TArray<UObject*> ObjectsToDelete;
+		ObjectsToDelete.Add(ExistingSystem);
+		const int32 DeletedCount = ObjectTools::ForceDeleteObjects(ObjectsToDelete, false);
+		if (DeletedCount != ObjectsToDelete.Num())
+		{
+			UE_LOG(
+				LogTunaSweeperEditor,
+				Error,
+				TEXT("Failed to recreate %s because the existing asset could not be deleted."),
+				*ObjectPath);
+			return false;
+		}
+
+		CollectGarbage(RF_NoFlags);
+		return true;
+	}
+
+	bool EnsureExtractionSmokeSignalNiagaraSystem()
+	{
+		const FString ObjectPath = GetAssetObjectPath(EffectsAssetPath, ExtractionSmokeSignalNiagaraSystemAssetName);
+		if (!DeleteExistingExtractionSmokeSignalNiagaraSystem(ObjectPath))
+		{
+			return false;
+		}
+
+		UObject* SourceSystem = LoadExtractionSmokeSignalSourceTemplate();
+		if (!SourceSystem)
+		{
 			return false;
 		}
 
@@ -5907,8 +6099,15 @@ namespace TunaSweeperEditorSetup
 			return false;
 		}
 
-		DuplicatedSystem->Modify();
-		DuplicatedSystem->MarkPackageDirty();
+		if (UNiagaraSystem* NiagaraSystem = Cast<UNiagaraSystem>(DuplicatedSystem))
+		{
+			ConfigureExtractionSmokeSignalNiagaraSystem(NiagaraSystem);
+		}
+		else
+		{
+			DuplicatedSystem->Modify();
+			DuplicatedSystem->MarkPackageDirty();
+		}
 		return SaveAsset(DuplicatedSystem);
 	}
 
@@ -6360,51 +6559,84 @@ namespace TunaSweeperEditorSetup
 		UMaterialExpressionVectorParameter* ColorParameter = NewObject<UMaterialExpressionVectorParameter>(Material);
 		ColorParameter->Material = Material;
 		ColorParameter->ParameterName = TEXT("OutlineColor");
-		ColorParameter->DefaultValue = FLinearColor(0.12f, 0.92f, 1.0f, 1.0f);
+		ColorParameter->DefaultValue = FLinearColor(0.09f, 0.13f, 0.13f, 1.0f);
 		ColorParameter->MaterialExpressionEditorX = -360;
 		ColorParameter->MaterialExpressionEditorY = -90;
 		Material->GetExpressionCollection().AddExpression(ColorParameter);
 
-		UMaterialExpressionScalarParameter* IntensityParameter = NewObject<UMaterialExpressionScalarParameter>(Material);
-		IntensityParameter->Material = Material;
-		IntensityParameter->ParameterName = TEXT("Intensity");
-		IntensityParameter->DefaultValue = 12.0f;
-		IntensityParameter->MaterialExpressionEditorX = -360;
-		IntensityParameter->MaterialExpressionEditorY = 90;
-		Material->GetExpressionCollection().AddExpression(IntensityParameter);
+		UMaterialExpressionScalarParameter* StencilParameter = NewObject<UMaterialExpressionScalarParameter>(Material);
+		StencilParameter->Material = Material;
+		StencilParameter->ParameterName = TEXT("StencilValue");
+		StencilParameter->DefaultValue = 3.0f;
+		StencilParameter->MaterialExpressionEditorX = -360;
+		StencilParameter->MaterialExpressionEditorY = 70;
+		Material->GetExpressionCollection().AddExpression(StencilParameter);
 
-		UMaterialExpressionMultiply* EmissiveMultiply = NewObject<UMaterialExpressionMultiply>(Material);
-		EmissiveMultiply->Material = Material;
-		EmissiveMultiply->A.Connect(0, ColorParameter);
-		EmissiveMultiply->B.Connect(0, IntensityParameter);
-		EmissiveMultiply->MaterialExpressionEditorX = -100;
-		EmissiveMultiply->MaterialExpressionEditorY = 0;
-		Material->GetExpressionCollection().AddExpression(EmissiveMultiply);
+		UMaterialExpressionScalarParameter* ThicknessParameter = NewObject<UMaterialExpressionScalarParameter>(Material);
+		ThicknessParameter->Material = Material;
+		ThicknessParameter->ParameterName = TEXT("OutlineThickness");
+		ThicknessParameter->DefaultValue = 2.0f;
+		ThicknessParameter->MaterialExpressionEditorX = -360;
+		ThicknessParameter->MaterialExpressionEditorY = 230;
+		Material->GetExpressionCollection().AddExpression(ThicknessParameter);
 
-		UMaterialExpressionFresnel* FresnelExpression = NewObject<UMaterialExpressionFresnel>(Material);
-		FresnelExpression->Material = Material;
-		FresnelExpression->Exponent = 2.25f;
-		FresnelExpression->BaseReflectFraction = 0.0f;
-		FresnelExpression->MaterialExpressionEditorX = -100;
-		FresnelExpression->MaterialExpressionEditorY = 180;
-		Material->GetExpressionCollection().AddExpression(FresnelExpression);
+		UMaterialExpressionScalarParameter* OpacityParameter = NewObject<UMaterialExpressionScalarParameter>(Material);
+		OpacityParameter->Material = Material;
+		OpacityParameter->ParameterName = TEXT("OutlineOpacity");
+		OpacityParameter->DefaultValue = 0.92f;
+		OpacityParameter->MaterialExpressionEditorX = -360;
+		OpacityParameter->MaterialExpressionEditorY = 390;
+		Material->GetExpressionCollection().AddExpression(OpacityParameter);
 
-		UMaterialExpressionMultiply* EdgeOnlyMultiply = NewObject<UMaterialExpressionMultiply>(Material);
-		EdgeOnlyMultiply->Material = Material;
-		EdgeOnlyMultiply->A.Connect(0, EmissiveMultiply);
-		EdgeOnlyMultiply->B.Connect(0, FresnelExpression);
-		EdgeOnlyMultiply->MaterialExpressionEditorX = 170;
-		EdgeOnlyMultiply->MaterialExpressionEditorY = 40;
-		Material->GetExpressionCollection().AddExpression(EdgeOnlyMultiply);
+		UMaterialExpressionCustom* OutlineExpression = NewObject<UMaterialExpressionCustom>(Material);
+		OutlineExpression->Material = Material;
+		OutlineExpression->Description = TEXT("Sandbag custom stencil outline");
+		OutlineExpression->OutputType = CMOT_Float4;
+		OutlineExpression->MaterialExpressionEditorX = -40;
+		OutlineExpression->MaterialExpressionEditorY = 40;
+		OutlineExpression->Code = TEXT(
+			"float2 uv = GetDefaultSceneTextureUV(Parameters, 14);\n"
+			"float2 texel = View.ViewSizeAndInvSize.zw * max(1.0, OutlineThickness);\n"
+			"float targetRaw = StencilValue;\n"
+			"float targetNorm = StencilValue / 255.0;\n"
+			"float4 sceneColor = SceneTextureLookup(uv, 14, false);\n"
+			"#define MATCH_STENCIL(Value) max(1.0 - step(0.5, abs((Value) - targetRaw)), 1.0 - step(0.5 / 255.0, abs((Value) - targetNorm)))\n"
+			"float centerMask = MATCH_STENCIL(SceneTextureLookup(uv, 25, false).r);\n"
+			"float neighborMask = 0.0;\n"
+			"neighborMask = max(neighborMask, MATCH_STENCIL(SceneTextureLookup(uv + float2(texel.x, 0.0), 25, false).r));\n"
+			"neighborMask = max(neighborMask, MATCH_STENCIL(SceneTextureLookup(uv + float2(-texel.x, 0.0), 25, false).r));\n"
+			"neighborMask = max(neighborMask, MATCH_STENCIL(SceneTextureLookup(uv + float2(0.0, texel.y), 25, false).r));\n"
+			"neighborMask = max(neighborMask, MATCH_STENCIL(SceneTextureLookup(uv + float2(0.0, -texel.y), 25, false).r));\n"
+			"neighborMask = max(neighborMask, MATCH_STENCIL(SceneTextureLookup(uv + float2(texel.x, texel.y), 25, false).r));\n"
+			"neighborMask = max(neighborMask, MATCH_STENCIL(SceneTextureLookup(uv + float2(-texel.x, texel.y), 25, false).r));\n"
+			"neighborMask = max(neighborMask, MATCH_STENCIL(SceneTextureLookup(uv + float2(texel.x, -texel.y), 25, false).r));\n"
+			"neighborMask = max(neighborMask, MATCH_STENCIL(SceneTextureLookup(uv + float2(-texel.x, -texel.y), 25, false).r));\n"
+			"float edgeMask = saturate(neighborMask - centerMask);\n"
+			"#undef MATCH_STENCIL\n"
+			"return lerp(sceneColor, float4(OutlineColor.rgb, 1.0), edgeMask * saturate(OutlineOpacity));\n");
 
-		MaterialEditorOnly->BaseColor.Connect(0, EdgeOnlyMultiply);
-		MaterialEditorOnly->EmissiveColor.Connect(0, EdgeOnlyMultiply);
-		MaterialEditorOnly->Roughness.UseConstant = true;
-		MaterialEditorOnly->Roughness.Constant = 0.25f;
-		MaterialEditorOnly->Metallic.UseConstant = true;
-		MaterialEditorOnly->Metallic.Constant = 0.0f;
-		MaterialEditorOnly->Specular.UseConstant = true;
-		MaterialEditorOnly->Specular.Constant = 0.0f;
+		FCustomInput OutlineColorInput;
+		OutlineColorInput.InputName = TEXT("OutlineColor");
+		OutlineColorInput.Input.Connect(0, ColorParameter);
+		OutlineExpression->Inputs.Add(OutlineColorInput);
+
+		FCustomInput StencilInput;
+		StencilInput.InputName = TEXT("StencilValue");
+		StencilInput.Input.Connect(0, StencilParameter);
+		OutlineExpression->Inputs.Add(StencilInput);
+
+		FCustomInput ThicknessInput;
+		ThicknessInput.InputName = TEXT("OutlineThickness");
+		ThicknessInput.Input.Connect(0, ThicknessParameter);
+		OutlineExpression->Inputs.Add(ThicknessInput);
+
+		FCustomInput OpacityInput;
+		OpacityInput.InputName = TEXT("OutlineOpacity");
+		OpacityInput.Input.Connect(0, OpacityParameter);
+		OutlineExpression->Inputs.Add(OpacityInput);
+
+		Material->GetExpressionCollection().AddExpression(OutlineExpression);
+		MaterialEditorOnly->EmissiveColor.Connect(0, OutlineExpression);
 
 		Material->PostEditChange();
 		Material->MarkPackageDirty();
@@ -10875,6 +11107,20 @@ public:
 			TunaSweeperExperimentalVegetation::EnsureTurbulentConiferPrototypeAssets();
 
 			if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperTurbulentConiferQuit")))
+			{
+				FPlatformMisc::RequestExit(false);
+				return;
+			}
+		}
+
+		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperRebuildExplosiveBarrel")))
+		{
+			if (TunaSweeperEditorSetup::EnsureExplosiveBarrelAssets())
+			{
+				FTunaSweeperEditorRunOnce::MarkCompleted(TunaSweeperEditorSetup::ExplosiveBarrelTaskId);
+			}
+
+			if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperExplosiveBarrelSetupQuit")))
 			{
 				FPlatformMisc::RequestExit(false);
 				return;

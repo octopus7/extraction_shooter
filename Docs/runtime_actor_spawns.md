@@ -13,10 +13,11 @@
 
 파일: `TunaSweeper/Content/Data/GameplayInteractionSpawns.json`
 
-현재 `RaidMap` 초기 배치:
+현재 주요 초기 배치:
 
 | spawn_id | spawn_type | 주요 데이터 |
 | --- | --- | --- |
+| `TS_ShootingPracticeDummy_01` | `shooting_practice_dummy` | `BunkerMap` 사격 연습용 허수아비. 체력 `100`, 크리티컬 `3x`, 헤드샷 `6x`, 2초 회복 |
 | `TS_Travel_ToBunker` | `level_travel` | 레이드 시작 위치의 직접 진입 복귀 루트. `BunkerMap` 이동, `To Bunker`, 전환 영상/문구 |
 | `TS_ExtractionPoint_East` | `extraction_point` | 추출 포인트 복귀 루트. `BunkerMap` 이동, 4초 체류, 반경 `300` |
 | `TS_PickupItem_Sample` | `pickup_item` | `item_id=1001`, `item_quantity=1` |
@@ -65,7 +66,7 @@ File: `TunaSweeper/Content/Data/GameplayInteractionSpawns.json`
 
 `sandbag_cover` rows create `ATunaSweeperSandbagCoverActor` through `BP_SandbagCover`. The actor blocks pawns and projectiles, takes projectile damage, and destroys itself when health reaches zero.
 
-When the player is within `passthrough_radius` of the cover bounds, the cover shows a bright outline and player-fired projectiles ignore that cover for the shot. Enemy projectiles still collide with and damage the cover, so shots blocked by the sandbags do not continue into the player.
+When the player is within `passthrough_radius` of the cover bounds, the cover writes stencil `3` to CustomDepth through a single invisible proxy mesh and the player camera applies `/Game/Interaction/M_SandbagCover_Outline` as a screen-space NPR-style solid silhouette outline. The outline color and opacity are controlled by the material parameters `OutlineColor` and `OutlineOpacity`, and the proxy prevents internal bag seams from drawing as outline lines. Player-fired projectiles ignore that cover for the shot. Enemy projectiles still collide with and damage the cover, so shots blocked by the sandbags do not continue into the player.
 
 The source texture generated with imagegen is stored at `TunaSweeper/Content/SourceArt/SandbagCover/T_SandbagCover_Burlap_Source.png`; the editor import command creates `/Game/Interaction/T_SandbagCover_Burlap`, `/Game/Interaction/M_SandbagCover_Burlap`, `/Game/Interaction/M_SandbagCover_Outline`, and `/Game/Interaction/BP_SandbagCover`.
 
@@ -90,3 +91,17 @@ Supported fields:
 - `icon_offset`: Optional map-widget pixel offset `[x, y]` for the icon.
 
 Current overlays mark `TS_Travel_ToBunker` as the start location and `TS_ExtractionPoint_East` as the extraction point.
+
+## Static Mesh Prop
+
+File: `TunaSweeper/Content/Data/GameplayInteractionSpawns.json`
+
+`static_mesh_prop` rows create an `AStaticMeshActor` at runtime. Required fields are `level_name`, `spawn_id`, `spawn_type`, `location`, and `static_mesh`. Optional fields include `actor_class`, `static_mesh_materials`, `static_mesh_relative_location`, `static_mesh_relative_rotation`, `static_mesh_relative_scale`, and `collision_enabled`.
+
+`TS_TurbulentConiferPrototype_01` places `/Game/Prototype/SM_TurbulentConiferPrototype` on `RaidMap` at `[3000.0, -760.0, 0.0]` with the generated canopy and short trunk materials assigned explicitly.
+
+## Shooting Practice Dummy
+
+File: `TunaSweeper/Content/Data/GameplayInteractionSpawns.json`
+
+`shooting_practice_dummy` rows create `ATunaSweeperShootingPracticeDummyActor`. The dummy is non-lethal and never reaches zero health; it clamps to a minimum health value, then regenerates back to full over `health_recovery_seconds` while not taking new damage. Point-damage hit components choose the multiplier: body is normal, the orange plate is critical, and the red center plate/head is headshot.

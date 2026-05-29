@@ -14,12 +14,6 @@ namespace
 	const TCHAR* DefaultSandbagOutlineMaterialPath = TEXT("/Game/Interaction/M_SandbagCover_Outline.M_SandbagCover_Outline");
 	const TCHAR* FallbackVertexColorMaterialPath = TEXT("/Game/Prototype/M_Voxel_VertexColor.M_Voxel_VertexColor");
 
-	struct FSandbagMeshPiece
-	{
-		FVector Center = FVector::ZeroVector;
-		FVector Extent = FVector::ZeroVector;
-	};
-
 	FVector MakeSafeBoxExtent(const FVector& InBoxExtent)
 	{
 		return FVector(
@@ -125,8 +119,11 @@ ATunaSweeperSandbagCoverActor::ATunaSweeperSandbagCoverActor()
 	OutlineMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	OutlineMesh->SetGenerateOverlapEvents(false);
 	OutlineMesh->SetCastShadow(false);
-	OutlineMesh->SetHiddenInGame(true);
-	OutlineMesh->SetVisibility(false);
+	OutlineMesh->SetRenderInMainPass(false);
+	OutlineMesh->SetRenderCustomDepth(false);
+	OutlineMesh->SetCustomDepthStencilValue(3);
+	OutlineMesh->SetHiddenInGame(false);
+	OutlineMesh->SetVisibility(true);
 
 	VisualMaterial = TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath(DefaultSandbagMaterialPath));
 	OutlineMaterial = TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath(DefaultSandbagOutlineMaterialPath));
@@ -289,7 +286,6 @@ void ATunaSweeperSandbagCoverActor::RebuildMeshes()
 	TArray<FVector2D> UVs;
 	TArray<FLinearColor> VertexColors;
 	TArray<FProcMeshTangent> Tangents;
-	TArray<FSandbagMeshPiece> MeshPieces;
 
 	constexpr int32 LayerCount = 3;
 	constexpr int32 DepthCount = 2;
@@ -321,7 +317,6 @@ void ATunaSweeperSandbagCoverActor::RebuildMeshes()
 					0.52f * Shade,
 					1.0f);
 				AddBox(Vertices, Triangles, Normals, UVs, VertexColors, Tangents, BagCenter, BagExtent, BagColor);
-				MeshPieces.Add(FSandbagMeshPiece{ BagCenter, BagExtent });
 			}
 		}
 	}
@@ -336,6 +331,7 @@ void ATunaSweeperSandbagCoverActor::RebuildMeshes()
 		VertexColors,
 		Tangents,
 		false);
+	VisualMesh->SetRenderCustomDepth(false);
 
 	Vertices.Reset();
 	Triangles.Reset();
@@ -344,23 +340,17 @@ void ATunaSweeperSandbagCoverActor::RebuildMeshes()
 	VertexColors.Reset();
 	Tangents.Reset();
 
-	const float T = FMath::Max(0.5f, OutlineThickness);
-	const FLinearColor OutlineColor(0.15f, 0.95f, 1.0f, 1.0f);
-
-	for (const FSandbagMeshPiece& MeshPiece : MeshPieces)
-	{
-		AddBox(
-			Vertices,
-			Triangles,
-			Normals,
-			UVs,
-			VertexColors,
-			Tangents,
-			MeshPiece.Center,
-			MeshPiece.Extent + FVector(T),
-			OutlineColor);
-	}
-
+	const float ProxyOutset = FMath::Max(1.0f, OutlineThickness);
+	AddBox(
+		Vertices,
+		Triangles,
+		Normals,
+		UVs,
+		VertexColors,
+		Tangents,
+		FVector(0.0f, 0.0f, BoxExtent.Z),
+		BoxExtent + FVector(ProxyOutset, ProxyOutset, ProxyOutset * 0.35f),
+		FLinearColor::White);
 	OutlineMesh->ClearAllMeshSections();
 	OutlineMesh->CreateMeshSection_LinearColor(
 		0,
@@ -371,6 +361,10 @@ void ATunaSweeperSandbagCoverActor::RebuildMeshes()
 		VertexColors,
 		Tangents,
 		false);
+	OutlineMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	OutlineMesh->SetRenderInMainPass(false);
+	OutlineMesh->SetHiddenInGame(false);
+	OutlineMesh->SetVisibility(true, true);
 	SetOutlineActive(bOutlineActive);
 }
 
@@ -390,14 +384,7 @@ void ATunaSweeperSandbagCoverActor::ApplyMaterials()
 		}
 	}
 
-	if (OutlineMesh)
-	{
-		DynamicOutlineMaterial = nullptr;
-		if (UMaterialInterface* LoadedOutlineMaterial = OutlineMaterial.LoadSynchronous())
-		{
-			DynamicOutlineMaterial = OutlineMesh->CreateDynamicMaterialInstance(0, LoadedOutlineMaterial);
-		}
-	}
+	DynamicOutlineMaterial = nullptr;
 }
 
 void ATunaSweeperSandbagCoverActor::UpdateDamageVisual()
@@ -422,16 +409,17 @@ void ATunaSweeperSandbagCoverActor::SetOutlineActive(bool bEnabled)
 {
 	bOutlineActive = bEnabled && !bCoverDestroyed;
 
-	if (OutlineMesh)
-	{
-		OutlineMesh->SetHiddenInGame(!bOutlineActive);
-		OutlineMesh->SetVisibility(bOutlineActive, true);
-	}
-
 	if (VisualMesh)
 	{
-		VisualMesh->SetRenderCustomDepth(bOutlineActive);
+		VisualMesh->SetRenderCustomDepth(false);
 		VisualMesh->SetCustomDepthStencilValue(3);
+	}
+	if (OutlineMesh)
+	{
+		OutlineMesh->SetRenderCustomDepth(bOutlineActive);
+		OutlineMesh->SetCustomDepthStencilValue(3);
+		OutlineMesh->SetHiddenInGame(false);
+		OutlineMesh->SetVisibility(true, true);
 	}
 }
 

@@ -36,6 +36,24 @@ protected:
 	TObjectPtr<UStaticMeshComponent> ShockwaveSprite;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UStaticMeshComponent> GroundSmokeSpriteA;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UStaticMeshComponent> GroundSmokeSpriteB;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UStaticMeshComponent> GroundSmokeSpriteC;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UStaticMeshComponent> GroundSmokeSpriteD;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UStaticMeshComponent> GroundSmokeSpriteE;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UStaticMeshComponent> GroundSmokeSpriteF;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UStaticMeshComponent> FireSprite;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
@@ -72,6 +90,9 @@ protected:
 	float TotalDurationSeconds = 0.72f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Effect", meta = (ClampMin = "1.0", UIMin = "1.0"))
+	float ResidualSmokeDurationMultiplier = 4.2f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Effect", meta = (ClampMin = "1.0", UIMin = "1.0"))
 	float EffectRadiusCm = 210.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Effect", meta = (ClampMin = "0.0", UIMin = "0.0"))
@@ -96,6 +117,24 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<UMaterialInstanceDynamic> ShockwaveDynamicMaterial;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UMaterialInstanceDynamic> GroundSmokeDynamicMaterialA;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UMaterialInstanceDynamic> GroundSmokeDynamicMaterialB;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UMaterialInstanceDynamic> GroundSmokeDynamicMaterialC;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UMaterialInstanceDynamic> GroundSmokeDynamicMaterialD;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UMaterialInstanceDynamic> GroundSmokeDynamicMaterialE;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UMaterialInstanceDynamic> GroundSmokeDynamicMaterialF;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UMaterialInstanceDynamic> FireDynamicMaterial;

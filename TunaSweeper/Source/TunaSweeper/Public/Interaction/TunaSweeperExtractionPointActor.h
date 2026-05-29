@@ -14,9 +14,7 @@ class UProceduralMeshComponent;
 class USceneComponent;
 class USphereComponent;
 class UStaticMeshComponent;
-class UTunaSweeperExtractionProgressWidget;
 class UTunaSweeperLevelTransitionWidget;
-class UWidgetComponent;
 
 UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API ATunaSweeperExtractionPointActor : public AActor
@@ -35,7 +33,6 @@ public:
 		float InExtractionRadius,
 		float InExtractionHoldSeconds,
 		float InRadiusRingWidth,
-		TSoftClassPtr<UTunaSweeperExtractionProgressWidget> InProgressWidgetClass,
 		TSoftObjectPtr<UNiagaraSystem> InExtractionParticleSystem,
 		TSoftObjectPtr<UMaterialInterface> InRadiusVisualMaterial,
 		TSoftObjectPtr<UMediaSource> InTransitionMediaSource,
@@ -62,6 +59,7 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<USceneComponent> SceneRoot;
@@ -74,9 +72,6 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UNiagaraComponent> ExtractionEffectComponent;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<UWidgetComponent> ProgressWidgetComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TArray<TObjectPtr<UStaticMeshComponent>> FallbackParticleMeshes;
@@ -112,13 +107,25 @@ protected:
 	TSoftObjectPtr<UNiagaraSystem> ExtractionParticleSystem;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Extraction|Effect|Niagara")
-	FVector ExtractionNiagaraRelativeLocation = FVector(0.0f, 0.0f, 10.0f);
+	FVector ExtractionNiagaraRelativeLocation = FVector::ZeroVector;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Extraction|Effect|Niagara")
-	FRotator ExtractionNiagaraRelativeRotation = FRotator(0.0f, 0.0f, 90.0f);
+	FRotator ExtractionNiagaraRelativeRotation = FRotator::ZeroRotator;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Extraction|Effect|Niagara")
 	FVector ExtractionNiagaraRelativeScale = FVector(1.0f, 1.0f, 1.0f);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Extraction|Effect|Niagara")
+	FVector ExtractionNiagaraSourceOffset = FVector(0.0f, 0.0f, 8.0f);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Extraction|Effect|Niagara")
+	FVector ExtractionNiagaraSourceNonUniformScale = FVector(2.8f, 1.45f, 0.16f);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Extraction|Effect|Niagara", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float ExtractionNiagaraSourceUpVelocity = 185.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Extraction|Effect|Niagara")
+	bool bHideExtractionNiagaraDebugBounds = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Extraction|Effect")
 	bool bEnableFallbackParticleEffect = true;
@@ -171,18 +178,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Extraction|Effect|Smoke Signal", meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float SmokeSignalHorizontalSpread = 62.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Extraction|Progress")
-	TSoftClassPtr<UTunaSweeperExtractionProgressWidget> ProgressWidgetClass;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Extraction|Progress")
-	FVector2D ProgressWidgetDrawSize = FVector2D(180.0f, 36.0f);
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Extraction|Progress")
-	float ProgressWidgetHeightOffset = 200.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Extraction|Progress")
-	bool bShowProgressWidget = true;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Extraction|Transition")
 	TSoftObjectPtr<UMediaSource> TransitionMediaSource;
 
@@ -204,9 +199,8 @@ private:
 	void ApplyRadiusVisualMaterial();
 	void RefreshEffectComponent();
 	void ApplyExtractionNiagaraParameters();
-	void RefreshProgressWidgetComponent();
 	void UpdateExtractionProgress(float DeltaSeconds);
-	void UpdateProgressWidget();
+	void UpdateHudProgressWidget();
 	void ResetHoldProgress();
 	bool IsPawnInsideExtractionArea(const APawn* Pawn) const;
 	bool CanExtractPawn(const APawn* Pawn) const;

@@ -19,6 +19,7 @@
 #include "Interaction/TunaSweeperPickupItemActor.h"
 #include "Interaction/TunaSweeperSandbagCoverActor.h"
 #include "Interaction/TunaSweeperSelfDestructInteractableActor.h"
+#include "Interaction/TunaSweeperShootingPracticeDummyActor.h"
 #include "Interaction/TunaSweeperTransparentObstacleActor.h"
 #include "Interaction/TunaSweeperWarpPointActor.h"
 #include "Interaction/TunaSweeperWorldProgressActor.h"
@@ -31,7 +32,6 @@
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
 #include "Sound/SoundBase.h"
-#include "UI/TunaSweeperExtractionProgressWidget.h"
 #include "UI/TunaSweeperInteractionMarkerWidget.h"
 #include "UObject/UObjectGlobals.h"
 
@@ -57,6 +57,7 @@ namespace TunaSweeperEnemySpawn
 	const TCHAR* DefaultSandbagCoverClassPath = TEXT("/Game/Interaction/BP_SandbagCover.BP_SandbagCover_C");
 	const TCHAR* DefaultExplosiveBarrelClassPath = TEXT("/Game/Interaction/BP_ExplosiveBarrel.BP_ExplosiveBarrel_C");
 	const TCHAR* DefaultStaticMeshPropClassPath = TEXT("/Script/Engine.StaticMeshActor");
+	const TCHAR* DefaultShootingPracticeDummyClassPath = TEXT("/Script/TunaSweeper.TunaSweeperShootingPracticeDummyActor");
 	const TCHAR* DefaultRollingBomberClassPath = TEXT("/Script/TunaSweeper.TunaSweeperRollingBomber");
 	const TCHAR* DefaultRollingBomberLaunchSoundPath =
 		TEXT("/Game/Audio/SFX/SFX_RollingBomberSpawnerLaunch_FM.SFX_RollingBomberSpawnerLaunch_FM");
@@ -294,6 +295,21 @@ namespace TunaSweeperEnemySpawn
 		{
 			return UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::ExplosiveBarrel;
 		}
+		if (SpawnType == TEXT("static_mesh_prop") ||
+			SpawnType == TEXT("staticmeshprop") ||
+			SpawnType == TEXT("static_mesh") ||
+			SpawnType == TEXT("mesh_prop") ||
+			SpawnType == TEXT("prop_static_mesh"))
+		{
+			return UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::StaticMeshProp;
+		}
+		if (SpawnType == TEXT("shooting_practice_dummy") ||
+			SpawnType == TEXT("practice_dummy") ||
+			SpawnType == TEXT("target_dummy") ||
+			SpawnType == TEXT("shooting_dummy"))
+		{
+			return UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::ShootingPracticeDummy;
+		}
 
 		return UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::Unknown;
 	}
@@ -323,6 +339,10 @@ namespace TunaSweeperEnemySpawn
 			return DefaultSandbagCoverClassPath;
 		case UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::ExplosiveBarrel:
 			return DefaultExplosiveBarrelClassPath;
+		case UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::StaticMeshProp:
+			return DefaultStaticMeshPropClassPath;
+		case UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::ShootingPracticeDummy:
+			return DefaultShootingPracticeDummyClassPath;
 		default:
 			return nullptr;
 		}
@@ -349,6 +369,10 @@ namespace TunaSweeperEnemySpawn
 			return FText::FromString(TEXT("Sandbag Cover"));
 		case UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::ExplosiveBarrel:
 			return FText::FromString(TEXT("Explosive Barrel"));
+		case UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::StaticMeshProp:
+			return FText::GetEmpty();
+		case UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::ShootingPracticeDummy:
+			return FText::FromString(TEXT("Practice Dummy"));
 		default:
 			return FText::GetEmpty();
 		}
@@ -667,6 +691,65 @@ bool UTunaSweeperEnemySpawnSubsystem::EnsureRaidRuntimeActorsSpawnedForWorld(UWo
 					*SpawnDefinition.LevelName.ToString(),
 					*SpawnDefinition.SpawnId.ToString());
 				continue;
+			}
+
+			if (!SpawnDefinition.SpawnId.IsNone())
+			{
+				TArray<AActor*> ExistingActorsWithSpawnId;
+				UGameplayStatics::GetAllActorsWithTag(World, SpawnDefinition.SpawnId, ExistingActorsWithSpawnId);
+				for (AActor* ExistingActorWithSpawnId : ExistingActorsWithSpawnId)
+				{
+					if (!IsValid(ExistingActorWithSpawnId))
+					{
+						continue;
+					}
+
+					ExistingActorWithSpawnId->SetActorHiddenInGame(true);
+					ExistingActorWithSpawnId->SetActorEnableCollision(false);
+					ExistingActorWithSpawnId->Destroy();
+				}
+
+				if (ExistingActorsWithSpawnId.Num() > 0)
+				{
+					UE_LOG(
+						LogTunaSweeperEnemySpawn,
+						Log,
+						TEXT("Removed %d existing gameplay interaction actor(s) with spawn id %s before spawning JSON actor."),
+						ExistingActorsWithSpawnId.Num(),
+						*SpawnDefinition.SpawnId.ToString());
+				}
+			}
+
+			TArray<AActor*> ExistingActorsAtSpawnLocation;
+			UGameplayStatics::GetAllActorsOfClass(World, LoadedActorClass, ExistingActorsAtSpawnLocation);
+			int32 RemovedActorCountAtSpawnLocation = 0;
+			for (AActor* ExistingActorAtSpawnLocation : ExistingActorsAtSpawnLocation)
+			{
+				if (!IsValid(ExistingActorAtSpawnLocation))
+				{
+					continue;
+				}
+
+				if (!ExistingActorAtSpawnLocation->GetActorLocation().Equals(SpawnDefinition.Location, 2.0f))
+				{
+					continue;
+				}
+
+				ExistingActorAtSpawnLocation->SetActorHiddenInGame(true);
+				ExistingActorAtSpawnLocation->SetActorEnableCollision(false);
+				ExistingActorAtSpawnLocation->Destroy();
+				++RemovedActorCountAtSpawnLocation;
+			}
+
+			if (RemovedActorCountAtSpawnLocation > 0)
+			{
+				UE_LOG(
+					LogTunaSweeperEnemySpawn,
+					Log,
+					TEXT("Removed %d existing gameplay interaction actor(s) of class %s at JSON spawn location before spawning %s."),
+					RemovedActorCountAtSpawnLocation,
+					*GetNameSafe(LoadedActorClass),
+					*SpawnDefinition.SpawnId.ToString());
 			}
 
 			const FTransform SpawnTransform(SpawnDefinition.Rotation, SpawnDefinition.Location, SpawnDefinition.Scale);
@@ -1376,7 +1459,6 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadGameplayInteractionActorSpawnData(bool
 		double NumericExtractionRadiusMeters = 0.0;
 		double NumericExtractionHoldSeconds = 4.0;
 		double NumericExtractionRadiusRingWidth = 4.8;
-		FString ExtractionProgressWidgetClassPath;
 		FString ExtractionParticleSystemPath;
 		FString ExtractionRadiusVisualMaterialPath;
 		JsonObject->TryGetNumberField(TEXT("extraction_radius"), NumericExtractionRadius);
@@ -1387,18 +1469,11 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadGameplayInteractionActorSpawnData(bool
 		}
 		JsonObject->TryGetNumberField(TEXT("extraction_hold_seconds"), NumericExtractionHoldSeconds);
 		JsonObject->TryGetNumberField(TEXT("extraction_radius_ring_width"), NumericExtractionRadiusRingWidth);
-		JsonObject->TryGetStringField(TEXT("extraction_progress_widget_class"), ExtractionProgressWidgetClassPath);
 		JsonObject->TryGetStringField(TEXT("extraction_particle_system"), ExtractionParticleSystemPath);
 		JsonObject->TryGetStringField(TEXT("extraction_radius_visual_material"), ExtractionRadiusVisualMaterialPath);
 		SpawnDefinition.ExtractionRadius = FMath::Max(1.0f, static_cast<float>(NumericExtractionRadius));
 		SpawnDefinition.ExtractionHoldSeconds = FMath::Max(0.1f, static_cast<float>(NumericExtractionHoldSeconds));
 		SpawnDefinition.ExtractionRadiusRingWidth = FMath::Max(1.0f, static_cast<float>(NumericExtractionRadiusRingWidth));
-		const FString TrimmedExtractionProgressWidgetClassPath = ExtractionProgressWidgetClassPath.TrimStartAndEnd();
-		if (!TrimmedExtractionProgressWidgetClassPath.IsEmpty())
-		{
-			SpawnDefinition.ExtractionProgressWidgetClass = TSoftClassPtr<UTunaSweeperExtractionProgressWidget>(
-				FSoftObjectPath(TrimmedExtractionProgressWidgetClassPath));
-		}
 		const FString TrimmedExtractionParticleSystemPath = ExtractionParticleSystemPath.TrimStartAndEnd();
 		if (!TrimmedExtractionParticleSystemPath.IsEmpty())
 		{
@@ -1602,6 +1677,97 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadGameplayInteractionActorSpawnData(bool
 			0.05f,
 			static_cast<float>(NumericExplosiveBarrelExplosionDurationSeconds));
 
+		const FString StaticMeshPropMeshPath = TunaSweeperEnemySpawn::ReadFirstStringField(
+			JsonObject,
+			TEXT("static_mesh"),
+			TEXT("mesh"),
+			TEXT("static_mesh_prop_mesh"));
+		if (!StaticMeshPropMeshPath.IsEmpty())
+		{
+			SpawnDefinition.StaticMeshPropMesh = TSoftObjectPtr<UStaticMesh>(
+				FSoftObjectPath(StaticMeshPropMeshPath));
+		}
+
+		const TArray<TSharedPtr<FJsonValue>>* StaticMeshPropMaterialValues = nullptr;
+		if (JsonObject->TryGetArrayField(TEXT("static_mesh_materials"), StaticMeshPropMaterialValues) ||
+			JsonObject->TryGetArrayField(TEXT("materials"), StaticMeshPropMaterialValues))
+		{
+			for (const TSharedPtr<FJsonValue>& MaterialValue : *StaticMeshPropMaterialValues)
+			{
+				if (!MaterialValue.IsValid())
+				{
+					continue;
+				}
+
+				const FString MaterialPath = MaterialValue->AsString().TrimStartAndEnd();
+				if (!MaterialPath.IsEmpty())
+				{
+					SpawnDefinition.StaticMeshPropMaterials.Add(
+						TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath(MaterialPath)));
+				}
+			}
+		}
+		else
+		{
+			const FString StaticMeshPropMaterialPath = TunaSweeperEnemySpawn::ReadFirstStringField(
+				JsonObject,
+				TEXT("static_mesh_material"),
+				TEXT("material"));
+			if (!StaticMeshPropMaterialPath.IsEmpty())
+			{
+				SpawnDefinition.StaticMeshPropMaterials.Add(
+					TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath(StaticMeshPropMaterialPath)));
+			}
+		}
+
+		FVector StaticMeshPropRelativeLocation = SpawnDefinition.StaticMeshPropRelativeLocation;
+		if (!TunaSweeperEnemySpawn::TryReadVectorField(JsonObject, TEXT("static_mesh_relative_location"), StaticMeshPropRelativeLocation))
+		{
+			TunaSweeperEnemySpawn::TryReadVectorField(JsonObject, TEXT("mesh_relative_location"), StaticMeshPropRelativeLocation);
+		}
+		FRotator StaticMeshPropRelativeRotation = SpawnDefinition.StaticMeshPropRelativeRotation;
+		if (!TunaSweeperEnemySpawn::TryReadRotatorField(JsonObject, TEXT("static_mesh_relative_rotation"), StaticMeshPropRelativeRotation))
+		{
+			TunaSweeperEnemySpawn::TryReadRotatorField(JsonObject, TEXT("mesh_relative_rotation"), StaticMeshPropRelativeRotation);
+		}
+		FVector StaticMeshPropRelativeScale = SpawnDefinition.StaticMeshPropRelativeScale;
+		if (!TunaSweeperEnemySpawn::TryReadVectorField(JsonObject, TEXT("static_mesh_relative_scale"), StaticMeshPropRelativeScale))
+		{
+			TunaSweeperEnemySpawn::TryReadVectorField(JsonObject, TEXT("mesh_relative_scale"), StaticMeshPropRelativeScale);
+		}
+		JsonObject->TryGetBoolField(TEXT("static_mesh_collision_enabled"), SpawnDefinition.bStaticMeshPropCollisionEnabled);
+		JsonObject->TryGetBoolField(TEXT("collision_enabled"), SpawnDefinition.bStaticMeshPropCollisionEnabled);
+		SpawnDefinition.StaticMeshPropRelativeLocation = StaticMeshPropRelativeLocation;
+		SpawnDefinition.StaticMeshPropRelativeRotation = StaticMeshPropRelativeRotation;
+		SpawnDefinition.StaticMeshPropRelativeScale = FVector(
+			FMath::Max(0.01f, StaticMeshPropRelativeScale.X),
+			FMath::Max(0.01f, StaticMeshPropRelativeScale.Y),
+			FMath::Max(0.01f, StaticMeshPropRelativeScale.Z));
+
+		double NumericPracticeDummyMaxHealth = SpawnDefinition.PracticeDummyMaxHealth;
+		double NumericPracticeDummyCriticalMultiplier = SpawnDefinition.PracticeDummyCriticalDamageMultiplier;
+		double NumericPracticeDummyHeadshotMultiplier = SpawnDefinition.PracticeDummyHeadshotDamageMultiplier;
+		double NumericPracticeDummyHealthRecoverySeconds = SpawnDefinition.PracticeDummyHealthRecoverySeconds;
+		if (!JsonObject->TryGetNumberField(TEXT("practice_dummy_max_health"), NumericPracticeDummyMaxHealth))
+		{
+			if (!JsonObject->TryGetNumberField(TEXT("dummy_max_health"), NumericPracticeDummyMaxHealth))
+			{
+				JsonObject->TryGetNumberField(TEXT("max_health"), NumericPracticeDummyMaxHealth);
+			}
+		}
+		JsonObject->TryGetNumberField(TEXT("critical_damage_multiplier"), NumericPracticeDummyCriticalMultiplier);
+		JsonObject->TryGetNumberField(TEXT("headshot_damage_multiplier"), NumericPracticeDummyHeadshotMultiplier);
+		JsonObject->TryGetNumberField(TEXT("health_recovery_seconds"), NumericPracticeDummyHealthRecoverySeconds);
+		JsonObject->TryGetNumberField(TEXT("recovery_seconds"), NumericPracticeDummyHealthRecoverySeconds);
+		SpawnDefinition.PracticeDummyMaxHealth = FMath::Max(1.0f, static_cast<float>(NumericPracticeDummyMaxHealth));
+		SpawnDefinition.PracticeDummyCriticalDamageMultiplier =
+			FMath::Max(1.0f, static_cast<float>(NumericPracticeDummyCriticalMultiplier));
+		SpawnDefinition.PracticeDummyHeadshotDamageMultiplier = FMath::Max(
+			SpawnDefinition.PracticeDummyCriticalDamageMultiplier,
+			static_cast<float>(NumericPracticeDummyHeadshotMultiplier));
+		SpawnDefinition.PracticeDummyHealthRecoverySeconds =
+			FMath::Max(0.05f, static_cast<float>(NumericPracticeDummyHealthRecoverySeconds));
+
 		if (SpawnDefinition.SpawnType == EGameplayInteractionActorSpawnType::LevelTravel &&
 			SpawnDefinition.TargetLevelName.IsNone())
 		{
@@ -1618,6 +1784,12 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadGameplayInteractionActorSpawnData(bool
 			(SpawnDefinition.ContainerDefinitionId == INDEX_NONE || SpawnDefinition.ContentsId == INDEX_NONE))
 		{
 			UE_LOG(LogTunaSweeperEnemySpawn, Warning, TEXT("Skipping gameplay interaction actor spawn row %d: loot container identifiers are missing."), RowIndex);
+			continue;
+		}
+		if (SpawnDefinition.SpawnType == EGameplayInteractionActorSpawnType::StaticMeshProp &&
+			SpawnDefinition.StaticMeshPropMesh.IsNull())
+		{
+			UE_LOG(LogTunaSweeperEnemySpawn, Warning, TEXT("Skipping gameplay interaction actor spawn row %d: static mesh prop mesh is missing."), RowIndex);
 			continue;
 		}
 
@@ -1779,7 +1951,6 @@ void UTunaSweeperEnemySpawnSubsystem::ConfigureGameplayInteractionActor(
 				SpawnDefinition.ExtractionRadius,
 				SpawnDefinition.ExtractionHoldSeconds,
 				SpawnDefinition.ExtractionRadiusRingWidth,
-				SpawnDefinition.ExtractionProgressWidgetClass,
 				SpawnDefinition.ExtractionParticleSystem,
 				SpawnDefinition.ExtractionRadiusVisualMaterial,
 				SpawnDefinition.TransitionMediaSource,
@@ -1899,6 +2070,51 @@ void UTunaSweeperEnemySpawnSubsystem::ConfigureGameplayInteractionActor(
 				SpawnDefinition.ExplosiveBarrelExplosionEffectClass,
 				SpawnDefinition.ExplosiveBarrelExplosionVisualRadius,
 				SpawnDefinition.ExplosiveBarrelExplosionDurationSeconds);
+		}
+		break;
+	case EGameplayInteractionActorSpawnType::ShootingPracticeDummy:
+		if (ATunaSweeperShootingPracticeDummyActor* PracticeDummy = Cast<ATunaSweeperShootingPracticeDummyActor>(SpawnedActor))
+		{
+			PracticeDummy->ConfigurePracticeDummyDefaults(
+				SpawnDefinition.PracticeDummyMaxHealth,
+				SpawnDefinition.PracticeDummyCriticalDamageMultiplier,
+				SpawnDefinition.PracticeDummyHeadshotDamageMultiplier,
+				SpawnDefinition.PracticeDummyHealthRecoverySeconds);
+		}
+		break;
+	case EGameplayInteractionActorSpawnType::StaticMeshProp:
+		{
+			UStaticMeshComponent* MeshComponent = nullptr;
+			if (AStaticMeshActor* StaticMeshActor = Cast<AStaticMeshActor>(SpawnedActor))
+			{
+				MeshComponent = StaticMeshActor->GetStaticMeshComponent();
+			}
+			if (!MeshComponent)
+			{
+				MeshComponent = SpawnedActor->FindComponentByClass<UStaticMeshComponent>();
+			}
+			if (MeshComponent)
+			{
+				MeshComponent->SetMobility(EComponentMobility::Movable);
+				if (UStaticMesh* StaticMesh = SpawnDefinition.StaticMeshPropMesh.LoadSynchronous())
+				{
+					MeshComponent->SetStaticMesh(StaticMesh);
+				}
+				for (int32 MaterialIndex = 0; MaterialIndex < SpawnDefinition.StaticMeshPropMaterials.Num(); ++MaterialIndex)
+				{
+					if (UMaterialInterface* Material = SpawnDefinition.StaticMeshPropMaterials[MaterialIndex].LoadSynchronous())
+					{
+						MeshComponent->SetMaterial(MaterialIndex, Material);
+					}
+				}
+				MeshComponent->SetRelativeLocation(SpawnDefinition.StaticMeshPropRelativeLocation);
+				MeshComponent->SetRelativeRotation(SpawnDefinition.StaticMeshPropRelativeRotation);
+				MeshComponent->SetRelativeScale3D(SpawnDefinition.StaticMeshPropRelativeScale);
+				MeshComponent->SetCollisionEnabled(
+					SpawnDefinition.bStaticMeshPropCollisionEnabled
+						? ECollisionEnabled::QueryAndPhysics
+						: ECollisionEnabled::NoCollision);
+			}
 		}
 		break;
 	default:

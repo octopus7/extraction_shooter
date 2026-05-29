@@ -1,5 +1,18 @@
 [
   {
+    "level_name": "BunkerMap",
+    "spawn_id": "TS_ShootingPracticeDummy_01",
+    "spawn_type": "shooting_practice_dummy",
+    "actor_class": "/Script/TunaSweeper.TunaSweeperShootingPracticeDummyActor",
+    "max_health": 100.0,
+    "critical_damage_multiplier": 3.0,
+    "headshot_damage_multiplier": 6.0,
+    "health_recovery_seconds": 2.0,
+    "location": [1040.0, -120.0, 0.0],
+    "rotation": [0.0, 180.0, 0.0],
+    "scale": [1.0, 1.0, 1.0]
+  },
+  {
     "level_name": "RaidMap",
     "spawn_id": "TS_Travel_ToBunker",
     "spawn_type": "level_travel",
@@ -187,6 +200,20 @@
     "explosion_duration_seconds": 0.72,
     "location": [2020.0, 70.0, 0.0],
     "rotation": [0.0, -14.0, 0.0],
+    "scale": [1.0, 1.0, 1.0]
+  },
+  {
+    "level_name": "RaidMap",
+    "spawn_id": "TS_TurbulentConiferPrototype_01",
+    "spawn_type": "static_mesh_prop",
+    "actor_class": "/Script/Engine.StaticMeshActor",
+    "static_mesh": "/Game/Prototype/SM_TurbulentConiferPrototype.SM_TurbulentConiferPrototype",
+    "static_mesh_materials": [
+      "/Game/Prototype/M_TurbulentConiferCanopy.M_TurbulentConiferCanopy",
+      "/Game/Prototype/M_TurbulentConiferShortTrunk.M_TurbulentConiferShortTrunk"
+    ],
+    "location": [3000.0, -760.0, 0.0],
+    "rotation": [0.0, 32.0, 0.0],
     "scale": [1.0, 1.0, 1.0]
   }
 ]

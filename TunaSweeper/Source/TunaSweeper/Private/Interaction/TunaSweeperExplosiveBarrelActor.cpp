@@ -16,6 +16,7 @@ namespace
 	const TCHAR* DefaultDestroyedBarrelMeshPath = TEXT("/Game/Interaction/SM_ExplosiveBarrel_DestroyedBase.SM_ExplosiveBarrel_DestroyedBase");
 	const TCHAR* DefaultIntactBarrelMaterialPath = TEXT("/Game/Interaction/M_ExplosiveBarrel_Gray.M_ExplosiveBarrel_Gray");
 	const TCHAR* DefaultDestroyedBarrelMaterialPath = TEXT("/Game/Interaction/M_ExplosiveBarrel_CharredGray.M_ExplosiveBarrel_CharredGray");
+	const TCHAR* DefaultBarrelDetailMaterialPath = TEXT("/Game/Interaction/M_ExplosiveBarrel_Detail.M_ExplosiveBarrel_Detail");
 	const TCHAR* DefaultExplosionEffectClassPath = TEXT("/Script/TunaSweeper.TunaSweeperLocalExplosionEffectActor");
 
 	FVector MakeSafeExtent(const FVector& Extent)
@@ -42,8 +43,12 @@ ATunaSweeperExplosiveBarrelActor::ATunaSweeperExplosiveBarrelActor()
 
 	BarrelMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BarrelMesh"));
 	BarrelMeshComponent->SetupAttachment(RootComponent);
+	BarrelMeshComponent->SetRelativeLocation(FVector::ZeroVector);
+	BarrelMeshComponent->SetRelativeRotation(FRotator::ZeroRotator);
+	BarrelMeshComponent->SetRelativeScale3D(FVector::OneVector);
 	BarrelMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	BarrelMeshComponent->SetGenerateOverlapEvents(false);
+	BarrelMeshComponent->SetCastShadow(false);
 
 	DestroyedLoopEffectComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("DestroyedLoopEffect"));
 	DestroyedLoopEffectComponent->SetupAttachment(RootComponent);
@@ -176,6 +181,9 @@ void ATunaSweeperExplosiveBarrelActor::ApplyVisualState()
 	UStaticMesh* ActiveMesh = bBarrelDestroyed
 		? DestroyedBarrelMesh.LoadSynchronous()
 		: IntactBarrelMesh.LoadSynchronous();
+	BarrelMeshComponent->SetRelativeLocation(FVector::ZeroVector);
+	BarrelMeshComponent->SetRelativeRotation(FRotator::ZeroRotator);
+	BarrelMeshComponent->SetRelativeScale3D(FVector::OneVector);
 	BarrelMeshComponent->SetStaticMesh(ActiveMesh);
 
 	UMaterialInterface* ActiveMaterial = bBarrelDestroyed
@@ -185,9 +193,14 @@ void ATunaSweeperExplosiveBarrelActor::ApplyVisualState()
 	{
 		BarrelMeshComponent->SetMaterial(0, ActiveMaterial);
 	}
+	if (UMaterialInterface* DetailMaterial = LoadObject<UMaterialInterface>(nullptr, DefaultBarrelDetailMaterialPath))
+	{
+		BarrelMeshComponent->SetMaterial(1, DetailMaterial);
+	}
 
 	BarrelMeshComponent->SetHiddenInGame(false);
 	BarrelMeshComponent->SetVisibility(true, true);
+	BarrelMeshComponent->SetCastShadow(false);
 }
 
 void ATunaSweeperExplosiveBarrelActor::RefreshDestroyedLoopEffect()

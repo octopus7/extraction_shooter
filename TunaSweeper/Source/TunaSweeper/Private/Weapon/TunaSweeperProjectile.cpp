@@ -12,9 +12,47 @@
 #include "Kismet/GameplayStatics.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Materials/MaterialInterface.h"
+#include "Player/TunaSweeperPlayerController.h"
 #include "ProceduralMeshComponent.h"
 #include "TunaSweeperCollisionChannels.h"
+#include "UI/TunaSweeperGameHudWidget.h"
 #include "UObject/ConstructorHelpers.h"
+
+namespace
+{
+	ETunaSweeperDamageNumberType ResolveDamageNumberType(float BaseDamage, float AppliedDamage)
+	{
+		if (BaseDamage <= KINDA_SMALL_NUMBER || AppliedDamage <= 0.0f)
+		{
+			return ETunaSweeperDamageNumberType::Normal;
+		}
+
+		const float DamageRatio = AppliedDamage / BaseDamage;
+		if (DamageRatio >= 5.5f)
+		{
+			return ETunaSweeperDamageNumberType::Headshot;
+		}
+		if (DamageRatio >= 2.5f)
+		{
+			return ETunaSweeperDamageNumberType::Critical;
+		}
+
+		return ETunaSweeperDamageNumberType::Normal;
+	}
+
+	FVector ResolveDamageNumberLocation(const FHitResult& Hit, const AActor* OtherActor)
+	{
+		if (!OtherActor)
+		{
+			return Hit.ImpactPoint + FVector(0.0f, 0.0f, 42.0f);
+		}
+
+		FVector BoundsOrigin = FVector::ZeroVector;
+		FVector BoundsExtent = FVector::ZeroVector;
+		OtherActor->GetActorBounds(false, BoundsOrigin, BoundsExtent);
+		return FVector(Hit.ImpactPoint.X, Hit.ImpactPoint.Y, BoundsOrigin.Z + BoundsExtent.Z + 34.0f);
+	}
+}
 
 ATunaSweeperProjectile::ATunaSweeperProjectile()
 {
@@ -397,9 +435,17 @@ void ATunaSweeperProjectile::HandleHit(
 	float AppliedDamage = 0.0f;
 	if (DamageAmount > 0.0f)
 	{
-		AppliedDamage = UGameplayStatics::ApplyDamage(
+		FHitResult DamageHit = Hit;
+		if (OtherComp)
+		{
+			DamageHit.Component = OtherComp;
+		}
+		const FVector HitFromDirection = GetVelocity().GetSafeNormal();
+		AppliedDamage = UGameplayStatics::ApplyPointDamage(
 			OtherActor,
 			DamageAmount,
+			HitFromDirection.IsNearlyZero() ? GetActorForwardVector() : HitFromDirection,
+			DamageHit,
 			GetInstigatorController(),
 			this,
 			UDamageType::StaticClass());
@@ -408,6 +454,20 @@ void ATunaSweeperProjectile::HandleHit(
 	if (AppliedDamage > 0.0f)
 	{
 		SpawnHitEffect(Hit, OtherActor, OtherComp);
+		if (ATunaSweeperPlayerController* TunaPlayerController =
+			Cast<ATunaSweeperPlayerController>(GetInstigatorController()))
+		{
+			if (TunaPlayerController->IsLocalController())
+			{
+				if (UTunaSweeperGameHudWidget* GameHudWidget = TunaPlayerController->GetGameHudWidget())
+				{
+					GameHudWidget->ShowDamageNumber(
+						AppliedDamage,
+						ResolveDamageNumberLocation(Hit, OtherActor),
+						ResolveDamageNumberType(DamageAmount, AppliedDamage));
+				}
+			}
+		}
 	}
 
 	Destroy();

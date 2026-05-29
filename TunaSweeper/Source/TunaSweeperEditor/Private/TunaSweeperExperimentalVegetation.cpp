@@ -2028,7 +2028,7 @@ namespace TunaSweeperExperimentalVegetation
 			TEXT("float n2 = sin(dot(p, float3(-0.83f, 1.67f, 0.41f)) - Time * 1.37f + n1 * 1.40f);\n")
 			TEXT("float n3 = sin(dot(p, float3(0.37f, -1.29f, 2.11f)) + Time * 2.43f + n2 * 1.10f);\n")
 			TEXT("float n4 = sin(dot(p * 2.13f, float3(1.13f, 1.71f, -0.61f)) - Time * 1.91f + n1 * n2);\n")
-			TEXT("float tip = saturate(VertexColor.a);\n")
+			TEXT("float tip = saturate(MoveMask);\n")
 			TEXT("float mask = tip * tip * (3.0f - 2.0f * tip);\n")
 			TEXT("float2 dir = normalize(float2(n1 + 0.45f * n4, n2 - 0.35f * n3) + float2(0.001f, 0.002f));\n")
 			TEXT("float low = 0.65f + 0.35f * sin(dot(p, float3(0.23f, 0.19f, 0.31f)) + Time * 0.29f + n4);\n")
@@ -2044,10 +2044,10 @@ namespace TunaSweeperExperimentalVegetation
 		WorldPosInput.Input.Connect(0, WorldPositionExpression);
 		TurbulentOffsetExpression->Inputs.Add(WorldPosInput);
 
-		FCustomInput VertexColorInput;
-		VertexColorInput.InputName = TEXT("VertexColor");
-		VertexColorInput.Input.Connect(0, VertexColorExpression);
-		TurbulentOffsetExpression->Inputs.Add(VertexColorInput);
+		FCustomInput MoveMaskInput;
+		MoveMaskInput.InputName = TEXT("MoveMask");
+		MoveMaskInput.Input.Connect(4, VertexColorExpression);
+		TurbulentOffsetExpression->Inputs.Add(MoveMaskInput);
 
 		FCustomInput TimeInput;
 		TimeInput.InputName = TEXT("Time");

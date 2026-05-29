@@ -40,7 +40,7 @@ namespace
 ATunaSweeperLocalExplosionEffectActor::ATunaSweeperLocalExplosionEffectActor()
 {
 	PrimaryActorTick.bCanEverTick = true;
-	InitialLifeSpan = TotalDurationSeconds + 0.08f;
+	InitialLifeSpan = TotalDurationSeconds * ResidualSmokeDurationMultiplier + 0.08f;
 
 	SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("SceneRoot"));
 	RootComponent = SceneRoot;
@@ -50,6 +50,24 @@ ATunaSweeperLocalExplosionEffectActor::ATunaSweeperLocalExplosionEffectActor()
 
 	ShockwaveSprite = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ShockwaveSprite"));
 	ShockwaveSprite->SetupAttachment(RootComponent);
+
+	GroundSmokeSpriteA = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("GroundSmokeSpriteA"));
+	GroundSmokeSpriteA->SetupAttachment(RootComponent);
+
+	GroundSmokeSpriteB = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("GroundSmokeSpriteB"));
+	GroundSmokeSpriteB->SetupAttachment(RootComponent);
+
+	GroundSmokeSpriteC = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("GroundSmokeSpriteC"));
+	GroundSmokeSpriteC->SetupAttachment(RootComponent);
+
+	GroundSmokeSpriteD = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("GroundSmokeSpriteD"));
+	GroundSmokeSpriteD->SetupAttachment(RootComponent);
+
+	GroundSmokeSpriteE = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("GroundSmokeSpriteE"));
+	GroundSmokeSpriteE->SetupAttachment(RootComponent);
+
+	GroundSmokeSpriteF = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("GroundSmokeSpriteF"));
+	GroundSmokeSpriteF->SetupAttachment(RootComponent);
 
 	FireSprite = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("FireSprite"));
 	FireSprite->SetupAttachment(RootComponent);
@@ -67,14 +85,26 @@ ATunaSweeperLocalExplosionEffectActor::ATunaSweeperLocalExplosionEffectActor()
 	UStaticMesh* SpriteMesh = PlaneMesh.Succeeded() ? PlaneMesh.Object : nullptr;
 	ConfigureSpriteComponent(DistortionSprite, 0);
 	ConfigureSpriteComponent(ShockwaveSprite, 1);
-	ConfigureSpriteComponent(FireSprite, 2);
-	ConfigureSpriteComponent(SmokeSprite, 3);
-	ConfigureSpriteComponent(SmokeOffsetSpriteA, 4);
-	ConfigureSpriteComponent(SmokeOffsetSpriteB, 5);
+	ConfigureSpriteComponent(GroundSmokeSpriteA, 2);
+	ConfigureSpriteComponent(GroundSmokeSpriteB, 3);
+	ConfigureSpriteComponent(GroundSmokeSpriteC, 4);
+	ConfigureSpriteComponent(GroundSmokeSpriteD, 5);
+	ConfigureSpriteComponent(GroundSmokeSpriteE, 6);
+	ConfigureSpriteComponent(GroundSmokeSpriteF, 7);
+	ConfigureSpriteComponent(FireSprite, 8);
+	ConfigureSpriteComponent(SmokeSprite, 9);
+	ConfigureSpriteComponent(SmokeOffsetSpriteA, 10);
+	ConfigureSpriteComponent(SmokeOffsetSpriteB, 11);
 	if (SpriteMesh)
 	{
 		DistortionSprite->SetStaticMesh(SpriteMesh);
 		ShockwaveSprite->SetStaticMesh(SpriteMesh);
+		GroundSmokeSpriteA->SetStaticMesh(SpriteMesh);
+		GroundSmokeSpriteB->SetStaticMesh(SpriteMesh);
+		GroundSmokeSpriteC->SetStaticMesh(SpriteMesh);
+		GroundSmokeSpriteD->SetStaticMesh(SpriteMesh);
+		GroundSmokeSpriteE->SetStaticMesh(SpriteMesh);
+		GroundSmokeSpriteF->SetStaticMesh(SpriteMesh);
 		FireSprite->SetStaticMesh(SpriteMesh);
 		SmokeSprite->SetStaticMesh(SpriteMesh);
 		SmokeOffsetSpriteA->SetStaticMesh(SpriteMesh);
@@ -99,7 +129,7 @@ void ATunaSweeperLocalExplosionEffectActor::BeginPlay()
 	Super::BeginPlay();
 
 	ApplyDynamicMaterials();
-	SetLifeSpan(FMath::Max(0.08f, TotalDurationSeconds + 0.08f));
+	SetLifeSpan(FMath::Max(0.08f, TotalDurationSeconds * FMath::Max(1.0f, ResidualSmokeDurationMultiplier) + 0.08f));
 	UpdateEffect(0.0f);
 }
 
@@ -114,7 +144,7 @@ void ATunaSweeperLocalExplosionEffectActor::ConfigureExplosion(float InRadiusCm,
 {
 	EffectRadiusCm = FMath::Max(35.0f, InRadiusCm);
 	TotalDurationSeconds = FMath::Max(0.18f, InDurationSeconds);
-	SetLifeSpan(TotalDurationSeconds + 0.08f);
+	SetLifeSpan(TotalDurationSeconds * FMath::Max(1.0f, ResidualSmokeDurationMultiplier) + 0.08f);
 }
 
 void ATunaSweeperLocalExplosionEffectActor::ConfigureSpriteComponent(
@@ -159,6 +189,42 @@ void ATunaSweeperLocalExplosionEffectActor::ApplyDynamicMaterials()
 	}
 	if (LoadedSmokeMaterial)
 	{
+		if (GroundSmokeSpriteA)
+		{
+			GroundSmokeDynamicMaterialA = UMaterialInstanceDynamic::Create(LoadedSmokeMaterial, this);
+			GroundSmokeSpriteA->SetMaterial(0, GroundSmokeDynamicMaterialA);
+		}
+
+		if (GroundSmokeSpriteB)
+		{
+			GroundSmokeDynamicMaterialB = UMaterialInstanceDynamic::Create(LoadedSmokeMaterial, this);
+			GroundSmokeSpriteB->SetMaterial(0, GroundSmokeDynamicMaterialB);
+		}
+
+		if (GroundSmokeSpriteC)
+		{
+			GroundSmokeDynamicMaterialC = UMaterialInstanceDynamic::Create(LoadedSmokeMaterial, this);
+			GroundSmokeSpriteC->SetMaterial(0, GroundSmokeDynamicMaterialC);
+		}
+
+		if (GroundSmokeSpriteD)
+		{
+			GroundSmokeDynamicMaterialD = UMaterialInstanceDynamic::Create(LoadedSmokeMaterial, this);
+			GroundSmokeSpriteD->SetMaterial(0, GroundSmokeDynamicMaterialD);
+		}
+
+		if (GroundSmokeSpriteE)
+		{
+			GroundSmokeDynamicMaterialE = UMaterialInstanceDynamic::Create(LoadedSmokeMaterial, this);
+			GroundSmokeSpriteE->SetMaterial(0, GroundSmokeDynamicMaterialE);
+		}
+
+		if (GroundSmokeSpriteF)
+		{
+			GroundSmokeDynamicMaterialF = UMaterialInstanceDynamic::Create(LoadedSmokeMaterial, this);
+			GroundSmokeSpriteF->SetMaterial(0, GroundSmokeDynamicMaterialF);
+		}
+
 		if (SmokeSprite)
 		{
 			SmokeDynamicMaterial = UMaterialInstanceDynamic::Create(LoadedSmokeMaterial, this);
@@ -263,7 +329,9 @@ void ATunaSweeperLocalExplosionEffectActor::UpdateEffect(float DeltaSeconds)
 {
 	ElapsedSeconds += FMath::Max(0.0f, DeltaSeconds);
 	const float Duration = FMath::Max(0.01f, TotalDurationSeconds);
+	const float ResidualDuration = Duration * FMath::Max(1.0f, ResidualSmokeDurationMultiplier);
 	const float NormalizedTime = FMath::Clamp(ElapsedSeconds / Duration, 0.0f, 1.0f);
+	const float ResidualNormalizedTime = FMath::Clamp(ElapsedSeconds / ResidualDuration, 0.0f, 1.0f);
 	const int32 SafeFrameCount = FMath::Max(1, FlipbookFrameCount);
 	const int32 FireFrame = FMath::Clamp(
 		FMath::FloorToInt(NormalizedTime * static_cast<float>(SafeFrameCount)),
@@ -271,7 +339,7 @@ void ATunaSweeperLocalExplosionEffectActor::UpdateEffect(float DeltaSeconds)
 		SafeFrameCount - 1);
 	const int32 SmokeStartFrame = FMath::Clamp(SafeFrameCount / 2, 0, SafeFrameCount - 1);
 	const int32 SmokeFrame = FMath::Clamp(
-		SmokeStartFrame + FMath::FloorToInt(RangeAlpha(0.28f, 1.0f, NormalizedTime) * static_cast<float>(SafeFrameCount - SmokeStartFrame)),
+		SmokeStartFrame + FMath::FloorToInt(RangeAlpha(0.16f, 1.0f, ResidualNormalizedTime) * static_cast<float>(SafeFrameCount - SmokeStartFrame)),
 		SmokeStartFrame,
 		SafeFrameCount - 1);
 
@@ -325,10 +393,113 @@ void ATunaSweeperLocalExplosionEffectActor::UpdateEffect(float DeltaSeconds)
 		12.0f,
 		ShockOpacity * 0.82f);
 
-	const float SmokeReveal = SmoothStep01(RangeAlpha(0.12f, 0.32f, NormalizedTime));
-	const float SmokeFade = FadeOutAfter(0.68f, 1.0f, NormalizedTime);
-	const float SmokeOpacity = SmokeReveal * SmokeFade;
-	const float SmokeGrowth = SmoothStep01(RangeAlpha(0.12f, 1.0f, NormalizedTime));
+	const float GroundSmokeReveal = SmoothStep01(RangeAlpha(0.0f, 0.045f, ResidualNormalizedTime));
+	const float GroundSmokeFade = FadeOutAfter(0.72f, 1.0f, ResidualNormalizedTime);
+	const float GroundSmokeEarlyDensity = FMath::Lerp(1.55f, 1.0f, SmoothStep01(RangeAlpha(0.0f, 0.36f, ResidualNormalizedTime)));
+	const float GroundSmokeOpacity = GroundSmokeReveal * GroundSmokeFade * GroundSmokeEarlyDensity;
+	const float GroundSmokeGrowth = SmoothStep01(RangeAlpha(0.0f, 1.0f, ResidualNormalizedTime));
+	const auto UpdateGroundSmokeLayer =
+		[this, GroundSmokeOpacity, GroundSmokeGrowth](
+			UStaticMeshComponent* SpriteComponent,
+			UMaterialInstanceDynamic* DynamicMaterial,
+			int32 FrameOffset,
+			const FVector& Offset,
+			float StartDiameter,
+			float EndDiameter,
+			float RotationDegrees,
+			float RotationTravelDegrees,
+			const FLinearColor& TintColor,
+			float OpacityScale)
+		{
+			const float LayerOpacity = GroundSmokeOpacity * FMath::Max(0.0f, OpacityScale);
+			if (SpriteComponent)
+			{
+				SpriteComponent->SetRelativeLocation(Offset);
+				SetSpriteDiameter(SpriteComponent, FMath::Lerp(StartDiameter, EndDiameter, GroundSmokeGrowth));
+				SpriteComponent->SetRelativeRotation(FRotator(0.0f, 0.0f, RotationDegrees + GroundSmokeGrowth * RotationTravelDegrees));
+				SpriteComponent->SetVisibility(LayerOpacity > 0.01f);
+			}
+
+			UpdateSpriteMaterial(
+				DynamicMaterial,
+				FMath::Clamp(8 + FrameOffset + FMath::FloorToInt(GroundSmokeGrowth * 4.0f), 0, FMath::Max(0, FlipbookFrameCount - 1)),
+				TintColor,
+				0.0f,
+				LayerOpacity);
+		};
+
+	UpdateGroundSmokeLayer(
+		GroundSmokeSpriteA,
+		GroundSmokeDynamicMaterialA,
+		0,
+		FVector(0.0f, 0.0f, SpriteBaseHeightCm - 22.0f),
+		EffectRadiusCm * 1.10f,
+		EffectRadiusCm * 2.80f,
+		14.0f,
+		-54.0f,
+		FLinearColor(0.075f, 0.067f, 0.055f, 1.0f),
+		1.30f);
+	UpdateGroundSmokeLayer(
+		GroundSmokeSpriteB,
+		GroundSmokeDynamicMaterialB,
+		1,
+		FVector(EffectRadiusCm * -0.18f * GroundSmokeGrowth, EffectRadiusCm * 0.10f * GroundSmokeGrowth, SpriteBaseHeightCm - 17.0f),
+		EffectRadiusCm * 0.78f,
+		EffectRadiusCm * 2.10f,
+		-43.0f,
+		82.0f,
+		FLinearColor(0.095f, 0.086f, 0.070f, 1.0f),
+		1.02f);
+	UpdateGroundSmokeLayer(
+		GroundSmokeSpriteC,
+		GroundSmokeDynamicMaterialC,
+		2,
+		FVector(EffectRadiusCm * 0.20f * GroundSmokeGrowth, EffectRadiusCm * -0.16f * GroundSmokeGrowth, SpriteBaseHeightCm - 13.0f),
+		EffectRadiusCm * 0.66f,
+		EffectRadiusCm * 1.70f,
+		68.0f,
+		-96.0f,
+		FLinearColor(0.055f, 0.052f, 0.046f, 1.0f),
+		0.82f);
+	UpdateGroundSmokeLayer(
+		GroundSmokeSpriteD,
+		GroundSmokeDynamicMaterialD,
+		3,
+		FVector(EffectRadiusCm * -0.10f * GroundSmokeGrowth, EffectRadiusCm * -0.22f * GroundSmokeGrowth, SpriteBaseHeightCm - 19.0f),
+		EffectRadiusCm * 0.56f,
+		EffectRadiusCm * 1.45f,
+		132.0f,
+		118.0f,
+		FLinearColor(0.115f, 0.105f, 0.086f, 1.0f),
+		0.64f);
+	UpdateGroundSmokeLayer(
+		GroundSmokeSpriteE,
+		GroundSmokeDynamicMaterialE,
+		4,
+		FVector(EffectRadiusCm * 0.28f * GroundSmokeGrowth, EffectRadiusCm * 0.00f, SpriteBaseHeightCm - 15.0f),
+		EffectRadiusCm * 0.48f,
+		EffectRadiusCm * 1.28f,
+		-118.0f,
+		-74.0f,
+		FLinearColor(0.075f, 0.071f, 0.060f, 1.0f),
+		0.56f);
+	UpdateGroundSmokeLayer(
+		GroundSmokeSpriteF,
+		GroundSmokeDynamicMaterialF,
+		5,
+		FVector(EffectRadiusCm * -0.30f * GroundSmokeGrowth, EffectRadiusCm * -0.02f, SpriteBaseHeightCm - 12.0f),
+		EffectRadiusCm * 0.42f,
+		EffectRadiusCm * 1.18f,
+		92.0f,
+		-132.0f,
+		FLinearColor(0.040f, 0.038f, 0.035f, 1.0f),
+		0.48f);
+
+	const float SmokeReveal = SmoothStep01(RangeAlpha(0.07f, 0.18f, ResidualNormalizedTime));
+	const float SmokeFade = FadeOutAfter(0.70f, 1.0f, ResidualNormalizedTime);
+	const float SmokeEarlyDensity = FMath::Lerp(1.35f, 1.0f, SmoothStep01(RangeAlpha(0.0f, 0.34f, ResidualNormalizedTime)));
+	const float SmokeOpacity = SmokeReveal * SmokeFade * SmokeEarlyDensity;
+	const float SmokeGrowth = SmoothStep01(RangeAlpha(0.10f, 1.0f, ResidualNormalizedTime));
 	const auto UpdateSmokeLayer =
 		[this, SmokeFrame, SmokeOpacity, SmokeGrowth](
 			UStaticMeshComponent* SpriteComponent,
