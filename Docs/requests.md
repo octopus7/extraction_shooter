@@ -2739,3 +2739,30 @@
 - 2026-05-29 18:21:16 (elapsed: 00:00:00) - 판매 확인 UI의 썸네일은 아이템 이름과 판매가 사이에 배치할 것.
 - 2026-05-29 18:30:03 (elapsed: 00:00:00) - 아이템 정보 UI에서 썸네일은 단독으로 중앙 정렬하고 설명은 썸네일 아래에 배치할 것.
 - 2026-05-29 18:33:05 (elapsed: 00:00:00) - 판매 확인 패널은 현재 높이가 부족하므로 내용이 적절히 들어가도록 패널 높이와 내부 여백을 조정할 것.
+
+## 2026-05-29 18:06:49 (elapsed: 00:13:11)
+
+- Implement the workbench system.
+- Work in a separate worktree without affecting the main branch.
+- Write class code only and do not build.
+- Keep the work waiting for merge until explicitly instructed to merge.
+
+## 2026-05-29 18:09:52 (elapsed: 00:16:14)
+
+- Split workbench actions into craft, dismantle, and blueprint registration.
+- Leave repair unimplemented with only a code comment.
+- Show the interaction display names as 제조, 분해, and 설계도 등록.
+- Craft UI should show finished products on the left, materials on the right, a downward arrow, and output thumbnail/count/name.
+- Missing material counts should be red; disabled craft button gray; enabled craft button blue.
+- Dismantle UI should show inventory and storage in a connected left panel with visible headers, while equipment is hidden.
+- Selecting a dismantle item should show results on the right; results go to inventory and overflow drops to the floor.
+- Blueprint-category items should be visible, and crafting should unlock from default recipes, quest rewards, or acquired/registered blueprints.
+
+## 2026-05-29 18:37:02 (elapsed: 00:43:24)
+
+- Merge the workbench system branch into main.
+- After a successful merge, review whether the temporary worktree can be deleted.
+
+## 2026-05-29 18:39:56 (elapsed: 00:46:18)
+
+- Re-check because the uncommitted changes on main have been committed.
