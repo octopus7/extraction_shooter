@@ -2,6 +2,7 @@
 
 #include "Blueprint/UserWidget.h"
 #include "CoreMinimal.h"
+#include "Inventory/TunaSweeperInventoryTypes.h"
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
 #include "UI/TunaSweeperHudTypes.h"
 #include "TunaSweeperGameHudWidget.generated.h"
@@ -108,6 +109,18 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|HUD")
 	ETunaSweeperWorkbenchMode GetWorkbenchPanelMode() const;
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Workbench")
+	bool TryAssignWorkbenchDismantleCandidateToTarget(const FTunaSweeperItemSlotReference& SlotReference);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Workbench")
+	bool TryAssignFocusedWorkbenchDismantleCandidateToTarget();
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Workbench")
+	bool TryAssignWorkbenchBlueprintItemToTarget(const FTunaSweeperItemSlotReference& SlotReference);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Workbench")
+	bool TryAssignFocusedWorkbenchBlueprintItemToTarget();
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Shop")
 	bool TrySellSelectedShopItem();

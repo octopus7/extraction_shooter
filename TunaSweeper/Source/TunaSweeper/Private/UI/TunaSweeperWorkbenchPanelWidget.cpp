@@ -1,6 +1,8 @@
 #include "UI/TunaSweeperWorkbenchPanelWidget.h"
 
+#include "Blueprint/DragDropOperation.h"
 #include "Blueprint/WidgetTree.h"
+#include "Components/Border.h"
 #include "Components/Button.h"
 #include "Components/Image.h"
 #include "Components/ListViewBase.h"
@@ -12,6 +14,7 @@
 #include "Engine/Texture2D.h"
 #include "Player/TunaSweeperPlayerController.h"
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
+#include "UI/TunaSweeperItemDragDropOperation.h"
 #include "UI/TunaSweeperItemStackTileItemObject.h"
 #include "UI/TunaSweeperUIFont.h"
 #include "UI/TunaSweeperUiText.h"
@@ -106,6 +109,13 @@ namespace TunaSweeperWorkbenchPanel
 			Widget->SetVisibility(bVisible ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
 		}
 	}
+
+	bool AreSlotReferencesEqual(
+		const FTunaSweeperItemSlotReference& Left,
+		const FTunaSweeperItemSlotReference& Right)
+	{
+		return Left.Source == Right.Source && Left.SlotIndex == Right.SlotIndex;
+	}
 }
 
 void UTunaSweeperWorkbenchPanelWidget::NativeConstruct()
@@ -199,13 +209,75 @@ void UTunaSweeperWorkbenchPanelWidget::NativeDestruct()
 	Super::NativeDestruct();
 }
 
+bool UTunaSweeperWorkbenchPanelWidget::NativeOnDragOver(
+	const FGeometry& InGeometry,
+	const FDragDropEvent& InDragDropEvent,
+	UDragDropOperation* InOperation)
+{
+	FTunaSweeperItemSlotReference DismantleCandidateSlot;
+	const bool bCanDropDismantle =
+		ActiveWorkbenchMode == ETunaSweeperWorkbenchMode::Dismantle &&
+		IsDismantleTargetDropLocation(InDragDropEvent.GetScreenSpacePosition()) &&
+		TryResolveDismantleCandidateSlotFromDragOperation(InOperation, DismantleCandidateSlot);
+	FTunaSweeperItemSlotReference BlueprintSlot;
+	const bool bCanDropBlueprint =
+		ActiveWorkbenchMode == ETunaSweeperWorkbenchMode::BlueprintRegister &&
+		IsBlueprintTargetDropLocation(InDragDropEvent.GetScreenSpacePosition()) &&
+		TryResolveBlueprintItemSlotFromDragOperation(InOperation, BlueprintSlot);
+	ApplyDismantleTargetDropHighlight(bCanDropDismantle);
+	ApplyBlueprintTargetDropHighlight(bCanDropBlueprint);
+
+	const bool bCanDrop = bCanDropDismantle || bCanDropBlueprint;
+	return bCanDrop || Super::NativeOnDragOver(InGeometry, InDragDropEvent, InOperation);
+}
+
+void UTunaSweeperWorkbenchPanelWidget::NativeOnDragLeave(
+	const FDragDropEvent& InDragDropEvent,
+	UDragDropOperation* InOperation)
+{
+	ApplyDismantleTargetDropHighlight(false);
+	ApplyBlueprintTargetDropHighlight(false);
+	Super::NativeOnDragLeave(InDragDropEvent, InOperation);
+}
+
+bool UTunaSweeperWorkbenchPanelWidget::NativeOnDrop(
+	const FGeometry& InGeometry,
+	const FDragDropEvent& InDragDropEvent,
+	UDragDropOperation* InOperation)
+{
+	ApplyDismantleTargetDropHighlight(false);
+	ApplyBlueprintTargetDropHighlight(false);
+
+	FTunaSweeperItemSlotReference CandidateSlot;
+	if (ActiveWorkbenchMode == ETunaSweeperWorkbenchMode::Dismantle &&
+		IsDismantleTargetDropLocation(InDragDropEvent.GetScreenSpacePosition()) &&
+		TryResolveDismantleCandidateSlotFromDragOperation(InOperation, CandidateSlot) &&
+		AssignDismantleCandidateToTarget(CandidateSlot))
+	{
+		return true;
+	}
+
+	FTunaSweeperItemSlotReference BlueprintSlot;
+	if (ActiveWorkbenchMode == ETunaSweeperWorkbenchMode::BlueprintRegister &&
+		IsBlueprintTargetDropLocation(InDragDropEvent.GetScreenSpacePosition()) &&
+		TryResolveBlueprintItemSlotFromDragOperation(InOperation, BlueprintSlot) &&
+		AssignBlueprintItemToTarget(BlueprintSlot))
+	{
+		return true;
+	}
+
+	return Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
+}
+
 void UTunaSweeperWorkbenchPanelWidget::SetWorkbenchContext(int32 WorkbenchId, ETunaSweeperWorkbenchMode WorkbenchMode)
 {
 	ActiveWorkbenchId = FMath::Max(1, WorkbenchId);
 	ActiveWorkbenchMode = WorkbenchMode;
 	SelectedCraftRecipeSlotIndex = INDEX_NONE;
 	SelectedDismantleSlot = FTunaSweeperItemSlotReference();
+	FocusedDismantleCandidateSlot = FTunaSweeperItemSlotReference();
 	SelectedBlueprintSlot = FTunaSweeperItemSlotReference();
+	FocusedBlueprintSlot = FTunaSweeperItemSlotReference();
 
 	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
 	{
@@ -221,7 +293,9 @@ void UTunaSweeperWorkbenchPanelWidget::RefreshWorkbenchView()
 	TileObjects.Reset();
 	PopulateCraftRecipes();
 	PopulateDismantleItems();
+	PopulateDismantleTargetItem();
 	PopulateBlueprintItems();
+	PopulateBlueprintTargetItem();
 	RefreshCraftDetails();
 	RefreshDismantleDetails();
 	RefreshBlueprintDetails();
@@ -236,13 +310,64 @@ void UTunaSweeperWorkbenchPanelWidget::SelectCraftRecipe(int32 RecipeSlotIndex)
 void UTunaSweeperWorkbenchPanelWidget::SelectDismantleCandidate(const FTunaSweeperItemSlotReference& SlotReference)
 {
 	SelectedDismantleSlot = SlotReference;
+	FocusedDismantleCandidateSlot = SlotReference;
+	PopulateDismantleTargetItem();
 	RefreshDismantleDetails();
+}
+
+void UTunaSweeperWorkbenchPanelWidget::FocusDismantleCandidate(const FTunaSweeperItemSlotReference& SlotReference)
+{
+	FocusedDismantleCandidateSlot = SlotReference;
+}
+
+bool UTunaSweeperWorkbenchPanelWidget::AssignDismantleCandidateToTarget(const FTunaSweeperItemSlotReference& SlotReference)
+{
+	if (ActiveWorkbenchMode != ETunaSweeperWorkbenchMode::Dismantle ||
+		!IsDismantleCandidateSlotValid(SlotReference))
+	{
+		return false;
+	}
+
+	SelectedDismantleSlot = SlotReference;
+	FocusedDismantleCandidateSlot = SlotReference;
+	PopulateDismantleTargetItem();
+	RefreshDismantleDetails();
+	return true;
+}
+
+bool UTunaSweeperWorkbenchPanelWidget::AssignFocusedDismantleCandidateToTarget()
+{
+	return AssignDismantleCandidateToTarget(FocusedDismantleCandidateSlot);
 }
 
 void UTunaSweeperWorkbenchPanelWidget::SelectBlueprintItem(const FTunaSweeperItemSlotReference& SlotReference)
 {
 	SelectedBlueprintSlot = SlotReference;
+	FocusedBlueprintSlot = SlotReference;
+	PopulateBlueprintTargetItem();
 	RefreshBlueprintDetails();
+}
+
+void UTunaSweeperWorkbenchPanelWidget::FocusBlueprintItem(const FTunaSweeperItemSlotReference& SlotReference)
+{
+	FocusedBlueprintSlot = SlotReference;
+}
+
+bool UTunaSweeperWorkbenchPanelWidget::AssignBlueprintItemToTarget(const FTunaSweeperItemSlotReference& SlotReference)
+{
+	if (ActiveWorkbenchMode != ETunaSweeperWorkbenchMode::BlueprintRegister ||
+		!IsBlueprintItemSlotValid(SlotReference))
+	{
+		return false;
+	}
+
+	SelectBlueprintItem(SlotReference);
+	return true;
+}
+
+bool UTunaSweeperWorkbenchPanelWidget::AssignFocusedBlueprintItemToTarget()
+{
+	return AssignBlueprintItemToTarget(FocusedBlueprintSlot);
 }
 
 bool UTunaSweeperWorkbenchPanelWidget::ExecuteSelectedWorkbenchAction()
@@ -314,7 +439,7 @@ void UTunaSweeperWorkbenchPanelWidget::HandleDismantleTileClicked(UObject* ItemO
 		return;
 	}
 
-	SelectDismantleCandidate(TileObject->GetTileData().SlotReference);
+	FocusDismantleCandidate(TileObject->GetTileData().SlotReference);
 }
 
 void UTunaSweeperWorkbenchPanelWidget::HandleBlueprintTileClicked(UObject* ItemObject)
@@ -325,7 +450,7 @@ void UTunaSweeperWorkbenchPanelWidget::HandleBlueprintTileClicked(UObject* ItemO
 		return;
 	}
 
-	SelectBlueprintItem(TileObject->GetTileData().SlotReference);
+	FocusBlueprintItem(TileObject->GetTileData().SlotReference);
 }
 
 void UTunaSweeperWorkbenchPanelWidget::PopulateCraftRecipes()
@@ -404,13 +529,13 @@ void UTunaSweeperWorkbenchPanelWidget::PopulateDismantleItems()
 	{
 		TunaGameInstance->GetActiveWorkbenchDismantleCandidates(Candidates);
 	}
-	FTunaSweeperWorkbenchDismantleCandidateView ExistingDismantleSelection;
-	if ((!SelectedDismantleSlot.IsValid() ||
-		!TunaGameInstance ||
-		!TunaGameInstance->TryGetWorkbenchDismantleCandidateFromSlot(SelectedDismantleSlot, ExistingDismantleSelection)) &&
-		Candidates.Num() > 0)
+	if (!IsDismantleCandidateSlotValid(SelectedDismantleSlot))
 	{
-		SelectedDismantleSlot = Candidates[0].SlotReference;
+		SelectedDismantleSlot = FTunaSweeperItemSlotReference();
+	}
+	if (!IsDismantleCandidateSlotValid(FocusedDismantleCandidateSlot))
+	{
+		FocusedDismantleCandidateSlot = FTunaSweeperItemSlotReference();
 	}
 
 	if (DismantleInventoryTileView)
@@ -459,6 +584,63 @@ void UTunaSweeperWorkbenchPanelWidget::PopulateDismantleItems()
 	}
 }
 
+void UTunaSweeperWorkbenchPanelWidget::PopulateDismantleTargetItem()
+{
+	if (!DismantleSelectedItemTileView)
+	{
+		return;
+	}
+
+	DismantleSelectedItemTileView->ClearListItems();
+
+	UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+	UTunaSweeperItemDataSubsystem* ItemDataSubsystem = GetGameInstance()
+		? GetGameInstance()->GetSubsystem<UTunaSweeperItemDataSubsystem>()
+		: nullptr;
+	const ETunaSweeperItemTextLanguage Language = TunaGameInstance
+		? TunaGameInstance->GetCurrentTextLanguage()
+		: ETunaSweeperItemTextLanguage::English;
+
+	FTunaSweeperWorkbenchDismantleCandidateView CandidateView;
+	FTunaSweeperItemStackTileData TileData;
+	if (TunaGameInstance &&
+		TunaGameInstance->TryGetWorkbenchDismantleCandidateFromSlot(SelectedDismantleSlot, CandidateView))
+	{
+		TileData = TunaSweeperWorkbenchPanel::BuildItemTileData(
+			TunaGameInstance,
+			ItemDataSubsystem,
+			CandidateView.ItemId,
+			CandidateView.Quantity,
+			CandidateView.SlotReference,
+			ETunaSweeperItemSlotSource::WorkbenchDismantleItem,
+			CandidateView.ListIndex,
+			Language);
+		TileData.WorkbenchDismantleResultText = TunaSweeperWorkbenchPanel::BuildStackListText(
+			TunaGameInstance,
+			ItemDataSubsystem,
+			CandidateView.Results,
+			Language);
+		TileData.bCanDismantleWorkbenchItem = CandidateView.bCanDismantle;
+	}
+	else
+	{
+		TileData.DisplayName = FText::FromString(TEXT("\uBD84\uD574\uD560 \uC544\uC774\uD15C"));
+		TileData.Source = ETunaSweeperItemSlotSource::WorkbenchDismantleItem;
+		TileData.SourceIndex = INDEX_NONE;
+		TileData.SlotReference = FTunaSweeperItemSlotReference();
+		TileData.bIsEmpty = true;
+		TileData.bShowEmptySlotLabel = true;
+	}
+
+	UTunaSweeperItemStackTileItemObject* TileObject = NewObject<UTunaSweeperItemStackTileItemObject>(this);
+	if (TileObject)
+	{
+		TileObject->Initialize(TileData);
+		TileObjects.Add(TileObject);
+		DismantleSelectedItemTileView->AddItem(TileObject);
+	}
+}
+
 void UTunaSweeperWorkbenchPanelWidget::PopulateBlueprintItems()
 {
 	if (!BlueprintItemTileView)
@@ -479,9 +661,13 @@ void UTunaSweeperWorkbenchPanelWidget::PopulateBlueprintItems()
 	{
 		TunaGameInstance->GetActiveWorkbenchBlueprintItems(BlueprintItems);
 	}
-	if (!SelectedBlueprintSlot.IsValid() && BlueprintItems.Num() > 0)
+	if (!IsBlueprintItemSlotValid(SelectedBlueprintSlot))
 	{
-		SelectedBlueprintSlot = BlueprintItems[0].SlotReference;
+		SelectedBlueprintSlot = FTunaSweeperItemSlotReference();
+	}
+	if (!IsBlueprintItemSlotValid(FocusedBlueprintSlot))
+	{
+		FocusedBlueprintSlot = FTunaSweeperItemSlotReference();
 	}
 
 	BlueprintItemTileView->ClearListItems();
@@ -507,6 +693,74 @@ void UTunaSweeperWorkbenchPanelWidget::PopulateBlueprintItems()
 			TileObjects.Add(TileObject);
 			BlueprintItemTileView->AddItem(TileObject);
 		}
+	}
+}
+
+void UTunaSweeperWorkbenchPanelWidget::PopulateBlueprintTargetItem()
+{
+	if (!BlueprintSelectedItemTileView)
+	{
+		return;
+	}
+
+	BlueprintSelectedItemTileView->ClearListItems();
+
+	UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+	UTunaSweeperItemDataSubsystem* ItemDataSubsystem = GetGameInstance()
+		? GetGameInstance()->GetSubsystem<UTunaSweeperItemDataSubsystem>()
+		: nullptr;
+	const ETunaSweeperItemTextLanguage Language = TunaGameInstance
+		? TunaGameInstance->GetCurrentTextLanguage()
+		: ETunaSweeperItemTextLanguage::English;
+
+	TArray<FTunaSweeperWorkbenchBlueprintItemView> BlueprintItems;
+	if (TunaGameInstance)
+	{
+		TunaGameInstance->GetActiveWorkbenchBlueprintItems(BlueprintItems);
+	}
+
+	const FTunaSweeperWorkbenchBlueprintItemView* SelectedBlueprintItem = nullptr;
+	for (const FTunaSweeperWorkbenchBlueprintItemView& BlueprintItem : BlueprintItems)
+	{
+		if (TunaSweeperWorkbenchPanel::AreSlotReferencesEqual(BlueprintItem.SlotReference, SelectedBlueprintSlot))
+		{
+			SelectedBlueprintItem = &BlueprintItem;
+			break;
+		}
+	}
+
+	FTunaSweeperItemStackTileData TileData;
+	if (SelectedBlueprintItem)
+	{
+		TileData = TunaSweeperWorkbenchPanel::BuildItemTileData(
+			TunaGameInstance,
+			ItemDataSubsystem,
+			SelectedBlueprintItem->ItemId,
+			SelectedBlueprintItem->Quantity,
+			SelectedBlueprintItem->SlotReference,
+			ETunaSweeperItemSlotSource::WorkbenchBlueprintItem,
+			SelectedBlueprintItem->ListIndex,
+			Language);
+		TileData.WorkbenchBlueprintRecipeId = SelectedBlueprintItem->RecipeId;
+		TileData.bCanRegisterWorkbenchBlueprint = SelectedBlueprintItem->bCanRegister;
+		TileData.bWorkbenchBlueprintAlreadyUnlocked = SelectedBlueprintItem->bAlreadyUnlocked;
+	}
+	else
+	{
+		TileData.DisplayName = FText::FromString(TEXT("\uB4F1\uB85D\uD560 \uC124\uACC4\uB3C4"));
+		TileData.Source = ETunaSweeperItemSlotSource::WorkbenchBlueprintItem;
+		TileData.SourceIndex = INDEX_NONE;
+		TileData.SlotReference = FTunaSweeperItemSlotReference();
+		TileData.bIsEmpty = true;
+		TileData.bShowEmptySlotLabel = true;
+	}
+
+	UTunaSweeperItemStackTileItemObject* TileObject = NewObject<UTunaSweeperItemStackTileItemObject>(this);
+	if (TileObject)
+	{
+		TileObject->Initialize(TileData);
+		TileObjects.Add(TileObject);
+		BlueprintSelectedItemTileView->AddItem(TileObject);
 	}
 }
 
@@ -661,14 +915,22 @@ void UTunaSweeperWorkbenchPanelWidget::SetPanelModeVisibility() const
 	TunaSweeperWorkbenchPanel::SetWidgetModeVisible(CraftOutputText, bCraftMode);
 	TunaSweeperWorkbenchPanel::SetWidgetModeVisible(CraftButton, bCraftMode);
 
-	TunaSweeperWorkbenchPanel::SetWidgetModeVisible(DismantleInventoryTileView, bDismantleMode);
-	TunaSweeperWorkbenchPanel::SetWidgetModeVisible(DismantleStorageTileView, bDismantleMode);
-	TunaSweeperWorkbenchPanel::SetWidgetModeVisible(DismantleInventoryHeaderText, bDismantleMode);
-	TunaSweeperWorkbenchPanel::SetWidgetModeVisible(DismantleStorageHeaderText, bDismantleMode);
+	TunaSweeperWorkbenchPanel::SetWidgetModeVisible(LeftPanelBackground, bCraftMode);
+
+	TunaSweeperWorkbenchPanel::SetWidgetModeVisible(DismantleInventoryTileView, false);
+	TunaSweeperWorkbenchPanel::SetWidgetModeVisible(DismantleStorageTileView, false);
+	TunaSweeperWorkbenchPanel::SetWidgetModeVisible(DismantleSelectedItemTileView, bDismantleMode);
+	TunaSweeperWorkbenchPanel::SetWidgetModeVisible(DismantleInventoryHeaderText, false);
+	TunaSweeperWorkbenchPanel::SetWidgetModeVisible(DismantleStorageHeaderText, false);
+	TunaSweeperWorkbenchPanel::SetWidgetModeVisible(DismantleSelectedItemTitleText, bDismantleMode);
+	TunaSweeperWorkbenchPanel::SetWidgetModeVisible(DismantleSelectedItemDropZone, bDismantleMode);
 	TunaSweeperWorkbenchPanel::SetWidgetModeVisible(DismantleResultText, bDismantleMode);
 	TunaSweeperWorkbenchPanel::SetWidgetModeVisible(DismantleButton, bDismantleMode);
 
-	TunaSweeperWorkbenchPanel::SetWidgetModeVisible(BlueprintItemTileView, bBlueprintMode);
+	TunaSweeperWorkbenchPanel::SetWidgetModeVisible(BlueprintItemTileView, false);
+	TunaSweeperWorkbenchPanel::SetWidgetModeVisible(BlueprintSelectedItemTileView, bBlueprintMode);
+	TunaSweeperWorkbenchPanel::SetWidgetModeVisible(BlueprintSelectedItemTitleText, bBlueprintMode);
+	TunaSweeperWorkbenchPanel::SetWidgetModeVisible(BlueprintSelectedItemDropZone, bBlueprintMode);
 	TunaSweeperWorkbenchPanel::SetWidgetModeVisible(BlueprintRegisterText, bBlueprintMode);
 	TunaSweeperWorkbenchPanel::SetWidgetModeVisible(BlueprintRegisterButton, bBlueprintMode);
 
@@ -710,5 +972,143 @@ void UTunaSweeperWorkbenchPanelWidget::SetPanelModeVisibility() const
 			GetGameInstance<UTunaSweeperGameInstance>(),
 			TEXT("ui.storage.title"),
 			TEXT("\uCC3D\uACE0")));
+	}
+	if (DismantleSelectedItemTitleText)
+	{
+		DismantleSelectedItemTitleText->SetText(FText::FromString(TEXT("\uBD84\uD574\uD560 \uC544\uC774\uD15C")));
+	}
+	if (BlueprintSelectedItemTitleText)
+	{
+		BlueprintSelectedItemTitleText->SetText(FText::FromString(TEXT("\uB4F1\uB85D\uD560 \uC124\uACC4\uB3C4")));
+	}
+}
+
+bool UTunaSweeperWorkbenchPanelWidget::IsDismantleCandidateSlotValid(
+	const FTunaSweeperItemSlotReference& SlotReference) const
+{
+	if (!SlotReference.IsValid())
+	{
+		return false;
+	}
+
+	UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+	FTunaSweeperWorkbenchDismantleCandidateView CandidateView;
+	return TunaGameInstance &&
+		TunaGameInstance->TryGetWorkbenchDismantleCandidateFromSlot(SlotReference, CandidateView);
+}
+
+bool UTunaSweeperWorkbenchPanelWidget::TryResolveDismantleCandidateSlotFromDragOperation(
+	UDragDropOperation* InOperation,
+	FTunaSweeperItemSlotReference& OutSlotReference) const
+{
+	OutSlotReference = FTunaSweeperItemSlotReference();
+
+	const UTunaSweeperItemDragDropOperation* ItemDragOperation = Cast<UTunaSweeperItemDragDropOperation>(InOperation);
+	if (!ItemDragOperation || ItemDragOperation->TileData.bIsEmpty)
+	{
+		return false;
+	}
+
+	OutSlotReference = ItemDragOperation->TileData.SlotReference;
+	if (!OutSlotReference.IsValid())
+	{
+		OutSlotReference.Source = ItemDragOperation->TileData.Source;
+		OutSlotReference.SlotIndex = ItemDragOperation->TileData.SourceIndex;
+	}
+
+	return IsDismantleCandidateSlotValid(OutSlotReference);
+}
+
+bool UTunaSweeperWorkbenchPanelWidget::IsDismantleTargetDropLocation(
+	const FVector2D& ScreenSpacePosition) const
+{
+	if (DismantleSelectedItemDropZone)
+	{
+		return DismantleSelectedItemDropZone->GetCachedGeometry().IsUnderLocation(ScreenSpacePosition);
+	}
+
+	return DismantleSelectedItemTileView
+		? DismantleSelectedItemTileView->GetCachedGeometry().IsUnderLocation(ScreenSpacePosition)
+		: true;
+}
+
+void UTunaSweeperWorkbenchPanelWidget::ApplyDismantleTargetDropHighlight(bool bCanDrop) const
+{
+	if (DismantleSelectedItemDropZone)
+	{
+		DismantleSelectedItemDropZone->SetBrushColor(bCanDrop
+			? FLinearColor(0.18f, 0.38f, 0.28f, 1.0f)
+			: FLinearColor::White);
+	}
+}
+
+bool UTunaSweeperWorkbenchPanelWidget::IsBlueprintItemSlotValid(
+	const FTunaSweeperItemSlotReference& SlotReference) const
+{
+	if (!SlotReference.IsValid())
+	{
+		return false;
+	}
+
+	UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+	if (!TunaGameInstance)
+	{
+		return false;
+	}
+
+	TArray<FTunaSweeperWorkbenchBlueprintItemView> BlueprintItems;
+	if (!TunaGameInstance->GetActiveWorkbenchBlueprintItems(BlueprintItems))
+	{
+		return false;
+	}
+
+	return BlueprintItems.ContainsByPredicate([&SlotReference](const FTunaSweeperWorkbenchBlueprintItemView& BlueprintItem)
+	{
+		return TunaSweeperWorkbenchPanel::AreSlotReferencesEqual(BlueprintItem.SlotReference, SlotReference);
+	});
+}
+
+bool UTunaSweeperWorkbenchPanelWidget::TryResolveBlueprintItemSlotFromDragOperation(
+	UDragDropOperation* InOperation,
+	FTunaSweeperItemSlotReference& OutSlotReference) const
+{
+	OutSlotReference = FTunaSweeperItemSlotReference();
+
+	const UTunaSweeperItemDragDropOperation* ItemDragOperation = Cast<UTunaSweeperItemDragDropOperation>(InOperation);
+	if (!ItemDragOperation || ItemDragOperation->TileData.bIsEmpty)
+	{
+		return false;
+	}
+
+	OutSlotReference = ItemDragOperation->TileData.SlotReference;
+	if (!OutSlotReference.IsValid())
+	{
+		OutSlotReference.Source = ItemDragOperation->TileData.Source;
+		OutSlotReference.SlotIndex = ItemDragOperation->TileData.SourceIndex;
+	}
+
+	return IsBlueprintItemSlotValid(OutSlotReference);
+}
+
+bool UTunaSweeperWorkbenchPanelWidget::IsBlueprintTargetDropLocation(
+	const FVector2D& ScreenSpacePosition) const
+{
+	if (BlueprintSelectedItemDropZone)
+	{
+		return BlueprintSelectedItemDropZone->GetCachedGeometry().IsUnderLocation(ScreenSpacePosition);
+	}
+
+	return BlueprintSelectedItemTileView
+		? BlueprintSelectedItemTileView->GetCachedGeometry().IsUnderLocation(ScreenSpacePosition)
+		: true;
+}
+
+void UTunaSweeperWorkbenchPanelWidget::ApplyBlueprintTargetDropHighlight(bool bCanDrop) const
+{
+	if (BlueprintSelectedItemDropZone)
+	{
+		BlueprintSelectedItemDropZone->SetBrushColor(bCanDrop
+			? FLinearColor(0.18f, 0.38f, 0.28f, 1.0f)
+			: FLinearColor::White);
 	}
 }

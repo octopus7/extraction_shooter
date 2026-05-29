@@ -2,6 +2,7 @@
 
 #include "Blueprint/UserWidget.h"
 #include "CoreMinimal.h"
+#include "Inventory/TunaSweeperInventoryTypes.h"
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
 #include "UI/TunaSweeperHudTypes.h"
 #include "TunaSweeperHudExternalPanelWidget.generated.h"
@@ -36,6 +37,18 @@ public:
 		int32 WorkbenchId,
 		ETunaSweeperWorkbenchMode WorkbenchMode = ETunaSweeperWorkbenchMode::Craft);
 
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Workbench")
+	bool AssignWorkbenchDismantleCandidateToTarget(const FTunaSweeperItemSlotReference& SlotReference);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Workbench")
+	bool AssignFocusedWorkbenchDismantleCandidateToTarget();
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Workbench")
+	bool AssignWorkbenchBlueprintItemToTarget(const FTunaSweeperItemSlotReference& SlotReference);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Workbench")
+	bool AssignFocusedWorkbenchBlueprintItemToTarget();
+
 protected:
 	virtual void NativeConstruct() override;
 
@@ -59,6 +72,7 @@ protected:
 
 private:
 	void ApplyPanelMode();
+	void ApplyLootContainerPanelLayout();
 
 	UPROPERTY(EditAnywhere, Category = "TunaSweeper|HUD")
 	ETunaSweeperHudExternalPanelMode PanelMode = ETunaSweeperHudExternalPanelMode::None;

@@ -23,6 +23,9 @@ struct TUNASWEEPER_API FTunaSweeperItemStackTileData
 	FText DisplayName;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Tile")
+	FText EquipmentSlotDisplayName;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Tile")
 	FText DescriptionText;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Tile")

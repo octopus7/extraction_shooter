@@ -833,6 +833,40 @@ ETunaSweeperWorkbenchMode UTunaSweeperGameHudWidget::GetWorkbenchPanelMode() con
 		: ETunaSweeperWorkbenchMode::Craft;
 }
 
+bool UTunaSweeperGameHudWidget::TryAssignWorkbenchDismantleCandidateToTarget(
+	const FTunaSweeperItemSlotReference& SlotReference)
+{
+	return IsWorkbenchPanelOpen() &&
+		GetWorkbenchPanelMode() == ETunaSweeperWorkbenchMode::Dismantle &&
+		ExternalPanelWidget &&
+		ExternalPanelWidget->AssignWorkbenchDismantleCandidateToTarget(SlotReference);
+}
+
+bool UTunaSweeperGameHudWidget::TryAssignFocusedWorkbenchDismantleCandidateToTarget()
+{
+	return IsWorkbenchPanelOpen() &&
+		GetWorkbenchPanelMode() == ETunaSweeperWorkbenchMode::Dismantle &&
+		ExternalPanelWidget &&
+		ExternalPanelWidget->AssignFocusedWorkbenchDismantleCandidateToTarget();
+}
+
+bool UTunaSweeperGameHudWidget::TryAssignWorkbenchBlueprintItemToTarget(
+	const FTunaSweeperItemSlotReference& SlotReference)
+{
+	return IsWorkbenchPanelOpen() &&
+		GetWorkbenchPanelMode() == ETunaSweeperWorkbenchMode::BlueprintRegister &&
+		ExternalPanelWidget &&
+		ExternalPanelWidget->AssignWorkbenchBlueprintItemToTarget(SlotReference);
+}
+
+bool UTunaSweeperGameHudWidget::TryAssignFocusedWorkbenchBlueprintItemToTarget()
+{
+	return IsWorkbenchPanelOpen() &&
+		GetWorkbenchPanelMode() == ETunaSweeperWorkbenchMode::BlueprintRegister &&
+		ExternalPanelWidget &&
+		ExternalPanelWidget->AssignFocusedWorkbenchBlueprintItemToTarget();
+}
+
 bool UTunaSweeperGameHudWidget::TrySellSelectedShopItem()
 {
 	if (!IsShopPanelOpen())
@@ -1327,13 +1361,20 @@ void UTunaSweeperGameHudWidget::ApplyHudModeVisibility()
 	EnsureInventoryQuickSlotPanelWidget();
 	if (InventoryQuickSlotPanel)
 	{
+		const bool bExternalPanelOpen =
+			ExternalPanelWidget &&
+			ExternalPanelWidget->GetExternalPanelMode() != ETunaSweeperHudExternalPanelMode::None;
+		const bool bShowInventoryQuickSlotPanel =
+			bUtilityModeOpen &&
+			bInventoryMode &&
+			!bExternalPanelOpen;
 		SetTransitionedWidgetVisibility(
 			InventoryQuickSlotPanel,
-			bUtilityModeOpen && bInventoryMode
+			bShowInventoryQuickSlotPanel
 				? ESlateVisibility::SelfHitTestInvisible
 				: ESlateVisibility::Collapsed,
 			InventoryQuickSlotPanelTransitionEdge);
-		if (bUtilityModeOpen && bInventoryMode)
+		if (bShowInventoryQuickSlotPanel)
 		{
 			RefreshInventoryQuickSlotPanel();
 		}

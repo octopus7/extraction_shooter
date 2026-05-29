@@ -1,5 +1,6 @@
 #include "UI/TunaSweeperHudExternalPanelWidget.h"
 
+#include "Components/OverlaySlot.h"
 #include "Components/Widget.h"
 #include "UI/TunaSweeperLootContainerWidget.h"
 #include "UI/TunaSweeperUIFont.h"
@@ -9,6 +10,7 @@ void UTunaSweeperHudExternalPanelWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
+	ApplyLootContainerPanelLayout();
 	ApplyPanelMode();
 }
 
@@ -62,8 +64,40 @@ void UTunaSweeperHudExternalPanelWidget::SetWorkbenchContainer(int32 WorkbenchId
 	}
 }
 
+bool UTunaSweeperHudExternalPanelWidget::AssignWorkbenchDismantleCandidateToTarget(
+	const FTunaSweeperItemSlotReference& SlotReference)
+{
+	return PanelMode == ETunaSweeperHudExternalPanelMode::Workbench &&
+		WorkbenchPanelWidget &&
+		WorkbenchPanelWidget->AssignDismantleCandidateToTarget(SlotReference);
+}
+
+bool UTunaSweeperHudExternalPanelWidget::AssignFocusedWorkbenchDismantleCandidateToTarget()
+{
+	return PanelMode == ETunaSweeperHudExternalPanelMode::Workbench &&
+		WorkbenchPanelWidget &&
+		WorkbenchPanelWidget->AssignFocusedDismantleCandidateToTarget();
+}
+
+bool UTunaSweeperHudExternalPanelWidget::AssignWorkbenchBlueprintItemToTarget(
+	const FTunaSweeperItemSlotReference& SlotReference)
+{
+	return PanelMode == ETunaSweeperHudExternalPanelMode::Workbench &&
+		WorkbenchPanelWidget &&
+		WorkbenchPanelWidget->AssignBlueprintItemToTarget(SlotReference);
+}
+
+bool UTunaSweeperHudExternalPanelWidget::AssignFocusedWorkbenchBlueprintItemToTarget()
+{
+	return PanelMode == ETunaSweeperHudExternalPanelMode::Workbench &&
+		WorkbenchPanelWidget &&
+		WorkbenchPanelWidget->AssignFocusedBlueprintItemToTarget();
+}
+
 void UTunaSweeperHudExternalPanelWidget::ApplyPanelMode()
 {
+	ApplyLootContainerPanelLayout();
+
 	if (LootingBoxPanel)
 	{
 		const bool bShowContainerPanel =
@@ -97,5 +131,17 @@ void UTunaSweeperHudExternalPanelWidget::ApplyPanelMode()
 			PanelMode == ETunaSweeperHudExternalPanelMode::Workbench
 				? ESlateVisibility::SelfHitTestInvisible
 				: ESlateVisibility::Collapsed);
+	}
+}
+
+void UTunaSweeperHudExternalPanelWidget::ApplyLootContainerPanelLayout()
+{
+	if (LootContainerWidget)
+	{
+		if (UOverlaySlot* LootContainerSlot = Cast<UOverlaySlot>(LootContainerWidget->Slot))
+		{
+			LootContainerSlot->SetHorizontalAlignment(HAlign_Left);
+			LootContainerSlot->SetVerticalAlignment(VAlign_Top);
+		}
 	}
 }

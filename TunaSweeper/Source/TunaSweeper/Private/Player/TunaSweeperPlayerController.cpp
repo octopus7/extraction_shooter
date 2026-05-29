@@ -1015,8 +1015,42 @@ bool ATunaSweeperPlayerController::TryHandleHoveredItemInteract()
 	}
 
 	UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
-	if (!TunaGameInstance || !TunaGameInstance->HasHoveredItemSlot())
+	if (!TunaGameInstance)
 	{
+		return false;
+	}
+
+	if (!TunaGameInstance->HasHoveredItemSlot())
+	{
+		if (!GameHudWidget || !GameHudWidget->IsWorkbenchPanelOpen())
+		{
+			return false;
+		}
+
+		const ETunaSweeperWorkbenchMode WorkbenchMode = GameHudWidget->GetWorkbenchPanelMode();
+		if (TunaGameInstance->HasSelectedInventoryItem())
+		{
+			const FTunaSweeperItemSlotReference SelectedSlot = TunaGameInstance->GetSelectedItemSlotReference();
+			if (WorkbenchMode == ETunaSweeperWorkbenchMode::Dismantle &&
+				GameHudWidget->TryAssignWorkbenchDismantleCandidateToTarget(SelectedSlot))
+			{
+				return true;
+			}
+			if (WorkbenchMode == ETunaSweeperWorkbenchMode::BlueprintRegister &&
+				GameHudWidget->TryAssignWorkbenchBlueprintItemToTarget(SelectedSlot))
+			{
+				return true;
+			}
+		}
+
+		if (WorkbenchMode == ETunaSweeperWorkbenchMode::Dismantle)
+		{
+			return GameHudWidget->TryAssignFocusedWorkbenchDismantleCandidateToTarget();
+		}
+		if (WorkbenchMode == ETunaSweeperWorkbenchMode::BlueprintRegister)
+		{
+			return GameHudWidget->TryAssignFocusedWorkbenchBlueprintItemToTarget();
+		}
 		return false;
 	}
 
@@ -1043,18 +1077,13 @@ bool ATunaSweeperPlayerController::TryHandleHoveredItemInteract()
 		}
 		else if (WorkbenchMode == ETunaSweeperWorkbenchMode::Dismantle)
 		{
-			TArray<FTunaSweeperItemStack> OverflowItems;
-			if (TunaGameInstance->TryDismantleWorkbenchItemInSlot(HoveredSlot, OverflowItems))
-			{
-				for (const FTunaSweeperItemStack& OverflowItem : OverflowItems)
-				{
-					SpawnDroppedPickupItem(OverflowItem.ItemId, OverflowItem.Quantity);
-				}
-			}
+			GameHudWidget->TryAssignWorkbenchDismantleCandidateToTarget(HoveredSlot) ||
+				GameHudWidget->TryAssignFocusedWorkbenchDismantleCandidateToTarget();
 		}
 		else if (WorkbenchMode == ETunaSweeperWorkbenchMode::BlueprintRegister)
 		{
-			TunaGameInstance->TryRegisterWorkbenchBlueprintFromSlot(HoveredSlot);
+			GameHudWidget->TryAssignWorkbenchBlueprintItemToTarget(HoveredSlot) ||
+				GameHudWidget->TryAssignFocusedWorkbenchBlueprintItemToTarget();
 		}
 		return true;
 	}

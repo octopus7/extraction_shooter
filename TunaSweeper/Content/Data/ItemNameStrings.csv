@@ -11,7 +11,9 @@ item.rifle_extended_magazine,소총 대용량 탄창,Rifle Extended Magazine,ラ
 item.red_dot_optic,레드닷 광학장비,Red Dot Optic,レッドドットサイト
 item.laser_sight,레이저 사이트,Laser Sight,レーザーサイト
 item.canned_food,통조림,Canned Food,缶詰
-item.water_bottle,물병,Water Bottle,水ボトル
+item.water_bottle,생수,Bottled Water,飲料水
+item.large_water_bottle,큰생수,Large Bottled Water,大きな飲料水
+item.king_water_bottle,왕생수,Royal Bottled Water,王の飲料水
 item.energy_bar,에너지바,Energy Bar,エナジーバー
 item.canned_tuna,참치 통조림,Canned Tuna,ツナ缶
 item.bandage,붕대,Bandage,包帯
@@ -44,7 +46,9 @@ item.rifle_extended_magazine.desc,소총의 탄창 슬롯에 장착하는 대용
 item.red_dot_optic.desc,소총의 광학 슬롯에 장착하는 간단한 조준 장비다,A simple sight that fits the rifle optic slot,ライフルの光学スロットに装着する簡易照準器
 item.laser_sight.desc,소총의 전술 장비 슬롯에 장착하는 레이저 조준 장치다,A laser aiming device that fits the rifle tactical slot,ライフルの戦術装備スロットに装着するレーザー照準器
 item.canned_food.desc,오래 보관할 수 있는 평범한 식량 통조림이다,A plain canned meal with a long shelf life,長期保存できる普通の缶詰食品
-item.water_bottle.desc,갈증을 줄이는 깨끗한 물병이다,A clean water bottle that eases thirst,渇きを抑えるきれいな水ボトル
+item.water_bottle.desc,갈증을 줄이는 깨끗한 생수다,Clean bottled water that eases thirst,渇きを抑えるきれいな飲料水
+item.large_water_bottle.desc,생수 두 병을 합친 큰 생수다,Two bottles worth of clean water,2本分のきれいな飲料水
+item.king_water_bottle.desc,생수와 큰생수를 조합한 왕생수다,Clean water crafted from bottled water and large bottled water,飲料水と大きな飲料水を組み合わせた王の飲料水
 item.energy_bar.desc,빠르게 허기를 채우는 작은 에너지바다,A small energy bar that quickly eases hunger,素早く空腹を満たす小さなエナジーバー
 item.canned_tuna.desc,노란 라벨의 참치 통조림이다,A yellow labeled can of tuna,黄色いラベルのツナ缶
 item.bandage.desc,가벼운 상처를 응급 처치하는 붕대다,A bandage for simple first aid,軽い傷を応急処置する包帯
@@ -69,5 +73,7 @@ item.backpack_tier3.desc,인벤토리를 40칸에서 80칸으로 확장한다,Ex
 item.backpack_tier4.desc,인벤토리를 40칸에서 100칸으로 확장한다,Expands inventory from 40 to 100 slots,インベントリを40スロットから100スロットへ拡張する
 item.wood,목재,Wood,木材
 item.wood.desc,벌목기에게서 얻는 거친 목재다,Rough wood recovered from a lumberjack,伐採機から得た荒い木材
+item.blueprint_king_water_bottle,설계도 왕생수,Blueprint: Royal Bottled Water,設計図 王の飲料水
+item.blueprint_king_water_bottle.desc,왕생수 제조법을 등록할 수 있는 설계도다,A blueprint that unlocks the royal bottled water recipe,王の飲料水の製造法を登録できる設計図
 container.lumber_crate,목재 상자,Lumber Crate,木材箱
 container.developer_crate,개발자의 상자,Developer Crate,Developer Crate

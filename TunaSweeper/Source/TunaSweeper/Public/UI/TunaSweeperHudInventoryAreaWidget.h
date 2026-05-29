@@ -10,6 +10,7 @@ class UTileView;
 class UDragDropOperation;
 class UButton;
 class UProgressBar;
+class USizeBox;
 class UTextBlock;
 struct FTunaSweeperItemSlotReference;
 
@@ -47,6 +48,9 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
 	TObjectPtr<UTileView> EquipmentReserveTileView;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
+	TObjectPtr<USizeBox> EquipmentReserveSizeBox;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
 	TObjectPtr<UTileView> AuxiliaryBagTileView;

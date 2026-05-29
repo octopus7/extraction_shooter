@@ -50,6 +50,9 @@ protected:
 	TObjectPtr<UBorder> SlotBackground;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Tile", meta = (BindWidgetOptional))
+	TObjectPtr<UTextBlock> EquipmentSlotNameText;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Tile", meta = (BindWidgetOptional))
 	TObjectPtr<UImage> ItemIconImage;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Tile", meta = (BindWidgetOptional))
@@ -57,6 +60,9 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Tile", meta = (BindWidgetOptional))
 	TObjectPtr<UTextBlock> AttachmentSlotIndicatorText;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Tile", meta = (BindWidgetOptional))
+	TObjectPtr<UBorder> ItemNamePlate;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Tile", meta = (BindWidgetOptional))
 	TObjectPtr<UTextBlock> ItemNameText;

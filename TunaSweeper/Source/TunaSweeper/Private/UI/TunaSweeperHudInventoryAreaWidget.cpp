@@ -3,8 +3,10 @@
 #include "Blueprint/DragDropOperation.h"
 #include "Components/Button.h"
 #include "Components/ProgressBar.h"
+#include "Components/SizeBox.h"
 #include "Components/TextBlock.h"
 #include "Components/TileView.h"
+#include "Components/VerticalBoxSlot.h"
 #include "Components/Widget.h"
 #include "Engine/Texture2D.h"
 #include "Game/TunaSweeperGameInstance.h"
@@ -24,7 +26,11 @@ namespace TunaSweeperInventoryArea
 	constexpr float InventoryTileHeight = 96.0f;
 	constexpr float InventoryTileViewScrollbarReserveWidth = 22.0f;
 	constexpr float InventoryTileViewWidth = InventoryTileColumnCount * InventoryTileWidth + InventoryTileViewScrollbarReserveWidth;
-	constexpr float EquipmentReserveEntryWidth = InventoryTileViewWidth / EquipmentReserveColumnCount;
+	constexpr float EquipmentSlotLabelHeight = 22.0f;
+	constexpr float EquipmentReserveEntryWidth = InventoryTileWidth;
+	constexpr float EquipmentReserveEntryHeight = InventoryTileHeight + EquipmentSlotLabelHeight;
+	constexpr float EquipmentReserveWidth = EquipmentReserveColumnCount * EquipmentReserveEntryWidth;
+	constexpr float EquipmentReserveHeight = 2.0f * EquipmentReserveEntryHeight;
 	constexpr float AuxiliaryBagTileWidth = 96.0f;
 	constexpr float AuxiliaryBagTileHeight = 96.0f;
 
@@ -88,9 +94,9 @@ namespace TunaSweeperInventoryArea
 		TileData.bShowEmptySlotLabel = Source == ETunaSweeperItemSlotSource::Equipment;
 		TileData.bSortLocked = bSortLocked;
 
-		if (TileData.bIsEmpty && TileData.bShowEmptySlotLabel)
+		if (Source == ETunaSweeperItemSlotSource::Equipment)
 		{
-			TileData.DisplayName = GetEquipmentSlotDisplayName(SourceIndex, TunaGameInstance);
+			TileData.EquipmentSlotDisplayName = GetEquipmentSlotDisplayName(SourceIndex, TunaGameInstance);
 		}
 
 		if (!TileData.bIsEmpty && ItemDataSubsystem)
@@ -378,6 +384,16 @@ void UTunaSweeperHudInventoryAreaWidget::NativeConstruct()
 		TunaGameInstance->OnLanguageChanged.AddUObject(this, &UTunaSweeperHudInventoryAreaWidget::ApplyHudState);
 	}
 
+	if (EquipmentReserveSizeBox)
+	{
+		EquipmentReserveSizeBox->SetWidthOverride(TunaSweeperInventoryArea::EquipmentReserveWidth);
+		EquipmentReserveSizeBox->SetHeightOverride(TunaSweeperInventoryArea::EquipmentReserveHeight);
+		if (UVerticalBoxSlot* ReserveSlot = Cast<UVerticalBoxSlot>(EquipmentReserveSizeBox->Slot))
+		{
+			ReserveSlot->SetHorizontalAlignment(HAlign_Left);
+		}
+	}
+
 	RefreshInventoryItems();
 	ApplyHudState();
 }
@@ -499,7 +515,7 @@ void UTunaSweeperHudInventoryAreaWidget::RefreshInventoryItems()
 		ItemDataSubsystem,
 		ETunaSweeperItemSlotSource::Equipment,
 		TunaSweeperInventoryArea::EquipmentReserveEntryWidth,
-		TunaSweeperInventoryArea::InventoryTileHeight,
+		TunaSweeperInventoryArea::EquipmentReserveEntryHeight,
 		TileObjects);
 
 	TunaSweeperInventoryArea::PopulateTileView(

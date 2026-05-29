@@ -6,10 +6,13 @@
 #include "TunaSweeperWorkbenchPanelWidget.generated.h"
 
 class UButton;
+class UBorder;
 class UImage;
 class UTextBlock;
 class UTileView;
 class UVerticalBox;
+class UWidget;
+class UDragDropOperation;
 
 UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API UTunaSweeperWorkbenchPanelWidget : public UUserWidget
@@ -32,7 +35,25 @@ public:
 	void SelectDismantleCandidate(const FTunaSweeperItemSlotReference& SlotReference);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Workbench")
+	void FocusDismantleCandidate(const FTunaSweeperItemSlotReference& SlotReference);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Workbench")
+	bool AssignDismantleCandidateToTarget(const FTunaSweeperItemSlotReference& SlotReference);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Workbench")
+	bool AssignFocusedDismantleCandidateToTarget();
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Workbench")
 	void SelectBlueprintItem(const FTunaSweeperItemSlotReference& SlotReference);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Workbench")
+	void FocusBlueprintItem(const FTunaSweeperItemSlotReference& SlotReference);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Workbench")
+	bool AssignBlueprintItemToTarget(const FTunaSweeperItemSlotReference& SlotReference);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Workbench")
+	bool AssignFocusedBlueprintItemToTarget();
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Workbench")
 	bool ExecuteSelectedWorkbenchAction();
@@ -43,6 +64,17 @@ public:
 protected:
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
+	virtual bool NativeOnDragOver(
+		const FGeometry& InGeometry,
+		const FDragDropEvent& InDragDropEvent,
+		UDragDropOperation* InOperation) override;
+	virtual void NativeOnDragLeave(
+		const FDragDropEvent& InDragDropEvent,
+		UDragDropOperation* InOperation) override;
+	virtual bool NativeOnDrop(
+		const FGeometry& InGeometry,
+		const FDragDropEvent& InDragDropEvent,
+		UDragDropOperation* InOperation) override;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Workbench", meta = (BindWidgetOptional))
 	TObjectPtr<UTileView> CraftRecipeTileView;
@@ -54,7 +86,16 @@ protected:
 	TObjectPtr<UTileView> DismantleStorageTileView;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Workbench", meta = (BindWidgetOptional))
+	TObjectPtr<UTileView> DismantleSelectedItemTileView;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Workbench", meta = (BindWidgetOptional))
 	TObjectPtr<UTileView> BlueprintItemTileView;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Workbench", meta = (BindWidgetOptional))
+	TObjectPtr<UTileView> BlueprintSelectedItemTileView;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Workbench", meta = (BindWidgetOptional))
+	TObjectPtr<UBorder> LeftPanelBackground;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Workbench", meta = (BindWidgetOptional))
 	TObjectPtr<UTextBlock> WorkbenchTitleText;
@@ -64,6 +105,18 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Workbench", meta = (BindWidgetOptional))
 	TObjectPtr<UTextBlock> DismantleStorageHeaderText;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Workbench", meta = (BindWidgetOptional))
+	TObjectPtr<UTextBlock> DismantleSelectedItemTitleText;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Workbench", meta = (BindWidgetOptional))
+	TObjectPtr<UBorder> DismantleSelectedItemDropZone;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Workbench", meta = (BindWidgetOptional))
+	TObjectPtr<UTextBlock> BlueprintSelectedItemTitleText;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Workbench", meta = (BindWidgetOptional))
+	TObjectPtr<UBorder> BlueprintSelectedItemDropZone;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Workbench", meta = (BindWidgetOptional))
 	TObjectPtr<UVerticalBox> CraftIngredientList;
@@ -107,12 +160,26 @@ private:
 	void HandleBlueprintTileClicked(UObject* ItemObject);
 	void PopulateCraftRecipes();
 	void PopulateDismantleItems();
+	void PopulateDismantleTargetItem();
 	void PopulateBlueprintItems();
+	void PopulateBlueprintTargetItem();
 	void RefreshCraftDetails();
 	void RefreshDismantleDetails();
 	void RefreshBlueprintDetails();
 	void SetActionButtonState(UButton* Button, bool bEnabled) const;
 	void SetPanelModeVisibility() const;
+	bool IsDismantleCandidateSlotValid(const FTunaSweeperItemSlotReference& SlotReference) const;
+	bool TryResolveDismantleCandidateSlotFromDragOperation(
+		UDragDropOperation* InOperation,
+		FTunaSweeperItemSlotReference& OutSlotReference) const;
+	bool IsDismantleTargetDropLocation(const FVector2D& ScreenSpacePosition) const;
+	void ApplyDismantleTargetDropHighlight(bool bCanDrop) const;
+	bool IsBlueprintItemSlotValid(const FTunaSweeperItemSlotReference& SlotReference) const;
+	bool TryResolveBlueprintItemSlotFromDragOperation(
+		UDragDropOperation* InOperation,
+		FTunaSweeperItemSlotReference& OutSlotReference) const;
+	bool IsBlueprintTargetDropLocation(const FVector2D& ScreenSpacePosition) const;
+	void ApplyBlueprintTargetDropHighlight(bool bCanDrop) const;
 
 	UPROPERTY(Transient)
 	int32 ActiveWorkbenchId = INDEX_NONE;
@@ -127,7 +194,13 @@ private:
 	FTunaSweeperItemSlotReference SelectedDismantleSlot;
 
 	UPROPERTY(Transient)
+	FTunaSweeperItemSlotReference FocusedDismantleCandidateSlot;
+
+	UPROPERTY(Transient)
 	FTunaSweeperItemSlotReference SelectedBlueprintSlot;
+
+	UPROPERTY(Transient)
+	FTunaSweeperItemSlotReference FocusedBlueprintSlot;
 
 	UPROPERTY(Transient)
 	TArray<TObjectPtr<UObject>> TileObjects;

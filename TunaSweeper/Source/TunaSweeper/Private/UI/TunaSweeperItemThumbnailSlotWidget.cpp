@@ -101,9 +101,7 @@ FReply UTunaSweeperItemThumbnailSlotWidget::NativeOnMouseButtonDown(
 	if (!CachedTileData.bIsEmpty)
 	{
 		if (CachedTileData.Source == ETunaSweeperItemSlotSource::Shop ||
-			CachedTileData.Source == ETunaSweeperItemSlotSource::WorkbenchRecipe ||
-			CachedTileData.Source == ETunaSweeperItemSlotSource::WorkbenchDismantleItem ||
-			CachedTileData.Source == ETunaSweeperItemSlotSource::WorkbenchBlueprintItem)
+			CachedTileData.Source == ETunaSweeperItemSlotSource::WorkbenchRecipe)
 		{
 			return FReply::Handled();
 		}
@@ -162,9 +160,7 @@ void UTunaSweeperItemThumbnailSlotWidget::NativeOnDragDetected(
 	}
 
 	if (CachedTileData.Source == ETunaSweeperItemSlotSource::Shop ||
-		CachedTileData.Source == ETunaSweeperItemSlotSource::WorkbenchRecipe ||
-		CachedTileData.Source == ETunaSweeperItemSlotSource::WorkbenchDismantleItem ||
-		CachedTileData.Source == ETunaSweeperItemSlotSource::WorkbenchBlueprintItem)
+		CachedTileData.Source == ETunaSweeperItemSlotSource::WorkbenchRecipe)
 	{
 		OutOperation = nullptr;
 		return;
@@ -232,6 +228,16 @@ bool UTunaSweeperItemThumbnailSlotWidget::NativeOnDrop(
 	{
 		return Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
 	}
+	if (CachedTileData.Source == ETunaSweeperItemSlotSource::WorkbenchDismantleItem ||
+		CachedTileData.Source == ETunaSweeperItemSlotSource::WorkbenchBlueprintItem)
+	{
+		return Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
+	}
+	if (ItemDragOperation->TileData.Source == ETunaSweeperItemSlotSource::WorkbenchDismantleItem ||
+		ItemDragOperation->TileData.Source == ETunaSweeperItemSlotSource::WorkbenchBlueprintItem)
+	{
+		return Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
+	}
 
 	FTunaSweeperItemSlotReference SourceSlot = ItemDragOperation->TileData.SlotReference;
 	if (!SourceSlot.IsValid())
@@ -267,6 +273,17 @@ void UTunaSweeperItemThumbnailSlotWidget::ApplyTileData()
 	}
 
 	EnsureAttachmentSlotIndicatorWidget();
+
+	const bool bIsEquipmentSlot = CachedTileData.Source == ETunaSweeperItemSlotSource::Equipment;
+	if (EquipmentSlotNameText)
+	{
+		EquipmentSlotNameText->SetText(bIsEquipmentSlot ? CachedTileData.EquipmentSlotDisplayName : FText::GetEmpty());
+		EquipmentSlotNameText->SetVisibility(
+			bIsEquipmentSlot && !CachedTileData.EquipmentSlotDisplayName.IsEmpty()
+				? ESlateVisibility::HitTestInvisible
+				: ESlateVisibility::Collapsed);
+		EquipmentSlotNameText->SetColorAndOpacity(FSlateColor(FLinearColor(0.72f, 0.80f, 0.86f, 1.0f)));
+	}
 
 	if (ItemIconImage)
 	{
@@ -338,10 +355,16 @@ void UTunaSweeperItemThumbnailSlotWidget::ApplyTileData()
 
 	if (ItemNameText)
 	{
-		ItemNameText->SetText(
-			(!CachedTileData.bIsEmpty || CachedTileData.bShowEmptySlotLabel)
+		const FText NameText = bIsEquipmentSlot
+			? (!CachedTileData.bIsEmpty ? CachedTileData.DisplayName : FText::GetEmpty())
+			: ((!CachedTileData.bIsEmpty || CachedTileData.bShowEmptySlotLabel)
 				? CachedTileData.DisplayName
 				: FText::GetEmpty());
+		ItemNameText->SetText(NameText);
+		if (ItemNamePlate)
+		{
+			ItemNamePlate->SetVisibility(NameText.IsEmpty() ? ESlateVisibility::Collapsed : ESlateVisibility::HitTestInvisible);
+		}
 	}
 }
 
@@ -435,6 +458,16 @@ bool UTunaSweeperItemThumbnailSlotWidget::CanAcceptDragOperation(UDragDropOperat
 	const UTunaSweeperItemDragDropOperation* ItemDragOperation = Cast<UTunaSweeperItemDragDropOperation>(InOperation);
 	UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
 	if (!ItemDragOperation || !TunaGameInstance || ItemDragOperation->TileData.bIsEmpty)
+	{
+		return false;
+	}
+	if (CachedTileData.Source == ETunaSweeperItemSlotSource::WorkbenchDismantleItem ||
+		CachedTileData.Source == ETunaSweeperItemSlotSource::WorkbenchBlueprintItem)
+	{
+		return false;
+	}
+	if (ItemDragOperation->TileData.Source == ETunaSweeperItemSlotSource::WorkbenchDismantleItem ||
+		ItemDragOperation->TileData.Source == ETunaSweeperItemSlotSource::WorkbenchBlueprintItem)
 	{
 		return false;
 	}

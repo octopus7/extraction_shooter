@@ -27,6 +27,13 @@ namespace TunaSweeperLootContainerUi
 
 	using TunaSweeperUiText::ResolveUiText;
 
+	int32 RoundUpToUiSlotCount(int32 SlotCount)
+	{
+		return SlotCount > 0
+			? FMath::DivideAndRoundUp(SlotCount, ContainerTileColumnCount) * ContainerTileColumnCount
+			: 0;
+	}
+
 	FTunaSweeperItemStackTileData BuildTileData(
 		const UTunaSweeperGameInstance* TunaGameInstance,
 		UTunaSweeperItemDataSubsystem* ItemDataSubsystem,
@@ -784,7 +791,10 @@ void UTunaSweeperLootContainerWidget::PopulateContainerItems()
 		Capacity = BlueprintItems.Num();
 		OccupiedSlotCount = BlueprintItems.Num();
 	}
-	const int32 RowCount = FMath::Max(1, FMath::DivideAndRoundUp(Capacity, TunaSweeperLootContainerUi::ContainerTileColumnCount));
+	const int32 UiSlotCount = TunaSweeperLootContainerUi::RoundUpToUiSlotCount(Capacity);
+	const int32 RowCount = FMath::Max(
+		1,
+		FMath::DivideAndRoundUp(UiSlotCount, TunaSweeperLootContainerUi::ContainerTileColumnCount));
 	if (RootSizeBox)
 	{
 		RootSizeBox->SetWidthOverride(TunaSweeperLootContainerUi::ContainerPanelWidth);
@@ -845,7 +855,7 @@ void UTunaSweeperLootContainerWidget::PopulateContainerItems()
 	ContainerTileView->SetEntryWidth(TunaSweeperLootContainerUi::ContainerTileWidth);
 	ContainerTileView->SetEntryHeight(TunaSweeperLootContainerUi::ContainerTileHeight);
 
-	for (int32 SlotIndex = 0; SlotIndex < Capacity; ++SlotIndex)
+	for (int32 SlotIndex = 0; SlotIndex < UiSlotCount; ++SlotIndex)
 	{
 		FTunaSweeperItemInstance ItemInstance;
 		if (Slots && Slots->IsValidIndex(SlotIndex) && (*Slots)[SlotIndex].ItemUid.IsValid() && TunaGameInstance)

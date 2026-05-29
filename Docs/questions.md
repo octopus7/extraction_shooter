@@ -1277,3 +1277,33 @@ Niagara 파티클은 월드의 바람 액터에 자동으로 밀리지 않으므
 ## 2026-05-29 17:36:15 (elapsed: 00:00:00)
 Q. 창고 액터 혹시 벙커에 구현했어 json 배치데이터와 BP 까지?
 A. 아니다. 현재 저장소에는 창고 C++ 액터(`ATunaSweeperStorageActor`), `StorageOpen` 상호작용, 벙커 전용 열기 조건, 인벤토리/창고 UI와 저장 로직은 구현되어 있다. 하지만 `Content/Data/GameplayInteractionSpawns.json`에는 벙커 창고 배치 항목이 없고, `Content/Interaction`에도 전용 `BP_Storage`/창고 BP 에셋은 없다. 현재 상태에서 창고는 인벤토리 모드로는 열리지만, 벙커 월드에 배치된 창고 액터/BP 상호작용까지는 미완료다.
+
+## 2026-05-29 19:04:59 (elapsed: 01:11:21)
+
+### Question
+
+분해 데이터는 임의로 만들었는가?
+
+### Answer
+
+아니다. `TunaSweeper/Content/Data/WorkbenchDismantleRecipes.json` 같은 분해 레시피 데이터 파일은 만들지 않았고, 코드 안에도 임의 분해 결과를 하드코딩하지 않았다. 현재 구현은 해당 JSON 파일이 있으면 읽고, 없으면 분해 데이터 없이 통과하는 선택적 로더만 두었다. 따라서 실제 분해 가능 항목과 결과는 별도 데이터가 제공되기 전까지 비어 있다.
+
+## 2026-05-29 19:22:11 (elapsed: 00:00:24)
+
+### Question
+
+작업대 액터 하나에 상호작용이 3개 펼쳐져 나열된 것인가?
+
+### Answer
+
+맞다. 현재 `ATunaSweeperWorkbenchActor` 하나에 `InteractableComponent`(제조), `DismantleInteractableComponent`(분해), `BlueprintRegisterInteractableComponent`(설계도 등록) 세 개가 붙어 있고, 각각 별도 마커 위젯을 띄운다. 생성자에서 세 컴포넌트를 X -82/0/82, Z 120 위치로 벌려 놓았기 때문에 화면에는 마커 원 세 개가 세로로 겹쳐 보일 수 있다. 이는 하나의 목록 UI가 펼쳐진 것이 아니라 상호작용 컴포넌트 세 개가 각각 자기 마커를 표시하는 구조다.
+
+## 2026-05-29 19:23:39 (elapsed: 00:00:14)
+
+### Question
+
+마우스 휠로 상호작용을 선택하는 기능은 문서에만 있고 아직 미구현인가?
+
+### Answer
+
+그렇다. `Docs/requests.md`와 `Docs/questions.md`에는 상호작용 목록과 마우스 휠 포커스 이동 요구가 기록되어 있지만, 현재 런타임 구현은 그 구조가 아니다. `UTunaSweeperInteractionSubsystem::RefreshFocusedInteractable()`가 매 틱 상호작용 가능 컴포넌트 중 가장 가까운 하나를 자동 포커스하고, `IA_Interact` 입력은 그 포커스 하나에만 실행된다. 마우스 휠 입력은 현재 탄종 선택용 `IA_AmmoFocus`와 지도 줌에만 연결되어 있으며, 상호작용 후보 목록/인덱스/휠 전환 입력은 아직 구현되어 있지 않다.

@@ -494,15 +494,15 @@ void UTunaSweeperItemHoverPromptWidget::ApplyTileData()
 		{
 			ActionText = TunaSweeperItemHoverPrompt::ResolveUiText(
 				GetGameInstance<UTunaSweeperGameInstance>(),
-				TEXT("ui.item_hover.dismantle"),
-				TEXT("Dismantle"));
+				TEXT("ui.item_hover.assign_dismantle_target"),
+				TEXT("\uBD84\uD574 \uC2AC\uB86F \uC9C0\uC815"));
 		}
 		else if (bWorkbenchBlueprintItem)
 		{
 			ActionText = TunaSweeperItemHoverPrompt::ResolveUiText(
 				GetGameInstance<UTunaSweeperGameInstance>(),
-				TEXT("ui.item_hover.register_blueprint"),
-				TEXT("Register"));
+				TEXT("ui.item_hover.assign_blueprint_target"),
+				TEXT("\uC124\uACC4\uB3C4 \uC2AC\uB86F \uC9C0\uC815"));
 		}
 		TakeActionText->SetText(ActionText);
 	}

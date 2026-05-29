@@ -145,7 +145,7 @@ namespace TunaSweeperEditorSetup
 	const FString InteractionMarkerAlignmentTaskId = TEXT("2026-05-25_RebuildInteractionMarkerRequirementPreviewV1");
 	const FString PickupItemAndSpawnerTaskId = TEXT("2026-05-11_CreatePickupItemAndSpawnerAssetsV3");
 	const FString CommonGameHudTaskId = TEXT("2026-05-28_AddMeleeQuickSlotHudV1");
-	const FString WorkbenchPanelWidgetTaskId = TEXT("2026-05-29_CreateWorkbenchPanelWidgetV1");
+	const FString WorkbenchPanelWidgetTaskId = TEXT("2026-05-29_CreateWorkbenchPanelWidgetV4");
 	const FString InventoryInputTaskId = TEXT("2026-05-11_AddInventoryInput");
 	const FString QuickSlotInputTaskId = TEXT("2026-05-28_AddMeleeQuickSlotInputV1");
 	const FString DropInputTaskId = TEXT("2026-05-18_AddDropInputAction");
@@ -288,8 +288,11 @@ namespace TunaSweeperEditorSetup
 	constexpr float InventoryTileViewScrollbarReserveWidth = 22.0f;
 	constexpr float InventoryTileViewWidth = InventoryTileColumnCount * InventoryTileWidth + InventoryTileViewScrollbarReserveWidth;
 	constexpr float InventoryPanelWidth = InventoryPanelPadding * 2.0f + InventoryTileViewWidth;
-	constexpr float EquipmentReserveEntryWidth = InventoryTileViewWidth / EquipmentReserveColumnCount;
-	constexpr float EquipmentReserveHeight = 2.0f * InventoryTileHeight;
+	constexpr float EquipmentSlotLabelHeight = 22.0f;
+	constexpr float EquipmentReserveEntryWidth = InventoryTileWidth;
+	constexpr float EquipmentReserveEntryHeight = InventoryTileHeight + EquipmentSlotLabelHeight;
+	constexpr float EquipmentReserveWidth = EquipmentReserveColumnCount * EquipmentReserveEntryWidth;
+	constexpr float EquipmentReserveHeight = 2.0f * EquipmentReserveEntryHeight;
 	constexpr float AuxiliaryBagPanelPadding = 6.0f;
 	constexpr float AuxiliaryBagPanelGap = 4.0f;
 	constexpr float AuxiliaryBagPanelWidth = AuxiliaryBagPanelPadding * 2.0f + InventoryTileWidth;
@@ -7252,6 +7255,9 @@ namespace TunaSweeperEditorSetup
 
 		UWidgetTree* WidgetTree = WidgetBlueprint->WidgetTree;
 		USizeBox* RootSizeBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("RootSizeBox"));
+		UVerticalBox* RootStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("RootStack"));
+		UTextBlock* EquipmentSlotNameText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("EquipmentSlotNameText"));
+		USizeBox* SlotSizeBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("SlotSizeBox"));
 		UBorder* SlotBackground = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("SlotBackground"));
 		UOverlay* SlotOverlay = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), TEXT("SlotOverlay"));
 		USizeBox* IconBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("IconBox"));
@@ -7263,16 +7269,39 @@ namespace TunaSweeperEditorSetup
 		UBorder* ItemNamePlate = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("ItemNamePlate"));
 		UTextBlock* ItemNameText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("ItemNameText"));
 
-		if (!RootSizeBox || !SlotBackground || !SlotOverlay || !IconBox || !ItemIconImage ||
-			!ItemQuantityText || !AttachmentSlotIndicatorText || !ItemNamePlate || !ItemNameText)
+		if (!RootSizeBox || !RootStack || !EquipmentSlotNameText || !SlotSizeBox || !SlotBackground || !SlotOverlay ||
+			!IconBox || !ItemIconImage || !ItemQuantityText || !AttachmentSlotIndicatorText || !ItemNamePlate || !ItemNameText)
 		{
 			return false;
 		}
 
 		WidgetTree->RootWidget = RootSizeBox;
 		RootSizeBox->SetWidthOverride(96.0f);
-		RootSizeBox->SetHeightOverride(96.0f);
-		RootSizeBox->SetContent(SlotBackground);
+		RootSizeBox->SetContent(RootStack);
+
+		ConfigureTextBlockLeft(
+			EquipmentSlotNameText,
+			FText::FromString(TEXT("Slot")),
+			FLinearColor(0.72f, 0.80f, 0.86f, 1.0f),
+			12);
+		EquipmentSlotNameText->SetAutoWrapText(false);
+		EquipmentSlotNameText->SetVisibility(ESlateVisibility::Collapsed);
+		UVerticalBoxSlot* EquipmentSlotNameSlot = RootStack->AddChildToVerticalBox(EquipmentSlotNameText);
+		if (EquipmentSlotNameSlot)
+		{
+			EquipmentSlotNameSlot->SetHorizontalAlignment(HAlign_Fill);
+			EquipmentSlotNameSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 3.0f));
+		}
+
+		SlotSizeBox->SetWidthOverride(96.0f);
+		SlotSizeBox->SetHeightOverride(96.0f);
+		SlotSizeBox->SetContent(SlotBackground);
+		UVerticalBoxSlot* SlotSizeSlot = RootStack->AddChildToVerticalBox(SlotSizeBox);
+		if (SlotSizeSlot)
+		{
+			SlotSizeSlot->SetHorizontalAlignment(HAlign_Fill);
+			SlotSizeSlot->SetVerticalAlignment(VAlign_Top);
+		}
 
 		SlotBackground->SetPadding(FMargin(5.0f));
 		SlotBackground->SetBrush(MakeRoundedBoxBrush(
@@ -7327,9 +7356,11 @@ namespace TunaSweeperEditorSetup
 		}
 
 		RegisterWidgetVariable(WidgetBlueprint, SlotBackground);
+		RegisterWidgetVariable(WidgetBlueprint, EquipmentSlotNameText);
 		RegisterWidgetVariable(WidgetBlueprint, ItemIconImage);
 		RegisterWidgetVariable(WidgetBlueprint, ItemQuantityText);
 		RegisterWidgetVariable(WidgetBlueprint, AttachmentSlotIndicatorText);
+		RegisterWidgetVariable(WidgetBlueprint, ItemNamePlate);
 		RegisterWidgetVariable(WidgetBlueprint, ItemNameText);
 		WidgetBlueprint->MarkPackageDirty();
 		return true;
@@ -8128,15 +8159,16 @@ namespace TunaSweeperEditorSetup
 		}
 
 		EquipmentReserveTileView->SetEntryWidth(EquipmentReserveEntryWidth);
-		EquipmentReserveTileView->SetEntryHeight(InventoryTileHeight);
+		EquipmentReserveTileView->SetEntryHeight(EquipmentReserveEntryHeight);
 		SetListViewEntryWidgetClass(EquipmentReserveTileView, EntryWidgetClass);
+		EquipmentReserveSizeBox->SetWidthOverride(EquipmentReserveWidth);
 		EquipmentReserveSizeBox->SetHeightOverride(EquipmentReserveHeight);
 		EquipmentReserveSizeBox->SetContent(EquipmentReserveTileView);
 		UVerticalBoxSlot* ReserveRowSlot = InventoryStack->AddChildToVerticalBox(EquipmentReserveSizeBox);
 		if (ReserveRowSlot)
 		{
 			ReserveRowSlot->SetPadding(FMargin(0.0f, 12.0f, 0.0f, 12.0f));
-			ReserveRowSlot->SetHorizontalAlignment(HAlign_Fill);
+			ReserveRowSlot->SetHorizontalAlignment(HAlign_Left);
 			ReserveRowSlot->SetVerticalAlignment(VAlign_Top);
 		}
 
@@ -8551,6 +8583,10 @@ namespace TunaSweeperEditorSetup
 		UTextBlock* CraftButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("CraftButtonText"));
 
 		UVerticalBox* DismantleRightStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("DismantleRightStack"));
+		UTextBlock* DismantleSelectedItemTitleText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("DismantleSelectedItemTitleText"));
+		UBorder* DismantleSelectedItemDropZone = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("DismantleSelectedItemDropZone"));
+		USizeBox* DismantleSelectedItemBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("DismantleSelectedItemBox"));
+		UTileView* DismantleSelectedItemTileView = WidgetTree->ConstructWidget<UTileView>(UTileView::StaticClass(), TEXT("DismantleSelectedItemTileView"));
 		UTextBlock* DismantleResultTitleText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("DismantleResultTitleText"));
 		UTextBlock* DismantleResultText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("DismantleResultText"));
 		UButton* DismantleButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("DismantleButton"));
@@ -8558,6 +8594,10 @@ namespace TunaSweeperEditorSetup
 
 		UVerticalBox* BlueprintRightStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("BlueprintRightStack"));
 		UTextBlock* BlueprintGuideText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("BlueprintGuideText"));
+		UTextBlock* BlueprintSelectedItemTitleText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("BlueprintSelectedItemTitleText"));
+		UBorder* BlueprintSelectedItemDropZone = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("BlueprintSelectedItemDropZone"));
+		USizeBox* BlueprintSelectedItemBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("BlueprintSelectedItemBox"));
+		UTileView* BlueprintSelectedItemTileView = WidgetTree->ConstructWidget<UTileView>(UTileView::StaticClass(), TEXT("BlueprintSelectedItemTileView"));
 		UTextBlock* BlueprintRegisterText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("BlueprintRegisterText"));
 		UButton* BlueprintRegisterButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("BlueprintRegisterButton"));
 		UTextBlock* BlueprintRegisterButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("BlueprintRegisterButtonText"));
@@ -8568,9 +8608,11 @@ namespace TunaSweeperEditorSetup
 			!DismantleInventoryTileView || !DismantleStorageHeaderText || !DismantleStorageTileView ||
 			!BlueprintLeftStack || !BlueprintItemTileView || !CraftRightStack || !CraftMaterialsTitleText ||
 			!CraftIngredientList || !CraftArrowText || !CraftOutputRow || !CraftOutputImageBox || !CraftOutputImage ||
-			!CraftOutputText || !CraftButton || !CraftButtonText || !DismantleRightStack || !DismantleResultTitleText ||
-			!DismantleResultText || !DismantleButton || !DismantleButtonText || !BlueprintRightStack ||
-			!BlueprintGuideText || !BlueprintRegisterText || !BlueprintRegisterButton || !BlueprintRegisterButtonText)
+			!CraftOutputText || !CraftButton || !CraftButtonText || !DismantleRightStack || !DismantleSelectedItemTitleText ||
+			!DismantleSelectedItemDropZone || !DismantleSelectedItemBox || !DismantleSelectedItemTileView ||
+			!DismantleResultTitleText || !DismantleResultText || !DismantleButton || !DismantleButtonText || !BlueprintRightStack ||
+			!BlueprintGuideText || !BlueprintSelectedItemTitleText || !BlueprintSelectedItemDropZone || !BlueprintSelectedItemBox ||
+			!BlueprintSelectedItemTileView || !BlueprintRegisterText || !BlueprintRegisterButton || !BlueprintRegisterButtonText)
 		{
 			return false;
 		}
@@ -8709,8 +8751,6 @@ namespace TunaSweeperEditorSetup
 		ConfigureWorkbenchTileView(BlueprintItemTileView, WorkbenchTileViewHeight);
 
 		AddModeStackToOverlay(LeftModeOverlay, CraftLeftStack);
-		AddModeStackToOverlay(LeftModeOverlay, DismantleLeftStack);
-		AddModeStackToOverlay(LeftModeOverlay, BlueprintLeftStack);
 
 		auto ConfigureActionButton = [](UButton* Button, UTextBlock* ButtonText, const FText& Text)
 		{
@@ -8770,6 +8810,29 @@ namespace TunaSweeperEditorSetup
 			CraftButtonSlot->SetVerticalAlignment(VAlign_Top);
 		}
 
+		ConfigureTextBlockLeft(DismantleSelectedItemTitleText, FText::FromString(TEXT("\uBD84\uD574\uD560 \uC544\uC774\uD15C")), FLinearColor(0.84f, 0.90f, 0.94f, 1.0f), 18);
+		DismantleRightStack->AddChildToVerticalBox(DismantleSelectedItemTitleText);
+		DismantleSelectedItemDropZone->SetPadding(FMargin(8.0f));
+		DismantleSelectedItemDropZone->SetBrush(MakeRoundedBoxBrush(
+			FVector2D(128.0f, 128.0f),
+			FLinearColor(0.030f, 0.036f, 0.041f, 0.92f),
+			FLinearColor(0.24f, 0.31f, 0.36f, 1.0f),
+			1.0f));
+		DismantleSelectedItemTileView->SetEntryWidth(WorkbenchTileWidth);
+		DismantleSelectedItemTileView->SetEntryHeight(WorkbenchTileHeight);
+		SetListViewEntryWidgetClass(DismantleSelectedItemTileView, EntryWidgetClass);
+		DismantleSelectedItemBox->SetWidthOverride(WorkbenchTileWidth);
+		DismantleSelectedItemBox->SetHeightOverride(WorkbenchTileHeight);
+		DismantleSelectedItemBox->SetContent(DismantleSelectedItemTileView);
+		DismantleSelectedItemDropZone->SetContent(DismantleSelectedItemBox);
+		UVerticalBoxSlot* DismantleSelectedItemSlot = DismantleRightStack->AddChildToVerticalBox(DismantleSelectedItemDropZone);
+		if (DismantleSelectedItemSlot)
+		{
+			DismantleSelectedItemSlot->SetPadding(FMargin(0.0f, 10.0f, 0.0f, 18.0f));
+			DismantleSelectedItemSlot->SetHorizontalAlignment(HAlign_Left);
+			DismantleSelectedItemSlot->SetVerticalAlignment(VAlign_Top);
+		}
+
 		ConfigureTextBlockLeft(DismantleResultTitleText, FText::FromString(TEXT("\uBD84\uD574 \uACB0\uACFC")), FLinearColor(0.84f, 0.90f, 0.94f, 1.0f), 18);
 		DismantleRightStack->AddChildToVerticalBox(DismantleResultTitleText);
 		ConfigureTextBlockLeft(DismantleResultText, FText::GetEmpty(), FLinearColor::White, 17);
@@ -8791,6 +8854,34 @@ namespace TunaSweeperEditorSetup
 
 		ConfigureTextBlockLeft(BlueprintGuideText, FText::FromString(TEXT("\uC124\uACC4\uB3C4 \uC544\uC774\uD15C")), FLinearColor(0.84f, 0.90f, 0.94f, 1.0f), 18);
 		BlueprintRightStack->AddChildToVerticalBox(BlueprintGuideText);
+		ConfigureTextBlockLeft(BlueprintSelectedItemTitleText, FText::FromString(TEXT("\uB4F1\uB85D\uD560 \uC124\uACC4\uB3C4")), FLinearColor(0.84f, 0.90f, 0.94f, 1.0f), 18);
+		UVerticalBoxSlot* BlueprintSelectedItemTitleSlot = BlueprintRightStack->AddChildToVerticalBox(BlueprintSelectedItemTitleText);
+		if (BlueprintSelectedItemTitleSlot)
+		{
+			BlueprintSelectedItemTitleSlot->SetPadding(FMargin(0.0f, 18.0f, 0.0f, 0.0f));
+			BlueprintSelectedItemTitleSlot->SetHorizontalAlignment(HAlign_Fill);
+			BlueprintSelectedItemTitleSlot->SetVerticalAlignment(VAlign_Top);
+		}
+		BlueprintSelectedItemDropZone->SetPadding(FMargin(8.0f));
+		BlueprintSelectedItemDropZone->SetBrush(MakeRoundedBoxBrush(
+			FVector2D(128.0f, 128.0f),
+			FLinearColor(0.030f, 0.036f, 0.041f, 0.92f),
+			FLinearColor(0.24f, 0.31f, 0.36f, 1.0f),
+			1.0f));
+		BlueprintSelectedItemTileView->SetEntryWidth(WorkbenchTileWidth);
+		BlueprintSelectedItemTileView->SetEntryHeight(WorkbenchTileHeight);
+		SetListViewEntryWidgetClass(BlueprintSelectedItemTileView, EntryWidgetClass);
+		BlueprintSelectedItemBox->SetWidthOverride(WorkbenchTileWidth);
+		BlueprintSelectedItemBox->SetHeightOverride(WorkbenchTileHeight);
+		BlueprintSelectedItemBox->SetContent(BlueprintSelectedItemTileView);
+		BlueprintSelectedItemDropZone->SetContent(BlueprintSelectedItemBox);
+		UVerticalBoxSlot* BlueprintSelectedItemSlot = BlueprintRightStack->AddChildToVerticalBox(BlueprintSelectedItemDropZone);
+		if (BlueprintSelectedItemSlot)
+		{
+			BlueprintSelectedItemSlot->SetPadding(FMargin(0.0f, 10.0f, 0.0f, 18.0f));
+			BlueprintSelectedItemSlot->SetHorizontalAlignment(HAlign_Left);
+			BlueprintSelectedItemSlot->SetVerticalAlignment(VAlign_Top);
+		}
 		ConfigureTextBlockLeft(BlueprintRegisterText, FText::GetEmpty(), FLinearColor::White, 17);
 		UVerticalBoxSlot* BlueprintTextSlot = BlueprintRightStack->AddChildToVerticalBox(BlueprintRegisterText);
 		if (BlueprintTextSlot)
@@ -8864,7 +8955,7 @@ namespace TunaSweeperEditorSetup
 		UOverlaySlot* LootContainerSlot = LootingBoxPanel->AddChildToOverlay(LootContainerWidget);
 		if (LootContainerSlot)
 		{
-			LootContainerSlot->SetHorizontalAlignment(HAlign_Fill);
+			LootContainerSlot->SetHorizontalAlignment(HAlign_Left);
 			LootContainerSlot->SetVerticalAlignment(VAlign_Top);
 		}
 
