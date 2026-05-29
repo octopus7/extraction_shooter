@@ -43,6 +43,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
 	void OpenLootContainerPanel(const FTunaSweeperLootContainerInstance& ContainerInstance);
 
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
+	void OpenStoragePanel();
+
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Quest")
 	void OpenQuestPanel(FName QuestId);
 

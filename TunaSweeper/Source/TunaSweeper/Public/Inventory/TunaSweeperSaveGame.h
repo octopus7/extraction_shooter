@@ -57,7 +57,7 @@ class TUNASWEEPER_API UTunaSweeperSaveGame : public USaveGame
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Save")
-	int32 SaveVersion = 11;
+	int32 SaveVersion = 12;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Save")
 	int32 SaveSlotIndex = 1;
@@ -94,6 +94,12 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Inventory")
 	TArray<FTunaSweeperInventorySlot> UsableQuickSlots;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Storage", meta = (ClampMin = "0", UIMin = "0"))
+	int32 StorageSlotCapacity = 100;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Storage")
+	TArray<FTunaSweeperInventorySlot> StorageSlots;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|World Progress")
 	TArray<FTunaSweeperWorldProgressSaveData> WorldProgressStates;

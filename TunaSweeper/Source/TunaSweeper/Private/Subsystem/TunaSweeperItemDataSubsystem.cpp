@@ -679,12 +679,8 @@ bool UTunaSweeperItemDataSubsystem::LoadLootContainerTableJson()
 				static_cast<float>((*MeshScaleArray)[2]->AsNumber()));
 		}
 
-		const bool bCapacityIsSupported =
-			Definition.Capacity == 5 ||
-			Definition.Capacity == 10 ||
-			Definition.Capacity == 15;
 		if (Definition.Id == INDEX_NONE || Definition.NameStringKey.IsNone() || Definition.StaticMeshPath.IsEmpty() ||
-			!bCapacityIsSupported)
+			Definition.Capacity <= 0)
 		{
 			UE_LOG(LogTunaSweeperItemData, Warning, TEXT("Skipping loot container row %d: field value is invalid."), RowIndex);
 			continue;
@@ -796,7 +792,7 @@ bool UTunaSweeperItemDataSubsystem::LoadLootContainerContentsJson()
 			Contents.Items.Add(ItemStack);
 		}
 
-		if (Contents.Id == INDEX_NONE || Contents.Items.Num() <= 0 || Contents.Items.Num() > 15)
+		if (Contents.Id == INDEX_NONE || Contents.Items.Num() <= 0)
 		{
 			UE_LOG(LogTunaSweeperItemData, Warning, TEXT("Skipping loot contents row %d: field value is invalid."), RowIndex);
 			continue;

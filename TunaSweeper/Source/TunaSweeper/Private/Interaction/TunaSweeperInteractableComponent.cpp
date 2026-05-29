@@ -51,6 +51,8 @@ namespace TunaSweeperInteractionMarkerLayout
 			return FName(TEXT("ui.interaction.memo"));
 		case ETunaSweeperInteractionType::HousingManagement:
 			return FName(TEXT("ui.interaction.housing_management"));
+		case ETunaSweeperInteractionType::StorageOpen:
+			return FName(TEXT("ui.interaction.storage_open"));
 		default:
 			return NAME_None;
 		}

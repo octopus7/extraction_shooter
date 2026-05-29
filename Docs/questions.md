@@ -994,11 +994,11 @@ A. 프로젝트에는 아직 별도 `EditorOnly` 콘텐츠 폴더 규칙이 없�
 
 ### 질문
 
-개발자의 상자가 열리지 않는 것이 capacity를 비허용값으로 잡아서 그런 것인가?
+개발자의 상자가 열리지 않는 것이 capacity 제한 때문인가?
 
 ### 답변
 
-맞다. `LootContainerTable.json`에서 개발자 상자 `7008` capacity를 `7`로 바꿨는데, `UTunaSweeperItemDataSubsystem::LoadLootContainerTableJson()`은 capacity를 `5`, `10`, `15`만 지원값으로 인정한다. 로그에도 `Skipping loot container row 7: field value is invalid.`가 찍혀 개발자 상자 정의가 로드되지 않았고, 그래서 마커는 보여도 컨테이너 인스턴스 생성이 실패해 열리지 않았다. capacity를 `10`으로 수정했다.
+이전에는 상자 capacity 로더가 일부 고정값만 허용해서 그 밖의 값을 넣으면 정의 로드가 실패했다. 현재 규칙은 고정값 제한 없이 양수 정수 capacity를 허용하며, 내용물은 실제 컨테이너 capacity를 초과하지 않는지만 검사한다.
 ## 2026-05-28 14:44:03 (elapsed: 00:00:30)
 
 ### 질문

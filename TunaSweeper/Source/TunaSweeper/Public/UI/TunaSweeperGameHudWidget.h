@@ -71,6 +71,9 @@ public:
 	void ShowLootContainerPanel(const FTunaSweeperLootContainerInstance& ContainerInstance);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
+	void ShowStoragePanel();
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
 	void ShowMemoPanel(int32 MemoId);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")

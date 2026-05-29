@@ -49,6 +49,7 @@ private:
 	bool HandleWarpPointInteraction(UTunaSweeperInteractableComponent* Interactable, APawn* InstigatorPawn);
 	bool HandleMemoInteraction(UTunaSweeperInteractableComponent* Interactable, APawn* InstigatorPawn);
 	bool HandleHousingManagementInteraction(UTunaSweeperInteractableComponent* Interactable, APawn* InstigatorPawn);
+	bool HandleStorageOpenInteraction(UTunaSweeperInteractableComponent* Interactable, APawn* InstigatorPawn);
 
 	TSet<TWeakObjectPtr<UTunaSweeperInteractableComponent>> RegisteredInteractables;
 	TWeakObjectPtr<UTunaSweeperInteractableComponent> FocusedInteractable;

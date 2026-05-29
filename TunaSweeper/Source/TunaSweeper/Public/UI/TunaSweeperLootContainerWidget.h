@@ -2,6 +2,7 @@
 
 #include "Blueprint/UserWidget.h"
 #include "CoreMinimal.h"
+#include "Inventory/TunaSweeperInventoryTypes.h"
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
 #include "TunaSweeperLootContainerWidget.generated.h"
 
@@ -19,6 +20,9 @@ class TUNASWEEPER_API UTunaSweeperLootContainerWidget : public UUserWidget
 public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Loot Container")
 	void SetContainerInstance(const FTunaSweeperLootContainerInstance& InContainerInstance);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Storage")
+	void SetStorageView();
 
 protected:
 	virtual void NativeConstruct() override;
@@ -48,6 +52,9 @@ private:
 
 	UPROPERTY(Transient)
 	FTunaSweeperLootContainerInstance ContainerInstance;
+
+	UPROPERTY(Transient)
+	ETunaSweeperItemSlotSource SlotSource = ETunaSweeperItemSlotSource::LootContainer;
 
 	UPROPERTY(Transient)
 	TArray<TObjectPtr<UObject>> TileObjects;

@@ -33,6 +33,12 @@ struct TUNASWEEPER_API FTunaSweeperGameplaySettings
 	int32 AuxiliaryBagSlotCount = 2;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "TunaSweeper|Gameplay")
+	int32 DefaultStorageSlotCount = 100;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "TunaSweeper|Gameplay")
+	int32 MaxStorageSlotCount = 1000;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "TunaSweeper|Gameplay")
 	bool bEnableDebugGameplay = false;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "TunaSweeper|Gameplay|Debug")
@@ -379,6 +385,7 @@ public:
 	const TArray<FTunaSweeperInventorySlot>& GetEquipmentSlots();
 	const TArray<FTunaSweeperInventorySlot>& GetAuxiliaryBagSlots();
 	const TArray<FTunaSweeperInventorySlot>& GetUsableQuickSlots();
+	const TArray<FTunaSweeperInventorySlot>& GetStorageSlots();
 	const TArray<FTunaSweeperInventorySlot>& GetActiveLootContainerSlots();
 	const TArray<FTunaSweeperInventorySlot>& GetSelectedWeaponAttachmentSlots();
 	const TArray<FName>& GetSelectedWeaponAttachmentSlotTags() const { return SelectedWeaponAttachmentSlotTags; }
@@ -460,6 +467,12 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Inventory")
 	void CompactInventorySlots();
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Storage")
+	int32 GetStorageSlotCapacity();
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Storage")
+	bool SetStorageSlotCapacity(int32 NewCapacity, bool bSaveImmediately = false);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|World Progress")
 	FTunaSweeperWorldProgressSaveData GetOrCreateWorldProgressState(
@@ -557,6 +570,9 @@ private:
 	bool AddItemUidToFirstEmptyCompatibleEquipmentSlot(const FGuid& ItemUid);
 	void RemoveInvalidSlotReferences(TArray<FTunaSweeperInventorySlot>& Slots) const;
 	void EnsureSlotArraySize(TArray<FTunaSweeperInventorySlot>& Slots, int32 DesiredSize) const;
+	int32 GetDefaultStorageSlotCapacity() const;
+	int32 GetMaxStorageSlotCapacity() const;
+	int32 NormalizeStorageSlotCapacity(int32 RequestedCapacity) const;
 	TArray<FTunaSweeperInventorySlot>* GetMutableSlotsForSource(ETunaSweeperItemSlotSource Source);
 	const TArray<FTunaSweeperInventorySlot>* GetSlotsForSource(ETunaSweeperItemSlotSource Source) const;
 	int32 CalculateInventoryCapacityForEquipmentSlots(const TArray<FTunaSweeperInventorySlot>& InEquipmentSlots);
@@ -594,6 +610,7 @@ private:
 	bool HasOccupiedInventorySlotsBeyondCapacity(
 		const TArray<FTunaSweeperInventorySlot>& InInventorySlots,
 		int32 Capacity) const;
+	void CollectItemUidsFromSlots(const TArray<FTunaSweeperInventorySlot>& Slots, TSet<FGuid>& OutItemUids) const;
 	void CollectPlayerOwnedItemUids(TSet<FGuid>& OutItemUids, bool bIncludeUsableQuickSlots = true) const;
 	bool BackupExistingSaveGame(const FString& ExistingSlotName) const;
 	void TrimSaveGameBackups() const;
@@ -637,6 +654,12 @@ private:
 
 	UPROPERTY(Transient)
 	TArray<FTunaSweeperInventorySlot> UsableQuickSlots;
+
+	UPROPERTY(Transient)
+	TArray<FTunaSweeperInventorySlot> StorageSlots;
+
+	UPROPERTY(Transient)
+	int32 StorageSlotCapacity = 100;
 
 	UPROPERTY(Transient)
 	int32 RuntimeSelectedWeaponSlotNumber = 1;

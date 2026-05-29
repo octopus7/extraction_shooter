@@ -596,6 +596,12 @@ void UTunaSweeperGameHudWidget::ShowExternalPanel(ETunaSweeperHudExternalPanelMo
 
 void UTunaSweeperGameHudWidget::ShowInventoryOnlyPanel()
 {
+	if (IsBunkerMap())
+	{
+		ShowStoragePanel();
+		return;
+	}
+
 	SetHudMode(ETunaSweeperHudMode::Inventory);
 	ShowExternalPanel(ETunaSweeperHudExternalPanelMode::None);
 	HandleSelectedInventoryItemChanged();
@@ -623,12 +629,38 @@ void UTunaSweeperGameHudWidget::ShowLootContainerPanel(const FTunaSweeperLootCon
 {
 	ActiveHudMode = ETunaSweeperHudMode::Inventory;
 
+	if (ExternalPanelWidget &&
+		ExternalPanelWidget->GetExternalPanelMode() == ETunaSweeperHudExternalPanelMode::Storage)
+	{
+		if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
+		{
+			TunaGameInstance->SaveGameState();
+		}
+	}
+
 	if (ExternalPanelWidget)
 	{
+		bClearExternalPanelModeAfterHide = false;
 		ExternalPanelWidget->SetLootContainerInstance(ContainerInstance);
 	}
 
 	ApplyHudModeVisibility();
+	HandleSelectedInventoryItemChanged();
+}
+
+void UTunaSweeperGameHudWidget::ShowStoragePanel()
+{
+	if (!IsBunkerMap())
+	{
+		return;
+	}
+
+	ShowExternalPanel(ETunaSweeperHudExternalPanelMode::Storage);
+	if (ExternalPanelWidget)
+	{
+		ExternalPanelWidget->SetStorageContainer();
+	}
+
 	HandleSelectedInventoryItemChanged();
 }
 
@@ -675,6 +707,14 @@ void UTunaSweeperGameHudWidget::SetHudMode(ETunaSweeperHudMode InHudMode)
 	}
 
 	ActiveHudMode = InHudMode;
+	if (ActiveHudMode == ETunaSweeperHudMode::Inventory &&
+		IsBunkerMap() &&
+		ExternalPanelWidget &&
+		ExternalPanelWidget->GetExternalPanelMode() != ETunaSweeperHudExternalPanelMode::LootingBox)
+	{
+		bClearExternalPanelModeAfterHide = false;
+		ExternalPanelWidget->SetStorageContainer();
+	}
 	ApplyHudModeVisibility();
 	HandleSelectedInventoryItemChanged();
 }
@@ -1331,6 +1371,13 @@ void UTunaSweeperGameHudWidget::CloseLootContainerPanelIfOpen()
 		if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
 		{
 			TunaGameInstance->NotifyActiveLootContainerUiClosed();
+		}
+	}
+	else if (ExternalPanelWidget->GetExternalPanelMode() == ETunaSweeperHudExternalPanelMode::Storage)
+	{
+		if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
+		{
+			TunaGameInstance->SaveGameState();
 		}
 	}
 

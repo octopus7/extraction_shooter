@@ -1,6 +1,7 @@
 #include "Subsystem/TunaSweeperInteractionSubsystem.h"
 
 #include "Engine/Engine.h"
+#include "Engine/World.h"
 #include "Character/TunaSweeperQuestNpcActor.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "Interaction/TunaSweeperDoorActor.h"
@@ -14,6 +15,7 @@
 #include "Interaction/TunaSweeperPersistentDoorActor.h"
 #include "Interaction/TunaSweeperPickupItemActor.h"
 #include "Interaction/TunaSweeperSelfDestructInteractableActor.h"
+#include "Interaction/TunaSweeperStorageActor.h"
 #include "Interaction/TunaSweeperWarpPointActor.h"
 #include "Interaction/TunaSweeperWorldProgressActor.h"
 #include "Kismet/GameplayStatics.h"
@@ -24,6 +26,11 @@
 
 namespace TunaSweeperInteractionQuestEvents
 {
+	bool IsBunkerMap(const UWorld* World)
+	{
+		return World && World->GetMapName().EndsWith(TEXT("BunkerMap"));
+	}
+
 	FName GetInteractionTypeName(ETunaSweeperInteractionType InteractionType)
 	{
 		switch (InteractionType)
@@ -54,6 +61,8 @@ namespace TunaSweeperInteractionQuestEvents
 			return FName(TEXT("door_open"));
 		case ETunaSweeperInteractionType::HousingManagement:
 			return FName(TEXT("housing_management"));
+		case ETunaSweeperInteractionType::StorageOpen:
+			return FName(TEXT("storage_open"));
 		default:
 			return NAME_None;
 		}
@@ -156,6 +165,9 @@ bool UTunaSweeperInteractionSubsystem::RequestInteraction(UTunaSweeperInteractab
 	case ETunaSweeperInteractionType::HousingManagement:
 		bHandled = HandleHousingManagementInteraction(Interactable, InstigatorPawn);
 		break;
+	case ETunaSweeperInteractionType::StorageOpen:
+		bHandled = HandleStorageOpenInteraction(Interactable, InstigatorPawn);
+		break;
 	default:
 		return false;
 	}
@@ -191,6 +203,11 @@ bool UTunaSweeperInteractionSubsystem::CanOfferInteraction(const UTunaSweeperInt
 			TunaGameInstance &&
 			MemoActor->GetMemoId() > 0 &&
 			!TunaGameInstance->IsMemoAcquired(MemoActor->GetMemoId());
+	}
+
+	if (Interactable->GetInteractionType() == ETunaSweeperInteractionType::StorageOpen)
+	{
+		return TunaSweeperInteractionQuestEvents::IsBunkerMap(GetWorld());
 	}
 
 	if (Interactable->GetInteractionType() != ETunaSweeperInteractionType::Quest)
@@ -436,6 +453,28 @@ bool UTunaSweeperInteractionSubsystem::HandleHousingManagementInteraction(
 
 	ATunaSweeperPlayerController* TunaPlayerController = Cast<ATunaSweeperPlayerController>(InstigatorPawn->GetController());
 	return TunaPlayerController && TunaPlayerController->OpenHousingMode();
+}
+
+bool UTunaSweeperInteractionSubsystem::HandleStorageOpenInteraction(
+	UTunaSweeperInteractableComponent* Interactable,
+	APawn* InstigatorPawn)
+{
+	const ATunaSweeperStorageActor* StorageActor = Interactable
+		? Cast<ATunaSweeperStorageActor>(Interactable->GetOwner())
+		: nullptr;
+	if (!StorageActor || !InstigatorPawn || !TunaSweeperInteractionQuestEvents::IsBunkerMap(GetWorld()))
+	{
+		return false;
+	}
+
+	ATunaSweeperPlayerController* TunaPlayerController = Cast<ATunaSweeperPlayerController>(InstigatorPawn->GetController());
+	if (!TunaPlayerController)
+	{
+		return false;
+	}
+
+	TunaPlayerController->OpenStoragePanel();
+	return true;
 }
 
 void UTunaSweeperInteractionSubsystem::RefreshFocusedInteractable()

@@ -6,7 +6,7 @@ Update it whenever a new state field is expected to persist across save slots, l
 ## Current Save Container
 
 - Save object: `UTunaSweeperSaveGame`
-- Current save version: `11`
+- Current save version: `12`
 - Runtime owner: `UTunaSweeperGameInstance`
 - Save entry point: `UTunaSweeperGameInstance::SaveGameStateInternal()`
 - Load entry point: `UTunaSweeperGameInstance::LoadGameState()`
@@ -74,6 +74,17 @@ Slot arrays store item UIDs. Any item UID referenced by these slots, including n
 `UsableQuickSlots` stores the 3-8 quick-slot layout shown in inventory mode and reflected in the gameplay quick-slot bar. Slots 1, 2, and melee are equipment slots and are not duplicated here. Only usable items can occupy these slots; currently that means item definitions tagged `item.category.consumable` or `item.category.throwable`.
 
 Unlike memo unlocks and map markers, usable quick slots are item-possession state. Generic saves preserve the previously saved quick-slot payload without rewriting it, successful RaidMap-to-BunkerMap extraction saves write the current runtime quick slots, and death saves clear all usable quick slots.
+
+### Storage Slots
+
+The bunker-only storage/warehouse is persisted per save slot through:
+
+- `StorageSlotCapacity`
+- `StorageSlots`
+
+New save slots initialize storage with `100` slots. `StorageSlotCapacity` is saved separately from the slot array so future upgrades can expand capacity without changing the storage item layout. Storage slot arrays store item UIDs just like inventory slots, and any item UID referenced by storage, including nested attachment UIDs, must exist in `ItemInstances`.
+
+Storage is accessible only in `BunkerMap`: entering inventory mode in the bunker opens the storage panel at the same HUD location used by loot containers, and `ATunaSweeperStorageActor` opens the same panel through `StorageOpen` interaction. Raid maps do not offer or open storage. Death persistence clears carried inventory, equipment, auxiliary bag, and usable quick slots, but preserves storage slots and their item instances.
 
 ### World Progress Objects
 

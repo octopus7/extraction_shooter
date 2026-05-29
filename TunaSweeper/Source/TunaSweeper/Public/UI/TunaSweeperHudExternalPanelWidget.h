@@ -24,6 +24,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
 	void SetLootContainerInstance(const FTunaSweeperLootContainerInstance& InContainerInstance);
 
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
+	void SetStorageContainer();
+
 protected:
 	virtual void NativeConstruct() override;
 

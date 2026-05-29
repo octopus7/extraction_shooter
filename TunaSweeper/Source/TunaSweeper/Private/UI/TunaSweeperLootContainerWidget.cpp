@@ -6,8 +6,10 @@
 #include "Components/TileView.h"
 #include "Engine/Texture2D.h"
 #include "Game/TunaSweeperGameInstance.h"
+#include "GameFramework/PlayerController.h"
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
 #include "UI/TunaSweeperItemDragDropOperation.h"
+#include "UI/TunaSweeperItemStackSplitPopupWidget.h"
 #include "UI/TunaSweeperItemStackTileItemObject.h"
 #include "UI/TunaSweeperUIFont.h"
 #include "UI/TunaSweeperUiText.h"
@@ -29,6 +31,7 @@ namespace TunaSweeperLootContainerUi
 		const UTunaSweeperGameInstance* TunaGameInstance,
 		UTunaSweeperItemDataSubsystem* ItemDataSubsystem,
 		const FTunaSweeperItemInstance& ItemInstance,
+		ETunaSweeperItemSlotSource Source,
 		int32 SourceIndex,
 		ETunaSweeperItemTextLanguage Language)
 	{
@@ -36,9 +39,9 @@ namespace TunaSweeperLootContainerUi
 		TileData.ItemInstance = ItemInstance;
 		TileData.ItemStack.ItemId = ItemInstance.ItemId;
 		TileData.ItemStack.Quantity = FMath::Max(1, ItemInstance.Quantity);
-		TileData.Source = ETunaSweeperItemSlotSource::LootContainer;
+		TileData.Source = Source;
 		TileData.SourceIndex = SourceIndex;
-		TileData.SlotReference.Source = ETunaSweeperItemSlotSource::LootContainer;
+		TileData.SlotReference.Source = Source;
 		TileData.SlotReference.SlotIndex = SourceIndex;
 		TileData.bIsEmpty = !ItemInstance.IsValid();
 
@@ -111,6 +114,7 @@ namespace TunaSweeperLootContainerUi
 
 	bool TryResolveSlotFromTileView(
 		const UTileView* TileView,
+		ETunaSweeperItemSlotSource Source,
 		int32 SlotCount,
 		const FVector2D& ScreenSpacePosition,
 		FTunaSweeperItemSlotReference& OutSlotReference)
@@ -145,9 +149,53 @@ namespace TunaSweeperLootContainerUi
 			return false;
 		}
 
-		OutSlotReference.Source = ETunaSweeperItemSlotSource::LootContainer;
+		OutSlotReference.Source = Source;
 		OutSlotReference.SlotIndex = SlotIndex;
 		return true;
+	}
+
+	FTunaSweeperItemSlotReference ResolveSourceSlot(const UTunaSweeperItemDragDropOperation* ItemDragOperation)
+	{
+		FTunaSweeperItemSlotReference SourceSlot;
+		if (!ItemDragOperation)
+		{
+			return SourceSlot;
+		}
+
+		SourceSlot = ItemDragOperation->TileData.SlotReference;
+		if (!SourceSlot.IsValid())
+		{
+			SourceSlot.Source = ItemDragOperation->TileData.Source;
+			SourceSlot.SlotIndex = ItemDragOperation->TileData.SourceIndex;
+		}
+		return SourceSlot;
+	}
+
+	bool TryOpenStackSplitPopupForDrop(
+		APlayerController* OwningPlayer,
+		UTunaSweeperGameInstance* TunaGameInstance,
+		UTunaSweeperItemDragDropOperation* ItemDragOperation,
+		const FTunaSweeperItemSlotReference& TargetSlot,
+		const FVector2D& ScreenSpacePosition)
+	{
+		if (!OwningPlayer || !TunaGameInstance || !ItemDragOperation || ItemDragOperation->TileData.bIsEmpty)
+		{
+			return false;
+		}
+
+		const bool bOpenedPopup = UTunaSweeperItemStackSplitPopupWidget::TryOpenStackSplitPopup(
+			OwningPlayer,
+			TunaGameInstance,
+			ResolveSourceSlot(ItemDragOperation),
+			TargetSlot,
+			ScreenSpacePosition);
+		if (bOpenedPopup)
+		{
+			ItemDragOperation->bHasHoveredSlotReference = false;
+			ItemDragOperation->HoveredSlotReference = FTunaSweeperItemSlotReference();
+		}
+
+		return bOpenedPopup;
 	}
 
 	bool TryMoveFromDropSlot(
@@ -198,6 +246,11 @@ namespace TunaSweeperLootContainerUi
 		}
 		return OccupiedStackCount;
 	}
+
+	FText GetStorageDisplayName(const UTunaSweeperGameInstance* TunaGameInstance)
+	{
+		return ResolveUiText(TunaGameInstance, TEXT("ui.storage.title"), TEXT("\uCC3D\uACE0"));
+	}
 }
 
 void UTunaSweeperLootContainerWidget::NativeConstruct()
@@ -232,12 +285,15 @@ bool UTunaSweeperLootContainerWidget::TryResolveDropSlotFromCursor(
 	FTunaSweeperItemSlotReference& OutSlotReference)
 {
 	UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
-	const int32 Capacity = TunaGameInstance && TunaGameInstance->HasActiveLootContainer()
-		? TunaGameInstance->GetActiveLootContainerSlots().Num()
-		: FMath::Max(0, ContainerInstance.Capacity);
+	const int32 Capacity = SlotSource == ETunaSweeperItemSlotSource::Storage && TunaGameInstance
+		? TunaGameInstance->GetStorageSlots().Num()
+		: (TunaGameInstance && TunaGameInstance->HasActiveLootContainer()
+			? TunaGameInstance->GetActiveLootContainerSlots().Num()
+			: FMath::Max(0, ContainerInstance.Capacity));
 
 	return TunaSweeperLootContainerUi::TryResolveSlotFromTileView(
 		ContainerTileView,
+		SlotSource,
 		Capacity,
 		ScreenSpacePosition,
 		OutSlotReference);
@@ -245,7 +301,15 @@ bool UTunaSweeperLootContainerWidget::TryResolveDropSlotFromCursor(
 
 void UTunaSweeperLootContainerWidget::SetContainerInstance(const FTunaSweeperLootContainerInstance& InContainerInstance)
 {
+	SlotSource = ETunaSweeperItemSlotSource::LootContainer;
 	ContainerInstance = InContainerInstance;
+	PopulateContainerItems();
+}
+
+void UTunaSweeperLootContainerWidget::SetStorageView()
+{
+	SlotSource = ETunaSweeperItemSlotSource::Storage;
+	ContainerInstance = FTunaSweeperLootContainerInstance();
 	PopulateContainerItems();
 }
 
@@ -263,7 +327,26 @@ bool UTunaSweeperLootContainerWidget::NativeOnDrop(
 	UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
 	FTunaSweeperItemSlotReference CursorSlotReference;
 	if (TryResolveDropSlotFromCursor(InDragDropEvent.GetScreenSpacePosition(), CursorSlotReference) &&
-		TunaSweeperLootContainerUi::TryMoveFromDropSlot(TunaGameInstance, ItemDragOperation, CursorSlotReference))
+		((InDragDropEvent.GetModifierKeys().IsControlDown() &&
+			TunaSweeperLootContainerUi::TryOpenStackSplitPopupForDrop(
+				GetOwningPlayer(),
+				TunaGameInstance,
+				ItemDragOperation,
+				CursorSlotReference,
+				InDragDropEvent.GetScreenSpacePosition())) ||
+			TunaSweeperLootContainerUi::TryMoveFromDropSlot(TunaGameInstance, ItemDragOperation, CursorSlotReference)))
+	{
+		return true;
+	}
+
+	if (InDragDropEvent.GetModifierKeys().IsControlDown() &&
+		ItemDragOperation->bHasHoveredSlotReference &&
+		TunaSweeperLootContainerUi::TryOpenStackSplitPopupForDrop(
+			GetOwningPlayer(),
+			TunaGameInstance,
+			ItemDragOperation,
+			ItemDragOperation->HoveredSlotReference,
+			InDragDropEvent.GetScreenSpacePosition()))
 	{
 		return true;
 	}
@@ -284,9 +367,18 @@ void UTunaSweeperLootContainerWidget::PopulateContainerItems()
 	}
 
 	UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
-	const TArray<FTunaSweeperInventorySlot>* Slots = TunaGameInstance && TunaGameInstance->HasActiveLootContainer()
-		? &TunaGameInstance->GetActiveLootContainerSlots()
-		: nullptr;
+	const TArray<FTunaSweeperInventorySlot>* Slots = nullptr;
+	if (TunaGameInstance)
+	{
+		if (SlotSource == ETunaSweeperItemSlotSource::Storage)
+		{
+			Slots = &TunaGameInstance->GetStorageSlots();
+		}
+		else if (TunaGameInstance->HasActiveLootContainer())
+		{
+			Slots = &TunaGameInstance->GetActiveLootContainerSlots();
+		}
+	}
 	const int32 Capacity = Slots ? Slots->Num() : FMath::Max(0, ContainerInstance.Capacity);
 	const int32 OccupiedSlotCount = Slots
 		? TunaSweeperLootContainerUi::CountOccupiedSlots(*Slots)
@@ -301,9 +393,11 @@ void UTunaSweeperLootContainerWidget::PopulateContainerItems()
 
 	if (ContainerTitleText)
 	{
-		const FText DisplayName = TunaGameInstance && TunaGameInstance->HasActiveLootContainer()
-			? TunaGameInstance->GetActiveLootContainerDisplayName()
-			: ContainerInstance.DisplayName;
+		const FText DisplayName = SlotSource == ETunaSweeperItemSlotSource::Storage
+			? TunaSweeperLootContainerUi::GetStorageDisplayName(TunaGameInstance)
+			: (TunaGameInstance && TunaGameInstance->HasActiveLootContainer()
+				? TunaGameInstance->GetActiveLootContainerDisplayName()
+				: ContainerInstance.DisplayName);
 		ContainerTitleText->SetText(DisplayName.IsEmpty()
 			? TunaSweeperLootContainerUi::ResolveUiText(
 				TunaGameInstance,
@@ -346,6 +440,7 @@ void UTunaSweeperLootContainerWidget::PopulateContainerItems()
 			TunaGameInstance,
 			ItemDataSubsystem,
 			ItemInstance,
+			SlotSource,
 			SlotIndex,
 			Language));
 		TileObjects.Add(TileObject);

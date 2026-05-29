@@ -62,7 +62,8 @@
       { "item_id": 2002, "quantity": 100 },
       { "item_id": 1003, "quantity": 1 },
       { "item_id": 2003, "quantity": 100 },
-      { "item_id": 1005, "quantity": 1 }
+      { "item_id": 1005, "quantity": 1 },
+      { "item_id": 2006, "quantity": 1 }
     ]
   }
 ]

@@ -1054,6 +1054,21 @@ bool ATunaSweeperPlayerController::TryHandleHoveredItemInteract()
 		return true;
 	}
 
+	if (HoveredSlot.Source == ETunaSweeperItemSlotSource::Storage)
+	{
+		if (TunaSweeperHoveredItemInteraction::TryFindEquipmentTarget(TunaGameInstance, HoveredSlot, true, TargetSlot) ||
+			TunaSweeperHoveredItemInteraction::TryFindFirstInventoryTarget(TunaGameInstance, HoveredSlot, TargetSlot))
+		{
+			TunaGameInstance->MoveItemBetweenSlots(HoveredSlot, TargetSlot);
+			TunaGameInstance->ClearHoveredItemSlot(HoveredSlot);
+		}
+		else
+		{
+			TunaSweeperHoveredItemInteraction::ShowInsufficientSpaceMessage();
+		}
+		return true;
+	}
+
 	return true;
 }
 
@@ -1572,6 +1587,22 @@ void ATunaSweeperPlayerController::OpenLootContainerPanel(const FTunaSweeperLoot
 	if (GameHudWidget)
 	{
 		GameHudWidget->ShowLootContainerPanel(ContainerInstance);
+		CancelPawnGameplayActions();
+	}
+}
+
+void ATunaSweeperPlayerController::OpenStoragePanel()
+{
+	if (!IsBunkerMap())
+	{
+		return;
+	}
+
+	EnsureGameHudWidget();
+
+	if (GameHudWidget)
+	{
+		GameHudWidget->ShowStoragePanel();
 		CancelPawnGameplayActions();
 	}
 }
