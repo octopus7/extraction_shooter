@@ -60,6 +60,7 @@ Each `FTunaSweeperItemInstance` must preserve:
 
 Weapon loaded ammo state is part of the weapon item instance, not player-global state.
 When a weapon is loaded from a save or equipped later, ammo type and loaded count must be read from that weapon instance.
+Weapon attachment slots are keyed by attachment slot tags. Rifle instances may persist `attachment.slot.magazine`, `attachment.slot.optic`, and `attachment.slot.tactical`; the tactical slot currently stores the laser sight item when equipped.
 
 ### Player Slot Layout
 
@@ -123,9 +124,13 @@ Each `FTunaSweeperQuestProgressSaveData` preserves:
 
 Stored through `UTunaSweeperSaveGame::TotalExperiencePoints`.
 
-`TotalExperiencePoints` is the source of truth for the bunker/player experience level. Raid item and enemy experience is accumulated only in runtime pending state while the player is in `RaidMap`; it is copied into `TotalExperiencePoints` only during successful `RaidMap` to `BunkerMap` survival persistence, before the save is written. The pending raid gain and raid-start baseline are not saved.
+`TotalExperiencePoints` is the source of truth for the bunker/player experience level. The level thresholds and maximum level are derived from `Content/Data/ExperienceLevelTable.json`; the last level row is the current level cap. Raid item and enemy experience is accumulated only in runtime pending state while the player is in `RaidMap`; it is copied into `TotalExperiencePoints` only during successful `RaidMap` to `BunkerMap` survival persistence, before the save is written. The pending raid gain and raid-start baseline are not saved.
 
 Death persistence calls clear the pending raid gain before saving, so failed raids keep the previously saved `TotalExperiencePoints` unchanged.
+
+Level reward stat bonuses are derived from the current level and `Content/Data/ExperienceLevelRewards.json`. The reward table only drives max health, max food/fullness, max hydration, and max stamina increases; it does not persist separate stat-bonus fields and does not apply level-based attack or defense scaling.
+
+Raid-to-bunker travel keeps the entering vitals ratios in runtime memory only so the bunker character can preserve health and restore food/fullness or hydration up to at least 50% if they entered below that threshold. This bunker-entry adjustment is not a save-owned field.
 
 ## Loaded Ammo Rules
 

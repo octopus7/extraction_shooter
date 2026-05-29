@@ -1264,3 +1264,13 @@ SSOT 문서를 읽어보니 사선에 머리만 들어가면 헤드샷이 되는
 ### Answer
 
 Niagara 파티클은 월드의 바람 액터에 자동으로 밀리지 않으므로, Niagara System 내부에서 User 파라미터를 읽어 힘이나 속도에 연결해야 한다. 일반 파티클은 `User.WindVelocity` 같은 Vector3 파라미터를 만들고 Particle Update에 `Acceleration Force`/`Wind Force`/`Drag`/`Solve Forces and Velocity` 흐름으로 연결한다. 연기처럼 계속 흘러야 하면 Spawn에서 초기 속도에 바람을 조금 더하고 Update에서 Drag와 Curl Noise를 함께 쓰는 편이 자연스럽다. 현재 추출 포인트 C++ 액터는 이미 `User.Wind`, `User.WindVelocity`, `User.WindDirection`, `User.WindSpeed`를 Niagara 컴포넌트에 세팅하고 있으므로, `NS_ExtractionSmoke` 내부에서 이 User 값들을 실제 모듈에 바인딩하면 된다.
+
+## 2026-05-29 16:37:23 (elapsed: 00:12:52)
+
+### Question
+
+하우징에서 탭키 누르면 혹시 인벤토리로 가고있나?
+
+### Answer
+
+그렇다. 기존 입력 경로에서는 하우징 중에도 탭 입력이 인벤토리 토글로 이어질 수 있었고, HUD 모드 전환이 하우징 상태를 닫는 흐름까지 만들 수 있었다. 하우징 중 탭/지도 입력은 무시하고, 하우징 종료 시에는 카메라/입력/캐릭터 표시를 게임 플레이 상태로 복원하도록 처리한다.

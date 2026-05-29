@@ -2635,3 +2635,37 @@
 ## 2026-05-29 16:23:13 (elapsed: 00:00:00)
 
 - 추출 포인트 경계원 두께를 2cm로 줄일 것.
+
+## 2026-05-29 16:37:53 (elapsed: 00:00:00)
+
+- Limit level-up rewards to predetermined increases for max health, max food, max hydration, and max stamina.
+- Keep attack and defense affected only by equipment for now; do not add level-based attack or defense scaling.
+
+## 2026-05-29 16:37:23 (elapsed: 00:14:10)
+
+- 하우징 모드에서 빠져나오거나 하우징 UI가 닫힐 때 게임 플레이 상태로 복원하고 플레이어 캐릭터가 다시 보이게 할 것
+- 탭 입력은 게임 플레이 중일 때만 인벤토리 모드로 진입하고, 지도/메모/퀘스트/인벤토리 모드가 열린 상태에서는 탭으로 게임 플레이 상태로 돌아오게 할 것
+
+## 2026-05-29 16:41:55 (elapsed: 00:00:00)
+
+- Manage per-level stat increase values through JSON data.
+- In the bunker peace area, prevent hunger/fullness and hydration from decreasing.
+- When entering the bunker with hunger/fullness or hydration below 50%, restore that value to 50%; keep values above 50% unchanged.
+
+## 2026-05-29 16:51:09 (elapsed: 00:09:14)
+
+- 하우징 모드에서 Tab 키가 먹통이 되지 않고 하우징을 닫아 게임 플레이 상태로 복귀하게 할 것.
+## 2026-05-29 16:51:07 (elapsed: 00:00:00)
+
+- Set the experience-table maximum level to 30.
+- Distribute level-up stat rewards across levels 2 through 30.
+- Move the experience level table itself to JSON data.
+
+## 2026-05-29 16:56:35 (elapsed: 00:00:00)
+
+- 소총 모딩칸에 전술 장비 슬롯을 추가하고 레이저를 전술 장비로 분류할 것.
+- 장비 슬롯에 레이저가 장착되면 소총 BP에서 새 레이저 컴포넌트 클래스를 통해 `NS_LaserSight`를 활성화하고, 컴포넌트는 단순 켜기/끄기 기능만 구현할 것.
+## 2026-05-29 16:58:49 (elapsed: 00:00:00)
+
+- Keep the experience distribution as-is.
+- Rebalance level reward increases so they rise gradually instead of jumping in the middle.

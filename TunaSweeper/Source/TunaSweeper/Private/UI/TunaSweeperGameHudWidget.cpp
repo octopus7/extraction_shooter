@@ -19,6 +19,7 @@
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/Pawn.h"
 #include "Framework/Application/SlateApplication.h"
+#include "InputCoreTypes.h"
 #include "Player/TunaSweeperPlayerController.h"
 #include "Rendering/DrawElements.h"
 #include "Subsystem/TunaSweeperHousingSubsystem.h"
@@ -321,6 +322,32 @@ void UTunaSweeperGameHudWidget::NativeTick(const FGeometry& MyGeometry, float In
 	UpdateCrosshairState(InDeltaTime);
 	TickDamageNumberPopups(InDeltaTime);
 	Invalidate(EInvalidateWidgetReason::Paint);
+}
+
+FReply UTunaSweeperGameHudWidget::NativeOnPreviewKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
+{
+	if (InKeyEvent.GetKey() == EKeys::Tab && IsHousingModeActive())
+	{
+		if (UTunaSweeperHousingSubsystem* HousingSubsystem = GetGameInstance()
+			? GetGameInstance()->GetSubsystem<UTunaSweeperHousingSubsystem>()
+			: nullptr)
+		{
+			HousingSubsystem->CloseHousingMode();
+		}
+		return FReply::Handled();
+	}
+
+	if (InKeyEvent.GetKey() == EKeys::Tab && ActiveHudMode != ETunaSweeperHudMode::None)
+	{
+		ToggleInventoryOnlyPanel();
+		if (ATunaSweeperPlayerController* TunaPlayerController = Cast<ATunaSweeperPlayerController>(GetOwningPlayer()))
+		{
+			TunaPlayerController->ApplyDefaultGameInputMode();
+		}
+		return FReply::Handled();
+	}
+
+	return Super::NativeOnPreviewKeyDown(InGeometry, InKeyEvent);
 }
 
 int32 UTunaSweeperGameHudWidget::NativePaint(
@@ -627,6 +654,11 @@ void UTunaSweeperGameHudWidget::ShowQuestPanel(FName QuestId)
 
 void UTunaSweeperGameHudWidget::SetHudMode(ETunaSweeperHudMode InHudMode)
 {
+	if (InHudMode != ETunaSweeperHudMode::None && IsHousingModeActive())
+	{
+		return;
+	}
+
 	if (InHudMode != ETunaSweeperHudMode::Inventory)
 	{
 		CloseLootContainerPanelIfOpen();

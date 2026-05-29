@@ -255,6 +255,7 @@ void ATunaSweeperPlayerController::BeginPlay()
 	bShowMouseCursor = true;
 
 	ApplyDefaultGameInputMode();
+	BindHousingStateChanged();
 
 	if (IsIntroMap())
 	{
@@ -291,6 +292,42 @@ void ATunaSweeperPlayerController::BeginPlay()
 		{
 			MaybeStartCanBotIntroDialogue();
 		}
+	}
+}
+
+void ATunaSweeperPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	if (UGameInstance* GameInstance = GetGameInstance())
+	{
+		if (UTunaSweeperHousingSubsystem* HousingSubsystem = GameInstance->GetSubsystem<UTunaSweeperHousingSubsystem>())
+		{
+			HousingSubsystem->OnHousingStateChanged.RemoveAll(this);
+		}
+	}
+
+	EndHousingCameraMode(0.0f);
+	Super::EndPlay(EndPlayReason);
+}
+
+void ATunaSweeperPlayerController::BindHousingStateChanged()
+{
+	UTunaSweeperHousingSubsystem* HousingSubsystem = GetGameInstance()
+		? GetGameInstance()->GetSubsystem<UTunaSweeperHousingSubsystem>()
+		: nullptr;
+	if (!HousingSubsystem)
+	{
+		return;
+	}
+
+	HousingSubsystem->OnHousingStateChanged.RemoveAll(this);
+	HousingSubsystem->OnHousingStateChanged.AddUObject(this, &ATunaSweeperPlayerController::HandleHousingStateChanged);
+}
+
+void ATunaSweeperPlayerController::HandleHousingStateChanged()
+{
+	if (!IsHousingModeOpen())
+	{
+		RestoreGameplayState(TunaSweeperHousingCamera::BlendSeconds);
 	}
 }
 
@@ -403,7 +440,7 @@ void ATunaSweeperPlayerController::PlayerTick(float DeltaTime)
 
 	if (bHousingCameraActive && !IsHousingModeOpen())
 	{
-		EndHousingCameraMode(TunaSweeperHousingCamera::BlendSeconds);
+		RestoreGameplayState(TunaSweeperHousingCamera::BlendSeconds);
 	}
 
 	ATunaSweeperTopDownCharacter* ControlledCharacter = Cast<ATunaSweeperTopDownCharacter>(GetPawn());
@@ -1233,9 +1270,16 @@ void ATunaSweeperPlayerController::HandleHousingCancel()
 		else
 		{
 			HousingSubsystem->CloseHousingMode();
-			EndHousingCameraMode(TunaSweeperHousingCamera::BlendSeconds);
+			RestoreGameplayState(TunaSweeperHousingCamera::BlendSeconds);
 		}
 	}
+}
+
+void ATunaSweeperPlayerController::RestoreGameplayState(float HousingCameraBlendSeconds)
+{
+	EndHousingCameraMode(HousingCameraBlendSeconds);
+	ApplyDefaultGameInputMode();
+	bShowMouseCursor = true;
 }
 
 void ATunaSweeperPlayerController::BeginHousingCameraMode()
@@ -1280,23 +1324,23 @@ void ATunaSweeperPlayerController::BeginHousingCameraMode()
 
 void ATunaSweeperPlayerController::EndHousingCameraMode(float BlendSeconds)
 {
+	SetHousingCharacterVisualHidden(false);
+	bHousingMoveForwardHeld = false;
+	bHousingMoveBackwardHeld = false;
+	bHousingMoveRightHeld = false;
+	bHousingMoveLeftHeld = false;
+
 	if (!bHousingCameraActive)
 	{
-		SetHousingCharacterVisualHidden(false);
 		return;
 	}
 
-	SetHousingCharacterVisualHidden(false);
 	if (APawn* ControlledPawn = GetPawn())
 	{
 		SetViewTargetWithBlend(ControlledPawn, FMath::Max(0.0f, BlendSeconds), VTBlend_Cubic);
 	}
 
 	bHousingCameraActive = false;
-	bHousingMoveForwardHeld = false;
-	bHousingMoveBackwardHeld = false;
-	bHousingMoveRightHeld = false;
-	bHousingMoveLeftHeld = false;
 }
 
 void ATunaSweeperPlayerController::UpdateHousingCamera(float DeltaTime)
@@ -1467,21 +1511,38 @@ void ATunaSweeperPlayerController::HandleHousingMoveLeftReleased()
 
 void ATunaSweeperPlayerController::ToggleInventoryOnlyPanel()
 {
+	if (IsHousingModeOpen())
+	{
+		if (UTunaSweeperHousingSubsystem* HousingSubsystem = GetGameInstance()
+			? GetGameInstance()->GetSubsystem<UTunaSweeperHousingSubsystem>()
+			: nullptr)
+		{
+			HousingSubsystem->CloseHousingMode();
+		}
+		RestoreGameplayState(TunaSweeperHousingCamera::BlendSeconds);
+		return;
+	}
+
 	EnsureGameHudWidget();
 
 	if (GameHudWidget)
 	{
+		const bool bWasGameplayMode = GameHudWidget->GetHudMode() == ETunaSweeperHudMode::None;
 		GameHudWidget->ToggleInventoryOnlyPanel();
-		if (IsInventoryUiOpen())
+		if (GameHudWidget->GetHudMode() == ETunaSweeperHudMode::Inventory)
 		{
 			CancelPawnGameplayActions();
+		}
+		else if (!bWasGameplayMode)
+		{
+			RestoreGameplayState(0.0f);
 		}
 	}
 }
 
 void ATunaSweeperPlayerController::ToggleMapPanel()
 {
-	if (IsIntroMap() || IsOpeningScenarioMap() || bDialogueSequenceActive)
+	if (IsIntroMap() || IsOpeningScenarioMap() || bDialogueSequenceActive || IsHousingModeOpen())
 	{
 		return;
 	}
@@ -1497,6 +1558,10 @@ void ATunaSweeperPlayerController::ToggleMapPanel()
 	if (!bMapAlreadyOpen)
 	{
 		CancelPawnGameplayActions();
+	}
+	else
+	{
+		RestoreGameplayState(0.0f);
 	}
 }
 

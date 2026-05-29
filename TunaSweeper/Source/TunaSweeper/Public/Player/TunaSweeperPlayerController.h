@@ -27,6 +27,7 @@ public:
 	ATunaSweeperPlayerController();
 
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void PlayerTick(float DeltaTime) override;
 	virtual void SetupInputComponent() override;
 
@@ -133,6 +134,8 @@ private:
 	void EnsureGameHudWidget();
 	void EnsureIntroMenuWidget();
 	void EnsureScenarioPresentationWidget();
+	void BindHousingStateChanged();
+	void HandleHousingStateChanged();
 	void ApplyInitialTitleDisplaySettings();
 	void ApplyLevelBgmState();
 	bool ShowBunkerEntryFadeIfNeeded();
@@ -169,6 +172,7 @@ private:
 	void HandleHousingRotateLeft();
 	void HandleHousingRotateRight();
 	void HandleHousingCancel();
+	void RestoreGameplayState(float HousingCameraBlendSeconds);
 	void BeginHousingCameraMode();
 	void EndHousingCameraMode(float BlendSeconds);
 	void UpdateHousingCamera(float DeltaTime);
