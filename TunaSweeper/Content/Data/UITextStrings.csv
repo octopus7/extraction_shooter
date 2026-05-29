@@ -65,9 +65,10 @@ ui.inventory.slot.bag,가방,Bag,バッグ
 ui.inventory.slot.generic,슬롯 {0},Slot {0},スロット {0}
 ui.item_info.attachment_magazine,탄창,Magazine,マガジン
 ui.item_info.attachment_optic,광학,Optic,光学
+ui.item_info.attachment_tactical,전술 장비,Tactical,戦術装備
 ui.item_info.mod,Mod,Mod,MOD
 ui.item_info.attachments,부착물,Attachments,アタッチメント
-ui.item_info.rifle_modding,소총 모딩: 대용량 탄창 / 광학 장비,Rifle Mods: Extended Magazine / Optic,ライフル改造: 拡張マガジン / 光学装備
+ui.item_info.rifle_modding,소총 모딩: 대용량 탄창 / 광학 장비 / 전술 장비,Rifle Mods: Extended Magazine / Optic / Tactical,ライフル改造: 拡張マガジン / 光学装備 / 戦術装備
 ui.item_hover.take,줍기/배치,Take/Place,拾う/配置
 ui.item_hover.use,사용,Use,使用
 ui.item_hover.drop,버리기,Drop,捨てる

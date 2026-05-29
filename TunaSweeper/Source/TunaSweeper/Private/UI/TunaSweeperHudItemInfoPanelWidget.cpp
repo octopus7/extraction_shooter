@@ -31,6 +31,10 @@ namespace TunaSweeperItemInfoPanel
 		{
 			return ResolveUiText(TunaGameInstance, TEXT("ui.item_info.attachment_optic"), TEXT("\uAD11\uD559"));
 		}
+		if (AttachmentSlotTag == TEXT("attachment.slot.tactical"))
+		{
+			return ResolveUiText(TunaGameInstance, TEXT("ui.item_info.attachment_tactical"), TEXT("\uC804\uC220 \uC7A5\uBE44"));
+		}
 
 		return FText::FromName(AttachmentSlotTag);
 	}

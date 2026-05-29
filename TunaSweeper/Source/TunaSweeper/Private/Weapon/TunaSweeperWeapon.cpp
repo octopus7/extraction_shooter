@@ -1,5 +1,6 @@
 #include "Weapon/TunaSweeperWeapon.h"
 
+#include "Component/TunaSweeperLaserSightComponent.h"
 #include "Components/SceneComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/World.h"
@@ -79,6 +80,9 @@ ATunaSweeperWeapon::ATunaSweeperWeapon()
 	MuzzlePoint->SetupAttachment(RootComponent);
 	MuzzlePoint->SetRelativeLocation(FVector(80.0f, 0.0f, 0.0f));
 
+	LaserSightComponent = CreateDefaultSubobject<UTunaSweeperLaserSightComponent>(TEXT("LaserSightComponent"));
+	LaserSightComponent->SetupAttachment(MuzzlePoint);
+
 	ProjectileClass = TSoftClassPtr<ATunaSweeperProjectile>(FSoftObjectPath(TEXT("/Game/Weapons/BP_TunaSweeperProjectile.BP_TunaSweeperProjectile_C")));
 }
 
@@ -104,6 +108,19 @@ void ATunaSweeperWeapon::ConfigureMeleeVisual()
 	WeaponMesh->SetRelativeLocation(FVector(26.0f, 0.0f, 0.0f));
 	WeaponMesh->SetRelativeRotation(FRotator::ZeroRotator);
 	WeaponMesh->SetRelativeScale3D(FVector(0.52f, 0.075f, 0.075f));
+}
+
+void ATunaSweeperWeapon::SetLaserSightEnabled(bool bEnabled)
+{
+	if (LaserSightComponent)
+	{
+		LaserSightComponent->SetLaserSightEnabled(bEnabled);
+	}
+}
+
+bool ATunaSweeperWeapon::IsLaserSightEnabled() const
+{
+	return LaserSightComponent && LaserSightComponent->IsLaserSightEnabled();
 }
 
 void ATunaSweeperWeapon::SetWeaponMeshOverride(

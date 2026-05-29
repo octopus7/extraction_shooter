@@ -10,6 +10,7 @@ class UPrimitiveComponent;
 class USceneComponent;
 class UStaticMeshComponent;
 class UStaticMesh;
+class UTunaSweeperLaserSightComponent;
 class UWorld;
 
 UCLASS(BlueprintType, Blueprintable)
@@ -45,6 +46,12 @@ public:
 	void ConfigureMeleeVisual();
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Weapon")
+	void SetLaserSightEnabled(bool bEnabled);
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Weapon")
+	bool IsLaserSightEnabled() const;
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Weapon")
 	void SetWeaponMeshOverride(
 		UStaticMesh* Mesh,
 		UMaterialInterface* Material,
@@ -61,6 +68,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
 	TObjectPtr<USceneComponent> MuzzlePoint;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
+	TObjectPtr<UTunaSweeperLaserSightComponent> LaserSightComponent;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
 	TSoftClassPtr<ATunaSweeperProjectile> ProjectileClass;

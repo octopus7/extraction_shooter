@@ -33,7 +33,8 @@
     "reload_seconds": 2.2,
     "attachment_slot_tags": [
       "attachment.slot.magazine",
-      "attachment.slot.optic"
+      "attachment.slot.optic",
+      "attachment.slot.tactical"
     ]
   },
   {
@@ -129,6 +130,19 @@
     "icon_file_name": "T_UIIcon_RedDotOptic.uasset",
     "category_tag": "item.category.attachment",
     "attachment_slot_tag": "attachment.slot.optic",
+    "compatible_weapon_type_tags": [
+      "weapon.type.rifle"
+    ]
+  },
+  {
+    "id": 2006,
+    "name_string_key": "item.laser_sight",
+    "description_string_key": "item.laser_sight.desc",
+    "shop_sell_price": 90,
+    "experience_value": 30,
+    "icon_file_name": "T_UIIcon_RedDotOptic.uasset",
+    "category_tag": "item.category.attachment",
+    "attachment_slot_tag": "attachment.slot.tactical",
     "compatible_weapon_type_tags": [
       "weapon.type.rifle"
     ]
