@@ -102,6 +102,9 @@ private:
 	UFUNCTION()
 	void HandleBlueprintRegisterButtonClicked();
 
+	void HandleCraftTileClicked(UObject* ItemObject);
+	void HandleDismantleTileClicked(UObject* ItemObject);
+	void HandleBlueprintTileClicked(UObject* ItemObject);
 	void PopulateCraftRecipes();
 	void PopulateDismantleItems();
 	void PopulateBlueprintItems();

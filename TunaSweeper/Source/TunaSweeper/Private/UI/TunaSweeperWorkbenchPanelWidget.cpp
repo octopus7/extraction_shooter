@@ -3,6 +3,7 @@
 #include "Blueprint/WidgetTree.h"
 #include "Components/Button.h"
 #include "Components/Image.h"
+#include "Components/ListViewBase.h"
 #include "Components/TextBlock.h"
 #include "Components/TileView.h"
 #include "Components/VerticalBox.h"
@@ -127,6 +128,26 @@ void UTunaSweeperWorkbenchPanelWidget::NativeConstruct()
 		BlueprintRegisterButton->OnClicked.RemoveDynamic(this, &UTunaSweeperWorkbenchPanelWidget::HandleBlueprintRegisterButtonClicked);
 		BlueprintRegisterButton->OnClicked.AddDynamic(this, &UTunaSweeperWorkbenchPanelWidget::HandleBlueprintRegisterButtonClicked);
 	}
+	if (CraftRecipeTileView)
+	{
+		CraftRecipeTileView->OnItemClicked().RemoveAll(this);
+		CraftRecipeTileView->OnItemClicked().AddUObject(this, &UTunaSweeperWorkbenchPanelWidget::HandleCraftTileClicked);
+	}
+	if (DismantleInventoryTileView)
+	{
+		DismantleInventoryTileView->OnItemClicked().RemoveAll(this);
+		DismantleInventoryTileView->OnItemClicked().AddUObject(this, &UTunaSweeperWorkbenchPanelWidget::HandleDismantleTileClicked);
+	}
+	if (DismantleStorageTileView)
+	{
+		DismantleStorageTileView->OnItemClicked().RemoveAll(this);
+		DismantleStorageTileView->OnItemClicked().AddUObject(this, &UTunaSweeperWorkbenchPanelWidget::HandleDismantleTileClicked);
+	}
+	if (BlueprintItemTileView)
+	{
+		BlueprintItemTileView->OnItemClicked().RemoveAll(this);
+		BlueprintItemTileView->OnItemClicked().AddUObject(this, &UTunaSweeperWorkbenchPanelWidget::HandleBlueprintTileClicked);
+	}
 
 	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
 	{
@@ -152,6 +173,22 @@ void UTunaSweeperWorkbenchPanelWidget::NativeDestruct()
 	if (BlueprintRegisterButton)
 	{
 		BlueprintRegisterButton->OnClicked.RemoveDynamic(this, &UTunaSweeperWorkbenchPanelWidget::HandleBlueprintRegisterButtonClicked);
+	}
+	if (CraftRecipeTileView)
+	{
+		CraftRecipeTileView->OnItemClicked().RemoveAll(this);
+	}
+	if (DismantleInventoryTileView)
+	{
+		DismantleInventoryTileView->OnItemClicked().RemoveAll(this);
+	}
+	if (DismantleStorageTileView)
+	{
+		DismantleStorageTileView->OnItemClicked().RemoveAll(this);
+	}
+	if (BlueprintItemTileView)
+	{
+		BlueprintItemTileView->OnItemClicked().RemoveAll(this);
 	}
 	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
 	{
@@ -256,6 +293,39 @@ void UTunaSweeperWorkbenchPanelWidget::HandleDismantleButtonClicked()
 void UTunaSweeperWorkbenchPanelWidget::HandleBlueprintRegisterButtonClicked()
 {
 	ExecuteSelectedWorkbenchAction();
+}
+
+void UTunaSweeperWorkbenchPanelWidget::HandleCraftTileClicked(UObject* ItemObject)
+{
+	const UTunaSweeperItemStackTileItemObject* TileObject = Cast<UTunaSweeperItemStackTileItemObject>(ItemObject);
+	if (!TileObject)
+	{
+		return;
+	}
+
+	SelectCraftRecipe(TileObject->GetTileData().SlotReference.SlotIndex);
+}
+
+void UTunaSweeperWorkbenchPanelWidget::HandleDismantleTileClicked(UObject* ItemObject)
+{
+	const UTunaSweeperItemStackTileItemObject* TileObject = Cast<UTunaSweeperItemStackTileItemObject>(ItemObject);
+	if (!TileObject)
+	{
+		return;
+	}
+
+	SelectDismantleCandidate(TileObject->GetTileData().SlotReference);
+}
+
+void UTunaSweeperWorkbenchPanelWidget::HandleBlueprintTileClicked(UObject* ItemObject)
+{
+	const UTunaSweeperItemStackTileItemObject* TileObject = Cast<UTunaSweeperItemStackTileItemObject>(ItemObject);
+	if (!TileObject)
+	{
+		return;
+	}
+
+	SelectBlueprintItem(TileObject->GetTileData().SlotReference);
 }
 
 void UTunaSweeperWorkbenchPanelWidget::PopulateCraftRecipes()

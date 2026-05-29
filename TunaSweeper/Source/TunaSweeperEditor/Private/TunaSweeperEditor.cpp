@@ -126,6 +126,7 @@
 #include "UI/TunaSweeperQuestWidget.h"
 #include "UI/TunaSweeperReloadRingWidget.h"
 #include "UI/TunaSweeperSpeechBubbleWidget.h"
+#include "UI/TunaSweeperWorkbenchPanelWidget.h"
 #include "UObject/SavePackage.h"
 #include "UObject/UnrealType.h"
 #include "Weapon/TunaSweeperProjectile.h"
@@ -144,6 +145,7 @@ namespace TunaSweeperEditorSetup
 	const FString InteractionMarkerAlignmentTaskId = TEXT("2026-05-25_RebuildInteractionMarkerRequirementPreviewV1");
 	const FString PickupItemAndSpawnerTaskId = TEXT("2026-05-11_CreatePickupItemAndSpawnerAssetsV3");
 	const FString CommonGameHudTaskId = TEXT("2026-05-28_AddMeleeQuickSlotHudV1");
+	const FString WorkbenchPanelWidgetTaskId = TEXT("2026-05-29_CreateWorkbenchPanelWidgetV1");
 	const FString InventoryInputTaskId = TEXT("2026-05-11_AddInventoryInput");
 	const FString QuickSlotInputTaskId = TEXT("2026-05-28_AddMeleeQuickSlotInputV1");
 	const FString DropInputTaskId = TEXT("2026-05-18_AddDropInputAction");
@@ -265,6 +267,7 @@ namespace TunaSweeperEditorSetup
 	const FString HudExternalPanelWidgetAssetName = TEXT("WBP_HudExternalPanel");
 	const FString ItemThumbnailSlotWidgetAssetName = TEXT("WBP_ItemThumbnailSlot");
 	const FString LootContainerWidgetAssetName = TEXT("WBP_LootContainerPanel");
+	const FString WorkbenchPanelWidgetAssetName = TEXT("WBP_WorkbenchPanel");
 	const FString IntroMenuWidgetAssetName = TEXT("WBP_IntroMenu");
 	const FString LevelTransitionVideoWidgetAssetName = TEXT("WBP_LevelTransitionVideo");
 	const FString QuestWidgetAssetName = TEXT("WBP_Quest");
@@ -300,6 +303,14 @@ namespace TunaSweeperEditorSetup
 	constexpr float LootContainerPanelHeaderHeight = 74.0f;
 	constexpr float LootContainerPanelWidth =
 		LootContainerPanelPadding * 2.0f + LootContainerTileColumnCount * LootContainerTileWidth + LootContainerTileViewScrollbarReserveWidth;
+	constexpr float WorkbenchPanelWidth = 780.0f;
+	constexpr float WorkbenchPanelHeight = 620.0f;
+	constexpr float WorkbenchPanelPadding = 16.0f;
+	constexpr float WorkbenchLeftPanelWidth = 340.0f;
+	constexpr float WorkbenchTileViewWidth = 318.0f;
+	constexpr float WorkbenchTileViewHeight = 468.0f;
+	constexpr float WorkbenchTileWidth = 96.0f;
+	constexpr float WorkbenchTileHeight = 96.0f;
 	const FString InteractionAssetPath = TEXT("/Game/Interaction");
 	const FString EditorMapCaptureAssetPath = TEXT("/Game/EditorOnly/MapCapture");
 	const FString EditorMapCaptureBlueprintAssetName = TEXT("BP_Editor_MapCaptureActor");
@@ -8496,9 +8507,322 @@ namespace TunaSweeperEditorSetup
 		return true;
 	}
 
-	bool BuildHudExternalPanelWidgetTree(UWidgetBlueprint* WidgetBlueprint, TSubclassOf<UUserWidget> LootContainerWidgetClass)
+	bool BuildWorkbenchPanelWidgetTree(UWidgetBlueprint* WidgetBlueprint, TSubclassOf<UUserWidget> EntryWidgetClass)
 	{
-		if (!WidgetBlueprint || !WidgetBlueprint->WidgetTree || !LootContainerWidgetClass)
+		if (!WidgetBlueprint || !WidgetBlueprint->WidgetTree || !EntryWidgetClass)
+		{
+			return false;
+		}
+
+		WidgetBlueprint->Modify();
+		WidgetBlueprint->WidgetTree->Modify();
+		ClearWidgetTreeForRebuild(WidgetBlueprint);
+
+		UWidgetTree* WidgetTree = WidgetBlueprint->WidgetTree;
+		USizeBox* RootSizeBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("RootSizeBox"));
+		UBorder* PanelBackground = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("PanelBackground"));
+		UVerticalBox* PanelStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("PanelStack"));
+		UTextBlock* WorkbenchTitleText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("WorkbenchTitleText"));
+		UHorizontalBox* BodyRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("BodyRow"));
+		UBorder* LeftPanelBackground = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("LeftPanelBackground"));
+		UOverlay* LeftModeOverlay = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), TEXT("LeftModeOverlay"));
+		UBorder* RightPanelBackground = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("RightPanelBackground"));
+		UOverlay* RightModeOverlay = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), TEXT("RightModeOverlay"));
+
+		UVerticalBox* CraftLeftStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("CraftLeftStack"));
+		UTileView* CraftRecipeTileView = WidgetTree->ConstructWidget<UTileView>(UTileView::StaticClass(), TEXT("CraftRecipeTileView"));
+		UVerticalBox* DismantleLeftStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("DismantleLeftStack"));
+		UTextBlock* DismantleInventoryHeaderText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("DismantleInventoryHeaderText"));
+		UTileView* DismantleInventoryTileView = WidgetTree->ConstructWidget<UTileView>(UTileView::StaticClass(), TEXT("DismantleInventoryTileView"));
+		UTextBlock* DismantleStorageHeaderText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("DismantleStorageHeaderText"));
+		UTileView* DismantleStorageTileView = WidgetTree->ConstructWidget<UTileView>(UTileView::StaticClass(), TEXT("DismantleStorageTileView"));
+		UVerticalBox* BlueprintLeftStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("BlueprintLeftStack"));
+		UTileView* BlueprintItemTileView = WidgetTree->ConstructWidget<UTileView>(UTileView::StaticClass(), TEXT("BlueprintItemTileView"));
+
+		UVerticalBox* CraftRightStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("CraftRightStack"));
+		UTextBlock* CraftMaterialsTitleText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("CraftMaterialsTitleText"));
+		UVerticalBox* CraftIngredientList = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("CraftIngredientList"));
+		UTextBlock* CraftArrowText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("CraftArrowText"));
+		UHorizontalBox* CraftOutputRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("CraftOutputRow"));
+		USizeBox* CraftOutputImageBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("CraftOutputImageBox"));
+		UImage* CraftOutputImage = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("CraftOutputImage"));
+		UTextBlock* CraftOutputText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("CraftOutputText"));
+		UButton* CraftButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("CraftButton"));
+		UTextBlock* CraftButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("CraftButtonText"));
+
+		UVerticalBox* DismantleRightStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("DismantleRightStack"));
+		UTextBlock* DismantleResultTitleText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("DismantleResultTitleText"));
+		UTextBlock* DismantleResultText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("DismantleResultText"));
+		UButton* DismantleButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("DismantleButton"));
+		UTextBlock* DismantleButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("DismantleButtonText"));
+
+		UVerticalBox* BlueprintRightStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("BlueprintRightStack"));
+		UTextBlock* BlueprintGuideText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("BlueprintGuideText"));
+		UTextBlock* BlueprintRegisterText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("BlueprintRegisterText"));
+		UButton* BlueprintRegisterButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("BlueprintRegisterButton"));
+		UTextBlock* BlueprintRegisterButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("BlueprintRegisterButtonText"));
+
+		if (!RootSizeBox || !PanelBackground || !PanelStack || !WorkbenchTitleText || !BodyRow ||
+			!LeftPanelBackground || !LeftModeOverlay || !RightPanelBackground || !RightModeOverlay ||
+			!CraftLeftStack || !CraftRecipeTileView || !DismantleLeftStack || !DismantleInventoryHeaderText ||
+			!DismantleInventoryTileView || !DismantleStorageHeaderText || !DismantleStorageTileView ||
+			!BlueprintLeftStack || !BlueprintItemTileView || !CraftRightStack || !CraftMaterialsTitleText ||
+			!CraftIngredientList || !CraftArrowText || !CraftOutputRow || !CraftOutputImageBox || !CraftOutputImage ||
+			!CraftOutputText || !CraftButton || !CraftButtonText || !DismantleRightStack || !DismantleResultTitleText ||
+			!DismantleResultText || !DismantleButton || !DismantleButtonText || !BlueprintRightStack ||
+			!BlueprintGuideText || !BlueprintRegisterText || !BlueprintRegisterButton || !BlueprintRegisterButtonText)
+		{
+			return false;
+		}
+
+		WidgetTree->RootWidget = RootSizeBox;
+		RootSizeBox->SetWidthOverride(WorkbenchPanelWidth);
+		RootSizeBox->SetHeightOverride(WorkbenchPanelHeight);
+		RootSizeBox->SetContent(PanelBackground);
+
+		PanelBackground->SetPadding(FMargin(WorkbenchPanelPadding));
+		PanelBackground->SetBrush(MakeRoundedBoxBrush(
+			FVector2D(WorkbenchPanelWidth, WorkbenchPanelHeight),
+			FLinearColor(0.012f, 0.014f, 0.017f, 0.92f),
+			FLinearColor(0.22f, 0.42f, 0.56f, 1.0f),
+			1.0f));
+		PanelBackground->SetContent(PanelStack);
+
+		ConfigureTextBlockLeft(WorkbenchTitleText, FText::FromString(TEXT("\uC81C\uC870")), FLinearColor::White, 22);
+		UVerticalBoxSlot* TitleSlot = PanelStack->AddChildToVerticalBox(WorkbenchTitleText);
+		if (TitleSlot)
+		{
+			TitleSlot->SetHorizontalAlignment(HAlign_Fill);
+			TitleSlot->SetVerticalAlignment(VAlign_Top);
+		}
+
+		UVerticalBoxSlot* BodySlot = PanelStack->AddChildToVerticalBox(BodyRow);
+		if (BodySlot)
+		{
+			BodySlot->SetPadding(FMargin(0.0f, 12.0f, 0.0f, 0.0f));
+			BodySlot->SetHorizontalAlignment(HAlign_Fill);
+			BodySlot->SetVerticalAlignment(VAlign_Fill);
+			BodySlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+		}
+
+		LeftPanelBackground->SetPadding(FMargin(10.0f));
+		LeftPanelBackground->SetBrush(MakeRoundedBoxBrush(
+			FVector2D(WorkbenchLeftPanelWidth, WorkbenchPanelHeight - 72.0f),
+			FLinearColor(0.025f, 0.030f, 0.034f, 0.94f),
+			FLinearColor(0.18f, 0.22f, 0.26f, 1.0f),
+			1.0f));
+		LeftPanelBackground->SetContent(LeftModeOverlay);
+
+		RightPanelBackground->SetPadding(FMargin(14.0f));
+		RightPanelBackground->SetBrush(MakeRoundedBoxBrush(
+			FVector2D(WorkbenchPanelWidth - WorkbenchLeftPanelWidth - 54.0f, WorkbenchPanelHeight - 72.0f),
+			FLinearColor(0.020f, 0.024f, 0.028f, 0.94f),
+			FLinearColor(0.18f, 0.22f, 0.26f, 1.0f),
+			1.0f));
+		RightPanelBackground->SetContent(RightModeOverlay);
+
+		UHorizontalBoxSlot* LeftPanelSlot = BodyRow->AddChildToHorizontalBox(LeftPanelBackground);
+		if (LeftPanelSlot)
+		{
+			LeftPanelSlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
+			LeftPanelSlot->SetHorizontalAlignment(HAlign_Left);
+			LeftPanelSlot->SetVerticalAlignment(VAlign_Fill);
+		}
+
+		UHorizontalBoxSlot* RightPanelSlot = BodyRow->AddChildToHorizontalBox(RightPanelBackground);
+		if (RightPanelSlot)
+		{
+			RightPanelSlot->SetPadding(FMargin(14.0f, 0.0f, 0.0f, 0.0f));
+			RightPanelSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+			RightPanelSlot->SetHorizontalAlignment(HAlign_Fill);
+			RightPanelSlot->SetVerticalAlignment(VAlign_Fill);
+		}
+
+		auto ConfigureWorkbenchTileView = [EntryWidgetClass](UTileView* TileView, float Height)
+		{
+			TileView->SetEntryWidth(WorkbenchTileWidth);
+			TileView->SetEntryHeight(WorkbenchTileHeight);
+			TileView->SetWheelScrollMultiplier(0.55f);
+			SetListViewEntryWidgetClass(TileView, EntryWidgetClass);
+			if (USizeBox* TileViewSizeBox = Cast<USizeBox>(TileView->GetParent()))
+			{
+				TileViewSizeBox->SetWidthOverride(WorkbenchTileViewWidth);
+				TileViewSizeBox->SetHeightOverride(Height);
+			}
+		};
+
+		auto AddModeStackToOverlay = [](UOverlay* Overlay, UWidget* Stack)
+		{
+			UOverlaySlot* StackSlot = Overlay->AddChildToOverlay(Stack);
+			if (StackSlot)
+			{
+				StackSlot->SetHorizontalAlignment(HAlign_Fill);
+				StackSlot->SetVerticalAlignment(VAlign_Fill);
+			}
+		};
+
+		USizeBox* CraftTileViewBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("CraftTileViewBox"));
+		CraftTileViewBox->SetContent(CraftRecipeTileView);
+		UVerticalBoxSlot* CraftTileSlot = CraftLeftStack->AddChildToVerticalBox(CraftTileViewBox);
+		if (CraftTileSlot)
+		{
+			CraftTileSlot->SetHorizontalAlignment(HAlign_Fill);
+			CraftTileSlot->SetVerticalAlignment(VAlign_Fill);
+			CraftTileSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+		}
+		ConfigureWorkbenchTileView(CraftRecipeTileView, WorkbenchTileViewHeight);
+
+		ConfigureTextBlockLeft(DismantleInventoryHeaderText, FText::FromString(TEXT("\uC778\uBCA4\uD1A0\uB9AC")), FLinearColor(0.84f, 0.90f, 0.94f, 1.0f), 16);
+		ConfigureTextBlockLeft(DismantleStorageHeaderText, FText::FromString(TEXT("\uCC3D\uACE0")), FLinearColor(0.84f, 0.90f, 0.94f, 1.0f), 16);
+		DismantleLeftStack->AddChildToVerticalBox(DismantleInventoryHeaderText);
+		USizeBox* DismantleInventoryBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("DismantleInventoryBox"));
+		DismantleInventoryBox->SetContent(DismantleInventoryTileView);
+		UVerticalBoxSlot* DismantleInventorySlot = DismantleLeftStack->AddChildToVerticalBox(DismantleInventoryBox);
+		if (DismantleInventorySlot)
+		{
+			DismantleInventorySlot->SetPadding(FMargin(0.0f, 6.0f, 0.0f, 12.0f));
+			DismantleInventorySlot->SetHorizontalAlignment(HAlign_Fill);
+			DismantleInventorySlot->SetVerticalAlignment(VAlign_Top);
+		}
+		DismantleLeftStack->AddChildToVerticalBox(DismantleStorageHeaderText);
+		USizeBox* DismantleStorageBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("DismantleStorageBox"));
+		DismantleStorageBox->SetContent(DismantleStorageTileView);
+		UVerticalBoxSlot* DismantleStorageSlot = DismantleLeftStack->AddChildToVerticalBox(DismantleStorageBox);
+		if (DismantleStorageSlot)
+		{
+			DismantleStorageSlot->SetPadding(FMargin(0.0f, 6.0f, 0.0f, 0.0f));
+			DismantleStorageSlot->SetHorizontalAlignment(HAlign_Fill);
+			DismantleStorageSlot->SetVerticalAlignment(VAlign_Top);
+		}
+		ConfigureWorkbenchTileView(DismantleInventoryTileView, 204.0f);
+		ConfigureWorkbenchTileView(DismantleStorageTileView, 204.0f);
+
+		USizeBox* BlueprintTileViewBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("BlueprintTileViewBox"));
+		BlueprintTileViewBox->SetContent(BlueprintItemTileView);
+		UVerticalBoxSlot* BlueprintTileSlot = BlueprintLeftStack->AddChildToVerticalBox(BlueprintTileViewBox);
+		if (BlueprintTileSlot)
+		{
+			BlueprintTileSlot->SetHorizontalAlignment(HAlign_Fill);
+			BlueprintTileSlot->SetVerticalAlignment(VAlign_Fill);
+			BlueprintTileSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+		}
+		ConfigureWorkbenchTileView(BlueprintItemTileView, WorkbenchTileViewHeight);
+
+		AddModeStackToOverlay(LeftModeOverlay, CraftLeftStack);
+		AddModeStackToOverlay(LeftModeOverlay, DismantleLeftStack);
+		AddModeStackToOverlay(LeftModeOverlay, BlueprintLeftStack);
+
+		auto ConfigureActionButton = [](UButton* Button, UTextBlock* ButtonText, const FText& Text)
+		{
+			FButtonStyle ButtonStyle;
+			ButtonStyle.SetNormal(MakeRoundedBoxBrush(FVector2D(180.0f, 44.0f), FLinearColor(0.05f, 0.33f, 0.78f, 1.0f), FLinearColor(0.45f, 0.68f, 0.95f, 1.0f), 1.0f));
+			ButtonStyle.SetHovered(MakeRoundedBoxBrush(FVector2D(180.0f, 44.0f), FLinearColor(0.08f, 0.42f, 0.92f, 1.0f), FLinearColor(0.70f, 0.86f, 1.0f, 1.0f), 1.5f));
+			ButtonStyle.SetPressed(MakeRoundedBoxBrush(FVector2D(180.0f, 44.0f), FLinearColor(0.04f, 0.24f, 0.62f, 1.0f), FLinearColor(0.36f, 0.56f, 0.84f, 1.0f), 1.0f));
+			Button->SetStyle(ButtonStyle);
+			Button->SetContent(ButtonText);
+			ConfigureTextBlock(ButtonText, Text, FLinearColor::White, 17);
+		};
+
+		ConfigureTextBlockLeft(CraftMaterialsTitleText, FText::FromString(TEXT("\uC7AC\uB8CC")), FLinearColor(0.84f, 0.90f, 0.94f, 1.0f), 18);
+		CraftRightStack->AddChildToVerticalBox(CraftMaterialsTitleText);
+		UVerticalBoxSlot* IngredientSlot = CraftRightStack->AddChildToVerticalBox(CraftIngredientList);
+		if (IngredientSlot)
+		{
+			IngredientSlot->SetPadding(FMargin(0.0f, 10.0f, 0.0f, 0.0f));
+			IngredientSlot->SetHorizontalAlignment(HAlign_Fill);
+			IngredientSlot->SetVerticalAlignment(VAlign_Top);
+		}
+		ConfigureTextBlock(CraftArrowText, FText::FromString(TEXT("\u2193")), FLinearColor(0.68f, 0.82f, 0.96f, 1.0f), 34);
+		UVerticalBoxSlot* ArrowSlot = CraftRightStack->AddChildToVerticalBox(CraftArrowText);
+		if (ArrowSlot)
+		{
+			ArrowSlot->SetPadding(FMargin(0.0f, 18.0f, 0.0f, 12.0f));
+			ArrowSlot->SetHorizontalAlignment(HAlign_Center);
+			ArrowSlot->SetVerticalAlignment(VAlign_Top);
+		}
+		CraftOutputImageBox->SetWidthOverride(84.0f);
+		CraftOutputImageBox->SetHeightOverride(84.0f);
+		CraftOutputImageBox->SetContent(CraftOutputImage);
+		CraftOutputImage->SetOpacity(0.0f);
+		UHorizontalBoxSlot* OutputImageSlot = CraftOutputRow->AddChildToHorizontalBox(CraftOutputImageBox);
+		if (OutputImageSlot)
+		{
+			OutputImageSlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
+			OutputImageSlot->SetHorizontalAlignment(HAlign_Left);
+			OutputImageSlot->SetVerticalAlignment(VAlign_Center);
+		}
+		ConfigureTextBlockLeft(CraftOutputText, FText::GetEmpty(), FLinearColor::White, 18);
+		UHorizontalBoxSlot* OutputTextSlot = CraftOutputRow->AddChildToHorizontalBox(CraftOutputText);
+		if (OutputTextSlot)
+		{
+			OutputTextSlot->SetPadding(FMargin(14.0f, 0.0f, 0.0f, 0.0f));
+			OutputTextSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+			OutputTextSlot->SetHorizontalAlignment(HAlign_Fill);
+			OutputTextSlot->SetVerticalAlignment(VAlign_Center);
+		}
+		CraftRightStack->AddChildToVerticalBox(CraftOutputRow);
+		ConfigureActionButton(CraftButton, CraftButtonText, FText::FromString(TEXT("\uC81C\uC870")));
+		UVerticalBoxSlot* CraftButtonSlot = CraftRightStack->AddChildToVerticalBox(CraftButton);
+		if (CraftButtonSlot)
+		{
+			CraftButtonSlot->SetPadding(FMargin(0.0f, 24.0f, 0.0f, 0.0f));
+			CraftButtonSlot->SetHorizontalAlignment(HAlign_Right);
+			CraftButtonSlot->SetVerticalAlignment(VAlign_Top);
+		}
+
+		ConfigureTextBlockLeft(DismantleResultTitleText, FText::FromString(TEXT("\uBD84\uD574 \uACB0\uACFC")), FLinearColor(0.84f, 0.90f, 0.94f, 1.0f), 18);
+		DismantleRightStack->AddChildToVerticalBox(DismantleResultTitleText);
+		ConfigureTextBlockLeft(DismantleResultText, FText::GetEmpty(), FLinearColor::White, 17);
+		UVerticalBoxSlot* DismantleResultSlot = DismantleRightStack->AddChildToVerticalBox(DismantleResultText);
+		if (DismantleResultSlot)
+		{
+			DismantleResultSlot->SetPadding(FMargin(0.0f, 12.0f, 0.0f, 0.0f));
+			DismantleResultSlot->SetHorizontalAlignment(HAlign_Fill);
+			DismantleResultSlot->SetVerticalAlignment(VAlign_Top);
+		}
+		ConfigureActionButton(DismantleButton, DismantleButtonText, FText::FromString(TEXT("\uBD84\uD574")));
+		UVerticalBoxSlot* DismantleButtonSlot = DismantleRightStack->AddChildToVerticalBox(DismantleButton);
+		if (DismantleButtonSlot)
+		{
+			DismantleButtonSlot->SetPadding(FMargin(0.0f, 24.0f, 0.0f, 0.0f));
+			DismantleButtonSlot->SetHorizontalAlignment(HAlign_Right);
+			DismantleButtonSlot->SetVerticalAlignment(VAlign_Top);
+		}
+
+		ConfigureTextBlockLeft(BlueprintGuideText, FText::FromString(TEXT("\uC124\uACC4\uB3C4 \uC544\uC774\uD15C")), FLinearColor(0.84f, 0.90f, 0.94f, 1.0f), 18);
+		BlueprintRightStack->AddChildToVerticalBox(BlueprintGuideText);
+		ConfigureTextBlockLeft(BlueprintRegisterText, FText::GetEmpty(), FLinearColor::White, 17);
+		UVerticalBoxSlot* BlueprintTextSlot = BlueprintRightStack->AddChildToVerticalBox(BlueprintRegisterText);
+		if (BlueprintTextSlot)
+		{
+			BlueprintTextSlot->SetPadding(FMargin(0.0f, 12.0f, 0.0f, 0.0f));
+			BlueprintTextSlot->SetHorizontalAlignment(HAlign_Fill);
+			BlueprintTextSlot->SetVerticalAlignment(VAlign_Top);
+		}
+		ConfigureActionButton(BlueprintRegisterButton, BlueprintRegisterButtonText, FText::FromString(TEXT("\uC124\uACC4\uB3C4 \uB4F1\uB85D")));
+		UVerticalBoxSlot* BlueprintButtonSlot = BlueprintRightStack->AddChildToVerticalBox(BlueprintRegisterButton);
+		if (BlueprintButtonSlot)
+		{
+			BlueprintButtonSlot->SetPadding(FMargin(0.0f, 24.0f, 0.0f, 0.0f));
+			BlueprintButtonSlot->SetHorizontalAlignment(HAlign_Right);
+			BlueprintButtonSlot->SetVerticalAlignment(VAlign_Top);
+		}
+
+		AddModeStackToOverlay(RightModeOverlay, CraftRightStack);
+		AddModeStackToOverlay(RightModeOverlay, DismantleRightStack);
+		AddModeStackToOverlay(RightModeOverlay, BlueprintRightStack);
+
+		RegisterAllWidgetsInTree(WidgetBlueprint);
+		WidgetBlueprint->MarkPackageDirty();
+		return true;
+	}
+
+	bool BuildHudExternalPanelWidgetTree(
+		UWidgetBlueprint* WidgetBlueprint,
+		TSubclassOf<UUserWidget> LootContainerWidgetClass,
+		TSubclassOf<UUserWidget> WorkbenchPanelWidgetClass)
+	{
+		if (!WidgetBlueprint || !WidgetBlueprint->WidgetTree || !LootContainerWidgetClass || !WorkbenchPanelWidgetClass)
 		{
 			return false;
 		}
@@ -8512,6 +8836,8 @@ namespace TunaSweeperEditorSetup
 		UOverlay* PanelOverlay = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), TEXT("PanelOverlay"));
 		UOverlay* LootingBoxPanel = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), TEXT("LootingBoxPanel"));
 		UUserWidget* LootContainerWidget = WidgetTree->ConstructWidget<UUserWidget>(LootContainerWidgetClass, TEXT("LootContainerWidget"));
+		UOverlay* WorkbenchPanel = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), TEXT("WorkbenchPanel"));
+		UUserWidget* WorkbenchPanelWidget = WidgetTree->ConstructWidget<UUserWidget>(WorkbenchPanelWidgetClass, TEXT("WorkbenchPanelWidget"));
 		UBorder* ShopPanel = BuildHudSimplePanel(
 			WidgetTree,
 			TEXT("ShopPanel"),
@@ -8525,13 +8851,14 @@ namespace TunaSweeperEditorSetup
 			FVector2D(LootContainerPanelWidth, 620.0f),
 			FLinearColor(0.38f, 0.42f, 0.32f, 1.0f));
 
-		if (!RootSizeBox || !PanelOverlay || !LootingBoxPanel || !LootContainerWidget || !ShopPanel || !StoragePanel)
+		if (!RootSizeBox || !PanelOverlay || !LootingBoxPanel || !LootContainerWidget ||
+			!WorkbenchPanel || !WorkbenchPanelWidget || !ShopPanel || !StoragePanel)
 		{
 			return false;
 		}
 
 		WidgetTree->RootWidget = RootSizeBox;
-		RootSizeBox->SetWidthOverride(LootContainerPanelWidth);
+		RootSizeBox->SetWidthOverride(WorkbenchPanelWidth);
 		RootSizeBox->SetContent(PanelOverlay);
 
 		UOverlaySlot* LootContainerSlot = LootingBoxPanel->AddChildToOverlay(LootContainerWidget);
@@ -8541,7 +8868,14 @@ namespace TunaSweeperEditorSetup
 			LootContainerSlot->SetVerticalAlignment(VAlign_Top);
 		}
 
-		TArray<UWidget*> ExternalPanels = { LootingBoxPanel, ShopPanel, StoragePanel };
+		UOverlaySlot* WorkbenchSlot = WorkbenchPanel->AddChildToOverlay(WorkbenchPanelWidget);
+		if (WorkbenchSlot)
+		{
+			WorkbenchSlot->SetHorizontalAlignment(HAlign_Fill);
+			WorkbenchSlot->SetVerticalAlignment(VAlign_Top);
+		}
+
+		TArray<UWidget*> ExternalPanels = { LootingBoxPanel, WorkbenchPanel, ShopPanel, StoragePanel };
 		for (UWidget* Panel : ExternalPanels)
 		{
 			Panel->SetVisibility(ESlateVisibility::Collapsed);
@@ -8554,9 +8888,11 @@ namespace TunaSweeperEditorSetup
 		}
 
 		RegisterWidgetVariable(WidgetBlueprint, LootingBoxPanel);
+		RegisterWidgetVariable(WidgetBlueprint, WorkbenchPanel);
 		RegisterWidgetVariable(WidgetBlueprint, ShopPanel);
 		RegisterWidgetVariable(WidgetBlueprint, StoragePanel);
 		RegisterWidgetVariable(WidgetBlueprint, LootContainerWidget);
+		RegisterWidgetVariable(WidgetBlueprint, WorkbenchPanelWidget);
 		WidgetBlueprint->MarkPackageDirty();
 		return true;
 	}
@@ -8675,7 +9011,7 @@ namespace TunaSweeperEditorSetup
 			ExternalSlot->SetAnchors(FAnchors(1.0f, 0.0f, 1.0f, 0.0f));
 			ExternalSlot->SetAlignment(FVector2D(1.0f, 0.0f));
 			ExternalSlot->SetPosition(FVector2D(0.0f, 0.0f));
-			ExternalSlot->SetSize(FVector2D(LootContainerPanelWidth, 620.0f));
+			ExternalSlot->SetSize(FVector2D(WorkbenchPanelWidth, 620.0f));
 		}
 
 		UnsupportedModePanel->SetVisibility(ESlateVisibility::Collapsed);
@@ -8894,9 +9230,14 @@ namespace TunaSweeperEditorSetup
 			UIAssetPath,
 			LootContainerWidgetAssetName,
 			UTunaSweeperLootContainerWidget::StaticClass());
+		UWidgetBlueprint* WorkbenchPanelWidgetBlueprint = EnsureWidgetBlueprint(
+			UIAssetPath,
+			WorkbenchPanelWidgetAssetName,
+			UTunaSweeperWorkbenchPanelWidget::StaticClass());
 
 		if (!ItemThumbnailWidgetBlueprint || !TopReserveWidgetBlueprint || !BottomStatusWidgetBlueprint || !QuickSlotWidgetBlueprint ||
-			!InventoryAreaWidgetBlueprint || !ItemInfoPanelWidgetBlueprint || !ExternalPanelWidgetBlueprint || !LootContainerWidgetBlueprint)
+			!InventoryAreaWidgetBlueprint || !ItemInfoPanelWidgetBlueprint || !ExternalPanelWidgetBlueprint ||
+			!LootContainerWidgetBlueprint || !WorkbenchPanelWidgetBlueprint)
 		{
 			return false;
 		}
@@ -8925,7 +9266,8 @@ namespace TunaSweeperEditorSetup
 			BuildHudQuickSlotBarWidgetTree(QuickSlotWidgetBlueprint) &&
 			BuildHudInventoryAreaWidgetTree(InventoryAreaWidgetBlueprint, ItemThumbnailWidgetClass) &&
 			BuildHudItemInfoPanelWidgetTree(ItemInfoPanelWidgetBlueprint, ItemThumbnailWidgetClass) &&
-			BuildLootContainerWidgetTree(LootContainerWidgetBlueprint, ItemThumbnailWidgetClass);
+			BuildLootContainerWidgetTree(LootContainerWidgetBlueprint, ItemThumbnailWidgetClass) &&
+			BuildWorkbenchPanelWidgetTree(WorkbenchPanelWidgetBlueprint, ItemThumbnailWidgetClass);
 
 		if (!bChildWidgetsBuilt)
 		{
@@ -8938,7 +9280,8 @@ namespace TunaSweeperEditorSetup
 			QuickSlotWidgetBlueprint,
 			InventoryAreaWidgetBlueprint,
 			ItemInfoPanelWidgetBlueprint,
-			LootContainerWidgetBlueprint
+			LootContainerWidgetBlueprint,
+			WorkbenchPanelWidgetBlueprint
 		})
 		{
 			RegisterAllWidgetsInTree(ChildWidgetBlueprint);
@@ -8950,7 +9293,10 @@ namespace TunaSweeperEditorSetup
 			}
 		}
 
-		if (!BuildHudExternalPanelWidgetTree(ExternalPanelWidgetBlueprint, LootContainerWidgetBlueprint->GeneratedClass.Get()))
+		if (!BuildHudExternalPanelWidgetTree(
+			ExternalPanelWidgetBlueprint,
+			LootContainerWidgetBlueprint->GeneratedClass.Get(),
+			WorkbenchPanelWidgetBlueprint->GeneratedClass.Get()))
 		{
 			return false;
 		}
@@ -11112,6 +11458,12 @@ public:
 				{
 					return TunaSweeperEditorSetup::EnsureCommonGameHudAssets();
 				});
+			FTunaSweeperEditorRunOnce::Run(
+				TunaSweeperEditorSetup::WorkbenchPanelWidgetTaskId,
+				[]()
+				{
+					return TunaSweeperEditorSetup::EnsureCommonGameHudAssets();
+				});
 			FPlatformMisc::RequestExit(false);
 			return;
 		}
@@ -11402,6 +11754,13 @@ public:
 
 		FTunaSweeperEditorRunOnce::Run(
 			TunaSweeperEditorSetup::CommonGameHudTaskId,
+			[]()
+			{
+				return TunaSweeperEditorSetup::EnsureCommonGameHudAssets();
+			});
+
+		FTunaSweeperEditorRunOnce::Run(
+			TunaSweeperEditorSetup::WorkbenchPanelWidgetTaskId,
 			[]()
 			{
 				return TunaSweeperEditorSetup::EnsureCommonGameHudAssets();
