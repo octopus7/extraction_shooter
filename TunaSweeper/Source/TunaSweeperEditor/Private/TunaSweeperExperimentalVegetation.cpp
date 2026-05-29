@@ -9,10 +9,15 @@
 #include "HAL/FileManager.h"
 #include "ImageUtils.h"
 #include "Materials/Material.h"
+#include "Materials/MaterialExpressionConstant3Vector.h"
+#include "Materials/MaterialExpressionCustom.h"
 #include "Materials/MaterialExpressionMultiply.h"
+#include "Materials/MaterialExpressionScalarParameter.h"
 #include "Materials/MaterialExpressionTextureCoordinate.h"
 #include "Materials/MaterialExpressionTextureSample.h"
+#include "Materials/MaterialExpressionTime.h"
 #include "Materials/MaterialExpressionVertexColor.h"
+#include "Materials/MaterialExpressionWorldPosition.h"
 #include "MeshDescription.h"
 #include "Misc/CommandLine.h"
 #include "Misc/PackageName.h"
@@ -35,6 +40,10 @@ namespace TunaSweeperExperimentalVegetation
 	const FString VegetationFloweringWhiteMeshAssetName = TEXT("SM_ExperimentalVegetationTuft_FloweringWhite");
 	const FString VegetationFloweringYellowMeshAssetName = TEXT("SM_ExperimentalVegetationTuft_FloweringYellow");
 	const FString VegetationFloweringPinkMeshAssetName = TEXT("SM_ExperimentalVegetationTuft_Flowering");
+	const FString TurbulentConiferTextureAssetName = TEXT("T_TurbulentConiferCanopy_Imagegen");
+	const FString TurbulentConiferCanopyMaterialAssetName = TEXT("M_TurbulentConiferCanopy");
+	const FString TurbulentConiferStumpMaterialAssetName = TEXT("M_TurbulentConiferShortTrunk");
+	const FString TurbulentConiferMeshAssetName = TEXT("SM_TurbulentConiferPrototype");
 
 	constexpr int32 ShapeWidth = 128;
 	constexpr int32 ShapeHeight = 256;
@@ -1796,6 +1805,621 @@ namespace TunaSweeperExperimentalVegetation
 		}
 
 		return SaveAsset(StaticMesh) ? StaticMesh : nullptr;
+	}
+
+	bool LoadTexturePixelsFromSourceFile(const FString& SourceFile, TArray<FColor>& OutPixels, int32& OutWidth, int32& OutHeight)
+	{
+		FImage SourceImage;
+		if (!FImageUtils::LoadImage(*SourceFile, SourceImage))
+		{
+			UE_LOG(LogTunaSweeperExperimentalVegetation, Error, TEXT("Failed to load turbulent conifer texture source %s."), *SourceFile);
+			return false;
+		}
+
+		SourceImage.ChangeFormat(ERawImageFormat::BGRA8, EGammaSpace::sRGB);
+		const TArrayView64<FColor> SourceView = SourceImage.AsBGRA8();
+		OutPixels.Reset(static_cast<int32>(SourceView.Num()));
+		OutPixels.Append(SourceView.GetData(), static_cast<int32>(SourceView.Num()));
+		OutWidth = SourceImage.SizeX;
+		OutHeight = SourceImage.SizeY;
+		return OutPixels.Num() == OutWidth * OutHeight;
+	}
+
+	void BuildTurbulentConiferFallbackTexturePixels(TArray<FColor>& OutPixels, int32& OutWidth, int32& OutHeight)
+	{
+		OutWidth = 1024;
+		OutHeight = 1024;
+		OutPixels.SetNumUninitialized(OutWidth * OutHeight);
+
+		for (int32 Y = 0; Y < OutHeight; ++Y)
+		{
+			const float V = static_cast<float>(Y) / static_cast<float>(OutHeight - 1);
+			for (int32 X = 0; X < OutWidth; ++X)
+			{
+				const float U = static_cast<float>(X) / static_cast<float>(OutWidth - 1);
+				const float NeedleSweep =
+					0.5f + 0.5f * FMath::Sin((U * 18.0f + V * 7.0f) * PI + 0.9f * FMath::Sin(V * 21.0f));
+				const float Cluster =
+					0.5f + 0.5f * FMath::Sin((U * 5.0f - V * 9.0f) * PI + 1.7f * FMath::Sin(U * 11.0f));
+				const float Crease = FMath::Pow(ClampUnit(1.0f - FMath::Abs(NeedleSweep * 2.0f - 1.0f)), 2.2f);
+				const float Shade = FMath::Clamp(0.48f + 0.30f * NeedleSweep + 0.22f * Cluster - 0.26f * Crease, 0.0f, 1.0f);
+				const FLinearColor Dark(0.045f, 0.115f, 0.040f, 1.0f);
+				const FLinearColor Mid(0.215f, 0.375f, 0.100f, 1.0f);
+				const FLinearColor Light(0.520f, 0.640f, 0.185f, 1.0f);
+				FLinearColor Color = LerpColor(Dark, Mid, SmoothStep(0.10f, 0.68f, Shade));
+				Color = LerpColor(Color, Light, SmoothStep(0.62f, 0.96f, Shade));
+				OutPixels[Y * OutWidth + X] = Color.ToFColor(true);
+			}
+		}
+	}
+
+	UTexture2D* ImportTurbulentConiferTextureFromCommandLineIfRequested()
+	{
+		FString SourceFile;
+		if (!FParse::Value(FCommandLine::Get(), TEXT("TunaSweeperTurbulentConiferTextureSource="), SourceFile))
+		{
+			return nullptr;
+		}
+
+		SourceFile = FPaths::ConvertRelativePathToFull(SourceFile);
+		if (!FPaths::FileExists(SourceFile))
+		{
+			UE_LOG(LogTunaSweeperExperimentalVegetation, Error, TEXT("Turbulent conifer texture source does not exist: %s."), *SourceFile);
+			return nullptr;
+		}
+
+		TArray<FColor> Pixels;
+		int32 Width = 0;
+		int32 Height = 0;
+		if (!LoadTexturePixelsFromSourceFile(SourceFile, Pixels, Width, Height))
+		{
+			return nullptr;
+		}
+
+		SavePixelsAsPng(
+			GetVegetationGeneratedImagePath(TEXT("TurbulentConiferCanopyImagegenImported.png")),
+			Pixels,
+			Width,
+			Height);
+		return EnsureTextureAsset(TurbulentConiferTextureAssetName, Pixels, Width, Height, false);
+	}
+
+	UTexture2D* EnsureTurbulentConiferTexture()
+	{
+		if (UTexture2D* ImportedTexture = ImportTurbulentConiferTextureFromCommandLineIfRequested())
+		{
+			return ImportedTexture;
+		}
+
+		TArray<FColor> FallbackPixels;
+		int32 Width = 0;
+		int32 Height = 0;
+		BuildTurbulentConiferFallbackTexturePixels(FallbackPixels, Width, Height);
+		SavePixelsAsPng(
+			GetVegetationGeneratedImagePath(TEXT("TurbulentConiferCanopyFallback.png")),
+			FallbackPixels,
+			Width,
+			Height);
+		return EnsureTextureAsset(TurbulentConiferTextureAssetName, FallbackPixels, Width, Height, false);
+	}
+
+	UMaterial* EnsureTurbulentConiferCanopyMaterial(UTexture2D* CanopyTexture)
+	{
+		const FString ObjectPath = GetAssetObjectPath(VegetationAssetPath, TurbulentConiferCanopyMaterialAssetName);
+		UMaterial* Material = LoadObject<UMaterial>(nullptr, *ObjectPath);
+		if (!Material)
+		{
+			UMaterialFactoryNew* MaterialFactory = NewObject<UMaterialFactoryNew>();
+			FAssetToolsModule& AssetToolsModule = FModuleManager::LoadModuleChecked<FAssetToolsModule>(TEXT("AssetTools"));
+			UObject* CreatedAsset = AssetToolsModule.Get().CreateAsset(
+				TurbulentConiferCanopyMaterialAssetName,
+				VegetationAssetPath,
+				UMaterial::StaticClass(),
+				MaterialFactory);
+
+			Material = Cast<UMaterial>(CreatedAsset);
+			if (!Material)
+			{
+				UE_LOG(LogTunaSweeperExperimentalVegetation, Error, TEXT("Failed to create %s."), *ObjectPath);
+				return nullptr;
+			}
+
+			FAssetRegistryModule::AssetCreated(Material);
+		}
+
+		Material->Modify();
+		Material->GetExpressionCollection().Empty();
+		Material->TwoSided = true;
+		Material->BlendMode = BLEND_Opaque;
+		Material->SetShadingModel(MSM_DefaultLit);
+		Material->MaxWorldPositionOffsetDisplacement = 48.0f;
+		Material->bAlwaysEvaluateWorldPositionOffset = true;
+
+		UMaterialEditorOnlyData* MaterialEditorOnly = Material->GetEditorOnlyData();
+		if (!MaterialEditorOnly)
+		{
+			UE_LOG(LogTunaSweeperExperimentalVegetation, Error, TEXT("Failed to edit %s."), *ObjectPath);
+			return nullptr;
+		}
+
+		UMaterialExpressionTextureCoordinate* TextureCoordinateExpression = NewObject<UMaterialExpressionTextureCoordinate>(Material);
+		TextureCoordinateExpression->Material = Material;
+		TextureCoordinateExpression->CoordinateIndex = 0;
+		TextureCoordinateExpression->MaterialExpressionEditorX = -960;
+		TextureCoordinateExpression->MaterialExpressionEditorY = -80;
+		Material->GetExpressionCollection().AddExpression(TextureCoordinateExpression);
+
+		UMaterialExpressionTextureSample* CanopyTextureSample = NewObject<UMaterialExpressionTextureSample>(Material);
+		CanopyTextureSample->Material = Material;
+		CanopyTextureSample->Texture = CanopyTexture;
+		CanopyTextureSample->Coordinates.Connect(0, TextureCoordinateExpression);
+		CanopyTextureSample->MaterialExpressionEditorX = -700;
+		CanopyTextureSample->MaterialExpressionEditorY = -100;
+		CanopyTextureSample->AutoSetSampleType();
+		Material->GetExpressionCollection().AddExpression(CanopyTextureSample);
+
+		UMaterialExpressionVertexColor* VertexColorExpression = NewObject<UMaterialExpressionVertexColor>(Material);
+		VertexColorExpression->Material = Material;
+		VertexColorExpression->MaterialExpressionEditorX = -700;
+		VertexColorExpression->MaterialExpressionEditorY = 110;
+		Material->GetExpressionCollection().AddExpression(VertexColorExpression);
+
+		UMaterialExpressionMultiply* TintedTextureMultiply = NewObject<UMaterialExpressionMultiply>(Material);
+		TintedTextureMultiply->Material = Material;
+		TintedTextureMultiply->A.Connect(0, CanopyTextureSample);
+		TintedTextureMultiply->B.Connect(0, VertexColorExpression);
+		TintedTextureMultiply->MaterialExpressionEditorX = -420;
+		TintedTextureMultiply->MaterialExpressionEditorY = -40;
+		Material->GetExpressionCollection().AddExpression(TintedTextureMultiply);
+
+		UMaterialExpressionWorldPosition* WorldPositionExpression = NewObject<UMaterialExpressionWorldPosition>(Material);
+		WorldPositionExpression->Material = Material;
+		WorldPositionExpression->WorldPositionShaderOffset = WPT_ExcludeAllShaderOffsets;
+		WorldPositionExpression->MaterialExpressionEditorX = -980;
+		WorldPositionExpression->MaterialExpressionEditorY = 310;
+		Material->GetExpressionCollection().AddExpression(WorldPositionExpression);
+
+		UMaterialExpressionTime* TimeExpression = NewObject<UMaterialExpressionTime>(Material);
+		TimeExpression->Material = Material;
+		TimeExpression->bIgnorePause = true;
+		TimeExpression->MaterialExpressionEditorX = -980;
+		TimeExpression->MaterialExpressionEditorY = 460;
+		Material->GetExpressionCollection().AddExpression(TimeExpression);
+
+		UMaterialExpressionScalarParameter* TurbulenceStrengthParameter = NewObject<UMaterialExpressionScalarParameter>(Material);
+		TurbulenceStrengthParameter->Material = Material;
+		TurbulenceStrengthParameter->ParameterName = TEXT("TurbulenceStrengthCm");
+		TurbulenceStrengthParameter->DefaultValue = 21.0f;
+		TurbulenceStrengthParameter->MaterialExpressionEditorX = -700;
+		TurbulenceStrengthParameter->MaterialExpressionEditorY = 310;
+		Material->GetExpressionCollection().AddExpression(TurbulenceStrengthParameter);
+
+		UMaterialExpressionScalarParameter* FlutterStrengthParameter = NewObject<UMaterialExpressionScalarParameter>(Material);
+		FlutterStrengthParameter->Material = Material;
+		FlutterStrengthParameter->ParameterName = TEXT("FlutterStrengthCm");
+		FlutterStrengthParameter->DefaultValue = 7.0f;
+		FlutterStrengthParameter->MaterialExpressionEditorX = -700;
+		FlutterStrengthParameter->MaterialExpressionEditorY = 470;
+		Material->GetExpressionCollection().AddExpression(FlutterStrengthParameter);
+
+		UMaterialExpressionScalarParameter* VerticalStrengthParameter = NewObject<UMaterialExpressionScalarParameter>(Material);
+		VerticalStrengthParameter->Material = Material;
+		VerticalStrengthParameter->ParameterName = TEXT("VerticalStrengthCm");
+		VerticalStrengthParameter->DefaultValue = 2.0f;
+		VerticalStrengthParameter->MaterialExpressionEditorX = -700;
+		VerticalStrengthParameter->MaterialExpressionEditorY = 630;
+		Material->GetExpressionCollection().AddExpression(VerticalStrengthParameter);
+
+		UMaterialExpressionScalarParameter* NoiseScaleParameter = NewObject<UMaterialExpressionScalarParameter>(Material);
+		NoiseScaleParameter->Material = Material;
+		NoiseScaleParameter->ParameterName = TEXT("NoiseScale");
+		NoiseScaleParameter->DefaultValue = 0.018f;
+		NoiseScaleParameter->MaterialExpressionEditorX = -700;
+		NoiseScaleParameter->MaterialExpressionEditorY = 790;
+		Material->GetExpressionCollection().AddExpression(NoiseScaleParameter);
+
+		UMaterialExpressionCustom* TurbulentOffsetExpression = NewObject<UMaterialExpressionCustom>(Material);
+		TurbulentOffsetExpression->Material = Material;
+		TurbulentOffsetExpression->Description = TEXT("Directionless turbulent conifer WPO");
+		TurbulentOffsetExpression->OutputType = CMOT_Float3;
+		TurbulentOffsetExpression->Code =
+			TEXT("float3 p = WorldPos * max(NoiseScale, 0.00001f);\n")
+			TEXT("float n1 = sin(dot(p, float3(1.91f, 0.73f, 1.17f)) + Time * 0.83f);\n")
+			TEXT("float n2 = sin(dot(p, float3(-0.83f, 1.67f, 0.41f)) - Time * 1.37f + n1 * 1.40f);\n")
+			TEXT("float n3 = sin(dot(p, float3(0.37f, -1.29f, 2.11f)) + Time * 2.43f + n2 * 1.10f);\n")
+			TEXT("float n4 = sin(dot(p * 2.13f, float3(1.13f, 1.71f, -0.61f)) - Time * 1.91f + n1 * n2);\n")
+			TEXT("float tip = saturate(VertexColor.a);\n")
+			TEXT("float mask = tip * tip * (3.0f - 2.0f * tip);\n")
+			TEXT("float2 dir = normalize(float2(n1 + 0.45f * n4, n2 - 0.35f * n3) + float2(0.001f, 0.002f));\n")
+			TEXT("float low = 0.65f + 0.35f * sin(dot(p, float3(0.23f, 0.19f, 0.31f)) + Time * 0.29f + n4);\n")
+			TEXT("float mid = 0.45f + 0.55f * abs(n3);\n")
+			TEXT("float horizontal = TurbulenceStrengthCm * low * (0.40f + 0.60f * mid);\n")
+			TEXT("float3 offset = float3(dir.x, dir.y, 0.0f) * horizontal;\n")
+			TEXT("offset += float3(-dir.y, dir.x, 0.0f) * (n4 * FlutterStrengthCm);\n")
+			TEXT("offset.z += n3 * VerticalStrengthCm * 0.25f;\n")
+			TEXT("return offset * mask;");
+
+		FCustomInput WorldPosInput;
+		WorldPosInput.InputName = TEXT("WorldPos");
+		WorldPosInput.Input.Connect(0, WorldPositionExpression);
+		TurbulentOffsetExpression->Inputs.Add(WorldPosInput);
+
+		FCustomInput VertexColorInput;
+		VertexColorInput.InputName = TEXT("VertexColor");
+		VertexColorInput.Input.Connect(0, VertexColorExpression);
+		TurbulentOffsetExpression->Inputs.Add(VertexColorInput);
+
+		FCustomInput TimeInput;
+		TimeInput.InputName = TEXT("Time");
+		TimeInput.Input.Connect(0, TimeExpression);
+		TurbulentOffsetExpression->Inputs.Add(TimeInput);
+
+		FCustomInput TurbulenceStrengthInput;
+		TurbulenceStrengthInput.InputName = TEXT("TurbulenceStrengthCm");
+		TurbulenceStrengthInput.Input.Connect(0, TurbulenceStrengthParameter);
+		TurbulentOffsetExpression->Inputs.Add(TurbulenceStrengthInput);
+
+		FCustomInput FlutterStrengthInput;
+		FlutterStrengthInput.InputName = TEXT("FlutterStrengthCm");
+		FlutterStrengthInput.Input.Connect(0, FlutterStrengthParameter);
+		TurbulentOffsetExpression->Inputs.Add(FlutterStrengthInput);
+
+		FCustomInput VerticalStrengthInput;
+		VerticalStrengthInput.InputName = TEXT("VerticalStrengthCm");
+		VerticalStrengthInput.Input.Connect(0, VerticalStrengthParameter);
+		TurbulentOffsetExpression->Inputs.Add(VerticalStrengthInput);
+
+		FCustomInput NoiseScaleInput;
+		NoiseScaleInput.InputName = TEXT("NoiseScale");
+		NoiseScaleInput.Input.Connect(0, NoiseScaleParameter);
+		TurbulentOffsetExpression->Inputs.Add(NoiseScaleInput);
+
+		TurbulentOffsetExpression->MaterialExpressionEditorX = -340;
+		TurbulentOffsetExpression->MaterialExpressionEditorY = 420;
+		Material->GetExpressionCollection().AddExpression(TurbulentOffsetExpression);
+
+		MaterialEditorOnly->BaseColor.Connect(0, TintedTextureMultiply);
+		MaterialEditorOnly->WorldPositionOffset.Connect(0, TurbulentOffsetExpression);
+		MaterialEditorOnly->Roughness.UseConstant = true;
+		MaterialEditorOnly->Roughness.Constant = 0.88f;
+		MaterialEditorOnly->Metallic.UseConstant = true;
+		MaterialEditorOnly->Metallic.Constant = 0.0f;
+		MaterialEditorOnly->Specular.UseConstant = true;
+		MaterialEditorOnly->Specular.Constant = 0.18f;
+
+		Material->PostEditChange();
+		Material->MarkPackageDirty();
+		return SaveAsset(Material) ? Material : nullptr;
+	}
+
+	UMaterial* EnsureTurbulentConiferStumpMaterial()
+	{
+		const FString ObjectPath = GetAssetObjectPath(VegetationAssetPath, TurbulentConiferStumpMaterialAssetName);
+		UMaterial* Material = LoadObject<UMaterial>(nullptr, *ObjectPath);
+		if (!Material)
+		{
+			UMaterialFactoryNew* MaterialFactory = NewObject<UMaterialFactoryNew>();
+			FAssetToolsModule& AssetToolsModule = FModuleManager::LoadModuleChecked<FAssetToolsModule>(TEXT("AssetTools"));
+			UObject* CreatedAsset = AssetToolsModule.Get().CreateAsset(
+				TurbulentConiferStumpMaterialAssetName,
+				VegetationAssetPath,
+				UMaterial::StaticClass(),
+				MaterialFactory);
+
+			Material = Cast<UMaterial>(CreatedAsset);
+			if (!Material)
+			{
+				UE_LOG(LogTunaSweeperExperimentalVegetation, Error, TEXT("Failed to create %s."), *ObjectPath);
+				return nullptr;
+			}
+
+			FAssetRegistryModule::AssetCreated(Material);
+		}
+
+		Material->Modify();
+		Material->GetExpressionCollection().Empty();
+		Material->BlendMode = BLEND_Opaque;
+		Material->SetShadingModel(MSM_DefaultLit);
+
+		UMaterialEditorOnlyData* MaterialEditorOnly = Material->GetEditorOnlyData();
+		if (!MaterialEditorOnly)
+		{
+			return nullptr;
+		}
+
+		UMaterialExpressionConstant3Vector* BaseColorExpression = NewObject<UMaterialExpressionConstant3Vector>(Material);
+		BaseColorExpression->Material = Material;
+		BaseColorExpression->Constant = FLinearColor(0.150f, 0.088f, 0.045f, 1.0f);
+		BaseColorExpression->MaterialExpressionEditorX = -260;
+		BaseColorExpression->MaterialExpressionEditorY = 0;
+		Material->GetExpressionCollection().AddExpression(BaseColorExpression);
+
+		MaterialEditorOnly->BaseColor.Connect(0, BaseColorExpression);
+		MaterialEditorOnly->Roughness.UseConstant = true;
+		MaterialEditorOnly->Roughness.Constant = 0.82f;
+		MaterialEditorOnly->Metallic.UseConstant = true;
+		MaterialEditorOnly->Metallic.Constant = 0.0f;
+		MaterialEditorOnly->Specular.UseConstant = true;
+		MaterialEditorOnly->Specular.Constant = 0.16f;
+
+		Material->PostEditChange();
+		Material->MarkPackageDirty();
+		return SaveAsset(Material) ? Material : nullptr;
+	}
+
+	struct FTurbulentConiferPoint
+	{
+		FVector3f Position = FVector3f::ZeroVector;
+		FVector2f UV = FVector2f::ZeroVector;
+		FLinearColor Color = FLinearColor::White;
+	};
+
+	float GetTurbulentConiferBiteAmount(int32 SegmentIndex, int32 SegmentCount)
+	{
+		const float Angle = static_cast<float>(SegmentIndex) / static_cast<float>(SegmentCount) * 2.0f * PI;
+		const float Broad = 0.5f + 0.5f * FMath::Sin(Angle * 5.0f + 0.75f);
+		const float Narrow = 0.5f + 0.5f * FMath::Sin(Angle * 11.0f + 2.10f);
+		const float Fine = FMath::Frac(FMath::Sin(static_cast<float>(SegmentIndex + 1) * 12.9898f) * 43758.5453f);
+		return ClampUnit(FMath::Pow(Broad, 2.4f) * 0.72f + FMath::Pow(Narrow, 4.0f) * 0.22f + Fine * 0.16f - 0.18f);
+	}
+
+	FTurbulentConiferPoint EvaluateTurbulentConiferCanopyPoint(
+		int32 RingIndex,
+		int32 RingCount,
+		int32 SegmentIndex,
+		int32 SegmentCount,
+		float U)
+	{
+		const float T = static_cast<float>(RingIndex) / static_cast<float>(RingCount);
+		const float Angle = U * 2.0f * PI;
+		const float Bite = GetTurbulentConiferBiteAmount(SegmentIndex, SegmentCount);
+		const float BiteFalloff = FMath::Pow(1.0f - T, 3.15f);
+		const float Serration =
+			1.0f +
+			0.045f * FMath::Sin(static_cast<float>(SegmentIndex) * 3.70f + T * 9.20f) +
+			0.030f * FMath::Sin(static_cast<float>(SegmentIndex) * 8.30f - T * 5.40f);
+
+		constexpr float BaseRadius = 96.0f;
+		constexpr float BaseZ = 88.0f;
+		constexpr float Height = 205.0f;
+		const float Taper = FMath::Pow(FMath::Max(1.0f - T, 0.0f), 0.78f);
+		const float Radius = FMath::Max(BaseRadius * Taper * Serration - Bite * BiteFalloff * 34.0f, RingIndex == RingCount ? 0.0f : 2.0f);
+		const float Z = BaseZ + Height * T + Bite * BiteFalloff * 48.0f;
+
+		FTurbulentConiferPoint Point;
+		Point.Position = FVector3f(FMath::Cos(Angle) * Radius, FMath::Sin(Angle) * Radius, Z);
+		Point.UV = FVector2f(U, T);
+
+		const float MoveMask = SmoothStep(0.02f, 0.92f, T);
+		const float Tint = FMath::Clamp(0.88f + 0.10f * FMath::Sin(Angle * 2.0f + T * 5.0f) + 0.05f * Bite, 0.72f, 1.12f);
+		Point.Color = FLinearColor(Tint, Tint, Tint, MoveMask);
+		return Point;
+	}
+
+	FVertexInstanceID AddTurbulentConiferVertex(
+		FMeshDescription& MeshDescription,
+		FStaticMeshAttributes& Attributes,
+		const FVector3f& Position,
+		const FVector3f& Normal,
+		const FVector2f& UV,
+		const FLinearColor& Color)
+	{
+		TVertexAttributesRef<FVector3f> VertexPositions = Attributes.GetVertexPositions();
+		TVertexInstanceAttributesRef<FVector3f> VertexInstanceNormals = Attributes.GetVertexInstanceNormals();
+		TVertexInstanceAttributesRef<FVector2f> VertexInstanceUVs = Attributes.GetVertexInstanceUVs();
+		TVertexInstanceAttributesRef<FVector4f> VertexInstanceColors = Attributes.GetVertexInstanceColors();
+
+		const FVertexID VertexId = MeshDescription.CreateVertex();
+		VertexPositions[VertexId] = Position;
+
+		const FVertexInstanceID VertexInstanceId = MeshDescription.CreateVertexInstance(VertexId);
+		VertexInstanceNormals[VertexInstanceId] = Normal;
+		VertexInstanceUVs.Set(VertexInstanceId, 0, UV);
+		VertexInstanceColors[VertexInstanceId] = FVector4f(Color.R, Color.G, Color.B, Color.A);
+		return VertexInstanceId;
+	}
+
+	void AddTurbulentConiferQuad(
+		FMeshDescription& MeshDescription,
+		FStaticMeshAttributes& Attributes,
+		FPolygonGroupID PolygonGroupId,
+		const FTurbulentConiferPoint& A,
+		const FTurbulentConiferPoint& B,
+		const FTurbulentConiferPoint& C,
+		const FTurbulentConiferPoint& D)
+	{
+		FVector3f Normal = FVector3f::CrossProduct(B.Position - A.Position, D.Position - A.Position);
+		Normal = SafeNormal(Normal, FVector3f(0.0f, 0.0f, 1.0f));
+
+		TArray<FVertexInstanceID> VertexInstances;
+		VertexInstances.Reserve(4);
+		VertexInstances.Add(AddTurbulentConiferVertex(MeshDescription, Attributes, A.Position, Normal, A.UV, A.Color));
+		VertexInstances.Add(AddTurbulentConiferVertex(MeshDescription, Attributes, B.Position, Normal, B.UV, B.Color));
+		VertexInstances.Add(AddTurbulentConiferVertex(MeshDescription, Attributes, C.Position, Normal, C.UV, C.Color));
+		VertexInstances.Add(AddTurbulentConiferVertex(MeshDescription, Attributes, D.Position, Normal, D.UV, D.Color));
+		MeshDescription.CreatePolygon(PolygonGroupId, VertexInstances);
+	}
+
+	void AddTurbulentConiferTriangle(
+		FMeshDescription& MeshDescription,
+		FStaticMeshAttributes& Attributes,
+		FPolygonGroupID PolygonGroupId,
+		const FTurbulentConiferPoint& A,
+		const FTurbulentConiferPoint& B,
+		const FTurbulentConiferPoint& C)
+	{
+		FVector3f Normal = FVector3f::CrossProduct(B.Position - A.Position, C.Position - A.Position);
+		Normal = SafeNormal(Normal, FVector3f(0.0f, 0.0f, 1.0f));
+
+		TArray<FVertexInstanceID> VertexInstances;
+		VertexInstances.Reserve(3);
+		VertexInstances.Add(AddTurbulentConiferVertex(MeshDescription, Attributes, A.Position, Normal, A.UV, A.Color));
+		VertexInstances.Add(AddTurbulentConiferVertex(MeshDescription, Attributes, B.Position, Normal, B.UV, B.Color));
+		VertexInstances.Add(AddTurbulentConiferVertex(MeshDescription, Attributes, C.Position, Normal, C.UV, C.Color));
+		MeshDescription.CreatePolygon(PolygonGroupId, VertexInstances);
+	}
+
+	void AddTurbulentConiferShortTrunk(
+		FMeshDescription& MeshDescription,
+		FStaticMeshAttributes& Attributes,
+		FPolygonGroupID PolygonGroupId)
+	{
+		constexpr int32 SegmentCount = 14;
+		constexpr float BottomRadius = 13.0f;
+		constexpr float TopRadius = 8.0f;
+		constexpr float Height = 100.0f;
+		const FLinearColor TrunkColor(1.0f, 0.92f, 0.82f, 0.0f);
+
+		FTurbulentConiferPoint BottomCenter;
+		BottomCenter.Position = FVector3f(0.0f, 0.0f, 0.0f);
+		BottomCenter.UV = FVector2f(0.5f, 0.5f);
+		BottomCenter.Color = TrunkColor;
+
+		FTurbulentConiferPoint TopCenter;
+		TopCenter.Position = FVector3f(0.0f, 0.0f, Height);
+		TopCenter.UV = FVector2f(0.5f, 0.5f);
+		TopCenter.Color = TrunkColor;
+
+		for (int32 SegmentIndex = 0; SegmentIndex < SegmentCount; ++SegmentIndex)
+		{
+			const float U0 = static_cast<float>(SegmentIndex) / static_cast<float>(SegmentCount);
+			const float U1 = static_cast<float>(SegmentIndex + 1) / static_cast<float>(SegmentCount);
+			const float A0 = U0 * 2.0f * PI;
+			const float A1 = U1 * 2.0f * PI;
+
+			FTurbulentConiferPoint B0;
+			B0.Position = FVector3f(FMath::Cos(A0) * BottomRadius, FMath::Sin(A0) * BottomRadius, 0.0f);
+			B0.UV = FVector2f(U0, 0.0f);
+			B0.Color = TrunkColor;
+
+			FTurbulentConiferPoint B1;
+			B1.Position = FVector3f(FMath::Cos(A1) * BottomRadius, FMath::Sin(A1) * BottomRadius, 0.0f);
+			B1.UV = FVector2f(U1, 0.0f);
+			B1.Color = TrunkColor;
+
+			FTurbulentConiferPoint T0;
+			T0.Position = FVector3f(FMath::Cos(A0) * TopRadius, FMath::Sin(A0) * TopRadius, Height);
+			T0.UV = FVector2f(U0, 1.0f);
+			T0.Color = TrunkColor;
+
+			FTurbulentConiferPoint T1;
+			T1.Position = FVector3f(FMath::Cos(A1) * TopRadius, FMath::Sin(A1) * TopRadius, Height);
+			T1.UV = FVector2f(U1, 1.0f);
+			T1.Color = TrunkColor;
+
+			AddTurbulentConiferQuad(MeshDescription, Attributes, PolygonGroupId, B0, B1, T1, T0);
+			AddTurbulentConiferTriangle(MeshDescription, Attributes, PolygonGroupId, BottomCenter, B1, B0);
+			AddTurbulentConiferTriangle(MeshDescription, Attributes, PolygonGroupId, TopCenter, T0, T1);
+		}
+	}
+
+	void BuildTurbulentConiferMeshDescription(FMeshDescription& MeshDescription)
+	{
+		FStaticMeshAttributes Attributes(MeshDescription);
+		Attributes.Register();
+		Attributes.GetVertexInstanceUVs().SetNumChannels(1);
+
+		const FPolygonGroupID CanopyPolygonGroupId = MeshDescription.CreatePolygonGroup();
+		Attributes.GetPolygonGroupMaterialSlotNames()[CanopyPolygonGroupId] = FName(TEXT("Canopy"));
+
+		const FPolygonGroupID TrunkPolygonGroupId = MeshDescription.CreatePolygonGroup();
+		Attributes.GetPolygonGroupMaterialSlotNames()[TrunkPolygonGroupId] = FName(TEXT("ShortTrunk"));
+
+		constexpr int32 SegmentCount = 64;
+		constexpr int32 RingCount = 24;
+		for (int32 RingIndex = 0; RingIndex < RingCount; ++RingIndex)
+		{
+			for (int32 SegmentIndex = 0; SegmentIndex < SegmentCount; ++SegmentIndex)
+			{
+				const float U0 = static_cast<float>(SegmentIndex) / static_cast<float>(SegmentCount);
+				const float U1 = static_cast<float>(SegmentIndex + 1) / static_cast<float>(SegmentCount);
+				const int32 NextSegmentIndex = (SegmentIndex + 1) % SegmentCount;
+
+				const FTurbulentConiferPoint A = EvaluateTurbulentConiferCanopyPoint(RingIndex, RingCount, SegmentIndex, SegmentCount, U0);
+				const FTurbulentConiferPoint B = EvaluateTurbulentConiferCanopyPoint(RingIndex, RingCount, NextSegmentIndex, SegmentCount, U1);
+				const FTurbulentConiferPoint C = EvaluateTurbulentConiferCanopyPoint(RingIndex + 1, RingCount, NextSegmentIndex, SegmentCount, U1);
+				const FTurbulentConiferPoint D = EvaluateTurbulentConiferCanopyPoint(RingIndex + 1, RingCount, SegmentIndex, SegmentCount, U0);
+				AddTurbulentConiferQuad(MeshDescription, Attributes, CanopyPolygonGroupId, A, B, C, D);
+			}
+		}
+
+		AddTurbulentConiferShortTrunk(MeshDescription, Attributes, TrunkPolygonGroupId);
+	}
+
+	UStaticMesh* EnsureTurbulentConiferMeshAsset(UMaterialInterface* CanopyMaterial, UMaterialInterface* StumpMaterial)
+	{
+		const FString ObjectPath = GetAssetObjectPath(VegetationAssetPath, TurbulentConiferMeshAssetName);
+		UStaticMesh* StaticMesh = LoadObject<UStaticMesh>(nullptr, *ObjectPath);
+		const bool bNewAsset = StaticMesh == nullptr;
+
+		if (!StaticMesh)
+		{
+			const FString PackageName = FString::Printf(TEXT("%s/%s"), *VegetationAssetPath, *TurbulentConiferMeshAssetName);
+			UPackage* Package = CreatePackage(*PackageName);
+			StaticMesh = NewObject<UStaticMesh>(Package, *TurbulentConiferMeshAssetName, RF_Public | RF_Standalone | RF_Transactional);
+			if (!StaticMesh)
+			{
+				return nullptr;
+			}
+		}
+
+		StaticMesh->Modify();
+
+		FMeshDescription MeshDescription;
+		BuildTurbulentConiferMeshDescription(MeshDescription);
+
+		StaticMesh->GetStaticMaterials().Reset();
+		StaticMesh->GetStaticMaterials().Add(FStaticMaterial(CanopyMaterial, FName(TEXT("Canopy"))));
+		StaticMesh->GetStaticMaterials().Add(FStaticMaterial(StumpMaterial, FName(TEXT("ShortTrunk"))));
+
+		TArray<const FMeshDescription*> MeshDescriptions;
+		MeshDescriptions.Add(&MeshDescription);
+		UStaticMesh::FBuildMeshDescriptionsParams BuildParams;
+		BuildParams.bBuildSimpleCollision = true;
+		StaticMesh->BuildFromMeshDescriptions(MeshDescriptions, BuildParams);
+		StaticMesh->MarkPackageDirty();
+
+		if (bNewAsset)
+		{
+			FAssetRegistryModule::AssetCreated(StaticMesh);
+		}
+
+		return SaveAsset(StaticMesh) ? StaticMesh : nullptr;
+	}
+
+	bool EnsureTurbulentConiferPrototypeAssets()
+	{
+		UTexture2D* CanopyTexture = EnsureTurbulentConiferTexture();
+		UMaterial* CanopyMaterial = CanopyTexture ? EnsureTurbulentConiferCanopyMaterial(CanopyTexture) : nullptr;
+		UMaterial* StumpMaterial = EnsureTurbulentConiferStumpMaterial();
+		UStaticMesh* ConiferMesh = (CanopyMaterial && StumpMaterial)
+			? EnsureTurbulentConiferMeshAsset(CanopyMaterial, StumpMaterial)
+			: nullptr;
+
+		const bool bSucceeded = CanopyTexture && CanopyMaterial && StumpMaterial && ConiferMesh;
+		if (bSucceeded)
+		{
+			UE_LOG(
+				LogTunaSweeperExperimentalVegetation,
+				Log,
+				TEXT("Turbulent conifer prototype generation succeeded. Texture=%s CanopyMaterial=%s StumpMaterial=%s Mesh=%s"),
+				*CanopyTexture->GetPathName(),
+				*CanopyMaterial->GetPathName(),
+				*StumpMaterial->GetPathName(),
+				*ConiferMesh->GetPathName());
+		}
+		else
+		{
+			UE_LOG(
+				LogTunaSweeperExperimentalVegetation,
+				Error,
+				TEXT("Turbulent conifer prototype generation failed. Texture=%s CanopyMaterial=%s StumpMaterial=%s Mesh=%s"),
+				CanopyTexture ? *CanopyTexture->GetPathName() : TEXT("<none>"),
+				CanopyMaterial ? *CanopyMaterial->GetPathName() : TEXT("<none>"),
+				StumpMaterial ? *StumpMaterial->GetPathName() : TEXT("<none>"),
+				ConiferMesh ? *ConiferMesh->GetPathName() : TEXT("<none>"));
+		}
+		return bSucceeded;
 	}
 
 	bool EnsureExperimentalVegetationAssets()
