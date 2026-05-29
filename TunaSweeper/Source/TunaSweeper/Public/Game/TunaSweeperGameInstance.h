@@ -551,6 +551,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Shop")
 	bool TryBuyActiveShopSlot(int32 ShopSlotIndex);
 
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Shop|Debug")
+	bool DebugRestockActiveShop(bool bSaveImmediately = true);
+
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Shop")
 	bool TryGetSlotSellPrice(const FTunaSweeperItemSlotReference& SlotReference, int32& OutSalePrice);
 

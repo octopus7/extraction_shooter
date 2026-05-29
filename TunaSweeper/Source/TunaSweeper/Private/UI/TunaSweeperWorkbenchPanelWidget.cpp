@@ -5,6 +5,7 @@
 #include "Components/Border.h"
 #include "Components/Button.h"
 #include "Components/Image.h"
+#include "Components/ListView.h"
 #include "Components/ListViewBase.h"
 #include "Components/TextBlock.h"
 #include "Components/TileView.h"
@@ -143,6 +144,11 @@ void UTunaSweeperWorkbenchPanelWidget::NativeConstruct()
 		CraftRecipeTileView->OnItemClicked().RemoveAll(this);
 		CraftRecipeTileView->OnItemClicked().AddUObject(this, &UTunaSweeperWorkbenchPanelWidget::HandleCraftTileClicked);
 	}
+	if (CraftRecipeListView)
+	{
+		CraftRecipeListView->OnItemClicked().RemoveAll(this);
+		CraftRecipeListView->OnItemClicked().AddUObject(this, &UTunaSweeperWorkbenchPanelWidget::HandleCraftTileClicked);
+	}
 	if (DismantleInventoryTileView)
 	{
 		DismantleInventoryTileView->OnItemClicked().RemoveAll(this);
@@ -187,6 +193,10 @@ void UTunaSweeperWorkbenchPanelWidget::NativeDestruct()
 	if (CraftRecipeTileView)
 	{
 		CraftRecipeTileView->OnItemClicked().RemoveAll(this);
+	}
+	if (CraftRecipeListView)
+	{
+		CraftRecipeListView->OnItemClicked().RemoveAll(this);
 	}
 	if (DismantleInventoryTileView)
 	{
@@ -455,7 +465,7 @@ void UTunaSweeperWorkbenchPanelWidget::HandleBlueprintTileClicked(UObject* ItemO
 
 void UTunaSweeperWorkbenchPanelWidget::PopulateCraftRecipes()
 {
-	if (!CraftRecipeTileView)
+	if (!CraftRecipeListView && !CraftRecipeTileView)
 	{
 		return;
 	}
@@ -474,12 +484,24 @@ void UTunaSweeperWorkbenchPanelWidget::PopulateCraftRecipes()
 		TunaGameInstance->GetActiveWorkbenchRecipes(Recipes);
 	}
 
-	if (!Recipes.IsValidIndex(SelectedCraftRecipeSlotIndex) && Recipes.Num() > 0)
+	if (Recipes.Num() <= 0)
+	{
+		SelectedCraftRecipeSlotIndex = INDEX_NONE;
+	}
+	else if (!Recipes.IsValidIndex(SelectedCraftRecipeSlotIndex))
 	{
 		SelectedCraftRecipeSlotIndex = 0;
 	}
 
-	CraftRecipeTileView->ClearListItems();
+	if (CraftRecipeListView)
+	{
+		CraftRecipeListView->ClearListItems();
+	}
+	if (CraftRecipeTileView)
+	{
+		CraftRecipeTileView->ClearListItems();
+	}
+	UObject* SelectedCraftRecipeObject = nullptr;
 	for (const FTunaSweeperWorkbenchRecipeView& Recipe : Recipes)
 	{
 		FTunaSweeperItemSlotReference SlotReference;
@@ -504,8 +526,24 @@ void UTunaSweeperWorkbenchPanelWidget::PopulateCraftRecipes()
 		{
 			TileObject->Initialize(TileData);
 			TileObjects.Add(TileObject);
-			CraftRecipeTileView->AddItem(TileObject);
+			if (CraftRecipeListView)
+			{
+				CraftRecipeListView->AddItem(TileObject);
+				if (Recipe.SlotIndex == SelectedCraftRecipeSlotIndex)
+				{
+					SelectedCraftRecipeObject = TileObject;
+				}
+			}
+			else if (CraftRecipeTileView)
+			{
+				CraftRecipeTileView->AddItem(TileObject);
+			}
 		}
+	}
+
+	if (CraftRecipeListView && SelectedCraftRecipeObject)
+	{
+		CraftRecipeListView->SetSelectedItem(SelectedCraftRecipeObject);
 	}
 }
 
@@ -909,6 +947,7 @@ void UTunaSweeperWorkbenchPanelWidget::SetPanelModeVisibility() const
 	const bool bBlueprintMode = ActiveWorkbenchMode == ETunaSweeperWorkbenchMode::BlueprintRegister;
 
 	TunaSweeperWorkbenchPanel::SetWidgetModeVisible(CraftRecipeTileView, bCraftMode);
+	TunaSweeperWorkbenchPanel::SetWidgetModeVisible(CraftRecipeListView, bCraftMode);
 	TunaSweeperWorkbenchPanel::SetWidgetModeVisible(CraftIngredientList, bCraftMode);
 	TunaSweeperWorkbenchPanel::SetWidgetModeVisible(CraftArrowText, bCraftMode);
 	TunaSweeperWorkbenchPanel::SetWidgetModeVisible(CraftOutputImage, bCraftMode);

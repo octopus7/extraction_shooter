@@ -15,12 +15,14 @@ ATunaSweeperWorkbenchActor::ATunaSweeperWorkbenchActor()
 
 	if (InteractableComponent)
 	{
-		InteractableComponent->SetRelativeLocation(FVector(-82.0f, 0.0f, 120.0f));
+		InteractableComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 120.0f));
+		InteractableComponent->SetInteractionOrder(0);
 	}
 
 	DismantleInteractableComponent = CreateDefaultSubobject<UTunaSweeperInteractableComponent>(TEXT("DismantleInteractable"));
 	DismantleInteractableComponent->SetupAttachment(RootComponent);
 	DismantleInteractableComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 120.0f));
+	DismantleInteractableComponent->SetInteractionOrder(1);
 	DismantleInteractableComponent->ConfigureInteractionDefaults(
 		ETunaSweeperInteractionType::WorkbenchDismantle,
 		FText::FromString(TEXT("\uBD84\uD574")),
@@ -29,7 +31,8 @@ ATunaSweeperWorkbenchActor::ATunaSweeperWorkbenchActor()
 
 	BlueprintRegisterInteractableComponent = CreateDefaultSubobject<UTunaSweeperInteractableComponent>(TEXT("BlueprintRegisterInteractable"));
 	BlueprintRegisterInteractableComponent->SetupAttachment(RootComponent);
-	BlueprintRegisterInteractableComponent->SetRelativeLocation(FVector(82.0f, 0.0f, 120.0f));
+	BlueprintRegisterInteractableComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 120.0f));
+	BlueprintRegisterInteractableComponent->SetInteractionOrder(2);
 	BlueprintRegisterInteractableComponent->ConfigureInteractionDefaults(
 		ETunaSweeperInteractionType::WorkbenchBlueprintRegister,
 		FText::FromString(TEXT("\uC124\uACC4\uB3C4 \uB4F1\uB85D")),

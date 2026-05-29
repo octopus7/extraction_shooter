@@ -210,6 +210,12 @@ void UTunaSweeperInteractableComponent::SetInteractionDisplayNameStringKey(FName
 	ApplyMarkerState();
 }
 
+void UTunaSweeperInteractableComponent::SetInteractionOrder(int32 InInteractionOrder)
+{
+	Modify();
+	InteractionOrder = InInteractionOrder;
+}
+
 void UTunaSweeperInteractableComponent::SetInteractionRequirementPreview(
 	UTexture2D* InIconTexture,
 	int32 InRequiredQuantity,
@@ -328,16 +334,18 @@ void UTunaSweeperInteractableComponent::UpdateMarker(float DeltaSeconds)
 {
 	const APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(this, 0);
 	bool bCanInteract = InteractionType != ETunaSweeperInteractionType::None;
+	bool bCanDisplayMarker = bCanInteract;
 	if (UWorld* World = GetWorld())
 	{
 		if (UTunaSweeperInteractionSubsystem* InteractionSubsystem = World->GetSubsystem<UTunaSweeperInteractionSubsystem>())
 		{
 			bCanInteract = InteractionSubsystem->CanOfferInteraction(this);
+			bCanDisplayMarker = bCanInteract && InteractionSubsystem->ShouldDisplayMarkerForInteractable(this);
 		}
 	}
 
 	const bool bInsideVisibleDistance =
-		bCanInteract &&
+		bCanDisplayMarker &&
 		PlayerPawn &&
 		FVector::DistSquared2D(PlayerPawn->GetActorLocation(), GetInteractionLocation()) <= FMath::Square(MarkerVisibleDistance);
 
@@ -351,10 +359,8 @@ void UTunaSweeperInteractableComponent::UpdateMarker(float DeltaSeconds)
 		if (UTunaSweeperInteractionSubsystem* InteractionSubsystem = World->GetSubsystem<UTunaSweeperInteractionSubsystem>())
 		{
 			bIsFocusedInteractable =
-				bCanInteract &&
-				InteractionSubsystem->GetFocusedInteractable() == this &&
-				PlayerPawn &&
-				IsWithinInteractionDistance(PlayerPawn);
+				bCanDisplayMarker &&
+				InteractionSubsystem->IsFocusedInteractionGroupMarker(this);
 		}
 	}
 
@@ -383,7 +389,25 @@ void UTunaSweeperInteractableComponent::ApplyMarkerState()
 
 	if (UTunaSweeperInteractionMarkerWidget* MarkerWidget = Cast<UTunaSweeperInteractionMarkerWidget>(MarkerWidgetComponent->GetUserWidgetObject()))
 	{
-		MarkerWidget->SetMarkerText(ResolveInteractionDisplayName());
+		TArray<FText> GroupDisplayNames;
+		int32 FocusedGroupIndex = INDEX_NONE;
+		if (UWorld* World = GetWorld())
+		{
+			if (const UTunaSweeperInteractionSubsystem* InteractionSubsystem = World->GetSubsystem<UTunaSweeperInteractionSubsystem>())
+			{
+				InteractionSubsystem->GetMarkerInteractionOptions(this, GroupDisplayNames, FocusedGroupIndex);
+			}
+		}
+
+		if (GroupDisplayNames.Num() > 1)
+		{
+			MarkerWidget->SetInteractionOptions(GroupDisplayNames, FocusedGroupIndex);
+		}
+		else
+		{
+			MarkerWidget->SetMarkerText(ResolveInteractionDisplayName());
+		}
+
 		MarkerWidget->SetRequirementPreview(RequirementIconTexture, RequirementQuantity, bShowRequirementPreview);
 		MarkerWidget->SetMarkerOpened(bMarkerCompleted);
 		MarkerWidget->SetMarkerPresentation(MarkerAlpha, MarkerRingScale, LabelAlpha);

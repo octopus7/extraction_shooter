@@ -1307,3 +1307,52 @@ A. 아니다. 현재 저장소에는 창고 C++ 액터(`ATunaSweeperStorageActor
 ### Answer
 
 그렇다. `Docs/requests.md`와 `Docs/questions.md`에는 상호작용 목록과 마우스 휠 포커스 이동 요구가 기록되어 있지만, 현재 런타임 구현은 그 구조가 아니다. `UTunaSweeperInteractionSubsystem::RefreshFocusedInteractable()`가 매 틱 상호작용 가능 컴포넌트 중 가장 가까운 하나를 자동 포커스하고, `IA_Interact` 입력은 그 포커스 하나에만 실행된다. 마우스 휠 입력은 현재 탄종 선택용 `IA_AmmoFocus`와 지도 줌에만 연결되어 있으며, 상호작용 후보 목록/인덱스/휠 전환 입력은 아직 구현되어 있지 않다.
+## 2026-05-29 20:07:55 (elapsed: 02:14:17)
+
+### Question
+
+행 위젯은 WBP로 만드는 것이 맞지 않은가?
+
+### Answer
+
+맞다. 작업대 제조 목록처럼 `ListView` 엔트리로 쓰는 행은 네이티브 `UUserWidget` 클래스만 직접 꽂기보다, `WBP_WorkbenchRecipeListEntry`를 생성하고 그 WBP 클래스를 `EntryWidgetClass`로 지정하는 편이 맞다.
+
+## 2026-05-29 20:15:59 (elapsed: 02:22:21)
+
+### Question
+
+상점 UI 재고가 저장되고 있는가?
+
+### Answer
+
+저장되고 있다. UI 위젯이 직접 저장하는 구조는 아니고, `UTunaSweeperGameInstance`가 상점 재고를 `ShopId + SlotIndex + ItemId` 키로 런타임 관리한 뒤 `UTunaSweeperSaveGame::ShopStockStates`에 저장한다. 상점 UI는 `GetActiveShopItems()`를 통해 저장/런타임 재고를 읽어 표시하고, 구매 성공 시 `TryBuyActiveShopSlot()`에서 `SetShopStockQuantity()`로 재고를 줄인 뒤 코인 차감 저장 또는 직접 저장을 호출한다. 판매는 상점 재고를 늘리지 않는다.
+
+## 2026-05-29 20:18:44 (elapsed: 00:03:00)
+
+### Question
+
+무기 정보내부에 모딩 정보도 적용되고있는거 맞지?
+
+### Answer
+
+맞다. 선택 아이템 정보 패널은 선택된 아이템의 `AttachmentSlotTags`를 읽어서 모딩 패널을 열고, `SelectedWeaponAttachmentSlots`에 들어있는 부착물을 슬롯 타일로 보여준다. 장착/드롭 시에는 `AttachmentSlots`가 해당 무기 아이템 인스턴스에 커밋된다. 게임플레이 적용은 현재 대용량 탄창의 `MagazineCapacityBonus`가 탄창 용량 계산에 더해지고, 레이저 사이트가 전술 슬롯에 있으면 장착 무기 레이저 비주얼이 켜지는 수준이다. 재장전 시간이나 레드닷 조준 효과 같은 다른 수치 보정은 아직 별도로 적용되어 있지 않다.
+
+## 2026-05-29 20:20:34 (elapsed: 00:01:00)
+
+### Question
+
+장전된 탄약정보도 들어가있고
+
+### Answer
+
+맞다. 무기 아이템 인스턴스(`FTunaSweeperItemInstance`) 안에 `LoadedAmmoItemId`, `LoadedAmmoCount`, `SelectedAmmoItemId`가 들어가 있다. 장전/발사/탄약 선택은 이 필드를 갱신하고, 퀵슬롯 HUD도 `GetWeaponLoadedAmmoCount()`와 `GetWeaponSelectedAmmoItemId()`를 읽어 장전 수량과 탄약 종류를 표시한다. 저장 시에도 `SaveGame->ItemInstances`에 같은 인스턴스가 들어가며 저장/로드 양쪽에서 장전 탄약 필드를 정규화한다.
+
+## 2026-05-29 20:21:04 (elapsed: 00:01:00)
+
+### Question
+
+탄약에 따른 피해 증가 구현되어있어?
+
+### Answer
+
+아직 구현되어 있지 않다. 탄약 아이템 데이터에는 현재 `ammo_type_tag`와 `projectile_hit_effect_id`만 있고, 피해량/피해 배율 필드는 없다. 발사 시 장전 탄약의 `ProjectileHitEffectId`를 읽어서 발사체 이펙트 ID로 넘기지만, 발사체에는 `SetDamageAmount()`가 호출되지 않고 기본 `DamageAmount`가 그대로 쓰인다. 따라서 탄약별 피해 증가를 넣으려면 아이템 정의에 탄약 피해 보정 필드를 추가하고, 선택/장전 탄약 정의를 읽어 발사체 생성 시 `SetDamageAmount()` 또는 별도 배율을 적용하는 흐름을 추가해야 한다.

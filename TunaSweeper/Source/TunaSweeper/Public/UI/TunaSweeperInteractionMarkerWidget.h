@@ -21,6 +21,9 @@ public:
 	void SetMarkerText(const FText& InText);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Interaction")
+	void SetInteractionOptions(const TArray<FText>& InOptions, int32 InFocusedOptionIndex);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Interaction")
 	void SetRequirementPreview(UTexture2D* InIconTexture, int32 InRequiredQuantity, bool bInShowRequirement);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Interaction")
@@ -61,9 +64,11 @@ private:
 	void CacheNamedWidgets();
 	void EnsureRequirementWidgets();
 	void ApplyState();
+	FText BuildDisplayText() const;
 	UTexture2D* ResolveOpenedCheckTexture();
 
 	FText CachedDisplayText = FText::FromString(TEXT("Interact"));
+	TArray<FText> CachedOptionTexts;
 	UPROPERTY(Transient)
 	TObjectPtr<UTexture2D> CachedRequirementIconTexture;
 	UPROPERTY(Transient)
@@ -73,6 +78,7 @@ private:
 	UPROPERTY(Transient)
 	TObjectPtr<UImage> FilledBrushImage;
 	int32 CachedRequiredQuantity = 0;
+	int32 CachedFocusedOptionIndex = INDEX_NONE;
 	bool bCachedShowRequirement = false;
 	bool bCachedOpened = false;
 	bool bHasCachedRingBrush = false;

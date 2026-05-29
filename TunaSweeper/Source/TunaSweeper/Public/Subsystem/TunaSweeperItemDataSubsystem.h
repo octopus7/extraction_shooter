@@ -68,6 +68,12 @@ struct TUNASWEEPER_API FTunaSweeperItemDefinition
 	FName ProjectileHitEffectId;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
+	float ProjectileDamageMultiplier = 1.0f;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
+	float ProjectileDamageBonus = 0.0f;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
 	TArray<FName> AttachmentSlotTags;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")

@@ -1,6 +1,7 @@
 #include "UI/TunaSweeperLootContainerWidget.h"
 
 #include "Blueprint/DragDropOperation.h"
+#include "Components/Button.h"
 #include "Components/SizeBox.h"
 #include "Components/TextBlock.h"
 #include "Components/TileView.h"
@@ -583,6 +584,12 @@ void UTunaSweeperLootContainerWidget::NativeConstruct()
 	Super::NativeConstruct();
 	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
 
+	if (ShopRefreshStockButton)
+	{
+		ShopRefreshStockButton->OnClicked.RemoveDynamic(this, &UTunaSweeperLootContainerWidget::HandleShopRefreshStockButtonClicked);
+		ShopRefreshStockButton->OnClicked.AddDynamic(this, &UTunaSweeperLootContainerWidget::HandleShopRefreshStockButtonClicked);
+	}
+
 	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
 	{
 		TunaGameInstance->OnInventoryStateChanged.RemoveAll(this);
@@ -596,6 +603,11 @@ void UTunaSweeperLootContainerWidget::NativeConstruct()
 
 void UTunaSweeperLootContainerWidget::NativeDestruct()
 {
+	if (ShopRefreshStockButton)
+	{
+		ShopRefreshStockButton->OnClicked.RemoveDynamic(this, &UTunaSweeperLootContainerWidget::HandleShopRefreshStockButtonClicked);
+	}
+
 	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
 	{
 		TunaGameInstance->OnInventoryStateChanged.RemoveAll(this);
@@ -603,6 +615,37 @@ void UTunaSweeperLootContainerWidget::NativeDestruct()
 	}
 
 	Super::NativeDestruct();
+}
+
+void UTunaSweeperLootContainerWidget::HandleShopRefreshStockButtonClicked()
+{
+	if (SlotSource != ETunaSweeperItemSlotSource::Shop)
+	{
+		return;
+	}
+
+	UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+	if (TunaGameInstance && TunaGameInstance->DebugRestockActiveShop(true))
+	{
+		PopulateContainerItems();
+	}
+}
+
+void UTunaSweeperLootContainerWidget::RefreshShopRefreshStockButton()
+{
+	const bool bShowRefreshButton = SlotSource == ETunaSweeperItemSlotSource::Shop;
+	if (ShopRefreshStockButton)
+	{
+		ShopRefreshStockButton->SetVisibility(bShowRefreshButton ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
+		ShopRefreshStockButton->SetIsEnabled(bShowRefreshButton);
+	}
+	if (ShopRefreshStockButtonText)
+	{
+		ShopRefreshStockButtonText->SetText(TunaSweeperLootContainerUi::ResolveUiText(
+			GetGameInstance<UTunaSweeperGameInstance>(),
+			TEXT("ui.shop.debug_refresh_stock"),
+			TEXT("\uAC31\uC2E0")));
+	}
 }
 
 bool UTunaSweeperLootContainerWidget::TryResolveDropSlotFromCursor(
@@ -729,6 +772,8 @@ bool UTunaSweeperLootContainerWidget::NativeOnDrop(
 
 void UTunaSweeperLootContainerWidget::PopulateContainerItems()
 {
+	RefreshShopRefreshStockButton();
+
 	if (!ContainerTileView)
 	{
 		return;

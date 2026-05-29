@@ -232,6 +232,9 @@ protected:
 	TSoftObjectPtr<UInputAction> InteractAction;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+	TSoftObjectPtr<UInputAction> InteractionFocusAction;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	TSoftObjectPtr<UInputAction> InventoryAction;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
@@ -397,6 +400,7 @@ private:
 	void BeginAim(const FInputActionValue& Value);
 	void EndAim(const FInputActionValue& Value);
 	void HandleInteract(const FInputActionValue& Value);
+	void HandleInteractionFocus(const FInputActionValue& Value);
 	void HandleInventory(const FInputActionValue& Value);
 	void HandleMap(const FInputActionValue& Value);
 	void HandleReload(const FInputActionValue& Value);

@@ -142,6 +142,7 @@ ATunaSweeperTopDownCharacter::ATunaSweeperTopDownCharacter()
 	FireAction = TSoftObjectPtr<UInputAction>(FSoftObjectPath(TEXT("/Game/Input/IA_Fire.IA_Fire")));
 	AimAction = TSoftObjectPtr<UInputAction>(FSoftObjectPath(TEXT("/Game/Input/IA_Aim.IA_Aim")));
 	InteractAction = TSoftObjectPtr<UInputAction>(FSoftObjectPath(TEXT("/Game/Input/IA_Interact.IA_Interact")));
+	InteractionFocusAction = TSoftObjectPtr<UInputAction>(FSoftObjectPath(TEXT("/Game/Input/IA_InteractionFocus.IA_InteractionFocus")));
 	InventoryAction = TSoftObjectPtr<UInputAction>(FSoftObjectPath(TEXT("/Game/Input/IA_Inventory.IA_Inventory")));
 	MapAction = TSoftObjectPtr<UInputAction>(FSoftObjectPath(TEXT("/Game/Input/IA_Map.IA_Map")));
 	ReloadAction = TSoftObjectPtr<UInputAction>(FSoftObjectPath(TEXT("/Game/Input/IA_Reload.IA_Reload")));
@@ -352,6 +353,11 @@ void ATunaSweeperTopDownCharacter::SetupPlayerInputComponent(UInputComponent* Pl
 	if (UInputAction* LoadedInteractAction = InteractAction.LoadSynchronous())
 	{
 		EnhancedInputComponent->BindAction(LoadedInteractAction, ETriggerEvent::Started, this, &ATunaSweeperTopDownCharacter::HandleInteract);
+	}
+
+	if (UInputAction* LoadedInteractionFocusAction = InteractionFocusAction.LoadSynchronous())
+	{
+		EnhancedInputComponent->BindAction(LoadedInteractionFocusAction, ETriggerEvent::Triggered, this, &ATunaSweeperTopDownCharacter::HandleInteractionFocus);
 	}
 
 	if (UInputAction* LoadedInventoryAction = InventoryAction.LoadSynchronous())
@@ -738,6 +744,39 @@ void ATunaSweeperTopDownCharacter::HandleInteract(const FInputActionValue& Value
 	}
 }
 
+void ATunaSweeperTopDownCharacter::HandleInteractionFocus(const FInputActionValue& Value)
+{
+	if (bIsDead || bAmmoSelectionOpen)
+	{
+		return;
+	}
+
+	if (ATunaSweeperPlayerController* TunaPlayerController = Cast<ATunaSweeperPlayerController>(GetController()))
+	{
+		if (TunaPlayerController->IsHousingModeOpen() || TunaPlayerController->IsInventoryUiOpen())
+		{
+			return;
+		}
+	}
+
+	const float AxisValue = Value.Get<float>();
+	if (FMath::Abs(AxisValue) <= KINDA_SMALL_NUMBER)
+	{
+		return;
+	}
+
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		return;
+	}
+
+	if (UTunaSweeperInteractionSubsystem* InteractionSubsystem = World->GetSubsystem<UTunaSweeperInteractionSubsystem>())
+	{
+		InteractionSubsystem->MoveFocusedInteractionSelection(AxisValue > 0.0f ? -1 : 1, this);
+	}
+}
+
 void ATunaSweeperTopDownCharacter::HandleInventory(const FInputActionValue& Value)
 {
 	if (bIsDead)
@@ -956,6 +995,8 @@ void ATunaSweeperTopDownCharacter::FireWeapon()
 
 	FName ProjectileHitEffectId = NAME_None;
 	FName WeaponTypeTag = NAME_None;
+	float ProjectileDamageMultiplier = 1.0f;
+	float ProjectileDamageBonus = 0.0f;
 	FTunaSweeperItemInstance WeaponInstance;
 	FTunaSweeperItemDefinition WeaponDefinition;
 	if (TunaGameInstance->TryGetEquipmentWeaponSlotItem(SelectedWeaponSlotNumber, WeaponInstance, WeaponDefinition))
@@ -972,6 +1013,8 @@ void ATunaSweeperTopDownCharacter::FireWeapon()
 				if (ItemDataSubsystem->TryGetItemDefinition(LoadedAmmoItemId, AmmoDefinition))
 				{
 					ProjectileHitEffectId = AmmoDefinition.ProjectileHitEffectId;
+					ProjectileDamageMultiplier = AmmoDefinition.ProjectileDamageMultiplier;
+					ProjectileDamageBonus = AmmoDefinition.ProjectileDamageBonus;
 				}
 			}
 		}
@@ -998,6 +1041,8 @@ void ATunaSweeperTopDownCharacter::FireWeapon()
 		this,
 		ProjectileHitEffectId,
 		WeaponTypeTag,
+		ProjectileDamageMultiplier,
+		ProjectileDamageBonus,
 		SpreadHalfAngleDegrees,
 		bHasAimIntent ? AimIntentActor.Get() : nullptr,
 		bHasAimIntent ? AimIntentComponent.Get() : nullptr,

@@ -9,6 +9,7 @@
 class USizeBox;
 class UTextBlock;
 class UTileView;
+class UButton;
 class UDragDropOperation;
 struct FTunaSweeperItemSlotReference;
 
@@ -49,11 +50,21 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Loot Container", meta = (BindWidgetOptional))
 	TObjectPtr<UTextBlock> ContainerOccupancyText;
 
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Shop", meta = (BindWidgetOptional))
+	TObjectPtr<UButton> ShopRefreshStockButton;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Shop", meta = (BindWidgetOptional))
+	TObjectPtr<UTextBlock> ShopRefreshStockButtonText;
+
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Loot Container", meta = (BindWidgetOptional))
 	TObjectPtr<UTileView> ContainerTileView;
 
 private:
+	UFUNCTION()
+	void HandleShopRefreshStockButtonClicked();
+
 	void PopulateContainerItems();
+	void RefreshShopRefreshStockButton();
 	bool TryResolveDropSlotFromCursor(
 		const FVector2D& ScreenSpacePosition,
 		FTunaSweeperItemSlotReference& OutSlotReference);

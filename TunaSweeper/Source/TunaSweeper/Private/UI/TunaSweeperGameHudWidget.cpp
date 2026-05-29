@@ -708,6 +708,10 @@ void UTunaSweeperGameHudWidget::ShowWorkbenchPanel(int32 WorkbenchId, ETunaSweep
 	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
 	{
 		TunaGameInstance->SetActiveWorkbench(WorkbenchId, WorkbenchMode);
+		if (WorkbenchMode == ETunaSweeperWorkbenchMode::Craft)
+		{
+			TunaGameInstance->ClearSelectedItemSelection();
+		}
 	}
 
 	ShowExternalPanel(ETunaSweeperHudExternalPanelMode::Workbench);
@@ -827,9 +831,9 @@ bool UTunaSweeperGameHudWidget::IsWorkbenchPanelOpen() const
 
 ETunaSweeperWorkbenchMode UTunaSweeperGameHudWidget::GetWorkbenchPanelMode() const
 {
-	const UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
-	return TunaGameInstance && IsWorkbenchPanelOpen()
-		? TunaGameInstance->GetActiveWorkbenchMode()
+	const UTunaSweeperGameInstance* WorkbenchGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+	return WorkbenchGameInstance && IsWorkbenchPanelOpen()
+		? WorkbenchGameInstance->GetActiveWorkbenchMode()
 		: ETunaSweeperWorkbenchMode::Craft;
 }
 
@@ -1334,6 +1338,14 @@ void UTunaSweeperGameHudWidget::ApplyHudModeVisibility()
 	const bool bMapMode = ActiveHudMode == ETunaSweeperHudMode::Map;
 	const bool bMemoMode = ActiveHudMode == ETunaSweeperHudMode::Memo;
 	const bool bQuestMode = ActiveHudMode == ETunaSweeperHudMode::Quest;
+	const UTunaSweeperGameInstance* WorkbenchGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+	const bool bWorkbenchPanelOpen =
+		bInventoryMode &&
+		ExternalPanelWidget &&
+		ExternalPanelWidget->GetExternalPanelMode() == ETunaSweeperHudExternalPanelMode::Workbench;
+	const bool bCraftWorkbenchPanelOpen =
+		bWorkbenchPanelOpen &&
+		(!WorkbenchGameInstance || WorkbenchGameInstance->GetActiveWorkbenchMode() == ETunaSweeperWorkbenchMode::Craft);
 
 	if (TopStatusReserveWidget)
 	{
@@ -1351,11 +1363,12 @@ void UTunaSweeperGameHudWidget::ApplyHudModeVisibility()
 
 	if (InventoryAreaWidget)
 	{
+		const bool bShowInventoryArea = bUtilityModeOpen && bInventoryMode && !bCraftWorkbenchPanelOpen;
 		SetTransitionedWidgetVisibility(
 			InventoryAreaWidget,
-			bUtilityModeOpen && bInventoryMode ? ESlateVisibility::SelfHitTestInvisible : ESlateVisibility::Collapsed,
+			bShowInventoryArea ? ESlateVisibility::SelfHitTestInvisible : ESlateVisibility::Collapsed,
 			InventoryAreaTransitionEdge);
-		InventoryAreaWidget->SetInventoryVisible(bUtilityModeOpen && bInventoryMode);
+		InventoryAreaWidget->SetInventoryVisible(bShowInventoryArea);
 	}
 
 	EnsureInventoryQuickSlotPanelWidget();
@@ -1381,6 +1394,10 @@ void UTunaSweeperGameHudWidget::ApplyHudModeVisibility()
 	}
 
 	if (ItemInfoPanelWidget && !bInventoryMode)
+	{
+		SetTransitionedWidgetVisibility(ItemInfoPanelWidget, ESlateVisibility::Collapsed, ItemInfoPanelTransitionEdge);
+	}
+	else if (ItemInfoPanelWidget && bCraftWorkbenchPanelOpen)
 	{
 		SetTransitionedWidgetVisibility(ItemInfoPanelWidget, ESlateVisibility::Collapsed, ItemInfoPanelTransitionEdge);
 	}

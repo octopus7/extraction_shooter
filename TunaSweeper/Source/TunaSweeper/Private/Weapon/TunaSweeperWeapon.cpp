@@ -186,6 +186,8 @@ void ATunaSweeperWeapon::Fire(
 		InstigatorPawn,
 		ProjectileHitEffectId,
 		WeaponTypeTag,
+		1.0f,
+		0.0f,
 		0.0f,
 		nullptr,
 		nullptr,
@@ -198,6 +200,8 @@ void ATunaSweeperWeapon::FireWithAimIntent(
 	APawn* InstigatorPawn,
 	FName ProjectileHitEffectId,
 	FName WeaponTypeTag,
+	float ProjectileDamageMultiplier,
+	float ProjectileDamageBonus,
 	float SpreadHalfAngleDegrees,
 	AActor* AimIntentActor,
 	UPrimitiveComponent* AimIntentComponent,
@@ -245,6 +249,8 @@ void ATunaSweeperWeapon::FireWithAimIntent(
 				PelletDirection,
 				InstigatorPawn,
 				ProjectileHitEffectId,
+				ProjectileDamageMultiplier,
+				ProjectileDamageBonus,
 				AimIntentActor,
 				AimIntentComponent,
 				AimIntentWorldPoint,
@@ -260,6 +266,8 @@ void ATunaSweeperWeapon::FireWithAimIntent(
 			SpreadDirection,
 			InstigatorPawn,
 			ProjectileHitEffectId,
+			ProjectileDamageMultiplier,
+			ProjectileDamageBonus,
 			AimIntentActor,
 			AimIntentComponent,
 			AimIntentWorldPoint,
@@ -275,6 +283,8 @@ ATunaSweeperProjectile* ATunaSweeperWeapon::SpawnProjectile(
 	const FVector& ShotDirection,
 	APawn* InstigatorPawn,
 	FName ProjectileHitEffectId,
+	float ProjectileDamageMultiplier,
+	float ProjectileDamageBonus,
 	AActor* AimIntentActor,
 	UPrimitiveComponent* AimIntentComponent,
 	const FVector& AimIntentWorldPoint,
@@ -291,6 +301,9 @@ ATunaSweeperProjectile* ATunaSweeperWeapon::SpawnProjectile(
 		World.SpawnActor<ATunaSweeperProjectile>(ProjectileClassToSpawn, SpawnLocation, SpawnRotation, SpawnParameters);
 	if (SpawnedProjectile)
 	{
+		const float BaseDamageAmount = SpawnedProjectile->GetDamageAmount();
+		SpawnedProjectile->SetDamageAmount(
+			FMath::Max(0.0f, BaseDamageAmount * FMath::Max(0.0f, ProjectileDamageMultiplier) + ProjectileDamageBonus));
 		SpawnedProjectile->SetHitEffectId(ProjectileHitEffectId);
 		SpawnedProjectile->SetAimIntent(
 			AimIntentActor,

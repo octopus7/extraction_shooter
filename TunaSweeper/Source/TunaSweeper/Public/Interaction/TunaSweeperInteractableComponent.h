@@ -59,6 +59,9 @@ public:
 	FName GetObjectiveEventId() const { return ObjectiveEventId; }
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Interaction")
+	int32 GetInteractionOrder() const { return InteractionOrder; }
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Interaction")
 	float GetInteractionDistance() const { return InteractionDistance; }
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Interaction")
@@ -93,6 +96,8 @@ public:
 
 	void SetInteractionDisplayNameStringKey(FName InInteractionDisplayNameStringKey);
 
+	void SetInteractionOrder(int32 InInteractionOrder);
+
 	void SetInteractionRequirementPreview(
 		UTexture2D* InIconTexture,
 		int32 InRequiredQuantity,
@@ -112,6 +117,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
 	FName ObjectiveEventId = NAME_None;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
+	int32 InteractionOrder = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction", meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float InteractionDistance = 200.0f;

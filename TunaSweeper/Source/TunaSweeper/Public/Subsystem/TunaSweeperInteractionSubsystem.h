@@ -9,6 +9,7 @@ class ATunaSweeperLootContainerActor;
 class ATunaSweeperMemoActor;
 class ATunaSweeperDoorActor;
 class ATunaSweeperPersistentDoorActor;
+class AActor;
 
 UCLASS()
 class TUNASWEEPER_API UTunaSweeperInteractionSubsystem : public UTickableWorldSubsystem
@@ -27,15 +28,33 @@ public:
 	UTunaSweeperInteractableComponent* GetFocusedInteractable() const;
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Interaction")
+	bool MoveFocusedInteractionSelection(int32 SelectionDelta, APawn* InstigatorPawn);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Interaction")
 	bool TryInteract(APawn* InstigatorPawn);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Interaction")
 	bool RequestInteraction(UTunaSweeperInteractableComponent* Interactable, APawn* InstigatorPawn);
 
 	bool CanOfferInteraction(const UTunaSweeperInteractableComponent* Interactable) const;
+	bool ShouldDisplayMarkerForInteractable(const UTunaSweeperInteractableComponent* Interactable) const;
+	bool IsFocusedInteractionGroupMarker(const UTunaSweeperInteractableComponent* Interactable) const;
+	void GetMarkerInteractionOptions(
+		const UTunaSweeperInteractableComponent* MarkerInteractable,
+		TArray<FText>& OutDisplayNames,
+		int32& OutFocusedIndex) const;
 
 private:
 	void RefreshFocusedInteractable();
+	void GatherCandidateInteractablesForOwner(
+		const AActor* Owner,
+		const APawn* PlayerPawn,
+		bool bRequireInteractionDistance,
+		TArray<UTunaSweeperInteractableComponent*>& OutInteractables) const;
+	UTunaSweeperInteractableComponent* ResolveMarkerInteractableForOwner(const AActor* Owner) const;
+	int32 FindInteractableIndex(
+		const TArray<UTunaSweeperInteractableComponent*>& Interactables,
+		const UTunaSweeperInteractableComponent* Interactable) const;
 	bool HandlePickupItemInteraction(UTunaSweeperInteractableComponent* Interactable);
 	bool HandleItemSpawnInteraction(UTunaSweeperInteractableComponent* Interactable, APawn* InstigatorPawn);
 	bool HandleLootContainerOpenInteraction(UTunaSweeperInteractableComponent* Interactable, APawn* InstigatorPawn);
@@ -58,4 +77,6 @@ private:
 
 	TSet<TWeakObjectPtr<UTunaSweeperInteractableComponent>> RegisteredInteractables;
 	TWeakObjectPtr<UTunaSweeperInteractableComponent> FocusedInteractable;
+	TWeakObjectPtr<AActor> FocusedInteractionOwner;
+	int32 FocusedInteractionIndex = 0;
 };

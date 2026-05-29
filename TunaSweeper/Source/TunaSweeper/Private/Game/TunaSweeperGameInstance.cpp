@@ -2542,6 +2542,40 @@ bool UTunaSweeperGameInstance::TryBuyActiveShopSlot(int32 ShopSlotIndex)
 	return true;
 }
 
+bool UTunaSweeperGameInstance::DebugRestockActiveShop(bool bSaveImmediately)
+{
+	EnsureInventoryStateInitialized();
+
+	if (!bHasActiveShop || ActiveShopId == INDEX_NONE)
+	{
+		return false;
+	}
+
+	UTunaSweeperItemDataSubsystem* ItemDataSubsystem = GetSubsystem<UTunaSweeperItemDataSubsystem>();
+	FTunaSweeperShopDefinition ShopDefinition;
+	if (!ItemDataSubsystem || !ItemDataSubsystem->TryGetShopDefinition(ActiveShopId, ShopDefinition))
+	{
+		return false;
+	}
+
+	for (int32 SlotIndex = 0; SlotIndex < ShopDefinition.Items.Num(); ++SlotIndex)
+	{
+		const FTunaSweeperShopItemDefinition& ShopItemDefinition = ShopDefinition.Items[SlotIndex];
+		SetShopStockQuantity(
+			ActiveShopId,
+			SlotIndex,
+			ShopItemDefinition,
+			ShopItemDefinition.StockQuantity);
+	}
+
+	if (bSaveImmediately)
+	{
+		SaveGameStateInternal();
+	}
+	BroadcastInventoryStateChanged();
+	return true;
+}
+
 bool UTunaSweeperGameInstance::TryGetSlotSellPrice(
 	const FTunaSweeperItemSlotReference& SlotReference,
 	int32& OutSalePrice)

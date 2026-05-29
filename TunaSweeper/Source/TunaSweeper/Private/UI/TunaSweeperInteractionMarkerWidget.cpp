@@ -104,6 +104,21 @@ void UTunaSweeperInteractionMarkerWidget::NativePreConstruct()
 void UTunaSweeperInteractionMarkerWidget::SetMarkerText(const FText& InText)
 {
 	CachedDisplayText = InText;
+	CachedOptionTexts.Reset();
+	CachedFocusedOptionIndex = INDEX_NONE;
+	ApplyState();
+}
+
+void UTunaSweeperInteractionMarkerWidget::SetInteractionOptions(const TArray<FText>& InOptions, int32 InFocusedOptionIndex)
+{
+	CachedOptionTexts = InOptions;
+	CachedFocusedOptionIndex = CachedOptionTexts.IsValidIndex(InFocusedOptionIndex)
+		? InFocusedOptionIndex
+		: 0;
+	if (CachedOptionTexts.IsValidIndex(CachedFocusedOptionIndex))
+	{
+		CachedDisplayText = CachedOptionTexts[CachedFocusedOptionIndex];
+	}
 	ApplyState();
 }
 
@@ -230,6 +245,28 @@ UTexture2D* UTunaSweeperInteractionMarkerWidget::ResolveOpenedCheckTexture()
 	}
 
 	return CachedOpenedCheckTexture;
+}
+
+FText UTunaSweeperInteractionMarkerWidget::BuildDisplayText() const
+{
+	if (CachedOptionTexts.Num() <= 1)
+	{
+		return CachedDisplayText;
+	}
+
+	FString DisplayString;
+	for (int32 OptionIndex = 0; OptionIndex < CachedOptionTexts.Num(); ++OptionIndex)
+	{
+		if (!DisplayString.IsEmpty())
+		{
+			DisplayString.AppendChar(TEXT('\n'));
+		}
+
+		DisplayString += OptionIndex == CachedFocusedOptionIndex ? TEXT("> ") : TEXT("  ");
+		DisplayString += CachedOptionTexts[OptionIndex].ToString();
+	}
+
+	return FText::FromString(DisplayString);
 }
 
 void UTunaSweeperInteractionMarkerWidget::EnsureRequirementWidgets()
@@ -398,7 +435,7 @@ void UTunaSweeperInteractionMarkerWidget::ApplyState()
 
 	if (DisplayNameText)
 	{
-		DisplayNameText->SetText(CachedDisplayText);
+		DisplayNameText->SetText(BuildDisplayText());
 		ApplyPaintOpacity(DisplayNameText, CachedLabelAlpha);
 	}
 

@@ -17,6 +17,7 @@
 #include "Components/HorizontalBox.h"
 #include "Components/HorizontalBoxSlot.h"
 #include "Components/Image.h"
+#include "Components/ListView.h"
 #include "Components/ListViewBase.h"
 #include "Components/Overlay.h"
 #include "Components/OverlaySlot.h"
@@ -127,6 +128,7 @@
 #include "UI/TunaSweeperReloadRingWidget.h"
 #include "UI/TunaSweeperSpeechBubbleWidget.h"
 #include "UI/TunaSweeperWorkbenchPanelWidget.h"
+#include "UI/TunaSweeperWorkbenchRecipeListEntryWidget.h"
 #include "UObject/SavePackage.h"
 #include "UObject/UnrealType.h"
 #include "Weapon/TunaSweeperProjectile.h"
@@ -141,11 +143,12 @@ namespace TunaSweeperEditorSetup
 {
 	const FString GameInstanceTaskId = TEXT("2026-05-10_CreateGameInstanceBlueprint");
 	const FString TopDownShooterTaskId = TEXT("2026-05-10_CreateTopDownShooterAssets");
-	const FString InteractionInputTaskId = TEXT("2026-05-11_SetInteractInputToFKey");
+	const FString InteractionInputTaskId = TEXT("2026-05-29_SetInteractInputAndFocusWheelV1");
 	const FString InteractionMarkerAlignmentTaskId = TEXT("2026-05-25_RebuildInteractionMarkerRequirementPreviewV1");
 	const FString PickupItemAndSpawnerTaskId = TEXT("2026-05-11_CreatePickupItemAndSpawnerAssetsV3");
 	const FString CommonGameHudTaskId = TEXT("2026-05-28_AddMeleeQuickSlotHudV1");
-	const FString WorkbenchPanelWidgetTaskId = TEXT("2026-05-29_CreateWorkbenchPanelWidgetV4");
+	const FString WorkbenchPanelWidgetTaskId = TEXT("2026-05-29_CreateWorkbenchPanelWidgetV6");
+	const FString ShopRefreshStockButtonTaskId = TEXT("2026-05-29_AddShopRefreshStockButtonV1");
 	const FString InventoryInputTaskId = TEXT("2026-05-11_AddInventoryInput");
 	const FString QuickSlotInputTaskId = TEXT("2026-05-28_AddMeleeQuickSlotInputV1");
 	const FString DropInputTaskId = TEXT("2026-05-18_AddDropInputAction");
@@ -217,6 +220,7 @@ namespace TunaSweeperEditorSetup
 	const FString FireActionName = TEXT("IA_Fire");
 	const FString AimActionName = TEXT("IA_Aim");
 	const FString InteractActionName = TEXT("IA_Interact");
+	const FString InteractionFocusActionName = TEXT("IA_InteractionFocus");
 	const FString InventoryActionName = TEXT("IA_Inventory");
 	const FString DropActionName = TEXT("IA_Drop");
 	const FString ReloadActionName = TEXT("IA_Reload");
@@ -268,6 +272,7 @@ namespace TunaSweeperEditorSetup
 	const FString ItemThumbnailSlotWidgetAssetName = TEXT("WBP_ItemThumbnailSlot");
 	const FString LootContainerWidgetAssetName = TEXT("WBP_LootContainerPanel");
 	const FString WorkbenchPanelWidgetAssetName = TEXT("WBP_WorkbenchPanel");
+	const FString WorkbenchRecipeListEntryWidgetAssetName = TEXT("WBP_WorkbenchRecipeListEntry");
 	const FString IntroMenuWidgetAssetName = TEXT("WBP_IntroMenu");
 	const FString LevelTransitionVideoWidgetAssetName = TEXT("WBP_LevelTransitionVideo");
 	const FString QuestWidgetAssetName = TEXT("WBP_Quest");
@@ -1911,12 +1916,16 @@ namespace TunaSweeperEditorSetup
 			InteractActionName,
 			EInputActionValueType::Boolean,
 			EInputActionAccumulationBehavior::TakeHighestAbsoluteValue);
+		UInputAction* InteractionFocusAction = EnsureInputAction(
+			InteractionFocusActionName,
+			EInputActionValueType::Axis1D,
+			EInputActionAccumulationBehavior::Cumulative);
 
 		UInputMappingContext* MappingContext = LoadObject<UInputMappingContext>(
 			nullptr,
 			*GetAssetObjectPath(InputAssetPath, MappingContextName));
 
-		if (!InteractAction || !MappingContext)
+		if (!InteractAction || !InteractionFocusAction || !MappingContext)
 		{
 			return false;
 		}
@@ -1928,7 +1937,12 @@ namespace TunaSweeperEditorSetup
 			MappingContext->MapKey(InteractAction, EKeys::F);
 		}
 
-		MappingContext->ContextDescription = FText::FromString(TEXT("TunaSweeper player movement, fire, aim, and interaction input."));
+		if (!HasInputMapping(MappingContext, InteractionFocusAction, EKeys::MouseWheelAxis))
+		{
+			MappingContext->MapKey(InteractionFocusAction, EKeys::MouseWheelAxis);
+		}
+
+		MappingContext->ContextDescription = FText::FromString(TEXT("TunaSweeper player movement, fire, aim, interaction, and interaction focus input."));
 		MappingContext->MarkPackageDirty();
 		return SaveAsset(MappingContext);
 	}
@@ -8470,10 +8484,14 @@ namespace TunaSweeperEditorSetup
 		UHorizontalBox* ContainerHeaderRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("ContainerHeaderRow"));
 		UTextBlock* ContainerTitleText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("ContainerTitleText"));
 		UTextBlock* ContainerOccupancyText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("ContainerOccupancyText"));
+		USizeBox* ShopRefreshStockButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("ShopRefreshStockButtonBox"));
+		UButton* ShopRefreshStockButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("ShopRefreshStockButton"));
+		UTextBlock* ShopRefreshStockButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("ShopRefreshStockButtonText"));
 		UTileView* ContainerTileView = WidgetTree->ConstructWidget<UTileView>(UTileView::StaticClass(), TEXT("ContainerTileView"));
 
 		if (!RootSizeBox || !PanelBackground || !PanelStack || !ContainerHeaderRow ||
-			!ContainerTitleText || !ContainerOccupancyText || !ContainerTileView)
+			!ContainerTitleText || !ContainerOccupancyText || !ShopRefreshStockButtonBox ||
+			!ShopRefreshStockButton || !ShopRefreshStockButtonText || !ContainerTileView)
 		{
 			return false;
 		}
@@ -8493,11 +8511,18 @@ namespace TunaSweeperEditorSetup
 
 		ConfigureTextBlockLeft(ContainerTitleText, FText::FromString(TEXT("Container")), FLinearColor::White, 18);
 		ConfigureTextBlockLeft(ContainerOccupancyText, FText::FromString(TEXT("(0/0)")), FLinearColor(0.92f, 0.94f, 0.96f, 1.0f), 18);
+		ConfigureTextBlock(ShopRefreshStockButtonText, FText::FromString(TEXT("\uAC31\uC2E0")), FLinearColor(0.02f, 0.03f, 0.035f, 1.0f), 14);
+		ShopRefreshStockButton->SetContent(ShopRefreshStockButtonText);
+		ShopRefreshStockButton->SetBackgroundColor(FLinearColor(0.46f, 0.72f, 0.86f, 1.0f));
+		ShopRefreshStockButton->SetVisibility(ESlateVisibility::Collapsed);
+		ShopRefreshStockButtonBox->SetWidthOverride(62.0f);
+		ShopRefreshStockButtonBox->SetHeightOverride(30.0f);
+		ShopRefreshStockButtonBox->SetContent(ShopRefreshStockButton);
 
 		UHorizontalBoxSlot* TitleTextSlot = ContainerHeaderRow->AddChildToHorizontalBox(ContainerTitleText);
 		if (TitleTextSlot)
 		{
-			TitleTextSlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
+			TitleTextSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
 			TitleTextSlot->SetHorizontalAlignment(HAlign_Left);
 			TitleTextSlot->SetVerticalAlignment(VAlign_Center);
 		}
@@ -8509,6 +8534,15 @@ namespace TunaSweeperEditorSetup
 			OccupancyTextSlot->SetHorizontalAlignment(HAlign_Left);
 			OccupancyTextSlot->SetVerticalAlignment(VAlign_Center);
 			OccupancyTextSlot->SetPadding(FMargin(8.0f, 0.0f, 0.0f, 0.0f));
+		}
+
+		UHorizontalBoxSlot* ShopRefreshButtonSlot = ContainerHeaderRow->AddChildToHorizontalBox(ShopRefreshStockButtonBox);
+		if (ShopRefreshButtonSlot)
+		{
+			ShopRefreshButtonSlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
+			ShopRefreshButtonSlot->SetHorizontalAlignment(HAlign_Right);
+			ShopRefreshButtonSlot->SetVerticalAlignment(VAlign_Center);
+			ShopRefreshButtonSlot->SetPadding(FMargin(8.0f, 0.0f, 0.0f, 0.0f));
 		}
 
 		UVerticalBoxSlot* TitleSlot = PanelStack->AddChildToVerticalBox(ContainerHeaderRow);
@@ -8534,14 +8568,81 @@ namespace TunaSweeperEditorSetup
 		RegisterWidgetVariable(WidgetBlueprint, ContainerHeaderRow);
 		RegisterWidgetVariable(WidgetBlueprint, ContainerTitleText);
 		RegisterWidgetVariable(WidgetBlueprint, ContainerOccupancyText);
+		RegisterWidgetVariable(WidgetBlueprint, ShopRefreshStockButton);
+		RegisterWidgetVariable(WidgetBlueprint, ShopRefreshStockButtonText);
 		RegisterWidgetVariable(WidgetBlueprint, ContainerTileView);
 		WidgetBlueprint->MarkPackageDirty();
 		return true;
 	}
 
-	bool BuildWorkbenchPanelWidgetTree(UWidgetBlueprint* WidgetBlueprint, TSubclassOf<UUserWidget> EntryWidgetClass)
+	bool BuildWorkbenchRecipeListEntryWidgetTree(UWidgetBlueprint* WidgetBlueprint)
 	{
-		if (!WidgetBlueprint || !WidgetBlueprint->WidgetTree || !EntryWidgetClass)
+		if (!WidgetBlueprint || !WidgetBlueprint->WidgetTree)
+		{
+			return false;
+		}
+
+		WidgetBlueprint->Modify();
+		WidgetBlueprint->WidgetTree->Modify();
+		ClearWidgetTreeForRebuild(WidgetBlueprint);
+
+		UWidgetTree* WidgetTree = WidgetBlueprint->WidgetTree;
+		UBorder* RowBackground = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("RowBackground"));
+		UHorizontalBox* RowBox = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("RecipeRowBox"));
+		USizeBox* IconBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("RecipeIconBox"));
+		UImage* RecipeIconImage = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("RecipeIconImage"));
+		UTextBlock* RecipeNameText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("RecipeNameText"));
+
+		if (!RowBackground || !RowBox || !IconBox || !RecipeIconImage || !RecipeNameText)
+		{
+			return false;
+		}
+
+		WidgetTree->RootWidget = RowBackground;
+		RowBackground->SetPadding(FMargin(8.0f, 5.0f));
+		RowBackground->SetBrush(MakeRoundedBoxBrush(
+			FVector2D(318.0f, 52.0f),
+			FLinearColor(0.025f, 0.030f, 0.034f, 0.72f),
+			FLinearColor(0.14f, 0.17f, 0.20f, 0.80f),
+			1.0f,
+			4.0f));
+		RowBackground->SetContent(RowBox);
+
+		IconBox->SetWidthOverride(34.0f);
+		IconBox->SetHeightOverride(34.0f);
+		IconBox->SetContent(RecipeIconImage);
+		UHorizontalBoxSlot* IconSlot = RowBox->AddChildToHorizontalBox(IconBox);
+		if (IconSlot)
+		{
+			IconSlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
+			IconSlot->SetHorizontalAlignment(HAlign_Left);
+			IconSlot->SetVerticalAlignment(VAlign_Center);
+		}
+
+		ConfigureTextBlockLeft(RecipeNameText, FText::GetEmpty(), FLinearColor(0.92f, 0.96f, 1.0f, 1.0f), 16);
+		RecipeNameText->SetAutoWrapText(false);
+		UHorizontalBoxSlot* NameSlot = RowBox->AddChildToHorizontalBox(RecipeNameText);
+		if (NameSlot)
+		{
+			NameSlot->SetPadding(FMargin(10.0f, 0.0f, 0.0f, 0.0f));
+			NameSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+			NameSlot->SetHorizontalAlignment(HAlign_Fill);
+			NameSlot->SetVerticalAlignment(VAlign_Center);
+		}
+
+		RegisterWidgetVariable(WidgetBlueprint, RowBackground);
+		RegisterWidgetVariable(WidgetBlueprint, RecipeIconImage);
+		RegisterWidgetVariable(WidgetBlueprint, RecipeNameText);
+		WidgetBlueprint->MarkPackageDirty();
+		return true;
+	}
+
+	bool BuildWorkbenchPanelWidgetTree(
+		UWidgetBlueprint* WidgetBlueprint,
+		TSubclassOf<UUserWidget> EntryWidgetClass,
+		TSubclassOf<UUserWidget> WorkbenchRecipeEntryWidgetClass)
+	{
+		if (!WidgetBlueprint || !WidgetBlueprint->WidgetTree || !EntryWidgetClass || !WorkbenchRecipeEntryWidgetClass)
 		{
 			return false;
 		}
@@ -8562,7 +8663,7 @@ namespace TunaSweeperEditorSetup
 		UOverlay* RightModeOverlay = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), TEXT("RightModeOverlay"));
 
 		UVerticalBox* CraftLeftStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("CraftLeftStack"));
-		UTileView* CraftRecipeTileView = WidgetTree->ConstructWidget<UTileView>(UTileView::StaticClass(), TEXT("CraftRecipeTileView"));
+		UListView* CraftRecipeListView = WidgetTree->ConstructWidget<UListView>(UListView::StaticClass(), TEXT("CraftRecipeListView"));
 		UVerticalBox* DismantleLeftStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("DismantleLeftStack"));
 		UTextBlock* DismantleInventoryHeaderText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("DismantleInventoryHeaderText"));
 		UTileView* DismantleInventoryTileView = WidgetTree->ConstructWidget<UTileView>(UTileView::StaticClass(), TEXT("DismantleInventoryTileView"));
@@ -8604,7 +8705,7 @@ namespace TunaSweeperEditorSetup
 
 		if (!RootSizeBox || !PanelBackground || !PanelStack || !WorkbenchTitleText || !BodyRow ||
 			!LeftPanelBackground || !LeftModeOverlay || !RightPanelBackground || !RightModeOverlay ||
-			!CraftLeftStack || !CraftRecipeTileView || !DismantleLeftStack || !DismantleInventoryHeaderText ||
+			!CraftLeftStack || !CraftRecipeListView || !DismantleLeftStack || !DismantleInventoryHeaderText ||
 			!DismantleInventoryTileView || !DismantleStorageHeaderText || !DismantleStorageTileView ||
 			!BlueprintLeftStack || !BlueprintItemTileView || !CraftRightStack || !CraftMaterialsTitleText ||
 			!CraftIngredientList || !CraftArrowText || !CraftOutputRow || !CraftOutputImageBox || !CraftOutputImage ||
@@ -8693,6 +8794,12 @@ namespace TunaSweeperEditorSetup
 			}
 		};
 
+		auto ConfigureWorkbenchRecipeListView = [](UListView* ListView)
+		{
+			ListView->SetVerticalEntrySpacing(4.0f);
+			ListView->SetWheelScrollMultiplier(0.55f);
+		};
+
 		auto AddModeStackToOverlay = [](UOverlay* Overlay, UWidget* Stack)
 		{
 			UOverlaySlot* StackSlot = Overlay->AddChildToOverlay(Stack);
@@ -8703,16 +8810,19 @@ namespace TunaSweeperEditorSetup
 			}
 		};
 
-		USizeBox* CraftTileViewBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("CraftTileViewBox"));
-		CraftTileViewBox->SetContent(CraftRecipeTileView);
-		UVerticalBoxSlot* CraftTileSlot = CraftLeftStack->AddChildToVerticalBox(CraftTileViewBox);
-		if (CraftTileSlot)
+		USizeBox* CraftRecipeListBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("CraftRecipeListBox"));
+		CraftRecipeListBox->SetWidthOverride(WorkbenchTileViewWidth);
+		CraftRecipeListBox->SetHeightOverride(WorkbenchTileViewHeight);
+		CraftRecipeListBox->SetContent(CraftRecipeListView);
+		UVerticalBoxSlot* CraftListSlot = CraftLeftStack->AddChildToVerticalBox(CraftRecipeListBox);
+		if (CraftListSlot)
 		{
-			CraftTileSlot->SetHorizontalAlignment(HAlign_Fill);
-			CraftTileSlot->SetVerticalAlignment(VAlign_Fill);
-			CraftTileSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+			CraftListSlot->SetHorizontalAlignment(HAlign_Fill);
+			CraftListSlot->SetVerticalAlignment(VAlign_Fill);
+			CraftListSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
 		}
-		ConfigureWorkbenchTileView(CraftRecipeTileView, WorkbenchTileViewHeight);
+		ConfigureWorkbenchRecipeListView(CraftRecipeListView);
+		SetListViewEntryWidgetClass(CraftRecipeListView, WorkbenchRecipeEntryWidgetClass);
 
 		ConfigureTextBlockLeft(DismantleInventoryHeaderText, FText::FromString(TEXT("\uC778\uBCA4\uD1A0\uB9AC")), FLinearColor(0.84f, 0.90f, 0.94f, 1.0f), 16);
 		ConfigureTextBlockLeft(DismantleStorageHeaderText, FText::FromString(TEXT("\uCC3D\uACE0")), FLinearColor(0.84f, 0.90f, 0.94f, 1.0f), 16);
@@ -9325,10 +9435,14 @@ namespace TunaSweeperEditorSetup
 			UIAssetPath,
 			WorkbenchPanelWidgetAssetName,
 			UTunaSweeperWorkbenchPanelWidget::StaticClass());
+		UWidgetBlueprint* WorkbenchRecipeListEntryWidgetBlueprint = EnsureWidgetBlueprint(
+			UIAssetPath,
+			WorkbenchRecipeListEntryWidgetAssetName,
+			UTunaSweeperWorkbenchRecipeListEntryWidget::StaticClass());
 
 		if (!ItemThumbnailWidgetBlueprint || !TopReserveWidgetBlueprint || !BottomStatusWidgetBlueprint || !QuickSlotWidgetBlueprint ||
 			!InventoryAreaWidgetBlueprint || !ItemInfoPanelWidgetBlueprint || !ExternalPanelWidgetBlueprint ||
-			!LootContainerWidgetBlueprint || !WorkbenchPanelWidgetBlueprint)
+			!LootContainerWidgetBlueprint || !WorkbenchPanelWidgetBlueprint || !WorkbenchRecipeListEntryWidgetBlueprint)
 		{
 			return false;
 		}
@@ -9351,6 +9465,24 @@ namespace TunaSweeperEditorSetup
 			return false;
 		}
 
+		if (!BuildWorkbenchRecipeListEntryWidgetTree(WorkbenchRecipeListEntryWidgetBlueprint))
+		{
+			return false;
+		}
+		RegisterAllWidgetsInTree(WorkbenchRecipeListEntryWidgetBlueprint);
+		FKismetEditorUtilities::CompileBlueprint(WorkbenchRecipeListEntryWidgetBlueprint);
+		WorkbenchRecipeListEntryWidgetBlueprint->MarkPackageDirty();
+		if (!SaveAsset(WorkbenchRecipeListEntryWidgetBlueprint))
+		{
+			return false;
+		}
+		const TSubclassOf<UUserWidget> WorkbenchRecipeEntryWidgetClass =
+			WorkbenchRecipeListEntryWidgetBlueprint->GeneratedClass.Get();
+		if (!WorkbenchRecipeEntryWidgetClass)
+		{
+			return false;
+		}
+
 		const bool bChildWidgetsBuilt =
 			BuildHudTopReserveWidgetTree(TopReserveWidgetBlueprint) &&
 			BuildHudBottomStatusWidgetTree(BottomStatusWidgetBlueprint) &&
@@ -9358,7 +9490,10 @@ namespace TunaSweeperEditorSetup
 			BuildHudInventoryAreaWidgetTree(InventoryAreaWidgetBlueprint, ItemThumbnailWidgetClass) &&
 			BuildHudItemInfoPanelWidgetTree(ItemInfoPanelWidgetBlueprint, ItemThumbnailWidgetClass) &&
 			BuildLootContainerWidgetTree(LootContainerWidgetBlueprint, ItemThumbnailWidgetClass) &&
-			BuildWorkbenchPanelWidgetTree(WorkbenchPanelWidgetBlueprint, ItemThumbnailWidgetClass);
+			BuildWorkbenchPanelWidgetTree(
+				WorkbenchPanelWidgetBlueprint,
+				ItemThumbnailWidgetClass,
+				WorkbenchRecipeEntryWidgetClass);
 
 		if (!bChildWidgetsBuilt)
 		{
@@ -9372,6 +9507,7 @@ namespace TunaSweeperEditorSetup
 			InventoryAreaWidgetBlueprint,
 			ItemInfoPanelWidgetBlueprint,
 			LootContainerWidgetBlueprint,
+			WorkbenchRecipeListEntryWidgetBlueprint,
 			WorkbenchPanelWidgetBlueprint
 		})
 		{
@@ -11555,6 +11691,12 @@ public:
 				{
 					return TunaSweeperEditorSetup::EnsureCommonGameHudAssets();
 				});
+			FTunaSweeperEditorRunOnce::Run(
+				TunaSweeperEditorSetup::ShopRefreshStockButtonTaskId,
+				[]()
+				{
+					return TunaSweeperEditorSetup::EnsureCommonGameHudAssets();
+				});
 			FPlatformMisc::RequestExit(false);
 			return;
 		}
@@ -11852,6 +11994,13 @@ public:
 
 		FTunaSweeperEditorRunOnce::Run(
 			TunaSweeperEditorSetup::WorkbenchPanelWidgetTaskId,
+			[]()
+			{
+				return TunaSweeperEditorSetup::EnsureCommonGameHudAssets();
+			});
+
+		FTunaSweeperEditorRunOnce::Run(
+			TunaSweeperEditorSetup::ShopRefreshStockButtonTaskId,
 			[]()
 			{
 				return TunaSweeperEditorSetup::EnsureCommonGameHudAssets();

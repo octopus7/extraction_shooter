@@ -571,6 +571,8 @@ bool UTunaSweeperItemDataSubsystem::LoadItemTableJson()
 		double NumericMagazineCapacity = 0.0;
 		double NumericMagazineCapacityBonus = 0.0;
 		double NumericReloadSeconds = 0.0;
+		double NumericProjectileDamageMultiplier = 1.0;
+		double NumericProjectileDamageBonus = 0.0;
 		double NumericUseHealthDelta = 0.0;
 		double NumericUseFoodDelta = 0.0;
 		double NumericUseHydrationDelta = 0.0;
@@ -641,6 +643,18 @@ bool UTunaSweeperItemDataSubsystem::LoadItemTableJson()
 			(*JsonObject)->TryGetStringField(TEXT("hit_effect_id"), ProjectileHitEffectId))
 		{
 			ItemDefinition.ProjectileHitEffectId = FName(*ProjectileHitEffectId.TrimStartAndEnd());
+		}
+		if ((*JsonObject)->TryGetNumberField(TEXT("projectile_damage_multiplier"), NumericProjectileDamageMultiplier) ||
+			(*JsonObject)->TryGetNumberField(TEXT("ammo_damage_multiplier"), NumericProjectileDamageMultiplier) ||
+			(*JsonObject)->TryGetNumberField(TEXT("damage_multiplier"), NumericProjectileDamageMultiplier))
+		{
+			ItemDefinition.ProjectileDamageMultiplier = FMath::Max(0.0f, static_cast<float>(NumericProjectileDamageMultiplier));
+		}
+		if ((*JsonObject)->TryGetNumberField(TEXT("projectile_damage_bonus"), NumericProjectileDamageBonus) ||
+			(*JsonObject)->TryGetNumberField(TEXT("ammo_damage_bonus"), NumericProjectileDamageBonus) ||
+			(*JsonObject)->TryGetNumberField(TEXT("damage_bonus"), NumericProjectileDamageBonus))
+		{
+			ItemDefinition.ProjectileDamageBonus = static_cast<float>(NumericProjectileDamageBonus);
 		}
 		const TArray<TSharedPtr<FJsonValue>>* AttachmentSlotTagsArray = nullptr;
 		if ((*JsonObject)->TryGetArrayField(TEXT("attachment_slot_tags"), AttachmentSlotTagsArray) && AttachmentSlotTagsArray)

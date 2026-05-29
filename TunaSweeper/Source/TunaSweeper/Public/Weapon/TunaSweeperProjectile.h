@@ -21,6 +21,7 @@ public:
 	ATunaSweeperProjectile();
 
 	void SetDamageAmount(float InDamageAmount) { DamageAmount = FMath::Max(0.0f, InDamageAmount); }
+	float GetDamageAmount() const { return DamageAmount; }
 	void SetHitEffectId(FName InHitEffectId) { HitEffectId = InHitEffectId; }
 	FName GetHitEffectId() const { return HitEffectId; }
 	void SetAimIntent(

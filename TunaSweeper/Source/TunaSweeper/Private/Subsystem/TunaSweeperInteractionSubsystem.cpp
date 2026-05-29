@@ -22,6 +22,7 @@
 #include "Interaction/TunaSweeperWorldProgressActor.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/TunaSweeperPlayerController.h"
+#include "GameFramework/Actor.h"
 #include "Stats/Stats.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
 #include "Subsystem/TunaSweeperMemoSubsystem.h"
@@ -79,6 +80,19 @@ namespace TunaSweeperInteractionQuestEvents
 			return NAME_None;
 		}
 	}
+
+	void SortInteractablesForDisplay(TArray<UTunaSweeperInteractableComponent*>& Interactables)
+	{
+		Interactables.Sort([](const UTunaSweeperInteractableComponent& Left, const UTunaSweeperInteractableComponent& Right)
+		{
+			if (Left.GetInteractionOrder() != Right.GetInteractionOrder())
+			{
+				return Left.GetInteractionOrder() < Right.GetInteractionOrder();
+			}
+
+			return Left.GetFName().LexicalLess(Right.GetFName());
+		});
+	}
 }
 
 void UTunaSweeperInteractionSubsystem::Tick(float DeltaTime)
@@ -112,11 +126,50 @@ void UTunaSweeperInteractionSubsystem::UnregisterInteractable(UTunaSweeperIntera
 	{
 		FocusedInteractable.Reset();
 	}
+
+	if (Interactable && FocusedInteractionOwner.Get() == Interactable->GetOwner())
+	{
+		FocusedInteractionOwner.Reset();
+		FocusedInteractionIndex = 0;
+	}
 }
 
 UTunaSweeperInteractableComponent* UTunaSweeperInteractionSubsystem::GetFocusedInteractable() const
 {
 	return FocusedInteractable.Get();
+}
+
+bool UTunaSweeperInteractionSubsystem::MoveFocusedInteractionSelection(int32 SelectionDelta, APawn* InstigatorPawn)
+{
+	if (!InstigatorPawn || SelectionDelta == 0)
+	{
+		return false;
+	}
+
+	RefreshFocusedInteractable();
+
+	AActor* Owner = FocusedInteractionOwner.Get();
+	if (!Owner)
+	{
+		return false;
+	}
+
+	TArray<UTunaSweeperInteractableComponent*> OwnerInteractables;
+	GatherCandidateInteractablesForOwner(Owner, InstigatorPawn, true, OwnerInteractables);
+	if (OwnerInteractables.Num() <= 1)
+	{
+		return false;
+	}
+
+	const int32 CurrentIndex = OwnerInteractables.IsValidIndex(FocusedInteractionIndex)
+		? FocusedInteractionIndex
+		: FindInteractableIndex(OwnerInteractables, FocusedInteractable.Get());
+	const int32 BaseIndex = CurrentIndex == INDEX_NONE ? 0 : CurrentIndex;
+	const int32 WrappedIndex = (BaseIndex + SelectionDelta % OwnerInteractables.Num() + OwnerInteractables.Num()) % OwnerInteractables.Num();
+
+	FocusedInteractionIndex = WrappedIndex;
+	FocusedInteractable = OwnerInteractables[FocusedInteractionIndex];
+	return true;
 }
 
 bool UTunaSweeperInteractionSubsystem::TryInteract(APawn* InstigatorPawn)
@@ -261,6 +314,126 @@ bool UTunaSweeperInteractionSubsystem::CanOfferInteraction(const UTunaSweeperInt
 
 	const ATunaSweeperQuestNpcActor* QuestNpcActor = Cast<ATunaSweeperQuestNpcActor>(Interactable->GetOwner());
 	return QuestNpcActor && !QuestNpcActor->ResolveQuestId().IsNone();
+}
+
+bool UTunaSweeperInteractionSubsystem::ShouldDisplayMarkerForInteractable(
+	const UTunaSweeperInteractableComponent* Interactable) const
+{
+	if (!IsValid(Interactable) || !CanOfferInteraction(Interactable))
+	{
+		return false;
+	}
+
+	return ResolveMarkerInteractableForOwner(Interactable->GetOwner()) == Interactable;
+}
+
+bool UTunaSweeperInteractionSubsystem::IsFocusedInteractionGroupMarker(
+	const UTunaSweeperInteractableComponent* Interactable) const
+{
+	if (!IsValid(Interactable) || !FocusedInteractable.IsValid() || !FocusedInteractionOwner.IsValid())
+	{
+		return false;
+	}
+
+	return FocusedInteractionOwner.Get() == Interactable->GetOwner() &&
+		ResolveMarkerInteractableForOwner(FocusedInteractionOwner.Get()) == Interactable;
+}
+
+void UTunaSweeperInteractionSubsystem::GetMarkerInteractionOptions(
+	const UTunaSweeperInteractableComponent* MarkerInteractable,
+	TArray<FText>& OutDisplayNames,
+	int32& OutFocusedIndex) const
+{
+	OutDisplayNames.Reset();
+	OutFocusedIndex = INDEX_NONE;
+
+	if (!IsValid(MarkerInteractable) ||
+		!FocusedInteractionOwner.IsValid() ||
+		MarkerInteractable->GetOwner() != FocusedInteractionOwner.Get() ||
+		ResolveMarkerInteractableForOwner(FocusedInteractionOwner.Get()) != MarkerInteractable)
+	{
+		return;
+	}
+
+	const UWorld* World = GetWorld();
+	const APawn* PlayerPawn = World ? UGameplayStatics::GetPlayerPawn(World, 0) : nullptr;
+	if (!PlayerPawn)
+	{
+		return;
+	}
+
+	TArray<UTunaSweeperInteractableComponent*> OwnerInteractables;
+	GatherCandidateInteractablesForOwner(FocusedInteractionOwner.Get(), PlayerPawn, true, OwnerInteractables);
+	if (OwnerInteractables.Num() <= 1)
+	{
+		return;
+	}
+
+	OutFocusedIndex = FindInteractableIndex(OwnerInteractables, FocusedInteractable.Get());
+	if (OutFocusedIndex == INDEX_NONE)
+	{
+		OutFocusedIndex = FMath::Clamp(FocusedInteractionIndex, 0, OwnerInteractables.Num() - 1);
+	}
+
+	for (const UTunaSweeperInteractableComponent* OwnerInteractable : OwnerInteractables)
+	{
+		OutDisplayNames.Add(OwnerInteractable ? OwnerInteractable->GetInteractionDisplayName() : FText::GetEmpty());
+	}
+}
+
+void UTunaSweeperInteractionSubsystem::GatherCandidateInteractablesForOwner(
+	const AActor* Owner,
+	const APawn* PlayerPawn,
+	bool bRequireInteractionDistance,
+	TArray<UTunaSweeperInteractableComponent*>& OutInteractables) const
+{
+	OutInteractables.Reset();
+
+	if (!Owner)
+	{
+		return;
+	}
+
+	for (auto InteractableIt = RegisteredInteractables.CreateConstIterator(); InteractableIt; ++InteractableIt)
+	{
+		UTunaSweeperInteractableComponent* Interactable = InteractableIt->Get();
+		if (!IsValid(Interactable) || Interactable->GetOwner() != Owner || !CanOfferInteraction(Interactable))
+		{
+			continue;
+		}
+
+		if (bRequireInteractionDistance && (!PlayerPawn || !Interactable->IsWithinInteractionDistance(PlayerPawn)))
+		{
+			continue;
+		}
+
+		OutInteractables.Add(Interactable);
+	}
+
+	TunaSweeperInteractionQuestEvents::SortInteractablesForDisplay(OutInteractables);
+}
+
+UTunaSweeperInteractableComponent* UTunaSweeperInteractionSubsystem::ResolveMarkerInteractableForOwner(
+	const AActor* Owner) const
+{
+	TArray<UTunaSweeperInteractableComponent*> OwnerInteractables;
+	GatherCandidateInteractablesForOwner(Owner, nullptr, false, OwnerInteractables);
+	return OwnerInteractables.Num() > 0 ? OwnerInteractables[0] : nullptr;
+}
+
+int32 UTunaSweeperInteractionSubsystem::FindInteractableIndex(
+	const TArray<UTunaSweeperInteractableComponent*>& Interactables,
+	const UTunaSweeperInteractableComponent* Interactable) const
+{
+	for (int32 Index = 0; Index < Interactables.Num(); ++Index)
+	{
+		if (Interactables[Index] == Interactable)
+		{
+			return Index;
+		}
+	}
+
+	return INDEX_NONE;
 }
 
 bool UTunaSweeperInteractionSubsystem::HandlePickupItemInteraction(UTunaSweeperInteractableComponent* Interactable)
@@ -623,10 +796,12 @@ void UTunaSweeperInteractionSubsystem::RefreshFocusedInteractable()
 	if (!PlayerPawn)
 	{
 		FocusedInteractable.Reset();
+		FocusedInteractionOwner.Reset();
+		FocusedInteractionIndex = 0;
 		return;
 	}
 
-	UTunaSweeperInteractableComponent* ClosestInteractable = nullptr;
+	AActor* ClosestOwner = nullptr;
 	float ClosestDistanceSquared = TNumericLimits<float>::Max();
 
 	for (auto InteractableIt = RegisteredInteractables.CreateIterator(); InteractableIt; ++InteractableIt)
@@ -647,9 +822,46 @@ void UTunaSweeperInteractionSubsystem::RefreshFocusedInteractable()
 		if (DistanceSquared < ClosestDistanceSquared)
 		{
 			ClosestDistanceSquared = DistanceSquared;
-			ClosestInteractable = Interactable;
+			ClosestOwner = Interactable->GetOwner();
 		}
 	}
 
-	FocusedInteractable = ClosestInteractable;
+	if (!ClosestOwner)
+	{
+		FocusedInteractable.Reset();
+		FocusedInteractionOwner.Reset();
+		FocusedInteractionIndex = 0;
+		return;
+	}
+
+	TArray<UTunaSweeperInteractableComponent*> OwnerInteractables;
+	GatherCandidateInteractablesForOwner(ClosestOwner, PlayerPawn, true, OwnerInteractables);
+	if (OwnerInteractables.Num() == 0)
+	{
+		FocusedInteractable.Reset();
+		FocusedInteractionOwner.Reset();
+		FocusedInteractionIndex = 0;
+		return;
+	}
+
+	if (FocusedInteractionOwner.Get() != ClosestOwner)
+	{
+		FocusedInteractionOwner = ClosestOwner;
+		FocusedInteractionIndex = 0;
+	}
+	else
+	{
+		const int32 ExistingFocusedIndex = FindInteractableIndex(OwnerInteractables, FocusedInteractable.Get());
+		if (ExistingFocusedIndex != INDEX_NONE)
+		{
+			FocusedInteractionIndex = ExistingFocusedIndex;
+		}
+		else
+		{
+			FocusedInteractionIndex = FMath::Clamp(FocusedInteractionIndex, 0, OwnerInteractables.Num() - 1);
+		}
+	}
+
+	FocusedInteractionIndex = FMath::Clamp(FocusedInteractionIndex, 0, OwnerInteractables.Num() - 1);
+	FocusedInteractable = OwnerInteractables[FocusedInteractionIndex];
 }

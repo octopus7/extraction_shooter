@@ -8,6 +8,7 @@
 class UButton;
 class UBorder;
 class UImage;
+class UListView;
 class UTextBlock;
 class UTileView;
 class UVerticalBox;
@@ -75,6 +76,9 @@ protected:
 		const FGeometry& InGeometry,
 		const FDragDropEvent& InDragDropEvent,
 		UDragDropOperation* InOperation) override;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Workbench", meta = (BindWidgetOptional))
+	TObjectPtr<UListView> CraftRecipeListView;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Workbench", meta = (BindWidgetOptional))
 	TObjectPtr<UTileView> CraftRecipeTileView;
