@@ -4,12 +4,14 @@
 #include "Blueprint/WidgetTree.h"
 #include "Components/Button.h"
 #include "Components/HorizontalBox.h"
-#include "Components/HorizontalBoxSlot.h"
 #include "Components/Image.h"
 #include "Components/PanelSlot.h"
+#include "Components/PanelWidget.h"
 #include "Components/SizeBox.h"
 #include "Components/TextBlock.h"
 #include "Components/TileView.h"
+#include "Components/VerticalBox.h"
+#include "Components/VerticalBoxSlot.h"
 #include "Components/Widget.h"
 #include "Engine/Texture2D.h"
 #include "Game/TunaSweeperGameInstance.h"
@@ -24,7 +26,7 @@ namespace TunaSweeperItemInfoPanel
 	constexpr int32 AttachmentSlotColumnCount = 2;
 	constexpr float AttachmentSlotTileWidth = 96.0f;
 	constexpr float AttachmentSlotTileHeight = 96.0f;
-	constexpr float SelectedItemIconSize = 58.0f;
+	constexpr float SelectedItemIconSize = 132.0f;
 
 	using TunaSweeperUiText::ResolveUiText;
 
@@ -348,9 +350,17 @@ void UTunaSweeperHudItemInfoPanelWidget::CacheNamedWidgets()
 		return;
 	}
 
+	if (!PanelStack)
+	{
+		PanelStack = Cast<UVerticalBox>(WidgetTree->FindWidget(FName(TEXT("PanelStack"))));
+	}
 	if (!HeaderRow)
 	{
 		HeaderRow = Cast<UHorizontalBox>(WidgetTree->FindWidget(FName(TEXT("HeaderRow"))));
+	}
+	if (!SelectedItemDetailRow)
+	{
+		SelectedItemDetailRow = Cast<UHorizontalBox>(WidgetTree->FindWidget(FName(TEXT("SelectedItemDetailRow"))));
 	}
 	if (!SelectedItemIconContainer)
 	{
@@ -360,40 +370,87 @@ void UTunaSweeperHudItemInfoPanelWidget::CacheNamedWidgets()
 	{
 		SelectedItemIconImage = Cast<UImage>(WidgetTree->FindWidget(FName(TEXT("SelectedItemIconImage"))));
 	}
+	if (!SelectedItemDescriptionText)
+	{
+		SelectedItemDescriptionText = Cast<UTextBlock>(WidgetTree->FindWidget(FName(TEXT("SelectedItemDescriptionText"))));
+	}
 }
 
 void UTunaSweeperHudItemInfoPanelWidget::EnsureThumbnailWidgets()
 {
 	CacheNamedWidgets();
-	if (SelectedItemIconImage || !WidgetTree || !HeaderRow)
+	if (!WidgetTree || !PanelStack)
 	{
 		return;
 	}
 
-	USizeBox* IconSizeBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("SelectedItemIconContainer"));
-	UImage* IconImage = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("SelectedItemIconImage"));
-	if (!IconSizeBox || !IconImage)
+	USizeBox* IconSizeBox = Cast<USizeBox>(SelectedItemIconContainer);
+	if (!IconSizeBox)
+	{
+		if (SelectedItemIconContainer)
+		{
+			SelectedItemIconContainer->RemoveFromParent();
+		}
+		IconSizeBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("SelectedItemIconContainer"));
+		SelectedItemIconContainer = IconSizeBox;
+	}
+
+	if (!SelectedItemIconImage)
+	{
+		SelectedItemIconImage = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("SelectedItemIconImage"));
+		if (SelectedItemIconImage)
+		{
+			SelectedItemIconImage->SetOpacity(0.0f);
+		}
+	}
+	if (!IconSizeBox || !SelectedItemIconImage)
 	{
 		return;
 	}
 
 	IconSizeBox->SetWidthOverride(TunaSweeperItemInfoPanel::SelectedItemIconSize);
 	IconSizeBox->SetHeightOverride(TunaSweeperItemInfoPanel::SelectedItemIconSize);
-	IconImage->SetOpacity(0.0f);
-	IconSizeBox->SetContent(IconImage);
+	if (SelectedItemIconImage->GetParent() != IconSizeBox)
+	{
+		SelectedItemIconImage->RemoveFromParent();
+		IconSizeBox->SetContent(SelectedItemIconImage);
+	}
 
-	UPanelSlot* InsertedSlot = HeaderRow->InsertChildAt(0, IconSizeBox);
-	UHorizontalBoxSlot* IconSlot = Cast<UHorizontalBoxSlot>(InsertedSlot);
-	if (IconSlot)
+	IconSizeBox->RemoveFromParent();
+	const int32 HeaderIndex = HeaderRow ? PanelStack->GetChildIndex(HeaderRow) : INDEX_NONE;
+	UPanelSlot* IconPanelSlot = HeaderIndex != INDEX_NONE
+		? PanelStack->InsertChildAt(HeaderIndex + 1, IconSizeBox)
+		: PanelStack->AddChild(IconSizeBox);
+	if (UVerticalBoxSlot* IconSlot = Cast<UVerticalBoxSlot>(IconPanelSlot))
 	{
 		IconSlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
-		IconSlot->SetHorizontalAlignment(HAlign_Left);
-		IconSlot->SetVerticalAlignment(VAlign_Center);
-		IconSlot->SetPadding(FMargin(0.0f, 0.0f, 10.0f, 0.0f));
+		IconSlot->SetHorizontalAlignment(HAlign_Center);
+		IconSlot->SetVerticalAlignment(VAlign_Top);
+		IconSlot->SetPadding(FMargin(0.0f, 12.0f, 0.0f, 8.0f));
+	}
+
+	if (SelectedItemDescriptionText)
+	{
+		SelectedItemDescriptionText->RemoveFromParent();
+		const int32 IconIndex = PanelStack->GetChildIndex(IconSizeBox);
+		UPanelSlot* DescriptionPanelSlot = IconIndex != INDEX_NONE
+			? PanelStack->InsertChildAt(IconIndex + 1, SelectedItemDescriptionText)
+			: PanelStack->AddChild(SelectedItemDescriptionText);
+		if (UVerticalBoxSlot* DescriptionSlot = Cast<UVerticalBoxSlot>(DescriptionPanelSlot))
+		{
+			DescriptionSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+			DescriptionSlot->SetHorizontalAlignment(HAlign_Fill);
+			DescriptionSlot->SetVerticalAlignment(VAlign_Top);
+			DescriptionSlot->SetPadding(FMargin(0.0f, 4.0f, 0.0f, 0.0f));
+		}
+	}
+
+	if (SelectedItemDetailRow)
+	{
+		SelectedItemDetailRow->RemoveFromParent();
 	}
 
 	SelectedItemIconContainer = IconSizeBox;
-	SelectedItemIconImage = IconImage;
 }
 
 void UTunaSweeperHudItemInfoPanelWidget::SetSelectedItemThumbnail(UTexture2D* IconTexture)

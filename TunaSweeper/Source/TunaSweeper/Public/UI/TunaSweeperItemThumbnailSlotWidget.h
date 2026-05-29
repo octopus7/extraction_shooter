@@ -64,6 +64,7 @@ protected:
 private:
 	void ApplyTileData();
 	void ApplyDropHighlight(bool bCanAcceptDrop);
+	void EnsureAttachmentSlotIndicatorWidget();
 	FText BuildAttachmentSlotIndicatorText() const;
 	bool CanAcceptDragOperation(UDragDropOperation* InOperation) const;
 	void UpdateHoveredDropSlot(UDragDropOperation* InOperation, bool bCanAcceptDrop) const;

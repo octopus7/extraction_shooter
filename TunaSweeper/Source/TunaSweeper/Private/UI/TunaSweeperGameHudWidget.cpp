@@ -58,7 +58,7 @@ namespace
 	constexpr float HudWidgetTransitionFallbackVerticalDistance = 220.0f;
 	constexpr float ShopSellPanelTransitionOffsetY = -24.0f;
 	constexpr float ShopSellPanelWidth = 330.0f;
-	constexpr float ShopSellPanelHeight = 190.0f;
+	constexpr float ShopSellPanelHeight = 240.0f;
 	constexpr int32 MaxActiveDamageNumberPopups = 64;
 	constexpr float DamageNumberGrowDurationAlpha = 0.14f / 3.0f;
 	constexpr float DamageNumberSettleDurationAlpha = 0.28f / 2.0f;

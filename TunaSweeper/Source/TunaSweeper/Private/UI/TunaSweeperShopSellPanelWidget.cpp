@@ -3,8 +3,6 @@
 #include "Blueprint/WidgetTree.h"
 #include "Components/Border.h"
 #include "Components/Button.h"
-#include "Components/HorizontalBox.h"
-#include "Components/HorizontalBoxSlot.h"
 #include "Components/Image.h"
 #include "Components/SizeBox.h"
 #include "Components/TextBlock.h"
@@ -21,8 +19,9 @@
 namespace TunaSweeperShopSellPanel
 {
 	constexpr float PanelWidth = 330.0f;
-	constexpr float PanelHeight = 190.0f;
-	constexpr float IconSize = 66.0f;
+	constexpr float PanelHeight = 240.0f;
+	constexpr float IconSize = 88.0f;
+	constexpr float SellButtonHeight = 34.0f;
 
 	using TunaSweeperUiText::ResolveUiText;
 
@@ -194,24 +193,28 @@ void UTunaSweeperShopSellPanelWidget::BuildNativeWidgetTree()
 		return;
 	}
 
+	USizeBox* RootSizeBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("RootSizeBox"));
 	PanelBackground = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("PanelBackground"));
 	UVerticalBox* PanelStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("PanelStack"));
-	UHorizontalBox* ItemRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("ItemRow"));
 	USizeBox* IconSizeBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("ItemIconSizeBox"));
 	ItemIconImage = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("ItemIconImage"));
-	UVerticalBox* TextStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("TextStack"));
 	ItemNameText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("ItemNameText"));
 	SalePriceText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("SalePriceText"));
+	USizeBox* SellButtonSizeBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("SellButtonSizeBox"));
 	SellButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("SellButton"));
 	SellButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("SellButtonText"));
-	if (!PanelBackground || !PanelStack || !ItemRow || !IconSizeBox || !ItemIconImage || !TextStack ||
-		!ItemNameText || !SalePriceText || !SellButton || !SellButtonText)
+	if (!RootSizeBox || !PanelBackground || !PanelStack || !IconSizeBox || !ItemIconImage ||
+		!ItemNameText || !SalePriceText || !SellButtonSizeBox || !SellButton || !SellButtonText)
 	{
 		return;
 	}
 
-	WidgetTree->RootWidget = PanelBackground;
-	PanelBackground->SetPadding(FMargin(18.0f, 14.0f));
+	WidgetTree->RootWidget = RootSizeBox;
+	RootSizeBox->SetWidthOverride(TunaSweeperShopSellPanel::PanelWidth);
+	RootSizeBox->SetHeightOverride(TunaSweeperShopSellPanel::PanelHeight);
+	RootSizeBox->SetContent(PanelBackground);
+
+	PanelBackground->SetPadding(FMargin(18.0f, 16.0f));
 	PanelBackground->SetBrush(TunaSweeperShopSellPanel::MakeRoundedBoxBrush(
 		FVector2D(TunaSweeperShopSellPanel::PanelWidth, TunaSweeperShopSellPanel::PanelHeight),
 		FLinearColor(0.02f, 0.024f, 0.028f, 0.88f),
@@ -223,51 +226,41 @@ void UTunaSweeperShopSellPanelWidget::BuildNativeWidgetTree()
 	IconSizeBox->SetHeightOverride(TunaSweeperShopSellPanel::IconSize);
 	ItemIconImage->SetOpacity(0.0f);
 	IconSizeBox->SetContent(ItemIconImage);
-	UHorizontalBoxSlot* IconSlot = ItemRow->AddChildToHorizontalBox(IconSizeBox);
-	if (IconSlot)
-	{
-		IconSlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
-		IconSlot->SetVerticalAlignment(VAlign_Center);
-		IconSlot->SetPadding(FMargin(0.0f, 0.0f, 12.0f, 0.0f));
-	}
 
 	ItemNameText->SetColorAndOpacity(FSlateColor(FLinearColor::White));
 	ItemNameText->SetAutoWrapText(false);
 	TunaSweeperUIFont::ApplyFont(ItemNameText, 20, ETunaSweeperUIFontWeight::Bold);
-	UVerticalBoxSlot* NameSlot = TextStack->AddChildToVerticalBox(ItemNameText);
+	UVerticalBoxSlot* NameSlot = PanelStack->AddChildToVerticalBox(ItemNameText);
 	if (NameSlot)
 	{
 		NameSlot->SetHorizontalAlignment(HAlign_Fill);
 		NameSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 8.0f));
 	}
 
+	UVerticalBoxSlot* IconSlot = PanelStack->AddChildToVerticalBox(IconSizeBox);
+	if (IconSlot)
+	{
+		IconSlot->SetHorizontalAlignment(HAlign_Center);
+		IconSlot->SetVerticalAlignment(VAlign_Top);
+		IconSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 10.0f));
+	}
+
 	SalePriceText->SetColorAndOpacity(FSlateColor(FLinearColor(0.92f, 0.96f, 0.92f, 1.0f)));
 	TunaSweeperUIFont::ApplyFont(SalePriceText, 17);
-	UVerticalBoxSlot* PriceSlot = TextStack->AddChildToVerticalBox(SalePriceText);
+	UVerticalBoxSlot* PriceSlot = PanelStack->AddChildToVerticalBox(SalePriceText);
 	if (PriceSlot)
 	{
 		PriceSlot->SetHorizontalAlignment(HAlign_Fill);
-	}
-
-	UHorizontalBoxSlot* TextSlot = ItemRow->AddChildToHorizontalBox(TextStack);
-	if (TextSlot)
-	{
-		TextSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
-		TextSlot->SetVerticalAlignment(VAlign_Center);
-	}
-
-	UVerticalBoxSlot* ItemRowSlot = PanelStack->AddChildToVerticalBox(ItemRow);
-	if (ItemRowSlot)
-	{
-		ItemRowSlot->SetHorizontalAlignment(HAlign_Fill);
-		ItemRowSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 14.0f));
+		PriceSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 12.0f));
 	}
 
 	SellButtonText->SetJustification(ETextJustify::Center);
 	SellButtonText->SetColorAndOpacity(FSlateColor(FLinearColor(0.02f, 0.024f, 0.028f, 1.0f)));
 	TunaSweeperUIFont::ApplyFont(SellButtonText, 18, ETunaSweeperUIFontWeight::Bold);
 	SellButton->SetContent(SellButtonText);
-	UVerticalBoxSlot* ButtonSlot = PanelStack->AddChildToVerticalBox(SellButton);
+	SellButtonSizeBox->SetHeightOverride(TunaSweeperShopSellPanel::SellButtonHeight);
+	SellButtonSizeBox->SetContent(SellButton);
+	UVerticalBoxSlot* ButtonSlot = PanelStack->AddChildToVerticalBox(SellButtonSizeBox);
 	if (ButtonSlot)
 	{
 		ButtonSlot->SetHorizontalAlignment(HAlign_Fill);

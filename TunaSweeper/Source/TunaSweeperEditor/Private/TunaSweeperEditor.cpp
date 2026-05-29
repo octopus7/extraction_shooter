@@ -8271,8 +8271,8 @@ namespace TunaSweeperEditorSetup
 		UTextBlock* ModdingText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("ModdingText"));
 		UTileView* AttachmentSlotTileView = WidgetTree->ConstructWidget<UTileView>(UTileView::StaticClass(), TEXT("AttachmentSlotTileView"));
 
-		if (!RootSizeBox || !PanelBackground || !PanelStack || !HeaderRow || !SelectedItemIconContainer ||
-			!SelectedItemIconImage || !SelectedItemNameText || !CloseButton || !CloseButtonText ||
+		if (!RootSizeBox || !PanelBackground || !PanelStack || !HeaderRow ||
+			!SelectedItemIconContainer || !SelectedItemIconImage || !SelectedItemNameText || !CloseButton || !CloseButtonText ||
 			!SelectedItemDescriptionText || !ModdingPanel || !ModdingStack || !ModdingText ||
 			!AttachmentSlotTileView)
 		{
@@ -8290,19 +8290,6 @@ namespace TunaSweeperEditorSetup
 			FLinearColor(0.36f, 0.34f, 0.54f, 1.0f),
 			1.0f));
 		PanelBackground->SetContent(PanelStack);
-
-		SelectedItemIconContainer->SetWidthOverride(58.0f);
-		SelectedItemIconContainer->SetHeightOverride(58.0f);
-		SelectedItemIconImage->SetOpacity(0.0f);
-		SelectedItemIconContainer->SetContent(SelectedItemIconImage);
-		UHorizontalBoxSlot* IconSlot = HeaderRow->AddChildToHorizontalBox(SelectedItemIconContainer);
-		if (IconSlot)
-		{
-			IconSlot->SetHorizontalAlignment(HAlign_Left);
-			IconSlot->SetVerticalAlignment(VAlign_Center);
-			IconSlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
-			IconSlot->SetPadding(FMargin(0.0f, 0.0f, 10.0f, 0.0f));
-		}
 
 		ConfigureTextBlockLeft(SelectedItemNameText, FText::FromString(TEXT("No Item")), FLinearColor::White, 20);
 		UHorizontalBoxSlot* NameSlot = HeaderRow->AddChildToHorizontalBox(SelectedItemNameText);
@@ -8350,12 +8337,25 @@ namespace TunaSweeperEditorSetup
 			HeaderSlot->SetVerticalAlignment(VAlign_Top);
 		}
 
+		SelectedItemIconContainer->SetWidthOverride(132.0f);
+		SelectedItemIconContainer->SetHeightOverride(132.0f);
+		SelectedItemIconImage->SetOpacity(0.0f);
+		SelectedItemIconContainer->SetContent(SelectedItemIconImage);
+		UVerticalBoxSlot* IconSlot = PanelStack->AddChildToVerticalBox(SelectedItemIconContainer);
+		if (IconSlot)
+		{
+			IconSlot->SetHorizontalAlignment(HAlign_Center);
+			IconSlot->SetVerticalAlignment(VAlign_Top);
+			IconSlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
+			IconSlot->SetPadding(FMargin(0.0f, 12.0f, 0.0f, 8.0f));
+		}
+
 		ConfigureTextBlockLeft(SelectedItemDescriptionText, FText::GetEmpty(), FLinearColor(0.75f, 0.8f, 0.86f, 1.0f), 15);
 		SelectedItemDescriptionText->SetAutoWrapText(true);
 		UVerticalBoxSlot* DescriptionSlot = PanelStack->AddChildToVerticalBox(SelectedItemDescriptionText);
 		if (DescriptionSlot)
 		{
-			DescriptionSlot->SetPadding(FMargin(0.0f, 12.0f, 0.0f, 0.0f));
+			DescriptionSlot->SetPadding(FMargin(0.0f, 4.0f, 0.0f, 0.0f));
 			DescriptionSlot->SetHorizontalAlignment(HAlign_Fill);
 			DescriptionSlot->SetVerticalAlignment(VAlign_Top);
 			DescriptionSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
@@ -8394,6 +8394,7 @@ namespace TunaSweeperEditorSetup
 			ModdingSlot->SetVerticalAlignment(VAlign_Bottom);
 		}
 
+		RegisterWidgetVariable(WidgetBlueprint, PanelStack);
 		RegisterWidgetVariable(WidgetBlueprint, HeaderRow);
 		RegisterWidgetVariable(WidgetBlueprint, SelectedItemIconContainer);
 		RegisterWidgetVariable(WidgetBlueprint, SelectedItemIconImage);

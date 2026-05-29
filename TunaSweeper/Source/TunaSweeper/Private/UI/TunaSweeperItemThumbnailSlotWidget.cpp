@@ -1,9 +1,13 @@
 #include "UI/TunaSweeperItemThumbnailSlotWidget.h"
 
 #include "Blueprint/WidgetBlueprintLibrary.h"
+#include "Blueprint/WidgetTree.h"
 #include "Components/Border.h"
 #include "Components/Image.h"
+#include "Components/Overlay.h"
+#include "Components/OverlaySlot.h"
 #include "Components/TextBlock.h"
+#include "Components/Widget.h"
 #include "Engine/Texture2D.h"
 #include "GameFramework/PlayerController.h"
 #include "Game/TunaSweeperGameInstance.h"
@@ -253,6 +257,8 @@ void UTunaSweeperItemThumbnailSlotWidget::ApplyTileData()
 		ApplyDropHighlight(false);
 	}
 
+	EnsureAttachmentSlotIndicatorWidget();
+
 	if (ItemIconImage)
 	{
 		UTexture2D* IconTexture = CachedTileData.IconTexture.LoadSynchronous();
@@ -271,7 +277,6 @@ void UTunaSweeperItemThumbnailSlotWidget::ApplyTileData()
 	if (ItemQuantityText)
 	{
 		FText QuantityText = FText::GetEmpty();
-		const FText AttachmentIndicatorText = BuildAttachmentSlotIndicatorText();
 		if (!CachedTileData.bIsEmpty)
 		{
 			if (CachedTileData.Source == ETunaSweeperItemSlotSource::Shop)
@@ -290,17 +295,11 @@ void UTunaSweeperItemThumbnailSlotWidget::ApplyTileData()
 			}
 		}
 
-		if (!AttachmentSlotIndicatorText && !AttachmentIndicatorText.IsEmpty())
-		{
-			QuantityText = QuantityText.IsEmpty()
-				? AttachmentIndicatorText
-				: FText::Format(FText::FromString(TEXT("{0}\n{1}")), AttachmentIndicatorText, QuantityText);
-		}
 		ItemQuantityText->SetText(QuantityText);
 		ItemQuantityText->SetColorAndOpacity(FSlateColor(FLinearColor::White));
 	}
 
-	if (AttachmentSlotIndicatorText)
+	if (AttachmentSlotIndicatorText != nullptr)
 	{
 		const FText AttachmentIndicatorText = BuildAttachmentSlotIndicatorText();
 		AttachmentSlotIndicatorText->SetText(AttachmentIndicatorText);
@@ -329,6 +328,50 @@ void UTunaSweeperItemThumbnailSlotWidget::ApplyDropHighlight(bool bCanAcceptDrop
 	SlotBackground->SetBrushColor(bCanAcceptDrop
 		? FLinearColor(0.32f, 0.82f, 0.52f, 1.0f)
 		: FLinearColor::White);
+}
+
+void UTunaSweeperItemThumbnailSlotWidget::EnsureAttachmentSlotIndicatorWidget()
+{
+	if (AttachmentSlotIndicatorText == nullptr && WidgetTree)
+	{
+		AttachmentSlotIndicatorText = Cast<UTextBlock>(WidgetTree->FindWidget(FName(TEXT("AttachmentSlotIndicatorText"))));
+	}
+
+	if (AttachmentSlotIndicatorText == nullptr && WidgetTree)
+	{
+		UOverlay* SlotOverlay = Cast<UOverlay>(WidgetTree->FindWidget(FName(TEXT("SlotOverlay"))));
+		if (!SlotOverlay && ItemIconImage)
+		{
+			SlotOverlay = Cast<UOverlay>(ItemIconImage->GetParent());
+		}
+
+		if (SlotOverlay)
+		{
+			AttachmentSlotIndicatorText = WidgetTree->ConstructWidget<UTextBlock>(
+				UTextBlock::StaticClass(),
+				TEXT("AttachmentSlotIndicatorText"));
+			if (AttachmentSlotIndicatorText)
+			{
+				SlotOverlay->AddChildToOverlay(AttachmentSlotIndicatorText);
+			}
+		}
+	}
+
+	if (!AttachmentSlotIndicatorText)
+	{
+		return;
+	}
+
+	AttachmentSlotIndicatorText->SetAutoWrapText(false);
+	AttachmentSlotIndicatorText->SetJustification(ETextJustify::Left);
+	TunaSweeperUIFont::ApplyFont(AttachmentSlotIndicatorText, 13.0f);
+
+	if (UOverlaySlot* IndicatorSlot = Cast<UOverlaySlot>(AttachmentSlotIndicatorText->Slot))
+	{
+		IndicatorSlot->SetHorizontalAlignment(HAlign_Left);
+		IndicatorSlot->SetVerticalAlignment(VAlign_Top);
+		IndicatorSlot->SetPadding(FMargin(0.0f));
+	}
 }
 
 FText UTunaSweeperItemThumbnailSlotWidget::BuildAttachmentSlotIndicatorText() const

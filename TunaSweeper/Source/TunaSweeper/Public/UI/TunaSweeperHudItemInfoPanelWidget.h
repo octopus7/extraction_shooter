@@ -13,6 +13,7 @@ class UButton;
 class UHorizontalBox;
 class UImage;
 class UTexture2D;
+class UVerticalBox;
 
 UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API UTunaSweeperHudItemInfoPanelWidget : public UUserWidget
@@ -45,6 +46,12 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
 	TObjectPtr<UHorizontalBox> HeaderRow;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
+	TObjectPtr<UVerticalBox> PanelStack;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
+	TObjectPtr<UHorizontalBox> SelectedItemDetailRow;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
 	TObjectPtr<UWidget> SelectedItemIconContainer;
