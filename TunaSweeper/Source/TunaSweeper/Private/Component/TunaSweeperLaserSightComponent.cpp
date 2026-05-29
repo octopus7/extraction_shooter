@@ -17,12 +17,21 @@ UTunaSweeperLaserSightComponent::UTunaSweeperLaserSightComponent()
 	{
 		SetAsset(LaserSightSystem.Object);
 	}
+
+	ApplyLaserSightParameters();
 }
 
 void UTunaSweeperLaserSightComponent::BeginPlay()
 {
 	Super::BeginPlay();
+	ApplyLaserSightParameters();
 	SetLaserSightEnabled(bLaserSightEnabled);
+}
+
+void UTunaSweeperLaserSightComponent::SetBeamEnd(const FVector& InBeamEnd)
+{
+	BeamEnd = InBeamEnd;
+	ApplyLaserSightParameters();
 }
 
 void UTunaSweeperLaserSightComponent::SetLaserSightEnabled(bool bEnabled)
@@ -33,10 +42,16 @@ void UTunaSweeperLaserSightComponent::SetLaserSightEnabled(bool bEnabled)
 
 	if (bLaserSightEnabled)
 	{
+		ApplyLaserSightParameters();
 		Activate(true);
 	}
 	else
 	{
 		DeactivateImmediate();
 	}
+}
+
+void UTunaSweeperLaserSightComponent::ApplyLaserSightParameters()
+{
+	SetVariableVec3(FName(TEXT("User.BeamEnd")), BeamEnd);
 }
