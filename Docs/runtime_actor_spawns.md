@@ -19,7 +19,7 @@
 | --- | --- | --- |
 | `TS_ShootingPracticeDummy_01` | `shooting_practice_dummy` | `BunkerMap` 사격 연습용 허수아비. 체력 `100`, 크리티컬 `3x`, 헤드샷 `6x`, 2초 회복 |
 | `TS_Travel_ToBunker` | `level_travel` | 레이드 시작 위치의 직접 진입 복귀 루트. `BunkerMap` 이동, `To Bunker`, 전환 영상/문구 |
-| `TS_ExtractionPoint_East` | `extraction_point` | 추출 포인트 복귀 루트. `BunkerMap` 이동, 4초 체류, 반경 `300` |
+| `TS_ExtractionPoint_East` | `extraction_point` | 추출 포인트 복귀 루트. `BunkerMap` 이동, 4초 체류, 반경 `200`, 경계원 두께 `2` |
 | `TS_PickupItem_Sample` | `pickup_item` | `item_id=1001`, `item_quantity=1` |
 | `TS_Interact_ItemSpawn` | `item_spawn` | `BP_PickupItem` 랜덤 스폰, 반경 `160~420` |
 | `TS_LootContainer_Sample` | `loot_container` | `container_definition_id=7001`, `contents_id=8001` |

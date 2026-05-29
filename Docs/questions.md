@@ -1244,3 +1244,23 @@ SSOT 문서를 읽어보니 사선에 머리만 들어가면 헤드샷이 되는
 ### Answer
 
 그 방식이 더 일관적이다. 발사 시 먼저 리코일 적용 크로스헤어로 2D 조준 판정을 해서 대상과 부위를 정하고, 그 부위 높이의 목표점으로 상하 발사각을 만든 뒤, 마지막에 스프레드를 적용해 최종 탄도를 확정한다. 그러면 스프레드가 거의 없을 때 탄은 크로스헤어가 가리킨 부위에 맞고, 스프레드가 있을 때만 의도한 부위에서 벗어난다. 헤드샷은 조준 판정이 `Head Intent`이고 최종 탄도가 `Head Core`를 통과할 때만 성립한다.
+
+## 2026-05-29 16:21:48 (elapsed: 00:00:00)
+
+### Question
+
+추출 포인트 반경 얼마지?
+
+### Answer
+
+현재 `TS_ExtractionPoint_East`의 `extraction_radius`는 `300.0`cm, 즉 3m다. 유지 시간은 `4.0`초이고 경계 링 두께는 `4.8`cm다.
+
+## 2026-05-29 16:24:31 (elapsed: 00:00:00)
+
+### Question
+
+나이아카라 파티클에 바람 불게하려면 어떻게 해야해?
+
+### Answer
+
+Niagara 파티클은 월드의 바람 액터에 자동으로 밀리지 않으므로, Niagara System 내부에서 User 파라미터를 읽어 힘이나 속도에 연결해야 한다. 일반 파티클은 `User.WindVelocity` 같은 Vector3 파라미터를 만들고 Particle Update에 `Acceleration Force`/`Wind Force`/`Drag`/`Solve Forces and Velocity` 흐름으로 연결한다. 연기처럼 계속 흘러야 하면 Spawn에서 초기 속도에 바람을 조금 더하고 Update에서 Drag와 Curl Noise를 함께 쓰는 편이 자연스럽다. 현재 추출 포인트 C++ 액터는 이미 `User.Wind`, `User.WindVelocity`, `User.WindDirection`, `User.WindSpeed`를 Niagara 컴포넌트에 세팅하고 있으므로, `NS_ExtractionSmoke` 내부에서 이 User 값들을 실제 모듈에 바인딩하면 된다.
