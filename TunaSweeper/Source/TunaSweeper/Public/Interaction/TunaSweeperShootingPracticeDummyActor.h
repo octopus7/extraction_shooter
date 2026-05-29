@@ -5,6 +5,7 @@
 #include "TunaSweeperShootingPracticeDummyActor.generated.h"
 
 class USceneComponent;
+class UPrimitiveComponent;
 class UStaticMeshComponent;
 class UWidgetComponent;
 
@@ -72,10 +73,11 @@ protected:
 private:
 	void ConfigureHitComponent(UStaticMeshComponent* MeshComponent) const;
 	void ApplyHitZoneColors();
-	float ResolveDamageMultiplierForNextHit();
+	float ResolveDamageMultiplier(FDamageEvent const& DamageEvent, AActor* DamageCauser) const;
+	bool IsHeadshotComponent(const UPrimitiveComponent* Component) const;
+	bool IsCriticalComponent(const UPrimitiveComponent* Component) const;
 	void ApplyDummyDamage(float DamageAmount);
 	void RefreshHealthBar();
 
 	float CurrentHealth = 100.0f;
-	int32 ReceivedHitCount = 0;
 };

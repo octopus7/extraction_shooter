@@ -6,6 +6,7 @@
 
 class ATunaSweeperProjectile;
 class UMaterialInterface;
+class UPrimitiveComponent;
 class USceneComponent;
 class UStaticMeshComponent;
 class UStaticMesh;
@@ -25,6 +26,17 @@ public:
 		APawn* InstigatorPawn,
 		FName ProjectileHitEffectId = NAME_None,
 		FName WeaponTypeTag = NAME_None);
+
+	void FireWithAimIntent(
+		const FVector& AimDirection,
+		APawn* InstigatorPawn,
+		FName ProjectileHitEffectId,
+		FName WeaponTypeTag,
+		float SpreadHalfAngleDegrees = 0.0f,
+		AActor* AimIntentActor = nullptr,
+		UPrimitiveComponent* AimIntentComponent = nullptr,
+		FVector AimIntentWorldPoint = FVector::ZeroVector,
+		bool bHasAimIntentWorldPoint = false);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Weapon")
 	void ConfigureGunVisual();
@@ -67,7 +79,11 @@ protected:
 		TSubclassOf<ATunaSweeperProjectile> ProjectileClassToSpawn,
 		const FVector& ShotDirection,
 		APawn* InstigatorPawn,
-		FName ProjectileHitEffectId);
+		FName ProjectileHitEffectId,
+		AActor* AimIntentActor,
+		UPrimitiveComponent* AimIntentComponent,
+		const FVector& AimIntentWorldPoint,
+		bool bHasAimIntentWorldPoint);
 
 private:
 	float LastFireTimeSeconds = -1000.0f;

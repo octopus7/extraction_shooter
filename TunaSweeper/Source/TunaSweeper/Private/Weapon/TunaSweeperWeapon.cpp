@@ -16,6 +16,23 @@ namespace TunaSweeperWeaponTags
 
 namespace
 {
+	FVector ApplyRandomConeSpread(const FVector& Direction, float SpreadHalfAngleDegrees)
+	{
+		const FVector SafeDirection = Direction.GetSafeNormal();
+		if (SafeDirection.IsNearlyZero())
+		{
+			return FVector::ForwardVector;
+		}
+
+		const float SafeSpreadDegrees = FMath::Max(0.0f, SpreadHalfAngleDegrees);
+		if (SafeSpreadDegrees <= KINDA_SMALL_NUMBER)
+		{
+			return SafeDirection;
+		}
+
+		return FMath::VRandCone(SafeDirection, FMath::DegreesToRadians(SafeSpreadDegrees)).GetSafeNormal();
+	}
+
 	void IgnoreNearbyPlayerPassthroughCovers(ATunaSweeperProjectile* Projectile, APawn* InstigatorPawn)
 	{
 		if (!Projectile || !InstigatorPawn || !InstigatorPawn->IsPlayerControlled())
@@ -120,6 +137,29 @@ void ATunaSweeperWeapon::Fire(
 	FName ProjectileHitEffectId,
 	FName WeaponTypeTag)
 {
+	FireWithAimIntent(
+		AimDirection,
+		InstigatorPawn,
+		ProjectileHitEffectId,
+		WeaponTypeTag,
+		0.0f,
+		nullptr,
+		nullptr,
+		FVector::ZeroVector,
+		false);
+}
+
+void ATunaSweeperWeapon::FireWithAimIntent(
+	const FVector& AimDirection,
+	APawn* InstigatorPawn,
+	FName ProjectileHitEffectId,
+	FName WeaponTypeTag,
+	float SpreadHalfAngleDegrees,
+	AActor* AimIntentActor,
+	UPrimitiveComponent* AimIntentComponent,
+	FVector AimIntentWorldPoint,
+	bool bHasAimIntentWorldPoint)
+{
 	UWorld* World = GetWorld();
 	if (!World)
 	{
@@ -132,7 +172,10 @@ void ATunaSweeperWeapon::Fire(
 		return;
 	}
 
-	FVector ShotDirection = AimDirection.GetSafeNormal2D();
+	const FVector SpawnLocation = MuzzlePoint ? MuzzlePoint->GetComponentLocation() : GetActorLocation();
+	FVector ShotDirection = bHasAimIntentWorldPoint
+		? (AimIntentWorldPoint - SpawnLocation).GetSafeNormal()
+		: AimDirection.GetSafeNormal2D();
 	if (ShotDirection.IsNearlyZero())
 	{
 		ShotDirection = GetActorForwardVector().GetSafeNormal2D();
@@ -146,24 +189,37 @@ void ATunaSweeperWeapon::Fire(
 
 	if (WeaponTypeTag == TunaSweeperWeaponTags::ShotgunWeaponTypeTag)
 	{
+		const FVector CenterDirection = ApplyRandomConeSpread(ShotDirection, SpreadHalfAngleDegrees);
 		const int32 ProjectileCount = FMath::Max(1, ShotgunProjectileCount);
 		const float SpreadHalfAngle = FMath::Max(0.0f, ShotgunSpreadAngleDegrees) * 0.5f;
 		for (int32 ProjectileIndex = 0; ProjectileIndex < ProjectileCount; ++ProjectileIndex)
 		{
-			const float YawOffset = SpreadHalfAngle > 0.0f
-				? FMath::FRandRange(-SpreadHalfAngle, SpreadHalfAngle)
-				: 0.0f;
-			FVector SpreadDirection = ShotDirection.RotateAngleAxis(YawOffset, FVector::UpVector).GetSafeNormal2D();
-			if (SpreadDirection.IsNearlyZero())
-			{
-				SpreadDirection = ShotDirection;
-			}
-			SpawnProjectile(*World, LoadedProjectileClass, SpreadDirection, InstigatorPawn, ProjectileHitEffectId);
+			const FVector PelletDirection = ApplyRandomConeSpread(CenterDirection, SpreadHalfAngle);
+			SpawnProjectile(
+				*World,
+				LoadedProjectileClass,
+				PelletDirection,
+				InstigatorPawn,
+				ProjectileHitEffectId,
+				AimIntentActor,
+				AimIntentComponent,
+				AimIntentWorldPoint,
+				bHasAimIntentWorldPoint);
 		}
 	}
 	else
 	{
-		SpawnProjectile(*World, LoadedProjectileClass, ShotDirection, InstigatorPawn, ProjectileHitEffectId);
+		const FVector SpreadDirection = ApplyRandomConeSpread(ShotDirection, SpreadHalfAngleDegrees);
+		SpawnProjectile(
+			*World,
+			LoadedProjectileClass,
+			SpreadDirection,
+			InstigatorPawn,
+			ProjectileHitEffectId,
+			AimIntentActor,
+			AimIntentComponent,
+			AimIntentWorldPoint,
+			bHasAimIntentWorldPoint);
 	}
 
 	LastFireTimeSeconds = CurrentTime;
@@ -174,7 +230,11 @@ ATunaSweeperProjectile* ATunaSweeperWeapon::SpawnProjectile(
 	TSubclassOf<ATunaSweeperProjectile> ProjectileClassToSpawn,
 	const FVector& ShotDirection,
 	APawn* InstigatorPawn,
-	FName ProjectileHitEffectId)
+	FName ProjectileHitEffectId,
+	AActor* AimIntentActor,
+	UPrimitiveComponent* AimIntentComponent,
+	const FVector& AimIntentWorldPoint,
+	bool bHasAimIntentWorldPoint)
 {
 	FActorSpawnParameters SpawnParameters;
 	SpawnParameters.Owner = this;
@@ -188,6 +248,11 @@ ATunaSweeperProjectile* ATunaSweeperWeapon::SpawnProjectile(
 	if (SpawnedProjectile)
 	{
 		SpawnedProjectile->SetHitEffectId(ProjectileHitEffectId);
+		SpawnedProjectile->SetAimIntent(
+			AimIntentActor,
+			AimIntentComponent,
+			AimIntentWorldPoint,
+			bHasAimIntentWorldPoint);
 		IgnoreNearbyPlayerPassthroughCovers(SpawnedProjectile, InstigatorPawn);
 	}
 

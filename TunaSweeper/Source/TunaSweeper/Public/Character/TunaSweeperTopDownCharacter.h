@@ -12,6 +12,7 @@ class UCameraComponent;
 class UInputAction;
 class UInputMappingContext;
 class UMediaSource;
+class UPrimitiveComponent;
 class USceneComponent;
 class USpringArmComponent;
 class UStaticMeshComponent;
@@ -111,6 +112,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Aiming")
 	void SetAimWorldPoint(const FVector& WorldPoint);
+
+	void SetAimWorldHit(const FVector& WorldPoint, const FHitResult& AimHit);
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Aiming")
 	FVector GetAimDirection() const { return AimDirection; }
@@ -433,7 +436,7 @@ private:
 	void UpdateWeaponSpreadRecoil(float DeltaSeconds);
 	void ResetWeaponSpreadRecoil();
 	bool TryGetSelectedWeaponTypeTag(FName& OutWeaponTypeTag) const;
-	FVector ApplyWeaponSpreadToAimDirection(const FVector& BaseAimDirection, FName WeaponTypeTag) const;
+	float ResolveWeaponSpreadHalfAngleDegrees(FName WeaponTypeTag) const;
 	void AddWeaponSpreadRecoilShot(FName WeaponTypeTag);
 	void FinishRoll();
 	void SetRollProjectileCollisionPassthrough(bool bEnabled);
@@ -462,8 +465,10 @@ private:
 	FTimerHandle ReloadTimerHandle;
 	FTimerHandle RespawnTransitionTimerHandle;
 	FVector AimWorldPoint = FVector::ZeroVector;
+	FVector AimIntentWorldPoint = FVector::ZeroVector;
 	FVector AimDirection = FVector::ForwardVector;
 	bool bHasAimWorldPoint = false;
+	bool bHasAimIntent = false;
 	FRotator DefaultCameraRelativeRotation = FRotator::ZeroRotator;
 	FRotator DefaultCameraBoomRotation = FRotator(-60.0f, 0.0f, 0.0f);
 	FRotator CurrentCameraBoomRotation = FRotator(-60.0f, 0.0f, 0.0f);
@@ -497,6 +502,8 @@ private:
 	FRotator DefaultSkeletalMeshRelativeRotation = FRotator::ZeroRotator;
 	FRotator DefaultVisualMeshRelativeRotation = FRotator::ZeroRotator;
 	TWeakObjectPtr<USceneComponent> SavedWeaponAttachParent;
+	TWeakObjectPtr<AActor> AimIntentActor;
+	TWeakObjectPtr<UPrimitiveComponent> AimIntentComponent;
 	FName SavedWeaponAttachSocketName = NAME_None;
 	FName WeaponRecoilTypeTag = NAME_None;
 	FTransform SavedWeaponRelativeTransform = FTransform::Identity;

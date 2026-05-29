@@ -115,6 +115,18 @@ void ATunaSweeperProjectile::IgnoreActor(AActor* ActorToIgnore)
 	}
 }
 
+void ATunaSweeperProjectile::SetAimIntent(
+	AActor* InAimIntentActor,
+	UPrimitiveComponent* InAimIntentComponent,
+	const FVector& InAimIntentWorldPoint,
+	bool bInHasAimIntentWorldPoint)
+{
+	AimIntentActor = InAimIntentActor;
+	AimIntentComponent = InAimIntentComponent;
+	AimIntentWorldPoint = InAimIntentWorldPoint;
+	bHasAimIntentWorldPoint = bInHasAimIntentWorldPoint;
+}
+
 void ATunaSweeperProjectile::ApplyVisualMaterial(
 	UMaterialInterface* Material,
 	const FLinearColor& BaseColor,

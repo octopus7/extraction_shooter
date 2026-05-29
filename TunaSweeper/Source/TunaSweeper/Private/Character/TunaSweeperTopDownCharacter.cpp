@@ -392,6 +392,10 @@ void ATunaSweeperTopDownCharacter::SetAimWorldPoint(const FVector& WorldPoint)
 {
 	AimWorldPoint = WorldPoint;
 	bHasAimWorldPoint = true;
+	AimIntentActor.Reset();
+	AimIntentComponent.Reset();
+	AimIntentWorldPoint = WorldPoint;
+	bHasAimIntent = false;
 
 	const FVector ToAimPoint = FVector(WorldPoint.X - GetActorLocation().X, WorldPoint.Y - GetActorLocation().Y, 0.0f);
 	const FVector NewAimDirection = ToAimPoint.GetSafeNormal();
@@ -399,6 +403,23 @@ void ATunaSweeperTopDownCharacter::SetAimWorldPoint(const FVector& WorldPoint)
 	{
 		AimDirection = NewAimDirection;
 	}
+}
+
+void ATunaSweeperTopDownCharacter::SetAimWorldHit(const FVector& WorldPoint, const FHitResult& AimHit)
+{
+	SetAimWorldPoint(WorldPoint);
+
+	AActor* HitActor = AimHit.GetActor();
+	UPrimitiveComponent* HitComponent = AimHit.GetComponent();
+	if (!HitActor || !HitComponent)
+	{
+		return;
+	}
+
+	AimIntentActor = HitActor;
+	AimIntentComponent = HitComponent;
+	AimIntentWorldPoint = AimHit.ImpactPoint;
+	bHasAimIntent = true;
 }
 
 FVector2D ATunaSweeperTopDownCharacter::GetWeaponRecoilCrosshairScreenOffset() const
@@ -894,8 +915,17 @@ void ATunaSweeperTopDownCharacter::FireWeapon()
 		return;
 	}
 
-	const FVector SpreadAimDirection = ApplyWeaponSpreadToAimDirection(AimDirection, WeaponTypeTag);
-	EquippedWeapon->Fire(SpreadAimDirection, this, ProjectileHitEffectId, WeaponTypeTag);
+	const float SpreadHalfAngleDegrees = ResolveWeaponSpreadHalfAngleDegrees(WeaponTypeTag);
+	EquippedWeapon->FireWithAimIntent(
+		AimDirection,
+		this,
+		ProjectileHitEffectId,
+		WeaponTypeTag,
+		SpreadHalfAngleDegrees,
+		bHasAimIntent ? AimIntentActor.Get() : nullptr,
+		bHasAimIntent ? AimIntentComponent.Get() : nullptr,
+		AimIntentWorldPoint,
+		bHasAimIntent);
 	AddWeaponSpreadRecoilShot(WeaponTypeTag);
 }
 
@@ -2203,37 +2233,19 @@ bool ATunaSweeperTopDownCharacter::TryGetSelectedWeaponTypeTag(FName& OutWeaponT
 	return true;
 }
 
-FVector ATunaSweeperTopDownCharacter::ApplyWeaponSpreadToAimDirection(const FVector& BaseAimDirection, FName WeaponTypeTag) const
+float ATunaSweeperTopDownCharacter::ResolveWeaponSpreadHalfAngleDegrees(FName WeaponTypeTag) const
 {
-	FVector ShotDirection = BaseAimDirection.GetSafeNormal2D();
-	if (ShotDirection.IsNearlyZero())
-	{
-		ShotDirection = GetActorForwardVector().GetSafeNormal2D();
-	}
-	if (ShotDirection.IsNearlyZero())
-	{
-		ShotDirection = FVector::ForwardVector;
-	}
-
 	UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
 	FTunaSweeperWeaponSpreadRecoilDefinition RecoilDefinition;
 	if (!TunaGameInstance || !TunaGameInstance->TryGetWeaponSpreadRecoilDefinition(WeaponTypeTag, RecoilDefinition))
 	{
-		return ShotDirection;
+		return 0.0f;
 	}
 
-	const float SpreadHalfAngleDegrees = FMath::Clamp(
+	return FMath::Clamp(
 		FMath::Max(RecoilDefinition.MinimumSpreadHalfAngleDegrees, WeaponRecoilOffsetDegrees.Size()),
 		RecoilDefinition.MinimumSpreadHalfAngleDegrees,
 		RecoilDefinition.MaximumSpreadHalfAngleDegrees);
-	if (SpreadHalfAngleDegrees <= 0.0f)
-	{
-		return ShotDirection;
-	}
-
-	const float YawOffsetDegrees = FMath::FRandRange(-SpreadHalfAngleDegrees, SpreadHalfAngleDegrees);
-	FVector SpreadDirection = ShotDirection.RotateAngleAxis(YawOffsetDegrees, FVector::UpVector).GetSafeNormal2D();
-	return SpreadDirection.IsNearlyZero() ? ShotDirection : SpreadDirection;
 }
 
 void ATunaSweeperTopDownCharacter::AddWeaponSpreadRecoilShot(FName WeaponTypeTag)

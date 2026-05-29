@@ -146,7 +146,11 @@ private:
 	bool IsOpeningScenarioMap() const;
 	bool IsBunkerMap() const;
 	bool IsRaidMap() const;
-	bool GetMouseAimPointOnPlane(float PlaneZ, const FVector2D& ScreenOffset, FVector& OutAimPoint) const;
+	bool GetMouseAimPointOnPlane(
+		float PlaneZ,
+		const FVector2D& ScreenOffset,
+		FVector& OutAimPoint,
+		FHitResult* OutAimHit = nullptr) const;
 	bool FindDropLocationNearPlayer(FVector& OutDropLocation) const;
 	ATunaSweeperPickupItemActor* SpawnDroppedPickupItem(int32 ItemId, int32 Quantity);
 	void HandleQuickSlot(int32 SlotNumber);

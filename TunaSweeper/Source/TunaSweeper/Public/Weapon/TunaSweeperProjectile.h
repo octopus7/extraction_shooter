@@ -23,6 +23,15 @@ public:
 	void SetDamageAmount(float InDamageAmount) { DamageAmount = FMath::Max(0.0f, InDamageAmount); }
 	void SetHitEffectId(FName InHitEffectId) { HitEffectId = InHitEffectId; }
 	FName GetHitEffectId() const { return HitEffectId; }
+	void SetAimIntent(
+		AActor* InAimIntentActor,
+		UPrimitiveComponent* InAimIntentComponent,
+		const FVector& InAimIntentWorldPoint,
+		bool bInHasAimIntentWorldPoint);
+	bool IsAimIntentFor(const AActor* Actor) const { return Actor && AimIntentActor.Get() == Actor; }
+	UPrimitiveComponent* GetAimIntentComponent() const { return AimIntentComponent.Get(); }
+	const FVector& GetAimIntentWorldPoint() const { return AimIntentWorldPoint; }
+	bool HasAimIntentWorldPoint() const { return bHasAimIntentWorldPoint; }
 	void IgnoreActor(AActor* ActorToIgnore);
 	void ApplyVisualMaterial(
 		UMaterialInterface* Material,
@@ -72,6 +81,15 @@ protected:
 
 	UPROPERTY(Transient)
 	TObjectPtr<UMaterialInstanceDynamic> DynamicTrailMaterial;
+
+	UPROPERTY(Transient)
+	TObjectPtr<AActor> AimIntentActor;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UPrimitiveComponent> AimIntentComponent;
+
+	FVector AimIntentWorldPoint = FVector::ZeroVector;
+	bool bHasAimIntentWorldPoint = false;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Projectile")
 	float LifeSeconds = 3.0f;

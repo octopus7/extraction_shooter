@@ -10,6 +10,7 @@
 #include "TunaSweeperCollisionChannels.h"
 #include "UI/TunaSweeperPracticeDummyHealthBarWidget.h"
 #include "UObject/ConstructorHelpers.h"
+#include "Weapon/TunaSweeperProjectile.h"
 
 namespace
 {
@@ -130,7 +131,7 @@ float ATunaSweeperShootingPracticeDummyActor::TakeDamage(
 		return 0.0f;
 	}
 
-	const float AdjustedDamage = DamageAmount * ResolveDamageMultiplierForNextHit();
+	const float AdjustedDamage = DamageAmount * ResolveDamageMultiplier(DamageEvent, DamageCauser);
 	ApplyDummyDamage(AdjustedDamage);
 	return AdjustedDamage;
 }
@@ -180,20 +181,44 @@ void ATunaSweeperShootingPracticeDummyActor::ApplyHitZoneColors()
 	SetMaterialColor(HeadMesh, FLinearColor(0.95f, 0.16f, 0.10f, 1.0f));
 }
 
-float ATunaSweeperShootingPracticeDummyActor::ResolveDamageMultiplierForNextHit()
+float ATunaSweeperShootingPracticeDummyActor::ResolveDamageMultiplier(
+	FDamageEvent const& DamageEvent,
+	AActor* DamageCauser) const
 {
-	++ReceivedHitCount;
+	const UPrimitiveComponent* HitComponent = nullptr;
+	if (DamageEvent.IsOfType(FPointDamageEvent::ClassID))
+	{
+		const FPointDamageEvent* PointDamageEvent = static_cast<const FPointDamageEvent*>(&DamageEvent);
+		HitComponent = PointDamageEvent ? PointDamageEvent->HitInfo.GetComponent() : nullptr;
+	}
 
-	if (ReceivedHitCount % 6 == 0)
+	const ATunaSweeperProjectile* ProjectileCauser = Cast<ATunaSweeperProjectile>(DamageCauser);
+	const bool bHeadIntent =
+		ProjectileCauser &&
+		ProjectileCauser->IsAimIntentFor(this) &&
+		IsHeadshotComponent(ProjectileCauser->GetAimIntentComponent());
+	const bool bHeadCore = IsHeadshotComponent(HitComponent);
+
+	if (bHeadIntent && bHeadCore)
 	{
 		return HeadshotDamageMultiplier;
 	}
-	if (ReceivedHitCount % 3 == 0)
+	if (IsCriticalComponent(HitComponent))
 	{
 		return CriticalDamageMultiplier;
 	}
 
 	return 1.0f;
+}
+
+bool ATunaSweeperShootingPracticeDummyActor::IsHeadshotComponent(const UPrimitiveComponent* Component) const
+{
+	return Component && (Component == HeadMesh || Component == HeadshotPlateMesh);
+}
+
+bool ATunaSweeperShootingPracticeDummyActor::IsCriticalComponent(const UPrimitiveComponent* Component) const
+{
+	return Component && Component == CriticalPlateMesh;
 }
 
 void ATunaSweeperShootingPracticeDummyActor::ApplyDummyDamage(float DamageAmount)

@@ -440,10 +440,21 @@ void ATunaSweeperPlayerController::PlayerTick(float DeltaTime)
 	}
 
 	FVector AimPoint;
+	FHitResult AimHit;
 	const FVector2D AimScreenOffset = ControlledCharacter->GetWeaponRecoilCrosshairScreenOffset();
-	if (GetMouseAimPointOnPlane(ControlledCharacter->GetActorLocation().Z, AimScreenOffset, AimPoint))
+	if (GetMouseAimPointOnPlane(ControlledCharacter->GetActorLocation().Z, AimScreenOffset, AimPoint, &AimHit))
 	{
-		ControlledCharacter->SetAimWorldPoint(AimPoint);
+		if (AimHit.bBlockingHit &&
+			AimHit.GetActor() &&
+			AimHit.GetComponent() &&
+			AimHit.GetComponent()->GetCollisionObjectType() != ECC_WorldStatic)
+		{
+			ControlledCharacter->SetAimWorldHit(AimPoint, AimHit);
+		}
+		else
+		{
+			ControlledCharacter->SetAimWorldPoint(AimPoint);
+		}
 	}
 }
 
@@ -1667,8 +1678,14 @@ bool ATunaSweeperPlayerController::TryCommitHousingPlacement()
 bool ATunaSweeperPlayerController::GetMouseAimPointOnPlane(
 	float PlaneZ,
 	const FVector2D& ScreenOffset,
-	FVector& OutAimPoint) const
+	FVector& OutAimPoint,
+	FHitResult* OutAimHit) const
 {
+	if (OutAimHit)
+	{
+		*OutAimHit = FHitResult();
+	}
+
 	FVector WorldLocation;
 	FVector WorldDirection;
 	float MouseX = 0.0f;
@@ -1697,6 +1714,10 @@ bool ATunaSweeperPlayerController::GetMouseAimPointOnPlane(
 		if (World->LineTraceSingleByChannel(Hit, WorldLocation, TraceEnd, ECC_Visibility, QueryParams) && Hit.bBlockingHit)
 		{
 			OutAimPoint = Hit.ImpactPoint;
+			if (OutAimHit)
+			{
+				*OutAimHit = Hit;
+			}
 			return true;
 		}
 	}
