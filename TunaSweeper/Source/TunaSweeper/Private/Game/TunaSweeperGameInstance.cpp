@@ -1163,6 +1163,35 @@ int32 UTunaSweeperGameInstance::GetEquippedBackpackSlotBonus()
 	return FMath::Max(0, GetCurrentInventorySlotCapacity() - FMath::Max(TunaSweeperInventory::RequiredBareInventorySlots, GameplaySettings.BareInventorySlots));
 }
 
+int32 UTunaSweeperGameInstance::GetEquippedDefenseValue()
+{
+	EnsureInventoryStateInitialized();
+
+	UTunaSweeperItemDataSubsystem* ItemDataSubsystem = GetSubsystem<UTunaSweeperItemDataSubsystem>();
+	if (!ItemDataSubsystem)
+	{
+		return 0;
+	}
+
+	int32 DefenseValue = 0;
+	for (const FTunaSweeperInventorySlot& EquipmentSlot : EquipmentSlots)
+	{
+		FTunaSweeperItemInstance ItemInstance;
+		if (!TryGetItemInstance(EquipmentSlot.ItemUid, ItemInstance))
+		{
+			continue;
+		}
+
+		FTunaSweeperItemDefinition ItemDefinition;
+		if (ItemDataSubsystem->TryGetItemDefinition(ItemInstance.ItemId, ItemDefinition))
+		{
+			DefenseValue += FMath::Max(0, ItemDefinition.DefenseValue);
+		}
+	}
+
+	return DefenseValue;
+}
+
 const TArray<FTunaSweeperInventorySlot>& UTunaSweeperGameInstance::GetInventorySlots()
 {
 	EnsureInventoryStateInitialized();

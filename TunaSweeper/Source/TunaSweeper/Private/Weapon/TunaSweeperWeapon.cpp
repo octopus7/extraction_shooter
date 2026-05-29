@@ -187,7 +187,7 @@ void ATunaSweeperWeapon::Fire(
 		ProjectileHitEffectId,
 		WeaponTypeTag,
 		1.0f,
-		0.0f,
+		0,
 		0.0f,
 		nullptr,
 		nullptr,
@@ -201,7 +201,7 @@ void ATunaSweeperWeapon::FireWithAimIntent(
 	FName ProjectileHitEffectId,
 	FName WeaponTypeTag,
 	float ProjectileDamageMultiplier,
-	float ProjectileDamageBonus,
+	int32 ProjectileDamageBonus,
 	float SpreadHalfAngleDegrees,
 	AActor* AimIntentActor,
 	UPrimitiveComponent* AimIntentComponent,
@@ -284,7 +284,7 @@ ATunaSweeperProjectile* ATunaSweeperWeapon::SpawnProjectile(
 	APawn* InstigatorPawn,
 	FName ProjectileHitEffectId,
 	float ProjectileDamageMultiplier,
-	float ProjectileDamageBonus,
+	int32 ProjectileDamageBonus,
 	AActor* AimIntentActor,
 	UPrimitiveComponent* AimIntentComponent,
 	const FVector& AimIntentWorldPoint,
@@ -302,8 +302,10 @@ ATunaSweeperProjectile* ATunaSweeperWeapon::SpawnProjectile(
 	if (SpawnedProjectile)
 	{
 		const float BaseDamageAmount = SpawnedProjectile->GetDamageAmount();
-		SpawnedProjectile->SetDamageAmount(
-			FMath::Max(0.0f, BaseDamageAmount * FMath::Max(0.0f, ProjectileDamageMultiplier) + ProjectileDamageBonus));
+		const int32 ModifiedDamageAmount = FMath::Max(
+			0,
+			FMath::RoundToInt(BaseDamageAmount * FMath::Max(0.0f, ProjectileDamageMultiplier)) + ProjectileDamageBonus);
+		SpawnedProjectile->SetDamageAmount(static_cast<float>(ModifiedDamageAmount));
 		SpawnedProjectile->SetHitEffectId(ProjectileHitEffectId);
 		SpawnedProjectile->SetAimIntent(
 			AimIntentActor,

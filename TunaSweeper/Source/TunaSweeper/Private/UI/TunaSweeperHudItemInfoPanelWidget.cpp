@@ -20,6 +20,7 @@
 #include "UI/TunaSweeperItemStackTileItemObject.h"
 #include "UI/TunaSweeperUIFont.h"
 #include "UI/TunaSweeperUiText.h"
+#include "Weapon/TunaSweeperProjectile.h"
 
 namespace TunaSweeperItemInfoPanel
 {
@@ -27,8 +28,74 @@ namespace TunaSweeperItemInfoPanel
 	constexpr float AttachmentSlotTileWidth = 96.0f;
 	constexpr float AttachmentSlotTileHeight = 96.0f;
 	constexpr float SelectedItemIconSize = 132.0f;
+	constexpr float DefaultProjectileDamageAmount = 10.0f;
 
 	using TunaSweeperUiText::ResolveUiText;
+
+	float GetDefaultProjectileDamageAmount()
+	{
+		const ATunaSweeperProjectile* DefaultProjectile =
+			ATunaSweeperProjectile::StaticClass()->GetDefaultObject<ATunaSweeperProjectile>();
+		return DefaultProjectile ? FMath::Max(0.0f, DefaultProjectile->GetDamageAmount()) : DefaultProjectileDamageAmount;
+	}
+
+	FText BuildItemFormulaInfo(const FTunaSweeperItemDefinition& ItemDefinition, FLinearColor& OutTextColor)
+	{
+		OutTextColor = FLinearColor(0.72f, 0.84f, 0.88f, 1.0f);
+		if (!ItemDefinition.AmmoTypeTag.IsNone())
+		{
+			const int32 BaseDamage = FMath::Max(0, FMath::RoundToInt(GetDefaultProjectileDamageAmount()));
+			const float DamageMultiplier = FMath::Max(0.0f, ItemDefinition.ProjectileDamageMultiplier);
+			const int32 DamageBonus = ItemDefinition.ProjectileDamageBonus;
+			const int32 ResultDamage = FMath::Max(0, FMath::RoundToInt(BaseDamage * DamageMultiplier) + DamageBonus);
+
+			if (ResultDamage > BaseDamage)
+			{
+				OutTextColor = FLinearColor(0.66f, 0.95f, 0.70f, 1.0f);
+			}
+			else if (ResultDamage < BaseDamage)
+			{
+				OutTextColor = FLinearColor(0.98f, 0.72f, 0.56f, 1.0f);
+			}
+
+			const FString FormulaString = FMath::IsNearlyEqual(DamageMultiplier, 1.0f)
+				? FString::Printf(
+					TEXT("\uD0C4\uC57D \uC218\uC2DD\n")
+					TEXT("\uD53C\uD574\uB7C9 = \uAE30\uBCF8 %d + \uD0C4\uC57D %+d = %d\n")
+					TEXT("\uD0C4\uC885 = %s"),
+					BaseDamage,
+					DamageBonus,
+					ResultDamage,
+					*ItemDefinition.AmmoTypeTag.ToString())
+				: FString::Printf(
+					TEXT("\uD0C4\uC57D \uC218\uC2DD\n")
+					TEXT("\uD53C\uD574\uB7C9 = round(\uAE30\uBCF8 %d x %.2f) + \uD0C4\uC57D %+d = %d\n")
+					TEXT("\uD0C4\uC885 = %s"),
+					BaseDamage,
+					DamageMultiplier,
+					DamageBonus,
+					ResultDamage,
+					*ItemDefinition.AmmoTypeTag.ToString());
+
+			return FText::FromString(FormulaString);
+		}
+
+		if (ItemDefinition.DefenseValue > 0)
+		{
+			const int32 DefenseValue = FMath::Max(0, ItemDefinition.DefenseValue);
+			OutTextColor = FLinearColor(0.68f, 0.88f, 1.0f, 1.0f);
+			const FString FormulaString = FString::Printf(
+				TEXT("\uBC29\uC5B4 \uC218\uC2DD\n")
+				TEXT("\uBC1B\uB294 \uD53C\uD574 = max(0, \uB4E4\uC5B4\uC628 \uD53C\uD574 - \uBC29\uC5B4 %d)\n")
+				TEXT("\uBC29\uC5B4 = %d"),
+				DefenseValue,
+				DefenseValue);
+
+			return FText::FromString(FormulaString);
+		}
+
+		return FText::GetEmpty();
+	}
 
 	FText GetAttachmentSlotDisplayName(FName AttachmentSlotTag, const UTunaSweeperGameInstance* TunaGameInstance)
 	{
@@ -237,6 +304,11 @@ void UTunaSweeperHudItemInfoPanelWidget::RefreshSelectedItemInfo()
 	const TArray<FTunaSweeperInventorySlot>& AttachmentSlots = TunaGameInstance->GetSelectedWeaponAttachmentSlots();
 	const TArray<FName>& AttachmentSlotTags = TunaGameInstance->GetSelectedWeaponAttachmentSlotTags();
 	SetSelectedItemInfo(DisplayName, Description, AttachmentSlots.Num() > 0);
+	FLinearColor FormulaTextColor;
+	const FText FormulaText = TunaSweeperItemInfoPanel::BuildItemFormulaInfo(
+		SelectedItemDefinition,
+		FormulaTextColor);
+	SetSelectedItemFormulaInfo(FormulaText, FormulaTextColor, !FormulaText.IsEmpty());
 
 	AttachmentTileObjects.Reset();
 	if (AttachmentSlotTileView)
@@ -340,6 +412,7 @@ void UTunaSweeperHudItemInfoPanelWidget::ClearSelectedItemInfo()
 		SelectedItemDescriptionText->SetText(FText::GetEmpty());
 	}
 
+	SetSelectedItemFormulaInfo(FText::GetEmpty(), FLinearColor::White, false);
 	SetModdingPanelVisible(false);
 }
 
@@ -373,6 +446,10 @@ void UTunaSweeperHudItemInfoPanelWidget::CacheNamedWidgets()
 	if (!SelectedItemDescriptionText)
 	{
 		SelectedItemDescriptionText = Cast<UTextBlock>(WidgetTree->FindWidget(FName(TEXT("SelectedItemDescriptionText"))));
+	}
+	if (!SelectedItemFormulaText)
+	{
+		SelectedItemFormulaText = Cast<UTextBlock>(WidgetTree->FindWidget(FName(TEXT("SelectedItemFormulaText"))));
 	}
 }
 
@@ -445,6 +522,41 @@ void UTunaSweeperHudItemInfoPanelWidget::EnsureThumbnailWidgets()
 		}
 	}
 
+	if (!SelectedItemFormulaText)
+	{
+		SelectedItemFormulaText = WidgetTree->ConstructWidget<UTextBlock>(
+			UTextBlock::StaticClass(),
+			TEXT("SelectedItemFormulaText"));
+		if (SelectedItemFormulaText)
+		{
+			SelectedItemFormulaText->SetVisibility(ESlateVisibility::Collapsed);
+		}
+	}
+	if (SelectedItemFormulaText)
+	{
+		SelectedItemFormulaText->RemoveFromParent();
+		const int32 DescriptionIndex = SelectedItemDescriptionText
+			? PanelStack->GetChildIndex(SelectedItemDescriptionText)
+			: INDEX_NONE;
+		const int32 IconIndex = PanelStack->GetChildIndex(IconSizeBox);
+		UPanelSlot* FormulaPanelSlot = DescriptionIndex != INDEX_NONE
+			? PanelStack->InsertChildAt(DescriptionIndex + 1, SelectedItemFormulaText)
+			: (IconIndex != INDEX_NONE
+				? PanelStack->InsertChildAt(IconIndex + 1, SelectedItemFormulaText)
+				: PanelStack->AddChild(SelectedItemFormulaText));
+		if (UVerticalBoxSlot* FormulaSlot = Cast<UVerticalBoxSlot>(FormulaPanelSlot))
+		{
+			FormulaSlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
+			FormulaSlot->SetHorizontalAlignment(HAlign_Fill);
+			FormulaSlot->SetVerticalAlignment(VAlign_Top);
+			FormulaSlot->SetPadding(FMargin(0.0f, 8.0f, 0.0f, 6.0f));
+		}
+
+		SelectedItemFormulaText->SetAutoWrapText(true);
+		SelectedItemFormulaText->SetJustification(ETextJustify::Left);
+		TunaSweeperUIFont::ApplyFont(SelectedItemFormulaText, 14.0f, ETunaSweeperUIFontWeight::Bold);
+	}
+
 	if (SelectedItemDetailRow)
 	{
 		SelectedItemDetailRow->RemoveFromParent();
@@ -480,6 +592,22 @@ void UTunaSweeperHudItemInfoPanelWidget::ClearSelectedItemThumbnail()
 		SelectedItemIconImage->SetBrushFromTexture(nullptr, false);
 		SelectedItemIconImage->SetOpacity(0.0f);
 	}
+}
+
+void UTunaSweeperHudItemInfoPanelWidget::SetSelectedItemFormulaInfo(
+	const FText& FormulaText,
+	const FLinearColor& TextColor,
+	bool bVisible)
+{
+	EnsureThumbnailWidgets();
+	if (!SelectedItemFormulaText)
+	{
+		return;
+	}
+
+	SelectedItemFormulaText->SetText(FormulaText);
+	SelectedItemFormulaText->SetColorAndOpacity(FSlateColor(TextColor));
+	SelectedItemFormulaText->SetVisibility(bVisible ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
 }
 
 void UTunaSweeperHudItemInfoPanelWidget::SetModdingPanelVisible(bool bVisible)

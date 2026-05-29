@@ -63,6 +63,9 @@ protected:
 	TObjectPtr<UTextBlock> SelectedItemDescriptionText;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
+	TObjectPtr<UTextBlock> SelectedItemFormulaText;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
 	TObjectPtr<UButton> CloseButton;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
@@ -82,6 +85,7 @@ private:
 	void EnsureThumbnailWidgets();
 	void SetSelectedItemThumbnail(UTexture2D* IconTexture);
 	void ClearSelectedItemThumbnail();
+	void SetSelectedItemFormulaInfo(const FText& FormulaText, const FLinearColor& TextColor, bool bVisible);
 	bool TryResolveAttachmentDropSlotFromCursor(
 		const FVector2D& ScreenSpacePosition,
 		FTunaSweeperItemSlotReference& OutSlotReference) const;

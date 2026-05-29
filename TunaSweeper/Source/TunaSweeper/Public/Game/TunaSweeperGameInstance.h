@@ -435,6 +435,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Inventory")
 	int32 GetEquippedBackpackSlotBonus();
 
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Inventory")
+	int32 GetEquippedDefenseValue();
+
 	const TArray<FTunaSweeperInventorySlot>& GetInventorySlots();
 	const TArray<FTunaSweeperInventorySlot>& GetEquipmentSlots();
 	const TArray<FTunaSweeperInventorySlot>& GetAuxiliaryBagSlots();

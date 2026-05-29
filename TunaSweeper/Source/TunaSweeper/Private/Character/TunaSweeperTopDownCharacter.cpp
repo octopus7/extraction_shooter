@@ -312,11 +312,19 @@ float ATunaSweeperTopDownCharacter::TakeDamage(
 
 	LastDamageImpulseDirection = ResolveDamageCameraReactionDirection(DamageCauser);
 
+	UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+	const int32 DefenseValue = TunaGameInstance ? TunaGameInstance->GetEquippedDefenseValue() : 0;
+	const float AppliedDamage = FMath::Max(0.0f, DamageAmount - static_cast<float>(DefenseValue));
+	if (AppliedDamage <= 0.0f)
+	{
+		return 0.0f;
+	}
+
 	FTunaSweeperVitalsDelta DamageDelta;
-	DamageDelta.Health = -DamageAmount;
+	DamageDelta.Health = -AppliedDamage;
 	VitalsComponent->ApplyVitalsDelta(DamageDelta);
-	TriggerDamageCameraReaction(DamageAmount, DamageEvent, DamageCauser);
-	return DamageAmount;
+	TriggerDamageCameraReaction(AppliedDamage, DamageEvent, DamageCauser);
+	return AppliedDamage;
 }
 
 void ATunaSweeperTopDownCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -996,7 +1004,7 @@ void ATunaSweeperTopDownCharacter::FireWeapon()
 	FName ProjectileHitEffectId = NAME_None;
 	FName WeaponTypeTag = NAME_None;
 	float ProjectileDamageMultiplier = 1.0f;
-	float ProjectileDamageBonus = 0.0f;
+	int32 ProjectileDamageBonus = 0;
 	FTunaSweeperItemInstance WeaponInstance;
 	FTunaSweeperItemDefinition WeaponDefinition;
 	if (TunaGameInstance->TryGetEquipmentWeaponSlotItem(SelectedWeaponSlotNumber, WeaponInstance, WeaponDefinition))

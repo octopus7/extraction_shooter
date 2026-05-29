@@ -56,6 +56,9 @@ struct TUNASWEEPER_API FTunaSweeperItemDefinition
 	FName EquipmentSlotTag;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
+	int32 DefenseValue = 0;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
 	FName WeaponTypeTag;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
@@ -71,7 +74,7 @@ struct TUNASWEEPER_API FTunaSweeperItemDefinition
 	float ProjectileDamageMultiplier = 1.0f;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
-	float ProjectileDamageBonus = 0.0f;
+	int32 ProjectileDamageBonus = 0;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
 	TArray<FName> AttachmentSlotTags;

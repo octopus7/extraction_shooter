@@ -573,6 +573,7 @@ bool UTunaSweeperItemDataSubsystem::LoadItemTableJson()
 		double NumericReloadSeconds = 0.0;
 		double NumericProjectileDamageMultiplier = 1.0;
 		double NumericProjectileDamageBonus = 0.0;
+		double NumericDefenseValue = 0.0;
 		double NumericUseHealthDelta = 0.0;
 		double NumericUseFoodDelta = 0.0;
 		double NumericUseHydrationDelta = 0.0;
@@ -627,6 +628,12 @@ bool UTunaSweeperItemDataSubsystem::LoadItemTableJson()
 		{
 			ItemDefinition.EquipmentSlotTag = FName(*EquipmentSlotTag.TrimStartAndEnd());
 		}
+		if ((*JsonObject)->TryGetNumberField(TEXT("defense_value"), NumericDefenseValue) ||
+			(*JsonObject)->TryGetNumberField(TEXT("armor_defense"), NumericDefenseValue) ||
+			(*JsonObject)->TryGetNumberField(TEXT("defense"), NumericDefenseValue))
+		{
+			ItemDefinition.DefenseValue = FMath::Max(0, FMath::RoundToInt(NumericDefenseValue));
+		}
 		if ((*JsonObject)->TryGetStringField(TEXT("weapon_type_tag"), WeaponTypeTag))
 		{
 			ItemDefinition.WeaponTypeTag = FName(*WeaponTypeTag.TrimStartAndEnd());
@@ -654,7 +661,7 @@ bool UTunaSweeperItemDataSubsystem::LoadItemTableJson()
 			(*JsonObject)->TryGetNumberField(TEXT("ammo_damage_bonus"), NumericProjectileDamageBonus) ||
 			(*JsonObject)->TryGetNumberField(TEXT("damage_bonus"), NumericProjectileDamageBonus))
 		{
-			ItemDefinition.ProjectileDamageBonus = static_cast<float>(NumericProjectileDamageBonus);
+			ItemDefinition.ProjectileDamageBonus = FMath::RoundToInt(NumericProjectileDamageBonus);
 		}
 		const TArray<TSharedPtr<FJsonValue>>* AttachmentSlotTagsArray = nullptr;
 		if ((*JsonObject)->TryGetArrayField(TEXT("attachment_slot_tags"), AttachmentSlotTagsArray) && AttachmentSlotTagsArray)
