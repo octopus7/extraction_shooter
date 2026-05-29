@@ -99,6 +99,12 @@ Each `FTunaSweeperShopStockSaveData` preserves:
 
 Shop definitions are static data in `Content/Data/ShopDefinitions.json`. New saves start from each entry's defined `stock_quantity`; purchases decrease the runtime stock and immediately save the remaining stock with the inventory/currency transaction. Shop access is bunker-only through `ShopOpen` interaction. Item sale does not affect shop stock; it removes the player-owned item and grants half of the item table `shop_sell_price`.
 
+### Workbench Recipe Unlocks
+
+Workbench recipe unlocks are persisted per save slot through `UTunaSweeperSaveGame::UnlockedWorkbenchRecipeIds`.
+
+Each entry is a stable recipe id from `Content/Data/WorkbenchRecipes.json`. Recipes with `auto_unlocked` remain available without being written to the save. Non-default recipes can be added by quest rewards or by registering a blueprint item whose item definition points at a `BlueprintRecipeId`; older saves also derive missing unlocks from already completed quest rewards during load.
+
 ### World Progress Objects
 
 Stored through `UTunaSweeperSaveGame::WorldProgressStates`.

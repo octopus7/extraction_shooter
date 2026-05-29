@@ -131,6 +131,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Housing")
 	TArray<FName> UnlockedHousingFacilityIds;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Workbench")
+	TArray<FName> UnlockedWorkbenchRecipeIds;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest")
 	TArray<FTunaSweeperQuestProgressSaveData> QuestProgressStates;
 

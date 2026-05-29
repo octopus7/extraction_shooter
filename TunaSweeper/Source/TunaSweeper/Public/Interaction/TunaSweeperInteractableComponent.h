@@ -28,7 +28,11 @@ enum class ETunaSweeperInteractionType : uint8
 	DoorOpen = 14 UMETA(DisplayName = "Door Open"),
 	HousingManagement = 15 UMETA(DisplayName = "Housing Management"),
 	StorageOpen = 16 UMETA(DisplayName = "Storage Open"),
-	ShopOpen = 17 UMETA(DisplayName = "Shop Open")
+	ShopOpen = 17 UMETA(DisplayName = "Shop Open"),
+	WorkbenchOpen = 18 UMETA(DisplayName = "Workbench Open"),
+	WorkbenchCraft = 19 UMETA(DisplayName = "Workbench Craft"),
+	WorkbenchDismantle = 20 UMETA(DisplayName = "Workbench Dismantle"),
+	WorkbenchBlueprintRegister = 21 UMETA(DisplayName = "Workbench Blueprint Register")
 };
 
 UCLASS(BlueprintType, Blueprintable, ClassGroup=(TunaSweeper), meta=(BlueprintSpawnableComponent))

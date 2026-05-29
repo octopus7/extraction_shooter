@@ -23,6 +23,7 @@
 #include "Interaction/TunaSweeperShootingPracticeDummyActor.h"
 #include "Interaction/TunaSweeperTransparentObstacleActor.h"
 #include "Interaction/TunaSweeperWarpPointActor.h"
+#include "Interaction/TunaSweeperWorkbenchActor.h"
 #include "Interaction/TunaSweeperWorldProgressActor.h"
 #include "Kismet/GameplayStatics.h"
 #include "Materials/MaterialInterface.h"
@@ -60,6 +61,7 @@ namespace TunaSweeperEnemySpawn
 	const TCHAR* DefaultStaticMeshPropClassPath = TEXT("/Script/Engine.StaticMeshActor");
 	const TCHAR* DefaultShootingPracticeDummyClassPath = TEXT("/Script/TunaSweeper.TunaSweeperShootingPracticeDummyActor");
 	const TCHAR* DefaultShopClassPath = TEXT("/Script/TunaSweeper.TunaSweeperShopActor");
+	const TCHAR* DefaultWorkbenchClassPath = TEXT("/Script/TunaSweeper.TunaSweeperWorkbenchActor");
 	const TCHAR* DefaultRollingBomberClassPath = TEXT("/Script/TunaSweeper.TunaSweeperRollingBomber");
 	const TCHAR* DefaultRollingBomberLaunchSoundPath =
 		TEXT("/Game/Audio/SFX/SFX_RollingBomberSpawnerLaunch_FM.SFX_RollingBomberSpawnerLaunch_FM");
@@ -275,6 +277,13 @@ namespace TunaSweeperEnemySpawn
 		{
 			return UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::Shop;
 		}
+		if (SpawnType == TEXT("workbench") ||
+			SpawnType == TEXT("workbench_open") ||
+			SpawnType == TEXT("crafting_table") ||
+			SpawnType == TEXT("craftingtable"))
+		{
+			return UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::Workbench;
+		}
 		if (SpawnType == TEXT("self_destruct") || SpawnType == TEXT("selfdestruct"))
 		{
 			return UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::SelfDestruct;
@@ -354,6 +363,8 @@ namespace TunaSweeperEnemySpawn
 			return DefaultShootingPracticeDummyClassPath;
 		case UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::Shop:
 			return DefaultShopClassPath;
+		case UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::Workbench:
+			return DefaultWorkbenchClassPath;
 		default:
 			return nullptr;
 		}
@@ -386,6 +397,8 @@ namespace TunaSweeperEnemySpawn
 			return FText::FromString(TEXT("Practice Dummy"));
 		case UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::Shop:
 			return FText::FromString(TEXT("\uC0C1\uC810"));
+		case UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::Workbench:
+			return FText::FromString(TEXT("\uC791\uC5C5\uB300"));
 		default:
 			return FText::GetEmpty();
 		}
@@ -1551,6 +1564,10 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadGameplayInteractionActorSpawnData(bool
 		JsonObject->TryGetNumberField(TEXT("shop_id"), NumericShopId);
 		SpawnDefinition.ShopId = FMath::Max(1, static_cast<int32>(NumericShopId));
 
+		double NumericWorkbenchId = 1.0;
+		JsonObject->TryGetNumberField(TEXT("workbench_id"), NumericWorkbenchId);
+		SpawnDefinition.WorkbenchId = FMath::Max(1, static_cast<int32>(NumericWorkbenchId));
+
 		FString SpeechBubbleWidgetClassPath;
 		double NumericCountdownStartNumber = 3.0;
 		double NumericCountdownStepSeconds = 1.0;
@@ -2038,6 +2055,36 @@ void UTunaSweeperEnemySpawnSubsystem::ConfigureGameplayInteractionActor(
 					SpawnDefinition.InteractionDisplayName,
 					SpawnDefinition.MarkerWidgetClass,
 					FName(TEXT("ui.interaction.shop_open")));
+			}
+		}
+		break;
+	case EGameplayInteractionActorSpawnType::Workbench:
+		if (ATunaSweeperWorkbenchActor* WorkbenchActor = Cast<ATunaSweeperWorkbenchActor>(SpawnedActor))
+		{
+			WorkbenchActor->ConfigureWorkbenchDefaults(SpawnDefinition.WorkbenchId);
+			if (UTunaSweeperInteractableComponent* InteractableComponent = WorkbenchActor->GetInteractableComponent())
+			{
+				InteractableComponent->ConfigureInteractionDefaults(
+					ETunaSweeperInteractionType::WorkbenchCraft,
+					FText::FromString(TEXT("\uC81C\uC870")),
+					SpawnDefinition.MarkerWidgetClass,
+					FName(TEXT("ui.interaction.workbench_craft")));
+			}
+			if (UTunaSweeperInteractableComponent* DismantleComponent = WorkbenchActor->GetDismantleInteractableComponent())
+			{
+				DismantleComponent->ConfigureInteractionDefaults(
+					ETunaSweeperInteractionType::WorkbenchDismantle,
+					FText::FromString(TEXT("\uBD84\uD574")),
+					SpawnDefinition.MarkerWidgetClass,
+					FName(TEXT("ui.interaction.workbench_dismantle")));
+			}
+			if (UTunaSweeperInteractableComponent* BlueprintRegisterComponent = WorkbenchActor->GetBlueprintRegisterInteractableComponent())
+			{
+				BlueprintRegisterComponent->ConfigureInteractionDefaults(
+					ETunaSweeperInteractionType::WorkbenchBlueprintRegister,
+					FText::FromString(TEXT("\uC124\uACC4\uB3C4 \uB4F1\uB85D")),
+					SpawnDefinition.MarkerWidgetClass,
+					FName(TEXT("ui.interaction.workbench_blueprint_register")));
 			}
 		}
 		break;

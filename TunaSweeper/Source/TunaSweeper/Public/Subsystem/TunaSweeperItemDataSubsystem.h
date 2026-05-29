@@ -12,6 +12,14 @@ enum class ETunaSweeperItemTextLanguage : uint8
 	Japanese UMETA(DisplayName = "Japanese")
 };
 
+UENUM(BlueprintType)
+enum class ETunaSweeperWorkbenchMode : uint8
+{
+	Craft UMETA(DisplayName = "Craft"),
+	Dismantle UMETA(DisplayName = "Dismantle"),
+	BlueprintRegister UMETA(DisplayName = "Blueprint Register")
+};
+
 USTRUCT(BlueprintType)
 struct TUNASWEEPER_API FTunaSweeperItemDefinition
 {
@@ -40,6 +48,9 @@ struct TUNASWEEPER_API FTunaSweeperItemDefinition
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
 	FName CategoryTag;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
+	FName BlueprintRecipeId;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
 	FName EquipmentSlotTag;
@@ -239,6 +250,105 @@ struct TUNASWEEPER_API FTunaSweeperShopItemView
 	int32 Price = 0;
 };
 
+USTRUCT(BlueprintType)
+struct TUNASWEEPER_API FTunaSweeperWorkbenchIngredient
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Workbench")
+	int32 ItemId = INDEX_NONE;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Workbench", meta = (ClampMin = "1", UIMin = "1"))
+	int32 Quantity = 1;
+};
+
+USTRUCT(BlueprintType)
+struct TUNASWEEPER_API FTunaSweeperWorkbenchRecipeDefinition
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Workbench")
+	FName RecipeId = NAME_None;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Workbench", meta = (ClampMin = "1", UIMin = "1"))
+	int32 WorkbenchId = 1;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Workbench")
+	FName NameStringKey = NAME_None;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Workbench")
+	int32 OutputItemId = INDEX_NONE;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Workbench", meta = (ClampMin = "1", UIMin = "1"))
+	int32 OutputQuantity = 1;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Workbench")
+	TArray<FTunaSweeperWorkbenchIngredient> Ingredients;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Workbench")
+	bool bAutoUnlocked = true;
+};
+
+USTRUCT(BlueprintType)
+struct TUNASWEEPER_API FTunaSweeperWorkbenchIngredientView
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Workbench")
+	int32 ItemId = INDEX_NONE;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Workbench", meta = (ClampMin = "1", UIMin = "1"))
+	int32 RequiredQuantity = 1;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Workbench", meta = (ClampMin = "0", UIMin = "0"))
+	int32 AvailableQuantity = 0;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Workbench", meta = (ClampMin = "0", UIMin = "0"))
+	int32 MissingQuantity = 0;
+};
+
+USTRUCT(BlueprintType)
+struct TUNASWEEPER_API FTunaSweeperWorkbenchRecipeView
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Workbench")
+	FName RecipeId = NAME_None;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Workbench", meta = (ClampMin = "1", UIMin = "1"))
+	int32 WorkbenchId = 1;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Workbench")
+	int32 SlotIndex = INDEX_NONE;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Workbench")
+	int32 OutputItemId = INDEX_NONE;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Workbench", meta = (ClampMin = "1", UIMin = "1"))
+	int32 OutputQuantity = 1;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Workbench")
+	TArray<FTunaSweeperWorkbenchIngredientView> Ingredients;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Workbench", meta = (ClampMin = "0", UIMin = "0"))
+	int32 MissingIngredientCount = 0;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Workbench")
+	bool bCanCraft = false;
+};
+
+USTRUCT(BlueprintType)
+struct TUNASWEEPER_API FTunaSweeperWorkbenchDismantleDefinition
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Workbench")
+	int32 SourceItemId = INDEX_NONE;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Workbench")
+	TArray<FTunaSweeperItemStack> Results;
+};
+
 UCLASS()
 class TUNASWEEPER_API UTunaSweeperItemDataSubsystem : public UGameInstanceSubsystem
 {
@@ -309,6 +419,23 @@ public:
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Shop")
 	int32 ResolveShopItemBuyPrice(const FTunaSweeperShopItemDefinition& ShopItemDefinition) const;
 
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Workbench")
+	bool TryGetWorkbenchRecipeDefinition(FName RecipeId, FTunaSweeperWorkbenchRecipeDefinition& OutDefinition);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Workbench")
+	bool GetWorkbenchRecipeDefinitions(int32 WorkbenchId, TArray<FTunaSweeperWorkbenchRecipeDefinition>& OutDefinitions);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Workbench")
+	bool GetAllWorkbenchRecipeDefinitions(TArray<FTunaSweeperWorkbenchRecipeDefinition>& OutDefinitions);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Workbench")
+	bool TryGetWorkbenchDismantleDefinition(
+		int32 SourceItemId,
+		FTunaSweeperWorkbenchDismantleDefinition& OutDefinition);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Workbench")
+	bool GetAllWorkbenchDismantleDefinitions(TArray<FTunaSweeperWorkbenchDismantleDefinition>& OutDefinitions);
+
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Item Data")
 	FString BuildItemIconObjectPath(const FTunaSweeperItemDefinition& ItemDefinition) const;
 
@@ -319,12 +446,16 @@ private:
 	bool LoadLootContainerTableJson();
 	bool LoadLootContainerContentsJson();
 	bool LoadShopDefinitionsJson();
+	bool LoadWorkbenchRecipesJson();
+	bool LoadWorkbenchDismantleRecipesJson();
 	void ResetLoadedItemData();
 	FString GetItemTableJsonPath() const;
 	FString GetItemNameStringsCsvPath() const;
 	FString GetLootContainerTableJsonPath() const;
 	FString GetLootContainerContentsJsonPath() const;
 	FString GetShopDefinitionsJsonPath() const;
+	FString GetWorkbenchRecipesJsonPath() const;
+	FString GetWorkbenchDismantleRecipesJsonPath() const;
 
 	UPROPERTY(Transient)
 	TMap<int32, FTunaSweeperItemDefinition> ItemDefinitionsById;
@@ -340,6 +471,18 @@ private:
 
 	UPROPERTY(Transient)
 	TMap<int32, FTunaSweeperShopDefinition> ShopDefinitionsById;
+
+	UPROPERTY(Transient)
+	TMap<FName, FTunaSweeperWorkbenchRecipeDefinition> WorkbenchRecipeDefinitionsById;
+
+	UPROPERTY(Transient)
+	TArray<FName> WorkbenchRecipeIdsInLoadOrder;
+
+	UPROPERTY(Transient)
+	TMap<int32, FTunaSweeperWorkbenchDismantleDefinition> WorkbenchDismantleDefinitionsByItemId;
+
+	UPROPERTY(Transient)
+	TArray<int32> WorkbenchDismantleItemIdsInLoadOrder;
 
 	bool bItemDataLoaded = false;
 };

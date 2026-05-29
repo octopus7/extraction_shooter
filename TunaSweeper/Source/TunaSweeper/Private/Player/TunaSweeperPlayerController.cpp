@@ -1033,6 +1033,32 @@ bool ATunaSweeperPlayerController::TryHandleHoveredItemInteract()
 		return true;
 	}
 
+	if (GameHudWidget && GameHudWidget->IsWorkbenchPanelOpen())
+	{
+		const ETunaSweeperWorkbenchMode WorkbenchMode = GameHudWidget->GetWorkbenchPanelMode();
+		if (WorkbenchMode == ETunaSweeperWorkbenchMode::Craft &&
+			HoveredSlot.Source == ETunaSweeperItemSlotSource::WorkbenchRecipe)
+		{
+			TunaGameInstance->TryCraftActiveWorkbenchRecipe(HoveredSlot.SlotIndex);
+		}
+		else if (WorkbenchMode == ETunaSweeperWorkbenchMode::Dismantle)
+		{
+			TArray<FTunaSweeperItemStack> OverflowItems;
+			if (TunaGameInstance->TryDismantleWorkbenchItemInSlot(HoveredSlot, OverflowItems))
+			{
+				for (const FTunaSweeperItemStack& OverflowItem : OverflowItems)
+				{
+					SpawnDroppedPickupItem(OverflowItem.ItemId, OverflowItem.Quantity);
+				}
+			}
+		}
+		else if (WorkbenchMode == ETunaSweeperWorkbenchMode::BlueprintRegister)
+		{
+			TunaGameInstance->TryRegisterWorkbenchBlueprintFromSlot(HoveredSlot);
+		}
+		return true;
+	}
+
 	FTunaSweeperItemInstance HoveredItemInstance;
 	if (!TunaGameInstance->TryGetSlotItemInstance(HoveredSlot, HoveredItemInstance))
 	{
@@ -1659,6 +1685,67 @@ void ATunaSweeperPlayerController::OpenShopPanel(int32 ShopId)
 	{
 		GameHudWidget->ShowShopPanel(ShopId);
 		CancelPawnGameplayActions();
+	}
+}
+
+void ATunaSweeperPlayerController::OpenWorkbenchPanel(int32 WorkbenchId)
+{
+	OpenWorkbenchCraftPanel(WorkbenchId);
+}
+
+void ATunaSweeperPlayerController::OpenWorkbenchCraftPanel(int32 WorkbenchId)
+{
+	if (!IsBunkerMap())
+	{
+		return;
+	}
+
+	EnsureGameHudWidget();
+
+	if (GameHudWidget)
+	{
+		GameHudWidget->ShowWorkbenchPanel(WorkbenchId, ETunaSweeperWorkbenchMode::Craft);
+		CancelPawnGameplayActions();
+	}
+}
+
+void ATunaSweeperPlayerController::OpenWorkbenchDismantlePanel(int32 WorkbenchId)
+{
+	if (!IsBunkerMap())
+	{
+		return;
+	}
+
+	EnsureGameHudWidget();
+
+	if (GameHudWidget)
+	{
+		GameHudWidget->ShowWorkbenchPanel(WorkbenchId, ETunaSweeperWorkbenchMode::Dismantle);
+		CancelPawnGameplayActions();
+	}
+}
+
+void ATunaSweeperPlayerController::OpenWorkbenchBlueprintRegisterPanel(int32 WorkbenchId)
+{
+	if (!IsBunkerMap())
+	{
+		return;
+	}
+
+	EnsureGameHudWidget();
+
+	if (GameHudWidget)
+	{
+		GameHudWidget->ShowWorkbenchPanel(WorkbenchId, ETunaSweeperWorkbenchMode::BlueprintRegister);
+		CancelPawnGameplayActions();
+	}
+}
+
+void ATunaSweeperPlayerController::DropWorkbenchOverflowItems(const TArray<FTunaSweeperItemStack>& OverflowItems)
+{
+	for (const FTunaSweeperItemStack& OverflowItem : OverflowItems)
+	{
+		SpawnDroppedPickupItem(OverflowItem.ItemId, OverflowItem.Quantity);
 	}
 }
 

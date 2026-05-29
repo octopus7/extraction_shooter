@@ -18,6 +18,7 @@
 #include "Interaction/TunaSweeperShopActor.h"
 #include "Interaction/TunaSweeperStorageActor.h"
 #include "Interaction/TunaSweeperWarpPointActor.h"
+#include "Interaction/TunaSweeperWorkbenchActor.h"
 #include "Interaction/TunaSweeperWorldProgressActor.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/TunaSweeperPlayerController.h"
@@ -66,6 +67,14 @@ namespace TunaSweeperInteractionQuestEvents
 			return FName(TEXT("storage_open"));
 		case ETunaSweeperInteractionType::ShopOpen:
 			return FName(TEXT("shop_open"));
+		case ETunaSweeperInteractionType::WorkbenchOpen:
+			return FName(TEXT("workbench_open"));
+		case ETunaSweeperInteractionType::WorkbenchCraft:
+			return FName(TEXT("workbench_craft"));
+		case ETunaSweeperInteractionType::WorkbenchDismantle:
+			return FName(TEXT("workbench_dismantle"));
+		case ETunaSweeperInteractionType::WorkbenchBlueprintRegister:
+			return FName(TEXT("workbench_blueprint_register"));
 		default:
 			return NAME_None;
 		}
@@ -174,6 +183,18 @@ bool UTunaSweeperInteractionSubsystem::RequestInteraction(UTunaSweeperInteractab
 	case ETunaSweeperInteractionType::ShopOpen:
 		bHandled = HandleShopOpenInteraction(Interactable, InstigatorPawn);
 		break;
+	case ETunaSweeperInteractionType::WorkbenchOpen:
+		bHandled = HandleWorkbenchOpenInteraction(Interactable, InstigatorPawn);
+		break;
+	case ETunaSweeperInteractionType::WorkbenchCraft:
+		bHandled = HandleWorkbenchCraftInteraction(Interactable, InstigatorPawn);
+		break;
+	case ETunaSweeperInteractionType::WorkbenchDismantle:
+		bHandled = HandleWorkbenchDismantleInteraction(Interactable, InstigatorPawn);
+		break;
+	case ETunaSweeperInteractionType::WorkbenchBlueprintRegister:
+		bHandled = HandleWorkbenchBlueprintRegisterInteraction(Interactable, InstigatorPawn);
+		break;
 	default:
 		return false;
 	}
@@ -217,6 +238,18 @@ bool UTunaSweeperInteractionSubsystem::CanOfferInteraction(const UTunaSweeperInt
 	}
 
 	if (Interactable->GetInteractionType() == ETunaSweeperInteractionType::ShopOpen)
+	{
+		return TunaSweeperInteractionQuestEvents::IsBunkerMap(GetWorld());
+	}
+
+	if (Interactable->GetInteractionType() == ETunaSweeperInteractionType::WorkbenchOpen)
+	{
+		return TunaSweeperInteractionQuestEvents::IsBunkerMap(GetWorld());
+	}
+
+	if (Interactable->GetInteractionType() == ETunaSweeperInteractionType::WorkbenchCraft ||
+		Interactable->GetInteractionType() == ETunaSweeperInteractionType::WorkbenchDismantle ||
+		Interactable->GetInteractionType() == ETunaSweeperInteractionType::WorkbenchBlueprintRegister)
 	{
 		return TunaSweeperInteractionQuestEvents::IsBunkerMap(GetWorld());
 	}
@@ -507,6 +540,79 @@ bool UTunaSweeperInteractionSubsystem::HandleShopOpenInteraction(
 	}
 
 	TunaPlayerController->OpenShopPanel(ShopActor->GetShopId());
+	return true;
+}
+
+bool UTunaSweeperInteractionSubsystem::HandleWorkbenchOpenInteraction(
+	UTunaSweeperInteractableComponent* Interactable,
+	APawn* InstigatorPawn)
+{
+	return HandleWorkbenchCraftInteraction(Interactable, InstigatorPawn);
+}
+
+bool UTunaSweeperInteractionSubsystem::HandleWorkbenchCraftInteraction(
+	UTunaSweeperInteractableComponent* Interactable,
+	APawn* InstigatorPawn)
+{
+	const ATunaSweeperWorkbenchActor* WorkbenchActor = Interactable
+		? Cast<ATunaSweeperWorkbenchActor>(Interactable->GetOwner())
+		: nullptr;
+	if (!WorkbenchActor || !InstigatorPawn || !TunaSweeperInteractionQuestEvents::IsBunkerMap(GetWorld()))
+	{
+		return false;
+	}
+
+	ATunaSweeperPlayerController* TunaPlayerController = Cast<ATunaSweeperPlayerController>(InstigatorPawn->GetController());
+	if (!TunaPlayerController)
+	{
+		return false;
+	}
+
+	TunaPlayerController->OpenWorkbenchCraftPanel(WorkbenchActor->GetWorkbenchId());
+	return true;
+}
+
+bool UTunaSweeperInteractionSubsystem::HandleWorkbenchDismantleInteraction(
+	UTunaSweeperInteractableComponent* Interactable,
+	APawn* InstigatorPawn)
+{
+	const ATunaSweeperWorkbenchActor* WorkbenchActor = Interactable
+		? Cast<ATunaSweeperWorkbenchActor>(Interactable->GetOwner())
+		: nullptr;
+	if (!WorkbenchActor || !InstigatorPawn || !TunaSweeperInteractionQuestEvents::IsBunkerMap(GetWorld()))
+	{
+		return false;
+	}
+
+	ATunaSweeperPlayerController* TunaPlayerController = Cast<ATunaSweeperPlayerController>(InstigatorPawn->GetController());
+	if (!TunaPlayerController)
+	{
+		return false;
+	}
+
+	TunaPlayerController->OpenWorkbenchDismantlePanel(WorkbenchActor->GetWorkbenchId());
+	return true;
+}
+
+bool UTunaSweeperInteractionSubsystem::HandleWorkbenchBlueprintRegisterInteraction(
+	UTunaSweeperInteractableComponent* Interactable,
+	APawn* InstigatorPawn)
+{
+	const ATunaSweeperWorkbenchActor* WorkbenchActor = Interactable
+		? Cast<ATunaSweeperWorkbenchActor>(Interactable->GetOwner())
+		: nullptr;
+	if (!WorkbenchActor || !InstigatorPawn || !TunaSweeperInteractionQuestEvents::IsBunkerMap(GetWorld()))
+	{
+		return false;
+	}
+
+	ATunaSweeperPlayerController* TunaPlayerController = Cast<ATunaSweeperPlayerController>(InstigatorPawn->GetController());
+	if (!TunaPlayerController)
+	{
+		return false;
+	}
+
+	TunaPlayerController->OpenWorkbenchBlueprintRegisterPanel(WorkbenchActor->GetWorkbenchId());
 	return true;
 }
 

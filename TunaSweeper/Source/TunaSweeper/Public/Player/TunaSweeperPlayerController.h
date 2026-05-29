@@ -49,6 +49,21 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
 	void OpenShopPanel(int32 ShopId);
 
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
+	void OpenWorkbenchPanel(int32 WorkbenchId);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
+	void OpenWorkbenchCraftPanel(int32 WorkbenchId);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
+	void OpenWorkbenchDismantlePanel(int32 WorkbenchId);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
+	void OpenWorkbenchBlueprintRegisterPanel(int32 WorkbenchId);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Workbench")
+	void DropWorkbenchOverflowItems(const TArray<FTunaSweeperItemStack>& OverflowItems);
+
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Quest")
 	void OpenQuestPanel(FName QuestId);
 

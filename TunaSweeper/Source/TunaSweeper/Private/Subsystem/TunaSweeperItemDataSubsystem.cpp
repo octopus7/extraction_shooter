@@ -16,6 +16,8 @@ namespace TunaSweeperItemDataFiles
 	const TCHAR* LootContainerTableJsonRelativePath = TEXT("Data/LootContainerTable.json");
 	const TCHAR* LootContainerContentsJsonRelativePath = TEXT("Data/LootContainerContents.json");
 	const TCHAR* ShopDefinitionsJsonRelativePath = TEXT("Data/ShopDefinitions.json");
+	const TCHAR* WorkbenchRecipesJsonRelativePath = TEXT("Data/WorkbenchRecipes.json");
+	const TCHAR* WorkbenchDismantleRecipesJsonRelativePath = TEXT("Data/WorkbenchDismantleRecipes.json");
 
 	FString GetCsvCell(const TArray<const TCHAR*>& Row, int32 CellIndex)
 	{
@@ -77,12 +79,16 @@ bool UTunaSweeperItemDataSubsystem::LoadItemData(bool bForceReload)
 	const bool bLoadedLootContainerTable = LoadLootContainerTableJson();
 	const bool bLoadedLootContainerContents = LoadLootContainerContentsJson();
 	const bool bLoadedShopDefinitions = LoadShopDefinitionsJson();
+	const bool bLoadedWorkbenchRecipes = LoadWorkbenchRecipesJson();
+	const bool bLoadedWorkbenchDismantleRecipes = LoadWorkbenchDismantleRecipesJson();
 	bItemDataLoaded =
 		bLoadedItemTable &&
 		bLoadedNameStrings &&
 		bLoadedLootContainerTable &&
 		bLoadedLootContainerContents &&
-		bLoadedShopDefinitions;
+		bLoadedShopDefinitions &&
+		bLoadedWorkbenchRecipes &&
+		bLoadedWorkbenchDismantleRecipes;
 
 	if (!bItemDataLoaded)
 	{
@@ -404,6 +410,112 @@ int32 UTunaSweeperItemDataSubsystem::ResolveShopItemBuyPrice(
 	return 0;
 }
 
+bool UTunaSweeperItemDataSubsystem::TryGetWorkbenchRecipeDefinition(
+	FName RecipeId,
+	FTunaSweeperWorkbenchRecipeDefinition& OutDefinition)
+{
+	if (!EnsureItemDataLoaded())
+	{
+		OutDefinition = FTunaSweeperWorkbenchRecipeDefinition();
+		return false;
+	}
+
+	if (const FTunaSweeperWorkbenchRecipeDefinition* FoundDefinition = WorkbenchRecipeDefinitionsById.Find(RecipeId))
+	{
+		OutDefinition = *FoundDefinition;
+		return true;
+	}
+
+	OutDefinition = FTunaSweeperWorkbenchRecipeDefinition();
+	return false;
+}
+
+bool UTunaSweeperItemDataSubsystem::GetWorkbenchRecipeDefinitions(
+	int32 WorkbenchId,
+	TArray<FTunaSweeperWorkbenchRecipeDefinition>& OutDefinitions)
+{
+	if (!EnsureItemDataLoaded())
+	{
+		OutDefinitions.Reset();
+		return false;
+	}
+
+	OutDefinitions.Reset();
+	const int32 SanitizedWorkbenchId = FMath::Max(1, WorkbenchId);
+	for (const FName& RecipeId : WorkbenchRecipeIdsInLoadOrder)
+	{
+		const FTunaSweeperWorkbenchRecipeDefinition* Definition = WorkbenchRecipeDefinitionsById.Find(RecipeId);
+		if (Definition && Definition->WorkbenchId == SanitizedWorkbenchId)
+		{
+			OutDefinitions.Add(*Definition);
+		}
+	}
+
+	return OutDefinitions.Num() > 0;
+}
+
+bool UTunaSweeperItemDataSubsystem::GetAllWorkbenchRecipeDefinitions(
+	TArray<FTunaSweeperWorkbenchRecipeDefinition>& OutDefinitions)
+{
+	if (!EnsureItemDataLoaded())
+	{
+		OutDefinitions.Reset();
+		return false;
+	}
+
+	OutDefinitions.Reset();
+	for (const FName& RecipeId : WorkbenchRecipeIdsInLoadOrder)
+	{
+		if (const FTunaSweeperWorkbenchRecipeDefinition* Definition = WorkbenchRecipeDefinitionsById.Find(RecipeId))
+		{
+			OutDefinitions.Add(*Definition);
+		}
+	}
+
+	return OutDefinitions.Num() > 0;
+}
+
+bool UTunaSweeperItemDataSubsystem::TryGetWorkbenchDismantleDefinition(
+	int32 SourceItemId,
+	FTunaSweeperWorkbenchDismantleDefinition& OutDefinition)
+{
+	if (!EnsureItemDataLoaded())
+	{
+		OutDefinition = FTunaSweeperWorkbenchDismantleDefinition();
+		return false;
+	}
+
+	if (const FTunaSweeperWorkbenchDismantleDefinition* FoundDefinition = WorkbenchDismantleDefinitionsByItemId.Find(SourceItemId))
+	{
+		OutDefinition = *FoundDefinition;
+		return true;
+	}
+
+	OutDefinition = FTunaSweeperWorkbenchDismantleDefinition();
+	return false;
+}
+
+bool UTunaSweeperItemDataSubsystem::GetAllWorkbenchDismantleDefinitions(
+	TArray<FTunaSweeperWorkbenchDismantleDefinition>& OutDefinitions)
+{
+	if (!EnsureItemDataLoaded())
+	{
+		OutDefinitions.Reset();
+		return false;
+	}
+
+	OutDefinitions.Reset();
+	for (const int32 SourceItemId : WorkbenchDismantleItemIdsInLoadOrder)
+	{
+		if (const FTunaSweeperWorkbenchDismantleDefinition* Definition = WorkbenchDismantleDefinitionsByItemId.Find(SourceItemId))
+		{
+			OutDefinitions.Add(*Definition);
+		}
+	}
+
+	return OutDefinitions.Num() > 0;
+}
+
 FString UTunaSweeperItemDataSubsystem::BuildItemIconObjectPath(const FTunaSweeperItemDefinition& ItemDefinition) const
 {
 	const FString IconAssetName = FPaths::GetBaseFilename(ItemDefinition.IconFileName);
@@ -466,6 +578,7 @@ bool UTunaSweeperItemDataSubsystem::LoadItemTableJson()
 		FString DescriptionStringKey;
 		FString IconFileName;
 		FString CategoryTag;
+		FString BlueprintRecipeId;
 		FString EquipmentSlotTag;
 		FString WeaponTypeTag;
 		FString AttachmentSlotTag;
@@ -501,6 +614,12 @@ bool UTunaSweeperItemDataSubsystem::LoadItemTableJson()
 		if ((*JsonObject)->TryGetStringField(TEXT("category_tag"), CategoryTag))
 		{
 			ItemDefinition.CategoryTag = FName(*CategoryTag.TrimStartAndEnd());
+		}
+		if ((*JsonObject)->TryGetStringField(TEXT("blueprint_recipe_id"), BlueprintRecipeId) ||
+			(*JsonObject)->TryGetStringField(TEXT("workbench_recipe_id"), BlueprintRecipeId) ||
+			(*JsonObject)->TryGetStringField(TEXT("unlock_recipe_id"), BlueprintRecipeId))
+		{
+			ItemDefinition.BlueprintRecipeId = FName(*BlueprintRecipeId.TrimStartAndEnd());
 		}
 		if ((*JsonObject)->TryGetStringField(TEXT("equipment_slot_tag"), EquipmentSlotTag))
 		{
@@ -994,6 +1113,289 @@ bool UTunaSweeperItemDataSubsystem::LoadShopDefinitionsJson()
 	return bHasValidRows;
 }
 
+bool UTunaSweeperItemDataSubsystem::LoadWorkbenchRecipesJson()
+{
+	FString JsonContent;
+	const FString WorkbenchRecipesJsonPath = GetWorkbenchRecipesJsonPath();
+	if (!FPaths::FileExists(WorkbenchRecipesJsonPath))
+	{
+		return true;
+	}
+
+	if (!FFileHelper::LoadFileToString(JsonContent, *WorkbenchRecipesJsonPath))
+	{
+		UE_LOG(LogTunaSweeperItemData, Error, TEXT("Failed to read workbench recipes JSON: %s"), *WorkbenchRecipesJsonPath);
+		return false;
+	}
+
+	TArray<TSharedPtr<FJsonValue>> JsonRows;
+	const TSharedRef<TJsonReader<>> JsonReader = TJsonReaderFactory<>::Create(JsonContent);
+	if (!FJsonSerializer::Deserialize(JsonReader, JsonRows))
+	{
+		UE_LOG(LogTunaSweeperItemData, Error, TEXT("Failed to parse workbench recipes JSON: %s"), *WorkbenchRecipesJsonPath);
+		return false;
+	}
+
+	bool bHasValidRows = false;
+	for (int32 RowIndex = 0; RowIndex < JsonRows.Num(); ++RowIndex)
+	{
+		const TSharedPtr<FJsonObject>* JsonObject = nullptr;
+		if (!JsonRows[RowIndex].IsValid() || !JsonRows[RowIndex]->TryGetObject(JsonObject) || !JsonObject || !JsonObject->IsValid())
+		{
+			UE_LOG(LogTunaSweeperItemData, Warning, TEXT("Skipping workbench recipe row %d: row is not an object."), RowIndex);
+			continue;
+		}
+
+		FString RecipeIdString;
+		double NumericRecipeId = 0.0;
+		if (!(*JsonObject)->TryGetStringField(TEXT("recipe_id"), RecipeIdString) &&
+			!(*JsonObject)->TryGetStringField(TEXT("id"), RecipeIdString))
+		{
+			if ((*JsonObject)->TryGetNumberField(TEXT("id"), NumericRecipeId))
+			{
+				RecipeIdString = FString::Printf(TEXT("%d"), static_cast<int32>(NumericRecipeId));
+			}
+		}
+
+		double NumericWorkbenchId = 1.0;
+		double NumericOutputItemId = INDEX_NONE;
+		double NumericOutputQuantity = 1.0;
+		FString NameStringKey;
+		const TArray<TSharedPtr<FJsonValue>>* IngredientsArray = nullptr;
+		JsonObject->Get()->TryGetNumberField(TEXT("workbench_id"), NumericWorkbenchId);
+		JsonObject->Get()->TryGetStringField(TEXT("name_string_key"), NameStringKey);
+		JsonObject->Get()->TryGetNumberField(TEXT("output_quantity"), NumericOutputQuantity) ||
+			JsonObject->Get()->TryGetNumberField(TEXT("result_quantity"), NumericOutputQuantity) ||
+			JsonObject->Get()->TryGetNumberField(TEXT("quantity"), NumericOutputQuantity);
+		if (!JsonObject->Get()->TryGetNumberField(TEXT("output_item_id"), NumericOutputItemId) &&
+			!JsonObject->Get()->TryGetNumberField(TEXT("result_item_id"), NumericOutputItemId) &&
+			!JsonObject->Get()->TryGetNumberField(TEXT("item_id"), NumericOutputItemId))
+		{
+			UE_LOG(LogTunaSweeperItemData, Warning, TEXT("Skipping workbench recipe row %d: output item id is missing."), RowIndex);
+			continue;
+		}
+
+		if (!JsonObject->Get()->TryGetArrayField(TEXT("ingredients"), IngredientsArray) || !IngredientsArray)
+		{
+			UE_LOG(LogTunaSweeperItemData, Warning, TEXT("Skipping workbench recipe row %d: ingredients are missing."), RowIndex);
+			continue;
+		}
+
+		FTunaSweeperWorkbenchRecipeDefinition Definition;
+		Definition.RecipeId = FName(*RecipeIdString.TrimStartAndEnd());
+		Definition.WorkbenchId = FMath::Max(1, static_cast<int32>(NumericWorkbenchId));
+		Definition.NameStringKey = FName(*NameStringKey.TrimStartAndEnd());
+		Definition.OutputItemId = static_cast<int32>(NumericOutputItemId);
+		Definition.OutputQuantity = FMath::Max(1, static_cast<int32>(NumericOutputQuantity));
+		JsonObject->Get()->TryGetBoolField(TEXT("auto_unlocked"), Definition.bAutoUnlocked) ||
+			JsonObject->Get()->TryGetBoolField(TEXT("unlocked"), Definition.bAutoUnlocked);
+
+		if (Definition.RecipeId.IsNone())
+		{
+			Definition.RecipeId = FName(*FString::Printf(TEXT("workbench_%d_item_%d"), Definition.WorkbenchId, Definition.OutputItemId));
+		}
+
+		if (Definition.OutputItemId == INDEX_NONE || !ItemDefinitionsById.Contains(Definition.OutputItemId))
+		{
+			UE_LOG(LogTunaSweeperItemData, Warning, TEXT("Skipping workbench recipe %s: output item id %d is unknown."), *Definition.RecipeId.ToString(), Definition.OutputItemId);
+			continue;
+		}
+
+		for (const TSharedPtr<FJsonValue>& IngredientValue : *IngredientsArray)
+		{
+			const TSharedPtr<FJsonObject>* IngredientObject = nullptr;
+			if (!IngredientValue.IsValid() || !IngredientValue->TryGetObject(IngredientObject) || !IngredientObject || !IngredientObject->IsValid())
+			{
+				continue;
+			}
+
+			double NumericItemId = INDEX_NONE;
+			double NumericQuantity = 1.0;
+			if (!(*IngredientObject)->TryGetNumberField(TEXT("item_id"), NumericItemId))
+			{
+				continue;
+			}
+			(*IngredientObject)->TryGetNumberField(TEXT("quantity"), NumericQuantity) ||
+				(*IngredientObject)->TryGetNumberField(TEXT("count"), NumericQuantity) ||
+				(*IngredientObject)->TryGetNumberField(TEXT("required_quantity"), NumericQuantity);
+
+			FTunaSweeperWorkbenchIngredient Ingredient;
+			Ingredient.ItemId = static_cast<int32>(NumericItemId);
+			Ingredient.Quantity = FMath::Max(1, static_cast<int32>(NumericQuantity));
+			if (Ingredient.ItemId == INDEX_NONE || !ItemDefinitionsById.Contains(Ingredient.ItemId))
+			{
+				UE_LOG(LogTunaSweeperItemData, Warning, TEXT("Skipping unknown ingredient item id %d in workbench recipe %s."), Ingredient.ItemId, *Definition.RecipeId.ToString());
+				continue;
+			}
+
+			FTunaSweeperWorkbenchIngredient* ExistingIngredient = Definition.Ingredients.FindByPredicate(
+				[&Ingredient](const FTunaSweeperWorkbenchIngredient& Candidate)
+				{
+					return Candidate.ItemId == Ingredient.ItemId;
+				});
+			if (ExistingIngredient)
+			{
+				ExistingIngredient->Quantity += Ingredient.Quantity;
+			}
+			else
+			{
+				Definition.Ingredients.Add(Ingredient);
+			}
+		}
+
+		if (Definition.Ingredients.Num() <= 0)
+		{
+			UE_LOG(LogTunaSweeperItemData, Warning, TEXT("Skipping workbench recipe %s: no valid ingredients."), *Definition.RecipeId.ToString());
+			continue;
+		}
+
+		if (WorkbenchRecipeDefinitionsById.Contains(Definition.RecipeId))
+		{
+			UE_LOG(LogTunaSweeperItemData, Warning, TEXT("Duplicate workbench recipe id %s found. The later row will replace the earlier row."), *Definition.RecipeId.ToString());
+			WorkbenchRecipeIdsInLoadOrder.Remove(Definition.RecipeId);
+		}
+
+		WorkbenchRecipeDefinitionsById.Add(Definition.RecipeId, Definition);
+		WorkbenchRecipeIdsInLoadOrder.Add(Definition.RecipeId);
+		bHasValidRows = true;
+	}
+
+	if (!bHasValidRows)
+	{
+		UE_LOG(LogTunaSweeperItemData, Error, TEXT("Workbench recipes JSON has no valid rows: %s"), *WorkbenchRecipesJsonPath);
+	}
+
+	return bHasValidRows;
+}
+
+bool UTunaSweeperItemDataSubsystem::LoadWorkbenchDismantleRecipesJson()
+{
+	FString JsonContent;
+	const FString WorkbenchDismantleRecipesJsonPath = GetWorkbenchDismantleRecipesJsonPath();
+	if (!FPaths::FileExists(WorkbenchDismantleRecipesJsonPath))
+	{
+		return true;
+	}
+
+	if (!FFileHelper::LoadFileToString(JsonContent, *WorkbenchDismantleRecipesJsonPath))
+	{
+		UE_LOG(LogTunaSweeperItemData, Error, TEXT("Failed to read workbench dismantle recipes JSON: %s"), *WorkbenchDismantleRecipesJsonPath);
+		return false;
+	}
+
+	TArray<TSharedPtr<FJsonValue>> JsonRows;
+	const TSharedRef<TJsonReader<>> JsonReader = TJsonReaderFactory<>::Create(JsonContent);
+	if (!FJsonSerializer::Deserialize(JsonReader, JsonRows))
+	{
+		UE_LOG(LogTunaSweeperItemData, Error, TEXT("Failed to parse workbench dismantle recipes JSON: %s"), *WorkbenchDismantleRecipesJsonPath);
+		return false;
+	}
+
+	bool bHasValidRows = false;
+	for (int32 RowIndex = 0; RowIndex < JsonRows.Num(); ++RowIndex)
+	{
+		const TSharedPtr<FJsonObject>* JsonObject = nullptr;
+		if (!JsonRows[RowIndex].IsValid() || !JsonRows[RowIndex]->TryGetObject(JsonObject) || !JsonObject || !JsonObject->IsValid())
+		{
+			UE_LOG(LogTunaSweeperItemData, Warning, TEXT("Skipping workbench dismantle row %d: row is not an object."), RowIndex);
+			continue;
+		}
+
+		double NumericSourceItemId = INDEX_NONE;
+		if (!(*JsonObject)->TryGetNumberField(TEXT("source_item_id"), NumericSourceItemId) &&
+			!(*JsonObject)->TryGetNumberField(TEXT("input_item_id"), NumericSourceItemId) &&
+			!(*JsonObject)->TryGetNumberField(TEXT("item_id"), NumericSourceItemId))
+		{
+			UE_LOG(LogTunaSweeperItemData, Warning, TEXT("Skipping workbench dismantle row %d: source item id is missing."), RowIndex);
+			continue;
+		}
+
+		FTunaSweeperWorkbenchDismantleDefinition Definition;
+		Definition.SourceItemId = static_cast<int32>(NumericSourceItemId);
+		if (Definition.SourceItemId == INDEX_NONE || !ItemDefinitionsById.Contains(Definition.SourceItemId))
+		{
+			UE_LOG(LogTunaSweeperItemData, Warning, TEXT("Skipping workbench dismantle row %d: source item id %d is unknown."), RowIndex, Definition.SourceItemId);
+			continue;
+		}
+
+		const TArray<TSharedPtr<FJsonValue>>* ResultArray = nullptr;
+		if (!(*JsonObject)->TryGetArrayField(TEXT("results"), ResultArray) &&
+			!(*JsonObject)->TryGetArrayField(TEXT("outputs"), ResultArray))
+		{
+			UE_LOG(LogTunaSweeperItemData, Warning, TEXT("Skipping workbench dismantle row %d: results are missing."), RowIndex);
+			continue;
+		}
+		if (!ResultArray)
+		{
+			continue;
+		}
+
+		for (const TSharedPtr<FJsonValue>& ResultValue : *ResultArray)
+		{
+			const TSharedPtr<FJsonObject>* ResultObject = nullptr;
+			if (!ResultValue.IsValid() || !ResultValue->TryGetObject(ResultObject) || !ResultObject || !ResultObject->IsValid())
+			{
+				continue;
+			}
+
+			double NumericItemId = INDEX_NONE;
+			double NumericQuantity = 1.0;
+			if (!(*ResultObject)->TryGetNumberField(TEXT("item_id"), NumericItemId))
+			{
+				continue;
+			}
+			(*ResultObject)->TryGetNumberField(TEXT("quantity"), NumericQuantity) ||
+				(*ResultObject)->TryGetNumberField(TEXT("count"), NumericQuantity);
+
+			FTunaSweeperItemStack ResultStack;
+			ResultStack.ItemId = static_cast<int32>(NumericItemId);
+			ResultStack.Quantity = FMath::Max(1, static_cast<int32>(NumericQuantity));
+			if (ResultStack.ItemId == INDEX_NONE || !ItemDefinitionsById.Contains(ResultStack.ItemId))
+			{
+				UE_LOG(LogTunaSweeperItemData, Warning, TEXT("Skipping unknown dismantle result item id %d for source item %d."), ResultStack.ItemId, Definition.SourceItemId);
+				continue;
+			}
+
+			FTunaSweeperItemStack* ExistingResult = Definition.Results.FindByPredicate(
+				[&ResultStack](const FTunaSweeperItemStack& Candidate)
+				{
+					return Candidate.ItemId == ResultStack.ItemId;
+				});
+			if (ExistingResult)
+			{
+				ExistingResult->Quantity += ResultStack.Quantity;
+			}
+			else
+			{
+				Definition.Results.Add(ResultStack);
+			}
+		}
+
+		if (Definition.Results.Num() <= 0)
+		{
+			UE_LOG(LogTunaSweeperItemData, Warning, TEXT("Skipping workbench dismantle source item %d: no valid results."), Definition.SourceItemId);
+			continue;
+		}
+
+		if (WorkbenchDismantleDefinitionsByItemId.Contains(Definition.SourceItemId))
+		{
+			UE_LOG(LogTunaSweeperItemData, Warning, TEXT("Duplicate workbench dismantle source item id %d found. The later row will replace the earlier row."), Definition.SourceItemId);
+			WorkbenchDismantleItemIdsInLoadOrder.Remove(Definition.SourceItemId);
+		}
+
+		WorkbenchDismantleDefinitionsByItemId.Add(Definition.SourceItemId, Definition);
+		WorkbenchDismantleItemIdsInLoadOrder.Add(Definition.SourceItemId);
+		bHasValidRows = true;
+	}
+
+	if (!bHasValidRows)
+	{
+		UE_LOG(LogTunaSweeperItemData, Error, TEXT("Workbench dismantle recipes JSON has no valid rows: %s"), *WorkbenchDismantleRecipesJsonPath);
+	}
+
+	return bHasValidRows;
+}
+
 void UTunaSweeperItemDataSubsystem::ResetLoadedItemData()
 {
 	ItemDefinitionsById.Reset();
@@ -1001,6 +1403,10 @@ void UTunaSweeperItemDataSubsystem::ResetLoadedItemData()
 	LootContainerDefinitionsById.Reset();
 	LootContainerContentsById.Reset();
 	ShopDefinitionsById.Reset();
+	WorkbenchRecipeDefinitionsById.Reset();
+	WorkbenchRecipeIdsInLoadOrder.Reset();
+	WorkbenchDismantleDefinitionsByItemId.Reset();
+	WorkbenchDismantleItemIdsInLoadOrder.Reset();
 	bItemDataLoaded = false;
 }
 
@@ -1027,4 +1433,14 @@ FString UTunaSweeperItemDataSubsystem::GetLootContainerContentsJsonPath() const
 FString UTunaSweeperItemDataSubsystem::GetShopDefinitionsJsonPath() const
 {
 	return FPaths::Combine(FPaths::ProjectContentDir(), TunaSweeperItemDataFiles::ShopDefinitionsJsonRelativePath);
+}
+
+FString UTunaSweeperItemDataSubsystem::GetWorkbenchRecipesJsonPath() const
+{
+	return FPaths::Combine(FPaths::ProjectContentDir(), TunaSweeperItemDataFiles::WorkbenchRecipesJsonRelativePath);
+}
+
+FString UTunaSweeperItemDataSubsystem::GetWorkbenchDismantleRecipesJsonPath() const
+{
+	return FPaths::Combine(FPaths::ProjectContentDir(), TunaSweeperItemDataFiles::WorkbenchDismantleRecipesJsonRelativePath);
 }

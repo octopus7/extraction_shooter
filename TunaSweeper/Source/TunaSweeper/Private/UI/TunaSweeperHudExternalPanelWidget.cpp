@@ -3,6 +3,7 @@
 #include "Components/Widget.h"
 #include "UI/TunaSweeperLootContainerWidget.h"
 #include "UI/TunaSweeperUIFont.h"
+#include "UI/TunaSweeperWorkbenchPanelWidget.h"
 
 void UTunaSweeperHudExternalPanelWidget::NativeConstruct()
 {
@@ -47,6 +48,20 @@ void UTunaSweeperHudExternalPanelWidget::SetShopContainer(int32 ShopId)
 	}
 }
 
+void UTunaSweeperHudExternalPanelWidget::SetWorkbenchContainer(int32 WorkbenchId, ETunaSweeperWorkbenchMode WorkbenchMode)
+{
+	SetExternalPanelMode(ETunaSweeperHudExternalPanelMode::Workbench);
+
+	if (LootContainerWidget)
+	{
+		LootContainerWidget->SetWorkbenchView(WorkbenchId, WorkbenchMode);
+	}
+	if (WorkbenchPanelWidget)
+	{
+		WorkbenchPanelWidget->SetWorkbenchContext(WorkbenchId, WorkbenchMode);
+	}
+}
+
 void UTunaSweeperHudExternalPanelWidget::ApplyPanelMode()
 {
 	if (LootingBoxPanel)
@@ -54,7 +69,8 @@ void UTunaSweeperHudExternalPanelWidget::ApplyPanelMode()
 		const bool bShowContainerPanel =
 			PanelMode == ETunaSweeperHudExternalPanelMode::LootingBox ||
 			PanelMode == ETunaSweeperHudExternalPanelMode::Storage ||
-			PanelMode == ETunaSweeperHudExternalPanelMode::Shop;
+			PanelMode == ETunaSweeperHudExternalPanelMode::Shop ||
+			(PanelMode == ETunaSweeperHudExternalPanelMode::Workbench && !WorkbenchPanelWidget);
 		LootingBoxPanel->SetVisibility(bShowContainerPanel ? ESlateVisibility::SelfHitTestInvisible : ESlateVisibility::Collapsed);
 	}
 
@@ -66,5 +82,20 @@ void UTunaSweeperHudExternalPanelWidget::ApplyPanelMode()
 	if (StoragePanel)
 	{
 		StoragePanel->SetVisibility(ESlateVisibility::Collapsed);
+	}
+
+	if (WorkbenchPanel)
+	{
+		WorkbenchPanel->SetVisibility(
+			PanelMode == ETunaSweeperHudExternalPanelMode::Workbench && WorkbenchPanelWidget
+				? ESlateVisibility::SelfHitTestInvisible
+				: ESlateVisibility::Collapsed);
+	}
+	else if (WorkbenchPanelWidget)
+	{
+		WorkbenchPanelWidget->SetVisibility(
+			PanelMode == ETunaSweeperHudExternalPanelMode::Workbench
+				? ESlateVisibility::SelfHitTestInvisible
+				: ESlateVisibility::Collapsed);
 	}
 }

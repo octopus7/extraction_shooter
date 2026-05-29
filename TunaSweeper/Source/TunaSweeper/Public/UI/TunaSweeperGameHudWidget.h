@@ -78,6 +78,11 @@ public:
 	void ShowShopPanel(int32 ShopId);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
+	void ShowWorkbenchPanel(
+		int32 WorkbenchId,
+		ETunaSweeperWorkbenchMode WorkbenchMode = ETunaSweeperWorkbenchMode::Craft);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
 	void ShowMemoPanel(int32 MemoId);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
@@ -97,6 +102,12 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|HUD")
 	bool IsShopPanelOpen() const;
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|HUD")
+	bool IsWorkbenchPanelOpen() const;
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|HUD")
+	ETunaSweeperWorkbenchMode GetWorkbenchPanelMode() const;
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Shop")
 	bool TrySellSelectedShopItem();

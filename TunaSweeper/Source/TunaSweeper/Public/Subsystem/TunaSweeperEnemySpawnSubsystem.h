@@ -21,6 +21,7 @@ class ATunaSweeperSelfDestructInteractableActor;
 class ATunaSweeperShopActor;
 class ATunaSweeperTransparentObstacleActor;
 class ATunaSweeperWarpPointActor;
+class ATunaSweeperWorkbenchActor;
 class ATunaSweeperWorldProgressActor;
 class UMaterialInterface;
 class UMediaSource;
@@ -113,7 +114,8 @@ public:
 		ExplosiveBarrel,
 		StaticMeshProp,
 		ShootingPracticeDummy,
-		Shop
+		Shop,
+		Workbench
 	};
 
 private:
@@ -220,6 +222,7 @@ private:
 		int32 ContainerDefinitionId = INDEX_NONE;
 		int32 ContentsId = INDEX_NONE;
 		int32 ShopId = 1;
+		int32 WorkbenchId = 1;
 		float MinSpawnRadius = 160.0f;
 		float MaxSpawnRadius = 420.0f;
 		float SpawnTraceHeight = 800.0f;

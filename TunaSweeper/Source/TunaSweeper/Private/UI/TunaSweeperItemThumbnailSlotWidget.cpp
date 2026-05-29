@@ -100,7 +100,10 @@ FReply UTunaSweeperItemThumbnailSlotWidget::NativeOnMouseButtonDown(
 {
 	if (!CachedTileData.bIsEmpty)
 	{
-		if (CachedTileData.Source == ETunaSweeperItemSlotSource::Shop)
+		if (CachedTileData.Source == ETunaSweeperItemSlotSource::Shop ||
+			CachedTileData.Source == ETunaSweeperItemSlotSource::WorkbenchRecipe ||
+			CachedTileData.Source == ETunaSweeperItemSlotSource::WorkbenchDismantleItem ||
+			CachedTileData.Source == ETunaSweeperItemSlotSource::WorkbenchBlueprintItem)
 		{
 			return FReply::Handled();
 		}
@@ -118,7 +121,10 @@ FReply UTunaSweeperItemThumbnailSlotWidget::NativeOnMouseButtonUp(
 {
 	if (!CachedTileData.bIsEmpty && InMouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
 	{
-		if (CachedTileData.Source == ETunaSweeperItemSlotSource::Shop)
+		if (CachedTileData.Source == ETunaSweeperItemSlotSource::Shop ||
+			CachedTileData.Source == ETunaSweeperItemSlotSource::WorkbenchRecipe ||
+			CachedTileData.Source == ETunaSweeperItemSlotSource::WorkbenchDismantleItem ||
+			CachedTileData.Source == ETunaSweeperItemSlotSource::WorkbenchBlueprintItem)
 		{
 			return FReply::Handled();
 		}
@@ -155,7 +161,10 @@ void UTunaSweeperItemThumbnailSlotWidget::NativeOnDragDetected(
 		return;
 	}
 
-	if (CachedTileData.Source == ETunaSweeperItemSlotSource::Shop)
+	if (CachedTileData.Source == ETunaSweeperItemSlotSource::Shop ||
+		CachedTileData.Source == ETunaSweeperItemSlotSource::WorkbenchRecipe ||
+		CachedTileData.Source == ETunaSweeperItemSlotSource::WorkbenchDismantleItem ||
+		CachedTileData.Source == ETunaSweeperItemSlotSource::WorkbenchBlueprintItem)
 	{
 		OutOperation = nullptr;
 		return;
@@ -286,6 +295,25 @@ void UTunaSweeperItemThumbnailSlotWidget::ApplyTileData()
 					FText::AsNumber(FMath::Max(0, CachedTileData.ShopStockQuantity)),
 					FText::AsNumber(FMath::Max(0, CachedTileData.ShopTotalStockQuantity)),
 					FText::AsNumber(FMath::Max(0, CachedTileData.ShopPrice)));
+			}
+			else if (CachedTileData.Source == ETunaSweeperItemSlotSource::WorkbenchRecipe)
+			{
+				QuantityText = CachedTileData.bCanCraftWorkbenchRecipe
+					? FText::Format(FText::FromString(TEXT("x{0}\nOK")), FText::AsNumber(CachedTileData.ItemStack.Quantity))
+					: FText::Format(
+						FText::FromString(TEXT("x{0}\n-{1}")),
+						FText::AsNumber(CachedTileData.ItemStack.Quantity),
+						FText::AsNumber(FMath::Max(0, CachedTileData.WorkbenchMissingIngredientCount)));
+			}
+			else if (CachedTileData.Source == ETunaSweeperItemSlotSource::WorkbenchDismantleItem)
+			{
+				QuantityText = FText::Format(FText::FromString(TEXT("x{0}\nDIS")), FText::AsNumber(CachedTileData.ItemStack.Quantity));
+			}
+			else if (CachedTileData.Source == ETunaSweeperItemSlotSource::WorkbenchBlueprintItem)
+			{
+				QuantityText = CachedTileData.bCanRegisterWorkbenchBlueprint
+					? FText::Format(FText::FromString(TEXT("x{0}\nREG")), FText::AsNumber(CachedTileData.ItemStack.Quantity))
+					: FText::Format(FText::FromString(TEXT("x{0}\nLOCK")), FText::AsNumber(CachedTileData.ItemStack.Quantity));
 			}
 			else
 			{
