@@ -2742,32 +2742,57 @@
 
 ## 2026-05-29 18:06:49 (elapsed: 00:13:11)
 
-- Implement the workbench system.
-- Work in a separate worktree without affecting the main branch.
-- Write class code only and do not build.
-- Keep the work waiting for merge until explicitly instructed to merge.
+- 작업대 시스템을 구현할 것.
+- 별도 워크트리에서 작업하고 메인 브랜치에는 영향을 주지 말 것.
+- 클래스 코드만 작성하고 빌드는 하지 말 것.
+- 명시적으로 머지하라고 하기 전까지 코드만 작성하고 머징 대기 상태로 둘 것.
 
 ## 2026-05-29 18:09:52 (elapsed: 00:16:14)
 
-- Split workbench actions into craft, dismantle, and blueprint registration.
-- Leave repair unimplemented with only a code comment.
-- Show the interaction display names as 제조, 분해, and 설계도 등록.
-- Craft UI should show finished products on the left, materials on the right, a downward arrow, and output thumbnail/count/name.
-- Missing material counts should be red; disabled craft button gray; enabled craft button blue.
-- Dismantle UI should show inventory and storage in a connected left panel with visible headers, while equipment is hidden.
-- Selecting a dismantle item should show results on the right; results go to inventory and overflow drops to the floor.
-- Blueprint-category items should be visible, and crafting should unlock from default recipes, quest rewards, or acquired/registered blueprints.
+- 작업대 동작을 제조, 분해, 설계도 등록으로 나눌 것.
+- 수리는 미구현 상태로 두고 코드 주석만 남길 것.
+- 작업대 상호작용 표시명은 제조, 분해, 설계도 등록으로 노출할 것.
+- 제조 UI는 좌측 완제품 목록, 우측 재료와 아래 화살표 및 완제품 썸네일/수량/이름 정보를 표시할 것.
+- 부족한 제조 재료 숫자는 붉게, 제조 불가 버튼은 회색, 제조 가능 버튼은 푸르게 표시할 것.
+- 분해 UI는 인벤토리와 창고가 이어진 좌측 목록을 보이되 각 헤더 명칭은 표시하고 장비영역은 숨길 것.
+- 분해 선택 시 우측에 분해 결과를 표시하고, 분해 결과는 인벤토리에 넣되 공간이 부족하면 바닥에 버릴 것.
+- 설계도 분류 아이템을 표시하고, 제조는 기본 제공 레시피 또는 퀘스트 보상/설계도 획득으로 해금되게 할 것.
 
 ## 2026-05-29 18:37:02 (elapsed: 00:43:24)
 
-- Merge the workbench system branch into main.
-- After a successful merge, review whether the temporary worktree can be deleted.
+- 작업대 시스템 브랜치를 메인으로 머지할 것.
+- 머지가 성공하면 임시 작업용 워크트리를 삭제해도 되는지 검토할 것.
 
 ## 2026-05-29 18:39:56 (elapsed: 00:46:18)
 
-- Re-check because the uncommitted changes on main have been committed.
+- 메인 브랜치의 미커밋 변경을 커밋했으니 다시 확인할 것.
 
 ## 2026-05-29 18:45:04 (elapsed: 00:51:26)
 
-- Build the project.
-- Continue with WBP and follow-up work after the build.
+- 프로젝트를 빌드할 것.
+- 빌드 후 WBP와 후속 작업을 진행할 것.
+
+## 2026-05-29 18:55:33 (elapsed: 01:01:55)
+
+- 명시적으로 커밋하라고 지시하기 전에는 스테이징하거나 커밋하지 말 것.
+- 이전 작업대 WBP 커밋은 예외로 넘어갈 것.
+
+## 2026-05-29 18:56:31 (elapsed: 01:02:53)
+
+- 벙커에 작업대 액터를 배치할 것.
+- 작업대 액터 배치는 JSON으로 제어되게 할 것.
+
+## 2026-05-29 18:57:07 (elapsed: 01:03:29)
+
+- 요청 문서는 한국어로 작성할 것.
+- 이미 영어로 작성된 요청 로그는 한국어로 번역할 것.
+
+## 2026-05-29 18:58:55 (elapsed: 01:05:17)
+
+- 작업대 액터의 블루프린트도 생성할 것.
+- 벙커 작업대 JSON 배치는 네이티브 클래스가 아니라 작업대 블루프린트 클래스를 참조하게 할 것.
+
+## 2026-05-29 19:03:42 (elapsed: 01:10:04)
+
+- 프로젝트를 빌드할 것.
+- 빌드가 끝나면 언리얼 에디터를 열 것.
