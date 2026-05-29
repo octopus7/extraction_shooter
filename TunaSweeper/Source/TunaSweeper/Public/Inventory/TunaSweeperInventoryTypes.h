@@ -12,6 +12,9 @@ enum class ETunaSweeperItemSlotSource : uint8
 	LootContainer UMETA(DisplayName = "Loot Container"),
 	Storage UMETA(DisplayName = "Storage"),
 	Shop UMETA(DisplayName = "Shop"),
+	WorkbenchRecipe UMETA(DisplayName = "Workbench Recipe"),
+	WorkbenchDismantleItem UMETA(DisplayName = "Workbench Dismantle Item"),
+	WorkbenchBlueprintItem UMETA(DisplayName = "Workbench Blueprint Item"),
 	SelectedWeaponAttachment UMETA(DisplayName = "Selected Weapon Attachment"),
 	UsableQuickSlot UMETA(DisplayName = "Usable Quick Slot")
 };

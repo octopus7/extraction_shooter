@@ -513,6 +513,19 @@ bool UTunaSweeperQuestSubsystem::ClaimQuestReward(FName QuestId)
 		}
 	}
 
+	if (Definition->Rewards.WorkbenchRecipeUnlocks.Num() > 0)
+	{
+		if (!TunaGameInstance)
+		{
+			return false;
+		}
+
+		for (const FName& RecipeId : Definition->Rewards.WorkbenchRecipeUnlocks)
+		{
+			TunaGameInstance->UnlockWorkbenchRecipe(RecipeId, false);
+		}
+	}
+
 	CoinBalance += FMath::Max(0, Definition->Rewards.Coins);
 	SetQuestState(QuestId, ETunaSweeperQuestState::RewardCompleted);
 	if (TrackedQuestId == QuestId)
@@ -986,6 +999,24 @@ bool UTunaSweeperQuestSubsystem::LoadQuestDefinitionsJson()
 			for (const FName& FacilityId : HousingFacilityUnlocks)
 			{
 				Definition.Rewards.HousingFacilityUnlocks.AddUnique(FacilityId);
+			}
+
+			TArray<FName> WorkbenchRecipeUnlocks;
+			TunaSweeperQuestData::ReadNameArrayField(
+				*RewardObject,
+				TEXT("workbench_recipes"),
+				WorkbenchRecipeUnlocks);
+			for (const FName& RecipeId : WorkbenchRecipeUnlocks)
+			{
+				Definition.Rewards.WorkbenchRecipeUnlocks.AddUnique(RecipeId);
+			}
+			TunaSweeperQuestData::ReadNameArrayField(
+				*RewardObject,
+				TEXT("workbench_recipe_unlocks"),
+				WorkbenchRecipeUnlocks);
+			for (const FName& RecipeId : WorkbenchRecipeUnlocks)
+			{
+				Definition.Rewards.WorkbenchRecipeUnlocks.AddUnique(RecipeId);
 			}
 		}
 

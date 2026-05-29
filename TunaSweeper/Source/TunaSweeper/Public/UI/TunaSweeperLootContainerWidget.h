@@ -27,6 +27,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Shop")
 	void SetShopView(int32 ShopId);
 
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Workbench")
+	void SetWorkbenchView(
+		int32 WorkbenchId,
+		ETunaSweeperWorkbenchMode WorkbenchMode = ETunaSweeperWorkbenchMode::Craft);
+
 protected:
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
@@ -61,6 +66,12 @@ private:
 
 	UPROPERTY(Transient)
 	int32 ActiveShopId = INDEX_NONE;
+
+	UPROPERTY(Transient)
+	int32 ActiveWorkbenchId = INDEX_NONE;
+
+	UPROPERTY(Transient)
+	ETunaSweeperWorkbenchMode ActiveWorkbenchMode = ETunaSweeperWorkbenchMode::Craft;
 
 	UPROPERTY(Transient)
 	TArray<TObjectPtr<UObject>> TileObjects;

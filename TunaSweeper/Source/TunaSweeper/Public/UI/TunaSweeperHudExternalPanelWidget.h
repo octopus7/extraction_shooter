@@ -8,6 +8,7 @@
 
 class UWidget;
 class UTunaSweeperLootContainerWidget;
+class UTunaSweeperWorkbenchPanelWidget;
 
 UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API UTunaSweeperHudExternalPanelWidget : public UUserWidget
@@ -30,6 +31,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
 	void SetShopContainer(int32 ShopId);
 
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
+	void SetWorkbenchContainer(
+		int32 WorkbenchId,
+		ETunaSweeperWorkbenchMode WorkbenchMode = ETunaSweeperWorkbenchMode::Craft);
+
 protected:
 	virtual void NativeConstruct() override;
 
@@ -41,6 +47,12 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
 	TObjectPtr<UWidget> StoragePanel;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
+	TObjectPtr<UWidget> WorkbenchPanel;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
+	TObjectPtr<UTunaSweeperWorkbenchPanelWidget> WorkbenchPanelWidget;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
 	TObjectPtr<UTunaSweeperLootContainerWidget> LootContainerWidget;

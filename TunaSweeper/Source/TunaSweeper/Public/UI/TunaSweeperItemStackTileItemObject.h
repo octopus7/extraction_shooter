@@ -53,6 +53,36 @@ struct TUNASWEEPER_API FTunaSweeperItemStackTileData
 	int32 ShopPrice = 0;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Tile")
+	int32 WorkbenchId = INDEX_NONE;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Tile")
+	FName WorkbenchRecipeId = NAME_None;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Tile")
+	FText WorkbenchIngredientText;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Tile")
+	int32 WorkbenchMissingIngredientCount = 0;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Tile")
+	bool bCanCraftWorkbenchRecipe = false;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Tile")
+	FText WorkbenchDismantleResultText;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Tile")
+	bool bCanDismantleWorkbenchItem = false;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Tile")
+	FName WorkbenchBlueprintRecipeId = NAME_None;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Tile")
+	bool bCanRegisterWorkbenchBlueprint = false;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Tile")
+	bool bWorkbenchBlueprintAlreadyUnlocked = false;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Tile")
 	bool bIsEmpty = true;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Tile")

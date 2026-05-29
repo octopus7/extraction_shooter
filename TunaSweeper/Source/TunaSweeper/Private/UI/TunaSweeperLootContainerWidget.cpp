@@ -148,6 +148,230 @@ namespace TunaSweeperLootContainerUi
 		return TileData;
 	}
 
+	FText BuildWorkbenchIngredientText(
+		const UTunaSweeperGameInstance* TunaGameInstance,
+		UTunaSweeperItemDataSubsystem* ItemDataSubsystem,
+		const FTunaSweeperWorkbenchRecipeView& RecipeView,
+		ETunaSweeperItemTextLanguage Language)
+	{
+		TArray<FString> IngredientLines;
+		for (const FTunaSweeperWorkbenchIngredientView& IngredientView : RecipeView.Ingredients)
+		{
+			FText IngredientName;
+			if (!ItemDataSubsystem ||
+				!ItemDataSubsystem->TryGetItemNameText(IngredientView.ItemId, Language, IngredientName))
+			{
+				IngredientName = FText::Format(
+					ResolveUiText(TunaGameInstance, TEXT("ui.common.item_fallback"), TEXT("Item {0}")),
+					FText::AsNumber(IngredientView.ItemId));
+			}
+
+			IngredientLines.Add(FString::Printf(
+				TEXT("%s %d/%d"),
+				*IngredientName.ToString(),
+				FMath::Max(0, IngredientView.AvailableQuantity),
+				FMath::Max(1, IngredientView.RequiredQuantity)));
+		}
+
+		return FText::FromString(FString::Join(IngredientLines, TEXT("\n")));
+	}
+
+	FTunaSweeperItemStackTileData BuildWorkbenchTileData(
+		const UTunaSweeperGameInstance* TunaGameInstance,
+		UTunaSweeperItemDataSubsystem* ItemDataSubsystem,
+		const FTunaSweeperWorkbenchRecipeView& RecipeView,
+		ETunaSweeperItemTextLanguage Language)
+	{
+		FTunaSweeperItemStackTileData TileData;
+		TileData.ItemStack.ItemId = RecipeView.OutputItemId;
+		TileData.ItemStack.Quantity = FMath::Max(1, RecipeView.OutputQuantity);
+		TileData.ItemInstance.ItemId = RecipeView.OutputItemId;
+		TileData.ItemInstance.Quantity = FMath::Max(1, RecipeView.OutputQuantity);
+		TileData.Source = ETunaSweeperItemSlotSource::WorkbenchRecipe;
+		TileData.SourceIndex = RecipeView.SlotIndex;
+		TileData.SlotReference.Source = ETunaSweeperItemSlotSource::WorkbenchRecipe;
+		TileData.SlotReference.SlotIndex = RecipeView.SlotIndex;
+		TileData.WorkbenchId = RecipeView.WorkbenchId;
+		TileData.WorkbenchRecipeId = RecipeView.RecipeId;
+		TileData.WorkbenchIngredientText = BuildWorkbenchIngredientText(
+			TunaGameInstance,
+			ItemDataSubsystem,
+			RecipeView,
+			Language);
+		TileData.WorkbenchMissingIngredientCount = RecipeView.MissingIngredientCount;
+		TileData.bCanCraftWorkbenchRecipe = RecipeView.bCanCraft;
+		TileData.bIsEmpty = RecipeView.OutputItemId == INDEX_NONE;
+
+		if (!TileData.bIsEmpty && ItemDataSubsystem)
+		{
+			FTunaSweeperItemDefinition ItemDefinition;
+			if (ItemDataSubsystem->TryGetItemDefinition(RecipeView.OutputItemId, ItemDefinition))
+			{
+				TileData.ItemDefinition = ItemDefinition;
+				TileData.bHasItemDefinition = true;
+
+				FText DisplayName;
+				if (ItemDataSubsystem->TryGetItemNameTextByKey(ItemDefinition.NameStringKey, Language, DisplayName))
+				{
+					TileData.DisplayName = DisplayName;
+				}
+
+				const FString IconObjectPath = ItemDataSubsystem->BuildItemIconObjectPath(ItemDefinition);
+				if (!IconObjectPath.IsEmpty())
+				{
+					TileData.IconTexture = TSoftObjectPtr<UTexture2D>(FSoftObjectPath(IconObjectPath));
+				}
+
+				FText DescriptionText;
+				if (ItemDataSubsystem->TryGetItemTextByKey(ItemDefinition.DescriptionStringKey, Language, DescriptionText))
+				{
+					TileData.DescriptionText = DescriptionText;
+				}
+			}
+		}
+
+		if (!TileData.bIsEmpty && TileData.DisplayName.IsEmpty())
+		{
+			TileData.DisplayName = FText::Format(
+				ResolveUiText(TunaGameInstance, TEXT("ui.common.item_fallback"), TEXT("Item {0}")),
+				FText::AsNumber(RecipeView.OutputItemId));
+		}
+
+		return TileData;
+	}
+
+	FText BuildItemStackLinesText(
+		const UTunaSweeperGameInstance* TunaGameInstance,
+		UTunaSweeperItemDataSubsystem* ItemDataSubsystem,
+		const TArray<FTunaSweeperItemStack>& ItemStacks,
+		ETunaSweeperItemTextLanguage Language)
+	{
+		TArray<FString> ResultLines;
+		for (const FTunaSweeperItemStack& ItemStack : ItemStacks)
+		{
+			FText ItemName;
+			if (!ItemDataSubsystem ||
+				!ItemDataSubsystem->TryGetItemNameText(ItemStack.ItemId, Language, ItemName))
+			{
+				ItemName = FText::Format(
+					ResolveUiText(TunaGameInstance, TEXT("ui.common.item_fallback"), TEXT("Item {0}")),
+					FText::AsNumber(ItemStack.ItemId));
+			}
+
+			ResultLines.Add(FString::Printf(
+				TEXT("%s x%d"),
+				*ItemName.ToString(),
+				FMath::Max(1, ItemStack.Quantity)));
+		}
+
+		return FText::FromString(FString::Join(ResultLines, TEXT("\n")));
+	}
+
+	FTunaSweeperItemStackTileData BuildWorkbenchDismantleTileData(
+		const UTunaSweeperGameInstance* TunaGameInstance,
+		UTunaSweeperItemDataSubsystem* ItemDataSubsystem,
+		const FTunaSweeperWorkbenchDismantleCandidateView& CandidateView,
+		ETunaSweeperItemTextLanguage Language)
+	{
+		FTunaSweeperItemStackTileData TileData = BuildTileData(
+			TunaGameInstance,
+			ItemDataSubsystem,
+			FTunaSweeperItemInstance(),
+			ETunaSweeperItemSlotSource::WorkbenchDismantleItem,
+			CandidateView.ListIndex,
+			Language);
+		TileData.ItemStack.ItemId = CandidateView.ItemId;
+		TileData.ItemStack.Quantity = FMath::Max(1, CandidateView.Quantity);
+		TileData.ItemInstance.ItemId = CandidateView.ItemId;
+		TileData.ItemInstance.Quantity = FMath::Max(1, CandidateView.Quantity);
+		TileData.Source = ETunaSweeperItemSlotSource::WorkbenchDismantleItem;
+		TileData.SourceIndex = CandidateView.ListIndex;
+		TileData.SlotReference = CandidateView.SlotReference;
+		TileData.WorkbenchDismantleResultText = BuildItemStackLinesText(
+			TunaGameInstance,
+			ItemDataSubsystem,
+			CandidateView.Results,
+			Language);
+		TileData.bCanDismantleWorkbenchItem = CandidateView.bCanDismantle;
+		TileData.bIsEmpty = CandidateView.ItemId == INDEX_NONE;
+
+		if (!TileData.bIsEmpty && ItemDataSubsystem)
+		{
+			FTunaSweeperItemDefinition ItemDefinition;
+			if (ItemDataSubsystem->TryGetItemDefinition(CandidateView.ItemId, ItemDefinition))
+			{
+				TileData.ItemDefinition = ItemDefinition;
+				TileData.bHasItemDefinition = true;
+				ItemDataSubsystem->TryGetItemNameTextByKey(ItemDefinition.NameStringKey, Language, TileData.DisplayName);
+				ItemDataSubsystem->TryGetItemTextByKey(ItemDefinition.DescriptionStringKey, Language, TileData.DescriptionText);
+				const FString IconObjectPath = ItemDataSubsystem->BuildItemIconObjectPath(ItemDefinition);
+				if (!IconObjectPath.IsEmpty())
+				{
+					TileData.IconTexture = TSoftObjectPtr<UTexture2D>(FSoftObjectPath(IconObjectPath));
+				}
+			}
+		}
+
+		if (!TileData.bIsEmpty && TileData.DisplayName.IsEmpty())
+		{
+			TileData.DisplayName = FText::Format(
+				ResolveUiText(TunaGameInstance, TEXT("ui.common.item_fallback"), TEXT("Item {0}")),
+				FText::AsNumber(CandidateView.ItemId));
+		}
+		return TileData;
+	}
+
+	FTunaSweeperItemStackTileData BuildWorkbenchBlueprintTileData(
+		const UTunaSweeperGameInstance* TunaGameInstance,
+		UTunaSweeperItemDataSubsystem* ItemDataSubsystem,
+		const FTunaSweeperWorkbenchBlueprintItemView& BlueprintItemView,
+		ETunaSweeperItemTextLanguage Language)
+	{
+		FTunaSweeperItemStackTileData TileData = BuildTileData(
+			TunaGameInstance,
+			ItemDataSubsystem,
+			FTunaSweeperItemInstance(),
+			ETunaSweeperItemSlotSource::WorkbenchBlueprintItem,
+			BlueprintItemView.ListIndex,
+			Language);
+		TileData.ItemStack.ItemId = BlueprintItemView.ItemId;
+		TileData.ItemStack.Quantity = FMath::Max(1, BlueprintItemView.Quantity);
+		TileData.ItemInstance.ItemId = BlueprintItemView.ItemId;
+		TileData.ItemInstance.Quantity = FMath::Max(1, BlueprintItemView.Quantity);
+		TileData.Source = ETunaSweeperItemSlotSource::WorkbenchBlueprintItem;
+		TileData.SourceIndex = BlueprintItemView.ListIndex;
+		TileData.SlotReference = BlueprintItemView.SlotReference;
+		TileData.WorkbenchBlueprintRecipeId = BlueprintItemView.RecipeId;
+		TileData.bCanRegisterWorkbenchBlueprint = BlueprintItemView.bCanRegister;
+		TileData.bWorkbenchBlueprintAlreadyUnlocked = BlueprintItemView.bAlreadyUnlocked;
+		TileData.bIsEmpty = BlueprintItemView.ItemId == INDEX_NONE;
+
+		if (!TileData.bIsEmpty && ItemDataSubsystem)
+		{
+			FTunaSweeperItemDefinition ItemDefinition;
+			if (ItemDataSubsystem->TryGetItemDefinition(BlueprintItemView.ItemId, ItemDefinition))
+			{
+				TileData.ItemDefinition = ItemDefinition;
+				TileData.bHasItemDefinition = true;
+				ItemDataSubsystem->TryGetItemNameTextByKey(ItemDefinition.NameStringKey, Language, TileData.DisplayName);
+				ItemDataSubsystem->TryGetItemTextByKey(ItemDefinition.DescriptionStringKey, Language, TileData.DescriptionText);
+				const FString IconObjectPath = ItemDataSubsystem->BuildItemIconObjectPath(ItemDefinition);
+				if (!IconObjectPath.IsEmpty())
+				{
+					TileData.IconTexture = TSoftObjectPtr<UTexture2D>(FSoftObjectPath(IconObjectPath));
+				}
+			}
+		}
+
+		if (!TileData.bIsEmpty && TileData.DisplayName.IsEmpty())
+		{
+			TileData.DisplayName = FText::Format(
+				ResolveUiText(TunaGameInstance, TEXT("ui.common.item_fallback"), TEXT("Item {0}")),
+				FText::AsNumber(BlueprintItemView.ItemId));
+		}
+		return TileData;
+	}
+
 	bool TryMoveFromHoveredDropSlot(
 		UTunaSweeperGameInstance* TunaGameInstance,
 		UTunaSweeperItemDragDropOperation* ItemDragOperation)
@@ -332,6 +556,19 @@ namespace TunaSweeperLootContainerUi
 
 		return ResolveUiText(TunaGameInstance, TEXT("ui.shop.title"), TEXT("\uC0C1\uC810"));
 	}
+
+	FText GetWorkbenchDisplayName(const UTunaSweeperGameInstance* TunaGameInstance, ETunaSweeperWorkbenchMode WorkbenchMode)
+	{
+		switch (WorkbenchMode)
+		{
+		case ETunaSweeperWorkbenchMode::Dismantle:
+			return ResolveUiText(TunaGameInstance, TEXT("ui.workbench.dismantle"), TEXT("\uBD84\uD574"));
+		case ETunaSweeperWorkbenchMode::BlueprintRegister:
+			return ResolveUiText(TunaGameInstance, TEXT("ui.workbench.blueprint_register"), TEXT("\uC124\uACC4\uB3C4 \uB4F1\uB85D"));
+		default:
+			return ResolveUiText(TunaGameInstance, TEXT("ui.workbench.craft"), TEXT("\uC81C\uC870"));
+		}
+	}
 }
 
 void UTunaSweeperLootContainerWidget::NativeConstruct()
@@ -366,7 +603,10 @@ bool UTunaSweeperLootContainerWidget::TryResolveDropSlotFromCursor(
 	FTunaSweeperItemSlotReference& OutSlotReference)
 {
 	UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
-	if (SlotSource == ETunaSweeperItemSlotSource::Shop)
+	if (SlotSource == ETunaSweeperItemSlotSource::Shop ||
+		SlotSource == ETunaSweeperItemSlotSource::WorkbenchRecipe ||
+		SlotSource == ETunaSweeperItemSlotSource::WorkbenchDismantleItem ||
+		SlotSource == ETunaSweeperItemSlotSource::WorkbenchBlueprintItem)
 	{
 		return false;
 	}
@@ -389,6 +629,8 @@ void UTunaSweeperLootContainerWidget::SetContainerInstance(const FTunaSweeperLoo
 {
 	SlotSource = ETunaSweeperItemSlotSource::LootContainer;
 	ActiveShopId = INDEX_NONE;
+	ActiveWorkbenchId = INDEX_NONE;
+	ActiveWorkbenchMode = ETunaSweeperWorkbenchMode::Craft;
 	ContainerInstance = InContainerInstance;
 	PopulateContainerItems();
 }
@@ -397,6 +639,8 @@ void UTunaSweeperLootContainerWidget::SetStorageView()
 {
 	SlotSource = ETunaSweeperItemSlotSource::Storage;
 	ActiveShopId = INDEX_NONE;
+	ActiveWorkbenchId = INDEX_NONE;
+	ActiveWorkbenchMode = ETunaSweeperWorkbenchMode::Craft;
 	ContainerInstance = FTunaSweeperLootContainerInstance();
 	PopulateContainerItems();
 }
@@ -405,6 +649,22 @@ void UTunaSweeperLootContainerWidget::SetShopView(int32 ShopId)
 {
 	SlotSource = ETunaSweeperItemSlotSource::Shop;
 	ActiveShopId = ShopId;
+	ActiveWorkbenchId = INDEX_NONE;
+	ActiveWorkbenchMode = ETunaSweeperWorkbenchMode::Craft;
+	ContainerInstance = FTunaSweeperLootContainerInstance();
+	PopulateContainerItems();
+}
+
+void UTunaSweeperLootContainerWidget::SetWorkbenchView(int32 WorkbenchId, ETunaSweeperWorkbenchMode WorkbenchMode)
+{
+	SlotSource = WorkbenchMode == ETunaSweeperWorkbenchMode::Dismantle
+		? ETunaSweeperItemSlotSource::WorkbenchDismantleItem
+		: (WorkbenchMode == ETunaSweeperWorkbenchMode::BlueprintRegister
+			? ETunaSweeperItemSlotSource::WorkbenchBlueprintItem
+			: ETunaSweeperItemSlotSource::WorkbenchRecipe);
+	ActiveShopId = INDEX_NONE;
+	ActiveWorkbenchId = WorkbenchId;
+	ActiveWorkbenchMode = WorkbenchMode;
 	ContainerInstance = FTunaSweeperLootContainerInstance();
 	PopulateContainerItems();
 }
@@ -415,7 +675,12 @@ bool UTunaSweeperLootContainerWidget::NativeOnDrop(
 	UDragDropOperation* InOperation)
 {
 	UTunaSweeperItemDragDropOperation* ItemDragOperation = Cast<UTunaSweeperItemDragDropOperation>(InOperation);
-	if (SlotSource == ETunaSweeperItemSlotSource::Shop || !ItemDragOperation || ItemDragOperation->TileData.bIsEmpty)
+	if (SlotSource == ETunaSweeperItemSlotSource::Shop ||
+		SlotSource == ETunaSweeperItemSlotSource::WorkbenchRecipe ||
+		SlotSource == ETunaSweeperItemSlotSource::WorkbenchDismantleItem ||
+		SlotSource == ETunaSweeperItemSlotSource::WorkbenchBlueprintItem ||
+		!ItemDragOperation ||
+		ItemDragOperation->TileData.bIsEmpty)
 	{
 		return Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
 	}
@@ -464,12 +729,27 @@ void UTunaSweeperLootContainerWidget::PopulateContainerItems()
 
 	UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
 	TArray<FTunaSweeperShopItemView> ShopItems;
+	TArray<FTunaSweeperWorkbenchRecipeView> WorkbenchRecipes;
+	TArray<FTunaSweeperWorkbenchDismantleCandidateView> DismantleCandidates;
+	TArray<FTunaSweeperWorkbenchBlueprintItemView> BlueprintItems;
 	const TArray<FTunaSweeperInventorySlot>* Slots = nullptr;
 	if (TunaGameInstance)
 	{
 		if (SlotSource == ETunaSweeperItemSlotSource::Shop)
 		{
 			TunaGameInstance->GetActiveShopItems(ShopItems);
+		}
+		else if (SlotSource == ETunaSweeperItemSlotSource::WorkbenchRecipe)
+		{
+			TunaGameInstance->GetActiveWorkbenchRecipes(WorkbenchRecipes);
+		}
+		else if (SlotSource == ETunaSweeperItemSlotSource::WorkbenchDismantleItem)
+		{
+			TunaGameInstance->GetActiveWorkbenchDismantleCandidates(DismantleCandidates);
+		}
+		else if (SlotSource == ETunaSweeperItemSlotSource::WorkbenchBlueprintItem)
+		{
+			TunaGameInstance->GetActiveWorkbenchBlueprintItems(BlueprintItems);
 		}
 		else if (SlotSource == ETunaSweeperItemSlotSource::Storage)
 		{
@@ -480,14 +760,30 @@ void UTunaSweeperLootContainerWidget::PopulateContainerItems()
 			Slots = &TunaGameInstance->GetActiveLootContainerSlots();
 		}
 	}
-	const int32 Capacity = SlotSource == ETunaSweeperItemSlotSource::Shop
-		? ShopItems.Num()
-		: (Slots ? Slots->Num() : FMath::Max(0, ContainerInstance.Capacity));
-	const int32 OccupiedSlotCount = SlotSource == ETunaSweeperItemSlotSource::Shop
-		? ShopItems.Num()
-		: (Slots
-			? TunaSweeperLootContainerUi::CountOccupiedSlots(*Slots)
-			: TunaSweeperLootContainerUi::CountOccupiedStacks(ContainerInstance.Items));
+	int32 Capacity = Slots ? Slots->Num() : FMath::Max(0, ContainerInstance.Capacity);
+	int32 OccupiedSlotCount = Slots
+		? TunaSweeperLootContainerUi::CountOccupiedSlots(*Slots)
+		: TunaSweeperLootContainerUi::CountOccupiedStacks(ContainerInstance.Items);
+	if (SlotSource == ETunaSweeperItemSlotSource::Shop)
+	{
+		Capacity = ShopItems.Num();
+		OccupiedSlotCount = ShopItems.Num();
+	}
+	else if (SlotSource == ETunaSweeperItemSlotSource::WorkbenchRecipe)
+	{
+		Capacity = WorkbenchRecipes.Num();
+		OccupiedSlotCount = WorkbenchRecipes.Num();
+	}
+	else if (SlotSource == ETunaSweeperItemSlotSource::WorkbenchDismantleItem)
+	{
+		Capacity = DismantleCandidates.Num();
+		OccupiedSlotCount = DismantleCandidates.Num();
+	}
+	else if (SlotSource == ETunaSweeperItemSlotSource::WorkbenchBlueprintItem)
+	{
+		Capacity = BlueprintItems.Num();
+		OccupiedSlotCount = BlueprintItems.Num();
+	}
 	const int32 RowCount = FMath::Max(1, FMath::DivideAndRoundUp(Capacity, TunaSweeperLootContainerUi::ContainerTileColumnCount));
 	if (RootSizeBox)
 	{
@@ -508,6 +804,12 @@ void UTunaSweeperLootContainerWidget::PopulateContainerItems()
 				TunaGameInstance,
 				TitleItemDataSubsystem,
 				ActiveShopId);
+		}
+		else if (SlotSource == ETunaSweeperItemSlotSource::WorkbenchRecipe ||
+			SlotSource == ETunaSweeperItemSlotSource::WorkbenchDismantleItem ||
+			SlotSource == ETunaSweeperItemSlotSource::WorkbenchBlueprintItem)
+		{
+			DisplayName = TunaSweeperLootContainerUi::GetWorkbenchDisplayName(TunaGameInstance, ActiveWorkbenchMode);
 		}
 		else if (SlotSource == ETunaSweeperItemSlotSource::Storage)
 		{
@@ -557,19 +859,51 @@ void UTunaSweeperLootContainerWidget::PopulateContainerItems()
 			continue;
 		}
 
-		TileObject->Initialize(SlotSource == ETunaSweeperItemSlotSource::Shop && ShopItems.IsValidIndex(SlotIndex)
-			? TunaSweeperLootContainerUi::BuildShopTileData(
+		FTunaSweeperItemStackTileData TileData;
+		if (SlotSource == ETunaSweeperItemSlotSource::Shop && ShopItems.IsValidIndex(SlotIndex))
+		{
+			TileData = TunaSweeperLootContainerUi::BuildShopTileData(
 				TunaGameInstance,
 				ItemDataSubsystem,
 				ShopItems[SlotIndex],
-				Language)
-			: TunaSweeperLootContainerUi::BuildTileData(
+				Language);
+		}
+		else if (SlotSource == ETunaSweeperItemSlotSource::WorkbenchRecipe && WorkbenchRecipes.IsValidIndex(SlotIndex))
+		{
+			TileData = TunaSweeperLootContainerUi::BuildWorkbenchTileData(
+				TunaGameInstance,
+				ItemDataSubsystem,
+				WorkbenchRecipes[SlotIndex],
+				Language);
+		}
+		else if (SlotSource == ETunaSweeperItemSlotSource::WorkbenchDismantleItem && DismantleCandidates.IsValidIndex(SlotIndex))
+		{
+			TileData = TunaSweeperLootContainerUi::BuildWorkbenchDismantleTileData(
+				TunaGameInstance,
+				ItemDataSubsystem,
+				DismantleCandidates[SlotIndex],
+				Language);
+		}
+		else if (SlotSource == ETunaSweeperItemSlotSource::WorkbenchBlueprintItem && BlueprintItems.IsValidIndex(SlotIndex))
+		{
+			TileData = TunaSweeperLootContainerUi::BuildWorkbenchBlueprintTileData(
+				TunaGameInstance,
+				ItemDataSubsystem,
+				BlueprintItems[SlotIndex],
+				Language);
+		}
+		else
+		{
+			TileData = TunaSweeperLootContainerUi::BuildTileData(
 				TunaGameInstance,
 				ItemDataSubsystem,
 				ItemInstance,
 				SlotSource,
 				SlotIndex,
-				Language));
+				Language);
+		}
+
+		TileObject->Initialize(TileData);
 		TileObjects.Add(TileObject);
 		ContainerTileView->AddItem(TileObject);
 	}

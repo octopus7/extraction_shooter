@@ -568,9 +568,13 @@ void UTunaSweeperGameHudWidget::SetItemInfoPanelVisible(bool bVisible)
 void UTunaSweeperGameHudWidget::ShowExternalPanel(ETunaSweeperHudExternalPanelMode PanelMode)
 {
 	if (PanelMode != ETunaSweeperHudExternalPanelMode::LootingBox &&
+		PanelMode != ETunaSweeperHudExternalPanelMode::Storage &&
 		PanelMode != ETunaSweeperHudExternalPanelMode::Shop)
 	{
-		CloseLootContainerPanelIfOpen();
+		if (PanelMode != ETunaSweeperHudExternalPanelMode::Workbench)
+		{
+			CloseLootContainerPanelIfOpen();
+		}
 	}
 
 	if (PanelMode != ETunaSweeperHudExternalPanelMode::None)
@@ -689,6 +693,29 @@ void UTunaSweeperGameHudWidget::ShowShopPanel(int32 ShopId)
 	HandleSelectedInventoryItemChanged();
 }
 
+void UTunaSweeperGameHudWidget::ShowWorkbenchPanel(int32 WorkbenchId, ETunaSweeperWorkbenchMode WorkbenchMode)
+{
+	if (!IsBunkerMap())
+	{
+		return;
+	}
+
+	CloseLootContainerPanelIfOpen();
+
+	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
+	{
+		TunaGameInstance->SetActiveWorkbench(WorkbenchId, WorkbenchMode);
+	}
+
+	ShowExternalPanel(ETunaSweeperHudExternalPanelMode::Workbench);
+	if (ExternalPanelWidget)
+	{
+		ExternalPanelWidget->SetWorkbenchContainer(WorkbenchId, WorkbenchMode);
+	}
+
+	HandleSelectedInventoryItemChanged();
+}
+
 void UTunaSweeperGameHudWidget::ShowMemoPanel(int32 MemoId)
 {
 	SetHudMode(ETunaSweeperHudMode::Memo);
@@ -786,6 +813,21 @@ bool UTunaSweeperGameHudWidget::IsShopPanelOpen() const
 	return ActiveHudMode == ETunaSweeperHudMode::Inventory &&
 		ExternalPanelWidget &&
 		ExternalPanelWidget->GetExternalPanelMode() == ETunaSweeperHudExternalPanelMode::Shop;
+}
+
+bool UTunaSweeperGameHudWidget::IsWorkbenchPanelOpen() const
+{
+	return ActiveHudMode == ETunaSweeperHudMode::Inventory &&
+		ExternalPanelWidget &&
+		ExternalPanelWidget->GetExternalPanelMode() == ETunaSweeperHudExternalPanelMode::Workbench;
+}
+
+ETunaSweeperWorkbenchMode UTunaSweeperGameHudWidget::GetWorkbenchPanelMode() const
+{
+	const UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+	return TunaGameInstance && IsWorkbenchPanelOpen()
+		? TunaGameInstance->GetActiveWorkbenchMode()
+		: ETunaSweeperWorkbenchMode::Craft;
 }
 
 bool UTunaSweeperGameHudWidget::TrySellSelectedShopItem()
@@ -1436,6 +1478,13 @@ void UTunaSweeperGameHudWidget::CloseLootContainerPanelIfOpen()
 			TunaGameInstance->ClearActiveShop();
 		}
 		SetShopSellPanelVisible(false);
+	}
+	else if (ExternalPanelWidget->GetExternalPanelMode() == ETunaSweeperHudExternalPanelMode::Workbench)
+	{
+		if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
+		{
+			TunaGameInstance->ClearActiveWorkbench();
+		}
 	}
 
 	bClearExternalPanelModeAfterHide = true;

@@ -441,15 +441,42 @@ void UTunaSweeperItemHoverPromptWidget::ApplyTileData()
 	if (TakeActionText)
 	{
 		const bool bShopItem = CachedTileData.Source == ETunaSweeperItemSlotSource::Shop;
-		TakeActionText->SetText(bShopItem
-			? TunaSweeperItemHoverPrompt::ResolveUiText(
+		const bool bWorkbenchRecipe = CachedTileData.Source == ETunaSweeperItemSlotSource::WorkbenchRecipe;
+		const bool bWorkbenchDismantleItem = CachedTileData.Source == ETunaSweeperItemSlotSource::WorkbenchDismantleItem;
+		const bool bWorkbenchBlueprintItem = CachedTileData.Source == ETunaSweeperItemSlotSource::WorkbenchBlueprintItem;
+		FText ActionText = TunaSweeperItemHoverPrompt::ResolveUiText(
+			GetGameInstance<UTunaSweeperGameInstance>(),
+			TEXT("ui.item_hover.take"),
+			TEXT("\uC90D\uAE30/\uBC30\uCE58"));
+		if (bShopItem)
+		{
+			ActionText = TunaSweeperItemHoverPrompt::ResolveUiText(
 				GetGameInstance<UTunaSweeperGameInstance>(),
 				TEXT("ui.item_hover.buy"),
-				TEXT("F\ub85c \uad6c\ub9e4"))
-			: TunaSweeperItemHoverPrompt::ResolveUiText(
+				TEXT("F\ub85c \uad6c\ub9e4"));
+		}
+		else if (bWorkbenchRecipe)
+		{
+			ActionText = TunaSweeperItemHoverPrompt::ResolveUiText(
 				GetGameInstance<UTunaSweeperGameInstance>(),
-				TEXT("ui.item_hover.take"),
-				TEXT("\uC90D\uAE30/\uBC30\uCE58")));
+				TEXT("ui.item_hover.craft"),
+				TEXT("Craft"));
+		}
+		else if (bWorkbenchDismantleItem)
+		{
+			ActionText = TunaSweeperItemHoverPrompt::ResolveUiText(
+				GetGameInstance<UTunaSweeperGameInstance>(),
+				TEXT("ui.item_hover.dismantle"),
+				TEXT("Dismantle"));
+		}
+		else if (bWorkbenchBlueprintItem)
+		{
+			ActionText = TunaSweeperItemHoverPrompt::ResolveUiText(
+				GetGameInstance<UTunaSweeperGameInstance>(),
+				TEXT("ui.item_hover.register_blueprint"),
+				TEXT("Register"));
+		}
+		TakeActionText->SetText(ActionText);
 	}
 	if (DropKeyText)
 	{
@@ -465,14 +492,21 @@ void UTunaSweeperItemHoverPromptWidget::ApplyTileData()
 	if (DropActionRow)
 	{
 		DropActionRow->SetVisibility(
-			CachedTileData.Source == ETunaSweeperItemSlotSource::Shop
+			CachedTileData.Source == ETunaSweeperItemSlotSource::Shop ||
+			CachedTileData.Source == ETunaSweeperItemSlotSource::WorkbenchRecipe ||
+			CachedTileData.Source == ETunaSweeperItemSlotSource::WorkbenchDismantleItem ||
+			CachedTileData.Source == ETunaSweeperItemSlotSource::WorkbenchBlueprintItem
 				? ESlateVisibility::Collapsed
 				: ESlateVisibility::HitTestInvisible);
 	}
 	if (UseActionRow)
 	{
 		UseActionRow->SetVisibility(
-			CachedTileData.Source != ETunaSweeperItemSlotSource::Shop && CanUseCachedItem()
+			CachedTileData.Source != ETunaSweeperItemSlotSource::Shop &&
+			CachedTileData.Source != ETunaSweeperItemSlotSource::WorkbenchRecipe &&
+			CachedTileData.Source != ETunaSweeperItemSlotSource::WorkbenchDismantleItem &&
+			CachedTileData.Source != ETunaSweeperItemSlotSource::WorkbenchBlueprintItem &&
+			CanUseCachedItem()
 				? ESlateVisibility::HitTestInvisible
 				: ESlateVisibility::Collapsed);
 	}
@@ -572,6 +606,34 @@ FText UTunaSweeperItemHoverPromptWidget::BuildWeightText() const
 
 FText UTunaSweeperItemHoverPromptWidget::BuildPriceText() const
 {
+	if (CachedTileData.Source == ETunaSweeperItemSlotSource::WorkbenchRecipe)
+	{
+		return CachedTileData.WorkbenchIngredientText.IsEmpty()
+			? TunaSweeperItemHoverPrompt::ResolveUiText(
+				GetGameInstance<UTunaSweeperGameInstance>(),
+				TEXT("ui.workbench.no_ingredients"),
+				TEXT("No materials"))
+			: CachedTileData.WorkbenchIngredientText;
+	}
+	if (CachedTileData.Source == ETunaSweeperItemSlotSource::WorkbenchDismantleItem)
+	{
+		return CachedTileData.WorkbenchDismantleResultText.IsEmpty()
+			? TunaSweeperItemHoverPrompt::ResolveUiText(
+				GetGameInstance<UTunaSweeperGameInstance>(),
+				TEXT("ui.workbench.no_dismantle_results"),
+				TEXT("No dismantle results"))
+			: CachedTileData.WorkbenchDismantleResultText;
+	}
+	if (CachedTileData.Source == ETunaSweeperItemSlotSource::WorkbenchBlueprintItem)
+	{
+		return CachedTileData.bCanRegisterWorkbenchBlueprint
+			? FText::FromName(CachedTileData.WorkbenchBlueprintRecipeId)
+			: TunaSweeperItemHoverPrompt::ResolveUiText(
+				GetGameInstance<UTunaSweeperGameInstance>(),
+				TEXT("ui.workbench.blueprint_already_known"),
+				TEXT("Already registered"));
+	}
+
 	const int32 Price = CachedTileData.bHasItemDefinition
 		? (CachedTileData.Source == ETunaSweeperItemSlotSource::Shop
 			? FMath::Max(0, CachedTileData.ShopPrice)

@@ -174,6 +174,60 @@ struct TUNASWEEPER_API FTunaSweeperPlayerHudState
 	float GetCarryWeightMovementSpeedMultiplier() const;
 };
 
+USTRUCT(BlueprintType)
+struct TUNASWEEPER_API FTunaSweeperWorkbenchDismantleCandidateView
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Workbench")
+	FTunaSweeperItemSlotReference SlotReference;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Workbench")
+	int32 ListIndex = INDEX_NONE;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Workbench")
+	int32 ItemId = INDEX_NONE;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Workbench", meta = (ClampMin = "1", UIMin = "1"))
+	int32 Quantity = 1;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Workbench")
+	TArray<FTunaSweeperItemStack> Results;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Workbench")
+	bool bCanDismantle = false;
+};
+
+USTRUCT(BlueprintType)
+struct TUNASWEEPER_API FTunaSweeperWorkbenchBlueprintItemView
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Workbench")
+	FTunaSweeperItemSlotReference SlotReference;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Workbench")
+	int32 ListIndex = INDEX_NONE;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Workbench")
+	int32 ItemId = INDEX_NONE;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Workbench", meta = (ClampMin = "1", UIMin = "1"))
+	int32 Quantity = 1;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Workbench")
+	FName RecipeId = NAME_None;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Workbench")
+	bool bRecipeKnown = false;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Workbench")
+	bool bAlreadyUnlocked = false;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Workbench")
+	bool bCanRegister = false;
+};
+
 UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API UTunaSweeperGameInstance : public UGameInstance
 {
@@ -501,6 +555,67 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Shop")
 	bool TrySellItemInSlot(const FTunaSweeperItemSlotReference& SlotReference, int32& OutSalePrice);
 
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Workbench")
+	bool HasActiveWorkbench() const { return bHasActiveWorkbench; }
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Workbench")
+	int32 GetActiveWorkbenchId() const { return bHasActiveWorkbench ? ActiveWorkbenchId : INDEX_NONE; }
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Workbench")
+	ETunaSweeperWorkbenchMode GetActiveWorkbenchMode() const { return ActiveWorkbenchMode; }
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Workbench")
+	void SetActiveWorkbench(int32 WorkbenchId, ETunaSweeperWorkbenchMode WorkbenchMode = ETunaSweeperWorkbenchMode::Craft);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Workbench")
+	void SetActiveWorkbenchMode(ETunaSweeperWorkbenchMode WorkbenchMode);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Workbench")
+	void ClearActiveWorkbench();
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Workbench")
+	bool GetActiveWorkbenchRecipes(TArray<FTunaSweeperWorkbenchRecipeView>& OutRecipeViews);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Workbench")
+	bool TryGetActiveWorkbenchRecipeView(int32 RecipeSlotIndex, FTunaSweeperWorkbenchRecipeView& OutRecipeView);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Workbench")
+	bool CanCraftActiveWorkbenchRecipe(int32 RecipeSlotIndex);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Workbench")
+	bool TryCraftActiveWorkbenchRecipe(int32 RecipeSlotIndex, bool bSaveImmediately = true);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Workbench")
+	bool GetActiveWorkbenchDismantleCandidates(TArray<FTunaSweeperWorkbenchDismantleCandidateView>& OutCandidateViews);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Workbench")
+	bool TryGetWorkbenchDismantleCandidateFromSlot(
+		const FTunaSweeperItemSlotReference& SlotReference,
+		FTunaSweeperWorkbenchDismantleCandidateView& OutCandidateView);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Workbench")
+	bool TryDismantleWorkbenchItemInSlot(
+		const FTunaSweeperItemSlotReference& SlotReference,
+		TArray<FTunaSweeperItemStack>& OutOverflowItems,
+		bool bSaveImmediately = true);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Workbench")
+	bool GetActiveWorkbenchBlueprintItems(TArray<FTunaSweeperWorkbenchBlueprintItemView>& OutBlueprintItemViews);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Workbench")
+	bool TryRegisterWorkbenchBlueprintFromSlot(
+		const FTunaSweeperItemSlotReference& SlotReference,
+		bool bSaveImmediately = true);
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Workbench")
+	bool IsWorkbenchRecipeUnlocked(FName RecipeId) const;
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Workbench")
+	bool UnlockWorkbenchRecipe(FName RecipeId, bool bSaveImmediately = false);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Workbench")
+	void GetUnlockedWorkbenchRecipeIds(TArray<FName>& OutRecipeIds) const;
+
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|World Progress")
 	FTunaSweeperWorldProgressSaveData GetOrCreateWorldProgressState(
 		FName ObjectId,
@@ -609,6 +724,20 @@ private:
 		int32 SlotIndex,
 		const FTunaSweeperShopItemDefinition& ShopItemDefinition,
 		int32 StockQuantity);
+	FTunaSweeperWorkbenchRecipeView BuildWorkbenchRecipeView(
+		const FTunaSweeperWorkbenchRecipeDefinition& RecipeDefinition,
+		int32 RecipeSlotIndex) const;
+	bool IsWorkbenchRecipeDefinitionUnlocked(const FTunaSweeperWorkbenchRecipeDefinition& RecipeDefinition) const;
+	bool IsWorkbenchBlueprintItemDefinition(const FTunaSweeperItemDefinition& ItemDefinition) const;
+	bool IsWorkbenchItemSlotSourceAllowedForDismantle(ETunaSweeperItemSlotSource Source) const;
+	bool IsWorkbenchItemSlotSourceAllowedForBlueprintRegister(ETunaSweeperItemSlotSource Source) const;
+	bool TryConsumeSingleItemFromSlot(const FTunaSweeperItemSlotReference& SlotReference);
+	bool AddWorkbenchResultToInventoryOrOverflow(
+		int32 ItemId,
+		int32 Quantity,
+		TArray<FTunaSweeperItemStack>& InOutOverflowItems);
+	int32 CountWorkbenchIngredientItemById(int32 ItemId) const;
+	int32 ConsumeWorkbenchIngredientItemById(int32 ItemId, int32 RequestedAmount);
 	bool IsSellableItemSlotSource(ETunaSweeperItemSlotSource Source) const;
 	TArray<FTunaSweeperInventorySlot>* GetMutableSlotsForSource(ETunaSweeperItemSlotSource Source);
 	const TArray<FTunaSweeperInventorySlot>* GetSlotsForSource(ETunaSweeperItemSlotSource Source) const;
@@ -708,6 +837,15 @@ private:
 	bool bHasActiveShop = false;
 
 	UPROPERTY(Transient)
+	int32 ActiveWorkbenchId = INDEX_NONE;
+
+	UPROPERTY(Transient)
+	ETunaSweeperWorkbenchMode ActiveWorkbenchMode = ETunaSweeperWorkbenchMode::Craft;
+
+	UPROPERTY(Transient)
+	bool bHasActiveWorkbench = false;
+
+	UPROPERTY(Transient)
 	int32 RuntimeSelectedWeaponSlotNumber = 1;
 
 	UPROPERTY(Transient)
@@ -757,6 +895,9 @@ private:
 
 	UPROPERTY(Transient)
 	TSet<FName> UnlockedHousingFacilityIds;
+
+	UPROPERTY(Transient)
+	TSet<FName> UnlockedWorkbenchRecipeIds;
 
 	UPROPERTY(Transient)
 	TSet<int32> AcquiredMemoIds;
