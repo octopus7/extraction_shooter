@@ -46,12 +46,14 @@
 #include "InputCoreTypes.h"
 #include "InputMappingContext.h"
 #include "InputModifiers.h"
+#include "Interaction/TunaSweeperExplosiveBarrelActor.h"
 #include "Interaction/TunaSweeperInteractableComponent.h"
 #include "Interaction/TunaSweeperItemSpawnInteractableActor.h"
 #include "Interaction/TunaSweeperLevelTravelInteractableActor.h"
 #include "Interaction/TunaSweeperLootContainerActor.h"
 #include "Interaction/TunaSweeperLootContainerSpawnInteractableActor.h"
 #include "Interaction/TunaSweeperPickupItemActor.h"
+#include "Interaction/TunaSweeperSandbagCoverActor.h"
 #include "Interaction/TunaSweeperSelfDestructInteractableActor.h"
 #include "Interaction/TunaSweeperTransparentObstacleActor.h"
 #include "Interaction/TunaSweeperWarpPointActor.h"
@@ -63,10 +65,20 @@
 #include "Factories/MaterialFactoryNew.h"
 #include "Materials/Material.h"
 #include "Materials/MaterialInterface.h"
+#include "Materials/MaterialExpressionAbs.h"
+#include "Materials/MaterialExpressionAppendVector.h"
 #include "Materials/MaterialExpressionAdd.h"
+#include "Materials/MaterialExpressionConstant.h"
+#include "Materials/MaterialExpressionConstant2Vector.h"
 #include "Materials/MaterialExpressionComponentMask.h"
 #include "Materials/MaterialExpressionConstant3Vector.h"
+#include "Materials/MaterialExpressionDivide.h"
+#include "Materials/MaterialExpressionFresnel.h"
+#include "Materials/MaterialExpressionLength.h"
+#include "Materials/MaterialExpressionLinearInterpolate.h"
 #include "Materials/MaterialExpressionMultiply.h"
+#include "Materials/MaterialExpressionNormalize.h"
+#include "Materials/MaterialExpressionOneMinus.h"
 #include "Materials/MaterialExpressionPanner.h"
 #include "Materials/MaterialExpressionScalarParameter.h"
 #include "Materials/MaterialExpressionSaturate.h"
@@ -145,12 +157,16 @@ namespace TunaSweeperEditorSetup
 	const FString WorldProgressInteractionTaskId = TEXT("2026-05-19_CreateWorldProgressObstacleAssetsV1");
 	const FString WarpPointInteractionTaskId = TEXT("2026-05-25_CreateWarpPointInteractionAssetsV1");
 	const FString EnemyVisualMaterialTaskId = TEXT("2026-05-19_CreateEnemyAndContainerVisualMaterialsV3");
+	const FString ExplosiveBarrelTaskId = TEXT("2026-05-29_CreateExplosiveBarrelAssetsV3");
 	const FString RollingBomberBodyMaterialTaskId = TEXT("2026-05-28_CreateRollingBomberBodyGrayMaterialV1");
 	const FString RollingBomberLegMaterialTaskId = TEXT("2026-05-28_CreateRollingBomberLegMetalMaterialV1");
 	const FString RollingBomberChargeCylinderEffectTaskId = TEXT("2026-05-28_CreateRollingBomberChargeCylinderEffectV1");
+	const FString LocalExplosionEffectTaskId = TEXT("2026-05-29_CreateLocalExplosionFlipbookEffectV3");
+	const FString ExtractionSmokeSignalNiagaraSystemTaskId = TEXT("2026-05-29_CreateExtractionSmokeSignalNiagaraSystemV1");
 	const FString ProjectileHitEffectAssetTaskId = TEXT("2026-05-28_CreateProjectileHitEffectAssetsV1");
 	const FString WeaponSpreadRecoilAssetTaskId = TEXT("2026-05-28_CreateWeaponSpreadRecoilAssetsV1");
 	const FString BaseballBatAssetTaskId = TEXT("2026-05-28_CreateBaseballBatStaticMeshAssetsV1");
+	const FString SandbagCoverAssetTaskId = TEXT("2026-05-29_CreateSandbagCoverAssetsV1");
 	const FString VoxelMeshAssetTaskId = TEXT("2026-05-19_CreateSharedVoxelMeshAssetsV1");
 	const FString LumberjackMeleeSwingArcAssetTaskId = TEXT("2026-05-20_CreateLumberjackMeleeSwingArcAssetsV2");
 	const FString LedExpressionMaterialTaskId = TEXT("2026-05-26_CreateLedExpressionMaterialV1");
@@ -209,6 +225,11 @@ namespace TunaSweeperEditorSetup
 	const FString RollingBomberChargeCylinderMaskTextureAssetName = TEXT("T_RollingBomberChargeCylinderMask");
 	const FString RollingBomberChargeCylinderMaterialAssetName = TEXT("M_RollingBomberChargeCylinder");
 	const FString RollingBomberChargeCylinderMeshAssetName = TEXT("SM_RollingBomberChargeCylinder_Open");
+	const FString LocalExplosionFlipbookTextureAssetName = TEXT("T_LocalExplosionFlipbook");
+	const FString LocalExplosionFlipbookMaterialAssetName = TEXT("M_LocalExplosionFlipbook");
+	const FString LocalExplosionDistortionMaterialAssetName = TEXT("M_LocalExplosionDistortion");
+	const FString LocalExplosionSmokeMaterialAssetName = TEXT("M_LocalExplosionSmoke");
+	const FString ExtractionSmokeSignalNiagaraSystemAssetName = TEXT("NS_ExtractionSmokeSignal");
 	const FString ProjectileHitEffectDataAssetName = TEXT("DA_ProjectileHitEffects");
 	const FString ProjectileHitRedBurstActorAssetName = TEXT("BP_ProjectileHit_RedBurst");
 	const FString LumberjackMeleeSwingArcMaterialAssetName = TEXT("M_LumberjackMeleeSwingArc");
@@ -296,11 +317,21 @@ namespace TunaSweeperEditorSetup
 	const FString MemoStorageDeviceMaterialAssetName = TEXT("M_MemoStorageDevice");
 	const FString RollingBomberSpawnerTextureAssetName = TEXT("T_RollingBomberSpawner_Mechanic");
 	const FString RollingBomberSpawnerMaterialAssetName = TEXT("M_RollingBomberSpawner_Mechanic");
+	const FString SandbagCoverTextureAssetName = TEXT("T_SandbagCover_Burlap");
+	const FString SandbagCoverMaterialAssetName = TEXT("M_SandbagCover_Burlap");
+	const FString SandbagCoverOutlineMaterialAssetName = TEXT("M_SandbagCover_Outline");
+	const FString SandbagCoverAssetName = TEXT("BP_SandbagCover");
 	const FString TransparentObstacleAssetName = TEXT("BP_TransparentObstacle");
 	const FString WorldProgressBrokenBridgeAssetName = TEXT("BP_WorldProgress_BrokenBridge");
 	const FString WorldProgressRepairedBridgeAssetName = TEXT("BP_WorldProgress_RepairedBridge");
 	const FString BrokenBridgeVoxelMeshAssetName = TEXT("SM_Bridge_Broken_Voxel");
 	const FString RepairedBridgeVoxelMeshAssetName = TEXT("SM_Bridge_Repaired_Voxel");
+	const FString ExplosiveBarrelAssetName = TEXT("BP_ExplosiveBarrel");
+	const FString ExplosiveBarrelIntactMeshAssetName = TEXT("SM_ExplosiveBarrel_Intact");
+	const FString ExplosiveBarrelDestroyedMeshAssetName = TEXT("SM_ExplosiveBarrel_DestroyedBase");
+	const FString ExplosiveBarrelGrayMaterialAssetName = TEXT("M_ExplosiveBarrel_Gray");
+	const FString ExplosiveBarrelCharredMaterialAssetName = TEXT("M_ExplosiveBarrel_CharredGray");
+	const FString ExplosiveBarrelDetailMaterialAssetName = TEXT("M_ExplosiveBarrel_Detail");
 	const FString IntroMapPackagePath = TEXT("/Game/IntroMap");
 	const FString OpeningScenarioMapPackagePath = TEXT("/Game/OpeningScenarioMap");
 	const FString BunkerMapPackagePath = TEXT("/Game/BunkerMap");
@@ -814,7 +845,8 @@ namespace TunaSweeperEditorSetup
 		const FString& AssetName,
 		const FLinearColor& BaseColor,
 		float Roughness = 0.65f,
-		float Metallic = 0.0f)
+		float Metallic = 0.0f,
+		float Specular = 0.25f)
 	{
 		const FString ObjectPath = GetAssetObjectPath(AssetPath, AssetName);
 		UMaterial* Material = LoadObject<UMaterial>(nullptr, *ObjectPath);
@@ -862,7 +894,7 @@ namespace TunaSweeperEditorSetup
 		MaterialEditorOnly->Metallic.UseConstant = true;
 		MaterialEditorOnly->Metallic.Constant = Metallic;
 		MaterialEditorOnly->Specular.UseConstant = true;
-		MaterialEditorOnly->Specular.Constant = 0.25f;
+		MaterialEditorOnly->Specular.Constant = Specular;
 
 		Material->PostEditChange();
 		Material->MarkPackageDirty();
@@ -1117,7 +1149,7 @@ namespace TunaSweeperEditorSetup
 		Material->GetExpressionCollection().Empty();
 		Material->BlendMode = BLEND_Additive;
 		Material->SetShadingModel(MSM_Unlit);
-		Material->TwoSided = true;
+		Material->TwoSided = false;
 		Material->bUsedWithNiagaraMeshParticles = true;
 
 		UMaterialEditorOnlyData* MaterialEditorOnly = Material->GetEditorOnlyData();
@@ -2524,6 +2556,434 @@ namespace TunaSweeperEditorSetup
 			FLinearColor(0.48f, 0.52f, 0.54f, 1.0f),
 			0.32f,
 			1.0f) != nullptr;
+	}
+
+	FVector3f MakeBarrelVertex(float AngleRadians, float Radius, float Height)
+	{
+		return FVector3f(
+			FMath::Cos(AngleRadians) * Radius,
+			FMath::Sin(AngleRadians) * Radius,
+			Height);
+	}
+
+	FVector3f MakeBarrelRadialNormal(const FVector3f& Position)
+	{
+		const FVector3f Radial(Position.X, Position.Y, 0.0f);
+		return Radial.IsNearlyZero() ? FVector3f(1.0f, 0.0f, 0.0f) : Radial.GetSafeNormal();
+	}
+
+	void AddBarrelTriangle(
+		FMeshDescription& MeshDescription,
+		FStaticMeshAttributes& Attributes,
+		FPolygonGroupID PolygonGroupId,
+		const FVector3f& A,
+		const FVector3f& B,
+		const FVector3f& C,
+		const FVector2f& UvA,
+		const FVector2f& UvB,
+		const FVector2f& UvC,
+		const FVector3f& SurfaceNormal)
+	{
+		TVertexAttributesRef<FVector3f> VertexPositions = Attributes.GetVertexPositions();
+		TVertexInstanceAttributesRef<FVector3f> VertexInstanceNormals = Attributes.GetVertexInstanceNormals();
+		TVertexInstanceAttributesRef<FVector2f> VertexInstanceUVs = Attributes.GetVertexInstanceUVs();
+
+		const FVector3f Positions[] = { A, B, C };
+		const FVector2f UVs[] = { UvA, UvB, UvC };
+
+		TArray<FVertexInstanceID> VertexInstances;
+		VertexInstances.Reserve(UE_ARRAY_COUNT(Positions));
+		for (int32 Index = 0; Index < UE_ARRAY_COUNT(Positions); ++Index)
+		{
+			const FVertexID VertexId = MeshDescription.CreateVertex();
+			VertexPositions[VertexId] = Positions[Index];
+
+			const FVertexInstanceID VertexInstanceId = MeshDescription.CreateVertexInstance(VertexId);
+			VertexInstanceNormals[VertexInstanceId] = SurfaceNormal;
+			VertexInstanceUVs.Set(VertexInstanceId, 0, UVs[Index]);
+			VertexInstances.Add(VertexInstanceId);
+		}
+
+		MeshDescription.CreatePolygon(PolygonGroupId, VertexInstances);
+	}
+
+	void AddBarrelQuad(
+		FMeshDescription& MeshDescription,
+		FStaticMeshAttributes& Attributes,
+		FPolygonGroupID PolygonGroupId,
+		const FVector3f& A,
+		const FVector3f& B,
+		const FVector3f& C,
+		const FVector3f& D,
+		float U0,
+		float U1,
+		float V0,
+		float V1)
+	{
+		TVertexAttributesRef<FVector3f> VertexPositions = Attributes.GetVertexPositions();
+		TVertexInstanceAttributesRef<FVector3f> VertexInstanceNormals = Attributes.GetVertexInstanceNormals();
+		TVertexInstanceAttributesRef<FVector2f> VertexInstanceUVs = Attributes.GetVertexInstanceUVs();
+
+		const FVector3f Positions[] = { A, B, C, D };
+		const FVector3f Normals[] = {
+			MakeBarrelRadialNormal(A),
+			MakeBarrelRadialNormal(B),
+			MakeBarrelRadialNormal(C),
+			MakeBarrelRadialNormal(D)
+		};
+		const FVector2f UVs[] = {
+			FVector2f(U0, V0),
+			FVector2f(U1, V0),
+			FVector2f(U1, V1),
+			FVector2f(U0, V1)
+		};
+
+		TArray<FVertexInstanceID> VertexInstances;
+		VertexInstances.Reserve(UE_ARRAY_COUNT(Positions));
+		for (int32 Index = 0; Index < UE_ARRAY_COUNT(Positions); ++Index)
+		{
+			const FVertexID VertexId = MeshDescription.CreateVertex();
+			VertexPositions[VertexId] = Positions[Index];
+
+			const FVertexInstanceID VertexInstanceId = MeshDescription.CreateVertexInstance(VertexId);
+			VertexInstanceNormals[VertexInstanceId] = Normals[Index];
+			VertexInstanceUVs.Set(VertexInstanceId, 0, UVs[Index]);
+			VertexInstances.Add(VertexInstanceId);
+		}
+
+		MeshDescription.CreatePolygon(PolygonGroupId, VertexInstances);
+	}
+
+	void BuildExplosiveBarrelIntactMeshDescription(FMeshDescription& MeshDescription)
+	{
+		FStaticMeshAttributes Attributes(MeshDescription);
+		Attributes.Register();
+		Attributes.GetVertexInstanceUVs().SetNumChannels(1);
+
+		const FPolygonGroupID PolygonGroupId = MeshDescription.CreatePolygonGroup();
+		Attributes.GetPolygonGroupMaterialSlotNames()[PolygonGroupId] = FName(TEXT("Barrel"));
+		const FPolygonGroupID DetailPolygonGroupId = MeshDescription.CreatePolygonGroup();
+		Attributes.GetPolygonGroupMaterialSlotNames()[DetailPolygonGroupId] = FName(TEXT("BarrelDetail"));
+
+		constexpr int32 SegmentCount = 32;
+		const float Heights[] = { 0.0f, 6.0f, 13.0f, 25.0f, 58.0f, 95.0f, 107.0f, 114.0f, 120.0f };
+		const float Radii[] = { 31.0f, 35.0f, 35.0f, 32.5f, 34.0f, 32.5f, 35.0f, 35.0f, 31.0f };
+		constexpr int32 RingCount = UE_ARRAY_COUNT(Heights);
+		for (int32 RingIndex = 0; RingIndex < RingCount - 1; ++RingIndex)
+		{
+			const float V0 = Heights[RingIndex] / Heights[RingCount - 1];
+			const float V1 = Heights[RingIndex + 1] / Heights[RingCount - 1];
+			for (int32 SegmentIndex = 0; SegmentIndex < SegmentCount; ++SegmentIndex)
+			{
+				const float U0 = static_cast<float>(SegmentIndex) / static_cast<float>(SegmentCount);
+				const float U1 = static_cast<float>(SegmentIndex + 1) / static_cast<float>(SegmentCount);
+				const float Angle0 = U0 * 2.0f * UE_PI;
+				const float Angle1 = U1 * 2.0f * UE_PI;
+				AddBarrelQuad(
+					MeshDescription,
+					Attributes,
+					PolygonGroupId,
+					MakeBarrelVertex(Angle0, Radii[RingIndex], Heights[RingIndex]),
+					MakeBarrelVertex(Angle1, Radii[RingIndex], Heights[RingIndex]),
+					MakeBarrelVertex(Angle1, Radii[RingIndex + 1], Heights[RingIndex + 1]),
+					MakeBarrelVertex(Angle0, Radii[RingIndex + 1], Heights[RingIndex + 1]),
+					U0,
+					U1,
+					V0,
+					V1);
+			}
+		}
+
+		for (int32 SegmentIndex = 0; SegmentIndex < SegmentCount; ++SegmentIndex)
+		{
+			const float U0 = static_cast<float>(SegmentIndex) / static_cast<float>(SegmentCount);
+			const float U1 = static_cast<float>(SegmentIndex + 1) / static_cast<float>(SegmentCount);
+			const float Angle0 = U0 * 2.0f * UE_PI;
+			const float Angle1 = U1 * 2.0f * UE_PI;
+			AddBarrelQuad(
+				MeshDescription,
+				Attributes,
+				DetailPolygonGroupId,
+				MakeBarrelVertex(Angle0, 35.8f, 13.0f),
+				MakeBarrelVertex(Angle1, 35.8f, 13.0f),
+				MakeBarrelVertex(Angle1, 35.8f, 18.5f),
+				MakeBarrelVertex(Angle0, 35.8f, 18.5f),
+				U0,
+				U1,
+				0.0f,
+				0.1f);
+			AddBarrelQuad(
+				MeshDescription,
+				Attributes,
+				DetailPolygonGroupId,
+				MakeBarrelVertex(Angle0, 35.8f, 101.5f),
+				MakeBarrelVertex(Angle1, 35.8f, 101.5f),
+				MakeBarrelVertex(Angle1, 35.8f, 107.0f),
+				MakeBarrelVertex(Angle0, 35.8f, 107.0f),
+				U0,
+				U1,
+				0.9f,
+				1.0f);
+		}
+
+		AddBarrelQuad(
+			MeshDescription,
+			Attributes,
+			DetailPolygonGroupId,
+			MakeBarrelVertex(-0.055f, 36.4f, 22.0f),
+			MakeBarrelVertex(0.055f, 36.4f, 22.0f),
+			MakeBarrelVertex(0.055f, 36.4f, 99.0f),
+			MakeBarrelVertex(-0.055f, 36.4f, 99.0f),
+			0.0f,
+			1.0f,
+			0.0f,
+			1.0f);
+
+		const FVector3f BottomCenter(0.0f, 0.0f, Heights[0]);
+		const FVector3f TopCenter(0.0f, 0.0f, Heights[RingCount - 1]);
+		for (int32 SegmentIndex = 0; SegmentIndex < SegmentCount; ++SegmentIndex)
+		{
+			const float U0 = static_cast<float>(SegmentIndex) / static_cast<float>(SegmentCount);
+			const float U1 = static_cast<float>(SegmentIndex + 1) / static_cast<float>(SegmentCount);
+			const float Angle0 = U0 * 2.0f * UE_PI;
+			const float Angle1 = U1 * 2.0f * UE_PI;
+			const FVector3f Bottom0 = MakeBarrelVertex(Angle0, Radii[0], Heights[0]);
+			const FVector3f Bottom1 = MakeBarrelVertex(Angle1, Radii[0], Heights[0]);
+			const FVector3f Top0 = MakeBarrelVertex(Angle0, Radii[RingCount - 1], Heights[RingCount - 1]);
+			const FVector3f Top1 = MakeBarrelVertex(Angle1, Radii[RingCount - 1], Heights[RingCount - 1]);
+			AddBarrelTriangle(
+				MeshDescription,
+				Attributes,
+				PolygonGroupId,
+				BottomCenter,
+				Bottom1,
+				Bottom0,
+				FVector2f(0.5f, 0.5f),
+				FVector2f(0.5f + FMath::Cos(Angle1) * 0.5f, 0.5f + FMath::Sin(Angle1) * 0.5f),
+				FVector2f(0.5f + FMath::Cos(Angle0) * 0.5f, 0.5f + FMath::Sin(Angle0) * 0.5f),
+				FVector3f(0.0f, 0.0f, -1.0f));
+			AddBarrelTriangle(
+				MeshDescription,
+				Attributes,
+				PolygonGroupId,
+				TopCenter,
+				Top0,
+				Top1,
+				FVector2f(0.5f, 0.5f),
+				FVector2f(0.5f + FMath::Cos(Angle0) * 0.5f, 0.5f + FMath::Sin(Angle0) * 0.5f),
+				FVector2f(0.5f + FMath::Cos(Angle1) * 0.5f, 0.5f + FMath::Sin(Angle1) * 0.5f),
+				FVector3f(0.0f, 0.0f, 1.0f));
+		}
+	}
+
+	void BuildExplosiveBarrelDestroyedMeshDescription(FMeshDescription& MeshDescription)
+	{
+		FStaticMeshAttributes Attributes(MeshDescription);
+		Attributes.Register();
+		Attributes.GetVertexInstanceUVs().SetNumChannels(1);
+
+		const FPolygonGroupID PolygonGroupId = MeshDescription.CreatePolygonGroup();
+		Attributes.GetPolygonGroupMaterialSlotNames()[PolygonGroupId] = FName(TEXT("Barrel"));
+		const FPolygonGroupID DetailPolygonGroupId = MeshDescription.CreatePolygonGroup();
+		Attributes.GetPolygonGroupMaterialSlotNames()[DetailPolygonGroupId] = FName(TEXT("BarrelDetail"));
+
+		constexpr int32 SegmentCount = 32;
+		const float BaseRadius = 32.0f;
+		const float RimRadius = 35.0f;
+		const float BottomHeight = 0.0f;
+		for (int32 SegmentIndex = 0; SegmentIndex < SegmentCount; ++SegmentIndex)
+		{
+			const int32 NextSegmentIndex = SegmentIndex + 1;
+			const float U0 = static_cast<float>(SegmentIndex) / static_cast<float>(SegmentCount);
+			const float U1 = static_cast<float>(NextSegmentIndex) / static_cast<float>(SegmentCount);
+			const float Angle0 = U0 * 2.0f * UE_PI;
+			const float Angle1 = U1 * 2.0f * UE_PI;
+			const float TopHeight0 = 20.0f + static_cast<float>((SegmentIndex * 7) % 9) * 1.7f;
+			const float TopHeight1 = 20.0f + static_cast<float>((NextSegmentIndex * 7) % 9) * 1.7f;
+
+			AddBarrelQuad(
+				MeshDescription,
+				Attributes,
+				PolygonGroupId,
+				MakeBarrelVertex(Angle0, BaseRadius, BottomHeight),
+				MakeBarrelVertex(Angle1, BaseRadius, BottomHeight),
+				MakeBarrelVertex(Angle1, RimRadius, TopHeight1),
+				MakeBarrelVertex(Angle0, RimRadius, TopHeight0),
+				U0,
+				U1,
+				0.0f,
+				1.0f);
+		}
+
+		AddBarrelQuad(
+			MeshDescription,
+			Attributes,
+			DetailPolygonGroupId,
+			MakeBarrelVertex(-0.07f, 36.0f, 2.0f),
+			MakeBarrelVertex(0.07f, 36.0f, 2.0f),
+			MakeBarrelVertex(0.07f, 36.0f, 24.0f),
+			MakeBarrelVertex(-0.07f, 36.0f, 22.0f),
+			0.0f,
+			1.0f,
+			0.0f,
+			1.0f);
+
+		const FVector3f BottomCenter(0.0f, 0.0f, BottomHeight);
+		for (int32 SegmentIndex = 0; SegmentIndex < SegmentCount; ++SegmentIndex)
+		{
+			const float U0 = static_cast<float>(SegmentIndex) / static_cast<float>(SegmentCount);
+			const float U1 = static_cast<float>(SegmentIndex + 1) / static_cast<float>(SegmentCount);
+			const float Angle0 = U0 * 2.0f * UE_PI;
+			const float Angle1 = U1 * 2.0f * UE_PI;
+			AddBarrelTriangle(
+				MeshDescription,
+				Attributes,
+				PolygonGroupId,
+				BottomCenter,
+				MakeBarrelVertex(Angle1, BaseRadius, BottomHeight),
+				MakeBarrelVertex(Angle0, BaseRadius, BottomHeight),
+				FVector2f(0.5f, 0.5f),
+				FVector2f(0.5f + FMath::Cos(Angle1) * 0.5f, 0.5f + FMath::Sin(Angle1) * 0.5f),
+				FVector2f(0.5f + FMath::Cos(Angle0) * 0.5f, 0.5f + FMath::Sin(Angle0) * 0.5f),
+				FVector3f(0.0f, 0.0f, -1.0f));
+		}
+	}
+
+	UStaticMesh* EnsureExplosiveBarrelStaticMesh(
+		const FString& AssetName,
+		UMaterialInterface* BarrelMaterial,
+		UMaterialInterface* DetailMaterial,
+		TFunctionRef<void(FMeshDescription&)> BuildMeshDescription)
+	{
+		if (!BarrelMaterial)
+		{
+			return nullptr;
+		}
+
+		const FString ObjectPath = GetAssetObjectPath(InteractionAssetPath, AssetName);
+		UStaticMesh* StaticMesh = LoadObject<UStaticMesh>(nullptr, *ObjectPath);
+		if (!StaticMesh)
+		{
+			const FString PackageName = FString::Printf(TEXT("%s/%s"), *InteractionAssetPath, *AssetName);
+			UPackage* Package = CreatePackage(*PackageName);
+			if (!Package)
+			{
+				return nullptr;
+			}
+
+			StaticMesh = NewObject<UStaticMesh>(
+				Package,
+				*AssetName,
+				RF_Public | RF_Standalone | RF_Transactional);
+			if (!StaticMesh)
+			{
+				return nullptr;
+			}
+
+			FAssetRegistryModule::AssetCreated(StaticMesh);
+		}
+
+		StaticMesh->Modify();
+		FMeshDescription MeshDescription;
+		BuildMeshDescription(MeshDescription);
+
+		StaticMesh->GetStaticMaterials().Reset();
+		StaticMesh->GetStaticMaterials().Add(FStaticMaterial(BarrelMaterial, FName(TEXT("Barrel"))));
+		if (DetailMaterial)
+		{
+			StaticMesh->GetStaticMaterials().Add(FStaticMaterial(DetailMaterial, FName(TEXT("BarrelDetail"))));
+		}
+
+		TArray<const FMeshDescription*> MeshDescriptions;
+		MeshDescriptions.Add(&MeshDescription);
+		StaticMesh->BuildFromMeshDescriptions(MeshDescriptions);
+		StaticMesh->MarkPackageDirty();
+
+		return SaveAsset(StaticMesh) ? StaticMesh : nullptr;
+	}
+
+	bool ConfigureExplosiveBarrelBlueprint(UBlueprint* ExplosiveBarrelBlueprint)
+	{
+		if (!ExplosiveBarrelBlueprint)
+		{
+			return false;
+		}
+
+		FKismetEditorUtilities::CompileBlueprint(ExplosiveBarrelBlueprint);
+
+		ATunaSweeperExplosiveBarrelActor* Defaults = ExplosiveBarrelBlueprint->GeneratedClass
+			? Cast<ATunaSweeperExplosiveBarrelActor>(ExplosiveBarrelBlueprint->GeneratedClass->GetDefaultObject())
+			: nullptr;
+		if (!Defaults)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to configure %s defaults."), *GetNameSafe(ExplosiveBarrelBlueprint));
+			return false;
+		}
+
+		ExplosiveBarrelBlueprint->Modify();
+		Defaults->Modify();
+		Defaults->ConfigureExplosiveBarrelDefaults(
+			NAME_None,
+			30.0f,
+			TSoftObjectPtr<UStaticMesh>(FSoftObjectPath(GetAssetObjectPath(InteractionAssetPath, ExplosiveBarrelIntactMeshAssetName))),
+			TSoftObjectPtr<UStaticMesh>(FSoftObjectPath(GetAssetObjectPath(InteractionAssetPath, ExplosiveBarrelDestroyedMeshAssetName))),
+			TSoftObjectPtr<UNiagaraSystem>(),
+			TSoftClassPtr<ATunaSweeperLocalExplosionEffectActor>(
+				FSoftObjectPath(TEXT("/Script/TunaSweeper.TunaSweeperLocalExplosionEffectActor"))),
+			210.0f,
+			0.72f);
+		FBlueprintEditorUtils::MarkBlueprintAsModified(ExplosiveBarrelBlueprint);
+		FKismetEditorUtilities::CompileBlueprint(ExplosiveBarrelBlueprint);
+		ExplosiveBarrelBlueprint->MarkPackageDirty();
+		return SaveAsset(ExplosiveBarrelBlueprint);
+	}
+
+	bool EnsureExplosiveBarrelAssets()
+	{
+		UMaterial* IntactMaterial = EnsureSolidColorMaterial(
+			InteractionAssetPath,
+			ExplosiveBarrelGrayMaterialAssetName,
+			FLinearColor(0.42f, 0.44f, 0.43f, 1.0f),
+			0.92f,
+			0.0f,
+			0.06f);
+		UMaterial* DestroyedMaterial = EnsureSolidColorMaterial(
+			InteractionAssetPath,
+			ExplosiveBarrelCharredMaterialAssetName,
+			FLinearColor(0.12f, 0.12f, 0.11f, 1.0f),
+			0.86f,
+			0.0f,
+			0.05f);
+		UMaterial* DetailMaterial = EnsureSolidColorMaterial(
+			InteractionAssetPath,
+			ExplosiveBarrelDetailMaterialAssetName,
+			FLinearColor(0.22f, 0.23f, 0.22f, 1.0f),
+			0.94f,
+			0.0f,
+			0.04f);
+		UStaticMesh* IntactMesh = EnsureExplosiveBarrelStaticMesh(
+			ExplosiveBarrelIntactMeshAssetName,
+			IntactMaterial,
+			DetailMaterial,
+			[](FMeshDescription& MeshDescription)
+			{
+				BuildExplosiveBarrelIntactMeshDescription(MeshDescription);
+			});
+		UStaticMesh* DestroyedMesh = EnsureExplosiveBarrelStaticMesh(
+			ExplosiveBarrelDestroyedMeshAssetName,
+			DestroyedMaterial,
+			DetailMaterial,
+			[](FMeshDescription& MeshDescription)
+			{
+				BuildExplosiveBarrelDestroyedMeshDescription(MeshDescription);
+			});
+		UBlueprint* ExplosiveBarrelBlueprint = EnsureBlueprint(
+			InteractionAssetPath,
+			ExplosiveBarrelAssetName,
+			ATunaSweeperExplosiveBarrelActor::StaticClass());
+
+		return IntactMaterial && DestroyedMaterial && DetailMaterial && IntactMesh && DestroyedMesh &&
+			ConfigureExplosiveBarrelBlueprint(ExplosiveBarrelBlueprint);
 	}
 
 	bool EnsureSharedVoxelMeshAssets()
@@ -4472,6 +4932,24 @@ namespace TunaSweeperEditorSetup
 		SaveAsset(Texture);
 	}
 
+	void ConfigureImportedEffectTexture(UTexture2D* Texture)
+	{
+		if (!Texture)
+		{
+			return;
+		}
+
+		Texture->Modify();
+		Texture->CompressionSettings = TC_Default;
+		Texture->MipGenSettings = TMGS_FromTextureGroup;
+		Texture->LODGroup = TEXTUREGROUP_Effects;
+		Texture->SRGB = true;
+		Texture->UpdateResource();
+		Texture->PostEditChange();
+		Texture->MarkPackageDirty();
+		SaveAsset(Texture);
+	}
+
 	void ConfigureImportedMaskTexture(UTexture2D* Texture)
 	{
 		if (!Texture)
@@ -4854,6 +5332,586 @@ namespace TunaSweeperEditorSetup
 		return ChargeMaterial && EnsureRollingBomberChargeCylinderMesh(ChargeMaterial);
 	}
 
+	FString GetLocalExplosionFlipbookSourcePath()
+	{
+		FString SourcePath = FPaths::ConvertRelativePathToFull(FPaths::Combine(
+			FPaths::ProjectDir(),
+			TEXT(".."),
+			TEXT("GeneratedImages"),
+			TEXT("Effects"),
+			TEXT("T_LocalExplosionFlipbook.png")));
+		FPaths::CollapseRelativeDirectories(SourcePath);
+		return SourcePath;
+	}
+
+	UMaterial* EnsureLocalExplosionFlipbookMaterial(
+		UTexture2D* FlipbookTexture,
+		const FString& MaterialAssetName,
+		bool bSmokeMaterial)
+	{
+		if (!FlipbookTexture)
+		{
+			return nullptr;
+		}
+
+		const FString ObjectPath = GetAssetObjectPath(EffectsAssetPath, MaterialAssetName);
+		UMaterial* Material = LoadObject<UMaterial>(nullptr, *ObjectPath);
+		if (!Material)
+		{
+			UMaterialFactoryNew* MaterialFactory = NewObject<UMaterialFactoryNew>();
+
+			FAssetToolsModule& AssetToolsModule = FModuleManager::LoadModuleChecked<FAssetToolsModule>(TEXT("AssetTools"));
+			UObject* CreatedAsset = AssetToolsModule.Get().CreateAsset(
+				MaterialAssetName,
+				EffectsAssetPath,
+				UMaterial::StaticClass(),
+				MaterialFactory);
+
+			Material = Cast<UMaterial>(CreatedAsset);
+			if (!Material)
+			{
+				UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to create %s."), *ObjectPath);
+				return nullptr;
+			}
+
+			FAssetRegistryModule::AssetCreated(Material);
+		}
+
+		Material->Modify();
+		Material->GetExpressionCollection().Empty();
+		Material->BlendMode = BLEND_Translucent;
+		Material->SetShadingModel(MSM_Unlit);
+		Material->TwoSided = true;
+
+		UMaterialEditorOnlyData* MaterialEditorOnly = Material->GetEditorOnlyData();
+		if (!MaterialEditorOnly)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to edit %s."), *ObjectPath);
+			return nullptr;
+		}
+
+		UMaterialExpressionTextureCoordinate* TextureCoordinateExpression = NewObject<UMaterialExpressionTextureCoordinate>(Material);
+		TextureCoordinateExpression->Material = Material;
+		TextureCoordinateExpression->CoordinateIndex = 0;
+		TextureCoordinateExpression->MaterialExpressionEditorX = -1040;
+		TextureCoordinateExpression->MaterialExpressionEditorY = 120;
+		Material->GetExpressionCollection().AddExpression(TextureCoordinateExpression);
+
+		UMaterialExpressionScalarParameter* FrameScaleParameter = NewObject<UMaterialExpressionScalarParameter>(Material);
+		FrameScaleParameter->Material = Material;
+		FrameScaleParameter->ParameterName = TEXT("FrameScale");
+		FrameScaleParameter->DefaultValue = 0.25f;
+		FrameScaleParameter->MaterialExpressionEditorX = -1040;
+		FrameScaleParameter->MaterialExpressionEditorY = 300;
+		Material->GetExpressionCollection().AddExpression(FrameScaleParameter);
+
+		UMaterialExpressionMultiply* ScaledUv = NewObject<UMaterialExpressionMultiply>(Material);
+		ScaledUv->Material = Material;
+		ScaledUv->A.Connect(0, TextureCoordinateExpression);
+		ScaledUv->B.Connect(0, FrameScaleParameter);
+		ScaledUv->MaterialExpressionEditorX = -800;
+		ScaledUv->MaterialExpressionEditorY = 160;
+		Material->GetExpressionCollection().AddExpression(ScaledUv);
+
+		UMaterialExpressionScalarParameter* FrameUParameter = NewObject<UMaterialExpressionScalarParameter>(Material);
+		FrameUParameter->Material = Material;
+		FrameUParameter->ParameterName = TEXT("FrameU");
+		FrameUParameter->DefaultValue = 0.0f;
+		FrameUParameter->MaterialExpressionEditorX = -1040;
+		FrameUParameter->MaterialExpressionEditorY = 480;
+		Material->GetExpressionCollection().AddExpression(FrameUParameter);
+
+		UMaterialExpressionScalarParameter* FrameVParameter = NewObject<UMaterialExpressionScalarParameter>(Material);
+		FrameVParameter->Material = Material;
+		FrameVParameter->ParameterName = TEXT("FrameV");
+		FrameVParameter->DefaultValue = 0.0f;
+		FrameVParameter->MaterialExpressionEditorX = -1040;
+		FrameVParameter->MaterialExpressionEditorY = 640;
+		Material->GetExpressionCollection().AddExpression(FrameVParameter);
+
+		UMaterialExpressionAppendVector* FrameOffset = NewObject<UMaterialExpressionAppendVector>(Material);
+		FrameOffset->Material = Material;
+		FrameOffset->A.Connect(0, FrameUParameter);
+		FrameOffset->B.Connect(0, FrameVParameter);
+		FrameOffset->MaterialExpressionEditorX = -800;
+		FrameOffset->MaterialExpressionEditorY = 520;
+		Material->GetExpressionCollection().AddExpression(FrameOffset);
+
+		UMaterialExpressionAdd* FrameUv = NewObject<UMaterialExpressionAdd>(Material);
+		FrameUv->Material = Material;
+		FrameUv->A.Connect(0, ScaledUv);
+		FrameUv->B.Connect(0, FrameOffset);
+		FrameUv->MaterialExpressionEditorX = -560;
+		FrameUv->MaterialExpressionEditorY = 260;
+		Material->GetExpressionCollection().AddExpression(FrameUv);
+
+		UMaterialExpressionTextureSampleParameter2D* FlipbookSample = NewObject<UMaterialExpressionTextureSampleParameter2D>(Material);
+		FlipbookSample->Material = Material;
+		FlipbookSample->ParameterName = TEXT("ExplosionTexture");
+		FlipbookSample->Texture = FlipbookTexture;
+		FlipbookSample->SamplerType = SAMPLERTYPE_Color;
+		FlipbookSample->Coordinates.Connect(0, FrameUv);
+		FlipbookSample->MaterialExpressionEditorX = -300;
+		FlipbookSample->MaterialExpressionEditorY = 200;
+		Material->GetExpressionCollection().AddExpression(FlipbookSample);
+
+		UMaterialExpressionVectorParameter* TintColorParameter = NewObject<UMaterialExpressionVectorParameter>(Material);
+		TintColorParameter->Material = Material;
+		TintColorParameter->ParameterName = TEXT("TintColor");
+		TintColorParameter->DefaultValue = bSmokeMaterial
+			? FLinearColor(0.48f, 0.43f, 0.36f, 1.0f)
+			: FLinearColor(1.0f, 0.72f, 0.42f, 1.0f);
+		TintColorParameter->MaterialExpressionEditorX = -300;
+		TintColorParameter->MaterialExpressionEditorY = -120;
+		Material->GetExpressionCollection().AddExpression(TintColorParameter);
+
+		UMaterialExpressionMultiply* TintedTexture = NewObject<UMaterialExpressionMultiply>(Material);
+		TintedTexture->Material = Material;
+		TintedTexture->A.Connect(0, FlipbookSample);
+		TintedTexture->B.Connect(0, TintColorParameter);
+		TintedTexture->MaterialExpressionEditorX = -20;
+		TintedTexture->MaterialExpressionEditorY = 20;
+		Material->GetExpressionCollection().AddExpression(TintedTexture);
+
+		UMaterialExpressionScalarParameter* EmissiveStrengthParameter = NewObject<UMaterialExpressionScalarParameter>(Material);
+		EmissiveStrengthParameter->Material = Material;
+		EmissiveStrengthParameter->ParameterName = TEXT("EmissiveStrength");
+		EmissiveStrengthParameter->DefaultValue = bSmokeMaterial ? 0.0f : 3.5f;
+		EmissiveStrengthParameter->MaterialExpressionEditorX = -20;
+		EmissiveStrengthParameter->MaterialExpressionEditorY = -200;
+		Material->GetExpressionCollection().AddExpression(EmissiveStrengthParameter);
+
+		UMaterialExpressionScalarParameter* OpacityParameter = NewObject<UMaterialExpressionScalarParameter>(Material);
+		OpacityParameter->Material = Material;
+		OpacityParameter->ParameterName = TEXT("Opacity");
+		OpacityParameter->DefaultValue = 1.0f;
+		OpacityParameter->MaterialExpressionEditorX = -20;
+		OpacityParameter->MaterialExpressionEditorY = 500;
+		Material->GetExpressionCollection().AddExpression(OpacityParameter);
+
+		UMaterialExpressionMultiply* EmissiveStrengthMultiply = NewObject<UMaterialExpressionMultiply>(Material);
+		EmissiveStrengthMultiply->Material = Material;
+		EmissiveStrengthMultiply->A.Connect(0, TintedTexture);
+		EmissiveStrengthMultiply->B.Connect(0, EmissiveStrengthParameter);
+		EmissiveStrengthMultiply->MaterialExpressionEditorX = 220;
+		EmissiveStrengthMultiply->MaterialExpressionEditorY = -80;
+		Material->GetExpressionCollection().AddExpression(EmissiveStrengthMultiply);
+
+		UMaterialExpressionMultiply* FinalEmissive = NewObject<UMaterialExpressionMultiply>(Material);
+		FinalEmissive->Material = Material;
+		FinalEmissive->A.Connect(0, EmissiveStrengthMultiply);
+		FinalEmissive->B.Connect(0, OpacityParameter);
+		FinalEmissive->MaterialExpressionEditorX = 460;
+		FinalEmissive->MaterialExpressionEditorY = -60;
+		Material->GetExpressionCollection().AddExpression(FinalEmissive);
+
+		UMaterialExpressionComponentMask* RedChannel = NewObject<UMaterialExpressionComponentMask>(Material);
+		RedChannel->Material = Material;
+		RedChannel->Input.Connect(0, FlipbookSample);
+		RedChannel->R = 1;
+		RedChannel->G = 0;
+		RedChannel->B = 0;
+		RedChannel->A = 0;
+		RedChannel->MaterialExpressionEditorX = -20;
+		RedChannel->MaterialExpressionEditorY = 700;
+		Material->GetExpressionCollection().AddExpression(RedChannel);
+
+		UMaterialExpressionComponentMask* GreenChannel = NewObject<UMaterialExpressionComponentMask>(Material);
+		GreenChannel->Material = Material;
+		GreenChannel->Input.Connect(0, FlipbookSample);
+		GreenChannel->R = 0;
+		GreenChannel->G = 1;
+		GreenChannel->B = 0;
+		GreenChannel->A = 0;
+		GreenChannel->MaterialExpressionEditorX = -20;
+		GreenChannel->MaterialExpressionEditorY = 860;
+		Material->GetExpressionCollection().AddExpression(GreenChannel);
+
+		UMaterialExpressionComponentMask* BlueChannel = NewObject<UMaterialExpressionComponentMask>(Material);
+		BlueChannel->Material = Material;
+		BlueChannel->Input.Connect(0, FlipbookSample);
+		BlueChannel->R = 0;
+		BlueChannel->G = 0;
+		BlueChannel->B = 1;
+		BlueChannel->A = 0;
+		BlueChannel->MaterialExpressionEditorX = -20;
+		BlueChannel->MaterialExpressionEditorY = 1020;
+		Material->GetExpressionCollection().AddExpression(BlueChannel);
+
+		UMaterialExpressionAdd* RedGreenSum = NewObject<UMaterialExpressionAdd>(Material);
+		RedGreenSum->Material = Material;
+		RedGreenSum->A.Connect(0, RedChannel);
+		RedGreenSum->B.Connect(0, GreenChannel);
+		RedGreenSum->MaterialExpressionEditorX = 220;
+		RedGreenSum->MaterialExpressionEditorY = 780;
+		Material->GetExpressionCollection().AddExpression(RedGreenSum);
+
+		UMaterialExpressionAdd* RgbSum = NewObject<UMaterialExpressionAdd>(Material);
+		RgbSum->Material = Material;
+		RgbSum->A.Connect(0, RedGreenSum);
+		RgbSum->B.Connect(0, BlueChannel);
+		RgbSum->MaterialExpressionEditorX = 460;
+		RgbSum->MaterialExpressionEditorY = 860;
+		Material->GetExpressionCollection().AddExpression(RgbSum);
+
+		UMaterialExpressionMultiply* LuminanceScale = NewObject<UMaterialExpressionMultiply>(Material);
+		LuminanceScale->Material = Material;
+		LuminanceScale->A.Connect(0, RgbSum);
+		LuminanceScale->ConstB = 0.42f;
+		LuminanceScale->MaterialExpressionEditorX = 700;
+		LuminanceScale->MaterialExpressionEditorY = 860;
+		Material->GetExpressionCollection().AddExpression(LuminanceScale);
+
+		UMaterialExpressionSaturate* LuminanceMask = NewObject<UMaterialExpressionSaturate>(Material);
+		LuminanceMask->Material = Material;
+		LuminanceMask->Input.Connect(0, LuminanceScale);
+		LuminanceMask->MaterialExpressionEditorX = 940;
+		LuminanceMask->MaterialExpressionEditorY = 860;
+		Material->GetExpressionCollection().AddExpression(LuminanceMask);
+
+		UMaterialExpressionScalarParameter* AlphaBoostParameter = NewObject<UMaterialExpressionScalarParameter>(Material);
+		AlphaBoostParameter->Material = Material;
+		AlphaBoostParameter->ParameterName = TEXT("AlphaBoost");
+		AlphaBoostParameter->DefaultValue = bSmokeMaterial ? 2.65f : 1.0f;
+		AlphaBoostParameter->MaterialExpressionEditorX = 940;
+		AlphaBoostParameter->MaterialExpressionEditorY = 1040;
+		Material->GetExpressionCollection().AddExpression(AlphaBoostParameter);
+
+		UMaterialExpressionMultiply* BoostedLuminanceMask = NewObject<UMaterialExpressionMultiply>(Material);
+		BoostedLuminanceMask->Material = Material;
+		BoostedLuminanceMask->A.Connect(0, LuminanceMask);
+		BoostedLuminanceMask->B.Connect(0, AlphaBoostParameter);
+		BoostedLuminanceMask->MaterialExpressionEditorX = 1180;
+		BoostedLuminanceMask->MaterialExpressionEditorY = 920;
+		Material->GetExpressionCollection().AddExpression(BoostedLuminanceMask);
+
+		UMaterialExpressionSaturate* BoostedOpacityMask = NewObject<UMaterialExpressionSaturate>(Material);
+		BoostedOpacityMask->Material = Material;
+		BoostedOpacityMask->Input.Connect(0, BoostedLuminanceMask);
+		BoostedOpacityMask->MaterialExpressionEditorX = 1420;
+		BoostedOpacityMask->MaterialExpressionEditorY = 920;
+		Material->GetExpressionCollection().AddExpression(BoostedOpacityMask);
+
+		UMaterialExpressionMultiply* FinalOpacity = NewObject<UMaterialExpressionMultiply>(Material);
+		FinalOpacity->Material = Material;
+		FinalOpacity->A.Connect(0, BoostedOpacityMask);
+		FinalOpacity->B.Connect(0, OpacityParameter);
+		FinalOpacity->MaterialExpressionEditorX = 1660;
+		FinalOpacity->MaterialExpressionEditorY = 780;
+		Material->GetExpressionCollection().AddExpression(FinalOpacity);
+
+		MaterialEditorOnly->BaseColor.Connect(0, TintedTexture);
+		MaterialEditorOnly->EmissiveColor.Connect(0, FinalEmissive);
+		MaterialEditorOnly->Opacity.Connect(0, FinalOpacity);
+
+		Material->PostEditChange();
+		Material->MarkPackageDirty();
+
+		if (!SaveAsset(Material))
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to save %s."), *ObjectPath);
+			return nullptr;
+		}
+
+		return Material;
+	}
+
+	UMaterial* EnsureLocalExplosionDistortionMaterial()
+	{
+		const FString ObjectPath = GetAssetObjectPath(EffectsAssetPath, LocalExplosionDistortionMaterialAssetName);
+		UMaterial* Material = LoadObject<UMaterial>(nullptr, *ObjectPath);
+		if (!Material)
+		{
+			UMaterialFactoryNew* MaterialFactory = NewObject<UMaterialFactoryNew>();
+
+			FAssetToolsModule& AssetToolsModule = FModuleManager::LoadModuleChecked<FAssetToolsModule>(TEXT("AssetTools"));
+			UObject* CreatedAsset = AssetToolsModule.Get().CreateAsset(
+				LocalExplosionDistortionMaterialAssetName,
+				EffectsAssetPath,
+				UMaterial::StaticClass(),
+				MaterialFactory);
+
+			Material = Cast<UMaterial>(CreatedAsset);
+			if (!Material)
+			{
+				UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to create %s."), *ObjectPath);
+				return nullptr;
+			}
+
+			FAssetRegistryModule::AssetCreated(Material);
+		}
+
+		Material->Modify();
+		Material->GetExpressionCollection().Empty();
+		Material->BlendMode = BLEND_Translucent;
+		Material->SetShadingModel(MSM_Unlit);
+		Material->TwoSided = true;
+		Material->bTangentSpaceNormal = true;
+		Material->RefractionMethod = RM_PixelNormalOffset;
+		Material->RefractionDepthBias = 8.0f;
+
+		UMaterialEditorOnlyData* MaterialEditorOnly = Material->GetEditorOnlyData();
+		if (!MaterialEditorOnly)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to edit %s."), *ObjectPath);
+			return nullptr;
+		}
+
+		UMaterialExpressionTextureCoordinate* TextureCoordinateExpression = NewObject<UMaterialExpressionTextureCoordinate>(Material);
+		TextureCoordinateExpression->Material = Material;
+		TextureCoordinateExpression->CoordinateIndex = 0;
+		TextureCoordinateExpression->MaterialExpressionEditorX = -1240;
+		TextureCoordinateExpression->MaterialExpressionEditorY = 40;
+		Material->GetExpressionCollection().AddExpression(TextureCoordinateExpression);
+
+		UMaterialExpressionConstant2Vector* CenterVector = NewObject<UMaterialExpressionConstant2Vector>(Material);
+		CenterVector->Material = Material;
+		CenterVector->R = 0.5f;
+		CenterVector->G = 0.5f;
+		CenterVector->MaterialExpressionEditorX = -1240;
+		CenterVector->MaterialExpressionEditorY = 240;
+		Material->GetExpressionCollection().AddExpression(CenterVector);
+
+		UMaterialExpressionSubtract* CenteredUv = NewObject<UMaterialExpressionSubtract>(Material);
+		CenteredUv->Material = Material;
+		CenteredUv->A.Connect(0, TextureCoordinateExpression);
+		CenteredUv->B.Connect(0, CenterVector);
+		CenteredUv->MaterialExpressionEditorX = -980;
+		CenteredUv->MaterialExpressionEditorY = 100;
+		Material->GetExpressionCollection().AddExpression(CenteredUv);
+
+		UMaterialExpressionLength* RadialDistance = NewObject<UMaterialExpressionLength>(Material);
+		RadialDistance->Material = Material;
+		RadialDistance->Input.Connect(0, CenteredUv);
+		RadialDistance->MaterialExpressionEditorX = -740;
+		RadialDistance->MaterialExpressionEditorY = 100;
+		Material->GetExpressionCollection().AddExpression(RadialDistance);
+
+		UMaterialExpressionScalarParameter* WavePositionParameter = NewObject<UMaterialExpressionScalarParameter>(Material);
+		WavePositionParameter->Material = Material;
+		WavePositionParameter->ParameterName = TEXT("WavePosition");
+		WavePositionParameter->DefaultValue = 0.22f;
+		WavePositionParameter->MaterialExpressionEditorX = -740;
+		WavePositionParameter->MaterialExpressionEditorY = 300;
+		Material->GetExpressionCollection().AddExpression(WavePositionParameter);
+
+		UMaterialExpressionSubtract* RadiusFromWave = NewObject<UMaterialExpressionSubtract>(Material);
+		RadiusFromWave->Material = Material;
+		RadiusFromWave->A.Connect(0, RadialDistance);
+		RadiusFromWave->B.Connect(0, WavePositionParameter);
+		RadiusFromWave->MaterialExpressionEditorX = -500;
+		RadiusFromWave->MaterialExpressionEditorY = 120;
+		Material->GetExpressionCollection().AddExpression(RadiusFromWave);
+
+		UMaterialExpressionAbs* WaveDelta = NewObject<UMaterialExpressionAbs>(Material);
+		WaveDelta->Material = Material;
+		WaveDelta->Input.Connect(0, RadiusFromWave);
+		WaveDelta->MaterialExpressionEditorX = -260;
+		WaveDelta->MaterialExpressionEditorY = 120;
+		Material->GetExpressionCollection().AddExpression(WaveDelta);
+
+		UMaterialExpressionScalarParameter* WaveWidthParameter = NewObject<UMaterialExpressionScalarParameter>(Material);
+		WaveWidthParameter->Material = Material;
+		WaveWidthParameter->ParameterName = TEXT("WaveWidth");
+		WaveWidthParameter->DefaultValue = 0.15f;
+		WaveWidthParameter->MaterialExpressionEditorX = -260;
+		WaveWidthParameter->MaterialExpressionEditorY = 300;
+		Material->GetExpressionCollection().AddExpression(WaveWidthParameter);
+
+		UMaterialExpressionDivide* NormalizedWaveDelta = NewObject<UMaterialExpressionDivide>(Material);
+		NormalizedWaveDelta->Material = Material;
+		NormalizedWaveDelta->A.Connect(0, WaveDelta);
+		NormalizedWaveDelta->B.Connect(0, WaveWidthParameter);
+		NormalizedWaveDelta->MaterialExpressionEditorX = -20;
+		NormalizedWaveDelta->MaterialExpressionEditorY = 120;
+		Material->GetExpressionCollection().AddExpression(NormalizedWaveDelta);
+
+		UMaterialExpressionOneMinus* WaveFalloff = NewObject<UMaterialExpressionOneMinus>(Material);
+		WaveFalloff->Material = Material;
+		WaveFalloff->Input.Connect(0, NormalizedWaveDelta);
+		WaveFalloff->MaterialExpressionEditorX = 220;
+		WaveFalloff->MaterialExpressionEditorY = 120;
+		Material->GetExpressionCollection().AddExpression(WaveFalloff);
+
+		UMaterialExpressionSaturate* RingMask = NewObject<UMaterialExpressionSaturate>(Material);
+		RingMask->Material = Material;
+		RingMask->Input.Connect(0, WaveFalloff);
+		RingMask->MaterialExpressionEditorX = 460;
+		RingMask->MaterialExpressionEditorY = 120;
+		Material->GetExpressionCollection().AddExpression(RingMask);
+
+		UMaterialExpressionScalarParameter* DistortionStrengthParameter = NewObject<UMaterialExpressionScalarParameter>(Material);
+		DistortionStrengthParameter->Material = Material;
+		DistortionStrengthParameter->ParameterName = TEXT("DistortionStrength");
+		DistortionStrengthParameter->DefaultValue = 0.32f;
+		DistortionStrengthParameter->MaterialExpressionEditorX = 220;
+		DistortionStrengthParameter->MaterialExpressionEditorY = 360;
+		Material->GetExpressionCollection().AddExpression(DistortionStrengthParameter);
+
+		UMaterialExpressionMultiply* MaskedStrength = NewObject<UMaterialExpressionMultiply>(Material);
+		MaskedStrength->Material = Material;
+		MaskedStrength->A.Connect(0, RingMask);
+		MaskedStrength->B.Connect(0, DistortionStrengthParameter);
+		MaskedStrength->MaterialExpressionEditorX = 700;
+		MaskedStrength->MaterialExpressionEditorY = 220;
+		Material->GetExpressionCollection().AddExpression(MaskedStrength);
+
+		UMaterialExpressionMultiply* DistortedNormalXY = NewObject<UMaterialExpressionMultiply>(Material);
+		DistortedNormalXY->Material = Material;
+		DistortedNormalXY->A.Connect(0, CenteredUv);
+		DistortedNormalXY->B.Connect(0, MaskedStrength);
+		DistortedNormalXY->MaterialExpressionEditorX = 940;
+		DistortedNormalXY->MaterialExpressionEditorY = 120;
+		Material->GetExpressionCollection().AddExpression(DistortedNormalXY);
+
+		UMaterialExpressionConstant* NormalZ = NewObject<UMaterialExpressionConstant>(Material);
+		NormalZ->Material = Material;
+		NormalZ->R = 1.0f;
+		NormalZ->MaterialExpressionEditorX = 940;
+		NormalZ->MaterialExpressionEditorY = 320;
+		Material->GetExpressionCollection().AddExpression(NormalZ);
+
+		UMaterialExpressionAppendVector* DistortedNormalVector = NewObject<UMaterialExpressionAppendVector>(Material);
+		DistortedNormalVector->Material = Material;
+		DistortedNormalVector->A.Connect(0, DistortedNormalXY);
+		DistortedNormalVector->B.Connect(0, NormalZ);
+		DistortedNormalVector->MaterialExpressionEditorX = 1180;
+		DistortedNormalVector->MaterialExpressionEditorY = 120;
+		Material->GetExpressionCollection().AddExpression(DistortedNormalVector);
+
+		UMaterialExpressionNormalize* DistortionNormal = NewObject<UMaterialExpressionNormalize>(Material);
+		DistortionNormal->Material = Material;
+		DistortionNormal->VectorInput.Connect(0, DistortedNormalVector);
+		DistortionNormal->MaterialExpressionEditorX = 1420;
+		DistortionNormal->MaterialExpressionEditorY = 120;
+		Material->GetExpressionCollection().AddExpression(DistortionNormal);
+
+		UMaterialExpressionScalarParameter* OpacityParameter = NewObject<UMaterialExpressionScalarParameter>(Material);
+		OpacityParameter->Material = Material;
+		OpacityParameter->ParameterName = TEXT("Opacity");
+		OpacityParameter->DefaultValue = 0.26f;
+		OpacityParameter->MaterialExpressionEditorX = 700;
+		OpacityParameter->MaterialExpressionEditorY = 520;
+		Material->GetExpressionCollection().AddExpression(OpacityParameter);
+
+		UMaterialExpressionMultiply* FinalOpacity = NewObject<UMaterialExpressionMultiply>(Material);
+		FinalOpacity->Material = Material;
+		FinalOpacity->A.Connect(0, RingMask);
+		FinalOpacity->B.Connect(0, OpacityParameter);
+		FinalOpacity->MaterialExpressionEditorX = 940;
+		FinalOpacity->MaterialExpressionEditorY = 500;
+		Material->GetExpressionCollection().AddExpression(FinalOpacity);
+
+		UMaterialExpressionScalarParameter* RefractionAmountParameter = NewObject<UMaterialExpressionScalarParameter>(Material);
+		RefractionAmountParameter->Material = Material;
+		RefractionAmountParameter->ParameterName = TEXT("RefractionAmount");
+		RefractionAmountParameter->DefaultValue = 1.18f;
+		RefractionAmountParameter->MaterialExpressionEditorX = 1420;
+		RefractionAmountParameter->MaterialExpressionEditorY = 360;
+		Material->GetExpressionCollection().AddExpression(RefractionAmountParameter);
+
+		UMaterialExpressionConstant3Vector* BaseColor = NewObject<UMaterialExpressionConstant3Vector>(Material);
+		BaseColor->Material = Material;
+		BaseColor->Constant = FLinearColor::Black;
+		BaseColor->MaterialExpressionEditorX = 1420;
+		BaseColor->MaterialExpressionEditorY = 560;
+		Material->GetExpressionCollection().AddExpression(BaseColor);
+
+		MaterialEditorOnly->BaseColor.Connect(0, BaseColor);
+		MaterialEditorOnly->Normal.Connect(0, DistortionNormal);
+		MaterialEditorOnly->Opacity.Connect(0, FinalOpacity);
+		MaterialEditorOnly->Refraction.Connect(0, RefractionAmountParameter);
+
+		Material->PostEditChange();
+		Material->MarkPackageDirty();
+
+		if (!SaveAsset(Material))
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to save %s."), *ObjectPath);
+			return nullptr;
+		}
+
+		return Material;
+	}
+
+	bool EnsureLocalExplosionEffectAssets()
+	{
+		UTexture2D* FlipbookTexture = nullptr;
+		const FString SourcePath = GetLocalExplosionFlipbookSourcePath();
+		if (FPaths::FileExists(SourcePath))
+		{
+			if (!ImportWorldTexture(SourcePath, EffectsAssetPath, LocalExplosionFlipbookTextureAssetName, &FlipbookTexture))
+			{
+				return false;
+			}
+		}
+		else
+		{
+			FlipbookTexture = LoadObject<UTexture2D>(
+				nullptr,
+				*GetAssetObjectPath(EffectsAssetPath, LocalExplosionFlipbookTextureAssetName));
+		}
+
+		if (!FlipbookTexture)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Missing local explosion flipbook source: %s"), *SourcePath);
+			return false;
+		}
+
+		ConfigureImportedEffectTexture(FlipbookTexture);
+		return EnsureLocalExplosionFlipbookMaterial(FlipbookTexture, LocalExplosionFlipbookMaterialAssetName, false) != nullptr
+			&& EnsureLocalExplosionFlipbookMaterial(FlipbookTexture, LocalExplosionSmokeMaterialAssetName, true) != nullptr
+			&& EnsureLocalExplosionDistortionMaterial() != nullptr;
+	}
+
+	bool EnsureExtractionSmokeSignalNiagaraSystem()
+	{
+		const FString ObjectPath = GetAssetObjectPath(EffectsAssetPath, ExtractionSmokeSignalNiagaraSystemAssetName);
+		if (UObject* ExistingSystem = LoadObject<UObject>(nullptr, *ObjectPath))
+		{
+			return SaveAsset(ExistingSystem);
+		}
+
+		const TCHAR* SourceSystemPaths[] = {
+			TEXT("/NiagaraFluids/Templates/Gas/3D/Systems/Grid3D_Gas_ColoredSmoke.Grid3D_Gas_ColoredSmoke"),
+			TEXT("/NiagaraFluids/Templates/Gas/3D/Systems/Grid3D_Gas_Smoke.Grid3D_Gas_Smoke")
+		};
+
+		UObject* SourceSystem = nullptr;
+		for (const TCHAR* SourceSystemPath : SourceSystemPaths)
+		{
+			SourceSystem = LoadObject<UObject>(nullptr, SourceSystemPath);
+			if (SourceSystem)
+			{
+				break;
+			}
+		}
+
+		if (!SourceSystem)
+		{
+			UE_LOG(
+				LogTunaSweeperEditor,
+				Error,
+				TEXT("Failed to load Niagara Fluids smoke template. Enable the NiagaraFluids plugin and ensure its content is available."));
+			return false;
+		}
+
+		FAssetToolsModule& AssetToolsModule = FModuleManager::LoadModuleChecked<FAssetToolsModule>(TEXT("AssetTools"));
+		UObject* DuplicatedSystem = AssetToolsModule.Get().DuplicateAsset(
+			ExtractionSmokeSignalNiagaraSystemAssetName,
+			EffectsAssetPath,
+			SourceSystem);
+		if (!DuplicatedSystem)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to duplicate %s."), *ObjectPath);
+			return false;
+		}
+
+		DuplicatedSystem->Modify();
+		DuplicatedSystem->MarkPackageDirty();
+		return SaveAsset(DuplicatedSystem);
+	}
+
 	UMaterial* EnsureMemoStorageDeviceMaterial(UTexture2D* StorageTexture)
 	{
 		if (!StorageTexture)
@@ -5098,6 +6156,342 @@ namespace TunaSweeperEditorSetup
 		}
 
 		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperImportRollingBomberSpawnerTextureQuit")))
+		{
+			FPlatformMisc::RequestExit(false);
+		}
+
+		return bSucceeded;
+	}
+
+	FString GetSandbagCoverTextureSourcePath()
+	{
+		FString SourcePath = FPaths::ConvertRelativePathToFull(FPaths::Combine(
+			FPaths::ProjectContentDir(),
+			TEXT("SourceArt"),
+			TEXT("SandbagCover"),
+			TEXT("T_SandbagCover_Burlap_Source.png")));
+		FPaths::CollapseRelativeDirectories(SourcePath);
+		return SourcePath;
+	}
+
+	UMaterial* EnsureSandbagCoverMaterial(UTexture2D* SandbagTexture)
+	{
+		if (!SandbagTexture)
+		{
+			return nullptr;
+		}
+
+		const FString ObjectPath = GetAssetObjectPath(InteractionAssetPath, SandbagCoverMaterialAssetName);
+		UMaterial* Material = LoadObject<UMaterial>(nullptr, *ObjectPath);
+		if (!Material)
+		{
+			UMaterialFactoryNew* MaterialFactory = NewObject<UMaterialFactoryNew>();
+
+			FAssetToolsModule& AssetToolsModule = FModuleManager::LoadModuleChecked<FAssetToolsModule>(TEXT("AssetTools"));
+			UObject* CreatedAsset = AssetToolsModule.Get().CreateAsset(
+				SandbagCoverMaterialAssetName,
+				InteractionAssetPath,
+				UMaterial::StaticClass(),
+				MaterialFactory);
+
+			Material = Cast<UMaterial>(CreatedAsset);
+			if (!Material)
+			{
+				UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to create %s."), *ObjectPath);
+				return nullptr;
+			}
+
+			FAssetRegistryModule::AssetCreated(Material);
+		}
+
+		Material->Modify();
+		Material->GetExpressionCollection().Empty();
+		Material->BlendMode = BLEND_Opaque;
+		Material->SetShadingModel(MSM_DefaultLit);
+		Material->TwoSided = false;
+
+		UMaterialEditorOnlyData* MaterialEditorOnly = Material->GetEditorOnlyData();
+		if (!MaterialEditorOnly)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to edit %s."), *ObjectPath);
+			return nullptr;
+		}
+
+		UMaterialExpressionTextureCoordinate* TextureCoordinateExpression = NewObject<UMaterialExpressionTextureCoordinate>(Material);
+		TextureCoordinateExpression->Material = Material;
+		TextureCoordinateExpression->CoordinateIndex = 0;
+		TextureCoordinateExpression->MaterialExpressionEditorX = -860;
+		TextureCoordinateExpression->MaterialExpressionEditorY = 40;
+		Material->GetExpressionCollection().AddExpression(TextureCoordinateExpression);
+
+		UMaterialExpressionTextureSampleParameter2D* TextureSample = NewObject<UMaterialExpressionTextureSampleParameter2D>(Material);
+		TextureSample->Material = Material;
+		TextureSample->ParameterName = TEXT("SandbagTexture");
+		TextureSample->Texture = SandbagTexture;
+		TextureSample->SamplerType = SAMPLERTYPE_Color;
+		TextureSample->Coordinates.Connect(0, TextureCoordinateExpression);
+		TextureSample->MaterialExpressionEditorX = -620;
+		TextureSample->MaterialExpressionEditorY = -20;
+		TextureSample->AutoSetSampleType();
+		Material->GetExpressionCollection().AddExpression(TextureSample);
+
+		UMaterialExpressionVertexColor* VertexColorExpression = NewObject<UMaterialExpressionVertexColor>(Material);
+		VertexColorExpression->Material = Material;
+		VertexColorExpression->MaterialExpressionEditorX = -620;
+		VertexColorExpression->MaterialExpressionEditorY = 190;
+		Material->GetExpressionCollection().AddExpression(VertexColorExpression);
+
+		UMaterialExpressionMultiply* BaseColorMultiply = NewObject<UMaterialExpressionMultiply>(Material);
+		BaseColorMultiply->Material = Material;
+		BaseColorMultiply->A.Connect(0, TextureSample);
+		BaseColorMultiply->B.Connect(0, VertexColorExpression);
+		BaseColorMultiply->MaterialExpressionEditorX = -360;
+		BaseColorMultiply->MaterialExpressionEditorY = 80;
+		Material->GetExpressionCollection().AddExpression(BaseColorMultiply);
+
+		UMaterialExpressionVectorParameter* DamageTintParameter = NewObject<UMaterialExpressionVectorParameter>(Material);
+		DamageTintParameter->Material = Material;
+		DamageTintParameter->ParameterName = TEXT("DamageTint");
+		DamageTintParameter->DefaultValue = FLinearColor(0.46f, 0.37f, 0.26f, 1.0f);
+		DamageTintParameter->MaterialExpressionEditorX = -360;
+		DamageTintParameter->MaterialExpressionEditorY = 300;
+		Material->GetExpressionCollection().AddExpression(DamageTintParameter);
+
+		UMaterialExpressionMultiply* DamagedColorMultiply = NewObject<UMaterialExpressionMultiply>(Material);
+		DamagedColorMultiply->Material = Material;
+		DamagedColorMultiply->A.Connect(0, BaseColorMultiply);
+		DamagedColorMultiply->B.Connect(0, DamageTintParameter);
+		DamagedColorMultiply->MaterialExpressionEditorX = -80;
+		DamagedColorMultiply->MaterialExpressionEditorY = 210;
+		Material->GetExpressionCollection().AddExpression(DamagedColorMultiply);
+
+		UMaterialExpressionScalarParameter* DamageAlphaParameter = NewObject<UMaterialExpressionScalarParameter>(Material);
+		DamageAlphaParameter->Material = Material;
+		DamageAlphaParameter->ParameterName = TEXT("DamageAlpha");
+		DamageAlphaParameter->DefaultValue = 0.0f;
+		DamageAlphaParameter->MaterialExpressionEditorX = -80;
+		DamageAlphaParameter->MaterialExpressionEditorY = 390;
+		Material->GetExpressionCollection().AddExpression(DamageAlphaParameter);
+
+		UMaterialExpressionLinearInterpolate* DamageLerp = NewObject<UMaterialExpressionLinearInterpolate>(Material);
+		DamageLerp->Material = Material;
+		DamageLerp->A.Connect(0, BaseColorMultiply);
+		DamageLerp->B.Connect(0, DamagedColorMultiply);
+		DamageLerp->Alpha.Connect(0, DamageAlphaParameter);
+		DamageLerp->MaterialExpressionEditorX = 170;
+		DamageLerp->MaterialExpressionEditorY = 110;
+		Material->GetExpressionCollection().AddExpression(DamageLerp);
+
+		UMaterialExpressionScalarParameter* AmbientLiftParameter = NewObject<UMaterialExpressionScalarParameter>(Material);
+		AmbientLiftParameter->Material = Material;
+		AmbientLiftParameter->ParameterName = TEXT("AmbientLift");
+		AmbientLiftParameter->DefaultValue = 0.18f;
+		AmbientLiftParameter->MaterialExpressionEditorX = 170;
+		AmbientLiftParameter->MaterialExpressionEditorY = 360;
+		Material->GetExpressionCollection().AddExpression(AmbientLiftParameter);
+
+		UMaterialExpressionMultiply* AmbientLiftMultiply = NewObject<UMaterialExpressionMultiply>(Material);
+		AmbientLiftMultiply->Material = Material;
+		AmbientLiftMultiply->A.Connect(0, DamageLerp);
+		AmbientLiftMultiply->B.Connect(0, AmbientLiftParameter);
+		AmbientLiftMultiply->MaterialExpressionEditorX = 430;
+		AmbientLiftMultiply->MaterialExpressionEditorY = 260;
+		Material->GetExpressionCollection().AddExpression(AmbientLiftMultiply);
+
+		MaterialEditorOnly->BaseColor.Connect(0, DamageLerp);
+		MaterialEditorOnly->EmissiveColor.Connect(0, AmbientLiftMultiply);
+		MaterialEditorOnly->Roughness.UseConstant = true;
+		MaterialEditorOnly->Roughness.Constant = 0.88f;
+		MaterialEditorOnly->Metallic.UseConstant = true;
+		MaterialEditorOnly->Metallic.Constant = 0.0f;
+		MaterialEditorOnly->Specular.UseConstant = true;
+		MaterialEditorOnly->Specular.Constant = 0.18f;
+
+		Material->PostEditChange();
+		Material->MarkPackageDirty();
+
+		if (!SaveAsset(Material))
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to save %s."), *ObjectPath);
+			return nullptr;
+		}
+
+		return Material;
+	}
+
+	UMaterial* EnsureSandbagCoverOutlineMaterial()
+	{
+		const FString ObjectPath = GetAssetObjectPath(InteractionAssetPath, SandbagCoverOutlineMaterialAssetName);
+		UMaterial* Material = LoadObject<UMaterial>(nullptr, *ObjectPath);
+		if (!Material)
+		{
+			UMaterialFactoryNew* MaterialFactory = NewObject<UMaterialFactoryNew>();
+
+			FAssetToolsModule& AssetToolsModule = FModuleManager::LoadModuleChecked<FAssetToolsModule>(TEXT("AssetTools"));
+			UObject* CreatedAsset = AssetToolsModule.Get().CreateAsset(
+				SandbagCoverOutlineMaterialAssetName,
+				InteractionAssetPath,
+				UMaterial::StaticClass(),
+				MaterialFactory);
+
+			Material = Cast<UMaterial>(CreatedAsset);
+			if (!Material)
+			{
+				UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to create %s."), *ObjectPath);
+				return nullptr;
+			}
+
+			FAssetRegistryModule::AssetCreated(Material);
+		}
+
+		Material->Modify();
+		Material->GetExpressionCollection().Empty();
+		Material->BlendMode = BLEND_Additive;
+		Material->SetShadingModel(MSM_Unlit);
+		Material->TwoSided = false;
+
+		UMaterialEditorOnlyData* MaterialEditorOnly = Material->GetEditorOnlyData();
+		if (!MaterialEditorOnly)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to edit %s."), *ObjectPath);
+			return nullptr;
+		}
+
+		UMaterialExpressionVectorParameter* ColorParameter = NewObject<UMaterialExpressionVectorParameter>(Material);
+		ColorParameter->Material = Material;
+		ColorParameter->ParameterName = TEXT("OutlineColor");
+		ColorParameter->DefaultValue = FLinearColor(0.12f, 0.92f, 1.0f, 1.0f);
+		ColorParameter->MaterialExpressionEditorX = -360;
+		ColorParameter->MaterialExpressionEditorY = -90;
+		Material->GetExpressionCollection().AddExpression(ColorParameter);
+
+		UMaterialExpressionScalarParameter* IntensityParameter = NewObject<UMaterialExpressionScalarParameter>(Material);
+		IntensityParameter->Material = Material;
+		IntensityParameter->ParameterName = TEXT("Intensity");
+		IntensityParameter->DefaultValue = 12.0f;
+		IntensityParameter->MaterialExpressionEditorX = -360;
+		IntensityParameter->MaterialExpressionEditorY = 90;
+		Material->GetExpressionCollection().AddExpression(IntensityParameter);
+
+		UMaterialExpressionMultiply* EmissiveMultiply = NewObject<UMaterialExpressionMultiply>(Material);
+		EmissiveMultiply->Material = Material;
+		EmissiveMultiply->A.Connect(0, ColorParameter);
+		EmissiveMultiply->B.Connect(0, IntensityParameter);
+		EmissiveMultiply->MaterialExpressionEditorX = -100;
+		EmissiveMultiply->MaterialExpressionEditorY = 0;
+		Material->GetExpressionCollection().AddExpression(EmissiveMultiply);
+
+		UMaterialExpressionFresnel* FresnelExpression = NewObject<UMaterialExpressionFresnel>(Material);
+		FresnelExpression->Material = Material;
+		FresnelExpression->Exponent = 2.25f;
+		FresnelExpression->BaseReflectFraction = 0.0f;
+		FresnelExpression->MaterialExpressionEditorX = -100;
+		FresnelExpression->MaterialExpressionEditorY = 180;
+		Material->GetExpressionCollection().AddExpression(FresnelExpression);
+
+		UMaterialExpressionMultiply* EdgeOnlyMultiply = NewObject<UMaterialExpressionMultiply>(Material);
+		EdgeOnlyMultiply->Material = Material;
+		EdgeOnlyMultiply->A.Connect(0, EmissiveMultiply);
+		EdgeOnlyMultiply->B.Connect(0, FresnelExpression);
+		EdgeOnlyMultiply->MaterialExpressionEditorX = 170;
+		EdgeOnlyMultiply->MaterialExpressionEditorY = 40;
+		Material->GetExpressionCollection().AddExpression(EdgeOnlyMultiply);
+
+		MaterialEditorOnly->BaseColor.Connect(0, EdgeOnlyMultiply);
+		MaterialEditorOnly->EmissiveColor.Connect(0, EdgeOnlyMultiply);
+		MaterialEditorOnly->Roughness.UseConstant = true;
+		MaterialEditorOnly->Roughness.Constant = 0.25f;
+		MaterialEditorOnly->Metallic.UseConstant = true;
+		MaterialEditorOnly->Metallic.Constant = 0.0f;
+		MaterialEditorOnly->Specular.UseConstant = true;
+		MaterialEditorOnly->Specular.Constant = 0.0f;
+
+		Material->PostEditChange();
+		Material->MarkPackageDirty();
+
+		if (!SaveAsset(Material))
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to save %s."), *ObjectPath);
+			return nullptr;
+		}
+
+		return Material;
+	}
+
+	bool EnsureSandbagCoverAssets()
+	{
+		UTexture2D* SandbagTexture = LoadObject<UTexture2D>(
+			nullptr,
+			*GetAssetObjectPath(InteractionAssetPath, SandbagCoverTextureAssetName));
+		if (!SandbagTexture)
+		{
+			const FString SourcePath = GetSandbagCoverTextureSourcePath();
+			if (!FPaths::FileExists(SourcePath) ||
+				!ImportWorldTexture(SourcePath, InteractionAssetPath, SandbagCoverTextureAssetName, &SandbagTexture))
+			{
+				UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to import sandbag cover texture source: %s"), *SourcePath);
+				return false;
+			}
+		}
+
+		UMaterial* SandbagMaterial = EnsureSandbagCoverMaterial(SandbagTexture);
+		UMaterial* OutlineMaterial = EnsureSandbagCoverOutlineMaterial();
+		UBlueprint* SandbagBlueprint = EnsureBlueprint(
+			InteractionAssetPath,
+			SandbagCoverAssetName,
+			ATunaSweeperSandbagCoverActor::StaticClass());
+		if (!SandbagMaterial || !OutlineMaterial || !SandbagBlueprint)
+		{
+			return false;
+		}
+
+		FKismetEditorUtilities::CompileBlueprint(SandbagBlueprint);
+		ATunaSweeperSandbagCoverActor* Defaults = SandbagBlueprint->GeneratedClass
+			? Cast<ATunaSweeperSandbagCoverActor>(SandbagBlueprint->GeneratedClass->GetDefaultObject())
+			: nullptr;
+		if (!Defaults)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to configure %s defaults."), *GetNameSafe(SandbagBlueprint));
+			return false;
+		}
+
+		SandbagBlueprint->Modify();
+		Defaults->Modify();
+		Defaults->ConfigureCoverDefaults(
+			FName(TEXT("TS_SandbagCover_Default")),
+			FVector(75.0f, 320.0f, 90.0f),
+			70.0f,
+			125.0f);
+		Defaults->ConfigureCoverVisualDefaults(
+			TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath(GetAssetObjectPath(InteractionAssetPath, SandbagCoverMaterialAssetName))),
+			TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath(GetAssetObjectPath(InteractionAssetPath, SandbagCoverOutlineMaterialAssetName))));
+		FBlueprintEditorUtils::MarkBlueprintAsModified(SandbagBlueprint);
+		FKismetEditorUtilities::CompileBlueprint(SandbagBlueprint);
+		SandbagBlueprint->MarkPackageDirty();
+		return SaveAsset(SandbagBlueprint);
+	}
+
+	bool ImportSandbagCoverTextureFromCommandLineIfRequested()
+	{
+		FString SourceFile;
+		if (!FParse::Value(FCommandLine::Get(), TEXT("TunaSweeperImportSandbagCoverTextureSource="), SourceFile))
+		{
+			return false;
+		}
+
+		UTexture2D* ImportedTexture = nullptr;
+		const bool bImported = ImportWorldTexture(
+			SourceFile,
+			InteractionAssetPath,
+			SandbagCoverTextureAssetName,
+			&ImportedTexture);
+		const bool bSucceeded = bImported && EnsureSandbagCoverAssets();
+		if (!bSucceeded)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to import sandbag cover texture/material/blueprint."));
+		}
+
+		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperImportSandbagCoverTextureQuit")))
 		{
 			FPlatformMisc::RequestExit(false);
 		}
@@ -9433,6 +10827,16 @@ public:
 			}
 		}
 
+		FString SandbagCoverTextureSource;
+		if (FParse::Value(FCommandLine::Get(), TEXT("TunaSweeperImportSandbagCoverTextureSource="), SandbagCoverTextureSource))
+		{
+			TunaSweeperEditorSetup::ImportSandbagCoverTextureFromCommandLineIfRequested();
+			if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperImportSandbagCoverTextureQuit")))
+			{
+				return;
+			}
+		}
+
 		FMSoundTool = MakeUnique<FTunaSweeperFMSoundTool>();
 		FMSoundTool->Startup();
 
@@ -9458,6 +10862,19 @@ public:
 			}
 
 			if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperExperimentalVegetationQuit")))
+			{
+				FPlatformMisc::RequestExit(false);
+				return;
+			}
+		}
+
+		FString TurbulentConiferTextureSource;
+		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperRebuildTurbulentConifer")) ||
+			FParse::Value(FCommandLine::Get(), TEXT("TunaSweeperTurbulentConiferTextureSource="), TurbulentConiferTextureSource))
+		{
+			TunaSweeperExperimentalVegetation::EnsureTurbulentConiferPrototypeAssets();
+
+			if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperTurbulentConiferQuit")))
 			{
 				FPlatformMisc::RequestExit(false);
 				return;
@@ -9499,6 +10916,13 @@ public:
 			});
 
 		FTunaSweeperEditorRunOnce::Run(
+			TunaSweeperEditorSetup::ExplosiveBarrelTaskId,
+			[]()
+			{
+				return TunaSweeperEditorSetup::EnsureExplosiveBarrelAssets();
+			});
+
+		FTunaSweeperEditorRunOnce::Run(
 			TunaSweeperEditorSetup::RollingBomberBodyMaterialTaskId,
 			[]()
 			{
@@ -9534,6 +10958,27 @@ public:
 			});
 
 		FTunaSweeperEditorRunOnce::Run(
+			TunaSweeperEditorSetup::LocalExplosionEffectTaskId,
+			[]()
+			{
+				return TunaSweeperEditorSetup::EnsureLocalExplosionEffectAssets();
+			});
+
+		const bool bExtractionSmokeSignalNiagaraTaskRan = FTunaSweeperEditorRunOnce::Run(
+			TunaSweeperEditorSetup::ExtractionSmokeSignalNiagaraSystemTaskId,
+			[]()
+			{
+				return TunaSweeperEditorSetup::EnsureExtractionSmokeSignalNiagaraSystem();
+			});
+		if ((bExtractionSmokeSignalNiagaraTaskRan ||
+				FTunaSweeperEditorRunOnce::HasCompleted(TunaSweeperEditorSetup::ExtractionSmokeSignalNiagaraSystemTaskId)) &&
+			FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperExtractionSmokeSignalNiagaraSetupQuit")))
+		{
+			FPlatformMisc::RequestExit(false);
+			return;
+		}
+
+		FTunaSweeperEditorRunOnce::Run(
 			TunaSweeperEditorSetup::ProjectileHitEffectAssetTaskId,
 			[]()
 			{
@@ -9552,6 +10997,13 @@ public:
 			[]()
 			{
 				return TunaSweeperEditorSetup::EnsureBaseballBatAssets();
+			});
+
+		FTunaSweeperEditorRunOnce::Run(
+			TunaSweeperEditorSetup::SandbagCoverAssetTaskId,
+			[]()
+			{
+				return TunaSweeperEditorSetup::EnsureSandbagCoverAssets();
 			});
 
 		const bool bLedExpressionMaterialTaskRan = FTunaSweeperEditorRunOnce::Run(

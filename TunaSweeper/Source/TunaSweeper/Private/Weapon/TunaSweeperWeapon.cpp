@@ -3,6 +3,8 @@
 #include "Components/SceneComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/World.h"
+#include "EngineUtils.h"
+#include "Interaction/TunaSweeperSandbagCoverActor.h"
 #include "Materials/MaterialInterface.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Weapon/TunaSweeperProjectile.h"
@@ -10,6 +12,32 @@
 namespace TunaSweeperWeaponTags
 {
 	const FName ShotgunWeaponTypeTag(TEXT("weapon.type.shotgun"));
+}
+
+namespace
+{
+	void IgnoreNearbyPlayerPassthroughCovers(ATunaSweeperProjectile* Projectile, APawn* InstigatorPawn)
+	{
+		if (!Projectile || !InstigatorPawn || !InstigatorPawn->IsPlayerControlled())
+		{
+			return;
+		}
+
+		UWorld* World = Projectile->GetWorld();
+		if (!World)
+		{
+			return;
+		}
+
+		for (TActorIterator<ATunaSweeperSandbagCoverActor> It(World); It; ++It)
+		{
+			ATunaSweeperSandbagCoverActor* SandbagCover = *It;
+			if (SandbagCover && SandbagCover->ShouldAllowPlayerProjectilePassthrough(InstigatorPawn))
+			{
+				Projectile->IgnoreActor(SandbagCover);
+			}
+		}
+	}
 }
 
 ATunaSweeperWeapon::ATunaSweeperWeapon()
@@ -160,6 +188,7 @@ ATunaSweeperProjectile* ATunaSweeperWeapon::SpawnProjectile(
 	if (SpawnedProjectile)
 	{
 		SpawnedProjectile->SetHitEffectId(ProjectileHitEffectId);
+		IgnoreNearbyPlayerPassthroughCovers(SpawnedProjectile, InstigatorPawn);
 	}
 
 	return SpawnedProjectile;

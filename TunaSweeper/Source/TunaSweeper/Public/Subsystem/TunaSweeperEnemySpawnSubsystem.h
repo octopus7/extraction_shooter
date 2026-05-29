@@ -6,7 +6,9 @@
 
 class AActor;
 class ATunaSweeperEnemyCharacter;
+class ATunaSweeperExplosiveBarrelActor;
 class ATunaSweeperExtractionPointActor;
+class ATunaSweeperLocalExplosionEffectActor;
 class ATunaSweeperItemSpawnInteractableActor;
 class ATunaSweeperLevelTravelInteractableActor;
 class ATunaSweeperLootContainerActor;
@@ -14,6 +16,7 @@ class ATunaSweeperLootContainerSpawnInteractableActor;
 class ATunaSweeperPickupItemActor;
 class ATunaSweeperRollingBomber;
 class ATunaSweeperRollingBomberSpawner;
+class ATunaSweeperSandbagCoverActor;
 class ATunaSweeperSelfDestructInteractableActor;
 class ATunaSweeperTransparentObstacleActor;
 class ATunaSweeperWarpPointActor;
@@ -105,7 +108,10 @@ public:
 		LootContainerSpawn,
 		SelfDestruct,
 		RollingBomberSpawner,
-		ExtractionPoint
+		ExtractionPoint,
+		SandbagCover,
+		ExplosiveBarrel,
+		StaticMeshProp
 	};
 
 private:
@@ -235,6 +241,25 @@ private:
 		float RollingBomberLaunchPitchMaxDegrees = 58.0f;
 		float RollingBomberSpawnerMaxHealth = 80.0f;
 		int32 RollingBomberSpawnerExperienceValue = 120;
+
+		FVector SandbagCoverBoxExtent = FVector(75.0f, 320.0f, 90.0f);
+		float SandbagCoverMaxHealth = 70.0f;
+		float SandbagCoverPassthroughRadius = 125.0f;
+
+		float ExplosiveBarrelMaxHealth = 30.0f;
+		TSoftObjectPtr<UStaticMesh> ExplosiveBarrelIntactMesh;
+		TSoftObjectPtr<UStaticMesh> ExplosiveBarrelDestroyedMesh;
+		TSoftObjectPtr<UNiagaraSystem> ExplosiveBarrelDestroyedLoopEffect;
+		TSoftClassPtr<ATunaSweeperLocalExplosionEffectActor> ExplosiveBarrelExplosionEffectClass;
+		float ExplosiveBarrelExplosionVisualRadius = 210.0f;
+		float ExplosiveBarrelExplosionDurationSeconds = 0.72f;
+
+		TSoftObjectPtr<UStaticMesh> StaticMeshPropMesh;
+		TArray<TSoftObjectPtr<UMaterialInterface>> StaticMeshPropMaterials;
+		FVector StaticMeshPropRelativeLocation = FVector::ZeroVector;
+		FRotator StaticMeshPropRelativeRotation = FRotator::ZeroRotator;
+		FVector StaticMeshPropRelativeScale = FVector::OneVector;
+		bool bStaticMeshPropCollisionEnabled = true;
 
 		FTunaSweeperMapOverlayDefinition MapOverlay;
 		bool bHasMapOverlay = false;

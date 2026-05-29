@@ -42,6 +42,9 @@ public:
 		TSoftClassPtr<UTunaSweeperLevelTransitionWidget> InTransitionWidgetClass,
 		const FText& InTransitionMessage);
 
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Extraction|Effect")
+	void SetSmokeSignalWind(FVector2D InWindDirection, float InWindSpeedCmPerSecond);
+
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Extraction")
 	float GetExtractionRadius() const { return ExtractionRadius; }
 
@@ -78,6 +81,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TArray<TObjectPtr<UStaticMeshComponent>> FallbackParticleMeshes;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TArray<TObjectPtr<UStaticMeshComponent>> SmokeSignalSprites;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Extraction", meta = (ClampMin = "1.0", UIMin = "1.0"))
 	float ExtractionRadius = 300.0f;
 
@@ -105,6 +111,15 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Extraction|Effect")
 	TSoftObjectPtr<UNiagaraSystem> ExtractionParticleSystem;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Extraction|Effect|Niagara")
+	FVector ExtractionNiagaraRelativeLocation = FVector(0.0f, 0.0f, 10.0f);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Extraction|Effect|Niagara")
+	FRotator ExtractionNiagaraRelativeRotation = FRotator(0.0f, 0.0f, 90.0f);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Extraction|Effect|Niagara")
+	FVector ExtractionNiagaraRelativeScale = FVector(1.0f, 1.0f, 1.0f);
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Extraction|Effect")
 	bool bEnableFallbackParticleEffect = true;
 
@@ -119,6 +134,42 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Extraction|Effect", meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float FallbackParticleVerticalAmplitude = 30.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Extraction|Effect|Smoke Signal")
+	bool bEnableSmokeSignalEffect = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Extraction|Effect|Smoke Signal")
+	TSoftObjectPtr<UMaterialInterface> SmokeSignalSpriteMaterial;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Extraction|Effect|Smoke Signal")
+	FLinearColor SmokeSignalBaseColor = FLinearColor(0.02f, 1.0f, 0.18f, 1.0f);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Extraction|Effect|Smoke Signal")
+	FLinearColor SmokeSignalTopColor = FLinearColor(0.035f, 0.04f, 0.035f, 1.0f);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Extraction|Effect|Smoke Signal", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float SmokeSignalBaseHeight = 42.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Extraction|Effect|Smoke Signal", meta = (ClampMin = "1.0", UIMin = "1.0"))
+	float SmokeSignalColumnHeight = 360.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Extraction|Effect|Smoke Signal", meta = (ClampMin = "1.0", UIMin = "1.0"))
+	float SmokeSignalBaseDiameter = 54.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Extraction|Effect|Smoke Signal", meta = (ClampMin = "1.0", UIMin = "1.0"))
+	float SmokeSignalTopDiameter = 265.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Extraction|Effect|Smoke Signal", meta = (ClampMin = "0.25", UIMin = "0.25"))
+	float SmokeSignalLoopDurationSeconds = 4.6f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Extraction|Effect|Smoke Signal")
+	FVector2D SmokeSignalWindDirection = FVector2D(0.92f, 0.34f);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Extraction|Effect|Smoke Signal", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float SmokeSignalWindSpeedCmPerSecond = 54.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Extraction|Effect|Smoke Signal", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float SmokeSignalHorizontalSpread = 62.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Extraction|Progress")
 	TSoftClassPtr<UTunaSweeperExtractionProgressWidget> ProgressWidgetClass;
@@ -152,6 +203,7 @@ private:
 	void RebuildRadiusVisualMesh();
 	void ApplyRadiusVisualMaterial();
 	void RefreshEffectComponent();
+	void ApplyExtractionNiagaraParameters();
 	void RefreshProgressWidgetComponent();
 	void UpdateExtractionProgress(float DeltaSeconds);
 	void UpdateProgressWidget();
@@ -161,6 +213,15 @@ private:
 	void StopPawnForExtraction(APawn* Pawn) const;
 	void UpdateFallbackParticleEffect(float DeltaSeconds);
 	void ApplyFallbackParticleMaterials();
+	void UpdateSmokeSignalEffect(float DeltaSeconds);
+	void ApplySmokeSignalMaterials();
+	void UpdateSmokeSignalSpriteMaterial(
+		UMaterialInstanceDynamic* DynamicMaterial,
+		int32 FrameIndex,
+		const FLinearColor& TintColor,
+		float EmissiveStrength,
+		float Opacity) const;
+	FVector GetSmokeSignalWindVelocity() const;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UMaterialInstanceDynamic> RadiusVisualDynamicMaterial;
@@ -168,7 +229,11 @@ private:
 	UPROPERTY(Transient)
 	TArray<TObjectPtr<UMaterialInstanceDynamic>> FallbackParticleDynamicMaterials;
 
+	UPROPERTY(Transient)
+	TArray<TObjectPtr<UMaterialInstanceDynamic>> SmokeSignalDynamicMaterials;
+
 	float CurrentHoldSeconds = 0.0f;
 	float EffectElapsedSeconds = 0.0f;
+	bool bHasActiveNiagaraExtractionEffect = false;
 	bool bExtractionTriggered = false;
 };

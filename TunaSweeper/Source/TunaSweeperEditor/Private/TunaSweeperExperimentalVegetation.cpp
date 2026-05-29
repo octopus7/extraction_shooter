@@ -2234,9 +2234,9 @@ namespace TunaSweeperExperimentalVegetation
 		TArray<FVertexInstanceID> VertexInstances;
 		VertexInstances.Reserve(4);
 		VertexInstances.Add(AddTurbulentConiferVertex(MeshDescription, Attributes, A.Position, Normal, A.UV, A.Color));
-		VertexInstances.Add(AddTurbulentConiferVertex(MeshDescription, Attributes, B.Position, Normal, B.UV, B.Color));
-		VertexInstances.Add(AddTurbulentConiferVertex(MeshDescription, Attributes, C.Position, Normal, C.UV, C.Color));
 		VertexInstances.Add(AddTurbulentConiferVertex(MeshDescription, Attributes, D.Position, Normal, D.UV, D.Color));
+		VertexInstances.Add(AddTurbulentConiferVertex(MeshDescription, Attributes, C.Position, Normal, C.UV, C.Color));
+		VertexInstances.Add(AddTurbulentConiferVertex(MeshDescription, Attributes, B.Position, Normal, B.UV, B.Color));
 		MeshDescription.CreatePolygon(PolygonGroupId, VertexInstances);
 	}
 
@@ -2254,8 +2254,8 @@ namespace TunaSweeperExperimentalVegetation
 		TArray<FVertexInstanceID> VertexInstances;
 		VertexInstances.Reserve(3);
 		VertexInstances.Add(AddTurbulentConiferVertex(MeshDescription, Attributes, A.Position, Normal, A.UV, A.Color));
-		VertexInstances.Add(AddTurbulentConiferVertex(MeshDescription, Attributes, B.Position, Normal, B.UV, B.Color));
 		VertexInstances.Add(AddTurbulentConiferVertex(MeshDescription, Attributes, C.Position, Normal, C.UV, C.Color));
+		VertexInstances.Add(AddTurbulentConiferVertex(MeshDescription, Attributes, B.Position, Normal, B.UV, B.Color));
 		MeshDescription.CreatePolygon(PolygonGroupId, VertexInstances);
 	}
 
@@ -2377,6 +2377,11 @@ namespace TunaSweeperExperimentalVegetation
 		UStaticMesh::FBuildMeshDescriptionsParams BuildParams;
 		BuildParams.bBuildSimpleCollision = true;
 		StaticMesh->BuildFromMeshDescriptions(MeshDescriptions, BuildParams);
+		if (StaticMesh->GetStaticMaterials().Num() >= 2)
+		{
+			StaticMesh->GetStaticMaterials()[0] = FStaticMaterial(CanopyMaterial, FName(TEXT("Canopy")));
+			StaticMesh->GetStaticMaterials()[1] = FStaticMaterial(StumpMaterial, FName(TEXT("ShortTrunk")));
+		}
 		StaticMesh->MarkPackageDirty();
 
 		if (bNewAsset)

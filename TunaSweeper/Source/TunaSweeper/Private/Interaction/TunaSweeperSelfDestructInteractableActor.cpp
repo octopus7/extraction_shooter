@@ -4,6 +4,7 @@
 #include "Components/SceneComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/WidgetComponent.h"
+#include "Effect/TunaSweeperLocalExplosionEffectActor.h"
 #include "Engine/Engine.h"
 #include "Engine/OverlapResult.h"
 #include "Engine/World.h"
@@ -39,6 +40,8 @@ ATunaSweeperSelfDestructInteractableActor::ATunaSweeperSelfDestructInteractableA
 
 	SpeechBubbleWidgetClass = TSoftClassPtr<UTunaSweeperSpeechBubbleWidget>(
 		FSoftObjectPath(TEXT("/Game/UI/WBP_SpeechBubble.WBP_SpeechBubble_C")));
+	ExplosionEffectActorClass = TSoftClassPtr<ATunaSweeperLocalExplosionEffectActor>(
+		FSoftObjectPath(TEXT("/Script/TunaSweeper.TunaSweeperLocalExplosionEffectActor")));
 
 	SpeechBubbleWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("SpeechBubble"));
 	SpeechBubbleWidgetComponent->SetupAttachment(RootComponent);
@@ -159,6 +162,7 @@ void ATunaSweeperSelfDestructInteractableActor::Explode()
 
 	bExploded = true;
 	bCountdownActive = false;
+	SpawnExplosionEffect();
 	ApplyExplosionDamage();
 
 	if (GEngine)
@@ -167,6 +171,43 @@ void ATunaSweeperSelfDestructInteractableActor::Explode()
 	}
 
 	Destroy();
+}
+
+void ATunaSweeperSelfDestructInteractableActor::SpawnExplosionEffect()
+{
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		return;
+	}
+
+	TSubclassOf<ATunaSweeperLocalExplosionEffectActor> LoadedExplosionClass =
+		ExplosionEffectActorClass.LoadSynchronous();
+	if (!LoadedExplosionClass)
+	{
+		LoadedExplosionClass = ATunaSweeperLocalExplosionEffectActor::StaticClass();
+	}
+
+	FVector EffectLocation = GetActorLocation();
+	EffectLocation.Z += 28.0f;
+
+	FActorSpawnParameters SpawnParameters;
+	SpawnParameters.Owner = this;
+	SpawnParameters.Instigator = CountdownInstigator.Get();
+	SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+	ATunaSweeperLocalExplosionEffectActor* ExplosionActor =
+		World->SpawnActor<ATunaSweeperLocalExplosionEffectActor>(
+			LoadedExplosionClass,
+			EffectLocation,
+			FRotator::ZeroRotator,
+			SpawnParameters);
+	if (ExplosionActor)
+	{
+		ExplosionActor->ConfigureExplosion(
+			ExplosionRadius * FMath::Max(0.1f, ExplosionVisualRadiusMultiplier),
+			ExplosionVisualDurationSeconds);
+	}
 }
 
 void ATunaSweeperSelfDestructInteractableActor::ApplyExplosionDamage()

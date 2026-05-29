@@ -3,10 +3,13 @@
 #include "AI/TunaSweeperEnemyCharacter.h"
 #include "AI/TunaSweeperRollingBomber.h"
 #include "AI/TunaSweeperRollingBomberSpawner.h"
+#include "Components/StaticMeshComponent.h"
 #include "Dom/JsonObject.h"
+#include "Engine/StaticMeshActor.h"
 #include "Engine/StaticMesh.h"
 #include "Engine/World.h"
 #include "GameFramework/Actor.h"
+#include "Interaction/TunaSweeperExplosiveBarrelActor.h"
 #include "Interaction/TunaSweeperExtractionPointActor.h"
 #include "Interaction/TunaSweeperInteractableComponent.h"
 #include "Interaction/TunaSweeperItemSpawnInteractableActor.h"
@@ -14,6 +17,7 @@
 #include "Interaction/TunaSweeperLootContainerActor.h"
 #include "Interaction/TunaSweeperLootContainerSpawnInteractableActor.h"
 #include "Interaction/TunaSweeperPickupItemActor.h"
+#include "Interaction/TunaSweeperSandbagCoverActor.h"
 #include "Interaction/TunaSweeperSelfDestructInteractableActor.h"
 #include "Interaction/TunaSweeperTransparentObstacleActor.h"
 #include "Interaction/TunaSweeperWarpPointActor.h"
@@ -50,6 +54,9 @@ namespace TunaSweeperEnemySpawn
 	const TCHAR* DefaultSelfDestructClassPath = TEXT("/Game/Interaction/BP_Interact_SelfDestruct.BP_Interact_SelfDestruct_C");
 	const TCHAR* DefaultRollingBomberSpawnerClassPath = TEXT("/Script/TunaSweeper.TunaSweeperRollingBomberSpawner");
 	const TCHAR* DefaultExtractionPointClassPath = TEXT("/Script/TunaSweeper.TunaSweeperExtractionPointActor");
+	const TCHAR* DefaultSandbagCoverClassPath = TEXT("/Game/Interaction/BP_SandbagCover.BP_SandbagCover_C");
+	const TCHAR* DefaultExplosiveBarrelClassPath = TEXT("/Game/Interaction/BP_ExplosiveBarrel.BP_ExplosiveBarrel_C");
+	const TCHAR* DefaultStaticMeshPropClassPath = TEXT("/Script/Engine.StaticMeshActor");
 	const TCHAR* DefaultRollingBomberClassPath = TEXT("/Script/TunaSweeper.TunaSweeperRollingBomber");
 	const TCHAR* DefaultRollingBomberLaunchSoundPath =
 		TEXT("/Game/Audio/SFX/SFX_RollingBomberSpawnerLaunch_FM.SFX_RollingBomberSpawnerLaunch_FM");
@@ -63,6 +70,9 @@ namespace TunaSweeperEnemySpawn
 	const TCHAR* DefaultLevelTransitionWidgetClassPath = TEXT("/Game/UI/WBP_LevelTransitionVideo.WBP_LevelTransitionVideo_C");
 	const TCHAR* DefaultPickupItemIconWidgetClassPath = TEXT("/Game/UI/WBP_PickupItemIcon.WBP_PickupItemIcon_C");
 	const TCHAR* DefaultSpeechBubbleWidgetClassPath = TEXT("/Game/UI/WBP_SpeechBubble.WBP_SpeechBubble_C");
+	const TCHAR* DefaultExplosiveBarrelIntactMeshPath = TEXT("/Game/Interaction/SM_ExplosiveBarrel_Intact.SM_ExplosiveBarrel_Intact");
+	const TCHAR* DefaultExplosiveBarrelDestroyedMeshPath = TEXT("/Game/Interaction/SM_ExplosiveBarrel_DestroyedBase.SM_ExplosiveBarrel_DestroyedBase");
+	const TCHAR* DefaultExplosionEffectActorClassPath = TEXT("/Script/TunaSweeper.TunaSweeperLocalExplosionEffectActor");
 
 	FString NormalizeLevelName(const FString& RawLevelName)
 	{
@@ -271,6 +281,19 @@ namespace TunaSweeperEnemySpawn
 		{
 			return UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::ExtractionPoint;
 		}
+		if (SpawnType == TEXT("sandbag_cover") ||
+			SpawnType == TEXT("sandbagcover") ||
+			SpawnType == TEXT("cover_sandbag"))
+		{
+			return UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::SandbagCover;
+		}
+		if (SpawnType == TEXT("explosive_barrel") ||
+			SpawnType == TEXT("explosivebarrel") ||
+			SpawnType == TEXT("barrel_explosive") ||
+			SpawnType == TEXT("drum_barrel"))
+		{
+			return UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::ExplosiveBarrel;
+		}
 
 		return UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::Unknown;
 	}
@@ -296,6 +319,10 @@ namespace TunaSweeperEnemySpawn
 			return DefaultRollingBomberSpawnerClassPath;
 		case UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::ExtractionPoint:
 			return DefaultExtractionPointClassPath;
+		case UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::SandbagCover:
+			return DefaultSandbagCoverClassPath;
+		case UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::ExplosiveBarrel:
+			return DefaultExplosiveBarrelClassPath;
 		default:
 			return nullptr;
 		}
@@ -318,6 +345,10 @@ namespace TunaSweeperEnemySpawn
 			return FText::FromString(TEXT("Rolling Bomber Spawner"));
 		case UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::ExtractionPoint:
 			return FText::FromString(TEXT("Extraction"));
+		case UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::SandbagCover:
+			return FText::FromString(TEXT("Sandbag Cover"));
+		case UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::ExplosiveBarrel:
+			return FText::FromString(TEXT("Explosive Barrel"));
 		default:
 			return FText::GetEmpty();
 		}
@@ -1508,6 +1539,69 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadGameplayInteractionActorSpawnData(bool
 			0,
 			static_cast<int32>(NumericRollingBomberSpawnerExperienceValue));
 
+		FVector SandbagCoverBoxExtent = SpawnDefinition.SandbagCoverBoxExtent;
+		if (!TunaSweeperEnemySpawn::TryReadVectorField(JsonObject, TEXT("sandbag_box_extent"), SandbagCoverBoxExtent))
+		{
+			TunaSweeperEnemySpawn::TryReadVectorField(JsonObject, TEXT("box_extent"), SandbagCoverBoxExtent);
+		}
+		double NumericSandbagCoverMaxHealth = SpawnDefinition.SandbagCoverMaxHealth;
+		double NumericSandbagCoverPassthroughRadius = SpawnDefinition.SandbagCoverPassthroughRadius;
+		JsonObject->TryGetNumberField(TEXT("cover_max_health"), NumericSandbagCoverMaxHealth);
+		JsonObject->TryGetNumberField(TEXT("max_health"), NumericSandbagCoverMaxHealth);
+		JsonObject->TryGetNumberField(TEXT("passthrough_radius"), NumericSandbagCoverPassthroughRadius);
+		SpawnDefinition.SandbagCoverBoxExtent = FVector(
+			FMath::Max(1.0f, SandbagCoverBoxExtent.X),
+			FMath::Max(1.0f, SandbagCoverBoxExtent.Y),
+			FMath::Max(1.0f, SandbagCoverBoxExtent.Z));
+		SpawnDefinition.SandbagCoverMaxHealth = FMath::Max(1.0f, static_cast<float>(NumericSandbagCoverMaxHealth));
+		SpawnDefinition.SandbagCoverPassthroughRadius = FMath::Max(
+			0.0f,
+			static_cast<float>(NumericSandbagCoverPassthroughRadius));
+
+		FString ExplosiveBarrelIntactMeshPath;
+		FString ExplosiveBarrelDestroyedMeshPath;
+		FString ExplosiveBarrelDestroyedLoopEffectPath;
+		FString ExplosiveBarrelExplosionEffectClassPath;
+		double NumericExplosiveBarrelMaxHealth = SpawnDefinition.ExplosiveBarrelMaxHealth;
+		double NumericExplosiveBarrelExplosionVisualRadius = SpawnDefinition.ExplosiveBarrelExplosionVisualRadius;
+		double NumericExplosiveBarrelExplosionDurationSeconds = SpawnDefinition.ExplosiveBarrelExplosionDurationSeconds;
+		JsonObject->TryGetNumberField(TEXT("barrel_max_health"), NumericExplosiveBarrelMaxHealth);
+		JsonObject->TryGetNumberField(TEXT("max_health"), NumericExplosiveBarrelMaxHealth);
+		JsonObject->TryGetStringField(TEXT("intact_mesh"), ExplosiveBarrelIntactMeshPath);
+		JsonObject->TryGetStringField(TEXT("destroyed_mesh"), ExplosiveBarrelDestroyedMeshPath);
+		JsonObject->TryGetStringField(TEXT("destroyed_loop_effect"), ExplosiveBarrelDestroyedLoopEffectPath);
+		JsonObject->TryGetStringField(TEXT("explosion_effect_actor_class"), ExplosiveBarrelExplosionEffectClassPath);
+		JsonObject->TryGetNumberField(TEXT("explosion_visual_radius"), NumericExplosiveBarrelExplosionVisualRadius);
+		JsonObject->TryGetNumberField(TEXT("explosion_duration_seconds"), NumericExplosiveBarrelExplosionDurationSeconds);
+		const FString TrimmedExplosiveBarrelIntactMeshPath = ExplosiveBarrelIntactMeshPath.TrimStartAndEnd();
+		const FString TrimmedExplosiveBarrelDestroyedMeshPath = ExplosiveBarrelDestroyedMeshPath.TrimStartAndEnd();
+		const FString TrimmedExplosiveBarrelDestroyedLoopEffectPath = ExplosiveBarrelDestroyedLoopEffectPath.TrimStartAndEnd();
+		const FString TrimmedExplosiveBarrelExplosionEffectClassPath = ExplosiveBarrelExplosionEffectClassPath.TrimStartAndEnd();
+		SpawnDefinition.ExplosiveBarrelMaxHealth = FMath::Max(1.0f, static_cast<float>(NumericExplosiveBarrelMaxHealth));
+		SpawnDefinition.ExplosiveBarrelIntactMesh = TSoftObjectPtr<UStaticMesh>(
+			FSoftObjectPath(TrimmedExplosiveBarrelIntactMeshPath.IsEmpty()
+				? FString(TunaSweeperEnemySpawn::DefaultExplosiveBarrelIntactMeshPath)
+				: TrimmedExplosiveBarrelIntactMeshPath));
+		SpawnDefinition.ExplosiveBarrelDestroyedMesh = TSoftObjectPtr<UStaticMesh>(
+			FSoftObjectPath(TrimmedExplosiveBarrelDestroyedMeshPath.IsEmpty()
+				? FString(TunaSweeperEnemySpawn::DefaultExplosiveBarrelDestroyedMeshPath)
+				: TrimmedExplosiveBarrelDestroyedMeshPath));
+		if (!TrimmedExplosiveBarrelDestroyedLoopEffectPath.IsEmpty())
+		{
+			SpawnDefinition.ExplosiveBarrelDestroyedLoopEffect = TSoftObjectPtr<UNiagaraSystem>(
+				FSoftObjectPath(TrimmedExplosiveBarrelDestroyedLoopEffectPath));
+		}
+		SpawnDefinition.ExplosiveBarrelExplosionEffectClass = TSoftClassPtr<ATunaSweeperLocalExplosionEffectActor>(
+			FSoftObjectPath(TrimmedExplosiveBarrelExplosionEffectClassPath.IsEmpty()
+				? FString(TunaSweeperEnemySpawn::DefaultExplosionEffectActorClassPath)
+				: TrimmedExplosiveBarrelExplosionEffectClassPath));
+		SpawnDefinition.ExplosiveBarrelExplosionVisualRadius = FMath::Max(
+			1.0f,
+			static_cast<float>(NumericExplosiveBarrelExplosionVisualRadius));
+		SpawnDefinition.ExplosiveBarrelExplosionDurationSeconds = FMath::Max(
+			0.05f,
+			static_cast<float>(NumericExplosiveBarrelExplosionDurationSeconds));
+
 		if (SpawnDefinition.SpawnType == EGameplayInteractionActorSpawnType::LevelTravel &&
 			SpawnDefinition.TargetLevelName.IsNone())
 		{
@@ -1781,6 +1875,30 @@ void UTunaSweeperEnemySpawnSubsystem::ConfigureGameplayInteractionActor(
 				SpawnDefinition.RollingBomberLaunchPitchMaxDegrees,
 				SpawnDefinition.RollingBomberSpawnerMaxHealth,
 				SpawnDefinition.RollingBomberSpawnerExperienceValue);
+		}
+		break;
+	case EGameplayInteractionActorSpawnType::SandbagCover:
+		if (ATunaSweeperSandbagCoverActor* SandbagCover = Cast<ATunaSweeperSandbagCoverActor>(SpawnedActor))
+		{
+			SandbagCover->ConfigureCoverDefaults(
+				SpawnDefinition.SpawnId,
+				SpawnDefinition.SandbagCoverBoxExtent,
+				SpawnDefinition.SandbagCoverMaxHealth,
+				SpawnDefinition.SandbagCoverPassthroughRadius);
+		}
+		break;
+	case EGameplayInteractionActorSpawnType::ExplosiveBarrel:
+		if (ATunaSweeperExplosiveBarrelActor* ExplosiveBarrel = Cast<ATunaSweeperExplosiveBarrelActor>(SpawnedActor))
+		{
+			ExplosiveBarrel->ConfigureExplosiveBarrelDefaults(
+				SpawnDefinition.SpawnId,
+				SpawnDefinition.ExplosiveBarrelMaxHealth,
+				SpawnDefinition.ExplosiveBarrelIntactMesh,
+				SpawnDefinition.ExplosiveBarrelDestroyedMesh,
+				SpawnDefinition.ExplosiveBarrelDestroyedLoopEffect,
+				SpawnDefinition.ExplosiveBarrelExplosionEffectClass,
+				SpawnDefinition.ExplosiveBarrelExplosionVisualRadius,
+				SpawnDefinition.ExplosiveBarrelExplosionDurationSeconds);
 		}
 		break;
 	default:

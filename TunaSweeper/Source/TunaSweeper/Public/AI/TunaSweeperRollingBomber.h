@@ -5,7 +5,7 @@
 #include "TunaSweeperRollingBomber.generated.h"
 
 class ATunaSweeperProjectile;
-class ATunaSweeperMeleeImpactBurstActor;
+class ATunaSweeperLocalExplosionEffectActor;
 class ATunaSweeperTopDownCharacter;
 class UDamageType;
 class UMaterialInterface;
@@ -324,13 +324,13 @@ protected:
 	TSubclassOf<UDamageType> ExplosionDamageType;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|Self Destruct")
-	TSoftClassPtr<ATunaSweeperMeleeImpactBurstActor> SelfDestructBurstActorClass;
+	TSoftClassPtr<ATunaSweeperLocalExplosionEffectActor> SelfDestructExplosionEffectActorClass;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|Self Destruct")
-	FLinearColor SelfDestructBurstColor = FLinearColor(1.0f, 0.03f, 0.0f, 1.0f);
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|Self Destruct", meta = (ClampMin = "0.1", UIMin = "0.1"))
+	float SelfDestructExplosionVisualRadiusMultiplier = 1.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|Self Destruct", meta = (ClampMin = "0.0", UIMin = "0.0"))
-	float SelfDestructBurstVisualScale = 2.0f;
+	float SelfDestructExplosionDurationSeconds = 0.72f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber|IK")
 	FVector LeftFootHomeLocalOffset = FVector(-4.0f, -15.0f, -25.0f);

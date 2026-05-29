@@ -5,6 +5,7 @@
 #include "TunaSweeperSelfDestructInteractableActor.generated.h"
 
 class APawn;
+class ATunaSweeperLocalExplosionEffectActor;
 class USceneComponent;
 class UStaticMeshComponent;
 class UTunaSweeperInteractableComponent;
@@ -67,12 +68,22 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Self Destruct", meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float ExplosionDamage = 100.0f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Self Destruct|Visual")
+	TSoftClassPtr<ATunaSweeperLocalExplosionEffectActor> ExplosionEffectActorClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Self Destruct|Visual", meta = (ClampMin = "0.1", UIMin = "0.1"))
+	float ExplosionVisualRadiusMultiplier = 1.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Self Destruct|Visual", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float ExplosionVisualDurationSeconds = 0.72f;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Self Destruct|UI")
 	TSoftClassPtr<UTunaSweeperSpeechBubbleWidget> SpeechBubbleWidgetClass;
 
 private:
 	void AdvanceCountdown();
 	void Explode();
+	void SpawnExplosionEffect();
 	void ApplyExplosionDamage();
 	void SetSpeechBubbleText(const FText& InText);
 	void EnsureSpeechBubbleWidgetClass();

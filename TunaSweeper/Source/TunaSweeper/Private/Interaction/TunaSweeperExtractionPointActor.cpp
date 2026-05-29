@@ -26,8 +26,27 @@
 namespace
 {
 	const TCHAR* ExtractionVisualMaterialPath = TEXT("/Game/Effects/M_LedExpression_VertexColorEmissive.M_LedExpression_VertexColorEmissive");
+	const TCHAR* SmokeSignalMaterialPath = TEXT("/Game/Effects/M_LocalExplosionFlipbook.M_LocalExplosionFlipbook");
 	const TCHAR* LevelTransitionWidgetClassPath = TEXT("/Game/UI/WBP_LevelTransitionVideo.WBP_LevelTransitionVideo_C");
 	constexpr int32 FallbackParticleCount = 10;
+	constexpr int32 SmokeSignalSpriteCount = 18;
+	constexpr float ExtractionSmokePlaneMeshSizeCm = 100.0f;
+
+	float SmoothExtractionSmokeAlpha(float Alpha)
+	{
+		const float ClampedAlpha = FMath::Clamp(Alpha, 0.0f, 1.0f);
+		return ClampedAlpha * ClampedAlpha * (3.0f - 2.0f * ClampedAlpha);
+	}
+
+	float RangeExtractionSmokeAlpha(float Start, float End, float Value)
+	{
+		if (FMath::IsNearlyEqual(Start, End))
+		{
+			return Value >= End ? 1.0f : 0.0f;
+		}
+
+		return FMath::Clamp((Value - Start) / (End - Start), 0.0f, 1.0f);
+	}
 
 	void ApplyExtractionColorParameters(UMaterialInstanceDynamic* DynamicMaterial, const FLinearColor& Color)
 	{
@@ -72,7 +91,9 @@ ATunaSweeperExtractionPointActor::ATunaSweeperExtractionPointActor()
 	ExtractionEffectComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("ExtractionEffect"));
 	ExtractionEffectComponent->SetupAttachment(RootComponent);
 	ExtractionEffectComponent->SetAutoActivate(true);
-	ExtractionEffectComponent->SetRelativeLocation(FVector(0.0f, 0.0f, FallbackParticleBaseHeight));
+	ExtractionEffectComponent->SetRelativeLocation(ExtractionNiagaraRelativeLocation);
+	ExtractionEffectComponent->SetRelativeRotation(ExtractionNiagaraRelativeRotation);
+	ExtractionEffectComponent->SetRelativeScale3D(ExtractionNiagaraRelativeScale);
 
 	ProgressWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("ExtractionProgressWidget"));
 	ProgressWidgetComponent->SetupAttachment(RootComponent);
@@ -85,6 +106,7 @@ ATunaSweeperExtractionPointActor::ATunaSweeperExtractionPointActor()
 	ProgressWidgetComponent->SetGenerateOverlapEvents(false);
 
 	RadiusVisualMaterial = TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath(ExtractionVisualMaterialPath));
+	SmokeSignalSpriteMaterial = TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath(SmokeSignalMaterialPath));
 	TransitionWidgetClass = TSoftClassPtr<UTunaSweeperLevelTransitionWidget>(FSoftObjectPath(LevelTransitionWidgetClassPath));
 	TransitionMessage = FText::FromString(TEXT("Returning to Bunker"));
 
@@ -107,6 +129,28 @@ ATunaSweeperExtractionPointActor::ATunaSweeperExtractionPointActor()
 		}
 		FallbackParticleMeshes.Add(ParticleComponent);
 	}
+
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> PlaneMesh(TEXT("/Engine/BasicShapes/Plane.Plane"));
+	UStaticMesh* SmokeSpriteMesh = PlaneMesh.Succeeded() ? PlaneMesh.Object : nullptr;
+	SmokeSignalSprites.Reserve(SmokeSignalSpriteCount);
+	for (int32 Index = 0; Index < SmokeSignalSpriteCount; ++Index)
+	{
+		const FName ComponentName(*FString::Printf(TEXT("SmokeSignalSprite%d"), Index));
+		UStaticMeshComponent* SmokeSprite = CreateDefaultSubobject<UStaticMeshComponent>(ComponentName);
+		SmokeSprite->SetupAttachment(RootComponent);
+		SmokeSprite->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		SmokeSprite->SetGenerateOverlapEvents(false);
+		SmokeSprite->SetCastShadow(false);
+		SmokeSprite->SetCanEverAffectNavigation(false);
+		SmokeSprite->SetTranslucentSortPriority(4 + Index);
+		SmokeSprite->SetVisibility(true);
+		SmokeSprite->SetHiddenInGame(false);
+		if (SmokeSpriteMesh)
+		{
+			SmokeSprite->SetStaticMesh(SmokeSpriteMesh);
+		}
+		SmokeSignalSprites.Add(SmokeSprite);
+	}
 }
 
 void ATunaSweeperExtractionPointActor::OnConstruction(const FTransform& Transform)
@@ -114,8 +158,10 @@ void ATunaSweeperExtractionPointActor::OnConstruction(const FTransform& Transfor
 	Super::OnConstruction(Transform);
 
 	RefreshExtractionComponents();
+	ApplySmokeSignalMaterials();
 	UpdateProgressWidget();
 	UpdateFallbackParticleEffect(0.0f);
+	UpdateSmokeSignalEffect(0.0f);
 }
 
 void ATunaSweeperExtractionPointActor::BeginPlay()
@@ -124,7 +170,9 @@ void ATunaSweeperExtractionPointActor::BeginPlay()
 
 	RefreshExtractionComponents();
 	ApplyFallbackParticleMaterials();
+	ApplySmokeSignalMaterials();
 	UpdateProgressWidget();
+	UpdateSmokeSignalEffect(0.0f);
 }
 
 void ATunaSweeperExtractionPointActor::Tick(float DeltaSeconds)
@@ -132,6 +180,7 @@ void ATunaSweeperExtractionPointActor::Tick(float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 
 	UpdateFallbackParticleEffect(DeltaSeconds);
+	UpdateSmokeSignalEffect(DeltaSeconds);
 	UpdateExtractionProgress(DeltaSeconds);
 }
 
@@ -166,6 +215,18 @@ void ATunaSweeperExtractionPointActor::ConfigureExtractionPointDefaults(
 	TransitionMessage = InTransitionMessage;
 	RefreshExtractionComponents();
 	UpdateProgressWidget();
+}
+
+void ATunaSweeperExtractionPointActor::SetSmokeSignalWind(FVector2D InWindDirection, float InWindSpeedCmPerSecond)
+{
+	SmokeSignalWindDirection = InWindDirection.GetSafeNormal(0.0f);
+	if (SmokeSignalWindDirection.IsNearlyZero())
+	{
+		SmokeSignalWindDirection = FVector2D(1.0f, 0.0f);
+	}
+
+	SmokeSignalWindSpeedCmPerSecond = FMath::Max(0.0f, InWindSpeedCmPerSecond);
+	ApplyExtractionNiagaraParameters();
 }
 
 float ATunaSweeperExtractionPointActor::GetCurrentHoldProgress() const
@@ -359,22 +420,76 @@ void ATunaSweeperExtractionPointActor::ApplyRadiusVisualMaterial()
 
 void ATunaSweeperExtractionPointActor::RefreshEffectComponent()
 {
+	bHasActiveNiagaraExtractionEffect = false;
 	if (!ExtractionEffectComponent)
 	{
 		return;
 	}
 
-	ExtractionEffectComponent->SetRelativeLocation(FVector(0.0f, 0.0f, FallbackParticleBaseHeight));
+	const FVector SafeNiagaraScale(
+		FMath::Max(0.01f, FMath::Abs(ExtractionNiagaraRelativeScale.X)),
+		FMath::Max(0.01f, FMath::Abs(ExtractionNiagaraRelativeScale.Y)),
+		FMath::Max(0.01f, FMath::Abs(ExtractionNiagaraRelativeScale.Z)));
+	ExtractionEffectComponent->SetRelativeLocation(ExtractionNiagaraRelativeLocation);
+	ExtractionEffectComponent->SetRelativeRotation(ExtractionNiagaraRelativeRotation);
+	ExtractionEffectComponent->SetRelativeScale3D(SafeNiagaraScale);
 	if (UNiagaraSystem* LoadedSystem = ExtractionParticleSystem.LoadSynchronous())
 	{
 		ExtractionEffectComponent->SetAsset(LoadedSystem);
-		ExtractionEffectComponent->SetVariableLinearColor(FName(TEXT("User.Color")), ParticleColor);
+		ApplyExtractionNiagaraParameters();
+		bHasActiveNiagaraExtractionEffect = true;
 		ExtractionEffectComponent->Activate(true);
 	}
 	else
 	{
 		ExtractionEffectComponent->Deactivate();
 	}
+}
+
+void ATunaSweeperExtractionPointActor::ApplyExtractionNiagaraParameters()
+{
+	if (!ExtractionEffectComponent)
+	{
+		return;
+	}
+
+	const FVector WindVelocity = GetSmokeSignalWindVelocity();
+	FVector2D WindDirection(WindVelocity.X, WindVelocity.Y);
+	WindDirection = WindDirection.IsNearlyZero() ? FVector2D(1.0f, 0.0f) : WindDirection.GetSafeNormal();
+	const FLinearColor GreenSmokeColor(0.10f, 0.58f, 0.16f, 1.0f);
+	const float SourceRadius = FMath::Max(8.0f, SmokeSignalBaseDiameter * 0.5f);
+	const float TopRadius = FMath::Max(SourceRadius, SmokeSignalTopDiameter * 0.5f);
+	const FQuat NiagaraRotation = ExtractionNiagaraRelativeRotation.Quaternion();
+	const FVector NiagaraUpAxis = NiagaraRotation.RotateVector(FVector::UpVector).GetSafeNormal();
+	const FVector NiagaraForwardAxis = NiagaraRotation.RotateVector(FVector::ForwardVector).GetSafeNormal();
+
+	ExtractionEffectComponent->SetVariableLinearColor(FName(TEXT("User.Color")), SmokeSignalBaseColor);
+	ExtractionEffectComponent->SetVariableLinearColor(FName(TEXT("User.BaseColor")), SmokeSignalBaseColor);
+	ExtractionEffectComponent->SetVariableLinearColor(FName(TEXT("User.SourceColor")), SmokeSignalBaseColor);
+	ExtractionEffectComponent->SetVariableLinearColor(FName(TEXT("User.SmokeBaseColor")), SmokeSignalBaseColor);
+	ExtractionEffectComponent->SetVariableLinearColor(FName(TEXT("User.SmokeMidColor")), GreenSmokeColor);
+	ExtractionEffectComponent->SetVariableLinearColor(FName(TEXT("User.SmokeColor")), SmokeSignalTopColor);
+	ExtractionEffectComponent->SetVariableLinearColor(FName(TEXT("User.TopColor")), SmokeSignalTopColor);
+	ExtractionEffectComponent->SetVariableLinearColor(FName(TEXT("User.Albedo")), SmokeSignalTopColor);
+	ExtractionEffectComponent->SetVariableLinearColor(FName(TEXT("User.TintColor")), SmokeSignalTopColor);
+	ExtractionEffectComponent->SetVariableVec3(FName(TEXT("User.Wind")), WindVelocity);
+	ExtractionEffectComponent->SetVariableVec3(FName(TEXT("User.WindVelocity")), WindVelocity);
+	ExtractionEffectComponent->SetVariableVec3(FName(TEXT("User.Wind Direction")), FVector(WindDirection.X, WindDirection.Y, 0.0f));
+	ExtractionEffectComponent->SetVariableVec3(FName(TEXT("User.UpVector")), NiagaraUpAxis);
+	ExtractionEffectComponent->SetVariableVec3(FName(TEXT("User.PlumeAxis")), NiagaraUpAxis);
+	ExtractionEffectComponent->SetVariableVec3(FName(TEXT("User.SignalAxis")), NiagaraUpAxis);
+	ExtractionEffectComponent->SetVariableVec3(FName(TEXT("User.EmitDirection")), NiagaraUpAxis);
+	ExtractionEffectComponent->SetVariableVec3(FName(TEXT("User.ForwardVector")), NiagaraForwardAxis);
+	ExtractionEffectComponent->SetVariableVec2(FName(TEXT("User.WindDirection")), WindDirection);
+	ExtractionEffectComponent->SetVariableFloat(FName(TEXT("User.WindSpeed")), FMath::Max(0.0f, SmokeSignalWindSpeedCmPerSecond));
+	ExtractionEffectComponent->SetVariableFloat(FName(TEXT("User.SourceRadius")), SourceRadius);
+	ExtractionEffectComponent->SetVariableFloat(FName(TEXT("User.SmokeSourceRadius")), SourceRadius);
+	ExtractionEffectComponent->SetVariableFloat(FName(TEXT("User.PlumeHeight")), FMath::Max(120.0f, SmokeSignalColumnHeight));
+	ExtractionEffectComponent->SetVariableFloat(FName(TEXT("User.SmokeRadius")), TopRadius);
+	ExtractionEffectComponent->SetVariableFloat(FName(TEXT("User.Density")), 1.35f);
+	ExtractionEffectComponent->SetVariableFloat(FName(TEXT("User.DensityScale")), 1.35f);
+	ExtractionEffectComponent->SetVariableFloat(FName(TEXT("User.Temperature")), 0.18f);
+	ExtractionEffectComponent->SetVariableFloat(FName(TEXT("User.Buoyancy")), 1.1f);
 }
 
 void ATunaSweeperExtractionPointActor::RefreshProgressWidgetComponent()
@@ -498,7 +613,8 @@ void ATunaSweeperExtractionPointActor::UpdateFallbackParticleEffect(float DeltaS
 
 	const int32 ParticleCount = FallbackParticleMeshes.Num();
 	const bool bShowFallbackParticles = bEnableFallbackParticleEffect && ParticleCount > 0;
-	const float OrbitRadius = FMath::Min(FallbackParticleOrbitRadius, FMath::Max(0.0f, ExtractionRadius * 0.42f));
+	const float CoreRadius = FMath::Min(FallbackParticleOrbitRadius, FMath::Max(0.0f, ExtractionRadius * 0.14f));
+	const FVector WindVelocity = GetSmokeSignalWindVelocity();
 	for (int32 Index = 0; Index < ParticleCount; ++Index)
 	{
 		UStaticMeshComponent* ParticleComponent = FallbackParticleMeshes[Index];
@@ -515,14 +631,17 @@ void ATunaSweeperExtractionPointActor::UpdateFallbackParticleEffect(float DeltaS
 		}
 
 		const float IndexAlpha = static_cast<float>(Index) / static_cast<float>(FMath::Max(1, ParticleCount));
-		const float Angle = EffectElapsedSeconds * 1.35f + IndexAlpha * 2.0f * PI;
-		const float VerticalOffset = FMath::Sin(EffectElapsedSeconds * 2.4f + IndexAlpha * 2.0f * PI) * FallbackParticleVerticalAmplitude;
-		const float Pulse = 0.78f + 0.22f * FMath::Sin(EffectElapsedSeconds * 3.1f + IndexAlpha * 4.0f * PI);
+		const float LifeAlpha = FMath::Frac(EffectElapsedSeconds * 0.72f + IndexAlpha);
+		const float LiftAlpha = SmoothExtractionSmokeAlpha(LifeAlpha);
+		const float Angle = EffectElapsedSeconds * 2.2f + IndexAlpha * 5.0f * PI;
+		const float SparkRadius = FMath::Lerp(5.0f, CoreRadius, SmoothExtractionSmokeAlpha(FMath::Sin(LifeAlpha * PI)));
+		const float VerticalOffset = LiftAlpha * (FallbackParticleVerticalAmplitude + 58.0f);
+		const float Pulse = 0.76f + 0.24f * FMath::Sin(EffectElapsedSeconds * 7.1f + IndexAlpha * 6.0f * PI);
 		const FVector RelativeLocation(
-			FMath::Cos(Angle) * OrbitRadius,
-			FMath::Sin(Angle) * OrbitRadius,
+			FMath::Cos(Angle) * SparkRadius + WindVelocity.X * LifeAlpha * 0.22f,
+			FMath::Sin(Angle) * SparkRadius + WindVelocity.Y * LifeAlpha * 0.22f,
 			FallbackParticleBaseHeight + VerticalOffset);
-		const float RelativeScale = 0.055f * Pulse;
+		const float RelativeScale = FMath::Lerp(0.075f, 0.022f, LifeAlpha) * Pulse;
 
 		ParticleComponent->SetRelativeLocation(RelativeLocation);
 		ParticleComponent->SetRelativeScale3D(FVector(RelativeScale));
@@ -553,4 +672,176 @@ void ATunaSweeperExtractionPointActor::ApplyFallbackParticleMaterials()
 			FallbackParticleDynamicMaterials.Add(DynamicMaterial);
 		}
 	}
+}
+
+void ATunaSweeperExtractionPointActor::UpdateSmokeSignalEffect(float DeltaSeconds)
+{
+	(void)DeltaSeconds;
+
+	const int32 SpriteCount = SmokeSignalSprites.Num();
+	const bool bShowSmokeSignal =
+		bEnableSmokeSignalEffect &&
+		!bHasActiveNiagaraExtractionEffect &&
+		SpriteCount > 0 &&
+		SmokeSignalDynamicMaterials.Num() > 0;
+	const FVector WindVelocity = GetSmokeSignalWindVelocity();
+	const float LoopDuration = FMath::Max(0.25f, SmokeSignalLoopDurationSeconds);
+	const float ColumnHeight = FMath::Max(1.0f, SmokeSignalColumnHeight);
+	const float BaseDiameter = FMath::Max(1.0f, SmokeSignalBaseDiameter);
+	const float TopDiameter = FMath::Max(BaseDiameter, SmokeSignalTopDiameter);
+	const float HorizontalSpread = FMath::Max(0.0f, SmokeSignalHorizontalSpread);
+
+	for (int32 Index = 0; Index < SpriteCount; ++Index)
+	{
+		UStaticMeshComponent* SmokeSprite = SmokeSignalSprites[Index];
+		if (!SmokeSprite)
+		{
+			continue;
+		}
+
+		SmokeSprite->SetVisibility(bShowSmokeSignal);
+		SmokeSprite->SetHiddenInGame(!bShowSmokeSignal);
+		if (!bShowSmokeSignal)
+		{
+			continue;
+		}
+
+		const float IndexAlpha = static_cast<float>(Index) / static_cast<float>(FMath::Max(1, SpriteCount));
+		const float LifeAlpha = FMath::Frac(EffectElapsedSeconds / LoopDuration + IndexAlpha);
+		const float RiseAlpha = SmoothExtractionSmokeAlpha(LifeAlpha);
+		const float SpawnFade = SmoothExtractionSmokeAlpha(RangeExtractionSmokeAlpha(0.0f, 0.12f, LifeAlpha));
+		const float DeathFade = 1.0f - SmoothExtractionSmokeAlpha(RangeExtractionSmokeAlpha(0.78f, 1.0f, LifeAlpha));
+		const float SmokeOpacity = SpawnFade * DeathFade * FMath::Lerp(0.82f, 0.54f, RiseAlpha);
+
+		const float SpiralAngle = IndexAlpha * 7.0f * PI + EffectElapsedSeconds * 0.24f;
+		const float TurbulenceAngle = IndexAlpha * 13.0f * PI + EffectElapsedSeconds * 0.47f;
+		const float SpreadRadius = HorizontalSpread * SmoothExtractionSmokeAlpha(RiseAlpha);
+		const FVector TurbulenceOffset(
+			FMath::Cos(SpiralAngle) * SpreadRadius * 0.62f + FMath::Cos(TurbulenceAngle) * SpreadRadius * 0.28f,
+			FMath::Sin(SpiralAngle) * SpreadRadius * 0.62f + FMath::Sin(TurbulenceAngle) * SpreadRadius * 0.28f,
+			0.0f);
+		const FVector WindOffset = WindVelocity * (LifeAlpha * LoopDuration);
+		const FVector RelativeLocation = FVector(0.0f, 0.0f, SmokeSignalBaseHeight + ColumnHeight * RiseAlpha)
+			+ TurbulenceOffset
+			+ WindOffset;
+
+		const float DiameterPulse = 0.92f + 0.08f * FMath::Sin(EffectElapsedSeconds * 1.9f + IndexAlpha * 8.0f * PI);
+		const float Diameter = FMath::Lerp(BaseDiameter, TopDiameter, RiseAlpha) * DiameterPulse;
+		const float SmokeSpriteScale = Diameter / ExtractionSmokePlaneMeshSizeCm;
+		SmokeSprite->SetRelativeLocation(RelativeLocation);
+		SmokeSprite->SetRelativeScale3D(FVector(SmokeSpriteScale, SmokeSpriteScale, 1.0f));
+		SmokeSprite->SetRelativeRotation(FRotator(0.0f, 0.0f, LifeAlpha * 180.0f + IndexAlpha * 360.0f));
+
+		FLinearColor TintColor = SmokeSignalTopColor;
+		if (LifeAlpha < 0.32f)
+		{
+			const FLinearColor GreenSmokeColor(0.10f, 0.58f, 0.16f, 1.0f);
+			TintColor = FMath::Lerp(SmokeSignalBaseColor, GreenSmokeColor, SmoothExtractionSmokeAlpha(LifeAlpha / 0.32f));
+		}
+		else
+		{
+			const FLinearColor GreenSmokeColor(0.10f, 0.58f, 0.16f, 1.0f);
+			TintColor = FMath::Lerp(GreenSmokeColor, SmokeSignalTopColor, SmoothExtractionSmokeAlpha((LifeAlpha - 0.32f) / 0.68f));
+		}
+		TintColor.A = 1.0f;
+
+		const float EmissiveStrength = FMath::Lerp(
+			6.2f,
+			0.48f,
+			SmoothExtractionSmokeAlpha(RangeExtractionSmokeAlpha(0.06f, 0.58f, LifeAlpha)));
+		const int32 FrameIndex = FMath::Clamp(
+			8 + FMath::FloorToInt(RiseAlpha * 7.0f) + (Index % 2),
+			8,
+			15);
+
+		UMaterialInstanceDynamic* DynamicMaterial = SmokeSignalDynamicMaterials.IsValidIndex(Index)
+			? SmokeSignalDynamicMaterials[Index]
+			: nullptr;
+		UpdateSmokeSignalSpriteMaterial(
+			DynamicMaterial,
+			FrameIndex,
+			TintColor,
+			EmissiveStrength,
+			SmokeOpacity);
+	}
+}
+
+void ATunaSweeperExtractionPointActor::ApplySmokeSignalMaterials()
+{
+	SmokeSignalDynamicMaterials.Reset();
+	UMaterialInterface* SmokeMaterial = SmokeSignalSpriteMaterial.IsNull()
+		? nullptr
+		: SmokeSignalSpriteMaterial.LoadSynchronous();
+	if (!SmokeMaterial)
+	{
+		SmokeMaterial = LoadObject<UMaterialInterface>(nullptr, SmokeSignalMaterialPath);
+	}
+	if (!SmokeMaterial)
+	{
+		return;
+	}
+
+	for (UStaticMeshComponent* SmokeSprite : SmokeSignalSprites)
+	{
+		if (!SmokeSprite)
+		{
+			continue;
+		}
+
+		SmokeSprite->SetMaterial(0, SmokeMaterial);
+		UMaterialInstanceDynamic* DynamicMaterial = SmokeSprite->CreateAndSetMaterialInstanceDynamic(0);
+		if (DynamicMaterial)
+		{
+			UpdateSmokeSignalSpriteMaterial(DynamicMaterial, 8, SmokeSignalBaseColor, 3.0f, 0.0f);
+			SmokeSignalDynamicMaterials.Add(DynamicMaterial);
+		}
+	}
+}
+
+void ATunaSweeperExtractionPointActor::UpdateSmokeSignalSpriteMaterial(
+	UMaterialInstanceDynamic* DynamicMaterial,
+	int32 FrameIndex,
+	const FLinearColor& TintColor,
+	float EmissiveStrength,
+	float Opacity) const
+{
+	if (!DynamicMaterial)
+	{
+		return;
+	}
+
+	const int32 SafeFrameIndex = FMath::Clamp(FrameIndex, 0, 15);
+	const int32 Column = SafeFrameIndex % 4;
+	const int32 Row = SafeFrameIndex / 4;
+	const float FrameScale = 0.25f;
+	const float ClampedOpacity = FMath::Clamp(Opacity, 0.0f, 1.0f);
+	const float SafeEmissiveStrength = FMath::Max(0.0f, EmissiveStrength);
+
+	DynamicMaterial->SetScalarParameterValue(TEXT("FrameScale"), FrameScale);
+	DynamicMaterial->SetScalarParameterValue(TEXT("FrameU"), static_cast<float>(Column) * FrameScale);
+	DynamicMaterial->SetScalarParameterValue(TEXT("FrameV"), static_cast<float>(Row) * FrameScale);
+	DynamicMaterial->SetVectorParameterValue(TEXT("TintColor"), TintColor);
+	DynamicMaterial->SetScalarParameterValue(TEXT("EmissiveStrength"), SafeEmissiveStrength);
+	DynamicMaterial->SetScalarParameterValue(TEXT("Opacity"), ClampedOpacity);
+
+	DynamicMaterial->SetVectorParameterValue(TEXT("Color"), TintColor);
+	DynamicMaterial->SetVectorParameterValue(TEXT("BaseColor"), TintColor);
+	DynamicMaterial->SetVectorParameterValue(TEXT("Base Color"), TintColor);
+	DynamicMaterial->SetVectorParameterValue(TEXT("LedColor"), TintColor);
+	DynamicMaterial->SetVectorParameterValue(TEXT("EmissiveColor"), TintColor * SafeEmissiveStrength);
+	DynamicMaterial->SetVectorParameterValue(TEXT("Emissive Color"), TintColor * SafeEmissiveStrength);
+	DynamicMaterial->SetScalarParameterValue(TEXT("Emissive Strength"), SafeEmissiveStrength);
+	DynamicMaterial->SetScalarParameterValue(TEXT("Intensity"), SafeEmissiveStrength);
+}
+
+FVector ATunaSweeperExtractionPointActor::GetSmokeSignalWindVelocity() const
+{
+	FVector2D SafeDirection = SmokeSignalWindDirection.GetSafeNormal(0.0f);
+	if (SafeDirection.IsNearlyZero())
+	{
+		SafeDirection = FVector2D(1.0f, 0.0f);
+	}
+
+	const float WindSpeed = FMath::Max(0.0f, SmokeSignalWindSpeedCmPerSecond);
+	return FVector(SafeDirection.X * WindSpeed, SafeDirection.Y * WindSpeed, 0.0f);
 }

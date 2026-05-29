@@ -5,7 +5,7 @@
 #include "Components/PointLightComponent.h"
 #include "Components/SceneComponent.h"
 #include "Components/StaticMeshComponent.h"
-#include "Effect/TunaSweeperMeleeImpactBurstActor.h"
+#include "Effect/TunaSweeperLocalExplosionEffectActor.h"
 #include "Engine/OverlapResult.h"
 #include "Engine/StaticMesh.h"
 #include "Engine/World.h"
@@ -80,8 +80,8 @@ ATunaSweeperRollingBomber::ATunaSweeperRollingBomber()
 		FSoftObjectPath(TEXT("/Game/Effects/M_LedExpression_VertexColorEmissive.M_LedExpression_VertexColorEmissive")));
 	RollingBomberProjectileTrailMaterial = TSoftObjectPtr<UMaterialInterface>(
 		FSoftObjectPath(TEXT("/Game/Effects/M_LumberjackMeleeSwingArc.M_LumberjackMeleeSwingArc")));
-	SelfDestructBurstActorClass = TSoftClassPtr<ATunaSweeperMeleeImpactBurstActor>(
-		FSoftObjectPath(TEXT("/Script/TunaSweeper.TunaSweeperMeleeImpactBurstActor")));
+	SelfDestructExplosionEffectActorClass = TSoftClassPtr<ATunaSweeperLocalExplosionEffectActor>(
+		FSoftObjectPath(TEXT("/Script/TunaSweeper.TunaSweeperLocalExplosionEffectActor")));
 
 	BodyVisualPivot = CreateDefaultSubobject<USceneComponent>(TEXT("BodyVisualPivot"));
 	BodyVisualPivot->SetupAttachment(RootComponent);
@@ -1189,10 +1189,11 @@ void ATunaSweeperRollingBomber::SpawnSelfDestructBurst()
 		return;
 	}
 
-	TSubclassOf<ATunaSweeperMeleeImpactBurstActor> LoadedBurstClass = SelfDestructBurstActorClass.LoadSynchronous();
-	if (!LoadedBurstClass)
+	TSubclassOf<ATunaSweeperLocalExplosionEffectActor> LoadedExplosionClass =
+		SelfDestructExplosionEffectActorClass.LoadSynchronous();
+	if (!LoadedExplosionClass)
 	{
-		LoadedBurstClass = ATunaSweeperMeleeImpactBurstActor::StaticClass();
+		LoadedExplosionClass = ATunaSweeperLocalExplosionEffectActor::StaticClass();
 	}
 
 	FVector BurstLocation = GetActorLocation();
@@ -1212,15 +1213,17 @@ void ATunaSweeperRollingBomber::SpawnSelfDestructBurst()
 	SpawnParameters.Instigator = this;
 	SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-	ATunaSweeperMeleeImpactBurstActor* BurstActor = World->SpawnActor<ATunaSweeperMeleeImpactBurstActor>(
-		LoadedBurstClass,
-		BurstLocation,
-		BurstRotation,
-		SpawnParameters);
-	if (BurstActor)
+	ATunaSweeperLocalExplosionEffectActor* ExplosionActor =
+		World->SpawnActor<ATunaSweeperLocalExplosionEffectActor>(
+			LoadedExplosionClass,
+			BurstLocation,
+			BurstRotation,
+			SpawnParameters);
+	if (ExplosionActor)
 	{
-		BurstActor->SetBurstColor(SelfDestructBurstColor);
-		BurstActor->SetActorScale3D(FVector(FMath::Max(0.0f, SelfDestructBurstVisualScale)));
+		ExplosionActor->ConfigureExplosion(
+			ExplosionRadius * FMath::Max(0.1f, SelfDestructExplosionVisualRadiusMultiplier),
+			SelfDestructExplosionDurationSeconds);
 	}
 }
 
