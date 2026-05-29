@@ -41,7 +41,10 @@
 namespace TunaSweeperEquippedWeaponVisual
 {
 	const FName GunCategoryTag(TEXT("item.category.weapon.gun"));
+	const FName RifleWeaponTypeTag(TEXT("weapon.type.rifle"));
+	const FName TacticalAttachmentSlotTag(TEXT("attachment.slot.tactical"));
 	const FSoftObjectPath AssaultRifleClassPath(TEXT("/Game/Weapons/BP_AssaultRifle.BP_AssaultRifle_C"));
+	constexpr int32 LaserSightItemId = 2006;
 	constexpr int32 BaseballBatItemId = 1005;
 	const FSoftObjectPath BaseballBatMeshPath(TEXT("/Game/Weapons/SM_BaseballBat.SM_BaseballBat"));
 	const FSoftObjectPath BaseballBatMaterialPath(TEXT("/Game/Weapons/M_BaseballBat_Wood.M_BaseballBat_Wood"));
@@ -194,6 +197,9 @@ void ATunaSweeperTopDownCharacter::BeginPlay()
 	CurrentCameraAimOffset = FVector::ZeroVector;
 	DefaultSkeletalMeshRelativeRotation = GetMesh() ? GetMesh()->GetRelativeRotation() : FRotator::ZeroRotator;
 	DefaultVisualMeshRelativeRotation = VisualMesh ? VisualMesh->GetRelativeRotation() : FRotator::ZeroRotator;
+	CacheBaseSurvivalStats();
+	ApplyExperienceLevelStatBonuses();
+	ApplyBunkerPeaceZoneVitalsRules();
 	CurrentStamina = FMath::Max(0.0f, MaxStamina);
 	StaminaGaugeOpacity = 0.0f;
 
@@ -201,6 +207,8 @@ void ATunaSweeperTopDownCharacter::BeginPlay()
 	{
 		TunaGameInstance->OnInventoryStateChanged.RemoveAll(this);
 		TunaGameInstance->OnInventoryStateChanged.AddUObject(this, &ATunaSweeperTopDownCharacter::RefreshSelectedWeaponAfterInventoryChanged);
+		TunaGameInstance->OnExperienceChanged.RemoveAll(this);
+		TunaGameInstance->OnExperienceChanged.AddUObject(this, &ATunaSweeperTopDownCharacter::ApplyExperienceLevelStatBonuses);
 	}
 
 	if (VitalsComponent)
@@ -272,6 +280,7 @@ void ATunaSweeperTopDownCharacter::EndPlay(const EEndPlayReason::Type EndPlayRea
 	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
 	{
 		TunaGameInstance->OnInventoryStateChanged.RemoveAll(this);
+		TunaGameInstance->OnExperienceChanged.RemoveAll(this);
 	}
 
 	Super::EndPlay(EndPlayReason);
@@ -504,6 +513,7 @@ void ATunaSweeperTopDownCharacter::EnsureEquippedWeaponActor()
 			}
 		}
 		EquippedWeapon->SetActorHiddenInGame(bHousingModeVisualHidden);
+		ApplyEquippedWeaponAttachmentVisuals();
 	}
 }
 
@@ -533,6 +543,52 @@ TSubclassOf<ATunaSweeperWeapon> ATunaSweeperTopDownCharacter::ResolveEquippedWea
 	}
 
 	return DefaultWeaponClass.LoadSynchronous();
+}
+
+void ATunaSweeperTopDownCharacter::ApplyEquippedWeaponAttachmentVisuals()
+{
+	if (EquippedWeapon)
+	{
+		EquippedWeapon->SetLaserSightEnabled(!bHousingModeVisualHidden && IsSelectedWeaponLaserSightEquipped());
+	}
+}
+
+bool ATunaSweeperTopDownCharacter::IsSelectedWeaponLaserSightEquipped() const
+{
+	if (bMeleeWeaponSelected || SelectedWeaponSlotNumber <= 0)
+	{
+		return false;
+	}
+
+	UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+	if (!TunaGameInstance)
+	{
+		return false;
+	}
+
+	FTunaSweeperItemInstance WeaponInstance;
+	FTunaSweeperItemDefinition WeaponDefinition;
+	if (!TunaGameInstance->TryGetEquipmentWeaponSlotItem(SelectedWeaponSlotNumber, WeaponInstance, WeaponDefinition) ||
+		WeaponDefinition.WeaponTypeTag != TunaSweeperEquippedWeaponVisual::RifleWeaponTypeTag)
+	{
+		return false;
+	}
+
+	const FGuid* AttachmentUid = WeaponInstance.AttachmentSlots.Find(
+		TunaSweeperEquippedWeaponVisual::TacticalAttachmentSlotTag);
+	if (!AttachmentUid || !AttachmentUid->IsValid())
+	{
+		return false;
+	}
+
+	FTunaSweeperItemInstance AttachmentInstance;
+	FTunaSweeperItemDefinition AttachmentDefinition;
+	UTunaSweeperItemDataSubsystem* ItemDataSubsystem = TunaGameInstance->GetSubsystem<UTunaSweeperItemDataSubsystem>();
+	return ItemDataSubsystem &&
+		TunaGameInstance->TryGetItemInstance(*AttachmentUid, AttachmentInstance) &&
+		ItemDataSubsystem->TryGetItemDefinition(AttachmentInstance.ItemId, AttachmentDefinition) &&
+		AttachmentDefinition.Id == TunaSweeperEquippedWeaponVisual::LaserSightItemId &&
+		AttachmentDefinition.AttachmentSlotTag == TunaSweeperEquippedWeaponVisual::TacticalAttachmentSlotTag;
 }
 
 void ATunaSweeperTopDownCharacter::ClearEquippedWeaponActor()
@@ -694,6 +750,11 @@ void ATunaSweeperTopDownCharacter::HandleMap(const FInputActionValue& Value)
 	if (ATunaSweeperPlayerController* TunaPlayerController = Cast<ATunaSweeperPlayerController>(GetController()))
 	{
 		if (TunaPlayerController->IsDialogueSequenceActive())
+		{
+			return;
+		}
+
+		if (TunaPlayerController->IsHousingModeOpen())
 		{
 			return;
 		}
@@ -1492,10 +1553,12 @@ void ATunaSweeperTopDownCharacter::RefreshSelectedWeaponAfterInventoryChanged()
 {
 	if (SelectedWeaponSlotNumber > 0 && CanUseSelectedWeaponSlot())
 	{
+		ApplyEquippedWeaponAttachmentVisuals();
 		return;
 	}
 	if (bMeleeWeaponSelected && CanUseSelectedMeleeWeapon())
 	{
+		ApplyEquippedWeaponAttachmentVisuals();
 		return;
 	}
 
@@ -1527,6 +1590,7 @@ void ATunaSweeperTopDownCharacter::RefreshCharacterVisualVisibility()
 	if (EquippedWeapon)
 	{
 		EquippedWeapon->SetActorHiddenInGame(bHousingModeVisualHidden);
+		ApplyEquippedWeaponAttachmentVisuals();
 	}
 
 	if (StaminaGaugeWidgetComponent)
@@ -1537,6 +1601,69 @@ void ATunaSweeperTopDownCharacter::RefreshCharacterVisualVisibility()
 			StaminaGaugeWidgetComponent->SetVisibility(false);
 		}
 	}
+}
+
+void ATunaSweeperTopDownCharacter::CacheBaseSurvivalStats()
+{
+	if (bBaseSurvivalStatsCached)
+	{
+		return;
+	}
+
+	if (VitalsComponent)
+	{
+		const FTunaSweeperVitalsState& VitalsState = VitalsComponent->GetVitalsState();
+		BaseMaxHealth = FMath::Max(1.0f, VitalsState.MaxHealth);
+		BaseMaxFood = FMath::Max(1.0f, VitalsState.MaxFood);
+		BaseMaxHydration = FMath::Max(1.0f, VitalsState.MaxHydration);
+	}
+
+	BaseMaxStamina = FMath::Max(1.0f, MaxStamina);
+	bBaseSurvivalStatsCached = true;
+}
+
+void ATunaSweeperTopDownCharacter::ApplyExperienceLevelStatBonuses()
+{
+	CacheBaseSurvivalStats();
+
+	const UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+	const FTunaSweeperExperienceLevelStatBonuses Bonuses = TunaGameInstance
+		? TunaGameInstance->GetCurrentExperienceLevelStatBonuses()
+		: FTunaSweeperExperienceLevelStatBonuses();
+
+	if (VitalsComponent)
+	{
+		VitalsComponent->SetMaxVitals(
+			BaseMaxHealth + Bonuses.MaxHealthBonus,
+			BaseMaxFood + Bonuses.MaxFoodBonus,
+			BaseMaxHydration + Bonuses.MaxHydrationBonus,
+			true);
+	}
+
+	const float OldMaxStamina = FMath::Max(1.0f, MaxStamina);
+	const float StaminaRatio = FMath::Clamp(CurrentStamina / OldMaxStamina, 0.0f, 1.0f);
+	MaxStamina = FMath::Max(1.0f, BaseMaxStamina + Bonuses.MaxStaminaBonus);
+	CurrentStamina = FMath::Clamp(MaxStamina * StaminaRatio, 0.0f, MaxStamina);
+}
+
+void ATunaSweeperTopDownCharacter::ApplyBunkerPeaceZoneVitalsRules()
+{
+	const UWorld* World = GetWorld();
+	if (!World || !World->GetMapName().EndsWith(TEXT("BunkerMap")) || !VitalsComponent)
+	{
+		return;
+	}
+
+	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
+	{
+		TunaGameInstance->ConsumePendingBunkerEntryVitals(VitalsComponent);
+	}
+
+	FTunaSweeperVitalsDepletionMultipliers PeaceZoneMultipliers;
+	PeaceZoneMultipliers.Health = 1.0f;
+	PeaceZoneMultipliers.Food = 0.0f;
+	PeaceZoneMultipliers.Hydration = 0.0f;
+	VitalsComponent->SetDepletionRateMultipliers(PeaceZoneMultipliers);
 }
 
 bool ATunaSweeperTopDownCharacter::IsGameplayActionInputLocked() const

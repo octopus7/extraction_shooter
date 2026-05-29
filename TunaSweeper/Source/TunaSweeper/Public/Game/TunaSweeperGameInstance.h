@@ -10,6 +10,7 @@
 #include "TunaSweeperGameInstance.generated.h"
 
 class APawn;
+class UTunaSweeperVitalsComponent;
 
 USTRUCT(BlueprintType)
 struct TUNASWEEPER_API FTunaSweeperGameplaySettings
@@ -84,6 +85,49 @@ struct TUNASWEEPER_API FTunaSweeperExperienceAnimationState
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Experience")
 	float AnimationDurationSeconds = 3.2f;
+};
+
+USTRUCT(BlueprintType)
+struct TUNASWEEPER_API FTunaSweeperExperienceLevelStatBonuses
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Experience", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float MaxHealthBonus = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Experience", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float MaxFoodBonus = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Experience", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float MaxHydrationBonus = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Experience", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float MaxStaminaBonus = 0.0f;
+
+	void ClampNonNegative();
+};
+
+USTRUCT(BlueprintType)
+struct TUNASWEEPER_API FTunaSweeperExperienceLevelReward
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Experience", meta = (ClampMin = "2", UIMin = "2"))
+	int32 Level = 2;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Experience", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float MaxHealthIncrease = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Experience", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float MaxFoodIncrease = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Experience", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float MaxHydrationIncrease = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Experience", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float MaxStaminaIncrease = 0.0f;
+
+	void Normalize();
 };
 
 USTRUCT(BlueprintType)
@@ -270,6 +314,9 @@ public:
 	int32 GetCurrentExperienceLevel() const;
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Experience")
+	int32 GetMaxExperienceLevel() const;
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Experience")
 	int32 GetExperienceLevelForTotal(int64 ExperiencePoints) const;
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Experience")
@@ -280,6 +327,12 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Experience")
 	float GetExperienceProgressForTotal(int64 ExperiencePoints) const;
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Experience")
+	FTunaSweeperExperienceLevelStatBonuses GetExperienceLevelStatBonuses(int32 Level) const;
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Experience")
+	FTunaSweeperExperienceLevelStatBonuses GetCurrentExperienceLevelStatBonuses() const;
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Experience")
 	bool HasPendingRaidExperienceAnimationState() const { return bHasPendingRaidExperienceAnimationState; }
@@ -459,6 +512,8 @@ public:
 	void SaveGameState();
 	void ClearInventoryAndSave();
 	void HandleLevelTravelPersistence(FName SourceLevelName, FName TargetLevelName);
+	void CaptureBunkerEntryVitalsFromPawn(APawn* Pawn);
+	bool ConsumePendingBunkerEntryVitals(UTunaSweeperVitalsComponent* VitalsComponent);
 
 	FSimpleMulticastDelegate OnInventoryStateChanged;
 	FSimpleMulticastDelegate OnSelectedInventoryItemChanged;
@@ -466,6 +521,7 @@ public:
 	FSimpleMulticastDelegate OnMemoStateChanged;
 	FSimpleMulticastDelegate OnMapMarkersChanged;
 	FSimpleMulticastDelegate OnLanguageChanged;
+	FSimpleMulticastDelegate OnExperienceChanged;
 
 private:
 	enum class EUsableQuickSlotSaveMode : uint8
@@ -488,6 +544,13 @@ private:
 		int64 StartExperiencePoints,
 		int64 TargetExperiencePoints,
 		int64 GainedExperiencePoints) const;
+	void EnsureExperienceLevelTableLoaded() const;
+	bool LoadExperienceLevelTableJson(TArray<int64>& OutExperienceForLevels) const;
+	void BuildDefaultExperienceLevelTable(TArray<int64>& OutExperienceForLevels) const;
+	FString GetExperienceLevelTableJsonPath() const;
+	void EnsureExperienceLevelRewardsLoaded() const;
+	bool LoadExperienceLevelRewardsJson(TArray<FTunaSweeperExperienceLevelReward>& OutRewards) const;
+	FString GetExperienceLevelRewardsJsonPath() const;
 	void BroadcastInventoryStateChanged();
 	FGuid CreateItemInstance(int32 ItemId, int32 Quantity);
 	bool AddItemUidToFirstEmptySlot(const FGuid& ItemUid, TArray<FTunaSweeperInventorySlot>& Slots);
@@ -652,6 +715,17 @@ private:
 
 	UPROPERTY(Transient)
 	bool bHasPendingRaidExperienceAnimationState = false;
+
+	mutable bool bExperienceLevelRewardsLoaded = false;
+	mutable TArray<FTunaSweeperExperienceLevelReward> CachedExperienceLevelRewards;
+
+	mutable bool bExperienceLevelTableLoaded = false;
+	mutable TArray<int64> CachedExperienceForLevels;
+
+	bool bHasPendingBunkerEntryVitals = false;
+	float PendingBunkerEntryHealthRatio = 1.0f;
+	float PendingBunkerEntryFoodRatio = 1.0f;
+	float PendingBunkerEntryHydrationRatio = 1.0f;
 
 	UPROPERTY(Transient)
 	FName PendingScenarioCompletionFlag;

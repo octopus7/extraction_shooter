@@ -386,6 +386,8 @@ private:
 	void EnsureEquippedWeaponActor();
 	void ClearEquippedWeaponActor();
 	TSubclassOf<ATunaSweeperWeapon> ResolveEquippedWeaponClass() const;
+	void ApplyEquippedWeaponAttachmentVisuals();
+	bool IsSelectedWeaponLaserSightEquipped() const;
 	UFUNCTION()
 	void HandleVitalsChanged(const FTunaSweeperVitalsState& VitalsState);
 	void HandleMove(const FInputActionValue& Value);
@@ -426,6 +428,9 @@ private:
 	void MoveAmmoSelectionFocus(int32 FocusDelta);
 	void RefreshSelectedWeaponAfterInventoryChanged();
 	void RefreshCharacterVisualVisibility();
+	void CacheBaseSurvivalStats();
+	void ApplyExperienceLevelStatBonuses();
+	void ApplyBunkerPeaceZoneVitalsRules();
 	void ApplySandbagCoverOutlinePostProcess();
 	float ResolveCameraCursorLeadRatio() const;
 	void UpdateAimingVisuals(float DeltaSeconds);
@@ -489,6 +494,10 @@ private:
 	float ReloadDurationSeconds = 0.0f;
 	float CurrentCameraBaseFOV = 0.0f;
 	float CurrentStamina = 100.0f;
+	float BaseMaxHealth = 100.0f;
+	float BaseMaxFood = 100.0f;
+	float BaseMaxHydration = 100.0f;
+	float BaseMaxStamina = 100.0f;
 	float StaminaGaugeOpacity = 0.0f;
 	float RollElapsedSeconds = 0.0f;
 	float MeleeSwingElapsedSeconds = 0.0f;
@@ -525,4 +534,5 @@ private:
 	bool bRollVisualRotationApplied = false;
 	bool bWeaponAttachedForRoll = false;
 	bool bHousingModeVisualHidden = false;
+	bool bBaseSurvivalStatsCached = false;
 };

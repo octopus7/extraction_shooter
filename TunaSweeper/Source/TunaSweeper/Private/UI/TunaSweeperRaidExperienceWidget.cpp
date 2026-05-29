@@ -216,11 +216,15 @@ void UTunaSweeperRaidExperienceWidget::RefreshDisplayedExperience(int64 DisplayE
 		AnimationState.StartExperiencePoints,
 		AnimationState.TargetExperiencePoints);
 	const int32 DisplayLevel = TunaGameInstance->GetExperienceLevelForTotal(ClampedExperience);
+	const int32 MaxLevel = TunaGameInstance->GetMaxExperienceLevel();
 	const int64 LevelStartExperience = TunaGameInstance->GetExperienceForLevel(DisplayLevel);
 	const int64 NextLevelExperience = TunaGameInstance->GetExperienceForLevel(DisplayLevel + 1);
 	const int64 CurrentLevelExperience = FMath::Max<int64>(0, ClampedExperience - LevelStartExperience);
 	const int64 RequiredLevelExperience = FMath::Max<int64>(1, NextLevelExperience - LevelStartExperience);
-	const float Progress = static_cast<float>(CurrentLevelExperience) / static_cast<float>(RequiredLevelExperience);
+	const bool bAtMaxLevel = DisplayLevel >= MaxLevel;
+	const float Progress = bAtMaxLevel
+		? 1.0f
+		: static_cast<float>(CurrentLevelExperience) / static_cast<float>(RequiredLevelExperience);
 
 	if (LevelText)
 	{
@@ -232,10 +236,17 @@ void UTunaSweeperRaidExperienceWidget::RefreshDisplayedExperience(int64 DisplayE
 	}
 	if (ExperienceText)
 	{
-		ExperienceText->SetText(FText::FromString(FString::Printf(
-			TEXT("%lld / %lld EXP"),
-			CurrentLevelExperience,
-			RequiredLevelExperience)));
+		if (bAtMaxLevel)
+		{
+			ExperienceText->SetText(FText::FromString(TEXT("MAX LEVEL")));
+		}
+		else
+		{
+			ExperienceText->SetText(FText::FromString(FString::Printf(
+				TEXT("%lld / %lld EXP"),
+				CurrentLevelExperience,
+				RequiredLevelExperience)));
+		}
 	}
 	if (GainText)
 	{

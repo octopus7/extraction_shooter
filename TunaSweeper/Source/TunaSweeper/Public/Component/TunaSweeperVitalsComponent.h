@@ -111,6 +111,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Vitals")
 	void ApplyActionVitalsCost(const FTunaSweeperVitalsDelta& Cost);
 
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Vitals")
+	void SetVitalsState(const FTunaSweeperVitalsState& NewVitalsState);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Vitals")
+	void SetMaxVitals(float NewMaxHealth, float NewMaxFood, float NewMaxHydration, bool bPreserveCurrentPercent = true);
+
 	UFUNCTION(BlueprintCallable, Server, Reliable, Category = "TunaSweeper|Vitals")
 	void ServerApplyVitalsDelta(const FTunaSweeperVitalsDelta& Delta);
 

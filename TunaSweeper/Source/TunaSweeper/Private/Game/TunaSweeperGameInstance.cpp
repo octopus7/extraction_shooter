@@ -1,6 +1,8 @@
 #include "Game/TunaSweeperGameInstance.h"
 
 #include "Component/TunaSweeperVitalsComponent.h"
+#include "Dom/JsonObject.h"
+#include "Dom/JsonValue.h"
 #include "GameFramework/Pawn.h"
 #include "HAL/PlatformMisc.h"
 #include "HAL/FileManager.h"
@@ -10,8 +12,14 @@
 #include "Misc/ConfigCacheIni.h"
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
+#include "Serialization/JsonReader.h"
+#include "Serialization/JsonSerializer.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
 #include "Subsystem/TunaSweeperTextSubsystem.h"
+
+#include <initializer_list>
+
+DEFINE_LOG_CATEGORY_STATIC(LogTunaSweeperGameInstance, Log, All);
 
 namespace TunaSweeperSave
 {
@@ -44,9 +52,125 @@ namespace TunaSweeperDebug
 
 namespace TunaSweeperExperience
 {
+	const TCHAR* LevelTableJsonRelativePath = TEXT("Data/ExperienceLevelTable.json");
+	const TCHAR* LevelRewardsJsonRelativePath = TEXT("Data/ExperienceLevelRewards.json");
+	constexpr int32 DefaultMaxExperienceLevel = 30;
 	constexpr int64 BaseExperienceForNextLevel = 100;
 	constexpr int64 ExperienceIncreasePerLevel = 50;
 	constexpr float RaidReturnAnimationDurationSeconds = 3.2f;
+
+	bool TryReadNumberField(
+		const TSharedPtr<FJsonObject>& JsonObject,
+		std::initializer_list<const TCHAR*> FieldNames,
+		float& OutValue)
+	{
+		if (!JsonObject.IsValid())
+		{
+			return false;
+		}
+
+		double NumericValue = 0.0;
+		for (const TCHAR* FieldName : FieldNames)
+		{
+			if (JsonObject->TryGetNumberField(FieldName, NumericValue))
+			{
+				OutValue = static_cast<float>(NumericValue);
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	bool TryReadInt64Field(
+		const TSharedPtr<FJsonObject>& JsonObject,
+		std::initializer_list<const TCHAR*> FieldNames,
+		int64& OutValue)
+	{
+		if (!JsonObject.IsValid())
+		{
+			return false;
+		}
+
+		double NumericValue = 0.0;
+		for (const TCHAR* FieldName : FieldNames)
+		{
+			if (JsonObject->TryGetNumberField(FieldName, NumericValue))
+			{
+				OutValue = static_cast<int64>(FMath::Max(0.0, NumericValue) + 0.5);
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	bool ParseLevelTableRow(
+		const TSharedPtr<FJsonObject>& JsonObject,
+		int32& OutLevel,
+		int64& OutTotalExperience)
+	{
+		if (!JsonObject.IsValid())
+		{
+			return false;
+		}
+
+		double NumericLevel = 0.0;
+		if (!JsonObject->TryGetNumberField(TEXT("level"), NumericLevel))
+		{
+			return false;
+		}
+
+		int64 TotalExperience = 0;
+		if (!TryReadInt64Field(
+			JsonObject,
+			{ TEXT("total_experience"), TEXT("total_xp"), TEXT("experience"), TEXT("required_total_experience") },
+			TotalExperience))
+		{
+			return false;
+		}
+
+		OutLevel = FMath::RoundToInt(NumericLevel);
+		OutTotalExperience = FMath::Max<int64>(0, TotalExperience);
+		return OutLevel >= 1;
+	}
+
+	bool ParseLevelReward(
+		const TSharedPtr<FJsonObject>& JsonObject,
+		FTunaSweeperExperienceLevelReward& OutReward)
+	{
+		if (!JsonObject.IsValid())
+		{
+			return false;
+		}
+
+		double NumericLevel = 0.0;
+		if (!JsonObject->TryGetNumberField(TEXT("level"), NumericLevel))
+		{
+			return false;
+		}
+
+		OutReward = FTunaSweeperExperienceLevelReward();
+		OutReward.Level = FMath::RoundToInt(NumericLevel);
+		TryReadNumberField(
+			JsonObject,
+			{ TEXT("max_health_increase"), TEXT("max_health_bonus"), TEXT("maxHealthIncrease") },
+			OutReward.MaxHealthIncrease);
+		TryReadNumberField(
+			JsonObject,
+			{ TEXT("max_food_increase"), TEXT("max_fullness_increase"), TEXT("max_hunger_increase"), TEXT("maxFoodIncrease") },
+			OutReward.MaxFoodIncrease);
+		TryReadNumberField(
+			JsonObject,
+			{ TEXT("max_hydration_increase"), TEXT("max_water_increase"), TEXT("maxHydrationIncrease") },
+			OutReward.MaxHydrationIncrease);
+		TryReadNumberField(
+			JsonObject,
+			{ TEXT("max_stamina_increase"), TEXT("maxStaminaIncrease") },
+			OutReward.MaxStaminaIncrease);
+		OutReward.Normalize();
+		return OutReward.Level >= 2;
+	}
 }
 
 namespace TunaSweeperProjectileHitEffects
@@ -286,6 +410,23 @@ namespace TunaSweeperWeaponSpreadRecoil
 		OutDefinition.DecreasePerSecond = 5.0f;
 		return true;
 	}
+}
+
+void FTunaSweeperExperienceLevelStatBonuses::ClampNonNegative()
+{
+	MaxHealthBonus = FMath::Max(0.0f, MaxHealthBonus);
+	MaxFoodBonus = FMath::Max(0.0f, MaxFoodBonus);
+	MaxHydrationBonus = FMath::Max(0.0f, MaxHydrationBonus);
+	MaxStaminaBonus = FMath::Max(0.0f, MaxStaminaBonus);
+}
+
+void FTunaSweeperExperienceLevelReward::Normalize()
+{
+	Level = FMath::Max(2, Level);
+	MaxHealthIncrease = FMath::Max(0.0f, MaxHealthIncrease);
+	MaxFoodIncrease = FMath::Max(0.0f, MaxFoodIncrease);
+	MaxHydrationIncrease = FMath::Max(0.0f, MaxHydrationIncrease);
+	MaxStaminaIncrease = FMath::Max(0.0f, MaxStaminaIncrease);
 }
 
 void FTunaSweeperPlayerHudState::NormalizeWeightLimits()
@@ -760,13 +901,26 @@ int32 UTunaSweeperGameInstance::GetCurrentExperienceLevel() const
 	return GetExperienceLevelForTotal(TotalExperiencePoints);
 }
 
+int32 UTunaSweeperGameInstance::GetMaxExperienceLevel() const
+{
+	EnsureExperienceLevelTableLoaded();
+	return FMath::Max(1, CachedExperienceForLevels.Num());
+}
+
 int32 UTunaSweeperGameInstance::GetExperienceLevelForTotal(int64 ExperiencePoints) const
 {
+	EnsureExperienceLevelTableLoaded();
+
 	const int64 ClampedExperience = FMath::Max<int64>(0, ExperiencePoints);
 	int32 Level = 1;
-	while (ClampedExperience >= GetExperienceForLevel(Level + 1))
+	for (int32 LevelIndex = 1; LevelIndex < CachedExperienceForLevels.Num(); ++LevelIndex)
 	{
-		++Level;
+		if (ClampedExperience < CachedExperienceForLevels[LevelIndex])
+		{
+			break;
+		}
+
+		Level = LevelIndex + 1;
 	}
 
 	return Level;
@@ -774,33 +928,73 @@ int32 UTunaSweeperGameInstance::GetExperienceLevelForTotal(int64 ExperiencePoint
 
 int64 UTunaSweeperGameInstance::GetExperienceForLevel(int32 Level) const
 {
-	if (Level <= 1)
+	EnsureExperienceLevelTableLoaded();
+
+	if (CachedExperienceForLevels.Num() <= 0)
 	{
 		return 0;
 	}
 
-	const int64 CompletedLevels = static_cast<int64>(Level - 1);
-	return CompletedLevels *
-		((2 * TunaSweeperExperience::BaseExperienceForNextLevel) +
-			((CompletedLevels - 1) * TunaSweeperExperience::ExperienceIncreasePerLevel)) /
-		2;
+	const int32 LevelIndex = FMath::Clamp(Level, 1, CachedExperienceForLevels.Num()) - 1;
+	return CachedExperienceForLevels[LevelIndex];
 }
 
 int64 UTunaSweeperGameInstance::GetExperienceForNextLevel(int32 Level) const
 {
-	const int64 SafeLevel = FMath::Max<int64>(1, Level);
-	return TunaSweeperExperience::BaseExperienceForNextLevel +
-		((SafeLevel - 1) * TunaSweeperExperience::ExperienceIncreasePerLevel);
+	EnsureExperienceLevelTableLoaded();
+
+	const int32 SafeLevel = FMath::Clamp(Level, 1, FMath::Max(1, CachedExperienceForLevels.Num()));
+	if (SafeLevel >= CachedExperienceForLevels.Num())
+	{
+		return 0;
+	}
+
+	return FMath::Max<int64>(
+		0,
+		CachedExperienceForLevels[SafeLevel] - CachedExperienceForLevels[SafeLevel - 1]);
 }
 
 float UTunaSweeperGameInstance::GetExperienceProgressForTotal(int64 ExperiencePoints) const
 {
 	const int64 ClampedExperience = FMath::Max<int64>(0, ExperiencePoints);
 	const int32 Level = GetExperienceLevelForTotal(ClampedExperience);
+	if (Level >= GetMaxExperienceLevel())
+	{
+		return 1.0f;
+	}
+
 	const int64 LevelStartExperience = GetExperienceForLevel(Level);
 	const int64 NextLevelExperience = GetExperienceForLevel(Level + 1);
 	const int64 LevelSpan = FMath::Max<int64>(1, NextLevelExperience - LevelStartExperience);
 	return static_cast<float>(ClampedExperience - LevelStartExperience) / static_cast<float>(LevelSpan);
+}
+
+FTunaSweeperExperienceLevelStatBonuses UTunaSweeperGameInstance::GetExperienceLevelStatBonuses(int32 Level) const
+{
+	EnsureExperienceLevelRewardsLoaded();
+
+	FTunaSweeperExperienceLevelStatBonuses Bonuses;
+	const int32 TargetLevel = FMath::Max(1, Level);
+	for (const FTunaSweeperExperienceLevelReward& Reward : CachedExperienceLevelRewards)
+	{
+		if (Reward.Level > TargetLevel)
+		{
+			break;
+		}
+
+		Bonuses.MaxHealthBonus += Reward.MaxHealthIncrease;
+		Bonuses.MaxFoodBonus += Reward.MaxFoodIncrease;
+		Bonuses.MaxHydrationBonus += Reward.MaxHydrationIncrease;
+		Bonuses.MaxStaminaBonus += Reward.MaxStaminaIncrease;
+	}
+
+	Bonuses.ClampNonNegative();
+	return Bonuses;
+}
+
+FTunaSweeperExperienceLevelStatBonuses UTunaSweeperGameInstance::GetCurrentExperienceLevelStatBonuses() const
+{
+	return GetExperienceLevelStatBonuses(GetCurrentExperienceLevel());
 }
 
 void UTunaSweeperGameInstance::BeginRaidExperienceSession()
@@ -876,6 +1070,7 @@ bool UTunaSweeperGameInstance::CommitRaidExperienceGain(FTunaSweeperExperienceAn
 	{
 		PendingRaidExperienceAnimationState = OutAnimationState;
 		bHasPendingRaidExperienceAnimationState = true;
+		OnExperienceChanged.Broadcast();
 	}
 	else
 	{
@@ -2337,6 +2532,7 @@ void UTunaSweeperGameInstance::ClearInventoryAndSave()
 	ActiveLootContainerCapacity = 0;
 	bHasActiveLootContainer = false;
 	ClearRaidExperienceGain();
+	bHasPendingBunkerEntryVitals = false;
 	SaveGameStateInternal(EUsableQuickSlotSaveMode::Clear);
 	BroadcastInventoryStateChanged();
 }
@@ -2346,6 +2542,7 @@ void UTunaSweeperGameInstance::HandleLevelTravelPersistence(FName SourceLevelNam
 	if (IsRaidToBunkerTravel(SourceLevelName, TargetLevelName))
 	{
 		EnsureInventoryStateInitialized();
+		CaptureBunkerEntryVitalsFromPawn(GetWorld() ? UGameplayStatics::GetPlayerPawn(GetWorld(), 0) : nullptr);
 		FTunaSweeperExperienceAnimationState ExperienceAnimationState;
 		CommitRaidExperienceGain(ExperienceAnimationState);
 		SaveGameStateInternal(EUsableQuickSlotSaveMode::PersistRuntime);
@@ -2357,6 +2554,58 @@ void UTunaSweeperGameInstance::HandleLevelTravelPersistence(FName SourceLevelNam
 		SaveGameState();
 		BeginRaidExperienceSession();
 	}
+}
+
+void UTunaSweeperGameInstance::CaptureBunkerEntryVitalsFromPawn(APawn* Pawn)
+{
+	bHasPendingBunkerEntryVitals = false;
+	PendingBunkerEntryHealthRatio = 1.0f;
+	PendingBunkerEntryFoodRatio = 1.0f;
+	PendingBunkerEntryHydrationRatio = 1.0f;
+
+	const UTunaSweeperVitalsComponent* VitalsComponent = Pawn
+		? Pawn->FindComponentByClass<UTunaSweeperVitalsComponent>()
+		: nullptr;
+	if (!VitalsComponent)
+	{
+		return;
+	}
+
+	const FTunaSweeperVitalsState& VitalsState = VitalsComponent->GetVitalsState();
+	PendingBunkerEntryHealthRatio = VitalsState.MaxHealth > 0.0f
+		? FMath::Clamp(VitalsState.Health / VitalsState.MaxHealth, 0.0f, 1.0f)
+		: 1.0f;
+	PendingBunkerEntryFoodRatio = VitalsState.MaxFood > 0.0f
+		? FMath::Clamp(VitalsState.Food / VitalsState.MaxFood, 0.0f, 1.0f)
+		: 1.0f;
+	PendingBunkerEntryHydrationRatio = VitalsState.MaxHydration > 0.0f
+		? FMath::Clamp(VitalsState.Hydration / VitalsState.MaxHydration, 0.0f, 1.0f)
+		: 1.0f;
+	bHasPendingBunkerEntryVitals = true;
+}
+
+bool UTunaSweeperGameInstance::ConsumePendingBunkerEntryVitals(UTunaSweeperVitalsComponent* VitalsComponent)
+{
+	if (!bHasPendingBunkerEntryVitals || !VitalsComponent)
+	{
+		return false;
+	}
+
+	FTunaSweeperVitalsState BunkerEntryVitals = VitalsComponent->GetVitalsState();
+	BunkerEntryVitals.Normalize();
+	BunkerEntryVitals.Health = BunkerEntryVitals.MaxHealth * FMath::Clamp(PendingBunkerEntryHealthRatio, 0.0f, 1.0f);
+	BunkerEntryVitals.Food = BunkerEntryVitals.MaxFood * FMath::Max(0.5f, FMath::Clamp(PendingBunkerEntryFoodRatio, 0.0f, 1.0f));
+	BunkerEntryVitals.Hydration = BunkerEntryVitals.MaxHydration * FMath::Max(
+		0.5f,
+		FMath::Clamp(PendingBunkerEntryHydrationRatio, 0.0f, 1.0f));
+	BunkerEntryVitals.Normalize();
+	VitalsComponent->SetVitalsState(BunkerEntryVitals);
+
+	bHasPendingBunkerEntryVitals = false;
+	PendingBunkerEntryHealthRatio = 1.0f;
+	PendingBunkerEntryFoodRatio = 1.0f;
+	PendingBunkerEntryHydrationRatio = 1.0f;
+	return true;
 }
 
 void UTunaSweeperGameInstance::GeneratePlayerInventoryItems()
@@ -2763,6 +3012,10 @@ void UTunaSweeperGameInstance::ResetRuntimeStateForSaveSlotSelection()
 	PendingRaidExperienceAnimationState = FTunaSweeperExperienceAnimationState();
 	bRaidExperienceSessionActive = false;
 	bHasPendingRaidExperienceAnimationState = false;
+	bHasPendingBunkerEntryVitals = false;
+	PendingBunkerEntryHealthRatio = 1.0f;
+	PendingBunkerEntryFoodRatio = 1.0f;
+	PendingBunkerEntryHydrationRatio = 1.0f;
 	CompletedScenarioFlags.Reset();
 	AcquiredMemoIds.Reset();
 	MapMarkers.Reset();
@@ -2786,6 +3039,10 @@ void UTunaSweeperGameInstance::GenerateDefaultInventoryState()
 	PendingRaidExperienceAnimationState = FTunaSweeperExperienceAnimationState();
 	bRaidExperienceSessionActive = false;
 	bHasPendingRaidExperienceAnimationState = false;
+	bHasPendingBunkerEntryVitals = false;
+	PendingBunkerEntryHealthRatio = 1.0f;
+	PendingBunkerEntryFoodRatio = 1.0f;
+	PendingBunkerEntryHydrationRatio = 1.0f;
 	CompletedScenarioFlags.Reset();
 	AcquiredMemoIds.Reset();
 	MapMarkers.Reset();
@@ -2878,6 +3135,234 @@ FTunaSweeperExperienceAnimationState UTunaSweeperGameInstance::BuildExperienceAn
 	AnimationState.TargetLevel = GetExperienceLevelForTotal(AnimationState.TargetExperiencePoints);
 	AnimationState.AnimationDurationSeconds = TunaSweeperExperience::RaidReturnAnimationDurationSeconds;
 	return AnimationState;
+}
+
+void UTunaSweeperGameInstance::EnsureExperienceLevelTableLoaded() const
+{
+	if (bExperienceLevelTableLoaded)
+	{
+		return;
+	}
+
+	bExperienceLevelTableLoaded = true;
+	if (!LoadExperienceLevelTableJson(CachedExperienceForLevels))
+	{
+		BuildDefaultExperienceLevelTable(CachedExperienceForLevels);
+	}
+}
+
+bool UTunaSweeperGameInstance::LoadExperienceLevelTableJson(TArray<int64>& OutExperienceForLevels) const
+{
+	OutExperienceForLevels.Reset();
+
+	const FString JsonPath = GetExperienceLevelTableJsonPath();
+	FString JsonText;
+	if (!FFileHelper::LoadFileToString(JsonText, *JsonPath))
+	{
+		UE_LOG(LogTunaSweeperGameInstance, Warning, TEXT("Could not load experience level table JSON: %s"), *JsonPath);
+		return false;
+	}
+
+	TSharedPtr<FJsonValue> RootValue;
+	const TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(JsonText);
+	if (!FJsonSerializer::Deserialize(Reader, RootValue) || !RootValue.IsValid())
+	{
+		UE_LOG(LogTunaSweeperGameInstance, Error, TEXT("Could not parse experience level table JSON: %s"), *JsonPath);
+		return false;
+	}
+
+	TArray<TSharedPtr<FJsonValue>> RootArrayValues;
+	const TArray<TSharedPtr<FJsonValue>>* LevelValues = nullptr;
+	if (RootValue->Type == EJson::Array)
+	{
+		RootArrayValues = RootValue->AsArray();
+		LevelValues = &RootArrayValues;
+	}
+	else if (RootValue->Type == EJson::Object)
+	{
+		const TSharedPtr<FJsonObject> RootObject = RootValue->AsObject();
+		if (RootObject.IsValid())
+		{
+			if (!RootObject->TryGetArrayField(TEXT("levels"), LevelValues))
+			{
+				RootObject->TryGetArrayField(TEXT("level_table"), LevelValues);
+			}
+		}
+	}
+
+	if (!LevelValues)
+	{
+		UE_LOG(LogTunaSweeperGameInstance, Error, TEXT("Experience level table JSON has no level array: %s"), *JsonPath);
+		return false;
+	}
+
+	TMap<int32, int64> ExperienceByLevel;
+	for (const TSharedPtr<FJsonValue>& LevelValue : *LevelValues)
+	{
+		const TSharedPtr<FJsonObject> LevelObject = LevelValue.IsValid() ? LevelValue->AsObject() : nullptr;
+		int32 ParsedLevel = 1;
+		int64 ParsedExperience = 0;
+		if (TunaSweeperExperience::ParseLevelTableRow(LevelObject, ParsedLevel, ParsedExperience))
+		{
+			ExperienceByLevel.Add(ParsedLevel, ParsedExperience);
+		}
+	}
+
+	if (!ExperienceByLevel.Contains(1))
+	{
+		ExperienceByLevel.Add(1, 0);
+	}
+
+	int32 MaxLevel = 1;
+	for (const TPair<int32, int64>& LevelPair : ExperienceByLevel)
+	{
+		MaxLevel = FMath::Max(MaxLevel, LevelPair.Key);
+	}
+
+	if (MaxLevel <= 1)
+	{
+		UE_LOG(LogTunaSweeperGameInstance, Warning, TEXT("Experience level table JSON has no valid progression rows: %s"), *JsonPath);
+		return false;
+	}
+
+	int64 PreviousExperience = 0;
+	for (int32 Level = 1; Level <= MaxLevel; ++Level)
+	{
+		const int64* FoundExperience = ExperienceByLevel.Find(Level);
+		if (!FoundExperience)
+		{
+			UE_LOG(LogTunaSweeperGameInstance, Error, TEXT("Experience level table JSON is missing level %d: %s"), Level, *JsonPath);
+			OutExperienceForLevels.Reset();
+			return false;
+		}
+
+		const int64 NormalizedExperience = Level <= 1
+			? 0
+			: FMath::Max(*FoundExperience, PreviousExperience + 1);
+		OutExperienceForLevels.Add(NormalizedExperience);
+		PreviousExperience = NormalizedExperience;
+	}
+
+	return OutExperienceForLevels.Num() > 1;
+}
+
+void UTunaSweeperGameInstance::BuildDefaultExperienceLevelTable(TArray<int64>& OutExperienceForLevels) const
+{
+	OutExperienceForLevels.Reset();
+	OutExperienceForLevels.Add(0);
+
+	int64 TotalExperience = 0;
+	for (int32 Level = 2; Level <= TunaSweeperExperience::DefaultMaxExperienceLevel; ++Level)
+	{
+		const int64 PreviousLevel = static_cast<int64>(Level - 1);
+		TotalExperience += TunaSweeperExperience::BaseExperienceForNextLevel +
+			((PreviousLevel - 1) * TunaSweeperExperience::ExperienceIncreasePerLevel);
+		OutExperienceForLevels.Add(TotalExperience);
+	}
+}
+
+FString UTunaSweeperGameInstance::GetExperienceLevelTableJsonPath() const
+{
+	return FPaths::Combine(FPaths::ProjectContentDir(), TunaSweeperExperience::LevelTableJsonRelativePath);
+}
+
+void UTunaSweeperGameInstance::EnsureExperienceLevelRewardsLoaded() const
+{
+	if (bExperienceLevelRewardsLoaded)
+	{
+		return;
+	}
+
+	bExperienceLevelRewardsLoaded = true;
+
+	TArray<FTunaSweeperExperienceLevelReward> LoadedRewards;
+	LoadExperienceLevelRewardsJson(LoadedRewards);
+
+	TMap<int32, FTunaSweeperExperienceLevelReward> RewardsByLevel;
+	for (FTunaSweeperExperienceLevelReward Reward : LoadedRewards)
+	{
+		Reward.Normalize();
+		RewardsByLevel.Add(Reward.Level, Reward);
+	}
+
+	CachedExperienceLevelRewards.Reset();
+	RewardsByLevel.GenerateValueArray(CachedExperienceLevelRewards);
+	CachedExperienceLevelRewards.Sort([](
+		const FTunaSweeperExperienceLevelReward& Left,
+		const FTunaSweeperExperienceLevelReward& Right)
+	{
+		return Left.Level < Right.Level;
+	});
+}
+
+bool UTunaSweeperGameInstance::LoadExperienceLevelRewardsJson(
+	TArray<FTunaSweeperExperienceLevelReward>& OutRewards) const
+{
+	OutRewards.Reset();
+
+	const FString JsonPath = GetExperienceLevelRewardsJsonPath();
+	FString JsonText;
+	if (!FFileHelper::LoadFileToString(JsonText, *JsonPath))
+	{
+		UE_LOG(LogTunaSweeperGameInstance, Warning, TEXT("Could not load experience level rewards JSON: %s"), *JsonPath);
+		return false;
+	}
+
+	TSharedPtr<FJsonValue> RootValue;
+	const TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(JsonText);
+	if (!FJsonSerializer::Deserialize(Reader, RootValue) || !RootValue.IsValid())
+	{
+		UE_LOG(LogTunaSweeperGameInstance, Error, TEXT("Could not parse experience level rewards JSON: %s"), *JsonPath);
+		return false;
+	}
+
+	TArray<TSharedPtr<FJsonValue>> RootArrayValues;
+	const TArray<TSharedPtr<FJsonValue>>* RewardValues = nullptr;
+	if (RootValue->Type == EJson::Array)
+	{
+		RootArrayValues = RootValue->AsArray();
+		RewardValues = &RootArrayValues;
+	}
+	else if (RootValue->Type == EJson::Object)
+	{
+		const TSharedPtr<FJsonObject> RootObject = RootValue->AsObject();
+		if (RootObject.IsValid())
+		{
+			if (!RootObject->TryGetArrayField(TEXT("level_rewards"), RewardValues))
+			{
+				RootObject->TryGetArrayField(TEXT("rewards"), RewardValues);
+			}
+		}
+	}
+
+	if (!RewardValues)
+	{
+		UE_LOG(LogTunaSweeperGameInstance, Error, TEXT("Experience level rewards JSON has no reward array: %s"), *JsonPath);
+		return false;
+	}
+
+	for (const TSharedPtr<FJsonValue>& RewardValue : *RewardValues)
+	{
+		const TSharedPtr<FJsonObject> RewardObject = RewardValue.IsValid() ? RewardValue->AsObject() : nullptr;
+		FTunaSweeperExperienceLevelReward Reward;
+		if (TunaSweeperExperience::ParseLevelReward(RewardObject, Reward))
+		{
+			OutRewards.Add(Reward);
+		}
+	}
+
+	if (OutRewards.Num() <= 0)
+	{
+		UE_LOG(LogTunaSweeperGameInstance, Warning, TEXT("Experience level rewards JSON has no valid rows: %s"), *JsonPath);
+		return false;
+	}
+
+	return true;
+}
+
+FString UTunaSweeperGameInstance::GetExperienceLevelRewardsJsonPath() const
+{
+	return FPaths::Combine(FPaths::ProjectContentDir(), TunaSweeperExperience::LevelRewardsJsonRelativePath);
 }
 
 void UTunaSweeperGameInstance::BroadcastInventoryStateChanged()

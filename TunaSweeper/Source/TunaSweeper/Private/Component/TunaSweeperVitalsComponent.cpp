@@ -121,6 +121,66 @@ void UTunaSweeperVitalsComponent::ApplyActionVitalsCost(const FTunaSweeperVitals
 	ApplyVitalsDelta(Delta);
 }
 
+void UTunaSweeperVitalsComponent::SetVitalsState(const FTunaSweeperVitalsState& NewVitalsState)
+{
+	if (!HasAuthority())
+	{
+		return;
+	}
+
+	const FTunaSweeperVitalsState PreviousState = VitalsState;
+	VitalsState = NewVitalsState;
+	VitalsState.Normalize();
+	if (!FMath::IsNearlyEqual(PreviousState.Health, VitalsState.Health) ||
+		!FMath::IsNearlyEqual(PreviousState.MaxHealth, VitalsState.MaxHealth) ||
+		!FMath::IsNearlyEqual(PreviousState.Food, VitalsState.Food) ||
+		!FMath::IsNearlyEqual(PreviousState.MaxFood, VitalsState.MaxFood) ||
+		!FMath::IsNearlyEqual(PreviousState.Hydration, VitalsState.Hydration) ||
+		!FMath::IsNearlyEqual(PreviousState.MaxHydration, VitalsState.MaxHydration))
+	{
+		BroadcastVitalsChanged();
+		if (AActor* Owner = GetOwner())
+		{
+			Owner->ForceNetUpdate();
+		}
+	}
+}
+
+void UTunaSweeperVitalsComponent::SetMaxVitals(
+	float NewMaxHealth,
+	float NewMaxFood,
+	float NewMaxHydration,
+	bool bPreserveCurrentPercent)
+{
+	if (!HasAuthority())
+	{
+		return;
+	}
+
+	FTunaSweeperVitalsState NewState = VitalsState;
+	const float HealthPercent = VitalsState.MaxHealth > 0.0f
+		? FMath::Clamp(VitalsState.Health / VitalsState.MaxHealth, 0.0f, 1.0f)
+		: 1.0f;
+	const float FoodPercent = VitalsState.MaxFood > 0.0f
+		? FMath::Clamp(VitalsState.Food / VitalsState.MaxFood, 0.0f, 1.0f)
+		: 1.0f;
+	const float HydrationPercent = VitalsState.MaxHydration > 0.0f
+		? FMath::Clamp(VitalsState.Hydration / VitalsState.MaxHydration, 0.0f, 1.0f)
+		: 1.0f;
+
+	NewState.MaxHealth = FMath::Max(1.0f, NewMaxHealth);
+	NewState.MaxFood = FMath::Max(1.0f, NewMaxFood);
+	NewState.MaxHydration = FMath::Max(1.0f, NewMaxHydration);
+	if (bPreserveCurrentPercent)
+	{
+		NewState.Health = NewState.MaxHealth * HealthPercent;
+		NewState.Food = NewState.MaxFood * FoodPercent;
+		NewState.Hydration = NewState.MaxHydration * HydrationPercent;
+	}
+
+	SetVitalsState(NewState);
+}
+
 void UTunaSweeperVitalsComponent::ServerApplyVitalsDelta_Implementation(const FTunaSweeperVitalsDelta& Delta)
 {
 	ApplyVitalsDeltaInternal(Delta);
