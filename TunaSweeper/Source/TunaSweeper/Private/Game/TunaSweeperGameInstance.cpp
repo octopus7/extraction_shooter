@@ -25,7 +25,7 @@ namespace TunaSweeperSave
 {
 	const TCHAR* SaveSlotNamePrefix = TEXT("TunaSweeperSave_Slot");
 	const TCHAR* SaveSettingsSlotName = TEXT("TunaSweeperSaveSettings");
-	constexpr int32 CurrentSaveVersion = 13;
+	constexpr int32 CurrentSaveVersion = 14;
 	constexpr int32 SaveUserIndex = 0;
 	constexpr int32 MinSaveSlotIndex = 1;
 	constexpr int32 MaxSaveSlotIndex = 3;
@@ -1722,6 +1722,29 @@ bool UTunaSweeperGameInstance::TryUseHoveredItem(APawn* InstigatorPawn)
 	return bUsedItem;
 }
 
+bool UTunaSweeperGameInstance::ToggleInventorySlotSortLock(const FTunaSweeperItemSlotReference& SlotReference)
+{
+	EnsureInventoryStateInitialized();
+
+	if (SlotReference.Source != ETunaSweeperItemSlotSource::Inventory ||
+		!PlayerInventorySlots.IsValidIndex(SlotReference.SlotIndex) ||
+		PlayerInventorySlots[SlotReference.SlotIndex].IsEmpty())
+	{
+		return false;
+	}
+
+	PlayerInventorySlots[SlotReference.SlotIndex].bSortLocked =
+		!PlayerInventorySlots[SlotReference.SlotIndex].bSortLocked;
+	BroadcastInventoryStateChanged();
+	return true;
+}
+
+bool UTunaSweeperGameInstance::ToggleHoveredInventorySlotSortLock()
+{
+	EnsureInventoryStateInitialized();
+	return HoveredItemSlotReference.IsValid() && ToggleInventorySlotSortLock(HoveredItemSlotReference);
+}
+
 bool UTunaSweeperGameInstance::CanMoveItemBetweenSlots(
 	const FTunaSweeperItemSlotReference& SourceSlot,
 	const FTunaSweeperItemSlotReference& TargetSlot,
@@ -1763,6 +1786,27 @@ bool UTunaSweeperGameInstance::CanMoveItemBetweenSlots(
 	if (!SourceUid.IsValid())
 	{
 		return SetFailure(TEXT("Source slot is empty."));
+	}
+
+	FName AttachmentDropSlotTag;
+	FGuid ExistingAttachmentUid;
+	if (TryResolveItemAttachmentDrop(SourceSlot, TargetSlot, AttachmentDropSlotTag, ExistingAttachmentUid))
+	{
+		if (ExistingAttachmentUid == SourceUid)
+		{
+			return SetFailure(TEXT("Item is already attached to target item."));
+		}
+
+		if (ExistingAttachmentUid.IsValid() && !CanSlotAcceptItem(SourceSlot, ExistingAttachmentUid))
+		{
+			return SetFailure(TEXT("Source slot does not accept swapped attachment item."));
+		}
+
+		if (OutFailureReason)
+		{
+			OutFailureReason->Reset();
+		}
+		return true;
 	}
 
 	if (!CanSlotAcceptItem(TargetSlot, SourceUid))
@@ -1874,8 +1918,45 @@ bool UTunaSweeperGameInstance::MoveItemBetweenSlots(
 		}
 	}
 
+	FName AttachmentDropSlotTag;
+	FGuid ExistingAttachmentUid;
+	if (TryResolveItemAttachmentDrop(SourceSlot, TargetSlot, AttachmentDropSlotTag, ExistingAttachmentUid))
+	{
+		if (ExistingAttachmentUid == SourceUid ||
+			(ExistingAttachmentUid.IsValid() && !CanSlotAcceptItem(SourceSlot, ExistingAttachmentUid)) ||
+			!ApplyItemAttachmentDrop(SourceSlot, TargetSlot, AttachmentDropSlotTag, ExistingAttachmentUid))
+		{
+			return false;
+		}
+
+		const int32 NewInventoryCapacity = CalculateInventoryCapacityForEquipmentSlots(EquipmentSlots);
+		EnsureSlotArraySize(PlayerInventorySlots, NewInventoryCapacity);
+		BroadcastInventoryStateChanged();
+		if (bAcquiredFromLootContainer && AcquiredItemId != INDEX_NONE && AcquiredQuantity > 0)
+		{
+			if (UTunaSweeperQuestSubsystem* QuestSubsystem = GetSubsystem<UTunaSweeperQuestSubsystem>())
+			{
+				QuestSubsystem->NotifyItemAcquired(AcquiredItemId, AcquiredQuantity);
+			}
+			AddRaidExperienceForItem(AcquiredItemId, AcquiredQuantity);
+		}
+		return true;
+	}
+
 	(*SourceSlots)[SourceSlot.SlotIndex].ItemUid = TargetUid;
 	(*TargetSlots)[TargetSlot.SlotIndex].ItemUid = SourceUid;
+	if (SourceSlot.Source == ETunaSweeperItemSlotSource::Inventory &&
+		SourceSlots->IsValidIndex(SourceSlot.SlotIndex) &&
+		(*SourceSlots)[SourceSlot.SlotIndex].IsEmpty())
+	{
+		(*SourceSlots)[SourceSlot.SlotIndex].bSortLocked = false;
+	}
+	if (TargetSlot.Source == ETunaSweeperItemSlotSource::Inventory &&
+		TargetSlots->IsValidIndex(TargetSlot.SlotIndex) &&
+		(*TargetSlots)[TargetSlot.SlotIndex].IsEmpty())
+	{
+		(*TargetSlots)[TargetSlot.SlotIndex].bSortLocked = false;
+	}
 	if (SourceSlot.Source == ETunaSweeperItemSlotSource::SelectedWeaponAttachment ||
 		TargetSlot.Source == ETunaSweeperItemSlotSource::SelectedWeaponAttachment)
 	{
@@ -2249,23 +2330,35 @@ void UTunaSweeperGameInstance::CompactInventorySlots()
 {
 	EnsureInventoryStateInitialized();
 
-	TArray<FGuid> OccupiedItemUids;
+	TArray<FGuid> MovableItemUids;
 	for (const FTunaSweeperInventorySlot& Slot : PlayerInventorySlots)
 	{
-		if (Slot.ItemUid.IsValid())
+		if (!Slot.bSortLocked && Slot.ItemUid.IsValid())
 		{
-			OccupiedItemUids.Add(Slot.ItemUid);
+			MovableItemUids.Add(Slot.ItemUid);
 		}
 	}
 
 	for (FTunaSweeperInventorySlot& Slot : PlayerInventorySlots)
 	{
-		Slot.Clear();
+		if (!Slot.bSortLocked)
+		{
+			Slot.Clear();
+		}
 	}
 
-	for (int32 Index = 0; Index < OccupiedItemUids.Num() && PlayerInventorySlots.IsValidIndex(Index); ++Index)
+	int32 MovableItemIndex = 0;
+	for (FTunaSweeperInventorySlot& Slot : PlayerInventorySlots)
 	{
-		PlayerInventorySlots[Index].ItemUid = OccupiedItemUids[Index];
+		if (Slot.bSortLocked)
+		{
+			continue;
+		}
+
+		if (MovableItemUids.IsValidIndex(MovableItemIndex))
+		{
+			Slot.ItemUid = MovableItemUids[MovableItemIndex++];
+		}
 	}
 
 	BroadcastInventoryStateChanged();
@@ -4000,6 +4093,130 @@ bool UTunaSweeperGameInstance::DoesItemDefinitionHaveUseEffect(
 	return !FMath::IsNearlyZero(ItemDefinition.UseHealthDelta) ||
 		!FMath::IsNearlyZero(ItemDefinition.UseFoodDelta) ||
 		!FMath::IsNearlyZero(ItemDefinition.UseHydrationDelta);
+}
+
+bool UTunaSweeperGameInstance::TryResolveItemAttachmentDrop(
+	const FTunaSweeperItemSlotReference& SourceSlot,
+	const FTunaSweeperItemSlotReference& TargetSlot,
+	FName& OutAttachmentSlotTag,
+	FGuid& OutExistingAttachmentUid)
+{
+	OutAttachmentSlotTag = NAME_None;
+	OutExistingAttachmentUid.Invalidate();
+
+	const TArray<FTunaSweeperInventorySlot>* SourceSlots = GetSlotsForSource(SourceSlot.Source);
+	const TArray<FTunaSweeperInventorySlot>* TargetSlots = GetSlotsForSource(TargetSlot.Source);
+	if (!SourceSlots || !TargetSlots ||
+		!SourceSlots->IsValidIndex(SourceSlot.SlotIndex) ||
+		!TargetSlots->IsValidIndex(TargetSlot.SlotIndex))
+	{
+		return false;
+	}
+
+	const FGuid SourceUid = (*SourceSlots)[SourceSlot.SlotIndex].ItemUid;
+	const FGuid TargetUid = (*TargetSlots)[TargetSlot.SlotIndex].ItemUid;
+	if (!SourceUid.IsValid() || !TargetUid.IsValid() || SourceUid == TargetUid)
+	{
+		return false;
+	}
+
+	const FTunaSweeperItemInstance* SourceItemInstance = ItemInstancesByUid.Find(SourceUid);
+	const FTunaSweeperItemInstance* TargetItemInstance = ItemInstancesByUid.Find(TargetUid);
+	if (!SourceItemInstance || !TargetItemInstance)
+	{
+		return false;
+	}
+
+	UTunaSweeperItemDataSubsystem* ItemDataSubsystem = GetSubsystem<UTunaSweeperItemDataSubsystem>();
+	FTunaSweeperItemDefinition SourceItemDefinition;
+	FTunaSweeperItemDefinition TargetItemDefinition;
+	if (!ItemDataSubsystem ||
+		!ItemDataSubsystem->TryGetItemDefinition(SourceItemInstance->ItemId, SourceItemDefinition) ||
+		!ItemDataSubsystem->TryGetItemDefinition(TargetItemInstance->ItemId, TargetItemDefinition) ||
+		!DoesItemDefinitionAcceptAttachment(TargetItemDefinition, SourceItemDefinition))
+	{
+		return false;
+	}
+
+	OutAttachmentSlotTag = SourceItemDefinition.AttachmentSlotTag;
+	if (const FGuid* ExistingAttachmentUid = TargetItemInstance->AttachmentSlots.Find(OutAttachmentSlotTag))
+	{
+		OutExistingAttachmentUid = *ExistingAttachmentUid;
+	}
+	return true;
+}
+
+bool UTunaSweeperGameInstance::ApplyItemAttachmentDrop(
+	const FTunaSweeperItemSlotReference& SourceSlot,
+	const FTunaSweeperItemSlotReference& TargetSlot,
+	FName AttachmentSlotTag,
+	const FGuid& ExistingAttachmentUid)
+{
+	if (AttachmentSlotTag.IsNone())
+	{
+		return false;
+	}
+
+	TArray<FTunaSweeperInventorySlot>* SourceSlots = GetMutableSlotsForSource(SourceSlot.Source);
+	TArray<FTunaSweeperInventorySlot>* TargetSlots = GetMutableSlotsForSource(TargetSlot.Source);
+	if (!SourceSlots || !TargetSlots ||
+		!SourceSlots->IsValidIndex(SourceSlot.SlotIndex) ||
+		!TargetSlots->IsValidIndex(TargetSlot.SlotIndex))
+	{
+		return false;
+	}
+
+	const FGuid SourceUid = (*SourceSlots)[SourceSlot.SlotIndex].ItemUid;
+	const FGuid TargetUid = (*TargetSlots)[TargetSlot.SlotIndex].ItemUid;
+	if (!SourceUid.IsValid() || !TargetUid.IsValid() || ExistingAttachmentUid == SourceUid)
+	{
+		return false;
+	}
+
+	FTunaSweeperItemInstance* TargetItemInstance = ItemInstancesByUid.Find(TargetUid);
+	if (!TargetItemInstance)
+	{
+		return false;
+	}
+
+	TargetItemInstance->AttachmentSlots.Add(AttachmentSlotTag, SourceUid);
+	if (ExistingAttachmentUid.IsValid())
+	{
+		(*SourceSlots)[SourceSlot.SlotIndex].ItemUid = ExistingAttachmentUid;
+	}
+	else
+	{
+		(*SourceSlots)[SourceSlot.SlotIndex].Clear();
+	}
+
+	if (SourceSlot.Source == ETunaSweeperItemSlotSource::Inventory &&
+		SourceSlots->IsValidIndex(SourceSlot.SlotIndex) &&
+		(*SourceSlots)[SourceSlot.SlotIndex].IsEmpty())
+	{
+		(*SourceSlots)[SourceSlot.SlotIndex].bSortLocked = false;
+	}
+
+	if (SourceSlot.Source == ETunaSweeperItemSlotSource::SelectedWeaponAttachment)
+	{
+		CommitSelectedWeaponAttachmentSlotsToSelectedItem();
+	}
+
+	ClearSelectedItemIfInvalid();
+	return true;
+}
+
+bool UTunaSweeperGameInstance::DoesItemDefinitionAcceptAttachment(
+	const FTunaSweeperItemDefinition& ItemDefinition,
+	const FTunaSweeperItemDefinition& AttachmentDefinition) const
+{
+	if (AttachmentDefinition.AttachmentSlotTag.IsNone() ||
+		!ItemDefinition.AttachmentSlotTags.Contains(AttachmentDefinition.AttachmentSlotTag))
+	{
+		return false;
+	}
+
+	return AttachmentDefinition.CompatibleWeaponTypeTags.Num() <= 0 ||
+		AttachmentDefinition.CompatibleWeaponTypeTags.Contains(ItemDefinition.WeaponTypeTag);
 }
 
 bool UTunaSweeperGameInstance::IsBackpackItemUid(const FGuid& ItemUid)

@@ -165,6 +165,7 @@ private:
 	void HandleQuickSlot(int32 SlotNumber);
 	void HandleMeleeQuickSlotPressed();
 	void HandleUseHoveredItem();
+	void HandleToggleHoveredInventorySortLock();
 	void HandleDrop(const FInputActionValue& Value);
 	void HandleMeleeQuickSlot(const FInputActionValue& Value);
 	void HandleQuickSlot1(const FInputActionValue& Value);

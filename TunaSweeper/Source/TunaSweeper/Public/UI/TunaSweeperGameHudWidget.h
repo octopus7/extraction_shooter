@@ -288,6 +288,7 @@ private:
 	FVector2D GetHudTransitionHiddenTranslation(const UWidget* Widget, ETunaSweeperHudTransitionEdge Edge) const;
 	bool HasActiveHudTransition(const UWidget* Widget) const;
 	void SetTransitionedWidgetVisibility(UWidget* Widget, ESlateVisibility TargetVisibility, ETunaSweeperHudTransitionEdge DirectionOverride);
+	void SetTransitionedWidgetVisibilityFromTranslation(UWidget* Widget, ESlateVisibility TargetVisibility, const FVector2D& HiddenTranslation);
 	void TickHudTransitions(float InDeltaTime);
 	void CacheAmmoReloadWidgets();
 	void BuildAmmoSelectorOptionTexts(TArray<FText>& OutOptionTexts, int32& OutFocusedIndex) const;

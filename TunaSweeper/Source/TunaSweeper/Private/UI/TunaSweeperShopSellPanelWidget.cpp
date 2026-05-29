@@ -3,9 +3,14 @@
 #include "Blueprint/WidgetTree.h"
 #include "Components/Border.h"
 #include "Components/Button.h"
+#include "Components/HorizontalBox.h"
+#include "Components/HorizontalBoxSlot.h"
+#include "Components/Image.h"
+#include "Components/SizeBox.h"
 #include "Components/TextBlock.h"
 #include "Components/VerticalBox.h"
 #include "Components/VerticalBoxSlot.h"
+#include "Engine/Texture2D.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "Styling/SlateBrush.h"
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
@@ -15,8 +20,9 @@
 
 namespace TunaSweeperShopSellPanel
 {
-	constexpr float PanelWidth = 292.0f;
-	constexpr float PanelHeight = 150.0f;
+	constexpr float PanelWidth = 330.0f;
+	constexpr float PanelHeight = 190.0f;
+	constexpr float IconSize = 66.0f;
 
 	using TunaSweeperUiText::ResolveUiText;
 
@@ -52,6 +58,7 @@ void UTunaSweeperShopSellPanelWidget::RefreshSelectedItem()
 		!ItemDataSubsystem->TryGetItemDefinition(SelectedItemInstance.ItemId, SelectedItemDefinition) ||
 		!TunaGameInstance->TryGetSlotSellPrice(TunaGameInstance->GetSelectedItemSlotReference(), SalePrice))
 	{
+		ClearItemThumbnail();
 		SetVisibility(ESlateVisibility::Collapsed);
 		return;
 	}
@@ -71,6 +78,13 @@ void UTunaSweeperShopSellPanelWidget::RefreshSelectedItem()
 	{
 		ItemNameText->SetText(DisplayName);
 	}
+	UTexture2D* IconTexture = nullptr;
+	const FString IconObjectPath = ItemDataSubsystem->BuildItemIconObjectPath(SelectedItemDefinition);
+	if (!IconObjectPath.IsEmpty())
+	{
+		IconTexture = LoadObject<UTexture2D>(nullptr, *IconObjectPath);
+	}
+	SetItemThumbnail(IconTexture);
 	if (SalePriceText)
 	{
 		SalePriceText->SetText(FText::Format(
@@ -182,11 +196,16 @@ void UTunaSweeperShopSellPanelWidget::BuildNativeWidgetTree()
 
 	PanelBackground = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("PanelBackground"));
 	UVerticalBox* PanelStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("PanelStack"));
+	UHorizontalBox* ItemRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("ItemRow"));
+	USizeBox* IconSizeBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("ItemIconSizeBox"));
+	ItemIconImage = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("ItemIconImage"));
+	UVerticalBox* TextStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("TextStack"));
 	ItemNameText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("ItemNameText"));
 	SalePriceText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("SalePriceText"));
 	SellButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("SellButton"));
 	SellButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("SellButtonText"));
-	if (!PanelBackground || !PanelStack || !ItemNameText || !SalePriceText || !SellButton || !SellButtonText)
+	if (!PanelBackground || !PanelStack || !ItemRow || !IconSizeBox || !ItemIconImage || !TextStack ||
+		!ItemNameText || !SalePriceText || !SellButton || !SellButtonText)
 	{
 		return;
 	}
@@ -200,10 +219,22 @@ void UTunaSweeperShopSellPanelWidget::BuildNativeWidgetTree()
 		1.0f));
 	PanelBackground->SetContent(PanelStack);
 
+	IconSizeBox->SetWidthOverride(TunaSweeperShopSellPanel::IconSize);
+	IconSizeBox->SetHeightOverride(TunaSweeperShopSellPanel::IconSize);
+	ItemIconImage->SetOpacity(0.0f);
+	IconSizeBox->SetContent(ItemIconImage);
+	UHorizontalBoxSlot* IconSlot = ItemRow->AddChildToHorizontalBox(IconSizeBox);
+	if (IconSlot)
+	{
+		IconSlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
+		IconSlot->SetVerticalAlignment(VAlign_Center);
+		IconSlot->SetPadding(FMargin(0.0f, 0.0f, 12.0f, 0.0f));
+	}
+
 	ItemNameText->SetColorAndOpacity(FSlateColor(FLinearColor::White));
 	ItemNameText->SetAutoWrapText(false);
 	TunaSweeperUIFont::ApplyFont(ItemNameText, 20, ETunaSweeperUIFontWeight::Bold);
-	UVerticalBoxSlot* NameSlot = PanelStack->AddChildToVerticalBox(ItemNameText);
+	UVerticalBoxSlot* NameSlot = TextStack->AddChildToVerticalBox(ItemNameText);
 	if (NameSlot)
 	{
 		NameSlot->SetHorizontalAlignment(HAlign_Fill);
@@ -212,11 +243,24 @@ void UTunaSweeperShopSellPanelWidget::BuildNativeWidgetTree()
 
 	SalePriceText->SetColorAndOpacity(FSlateColor(FLinearColor(0.92f, 0.96f, 0.92f, 1.0f)));
 	TunaSweeperUIFont::ApplyFont(SalePriceText, 17);
-	UVerticalBoxSlot* PriceSlot = PanelStack->AddChildToVerticalBox(SalePriceText);
+	UVerticalBoxSlot* PriceSlot = TextStack->AddChildToVerticalBox(SalePriceText);
 	if (PriceSlot)
 	{
 		PriceSlot->SetHorizontalAlignment(HAlign_Fill);
-		PriceSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 14.0f));
+	}
+
+	UHorizontalBoxSlot* TextSlot = ItemRow->AddChildToHorizontalBox(TextStack);
+	if (TextSlot)
+	{
+		TextSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+		TextSlot->SetVerticalAlignment(VAlign_Center);
+	}
+
+	UVerticalBoxSlot* ItemRowSlot = PanelStack->AddChildToVerticalBox(ItemRow);
+	if (ItemRowSlot)
+	{
+		ItemRowSlot->SetHorizontalAlignment(HAlign_Fill);
+		ItemRowSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 14.0f));
 	}
 
 	SellButtonText->SetJustification(ETextJustify::Center);
@@ -245,6 +289,10 @@ void UTunaSweeperShopSellPanelWidget::CacheNamedWidgets()
 	{
 		ItemNameText = Cast<UTextBlock>(WidgetTree->FindWidget(FName(TEXT("ItemNameText"))));
 	}
+	if (!ItemIconImage)
+	{
+		ItemIconImage = Cast<UImage>(WidgetTree->FindWidget(FName(TEXT("ItemIconImage"))));
+	}
 	if (!SalePriceText)
 	{
 		SalePriceText = Cast<UTextBlock>(WidgetTree->FindWidget(FName(TEXT("SalePriceText"))));
@@ -256,6 +304,34 @@ void UTunaSweeperShopSellPanelWidget::CacheNamedWidgets()
 	if (!SellButtonText)
 	{
 		SellButtonText = Cast<UTextBlock>(WidgetTree->FindWidget(FName(TEXT("SellButtonText"))));
+	}
+}
+
+void UTunaSweeperShopSellPanelWidget::SetItemThumbnail(UTexture2D* IconTexture)
+{
+	if (!ItemIconImage)
+	{
+		return;
+	}
+
+	if (IconTexture)
+	{
+		ItemIconImage->SetBrushFromTexture(IconTexture, true);
+		ItemIconImage->SetBrushTintColor(FSlateColor(FLinearColor::White));
+		ItemIconImage->SetOpacity(1.0f);
+	}
+	else
+	{
+		ClearItemThumbnail();
+	}
+}
+
+void UTunaSweeperShopSellPanelWidget::ClearItemThumbnail()
+{
+	if (ItemIconImage)
+	{
+		ItemIconImage->SetBrushFromTexture(nullptr, false);
+		ItemIconImage->SetOpacity(0.0f);
 	}
 }
 

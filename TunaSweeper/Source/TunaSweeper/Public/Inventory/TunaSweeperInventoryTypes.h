@@ -73,6 +73,9 @@ struct TUNASWEEPER_API FTunaSweeperInventorySlot
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Inventory")
 	FGuid ItemUid;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Inventory")
+	bool bSortLocked = false;
+
 	bool IsEmpty() const
 	{
 		return !ItemUid.IsValid();
@@ -81,5 +84,6 @@ struct TUNASWEEPER_API FTunaSweeperInventorySlot
 	void Clear()
 	{
 		ItemUid.Invalidate();
+		bSortLocked = false;
 	}
 };

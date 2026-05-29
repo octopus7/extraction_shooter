@@ -306,6 +306,22 @@ void UTunaSweeperItemHoverPromptWidget::BuildNativeWidgetTree()
 	UseKeyText = RawUseKeyText;
 	UseActionText = RawUseActionText;
 
+	UTextBlock* RawSortLockKeyText = nullptr;
+	UTextBlock* RawSortLockActionText = nullptr;
+	SortLockActionRow = TunaSweeperItemHoverPrompt::AddActionRow(
+		WidgetTree,
+		ActionHintsStack,
+		TEXT("SortLock"),
+		FText::FromString(TEXT("L")),
+		TunaSweeperItemHoverPrompt::ResolveUiText(
+			GetGameInstance<UTunaSweeperGameInstance>(),
+			TEXT("ui.item_hover.sort_lock"),
+			TEXT("\uC815\uB82C \uC7A0\uAE08")),
+		RawSortLockKeyText,
+		RawSortLockActionText);
+	SortLockKeyText = RawSortLockKeyText;
+	SortLockActionText = RawSortLockActionText;
+
 	UTextBlock* RawDropKeyText = nullptr;
 	UTextBlock* RawDropActionText = nullptr;
 	DropActionRow = TunaSweeperItemHoverPrompt::AddActionRow(
@@ -405,6 +421,18 @@ void UTunaSweeperItemHoverPromptWidget::CacheNamedWidgets()
 	{
 		UseActionText = Cast<UTextBlock>(WidgetTree->FindWidget(FName(TEXT("UseActionText"))));
 	}
+	if (!SortLockActionRow)
+	{
+		SortLockActionRow = WidgetTree->FindWidget(FName(TEXT("SortLockActionRow")));
+	}
+	if (!SortLockKeyText)
+	{
+		SortLockKeyText = Cast<UTextBlock>(WidgetTree->FindWidget(FName(TEXT("SortLockKeyText"))));
+	}
+	if (!SortLockActionText)
+	{
+		SortLockActionText = Cast<UTextBlock>(WidgetTree->FindWidget(FName(TEXT("SortLockActionText"))));
+	}
 }
 
 void UTunaSweeperItemHoverPromptWidget::ApplyTileData()
@@ -486,6 +514,29 @@ void UTunaSweeperItemHoverPromptWidget::ApplyTileData()
 			GetGameInstance<UTunaSweeperGameInstance>(),
 			TEXT("ui.item_hover.use"),
 			TEXT("\uC0AC\uC6A9")));
+	}
+	if (SortLockActionRow)
+	{
+		SortLockActionRow->SetVisibility(
+			CachedTileData.Source == ETunaSweeperItemSlotSource::Inventory
+				? ESlateVisibility::HitTestInvisible
+				: ESlateVisibility::Collapsed);
+	}
+	if (SortLockKeyText)
+	{
+		SortLockKeyText->SetText(FText::FromString(TEXT("L")));
+	}
+	if (SortLockActionText)
+	{
+		SortLockActionText->SetText(CachedTileData.bSortLocked
+			? TunaSweeperItemHoverPrompt::ResolveUiText(
+				GetGameInstance<UTunaSweeperGameInstance>(),
+				TEXT("ui.item_hover.sort_unlock"),
+				TEXT("\uC815\uB82C\uD574\uC81C"))
+			: TunaSweeperItemHoverPrompt::ResolveUiText(
+				GetGameInstance<UTunaSweeperGameInstance>(),
+				TEXT("ui.item_hover.sort_lock"),
+				TEXT("\uC815\uB82C \uC7A0\uAE08")));
 	}
 
 	RefreshPromptHeight();

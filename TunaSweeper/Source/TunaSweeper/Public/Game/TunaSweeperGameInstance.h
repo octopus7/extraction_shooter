@@ -402,6 +402,8 @@ public:
 	bool TryGetSlotItemInstance(const FTunaSweeperItemSlotReference& SlotReference, FTunaSweeperItemInstance& OutItemInstance);
 	bool TryGetSelectedItemInstance(FTunaSweeperItemInstance& OutItemInstance);
 	bool TryGetSelectedItemDefinition(FTunaSweeperItemDefinition& OutItemDefinition);
+	bool ToggleInventorySlotSortLock(const FTunaSweeperItemSlotReference& SlotReference);
+	bool ToggleHoveredInventorySlotSortLock();
 	bool IsEquipmentWeaponSlotOccupied(int32 WeaponSlotNumber);
 	bool TryGetEquipmentWeaponSlotItem(
 		int32 WeaponSlotNumber,
@@ -619,6 +621,19 @@ private:
 	bool IsItemCompatibleWithUsableQuickSlot(const FGuid& ItemUid);
 	bool IsUsableQuickSlotItemDefinition(const FTunaSweeperItemDefinition& ItemDefinition) const;
 	bool DoesItemDefinitionHaveUseEffect(const FTunaSweeperItemDefinition& ItemDefinition) const;
+	bool TryResolveItemAttachmentDrop(
+		const FTunaSweeperItemSlotReference& SourceSlot,
+		const FTunaSweeperItemSlotReference& TargetSlot,
+		FName& OutAttachmentSlotTag,
+		FGuid& OutExistingAttachmentUid);
+	bool ApplyItemAttachmentDrop(
+		const FTunaSweeperItemSlotReference& SourceSlot,
+		const FTunaSweeperItemSlotReference& TargetSlot,
+		FName AttachmentSlotTag,
+		const FGuid& ExistingAttachmentUid);
+	bool DoesItemDefinitionAcceptAttachment(
+		const FTunaSweeperItemDefinition& ItemDefinition,
+		const FTunaSweeperItemDefinition& AttachmentDefinition) const;
 	bool IsBackpackItemUid(const FGuid& ItemUid);
 	bool IsBackpackItemDefinition(const FTunaSweeperItemDefinition& ItemDefinition) const;
 	bool IsEquipmentWeaponSlotNumberValid(int32 WeaponSlotNumber) const;

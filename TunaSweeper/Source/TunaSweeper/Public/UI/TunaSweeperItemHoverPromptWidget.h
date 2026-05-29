@@ -70,6 +70,15 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Hover Prompt", meta = (BindWidgetOptional))
 	TObjectPtr<UTextBlock> UseActionText;
 
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Hover Prompt", meta = (BindWidgetOptional))
+	TObjectPtr<UWidget> SortLockActionRow;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Hover Prompt", meta = (BindWidgetOptional))
+	TObjectPtr<UTextBlock> SortLockKeyText;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Hover Prompt", meta = (BindWidgetOptional))
+	TObjectPtr<UTextBlock> SortLockActionText;
+
 private:
 	void BuildNativeWidgetTree();
 	void CacheNamedWidgets();

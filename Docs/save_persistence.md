@@ -6,7 +6,7 @@ Update it whenever a new state field is expected to persist across save slots, l
 ## Current Save Container
 
 - Save object: `UTunaSweeperSaveGame`
-- Current save version: `13`
+- Current save version: `14`
 - Runtime owner: `UTunaSweeperGameInstance`
 - Save entry point: `UTunaSweeperGameInstance::SaveGameStateInternal()`
 - Load entry point: `UTunaSweeperGameInstance::LoadGameState()`
@@ -69,7 +69,7 @@ Weapon attachment slots are keyed by attachment slot tags. Rifle instances may p
 - `AuxiliaryBagSlots`
 - `UsableQuickSlots`
 
-Slot arrays store item UIDs. Any item UID referenced by these slots, including nested attachment UIDs, must also exist in `ItemInstances`.
+Slot arrays store item UIDs. Any item UID referenced by these slots, including nested attachment UIDs, must also exist in `ItemInstances`. `FTunaSweeperInventorySlot::bSortLocked` persists the player's inventory sort-lock state; the inventory compact/sort button leaves locked inventory slots in place and only trims unlocked inventory slots around them.
 
 `UsableQuickSlots` stores the 3-8 quick-slot layout shown in inventory mode and reflected in the gameplay quick-slot bar. Slots 1, 2, and melee are equipment slots and are not duplicated here. Only usable items can occupy these slots; currently that means item definitions tagged `item.category.consumable` or `item.category.throwable`.
 

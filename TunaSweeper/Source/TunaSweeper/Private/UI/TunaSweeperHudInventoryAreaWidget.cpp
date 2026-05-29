@@ -73,7 +73,8 @@ namespace TunaSweeperInventoryArea
 		const FTunaSweeperItemInstance& ItemInstance,
 		ETunaSweeperItemSlotSource Source,
 		int32 SourceIndex,
-		ETunaSweeperItemTextLanguage Language)
+		ETunaSweeperItemTextLanguage Language,
+		bool bSortLocked)
 	{
 		FTunaSweeperItemStackTileData TileData;
 		TileData.ItemInstance = ItemInstance;
@@ -85,6 +86,7 @@ namespace TunaSweeperInventoryArea
 		TileData.SlotReference.SlotIndex = SourceIndex;
 		TileData.bIsEmpty = !ItemInstance.IsValid();
 		TileData.bShowEmptySlotLabel = Source == ETunaSweeperItemSlotSource::Equipment;
+		TileData.bSortLocked = bSortLocked;
 
 		if (TileData.bIsEmpty && TileData.bShowEmptySlotLabel)
 		{
@@ -172,7 +174,7 @@ namespace TunaSweeperInventoryArea
 
 			UTunaSweeperItemStackTileItemObject* TileObject = CreateTileObject(
 				Outer,
-				BuildTileData(TunaGameInstance, ItemDataSubsystem, ItemInstance, Source, Index, Language));
+				BuildTileData(TunaGameInstance, ItemDataSubsystem, ItemInstance, Source, Index, Language, Slots[Index].bSortLocked));
 			if (TileObject)
 			{
 				TileObjects.Add(TileObject);

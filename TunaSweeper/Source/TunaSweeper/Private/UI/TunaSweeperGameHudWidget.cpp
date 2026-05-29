@@ -56,6 +56,9 @@ namespace
 	constexpr float HudWidgetTransitionDistancePadding = 36.0f;
 	constexpr float HudWidgetTransitionFallbackHorizontalDistance = 420.0f;
 	constexpr float HudWidgetTransitionFallbackVerticalDistance = 220.0f;
+	constexpr float ShopSellPanelTransitionOffsetY = -24.0f;
+	constexpr float ShopSellPanelWidth = 330.0f;
+	constexpr float ShopSellPanelHeight = 190.0f;
 	constexpr int32 MaxActiveDamageNumberPopups = 64;
 	constexpr float DamageNumberGrowDurationAlpha = 0.14f / 3.0f;
 	constexpr float DamageNumberSettleDurationAlpha = 0.28f / 2.0f;
@@ -1019,6 +1022,23 @@ void UTunaSweeperGameHudWidget::SetTransitionedWidgetVisibility(
 		return;
 	}
 
+	const ETunaSweeperHudTransitionEdge ResolvedEdge = ResolveHudTransitionEdge(Widget, DirectionOverride);
+	SetTransitionedWidgetVisibilityFromTranslation(
+		Widget,
+		TargetVisibility,
+		GetHudTransitionHiddenTranslation(Widget, ResolvedEdge));
+}
+
+void UTunaSweeperGameHudWidget::SetTransitionedWidgetVisibilityFromTranslation(
+	UWidget* Widget,
+	ESlateVisibility TargetVisibility,
+	const FVector2D& HiddenTranslation)
+{
+	if (!Widget)
+	{
+		return;
+	}
+
 	const bool bTargetShown = IsSlateVisibilityShown(TargetVisibility);
 	const bool bCurrentlyShown = IsSlateVisibilityShown(Widget->GetVisibility());
 	if (!bTargetShown && !bCurrentlyShown && !HasActiveHudTransition(Widget))
@@ -1050,8 +1070,6 @@ void UTunaSweeperGameHudWidget::SetTransitionedWidgetVisibility(
 	const float BaseOpacity = HudTransitionBaseOpacities.Contains(WidgetKey)
 		? HudTransitionBaseOpacities.FindRef(WidgetKey)
 		: 1.0f;
-	const ETunaSweeperHudTransitionEdge ResolvedEdge = ResolveHudTransitionEdge(Widget, DirectionOverride);
-	const FVector2D HiddenTranslation = GetHudTransitionHiddenTranslation(Widget, ResolvedEdge);
 	const FWidgetTransform HiddenTransform = WithAddedTranslation(BaseTransform, HiddenTranslation);
 
 	for (int32 Index = ActiveHudTransitions.Num() - 1; Index >= 0; --Index)
@@ -1758,8 +1776,14 @@ void UTunaSweeperGameHudWidget::EnsureShopSellPanelWidget()
 		return;
 	}
 
-	UCanvasPanel* RootCanvas = Cast<UCanvasPanel>(WidgetTree->RootWidget);
-	if (!RootCanvas)
+	UCanvasPanel* ParentCanvas = ItemInfoPanelWidget
+		? Cast<UCanvasPanel>(ItemInfoPanelWidget->GetParent())
+		: nullptr;
+	if (!ParentCanvas)
+	{
+		ParentCanvas = Cast<UCanvasPanel>(WidgetTree->RootWidget);
+	}
+	if (!ParentCanvas)
 	{
 		return;
 	}
@@ -1773,7 +1797,7 @@ void UTunaSweeperGameHudWidget::EnsureShopSellPanelWidget()
 	}
 
 	ShopSellPanelWidget->SetVisibility(ESlateVisibility::Collapsed);
-	UCanvasPanelSlot* CanvasSlot = RootCanvas->AddChildToCanvas(ShopSellPanelWidget);
+	UCanvasPanelSlot* CanvasSlot = ParentCanvas->AddChildToCanvas(ShopSellPanelWidget);
 	if (!CanvasSlot)
 	{
 		return;
@@ -1785,7 +1809,8 @@ void UTunaSweeperGameHudWidget::EnsureShopSellPanelWidget()
 	{
 		CanvasSlot->SetAnchors(ItemInfoCanvasSlot->GetAnchors());
 		CanvasSlot->SetAlignment(ItemInfoCanvasSlot->GetAlignment());
-		CanvasSlot->SetOffsets(ItemInfoCanvasSlot->GetOffsets());
+		CanvasSlot->SetPosition(ItemInfoCanvasSlot->GetPosition());
+		CanvasSlot->SetSize(FVector2D(ShopSellPanelWidth, ShopSellPanelHeight));
 		CanvasSlot->SetZOrder(ItemInfoCanvasSlot->GetZOrder() + 1);
 		return;
 	}
@@ -1793,7 +1818,7 @@ void UTunaSweeperGameHudWidget::EnsureShopSellPanelWidget()
 	CanvasSlot->SetAnchors(FAnchors(0.5f, 0.5f));
 	CanvasSlot->SetAlignment(FVector2D(0.5f, 0.5f));
 	CanvasSlot->SetPosition(FVector2D(0.0f, -24.0f));
-	CanvasSlot->SetSize(FVector2D(292.0f, 150.0f));
+	CanvasSlot->SetSize(FVector2D(ShopSellPanelWidth, ShopSellPanelHeight));
 	CanvasSlot->SetZOrder(31);
 }
 
@@ -1812,12 +1837,12 @@ void UTunaSweeperGameHudWidget::SetShopSellPanelVisible(bool bVisible)
 		ShopSellPanelWidget->RefreshSelectedItem();
 	}
 
-	SetTransitionedWidgetVisibility(
+	SetTransitionedWidgetVisibilityFromTranslation(
 		ShopSellPanelWidget,
 		bVisible && ActiveHudMode == ETunaSweeperHudMode::Inventory
 			? ESlateVisibility::SelfHitTestInvisible
 			: ESlateVisibility::Collapsed,
-		ItemInfoPanelTransitionEdge);
+		FVector2D(0.0f, ShopSellPanelTransitionOffsetY));
 }
 
 void UTunaSweeperGameHudWidget::RefreshBottomStatusFromGameInstance()

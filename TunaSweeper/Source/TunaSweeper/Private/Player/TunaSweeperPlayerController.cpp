@@ -381,6 +381,7 @@ void ATunaSweeperPlayerController::SetupInputComponent()
 	if (InputComponent)
 	{
 		InputComponent->BindKey(EKeys::U, IE_Pressed, this, &ATunaSweeperPlayerController::HandleUseHoveredItem);
+		InputComponent->BindKey(EKeys::L, IE_Pressed, this, &ATunaSweeperPlayerController::HandleToggleHoveredInventorySortLock);
 		InputComponent->BindKey(EKeys::V, IE_Pressed, this, &ATunaSweeperPlayerController::HandleMeleeQuickSlotPressed);
 		InputComponent->BindKey(EKeys::Q, IE_Pressed, this, &ATunaSweeperPlayerController::HandleHousingRotateLeft);
 		InputComponent->BindKey(EKeys::E, IE_Pressed, this, &ATunaSweeperPlayerController::HandleHousingRotateRight);
@@ -1166,6 +1167,32 @@ void ATunaSweeperPlayerController::HandleUseHoveredItem()
 	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
 	{
 		TunaGameInstance->TryUseHoveredItem(GetPawn());
+	}
+}
+
+void ATunaSweeperPlayerController::HandleToggleHoveredInventorySortLock()
+{
+	if (IsIntroMap() || IsOpeningScenarioMap())
+	{
+		return;
+	}
+
+	if (bDialogueSequenceActive)
+	{
+		return;
+	}
+
+	if (const ATunaSweeperTopDownCharacter* ControlledCharacter = Cast<ATunaSweeperTopDownCharacter>(GetPawn()))
+	{
+		if (ControlledCharacter->IsDead())
+		{
+			return;
+		}
+	}
+
+	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
+	{
+		TunaGameInstance->ToggleHoveredInventorySlotSortLock();
 	}
 }
 

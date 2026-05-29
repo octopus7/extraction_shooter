@@ -1,7 +1,13 @@
 #include "UI/TunaSweeperHudItemInfoPanelWidget.h"
 
 #include "Blueprint/DragDropOperation.h"
+#include "Blueprint/WidgetTree.h"
 #include "Components/Button.h"
+#include "Components/HorizontalBox.h"
+#include "Components/HorizontalBoxSlot.h"
+#include "Components/Image.h"
+#include "Components/PanelSlot.h"
+#include "Components/SizeBox.h"
 #include "Components/TextBlock.h"
 #include "Components/TileView.h"
 #include "Components/Widget.h"
@@ -18,6 +24,7 @@ namespace TunaSweeperItemInfoPanel
 	constexpr int32 AttachmentSlotColumnCount = 2;
 	constexpr float AttachmentSlotTileWidth = 96.0f;
 	constexpr float AttachmentSlotTileHeight = 96.0f;
+	constexpr float SelectedItemIconSize = 58.0f;
 
 	using TunaSweeperUiText::ResolveUiText;
 
@@ -124,6 +131,8 @@ void UTunaSweeperHudItemInfoPanelWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
+	CacheNamedWidgets();
+	EnsureThumbnailWidgets();
 
 	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
 	{
@@ -215,6 +224,14 @@ void UTunaSweeperHudItemInfoPanelWidget::RefreshSelectedItemInfo()
 	FText Description;
 	ItemDataSubsystem->TryGetItemDescriptionText(SelectedItemInstance.ItemId, Language, Description);
 
+	UTexture2D* IconTexture = nullptr;
+	const FString SelectedIconObjectPath = ItemDataSubsystem->BuildItemIconObjectPath(SelectedItemDefinition);
+	if (!SelectedIconObjectPath.IsEmpty())
+	{
+		IconTexture = LoadObject<UTexture2D>(nullptr, *SelectedIconObjectPath);
+	}
+	SetSelectedItemThumbnail(IconTexture);
+
 	const TArray<FTunaSweeperInventorySlot>& AttachmentSlots = TunaGameInstance->GetSelectedWeaponAttachmentSlots();
 	const TArray<FName>& AttachmentSlotTags = TunaGameInstance->GetSelectedWeaponAttachmentSlotTags();
 	SetSelectedItemInfo(DisplayName, Description, AttachmentSlots.Num() > 0);
@@ -300,6 +317,7 @@ void UTunaSweeperHudItemInfoPanelWidget::SetSelectedItemInfo(const FText& ItemNa
 
 void UTunaSweeperHudItemInfoPanelWidget::ClearSelectedItemInfo()
 {
+	ClearSelectedItemThumbnail();
 	AttachmentTileObjects.Reset();
 	if (AttachmentSlotTileView)
 	{
@@ -321,6 +339,90 @@ void UTunaSweeperHudItemInfoPanelWidget::ClearSelectedItemInfo()
 	}
 
 	SetModdingPanelVisible(false);
+}
+
+void UTunaSweeperHudItemInfoPanelWidget::CacheNamedWidgets()
+{
+	if (!WidgetTree)
+	{
+		return;
+	}
+
+	if (!HeaderRow)
+	{
+		HeaderRow = Cast<UHorizontalBox>(WidgetTree->FindWidget(FName(TEXT("HeaderRow"))));
+	}
+	if (!SelectedItemIconContainer)
+	{
+		SelectedItemIconContainer = WidgetTree->FindWidget(FName(TEXT("SelectedItemIconContainer")));
+	}
+	if (!SelectedItemIconImage)
+	{
+		SelectedItemIconImage = Cast<UImage>(WidgetTree->FindWidget(FName(TEXT("SelectedItemIconImage"))));
+	}
+}
+
+void UTunaSweeperHudItemInfoPanelWidget::EnsureThumbnailWidgets()
+{
+	CacheNamedWidgets();
+	if (SelectedItemIconImage || !WidgetTree || !HeaderRow)
+	{
+		return;
+	}
+
+	USizeBox* IconSizeBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("SelectedItemIconContainer"));
+	UImage* IconImage = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("SelectedItemIconImage"));
+	if (!IconSizeBox || !IconImage)
+	{
+		return;
+	}
+
+	IconSizeBox->SetWidthOverride(TunaSweeperItemInfoPanel::SelectedItemIconSize);
+	IconSizeBox->SetHeightOverride(TunaSweeperItemInfoPanel::SelectedItemIconSize);
+	IconImage->SetOpacity(0.0f);
+	IconSizeBox->SetContent(IconImage);
+
+	UPanelSlot* InsertedSlot = HeaderRow->InsertChildAt(0, IconSizeBox);
+	UHorizontalBoxSlot* IconSlot = Cast<UHorizontalBoxSlot>(InsertedSlot);
+	if (IconSlot)
+	{
+		IconSlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
+		IconSlot->SetHorizontalAlignment(HAlign_Left);
+		IconSlot->SetVerticalAlignment(VAlign_Center);
+		IconSlot->SetPadding(FMargin(0.0f, 0.0f, 10.0f, 0.0f));
+	}
+
+	SelectedItemIconContainer = IconSizeBox;
+	SelectedItemIconImage = IconImage;
+}
+
+void UTunaSweeperHudItemInfoPanelWidget::SetSelectedItemThumbnail(UTexture2D* IconTexture)
+{
+	EnsureThumbnailWidgets();
+	if (!SelectedItemIconImage)
+	{
+		return;
+	}
+
+	if (IconTexture)
+	{
+		SelectedItemIconImage->SetBrushFromTexture(IconTexture, true);
+		SelectedItemIconImage->SetBrushTintColor(FSlateColor(FLinearColor::White));
+		SelectedItemIconImage->SetOpacity(1.0f);
+	}
+	else
+	{
+		ClearSelectedItemThumbnail();
+	}
+}
+
+void UTunaSweeperHudItemInfoPanelWidget::ClearSelectedItemThumbnail()
+{
+	if (SelectedItemIconImage)
+	{
+		SelectedItemIconImage->SetBrushFromTexture(nullptr, false);
+		SelectedItemIconImage->SetOpacity(0.0f);
+	}
 }
 
 void UTunaSweeperHudItemInfoPanelWidget::SetModdingPanelVisible(bool bVisible)

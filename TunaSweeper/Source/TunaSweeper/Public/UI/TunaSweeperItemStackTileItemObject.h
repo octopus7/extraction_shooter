@@ -60,6 +60,9 @@ struct TUNASWEEPER_API FTunaSweeperItemStackTileData
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Tile")
 	bool bHasItemDefinition = false;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Tile")
+	bool bSortLocked = false;
 };
 
 UCLASS(BlueprintType)

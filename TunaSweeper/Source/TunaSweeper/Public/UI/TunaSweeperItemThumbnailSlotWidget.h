@@ -56,11 +56,15 @@ protected:
 	TObjectPtr<UTextBlock> ItemQuantityText;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Tile", meta = (BindWidgetOptional))
+	TObjectPtr<UTextBlock> AttachmentSlotIndicatorText;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Tile", meta = (BindWidgetOptional))
 	TObjectPtr<UTextBlock> ItemNameText;
 
 private:
 	void ApplyTileData();
 	void ApplyDropHighlight(bool bCanAcceptDrop);
+	FText BuildAttachmentSlotIndicatorText() const;
 	bool CanAcceptDragOperation(UDragDropOperation* InOperation) const;
 	void UpdateHoveredDropSlot(UDragDropOperation* InOperation, bool bCanAcceptDrop) const;
 	FTunaSweeperItemSlotReference GetCachedSlotReference() const;

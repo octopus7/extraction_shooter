@@ -10,6 +10,9 @@ class UTileView;
 class UWidget;
 class UDragDropOperation;
 class UButton;
+class UHorizontalBox;
+class UImage;
+class UTexture2D;
 
 UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API UTunaSweeperHudItemInfoPanelWidget : public UUserWidget
@@ -41,6 +44,15 @@ protected:
 	TObjectPtr<UTextBlock> SelectedItemNameText;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
+	TObjectPtr<UHorizontalBox> HeaderRow;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
+	TObjectPtr<UWidget> SelectedItemIconContainer;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
+	TObjectPtr<UImage> SelectedItemIconImage;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
 	TObjectPtr<UTextBlock> SelectedItemDescriptionText;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
@@ -59,6 +71,10 @@ private:
 	UFUNCTION()
 	void HandleCloseButtonClicked();
 
+	void CacheNamedWidgets();
+	void EnsureThumbnailWidgets();
+	void SetSelectedItemThumbnail(UTexture2D* IconTexture);
+	void ClearSelectedItemThumbnail();
 	bool TryResolveAttachmentDropSlotFromCursor(
 		const FVector2D& ScreenSpacePosition,
 		FTunaSweeperItemSlotReference& OutSlotReference) const;

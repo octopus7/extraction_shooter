@@ -13,6 +13,8 @@
 #include "Components/SizeBox.h"
 #include "Components/Slider.h"
 #include "Components/TextBlock.h"
+#include "Components/VerticalBox.h"
+#include "Components/VerticalBoxSlot.h"
 #include "Engine/Texture2D.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "GameFramework/Pawn.h"
@@ -303,12 +305,16 @@ void UTunaSweeperMapWidget::BuildMapWidget()
 	RootOverlay = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), TEXT("MapRootOverlay"));
 	BackgroundBlur = WidgetTree->ConstructWidget<UBackgroundBlur>(UBackgroundBlur::StaticClass(), TEXT("MapBackgroundBlur"));
 	MapCanvas = WidgetTree->ConstructWidget<UCanvasPanel>(UCanvasPanel::StaticClass(), TEXT("MapCanvas"));
+	UCanvasPanel* ControlCanvas = WidgetTree->ConstructWidget<UCanvasPanel>(UCanvasPanel::StaticClass(), TEXT("MapControlCanvas"));
 	USizeBox* ZoomSliderBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("MapZoomSliderBox"));
 	ZoomSlider = WidgetTree->ConstructWidget<USlider>(USlider::StaticClass(), TEXT("MapZoomSlider"));
+	UVerticalBox* PaletteStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("MapMarkerPaletteStack"));
+	UTextBlock* PaletteHelpText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("MapMarkerHelpText"));
 	UHorizontalBox* PaletteRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("MapMarkerPaletteRow"));
 	USizeBox* PaletteGap = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("MapMarkerPaletteGap"));
 
-	if (!RootOverlay || !BackgroundBlur || !MapCanvas || !ZoomSliderBox || !ZoomSlider || !PaletteRow || !PaletteGap)
+	if (!RootOverlay || !BackgroundBlur || !MapCanvas || !ControlCanvas || !ZoomSliderBox || !ZoomSlider ||
+		!PaletteStack || !PaletteHelpText || !PaletteRow || !PaletteGap)
 	{
 		return;
 	}
@@ -330,18 +336,26 @@ void UTunaSweeperMapWidget::BuildMapWidget()
 		CanvasSlot->SetVerticalAlignment(VAlign_Fill);
 	}
 
+	ControlCanvas->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+	UOverlaySlot* ControlSlot = RootOverlay->AddChildToOverlay(ControlCanvas);
+	if (ControlSlot)
+	{
+		ControlSlot->SetHorizontalAlignment(HAlign_Fill);
+		ControlSlot->SetVerticalAlignment(VAlign_Fill);
+	}
+
 	ZoomSliderBox->SetWidthOverride(28.0f);
 	ZoomSliderBox->SetContent(ZoomSlider);
 	ZoomSlider->SetOrientation(Orient_Vertical);
 	ZoomSlider->SetMinValue(0.0f);
 	ZoomSlider->SetMaxValue(1.0f);
 	ZoomSlider->SetValue((MapZoom - TunaSweeperMap::MinZoom) / (TunaSweeperMap::MaxZoom - TunaSweeperMap::MinZoom));
-	UOverlaySlot* SliderSlot = RootOverlay->AddChildToOverlay(ZoomSliderBox);
+	UCanvasPanelSlot* SliderSlot = ControlCanvas->AddChildToCanvas(ZoomSliderBox);
 	if (SliderSlot)
 	{
-		SliderSlot->SetHorizontalAlignment(HAlign_Right);
-		SliderSlot->SetVerticalAlignment(VAlign_Fill);
-		SliderSlot->SetPadding(FMargin(0.0f, 8.0f, 4.0f, 8.0f));
+		SliderSlot->SetAnchors(FAnchors(1.0f, 1.0f / 3.0f, 1.0f, 2.0f / 3.0f));
+		SliderSlot->SetAlignment(FVector2D(1.0f, 0.0f));
+		SliderSlot->SetOffsets(FMargin(-28.0f, 0.0f, 28.0f, 0.0f));
 	}
 
 	auto AddSizedWidget = [this, PaletteRow](UWidget* Widget, float Width, float Height, float RightPadding)
@@ -406,12 +420,29 @@ void UTunaSweeperMapWidget::BuildMapWidget()
 	VioletMarkerColorButton = MakeColorButton(TEXT("VioletMarkerColorButton"));
 	WhiteMarkerColorButton = MakeColorButton(TEXT("WhiteMarkerColorButton"));
 
-	UOverlaySlot* PaletteSlot = RootOverlay->AddChildToOverlay(PaletteRow);
+	PaletteHelpText->SetText(FText::FromString(TEXT("\uC6B0\uD074\uB9AD: \uB9C8\uCEE4 \uCD94\uAC00 / \uAE30\uC874 \uB9C8\uCEE4 \uC6B0\uD074\uB9AD: \uC0AD\uC81C")));
+	PaletteHelpText->SetColorAndOpacity(FSlateColor(FLinearColor(0.88f, 0.96f, 0.98f, 0.88f)));
+	PaletteHelpText->SetShadowOffset(FVector2D(1.0f, 1.0f));
+	PaletteHelpText->SetShadowColorAndOpacity(FLinearColor(0.0f, 0.0f, 0.0f, 0.86f));
+	PaletteHelpText->SetVisibility(ESlateVisibility::HitTestInvisible);
+	TunaSweeperUIFont::ApplyFont(PaletteHelpText, 13, ETunaSweeperUIFontWeight::Regular);
+	if (UVerticalBoxSlot* HelpSlot = PaletteStack->AddChildToVerticalBox(PaletteHelpText))
+	{
+		HelpSlot->SetPadding(FMargin(2.0f, 0.0f, 0.0f, 6.0f));
+		HelpSlot->SetHorizontalAlignment(HAlign_Left);
+	}
+	if (UVerticalBoxSlot* RowSlot = PaletteStack->AddChildToVerticalBox(PaletteRow))
+	{
+		RowSlot->SetHorizontalAlignment(HAlign_Left);
+	}
+
+	UCanvasPanelSlot* PaletteSlot = ControlCanvas->AddChildToCanvas(PaletteStack);
 	if (PaletteSlot)
 	{
-		PaletteSlot->SetHorizontalAlignment(HAlign_Left);
-		PaletteSlot->SetVerticalAlignment(VAlign_Bottom);
-		PaletteSlot->SetPadding(FMargin(6.0f, 0.0f, 0.0f, 6.0f));
+		PaletteSlot->SetAnchors(FAnchors(0.0f, 1.0f));
+		PaletteSlot->SetAlignment(FVector2D(0.0f, 1.0f));
+		PaletteSlot->SetAutoSize(true);
+		PaletteSlot->SetPosition(FVector2D(32.0f, -24.0f));
 	}
 
 	RefreshMarkerIconButtons();

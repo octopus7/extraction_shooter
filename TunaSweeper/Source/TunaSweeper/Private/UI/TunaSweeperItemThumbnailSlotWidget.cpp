@@ -271,6 +271,7 @@ void UTunaSweeperItemThumbnailSlotWidget::ApplyTileData()
 	if (ItemQuantityText)
 	{
 		FText QuantityText = FText::GetEmpty();
+		const FText AttachmentIndicatorText = BuildAttachmentSlotIndicatorText();
 		if (!CachedTileData.bIsEmpty)
 		{
 			if (CachedTileData.Source == ETunaSweeperItemSlotSource::Shop)
@@ -289,7 +290,23 @@ void UTunaSweeperItemThumbnailSlotWidget::ApplyTileData()
 			}
 		}
 
+		if (!AttachmentSlotIndicatorText && !AttachmentIndicatorText.IsEmpty())
+		{
+			QuantityText = QuantityText.IsEmpty()
+				? AttachmentIndicatorText
+				: FText::Format(FText::FromString(TEXT("{0}\n{1}")), AttachmentIndicatorText, QuantityText);
+		}
 		ItemQuantityText->SetText(QuantityText);
+		ItemQuantityText->SetColorAndOpacity(FSlateColor(FLinearColor::White));
+	}
+
+	if (AttachmentSlotIndicatorText)
+	{
+		const FText AttachmentIndicatorText = BuildAttachmentSlotIndicatorText();
+		AttachmentSlotIndicatorText->SetText(AttachmentIndicatorText);
+		AttachmentSlotIndicatorText->SetColorAndOpacity(FSlateColor(FLinearColor::White));
+		AttachmentSlotIndicatorText->SetVisibility(
+			AttachmentIndicatorText.IsEmpty() ? ESlateVisibility::Collapsed : ESlateVisibility::HitTestInvisible);
 	}
 
 	if (ItemNameText)
@@ -312,6 +329,34 @@ void UTunaSweeperItemThumbnailSlotWidget::ApplyDropHighlight(bool bCanAcceptDrop
 	SlotBackground->SetBrushColor(bCanAcceptDrop
 		? FLinearColor(0.32f, 0.82f, 0.52f, 1.0f)
 		: FLinearColor::White);
+}
+
+FText UTunaSweeperItemThumbnailSlotWidget::BuildAttachmentSlotIndicatorText() const
+{
+	if (CachedTileData.bIsEmpty ||
+		!CachedTileData.bHasItemDefinition ||
+		CachedTileData.ItemDefinition.AttachmentSlotTags.Num() <= 0)
+	{
+		return FText::GetEmpty();
+	}
+
+	FString IndicatorText;
+	for (const FName& AttachmentSlotTag : CachedTileData.ItemDefinition.AttachmentSlotTags)
+	{
+		if (AttachmentSlotTag.IsNone())
+		{
+			continue;
+		}
+
+		const FGuid* AttachmentUid = CachedTileData.ItemInstance.AttachmentSlots.Find(AttachmentSlotTag);
+		IndicatorText += AttachmentUid && AttachmentUid->IsValid()
+			? TEXT("\u25CF")
+			: TEXT("\u25CB");
+	}
+
+	return IndicatorText.IsEmpty()
+		? FText::GetEmpty()
+		: FText::FromString(IndicatorText);
 }
 
 bool UTunaSweeperItemThumbnailSlotWidget::CanAcceptDragOperation(UDragDropOperation* InOperation) const
