@@ -38,6 +38,7 @@
 #include "UI/TunaSweeperMemoWidget.h"
 #include "UI/TunaSweeperQuestWidget.h"
 #include "UI/TunaSweeperReloadRingWidget.h"
+#include "UI/TunaSweeperShopSellPanelWidget.h"
 #include "UI/TunaSweeperUIFont.h"
 #include "UI/TunaSweeperUiText.h"
 #include "Styling/SlateBrush.h"
@@ -566,7 +567,8 @@ void UTunaSweeperGameHudWidget::SetItemInfoPanelVisible(bool bVisible)
 
 void UTunaSweeperGameHudWidget::ShowExternalPanel(ETunaSweeperHudExternalPanelMode PanelMode)
 {
-	if (PanelMode != ETunaSweeperHudExternalPanelMode::LootingBox)
+	if (PanelMode != ETunaSweeperHudExternalPanelMode::LootingBox &&
+		PanelMode != ETunaSweeperHudExternalPanelMode::Shop)
 	{
 		CloseLootContainerPanelIfOpen();
 	}
@@ -664,6 +666,29 @@ void UTunaSweeperGameHudWidget::ShowStoragePanel()
 	HandleSelectedInventoryItemChanged();
 }
 
+void UTunaSweeperGameHudWidget::ShowShopPanel(int32 ShopId)
+{
+	if (!IsBunkerMap())
+	{
+		return;
+	}
+
+	CloseLootContainerPanelIfOpen();
+
+	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
+	{
+		TunaGameInstance->SetActiveShop(ShopId);
+	}
+
+	ShowExternalPanel(ETunaSweeperHudExternalPanelMode::Shop);
+	if (ExternalPanelWidget)
+	{
+		ExternalPanelWidget->SetShopContainer(ShopId);
+	}
+
+	HandleSelectedInventoryItemChanged();
+}
+
 void UTunaSweeperGameHudWidget::ShowMemoPanel(int32 MemoId)
 {
 	SetHudMode(ETunaSweeperHudMode::Memo);
@@ -710,7 +735,7 @@ void UTunaSweeperGameHudWidget::SetHudMode(ETunaSweeperHudMode InHudMode)
 	if (ActiveHudMode == ETunaSweeperHudMode::Inventory &&
 		IsBunkerMap() &&
 		ExternalPanelWidget &&
-		ExternalPanelWidget->GetExternalPanelMode() != ETunaSweeperHudExternalPanelMode::LootingBox)
+		ExternalPanelWidget->GetExternalPanelMode() == ETunaSweeperHudExternalPanelMode::None)
 	{
 		bClearExternalPanelModeAfterHide = false;
 		ExternalPanelWidget->SetStorageContainer();
@@ -752,7 +777,26 @@ bool UTunaSweeperGameHudWidget::IsInventoryUiOpen() const
 		IsWidgetVisible(InventoryAreaWidget) ||
 		IsWidgetVisible(ItemInfoPanelWidget) ||
 		IsWidgetVisible(ExternalPanelWidget) ||
-		IsWidgetVisible(InventoryQuickSlotPanel);
+		IsWidgetVisible(InventoryQuickSlotPanel) ||
+		IsWidgetVisible(ShopSellPanelWidget);
+}
+
+bool UTunaSweeperGameHudWidget::IsShopPanelOpen() const
+{
+	return ActiveHudMode == ETunaSweeperHudMode::Inventory &&
+		ExternalPanelWidget &&
+		ExternalPanelWidget->GetExternalPanelMode() == ETunaSweeperHudExternalPanelMode::Shop;
+}
+
+bool UTunaSweeperGameHudWidget::TrySellSelectedShopItem()
+{
+	if (!IsShopPanelOpen())
+	{
+		return false;
+	}
+
+	EnsureShopSellPanelWidget();
+	return ShopSellPanelWidget && ShopSellPanelWidget->TrySellSelectedHoveredItem();
 }
 
 void UTunaSweeperGameHudWidget::ShowDamageNumber(
@@ -1240,6 +1284,11 @@ void UTunaSweeperGameHudWidget::ApplyHudModeVisibility()
 		SetTransitionedWidgetVisibility(ItemInfoPanelWidget, ESlateVisibility::Collapsed, ItemInfoPanelTransitionEdge);
 	}
 
+	if (ShopSellPanelWidget && !bInventoryMode)
+	{
+		SetShopSellPanelVisible(false);
+	}
+
 	EnsureHousingPanelWidget();
 	if (HousingPanelWidget)
 	{
@@ -1379,6 +1428,14 @@ void UTunaSweeperGameHudWidget::CloseLootContainerPanelIfOpen()
 		{
 			TunaGameInstance->SaveGameState();
 		}
+	}
+	else if (ExternalPanelWidget->GetExternalPanelMode() == ETunaSweeperHudExternalPanelMode::Shop)
+	{
+		if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
+		{
+			TunaGameInstance->ClearActiveShop();
+		}
+		SetShopSellPanelVisible(false);
 	}
 
 	bClearExternalPanelModeAfterHide = true;
@@ -1692,6 +1749,75 @@ void UTunaSweeperGameHudWidget::EnsureQuestPanelWidget()
 		CanvasSlot->SetSize(FVector2D(1180.0f, 640.0f));
 		CanvasSlot->SetZOrder(20);
 	}
+}
+
+void UTunaSweeperGameHudWidget::EnsureShopSellPanelWidget()
+{
+	if (ShopSellPanelWidget || !WidgetTree)
+	{
+		return;
+	}
+
+	UCanvasPanel* RootCanvas = Cast<UCanvasPanel>(WidgetTree->RootWidget);
+	if (!RootCanvas)
+	{
+		return;
+	}
+
+	ShopSellPanelWidget = CreateWidget<UTunaSweeperShopSellPanelWidget>(
+		GetOwningPlayer(),
+		UTunaSweeperShopSellPanelWidget::StaticClass());
+	if (!ShopSellPanelWidget)
+	{
+		return;
+	}
+
+	ShopSellPanelWidget->SetVisibility(ESlateVisibility::Collapsed);
+	UCanvasPanelSlot* CanvasSlot = RootCanvas->AddChildToCanvas(ShopSellPanelWidget);
+	if (!CanvasSlot)
+	{
+		return;
+	}
+
+	if (const UCanvasPanelSlot* ItemInfoCanvasSlot = ItemInfoPanelWidget
+		? Cast<UCanvasPanelSlot>(ItemInfoPanelWidget->Slot)
+		: nullptr)
+	{
+		CanvasSlot->SetAnchors(ItemInfoCanvasSlot->GetAnchors());
+		CanvasSlot->SetAlignment(ItemInfoCanvasSlot->GetAlignment());
+		CanvasSlot->SetOffsets(ItemInfoCanvasSlot->GetOffsets());
+		CanvasSlot->SetZOrder(ItemInfoCanvasSlot->GetZOrder() + 1);
+		return;
+	}
+
+	CanvasSlot->SetAnchors(FAnchors(0.5f, 0.5f));
+	CanvasSlot->SetAlignment(FVector2D(0.5f, 0.5f));
+	CanvasSlot->SetPosition(FVector2D(0.0f, -24.0f));
+	CanvasSlot->SetSize(FVector2D(292.0f, 150.0f));
+	CanvasSlot->SetZOrder(31);
+}
+
+void UTunaSweeperGameHudWidget::SetShopSellPanelVisible(bool bVisible)
+{
+	EnsureShopSellPanelWidget();
+
+	if (!ShopSellPanelWidget)
+	{
+		return;
+	}
+
+	if (bVisible)
+	{
+		ActiveHudMode = ETunaSweeperHudMode::Inventory;
+		ShopSellPanelWidget->RefreshSelectedItem();
+	}
+
+	SetTransitionedWidgetVisibility(
+		ShopSellPanelWidget,
+		bVisible && ActiveHudMode == ETunaSweeperHudMode::Inventory
+			? ESlateVisibility::SelfHitTestInvisible
+			: ESlateVisibility::Collapsed,
+		ItemInfoPanelTransitionEdge);
 }
 
 void UTunaSweeperGameHudWidget::RefreshBottomStatusFromGameInstance()
@@ -2401,16 +2527,31 @@ void UTunaSweeperGameHudWidget::UpdateCrosshairState(float InDeltaTime)
 
 void UTunaSweeperGameHudWidget::HandleSelectedInventoryItemChanged()
 {
+	UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
 	const bool bCenterVisible =
 		ActiveHudMode == ETunaSweeperHudMode::Inventory &&
 		CenterContentPanel &&
 		CenterContentPanel->GetVisibility() != ESlateVisibility::Collapsed;
 	const bool bHasSelection = bCenterVisible &&
-		GetGameInstance<UTunaSweeperGameInstance>() &&
-		GetGameInstance<UTunaSweeperGameInstance>()->HasSelectedInventoryItem();
+		TunaGameInstance &&
+		TunaGameInstance->HasSelectedInventoryItem();
 
-	SetItemInfoPanelVisible(bHasSelection);
-	if (bHasSelection && ItemInfoPanelWidget)
+	bool bShowShopSellPanel = false;
+	if (bHasSelection && IsShopPanelOpen() && TunaGameInstance)
+	{
+		int32 SalePrice = 0;
+		bShowShopSellPanel = TunaGameInstance->TryGetSlotSellPrice(
+			TunaGameInstance->GetSelectedItemSlotReference(),
+			SalePrice);
+	}
+
+	SetShopSellPanelVisible(bShowShopSellPanel);
+	SetItemInfoPanelVisible(bHasSelection && !bShowShopSellPanel);
+	if (bShowShopSellPanel && ShopSellPanelWidget)
+	{
+		ShopSellPanelWidget->RefreshSelectedItem();
+	}
+	else if (bHasSelection && ItemInfoPanelWidget)
 	{
 		ItemInfoPanelWidget->RefreshSelectedItemInfo();
 	}
@@ -2444,6 +2585,10 @@ void UTunaSweeperGameHudWidget::HandleLanguageChanged()
 	if (ItemInfoPanelWidget)
 	{
 		ItemInfoPanelWidget->RefreshSelectedItemInfo();
+	}
+	if (ShopSellPanelWidget)
+	{
+		ShopSellPanelWidget->RefreshSelectedItem();
 	}
 	if (MemoPanelWidget)
 	{

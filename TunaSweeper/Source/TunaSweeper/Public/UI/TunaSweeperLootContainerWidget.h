@@ -24,6 +24,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Storage")
 	void SetStorageView();
 
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Shop")
+	void SetShopView(int32 ShopId);
+
 protected:
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
@@ -55,6 +58,9 @@ private:
 
 	UPROPERTY(Transient)
 	ETunaSweeperItemSlotSource SlotSource = ETunaSweeperItemSlotSource::LootContainer;
+
+	UPROPERTY(Transient)
+	int32 ActiveShopId = INDEX_NONE;
 
 	UPROPERTY(Transient)
 	TArray<TObjectPtr<UObject>> TileObjects;

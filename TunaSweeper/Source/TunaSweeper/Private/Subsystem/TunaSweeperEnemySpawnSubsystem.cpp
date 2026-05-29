@@ -19,6 +19,7 @@
 #include "Interaction/TunaSweeperPickupItemActor.h"
 #include "Interaction/TunaSweeperSandbagCoverActor.h"
 #include "Interaction/TunaSweeperSelfDestructInteractableActor.h"
+#include "Interaction/TunaSweeperShopActor.h"
 #include "Interaction/TunaSweeperShootingPracticeDummyActor.h"
 #include "Interaction/TunaSweeperTransparentObstacleActor.h"
 #include "Interaction/TunaSweeperWarpPointActor.h"
@@ -58,6 +59,7 @@ namespace TunaSweeperEnemySpawn
 	const TCHAR* DefaultExplosiveBarrelClassPath = TEXT("/Game/Interaction/BP_ExplosiveBarrel.BP_ExplosiveBarrel_C");
 	const TCHAR* DefaultStaticMeshPropClassPath = TEXT("/Script/Engine.StaticMeshActor");
 	const TCHAR* DefaultShootingPracticeDummyClassPath = TEXT("/Script/TunaSweeper.TunaSweeperShootingPracticeDummyActor");
+	const TCHAR* DefaultShopClassPath = TEXT("/Script/TunaSweeper.TunaSweeperShopActor");
 	const TCHAR* DefaultRollingBomberClassPath = TEXT("/Script/TunaSweeper.TunaSweeperRollingBomber");
 	const TCHAR* DefaultRollingBomberLaunchSoundPath =
 		TEXT("/Game/Audio/SFX/SFX_RollingBomberSpawnerLaunch_FM.SFX_RollingBomberSpawnerLaunch_FM");
@@ -266,6 +268,13 @@ namespace TunaSweeperEnemySpawn
 		{
 			return UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::LootContainerSpawn;
 		}
+		if (SpawnType == TEXT("shop") ||
+			SpawnType == TEXT("shop_open") ||
+			SpawnType == TEXT("vending_machine") ||
+			SpawnType == TEXT("vendingmachine"))
+		{
+			return UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::Shop;
+		}
 		if (SpawnType == TEXT("self_destruct") || SpawnType == TEXT("selfdestruct"))
 		{
 			return UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::SelfDestruct;
@@ -343,6 +352,8 @@ namespace TunaSweeperEnemySpawn
 			return DefaultStaticMeshPropClassPath;
 		case UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::ShootingPracticeDummy:
 			return DefaultShootingPracticeDummyClassPath;
+		case UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::Shop:
+			return DefaultShopClassPath;
 		default:
 			return nullptr;
 		}
@@ -373,6 +384,8 @@ namespace TunaSweeperEnemySpawn
 			return FText::GetEmpty();
 		case UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::ShootingPracticeDummy:
 			return FText::FromString(TEXT("Practice Dummy"));
+		case UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::Shop:
+			return FText::FromString(TEXT("\uC0C1\uC810"));
 		default:
 			return FText::GetEmpty();
 		}
@@ -1534,6 +1547,10 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadGameplayInteractionActorSpawnData(bool
 				? FString(TunaSweeperEnemySpawn::DefaultLootContainerClassPath)
 				: TrimmedLootContainerActorClassPath));
 
+		double NumericShopId = 1.0;
+		JsonObject->TryGetNumberField(TEXT("shop_id"), NumericShopId);
+		SpawnDefinition.ShopId = FMath::Max(1, static_cast<int32>(NumericShopId));
+
 		FString SpeechBubbleWidgetClassPath;
 		double NumericCountdownStartNumber = 3.0;
 		double NumericCountdownStepSeconds = 1.0;
@@ -2007,6 +2024,20 @@ void UTunaSweeperEnemySpawnSubsystem::ConfigureGameplayInteractionActor(
 					ETunaSweeperInteractionType::LootContainerSpawn,
 					SpawnDefinition.InteractionDisplayName,
 					SpawnDefinition.MarkerWidgetClass);
+			}
+		}
+		break;
+	case EGameplayInteractionActorSpawnType::Shop:
+		if (ATunaSweeperShopActor* ShopActor = Cast<ATunaSweeperShopActor>(SpawnedActor))
+		{
+			ShopActor->ConfigureShopDefaults(SpawnDefinition.ShopId);
+			if (UTunaSweeperInteractableComponent* InteractableComponent = ShopActor->GetInteractableComponent())
+			{
+				InteractableComponent->ConfigureInteractionDefaults(
+					ETunaSweeperInteractionType::ShopOpen,
+					SpawnDefinition.InteractionDisplayName,
+					SpawnDefinition.MarkerWidgetClass,
+					FName(TEXT("ui.interaction.shop_open")));
 			}
 		}
 		break;

@@ -13,6 +13,7 @@ class UTunaSweeperHudInventoryAreaWidget;
 class UTunaSweeperHudItemInfoPanelWidget;
 class UTunaSweeperHudQuickSlotBarWidget;
 class UTunaSweeperHudTopReserveWidget;
+class UTunaSweeperShopSellPanelWidget;
 class UTunaSweeperExtractionProgressWidget;
 class UTunaSweeperItemThumbnailSlotWidget;
 class UTunaSweeperMapWidget;
@@ -74,6 +75,9 @@ public:
 	void ShowStoragePanel();
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
+	void ShowShopPanel(int32 ShopId);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
 	void ShowMemoPanel(int32 MemoId);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
@@ -90,6 +94,12 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|HUD")
 	bool IsInventoryUiOpen() const;
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|HUD")
+	bool IsShopPanelOpen() const;
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Shop")
+	bool TrySellSelectedShopItem();
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD|Damage")
 	void ShowDamageNumber(float DamageAmount, FVector WorldLocation, ETunaSweeperDamageNumberType DamageNumberType);
@@ -262,6 +272,8 @@ private:
 	void EnsureMapPanelWidget();
 	void EnsureMemoPanelWidget();
 	void EnsureQuestPanelWidget();
+	void EnsureShopSellPanelWidget();
+	void SetShopSellPanelVisible(bool bVisible);
 	ETunaSweeperHudTransitionEdge ResolveHudTransitionEdge(const UWidget* Widget, ETunaSweeperHudTransitionEdge DirectionOverride) const;
 	void RefreshBottomStatusFromGameInstance();
 	void RefreshQuickSlotsFromGameState();
@@ -346,6 +358,9 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<UTunaSweeperQuestWidget> QuestPanelWidget;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTunaSweeperShopSellPanelWidget> ShopSellPanelWidget;
 
 	UPROPERTY(Transient)
 	TArray<TObjectPtr<UBorder>> CenterReloadSegments;

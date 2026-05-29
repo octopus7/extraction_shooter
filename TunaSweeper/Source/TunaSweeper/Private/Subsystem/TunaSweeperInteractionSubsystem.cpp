@@ -15,6 +15,7 @@
 #include "Interaction/TunaSweeperPersistentDoorActor.h"
 #include "Interaction/TunaSweeperPickupItemActor.h"
 #include "Interaction/TunaSweeperSelfDestructInteractableActor.h"
+#include "Interaction/TunaSweeperShopActor.h"
 #include "Interaction/TunaSweeperStorageActor.h"
 #include "Interaction/TunaSweeperWarpPointActor.h"
 #include "Interaction/TunaSweeperWorldProgressActor.h"
@@ -63,6 +64,8 @@ namespace TunaSweeperInteractionQuestEvents
 			return FName(TEXT("housing_management"));
 		case ETunaSweeperInteractionType::StorageOpen:
 			return FName(TEXT("storage_open"));
+		case ETunaSweeperInteractionType::ShopOpen:
+			return FName(TEXT("shop_open"));
 		default:
 			return NAME_None;
 		}
@@ -168,6 +171,9 @@ bool UTunaSweeperInteractionSubsystem::RequestInteraction(UTunaSweeperInteractab
 	case ETunaSweeperInteractionType::StorageOpen:
 		bHandled = HandleStorageOpenInteraction(Interactable, InstigatorPawn);
 		break;
+	case ETunaSweeperInteractionType::ShopOpen:
+		bHandled = HandleShopOpenInteraction(Interactable, InstigatorPawn);
+		break;
 	default:
 		return false;
 	}
@@ -206,6 +212,11 @@ bool UTunaSweeperInteractionSubsystem::CanOfferInteraction(const UTunaSweeperInt
 	}
 
 	if (Interactable->GetInteractionType() == ETunaSweeperInteractionType::StorageOpen)
+	{
+		return TunaSweeperInteractionQuestEvents::IsBunkerMap(GetWorld());
+	}
+
+	if (Interactable->GetInteractionType() == ETunaSweeperInteractionType::ShopOpen)
 	{
 		return TunaSweeperInteractionQuestEvents::IsBunkerMap(GetWorld());
 	}
@@ -474,6 +485,28 @@ bool UTunaSweeperInteractionSubsystem::HandleStorageOpenInteraction(
 	}
 
 	TunaPlayerController->OpenStoragePanel();
+	return true;
+}
+
+bool UTunaSweeperInteractionSubsystem::HandleShopOpenInteraction(
+	UTunaSweeperInteractableComponent* Interactable,
+	APawn* InstigatorPawn)
+{
+	const ATunaSweeperShopActor* ShopActor = Interactable
+		? Cast<ATunaSweeperShopActor>(Interactable->GetOwner())
+		: nullptr;
+	if (!ShopActor || !InstigatorPawn || !TunaSweeperInteractionQuestEvents::IsBunkerMap(GetWorld()))
+	{
+		return false;
+	}
+
+	ATunaSweeperPlayerController* TunaPlayerController = Cast<ATunaSweeperPlayerController>(InstigatorPawn->GetController());
+	if (!TunaPlayerController)
+	{
+		return false;
+	}
+
+	TunaPlayerController->OpenShopPanel(ShopActor->GetShopId());
 	return true;
 }
 

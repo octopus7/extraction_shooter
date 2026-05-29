@@ -547,9 +547,25 @@ TSubclassOf<ATunaSweeperWeapon> ATunaSweeperTopDownCharacter::ResolveEquippedWea
 
 void ATunaSweeperTopDownCharacter::ApplyEquippedWeaponAttachmentVisuals()
 {
-	if (EquippedWeapon)
+	UpdateEquippedWeaponLaserSightBeam();
+}
+
+void ATunaSweeperTopDownCharacter::UpdateEquippedWeaponLaserSightBeam()
+{
+	if (!EquippedWeapon)
 	{
-		EquippedWeapon->SetLaserSightEnabled(!bHousingModeVisualHidden && IsSelectedWeaponLaserSightEquipped());
+		return;
+	}
+
+	const bool bShouldEnableLaserSight = !bHousingModeVisualHidden && IsSelectedWeaponLaserSightEquipped();
+	if (EquippedWeapon->IsLaserSightEnabled() != bShouldEnableLaserSight)
+	{
+		EquippedWeapon->SetLaserSightEnabled(bShouldEnableLaserSight);
+	}
+
+	if (bShouldEnableLaserSight)
+	{
+		EquippedWeapon->UpdateLaserSightBeam(AimDirection, AimIntentWorldPoint, bHasAimIntent);
 	}
 }
 
@@ -2009,6 +2025,8 @@ void ATunaSweeperTopDownCharacter::UpdateAimingVisuals(float DeltaSeconds)
 		CurrentCameraAimOffset = FMath::VInterpTo(CurrentCameraAimOffset, AimTargetOffset, DeltaSeconds, CameraInterpSpeed);
 		CameraBoom->TargetOffset = CurrentCameraModeOffset + CurrentCameraAimOffset + HitReactionOffset;
 	}
+
+	UpdateEquippedWeaponLaserSightBeam();
 }
 
 FTunaSweeperPlayerCameraModeSettings ATunaSweeperTopDownCharacter::ResolveCurrentCameraModeSettings() const

@@ -50,6 +50,24 @@ struct TUNASWEEPER_API FTunaSweeperMapMarkerSaveData
 	int32 MarkerColorIndex = 0;
 };
 
+USTRUCT(BlueprintType)
+struct TUNASWEEPER_API FTunaSweeperShopStockSaveData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Shop")
+	int32 ShopId = INDEX_NONE;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Shop")
+	int32 SlotIndex = INDEX_NONE;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Shop")
+	int32 ItemId = INDEX_NONE;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Shop", meta = (ClampMin = "0", UIMin = "0"))
+	int32 StockQuantity = 0;
+};
+
 UCLASS()
 class TUNASWEEPER_API UTunaSweeperSaveGame : public USaveGame
 {
@@ -57,7 +75,7 @@ class TUNASWEEPER_API UTunaSweeperSaveGame : public USaveGame
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Save")
-	int32 SaveVersion = 12;
+	int32 SaveVersion = 13;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Save")
 	int32 SaveSlotIndex = 1;
@@ -100,6 +118,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Storage")
 	TArray<FTunaSweeperInventorySlot> StorageSlots;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Shop")
+	TArray<FTunaSweeperShopStockSaveData> ShopStockStates;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|World Progress")
 	TArray<FTunaSweeperWorldProgressSaveData> WorldProgressStates;

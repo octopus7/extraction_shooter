@@ -100,6 +100,12 @@ public:
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Quest")
 	int32 GetCoinBalance() const { return CoinBalance; }
 
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Quest")
+	void AddCoins(int32 Amount, bool bSaveImmediately = true);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Quest")
+	bool TrySpendCoins(int32 Amount, bool bSaveImmediately = true);
+
 	void ExportQuestProgressForSave(
 		TArray<FTunaSweeperQuestProgressSaveData>& OutQuestProgress,
 		FName& OutTrackedQuestId,

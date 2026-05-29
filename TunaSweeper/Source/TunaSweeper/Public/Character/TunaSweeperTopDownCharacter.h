@@ -387,6 +387,7 @@ private:
 	void ClearEquippedWeaponActor();
 	TSubclassOf<ATunaSweeperWeapon> ResolveEquippedWeaponClass() const;
 	void ApplyEquippedWeaponAttachmentVisuals();
+	void UpdateEquippedWeaponLaserSightBeam();
 	bool IsSelectedWeaponLaserSightEquipped() const;
 	UFUNCTION()
 	void HandleVitalsChanged(const FTunaSweeperVitalsState& VitalsState);

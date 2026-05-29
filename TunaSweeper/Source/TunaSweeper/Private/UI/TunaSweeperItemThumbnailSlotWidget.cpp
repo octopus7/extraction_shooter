@@ -96,6 +96,11 @@ FReply UTunaSweeperItemThumbnailSlotWidget::NativeOnMouseButtonDown(
 {
 	if (!CachedTileData.bIsEmpty)
 	{
+		if (CachedTileData.Source == ETunaSweeperItemSlotSource::Shop)
+		{
+			return FReply::Handled();
+		}
+
 		bSuppressNextMouseButtonUpSelection = false;
 		return UWidgetBlueprintLibrary::DetectDragIfPressed(InMouseEvent, this, EKeys::LeftMouseButton).NativeReply;
 	}
@@ -109,6 +114,11 @@ FReply UTunaSweeperItemThumbnailSlotWidget::NativeOnMouseButtonUp(
 {
 	if (!CachedTileData.bIsEmpty && InMouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
 	{
+		if (CachedTileData.Source == ETunaSweeperItemSlotSource::Shop)
+		{
+			return FReply::Handled();
+		}
+
 		if (bSuppressNextMouseButtonUpSelection)
 		{
 			bSuppressNextMouseButtonUpSelection = false;
@@ -136,6 +146,12 @@ void UTunaSweeperItemThumbnailSlotWidget::NativeOnDragDetected(
 	bSuppressNextMouseButtonUpSelection = true;
 
 	if (CachedTileData.bIsEmpty)
+	{
+		OutOperation = nullptr;
+		return;
+	}
+
+	if (CachedTileData.Source == ETunaSweeperItemSlotSource::Shop)
 	{
 		OutOperation = nullptr;
 		return;
@@ -254,10 +270,26 @@ void UTunaSweeperItemThumbnailSlotWidget::ApplyTileData()
 
 	if (ItemQuantityText)
 	{
-		ItemQuantityText->SetText(
-			CachedTileData.bIsEmpty
-				? FText::GetEmpty()
-				: FText::Format(FText::FromString(TEXT("x{0}")), FText::AsNumber(CachedTileData.ItemStack.Quantity)));
+		FText QuantityText = FText::GetEmpty();
+		if (!CachedTileData.bIsEmpty)
+		{
+			if (CachedTileData.Source == ETunaSweeperItemSlotSource::Shop)
+			{
+				QuantityText = FText::Format(
+					FText::FromString(TEXT("{0}/{1}\n${2}")),
+					FText::AsNumber(FMath::Max(0, CachedTileData.ShopStockQuantity)),
+					FText::AsNumber(FMath::Max(0, CachedTileData.ShopTotalStockQuantity)),
+					FText::AsNumber(FMath::Max(0, CachedTileData.ShopPrice)));
+			}
+			else
+			{
+				QuantityText = FText::Format(
+					FText::FromString(TEXT("x{0}")),
+					FText::AsNumber(CachedTileData.ItemStack.Quantity));
+			}
+		}
+
+		ItemQuantityText->SetText(QuantityText);
 	}
 
 	if (ItemNameText)

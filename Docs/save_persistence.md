@@ -6,7 +6,7 @@ Update it whenever a new state field is expected to persist across save slots, l
 ## Current Save Container
 
 - Save object: `UTunaSweeperSaveGame`
-- Current save version: `12`
+- Current save version: `13`
 - Runtime owner: `UTunaSweeperGameInstance`
 - Save entry point: `UTunaSweeperGameInstance::SaveGameStateInternal()`
 - Load entry point: `UTunaSweeperGameInstance::LoadGameState()`
@@ -85,6 +85,19 @@ The bunker-only storage/warehouse is persisted per save slot through:
 New save slots initialize storage with `100` slots. `StorageSlotCapacity` is saved separately from the slot array so future upgrades can expand capacity without changing the storage item layout. Storage slot arrays store item UIDs just like inventory slots, and any item UID referenced by storage, including nested attachment UIDs, must exist in `ItemInstances`.
 
 Storage is accessible only in `BunkerMap`: entering inventory mode in the bunker opens the storage panel at the same HUD location used by loot containers, and `ATunaSweeperStorageActor` opens the same panel through `StorageOpen` interaction. Raid maps do not offer or open storage. Death persistence clears carried inventory, equipment, auxiliary bag, and usable quick slots, but preserves storage slots and their item instances.
+
+### Shop Stock
+
+Bunker shop stock is persisted per save slot through `UTunaSweeperSaveGame::ShopStockStates`.
+
+Each `FTunaSweeperShopStockSaveData` preserves:
+
+- `ShopId`: stable shop identifier assigned on `ATunaSweeperShopActor`.
+- `SlotIndex`: index of the item entry in `Content/Data/ShopDefinitions.json`.
+- `ItemId`: item id from the shop entry, included to guard against reordered or changed definitions.
+- `StockQuantity`: remaining stock for that shop entry.
+
+Shop definitions are static data in `Content/Data/ShopDefinitions.json`. New saves start from each entry's defined `stock_quantity`; purchases decrease the runtime stock and immediately save the remaining stock with the inventory/currency transaction. Shop access is bunker-only through `ShopOpen` interaction. Item sale does not affect shop stock; it removes the player-owned item and grants half of the item table `shop_sell_price`.
 
 ### World Progress Objects
 

@@ -123,6 +123,33 @@ bool ATunaSweeperWeapon::IsLaserSightEnabled() const
 	return LaserSightComponent && LaserSightComponent->IsLaserSightEnabled();
 }
 
+void ATunaSweeperWeapon::UpdateLaserSightBeam(
+	const FVector& AimDirection,
+	const FVector& AimIntentWorldPoint,
+	bool bHasAimIntentWorldPoint)
+{
+	if (!LaserSightComponent || !MuzzlePoint)
+	{
+		return;
+	}
+
+	const FVector BeamStartWorld = MuzzlePoint->GetComponentLocation();
+	FVector BeamEndWorld = AimIntentWorldPoint;
+	if (!bHasAimIntentWorldPoint)
+	{
+		FVector ShotDirection = AimDirection.GetSafeNormal2D();
+		if (ShotDirection.IsNearlyZero())
+		{
+			ShotDirection = GetActorForwardVector().GetSafeNormal2D();
+		}
+
+		BeamEndWorld = BeamStartWorld + ShotDirection * FMath::Max(1.0f, LaserSightFallbackRange);
+	}
+
+	LaserSightComponent->SetBeamEnd(
+		LaserSightComponent->GetComponentTransform().InverseTransformPosition(BeamEndWorld));
+}
+
 void ATunaSweeperWeapon::SetWeaponMeshOverride(
 	UStaticMesh* Mesh,
 	UMaterialInterface* Material,

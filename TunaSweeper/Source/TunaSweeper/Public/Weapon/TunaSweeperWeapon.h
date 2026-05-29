@@ -52,6 +52,12 @@ public:
 	bool IsLaserSightEnabled() const;
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Weapon")
+	void UpdateLaserSightBeam(
+		const FVector& AimDirection,
+		const FVector& AimIntentWorldPoint,
+		bool bHasAimIntentWorldPoint);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Weapon")
 	void SetWeaponMeshOverride(
 		UStaticMesh* Mesh,
 		UMaterialInterface* Material,
@@ -83,6 +89,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon|Shotgun", meta = (ClampMin = "0.0", UIMin = "0.0", ClampMax = "360.0", UIMax = "120.0"))
 	float ShotgunSpreadAngleDegrees = 36.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon|Laser", meta = (ClampMin = "1.0", UIMin = "1.0"))
+	float LaserSightFallbackRange = 5000.0f;
 
 	ATunaSweeperProjectile* SpawnProjectile(
 		UWorld& World,

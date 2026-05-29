@@ -474,6 +474,33 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Storage")
 	bool SetStorageSlotCapacity(int32 NewCapacity, bool bSaveImmediately = false);
 
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Shop")
+	bool HasActiveShop() const { return bHasActiveShop; }
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Shop")
+	int32 GetActiveShopId() const { return bHasActiveShop ? ActiveShopId : INDEX_NONE; }
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Shop")
+	void SetActiveShop(int32 ShopId);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Shop")
+	void ClearActiveShop();
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Shop")
+	bool GetActiveShopItems(TArray<FTunaSweeperShopItemView>& OutShopItems);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Shop")
+	bool TryGetActiveShopItemView(int32 ShopSlotIndex, FTunaSweeperShopItemView& OutShopItem);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Shop")
+	bool TryBuyActiveShopSlot(int32 ShopSlotIndex);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Shop")
+	bool TryGetSlotSellPrice(const FTunaSweeperItemSlotReference& SlotReference, int32& OutSalePrice);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Shop")
+	bool TrySellItemInSlot(const FTunaSweeperItemSlotReference& SlotReference, int32& OutSalePrice);
+
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|World Progress")
 	FTunaSweeperWorldProgressSaveData GetOrCreateWorldProgressState(
 		FName ObjectId,
@@ -573,6 +600,16 @@ private:
 	int32 GetDefaultStorageSlotCapacity() const;
 	int32 GetMaxStorageSlotCapacity() const;
 	int32 NormalizeStorageSlotCapacity(int32 RequestedCapacity) const;
+	int32 GetShopStockQuantity(
+		int32 ShopId,
+		int32 SlotIndex,
+		const FTunaSweeperShopItemDefinition& ShopItemDefinition) const;
+	void SetShopStockQuantity(
+		int32 ShopId,
+		int32 SlotIndex,
+		const FTunaSweeperShopItemDefinition& ShopItemDefinition,
+		int32 StockQuantity);
+	bool IsSellableItemSlotSource(ETunaSweeperItemSlotSource Source) const;
 	TArray<FTunaSweeperInventorySlot>* GetMutableSlotsForSource(ETunaSweeperItemSlotSource Source);
 	const TArray<FTunaSweeperInventorySlot>* GetSlotsForSource(ETunaSweeperItemSlotSource Source) const;
 	int32 CalculateInventoryCapacityForEquipmentSlots(const TArray<FTunaSweeperInventorySlot>& InEquipmentSlots);
@@ -660,6 +697,15 @@ private:
 
 	UPROPERTY(Transient)
 	int32 StorageSlotCapacity = 100;
+
+	UPROPERTY(Transient)
+	TMap<FName, FTunaSweeperShopStockSaveData> ShopStockStatesByKey;
+
+	UPROPERTY(Transient)
+	int32 ActiveShopId = INDEX_NONE;
+
+	UPROPERTY(Transient)
+	bool bHasActiveShop = false;
 
 	UPROPERTY(Transient)
 	int32 RuntimeSelectedWeaponSlotNumber = 1;

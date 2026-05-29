@@ -59,6 +59,9 @@ protected:
 	TObjectPtr<UTextBlock> DropActionText;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Hover Prompt", meta = (BindWidgetOptional))
+	TObjectPtr<UWidget> DropActionRow;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Hover Prompt", meta = (BindWidgetOptional))
 	TObjectPtr<UWidget> UseActionRow;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Hover Prompt", meta = (BindWidgetOptional))

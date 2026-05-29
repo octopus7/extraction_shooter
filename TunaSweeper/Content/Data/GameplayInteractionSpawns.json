@@ -13,6 +13,17 @@
     "scale": [1.0, 1.0, 1.0]
   },
   {
+    "level_name": "BunkerMap",
+    "spawn_id": "TS_VendingMachine_Shop_01",
+    "spawn_type": "vending_machine",
+    "actor_class": "/Script/TunaSweeper.TunaSweeperShopActor",
+    "shop_id": 1,
+    "interaction_display_name": "Shop",
+    "location": [820.0, 180.0, 0.0],
+    "rotation": [0.0, 180.0, 0.0],
+    "scale": [1.0, 1.0, 1.0]
+  },
+  {
     "level_name": "RaidMap",
     "spawn_id": "TS_Travel_ToBunker",
     "spawn_type": "level_travel",

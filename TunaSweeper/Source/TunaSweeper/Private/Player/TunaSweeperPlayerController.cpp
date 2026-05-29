@@ -1020,6 +1020,18 @@ bool ATunaSweeperPlayerController::TryHandleHoveredItemInteract()
 	}
 
 	const FTunaSweeperItemSlotReference HoveredSlot = TunaGameInstance->GetHoveredItemSlotReference();
+	if (GameHudWidget && GameHudWidget->IsShopPanelOpen())
+	{
+		if (HoveredSlot.Source == ETunaSweeperItemSlotSource::Shop)
+		{
+			TunaGameInstance->TryBuyActiveShopSlot(HoveredSlot.SlotIndex);
+			return true;
+		}
+
+		GameHudWidget->TrySellSelectedShopItem();
+		return true;
+	}
+
 	FTunaSweeperItemInstance HoveredItemInstance;
 	if (!TunaGameInstance->TryGetSlotItemInstance(HoveredSlot, HoveredItemInstance))
 	{
@@ -1603,6 +1615,22 @@ void ATunaSweeperPlayerController::OpenStoragePanel()
 	if (GameHudWidget)
 	{
 		GameHudWidget->ShowStoragePanel();
+		CancelPawnGameplayActions();
+	}
+}
+
+void ATunaSweeperPlayerController::OpenShopPanel(int32 ShopId)
+{
+	if (!IsBunkerMap())
+	{
+		return;
+	}
+
+	EnsureGameHudWidget();
+
+	if (GameHudWidget)
+	{
+		GameHudWidget->ShowShopPanel(ShopId);
 		CancelPawnGameplayActions();
 	}
 }

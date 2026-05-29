@@ -25,11 +25,24 @@ namespace TunaSweeperSave
 {
 	const TCHAR* SaveSlotNamePrefix = TEXT("TunaSweeperSave_Slot");
 	const TCHAR* SaveSettingsSlotName = TEXT("TunaSweeperSaveSettings");
-	constexpr int32 CurrentSaveVersion = 12;
+	constexpr int32 CurrentSaveVersion = 13;
 	constexpr int32 SaveUserIndex = 0;
 	constexpr int32 MinSaveSlotIndex = 1;
 	constexpr int32 MaxSaveSlotIndex = 3;
 	constexpr int32 MaxSaveGameBackupCount = 30;
+}
+
+namespace TunaSweeperShop
+{
+	FName MakeStockKey(int32 ShopId, int32 SlotIndex, int32 ItemId)
+	{
+		return FName(*FString::Printf(TEXT("%d:%d:%d"), ShopId, SlotIndex, ItemId));
+	}
+
+	bool IsValidShopSlotKey(int32 ShopId, int32 SlotIndex, int32 ItemId)
+	{
+		return ShopId > 0 && SlotIndex != INDEX_NONE && ItemId != INDEX_NONE;
+	}
 }
 
 namespace TunaSweeperScenario
@@ -2292,6 +2305,212 @@ bool UTunaSweeperGameInstance::SetStorageSlotCapacity(int32 NewCapacity, bool bS
 	return true;
 }
 
+void UTunaSweeperGameInstance::SetActiveShop(int32 ShopId)
+{
+	EnsureInventoryStateInitialized();
+
+	UTunaSweeperItemDataSubsystem* ItemDataSubsystem = GetSubsystem<UTunaSweeperItemDataSubsystem>();
+	FTunaSweeperShopDefinition ShopDefinition;
+	if (!ItemDataSubsystem || !ItemDataSubsystem->TryGetShopDefinition(ShopId, ShopDefinition))
+	{
+		ClearActiveShop();
+		return;
+	}
+
+	ActiveShopId = ShopId;
+	bHasActiveShop = true;
+	BroadcastInventoryStateChanged();
+}
+
+void UTunaSweeperGameInstance::ClearActiveShop()
+{
+	const bool bHadActiveShop = bHasActiveShop || ActiveShopId != INDEX_NONE;
+	ActiveShopId = INDEX_NONE;
+	bHasActiveShop = false;
+
+	if (bHadActiveShop)
+	{
+		BroadcastInventoryStateChanged();
+	}
+}
+
+bool UTunaSweeperGameInstance::GetActiveShopItems(TArray<FTunaSweeperShopItemView>& OutShopItems)
+{
+	EnsureInventoryStateInitialized();
+	OutShopItems.Reset();
+
+	if (!bHasActiveShop || ActiveShopId == INDEX_NONE)
+	{
+		return false;
+	}
+
+	UTunaSweeperItemDataSubsystem* ItemDataSubsystem = GetSubsystem<UTunaSweeperItemDataSubsystem>();
+	FTunaSweeperShopDefinition ShopDefinition;
+	if (!ItemDataSubsystem || !ItemDataSubsystem->TryGetShopDefinition(ActiveShopId, ShopDefinition))
+	{
+		return false;
+	}
+
+	OutShopItems.Reserve(ShopDefinition.Items.Num());
+	for (int32 SlotIndex = 0; SlotIndex < ShopDefinition.Items.Num(); ++SlotIndex)
+	{
+		const FTunaSweeperShopItemDefinition& ShopItemDefinition = ShopDefinition.Items[SlotIndex];
+		FTunaSweeperShopItemView ShopItemView;
+		ShopItemView.ShopId = ActiveShopId;
+		ShopItemView.SlotIndex = SlotIndex;
+		ShopItemView.ItemId = ShopItemDefinition.ItemId;
+		ShopItemView.StockQuantity = GetShopStockQuantity(ActiveShopId, SlotIndex, ShopItemDefinition);
+		ShopItemView.TotalStockQuantity = FMath::Max(0, ShopItemDefinition.StockQuantity);
+		ShopItemView.Price = ItemDataSubsystem->ResolveShopItemBuyPrice(ShopItemDefinition);
+		OutShopItems.Add(ShopItemView);
+	}
+
+	return OutShopItems.Num() > 0;
+}
+
+bool UTunaSweeperGameInstance::TryGetActiveShopItemView(
+	int32 ShopSlotIndex,
+	FTunaSweeperShopItemView& OutShopItem)
+{
+	EnsureInventoryStateInitialized();
+	OutShopItem = FTunaSweeperShopItemView();
+
+	if (!bHasActiveShop || ActiveShopId == INDEX_NONE || ShopSlotIndex == INDEX_NONE)
+	{
+		return false;
+	}
+
+	UTunaSweeperItemDataSubsystem* ItemDataSubsystem = GetSubsystem<UTunaSweeperItemDataSubsystem>();
+	FTunaSweeperShopItemDefinition ShopItemDefinition;
+	if (!ItemDataSubsystem ||
+		!ItemDataSubsystem->TryGetShopItemDefinition(ActiveShopId, ShopSlotIndex, ShopItemDefinition))
+	{
+		return false;
+	}
+
+	OutShopItem.ShopId = ActiveShopId;
+	OutShopItem.SlotIndex = ShopSlotIndex;
+	OutShopItem.ItemId = ShopItemDefinition.ItemId;
+	OutShopItem.StockQuantity = GetShopStockQuantity(ActiveShopId, ShopSlotIndex, ShopItemDefinition);
+	OutShopItem.TotalStockQuantity = FMath::Max(0, ShopItemDefinition.StockQuantity);
+	OutShopItem.Price = ItemDataSubsystem->ResolveShopItemBuyPrice(ShopItemDefinition);
+	return true;
+}
+
+bool UTunaSweeperGameInstance::TryBuyActiveShopSlot(int32 ShopSlotIndex)
+{
+	EnsureInventoryStateInitialized();
+
+	FTunaSweeperShopItemView ShopItemView;
+	if (!TryGetActiveShopItemView(ShopSlotIndex, ShopItemView) ||
+		ShopItemView.ItemId == INDEX_NONE ||
+		ShopItemView.StockQuantity <= 0)
+	{
+		return false;
+	}
+
+	UTunaSweeperQuestSubsystem* QuestSubsystem = GetSubsystem<UTunaSweeperQuestSubsystem>();
+	if (!QuestSubsystem || QuestSubsystem->GetCoinBalance() < ShopItemView.Price)
+	{
+		return false;
+	}
+
+	UTunaSweeperItemDataSubsystem* ItemDataSubsystem = GetSubsystem<UTunaSweeperItemDataSubsystem>();
+	FTunaSweeperShopItemDefinition ShopItemDefinition;
+	if (!ItemDataSubsystem ||
+		!ItemDataSubsystem->TryGetShopItemDefinition(ShopItemView.ShopId, ShopItemView.SlotIndex, ShopItemDefinition))
+	{
+		return false;
+	}
+
+	if (!AddItemToFirstAvailableInventorySlot(ShopItemView.ItemId, 1))
+	{
+		return false;
+	}
+
+	SetShopStockQuantity(
+		ShopItemView.ShopId,
+		ShopItemView.SlotIndex,
+		ShopItemDefinition,
+		ShopItemView.StockQuantity - 1);
+
+	if (ShopItemView.Price > 0)
+	{
+		QuestSubsystem->TrySpendCoins(ShopItemView.Price, true);
+	}
+	else
+	{
+		SaveGameStateInternal();
+	}
+	BroadcastInventoryStateChanged();
+	return true;
+}
+
+bool UTunaSweeperGameInstance::TryGetSlotSellPrice(
+	const FTunaSweeperItemSlotReference& SlotReference,
+	int32& OutSalePrice)
+{
+	EnsureInventoryStateInitialized();
+	OutSalePrice = 0;
+
+	if (!SlotReference.IsValid() || !IsSellableItemSlotSource(SlotReference.Source))
+	{
+		return false;
+	}
+
+	FTunaSweeperItemInstance ItemInstance;
+	FTunaSweeperItemDefinition ItemDefinition;
+	UTunaSweeperItemDataSubsystem* ItemDataSubsystem = GetSubsystem<UTunaSweeperItemDataSubsystem>();
+	if (!ItemDataSubsystem ||
+		!TryGetSlotItemInstance(SlotReference, ItemInstance) ||
+		!ItemDataSubsystem->TryGetItemDefinition(ItemInstance.ItemId, ItemDefinition))
+	{
+		return false;
+	}
+
+	OutSalePrice = FMath::Max(0, (FMath::Max(0, ItemDefinition.ShopSellPrice) * FMath::Max(1, ItemInstance.Quantity)) / 2);
+	return true;
+}
+
+bool UTunaSweeperGameInstance::TrySellItemInSlot(
+	const FTunaSweeperItemSlotReference& SlotReference,
+	int32& OutSalePrice)
+{
+	EnsureInventoryStateInitialized();
+	OutSalePrice = 0;
+
+	if (!bHasActiveShop || !TryGetSlotSellPrice(SlotReference, OutSalePrice))
+	{
+		return false;
+	}
+
+	FTunaSweeperItemInstance RemovedItemInstance;
+	if (!RemoveItemFromSlot(SlotReference, RemovedItemInstance))
+	{
+		return false;
+	}
+
+	if (UTunaSweeperQuestSubsystem* QuestSubsystem = GetSubsystem<UTunaSweeperQuestSubsystem>())
+	{
+		if (OutSalePrice > 0)
+		{
+			QuestSubsystem->AddCoins(OutSalePrice, true);
+		}
+		else
+		{
+			SaveGameStateInternal();
+		}
+	}
+	else
+	{
+		SaveGameStateInternal();
+	}
+
+	ClearSelectedItemSelection();
+	ClearHoveredItemSlot(SlotReference);
+	return true;
+}
+
 FTunaSweeperWorldProgressSaveData UTunaSweeperGameInstance::GetOrCreateWorldProgressState(
 	FName ObjectId,
 	FName InfoId,
@@ -2834,6 +3053,26 @@ bool UTunaSweeperGameInstance::LoadGameState()
 	UsableQuickSlots = SaveGame->UsableQuickSlots;
 	StorageSlotCapacity = NormalizeStorageSlotCapacity(SaveGame->StorageSlotCapacity);
 	StorageSlots = SaveGame->StorageSlots;
+	ShopStockStatesByKey.Reset();
+	for (const FTunaSweeperShopStockSaveData& SavedShopStockState : SaveGame->ShopStockStates)
+	{
+		if (!TunaSweeperShop::IsValidShopSlotKey(
+			SavedShopStockState.ShopId,
+			SavedShopStockState.SlotIndex,
+			SavedShopStockState.ItemId))
+		{
+			continue;
+		}
+
+		FTunaSweeperShopStockSaveData LoadedShopStockState = SavedShopStockState;
+		LoadedShopStockState.StockQuantity = FMath::Max(0, LoadedShopStockState.StockQuantity);
+		ShopStockStatesByKey.Add(
+			TunaSweeperShop::MakeStockKey(
+				LoadedShopStockState.ShopId,
+				LoadedShopStockState.SlotIndex,
+				LoadedShopStockState.ItemId),
+			LoadedShopStockState);
+	}
 	RemoveInvalidSlotReferences(PlayerInventorySlots);
 	RemoveInvalidSlotReferences(EquipmentSlots);
 	RemoveInvalidSlotReferences(AuxiliaryBagSlots);
@@ -2879,6 +3118,8 @@ bool UTunaSweeperGameInstance::LoadGameState()
 	ActiveLootContainerDisplayName = FText::GetEmpty();
 	ActiveLootContainerCapacity = 0;
 	bHasActiveLootContainer = false;
+	ActiveShopId = INDEX_NONE;
+	bHasActiveShop = false;
 	SelectedItemSlotReference = FTunaSweeperItemSlotReference();
 	HoveredItemSlotReference = FTunaSweeperItemSlotReference();
 	SelectedWeaponAttachmentSlotTags.Reset();
@@ -2965,6 +3206,21 @@ bool UTunaSweeperGameInstance::SaveGameStateInternal(
 	SaveGame->StorageSlotCapacity = NormalizeStorageSlotCapacity(StorageSlotCapacity);
 	SaveGame->StorageSlots = StorageSlots;
 	EnsureSlotArraySize(SaveGame->StorageSlots, SaveGame->StorageSlotCapacity);
+	ShopStockStatesByKey.GenerateValueArray(SaveGame->ShopStockStates);
+	SaveGame->ShopStockStates.Sort([](
+		const FTunaSweeperShopStockSaveData& Left,
+		const FTunaSweeperShopStockSaveData& Right)
+	{
+		if (Left.ShopId != Right.ShopId)
+		{
+			return Left.ShopId < Right.ShopId;
+		}
+		if (Left.SlotIndex != Right.SlotIndex)
+		{
+			return Left.SlotIndex < Right.SlotIndex;
+		}
+		return Left.ItemId < Right.ItemId;
+	});
 
 	switch (UsableQuickSlotSaveMode)
 	{
@@ -3072,6 +3328,9 @@ void UTunaSweeperGameInstance::ResetRuntimeStateForSaveSlotSelection()
 	UsableQuickSlots.Reset();
 	StorageSlots.Reset();
 	StorageSlotCapacity = GetDefaultStorageSlotCapacity();
+	ShopStockStatesByKey.Reset();
+	ActiveShopId = INDEX_NONE;
+	bHasActiveShop = false;
 	ActiveLootContainerSlots.Reset();
 	ActiveLootContainerOwner.Reset();
 	SelectedWeaponAttachmentSlotTags.Reset();
@@ -3137,6 +3396,9 @@ void UTunaSweeperGameInstance::GenerateDefaultInventoryState()
 	StorageSlotCapacity = GetDefaultStorageSlotCapacity();
 	StorageSlots.Reset();
 	EnsureSlotArraySize(StorageSlots, StorageSlotCapacity);
+	ShopStockStatesByKey.Reset();
+	ActiveShopId = INDEX_NONE;
+	bHasActiveShop = false;
 	ActiveLootContainerSlots.Reset();
 	ActiveLootContainerOwner.Reset();
 	ActiveLootContainerDisplayName = FText::GetEmpty();
@@ -3547,6 +3809,52 @@ int32 UTunaSweeperGameInstance::GetMaxStorageSlotCapacity() const
 int32 UTunaSweeperGameInstance::NormalizeStorageSlotCapacity(int32 RequestedCapacity) const
 {
 	return FMath::Clamp(RequestedCapacity, GetDefaultStorageSlotCapacity(), GetMaxStorageSlotCapacity());
+}
+
+int32 UTunaSweeperGameInstance::GetShopStockQuantity(
+	int32 ShopId,
+	int32 SlotIndex,
+	const FTunaSweeperShopItemDefinition& ShopItemDefinition) const
+{
+	if (!TunaSweeperShop::IsValidShopSlotKey(ShopId, SlotIndex, ShopItemDefinition.ItemId))
+	{
+		return 0;
+	}
+
+	const FName StockKey = TunaSweeperShop::MakeStockKey(ShopId, SlotIndex, ShopItemDefinition.ItemId);
+	if (const FTunaSweeperShopStockSaveData* SavedStockState = ShopStockStatesByKey.Find(StockKey))
+	{
+		return FMath::Clamp(SavedStockState->StockQuantity, 0, FMath::Max(0, ShopItemDefinition.StockQuantity));
+	}
+
+	return FMath::Max(0, ShopItemDefinition.StockQuantity);
+}
+
+void UTunaSweeperGameInstance::SetShopStockQuantity(
+	int32 ShopId,
+	int32 SlotIndex,
+	const FTunaSweeperShopItemDefinition& ShopItemDefinition,
+	int32 StockQuantity)
+{
+	if (!TunaSweeperShop::IsValidShopSlotKey(ShopId, SlotIndex, ShopItemDefinition.ItemId))
+	{
+		return;
+	}
+
+	const FName StockKey = TunaSweeperShop::MakeStockKey(ShopId, SlotIndex, ShopItemDefinition.ItemId);
+	FTunaSweeperShopStockSaveData StockState;
+	StockState.ShopId = ShopId;
+	StockState.SlotIndex = SlotIndex;
+	StockState.ItemId = ShopItemDefinition.ItemId;
+	StockState.StockQuantity = FMath::Clamp(StockQuantity, 0, FMath::Max(0, ShopItemDefinition.StockQuantity));
+	ShopStockStatesByKey.Add(StockKey, StockState);
+}
+
+bool UTunaSweeperGameInstance::IsSellableItemSlotSource(ETunaSweeperItemSlotSource Source) const
+{
+	return Source == ETunaSweeperItemSlotSource::Inventory ||
+		Source == ETunaSweeperItemSlotSource::AuxiliaryBag ||
+		Source == ETunaSweeperItemSlotSource::UsableQuickSlot;
 }
 
 TArray<FTunaSweeperInventorySlot>* UTunaSweeperGameInstance::GetMutableSlotsForSource(ETunaSweeperItemSlotSource Source)

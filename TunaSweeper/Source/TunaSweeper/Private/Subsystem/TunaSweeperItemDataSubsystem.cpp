@@ -15,6 +15,7 @@ namespace TunaSweeperItemDataFiles
 	const TCHAR* ItemNameStringsCsvRelativePath = TEXT("Data/ItemNameStrings.csv");
 	const TCHAR* LootContainerTableJsonRelativePath = TEXT("Data/LootContainerTable.json");
 	const TCHAR* LootContainerContentsJsonRelativePath = TEXT("Data/LootContainerContents.json");
+	const TCHAR* ShopDefinitionsJsonRelativePath = TEXT("Data/ShopDefinitions.json");
 
 	FString GetCsvCell(const TArray<const TCHAR*>& Row, int32 CellIndex)
 	{
@@ -75,7 +76,13 @@ bool UTunaSweeperItemDataSubsystem::LoadItemData(bool bForceReload)
 	const bool bLoadedNameStrings = LoadItemNameStringsCsv();
 	const bool bLoadedLootContainerTable = LoadLootContainerTableJson();
 	const bool bLoadedLootContainerContents = LoadLootContainerContentsJson();
-	bItemDataLoaded = bLoadedItemTable && bLoadedNameStrings && bLoadedLootContainerTable && bLoadedLootContainerContents;
+	const bool bLoadedShopDefinitions = LoadShopDefinitionsJson();
+	bItemDataLoaded =
+		bLoadedItemTable &&
+		bLoadedNameStrings &&
+		bLoadedLootContainerTable &&
+		bLoadedLootContainerContents &&
+		bLoadedShopDefinitions;
 
 	if (!bItemDataLoaded)
 	{
@@ -326,8 +333,75 @@ bool UTunaSweeperItemDataSubsystem::GetAllLootContainerContents(TArray<FTunaSwee
 		[](const FTunaSweeperLootContainerContents& Left, const FTunaSweeperLootContainerContents& Right)
 		{
 			return Left.Id < Right.Id;
+	});
+	return true;
+}
+
+bool UTunaSweeperItemDataSubsystem::TryGetShopDefinition(int32 ShopId, FTunaSweeperShopDefinition& OutDefinition)
+{
+	if (!EnsureItemDataLoaded())
+	{
+		OutDefinition = FTunaSweeperShopDefinition();
+		return false;
+	}
+
+	if (const FTunaSweeperShopDefinition* FoundDefinition = ShopDefinitionsById.Find(ShopId))
+	{
+		OutDefinition = *FoundDefinition;
+		return true;
+	}
+
+	OutDefinition = FTunaSweeperShopDefinition();
+	return false;
+}
+
+bool UTunaSweeperItemDataSubsystem::TryGetShopItemDefinition(
+	int32 ShopId,
+	int32 SlotIndex,
+	FTunaSweeperShopItemDefinition& OutItemDefinition)
+{
+	FTunaSweeperShopDefinition ShopDefinition;
+	if (!TryGetShopDefinition(ShopId, ShopDefinition) || !ShopDefinition.Items.IsValidIndex(SlotIndex))
+	{
+		OutItemDefinition = FTunaSweeperShopItemDefinition();
+		return false;
+	}
+
+	OutItemDefinition = ShopDefinition.Items[SlotIndex];
+	return true;
+}
+
+bool UTunaSweeperItemDataSubsystem::GetAllShopDefinitions(TArray<FTunaSweeperShopDefinition>& OutDefinitions)
+{
+	if (!EnsureItemDataLoaded())
+	{
+		OutDefinitions.Reset();
+		return false;
+	}
+
+	ShopDefinitionsById.GenerateValueArray(OutDefinitions);
+	OutDefinitions.Sort(
+		[](const FTunaSweeperShopDefinition& Left, const FTunaSweeperShopDefinition& Right)
+		{
+			return Left.ShopId < Right.ShopId;
 		});
 	return true;
+}
+
+int32 UTunaSweeperItemDataSubsystem::ResolveShopItemBuyPrice(
+	const FTunaSweeperShopItemDefinition& ShopItemDefinition) const
+{
+	if (ShopItemDefinition.PriceOverride >= 0)
+	{
+		return ShopItemDefinition.PriceOverride;
+	}
+
+	if (const FTunaSweeperItemDefinition* ItemDefinition = ItemDefinitionsById.Find(ShopItemDefinition.ItemId))
+	{
+		return FMath::Max(0, ItemDefinition->ShopSellPrice);
+	}
+
+	return 0;
 }
 
 FString UTunaSweeperItemDataSubsystem::BuildItemIconObjectPath(const FTunaSweeperItemDefinition& ItemDefinition) const
@@ -810,12 +884,123 @@ bool UTunaSweeperItemDataSubsystem::LoadLootContainerContentsJson()
 	return bHasValidRows;
 }
 
+bool UTunaSweeperItemDataSubsystem::LoadShopDefinitionsJson()
+{
+	FString JsonContent;
+	const FString ShopDefinitionsJsonPath = GetShopDefinitionsJsonPath();
+	if (!FFileHelper::LoadFileToString(JsonContent, *ShopDefinitionsJsonPath))
+	{
+		UE_LOG(LogTunaSweeperItemData, Error, TEXT("Failed to read shop definitions JSON: %s"), *ShopDefinitionsJsonPath);
+		return false;
+	}
+
+	TArray<TSharedPtr<FJsonValue>> JsonRows;
+	const TSharedRef<TJsonReader<>> JsonReader = TJsonReaderFactory<>::Create(JsonContent);
+	if (!FJsonSerializer::Deserialize(JsonReader, JsonRows))
+	{
+		UE_LOG(LogTunaSweeperItemData, Error, TEXT("Failed to parse shop definitions JSON: %s"), *ShopDefinitionsJsonPath);
+		return false;
+	}
+
+	bool bHasValidRows = false;
+	for (int32 RowIndex = 0; RowIndex < JsonRows.Num(); ++RowIndex)
+	{
+		const TSharedPtr<FJsonObject>* JsonObject = nullptr;
+		if (!JsonRows[RowIndex].IsValid() || !JsonRows[RowIndex]->TryGetObject(JsonObject) || !JsonObject || !JsonObject->IsValid())
+		{
+			UE_LOG(LogTunaSweeperItemData, Warning, TEXT("Skipping shop definition row %d: row is not an object."), RowIndex);
+			continue;
+		}
+
+		double NumericShopId = 0.0;
+		FString NameStringKey;
+		const TArray<TSharedPtr<FJsonValue>>* ItemsArray = nullptr;
+		if (!(*JsonObject)->TryGetNumberField(TEXT("shop_id"), NumericShopId) ||
+			!(*JsonObject)->TryGetArrayField(TEXT("items"), ItemsArray) ||
+			!ItemsArray)
+		{
+			UE_LOG(LogTunaSweeperItemData, Warning, TEXT("Skipping shop definition row %d: required field is missing."), RowIndex);
+			continue;
+		}
+
+		FTunaSweeperShopDefinition Definition;
+		Definition.ShopId = static_cast<int32>(NumericShopId);
+		if ((*JsonObject)->TryGetStringField(TEXT("name_string_key"), NameStringKey))
+		{
+			Definition.NameStringKey = FName(*NameStringKey.TrimStartAndEnd());
+		}
+
+		for (const TSharedPtr<FJsonValue>& ItemValue : *ItemsArray)
+		{
+			const TSharedPtr<FJsonObject>* ItemObject = nullptr;
+			if (!ItemValue.IsValid() || !ItemValue->TryGetObject(ItemObject) || !ItemObject || !ItemObject->IsValid())
+			{
+				continue;
+			}
+
+			double NumericItemId = 0.0;
+			double NumericStockQuantity = 0.0;
+			double NumericPrice = INDEX_NONE;
+			const bool bHasStockQuantity =
+				(*ItemObject)->TryGetNumberField(TEXT("stock_quantity"), NumericStockQuantity) ||
+				(*ItemObject)->TryGetNumberField(TEXT("total_stock_quantity"), NumericStockQuantity) ||
+				(*ItemObject)->TryGetNumberField(TEXT("stock"), NumericStockQuantity) ||
+				(*ItemObject)->TryGetNumberField(TEXT("quantity"), NumericStockQuantity);
+			if (!(*ItemObject)->TryGetNumberField(TEXT("item_id"), NumericItemId) || !bHasStockQuantity)
+			{
+				continue;
+			}
+
+			const int32 ItemId = static_cast<int32>(NumericItemId);
+			if (!ItemDefinitionsById.Contains(ItemId))
+			{
+				UE_LOG(LogTunaSweeperItemData, Warning, TEXT("Skipping unknown item id %d in shop %d."), ItemId, Definition.ShopId);
+				continue;
+			}
+
+			FTunaSweeperShopItemDefinition ShopItem;
+			ShopItem.ItemId = ItemId;
+			ShopItem.StockQuantity = FMath::Max(0, static_cast<int32>(NumericStockQuantity));
+			if ((*ItemObject)->TryGetNumberField(TEXT("price"), NumericPrice) ||
+				(*ItemObject)->TryGetNumberField(TEXT("buy_price"), NumericPrice) ||
+				(*ItemObject)->TryGetNumberField(TEXT("shop_price"), NumericPrice))
+			{
+				ShopItem.PriceOverride = FMath::Max(0, static_cast<int32>(NumericPrice));
+			}
+
+			Definition.Items.Add(ShopItem);
+		}
+
+		if (Definition.ShopId == INDEX_NONE || Definition.ShopId <= 0 || Definition.Items.Num() <= 0)
+		{
+			UE_LOG(LogTunaSweeperItemData, Warning, TEXT("Skipping shop definition row %d: field value is invalid."), RowIndex);
+			continue;
+		}
+
+		if (ShopDefinitionsById.Contains(Definition.ShopId))
+		{
+			UE_LOG(LogTunaSweeperItemData, Warning, TEXT("Duplicate shop id %d found. The later row will replace the earlier row."), Definition.ShopId);
+		}
+
+		ShopDefinitionsById.Add(Definition.ShopId, Definition);
+		bHasValidRows = true;
+	}
+
+	if (!bHasValidRows)
+	{
+		UE_LOG(LogTunaSweeperItemData, Error, TEXT("Shop definitions JSON has no valid rows: %s"), *ShopDefinitionsJsonPath);
+	}
+
+	return bHasValidRows;
+}
+
 void UTunaSweeperItemDataSubsystem::ResetLoadedItemData()
 {
 	ItemDefinitionsById.Reset();
 	ItemNameStringsByKey.Reset();
 	LootContainerDefinitionsById.Reset();
 	LootContainerContentsById.Reset();
+	ShopDefinitionsById.Reset();
 	bItemDataLoaded = false;
 }
 
@@ -837,4 +1022,9 @@ FString UTunaSweeperItemDataSubsystem::GetLootContainerTableJsonPath() const
 FString UTunaSweeperItemDataSubsystem::GetLootContainerContentsJsonPath() const
 {
 	return FPaths::Combine(FPaths::ProjectContentDir(), TunaSweeperItemDataFiles::LootContainerContentsJsonRelativePath);
+}
+
+FString UTunaSweeperItemDataSubsystem::GetShopDefinitionsJsonPath() const
+{
+	return FPaths::Combine(FPaths::ProjectContentDir(), TunaSweeperItemDataFiles::ShopDefinitionsJsonRelativePath);
 }

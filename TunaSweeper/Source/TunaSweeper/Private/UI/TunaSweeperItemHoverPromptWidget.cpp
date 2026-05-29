@@ -308,7 +308,7 @@ void UTunaSweeperItemHoverPromptWidget::BuildNativeWidgetTree()
 
 	UTextBlock* RawDropKeyText = nullptr;
 	UTextBlock* RawDropActionText = nullptr;
-	TunaSweeperItemHoverPrompt::AddActionRow(
+	DropActionRow = TunaSweeperItemHoverPrompt::AddActionRow(
 		WidgetTree,
 		ActionHintsStack,
 		TEXT("Drop"),
@@ -389,6 +389,10 @@ void UTunaSweeperItemHoverPromptWidget::CacheNamedWidgets()
 	{
 		DropActionText = Cast<UTextBlock>(WidgetTree->FindWidget(FName(TEXT("DropActionText"))));
 	}
+	if (!DropActionRow)
+	{
+		DropActionRow = WidgetTree->FindWidget(FName(TEXT("DropActionRow")));
+	}
 	if (!UseActionRow)
 	{
 		UseActionRow = WidgetTree->FindWidget(FName(TEXT("UseActionRow")));
@@ -436,10 +440,16 @@ void UTunaSweeperItemHoverPromptWidget::ApplyTileData()
 	}
 	if (TakeActionText)
 	{
-		TakeActionText->SetText(TunaSweeperItemHoverPrompt::ResolveUiText(
-			GetGameInstance<UTunaSweeperGameInstance>(),
-			TEXT("ui.item_hover.take"),
-			TEXT("\uC90D\uAE30/\uBC30\uCE58")));
+		const bool bShopItem = CachedTileData.Source == ETunaSweeperItemSlotSource::Shop;
+		TakeActionText->SetText(bShopItem
+			? TunaSweeperItemHoverPrompt::ResolveUiText(
+				GetGameInstance<UTunaSweeperGameInstance>(),
+				TEXT("ui.item_hover.buy"),
+				TEXT("F\ub85c \uad6c\ub9e4"))
+			: TunaSweeperItemHoverPrompt::ResolveUiText(
+				GetGameInstance<UTunaSweeperGameInstance>(),
+				TEXT("ui.item_hover.take"),
+				TEXT("\uC90D\uAE30/\uBC30\uCE58")));
 	}
 	if (DropKeyText)
 	{
@@ -452,9 +462,19 @@ void UTunaSweeperItemHoverPromptWidget::ApplyTileData()
 			TEXT("ui.item_hover.drop"),
 			TEXT("\uBC84\uB9AC\uAE30")));
 	}
+	if (DropActionRow)
+	{
+		DropActionRow->SetVisibility(
+			CachedTileData.Source == ETunaSweeperItemSlotSource::Shop
+				? ESlateVisibility::Collapsed
+				: ESlateVisibility::HitTestInvisible);
+	}
 	if (UseActionRow)
 	{
-		UseActionRow->SetVisibility(CanUseCachedItem() ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
+		UseActionRow->SetVisibility(
+			CachedTileData.Source != ETunaSweeperItemSlotSource::Shop && CanUseCachedItem()
+				? ESlateVisibility::HitTestInvisible
+				: ESlateVisibility::Collapsed);
 	}
 	if (UseKeyText)
 	{
@@ -553,7 +573,9 @@ FText UTunaSweeperItemHoverPromptWidget::BuildWeightText() const
 FText UTunaSweeperItemHoverPromptWidget::BuildPriceText() const
 {
 	const int32 Price = CachedTileData.bHasItemDefinition
-		? FMath::Max(0, CachedTileData.ItemDefinition.ShopSellPrice)
+		? (CachedTileData.Source == ETunaSweeperItemSlotSource::Shop
+			? FMath::Max(0, CachedTileData.ShopPrice)
+			: FMath::Max(0, CachedTileData.ItemDefinition.ShopSellPrice))
 		: 0;
 	return FText::Format(
 		TunaSweeperItemHoverPrompt::ResolveUiText(

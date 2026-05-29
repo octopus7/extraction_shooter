@@ -46,6 +46,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
 	void OpenStoragePanel();
 
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
+	void OpenShopPanel(int32 ShopId);
+
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Quest")
 	void OpenQuestPanel(FName QuestId);
 

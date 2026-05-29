@@ -185,6 +185,60 @@ struct TUNASWEEPER_API FTunaSweeperLootContainerInstance
 	TArray<FTunaSweeperItemStack> Items;
 };
 
+USTRUCT(BlueprintType)
+struct TUNASWEEPER_API FTunaSweeperShopItemDefinition
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Shop")
+	int32 ItemId = INDEX_NONE;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Shop", meta = (ClampMin = "0", UIMin = "0"))
+	int32 StockQuantity = 0;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Shop")
+	int32 PriceOverride = INDEX_NONE;
+};
+
+USTRUCT(BlueprintType)
+struct TUNASWEEPER_API FTunaSweeperShopDefinition
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Shop")
+	int32 ShopId = INDEX_NONE;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Shop")
+	FName NameStringKey;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Shop")
+	TArray<FTunaSweeperShopItemDefinition> Items;
+};
+
+USTRUCT(BlueprintType)
+struct TUNASWEEPER_API FTunaSweeperShopItemView
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Shop")
+	int32 ShopId = INDEX_NONE;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Shop")
+	int32 SlotIndex = INDEX_NONE;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Shop")
+	int32 ItemId = INDEX_NONE;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Shop", meta = (ClampMin = "0", UIMin = "0"))
+	int32 StockQuantity = 0;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Shop", meta = (ClampMin = "0", UIMin = "0"))
+	int32 TotalStockQuantity = 0;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Shop", meta = (ClampMin = "0", UIMin = "0"))
+	int32 Price = 0;
+};
+
 UCLASS()
 class TUNASWEEPER_API UTunaSweeperItemDataSubsystem : public UGameInstanceSubsystem
 {
@@ -240,6 +294,21 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Item Data")
 	bool GetAllLootContainerContents(TArray<FTunaSweeperLootContainerContents>& OutContents);
 
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Shop")
+	bool TryGetShopDefinition(int32 ShopId, FTunaSweeperShopDefinition& OutDefinition);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Shop")
+	bool TryGetShopItemDefinition(
+		int32 ShopId,
+		int32 SlotIndex,
+		FTunaSweeperShopItemDefinition& OutItemDefinition);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Shop")
+	bool GetAllShopDefinitions(TArray<FTunaSweeperShopDefinition>& OutDefinitions);
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Shop")
+	int32 ResolveShopItemBuyPrice(const FTunaSweeperShopItemDefinition& ShopItemDefinition) const;
+
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Item Data")
 	FString BuildItemIconObjectPath(const FTunaSweeperItemDefinition& ItemDefinition) const;
 
@@ -249,11 +318,13 @@ private:
 	bool LoadItemNameStringsCsv();
 	bool LoadLootContainerTableJson();
 	bool LoadLootContainerContentsJson();
+	bool LoadShopDefinitionsJson();
 	void ResetLoadedItemData();
 	FString GetItemTableJsonPath() const;
 	FString GetItemNameStringsCsvPath() const;
 	FString GetLootContainerTableJsonPath() const;
 	FString GetLootContainerContentsJsonPath() const;
+	FString GetShopDefinitionsJsonPath() const;
 
 	UPROPERTY(Transient)
 	TMap<int32, FTunaSweeperItemDefinition> ItemDefinitionsById;
@@ -266,6 +337,9 @@ private:
 
 	UPROPERTY(Transient)
 	TMap<int32, FTunaSweeperLootContainerContents> LootContainerContentsById;
+
+	UPROPERTY(Transient)
+	TMap<int32, FTunaSweeperShopDefinition> ShopDefinitionsById;
 
 	bool bItemDataLoaded = false;
 };

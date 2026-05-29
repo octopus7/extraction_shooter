@@ -37,19 +37,30 @@ void UTunaSweeperHudExternalPanelWidget::SetStorageContainer()
 	}
 }
 
+void UTunaSweeperHudExternalPanelWidget::SetShopContainer(int32 ShopId)
+{
+	SetExternalPanelMode(ETunaSweeperHudExternalPanelMode::Shop);
+
+	if (LootContainerWidget)
+	{
+		LootContainerWidget->SetShopView(ShopId);
+	}
+}
+
 void UTunaSweeperHudExternalPanelWidget::ApplyPanelMode()
 {
 	if (LootingBoxPanel)
 	{
 		const bool bShowContainerPanel =
 			PanelMode == ETunaSweeperHudExternalPanelMode::LootingBox ||
-			PanelMode == ETunaSweeperHudExternalPanelMode::Storage;
+			PanelMode == ETunaSweeperHudExternalPanelMode::Storage ||
+			PanelMode == ETunaSweeperHudExternalPanelMode::Shop;
 		LootingBoxPanel->SetVisibility(bShowContainerPanel ? ESlateVisibility::SelfHitTestInvisible : ESlateVisibility::Collapsed);
 	}
 
 	if (ShopPanel)
 	{
-		ShopPanel->SetVisibility(PanelMode == ETunaSweeperHudExternalPanelMode::Shop ? ESlateVisibility::SelfHitTestInvisible : ESlateVisibility::Collapsed);
+		ShopPanel->SetVisibility(ESlateVisibility::Collapsed);
 	}
 
 	if (StoragePanel)

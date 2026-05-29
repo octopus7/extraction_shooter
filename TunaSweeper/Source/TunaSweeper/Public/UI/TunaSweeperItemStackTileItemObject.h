@@ -41,6 +41,18 @@ struct TUNASWEEPER_API FTunaSweeperItemStackTileData
 	FTunaSweeperItemSlotReference SlotReference;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Tile")
+	int32 ShopId = INDEX_NONE;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Tile")
+	int32 ShopStockQuantity = 0;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Tile")
+	int32 ShopTotalStockQuantity = 0;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Tile")
+	int32 ShopPrice = 0;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Tile")
 	bool bIsEmpty = true;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Tile")

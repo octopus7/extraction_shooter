@@ -776,6 +776,40 @@ void UTunaSweeperQuestSubsystem::NotifyInteractionCompleted(FName InteractionEve
 		1);
 }
 
+void UTunaSweeperQuestSubsystem::AddCoins(int32 Amount, bool bSaveImmediately)
+{
+	EnsureSaveStateLoaded();
+
+	const int32 PositiveAmount = FMath::Max(0, Amount);
+	if (PositiveAmount <= 0)
+	{
+		return;
+	}
+
+	CoinBalance += PositiveAmount;
+	BroadcastQuestProgressChanged(bSaveImmediately);
+}
+
+bool UTunaSweeperQuestSubsystem::TrySpendCoins(int32 Amount, bool bSaveImmediately)
+{
+	EnsureSaveStateLoaded();
+
+	const int32 PositiveAmount = FMath::Max(0, Amount);
+	if (PositiveAmount <= 0)
+	{
+		return true;
+	}
+
+	if (CoinBalance < PositiveAmount)
+	{
+		return false;
+	}
+
+	CoinBalance -= PositiveAmount;
+	BroadcastQuestProgressChanged(bSaveImmediately);
+	return true;
+}
+
 void UTunaSweeperQuestSubsystem::ExportQuestProgressForSave(
 	TArray<FTunaSweeperQuestProgressSaveData>& OutQuestProgress,
 	FName& OutTrackedQuestId,

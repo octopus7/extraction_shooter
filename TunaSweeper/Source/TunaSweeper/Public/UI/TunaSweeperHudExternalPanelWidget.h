@@ -27,6 +27,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
 	void SetStorageContainer();
 
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
+	void SetShopContainer(int32 ShopId);
+
 protected:
 	virtual void NativeConstruct() override;
 
