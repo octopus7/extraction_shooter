@@ -88,6 +88,7 @@ protected:
 
 private:
 	void EnsureCurrencyDisplayWidget();
+	void AttachCurrencyDisplayAboveInventoryPanel();
 	void ApplyHudState();
 
 	bool TryResolveDropSlotFromCursor(

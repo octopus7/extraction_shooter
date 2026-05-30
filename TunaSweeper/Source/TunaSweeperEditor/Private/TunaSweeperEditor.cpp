@@ -308,6 +308,10 @@ namespace TunaSweeperEditorSetup
 	constexpr float HudTopModeTabPanelWidth =
 		4.0f * HudTopModeTabButtonWidth + 3.0f * HudTopModeTabGap + 2.0f * HudTopModeTabPaddingX;
 	constexpr float HudTopModeTabPanelHeight = HudTopModeTabButtonHeight + 2.0f * HudTopModeTabPaddingY;
+	constexpr float HudUtilityPanelLeftInset = 34.0f;
+	constexpr float HudUtilityPanelRightInset = 34.0f;
+	constexpr float HudUtilityPanelTopOffset = 96.0f;
+	constexpr float HudUtilityPanelHeight = 620.0f;
 	constexpr int32 InventoryTileColumnCount = 5;
 	constexpr int32 EquipmentReserveColumnCount = 4;
 	constexpr float InventoryTileWidth = 96.0f;
@@ -9458,9 +9462,13 @@ namespace TunaSweeperEditorSetup
 		UCanvasPanelSlot* CenterSlot = RootCanvas->AddChildToCanvas(CenterContentPanel);
 		if (CenterSlot)
 		{
-			CenterSlot->SetAnchors(FAnchors(0.0f, 0.5f, 1.0f, 0.5f));
-			CenterSlot->SetAlignment(FVector2D(0.0f, 0.5f));
-			CenterSlot->SetOffsets(FMargin(34.0f, -20.0f, 34.0f, 620.0f));
+			CenterSlot->SetAnchors(FAnchors(0.0f, 0.0f, 1.0f, 0.0f));
+			CenterSlot->SetAlignment(FVector2D(0.0f, 0.0f));
+			CenterSlot->SetOffsets(FMargin(
+				HudUtilityPanelLeftInset,
+				HudUtilityPanelTopOffset,
+				HudUtilityPanelRightInset,
+				HudUtilityPanelHeight));
 		}
 
 		UCanvasPanelSlot* InventorySlot = CenterContentPanel->AddChildToCanvas(InventoryAreaWidget);

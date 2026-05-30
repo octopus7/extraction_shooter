@@ -5,6 +5,8 @@
 #include "Components/Button.h"
 #include "Components/HorizontalBox.h"
 #include "Components/HorizontalBoxSlot.h"
+#include "Components/Overlay.h"
+#include "Components/OverlaySlot.h"
 #include "Components/ProgressBar.h"
 #include "Components/SizeBox.h"
 #include "Components/TextBlock.h"
@@ -37,6 +39,8 @@ namespace TunaSweeperInventoryArea
 	constexpr float EquipmentReserveHeight = 2.0f * EquipmentReserveEntryHeight;
 	constexpr float AuxiliaryBagTileWidth = 96.0f;
 	constexpr float AuxiliaryBagTileHeight = 96.0f;
+	constexpr float CurrencyExteriorOffset = 26.0f;
+	constexpr float CurrencyExteriorRightInset = 8.0f;
 
 	FText MakeRoundedFloatText(float Value)
 	{
@@ -434,6 +438,11 @@ void UTunaSweeperHudInventoryAreaWidget::SetInventoryVisible(bool bVisible)
 	{
 		InventoryWeightPanel->SetVisibility(bVisible ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
 	}
+
+	if (CurrencyDisplayWidget)
+	{
+		CurrencyDisplayWidget->SetVisibility(bVisible ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
+	}
 }
 
 void UTunaSweeperHudInventoryAreaWidget::SetHudState(const FTunaSweeperPlayerHudState& InHudState)
@@ -445,33 +454,108 @@ void UTunaSweeperHudInventoryAreaWidget::SetHudState(const FTunaSweeperPlayerHud
 
 void UTunaSweeperHudInventoryAreaWidget::EnsureCurrencyDisplayWidget()
 {
-	if (CurrencyDisplayWidget || !WidgetTree)
+	if (!WidgetTree)
 	{
 		return;
 	}
 
-	UHorizontalBox* InventoryHeaderRow = Cast<UHorizontalBox>(WidgetTree->FindWidget(FName(TEXT("InventoryHeaderRow"))));
-	if (!InventoryHeaderRow)
-	{
-		return;
-	}
-
-	CurrencyDisplayWidget = WidgetTree->ConstructWidget<UTunaSweeperCurrencyDisplayWidget>(
-		UTunaSweeperCurrencyDisplayWidget::StaticClass(),
-		TEXT("CurrencyDisplayWidget"));
 	if (!CurrencyDisplayWidget)
 	{
+		CurrencyDisplayWidget = Cast<UTunaSweeperCurrencyDisplayWidget>(
+			WidgetTree->FindWidget(FName(TEXT("CurrencyDisplayWidget"))));
+	}
+
+	if (!CurrencyDisplayWidget)
+	{
+		CurrencyDisplayWidget = WidgetTree->ConstructWidget<UTunaSweeperCurrencyDisplayWidget>(
+			UTunaSweeperCurrencyDisplayWidget::StaticClass(),
+			TEXT("CurrencyDisplayWidgetRuntime"));
+	}
+
+	if (CurrencyDisplayWidget)
+	{
+		CurrencyDisplayWidget->EnsureCurrencyContent();
+		CurrencyDisplayWidget->RefreshCurrencyBalance();
+	}
+
+	AttachCurrencyDisplayAboveInventoryPanel();
+}
+
+void UTunaSweeperHudInventoryAreaWidget::AttachCurrencyDisplayAboveInventoryPanel()
+{
+	if (!CurrencyDisplayWidget || !InventoryPanel || !WidgetTree)
+	{
 		return;
 	}
 
-	UHorizontalBoxSlot* CurrencySlot = InventoryHeaderRow->AddChildToHorizontalBox(CurrencyDisplayWidget);
+	USizeBox* MainInventorySizeBox = Cast<USizeBox>(WidgetTree->FindWidget(FName(TEXT("MainInventorySizeBox"))));
+	if (!MainInventorySizeBox)
+	{
+		return;
+	}
+
+	UOverlay* InventoryPanelOverlay = Cast<UOverlay>(WidgetTree->FindWidget(FName(TEXT("InventoryPanelOverlay"))));
+	if (!InventoryPanelOverlay)
+	{
+		InventoryPanelOverlay = WidgetTree->ConstructWidget<UOverlay>(
+			UOverlay::StaticClass(),
+			TEXT("InventoryPanelOverlay"));
+	}
+
+	UHorizontalBox* InventoryCurrencyExteriorRow = Cast<UHorizontalBox>(
+		WidgetTree->FindWidget(FName(TEXT("InventoryCurrencyExteriorRow"))));
+	if (!InventoryCurrencyExteriorRow)
+	{
+		InventoryCurrencyExteriorRow = WidgetTree->ConstructWidget<UHorizontalBox>(
+			UHorizontalBox::StaticClass(),
+			TEXT("InventoryCurrencyExteriorRow"));
+	}
+
+	if (!InventoryPanelOverlay || !InventoryCurrencyExteriorRow)
+	{
+		return;
+	}
+
+	if (MainInventorySizeBox->GetContent() != InventoryPanelOverlay)
+	{
+		InventoryPanel->RemoveFromParent();
+		MainInventorySizeBox->SetContent(InventoryPanelOverlay);
+	}
+
+	InventoryPanelOverlay->ClearChildren();
+	InventoryPanel->RemoveFromParent();
+	InventoryCurrencyExteriorRow->RemoveFromParent();
+	CurrencyDisplayWidget->RemoveFromParent();
+
+	UOverlaySlot* PanelSlot = InventoryPanelOverlay->AddChildToOverlay(InventoryPanel);
+	if (PanelSlot)
+	{
+		PanelSlot->SetHorizontalAlignment(HAlign_Fill);
+		PanelSlot->SetVerticalAlignment(VAlign_Top);
+	}
+
+	UOverlaySlot* CurrencyRowSlot = InventoryPanelOverlay->AddChildToOverlay(InventoryCurrencyExteriorRow);
+	if (CurrencyRowSlot)
+	{
+		CurrencyRowSlot->SetHorizontalAlignment(HAlign_Right);
+		CurrencyRowSlot->SetVerticalAlignment(VAlign_Top);
+		CurrencyRowSlot->SetPadding(FMargin(0.0f, 0.0f, TunaSweeperInventoryArea::CurrencyExteriorRightInset, 0.0f));
+	}
+	InventoryCurrencyExteriorRow->SetRenderTranslation(
+		FVector2D(0.0f, -TunaSweeperInventoryArea::CurrencyExteriorOffset));
+
+	InventoryCurrencyExteriorRow->ClearChildren();
+	UHorizontalBoxSlot* CurrencySlot = InventoryCurrencyExteriorRow->AddChildToHorizontalBox(CurrencyDisplayWidget);
 	if (CurrencySlot)
 	{
 		CurrencySlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
 		CurrencySlot->SetHorizontalAlignment(HAlign_Right);
 		CurrencySlot->SetVerticalAlignment(VAlign_Center);
-		CurrencySlot->SetPadding(FMargin(12.0f, 0.0f, 0.0f, 0.0f));
 	}
+
+	CurrencyDisplayWidget->SetRenderTranslation(FVector2D::ZeroVector);
+	CurrencyDisplayWidget->SetVisibility(ESlateVisibility::HitTestInvisible);
+	CurrencyDisplayWidget->RefreshCurrencyBalance();
 }
 
 void UTunaSweeperHudInventoryAreaWidget::ApplyHudState()

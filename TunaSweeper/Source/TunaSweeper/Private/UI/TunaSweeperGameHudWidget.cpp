@@ -66,6 +66,10 @@ namespace
 	constexpr float ShopSellPanelTransitionOffsetY = -24.0f;
 	constexpr float ShopSellPanelWidth = 330.0f;
 	constexpr float ShopSellPanelHeight = 240.0f;
+	constexpr float UtilityPanelLeftInset = 34.0f;
+	constexpr float UtilityPanelRightInset = 34.0f;
+	constexpr float UtilityPanelTopOffset = 96.0f;
+	constexpr float UtilityPanelHeight = 620.0f;
 	constexpr int32 MaxActiveDamageNumberPopups = 64;
 	constexpr float DamageNumberGrowDurationAlpha = 0.14f / 3.0f;
 	constexpr float DamageNumberSettleDurationAlpha = 0.28f / 2.0f;
@@ -280,6 +284,7 @@ void UTunaSweeperGameHudWidget::NativeConstruct()
 	EnsureMemoPanelWidget();
 	EnsureQuestPanelWidgets();
 	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
+	NormalizeCenterContentPanelLayout();
 	CacheAmmoReloadWidgets();
 	RefreshLocalizedTexts();
 	SetHudMode(ETunaSweeperHudMode::None);
@@ -1570,6 +1575,22 @@ void UTunaSweeperGameHudWidget::ApplyHudModeVisibility()
 
 	RefreshExtractionProgressWidget();
 	RefreshCursorDistanceWidget();
+}
+
+void UTunaSweeperGameHudWidget::NormalizeCenterContentPanelLayout()
+{
+	if (UCanvasPanelSlot* CenterSlot = CenterContentPanel
+		? Cast<UCanvasPanelSlot>(CenterContentPanel->Slot)
+		: nullptr)
+	{
+		CenterSlot->SetAnchors(FAnchors(0.0f, 0.0f, 1.0f, 0.0f));
+		CenterSlot->SetAlignment(FVector2D(0.0f, 0.0f));
+		CenterSlot->SetOffsets(FMargin(
+			UtilityPanelLeftInset,
+			UtilityPanelTopOffset,
+			UtilityPanelRightInset,
+			UtilityPanelHeight));
+	}
 }
 
 void UTunaSweeperGameHudWidget::CloseLootContainerPanelIfOpen()

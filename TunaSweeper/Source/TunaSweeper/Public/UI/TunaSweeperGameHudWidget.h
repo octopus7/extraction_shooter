@@ -313,6 +313,7 @@ private:
 	void RefreshQuickSlotsFromGameState();
 	void RefreshInventoryQuickSlotPanel();
 	void RefreshLocalizedTexts();
+	void NormalizeCenterContentPanelLayout();
 	void RefreshReloadWidgets();
 	void RefreshDialogueHudVisibility();
 	void RefreshExtractionProgressWidget();

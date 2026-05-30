@@ -52,7 +52,17 @@ protected:
 
 private:
 	void RefreshTabVisuals();
-	void SetTabVisual(ETunaSweeperHudMode Mode, UButton* Button, UImage* Icon);
+	void CacheNamedWidgets();
+	UImage* EnsureTabIcon(
+		ETunaSweeperHudMode Mode,
+		UButton* Button,
+		TObjectPtr<UImage>& Icon,
+		const TCHAR* IconWidgetName);
+	void SetTabVisual(
+		ETunaSweeperHudMode Mode,
+		UButton* Button,
+		TObjectPtr<UImage>& Icon,
+		const TCHAR* IconWidgetName);
 
 	UFUNCTION()
 	void HandleInventoryModeClicked();

@@ -1053,8 +1053,6 @@ void UTunaSweeperShopContainerWidget::NativeDestruct()
 
 void UTunaSweeperShopContainerWidget::RefreshHeaderControls()
 {
-	EnsureShopCurrencyDisplayWidget();
-
 	if (ShopRefreshStockButton)
 	{
 		ShopRefreshStockButton->SetVisibility(ESlateVisibility::Visible);
@@ -1069,8 +1067,7 @@ void UTunaSweeperShopContainerWidget::RefreshHeaderControls()
 	}
 	if (ShopCurrencyDisplayWidget)
 	{
-		ShopCurrencyDisplayWidget->SetVisibility(ESlateVisibility::HitTestInvisible);
-		ShopCurrencyDisplayWidget->RefreshCurrencyBalance();
+		ShopCurrencyDisplayWidget->SetVisibility(ESlateVisibility::Collapsed);
 	}
 }
 

@@ -25,6 +25,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Currency")
 	int32 GetCurrencyAmount() const { return CurrencyAmount; }
 
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Currency")
+	void EnsureCurrencyContent();
+
 	static UTexture2D* LoadCurrencyCoinIconTexture();
 
 protected:

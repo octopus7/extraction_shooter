@@ -17,6 +17,15 @@ namespace TunaSweeperCurrencyDisplay
 	const TCHAR* CurrencyCoinIconPath =
 		TEXT("/Game/UI/Icons/T_UIIcon_CurrencyCoin_White.T_UIIcon_CurrencyCoin_White");
 	constexpr float CoinIconSize = 18.0f;
+
+	template <typename WidgetClass>
+	FName MakeWidgetName(UWidgetTree* WidgetTree, const TCHAR* DesiredName)
+	{
+		const FName BaseName(DesiredName);
+		return WidgetTree && WidgetTree->FindWidget(BaseName)
+			? MakeUniqueObjectName(WidgetTree, WidgetClass::StaticClass(), BaseName)
+			: BaseName;
+	}
 }
 
 UTexture2D* UTunaSweeperCurrencyDisplayWidget::LoadCurrencyCoinIconTexture()
@@ -47,17 +56,25 @@ void UTunaSweeperCurrencyDisplayWidget::SetCurrencyAmount(int32 InCurrencyAmount
 	ApplyCurrencyPresentation();
 }
 
-TSharedRef<SWidget> UTunaSweeperCurrencyDisplayWidget::RebuildWidget()
+void UTunaSweeperCurrencyDisplayWidget::EnsureCurrencyContent()
 {
 	if (!WidgetTree)
 	{
 		WidgetTree = NewObject<UWidgetTree>(this, TEXT("WidgetTree"), RF_Transient);
 	}
 
-	if (WidgetTree && !WidgetTree->RootWidget)
+	CacheNamedWidgets();
+	if (!WidgetTree->RootWidget || !CoinImage || !BalanceText)
 	{
 		BuildNativeWidgetTree();
 	}
+
+	ApplyCurrencyPresentation();
+}
+
+TSharedRef<SWidget> UTunaSweeperCurrencyDisplayWidget::RebuildWidget()
+{
+	EnsureCurrencyContent();
 
 	TSharedRef<SWidget> RebuiltWidget = Super::RebuildWidget();
 	CacheNamedWidgets();
@@ -69,7 +86,7 @@ void UTunaSweeperCurrencyDisplayWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
-	CacheNamedWidgets();
+	EnsureCurrencyContent();
 
 	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
 	{
@@ -101,8 +118,7 @@ void UTunaSweeperCurrencyDisplayWidget::NativeDestruct()
 void UTunaSweeperCurrencyDisplayWidget::NativePreConstruct()
 {
 	Super::NativePreConstruct();
-	CacheNamedWidgets();
-	ApplyCurrencyPresentation();
+	EnsureCurrencyContent();
 }
 
 void UTunaSweeperCurrencyDisplayWidget::BuildNativeWidgetTree()
@@ -112,10 +128,18 @@ void UTunaSweeperCurrencyDisplayWidget::BuildNativeWidgetTree()
 		return;
 	}
 
-	RootBox = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("RootBox"));
-	USizeBox* CoinSizeBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("CoinSizeBox"));
-	CoinImage = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("CoinImage"));
-	BalanceText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("BalanceText"));
+	RootBox = WidgetTree->ConstructWidget<UHorizontalBox>(
+		UHorizontalBox::StaticClass(),
+		TunaSweeperCurrencyDisplay::MakeWidgetName<UHorizontalBox>(WidgetTree, TEXT("RootBox")));
+	USizeBox* CoinSizeBox = WidgetTree->ConstructWidget<USizeBox>(
+		USizeBox::StaticClass(),
+		TunaSweeperCurrencyDisplay::MakeWidgetName<USizeBox>(WidgetTree, TEXT("CoinSizeBox")));
+	CoinImage = WidgetTree->ConstructWidget<UImage>(
+		UImage::StaticClass(),
+		TunaSweeperCurrencyDisplay::MakeWidgetName<UImage>(WidgetTree, TEXT("CoinImage")));
+	BalanceText = WidgetTree->ConstructWidget<UTextBlock>(
+		UTextBlock::StaticClass(),
+		TunaSweeperCurrencyDisplay::MakeWidgetName<UTextBlock>(WidgetTree, TEXT("BalanceText")));
 	if (!RootBox || !CoinSizeBox || !CoinImage || !BalanceText)
 	{
 		return;
