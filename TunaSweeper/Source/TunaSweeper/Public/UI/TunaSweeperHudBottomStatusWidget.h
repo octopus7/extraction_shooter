@@ -8,6 +8,7 @@
 class UProgressBar;
 class UTextBlock;
 class UWidget;
+class UTunaSweeperHudStatusRingWidget;
 
 UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API UTunaSweeperHudBottomStatusWidget : public UUserWidget
@@ -48,6 +49,15 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
 	TObjectPtr<UProgressBar> HydrationGauge;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
+	TObjectPtr<UTunaSweeperHudStatusRingWidget> HealthRing;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
+	TObjectPtr<UTunaSweeperHudStatusRingWidget> HungerRing;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
+	TObjectPtr<UTunaSweeperHudStatusRingWidget> HydrationRing;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
 	TObjectPtr<UProgressBar> CarryWeightGauge;

@@ -117,6 +117,7 @@
 #include "UI/TunaSweeperHudInventoryAreaWidget.h"
 #include "UI/TunaSweeperHudItemInfoPanelWidget.h"
 #include "UI/TunaSweeperHudQuickSlotBarWidget.h"
+#include "UI/TunaSweeperHudStatusRingWidget.h"
 #include "UI/TunaSweeperHudTopReserveWidget.h"
 #include "UI/TunaSweeperUIFont.h"
 #include "UI/TunaSweeperItemThumbnailSlotWidget.h"
@@ -146,7 +147,7 @@ namespace TunaSweeperEditorSetup
 	const FString InteractionInputTaskId = TEXT("2026-05-29_SetInteractInputAndFocusWheelV1");
 	const FString InteractionMarkerAlignmentTaskId = TEXT("2026-05-25_RebuildInteractionMarkerRequirementPreviewV1");
 	const FString PickupItemAndSpawnerTaskId = TEXT("2026-05-11_CreatePickupItemAndSpawnerAssetsV3");
-	const FString CommonGameHudTaskId = TEXT("2026-05-28_AddMeleeQuickSlotHudV1");
+	const FString CommonGameHudTaskId = TEXT("2026-05-30_CircularVitalsHudV1");
 	const FString WorkbenchPanelWidgetTaskId = TEXT("2026-05-29_CreateWorkbenchPanelWidgetV6");
 	const FString ShopRefreshStockButtonTaskId = TEXT("2026-05-29_AddShopRefreshStockButtonV1");
 	const FString ItemThumbnailSlotLayoutTaskId = TEXT("2026-05-30_RebuildItemThumbnailSlotLayoutV1");
@@ -256,6 +257,9 @@ namespace TunaSweeperEditorSetup
 	const FString HudModeQuestIconAssetName = TEXT("T_UI_Mode_Quest");
 	const FString HudModeMapIconAssetName = TEXT("T_UI_Mode_Map");
 	const FString HudModeMemoIconAssetName = TEXT("T_UI_Mode_Memo");
+	const FString HudStatusHeartIconAssetName = TEXT("T_UI_Hud_Status_Heart");
+	const FString HudStatusWaterIconAssetName = TEXT("T_UI_Hud_Status_WaterDrop");
+	const FString HudStatusMeatIconAssetName = TEXT("T_UI_Hud_Status_Meat");
 	const FString UITitleTextureAssetPath = TEXT("/Game/UI/Title");
 	const FString UIStoryTextureAssetPath = TEXT("/Game/UI/Story");
 	const FString TitleBackgroundTextureAssetName = TEXT("Title_C1");
@@ -4905,6 +4909,18 @@ namespace TunaSweeperEditorSetup
 		return SourcePath;
 	}
 
+	FString GetGeneratedUiImageSourcePath(const FString& ImageFileName)
+	{
+		FString SourcePath = FPaths::ConvertRelativePathToFull(FPaths::Combine(
+			FPaths::ProjectDir(),
+			TEXT(".."),
+			TEXT("GeneratedImages"),
+			TEXT("UI"),
+			ImageFileName));
+		FPaths::CollapseRelativeDirectories(SourcePath);
+		return SourcePath;
+	}
+
 	void ConfigureImportedIconTexture(UTexture2D* Texture)
 	{
 		if (!Texture)
@@ -7207,6 +7223,31 @@ namespace TunaSweeperEditorSetup
 		return true;
 	}
 
+	bool ImportHudStatusIconTexture(const FString& SourceFileName, const FString& AssetName)
+	{
+		FUiTextureImportArgs Args;
+		Args.SourceFile = GetGeneratedUiImageSourcePath(SourceFileName);
+		Args.DestinationPath = UIIconAssetPath;
+		Args.AssetName = AssetName;
+		Args.bReplaceExisting = true;
+
+		UTexture2D* ImportedTexture = nullptr;
+		const bool bImported = ImportUiTexture(Args, &ImportedTexture);
+		if (bImported)
+		{
+			ConfigureImportedIconTexture(ImportedTexture);
+		}
+		return bImported;
+	}
+
+	bool EnsureHudStatusIconTextures()
+	{
+		return
+			ImportHudStatusIconTexture(TEXT("T_UI_Hud_Status_Heart.png"), HudStatusHeartIconAssetName) &&
+			ImportHudStatusIconTexture(TEXT("T_UI_Hud_Status_WaterDrop.png"), HudStatusWaterIconAssetName) &&
+			ImportHudStatusIconTexture(TEXT("T_UI_Hud_Status_Meat.png"), HudStatusMeatIconAssetName);
+	}
+
 	void SetListViewEntryWidgetClass(UListViewBase* ListViewBase, TSubclassOf<UUserWidget> EntryWidgetClass)
 	{
 		if (!ListViewBase || !EntryWidgetClass)
@@ -7593,88 +7634,153 @@ namespace TunaSweeperEditorSetup
 
 		UWidgetTree* WidgetTree = WidgetBlueprint->WidgetTree;
 		USizeBox* RootSizeBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("RootSizeBox"));
+		UOverlay* RootOverlay = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), TEXT("RootOverlay"));
 		UHorizontalBox* VitalsRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("VitalsRow"));
 		USizeBox* HealthBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("HealthBox"));
 		UOverlay* HealthOverlay = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), TEXT("HealthOverlay"));
-		UProgressBar* HealthGauge = WidgetTree->ConstructWidget<UProgressBar>(UProgressBar::StaticClass(), TEXT("HealthGauge"));
-		UTextBlock* HealthText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("HealthText"));
+		UBorder* HealthBackdrop = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("HealthBackdrop"));
+		UTunaSweeperHudStatusRingWidget* HealthRing = WidgetTree->ConstructWidget<UTunaSweeperHudStatusRingWidget>(
+			UTunaSweeperHudStatusRingWidget::StaticClass(),
+			TEXT("HealthRing"));
+		USizeBox* HealthIconBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("HealthIconBox"));
+		UImage* HealthIcon = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("HealthIcon"));
 		USizeBox* HydrationBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("HydrationBox"));
 		UOverlay* HydrationOverlay = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), TEXT("HydrationOverlay"));
-		UProgressBar* HydrationGauge = WidgetTree->ConstructWidget<UProgressBar>(UProgressBar::StaticClass(), TEXT("HydrationGauge"));
-		UTextBlock* HydrationText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("HydrationText"));
+		UBorder* HydrationBackdrop = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("HydrationBackdrop"));
+		UTunaSweeperHudStatusRingWidget* HydrationRing = WidgetTree->ConstructWidget<UTunaSweeperHudStatusRingWidget>(
+			UTunaSweeperHudStatusRingWidget::StaticClass(),
+			TEXT("HydrationRing"));
+		USizeBox* HydrationIconBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("HydrationIconBox"));
+		UImage* HydrationIcon = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("HydrationIcon"));
 		USizeBox* HungerBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("HungerBox"));
 		UOverlay* HungerOverlay = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), TEXT("HungerOverlay"));
-		UProgressBar* HungerGauge = WidgetTree->ConstructWidget<UProgressBar>(UProgressBar::StaticClass(), TEXT("HungerGauge"));
-		UTextBlock* HungerText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("HungerText"));
+		UBorder* HungerBackdrop = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("HungerBackdrop"));
+		UTunaSweeperHudStatusRingWidget* HungerRing = WidgetTree->ConstructWidget<UTunaSweeperHudStatusRingWidget>(
+			UTunaSweeperHudStatusRingWidget::StaticClass(),
+			TEXT("HungerRing"));
+		USizeBox* HungerIconBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("HungerIconBox"));
+		UImage* HungerIcon = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("HungerIcon"));
 
-		if (!RootSizeBox || !VitalsRow || !HealthBox || !HealthOverlay || !HealthGauge || !HealthText ||
-			!HydrationBox || !HydrationOverlay || !HydrationGauge || !HydrationText ||
-			!HungerBox || !HungerOverlay || !HungerGauge || !HungerText)
+		if (!RootSizeBox || !RootOverlay || !VitalsRow ||
+			!HealthBox || !HealthOverlay || !HealthBackdrop || !HealthRing || !HealthIconBox || !HealthIcon ||
+			!HydrationBox || !HydrationOverlay || !HydrationBackdrop || !HydrationRing || !HydrationIconBox || !HydrationIcon ||
+			!HungerBox || !HungerOverlay || !HungerBackdrop || !HungerRing || !HungerIconBox || !HungerIcon)
 		{
 			return false;
 		}
 
+		UTexture2D* HealthIconTexture = LoadObject<UTexture2D>(
+			nullptr,
+			*GetAssetObjectPath(UIIconAssetPath, HudStatusHeartIconAssetName));
+		UTexture2D* HydrationIconTexture = LoadObject<UTexture2D>(
+			nullptr,
+			*GetAssetObjectPath(UIIconAssetPath, HudStatusWaterIconAssetName));
+		UTexture2D* HungerIconTexture = LoadObject<UTexture2D>(
+			nullptr,
+			*GetAssetObjectPath(UIIconAssetPath, HudStatusMeatIconAssetName));
+
 		WidgetTree->RootWidget = RootSizeBox;
 		RootSizeBox->SetWidthOverride(430.0f);
-		RootSizeBox->SetHeightOverride(42.0f);
-		RootSizeBox->SetContent(VitalsRow);
+		RootSizeBox->SetHeightOverride(70.0f);
+		RootSizeBox->SetContent(RootOverlay);
 
-		HealthBox->SetWidthOverride(210.0f);
-		HealthBox->SetHeightOverride(34.0f);
-		HealthBox->SetContent(HealthOverlay);
-		HealthGauge->SetPercent(1.0f);
-		HealthGauge->SetFillColorAndOpacity(FLinearColor(0.96f, 0.32f, 0.36f, 1.0f));
-		UOverlaySlot* HealthGaugeSlot = HealthOverlay->AddChildToOverlay(HealthGauge);
-		if (HealthGaugeSlot)
+		UOverlaySlot* VitalsRowSlot = RootOverlay->AddChildToOverlay(VitalsRow);
+		if (VitalsRowSlot)
 		{
-			HealthGaugeSlot->SetHorizontalAlignment(HAlign_Fill);
-			HealthGaugeSlot->SetVerticalAlignment(VAlign_Fill);
-		}
-		ConfigureTextBlock(HealthText, FText::FromString(TEXT("HP 100 / 100")), FLinearColor::White, 16);
-		UOverlaySlot* HealthTextSlot = HealthOverlay->AddChildToOverlay(HealthText);
-		if (HealthTextSlot)
-		{
-			HealthTextSlot->SetHorizontalAlignment(HAlign_Center);
-			HealthTextSlot->SetVerticalAlignment(VAlign_Center);
+			VitalsRowSlot->SetHorizontalAlignment(HAlign_Right);
+			VitalsRowSlot->SetVerticalAlignment(VAlign_Center);
 		}
 
-		HydrationBox->SetWidthOverride(96.0f);
-		HydrationBox->SetHeightOverride(34.0f);
-		HydrationBox->SetContent(HydrationOverlay);
-		HydrationGauge->SetPercent(1.0f);
-		HydrationGauge->SetFillColorAndOpacity(FLinearColor(0.30f, 0.65f, 0.98f, 1.0f));
-		UOverlaySlot* HydrationGaugeSlot = HydrationOverlay->AddChildToOverlay(HydrationGauge);
-		if (HydrationGaugeSlot)
+		auto ConfigureStatusSlot = [](
+			USizeBox* Box,
+			UOverlay* Overlay,
+			UBorder* Backdrop,
+			UTunaSweeperHudStatusRingWidget* Ring,
+			USizeBox* IconBox,
+			UImage* Icon,
+			UTexture2D* IconTexture,
+			const FLinearColor& FillColor)
 		{
-			HydrationGaugeSlot->SetHorizontalAlignment(HAlign_Fill);
-			HydrationGaugeSlot->SetVerticalAlignment(VAlign_Fill);
-		}
-		ConfigureTextBlock(HydrationText, FText::FromString(TEXT("수분 100")), FLinearColor::White, 14);
-		UOverlaySlot* HydrationTextSlot = HydrationOverlay->AddChildToOverlay(HydrationText);
-		if (HydrationTextSlot)
-		{
-			HydrationTextSlot->SetHorizontalAlignment(HAlign_Center);
-			HydrationTextSlot->SetVerticalAlignment(VAlign_Center);
-		}
+			Box->SetWidthOverride(58.0f);
+			Box->SetHeightOverride(58.0f);
+			Box->SetContent(Overlay);
 
-		HungerBox->SetWidthOverride(112.0f);
-		HungerBox->SetHeightOverride(34.0f);
-		HungerBox->SetContent(HungerOverlay);
-		HungerGauge->SetPercent(1.0f);
-		HungerGauge->SetFillColorAndOpacity(FLinearColor(0.92f, 0.58f, 0.22f, 1.0f));
-		UOverlaySlot* HungerGaugeSlot = HungerOverlay->AddChildToOverlay(HungerGauge);
-		if (HungerGaugeSlot)
-		{
-			HungerGaugeSlot->SetHorizontalAlignment(HAlign_Fill);
-			HungerGaugeSlot->SetVerticalAlignment(VAlign_Fill);
-		}
-		ConfigureTextBlock(HungerText, FText::FromString(TEXT("배부름 100")), FLinearColor::White, 14);
-		UOverlaySlot* HungerTextSlot = HungerOverlay->AddChildToOverlay(HungerText);
-		if (HungerTextSlot)
-		{
-			HungerTextSlot->SetHorizontalAlignment(HAlign_Center);
-			HungerTextSlot->SetVerticalAlignment(VAlign_Center);
-		}
+			Backdrop->SetBrush(MakeCircularBrush(
+				FVector2D(58.0f, 58.0f),
+				FLinearColor(0.010f, 0.014f, 0.018f, 0.74f),
+				FLinearColor(1.0f, 1.0f, 1.0f, 0.06f),
+				1.0f));
+			UOverlaySlot* BackdropSlot = Overlay->AddChildToOverlay(Backdrop);
+			if (BackdropSlot)
+			{
+				BackdropSlot->SetHorizontalAlignment(HAlign_Fill);
+				BackdropSlot->SetVerticalAlignment(VAlign_Fill);
+			}
+
+			Ring->SetRingColors(FLinearColor(0.035f, 0.040f, 0.045f, 0.82f), FillColor);
+			Ring->SetStatusPercent(1.0f);
+			UOverlaySlot* RingSlot = Overlay->AddChildToOverlay(Ring);
+			if (RingSlot)
+			{
+				RingSlot->SetHorizontalAlignment(HAlign_Fill);
+				RingSlot->SetVerticalAlignment(VAlign_Fill);
+			}
+
+			IconBox->SetWidthOverride(30.0f);
+			IconBox->SetHeightOverride(30.0f);
+			IconBox->SetContent(Icon);
+			if (IconTexture)
+			{
+				Icon->SetBrushFromTexture(IconTexture, true);
+				FSlateBrush IconBrush = Icon->GetBrush();
+				IconBrush.SetImageSize(FVector2D(30.0f, 30.0f));
+				Icon->SetBrush(IconBrush);
+				Icon->SetColorAndOpacity(FLinearColor::White);
+			}
+			else
+			{
+				Icon->SetBrush(MakeCircularBrush(
+					FVector2D(30.0f, 30.0f),
+					FillColor,
+					FLinearColor::Transparent,
+					0.0f));
+			}
+
+			UOverlaySlot* IconSlot = Overlay->AddChildToOverlay(IconBox);
+			if (IconSlot)
+			{
+				IconSlot->SetHorizontalAlignment(HAlign_Center);
+				IconSlot->SetVerticalAlignment(VAlign_Center);
+			}
+		};
+
+		ConfigureStatusSlot(
+			HealthBox,
+			HealthOverlay,
+			HealthBackdrop,
+			HealthRing,
+			HealthIconBox,
+			HealthIcon,
+			HealthIconTexture,
+			FLinearColor(0.95f, 0.24f, 0.32f, 1.0f));
+		ConfigureStatusSlot(
+			HydrationBox,
+			HydrationOverlay,
+			HydrationBackdrop,
+			HydrationRing,
+			HydrationIconBox,
+			HydrationIcon,
+			HydrationIconTexture,
+			FLinearColor(0.23f, 0.63f, 1.0f, 1.0f));
+		ConfigureStatusSlot(
+			HungerBox,
+			HungerOverlay,
+			HungerBackdrop,
+			HungerRing,
+			HungerIconBox,
+			HungerIcon,
+			HungerIconTexture,
+			FLinearColor(0.96f, 0.68f, 0.22f, 1.0f));
 
 		UHorizontalBoxSlot* HealthBoxSlot = VitalsRow->AddChildToHorizontalBox(HealthBox);
 		if (HealthBoxSlot)
@@ -7684,23 +7790,24 @@ namespace TunaSweeperEditorSetup
 		UHorizontalBoxSlot* HydrationBoxSlot = VitalsRow->AddChildToHorizontalBox(HydrationBox);
 		if (HydrationBoxSlot)
 		{
-			HydrationBoxSlot->SetPadding(FMargin(12.0f, 0.0f, 0.0f, 0.0f));
+			HydrationBoxSlot->SetPadding(FMargin(10.0f, 0.0f, 0.0f, 0.0f));
 			HydrationBoxSlot->SetVerticalAlignment(VAlign_Center);
 		}
 		UHorizontalBoxSlot* HungerBoxSlot = VitalsRow->AddChildToHorizontalBox(HungerBox);
 		if (HungerBoxSlot)
 		{
-			HungerBoxSlot->SetPadding(FMargin(12.0f, 0.0f, 0.0f, 0.0f));
+			HungerBoxSlot->SetPadding(FMargin(10.0f, 0.0f, 0.0f, 0.0f));
 			HungerBoxSlot->SetVerticalAlignment(VAlign_Center);
 		}
 
-		RegisterWidgetVariable(WidgetBlueprint, HealthText);
-		RegisterWidgetVariable(WidgetBlueprint, HungerText);
-		RegisterWidgetVariable(WidgetBlueprint, HydrationText);
-		RegisterWidgetVariable(WidgetBlueprint, HealthGauge);
-		RegisterWidgetVariable(WidgetBlueprint, HungerGauge);
-		RegisterWidgetVariable(WidgetBlueprint, HydrationGauge);
+		RegisterWidgetVariable(WidgetBlueprint, HealthRing);
+		RegisterWidgetVariable(WidgetBlueprint, HungerRing);
+		RegisterWidgetVariable(WidgetBlueprint, HydrationRing);
+		RegisterWidgetVariable(WidgetBlueprint, HealthIcon);
+		RegisterWidgetVariable(WidgetBlueprint, HungerIcon);
+		RegisterWidgetVariable(WidgetBlueprint, HydrationIcon);
 		RegisterWidgetVariable(WidgetBlueprint, RootSizeBox);
+		RegisterWidgetVariable(WidgetBlueprint, RootOverlay);
 		RegisterWidgetVariable(WidgetBlueprint, VitalsRow);
 		WidgetBlueprint->MarkPackageDirty();
 		return true;
@@ -9452,6 +9559,11 @@ namespace TunaSweeperEditorSetup
 
 	bool EnsureCommonGameHudAssets()
 	{
+		if (!EnsureHudStatusIconTextures())
+		{
+			return false;
+		}
+
 		UWidgetBlueprint* ItemThumbnailWidgetBlueprint = EnsureWidgetBlueprint(
 			UIAssetPath,
 			ItemThumbnailSlotWidgetAssetName,

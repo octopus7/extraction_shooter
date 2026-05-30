@@ -3,6 +3,7 @@
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
 #include "Components/Widget.h"
+#include "UI/TunaSweeperHudStatusRingWidget.h"
 #include "UI/TunaSweeperUIFont.h"
 
 namespace TunaSweeperHudStatus
@@ -21,6 +22,11 @@ namespace TunaSweeperHudStatus
 			? FMath::Clamp(Value / MaxValue, 0.0f, 1.0f)
 			: 0.0f;
 	}
+
+	const FLinearColor StatusTrackColor(0.035f, 0.040f, 0.045f, 0.80f);
+	const FLinearColor HealthFillColor(0.95f, 0.24f, 0.32f, 1.0f);
+	const FLinearColor HungerFillColor(0.96f, 0.68f, 0.22f, 1.0f);
+	const FLinearColor HydrationFillColor(0.23f, 0.63f, 1.0f, 1.0f);
 }
 
 void UTunaSweeperHudBottomStatusWidget::NativeConstruct()
@@ -108,19 +114,41 @@ void UTunaSweeperHudBottomStatusWidget::ApplyHudState()
 			TunaSweeperHudStatus::MakeVitalsText(PreviewHudState.Hydration)));
 	}
 
+	const float HealthPercent = TunaSweeperHudStatus::MakeVitalsPercent(PreviewHudState.Health, PreviewHudState.MaxHealth);
+	const float HungerPercent = TunaSweeperHudStatus::MakeVitalsPercent(PreviewHudState.Food, PreviewHudState.MaxFood);
+	const float HydrationPercent = TunaSweeperHudStatus::MakeVitalsPercent(PreviewHudState.Hydration, PreviewHudState.MaxHydration);
+
 	if (HealthGauge)
 	{
-		HealthGauge->SetPercent(TunaSweeperHudStatus::MakeVitalsPercent(PreviewHudState.Health, PreviewHudState.MaxHealth));
+		HealthGauge->SetPercent(HealthPercent);
 	}
 
 	if (HungerGauge)
 	{
-		HungerGauge->SetPercent(TunaSweeperHudStatus::MakeVitalsPercent(PreviewHudState.Food, PreviewHudState.MaxFood));
+		HungerGauge->SetPercent(HungerPercent);
 	}
 
 	if (HydrationGauge)
 	{
-		HydrationGauge->SetPercent(TunaSweeperHudStatus::MakeVitalsPercent(PreviewHudState.Hydration, PreviewHudState.MaxHydration));
+		HydrationGauge->SetPercent(HydrationPercent);
+	}
+
+	if (HealthRing)
+	{
+		HealthRing->SetRingColors(TunaSweeperHudStatus::StatusTrackColor, TunaSweeperHudStatus::HealthFillColor);
+		HealthRing->SetStatusPercent(HealthPercent);
+	}
+
+	if (HungerRing)
+	{
+		HungerRing->SetRingColors(TunaSweeperHudStatus::StatusTrackColor, TunaSweeperHudStatus::HungerFillColor);
+		HungerRing->SetStatusPercent(HungerPercent);
+	}
+
+	if (HydrationRing)
+	{
+		HydrationRing->SetRingColors(TunaSweeperHudStatus::StatusTrackColor, TunaSweeperHudStatus::HydrationFillColor);
+		HydrationRing->SetStatusPercent(HydrationPercent);
 	}
 
 	if (CarryWeightGauge)
