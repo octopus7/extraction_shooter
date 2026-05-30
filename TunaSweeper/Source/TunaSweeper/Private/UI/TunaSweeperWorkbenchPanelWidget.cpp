@@ -3,7 +3,9 @@
 #include "Blueprint/DragDropOperation.h"
 #include "Blueprint/WidgetTree.h"
 #include "Components/Border.h"
+#include "Components/BorderSlot.h"
 #include "Components/Button.h"
+#include "Components/ButtonSlot.h"
 #include "Components/Image.h"
 #include "Components/ListView.h"
 #include "Components/ListViewBase.h"
@@ -26,6 +28,7 @@ namespace TunaSweeperWorkbenchPanel
 	const FLinearColor DisabledButtonColor(0.24f, 0.25f, 0.27f, 0.78f);
 	const FLinearColor NormalTextColor(0.90f, 0.94f, 0.98f, 1.0f);
 	const FLinearColor MissingTextColor(0.92f, 0.18f, 0.12f, 1.0f);
+	constexpr float TargetTileEntrySize = 96.0f;
 
 	using TunaSweeperUiText::ResolveUiText;
 
@@ -111,6 +114,84 @@ namespace TunaSweeperWorkbenchPanel
 		}
 	}
 
+	void SetNamedWidgetModeVisible(UWidgetTree* WidgetTree, const TCHAR* WidgetName, bool bVisible)
+	{
+		if (WidgetTree)
+		{
+			SetWidgetModeVisible(WidgetTree->FindWidget(FName(WidgetName)), bVisible);
+		}
+	}
+
+	template <typename WidgetType>
+	WidgetType* FindNamedWidget(UWidgetTree* WidgetTree, const TCHAR* WidgetName)
+	{
+		return WidgetTree
+			? Cast<WidgetType>(WidgetTree->FindWidget(FName(WidgetName)))
+			: nullptr;
+	}
+
+	void SetTextCentered(UTextBlock* TextBlock)
+	{
+		if (TextBlock)
+		{
+			TextBlock->SetJustification(ETextJustify::Center);
+		}
+	}
+
+	void SetVerticalSlotHorizontalAlignment(UWidget* Widget, EHorizontalAlignment HorizontalAlignment)
+	{
+		if (Widget)
+		{
+			if (UVerticalBoxSlot* VerticalSlot = Cast<UVerticalBoxSlot>(Widget->Slot))
+			{
+				VerticalSlot->SetHorizontalAlignment(HorizontalAlignment);
+			}
+		}
+	}
+
+	void SetBorderContentAlignment(UBorder* Border, EHorizontalAlignment HorizontalAlignment, EVerticalAlignment VerticalAlignment)
+	{
+		if (!Border)
+		{
+			return;
+		}
+
+		if (UWidget* Content = Border->GetContent())
+		{
+			if (UBorderSlot* BorderSlot = Cast<UBorderSlot>(Content->Slot))
+			{
+				BorderSlot->SetHorizontalAlignment(HorizontalAlignment);
+				BorderSlot->SetVerticalAlignment(VerticalAlignment);
+			}
+		}
+	}
+
+	void SetButtonContentCentered(UButton* Button)
+	{
+		if (!Button)
+		{
+			return;
+		}
+
+		if (UWidget* Content = Button->GetContent())
+		{
+			if (UButtonSlot* ButtonSlot = Cast<UButtonSlot>(Content->Slot))
+			{
+				ButtonSlot->SetHorizontalAlignment(HAlign_Center);
+				ButtonSlot->SetVerticalAlignment(VAlign_Center);
+			}
+		}
+	}
+
+	void ConfigureTargetTileView(UTileView* TileView)
+	{
+		if (TileView)
+		{
+			TileView->SetEntryWidth(TargetTileEntrySize);
+			TileView->SetEntryHeight(TargetTileEntrySize);
+		}
+	}
+
 	bool AreSlotReferencesEqual(
 		const FTunaSweeperItemSlotReference& Left,
 		const FTunaSweeperItemSlotReference& Right)
@@ -123,6 +204,29 @@ void UTunaSweeperWorkbenchPanelWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
+
+	TunaSweeperWorkbenchPanel::SetTextCentered(DismantleSelectedItemTitleText);
+	TunaSweeperWorkbenchPanel::SetTextCentered(DismantleResultText);
+	TunaSweeperWorkbenchPanel::SetTextCentered(BlueprintSelectedItemTitleText);
+	TunaSweeperWorkbenchPanel::SetTextCentered(BlueprintRegisterText);
+	TunaSweeperWorkbenchPanel::SetTextCentered(
+		TunaSweeperWorkbenchPanel::FindNamedWidget<UTextBlock>(WidgetTree, TEXT("DismantleResultTitleText")));
+	TunaSweeperWorkbenchPanel::SetTextCentered(
+		TunaSweeperWorkbenchPanel::FindNamedWidget<UTextBlock>(WidgetTree, TEXT("BlueprintGuideText")));
+	TunaSweeperWorkbenchPanel::SetVerticalSlotHorizontalAlignment(DismantleSelectedItemTitleText, HAlign_Fill);
+	TunaSweeperWorkbenchPanel::SetVerticalSlotHorizontalAlignment(DismantleSelectedItemDropZone, HAlign_Center);
+	TunaSweeperWorkbenchPanel::SetVerticalSlotHorizontalAlignment(CraftButton, HAlign_Center);
+	TunaSweeperWorkbenchPanel::SetVerticalSlotHorizontalAlignment(DismantleButton, HAlign_Center);
+	TunaSweeperWorkbenchPanel::SetVerticalSlotHorizontalAlignment(BlueprintSelectedItemTitleText, HAlign_Fill);
+	TunaSweeperWorkbenchPanel::SetVerticalSlotHorizontalAlignment(BlueprintSelectedItemDropZone, HAlign_Center);
+	TunaSweeperWorkbenchPanel::SetVerticalSlotHorizontalAlignment(BlueprintRegisterButton, HAlign_Center);
+	TunaSweeperWorkbenchPanel::SetBorderContentAlignment(DismantleSelectedItemDropZone, HAlign_Center, VAlign_Center);
+	TunaSweeperWorkbenchPanel::SetBorderContentAlignment(BlueprintSelectedItemDropZone, HAlign_Center, VAlign_Center);
+	TunaSweeperWorkbenchPanel::ConfigureTargetTileView(DismantleSelectedItemTileView);
+	TunaSweeperWorkbenchPanel::ConfigureTargetTileView(BlueprintSelectedItemTileView);
+	TunaSweeperWorkbenchPanel::SetButtonContentCentered(CraftButton);
+	TunaSweeperWorkbenchPanel::SetButtonContentCentered(DismantleButton);
+	TunaSweeperWorkbenchPanel::SetButtonContentCentered(BlueprintRegisterButton);
 
 	if (CraftButton)
 	{
@@ -662,15 +766,12 @@ void UTunaSweeperWorkbenchPanelWidget::PopulateDismantleTargetItem()
 	}
 	else
 	{
-		TileData.DisplayName = TunaSweeperWorkbenchPanel::ResolveUiText(
-			TunaGameInstance,
-			TEXT("ui.workbench.dismantle_target"),
-			TEXT("\uBD84\uD574\uD560 \uC544\uC774\uD15C"));
+		TileData.DisplayName = FText::GetEmpty();
 		TileData.Source = ETunaSweeperItemSlotSource::WorkbenchDismantleItem;
 		TileData.SourceIndex = INDEX_NONE;
 		TileData.SlotReference = FTunaSweeperItemSlotReference();
 		TileData.bIsEmpty = true;
-		TileData.bShowEmptySlotLabel = true;
+		TileData.bShowEmptySlotLabel = false;
 	}
 
 	UTunaSweeperItemStackTileItemObject* TileObject = NewObject<UTunaSweeperItemStackTileItemObject>(this);
@@ -788,15 +889,12 @@ void UTunaSweeperWorkbenchPanelWidget::PopulateBlueprintTargetItem()
 	}
 	else
 	{
-		TileData.DisplayName = TunaSweeperWorkbenchPanel::ResolveUiText(
-			TunaGameInstance,
-			TEXT("ui.workbench.blueprint_target"),
-			TEXT("\uB4F1\uB85D\uD560 \uC124\uACC4\uB3C4"));
+		TileData.DisplayName = FText::GetEmpty();
 		TileData.Source = ETunaSweeperItemSlotSource::WorkbenchBlueprintItem;
 		TileData.SourceIndex = INDEX_NONE;
 		TileData.SlotReference = FTunaSweeperItemSlotReference();
 		TileData.bIsEmpty = true;
-		TileData.bShowEmptySlotLabel = true;
+		TileData.bShowEmptySlotLabel = false;
 	}
 
 	UTunaSweeperItemStackTileItemObject* TileObject = NewObject<UTunaSweeperItemStackTileItemObject>(this);
@@ -951,6 +1049,13 @@ void UTunaSweeperWorkbenchPanelWidget::SetPanelModeVisibility() const
 	const bool bCraftMode = ActiveWorkbenchMode == ETunaSweeperWorkbenchMode::Craft;
 	const bool bDismantleMode = ActiveWorkbenchMode == ETunaSweeperWorkbenchMode::Dismantle;
 	const bool bBlueprintMode = ActiveWorkbenchMode == ETunaSweeperWorkbenchMode::BlueprintRegister;
+
+	TunaSweeperWorkbenchPanel::SetNamedWidgetModeVisible(WidgetTree, TEXT("CraftLeftStack"), bCraftMode);
+	TunaSweeperWorkbenchPanel::SetNamedWidgetModeVisible(WidgetTree, TEXT("DismantleLeftStack"), bDismantleMode);
+	TunaSweeperWorkbenchPanel::SetNamedWidgetModeVisible(WidgetTree, TEXT("BlueprintLeftStack"), bBlueprintMode);
+	TunaSweeperWorkbenchPanel::SetNamedWidgetModeVisible(WidgetTree, TEXT("CraftRightStack"), bCraftMode);
+	TunaSweeperWorkbenchPanel::SetNamedWidgetModeVisible(WidgetTree, TEXT("DismantleRightStack"), bDismantleMode);
+	TunaSweeperWorkbenchPanel::SetNamedWidgetModeVisible(WidgetTree, TEXT("BlueprintRightStack"), bBlueprintMode);
 
 	TunaSweeperWorkbenchPanel::SetWidgetModeVisible(CraftRecipeTileView, bCraftMode);
 	TunaSweeperWorkbenchPanel::SetWidgetModeVisible(CraftRecipeListView, bCraftMode);
