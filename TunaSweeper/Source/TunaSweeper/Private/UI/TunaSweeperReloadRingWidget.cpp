@@ -10,9 +10,9 @@ void UTunaSweeperReloadRingWidget::NativeConstruct()
 	SetVisibility(ESlateVisibility::Collapsed);
 }
 
-void UTunaSweeperReloadRingWidget::SetReloadProgress(float InReloadProgress, bool bInVisible)
+void UTunaSweeperReloadRingWidget::SetCancelableActionProgress(float InProgress, bool bInVisible)
 {
-	ReloadProgress = FMath::Clamp(InReloadProgress, 0.0f, 1.0f);
+	CancelableActionProgress = FMath::Clamp(InProgress, 0.0f, 1.0f);
 	bVisibleGauge = bInVisible;
 	SetVisibility(bVisibleGauge ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
 	InvalidateLayoutAndVolatility();
@@ -71,11 +71,11 @@ int32 UTunaSweeperReloadRingWidget::NativePaint(
 		PaintVertices,
 		PaintIndices);
 
-	if (ReloadProgress > 0.0f)
+	if (CancelableActionProgress > 0.0f)
 	{
 		AddRingSegment(
 			StartAngleRadians,
-			GaugeSweepRadians * ReloadProgress,
+			GaugeSweepRadians * CancelableActionProgress,
 			InnerRadius,
 			OuterRadius,
 			FillColor,

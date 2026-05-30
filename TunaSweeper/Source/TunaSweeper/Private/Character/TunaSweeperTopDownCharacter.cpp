@@ -271,6 +271,7 @@ void ATunaSweeperTopDownCharacter::EndPlay(const EEndPlayReason::Type EndPlayRea
 	{
 		GetWorldTimerManager().ClearTimer(FireTimerHandle);
 		GetWorldTimerManager().ClearTimer(ReloadTimerHandle);
+		GetWorldTimerManager().ClearTimer(ItemUseTimerHandle);
 		GetWorldTimerManager().ClearTimer(RespawnTransitionTimerHandle);
 	}
 
@@ -280,6 +281,7 @@ void ATunaSweeperTopDownCharacter::EndPlay(const EEndPlayReason::Type EndPlayRea
 	}
 
 	FinishRoll();
+	CancelItemUse();
 	CancelMeleeSwing();
 
 	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
@@ -695,6 +697,11 @@ void ATunaSweeperTopDownCharacter::BeginFire(const FInputActionValue& Value)
 	}
 
 	bFireHeld = true;
+	if (bIsUsingItem)
+	{
+		CancelItemUse();
+	}
+
 	FireWeapon();
 
 	if (GetWorld())
@@ -808,6 +815,7 @@ void ATunaSweeperTopDownCharacter::HandleInventory(const FInputActionValue& Valu
 			return;
 		}
 
+		CancelItemUse();
 		TunaPlayerController->ToggleInventoryOnlyPanel();
 	}
 }
@@ -831,6 +839,7 @@ void ATunaSweeperTopDownCharacter::HandleMap(const FInputActionValue& Value)
 			return;
 		}
 
+		CancelItemUse();
 		TunaPlayerController->ToggleMapPanel();
 	}
 }
@@ -850,6 +859,11 @@ void ATunaSweeperTopDownCharacter::HandleAmmoSelect(const FInputActionValue& Val
 	if (bIsDead || IsGameplayActionInputLocked())
 	{
 		return;
+	}
+
+	if (bIsUsingItem)
+	{
+		CancelItemUse();
 	}
 
 	if (bAmmoSelectionOpen)
@@ -940,6 +954,7 @@ void ATunaSweeperTopDownCharacter::BeginRoll(const FInputActionValue& Value)
 	DefaultVisualMeshRelativeRotation = VisualMesh ? VisualMesh->GetRelativeRotation() : DefaultVisualMeshRelativeRotation;
 
 	CancelReload();
+	CancelItemUse();
 	CloseAmmoSelection();
 	CancelMeleeSwing();
 	if (GetWorld())
@@ -996,6 +1011,10 @@ void ATunaSweeperTopDownCharacter::FireWeapon()
 	if (bIsReloading)
 	{
 		CancelReload();
+	}
+	if (bIsUsingItem)
+	{
+		CancelItemUse();
 	}
 
 	EnsureEquippedWeaponActor();
@@ -1104,6 +1123,7 @@ bool ATunaSweeperTopDownCharacter::SelectWeaponSlot(int32 SlotNumber)
 	if (SelectedWeaponSlotNumber != SlotNumber || bMeleeWeaponSelected)
 	{
 		CancelReload();
+		CancelItemUse();
 		CloseAmmoSelection();
 		CancelMeleeSwing();
 		ClearEquippedWeaponActor();
@@ -1127,6 +1147,7 @@ bool ATunaSweeperTopDownCharacter::SelectMeleeWeapon()
 	if (!bMeleeWeaponSelected || SelectedWeaponSlotNumber != 0)
 	{
 		CancelReload();
+		CancelItemUse();
 		CloseAmmoSelection();
 		CancelMeleeSwing();
 		ClearEquippedWeaponActor();
@@ -1178,6 +1199,7 @@ void ATunaSweeperTopDownCharacter::StartMeleeAttack()
 	}
 
 	CancelReload();
+	CancelItemUse();
 	CloseAmmoSelection();
 	EnsureEquippedWeaponActor();
 	if (!EquippedWeapon)
@@ -1454,6 +1476,28 @@ float ATunaSweeperTopDownCharacter::GetReloadProgress() const
 	return FMath::Clamp((CurrentTime - ReloadStartWorldSeconds) / ReloadDurationSeconds, 0.0f, 1.0f);
 }
 
+float ATunaSweeperTopDownCharacter::GetItemUseProgress() const
+{
+	if (!bIsUsingItem || ItemUseDurationSeconds <= 0.0f)
+	{
+		return 0.0f;
+	}
+
+	const UWorld* World = GetWorld();
+	const float CurrentTime = World ? World->GetTimeSeconds() : ItemUseStartWorldSeconds;
+	return FMath::Clamp((CurrentTime - ItemUseStartWorldSeconds) / ItemUseDurationSeconds, 0.0f, 1.0f);
+}
+
+float ATunaSweeperTopDownCharacter::GetCancelableActionProgress() const
+{
+	if (bIsUsingItem)
+	{
+		return GetItemUseProgress();
+	}
+
+	return GetReloadProgress();
+}
+
 void ATunaSweeperTopDownCharacter::GetAmmoSelectionItemIds(TArray<int32>& OutAmmoItemIds) const
 {
 	OutAmmoItemIds = AmmoSelectionItemIds;
@@ -1464,6 +1508,11 @@ void ATunaSweeperTopDownCharacter::StartReload()
 	if (bIsReloading || !CanUseSelectedWeaponSlot())
 	{
 		return;
+	}
+
+	if (bIsUsingItem)
+	{
+		CancelItemUse();
 	}
 
 	UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
@@ -1537,6 +1586,102 @@ void ATunaSweeperTopDownCharacter::CancelReload()
 	PendingReloadAmmoItemId = INDEX_NONE;
 	ReloadStartWorldSeconds = 0.0f;
 	ReloadDurationSeconds = 0.0f;
+}
+
+bool ATunaSweeperTopDownCharacter::StartItemUseFromSlot(const FTunaSweeperItemSlotReference& SlotReference)
+{
+	const ATunaSweeperPlayerController* TunaPlayerController = Cast<ATunaSweeperPlayerController>(GetController());
+	if (bIsDead ||
+		bIsRolling ||
+		!GetWorld() ||
+		(TunaPlayerController && (TunaPlayerController->IsDialogueSequenceActive() || TunaPlayerController->IsHousingModeOpen())))
+	{
+		return false;
+	}
+
+	UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+	if (!TunaGameInstance || !TunaGameInstance->CanUseItemInSlot(SlotReference, this))
+	{
+		return false;
+	}
+
+	FGuid ItemUid;
+	if (!TunaGameInstance->TryGetSlotItemUid(SlotReference, ItemUid))
+	{
+		return false;
+	}
+
+	const float UseSeconds = TunaGameInstance->GetItemUseSecondsInSlot(SlotReference);
+	if (UseSeconds <= 0.0f)
+	{
+		return false;
+	}
+
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		return false;
+	}
+
+	CancelReload();
+	if (bIsUsingItem)
+	{
+		CancelItemUse();
+	}
+	CloseAmmoSelection();
+	CancelMeleeSwing();
+	bFireHeld = false;
+	GetWorldTimerManager().ClearTimer(FireTimerHandle);
+
+	PendingItemUseSlotReference = SlotReference;
+	PendingItemUseUid = ItemUid;
+	ItemUseDurationSeconds = FMath::Max(0.01f, UseSeconds);
+	ItemUseStartWorldSeconds = World->GetTimeSeconds();
+	bIsUsingItem = true;
+
+	GetWorldTimerManager().SetTimer(
+		ItemUseTimerHandle,
+		this,
+		&ATunaSweeperTopDownCharacter::CompleteItemUse,
+		ItemUseDurationSeconds,
+		false);
+
+	return true;
+}
+
+void ATunaSweeperTopDownCharacter::CompleteItemUse()
+{
+	const FTunaSweeperItemSlotReference ItemUseSlotReference = PendingItemUseSlotReference;
+	const FGuid ItemUseUid = PendingItemUseUid;
+	CancelItemUse();
+
+	UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+	if (!TunaGameInstance || !ItemUseSlotReference.IsValid() || !ItemUseUid.IsValid())
+	{
+		return;
+	}
+
+	FGuid CurrentItemUid;
+	if (!TunaGameInstance->TryGetSlotItemUid(ItemUseSlotReference, CurrentItemUid) || CurrentItemUid != ItemUseUid)
+	{
+		return;
+	}
+
+	TunaGameInstance->TryUseItemInSlot(ItemUseSlotReference, this);
+}
+
+void ATunaSweeperTopDownCharacter::CancelItemUse()
+{
+	if (GetWorld())
+	{
+		GetWorldTimerManager().ClearTimer(ItemUseTimerHandle);
+	}
+
+	bIsUsingItem = false;
+	PendingItemUseSlotReference = FTunaSweeperItemSlotReference();
+	PendingItemUseUid.Invalidate();
+	ItemUseStartWorldSeconds = 0.0f;
+	ItemUseDurationSeconds = 0.0f;
 }
 
 void ATunaSweeperTopDownCharacter::OpenAmmoSelection()
@@ -1644,6 +1789,7 @@ void ATunaSweeperTopDownCharacter::RefreshSelectedWeaponAfterInventoryChanged()
 	}
 
 	CancelReload();
+	CancelItemUse();
 	CloseAmmoSelection();
 	CancelMeleeSwing();
 	SelectedWeaponSlotNumber = 0;
@@ -1800,6 +1946,12 @@ bool ATunaSweeperTopDownCharacter::IsCarryWeightMovementBlocked() const
 	return TunaGameInstance && TunaGameInstance->IsCarryWeightMovementBlocked();
 }
 
+void ATunaSweeperTopDownCharacter::CancelActiveCancelableAction()
+{
+	CancelReload();
+	CancelItemUse();
+}
+
 void ATunaSweeperTopDownCharacter::CancelActiveGameplayActions()
 {
 	FinishRoll();
@@ -1810,6 +1962,7 @@ void ATunaSweeperTopDownCharacter::CancelActiveGameplayActions()
 	bSprintLockedUntilReleased = false;
 	CurrentMoveInput = FVector2D::ZeroVector;
 	CancelReload();
+	CancelItemUse();
 	CloseAmmoSelection();
 	CancelMeleeSwing();
 
@@ -1848,6 +2001,7 @@ void ATunaSweeperTopDownCharacter::HandleDeath()
 	bSprintLockedUntilReleased = false;
 	CurrentMoveInput = FVector2D::ZeroVector;
 	CancelReload();
+	CancelItemUse();
 	CloseAmmoSelection();
 	ClearEquippedWeaponActor();
 	GetWorldTimerManager().ClearTimer(FireTimerHandle);

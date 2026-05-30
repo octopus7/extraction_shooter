@@ -314,7 +314,7 @@ private:
 	void RefreshInventoryQuickSlotPanel();
 	void RefreshLocalizedTexts();
 	void NormalizeCenterContentPanelLayout();
-	void RefreshReloadWidgets();
+	void RefreshCancelableActionWidgets();
 	void RefreshDialogueHudVisibility();
 	void RefreshExtractionProgressWidget();
 	void RefreshCursorDistanceWidget();
@@ -324,7 +324,7 @@ private:
 	void SetTransitionedWidgetVisibility(UWidget* Widget, ESlateVisibility TargetVisibility, ETunaSweeperHudTransitionEdge DirectionOverride);
 	void SetTransitionedWidgetVisibilityFromTranslation(UWidget* Widget, ESlateVisibility TargetVisibility, const FVector2D& HiddenTranslation);
 	void TickHudTransitions(float InDeltaTime);
-	void CacheAmmoReloadWidgets();
+	void CacheAmmoCancelableActionWidgets();
 	void BuildAmmoSelectorOptionTexts(TArray<FText>& OutOptionTexts, int32& OutFocusedIndex) const;
 	void HandleSelectedInventoryItemChanged();
 	void HandleQuestProgressChanged();
@@ -347,16 +347,16 @@ private:
 	ETunaSweeperHudMode ActiveHudMode = ETunaSweeperHudMode::None;
 
 	UPROPERTY(BlueprintReadOnly, Transient, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional, AllowPrivateAccess = "true"))
-	TObjectPtr<UWidget> CenterReloadGaugeRoot;
+	TObjectPtr<UWidget> CenterCancelableActionGaugeRoot;
 
 	UPROPERTY(BlueprintReadOnly, Transient, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional, AllowPrivateAccess = "true"))
-	TObjectPtr<UTunaSweeperReloadRingWidget> CenterReloadRingWidget;
+	TObjectPtr<UTunaSweeperReloadRingWidget> CenterCancelableActionRingWidget;
 
 	UPROPERTY(BlueprintReadOnly, Transient, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional, AllowPrivateAccess = "true"))
 	TObjectPtr<UWidget> CenterReloadPromptRoot;
 
 	UPROPERTY(BlueprintReadOnly, Transient, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional, AllowPrivateAccess = "true"))
-	TObjectPtr<UTextBlock> CenterReloadPercentText;
+	TObjectPtr<UTextBlock> CenterCancelableActionPercentText;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UBorder> InventoryQuickSlotPanel;
@@ -401,7 +401,7 @@ private:
 	TObjectPtr<UTunaSweeperShopSellPanelWidget> ShopSellPanelWidget;
 
 	UPROPERTY(Transient)
-	TArray<TObjectPtr<UBorder>> CenterReloadSegments;
+	TArray<TObjectPtr<UBorder>> CenterCancelableActionSegments;
 
 	bool bClearExternalPanelModeAfterHide = false;
 	float ExtractionProgressCurrentSeconds = 0.0f;

@@ -291,7 +291,7 @@ void UTunaSweeperGameHudWidget::NativeConstruct()
 	EnsureQuestPanelWidgets();
 	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
 	NormalizeCenterContentPanelLayout();
-	CacheAmmoReloadWidgets();
+	CacheAmmoCancelableActionWidgets();
 	RefreshLocalizedTexts();
 	SetHudMode(ETunaSweeperHudMode::None);
 	SetItemInfoPanelVisible(false);
@@ -299,7 +299,7 @@ void UTunaSweeperGameHudWidget::NativeConstruct()
 	RefreshDebuffBarFromPlayer();
 	RefreshQuickSlotsFromGameState();
 	RefreshInventoryQuickSlotPanel();
-	RefreshReloadWidgets();
+	RefreshCancelableActionWidgets();
 	RefreshDialogueHudVisibility();
 	RefreshCursorDistanceWidget();
 }
@@ -339,7 +339,7 @@ void UTunaSweeperGameHudWidget::NativeTick(const FGeometry& MyGeometry, float In
 	RefreshDebuffBarFromPlayer();
 	RefreshQuickSlotsFromGameState();
 	RefreshInventoryQuickSlotPanel();
-	RefreshReloadWidgets();
+	RefreshCancelableActionWidgets();
 	RefreshDialogueHudVisibility();
 	RefreshExtractionProgressWidget();
 	RefreshCursorDistanceWidget();
@@ -2413,9 +2413,9 @@ void UTunaSweeperGameHudWidget::RefreshLocalizedTexts()
 	}
 }
 
-void UTunaSweeperGameHudWidget::RefreshReloadWidgets()
+void UTunaSweeperGameHudWidget::RefreshCancelableActionWidgets()
 {
-	CacheAmmoReloadWidgets();
+	CacheAmmoCancelableActionWidgets();
 
 	const bool bDialogueActive = IsDialogueSequenceActive();
 	const bool bHousingModeActive = IsHousingModeActive();
@@ -2425,10 +2425,10 @@ void UTunaSweeperGameHudWidget::RefreshReloadWidgets()
 		TunaCharacter = Cast<ATunaSweeperTopDownCharacter>(PlayerController->GetPawn());
 	}
 
-	const bool bShowReload = !bDialogueActive && !bHousingModeActive && TunaCharacter && TunaCharacter->IsWeaponReloading();
-	const float ReloadProgress = bShowReload ? TunaCharacter->GetReloadProgress() : 0.0f;
+	const bool bShowCancelableAction = !bDialogueActive && !bHousingModeActive && TunaCharacter && TunaCharacter->IsCancelableActionActive();
+	const float CancelableActionProgress = bShowCancelableAction ? TunaCharacter->GetCancelableActionProgress() : 0.0f;
 	bool bShowReloadPrompt = false;
-	if (!bDialogueActive && !bHousingModeActive && !bShowReload && TunaCharacter && !TunaCharacter->IsAmmoSelectionOpen() && !IsInventoryUiOpen())
+	if (!bDialogueActive && !bHousingModeActive && !bShowCancelableAction && TunaCharacter && !TunaCharacter->IsAmmoSelectionOpen() && !IsInventoryUiOpen())
 	{
 		if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
 		{
@@ -2445,12 +2445,12 @@ void UTunaSweeperGameHudWidget::RefreshReloadWidgets()
 
 	if (QuickSlotBarWidget)
 	{
-		QuickSlotBarWidget->SetReloadProgress(ReloadProgress, bShowReload);
+		QuickSlotBarWidget->SetCancelableActionProgress(CancelableActionProgress, bShowCancelableAction);
 	}
 
-	if (CenterReloadGaugeRoot)
+	if (CenterCancelableActionGaugeRoot)
 	{
-		CenterReloadGaugeRoot->SetVisibility(bShowReload ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
+		CenterCancelableActionGaugeRoot->SetVisibility(bShowCancelableAction ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
 	}
 
 	if (CenterReloadPromptRoot)
@@ -2458,26 +2458,26 @@ void UTunaSweeperGameHudWidget::RefreshReloadWidgets()
 		CenterReloadPromptRoot->SetVisibility(bShowReloadPrompt ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
 	}
 
-	if (CenterReloadPercentText)
+	if (CenterCancelableActionPercentText)
 	{
-		CenterReloadPercentText->SetText(
-			bShowReload
-				? FText::FromString(FString::Printf(TEXT("%d%%"), FMath::RoundToInt(ReloadProgress * 100.0f)))
+		CenterCancelableActionPercentText->SetText(
+			bShowCancelableAction
+				? FText::FromString(FString::Printf(TEXT("%d%%"), FMath::RoundToInt(CancelableActionProgress * 100.0f)))
 				: FText::GetEmpty());
 	}
 
-	if (CenterReloadRingWidget)
+	if (CenterCancelableActionRingWidget)
 	{
-		CenterReloadRingWidget->SetReloadProgress(ReloadProgress, bShowReload);
+		CenterCancelableActionRingWidget->SetCancelableActionProgress(CancelableActionProgress, bShowCancelableAction);
 	}
 
-	const int32 FilledSegmentCount = FMath::CeilToInt(ReloadProgress * CenterReloadSegments.Num());
-	for (int32 SegmentIndex = 0; SegmentIndex < CenterReloadSegments.Num(); ++SegmentIndex)
+	const int32 FilledSegmentCount = FMath::CeilToInt(CancelableActionProgress * CenterCancelableActionSegments.Num());
+	for (int32 SegmentIndex = 0; SegmentIndex < CenterCancelableActionSegments.Num(); ++SegmentIndex)
 	{
-		if (CenterReloadSegments[SegmentIndex])
+		if (CenterCancelableActionSegments[SegmentIndex])
 		{
-			CenterReloadSegments[SegmentIndex]->SetRenderOpacity(
-				bShowReload && SegmentIndex < FilledSegmentCount ? 1.0f : 0.18f);
+			CenterCancelableActionSegments[SegmentIndex]->SetRenderOpacity(
+				bShowCancelableAction && SegmentIndex < FilledSegmentCount ? 1.0f : 0.18f);
 		}
 	}
 
@@ -2503,23 +2503,40 @@ void UTunaSweeperGameHudWidget::RefreshReloadWidgets()
 	}
 }
 
-void UTunaSweeperGameHudWidget::CacheAmmoReloadWidgets()
+void UTunaSweeperGameHudWidget::CacheAmmoCancelableActionWidgets()
 {
 	if (!WidgetTree)
 	{
 		return;
 	}
 
-	CenterReloadGaugeRoot = WidgetTree->FindWidget(FName(TEXT("CenterReloadGaugeRoot")));
-	CenterReloadRingWidget = Cast<UTunaSweeperReloadRingWidget>(WidgetTree->FindWidget(FName(TEXT("CenterReloadRingWidget"))));
+	CenterCancelableActionGaugeRoot = WidgetTree->FindWidget(FName(TEXT("CenterCancelableActionGaugeRoot")));
+	if (!CenterCancelableActionGaugeRoot)
+	{
+		CenterCancelableActionGaugeRoot = WidgetTree->FindWidget(FName(TEXT("CenterReloadGaugeRoot")));
+	}
+	CenterCancelableActionRingWidget = Cast<UTunaSweeperReloadRingWidget>(WidgetTree->FindWidget(FName(TEXT("CenterCancelableActionRingWidget"))));
+	if (!CenterCancelableActionRingWidget)
+	{
+		CenterCancelableActionRingWidget = Cast<UTunaSweeperReloadRingWidget>(WidgetTree->FindWidget(FName(TEXT("CenterReloadRingWidget"))));
+	}
 	CenterReloadPromptRoot = WidgetTree->FindWidget(FName(TEXT("CenterReloadPromptRoot")));
-	CenterReloadPercentText = Cast<UTextBlock>(WidgetTree->FindWidget(FName(TEXT("CenterReloadPercentText"))));
-	CenterReloadSegments.SetNum(12);
-	for (int32 SegmentNumber = 1; SegmentNumber <= CenterReloadSegments.Num(); ++SegmentNumber)
+	CenterCancelableActionPercentText = Cast<UTextBlock>(WidgetTree->FindWidget(FName(TEXT("CenterCancelableActionPercentText"))));
+	if (!CenterCancelableActionPercentText)
+	{
+		CenterCancelableActionPercentText = Cast<UTextBlock>(WidgetTree->FindWidget(FName(TEXT("CenterReloadPercentText"))));
+	}
+	CenterCancelableActionSegments.SetNum(12);
+	for (int32 SegmentNumber = 1; SegmentNumber <= CenterCancelableActionSegments.Num(); ++SegmentNumber)
 	{
 		UBorder* Segment = Cast<UBorder>(WidgetTree->FindWidget(
-			FName(*FString::Printf(TEXT("CenterReloadSegment%02d"), SegmentNumber))));
-		CenterReloadSegments[SegmentNumber - 1] = Segment;
+			FName(*FString::Printf(TEXT("CenterCancelableActionSegment%02d"), SegmentNumber))));
+		if (!Segment)
+		{
+			Segment = Cast<UBorder>(WidgetTree->FindWidget(
+				FName(*FString::Printf(TEXT("CenterReloadSegment%02d"), SegmentNumber))));
+		}
+		CenterCancelableActionSegments[SegmentNumber - 1] = Segment;
 		if (!Segment)
 		{
 			continue;
@@ -2862,7 +2879,7 @@ void UTunaSweeperGameHudWidget::HandleHousingStateChanged()
 {
 	ApplyHudModeVisibility();
 	RefreshDialogueHudVisibility();
-	RefreshReloadWidgets();
+	RefreshCancelableActionWidgets();
 	Invalidate(EInvalidateWidgetReason::LayoutAndVolatility);
 }
 

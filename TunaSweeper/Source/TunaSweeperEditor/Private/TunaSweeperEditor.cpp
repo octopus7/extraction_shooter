@@ -149,7 +149,7 @@ namespace TunaSweeperEditorSetup
 	const FString InteractionInputTaskId = TEXT("2026-05-29_SetInteractInputAndFocusWheelV1");
 	const FString InteractionMarkerAlignmentTaskId = TEXT("2026-05-25_RebuildInteractionMarkerRequirementPreviewV1");
 	const FString PickupItemAndSpawnerTaskId = TEXT("2026-05-11_CreatePickupItemAndSpawnerAssetsV3");
-	const FString CommonGameHudTaskId = TEXT("2026-05-30_CenterQuickSlotsBottomHudV1");
+	const FString CommonGameHudTaskId = TEXT("2026-05-30_CancelableActionProgressHudV1");
 	constexpr float GameplayBottomQuickSlotWidth = 694.0f;
 	constexpr float GameplayBottomQuickSlotHeight = 174.0f;
 	constexpr float GameplayBottomStatusWidth = 194.0f;
@@ -7904,11 +7904,17 @@ namespace TunaSweeperEditorSetup
 		UTextBlock* AmmoSelectorPromptText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("AmmoSelectorPromptText"));
 		UBorder* AmmoSelectorKeyBackground = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("AmmoSelectorKeyBackground"));
 		UTextBlock* AmmoSelectorKeyText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("AmmoSelectorKeyText"));
-		USizeBox* ReloadProgressPanel = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("ReloadProgressPanel"));
-		UProgressBar* ReloadProgressBar = WidgetTree->ConstructWidget<UProgressBar>(UProgressBar::StaticClass(), TEXT("ReloadProgressBar"));
+		UHorizontalBox* CancelableActionPromptRoot = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("CancelableActionPromptRoot"));
+		UBorder* CancelableActionCancelKeyBackground = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("CancelableActionCancelKeyBackground"));
+		UTextBlock* CancelableActionCancelKeyText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("CancelableActionCancelKeyText"));
+		UTextBlock* CancelableActionCancelText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("CancelableActionCancelText"));
+		USizeBox* CancelableActionProgressPanel = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("CancelableActionProgressPanel"));
+		UProgressBar* CancelableActionProgressBar = WidgetTree->ConstructWidget<UProgressBar>(UProgressBar::StaticClass(), TEXT("CancelableActionProgressBar"));
 		UHorizontalBox* SlotRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("SlotRow"));
 		if (!RootSizeBox || !RootCanvas || !AmmoSelectorPanel || !AmmoSelectorPromptBackground || !AmmoSelectorPromptText ||
-			!AmmoSelectorKeyBackground || !AmmoSelectorKeyText || !ReloadProgressPanel || !ReloadProgressBar || !SlotRow)
+			!AmmoSelectorKeyBackground || !AmmoSelectorKeyText ||
+			!CancelableActionPromptRoot || !CancelableActionCancelKeyBackground || !CancelableActionCancelKeyText || !CancelableActionCancelText ||
+			!CancelableActionProgressPanel || !CancelableActionProgressBar || !SlotRow)
 		{
 			return false;
 		}
@@ -7994,19 +8000,60 @@ namespace TunaSweeperEditorSetup
 			KeySlot->SetVerticalAlignment(VAlign_Center);
 		}
 
-		ReloadProgressPanel->SetWidthOverride(420.0f);
-		ReloadProgressPanel->SetHeightOverride(10.0f);
-		ReloadProgressPanel->SetVisibility(ESlateVisibility::Collapsed);
-		ReloadProgressBar->SetPercent(0.0f);
-		ReloadProgressBar->SetFillColorAndOpacity(FLinearColor(0.62f, 0.98f, 0.62f, 1.0f));
-		ReloadProgressPanel->SetContent(ReloadProgressBar);
-		UCanvasPanelSlot* ReloadProgressSlot = RootCanvas->AddChildToCanvas(ReloadProgressPanel);
-		if (ReloadProgressSlot)
+		CancelableActionPromptRoot->SetVisibility(ESlateVisibility::Collapsed);
+		UCanvasPanelSlot* CancelableActionPromptSlot = RootCanvas->AddChildToCanvas(CancelableActionPromptRoot);
+		if (CancelableActionPromptSlot)
 		{
-			ReloadProgressSlot->SetAnchors(FAnchors(0.5f, 0.0f, 0.5f, 0.0f));
-			ReloadProgressSlot->SetAlignment(FVector2D(0.5f, 0.0f));
-			ReloadProgressSlot->SetPosition(FVector2D(0.0f, 34.0f));
-			ReloadProgressSlot->SetSize(FVector2D(420.0f, 10.0f));
+			CancelableActionPromptSlot->SetAnchors(FAnchors(0.5f, 0.0f, 0.5f, 0.0f));
+			CancelableActionPromptSlot->SetAlignment(FVector2D(0.5f, 0.0f));
+			CancelableActionPromptSlot->SetPosition(FVector2D(0.0f, 4.0f));
+			CancelableActionPromptSlot->SetAutoSize(true);
+			CancelableActionPromptSlot->SetZOrder(12);
+		}
+
+		CancelableActionCancelKeyBackground->SetPadding(FMargin(7.0f, 2.0f));
+		CancelableActionCancelKeyBackground->SetVisibility(ESlateVisibility::Collapsed);
+		CancelableActionCancelKeyBackground->SetBrush(MakeRoundedBoxBrush(
+			FVector2D(24.0f, 22.0f),
+			FLinearColor(1.0f, 1.0f, 1.0f, 0.98f),
+			FLinearColor(0.0f, 0.0f, 0.0f, 1.0f),
+			1.0f,
+			4.0f));
+		ConfigureTextBlock(CancelableActionCancelKeyText, FText::FromString(TEXT("X")), FLinearColor(0.0f, 0.0f, 0.0f, 1.0f), 11);
+		TunaSweeperUIFont::ApplyFont(CancelableActionCancelKeyText, 11.0f, ETunaSweeperUIFontWeight::Bold);
+		CancelableActionCancelKeyText->SetVisibility(ESlateVisibility::Collapsed);
+		CancelableActionCancelKeyBackground->SetContent(CancelableActionCancelKeyText);
+		UHorizontalBoxSlot* CancelableActionCancelKeySlot = CancelableActionPromptRoot->AddChildToHorizontalBox(CancelableActionCancelKeyBackground);
+		if (CancelableActionCancelKeySlot)
+		{
+			CancelableActionCancelKeySlot->SetVerticalAlignment(VAlign_Center);
+		}
+
+		ConfigureTextBlock(CancelableActionCancelText, FText::FromString(TEXT("\uC911\uC9C0")), FLinearColor(0.92f, 0.96f, 1.0f, 1.0f), 13);
+		TunaSweeperUIFont::ApplyFont(CancelableActionCancelText, 13.0f, ETunaSweeperUIFontWeight::Bold);
+		CancelableActionCancelText->SetShadowOffset(FVector2D(0.0f, 1.0f));
+		CancelableActionCancelText->SetShadowColorAndOpacity(FLinearColor(0.0f, 0.0f, 0.0f, 0.7f));
+		CancelableActionCancelText->SetVisibility(ESlateVisibility::Collapsed);
+		UHorizontalBoxSlot* CancelableActionCancelTextSlot = CancelableActionPromptRoot->AddChildToHorizontalBox(CancelableActionCancelText);
+		if (CancelableActionCancelTextSlot)
+		{
+			CancelableActionCancelTextSlot->SetPadding(FMargin(6.0f, 0.0f, 0.0f, 0.0f));
+			CancelableActionCancelTextSlot->SetVerticalAlignment(VAlign_Center);
+		}
+
+		CancelableActionProgressPanel->SetWidthOverride(420.0f);
+		CancelableActionProgressPanel->SetHeightOverride(10.0f);
+		CancelableActionProgressPanel->SetVisibility(ESlateVisibility::Collapsed);
+		CancelableActionProgressBar->SetPercent(0.0f);
+		CancelableActionProgressBar->SetFillColorAndOpacity(FLinearColor(0.62f, 0.98f, 0.62f, 1.0f));
+		CancelableActionProgressPanel->SetContent(CancelableActionProgressBar);
+		UCanvasPanelSlot* CancelableActionProgressSlot = RootCanvas->AddChildToCanvas(CancelableActionProgressPanel);
+		if (CancelableActionProgressSlot)
+		{
+			CancelableActionProgressSlot->SetAnchors(FAnchors(0.5f, 0.0f, 0.5f, 0.0f));
+			CancelableActionProgressSlot->SetAlignment(FVector2D(0.5f, 0.0f));
+			CancelableActionProgressSlot->SetPosition(FVector2D(0.0f, 34.0f));
+			CancelableActionProgressSlot->SetSize(FVector2D(420.0f, 10.0f));
 		}
 
 		UCanvasPanelSlot* SlotRowCanvasSlot = RootCanvas->AddChildToCanvas(SlotRow);
@@ -8249,8 +8296,12 @@ namespace TunaSweeperEditorSetup
 		RegisterWidgetVariable(WidgetBlueprint, AmmoSelectorPromptText);
 		RegisterWidgetVariable(WidgetBlueprint, AmmoSelectorKeyBackground);
 		RegisterWidgetVariable(WidgetBlueprint, AmmoSelectorKeyText);
-		RegisterWidgetVariable(WidgetBlueprint, ReloadProgressPanel);
-		RegisterWidgetVariable(WidgetBlueprint, ReloadProgressBar);
+		RegisterWidgetVariable(WidgetBlueprint, CancelableActionPromptRoot);
+		RegisterWidgetVariable(WidgetBlueprint, CancelableActionCancelKeyBackground);
+		RegisterWidgetVariable(WidgetBlueprint, CancelableActionCancelKeyText);
+		RegisterWidgetVariable(WidgetBlueprint, CancelableActionCancelText);
+		RegisterWidgetVariable(WidgetBlueprint, CancelableActionProgressPanel);
+		RegisterWidgetVariable(WidgetBlueprint, CancelableActionProgressBar);
 		WidgetBlueprint->MarkPackageDirty();
 		return true;
 	}
@@ -9444,13 +9495,13 @@ namespace TunaSweeperEditorSetup
 		UUserWidget* BottomStatusWidget = WidgetTree->ConstructWidget<UUserWidget>(BottomStatusWidgetClass, TEXT("BottomStatusWidget"));
 		UUserWidget* DebuffBarWidget = WidgetTree->ConstructWidget<UUserWidget>(DebuffBarWidgetClass, TEXT("DebuffBarWidget"));
 		UUserWidget* QuickSlotBarWidget = WidgetTree->ConstructWidget<UUserWidget>(QuickSlotBarWidgetClass, TEXT("QuickSlotBarWidget"));
-		USizeBox* CenterReloadGaugeRoot = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("CenterReloadGaugeRoot"));
-		UCanvasPanel* CenterReloadGaugeCanvas = WidgetTree->ConstructWidget<UCanvasPanel>(UCanvasPanel::StaticClass(), TEXT("CenterReloadGaugeCanvas"));
-		UBorder* CenterReloadGaugeBackdrop = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("CenterReloadGaugeBackdrop"));
-		UTunaSweeperReloadRingWidget* CenterReloadRingWidget = WidgetTree->ConstructWidget<UTunaSweeperReloadRingWidget>(
+		USizeBox* CenterCancelableActionGaugeRoot = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("CenterCancelableActionGaugeRoot"));
+		UCanvasPanel* CenterCancelableActionGaugeCanvas = WidgetTree->ConstructWidget<UCanvasPanel>(UCanvasPanel::StaticClass(), TEXT("CenterCancelableActionGaugeCanvas"));
+		UBorder* CenterCancelableActionGaugeBackdrop = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("CenterCancelableActionGaugeBackdrop"));
+		UTunaSweeperReloadRingWidget* CenterCancelableActionRingWidget = WidgetTree->ConstructWidget<UTunaSweeperReloadRingWidget>(
 			UTunaSweeperReloadRingWidget::StaticClass(),
-			TEXT("CenterReloadRingWidget"));
-		UTextBlock* CenterReloadPercentText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("CenterReloadPercentText"));
+			TEXT("CenterCancelableActionRingWidget"));
+		UTextBlock* CenterCancelableActionPercentText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("CenterCancelableActionPercentText"));
 		UHorizontalBox* CenterReloadPromptRoot = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("CenterReloadPromptRoot"));
 		UTextBlock* CenterReloadPromptText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("CenterReloadPromptText"));
 		UBorder* CenterReloadPromptKeyBackground = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("CenterReloadPromptKeyBackground"));
@@ -9459,7 +9510,7 @@ namespace TunaSweeperEditorSetup
 		if (!RootCanvas || !TopStatusReserveWidget || !CenterContentPanel || !InventoryAreaWidget || !ItemInfoPanelWidget ||
 			!ExternalPanelWidget || !UnsupportedModePanel || !UnsupportedModeText || !ModeTitleText ||
 			!BottomRow || !BottomStatusWidget || !DebuffBarWidget || !QuickSlotBarWidget ||
-			!CenterReloadGaugeRoot || !CenterReloadGaugeCanvas || !CenterReloadGaugeBackdrop || !CenterReloadRingWidget || !CenterReloadPercentText ||
+			!CenterCancelableActionGaugeRoot || !CenterCancelableActionGaugeCanvas || !CenterCancelableActionGaugeBackdrop || !CenterCancelableActionRingWidget || !CenterCancelableActionPercentText ||
 			!CenterReloadPromptRoot || !CenterReloadPromptText || !CenterReloadPromptKeyBackground || !CenterReloadPromptKeyText)
 		{
 			return false;
@@ -9571,51 +9622,51 @@ namespace TunaSweeperEditorSetup
 			DebuffBarSlot->SetZOrder(36);
 		}
 
-		CenterReloadGaugeRoot->SetWidthOverride(96.0f);
-		CenterReloadGaugeRoot->SetHeightOverride(96.0f);
-		CenterReloadGaugeRoot->SetContent(CenterReloadGaugeCanvas);
-		CenterReloadGaugeRoot->SetVisibility(ESlateVisibility::Collapsed);
-		UCanvasPanelSlot* CenterReloadSlot = RootCanvas->AddChildToCanvas(CenterReloadGaugeRoot);
-		if (CenterReloadSlot)
+		CenterCancelableActionGaugeRoot->SetWidthOverride(96.0f);
+		CenterCancelableActionGaugeRoot->SetHeightOverride(96.0f);
+		CenterCancelableActionGaugeRoot->SetContent(CenterCancelableActionGaugeCanvas);
+		CenterCancelableActionGaugeRoot->SetVisibility(ESlateVisibility::Collapsed);
+		UCanvasPanelSlot* CenterCancelableActionSlot = RootCanvas->AddChildToCanvas(CenterCancelableActionGaugeRoot);
+		if (CenterCancelableActionSlot)
 		{
-			CenterReloadSlot->SetAnchors(FAnchors(0.5f, 0.5f, 0.5f, 0.5f));
-			CenterReloadSlot->SetAlignment(FVector2D(0.5f, 0.5f));
-			CenterReloadSlot->SetPosition(FVector2D(0.0f, 0.0f));
-			CenterReloadSlot->SetSize(FVector2D(96.0f, 96.0f));
+			CenterCancelableActionSlot->SetAnchors(FAnchors(0.5f, 0.5f, 0.5f, 0.5f));
+			CenterCancelableActionSlot->SetAlignment(FVector2D(0.5f, 0.5f));
+			CenterCancelableActionSlot->SetPosition(FVector2D(0.0f, 0.0f));
+			CenterCancelableActionSlot->SetSize(FVector2D(96.0f, 96.0f));
 		}
 
-		CenterReloadGaugeBackdrop->SetBrush(MakeRoundedBoxBrush(
+		CenterCancelableActionGaugeBackdrop->SetBrush(MakeRoundedBoxBrush(
 			FVector2D(58.0f, 58.0f),
 			FLinearColor(0.012f, 0.016f, 0.018f, 0.68f),
 			FLinearColor(0.48f, 0.66f, 0.46f, 0.3f),
 			1.0f));
-		UCanvasPanelSlot* CenterReloadBackdropSlot = CenterReloadGaugeCanvas->AddChildToCanvas(CenterReloadGaugeBackdrop);
-		if (CenterReloadBackdropSlot)
+		UCanvasPanelSlot* CenterCancelableActionBackdropSlot = CenterCancelableActionGaugeCanvas->AddChildToCanvas(CenterCancelableActionGaugeBackdrop);
+		if (CenterCancelableActionBackdropSlot)
 		{
-			CenterReloadBackdropSlot->SetAnchors(FAnchors(0.5f, 0.5f, 0.5f, 0.5f));
-			CenterReloadBackdropSlot->SetAlignment(FVector2D(0.5f, 0.5f));
-			CenterReloadBackdropSlot->SetPosition(FVector2D(0.0f, 0.0f));
-			CenterReloadBackdropSlot->SetSize(FVector2D(58.0f, 58.0f));
+			CenterCancelableActionBackdropSlot->SetAnchors(FAnchors(0.5f, 0.5f, 0.5f, 0.5f));
+			CenterCancelableActionBackdropSlot->SetAlignment(FVector2D(0.5f, 0.5f));
+			CenterCancelableActionBackdropSlot->SetPosition(FVector2D(0.0f, 0.0f));
+			CenterCancelableActionBackdropSlot->SetSize(FVector2D(58.0f, 58.0f));
 		}
 
-		CenterReloadRingWidget->SetReloadProgress(0.0f, true);
-		UCanvasPanelSlot* CenterReloadRingSlot = CenterReloadGaugeCanvas->AddChildToCanvas(CenterReloadRingWidget);
-		if (CenterReloadRingSlot)
+		CenterCancelableActionRingWidget->SetCancelableActionProgress(0.0f, true);
+		UCanvasPanelSlot* CenterCancelableActionRingSlot = CenterCancelableActionGaugeCanvas->AddChildToCanvas(CenterCancelableActionRingWidget);
+		if (CenterCancelableActionRingSlot)
 		{
-			CenterReloadRingSlot->SetAnchors(FAnchors(0.5f, 0.5f, 0.5f, 0.5f));
-			CenterReloadRingSlot->SetAlignment(FVector2D(0.5f, 0.5f));
-			CenterReloadRingSlot->SetPosition(FVector2D(0.0f, 0.0f));
-			CenterReloadRingSlot->SetSize(FVector2D(90.0f, 90.0f));
+			CenterCancelableActionRingSlot->SetAnchors(FAnchors(0.5f, 0.5f, 0.5f, 0.5f));
+			CenterCancelableActionRingSlot->SetAlignment(FVector2D(0.5f, 0.5f));
+			CenterCancelableActionRingSlot->SetPosition(FVector2D(0.0f, 0.0f));
+			CenterCancelableActionRingSlot->SetSize(FVector2D(90.0f, 90.0f));
 		}
 
-		ConfigureTextBlock(CenterReloadPercentText, FText::GetEmpty(), FLinearColor(0.9f, 1.0f, 0.88f, 1.0f), 13);
-		UCanvasPanelSlot* CenterReloadTextSlot = CenterReloadGaugeCanvas->AddChildToCanvas(CenterReloadPercentText);
-		if (CenterReloadTextSlot)
+		ConfigureTextBlock(CenterCancelableActionPercentText, FText::GetEmpty(), FLinearColor(0.9f, 1.0f, 0.88f, 1.0f), 13);
+		UCanvasPanelSlot* CenterCancelableActionTextSlot = CenterCancelableActionGaugeCanvas->AddChildToCanvas(CenterCancelableActionPercentText);
+		if (CenterCancelableActionTextSlot)
 		{
-			CenterReloadTextSlot->SetAnchors(FAnchors(0.5f, 0.5f, 0.5f, 0.5f));
-			CenterReloadTextSlot->SetAlignment(FVector2D(0.5f, 0.5f));
-			CenterReloadTextSlot->SetPosition(FVector2D(0.0f, 0.0f));
-			CenterReloadTextSlot->SetSize(FVector2D(54.0f, 24.0f));
+			CenterCancelableActionTextSlot->SetAnchors(FAnchors(0.5f, 0.5f, 0.5f, 0.5f));
+			CenterCancelableActionTextSlot->SetAlignment(FVector2D(0.5f, 0.5f));
+			CenterCancelableActionTextSlot->SetPosition(FVector2D(0.0f, 0.0f));
+			CenterCancelableActionTextSlot->SetSize(FVector2D(54.0f, 24.0f));
 		}
 
 		CenterReloadPromptRoot->SetVisibility(ESlateVisibility::Collapsed);
@@ -9672,10 +9723,10 @@ namespace TunaSweeperEditorSetup
 		RegisterWidgetVariable(WidgetBlueprint, BottomStatusWidget);
 		RegisterWidgetVariable(WidgetBlueprint, DebuffBarWidget);
 		RegisterWidgetVariable(WidgetBlueprint, QuickSlotBarWidget);
-		RegisterWidgetVariable(WidgetBlueprint, CenterReloadGaugeRoot);
-		RegisterWidgetVariable(WidgetBlueprint, CenterReloadRingWidget);
+		RegisterWidgetVariable(WidgetBlueprint, CenterCancelableActionGaugeRoot);
+		RegisterWidgetVariable(WidgetBlueprint, CenterCancelableActionRingWidget);
 		RegisterWidgetVariable(WidgetBlueprint, CenterReloadPromptRoot);
-		RegisterWidgetVariable(WidgetBlueprint, CenterReloadPercentText);
+		RegisterWidgetVariable(WidgetBlueprint, CenterCancelableActionPercentText);
 		RegisterWidgetVariable(WidgetBlueprint, CenterContentPanel);
 		RegisterWidgetVariable(WidgetBlueprint, InventoryAreaWidget);
 		RegisterWidgetVariable(WidgetBlueprint, ItemInfoPanelWidget);

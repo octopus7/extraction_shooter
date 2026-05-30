@@ -1,5 +1,6 @@
 #include "Subsystem/TunaSweeperKeyboardInputSubsystem.h"
 
+#include "Character/TunaSweeperTopDownCharacter.h"
 #include "Engine/Engine.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "Math/UnrealMathUtility.h"
@@ -26,10 +27,11 @@ void UTunaSweeperKeyboardInputSubsystem::ReceiveQuickSlotKeyInput(int32 SlotNumb
 				{
 					ItemDataSubsystem->TryGetItemNameText(ItemInstance.ItemId, TunaGameInstance->GetCurrentTextLanguage(), ItemName);
 				}
-				if (TunaGameInstance->TryUseItemInSlot(QuickSlotReference, InstigatorPawn))
+				ATunaSweeperTopDownCharacter* TunaCharacter = Cast<ATunaSweeperTopDownCharacter>(InstigatorPawn);
+				if (TunaCharacter && TunaCharacter->StartItemUseFromSlot(QuickSlotReference))
 				{
 					Message = FString::Printf(
-						TEXT("[QuickSlot] Slot %d used: %s"),
+						TEXT("[QuickSlot] Slot %d using: %s"),
 						ClampedSlotNumber,
 						*ItemName.ToString());
 				}

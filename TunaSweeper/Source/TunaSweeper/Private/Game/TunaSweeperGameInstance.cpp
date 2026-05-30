@@ -306,6 +306,7 @@ namespace TunaSweeperInventory
 	const FName OpticAttachmentSlotTag(TEXT("attachment.slot.optic"));
 	constexpr int32 DefaultWeaponMagazineCapacity = 12;
 	constexpr float DefaultWeaponReloadSeconds = 1.8f;
+	constexpr float DefaultItemUseSeconds = 1.25f;
 
 	struct FEquipmentSlotRule
 	{
@@ -1337,6 +1338,22 @@ bool UTunaSweeperGameInstance::TryGetSlotItemInstance(
 	return TryGetItemInstance(ItemUid, OutItemInstance);
 }
 
+bool UTunaSweeperGameInstance::TryGetSlotItemUid(
+	const FTunaSweeperItemSlotReference& SlotReference,
+	FGuid& OutItemUid)
+{
+	EnsureInventoryStateInitialized();
+	const TArray<FTunaSweeperInventorySlot>* Slots = GetSlotsForSource(SlotReference.Source);
+	if (!Slots || !Slots->IsValidIndex(SlotReference.SlotIndex))
+	{
+		OutItemUid.Invalidate();
+		return false;
+	}
+
+	OutItemUid = (*Slots)[SlotReference.SlotIndex].ItemUid;
+	return OutItemUid.IsValid() && ItemInstancesByUid.Contains(OutItemUid);
+}
+
 bool UTunaSweeperGameInstance::TryGetSelectedItemInstance(FTunaSweeperItemInstance& OutItemInstance)
 {
 	EnsureInventoryStateInitialized();
@@ -1747,6 +1764,85 @@ bool UTunaSweeperGameInstance::CanSlotAcceptItem(const FTunaSweeperItemSlotRefer
 	}
 
 	return true;
+}
+
+bool UTunaSweeperGameInstance::CanUseItemInSlot(
+	const FTunaSweeperItemSlotReference& SlotReference,
+	APawn* InstigatorPawn)
+{
+	EnsureInventoryStateInitialized();
+	if (!SlotReference.IsValid() || !InstigatorPawn)
+	{
+		return false;
+	}
+
+	const TArray<FTunaSweeperInventorySlot>* Slots = GetSlotsForSource(SlotReference.Source);
+	if (!Slots || !Slots->IsValidIndex(SlotReference.SlotIndex))
+	{
+		return false;
+	}
+
+	const FGuid ItemUid = (*Slots)[SlotReference.SlotIndex].ItemUid;
+	const FTunaSweeperItemInstance* ItemInstance = ItemInstancesByUid.Find(ItemUid);
+	if (!ItemInstance || !ItemInstance->IsValid())
+	{
+		return false;
+	}
+
+	UTunaSweeperItemDataSubsystem* ItemDataSubsystem = GetSubsystem<UTunaSweeperItemDataSubsystem>();
+	FTunaSweeperItemDefinition ItemDefinition;
+	if (!ItemDataSubsystem ||
+		!ItemDataSubsystem->TryGetItemDefinition(ItemInstance->ItemId, ItemDefinition) ||
+		ItemDefinition.CategoryTag != TunaSweeperInventory::ConsumableCategoryTag ||
+		!DoesItemDefinitionHaveUseEffect(ItemDefinition))
+	{
+		return false;
+	}
+
+	const bool bHasVitalsEffect =
+		!FMath::IsNearlyZero(ItemDefinition.UseHealthDelta) ||
+		!FMath::IsNearlyZero(ItemDefinition.UseFoodDelta) ||
+		!FMath::IsNearlyZero(ItemDefinition.UseHydrationDelta);
+	const bool bClearsDebuffs = ItemDefinition.ClearsDebuffIds.Num() > 0;
+
+	const UTunaSweeperVitalsComponent* VitalsComponent = bHasVitalsEffect
+		? InstigatorPawn->FindComponentByClass<UTunaSweeperVitalsComponent>()
+		: nullptr;
+	const UTunaSweeperDebuffComponent* DebuffComponent = bClearsDebuffs
+		? InstigatorPawn->FindComponentByClass<UTunaSweeperDebuffComponent>()
+		: nullptr;
+	return (!bHasVitalsEffect || VitalsComponent) && (!bClearsDebuffs || DebuffComponent);
+}
+
+float UTunaSweeperGameInstance::GetItemUseSecondsInSlot(const FTunaSweeperItemSlotReference& SlotReference)
+{
+	EnsureInventoryStateInitialized();
+	const TArray<FTunaSweeperInventorySlot>* Slots = GetSlotsForSource(SlotReference.Source);
+	if (!SlotReference.IsValid() || !Slots || !Slots->IsValidIndex(SlotReference.SlotIndex))
+	{
+		return 0.0f;
+	}
+
+	const FGuid ItemUid = (*Slots)[SlotReference.SlotIndex].ItemUid;
+	const FTunaSweeperItemInstance* ItemInstance = ItemInstancesByUid.Find(ItemUid);
+	if (!ItemInstance || !ItemInstance->IsValid())
+	{
+		return 0.0f;
+	}
+
+	UTunaSweeperItemDataSubsystem* ItemDataSubsystem = GetSubsystem<UTunaSweeperItemDataSubsystem>();
+	FTunaSweeperItemDefinition ItemDefinition;
+	if (!ItemDataSubsystem ||
+		!ItemDataSubsystem->TryGetItemDefinition(ItemInstance->ItemId, ItemDefinition) ||
+		ItemDefinition.CategoryTag != TunaSweeperInventory::ConsumableCategoryTag ||
+		!DoesItemDefinitionHaveUseEffect(ItemDefinition))
+	{
+		return 0.0f;
+	}
+
+	return ItemDefinition.UseSeconds > 0.0f
+		? ItemDefinition.UseSeconds
+		: TunaSweeperInventory::DefaultItemUseSeconds;
 }
 
 bool UTunaSweeperGameInstance::TryUseItemInSlot(const FTunaSweeperItemSlotReference& SlotReference, APawn* InstigatorPawn)

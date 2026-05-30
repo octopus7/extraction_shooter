@@ -9,6 +9,8 @@ class UProgressBar;
 class UTextBlock;
 class UTexture2D;
 class UWidget;
+class UBorder;
+class UHorizontalBox;
 
 UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API UTunaSweeperHudQuickSlotBarWidget : public UUserWidget
@@ -36,7 +38,8 @@ public:
 
 	void SetWeaponAmmoTypeText(int32 SlotNumber, const FText& AmmoTypeText, bool bVisible);
 	void SetWeaponAmmoText(int32 SlotNumber, int32 LoadedAmmoCount, int32 InventoryAmmoCount, bool bVisible);
-	void SetReloadProgress(float Progress, bool bVisible);
+	void SetCancelableActionProgress(float Progress, bool bVisible);
+	void SetReloadProgress(float Progress, bool bVisible) { SetCancelableActionProgress(Progress, bVisible); }
 	void SetAmmoSelectorOptions(const TArray<FText>& OptionTexts, int32 FocusedOptionIndex, int32 WeaponSlotNumber, bool bVisible);
 	void SetAmmoSelectorPrompt(int32 WeaponSlotNumber, const FText& PromptText, bool bVisible);
 
@@ -46,6 +49,7 @@ protected:
 
 private:
 	void CacheNamedWidgets();
+	void EnsureCancelableActionPromptWidgets();
 	int32 GetSlotIndex(int32 SlotNumber) const;
 	float GetWeaponSlotCenterOffsetX(int32 WeaponSlotNumber) const;
 	void SetAmmoSelectorPanelPosition(int32 WeaponSlotNumber);
@@ -104,8 +108,20 @@ private:
 	TObjectPtr<UWidget> AmmoSelectorPanel;
 
 	UPROPERTY(BlueprintReadOnly, Transient, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional, AllowPrivateAccess = "true"))
-	TObjectPtr<UWidget> ReloadProgressPanel;
+	TObjectPtr<UWidget> CancelableActionProgressPanel;
 
 	UPROPERTY(BlueprintReadOnly, Transient, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional, AllowPrivateAccess = "true"))
-	TObjectPtr<UProgressBar> ReloadProgressBar;
+	TObjectPtr<UProgressBar> CancelableActionProgressBar;
+
+	UPROPERTY(BlueprintReadOnly, Transient, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional, AllowPrivateAccess = "true"))
+	TObjectPtr<UHorizontalBox> CancelableActionPromptRoot;
+
+	UPROPERTY(BlueprintReadOnly, Transient, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional, AllowPrivateAccess = "true"))
+	TObjectPtr<UBorder> CancelableActionCancelKeyBackground;
+
+	UPROPERTY(BlueprintReadOnly, Transient, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional, AllowPrivateAccess = "true"))
+	TObjectPtr<UTextBlock> CancelableActionCancelKeyText;
+
+	UPROPERTY(BlueprintReadOnly, Transient, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional, AllowPrivateAccess = "true"))
+	TObjectPtr<UTextBlock> CancelableActionCancelText;
 };

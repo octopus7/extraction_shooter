@@ -482,6 +482,7 @@ public:
 	FTunaSweeperItemSlotReference GetHoveredItemSlotReference() const { return HoveredItemSlotReference; }
 
 	bool TryGetItemInstance(const FGuid& ItemUid, FTunaSweeperItemInstance& OutItemInstance) const;
+	bool TryGetSlotItemUid(const FTunaSweeperItemSlotReference& SlotReference, FGuid& OutItemUid);
 	bool TryGetSlotItemInstance(const FTunaSweeperItemSlotReference& SlotReference, FTunaSweeperItemInstance& OutItemInstance);
 	bool TryGetSelectedItemInstance(FTunaSweeperItemInstance& OutItemInstance);
 	bool TryGetSelectedItemDefinition(FTunaSweeperItemDefinition& OutItemDefinition);
@@ -512,6 +513,8 @@ public:
 	bool TryConsumeLoadedAmmoForWeaponSlot(int32 WeaponSlotNumber);
 	bool TryReloadWeaponSlot(int32 WeaponSlotNumber, int32 AmmoItemId, int32& OutLoadedAmmoCount);
 	bool CanSlotAcceptItem(const FTunaSweeperItemSlotReference& SlotReference, const FGuid& ItemUid);
+	bool CanUseItemInSlot(const FTunaSweeperItemSlotReference& SlotReference, APawn* InstigatorPawn);
+	float GetItemUseSecondsInSlot(const FTunaSweeperItemSlotReference& SlotReference);
 	bool TryUseItemInSlot(const FTunaSweeperItemSlotReference& SlotReference, APawn* InstigatorPawn);
 	bool TryUseHoveredItem(APawn* InstigatorPawn);
 	bool CanMoveItemBetweenSlots(

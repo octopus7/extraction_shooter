@@ -11,11 +11,15 @@ class TUNASWEEPER_API UTunaSweeperReloadRingWidget : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Reload")
-	void SetReloadProgress(float InReloadProgress, bool bInVisible);
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Cancelable Action")
+	void SetCancelableActionProgress(float InProgress, bool bInVisible);
 
-	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Reload")
-	float GetReloadProgress() const { return ReloadProgress; }
+	void SetReloadProgress(float InReloadProgress, bool bInVisible) { SetCancelableActionProgress(InReloadProgress, bInVisible); }
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Cancelable Action")
+	float GetCancelableActionProgress() const { return CancelableActionProgress; }
+
+	float GetReloadProgress() const { return CancelableActionProgress; }
 
 protected:
 	virtual void NativeConstruct() override;
@@ -28,19 +32,19 @@ protected:
 		const FWidgetStyle& InWidgetStyle,
 		bool bParentEnabled) const override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Reload", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Cancelable Action", meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float RingThickness = 8.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Reload", meta = (ClampMin = "1.0", ClampMax = "360.0", UIMin = "1.0", UIMax = "360.0"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Cancelable Action", meta = (ClampMin = "1.0", ClampMax = "360.0", UIMin = "1.0", UIMax = "360.0"))
 	float GaugeSweepDegrees = 360.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Reload")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Cancelable Action")
 	float GaugeStartAngleDegrees = -90.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Reload")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Cancelable Action")
 	FLinearColor TrackColor = FLinearColor(0.18f, 0.24f, 0.22f, 0.62f);
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Reload")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Cancelable Action")
 	FLinearColor FillColor = FLinearColor(0.62f, 0.98f, 0.62f, 0.98f);
 
 private:
@@ -55,7 +59,7 @@ private:
 		TArray<FSlateVertex>& OutVertices,
 		TArray<SlateIndex>& OutIndices) const;
 
-	float ReloadProgress = 0.0f;
+	float CancelableActionProgress = 0.0f;
 	bool bVisibleGauge = false;
 	mutable TArray<FSlateVertex> PaintVertices;
 	mutable TArray<SlateIndex> PaintIndices;

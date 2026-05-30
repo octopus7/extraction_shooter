@@ -579,6 +579,7 @@ bool UTunaSweeperItemDataSubsystem::LoadItemTableJson()
 		double NumericUseHealthDelta = 0.0;
 		double NumericUseFoodDelta = 0.0;
 		double NumericUseHydrationDelta = 0.0;
+		double NumericUseSeconds = 0.0;
 		FString NameStringKey;
 		FString DescriptionStringKey;
 		FString IconFileName;
@@ -740,6 +741,12 @@ bool UTunaSweeperItemDataSubsystem::LoadItemTableJson()
 		if ((*JsonObject)->TryGetNumberField(TEXT("use_hydration_delta"), NumericUseHydrationDelta))
 		{
 			ItemDefinition.UseHydrationDelta = static_cast<float>(NumericUseHydrationDelta);
+		}
+		if ((*JsonObject)->TryGetNumberField(TEXT("use_seconds"), NumericUseSeconds) ||
+			(*JsonObject)->TryGetNumberField(TEXT("use_duration_seconds"), NumericUseSeconds) ||
+			(*JsonObject)->TryGetNumberField(TEXT("consume_seconds"), NumericUseSeconds))
+		{
+			ItemDefinition.UseSeconds = FMath::Max(0.0f, static_cast<float>(NumericUseSeconds));
 		}
 		const TArray<TSharedPtr<FJsonValue>>* ClearsDebuffIdsArray = nullptr;
 		if (((*JsonObject)->TryGetArrayField(TEXT("clears_debuff_ids"), ClearsDebuffIdsArray) ||

@@ -4,6 +4,7 @@
 #include "Component/TunaSweeperVitalsComponent.h"
 #include "Debuff/TunaSweeperDebuffTypes.h"
 #include "GameFramework/Character.h"
+#include "Inventory/TunaSweeperInventoryTypes.h"
 #include "TunaSweeperTopDownCharacter.generated.h"
 
 class ATunaSweeperWeapon;
@@ -168,6 +169,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Input")
 	void CancelActiveGameplayActions();
 
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Input")
+	void CancelActiveCancelableAction();
+
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Camera")
 	void TriggerDebuffCameraReaction(FName DebuffId, const FTunaSweeperDebuffCameraReactionSettings& ReactionSettings);
 
@@ -191,6 +195,21 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Weapon")
 	float GetReloadProgress() const;
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Item")
+	bool StartItemUseFromSlot(const FTunaSweeperItemSlotReference& SlotReference);
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Item")
+	bool IsUsingItem() const { return bIsUsingItem; }
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Item")
+	float GetItemUseProgress() const;
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Action")
+	bool IsCancelableActionActive() const { return bIsReloading || bIsUsingItem; }
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Action")
+	float GetCancelableActionProgress() const;
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Weapon")
 	bool IsAmmoSelectionOpen() const { return bAmmoSelectionOpen; }
@@ -441,6 +460,8 @@ private:
 	void StartReload();
 	void CompleteReload();
 	void CancelReload();
+	void CompleteItemUse();
+	void CancelItemUse();
 	void OpenAmmoSelection();
 	void ConfirmAmmoSelection();
 	void CloseAmmoSelection();
@@ -490,6 +511,7 @@ private:
 
 	FTimerHandle FireTimerHandle;
 	FTimerHandle ReloadTimerHandle;
+	FTimerHandle ItemUseTimerHandle;
 	FTimerHandle RespawnTransitionTimerHandle;
 	FVector AimWorldPoint = FVector::ZeroVector;
 	FVector AimIntentWorldPoint = FVector::ZeroVector;
@@ -514,6 +536,8 @@ private:
 	float CurrentCameraArmLength = 1200.0f;
 	float ReloadStartWorldSeconds = 0.0f;
 	float ReloadDurationSeconds = 0.0f;
+	float ItemUseStartWorldSeconds = 0.0f;
+	float ItemUseDurationSeconds = 0.0f;
 	float CurrentCameraBaseFOV = 0.0f;
 	float CurrentStamina = 100.0f;
 	float BaseMaxHealth = 100.0f;
@@ -535,14 +559,17 @@ private:
 	TWeakObjectPtr<USceneComponent> SavedWeaponAttachParent;
 	TWeakObjectPtr<AActor> AimIntentActor;
 	TWeakObjectPtr<UPrimitiveComponent> AimIntentComponent;
+	FTunaSweeperItemSlotReference PendingItemUseSlotReference;
 	FName SavedWeaponAttachSocketName = NAME_None;
 	FName WeaponRecoilTypeTag = NAME_None;
 	FTransform SavedWeaponRelativeTransform = FTransform::Identity;
+	FGuid PendingItemUseUid;
 	TEnumAsByte<ECollisionResponse> SavedProjectileCollisionResponse = ECR_Block;
 	bool bFireHeld = false;
 	bool bIsAiming = false;
 	bool bIsDead = false;
 	bool bIsReloading = false;
+	bool bIsUsingItem = false;
 	bool bAmmoSelectionOpen = false;
 	bool bMeleeWeaponSelected = false;
 	bool bMeleeSwingActive = false;

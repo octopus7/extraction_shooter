@@ -1523,3 +1523,23 @@ Review whether horizontal quest UI placement should also use left/right stretch,
 ### Answer
 
 Yes. Horizontal stretch is the cleaner layout model here. The canvas slot should reserve left/right margins instead of using a centered fixed size, while the internal root columns keep the quest list in a fixed SizeBox and let the detail panel use Fill. That uses the available screen width without letting the list title area expand unpredictably.
+
+## 2026-05-30 21:23:26 (elapsed: 00:00:00)
+
+### Question
+
+하우징과 상관없이 지금 돼지저금통 액터가 있는지?
+
+### Answer
+
+있다. `ATunaSweeperPiggyBankActor` C++ 액터가 있고, `GameplayInteractionSpawns.json`에 `TS_DebugPiggyBank_01`이 `piggy_bank` 스폰 타입과 `/Script/TunaSweeper.TunaSweeperPiggyBankActor` 클래스로 등록되어 있다. 상호작용 타입은 기본 돼지저금통, 저금, 출금 3가지가 있으며, 옛 문명 동전/지폐 저금 저장값도 `PiggyBankStates`로 세이브된다.
+
+## 2026-05-30 21:33:30 (elapsed: 00:03:30)
+
+### Question
+
+재장전 원형 인디케이터가 재장전 중 화면 중앙 고정 위치가 아니라 현재 크로스헤어 자리를 대신하면서 커서를 따라다니게 하려면 현재 상태 기준으로 어떻게 구현해야 하는지 확인 요청.
+
+### Answer
+
+현재 크로스헤어는 `UTunaSweeperGameHudWidget::NativePaint()`에서 Slate 커서 위치를 로컬 좌표로 바꿔 직접 그리며, 재장전 원형 인디케이터는 `CenterCancelableActionGaugeRoot` 캔버스 슬롯이 화면 중앙 앵커에 고정되어 있고 `RefreshCancelableActionWidgets()`가 재장전/아이템 사용 진행률과 표시 여부를 갱신한다. 구현은 재장전 중에만 `IsWeaponCrosshairSuppressed()`가 크로스헤어 페인트를 막게 하고, 같은 커서 로컬 좌표 계산을 재사용해 `CenterCancelableActionGaugeRoot`의 `UCanvasPanelSlot` 위치를 매 틱 커서 위치로 옮기면 된다. 아이템 사용도 같은 링을 공유하므로, 재장전은 커서 위치, 아이템 사용은 기존 중앙 위치로 분기하는 것이 안전하다.

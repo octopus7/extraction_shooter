@@ -1223,7 +1223,19 @@ void ATunaSweeperPlayerController::HandleUseHoveredItem()
 
 	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
 	{
-		TunaGameInstance->TryUseHoveredItem(GetPawn());
+		const FTunaSweeperItemSlotReference HoveredSlot = TunaGameInstance->GetHoveredItemSlotReference();
+		if (ATunaSweeperTopDownCharacter* ControlledCharacter = Cast<ATunaSweeperTopDownCharacter>(GetPawn()))
+		{
+			if (ControlledCharacter->StartItemUseFromSlot(HoveredSlot))
+			{
+				TunaGameInstance->ClearHoveredItemSlot(HoveredSlot);
+				if (GameHudWidget && GameHudWidget->IsInventoryUiOpen())
+				{
+					GameHudWidget->SetHudMode(ETunaSweeperHudMode::None);
+					RestoreGameplayState(0.0f);
+				}
+			}
+		}
 	}
 }
 
@@ -1269,6 +1281,15 @@ void ATunaSweeperPlayerController::HandleDrop(const FInputActionValue&)
 	{
 		if (ControlledCharacter->IsDead())
 		{
+			return;
+		}
+	}
+
+	if (ATunaSweeperTopDownCharacter* ControlledCharacter = Cast<ATunaSweeperTopDownCharacter>(GetPawn()))
+	{
+		if (ControlledCharacter->IsCancelableActionActive())
+		{
+			ControlledCharacter->CancelActiveCancelableAction();
 			return;
 		}
 	}

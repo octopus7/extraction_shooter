@@ -1,12 +1,17 @@
 #include "UI/TunaSweeperHudQuickSlotBarWidget.h"
 
 #include "Blueprint/WidgetTree.h"
+#include "Components/Border.h"
+#include "Components/CanvasPanel.h"
 #include "Components/CanvasPanelSlot.h"
+#include "Components/HorizontalBox.h"
+#include "Components/HorizontalBoxSlot.h"
 #include "Components/Image.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
 #include "Components/Widget.h"
 #include "Engine/Texture2D.h"
+#include "Styling/SlateBrush.h"
 #include "UI/TunaSweeperUIFont.h"
 
 namespace
@@ -16,6 +21,22 @@ namespace
 	constexpr float WeaponSlotWidth = 82.0f;
 	constexpr float SlotGapWidth = 8.0f;
 	constexpr float AmmoSelectorPanelOffsetY = 28.0f;
+
+	FSlateBrush MakeRoundedBoxBrush(
+		const FVector2D& ImageSize,
+		const FLinearColor& FillColor,
+		const FLinearColor& OutlineColor,
+		float OutlineWidth,
+		float Radius = 4.0f)
+	{
+		FSlateBrush Brush;
+		Brush.DrawAs = ESlateBrushDrawType::RoundedBox;
+		Brush.TintColor = FSlateColor(FillColor);
+		Brush.SetImageSize(ImageSize);
+		Brush.OutlineSettings = FSlateBrushOutlineSettings(Radius, FSlateColor(OutlineColor), OutlineWidth);
+		Brush.OutlineSettings.bUseBrushTransparency = false;
+		return Brush;
+	}
 }
 
 void UTunaSweeperHudQuickSlotBarWidget::NativeConstruct()
@@ -24,7 +45,7 @@ void UTunaSweeperHudQuickSlotBarWidget::NativeConstruct()
 	CacheNamedWidgets();
 	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
 	SetSelectedQuickSlot(0);
-	SetReloadProgress(0.0f, false);
+	SetCancelableActionProgress(0.0f, false);
 	SetAmmoSelectorOptions(TArray<FText>(), INDEX_NONE, 0, false);
 }
 
@@ -212,18 +233,41 @@ void UTunaSweeperHudQuickSlotBarWidget::SetWeaponAmmoText(
 			: FText::GetEmpty());
 }
 
-void UTunaSweeperHudQuickSlotBarWidget::SetReloadProgress(float Progress, bool bVisible)
+void UTunaSweeperHudQuickSlotBarWidget::SetCancelableActionProgress(float Progress, bool bVisible)
 {
 	CacheNamedWidgets();
 
-	if (ReloadProgressPanel)
+	const ESlateVisibility TargetVisibility = bVisible
+		? ESlateVisibility::HitTestInvisible
+		: ESlateVisibility::Collapsed;
+
+	if (CancelableActionProgressPanel)
 	{
-		ReloadProgressPanel->SetVisibility(bVisible ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
+		CancelableActionProgressPanel->SetVisibility(TargetVisibility);
 	}
 
-	if (ReloadProgressBar)
+	if (CancelableActionProgressBar)
 	{
-		ReloadProgressBar->SetPercent(FMath::Clamp(Progress, 0.0f, 1.0f));
+		CancelableActionProgressBar->SetPercent(FMath::Clamp(Progress, 0.0f, 1.0f));
+	}
+
+	if (CancelableActionPromptRoot)
+	{
+		CancelableActionPromptRoot->SetVisibility(TargetVisibility);
+	}
+	if (CancelableActionCancelKeyBackground)
+	{
+		CancelableActionCancelKeyBackground->SetVisibility(TargetVisibility);
+	}
+	if (CancelableActionCancelKeyText)
+	{
+		CancelableActionCancelKeyText->SetVisibility(TargetVisibility);
+		CancelableActionCancelKeyText->SetText(bVisible ? FText::FromString(TEXT("X")) : FText::GetEmpty());
+	}
+	if (CancelableActionCancelText)
+	{
+		CancelableActionCancelText->SetVisibility(TargetVisibility);
+		CancelableActionCancelText->SetText(bVisible ? FText::FromString(TEXT("\uC911\uC9C0")) : FText::GetEmpty());
 	}
 }
 
@@ -331,10 +375,27 @@ void UTunaSweeperHudQuickSlotBarWidget::CacheNamedWidgets()
 	AmmoSelectorPromptText = Cast<UTextBlock>(WidgetTree->FindWidget(FName(TEXT("AmmoSelectorPromptText"))));
 	AmmoSelectorKeyBackground = WidgetTree->FindWidget(FName(TEXT("AmmoSelectorKeyBackground")));
 	AmmoSelectorKeyText = Cast<UTextBlock>(WidgetTree->FindWidget(FName(TEXT("AmmoSelectorKeyText"))));
-	ReloadProgressPanel = WidgetTree->FindWidget(FName(TEXT("ReloadProgressPanel")));
-	ReloadProgressBar = Cast<UProgressBar>(WidgetTree->FindWidget(FName(TEXT("ReloadProgressBar"))));
+	CancelableActionProgressPanel = WidgetTree->FindWidget(FName(TEXT("CancelableActionProgressPanel")));
+	if (!CancelableActionProgressPanel)
+	{
+		CancelableActionProgressPanel = WidgetTree->FindWidget(FName(TEXT("ReloadProgressPanel")));
+	}
+	CancelableActionProgressBar = Cast<UProgressBar>(WidgetTree->FindWidget(FName(TEXT("CancelableActionProgressBar"))));
+	if (!CancelableActionProgressBar)
+	{
+		CancelableActionProgressBar = Cast<UProgressBar>(WidgetTree->FindWidget(FName(TEXT("ReloadProgressBar"))));
+	}
+	CancelableActionPromptRoot = Cast<UHorizontalBox>(WidgetTree->FindWidget(FName(TEXT("CancelableActionPromptRoot"))));
+	CancelableActionCancelKeyBackground = Cast<UBorder>(WidgetTree->FindWidget(FName(TEXT("CancelableActionCancelKeyBackground"))));
+	CancelableActionCancelKeyText = Cast<UTextBlock>(WidgetTree->FindWidget(FName(TEXT("CancelableActionCancelKeyText"))));
+	CancelableActionCancelText = Cast<UTextBlock>(WidgetTree->FindWidget(FName(TEXT("CancelableActionCancelText"))));
 	QuickSlotMeleeIcon = Cast<UImage>(WidgetTree->FindWidget(FName(TEXT("QuickSlotMeleeIcon"))));
 	QuickSlotMeleeSelectionFrame = WidgetTree->FindWidget(FName(TEXT("QuickSlotMeleeSelectionFrame")));
+
+	if (!IsDesignTime())
+	{
+		EnsureCancelableActionPromptWidgets();
+	}
 
 	for (int32 OptionNumber = 1; OptionNumber <= AmmoSelectorOptionTexts.Num(); ++OptionNumber)
 	{
@@ -343,6 +404,109 @@ void UTunaSweeperHudQuickSlotBarWidget::CacheNamedWidgets()
 			FName(*FString::Printf(TEXT("AmmoOption%dBackground"), OptionNumber)));
 		AmmoSelectorOptionTexts[OptionIndex] = Cast<UTextBlock>(WidgetTree->FindWidget(
 			FName(*FString::Printf(TEXT("AmmoOption%dText"), OptionNumber))));
+	}
+}
+
+void UTunaSweeperHudQuickSlotBarWidget::EnsureCancelableActionPromptWidgets()
+{
+	if (!WidgetTree)
+	{
+		return;
+	}
+
+	UCanvasPanel* RootCanvas = Cast<UCanvasPanel>(WidgetTree->FindWidget(FName(TEXT("RootCanvas"))));
+	if (!CancelableActionPromptRoot)
+	{
+		CancelableActionPromptRoot = WidgetTree->ConstructWidget<UHorizontalBox>(
+			UHorizontalBox::StaticClass(),
+			FName(TEXT("CancelableActionPromptRoot")));
+		if (CancelableActionPromptRoot && RootCanvas)
+		{
+			UCanvasPanelSlot* PromptSlot = RootCanvas->AddChildToCanvas(CancelableActionPromptRoot);
+			if (PromptSlot)
+			{
+				PromptSlot->SetAnchors(FAnchors(0.5f, 0.0f, 0.5f, 0.0f));
+				PromptSlot->SetAlignment(FVector2D(0.5f, 0.0f));
+				PromptSlot->SetPosition(FVector2D(0.0f, 4.0f));
+				PromptSlot->SetAutoSize(true);
+				PromptSlot->SetZOrder(12);
+			}
+		}
+	}
+
+	if (!CancelableActionCancelKeyBackground)
+	{
+		CancelableActionCancelKeyBackground = WidgetTree->ConstructWidget<UBorder>(
+			UBorder::StaticClass(),
+			FName(TEXT("CancelableActionCancelKeyBackground")));
+	}
+	if (!CancelableActionCancelKeyText)
+	{
+		CancelableActionCancelKeyText = WidgetTree->ConstructWidget<UTextBlock>(
+			UTextBlock::StaticClass(),
+			FName(TEXT("CancelableActionCancelKeyText")));
+	}
+	if (!CancelableActionCancelText)
+	{
+		CancelableActionCancelText = WidgetTree->ConstructWidget<UTextBlock>(
+			UTextBlock::StaticClass(),
+			FName(TEXT("CancelableActionCancelText")));
+	}
+
+	if (CancelableActionPromptRoot)
+	{
+		CancelableActionPromptRoot->SetVisibility(ESlateVisibility::Collapsed);
+	}
+
+	if (CancelableActionCancelKeyBackground)
+	{
+		CancelableActionCancelKeyBackground->SetPadding(FMargin(7.0f, 2.0f));
+		CancelableActionCancelKeyBackground->SetVisibility(ESlateVisibility::Collapsed);
+		CancelableActionCancelKeyBackground->SetBrush(MakeRoundedBoxBrush(
+			FVector2D(24.0f, 22.0f),
+			FLinearColor(1.0f, 1.0f, 1.0f, 0.98f),
+			FLinearColor(0.0f, 0.0f, 0.0f, 1.0f),
+			1.0f,
+			4.0f));
+		if (CancelableActionCancelKeyText)
+		{
+			CancelableActionCancelKeyBackground->SetContent(CancelableActionCancelKeyText);
+		}
+		if (CancelableActionPromptRoot && !CancelableActionCancelKeyBackground->Slot)
+		{
+			UHorizontalBoxSlot* KeySlot = CancelableActionPromptRoot->AddChildToHorizontalBox(CancelableActionCancelKeyBackground);
+			if (KeySlot)
+			{
+				KeySlot->SetVerticalAlignment(VAlign_Center);
+			}
+		}
+	}
+
+	if (CancelableActionCancelKeyText)
+	{
+		CancelableActionCancelKeyText->SetColorAndOpacity(FSlateColor(FLinearColor(0.0f, 0.0f, 0.0f, 1.0f)));
+		CancelableActionCancelKeyText->SetJustification(ETextJustify::Center);
+		CancelableActionCancelKeyText->SetVisibility(ESlateVisibility::Collapsed);
+		TunaSweeperUIFont::ApplyFont(CancelableActionCancelKeyText, 11.0f, ETunaSweeperUIFontWeight::Bold);
+	}
+
+	if (CancelableActionCancelText)
+	{
+		CancelableActionCancelText->SetColorAndOpacity(FSlateColor(FLinearColor(0.92f, 0.96f, 1.0f, 1.0f)));
+		CancelableActionCancelText->SetShadowOffset(FVector2D(0.0f, 1.0f));
+		CancelableActionCancelText->SetShadowColorAndOpacity(FLinearColor(0.0f, 0.0f, 0.0f, 0.7f));
+		CancelableActionCancelText->SetJustification(ETextJustify::Center);
+		CancelableActionCancelText->SetVisibility(ESlateVisibility::Collapsed);
+		TunaSweeperUIFont::ApplyFont(CancelableActionCancelText, 13.0f, ETunaSweeperUIFontWeight::Bold);
+		if (CancelableActionPromptRoot && !CancelableActionCancelText->Slot)
+		{
+			UHorizontalBoxSlot* TextSlot = CancelableActionPromptRoot->AddChildToHorizontalBox(CancelableActionCancelText);
+			if (TextSlot)
+			{
+				TextSlot->SetPadding(FMargin(6.0f, 0.0f, 0.0f, 0.0f));
+				TextSlot->SetVerticalAlignment(VAlign_Center);
+			}
+		}
 	}
 }
 

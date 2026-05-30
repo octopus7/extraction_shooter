@@ -109,6 +109,9 @@ struct TUNASWEEPER_API FTunaSweeperItemDefinition
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
 	float UseHydrationDelta = 0.0f;
 
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float UseSeconds = 0.0f;
+
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
 	TArray<FName> ClearsDebuffIds;
 };
