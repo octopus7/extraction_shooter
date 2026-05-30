@@ -128,6 +128,7 @@ protected:
 
 private:
 	void RefreshContainerPresentation();
+	void HandleLanguageChanged();
 	void ResetRuntimeContainerState();
 	void ApplyOpenedMarkerState();
 	void CaptureRuntimeContentsFromActiveContainer();

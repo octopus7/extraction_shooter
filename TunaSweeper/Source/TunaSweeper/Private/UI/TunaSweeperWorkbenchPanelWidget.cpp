@@ -662,7 +662,10 @@ void UTunaSweeperWorkbenchPanelWidget::PopulateDismantleTargetItem()
 	}
 	else
 	{
-		TileData.DisplayName = FText::FromString(TEXT("\uBD84\uD574\uD560 \uC544\uC774\uD15C"));
+		TileData.DisplayName = TunaSweeperWorkbenchPanel::ResolveUiText(
+			TunaGameInstance,
+			TEXT("ui.workbench.dismantle_target"),
+			TEXT("\uBD84\uD574\uD560 \uC544\uC774\uD15C"));
 		TileData.Source = ETunaSweeperItemSlotSource::WorkbenchDismantleItem;
 		TileData.SourceIndex = INDEX_NONE;
 		TileData.SlotReference = FTunaSweeperItemSlotReference();
@@ -785,7 +788,10 @@ void UTunaSweeperWorkbenchPanelWidget::PopulateBlueprintTargetItem()
 	}
 	else
 	{
-		TileData.DisplayName = FText::FromString(TEXT("\uB4F1\uB85D\uD560 \uC124\uACC4\uB3C4"));
+		TileData.DisplayName = TunaSweeperWorkbenchPanel::ResolveUiText(
+			TunaGameInstance,
+			TEXT("ui.workbench.blueprint_target"),
+			TEXT("\uB4F1\uB85D\uD560 \uC124\uACC4\uB3C4"));
 		TileData.Source = ETunaSweeperItemSlotSource::WorkbenchBlueprintItem;
 		TileData.SourceIndex = INDEX_NONE;
 		TileData.SlotReference = FTunaSweeperItemSlotReference();
@@ -1014,11 +1020,17 @@ void UTunaSweeperWorkbenchPanelWidget::SetPanelModeVisibility() const
 	}
 	if (DismantleSelectedItemTitleText)
 	{
-		DismantleSelectedItemTitleText->SetText(FText::FromString(TEXT("\uBD84\uD574\uD560 \uC544\uC774\uD15C")));
+		DismantleSelectedItemTitleText->SetText(TunaSweeperWorkbenchPanel::ResolveUiText(
+			GetGameInstance<UTunaSweeperGameInstance>(),
+			TEXT("ui.workbench.dismantle_target"),
+			TEXT("\uBD84\uD574\uD560 \uC544\uC774\uD15C")));
 	}
 	if (BlueprintSelectedItemTitleText)
 	{
-		BlueprintSelectedItemTitleText->SetText(FText::FromString(TEXT("\uB4F1\uB85D\uD560 \uC124\uACC4\uB3C4")));
+		BlueprintSelectedItemTitleText->SetText(TunaSweeperWorkbenchPanel::ResolveUiText(
+			GetGameInstance<UTunaSweeperGameInstance>(),
+			TEXT("ui.workbench.blueprint_target"),
+			TEXT("\uB4F1\uB85D\uD560 \uC124\uACC4\uB3C4")));
 	}
 }
 

@@ -21,9 +21,10 @@ ATunaSweeperLevelTravelInteractableActor::ATunaSweeperLevelTravelInteractableAct
 
 	if (InteractableComponent)
 	{
-		InteractableComponent->SetInteractionTypeAndDisplayName(
+		InteractableComponent->SetInteractionTypeDisplayNameAndStringKey(
 			ETunaSweeperInteractionType::LevelTravel,
-			FText::FromString(TEXT("Travel")));
+			FText::FromString(TEXT("Travel")),
+			FName(TEXT("ui.interaction.travel")));
 	}
 }
 
@@ -33,19 +34,26 @@ void ATunaSweeperLevelTravelInteractableActor::ConfigureLevelTravelDefaults(
 	TSoftClassPtr<UTunaSweeperInteractionMarkerWidget> InMarkerWidgetClass,
 	TSoftObjectPtr<UMediaSource> InTransitionMediaSource,
 	TSoftClassPtr<UTunaSweeperLevelTransitionWidget> InTransitionWidgetClass,
-	const FText& InTransitionMessage)
+	const FText& InTransitionMessage,
+	FName InInteractionDisplayNameStringKey,
+	FName InTransitionMessageStringKey)
 {
 	Modify();
 	TargetLevelName = InTargetLevelName;
 	TransitionMediaSource = InTransitionMediaSource;
 	TransitionMessage = InTransitionMessage;
+	TransitionMessageStringKey = InTransitionMessageStringKey;
 	FadeToBlackDuration = 0.2f;
 	FadeFromBlackDuration = 0.2f;
 	if (!InTransitionWidgetClass.IsNull())
 	{
 		TransitionWidgetClass = InTransitionWidgetClass;
 	}
-	ConfigureInteractionDefaults(ETunaSweeperInteractionType::LevelTravel, InInteractionDisplayName, InMarkerWidgetClass);
+	ConfigureInteractionDefaults(
+		ETunaSweeperInteractionType::LevelTravel,
+		InInteractionDisplayName,
+		InMarkerWidgetClass,
+		InInteractionDisplayNameStringKey);
 }
 
 void ATunaSweeperLevelTravelInteractableActor::ConfigureLevelTravelVisualDefaults(
@@ -92,6 +100,14 @@ void ATunaSweeperLevelTravelInteractableActor::RefreshLevelTravelVisual()
 	VisualMesh->SetRelativeLocation(LevelTravelVisualRelativeLocation);
 }
 
+FText ATunaSweeperLevelTravelInteractableActor::ResolveTransitionMessage() const
+{
+	const UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+	return TunaGameInstance && !TransitionMessageStringKey.IsNone()
+		? TunaGameInstance->ResolveLocalizedText(TransitionMessageStringKey, TransitionMessage)
+		: TransitionMessage;
+}
+
 bool ATunaSweeperLevelTravelInteractableActor::TravelToTargetLevel(APawn* InstigatorPawn)
 {
 	if (TargetLevelName.IsNone())
@@ -116,6 +132,7 @@ bool ATunaSweeperLevelTravelInteractableActor::TravelToTargetLevel(APawn* Instig
 		}
 	}
 
+	const FText ResolvedTransitionMessage = ResolveTransitionMessage();
 	if (TunaGameInstance && TunaGameInstance->HasPendingRaidExperienceAnimationState())
 	{
 		if (UGameInstance* GameInstance = GetGameInstance())
@@ -130,7 +147,7 @@ bool ATunaSweeperLevelTravelInteractableActor::TravelToTargetLevel(APawn* Instig
 					TransitionWidgetClass,
 					FadeToBlackDuration,
 					FadeFromBlackDuration,
-					TransitionMessage))
+					ResolvedTransitionMessage))
 				{
 					return true;
 				}
@@ -151,7 +168,7 @@ bool ATunaSweeperLevelTravelInteractableActor::TravelToTargetLevel(APawn* Instig
 					TransitionWidgetClass,
 					FadeToBlackDuration,
 					FadeFromBlackDuration,
-					TransitionMessage))
+					ResolvedTransitionMessage))
 				{
 					return true;
 				}

@@ -27,6 +27,7 @@ public:
 protected:
 	virtual TSharedRef<SWidget> RebuildWidget() override;
 	virtual void NativeConstruct() override;
+	virtual void NativeDestruct() override;
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 	virtual FReply NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent) override;
 	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
@@ -34,8 +35,10 @@ protected:
 
 private:
 	void BuildWidgetTree();
+	void RefreshStaticText();
 	void RefreshDisplayedExperience(int64 DisplayExperiencePoints);
 	void RefreshStatusText();
+	void HandleLanguageChanged();
 	bool TryRequestContinue();
 
 	UPROPERTY(Transient)
@@ -66,6 +69,7 @@ private:
 	TObjectPtr<UTextBlock> StatusText;
 
 	FTunaSweeperExperienceAnimationState AnimationState;
+	int64 LastDisplayedExperiencePoints = 0;
 	float AnimationElapsedSeconds = 0.0f;
 	bool bAnimationFinished = false;
 	bool bContinueReady = false;

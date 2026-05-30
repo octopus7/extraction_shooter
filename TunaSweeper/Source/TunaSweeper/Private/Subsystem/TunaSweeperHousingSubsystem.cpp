@@ -20,6 +20,7 @@
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
+#include "UI/TunaSweeperUiText.h"
 #include "UObject/SoftObjectPath.h"
 #include "UObject/SoftObjectPtr.h"
 
@@ -115,6 +116,14 @@ namespace TunaSweeperHousing
 			NormalizedTurns += 4;
 		}
 		return NormalizedTurns;
+	}
+
+	FText ResolveUiText(const UGameInstance* GameInstance, const TCHAR* StringKey, const TCHAR* Fallback)
+	{
+		return TunaSweeperUiText::ResolveUiText(
+			Cast<UTunaSweeperGameInstance>(GameInstance),
+			StringKey,
+			Fallback);
 	}
 }
 
@@ -1381,7 +1390,10 @@ FText UTunaSweeperHousingSubsystem::BuildMaterialsText(
 {
 	if (Definition.RequiredMaterials.IsEmpty())
 	{
-		return FText::FromString(TEXT("No materials required"));
+		return TunaSweeperHousing::ResolveUiText(
+			GetGameInstance(),
+			TEXT("ui.housing.no_materials"),
+			TEXT("No materials required"));
 	}
 
 	UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GetGameInstance());
@@ -1416,7 +1428,15 @@ FText UTunaSweeperHousingSubsystem::BuildMaterialsText(
 			MaterialCost.Quantity));
 	}
 
-	return FText::FromString(MaterialParts.IsEmpty() ? FString(TEXT("No materials required")) : FString::Join(MaterialParts, TEXT("  ")));
+	if (MaterialParts.IsEmpty())
+	{
+		return TunaSweeperHousing::ResolveUiText(
+			GetGameInstance(),
+			TEXT("ui.housing.no_materials"),
+			TEXT("No materials required"));
+	}
+
+	return FText::FromString(FString::Join(MaterialParts, TEXT("  ")));
 }
 
 FText UTunaSweeperHousingSubsystem::BuildStateText(ETunaSweeperHousingFacilityBuildState BuildState) const
@@ -1424,14 +1444,26 @@ FText UTunaSweeperHousingSubsystem::BuildStateText(ETunaSweeperHousingFacilityBu
 	switch (BuildState)
 	{
 	case ETunaSweeperHousingFacilityBuildState::Buildable:
-		return FText::FromString(TEXT("Ready to build"));
+		return TunaSweeperHousing::ResolveUiText(
+			GetGameInstance(),
+			TEXT("ui.housing.ready_to_build"),
+			TEXT("Ready to build"));
 	case ETunaSweeperHousingFacilityBuildState::Stored:
-		return FText::FromString(TEXT("Stored"));
+		return TunaSweeperHousing::ResolveUiText(
+			GetGameInstance(),
+			TEXT("ui.housing.stored"),
+			TEXT("Stored"));
 	case ETunaSweeperHousingFacilityBuildState::Placed:
-		return FText::FromString(TEXT("Placed - hold to store"));
+		return TunaSweeperHousing::ResolveUiText(
+			GetGameInstance(),
+			TEXT("ui.housing.placed_hold_to_store"),
+			TEXT("Placed - hold to store"));
 	case ETunaSweeperHousingFacilityBuildState::InsufficientMaterials:
 	default:
-		return FText::FromString(TEXT("Need materials"));
+		return TunaSweeperHousing::ResolveUiText(
+			GetGameInstance(),
+			TEXT("ui.housing.need_materials"),
+			TEXT("Need materials"));
 	}
 }
 

@@ -67,6 +67,8 @@ void ATunaSweeperWorldProgressActor::BeginPlay()
 	{
 		TunaGameInstance->OnInventoryStateChanged.RemoveAll(this);
 		TunaGameInstance->OnInventoryStateChanged.AddUObject(this, &ATunaSweeperWorldProgressActor::RefreshPresentation);
+		TunaGameInstance->OnLanguageChanged.RemoveAll(this);
+		TunaGameInstance->OnLanguageChanged.AddUObject(this, &ATunaSweeperWorldProgressActor::RefreshPresentation);
 	}
 
 	ApplySavedState();
@@ -79,6 +81,7 @@ void ATunaSweeperWorldProgressActor::EndPlay(const EEndPlayReason::Type EndPlayR
 	if (UTunaSweeperGameInstance* TunaGameInstance = GetTunaGameInstance())
 	{
 		TunaGameInstance->OnInventoryStateChanged.RemoveAll(this);
+		TunaGameInstance->OnLanguageChanged.RemoveAll(this);
 	}
 
 	Super::EndPlay(EndPlayReason);
@@ -94,20 +97,26 @@ void ATunaSweeperWorldProgressActor::ConfigureWorldProgressDefaults(
 	int32 InInitialProgressQuantity,
 	const FText& InRequiredItemDisplayName,
 	const FVector& InBlockingBoxExtent,
-	TSoftClassPtr<AActor> InCompletedReplacementActorClass)
+	TSoftClassPtr<AActor> InCompletedReplacementActorClass,
+	FName InDisplayNameStringKey,
+	FName InInteractionDisplayNameStringKey,
+	FName InRequiredItemDisplayNameStringKey)
 {
 	Modify();
 	ProgressObjectId = InProgressObjectId;
 	ProgressInfoId = InProgressInfoId;
+	DisplayNameStringKey = InDisplayNameStringKey;
 	DisplayName = InDisplayName.IsEmpty()
 		? FText::FromString(TEXT("\uBD80\uC11C\uC9C4 \uB2E4\uB9AC"))
 		: InDisplayName;
+	InteractionDisplayNameStringKey = InInteractionDisplayNameStringKey;
 	InteractionDisplayName = InInteractionDisplayName.IsEmpty()
 		? FText::FromString(TEXT("\uC218\uB9AC\uD558\uAE30"))
 		: InInteractionDisplayName;
 	RequiredItemId = InRequiredItemId == INDEX_NONE ? 6002 : InRequiredItemId;
 	RequiredQuantity = FMath::Max(1, InRequiredQuantity);
 	InitialProgressQuantity = FMath::Clamp(InInitialProgressQuantity, 0, RequiredQuantity);
+	RequiredItemDisplayNameStringKey = InRequiredItemDisplayNameStringKey;
 	RequiredItemDisplayName = InRequiredItemDisplayName.IsEmpty()
 		? FText::FromString(TEXT("\uBAA9\uC7AC"))
 		: InRequiredItemDisplayName;
@@ -241,6 +250,16 @@ bool ATunaSweeperWorldProgressActor::RepairUsingAvailableRequiredItems(bool bSav
 	return true;
 }
 
+FText ATunaSweeperWorldProgressActor::GetDisplayName() const
+{
+	return ResolveLocalizedText(DisplayNameStringKey, DisplayName);
+}
+
+FText ATunaSweeperWorldProgressActor::GetRequiredItemDisplayName() const
+{
+	return ResolveLocalizedText(RequiredItemDisplayNameStringKey, RequiredItemDisplayName);
+}
+
 void ATunaSweeperWorldProgressActor::ApplyCollisionDefaults()
 {
 	if (!BlockingCollision)
@@ -264,9 +283,10 @@ void ATunaSweeperWorldProgressActor::RefreshPresentation()
 {
 	if (InteractableComponent)
 	{
-		InteractableComponent->SetInteractionTypeAndDisplayName(
+		InteractableComponent->SetInteractionTypeDisplayNameAndStringKey(
 			bCompleted ? ETunaSweeperInteractionType::None : ETunaSweeperInteractionType::WorldProgress,
-			bCompleted ? FText::GetEmpty() : InteractionDisplayName);
+			bCompleted ? FText::GetEmpty() : ResolveInteractionDisplayName(),
+			bCompleted ? NAME_None : InteractionDisplayNameStringKey);
 		InteractableComponent->SetInteractionRequirementPreview(
 			LoadRequiredItemIconTexture(),
 			GetRemainingRequiredQuantity(),
@@ -279,6 +299,19 @@ void ATunaSweeperWorldProgressActor::RefreshPresentation()
 	}
 
 	SetActorHiddenInGame(bCompleted);
+}
+
+FText ATunaSweeperWorldProgressActor::ResolveLocalizedText(FName StringKey, const FText& FallbackText) const
+{
+	const UTunaSweeperGameInstance* TunaGameInstance = GetTunaGameInstance();
+	return TunaGameInstance && !StringKey.IsNone()
+		? TunaGameInstance->ResolveLocalizedText(StringKey, FallbackText)
+		: FallbackText;
+}
+
+FText ATunaSweeperWorldProgressActor::ResolveInteractionDisplayName() const
+{
+	return ResolveLocalizedText(InteractionDisplayNameStringKey, InteractionDisplayName);
 }
 
 void ATunaSweeperWorldProgressActor::ApplySavedState()
