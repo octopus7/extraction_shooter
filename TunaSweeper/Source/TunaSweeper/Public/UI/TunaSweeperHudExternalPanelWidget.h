@@ -9,6 +9,8 @@
 
 class UWidget;
 class UTunaSweeperLootContainerWidget;
+class UTunaSweeperShopContainerWidget;
+class UTunaSweeperStorageContainerWidget;
 class UTunaSweeperWorkbenchPanelWidget;
 
 UCLASS(BlueprintType, Blueprintable)
@@ -69,6 +71,12 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
 	TObjectPtr<UTunaSweeperLootContainerWidget> LootContainerWidget;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
+	TObjectPtr<UTunaSweeperStorageContainerWidget> StorageContainerWidget;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
+	TObjectPtr<UTunaSweeperShopContainerWidget> ShopContainerWidget;
 
 private:
 	void ApplyPanelMode();

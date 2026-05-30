@@ -587,35 +587,24 @@ namespace TunaSweeperLootContainerUi
 	}
 }
 
-void UTunaSweeperLootContainerWidget::NativeConstruct()
+void UTunaSweeperItemContainerPanelWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
 
-	if (ShopRefreshStockButton)
-	{
-		ShopRefreshStockButton->OnClicked.RemoveDynamic(this, &UTunaSweeperLootContainerWidget::HandleShopRefreshStockButtonClicked);
-		ShopRefreshStockButton->OnClicked.AddDynamic(this, &UTunaSweeperLootContainerWidget::HandleShopRefreshStockButtonClicked);
-	}
-
 	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
 	{
 		TunaGameInstance->OnInventoryStateChanged.RemoveAll(this);
-		TunaGameInstance->OnInventoryStateChanged.AddUObject(this, &UTunaSweeperLootContainerWidget::PopulateContainerItems);
+		TunaGameInstance->OnInventoryStateChanged.AddUObject(this, &UTunaSweeperItemContainerPanelWidget::PopulateContainerItems);
 		TunaGameInstance->OnLanguageChanged.RemoveAll(this);
-		TunaGameInstance->OnLanguageChanged.AddUObject(this, &UTunaSweeperLootContainerWidget::PopulateContainerItems);
+		TunaGameInstance->OnLanguageChanged.AddUObject(this, &UTunaSweeperItemContainerPanelWidget::PopulateContainerItems);
 	}
 
 	PopulateContainerItems();
 }
 
-void UTunaSweeperLootContainerWidget::NativeDestruct()
+void UTunaSweeperItemContainerPanelWidget::NativeDestruct()
 {
-	if (ShopRefreshStockButton)
-	{
-		ShopRefreshStockButton->OnClicked.RemoveDynamic(this, &UTunaSweeperLootContainerWidget::HandleShopRefreshStockButtonClicked);
-	}
-
 	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
 	{
 		TunaGameInstance->OnInventoryStateChanged.RemoveAll(this);
@@ -625,27 +614,12 @@ void UTunaSweeperLootContainerWidget::NativeDestruct()
 	Super::NativeDestruct();
 }
 
-void UTunaSweeperLootContainerWidget::HandleShopRefreshStockButtonClicked()
+void UTunaSweeperItemContainerPanelWidget::RefreshHeaderControls()
 {
-	if (SlotSource != ETunaSweeperItemSlotSource::Shop)
-	{
-		return;
-	}
-
-	UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
-	if (TunaGameInstance && TunaGameInstance->DebugRestockActiveShop(true))
-	{
-		PopulateContainerItems();
-	}
-}
-
-void UTunaSweeperLootContainerWidget::RefreshShopRefreshStockButton()
-{
-	const bool bShowRefreshButton = SlotSource == ETunaSweeperItemSlotSource::Shop;
 	if (ShopRefreshStockButton)
 	{
-		ShopRefreshStockButton->SetVisibility(bShowRefreshButton ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
-		ShopRefreshStockButton->SetIsEnabled(bShowRefreshButton);
+		ShopRefreshStockButton->SetVisibility(ESlateVisibility::Collapsed);
+		ShopRefreshStockButton->SetIsEnabled(false);
 	}
 	if (ShopRefreshStockButtonText)
 	{
@@ -656,7 +630,7 @@ void UTunaSweeperLootContainerWidget::RefreshShopRefreshStockButton()
 	}
 }
 
-bool UTunaSweeperLootContainerWidget::TryResolveDropSlotFromCursor(
+bool UTunaSweeperItemContainerPanelWidget::TryResolveDropSlotFromCursor(
 	const FVector2D& ScreenSpacePosition,
 	FTunaSweeperItemSlotReference& OutSlotReference)
 {
@@ -683,7 +657,8 @@ bool UTunaSweeperLootContainerWidget::TryResolveDropSlotFromCursor(
 		OutSlotReference);
 }
 
-void UTunaSweeperLootContainerWidget::SetContainerInstance(const FTunaSweeperLootContainerInstance& InContainerInstance)
+void UTunaSweeperItemContainerPanelWidget::SetContainerInstanceInternal(
+	const FTunaSweeperLootContainerInstance& InContainerInstance)
 {
 	SlotSource = ETunaSweeperItemSlotSource::LootContainer;
 	ActiveShopId = INDEX_NONE;
@@ -693,7 +668,7 @@ void UTunaSweeperLootContainerWidget::SetContainerInstance(const FTunaSweeperLoo
 	PopulateContainerItems();
 }
 
-void UTunaSweeperLootContainerWidget::SetStorageView()
+void UTunaSweeperItemContainerPanelWidget::SetStorageViewInternal()
 {
 	SlotSource = ETunaSweeperItemSlotSource::Storage;
 	ActiveShopId = INDEX_NONE;
@@ -703,7 +678,7 @@ void UTunaSweeperLootContainerWidget::SetStorageView()
 	PopulateContainerItems();
 }
 
-void UTunaSweeperLootContainerWidget::SetShopView(int32 ShopId)
+void UTunaSweeperItemContainerPanelWidget::SetShopViewInternal(int32 ShopId)
 {
 	SlotSource = ETunaSweeperItemSlotSource::Shop;
 	ActiveShopId = ShopId;
@@ -713,7 +688,9 @@ void UTunaSweeperLootContainerWidget::SetShopView(int32 ShopId)
 	PopulateContainerItems();
 }
 
-void UTunaSweeperLootContainerWidget::SetWorkbenchView(int32 WorkbenchId, ETunaSweeperWorkbenchMode WorkbenchMode)
+void UTunaSweeperItemContainerPanelWidget::SetWorkbenchViewInternal(
+	int32 WorkbenchId,
+	ETunaSweeperWorkbenchMode WorkbenchMode)
 {
 	SlotSource = WorkbenchMode == ETunaSweeperWorkbenchMode::Dismantle
 		? ETunaSweeperItemSlotSource::WorkbenchDismantleItem
@@ -727,7 +704,7 @@ void UTunaSweeperLootContainerWidget::SetWorkbenchView(int32 WorkbenchId, ETunaS
 	PopulateContainerItems();
 }
 
-bool UTunaSweeperLootContainerWidget::NativeOnDrop(
+bool UTunaSweeperItemContainerPanelWidget::NativeOnDrop(
 	const FGeometry& InGeometry,
 	const FDragDropEvent& InDragDropEvent,
 	UDragDropOperation* InOperation)
@@ -778,9 +755,9 @@ bool UTunaSweeperLootContainerWidget::NativeOnDrop(
 	return Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
 }
 
-void UTunaSweeperLootContainerWidget::PopulateContainerItems()
+void UTunaSweeperItemContainerPanelWidget::PopulateContainerItems()
 {
-	RefreshShopRefreshStockButton();
+	RefreshHeaderControls();
 
 	if (!ContainerTileView)
 	{
@@ -970,5 +947,87 @@ void UTunaSweeperLootContainerWidget::PopulateContainerItems()
 		TileObject->Initialize(TileData);
 		TileObjects.Add(TileObject);
 		ContainerTileView->AddItem(TileObject);
+	}
+}
+
+void UTunaSweeperLootContainerWidget::SetContainerInstance(const FTunaSweeperLootContainerInstance& InContainerInstance)
+{
+	SetContainerInstanceInternal(InContainerInstance);
+}
+
+void UTunaSweeperLootContainerWidget::SetStorageView()
+{
+	SetStorageViewInternal();
+}
+
+void UTunaSweeperLootContainerWidget::SetShopView(int32 ShopId)
+{
+	SetShopViewInternal(ShopId);
+}
+
+void UTunaSweeperLootContainerWidget::SetWorkbenchView(int32 WorkbenchId, ETunaSweeperWorkbenchMode WorkbenchMode)
+{
+	SetWorkbenchViewInternal(WorkbenchId, WorkbenchMode);
+}
+
+void UTunaSweeperStorageContainerWidget::SetStorageView()
+{
+	SetStorageViewInternal();
+}
+
+void UTunaSweeperShopContainerWidget::SetShopView(int32 ShopId)
+{
+	SetShopViewInternal(ShopId);
+}
+
+void UTunaSweeperShopContainerWidget::NativeConstruct()
+{
+	Super::NativeConstruct();
+
+	if (ShopRefreshStockButton)
+	{
+		ShopRefreshStockButton->OnClicked.RemoveDynamic(
+			this,
+			&UTunaSweeperShopContainerWidget::HandleShopRefreshStockButtonClicked);
+		ShopRefreshStockButton->OnClicked.AddDynamic(
+			this,
+			&UTunaSweeperShopContainerWidget::HandleShopRefreshStockButtonClicked);
+	}
+}
+
+void UTunaSweeperShopContainerWidget::NativeDestruct()
+{
+	if (ShopRefreshStockButton)
+	{
+		ShopRefreshStockButton->OnClicked.RemoveDynamic(
+			this,
+			&UTunaSweeperShopContainerWidget::HandleShopRefreshStockButtonClicked);
+	}
+
+	Super::NativeDestruct();
+}
+
+void UTunaSweeperShopContainerWidget::RefreshHeaderControls()
+{
+	if (ShopRefreshStockButton)
+	{
+		ShopRefreshStockButton->SetVisibility(ESlateVisibility::Visible);
+		ShopRefreshStockButton->SetIsEnabled(true);
+	}
+	if (ShopRefreshStockButtonText)
+	{
+		ShopRefreshStockButtonText->SetText(TunaSweeperLootContainerUi::ResolveUiText(
+			GetGameInstance<UTunaSweeperGameInstance>(),
+			TEXT("ui.shop.debug_refresh_stock"),
+			TEXT("\uAC31\uC2E0")));
+	}
+}
+
+void UTunaSweeperShopContainerWidget::HandleShopRefreshStockButtonClicked()
+{
+	UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+	if (TunaGameInstance && TunaGameInstance->DebugRestockActiveShop(true))
+	{
+		PopulateContainerItems();
 	}
 }

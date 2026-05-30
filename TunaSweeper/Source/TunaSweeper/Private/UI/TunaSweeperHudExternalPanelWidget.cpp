@@ -6,6 +6,31 @@
 #include "UI/TunaSweeperUIFont.h"
 #include "UI/TunaSweeperWorkbenchPanelWidget.h"
 
+namespace
+{
+	bool HasVisibleStorageContainer(const UTunaSweeperStorageContainerWidget* StorageContainerWidget)
+	{
+		return StorageContainerWidget != nullptr;
+	}
+
+	bool HasVisibleShopContainer(const UTunaSweeperShopContainerWidget* ShopContainerWidget)
+	{
+		return ShopContainerWidget != nullptr;
+	}
+
+	void RightAlignOverlayChild(UWidget* Widget)
+	{
+		if (Widget)
+		{
+			if (UOverlaySlot* OverlaySlot = Cast<UOverlaySlot>(Widget->Slot))
+			{
+				OverlaySlot->SetHorizontalAlignment(HAlign_Right);
+				OverlaySlot->SetVerticalAlignment(VAlign_Top);
+			}
+		}
+	}
+}
+
 void UTunaSweeperHudExternalPanelWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
@@ -34,7 +59,11 @@ void UTunaSweeperHudExternalPanelWidget::SetStorageContainer()
 {
 	SetExternalPanelMode(ETunaSweeperHudExternalPanelMode::Storage);
 
-	if (LootContainerWidget)
+	if (StorageContainerWidget)
+	{
+		StorageContainerWidget->SetStorageView();
+	}
+	else if (LootContainerWidget)
 	{
 		LootContainerWidget->SetStorageView();
 	}
@@ -44,7 +73,11 @@ void UTunaSweeperHudExternalPanelWidget::SetShopContainer(int32 ShopId)
 {
 	SetExternalPanelMode(ETunaSweeperHudExternalPanelMode::Shop);
 
-	if (LootContainerWidget)
+	if (ShopContainerWidget)
+	{
+		ShopContainerWidget->SetShopView(ShopId);
+	}
+	else if (LootContainerWidget)
 	{
 		LootContainerWidget->SetShopView(ShopId);
 	}
@@ -54,7 +87,7 @@ void UTunaSweeperHudExternalPanelWidget::SetWorkbenchContainer(int32 WorkbenchId
 {
 	SetExternalPanelMode(ETunaSweeperHudExternalPanelMode::Workbench);
 
-	if (LootContainerWidget)
+	if (LootContainerWidget && !WorkbenchPanelWidget)
 	{
 		LootContainerWidget->SetWorkbenchView(WorkbenchId, WorkbenchMode);
 	}
@@ -100,22 +133,30 @@ void UTunaSweeperHudExternalPanelWidget::ApplyPanelMode()
 
 	if (LootingBoxPanel)
 	{
+		const bool bUseFallbackLootContainerPanel =
+			(PanelMode == ETunaSweeperHudExternalPanelMode::Storage && !HasVisibleStorageContainer(StorageContainerWidget)) ||
+			(PanelMode == ETunaSweeperHudExternalPanelMode::Shop && !HasVisibleShopContainer(ShopContainerWidget)) ||
+			(PanelMode == ETunaSweeperHudExternalPanelMode::Workbench && !WorkbenchPanelWidget);
 		const bool bShowContainerPanel =
 			PanelMode == ETunaSweeperHudExternalPanelMode::LootingBox ||
-			PanelMode == ETunaSweeperHudExternalPanelMode::Storage ||
-			PanelMode == ETunaSweeperHudExternalPanelMode::Shop ||
-			(PanelMode == ETunaSweeperHudExternalPanelMode::Workbench && !WorkbenchPanelWidget);
+			bUseFallbackLootContainerPanel;
 		LootingBoxPanel->SetVisibility(bShowContainerPanel ? ESlateVisibility::SelfHitTestInvisible : ESlateVisibility::Collapsed);
 	}
 
 	if (ShopPanel)
 	{
-		ShopPanel->SetVisibility(ESlateVisibility::Collapsed);
+		ShopPanel->SetVisibility(
+			PanelMode == ETunaSweeperHudExternalPanelMode::Shop && HasVisibleShopContainer(ShopContainerWidget)
+				? ESlateVisibility::SelfHitTestInvisible
+				: ESlateVisibility::Collapsed);
 	}
 
 	if (StoragePanel)
 	{
-		StoragePanel->SetVisibility(ESlateVisibility::Collapsed);
+		StoragePanel->SetVisibility(
+			PanelMode == ETunaSweeperHudExternalPanelMode::Storage && HasVisibleStorageContainer(StorageContainerWidget)
+				? ESlateVisibility::SelfHitTestInvisible
+				: ESlateVisibility::Collapsed);
 	}
 
 	if (WorkbenchPanel)
@@ -136,12 +177,7 @@ void UTunaSweeperHudExternalPanelWidget::ApplyPanelMode()
 
 void UTunaSweeperHudExternalPanelWidget::ApplyLootContainerPanelLayout()
 {
-	if (LootContainerWidget)
-	{
-		if (UOverlaySlot* LootContainerSlot = Cast<UOverlaySlot>(LootContainerWidget->Slot))
-		{
-			LootContainerSlot->SetHorizontalAlignment(HAlign_Left);
-			LootContainerSlot->SetVerticalAlignment(VAlign_Top);
-		}
-	}
+	RightAlignOverlayChild(LootContainerWidget);
+	RightAlignOverlayChild(StorageContainerWidget);
+	RightAlignOverlayChild(ShopContainerWidget);
 }

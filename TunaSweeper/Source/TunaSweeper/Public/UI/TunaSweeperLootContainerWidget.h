@@ -13,25 +13,10 @@ class UButton;
 class UDragDropOperation;
 struct FTunaSweeperItemSlotReference;
 
-UCLASS(BlueprintType, Blueprintable)
-class TUNASWEEPER_API UTunaSweeperLootContainerWidget : public UUserWidget
+UCLASS(Abstract, BlueprintType, Blueprintable)
+class TUNASWEEPER_API UTunaSweeperItemContainerPanelWidget : public UUserWidget
 {
 	GENERATED_BODY()
-
-public:
-	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Loot Container")
-	void SetContainerInstance(const FTunaSweeperLootContainerInstance& InContainerInstance);
-
-	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Storage")
-	void SetStorageView();
-
-	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Shop")
-	void SetShopView(int32 ShopId);
-
-	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Workbench")
-	void SetWorkbenchView(
-		int32 WorkbenchId,
-		ETunaSweeperWorkbenchMode WorkbenchMode = ETunaSweeperWorkbenchMode::Craft);
 
 protected:
 	virtual void NativeConstruct() override;
@@ -59,12 +44,16 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Loot Container", meta = (BindWidgetOptional))
 	TObjectPtr<UTileView> ContainerTileView;
 
-private:
-	UFUNCTION()
-	void HandleShopRefreshStockButtonClicked();
+	void SetContainerInstanceInternal(const FTunaSweeperLootContainerInstance& InContainerInstance);
+	void SetStorageViewInternal();
+	void SetShopViewInternal(int32 ShopId);
+	void SetWorkbenchViewInternal(
+		int32 WorkbenchId,
+		ETunaSweeperWorkbenchMode WorkbenchMode = ETunaSweeperWorkbenchMode::Craft);
 
-	void PopulateContainerItems();
-	void RefreshShopRefreshStockButton();
+	virtual void PopulateContainerItems();
+	virtual void RefreshHeaderControls();
+
 	bool TryResolveDropSlotFromCursor(
 		const FVector2D& ScreenSpacePosition,
 		FTunaSweeperItemSlotReference& OutSlotReference);
@@ -86,4 +75,50 @@ private:
 
 	UPROPERTY(Transient)
 	TArray<TObjectPtr<UObject>> TileObjects;
+};
+
+UCLASS(BlueprintType, Blueprintable)
+class TUNASWEEPER_API UTunaSweeperLootContainerWidget : public UTunaSweeperItemContainerPanelWidget
+{
+	GENERATED_BODY()
+
+public:
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Loot Container")
+	void SetContainerInstance(const FTunaSweeperLootContainerInstance& InContainerInstance);
+
+	// Compatibility fallback for older HUD blueprints that still route every external container through this widget.
+	void SetStorageView();
+	void SetShopView(int32 ShopId);
+	void SetWorkbenchView(
+		int32 WorkbenchId,
+		ETunaSweeperWorkbenchMode WorkbenchMode = ETunaSweeperWorkbenchMode::Craft);
+};
+
+UCLASS(BlueprintType, Blueprintable)
+class TUNASWEEPER_API UTunaSweeperStorageContainerWidget : public UTunaSweeperItemContainerPanelWidget
+{
+	GENERATED_BODY()
+
+public:
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Storage")
+	void SetStorageView();
+};
+
+UCLASS(BlueprintType, Blueprintable)
+class TUNASWEEPER_API UTunaSweeperShopContainerWidget : public UTunaSweeperItemContainerPanelWidget
+{
+	GENERATED_BODY()
+
+public:
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Shop")
+	void SetShopView(int32 ShopId);
+
+protected:
+	virtual void NativeConstruct() override;
+	virtual void NativeDestruct() override;
+	virtual void RefreshHeaderControls() override;
+
+private:
+	UFUNCTION()
+	void HandleShopRefreshStockButtonClicked();
 };

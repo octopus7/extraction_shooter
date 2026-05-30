@@ -157,6 +157,7 @@ namespace TunaSweeperEditorSetup
 	constexpr float GameplayBottomPanelHeight = 174.0f;
 	const FString WorkbenchPanelWidgetTaskId = TEXT("2026-05-29_CreateWorkbenchPanelWidgetV6");
 	const FString ShopRefreshStockButtonTaskId = TEXT("2026-05-29_AddShopRefreshStockButtonV1");
+	const FString SplitExternalContainerPanelTaskId = TEXT("2026-05-30_SplitExternalContainerPanelsV1");
 	const FString ItemThumbnailSlotLayoutTaskId = TEXT("2026-05-30_RebuildItemThumbnailSlotLayoutV1");
 	const FString InventoryInputTaskId = TEXT("2026-05-11_AddInventoryInput");
 	const FString QuickSlotInputTaskId = TEXT("2026-05-28_AddMeleeQuickSlotInputV1");
@@ -283,6 +284,8 @@ namespace TunaSweeperEditorSetup
 	const FString HudExternalPanelWidgetAssetName = TEXT("WBP_HudExternalPanel");
 	const FString ItemThumbnailSlotWidgetAssetName = TEXT("WBP_ItemThumbnailSlot");
 	const FString LootContainerWidgetAssetName = TEXT("WBP_LootContainerPanel");
+	const FString StorageContainerWidgetAssetName = TEXT("WBP_StorageContainerPanel");
+	const FString ShopContainerWidgetAssetName = TEXT("WBP_ShopContainerPanel");
 	const FString WorkbenchPanelWidgetAssetName = TEXT("WBP_WorkbenchPanel");
 	const FString WorkbenchRecipeListEntryWidgetAssetName = TEXT("WBP_WorkbenchRecipeListEntry");
 	const FString IntroMenuWidgetAssetName = TEXT("WBP_IntroMenu");
@@ -9188,9 +9191,13 @@ namespace TunaSweeperEditorSetup
 	bool BuildHudExternalPanelWidgetTree(
 		UWidgetBlueprint* WidgetBlueprint,
 		TSubclassOf<UUserWidget> LootContainerWidgetClass,
+		TSubclassOf<UUserWidget> StorageContainerWidgetClass,
+		TSubclassOf<UUserWidget> ShopContainerWidgetClass,
 		TSubclassOf<UUserWidget> WorkbenchPanelWidgetClass)
 	{
-		if (!WidgetBlueprint || !WidgetBlueprint->WidgetTree || !LootContainerWidgetClass || !WorkbenchPanelWidgetClass)
+		if (!WidgetBlueprint || !WidgetBlueprint->WidgetTree ||
+			!LootContainerWidgetClass || !StorageContainerWidgetClass || !ShopContainerWidgetClass ||
+			!WorkbenchPanelWidgetClass)
 		{
 			return false;
 		}
@@ -9204,23 +9211,20 @@ namespace TunaSweeperEditorSetup
 		UOverlay* PanelOverlay = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), TEXT("PanelOverlay"));
 		UOverlay* LootingBoxPanel = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), TEXT("LootingBoxPanel"));
 		UUserWidget* LootContainerWidget = WidgetTree->ConstructWidget<UUserWidget>(LootContainerWidgetClass, TEXT("LootContainerWidget"));
+		UOverlay* StoragePanel = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), TEXT("StoragePanel"));
+		UUserWidget* StorageContainerWidget = WidgetTree->ConstructWidget<UUserWidget>(
+			StorageContainerWidgetClass,
+			TEXT("StorageContainerWidget"));
+		UOverlay* ShopPanel = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), TEXT("ShopPanel"));
+		UUserWidget* ShopContainerWidget = WidgetTree->ConstructWidget<UUserWidget>(
+			ShopContainerWidgetClass,
+			TEXT("ShopContainerWidget"));
 		UOverlay* WorkbenchPanel = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), TEXT("WorkbenchPanel"));
 		UUserWidget* WorkbenchPanelWidget = WidgetTree->ConstructWidget<UUserWidget>(WorkbenchPanelWidgetClass, TEXT("WorkbenchPanelWidget"));
-		UBorder* ShopPanel = BuildHudSimplePanel(
-			WidgetTree,
-			TEXT("ShopPanel"),
-			FText::FromString(TEXT("Shop")),
-			FVector2D(LootContainerPanelWidth, 620.0f),
-			FLinearColor(0.28f, 0.40f, 0.50f, 1.0f));
-		UBorder* StoragePanel = BuildHudSimplePanel(
-			WidgetTree,
-			TEXT("StoragePanel"),
-			FText::FromString(TEXT("Storage")),
-			FVector2D(LootContainerPanelWidth, 620.0f),
-			FLinearColor(0.38f, 0.42f, 0.32f, 1.0f));
 
 		if (!RootSizeBox || !PanelOverlay || !LootingBoxPanel || !LootContainerWidget ||
-			!WorkbenchPanel || !WorkbenchPanelWidget || !ShopPanel || !StoragePanel)
+			!StoragePanel || !StorageContainerWidget || !ShopPanel || !ShopContainerWidget ||
+			!WorkbenchPanel || !WorkbenchPanelWidget)
 		{
 			return false;
 		}
@@ -9232,8 +9236,22 @@ namespace TunaSweeperEditorSetup
 		UOverlaySlot* LootContainerSlot = LootingBoxPanel->AddChildToOverlay(LootContainerWidget);
 		if (LootContainerSlot)
 		{
-			LootContainerSlot->SetHorizontalAlignment(HAlign_Left);
+			LootContainerSlot->SetHorizontalAlignment(HAlign_Right);
 			LootContainerSlot->SetVerticalAlignment(VAlign_Top);
+		}
+
+		UOverlaySlot* StorageContainerSlot = StoragePanel->AddChildToOverlay(StorageContainerWidget);
+		if (StorageContainerSlot)
+		{
+			StorageContainerSlot->SetHorizontalAlignment(HAlign_Right);
+			StorageContainerSlot->SetVerticalAlignment(VAlign_Top);
+		}
+
+		UOverlaySlot* ShopContainerSlot = ShopPanel->AddChildToOverlay(ShopContainerWidget);
+		if (ShopContainerSlot)
+		{
+			ShopContainerSlot->SetHorizontalAlignment(HAlign_Right);
+			ShopContainerSlot->SetVerticalAlignment(VAlign_Top);
 		}
 
 		UOverlaySlot* WorkbenchSlot = WorkbenchPanel->AddChildToOverlay(WorkbenchPanelWidget);
@@ -9260,6 +9278,8 @@ namespace TunaSweeperEditorSetup
 		RegisterWidgetVariable(WidgetBlueprint, ShopPanel);
 		RegisterWidgetVariable(WidgetBlueprint, StoragePanel);
 		RegisterWidgetVariable(WidgetBlueprint, LootContainerWidget);
+		RegisterWidgetVariable(WidgetBlueprint, StorageContainerWidget);
+		RegisterWidgetVariable(WidgetBlueprint, ShopContainerWidget);
 		RegisterWidgetVariable(WidgetBlueprint, WorkbenchPanelWidget);
 		WidgetBlueprint->MarkPackageDirty();
 		return true;
@@ -9601,6 +9621,14 @@ namespace TunaSweeperEditorSetup
 			UIAssetPath,
 			LootContainerWidgetAssetName,
 			UTunaSweeperLootContainerWidget::StaticClass());
+		UWidgetBlueprint* StorageContainerWidgetBlueprint = EnsureWidgetBlueprint(
+			UIAssetPath,
+			StorageContainerWidgetAssetName,
+			UTunaSweeperStorageContainerWidget::StaticClass());
+		UWidgetBlueprint* ShopContainerWidgetBlueprint = EnsureWidgetBlueprint(
+			UIAssetPath,
+			ShopContainerWidgetAssetName,
+			UTunaSweeperShopContainerWidget::StaticClass());
 		UWidgetBlueprint* WorkbenchPanelWidgetBlueprint = EnsureWidgetBlueprint(
 			UIAssetPath,
 			WorkbenchPanelWidgetAssetName,
@@ -9612,7 +9640,8 @@ namespace TunaSweeperEditorSetup
 
 		if (!ItemThumbnailWidgetBlueprint || !TopReserveWidgetBlueprint || !BottomStatusWidgetBlueprint || !QuickSlotWidgetBlueprint ||
 			!InventoryAreaWidgetBlueprint || !ItemInfoPanelWidgetBlueprint || !ExternalPanelWidgetBlueprint ||
-			!LootContainerWidgetBlueprint || !WorkbenchPanelWidgetBlueprint || !WorkbenchRecipeListEntryWidgetBlueprint)
+			!LootContainerWidgetBlueprint || !StorageContainerWidgetBlueprint || !ShopContainerWidgetBlueprint ||
+			!WorkbenchPanelWidgetBlueprint || !WorkbenchRecipeListEntryWidgetBlueprint)
 		{
 			return false;
 		}
@@ -9660,6 +9689,8 @@ namespace TunaSweeperEditorSetup
 			BuildHudInventoryAreaWidgetTree(InventoryAreaWidgetBlueprint, ItemThumbnailWidgetClass) &&
 			BuildHudItemInfoPanelWidgetTree(ItemInfoPanelWidgetBlueprint, ItemThumbnailWidgetClass) &&
 			BuildLootContainerWidgetTree(LootContainerWidgetBlueprint, ItemThumbnailWidgetClass) &&
+			BuildLootContainerWidgetTree(StorageContainerWidgetBlueprint, ItemThumbnailWidgetClass) &&
+			BuildLootContainerWidgetTree(ShopContainerWidgetBlueprint, ItemThumbnailWidgetClass) &&
 			BuildWorkbenchPanelWidgetTree(
 				WorkbenchPanelWidgetBlueprint,
 				ItemThumbnailWidgetClass,
@@ -9677,6 +9708,8 @@ namespace TunaSweeperEditorSetup
 			InventoryAreaWidgetBlueprint,
 			ItemInfoPanelWidgetBlueprint,
 			LootContainerWidgetBlueprint,
+			StorageContainerWidgetBlueprint,
+			ShopContainerWidgetBlueprint,
 			WorkbenchRecipeListEntryWidgetBlueprint,
 			WorkbenchPanelWidgetBlueprint
 		})
@@ -9693,6 +9726,8 @@ namespace TunaSweeperEditorSetup
 		if (!BuildHudExternalPanelWidgetTree(
 			ExternalPanelWidgetBlueprint,
 			LootContainerWidgetBlueprint->GeneratedClass.Get(),
+			StorageContainerWidgetBlueprint->GeneratedClass.Get(),
+			ShopContainerWidgetBlueprint->GeneratedClass.Get(),
 			WorkbenchPanelWidgetBlueprint->GeneratedClass.Get()))
 		{
 			return false;
@@ -11872,6 +11907,12 @@ public:
 				{
 					return TunaSweeperEditorSetup::EnsureCommonGameHudAssets();
 				});
+			FTunaSweeperEditorRunOnce::Run(
+				TunaSweeperEditorSetup::SplitExternalContainerPanelTaskId,
+				[]()
+				{
+					return TunaSweeperEditorSetup::EnsureCommonGameHudAssets();
+				});
 			FPlatformMisc::RequestExit(false);
 			return;
 		}
@@ -12176,6 +12217,13 @@ public:
 
 		FTunaSweeperEditorRunOnce::Run(
 			TunaSweeperEditorSetup::ShopRefreshStockButtonTaskId,
+			[]()
+			{
+				return TunaSweeperEditorSetup::EnsureCommonGameHudAssets();
+			});
+
+		FTunaSweeperEditorRunOnce::Run(
+			TunaSweeperEditorSetup::SplitExternalContainerPanelTaskId,
 			[]()
 			{
 				return TunaSweeperEditorSetup::EnsureCommonGameHudAssets();
