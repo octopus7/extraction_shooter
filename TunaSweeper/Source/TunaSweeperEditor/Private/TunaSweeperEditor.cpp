@@ -125,7 +125,7 @@
 #include "UI/TunaSweeperItemThumbnailSlotWidget.h"
 #include "UI/TunaSweeperIntroMenuWidget.h"
 #include "UI/TunaSweeperLevelTransitionWidget.h"
-#include "UI/TunaSweeperLootContainerWidget.h"
+#include "UI/ItemContainerWidget.h"
 #include "UI/TunaSweeperPickupItemIconWidget.h"
 #include "UI/TunaSweeperQuestWidget.h"
 #include "UI/TunaSweeperReloadRingWidget.h"
@@ -149,7 +149,7 @@ namespace TunaSweeperEditorSetup
 	const FString InteractionInputTaskId = TEXT("2026-05-29_SetInteractInputAndFocusWheelV1");
 	const FString InteractionMarkerAlignmentTaskId = TEXT("2026-05-25_RebuildInteractionMarkerRequirementPreviewV1");
 	const FString PickupItemAndSpawnerTaskId = TEXT("2026-05-11_CreatePickupItemAndSpawnerAssetsV3");
-	const FString CommonGameHudTaskId = TEXT("2026-05-30_CancelableActionProgressHudV1");
+	const FString CommonGameHudTaskId = TEXT("2026-05-30_StretchInventoryStorageAndFilterHeaderV1");
 	constexpr float GameplayBottomQuickSlotWidth = 694.0f;
 	constexpr float GameplayBottomQuickSlotHeight = 174.0f;
 	constexpr float GameplayBottomStatusWidth = 194.0f;
@@ -165,6 +165,7 @@ namespace TunaSweeperEditorSetup
 	const FString CurrencyCoinUiTaskId = TEXT("2026-05-30_AddCurrencyCoinUiV1");
 	const FString HudDebuffBarWidgetTaskId = TEXT("2026-05-30_HudDebuffBarWidgetV2");
 	const FString ItemThumbnailSlotLayoutTaskId = TEXT("2026-05-30_RebuildItemThumbnailSlotLayoutV1");
+	const FString ItemContainerScrollbarStyleTaskId = TEXT("2026-05-30_ItemContainerScrollbarStyleV1");
 	const FString InventoryInputTaskId = TEXT("2026-05-11_AddInventoryInput");
 	const FString QuickSlotInputTaskId = TEXT("2026-05-28_AddMeleeQuickSlotInputV1");
 	const FString DropInputTaskId = TEXT("2026-05-18_AddDropInputAction");
@@ -175,7 +176,7 @@ namespace TunaSweeperEditorSetup
 	const FString MapInputTaskId = TEXT("2026-05-28_AddMapInputV1");
 	const FString EditorMapCaptureTaskId = TEXT("2026-05-28_CreateEditorMapCaptureBlueprintAndRaidPlacementV1");
 	const FString LootContainerAndSpawnerTaskId = TEXT("2026-05-11_CreateLootContainerAndSpawnerAssetsV1");
-	const FString LootContainerOccupancyHeaderTaskId = TEXT("2026-05-18_AddLootContainerOccupancyHeaderV1");
+	const FString LootContainerOccupancyHeaderTaskId = TEXT("2026-05-30_StorageFilterHeaderAboveGridV1");
 	const FString CannedTunaIconImportTaskId = TEXT("2026-05-11_ImportCannedTunaIconV1");
 	const FString BackpackInventoryTaskId = TEXT("2026-05-16_CreateEquipmentInventoryAssetsV3");
 	const FString IntroMenuAndLevelTravelTaskId = TEXT("2026-05-24_CreateTitleIntroMenuPersistentSaveSlotSelectionLevelTravelLadderInitialScaleV1");
@@ -311,7 +312,7 @@ namespace TunaSweeperEditorSetup
 	constexpr float HudUtilityPanelLeftInset = 34.0f;
 	constexpr float HudUtilityPanelRightInset = 34.0f;
 	constexpr float HudUtilityPanelTopOffset = 96.0f;
-	constexpr float HudUtilityPanelHeight = 620.0f;
+	constexpr float HudUtilityPanelBottomInset = 40.0f;
 	constexpr int32 InventoryTileColumnCount = 5;
 	constexpr int32 EquipmentReserveColumnCount = 4;
 	constexpr float InventoryTileWidth = 96.0f;
@@ -3253,6 +3254,71 @@ namespace TunaSweeperEditorSetup
 		Brush.OutlineSettings.Width = OutlineWidth;
 		Brush.OutlineSettings.bUseBrushTransparency = false;
 		return Brush;
+	}
+
+	FScrollBarStyle MakeItemContainerScrollBarStyle()
+	{
+		const FSlateBrush TrackBrush = MakeRoundedBoxBrush(
+			FVector2D(8.0f, 8.0f),
+			FLinearColor(0.012f, 0.016f, 0.018f, 0.18f),
+			FLinearColor(0.0f, 0.0f, 0.0f, 0.0f),
+			0.0f,
+			3.0f);
+		const FSlateBrush ThumbBrush = MakeRoundedBoxBrush(
+			FVector2D(8.0f, 8.0f),
+			FLinearColor(0.34f, 0.42f, 0.45f, 0.42f),
+			FLinearColor(0.55f, 0.68f, 0.72f, 0.20f),
+			0.8f,
+			3.0f);
+		const FSlateBrush HoveredThumbBrush = MakeRoundedBoxBrush(
+			FVector2D(8.0f, 8.0f),
+			FLinearColor(0.46f, 0.56f, 0.60f, 0.66f),
+			FLinearColor(0.70f, 0.82f, 0.86f, 0.34f),
+			1.0f,
+			3.0f);
+		const FSlateBrush DraggedThumbBrush = MakeRoundedBoxBrush(
+			FVector2D(8.0f, 8.0f),
+			FLinearColor(0.54f, 0.66f, 0.70f, 0.78f),
+			FLinearColor(0.82f, 0.92f, 0.96f, 0.48f),
+			1.0f,
+			3.0f);
+
+		FScrollBarStyle ScrollBarStyle;
+		ScrollBarStyle.SetHorizontalBackgroundImage(TrackBrush)
+			.SetVerticalBackgroundImage(TrackBrush)
+			.SetVerticalTopSlotImage(TrackBrush)
+			.SetVerticalBottomSlotImage(TrackBrush)
+			.SetHorizontalTopSlotImage(TrackBrush)
+			.SetHorizontalBottomSlotImage(TrackBrush)
+			.SetNormalThumbImage(ThumbBrush)
+			.SetHoveredThumbImage(HoveredThumbBrush)
+			.SetDraggedThumbImage(DraggedThumbBrush)
+			.SetThickness(8.0f);
+		return ScrollBarStyle;
+	}
+
+	void ApplyItemContainerScrollBarStyle(UTileView* TileView)
+	{
+		if (!TileView)
+		{
+			return;
+		}
+
+		static const FName ScrollBarStylePropertyName(TEXT("ScrollBarStyle"));
+		if (FStructProperty* ScrollBarStyleProperty =
+			FindFProperty<FStructProperty>(UListView::StaticClass(), ScrollBarStylePropertyName))
+		{
+			if (ScrollBarStyleProperty->Struct == FScrollBarStyle::StaticStruct())
+			{
+				if (FScrollBarStyle* ScrollBarStyle =
+					ScrollBarStyleProperty->ContainerPtrToValuePtr<FScrollBarStyle>(TileView))
+				{
+					*ScrollBarStyle = MakeItemContainerScrollBarStyle();
+				}
+			}
+		}
+
+		TileView->SetScrollBarPadding(FMargin(8.0f, 0.0f, 2.0f, 0.0f));
 	}
 
 	bool BuildIntroMenuWidgetTree(UWidgetBlueprint* WidgetBlueprint)
@@ -8475,6 +8541,7 @@ namespace TunaSweeperEditorSetup
 		EquipmentReserveTileView->SetEntryWidth(EquipmentReserveEntryWidth);
 		EquipmentReserveTileView->SetEntryHeight(EquipmentReserveEntryHeight);
 		SetListViewEntryWidgetClass(EquipmentReserveTileView, EntryWidgetClass);
+		ApplyItemContainerScrollBarStyle(EquipmentReserveTileView);
 		EquipmentReserveSizeBox->SetWidthOverride(EquipmentReserveWidth);
 		EquipmentReserveSizeBox->SetHeightOverride(EquipmentReserveHeight);
 		EquipmentReserveSizeBox->SetContent(EquipmentReserveTileView);
@@ -8498,6 +8565,7 @@ namespace TunaSweeperEditorSetup
 		AuxiliaryBagTileView->SetEntryWidth(InventoryTileWidth);
 		AuxiliaryBagTileView->SetEntryHeight(InventoryTileHeight);
 		SetListViewEntryWidgetClass(AuxiliaryBagTileView, EntryWidgetClass);
+		ApplyItemContainerScrollBarStyle(AuxiliaryBagTileView);
 		AuxiliaryBagBackground->SetContent(AuxiliaryBagTileView);
 		UHorizontalBoxSlot* BagSlot = RootRow->AddChildToHorizontalBox(AuxiliaryBagPanel);
 		if (BagSlot)
@@ -8509,6 +8577,7 @@ namespace TunaSweeperEditorSetup
 		InventoryTileView->SetEntryWidth(InventoryTileWidth);
 		InventoryTileView->SetEntryHeight(InventoryTileHeight);
 		SetListViewEntryWidgetClass(InventoryTileView, EntryWidgetClass);
+		ApplyItemContainerScrollBarStyle(InventoryTileView);
 		UVerticalBoxSlot* InventoryTileSlot = InventoryStack->AddChildToVerticalBox(InventoryTileView);
 		if (InventoryTileSlot)
 		{
@@ -8595,13 +8664,7 @@ namespace TunaSweeperEditorSetup
 			WeightWarningSlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
 		}
 
-		UVerticalBoxSlot* WeightPanelSlot = InventoryStack->AddChildToVerticalBox(InventoryWeightPanel);
-		if (WeightPanelSlot)
-		{
-			WeightPanelSlot->SetPadding(FMargin(0.0f, 10.0f, 0.0f, 0.0f));
-			WeightPanelSlot->SetHorizontalAlignment(HAlign_Fill);
-			WeightPanelSlot->SetVerticalAlignment(VAlign_Bottom);
-		}
+		InventoryWeightPanel->SetVisibility(ESlateVisibility::Collapsed);
 
 		RegisterWidgetVariable(WidgetBlueprint, RootSizeBox);
 		RegisterWidgetVariable(WidgetBlueprint, RootRow);
@@ -8766,6 +8829,7 @@ namespace TunaSweeperEditorSetup
 		AttachmentSlotTileView->SetEntryWidth(96.0f);
 		AttachmentSlotTileView->SetEntryHeight(96.0f);
 		SetListViewEntryWidgetClass(AttachmentSlotTileView, EntryWidgetClass);
+		ApplyItemContainerScrollBarStyle(AttachmentSlotTileView);
 		UVerticalBoxSlot* AttachmentSlot = ModdingStack->AddChildToVerticalBox(AttachmentSlotTileView);
 		if (AttachmentSlot)
 		{
@@ -8812,6 +8876,7 @@ namespace TunaSweeperEditorSetup
 		UBorder* PanelBackground = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("PanelBackground"));
 		UVerticalBox* PanelStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("PanelStack"));
 		UHorizontalBox* ContainerHeaderRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("ContainerHeaderRow"));
+		UHorizontalBox* StorageFilterTabsRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("StorageFilterTabsRow"));
 		UTextBlock* ContainerTitleText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("ContainerTitleText"));
 		UTextBlock* ContainerOccupancyText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("ContainerOccupancyText"));
 		UTunaSweeperCurrencyDisplayWidget* ShopCurrencyDisplayWidget =
@@ -8823,7 +8888,7 @@ namespace TunaSweeperEditorSetup
 		UTextBlock* ShopRefreshStockButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("ShopRefreshStockButtonText"));
 		UTileView* ContainerTileView = WidgetTree->ConstructWidget<UTileView>(UTileView::StaticClass(), TEXT("ContainerTileView"));
 
-		if (!RootSizeBox || !PanelBackground || !PanelStack || !ContainerHeaderRow ||
+		if (!RootSizeBox || !PanelBackground || !PanelStack || !ContainerHeaderRow || !StorageFilterTabsRow ||
 			!ContainerTitleText || !ContainerOccupancyText || !ShopCurrencyDisplayWidget || !ShopRefreshStockButtonBox ||
 			!ShopRefreshStockButton || !ShopRefreshStockButtonText || !ContainerTileView)
 		{
@@ -8896,9 +8961,19 @@ namespace TunaSweeperEditorSetup
 			TitleSlot->SetVerticalAlignment(VAlign_Top);
 		}
 
+		StorageFilterTabsRow->SetVisibility(ESlateVisibility::Collapsed);
+		UVerticalBoxSlot* FilterTabsSlot = PanelStack->AddChildToVerticalBox(StorageFilterTabsRow);
+		if (FilterTabsSlot)
+		{
+			FilterTabsSlot->SetPadding(FMargin(0.0f, 5.0f, 0.0f, 5.0f));
+			FilterTabsSlot->SetHorizontalAlignment(HAlign_Fill);
+			FilterTabsSlot->SetVerticalAlignment(VAlign_Center);
+		}
+
 		ContainerTileView->SetEntryWidth(LootContainerTileWidth);
 		ContainerTileView->SetEntryHeight(LootContainerTileHeight);
 		SetListViewEntryWidgetClass(ContainerTileView, EntryWidgetClass);
+		ApplyItemContainerScrollBarStyle(ContainerTileView);
 		UVerticalBoxSlot* TileViewSlot = PanelStack->AddChildToVerticalBox(ContainerTileView);
 		if (TileViewSlot)
 		{
@@ -8910,6 +8985,7 @@ namespace TunaSweeperEditorSetup
 
 		RegisterWidgetVariable(WidgetBlueprint, RootSizeBox);
 		RegisterWidgetVariable(WidgetBlueprint, ContainerHeaderRow);
+		RegisterWidgetVariable(WidgetBlueprint, StorageFilterTabsRow);
 		RegisterWidgetVariable(WidgetBlueprint, ContainerTitleText);
 		RegisterWidgetVariable(WidgetBlueprint, ContainerOccupancyText);
 		RegisterWidgetVariable(WidgetBlueprint, ShopCurrencyDisplayWidget);
@@ -9132,6 +9208,7 @@ namespace TunaSweeperEditorSetup
 			TileView->SetEntryHeight(WorkbenchTileHeight);
 			TileView->SetWheelScrollMultiplier(0.55f);
 			SetListViewEntryWidgetClass(TileView, EntryWidgetClass);
+			ApplyItemContainerScrollBarStyle(TileView);
 			if (USizeBox* TileViewSizeBox = Cast<USizeBox>(TileView->GetParent()))
 			{
 				TileViewSizeBox->SetWidthOverride(WorkbenchTileViewWidth);
@@ -9276,6 +9353,7 @@ namespace TunaSweeperEditorSetup
 		DismantleSelectedItemTileView->SetEntryWidth(WorkbenchTileWidth);
 		DismantleSelectedItemTileView->SetEntryHeight(WorkbenchTileHeight);
 		SetListViewEntryWidgetClass(DismantleSelectedItemTileView, EntryWidgetClass);
+		ApplyItemContainerScrollBarStyle(DismantleSelectedItemTileView);
 		DismantleSelectedItemBox->SetWidthOverride(WorkbenchTileWidth);
 		DismantleSelectedItemBox->SetHeightOverride(WorkbenchTileHeight);
 		DismantleSelectedItemBox->SetContent(DismantleSelectedItemTileView);
@@ -9326,6 +9404,7 @@ namespace TunaSweeperEditorSetup
 		BlueprintSelectedItemTileView->SetEntryWidth(WorkbenchTileWidth);
 		BlueprintSelectedItemTileView->SetEntryHeight(WorkbenchTileHeight);
 		SetListViewEntryWidgetClass(BlueprintSelectedItemTileView, EntryWidgetClass);
+		ApplyItemContainerScrollBarStyle(BlueprintSelectedItemTileView);
 		BlueprintSelectedItemBox->SetWidthOverride(WorkbenchTileWidth);
 		BlueprintSelectedItemBox->SetHeightOverride(WorkbenchTileHeight);
 		BlueprintSelectedItemBox->SetContent(BlueprintSelectedItemTileView);
@@ -9546,41 +9625,38 @@ namespace TunaSweeperEditorSetup
 		UCanvasPanelSlot* CenterSlot = RootCanvas->AddChildToCanvas(CenterContentPanel);
 		if (CenterSlot)
 		{
-			CenterSlot->SetAnchors(FAnchors(0.0f, 0.0f, 1.0f, 0.0f));
+			CenterSlot->SetAnchors(FAnchors(0.0f, 0.0f, 1.0f, 1.0f));
 			CenterSlot->SetAlignment(FVector2D(0.0f, 0.0f));
 			CenterSlot->SetOffsets(FMargin(
 				HudUtilityPanelLeftInset,
 				HudUtilityPanelTopOffset,
 				HudUtilityPanelRightInset,
-				HudUtilityPanelHeight));
+				HudUtilityPanelBottomInset));
 		}
 
 		UCanvasPanelSlot* InventorySlot = CenterContentPanel->AddChildToCanvas(InventoryAreaWidget);
 		if (InventorySlot)
 		{
-			InventorySlot->SetAnchors(FAnchors(0.0f, 0.0f, 0.0f, 0.0f));
+			InventorySlot->SetAnchors(FAnchors(0.0f, 0.0f, 0.0f, 1.0f));
 			InventorySlot->SetAlignment(FVector2D(0.0f, 0.0f));
-			InventorySlot->SetPosition(FVector2D(0.0f, 0.0f));
-			InventorySlot->SetSize(FVector2D(InventoryAreaPanelWidth, 620.0f));
+			InventorySlot->SetOffsets(FMargin(0.0f, 0.0f, InventoryAreaPanelWidth, 0.0f));
 		}
 
 		ItemInfoPanelWidget->SetVisibility(ESlateVisibility::Collapsed);
 		UCanvasPanelSlot* ItemInfoSlot = CenterContentPanel->AddChildToCanvas(ItemInfoPanelWidget);
 		if (ItemInfoSlot)
 		{
-			ItemInfoSlot->SetAnchors(FAnchors(0.5f, 0.0f, 0.5f, 0.0f));
+			ItemInfoSlot->SetAnchors(FAnchors(0.5f, 0.0f, 0.5f, 1.0f));
 			ItemInfoSlot->SetAlignment(FVector2D(0.5f, 0.0f));
-			ItemInfoSlot->SetPosition(FVector2D(0.0f, 0.0f));
-			ItemInfoSlot->SetSize(FVector2D(330.0f, 620.0f));
+			ItemInfoSlot->SetOffsets(FMargin(0.0f, 0.0f, 330.0f, 0.0f));
 		}
 
 		UCanvasPanelSlot* ExternalSlot = CenterContentPanel->AddChildToCanvas(ExternalPanelWidget);
 		if (ExternalSlot)
 		{
-			ExternalSlot->SetAnchors(FAnchors(1.0f, 0.0f, 1.0f, 0.0f));
+			ExternalSlot->SetAnchors(FAnchors(1.0f, 0.0f, 1.0f, 1.0f));
 			ExternalSlot->SetAlignment(FVector2D(1.0f, 0.0f));
-			ExternalSlot->SetPosition(FVector2D(0.0f, 0.0f));
-			ExternalSlot->SetSize(FVector2D(WorkbenchPanelWidth, 620.0f));
+			ExternalSlot->SetOffsets(FMargin(0.0f, 0.0f, WorkbenchPanelWidth, 0.0f));
 		}
 
 		UnsupportedModePanel->SetVisibility(ESlateVisibility::Collapsed);
@@ -9818,15 +9894,15 @@ namespace TunaSweeperEditorSetup
 		UWidgetBlueprint* LootContainerWidgetBlueprint = EnsureWidgetBlueprint(
 			UIAssetPath,
 			LootContainerWidgetAssetName,
-			UTunaSweeperLootContainerWidget::StaticClass());
+			ULootContainerWidget::StaticClass());
 		UWidgetBlueprint* StorageContainerWidgetBlueprint = EnsureWidgetBlueprint(
 			UIAssetPath,
 			StorageContainerWidgetAssetName,
-			UTunaSweeperStorageContainerWidget::StaticClass());
+			UStorageContainerWidget::StaticClass());
 		UWidgetBlueprint* ShopContainerWidgetBlueprint = EnsureWidgetBlueprint(
 			UIAssetPath,
 			ShopContainerWidgetAssetName,
-			UTunaSweeperShopContainerWidget::StaticClass());
+			UShopContainerWidget::StaticClass());
 		UWidgetBlueprint* WorkbenchPanelWidgetBlueprint = EnsureWidgetBlueprint(
 			UIAssetPath,
 			WorkbenchPanelWidgetAssetName,
@@ -9978,7 +10054,7 @@ namespace TunaSweeperEditorSetup
 		UWidgetBlueprint* LootContainerWidgetBlueprint = EnsureWidgetBlueprint(
 			UIAssetPath,
 			LootContainerWidgetAssetName,
-			UTunaSweeperLootContainerWidget::StaticClass());
+			ULootContainerWidget::StaticClass());
 		if (!ItemThumbnailWidgetBlueprint || !LootContainerWidgetBlueprint)
 		{
 			return false;
@@ -12127,6 +12203,12 @@ public:
 				{
 					return TunaSweeperEditorSetup::EnsureCommonGameHudAssets();
 				});
+			FTunaSweeperEditorRunOnce::Run(
+				TunaSweeperEditorSetup::ItemContainerScrollbarStyleTaskId,
+				[]()
+				{
+					return TunaSweeperEditorSetup::EnsureCommonGameHudAssets();
+				});
 			FPlatformMisc::RequestExit(false);
 			return;
 		}
@@ -12459,6 +12541,13 @@ public:
 
 		FTunaSweeperEditorRunOnce::Run(
 			TunaSweeperEditorSetup::ItemThumbnailSlotLayoutTaskId,
+			[]()
+			{
+				return TunaSweeperEditorSetup::EnsureCommonGameHudAssets();
+			});
+
+		FTunaSweeperEditorRunOnce::Run(
+			TunaSweeperEditorSetup::ItemContainerScrollbarStyleTaskId,
 			[]()
 			{
 				return TunaSweeperEditorSetup::EnsureCommonGameHudAssets();

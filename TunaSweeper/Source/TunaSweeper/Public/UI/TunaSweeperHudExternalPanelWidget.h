@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Blueprint/UserWidget.h"
 #include "CoreMinimal.h"
@@ -8,9 +8,9 @@
 #include "TunaSweeperHudExternalPanelWidget.generated.h"
 
 class UWidget;
-class UTunaSweeperLootContainerWidget;
-class UTunaSweeperShopContainerWidget;
-class UTunaSweeperStorageContainerWidget;
+class ULootContainerWidget;
+class UShopContainerWidget;
+class UStorageContainerWidget;
 class UTunaSweeperWorkbenchPanelWidget;
 
 UCLASS(BlueprintType, Blueprintable)
@@ -70,13 +70,13 @@ protected:
 	TObjectPtr<UTunaSweeperWorkbenchPanelWidget> WorkbenchPanelWidget;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
-	TObjectPtr<UTunaSweeperLootContainerWidget> LootContainerWidget;
+	TObjectPtr<ULootContainerWidget> LootContainerWidget;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
-	TObjectPtr<UTunaSweeperStorageContainerWidget> StorageContainerWidget;
+	TObjectPtr<UStorageContainerWidget> StorageContainerWidget;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
-	TObjectPtr<UTunaSweeperShopContainerWidget> ShopContainerWidget;
+	TObjectPtr<UShopContainerWidget> ShopContainerWidget;
 
 private:
 	void ApplyPanelMode();

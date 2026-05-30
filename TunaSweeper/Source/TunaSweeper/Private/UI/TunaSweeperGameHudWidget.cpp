@@ -10,6 +10,7 @@
 #include "Components/CanvasPanelSlot.h"
 #include "Components/HorizontalBox.h"
 #include "Components/HorizontalBoxSlot.h"
+#include "Components/ProgressBar.h"
 #include "Components/SizeBox.h"
 #include "Components/TextBlock.h"
 #include "Components/VerticalBox.h"
@@ -69,7 +70,13 @@ namespace
 	constexpr float UtilityPanelLeftInset = 34.0f;
 	constexpr float UtilityPanelRightInset = 34.0f;
 	constexpr float UtilityPanelTopOffset = 96.0f;
-	constexpr float UtilityPanelHeight = 620.0f;
+	constexpr float UtilityPanelBottomInset = 40.0f;
+	constexpr float InventoryAreaPanelWidth = 642.0f;
+	constexpr float ItemInfoPanelWidth = 330.0f;
+	constexpr float ExternalPanelWidth = 780.0f;
+	constexpr float InventoryWeightPanelWidth = 300.0f;
+	constexpr float InventoryWeightPanelHeight = 38.0f;
+	constexpr float InventoryWeightPanelBottomOffset = 2.0f;
 	constexpr float QuestMenuHorizontalMargin = 250.0f;
 	constexpr float QuestMenuTopMargin = 112.0f;
 	constexpr float QuestMenuBottomMargin = 56.0f;
@@ -284,6 +291,7 @@ void UTunaSweeperGameHudWidget::NativeConstruct()
 	EnsureExtractionProgressWidget();
 	EnsureCursorDistanceWidget();
 	EnsureDebuffBarWidget();
+	EnsureInventoryWeightPanelWidget();
 	EnsureInventoryQuickSlotPanelWidget();
 	EnsureHousingPanelWidget();
 	EnsureMapPanelWidget();
@@ -851,6 +859,13 @@ bool UTunaSweeperGameHudWidget::IsShopPanelOpen() const
 		ExternalPanelWidget->GetExternalPanelMode() == ETunaSweeperHudExternalPanelMode::Shop;
 }
 
+bool UTunaSweeperGameHudWidget::IsStoragePanelOpen() const
+{
+	return ActiveHudMode == ETunaSweeperHudMode::Inventory &&
+		ExternalPanelWidget &&
+		ExternalPanelWidget->GetExternalPanelMode() == ETunaSweeperHudExternalPanelMode::Storage;
+}
+
 bool UTunaSweeperGameHudWidget::IsWorkbenchPanelOpen() const
 {
 	return ActiveHudMode == ETunaSweeperHudMode::Inventory &&
@@ -1401,6 +1416,16 @@ void UTunaSweeperGameHudWidget::ApplyHudModeVisibility()
 		InventoryAreaWidget->SetInventoryVisible(bShowInventoryArea);
 	}
 
+	EnsureInventoryWeightPanelWidget();
+	if (InventoryWeightPanel)
+	{
+		const bool bShowInventoryWeightPanel = bUtilityModeOpen && bInventoryMode && !bCraftWorkbenchPanelOpen;
+		SetTransitionedWidgetVisibility(
+			InventoryWeightPanel,
+			bShowInventoryWeightPanel ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed,
+			ETunaSweeperHudTransitionEdge::Bottom);
+	}
+
 	EnsureInventoryQuickSlotPanelWidget();
 	if (InventoryQuickSlotPanel)
 	{
@@ -1577,13 +1602,50 @@ void UTunaSweeperGameHudWidget::NormalizeCenterContentPanelLayout()
 		? Cast<UCanvasPanelSlot>(CenterContentPanel->Slot)
 		: nullptr)
 	{
-		CenterSlot->SetAnchors(FAnchors(0.0f, 0.0f, 1.0f, 0.0f));
+		CenterSlot->SetAnchors(FAnchors(0.0f, 0.0f, 1.0f, 1.0f));
 		CenterSlot->SetAlignment(FVector2D(0.0f, 0.0f));
 		CenterSlot->SetOffsets(FMargin(
 			UtilityPanelLeftInset,
 			UtilityPanelTopOffset,
 			UtilityPanelRightInset,
-			UtilityPanelHeight));
+			UtilityPanelBottomInset));
+	}
+
+	auto StretchCanvasChildVertically = [](UWidget* Widget, const FAnchors& Anchors, const FVector2D& Alignment, float FallbackWidth)
+	{
+		UCanvasPanelSlot* CanvasSlot = Widget ? Cast<UCanvasPanelSlot>(Widget->Slot) : nullptr;
+		if (!CanvasSlot)
+		{
+			return;
+		}
+
+		const FVector2D CurrentSize = CanvasSlot->GetSize();
+		const float Width = CurrentSize.X > 1.0f ? CurrentSize.X : FallbackWidth;
+		CanvasSlot->SetAnchors(Anchors);
+		CanvasSlot->SetAlignment(Alignment);
+		CanvasSlot->SetOffsets(FMargin(0.0f, 0.0f, Width, 0.0f));
+	};
+
+	StretchCanvasChildVertically(
+		InventoryAreaWidget,
+		FAnchors(0.0f, 0.0f, 0.0f, 1.0f),
+		FVector2D(0.0f, 0.0f),
+		InventoryAreaPanelWidth);
+	StretchCanvasChildVertically(
+		ExternalPanelWidget,
+		FAnchors(1.0f, 0.0f, 1.0f, 1.0f),
+		FVector2D(1.0f, 0.0f),
+		ExternalPanelWidth);
+
+	if (UCanvasPanelSlot* ItemInfoSlot = ItemInfoPanelWidget
+		? Cast<UCanvasPanelSlot>(ItemInfoPanelWidget->Slot)
+		: nullptr)
+	{
+		const FVector2D CurrentSize = ItemInfoSlot->GetSize();
+		const float Width = CurrentSize.X > 1.0f ? CurrentSize.X : ItemInfoPanelWidth;
+		ItemInfoSlot->SetAnchors(FAnchors(0.5f, 0.0f, 0.5f, 1.0f));
+		ItemInfoSlot->SetAlignment(FVector2D(0.5f, 0.0f));
+		ItemInfoSlot->SetOffsets(FMargin(0.0f, 0.0f, Width, 0.0f));
 	}
 }
 
@@ -1758,6 +1820,109 @@ void UTunaSweeperGameHudWidget::EnsureDebuffBarWidget()
 
 	UCanvasPanelSlot* CanvasSlot = RootCanvas->AddChildToCanvas(DebuffBarWidget);
 	ConfigureDebuffBarCanvasSlot(CanvasSlot);
+}
+
+void UTunaSweeperGameHudWidget::EnsureInventoryWeightPanelWidget()
+{
+	if (!WidgetTree)
+	{
+		return;
+	}
+
+	auto ConfigureWeightPanelCanvasSlot = [](UCanvasPanelSlot* CanvasSlot)
+	{
+		if (!CanvasSlot)
+		{
+			return;
+		}
+
+		CanvasSlot->SetAnchors(FAnchors(0.0f, 1.0f, 0.0f, 1.0f));
+		CanvasSlot->SetAlignment(FVector2D(0.0f, 1.0f));
+		CanvasSlot->SetPosition(FVector2D(UtilityPanelLeftInset, -InventoryWeightPanelBottomOffset));
+		CanvasSlot->SetSize(FVector2D(InventoryWeightPanelWidth, InventoryWeightPanelHeight));
+		CanvasSlot->SetZOrder(37);
+	};
+
+	if (InventoryWeightPanel)
+	{
+		ConfigureWeightPanelCanvasSlot(Cast<UCanvasPanelSlot>(InventoryWeightPanel->Slot));
+		return;
+	}
+
+	UCanvasPanel* RootCanvas = Cast<UCanvasPanel>(WidgetTree->RootWidget);
+	if (!RootCanvas)
+	{
+		return;
+	}
+
+	InventoryWeightPanel = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("InventoryWeightPanel"));
+	UHorizontalBox* WeightRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("InventoryWeightRow"));
+	InventoryWeightLabelText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("InventoryWeightLabelText"));
+	USizeBox* WeightGaugeBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("InventoryWeightGaugeBox"));
+	InventoryWeightGauge = WidgetTree->ConstructWidget<UProgressBar>(UProgressBar::StaticClass(), TEXT("InventoryWeightGauge"));
+	InventoryWeightText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("InventoryWeightText"));
+	InventoryWeightWarningText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("InventoryWeightWarningText"));
+	if (!InventoryWeightPanel || !WeightRow || !InventoryWeightLabelText || !WeightGaugeBox ||
+		!InventoryWeightGauge || !InventoryWeightText || !InventoryWeightWarningText)
+	{
+		return;
+	}
+
+	InventoryWeightPanel->SetVisibility(ESlateVisibility::Collapsed);
+	InventoryWeightPanel->SetPadding(FMargin(10.0f, 6.0f));
+	InventoryWeightPanel->SetBrush(MakeHudRoundedBoxBrush(
+		FVector2D(InventoryWeightPanelWidth, InventoryWeightPanelHeight),
+		FLinearColor(0.005f, 0.008f, 0.010f, 0.76f),
+		1.0f,
+		FLinearColor(0.18f, 0.24f, 0.26f, 0.85f),
+		1.0f));
+	InventoryWeightPanel->SetContent(WeightRow);
+
+	InventoryWeightLabelText->SetColorAndOpacity(FSlateColor(FLinearColor(0.92f, 0.96f, 0.94f, 1.0f)));
+	InventoryWeightLabelText->SetJustification(ETextJustify::Left);
+	TunaSweeperUIFont::ApplyFont(InventoryWeightLabelText, 13.0f, ETunaSweeperUIFontWeight::Bold);
+	UHorizontalBoxSlot* LabelSlot = WeightRow->AddChildToHorizontalBox(InventoryWeightLabelText);
+	if (LabelSlot)
+	{
+		LabelSlot->SetVerticalAlignment(VAlign_Center);
+		LabelSlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
+	}
+
+	InventoryWeightGauge->SetPercent(0.0f);
+	InventoryWeightGauge->SetFillColorAndOpacity(FLinearColor(0.60f, 0.84f, 0.36f, 1.0f));
+	WeightGaugeBox->SetHeightOverride(16.0f);
+	WeightGaugeBox->SetContent(InventoryWeightGauge);
+	UHorizontalBoxSlot* GaugeSlot = WeightRow->AddChildToHorizontalBox(WeightGaugeBox);
+	if (GaugeSlot)
+	{
+		GaugeSlot->SetPadding(FMargin(10.0f, 0.0f));
+		GaugeSlot->SetVerticalAlignment(VAlign_Center);
+		GaugeSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+	}
+
+	InventoryWeightText->SetColorAndOpacity(FSlateColor(FLinearColor::White));
+	InventoryWeightText->SetJustification(ETextJustify::Right);
+	TunaSweeperUIFont::ApplyFont(InventoryWeightText, 13.0f, ETunaSweeperUIFontWeight::Bold);
+	UHorizontalBoxSlot* WeightTextSlot = WeightRow->AddChildToHorizontalBox(InventoryWeightText);
+	if (WeightTextSlot)
+	{
+		WeightTextSlot->SetVerticalAlignment(VAlign_Center);
+		WeightTextSlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
+	}
+
+	InventoryWeightWarningText->SetColorAndOpacity(FSlateColor(FLinearColor(1.0f, 0.84f, 0.50f, 1.0f)));
+	InventoryWeightWarningText->SetJustification(ETextJustify::Center);
+	TunaSweeperUIFont::ApplyFont(InventoryWeightWarningText, 11.0f, ETunaSweeperUIFontWeight::Bold);
+	UHorizontalBoxSlot* WarningSlot = WeightRow->AddChildToHorizontalBox(InventoryWeightWarningText);
+	if (WarningSlot)
+	{
+		WarningSlot->SetPadding(FMargin(8.0f, 0.0f, 0.0f, 0.0f));
+		WarningSlot->SetVerticalAlignment(VAlign_Center);
+		WarningSlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
+	}
+
+	UCanvasPanelSlot* CanvasSlot = RootCanvas->AddChildToCanvas(InventoryWeightPanel);
+	ConfigureWeightPanelCanvasSlot(CanvasSlot);
 }
 
 void UTunaSweeperGameHudWidget::EnsureInventoryQuickSlotPanelWidget()
@@ -2148,7 +2313,7 @@ void UTunaSweeperGameHudWidget::SetShopSellPanelVisible(bool bVisible)
 
 void UTunaSweeperGameHudWidget::RefreshBottomStatusFromGameInstance()
 {
-	if (!BottomStatusWidget && !InventoryAreaWidget)
+	if (!BottomStatusWidget && !InventoryAreaWidget && !InventoryWeightPanel)
 	{
 		return;
 	}
@@ -2189,6 +2354,71 @@ void UTunaSweeperGameHudWidget::RefreshBottomStatusFromGameInstance()
 	if (InventoryAreaWidget)
 	{
 		InventoryAreaWidget->SetHudState(HudState);
+	}
+
+	RefreshInventoryWeightPanelFromHudState(HudState);
+}
+
+void UTunaSweeperGameHudWidget::RefreshInventoryWeightPanelFromHudState(const FTunaSweeperPlayerHudState& HudState)
+{
+	EnsureInventoryWeightPanelWidget();
+	if (!InventoryWeightPanel)
+	{
+		return;
+	}
+
+	FTunaSweeperPlayerHudState NormalizedHudState = HudState;
+	NormalizedHudState.NormalizeWeightLimits();
+	const UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+
+	FNumberFormattingOptions NumberFormat;
+	NumberFormat.MinimumFractionalDigits = 0;
+	NumberFormat.MaximumFractionalDigits = 1;
+	auto MakeWeightNumberText = [&NumberFormat](float Value)
+	{
+		return FText::AsNumber(Value, &NumberFormat);
+	};
+
+	if (InventoryWeightLabelText)
+	{
+		InventoryWeightLabelText->SetText(ResolveUiText(
+			TunaGameInstance,
+			TEXT("ui.inventory.weight_label"),
+			TEXT("\uC18C\uC9C0 \uC911\uB7C9")));
+	}
+
+	if (InventoryWeightText)
+	{
+		InventoryWeightText->SetText(FText::Format(
+			ResolveUiText(TunaGameInstance, TEXT("ui.inventory.weight_pattern"), TEXT("{0}/{1}kg")),
+			MakeWeightNumberText(NormalizedHudState.CurrentCarryWeight),
+			MakeWeightNumberText(NormalizedHudState.MaxCarryWeight)));
+	}
+
+	if (InventoryWeightGauge)
+	{
+		const float GaugePercent = NormalizedHudState.MovementBlockedWeight > 0.0f
+			? NormalizedHudState.CurrentCarryWeight / NormalizedHudState.MovementBlockedWeight
+			: 0.0f;
+		InventoryWeightGauge->SetPercent(FMath::Clamp(GaugePercent, 0.0f, 1.0f));
+		InventoryWeightGauge->SetFillColorAndOpacity(
+			NormalizedHudState.IsCarryWeightMovementBlocked()
+				? FLinearColor(0.92f, 0.16f, 0.10f, 1.0f)
+				: NormalizedHudState.IsCarryWeightOverLimit()
+					? FLinearColor(0.96f, 0.74f, 0.18f, 1.0f)
+					: FLinearColor(0.60f, 0.84f, 0.36f, 1.0f));
+	}
+
+	if (InventoryWeightWarningText)
+	{
+		InventoryWeightWarningText->SetText(ResolveUiText(
+			TunaGameInstance,
+			TEXT("ui.inventory.overweight"),
+			TEXT("\uACFC\uC911\uB7C9")));
+		InventoryWeightWarningText->SetVisibility(
+			NormalizedHudState.IsCarryWeightOverLimit()
+				? ESlateVisibility::HitTestInvisible
+				: ESlateVisibility::Collapsed);
 	}
 }
 
@@ -2258,6 +2488,7 @@ void UTunaSweeperGameHudWidget::RefreshQuickSlotsFromGameState()
 			!TunaGameInstance->TryGetEquipmentWeaponSlotItem(SlotNumber, WeaponInstance, WeaponDefinition))
 		{
 			QuickSlotBarWidget->ClearQuickSlotIcon(SlotNumber);
+			QuickSlotBarWidget->SetQuickSlotItemGrade(SlotNumber, ETunaSweeperItemGrade::Common, false);
 			QuickSlotBarWidget->SetWeaponAmmoTypeText(SlotNumber, FText::GetEmpty(), false);
 			QuickSlotBarWidget->SetWeaponAmmoText(SlotNumber, 0, 0, false);
 			continue;
@@ -2273,6 +2504,7 @@ void UTunaSweeperGameHudWidget::RefreshQuickSlotsFromGameState()
 			}
 		}
 		QuickSlotBarWidget->SetQuickSlotIcon(SlotNumber, IconTexture);
+		QuickSlotBarWidget->SetQuickSlotItemGrade(SlotNumber, WeaponDefinition.ItemGrade, true);
 
 		FText AmmoTypeText = ResolveUiText(TunaGameInstance, TEXT("ui.hud.ammo_unset"), TEXT("\uD0C4\uC57D \uBBF8\uC9C0\uC815"));
 		const int32 AmmoItemId = TunaGameInstance->GetWeaponSelectedAmmoItemId(SlotNumber);
@@ -2301,6 +2533,7 @@ void UTunaSweeperGameHudWidget::RefreshQuickSlotsFromGameState()
 		!ItemDataSubsystem)
 	{
 		QuickSlotBarWidget->ClearMeleeQuickSlotIcon();
+		QuickSlotBarWidget->SetMeleeQuickSlotItemGrade(ETunaSweeperItemGrade::Common, false);
 	}
 	else
 	{
@@ -2311,6 +2544,7 @@ void UTunaSweeperGameHudWidget::RefreshQuickSlotsFromGameState()
 			IconTexture = LoadObject<UTexture2D>(nullptr, *IconObjectPath);
 		}
 		QuickSlotBarWidget->SetMeleeQuickSlotIcon(IconTexture);
+		QuickSlotBarWidget->SetMeleeQuickSlotItemGrade(MeleeDefinition.ItemGrade, true);
 	}
 
 	static const TArray<FTunaSweeperInventorySlot> EmptyQuickSlots;
@@ -2329,6 +2563,7 @@ void UTunaSweeperGameHudWidget::RefreshQuickSlotsFromGameState()
 			!ItemDataSubsystem->TryGetItemDefinition(ItemInstance.ItemId, ItemDefinition))
 		{
 			QuickSlotBarWidget->ClearQuickSlotIcon(SlotNumber);
+			QuickSlotBarWidget->SetQuickSlotItemGrade(SlotNumber, ETunaSweeperItemGrade::Common, false);
 			QuickSlotBarWidget->SetWeaponAmmoTypeText(SlotNumber, FText::GetEmpty(), false);
 			QuickSlotBarWidget->SetWeaponAmmoText(SlotNumber, 0, 0, false);
 			continue;
@@ -2342,6 +2577,7 @@ void UTunaSweeperGameHudWidget::RefreshQuickSlotsFromGameState()
 		}
 
 		QuickSlotBarWidget->SetQuickSlotIcon(SlotNumber, IconTexture);
+		QuickSlotBarWidget->SetQuickSlotItemGrade(SlotNumber, ItemDefinition.ItemGrade, true);
 		QuickSlotBarWidget->SetWeaponAmmoTypeText(SlotNumber, FText::GetEmpty(), false);
 		QuickSlotBarWidget->SetWeaponAmmoText(SlotNumber, 0, 0, false);
 	}

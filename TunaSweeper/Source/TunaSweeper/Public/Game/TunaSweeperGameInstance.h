@@ -559,6 +559,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Inventory")
 	void CompactInventorySlots();
 
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Storage")
+	void CompactStorageSlots();
+
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Storage")
 	int32 GetStorageSlotCapacity();
 

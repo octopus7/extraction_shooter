@@ -381,6 +381,10 @@ void UTunaSweeperHudInventoryAreaWidget::NativeConstruct()
 	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
 	EnsureCurrencyDisplayWidget();
 	EnsureWeightThresholdMarkerWidgets();
+	if (InventoryWeightPanel)
+	{
+		InventoryWeightPanel->SetVisibility(ESlateVisibility::Collapsed);
+	}
 
 	if (SortInventoryButton)
 	{
@@ -440,7 +444,7 @@ void UTunaSweeperHudInventoryAreaWidget::SetInventoryVisible(bool bVisible)
 
 	if (InventoryWeightPanel)
 	{
-		InventoryWeightPanel->SetVisibility(bVisible ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
+		InventoryWeightPanel->SetVisibility(ESlateVisibility::Collapsed);
 	}
 
 	if (CurrencyDisplayWidget)

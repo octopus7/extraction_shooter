@@ -180,6 +180,44 @@ namespace TunaSweeperHoveredItemInteraction
 		return false;
 	}
 
+	bool TryFindFirstStorageTarget(
+		UTunaSweeperGameInstance* TunaGameInstance,
+		const FTunaSweeperItemSlotReference& SourceSlot,
+		FTunaSweeperItemSlotReference& OutTargetSlot)
+	{
+		if (!TunaGameInstance)
+		{
+			return false;
+		}
+
+		const TArray<FTunaSweeperInventorySlot>& StorageSlots = TunaGameInstance->GetStorageSlots();
+		for (int32 SlotIndex = 0; SlotIndex < StorageSlots.Num(); ++SlotIndex)
+		{
+			if (!StorageSlots[SlotIndex].IsEmpty())
+			{
+				continue;
+			}
+
+			FTunaSweeperItemSlotReference TargetSlot;
+			TargetSlot.Source = ETunaSweeperItemSlotSource::Storage;
+			TargetSlot.SlotIndex = SlotIndex;
+			if (TunaGameInstance->CanMoveItemBetweenSlots(SourceSlot, TargetSlot))
+			{
+				OutTargetSlot = TargetSlot;
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	bool IsCarriedInventorySource(ETunaSweeperItemSlotSource Source)
+	{
+		return Source == ETunaSweeperItemSlotSource::Inventory ||
+			Source == ETunaSweeperItemSlotSource::Equipment ||
+			Source == ETunaSweeperItemSlotSource::AuxiliaryBag;
+	}
+
 	void ShowInsufficientSpaceMessage()
 	{
 		if (GEngine)
@@ -1098,6 +1136,22 @@ bool ATunaSweeperPlayerController::TryHandleHoveredItemInteract()
 	}
 
 	FTunaSweeperItemSlotReference TargetSlot;
+	if (GameHudWidget &&
+		GameHudWidget->IsStoragePanelOpen() &&
+		TunaSweeperHoveredItemInteraction::IsCarriedInventorySource(HoveredSlot.Source))
+	{
+		if (TunaSweeperHoveredItemInteraction::TryFindFirstStorageTarget(TunaGameInstance, HoveredSlot, TargetSlot))
+		{
+			TunaGameInstance->MoveItemBetweenSlots(HoveredSlot, TargetSlot);
+			TunaGameInstance->ClearHoveredItemSlot(HoveredSlot);
+		}
+		else
+		{
+			TunaSweeperHoveredItemInteraction::ShowInsufficientSpaceMessage();
+		}
+		return true;
+	}
+
 	if (HoveredSlot.Source == ETunaSweeperItemSlotSource::Inventory)
 	{
 		if (TunaSweeperHoveredItemInteraction::TryFindEquipmentTarget(TunaGameInstance, HoveredSlot, true, TargetSlot) ||

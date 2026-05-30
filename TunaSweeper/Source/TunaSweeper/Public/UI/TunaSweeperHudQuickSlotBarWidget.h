@@ -2,6 +2,7 @@
 
 #include "Blueprint/UserWidget.h"
 #include "CoreMinimal.h"
+#include "Subsystem/TunaSweeperItemDataSubsystem.h"
 #include "TunaSweeperHudQuickSlotBarWidget.generated.h"
 
 class UImage;
@@ -11,6 +12,7 @@ class UTexture2D;
 class UWidget;
 class UBorder;
 class UHorizontalBox;
+class UTunaSweeperItemRaritySlotAccentWidget;
 
 UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API UTunaSweeperHudQuickSlotBarWidget : public UUserWidget
@@ -29,6 +31,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
 	void ClearMeleeQuickSlotIcon();
+
+	void SetQuickSlotItemGrade(int32 SlotNumber, ETunaSweeperItemGrade ItemGrade, bool bVisible);
+	void SetMeleeQuickSlotItemGrade(ETunaSweeperItemGrade ItemGrade, bool bVisible);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
 	void SetSelectedQuickSlot(int32 SlotNumber);
@@ -55,9 +60,15 @@ private:
 	void SetAmmoSelectorPanelPosition(int32 WeaponSlotNumber);
 	void SetAmmoSelectorPromptVisible(const FText& PromptText, bool bVisible);
 	void SetAmmoSelectorKeyHintVisible(bool bVisible);
+	UTunaSweeperItemRaritySlotAccentWidget* EnsureQuickSlotRarityAccentWidget(
+		UImage* IconImage,
+		const FName& WidgetName);
 
 	UPROPERTY(Transient)
 	TArray<TObjectPtr<UImage>> SlotIconImages;
+
+	UPROPERTY(Transient)
+	TArray<TObjectPtr<UTunaSweeperItemRaritySlotAccentWidget>> SlotRarityAccentWidgets;
 
 	UPROPERTY(Transient)
 	TArray<TObjectPtr<UWidget>> SlotSelectionFrames;
@@ -82,6 +93,9 @@ private:
 
 	UPROPERTY(BlueprintReadOnly, Transient, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional, AllowPrivateAccess = "true"))
 	TObjectPtr<UImage> QuickSlotMeleeIcon;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTunaSweeperItemRaritySlotAccentWidget> QuickSlotMeleeRarityAccentWidget;
 
 	UPROPERTY(BlueprintReadOnly, Transient, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional, AllowPrivateAccess = "true"))
 	TObjectPtr<UWidget> QuickSlotMeleeSelectionFrame;

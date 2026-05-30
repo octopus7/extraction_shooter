@@ -3,9 +3,9 @@
 #include "Blueprint/UserWidget.h"
 #include "CoreMinimal.h"
 #include "Inventory/TunaSweeperInventoryTypes.h"
-#include "Layout/Anchors.h"
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
 #include "UI/TunaSweeperHudTypes.h"
+#include "Widgets/Layout/Anchors.h"
 #include "TunaSweeperGameHudWidget.generated.h"
 
 class ATunaSweeperTopDownCharacter;
@@ -27,8 +27,10 @@ class UTunaSweeperQuestWidget;
 class UTunaSweeperReloadRingWidget;
 class UBorder;
 class UHorizontalBox;
+class UProgressBar;
 class UTextBlock;
 class UWidget;
+struct FTunaSweeperPlayerHudState;
 
 UENUM(BlueprintType)
 enum class ETunaSweeperHudTransitionEdge : uint8
@@ -110,6 +112,9 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|HUD")
 	bool IsShopPanelOpen() const;
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|HUD")
+	bool IsStoragePanelOpen() const;
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|HUD")
 	bool IsWorkbenchPanelOpen() const;
@@ -303,6 +308,7 @@ private:
 	void EnsureExtractionProgressWidget();
 	void EnsureCursorDistanceWidget();
 	void EnsureDebuffBarWidget();
+	void EnsureInventoryWeightPanelWidget();
 	void EnsureInventoryQuickSlotPanelWidget();
 	void EnsureHousingPanelWidget();
 	void EnsureMapPanelWidget();
@@ -312,6 +318,7 @@ private:
 	void SetShopSellPanelVisible(bool bVisible);
 	ETunaSweeperHudTransitionEdge ResolveHudTransitionEdge(const UWidget* Widget, ETunaSweeperHudTransitionEdge DirectionOverride) const;
 	void RefreshBottomStatusFromGameInstance();
+	void RefreshInventoryWeightPanelFromHudState(const FTunaSweeperPlayerHudState& HudState);
 	void RefreshDebuffBarFromPlayer();
 	void RefreshQuickSlotsFromGameState();
 	void RefreshInventoryQuickSlotPanel();
@@ -389,6 +396,21 @@ private:
 
 	UPROPERTY(BlueprintReadOnly, Transient, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional, AllowPrivateAccess = "true"))
 	TObjectPtr<UTunaSweeperHudDebuffBarWidget> DebuffBarWidget;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UBorder> InventoryWeightPanel;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTextBlock> InventoryWeightLabelText;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UProgressBar> InventoryWeightGauge;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTextBlock> InventoryWeightText;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTextBlock> InventoryWeightWarningText;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UTextBlock> CursorDistanceText;

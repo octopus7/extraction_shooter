@@ -11,6 +11,7 @@ class UImage;
 class UTextBlock;
 class UDragDropOperation;
 class UTunaSweeperItemHoverPromptWidget;
+class UTunaSweeperItemRaritySlotAccentWidget;
 
 UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API UTunaSweeperItemThumbnailSlotWidget : public UUserWidget, public IUserObjectListEntry
@@ -82,6 +83,8 @@ protected:
 private:
 	void ApplyTileData();
 	void ApplyDropHighlight(bool bCanAcceptDrop);
+	void EnsureRaritySlotAccentWidget();
+	void ApplyRaritySlotAccent();
 	void EnsureAttachmentSlotIndicatorWidget();
 	void EnsureItemPriceCoinWidget();
 	FText BuildAttachmentSlotIndicatorText() const;
@@ -100,6 +103,9 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<UTunaSweeperItemHoverPromptWidget> ActiveHoverPrompt;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTunaSweeperItemRaritySlotAccentWidget> RaritySlotAccentWidget;
 
 	bool bSuppressNextMouseButtonUpSelection = false;
 };

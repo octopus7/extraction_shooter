@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="430" viewBox="0 0 1180 430">
+  <defs>
+    <linearGradient id="panelBg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#161b1e"/>
+      <stop offset="1" stop-color="#0a0e11"/>
+    </linearGradient>
+    <linearGradient id="commonFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#c7ccd1" stop-opacity="0.28"/>
+      <stop offset="0.58" stop-color="#8c949c" stop-opacity="0.08"/>
+      <stop offset="1" stop-color="#8c949c" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="uncommonFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#44ff74" stop-opacity="0.56"/>
+      <stop offset="0.60" stop-color="#1eea70" stop-opacity="0.14"/>
+      <stop offset="1" stop-color="#1eea70" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="rareFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#19c8ff" stop-opacity="0.62"/>
+      <stop offset="0.62" stop-color="#167dff" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#167dff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="epicFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#b44cff" stop-opacity="0.66"/>
+      <stop offset="0.58" stop-color="#eb3cff" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#eb3cff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="legendaryFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffbd2e" stop-opacity="0.70"/>
+      <stop offset="0.58" stop-color="#ff6d1a" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#ff6d1a" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="softGlow" x="-25%" y="-25%" width="150%" height="150%">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <style>
+      .label { fill: #e8eef0; font-family: Arial, sans-serif; font-size: 24px; font-weight: 700; }
+      .sub { fill: #99a5aa; font-family: Arial, sans-serif; font-size: 15px; }
+      .small { fill: #cfd6d9; font-family: Arial, sans-serif; font-size: 13px; font-weight: 700; }
+      .slotBase { fill: #11171a; stroke: #29343a; stroke-width: 2; }
+      .innerLine { fill: none; stroke: rgba(255,255,255,0.10); stroke-width: 1; }
+      .icon { fill: #d9e2e5; opacity: 0.92; }
+      .iconDim { fill: #9aa5aa; opacity: 0.78; }
+    </style>
+  </defs>
+
+  <rect width="1180" height="430" rx="0" fill="url(#panelBg)"/>
+  <text x="42" y="50" class="label">Item Slot Rarity Preview</text>
+  <text x="42" y="76" class="sub">Icon-back vertical gradient + thin top accent band. Keep the band subtle, not a thick fantasy border.</text>
+
+  <g transform="translate(42 122)">
+    <g transform="translate(0 0)">
+      <rect x="0" y="0" width="170" height="170" rx="7" class="slotBase"/>
+      <rect x="8" y="8" width="154" height="154" rx="5" fill="url(#commonFill)"/>
+      <rect x="8" y="8" width="154" height="3" rx="1.5" fill="#aab3ba" opacity="0.28"/>
+      <rect x="16" y="16" width="138" height="138" rx="4" class="innerLine"/>
+      <path class="iconDim" d="M84 42c15 0 28 9 32 23 4 13-1 26-12 35l17 26-15 8-17-26c-2 0-4 1-6 1s-4-1-6-1l-17 26-15-8 17-26c-11-9-16-22-12-35 4-14 17-23 34-23zm0 18c-10 0-18 7-18 16 0 10 8 17 18 17 10 0 18-7 18-17 0-9-8-16-18-16z"/>
+      <text x="14" y="194" class="small">COMMON</text>
+      <text x="14" y="215" class="sub">band nearly absent</text>
+    </g>
+
+    <g transform="translate(222 0)">
+      <rect x="0" y="0" width="170" height="170" rx="7" class="slotBase"/>
+      <rect x="8" y="8" width="154" height="154" rx="5" fill="url(#uncommonFill)"/>
+      <rect x="8" y="8" width="154" height="3" rx="1.5" fill="#3cff75" opacity="0.86"/>
+      <rect x="8" y="8" width="154" height="3" rx="1.5" fill="#3cff75" opacity="0.38" filter="url(#softGlow)"/>
+      <rect x="16" y="16" width="138" height="138" rx="4" class="innerLine"/>
+      <path class="icon" d="M84 38l43 23v48l-43 25-43-25V61l43-23zm0 20L59 71v26l25 15 25-15V71L84 58z"/>
+      <text x="14" y="194" class="small">UNCOMMON</text>
+      <text x="14" y="215" class="sub">thin readable accent</text>
+    </g>
+
+    <g transform="translate(444 0)">
+      <rect x="0" y="0" width="170" height="170" rx="7" class="slotBase"/>
+      <rect x="8" y="8" width="154" height="154" rx="5" fill="url(#rareFill)"/>
+      <rect x="8" y="8" width="154" height="3" rx="1.5" fill="#19c8ff" opacity="0.94"/>
+      <rect x="8" y="8" width="154" height="3" rx="1.5" fill="#19c8ff" opacity="0.44" filter="url(#softGlow)"/>
+      <rect x="16" y="16" width="138" height="138" rx="4" class="innerLine"/>
+      <path class="icon" d="M47 104l16-54h42l18 54-12 9-10-25H68l-9 25-12-9zm25-31h25l-8-16h-9l-8 16z"/>
+      <text x="14" y="194" class="small">RARE</text>
+      <text x="14" y="215" class="sub">blue/cyan signal</text>
+    </g>
+
+    <g transform="translate(666 0)">
+      <rect x="0" y="0" width="170" height="170" rx="7" class="slotBase"/>
+      <rect x="8" y="8" width="154" height="154" rx="5" fill="url(#epicFill)"/>
+      <rect x="8" y="8" width="154" height="3" rx="1.5" fill="#c34dff" opacity="0.96"/>
+      <rect x="8" y="8" width="154" height="3" rx="1.5" fill="#df42ff" opacity="0.48" filter="url(#softGlow)"/>
+      <rect x="16" y="16" width="138" height="138" rx="4" class="innerLine"/>
+      <path class="icon" d="M84 39l14 31 34 4-25 23 7 34-30-17-30 17 7-34-25-23 34-4 14-31z"/>
+      <text x="14" y="194" class="small">EPIC</text>
+      <text x="14" y="215" class="sub">higher saturation</text>
+    </g>
+
+    <g transform="translate(888 0)">
+      <rect x="0" y="0" width="170" height="170" rx="7" class="slotBase"/>
+      <rect x="8" y="8" width="154" height="154" rx="5" fill="url(#legendaryFill)"/>
+      <rect x="8" y="8" width="154" height="3" rx="1.5" fill="#ffbd2e" opacity="1"/>
+      <rect x="8" y="8" width="154" height="3" rx="1.5" fill="#ff8a20" opacity="0.52" filter="url(#softGlow)"/>
+      <rect x="16" y="16" width="138" height="138" rx="4" class="innerLine"/>
+      <path class="icon" d="M84 35l12 26 28-4-14 25 21 20-29 4-8 28-20-21-27 10 13-27-18-23 29-1 13-37z"/>
+      <text x="14" y="194" class="small">LEGENDARY</text>
+      <text x="14" y="215" class="sub">strong but contained</text>
+    </g>
+  </g>
+
+  <g transform="translate(42 350)">
+    <rect x="0" y="0" width="1096" height="1" fill="#ffffff" opacity="0.08"/>
+    <text x="0" y="30" class="sub">Recommended for TunaSweeper: gradient behind icon + 2-3px top accent. Avoid thick full-border glow unless the item is truly special.</text>
+  </g>
+</svg>

@@ -102,7 +102,7 @@ The bunker-only storage/warehouse is persisted per save slot through:
 - `StorageSlotCapacity`
 - `StorageSlots`
 
-New save slots initialize storage with `100` slots. `StorageSlotCapacity` is saved separately from the slot array so future upgrades can expand capacity without changing the storage item layout. Storage slot arrays store item UIDs just like inventory slots, and any item UID referenced by storage, including nested attachment UIDs, must exist in `ItemInstances`.
+New save slots initialize storage with `100` slots. `StorageSlotCapacity` is saved separately from the slot array so future upgrades can expand capacity without changing the storage item layout. Storage slot arrays store item UIDs just like inventory slots, and any item UID referenced by storage, including nested attachment UIDs, must exist in `ItemInstances`. The storage compact/sort button rewrites `StorageSlots` into first-available unlocked slots while preserving any `bSortLocked` slot positions.
 
 Storage is accessible only in `BunkerMap`: entering inventory mode in the bunker opens the storage panel at the same HUD location used by loot containers, and `ATunaSweeperStorageActor` opens the same panel through `StorageOpen` interaction. Raid maps do not offer or open storage. Death persistence clears carried inventory, equipment, auxiliary bag, and usable quick slots, but preserves storage slots and their item instances.
 

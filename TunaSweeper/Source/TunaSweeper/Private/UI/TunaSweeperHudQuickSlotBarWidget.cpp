@@ -7,11 +7,15 @@
 #include "Components/HorizontalBox.h"
 #include "Components/HorizontalBoxSlot.h"
 #include "Components/Image.h"
+#include "Components/Overlay.h"
+#include "Components/OverlaySlot.h"
+#include "Components/PanelWidget.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
 #include "Components/Widget.h"
 #include "Engine/Texture2D.h"
 #include "Styling/SlateBrush.h"
+#include "UI/TunaSweeperItemRaritySlotAccentWidget.h"
 #include "UI/TunaSweeperUIFont.h"
 
 namespace
@@ -86,6 +90,7 @@ void UTunaSweeperHudQuickSlotBarWidget::ClearQuickSlotIcon(int32 SlotNumber)
 		SlotIconImages[SlotIndex]->SetBrushFromTexture(nullptr, false);
 		SlotIconImages[SlotIndex]->SetOpacity(0.0f);
 	}
+	SetQuickSlotItemGrade(SlotNumber, ETunaSweeperItemGrade::Common, false);
 }
 
 void UTunaSweeperHudQuickSlotBarWidget::SetMeleeQuickSlotIcon(UTexture2D* IconTexture)
@@ -116,6 +121,57 @@ void UTunaSweeperHudQuickSlotBarWidget::ClearMeleeQuickSlotIcon()
 	{
 		QuickSlotMeleeIcon->SetBrushFromTexture(nullptr, false);
 		QuickSlotMeleeIcon->SetOpacity(0.0f);
+	}
+	SetMeleeQuickSlotItemGrade(ETunaSweeperItemGrade::Common, false);
+}
+
+void UTunaSweeperHudQuickSlotBarWidget::SetQuickSlotItemGrade(
+	int32 SlotNumber,
+	ETunaSweeperItemGrade ItemGrade,
+	bool bVisible)
+{
+	CacheNamedWidgets();
+
+	const int32 SlotIndex = GetSlotIndex(SlotNumber);
+	if (!SlotIconImages.IsValidIndex(SlotIndex) || !SlotIconImages[SlotIndex])
+	{
+		return;
+	}
+
+	if (!SlotRarityAccentWidgets.IsValidIndex(SlotIndex) || !SlotRarityAccentWidgets[SlotIndex])
+	{
+		SlotRarityAccentWidgets[SlotIndex] = EnsureQuickSlotRarityAccentWidget(
+			SlotIconImages[SlotIndex],
+			FName(*FString::Printf(TEXT("QuickSlot%dRarityAccent"), SlotNumber)));
+	}
+
+	if (SlotRarityAccentWidgets.IsValidIndex(SlotIndex) && SlotRarityAccentWidgets[SlotIndex])
+	{
+		SlotRarityAccentWidgets[SlotIndex]->SetItemGrade(ItemGrade, bVisible);
+	}
+}
+
+void UTunaSweeperHudQuickSlotBarWidget::SetMeleeQuickSlotItemGrade(
+	ETunaSweeperItemGrade ItemGrade,
+	bool bVisible)
+{
+	CacheNamedWidgets();
+
+	if (!QuickSlotMeleeIcon)
+	{
+		return;
+	}
+
+	if (!QuickSlotMeleeRarityAccentWidget)
+	{
+		QuickSlotMeleeRarityAccentWidget = EnsureQuickSlotRarityAccentWidget(
+			QuickSlotMeleeIcon,
+			FName(TEXT("QuickSlotMeleeRarityAccent")));
+	}
+
+	if (QuickSlotMeleeRarityAccentWidget)
+	{
+		QuickSlotMeleeRarityAccentWidget->SetItemGrade(ItemGrade, bVisible);
 	}
 }
 
@@ -347,6 +403,7 @@ void UTunaSweeperHudQuickSlotBarWidget::CacheNamedWidgets()
 	}
 
 	SlotIconImages.SetNum(8);
+	SlotRarityAccentWidgets.SetNum(8);
 	SlotSelectionFrames.SetNum(8);
 	SlotAmmoTexts.SetNum(8);
 	SlotAmmoTextContainers.SetNum(8);
@@ -405,6 +462,52 @@ void UTunaSweeperHudQuickSlotBarWidget::CacheNamedWidgets()
 		AmmoSelectorOptionTexts[OptionIndex] = Cast<UTextBlock>(WidgetTree->FindWidget(
 			FName(*FString::Printf(TEXT("AmmoOption%dText"), OptionNumber))));
 	}
+}
+
+UTunaSweeperItemRaritySlotAccentWidget* UTunaSweeperHudQuickSlotBarWidget::EnsureQuickSlotRarityAccentWidget(
+	UImage* IconImage,
+	const FName& WidgetName)
+{
+	if (!WidgetTree || !IconImage)
+	{
+		return nullptr;
+	}
+
+	if (UTunaSweeperItemRaritySlotAccentWidget* ExistingWidget =
+		Cast<UTunaSweeperItemRaritySlotAccentWidget>(WidgetTree->FindWidget(WidgetName)))
+	{
+		return ExistingWidget;
+	}
+
+	UOverlay* SlotOverlay = Cast<UOverlay>(IconImage->GetParent());
+	if (!SlotOverlay)
+	{
+		return nullptr;
+	}
+
+	UTunaSweeperItemRaritySlotAccentWidget* AccentWidget =
+		WidgetTree->ConstructWidget<UTunaSweeperItemRaritySlotAccentWidget>(
+			UTunaSweeperItemRaritySlotAccentWidget::StaticClass(),
+			WidgetName);
+	if (!AccentWidget)
+	{
+		return nullptr;
+	}
+
+	const int32 IconIndex = SlotOverlay->GetChildIndex(IconImage);
+	UOverlaySlot* AccentSlot = Cast<UOverlaySlot>(SlotOverlay->InsertChildAt(FMath::Max(0, IconIndex), AccentWidget));
+	if (!AccentSlot)
+	{
+		AccentSlot = SlotOverlay->AddChildToOverlay(AccentWidget);
+	}
+	if (AccentSlot)
+	{
+		AccentSlot->SetHorizontalAlignment(HAlign_Fill);
+		AccentSlot->SetVerticalAlignment(VAlign_Fill);
+		AccentSlot->SetPadding(FMargin(0.0f));
+	}
+
+	return AccentWidget;
 }
 
 void UTunaSweeperHudQuickSlotBarWidget::EnsureCancelableActionPromptWidgets()

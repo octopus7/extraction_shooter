@@ -1,31 +1,31 @@
-#include "UI/TunaSweeperHudExternalPanelWidget.h"
+﻿#include "UI/TunaSweeperHudExternalPanelWidget.h"
 
 #include "Components/OverlaySlot.h"
 #include "Components/Widget.h"
-#include "UI/TunaSweeperLootContainerWidget.h"
+#include "UI/ItemContainerWidget.h"
 #include "UI/TunaSweeperUIFont.h"
 #include "UI/TunaSweeperWorkbenchPanelWidget.h"
 
 namespace
 {
-	bool HasVisibleStorageContainer(const UTunaSweeperStorageContainerWidget* StorageContainerWidget)
+	bool HasVisibleStorageContainer(const UStorageContainerWidget* StorageContainerWidget)
 	{
 		return StorageContainerWidget != nullptr;
 	}
 
-	bool HasVisibleShopContainer(const UTunaSweeperShopContainerWidget* ShopContainerWidget)
+	bool HasVisibleShopContainer(const UShopContainerWidget* ShopContainerWidget)
 	{
 		return ShopContainerWidget != nullptr;
 	}
 
-	void RightAlignOverlayChild(UWidget* Widget)
+	void AlignOverlayChild(UWidget* Widget, EVerticalAlignment VerticalAlignment)
 	{
 		if (Widget)
 		{
 			if (UOverlaySlot* OverlaySlot = Cast<UOverlaySlot>(Widget->Slot))
 			{
 				OverlaySlot->SetHorizontalAlignment(HAlign_Right);
-				OverlaySlot->SetVerticalAlignment(VAlign_Top);
+				OverlaySlot->SetVerticalAlignment(VerticalAlignment);
 			}
 		}
 	}
@@ -177,7 +177,7 @@ void UTunaSweeperHudExternalPanelWidget::ApplyPanelMode()
 
 void UTunaSweeperHudExternalPanelWidget::ApplyLootContainerPanelLayout()
 {
-	RightAlignOverlayChild(LootContainerWidget);
-	RightAlignOverlayChild(StorageContainerWidget);
-	RightAlignOverlayChild(ShopContainerWidget);
+	AlignOverlayChild(LootContainerWidget, VAlign_Top);
+	AlignOverlayChild(StorageContainerWidget, VAlign_Fill);
+	AlignOverlayChild(ShopContainerWidget, VAlign_Top);
 }

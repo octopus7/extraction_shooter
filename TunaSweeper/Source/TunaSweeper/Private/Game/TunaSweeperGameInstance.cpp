@@ -2613,6 +2613,45 @@ void UTunaSweeperGameInstance::CompactInventorySlots()
 	MarkItemStateMutationForSave();
 }
 
+void UTunaSweeperGameInstance::CompactStorageSlots()
+{
+	EnsureInventoryStateInitialized();
+
+	TArray<FGuid> MovableItemUids;
+	for (const FTunaSweeperInventorySlot& Slot : StorageSlots)
+	{
+		if (!Slot.bSortLocked && Slot.ItemUid.IsValid())
+		{
+			MovableItemUids.Add(Slot.ItemUid);
+		}
+	}
+
+	for (FTunaSweeperInventorySlot& Slot : StorageSlots)
+	{
+		if (!Slot.bSortLocked)
+		{
+			Slot.Clear();
+		}
+	}
+
+	int32 MovableItemIndex = 0;
+	for (FTunaSweeperInventorySlot& Slot : StorageSlots)
+	{
+		if (Slot.bSortLocked)
+		{
+			continue;
+		}
+
+		if (MovableItemUids.IsValidIndex(MovableItemIndex))
+		{
+			Slot.ItemUid = MovableItemUids[MovableItemIndex++];
+		}
+	}
+
+	BroadcastInventoryStateChanged();
+	MarkItemStateMutationForSave();
+}
+
 int32 UTunaSweeperGameInstance::GetStorageSlotCapacity()
 {
 	EnsureInventoryStateInitialized();

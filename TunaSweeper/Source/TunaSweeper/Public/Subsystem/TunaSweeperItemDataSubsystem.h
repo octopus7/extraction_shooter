@@ -20,6 +20,16 @@ enum class ETunaSweeperWorkbenchMode : uint8
 	BlueprintRegister UMETA(DisplayName = "Blueprint Register")
 };
 
+UENUM(BlueprintType)
+enum class ETunaSweeperItemGrade : uint8
+{
+	Common UMETA(DisplayName = "Common"),
+	Uncommon UMETA(DisplayName = "Uncommon"),
+	Rare UMETA(DisplayName = "Rare"),
+	Epic UMETA(DisplayName = "Epic"),
+	Legendary UMETA(DisplayName = "Legendary")
+};
+
 USTRUCT(BlueprintType)
 struct TUNASWEEPER_API FTunaSweeperItemDefinition
 {
@@ -42,6 +52,9 @@ struct TUNASWEEPER_API FTunaSweeperItemDefinition
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
 	float WeightKg = 0.0f;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
+	ETunaSweeperItemGrade ItemGrade = ETunaSweeperItemGrade::Common;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
 	FString IconFileName;

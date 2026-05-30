@@ -38,6 +38,32 @@ namespace TunaSweeperItemDataFiles
 		OutEntry.QuantityMax = FMath::Max(OutEntry.QuantityMin, FMath::Max(QuantityMin, QuantityMax));
 	}
 
+	ETunaSweeperItemGrade ResolveItemGradeFromString(const FString& GradeString)
+	{
+		FString NormalizedGrade = GradeString.TrimStartAndEnd().ToLower();
+		NormalizedGrade.ReplaceInline(TEXT("-"), TEXT("_"));
+		NormalizedGrade.ReplaceInline(TEXT(" "), TEXT("_"));
+
+		if (NormalizedGrade == TEXT("uncommon") || NormalizedGrade == TEXT("green"))
+		{
+			return ETunaSweeperItemGrade::Uncommon;
+		}
+		if (NormalizedGrade == TEXT("rare") || NormalizedGrade == TEXT("blue"))
+		{
+			return ETunaSweeperItemGrade::Rare;
+		}
+		if (NormalizedGrade == TEXT("epic") || NormalizedGrade == TEXT("purple"))
+		{
+			return ETunaSweeperItemGrade::Epic;
+		}
+		if (NormalizedGrade == TEXT("legendary") || NormalizedGrade == TEXT("orange") || NormalizedGrade == TEXT("gold"))
+		{
+			return ETunaSweeperItemGrade::Legendary;
+		}
+
+		return ETunaSweeperItemGrade::Common;
+	}
+
 	TArray<FTunaSweeperItemStack> ResolveLootContainerItems(const FTunaSweeperLootContainerContents& Contents)
 	{
 		TArray<FTunaSweeperItemStack> ResolvedItems;
@@ -583,6 +609,7 @@ bool UTunaSweeperItemDataSubsystem::LoadItemTableJson()
 		FString NameStringKey;
 		FString DescriptionStringKey;
 		FString IconFileName;
+		FString ItemGradeString;
 		FString CategoryTag;
 		FString BlueprintRecipeId;
 		FString EquipmentSlotTag;
@@ -606,6 +633,12 @@ bool UTunaSweeperItemDataSubsystem::LoadItemTableJson()
 		ItemDefinition.DescriptionStringKey = FName(*DescriptionStringKey.TrimStartAndEnd());
 		ItemDefinition.ShopSellPrice = FMath::Max(0, static_cast<int32>(NumericShopSellPrice));
 		ItemDefinition.IconFileName = IconFileName.TrimStartAndEnd();
+		if ((*JsonObject)->TryGetStringField(TEXT("item_grade"), ItemGradeString) ||
+			(*JsonObject)->TryGetStringField(TEXT("rarity"), ItemGradeString) ||
+			(*JsonObject)->TryGetStringField(TEXT("grade"), ItemGradeString))
+		{
+			ItemDefinition.ItemGrade = TunaSweeperItemDataFiles::ResolveItemGradeFromString(ItemGradeString);
+		}
 		if ((*JsonObject)->TryGetNumberField(TEXT("experience_value"), NumericExperienceValue) ||
 			(*JsonObject)->TryGetNumberField(TEXT("experience_points"), NumericExperienceValue) ||
 			(*JsonObject)->TryGetNumberField(TEXT("xp_value"), NumericExperienceValue))

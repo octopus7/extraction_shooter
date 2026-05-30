@@ -8,6 +8,7 @@
 #include "Components/Image.h"
 #include "Components/Overlay.h"
 #include "Components/OverlaySlot.h"
+#include "Components/PanelWidget.h"
 #include "Components/SizeBox.h"
 #include "Components/TextBlock.h"
 #include "Components/Widget.h"
@@ -19,6 +20,7 @@
 #include "UI/TunaSweeperCurrencyDisplayWidget.h"
 #include "UI/TunaSweeperItemDragDropOperation.h"
 #include "UI/TunaSweeperItemHoverPromptWidget.h"
+#include "UI/TunaSweeperItemRaritySlotAccentWidget.h"
 #include "UI/TunaSweeperItemStackSplitPopupWidget.h"
 #include "UI/TunaSweeperItemStackTileItemObject.h"
 #include "UI/TunaSweeperUIFont.h"
@@ -276,6 +278,8 @@ void UTunaSweeperItemThumbnailSlotWidget::ApplyTileData()
 		ApplyDropHighlight(false);
 	}
 
+	EnsureRaritySlotAccentWidget();
+	ApplyRaritySlotAccent();
 	EnsureAttachmentSlotIndicatorWidget();
 	EnsureItemPriceCoinWidget();
 
@@ -423,6 +427,80 @@ void UTunaSweeperItemThumbnailSlotWidget::ApplyDropHighlight(bool bCanAcceptDrop
 	SlotBackground->SetBrushColor(bCanAcceptDrop
 		? FLinearColor(0.32f, 0.82f, 0.52f, 1.0f)
 		: FLinearColor::White);
+	if (RaritySlotAccentWidget)
+	{
+		RaritySlotAccentWidget->SetRenderOpacity(bCanAcceptDrop ? 0.22f : 1.0f);
+	}
+}
+
+void UTunaSweeperItemThumbnailSlotWidget::EnsureRaritySlotAccentWidget()
+{
+	if (RaritySlotAccentWidget || !WidgetTree)
+	{
+		return;
+	}
+
+	RaritySlotAccentWidget = Cast<UTunaSweeperItemRaritySlotAccentWidget>(
+		WidgetTree->FindWidget(FName(TEXT("RaritySlotAccentWidget"))));
+	if (RaritySlotAccentWidget)
+	{
+		return;
+	}
+
+	UOverlay* SlotOverlay = Cast<UOverlay>(WidgetTree->FindWidget(FName(TEXT("SlotOverlay"))));
+	if (!SlotOverlay && ItemIconImage)
+	{
+		SlotOverlay = Cast<UOverlay>(ItemIconImage->GetParent());
+	}
+	if (!SlotOverlay)
+	{
+		return;
+	}
+
+	RaritySlotAccentWidget = WidgetTree->ConstructWidget<UTunaSweeperItemRaritySlotAccentWidget>(
+		UTunaSweeperItemRaritySlotAccentWidget::StaticClass(),
+		FName(TEXT("RaritySlotAccentWidget")));
+	if (!RaritySlotAccentWidget)
+	{
+		return;
+	}
+
+	int32 InsertIndex = 0;
+	if (SlotBackground && SlotBackground->GetParent() == SlotOverlay)
+	{
+		InsertIndex = SlotOverlay->GetChildIndex(SlotBackground) + 1;
+	}
+	else if (ItemIconImage && ItemIconImage->GetParent() == SlotOverlay)
+	{
+		InsertIndex = SlotOverlay->GetChildIndex(ItemIconImage);
+	}
+
+	UOverlaySlot* AccentSlot = Cast<UOverlaySlot>(SlotOverlay->InsertChildAt(InsertIndex, RaritySlotAccentWidget));
+	if (!AccentSlot)
+	{
+		AccentSlot = SlotOverlay->AddChildToOverlay(RaritySlotAccentWidget);
+	}
+	if (AccentSlot)
+	{
+		AccentSlot->SetHorizontalAlignment(HAlign_Fill);
+		AccentSlot->SetVerticalAlignment(VAlign_Fill);
+		AccentSlot->SetPadding(FMargin(0.0f));
+	}
+}
+
+void UTunaSweeperItemThumbnailSlotWidget::ApplyRaritySlotAccent()
+{
+	if (!RaritySlotAccentWidget)
+	{
+		return;
+	}
+
+	const ETunaSweeperItemGrade ItemGrade = CachedTileData.bHasItemDefinition
+		? CachedTileData.ItemDefinition.ItemGrade
+		: ETunaSweeperItemGrade::Common;
+	RaritySlotAccentWidget->SetItemGrade(
+		ItemGrade,
+		!CachedTileData.bIsEmpty && CachedTileData.bHasItemDefinition);
 }
 
 void UTunaSweeperItemThumbnailSlotWidget::EnsureAttachmentSlotIndicatorWidget()
