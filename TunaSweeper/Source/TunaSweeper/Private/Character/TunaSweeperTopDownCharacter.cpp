@@ -2026,6 +2026,11 @@ float ATunaSweeperTopDownCharacter::ResolveCameraCursorLeadRatio() const
 
 void ATunaSweeperTopDownCharacter::UpdateAimingVisuals(float DeltaSeconds)
 {
+	if (IsGameplayActionInputLocked())
+	{
+		return;
+	}
+
 	float HitReactionRollDegrees = 0.0f;
 	float HitReactionFOVDegrees = 0.0f;
 	const FVector HitReactionOffset = UpdateDamageCameraReaction(DeltaSeconds, HitReactionRollDegrees, HitReactionFOVDegrees);
