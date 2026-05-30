@@ -5,8 +5,12 @@
 #include "Components/HorizontalBox.h"
 #include "Components/HorizontalBoxSlot.h"
 #include "Components/Image.h"
+#include "Components/Overlay.h"
+#include "Components/OverlaySlot.h"
 #include "Components/SizeBox.h"
 #include "Components/TextBlock.h"
+#include "Components/VerticalBox.h"
+#include "Components/VerticalBoxSlot.h"
 #include "Components/Widget.h"
 #include "Engine/Texture2D.h"
 #include "Styling/SlateBrush.h"
@@ -74,6 +78,64 @@ namespace
 
 		return Brush;
 	}
+
+	FSlateBrush BuildRoundedBrush(const FVector2D& ImageSize, const FLinearColor& FillColor, float Radius)
+	{
+		FSlateBrush Brush;
+		Brush.DrawAs = ESlateBrushDrawType::RoundedBox;
+		Brush.TintColor = FSlateColor(FillColor);
+		Brush.SetImageSize(ImageSize);
+		Brush.OutlineSettings = FSlateBrushOutlineSettings(Radius, FSlateColor(FLinearColor::Transparent), 0.0f);
+		Brush.OutlineSettings.bUseBrushTransparency = false;
+		return Brush;
+	}
+
+	FSlateBrush BuildRoundedOutlineBrush(
+		const FVector2D& ImageSize,
+		const FLinearColor& FillColor,
+		const FLinearColor& OutlineColor,
+		float Radius,
+		float OutlineWidth)
+	{
+		FSlateBrush Brush;
+		Brush.DrawAs = ESlateBrushDrawType::RoundedBox;
+		Brush.TintColor = FSlateColor(FillColor);
+		Brush.SetImageSize(ImageSize);
+		Brush.OutlineSettings = FSlateBrushOutlineSettings(Radius, FSlateColor(OutlineColor), OutlineWidth);
+		Brush.OutlineSettings.bUseBrushTransparency = false;
+		return Brush;
+	}
+
+	FSlateBrush BuildCircularBrush(const FVector2D& ImageSize, const FLinearColor& FillColor)
+	{
+		FSlateBrush Brush;
+		Brush.DrawAs = ESlateBrushDrawType::RoundedBox;
+		Brush.TintColor = FSlateColor(FillColor);
+		Brush.SetImageSize(ImageSize);
+		Brush.OutlineSettings.RoundingType = ESlateBrushRoundingType::HalfHeightRadius;
+		Brush.OutlineSettings.Color = FSlateColor(FLinearColor::Transparent);
+		Brush.OutlineSettings.Width = 0.0f;
+		Brush.OutlineSettings.bUseBrushTransparency = false;
+		return Brush;
+	}
+
+	bool TextArraysEqual(const TArray<FText>& LeftTexts, const TArray<FText>& RightTexts)
+	{
+		if (LeftTexts.Num() != RightTexts.Num())
+		{
+			return false;
+		}
+
+		for (int32 Index = 0; Index < LeftTexts.Num(); ++Index)
+		{
+			if (!LeftTexts[Index].EqualTo(RightTexts[Index]))
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
 }
 
 void UTunaSweeperInteractionMarkerWidget::NativeConstruct()
@@ -104,21 +166,30 @@ void UTunaSweeperInteractionMarkerWidget::NativePreConstruct()
 void UTunaSweeperInteractionMarkerWidget::SetMarkerText(const FText& InText)
 {
 	CachedDisplayText = InText;
-	CachedOptionTexts.Reset();
-	CachedFocusedOptionIndex = INDEX_NONE;
+	if (CachedOptionTexts.Num() > 0 || CachedFocusedOptionIndex != INDEX_NONE)
+	{
+		CachedOptionTexts.Reset();
+		CachedFocusedOptionIndex = INDEX_NONE;
+		bMultiOptionListDirty = true;
+	}
 	ApplyState();
 }
 
 void UTunaSweeperInteractionMarkerWidget::SetInteractionOptions(const TArray<FText>& InOptions, int32 InFocusedOptionIndex)
 {
-	CachedOptionTexts = InOptions;
-	CachedFocusedOptionIndex = CachedOptionTexts.IsValidIndex(InFocusedOptionIndex)
+	const int32 NewFocusedOptionIndex = InOptions.IsValidIndex(InFocusedOptionIndex)
 		? InFocusedOptionIndex
 		: 0;
+	const bool bOptionsChanged = !TextArraysEqual(CachedOptionTexts, InOptions);
+	const bool bFocusChanged = CachedFocusedOptionIndex != NewFocusedOptionIndex;
+
+	CachedOptionTexts = InOptions;
+	CachedFocusedOptionIndex = NewFocusedOptionIndex;
 	if (CachedOptionTexts.IsValidIndex(CachedFocusedOptionIndex))
 	{
 		CachedDisplayText = CachedOptionTexts[CachedFocusedOptionIndex];
 	}
+	bMultiOptionListDirty = bMultiOptionListDirty || bOptionsChanged || bFocusChanged;
 	ApplyState();
 }
 
@@ -247,28 +318,6 @@ UTexture2D* UTunaSweeperInteractionMarkerWidget::ResolveOpenedCheckTexture()
 	return CachedOpenedCheckTexture;
 }
 
-FText UTunaSweeperInteractionMarkerWidget::BuildDisplayText() const
-{
-	if (CachedOptionTexts.Num() <= 1)
-	{
-		return CachedDisplayText;
-	}
-
-	FString DisplayString;
-	for (int32 OptionIndex = 0; OptionIndex < CachedOptionTexts.Num(); ++OptionIndex)
-	{
-		if (!DisplayString.IsEmpty())
-		{
-			DisplayString.AppendChar(TEXT('\n'));
-		}
-
-		DisplayString += OptionIndex == CachedFocusedOptionIndex ? TEXT("> ") : TEXT("  ");
-		DisplayString += CachedOptionTexts[OptionIndex].ToString();
-	}
-
-	return FText::FromString(DisplayString);
-}
-
 void UTunaSweeperInteractionMarkerWidget::EnsureRequirementWidgets()
 {
 	if (!WidgetTree || !LabelBackground || (RequirementRoot && RequirementIconImage && RequirementQuantityText))
@@ -276,7 +325,10 @@ void UTunaSweeperInteractionMarkerWidget::EnsureRequirementWidgets()
 		return;
 	}
 
-	UHorizontalBox* LabelContentRow = Cast<UHorizontalBox>(WidgetTree->FindWidget(TEXT("LabelContentRow")));
+	if (!LabelContentRow)
+	{
+		LabelContentRow = Cast<UHorizontalBox>(WidgetTree->FindWidget(TEXT("LabelContentRow")));
+	}
 	if (!LabelContentRow)
 	{
 		LabelContentRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("LabelContentRow_Runtime"));
@@ -368,9 +420,247 @@ void UTunaSweeperInteractionMarkerWidget::EnsureRequirementWidgets()
 	}
 }
 
+void UTunaSweeperInteractionMarkerWidget::EnsureSingleLabelContent()
+{
+	if (!WidgetTree || !LabelBackground)
+	{
+		return;
+	}
+
+	if (!LabelContentRow)
+	{
+		LabelContentRow = Cast<UHorizontalBox>(WidgetTree->FindWidget(TEXT("LabelContentRow")));
+	}
+
+	if (LabelContentRow && LabelBackground->GetContent() != LabelContentRow)
+	{
+		LabelBackground->SetContent(LabelContentRow);
+	}
+
+	if (DisplayNameText)
+	{
+		DisplayNameText->SetVisibility(ESlateVisibility::HitTestInvisible);
+	}
+
+	if (MultiOptionListRoot)
+	{
+		MultiOptionListRoot->SetVisibility(ESlateVisibility::Collapsed);
+	}
+}
+
+void UTunaSweeperInteractionMarkerWidget::EnsureMultiOptionList()
+{
+	if (!WidgetTree || !LabelBackground)
+	{
+		return;
+	}
+
+	if (!MultiOptionListRoot)
+	{
+		MultiOptionListRoot = Cast<UVerticalBox>(WidgetTree->FindWidget(TEXT("MultiOptionListRoot")));
+	}
+
+	if (!MultiOptionListRoot)
+	{
+		MultiOptionListRoot = WidgetTree->ConstructWidget<UVerticalBox>(
+			UVerticalBox::StaticClass(),
+			TEXT("MultiOptionListRoot_Runtime"));
+		bMultiOptionListDirty = true;
+	}
+
+	if (MultiOptionListRoot && LabelBackground->GetContent() != MultiOptionListRoot)
+	{
+		LabelBackground->SetContent(MultiOptionListRoot);
+	}
+
+	if (DisplayNameText)
+	{
+		DisplayNameText->SetVisibility(ESlateVisibility::Collapsed);
+	}
+
+	if (MultiOptionListRoot)
+	{
+		MultiOptionListRoot->SetVisibility(ESlateVisibility::HitTestInvisible);
+	}
+}
+
+void UTunaSweeperInteractionMarkerWidget::RebuildMultiOptionList()
+{
+	if (!WidgetTree || !MultiOptionListRoot)
+	{
+		return;
+	}
+
+	MultiOptionListRoot->ClearChildren();
+
+	const FSlateBrush DotBrush = BuildCircularBrush(FVector2D(8.0f, 8.0f), FLinearColor::White);
+	const FSlateBrush FocusBackgroundBrush = BuildRoundedBrush(
+		FVector2D(128.0f, 24.0f),
+		FLinearColor(1.0f, 1.0f, 1.0f, 0.95f),
+		2.0f);
+	const FSlateBrush TransparentBrush = BuildRoundedBrush(
+		FVector2D(128.0f, 24.0f),
+		FLinearColor::Transparent,
+		2.0f);
+
+	for (int32 OptionIndex = 0; OptionIndex < CachedOptionTexts.Num(); ++OptionIndex)
+	{
+		const bool bFocused = OptionIndex == CachedFocusedOptionIndex;
+
+		UHorizontalBox* Row = WidgetTree->ConstructWidget<UHorizontalBox>(
+			UHorizontalBox::StaticClass(),
+			*FString::Printf(TEXT("InteractionOptionRow_%d"), OptionIndex));
+		USizeBox* IndicatorBox = WidgetTree->ConstructWidget<USizeBox>(
+			USizeBox::StaticClass(),
+			*FString::Printf(TEXT("InteractionOptionIndicatorBox_%d"), OptionIndex));
+		UOverlay* IndicatorOverlay = WidgetTree->ConstructWidget<UOverlay>(
+			UOverlay::StaticClass(),
+			*FString::Printf(TEXT("InteractionOptionIndicator_%d"), OptionIndex));
+		UImage* DotImage = WidgetTree->ConstructWidget<UImage>(
+			UImage::StaticClass(),
+			*FString::Printf(TEXT("InteractionOptionDot_%d"), OptionIndex));
+		UTextBlock* UpIndicatorText = WidgetTree->ConstructWidget<UTextBlock>(
+			UTextBlock::StaticClass(),
+			*FString::Printf(TEXT("InteractionOptionUp_%d"), OptionIndex));
+		UTextBlock* DownIndicatorText = WidgetTree->ConstructWidget<UTextBlock>(
+			UTextBlock::StaticClass(),
+			*FString::Printf(TEXT("InteractionOptionDown_%d"), OptionIndex));
+		UBorder* OptionBackground = WidgetTree->ConstructWidget<UBorder>(
+			UBorder::StaticClass(),
+			*FString::Printf(TEXT("InteractionOptionBackground_%d"), OptionIndex));
+		UHorizontalBox* OptionContent = WidgetTree->ConstructWidget<UHorizontalBox>(
+			UHorizontalBox::StaticClass(),
+			*FString::Printf(TEXT("InteractionOptionContent_%d"), OptionIndex));
+		UTextBlock* OptionText = WidgetTree->ConstructWidget<UTextBlock>(
+			UTextBlock::StaticClass(),
+			*FString::Printf(TEXT("InteractionOptionText_%d"), OptionIndex));
+		UBorder* KeyPromptBackground = WidgetTree->ConstructWidget<UBorder>(
+			UBorder::StaticClass(),
+			*FString::Printf(TEXT("InteractionOptionKeyBackground_%d"), OptionIndex));
+		UTextBlock* KeyPromptText = WidgetTree->ConstructWidget<UTextBlock>(
+			UTextBlock::StaticClass(),
+			*FString::Printf(TEXT("InteractionOptionKey_%d"), OptionIndex));
+
+		if (!Row || !IndicatorBox || !IndicatorOverlay || !DotImage || !UpIndicatorText ||
+			!DownIndicatorText || !OptionBackground || !OptionContent || !OptionText ||
+			!KeyPromptBackground || !KeyPromptText)
+		{
+			continue;
+		}
+
+		IndicatorBox->SetWidthOverride(20.0f);
+		IndicatorBox->SetHeightOverride(24.0f);
+		IndicatorBox->SetContent(IndicatorOverlay);
+
+		DotImage->SetBrush(DotBrush);
+		DotImage->SetColorAndOpacity(FLinearColor::White);
+		if (UOverlaySlot* DotSlot = IndicatorOverlay->AddChildToOverlay(DotImage))
+		{
+			DotSlot->SetHorizontalAlignment(HAlign_Center);
+			DotSlot->SetVerticalAlignment(VAlign_Center);
+		}
+
+		const FLinearColor IndicatorColor = FLinearColor::White;
+		UpIndicatorText->SetText(FText::FromString(TEXT("^")));
+		UpIndicatorText->SetColorAndOpacity(FSlateColor(IndicatorColor));
+		UpIndicatorText->SetJustification(ETextJustify::Center);
+		UpIndicatorText->SetVisibility(bFocused ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
+		if (DisplayNameText)
+		{
+			FSlateFontInfo IndicatorFont = DisplayNameText->GetFont();
+			IndicatorFont.Size = 9;
+			UpIndicatorText->SetFont(IndicatorFont);
+		}
+		if (UOverlaySlot* UpSlot = IndicatorOverlay->AddChildToOverlay(UpIndicatorText))
+		{
+			UpSlot->SetHorizontalAlignment(HAlign_Center);
+			UpSlot->SetVerticalAlignment(VAlign_Top);
+		}
+
+		DownIndicatorText->SetText(FText::FromString(TEXT("v")));
+		DownIndicatorText->SetColorAndOpacity(FSlateColor(IndicatorColor));
+		DownIndicatorText->SetJustification(ETextJustify::Center);
+		DownIndicatorText->SetVisibility(bFocused ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
+		if (DisplayNameText)
+		{
+			FSlateFontInfo IndicatorFont = DisplayNameText->GetFont();
+			IndicatorFont.Size = 9;
+			DownIndicatorText->SetFont(IndicatorFont);
+		}
+		if (UOverlaySlot* DownSlot = IndicatorOverlay->AddChildToOverlay(DownIndicatorText))
+		{
+			DownSlot->SetHorizontalAlignment(HAlign_Center);
+			DownSlot->SetVerticalAlignment(VAlign_Bottom);
+		}
+
+		if (UHorizontalBoxSlot* IndicatorSlot = Row->AddChildToHorizontalBox(IndicatorBox))
+		{
+			IndicatorSlot->SetHorizontalAlignment(HAlign_Center);
+			IndicatorSlot->SetVerticalAlignment(VAlign_Center);
+		}
+
+		OptionBackground->SetBrush(bFocused ? FocusBackgroundBrush : TransparentBrush);
+		OptionBackground->SetPadding(bFocused ? FMargin(7.0f, 1.0f, 6.0f, 1.0f) : FMargin(7.0f, 1.0f, 6.0f, 1.0f));
+		OptionBackground->SetContent(OptionContent);
+
+		OptionText->SetText(CachedOptionTexts[OptionIndex]);
+		OptionText->SetJustification(ETextJustify::Left);
+		if (DisplayNameText)
+		{
+			OptionText->SetFont(DisplayNameText->GetFont());
+		}
+		OptionText->SetColorAndOpacity(FSlateColor(FLinearColor::Black));
+		if (UHorizontalBoxSlot* TextSlot = OptionContent->AddChildToHorizontalBox(OptionText))
+		{
+			TextSlot->SetHorizontalAlignment(HAlign_Left);
+			TextSlot->SetVerticalAlignment(VAlign_Center);
+		}
+
+		KeyPromptBackground->SetVisibility(bFocused ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
+		KeyPromptBackground->SetBrush(BuildRoundedOutlineBrush(
+			FVector2D(22.0f, 20.0f),
+			FLinearColor::White,
+			FLinearColor::Black,
+			5.0f,
+			1.0f));
+		KeyPromptBackground->SetPadding(FMargin(5.0f, 0.0f, 5.0f, 0.0f));
+		KeyPromptText->SetText(FText::FromString(TEXT("F")));
+		KeyPromptText->SetJustification(ETextJustify::Center);
+		if (DisplayNameText)
+		{
+			FSlateFontInfo KeyFont = DisplayNameText->GetFont();
+			KeyFont.Size = FMath::Max(1, KeyFont.Size - 2);
+			KeyPromptText->SetFont(KeyFont);
+		}
+		KeyPromptText->SetColorAndOpacity(FSlateColor(FLinearColor::Black));
+		KeyPromptBackground->SetContent(KeyPromptText);
+		if (UHorizontalBoxSlot* KeySlot = OptionContent->AddChildToHorizontalBox(KeyPromptBackground))
+		{
+			KeySlot->SetPadding(FMargin(8.0f, 0.0f, 0.0f, 0.0f));
+			KeySlot->SetHorizontalAlignment(HAlign_Left);
+			KeySlot->SetVerticalAlignment(VAlign_Center);
+		}
+
+		if (UHorizontalBoxSlot* BackgroundSlot = Row->AddChildToHorizontalBox(OptionBackground))
+		{
+			BackgroundSlot->SetHorizontalAlignment(HAlign_Left);
+			BackgroundSlot->SetVerticalAlignment(VAlign_Center);
+		}
+
+		if (UVerticalBoxSlot* RowSlot = MultiOptionListRoot->AddChildToVerticalBox(Row))
+		{
+			RowSlot->SetHorizontalAlignment(HAlign_Left);
+			RowSlot->SetVerticalAlignment(VAlign_Center);
+		}
+	}
+
+	bMultiOptionListDirty = false;
+}
+
 void UTunaSweeperInteractionMarkerWidget::ApplyState()
 {
 	SetRenderOpacity(1.0f);
+	const bool bUseMultiOptionList = CachedOptionTexts.Num() > 1;
 
 	if (MarkerRoot)
 	{
@@ -433,15 +723,44 @@ void UTunaSweeperInteractionMarkerWidget::ApplyState()
 		ApplyPaintOpacity(FilledImage, CachedAlpha);
 	}
 
-	if (DisplayNameText)
+	if (bUseMultiOptionList)
 	{
-		DisplayNameText->SetText(BuildDisplayText());
-		ApplyPaintOpacity(DisplayNameText, CachedLabelAlpha);
-	}
+		EnsureMultiOptionList();
+		if (bMultiOptionListDirty)
+		{
+			RebuildMultiOptionList();
+		}
 
-	if (LabelBackground)
+		if (DisplayNameText)
+		{
+			DisplayNameText->SetText(CachedDisplayText);
+			DisplayNameText->SetVisibility(ESlateVisibility::Collapsed);
+		}
+		if (MultiOptionListRoot)
+		{
+			MultiOptionListRoot->SetRenderOpacity(CachedLabelAlpha);
+		}
+		if (LabelBackground)
+		{
+			LabelBackground->SetBrushColor(FLinearColor::Transparent);
+			LabelBackground->SetRenderOpacity(1.0f);
+		}
+	}
+	else
 	{
-		ApplyPaintOpacity(LabelBackground, CachedLabelAlpha);
+		EnsureSingleLabelContent();
+
+		if (DisplayNameText)
+		{
+			DisplayNameText->SetText(CachedDisplayText);
+			ApplyPaintOpacity(DisplayNameText, CachedLabelAlpha);
+		}
+
+		if (LabelBackground)
+		{
+			LabelBackground->SetBrushColor(FLinearColor::White);
+			ApplyPaintOpacity(LabelBackground, CachedLabelAlpha);
+		}
 	}
 
 	const bool bShowRequirement = bCachedShowRequirement && CachedRequiredQuantity > 0;

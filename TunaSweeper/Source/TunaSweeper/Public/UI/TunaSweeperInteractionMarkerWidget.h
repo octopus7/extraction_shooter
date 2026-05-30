@@ -8,8 +8,10 @@
 class UTextBlock;
 class UWidget;
 class UBorder;
+class UHorizontalBox;
 class UImage;
 class UTexture2D;
+class UVerticalBox;
 
 UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API UTunaSweeperInteractionMarkerWidget : public UUserWidget
@@ -63,12 +65,18 @@ protected:
 private:
 	void CacheNamedWidgets();
 	void EnsureRequirementWidgets();
+	void EnsureSingleLabelContent();
+	void EnsureMultiOptionList();
+	void RebuildMultiOptionList();
 	void ApplyState();
-	FText BuildDisplayText() const;
 	UTexture2D* ResolveOpenedCheckTexture();
 
 	FText CachedDisplayText = FText::FromString(TEXT("Interact"));
 	TArray<FText> CachedOptionTexts;
+	UPROPERTY(Transient)
+	TObjectPtr<UHorizontalBox> LabelContentRow;
+	UPROPERTY(Transient)
+	TObjectPtr<UVerticalBox> MultiOptionListRoot;
 	UPROPERTY(Transient)
 	TObjectPtr<UTexture2D> CachedRequirementIconTexture;
 	UPROPERTY(Transient)
@@ -79,6 +87,7 @@ private:
 	TObjectPtr<UImage> FilledBrushImage;
 	int32 CachedRequiredQuantity = 0;
 	int32 CachedFocusedOptionIndex = INDEX_NONE;
+	bool bMultiOptionListDirty = true;
 	bool bCachedShowRequirement = false;
 	bool bCachedOpened = false;
 	bool bHasCachedRingBrush = false;
