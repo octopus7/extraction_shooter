@@ -13,6 +13,7 @@
 #include "Components/VerticalBoxSlot.h"
 #include "Components/Widget.h"
 #include "Engine/Texture2D.h"
+#include "Rendering/Texture2DResource.h"
 #include "Styling/SlateBrush.h"
 #include "UI/TunaSweeperUIFont.h"
 
@@ -117,6 +118,82 @@ namespace
 		Brush.OutlineSettings.Width = 0.0f;
 		Brush.OutlineSettings.bUseBrushTransparency = false;
 		return Brush;
+	}
+
+	bool IsPointInsideTriangle(const FVector2D& Point, const FVector2D& A, const FVector2D& B, const FVector2D& C)
+	{
+		const auto Sign = [](const FVector2D& P1, const FVector2D& P2, const FVector2D& P3)
+		{
+			return (P1.X - P3.X) * (P2.Y - P3.Y) - (P2.X - P3.X) * (P1.Y - P3.Y);
+		};
+
+		const float D1 = Sign(Point, A, B);
+		const float D2 = Sign(Point, B, C);
+		const float D3 = Sign(Point, C, A);
+		const bool bHasNegative = D1 < 0.0f || D2 < 0.0f || D3 < 0.0f;
+		const bool bHasPositive = D1 > 0.0f || D2 > 0.0f || D3 > 0.0f;
+		return !(bHasNegative && bHasPositive);
+	}
+
+	UTexture2D* CreateIndicatorTriangleTexture(bool bPointUp)
+	{
+		constexpr int32 Width = 14;
+		constexpr int32 Height = 8;
+		constexpr int32 SamplesPerAxis = 4;
+
+		UTexture2D* Texture = UTexture2D::CreateTransient(Width, Height, PF_B8G8R8A8);
+		if (!Texture || !Texture->GetPlatformData() || Texture->GetPlatformData()->Mips.Num() == 0)
+		{
+			return Texture;
+		}
+
+		Texture->Filter = TF_Bilinear;
+		Texture->NeverStream = true;
+		Texture->SRGB = true;
+
+		constexpr float VisualCenterCorrectionX = 0.65f;
+		const float CenterX = Width * 0.5f + VisualCenterCorrectionX;
+		const FVector2D TopPoint(CenterX, 0.6f);
+		const FVector2D BottomLeft(CenterX - 5.8f, Height - 1.1f);
+		const FVector2D BottomRight(CenterX + 5.8f, Height - 1.1f);
+		const FVector2D A = bPointUp ? TopPoint : FVector2D(CenterX, Height - 0.6f);
+		const FVector2D B = bPointUp ? BottomLeft : FVector2D(CenterX - 5.8f, 1.1f);
+		const FVector2D C = bPointUp ? BottomRight : FVector2D(CenterX + 5.8f, 1.1f);
+
+		TArray<FColor> Pixels;
+		Pixels.SetNumZeroed(Width * Height);
+
+		for (int32 Y = 0; Y < Height; ++Y)
+		{
+			for (int32 X = 0; X < Width; ++X)
+			{
+				int32 CoveredSamples = 0;
+				for (int32 SampleY = 0; SampleY < SamplesPerAxis; ++SampleY)
+				{
+					for (int32 SampleX = 0; SampleX < SamplesPerAxis; ++SampleX)
+					{
+						const FVector2D SamplePoint(
+							X + (SampleX + 0.5f) / SamplesPerAxis,
+							Y + (SampleY + 0.5f) / SamplesPerAxis);
+						if (IsPointInsideTriangle(SamplePoint, A, B, C))
+						{
+							++CoveredSamples;
+						}
+					}
+				}
+
+				const uint8 Alpha = static_cast<uint8>(
+					FMath::RoundToInt(255.0f * CoveredSamples / FMath::Square(SamplesPerAxis)));
+				Pixels[Y * Width + X] = FColor(255, 255, 255, Alpha);
+			}
+		}
+
+		FTexture2DMipMap& Mip = Texture->GetPlatformData()->Mips[0];
+		void* Data = Mip.BulkData.Lock(LOCK_READ_WRITE);
+		FMemory::Memcpy(Data, Pixels.GetData(), Pixels.Num() * sizeof(FColor));
+		Mip.BulkData.Unlock();
+		Texture->UpdateResource();
+		return Texture;
 	}
 
 	bool TextArraysEqual(const TArray<FText>& LeftTexts, const TArray<FText>& RightTexts)
@@ -269,19 +346,19 @@ void UTunaSweeperInteractionMarkerWidget::CacheNamedWidgets()
 			RingImage = WidgetTree->FindWidget(TEXT("RingText"));
 		}
 	}
-	if (!RingBrushImage)
+	if (!CachedRingBrushImageWidget)
 	{
-		RingBrushImage = Cast<UImage>(WidgetTree->FindWidget(TEXT("RingBrushImage")));
-		if (!RingBrushImage)
+		CachedRingBrushImageWidget = Cast<UImage>(WidgetTree->FindWidget(TEXT("RingBrushImage")));
+		if (!CachedRingBrushImageWidget)
 		{
-			RingBrushImage = Cast<UImage>(RingImage);
+			CachedRingBrushImageWidget = Cast<UImage>(RingImage);
 		}
 	}
 	if (!bHasCachedRingBrush)
 	{
-		if (RingBrushImage)
+		if (CachedRingBrushImageWidget)
 		{
-			CachedRingBrush = RingBrushImage->GetBrush();
+			CachedRingBrush = CachedRingBrushImageWidget->GetBrush();
 			bHasCachedRingBrush = true;
 		}
 	}
@@ -294,19 +371,19 @@ void UTunaSweeperInteractionMarkerWidget::CacheNamedWidgets()
 			FilledImage = WidgetTree->FindWidget(TEXT("FilledText"));
 		}
 	}
-	if (!FilledBrushImage)
+	if (!CachedFilledBrushImageWidget)
 	{
-		FilledBrushImage = Cast<UImage>(WidgetTree->FindWidget(TEXT("FilledBrushImage")));
-		if (!FilledBrushImage)
+		CachedFilledBrushImageWidget = Cast<UImage>(WidgetTree->FindWidget(TEXT("FilledBrushImage")));
+		if (!CachedFilledBrushImageWidget)
 		{
-			FilledBrushImage = Cast<UImage>(FilledImage);
+			CachedFilledBrushImageWidget = Cast<UImage>(FilledImage);
 		}
 	}
 	if (!bHasCachedFilledBrush)
 	{
-		if (FilledBrushImage)
+		if (CachedFilledBrushImageWidget)
 		{
-			CachedFilledBrush = FilledBrushImage->GetBrush();
+			CachedFilledBrush = CachedFilledBrushImageWidget->GetBrush();
 			bHasCachedFilledBrush = true;
 		}
 	}
@@ -349,6 +426,17 @@ UTexture2D* UTunaSweeperInteractionMarkerWidget::ResolveOpenedCheckTexture()
 	return CachedOpenedCheckTexture;
 }
 
+UTexture2D* UTunaSweeperInteractionMarkerWidget::ResolveIndicatorTriangleTexture(bool bPointUp)
+{
+	TObjectPtr<UTexture2D>* CachedTexture = bPointUp ? &CachedUpTriangleTexture : &CachedDownTriangleTexture;
+	if (!CachedTexture->Get())
+	{
+		*CachedTexture = CreateIndicatorTriangleTexture(bPointUp);
+	}
+
+	return CachedTexture->Get();
+}
+
 void UTunaSweeperInteractionMarkerWidget::EnsureRequirementWidgets()
 {
 	if (!WidgetTree || !LabelBackground || (RequirementRoot && RequirementIconImage && RequirementQuantityText))
@@ -356,23 +444,23 @@ void UTunaSweeperInteractionMarkerWidget::EnsureRequirementWidgets()
 		return;
 	}
 
-	if (!LabelContentRow)
+	if (!CachedLabelContentRow)
 	{
-		LabelContentRow = Cast<UHorizontalBox>(WidgetTree->FindWidget(TEXT("LabelContentRow")));
+		CachedLabelContentRow = Cast<UHorizontalBox>(WidgetTree->FindWidget(TEXT("LabelContentRow")));
 	}
-	if (!LabelContentRow)
+	if (!CachedLabelContentRow)
 	{
-		LabelContentRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("LabelContentRow_Runtime"));
-		if (!LabelContentRow)
+		CachedLabelContentRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("LabelContentRow_Runtime"));
+		if (!CachedLabelContentRow)
 		{
 			return;
 		}
 
 		UWidget* ExistingContent = LabelBackground->GetContent();
-		LabelBackground->SetContent(LabelContentRow);
+		LabelBackground->SetContent(CachedLabelContentRow);
 		if (DisplayNameText && ExistingContent == DisplayNameText)
 		{
-			if (UHorizontalBoxSlot* DisplayNameSlot = LabelContentRow->AddChildToHorizontalBox(DisplayNameText))
+			if (UHorizontalBoxSlot* DisplayNameSlot = CachedLabelContentRow->AddChildToHorizontalBox(DisplayNameText))
 			{
 				DisplayNameSlot->SetHorizontalAlignment(HAlign_Left);
 				DisplayNameSlot->SetVerticalAlignment(VAlign_Center);
@@ -440,9 +528,9 @@ void UTunaSweeperInteractionMarkerWidget::EnsureRequirementWidgets()
 		}
 	}
 
-	if (RequirementRoot && RequirementRoot->GetParent() != LabelContentRow)
+	if (RequirementRoot && RequirementRoot->GetParent() != CachedLabelContentRow)
 	{
-		if (UHorizontalBoxSlot* RequirementSlot = LabelContentRow->AddChildToHorizontalBox(RequirementRoot))
+		if (UHorizontalBoxSlot* RequirementSlot = CachedLabelContentRow->AddChildToHorizontalBox(RequirementRoot))
 		{
 			RequirementSlot->SetPadding(FMargin(10.0f, 0.0f, 0.0f, 0.0f));
 			RequirementSlot->SetHorizontalAlignment(HAlign_Left);
@@ -458,14 +546,14 @@ void UTunaSweeperInteractionMarkerWidget::EnsureSingleLabelContent()
 		return;
 	}
 
-	if (!LabelContentRow)
+	if (!CachedLabelContentRow)
 	{
-		LabelContentRow = Cast<UHorizontalBox>(WidgetTree->FindWidget(TEXT("LabelContentRow")));
+		CachedLabelContentRow = Cast<UHorizontalBox>(WidgetTree->FindWidget(TEXT("LabelContentRow")));
 	}
 
-	if (LabelContentRow && LabelBackground->GetContent() != LabelContentRow)
+	if (CachedLabelContentRow && LabelBackground->GetContent() != CachedLabelContentRow)
 	{
-		LabelBackground->SetContent(LabelContentRow);
+		LabelBackground->SetContent(CachedLabelContentRow);
 	}
 
 	if (DisplayNameText)
@@ -473,9 +561,9 @@ void UTunaSweeperInteractionMarkerWidget::EnsureSingleLabelContent()
 		DisplayNameText->SetVisibility(ESlateVisibility::HitTestInvisible);
 	}
 
-	if (MultiOptionListRoot)
+	if (CachedMultiOptionListRoot)
 	{
-		MultiOptionListRoot->SetVisibility(ESlateVisibility::Collapsed);
+		CachedMultiOptionListRoot->SetVisibility(ESlateVisibility::Collapsed);
 	}
 }
 
@@ -486,22 +574,22 @@ void UTunaSweeperInteractionMarkerWidget::EnsureMultiOptionList()
 		return;
 	}
 
-	if (!MultiOptionListRoot)
+	if (!CachedMultiOptionListRoot)
 	{
-		MultiOptionListRoot = Cast<UVerticalBox>(WidgetTree->FindWidget(TEXT("MultiOptionListRoot")));
+		CachedMultiOptionListRoot = Cast<UVerticalBox>(WidgetTree->FindWidget(TEXT("MultiOptionListRoot")));
 	}
 
-	if (!MultiOptionListRoot)
+	if (!CachedMultiOptionListRoot)
 	{
-		MultiOptionListRoot = WidgetTree->ConstructWidget<UVerticalBox>(
+		CachedMultiOptionListRoot = WidgetTree->ConstructWidget<UVerticalBox>(
 			UVerticalBox::StaticClass(),
 			TEXT("MultiOptionListRoot_Runtime"));
 		bMultiOptionListDirty = true;
 	}
 
-	if (MultiOptionListRoot && LabelBackground->GetContent() != MultiOptionListRoot)
+	if (CachedMultiOptionListRoot && LabelBackground->GetContent() != CachedMultiOptionListRoot)
 	{
-		LabelBackground->SetContent(MultiOptionListRoot);
+		LabelBackground->SetContent(CachedMultiOptionListRoot);
 	}
 
 	if (DisplayNameText)
@@ -509,20 +597,20 @@ void UTunaSweeperInteractionMarkerWidget::EnsureMultiOptionList()
 		DisplayNameText->SetVisibility(ESlateVisibility::Collapsed);
 	}
 
-	if (MultiOptionListRoot)
+	if (CachedMultiOptionListRoot)
 	{
-		MultiOptionListRoot->SetVisibility(ESlateVisibility::HitTestInvisible);
+		CachedMultiOptionListRoot->SetVisibility(ESlateVisibility::HitTestInvisible);
 	}
 }
 
 void UTunaSweeperInteractionMarkerWidget::RebuildMultiOptionList()
 {
-	if (!WidgetTree || !MultiOptionListRoot)
+	if (!WidgetTree || !CachedMultiOptionListRoot)
 	{
 		return;
 	}
 
-	MultiOptionListRoot->ClearChildren();
+	CachedMultiOptionListRoot->ClearChildren();
 	MultiOptionRows.Reset();
 
 	const FSlateBrush DotBrush = BuildCircularBrush(FVector2D(8.0f, 8.0f), FLinearColor::White);
@@ -545,17 +633,26 @@ void UTunaSweeperInteractionMarkerWidget::RebuildMultiOptionList()
 		USizeBox* IndicatorBox = WidgetTree->ConstructWidget<USizeBox>(
 			USizeBox::StaticClass(),
 			*FString::Printf(TEXT("InteractionOptionIndicatorBox_%d"), OptionIndex));
-		UOverlay* IndicatorOverlay = WidgetTree->ConstructWidget<UOverlay>(
-			UOverlay::StaticClass(),
+		UVerticalBox* IndicatorStack = WidgetTree->ConstructWidget<UVerticalBox>(
+			UVerticalBox::StaticClass(),
 			*FString::Printf(TEXT("InteractionOptionIndicator_%d"), OptionIndex));
+		USizeBox* UpIndicatorBox = WidgetTree->ConstructWidget<USizeBox>(
+			USizeBox::StaticClass(),
+			*FString::Printf(TEXT("InteractionOptionUpBox_%d"), OptionIndex));
 		UImage* DotImage = WidgetTree->ConstructWidget<UImage>(
 			UImage::StaticClass(),
 			*FString::Printf(TEXT("InteractionOptionDot_%d"), OptionIndex));
-		UTextBlock* UpIndicatorText = WidgetTree->ConstructWidget<UTextBlock>(
-			UTextBlock::StaticClass(),
+		USizeBox* DotBox = WidgetTree->ConstructWidget<USizeBox>(
+			USizeBox::StaticClass(),
+			*FString::Printf(TEXT("InteractionOptionDotBox_%d"), OptionIndex));
+		USizeBox* DownIndicatorBox = WidgetTree->ConstructWidget<USizeBox>(
+			USizeBox::StaticClass(),
+			*FString::Printf(TEXT("InteractionOptionDownBox_%d"), OptionIndex));
+		UImage* UpIndicatorImage = WidgetTree->ConstructWidget<UImage>(
+			UImage::StaticClass(),
 			*FString::Printf(TEXT("InteractionOptionUp_%d"), OptionIndex));
-		UTextBlock* DownIndicatorText = WidgetTree->ConstructWidget<UTextBlock>(
-			UTextBlock::StaticClass(),
+		UImage* DownIndicatorImage = WidgetTree->ConstructWidget<UImage>(
+			UImage::StaticClass(),
 			*FString::Printf(TEXT("InteractionOptionDown_%d"), OptionIndex));
 		UBorder* OptionBackground = WidgetTree->ConstructWidget<UBorder>(
 			UBorder::StaticClass(),
@@ -573,56 +670,63 @@ void UTunaSweeperInteractionMarkerWidget::RebuildMultiOptionList()
 			UTextBlock::StaticClass(),
 			*FString::Printf(TEXT("InteractionOptionKey_%d"), OptionIndex));
 
-		if (!Row || !IndicatorBox || !IndicatorOverlay || !DotImage || !UpIndicatorText ||
-			!DownIndicatorText || !OptionBackground || !OptionContent || !OptionText ||
-			!KeyPromptBackground || !KeyPromptText)
+		if (!Row || !IndicatorBox || !IndicatorStack || !UpIndicatorBox || !DotImage || !DotBox ||
+			!DownIndicatorBox || !UpIndicatorImage || !DownIndicatorImage || !OptionBackground ||
+			!OptionContent || !OptionText || !KeyPromptBackground || !KeyPromptText)
 		{
 			continue;
 		}
 
-		IndicatorBox->SetWidthOverride(20.0f);
-		IndicatorBox->SetHeightOverride(24.0f);
-		IndicatorBox->SetContent(IndicatorOverlay);
+		const FLinearColor IndicatorColor = FLinearColor::White;
+		IndicatorBox->SetWidthOverride(18.0f);
+		IndicatorBox->SetHeightOverride(28.0f);
+		IndicatorBox->SetContent(IndicatorStack);
 
+		UpIndicatorBox->SetWidthOverride(14.0f);
+		UpIndicatorBox->SetHeightOverride(8.0f);
+		UpIndicatorBox->SetContent(UpIndicatorImage);
+		if (UTexture2D* UpTexture = ResolveIndicatorTriangleTexture(true))
+		{
+			UpIndicatorImage->SetBrushFromTexture(UpTexture, true);
+		}
+		UpIndicatorImage->SetColorAndOpacity(IndicatorColor);
+		UpIndicatorImage->SetBrushTintColor(FSlateColor(IndicatorColor));
+		UpIndicatorImage->SetVisibility(bFocused ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Hidden);
+
+		if (UVerticalBoxSlot* UpSlot = IndicatorStack->AddChildToVerticalBox(UpIndicatorBox))
+		{
+			UpSlot->SetHorizontalAlignment(HAlign_Center);
+			UpSlot->SetVerticalAlignment(VAlign_Center);
+			UpSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 2.0f));
+		}
+
+		DotBox->SetWidthOverride(8.0f);
+		DotBox->SetHeightOverride(8.0f);
+		DotBox->SetContent(DotImage);
 		DotImage->SetBrush(DotBrush);
 		DotImage->SetColorAndOpacity(FLinearColor::White);
-		if (UOverlaySlot* DotSlot = IndicatorOverlay->AddChildToOverlay(DotImage))
+		if (UVerticalBoxSlot* DotSlot = IndicatorStack->AddChildToVerticalBox(DotBox))
 		{
 			DotSlot->SetHorizontalAlignment(HAlign_Center);
 			DotSlot->SetVerticalAlignment(VAlign_Center);
+			DotSlot->SetPadding(FMargin(0.0f));
 		}
 
-		const FLinearColor IndicatorColor = FLinearColor::White;
-		UpIndicatorText->SetText(FText::FromString(TEXT("^")));
-		UpIndicatorText->SetColorAndOpacity(FSlateColor(IndicatorColor));
-		UpIndicatorText->SetJustification(ETextJustify::Center);
-		UpIndicatorText->SetVisibility(bFocused ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
-		if (DisplayNameText)
+		DownIndicatorBox->SetWidthOverride(14.0f);
+		DownIndicatorBox->SetHeightOverride(8.0f);
+		DownIndicatorBox->SetContent(DownIndicatorImage);
+		if (UTexture2D* DownTexture = ResolveIndicatorTriangleTexture(false))
 		{
-			FSlateFontInfo IndicatorFont = DisplayNameText->GetFont();
-			IndicatorFont.Size = 9;
-			UpIndicatorText->SetFont(IndicatorFont);
+			DownIndicatorImage->SetBrushFromTexture(DownTexture, true);
 		}
-		if (UOverlaySlot* UpSlot = IndicatorOverlay->AddChildToOverlay(UpIndicatorText))
-		{
-			UpSlot->SetHorizontalAlignment(HAlign_Center);
-			UpSlot->SetVerticalAlignment(VAlign_Top);
-		}
-
-		DownIndicatorText->SetText(FText::FromString(TEXT("v")));
-		DownIndicatorText->SetColorAndOpacity(FSlateColor(IndicatorColor));
-		DownIndicatorText->SetJustification(ETextJustify::Center);
-		DownIndicatorText->SetVisibility(bFocused ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
-		if (DisplayNameText)
-		{
-			FSlateFontInfo IndicatorFont = DisplayNameText->GetFont();
-			IndicatorFont.Size = 9;
-			DownIndicatorText->SetFont(IndicatorFont);
-		}
-		if (UOverlaySlot* DownSlot = IndicatorOverlay->AddChildToOverlay(DownIndicatorText))
+		DownIndicatorImage->SetColorAndOpacity(IndicatorColor);
+		DownIndicatorImage->SetBrushTintColor(FSlateColor(IndicatorColor));
+		DownIndicatorImage->SetVisibility(bFocused ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Hidden);
+		if (UVerticalBoxSlot* DownSlot = IndicatorStack->AddChildToVerticalBox(DownIndicatorBox))
 		{
 			DownSlot->SetHorizontalAlignment(HAlign_Center);
-			DownSlot->SetVerticalAlignment(VAlign_Bottom);
+			DownSlot->SetVerticalAlignment(VAlign_Center);
+			DownSlot->SetPadding(FMargin(0.0f, 2.0f, 0.0f, 0.0f));
 		}
 
 		if (UHorizontalBoxSlot* IndicatorSlot = Row->AddChildToHorizontalBox(IndicatorBox))
@@ -680,7 +784,7 @@ void UTunaSweeperInteractionMarkerWidget::RebuildMultiOptionList()
 			BackgroundSlot->SetVerticalAlignment(VAlign_Center);
 		}
 
-		if (UVerticalBoxSlot* RowSlot = MultiOptionListRoot->AddChildToVerticalBox(Row))
+		if (UVerticalBoxSlot* RowSlot = CachedMultiOptionListRoot->AddChildToVerticalBox(Row))
 		{
 			RowSlot->SetHorizontalAlignment(HAlign_Left);
 			RowSlot->SetVerticalAlignment(VAlign_Center);
@@ -721,16 +825,16 @@ void UTunaSweeperInteractionMarkerWidget::ApplyState()
 		RingImage->SetRenderScale(FVector2D(CachedRingScale));
 		RingImage->SetRenderOpacity(1.0f);
 	}
-	if (RingBrushImage)
+	if (CachedRingBrushImageWidget)
 	{
 		if (!bHasCachedRingBrush)
 		{
-			CachedRingBrush = RingBrushImage->GetBrush();
+			CachedRingBrush = CachedRingBrushImageWidget->GetBrush();
 			bHasCachedRingBrush = true;
 		}
-		RingBrushImage->SetBrush(BuildBrushWithPaintOpacity(CachedRingBrush, CachedAlpha));
-		RingBrushImage->SetRenderOpacity(1.0f);
-		RingBrushImage->SetColorAndOpacity(FLinearColor::White);
+		CachedRingBrushImageWidget->SetBrush(BuildBrushWithPaintOpacity(CachedRingBrush, CachedAlpha));
+		CachedRingBrushImageWidget->SetRenderOpacity(1.0f);
+		CachedRingBrushImageWidget->SetColorAndOpacity(FLinearColor::White);
 	}
 	else if (RingImage)
 	{
@@ -741,11 +845,11 @@ void UTunaSweeperInteractionMarkerWidget::ApplyState()
 	{
 		FilledImage->SetRenderOpacity(1.0f);
 	}
-	if (FilledBrushImage)
+	if (CachedFilledBrushImageWidget)
 	{
 		if (!bHasCachedFilledBrush)
 		{
-			CachedFilledBrush = FilledBrushImage->GetBrush();
+			CachedFilledBrush = CachedFilledBrushImageWidget->GetBrush();
 			bHasCachedFilledBrush = true;
 		}
 
@@ -753,18 +857,18 @@ void UTunaSweeperInteractionMarkerWidget::ApplyState()
 		{
 			if (UTexture2D* OpenedCheckTexture = ResolveOpenedCheckTexture())
 			{
-				FilledBrushImage->SetBrushFromTexture(OpenedCheckTexture, false);
+				CachedFilledBrushImageWidget->SetBrushFromTexture(OpenedCheckTexture, false);
 			}
 		}
 		else if (bHasCachedFilledBrush)
 		{
-			FilledBrushImage->SetBrush(BuildBrushWithPaintOpacity(CachedFilledBrush, CachedAlpha));
-			FilledBrushImage->SetRenderOpacity(1.0f);
-			FilledBrushImage->SetColorAndOpacity(FLinearColor::White);
+			CachedFilledBrushImageWidget->SetBrush(BuildBrushWithPaintOpacity(CachedFilledBrush, CachedAlpha));
+			CachedFilledBrushImageWidget->SetRenderOpacity(1.0f);
+			CachedFilledBrushImageWidget->SetColorAndOpacity(FLinearColor::White);
 		}
 		if (bCachedOpened)
 		{
-			ApplyPaintOpacity(FilledBrushImage, CachedAlpha);
+			ApplyPaintOpacity(CachedFilledBrushImageWidget, CachedAlpha);
 		}
 	}
 	else if (FilledImage)
@@ -785,9 +889,9 @@ void UTunaSweeperInteractionMarkerWidget::ApplyState()
 			DisplayNameText->SetText(CachedDisplayText);
 			DisplayNameText->SetVisibility(ESlateVisibility::Collapsed);
 		}
-		if (MultiOptionListRoot)
+		if (CachedMultiOptionListRoot)
 		{
-			MultiOptionListRoot->SetRenderOpacity(CachedLabelAlpha);
+			CachedMultiOptionListRoot->SetRenderOpacity(CachedLabelAlpha);
 		}
 		if (LabelBackground)
 		{

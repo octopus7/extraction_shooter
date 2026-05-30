@@ -72,13 +72,14 @@ private:
 	void ApplyState();
 	void ApplyMultiOptionFocusScales();
 	UTexture2D* ResolveOpenedCheckTexture();
+	UTexture2D* ResolveIndicatorTriangleTexture(bool bPointUp);
 
 	FText CachedDisplayText = FText::FromString(TEXT("Interact"));
 	TArray<FText> CachedOptionTexts;
 	UPROPERTY(Transient)
-	TObjectPtr<UHorizontalBox> LabelContentRow;
+	TObjectPtr<UHorizontalBox> CachedLabelContentRow;
 	UPROPERTY(Transient)
-	TObjectPtr<UVerticalBox> MultiOptionListRoot;
+	TObjectPtr<UVerticalBox> CachedMultiOptionListRoot;
 	UPROPERTY(Transient)
 	TArray<TObjectPtr<UWidget>> MultiOptionRows;
 	UPROPERTY(Transient)
@@ -86,9 +87,13 @@ private:
 	UPROPERTY(Transient)
 	TObjectPtr<UTexture2D> CachedOpenedCheckTexture;
 	UPROPERTY(Transient)
-	TObjectPtr<UImage> RingBrushImage;
+	TObjectPtr<UTexture2D> CachedUpTriangleTexture;
 	UPROPERTY(Transient)
-	TObjectPtr<UImage> FilledBrushImage;
+	TObjectPtr<UTexture2D> CachedDownTriangleTexture;
+	UPROPERTY(Transient)
+	TObjectPtr<UImage> CachedRingBrushImageWidget;
+	UPROPERTY(Transient)
+	TObjectPtr<UImage> CachedFilledBrushImageWidget;
 	int32 CachedRequiredQuantity = 0;
 	int32 CachedFocusedOptionIndex = INDEX_NONE;
 	float FocusScaleElapsedSeconds = 1.0f;
