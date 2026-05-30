@@ -136,6 +136,21 @@ namespace
 
 		return true;
 	}
+
+	constexpr float FocusElasticDurationSeconds = 0.22f;
+
+	float ResolveFocusElasticScale(float ElapsedSeconds)
+	{
+		const float NormalizedTime = FMath::Clamp(ElapsedSeconds / FocusElasticDurationSeconds, 0.0f, 1.0f);
+		if (NormalizedTime >= 1.0f)
+		{
+			return 1.0f;
+		}
+
+		const float Decay = FMath::Pow(1.0f - NormalizedTime, 2.0f);
+		const float Wave = FMath::Sin(NormalizedTime * UE_PI * 3.5f);
+		return 1.0f + Wave * Decay * 0.16f;
+	}
 }
 
 void UTunaSweeperInteractionMarkerWidget::NativeConstruct()
@@ -163,6 +178,17 @@ void UTunaSweeperInteractionMarkerWidget::NativePreConstruct()
 	ApplyState();
 }
 
+void UTunaSweeperInteractionMarkerWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
+{
+	Super::NativeTick(MyGeometry, InDeltaTime);
+
+	if (FocusScaleElapsedSeconds < FocusElasticDurationSeconds)
+	{
+		FocusScaleElapsedSeconds = FMath::Min(FocusElasticDurationSeconds, FocusScaleElapsedSeconds + InDeltaTime);
+		ApplyMultiOptionFocusScales();
+	}
+}
+
 void UTunaSweeperInteractionMarkerWidget::SetMarkerText(const FText& InText)
 {
 	CachedDisplayText = InText;
@@ -170,6 +196,7 @@ void UTunaSweeperInteractionMarkerWidget::SetMarkerText(const FText& InText)
 	{
 		CachedOptionTexts.Reset();
 		CachedFocusedOptionIndex = INDEX_NONE;
+		FocusScaleElapsedSeconds = FocusElasticDurationSeconds;
 		bMultiOptionListDirty = true;
 	}
 	ApplyState();
@@ -188,6 +215,10 @@ void UTunaSweeperInteractionMarkerWidget::SetInteractionOptions(const TArray<FTe
 	if (CachedOptionTexts.IsValidIndex(CachedFocusedOptionIndex))
 	{
 		CachedDisplayText = CachedOptionTexts[CachedFocusedOptionIndex];
+	}
+	if ((bOptionsChanged || bFocusChanged) && CachedOptionTexts.Num() > 1)
+	{
+		FocusScaleElapsedSeconds = 0.0f;
 	}
 	bMultiOptionListDirty = bMultiOptionListDirty || bOptionsChanged || bFocusChanged;
 	ApplyState();
@@ -492,15 +523,16 @@ void UTunaSweeperInteractionMarkerWidget::RebuildMultiOptionList()
 	}
 
 	MultiOptionListRoot->ClearChildren();
+	MultiOptionRows.Reset();
 
 	const FSlateBrush DotBrush = BuildCircularBrush(FVector2D(8.0f, 8.0f), FLinearColor::White);
 	const FSlateBrush FocusBackgroundBrush = BuildRoundedBrush(
 		FVector2D(128.0f, 24.0f),
 		FLinearColor(1.0f, 1.0f, 1.0f, 0.95f),
 		2.0f);
-	const FSlateBrush TransparentBrush = BuildRoundedBrush(
+	const FSlateBrush UnfocusedBackgroundBrush = BuildRoundedBrush(
 		FVector2D(128.0f, 24.0f),
-		FLinearColor::Transparent,
+		FLinearColor(0.0f, 0.0f, 0.0f, 0.58f),
 		2.0f);
 
 	for (int32 OptionIndex = 0; OptionIndex < CachedOptionTexts.Num(); ++OptionIndex)
@@ -599,7 +631,8 @@ void UTunaSweeperInteractionMarkerWidget::RebuildMultiOptionList()
 			IndicatorSlot->SetVerticalAlignment(VAlign_Center);
 		}
 
-		OptionBackground->SetBrush(bFocused ? FocusBackgroundBrush : TransparentBrush);
+		Row->SetRenderTransformPivot(FVector2D(0.5f, 0.5f));
+		OptionBackground->SetBrush(bFocused ? FocusBackgroundBrush : UnfocusedBackgroundBrush);
 		OptionBackground->SetPadding(bFocused ? FMargin(7.0f, 1.0f, 6.0f, 1.0f) : FMargin(7.0f, 1.0f, 6.0f, 1.0f));
 		OptionBackground->SetContent(OptionContent);
 
@@ -609,7 +642,7 @@ void UTunaSweeperInteractionMarkerWidget::RebuildMultiOptionList()
 		{
 			OptionText->SetFont(DisplayNameText->GetFont());
 		}
-		OptionText->SetColorAndOpacity(FSlateColor(FLinearColor::Black));
+		OptionText->SetColorAndOpacity(FSlateColor(bFocused ? FLinearColor::Black : FLinearColor::White));
 		if (UHorizontalBoxSlot* TextSlot = OptionContent->AddChildToHorizontalBox(OptionText))
 		{
 			TextSlot->SetHorizontalAlignment(HAlign_Left);
@@ -652,9 +685,25 @@ void UTunaSweeperInteractionMarkerWidget::RebuildMultiOptionList()
 			RowSlot->SetHorizontalAlignment(HAlign_Left);
 			RowSlot->SetVerticalAlignment(VAlign_Center);
 		}
+		MultiOptionRows.Add(Row);
 	}
 
 	bMultiOptionListDirty = false;
+	ApplyMultiOptionFocusScales();
+}
+
+void UTunaSweeperInteractionMarkerWidget::ApplyMultiOptionFocusScales()
+{
+	const float FocusScale = ResolveFocusElasticScale(FocusScaleElapsedSeconds);
+	for (int32 RowIndex = 0; RowIndex < MultiOptionRows.Num(); ++RowIndex)
+	{
+		if (UWidget* RowWidget = MultiOptionRows[RowIndex])
+		{
+			RowWidget->SetRenderScale(RowIndex == CachedFocusedOptionIndex
+				? FVector2D(FocusScale, FocusScale)
+				: FVector2D(1.0f, 1.0f));
+		}
+	}
 }
 
 void UTunaSweeperInteractionMarkerWidget::ApplyState()

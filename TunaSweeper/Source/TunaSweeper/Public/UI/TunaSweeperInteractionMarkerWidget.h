@@ -37,6 +37,7 @@ public:
 protected:
 	virtual void NativeConstruct() override;
 	virtual void NativePreConstruct() override;
+	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Interaction", meta = (BindWidgetOptional))
 	TObjectPtr<UWidget> MarkerRoot;
@@ -69,6 +70,7 @@ private:
 	void EnsureMultiOptionList();
 	void RebuildMultiOptionList();
 	void ApplyState();
+	void ApplyMultiOptionFocusScales();
 	UTexture2D* ResolveOpenedCheckTexture();
 
 	FText CachedDisplayText = FText::FromString(TEXT("Interact"));
@@ -77,6 +79,8 @@ private:
 	TObjectPtr<UHorizontalBox> LabelContentRow;
 	UPROPERTY(Transient)
 	TObjectPtr<UVerticalBox> MultiOptionListRoot;
+	UPROPERTY(Transient)
+	TArray<TObjectPtr<UWidget>> MultiOptionRows;
 	UPROPERTY(Transient)
 	TObjectPtr<UTexture2D> CachedRequirementIconTexture;
 	UPROPERTY(Transient)
@@ -87,6 +91,7 @@ private:
 	TObjectPtr<UImage> FilledBrushImage;
 	int32 CachedRequiredQuantity = 0;
 	int32 CachedFocusedOptionIndex = INDEX_NONE;
+	float FocusScaleElapsedSeconds = 1.0f;
 	bool bMultiOptionListDirty = true;
 	bool bCachedShowRequirement = false;
 	bool bCachedOpened = false;
