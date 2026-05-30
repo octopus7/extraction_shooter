@@ -11,6 +11,7 @@
 #include "Housing/TunaSweeperHousingFacilityActor.h"
 #include "Interaction/TunaSweeperHousingManagementActor.h"
 #include "Interaction/TunaSweeperPiggyBankActor.h"
+#include "Interaction/TunaSweeperWorkbenchActor.h"
 #include "Kismet/GameplayStatics.h"
 #include "Misc/FileHelper.h"
 #include "Misc/PackageName.h"
@@ -1250,6 +1251,10 @@ void UTunaSweeperHousingSubsystem::ConfigurePlacedFacilityActor(
 	if (ATunaSweeperPiggyBankActor* PiggyBankActor = Cast<ATunaSweeperPiggyBankActor>(Actor))
 	{
 		PiggyBankActor->SetPiggyBankId(ActorId);
+	}
+	if (ATunaSweeperWorkbenchActor* WorkbenchActor = Cast<ATunaSweeperWorkbenchActor>(Actor))
+	{
+		WorkbenchActor->ConfigureWorkbenchDefaults(1);
 	}
 
 #if WITH_EDITOR

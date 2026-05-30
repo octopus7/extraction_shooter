@@ -10,7 +10,8 @@
       { "item_id": 6002, "quantity": 12 }
     ],
     "sort_order": 10,
-    "function_unlocked": false
+    "function_unlocked": false,
+    "actor_class": "/Game/Interaction/BP_Workbench.BP_Workbench_C"
   },
   {
     "facility_id": "housing_piggy_bank",
