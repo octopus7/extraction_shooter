@@ -199,11 +199,20 @@ bool UTunaSweeperDebuffComponent::ApplyDebuffInternal(
 		return false;
 	}
 
-	(void)SourceActor;
-
 	const float DurationSeconds = FMath::Max(
 		0.01f,
 		Definition.DurationSeconds + FMath::Max(0.0f, DurationBonusSeconds));
+
+	return ApplyDebuffStateInternal(DebuffId, Definition, DurationSeconds, SourceActor);
+}
+
+bool UTunaSweeperDebuffComponent::ApplyDebuffStateInternal(
+	FName DebuffId,
+	const FTunaSweeperDebuffDefinition& Definition,
+	float DurationSeconds,
+	AActor* SourceActor)
+{
+	(void)SourceActor;
 
 	if (FTunaSweeperActiveDebuffState* ExistingDebuff = ActiveDebuffs.FindByPredicate(
 		[DebuffId](const FTunaSweeperActiveDebuffState& DebuffState)

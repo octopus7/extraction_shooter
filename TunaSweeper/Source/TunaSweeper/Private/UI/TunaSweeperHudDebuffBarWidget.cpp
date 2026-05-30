@@ -63,7 +63,28 @@ void UTunaSweeperHudDebuffBarWidget::SetActiveDebuffs(
 
 void UTunaSweeperHudDebuffBarWidget::EnsureDebuffRow()
 {
-	if (DebuffRow || !WidgetTree)
+	if (DebuffRow)
+	{
+		return;
+	}
+
+	if (!WidgetTree)
+	{
+		WidgetTree = NewObject<UWidgetTree>(this, TEXT("WidgetTree"), RF_Transient);
+	}
+	if (!WidgetTree)
+	{
+		return;
+	}
+
+	DebuffRow = Cast<UHorizontalBox>(WidgetTree->FindWidget(FName(TEXT("DebuffRow"))));
+	if (DebuffRow)
+	{
+		return;
+	}
+
+	DebuffRow = Cast<UHorizontalBox>(WidgetTree->FindWidget(FName(TEXT("DebuffRowRoot"))));
+	if (DebuffRow)
 	{
 		return;
 	}

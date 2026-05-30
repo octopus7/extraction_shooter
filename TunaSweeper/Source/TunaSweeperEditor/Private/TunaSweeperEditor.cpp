@@ -113,6 +113,7 @@
 #include "UI/TunaSweeperInteractionMarkerWidget.h"
 #include "UI/TunaSweeperGameHudWidget.h"
 #include "UI/TunaSweeperHudBottomStatusWidget.h"
+#include "UI/TunaSweeperHudDebuffBarWidget.h"
 #include "UI/TunaSweeperHudExternalPanelWidget.h"
 #include "UI/TunaSweeperHudInventoryAreaWidget.h"
 #include "UI/TunaSweeperHudItemInfoPanelWidget.h"
@@ -156,10 +157,13 @@ namespace TunaSweeperEditorSetup
 	constexpr float GameplayBottomStatusGap = 12.0f;
 	constexpr float GameplayBottomPanelWidth = 1120.0f;
 	constexpr float GameplayBottomPanelHeight = 174.0f;
+	constexpr float HudDebuffBarLeftOffset = 24.0f;
+	constexpr float HudDebuffBarBottomOffset = 40.0f;
 	const FString WorkbenchPanelWidgetTaskId = TEXT("2026-05-29_CreateWorkbenchPanelWidgetV6");
 	const FString ShopRefreshStockButtonTaskId = TEXT("2026-05-29_AddShopRefreshStockButtonV1");
 	const FString SplitExternalContainerPanelTaskId = TEXT("2026-05-30_SplitExternalContainerPanelsV1");
 	const FString CurrencyCoinUiTaskId = TEXT("2026-05-30_AddCurrencyCoinUiV1");
+	const FString HudDebuffBarWidgetTaskId = TEXT("2026-05-30_HudDebuffBarWidgetV2");
 	const FString ItemThumbnailSlotLayoutTaskId = TEXT("2026-05-30_RebuildItemThumbnailSlotLayoutV1");
 	const FString InventoryInputTaskId = TEXT("2026-05-11_AddInventoryInput");
 	const FString QuickSlotInputTaskId = TEXT("2026-05-28_AddMeleeQuickSlotInputV1");
@@ -280,6 +284,7 @@ namespace TunaSweeperEditorSetup
 	const FString GameHudWidgetAssetName = TEXT("WBP_GameHud");
 	const FString HudTopReserveWidgetAssetName = TEXT("WBP_HudTopReserve");
 	const FString HudBottomStatusWidgetAssetName = TEXT("WBP_HudBottomStatus");
+	const FString HudDebuffBarWidgetAssetName = TEXT("WBP_HudDebuffBar");
 	const FString HudQuickSlotBarWidgetAssetName = TEXT("WBP_HudQuickSlotBar");
 	const FString HudInventoryAreaWidgetAssetName = TEXT("WBP_HudInventoryArea");
 	const FString HudItemInfoPanelWidgetAssetName = TEXT("WBP_HudItemInfoPanel");
@@ -7848,6 +7853,34 @@ namespace TunaSweeperEditorSetup
 		return true;
 	}
 
+	bool BuildHudDebuffBarWidgetTree(UWidgetBlueprint* WidgetBlueprint)
+	{
+		if (!WidgetBlueprint || !WidgetBlueprint->WidgetTree)
+		{
+			return false;
+		}
+
+		WidgetBlueprint->Modify();
+		WidgetBlueprint->WidgetTree->Modify();
+		ClearWidgetTreeForRebuild(WidgetBlueprint);
+
+		UWidgetTree* WidgetTree = WidgetBlueprint->WidgetTree;
+		UHorizontalBox* DebuffRow = WidgetTree->ConstructWidget<UHorizontalBox>(
+			UHorizontalBox::StaticClass(),
+			TEXT("DebuffRowRoot"));
+		if (!DebuffRow)
+		{
+			return false;
+		}
+
+		WidgetTree->RootWidget = DebuffRow;
+		DebuffRow->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+
+		RegisterWidgetVariable(WidgetBlueprint, DebuffRow);
+		WidgetBlueprint->MarkPackageDirty();
+		return true;
+	}
+
 	bool BuildHudQuickSlotBarWidgetTree(UWidgetBlueprint* WidgetBlueprint)
 	{
 		if (!WidgetBlueprint || !WidgetBlueprint->WidgetTree)
@@ -9343,12 +9376,14 @@ namespace TunaSweeperEditorSetup
 		UWidgetBlueprint* WidgetBlueprint,
 		TSubclassOf<UUserWidget> TopReserveWidgetClass,
 		TSubclassOf<UUserWidget> BottomStatusWidgetClass,
+		TSubclassOf<UUserWidget> DebuffBarWidgetClass,
 		TSubclassOf<UUserWidget> QuickSlotBarWidgetClass,
 		TSubclassOf<UUserWidget> InventoryAreaWidgetClass,
 		TSubclassOf<UUserWidget> ItemInfoPanelWidgetClass,
 		TSubclassOf<UUserWidget> ExternalPanelWidgetClass)
 	{
 		if (!WidgetBlueprint || !WidgetBlueprint->WidgetTree || !TopReserveWidgetClass || !BottomStatusWidgetClass ||
+			!DebuffBarWidgetClass ||
 			!QuickSlotBarWidgetClass || !InventoryAreaWidgetClass || !ItemInfoPanelWidgetClass || !ExternalPanelWidgetClass)
 		{
 			return false;
@@ -9370,6 +9405,7 @@ namespace TunaSweeperEditorSetup
 		UTextBlock* ModeTitleText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("ModeTitleText"));
 		UCanvasPanel* BottomRow = WidgetTree->ConstructWidget<UCanvasPanel>(UCanvasPanel::StaticClass(), TEXT("BottomRow"));
 		UUserWidget* BottomStatusWidget = WidgetTree->ConstructWidget<UUserWidget>(BottomStatusWidgetClass, TEXT("BottomStatusWidget"));
+		UUserWidget* DebuffBarWidget = WidgetTree->ConstructWidget<UUserWidget>(DebuffBarWidgetClass, TEXT("DebuffBarWidget"));
 		UUserWidget* QuickSlotBarWidget = WidgetTree->ConstructWidget<UUserWidget>(QuickSlotBarWidgetClass, TEXT("QuickSlotBarWidget"));
 		USizeBox* CenterReloadGaugeRoot = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("CenterReloadGaugeRoot"));
 		UCanvasPanel* CenterReloadGaugeCanvas = WidgetTree->ConstructWidget<UCanvasPanel>(UCanvasPanel::StaticClass(), TEXT("CenterReloadGaugeCanvas"));
@@ -9385,7 +9421,7 @@ namespace TunaSweeperEditorSetup
 
 		if (!RootCanvas || !TopStatusReserveWidget || !CenterContentPanel || !InventoryAreaWidget || !ItemInfoPanelWidget ||
 			!ExternalPanelWidget || !UnsupportedModePanel || !UnsupportedModeText || !ModeTitleText ||
-			!BottomRow || !BottomStatusWidget || !QuickSlotBarWidget ||
+			!BottomRow || !BottomStatusWidget || !DebuffBarWidget || !QuickSlotBarWidget ||
 			!CenterReloadGaugeRoot || !CenterReloadGaugeCanvas || !CenterReloadGaugeBackdrop || !CenterReloadRingWidget || !CenterReloadPercentText ||
 			!CenterReloadPromptRoot || !CenterReloadPromptText || !CenterReloadPromptKeyBackground || !CenterReloadPromptKeyText)
 		{
@@ -9481,6 +9517,17 @@ namespace TunaSweeperEditorSetup
 			BottomSlot->SetAlignment(FVector2D(0.5f, 1.0f));
 			BottomSlot->SetPosition(FVector2D(0.0f, -20.0f));
 			BottomSlot->SetSize(FVector2D(GameplayBottomPanelWidth, GameplayBottomPanelHeight));
+		}
+
+		DebuffBarWidget->SetVisibility(ESlateVisibility::Collapsed);
+		UCanvasPanelSlot* DebuffBarSlot = RootCanvas->AddChildToCanvas(DebuffBarWidget);
+		if (DebuffBarSlot)
+		{
+			DebuffBarSlot->SetAnchors(FAnchors(0.0f, 1.0f, 0.0f, 1.0f));
+			DebuffBarSlot->SetAlignment(FVector2D(0.0f, 1.0f));
+			DebuffBarSlot->SetPosition(FVector2D(HudDebuffBarLeftOffset, -HudDebuffBarBottomOffset));
+			DebuffBarSlot->SetAutoSize(true);
+			DebuffBarSlot->SetZOrder(36);
 		}
 
 		CenterReloadGaugeRoot->SetWidthOverride(96.0f);
@@ -9582,6 +9629,7 @@ namespace TunaSweeperEditorSetup
 
 		RegisterWidgetVariable(WidgetBlueprint, TopStatusReserveWidget);
 		RegisterWidgetVariable(WidgetBlueprint, BottomStatusWidget);
+		RegisterWidgetVariable(WidgetBlueprint, DebuffBarWidget);
 		RegisterWidgetVariable(WidgetBlueprint, QuickSlotBarWidget);
 		RegisterWidgetVariable(WidgetBlueprint, CenterReloadGaugeRoot);
 		RegisterWidgetVariable(WidgetBlueprint, CenterReloadRingWidget);
@@ -9655,6 +9703,10 @@ namespace TunaSweeperEditorSetup
 			UIAssetPath,
 			HudBottomStatusWidgetAssetName,
 			UTunaSweeperHudBottomStatusWidget::StaticClass());
+		UWidgetBlueprint* DebuffBarWidgetBlueprint = EnsureWidgetBlueprint(
+			UIAssetPath,
+			HudDebuffBarWidgetAssetName,
+			UTunaSweeperHudDebuffBarWidget::StaticClass());
 		UWidgetBlueprint* QuickSlotWidgetBlueprint = EnsureWidgetBlueprint(
 			UIAssetPath,
 			HudQuickSlotBarWidgetAssetName,
@@ -9692,8 +9744,9 @@ namespace TunaSweeperEditorSetup
 			WorkbenchRecipeListEntryWidgetAssetName,
 			UTunaSweeperWorkbenchRecipeListEntryWidget::StaticClass());
 
-		if (!ItemThumbnailWidgetBlueprint || !TopReserveWidgetBlueprint || !BottomStatusWidgetBlueprint || !QuickSlotWidgetBlueprint ||
-			!InventoryAreaWidgetBlueprint || !ItemInfoPanelWidgetBlueprint || !ExternalPanelWidgetBlueprint ||
+		if (!ItemThumbnailWidgetBlueprint || !TopReserveWidgetBlueprint || !BottomStatusWidgetBlueprint ||
+			!DebuffBarWidgetBlueprint || !QuickSlotWidgetBlueprint || !InventoryAreaWidgetBlueprint ||
+			!ItemInfoPanelWidgetBlueprint || !ExternalPanelWidgetBlueprint ||
 			!LootContainerWidgetBlueprint || !StorageContainerWidgetBlueprint || !ShopContainerWidgetBlueprint ||
 			!WorkbenchPanelWidgetBlueprint || !WorkbenchRecipeListEntryWidgetBlueprint)
 		{
@@ -9739,6 +9792,7 @@ namespace TunaSweeperEditorSetup
 		const bool bChildWidgetsBuilt =
 			BuildHudTopReserveWidgetTree(TopReserveWidgetBlueprint) &&
 			BuildHudBottomStatusWidgetTree(BottomStatusWidgetBlueprint) &&
+			BuildHudDebuffBarWidgetTree(DebuffBarWidgetBlueprint) &&
 			BuildHudQuickSlotBarWidgetTree(QuickSlotWidgetBlueprint) &&
 			BuildHudInventoryAreaWidgetTree(InventoryAreaWidgetBlueprint, ItemThumbnailWidgetClass) &&
 			BuildHudItemInfoPanelWidgetTree(ItemInfoPanelWidgetBlueprint, ItemThumbnailWidgetClass) &&
@@ -9758,6 +9812,7 @@ namespace TunaSweeperEditorSetup
 		for (UWidgetBlueprint* ChildWidgetBlueprint : {
 			TopReserveWidgetBlueprint,
 			BottomStatusWidgetBlueprint,
+			DebuffBarWidgetBlueprint,
 			QuickSlotWidgetBlueprint,
 			InventoryAreaWidgetBlueprint,
 			ItemInfoPanelWidgetBlueprint,
@@ -9807,6 +9862,7 @@ namespace TunaSweeperEditorSetup
 			GameHudWidgetBlueprint,
 			TopReserveWidgetBlueprint->GeneratedClass.Get(),
 			BottomStatusWidgetBlueprint->GeneratedClass.Get(),
+			DebuffBarWidgetBlueprint->GeneratedClass.Get(),
 			QuickSlotWidgetBlueprint->GeneratedClass.Get(),
 			InventoryAreaWidgetBlueprint->GeneratedClass.Get(),
 			ItemInfoPanelWidgetBlueprint->GeneratedClass.Get(),
@@ -11973,6 +12029,12 @@ public:
 				{
 					return TunaSweeperEditorSetup::EnsureCommonGameHudAssets();
 				});
+			FTunaSweeperEditorRunOnce::Run(
+				TunaSweeperEditorSetup::HudDebuffBarWidgetTaskId,
+				[]()
+				{
+					return TunaSweeperEditorSetup::EnsureCommonGameHudAssets();
+				});
 			FPlatformMisc::RequestExit(false);
 			return;
 		}
@@ -12291,6 +12353,13 @@ public:
 
 		FTunaSweeperEditorRunOnce::Run(
 			TunaSweeperEditorSetup::CurrencyCoinUiTaskId,
+			[]()
+			{
+				return TunaSweeperEditorSetup::EnsureCommonGameHudAssets();
+			});
+
+		FTunaSweeperEditorRunOnce::Run(
+			TunaSweeperEditorSetup::HudDebuffBarWidgetTaskId,
 			[]()
 			{
 				return TunaSweeperEditorSetup::EnsureCommonGameHudAssets();

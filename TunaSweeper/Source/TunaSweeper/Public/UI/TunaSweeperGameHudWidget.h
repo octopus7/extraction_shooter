@@ -372,7 +372,7 @@ private:
 	UPROPERTY(Transient)
 	TObjectPtr<UBorder> CursorDistancePanel;
 
-	UPROPERTY(Transient)
+	UPROPERTY(BlueprintReadOnly, Transient, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional, AllowPrivateAccess = "true"))
 	TObjectPtr<UTunaSweeperHudDebuffBarWidget> DebuffBarWidget;
 
 	UPROPERTY(Transient)

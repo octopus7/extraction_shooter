@@ -53,6 +53,11 @@ protected:
 private:
 	bool HasAuthority() const;
 	bool ApplyDebuffInternal(FName DebuffId, int32 ApplyChanceBonus, float DurationBonusSeconds, AActor* SourceActor);
+	bool ApplyDebuffStateInternal(
+		FName DebuffId,
+		const FTunaSweeperDebuffDefinition& Definition,
+		float DurationSeconds,
+		AActor* SourceActor);
 	bool RemoveDebuffInternal(FName DebuffId);
 	int32 RemoveDebuffsInternal(const TArray<FName>& DebuffIds);
 	void ApplyTickDamage(const FTunaSweeperActiveDebuffState& DebuffState);

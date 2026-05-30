@@ -1,5 +1,5 @@
 {
-  "global_tick_interval_seconds": 2.0,
+  "global_tick_interval_seconds": 1.0,
   "debuffs": [
     {
       "debuff_id": "debuff.bleeding",

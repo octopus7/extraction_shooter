@@ -58,7 +58,7 @@ namespace
 	constexpr float CursorDistanceBottomOffset = 40.0f;
 	constexpr float CursorDistanceMinTextWidth = 42.0f;
 	constexpr float DebuffBarLeftOffset = 24.0f;
-	constexpr float DebuffBarBottomOffset = 118.0f;
+	constexpr float DebuffBarBottomOffset = CursorDistanceBottomOffset;
 	constexpr float HudWidgetTransitionDurationSeconds = 0.18f;
 	constexpr float HudWidgetTransitionDistancePadding = 36.0f;
 	constexpr float HudWidgetTransitionFallbackHorizontalDistance = 420.0f;
@@ -1691,8 +1691,28 @@ void UTunaSweeperGameHudWidget::EnsureCursorDistanceWidget()
 
 void UTunaSweeperGameHudWidget::EnsureDebuffBarWidget()
 {
-	if (DebuffBarWidget || !WidgetTree)
+	if (!WidgetTree)
 	{
+		return;
+	}
+
+	auto ConfigureDebuffBarCanvasSlot = [](UCanvasPanelSlot* CanvasSlot)
+	{
+		if (!CanvasSlot)
+		{
+			return;
+		}
+
+		CanvasSlot->SetAnchors(FAnchors(0.0f, 1.0f, 0.0f, 1.0f));
+		CanvasSlot->SetAlignment(FVector2D(0.0f, 1.0f));
+		CanvasSlot->SetPosition(FVector2D(DebuffBarLeftOffset, -DebuffBarBottomOffset));
+		CanvasSlot->SetAutoSize(true);
+		CanvasSlot->SetZOrder(36);
+	};
+
+	if (DebuffBarWidget)
+	{
+		ConfigureDebuffBarCanvasSlot(Cast<UCanvasPanelSlot>(DebuffBarWidget->Slot));
 		return;
 	}
 
@@ -1702,9 +1722,18 @@ void UTunaSweeperGameHudWidget::EnsureDebuffBarWidget()
 		return;
 	}
 
-	DebuffBarWidget = WidgetTree->ConstructWidget<UTunaSweeperHudDebuffBarWidget>(
-		UTunaSweeperHudDebuffBarWidget::StaticClass(),
-		TEXT("DebuffBarWidget_Runtime"));
+	TSubclassOf<UTunaSweeperHudDebuffBarWidget> DebuffBarWidgetClass =
+		LoadClass<UTunaSweeperHudDebuffBarWidget>(
+			nullptr,
+			TEXT("/Game/UI/WBP_HudDebuffBar.WBP_HudDebuffBar_C"));
+	if (!DebuffBarWidgetClass)
+	{
+		DebuffBarWidgetClass = UTunaSweeperHudDebuffBarWidget::StaticClass();
+	}
+
+	DebuffBarWidget = CreateWidget<UTunaSweeperHudDebuffBarWidget>(
+		GetOwningPlayer(),
+		DebuffBarWidgetClass);
 	if (!DebuffBarWidget)
 	{
 		return;
@@ -1713,14 +1742,7 @@ void UTunaSweeperGameHudWidget::EnsureDebuffBarWidget()
 	DebuffBarWidget->SetVisibility(ESlateVisibility::Collapsed);
 
 	UCanvasPanelSlot* CanvasSlot = RootCanvas->AddChildToCanvas(DebuffBarWidget);
-	if (CanvasSlot)
-	{
-		CanvasSlot->SetAnchors(FAnchors(0.0f, 1.0f, 0.0f, 1.0f));
-		CanvasSlot->SetAlignment(FVector2D(0.0f, 1.0f));
-		CanvasSlot->SetPosition(FVector2D(DebuffBarLeftOffset, -DebuffBarBottomOffset));
-		CanvasSlot->SetAutoSize(true);
-		CanvasSlot->SetZOrder(9);
-	}
+	ConfigureDebuffBarCanvasSlot(CanvasSlot);
 }
 
 void UTunaSweeperGameHudWidget::EnsureInventoryQuickSlotPanelWidget()
