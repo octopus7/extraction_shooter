@@ -446,6 +446,9 @@ private:
 	void CloseAmmoSelection();
 	void MoveAmmoSelectionFocus(int32 FocusDelta);
 	void RefreshSelectedWeaponAfterInventoryChanged();
+	void HandleInventoryStateChanged();
+	void RefreshCarryWeightConditionDebuffs();
+	bool IsCarryWeightMovementBlocked() const;
 	void RefreshCharacterVisualVisibility();
 	void CacheBaseSurvivalStats();
 	void ApplyExperienceLevelStatBonuses();

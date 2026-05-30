@@ -1,4 +1,6 @@
 string_key,ko,en,ja
+ui.debuff.overweight,중량 과다,Overweight,重量過多
+ui.debuff.movement_blocked,이동불가,Movement Blocked,移動不可
 ui.debuff.bleeding,출혈,Bleeding,出血
 ui.common.ok,OK,OK,OK
 ui.common.cancel,취소,Cancel,キャンセル

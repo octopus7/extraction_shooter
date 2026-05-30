@@ -8329,7 +8329,10 @@ namespace TunaSweeperEditorSetup
 		UHorizontalBox* InventoryWeightRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("InventoryWeightRow"));
 		UTextBlock* InventoryWeightLabelText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("InventoryWeightLabelText"));
 		USizeBox* InventoryWeightGaugeBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("InventoryWeightGaugeBox"));
+		UOverlay* InventoryWeightGaugeOverlay = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), TEXT("InventoryWeightGaugeOverlay"));
 		UProgressBar* InventoryWeightGauge = WidgetTree->ConstructWidget<UProgressBar>(UProgressBar::StaticClass(), TEXT("InventoryWeightGauge"));
+		UCanvasPanel* InventoryWeightMarkerCanvas = WidgetTree->ConstructWidget<UCanvasPanel>(UCanvasPanel::StaticClass(), TEXT("InventoryWeightMarkerCanvas"));
+		UTextBlock* InventoryWeightOverweightMarker = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("InventoryWeightOverweightMarker"));
 		UTextBlock* InventoryWeightText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("InventoryWeightText"));
 		UBorder* InventoryWeightWarningIcon = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("InventoryWeightWarningIcon"));
 		UTextBlock* InventoryWeightWarningText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("InventoryWeightWarningText"));
@@ -8338,7 +8341,8 @@ namespace TunaSweeperEditorSetup
 			!InventoryTitleText || !CurrencyDisplayWidget || !SortInventoryButton || !SortInventoryButtonText || !EquipmentReserveSizeBox ||
 			!EquipmentReserveTileView || !AuxiliaryBagPanel || !AuxiliaryBagBackground || !AuxiliaryBagTileView || !InventoryTileView ||
 			!InventoryWeightPanel || !InventoryWeightRow || !InventoryWeightLabelText || !InventoryWeightGaugeBox ||
-			!InventoryWeightGauge || !InventoryWeightText || !InventoryWeightWarningIcon || !InventoryWeightWarningText)
+			!InventoryWeightGaugeOverlay || !InventoryWeightGauge || !InventoryWeightMarkerCanvas || !InventoryWeightOverweightMarker ||
+			!InventoryWeightText || !InventoryWeightWarningIcon || !InventoryWeightWarningText)
 		{
 			return false;
 		}
@@ -8481,7 +8485,32 @@ namespace TunaSweeperEditorSetup
 		InventoryWeightGauge->SetPercent(0.0f);
 		InventoryWeightGauge->SetFillColorAndOpacity(FLinearColor(0.60f, 0.84f, 0.36f, 1.0f));
 		InventoryWeightGaugeBox->SetHeightOverride(16.0f);
-		InventoryWeightGaugeBox->SetContent(InventoryWeightGauge);
+		InventoryWeightGaugeBox->SetContent(InventoryWeightGaugeOverlay);
+		UOverlaySlot* WeightGaugeOverlaySlot = InventoryWeightGaugeOverlay->AddChildToOverlay(InventoryWeightGauge);
+		if (WeightGaugeOverlaySlot)
+		{
+			WeightGaugeOverlaySlot->SetHorizontalAlignment(HAlign_Fill);
+			WeightGaugeOverlaySlot->SetVerticalAlignment(VAlign_Fill);
+		}
+		UOverlaySlot* WeightMarkerCanvasSlot = InventoryWeightGaugeOverlay->AddChildToOverlay(InventoryWeightMarkerCanvas);
+		if (WeightMarkerCanvasSlot)
+		{
+			WeightMarkerCanvasSlot->SetHorizontalAlignment(HAlign_Fill);
+			WeightMarkerCanvasSlot->SetVerticalAlignment(VAlign_Fill);
+		}
+		ConfigureTextBlock(InventoryWeightOverweightMarker, FText::FromString(TEXT("\u25B2")), FLinearColor(1.0f, 0.90f, 0.30f, 1.0f), 13);
+		InventoryWeightOverweightMarker->SetJustification(ETextJustify::Center);
+		InventoryWeightOverweightMarker->SetShadowColorAndOpacity(FLinearColor(0.0f, 0.0f, 0.0f, 0.85f));
+		InventoryWeightOverweightMarker->SetShadowOffset(FVector2D(1.0f, 1.0f));
+		UCanvasPanelSlot* WeightMarkerSlot = Cast<UCanvasPanelSlot>(
+			InventoryWeightMarkerCanvas->AddChild(InventoryWeightOverweightMarker));
+		if (WeightMarkerSlot)
+		{
+			WeightMarkerSlot->SetAnchors(FAnchors(0.7f, 1.0f, 0.7f, 1.0f));
+			WeightMarkerSlot->SetAlignment(FVector2D(0.5f, 1.0f));
+			WeightMarkerSlot->SetPosition(FVector2D::ZeroVector);
+			WeightMarkerSlot->SetAutoSize(true);
+		}
 		UHorizontalBoxSlot* WeightGaugeSlot = InventoryWeightRow->AddChildToHorizontalBox(InventoryWeightGaugeBox);
 		if (WeightGaugeSlot)
 		{
@@ -8541,7 +8570,11 @@ namespace TunaSweeperEditorSetup
 		RegisterWidgetVariable(WidgetBlueprint, InventoryTileView);
 		RegisterWidgetVariable(WidgetBlueprint, InventoryWeightPanel);
 		RegisterWidgetVariable(WidgetBlueprint, InventoryWeightText);
+		RegisterWidgetVariable(WidgetBlueprint, InventoryWeightGaugeBox);
+		RegisterWidgetVariable(WidgetBlueprint, InventoryWeightGaugeOverlay);
 		RegisterWidgetVariable(WidgetBlueprint, InventoryWeightGauge);
+		RegisterWidgetVariable(WidgetBlueprint, InventoryWeightMarkerCanvas);
+		RegisterWidgetVariable(WidgetBlueprint, InventoryWeightOverweightMarker);
 		RegisterWidgetVariable(WidgetBlueprint, InventoryWeightWarningIcon);
 		WidgetBlueprint->MarkPackageDirty();
 		return true;

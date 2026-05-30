@@ -15,6 +15,7 @@
 #include "Misc/Paths.h"
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
+#include "Subsystem/TunaSweeperDebuffDataSubsystem.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
 #include "Subsystem/TunaSweeperTextSubsystem.h"
 
@@ -182,6 +183,12 @@ namespace TunaSweeperExperience
 			JsonObject,
 			{ TEXT("max_stamina_increase"), TEXT("maxStaminaIncrease") },
 			OutReward.MaxStaminaIncrease);
+		double NumericCarryStrengthIncrease = 0.0;
+		if (JsonObject->TryGetNumberField(TEXT("carry_strength_increase"), NumericCarryStrengthIncrease) ||
+			JsonObject->TryGetNumberField(TEXT("strength_increase"), NumericCarryStrengthIncrease))
+		{
+			OutReward.CarryStrengthIncrease = static_cast<float>(NumericCarryStrengthIncrease);
+		}
 		OutReward.Normalize();
 		return OutReward.Level >= 2;
 	}
@@ -434,6 +441,7 @@ void FTunaSweeperExperienceLevelStatBonuses::ClampNonNegative()
 	MaxFoodBonus = FMath::Max(0.0f, MaxFoodBonus);
 	MaxHydrationBonus = FMath::Max(0.0f, MaxHydrationBonus);
 	MaxStaminaBonus = FMath::Max(0.0f, MaxStaminaBonus);
+	CarryStrengthBonus = FMath::Max(0.0f, CarryStrengthBonus);
 }
 
 void FTunaSweeperExperienceLevelReward::Normalize()
@@ -443,13 +451,24 @@ void FTunaSweeperExperienceLevelReward::Normalize()
 	MaxFoodIncrease = TunaSweeperDataValues::ClampRatioValue(MaxFoodIncrease);
 	MaxHydrationIncrease = TunaSweeperDataValues::ClampRatioValue(MaxHydrationIncrease);
 	MaxStaminaIncrease = TunaSweeperDataValues::ClampRatioValue(MaxStaminaIncrease);
+	CarryStrengthIncrease = FMath::Max(0.0f, CarryStrengthIncrease);
 }
 
 void FTunaSweeperPlayerHudState::NormalizeWeightLimits()
 {
 	CurrentCarryWeight = FMath::Max(0.0f, CurrentCarryWeight);
 	MaxCarryWeight = FMath::Max(1.0f, MaxCarryWeight);
-	MovementBlockedWeight = FMath::Max(MovementBlockedWeight, MaxCarryWeight * 2.0f);
+	OverweightThreshold = TunaSweeperDataValues::ClampRatioValue(OverweightThreshold);
+	OverweightSpeedMultiplier = TunaSweeperDataValues::ClampRatioValue(OverweightSpeedMultiplier);
+	OverweightCarryWeight = OverweightCarryWeight > 0.0f
+		? OverweightCarryWeight
+		: MaxCarryWeight * TunaSweeperDataValues::ToRatioFloat(OverweightThreshold);
+	OverweightCarryWeight = FMath::Clamp(OverweightCarryWeight, 0.0f, MaxCarryWeight);
+	MovementBlockedWeight = FMath::Max(1.0f, MovementBlockedWeight);
+	if (MovementBlockedWeight < OverweightCarryWeight)
+	{
+		MovementBlockedWeight = OverweightCarryWeight;
+	}
 	Health = FMath::Clamp(Health, 0.0f, 100.0f);
 	Food = FMath::Clamp(Food, 0.0f, 100.0f);
 	Hydration = FMath::Clamp(Hydration, 0.0f, 100.0f);
@@ -457,7 +476,7 @@ void FTunaSweeperPlayerHudState::NormalizeWeightLimits()
 
 bool FTunaSweeperPlayerHudState::IsCarryWeightOverLimit() const
 {
-	return MaxCarryWeight > 0.0f && CurrentCarryWeight >= MaxCarryWeight;
+	return OverweightCarryWeight > 0.0f && CurrentCarryWeight >= OverweightCarryWeight;
 }
 
 bool FTunaSweeperPlayerHudState::IsCarryWeightMovementBlocked() const
@@ -472,7 +491,16 @@ float FTunaSweeperPlayerHudState::GetCarryWeightMovementSpeedMultiplier() const
 		return 0.0f;
 	}
 
-	return IsCarryWeightOverLimit() ? 0.5f : 1.0f;
+	return IsCarryWeightOverLimit()
+		? TunaSweeperDataValues::ToRatioFloat(TunaSweeperDataValues::ClampRatioValue(OverweightSpeedMultiplier))
+		: 1.0f;
+}
+
+float FTunaSweeperPlayerHudState::GetOverweightThresholdRatio() const
+{
+	return MaxCarryWeight > 0.0f
+		? FMath::Clamp(OverweightCarryWeight / MaxCarryWeight, 0.0f, 1.0f)
+		: 0.0f;
 }
 
 void UTunaSweeperGameInstance::Init()
@@ -1005,6 +1033,7 @@ FTunaSweeperExperienceLevelStatBonuses UTunaSweeperGameInstance::GetExperienceLe
 		Bonuses.MaxFoodBonus += TunaSweeperDataValues::ToRatioFloat(Reward.MaxFoodIncrease);
 		Bonuses.MaxHydrationBonus += TunaSweeperDataValues::ToRatioFloat(Reward.MaxHydrationIncrease);
 		Bonuses.MaxStaminaBonus += TunaSweeperDataValues::ToRatioFloat(Reward.MaxStaminaIncrease);
+		Bonuses.CarryStrengthBonus += FMath::Max(0.0f, Reward.CarryStrengthIncrease);
 	}
 
 	Bonuses.ClampNonNegative();
@@ -1089,6 +1118,7 @@ bool UTunaSweeperGameInstance::CommitRaidExperienceGain(FTunaSweeperExperienceAn
 	{
 		PendingRaidExperienceAnimationState = OutAnimationState;
 		bHasPendingRaidExperienceAnimationState = true;
+		RefreshCarryWeightState();
 		OnExperienceChanged.Broadcast();
 	}
 	else
@@ -1129,6 +1159,32 @@ void UTunaSweeperGameInstance::SetCarryWeight(float CurrentCarryWeight, float Ma
 	PlayerHudState.CurrentCarryWeight = CurrentCarryWeight;
 	PlayerHudState.MaxCarryWeight = MaxCarryWeight;
 	PlayerHudState.MovementBlockedWeight = MovementBlockedWeight;
+	PlayerHudState.OverweightCarryWeight = MaxCarryWeight * PlayerHudState.GetOverweightThresholdRatio();
+	PlayerHudState.NormalizeWeightLimits();
+}
+
+void UTunaSweeperGameInstance::RefreshCarryWeightState()
+{
+	EnsureInventoryStateInitialized();
+
+	FTunaSweeperCarryWeightDebuffSettings CarrySettings;
+	if (UTunaSweeperDebuffDataSubsystem* DebuffDataSubsystem = GetSubsystem<UTunaSweeperDebuffDataSubsystem>())
+	{
+		CarrySettings = DebuffDataSubsystem->GetCarryWeightSettings();
+	}
+	CarrySettings.Normalize();
+
+	const float MaxCarryWeight = CalculateMaxCarryWeight();
+	const float MovementBlockedWeight = FMath::Max(
+		1.0f,
+		MaxCarryWeight * CarrySettings.GetMovementBlockedThresholdRatio());
+
+	PlayerHudState.CurrentCarryWeight = CalculatePlayerCarryWeight();
+	PlayerHudState.MaxCarryWeight = MaxCarryWeight;
+	PlayerHudState.OverweightThreshold = CarrySettings.OverweightThreshold;
+	PlayerHudState.OverweightSpeedMultiplier = CarrySettings.OverweightSpeedMultiplier;
+	PlayerHudState.OverweightCarryWeight = MaxCarryWeight * CarrySettings.GetOverweightThresholdRatio();
+	PlayerHudState.MovementBlockedWeight = MovementBlockedWeight;
 	PlayerHudState.NormalizeWeightLimits();
 }
 
@@ -1137,6 +1193,20 @@ float UTunaSweeperGameInstance::GetCarryWeightMovementSpeedMultiplier() const
 	FTunaSweeperPlayerHudState NormalizedHudState = PlayerHudState;
 	NormalizedHudState.NormalizeWeightLimits();
 	return NormalizedHudState.GetCarryWeightMovementSpeedMultiplier();
+}
+
+bool UTunaSweeperGameInstance::IsCarryWeightOverLimit() const
+{
+	FTunaSweeperPlayerHudState NormalizedHudState = PlayerHudState;
+	NormalizedHudState.NormalizeWeightLimits();
+	return NormalizedHudState.IsCarryWeightOverLimit();
+}
+
+bool UTunaSweeperGameInstance::IsCarryWeightMovementBlocked() const
+{
+	FTunaSweeperPlayerHudState NormalizedHudState = PlayerHudState;
+	NormalizedHudState.NormalizeWeightLimits();
+	return NormalizedHudState.IsCarryWeightMovementBlocked();
 }
 
 const TArray<FTunaSweeperItemStack>& UTunaSweeperGameInstance::GetOrCreatePlayerInventoryItems()
@@ -4432,6 +4502,7 @@ void UTunaSweeperGameInstance::BroadcastInventoryStateChanged()
 	bHasGeneratedPlayerInventoryItems = false;
 	RefreshLegacyPlayerInventoryItems();
 	ClearSelectedItemIfInvalid();
+	RefreshCarryWeightState();
 	OnInventoryStateChanged.Broadcast();
 }
 
@@ -5087,6 +5158,100 @@ bool UTunaSweeperGameInstance::IsBackpackItemDefinition(const FTunaSweeperItemDe
 	return ItemDefinition.CategoryTag == TunaSweeperInventory::BackpackCategoryTag ||
 		ItemDefinition.EquipmentSlotTag == TunaSweeperInventory::BackpackEquipmentSlotTag ||
 		ItemDefinition.InventorySlotCapacity > FMath::Max(TunaSweeperInventory::RequiredBareInventorySlots, GameplaySettings.BareInventorySlots);
+}
+
+float UTunaSweeperGameInstance::GetEquippedBackpackCarryStrengthBonus() const
+{
+	if (!EquipmentSlots.IsValidIndex(TunaSweeperInventory::BackpackSlotIndex))
+	{
+		return 0.0f;
+	}
+
+	const FTunaSweeperItemInstance* BackpackInstance =
+		ItemInstancesByUid.Find(EquipmentSlots[TunaSweeperInventory::BackpackSlotIndex].ItemUid);
+	if (!BackpackInstance)
+	{
+		return 0.0f;
+	}
+
+	UTunaSweeperItemDataSubsystem* ItemDataSubsystem = GetSubsystem<UTunaSweeperItemDataSubsystem>();
+	FTunaSweeperItemDefinition BackpackDefinition;
+	if (!ItemDataSubsystem ||
+		!ItemDataSubsystem->TryGetItemDefinition(BackpackInstance->ItemId, BackpackDefinition) ||
+		!IsBackpackItemDefinition(BackpackDefinition))
+	{
+		return 0.0f;
+	}
+
+	return FMath::Max(0.0f, BackpackDefinition.CarryStrengthBonus);
+}
+
+float UTunaSweeperGameInstance::CalculatePlayerCarryWeight() const
+{
+	TSet<FGuid> VisitedItemUids;
+	float TotalWeight = 0.0f;
+	auto AccumulateSlotWeights = [this, &VisitedItemUids, &TotalWeight](const TArray<FTunaSweeperInventorySlot>& Slots)
+	{
+		for (const FTunaSweeperInventorySlot& Slot : Slots)
+		{
+			TotalWeight += CalculateItemInstanceCarryWeight(Slot.ItemUid, VisitedItemUids);
+		}
+	};
+
+	AccumulateSlotWeights(PlayerInventorySlots);
+	AccumulateSlotWeights(EquipmentSlots);
+	AccumulateSlotWeights(AuxiliaryBagSlots);
+	AccumulateSlotWeights(UsableQuickSlots);
+	return FMath::Max(0.0f, TotalWeight);
+}
+
+float UTunaSweeperGameInstance::CalculateItemInstanceCarryWeight(
+	const FGuid& ItemUid,
+	TSet<FGuid>& VisitedItemUids) const
+{
+	if (!ItemUid.IsValid() || VisitedItemUids.Contains(ItemUid))
+	{
+		return 0.0f;
+	}
+	VisitedItemUids.Add(ItemUid);
+
+	const FTunaSweeperItemInstance* ItemInstance = ItemInstancesByUid.Find(ItemUid);
+	if (!ItemInstance || !ItemInstance->IsValid())
+	{
+		return 0.0f;
+	}
+
+	UTunaSweeperItemDataSubsystem* ItemDataSubsystem = GetSubsystem<UTunaSweeperItemDataSubsystem>();
+	FTunaSweeperItemDefinition ItemDefinition;
+	float TotalWeight = 0.0f;
+	if (ItemDataSubsystem && ItemDataSubsystem->TryGetItemDefinition(ItemInstance->ItemId, ItemDefinition))
+	{
+		TotalWeight += FMath::Max(0.0f, ItemDefinition.WeightKg) * FMath::Max(1, ItemInstance->Quantity);
+	}
+
+	for (const TPair<FName, FGuid>& AttachmentSlot : ItemInstance->AttachmentSlots)
+	{
+		TotalWeight += CalculateItemInstanceCarryWeight(AttachmentSlot.Value, VisitedItemUids);
+	}
+
+	return FMath::Max(0.0f, TotalWeight);
+}
+
+float UTunaSweeperGameInstance::CalculateMaxCarryWeight() const
+{
+	FTunaSweeperCarryWeightDebuffSettings CarrySettings;
+	if (UTunaSweeperDebuffDataSubsystem* DebuffDataSubsystem = GetSubsystem<UTunaSweeperDebuffDataSubsystem>())
+	{
+		CarrySettings = DebuffDataSubsystem->GetCarryWeightSettings();
+	}
+	CarrySettings.Normalize();
+
+	const FTunaSweeperExperienceLevelStatBonuses LevelBonuses = GetCurrentExperienceLevelStatBonuses();
+	const float CarryStrength =
+		CarrySettings.BaseStrength +
+		FMath::Max(0.0f, LevelBonuses.CarryStrengthBonus) +
+		GetEquippedBackpackCarryStrengthBonus();
+	return FMath::Max(1.0f, CarryStrength * CarrySettings.KgPerStrength);
 }
 
 bool UTunaSweeperGameInstance::IsEquipmentWeaponSlotNumberValid(int32 WeaponSlotNumber) const

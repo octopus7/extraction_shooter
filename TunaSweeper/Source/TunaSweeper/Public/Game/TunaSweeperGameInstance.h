@@ -111,6 +111,9 @@ struct TUNASWEEPER_API FTunaSweeperExperienceLevelStatBonuses
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Experience", meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float MaxStaminaBonus = 0.0f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Experience", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float CarryStrengthBonus = 0.0f;
+
 	void ClampNonNegative();
 };
 
@@ -134,6 +137,9 @@ struct TUNASWEEPER_API FTunaSweeperExperienceLevelReward
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Experience", meta = (ClampMin = "0", UIMin = "0"))
 	int32 MaxStaminaIncrease = 0;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Experience", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float CarryStrengthIncrease = 0.0f;
+
 	void Normalize();
 };
 
@@ -148,8 +154,17 @@ struct TUNASWEEPER_API FTunaSweeperPlayerHudState
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD", meta = (ClampMin = "1.0", UIMin = "1.0"))
 	float MaxCarryWeight = 50.0f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float OverweightCarryWeight = 35.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD", meta = (ClampMin = "0", UIMin = "0"))
+	int32 OverweightThreshold = 7000;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD", meta = (ClampMin = "0", UIMin = "0"))
+	int32 OverweightSpeedMultiplier = 5000;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD", meta = (ClampMin = "1.0", UIMin = "1.0"))
-	float MovementBlockedWeight = 100.0f;
+	float MovementBlockedWeight = 50.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD", meta = (ClampMin = "0.0", ClampMax = "100.0", UIMin = "0.0", UIMax = "100.0"))
 	float Health = 100.0f;
@@ -173,6 +188,7 @@ struct TUNASWEEPER_API FTunaSweeperPlayerHudState
 	bool IsCarryWeightOverLimit() const;
 	bool IsCarryWeightMovementBlocked() const;
 	float GetCarryWeightMovementSpeedMultiplier() const;
+	float GetOverweightThresholdRatio() const;
 };
 
 USTRUCT(BlueprintType)
@@ -422,8 +438,17 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
 	void SetCarryWeight(float CurrentCarryWeight, float MaxCarryWeight, float MovementBlockedWeight);
 
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
+	void RefreshCarryWeightState();
+
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|HUD")
 	float GetCarryWeightMovementSpeedMultiplier() const;
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|HUD")
+	bool IsCarryWeightOverLimit() const;
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|HUD")
+	bool IsCarryWeightMovementBlocked() const;
 
 	const TArray<FTunaSweeperItemStack>& GetOrCreatePlayerInventoryItems();
 
@@ -776,6 +801,10 @@ private:
 		const FTunaSweeperItemDefinition& AttachmentDefinition) const;
 	bool IsBackpackItemUid(const FGuid& ItemUid);
 	bool IsBackpackItemDefinition(const FTunaSweeperItemDefinition& ItemDefinition) const;
+	float GetEquippedBackpackCarryStrengthBonus() const;
+	float CalculatePlayerCarryWeight() const;
+	float CalculateItemInstanceCarryWeight(const FGuid& ItemUid, TSet<FGuid>& VisitedItemUids) const;
+	float CalculateMaxCarryWeight() const;
 	bool IsEquipmentWeaponSlotNumberValid(int32 WeaponSlotNumber) const;
 	int32 GetEquipmentSlotIndexForWeaponSlotNumber(int32 WeaponSlotNumber) const;
 	bool IsGunItemDefinition(const FTunaSweeperItemDefinition& ItemDefinition) const;

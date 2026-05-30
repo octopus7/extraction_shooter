@@ -296,7 +296,8 @@
     "icon_file_name": "T_UIIcon_Backpack_Tier1.uasset",
     "category_tag": "item.category.bag",
     "equipment_slot_tag": "equipment.slot.backpack",
-    "inventory_slot_capacity": 50
+    "inventory_slot_capacity": 50,
+    "carry_strength_bonus": 10
   },
   {
     "id": 5003,
@@ -307,7 +308,8 @@
     "icon_file_name": "T_UIIcon_Backpack_Tier2.uasset",
     "category_tag": "item.category.bag",
     "equipment_slot_tag": "equipment.slot.backpack",
-    "inventory_slot_capacity": 60
+    "inventory_slot_capacity": 60,
+    "carry_strength_bonus": 20
   },
   {
     "id": 5004,
@@ -318,7 +320,8 @@
     "icon_file_name": "T_UIIcon_Backpack_Tier3.uasset",
     "category_tag": "item.category.bag",
     "equipment_slot_tag": "equipment.slot.backpack",
-    "inventory_slot_capacity": 80
+    "inventory_slot_capacity": 80,
+    "carry_strength_bonus": 40
   },
   {
     "id": 5005,
@@ -329,7 +332,8 @@
     "icon_file_name": "T_UIIcon_Backpack_Tier4.uasset",
     "category_tag": "item.category.bag",
     "equipment_slot_tag": "equipment.slot.backpack",
-    "inventory_slot_capacity": 100
+    "inventory_slot_capacity": 100,
+    "carry_strength_bonus": 60
   },
   {
     "id": 5006,

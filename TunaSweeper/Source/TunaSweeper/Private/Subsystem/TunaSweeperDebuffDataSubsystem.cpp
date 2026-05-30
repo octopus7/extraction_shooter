@@ -94,6 +94,47 @@ namespace TunaSweeperDebuffData
 
 		OutSettings.Normalize();
 	}
+
+	void ParseCarryWeightSettings(
+		const TSharedPtr<FJsonObject>& RootObject,
+		FTunaSweeperCarryWeightDebuffSettings& OutSettings)
+	{
+		if (!RootObject.IsValid())
+		{
+			OutSettings.Normalize();
+			return;
+		}
+
+		const TSharedPtr<FJsonObject>* CarryWeightObjectPtr = nullptr;
+		const TSharedPtr<FJsonObject> CarryWeightObject =
+			(RootObject->TryGetObjectField(TEXT("carry_weight"), CarryWeightObjectPtr) && CarryWeightObjectPtr)
+				? *CarryWeightObjectPtr
+				: RootObject;
+
+		double NumericValue = 0.0;
+		if (TryReadAnyNumberField(CarryWeightObject, { TEXT("base_strength"), TEXT("base_carry_strength") }, NumericValue))
+		{
+			OutSettings.BaseStrength = static_cast<float>(NumericValue);
+		}
+		if (TryReadAnyNumberField(CarryWeightObject, { TEXT("kg_per_strength"), TEXT("carry_kg_per_strength") }, NumericValue))
+		{
+			OutSettings.KgPerStrength = static_cast<float>(NumericValue);
+		}
+		if (TryReadAnyNumberField(CarryWeightObject, { TEXT("overweight_threshold"), TEXT("overweight_ratio") }, NumericValue))
+		{
+			OutSettings.OverweightThreshold = FMath::RoundToInt(NumericValue);
+		}
+		if (TryReadAnyNumberField(CarryWeightObject, { TEXT("movement_blocked_threshold"), TEXT("blocked_threshold") }, NumericValue))
+		{
+			OutSettings.MovementBlockedThreshold = FMath::RoundToInt(NumericValue);
+		}
+		if (TryReadAnyNumberField(CarryWeightObject, { TEXT("overweight_speed_multiplier"), TEXT("overweight_move_speed_multiplier") }, NumericValue))
+		{
+			OutSettings.OverweightSpeedMultiplier = FMath::RoundToInt(NumericValue);
+		}
+
+		OutSettings.Normalize();
+	}
 }
 
 bool UTunaSweeperDebuffDataSubsystem::LoadDebuffData(bool bForceReload)
@@ -132,6 +173,14 @@ bool UTunaSweeperDebuffDataSubsystem::TryGetDebuffDefinition(
 
 	OutDefinition = FTunaSweeperDebuffDefinition();
 	return false;
+}
+
+FTunaSweeperCarryWeightDebuffSettings UTunaSweeperDebuffDataSubsystem::GetCarryWeightSettings()
+{
+	EnsureDebuffDataLoaded();
+	FTunaSweeperCarryWeightDebuffSettings NormalizedSettings = CarryWeightSettings;
+	NormalizedSettings.Normalize();
+	return NormalizedSettings;
 }
 
 FString UTunaSweeperDebuffDataSubsystem::BuildDebuffIconObjectPath(
@@ -192,6 +241,7 @@ bool UTunaSweeperDebuffDataSubsystem::LoadDebuffDefinitionsJson()
 		{
 			GlobalTickIntervalSeconds = FMath::Max(0.01f, static_cast<float>(NumericGlobalTickIntervalSeconds));
 		}
+		TunaSweeperDebuffData::ParseCarryWeightSettings(RootObject, CarryWeightSettings);
 
 		const TArray<TSharedPtr<FJsonValue>>* DebuffArray = nullptr;
 		if (!RootObject.IsValid() ||
@@ -269,6 +319,12 @@ bool UTunaSweeperDebuffDataSubsystem::LoadDebuffDefinitionsJson()
 		{
 			Definition.DurationSeconds = static_cast<float>(NumericValue);
 		}
+		bool bHasDuration = Definition.bHasDuration;
+		if (JsonObject->TryGetBoolField(TEXT("has_duration"), bHasDuration) ||
+			JsonObject->TryGetBoolField(TEXT("uses_duration"), bHasDuration))
+		{
+			Definition.bHasDuration = bHasDuration;
+		}
 		if (TunaSweeperDebuffData::TryReadAnyNumberField(
 			JsonObject,
 			{ TEXT("tick_interval_seconds"), TEXT("interval_seconds"), TEXT("tick_seconds") },
@@ -313,6 +369,7 @@ void UTunaSweeperDebuffDataSubsystem::ResetLoadedDebuffData()
 {
 	DebuffDefinitionsById.Reset();
 	GlobalTickIntervalSeconds = 2.0f;
+	CarryWeightSettings = FTunaSweeperCarryWeightDebuffSettings();
 	bDebuffDataLoaded = false;
 }
 
@@ -328,6 +385,26 @@ void UTunaSweeperDebuffDataSubsystem::InstallFallbackDefinitions()
 	BleedingDefinition.DamagePerTick = 2.0f;
 	BleedingDefinition.Normalize();
 	DebuffDefinitionsById.Add(BleedingDefinition.DebuffId, BleedingDefinition);
+
+	FTunaSweeperDebuffDefinition OverweightDefinition;
+	OverweightDefinition.DebuffId = TunaSweeperDebuff::OverweightDebuffId();
+	OverweightDefinition.NameStringKey = FName(TEXT("ui.debuff.overweight"));
+	OverweightDefinition.IconFileName = TEXT("T_UIIcon_Backpack_Tier1.uasset");
+	OverweightDefinition.BaseApplyChance = TunaSweeperDataValues::ProbabilityMax;
+	OverweightDefinition.bHasDuration = false;
+	OverweightDefinition.DamagePerTick = 0.0f;
+	OverweightDefinition.Normalize();
+	DebuffDefinitionsById.Add(OverweightDefinition.DebuffId, OverweightDefinition);
+
+	FTunaSweeperDebuffDefinition MovementBlockedDefinition;
+	MovementBlockedDefinition.DebuffId = TunaSweeperDebuff::MovementBlockedDebuffId();
+	MovementBlockedDefinition.NameStringKey = FName(TEXT("ui.debuff.movement_blocked"));
+	MovementBlockedDefinition.IconFileName = TEXT("T_UIIcon_Backpack_Tier2.uasset");
+	MovementBlockedDefinition.BaseApplyChance = TunaSweeperDataValues::ProbabilityMax;
+	MovementBlockedDefinition.bHasDuration = false;
+	MovementBlockedDefinition.DamagePerTick = 0.0f;
+	MovementBlockedDefinition.Normalize();
+	DebuffDefinitionsById.Add(MovementBlockedDefinition.DebuffId, MovementBlockedDefinition);
 	bDebuffDataLoaded = true;
 }
 

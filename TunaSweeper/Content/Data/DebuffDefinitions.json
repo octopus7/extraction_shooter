@@ -1,5 +1,12 @@
 {
   "global_tick_interval_seconds": 1.0,
+  "carry_weight": {
+    "base_strength": 50.0,
+    "kg_per_strength": 1.0,
+    "overweight_threshold": 7000,
+    "movement_blocked_threshold": 10000,
+    "overweight_speed_multiplier": 5000
+  },
   "debuffs": [
     {
       "debuff_id": "debuff.bleeding",
@@ -15,6 +22,24 @@
         "fov_amplitude_degrees": 0.0,
         "frequency": 22.0
       }
+    },
+    {
+      "debuff_id": "debuff.overweight",
+      "name_string_key": "ui.debuff.overweight",
+      "icon_file_name": "T_UIIcon_Backpack_Tier1.uasset",
+      "base_apply_chance": 10000,
+      "has_duration": false,
+      "duration_seconds": 0.0,
+      "damage_per_tick": 0.0
+    },
+    {
+      "debuff_id": "debuff.movement_blocked",
+      "name_string_key": "ui.debuff.movement_blocked",
+      "icon_file_name": "T_UIIcon_Backpack_Tier2.uasset",
+      "base_apply_chance": 10000,
+      "has_duration": false,
+      "duration_seconds": 0.0,
+      "damage_per_tick": 0.0
     }
   ]
 }

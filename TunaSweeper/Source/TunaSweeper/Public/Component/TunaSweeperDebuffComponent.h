@@ -34,6 +34,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Debuff")
 	int32 RemoveDebuffs(const TArray<FName>& DebuffIds);
 
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Debuff")
+	bool SetConditionalDebuffActive(FName DebuffId, bool bActive, AActor* SourceActor = nullptr);
+
 protected:
 	UPROPERTY(EditAnywhere, ReplicatedUsing = OnRep_ActiveDebuffs, Category = "TunaSweeper|Debuff")
 	TArray<FTunaSweeperActiveDebuffState> ActiveDebuffs;
@@ -57,6 +60,7 @@ private:
 		FName DebuffId,
 		const FTunaSweeperDebuffDefinition& Definition,
 		float DurationSeconds,
+		bool bHasDuration,
 		AActor* SourceActor);
 	bool RemoveDebuffInternal(FName DebuffId);
 	int32 RemoveDebuffsInternal(const TArray<FName>& DebuffIds);

@@ -158,6 +158,7 @@ void UTunaSweeperHudDebuffBarWidget::RebuildEntries()
 		TimeText->SetColorAndOpacity(FSlateColor(FLinearColor(1.0f, 0.82f, 0.78f, 1.0f)));
 		TimeText->SetJustification(ETextJustify::Right);
 		TimeText->SetMinDesiredWidth(24.0f);
+		TimeText->SetVisibility(DebuffState.bHasDuration ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
 		TunaSweeperUIFont::ApplyFont(TimeText, 14.0f, ETunaSweeperUIFontWeight::Bold);
 
 		if (UHorizontalBoxSlot* IconSlot = EntryRow->AddChildToHorizontalBox(IconSizeBox))
@@ -202,6 +203,10 @@ void UTunaSweeperHudDebuffBarWidget::RefreshEntryTexts()
 		if (DebuffTimeTexts.IsValidIndex(DebuffIndex) && DebuffTimeTexts[DebuffIndex])
 		{
 			DebuffTimeTexts[DebuffIndex]->SetText(ResolveDebuffTimeText(ActiveDebuffs[DebuffIndex]));
+			DebuffTimeTexts[DebuffIndex]->SetVisibility(
+				ActiveDebuffs[DebuffIndex].bHasDuration
+					? ESlateVisibility::HitTestInvisible
+					: ESlateVisibility::Collapsed);
 		}
 	}
 }
@@ -252,6 +257,11 @@ FText UTunaSweeperHudDebuffBarWidget::ResolveDebuffNameText(
 FText UTunaSweeperHudDebuffBarWidget::ResolveDebuffTimeText(
 	const FTunaSweeperActiveDebuffState& DebuffState) const
 {
+	if (!DebuffState.bHasDuration)
+	{
+		return FText::GetEmpty();
+	}
+
 	const int32 RemainingSeconds = FMath::Max(0, FMath::CeilToInt(DebuffState.RemainingSeconds));
 	return FText::FromString(FString::Printf(TEXT("%ds"), RemainingSeconds));
 }

@@ -3,6 +3,8 @@
 #include "Blueprint/DragDropOperation.h"
 #include "Blueprint/WidgetTree.h"
 #include "Components/Button.h"
+#include "Components/CanvasPanel.h"
+#include "Components/CanvasPanelSlot.h"
 #include "Components/HorizontalBox.h"
 #include "Components/HorizontalBoxSlot.h"
 #include "Components/Overlay.h"
@@ -41,6 +43,7 @@ namespace TunaSweeperInventoryArea
 	constexpr float AuxiliaryBagTileHeight = 96.0f;
 	constexpr float CurrencyExteriorOffset = 26.0f;
 	constexpr float CurrencyExteriorRightInset = 8.0f;
+	constexpr float WeightThresholdMarkerFontSize = 13.0f;
 
 	FText MakeRoundedFloatText(float Value)
 	{
@@ -377,6 +380,7 @@ void UTunaSweeperHudInventoryAreaWidget::NativeConstruct()
 	Super::NativeConstruct();
 	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
 	EnsureCurrencyDisplayWidget();
+	EnsureWeightThresholdMarkerWidgets();
 
 	if (SortInventoryButton)
 	{
@@ -558,9 +562,138 @@ void UTunaSweeperHudInventoryAreaWidget::AttachCurrencyDisplayAboveInventoryPane
 	CurrencyDisplayWidget->RefreshCurrencyBalance();
 }
 
+void UTunaSweeperHudInventoryAreaWidget::EnsureWeightThresholdMarkerWidgets()
+{
+	if (!WidgetTree)
+	{
+		return;
+	}
+
+	if (!InventoryWeightGaugeBox)
+	{
+		InventoryWeightGaugeBox = Cast<USizeBox>(WidgetTree->FindWidget(FName(TEXT("InventoryWeightGaugeBox"))));
+	}
+	if (!InventoryWeightGaugeOverlay)
+	{
+		InventoryWeightGaugeOverlay = Cast<UOverlay>(WidgetTree->FindWidget(FName(TEXT("InventoryWeightGaugeOverlay"))));
+	}
+	if (!InventoryWeightMarkerCanvas)
+	{
+		InventoryWeightMarkerCanvas = Cast<UCanvasPanel>(WidgetTree->FindWidget(FName(TEXT("InventoryWeightMarkerCanvas"))));
+	}
+	if (!InventoryWeightOverweightMarker)
+	{
+		InventoryWeightOverweightMarker = Cast<UTextBlock>(WidgetTree->FindWidget(FName(TEXT("InventoryWeightOverweightMarker"))));
+	}
+
+	if (!InventoryWeightGauge || !InventoryWeightGaugeBox)
+	{
+		return;
+	}
+
+	if (!InventoryWeightGaugeOverlay)
+	{
+		InventoryWeightGaugeOverlay = WidgetTree->ConstructWidget<UOverlay>(
+			UOverlay::StaticClass(),
+			TEXT("InventoryWeightGaugeOverlayRuntime"));
+	}
+	if (!InventoryWeightMarkerCanvas)
+	{
+		InventoryWeightMarkerCanvas = WidgetTree->ConstructWidget<UCanvasPanel>(
+			UCanvasPanel::StaticClass(),
+			TEXT("InventoryWeightMarkerCanvasRuntime"));
+	}
+	if (!InventoryWeightOverweightMarker)
+	{
+		InventoryWeightOverweightMarker = WidgetTree->ConstructWidget<UTextBlock>(
+			UTextBlock::StaticClass(),
+			TEXT("InventoryWeightOverweightMarkerRuntime"));
+	}
+	if (!InventoryWeightGaugeOverlay || !InventoryWeightMarkerCanvas || !InventoryWeightOverweightMarker)
+	{
+		return;
+	}
+
+	if (InventoryWeightGaugeBox->GetContent() != InventoryWeightGaugeOverlay)
+	{
+		InventoryWeightGaugeOverlay->RemoveFromParent();
+		InventoryWeightGauge->RemoveFromParent();
+		InventoryWeightGaugeBox->SetContent(InventoryWeightGaugeOverlay);
+	}
+
+	if (InventoryWeightGauge->GetParent() != InventoryWeightGaugeOverlay)
+	{
+		InventoryWeightGauge->RemoveFromParent();
+		if (UOverlaySlot* GaugeSlot = InventoryWeightGaugeOverlay->AddChildToOverlay(InventoryWeightGauge))
+		{
+			GaugeSlot->SetHorizontalAlignment(HAlign_Fill);
+			GaugeSlot->SetVerticalAlignment(VAlign_Fill);
+		}
+	}
+
+	if (InventoryWeightMarkerCanvas->GetParent() != InventoryWeightGaugeOverlay)
+	{
+		InventoryWeightMarkerCanvas->RemoveFromParent();
+		if (UOverlaySlot* MarkerCanvasSlot = InventoryWeightGaugeOverlay->AddChildToOverlay(InventoryWeightMarkerCanvas))
+		{
+			MarkerCanvasSlot->SetHorizontalAlignment(HAlign_Fill);
+			MarkerCanvasSlot->SetVerticalAlignment(VAlign_Fill);
+		}
+	}
+
+	if (InventoryWeightOverweightMarker->GetParent() != InventoryWeightMarkerCanvas)
+	{
+		InventoryWeightOverweightMarker->RemoveFromParent();
+		InventoryWeightMarkerCanvas->AddChild(InventoryWeightOverweightMarker);
+	}
+
+	InventoryWeightOverweightMarker->SetText(FText::FromString(TEXT("\u25B2")));
+	InventoryWeightOverweightMarker->SetColorAndOpacity(FSlateColor(FLinearColor(1.0f, 0.90f, 0.30f, 1.0f)));
+	InventoryWeightOverweightMarker->SetJustification(ETextJustify::Center);
+	InventoryWeightOverweightMarker->SetShadowColorAndOpacity(FLinearColor(0.0f, 0.0f, 0.0f, 0.85f));
+	InventoryWeightOverweightMarker->SetShadowOffset(FVector2D(1.0f, 1.0f));
+	TunaSweeperUIFont::ApplyFont(
+		InventoryWeightOverweightMarker,
+		TunaSweeperInventoryArea::WeightThresholdMarkerFontSize,
+		ETunaSweeperUIFontWeight::Bold);
+
+	RefreshWeightThresholdMarker();
+}
+
+void UTunaSweeperHudInventoryAreaWidget::RefreshWeightThresholdMarker()
+{
+	if (!InventoryWeightOverweightMarker)
+	{
+		return;
+	}
+
+	const bool bHasThreshold =
+		PreviewHudState.MovementBlockedWeight > 0.0f &&
+		PreviewHudState.OverweightCarryWeight > 0.0f;
+	if (!bHasThreshold)
+	{
+		InventoryWeightOverweightMarker->SetVisibility(ESlateVisibility::Collapsed);
+		return;
+	}
+
+	const float MarkerPercent = FMath::Clamp(
+		PreviewHudState.OverweightCarryWeight / PreviewHudState.MovementBlockedWeight,
+		0.0f,
+		1.0f);
+	InventoryWeightOverweightMarker->SetVisibility(ESlateVisibility::HitTestInvisible);
+	if (UCanvasPanelSlot* MarkerSlot = Cast<UCanvasPanelSlot>(InventoryWeightOverweightMarker->Slot))
+	{
+		MarkerSlot->SetAnchors(FAnchors(MarkerPercent, 1.0f, MarkerPercent, 1.0f));
+		MarkerSlot->SetAlignment(FVector2D(0.5f, 1.0f));
+		MarkerSlot->SetPosition(FVector2D::ZeroVector);
+		MarkerSlot->SetAutoSize(true);
+	}
+}
+
 void UTunaSweeperHudInventoryAreaWidget::ApplyHudState()
 {
 	PreviewHudState.NormalizeWeightLimits();
+	EnsureWeightThresholdMarkerWidgets();
 	const UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
 
 	if (SortInventoryButtonText)
@@ -611,6 +744,7 @@ void UTunaSweeperHudInventoryAreaWidget::ApplyHudState()
 					? FLinearColor(0.96f, 0.74f, 0.18f, 1.0f)
 					: FLinearColor(0.60f, 0.84f, 0.36f, 1.0f));
 	}
+	RefreshWeightThresholdMarker();
 
 	if (InventoryWeightWarningIcon)
 	{

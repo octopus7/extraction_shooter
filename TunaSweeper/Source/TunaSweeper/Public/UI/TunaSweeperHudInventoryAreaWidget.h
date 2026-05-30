@@ -6,6 +6,8 @@
 #include "TunaSweeperHudInventoryAreaWidget.generated.h"
 
 class UWidget;
+class UCanvasPanel;
+class UOverlay;
 class UTileView;
 class UDragDropOperation;
 class UButton;
@@ -81,6 +83,18 @@ protected:
 	TObjectPtr<UProgressBar> InventoryWeightGauge;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
+	TObjectPtr<USizeBox> InventoryWeightGaugeBox;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
+	TObjectPtr<UOverlay> InventoryWeightGaugeOverlay;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
+	TObjectPtr<UCanvasPanel> InventoryWeightMarkerCanvas;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
+	TObjectPtr<UTextBlock> InventoryWeightOverweightMarker;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
 	TObjectPtr<UWidget> InventoryWeightWarningIcon;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
@@ -89,6 +103,8 @@ protected:
 private:
 	void EnsureCurrencyDisplayWidget();
 	void AttachCurrencyDisplayAboveInventoryPanel();
+	void EnsureWeightThresholdMarkerWidgets();
+	void RefreshWeightThresholdMarker();
 	void ApplyHudState();
 
 	bool TryResolveDropSlotFromCursor(

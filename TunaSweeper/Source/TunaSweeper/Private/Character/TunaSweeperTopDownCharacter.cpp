@@ -210,7 +210,7 @@ void ATunaSweeperTopDownCharacter::BeginPlay()
 	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
 	{
 		TunaGameInstance->OnInventoryStateChanged.RemoveAll(this);
-		TunaGameInstance->OnInventoryStateChanged.AddUObject(this, &ATunaSweeperTopDownCharacter::RefreshSelectedWeaponAfterInventoryChanged);
+		TunaGameInstance->OnInventoryStateChanged.AddUObject(this, &ATunaSweeperTopDownCharacter::HandleInventoryStateChanged);
 		TunaGameInstance->OnExperienceChanged.RemoveAll(this);
 		TunaGameInstance->OnExperienceChanged.AddUObject(this, &ATunaSweeperTopDownCharacter::ApplyExperienceLevelStatBonuses);
 	}
@@ -227,6 +227,7 @@ void ATunaSweeperTopDownCharacter::BeginPlay()
 	}
 
 	UpdateMovementSpeed();
+	RefreshCarryWeightConditionDebuffs();
 	UpdateStaminaGauge(0.0f);
 }
 
@@ -655,7 +656,7 @@ void ATunaSweeperTopDownCharacter::HandleMove(const FInputActionValue& Value)
 
 	const FVector2D MoveVector = Value.Get<FVector2D>();
 	CurrentMoveInput = MoveVector.GetClampedToMaxSize(1.0f);
-	if (bIsRolling)
+	if (bIsRolling || IsCarryWeightMovementBlocked())
 	{
 		return;
 	}
@@ -1651,6 +1652,43 @@ void ATunaSweeperTopDownCharacter::RefreshSelectedWeaponAfterInventoryChanged()
 	ResetWeaponSpreadRecoil();
 }
 
+void ATunaSweeperTopDownCharacter::HandleInventoryStateChanged()
+{
+	RefreshSelectedWeaponAfterInventoryChanged();
+	RefreshCarryWeightConditionDebuffs();
+}
+
+void ATunaSweeperTopDownCharacter::RefreshCarryWeightConditionDebuffs()
+{
+	UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+	if (!TunaGameInstance)
+	{
+		return;
+	}
+
+	TunaGameInstance->RefreshCarryWeightState();
+	const bool bMovementBlocked = TunaGameInstance->IsCarryWeightMovementBlocked();
+	const bool bOverweight = TunaGameInstance->IsCarryWeightOverLimit();
+	if (DebuffComponent)
+	{
+		DebuffComponent->SetConditionalDebuffActive(
+			TunaSweeperDebuff::MovementBlockedDebuffId(),
+			bMovementBlocked,
+			this);
+		DebuffComponent->SetConditionalDebuffActive(
+			TunaSweeperDebuff::OverweightDebuffId(),
+			bOverweight && !bMovementBlocked,
+			this);
+	}
+
+	if (!bOverweight)
+	{
+		bSprintLockedUntilReleased = false;
+	}
+
+	UpdateMovementSpeed();
+}
+
 void ATunaSweeperTopDownCharacter::RefreshCharacterVisualVisibility()
 {
 	USkeletalMeshComponent* CharacterMesh = GetMesh();
@@ -1706,7 +1744,7 @@ void ATunaSweeperTopDownCharacter::ApplyExperienceLevelStatBonuses()
 {
 	CacheBaseSurvivalStats();
 
-	const UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+	UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
 	const FTunaSweeperExperienceLevelStatBonuses Bonuses = TunaGameInstance
 		? TunaGameInstance->GetCurrentExperienceLevelStatBonuses()
 		: FTunaSweeperExperienceLevelStatBonuses();
@@ -1724,6 +1762,7 @@ void ATunaSweeperTopDownCharacter::ApplyExperienceLevelStatBonuses()
 	const float StaminaRatio = FMath::Clamp(CurrentStamina / OldMaxStamina, 0.0f, 1.0f);
 	MaxStamina = FMath::Max(1.0f, BaseMaxStamina + Bonuses.MaxStaminaBonus);
 	CurrentStamina = FMath::Clamp(MaxStamina * StaminaRatio, 0.0f, MaxStamina);
+	RefreshCarryWeightConditionDebuffs();
 }
 
 void ATunaSweeperTopDownCharacter::ApplyBunkerPeaceZoneVitalsRules()
@@ -1753,6 +1792,12 @@ bool ATunaSweeperTopDownCharacter::IsGameplayActionInputLocked() const
 		(TunaPlayerController->IsInventoryUiOpen() ||
 			TunaPlayerController->IsDialogueSequenceActive() ||
 			TunaPlayerController->IsHousingModeOpen());
+}
+
+bool ATunaSweeperTopDownCharacter::IsCarryWeightMovementBlocked() const
+{
+	const UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+	return TunaGameInstance && TunaGameInstance->IsCarryWeightMovementBlocked();
 }
 
 void ATunaSweeperTopDownCharacter::CancelActiveGameplayActions()
@@ -2321,6 +2366,7 @@ void ATunaSweeperTopDownCharacter::UpdateSprintAndStamina(float DeltaSeconds)
 		bSprintInputHeld &&
 		!bSprintLockedUntilReleased &&
 		HasActiveMoveInput() &&
+		!IsCarryWeightMovementBlocked() &&
 		!IsGameplayActionInputLocked();
 	bIsSprinting = bCanSprint && CurrentStamina > 0.0f;
 
@@ -2349,9 +2395,9 @@ void ATunaSweeperTopDownCharacter::UpdateMovementSpeed()
 	}
 
 	const UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
-	const float CarryWeightSpeedMultiplier = TunaGameInstance
-		? TunaGameInstance->GetCarryWeightMovementSpeedMultiplier()
-		: 1.0f;
+	const float CarryWeightSpeedMultiplier = (bIsRolling || !TunaGameInstance)
+		? 1.0f
+		: TunaGameInstance->GetCarryWeightMovementSpeedMultiplier();
 	const float ActionSpeedMultiplier = bIsRolling
 		? FMath::Max(0.0f, RollDistance) / FMath::Max(0.01f, RollDurationSeconds) / FMath::Max(1.0f, BaseWalkSpeed)
 		: (bIsSprinting ? FMath::Max(1.0f, SprintSpeedMultiplier) : 1.0f);

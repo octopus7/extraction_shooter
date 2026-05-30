@@ -569,6 +569,7 @@ bool UTunaSweeperItemDataSubsystem::LoadItemTableJson()
 		double NumericExperienceValue = 0.0;
 		double NumericWeightKg = 0.0;
 		double NumericInventorySlotCapacity = 0.0;
+		double NumericCarryStrengthBonus = 0.0;
 		double NumericMagazineCapacity = 0.0;
 		double NumericMagazineCapacityBonus = 0.0;
 		double NumericReloadSeconds = 0.0;
@@ -722,6 +723,11 @@ bool UTunaSweeperItemDataSubsystem::LoadItemTableJson()
 		if ((*JsonObject)->TryGetNumberField(TEXT("inventory_slot_capacity"), NumericInventorySlotCapacity))
 		{
 			ItemDefinition.InventorySlotCapacity = FMath::Max(0, static_cast<int32>(NumericInventorySlotCapacity));
+		}
+		if ((*JsonObject)->TryGetNumberField(TEXT("carry_strength_bonus"), NumericCarryStrengthBonus) ||
+			(*JsonObject)->TryGetNumberField(TEXT("strength_bonus"), NumericCarryStrengthBonus))
+		{
+			ItemDefinition.CarryStrengthBonus = FMath::Max(0.0f, static_cast<float>(NumericCarryStrengthBonus));
 		}
 		if ((*JsonObject)->TryGetNumberField(TEXT("use_health_delta"), NumericUseHealthDelta))
 		{

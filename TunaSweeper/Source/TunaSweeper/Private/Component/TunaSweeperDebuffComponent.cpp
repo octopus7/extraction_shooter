@@ -36,6 +36,11 @@ void UTunaSweeperDebuffComponent::TickComponent(
 	const float ClampedDeltaTime = FMath::Max(0.0f, DeltaTime);
 	for (FTunaSweeperActiveDebuffState& DebuffState : ActiveDebuffs)
 	{
+		if (!DebuffState.bHasDuration)
+		{
+			continue;
+		}
+
 		const float PreviousRemainingSeconds = DebuffState.RemainingSeconds;
 		const float EffectiveDeltaSeconds = FMath::Min(ClampedDeltaTime, PreviousRemainingSeconds);
 		DebuffState.RemainingSeconds = FMath::Max(0.0f, DebuffState.RemainingSeconds - ClampedDeltaTime);
@@ -58,7 +63,8 @@ void UTunaSweeperDebuffComponent::TickComponent(
 
 	for (int32 DebuffIndex = ActiveDebuffs.Num() - 1; DebuffIndex >= 0; --DebuffIndex)
 	{
-		if (ActiveDebuffs[DebuffIndex].RemainingSeconds <= KINDA_SMALL_NUMBER)
+		if (ActiveDebuffs[DebuffIndex].bHasDuration &&
+			ActiveDebuffs[DebuffIndex].RemainingSeconds <= KINDA_SMALL_NUMBER)
 		{
 			ActiveDebuffs.RemoveAt(DebuffIndex);
 			bChanged = true;
@@ -139,6 +145,37 @@ int32 UTunaSweeperDebuffComponent::RemoveDebuffs(const TArray<FName>& DebuffIds)
 	return RemoveDebuffsInternal(DebuffIds);
 }
 
+bool UTunaSweeperDebuffComponent::SetConditionalDebuffActive(FName DebuffId, bool bActive, AActor* SourceActor)
+{
+	if (DebuffId.IsNone())
+	{
+		return false;
+	}
+
+	if (!HasAuthority())
+	{
+		return false;
+	}
+
+	if (!bActive)
+	{
+		return RemoveDebuffInternal(DebuffId);
+	}
+
+	UGameInstance* GameInstance = GetWorld() ? GetWorld()->GetGameInstance() : nullptr;
+	UTunaSweeperDebuffDataSubsystem* DebuffDataSubsystem = GameInstance
+		? GameInstance->GetSubsystem<UTunaSweeperDebuffDataSubsystem>()
+		: nullptr;
+
+	FTunaSweeperDebuffDefinition Definition;
+	if (!DebuffDataSubsystem || !DebuffDataSubsystem->TryGetDebuffDefinition(DebuffId, Definition))
+	{
+		return false;
+	}
+
+	return ApplyDebuffStateInternal(DebuffId, Definition, 0.0f, false, SourceActor);
+}
+
 void UTunaSweeperDebuffComponent::OnRep_ActiveDebuffs()
 {
 	NormalizeActiveDebuffs();
@@ -199,17 +236,18 @@ bool UTunaSweeperDebuffComponent::ApplyDebuffInternal(
 		return false;
 	}
 
-	const float DurationSeconds = FMath::Max(
-		0.01f,
-		Definition.DurationSeconds + FMath::Max(0.0f, DurationBonusSeconds));
+	const float DurationSeconds = Definition.bHasDuration
+		? FMath::Max(0.01f, Definition.DurationSeconds + FMath::Max(0.0f, DurationBonusSeconds))
+		: 0.0f;
 
-	return ApplyDebuffStateInternal(DebuffId, Definition, DurationSeconds, SourceActor);
+	return ApplyDebuffStateInternal(DebuffId, Definition, DurationSeconds, Definition.bHasDuration, SourceActor);
 }
 
 bool UTunaSweeperDebuffComponent::ApplyDebuffStateInternal(
 	FName DebuffId,
 	const FTunaSweeperDebuffDefinition& Definition,
 	float DurationSeconds,
+	bool bHasDuration,
 	AActor* SourceActor)
 {
 	(void)SourceActor;
@@ -222,6 +260,7 @@ bool UTunaSweeperDebuffComponent::ApplyDebuffStateInternal(
 	{
 		ExistingDebuff->DurationSeconds = DurationSeconds;
 		ExistingDebuff->RemainingSeconds = DurationSeconds;
+		ExistingDebuff->bHasDuration = bHasDuration;
 		ExistingDebuff->TickIntervalSeconds = Definition.TickIntervalSeconds;
 		ExistingDebuff->DamagePerTick = Definition.DamagePerTick;
 		ExistingDebuff->Normalize();
@@ -233,6 +272,7 @@ bool UTunaSweeperDebuffComponent::ApplyDebuffStateInternal(
 	NewDebuff.DebuffId = DebuffId;
 	NewDebuff.DurationSeconds = DurationSeconds;
 	NewDebuff.RemainingSeconds = DurationSeconds;
+	NewDebuff.bHasDuration = bHasDuration;
 	NewDebuff.TickIntervalSeconds = Definition.TickIntervalSeconds;
 	NewDebuff.DamagePerTick = Definition.DamagePerTick;
 	NewDebuff.TickAccumulator = 0.0f;

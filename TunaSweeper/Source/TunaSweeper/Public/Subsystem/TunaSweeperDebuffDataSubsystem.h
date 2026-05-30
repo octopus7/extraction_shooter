@@ -24,6 +24,9 @@ public:
 	float GetGlobalTickIntervalSeconds() const { return GlobalTickIntervalSeconds; }
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Debuff Data")
+	FTunaSweeperCarryWeightDebuffSettings GetCarryWeightSettings();
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Debuff Data")
 	FString BuildDebuffIconObjectPath(const FTunaSweeperDebuffDefinition& Definition) const;
 
 private:
@@ -38,4 +41,5 @@ private:
 
 	bool bDebuffDataLoaded = false;
 	float GlobalTickIntervalSeconds = 2.0f;
+	FTunaSweeperCarryWeightDebuffSettings CarryWeightSettings;
 };
