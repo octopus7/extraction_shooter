@@ -1333,9 +1333,6 @@ void UTunaSweeperItemContainerPanelWidget::PopulateContainerItems()
 	int32 OccupiedSlotCount = Slots
 		? TunaSweeperLootContainerUi::CountOccupiedSlots(*Slots)
 		: TunaSweeperLootContainerUi::CountOccupiedStacks(ContainerInstance.Items);
-	const int32 StorageCapacity = SlotSource == ETunaSweeperItemSlotSource::Storage && Slots
-		? Slots->Num()
-		: 0;
 	const int32 TotalStorageOccupiedSlotCount = SlotSource == ETunaSweeperItemSlotSource::Storage && Slots
 		? OccupiedSlotCount
 		: 0;
@@ -1396,10 +1393,7 @@ void UTunaSweeperItemContainerPanelWidget::PopulateContainerItems()
 	const bool bStorageFilterActive =
 		SlotSource == ETunaSweeperItemSlotSource::Storage &&
 		ActiveStorageFilter != ETunaSweeperStorageFilter::All;
-	const int32 LayoutCapacity = bStorageFilterActive && StorageCapacity > 0
-		? StorageCapacity
-		: Capacity;
-	const int32 UiSlotCount = TunaSweeperLootContainerUi::RoundUpToUiSlotCount(LayoutCapacity);
+	const int32 UiSlotCount = TunaSweeperLootContainerUi::RoundUpToUiSlotCount(Capacity);
 	const int32 DisplaySlotCount = bStorageFilterActive ? VisibleStorageSlotIndices.Num() : UiSlotCount;
 	const int32 RowCount = FMath::Max(
 		1,
@@ -1408,8 +1402,39 @@ void UTunaSweeperItemContainerPanelWidget::PopulateContainerItems()
 	if (RootSizeBox)
 	{
 		RootSizeBox->SetWidthOverride(TunaSweeperLootContainerUi::ContainerPanelWidth);
-		RootSizeBox->SetHeightOverride(
-			TunaSweeperLootContainerUi::ResolveHeaderHeight(SlotSource) + RowCount * EntryHeight);
+		if (SlotSource == ETunaSweeperItemSlotSource::Storage)
+		{
+			const float CachedHeight = RootSizeBox->GetCachedGeometry().GetLocalSize().Y;
+			int32 ViewportSizeX = 0;
+			int32 ViewportSizeY = 0;
+			if (APlayerController* OwningPlayer = GetOwningPlayer())
+			{
+				OwningPlayer->GetViewportSize(ViewportSizeX, ViewportSizeY);
+			}
+			const bool bCachedHeightLooksLikeViewportStretch =
+				CachedHeight > 1.0f &&
+				(ViewportSizeY <= 0 || CachedHeight <= static_cast<float>(ViewportSizeY) * 1.05f);
+			if (bCachedHeightLooksLikeViewportStretch)
+			{
+				StorageStretchedPanelMinHeight = FMath::Max(StorageStretchedPanelMinHeight, CachedHeight);
+			}
+
+			RootSizeBox->ClearHeightOverride();
+			if (StorageStretchedPanelMinHeight > 1.0f)
+			{
+				RootSizeBox->SetMinDesiredHeight(StorageStretchedPanelMinHeight);
+			}
+			else
+			{
+				RootSizeBox->ClearMinDesiredHeight();
+			}
+		}
+		else
+		{
+			RootSizeBox->ClearMinDesiredHeight();
+			RootSizeBox->SetHeightOverride(
+				TunaSweeperLootContainerUi::ResolveHeaderHeight(SlotSource) + RowCount * EntryHeight);
+		}
 	}
 
 	if (ContainerTitleText)
