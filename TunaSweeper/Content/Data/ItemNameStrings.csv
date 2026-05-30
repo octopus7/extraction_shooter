@@ -77,8 +77,8 @@ item.wood.desc,벌목기에게서 얻는 거친 목재다,Rough wood recovered f
 item.blueprint_king_water_bottle,설계도 왕생수,Blueprint: Royal Bottled Water,設計図 王の飲料水
 item.blueprint_king_water_bottle.desc,왕생수 제조법을 등록할 수 있는 설계도다,A blueprint that unlocks the royal bottled water recipe,王の飲料水の製造法を登録できる設計図
 item.ancient_coin,옛 문명의 동전,Ancient Civilization Coin,古代文明の硬貨
-item.ancient_coin.desc,로켓 모양 탑이 양각된 오래된 동전이다. 왕국은행권과 함께 발견되어 종교단체로 오해 받는다.,An old coin embossed with a rocket-shaped tower. It is found with Kingdom Banknotes and is often mistaken for a religious group token.,ロケット型の塔が浮き彫りになった古い硬貨。王国銀行券と一緒に見つかるため宗教団体のものと誤解される。
+item.ancient_coin.desc,로켓 모양 탑이 양각된 오래된 동전이다. 함께 발견되는 왕국은행권 때문에 종교단체의 물건으로 오해받곤 한다.,An old coin embossed with a rocket-shaped tower. It is often found with Kingdom Banknotes and is sometimes mistaken for a religious group relic.,ロケット型の塔が浮き彫りになった古い硬貨。王国銀行券と一緒に見つかるため宗教団体の遺物と誤解されることがある。
 item.ancient_banknote,옛 문명의 지폐,Ancient Civilization Banknote,古代文明の紙幣
-item.ancient_banknote.desc,왕국은행권이라 불리는 오래된 지폐다. 둥근 사람 실루엣 때문에 종교단체로 오해 받는다.,An old note called a Kingdom Banknote. Its rounded human silhouette makes it easy to mistake for a religious group emblem.,王国銀行券と呼ばれる古い紙幣。丸い人型シルエットのせいで宗教団体のものと誤解される。
+item.ancient_banknote.desc,왕국은행권이라 불리는 오래된 지폐다. 둥근 머리와 몸통의 사람 실루엣 때문에 종교단체의 상징물로 오해받곤 한다.,An old note known as a Kingdom Banknote. Its simple round-headed human silhouette is sometimes mistaken for a religious group symbol.,王国銀行券と呼ばれる古い紙幣。丸い頭と胴体だけの人型シルエットのため宗教団体の象徴と誤解されることがある。
 container.lumber_crate,목재 상자,Lumber Crate,木材箱
 container.developer_crate,개발자의 상자,Developer Crate,Developer Crate
