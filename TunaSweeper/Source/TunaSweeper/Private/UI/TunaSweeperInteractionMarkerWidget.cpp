@@ -268,12 +268,19 @@ void UTunaSweeperInteractionMarkerWidget::NativeTick(const FGeometry& MyGeometry
 
 void UTunaSweeperInteractionMarkerWidget::SetMarkerText(const FText& InText)
 {
+	TArray<FText> NewOptionTexts;
+	NewOptionTexts.Add(InText);
+
+	constexpr int32 NewFocusedOptionIndex = 0;
+	const bool bOptionsChanged = !TextArraysEqual(CachedOptionTexts, NewOptionTexts);
+	const bool bFocusChanged = CachedFocusedOptionIndex != NewFocusedOptionIndex;
+
 	CachedDisplayText = InText;
-	if (CachedOptionTexts.Num() > 0 || CachedFocusedOptionIndex != INDEX_NONE)
+	CachedOptionTexts = NewOptionTexts;
+	CachedFocusedOptionIndex = NewFocusedOptionIndex;
+	if (bOptionsChanged || bFocusChanged)
 	{
-		CachedOptionTexts.Reset();
-		CachedFocusedOptionIndex = INDEX_NONE;
-		FocusScaleElapsedSeconds = FocusElasticDurationSeconds;
+		FocusScaleElapsedSeconds = 0.0f;
 		bMultiOptionListDirty = true;
 	}
 	ApplyState();
@@ -293,7 +300,7 @@ void UTunaSweeperInteractionMarkerWidget::SetInteractionOptions(const TArray<FTe
 	{
 		CachedDisplayText = CachedOptionTexts[CachedFocusedOptionIndex];
 	}
-	if ((bOptionsChanged || bFocusChanged) && CachedOptionTexts.Num() > 1)
+	if ((bOptionsChanged || bFocusChanged) && CachedOptionTexts.Num() > 0)
 	{
 		FocusScaleElapsedSeconds = 0.0f;
 	}
@@ -306,17 +313,29 @@ void UTunaSweeperInteractionMarkerWidget::SetRequirementPreview(
 	int32 InRequiredQuantity,
 	bool bInShowRequirement)
 {
+	const int32 NewRequiredQuantity = FMath::Max(0, InRequiredQuantity);
+	const bool bRequirementChanged =
+		CachedRequirementIconTexture.Get() != InIconTexture ||
+		CachedRequiredQuantity != NewRequiredQuantity ||
+		bCachedShowRequirement != bInShowRequirement;
+
 	CachedRequirementIconTexture = InIconTexture;
-	CachedRequiredQuantity = FMath::Max(0, InRequiredQuantity);
+	CachedRequiredQuantity = NewRequiredQuantity;
 	bCachedShowRequirement = bInShowRequirement;
+	bMultiOptionListDirty = bMultiOptionListDirty || bRequirementChanged;
 	ApplyState();
 }
 
 void UTunaSweeperInteractionMarkerWidget::SetMarkerPresentation(float InAlpha, float InRingScale, float InLabelAlpha)
 {
+	const bool bWasLabelHidden = CachedLabelAlpha <= 0.01f;
 	CachedAlpha = FMath::Clamp(InAlpha, 0.0f, 1.0f);
 	CachedRingScale = FMath::Max(InRingScale, 0.01f);
 	CachedLabelAlpha = FMath::Clamp(InLabelAlpha, 0.0f, 1.0f);
+	if (bWasLabelHidden && CachedLabelAlpha > 0.01f && CachedOptionTexts.Num() > 0)
+	{
+		FocusScaleElapsedSeconds = 0.0f;
+	}
 	ApplyState();
 }
 
@@ -622,10 +641,13 @@ void UTunaSweeperInteractionMarkerWidget::RebuildMultiOptionList()
 		FVector2D(128.0f, 24.0f),
 		FLinearColor(0.0f, 0.0f, 0.0f, 0.58f),
 		2.0f);
+	const bool bCanCycleOptions = CachedOptionTexts.Num() > 1;
 
 	for (int32 OptionIndex = 0; OptionIndex < CachedOptionTexts.Num(); ++OptionIndex)
 	{
 		const bool bFocused = OptionIndex == CachedFocusedOptionIndex;
+		const bool bShowFocusedCycleIndicator = bFocused && bCanCycleOptions;
+		const bool bShowRequirementInRow = bFocused && bCachedShowRequirement && CachedRequiredQuantity > 0;
 
 		UHorizontalBox* Row = WidgetTree->ConstructWidget<UHorizontalBox>(
 			UHorizontalBox::StaticClass(),
@@ -691,7 +713,7 @@ void UTunaSweeperInteractionMarkerWidget::RebuildMultiOptionList()
 		}
 		UpIndicatorImage->SetColorAndOpacity(IndicatorColor);
 		UpIndicatorImage->SetBrushTintColor(FSlateColor(IndicatorColor));
-		UpIndicatorImage->SetVisibility(bFocused ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Hidden);
+		UpIndicatorImage->SetVisibility(bShowFocusedCycleIndicator ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Hidden);
 
 		if (UVerticalBoxSlot* UpSlot = IndicatorStack->AddChildToVerticalBox(UpIndicatorBox))
 		{
@@ -721,7 +743,7 @@ void UTunaSweeperInteractionMarkerWidget::RebuildMultiOptionList()
 		}
 		DownIndicatorImage->SetColorAndOpacity(IndicatorColor);
 		DownIndicatorImage->SetBrushTintColor(FSlateColor(IndicatorColor));
-		DownIndicatorImage->SetVisibility(bFocused ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Hidden);
+		DownIndicatorImage->SetVisibility(bShowFocusedCycleIndicator ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Hidden);
 		if (UVerticalBoxSlot* DownSlot = IndicatorStack->AddChildToVerticalBox(DownIndicatorBox))
 		{
 			DownSlot->SetHorizontalAlignment(HAlign_Center);
@@ -751,6 +773,58 @@ void UTunaSweeperInteractionMarkerWidget::RebuildMultiOptionList()
 		{
 			TextSlot->SetHorizontalAlignment(HAlign_Left);
 			TextSlot->SetVerticalAlignment(VAlign_Center);
+		}
+
+		if (bShowRequirementInRow)
+		{
+			if (CachedRequirementIconTexture)
+			{
+				USizeBox* RowRequirementIconBox = WidgetTree->ConstructWidget<USizeBox>(
+					USizeBox::StaticClass(),
+					*FString::Printf(TEXT("InteractionOptionRequirementIconBox_%d"), OptionIndex));
+				UImage* RowRequirementIcon = WidgetTree->ConstructWidget<UImage>(
+					UImage::StaticClass(),
+					*FString::Printf(TEXT("InteractionOptionRequirementIcon_%d"), OptionIndex));
+
+				if (RowRequirementIconBox && RowRequirementIcon)
+				{
+					RowRequirementIconBox->SetWidthOverride(18.0f);
+					RowRequirementIconBox->SetHeightOverride(18.0f);
+					RowRequirementIcon->SetBrushFromTexture(CachedRequirementIconTexture, true);
+					RowRequirementIcon->SetColorAndOpacity(FLinearColor::White);
+					RowRequirementIconBox->SetContent(RowRequirementIcon);
+					if (UHorizontalBoxSlot* RequirementIconSlot = OptionContent->AddChildToHorizontalBox(RowRequirementIconBox))
+					{
+						RequirementIconSlot->SetPadding(FMargin(8.0f, 0.0f, 0.0f, 0.0f));
+						RequirementIconSlot->SetHorizontalAlignment(HAlign_Left);
+						RequirementIconSlot->SetVerticalAlignment(VAlign_Center);
+					}
+				}
+			}
+
+			UTextBlock* RowRequirementQuantityText = WidgetTree->ConstructWidget<UTextBlock>(
+				UTextBlock::StaticClass(),
+				*FString::Printf(TEXT("InteractionOptionRequirementQuantity_%d"), OptionIndex));
+			if (RowRequirementQuantityText)
+			{
+				RowRequirementQuantityText->SetText(FText::Format(
+					FText::FromString(TEXT("x{0}")),
+					FText::AsNumber(CachedRequiredQuantity)));
+				RowRequirementQuantityText->SetJustification(ETextJustify::Left);
+				if (DisplayNameText)
+				{
+					FSlateFontInfo RequirementFont = DisplayNameText->GetFont();
+					RequirementFont.Size = FMath::Max(1, RequirementFont.Size - 1);
+					RowRequirementQuantityText->SetFont(RequirementFont);
+				}
+				RowRequirementQuantityText->SetColorAndOpacity(FSlateColor(FLinearColor::Black));
+				if (UHorizontalBoxSlot* RequirementQuantitySlot = OptionContent->AddChildToHorizontalBox(RowRequirementQuantityText))
+				{
+					RequirementQuantitySlot->SetPadding(FMargin(CachedRequirementIconTexture ? 3.0f : 8.0f, 0.0f, 0.0f, 0.0f));
+					RequirementQuantitySlot->SetHorizontalAlignment(HAlign_Left);
+					RequirementQuantitySlot->SetVerticalAlignment(VAlign_Center);
+				}
+			}
 		}
 
 		KeyPromptBackground->SetVisibility(bFocused ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
@@ -813,7 +887,7 @@ void UTunaSweeperInteractionMarkerWidget::ApplyMultiOptionFocusScales()
 void UTunaSweeperInteractionMarkerWidget::ApplyState()
 {
 	SetRenderOpacity(1.0f);
-	const bool bUseMultiOptionList = CachedOptionTexts.Num() > 1;
+	const bool bUseMultiOptionList = CachedOptionTexts.Num() > 0;
 
 	if (MarkerRoot)
 	{
@@ -916,7 +990,7 @@ void UTunaSweeperInteractionMarkerWidget::ApplyState()
 		}
 	}
 
-	const bool bShowRequirement = bCachedShowRequirement && CachedRequiredQuantity > 0;
+	const bool bShowRequirement = !bUseMultiOptionList && bCachedShowRequirement && CachedRequiredQuantity > 0;
 	if (RequirementRoot)
 	{
 		RequirementRoot->SetVisibility(bShowRequirement ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
