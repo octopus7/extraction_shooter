@@ -9,9 +9,11 @@ class UTextBlock;
 class UTileView;
 class UWidget;
 class UDragDropOperation;
+class UBorder;
 class UButton;
 class UHorizontalBox;
 class UImage;
+class USizeBox;
 class UTexture2D;
 class UVerticalBox;
 
@@ -33,6 +35,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
 	void SetModdingPanelVisible(bool bVisible);
 
+	void SetPanelLayoutLimits(float InPanelWidth, float InMaxPanelHeight);
+
 protected:
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
@@ -43,6 +47,12 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
 	TObjectPtr<UTextBlock> SelectedItemNameText;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
+	TObjectPtr<USizeBox> RootSizeBox;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
+	TObjectPtr<UBorder> PanelBackground;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
 	TObjectPtr<UHorizontalBox> HeaderRow;
@@ -66,6 +76,24 @@ protected:
 	TObjectPtr<UTextBlock> SelectedItemFormulaText;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
+	TObjectPtr<UVerticalBox> SelectedItemSpecStack;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
+	TObjectPtr<UTextBlock> SelectedItemSpecTitleText;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
+	TObjectPtr<UHorizontalBox> SelectedItemSpecValueRow;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
+	TObjectPtr<UTextBlock> SelectedItemSpecLabelText;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
+	TObjectPtr<UTextBlock> SelectedItemSpecValueText;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
+	TObjectPtr<UTextBlock> SelectedItemSpecSecondaryText;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
 	TObjectPtr<UButton> CloseButton;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
@@ -85,7 +113,7 @@ private:
 	void EnsureThumbnailWidgets();
 	void SetSelectedItemThumbnail(UTexture2D* IconTexture);
 	void ClearSelectedItemThumbnail();
-	void SetSelectedItemFormulaInfo(const FText& FormulaText, const FLinearColor& TextColor, bool bVisible);
+	void SetSelectedItemSpecInfo(const FText& TitleText, const FText& LabelText, const FText& ValueText, const FText& SecondaryText, const FLinearColor& ValueColor, bool bVisible);
 	bool TryResolveAttachmentDropSlotFromCursor(
 		const FVector2D& ScreenSpacePosition,
 		FTunaSweeperItemSlotReference& OutSlotReference) const;
