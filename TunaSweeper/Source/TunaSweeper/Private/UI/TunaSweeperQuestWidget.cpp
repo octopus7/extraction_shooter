@@ -3,11 +3,13 @@
 #include "Blueprint/WidgetTree.h"
 #include "Components/Border.h"
 #include "Components/Button.h"
+#include "Components/ButtonSlot.h"
 #include "Components/HorizontalBox.h"
 #include "Components/HorizontalBoxSlot.h"
 #include "Components/Overlay.h"
 #include "Components/OverlaySlot.h"
 #include "Components/ScrollBox.h"
+#include "Components/ScrollBoxSlot.h"
 #include "Components/SizeBox.h"
 #include "Components/TextBlock.h"
 #include "Components/VerticalBox.h"
@@ -22,6 +24,10 @@
 
 namespace
 {
+	constexpr float QuestListWidth = 380.0f;
+	constexpr float QuestListPanelPadding = 12.0f;
+	constexpr float QuestListEntryWidth = QuestListWidth - QuestListPanelPadding * 2.0f;
+
 	FSlateBrush MakeQuestBoxBrush(
 		const FVector2D& ImageSize,
 		const FLinearColor& FillColor,
@@ -114,25 +120,35 @@ void UTunaSweeperQuestListEntryWidget::BuildEntryWidget()
 		return;
 	}
 
+	EntrySizeBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("QuestEntrySizeBox"));
 	EntryButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("QuestEntryButton"));
 	UVerticalBox* EntryStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("QuestEntryStack"));
 	EntryLabelText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("QuestEntryLabelText"));
 	EntryStateText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("QuestEntryStateText"));
-	if (!EntryButton || !EntryStack || !EntryLabelText || !EntryStateText)
+	if (!EntrySizeBox || !EntryButton || !EntryStack || !EntryLabelText || !EntryStateText)
 	{
 		return;
 	}
 
-	WidgetTree->RootWidget = EntryButton;
+	WidgetTree->RootWidget = EntrySizeBox;
+	EntrySizeBox->SetWidthOverride(QuestListEntryWidth);
+	EntrySizeBox->SetMinDesiredWidth(QuestListEntryWidth);
+	EntrySizeBox->SetContent(EntryButton);
 	EntryButton->SetContent(EntryStack);
 	EntryButton->SetRenderOpacity(0.9f);
+	if (UButtonSlot* EntryButtonSlot = Cast<UButtonSlot>(EntryStack->Slot))
+	{
+		EntryButtonSlot->SetHorizontalAlignment(HAlign_Fill);
+		EntryButtonSlot->SetVerticalAlignment(VAlign_Fill);
+	}
 
 	EntryLabelText->SetJustification(ETextJustify::Left);
-	EntryLabelText->SetAutoWrapText(true);
+	EntryLabelText->SetAutoWrapText(false);
 	EntryLabelText->SetWrapTextAt(0.0f);
 	TunaSweeperUIFont::ApplyFont(EntryLabelText, 17, ETunaSweeperUIFontWeight::Bold);
 	if (UVerticalBoxSlot* LabelSlot = EntryStack->AddChildToVerticalBox(EntryLabelText))
 	{
+		LabelSlot->SetHorizontalAlignment(HAlign_Fill);
 		LabelSlot->SetPadding(FMargin(10.0f, 8.0f, 10.0f, 2.0f));
 	}
 
@@ -141,6 +157,7 @@ void UTunaSweeperQuestListEntryWidget::BuildEntryWidget()
 	TunaSweeperUIFont::ApplyFont(EntryStateText, 13);
 	if (UVerticalBoxSlot* StateSlot = EntryStack->AddChildToVerticalBox(EntryStateText))
 	{
+		StateSlot->SetHorizontalAlignment(HAlign_Fill);
 		StateSlot->SetPadding(FMargin(10.0f, 0.0f, 10.0f, 8.0f));
 	}
 }
@@ -645,19 +662,21 @@ void UTunaSweeperQuestWidget::BuildQuestWidget()
 		EmptySlot->SetPadding(FMargin(24.0f));
 	}
 
-	ListSizeBox->SetWidthOverride(380.0f);
+	ListSizeBox->SetWidthOverride(QuestListWidth);
+	ListSizeBox->SetMinDesiredWidth(QuestListWidth);
 	ListPanel->SetBrush(MakeQuestBoxBrush(
-		FVector2D(380.0f, 640.0f),
+		FVector2D(QuestListWidth, 640.0f),
 		FLinearColor(0.07f, 0.078f, 0.085f, 0.96f),
 		4.0f,
 		FLinearColor(0.24f, 0.30f, 0.33f, 0.65f),
 		1.0f));
-	ListPanel->SetPadding(FMargin(12.0f));
+	ListPanel->SetPadding(FMargin(QuestListPanelPadding));
 	ListPanel->SetContent(ListStack);
 	ListSizeBox->SetContent(ListPanel);
 	if (UHorizontalBoxSlot* ListColumnSlot = RootColumns->AddChildToHorizontalBox(ListSizeBox))
 	{
 		ListColumnSlot->SetSize(MakeQuestSlateChildSize(ESlateSizeRule::Automatic));
+		ListColumnSlot->SetHorizontalAlignment(HAlign_Left);
 		ListColumnSlot->SetPadding(FMargin(0.0f, 0.0f, 14.0f, 0.0f));
 	}
 
@@ -705,6 +724,7 @@ void UTunaSweeperQuestWidget::BuildQuestWidget()
 	if (UVerticalBoxSlot* ScrollSlot = ListStack->AddChildToVerticalBox(QuestListScrollBox))
 	{
 		ScrollSlot->SetSize(MakeQuestSlateChildSize(ESlateSizeRule::Fill));
+		ScrollSlot->SetHorizontalAlignment(HAlign_Fill);
 	}
 }
 
@@ -728,7 +748,10 @@ void UTunaSweeperQuestWidget::RebuildQuestList(const TArray<FTunaSweeperQuestDef
 			EmptyText->SetWrapTextAt(0.0f);
 			EmptyText->SetColorAndOpacity(FSlateColor(FLinearColor(0.62f, 0.68f, 0.68f, 1.0f)));
 			TunaSweeperUIFont::ApplyFont(EmptyText, 16);
-			QuestListScrollBox->AddChild(EmptyText);
+			if (UScrollBoxSlot* EmptySlot = Cast<UScrollBoxSlot>(QuestListScrollBox->AddChild(EmptyText)))
+			{
+				EmptySlot->SetHorizontalAlignment(HAlign_Fill);
+			}
 		}
 		return;
 	}
@@ -749,7 +772,10 @@ void UTunaSweeperQuestWidget::RebuildQuestList(const TArray<FTunaSweeperQuestDef
 			GetStateText(QuestDefinition.QuestId),
 			QuestDefinition.QuestId == QuestId,
 			FTunaSweeperQuestEntryClickedDelegate::CreateUObject(this, &UTunaSweeperQuestWidget::SetSelectedQuestId));
-		QuestListScrollBox->AddChild(EntryWidget);
+		if (UScrollBoxSlot* EntrySlot = Cast<UScrollBoxSlot>(QuestListScrollBox->AddChild(EntryWidget)))
+		{
+			EntrySlot->SetHorizontalAlignment(HAlign_Fill);
+		}
 	}
 }
 

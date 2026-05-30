@@ -9,6 +9,7 @@ class UBorder;
 class UButton;
 class UHorizontalBox;
 class UScrollBox;
+class USizeBox;
 class UTextBlock;
 class UVerticalBox;
 class UTunaSweeperQuestSubsystem;
@@ -41,6 +42,9 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<UButton> EntryButton;
+
+	UPROPERTY(Transient)
+	TObjectPtr<USizeBox> EntrySizeBox;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UTextBlock> EntryLabelText;
