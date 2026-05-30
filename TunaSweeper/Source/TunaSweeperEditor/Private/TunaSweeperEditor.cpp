@@ -147,7 +147,14 @@ namespace TunaSweeperEditorSetup
 	const FString InteractionInputTaskId = TEXT("2026-05-29_SetInteractInputAndFocusWheelV1");
 	const FString InteractionMarkerAlignmentTaskId = TEXT("2026-05-25_RebuildInteractionMarkerRequirementPreviewV1");
 	const FString PickupItemAndSpawnerTaskId = TEXT("2026-05-11_CreatePickupItemAndSpawnerAssetsV3");
-	const FString CommonGameHudTaskId = TEXT("2026-05-30_CircularVitalsHudV1");
+	const FString CommonGameHudTaskId = TEXT("2026-05-30_CenterQuickSlotsBottomHudV1");
+	constexpr float GameplayBottomQuickSlotWidth = 694.0f;
+	constexpr float GameplayBottomQuickSlotHeight = 174.0f;
+	constexpr float GameplayBottomStatusWidth = 194.0f;
+	constexpr float GameplayBottomStatusHeight = 70.0f;
+	constexpr float GameplayBottomStatusGap = 12.0f;
+	constexpr float GameplayBottomPanelWidth = 1120.0f;
+	constexpr float GameplayBottomPanelHeight = 174.0f;
 	const FString WorkbenchPanelWidgetTaskId = TEXT("2026-05-29_CreateWorkbenchPanelWidgetV6");
 	const FString ShopRefreshStockButtonTaskId = TEXT("2026-05-29_AddShopRefreshStockButtonV1");
 	const FString ItemThumbnailSlotLayoutTaskId = TEXT("2026-05-30_RebuildItemThumbnailSlotLayoutV1");
@@ -7680,14 +7687,14 @@ namespace TunaSweeperEditorSetup
 			*GetAssetObjectPath(UIIconAssetPath, HudStatusMeatIconAssetName));
 
 		WidgetTree->RootWidget = RootSizeBox;
-		RootSizeBox->SetWidthOverride(430.0f);
-		RootSizeBox->SetHeightOverride(70.0f);
+		RootSizeBox->SetWidthOverride(GameplayBottomStatusWidth);
+		RootSizeBox->SetHeightOverride(GameplayBottomStatusHeight);
 		RootSizeBox->SetContent(RootOverlay);
 
 		UOverlaySlot* VitalsRowSlot = RootOverlay->AddChildToOverlay(VitalsRow);
 		if (VitalsRowSlot)
 		{
-			VitalsRowSlot->SetHorizontalAlignment(HAlign_Right);
+			VitalsRowSlot->SetHorizontalAlignment(HAlign_Center);
 			VitalsRowSlot->SetVerticalAlignment(VAlign_Center);
 		}
 
@@ -7842,8 +7849,8 @@ namespace TunaSweeperEditorSetup
 		}
 
 		WidgetTree->RootWidget = RootSizeBox;
-		RootSizeBox->SetWidthOverride(694.0f);
-		RootSizeBox->SetHeightOverride(174.0f);
+		RootSizeBox->SetWidthOverride(GameplayBottomQuickSlotWidth);
+		RootSizeBox->SetHeightOverride(GameplayBottomQuickSlotHeight);
 		RootSizeBox->SetContent(RootCanvas);
 
 		AmmoSelectorPanel->SetVisibility(ESlateVisibility::Collapsed);
@@ -9287,9 +9294,8 @@ namespace TunaSweeperEditorSetup
 		UBorder* UnsupportedModePanel = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("UnsupportedModePanel"));
 		UTextBlock* UnsupportedModeText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("UnsupportedModeText"));
 		UTextBlock* ModeTitleText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("ModeTitleText"));
-		UHorizontalBox* BottomRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("BottomRow"));
+		UCanvasPanel* BottomRow = WidgetTree->ConstructWidget<UCanvasPanel>(UCanvasPanel::StaticClass(), TEXT("BottomRow"));
 		UUserWidget* BottomStatusWidget = WidgetTree->ConstructWidget<UUserWidget>(BottomStatusWidgetClass, TEXT("BottomStatusWidget"));
-		USizeBox* BottomGap = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("BottomGap"));
 		UUserWidget* QuickSlotBarWidget = WidgetTree->ConstructWidget<UUserWidget>(QuickSlotBarWidgetClass, TEXT("QuickSlotBarWidget"));
 		USizeBox* CenterReloadGaugeRoot = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("CenterReloadGaugeRoot"));
 		UCanvasPanel* CenterReloadGaugeCanvas = WidgetTree->ConstructWidget<UCanvasPanel>(UCanvasPanel::StaticClass(), TEXT("CenterReloadGaugeCanvas"));
@@ -9305,7 +9311,7 @@ namespace TunaSweeperEditorSetup
 
 		if (!RootCanvas || !TopStatusReserveWidget || !CenterContentPanel || !InventoryAreaWidget || !ItemInfoPanelWidget ||
 			!ExternalPanelWidget || !UnsupportedModePanel || !UnsupportedModeText || !ModeTitleText ||
-			!BottomRow || !BottomStatusWidget || !BottomGap || !QuickSlotBarWidget ||
+			!BottomRow || !BottomStatusWidget || !QuickSlotBarWidget ||
 			!CenterReloadGaugeRoot || !CenterReloadGaugeCanvas || !CenterReloadGaugeBackdrop || !CenterReloadRingWidget || !CenterReloadPercentText ||
 			!CenterReloadPromptRoot || !CenterReloadPromptText || !CenterReloadPromptKeyBackground || !CenterReloadPromptKeyText)
 		{
@@ -9400,7 +9406,7 @@ namespace TunaSweeperEditorSetup
 			BottomSlot->SetAnchors(FAnchors(0.5f, 1.0f, 0.5f, 1.0f));
 			BottomSlot->SetAlignment(FVector2D(0.5f, 1.0f));
 			BottomSlot->SetPosition(FVector2D(0.0f, -20.0f));
-			BottomSlot->SetSize(FVector2D(980.0f, 172.0f));
+			BottomSlot->SetSize(FVector2D(GameplayBottomPanelWidth, GameplayBottomPanelHeight));
 		}
 
 		CenterReloadGaugeRoot->SetWidthOverride(96.0f);
@@ -9482,23 +9488,22 @@ namespace TunaSweeperEditorSetup
 			CenterReloadPromptKeySlot->SetVerticalAlignment(VAlign_Center);
 		}
 
-		UHorizontalBoxSlot* BottomStatusSlot = BottomRow->AddChildToHorizontalBox(BottomStatusWidget);
+		UCanvasPanelSlot* BottomStatusSlot = BottomRow->AddChildToCanvas(BottomStatusWidget);
 		if (BottomStatusSlot)
 		{
-			BottomStatusSlot->SetVerticalAlignment(VAlign_Bottom);
+			BottomStatusSlot->SetAnchors(FAnchors(0.5f, 1.0f, 0.5f, 1.0f));
+			BottomStatusSlot->SetAlignment(FVector2D(1.0f, 1.0f));
+			BottomStatusSlot->SetPosition(FVector2D(-(GameplayBottomQuickSlotWidth * 0.5f + GameplayBottomStatusGap), 0.0f));
+			BottomStatusSlot->SetSize(FVector2D(GameplayBottomStatusWidth, GameplayBottomStatusHeight));
 		}
 
-		BottomGap->SetWidthOverride(34.0f);
-		UHorizontalBoxSlot* GapSlot = BottomRow->AddChildToHorizontalBox(BottomGap);
-		if (GapSlot)
-		{
-			GapSlot->SetVerticalAlignment(VAlign_Fill);
-		}
-
-		UHorizontalBoxSlot* QuickSlotSlot = BottomRow->AddChildToHorizontalBox(QuickSlotBarWidget);
+		UCanvasPanelSlot* QuickSlotSlot = BottomRow->AddChildToCanvas(QuickSlotBarWidget);
 		if (QuickSlotSlot)
 		{
-			QuickSlotSlot->SetVerticalAlignment(VAlign_Bottom);
+			QuickSlotSlot->SetAnchors(FAnchors(0.5f, 1.0f, 0.5f, 1.0f));
+			QuickSlotSlot->SetAlignment(FVector2D(0.5f, 1.0f));
+			QuickSlotSlot->SetPosition(FVector2D(0.0f, 0.0f));
+			QuickSlotSlot->SetSize(FVector2D(GameplayBottomQuickSlotWidth, GameplayBottomQuickSlotHeight));
 		}
 
 		RegisterWidgetVariable(WidgetBlueprint, TopStatusReserveWidget);
