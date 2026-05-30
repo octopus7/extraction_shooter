@@ -721,7 +721,10 @@ bool UTunaSweeperGameInstance::ActivateSaveSlot(int32 SaveSlotIndex, bool bStart
 		GenerateDefaultInventoryState();
 		bInventoryStateInitialized = true;
 		RefreshLegacyPlayerInventoryItems();
-		SaveGameStateInternal(EUsableQuickSlotSaveMode::Clear);
+		if (SaveGameStateInternal(EUsableQuickSlotSaveMode::Clear))
+		{
+			bPendingBunkerItemStateSave = false;
+		}
 		return true;
 	}
 
@@ -1545,6 +1548,7 @@ bool UTunaSweeperGameInstance::SetSelectedAmmoItemForWeaponSlot(int32 WeaponSlot
 	MutableWeaponInstance->LoadedAmmoItemId = AmmoItemId;
 	MutableWeaponInstance->SelectedAmmoItemId = AmmoItemId;
 	BroadcastInventoryStateChanged();
+	MarkItemStateMutationForSave();
 	return true;
 }
 
@@ -1574,6 +1578,7 @@ bool UTunaSweeperGameInstance::TryConsumeLoadedAmmoForWeaponSlot(int32 WeaponSlo
 
 	MutableWeaponInstance->LoadedAmmoCount = FMath::Max(0, MutableWeaponInstance->LoadedAmmoCount - 1);
 	BroadcastInventoryStateChanged();
+	MarkItemStateMutationForSave();
 	return true;
 }
 
@@ -1637,6 +1642,7 @@ bool UTunaSweeperGameInstance::TryReloadWeaponSlot(int32 WeaponSlotNumber, int32
 		MagazineCapacity);
 	OutLoadedAmmoCount = MutableWeaponInstance->LoadedAmmoCount;
 	BroadcastInventoryStateChanged();
+	MarkItemStateMutationForSave();
 	return true;
 }
 
@@ -1730,6 +1736,7 @@ bool UTunaSweeperGameInstance::TryUseItemInSlot(const FTunaSweeperItemSlotRefere
 
 	ClearSelectedItemIfInvalid();
 	BroadcastInventoryStateChanged();
+	MarkItemStateMutationForSave();
 	return true;
 }
 
@@ -1765,6 +1772,7 @@ bool UTunaSweeperGameInstance::ToggleInventorySlotSortLock(const FTunaSweeperIte
 	PlayerInventorySlots[SlotReference.SlotIndex].bSortLocked =
 		!PlayerInventorySlots[SlotReference.SlotIndex].bSortLocked;
 	BroadcastInventoryStateChanged();
+	MarkItemStateMutationForSave();
 	return true;
 }
 
@@ -1961,11 +1969,12 @@ bool UTunaSweeperGameInstance::MoveItemBetweenSlots(
 		const int32 NewInventoryCapacity = CalculateInventoryCapacityForEquipmentSlots(EquipmentSlots);
 		EnsureSlotArraySize(PlayerInventorySlots, NewInventoryCapacity);
 		BroadcastInventoryStateChanged();
+		MarkItemStateMutationForSave();
 		if (bAcquiredFromLootContainer && AcquiredItemId != INDEX_NONE && AcquiredQuantity > 0)
 		{
 			if (UTunaSweeperQuestSubsystem* QuestSubsystem = GetSubsystem<UTunaSweeperQuestSubsystem>())
 			{
-				QuestSubsystem->NotifyItemAcquired(AcquiredItemId, AcquiredQuantity);
+				QuestSubsystem->NotifyItemAcquired(AcquiredItemId, AcquiredQuantity, !IsCurrentWorldBunkerMap());
 			}
 			AddRaidExperienceForItem(AcquiredItemId, AcquiredQuantity);
 		}
@@ -1995,11 +2004,12 @@ bool UTunaSweeperGameInstance::MoveItemBetweenSlots(
 	const int32 NewInventoryCapacity = CalculateInventoryCapacityForEquipmentSlots(EquipmentSlots);
 	EnsureSlotArraySize(PlayerInventorySlots, NewInventoryCapacity);
 	BroadcastInventoryStateChanged();
+	MarkItemStateMutationForSave();
 	if (bAcquiredFromLootContainer && AcquiredItemId != INDEX_NONE && AcquiredQuantity > 0)
 	{
 		if (UTunaSweeperQuestSubsystem* QuestSubsystem = GetSubsystem<UTunaSweeperQuestSubsystem>())
 		{
-			QuestSubsystem->NotifyItemAcquired(AcquiredItemId, AcquiredQuantity);
+			QuestSubsystem->NotifyItemAcquired(AcquiredItemId, AcquiredQuantity, !IsCurrentWorldBunkerMap());
 		}
 		AddRaidExperienceForItem(AcquiredItemId, AcquiredQuantity);
 	}
@@ -2149,13 +2159,14 @@ bool UTunaSweeperGameInstance::SplitItemStackBetweenSlots(
 
 	ClearSelectedItemIfInvalid();
 	BroadcastInventoryStateChanged();
+	MarkItemStateMutationForSave();
 
 	if (SourceSlot.Source == ETunaSweeperItemSlotSource::LootContainer &&
 		TargetSlot.Source != ETunaSweeperItemSlotSource::LootContainer)
 	{
 		if (UTunaSweeperQuestSubsystem* QuestSubsystem = GetSubsystem<UTunaSweeperQuestSubsystem>())
 		{
-			QuestSubsystem->NotifyItemAcquired(SplitItemId, SplitQuantity);
+			QuestSubsystem->NotifyItemAcquired(SplitItemId, SplitQuantity, !IsCurrentWorldBunkerMap());
 		}
 		AddRaidExperienceForItem(SplitItemId, SplitQuantity);
 	}
@@ -2241,6 +2252,7 @@ bool UTunaSweeperGameInstance::RemoveItemFromSlot(
 	const int32 NewInventoryCapacity = CalculateInventoryCapacityForEquipmentSlots(EquipmentSlots);
 	EnsureSlotArraySize(PlayerInventorySlots, NewInventoryCapacity);
 	BroadcastInventoryStateChanged();
+	MarkItemStateMutationForSave();
 	return true;
 }
 
@@ -2260,9 +2272,10 @@ bool UTunaSweeperGameInstance::AddItemToFirstAvailableInventorySlot(int32 ItemId
 	}
 
 	BroadcastInventoryStateChanged();
+	MarkItemStateMutationForSave();
 	if (UTunaSweeperQuestSubsystem* QuestSubsystem = GetSubsystem<UTunaSweeperQuestSubsystem>())
 	{
-		QuestSubsystem->NotifyItemAcquired(ItemId, Quantity);
+		QuestSubsystem->NotifyItemAcquired(ItemId, Quantity, !IsCurrentWorldBunkerMap());
 	}
 	AddRaidExperienceForItem(ItemId, Quantity);
 	return true;
@@ -2285,9 +2298,10 @@ bool UTunaSweeperGameInstance::AddItemToPreferredAvailableSlot(int32 ItemId, int
 	}
 
 	BroadcastInventoryStateChanged();
+	MarkItemStateMutationForSave();
 	if (UTunaSweeperQuestSubsystem* QuestSubsystem = GetSubsystem<UTunaSweeperQuestSubsystem>())
 	{
-		QuestSubsystem->NotifyItemAcquired(ItemId, Quantity);
+		QuestSubsystem->NotifyItemAcquired(ItemId, Quantity, !IsCurrentWorldBunkerMap());
 	}
 	AddRaidExperienceForItem(ItemId, Quantity);
 	return true;
@@ -2307,6 +2321,7 @@ int32 UTunaSweeperGameInstance::ConsumeInventoryItemById(int32 ItemId, int32 Req
 	{
 		ClearSelectedItemIfInvalid();
 		BroadcastInventoryStateChanged();
+		MarkItemStateMutationForSave();
 	}
 	return ConsumedAmount;
 }
@@ -2351,6 +2366,7 @@ bool UTunaSweeperGameInstance::GrantQuestItemRewards(const TArray<FTunaSweeperIt
 	if (CreatedItemUids.Num() > 0)
 	{
 		BroadcastInventoryStateChanged();
+		MarkItemStateMutationForSave();
 	}
 	return true;
 }
@@ -2391,6 +2407,7 @@ void UTunaSweeperGameInstance::CompactInventorySlots()
 	}
 
 	BroadcastInventoryStateChanged();
+	MarkItemStateMutationForSave();
 }
 
 int32 UTunaSweeperGameInstance::GetStorageSlotCapacity()
@@ -2420,10 +2437,7 @@ bool UTunaSweeperGameInstance::SetStorageSlotCapacity(int32 NewCapacity, bool bS
 	StorageSlotCapacity = NewCapacity;
 	EnsureSlotArraySize(StorageSlots, StorageSlotCapacity);
 	BroadcastInventoryStateChanged();
-	if (bSaveImmediately)
-	{
-		SaveGameStateInternal();
-	}
+	MarkItemStateMutationForSave(bSaveImmediately);
 	return true;
 }
 
@@ -2561,13 +2575,10 @@ bool UTunaSweeperGameInstance::TryBuyActiveShopSlot(int32 ShopSlotIndex)
 
 	if (ShopItemView.Price > 0)
 	{
-		QuestSubsystem->TrySpendCoins(ShopItemView.Price, true);
-	}
-	else
-	{
-		SaveGameStateInternal();
+		QuestSubsystem->TrySpendCoins(ShopItemView.Price, false);
 	}
 	BroadcastInventoryStateChanged();
+	MarkItemStateMutationForSave(true);
 	return true;
 }
 
@@ -2599,7 +2610,7 @@ bool UTunaSweeperGameInstance::DebugRestockActiveShop(bool bSaveImmediately)
 
 	if (bSaveImmediately)
 	{
-		SaveGameStateInternal();
+		MarkItemStateMutationForSave(true);
 	}
 	BroadcastInventoryStateChanged();
 	return true;
@@ -2653,18 +2664,11 @@ bool UTunaSweeperGameInstance::TrySellItemInSlot(
 	{
 		if (OutSalePrice > 0)
 		{
-			QuestSubsystem->AddCoins(OutSalePrice, true);
+			QuestSubsystem->AddCoins(OutSalePrice, false);
 		}
-		else
-		{
-			SaveGameStateInternal();
-		}
-	}
-	else
-	{
-		SaveGameStateInternal();
 	}
 
+	MarkItemStateMutationForSave(true);
 	ClearSelectedItemSelection();
 	ClearHoveredItemSlot(SlotReference);
 	return true;
@@ -2850,13 +2854,13 @@ bool UTunaSweeperGameInstance::TryCraftActiveWorkbenchRecipe(int32 RecipeSlotInd
 	BroadcastInventoryStateChanged();
 	if (UTunaSweeperQuestSubsystem* QuestSubsystem = GetSubsystem<UTunaSweeperQuestSubsystem>())
 	{
-		QuestSubsystem->NotifyItemAcquired(RecipeDefinition.OutputItemId, RecipeDefinition.OutputQuantity);
+		QuestSubsystem->NotifyItemAcquired(
+			RecipeDefinition.OutputItemId,
+			RecipeDefinition.OutputQuantity,
+			!IsCurrentWorldBunkerMap());
 	}
 	AddRaidExperienceForItem(RecipeDefinition.OutputItemId, RecipeDefinition.OutputQuantity);
-	if (bSaveImmediately)
-	{
-		SaveGameStateInternal();
-	}
+	MarkItemStateMutationForSave(bSaveImmediately);
 	return true;
 }
 
@@ -2954,10 +2958,7 @@ bool UTunaSweeperGameInstance::TryDismantleWorkbenchItemInSlot(
 	ClearSelectedItemIfInvalid();
 	ClearHoveredItemSlot(SlotReference);
 	BroadcastInventoryStateChanged();
-	if (bSaveImmediately)
-	{
-		SaveGameStateInternal();
-	}
+	MarkItemStateMutationForSave(bSaveImmediately);
 	return true;
 }
 
@@ -3066,10 +3067,7 @@ bool UTunaSweeperGameInstance::TryRegisterWorkbenchBlueprintFromSlot(
 	ClearSelectedItemIfInvalid();
 	ClearHoveredItemSlot(SlotReference);
 	BroadcastInventoryStateChanged();
-	if (bSaveImmediately)
-	{
-		SaveGameStateInternal();
-	}
+	MarkItemStateMutationForSave(bSaveImmediately);
 	return true;
 }
 
@@ -3397,7 +3395,52 @@ void UTunaSweeperGameInstance::NotifyActiveLootContainerUiClosed()
 void UTunaSweeperGameInstance::SaveGameState()
 {
 	EnsureInventoryStateInitialized();
-	SaveGameStateInternal();
+	const EUsableQuickSlotSaveMode SaveMode = bPendingBunkerItemStateSave
+		? EUsableQuickSlotSaveMode::PersistRuntime
+		: EUsableQuickSlotSaveMode::PreserveExisting;
+	if (SaveGameStateInternal(SaveMode))
+	{
+		bPendingBunkerItemStateSave = false;
+	}
+}
+
+void UTunaSweeperGameInstance::MarkBunkerItemStateSavePending()
+{
+	if (IsCurrentWorldBunkerMap())
+	{
+		bPendingBunkerItemStateSave = true;
+	}
+}
+
+bool UTunaSweeperGameInstance::FlushPendingBunkerItemStateSave()
+{
+	if (!bPendingBunkerItemStateSave)
+	{
+		return false;
+	}
+
+	EnsureInventoryStateInitialized();
+	if (!SaveGameStateInternal(EUsableQuickSlotSaveMode::PersistRuntime))
+	{
+		return false;
+	}
+
+	bPendingBunkerItemStateSave = false;
+	return true;
+}
+
+void UTunaSweeperGameInstance::MarkItemStateMutationForSave(bool bSaveImmediatelyOutsideBunker)
+{
+	if (IsCurrentWorldBunkerMap())
+	{
+		bPendingBunkerItemStateSave = true;
+		return;
+	}
+
+	if (bSaveImmediatelyOutsideBunker)
+	{
+		SaveGameStateInternal();
+	}
 }
 
 void UTunaSweeperGameInstance::ClearInventoryAndSave()
@@ -3430,7 +3473,10 @@ void UTunaSweeperGameInstance::ClearInventoryAndSave()
 	bHasActiveLootContainer = false;
 	ClearRaidExperienceGain();
 	bHasPendingBunkerEntryVitals = false;
-	SaveGameStateInternal(EUsableQuickSlotSaveMode::Clear);
+	if (SaveGameStateInternal(EUsableQuickSlotSaveMode::Clear))
+	{
+		bPendingBunkerItemStateSave = false;
+	}
 	BroadcastInventoryStateChanged();
 }
 
@@ -3442,7 +3488,10 @@ void UTunaSweeperGameInstance::HandleLevelTravelPersistence(FName SourceLevelNam
 		CaptureBunkerEntryVitalsFromPawn(GetWorld() ? UGameplayStatics::GetPlayerPawn(GetWorld(), 0) : nullptr);
 		FTunaSweeperExperienceAnimationState ExperienceAnimationState;
 		CommitRaidExperienceGain(ExperienceAnimationState);
-		SaveGameStateInternal(EUsableQuickSlotSaveMode::PersistRuntime);
+		if (SaveGameStateInternal(EUsableQuickSlotSaveMode::PersistRuntime))
+		{
+			bPendingBunkerItemStateSave = false;
+		}
 		return;
 	}
 
@@ -3985,6 +4034,7 @@ void UTunaSweeperGameInstance::ResetRuntimeStateForSaveSlotSelection()
 	ActiveLootContainerCapacity = 0;
 	bHasActiveLootContainer = false;
 	bInventoryStateInitialized = false;
+	bPendingBunkerItemStateSave = false;
 	LoadedSlotTotalPlaySeconds = 0.0f;
 	ActiveSlotStartTimeSeconds = FPlatformTime::Seconds();
 	TotalExperiencePoints = 0;
@@ -4022,6 +4072,7 @@ void UTunaSweeperGameInstance::GenerateDefaultInventoryState()
 	bRaidExperienceSessionActive = false;
 	bHasPendingRaidExperienceAnimationState = false;
 	bHasPendingBunkerEntryVitals = false;
+	bPendingBunkerItemStateSave = false;
 	PendingBunkerEntryHealthRatio = 1.0f;
 	PendingBunkerEntryFoodRatio = 1.0f;
 	PendingBunkerEntryHydrationRatio = 1.0f;
@@ -4647,7 +4698,7 @@ bool UTunaSweeperGameInstance::AddWorkbenchResultToInventoryOrOverflow(
 
 	if (UTunaSweeperQuestSubsystem* QuestSubsystem = GetSubsystem<UTunaSweeperQuestSubsystem>())
 	{
-		QuestSubsystem->NotifyItemAcquired(ItemId, Quantity);
+		QuestSubsystem->NotifyItemAcquired(ItemId, Quantity, !IsCurrentWorldBunkerMap());
 	}
 	AddRaidExperienceForItem(ItemId, Quantity);
 	return true;
@@ -5679,6 +5730,12 @@ float UTunaSweeperGameInstance::GetCurrentActiveSlotTotalPlaySeconds() const
 		? FPlatformTime::Seconds() - ActiveSlotStartTimeSeconds
 		: 0.0;
 	return LoadedSlotTotalPlaySeconds + static_cast<float>(FMath::Max(0.0, SessionSeconds));
+}
+
+bool UTunaSweeperGameInstance::IsCurrentWorldBunkerMap() const
+{
+	const UWorld* World = GetWorld();
+	return World && World->GetMapName().EndsWith(TEXT("BunkerMap"));
 }
 
 bool UTunaSweeperGameInstance::IsBunkerToRaidTravel(FName SourceLevelName, FName TargetLevelName) const

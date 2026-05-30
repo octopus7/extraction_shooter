@@ -19,6 +19,8 @@ Bunker item ownership/layout mutations must be saved after the player leaves the
 
 While the responsible UI is alive, the mutation should only mark a pending bunker item save in runtime memory. Multiple mutations during the same UI session coalesce into one pending save. The pending save must be flushed immediately when the HUD/input state becomes gameplay-capable again: no inventory-only panel, external storage/shop/workbench panel, attachment edit UI, modal confirmation, or other blocking item UI remains open, and the player can resume normal bunker gameplay controls.
 
+The gameplay-capable flush point is a player-facing UX rule, not a purely theoretical engine-state rule. If a player would reasonably feel that control has returned or that delaying the save is uncomfortable, prefer the earlier/comfortable flush point. Minor differences between UI flows are acceptable when they match player perception; do not delay a save just to make every flow satisfy an abstractly identical state checklist.
+
 The flush uses the normal active-slot save path through `UTunaSweeperGameInstance::SaveGameStateInternal()` with runtime quick slots persisted. If another guaranteed save writes the same active slot before gameplay becomes available, it may clear the pending bunker item save only after the in-memory item state has been included in that write.
 
 Raid item changes keep their existing extraction/death/level-travel save rules and are not covered by this bunker UI deferral rule.

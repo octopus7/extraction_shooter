@@ -644,15 +644,6 @@ void UTunaSweeperGameHudWidget::ShowLootContainerPanel(const FTunaSweeperLootCon
 {
 	ActiveHudMode = ETunaSweeperHudMode::Inventory;
 
-	if (ExternalPanelWidget &&
-		ExternalPanelWidget->GetExternalPanelMode() == ETunaSweeperHudExternalPanelMode::Storage)
-	{
-		if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
-		{
-			TunaGameInstance->SaveGameState();
-		}
-	}
-
 	if (ExternalPanelWidget)
 	{
 		bClearExternalPanelModeAfterHide = false;
@@ -1590,13 +1581,6 @@ void UTunaSweeperGameHudWidget::CloseLootContainerPanelIfOpen()
 		if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
 		{
 			TunaGameInstance->NotifyActiveLootContainerUiClosed();
-		}
-	}
-	else if (ExternalPanelWidget->GetExternalPanelMode() == ETunaSweeperHudExternalPanelMode::Storage)
-	{
-		if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
-		{
-			TunaGameInstance->SaveGameState();
 		}
 	}
 	else if (ExternalPanelWidget->GetExternalPanelMode() == ETunaSweeperHudExternalPanelMode::Shop)

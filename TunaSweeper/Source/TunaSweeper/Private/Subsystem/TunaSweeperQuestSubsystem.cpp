@@ -754,7 +754,7 @@ void UTunaSweeperQuestSubsystem::NotifyWarpPointUsed(FName LevelName, FName Warp
 		1);
 }
 
-void UTunaSweeperQuestSubsystem::NotifyItemAcquired(int32 ItemId, int32 Quantity)
+void UTunaSweeperQuestSubsystem::NotifyItemAcquired(int32 ItemId, int32 Quantity, bool bSaveImmediately)
 {
 	if (ItemId == INDEX_NONE || Quantity <= 0)
 	{
@@ -766,7 +766,8 @@ void UTunaSweeperQuestSubsystem::NotifyItemAcquired(int32 ItemId, int32 Quantity
 		{
 			return DoesObjectiveMatchItemAcquired(Objective, ItemId);
 		},
-		Quantity);
+		Quantity,
+		bSaveImmediately);
 }
 
 void UTunaSweeperQuestSubsystem::NotifyEnemyKilled(FName EnemyId)
@@ -1292,7 +1293,8 @@ bool UTunaSweeperQuestSubsystem::AdvanceObjectiveProgress(FName QuestId, FName O
 
 void UTunaSweeperQuestSubsystem::AdvanceMatchingObjectives(
 	TFunctionRef<bool(const FTunaSweeperObjectiveDefinition&)> Predicate,
-	int32 Amount)
+	int32 Amount,
+	bool bSaveImmediately)
 {
 	if (!EnsureQuestDataLoaded() || Amount <= 0)
 	{
@@ -1327,7 +1329,7 @@ void UTunaSweeperQuestSubsystem::AdvanceMatchingObjectives(
 
 	if (bChanged)
 	{
-		BroadcastQuestProgressChanged(true);
+		BroadcastQuestProgressChanged(bSaveImmediately);
 	}
 }
 

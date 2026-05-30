@@ -673,6 +673,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Inventory")
 	void NotifyActiveLootContainerUiClosed();
 	void SaveGameState();
+	void MarkBunkerItemStateSavePending();
+	bool FlushPendingBunkerItemStateSave();
+	bool HasPendingBunkerItemStateSave() const { return bPendingBunkerItemStateSave; }
 	void ClearInventoryAndSave();
 	void HandleLevelTravelPersistence(FName SourceLevelName, FName TargetLevelName);
 	void CaptureBunkerEntryVitalsFromPawn(APawn* Pawn);
@@ -698,6 +701,7 @@ private:
 	void EnsureInventoryStateInitialized();
 	bool LoadGameState();
 	bool SaveGameStateInternal(EUsableQuickSlotSaveMode UsableQuickSlotSaveMode = EUsableQuickSlotSaveMode::PreserveExisting) const;
+	void MarkItemStateMutationForSave(bool bSaveImmediatelyOutsideBunker = false);
 	void ResetRuntimeStateForSaveSlotSelection();
 	void GenerateDefaultInventoryState();
 	void ResetPlayerSlotArrays();
@@ -817,6 +821,7 @@ private:
 	FString GetSaveGameBackupDirectory() const;
 	FString CreateSaveGameBackupFilePath(int32 SaveSlotIndex, FDateTime BackupTime) const;
 	float GetCurrentActiveSlotTotalPlaySeconds() const;
+	bool IsCurrentWorldBunkerMap() const;
 	bool IsBunkerToRaidTravel(FName SourceLevelName, FName TargetLevelName) const;
 	bool IsRaidToBunkerTravel(FName SourceLevelName, FName TargetLevelName) const;
 	bool IsMapNameMatch(FName MapName, const TCHAR* ExpectedMapName) const;
@@ -904,6 +909,9 @@ private:
 
 	UPROPERTY(Transient)
 	bool bInventoryStateInitialized = false;
+
+	UPROPERTY(Transient)
+	bool bPendingBunkerItemStateSave = false;
 
 	UPROPERTY(Transient)
 	TSet<FName> CompletedScenarioFlags;

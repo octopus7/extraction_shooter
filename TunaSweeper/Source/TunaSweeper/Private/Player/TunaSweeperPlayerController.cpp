@@ -477,6 +477,8 @@ void ATunaSweeperPlayerController::PlayerTick(float DeltaTime)
 		return;
 	}
 
+	TryFlushPendingBunkerItemStateSave();
+
 	FVector AimPoint;
 	FHitResult AimHit;
 	const FVector2D AimScreenOffset = ControlledCharacter->GetWeaponRecoilCrosshairScreenOffset();
@@ -1389,6 +1391,7 @@ void ATunaSweeperPlayerController::RestoreGameplayState(float HousingCameraBlend
 	EndHousingCameraMode(HousingCameraBlendSeconds);
 	ApplyDefaultGameInputMode();
 	bShowMouseCursor = true;
+	TryFlushPendingBunkerItemStateSave();
 }
 
 void ATunaSweeperPlayerController::BeginHousingCameraMode()
@@ -1928,6 +1931,36 @@ bool ATunaSweeperPlayerController::IsHousingModeOpen() const
 		? GetGameInstance()->GetSubsystem<UTunaSweeperHousingSubsystem>()
 		: nullptr;
 	return HousingSubsystem && HousingSubsystem->IsHousingModeOpen();
+}
+
+void ATunaSweeperPlayerController::TryFlushPendingBunkerItemStateSave()
+{
+	if (!CanFlushPendingBunkerItemStateSave())
+	{
+		return;
+	}
+
+	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
+	{
+		TunaGameInstance->FlushPendingBunkerItemStateSave();
+	}
+}
+
+bool ATunaSweeperPlayerController::CanFlushPendingBunkerItemStateSave() const
+{
+	if (!IsLocalController() ||
+		!IsBunkerMap() ||
+		IsIntroMap() ||
+		IsOpeningScenarioMap() ||
+		bDialogueSequenceActive ||
+		IsInventoryUiOpen() ||
+		IsHousingModeOpen())
+	{
+		return false;
+	}
+
+	const ATunaSweeperTopDownCharacter* ControlledCharacter = Cast<ATunaSweeperTopDownCharacter>(GetPawn());
+	return ControlledCharacter && !ControlledCharacter->IsDead();
 }
 
 bool ATunaSweeperPlayerController::TryCommitHousingPlacement()

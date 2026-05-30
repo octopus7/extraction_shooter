@@ -214,6 +214,8 @@ private:
 	void HandleHousingMoveRightReleased();
 	void HandleHousingMoveLeftPressed();
 	void HandleHousingMoveLeftReleased();
+	void TryFlushPendingBunkerItemStateSave();
+	bool CanFlushPendingBunkerItemStateSave() const;
 
 	FTimerHandle CanBotIntroDialogueTimerHandle;
 	FTimerHandle DialogueCameraReturnTimerHandle;
