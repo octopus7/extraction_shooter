@@ -11,8 +11,23 @@ class UTextBlock;
 class UTileView;
 class UButton;
 class UDragDropOperation;
+class UHorizontalBox;
 class UTunaSweeperCurrencyDisplayWidget;
 struct FTunaSweeperItemSlotReference;
+
+UENUM(BlueprintType)
+enum class ETunaSweeperStorageFilter : uint8
+{
+	All UMETA(DisplayName = "All"),
+	Weapon UMETA(DisplayName = "Weapon"),
+	Ammo UMETA(DisplayName = "Ammo"),
+	Attachment UMETA(DisplayName = "Attachment"),
+	Consumable UMETA(DisplayName = "Consumable"),
+	Gear UMETA(DisplayName = "Gear"),
+	Material UMETA(DisplayName = "Material"),
+	Blueprint UMETA(DisplayName = "Blueprint"),
+	Other UMETA(DisplayName = "Other")
+};
 
 UCLASS(Abstract, BlueprintType, Blueprintable)
 class TUNASWEEPER_API UTunaSweeperItemContainerPanelWidget : public UUserWidget
@@ -59,10 +74,42 @@ protected:
 	virtual void RefreshHeaderControls();
 
 	void EnsureShopCurrencyDisplayWidget();
+	void EnsureStorageFilterControls();
+	void RefreshStorageFilterControls();
+	void SetStorageFilter(ETunaSweeperStorageFilter NewFilter);
+	void AddStorageFilterButton(ETunaSweeperStorageFilter Filter);
+	FText ResolveStorageFilterText(ETunaSweeperStorageFilter Filter) const;
 
 	bool TryResolveDropSlotFromCursor(
 		const FVector2D& ScreenSpacePosition,
 		FTunaSweeperItemSlotReference& OutSlotReference);
+
+	UFUNCTION()
+	void HandleStorageFilterAllClicked();
+
+	UFUNCTION()
+	void HandleStorageFilterWeaponClicked();
+
+	UFUNCTION()
+	void HandleStorageFilterAmmoClicked();
+
+	UFUNCTION()
+	void HandleStorageFilterAttachmentClicked();
+
+	UFUNCTION()
+	void HandleStorageFilterConsumableClicked();
+
+	UFUNCTION()
+	void HandleStorageFilterGearClicked();
+
+	UFUNCTION()
+	void HandleStorageFilterMaterialClicked();
+
+	UFUNCTION()
+	void HandleStorageFilterBlueprintClicked();
+
+	UFUNCTION()
+	void HandleStorageFilterOtherClicked();
 
 	UPROPERTY(Transient)
 	FTunaSweeperLootContainerInstance ContainerInstance;
@@ -81,6 +128,24 @@ protected:
 
 	UPROPERTY(Transient)
 	TArray<TObjectPtr<UObject>> TileObjects;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UHorizontalBox> StorageFilterTabsRow;
+
+	UPROPERTY(Transient)
+	TArray<TObjectPtr<UButton>> StorageFilterButtons;
+
+	UPROPERTY(Transient)
+	TArray<TObjectPtr<UTextBlock>> StorageFilterButtonTexts;
+
+	UPROPERTY(Transient)
+	TArray<ETunaSweeperStorageFilter> StorageFilterButtonValues;
+
+	UPROPERTY(Transient)
+	TArray<int32> VisibleStorageSlotIndices;
+
+	UPROPERTY(Transient)
+	ETunaSweeperStorageFilter ActiveStorageFilter = ETunaSweeperStorageFilter::All;
 };
 
 UCLASS(BlueprintType, Blueprintable)
