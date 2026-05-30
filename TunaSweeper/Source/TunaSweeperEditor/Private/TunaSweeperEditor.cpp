@@ -7460,7 +7460,7 @@ namespace TunaSweeperEditorSetup
 			SlotSizeSlot->SetPadding(FMargin(2.0f));
 		}
 
-		SlotBackground->SetPadding(FMargin(3.0f));
+		SlotBackground->SetPadding(FMargin(1.0f));
 		SlotBackground->SetBrush(MakeRoundedBoxBrush(
 			FVector2D(92.0f, 92.0f),
 			FLinearColor(0.012f, 0.014f, 0.017f, 0.90f),

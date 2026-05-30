@@ -157,7 +157,7 @@ int32 UTunaSweeperItemRaritySlotAccentWidget::NativePaint(
 	Vertices.Reserve(12);
 	Indices.Reserve(18);
 
-	constexpr float SlotInset = 4.0f;
+	constexpr float SlotInset = 0.0f;
 	const FVector2D FillPosition(SlotInset, SlotInset);
 	const FVector2D FillSize(
 		FMath::Max(1.0f, LocalSize.X - SlotInset * 2.0f),
@@ -196,7 +196,7 @@ int32 UTunaSweeperItemRaritySlotAccentWidget::NativePaint(
 
 	FSlateDrawElement::MakeCustomVerts(
 		OutDrawElements,
-		PaintedLayerId + 1,
+		PaintedLayerId,
 		FSlateApplication::Get().GetRenderer()->GetResourceHandle(*WhiteBrush),
 		Vertices,
 		Indices,
@@ -204,5 +204,5 @@ int32 UTunaSweeperItemRaritySlotAccentWidget::NativePaint(
 		0,
 		0);
 
-	return PaintedLayerId + 1;
+	return PaintedLayerId;
 }

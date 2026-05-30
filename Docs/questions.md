@@ -1619,3 +1619,21 @@ Yes. Horizontal stretch is the cleaner layout model here. The canvas slot should
 ### Answer
 
 맞다. 현재는 등급 배경과 accent가 슬롯 외곽선 안쪽에서 별도 레이어처럼 떠 보이는 것이 문제다. 내부 배경을 키우되 아이콘/텍스트까지 키우는 것이 아니라, rarity 배경 레이어만 슬롯 외곽선 바로 안쪽까지 확장하고 outline은 그 위에 올라오게 하는 쪽이 맞다. accent 색도 같은 좌표계와 패딩을 써야 분리된 작은 띠처럼 보이지 않고 슬롯에 붙은 edge 신호로 읽힌다.
+## 2026-05-31 00:39:08 (elapsed: 00:00:00)
+
+### Question
+
+장비만 배경이 아이콘 위로 올라온 느낌인데 기분탓인가?
+
+### Answer
+
+기분탓만은 아닐 수 있다. 장비 슬롯만 별도 rarity 배경 로직을 쓰는 것은 아니지만, 현재 rarity accent 위젯은 overlay의 앞쪽 child로 들어가면서도 `NativePaint`에서 자기 기본 레이어보다 한 단계 높은 레이어에 그린다. 그래서 Slate paint 순서에 따라 다음 아이콘 레이어와 같은 높이 또는 근접한 높이에 걸릴 수 있고, 특히 소총처럼 투명 영역이 넓고 얇은 장비 아이콘에서는 배경이 아이콘 위에 올라온 듯 더 강하게 보일 수 있다. 안정적으로 정리하려면 rarity 배경/accent는 자기 base layer에 그리고, 아이콘/텍스트/hover border는 항상 그 위 레이어에 남도록 해야 한다.
+## 2026-05-31 00:46:32 (elapsed: 00:00:00)
+
+### Question
+
+아직 같지?
+
+### Answer
+
+맞다. 레이어만 낮춘 것으로는 부족하다. 기존에 이미 생성된 `RaritySlotAccentWidget`이 있으면 현재 코드는 해당 위젯을 찾고 바로 return해서 child 순서를 다시 낮추지 않는다. 따라서 rarity 위젯이 아이콘보다 뒤 child로 남아 있던 슬롯은 계속 아이콘 위에 배경이 올라온 것처럼 보일 수 있다. 기존 위젯과 신규 위젯 모두 `SlotOverlay`의 0번 child로 강제 재배치해야 한다.

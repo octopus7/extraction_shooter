@@ -605,14 +605,12 @@ void UTunaSweeperItemThumbnailSlotWidget::ApplyDropHighlight(bool bCanAcceptDrop
 
 void UTunaSweeperItemThumbnailSlotWidget::EnsureRaritySlotAccentWidget()
 {
-	if (RaritySlotAccentWidget || !WidgetTree)
+	if (SlotBackground)
 	{
-		return;
+		SlotBackground->SetPadding(FMargin(1.0f));
 	}
 
-	RaritySlotAccentWidget = Cast<UTunaSweeperItemRaritySlotAccentWidget>(
-		WidgetTree->FindWidget(FName(TEXT("RaritySlotAccentWidget"))));
-	if (RaritySlotAccentWidget)
+	if (!WidgetTree)
 	{
 		return;
 	}
@@ -627,28 +625,38 @@ void UTunaSweeperItemThumbnailSlotWidget::EnsureRaritySlotAccentWidget()
 		return;
 	}
 
-	RaritySlotAccentWidget = WidgetTree->ConstructWidget<UTunaSweeperItemRaritySlotAccentWidget>(
-		UTunaSweeperItemRaritySlotAccentWidget::StaticClass(),
-		FName(TEXT("RaritySlotAccentWidget")));
+	if (!RaritySlotAccentWidget)
+	{
+		RaritySlotAccentWidget = Cast<UTunaSweeperItemRaritySlotAccentWidget>(
+			WidgetTree->FindWidget(FName(TEXT("RaritySlotAccentWidget"))));
+	}
+	if (!RaritySlotAccentWidget)
+	{
+		RaritySlotAccentWidget = WidgetTree->ConstructWidget<UTunaSweeperItemRaritySlotAccentWidget>(
+			UTunaSweeperItemRaritySlotAccentWidget::StaticClass(),
+			FName(TEXT("RaritySlotAccentWidget")));
+	}
 	if (!RaritySlotAccentWidget)
 	{
 		return;
 	}
 
-	int32 InsertIndex = 0;
-	if (SlotBackground && SlotBackground->GetParent() == SlotOverlay)
+	if (RaritySlotAccentWidget->GetParent() == SlotOverlay &&
+		SlotOverlay->GetChildIndex(RaritySlotAccentWidget) != 0)
 	{
-		InsertIndex = SlotOverlay->GetChildIndex(SlotBackground) + 1;
+		SlotOverlay->RemoveChild(RaritySlotAccentWidget);
 	}
-	else if (ItemIconImage && ItemIconImage->GetParent() == SlotOverlay)
+	else if (RaritySlotAccentWidget->GetParent() && RaritySlotAccentWidget->GetParent() != SlotOverlay)
 	{
-		InsertIndex = SlotOverlay->GetChildIndex(ItemIconImage);
+		RaritySlotAccentWidget->RemoveFromParent();
 	}
 
-	UOverlaySlot* AccentSlot = Cast<UOverlaySlot>(SlotOverlay->InsertChildAt(InsertIndex, RaritySlotAccentWidget));
+	UOverlaySlot* AccentSlot = RaritySlotAccentWidget->GetParent() == SlotOverlay
+		? Cast<UOverlaySlot>(RaritySlotAccentWidget->Slot)
+		: Cast<UOverlaySlot>(SlotOverlay->InsertChildAt(0, RaritySlotAccentWidget));
 	if (!AccentSlot)
 	{
-		AccentSlot = SlotOverlay->AddChildToOverlay(RaritySlotAccentWidget);
+		AccentSlot = Cast<UOverlaySlot>(SlotOverlay->InsertChildAt(0, RaritySlotAccentWidget));
 	}
 	if (AccentSlot)
 	{
