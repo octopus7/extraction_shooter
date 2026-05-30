@@ -4,6 +4,8 @@
 #include "AI/TunaSweeperRollingBomber.h"
 #include "AI/TunaSweeperRollingBomberSpawner.h"
 #include "Components/StaticMeshComponent.h"
+#include "Game/TunaSweeperDataValueTypes.h"
+#include "Debuff/TunaSweeperDebuffTypes.h"
 #include "Dom/JsonObject.h"
 #include "Engine/StaticMeshActor.h"
 #include "Engine/StaticMesh.h"
@@ -16,6 +18,7 @@
 #include "Interaction/TunaSweeperLevelTravelInteractableActor.h"
 #include "Interaction/TunaSweeperLootContainerActor.h"
 #include "Interaction/TunaSweeperLootContainerSpawnInteractableActor.h"
+#include "Interaction/TunaSweeperPiggyBankActor.h"
 #include "Interaction/TunaSweeperPickupItemActor.h"
 #include "Interaction/TunaSweeperSandbagCoverActor.h"
 #include "Interaction/TunaSweeperSelfDestructInteractableActor.h"
@@ -62,6 +65,7 @@ namespace TunaSweeperEnemySpawn
 	const TCHAR* DefaultShootingPracticeDummyClassPath = TEXT("/Script/TunaSweeper.TunaSweeperShootingPracticeDummyActor");
 	const TCHAR* DefaultShopClassPath = TEXT("/Script/TunaSweeper.TunaSweeperShopActor");
 	const TCHAR* DefaultWorkbenchClassPath = TEXT("/Script/TunaSweeper.TunaSweeperWorkbenchActor");
+	const TCHAR* DefaultPiggyBankClassPath = TEXT("/Script/TunaSweeper.TunaSweeperPiggyBankActor");
 	const TCHAR* DefaultRollingBomberClassPath = TEXT("/Script/TunaSweeper.TunaSweeperRollingBomber");
 	const TCHAR* DefaultRollingBomberLaunchSoundPath =
 		TEXT("/Game/Audio/SFX/SFX_RollingBomberSpawnerLaunch_FM.SFX_RollingBomberSpawnerLaunch_FM");
@@ -284,6 +288,13 @@ namespace TunaSweeperEnemySpawn
 		{
 			return UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::Workbench;
 		}
+		if (SpawnType == TEXT("piggy_bank") ||
+			SpawnType == TEXT("piggybank") ||
+			SpawnType == TEXT("debug_piggy_bank") ||
+			SpawnType == TEXT("currency_piggy_bank"))
+		{
+			return UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::PiggyBank;
+		}
 		if (SpawnType == TEXT("self_destruct") || SpawnType == TEXT("selfdestruct"))
 		{
 			return UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::SelfDestruct;
@@ -365,6 +376,8 @@ namespace TunaSweeperEnemySpawn
 			return DefaultShopClassPath;
 		case UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::Workbench:
 			return DefaultWorkbenchClassPath;
+		case UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::PiggyBank:
+			return DefaultPiggyBankClassPath;
 		default:
 			return nullptr;
 		}
@@ -399,6 +412,8 @@ namespace TunaSweeperEnemySpawn
 			return FText::FromString(TEXT("\uC0C1\uC810"));
 		case UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::Workbench:
 			return FText::FromString(TEXT("\uC791\uC5C5\uB300"));
+		case UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::PiggyBank:
+			return FText::FromString(TEXT("\uB3C8\uB0B4\uB194"));
 		default:
 			return FText::GetEmpty();
 		}
@@ -907,7 +922,8 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadEnemySpawnData(bool bForceReload)
 		SpawnDefinition.DropContentsId = static_cast<int32>(NumericDropContentsId);
 		SpawnDefinition.ExperienceValue = FMath::Max(0, static_cast<int32>(NumericExperienceValue));
 		SpawnDefinition.MaxHealth = FMath::Max(1.0f, static_cast<float>(NumericMaxHealth));
-		SpawnDefinition.BleedingChanceBonus = FMath::Clamp(static_cast<float>(NumericBleedingChanceBonus), 0.0f, 1.0f);
+		SpawnDefinition.BleedingChanceBonus = TunaSweeperDataValues::ClampProbabilityValue(
+			FMath::RoundToInt(NumericBleedingChanceBonus));
 		SpawnDefinition.BleedingDurationBonusSeconds = FMath::Max(0.0f, static_cast<float>(NumericBleedingDurationBonusSeconds));
 
 		if (SpawnDefinition.LevelName.IsNone())
@@ -1578,6 +1594,13 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadGameplayInteractionActorSpawnData(bool
 		JsonObject->TryGetNumberField(TEXT("workbench_id"), NumericWorkbenchId);
 		SpawnDefinition.WorkbenchId = FMath::Max(1, static_cast<int32>(NumericWorkbenchId));
 
+		double NumericCurrencyGrantAmount = SpawnDefinition.CurrencyGrantAmount;
+		if (!JsonObject->TryGetNumberField(TEXT("currency_grant_amount"), NumericCurrencyGrantAmount))
+		{
+			JsonObject->TryGetNumberField(TEXT("grant_amount"), NumericCurrencyGrantAmount);
+		}
+		SpawnDefinition.CurrencyGrantAmount = FMath::Max(1, static_cast<int32>(NumericCurrencyGrantAmount));
+
 		FString SpeechBubbleWidgetClassPath;
 		double NumericCountdownStartNumber = 3.0;
 		double NumericCountdownStepSeconds = 1.0;
@@ -1789,8 +1812,10 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadGameplayInteractionActorSpawnData(bool
 			FMath::Max(0.01f, StaticMeshPropRelativeScale.Z));
 
 		double NumericPracticeDummyMaxHealth = SpawnDefinition.PracticeDummyMaxHealth;
-		double NumericPracticeDummyCriticalMultiplier = SpawnDefinition.PracticeDummyCriticalDamageMultiplier;
-		double NumericPracticeDummyHeadshotMultiplier = SpawnDefinition.PracticeDummyHeadshotDamageMultiplier;
+		double NumericPracticeDummyCriticalMultiplier =
+			TunaSweeperDataValues::RatioIdentity * SpawnDefinition.PracticeDummyCriticalDamageMultiplier;
+		double NumericPracticeDummyHeadshotMultiplier =
+			TunaSweeperDataValues::RatioIdentity * SpawnDefinition.PracticeDummyHeadshotDamageMultiplier;
 		double NumericPracticeDummyHealthRecoverySeconds = SpawnDefinition.PracticeDummyHealthRecoverySeconds;
 		if (!JsonObject->TryGetNumberField(TEXT("practice_dummy_max_health"), NumericPracticeDummyMaxHealth))
 		{
@@ -1805,10 +1830,14 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadGameplayInteractionActorSpawnData(bool
 		JsonObject->TryGetNumberField(TEXT("recovery_seconds"), NumericPracticeDummyHealthRecoverySeconds);
 		SpawnDefinition.PracticeDummyMaxHealth = FMath::Max(1.0f, static_cast<float>(NumericPracticeDummyMaxHealth));
 		SpawnDefinition.PracticeDummyCriticalDamageMultiplier =
-			FMath::Max(1.0f, static_cast<float>(NumericPracticeDummyCriticalMultiplier));
+			FMath::Max(
+				1.0f,
+				TunaSweeperDataValues::ToRatioFloat(TunaSweeperDataValues::ClampRatioValue(
+					FMath::RoundToInt(NumericPracticeDummyCriticalMultiplier))));
 		SpawnDefinition.PracticeDummyHeadshotDamageMultiplier = FMath::Max(
 			SpawnDefinition.PracticeDummyCriticalDamageMultiplier,
-			static_cast<float>(NumericPracticeDummyHeadshotMultiplier));
+			TunaSweeperDataValues::ToRatioFloat(TunaSweeperDataValues::ClampRatioValue(
+				FMath::RoundToInt(NumericPracticeDummyHeadshotMultiplier))));
 		SpawnDefinition.PracticeDummyHealthRecoverySeconds =
 			FMath::Max(0.05f, static_cast<float>(NumericPracticeDummyHealthRecoverySeconds));
 
@@ -2096,6 +2125,15 @@ void UTunaSweeperEnemySpawnSubsystem::ConfigureGameplayInteractionActor(
 					SpawnDefinition.MarkerWidgetClass,
 					FName(TEXT("ui.interaction.workbench_blueprint_register")));
 			}
+		}
+		break;
+	case EGameplayInteractionActorSpawnType::PiggyBank:
+		if (ATunaSweeperPiggyBankActor* PiggyBankActor = Cast<ATunaSweeperPiggyBankActor>(SpawnedActor))
+		{
+			PiggyBankActor->ConfigurePiggyBankDefaults(
+				SpawnDefinition.CurrencyGrantAmount,
+				SpawnDefinition.InteractionDisplayName,
+				SpawnDefinition.MarkerWidgetClass);
 		}
 		break;
 	case EGameplayInteractionActorSpawnType::SelfDestruct:

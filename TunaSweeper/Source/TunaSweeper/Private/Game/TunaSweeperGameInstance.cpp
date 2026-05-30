@@ -73,10 +73,10 @@ namespace TunaSweeperExperience
 	constexpr int64 ExperienceIncreasePerLevel = 50;
 	constexpr float RaidReturnAnimationDurationSeconds = 3.2f;
 
-	bool TryReadNumberField(
+	bool TryReadDataValueField(
 		const TSharedPtr<FJsonObject>& JsonObject,
 		std::initializer_list<const TCHAR*> FieldNames,
-		float& OutValue)
+		int32& OutValue)
 	{
 		if (!JsonObject.IsValid())
 		{
@@ -88,7 +88,7 @@ namespace TunaSweeperExperience
 		{
 			if (JsonObject->TryGetNumberField(FieldName, NumericValue))
 			{
-				OutValue = static_cast<float>(NumericValue);
+				OutValue = TunaSweeperDataValues::ClampRatioValue(FMath::RoundToInt(NumericValue));
 				return true;
 			}
 		}
@@ -166,19 +166,19 @@ namespace TunaSweeperExperience
 
 		OutReward = FTunaSweeperExperienceLevelReward();
 		OutReward.Level = FMath::RoundToInt(NumericLevel);
-		TryReadNumberField(
+		TryReadDataValueField(
 			JsonObject,
 			{ TEXT("max_health_increase"), TEXT("max_health_bonus"), TEXT("maxHealthIncrease") },
 			OutReward.MaxHealthIncrease);
-		TryReadNumberField(
+		TryReadDataValueField(
 			JsonObject,
 			{ TEXT("max_food_increase"), TEXT("max_fullness_increase"), TEXT("max_hunger_increase"), TEXT("maxFoodIncrease") },
 			OutReward.MaxFoodIncrease);
-		TryReadNumberField(
+		TryReadDataValueField(
 			JsonObject,
 			{ TEXT("max_hydration_increase"), TEXT("max_water_increase"), TEXT("maxHydrationIncrease") },
 			OutReward.MaxHydrationIncrease);
-		TryReadNumberField(
+		TryReadDataValueField(
 			JsonObject,
 			{ TEXT("max_stamina_increase"), TEXT("maxStaminaIncrease") },
 			OutReward.MaxStaminaIncrease);
@@ -439,10 +439,10 @@ void FTunaSweeperExperienceLevelStatBonuses::ClampNonNegative()
 void FTunaSweeperExperienceLevelReward::Normalize()
 {
 	Level = FMath::Max(2, Level);
-	MaxHealthIncrease = FMath::Max(0.0f, MaxHealthIncrease);
-	MaxFoodIncrease = FMath::Max(0.0f, MaxFoodIncrease);
-	MaxHydrationIncrease = FMath::Max(0.0f, MaxHydrationIncrease);
-	MaxStaminaIncrease = FMath::Max(0.0f, MaxStaminaIncrease);
+	MaxHealthIncrease = TunaSweeperDataValues::ClampRatioValue(MaxHealthIncrease);
+	MaxFoodIncrease = TunaSweeperDataValues::ClampRatioValue(MaxFoodIncrease);
+	MaxHydrationIncrease = TunaSweeperDataValues::ClampRatioValue(MaxHydrationIncrease);
+	MaxStaminaIncrease = TunaSweeperDataValues::ClampRatioValue(MaxStaminaIncrease);
 }
 
 void FTunaSweeperPlayerHudState::NormalizeWeightLimits()
@@ -1001,10 +1001,10 @@ FTunaSweeperExperienceLevelStatBonuses UTunaSweeperGameInstance::GetExperienceLe
 			break;
 		}
 
-		Bonuses.MaxHealthBonus += Reward.MaxHealthIncrease;
-		Bonuses.MaxFoodBonus += Reward.MaxFoodIncrease;
-		Bonuses.MaxHydrationBonus += Reward.MaxHydrationIncrease;
-		Bonuses.MaxStaminaBonus += Reward.MaxStaminaIncrease;
+		Bonuses.MaxHealthBonus += TunaSweeperDataValues::ToRatioFloat(Reward.MaxHealthIncrease);
+		Bonuses.MaxFoodBonus += TunaSweeperDataValues::ToRatioFloat(Reward.MaxFoodIncrease);
+		Bonuses.MaxHydrationBonus += TunaSweeperDataValues::ToRatioFloat(Reward.MaxHydrationIncrease);
+		Bonuses.MaxStaminaBonus += TunaSweeperDataValues::ToRatioFloat(Reward.MaxStaminaIncrease);
 	}
 
 	Bonuses.ClampNonNegative();

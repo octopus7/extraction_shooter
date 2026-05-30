@@ -5,6 +5,7 @@
 #include "AutomatedAssetImportData.h"
 #include "Editor.h"
 #include "Framework/Docking/TabManager.h"
+#include "Game/TunaSweeperDataValueTypes.h"
 #include "IAssetTools.h"
 #include "Json.h"
 #include "Misc/FileHelper.h"
@@ -156,6 +157,23 @@ namespace TunaSweeperFMSound
 		return Object->TryGetNumberField(FieldName, Value) ? Value : DefaultValue;
 	}
 
+	float ReadRatioField(const TSharedPtr<FJsonObject>& Object, const TCHAR* FieldName, float DefaultValue)
+	{
+		if (!Object.IsValid())
+		{
+			return DefaultValue;
+		}
+
+		double Value = 0.0;
+		if (!Object->TryGetNumberField(FieldName, Value))
+		{
+			return DefaultValue;
+		}
+
+		return TunaSweeperDataValues::ToRatioFloat(
+			TunaSweeperDataValues::ClampRatioValue(FMath::RoundToInt(Value)));
+	}
+
 	FString ReadStringField(const TSharedPtr<FJsonObject>& Object, const TCHAR* FieldName, const FString& DefaultValue)
 	{
 		if (!Object.IsValid())
@@ -176,7 +194,7 @@ namespace TunaSweeperFMSound
 		Preset.BasePitchHz = FMath::Clamp(ReadFloatField(Object, TEXT("base_pitch_hz"), Preset.BasePitchHz), 20.0f, 8000.0f);
 		Preset.PitchSweepSemitones = FMath::Clamp(ReadFloatField(Object, TEXT("pitch_sweep_semitones"), Preset.PitchSweepSemitones), -48.0f, 48.0f);
 		Preset.Decay = FMath::Clamp(ReadFloatField(Object, TEXT("decay"), Preset.Decay), 0.01f, 3.0f);
-		Preset.FmRatio = FMath::Clamp(ReadFloatField(Object, TEXT("fm_ratio"), Preset.FmRatio), 0.125f, 16.0f);
+		Preset.FmRatio = FMath::Clamp(ReadRatioField(Object, TEXT("fm_ratio"), Preset.FmRatio), 0.125f, 16.0f);
 		Preset.FmAmount = FMath::Clamp(ReadFloatField(Object, TEXT("fm_amount"), Preset.FmAmount), 0.0f, 18.0f);
 		Preset.NoiseAmount = FMath::Clamp(ReadFloatField(Object, TEXT("noise_amount"), Preset.NoiseAmount), 0.0f, 1.0f);
 		Preset.Brightness = FMath::Clamp(ReadFloatField(Object, TEXT("brightness"), Preset.Brightness), 0.0f, 1.0f);
@@ -196,7 +214,10 @@ namespace TunaSweeperFMSound
 		Object->SetNumberField(TEXT("base_pitch_hz"), Preset.BasePitchHz);
 		Object->SetNumberField(TEXT("pitch_sweep_semitones"), Preset.PitchSweepSemitones);
 		Object->SetNumberField(TEXT("decay"), Preset.Decay);
-		Object->SetNumberField(TEXT("fm_ratio"), Preset.FmRatio);
+		Object->SetNumberField(
+			TEXT("fm_ratio"),
+			TunaSweeperDataValues::ClampRatioValue(FMath::RoundToInt(
+				Preset.FmRatio * TunaSweeperDataValues::FixedPointBasis)));
 		Object->SetNumberField(TEXT("fm_amount"), Preset.FmAmount);
 		Object->SetNumberField(TEXT("noise_amount"), Preset.NoiseAmount);
 		Object->SetNumberField(TEXT("brightness"), Preset.Brightness);

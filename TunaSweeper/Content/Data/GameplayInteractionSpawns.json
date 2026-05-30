@@ -5,8 +5,8 @@
     "spawn_type": "shooting_practice_dummy",
     "actor_class": "/Script/TunaSweeper.TunaSweeperShootingPracticeDummyActor",
     "max_health": 100.0,
-    "critical_damage_multiplier": 3.0,
-    "headshot_damage_multiplier": 6.0,
+    "critical_damage_multiplier": 30000,
+    "headshot_damage_multiplier": 60000,
     "health_recovery_seconds": 2.0,
     "location": [1040.0, -120.0, 0.0],
     "rotation": [0.0, 180.0, 0.0],
@@ -31,6 +31,17 @@
     "workbench_id": 1,
     "location": [1080.0, 180.0, 0.0],
     "rotation": [0.0, 180.0, 0.0],
+    "scale": [1.0, 1.0, 1.0]
+  },
+  {
+    "level_name": "BunkerMap",
+    "spawn_id": "TS_DebugPiggyBank_01",
+    "spawn_type": "piggy_bank",
+    "actor_class": "/Script/TunaSweeper.TunaSweeperPiggyBankActor",
+    "interaction_display_name": "돈내놔",
+    "currency_grant_amount": 1000,
+    "location": [180.0, -1000.0, 40.0],
+    "rotation": [0.0, 0.0, 0.0],
     "scale": [1.0, 1.0, 1.0]
   },
   {

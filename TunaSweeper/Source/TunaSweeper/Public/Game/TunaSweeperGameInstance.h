@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
 #include "Effect/TunaSweeperProjectileHitEffectDataAsset.h"
+#include "Game/TunaSweeperDataValueTypes.h"
 #include "Inventory/TunaSweeperInventoryTypes.h"
 #include "Inventory/TunaSweeperSaveGame.h"
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
@@ -121,17 +122,17 @@ struct TUNASWEEPER_API FTunaSweeperExperienceLevelReward
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Experience", meta = (ClampMin = "2", UIMin = "2"))
 	int32 Level = 2;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Experience", meta = (ClampMin = "0.0", UIMin = "0.0"))
-	float MaxHealthIncrease = 0.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Experience", meta = (ClampMin = "0", UIMin = "0"))
+	int32 MaxHealthIncrease = 0;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Experience", meta = (ClampMin = "0.0", UIMin = "0.0"))
-	float MaxFoodIncrease = 0.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Experience", meta = (ClampMin = "0", UIMin = "0"))
+	int32 MaxFoodIncrease = 0;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Experience", meta = (ClampMin = "0.0", UIMin = "0.0"))
-	float MaxHydrationIncrease = 0.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Experience", meta = (ClampMin = "0", UIMin = "0"))
+	int32 MaxHydrationIncrease = 0;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Experience", meta = (ClampMin = "0.0", UIMin = "0.0"))
-	float MaxStaminaIncrease = 0.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Experience", meta = (ClampMin = "0", UIMin = "0"))
+	int32 MaxStaminaIncrease = 0;
 
 	void Normalize();
 };

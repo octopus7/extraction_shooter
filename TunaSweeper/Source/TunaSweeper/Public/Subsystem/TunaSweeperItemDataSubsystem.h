@@ -70,8 +70,8 @@ struct TUNASWEEPER_API FTunaSweeperItemDefinition
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
 	FName ProjectileHitEffectId;
 
-	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
-	float ProjectileDamageMultiplier = 1.0f;
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item", meta = (ClampMin = "0", UIMin = "0"))
+	int32 ProjectileDamageMultiplier = 10000;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
 	int32 ProjectileDamageBonus = 0;

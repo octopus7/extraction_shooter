@@ -5,6 +5,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/PrimitiveComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Game/TunaSweeperDataValueTypes.h"
 #include "Effect/TunaSweeperMeleeImpactBurstActor.h"
 #include "Effect/TunaSweeperMeleeSwingTrailActor.h"
 #include "Engine/StaticMesh.h"
@@ -153,7 +154,7 @@ void ATunaSweeperEnemyCharacter::ConfigureSpawnData(
 	int32 InDropContentsId,
 	float InMaxHealth,
 	int32 InExperienceValue,
-	float InBleedingChanceBonus,
+	int32 InBleedingChanceBonus,
 	float InBleedingDurationBonusSeconds)
 {
 	if (!InBodyMaterial.IsNull())
@@ -171,7 +172,7 @@ void ATunaSweeperEnemyCharacter::ConfigureSpawnData(
 	DropContainerDefinitionId = InDropContainerDefinitionId;
 	DropContentsId = InDropContentsId;
 	ExperienceValue = FMath::Max(0, InExperienceValue);
-	BleedingChanceBonus = FMath::Clamp(InBleedingChanceBonus, 0.0f, 1.0f);
+	BleedingChanceBonus = TunaSweeperDataValues::ClampProbabilityValue(InBleedingChanceBonus);
 	BleedingDurationBonusSeconds = FMath::Max(0.0f, InBleedingDurationBonusSeconds);
 	ApplyVisualMaterials();
 }

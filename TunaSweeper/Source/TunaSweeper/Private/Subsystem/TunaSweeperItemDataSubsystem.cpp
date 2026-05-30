@@ -1,6 +1,7 @@
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
 
 #include "Dom/JsonObject.h"
+#include "Game/TunaSweeperDataValueTypes.h"
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
 #include "Serialization/Csv/CsvParser.h"
@@ -571,7 +572,7 @@ bool UTunaSweeperItemDataSubsystem::LoadItemTableJson()
 		double NumericMagazineCapacity = 0.0;
 		double NumericMagazineCapacityBonus = 0.0;
 		double NumericReloadSeconds = 0.0;
-		double NumericProjectileDamageMultiplier = 1.0;
+		double NumericProjectileDamageMultiplier = TunaSweeperDataValues::RatioIdentity;
 		double NumericProjectileDamageBonus = 0.0;
 		double NumericDefenseValue = 0.0;
 		double NumericUseHealthDelta = 0.0;
@@ -655,7 +656,8 @@ bool UTunaSweeperItemDataSubsystem::LoadItemTableJson()
 			(*JsonObject)->TryGetNumberField(TEXT("ammo_damage_multiplier"), NumericProjectileDamageMultiplier) ||
 			(*JsonObject)->TryGetNumberField(TEXT("damage_multiplier"), NumericProjectileDamageMultiplier))
 		{
-			ItemDefinition.ProjectileDamageMultiplier = FMath::Max(0.0f, static_cast<float>(NumericProjectileDamageMultiplier));
+			ItemDefinition.ProjectileDamageMultiplier =
+				TunaSweeperDataValues::ClampRatioValue(FMath::RoundToInt(NumericProjectileDamageMultiplier));
 		}
 		if ((*JsonObject)->TryGetNumberField(TEXT("projectile_damage_bonus"), NumericProjectileDamageBonus) ||
 			(*JsonObject)->TryGetNumberField(TEXT("ammo_damage_bonus"), NumericProjectileDamageBonus) ||

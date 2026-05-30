@@ -252,10 +252,15 @@ bool UTunaSweeperDebuffDataSubsystem::LoadDebuffDefinitionsJson()
 		double NumericValue = 0.0;
 		if (TunaSweeperDebuffData::TryReadAnyNumberField(
 			JsonObject,
-			{ TEXT("base_apply_chance"), TEXT("apply_chance"), TEXT("base_chance") },
+			{
+				TEXT("base_apply_chance"),
+				TEXT("apply_chance"),
+				TEXT("base_chance")
+			},
 			NumericValue))
 		{
-			Definition.BaseApplyChance = static_cast<float>(NumericValue);
+			Definition.BaseApplyChance =
+				TunaSweeperDataValues::ClampProbabilityValue(FMath::RoundToInt(NumericValue));
 		}
 		if (TunaSweeperDebuffData::TryReadAnyNumberField(
 			JsonObject,
@@ -317,7 +322,7 @@ void UTunaSweeperDebuffDataSubsystem::InstallFallbackDefinitions()
 	BleedingDefinition.DebuffId = TunaSweeperDebuff::BleedingDebuffId();
 	BleedingDefinition.NameStringKey = FName(TEXT("ui.debuff.bleeding"));
 	BleedingDefinition.IconFileName = TEXT("T_UIIcon_Bandage.uasset");
-	BleedingDefinition.BaseApplyChance = 0.04f;
+	BleedingDefinition.BaseApplyChance = 400;
 	BleedingDefinition.DurationSeconds = 12.0f;
 	BleedingDefinition.TickIntervalSeconds = GlobalTickIntervalSeconds;
 	BleedingDefinition.DamagePerTick = 2.0f;

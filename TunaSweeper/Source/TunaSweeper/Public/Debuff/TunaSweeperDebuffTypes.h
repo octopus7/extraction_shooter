@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Game/TunaSweeperDataValueTypes.h"
 #include "TunaSweeperDebuffTypes.generated.h"
 
 namespace TunaSweeperDebuff
@@ -56,8 +57,8 @@ struct TUNASWEEPER_API FTunaSweeperDebuffDefinition
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Debuff")
 	FString IconFileName;
 
-	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Debuff", meta = (ClampMin = "0.0", ClampMax = "1.0"))
-	float BaseApplyChance = 0.04f;
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Debuff", meta = (ClampMin = "0", ClampMax = "10000"))
+	int32 BaseApplyChance = 400;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Debuff", meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float DurationSeconds = 12.0f;
@@ -73,7 +74,7 @@ struct TUNASWEEPER_API FTunaSweeperDebuffDefinition
 
 	void Normalize()
 	{
-		BaseApplyChance = FMath::Clamp(BaseApplyChance, 0.0f, 1.0f);
+		BaseApplyChance = TunaSweeperDataValues::ClampProbabilityValue(BaseApplyChance);
 		DurationSeconds = FMath::Max(0.01f, DurationSeconds);
 		TickIntervalSeconds = FMath::Max(0.01f, TickIntervalSeconds);
 		DamagePerTick = FMath::Max(0.0f, DamagePerTick);

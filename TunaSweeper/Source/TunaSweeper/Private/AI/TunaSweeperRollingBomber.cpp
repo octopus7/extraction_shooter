@@ -65,7 +65,7 @@ ATunaSweeperRollingBomber::ATunaSweeperRollingBomber()
 	MovementSpeedRandomOffset = FVector2D::ZeroVector;
 	ProjectileSpawnOffset = FVector(29.0f, 0.0f, 21.0f);
 	ProjectileDamage = 1.0f;
-	BleedingChanceBonus = 0.30f;
+	BleedingChanceBonus = 3000;
 	ExplosionDamageType = UDamageType::StaticClass();
 	BodyMaterial = TSoftObjectPtr<UMaterialInterface>(
 		FSoftObjectPath(TunaSweeperRollingBomber::BodyMaterialPath));

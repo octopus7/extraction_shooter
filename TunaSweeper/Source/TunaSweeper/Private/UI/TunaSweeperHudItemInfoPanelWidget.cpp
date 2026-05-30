@@ -14,6 +14,7 @@
 #include "Components/VerticalBoxSlot.h"
 #include "Components/Widget.h"
 #include "Engine/Texture2D.h"
+#include "Game/TunaSweeperDataValueTypes.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
 #include "UI/TunaSweeperItemDragDropOperation.h"
@@ -45,7 +46,9 @@ namespace TunaSweeperItemInfoPanel
 		if (!ItemDefinition.AmmoTypeTag.IsNone())
 		{
 			const int32 BaseDamage = FMath::Max(0, FMath::RoundToInt(GetDefaultProjectileDamageAmount()));
-			const float DamageMultiplier = FMath::Max(0.0f, ItemDefinition.ProjectileDamageMultiplier);
+			const float DamageMultiplier = FMath::Max(
+				0.0f,
+				TunaSweeperDataValues::ToRatioFloat(ItemDefinition.ProjectileDamageMultiplier));
 			const int32 DamageBonus = ItemDefinition.ProjectileDamageBonus;
 			const int32 ResultDamage = FMath::Max(0, FMath::RoundToInt(BaseDamage * DamageMultiplier) + DamageBonus);
 

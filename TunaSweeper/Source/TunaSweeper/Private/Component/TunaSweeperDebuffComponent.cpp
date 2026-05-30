@@ -89,7 +89,7 @@ bool UTunaSweeperDebuffComponent::HasDebuff(FName DebuffId) const
 
 bool UTunaSweeperDebuffComponent::TryApplyDebuff(
 	FName DebuffId,
-	float ApplyChanceBonus,
+	int32 ApplyChanceBonus,
 	float DurationBonusSeconds,
 	AActor* SourceActor)
 {
@@ -146,7 +146,7 @@ void UTunaSweeperDebuffComponent::OnRep_ActiveDebuffs()
 
 void UTunaSweeperDebuffComponent::ServerTryApplyDebuff_Implementation(
 	FName DebuffId,
-	float ApplyChanceBonus,
+	int32 ApplyChanceBonus,
 	float DurationBonusSeconds,
 	AActor* SourceActor)
 {
@@ -171,7 +171,7 @@ bool UTunaSweeperDebuffComponent::HasAuthority() const
 
 bool UTunaSweeperDebuffComponent::ApplyDebuffInternal(
 	FName DebuffId,
-	float ApplyChanceBonus,
+	int32 ApplyChanceBonus,
 	float DurationBonusSeconds,
 	AActor* SourceActor)
 {
@@ -191,11 +191,10 @@ bool UTunaSweeperDebuffComponent::ApplyDebuffInternal(
 		return false;
 	}
 
-	const float ApplyChance = FMath::Clamp(
-		Definition.BaseApplyChance + FMath::Max(0.0f, ApplyChanceBonus),
-		0.0f,
-		1.0f);
-	if (ApplyChance <= 0.0f || FMath::FRand() > ApplyChance)
+	const int32 ApplyChance = TunaSweeperDataValues::ClampProbabilityValue(
+		Definition.BaseApplyChance + FMath::Max(0, ApplyChanceBonus));
+	if (ApplyChance <= 0 ||
+		FMath::RandRange(1, TunaSweeperDataValues::ProbabilityMax) > ApplyChance)
 	{
 		return false;
 	}

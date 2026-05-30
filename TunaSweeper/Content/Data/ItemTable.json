@@ -84,7 +84,7 @@
     "category_tag": "item.category.ammo",
     "ammo_type_tag": "ammo.type.pistol",
     "projectile_hit_effect_id": "hit.red_burst",
-    "projectile_damage_multiplier": 1.0,
+    "projectile_damage_multiplier": 10000,
     "projectile_damage_bonus": 1
   },
   {
@@ -97,7 +97,7 @@
     "category_tag": "item.category.ammo",
     "ammo_type_tag": "ammo.type.rifle",
     "projectile_hit_effect_id": "hit.red_burst",
-    "projectile_damage_multiplier": 1.0,
+    "projectile_damage_multiplier": 10000,
     "projectile_damage_bonus": 2
   },
   {
@@ -110,7 +110,7 @@
     "category_tag": "item.category.ammo",
     "ammo_type_tag": "ammo.type.shotgun",
     "projectile_hit_effect_id": "hit.red_burst",
-    "projectile_damage_multiplier": 1.0,
+    "projectile_damage_multiplier": 10000,
     "projectile_damage_bonus": 1
   },
   {

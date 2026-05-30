@@ -76,7 +76,8 @@ ui.item_hover.assign_dismantle_target,분해 슬롯 지정,Assign Dismantle Slot
 ui.item_hover.assign_blueprint_target,설계도 슬롯 지정,Assign Blueprint Slot,設計図スロット指定
 ui.item_hover.name_pattern,{0} #{1},{0} #{1},{0} #{1}
 ui.item_hover.weight_kg_pattern,{0} kg,{0} kg,{0} kg
-ui.item_hover.price_pattern,${0},${0},${0}
+ui.item_hover.price_pattern,{0},{0},{0}
+ui.shop.sell_price_pattern,판매가 {0},Sell {0},売却 {0}
 ui.split.title,수량 나누기,Split Quantity,数量分割
 ui.split.guide,나눌 수량을 입력하세요 (1-{0}),Enter split quantity (1-{0}),分割する数量を入力 (1-{0})
 ui.memo.title,메모,Memo,メモ
@@ -109,6 +110,7 @@ ui.interaction.travel,이동,Travel,移動
 ui.interaction.item_spawn,아이템스폰,Item Spawn,アイテムスポーン
 ui.interaction.container_spawn,상자스폰,Container Spawn,箱スポーン
 ui.interaction.self_destruct,자폭,Self Destruct,自爆
+ui.interaction.piggy_bank,돈내놔,Gimme money,金を出せ
 ui.interaction.housing_management,시설관리,Facility Management,施設管理
 ui.housing.facility.workbench,작업대,Workbench,作業台
 ui.housing.facility.workbench.desc,제작과 수리에 사용할 수 있는 작업대,A functional work surface for crafting and repairs,制作と修理に使える作業台

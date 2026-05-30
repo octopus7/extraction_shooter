@@ -17,6 +17,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "Engine/OverlapResult.h"
 #include "Engine/StaticMesh.h"
+#include "Game/TunaSweeperDataValueTypes.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/DamageType.h"
@@ -1028,7 +1029,8 @@ void ATunaSweeperTopDownCharacter::FireWeapon()
 				if (ItemDataSubsystem->TryGetItemDefinition(LoadedAmmoItemId, AmmoDefinition))
 				{
 					ProjectileHitEffectId = AmmoDefinition.ProjectileHitEffectId;
-					ProjectileDamageMultiplier = AmmoDefinition.ProjectileDamageMultiplier;
+					ProjectileDamageMultiplier =
+						TunaSweeperDataValues::ToRatioFloat(AmmoDefinition.ProjectileDamageMultiplier);
 					ProjectileDamageBonus = AmmoDefinition.ProjectileDamageBonus;
 				}
 			}

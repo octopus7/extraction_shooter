@@ -5,7 +5,7 @@
       "debuff_id": "debuff.bleeding",
       "name_string_key": "ui.debuff.bleeding",
       "icon_file_name": "T_UIIcon_Bandage.uasset",
-      "base_apply_chance": 0.04,
+      "base_apply_chance": 400,
       "duration_seconds": 12.0,
       "damage_per_tick": 2.0,
       "camera_reaction": {

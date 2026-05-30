@@ -115,7 +115,8 @@ public:
 		StaticMeshProp,
 		ShootingPracticeDummy,
 		Shop,
-		Workbench
+		Workbench,
+		PiggyBank
 	};
 
 private:
@@ -131,7 +132,7 @@ private:
 		int32 DropContentsId = INDEX_NONE;
 		int32 ExperienceValue = 30;
 		float MaxHealth = 30.0f;
-		float BleedingChanceBonus = 0.0f;
+		int32 BleedingChanceBonus = 0;
 		float BleedingDurationBonusSeconds = 0.0f;
 	};
 
@@ -225,6 +226,7 @@ private:
 		int32 ContentsId = INDEX_NONE;
 		int32 ShopId = 1;
 		int32 WorkbenchId = 1;
+		int32 CurrencyGrantAmount = 1000;
 		float MinSpawnRadius = 160.0f;
 		float MaxSpawnRadius = 420.0f;
 		float SpawnTraceHeight = 800.0f;

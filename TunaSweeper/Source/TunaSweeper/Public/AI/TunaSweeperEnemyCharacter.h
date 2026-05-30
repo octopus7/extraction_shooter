@@ -47,7 +47,7 @@ public:
 		int32 InDropContentsId,
 		float InMaxHealth,
 		int32 InExperienceValue,
-		float InBleedingChanceBonus = 0.0f,
+		int32 InBleedingChanceBonus = 0,
 		float InBleedingDurationBonusSeconds = 0.0f);
 
 protected:
@@ -83,8 +83,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat", meta = (ClampMin = "1.0", UIMin = "1.0"))
 	float MaxHealth = 30.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat|Debuffs", meta = (ClampMin = "0.0", ClampMax = "1.0", UIMin = "0.0", UIMax = "1.0"))
-	float BleedingChanceBonus = 0.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat|Debuffs", meta = (ClampMin = "0", ClampMax = "10000"))
+	int32 BleedingChanceBonus = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat|Debuffs", meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float BleedingDurationBonusSeconds = 0.0f;

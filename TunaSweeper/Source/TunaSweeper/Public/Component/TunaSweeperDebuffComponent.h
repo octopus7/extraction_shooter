@@ -26,7 +26,7 @@ public:
 	bool HasDebuff(FName DebuffId) const;
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Debuff")
-	bool TryApplyDebuff(FName DebuffId, float ApplyChanceBonus = 0.0f, float DurationBonusSeconds = 0.0f, AActor* SourceActor = nullptr);
+	bool TryApplyDebuff(FName DebuffId, int32 ApplyChanceBonus = 0, float DurationBonusSeconds = 0.0f, AActor* SourceActor = nullptr);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Debuff")
 	bool RemoveDebuff(FName DebuffId);
@@ -42,7 +42,7 @@ protected:
 	void OnRep_ActiveDebuffs();
 
 	UFUNCTION(Server, Reliable)
-	void ServerTryApplyDebuff(FName DebuffId, float ApplyChanceBonus, float DurationBonusSeconds, AActor* SourceActor);
+	void ServerTryApplyDebuff(FName DebuffId, int32 ApplyChanceBonus, float DurationBonusSeconds, AActor* SourceActor);
 
 	UFUNCTION(Server, Reliable)
 	void ServerRemoveDebuff(FName DebuffId);
@@ -52,7 +52,7 @@ protected:
 
 private:
 	bool HasAuthority() const;
-	bool ApplyDebuffInternal(FName DebuffId, float ApplyChanceBonus, float DurationBonusSeconds, AActor* SourceActor);
+	bool ApplyDebuffInternal(FName DebuffId, int32 ApplyChanceBonus, float DurationBonusSeconds, AActor* SourceActor);
 	bool RemoveDebuffInternal(FName DebuffId);
 	int32 RemoveDebuffsInternal(const TArray<FName>& DebuffIds);
 	void ApplyTickDamage(const FTunaSweeperActiveDebuffState& DebuffState);
