@@ -228,6 +228,23 @@ namespace
 		const float Wave = FMath::Sin(NormalizedTime * UE_PI * 3.5f);
 		return 1.0f + Wave * Decay * 0.16f;
 	}
+
+	void ApplyRuntimeTextFont(
+		UTextBlock* TextBlock,
+		const UTextBlock* ReferenceTextBlock,
+		float SizeOffset = 0.0f,
+		ETunaSweeperUIFontWeight Weight = ETunaSweeperUIFontWeight::Preserve)
+	{
+		if (!TextBlock)
+		{
+			return;
+		}
+
+		const float BaseSize = ReferenceTextBlock
+			? ReferenceTextBlock->GetFont().Size
+			: TextBlock->GetFont().Size;
+		TunaSweeperUIFont::ApplyFont(TextBlock, FMath::Max(1.0f, BaseSize + SizeOffset), Weight);
+	}
 }
 
 void UTunaSweeperInteractionMarkerWidget::NativeConstruct()
@@ -531,11 +548,9 @@ void UTunaSweeperInteractionMarkerWidget::EnsureRequirementWidgets()
 		{
 			if (DisplayNameText)
 			{
-				FSlateFontInfo QuantityFont = DisplayNameText->GetFont();
-				QuantityFont.Size = FMath::Max(1, QuantityFont.Size - 1);
-				RequirementQuantityText->SetFont(QuantityFont);
 				RequirementQuantityText->SetColorAndOpacity(DisplayNameText->GetColorAndOpacity());
 			}
+			ApplyRuntimeTextFont(RequirementQuantityText, DisplayNameText, -1.0f);
 			RequirementQuantityText->SetJustification(ETextJustify::Left);
 
 			if (UHorizontalBoxSlot* QuantitySlot = RequirementHorizontalBox->AddChildToHorizontalBox(RequirementQuantityText))
@@ -764,10 +779,7 @@ void UTunaSweeperInteractionMarkerWidget::RebuildMultiOptionList()
 
 		OptionText->SetText(CachedOptionTexts[OptionIndex]);
 		OptionText->SetJustification(ETextJustify::Left);
-		if (DisplayNameText)
-		{
-			OptionText->SetFont(DisplayNameText->GetFont());
-		}
+		ApplyRuntimeTextFont(OptionText, DisplayNameText);
 		OptionText->SetColorAndOpacity(FSlateColor(bFocused ? FLinearColor::Black : FLinearColor::White));
 		if (UHorizontalBoxSlot* TextSlot = OptionContent->AddChildToHorizontalBox(OptionText))
 		{
@@ -811,12 +823,7 @@ void UTunaSweeperInteractionMarkerWidget::RebuildMultiOptionList()
 					FText::FromString(TEXT("x{0}")),
 					FText::AsNumber(CachedRequiredQuantity)));
 				RowRequirementQuantityText->SetJustification(ETextJustify::Left);
-				if (DisplayNameText)
-				{
-					FSlateFontInfo RequirementFont = DisplayNameText->GetFont();
-					RequirementFont.Size = FMath::Max(1, RequirementFont.Size - 1);
-					RowRequirementQuantityText->SetFont(RequirementFont);
-				}
+				ApplyRuntimeTextFont(RowRequirementQuantityText, DisplayNameText, -1.0f);
 				RowRequirementQuantityText->SetColorAndOpacity(FSlateColor(FLinearColor::Black));
 				if (UHorizontalBoxSlot* RequirementQuantitySlot = OptionContent->AddChildToHorizontalBox(RowRequirementQuantityText))
 				{
@@ -837,12 +844,7 @@ void UTunaSweeperInteractionMarkerWidget::RebuildMultiOptionList()
 		KeyPromptBackground->SetPadding(FMargin(5.0f, 0.0f, 5.0f, 0.0f));
 		KeyPromptText->SetText(FText::FromString(TEXT("F")));
 		KeyPromptText->SetJustification(ETextJustify::Center);
-		if (DisplayNameText)
-		{
-			FSlateFontInfo KeyFont = DisplayNameText->GetFont();
-			KeyFont.Size = FMath::Max(1, KeyFont.Size - 2);
-			KeyPromptText->SetFont(KeyFont);
-		}
+		ApplyRuntimeTextFont(KeyPromptText, DisplayNameText, -2.0f);
 		KeyPromptText->SetColorAndOpacity(FSlateColor(FLinearColor::Black));
 		KeyPromptBackground->SetContent(KeyPromptText);
 		if (UHorizontalBoxSlot* KeySlot = OptionContent->AddChildToHorizontalBox(KeyPromptBackground))

@@ -1414,3 +1414,23 @@ A. 아니다. 현재 저장소에는 창고 C++ 액터(`ATunaSweeperStorageActor
 ### Answer
 
 바깥 외부 패널은 작업대까지 담으려고 `780px` 폭으로 잡혀 있었고, 그 안의 상점/창고/전리품 컨테이너는 `530px` 폭으로 좌측 정렬되어 있었다. 그래서 컨테이너 오른쪽에 남는 약 `250px`가 빈 공간처럼 보였다.
+
+## 2026-05-30 17:16:00 (elapsed: 00:00:00)
+
+### Question
+
+단일 상호작용 수정은 확인했는데 기존 다중 상호작용 UI가 깨진 원인만 파악하고 고치지는 말 것.
+
+### Answer
+
+다중 옵션 row를 런타임에서 새로 만들면서 `OptionText`, `KeyPromptText`, 요구 수량 텍스트에 프로젝트 공용 한글 폰트 적용이 보장되지 않는 것이 원인이다. `ApplyFontToWidgetTree()`는 `NativeConstruct()` 시점에 이미 존재하는 위젯만 대상으로 하고, `RebuildMultiOptionList()`에서 나중에 생성한 `UTextBlock`들은 이 패스를 타지 않는다. 결과적으로 일부 런타임 텍스트가 기본 Slate 폰트로 렌더되어 한글 글리프가 네모 박스로 보인다. 옵션 배열 호출 순서는 정상이라 `SetMarkerText()`가 다중 옵션을 덮는 문제는 아니다.
+
+## 2026-05-30 17:17:14 (elapsed: 00:00:00)
+
+### Question
+
+다중 상호작용 UI 깨짐은 코드만 수정하는 범위인지?
+
+### Answer
+
+코드만 수정하는 범위다. 깨짐 원인은 WBP/에셋 자체가 아니라 `RebuildMultiOptionList()`에서 런타임 생성한 `UTextBlock`들이 공용 한글 폰트 적용 시점을 놓친 것이다. 따라서 생성 직후 `TunaSweeperUIFont::ApplyFont()`를 적용하거나 런타임 row 생성 뒤 폰트 적용 패스를 다시 태우는 식으로 C++ 위젯 코드에서 해결하면 된다.
