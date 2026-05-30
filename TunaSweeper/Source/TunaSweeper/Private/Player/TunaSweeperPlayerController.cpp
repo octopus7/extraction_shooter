@@ -480,7 +480,7 @@ void ATunaSweeperPlayerController::PlayerTick(float DeltaTime)
 	FVector AimPoint;
 	FHitResult AimHit;
 	const FVector2D AimScreenOffset = ControlledCharacter->GetWeaponRecoilCrosshairScreenOffset();
-	if (GetMouseAimPointOnPlane(ControlledCharacter->GetActorLocation().Z, AimScreenOffset, AimPoint, &AimHit))
+	if (GetMouseAimPointOnPlane(ControlledCharacter->GetWeaponAimPlaneZ(), AimScreenOffset, AimPoint, &AimHit))
 	{
 		if (AimHit.bBlockingHit &&
 			AimHit.GetActor() &&
@@ -1967,6 +1967,17 @@ bool ATunaSweeperPlayerController::GetMouseAimPointOnPlane(
 		return false;
 	}
 
+	bool bHasPlaneAimPoint = false;
+	if (!FMath::IsNearlyZero(WorldDirection.Z))
+	{
+		const float DistanceToPlane = (PlaneZ - WorldLocation.Z) / WorldDirection.Z;
+		if (DistanceToPlane >= 0.0f)
+		{
+			OutAimPoint = WorldLocation + WorldDirection * DistanceToPlane;
+			bHasPlaneAimPoint = true;
+		}
+	}
+
 	UWorld* World = GetWorld();
 	if (World)
 	{
@@ -1980,7 +1991,10 @@ bool ATunaSweeperPlayerController::GetMouseAimPointOnPlane(
 		const FVector TraceEnd = WorldLocation + WorldDirection * 100000.0f;
 		if (World->LineTraceSingleByChannel(Hit, WorldLocation, TraceEnd, ECC_Visibility, QueryParams) && Hit.bBlockingHit)
 		{
-			OutAimPoint = Hit.ImpactPoint;
+			if (!bHasPlaneAimPoint)
+			{
+				OutAimPoint = Hit.ImpactPoint;
+			}
 			if (OutAimHit)
 			{
 				*OutAimHit = Hit;
@@ -1989,17 +2003,5 @@ bool ATunaSweeperPlayerController::GetMouseAimPointOnPlane(
 		}
 	}
 
-	if (FMath::IsNearlyZero(WorldDirection.Z))
-	{
-		return false;
-	}
-
-	const float DistanceToPlane = (PlaneZ - WorldLocation.Z) / WorldDirection.Z;
-	if (DistanceToPlane < 0.0f)
-	{
-		return false;
-	}
-
-	OutAimPoint = WorldLocation + WorldDirection * DistanceToPlane;
-	return true;
+	return bHasPlaneAimPoint;
 }

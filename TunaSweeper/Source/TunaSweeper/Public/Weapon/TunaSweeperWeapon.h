@@ -36,6 +36,8 @@ public:
 		float ProjectileDamageMultiplier = 1.0f,
 		int32 ProjectileDamageBonus = 0,
 		float SpreadHalfAngleDegrees = 0.0f,
+		const FVector& AimWorldPoint = FVector::ZeroVector,
+		bool bHasAimWorldPoint = false,
 		AActor* AimIntentActor = nullptr,
 		UPrimitiveComponent* AimIntentComponent = nullptr,
 		FVector AimIntentWorldPoint = FVector::ZeroVector,
@@ -53,11 +55,13 @@ public:
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Weapon")
 	bool IsLaserSightEnabled() const;
 
+	FVector GetMuzzleWorldLocation() const;
+
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Weapon")
 	void UpdateLaserSightBeam(
 		const FVector& AimDirection,
-		const FVector& AimIntentWorldPoint,
-		bool bHasAimIntentWorldPoint);
+		const FVector& AimWorldPoint,
+		bool bHasAimWorldPoint);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Weapon")
 	void SetWeaponMeshOverride(

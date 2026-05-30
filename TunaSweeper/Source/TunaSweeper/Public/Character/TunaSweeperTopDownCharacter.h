@@ -122,6 +122,9 @@ public:
 	FVector2D GetWeaponRecoilCrosshairScreenOffset() const;
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Aiming")
+	float GetWeaponAimPlaneZ() const;
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Aiming")
 	bool IsAiming() const { return bIsAiming; }
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Vitals")

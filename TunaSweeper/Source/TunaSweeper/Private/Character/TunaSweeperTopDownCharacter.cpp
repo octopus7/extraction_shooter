@@ -450,6 +450,11 @@ FVector2D ATunaSweeperTopDownCharacter::GetWeaponRecoilCrosshairScreenOffset() c
 	return WeaponRecoilOffsetDegrees * FMath::Max(0.0f, WeaponRecoilScreenPixelsPerDegree);
 }
 
+float ATunaSweeperTopDownCharacter::GetWeaponAimPlaneZ() const
+{
+	return EquippedWeapon ? EquippedWeapon->GetMuzzleWorldLocation().Z : GetActorLocation().Z;
+}
+
 float ATunaSweeperTopDownCharacter::GetStaminaPercent() const
 {
 	return MaxStamina > 0.0f
@@ -579,7 +584,7 @@ void ATunaSweeperTopDownCharacter::UpdateEquippedWeaponLaserSightBeam()
 
 	if (bShouldEnableLaserSight)
 	{
-		EquippedWeapon->UpdateLaserSightBeam(AimDirection, AimIntentWorldPoint, bHasAimIntent);
+		EquippedWeapon->UpdateLaserSightBeam(AimDirection, AimWorldPoint, bHasAimWorldPoint);
 	}
 }
 
@@ -1052,6 +1057,8 @@ void ATunaSweeperTopDownCharacter::FireWeapon()
 		ProjectileDamageMultiplier,
 		ProjectileDamageBonus,
 		SpreadHalfAngleDegrees,
+		AimWorldPoint,
+		bHasAimWorldPoint,
 		bHasAimIntent ? AimIntentActor.Get() : nullptr,
 		bHasAimIntent ? AimIntentComponent.Get() : nullptr,
 		AimIntentWorldPoint,

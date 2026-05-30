@@ -1,5 +1,6 @@
 #include "Weapon/TunaSweeperWeapon.h"
 
+#include "CollisionQueryParams.h"
 #include "Component/TunaSweeperLaserSightComponent.h"
 #include "Components/SceneComponent.h"
 #include "Components/StaticMeshComponent.h"
@@ -32,6 +33,36 @@ namespace
 		}
 
 		return FMath::VRandCone(SafeDirection, FMath::DegreesToRadians(SafeSpreadDegrees)).GetSafeNormal();
+	}
+
+	FVector ResolveMuzzleLevelAimDirection(
+		const FVector& MuzzleWorldLocation,
+		const FVector& AimWorldPoint,
+		bool bHasAimWorldPoint,
+		const FVector& AimDirection,
+		const FVector& FallbackForward)
+	{
+		FVector ResolvedDirection = FVector::ZeroVector;
+		if (bHasAimWorldPoint)
+		{
+			const FVector MuzzleLevelAimPoint(AimWorldPoint.X, AimWorldPoint.Y, MuzzleWorldLocation.Z);
+			ResolvedDirection = (MuzzleLevelAimPoint - MuzzleWorldLocation).GetSafeNormal2D();
+		}
+
+		if (ResolvedDirection.IsNearlyZero())
+		{
+			ResolvedDirection = AimDirection.GetSafeNormal2D();
+		}
+		if (ResolvedDirection.IsNearlyZero())
+		{
+			ResolvedDirection = FallbackForward.GetSafeNormal2D();
+		}
+		if (ResolvedDirection.IsNearlyZero())
+		{
+			ResolvedDirection = FVector::ForwardVector;
+		}
+
+		return ResolvedDirection;
 	}
 
 	void IgnoreNearbyPlayerPassthroughCovers(ATunaSweeperProjectile* Projectile, APawn* InstigatorPawn)
@@ -123,27 +154,56 @@ bool ATunaSweeperWeapon::IsLaserSightEnabled() const
 	return LaserSightComponent && LaserSightComponent->IsLaserSightEnabled();
 }
 
+FVector ATunaSweeperWeapon::GetMuzzleWorldLocation() const
+{
+	return MuzzlePoint ? MuzzlePoint->GetComponentLocation() : GetActorLocation();
+}
+
 void ATunaSweeperWeapon::UpdateLaserSightBeam(
 	const FVector& AimDirection,
-	const FVector& AimIntentWorldPoint,
-	bool bHasAimIntentWorldPoint)
+	const FVector& AimWorldPoint,
+	bool bHasAimWorldPoint)
 {
 	if (!LaserSightComponent || !MuzzlePoint)
 	{
 		return;
 	}
 
-	const FVector BeamStartWorld = MuzzlePoint->GetComponentLocation();
-	FVector BeamEndWorld = AimIntentWorldPoint;
-	if (!bHasAimIntentWorldPoint)
+	const FVector BeamStartWorld = GetMuzzleWorldLocation();
+	const FVector LaserDirection = ResolveMuzzleLevelAimDirection(
+		BeamStartWorld,
+		AimWorldPoint,
+		bHasAimWorldPoint,
+		AimDirection,
+		GetActorForwardVector());
+	const FVector TraceEndWorld =
+		BeamStartWorld + LaserDirection * FMath::Max(1.0f, LaserSightFallbackRange);
+	FVector BeamEndWorld = TraceEndWorld;
+
+	if (UWorld* World = GetWorld())
 	{
-		FVector ShotDirection = AimDirection.GetSafeNormal2D();
-		if (ShotDirection.IsNearlyZero())
+		FCollisionQueryParams QueryParams(SCENE_QUERY_STAT(TunaSweeperLaserSight), false);
+		QueryParams.AddIgnoredActor(this);
+		if (AActor* OwnerActor = GetOwner())
 		{
-			ShotDirection = GetActorForwardVector().GetSafeNormal2D();
+			QueryParams.AddIgnoredActor(OwnerActor);
+		}
+		if (APawn* InstigatorPawn = GetInstigator())
+		{
+			QueryParams.AddIgnoredActor(InstigatorPawn);
 		}
 
-		BeamEndWorld = BeamStartWorld + ShotDirection * FMath::Max(1.0f, LaserSightFallbackRange);
+		FHitResult LaserHit;
+		if (World->LineTraceSingleByChannel(
+			LaserHit,
+			BeamStartWorld,
+			TraceEndWorld,
+			ECC_Visibility,
+			QueryParams) &&
+			LaserHit.bBlockingHit)
+		{
+			BeamEndWorld = LaserHit.ImpactPoint;
+		}
 	}
 
 	LaserSightComponent->SetBeamEnd(
@@ -189,6 +249,8 @@ void ATunaSweeperWeapon::Fire(
 		1.0f,
 		0,
 		0.0f,
+		FVector::ZeroVector,
+		false,
 		nullptr,
 		nullptr,
 		FVector::ZeroVector,
@@ -203,6 +265,8 @@ void ATunaSweeperWeapon::FireWithAimIntent(
 	float ProjectileDamageMultiplier,
 	int32 ProjectileDamageBonus,
 	float SpreadHalfAngleDegrees,
+	const FVector& AimWorldPoint,
+	bool bHasAimWorldPoint,
 	AActor* AimIntentActor,
 	UPrimitiveComponent* AimIntentComponent,
 	FVector AimIntentWorldPoint,
@@ -220,14 +284,13 @@ void ATunaSweeperWeapon::FireWithAimIntent(
 		return;
 	}
 
-	const FVector SpawnLocation = MuzzlePoint ? MuzzlePoint->GetComponentLocation() : GetActorLocation();
-	FVector ShotDirection = bHasAimIntentWorldPoint
-		? (AimIntentWorldPoint - SpawnLocation).GetSafeNormal()
-		: AimDirection.GetSafeNormal2D();
-	if (ShotDirection.IsNearlyZero())
-	{
-		ShotDirection = GetActorForwardVector().GetSafeNormal2D();
-	}
+	const FVector SpawnLocation = GetMuzzleWorldLocation();
+	const FVector ShotDirection = ResolveMuzzleLevelAimDirection(
+		SpawnLocation,
+		AimWorldPoint,
+		bHasAimWorldPoint,
+		AimDirection,
+		GetActorForwardVector());
 
 	TSubclassOf<ATunaSweeperProjectile> LoadedProjectileClass = ProjectileClass.LoadSynchronous();
 	if (!LoadedProjectileClass)
