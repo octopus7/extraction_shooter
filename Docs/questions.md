@@ -1394,3 +1394,13 @@ A. 아니다. 현재 저장소에는 창고 C++ 액터(`ATunaSweeperStorageActor
 ### Answer
 
 맞다. 투명 PNG 자체에는 검은 배경이 묻어 있지 않다. 로컬 PNG의 모서리와 가장자리 알파값을 확인했을 때 하트, 물방울, 고기 아이콘 모두 `0`으로 투명했고, UE 텍스처 asset도 alpha channel을 가진다. 화면에서 보이는 검은 원형 띠는 `WBP_HudBottomStatus` 생성 코드의 `HealthBackdrop`/`HydrationBackdrop`/`HungerBackdrop` 배경 레이어와 링 track 색상에서 나온 것이다.
+
+## 2026-05-30 16:47:48 (elapsed: 00:07:00)
+
+### Question
+
+상점, 창고 우측이 비어있는데 이유가 뭐야. 전리품도 마찬가지네.
+
+### Answer
+
+주 원인은 외부 패널 슬롯이 작업대 UI 기준 폭으로 잡혀 있는데, 상점/창고/전리품 컨테이너 위젯은 그보다 좁은 폭으로 좌측 정렬되어 있기 때문이다. `WBP_HudExternalPanel` 생성 코드에서 외부 패널 루트와 캔버스 슬롯은 `WorkbenchPanelWidth = 780` 기준으로 잡고, 그 안의 `LootContainerWidget`은 `LootContainerPanelWidth = 14 * 2 + 5 * 96 + 22 = 530` 폭으로 배치한다. 그래서 상점/창고/전리품 모드에서는 오른쪽 약 250px가 투명한 예약 영역처럼 남는다. 전리품도 같은 `UTunaSweeperLootContainerWidget` 경로를 쓰므로 동일하게 보인다. 별도로 그리드 안의 빈 칸은 슬롯 수를 5열 단위로 올림 처리하는 의도된 결과다. 상점 6개는 10칸으로, 전리품 9/10은 10칸으로 보이고, 창고는 100칸 용량 중 비어 있는 슬롯을 그대로 표시한다.

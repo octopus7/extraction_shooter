@@ -348,10 +348,9 @@ void UTunaSweeperMemoWidget::RebuildMemoList(const TArray<FTunaSweeperMemoListEn
 			continue;
 		}
 
-		const FString LabelText = FString::Printf(
-			TEXT("#%02d  %s"),
-			Entry.MemoId,
-			Entry.bAcquired ? *Entry.Title.ToString() : TEXT("???"));
+		const FString LabelText = Entry.bAcquired
+			? FString::Printf(TEXT("#%02d  %s"), Entry.MemoId, *Entry.Title.ToString())
+			: FString(TEXT("???"));
 		EntryWidget->InitializeMemoEntry(
 			Entry.MemoId,
 			FText::FromString(LabelText),

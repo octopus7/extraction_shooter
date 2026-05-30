@@ -14,8 +14,11 @@
 #include "Components/TextBlock.h"
 #include "Components/VerticalBox.h"
 #include "Components/VerticalBoxSlot.h"
+#include "Fonts/FontMeasure.h"
+#include "Framework/Application/SlateApplication.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "Player/TunaSweeperPlayerController.h"
+#include "Rendering/SlateRenderer.h"
 #include "Styling/SlateBrush.h"
 #include "Subsystem/TunaSweeperHousingSubsystem.h"
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
@@ -28,6 +31,9 @@ namespace
 	constexpr float QuestListPanelPadding = 12.0f;
 	constexpr float QuestListEntryWidth = QuestListWidth - QuestListPanelPadding * 2.0f;
 	constexpr float QuestListEntrySpacing = 6.0f;
+	constexpr float QuestTabCountBadgeMinWidth = 22.0f;
+	constexpr float QuestTabCountBadgeHorizontalPadding = 5.0f;
+	constexpr float QuestTabCountBadgeGap = 2.0f;
 
 	FSlateBrush MakeQuestBoxBrush(
 		const FVector2D& ImageSize,
@@ -51,6 +57,47 @@ namespace
 		ChildSize.SizeRule = SizeRule;
 		ChildSize.Value = Value;
 		return ChildSize;
+	}
+
+	float EstimateQuestTextWidth(const FString& Text, float FontSize)
+	{
+		float Width = 0.0f;
+		for (const TCHAR Character : Text)
+		{
+			if (FChar::IsWhitespace(Character))
+			{
+				Width += FontSize * 0.36f;
+			}
+			else if (Character < 0x80)
+			{
+				Width += FontSize * 0.54f;
+			}
+			else
+			{
+				Width += FontSize * 0.94f;
+			}
+		}
+
+		return Width;
+	}
+
+	float MeasureQuestTextWidth(const FText& Text, const FSlateFontInfo& FontInfo)
+	{
+		const FString TextString = Text.ToString();
+		if (TextString.IsEmpty())
+		{
+			return 0.0f;
+		}
+
+		if (FSlateApplication::IsInitialized())
+		{
+			if (FSlateRenderer* Renderer = FSlateApplication::Get().GetRenderer())
+			{
+				return Renderer->GetFontMeasureService()->Measure(TextString, FontInfo).X;
+			}
+		}
+
+		return EstimateQuestTextWidth(TextString, static_cast<float>(FontInfo.Size));
 	}
 }
 
@@ -739,9 +786,9 @@ void UTunaSweeperQuestWidget::BuildQuestWidget()
 
 		if (CountBadge && CountText)
 		{
-			CountBadge->SetPadding(FMargin(5.0f, 1.0f));
+			CountBadge->SetPadding(FMargin(QuestTabCountBadgeHorizontalPadding, 1.0f));
 			CountBadge->SetBrush(MakeQuestBoxBrush(
-				FVector2D(22.0f, 15.0f),
+				FVector2D(QuestTabCountBadgeMinWidth, 15.0f),
 				FLinearColor(0.06f, 0.08f, 0.085f, 0.86f),
 				6.0f,
 				FLinearColor(0.68f, 0.78f, 0.80f, 0.70f),
@@ -756,9 +803,8 @@ void UTunaSweeperQuestWidget::BuildQuestWidget()
 
 			if (UOverlaySlot* BadgeSlot = Content->AddChildToOverlay(CountBadge))
 			{
-				BadgeSlot->SetHorizontalAlignment(HAlign_Left);
+				BadgeSlot->SetHorizontalAlignment(HAlign_Center);
 				BadgeSlot->SetVerticalAlignment(VAlign_Center);
-				BadgeSlot->SetPadding(FMargin(6.0f, 0.0f, 0.0f, 0.0f));
 			}
 		}
 
@@ -991,6 +1037,7 @@ void UTunaSweeperQuestWidget::UpdateTabButtonStates()
 		}
 
 		const bool bActive = ActiveFilter == Tab.Filter;
+		const FText TabLabel = GetQuestText(Tab.TextKey);
 		if (Tab.Button)
 		{
 			Tab.Button->SetVisibility(ESlateVisibility::Visible);
@@ -1001,7 +1048,7 @@ void UTunaSweeperQuestWidget::UpdateTabButtonStates()
 		}
 		if (Tab.Text)
 		{
-			Tab.Text->SetText(GetQuestText(Tab.TextKey));
+			Tab.Text->SetText(TabLabel);
 			Tab.Text->SetColorAndOpacity(FSlateColor(
 				bActive
 					? FLinearColor(0.03f, 0.05f, 0.06f, 1.0f)
@@ -1009,9 +1056,19 @@ void UTunaSweeperQuestWidget::UpdateTabButtonStates()
 		}
 		if (Tab.CountBadge && Tab.CountText)
 		{
+			const FText CountLabel = FText::AsNumber(CountVisibleQuestsForFilter(Tab.Filter));
+			Tab.CountText->SetText(CountLabel);
 			Tab.CountBadge->SetVisibility(ESlateVisibility::HitTestInvisible);
-			Tab.CountText->SetText(FText::AsNumber(CountVisibleQuestsForFilter(Tab.Filter)));
 			Tab.CountText->SetColorAndOpacity(FSlateColor(FLinearColor(0.90f, 0.96f, 0.96f, 1.0f)));
+			const float TextWidth = Tab.Text
+				? MeasureQuestTextWidth(TabLabel, Tab.Text->GetFont())
+				: 0.0f;
+			const float CountTextWidth = MeasureQuestTextWidth(CountLabel, Tab.CountText->GetFont());
+			const float BadgeWidth = FMath::Max(
+				QuestTabCountBadgeMinWidth,
+				CountTextWidth + QuestTabCountBadgeHorizontalPadding * 2.0f);
+			const float BadgeOffsetX = TextWidth * 0.5f + QuestTabCountBadgeGap + BadgeWidth * 0.5f;
+			Tab.CountBadge->SetRenderTranslation(FVector2D(BadgeOffsetX, 0.0f));
 		}
 	}
 }
