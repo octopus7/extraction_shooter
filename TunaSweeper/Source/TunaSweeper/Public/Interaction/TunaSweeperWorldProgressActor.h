@@ -36,16 +36,19 @@ public:
 		int32 InInitialProgressQuantity,
 		const FText& InRequiredItemDisplayName,
 		const FVector& InBlockingBoxExtent,
-		TSoftClassPtr<AActor> InCompletedReplacementActorClass);
+		TSoftClassPtr<AActor> InCompletedReplacementActorClass,
+		FName InDisplayNameStringKey = NAME_None,
+		FName InInteractionDisplayNameStringKey = NAME_None,
+		FName InRequiredItemDisplayNameStringKey = NAME_None);
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Interaction")
 	UTunaSweeperInteractableComponent* GetInteractableComponent() const { return InteractableComponent; }
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|World Progress")
-	FText GetDisplayName() const { return DisplayName; }
+	FText GetDisplayName() const;
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|World Progress")
-	FText GetRequiredItemDisplayName() const { return RequiredItemDisplayName; }
+	FText GetRequiredItemDisplayName() const;
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|World Progress")
 	int32 GetRequiredItemId() const { return RequiredItemId; }
@@ -100,7 +103,13 @@ protected:
 	FText DisplayName = FText::FromString(TEXT("\uBD80\uC11C\uC9C4 \uB2E4\uB9AC"));
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "World Progress")
+	FName DisplayNameStringKey;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "World Progress")
 	FText InteractionDisplayName = FText::FromString(TEXT("\uC218\uB9AC\uD558\uAE30"));
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "World Progress")
+	FName InteractionDisplayNameStringKey;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "World Progress")
 	int32 RequiredItemId = 6002;
@@ -115,6 +124,9 @@ protected:
 	FText RequiredItemDisplayName = FText::FromString(TEXT("\uBAA9\uC7AC"));
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "World Progress")
+	FName RequiredItemDisplayNameStringKey;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "World Progress")
 	FVector BlockingBoxExtent = FVector(260.0f, 55.0f, 140.0f);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "World Progress")
@@ -124,6 +136,8 @@ private:
 	void ApplyBridgeVisualMesh();
 	void ApplyCollisionDefaults();
 	void RefreshPresentation();
+	FText ResolveLocalizedText(FName StringKey, const FText& FallbackText) const;
+	FText ResolveInteractionDisplayName() const;
 	void ApplySavedState();
 	void CompleteAndReplace(bool bSaveImmediately);
 	UTexture2D* LoadRequiredItemIconTexture() const;

@@ -68,6 +68,11 @@ void ATunaSweeperPickupItemActor::BeginPlay()
 	EnsureFloorIconWidgetClass();
 	RefreshItemPresentation();
 	UpdateFloorIconBillboardRotation();
+	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
+	{
+		TunaGameInstance->OnLanguageChanged.RemoveAll(this);
+		TunaGameInstance->OnLanguageChanged.AddUObject(this, &ATunaSweeperPickupItemActor::RefreshItemPresentation);
+	}
 }
 
 void ATunaSweeperPickupItemActor::Tick(float DeltaSeconds)
@@ -75,6 +80,16 @@ void ATunaSweeperPickupItemActor::Tick(float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 
 	UpdateFloorIconBillboardRotation();
+}
+
+void ATunaSweeperPickupItemActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
+	{
+		TunaGameInstance->OnLanguageChanged.RemoveAll(this);
+	}
+
+	Super::EndPlay(EndPlayReason);
 }
 
 void ATunaSweeperPickupItemActor::SetItemId(int32 InItemId)

@@ -165,8 +165,11 @@ private:
 		TSoftClassPtr<ATunaSweeperWorldProgressActor> ProgressActorClass;
 		TSoftClassPtr<AActor> CompletedActorClass;
 		FText DisplayName;
+		FName DisplayNameStringKey;
 		FText InteractionDisplayName;
+		FName InteractionDisplayNameStringKey;
 		FText RequiredItemDisplayName;
+		FName RequiredItemDisplayNameStringKey;
 		FVector Location = FVector::ZeroVector;
 		FRotator Rotation = FRotator::ZeroRotator;
 		FVector BoxExtent = FVector(260.0f, 55.0f, 140.0f);
@@ -199,12 +202,14 @@ private:
 		FRotator Rotation = FRotator::ZeroRotator;
 		FVector Scale = FVector::OneVector;
 		FText InteractionDisplayName;
+		FName InteractionDisplayNameStringKey;
 		TSoftClassPtr<UTunaSweeperInteractionMarkerWidget> MarkerWidgetClass;
 
 		FName TargetLevelName;
 		TSoftObjectPtr<UMediaSource> TransitionMediaSource;
 		TSoftClassPtr<UTunaSweeperLevelTransitionWidget> TransitionWidgetClass;
 		FText TransitionMessage;
+		FName TransitionMessageStringKey;
 		TSoftObjectPtr<UStaticMesh> LevelTravelVisualMesh;
 		FVector LevelTravelVisualScale = FVector(0.75f, 0.75f, 0.75f);
 		FVector LevelTravelVisualRelativeLocation = FVector::ZeroVector;

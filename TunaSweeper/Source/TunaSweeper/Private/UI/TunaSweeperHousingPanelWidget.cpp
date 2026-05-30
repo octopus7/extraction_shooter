@@ -7,15 +7,18 @@
 #include "Components/TextBlock.h"
 #include "Components/VerticalBox.h"
 #include "Components/VerticalBoxSlot.h"
+#include "Game/TunaSweeperGameInstance.h"
 #include "Player/TunaSweeperPlayerController.h"
 #include "Styling/SlateBrush.h"
 #include "Subsystem/TunaSweeperHousingSubsystem.h"
 #include "TimerManager.h"
 #include "UI/TunaSweeperUIFont.h"
+#include "UI/TunaSweeperUiText.h"
 
 namespace TunaSweeperHousingPanel
 {
 	constexpr float StoreHoldSeconds = 0.65f;
+	using TunaSweeperUiText::ResolveUiText;
 
 	FSlateBrush MakePanelBrush(
 		const FVector2D& ImageSize,
@@ -283,11 +286,22 @@ void UTunaSweeperHousingPanelWidget::RefreshHousingPanel()
 	HousingSubsystem->GetFacilityViews(FacilityViews);
 	RebuildFacilityEntries(FacilityViews);
 
+	const UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+	if (TitleText)
+	{
+		TitleText->SetText(TunaSweeperHousingPanel::ResolveUiText(
+			TunaGameInstance,
+			TEXT("ui.housing.title"),
+			TEXT("Bunker Housing")));
+	}
 	if (GuideText)
 	{
 		if (HousingSubsystem->HasActivePlacement())
 		{
-			GuideText->SetText(FText::FromString(TEXT("Q/E rotate. Click floor to place.")));
+			GuideText->SetText(TunaSweeperHousingPanel::ResolveUiText(
+				TunaGameInstance,
+				TEXT("ui.housing.guide.place"),
+				TEXT("Q/E rotate. Click floor to place.")));
 			GuideText->SetColorAndOpacity(FSlateColor(
 				HousingSubsystem->GetActivePlacementStatus() == ETunaSweeperHousingPlacementStatus::Valid
 					? FLinearColor(0.60f, 0.92f, 1.0f, 1.0f)
@@ -295,7 +309,10 @@ void UTunaSweeperHousingPanelWidget::RefreshHousingPanel()
 		}
 		else
 		{
-			GuideText->SetText(FText::FromString(TEXT("Click stored or ready facilities. Hold placed entries to store.")));
+			GuideText->SetText(TunaSweeperHousingPanel::ResolveUiText(
+				TunaGameInstance,
+				TEXT("ui.housing.guide.select"),
+				TEXT("Click stored or ready facilities. Hold placed entries to store.")));
 			GuideText->SetColorAndOpacity(FSlateColor(FLinearColor(0.66f, 0.78f, 0.82f, 1.0f)));
 		}
 	}
@@ -325,6 +342,11 @@ void UTunaSweeperHousingPanelWidget::NativeConstruct()
 		HousingSubsystem->OnHousingStateChanged.RemoveAll(this);
 		HousingSubsystem->OnHousingStateChanged.AddUObject(this, &UTunaSweeperHousingPanelWidget::HandleHousingStateChanged);
 	}
+	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
+	{
+		TunaGameInstance->OnLanguageChanged.RemoveAll(this);
+		TunaGameInstance->OnLanguageChanged.AddUObject(this, &UTunaSweeperHousingPanelWidget::RefreshHousingPanel);
+	}
 
 	RefreshHousingPanel();
 }
@@ -336,6 +358,10 @@ void UTunaSweeperHousingPanelWidget::NativeDestruct()
 		: nullptr)
 	{
 		HousingSubsystem->OnHousingStateChanged.RemoveAll(this);
+	}
+	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
+	{
+		TunaGameInstance->OnLanguageChanged.RemoveAll(this);
 	}
 
 	Super::NativeDestruct();
@@ -383,7 +409,10 @@ void UTunaSweeperHousingPanelWidget::BuildPanelWidget()
 		1.0f));
 	RootPanel->SetContent(PanelStack);
 
-	TitleText->SetText(FText::FromString(TEXT("Bunker Housing")));
+	TitleText->SetText(TunaSweeperHousingPanel::ResolveUiText(
+		GetGameInstance<UTunaSweeperGameInstance>(),
+		TEXT("ui.housing.title"),
+		TEXT("Bunker Housing")));
 	TitleText->SetColorAndOpacity(FSlateColor(FLinearColor(0.86f, 0.96f, 1.0f, 1.0f)));
 	TunaSweeperUIFont::ApplyFont(TitleText, 21, ETunaSweeperUIFontWeight::Bold);
 	if (UVerticalBoxSlot* TitleSlot = PanelStack->AddChildToVerticalBox(TitleText))

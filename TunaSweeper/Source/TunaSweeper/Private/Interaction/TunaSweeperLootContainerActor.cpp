@@ -44,9 +44,10 @@ ATunaSweeperLootContainerActor::ATunaSweeperLootContainerActor()
 	InteractableComponent = CreateDefaultSubobject<UTunaSweeperInteractableComponent>(TEXT("Interactable"));
 	InteractableComponent->SetupAttachment(RootComponent);
 	InteractableComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 90.0f));
-	InteractableComponent->SetInteractionTypeAndDisplayName(
+	InteractableComponent->SetInteractionTypeDisplayNameAndStringKey(
 		ETunaSweeperInteractionType::LootContainerOpen,
-		FText::FromString(TEXT("\uC5F4\uAE30")));
+		FText::FromString(TEXT("\uC5F4\uAE30")),
+		FName(TEXT("ui.interaction.open")));
 }
 
 void ATunaSweeperLootContainerActor::OnConstruction(const FTransform& Transform)
@@ -61,6 +62,11 @@ void ATunaSweeperLootContainerActor::BeginPlay()
 	Super::BeginPlay();
 	RefreshContainerPresentation();
 	ApplyLidRotation(bLidOpen ? OpenLidRelativeRotation : ClosedLidRelativeRotation);
+	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
+	{
+		TunaGameInstance->OnLanguageChanged.RemoveAll(this);
+		TunaGameInstance->OnLanguageChanged.AddUObject(this, &ATunaSweeperLootContainerActor::HandleLanguageChanged);
+	}
 	SetActorTickEnabled(false);
 }
 
@@ -99,6 +105,11 @@ void ATunaSweeperLootContainerActor::EndPlay(const EEndPlayReason::Type EndPlayR
 	{
 		RuntimeGameInstance->OnInventoryStateChanged.RemoveAll(this);
 		RuntimeGameInstance->OnActiveLootContainerUiClosed.RemoveAll(this);
+		RuntimeGameInstance->OnLanguageChanged.RemoveAll(this);
+	}
+	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
+	{
+		TunaGameInstance->OnLanguageChanged.RemoveAll(this);
 	}
 
 	Super::EndPlay(EndPlayReason);
@@ -154,6 +165,7 @@ bool ATunaSweeperLootContainerActor::OpenRuntimeContainer(
 		{
 			RuntimeGameInstance->OnInventoryStateChanged.RemoveAll(this);
 			RuntimeGameInstance->OnActiveLootContainerUiClosed.RemoveAll(this);
+			RuntimeGameInstance->OnLanguageChanged.RemoveAll(this);
 		}
 
 		RuntimeGameInstance = TunaGameInstance;
@@ -161,6 +173,8 @@ bool ATunaSweeperLootContainerActor::OpenRuntimeContainer(
 		TunaGameInstance->OnInventoryStateChanged.AddUObject(this, &ATunaSweeperLootContainerActor::CaptureRuntimeContentsFromActiveContainer);
 		TunaGameInstance->OnActiveLootContainerUiClosed.RemoveAll(this);
 		TunaGameInstance->OnActiveLootContainerUiClosed.AddUObject(this, &ATunaSweeperLootContainerActor::HandleActiveLootContainerUiClosed);
+		TunaGameInstance->OnLanguageChanged.RemoveAll(this);
+		TunaGameInstance->OnLanguageChanged.AddUObject(this, &ATunaSweeperLootContainerActor::HandleLanguageChanged);
 	}
 
 	if (bHasRuntimeContainerState && !IsRuntimeContainerStateValid(TunaGameInstance))
@@ -234,9 +248,10 @@ void ATunaSweeperLootContainerActor::RefreshContainerPresentation()
 {
 	if (InteractableComponent)
 	{
-		InteractableComponent->SetInteractionTypeAndDisplayName(
+		InteractableComponent->SetInteractionTypeDisplayNameAndStringKey(
 			ETunaSweeperInteractionType::LootContainerOpen,
-			FText::FromString(TEXT("\uC5F4\uAE30")));
+			FText::FromString(TEXT("\uC5F4\uAE30")),
+			FName(TEXT("ui.interaction.open")));
 		ApplyOpenedMarkerState();
 	}
 
@@ -292,6 +307,32 @@ void ATunaSweeperLootContainerActor::RefreshContainerPresentation()
 
 	VisualMesh->SetRelativeScale3D(Definition.MeshScale);
 	ApplyLidRotation(bLidOpen ? OpenLidRelativeRotation : ClosedLidRelativeRotation);
+}
+
+void ATunaSweeperLootContainerActor::HandleLanguageChanged()
+{
+	if (bHasRuntimeContainerState)
+	{
+		FTunaSweeperLootContainerInstance UpdatedInstance;
+		if (BuildContainerInstance(UpdatedInstance))
+		{
+			RuntimeDisplayName = UpdatedInstance.DisplayName;
+			RuntimeCapacity = FMath::Max(0, UpdatedInstance.Capacity);
+			if (UTunaSweeperGameInstance* TunaGameInstance = RuntimeGameInstance.Get())
+			{
+				if (TunaGameInstance->HasActiveLootContainer() &&
+					TunaGameInstance->GetActiveLootContainerOwner() == this)
+				{
+					TunaGameInstance->SetActiveLootContainerRuntimeSlots(
+						BuildRuntimeContainerInstance(),
+						RuntimeSlots,
+						this);
+				}
+			}
+		}
+	}
+
+	RefreshContainerPresentation();
 }
 
 void ATunaSweeperLootContainerActor::ResetRuntimeContainerState()

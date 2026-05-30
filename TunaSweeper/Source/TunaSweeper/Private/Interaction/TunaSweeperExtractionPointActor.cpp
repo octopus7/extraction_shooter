@@ -99,6 +99,7 @@ ATunaSweeperExtractionPointActor::ATunaSweeperExtractionPointActor()
 	SmokeSignalSpriteMaterial = TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath(SmokeSignalMaterialPath));
 	TransitionWidgetClass = TSoftClassPtr<UTunaSweeperLevelTransitionWidget>(FSoftObjectPath(LevelTransitionWidgetClassPath));
 	TransitionMessage = FText::FromString(TEXT("Returning to Bunker"));
+	TransitionMessageStringKey = FName(TEXT("ui.transition.returning_to_bunker"));
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereMesh(TEXT("/Engine/BasicShapes/Sphere.Sphere"));
 	UStaticMesh* ParticleMesh = SphereMesh.Succeeded() ? SphereMesh.Object : nullptr;
@@ -190,7 +191,8 @@ void ATunaSweeperExtractionPointActor::ConfigureExtractionPointDefaults(
 	TSoftObjectPtr<UMaterialInterface> InRadiusVisualMaterial,
 	TSoftObjectPtr<UMediaSource> InTransitionMediaSource,
 	TSoftClassPtr<UTunaSweeperLevelTransitionWidget> InTransitionWidgetClass,
-	const FText& InTransitionMessage)
+	const FText& InTransitionMessage,
+	FName InTransitionMessageStringKey)
 {
 	Modify();
 	TargetLevelName = InTargetLevelName;
@@ -208,6 +210,7 @@ void ATunaSweeperExtractionPointActor::ConfigureExtractionPointDefaults(
 		TransitionWidgetClass = InTransitionWidgetClass;
 	}
 	TransitionMessage = InTransitionMessage;
+	TransitionMessageStringKey = InTransitionMessageStringKey;
 	RefreshExtractionComponents();
 	UpdateHudProgressWidget();
 }
@@ -258,6 +261,7 @@ bool ATunaSweeperExtractionPointActor::ExtractPawn(APawn* InstigatorPawn)
 			QuestSubsystem->NotifyLevelTravelRequested(SourceLevelName, TargetLevelName);
 		}
 
+		const FText ResolvedTransitionMessage = ResolveTransitionMessage();
 		if (TunaGameInstance && TunaGameInstance->HasPendingRaidExperienceAnimationState())
 		{
 			if (UTunaSweeperRaidExperienceReturnSubsystem* ExperienceReturnSubsystem =
@@ -270,7 +274,7 @@ bool ATunaSweeperExtractionPointActor::ExtractPawn(APawn* InstigatorPawn)
 					TransitionWidgetClass,
 					FadeToBlackDuration,
 					FadeFromBlackDuration,
-					TransitionMessage))
+					ResolvedTransitionMessage))
 				{
 					return true;
 				}
@@ -288,7 +292,7 @@ bool ATunaSweeperExtractionPointActor::ExtractPawn(APawn* InstigatorPawn)
 					TransitionWidgetClass,
 					FadeToBlackDuration,
 					FadeFromBlackDuration,
-					TransitionMessage))
+					ResolvedTransitionMessage))
 				{
 					return true;
 				}
@@ -622,6 +626,14 @@ void ATunaSweeperExtractionPointActor::StopPawnForExtraction(APawn* Pawn) const
 	{
 		Controller->StopMovement();
 	}
+}
+
+FText ATunaSweeperExtractionPointActor::ResolveTransitionMessage() const
+{
+	const UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+	return TunaGameInstance && !TransitionMessageStringKey.IsNone()
+		? TunaGameInstance->ResolveLocalizedText(TransitionMessageStringKey, TransitionMessage)
+		: TransitionMessage;
 }
 
 void ATunaSweeperExtractionPointActor::UpdateFallbackParticleEffect(float DeltaSeconds)

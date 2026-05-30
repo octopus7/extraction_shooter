@@ -649,7 +649,10 @@ bool UTunaSweeperEnemySpawnSubsystem::EnsureRaidRuntimeActorsSpawnedForWorld(UWo
 					SpawnDefinition.InitialProgressQuantity,
 					SpawnDefinition.RequiredItemDisplayName,
 					SpawnDefinition.BoxExtent,
-					SpawnDefinition.CompletedActorClass);
+					SpawnDefinition.CompletedActorClass,
+					SpawnDefinition.DisplayNameStringKey,
+					SpawnDefinition.InteractionDisplayNameStringKey,
+					SpawnDefinition.RequiredItemDisplayNameStringKey);
 				if (!SpawnDefinition.ObjectId.IsNone())
 				{
 					SpawnedProgressActor->Tags.AddUnique(SpawnDefinition.ObjectId);
@@ -1169,8 +1172,11 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadWorldProgressObjectSpawnData(bool bFor
 		FString ProgressActorClassPath;
 		FString CompletedActorClassPath;
 		FString DisplayName;
+		FString DisplayNameStringKey;
 		FString InteractionDisplayName;
+		FString InteractionDisplayNameStringKey;
 		FString RequiredItemDisplayName;
+		FString RequiredItemDisplayNameStringKey;
 		FVector Location = FVector::ZeroVector;
 		FRotator Rotation = FRotator::ZeroRotator;
 		FVector BoxExtent(260.0f, 55.0f, 140.0f);
@@ -1189,8 +1195,11 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadWorldProgressObjectSpawnData(bool bFor
 		JsonObject->TryGetStringField(TEXT("progress_actor_class"), ProgressActorClassPath);
 		JsonObject->TryGetStringField(TEXT("completed_actor_class"), CompletedActorClassPath);
 		JsonObject->TryGetStringField(TEXT("display_name"), DisplayName);
+		JsonObject->TryGetStringField(TEXT("display_name_key"), DisplayNameStringKey);
 		JsonObject->TryGetStringField(TEXT("interaction_display_name"), InteractionDisplayName);
+		JsonObject->TryGetStringField(TEXT("interaction_display_name_key"), InteractionDisplayNameStringKey);
 		JsonObject->TryGetStringField(TEXT("required_item_display_name"), RequiredItemDisplayName);
+		JsonObject->TryGetStringField(TEXT("required_item_display_name_key"), RequiredItemDisplayNameStringKey);
 		JsonObject->TryGetNumberField(TEXT("required_item_id"), NumericRequiredItemId);
 		JsonObject->TryGetNumberField(TEXT("required_quantity"), NumericRequiredQuantity);
 		JsonObject->TryGetNumberField(TEXT("initial_progress_quantity"), NumericInitialProgressQuantity);
@@ -1212,12 +1221,15 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadWorldProgressObjectSpawnData(bool bFor
 		SpawnDefinition.DisplayName = DisplayName.TrimStartAndEnd().IsEmpty()
 			? FText::FromString(TEXT("\uBD80\uC11C\uC9C4 \uB2E4\uB9AC"))
 			: FText::FromString(DisplayName.TrimStartAndEnd());
+		SpawnDefinition.DisplayNameStringKey = FName(*DisplayNameStringKey.TrimStartAndEnd());
 		SpawnDefinition.InteractionDisplayName = InteractionDisplayName.TrimStartAndEnd().IsEmpty()
 			? FText::FromString(TEXT("\uC218\uB9AC\uD558\uAE30"))
 			: FText::FromString(InteractionDisplayName.TrimStartAndEnd());
+		SpawnDefinition.InteractionDisplayNameStringKey = FName(*InteractionDisplayNameStringKey.TrimStartAndEnd());
 		SpawnDefinition.RequiredItemDisplayName = RequiredItemDisplayName.TrimStartAndEnd().IsEmpty()
 			? FText::FromString(TEXT("\uBAA9\uC7AC"))
 			: FText::FromString(RequiredItemDisplayName.TrimStartAndEnd());
+		SpawnDefinition.RequiredItemDisplayNameStringKey = FName(*RequiredItemDisplayNameStringKey.TrimStartAndEnd());
 		SpawnDefinition.Location = Location;
 		SpawnDefinition.Rotation = Rotation;
 		SpawnDefinition.BoxExtent = FVector(
@@ -1399,6 +1411,7 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadGameplayInteractionActorSpawnData(bool
 		FString SpawnTypeText;
 		FString ActorClassPath;
 		FString InteractionDisplayName;
+		FString InteractionDisplayNameStringKey;
 		FString MarkerWidgetClassPath;
 		FVector Location = FVector::ZeroVector;
 		FRotator Rotation = FRotator::ZeroRotator;
@@ -1434,6 +1447,7 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadGameplayInteractionActorSpawnData(bool
 
 		JsonObject->TryGetStringField(TEXT("actor_class"), ActorClassPath);
 		JsonObject->TryGetStringField(TEXT("interaction_display_name"), InteractionDisplayName);
+		JsonObject->TryGetStringField(TEXT("interaction_display_name_key"), InteractionDisplayNameStringKey);
 		JsonObject->TryGetStringField(TEXT("marker_widget_class"), MarkerWidgetClassPath);
 		TunaSweeperEnemySpawn::TryReadRotatorField(JsonObject, TEXT("rotation"), Rotation);
 		TunaSweeperEnemySpawn::TryReadVectorField(JsonObject, TEXT("scale"), Scale);
@@ -1453,6 +1467,7 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadGameplayInteractionActorSpawnData(bool
 		SpawnDefinition.InteractionDisplayName = InteractionDisplayName.TrimStartAndEnd().IsEmpty()
 			? TunaSweeperEnemySpawn::GetDefaultGameplayInteractionDisplayName(SpawnDefinition.SpawnType)
 			: FText::FromString(InteractionDisplayName.TrimStartAndEnd());
+		SpawnDefinition.InteractionDisplayNameStringKey = FName(*InteractionDisplayNameStringKey.TrimStartAndEnd());
 		SpawnDefinition.MarkerWidgetClass = TSoftClassPtr<UTunaSweeperInteractionMarkerWidget>(
 			FSoftObjectPath(TrimmedMarkerWidgetClassPath.IsEmpty()
 				? FString(TunaSweeperEnemySpawn::DefaultInteractionMarkerWidgetClassPath)
@@ -1468,6 +1483,7 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadGameplayInteractionActorSpawnData(bool
 		FString TransitionMediaSourcePath;
 		FString TransitionWidgetClassPath;
 		FString TransitionMessage;
+		FString TransitionMessageStringKey;
 		FString LevelTravelVisualMeshPath;
 		FVector LevelTravelVisualScale(0.75f, 0.75f, 0.75f);
 		FVector LevelTravelVisualRelativeLocation = FVector::ZeroVector;
@@ -1475,6 +1491,7 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadGameplayInteractionActorSpawnData(bool
 		JsonObject->TryGetStringField(TEXT("transition_media_source"), TransitionMediaSourcePath);
 		JsonObject->TryGetStringField(TEXT("transition_widget_class"), TransitionWidgetClassPath);
 		JsonObject->TryGetStringField(TEXT("transition_message"), TransitionMessage);
+		JsonObject->TryGetStringField(TEXT("transition_message_key"), TransitionMessageStringKey);
 		JsonObject->TryGetStringField(TEXT("level_travel_visual_mesh"), LevelTravelVisualMeshPath);
 		TunaSweeperEnemySpawn::TryReadVectorField(JsonObject, TEXT("level_travel_visual_scale"), LevelTravelVisualScale);
 		TunaSweeperEnemySpawn::TryReadVectorField(JsonObject, TEXT("level_travel_visual_relative_location"), LevelTravelVisualRelativeLocation);
@@ -1495,6 +1512,7 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadGameplayInteractionActorSpawnData(bool
 		SpawnDefinition.TransitionMessage = TransitionMessage.TrimStartAndEnd().IsEmpty()
 			? FText::GetEmpty()
 			: FText::FromString(TransitionMessage.TrimStartAndEnd());
+		SpawnDefinition.TransitionMessageStringKey = FName(*TransitionMessageStringKey.TrimStartAndEnd());
 		const FString TrimmedLevelTravelVisualMeshPath = LevelTravelVisualMeshPath.TrimStartAndEnd();
 		if (!TrimmedLevelTravelVisualMeshPath.IsEmpty())
 		{
@@ -2009,7 +2027,9 @@ void UTunaSweeperEnemySpawnSubsystem::ConfigureGameplayInteractionActor(
 				SpawnDefinition.MarkerWidgetClass,
 				SpawnDefinition.TransitionMediaSource,
 				SpawnDefinition.TransitionWidgetClass,
-				SpawnDefinition.TransitionMessage);
+				SpawnDefinition.TransitionMessage,
+				SpawnDefinition.InteractionDisplayNameStringKey,
+				SpawnDefinition.TransitionMessageStringKey);
 			LevelTravelActor->ConfigureLevelTravelVisualDefaults(
 				SpawnDefinition.LevelTravelVisualMesh,
 				SpawnDefinition.LevelTravelVisualScale,
@@ -2028,7 +2048,8 @@ void UTunaSweeperEnemySpawnSubsystem::ConfigureGameplayInteractionActor(
 				SpawnDefinition.ExtractionRadiusVisualMaterial,
 				SpawnDefinition.TransitionMediaSource,
 				SpawnDefinition.TransitionWidgetClass,
-				SpawnDefinition.TransitionMessage);
+				SpawnDefinition.TransitionMessage,
+				SpawnDefinition.TransitionMessageStringKey);
 		}
 		break;
 	case EGameplayInteractionActorSpawnType::PickupItem:
@@ -2054,7 +2075,8 @@ void UTunaSweeperEnemySpawnSubsystem::ConfigureGameplayInteractionActor(
 				InteractableComponent->ConfigureInteractionDefaults(
 					ETunaSweeperInteractionType::ItemSpawn,
 					SpawnDefinition.InteractionDisplayName,
-					SpawnDefinition.MarkerWidgetClass);
+					SpawnDefinition.MarkerWidgetClass,
+					SpawnDefinition.InteractionDisplayNameStringKey);
 			}
 		}
 		break;
@@ -2079,7 +2101,8 @@ void UTunaSweeperEnemySpawnSubsystem::ConfigureGameplayInteractionActor(
 				InteractableComponent->ConfigureInteractionDefaults(
 					ETunaSweeperInteractionType::LootContainerSpawn,
 					SpawnDefinition.InteractionDisplayName,
-					SpawnDefinition.MarkerWidgetClass);
+					SpawnDefinition.MarkerWidgetClass,
+					SpawnDefinition.InteractionDisplayNameStringKey);
 			}
 		}
 		break;
@@ -2093,7 +2116,9 @@ void UTunaSweeperEnemySpawnSubsystem::ConfigureGameplayInteractionActor(
 					ETunaSweeperInteractionType::ShopOpen,
 					SpawnDefinition.InteractionDisplayName,
 					SpawnDefinition.MarkerWidgetClass,
-					FName(TEXT("ui.interaction.shop_open")));
+					SpawnDefinition.InteractionDisplayNameStringKey.IsNone()
+						? FName(TEXT("ui.interaction.shop_open"))
+						: SpawnDefinition.InteractionDisplayNameStringKey);
 			}
 		}
 		break;
@@ -2153,7 +2178,8 @@ void UTunaSweeperEnemySpawnSubsystem::ConfigureGameplayInteractionActor(
 				InteractableComponent->ConfigureInteractionDefaults(
 					ETunaSweeperInteractionType::SelfDestruct,
 					SpawnDefinition.InteractionDisplayName,
-					SpawnDefinition.MarkerWidgetClass);
+					SpawnDefinition.MarkerWidgetClass,
+					SpawnDefinition.InteractionDisplayNameStringKey);
 			}
 		}
 		break;

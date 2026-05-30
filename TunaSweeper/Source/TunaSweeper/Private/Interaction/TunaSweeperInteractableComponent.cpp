@@ -44,6 +44,7 @@ namespace TunaSweeperInteractionMarkerLayout
 			return FName(TEXT("ui.interaction.repair"));
 		case ETunaSweeperInteractionType::PersistentDoor:
 		case ETunaSweeperInteractionType::DoorOpen:
+		case ETunaSweeperInteractionType::LootContainerOpen:
 			return FName(TEXT("ui.interaction.open"));
 		case ETunaSweeperInteractionType::WarpPoint:
 			return FName(TEXT("ui.interaction.default"));

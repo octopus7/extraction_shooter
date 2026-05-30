@@ -28,7 +28,9 @@ public:
 		TSoftClassPtr<UTunaSweeperInteractionMarkerWidget> InMarkerWidgetClass,
 		TSoftObjectPtr<UMediaSource> InTransitionMediaSource,
 		TSoftClassPtr<UTunaSweeperLevelTransitionWidget> InTransitionWidgetClass,
-		const FText& InTransitionMessage);
+		const FText& InTransitionMessage,
+		FName InInteractionDisplayNameStringKey = NAME_None,
+		FName InTransitionMessageStringKey = NAME_None);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Level Travel")
 	bool TravelToTargetLevel(APawn* InstigatorPawn);
@@ -44,6 +46,7 @@ protected:
 	virtual void BeginPlay() override;
 
 	void RefreshLevelTravelVisual();
+	FText ResolveTransitionMessage() const;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Travel")
 	FName TargetLevelName;
@@ -65,6 +68,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Travel|Transition Video")
 	FText TransitionMessage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Travel|Transition Video")
+	FName TransitionMessageStringKey;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Travel|Transition Video", meta = (ClampMin = "0.01", UIMin = "0.01"))
 	float FadeToBlackDuration = 0.2f;

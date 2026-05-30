@@ -37,7 +37,8 @@ public:
 		TSoftObjectPtr<UMaterialInterface> InRadiusVisualMaterial,
 		TSoftObjectPtr<UMediaSource> InTransitionMediaSource,
 		TSoftClassPtr<UTunaSweeperLevelTransitionWidget> InTransitionWidgetClass,
-		const FText& InTransitionMessage);
+		const FText& InTransitionMessage,
+		FName InTransitionMessageStringKey = NAME_None);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Extraction|Effect")
 	void SetSmokeSignalWind(FVector2D InWindDirection, float InWindSpeedCmPerSecond);
@@ -187,6 +188,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Extraction|Transition")
 	FText TransitionMessage;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Extraction|Transition")
+	FName TransitionMessageStringKey;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Extraction|Transition", meta = (ClampMin = "0.01", UIMin = "0.01"))
 	float FadeToBlackDuration = 0.2f;
 
@@ -205,6 +209,7 @@ private:
 	bool IsPawnInsideExtractionArea(const APawn* Pawn) const;
 	bool CanExtractPawn(const APawn* Pawn) const;
 	void StopPawnForExtraction(APawn* Pawn) const;
+	FText ResolveTransitionMessage() const;
 	void UpdateFallbackParticleEffect(float DeltaSeconds);
 	void ApplyFallbackParticleMaterials();
 	void UpdateSmokeSignalEffect(float DeltaSeconds);

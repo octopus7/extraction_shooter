@@ -9,6 +9,7 @@
 #include "Components/VerticalBox.h"
 #include "Components/VerticalBoxSlot.h"
 #include "UI/TunaSweeperUIFont.h"
+#include "UI/TunaSweeperUiText.h"
 
 namespace
 {
@@ -44,6 +45,11 @@ namespace
 	}
 }
 
+namespace TunaSweeperRaidExperience
+{
+	using TunaSweeperUiText::ResolveUiText;
+}
+
 TSharedRef<SWidget> UTunaSweeperRaidExperienceWidget::RebuildWidget()
 {
 	BuildWidgetTree();
@@ -56,8 +62,24 @@ void UTunaSweeperRaidExperienceWidget::NativeConstruct()
 
 	SetIsFocusable(true);
 	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
+	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
+	{
+		TunaGameInstance->OnLanguageChanged.RemoveAll(this);
+		TunaGameInstance->OnLanguageChanged.AddUObject(this, &UTunaSweeperRaidExperienceWidget::HandleLanguageChanged);
+	}
+	RefreshStaticText();
 	RefreshDisplayedExperience(AnimationState.StartExperiencePoints);
 	RefreshStatusText();
+}
+
+void UTunaSweeperRaidExperienceWidget::NativeDestruct()
+{
+	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
+	{
+		TunaGameInstance->OnLanguageChanged.RemoveAll(this);
+	}
+
+	Super::NativeDestruct();
 }
 
 void UTunaSweeperRaidExperienceWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
@@ -176,7 +198,10 @@ void UTunaSweeperRaidExperienceWidget::BuildWidgetTree()
 
 	if (HeaderText)
 	{
-		HeaderText->SetText(FText::FromString(TEXT("RAID EXPERIENCE")));
+		HeaderText->SetText(TunaSweeperRaidExperience::ResolveUiText(
+			GetGameInstance<UTunaSweeperGameInstance>(),
+			TEXT("ui.raid_experience.header"),
+			TEXT("RAID EXPERIENCE")));
 	}
 	if (ExperienceProgressBar)
 	{
@@ -203,8 +228,20 @@ void UTunaSweeperRaidExperienceWidget::BuildWidgetTree()
 	ConfigureVerticalSlot(PanelBox->AddChildToVerticalBox(StatusText), 34.0f);
 }
 
+void UTunaSweeperRaidExperienceWidget::RefreshStaticText()
+{
+	if (HeaderText)
+	{
+		HeaderText->SetText(TunaSweeperRaidExperience::ResolveUiText(
+			GetGameInstance<UTunaSweeperGameInstance>(),
+			TEXT("ui.raid_experience.header"),
+			TEXT("RAID EXPERIENCE")));
+	}
+}
+
 void UTunaSweeperRaidExperienceWidget::RefreshDisplayedExperience(int64 DisplayExperiencePoints)
 {
+	LastDisplayedExperiencePoints = DisplayExperiencePoints;
 	const UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
 	if (!TunaGameInstance)
 	{
@@ -228,7 +265,12 @@ void UTunaSweeperRaidExperienceWidget::RefreshDisplayedExperience(int64 DisplayE
 
 	if (LevelText)
 	{
-		LevelText->SetText(FText::FromString(FString::Printf(TEXT("LEVEL %d"), DisplayLevel)));
+		LevelText->SetText(FText::Format(
+			TunaSweeperRaidExperience::ResolveUiText(
+				TunaGameInstance,
+				TEXT("ui.raid_experience.level_pattern"),
+				TEXT("LEVEL {0}")),
+			FText::AsNumber(DisplayLevel)));
 	}
 	if (ExperienceProgressBar)
 	{
@@ -238,21 +280,30 @@ void UTunaSweeperRaidExperienceWidget::RefreshDisplayedExperience(int64 DisplayE
 	{
 		if (bAtMaxLevel)
 		{
-			ExperienceText->SetText(FText::FromString(TEXT("MAX LEVEL")));
+			ExperienceText->SetText(TunaSweeperRaidExperience::ResolveUiText(
+				TunaGameInstance,
+				TEXT("ui.raid_experience.max_level"),
+				TEXT("MAX LEVEL")));
 		}
 		else
 		{
-			ExperienceText->SetText(FText::FromString(FString::Printf(
-				TEXT("%lld / %lld EXP"),
-				CurrentLevelExperience,
-				RequiredLevelExperience)));
+			ExperienceText->SetText(FText::Format(
+				TunaSweeperRaidExperience::ResolveUiText(
+					TunaGameInstance,
+					TEXT("ui.raid_experience.exp_pattern"),
+					TEXT("{0} / {1} EXP")),
+				FText::AsNumber(CurrentLevelExperience),
+				FText::AsNumber(RequiredLevelExperience)));
 		}
 	}
 	if (GainText)
 	{
-		GainText->SetText(FText::FromString(FString::Printf(
-			TEXT("+%lld EXP"),
-			AnimationState.GainedExperiencePoints)));
+		GainText->SetText(FText::Format(
+			TunaSweeperRaidExperience::ResolveUiText(
+				TunaGameInstance,
+				TEXT("ui.raid_experience.gain_pattern"),
+				TEXT("+{0} EXP")),
+			FText::AsNumber(AnimationState.GainedExperiencePoints)));
 	}
 }
 
@@ -265,13 +316,29 @@ void UTunaSweeperRaidExperienceWidget::RefreshStatusText()
 
 	if (!bAnimationFinished)
 	{
-		StatusText->SetText(FText::FromString(TEXT("Calculating raid rewards...")));
+		StatusText->SetText(TunaSweeperRaidExperience::ResolveUiText(
+			GetGameInstance<UTunaSweeperGameInstance>(),
+			TEXT("ui.raid_experience.calculating"),
+			TEXT("Calculating raid rewards...")));
 		return;
 	}
 
 	StatusText->SetText(bContinueReady
-		? FText::FromString(TEXT("Press any key or click to return to bunker"))
-		: FText::FromString(TEXT("Loading bunker...")));
+		? TunaSweeperRaidExperience::ResolveUiText(
+			GetGameInstance<UTunaSweeperGameInstance>(),
+			TEXT("ui.raid_experience.return_ready"),
+			TEXT("Press any key or click to return to bunker"))
+		: TunaSweeperRaidExperience::ResolveUiText(
+			GetGameInstance<UTunaSweeperGameInstance>(),
+			TEXT("ui.raid_experience.loading_bunker"),
+			TEXT("Loading bunker...")));
+}
+
+void UTunaSweeperRaidExperienceWidget::HandleLanguageChanged()
+{
+	RefreshStaticText();
+	RefreshDisplayedExperience(LastDisplayedExperiencePoints);
+	RefreshStatusText();
 }
 
 bool UTunaSweeperRaidExperienceWidget::TryRequestContinue()

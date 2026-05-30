@@ -54,6 +54,7 @@ ui.hud.food_pattern,배부름 {0},Fullness {0},満腹度 {0}
 ui.hud.hydration_pattern,수분 {0},Hydration {0},水分 {0}
 ui.inventory.weight_label,소지 중량,Carry Weight,所持重量
 ui.inventory.weight_pattern,{0}/{1}kg,{0}/{1}kg,{0}/{1}kg
+ui.inventory.title,인벤토리,Inventory,インベントリ
 ui.inventory.overweight,과중량,Overweight,重量超過
 ui.inventory.sort,정리,Sort,整理
 ui.inventory.slot.gun1,총기 1,Weapon 1,武器 1
@@ -79,6 +80,31 @@ ui.item_hover.assign_blueprint_target,설계도 슬롯 지정,Assign Blueprint S
 ui.item_hover.name_pattern,{0} #{1},{0} #{1},{0} #{1}
 ui.item_hover.weight_kg_pattern,{0} kg,{0} kg,{0} kg
 ui.item_hover.price_pattern,{0},{0},{0}
+ui.item_hover.buy,F로 구매,Buy with F,Fで購入
+ui.item_hover.craft,제조,Craft,製造
+ui.item_hover.sort_lock,정렬 잠금,Lock Sort,整理ロック
+ui.item_hover.sort_unlock,정렬 잠금 해제,Unlock Sort,整理ロック解除
+ui.shop.title,상점,Shop,ショップ
+ui.shop.debug_refresh_stock,갱신,Refresh,更新
+ui.shop.sell_button,F키 판매,Sell with F,Fキーで売却
+ui.storage.title,창고,Storage,倉庫
+ui.storage.filter.all,전체,All,すべて
+ui.storage.filter.weapon,무기,Weapon,武器
+ui.storage.filter.ammo,탄약,Ammo,弾薬
+ui.storage.filter.attachment,부착,Attachment,アタッチメント
+ui.storage.filter.consumable,소모,Consumable,消耗品
+ui.storage.filter.gear,장비,Gear,装備
+ui.storage.filter.material,재료,Material,素材
+ui.storage.filter.blueprint,설계도,Blueprint,設計図
+ui.storage.filter.other,기타,Other,その他
+ui.workbench.craft,제조,Craft,製造
+ui.workbench.dismantle,분해,Dismantle,分解
+ui.workbench.blueprint_register,설계도 등록,Blueprint Register,設計図登録
+ui.workbench.no_ingredients,필요 재료 없음,No materials,必要素材なし
+ui.workbench.no_dismantle_results,분해 결과 없음,No dismantle results,分解結果なし
+ui.workbench.blueprint_already_known,이미 등록됨,Already registered,登録済み
+ui.workbench.dismantle_target,분해할 아이템,Dismantle Item,分解するアイテム
+ui.workbench.blueprint_target,등록할 설계도,Blueprint to Register,登録する設計図
 ui.shop.sell_price_pattern,판매가 {0},Sell {0},売却 {0}
 ui.split.title,수량 나누기,Split Quantity,数量分割
 ui.split.guide,나눌 수량을 입력하세요 (1-{0}),Enter split quantity (1-{0}),分割する数量を入力 (1-{0})
@@ -116,6 +142,29 @@ ui.interaction.piggy_bank,돈내놔,Gimme money,金を出せ
 ui.interaction.piggy_bank_deposit,저금,Deposit,預ける
 ui.interaction.piggy_bank_withdraw,빼기,Withdraw,引き出す
 ui.interaction.housing_management,시설관리,Facility Management,施設管理
+ui.interaction.storage_open,창고 열기,Open Storage,倉庫を開く
+ui.interaction.shop_open,상점,Shop,ショップ
+ui.interaction.workbench_open,작업대,Workbench,作業台
+ui.interaction.workbench_craft,제조,Craft,製造
+ui.interaction.workbench_dismantle,분해,Dismantle,分解
+ui.interaction.workbench_blueprint_register,설계도 등록,Register Blueprint,設計図登録
+ui.transition.returning_to_bunker,벙커로 복귀 중,Returning to Bunker,バンカーへ帰還中
+ui.raid_experience.header,레이드 경험치,Raid Experience,レイド経験値
+ui.raid_experience.level_pattern,레벨 {0},Level {0},レベル {0}
+ui.raid_experience.max_level,최대 레벨,Max Level,最大レベル
+ui.raid_experience.exp_pattern,{0} / {1} EXP,{0} / {1} EXP,{0} / {1} EXP
+ui.raid_experience.gain_pattern,+{0} EXP,+{0} EXP,+{0} EXP
+ui.raid_experience.calculating,레이드 보상 계산 중...,Calculating raid rewards...,レイド報酬を計算中...
+ui.raid_experience.return_ready,아무 키나 누르거나 클릭해 벙커로 복귀,Press any key or click to return to bunker,任意のキーまたはクリックでバンカーへ帰還
+ui.raid_experience.loading_bunker,벙커 로딩 중...,Loading bunker...,バンカーをロード中...
+ui.housing.title,벙커 하우징,Bunker Housing,バンカーハウジング
+ui.housing.guide.place,Q/E 회전. 바닥을 클릭해 배치,Q/E rotate. Click floor to place.,Q/Eで回転。床をクリックして配置
+ui.housing.guide.select,보관 중이거나 건설 가능한 시설을 클릭하세요. 배치된 항목은 길게 눌러 보관합니다.,Click stored or ready facilities. Hold placed entries to store.,保管中または建設可能な施設をクリック。配置済み項目は長押しで保管
+ui.housing.no_materials,필요 재료 없음,No materials required,必要素材なし
+ui.housing.ready_to_build,건설 가능,Ready to build,建設可能
+ui.housing.stored,보관 중,Stored,保管中
+ui.housing.placed_hold_to_store,배치됨 - 길게 눌러 보관,Placed - hold to store,配置済み - 長押しで保管
+ui.housing.need_materials,재료 부족,Need materials,素材不足
 ui.housing.facility.workbench,작업대,Workbench,作業台
 ui.housing.facility.workbench.desc,제작과 수리에 사용할 수 있는 작업대,A functional work surface for crafting and repairs,制作と修理に使える作業台
 ui.housing.facility.piggy_bank,돼지저금통,Piggy Bank,豚の貯金箱
