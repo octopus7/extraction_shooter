@@ -733,6 +733,23 @@ bool UTunaSweeperItemDataSubsystem::LoadItemTableJson()
 		{
 			ItemDefinition.UseHydrationDelta = static_cast<float>(NumericUseHydrationDelta);
 		}
+		const TArray<TSharedPtr<FJsonValue>>* ClearsDebuffIdsArray = nullptr;
+		if (((*JsonObject)->TryGetArrayField(TEXT("clears_debuff_ids"), ClearsDebuffIdsArray) ||
+			 (*JsonObject)->TryGetArrayField(TEXT("clear_debuff_ids"), ClearsDebuffIdsArray) ||
+			 (*JsonObject)->TryGetArrayField(TEXT("remove_debuff_ids"), ClearsDebuffIdsArray)) &&
+			ClearsDebuffIdsArray)
+		{
+			for (const TSharedPtr<FJsonValue>& DebuffIdValue : *ClearsDebuffIdsArray)
+			{
+				const FString DebuffIdString = DebuffIdValue.IsValid()
+					? DebuffIdValue->AsString().TrimStartAndEnd()
+					: FString();
+				if (!DebuffIdString.IsEmpty())
+				{
+					ItemDefinition.ClearsDebuffIds.AddUnique(FName(*DebuffIdString));
+				}
+			}
+		}
 
 		if (ItemDefinition.Id == INDEX_NONE || ItemDefinition.NameStringKey.IsNone() ||
 			ItemDefinition.DescriptionStringKey.IsNone() || ItemDefinition.IconFileName.IsEmpty())

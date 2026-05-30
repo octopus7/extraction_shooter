@@ -1,6 +1,7 @@
 #include "AI/TunaSweeperEnemyCharacter.h"
 
 #include "AI/TunaSweeperEnemyAIController.h"
+#include "Component/TunaSweeperDebuffComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/PrimitiveComponent.h"
 #include "Components/StaticMeshComponent.h"
@@ -17,6 +18,7 @@
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraSystem.h"
+#include "Debuff/TunaSweeperDebuffTypes.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
 #include "TimerManager.h"
 #include "UObject/ConstructorHelpers.h"
@@ -150,7 +152,9 @@ void ATunaSweeperEnemyCharacter::ConfigureSpawnData(
 	int32 InDropContainerDefinitionId,
 	int32 InDropContentsId,
 	float InMaxHealth,
-	int32 InExperienceValue)
+	int32 InExperienceValue,
+	float InBleedingChanceBonus,
+	float InBleedingDurationBonusSeconds)
 {
 	if (!InBodyMaterial.IsNull())
 	{
@@ -167,6 +171,8 @@ void ATunaSweeperEnemyCharacter::ConfigureSpawnData(
 	DropContainerDefinitionId = InDropContainerDefinitionId;
 	DropContentsId = InDropContentsId;
 	ExperienceValue = FMath::Max(0, InExperienceValue);
+	BleedingChanceBonus = FMath::Clamp(InBleedingChanceBonus, 0.0f, 1.0f);
+	BleedingDurationBonusSeconds = FMath::Max(0.0f, InBleedingDurationBonusSeconds);
 	ApplyVisualMaterials();
 }
 
@@ -232,6 +238,23 @@ float ATunaSweeperEnemyCharacter::GetMeleeTrackingRange() const
 float ATunaSweeperEnemyCharacter::GetMeleeAttackCooldownSeconds() const
 {
 	return LumberjackMeleeAttackCooldownSeconds;
+}
+
+bool ATunaSweeperEnemyCharacter::TryApplyBleedTo(AActor* TargetActor) const
+{
+	if (!TargetActor || TargetActor == this || bIsDead)
+	{
+		return false;
+	}
+
+	UTunaSweeperDebuffComponent* DebuffComponent = TargetActor->FindComponentByClass<UTunaSweeperDebuffComponent>();
+	return DebuffComponent
+		? DebuffComponent->TryApplyDebuff(
+			TunaSweeperDebuff::BleedingDebuffId(),
+			BleedingChanceBonus,
+			BleedingDurationBonusSeconds,
+			const_cast<ATunaSweeperEnemyCharacter*>(this))
+		: false;
 }
 
 bool ATunaSweeperEnemyCharacter::FireProjectileAt(AActor* TargetActor)
@@ -318,6 +341,7 @@ bool ATunaSweeperEnemyCharacter::ApplyMeleeDamageTo(AActor* TargetActor)
 		return false;
 	}
 
+	TryApplyBleedTo(TargetActor);
 	ApplyMeleeKnockbackTo(TargetActor, ResolvedAttackDirection);
 
 	const FVector HitLocation = TargetLocation + FVector(0.0f, 0.0f, LumberjackMeleeImpactHeight);

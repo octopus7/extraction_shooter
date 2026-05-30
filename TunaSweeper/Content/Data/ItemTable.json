@@ -235,7 +235,10 @@
     "category_tag": "item.category.consumable",
     "use_health_delta": 18,
     "use_food_delta": 0,
-    "use_hydration_delta": 0
+    "use_hydration_delta": 0,
+    "clears_debuff_ids": [
+      "debuff.bleeding"
+    ]
   },
   {
     "id": 4002,

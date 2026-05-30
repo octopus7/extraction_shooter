@@ -2,12 +2,14 @@
 
 #include "CoreMinimal.h"
 #include "Component/TunaSweeperVitalsComponent.h"
+#include "Debuff/TunaSweeperDebuffTypes.h"
 #include "GameFramework/Character.h"
 #include "TunaSweeperTopDownCharacter.generated.h"
 
 class ATunaSweeperWeapon;
 class ATunaSweeperMeleeImpactBurstActor;
 class ATunaSweeperMeleeSwingTrailActor;
+class UTunaSweeperDebuffComponent;
 class UCameraComponent;
 class UInputAction;
 class UInputMappingContext;
@@ -130,6 +132,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Vitals")
 	UTunaSweeperVitalsComponent* GetVitalsComponent() const { return VitalsComponent; }
 
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Debuff")
+	UTunaSweeperDebuffComponent* GetDebuffComponent() const { return DebuffComponent; }
+
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Vision")
 	UTunaSweeperPlayerVisionComponent* GetPlayerVisionComponent() const { return PlayerVisionComponent; }
 
@@ -162,6 +167,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Input")
 	void CancelActiveGameplayActions();
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Camera")
+	void TriggerDebuffCameraReaction(FName DebuffId, const FTunaSweeperDebuffCameraReactionSettings& ReactionSettings);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Housing")
 	void SetHousingModeVisualHidden(bool bShouldHide);
@@ -212,6 +220,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UTunaSweeperVitalsComponent> VitalsComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UTunaSweeperDebuffComponent> DebuffComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UTunaSweeperPlayerVisionComponent> PlayerVisionComponent;

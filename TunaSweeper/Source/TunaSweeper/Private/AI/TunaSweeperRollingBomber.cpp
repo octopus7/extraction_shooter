@@ -1264,12 +1264,16 @@ void ATunaSweeperRollingBomber::ApplyExplosionDamage()
 		DamagedActors.Add(DamagedActor);
 		const TSubclassOf<UDamageType> DamageTypeClass =
 			ExplosionDamageType ? ExplosionDamageType : TSubclassOf<UDamageType>(UDamageType::StaticClass());
-		UGameplayStatics::ApplyDamage(
+		const float AppliedDamage = UGameplayStatics::ApplyDamage(
 			DamagedActor,
 			ExplosionDamage,
 			GetController(),
 			this,
 			DamageTypeClass);
+		if (AppliedDamage > 0.0f)
+		{
+			TryApplyBleedTo(DamagedActor);
+		}
 	}
 }
 

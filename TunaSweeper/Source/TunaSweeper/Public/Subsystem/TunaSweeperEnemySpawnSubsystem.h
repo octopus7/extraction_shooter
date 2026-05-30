@@ -131,6 +131,8 @@ private:
 		int32 DropContentsId = INDEX_NONE;
 		int32 ExperienceValue = 30;
 		float MaxHealth = 30.0f;
+		float BleedingChanceBonus = 0.0f;
+		float BleedingDurationBonusSeconds = 0.0f;
 	};
 
 	struct FLootContainerSpawnDefinition

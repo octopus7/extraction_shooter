@@ -3,6 +3,7 @@
 #include "Blueprint/WidgetTree.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Character/TunaSweeperTopDownCharacter.h"
+#include "Component/TunaSweeperDebuffComponent.h"
 #include "Component/TunaSweeperVitalsComponent.h"
 #include "Components/Border.h"
 #include "Components/CanvasPanel.h"
@@ -26,6 +27,7 @@
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
 #include "UI/TunaSweeperExtractionProgressWidget.h"
 #include "UI/TunaSweeperHudBottomStatusWidget.h"
+#include "UI/TunaSweeperHudDebuffBarWidget.h"
 #include "UI/TunaSweeperHudExternalPanelWidget.h"
 #include "UI/TunaSweeperHousingPanelWidget.h"
 #include "UI/TunaSweeperHudInventoryAreaWidget.h"
@@ -55,6 +57,8 @@ namespace
 	constexpr float CursorDistanceRightOffset = 34.0f;
 	constexpr float CursorDistanceBottomOffset = 40.0f;
 	constexpr float CursorDistanceMinTextWidth = 42.0f;
+	constexpr float DebuffBarLeftOffset = 24.0f;
+	constexpr float DebuffBarBottomOffset = 118.0f;
 	constexpr float HudWidgetTransitionDurationSeconds = 0.18f;
 	constexpr float HudWidgetTransitionDistancePadding = 36.0f;
 	constexpr float HudWidgetTransitionFallbackHorizontalDistance = 420.0f;
@@ -269,6 +273,7 @@ void UTunaSweeperGameHudWidget::NativeConstruct()
 
 	EnsureExtractionProgressWidget();
 	EnsureCursorDistanceWidget();
+	EnsureDebuffBarWidget();
 	EnsureInventoryQuickSlotPanelWidget();
 	EnsureHousingPanelWidget();
 	EnsureMapPanelWidget();
@@ -280,6 +285,7 @@ void UTunaSweeperGameHudWidget::NativeConstruct()
 	SetHudMode(ETunaSweeperHudMode::None);
 	SetItemInfoPanelVisible(false);
 	RefreshBottomStatusFromGameInstance();
+	RefreshDebuffBarFromPlayer();
 	RefreshQuickSlotsFromGameState();
 	RefreshInventoryQuickSlotPanel();
 	RefreshReloadWidgets();
@@ -319,6 +325,7 @@ void UTunaSweeperGameHudWidget::NativeTick(const FGeometry& MyGeometry, float In
 	Super::NativeTick(MyGeometry, InDeltaTime);
 
 	RefreshBottomStatusFromGameInstance();
+	RefreshDebuffBarFromPlayer();
 	RefreshQuickSlotsFromGameState();
 	RefreshInventoryQuickSlotPanel();
 	RefreshReloadWidgets();
@@ -1682,6 +1689,40 @@ void UTunaSweeperGameHudWidget::EnsureCursorDistanceWidget()
 	}
 }
 
+void UTunaSweeperGameHudWidget::EnsureDebuffBarWidget()
+{
+	if (DebuffBarWidget || !WidgetTree)
+	{
+		return;
+	}
+
+	UCanvasPanel* RootCanvas = Cast<UCanvasPanel>(WidgetTree->RootWidget);
+	if (!RootCanvas)
+	{
+		return;
+	}
+
+	DebuffBarWidget = WidgetTree->ConstructWidget<UTunaSweeperHudDebuffBarWidget>(
+		UTunaSweeperHudDebuffBarWidget::StaticClass(),
+		TEXT("DebuffBarWidget_Runtime"));
+	if (!DebuffBarWidget)
+	{
+		return;
+	}
+
+	DebuffBarWidget->SetVisibility(ESlateVisibility::Collapsed);
+
+	UCanvasPanelSlot* CanvasSlot = RootCanvas->AddChildToCanvas(DebuffBarWidget);
+	if (CanvasSlot)
+	{
+		CanvasSlot->SetAnchors(FAnchors(0.0f, 1.0f, 0.0f, 1.0f));
+		CanvasSlot->SetAlignment(FVector2D(0.0f, 1.0f));
+		CanvasSlot->SetPosition(FVector2D(DebuffBarLeftOffset, -DebuffBarBottomOffset));
+		CanvasSlot->SetAutoSize(true);
+		CanvasSlot->SetZOrder(9);
+	}
+}
+
 void UTunaSweeperGameHudWidget::EnsureInventoryQuickSlotPanelWidget()
 {
 	if (InventoryQuickSlotPanel || !WidgetTree)
@@ -2110,6 +2151,30 @@ void UTunaSweeperGameHudWidget::RefreshBottomStatusFromGameInstance()
 	}
 }
 
+void UTunaSweeperGameHudWidget::RefreshDebuffBarFromPlayer()
+{
+	EnsureDebuffBarWidget();
+	bDebuffBarHasActiveDebuffs = false;
+	if (!DebuffBarWidget)
+	{
+		return;
+	}
+
+	TArray<FTunaSweeperActiveDebuffState> ActiveDebuffs;
+	const APlayerController* PlayerController = GetOwningPlayer();
+	const APawn* PlayerPawn = PlayerController ? PlayerController->GetPawn() : nullptr;
+	const UTunaSweeperDebuffComponent* DebuffComponent = PlayerPawn
+		? PlayerPawn->FindComponentByClass<UTunaSweeperDebuffComponent>()
+		: nullptr;
+	if (DebuffComponent)
+	{
+		ActiveDebuffs = DebuffComponent->GetActiveDebuffs();
+		bDebuffBarHasActiveDebuffs = ActiveDebuffs.Num() > 0;
+	}
+
+	DebuffBarWidget->SetActiveDebuffs(ActiveDebuffs);
+}
+
 void UTunaSweeperGameHudWidget::RefreshQuickSlotsFromGameState()
 {
 	if (!QuickSlotBarWidget)
@@ -2428,6 +2493,7 @@ void UTunaSweeperGameHudWidget::RefreshDialogueHudVisibility()
 	{
 		ForceCollapseHudWidget(BottomStatusWidget);
 		ForceCollapseHudWidget(QuickSlotBarWidget);
+		ForceCollapseHudWidget(DebuffBarWidget);
 		return;
 	}
 
@@ -2436,6 +2502,9 @@ void UTunaSweeperGameHudWidget::RefreshDialogueHudVisibility()
 		? ESlateVisibility::Collapsed
 		: ESlateVisibility::HitTestInvisible;
 	const ESlateVisibility QuickSlotVisibility = bSuppressBottomHud
+		? ESlateVisibility::Collapsed
+		: ESlateVisibility::HitTestInvisible;
+	const ESlateVisibility DebuffBarVisibility = (bSuppressBottomHud || !bDebuffBarHasActiveDebuffs)
 		? ESlateVisibility::Collapsed
 		: ESlateVisibility::HitTestInvisible;
 
@@ -2447,6 +2516,11 @@ void UTunaSweeperGameHudWidget::RefreshDialogueHudVisibility()
 	if (QuickSlotBarWidget)
 	{
 		SetTransitionedWidgetVisibility(QuickSlotBarWidget, QuickSlotVisibility, QuickSlotBarTransitionEdge);
+	}
+
+	if (DebuffBarWidget)
+	{
+		SetTransitionedWidgetVisibility(DebuffBarWidget, DebuffBarVisibility, DebuffBarTransitionEdge);
 	}
 }
 

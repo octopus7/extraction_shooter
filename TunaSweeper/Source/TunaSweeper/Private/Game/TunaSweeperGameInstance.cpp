@@ -1,5 +1,6 @@
 #include "Game/TunaSweeperGameInstance.h"
 
+#include "Component/TunaSweeperDebuffComponent.h"
 #include "Component/TunaSweeperVitalsComponent.h"
 #include "Dom/JsonObject.h"
 #include "Dom/JsonValue.h"
@@ -1709,17 +1710,35 @@ bool UTunaSweeperGameInstance::TryUseItemInSlot(const FTunaSweeperItemSlotRefere
 		return false;
 	}
 
-	UTunaSweeperVitalsComponent* VitalsComponent = InstigatorPawn->FindComponentByClass<UTunaSweeperVitalsComponent>();
-	if (!VitalsComponent)
+	const bool bHasVitalsEffect =
+		!FMath::IsNearlyZero(ItemDefinition.UseHealthDelta) ||
+		!FMath::IsNearlyZero(ItemDefinition.UseFoodDelta) ||
+		!FMath::IsNearlyZero(ItemDefinition.UseHydrationDelta);
+	const bool bClearsDebuffs = ItemDefinition.ClearsDebuffIds.Num() > 0;
+
+	UTunaSweeperVitalsComponent* VitalsComponent = bHasVitalsEffect
+		? InstigatorPawn->FindComponentByClass<UTunaSweeperVitalsComponent>()
+		: nullptr;
+	UTunaSweeperDebuffComponent* DebuffComponent = bClearsDebuffs
+		? InstigatorPawn->FindComponentByClass<UTunaSweeperDebuffComponent>()
+		: nullptr;
+	if ((bHasVitalsEffect && !VitalsComponent) || (bClearsDebuffs && !DebuffComponent))
 	{
 		return false;
 	}
 
-	FTunaSweeperVitalsDelta Effect;
-	Effect.Health = ItemDefinition.UseHealthDelta;
-	Effect.Food = ItemDefinition.UseFoodDelta;
-	Effect.Hydration = ItemDefinition.UseHydrationDelta;
-	VitalsComponent->ApplyConsumableVitalsEffect(Effect);
+	if (VitalsComponent)
+	{
+		FTunaSweeperVitalsDelta Effect;
+		Effect.Health = ItemDefinition.UseHealthDelta;
+		Effect.Food = ItemDefinition.UseFoodDelta;
+		Effect.Hydration = ItemDefinition.UseHydrationDelta;
+		VitalsComponent->ApplyConsumableVitalsEffect(Effect);
+	}
+	if (DebuffComponent)
+	{
+		DebuffComponent->RemoveDebuffs(ItemDefinition.ClearsDebuffIds);
+	}
 
 	ItemInstance->Quantity -= 1;
 	if (ItemInstance->Quantity <= 0)
@@ -4920,7 +4939,8 @@ bool UTunaSweeperGameInstance::DoesItemDefinitionHaveUseEffect(
 {
 	return !FMath::IsNearlyZero(ItemDefinition.UseHealthDelta) ||
 		!FMath::IsNearlyZero(ItemDefinition.UseFoodDelta) ||
-		!FMath::IsNearlyZero(ItemDefinition.UseHydrationDelta);
+		!FMath::IsNearlyZero(ItemDefinition.UseHydrationDelta) ||
+		ItemDefinition.ClearsDebuffIds.Num() > 0;
 }
 
 bool UTunaSweeperGameInstance::TryResolveItemAttachmentDrop(

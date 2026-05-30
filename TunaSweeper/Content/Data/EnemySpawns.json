@@ -49,6 +49,8 @@
     "approach_stop_range": 95.0,
     "tracking_range": 1800.0,
     "attack_cooldown_seconds": 1.25,
+    "bleed_chance_bonus": 0.08,
+    "bleed_duration_bonus_seconds": 4.0,
     "location": [-2600.0, 120.0, 90.0],
     "rotation": [0.0, 0.0, 0.0]
   },
@@ -67,6 +69,8 @@
     "approach_stop_range": 95.0,
     "tracking_range": 1800.0,
     "attack_cooldown_seconds": 1.25,
+    "bleed_chance_bonus": 0.08,
+    "bleed_duration_bonus_seconds": 4.0,
     "location": [-2600.0, 320.0, 90.0],
     "rotation": [0.0, 0.0, 0.0]
   }

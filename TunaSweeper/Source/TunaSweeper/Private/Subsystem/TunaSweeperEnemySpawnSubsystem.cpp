@@ -498,7 +498,9 @@ bool UTunaSweeperEnemySpawnSubsystem::EnsureRaidRuntimeActorsSpawnedForWorld(UWo
 					SpawnDefinition.DropContainerDefinitionId,
 					SpawnDefinition.DropContentsId,
 					SpawnDefinition.MaxHealth,
-					SpawnDefinition.ExperienceValue);
+					SpawnDefinition.ExperienceValue,
+					SpawnDefinition.BleedingChanceBonus,
+					SpawnDefinition.BleedingDurationBonusSeconds);
 				UGameplayStatics::FinishSpawningActor(SpawnedEnemy, SpawnTransform);
 				++SpawnedCount;
 			}
@@ -862,6 +864,8 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadEnemySpawnData(bool bForceReload)
 		double NumericDropContentsId = INDEX_NONE;
 		double NumericMaxHealth = 30.0;
 		double NumericExperienceValue = 30.0;
+		double NumericBleedingChanceBonus = 0.0;
+		double NumericBleedingDurationBonusSeconds = 0.0;
 		if (!JsonObject->TryGetStringField(TEXT("level_name"), LevelName) ||
 			!TunaSweeperEnemySpawn::TryReadVectorField(JsonObject, TEXT("location"), Location))
 		{
@@ -876,6 +880,10 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadEnemySpawnData(bool bForceReload)
 		JsonObject->TryGetNumberField(TEXT("drop_contents_id"), NumericDropContentsId);
 		JsonObject->TryGetNumberField(TEXT("max_health"), NumericMaxHealth);
 		JsonObject->TryGetNumberField(TEXT("experience_value"), NumericExperienceValue);
+		JsonObject->TryGetNumberField(TEXT("bleeding_chance_bonus"), NumericBleedingChanceBonus) ||
+			JsonObject->TryGetNumberField(TEXT("bleed_chance_bonus"), NumericBleedingChanceBonus);
+		JsonObject->TryGetNumberField(TEXT("bleeding_duration_bonus_seconds"), NumericBleedingDurationBonusSeconds) ||
+			JsonObject->TryGetNumberField(TEXT("bleed_duration_bonus_seconds"), NumericBleedingDurationBonusSeconds);
 		TunaSweeperEnemySpawn::TryReadRotatorField(JsonObject, TEXT("rotation"), Rotation);
 
 		FEnemySpawnDefinition SpawnDefinition;
@@ -899,6 +907,8 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadEnemySpawnData(bool bForceReload)
 		SpawnDefinition.DropContentsId = static_cast<int32>(NumericDropContentsId);
 		SpawnDefinition.ExperienceValue = FMath::Max(0, static_cast<int32>(NumericExperienceValue));
 		SpawnDefinition.MaxHealth = FMath::Max(1.0f, static_cast<float>(NumericMaxHealth));
+		SpawnDefinition.BleedingChanceBonus = FMath::Clamp(static_cast<float>(NumericBleedingChanceBonus), 0.0f, 1.0f);
+		SpawnDefinition.BleedingDurationBonusSeconds = FMath::Max(0.0f, static_cast<float>(NumericBleedingDurationBonusSeconds));
 
 		if (SpawnDefinition.LevelName.IsNone())
 		{

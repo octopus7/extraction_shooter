@@ -8,6 +8,7 @@
 #include "TunaSweeperGameHudWidget.generated.h"
 
 class UTunaSweeperHudBottomStatusWidget;
+class UTunaSweeperHudDebuffBarWidget;
 class UTunaSweeperHudExternalPanelWidget;
 class UTunaSweeperHousingPanelWidget;
 class UTunaSweeperHudInventoryAreaWidget;
@@ -214,6 +215,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Transitions", meta = (DisplayName = "Bottom Status Direction Override"))
 	ETunaSweeperHudTransitionEdge BottomStatusTransitionEdge = ETunaSweeperHudTransitionEdge::Bottom;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Transitions", meta = (DisplayName = "Debuff Bar Direction Override"))
+	ETunaSweeperHudTransitionEdge DebuffBarTransitionEdge = ETunaSweeperHudTransitionEdge::Bottom;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Transitions", meta = (DisplayName = "Quick Slot Bar Direction Override"))
 	ETunaSweeperHudTransitionEdge QuickSlotBarTransitionEdge = ETunaSweeperHudTransitionEdge::Bottom;
 
@@ -295,6 +299,7 @@ private:
 	void CloseLootContainerPanelIfOpen();
 	void EnsureExtractionProgressWidget();
 	void EnsureCursorDistanceWidget();
+	void EnsureDebuffBarWidget();
 	void EnsureInventoryQuickSlotPanelWidget();
 	void EnsureHousingPanelWidget();
 	void EnsureMapPanelWidget();
@@ -304,6 +309,7 @@ private:
 	void SetShopSellPanelVisible(bool bVisible);
 	ETunaSweeperHudTransitionEdge ResolveHudTransitionEdge(const UWidget* Widget, ETunaSweeperHudTransitionEdge DirectionOverride) const;
 	void RefreshBottomStatusFromGameInstance();
+	void RefreshDebuffBarFromPlayer();
 	void RefreshQuickSlotsFromGameState();
 	void RefreshInventoryQuickSlotPanel();
 	void RefreshLocalizedTexts();
@@ -367,6 +373,9 @@ private:
 	TObjectPtr<UBorder> CursorDistancePanel;
 
 	UPROPERTY(Transient)
+	TObjectPtr<UTunaSweeperHudDebuffBarWidget> DebuffBarWidget;
+
+	UPROPERTY(Transient)
 	TObjectPtr<UTextBlock> CursorDistanceText;
 
 	UPROPERTY(Transient)
@@ -399,6 +408,7 @@ private:
 	bool bExtractionProgressActive = false;
 	float PrecisionCrosshairAimAlpha = 0.0f;
 	int32 LastCursorDistanceMeters = INDEX_NONE;
+	bool bDebuffBarHasActiveDebuffs = false;
 	TArray<FDamageNumberPopup> DamageNumberPopups;
 	TArray<FHudWidgetTransition> ActiveHudTransitions;
 	TMap<TWeakObjectPtr<UWidget>, FWidgetTransform> HudTransitionBaseTransforms;

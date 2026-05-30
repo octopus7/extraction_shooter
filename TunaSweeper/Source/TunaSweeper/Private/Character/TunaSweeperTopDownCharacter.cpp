@@ -3,6 +3,7 @@
 #include "Camera/CameraComponent.h"
 #include "CollisionQueryParams.h"
 #include "CollisionShape.h"
+#include "Component/TunaSweeperDebuffComponent.h"
 #include "Component/TunaSweeperPlayerVisionComponent.h"
 #include "Component/TunaSweeperVitalsComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -124,6 +125,7 @@ ATunaSweeperTopDownCharacter::ATunaSweeperTopDownCharacter()
 	LowFrontCameraModeSettings.AimFOV = 60.0f;
 
 	VitalsComponent = CreateDefaultSubobject<UTunaSweeperVitalsComponent>(TEXT("VitalsComponent"));
+	DebuffComponent = CreateDefaultSubobject<UTunaSweeperDebuffComponent>(TEXT("DebuffComponent"));
 	PlayerVisionComponent = CreateDefaultSubobject<UTunaSweeperPlayerVisionComponent>(TEXT("PlayerVisionComponent"));
 	StaminaGaugeWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("StaminaGaugeWidget"));
 	StaminaGaugeWidgetComponent->SetupAttachment(RootComponent);
@@ -2150,6 +2152,44 @@ void ATunaSweeperTopDownCharacter::TriggerDamageCameraReaction(
 	CameraHitReactionDirection = ResolveDamageCameraReactionDirection(DamageCauser);
 	CameraHitReactionElapsed = 0.0f;
 	CameraHitReactionPhase = 0.0f;
+	bCameraHitReactionActive = true;
+}
+
+void ATunaSweeperTopDownCharacter::TriggerDebuffCameraReaction(
+	FName DebuffId,
+	const FTunaSweeperDebuffCameraReactionSettings& ReactionSettings)
+{
+	(void)DebuffId;
+
+	if (!CameraBoom && !TopDownCamera)
+	{
+		return;
+	}
+
+	FTunaSweeperDebuffCameraReactionSettings NormalizedSettings = ReactionSettings;
+	NormalizedSettings.Normalize();
+	if (NormalizedSettings.DurationSeconds <= 0.0f ||
+		(NormalizedSettings.LocationAmplitude <= 0.0f &&
+		 NormalizedSettings.RollAmplitudeDegrees <= 0.0f &&
+		 NormalizedSettings.FOVAmplitudeDegrees <= 0.0f))
+	{
+		return;
+	}
+
+	ActiveCameraHitReaction.Duration = NormalizedSettings.DurationSeconds;
+	ActiveCameraHitReaction.LocationAmplitude = NormalizedSettings.LocationAmplitude;
+	ActiveCameraHitReaction.RollAmplitudeDegrees = NormalizedSettings.RollAmplitudeDegrees;
+	ActiveCameraHitReaction.FOVAmplitudeDegrees = NormalizedSettings.FOVAmplitudeDegrees;
+	ActiveCameraHitReaction.Frequency = NormalizedSettings.Frequency;
+	ActiveCameraHitReaction.DamageScaleReference = 1.0f;
+	ActiveCameraHitReaction.MinDamageScale = 1.0f;
+	ActiveCameraHitReaction.MaxDamageScale = 1.0f;
+	CameraHitReactionScale = 1.0f;
+
+	const float ReactionAngleRadians = FMath::FRandRange(0.0f, 2.0f * UE_PI);
+	CameraHitReactionDirection = FVector(FMath::Cos(ReactionAngleRadians), FMath::Sin(ReactionAngleRadians), 0.0f);
+	CameraHitReactionElapsed = 0.0f;
+	CameraHitReactionPhase = FMath::FRandRange(0.0f, 2.0f * UE_PI);
 	bCameraHitReactionActive = true;
 }
 

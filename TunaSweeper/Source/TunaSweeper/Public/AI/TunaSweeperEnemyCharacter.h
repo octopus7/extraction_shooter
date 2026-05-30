@@ -38,6 +38,7 @@ public:
 	float GetMeleeApproachStopRange() const;
 	float GetMeleeTrackingRange() const;
 	float GetMeleeAttackCooldownSeconds() const;
+	bool TryApplyBleedTo(AActor* TargetActor) const;
 
 	void ConfigureSpawnData(
 		const TSoftObjectPtr<UMaterialInterface>& InBodyMaterial,
@@ -45,7 +46,9 @@ public:
 		int32 InDropContainerDefinitionId,
 		int32 InDropContentsId,
 		float InMaxHealth,
-		int32 InExperienceValue);
+		int32 InExperienceValue,
+		float InBleedingChanceBonus = 0.0f,
+		float InBleedingDurationBonusSeconds = 0.0f);
 
 protected:
 	virtual void BeginPlay() override;
@@ -79,6 +82,12 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat", meta = (ClampMin = "1.0", UIMin = "1.0"))
 	float MaxHealth = 30.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat|Debuffs", meta = (ClampMin = "0.0", ClampMax = "1.0", UIMin = "0.0", UIMax = "1.0"))
+	float BleedingChanceBonus = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat|Debuffs", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float BleedingDurationBonusSeconds = 0.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement", meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float MovementSpeed = 260.0f;

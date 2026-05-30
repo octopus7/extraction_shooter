@@ -465,6 +465,11 @@ void ATunaSweeperProjectile::HandleHit(
 
 	if (AppliedDamage > 0.0f)
 	{
+		if (ATunaSweeperEnemyCharacter* EnemyOwner = Cast<ATunaSweeperEnemyCharacter>(GetOwner()))
+		{
+			EnemyOwner->TryApplyBleedTo(OtherActor);
+		}
+
 		SpawnHitEffect(Hit, OtherActor, OtherComp);
 		if (ATunaSweeperPlayerController* TunaPlayerController =
 			Cast<ATunaSweeperPlayerController>(GetInstigatorController()))
