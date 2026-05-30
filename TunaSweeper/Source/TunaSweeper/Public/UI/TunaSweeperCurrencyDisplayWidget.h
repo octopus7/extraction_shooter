@@ -2,6 +2,7 @@
 
 #include "Blueprint/UserWidget.h"
 #include "CoreMinimal.h"
+#include "Rendering/RenderingCommon.h"
 #include "TunaSweeperCurrencyDisplayWidget.generated.h"
 
 class UHorizontalBox;
@@ -35,6 +36,14 @@ protected:
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
 	virtual void NativePreConstruct() override;
+	virtual int32 NativePaint(
+		const FPaintArgs& Args,
+		const FGeometry& AllottedGeometry,
+		const FSlateRect& MyCullingRect,
+		FSlateWindowElementList& OutDrawElements,
+		int32 LayerId,
+		const FWidgetStyle& InWidgetStyle,
+		bool bParentEnabled) const override;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Currency", meta = (BindWidgetOptional))
 	TObjectPtr<UHorizontalBox> RootBox;

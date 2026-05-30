@@ -9,6 +9,7 @@
 
 class UBorder;
 class UImage;
+class USizeBox;
 class UTextBlock;
 class UDragDropOperation;
 class UTunaSweeperItemHoverBorderEffectWidget;
@@ -62,6 +63,15 @@ protected:
 	TObjectPtr<UBorder> SlotBackground;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Tile", meta = (BindWidgetOptional))
+	TObjectPtr<USizeBox> RootSizeBox;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Tile", meta = (BindWidgetOptional))
+	TObjectPtr<USizeBox> SlotSizeBox;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Tile", meta = (BindWidgetOptional))
+	TObjectPtr<USizeBox> IconBox;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Tile", meta = (BindWidgetOptional))
 	TObjectPtr<UTextBlock> EquipmentSlotNameText;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Tile", meta = (BindWidgetOptional))
@@ -92,6 +102,8 @@ protected:
 	TObjectPtr<UImage> ItemPriceCoinImage;
 
 private:
+	void CacheLayoutWidgets();
+	void ApplySlotMetrics(bool bIsEquipmentSlot);
 	void ApplyTileData();
 	void ApplyDropHighlight(bool bCanAcceptDrop);
 	void EnsureRaritySlotAccentWidget();

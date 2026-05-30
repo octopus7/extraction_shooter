@@ -7,7 +7,10 @@
 #include "Components/SizeBox.h"
 #include "Components/TextBlock.h"
 #include "Engine/Texture2D.h"
+#include "Framework/Application/SlateApplication.h"
 #include "Game/TunaSweeperGameInstance.h"
+#include "Rendering/DrawElements.h"
+#include "Styling/CoreStyle.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
 #include "UI/TunaSweeperUIFont.h"
 #include "Widgets/SWidget.h"
@@ -16,7 +19,11 @@ namespace TunaSweeperCurrencyDisplay
 {
 	const TCHAR* CurrencyCoinIconPath =
 		TEXT("/Game/UI/Icons/T_UIIcon_CurrencyCoin_White.T_UIIcon_CurrencyCoin_White");
-	constexpr float CoinIconSize = 18.0f;
+	constexpr float CoinIconSize = 28.0f;
+	constexpr float BalanceFontSize = 28.0f;
+	constexpr float CoinToTextGap = 8.0f;
+	constexpr float GradientHorizontalPadding = 14.0f;
+	constexpr float GradientVerticalPadding = 4.0f;
 
 	template <typename WidgetClass>
 	FName MakeWidgetName(UWidgetTree* WidgetTree, const TCHAR* DesiredName)
@@ -25,6 +32,125 @@ namespace TunaSweeperCurrencyDisplay
 		return WidgetTree && WidgetTree->FindWidget(BaseName)
 			? MakeUniqueObjectName(WidgetTree, WidgetClass::StaticClass(), BaseName)
 			: BaseName;
+	}
+
+	void AddHorizontalGradientQuad(
+		const FSlateRenderTransform& RenderTransform,
+		const FVector2D& Position,
+		const FVector2D& Size,
+		const FLinearColor& LeftColor,
+		const FLinearColor& RightColor,
+		TArray<FSlateVertex>& OutVertices,
+		TArray<SlateIndex>& OutIndices)
+	{
+		const SlateIndex BaseIndex = static_cast<SlateIndex>(OutVertices.Num());
+		const FColor LeftVertexColor = LeftColor.ToFColor(true);
+		const FColor RightVertexColor = RightColor.ToFColor(true);
+		const FVector2D TopLeft = Position;
+		const FVector2D TopRight = Position + FVector2D(Size.X, 0.0f);
+		const FVector2D BottomLeft = Position + FVector2D(0.0f, Size.Y);
+		const FVector2D BottomRight = Position + Size;
+
+		OutVertices.Add(FSlateVertex::Make<ESlateVertexRounding::Disabled>(
+			RenderTransform,
+			FVector2f(TopLeft),
+			FVector2f::ZeroVector,
+			LeftVertexColor));
+		OutVertices.Add(FSlateVertex::Make<ESlateVertexRounding::Disabled>(
+			RenderTransform,
+			FVector2f(TopRight),
+			FVector2f::ZeroVector,
+			RightVertexColor));
+		OutVertices.Add(FSlateVertex::Make<ESlateVertexRounding::Disabled>(
+			RenderTransform,
+			FVector2f(BottomLeft),
+			FVector2f::ZeroVector,
+			LeftVertexColor));
+		OutVertices.Add(FSlateVertex::Make<ESlateVertexRounding::Disabled>(
+			RenderTransform,
+			FVector2f(BottomRight),
+			FVector2f::ZeroVector,
+			RightVertexColor));
+
+		OutIndices.Add(BaseIndex);
+		OutIndices.Add(BaseIndex + 1);
+		OutIndices.Add(BaseIndex + 2);
+		OutIndices.Add(BaseIndex + 1);
+		OutIndices.Add(BaseIndex + 3);
+		OutIndices.Add(BaseIndex + 2);
+	}
+
+	void DrawCurrencyGradientBackground(
+		const FGeometry& AllottedGeometry,
+		FSlateWindowElementList& OutDrawElements,
+		int32 LayerId)
+	{
+		if (!FSlateApplication::IsInitialized())
+		{
+			return;
+		}
+
+		const FSlateBrush* WhiteBrush = FCoreStyle::Get().GetBrush(TEXT("WhiteBrush"));
+		if (!WhiteBrush || !FSlateApplication::Get().GetRenderer())
+		{
+			return;
+		}
+
+		const FVector2D LocalSize = AllottedGeometry.GetLocalSize();
+		if (LocalSize.X <= 2.0f || LocalSize.Y <= 2.0f)
+		{
+			return;
+		}
+
+		const FVector2D BackgroundPosition(-GradientHorizontalPadding, -GradientVerticalPadding);
+		const FVector2D BackgroundSize(
+			LocalSize.X + GradientHorizontalPadding * 2.0f,
+			LocalSize.Y + GradientVerticalPadding * 2.0f);
+		const float FadeWidth = FMath::Clamp(BackgroundSize.X * 0.28f, 12.0f, 36.0f);
+		const float SolidWidth = FMath::Max(1.0f, BackgroundSize.X - FadeWidth * 2.0f);
+		const FLinearColor TransparentColor(0.0f, 0.0f, 0.0f, 0.0f);
+		const FLinearColor SolidColor(0.0f, 0.0f, 0.0f, 0.48f);
+
+		const FSlateRenderTransform& RenderTransform = AllottedGeometry.GetAccumulatedRenderTransform();
+		TArray<FSlateVertex> Vertices;
+		TArray<SlateIndex> Indices;
+		Vertices.Reserve(12);
+		Indices.Reserve(18);
+
+		AddHorizontalGradientQuad(
+			RenderTransform,
+			BackgroundPosition,
+			FVector2D(FadeWidth, BackgroundSize.Y),
+			TransparentColor,
+			SolidColor,
+			Vertices,
+			Indices);
+		AddHorizontalGradientQuad(
+			RenderTransform,
+			BackgroundPosition + FVector2D(FadeWidth, 0.0f),
+			FVector2D(SolidWidth, BackgroundSize.Y),
+			SolidColor,
+			SolidColor,
+			Vertices,
+			Indices);
+		AddHorizontalGradientQuad(
+			RenderTransform,
+			BackgroundPosition + FVector2D(FadeWidth + SolidWidth, 0.0f),
+			FVector2D(FadeWidth, BackgroundSize.Y),
+			SolidColor,
+			TransparentColor,
+			Vertices,
+			Indices);
+
+		FSlateDrawElement::MakeCustomVerts(
+			OutDrawElements,
+			LayerId,
+			FSlateApplication::Get().GetRenderer()->GetResourceHandle(*WhiteBrush),
+			Vertices,
+			Indices,
+			nullptr,
+			0,
+			0);
 	}
 }
 
@@ -121,6 +247,28 @@ void UTunaSweeperCurrencyDisplayWidget::NativePreConstruct()
 	EnsureCurrencyContent();
 }
 
+int32 UTunaSweeperCurrencyDisplayWidget::NativePaint(
+	const FPaintArgs& Args,
+	const FGeometry& AllottedGeometry,
+	const FSlateRect& MyCullingRect,
+	FSlateWindowElementList& OutDrawElements,
+	int32 LayerId,
+	const FWidgetStyle& InWidgetStyle,
+	bool bParentEnabled) const
+{
+	TunaSweeperCurrencyDisplay::DrawCurrencyGradientBackground(AllottedGeometry, OutDrawElements, LayerId);
+
+	const int32 PaintedLayerId = Super::NativePaint(
+		Args,
+		AllottedGeometry,
+		MyCullingRect,
+		OutDrawElements,
+		LayerId + 1,
+		InWidgetStyle,
+		bParentEnabled);
+	return FMath::Max(PaintedLayerId, LayerId + 1);
+}
+
 void UTunaSweeperCurrencyDisplayWidget::BuildNativeWidgetTree()
 {
 	if (!WidgetTree)
@@ -158,15 +306,17 @@ void UTunaSweeperCurrencyDisplayWidget::BuildNativeWidgetTree()
 		CoinSlot->SetVerticalAlignment(VAlign_Center);
 	}
 
-	TunaSweeperUIFont::ApplyFont(BalanceText, 16, ETunaSweeperUIFontWeight::Bold);
+	TunaSweeperUIFont::ApplyFont(BalanceText, TunaSweeperCurrencyDisplay::BalanceFontSize, ETunaSweeperUIFontWeight::Bold);
 	BalanceText->SetAutoWrapText(false);
 	BalanceText->SetJustification(ETextJustify::Left);
+	BalanceText->SetShadowColorAndOpacity(FLinearColor(0.0f, 0.0f, 0.0f, 0.82f));
+	BalanceText->SetShadowOffset(FVector2D(1.0f, 1.0f));
 	UHorizontalBoxSlot* BalanceSlot = RootBox->AddChildToHorizontalBox(BalanceText);
 	if (BalanceSlot)
 	{
 		BalanceSlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
 		BalanceSlot->SetVerticalAlignment(VAlign_Center);
-		BalanceSlot->SetPadding(FMargin(6.0f, 0.0f, 0.0f, 0.0f));
+		BalanceSlot->SetPadding(FMargin(TunaSweeperCurrencyDisplay::CoinToTextGap, 0.0f, 0.0f, 0.0f));
 	}
 }
 
@@ -204,7 +354,12 @@ void UTunaSweeperCurrencyDisplayWidget::ApplyCurrencyPresentation()
 	{
 		BalanceText->SetText(FText::AsNumber(CurrencyAmount));
 		BalanceText->SetColorAndOpacity(FSlateColor(FLinearColor::White));
-		TunaSweeperUIFont::ApplyFont(BalanceText, 16, ETunaSweeperUIFontWeight::Bold);
+		BalanceText->SetShadowColorAndOpacity(FLinearColor(0.0f, 0.0f, 0.0f, 0.82f));
+		BalanceText->SetShadowOffset(FVector2D(1.0f, 1.0f));
+		TunaSweeperUIFont::ApplyFont(
+			BalanceText,
+			TunaSweeperCurrencyDisplay::BalanceFontSize,
+			ETunaSweeperUIFontWeight::Bold);
 	}
 }
 

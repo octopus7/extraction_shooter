@@ -34,9 +34,8 @@ namespace TunaSweeperInventoryArea
 	constexpr float InventoryTileHeight = 96.0f;
 	constexpr float InventoryTileViewScrollbarReserveWidth = 22.0f;
 	constexpr float InventoryTileViewWidth = InventoryTileColumnCount * InventoryTileWidth + InventoryTileViewScrollbarReserveWidth;
-	constexpr float EquipmentSlotLabelHeight = 22.0f;
-	constexpr float EquipmentReserveEntryWidth = InventoryTileWidth;
-	constexpr float EquipmentReserveEntryHeight = InventoryTileHeight + EquipmentSlotLabelHeight;
+	constexpr float EquipmentReserveEntryWidth = 112.0f;
+	constexpr float EquipmentReserveEntryHeight = 124.0f;
 	constexpr float EquipmentReserveWidth = EquipmentReserveColumnCount * EquipmentReserveEntryWidth;
 	constexpr float EquipmentReserveHeight = 2.0f * EquipmentReserveEntryHeight;
 	constexpr float AuxiliaryBagTileWidth = 96.0f;

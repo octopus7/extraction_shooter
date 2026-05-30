@@ -321,9 +321,8 @@ namespace TunaSweeperEditorSetup
 	constexpr float InventoryTileViewScrollbarReserveWidth = 22.0f;
 	constexpr float InventoryTileViewWidth = InventoryTileColumnCount * InventoryTileWidth + InventoryTileViewScrollbarReserveWidth;
 	constexpr float InventoryPanelWidth = InventoryPanelPadding * 2.0f + InventoryTileViewWidth;
-	constexpr float EquipmentSlotLabelHeight = 22.0f;
-	constexpr float EquipmentReserveEntryWidth = InventoryTileWidth;
-	constexpr float EquipmentReserveEntryHeight = InventoryTileHeight + EquipmentSlotLabelHeight;
+	constexpr float EquipmentReserveEntryWidth = 112.0f;
+	constexpr float EquipmentReserveEntryHeight = 124.0f;
 	constexpr float EquipmentReserveWidth = EquipmentReserveColumnCount * EquipmentReserveEntryWidth;
 	constexpr float EquipmentReserveHeight = 2.0f * EquipmentReserveEntryHeight;
 	constexpr float AuxiliaryBagPanelPadding = 6.0f;
@@ -7441,6 +7440,7 @@ namespace TunaSweeperEditorSetup
 			FLinearColor(0.72f, 0.80f, 0.86f, 1.0f),
 			12);
 		EquipmentSlotNameText->SetAutoWrapText(false);
+		EquipmentSlotNameText->SetJustification(ETextJustify::Center);
 		EquipmentSlotNameText->SetVisibility(ESlateVisibility::Collapsed);
 		UVerticalBoxSlot* EquipmentSlotNameSlot = RootStack->AddChildToVerticalBox(EquipmentSlotNameText);
 		if (EquipmentSlotNameSlot)
@@ -7569,7 +7569,10 @@ namespace TunaSweeperEditorSetup
 			PriceSlot->SetPadding(FMargin(0.0f, 2.0f, 0.0f, 0.0f));
 		}
 
+		RegisterWidgetVariable(WidgetBlueprint, RootSizeBox);
+		RegisterWidgetVariable(WidgetBlueprint, SlotSizeBox);
 		RegisterWidgetVariable(WidgetBlueprint, SlotBackground);
+		RegisterWidgetVariable(WidgetBlueprint, IconBox);
 		RegisterWidgetVariable(WidgetBlueprint, EquipmentSlotNameText);
 		RegisterWidgetVariable(WidgetBlueprint, ItemIconImage);
 		RegisterWidgetVariable(WidgetBlueprint, ItemQuantityPlate);

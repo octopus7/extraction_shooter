@@ -134,6 +134,16 @@ namespace TunaSweeperItemThumbnailSlotHover
 	}
 }
 
+namespace TunaSweeperItemThumbnailSlotLayout
+{
+	constexpr float DefaultRootWidth = 96.0f;
+	constexpr float DefaultSlotSize = 92.0f;
+	constexpr float DefaultIconSize = 86.0f;
+	constexpr float EquipmentRootWidth = 112.0f;
+	constexpr float EquipmentSlotSize = 98.0f;
+	constexpr float EquipmentIconSize = 92.0f;
+}
+
 void UTunaSweeperItemThumbnailSlotWidget::NativeOnListItemObjectSet(UObject* ListItemObject)
 {
 	IUserObjectListEntry::NativeOnListItemObjectSet(ListItemObject);
@@ -440,8 +450,62 @@ bool UTunaSweeperItemThumbnailSlotWidget::NativeOnDrop(
 	return bMoved || Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
 }
 
+void UTunaSweeperItemThumbnailSlotWidget::CacheLayoutWidgets()
+{
+	if (!WidgetTree)
+	{
+		return;
+	}
+
+	if (!RootSizeBox)
+	{
+		RootSizeBox = Cast<USizeBox>(WidgetTree->FindWidget(FName(TEXT("RootSizeBox"))));
+	}
+	if (!SlotSizeBox)
+	{
+		SlotSizeBox = Cast<USizeBox>(WidgetTree->FindWidget(FName(TEXT("SlotSizeBox"))));
+	}
+	if (!IconBox)
+	{
+		IconBox = Cast<USizeBox>(WidgetTree->FindWidget(FName(TEXT("IconBox"))));
+	}
+}
+
+void UTunaSweeperItemThumbnailSlotWidget::ApplySlotMetrics(bool bIsEquipmentSlot)
+{
+	CacheLayoutWidgets();
+
+	const float RootWidth = bIsEquipmentSlot
+		? TunaSweeperItemThumbnailSlotLayout::EquipmentRootWidth
+		: TunaSweeperItemThumbnailSlotLayout::DefaultRootWidth;
+	const float SlotSize = bIsEquipmentSlot
+		? TunaSweeperItemThumbnailSlotLayout::EquipmentSlotSize
+		: TunaSweeperItemThumbnailSlotLayout::DefaultSlotSize;
+	const float IconSize = bIsEquipmentSlot
+		? TunaSweeperItemThumbnailSlotLayout::EquipmentIconSize
+		: TunaSweeperItemThumbnailSlotLayout::DefaultIconSize;
+
+	if (RootSizeBox)
+	{
+		RootSizeBox->SetWidthOverride(RootWidth);
+	}
+	if (SlotSizeBox)
+	{
+		SlotSizeBox->SetWidthOverride(SlotSize);
+		SlotSizeBox->SetHeightOverride(SlotSize);
+	}
+	if (IconBox)
+	{
+		IconBox->SetWidthOverride(IconSize);
+		IconBox->SetHeightOverride(IconSize);
+	}
+}
+
 void UTunaSweeperItemThumbnailSlotWidget::ApplyTileData()
 {
+	const bool bIsEquipmentSlot = CachedTileData.Source == ETunaSweeperItemSlotSource::Equipment;
+	ApplySlotMetrics(bIsEquipmentSlot);
+
 	if (SlotBackground)
 	{
 		ApplyDropHighlight(false);
@@ -453,10 +517,10 @@ void UTunaSweeperItemThumbnailSlotWidget::ApplyTileData()
 	EnsureAttachmentSlotIndicatorWidget();
 	EnsureItemPriceCoinWidget();
 
-	const bool bIsEquipmentSlot = CachedTileData.Source == ETunaSweeperItemSlotSource::Equipment;
 	if (EquipmentSlotNameText)
 	{
 		EquipmentSlotNameText->SetText(bIsEquipmentSlot ? CachedTileData.EquipmentSlotDisplayName : FText::GetEmpty());
+		EquipmentSlotNameText->SetJustification(ETextJustify::Center);
 		EquipmentSlotNameText->SetVisibility(
 			bIsEquipmentSlot && !CachedTileData.EquipmentSlotDisplayName.IsEmpty()
 				? ESlateVisibility::HitTestInvisible
