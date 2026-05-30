@@ -70,6 +70,12 @@ namespace
 	constexpr float UtilityPanelRightInset = 34.0f;
 	constexpr float UtilityPanelTopOffset = 96.0f;
 	constexpr float UtilityPanelHeight = 620.0f;
+	constexpr float QuestMenuHorizontalMargin = 250.0f;
+	constexpr float QuestMenuTopMargin = 112.0f;
+	constexpr float QuestMenuBottomMargin = 56.0f;
+	constexpr float QuestInteractionHorizontalMargin = 200.0f;
+	constexpr float QuestInteractionTopMargin = 76.0f;
+	constexpr float QuestInteractionBottomMargin = 56.0f;
 	constexpr int32 MaxActiveDamageNumberPopups = 64;
 	constexpr float DamageNumberGrowDurationAlpha = 0.14f / 3.0f;
 	constexpr float DamageNumberSettleDurationAlpha = 0.28f / 2.0f;
@@ -2030,8 +2036,7 @@ void UTunaSweeperGameHudWidget::EnsureQuestPanelWidgets()
 	auto AddQuestWidgetToCanvas = [this, RootCanvas](
 		TObjectPtr<UTunaSweeperQuestWidget>& OutWidget,
 		TSubclassOf<UTunaSweeperQuestWidget> WidgetClass,
-		const FVector2D& Position,
-		const FVector2D& Size)
+		const FMargin& Margins)
 	{
 		if (OutWidget || !WidgetClass)
 		{
@@ -2048,10 +2053,9 @@ void UTunaSweeperGameHudWidget::EnsureQuestPanelWidgets()
 		UCanvasPanelSlot* CanvasSlot = RootCanvas->AddChildToCanvas(OutWidget);
 		if (CanvasSlot)
 		{
-			CanvasSlot->SetAnchors(FAnchors(0.5f, 0.5f));
-			CanvasSlot->SetAlignment(FVector2D(0.5f, 0.5f));
-			CanvasSlot->SetPosition(Position);
-			CanvasSlot->SetSize(Size);
+			CanvasSlot->SetAnchors(FAnchors(0.0f, 0.0f, 1.0f, 1.0f));
+			CanvasSlot->SetAlignment(FVector2D::ZeroVector);
+			CanvasSlot->SetOffsets(Margins);
 			CanvasSlot->SetZOrder(20);
 		}
 	};
@@ -2061,15 +2065,21 @@ void UTunaSweeperGameHudWidget::EnsureQuestPanelWidgets()
 		ResolveQuestWidgetClass(
 			TEXT("/Game/UI/WBP_QuestMenu.WBP_QuestMenu_C"),
 			UTunaSweeperMenuQuestWidget::StaticClass()),
-		FVector2D(0.0f, 42.0f),
-		FVector2D(1180.0f, 640.0f));
+		FMargin(
+			QuestMenuHorizontalMargin,
+			QuestMenuTopMargin,
+			QuestMenuHorizontalMargin,
+			QuestMenuBottomMargin));
 	AddQuestWidgetToCanvas(
 		InteractionQuestPanelWidget,
 		ResolveQuestWidgetClass(
 			TEXT("/Game/UI/WBP_QuestInteraction.WBP_QuestInteraction_C"),
 			UTunaSweeperInteractionQuestWidget::StaticClass()),
-		FVector2D(0.0f, 0.0f),
-		FVector2D(1240.0f, 704.0f));
+		FMargin(
+			QuestInteractionHorizontalMargin,
+			QuestInteractionTopMargin,
+			QuestInteractionHorizontalMargin,
+			QuestInteractionBottomMargin));
 }
 
 void UTunaSweeperGameHudWidget::EnsureShopSellPanelWidget()

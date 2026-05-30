@@ -3251,3 +3251,13 @@
 ## 2026-05-30 19:12:57 (elapsed: 00:00:00)
 
 - 지폐 아이콘은 낱장이 아니라 비스듬한 뷰의 흰 띠지로 묶인 지폐 다발 모습으로 처리할 것.
+
+## 2026-05-30 21:03:03 (elapsed: 00:00:00)
+
+- Implement quest UI outer canvas stretch layout: left/right/top/bottom margins instead of centered fixed size.
+- Keep quest list column fixed-width and let the detail panel fill the remaining width.
+- Use separate margins for top-menu quest entry and actor-interaction quest entry, with actor interaction filling more upward because no top menu is reserved.
+
+## 2026-05-30 21:08:00 (elapsed: 00:00:00)
+
+- Proceed with verification after the quest UI stretch layout implementation.

@@ -1493,3 +1493,33 @@ A. 아니다. 현재 저장소에는 창고 C++ 액터(`ATunaSweeperStorageActor
 ### Answer
 
 현재 데이터에 실제 정의된 디버프는 출혈뿐이다. 후보로는 이동속도 감소, 시야/조준 흔들림, 화상, 중독, 감전/스턴, 장비/재장전 방해, 소음 유발, 회복량 감소 등이 가능하지만, 초반에는 출혈과 명확히 다른 대응 아이템이나 플레이 선택이 생기는 것부터 추가하는 편이 적합하다.
+
+## 2026-05-30 20:58:34 (elapsed: 00:00:00)
+
+### Question
+
+Review only how to enlarge the quest UI because current margins are excessive, especially in actor interaction mode where no top menu bar needs to be reserved.
+
+### Answer
+
+Enlarge the outer canvas slot per quest entry context first, then make the quest widget expose context-specific layout metrics so the root/detail panel sizes match that slot. Menu mode should keep a top-bar reserve, while actor interaction mode can use a larger height and an upward Y offset or full-screen anchored margins. Most extra width should go to the detail area; the list column can stay near its current width or grow only slightly.
+
+## 2026-05-30 21:00:46 (elapsed: 00:00:00)
+
+### Question
+
+Review whether vertically asymmetric quest UI placement should avoid vertical center alignment and use vertical stretch because top/bottom margins differ by entry context.
+
+### Answer
+
+Yes. The current quest canvas slot uses center anchors and center alignment with a fixed size, so asymmetric top/bottom usable space is handled poorly. The safer approach is to place quest panels with stretched canvas anchors and context-specific margins: menu mode reserves the top bar with a larger top margin, while actor interaction mode uses a small top margin and fills down to a bottom margin. The quest widget internals already use fill slots for list/detail scroll areas, so the outer stretch slot should be the primary fix.
+
+## 2026-05-30 21:02:23 (elapsed: 00:00:00)
+
+### Question
+
+Review whether horizontal quest UI placement should also use left/right stretch, with a fixed-width quest list and the detail area filling the remaining width.
+
+### Answer
+
+Yes. Horizontal stretch is the cleaner layout model here. The canvas slot should reserve left/right margins instead of using a centered fixed size, while the internal root columns keep the quest list in a fixed SizeBox and let the detail panel use Fill. That uses the available screen width without letting the list title area expand unpredictably.
