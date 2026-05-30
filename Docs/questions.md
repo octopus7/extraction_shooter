@@ -1366,3 +1366,12 @@ A. 아니다. 현재 저장소에는 창고 C++ 액터(`ATunaSweeperStorageActor
 ### Answer
 
 코드 기준으로는 좌표계 문제 가능성보다 구체 목표 좌표를 항상 사용하지 않는 흐름이 더 유력하다. 마우스 조준 함수는 월드 스태틱 히트나 조준 평면 교차점을 AimPoint로 만들지만, SetAimWorldPoint()는 bHasAimIntent=false로 두고 레이저/발사 쪽은 bHasAimIntent가 true일 때만 AimIntentWorldPoint를 목표로 사용한다. 그래서 바닥/벽처럼 WorldStatic에 조준하거나 히트 없이 평면 교차점으로 조준하는 경우, 실제 조준 좌표가 있어도 레이저는 이를 쓰지 않고 AimDirection 기반 fallback 거리로 뻗는다. BeamEnd는 현재 LaserSightComponent 로컬 좌표로 변환해 Niagara User.BeamEnd에 넣고 있으므로, NS_LaserSight가 로컬 BeamEnd를 기대한다면 변환 자체는 의도에 맞다. 단 NS_LaserSight가 월드 좌표 BeamEnd를 기대하도록 구성되어 있다면 그 경우에는 좌표계 문제가 된다.
+## 2026-05-30 14:54:23 (elapsed: 00:00:00)
+
+### Question
+
+첫 외출 퀘스트 텍스트가 너무 줄내림이 심한데 원인 분석만 해봐
+
+### Answer
+
+첫 외출 퀘스트 문자열 데이터에는 강제 줄바꿈이 없어서 데이터 자체가 원인은 아니다. 원인은 퀘스트 UI의 실제 렌더 폭과 래핑 설정 쪽 가능성이 높다. 런타임 퀘스트 위젯은 상세 설명/목표 텍스트에 `AutoWrapText`와 고정 `WrapTextAt` 값을 쓰고, 상단 메뉴 진입 화면은 인터랙션 진입 화면보다 작은 캔버스 슬롯을 사용한다. 특히 에디터에서 생성된 WBP 트리는 아직 예전 560x380 폭의 좁은 퀘스트 패널 구조를 가지고 있어, 디자이너 프리뷰나 런타임 대체 경로가 실행되지 않은 화면에서는 한국어 문장이 좁은 폭에서 과도하게 줄바꿈될 수 있다. 따라서 확인 포인트는 실제 화면이 런타임에서 재구성된 넓은 `QuestRootPanel` 경로인지, 아니면 좁은 WBP 기본 트리/프리뷰를 보고 있는지다.
