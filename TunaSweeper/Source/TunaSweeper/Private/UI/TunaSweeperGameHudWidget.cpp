@@ -72,7 +72,7 @@ namespace
 	constexpr float UtilityPanelTopOffset = 96.0f;
 	constexpr float UtilityPanelBottomInset = 40.0f;
 	constexpr float InventoryAreaPanelWidth = 642.0f;
-	constexpr float ItemInfoPanelWidth = 330.0f;
+	constexpr float ItemInfoPanelWidth = 429.0f;
 	constexpr float ExternalPanelWidth = 780.0f;
 	constexpr float InventoryWeightPanelWidth = 300.0f;
 	constexpr float InventoryWeightPanelHeight = 38.0f;
@@ -1641,11 +1641,23 @@ void UTunaSweeperGameHudWidget::NormalizeCenterContentPanelLayout()
 		? Cast<UCanvasPanelSlot>(ItemInfoPanelWidget->Slot)
 		: nullptr)
 	{
-		const FVector2D CurrentSize = ItemInfoSlot->GetSize();
-		const float Width = CurrentSize.X > 1.0f ? CurrentSize.X : ItemInfoPanelWidth;
-		ItemInfoSlot->SetAnchors(FAnchors(0.5f, 0.0f, 0.5f, 1.0f));
+		float MaxPanelHeight = 620.0f;
+		if (UWorld* World = GetWorld())
+		{
+			FVector2D ViewportSize = UWidgetLayoutLibrary::GetViewportSize(World);
+			const float ViewportScale = UWidgetLayoutLibrary::GetViewportScale(World);
+			if (!FMath::IsNearlyZero(ViewportScale))
+			{
+				ViewportSize /= ViewportScale;
+			}
+			MaxPanelHeight = FMath::Max(1.0f, ViewportSize.Y - UtilityPanelTopOffset - UtilityPanelBottomInset);
+		}
+
+		ItemInfoSlot->SetAnchors(FAnchors(0.5f, 0.0f, 0.5f, 0.0f));
 		ItemInfoSlot->SetAlignment(FVector2D(0.5f, 0.0f));
-		ItemInfoSlot->SetOffsets(FMargin(0.0f, 0.0f, Width, 0.0f));
+		ItemInfoSlot->SetAutoSize(true);
+		ItemInfoSlot->SetOffsets(FMargin(0.0f, 0.0f, ItemInfoPanelWidth, MaxPanelHeight));
+		ItemInfoPanelWidget->SetPanelLayoutLimits(ItemInfoPanelWidth, MaxPanelHeight);
 	}
 }
 

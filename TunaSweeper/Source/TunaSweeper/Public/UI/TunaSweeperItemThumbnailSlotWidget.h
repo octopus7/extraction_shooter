@@ -3,6 +3,7 @@
 #include "Blueprint/IUserObjectListEntry.h"
 #include "Blueprint/UserWidget.h"
 #include "CoreMinimal.h"
+#include "Rendering/RenderingCommon.h"
 #include "UI/TunaSweeperItemStackTileItemObject.h"
 #include "TunaSweeperItemThumbnailSlotWidget.generated.h"
 
@@ -10,6 +11,7 @@ class UBorder;
 class UImage;
 class UTextBlock;
 class UDragDropOperation;
+class UTunaSweeperItemHoverBorderEffectWidget;
 class UTunaSweeperItemHoverPromptWidget;
 class UTunaSweeperItemRaritySlotAccentWidget;
 
@@ -24,6 +26,15 @@ public:
 protected:
 	virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override;
 	virtual void NativeDestruct() override;
+	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
+	virtual int32 NativePaint(
+		const FPaintArgs& Args,
+		const FGeometry& AllottedGeometry,
+		const FSlateRect& MyCullingRect,
+		FSlateWindowElementList& OutDrawElements,
+		int32 LayerId,
+		const FWidgetStyle& InWidgetStyle,
+		bool bParentEnabled) const override;
 	virtual void NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 	virtual void NativeOnMouseLeave(const FPointerEvent& InMouseEvent) override;
 	virtual FReply NativeOnMouseMove(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
@@ -85,12 +96,19 @@ private:
 	void ApplyDropHighlight(bool bCanAcceptDrop);
 	void EnsureRaritySlotAccentWidget();
 	void ApplyRaritySlotAccent();
+	void EnsureHoverBorderEffectWidget();
 	void EnsureAttachmentSlotIndicatorWidget();
 	void EnsureItemPriceCoinWidget();
 	FText BuildAttachmentSlotIndicatorText() const;
 	bool CanAcceptDragOperation(UDragDropOperation* InOperation) const;
 	void UpdateHoveredDropSlot(UDragDropOperation* InOperation, bool bCanAcceptDrop) const;
 	FTunaSweeperItemSlotReference GetCachedSlotReference() const;
+	bool CanShowHoverBorderEffect() const;
+	void SetHoverBorderEffectActive(bool bInActive);
+	void DrawHoverBorderEffect(
+		const FGeometry& AllottedGeometry,
+		FSlateWindowElementList& OutDrawElements,
+		int32 LayerId) const;
 	bool CanShowHoverPrompt() const;
 	void ShowHoverPrompt(const FPointerEvent& InMouseEvent);
 	void HideHoverPrompt();
@@ -107,5 +125,11 @@ private:
 	UPROPERTY(Transient)
 	TObjectPtr<UTunaSweeperItemRaritySlotAccentWidget> RaritySlotAccentWidget;
 
+	UPROPERTY(Transient)
+	TObjectPtr<UTunaSweeperItemHoverBorderEffectWidget> HoverBorderEffectWidget;
+
 	bool bSuppressNextMouseButtonUpSelection = false;
+	bool bHoverBorderEffectActive = false;
+	float HoverBorderAnimationSeconds = 0.0f;
+	float HoverBorderEffectOpacity = 0.0f;
 };

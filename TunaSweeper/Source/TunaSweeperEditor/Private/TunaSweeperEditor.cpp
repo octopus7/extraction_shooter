@@ -8730,12 +8730,13 @@ namespace TunaSweeperEditorSetup
 		}
 
 		WidgetTree->RootWidget = RootSizeBox;
-		RootSizeBox->SetWidthOverride(330.0f);
+		RootSizeBox->SetWidthOverride(429.0f);
+		RootSizeBox->SetMaxDesiredHeight(620.0f);
 		RootSizeBox->SetContent(PanelBackground);
 
 		PanelBackground->SetPadding(FMargin(LootContainerPanelPadding));
 		PanelBackground->SetBrush(MakeRoundedBoxBrush(
-			FVector2D(330.0f, 620.0f),
+			FVector2D(429.0f, 620.0f),
 			FLinearColor(0.012f, 0.014f, 0.017f, 0.90f),
 			FLinearColor(0.36f, 0.34f, 0.54f, 1.0f),
 			1.0f));
@@ -8808,7 +8809,7 @@ namespace TunaSweeperEditorSetup
 			DescriptionSlot->SetPadding(FMargin(0.0f, 4.0f, 0.0f, 0.0f));
 			DescriptionSlot->SetHorizontalAlignment(HAlign_Fill);
 			DescriptionSlot->SetVerticalAlignment(VAlign_Top);
-			DescriptionSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+			DescriptionSlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
 		}
 
 		ModdingPanel->SetVisibility(ESlateVisibility::Collapsed);
@@ -9646,9 +9647,10 @@ namespace TunaSweeperEditorSetup
 		UCanvasPanelSlot* ItemInfoSlot = CenterContentPanel->AddChildToCanvas(ItemInfoPanelWidget);
 		if (ItemInfoSlot)
 		{
-			ItemInfoSlot->SetAnchors(FAnchors(0.5f, 0.0f, 0.5f, 1.0f));
+			ItemInfoSlot->SetAnchors(FAnchors(0.5f, 0.0f, 0.5f, 0.0f));
 			ItemInfoSlot->SetAlignment(FVector2D(0.5f, 0.0f));
-			ItemInfoSlot->SetOffsets(FMargin(0.0f, 0.0f, 330.0f, 0.0f));
+			ItemInfoSlot->SetAutoSize(true);
+			ItemInfoSlot->SetOffsets(FMargin(0.0f, 0.0f, 429.0f, 620.0f));
 		}
 
 		UCanvasPanelSlot* ExternalSlot = CenterContentPanel->AddChildToCanvas(ExternalPanelWidget);
