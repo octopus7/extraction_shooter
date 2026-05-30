@@ -4,12 +4,16 @@
 #include "Component/TunaSweeperLaserSightComponent.h"
 #include "Components/SceneComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "DrawDebugHelpers.h"
 #include "Engine/World.h"
 #include "EngineUtils.h"
+#include "HAL/IConsoleManager.h"
 #include "Interaction/TunaSweeperSandbagCoverActor.h"
 #include "Materials/MaterialInterface.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Weapon/TunaSweeperProjectile.h"
+
+DEFINE_LOG_CATEGORY_STATIC(LogTunaSweeperLaserSight, Log, All);
 
 namespace TunaSweeperWeaponTags
 {
@@ -18,6 +22,126 @@ namespace TunaSweeperWeaponTags
 
 namespace
 {
+	TAutoConsoleVariable<int32> CVarTunaSweeperLaserSightDebug(
+		TEXT("ts.LaserSight.Debug"),
+		1,
+		TEXT("Draw and log TunaSweeper laser sight diagnostics. 0 disables, 1 enables."),
+		ECVF_Default);
+
+	TAutoConsoleVariable<float> CVarTunaSweeperLaserSightLogInterval(
+		TEXT("ts.LaserSight.LogInterval"),
+		0.5f,
+		TEXT("Seconds between TunaSweeper laser sight diagnostic log lines."),
+		ECVF_Default);
+
+	constexpr uint8 LaserSightDebugDepthPriority = 0;
+	constexpr float LaserSightDebugLifeTime = 0.0f;
+
+	bool IsLaserSightDebugEnabled()
+	{
+		return CVarTunaSweeperLaserSightDebug.GetValueOnGameThread() != 0;
+	}
+
+	void DrawLaserSightDebug(
+		UWorld& World,
+		const FVector& MuzzleWorldLocation,
+		const FVector& MuzzleSightDirection,
+		const FVector& MuzzleForwardDirection,
+		const FVector& AimWorldPoint,
+		bool bHasAimWorldPoint,
+		const FVector& TraceEndWorld,
+		const FVector& BeamEndWorld,
+		const FHitResult& LaserHit,
+		bool bLaserTraceHit,
+		float DebugRange)
+	{
+		const float SafeDebugRange = FMath::Max(1.0f, DebugRange);
+
+		// Cyan is the requested diagnostic line from the muzzle along the current sight direction.
+		DrawDebugLine(
+			&World,
+			MuzzleWorldLocation,
+			MuzzleWorldLocation + MuzzleSightDirection * SafeDebugRange,
+			FColor::Cyan,
+			false,
+			LaserSightDebugLifeTime,
+			LaserSightDebugDepthPriority,
+			4.0f);
+
+		DrawDebugLine(
+			&World,
+			MuzzleWorldLocation,
+			TraceEndWorld,
+			FColor::Yellow,
+			false,
+			LaserSightDebugLifeTime,
+			LaserSightDebugDepthPriority,
+			2.0f);
+
+		DrawDebugLine(
+			&World,
+			MuzzleWorldLocation,
+			BeamEndWorld,
+			bLaserTraceHit ? FColor::Green : FColor::Orange,
+			false,
+			LaserSightDebugLifeTime,
+			LaserSightDebugDepthPriority,
+			3.0f);
+
+		DrawDebugLine(
+			&World,
+			MuzzleWorldLocation,
+			MuzzleWorldLocation + MuzzleForwardDirection * FMath::Min(SafeDebugRange, 300.0f),
+			FColor::Magenta,
+			false,
+			LaserSightDebugLifeTime,
+			LaserSightDebugDepthPriority,
+			2.0f);
+
+		DrawDebugPoint(
+			&World,
+			MuzzleWorldLocation,
+			12.0f,
+			FColor::White,
+			false,
+			LaserSightDebugLifeTime,
+			LaserSightDebugDepthPriority);
+		DrawDebugPoint(
+			&World,
+			BeamEndWorld,
+			14.0f,
+			bLaserTraceHit ? FColor::Red : FColor::Orange,
+			false,
+			LaserSightDebugLifeTime,
+			LaserSightDebugDepthPriority);
+
+		if (bHasAimWorldPoint)
+		{
+			DrawDebugPoint(
+				&World,
+				AimWorldPoint,
+				12.0f,
+				FColor::Blue,
+				false,
+				LaserSightDebugLifeTime,
+				LaserSightDebugDepthPriority);
+		}
+
+		if (bLaserTraceHit)
+		{
+			DrawDebugSphere(
+				&World,
+				LaserHit.ImpactPoint,
+				12.0f,
+				12,
+				FColor::Red,
+				false,
+				LaserSightDebugLifeTime,
+				LaserSightDebugDepthPriority,
+				1.5f);
+		}
+	}
+
 	FVector ApplyRandomConeSpread(const FVector& Direction, float SpreadHalfAngleDegrees)
 	{
 		const FVector SafeDirection = Direction.GetSafeNormal();
@@ -179,8 +303,11 @@ void ATunaSweeperWeapon::UpdateLaserSightBeam(
 	const FVector TraceEndWorld =
 		BeamStartWorld + LaserDirection * FMath::Max(1.0f, LaserSightFallbackRange);
 	FVector BeamEndWorld = TraceEndWorld;
+	FHitResult LaserHit;
+	bool bLaserTraceHit = false;
 
-	if (UWorld* World = GetWorld())
+	UWorld* World = GetWorld();
+	if (World)
 	{
 		FCollisionQueryParams QueryParams(SCENE_QUERY_STAT(TunaSweeperLaserSight), false);
 		QueryParams.AddIgnoredActor(this);
@@ -193,7 +320,6 @@ void ATunaSweeperWeapon::UpdateLaserSightBeam(
 			QueryParams.AddIgnoredActor(InstigatorPawn);
 		}
 
-		FHitResult LaserHit;
 		if (World->LineTraceSingleByChannel(
 			LaserHit,
 			BeamStartWorld,
@@ -202,12 +328,80 @@ void ATunaSweeperWeapon::UpdateLaserSightBeam(
 			QueryParams) &&
 			LaserHit.bBlockingHit)
 		{
+			bLaserTraceHit = true;
 			BeamEndWorld = LaserHit.ImpactPoint;
 		}
 	}
 
-	LaserSightComponent->SetBeamEnd(
-		LaserSightComponent->GetComponentTransform().InverseTransformPosition(BeamEndWorld));
+	const FVector BeamEndLocal = LaserSightComponent->GetComponentTransform().InverseTransformPosition(BeamEndWorld);
+	LaserSightComponent->SetBeamEnd(BeamEndLocal);
+
+	if (World && IsLaserSightDebugEnabled())
+	{
+		const float DebugRange = FMath::Max(1.0f, LaserSightFallbackRange);
+		const FVector MuzzleSightDirection = ResolveMuzzleLevelAimDirection(
+			BeamStartWorld,
+			FVector::ZeroVector,
+			false,
+			AimDirection,
+			GetActorForwardVector());
+		FVector MuzzleForwardDirection = MuzzlePoint->GetForwardVector().GetSafeNormal2D();
+		if (MuzzleForwardDirection.IsNearlyZero())
+		{
+			MuzzleForwardDirection = GetActorForwardVector().GetSafeNormal2D();
+		}
+		if (MuzzleForwardDirection.IsNearlyZero())
+		{
+			MuzzleForwardDirection = FVector::ForwardVector;
+		}
+
+		DrawLaserSightDebug(
+			*World,
+			BeamStartWorld,
+			MuzzleSightDirection,
+			MuzzleForwardDirection,
+			AimWorldPoint,
+			bHasAimWorldPoint,
+			TraceEndWorld,
+			BeamEndWorld,
+			LaserHit,
+			bLaserTraceHit,
+			DebugRange);
+
+		const float LogIntervalSeconds = FMath::Max(0.0f, CVarTunaSweeperLaserSightLogInterval.GetValueOnGameThread());
+		const float CurrentTimeSeconds = World->GetTimeSeconds();
+		if (CurrentTimeSeconds - LastLaserSightDebugLogTimeSeconds >= LogIntervalSeconds)
+		{
+			LastLaserSightDebugLogTimeSeconds = CurrentTimeSeconds;
+
+			const FString HitActorName = LaserHit.GetActor() ? LaserHit.GetActor()->GetName() : TEXT("None");
+			const FString HitComponentName = LaserHit.GetComponent() ? LaserHit.GetComponent()->GetName() : TEXT("None");
+			const FVector HitPointWorld = bLaserTraceHit ? LaserHit.ImpactPoint : FVector::ZeroVector;
+
+			UE_LOG(
+				LogTunaSweeperLaserSight,
+				Display,
+				TEXT("LaserSightDebug Weapon=%s HasAimWorld=%d AimWorld=%s AimDir=%s Muzzle=%s MuzzleRot=%s MuzzleSightDir=%s MuzzleForwardDir=%s ResolvedLaserDir=%s TraceEnd=%s Hit=%d HitActor=%s HitComponent=%s HitPoint=%s BeamEndWorld=%s BeamEndLocal=%s LaserComponentLocation=%s LaserComponentRotation=%s"),
+				*GetNameSafe(this),
+				bHasAimWorldPoint ? 1 : 0,
+				*AimWorldPoint.ToString(),
+				*AimDirection.ToString(),
+				*BeamStartWorld.ToString(),
+				*MuzzlePoint->GetComponentRotation().ToString(),
+				*MuzzleSightDirection.ToString(),
+				*MuzzleForwardDirection.ToString(),
+				*LaserDirection.ToString(),
+				*TraceEndWorld.ToString(),
+				bLaserTraceHit ? 1 : 0,
+				*HitActorName,
+				*HitComponentName,
+				*HitPointWorld.ToString(),
+				*BeamEndWorld.ToString(),
+				*BeamEndLocal.ToString(),
+				*LaserSightComponent->GetComponentLocation().ToString(),
+				*LaserSightComponent->GetComponentRotation().ToString());
+		}
+	}
 }
 
 void ATunaSweeperWeapon::SetWeaponMeshOverride(

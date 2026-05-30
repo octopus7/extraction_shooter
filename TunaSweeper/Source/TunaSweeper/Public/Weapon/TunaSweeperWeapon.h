@@ -114,4 +114,5 @@ protected:
 
 private:
 	float LastFireTimeSeconds = -1000.0f;
+	float LastLaserSightDebugLogTimeSeconds = -1000.0f;
 };
