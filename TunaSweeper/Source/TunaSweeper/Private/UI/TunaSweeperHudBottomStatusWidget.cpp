@@ -23,7 +23,7 @@ namespace TunaSweeperHudStatus
 			: 0.0f;
 	}
 
-	const FLinearColor StatusTrackColor(0.035f, 0.040f, 0.045f, 0.80f);
+	const FLinearColor StatusTrackColor(0.0f, 0.0f, 0.0f, 0.0f);
 	const FLinearColor HealthFillColor(0.95f, 0.24f, 0.32f, 1.0f);
 	const FLinearColor HungerFillColor(0.96f, 0.68f, 0.22f, 1.0f);
 	const FLinearColor HydrationFillColor(0.23f, 0.63f, 1.0f, 1.0f);

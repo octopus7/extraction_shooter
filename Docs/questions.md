@@ -1385,3 +1385,12 @@ A. 아니다. 현재 저장소에는 창고 C++ 액터(`ATunaSweeperStorageActor
 ### Answer
 
 수정 방향은 리스트 컬럼, 스크롤박스, 각 엔트리 루트까지 같은 폭 계약을 걸어 텍스트 desired width가 항목 폭을 결정하지 못하게 하는 것이다. 리스트 컬럼에는 `USizeBox`의 `WidthOverride`와 `MinDesiredWidth`를 유지하고, `QuestListScrollBox`와 엔트리 루트 버튼/내부 스택을 `HAlign_Fill`로 배치한다. 엔트리 위젯 루트는 별도 `USizeBox`로 감싸 `WidthOverride`를 리스트 내부 폭으로 고정하고, 항목 텍스트는 `AutoWrapText=false` 또는 실제 항목 폭 기준의 명시적 `WrapTextAt`을 적용한다. 이렇게 하면 짧은 `첫 외출` 제목도 자기 텍스트 폭으로 줄어들지 않고, 모든 항목이 동일한 리스트 폭을 차지한다.
+## 2026-05-30 15:42:04 (elapsed: 00:00:00)
+
+### Question
+
+아래에 검은 바탕을 깐거지 투명 PNG에 검은게 묻어있는건 아니지?
+
+### Answer
+
+맞다. 투명 PNG 자체에는 검은 배경이 묻어 있지 않다. 로컬 PNG의 모서리와 가장자리 알파값을 확인했을 때 하트, 물방울, 고기 아이콘 모두 `0`으로 투명했고, UE 텍스처 asset도 alpha channel을 가진다. 화면에서 보이는 검은 원형 띠는 `WBP_HudBottomStatus` 생성 코드의 `HealthBackdrop`/`HydrationBackdrop`/`HungerBackdrop` 배경 레이어와 링 track 색상에서 나온 것이다.

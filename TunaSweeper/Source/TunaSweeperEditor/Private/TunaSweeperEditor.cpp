@@ -7707,9 +7707,9 @@ namespace TunaSweeperEditorSetup
 
 			Backdrop->SetBrush(MakeCircularBrush(
 				FVector2D(58.0f, 58.0f),
-				FLinearColor(0.010f, 0.014f, 0.018f, 0.74f),
-				FLinearColor(1.0f, 1.0f, 1.0f, 0.06f),
-				1.0f));
+				FLinearColor::Transparent,
+				FLinearColor::Transparent,
+				0.0f));
 			UOverlaySlot* BackdropSlot = Overlay->AddChildToOverlay(Backdrop);
 			if (BackdropSlot)
 			{
@@ -7717,7 +7717,7 @@ namespace TunaSweeperEditorSetup
 				BackdropSlot->SetVerticalAlignment(VAlign_Fill);
 			}
 
-			Ring->SetRingColors(FLinearColor(0.035f, 0.040f, 0.045f, 0.82f), FillColor);
+			Ring->SetRingColors(FLinearColor::Transparent, FillColor);
 			Ring->SetStatusPercent(1.0f);
 			UOverlaySlot* RingSlot = Overlay->AddChildToOverlay(Ring);
 			if (RingSlot)
