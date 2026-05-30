@@ -12,6 +12,7 @@ class UTileView;
 class UButton;
 class UDragDropOperation;
 class UHorizontalBox;
+class UImage;
 class UTunaSweeperCurrencyDisplayWidget;
 struct FTunaSweeperItemSlotReference;
 
@@ -136,7 +137,7 @@ protected:
 	TArray<TObjectPtr<UButton>> StorageFilterButtons;
 
 	UPROPERTY(Transient)
-	TArray<TObjectPtr<UTextBlock>> StorageFilterButtonTexts;
+	TArray<TObjectPtr<UImage>> StorageFilterButtonImages;
 
 	UPROPERTY(Transient)
 	TArray<ETunaSweeperStorageFilter> StorageFilterButtonValues;
@@ -146,6 +147,9 @@ protected:
 
 	UPROPERTY(Transient)
 	ETunaSweeperStorageFilter ActiveStorageFilter = ETunaSweeperStorageFilter::All;
+
+	UPROPERTY(Transient)
+	float StorageStretchedPanelMinHeight = 0.0f;
 };
 
 UCLASS(BlueprintType, Blueprintable)

@@ -5,6 +5,7 @@
 #include "Components/Button.h"
 #include "Components/HorizontalBox.h"
 #include "Components/HorizontalBoxSlot.h"
+#include "Components/Image.h"
 #include "Components/PanelWidget.h"
 #include "Components/SizeBox.h"
 #include "Components/TextBlock.h"
@@ -31,6 +32,7 @@ namespace TunaSweeperLootContainerUi
 	constexpr float ContainerTileViewScrollbarReserveWidth = 22.0f;
 	constexpr float ContainerPanelHeaderHeight = 74.0f;
 	constexpr float StorageFilterTabsHeight = 36.0f;
+	constexpr float StorageFilterIconSize = 21.0f;
 	constexpr float ContainerPanelWidth =
 		ContainerPanelPadding * 2.0f + ContainerTileColumnCount * ContainerTileWidth + ContainerTileViewScrollbarReserveWidth;
 
@@ -116,6 +118,33 @@ namespace TunaSweeperLootContainerUi
 			return CategoryTag.IsNone() || !IsKnownStorageFilterCategory(CategoryTag);
 		default:
 			return false;
+		}
+	}
+
+	const TCHAR* ResolveStorageFilterIconObjectPath(ETunaSweeperStorageFilter Filter)
+	{
+		switch (Filter)
+		{
+		case ETunaSweeperStorageFilter::All:
+			return TEXT("/Game/UI/StorageFilters/T_UIStorageFilter_All.T_UIStorageFilter_All");
+		case ETunaSweeperStorageFilter::Weapon:
+			return TEXT("/Game/UI/StorageFilters/T_UIStorageFilter_Weapon.T_UIStorageFilter_Weapon");
+		case ETunaSweeperStorageFilter::Ammo:
+			return TEXT("/Game/UI/StorageFilters/T_UIStorageFilter_Ammo.T_UIStorageFilter_Ammo");
+		case ETunaSweeperStorageFilter::Attachment:
+			return TEXT("/Game/UI/StorageFilters/T_UIStorageFilter_Attachment.T_UIStorageFilter_Attachment");
+		case ETunaSweeperStorageFilter::Consumable:
+			return TEXT("/Game/UI/StorageFilters/T_UIStorageFilter_Consumable.T_UIStorageFilter_Consumable");
+		case ETunaSweeperStorageFilter::Gear:
+			return TEXT("/Game/UI/StorageFilters/T_UIStorageFilter_Gear.T_UIStorageFilter_Gear");
+		case ETunaSweeperStorageFilter::Material:
+			return TEXT("/Game/UI/StorageFilters/T_UIStorageFilter_Material.T_UIStorageFilter_Material");
+		case ETunaSweeperStorageFilter::Blueprint:
+			return TEXT("/Game/UI/StorageFilters/T_UIStorageFilter_Blueprint.T_UIStorageFilter_Blueprint");
+		case ETunaSweeperStorageFilter::Other:
+			return TEXT("/Game/UI/StorageFilters/T_UIStorageFilter_Other.T_UIStorageFilter_Other");
+		default:
+			return TEXT("");
 		}
 	}
 
@@ -742,28 +771,53 @@ void UTunaSweeperItemContainerPanelWidget::EnsureStorageFilterControls()
 
 	if (!StorageFilterTabsRow->GetParent())
 	{
-		UHorizontalBox* ContainerHeaderRow = Cast<UHorizontalBox>(WidgetTree->FindWidget(FName(TEXT("ContainerHeaderRow"))));
-		UPanelWidget* HeaderParent = ContainerHeaderRow ? ContainerHeaderRow->GetParent() : nullptr;
-		if (HeaderParent)
+		UPanelWidget* TargetParent = nullptr;
+		int32 TargetIndex = INDEX_NONE;
+
+		if (ContainerTileView && Cast<UVerticalBoxSlot>(ContainerTileView->Slot))
 		{
-			int32 HeaderIndex = INDEX_NONE;
-			for (int32 ChildIndex = 0; ChildIndex < HeaderParent->GetChildrenCount(); ++ChildIndex)
+			if (UPanelWidget* TileParent = ContainerTileView->GetParent())
 			{
-				if (HeaderParent->GetChildAt(ChildIndex) == ContainerHeaderRow)
+				for (int32 ChildIndex = 0; ChildIndex < TileParent->GetChildrenCount(); ++ChildIndex)
 				{
-					HeaderIndex = ChildIndex;
-					break;
+					if (TileParent->GetChildAt(ChildIndex) == ContainerTileView)
+					{
+						TargetParent = TileParent;
+						TargetIndex = ChildIndex;
+						break;
+					}
 				}
 			}
+		}
 
-			UPanelSlot* TabsSlot = HeaderParent->InsertChildAt(
-				HeaderIndex == INDEX_NONE ? HeaderParent->GetChildrenCount() : HeaderIndex + 1,
+		UHorizontalBox* ContainerHeaderRow = Cast<UHorizontalBox>(WidgetTree->FindWidget(FName(TEXT("ContainerHeaderRow"))));
+		if (!TargetParent && ContainerHeaderRow)
+		{
+			UPanelWidget* HeaderParent = ContainerHeaderRow->GetParent();
+			if (HeaderParent)
+			{
+				for (int32 ChildIndex = 0; ChildIndex < HeaderParent->GetChildrenCount(); ++ChildIndex)
+				{
+					if (HeaderParent->GetChildAt(ChildIndex) == ContainerHeaderRow)
+					{
+						TargetParent = HeaderParent;
+						TargetIndex = ChildIndex + 1;
+						break;
+					}
+				}
+			}
+		}
+
+		if (TargetParent)
+		{
+			UPanelSlot* TabsSlot = TargetParent->InsertChildAt(
+				TargetIndex == INDEX_NONE ? TargetParent->GetChildrenCount() : TargetIndex,
 				StorageFilterTabsRow);
 			if (UVerticalBoxSlot* VerticalTabsSlot = Cast<UVerticalBoxSlot>(TabsSlot))
 			{
 				VerticalTabsSlot->SetHorizontalAlignment(HAlign_Fill);
 				VerticalTabsSlot->SetVerticalAlignment(VAlign_Center);
-				VerticalTabsSlot->SetPadding(FMargin(0.0f, 2.0f, 0.0f, 6.0f));
+				VerticalTabsSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 6.0f));
 			}
 		}
 		else if (ContainerHeaderRow)
@@ -813,8 +867,8 @@ void UTunaSweeperItemContainerPanelWidget::RefreshStorageFilterControls()
 	for (int32 ButtonIndex = 0; ButtonIndex < StorageFilterButtons.Num(); ++ButtonIndex)
 	{
 		UButton* Button = StorageFilterButtons[ButtonIndex];
-		UTextBlock* ButtonText = StorageFilterButtonTexts.IsValidIndex(ButtonIndex)
-			? StorageFilterButtonTexts[ButtonIndex]
+		UImage* ButtonImage = StorageFilterButtonImages.IsValidIndex(ButtonIndex)
+			? StorageFilterButtonImages[ButtonIndex]
 			: nullptr;
 		const ETunaSweeperStorageFilter ButtonFilter = StorageFilterButtonValues.IsValidIndex(ButtonIndex)
 			? StorageFilterButtonValues[ButtonIndex]
@@ -825,13 +879,16 @@ void UTunaSweeperItemContainerPanelWidget::RefreshStorageFilterControls()
 		{
 			Button->SetIsEnabled(true);
 			Button->SetRenderOpacity(bActive ? 1.0f : 0.72f);
+			Button->SetBackgroundColor(bActive
+				? FLinearColor(0.78f, 0.58f, 0.18f, 0.88f)
+				: FLinearColor(0.18f, 0.20f, 0.22f, 0.58f));
+			Button->SetToolTipText(ResolveStorageFilterText(ButtonFilter));
 		}
-		if (ButtonText)
+		if (ButtonImage)
 		{
-			ButtonText->SetText(ResolveStorageFilterText(ButtonFilter));
-			ButtonText->SetColorAndOpacity(FSlateColor(bActive
-				? FLinearColor(0.96f, 0.82f, 0.36f, 1.0f)
-				: FLinearColor(0.78f, 0.84f, 0.88f, 1.0f)));
+			ButtonImage->SetColorAndOpacity(bActive
+				? FLinearColor(1.0f, 0.92f, 0.54f, 1.0f)
+				: FLinearColor(0.86f, 0.91f, 0.94f, 1.0f));
 		}
 	}
 }
@@ -894,18 +951,32 @@ void UTunaSweeperItemContainerPanelWidget::AddStorageFilterButton(ETunaSweeperSt
 	UButton* Button = WidgetTree->ConstructWidget<UButton>(
 		UButton::StaticClass(),
 		*FString::Printf(TEXT("StorageFilterButton_%s"), FilterName));
-	UTextBlock* ButtonText = WidgetTree->ConstructWidget<UTextBlock>(
-		UTextBlock::StaticClass(),
-		*FString::Printf(TEXT("StorageFilterButtonText_%s"), FilterName));
-	if (!Button || !ButtonText)
+	USizeBox* IconBox = WidgetTree->ConstructWidget<USizeBox>(
+		USizeBox::StaticClass(),
+		*FString::Printf(TEXT("StorageFilterIconBox_%s"), FilterName));
+	UImage* ButtonImage = WidgetTree->ConstructWidget<UImage>(
+		UImage::StaticClass(),
+		*FString::Printf(TEXT("StorageFilterButtonImage_%s"), FilterName));
+	if (!Button || !IconBox || !ButtonImage)
 	{
 		return;
 	}
 
-	TunaSweeperUIFont::ApplyFont(ButtonText, 11.0f, ETunaSweeperUIFontWeight::Bold);
-	ButtonText->SetJustification(ETextJustify::Center);
-	ButtonText->SetText(ResolveStorageFilterText(Filter));
-	Button->SetContent(ButtonText);
+	IconBox->SetWidthOverride(TunaSweeperLootContainerUi::StorageFilterIconSize);
+	IconBox->SetHeightOverride(TunaSweeperLootContainerUi::StorageFilterIconSize);
+	if (UTexture2D* IconTexture = LoadObject<UTexture2D>(
+		nullptr,
+		TunaSweeperLootContainerUi::ResolveStorageFilterIconObjectPath(Filter)))
+	{
+		ButtonImage->SetBrushFromTexture(IconTexture, true);
+	}
+	IconBox->SetContent(ButtonImage);
+	Button->SetContent(IconBox);
+	Button->SetToolTipText(ResolveStorageFilterText(Filter));
+	FButtonStyle ButtonStyle = Button->GetStyle();
+	ButtonStyle.NormalPadding = FMargin(3.0f);
+	ButtonStyle.PressedPadding = FMargin(3.0f);
+	Button->SetStyle(ButtonStyle);
 
 	switch (Filter)
 	{
@@ -949,7 +1020,7 @@ void UTunaSweeperItemContainerPanelWidget::AddStorageFilterButton(ETunaSweeperSt
 	}
 
 	StorageFilterButtons.Add(Button);
-	StorageFilterButtonTexts.Add(ButtonText);
+	StorageFilterButtonImages.Add(ButtonImage);
 	StorageFilterButtonValues.Add(Filter);
 }
 
@@ -1262,6 +1333,9 @@ void UTunaSweeperItemContainerPanelWidget::PopulateContainerItems()
 	int32 OccupiedSlotCount = Slots
 		? TunaSweeperLootContainerUi::CountOccupiedSlots(*Slots)
 		: TunaSweeperLootContainerUi::CountOccupiedStacks(ContainerInstance.Items);
+	const int32 StorageCapacity = SlotSource == ETunaSweeperItemSlotSource::Storage && Slots
+		? Slots->Num()
+		: 0;
 	const int32 TotalStorageOccupiedSlotCount = SlotSource == ETunaSweeperItemSlotSource::Storage && Slots
 		? OccupiedSlotCount
 		: 0;
@@ -1322,7 +1396,10 @@ void UTunaSweeperItemContainerPanelWidget::PopulateContainerItems()
 	const bool bStorageFilterActive =
 		SlotSource == ETunaSweeperItemSlotSource::Storage &&
 		ActiveStorageFilter != ETunaSweeperStorageFilter::All;
-	const int32 UiSlotCount = TunaSweeperLootContainerUi::RoundUpToUiSlotCount(Capacity);
+	const int32 LayoutCapacity = bStorageFilterActive && StorageCapacity > 0
+		? StorageCapacity
+		: Capacity;
+	const int32 UiSlotCount = TunaSweeperLootContainerUi::RoundUpToUiSlotCount(LayoutCapacity);
 	const int32 DisplaySlotCount = bStorageFilterActive ? VisibleStorageSlotIndices.Num() : UiSlotCount;
 	const int32 RowCount = FMath::Max(
 		1,

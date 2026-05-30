@@ -1561,3 +1561,12 @@ Yes. Horizontal stretch is the cleaner layout model here. The canvas slot should
 ### Answer
 
 맞다. 카테고리 필터에서는 표시 목록을 압축하되 각 표시 항목이 원래 `StorageSlots`의 몇 번 슬롯이었는지를 `VisibleSlotIndices` 같은 배열로 보관하는 방식이 적합하다. 예를 들어 화면상 0번째 항목이 실제 창고 17번 슬롯이면, 타일 데이터의 `SlotReference.SlotIndex`는 17을 유지해야 한다. 선택, 드래그 시작, 드롭, 분할, 아이템 정보 패널은 모두 이 실제 슬롯 인덱스를 사용해야 저장 배열과 UI가 어긋나지 않는다.
+## 2026-05-30 22:09:04 (elapsed: 00:00:00)
+
+### Question
+
+루트 컨테이너 위젯에 창고 필터 기능이 들어간 것은 별로인데, 전리품 상자/상점/창고 클래스를 분할하라고 예전에 말했던 것이 구현되지 않았는가?
+
+### Answer
+
+맞다. 이전 요청에 `상점/창고/전리품 외부 패널이 우측에 공백을 남기지 않고 우측 정렬되도록 조정할 것`과 `창고와 상점은 전리품 컨테이너 위젯에 모드만 얹는 방식이 아니라 별도 클래스로 실질 분리할 것`이 기록되어 있다. 현재 코드는 `UTunaSweeperLootContainerWidget`, `UTunaSweeperStorageContainerWidget`, `UTunaSweeperShopContainerWidget` 클래스 껍데기는 나뉘어 있지만, 실제 표시/드롭/헤더/모드 분기 로직 대부분이 `UTunaSweeperItemContainerPanelWidget` 베이스에 남아 있다. 따라서 실질 분리 완료 상태가 아니며, 창고 필터를 베이스에 추가한 최근 변경도 이 방향과 맞지 않는다. 정리하려면 창고 필터 상태와 탭 UI, 창고 슬롯 필터링/매핑은 `UTunaSweeperStorageContainerWidget`로 옮기고, 베이스는 공통 타일 생성/드롭에 필요한 최소 hook만 제공하도록 줄이는 것이 맞다.
