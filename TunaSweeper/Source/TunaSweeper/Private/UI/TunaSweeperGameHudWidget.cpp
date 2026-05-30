@@ -328,6 +328,8 @@ void UTunaSweeperGameHudWidget::NativeDestruct()
 		TopStatusReserveWidget->OnHudModeSelected.RemoveDynamic(this, &UTunaSweeperGameHudWidget::HandleHudModeTabSelected);
 	}
 
+	UpdateMouseCursorForReloadGauge(false);
+
 	Super::NativeDestruct();
 }
 
@@ -339,7 +341,7 @@ void UTunaSweeperGameHudWidget::NativeTick(const FGeometry& MyGeometry, float In
 	RefreshDebuffBarFromPlayer();
 	RefreshQuickSlotsFromGameState();
 	RefreshInventoryQuickSlotPanel();
-	RefreshCancelableActionWidgets();
+	RefreshCancelableActionWidgets(&MyGeometry);
 	RefreshDialogueHudVisibility();
 	RefreshExtractionProgressWidget();
 	RefreshCursorDistanceWidget();
@@ -406,24 +408,10 @@ int32 UTunaSweeperGameHudWidget::NativePaint(
 		return PaintedLayerId;
 	}
 
-	const FVector2D CursorAbsolutePosition = FSlateApplication::Get().GetCursorPos();
-	const FVector2D CursorLocalPosition = AllottedGeometry.AbsoluteToLocal(CursorAbsolutePosition);
-	const FVector2D LocalSize = AllottedGeometry.GetLocalSize();
-	if (CursorLocalPosition.X < 0.0f ||
-		CursorLocalPosition.Y < 0.0f ||
-		CursorLocalPosition.X > LocalSize.X ||
-		CursorLocalPosition.Y > LocalSize.Y)
+	FVector2D CrosshairLocalPosition = FVector2D::ZeroVector;
+	if (!TryGetWeaponCrosshairLocalPosition(AllottedGeometry, CrosshairLocalPosition))
 	{
 		return PaintedLayerId;
-	}
-
-	FVector2D CrosshairLocalPosition = CursorLocalPosition;
-	if (const APlayerController* PlayerController = GetOwningPlayer())
-	{
-		if (const ATunaSweeperTopDownCharacter* TunaCharacter = Cast<ATunaSweeperTopDownCharacter>(PlayerController->GetPawn()))
-		{
-			CrosshairLocalPosition += TunaCharacter->GetWeaponRecoilCrosshairScreenOffset();
-		}
 	}
 
 	auto DrawLineStrip = [&](
@@ -2413,7 +2401,7 @@ void UTunaSweeperGameHudWidget::RefreshLocalizedTexts()
 	}
 }
 
-void UTunaSweeperGameHudWidget::RefreshCancelableActionWidgets()
+void UTunaSweeperGameHudWidget::RefreshCancelableActionWidgets(const FGeometry* GeometryForPlacement)
 {
 	CacheAmmoCancelableActionWidgets();
 
@@ -2427,6 +2415,13 @@ void UTunaSweeperGameHudWidget::RefreshCancelableActionWidgets()
 
 	const bool bShowCancelableAction = !bDialogueActive && !bHousingModeActive && TunaCharacter && TunaCharacter->IsCancelableActionActive();
 	const float CancelableActionProgress = bShowCancelableAction ? TunaCharacter->GetCancelableActionProgress() : 0.0f;
+	const bool bUseCrosshairReloadGauge = bShowCancelableAction && IsReloadGaugeReplacingCrosshair(TunaCharacter);
+	if (GeometryForPlacement)
+	{
+		UpdateCenterCancelableActionGaugePlacement(*GeometryForPlacement, bUseCrosshairReloadGauge);
+	}
+	UpdateMouseCursorForReloadGauge(bUseCrosshairReloadGauge);
+
 	bool bShowReloadPrompt = false;
 	if (!bDialogueActive && !bHousingModeActive && !bShowCancelableAction && TunaCharacter && !TunaCharacter->IsAmmoSelectionOpen() && !IsInventoryUiOpen())
 	{
@@ -2803,9 +2798,125 @@ FName UTunaSweeperGameHudWidget::GetSelectedWeaponTypeTag() const
 
 bool UTunaSweeperGameHudWidget::IsWeaponCrosshairSuppressed() const
 {
-	return IsInventoryUiOpen() ||
-		IsDialogueSequenceActive() ||
-		IsHousingModeActive();
+	if (IsInventoryUiOpen() || IsDialogueSequenceActive() || IsHousingModeActive())
+	{
+		return true;
+	}
+
+	return IsReloadGaugeReplacingCrosshair();
+}
+
+bool UTunaSweeperGameHudWidget::IsReloadGaugeReplacingCrosshair(const ATunaSweeperTopDownCharacter* TunaCharacter) const
+{
+	if (IsInventoryUiOpen() || IsDialogueSequenceActive() || IsHousingModeActive())
+	{
+		return false;
+	}
+
+	const ATunaSweeperTopDownCharacter* ResolvedCharacter = TunaCharacter;
+	if (!ResolvedCharacter)
+	{
+		const APlayerController* PlayerController = GetOwningPlayer();
+		ResolvedCharacter = PlayerController
+			? Cast<ATunaSweeperTopDownCharacter>(PlayerController->GetPawn())
+			: nullptr;
+	}
+
+	return ResolvedCharacter && ResolvedCharacter->IsWeaponReloading();
+}
+
+bool UTunaSweeperGameHudWidget::TryGetWeaponCrosshairLocalPosition(const FGeometry& AllottedGeometry, FVector2D& OutLocalPosition) const
+{
+	if (!FSlateApplication::IsInitialized())
+	{
+		return false;
+	}
+
+	const FVector2D CursorAbsolutePosition = FSlateApplication::Get().GetCursorPos();
+	const FVector2D CursorLocalPosition = AllottedGeometry.AbsoluteToLocal(CursorAbsolutePosition);
+	const FVector2D LocalSize = AllottedGeometry.GetLocalSize();
+	if (CursorLocalPosition.X < 0.0f ||
+		CursorLocalPosition.Y < 0.0f ||
+		CursorLocalPosition.X > LocalSize.X ||
+		CursorLocalPosition.Y > LocalSize.Y)
+	{
+		return false;
+	}
+
+	OutLocalPosition = CursorLocalPosition;
+	if (const APlayerController* PlayerController = GetOwningPlayer())
+	{
+		if (const ATunaSweeperTopDownCharacter* TunaCharacter = Cast<ATunaSweeperTopDownCharacter>(PlayerController->GetPawn()))
+		{
+			OutLocalPosition += TunaCharacter->GetWeaponRecoilCrosshairScreenOffset();
+		}
+	}
+
+	return true;
+}
+
+void UTunaSweeperGameHudWidget::UpdateCenterCancelableActionGaugePlacement(
+	const FGeometry& AllottedGeometry,
+	bool bUseCrosshairPosition)
+{
+	if (!CenterCancelableActionGaugeRoot)
+	{
+		return;
+	}
+
+	UCanvasPanelSlot* GaugeSlot = Cast<UCanvasPanelSlot>(CenterCancelableActionGaugeRoot->Slot);
+	if (!GaugeSlot)
+	{
+		return;
+	}
+
+	if (!bCenterCancelableActionGaugeSlotLayoutCached)
+	{
+		DefaultCenterCancelableActionGaugeAnchors = GaugeSlot->GetAnchors();
+		DefaultCenterCancelableActionGaugeAlignment = GaugeSlot->GetAlignment();
+		DefaultCenterCancelableActionGaugePosition = GaugeSlot->GetPosition();
+		DefaultCenterCancelableActionGaugeSize = GaugeSlot->GetSize();
+		bCenterCancelableActionGaugeSlotLayoutCached = true;
+	}
+
+	GaugeSlot->SetAlignment(FVector2D(0.5f, 0.5f));
+	GaugeSlot->SetSize(DefaultCenterCancelableActionGaugeSize);
+
+	FVector2D CrosshairLocalPosition = FVector2D::ZeroVector;
+	if (bUseCrosshairPosition && TryGetWeaponCrosshairLocalPosition(AllottedGeometry, CrosshairLocalPosition))
+	{
+		GaugeSlot->SetAnchors(FAnchors(0.0f, 0.0f, 0.0f, 0.0f));
+		GaugeSlot->SetPosition(CrosshairLocalPosition);
+		return;
+	}
+
+	GaugeSlot->SetAnchors(DefaultCenterCancelableActionGaugeAnchors);
+	GaugeSlot->SetAlignment(DefaultCenterCancelableActionGaugeAlignment);
+	GaugeSlot->SetPosition(DefaultCenterCancelableActionGaugePosition);
+	GaugeSlot->SetSize(DefaultCenterCancelableActionGaugeSize);
+}
+
+void UTunaSweeperGameHudWidget::UpdateMouseCursorForReloadGauge(bool bShouldHideCursor)
+{
+	APlayerController* PlayerController = GetOwningPlayer();
+	if (!PlayerController)
+	{
+		bReloadGaugeHidMouseCursor = false;
+		return;
+	}
+
+	if (bShouldHideCursor)
+	{
+		PlayerController->CurrentMouseCursor = EMouseCursor::None;
+		bReloadGaugeHidMouseCursor = true;
+		return;
+	}
+
+	if (bReloadGaugeHidMouseCursor)
+	{
+		PlayerController->CurrentMouseCursor = PlayerController->DefaultMouseCursor;
+		bReloadGaugeHidMouseCursor = false;
+	}
 }
 
 void UTunaSweeperGameHudWidget::UpdateCrosshairState(float InDeltaTime)

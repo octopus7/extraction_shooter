@@ -3,10 +3,13 @@
 #include "Blueprint/UserWidget.h"
 #include "CoreMinimal.h"
 #include "Inventory/TunaSweeperInventoryTypes.h"
+#include "Layout/Anchors.h"
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
 #include "UI/TunaSweeperHudTypes.h"
 #include "TunaSweeperGameHudWidget.generated.h"
 
+class ATunaSweeperTopDownCharacter;
+struct FGeometry;
 class UTunaSweeperHudBottomStatusWidget;
 class UTunaSweeperHudDebuffBarWidget;
 class UTunaSweeperHudExternalPanelWidget;
@@ -314,7 +317,7 @@ private:
 	void RefreshInventoryQuickSlotPanel();
 	void RefreshLocalizedTexts();
 	void NormalizeCenterContentPanelLayout();
-	void RefreshCancelableActionWidgets();
+	void RefreshCancelableActionWidgets(const FGeometry* GeometryForPlacement = nullptr);
 	void RefreshDialogueHudVisibility();
 	void RefreshExtractionProgressWidget();
 	void RefreshCursorDistanceWidget();
@@ -336,6 +339,10 @@ private:
 	bool IsBunkerMap() const;
 	FName GetSelectedWeaponTypeTag() const;
 	bool IsWeaponCrosshairSuppressed() const;
+	bool IsReloadGaugeReplacingCrosshair(const ATunaSweeperTopDownCharacter* TunaCharacter = nullptr) const;
+	bool TryGetWeaponCrosshairLocalPosition(const FGeometry& AllottedGeometry, FVector2D& OutLocalPosition) const;
+	void UpdateCenterCancelableActionGaugePlacement(const FGeometry& AllottedGeometry, bool bUseCrosshairPosition);
+	void UpdateMouseCursorForReloadGauge(bool bShouldHideCursor);
 	void UpdateCrosshairState(float InDeltaTime);
 	void TickDamageNumberPopups(float InDeltaTime);
 	void RemoveDamageNumberPopupAt(int32 PopupIndex);
@@ -357,6 +364,13 @@ private:
 
 	UPROPERTY(BlueprintReadOnly, Transient, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional, AllowPrivateAccess = "true"))
 	TObjectPtr<UTextBlock> CenterCancelableActionPercentText;
+
+	bool bReloadGaugeHidMouseCursor = false;
+	bool bCenterCancelableActionGaugeSlotLayoutCached = false;
+	FAnchors DefaultCenterCancelableActionGaugeAnchors;
+	FVector2D DefaultCenterCancelableActionGaugeAlignment = FVector2D(0.5f, 0.5f);
+	FVector2D DefaultCenterCancelableActionGaugePosition = FVector2D::ZeroVector;
+	FVector2D DefaultCenterCancelableActionGaugeSize = FVector2D(96.0f, 96.0f);
 
 	UPROPERTY(Transient)
 	TObjectPtr<UBorder> InventoryQuickSlotPanel;
