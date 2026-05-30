@@ -90,6 +90,9 @@ public:
 	void ShowQuestPanel(FName QuestId);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
+	void ShowMenuQuestPanel(FName QuestId = NAME_None);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
 	void SetHudMode(ETunaSweeperHudMode InHudMode);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD|Extraction")
@@ -295,7 +298,7 @@ private:
 	void EnsureHousingPanelWidget();
 	void EnsureMapPanelWidget();
 	void EnsureMemoPanelWidget();
-	void EnsureQuestPanelWidget();
+	void EnsureQuestPanelWidgets();
 	void EnsureShopSellPanelWidget();
 	void SetShopSellPanelVisible(bool bVisible);
 	ETunaSweeperHudTransitionEdge ResolveHudTransitionEdge(const UWidget* Widget, ETunaSweeperHudTransitionEdge DirectionOverride) const;
@@ -382,7 +385,10 @@ private:
 	TObjectPtr<UTunaSweeperMemoWidget> MemoPanelWidget;
 
 	UPROPERTY(Transient)
-	TObjectPtr<UTunaSweeperQuestWidget> QuestPanelWidget;
+	TObjectPtr<UTunaSweeperQuestWidget> MenuQuestPanelWidget;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTunaSweeperQuestWidget> InteractionQuestPanelWidget;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UTunaSweeperShopSellPanelWidget> ShopSellPanelWidget;
@@ -399,4 +405,5 @@ private:
 	TArray<FHudWidgetTransition> ActiveHudTransitions;
 	TMap<TWeakObjectPtr<UWidget>, FWidgetTransform> HudTransitionBaseTransforms;
 	TMap<TWeakObjectPtr<UWidget>, float> HudTransitionBaseOpacities;
+	bool bQuestPanelOpenedFromInteraction = false;
 };

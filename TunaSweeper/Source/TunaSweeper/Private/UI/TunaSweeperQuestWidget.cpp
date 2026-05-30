@@ -45,6 +45,25 @@ namespace
 	}
 }
 
+UTunaSweeperQuestWidget::UTunaSweeperQuestWidget(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+	bShowAvailableTab = true;
+	ActiveFilter = EQuestListFilter::Available;
+}
+
+UTunaSweeperMenuQuestWidget::UTunaSweeperMenuQuestWidget(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+	bShowAvailableTab = false;
+}
+
+UTunaSweeperInteractionQuestWidget::UTunaSweeperInteractionQuestWidget(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+	bShowAvailableTab = true;
+}
+
 void UTunaSweeperQuestListEntryWidget::InitializeQuestEntry(
 	FName InQuestId,
 	const FText& InLabel,
@@ -161,6 +180,7 @@ void UTunaSweeperQuestListEntryWidget::HandleEntryClicked()
 void UTunaSweeperQuestWidget::InitializeQuest(FName InQuestId)
 {
 	QuestId = InQuestId;
+	ActiveFilter = GetDefaultFilter();
 
 	if (const UTunaSweeperQuestSubsystem* QuestSubsystem = GetGameInstance()
 		? GetGameInstance()->GetSubsystem<UTunaSweeperQuestSubsystem>()
@@ -177,17 +197,19 @@ void UTunaSweeperQuestWidget::InitializeQuest(FName InQuestId)
 			break;
 		case ETunaSweeperQuestState::Available:
 		default:
-			ActiveFilter = EQuestListFilter::Available;
+			ActiveFilter = bShowAvailableTab ? EQuestListFilter::Available : GetDefaultFilter();
 			break;
 		}
 	}
 
+	NormalizeActiveFilter();
 	RefreshQuestView();
 }
 
 void UTunaSweeperQuestWidget::RefreshQuestView()
 {
 	BuildQuestWidget();
+	NormalizeActiveFilter();
 	UpdateTabButtonStates();
 
 	UTunaSweeperQuestSubsystem* QuestSubsystem = GetGameInstance()
@@ -203,6 +225,19 @@ void UTunaSweeperQuestWidget::RefreshQuestView()
 	ApplySelectedQuest(FilteredDefinitions);
 	RebuildQuestList(FilteredDefinitions);
 	UpdateDetailView();
+}
+
+UTunaSweeperQuestWidget::EQuestListFilter UTunaSweeperQuestWidget::GetDefaultFilter() const
+{
+	return bShowAvailableTab ? EQuestListFilter::Available : EQuestListFilter::InProgress;
+}
+
+void UTunaSweeperQuestWidget::NormalizeActiveFilter()
+{
+	if (!bShowAvailableTab && ActiveFilter == EQuestListFilter::Available)
+	{
+		ActiveFilter = EQuestListFilter::InProgress;
+	}
 }
 
 TSharedRef<SWidget> UTunaSweeperQuestWidget::RebuildWidget()
@@ -272,6 +307,11 @@ void UTunaSweeperQuestWidget::NativeDestruct()
 
 void UTunaSweeperQuestWidget::HandleAvailableTabClicked()
 {
+	if (!bShowAvailableTab)
+	{
+		return;
+	}
+
 	SetActiveFilter(EQuestListFilter::Available);
 }
 
@@ -326,11 +366,67 @@ void UTunaSweeperQuestWidget::HandlePrimaryButtonClicked()
 	RefreshQuestView();
 }
 
+bool UTunaSweeperQuestWidget::CacheBuiltQuestWidgets()
+{
+	if (!WidgetTree)
+	{
+		return false;
+	}
+
+	RootPanel = Cast<UBorder>(WidgetTree->FindWidget(TEXT("QuestRootPanel")));
+	RootColumns = Cast<UHorizontalBox>(WidgetTree->FindWidget(TEXT("QuestRootColumns")));
+	QuestListScrollBox = Cast<UScrollBox>(WidgetTree->FindWidget(TEXT("QuestListScrollBox")));
+	AvailableTabButton = Cast<UButton>(WidgetTree->FindWidget(TEXT("QuestAvailableTabButton")));
+	AvailableTabText = Cast<UTextBlock>(WidgetTree->FindWidget(TEXT("QuestAvailableTabText")));
+	InProgressTabButton = Cast<UButton>(WidgetTree->FindWidget(TEXT("QuestInProgressTabButton")));
+	InProgressTabText = Cast<UTextBlock>(WidgetTree->FindWidget(TEXT("QuestInProgressTabText")));
+	CompletedTabButton = Cast<UButton>(WidgetTree->FindWidget(TEXT("QuestCompletedTabButton")));
+	CompletedTabText = Cast<UTextBlock>(WidgetTree->FindWidget(TEXT("QuestCompletedTabText")));
+	DetailTitleText = Cast<UTextBlock>(WidgetTree->FindWidget(TEXT("QuestDetailTitleText")));
+	DetailDescriptionText = Cast<UTextBlock>(WidgetTree->FindWidget(TEXT("QuestDetailDescriptionText")));
+	DetailStateText = Cast<UTextBlock>(WidgetTree->FindWidget(TEXT("QuestDetailStateText")));
+	DetailObjectiveHeaderText = Cast<UTextBlock>(WidgetTree->FindWidget(TEXT("QuestDetailObjectiveHeaderText")));
+	DetailObjectiveText = Cast<UTextBlock>(WidgetTree->FindWidget(TEXT("QuestDetailObjectiveText")));
+	DetailRewardHeaderText = Cast<UTextBlock>(WidgetTree->FindWidget(TEXT("QuestDetailRewardHeaderText")));
+	DetailRewardText = Cast<UTextBlock>(WidgetTree->FindWidget(TEXT("QuestDetailRewardText")));
+	PrimaryButton = Cast<UButton>(WidgetTree->FindWidget(TEXT("QuestPrimaryButton")));
+	PrimaryButtonText = Cast<UTextBlock>(WidgetTree->FindWidget(TEXT("QuestPrimaryButtonText")));
+
+	return RootPanel &&
+		RootColumns &&
+		QuestListScrollBox &&
+		InProgressTabButton &&
+		InProgressTabText &&
+		CompletedTabButton &&
+		CompletedTabText &&
+		DetailTitleText &&
+		DetailDescriptionText &&
+		DetailStateText &&
+		DetailObjectiveHeaderText &&
+		DetailObjectiveText &&
+		DetailRewardHeaderText &&
+		DetailRewardText &&
+		PrimaryButton &&
+		PrimaryButtonText &&
+		(!bShowAvailableTab || (AvailableTabButton && AvailableTabText));
+}
+
 void UTunaSweeperQuestWidget::BuildQuestWidget()
 {
-	if (!WidgetTree || WidgetTree->RootWidget)
+	if (!WidgetTree)
 	{
 		return;
+	}
+
+	if (WidgetTree->RootWidget)
+	{
+		if (CacheBuiltQuestWidgets())
+		{
+			return;
+		}
+
+		WidgetTree->RemoveWidget(WidgetTree->RootWidget);
+		WidgetTree->RootWidget = nullptr;
 	}
 
 	RootPanel = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("QuestRootPanel"));
@@ -537,7 +633,14 @@ void UTunaSweeperQuestWidget::BuildQuestWidget()
 		}
 	};
 
-	ConfigureTab(AvailableTabButton, AvailableTabText);
+	if (bShowAvailableTab)
+	{
+		ConfigureTab(AvailableTabButton, AvailableTabText);
+	}
+	else
+	{
+		AvailableTabButton->SetVisibility(ESlateVisibility::Collapsed);
+	}
 	ConfigureTab(InProgressTabButton, InProgressTabText);
 	ConfigureTab(CompletedTabButton, CompletedTabText);
 	if (UVerticalBoxSlot* TabRowSlot = ListStack->AddChildToVerticalBox(TabRow))
@@ -618,6 +721,7 @@ void UTunaSweeperQuestWidget::SetSelectedQuestId(FName InQuestId)
 void UTunaSweeperQuestWidget::SetActiveFilter(EQuestListFilter InFilter)
 {
 	ActiveFilter = InFilter;
+	NormalizeActiveFilter();
 	RefreshQuestView();
 }
 
@@ -644,9 +748,19 @@ void UTunaSweeperQuestWidget::UpdateTabButtonStates()
 
 	for (const FTabInfo& Tab : Tabs)
 	{
+		if (Tab.Filter == EQuestListFilter::Available && !bShowAvailableTab)
+		{
+			if (Tab.Button)
+			{
+				Tab.Button->SetVisibility(ESlateVisibility::Collapsed);
+			}
+			continue;
+		}
+
 		const bool bActive = ActiveFilter == Tab.Filter;
 		if (Tab.Button)
 		{
+			Tab.Button->SetVisibility(ESlateVisibility::Visible);
 			Tab.Button->SetBackgroundColor(
 				bActive
 					? FLinearColor(0.44f, 0.76f, 0.88f, 1.0f)
@@ -743,7 +857,9 @@ bool UTunaSweeperQuestWidget::IsQuestVisibleInActiveFilter(
 	switch (ActiveFilter)
 	{
 	case EQuestListFilter::Available:
-		return State == ETunaSweeperQuestState::Available && QuestSubsystem.CanAcceptQuest(QuestDefinition.QuestId);
+		return bShowAvailableTab &&
+			State == ETunaSweeperQuestState::Available &&
+			QuestSubsystem.CanAcceptQuest(QuestDefinition.QuestId);
 	case EQuestListFilter::InProgress:
 		return State == ETunaSweeperQuestState::Accepted || State == ETunaSweeperQuestState::RewardAvailable;
 	case EQuestListFilter::RewardCompleted:

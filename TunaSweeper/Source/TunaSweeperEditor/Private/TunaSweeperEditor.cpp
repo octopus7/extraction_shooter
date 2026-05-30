@@ -167,7 +167,7 @@ namespace TunaSweeperEditorSetup
 	const FString IntroMenuGraphicsSettingsTaskId = TEXT("2026-05-30_RemoveTitlePlayTimeAndWidenSaveSlotV1");
 	const FString OpeningScenarioPresentationTaskId = TEXT("2026-05-19_CreateOpeningScenarioPresentationV2");
 	const FString LevelTransitionVideoTaskId = TEXT("2026-05-16_AddBidirectionalLevelTransitionVideoV3");
-	const FString FirstOutingQuestTaskId = TEXT("2026-05-15_CreateFirstOutingQuestNpcV2");
+	const FString FirstOutingQuestTaskId = TEXT("2026-05-30_CreateSeparateQuestPanelWidgetsV1");
 	const FString SelfDestructInteractionTaskId = TEXT("2026-05-16_CreateSelfDestructInteractionV1");
 	const FString WorldProgressInteractionTaskId = TEXT("2026-05-19_CreateWorldProgressObstacleAssetsV1");
 	const FString WarpPointInteractionTaskId = TEXT("2026-05-25_CreateWarpPointInteractionAssetsV1");
@@ -276,7 +276,8 @@ namespace TunaSweeperEditorSetup
 	const FString WorkbenchRecipeListEntryWidgetAssetName = TEXT("WBP_WorkbenchRecipeListEntry");
 	const FString IntroMenuWidgetAssetName = TEXT("WBP_IntroMenu");
 	const FString LevelTransitionVideoWidgetAssetName = TEXT("WBP_LevelTransitionVideo");
-	const FString QuestWidgetAssetName = TEXT("WBP_Quest");
+	const FString QuestMenuWidgetAssetName = TEXT("WBP_QuestMenu");
+	const FString QuestInteractionWidgetAssetName = TEXT("WBP_QuestInteraction");
 	const FString SpeechBubbleWidgetAssetName = TEXT("WBP_SpeechBubble");
 	constexpr float HudTopModeTabButtonWidth = 52.0f;
 	constexpr float HudTopModeTabButtonHeight = 46.0f;
@@ -11344,22 +11345,27 @@ namespace TunaSweeperEditorSetup
 
 	bool EnsureFirstOutingQuestSetup()
 	{
-		UWidgetBlueprint* QuestWidgetBlueprint = EnsureWidgetBlueprint(
+		UWidgetBlueprint* QuestMenuWidgetBlueprint = EnsureWidgetBlueprint(
 			UIAssetPath,
-			QuestWidgetAssetName,
-			UTunaSweeperQuestWidget::StaticClass());
+			QuestMenuWidgetAssetName,
+			UTunaSweeperMenuQuestWidget::StaticClass());
+		UWidgetBlueprint* QuestInteractionWidgetBlueprint = EnsureWidgetBlueprint(
+			UIAssetPath,
+			QuestInteractionWidgetAssetName,
+			UTunaSweeperInteractionQuestWidget::StaticClass());
 		UBlueprint* QuestNpcBlueprint = EnsureBlueprint(
 			NpcAssetPath,
 			InstructorQuestNpcAssetName,
 			ATunaSweeperQuestNpcActor::StaticClass());
 
-		if (!QuestWidgetBlueprint || !QuestNpcBlueprint)
+		if (!QuestMenuWidgetBlueprint || !QuestInteractionWidgetBlueprint || !QuestNpcBlueprint)
 		{
 			return false;
 		}
 
 		const bool bConfigured =
-			ConfigureQuestWidgetBlueprint(QuestWidgetBlueprint) &&
+			ConfigureQuestWidgetBlueprint(QuestMenuWidgetBlueprint) &&
+			ConfigureQuestWidgetBlueprint(QuestInteractionWidgetBlueprint) &&
 			ConfigureQuestNpcBlueprint(QuestNpcBlueprint);
 
 		return bConfigured && PlaceFirstOutingQuestNpcInBunkerMap(QuestNpcBlueprint);

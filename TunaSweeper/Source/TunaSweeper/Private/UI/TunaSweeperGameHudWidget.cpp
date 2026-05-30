@@ -270,7 +270,7 @@ void UTunaSweeperGameHudWidget::NativeConstruct()
 	EnsureHousingPanelWidget();
 	EnsureMapPanelWidget();
 	EnsureMemoPanelWidget();
-	EnsureQuestPanelWidget();
+	EnsureQuestPanelWidgets();
 	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
 	CacheAmmoReloadWidgets();
 	RefreshLocalizedTexts();
@@ -735,11 +735,23 @@ void UTunaSweeperGameHudWidget::ShowMemoPanel(int32 MemoId)
 
 void UTunaSweeperGameHudWidget::ShowQuestPanel(FName QuestId)
 {
+	bQuestPanelOpenedFromInteraction = true;
 	SetHudMode(ETunaSweeperHudMode::Quest);
-	EnsureQuestPanelWidget();
-	if (QuestPanelWidget)
+	EnsureQuestPanelWidgets();
+	if (InteractionQuestPanelWidget)
 	{
-		QuestPanelWidget->InitializeQuest(QuestId);
+		InteractionQuestPanelWidget->InitializeQuest(QuestId);
+	}
+}
+
+void UTunaSweeperGameHudWidget::ShowMenuQuestPanel(FName QuestId)
+{
+	bQuestPanelOpenedFromInteraction = false;
+	SetHudMode(ETunaSweeperHudMode::Quest);
+	EnsureQuestPanelWidgets();
+	if (MenuQuestPanelWidget)
+	{
+		MenuQuestPanelWidget->InitializeQuest(QuestId);
 	}
 }
 
@@ -748,6 +760,11 @@ void UTunaSweeperGameHudWidget::SetHudMode(ETunaSweeperHudMode InHudMode)
 	if (InHudMode != ETunaSweeperHudMode::None && IsHousingModeActive())
 	{
 		return;
+	}
+
+	if (InHudMode != ETunaSweeperHudMode::Quest)
+	{
+		bQuestPanelOpenedFromInteraction = false;
 	}
 
 	if (InHudMode != ETunaSweeperHudMode::Inventory)
@@ -1349,9 +1366,10 @@ void UTunaSweeperGameHudWidget::ApplyHudModeVisibility()
 
 	if (TopStatusReserveWidget)
 	{
+		const bool bShowTopStatusReserve = bUtilityModeOpen && !(bQuestMode && bQuestPanelOpenedFromInteraction);
 		SetTransitionedWidgetVisibility(
 			TopStatusReserveWidget,
-			bUtilityModeOpen ? ESlateVisibility::Visible : ESlateVisibility::Collapsed,
+			bShowTopStatusReserve ? ESlateVisibility::Visible : ESlateVisibility::Collapsed,
 			TopStatusReserveTransitionEdge);
 		TopStatusReserveWidget->SetActiveMode(ActiveHudMode);
 	}
@@ -1455,16 +1473,31 @@ void UTunaSweeperGameHudWidget::ApplyHudModeVisibility()
 		}
 	}
 
-	EnsureQuestPanelWidget();
-	if (QuestPanelWidget)
+	EnsureQuestPanelWidgets();
+	if (MenuQuestPanelWidget)
 	{
 		SetTransitionedWidgetVisibility(
-			QuestPanelWidget,
-			bUtilityModeOpen && bQuestMode ? ESlateVisibility::SelfHitTestInvisible : ESlateVisibility::Collapsed,
+			MenuQuestPanelWidget,
+			bUtilityModeOpen && bQuestMode && !bQuestPanelOpenedFromInteraction
+				? ESlateVisibility::SelfHitTestInvisible
+				: ESlateVisibility::Collapsed,
 			QuestPanelTransitionEdge);
-		if (bUtilityModeOpen && bQuestMode)
+		if (bUtilityModeOpen && bQuestMode && !bQuestPanelOpenedFromInteraction)
 		{
-			QuestPanelWidget->RefreshQuestView();
+			MenuQuestPanelWidget->RefreshQuestView();
+		}
+	}
+	if (InteractionQuestPanelWidget)
+	{
+		SetTransitionedWidgetVisibility(
+			InteractionQuestPanelWidget,
+			bUtilityModeOpen && bQuestMode && bQuestPanelOpenedFromInteraction
+				? ESlateVisibility::SelfHitTestInvisible
+				: ESlateVisibility::Collapsed,
+			QuestPanelTransitionEdge);
+		if (bUtilityModeOpen && bQuestMode && bQuestPanelOpenedFromInteraction)
+		{
+			InteractionQuestPanelWidget->RefreshQuestView();
 		}
 	}
 
@@ -1843,9 +1876,9 @@ void UTunaSweeperGameHudWidget::EnsureMemoPanelWidget()
 	}
 }
 
-void UTunaSweeperGameHudWidget::EnsureQuestPanelWidget()
+void UTunaSweeperGameHudWidget::EnsureQuestPanelWidgets()
 {
-	if (QuestPanelWidget || !WidgetTree)
+	if ((MenuQuestPanelWidget && InteractionQuestPanelWidget) || !WidgetTree)
 	{
 		return;
 	}
@@ -1856,24 +1889,56 @@ void UTunaSweeperGameHudWidget::EnsureQuestPanelWidget()
 		return;
 	}
 
-	QuestPanelWidget = CreateWidget<UTunaSweeperQuestWidget>(
-		GetOwningPlayer(),
-		UTunaSweeperQuestWidget::StaticClass());
-	if (!QuestPanelWidget)
+	auto ResolveQuestWidgetClass = [](const TCHAR* WidgetClassPath, UClass* FallbackClass)
 	{
-		return;
-	}
+		TSoftClassPtr<UTunaSweeperQuestWidget> SoftWidgetClass{ FSoftObjectPath(WidgetClassPath) };
+		TSubclassOf<UTunaSweeperQuestWidget> LoadedClass = SoftWidgetClass.LoadSynchronous();
+		return LoadedClass ? LoadedClass : TSubclassOf<UTunaSweeperQuestWidget>(FallbackClass);
+	};
 
-	QuestPanelWidget->SetVisibility(ESlateVisibility::Collapsed);
-	UCanvasPanelSlot* CanvasSlot = RootCanvas->AddChildToCanvas(QuestPanelWidget);
-	if (CanvasSlot)
+	auto AddQuestWidgetToCanvas = [this, RootCanvas](
+		TObjectPtr<UTunaSweeperQuestWidget>& OutWidget,
+		TSubclassOf<UTunaSweeperQuestWidget> WidgetClass,
+		const FVector2D& Position,
+		const FVector2D& Size)
 	{
-		CanvasSlot->SetAnchors(FAnchors(0.5f, 0.5f));
-		CanvasSlot->SetAlignment(FVector2D(0.5f, 0.5f));
-		CanvasSlot->SetPosition(FVector2D(0.0f, 34.0f));
-		CanvasSlot->SetSize(FVector2D(1180.0f, 640.0f));
-		CanvasSlot->SetZOrder(20);
-	}
+		if (OutWidget || !WidgetClass)
+		{
+			return;
+		}
+
+		OutWidget = CreateWidget<UTunaSweeperQuestWidget>(GetOwningPlayer(), WidgetClass);
+		if (!OutWidget)
+		{
+			return;
+		}
+
+		OutWidget->SetVisibility(ESlateVisibility::Collapsed);
+		UCanvasPanelSlot* CanvasSlot = RootCanvas->AddChildToCanvas(OutWidget);
+		if (CanvasSlot)
+		{
+			CanvasSlot->SetAnchors(FAnchors(0.5f, 0.5f));
+			CanvasSlot->SetAlignment(FVector2D(0.5f, 0.5f));
+			CanvasSlot->SetPosition(Position);
+			CanvasSlot->SetSize(Size);
+			CanvasSlot->SetZOrder(20);
+		}
+	};
+
+	AddQuestWidgetToCanvas(
+		MenuQuestPanelWidget,
+		ResolveQuestWidgetClass(
+			TEXT("/Game/UI/WBP_QuestMenu.WBP_QuestMenu_C"),
+			UTunaSweeperMenuQuestWidget::StaticClass()),
+		FVector2D(0.0f, 42.0f),
+		FVector2D(1180.0f, 640.0f));
+	AddQuestWidgetToCanvas(
+		InteractionQuestPanelWidget,
+		ResolveQuestWidgetClass(
+			TEXT("/Game/UI/WBP_QuestInteraction.WBP_QuestInteraction_C"),
+			UTunaSweeperInteractionQuestWidget::StaticClass()),
+		FVector2D(0.0f, 0.0f),
+		FVector2D(1240.0f, 704.0f));
 }
 
 void UTunaSweeperGameHudWidget::EnsureShopSellPanelWidget()
@@ -2692,9 +2757,13 @@ void UTunaSweeperGameHudWidget::HandleSelectedInventoryItemChanged()
 void UTunaSweeperGameHudWidget::HandleQuestProgressChanged()
 {
 	RefreshQuestTrackerFromQuestSubsystem();
-	if (QuestPanelWidget)
+	if (MenuQuestPanelWidget)
 	{
-		QuestPanelWidget->RefreshQuestView();
+		MenuQuestPanelWidget->RefreshQuestView();
+	}
+	if (InteractionQuestPanelWidget)
+	{
+		InteractionQuestPanelWidget->RefreshQuestView();
 	}
 }
 
@@ -2726,13 +2795,23 @@ void UTunaSweeperGameHudWidget::HandleLanguageChanged()
 	{
 		MemoPanelWidget->RefreshMemoView();
 	}
-	if (QuestPanelWidget)
+	if (MenuQuestPanelWidget)
 	{
-		QuestPanelWidget->RefreshQuestView();
+		MenuQuestPanelWidget->RefreshQuestView();
+	}
+	if (InteractionQuestPanelWidget)
+	{
+		InteractionQuestPanelWidget->RefreshQuestView();
 	}
 }
 
 void UTunaSweeperGameHudWidget::HandleHudModeTabSelected(ETunaSweeperHudMode SelectedMode)
 {
+	if (SelectedMode == ETunaSweeperHudMode::Quest)
+	{
+		ShowMenuQuestPanel();
+		return;
+	}
+
 	SetHudMode(SelectedMode);
 }

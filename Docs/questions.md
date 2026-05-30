@@ -1356,3 +1356,13 @@ A. 아니다. 현재 저장소에는 창고 C++ 액터(`ATunaSweeperStorageActor
 ### Answer
 
 아직 구현되어 있지 않다. 탄약 아이템 데이터에는 현재 `ammo_type_tag`와 `projectile_hit_effect_id`만 있고, 피해량/피해 배율 필드는 없다. 발사 시 장전 탄약의 `ProjectileHitEffectId`를 읽어서 발사체 이펙트 ID로 넘기지만, 발사체에는 `SetDamageAmount()`가 호출되지 않고 기본 `DamageAmount`가 그대로 쓰인다. 따라서 탄약별 피해 증가를 넣으려면 아이템 정의에 탄약 피해 보정 필드를 추가하고, 선택/장전 탄약 정의를 읽어 발사체 생성 시 `SetDamageAmount()` 또는 별도 배율을 적용하는 흐름을 추가해야 한다.
+
+## 2026-05-30 14:44:36 (elapsed: 00:03:00)
+
+### Question
+
+레이저 사이트 컴포넌트 끝나는 위치 지정 구현이 되어있을텐데 코드를 수정했지만 북쪽의 어느지점이나 엉뚱한 위치를 가리키고있어 일단 원인 검토해봐 좌표계 문제일까 아니면 구체적인 목표 위치 구현이 없어서일까. 코드는 고치지 말고 분석만 해.
+
+### Answer
+
+코드 기준으로는 좌표계 문제 가능성보다 구체 목표 좌표를 항상 사용하지 않는 흐름이 더 유력하다. 마우스 조준 함수는 월드 스태틱 히트나 조준 평면 교차점을 AimPoint로 만들지만, SetAimWorldPoint()는 bHasAimIntent=false로 두고 레이저/발사 쪽은 bHasAimIntent가 true일 때만 AimIntentWorldPoint를 목표로 사용한다. 그래서 바닥/벽처럼 WorldStatic에 조준하거나 히트 없이 평면 교차점으로 조준하는 경우, 실제 조준 좌표가 있어도 레이저는 이를 쓰지 않고 AimDirection 기반 fallback 거리로 뻗는다. BeamEnd는 현재 LaserSightComponent 로컬 좌표로 변환해 Niagara User.BeamEnd에 넣고 있으므로, NS_LaserSight가 로컬 BeamEnd를 기대한다면 변환 자체는 의도에 맞다. 단 NS_LaserSight가 월드 좌표 BeamEnd를 기대하도록 구성되어 있다면 그 경우에는 좌표계 문제가 된다.

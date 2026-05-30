@@ -61,6 +61,8 @@ class TUNASWEEPER_API UTunaSweeperQuestWidget : public UUserWidget
 	GENERATED_BODY()
 
 public:
+	UTunaSweeperQuestWidget(const FObjectInitializer& ObjectInitializer);
+
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Quest")
 	void InitializeQuest(FName InQuestId);
 
@@ -72,7 +74,7 @@ protected:
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
 
-private:
+protected:
 	enum class EQuestListFilter : uint8
 	{
 		Available,
@@ -80,6 +82,13 @@ private:
 		RewardCompleted
 	};
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TunaSweeper|Quest")
+	bool bShowAvailableTab = true;
+
+	virtual EQuestListFilter GetDefaultFilter() const;
+	void NormalizeActiveFilter();
+
+private:
 	UFUNCTION()
 	void HandleAvailableTabClicked();
 
@@ -93,6 +102,7 @@ private:
 	void HandlePrimaryButtonClicked();
 
 	void BuildQuestWidget();
+	bool CacheBuiltQuestWidgets();
 	void RebuildQuestList(const TArray<FTunaSweeperQuestDefinition>& QuestDefinitions);
 	void ApplySelectedQuest(const TArray<FTunaSweeperQuestDefinition>& QuestDefinitions);
 	void SetSelectedQuestId(FName InQuestId);
@@ -170,4 +180,22 @@ private:
 
 	EQuestListFilter ActiveFilter = EQuestListFilter::Available;
 	FName QuestId = NAME_None;
+};
+
+UCLASS(BlueprintType, Blueprintable)
+class TUNASWEEPER_API UTunaSweeperMenuQuestWidget : public UTunaSweeperQuestWidget
+{
+	GENERATED_BODY()
+
+public:
+	UTunaSweeperMenuQuestWidget(const FObjectInitializer& ObjectInitializer);
+};
+
+UCLASS(BlueprintType, Blueprintable)
+class TUNASWEEPER_API UTunaSweeperInteractionQuestWidget : public UTunaSweeperQuestWidget
+{
+	GENERATED_BODY()
+
+public:
+	UTunaSweeperInteractionQuestWidget(const FObjectInitializer& ObjectInitializer);
 };

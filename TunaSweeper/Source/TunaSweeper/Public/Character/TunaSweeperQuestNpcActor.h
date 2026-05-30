@@ -5,6 +5,7 @@
 #include "TunaSweeperQuestNpcActor.generated.h"
 
 class UTunaSweeperInteractionMarkerWidget;
+class UWidgetComponent;
 
 UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API ATunaSweeperQuestNpcActor : public ATunaSweeperInteractableActor
@@ -13,6 +14,9 @@ class TUNASWEEPER_API ATunaSweeperQuestNpcActor : public ATunaSweeperInteractabl
 
 public:
 	ATunaSweeperQuestNpcActor();
+
+	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Quest")
 	FName GetQuestId() const { return QuestId; }
@@ -33,6 +37,9 @@ public:
 		FName InProviderId = NAME_None);
 
 protected:
+	void RefreshQuestNoticeVisibility();
+	bool ShouldShowQuestNotice() const;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Quest")
 	FName QuestId;
 
@@ -41,4 +48,7 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NPC")
 	FText NpcDisplayName;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UWidgetComponent> QuestNoticeWidgetComponent;
 };
