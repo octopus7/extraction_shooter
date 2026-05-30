@@ -63,6 +63,9 @@ struct TUNASWEEPER_API FTunaSweeperItemDefinition
 	FName CategoryTag;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
+	FName MaxStackCategoryKey;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
 	FName BlueprintRecipeId;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
@@ -450,6 +453,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Shop")
 	int32 ResolveShopItemBuyPrice(const FTunaSweeperShopItemDefinition& ShopItemDefinition) const;
 
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Item Data")
+	int32 ResolveItemMaxStackQuantity(const FTunaSweeperItemDefinition& ItemDefinition) const;
+
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Workbench")
 	bool TryGetWorkbenchRecipeDefinition(FName RecipeId, FTunaSweeperWorkbenchRecipeDefinition& OutDefinition);
 
@@ -473,6 +479,7 @@ public:
 private:
 	bool EnsureItemDataLoaded();
 	bool LoadItemTableJson();
+	bool LoadItemStackDefinitionsJson();
 	bool LoadItemNameStringsCsv();
 	bool LoadLootContainerTableJson();
 	bool LoadLootContainerContentsJson();
@@ -481,6 +488,7 @@ private:
 	bool LoadWorkbenchDismantleRecipesJson();
 	void ResetLoadedItemData();
 	FString GetItemTableJsonPath() const;
+	FString GetItemStackDefinitionsJsonPath() const;
 	FString GetItemNameStringsCsvPath() const;
 	FString GetLootContainerTableJsonPath() const;
 	FString GetLootContainerContentsJsonPath() const;
@@ -490,6 +498,9 @@ private:
 
 	UPROPERTY(Transient)
 	TMap<int32, FTunaSweeperItemDefinition> ItemDefinitionsById;
+
+	UPROPERTY(Transient)
+	TMap<FName, int32> MaxStackQuantitiesByCategoryKey;
 
 	UPROPERTY(Transient)
 	TMap<FName, FTunaSweeperItemNameString> ItemNameStringsByKey;

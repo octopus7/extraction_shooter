@@ -520,6 +520,14 @@ public:
 	float GetItemUseSecondsInSlot(const FTunaSweeperItemSlotReference& SlotReference);
 	bool TryUseItemInSlot(const FTunaSweeperItemSlotReference& SlotReference, APawn* InstigatorPawn);
 	bool TryUseHoveredItem(APawn* InstigatorPawn);
+	bool CanStackItemBetweenSlots(
+		const FTunaSweeperItemSlotReference& SourceSlot,
+		const FTunaSweeperItemSlotReference& TargetSlot,
+		FString* OutFailureReason = nullptr);
+	bool TryFindFirstStackTargetSlot(
+		const FTunaSweeperItemSlotReference& SourceSlot,
+		ETunaSweeperItemSlotSource TargetSource,
+		FTunaSweeperItemSlotReference& OutTargetSlot);
 	bool CanMoveItemBetweenSlots(
 		const FTunaSweeperItemSlotReference& SourceSlot,
 		const FTunaSweeperItemSlotReference& TargetSlot,
@@ -766,6 +774,15 @@ private:
 	void MarkItemEverAcquired(int32 ItemId);
 	void BackfillEverAcquiredItemIdsFromCurrentItems();
 	FGuid CreateItemInstance(int32 ItemId, int32 Quantity);
+	bool TryAddItemQuantityToExistingStacks(
+		int32 ItemId,
+		int32& InOutQuantity,
+		TArray<FTunaSweeperInventorySlot>& Slots);
+	bool TryAddItemQuantityToFirstEmptySlots(
+		int32 ItemId,
+		int32& InOutQuantity,
+		TArray<FTunaSweeperInventorySlot>& Slots,
+		TArray<FGuid>* OutCreatedItemUids = nullptr);
 	bool AddItemUidToFirstEmptySlot(const FGuid& ItemUid, TArray<FTunaSweeperInventorySlot>& Slots);
 	bool AddItemUidToFirstEmptyCompatibleEquipmentSlot(const FGuid& ItemUid);
 	void RemoveInvalidSlotReferences(TArray<FTunaSweeperInventorySlot>& Slots) const;
@@ -833,6 +850,17 @@ private:
 	bool IsAmmoDefinitionCompatibleWithWeapon(
 		const FTunaSweeperItemDefinition& WeaponDefinition,
 		const FTunaSweeperItemDefinition& AmmoDefinition) const;
+	bool IsStackableItemDefinition(const FTunaSweeperItemDefinition& ItemDefinition) const;
+	bool IsStackableItemId(int32 ItemId) const;
+	bool DoesItemInstanceAllowStacking(const FTunaSweeperItemInstance& ItemInstance) const;
+	bool CanStackItemInstances(
+		const FTunaSweeperItemInstance& SourceItemInstance,
+		const FTunaSweeperItemInstance& TargetItemInstance) const;
+	bool TryMergeItemStacksBetweenSlots(
+		const FTunaSweeperItemSlotReference& SourceSlot,
+		const FTunaSweeperItemSlotReference& TargetSlot,
+		int32& OutMergedItemId,
+		int32& OutMergedQuantity);
 	bool CanGrantQuestItemRewards(const TArray<FTunaSweeperItemStack>& ItemRewards) const;
 	int32 CalculateWeaponMagazineCapacity(
 		const FTunaSweeperItemInstance& WeaponInstance,

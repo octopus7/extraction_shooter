@@ -457,6 +457,7 @@
     "experience_value": 0,
     "item_grade": "common",
     "icon_file_name": "T_UIIcon_AncientCoin.uasset",
+    "category_tag": "item.category.currency",
     "weight_kg": 0.01
   },
   {
@@ -467,6 +468,7 @@
     "experience_value": 0,
     "item_grade": "uncommon",
     "icon_file_name": "T_UIIcon_AncientBanknoteBundle.uasset",
+    "category_tag": "item.category.currency",
     "weight_kg": 0.01
   }
 ]

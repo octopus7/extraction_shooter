@@ -184,7 +184,7 @@ private:
 	void HandleStorageFilterOtherClicked();
 
 	UPROPERTY(Transient)
-	TObjectPtr<UHorizontalBox> StorageFilterTabsRow;
+	TObjectPtr<UHorizontalBox> StorageFilterTabsWidget;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UButton> StorageSortButton;

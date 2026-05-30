@@ -13,6 +13,7 @@ DEFINE_LOG_CATEGORY_STATIC(LogTunaSweeperItemData, Log, All);
 namespace TunaSweeperItemDataFiles
 {
 	const TCHAR* ItemTableJsonRelativePath = TEXT("Data/ItemTable.json");
+	const TCHAR* ItemStackDefinitionsJsonRelativePath = TEXT("Data/ItemStackDefinitions.json");
 	const TCHAR* ItemNameStringsCsvRelativePath = TEXT("Data/ItemNameStrings.csv");
 	const TCHAR* LootContainerTableJsonRelativePath = TEXT("Data/LootContainerTable.json");
 	const TCHAR* LootContainerContentsJsonRelativePath = TEXT("Data/LootContainerContents.json");
@@ -64,6 +65,33 @@ namespace TunaSweeperItemDataFiles
 		return ETunaSweeperItemGrade::Common;
 	}
 
+	FName ResolveDefaultMaxStackCategoryKey(FName ItemCategoryTag)
+	{
+		static const TMap<FName, FName> DefaultStackCategoryKeysByItemCategory =
+		{
+			{ FName(TEXT("item.category.weapon.gun")), FName(TEXT("stack.default.weapon")) },
+			{ FName(TEXT("item.category.weapon.melee")), FName(TEXT("stack.default.weapon")) },
+			{ FName(TEXT("item.category.ammo")), FName(TEXT("stack.default.ammo")) },
+			{ FName(TEXT("item.category.attachment")), FName(TEXT("stack.default.attachment")) },
+			{ FName(TEXT("item.category.consumable")), FName(TEXT("stack.default.consumable")) },
+			{ FName(TEXT("item.category.body")), FName(TEXT("stack.default.equipment")) },
+			{ FName(TEXT("item.category.bag")), FName(TEXT("stack.default.equipment")) },
+			{ FName(TEXT("item.category.head")), FName(TEXT("stack.default.equipment")) },
+			{ FName(TEXT("item.category.face")), FName(TEXT("stack.default.equipment")) },
+			{ FName(TEXT("item.category.ear")), FName(TEXT("stack.default.equipment")) },
+			{ FName(TEXT("item.category.material")), FName(TEXT("stack.default.material")) },
+			{ FName(TEXT("item.category.blueprint")), FName(TEXT("stack.default.blueprint")) },
+			{ FName(TEXT("item.category.currency")), FName(TEXT("stack.default.currency")) }
+		};
+
+		if (const FName* StackCategoryKey = DefaultStackCategoryKeysByItemCategory.Find(ItemCategoryTag))
+		{
+			return *StackCategoryKey;
+		}
+
+		return NAME_None;
+	}
+
 	TArray<FTunaSweeperItemStack> ResolveLootContainerItems(const FTunaSweeperLootContainerContents& Contents)
 	{
 		TArray<FTunaSweeperItemStack> ResolvedItems;
@@ -102,6 +130,7 @@ bool UTunaSweeperItemDataSubsystem::LoadItemData(bool bForceReload)
 	ResetLoadedItemData();
 
 	const bool bLoadedItemTable = LoadItemTableJson();
+	const bool bLoadedItemStackDefinitions = LoadItemStackDefinitionsJson();
 	const bool bLoadedNameStrings = LoadItemNameStringsCsv();
 	const bool bLoadedLootContainerTable = LoadLootContainerTableJson();
 	const bool bLoadedLootContainerContents = LoadLootContainerContentsJson();
@@ -110,6 +139,7 @@ bool UTunaSweeperItemDataSubsystem::LoadItemData(bool bForceReload)
 	const bool bLoadedWorkbenchDismantleRecipes = LoadWorkbenchDismantleRecipesJson();
 	bItemDataLoaded =
 		bLoadedItemTable &&
+		bLoadedItemStackDefinitions &&
 		bLoadedNameStrings &&
 		bLoadedLootContainerTable &&
 		bLoadedLootContainerContents &&
@@ -437,6 +467,28 @@ int32 UTunaSweeperItemDataSubsystem::ResolveShopItemBuyPrice(
 	return 0;
 }
 
+int32 UTunaSweeperItemDataSubsystem::ResolveItemMaxStackQuantity(
+	const FTunaSweeperItemDefinition& ItemDefinition) const
+{
+	FName StackCategoryKey = ItemDefinition.MaxStackCategoryKey;
+	if (StackCategoryKey.IsNone())
+	{
+		StackCategoryKey = TunaSweeperItemDataFiles::ResolveDefaultMaxStackCategoryKey(ItemDefinition.CategoryTag);
+	}
+
+	if (StackCategoryKey.IsNone())
+	{
+		return 1;
+	}
+
+	if (const int32* MaxStackQuantity = MaxStackQuantitiesByCategoryKey.Find(StackCategoryKey))
+	{
+		return FMath::Max(1, *MaxStackQuantity);
+	}
+
+	return 1;
+}
+
 bool UTunaSweeperItemDataSubsystem::TryGetWorkbenchRecipeDefinition(
 	FName RecipeId,
 	FTunaSweeperWorkbenchRecipeDefinition& OutDefinition)
@@ -611,6 +663,7 @@ bool UTunaSweeperItemDataSubsystem::LoadItemTableJson()
 		FString IconFileName;
 		FString ItemGradeString;
 		FString CategoryTag;
+		FString MaxStackCategoryKey;
 		FString BlueprintRecipeId;
 		FString EquipmentSlotTag;
 		FString WeaponTypeTag;
@@ -653,6 +706,13 @@ bool UTunaSweeperItemDataSubsystem::LoadItemTableJson()
 		if ((*JsonObject)->TryGetStringField(TEXT("category_tag"), CategoryTag))
 		{
 			ItemDefinition.CategoryTag = FName(*CategoryTag.TrimStartAndEnd());
+		}
+		if ((*JsonObject)->TryGetStringField(TEXT("max_stack_category_key"), MaxStackCategoryKey) ||
+			(*JsonObject)->TryGetStringField(TEXT("stack_category_key"), MaxStackCategoryKey) ||
+			(*JsonObject)->TryGetStringField(TEXT("max_stack_key"), MaxStackCategoryKey) ||
+			(*JsonObject)->TryGetStringField(TEXT("stack_class_key"), MaxStackCategoryKey))
+		{
+			ItemDefinition.MaxStackCategoryKey = FName(*MaxStackCategoryKey.TrimStartAndEnd());
 		}
 		if ((*JsonObject)->TryGetStringField(TEXT("blueprint_recipe_id"), BlueprintRecipeId) ||
 			(*JsonObject)->TryGetStringField(TEXT("workbench_recipe_id"), BlueprintRecipeId) ||
@@ -818,6 +878,62 @@ bool UTunaSweeperItemDataSubsystem::LoadItemTableJson()
 	if (!bHasValidRows)
 	{
 		UE_LOG(LogTunaSweeperItemData, Error, TEXT("Item table JSON has no valid rows: %s"), *ItemTableJsonPath);
+	}
+
+	return bHasValidRows;
+}
+
+bool UTunaSweeperItemDataSubsystem::LoadItemStackDefinitionsJson()
+{
+	FString JsonContent;
+	const FString ItemStackDefinitionsJsonPath = GetItemStackDefinitionsJsonPath();
+	if (!FFileHelper::LoadFileToString(JsonContent, *ItemStackDefinitionsJsonPath))
+	{
+		UE_LOG(LogTunaSweeperItemData, Error, TEXT("Failed to read item stack definitions JSON: %s"), *ItemStackDefinitionsJsonPath);
+		return false;
+	}
+
+	TSharedPtr<FJsonObject> JsonObject;
+	const TSharedRef<TJsonReader<>> JsonReader = TJsonReaderFactory<>::Create(JsonContent);
+	if (!FJsonSerializer::Deserialize(JsonReader, JsonObject) || !JsonObject.IsValid())
+	{
+		UE_LOG(LogTunaSweeperItemData, Error, TEXT("Failed to parse item stack definitions JSON: %s"), *ItemStackDefinitionsJsonPath);
+		return false;
+	}
+
+	bool bHasValidRows = false;
+	for (const TPair<FString, TSharedPtr<FJsonValue>>& StackDefinitionPair : JsonObject->Values)
+	{
+		const FString StackCategoryKeyString = StackDefinitionPair.Key.TrimStartAndEnd();
+		if (StackCategoryKeyString.IsEmpty() || !StackDefinitionPair.Value.IsValid())
+		{
+			continue;
+		}
+
+		double NumericMaxStackQuantity = 0.0;
+		if (StackDefinitionPair.Value->Type == EJson::Number)
+		{
+			NumericMaxStackQuantity = StackDefinitionPair.Value->AsNumber();
+		}
+		else if (StackDefinitionPair.Value->Type == EJson::Object)
+		{
+			const TSharedPtr<FJsonObject> StackObject = StackDefinitionPair.Value->AsObject();
+			if (StackObject.IsValid())
+			{
+				StackObject->TryGetNumberField(TEXT("quantity"), NumericMaxStackQuantity) ||
+					StackObject->TryGetNumberField(TEXT("max_stack"), NumericMaxStackQuantity) ||
+					StackObject->TryGetNumberField(TEXT("max_stack_quantity"), NumericMaxStackQuantity);
+			}
+		}
+
+		const int32 MaxStackQuantity = FMath::Max(1, FMath::RoundToInt(NumericMaxStackQuantity));
+		MaxStackQuantitiesByCategoryKey.Add(FName(*StackCategoryKeyString), MaxStackQuantity);
+		bHasValidRows = true;
+	}
+
+	if (!bHasValidRows)
+	{
+		UE_LOG(LogTunaSweeperItemData, Error, TEXT("Item stack definitions JSON has no valid rows: %s"), *ItemStackDefinitionsJsonPath);
 	}
 
 	return bHasValidRows;
@@ -1485,6 +1601,7 @@ bool UTunaSweeperItemDataSubsystem::LoadWorkbenchDismantleRecipesJson()
 void UTunaSweeperItemDataSubsystem::ResetLoadedItemData()
 {
 	ItemDefinitionsById.Reset();
+	MaxStackQuantitiesByCategoryKey.Reset();
 	ItemNameStringsByKey.Reset();
 	LootContainerDefinitionsById.Reset();
 	LootContainerContentsById.Reset();
@@ -1499,6 +1616,11 @@ void UTunaSweeperItemDataSubsystem::ResetLoadedItemData()
 FString UTunaSweeperItemDataSubsystem::GetItemTableJsonPath() const
 {
 	return FPaths::Combine(FPaths::ProjectContentDir(), TunaSweeperItemDataFiles::ItemTableJsonRelativePath);
+}
+
+FString UTunaSweeperItemDataSubsystem::GetItemStackDefinitionsJsonPath() const
+{
+	return FPaths::Combine(FPaths::ProjectContentDir(), TunaSweeperItemDataFiles::ItemStackDefinitionsJsonRelativePath);
 }
 
 FString UTunaSweeperItemDataSubsystem::GetItemNameStringsCsvPath() const

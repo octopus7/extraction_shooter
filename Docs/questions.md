@@ -1637,3 +1637,51 @@ Yes. Horizontal stretch is the cleaner layout model here. The canvas slot should
 ### Answer
 
 맞다. 레이어만 낮춘 것으로는 부족하다. 기존에 이미 생성된 `RaritySlotAccentWidget`이 있으면 현재 코드는 해당 위젯을 찾고 바로 return해서 child 순서를 다시 낮추지 않는다. 따라서 rarity 위젯이 아이콘보다 뒤 child로 남아 있던 슬롯은 계속 아이콘 위에 배경이 올라온 것처럼 보일 수 있다. 기존 위젯과 신규 위젯 모두 `SlotOverlay`의 0번 child로 강제 재배치해야 한다.
+
+## 2026-05-31 00:56:03 (elapsed: 00:00:00)
+
+### Question
+
+다음 남은 작업은?
+
+### Answer
+
+main 병합 후 남은 작업은 빌드/에디터 검증, 언어 전환 실기 확인, 아직 코드/에셋에 남은 하드코딩 텍스트 재감사, CSV 번역 품질 확인, 패키징/저장 문화권 검증이다. 현재 요청에 따라 빌드와 에디터 실행은 하지 않았다.
+
+## 2026-05-31 00:57:48 (elapsed: 00:00:00)
+
+### Question
+
+위젯 수정이 필요한 항목은 없어?
+
+### Answer
+
+위젯 수정이 전혀 없다고 단정하기는 어렵다. 남은 위젯 관련 항목은 코드상 확정 수정이라기보다 실제 언어 전환 후 UI 폭, 줄바꿈, 폰트 적용, 동적 생성 텍스트 반영 여부를 확인해야 판단할 수 있는 검증 항목이다.
+## 2026-05-31 01:09:58 (elapsed: 00:00:00)
+
+### Question
+
+하우징에서 작업대 개방조건 뭐야?
+
+### Answer
+
+현재 작업대 하우징 시설 `housing_workbench`는 `HousingFacilityDefinitions.json`에서 `function_unlocked: false`이고 별도 `unlock_when_ever_acquired_items` 조건이 없다. 따라서 기본/아이템 보유 조건으로 열리지 않고, `UnlockedHousingFacilityIds`에 `housing_workbench`가 들어가야 열린다. 현재 데이터상 이 해금은 `QuestDefinitions.json`의 `quest_lumberjack_first_kill` 보상 `housing_facilities: ["housing_workbench"]`로 지급된다. 해금 후 실제 설치에는 목재 `6002` 12개가 필요하다.
+
+## 2026-05-31 01:45:03 (elapsed: 00:00:00)
+
+### Question
+
+패키징 가능해? 하지는 말고 물어만 보는거
+
+### Answer
+
+가능하다. Windows 패키징은 `RunUAT BuildCookRun`으로 진행할 수 있고, 프로젝트 지침상 AutomationTool이 AppData 로그/캐시에 쓰기 때문에 실행 전 권한 상승 승인을 먼저 요청해야 한다. 지금은 질문만 한 것이므로 패키징은 실행하지 않았다.
+## 2026-05-31 01:51:27 (elapsed: 00:00:00)
+
+### Question
+
+에디터 세이브 파일을 윈도우에 적용하는법 그냥 복사만 하면되나?
+
+### Answer
+
+대체로 맞다. 에디터 저장 파일은 `TunaSweeper/Saved/SaveGames`에 있고, 패키징된 Windows 빌드는 `%LOCALAPPDATA%\TunaSweeper\Saved\SaveGames`를 사용한다. `TunaSweeperSave_Slot01.sav` 같은 슬롯 파일을 같은 이름으로 복사하면 된다. 현재 선택 슬롯까지 맞추려면 `TunaSweeperSaveSettings.sav`도 같이 복사한다. 단, 실행 중인 게임이나 에디터가 저장 파일을 다시 쓸 수 있으므로 둘 다 끈 상태에서 복사하고, 대상 폴더의 기존 `.sav`는 백업해 두는 편이 안전하다.

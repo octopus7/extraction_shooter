@@ -159,6 +159,14 @@ namespace TunaSweeperHoveredItemInteraction
 			return false;
 		}
 
+		if (TunaGameInstance->TryFindFirstStackTargetSlot(
+			SourceSlot,
+			ETunaSweeperItemSlotSource::Inventory,
+			OutTargetSlot))
+		{
+			return true;
+		}
+
 		const TArray<FTunaSweeperInventorySlot>& InventorySlots = TunaGameInstance->GetInventorySlots();
 		for (int32 SlotIndex = 0; SlotIndex < InventorySlots.Num(); ++SlotIndex)
 		{
@@ -188,6 +196,14 @@ namespace TunaSweeperHoveredItemInteraction
 		if (!TunaGameInstance)
 		{
 			return false;
+		}
+
+		if (TunaGameInstance->TryFindFirstStackTargetSlot(
+			SourceSlot,
+			ETunaSweeperItemSlotSource::Storage,
+			OutTargetSlot))
+		{
+			return true;
 		}
 
 		const TArray<FTunaSweeperInventorySlot>& StorageSlots = TunaGameInstance->GetStorageSlots();

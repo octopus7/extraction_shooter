@@ -1973,6 +1973,69 @@ bool UTunaSweeperGameInstance::ToggleHoveredInventorySlotSortLock()
 	return HoveredItemSlotReference.IsValid() && ToggleInventorySlotSortLock(HoveredItemSlotReference);
 }
 
+bool UTunaSweeperGameInstance::CanStackItemBetweenSlots(
+	const FTunaSweeperItemSlotReference& SourceSlot,
+	const FTunaSweeperItemSlotReference& TargetSlot,
+	FString* OutFailureReason)
+{
+	EnsureInventoryStateInitialized();
+	RefreshSelectedWeaponAttachmentSlots();
+
+	auto SetFailure = [OutFailureReason](const TCHAR* Reason)
+	{
+		if (OutFailureReason)
+		{
+			*OutFailureReason = Reason;
+		}
+		return false;
+	};
+
+	if (!SourceSlot.IsValid() || !TargetSlot.IsValid())
+	{
+		return SetFailure(TEXT("Invalid slot."));
+	}
+
+	if (SourceSlot.Source == TargetSlot.Source && SourceSlot.SlotIndex == TargetSlot.SlotIndex)
+	{
+		return SetFailure(TEXT("Same slot."));
+	}
+
+	const TArray<FTunaSweeperInventorySlot>* SourceSlots = GetSlotsForSource(SourceSlot.Source);
+	const TArray<FTunaSweeperInventorySlot>* TargetSlots = GetSlotsForSource(TargetSlot.Source);
+	if (!SourceSlots || !TargetSlots ||
+		!SourceSlots->IsValidIndex(SourceSlot.SlotIndex) ||
+		!TargetSlots->IsValidIndex(TargetSlot.SlotIndex))
+	{
+		return SetFailure(TEXT("Slot is out of range."));
+	}
+
+	const FGuid SourceUid = (*SourceSlots)[SourceSlot.SlotIndex].ItemUid;
+	const FGuid TargetUid = (*TargetSlots)[TargetSlot.SlotIndex].ItemUid;
+	if (!SourceUid.IsValid() || !TargetUid.IsValid())
+	{
+		return SetFailure(TEXT("Both slots must contain items."));
+	}
+
+	if (!CanSlotAcceptItem(TargetSlot, SourceUid))
+	{
+		return SetFailure(TEXT("Target slot does not accept this item."));
+	}
+
+	const FTunaSweeperItemInstance* SourceItemInstance = ItemInstancesByUid.Find(SourceUid);
+	const FTunaSweeperItemInstance* TargetItemInstance = ItemInstancesByUid.Find(TargetUid);
+	if (!SourceItemInstance || !TargetItemInstance ||
+		!CanStackItemInstances(*SourceItemInstance, *TargetItemInstance))
+	{
+		return SetFailure(TEXT("Items cannot be stacked."));
+	}
+
+	if (OutFailureReason)
+	{
+		OutFailureReason->Reset();
+	}
+	return true;
+}
+
 bool UTunaSweeperGameInstance::CanMoveItemBetweenSlots(
 	const FTunaSweeperItemSlotReference& SourceSlot,
 	const FTunaSweeperItemSlotReference& TargetSlot,
@@ -2035,6 +2098,28 @@ bool UTunaSweeperGameInstance::CanMoveItemBetweenSlots(
 			OutFailureReason->Reset();
 		}
 		return true;
+	}
+
+	if (CanStackItemBetweenSlots(SourceSlot, TargetSlot))
+	{
+		if (OutFailureReason)
+		{
+			OutFailureReason->Reset();
+		}
+		return true;
+	}
+
+	if (TargetUid.IsValid())
+	{
+		const FTunaSweeperItemInstance* SourceItemInstance = ItemInstancesByUid.Find(SourceUid);
+		const FTunaSweeperItemInstance* TargetItemInstance = ItemInstancesByUid.Find(TargetUid);
+		if (SourceItemInstance &&
+			TargetItemInstance &&
+			SourceItemInstance->ItemId == TargetItemInstance->ItemId &&
+			IsStackableItemId(SourceItemInstance->ItemId))
+		{
+			return SetFailure(TEXT("Target stack is full."));
+		}
 	}
 
 	if (!CanSlotAcceptItem(TargetSlot, SourceUid))
@@ -2171,6 +2256,75 @@ bool UTunaSweeperGameInstance::MoveItemBetweenSlots(
 		}
 		MarkItemStateMutationForSave();
 		return true;
+	}
+
+	int32 MergedItemId = INDEX_NONE;
+	int32 MergedQuantity = 0;
+	if (TryMergeItemStacksBetweenSlots(SourceSlot, TargetSlot, MergedItemId, MergedQuantity))
+	{
+		ClearSelectedItemIfInvalid();
+		BroadcastInventoryStateChanged();
+		if (bAcquiredFromLootContainer && MergedItemId != INDEX_NONE && MergedQuantity > 0)
+		{
+			MarkItemEverAcquired(MergedItemId);
+			if (UTunaSweeperQuestSubsystem* QuestSubsystem = GetSubsystem<UTunaSweeperQuestSubsystem>())
+			{
+				QuestSubsystem->NotifyItemAcquired(MergedItemId, MergedQuantity, !IsCurrentWorldBunkerMap());
+			}
+			AddRaidExperienceForItem(MergedItemId, MergedQuantity);
+		}
+		MarkItemStateMutationForSave();
+		return true;
+	}
+
+	if (!TargetUid.IsValid())
+	{
+		FTunaSweeperItemInstance* SourceItemInstance = ItemInstancesByUid.Find(SourceUid);
+		UTunaSweeperItemDataSubsystem* ItemDataSubsystem = GetSubsystem<UTunaSweeperItemDataSubsystem>();
+		FTunaSweeperItemDefinition SourceItemDefinition;
+		if (SourceItemInstance &&
+			ItemDataSubsystem &&
+			ItemDataSubsystem->TryGetItemDefinition(SourceItemInstance->ItemId, SourceItemDefinition))
+		{
+			const int32 MaxStackQuantity = FMath::Max(1, ItemDataSubsystem->ResolveItemMaxStackQuantity(SourceItemDefinition));
+			if (MaxStackQuantity > 1 && SourceItemInstance->Quantity > MaxStackQuantity)
+			{
+				const int32 MovedQuantity = MaxStackQuantity;
+				const int32 MovedItemId = SourceItemInstance->ItemId;
+				const FGuid NewStackUid = CreateItemInstance(MovedItemId, MovedQuantity);
+				if (!NewStackUid.IsValid())
+				{
+					return false;
+				}
+
+				SourceItemInstance = ItemInstancesByUid.Find(SourceUid);
+				if (!SourceItemInstance)
+				{
+					ItemInstancesByUid.Remove(NewStackUid);
+					return false;
+				}
+				SourceItemInstance->Quantity -= MovedQuantity;
+				(*TargetSlots)[TargetSlot.SlotIndex].ItemUid = NewStackUid;
+				if (TargetSlot.Source == ETunaSweeperItemSlotSource::SelectedWeaponAttachment)
+				{
+					CommitSelectedWeaponAttachmentSlotsToSelectedItem();
+				}
+
+				ClearSelectedItemIfInvalid();
+				BroadcastInventoryStateChanged();
+				if (bAcquiredFromLootContainer)
+				{
+					MarkItemEverAcquired(MovedItemId);
+					if (UTunaSweeperQuestSubsystem* QuestSubsystem = GetSubsystem<UTunaSweeperQuestSubsystem>())
+					{
+						QuestSubsystem->NotifyItemAcquired(MovedItemId, MovedQuantity, !IsCurrentWorldBunkerMap());
+					}
+					AddRaidExperienceForItem(MovedItemId, MovedQuantity);
+				}
+				MarkItemStateMutationForSave();
+				return true;
+			}
+		}
 	}
 
 	(*SourceSlots)[SourceSlot.SlotIndex].ItemUid = TargetUid;
@@ -2458,10 +2612,15 @@ bool UTunaSweeperGameInstance::AddItemToFirstAvailableInventorySlot(int32 ItemId
 		return false;
 	}
 
-	const FGuid ItemUid = CreateItemInstance(ItemId, Quantity);
-	if (!AddItemUidToFirstEmptySlot(ItemUid, PlayerInventorySlots))
+	const TMap<FGuid, FTunaSweeperItemInstance> PreviousItemInstances = ItemInstancesByUid;
+	const TArray<FTunaSweeperInventorySlot> PreviousInventorySlots = PlayerInventorySlots;
+	int32 RemainingQuantity = Quantity;
+	TryAddItemQuantityToExistingStacks(ItemId, RemainingQuantity, PlayerInventorySlots);
+	TryAddItemQuantityToFirstEmptySlots(ItemId, RemainingQuantity, PlayerInventorySlots);
+	if (RemainingQuantity > 0)
 	{
-		ItemInstancesByUid.Remove(ItemUid);
+		ItemInstancesByUid = PreviousItemInstances;
+		PlayerInventorySlots = PreviousInventorySlots;
 		return false;
 	}
 
@@ -2484,11 +2643,40 @@ bool UTunaSweeperGameInstance::AddItemToPreferredAvailableSlot(int32 ItemId, int
 		return false;
 	}
 
-	const FGuid ItemUid = CreateItemInstance(ItemId, Quantity);
-	if (!AddItemUidToFirstEmptyCompatibleEquipmentSlot(ItemUid) &&
-		!AddItemUidToFirstEmptySlot(ItemUid, PlayerInventorySlots))
+	const TMap<FGuid, FTunaSweeperItemInstance> PreviousItemInstances = ItemInstancesByUid;
+	const TArray<FTunaSweeperInventorySlot> PreviousInventorySlots = PlayerInventorySlots;
+	const TArray<FTunaSweeperInventorySlot> PreviousEquipmentSlots = EquipmentSlots;
+
+	bool bAdded = false;
+	if (IsStackableItemId(ItemId))
 	{
-		ItemInstancesByUid.Remove(ItemUid);
+		int32 RemainingQuantity = Quantity;
+		TryAddItemQuantityToExistingStacks(ItemId, RemainingQuantity, PlayerInventorySlots);
+		TryAddItemQuantityToFirstEmptySlots(ItemId, RemainingQuantity, PlayerInventorySlots);
+		bAdded = RemainingQuantity <= 0;
+	}
+	else if (Quantity == 1)
+	{
+		const FGuid ItemUid = CreateItemInstance(ItemId, Quantity);
+		bAdded = AddItemUidToFirstEmptyCompatibleEquipmentSlot(ItemUid) ||
+			AddItemUidToFirstEmptySlot(ItemUid, PlayerInventorySlots);
+		if (!bAdded)
+		{
+			ItemInstancesByUid.Remove(ItemUid);
+		}
+	}
+	else
+	{
+		int32 RemainingQuantity = Quantity;
+		TryAddItemQuantityToFirstEmptySlots(ItemId, RemainingQuantity, PlayerInventorySlots);
+		bAdded = RemainingQuantity <= 0;
+	}
+
+	if (!bAdded)
+	{
+		ItemInstancesByUid = PreviousItemInstances;
+		PlayerInventorySlots = PreviousInventorySlots;
+		EquipmentSlots = PreviousEquipmentSlots;
 		return false;
 	}
 
@@ -2530,7 +2718,9 @@ bool UTunaSweeperGameInstance::GrantQuestItemRewards(const TArray<FTunaSweeperIt
 		return false;
 	}
 
-	TArray<FGuid> CreatedItemUids;
+	const TMap<FGuid, FTunaSweeperItemInstance> PreviousItemInstances = ItemInstancesByUid;
+	const TArray<FTunaSweeperInventorySlot> PreviousInventorySlots = PlayerInventorySlots;
+	TArray<int32> GrantedItemIds;
 	for (const FTunaSweeperItemStack& ItemReward : ItemRewards)
 	{
 		if (ItemReward.ItemId == INDEX_NONE || ItemReward.Quantity <= 0)
@@ -2538,35 +2728,24 @@ bool UTunaSweeperGameInstance::GrantQuestItemRewards(const TArray<FTunaSweeperIt
 			continue;
 		}
 
-		const FGuid ItemUid = CreateItemInstance(ItemReward.ItemId, ItemReward.Quantity);
-		if (!AddItemUidToFirstEmptySlot(ItemUid, PlayerInventorySlots))
+		int32 RemainingQuantity = ItemReward.Quantity;
+		TryAddItemQuantityToExistingStacks(ItemReward.ItemId, RemainingQuantity, PlayerInventorySlots);
+		TryAddItemQuantityToFirstEmptySlots(ItemReward.ItemId, RemainingQuantity, PlayerInventorySlots);
+		if (RemainingQuantity > 0)
 		{
-			ItemInstancesByUid.Remove(ItemUid);
-			for (const FGuid& CreatedItemUid : CreatedItemUids)
-			{
-				ItemInstancesByUid.Remove(CreatedItemUid);
-				for (FTunaSweeperInventorySlot& InventorySlot : PlayerInventorySlots)
-				{
-					if (InventorySlot.ItemUid == CreatedItemUid)
-					{
-						InventorySlot.Clear();
-					}
-				}
-			}
+			ItemInstancesByUid = PreviousItemInstances;
+			PlayerInventorySlots = PreviousInventorySlots;
 			return false;
 		}
 
-		CreatedItemUids.Add(ItemUid);
+		GrantedItemIds.AddUnique(ItemReward.ItemId);
 	}
 
-	if (CreatedItemUids.Num() > 0)
+	if (GrantedItemIds.Num() > 0)
 	{
-		for (const FGuid& CreatedItemUid : CreatedItemUids)
+		for (const int32 GrantedItemId : GrantedItemIds)
 		{
-			if (const FTunaSweeperItemInstance* CreatedItemInstance = ItemInstancesByUid.Find(CreatedItemUid))
-			{
-				MarkItemEverAcquired(CreatedItemInstance->ItemId);
-			}
+			MarkItemEverAcquired(GrantedItemId);
 		}
 		BroadcastInventoryStateChanged();
 		MarkItemStateMutationForSave();
@@ -3082,8 +3261,10 @@ bool UTunaSweeperGameInstance::TryCraftActiveWorkbenchRecipe(int32 RecipeSlotInd
 		}
 	}
 
-	const FGuid OutputItemUid = CreateItemInstance(RecipeDefinition.OutputItemId, RecipeDefinition.OutputQuantity);
-	if (!AddItemUidToFirstEmptySlot(OutputItemUid, PlayerInventorySlots))
+	int32 RemainingOutputQuantity = RecipeDefinition.OutputQuantity;
+	TryAddItemQuantityToExistingStacks(RecipeDefinition.OutputItemId, RemainingOutputQuantity, PlayerInventorySlots);
+	TryAddItemQuantityToFirstEmptySlots(RecipeDefinition.OutputItemId, RemainingOutputQuantity, PlayerInventorySlots);
+	if (RemainingOutputQuantity > 0)
 	{
 		ItemInstancesByUid = PreviousItemInstances;
 		PlayerInventorySlots = PreviousInventorySlots;
@@ -4756,6 +4937,108 @@ FGuid UTunaSweeperGameInstance::CreateItemInstance(int32 ItemId, int32 Quantity)
 	return ItemInstance.Uid;
 }
 
+bool UTunaSweeperGameInstance::TryAddItemQuantityToExistingStacks(
+	int32 ItemId,
+	int32& InOutQuantity,
+	TArray<FTunaSweeperInventorySlot>& Slots)
+{
+	if (ItemId == INDEX_NONE || InOutQuantity <= 0 || !IsStackableItemId(ItemId))
+	{
+		return false;
+	}
+
+	UTunaSweeperItemDataSubsystem* ItemDataSubsystem = GetSubsystem<UTunaSweeperItemDataSubsystem>();
+	FTunaSweeperItemDefinition ItemDefinition;
+	if (!ItemDataSubsystem || !ItemDataSubsystem->TryGetItemDefinition(ItemId, ItemDefinition))
+	{
+		return false;
+	}
+
+	const int32 MaxStackQuantity = FMath::Max(1, ItemDataSubsystem->ResolveItemMaxStackQuantity(ItemDefinition));
+	bool bAddedAny = false;
+	for (FTunaSweeperInventorySlot& Slot : Slots)
+	{
+		if (InOutQuantity <= 0)
+		{
+			break;
+		}
+
+		FTunaSweeperItemInstance* ItemInstance = ItemInstancesByUid.Find(Slot.ItemUid);
+		if (!ItemInstance ||
+			ItemInstance->ItemId != ItemId ||
+			!DoesItemInstanceAllowStacking(*ItemInstance) ||
+			ItemInstance->Quantity >= MaxStackQuantity)
+		{
+			continue;
+		}
+
+		const int32 AddedQuantity = FMath::Min(InOutQuantity, MaxStackQuantity - ItemInstance->Quantity);
+		if (AddedQuantity <= 0)
+		{
+			continue;
+		}
+
+		ItemInstance->Quantity += AddedQuantity;
+		InOutQuantity -= AddedQuantity;
+		bAddedAny = true;
+	}
+
+	return bAddedAny;
+}
+
+bool UTunaSweeperGameInstance::TryAddItemQuantityToFirstEmptySlots(
+	int32 ItemId,
+	int32& InOutQuantity,
+	TArray<FTunaSweeperInventorySlot>& Slots,
+	TArray<FGuid>* OutCreatedItemUids)
+{
+	if (ItemId == INDEX_NONE || InOutQuantity <= 0)
+	{
+		return false;
+	}
+
+	int32 MaxStackQuantity = 1;
+	if (UTunaSweeperItemDataSubsystem* ItemDataSubsystem = GetSubsystem<UTunaSweeperItemDataSubsystem>())
+	{
+		FTunaSweeperItemDefinition ItemDefinition;
+		if (ItemDataSubsystem->TryGetItemDefinition(ItemId, ItemDefinition))
+		{
+			MaxStackQuantity = FMath::Max(1, ItemDataSubsystem->ResolveItemMaxStackQuantity(ItemDefinition));
+		}
+	}
+
+	bool bAddedAny = false;
+	for (FTunaSweeperInventorySlot& Slot : Slots)
+	{
+		if (InOutQuantity <= 0)
+		{
+			break;
+		}
+
+		if (!Slot.IsEmpty())
+		{
+			continue;
+		}
+
+		const int32 NewStackQuantity = FMath::Min(InOutQuantity, MaxStackQuantity);
+		const FGuid ItemUid = CreateItemInstance(ItemId, NewStackQuantity);
+		if (!ItemUid.IsValid())
+		{
+			continue;
+		}
+
+		Slot.ItemUid = ItemUid;
+		if (OutCreatedItemUids)
+		{
+			OutCreatedItemUids->Add(ItemUid);
+		}
+		InOutQuantity -= NewStackQuantity;
+		bAddedAny = true;
+	}
+
+	return bAddedAny;
+}
+
 bool UTunaSweeperGameInstance::AddItemUidToFirstEmptySlot(
 	const FGuid& ItemUid,
 	TArray<FTunaSweeperInventorySlot>& Slots)
@@ -5003,10 +5286,11 @@ bool UTunaSweeperGameInstance::AddWorkbenchResultToInventoryOrOverflow(
 		return false;
 	}
 
-	const FGuid ItemUid = CreateItemInstance(ItemId, Quantity);
-	if (!AddItemUidToFirstEmptySlot(ItemUid, PlayerInventorySlots))
+	int32 RemainingQuantity = Quantity;
+	TryAddItemQuantityToExistingStacks(ItemId, RemainingQuantity, PlayerInventorySlots);
+	TryAddItemQuantityToFirstEmptySlots(ItemId, RemainingQuantity, PlayerInventorySlots);
+	if (RemainingQuantity > 0)
 	{
-		ItemInstancesByUid.Remove(ItemUid);
 		FTunaSweeperItemStack* ExistingOverflow = InOutOverflowItems.FindByPredicate(
 			[ItemId](const FTunaSweeperItemStack& Candidate)
 			{
@@ -5014,24 +5298,27 @@ bool UTunaSweeperGameInstance::AddWorkbenchResultToInventoryOrOverflow(
 			});
 		if (ExistingOverflow)
 		{
-			ExistingOverflow->Quantity += Quantity;
+			ExistingOverflow->Quantity += RemainingQuantity;
 		}
 		else
 		{
 			FTunaSweeperItemStack OverflowStack;
 			OverflowStack.ItemId = ItemId;
-			OverflowStack.Quantity = Quantity;
+			OverflowStack.Quantity = RemainingQuantity;
 			InOutOverflowItems.Add(OverflowStack);
 		}
-		return true;
 	}
 
-	MarkItemEverAcquired(ItemId);
-	if (UTunaSweeperQuestSubsystem* QuestSubsystem = GetSubsystem<UTunaSweeperQuestSubsystem>())
+	const int32 AddedQuantity = Quantity - RemainingQuantity;
+	if (AddedQuantity > 0)
 	{
-		QuestSubsystem->NotifyItemAcquired(ItemId, Quantity, !IsCurrentWorldBunkerMap());
+		MarkItemEverAcquired(ItemId);
+		if (UTunaSweeperQuestSubsystem* QuestSubsystem = GetSubsystem<UTunaSweeperQuestSubsystem>())
+		{
+			QuestSubsystem->NotifyItemAcquired(ItemId, AddedQuantity, !IsCurrentWorldBunkerMap());
+		}
+		AddRaidExperienceForItem(ItemId, AddedQuantity);
 	}
-	AddRaidExperienceForItem(ItemId, Quantity);
 	return true;
 }
 
@@ -5541,22 +5828,159 @@ bool UTunaSweeperGameInstance::IsAmmoDefinitionCompatibleWithWeapon(
 	return TunaSweeperInventory::GetDefaultAmmoTypeTagForWeaponType(WeaponDefinition.WeaponTypeTag) == AmmoDefinition.AmmoTypeTag;
 }
 
-bool UTunaSweeperGameInstance::CanGrantQuestItemRewards(const TArray<FTunaSweeperItemStack>& ItemRewards) const
+bool UTunaSweeperGameInstance::IsStackableItemDefinition(const FTunaSweeperItemDefinition& ItemDefinition) const
 {
-	int32 RequiredInventorySlots = 0;
-	for (const FTunaSweeperItemStack& ItemReward : ItemRewards)
+	const UTunaSweeperItemDataSubsystem* ItemDataSubsystem = GetSubsystem<UTunaSweeperItemDataSubsystem>();
+	return ItemDataSubsystem && ItemDataSubsystem->ResolveItemMaxStackQuantity(ItemDefinition) > 1;
+}
+
+bool UTunaSweeperGameInstance::IsStackableItemId(int32 ItemId) const
+{
+	UTunaSweeperItemDataSubsystem* ItemDataSubsystem = GetSubsystem<UTunaSweeperItemDataSubsystem>();
+	FTunaSweeperItemDefinition ItemDefinition;
+	return ItemId != INDEX_NONE &&
+		ItemDataSubsystem &&
+		ItemDataSubsystem->TryGetItemDefinition(ItemId, ItemDefinition) &&
+		IsStackableItemDefinition(ItemDefinition);
+}
+
+bool UTunaSweeperGameInstance::DoesItemInstanceAllowStacking(const FTunaSweeperItemInstance& ItemInstance) const
+{
+	return ItemInstance.IsValid() &&
+		ItemInstance.AttachmentSlots.IsEmpty() &&
+		ItemInstance.LoadedAmmoItemId == INDEX_NONE &&
+		ItemInstance.LoadedAmmoCount <= 0 &&
+		ItemInstance.SelectedAmmoItemId == INDEX_NONE;
+}
+
+bool UTunaSweeperGameInstance::CanStackItemInstances(
+	const FTunaSweeperItemInstance& SourceItemInstance,
+	const FTunaSweeperItemInstance& TargetItemInstance) const
+{
+	if (!DoesItemInstanceAllowStacking(SourceItemInstance) ||
+		!DoesItemInstanceAllowStacking(TargetItemInstance) ||
+		SourceItemInstance.ItemId != TargetItemInstance.ItemId)
 	{
-		if (ItemReward.ItemId != INDEX_NONE && ItemReward.Quantity > 0)
+		return false;
+	}
+
+	UTunaSweeperItemDataSubsystem* ItemDataSubsystem = GetSubsystem<UTunaSweeperItemDataSubsystem>();
+	FTunaSweeperItemDefinition ItemDefinition;
+	if (!ItemDataSubsystem || !ItemDataSubsystem->TryGetItemDefinition(TargetItemInstance.ItemId, ItemDefinition))
+	{
+		return false;
+	}
+
+	const int32 MaxStackQuantity = FMath::Max(1, ItemDataSubsystem->ResolveItemMaxStackQuantity(ItemDefinition));
+	return MaxStackQuantity > 1 && TargetItemInstance.Quantity < MaxStackQuantity;
+}
+
+bool UTunaSweeperGameInstance::TryFindFirstStackTargetSlot(
+	const FTunaSweeperItemSlotReference& SourceSlot,
+	ETunaSweeperItemSlotSource TargetSource,
+	FTunaSweeperItemSlotReference& OutTargetSlot)
+{
+	EnsureInventoryStateInitialized();
+	OutTargetSlot = FTunaSweeperItemSlotReference();
+
+	const TArray<FTunaSweeperInventorySlot>* TargetSlots = GetSlotsForSource(TargetSource);
+	if (!SourceSlot.IsValid() || !TargetSlots)
+	{
+		return false;
+	}
+
+	for (int32 SlotIndex = 0; SlotIndex < TargetSlots->Num(); ++SlotIndex)
+	{
+		if ((*TargetSlots)[SlotIndex].IsEmpty())
 		{
-			++RequiredInventorySlots;
+			continue;
+		}
+
+		FTunaSweeperItemSlotReference TargetSlot;
+		TargetSlot.Source = TargetSource;
+		TargetSlot.SlotIndex = SlotIndex;
+		if (CanStackItemBetweenSlots(SourceSlot, TargetSlot))
+		{
+			OutTargetSlot = TargetSlot;
+			return true;
 		}
 	}
 
-	if (RequiredInventorySlots <= 0)
+	return false;
+}
+
+bool UTunaSweeperGameInstance::TryMergeItemStacksBetweenSlots(
+	const FTunaSweeperItemSlotReference& SourceSlot,
+	const FTunaSweeperItemSlotReference& TargetSlot,
+	int32& OutMergedItemId,
+	int32& OutMergedQuantity)
+{
+	OutMergedItemId = INDEX_NONE;
+	OutMergedQuantity = 0;
+
+	if (!CanStackItemBetweenSlots(SourceSlot, TargetSlot))
 	{
-		return true;
+		return false;
 	}
 
+	TArray<FTunaSweeperInventorySlot>* SourceSlots = GetMutableSlotsForSource(SourceSlot.Source);
+	TArray<FTunaSweeperInventorySlot>* TargetSlots = GetMutableSlotsForSource(TargetSlot.Source);
+	if (!SourceSlots || !TargetSlots ||
+		!SourceSlots->IsValidIndex(SourceSlot.SlotIndex) ||
+		!TargetSlots->IsValidIndex(TargetSlot.SlotIndex))
+	{
+		return false;
+	}
+
+	const FGuid SourceUid = (*SourceSlots)[SourceSlot.SlotIndex].ItemUid;
+	const FGuid TargetUid = (*TargetSlots)[TargetSlot.SlotIndex].ItemUid;
+	FTunaSweeperItemInstance* SourceItemInstance = ItemInstancesByUid.Find(SourceUid);
+	FTunaSweeperItemInstance* TargetItemInstance = ItemInstancesByUid.Find(TargetUid);
+	if (!SourceItemInstance || !TargetItemInstance)
+	{
+		return false;
+	}
+
+	UTunaSweeperItemDataSubsystem* ItemDataSubsystem = GetSubsystem<UTunaSweeperItemDataSubsystem>();
+	FTunaSweeperItemDefinition ItemDefinition;
+	if (!ItemDataSubsystem || !ItemDataSubsystem->TryGetItemDefinition(TargetItemInstance->ItemId, ItemDefinition))
+	{
+		return false;
+	}
+
+	const int32 MaxStackQuantity = FMath::Max(1, ItemDataSubsystem->ResolveItemMaxStackQuantity(ItemDefinition));
+	const int32 MergedQuantity = FMath::Min(SourceItemInstance->Quantity, MaxStackQuantity - TargetItemInstance->Quantity);
+	if (MergedQuantity <= 0)
+	{
+		return false;
+	}
+
+	OutMergedItemId = SourceItemInstance->ItemId;
+	OutMergedQuantity = MergedQuantity;
+	TargetItemInstance->Quantity += MergedQuantity;
+	SourceItemInstance->Quantity -= MergedQuantity;
+	if (SourceItemInstance->Quantity <= 0)
+	{
+		ItemInstancesByUid.Remove(SourceUid);
+		(*SourceSlots)[SourceSlot.SlotIndex].Clear();
+		if (SourceSlot.Source == ETunaSweeperItemSlotSource::SelectedWeaponAttachment)
+		{
+			CommitSelectedWeaponAttachmentSlotsToSelectedItem();
+		}
+	}
+
+	if (SourceSlot.Source == ETunaSweeperItemSlotSource::Inventory &&
+		SourceSlots->IsValidIndex(SourceSlot.SlotIndex) &&
+		(*SourceSlots)[SourceSlot.SlotIndex].IsEmpty())
+	{
+		(*SourceSlots)[SourceSlot.SlotIndex].bSortLocked = false;
+	}
+
+	return true;
+}
+
+bool UTunaSweeperGameInstance::CanGrantQuestItemRewards(const TArray<FTunaSweeperItemStack>& ItemRewards) const
+{
 	int32 EmptyInventorySlots = 0;
 	for (const FTunaSweeperInventorySlot& InventorySlot : PlayerInventorySlots)
 	{
@@ -5566,7 +5990,76 @@ bool UTunaSweeperGameInstance::CanGrantQuestItemRewards(const TArray<FTunaSweepe
 		}
 	}
 
-	return EmptyInventorySlots >= RequiredInventorySlots;
+	TMap<int32, TArray<int32>> SimulatedStackQuantitiesByItemId;
+	for (const FTunaSweeperInventorySlot& InventorySlot : PlayerInventorySlots)
+	{
+		const FTunaSweeperItemInstance* ItemInstance = ItemInstancesByUid.Find(InventorySlot.ItemUid);
+		if (ItemInstance && DoesItemInstanceAllowStacking(*ItemInstance))
+		{
+			SimulatedStackQuantitiesByItemId
+				.FindOrAdd(ItemInstance->ItemId)
+				.Add(FMath::Max(0, ItemInstance->Quantity));
+		}
+	}
+
+	for (const FTunaSweeperItemStack& ItemReward : ItemRewards)
+	{
+		if (ItemReward.ItemId == INDEX_NONE || ItemReward.Quantity <= 0)
+		{
+			continue;
+		}
+
+		int32 MaxStackQuantity = 1;
+		UTunaSweeperItemDataSubsystem* ItemDataSubsystem = GetSubsystem<UTunaSweeperItemDataSubsystem>();
+		FTunaSweeperItemDefinition ItemDefinition;
+		if (ItemDataSubsystem && ItemDataSubsystem->TryGetItemDefinition(ItemReward.ItemId, ItemDefinition))
+		{
+			MaxStackQuantity = FMath::Max(1, ItemDataSubsystem->ResolveItemMaxStackQuantity(ItemDefinition));
+		}
+
+		int32 RemainingQuantity = ItemReward.Quantity;
+		if (MaxStackQuantity > 1)
+		{
+			TArray<int32>& SimulatedStackQuantities = SimulatedStackQuantitiesByItemId.FindOrAdd(ItemReward.ItemId);
+			for (int32& SimulatedQuantity : SimulatedStackQuantities)
+			{
+				if (RemainingQuantity <= 0)
+				{
+					break;
+				}
+
+				if (SimulatedQuantity >= MaxStackQuantity)
+				{
+					continue;
+				}
+
+				const int32 AddedQuantity = FMath::Min(RemainingQuantity, MaxStackQuantity - SimulatedQuantity);
+				SimulatedQuantity += AddedQuantity;
+				RemainingQuantity -= AddedQuantity;
+			}
+		}
+
+		const int32 RequiredInventorySlots = FMath::DivideAndRoundUp(RemainingQuantity, MaxStackQuantity);
+		if (RequiredInventorySlots > EmptyInventorySlots)
+		{
+			return false;
+		}
+		EmptyInventorySlots -= RequiredInventorySlots;
+
+		if (RequiredInventorySlots > 0 && MaxStackQuantity > 1)
+		{
+			TArray<int32>& SimulatedStackQuantities = SimulatedStackQuantitiesByItemId.FindOrAdd(ItemReward.ItemId);
+			int32 QuantityInNewStacks = RemainingQuantity;
+			for (int32 StackIndex = 0; StackIndex < RequiredInventorySlots; ++StackIndex)
+			{
+				const int32 NewStackQuantity = FMath::Min(QuantityInNewStacks, MaxStackQuantity);
+				SimulatedStackQuantities.Add(NewStackQuantity);
+				QuantityInNewStacks -= NewStackQuantity;
+			}
+		}
+	}
+
+	return true;
 }
 
 int32 UTunaSweeperGameInstance::CalculateWeaponMagazineCapacity(

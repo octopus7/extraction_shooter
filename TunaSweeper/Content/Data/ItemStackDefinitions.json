@@ -1,0 +1,10 @@
+{
+  "stack.default.weapon": 1,
+  "stack.default.equipment": 1,
+  "stack.default.attachment": 1,
+  "stack.default.ammo": 120,
+  "stack.default.consumable": 10,
+  "stack.default.material": 50,
+  "stack.default.blueprint": 1,
+  "stack.default.currency": 999
+}

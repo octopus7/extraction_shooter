@@ -84,6 +84,7 @@
 #include "Materials/MaterialExpressionOneMinus.h"
 #include "Materials/MaterialExpressionPanner.h"
 #include "Materials/MaterialExpressionScalarParameter.h"
+#include "Materials/MaterialExpressionSceneTexture.h"
 #include "Materials/MaterialExpressionSaturate.h"
 #include "Materials/MaterialExpressionSubtract.h"
 #include "Materials/MaterialExpressionTextureCoordinate.h"
@@ -197,7 +198,7 @@ namespace TunaSweeperEditorSetup
 	const FString ProjectileHitEffectAssetTaskId = TEXT("2026-05-28_CreateProjectileHitEffectAssetsV1");
 	const FString WeaponSpreadRecoilAssetTaskId = TEXT("2026-05-28_CreateWeaponSpreadRecoilAssetsV1");
 	const FString BaseballBatAssetTaskId = TEXT("2026-05-28_CreateBaseballBatStaticMeshAssetsV1");
-	const FString SandbagCoverAssetTaskId = TEXT("2026-05-29_CreateSandbagCoverAssetsV1");
+	const FString SandbagCoverAssetTaskId = TEXT("2026-05-29_CreateSandbagCoverAssetsV3");
 	const FString VoxelMeshAssetTaskId = TEXT("2026-05-19_CreateSharedVoxelMeshAssetsV1");
 	const FString LumberjackMeleeSwingArcAssetTaskId = TEXT("2026-05-20_CreateLumberjackMeleeSwingArcAssetsV2");
 	const FString LedExpressionMaterialTaskId = TEXT("2026-05-26_CreateLedExpressionMaterialV1");
@@ -6680,6 +6681,7 @@ namespace TunaSweeperEditorSetup
 
 		Material->Modify();
 		Material->GetExpressionCollection().Empty();
+		Material->MaterialDomain = MD_PostProcess;
 		Material->BlendMode = BLEND_Additive;
 		Material->SetShadingModel(MSM_Unlit);
 		Material->TwoSided = false;
@@ -6723,6 +6725,20 @@ namespace TunaSweeperEditorSetup
 		OpacityParameter->MaterialExpressionEditorY = 390;
 		Material->GetExpressionCollection().AddExpression(OpacityParameter);
 
+		UMaterialExpressionSceneTexture* SceneColorExpression = NewObject<UMaterialExpressionSceneTexture>(Material);
+		SceneColorExpression->Material = Material;
+		SceneColorExpression->SceneTextureId = PPI_PostProcessInput0;
+		SceneColorExpression->MaterialExpressionEditorX = -360;
+		SceneColorExpression->MaterialExpressionEditorY = 550;
+		Material->GetExpressionCollection().AddExpression(SceneColorExpression);
+
+		UMaterialExpressionSceneTexture* CustomStencilExpression = NewObject<UMaterialExpressionSceneTexture>(Material);
+		CustomStencilExpression->Material = Material;
+		CustomStencilExpression->SceneTextureId = PPI_CustomStencil;
+		CustomStencilExpression->MaterialExpressionEditorX = -360;
+		CustomStencilExpression->MaterialExpressionEditorY = 710;
+		Material->GetExpressionCollection().AddExpression(CustomStencilExpression);
+
 		UMaterialExpressionCustom* OutlineExpression = NewObject<UMaterialExpressionCustom>(Material);
 		OutlineExpression->Material = Material;
 		OutlineExpression->Description = TEXT("Sandbag custom stencil outline");
@@ -6730,25 +6746,23 @@ namespace TunaSweeperEditorSetup
 		OutlineExpression->MaterialExpressionEditorX = -40;
 		OutlineExpression->MaterialExpressionEditorY = 40;
 		OutlineExpression->Code = TEXT(
-			"float2 uv = GetDefaultSceneTextureUV(Parameters, 14);\n"
-			"float2 texel = View.ViewSizeAndInvSize.zw * max(1.0, OutlineThickness);\n"
+			"float thickness = max(1.0, OutlineThickness);\n"
 			"float targetRaw = StencilValue;\n"
 			"float targetNorm = StencilValue / 255.0;\n"
-			"float4 sceneColor = SceneTextureLookup(uv, 14, false);\n"
 			"#define MATCH_STENCIL(Value) max(1.0 - step(0.5, abs((Value) - targetRaw)), 1.0 - step(0.5 / 255.0, abs((Value) - targetNorm)))\n"
-			"float centerMask = MATCH_STENCIL(SceneTextureLookup(uv, 25, false).r);\n"
+			"float centerMask = MATCH_STENCIL(StencilCenter.r);\n"
 			"float neighborMask = 0.0;\n"
-			"neighborMask = max(neighborMask, MATCH_STENCIL(SceneTextureLookup(uv + float2(texel.x, 0.0), 25, false).r));\n"
-			"neighborMask = max(neighborMask, MATCH_STENCIL(SceneTextureLookup(uv + float2(-texel.x, 0.0), 25, false).r));\n"
-			"neighborMask = max(neighborMask, MATCH_STENCIL(SceneTextureLookup(uv + float2(0.0, texel.y), 25, false).r));\n"
-			"neighborMask = max(neighborMask, MATCH_STENCIL(SceneTextureLookup(uv + float2(0.0, -texel.y), 25, false).r));\n"
-			"neighborMask = max(neighborMask, MATCH_STENCIL(SceneTextureLookup(uv + float2(texel.x, texel.y), 25, false).r));\n"
-			"neighborMask = max(neighborMask, MATCH_STENCIL(SceneTextureLookup(uv + float2(-texel.x, texel.y), 25, false).r));\n"
-			"neighborMask = max(neighborMask, MATCH_STENCIL(SceneTextureLookup(uv + float2(texel.x, -texel.y), 25, false).r));\n"
-			"neighborMask = max(neighborMask, MATCH_STENCIL(SceneTextureLookup(uv + float2(-texel.x, -texel.y), 25, false).r));\n"
+			"neighborMask = max(neighborMask, MATCH_STENCIL(SceneTextureFetch(PPI_CustomStencil, float2(thickness, 0.0)).r));\n"
+			"neighborMask = max(neighborMask, MATCH_STENCIL(SceneTextureFetch(PPI_CustomStencil, float2(-thickness, 0.0)).r));\n"
+			"neighborMask = max(neighborMask, MATCH_STENCIL(SceneTextureFetch(PPI_CustomStencil, float2(0.0, thickness)).r));\n"
+			"neighborMask = max(neighborMask, MATCH_STENCIL(SceneTextureFetch(PPI_CustomStencil, float2(0.0, -thickness)).r));\n"
+			"neighborMask = max(neighborMask, MATCH_STENCIL(SceneTextureFetch(PPI_CustomStencil, float2(thickness, thickness)).r));\n"
+			"neighborMask = max(neighborMask, MATCH_STENCIL(SceneTextureFetch(PPI_CustomStencil, float2(-thickness, thickness)).r));\n"
+			"neighborMask = max(neighborMask, MATCH_STENCIL(SceneTextureFetch(PPI_CustomStencil, float2(thickness, -thickness)).r));\n"
+			"neighborMask = max(neighborMask, MATCH_STENCIL(SceneTextureFetch(PPI_CustomStencil, float2(-thickness, -thickness)).r));\n"
 			"float edgeMask = saturate(neighborMask - centerMask);\n"
 			"#undef MATCH_STENCIL\n"
-			"return lerp(sceneColor, float4(OutlineColor.rgb, 1.0), edgeMask * saturate(OutlineOpacity));\n");
+			"return lerp(SceneInputColor, float4(OutlineColor.rgb, 1.0), edgeMask * saturate(OutlineOpacity));\n");
 
 		FCustomInput OutlineColorInput;
 		OutlineColorInput.InputName = TEXT("OutlineColor");
@@ -6769,6 +6783,16 @@ namespace TunaSweeperEditorSetup
 		OpacityInput.InputName = TEXT("OutlineOpacity");
 		OpacityInput.Input.Connect(0, OpacityParameter);
 		OutlineExpression->Inputs.Add(OpacityInput);
+
+		FCustomInput SceneColorInput;
+		SceneColorInput.InputName = TEXT("SceneInputColor");
+		SceneColorInput.Input.Connect(0, SceneColorExpression);
+		OutlineExpression->Inputs.Add(SceneColorInput);
+
+		FCustomInput StencilCenterInput;
+		StencilCenterInput.InputName = TEXT("StencilCenter");
+		StencilCenterInput.Input.Connect(0, CustomStencilExpression);
+		OutlineExpression->Inputs.Add(StencilCenterInput);
 
 		Material->GetExpressionCollection().AddExpression(OutlineExpression);
 		MaterialEditorOnly->EmissiveColor.Connect(0, OutlineExpression);

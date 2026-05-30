@@ -1052,19 +1052,19 @@ void UStorageContainerWidget::EnsureStorageFilterControls()
 		return;
 	}
 
-	if (!StorageFilterTabsRow)
+	if (!StorageFilterTabsWidget)
 	{
-		StorageFilterTabsRow = Cast<UHorizontalBox>(WidgetTree->FindWidget(FName(TEXT("StorageFilterTabsRow"))));
+		StorageFilterTabsWidget = Cast<UHorizontalBox>(WidgetTree->FindWidget(FName(TEXT("StorageFilterTabsRow"))));
 	}
 
-	if (!StorageFilterTabsRow)
+	if (!StorageFilterTabsWidget)
 	{
-		StorageFilterTabsRow = WidgetTree->ConstructWidget<UHorizontalBox>(
+		StorageFilterTabsWidget = WidgetTree->ConstructWidget<UHorizontalBox>(
 			UHorizontalBox::StaticClass(),
 			TEXT("StorageFilterTabsRow"));
 	}
 
-	if (!StorageFilterTabsRow)
+	if (!StorageFilterTabsWidget)
 	{
 		return;
 	}
@@ -1133,13 +1133,13 @@ void UStorageContainerWidget::EnsureStorageFilterControls()
 
 	if (TargetParent)
 	{
-		UPanelWidget* CurrentParent = StorageFilterTabsRow->GetParent();
-		const int32 CurrentIndex = FindChildIndex(CurrentParent, StorageFilterTabsRow);
+		UPanelWidget* CurrentParent = StorageFilterTabsWidget->GetParent();
+		const int32 CurrentIndex = FindChildIndex(CurrentParent, StorageFilterTabsWidget);
 		if (CurrentParent != TargetParent || CurrentIndex != TargetIndex)
 		{
 			if (CurrentParent)
 			{
-				CurrentParent->RemoveChild(StorageFilterTabsRow);
+				CurrentParent->RemoveChild(StorageFilterTabsWidget);
 			}
 
 			if (ContainerHeaderRow && ContainerHeaderRow->GetParent() == TargetParent)
@@ -1152,16 +1152,16 @@ void UStorageContainerWidget::EnsureStorageFilterControls()
 			}
 
 			TargetIndex = FMath::Clamp(TargetIndex, 0, TargetParent->GetChildrenCount());
-			ConfigureFilterHeaderSlot(TargetParent->InsertChildAt(TargetIndex, StorageFilterTabsRow));
+			ConfigureFilterHeaderSlot(TargetParent->InsertChildAt(TargetIndex, StorageFilterTabsWidget));
 		}
 		else
 		{
-			ConfigureFilterHeaderSlot(StorageFilterTabsRow->Slot);
+			ConfigureFilterHeaderSlot(StorageFilterTabsWidget->Slot);
 		}
 	}
-	else if (!StorageFilterTabsRow->GetParent() && ContainerHeaderRow)
+	else if (!StorageFilterTabsWidget->GetParent() && ContainerHeaderRow)
 	{
-		UHorizontalBoxSlot* TabsSlot = ContainerHeaderRow->AddChildToHorizontalBox(StorageFilterTabsRow);
+		UHorizontalBoxSlot* TabsSlot = ContainerHeaderRow->AddChildToHorizontalBox(StorageFilterTabsWidget);
 		if (TabsSlot)
 		{
 			TabsSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
@@ -1192,19 +1192,19 @@ void UStorageContainerWidget::EnsureStorageFilterControls()
 		AddStorageFilterButton(ETunaSweeperStorageFilter::Other);
 	}
 
-	StorageFilterTabsRow->SetVisibility(
+	StorageFilterTabsWidget->SetVisibility(
 		SlotSource == ETunaSweeperItemSlotSource::Storage ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
 }
 
 void UStorageContainerWidget::RefreshStorageFilterControls()
 {
-	if (!StorageFilterTabsRow)
+	if (!StorageFilterTabsWidget)
 	{
 		return;
 	}
 
 	const bool bShowStorageFilters = SlotSource == ETunaSweeperItemSlotSource::Storage;
-	StorageFilterTabsRow->SetVisibility(bShowStorageFilters ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
+	StorageFilterTabsWidget->SetVisibility(bShowStorageFilters ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
 	if (!bShowStorageFilters)
 	{
 		return;
@@ -1256,7 +1256,7 @@ void UStorageContainerWidget::SetStorageFilter(ETunaSweeperStorageFilter NewFilt
 
 void UStorageContainerWidget::AddStorageFilterButton(ETunaSweeperStorageFilter Filter)
 {
-	if (!WidgetTree || !StorageFilterTabsRow)
+	if (!WidgetTree || !StorageFilterTabsWidget)
 	{
 		return;
 	}
@@ -1357,7 +1357,7 @@ void UStorageContainerWidget::AddStorageFilterButton(ETunaSweeperStorageFilter F
 		break;
 	}
 
-	UHorizontalBoxSlot* ButtonSlot = StorageFilterTabsRow->AddChildToHorizontalBox(Button);
+	UHorizontalBoxSlot* ButtonSlot = StorageFilterTabsWidget->AddChildToHorizontalBox(Button);
 	if (ButtonSlot)
 	{
 		ButtonSlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
