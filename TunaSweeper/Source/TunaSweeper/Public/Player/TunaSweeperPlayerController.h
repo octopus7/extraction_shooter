@@ -94,6 +94,8 @@ public:
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Dialogue")
 	bool IsDialogueSequenceActive() const { return bDialogueSequenceActive; }
 
+	bool TryGetCursorWorldPointOnPlane(float PlaneZ, FVector& OutWorldPoint) const;
+
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Dialogue")
 	bool StartDialogueSequence(const TArray<FTunaSweeperDialogueLine>& DialogueLines, FName CompletionFlag);
 

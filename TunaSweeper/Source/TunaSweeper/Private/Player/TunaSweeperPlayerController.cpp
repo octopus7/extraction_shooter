@@ -1942,6 +1942,11 @@ bool ATunaSweeperPlayerController::TryCommitHousingPlacement()
 	return false;
 }
 
+bool ATunaSweeperPlayerController::TryGetCursorWorldPointOnPlane(float PlaneZ, FVector& OutWorldPoint) const
+{
+	return GetMouseAimPointOnPlane(PlaneZ, FVector2D::ZeroVector, OutWorldPoint);
+}
+
 bool ATunaSweeperPlayerController::GetMouseAimPointOnPlane(
 	float PlaneZ,
 	const FVector2D& ScreenOffset,

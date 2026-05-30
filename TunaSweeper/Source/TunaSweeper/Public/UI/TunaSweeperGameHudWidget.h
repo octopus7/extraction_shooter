@@ -220,6 +220,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Transitions", meta = (DisplayName = "Quick Slot Bar Direction Override"))
 	ETunaSweeperHudTransitionEdge QuickSlotBarTransitionEdge = ETunaSweeperHudTransitionEdge::Bottom;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Transitions", meta = (DisplayName = "Cursor Distance Direction Override"))
+	ETunaSweeperHudTransitionEdge CursorDistanceTransitionEdge = ETunaSweeperHudTransitionEdge::Right;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Crosshair", meta = (ClampMin = "1.0", UIMin = "1.0"))
 	float ShotgunCrosshairRadius = 44.0f;
 
@@ -294,6 +297,7 @@ private:
 	void CacheHudTransitionBaseline(UWidget* Widget);
 	void CloseLootContainerPanelIfOpen();
 	void EnsureExtractionProgressWidget();
+	void EnsureCursorDistanceWidget();
 	void EnsureInventoryQuickSlotPanelWidget();
 	void EnsureHousingPanelWidget();
 	void EnsureMapPanelWidget();
@@ -309,6 +313,7 @@ private:
 	void RefreshReloadWidgets();
 	void RefreshDialogueHudVisibility();
 	void RefreshExtractionProgressWidget();
+	void RefreshCursorDistanceWidget();
 	void ForceCollapseHudWidget(UWidget* Widget);
 	void EnsureQuestTrackerWidgets();
 	void RefreshQuestTrackerFromQuestSubsystem();
@@ -373,6 +378,12 @@ private:
 	TObjectPtr<UTunaSweeperExtractionProgressWidget> ExtractionProgressWidget;
 
 	UPROPERTY(Transient)
+	TObjectPtr<UBorder> CursorDistancePanel;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTextBlock> CursorDistanceText;
+
+	UPROPERTY(Transient)
 	TArray<TObjectPtr<UTunaSweeperItemThumbnailSlotWidget>> InventoryQuickSlotWidgets;
 
 	UPROPERTY(Transient)
@@ -401,6 +412,7 @@ private:
 	float ExtractionProgressRequiredSeconds = 4.0f;
 	bool bExtractionProgressActive = false;
 	float PrecisionCrosshairAimAlpha = 0.0f;
+	int32 LastCursorDistanceMeters = INDEX_NONE;
 	TArray<FDamageNumberPopup> DamageNumberPopups;
 	TArray<FHudWidgetTransition> ActiveHudTransitions;
 	TMap<TWeakObjectPtr<UWidget>, FWidgetTransform> HudTransitionBaseTransforms;

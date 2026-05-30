@@ -52,6 +52,9 @@ namespace
 	constexpr float InventoryQuickSlotPanelHeight = 168.0f;
 	constexpr float InventoryQuickSlotTileSize = 112.0f;
 	constexpr float InventoryQuickSlotTileScale = 1.12f;
+	constexpr float CursorDistanceRightOffset = 34.0f;
+	constexpr float CursorDistanceBottomOffset = 40.0f;
+	constexpr float CursorDistanceMinTextWidth = 42.0f;
 	constexpr float HudWidgetTransitionDurationSeconds = 0.18f;
 	constexpr float HudWidgetTransitionDistancePadding = 36.0f;
 	constexpr float HudWidgetTransitionFallbackHorizontalDistance = 420.0f;
@@ -266,6 +269,7 @@ void UTunaSweeperGameHudWidget::NativeConstruct()
 
 	EnsureQuestTrackerWidgets();
 	EnsureExtractionProgressWidget();
+	EnsureCursorDistanceWidget();
 	EnsureInventoryQuickSlotPanelWidget();
 	EnsureHousingPanelWidget();
 	EnsureMapPanelWidget();
@@ -282,6 +286,7 @@ void UTunaSweeperGameHudWidget::NativeConstruct()
 	RefreshInventoryQuickSlotPanel();
 	RefreshReloadWidgets();
 	RefreshDialogueHudVisibility();
+	RefreshCursorDistanceWidget();
 }
 
 void UTunaSweeperGameHudWidget::NativeDestruct()
@@ -322,6 +327,7 @@ void UTunaSweeperGameHudWidget::NativeTick(const FGeometry& MyGeometry, float In
 	RefreshReloadWidgets();
 	RefreshDialogueHudVisibility();
 	RefreshExtractionProgressWidget();
+	RefreshCursorDistanceWidget();
 	TickHudTransitions(InDeltaTime);
 	UpdateCrosshairState(InDeltaTime);
 	TickDamageNumberPopups(InDeltaTime);
@@ -1556,6 +1562,7 @@ void UTunaSweeperGameHudWidget::ApplyHudModeVisibility()
 	}
 
 	RefreshExtractionProgressWidget();
+	RefreshCursorDistanceWidget();
 }
 
 void UTunaSweeperGameHudWidget::CloseLootContainerPanelIfOpen()
@@ -1632,6 +1639,53 @@ void UTunaSweeperGameHudWidget::EnsureExtractionProgressWidget()
 			FMath::Max(1.0, ExtractionProgressWidgetSize.X),
 			FMath::Max(1.0, ExtractionProgressWidgetSize.Y)));
 		CanvasSlot->SetZOrder(45);
+	}
+}
+
+void UTunaSweeperGameHudWidget::EnsureCursorDistanceWidget()
+{
+	if (CursorDistancePanel || !WidgetTree)
+	{
+		return;
+	}
+
+	UCanvasPanel* RootCanvas = Cast<UCanvasPanel>(WidgetTree->RootWidget);
+	if (!RootCanvas)
+	{
+		return;
+	}
+
+	CursorDistancePanel = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("CursorDistancePanel"));
+	CursorDistanceText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("CursorDistanceText"));
+	if (!CursorDistancePanel || !CursorDistanceText)
+	{
+		return;
+	}
+
+	CursorDistancePanel->SetVisibility(ESlateVisibility::Collapsed);
+	CursorDistancePanel->SetPadding(FMargin(12.0f, 5.0f, 12.0f, 5.0f));
+	CursorDistancePanel->SetBrush(MakeHudRoundedBoxBrush(
+		FVector2D(64.0f, 30.0f),
+		FLinearColor(0.0f, 0.0f, 0.0f, 0.70f),
+		8.0f,
+		FLinearColor(0.0f, 0.0f, 0.0f, 0.0f),
+		0.0f));
+	CursorDistancePanel->SetContent(CursorDistanceText);
+
+	CursorDistanceText->SetText(FText::FromString(TEXT("0M")));
+	CursorDistanceText->SetColorAndOpacity(FSlateColor(FLinearColor::White));
+	CursorDistanceText->SetJustification(ETextJustify::Right);
+	CursorDistanceText->SetMinDesiredWidth(CursorDistanceMinTextWidth);
+	TunaSweeperUIFont::ApplyFont(CursorDistanceText, 18.0f, ETunaSweeperUIFontWeight::Bold);
+
+	UCanvasPanelSlot* CanvasSlot = RootCanvas->AddChildToCanvas(CursorDistancePanel);
+	if (CanvasSlot)
+	{
+		CanvasSlot->SetAnchors(FAnchors(1.0f, 1.0f, 1.0f, 1.0f));
+		CanvasSlot->SetAlignment(FVector2D(1.0f, 1.0f));
+		CanvasSlot->SetPosition(FVector2D(-CursorDistanceRightOffset, -CursorDistanceBottomOffset));
+		CanvasSlot->SetAutoSize(true);
+		CanvasSlot->SetZOrder(8);
 	}
 }
 
@@ -2427,6 +2481,60 @@ void UTunaSweeperGameHudWidget::RefreshExtractionProgressWidget()
 		ExtractionProgressCurrentSeconds,
 		ExtractionProgressRequiredSeconds,
 		bShouldShowProgress);
+}
+
+void UTunaSweeperGameHudWidget::RefreshCursorDistanceWidget()
+{
+	EnsureCursorDistanceWidget();
+	if (!CursorDistancePanel)
+	{
+		return;
+	}
+
+	auto HideDistancePanel = [this]()
+	{
+		LastCursorDistanceMeters = INDEX_NONE;
+		SetTransitionedWidgetVisibility(
+			CursorDistancePanel,
+			ESlateVisibility::Collapsed,
+			CursorDistanceTransitionEdge);
+	};
+
+	if (ActiveHudMode != ETunaSweeperHudMode::None || IsGameplayBottomHudSuppressed())
+	{
+		HideDistancePanel();
+		return;
+	}
+
+	ATunaSweeperPlayerController* TunaPlayerController = Cast<ATunaSweeperPlayerController>(GetOwningPlayer());
+	ATunaSweeperTopDownCharacter* TunaCharacter = TunaPlayerController
+		? Cast<ATunaSweeperTopDownCharacter>(TunaPlayerController->GetPawn())
+		: nullptr;
+	if (!TunaPlayerController || !TunaCharacter || TunaCharacter->IsDead())
+	{
+		HideDistancePanel();
+		return;
+	}
+
+	FVector CursorWorldPoint = FVector::ZeroVector;
+	if (!TunaPlayerController->TryGetCursorWorldPointOnPlane(TunaCharacter->GetActorLocation().Z, CursorWorldPoint))
+	{
+		HideDistancePanel();
+		return;
+	}
+
+	const float DistanceMeters = FVector::Dist2D(TunaCharacter->GetActorLocation(), CursorWorldPoint) / 100.0f;
+	const int32 RoundedDistanceMeters = FMath::Max(0, FMath::RoundToInt(DistanceMeters));
+	if (CursorDistanceText && LastCursorDistanceMeters != RoundedDistanceMeters)
+	{
+		CursorDistanceText->SetText(FText::FromString(FString::Printf(TEXT("%dM"), RoundedDistanceMeters)));
+		LastCursorDistanceMeters = RoundedDistanceMeters;
+	}
+
+	SetTransitionedWidgetVisibility(
+		CursorDistancePanel,
+		ESlateVisibility::HitTestInvisible,
+		CursorDistanceTransitionEdge);
 }
 
 void UTunaSweeperGameHudWidget::ForceCollapseHudWidget(UWidget* Widget)
