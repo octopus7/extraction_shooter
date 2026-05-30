@@ -27,6 +27,7 @@ namespace
 	constexpr float QuestListWidth = 380.0f;
 	constexpr float QuestListPanelPadding = 12.0f;
 	constexpr float QuestListEntryWidth = QuestListWidth - QuestListPanelPadding * 2.0f;
+	constexpr float QuestListEntrySpacing = 6.0f;
 
 	FSlateBrush MakeQuestBoxBrush(
 		const FVector2D& ImageSize,
@@ -424,8 +425,12 @@ bool UTunaSweeperQuestWidget::CacheBuiltQuestWidgets()
 	DetailStack = Cast<UVerticalBox>(WidgetTree->FindWidget(TEXT("QuestDetailStack")));
 	AvailableTabButton = Cast<UButton>(WidgetTree->FindWidget(TEXT("QuestAvailableTabButton")));
 	AvailableTabText = Cast<UTextBlock>(WidgetTree->FindWidget(TEXT("QuestAvailableTabText")));
+	AvailableTabCountBadge = Cast<UBorder>(WidgetTree->FindWidget(TEXT("QuestAvailableTabCountBadge")));
+	AvailableTabCountText = Cast<UTextBlock>(WidgetTree->FindWidget(TEXT("QuestAvailableTabCountText")));
 	InProgressTabButton = Cast<UButton>(WidgetTree->FindWidget(TEXT("QuestInProgressTabButton")));
 	InProgressTabText = Cast<UTextBlock>(WidgetTree->FindWidget(TEXT("QuestInProgressTabText")));
+	InProgressTabCountBadge = Cast<UBorder>(WidgetTree->FindWidget(TEXT("QuestInProgressTabCountBadge")));
+	InProgressTabCountText = Cast<UTextBlock>(WidgetTree->FindWidget(TEXT("QuestInProgressTabCountText")));
 	CompletedTabButton = Cast<UButton>(WidgetTree->FindWidget(TEXT("QuestCompletedTabButton")));
 	CompletedTabText = Cast<UTextBlock>(WidgetTree->FindWidget(TEXT("QuestCompletedTabText")));
 	DetailTitleText = Cast<UTextBlock>(WidgetTree->FindWidget(TEXT("QuestDetailTitleText")));
@@ -445,6 +450,8 @@ bool UTunaSweeperQuestWidget::CacheBuiltQuestWidgets()
 		DetailStack &&
 		InProgressTabButton &&
 		InProgressTabText &&
+		InProgressTabCountBadge &&
+		InProgressTabCountText &&
 		CompletedTabButton &&
 		CompletedTabText &&
 		DetailTitleText &&
@@ -457,7 +464,7 @@ bool UTunaSweeperQuestWidget::CacheBuiltQuestWidgets()
 		DetailEmptyText &&
 		PrimaryButton &&
 		PrimaryButtonText &&
-		(!bShowAvailableTab || (AvailableTabButton && AvailableTabText));
+		(!bShowAvailableTab || (AvailableTabButton && AvailableTabText && AvailableTabCountBadge && AvailableTabCountText));
 }
 
 void UTunaSweeperQuestWidget::BuildQuestWidget()
@@ -502,10 +509,17 @@ void UTunaSweeperQuestWidget::BuildQuestWidget()
 	UTextBlock* ListTitleText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("QuestListTitleText"));
 	UHorizontalBox* TabRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("QuestTabRow"));
 	AvailableTabButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("QuestAvailableTabButton"));
+	UOverlay* AvailableTabContent = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), TEXT("QuestAvailableTabContent"));
 	AvailableTabText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("QuestAvailableTabText"));
+	AvailableTabCountBadge = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("QuestAvailableTabCountBadge"));
+	AvailableTabCountText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("QuestAvailableTabCountText"));
 	InProgressTabButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("QuestInProgressTabButton"));
+	UOverlay* InProgressTabContent = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), TEXT("QuestInProgressTabContent"));
 	InProgressTabText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("QuestInProgressTabText"));
+	InProgressTabCountBadge = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("QuestInProgressTabCountBadge"));
+	InProgressTabCountText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("QuestInProgressTabCountText"));
 	CompletedTabButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("QuestCompletedTabButton"));
+	UOverlay* CompletedTabContent = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), TEXT("QuestCompletedTabContent"));
 	CompletedTabText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("QuestCompletedTabText"));
 	QuestListScrollBox = WidgetTree->ConstructWidget<UScrollBox>(UScrollBox::StaticClass(), TEXT("QuestListScrollBox"));
 
@@ -533,10 +547,17 @@ void UTunaSweeperQuestWidget::BuildQuestWidget()
 		!ListTitleText ||
 		!TabRow ||
 		!AvailableTabButton ||
+		!AvailableTabContent ||
 		!AvailableTabText ||
+		!AvailableTabCountBadge ||
+		!AvailableTabCountText ||
 		!InProgressTabButton ||
+		!InProgressTabContent ||
 		!InProgressTabText ||
+		!InProgressTabCountBadge ||
+		!InProgressTabCountText ||
 		!CompletedTabButton ||
+		!CompletedTabContent ||
 		!CompletedTabText ||
 		!QuestListScrollBox)
 	{
@@ -693,12 +714,54 @@ void UTunaSweeperQuestWidget::BuildQuestWidget()
 		ListTitleSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 10.0f));
 	}
 
-	auto ConfigureTab = [this, TabRow](UButton* Button, UTextBlock* Text)
+	auto ConfigureTab = [this, TabRow](
+		UButton* Button,
+		UOverlay* Content,
+		UTextBlock* Text,
+		UBorder* CountBadge,
+		UTextBlock* CountText)
 	{
-		Button->SetContent(Text);
+		Button->SetContent(Content);
+		if (UButtonSlot* ButtonSlot = Cast<UButtonSlot>(Content->Slot))
+		{
+			ButtonSlot->SetHorizontalAlignment(HAlign_Fill);
+			ButtonSlot->SetVerticalAlignment(VAlign_Center);
+		}
+
 		Text->SetJustification(ETextJustify::Center);
 		Text->SetAutoWrapText(false);
 		TunaSweeperUIFont::ApplyFont(Text, 13, ETunaSweeperUIFontWeight::Bold);
+		if (UOverlaySlot* TextSlot = Content->AddChildToOverlay(Text))
+		{
+			TextSlot->SetHorizontalAlignment(HAlign_Fill);
+			TextSlot->SetVerticalAlignment(VAlign_Center);
+		}
+
+		if (CountBadge && CountText)
+		{
+			CountBadge->SetPadding(FMargin(5.0f, 1.0f));
+			CountBadge->SetBrush(MakeQuestBoxBrush(
+				FVector2D(22.0f, 15.0f),
+				FLinearColor(0.06f, 0.08f, 0.085f, 0.86f),
+				6.0f,
+				FLinearColor(0.68f, 0.78f, 0.80f, 0.70f),
+				1.0f));
+			CountBadge->SetVisibility(ESlateVisibility::HitTestInvisible);
+			CountBadge->SetContent(CountText);
+
+			CountText->SetJustification(ETextJustify::Center);
+			CountText->SetAutoWrapText(false);
+			CountText->SetColorAndOpacity(FSlateColor(FLinearColor(0.90f, 0.96f, 0.96f, 1.0f)));
+			TunaSweeperUIFont::ApplyFont(CountText, 11, ETunaSweeperUIFontWeight::Bold);
+
+			if (UOverlaySlot* BadgeSlot = Content->AddChildToOverlay(CountBadge))
+			{
+				BadgeSlot->SetHorizontalAlignment(HAlign_Left);
+				BadgeSlot->SetVerticalAlignment(VAlign_Center);
+				BadgeSlot->SetPadding(FMargin(6.0f, 0.0f, 0.0f, 0.0f));
+			}
+		}
+
 		if (UHorizontalBoxSlot* TabSlot = TabRow->AddChildToHorizontalBox(Button))
 		{
 			TabSlot->SetSize(MakeQuestSlateChildSize(ESlateSizeRule::Fill));
@@ -708,14 +771,14 @@ void UTunaSweeperQuestWidget::BuildQuestWidget()
 
 	if (bShowAvailableTab)
 	{
-		ConfigureTab(AvailableTabButton, AvailableTabText);
+		ConfigureTab(AvailableTabButton, AvailableTabContent, AvailableTabText, AvailableTabCountBadge, AvailableTabCountText);
 	}
 	else
 	{
 		AvailableTabButton->SetVisibility(ESlateVisibility::Collapsed);
 	}
-	ConfigureTab(InProgressTabButton, InProgressTabText);
-	ConfigureTab(CompletedTabButton, CompletedTabText);
+	ConfigureTab(InProgressTabButton, InProgressTabContent, InProgressTabText, InProgressTabCountBadge, InProgressTabCountText);
+	ConfigureTab(CompletedTabButton, CompletedTabContent, CompletedTabText, nullptr, nullptr);
 	if (UVerticalBoxSlot* TabRowSlot = ListStack->AddChildToVerticalBox(TabRow))
 	{
 		TabRowSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 10.0f));
@@ -775,6 +838,7 @@ void UTunaSweeperQuestWidget::RebuildQuestList(const TArray<FTunaSweeperQuestDef
 		if (UScrollBoxSlot* EntrySlot = Cast<UScrollBoxSlot>(QuestListScrollBox->AddChild(EntryWidget)))
 		{
 			EntrySlot->SetHorizontalAlignment(HAlign_Fill);
+			EntrySlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, QuestListEntrySpacing));
 		}
 	}
 }
@@ -849,20 +913,66 @@ void UTunaSweeperQuestWidget::HandleQuestProgressChanged()
 	RefreshQuestView();
 }
 
+int32 UTunaSweeperQuestWidget::CountVisibleQuestsForFilter(EQuestListFilter Filter) const
+{
+	const UTunaSweeperQuestSubsystem* QuestSubsystem = GetGameInstance()
+		? GetGameInstance()->GetSubsystem<UTunaSweeperQuestSubsystem>()
+		: nullptr;
+	if (!QuestSubsystem)
+	{
+		return 0;
+	}
+
+	TArray<FTunaSweeperQuestDefinition> AllDefinitions;
+	if (!QuestSubsystem->GetAllQuestDefinitions(AllDefinitions))
+	{
+		return 0;
+	}
+
+	int32 Count = 0;
+	for (const FTunaSweeperQuestDefinition& QuestDefinition : AllDefinitions)
+	{
+		const ETunaSweeperQuestState State = QuestSubsystem->GetQuestState(QuestDefinition.QuestId);
+		switch (Filter)
+		{
+		case EQuestListFilter::Available:
+			if (bShowAvailableTab &&
+				State == ETunaSweeperQuestState::Available &&
+				QuestSubsystem->CanAcceptQuest(QuestDefinition.QuestId))
+			{
+				++Count;
+			}
+			break;
+		case EQuestListFilter::InProgress:
+			if (State == ETunaSweeperQuestState::Accepted || State == ETunaSweeperQuestState::RewardAvailable)
+			{
+				++Count;
+			}
+			break;
+		default:
+			break;
+		}
+	}
+
+	return Count;
+}
+
 void UTunaSweeperQuestWidget::UpdateTabButtonStates()
 {
 	struct FTabInfo
 	{
 		UButton* Button = nullptr;
 		UTextBlock* Text = nullptr;
+		UBorder* CountBadge = nullptr;
+		UTextBlock* CountText = nullptr;
 		EQuestListFilter Filter = EQuestListFilter::Available;
 		FName TextKey = NAME_None;
 	};
 
 	const FTabInfo Tabs[] = {
-		{ AvailableTabButton, AvailableTabText, EQuestListFilter::Available, FName(TEXT("quest.ui.tab.available")) },
-		{ InProgressTabButton, InProgressTabText, EQuestListFilter::InProgress, FName(TEXT("quest.ui.tab.in_progress")) },
-		{ CompletedTabButton, CompletedTabText, EQuestListFilter::RewardCompleted, FName(TEXT("quest.ui.tab.completed")) }
+		{ AvailableTabButton, AvailableTabText, AvailableTabCountBadge, AvailableTabCountText, EQuestListFilter::Available, FName(TEXT("quest.ui.tab.available")) },
+		{ InProgressTabButton, InProgressTabText, InProgressTabCountBadge, InProgressTabCountText, EQuestListFilter::InProgress, FName(TEXT("quest.ui.tab.in_progress")) },
+		{ CompletedTabButton, CompletedTabText, nullptr, nullptr, EQuestListFilter::RewardCompleted, FName(TEXT("quest.ui.tab.completed")) }
 	};
 
 	for (const FTabInfo& Tab : Tabs)
@@ -872,6 +982,10 @@ void UTunaSweeperQuestWidget::UpdateTabButtonStates()
 			if (Tab.Button)
 			{
 				Tab.Button->SetVisibility(ESlateVisibility::Collapsed);
+			}
+			if (Tab.CountBadge)
+			{
+				Tab.CountBadge->SetVisibility(ESlateVisibility::Collapsed);
 			}
 			continue;
 		}
@@ -892,6 +1006,12 @@ void UTunaSweeperQuestWidget::UpdateTabButtonStates()
 				bActive
 					? FLinearColor(0.03f, 0.05f, 0.06f, 1.0f)
 					: FLinearColor(0.76f, 0.82f, 0.84f, 1.0f)));
+		}
+		if (Tab.CountBadge && Tab.CountText)
+		{
+			Tab.CountBadge->SetVisibility(ESlateVisibility::HitTestInvisible);
+			Tab.CountText->SetText(FText::AsNumber(CountVisibleQuestsForFilter(Tab.Filter)));
+			Tab.CountText->SetColorAndOpacity(FSlateColor(FLinearColor(0.90f, 0.96f, 0.96f, 1.0f)));
 		}
 	}
 }

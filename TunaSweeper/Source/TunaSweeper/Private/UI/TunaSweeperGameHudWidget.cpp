@@ -267,7 +267,6 @@ void UTunaSweeperGameHudWidget::NativeConstruct()
 		TopStatusReserveWidget->OnHudModeSelected.AddDynamic(this, &UTunaSweeperGameHudWidget::HandleHudModeTabSelected);
 	}
 
-	EnsureQuestTrackerWidgets();
 	EnsureExtractionProgressWidget();
 	EnsureCursorDistanceWidget();
 	EnsureInventoryQuickSlotPanelWidget();
@@ -281,7 +280,6 @@ void UTunaSweeperGameHudWidget::NativeConstruct()
 	SetHudMode(ETunaSweeperHudMode::None);
 	SetItemInfoPanelVisible(false);
 	RefreshBottomStatusFromGameInstance();
-	RefreshQuestTrackerFromQuestSubsystem();
 	RefreshQuickSlotsFromGameState();
 	RefreshInventoryQuickSlotPanel();
 	RefreshReloadWidgets();
@@ -321,7 +319,6 @@ void UTunaSweeperGameHudWidget::NativeTick(const FGeometry& MyGeometry, float In
 	Super::NativeTick(MyGeometry, InDeltaTime);
 
 	RefreshBottomStatusFromGameInstance();
-	RefreshQuestTrackerFromQuestSubsystem();
 	RefreshQuickSlotsFromGameState();
 	RefreshInventoryQuickSlotPanel();
 	RefreshReloadWidgets();
@@ -2558,142 +2555,6 @@ void UTunaSweeperGameHudWidget::ForceCollapseHudWidget(UWidget* Widget)
 	Widget->SetVisibility(ESlateVisibility::Collapsed);
 }
 
-void UTunaSweeperGameHudWidget::EnsureQuestTrackerWidgets()
-{
-	if (!WidgetTree)
-	{
-		return;
-	}
-
-	if (!QuestTrackerRoot)
-	{
-		QuestTrackerRoot = Cast<UBorder>(WidgetTree->FindWidget(FName(TEXT("QuestTrackerRoot"))));
-		QuestTrackerTitleText = Cast<UTextBlock>(WidgetTree->FindWidget(FName(TEXT("QuestTrackerTitleText"))));
-		QuestTrackerObjectiveText = Cast<UTextBlock>(WidgetTree->FindWidget(FName(TEXT("QuestTrackerObjectiveText"))));
-	}
-
-	if (QuestTrackerRoot)
-	{
-		return;
-	}
-
-	UCanvasPanel* RootCanvas = Cast<UCanvasPanel>(WidgetTree->RootWidget);
-	if (!RootCanvas)
-	{
-		return;
-	}
-
-	QuestTrackerRoot = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("QuestTrackerRoot"));
-	UVerticalBox* TrackerStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("QuestTrackerStack"));
-	QuestTrackerTitleText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("QuestTrackerTitleText"));
-	QuestTrackerObjectiveText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("QuestTrackerObjectiveText"));
-	if (!QuestTrackerRoot || !TrackerStack || !QuestTrackerTitleText || !QuestTrackerObjectiveText)
-	{
-		return;
-	}
-
-	QuestTrackerRoot->SetPadding(FMargin(14.0f, 10.0f));
-	QuestTrackerRoot->SetBrushColor(FLinearColor(0.02f, 0.025f, 0.03f, 0.78f));
-	QuestTrackerRoot->SetContent(TrackerStack);
-
-	QuestTrackerTitleText->SetColorAndOpacity(FSlateColor(FLinearColor(0.95f, 0.98f, 1.0f, 1.0f)));
-	QuestTrackerTitleText->SetAutoWrapText(false);
-	TunaSweeperUIFont::ApplyFont(QuestTrackerTitleText, 18, ETunaSweeperUIFontWeight::Bold);
-
-	QuestTrackerObjectiveText->SetColorAndOpacity(FSlateColor(FLinearColor(0.78f, 0.86f, 0.90f, 1.0f)));
-	QuestTrackerObjectiveText->SetAutoWrapText(true);
-	QuestTrackerObjectiveText->SetWrapTextAt(320.0f);
-	TunaSweeperUIFont::ApplyFont(QuestTrackerObjectiveText, 15);
-
-	UVerticalBoxSlot* TitleSlot = TrackerStack->AddChildToVerticalBox(QuestTrackerTitleText);
-	if (TitleSlot)
-	{
-		TitleSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 6.0f));
-	}
-	TrackerStack->AddChildToVerticalBox(QuestTrackerObjectiveText);
-
-	UCanvasPanelSlot* CanvasSlot = RootCanvas->AddChildToCanvas(QuestTrackerRoot);
-	if (CanvasSlot)
-	{
-		CanvasSlot->SetAnchors(FAnchors(0.0f, 0.0f));
-		CanvasSlot->SetAlignment(FVector2D(0.0f, 0.0f));
-		CanvasSlot->SetPosition(FVector2D(24.0f, 104.0f));
-		CanvasSlot->SetSize(FVector2D(360.0f, 132.0f));
-		CanvasSlot->SetZOrder(5);
-	}
-}
-
-void UTunaSweeperGameHudWidget::RefreshQuestTrackerFromQuestSubsystem()
-{
-	EnsureQuestTrackerWidgets();
-	if (!QuestTrackerRoot)
-	{
-		return;
-	}
-
-	UTunaSweeperQuestSubsystem* QuestSubsystem = GetGameInstance()
-		? GetGameInstance()->GetSubsystem<UTunaSweeperQuestSubsystem>()
-		: nullptr;
-	if (!QuestSubsystem || QuestSubsystem->GetTrackedQuestId().IsNone())
-	{
-		SetTransitionedWidgetVisibility(QuestTrackerRoot, ESlateVisibility::Collapsed, QuestTrackerTransitionEdge);
-		return;
-	}
-
-	FTunaSweeperQuestDefinition QuestDefinition;
-	const FName TrackedQuestId = QuestSubsystem->GetTrackedQuestId();
-	if (!QuestSubsystem->TryGetQuestDefinition(TrackedQuestId, QuestDefinition))
-	{
-		SetTransitionedWidgetVisibility(QuestTrackerRoot, ESlateVisibility::Collapsed, QuestTrackerTransitionEdge);
-		return;
-	}
-
-	TArray<FTunaSweeperObjectiveProgressView> ObjectiveProgress;
-	if (!QuestSubsystem->GetQuestObjectiveProgress(TrackedQuestId, ObjectiveProgress))
-	{
-		SetTransitionedWidgetVisibility(QuestTrackerRoot, ESlateVisibility::Collapsed, QuestTrackerTransitionEdge);
-		return;
-	}
-
-	if (QuestTrackerTitleText)
-	{
-		QuestTrackerTitleText->SetText(QuestDefinition.Title);
-	}
-
-	if (QuestTrackerObjectiveText)
-	{
-		const ETunaSweeperItemTextLanguage Language = GetGameInstance<UTunaSweeperGameInstance>()
-			? GetGameInstance<UTunaSweeperGameInstance>()->GetCurrentTextLanguage()
-			: ETunaSweeperItemTextLanguage::English;
-		TArray<FString> ObjectiveLines;
-		for (const FTunaSweeperObjectiveProgressView& Progress : ObjectiveProgress)
-		{
-			ObjectiveLines.Add(FString::Printf(
-				TEXT("%s (%d/%d)"),
-				*Progress.Text.ToString(),
-				FMath::Clamp(Progress.CurrentCount, 0, FMath::Max(1, Progress.RequiredCount)),
-				FMath::Max(1, Progress.RequiredCount)));
-		}
-
-		if (QuestSubsystem->GetQuestState(TrackedQuestId) == ETunaSweeperQuestState::RewardAvailable)
-		{
-			FText RewardAvailableText;
-			if (!QuestSubsystem->TryGetQuestTextByKey(
-				FName(TEXT("quest.ui.tracker.reward_available")),
-				Language,
-				RewardAvailableText))
-			{
-				RewardAvailableText = FText::FromString(TEXT("\uBCF4\uC0C1 \uC218\uB839 \uAC00\uB2A5"));
-			}
-			ObjectiveLines.Add(RewardAvailableText.ToString());
-		}
-
-		QuestTrackerObjectiveText->SetText(FText::FromString(FString::Join(ObjectiveLines, LINE_TERMINATOR)));
-	}
-
-	SetTransitionedWidgetVisibility(QuestTrackerRoot, ESlateVisibility::HitTestInvisible, QuestTrackerTransitionEdge);
-}
-
 void UTunaSweeperGameHudWidget::BuildAmmoSelectorOptionTexts(TArray<FText>& OutOptionTexts, int32& OutFocusedIndex) const
 {
 	OutOptionTexts.Reset();
@@ -2860,7 +2721,6 @@ void UTunaSweeperGameHudWidget::HandleSelectedInventoryItemChanged()
 
 void UTunaSweeperGameHudWidget::HandleQuestProgressChanged()
 {
-	RefreshQuestTrackerFromQuestSubsystem();
 	if (MenuQuestPanelWidget)
 	{
 		MenuQuestPanelWidget->RefreshQuestView();
@@ -2884,7 +2744,6 @@ void UTunaSweeperGameHudWidget::HandleLanguageChanged()
 	RefreshLocalizedTexts();
 	ApplyHudModeVisibility();
 	RefreshBottomStatusFromGameInstance();
-	RefreshQuestTrackerFromQuestSubsystem();
 	RefreshQuickSlotsFromGameState();
 	RefreshInventoryQuickSlotPanel();
 	if (ItemInfoPanelWidget)

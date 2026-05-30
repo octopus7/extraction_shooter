@@ -211,9 +211,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Transitions", meta = (DisplayName = "Quest Panel Direction Override"))
 	ETunaSweeperHudTransitionEdge QuestPanelTransitionEdge = ETunaSweeperHudTransitionEdge::Auto;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Transitions", meta = (DisplayName = "Quest Tracker Direction Override"))
-	ETunaSweeperHudTransitionEdge QuestTrackerTransitionEdge = ETunaSweeperHudTransitionEdge::Auto;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Transitions", meta = (DisplayName = "Bottom Status Direction Override"))
 	ETunaSweeperHudTransitionEdge BottomStatusTransitionEdge = ETunaSweeperHudTransitionEdge::Bottom;
 
@@ -315,8 +312,6 @@ private:
 	void RefreshExtractionProgressWidget();
 	void RefreshCursorDistanceWidget();
 	void ForceCollapseHudWidget(UWidget* Widget);
-	void EnsureQuestTrackerWidgets();
-	void RefreshQuestTrackerFromQuestSubsystem();
 	FVector2D GetHudTransitionHiddenTranslation(const UWidget* Widget, ETunaSweeperHudTransitionEdge Edge) const;
 	bool HasActiveHudTransition(const UWidget* Widget) const;
 	void SetTransitionedWidgetVisibility(UWidget* Widget, ESlateVisibility TargetVisibility, ETunaSweeperHudTransitionEdge DirectionOverride);
@@ -355,15 +350,6 @@ private:
 
 	UPROPERTY(BlueprintReadOnly, Transient, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional, AllowPrivateAccess = "true"))
 	TObjectPtr<UTextBlock> CenterReloadPercentText;
-
-	UPROPERTY(Transient)
-	TObjectPtr<UBorder> QuestTrackerRoot;
-
-	UPROPERTY(Transient)
-	TObjectPtr<UTextBlock> QuestTrackerTitleText;
-
-	UPROPERTY(Transient)
-	TObjectPtr<UTextBlock> QuestTrackerObjectiveText;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UBorder> InventoryQuickSlotPanel;

@@ -119,6 +119,7 @@ private:
 	void HandleQuestProgressChanged();
 	void UpdateTabButtonStates();
 	void UpdateDetailView();
+	int32 CountVisibleQuestsForFilter(EQuestListFilter Filter) const;
 	void BuildFilteredQuestDefinitions(
 		const UTunaSweeperQuestSubsystem& QuestSubsystem,
 		TArray<FTunaSweeperQuestDefinition>& OutQuestDefinitions) const;
@@ -149,10 +150,22 @@ private:
 	TObjectPtr<UTextBlock> AvailableTabText;
 
 	UPROPERTY(Transient)
+	TObjectPtr<UBorder> AvailableTabCountBadge;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTextBlock> AvailableTabCountText;
+
+	UPROPERTY(Transient)
 	TObjectPtr<UButton> InProgressTabButton;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UTextBlock> InProgressTabText;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UBorder> InProgressTabCountBadge;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTextBlock> InProgressTabCountText;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UButton> CompletedTabButton;

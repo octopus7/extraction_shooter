@@ -25,7 +25,6 @@ quest.ui.button.locked,잠김,Locked,ロック中
 quest.ui.button.in_progress,진행 중,In Progress,進行中
 quest.ui.button.claim_reward,보상 받기,Claim Reward,報酬を受け取る
 quest.ui.button.completed,완료,Complete,完了
-quest.ui.tracker.reward_available,보상 수령 가능,Reward available,報酬受取可能
 quest.speaker.canbot,캔봇,Canbot,キャンボット
 quest.first_outing.title,첫 외출,First Outing,初めての外出
 quest.first_outing.description,벙커 밖으로 나가 레이드 구역을 확인하고 돌아올 준비를 하세요.,Step outside the bunker and confirm the raid zone.,バンカーの外へ出てレイド区域を確認しましょう
