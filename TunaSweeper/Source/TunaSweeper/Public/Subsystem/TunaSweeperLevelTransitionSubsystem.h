@@ -63,6 +63,7 @@ private:
 	void SetBlackOpacity(float InOpacity);
 	void SetCircularRevealMask(float HoleRadiusPixels, bool bVisible);
 	float GetVideoVisibleElapsedSeconds() const;
+	float GetCircularRevealHoldRadius() const;
 	float GetFullscreenRevealRadius() const;
 
 	UPROPERTY(Transient)
@@ -85,6 +86,7 @@ private:
 	float FadeToBlackDuration = 0.45f;
 	float FadeFromBlackDuration = 0.55f;
 	float MinimumVideoDisplaySeconds = 1.0f;
+	float CircularRevealHoldRadius = 0.0f;
 	float CircularRevealFinalRadius = 0.0f;
 	double VideoVisibleStartSeconds = 0.0;
 	bool bOpenLevelRequested = false;

@@ -19,7 +19,7 @@
 
 namespace
 {
-	constexpr float CircularRevealInitialRadiusPixels = 72.0f;
+	constexpr float CircularRevealHoldHoleDiameterScreenHeightRatio = 0.30f;
 	constexpr float CircularRevealInitialDurationSeconds = 0.2f;
 	constexpr float CircularRevealHoldDurationSeconds = 0.1f;
 	constexpr float CircularRevealFinalDurationSeconds = 0.3f;
@@ -29,6 +29,23 @@ namespace
 		const FString MediaSourceName = MediaSource ? MediaSource->GetName() : FString();
 		const FString MediaSourcePath = MediaSourceReference.ToSoftObjectPath().ToString();
 		return MediaSourceName.Contains(TEXT("BunkerToRaid")) || MediaSourcePath.Contains(TEXT("BunkerToRaid"));
+	}
+
+	FVector2D GetViewportSizeForReveal()
+	{
+		FVector2D ViewportSize(1920.0f, 1080.0f);
+		if (GEngine && GEngine->GameViewport && GEngine->GameViewport->Viewport)
+		{
+			const FIntPoint ViewportIntSize = GEngine->GameViewport->Viewport->GetSizeXY();
+			if (ViewportIntSize.X > 0 && ViewportIntSize.Y > 0)
+			{
+				ViewportSize = FVector2D(
+					static_cast<float>(ViewportIntSize.X),
+					static_cast<float>(ViewportIntSize.Y));
+			}
+		}
+
+		return ViewportSize;
 	}
 
 	float EaseOutElastic(float Alpha)
@@ -328,6 +345,7 @@ void UTunaSweeperLevelTransitionSubsystem::BeginCircularReveal()
 		return;
 	}
 
+	CircularRevealHoldRadius = GetCircularRevealHoldRadius();
 	CircularRevealFinalRadius = GetFullscreenRevealRadius();
 	FadeElapsedSeconds = 0.0f;
 	SetBlackOpacity(0.0f);
@@ -346,18 +364,18 @@ void UTunaSweeperLevelTransitionSubsystem::UpdateCircularReveal(float DeltaTime)
 		const float Alpha = CircularRevealInitialDurationSeconds > 0.0f
 			? FadeElapsedSeconds / CircularRevealInitialDurationSeconds
 			: 1.0f;
-		SetCircularRevealMask(CircularRevealInitialRadiusPixels * FMath::Max(0.0f, EaseOutElastic(Alpha)), true);
+		SetCircularRevealMask(CircularRevealHoldRadius * FMath::Max(0.0f, EaseOutElastic(Alpha)), true);
 		if (FadeElapsedSeconds >= CircularRevealInitialDurationSeconds)
 		{
 			FadeElapsedSeconds = 0.0f;
-			SetCircularRevealMask(CircularRevealInitialRadiusPixels, true);
+			SetCircularRevealMask(CircularRevealHoldRadius, true);
 			Phase = ETransitionPhase::CircularRevealHold;
 		}
 		break;
 	}
 
 	case ETransitionPhase::CircularRevealHold:
-		SetCircularRevealMask(CircularRevealInitialRadiusPixels, true);
+		SetCircularRevealMask(CircularRevealHoldRadius, true);
 		if (FadeElapsedSeconds >= CircularRevealHoldDurationSeconds)
 		{
 			FadeElapsedSeconds = 0.0f;
@@ -371,8 +389,8 @@ void UTunaSweeperLevelTransitionSubsystem::UpdateCircularReveal(float DeltaTime)
 			? FadeElapsedSeconds / CircularRevealFinalDurationSeconds
 			: 1.0f;
 		const float Radius = FMath::Lerp(
-			CircularRevealInitialRadiusPixels,
-			FMath::Max(CircularRevealInitialRadiusPixels, CircularRevealFinalRadius),
+			CircularRevealHoldRadius,
+			FMath::Max(CircularRevealHoldRadius, CircularRevealFinalRadius),
 			SmoothStep(Alpha));
 		SetCircularRevealMask(Radius, true);
 		if (FadeElapsedSeconds >= CircularRevealFinalDurationSeconds)
@@ -444,6 +462,7 @@ void UTunaSweeperLevelTransitionSubsystem::FinishTransition()
 	TransitionMessage = FText::GetEmpty();
 	Phase = ETransitionPhase::Idle;
 	FadeElapsedSeconds = 0.0f;
+	CircularRevealHoldRadius = 0.0f;
 	CircularRevealFinalRadius = 0.0f;
 	VideoVisibleStartSeconds = 0.0;
 	bOpenLevelRequested = false;
@@ -473,19 +492,14 @@ float UTunaSweeperLevelTransitionSubsystem::GetVideoVisibleElapsedSeconds() cons
 		: 0.0f;
 }
 
+float UTunaSweeperLevelTransitionSubsystem::GetCircularRevealHoldRadius() const
+{
+	const FVector2D ViewportSize = GetViewportSizeForReveal();
+	return ViewportSize.Y * CircularRevealHoldHoleDiameterScreenHeightRatio * 0.5f;
+}
+
 float UTunaSweeperLevelTransitionSubsystem::GetFullscreenRevealRadius() const
 {
-	FVector2D ViewportSize(1920.0f, 1080.0f);
-	if (GEngine && GEngine->GameViewport && GEngine->GameViewport->Viewport)
-	{
-		const FIntPoint ViewportIntSize = GEngine->GameViewport->Viewport->GetSizeXY();
-		if (ViewportIntSize.X > 0 && ViewportIntSize.Y > 0)
-		{
-			ViewportSize = FVector2D(
-				static_cast<float>(ViewportIntSize.X),
-				static_cast<float>(ViewportIntSize.Y));
-		}
-	}
-
+	const FVector2D ViewportSize = GetViewportSizeForReveal();
 	return FMath::Sqrt(FMath::Square(ViewportSize.X) + FMath::Square(ViewportSize.Y)) * 0.5f + 96.0f;
 }
