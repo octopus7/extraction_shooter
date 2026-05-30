@@ -11,5 +11,21 @@
     ],
     "sort_order": 10,
     "function_unlocked": false
+  },
+  {
+    "facility_id": "housing_piggy_bank",
+    "display_name_key": "ui.housing.facility.piggy_bank",
+    "description_key": "ui.housing.facility.piggy_bank.desc",
+    "display_name": "Piggy Bank",
+    "description": "A bunker piggy bank that stores ancient coins and banknotes.",
+    "size_cells": [2, 2],
+    "required_materials": [
+      { "item_id": 7002, "quantity": 1 },
+      { "item_id": 6002, "quantity": 1 }
+    ],
+    "sort_order": 20,
+    "function_unlocked": false,
+    "unlock_when_ever_acquired_items": [7002, 7003],
+    "actor_class": "/Script/TunaSweeper.TunaSweeperPiggyBankActor"
   }
 ]

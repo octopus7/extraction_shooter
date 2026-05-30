@@ -6,7 +6,7 @@ Update it whenever a new state field is expected to persist across save slots, l
 ## Current Save Container
 
 - Save object: `UTunaSweeperSaveGame`
-- Current save version: `15`
+- Current save version: `16`
 - Runtime owner: `UTunaSweeperGameInstance`
 - Save entry point: `UTunaSweeperGameInstance::SaveGameStateInternal()`
 - Load entry point: `UTunaSweeperGameInstance::LoadGameState()`
@@ -44,6 +44,12 @@ See [Docs/scenario_progress_flags.md](scenario_progress_flags.md) for the flag c
 Collected memo ids are persisted per save slot through `UTunaSweeperSaveGame::AcquiredMemoIds`.
 
 Memo interaction marks the id as acquired in `UTunaSweeperGameInstance` memory immediately and destroys the spawned memo actor. It does not force an immediate save by default; the acquired ids are written on the next normal save, level-travel save, death save, or any other call to `SaveGameStateInternal()`. Runtime memo spawns must query this in-memory set so a collected memo stays hidden after death/respawn even before the next disk write.
+
+### Item Acquisition History
+
+Item ids that the player has acquired at least once are persisted per save slot through `UTunaSweeperSaveGame::EverAcquiredItemIds`.
+
+This history is separate from current item ownership. It is updated when items enter player inventory through pickups, rewards, purchases, crafting, and similar acquisition paths, and older saves are backfilled from currently saved item instances on load. Housing facility definitions can use this history for one-time unlock conditions, such as unlocking the piggy bank facility after the player has ever owned an ancient coin or ancient banknote.
 
 ### Map Markers
 
@@ -119,7 +125,7 @@ Piggy bank deposits are persisted per save slot through `UTunaSweeperSaveGame::P
 
 Each `FTunaSweeperPiggyBankSaveData` preserves:
 
-- `PiggyBankId`: stable id from the gameplay interaction spawn id.
+- `PiggyBankId`: stable id from the gameplay interaction spawn id or housing placed facility instance id.
 - `StoredAncientCoinValue`: accumulated value from deposited ancient coin and ancient banknote items.
 
 Ancient coin and ancient banknote are item instances, not player currency. Depositing removes those item instances from carried inventory and adds to the piggy bank state; one ancient banknote contributes ten ancient-coin value. Withdraw interaction is currently exposed as a placeholder only and does not mutate save data.

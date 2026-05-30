@@ -6,6 +6,7 @@
 #include "TunaSweeperHousingSubsystem.generated.h"
 
 class APlayerController;
+class AActor;
 class ATunaSweeperHousingAreaActor;
 class ATunaSweeperHousingFacilityActor;
 class ATunaSweeperHousingManagementActor;
@@ -123,6 +124,15 @@ private:
 	FTransform BuildFacilityWorldTransform(
 		const FTunaSweeperHousingFacilityDefinition& Definition,
 		const FTunaSweeperHousingPlacedFacilitySaveData& Placement) const;
+	FTransform BuildPlacedActorWorldTransform(
+		const FTunaSweeperHousingFacilityDefinition& Definition,
+		const FTunaSweeperHousingPlacedFacilitySaveData& Placement) const;
+	TSubclassOf<AActor> ResolveFacilityActorClass(const FTunaSweeperHousingFacilityDefinition& Definition) const;
+	FName BuildPlacedFacilityActorId(const FTunaSweeperHousingPlacedFacilitySaveData& Placement) const;
+	void ConfigurePlacedFacilityActor(
+		AActor* Actor,
+		const FTunaSweeperHousingFacilityDefinition& Definition,
+		const FTunaSweeperHousingPlacedFacilitySaveData& Placement) const;
 	bool TryGetDefinition(FName FacilityId, FTunaSweeperHousingFacilityDefinition& OutDefinition) const;
 	bool IsFacilityFunctionUnlocked(const FTunaSweeperHousingFacilityDefinition& Definition) const;
 	bool HasEnoughMaterials(const FTunaSweeperHousingFacilityDefinition& Definition) const;
@@ -152,7 +162,7 @@ private:
 	TWeakObjectPtr<ATunaSweeperHousingAreaActor> ActiveHousingArea;
 
 	UPROPERTY(Transient)
-	TMap<FGuid, TObjectPtr<ATunaSweeperHousingFacilityActor>> SpawnedFacilityActors;
+	TMap<FGuid, TObjectPtr<AActor>> SpawnedFacilityActors;
 
 	UPROPERTY(Transient)
 	TObjectPtr<ATunaSweeperHousingFacilityActor> PreviewActor;

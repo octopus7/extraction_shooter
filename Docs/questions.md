@@ -1543,3 +1543,21 @@ Yes. Horizontal stretch is the cleaner layout model here. The canvas slot should
 ### Answer
 
 현재 크로스헤어는 `UTunaSweeperGameHudWidget::NativePaint()`에서 Slate 커서 위치를 로컬 좌표로 바꿔 직접 그리며, 재장전 원형 인디케이터는 `CenterCancelableActionGaugeRoot` 캔버스 슬롯이 화면 중앙 앵커에 고정되어 있고 `RefreshCancelableActionWidgets()`가 재장전/아이템 사용 진행률과 표시 여부를 갱신한다. 구현은 재장전 중에만 `IsWeaponCrosshairSuppressed()`가 크로스헤어 페인트를 막게 하고, 같은 커서 로컬 좌표 계산을 재사용해 `CenterCancelableActionGaugeRoot`의 `UCanvasPanelSlot` 위치를 매 틱 커서 위치로 옮기면 된다. 아이템 사용도 같은 링을 공유하므로, 재장전은 커서 위치, 아이템 사용은 기존 중앙 위치로 분기하는 것이 안전하다.
+## 2026-05-30 21:49:24 (elapsed: 00:08:00)
+
+### Question
+
+창고에 All 및 카테고리별 필터 탭을 만들 때, 필터가 걸린 상태의 빈칸을 어떻게 처리하는 것이 좋은가?
+
+### Answer
+
+현재 창고는 `StorageSlots` 100칸짜리 실제 슬롯 배열을 UI 슬롯과 1:1로 보여주고, 드래그/드롭도 `FTunaSweeperItemSlotReference`의 실제 `SlotIndex`를 기준으로 움직인다. 그래서 필터 탭에서 빈칸을 실제 슬롯처럼 많이 보여주면, 숨겨진 다른 카테고리 아이템이 있는 칸을 빈칸처럼 오해하거나 드롭 대상 매핑이 꼬일 수 있다. 권장안은 `All` 탭만 실제 창고 레이아웃 전체와 빈칸을 보여주고, 카테고리 탭은 매칭되는 아이템만 압축 표시하는 방식이다. 카테고리 탭의 빈 영역은 실제 슬롯이 아니라 패딩/빈 상태 메시지로 처리하고, 입고를 지원하려면 별도 드롭 영역을 만들어 첫 번째 실제 빈 창고 슬롯으로 보내는 편이 안전하다. 단, 활성 카테고리와 맞지 않는 아이템을 해당 탭에 드롭하면 필터 때문에 바로 사라진 것처럼 보이므로 거부하거나 `All` 탭으로 유도하는 것이 좋다.
+## 2026-05-30 21:50:29 (elapsed: 00:00:00)
+
+### Question
+
+필터 시 실제 원래 있었던 자리의 인덱스를 가져와서 매핑하는 방식인가?
+
+### Answer
+
+맞다. 카테고리 필터에서는 표시 목록을 압축하되 각 표시 항목이 원래 `StorageSlots`의 몇 번 슬롯이었는지를 `VisibleSlotIndices` 같은 배열로 보관하는 방식이 적합하다. 예를 들어 화면상 0번째 항목이 실제 창고 17번 슬롯이면, 타일 데이터의 `SlotReference.SlotIndex`는 17을 유지해야 한다. 선택, 드래그 시작, 드롭, 분할, 아이템 정보 패널은 모두 이 실제 슬롯 인덱스를 사용해야 저장 배열과 UI가 어긋나지 않는다.

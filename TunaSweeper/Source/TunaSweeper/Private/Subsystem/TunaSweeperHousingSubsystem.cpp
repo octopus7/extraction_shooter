@@ -6,9 +6,11 @@
 #include "Engine/World.h"
 #include "EngineUtils.h"
 #include "Game/TunaSweeperGameInstance.h"
+#include "GameFramework/Actor.h"
 #include "Housing/TunaSweeperHousingAreaActor.h"
 #include "Housing/TunaSweeperHousingFacilityActor.h"
 #include "Interaction/TunaSweeperHousingManagementActor.h"
+#include "Interaction/TunaSweeperPiggyBankActor.h"
 #include "Kismet/GameplayStatics.h"
 #include "Misc/FileHelper.h"
 #include "Misc/PackageName.h"
@@ -17,6 +19,8 @@
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
+#include "UObject/SoftObjectPath.h"
+#include "UObject/SoftObjectPtr.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogTunaSweeperHousing, Log, All);
 
@@ -34,6 +38,7 @@ namespace TunaSweeperHousing
 	constexpr float CellOutlineMargin = 8.0f;
 	constexpr float CellOutlineThickness = 2.0f;
 	constexpr float InvalidCellOutlineThickness = 4.0f;
+	constexpr float PlacedActorZOffset = 2.0f;
 	const FColor HousingCellColor(70, 210, 255, 255);
 	const FColor InvalidCellColor(255, 38, 38, 255);
 	const FVector DefaultManagementActorLocation(-420.0f, -560.0f, 60.0f);
@@ -66,6 +71,29 @@ namespace TunaSweeperHousing
 			FMath::Max(1, static_cast<int32>((*ValueArray)[0]->AsNumber())),
 			FMath::Max(1, static_cast<int32>((*ValueArray)[1]->AsNumber())));
 		return true;
+	}
+
+	void ReadIntArrayField(const TSharedPtr<FJsonObject>& JsonObject, const TCHAR* FieldName, TArray<int32>& OutValues)
+	{
+		const TArray<TSharedPtr<FJsonValue>>* ValueArray = nullptr;
+		if (!JsonObject.IsValid() || !JsonObject->TryGetArrayField(FieldName, ValueArray) || !ValueArray)
+		{
+			return;
+		}
+
+		for (const TSharedPtr<FJsonValue>& Value : *ValueArray)
+		{
+			if (!Value.IsValid())
+			{
+				continue;
+			}
+
+			const int32 ItemId = FMath::RoundToInt(Value->AsNumber());
+			if (ItemId > 0)
+			{
+				OutValues.AddUnique(ItemId);
+			}
+		}
 	}
 
 	FString SanitizeStringField(const TSharedPtr<FJsonObject>& JsonObject, const TCHAR* FieldName)
@@ -242,6 +270,11 @@ bool UTunaSweeperHousingSubsystem::LoadHousingFacilityDefinitions(bool bForceRel
 		Definition.FallbackDescription = FText::FromString(TunaSweeperHousing::SanitizeStringField(JsonObject, TEXT("description")));
 		Definition.SizeX = SizeCells.X;
 		Definition.SizeY = SizeCells.Y;
+		TunaSweeperHousing::ReadIntArrayField(
+			JsonObject,
+			TEXT("unlock_when_ever_acquired_items"),
+			Definition.UnlockWhenEverAcquiredItemIds);
+		Definition.ActorClassPath = TunaSweeperHousing::SanitizeStringField(JsonObject, TEXT("actor_class"));
 		Definition.StaticMeshPath = TunaSweeperHousing::SanitizeStringField(JsonObject, TEXT("static_mesh"));
 		Definition.MaterialPath = TunaSweeperHousing::SanitizeStringField(JsonObject, TEXT("material"));
 
@@ -736,14 +769,25 @@ void UTunaSweeperHousingSubsystem::RefreshSpawnedFacilities()
 		}
 
 		DesiredInstanceIds.Add(SavedFacility.InstanceId);
-		ATunaSweeperHousingFacilityActor* SpawnedActor = SpawnedFacilityActors.FindRef(SavedFacility.InstanceId);
+		const TSubclassOf<AActor> DesiredActorClass = ResolveFacilityActorClass(Definition);
+		AActor* SpawnedActor = SpawnedFacilityActors.FindRef(SavedFacility.InstanceId);
+		if (IsValid(SpawnedActor) && !SpawnedActor->IsA(DesiredActorClass))
+		{
+			SpawnedActor->Destroy();
+			SpawnedActor = nullptr;
+			SpawnedFacilityActors.Remove(SavedFacility.InstanceId);
+		}
+
 		if (!IsValid(SpawnedActor) || SpawnedActor->GetWorld() != ActiveHousingArea->GetWorld())
 		{
 			UWorld* World = ActiveHousingArea->GetWorld();
+			FActorSpawnParameters SpawnParameters;
+			SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 			SpawnedActor = World
-				? World->SpawnActor<ATunaSweeperHousingFacilityActor>(
-					ATunaSweeperHousingFacilityActor::StaticClass(),
-					FTransform::Identity)
+				? World->SpawnActor<AActor>(
+					DesiredActorClass,
+					BuildPlacedActorWorldTransform(Definition, SavedFacility),
+					SpawnParameters)
 				: nullptr;
 			if (SpawnedActor)
 			{
@@ -753,17 +797,12 @@ void UTunaSweeperHousingSubsystem::RefreshSpawnedFacilities()
 
 		if (SpawnedActor)
 		{
-			SpawnedActor->ConfigureFacilityVisual(
-				Definition,
-				SavedFacility,
-				BuildFacilityWorldTransform(Definition, SavedFacility),
-				false,
-				true);
+			ConfigurePlacedFacilityActor(SpawnedActor, Definition, SavedFacility);
 		}
 	}
 
 	TArray<FGuid> InstanceIdsToRemove;
-	for (const TPair<FGuid, TObjectPtr<ATunaSweeperHousingFacilityActor>>& SpawnedPair : SpawnedFacilityActors)
+	for (const TPair<FGuid, TObjectPtr<AActor>>& SpawnedPair : SpawnedFacilityActors)
 	{
 		if (!DesiredInstanceIds.Contains(SpawnedPair.Key))
 		{
@@ -783,7 +822,7 @@ void UTunaSweeperHousingSubsystem::RefreshSpawnedFacilities()
 
 void UTunaSweeperHousingSubsystem::DestroySpawnedFacilities()
 {
-	for (const TPair<FGuid, TObjectPtr<ATunaSweeperHousingFacilityActor>>& SpawnedPair : SpawnedFacilityActors)
+	for (const TPair<FGuid, TObjectPtr<AActor>>& SpawnedPair : SpawnedFacilityActors)
 	{
 		if (IsValid(SpawnedPair.Value))
 		{
@@ -1128,6 +1167,99 @@ FTransform UTunaSweeperHousingSubsystem::BuildFacilityWorldTransform(
 	return FTransform(Rotation, CenterLocation + FVector(0.0f, 0.0f, Height * 0.5f + 2.0f), Scale);
 }
 
+FTransform UTunaSweeperHousingSubsystem::BuildPlacedActorWorldTransform(
+	const FTunaSweeperHousingFacilityDefinition& Definition,
+	const FTunaSweeperHousingPlacedFacilitySaveData& Placement) const
+{
+	if (!ActiveHousingArea.IsValid())
+	{
+		return FTransform::Identity;
+	}
+
+	const FIntPoint FootprintSize = GetRotatedFootprintSize(Definition, Placement.RotationQuarterTurns);
+	const FVector CenterLocation = ActiveHousingArea->GetWorldLocationForFootprintCenter(
+		Placement.AnchorCell,
+		FootprintSize);
+	const FRotator Rotation = ActiveHousingArea->GetAreaYawRotation() +
+		FRotator(0.0f, static_cast<float>(TunaSweeperHousing::NormalizeQuarterTurns(Placement.RotationQuarterTurns)) * 90.0f, 0.0f);
+	return FTransform(
+		Rotation,
+		CenterLocation + FVector(0.0f, 0.0f, TunaSweeperHousing::PlacedActorZOffset),
+		FVector::OneVector);
+}
+
+TSubclassOf<AActor> UTunaSweeperHousingSubsystem::ResolveFacilityActorClass(
+	const FTunaSweeperHousingFacilityDefinition& Definition) const
+{
+	const FString TrimmedActorClassPath = Definition.ActorClassPath.TrimStartAndEnd();
+	if (!TrimmedActorClassPath.IsEmpty())
+	{
+		const TSoftClassPtr<AActor> ActorClass{ FSoftObjectPath(TrimmedActorClassPath) };
+		if (TSubclassOf<AActor> LoadedActorClass = ActorClass.LoadSynchronous())
+		{
+			return LoadedActorClass;
+		}
+
+		UE_LOG(
+			LogTunaSweeperHousing,
+			Warning,
+			TEXT("Housing facility actor class failed to load for %s: %s"),
+			*Definition.FacilityId.ToString(),
+			*TrimmedActorClassPath);
+	}
+
+	return ATunaSweeperHousingFacilityActor::StaticClass();
+}
+
+FName UTunaSweeperHousingSubsystem::BuildPlacedFacilityActorId(
+	const FTunaSweeperHousingPlacedFacilitySaveData& Placement) const
+{
+	return FName(*FString::Printf(
+		TEXT("housing.%s.%s"),
+		*Placement.FacilityId.ToString(),
+		*Placement.InstanceId.ToString(EGuidFormats::Digits)));
+}
+
+void UTunaSweeperHousingSubsystem::ConfigurePlacedFacilityActor(
+	AActor* Actor,
+	const FTunaSweeperHousingFacilityDefinition& Definition,
+	const FTunaSweeperHousingPlacedFacilitySaveData& Placement) const
+{
+	if (!Actor)
+	{
+		return;
+	}
+
+	if (ATunaSweeperHousingFacilityActor* FacilityActor = Cast<ATunaSweeperHousingFacilityActor>(Actor))
+	{
+		FacilityActor->ConfigureFacilityVisual(
+			Definition,
+			Placement,
+			BuildFacilityWorldTransform(Definition, Placement),
+			false,
+			true);
+	}
+	else
+	{
+		Actor->SetActorTransform(BuildPlacedActorWorldTransform(Definition, Placement));
+		Actor->SetActorEnableCollision(true);
+	}
+
+	const FName ActorId = BuildPlacedFacilityActorId(Placement);
+	Actor->Tags.AddUnique(ActorId);
+	if (ATunaSweeperPiggyBankActor* PiggyBankActor = Cast<ATunaSweeperPiggyBankActor>(Actor))
+	{
+		PiggyBankActor->SetPiggyBankId(ActorId);
+	}
+
+#if WITH_EDITOR
+	if (!ActorId.IsNone())
+	{
+		Actor->SetActorLabel(ActorId.ToString());
+	}
+#endif
+}
+
 bool UTunaSweeperHousingSubsystem::TryGetDefinition(
 	FName FacilityId,
 	FTunaSweeperHousingFacilityDefinition& OutDefinition) const
@@ -1150,7 +1282,26 @@ bool UTunaSweeperHousingSubsystem::IsFacilityFunctionUnlocked(
 	}
 
 	UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GetGameInstance());
-	return TunaGameInstance && TunaGameInstance->IsHousingFacilityUnlocked(Definition.FacilityId);
+	if (!TunaGameInstance)
+	{
+		return false;
+	}
+
+	if (TunaGameInstance->IsHousingFacilityUnlocked(Definition.FacilityId))
+	{
+		return true;
+	}
+
+	for (int32 ItemId : Definition.UnlockWhenEverAcquiredItemIds)
+	{
+		if (ItemId != INDEX_NONE &&
+			(TunaGameInstance->HasEverAcquiredItem(ItemId) || TunaGameInstance->CountInventoryItemById(ItemId) > 0))
+		{
+			return true;
+		}
+	}
+
+	return false;
 }
 
 bool UTunaSweeperHousingSubsystem::HasEnoughMaterials(const FTunaSweeperHousingFacilityDefinition& Definition) const

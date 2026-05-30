@@ -22,12 +22,26 @@
         "stock_quantity": 5
       },
       {
+        "item_id": 6002,
+        "stock_quantity": 5
+      },
+      {
         "item_id": 2001,
         "stock_quantity": 12
       },
       {
         "item_id": 2002,
         "stock_quantity": 10
+      },
+      {
+        "item_id": 7002,
+        "stock_quantity": 10,
+        "price": 1
+      },
+      {
+        "item_id": 7003,
+        "stock_quantity": 5,
+        "price": 10
       }
     ]
   }

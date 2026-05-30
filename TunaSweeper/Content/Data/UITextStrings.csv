@@ -118,6 +118,8 @@ ui.interaction.piggy_bank_withdraw,빼기,Withdraw,引き出す
 ui.interaction.housing_management,시설관리,Facility Management,施設管理
 ui.housing.facility.workbench,작업대,Workbench,作業台
 ui.housing.facility.workbench.desc,제작과 수리에 사용할 수 있는 작업대,A functional work surface for crafting and repairs,制作と修理に使える作業台
+ui.housing.facility.piggy_bank,돼지저금통,Piggy Bank,豚の貯金箱
+ui.housing.facility.piggy_bank.desc,옛 문명의 동전과 지폐를 저금하는 돼지저금통,A piggy bank for storing ancient coins and banknotes,古代文明の硬貨と紙幣を預ける豚の貯金箱
 ui.interaction.boom,Boom!,Boom!,Boom!
 ui.notification.rescue_cart,구급 카트 후송 중,Rescue cart returning,救急カート搬送中
 ui.npc.instructor,교관,Instructor,教官

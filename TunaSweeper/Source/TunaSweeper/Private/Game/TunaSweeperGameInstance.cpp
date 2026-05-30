@@ -27,7 +27,7 @@ namespace TunaSweeperSave
 {
 	const TCHAR* SaveSlotNamePrefix = TEXT("TunaSweeperSave_Slot");
 	const TCHAR* SaveSettingsSlotName = TEXT("TunaSweeperSaveSettings");
-	constexpr int32 CurrentSaveVersion = 15;
+	constexpr int32 CurrentSaveVersion = 16;
 	constexpr int32 SaveUserIndex = 0;
 	constexpr int32 MinSaveSlotIndex = 1;
 	constexpr int32 MaxSaveSlotIndex = 3;
@@ -880,6 +880,12 @@ void UTunaSweeperGameInstance::GetAcquiredMemoIds(TArray<int32>& OutMemoIds)
 	EnsureInventoryStateInitialized();
 	OutMemoIds = AcquiredMemoIds.Array();
 	OutMemoIds.Sort();
+}
+
+bool UTunaSweeperGameInstance::HasEverAcquiredItem(int32 ItemId)
+{
+	EnsureInventoryStateInitialized();
+	return ItemId != INDEX_NONE && EverAcquiredItemIds.Contains(ItemId);
 }
 
 void UTunaSweeperGameInstance::GetMapMarkers(TArray<FTunaSweeperMapMarkerSaveData>& OutMapMarkers)
@@ -2154,15 +2160,16 @@ bool UTunaSweeperGameInstance::MoveItemBetweenSlots(
 		const int32 NewInventoryCapacity = CalculateInventoryCapacityForEquipmentSlots(EquipmentSlots);
 		EnsureSlotArraySize(PlayerInventorySlots, NewInventoryCapacity);
 		BroadcastInventoryStateChanged();
-		MarkItemStateMutationForSave();
 		if (bAcquiredFromLootContainer && AcquiredItemId != INDEX_NONE && AcquiredQuantity > 0)
 		{
+			MarkItemEverAcquired(AcquiredItemId);
 			if (UTunaSweeperQuestSubsystem* QuestSubsystem = GetSubsystem<UTunaSweeperQuestSubsystem>())
 			{
 				QuestSubsystem->NotifyItemAcquired(AcquiredItemId, AcquiredQuantity, !IsCurrentWorldBunkerMap());
 			}
 			AddRaidExperienceForItem(AcquiredItemId, AcquiredQuantity);
 		}
+		MarkItemStateMutationForSave();
 		return true;
 	}
 
@@ -2189,15 +2196,16 @@ bool UTunaSweeperGameInstance::MoveItemBetweenSlots(
 	const int32 NewInventoryCapacity = CalculateInventoryCapacityForEquipmentSlots(EquipmentSlots);
 	EnsureSlotArraySize(PlayerInventorySlots, NewInventoryCapacity);
 	BroadcastInventoryStateChanged();
-	MarkItemStateMutationForSave();
 	if (bAcquiredFromLootContainer && AcquiredItemId != INDEX_NONE && AcquiredQuantity > 0)
 	{
+		MarkItemEverAcquired(AcquiredItemId);
 		if (UTunaSweeperQuestSubsystem* QuestSubsystem = GetSubsystem<UTunaSweeperQuestSubsystem>())
 		{
 			QuestSubsystem->NotifyItemAcquired(AcquiredItemId, AcquiredQuantity, !IsCurrentWorldBunkerMap());
 		}
 		AddRaidExperienceForItem(AcquiredItemId, AcquiredQuantity);
 	}
+	MarkItemStateMutationForSave();
 	return true;
 }
 
@@ -2344,17 +2352,18 @@ bool UTunaSweeperGameInstance::SplitItemStackBetweenSlots(
 
 	ClearSelectedItemIfInvalid();
 	BroadcastInventoryStateChanged();
-	MarkItemStateMutationForSave();
 
 	if (SourceSlot.Source == ETunaSweeperItemSlotSource::LootContainer &&
 		TargetSlot.Source != ETunaSweeperItemSlotSource::LootContainer)
 	{
+		MarkItemEverAcquired(SplitItemId);
 		if (UTunaSweeperQuestSubsystem* QuestSubsystem = GetSubsystem<UTunaSweeperQuestSubsystem>())
 		{
 			QuestSubsystem->NotifyItemAcquired(SplitItemId, SplitQuantity, !IsCurrentWorldBunkerMap());
 		}
 		AddRaidExperienceForItem(SplitItemId, SplitQuantity);
 	}
+	MarkItemStateMutationForSave();
 	return true;
 }
 
@@ -2457,6 +2466,7 @@ bool UTunaSweeperGameInstance::AddItemToFirstAvailableInventorySlot(int32 ItemId
 	}
 
 	BroadcastInventoryStateChanged();
+	MarkItemEverAcquired(ItemId);
 	MarkItemStateMutationForSave();
 	if (UTunaSweeperQuestSubsystem* QuestSubsystem = GetSubsystem<UTunaSweeperQuestSubsystem>())
 	{
@@ -2483,6 +2493,7 @@ bool UTunaSweeperGameInstance::AddItemToPreferredAvailableSlot(int32 ItemId, int
 	}
 
 	BroadcastInventoryStateChanged();
+	MarkItemEverAcquired(ItemId);
 	MarkItemStateMutationForSave();
 	if (UTunaSweeperQuestSubsystem* QuestSubsystem = GetSubsystem<UTunaSweeperQuestSubsystem>())
 	{
@@ -2550,6 +2561,13 @@ bool UTunaSweeperGameInstance::GrantQuestItemRewards(const TArray<FTunaSweeperIt
 
 	if (CreatedItemUids.Num() > 0)
 	{
+		for (const FGuid& CreatedItemUid : CreatedItemUids)
+		{
+			if (const FTunaSweeperItemInstance* CreatedItemInstance = ItemInstancesByUid.Find(CreatedItemUid))
+			{
+				MarkItemEverAcquired(CreatedItemInstance->ItemId);
+			}
+		}
 		BroadcastInventoryStateChanged();
 		MarkItemStateMutationForSave();
 	}
@@ -3037,6 +3055,7 @@ bool UTunaSweeperGameInstance::TryCraftActiveWorkbenchRecipe(int32 RecipeSlotInd
 
 	ClearSelectedItemIfInvalid();
 	BroadcastInventoryStateChanged();
+	MarkItemEverAcquired(RecipeDefinition.OutputItemId);
 	if (UTunaSweeperQuestSubsystem* QuestSubsystem = GetSubsystem<UTunaSweeperQuestSubsystem>())
 	{
 		QuestSubsystem->NotifyItemAcquired(
@@ -3836,6 +3855,14 @@ bool UTunaSweeperGameInstance::LoadGameState()
 			AcquiredMemoIds.Add(MemoId);
 		}
 	}
+	EverAcquiredItemIds.Reset();
+	for (int32 ItemId : SaveGame->EverAcquiredItemIds)
+	{
+		if (ItemId != INDEX_NONE)
+		{
+			EverAcquiredItemIds.Add(ItemId);
+		}
+	}
 	MapMarkers.Reset();
 	NextMapMarkerId = 1;
 	TSet<int32> LoadedMapMarkerIds;
@@ -4011,6 +4038,7 @@ bool UTunaSweeperGameInstance::LoadGameState()
 		}
 	}
 	MigrateLegacyEquipmentSlots();
+	BackfillEverAcquiredItemIdsFromCurrentItems();
 
 	int32 InventoryCapacity = CalculateInventoryCapacityForEquipmentSlots(EquipmentSlots);
 	for (int32 SlotIndex = PlayerInventorySlots.Num() - 1; SlotIndex >= InventoryCapacity; --SlotIndex)
@@ -4081,6 +4109,8 @@ bool UTunaSweeperGameInstance::SaveGameStateInternal(
 	SaveGame->CompletedScenarioFlags = CompletedScenarioFlags.Array();
 	SaveGame->AcquiredMemoIds = AcquiredMemoIds.Array();
 	SaveGame->AcquiredMemoIds.Sort();
+	SaveGame->EverAcquiredItemIds = EverAcquiredItemIds.Array();
+	SaveGame->EverAcquiredItemIds.Sort();
 	SaveGame->MapMarkers = MapMarkers;
 	SaveGame->MapMarkers.Sort([](
 		const FTunaSweeperMapMarkerSaveData& Left,
@@ -4286,6 +4316,7 @@ void UTunaSweeperGameInstance::ResetRuntimeStateForSaveSlotSelection()
 	PendingBunkerEntryHydrationRatio = 1.0f;
 	CompletedScenarioFlags.Reset();
 	AcquiredMemoIds.Reset();
+	EverAcquiredItemIds.Reset();
 	MapMarkers.Reset();
 	NextMapMarkerId = 1;
 	WorldProgressStatesById.Reset();
@@ -4316,6 +4347,7 @@ void UTunaSweeperGameInstance::GenerateDefaultInventoryState()
 	PendingBunkerEntryHydrationRatio = 1.0f;
 	CompletedScenarioFlags.Reset();
 	AcquiredMemoIds.Reset();
+	EverAcquiredItemIds.Reset();
 	MapMarkers.Reset();
 	NextMapMarkerId = 1;
 	WorldProgressStatesById.Reset();
@@ -4656,6 +4688,25 @@ void UTunaSweeperGameInstance::BroadcastInventoryStateChanged()
 	OnInventoryStateChanged.Broadcast();
 }
 
+void UTunaSweeperGameInstance::MarkItemEverAcquired(int32 ItemId)
+{
+	if (ItemId != INDEX_NONE)
+	{
+		EverAcquiredItemIds.Add(ItemId);
+	}
+}
+
+void UTunaSweeperGameInstance::BackfillEverAcquiredItemIdsFromCurrentItems()
+{
+	for (const TPair<FGuid, FTunaSweeperItemInstance>& ItemPair : ItemInstancesByUid)
+	{
+		if (ItemPair.Value.ItemId != INDEX_NONE && ItemPair.Value.Quantity > 0)
+		{
+			EverAcquiredItemIds.Add(ItemPair.Value.ItemId);
+		}
+	}
+}
+
 FGuid UTunaSweeperGameInstance::CreateItemInstance(int32 ItemId, int32 Quantity)
 {
 	FTunaSweeperItemInstance ItemInstance;
@@ -4936,6 +4987,7 @@ bool UTunaSweeperGameInstance::AddWorkbenchResultToInventoryOrOverflow(
 		return true;
 	}
 
+	MarkItemEverAcquired(ItemId);
 	if (UTunaSweeperQuestSubsystem* QuestSubsystem = GetSubsystem<UTunaSweeperQuestSubsystem>())
 	{
 		QuestSubsystem->NotifyItemAcquired(ItemId, Quantity, !IsCurrentWorldBunkerMap());

@@ -64,6 +64,12 @@ struct TUNASWEEPER_API FTunaSweeperHousingFacilityDefinition
 	TArray<FTunaSweeperHousingMaterialCost> RequiredMaterials;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Housing")
+	TArray<int32> UnlockWhenEverAcquiredItemIds;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Housing")
+	FString ActorClassPath;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Housing")
 	FString StaticMeshPath;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Housing")

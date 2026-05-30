@@ -58,7 +58,7 @@
   {
     "id": 7008,
     "name_string_key": "container.developer_crate",
-    "capacity": 10,
+    "capacity": 15,
     "static_mesh_path": "/Engine/BasicShapes/Cube.Cube",
     "material_path": "/Game/Interaction/M_Container_Supply.M_Container_Supply",
     "mesh_scale": [1.0, 0.75, 0.5]

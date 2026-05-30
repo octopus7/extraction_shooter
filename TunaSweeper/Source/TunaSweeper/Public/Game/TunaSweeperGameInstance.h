@@ -371,6 +371,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Memo")
 	void GetAcquiredMemoIds(TArray<int32>& OutMemoIds);
 
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Inventory")
+	bool HasEverAcquiredItem(int32 ItemId);
+
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Map")
 	void GetMapMarkers(TArray<FTunaSweeperMapMarkerSaveData>& OutMapMarkers);
 
@@ -757,6 +760,8 @@ private:
 	bool LoadExperienceLevelRewardsJson(TArray<FTunaSweeperExperienceLevelReward>& OutRewards) const;
 	FString GetExperienceLevelRewardsJsonPath() const;
 	void BroadcastInventoryStateChanged();
+	void MarkItemEverAcquired(int32 ItemId);
+	void BackfillEverAcquiredItemIdsFromCurrentItems();
 	FGuid CreateItemInstance(int32 ItemId, int32 Quantity);
 	bool AddItemUidToFirstEmptySlot(const FGuid& ItemUid, TArray<FTunaSweeperInventorySlot>& Slots);
 	bool AddItemUidToFirstEmptyCompatibleEquipmentSlot(const FGuid& ItemUid);
@@ -972,6 +977,9 @@ private:
 
 	UPROPERTY(Transient)
 	TSet<FName> UnlockedWorkbenchRecipeIds;
+
+	UPROPERTY(Transient)
+	TSet<int32> EverAcquiredItemIds;
 
 	UPROPERTY(Transient)
 	TSet<int32> AcquiredMemoIds;
