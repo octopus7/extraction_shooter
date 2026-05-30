@@ -414,5 +414,23 @@
     "icon_file_name": "T_UIIcon_WaterBottle.uasset",
     "category_tag": "item.category.blueprint",
     "blueprint_recipe_id": "recipe.king_water_bottle"
+  },
+  {
+    "id": 7002,
+    "name_string_key": "item.ancient_coin",
+    "description_string_key": "item.ancient_coin.desc",
+    "shop_sell_price": 0,
+    "experience_value": 0,
+    "icon_file_name": "T_UIIcon_AncientCoin.uasset",
+    "weight_kg": 0.01
+  },
+  {
+    "id": 7003,
+    "name_string_key": "item.ancient_banknote",
+    "description_string_key": "item.ancient_banknote.desc",
+    "shop_sell_price": 0,
+    "experience_value": 0,
+    "icon_file_name": "T_UIIcon_AncientBanknoteBundle.uasset",
+    "weight_kg": 0.01
   }
 ]

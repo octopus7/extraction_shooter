@@ -113,6 +113,8 @@ ui.interaction.item_spawn,아이템스폰,Item Spawn,アイテムスポーン
 ui.interaction.container_spawn,상자스폰,Container Spawn,箱スポーン
 ui.interaction.self_destruct,자폭,Self Destruct,自爆
 ui.interaction.piggy_bank,돈내놔,Gimme money,金を出せ
+ui.interaction.piggy_bank_deposit,저금,Deposit,預ける
+ui.interaction.piggy_bank_withdraw,빼기,Withdraw,引き出す
 ui.interaction.housing_management,시설관리,Facility Management,施設管理
 ui.housing.facility.workbench,작업대,Workbench,作業台
 ui.housing.facility.workbench.desc,제작과 수리에 사용할 수 있는 작업대,A functional work surface for crafting and repairs,制作と修理に使える作業台

@@ -1,15 +1,19 @@
 #include "Interaction/TunaSweeperPiggyBankActor.h"
 
 #include "Components/StaticMeshComponent.h"
+#include "Components/WidgetComponent.h"
 #include "Engine/Engine.h"
 #include "Engine/StaticMesh.h"
 #include "Engine/World.h"
+#include "Game/TunaSweeperGameInstance.h"
 #include "GameFramework/Pawn.h"
 #include "Interaction/TunaSweeperInteractableComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Player/TunaSweeperPlayerController.h"
 #include "Sound/SoundWaveProcedural.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
 #include "TimerManager.h"
+#include "UI/TunaSweeperSpeechBubbleWidget.h"
 #include "UObject/ConstructorHelpers.h"
 
 namespace TunaSweeperPiggyBank
@@ -17,6 +21,9 @@ namespace TunaSweeperPiggyBank
 	constexpr int32 SampleRate = 24000;
 	constexpr int32 ChannelCount = 1;
 	constexpr float SoundDurationSeconds = 0.58f;
+	constexpr float SpeechBubbleHeight = 176.0f;
+	constexpr float SpeechBubbleWidth = 210.0f;
+	constexpr float SpeechBubbleDrawHeight = 78.0f;
 
 	float SmoothStart(float TimeSeconds, float Speed)
 	{
@@ -37,17 +44,68 @@ namespace TunaSweeperPiggyBank
 
 ATunaSweeperPiggyBankActor::ATunaSweeperPiggyBankActor()
 {
+	const TSoftClassPtr<UTunaSweeperInteractionMarkerWidget> MarkerWidgetClass(
+		FSoftObjectPath(TEXT("/Game/UI/WBP_InteractionMarker.WBP_InteractionMarker_C")));
+
 	ConfigureInteractionDefaults(
 		ETunaSweeperInteractionType::PiggyBank,
 		FText::FromString(TEXT("\uB3C8\uB0B4\uB194")),
-		TSoftClassPtr<UTunaSweeperInteractionMarkerWidget>(
-			FSoftObjectPath(TEXT("/Game/UI/WBP_InteractionMarker.WBP_InteractionMarker_C"))),
+		MarkerWidgetClass,
 		FName(TEXT("ui.interaction.piggy_bank")));
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereMeshFinder(TEXT("/Engine/BasicShapes/Sphere.Sphere"));
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> CubeMeshFinder(TEXT("/Engine/BasicShapes/Cube.Cube"));
 	UStaticMesh* SphereMesh = SphereMeshFinder.Succeeded() ? SphereMeshFinder.Object : nullptr;
 	UStaticMesh* CubeMesh = CubeMeshFinder.Succeeded() ? CubeMeshFinder.Object : nullptr;
+
+	if (InteractableComponent)
+	{
+		InteractableComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 120.0f));
+		InteractableComponent->SetInteractionOrder(0);
+	}
+
+	DepositInteractableComponent = CreateDefaultSubobject<UTunaSweeperInteractableComponent>(TEXT("DepositInteractable"));
+	if (DepositInteractableComponent)
+	{
+		DepositInteractableComponent->SetupAttachment(RootComponent);
+		DepositInteractableComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 120.0f));
+		DepositInteractableComponent->SetInteractionOrder(1);
+		DepositInteractableComponent->ConfigureInteractionDefaults(
+			ETunaSweeperInteractionType::PiggyBankDeposit,
+			FText::FromString(TEXT("\uC800\uAE08")),
+			MarkerWidgetClass,
+			FName(TEXT("ui.interaction.piggy_bank_deposit")));
+	}
+
+	WithdrawInteractableComponent = CreateDefaultSubobject<UTunaSweeperInteractableComponent>(TEXT("WithdrawInteractable"));
+	if (WithdrawInteractableComponent)
+	{
+		WithdrawInteractableComponent->SetupAttachment(RootComponent);
+		WithdrawInteractableComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 120.0f));
+		WithdrawInteractableComponent->SetInteractionOrder(2);
+		WithdrawInteractableComponent->ConfigureInteractionDefaults(
+			ETunaSweeperInteractionType::PiggyBankWithdraw,
+			FText::FromString(TEXT("\uBE7C\uAE30")),
+			MarkerWidgetClass,
+			FName(TEXT("ui.interaction.piggy_bank_withdraw")));
+	}
+
+	SpeechBubbleWidgetClass = TSoftClassPtr<UTunaSweeperSpeechBubbleWidget>(
+		FSoftObjectPath(TEXT("/Game/UI/WBP_SpeechBubble.WBP_SpeechBubble_C")));
+	SpeechBubbleWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("SpeechBubble"));
+	if (SpeechBubbleWidgetComponent)
+	{
+		SpeechBubbleWidgetComponent->SetupAttachment(RootComponent);
+		SpeechBubbleWidgetComponent->SetRelativeLocation(FVector(0.0f, 0.0f, TunaSweeperPiggyBank::SpeechBubbleHeight));
+		SpeechBubbleWidgetComponent->SetWidgetSpace(EWidgetSpace::Screen);
+		SpeechBubbleWidgetComponent->SetDrawSize(FVector2D(
+			TunaSweeperPiggyBank::SpeechBubbleWidth,
+			TunaSweeperPiggyBank::SpeechBubbleDrawHeight));
+		SpeechBubbleWidgetComponent->SetPivot(FVector2D(0.5f, 1.0f));
+		SpeechBubbleWidgetComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		SpeechBubbleWidgetComponent->SetVisibility(false);
+		SpeechBubbleWidgetComponent->SetHiddenInGame(false);
+	}
 
 	if (VisualMesh && SphereMesh)
 	{
@@ -126,11 +184,6 @@ ATunaSweeperPiggyBankActor::ATunaSweeperPiggyBankActor()
 		Leg.Mesh->SetRelativeScale3D(FVector(0.11f, 0.11f, 0.22f));
 		Leg.Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
-
-	if (InteractableComponent)
-	{
-		InteractableComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 120.0f));
-	}
 }
 
 void ATunaSweeperPiggyBankActor::SetGrantAmount(int32 InGrantAmount)
@@ -138,17 +191,49 @@ void ATunaSweeperPiggyBankActor::SetGrantAmount(int32 InGrantAmount)
 	GrantAmount = FMath::Max(1, InGrantAmount);
 }
 
+void ATunaSweeperPiggyBankActor::SetPiggyBankId(FName InPiggyBankId)
+{
+	if (!InPiggyBankId.IsNone())
+	{
+		PiggyBankId = InPiggyBankId;
+	}
+}
+
 void ATunaSweeperPiggyBankActor::ConfigurePiggyBankDefaults(
 	int32 InGrantAmount,
 	const FText& InInteractionDisplayName,
-	TSoftClassPtr<UTunaSweeperInteractionMarkerWidget> InMarkerWidgetClass)
+	TSoftClassPtr<UTunaSweeperInteractionMarkerWidget> InMarkerWidgetClass,
+	FName InPiggyBankId)
 {
 	SetGrantAmount(InGrantAmount);
+	SetPiggyBankId(InPiggyBankId);
 	ConfigureInteractionDefaults(
 		ETunaSweeperInteractionType::PiggyBank,
 		InInteractionDisplayName,
 		InMarkerWidgetClass,
 		FName(TEXT("ui.interaction.piggy_bank")));
+	if (InteractableComponent)
+	{
+		InteractableComponent->SetInteractionOrder(0);
+	}
+	if (DepositInteractableComponent)
+	{
+		DepositInteractableComponent->ConfigureInteractionDefaults(
+			ETunaSweeperInteractionType::PiggyBankDeposit,
+			FText::FromString(TEXT("\uC800\uAE08")),
+			InMarkerWidgetClass,
+			FName(TEXT("ui.interaction.piggy_bank_deposit")));
+		DepositInteractableComponent->SetInteractionOrder(1);
+	}
+	if (WithdrawInteractableComponent)
+	{
+		WithdrawInteractableComponent->ConfigureInteractionDefaults(
+			ETunaSweeperInteractionType::PiggyBankWithdraw,
+			FText::FromString(TEXT("\uBE7C\uAE30")),
+			InMarkerWidgetClass,
+			FName(TEXT("ui.interaction.piggy_bank_withdraw")));
+		WithdrawInteractableComponent->SetInteractionOrder(2);
+	}
 }
 
 bool ATunaSweeperPiggyBankActor::GrantCurrency(APawn* InstigatorPawn)
@@ -178,6 +263,81 @@ bool ATunaSweeperPiggyBankActor::GrantCurrency(APawn* InstigatorPawn)
 			FColor::Green,
 			FString::Printf(TEXT("[Debug] +%d coins"), GrantAmount));
 	}
+	return true;
+}
+
+int32 ATunaSweeperPiggyBankActor::GetStoredAncientCoinValue() const
+{
+	const UTunaSweeperGameInstance* TunaGameInstance = GetWorld()
+		? GetWorld()->GetGameInstance<UTunaSweeperGameInstance>()
+		: nullptr;
+	return TunaGameInstance ? TunaGameInstance->GetPiggyBankStoredAncientCoinValue(PiggyBankId) : 0;
+}
+
+bool ATunaSweeperPiggyBankActor::DepositAncientCurrencyItems(APawn* InstigatorPawn)
+{
+	if (!InstigatorPawn)
+	{
+		return false;
+	}
+
+	UTunaSweeperGameInstance* TunaGameInstance = GetWorld()
+		? GetWorld()->GetGameInstance<UTunaSweeperGameInstance>()
+		: nullptr;
+	if (!TunaGameInstance)
+	{
+		return false;
+	}
+
+	const int32 AvailableCoins = TunaGameInstance->CountInventoryItemById(AncientCoinItemId);
+	const int32 AvailableBanknotes = TunaGameInstance->CountInventoryItemById(AncientBanknoteItemId);
+	if (AvailableCoins <= 0 && AvailableBanknotes <= 0)
+	{
+		ShowSpeechBubble(FText::FromString(TEXT("\uC800\uAE08\uD560 \uB3D9\uC804\uC774\uB098 \uC9C0\uD3D0\uAC00 \uC5C6\uB2E4")));
+		return true;
+	}
+
+	const int32 ConsumedCoins = AvailableCoins > 0
+		? TunaGameInstance->ConsumeInventoryItemById(AncientCoinItemId, AvailableCoins)
+		: 0;
+	const int32 ConsumedBanknotes = AvailableBanknotes > 0
+		? TunaGameInstance->ConsumeInventoryItemById(AncientBanknoteItemId, AvailableBanknotes)
+		: 0;
+	const int32 DepositedCoinValue =
+		FMath::Max(0, ConsumedCoins) +
+		FMath::Max(0, ConsumedBanknotes) * FMath::Max(1, AncientBanknoteCoinValue);
+	if (DepositedCoinValue <= 0)
+	{
+		ShowSpeechBubble(FText::FromString(TEXT("\uC800\uAE08 \uC2E4\uD328")));
+		return true;
+	}
+
+	TunaGameInstance->AddPiggyBankStoredAncientCoinValue(PiggyBankId, DepositedCoinValue, true);
+	PlayMoneySound();
+	ShowSpeechBubble(FText::Format(
+		FText::FromString(TEXT("\uC800\uAE08 {0}")),
+		FText::AsNumber(DepositedCoinValue)));
+
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(
+			-1,
+			1.8f,
+			FColor::Cyan,
+			FString::Printf(
+				TEXT("[PiggyBank] Stored ancient value +%d (coin %d, banknote %d) / total %d"),
+				DepositedCoinValue,
+				ConsumedCoins,
+				ConsumedBanknotes,
+				GetStoredAncientCoinValue()));
+	}
+	return true;
+}
+
+bool ATunaSweeperPiggyBankActor::ShowWithdrawNotImplemented(APawn* InstigatorPawn)
+{
+	ShowSpeechBubble(FText::FromString(TEXT("\uBBF8\uAD6C\uD604")));
+	StartWithdrawDialogue(InstigatorPawn);
 	return true;
 }
 
@@ -256,4 +416,75 @@ void ATunaSweeperPiggyBankActor::PlayMoneySound()
 			TunaSweeperPiggyBank::SoundDurationSeconds + 0.2f,
 			false);
 	}
+}
+
+void ATunaSweeperPiggyBankActor::ShowSpeechBubble(const FText& InText, float DisplaySeconds)
+{
+	if (!SpeechBubbleWidgetComponent)
+	{
+		return;
+	}
+
+	EnsureSpeechBubbleWidgetClass();
+	SpeechBubbleWidgetComponent->SetVisibility(true);
+	if (UTunaSweeperSpeechBubbleWidget* SpeechBubbleWidget =
+		Cast<UTunaSweeperSpeechBubbleWidget>(SpeechBubbleWidgetComponent->GetUserWidgetObject()))
+	{
+		SpeechBubbleWidget->SetBubbleText(InText);
+	}
+
+	if (UWorld* World = GetWorld())
+	{
+		World->GetTimerManager().ClearTimer(SpeechBubbleTimerHandle);
+		World->GetTimerManager().SetTimer(
+			SpeechBubbleTimerHandle,
+			this,
+			&ATunaSweeperPiggyBankActor::HideSpeechBubble,
+			FMath::Max(0.1f, DisplaySeconds),
+			false);
+	}
+}
+
+void ATunaSweeperPiggyBankActor::HideSpeechBubble()
+{
+	if (SpeechBubbleWidgetComponent)
+	{
+		SpeechBubbleWidgetComponent->SetVisibility(false);
+	}
+}
+
+void ATunaSweeperPiggyBankActor::EnsureSpeechBubbleWidgetClass()
+{
+	if (!SpeechBubbleWidgetComponent)
+	{
+		return;
+	}
+
+	if (TSubclassOf<UTunaSweeperSpeechBubbleWidget> LoadedClass = SpeechBubbleWidgetClass.LoadSynchronous())
+	{
+		if (SpeechBubbleWidgetComponent->GetWidgetClass() != LoadedClass)
+		{
+			SpeechBubbleWidgetComponent->SetWidgetClass(LoadedClass);
+		}
+		SpeechBubbleWidgetComponent->InitWidget();
+	}
+}
+
+void ATunaSweeperPiggyBankActor::StartWithdrawDialogue(APawn* InstigatorPawn)
+{
+	ATunaSweeperPlayerController* TunaPlayerController = InstigatorPawn
+		? Cast<ATunaSweeperPlayerController>(InstigatorPawn->GetController())
+		: nullptr;
+	if (!TunaPlayerController || TunaPlayerController->IsDialogueSequenceActive())
+	{
+		return;
+	}
+
+	FTunaSweeperDialogueLine PlayerLine;
+	PlayerLine.SpeakerName = FText::FromString(TEXT("\uD50C\uB808\uC774\uC5B4"));
+	PlayerLine.DialogueText = FText::FromString(TEXT("\uBA39\uC5C8\uB0D0?"));
+
+	TArray<FTunaSweeperDialogueLine> DialogueLines;
+	DialogueLines.Add(PlayerLine);
+	TunaPlayerController->StartDialogueSequence(DialogueLines, NAME_None);
 }

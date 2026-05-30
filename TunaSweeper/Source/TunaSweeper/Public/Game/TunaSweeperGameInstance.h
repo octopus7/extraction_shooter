@@ -669,6 +669,15 @@ public:
 		int32 RequiredQuantity,
 		bool bSaveImmediately = false);
 
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Piggy Bank")
+	int32 GetPiggyBankStoredAncientCoinValue(FName PiggyBankId) const;
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Piggy Bank")
+	bool AddPiggyBankStoredAncientCoinValue(
+		FName PiggyBankId,
+		int32 CoinValueDelta,
+		bool bSaveImmediately = false);
+
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Housing")
 	void GetHousingFacilities(TArray<FTunaSweeperHousingPlacedFacilitySaveData>& OutFacilities);
 
@@ -948,6 +957,9 @@ private:
 
 	UPROPERTY(Transient)
 	TMap<FName, FTunaSweeperWorldProgressSaveData> WorldProgressStatesById;
+
+	UPROPERTY(Transient)
+	TMap<FName, FTunaSweeperPiggyBankSaveData> PiggyBankStatesById;
 
 	UPROPERTY(Transient)
 	TArray<FTunaSweeperHousingPlacedFacilitySaveData> HousingFacilities;

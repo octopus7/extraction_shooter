@@ -27,7 +27,7 @@ namespace TunaSweeperSave
 {
 	const TCHAR* SaveSlotNamePrefix = TEXT("TunaSweeperSave_Slot");
 	const TCHAR* SaveSettingsSlotName = TEXT("TunaSweeperSaveSettings");
-	constexpr int32 CurrentSaveVersion = 14;
+	constexpr int32 CurrentSaveVersion = 15;
 	constexpr int32 SaveUserIndex = 0;
 	constexpr int32 MinSaveSlotIndex = 1;
 	constexpr int32 MaxSaveSlotIndex = 3;
@@ -3309,6 +3309,39 @@ bool UTunaSweeperGameInstance::UpdateWorldProgressState(
 	return true;
 }
 
+int32 UTunaSweeperGameInstance::GetPiggyBankStoredAncientCoinValue(FName PiggyBankId) const
+{
+	if (PiggyBankId.IsNone())
+	{
+		return 0;
+	}
+
+	const FTunaSweeperPiggyBankSaveData* FoundState = PiggyBankStatesById.Find(PiggyBankId);
+	return FoundState ? FMath::Max(0, FoundState->StoredAncientCoinValue) : 0;
+}
+
+bool UTunaSweeperGameInstance::AddPiggyBankStoredAncientCoinValue(
+	FName PiggyBankId,
+	int32 CoinValueDelta,
+	bool bSaveImmediately)
+{
+	EnsureInventoryStateInitialized();
+	if (PiggyBankId.IsNone() || CoinValueDelta <= 0)
+	{
+		return false;
+	}
+
+	FTunaSweeperPiggyBankSaveData& State = PiggyBankStatesById.FindOrAdd(PiggyBankId);
+	State.PiggyBankId = PiggyBankId;
+	State.StoredAncientCoinValue = FMath::Max(0, State.StoredAncientCoinValue) + CoinValueDelta;
+
+	if (bSaveImmediately)
+	{
+		SaveGameState();
+	}
+	return true;
+}
+
 void UTunaSweeperGameInstance::GetHousingFacilities(
 	TArray<FTunaSweeperHousingPlacedFacilitySaveData>& OutFacilities)
 {
@@ -3740,6 +3773,18 @@ bool UTunaSweeperGameInstance::LoadGameState()
 		LoadedWorldProgressState.ProgressQuantity = FMath::Max(0, LoadedWorldProgressState.ProgressQuantity);
 		WorldProgressStatesById.Add(LoadedWorldProgressState.ObjectId, LoadedWorldProgressState);
 	}
+	PiggyBankStatesById.Reset();
+	for (const FTunaSweeperPiggyBankSaveData& SavedPiggyBankState : SaveGame->PiggyBankStates)
+	{
+		if (SavedPiggyBankState.PiggyBankId.IsNone())
+		{
+			continue;
+		}
+
+		FTunaSweeperPiggyBankSaveData LoadedPiggyBankState = SavedPiggyBankState;
+		LoadedPiggyBankState.StoredAncientCoinValue = FMath::Max(0, LoadedPiggyBankState.StoredAncientCoinValue);
+		PiggyBankStatesById.Add(LoadedPiggyBankState.PiggyBankId, LoadedPiggyBankState);
+	}
 	HousingFacilities.Reset();
 	TSet<FGuid> LoadedHousingFacilityIds;
 	for (const FTunaSweeperHousingPlacedFacilitySaveData& SavedHousingFacility : SaveGame->HousingFacilities)
@@ -3954,6 +3999,13 @@ bool UTunaSweeperGameInstance::SaveGameStateInternal(
 	{
 		return Left.ObjectId.LexicalLess(Right.ObjectId);
 	});
+	PiggyBankStatesById.GenerateValueArray(SaveGame->PiggyBankStates);
+	SaveGame->PiggyBankStates.Sort([](
+		const FTunaSweeperPiggyBankSaveData& Left,
+		const FTunaSweeperPiggyBankSaveData& Right)
+	{
+		return Left.PiggyBankId.LexicalLess(Right.PiggyBankId);
+	});
 	SaveGame->HousingFacilities = HousingFacilities;
 	SaveGame->HousingFacilities.Sort([](
 		const FTunaSweeperHousingPlacedFacilitySaveData& Left,
@@ -4141,6 +4193,7 @@ void UTunaSweeperGameInstance::ResetRuntimeStateForSaveSlotSelection()
 	MapMarkers.Reset();
 	NextMapMarkerId = 1;
 	WorldProgressStatesById.Reset();
+	PiggyBankStatesById.Reset();
 	HousingFacilities.Reset();
 	UnlockedHousingFacilityIds.Reset();
 	UnlockedWorkbenchRecipeIds.Reset();
@@ -4170,6 +4223,7 @@ void UTunaSweeperGameInstance::GenerateDefaultInventoryState()
 	MapMarkers.Reset();
 	NextMapMarkerId = 1;
 	WorldProgressStatesById.Reset();
+	PiggyBankStatesById.Reset();
 	HousingFacilities.Reset();
 	UnlockedHousingFacilityIds.Reset();
 	UnlockedWorkbenchRecipeIds.Reset();

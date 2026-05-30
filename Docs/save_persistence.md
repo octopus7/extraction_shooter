@@ -6,7 +6,7 @@ Update it whenever a new state field is expected to persist across save slots, l
 ## Current Save Container
 
 - Save object: `UTunaSweeperSaveGame`
-- Current save version: `14`
+- Current save version: `15`
 - Runtime owner: `UTunaSweeperGameInstance`
 - Save entry point: `UTunaSweeperGameInstance::SaveGameStateInternal()`
 - Load entry point: `UTunaSweeperGameInstance::LoadGameState()`
@@ -112,6 +112,17 @@ Each `FTunaSweeperShopStockSaveData` preserves:
 - `StockQuantity`: remaining stock for that shop entry.
 
 Shop definitions are static data in `Content/Data/ShopDefinitions.json`. New saves start from each entry's defined `stock_quantity`; purchases decrease the runtime stock and immediately save the remaining stock with the inventory/currency transaction. Shop access is bunker-only through `ShopOpen` interaction. Item sale does not affect shop stock; it removes the player-owned item and grants half of the item table `shop_sell_price`.
+
+### Piggy Bank Deposits
+
+Piggy bank deposits are persisted per save slot through `UTunaSweeperSaveGame::PiggyBankStates`.
+
+Each `FTunaSweeperPiggyBankSaveData` preserves:
+
+- `PiggyBankId`: stable id from the gameplay interaction spawn id.
+- `StoredAncientCoinValue`: accumulated value from deposited ancient coin and ancient banknote items.
+
+Ancient coin and ancient banknote are item instances, not player currency. Depositing removes those item instances from carried inventory and adds to the piggy bank state; one ancient banknote contributes ten ancient-coin value. Withdraw interaction is currently exposed as a placeholder only and does not mutate save data.
 
 ### Workbench Recipe Unlocks
 

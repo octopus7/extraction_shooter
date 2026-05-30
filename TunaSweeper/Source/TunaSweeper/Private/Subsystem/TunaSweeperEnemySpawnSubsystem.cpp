@@ -2133,7 +2133,8 @@ void UTunaSweeperEnemySpawnSubsystem::ConfigureGameplayInteractionActor(
 			PiggyBankActor->ConfigurePiggyBankDefaults(
 				SpawnDefinition.CurrencyGrantAmount,
 				SpawnDefinition.InteractionDisplayName,
-				SpawnDefinition.MarkerWidgetClass);
+				SpawnDefinition.MarkerWidgetClass,
+				SpawnDefinition.SpawnId);
 		}
 		break;
 	case EGameplayInteractionActorSpawnType::SelfDestruct:

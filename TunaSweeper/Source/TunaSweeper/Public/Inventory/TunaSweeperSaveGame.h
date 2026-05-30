@@ -68,6 +68,18 @@ struct TUNASWEEPER_API FTunaSweeperShopStockSaveData
 	int32 StockQuantity = 0;
 };
 
+USTRUCT(BlueprintType)
+struct TUNASWEEPER_API FTunaSweeperPiggyBankSaveData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Piggy Bank")
+	FName PiggyBankId;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Piggy Bank", meta = (ClampMin = "0", UIMin = "0"))
+	int32 StoredAncientCoinValue = 0;
+};
+
 UCLASS()
 class TUNASWEEPER_API UTunaSweeperSaveGame : public USaveGame
 {
@@ -75,7 +87,7 @@ class TUNASWEEPER_API UTunaSweeperSaveGame : public USaveGame
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Save")
-	int32 SaveVersion = 14;
+	int32 SaveVersion = 15;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Save")
 	int32 SaveSlotIndex = 1;
@@ -124,6 +136,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|World Progress")
 	TArray<FTunaSweeperWorldProgressSaveData> WorldProgressStates;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Piggy Bank")
+	TArray<FTunaSweeperPiggyBankSaveData> PiggyBankStates;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Housing")
 	TArray<FTunaSweeperHousingPlacedFacilitySaveData> HousingFacilities;
