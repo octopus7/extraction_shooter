@@ -149,6 +149,7 @@ namespace TunaSweeperEditorSetup
 	const FString CommonGameHudTaskId = TEXT("2026-05-28_AddMeleeQuickSlotHudV1");
 	const FString WorkbenchPanelWidgetTaskId = TEXT("2026-05-29_CreateWorkbenchPanelWidgetV6");
 	const FString ShopRefreshStockButtonTaskId = TEXT("2026-05-29_AddShopRefreshStockButtonV1");
+	const FString ItemThumbnailSlotLayoutTaskId = TEXT("2026-05-30_RebuildItemThumbnailSlotLayoutV1");
 	const FString InventoryInputTaskId = TEXT("2026-05-11_AddInventoryInput");
 	const FString QuickSlotInputTaskId = TEXT("2026-05-28_AddMeleeQuickSlotInputV1");
 	const FString DropInputTaskId = TEXT("2026-05-18_AddDropInputAction");
@@ -12049,6 +12050,13 @@ public:
 
 		FTunaSweeperEditorRunOnce::Run(
 			TunaSweeperEditorSetup::ShopRefreshStockButtonTaskId,
+			[]()
+			{
+				return TunaSweeperEditorSetup::EnsureCommonGameHudAssets();
+			});
+
+		FTunaSweeperEditorRunOnce::Run(
+			TunaSweeperEditorSetup::ItemThumbnailSlotLayoutTaskId,
 			[]()
 			{
 				return TunaSweeperEditorSetup::EnsureCommonGameHudAssets();
