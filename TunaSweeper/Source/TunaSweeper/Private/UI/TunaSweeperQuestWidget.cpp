@@ -187,8 +187,8 @@ void UTunaSweeperQuestWidget::InitializeQuest(FName InQuestId)
 	if (!QuestId.IsNone())
 	{
 		if (const UTunaSweeperQuestSubsystem* QuestSubsystem = GetGameInstance()
-		? GetGameInstance()->GetSubsystem<UTunaSweeperQuestSubsystem>()
-		: nullptr)
+			? GetGameInstance()->GetSubsystem<UTunaSweeperQuestSubsystem>()
+			: nullptr)
 		{
 			switch (QuestSubsystem->GetQuestState(QuestId))
 			{
@@ -230,6 +230,9 @@ void UTunaSweeperQuestWidget::RefreshQuestView()
 		: nullptr;
 	if (!QuestSubsystem)
 	{
+		QuestId = NAME_None;
+		RebuildQuestList(TArray<FTunaSweeperQuestDefinition>());
+		UpdateDetailView();
 		return;
 	}
 
@@ -888,7 +891,7 @@ void UTunaSweeperQuestWidget::UpdateDetailView()
 	{
 		DetailEmptyText->SetText(GetQuestText(
 			FName(TEXT("quest.ui.empty.detail")),
-			FText::FromString(TEXT("퀘스트가 없습니다"))));
+			FText::FromString(TEXT("\uD018\uC2A4\uD2B8\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4"))));
 		DetailEmptyText->SetVisibility(bHasQuest ? ESlateVisibility::Collapsed : ESlateVisibility::HitTestInvisible);
 	}
 
