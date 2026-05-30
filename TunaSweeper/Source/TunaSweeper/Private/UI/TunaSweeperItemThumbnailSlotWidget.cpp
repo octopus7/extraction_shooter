@@ -310,27 +310,25 @@ void UTunaSweeperItemThumbnailSlotWidget::ApplyTileData()
 		else if (CachedTileData.Source == ETunaSweeperItemSlotSource::WorkbenchRecipe)
 		{
 			QuantityText = CachedTileData.bCanCraftWorkbenchRecipe
-				? FText::Format(FText::FromString(TEXT("x{0}\nOK")), FText::AsNumber(CachedTileData.ItemStack.Quantity))
+				? FText::Format(FText::FromString(TEXT("{0}\nOK")), FText::AsNumber(CachedTileData.ItemStack.Quantity))
 				: FText::Format(
-					FText::FromString(TEXT("x{0}\n-{1}")),
+					FText::FromString(TEXT("{0}\n-{1}")),
 					FText::AsNumber(CachedTileData.ItemStack.Quantity),
 					FText::AsNumber(FMath::Max(0, CachedTileData.WorkbenchMissingIngredientCount)));
 		}
 		else if (CachedTileData.Source == ETunaSweeperItemSlotSource::WorkbenchDismantleItem)
 		{
-			QuantityText = FText::Format(FText::FromString(TEXT("x{0}\nDIS")), FText::AsNumber(CachedTileData.ItemStack.Quantity));
+			QuantityText = FText::Format(FText::FromString(TEXT("{0}\nDIS")), FText::AsNumber(CachedTileData.ItemStack.Quantity));
 		}
 		else if (CachedTileData.Source == ETunaSweeperItemSlotSource::WorkbenchBlueprintItem)
 		{
 			QuantityText = CachedTileData.bCanRegisterWorkbenchBlueprint
-				? FText::Format(FText::FromString(TEXT("x{0}\nREG")), FText::AsNumber(CachedTileData.ItemStack.Quantity))
-				: FText::Format(FText::FromString(TEXT("x{0}\nLOCK")), FText::AsNumber(CachedTileData.ItemStack.Quantity));
+				? FText::Format(FText::FromString(TEXT("{0}\nREG")), FText::AsNumber(CachedTileData.ItemStack.Quantity))
+				: FText::Format(FText::FromString(TEXT("{0}\nLOCK")), FText::AsNumber(CachedTileData.ItemStack.Quantity));
 		}
 		else
 		{
-			QuantityText = FText::Format(
-				FText::FromString(TEXT("x{0}")),
-				FText::AsNumber(CachedTileData.ItemStack.Quantity));
+			QuantityText = FText::AsNumber(CachedTileData.ItemStack.Quantity);
 		}
 	}
 
@@ -339,13 +337,14 @@ void UTunaSweeperItemThumbnailSlotWidget::ApplyTileData()
 		ItemQuantityText->SetText(QuantityText);
 		ItemQuantityText->SetColorAndOpacity(FSlateColor(FLinearColor::White));
 		ItemQuantityText->SetJustification(ETextJustify::Right);
+		ItemQuantityText->SetLineHeightPercentage(0.72f);
 		if (!ItemQuantityPlate)
 		{
 			if (UOverlaySlot* QuantityOverlaySlot = Cast<UOverlaySlot>(ItemQuantityText->Slot))
 			{
 				QuantityOverlaySlot->SetHorizontalAlignment(HAlign_Right);
 				QuantityOverlaySlot->SetVerticalAlignment(VAlign_Bottom);
-				QuantityOverlaySlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 20.0f));
+				QuantityOverlaySlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 14.0f));
 			}
 		}
 	}

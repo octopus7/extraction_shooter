@@ -7312,19 +7312,20 @@ namespace TunaSweeperEditorSetup
 			EquipmentSlotNameSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 3.0f));
 		}
 
-		SlotSizeBox->SetWidthOverride(96.0f);
-		SlotSizeBox->SetHeightOverride(96.0f);
+		SlotSizeBox->SetWidthOverride(92.0f);
+		SlotSizeBox->SetHeightOverride(92.0f);
 		SlotSizeBox->SetContent(SlotBackground);
 		UVerticalBoxSlot* SlotSizeSlot = RootStack->AddChildToVerticalBox(SlotSizeBox);
 		if (SlotSizeSlot)
 		{
-			SlotSizeSlot->SetHorizontalAlignment(HAlign_Fill);
+			SlotSizeSlot->SetHorizontalAlignment(HAlign_Center);
 			SlotSizeSlot->SetVerticalAlignment(VAlign_Top);
+			SlotSizeSlot->SetPadding(FMargin(2.0f));
 		}
 
-		SlotBackground->SetPadding(FMargin(5.0f));
+		SlotBackground->SetPadding(FMargin(3.0f));
 		SlotBackground->SetBrush(MakeRoundedBoxBrush(
-			FVector2D(96.0f, 96.0f),
+			FVector2D(92.0f, 92.0f),
 			FLinearColor(0.012f, 0.014f, 0.017f, 0.90f),
 			FLinearColor(0.24f, 0.27f, 0.31f, 0.95f),
 			1.0f));
@@ -7355,17 +7356,19 @@ namespace TunaSweeperEditorSetup
 		{
 			LabelStackSlot->SetHorizontalAlignment(HAlign_Right);
 			LabelStackSlot->SetVerticalAlignment(VAlign_Bottom);
+			LabelStackSlot->SetPadding(FMargin(0.0f, 0.0f, -2.0f, -2.0f));
 		}
 
-		ItemQuantityPlate->SetPadding(FMargin(3.0f, 1.0f));
+		ItemQuantityPlate->SetPadding(FMargin(2.0f, 0.0f));
 		ItemQuantityPlate->SetBrush(MakeRoundedBoxBrush(
-			FVector2D(42.0f, 18.0f),
+			FVector2D(28.0f, 14.0f),
 			FLinearColor(0.36f, 0.38f, 0.40f, 0.50f),
 			FLinearColor::Transparent,
 			0.0f));
-		ConfigureTextBlock(ItemQuantityText, FText::FromString(TEXT("x1")), FLinearColor::White, 13);
+		ConfigureTextBlock(ItemQuantityText, FText::FromString(TEXT("1")), FLinearColor::White, 12);
 		ItemQuantityText->SetJustification(ETextJustify::Right);
 		ItemQuantityText->SetAutoWrapText(false);
+		ItemQuantityText->SetLineHeightPercentage(0.72f);
 		ItemQuantityPlate->SetContent(ItemQuantityText);
 		UVerticalBoxSlot* QuantitySlot = SlotLabelStack->AddChildToVerticalBox(ItemQuantityPlate);
 		if (QuantitySlot)
@@ -7374,9 +7377,9 @@ namespace TunaSweeperEditorSetup
 			QuantitySlot->SetVerticalAlignment(VAlign_Bottom);
 		}
 
-		ItemNamePlate->SetPadding(FMargin(3.0f, 1.0f));
+		ItemNamePlate->SetPadding(FMargin(2.0f, 0.0f));
 		ItemNamePlate->SetBrush(MakeRoundedBoxBrush(
-			FVector2D(86.0f, 18.0f),
+			FVector2D(64.0f, 14.0f),
 			FLinearColor(0.0f, 0.0f, 0.0f, 0.50f),
 			FLinearColor::Transparent,
 			0.0f));
@@ -7389,7 +7392,7 @@ namespace TunaSweeperEditorSetup
 		{
 			NameSlot->SetHorizontalAlignment(HAlign_Right);
 			NameSlot->SetVerticalAlignment(VAlign_Bottom);
-			NameSlot->SetPadding(FMargin(0.0f, 2.0f, 0.0f, 0.0f));
+			NameSlot->SetPadding(FMargin(0.0f));
 		}
 
 		ItemPricePlate->SetPadding(FMargin(0.0f, 1.0f));
