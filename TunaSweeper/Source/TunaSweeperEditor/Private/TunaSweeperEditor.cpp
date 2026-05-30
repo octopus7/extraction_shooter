@@ -7276,15 +7276,20 @@ namespace TunaSweeperEditorSetup
 		UOverlay* SlotOverlay = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), TEXT("SlotOverlay"));
 		USizeBox* IconBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("IconBox"));
 		UImage* ItemIconImage = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("ItemIconImage"));
+		UVerticalBox* SlotLabelStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("SlotLabelStack"));
+		UBorder* ItemQuantityPlate = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("ItemQuantityPlate"));
 		UTextBlock* ItemQuantityText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("ItemQuantityText"));
 		UTextBlock* AttachmentSlotIndicatorText = WidgetTree->ConstructWidget<UTextBlock>(
 			UTextBlock::StaticClass(),
 			TEXT("AttachmentSlotIndicatorText"));
 		UBorder* ItemNamePlate = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("ItemNamePlate"));
 		UTextBlock* ItemNameText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("ItemNameText"));
+		UBorder* ItemPricePlate = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("ItemPricePlate"));
+		UTextBlock* ItemPriceText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("ItemPriceText"));
 
 		if (!RootSizeBox || !RootStack || !EquipmentSlotNameText || !SlotSizeBox || !SlotBackground || !SlotOverlay ||
-			!IconBox || !ItemIconImage || !ItemQuantityText || !AttachmentSlotIndicatorText || !ItemNamePlate || !ItemNameText)
+			!IconBox || !ItemIconImage || !SlotLabelStack || !ItemQuantityPlate || !ItemQuantityText ||
+			!AttachmentSlotIndicatorText || !ItemNamePlate || !ItemNameText || !ItemPricePlate || !ItemPriceText)
 		{
 			return false;
 		}
@@ -7337,14 +7342,6 @@ namespace TunaSweeperEditorSetup
 			IconSlot->SetVerticalAlignment(VAlign_Center);
 		}
 
-		ConfigureTextBlock(ItemQuantityText, FText::FromString(TEXT("x1")), FLinearColor::White, 13);
-		UOverlaySlot* QuantitySlot = SlotOverlay->AddChildToOverlay(ItemQuantityText);
-		if (QuantitySlot)
-		{
-			QuantitySlot->SetHorizontalAlignment(HAlign_Right);
-			QuantitySlot->SetVerticalAlignment(VAlign_Top);
-		}
-
 		ConfigureTextBlock(AttachmentSlotIndicatorText, FText::GetEmpty(), FLinearColor::White, 13);
 		UOverlaySlot* AttachmentIndicatorSlot = SlotOverlay->AddChildToOverlay(AttachmentSlotIndicatorText);
 		if (AttachmentIndicatorSlot)
@@ -7353,29 +7350,77 @@ namespace TunaSweeperEditorSetup
 			AttachmentIndicatorSlot->SetVerticalAlignment(VAlign_Top);
 		}
 
+		UOverlaySlot* LabelStackSlot = SlotOverlay->AddChildToOverlay(SlotLabelStack);
+		if (LabelStackSlot)
+		{
+			LabelStackSlot->SetHorizontalAlignment(HAlign_Right);
+			LabelStackSlot->SetVerticalAlignment(VAlign_Bottom);
+		}
+
+		ItemQuantityPlate->SetPadding(FMargin(3.0f, 1.0f));
+		ItemQuantityPlate->SetBrush(MakeRoundedBoxBrush(
+			FVector2D(42.0f, 18.0f),
+			FLinearColor(0.36f, 0.38f, 0.40f, 0.50f),
+			FLinearColor::Transparent,
+			0.0f));
+		ConfigureTextBlock(ItemQuantityText, FText::FromString(TEXT("x1")), FLinearColor::White, 13);
+		ItemQuantityText->SetJustification(ETextJustify::Right);
+		ItemQuantityText->SetAutoWrapText(false);
+		ItemQuantityPlate->SetContent(ItemQuantityText);
+		UVerticalBoxSlot* QuantitySlot = SlotLabelStack->AddChildToVerticalBox(ItemQuantityPlate);
+		if (QuantitySlot)
+		{
+			QuantitySlot->SetHorizontalAlignment(HAlign_Right);
+			QuantitySlot->SetVerticalAlignment(VAlign_Bottom);
+		}
+
 		ItemNamePlate->SetPadding(FMargin(3.0f, 1.0f));
 		ItemNamePlate->SetBrush(MakeRoundedBoxBrush(
 			FVector2D(86.0f, 18.0f),
-			FLinearColor(0.0f, 0.0f, 0.0f, 0.62f),
+			FLinearColor(0.0f, 0.0f, 0.0f, 0.50f),
 			FLinearColor::Transparent,
 			0.0f));
 		ConfigureTextBlock(ItemNameText, FText::FromString(TEXT("Item")), FLinearColor(0.82f, 0.88f, 0.94f, 1.0f), 10);
+		ItemNameText->SetJustification(ETextJustify::Right);
 		ItemNameText->SetAutoWrapText(false);
 		ItemNamePlate->SetContent(ItemNameText);
-		UOverlaySlot* NameSlot = SlotOverlay->AddChildToOverlay(ItemNamePlate);
+		UVerticalBoxSlot* NameSlot = SlotLabelStack->AddChildToVerticalBox(ItemNamePlate);
 		if (NameSlot)
 		{
-			NameSlot->SetHorizontalAlignment(HAlign_Fill);
+			NameSlot->SetHorizontalAlignment(HAlign_Right);
 			NameSlot->SetVerticalAlignment(VAlign_Bottom);
+			NameSlot->SetPadding(FMargin(0.0f, 2.0f, 0.0f, 0.0f));
+		}
+
+		ItemPricePlate->SetPadding(FMargin(0.0f, 1.0f));
+		ItemPricePlate->SetBrush(MakeRoundedBoxBrush(
+			FVector2D(86.0f, 18.0f),
+			FLinearColor::Transparent,
+			FLinearColor::Transparent,
+			0.0f));
+		ConfigureTextBlock(ItemPriceText, FText::FromString(TEXT("$0")), FLinearColor(0.92f, 0.96f, 0.92f, 1.0f), 12);
+		ItemPriceText->SetJustification(ETextJustify::Right);
+		ItemPriceText->SetAutoWrapText(false);
+		ItemPricePlate->SetContent(ItemPriceText);
+		ItemPricePlate->SetVisibility(ESlateVisibility::Collapsed);
+		UVerticalBoxSlot* PriceSlot = RootStack->AddChildToVerticalBox(ItemPricePlate);
+		if (PriceSlot)
+		{
+			PriceSlot->SetHorizontalAlignment(HAlign_Right);
+			PriceSlot->SetVerticalAlignment(VAlign_Top);
+			PriceSlot->SetPadding(FMargin(0.0f, 2.0f, 0.0f, 0.0f));
 		}
 
 		RegisterWidgetVariable(WidgetBlueprint, SlotBackground);
 		RegisterWidgetVariable(WidgetBlueprint, EquipmentSlotNameText);
 		RegisterWidgetVariable(WidgetBlueprint, ItemIconImage);
+		RegisterWidgetVariable(WidgetBlueprint, ItemQuantityPlate);
 		RegisterWidgetVariable(WidgetBlueprint, ItemQuantityText);
 		RegisterWidgetVariable(WidgetBlueprint, AttachmentSlotIndicatorText);
 		RegisterWidgetVariable(WidgetBlueprint, ItemNamePlate);
 		RegisterWidgetVariable(WidgetBlueprint, ItemNameText);
+		RegisterWidgetVariable(WidgetBlueprint, ItemPricePlate);
+		RegisterWidgetVariable(WidgetBlueprint, ItemPriceText);
 		WidgetBlueprint->MarkPackageDirty();
 		return true;
 	}

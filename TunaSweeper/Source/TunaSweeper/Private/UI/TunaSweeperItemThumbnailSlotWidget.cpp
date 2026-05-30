@@ -300,48 +300,59 @@ void UTunaSweeperItemThumbnailSlotWidget::ApplyTileData()
 		}
 	}
 
+	FText QuantityText = FText::GetEmpty();
+	if (!CachedTileData.bIsEmpty)
+	{
+		if (CachedTileData.Source == ETunaSweeperItemSlotSource::Shop)
+		{
+			QuantityText = FText::AsNumber(FMath::Max(0, CachedTileData.ShopStockQuantity));
+		}
+		else if (CachedTileData.Source == ETunaSweeperItemSlotSource::WorkbenchRecipe)
+		{
+			QuantityText = CachedTileData.bCanCraftWorkbenchRecipe
+				? FText::Format(FText::FromString(TEXT("x{0}\nOK")), FText::AsNumber(CachedTileData.ItemStack.Quantity))
+				: FText::Format(
+					FText::FromString(TEXT("x{0}\n-{1}")),
+					FText::AsNumber(CachedTileData.ItemStack.Quantity),
+					FText::AsNumber(FMath::Max(0, CachedTileData.WorkbenchMissingIngredientCount)));
+		}
+		else if (CachedTileData.Source == ETunaSweeperItemSlotSource::WorkbenchDismantleItem)
+		{
+			QuantityText = FText::Format(FText::FromString(TEXT("x{0}\nDIS")), FText::AsNumber(CachedTileData.ItemStack.Quantity));
+		}
+		else if (CachedTileData.Source == ETunaSweeperItemSlotSource::WorkbenchBlueprintItem)
+		{
+			QuantityText = CachedTileData.bCanRegisterWorkbenchBlueprint
+				? FText::Format(FText::FromString(TEXT("x{0}\nREG")), FText::AsNumber(CachedTileData.ItemStack.Quantity))
+				: FText::Format(FText::FromString(TEXT("x{0}\nLOCK")), FText::AsNumber(CachedTileData.ItemStack.Quantity));
+		}
+		else
+		{
+			QuantityText = FText::Format(
+				FText::FromString(TEXT("x{0}")),
+				FText::AsNumber(CachedTileData.ItemStack.Quantity));
+		}
+	}
+
 	if (ItemQuantityText)
 	{
-		FText QuantityText = FText::GetEmpty();
-		if (!CachedTileData.bIsEmpty)
-		{
-			if (CachedTileData.Source == ETunaSweeperItemSlotSource::Shop)
-			{
-				QuantityText = FText::Format(
-					FText::FromString(TEXT("{0}/{1}\n${2}")),
-					FText::AsNumber(FMath::Max(0, CachedTileData.ShopStockQuantity)),
-					FText::AsNumber(FMath::Max(0, CachedTileData.ShopTotalStockQuantity)),
-					FText::AsNumber(FMath::Max(0, CachedTileData.ShopPrice)));
-			}
-			else if (CachedTileData.Source == ETunaSweeperItemSlotSource::WorkbenchRecipe)
-			{
-				QuantityText = CachedTileData.bCanCraftWorkbenchRecipe
-					? FText::Format(FText::FromString(TEXT("x{0}\nOK")), FText::AsNumber(CachedTileData.ItemStack.Quantity))
-					: FText::Format(
-						FText::FromString(TEXT("x{0}\n-{1}")),
-						FText::AsNumber(CachedTileData.ItemStack.Quantity),
-						FText::AsNumber(FMath::Max(0, CachedTileData.WorkbenchMissingIngredientCount)));
-			}
-			else if (CachedTileData.Source == ETunaSweeperItemSlotSource::WorkbenchDismantleItem)
-			{
-				QuantityText = FText::Format(FText::FromString(TEXT("x{0}\nDIS")), FText::AsNumber(CachedTileData.ItemStack.Quantity));
-			}
-			else if (CachedTileData.Source == ETunaSweeperItemSlotSource::WorkbenchBlueprintItem)
-			{
-				QuantityText = CachedTileData.bCanRegisterWorkbenchBlueprint
-					? FText::Format(FText::FromString(TEXT("x{0}\nREG")), FText::AsNumber(CachedTileData.ItemStack.Quantity))
-					: FText::Format(FText::FromString(TEXT("x{0}\nLOCK")), FText::AsNumber(CachedTileData.ItemStack.Quantity));
-			}
-			else
-			{
-				QuantityText = FText::Format(
-					FText::FromString(TEXT("x{0}")),
-					FText::AsNumber(CachedTileData.ItemStack.Quantity));
-			}
-		}
-
 		ItemQuantityText->SetText(QuantityText);
 		ItemQuantityText->SetColorAndOpacity(FSlateColor(FLinearColor::White));
+		ItemQuantityText->SetJustification(ETextJustify::Right);
+		if (!ItemQuantityPlate)
+		{
+			if (UOverlaySlot* QuantityOverlaySlot = Cast<UOverlaySlot>(ItemQuantityText->Slot))
+			{
+				QuantityOverlaySlot->SetHorizontalAlignment(HAlign_Right);
+				QuantityOverlaySlot->SetVerticalAlignment(VAlign_Bottom);
+				QuantityOverlaySlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 20.0f));
+			}
+		}
+	}
+	if (ItemQuantityPlate)
+	{
+		ItemQuantityPlate->SetBrushColor(FLinearColor(0.36f, 0.38f, 0.40f, 0.50f));
+		ItemQuantityPlate->SetVisibility(QuantityText.IsEmpty() ? ESlateVisibility::Collapsed : ESlateVisibility::HitTestInvisible);
 	}
 
 	if (AttachmentSlotIndicatorText != nullptr)
@@ -361,10 +372,32 @@ void UTunaSweeperItemThumbnailSlotWidget::ApplyTileData()
 				? CachedTileData.DisplayName
 				: FText::GetEmpty());
 		ItemNameText->SetText(NameText);
+		ItemNameText->SetJustification(ETextJustify::Right);
 		if (ItemNamePlate)
 		{
+			ItemNamePlate->SetBrushColor(FLinearColor(0.0f, 0.0f, 0.0f, 0.50f));
 			ItemNamePlate->SetVisibility(NameText.IsEmpty() ? ESlateVisibility::Collapsed : ESlateVisibility::HitTestInvisible);
+			if (UOverlaySlot* NameOverlaySlot = Cast<UOverlaySlot>(ItemNamePlate->Slot))
+			{
+				NameOverlaySlot->SetHorizontalAlignment(HAlign_Right);
+				NameOverlaySlot->SetVerticalAlignment(VAlign_Bottom);
+			}
 		}
+	}
+
+	const FText PriceText = (!CachedTileData.bIsEmpty && CachedTileData.Source == ETunaSweeperItemSlotSource::Shop)
+		? FText::Format(FText::FromString(TEXT("${0}")), FText::AsNumber(FMath::Max(0, CachedTileData.ShopPrice)))
+		: FText::GetEmpty();
+	if (ItemPriceText)
+	{
+		ItemPriceText->SetText(PriceText);
+		ItemPriceText->SetColorAndOpacity(FSlateColor(FLinearColor(0.92f, 0.96f, 0.92f, 1.0f)));
+		ItemPriceText->SetJustification(ETextJustify::Right);
+	}
+	if (ItemPricePlate)
+	{
+		ItemPricePlate->SetBrushColor(FLinearColor::Transparent);
+		ItemPricePlate->SetVisibility(PriceText.IsEmpty() ? ESlateVisibility::Collapsed : ESlateVisibility::HitTestInvisible);
 	}
 }
 

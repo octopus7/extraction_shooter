@@ -56,6 +56,9 @@ protected:
 	TObjectPtr<UImage> ItemIconImage;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Tile", meta = (BindWidgetOptional))
+	TObjectPtr<UBorder> ItemQuantityPlate;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Tile", meta = (BindWidgetOptional))
 	TObjectPtr<UTextBlock> ItemQuantityText;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Tile", meta = (BindWidgetOptional))
@@ -66,6 +69,12 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Tile", meta = (BindWidgetOptional))
 	TObjectPtr<UTextBlock> ItemNameText;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Tile", meta = (BindWidgetOptional))
+	TObjectPtr<UBorder> ItemPricePlate;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Tile", meta = (BindWidgetOptional))
+	TObjectPtr<UTextBlock> ItemPriceText;
 
 private:
 	void ApplyTileData();
