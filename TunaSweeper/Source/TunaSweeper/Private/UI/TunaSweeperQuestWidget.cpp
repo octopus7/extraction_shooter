@@ -5,6 +5,8 @@
 #include "Components/Button.h"
 #include "Components/HorizontalBox.h"
 #include "Components/HorizontalBoxSlot.h"
+#include "Components/Overlay.h"
+#include "Components/OverlaySlot.h"
 #include "Components/ScrollBox.h"
 #include "Components/SizeBox.h"
 #include "Components/TextBlock.h"
@@ -127,7 +129,7 @@ void UTunaSweeperQuestListEntryWidget::BuildEntryWidget()
 
 	EntryLabelText->SetJustification(ETextJustify::Left);
 	EntryLabelText->SetAutoWrapText(true);
-	EntryLabelText->SetWrapTextAt(320.0f);
+	EntryLabelText->SetWrapTextAt(0.0f);
 	TunaSweeperUIFont::ApplyFont(EntryLabelText, 17, ETunaSweeperUIFontWeight::Bold);
 	if (UVerticalBoxSlot* LabelSlot = EntryStack->AddChildToVerticalBox(EntryLabelText))
 	{
@@ -179,30 +181,41 @@ void UTunaSweeperQuestListEntryWidget::HandleEntryClicked()
 
 void UTunaSweeperQuestWidget::InitializeQuest(FName InQuestId)
 {
-	QuestId = InQuestId;
 	ActiveFilter = GetDefaultFilter();
+	QuestId = InQuestId;
 
-	if (const UTunaSweeperQuestSubsystem* QuestSubsystem = GetGameInstance()
+	if (!QuestId.IsNone())
+	{
+		if (const UTunaSweeperQuestSubsystem* QuestSubsystem = GetGameInstance()
 		? GetGameInstance()->GetSubsystem<UTunaSweeperQuestSubsystem>()
 		: nullptr)
-	{
-		switch (QuestSubsystem->GetQuestState(QuestId))
 		{
-		case ETunaSweeperQuestState::Accepted:
-		case ETunaSweeperQuestState::RewardAvailable:
-			ActiveFilter = EQuestListFilter::InProgress;
-			break;
-		case ETunaSweeperQuestState::RewardCompleted:
-			ActiveFilter = EQuestListFilter::RewardCompleted;
-			break;
-		case ETunaSweeperQuestState::Available:
-		default:
-			ActiveFilter = bShowAvailableTab ? EQuestListFilter::Available : GetDefaultFilter();
-			break;
+			switch (QuestSubsystem->GetQuestState(QuestId))
+			{
+			case ETunaSweeperQuestState::Accepted:
+			case ETunaSweeperQuestState::RewardAvailable:
+				ActiveFilter = EQuestListFilter::InProgress;
+				break;
+			case ETunaSweeperQuestState::RewardCompleted:
+				ActiveFilter = EQuestListFilter::RewardCompleted;
+				break;
+			case ETunaSweeperQuestState::Available:
+			default:
+				ActiveFilter = bShowAvailableTab ? EQuestListFilter::Available : GetDefaultFilter();
+				break;
+			}
 		}
 	}
 
 	NormalizeActiveFilter();
+	if (!QuestId.IsNone())
+	{
+		SetSavedSelectedQuestId(ActiveFilter, QuestId);
+	}
+	else
+	{
+		QuestId = GetSavedSelectedQuestId(ActiveFilter);
+	}
 	RefreshQuestView();
 }
 
@@ -225,6 +238,15 @@ void UTunaSweeperQuestWidget::RefreshQuestView()
 	ApplySelectedQuest(FilteredDefinitions);
 	RebuildQuestList(FilteredDefinitions);
 	UpdateDetailView();
+}
+
+void UTunaSweeperQuestWidget::ResetQuestSelection()
+{
+	QuestId = NAME_None;
+	AvailableSelectedQuestId = NAME_None;
+	InProgressSelectedQuestId = NAME_None;
+	CompletedSelectedQuestId = NAME_None;
+	ActiveFilter = GetDefaultFilter();
 }
 
 UTunaSweeperQuestWidget::EQuestListFilter UTunaSweeperQuestWidget::GetDefaultFilter() const
@@ -302,6 +324,7 @@ void UTunaSweeperQuestWidget::NativeDestruct()
 		QuestSubsystem->OnQuestProgressChanged.RemoveAll(this);
 	}
 
+	ResetQuestSelection();
 	Super::NativeDestruct();
 }
 
@@ -344,6 +367,7 @@ void UTunaSweeperQuestWidget::HandlePrimaryButtonClicked()
 		{
 			QuestId = ActingQuestId;
 			ActiveFilter = EQuestListFilter::InProgress;
+			SetSavedSelectedQuestId(ActiveFilter, QuestId);
 			if (TunaPlayerController)
 			{
 				TunaPlayerController->PlayQuestPresentation(ActingQuestId, ETunaSweeperQuestPresentationTrigger::OnAccept);
@@ -356,6 +380,7 @@ void UTunaSweeperQuestWidget::HandlePrimaryButtonClicked()
 		{
 			QuestId = ActingQuestId;
 			ActiveFilter = EQuestListFilter::RewardCompleted;
+			SetSavedSelectedQuestId(ActiveFilter, QuestId);
 			if (TunaPlayerController)
 			{
 				TunaPlayerController->PlayQuestPresentation(ActingQuestId, ETunaSweeperQuestPresentationTrigger::OnRewardClaim);
@@ -376,6 +401,7 @@ bool UTunaSweeperQuestWidget::CacheBuiltQuestWidgets()
 	RootPanel = Cast<UBorder>(WidgetTree->FindWidget(TEXT("QuestRootPanel")));
 	RootColumns = Cast<UHorizontalBox>(WidgetTree->FindWidget(TEXT("QuestRootColumns")));
 	QuestListScrollBox = Cast<UScrollBox>(WidgetTree->FindWidget(TEXT("QuestListScrollBox")));
+	DetailStack = Cast<UVerticalBox>(WidgetTree->FindWidget(TEXT("QuestDetailStack")));
 	AvailableTabButton = Cast<UButton>(WidgetTree->FindWidget(TEXT("QuestAvailableTabButton")));
 	AvailableTabText = Cast<UTextBlock>(WidgetTree->FindWidget(TEXT("QuestAvailableTabText")));
 	InProgressTabButton = Cast<UButton>(WidgetTree->FindWidget(TEXT("QuestInProgressTabButton")));
@@ -389,12 +415,14 @@ bool UTunaSweeperQuestWidget::CacheBuiltQuestWidgets()
 	DetailObjectiveText = Cast<UTextBlock>(WidgetTree->FindWidget(TEXT("QuestDetailObjectiveText")));
 	DetailRewardHeaderText = Cast<UTextBlock>(WidgetTree->FindWidget(TEXT("QuestDetailRewardHeaderText")));
 	DetailRewardText = Cast<UTextBlock>(WidgetTree->FindWidget(TEXT("QuestDetailRewardText")));
+	DetailEmptyText = Cast<UTextBlock>(WidgetTree->FindWidget(TEXT("QuestDetailEmptyText")));
 	PrimaryButton = Cast<UButton>(WidgetTree->FindWidget(TEXT("QuestPrimaryButton")));
 	PrimaryButtonText = Cast<UTextBlock>(WidgetTree->FindWidget(TEXT("QuestPrimaryButtonText")));
 
 	return RootPanel &&
 		RootColumns &&
 		QuestListScrollBox &&
+		DetailStack &&
 		InProgressTabButton &&
 		InProgressTabText &&
 		CompletedTabButton &&
@@ -406,6 +434,7 @@ bool UTunaSweeperQuestWidget::CacheBuiltQuestWidgets()
 		DetailObjectiveText &&
 		DetailRewardHeaderText &&
 		DetailRewardText &&
+		DetailEmptyText &&
 		PrimaryButton &&
 		PrimaryButtonText &&
 		(!bShowAvailableTab || (AvailableTabButton && AvailableTabText));
@@ -432,7 +461,8 @@ void UTunaSweeperQuestWidget::BuildQuestWidget()
 	RootPanel = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("QuestRootPanel"));
 	RootColumns = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("QuestRootColumns"));
 	UBorder* DetailPanel = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("QuestDetailPanel"));
-	UVerticalBox* DetailStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("QuestDetailStack"));
+	UOverlay* DetailOverlay = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), TEXT("QuestDetailOverlay"));
+	DetailStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("QuestDetailStack"));
 	UHorizontalBox* DetailHeaderRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("QuestDetailHeaderRow"));
 	DetailTitleText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("QuestDetailTitleText"));
 	DetailStateText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("QuestDetailStateText"));
@@ -443,6 +473,7 @@ void UTunaSweeperQuestWidget::BuildQuestWidget()
 	DetailObjectiveText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("QuestDetailObjectiveText"));
 	DetailRewardHeaderText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("QuestDetailRewardHeaderText"));
 	DetailRewardText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("QuestDetailRewardText"));
+	DetailEmptyText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("QuestDetailEmptyText"));
 	PrimaryButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("QuestPrimaryButton"));
 	PrimaryButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("QuestPrimaryButtonText"));
 	USizeBox* ListSizeBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("QuestListSizeBox"));
@@ -461,6 +492,7 @@ void UTunaSweeperQuestWidget::BuildQuestWidget()
 	if (!RootPanel ||
 		!RootColumns ||
 		!DetailPanel ||
+		!DetailOverlay ||
 		!DetailStack ||
 		!DetailHeaderRow ||
 		!DetailTitleText ||
@@ -472,6 +504,7 @@ void UTunaSweeperQuestWidget::BuildQuestWidget()
 		!DetailObjectiveText ||
 		!DetailRewardHeaderText ||
 		!DetailRewardText ||
+		!DetailEmptyText ||
 		!PrimaryButton ||
 		!PrimaryButtonText ||
 		!ListSizeBox ||
@@ -507,11 +540,16 @@ void UTunaSweeperQuestWidget::BuildQuestWidget()
 		FLinearColor(0.27f, 0.31f, 0.32f, 0.62f),
 		1.0f));
 	DetailPanel->SetPadding(FMargin(22.0f, 18.0f));
-	DetailPanel->SetContent(DetailStack);
+	DetailPanel->SetContent(DetailOverlay);
+	if (UOverlaySlot* DetailStackSlot = DetailOverlay->AddChildToOverlay(DetailStack))
+	{
+		DetailStackSlot->SetHorizontalAlignment(HAlign_Fill);
+		DetailStackSlot->SetVerticalAlignment(VAlign_Fill);
+	}
 
 	DetailTitleText->SetColorAndOpacity(FSlateColor(FLinearColor(0.94f, 0.98f, 0.98f, 1.0f)));
 	DetailTitleText->SetAutoWrapText(true);
-	DetailTitleText->SetWrapTextAt(650.0f);
+	DetailTitleText->SetWrapTextAt(0.0f);
 	TunaSweeperUIFont::ApplyFont(DetailTitleText, 26, ETunaSweeperUIFontWeight::Bold);
 	if (UHorizontalBoxSlot* TitleSlot = DetailHeaderRow->AddChildToHorizontalBox(DetailTitleText))
 	{
@@ -536,7 +574,7 @@ void UTunaSweeperQuestWidget::BuildQuestWidget()
 
 	DetailDescriptionText->SetColorAndOpacity(FSlateColor(FLinearColor(0.80f, 0.86f, 0.85f, 1.0f)));
 	DetailDescriptionText->SetAutoWrapText(true);
-	DetailDescriptionText->SetWrapTextAt(748.0f);
+	DetailDescriptionText->SetWrapTextAt(0.0f);
 	DetailDescriptionText->SetLineHeightPercentage(1.12f);
 	TunaSweeperUIFont::ApplyFont(DetailDescriptionText, 18);
 	if (UVerticalBoxSlot* DescriptionSlot = DetailStack->AddChildToVerticalBox(DetailDescriptionText))
@@ -553,7 +591,7 @@ void UTunaSweeperQuestWidget::BuildQuestWidget()
 
 	DetailObjectiveText->SetColorAndOpacity(FSlateColor(FLinearColor(0.82f, 0.88f, 0.86f, 1.0f)));
 	DetailObjectiveText->SetAutoWrapText(true);
-	DetailObjectiveText->SetWrapTextAt(748.0f);
+	DetailObjectiveText->SetWrapTextAt(0.0f);
 	DetailObjectiveText->SetLineHeightPercentage(1.12f);
 	TunaSweeperUIFont::ApplyFont(DetailObjectiveText, 17);
 	if (UVerticalBoxSlot* ObjectiveSlot = DetailBodyStack->AddChildToVerticalBox(DetailObjectiveText))
@@ -570,7 +608,7 @@ void UTunaSweeperQuestWidget::BuildQuestWidget()
 
 	DetailRewardText->SetColorAndOpacity(FSlateColor(FLinearColor(0.82f, 0.88f, 0.86f, 1.0f)));
 	DetailRewardText->SetAutoWrapText(true);
-	DetailRewardText->SetWrapTextAt(748.0f);
+	DetailRewardText->SetWrapTextAt(0.0f);
 	TunaSweeperUIFont::ApplyFont(DetailRewardText, 17);
 	DetailBodyStack->AddChildToVerticalBox(DetailRewardText);
 
@@ -589,6 +627,19 @@ void UTunaSweeperQuestWidget::BuildQuestWidget()
 	{
 		PrimaryButtonSlot->SetHorizontalAlignment(HAlign_Right);
 		PrimaryButtonSlot->SetPadding(FMargin(0.0f, 18.0f, 0.0f, 0.0f));
+	}
+
+	DetailEmptyText->SetJustification(ETextJustify::Center);
+	DetailEmptyText->SetAutoWrapText(true);
+	DetailEmptyText->SetWrapTextAt(0.0f);
+	DetailEmptyText->SetColorAndOpacity(FSlateColor(FLinearColor(0.68f, 0.74f, 0.74f, 1.0f)));
+	TunaSweeperUIFont::ApplyFont(DetailEmptyText, 22, ETunaSweeperUIFontWeight::Bold);
+	DetailEmptyText->SetVisibility(ESlateVisibility::Collapsed);
+	if (UOverlaySlot* EmptySlot = DetailOverlay->AddChildToOverlay(DetailEmptyText))
+	{
+		EmptySlot->SetHorizontalAlignment(HAlign_Center);
+		EmptySlot->SetVerticalAlignment(VAlign_Center);
+		EmptySlot->SetPadding(FMargin(24.0f));
 	}
 
 	ListSizeBox->SetWidthOverride(380.0f);
@@ -671,7 +722,7 @@ void UTunaSweeperQuestWidget::RebuildQuestList(const TArray<FTunaSweeperQuestDef
 		{
 			EmptyText->SetText(GetEmptyListText());
 			EmptyText->SetAutoWrapText(true);
-			EmptyText->SetWrapTextAt(336.0f);
+			EmptyText->SetWrapTextAt(0.0f);
 			EmptyText->SetColorAndOpacity(FSlateColor(FLinearColor(0.62f, 0.68f, 0.68f, 1.0f)));
 			TunaSweeperUIFont::ApplyFont(EmptyText, 16);
 			QuestListScrollBox->AddChild(EmptyText);
@@ -701,28 +752,67 @@ void UTunaSweeperQuestWidget::RebuildQuestList(const TArray<FTunaSweeperQuestDef
 
 void UTunaSweeperQuestWidget::ApplySelectedQuest(const TArray<FTunaSweeperQuestDefinition>& QuestDefinitions)
 {
+	const FName SavedQuestId = GetSavedSelectedQuestId(ActiveFilter);
 	for (const FTunaSweeperQuestDefinition& QuestDefinition : QuestDefinitions)
 	{
-		if (QuestDefinition.QuestId == QuestId)
+		if (QuestDefinition.QuestId == SavedQuestId)
 		{
+			QuestId = SavedQuestId;
 			return;
 		}
 	}
 
 	QuestId = QuestDefinitions.Num() > 0 ? QuestDefinitions[0].QuestId : NAME_None;
+	SetSavedSelectedQuestId(ActiveFilter, QuestId);
 }
 
 void UTunaSweeperQuestWidget::SetSelectedQuestId(FName InQuestId)
 {
 	QuestId = InQuestId;
+	SetSavedSelectedQuestId(ActiveFilter, QuestId);
 	RefreshQuestView();
 }
 
 void UTunaSweeperQuestWidget::SetActiveFilter(EQuestListFilter InFilter)
 {
+	SetSavedSelectedQuestId(ActiveFilter, QuestId);
 	ActiveFilter = InFilter;
 	NormalizeActiveFilter();
+	QuestId = GetSavedSelectedQuestId(ActiveFilter);
 	RefreshQuestView();
+}
+
+FName UTunaSweeperQuestWidget::GetSavedSelectedQuestId(EQuestListFilter Filter) const
+{
+	switch (Filter)
+	{
+	case EQuestListFilter::Available:
+		return AvailableSelectedQuestId;
+	case EQuestListFilter::InProgress:
+		return InProgressSelectedQuestId;
+	case EQuestListFilter::RewardCompleted:
+		return CompletedSelectedQuestId;
+	default:
+		return NAME_None;
+	}
+}
+
+void UTunaSweeperQuestWidget::SetSavedSelectedQuestId(EQuestListFilter Filter, FName InQuestId)
+{
+	switch (Filter)
+	{
+	case EQuestListFilter::Available:
+		AvailableSelectedQuestId = InQuestId;
+		break;
+	case EQuestListFilter::InProgress:
+		InProgressSelectedQuestId = InQuestId;
+		break;
+	case EQuestListFilter::RewardCompleted:
+		CompletedSelectedQuestId = InQuestId;
+		break;
+	default:
+		break;
+	}
 }
 
 void UTunaSweeperQuestWidget::HandleQuestProgressChanged()
@@ -782,20 +872,33 @@ void UTunaSweeperQuestWidget::UpdateDetailView()
 	UTunaSweeperQuestSubsystem* QuestSubsystem = GetGameInstance()
 		? GetGameInstance()->GetSubsystem<UTunaSweeperQuestSubsystem>()
 		: nullptr;
-	if (!QuestSubsystem)
-	{
-		return;
-	}
 
 	FTunaSweeperQuestDefinition QuestDefinition;
-	const bool bHasQuest = !QuestId.IsNone() && QuestSubsystem->TryGetQuestDefinition(QuestId, QuestDefinition);
+	const bool bHasQuest =
+		QuestSubsystem &&
+		!QuestId.IsNone() &&
+		QuestSubsystem->TryGetQuestDefinition(QuestId, QuestDefinition);
+
+	if (DetailStack)
+	{
+		DetailStack->SetIsEnabled(bHasQuest);
+		DetailStack->SetVisibility(bHasQuest ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
+	}
+	if (DetailEmptyText)
+	{
+		DetailEmptyText->SetText(GetQuestText(
+			FName(TEXT("quest.ui.empty.detail")),
+			FText::FromString(TEXT("퀘스트가 없습니다"))));
+		DetailEmptyText->SetVisibility(bHasQuest ? ESlateVisibility::Collapsed : ESlateVisibility::HitTestInvisible);
+	}
+
 	if (DetailTitleText)
 	{
-		DetailTitleText->SetText(bHasQuest ? QuestDefinition.Title : GetQuestText(FName(TEXT("quest.ui.title"))));
+		DetailTitleText->SetText(bHasQuest ? QuestDefinition.Title : FText::GetEmpty());
 	}
 	if (DetailDescriptionText)
 	{
-		DetailDescriptionText->SetText(bHasQuest ? QuestDefinition.Description : GetQuestText(FName(TEXT("quest.ui.select_prompt"))));
+		DetailDescriptionText->SetText(bHasQuest ? QuestDefinition.Description : FText::GetEmpty());
 	}
 	if (DetailStateText)
 	{
@@ -803,19 +906,19 @@ void UTunaSweeperQuestWidget::UpdateDetailView()
 	}
 	if (DetailObjectiveHeaderText)
 	{
-		DetailObjectiveHeaderText->SetText(GetQuestText(FName(TEXT("quest.ui.objectives"))));
+		DetailObjectiveHeaderText->SetText(bHasQuest ? GetQuestText(FName(TEXT("quest.ui.objectives"))) : FText::GetEmpty());
 	}
 	if (DetailObjectiveText)
 	{
-		DetailObjectiveText->SetText(bHasQuest ? BuildObjectiveText(*QuestSubsystem, QuestId) : FText::GetEmpty());
+		DetailObjectiveText->SetText(bHasQuest && QuestSubsystem ? BuildObjectiveText(*QuestSubsystem, QuestId) : FText::GetEmpty());
 	}
 	if (DetailRewardHeaderText)
 	{
-		DetailRewardHeaderText->SetText(GetQuestText(FName(TEXT("quest.ui.rewards"))));
+		DetailRewardHeaderText->SetText(bHasQuest ? GetQuestText(FName(TEXT("quest.ui.rewards"))) : FText::GetEmpty());
 	}
 	if (DetailRewardText)
 	{
-		DetailRewardText->SetText(bHasQuest ? BuildRewardText(*QuestSubsystem, QuestId) : FText::GetEmpty());
+		DetailRewardText->SetText(bHasQuest && QuestSubsystem ? BuildRewardText(*QuestSubsystem, QuestId) : FText::GetEmpty());
 	}
 	if (PrimaryButtonText)
 	{
@@ -824,7 +927,8 @@ void UTunaSweeperQuestWidget::UpdateDetailView()
 	if (PrimaryButton)
 	{
 		PrimaryButton->SetIsEnabled(bHasQuest && IsPrimaryButtonEnabled(QuestId));
-		PrimaryButton->SetRenderOpacity(bHasQuest ? 1.0f : 0.0f);
+		PrimaryButton->SetVisibility(bHasQuest ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
+		PrimaryButton->SetRenderOpacity(1.0f);
 	}
 }
 

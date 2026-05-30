@@ -167,7 +167,7 @@ namespace TunaSweeperEditorSetup
 	const FString IntroMenuGraphicsSettingsTaskId = TEXT("2026-05-30_CenterTitleSaveSlotInfoV1");
 	const FString OpeningScenarioPresentationTaskId = TEXT("2026-05-19_CreateOpeningScenarioPresentationV2");
 	const FString LevelTransitionVideoTaskId = TEXT("2026-05-16_AddBidirectionalLevelTransitionVideoV3");
-	const FString FirstOutingQuestTaskId = TEXT("2026-05-30_CreateSeparateQuestPanelWidgetsV1");
+	const FString FirstOutingQuestTaskId = TEXT("2026-05-30_UpdateQuestPanelEmptyStateSelectionV2");
 	const FString SelfDestructInteractionTaskId = TEXT("2026-05-16_CreateSelfDestructInteractionV1");
 	const FString WorldProgressInteractionTaskId = TEXT("2026-05-19_CreateWorldProgressObstacleAssetsV1");
 	const FString WarpPointInteractionTaskId = TEXT("2026-05-25_CreateWarpPointInteractionAssetsV1");
@@ -4742,11 +4742,11 @@ namespace TunaSweeperEditorSetup
 			PanelSlot->SetAnchors(FAnchors(0.5f, 0.5f));
 			PanelSlot->SetAlignment(FVector2D(0.5f, 0.5f));
 			PanelSlot->SetPosition(FVector2D(0.0f, 0.0f));
-			PanelSlot->SetSize(FVector2D(560.0f, 380.0f));
+			PanelSlot->SetSize(FVector2D(1180.0f, 640.0f));
 		}
 
 		PanelBackground->SetBrush(MakeRoundedBoxBrush(
-			FVector2D(560.0f, 380.0f),
+			FVector2D(1180.0f, 640.0f),
 			FLinearColor(0.055f, 0.065f, 0.075f, 0.96f),
 			FLinearColor(0.40f, 0.48f, 0.54f, 0.85f),
 			1.5f));
@@ -4783,6 +4783,7 @@ namespace TunaSweeperEditorSetup
 
 		ConfigureTextBlockLeft(QuestDescriptionText, FText::FromString(TEXT("\uC774\uC81C \uB4E4\uC5B4\uC654\uC73C\uB2C8 \uB098\uAC00\uC11C \uD55C\uBC88 \uC0B0\uCC45\uD558\uACE0 \uB4E4\uC5B4\uC640")), FLinearColor(0.83f, 0.88f, 0.91f, 1.0f), 18);
 		QuestDescriptionText->SetAutoWrapText(true);
+		QuestDescriptionText->SetWrapTextAt(0.0f);
 		UVerticalBoxSlot* DescriptionSlot = PanelStack->AddChildToVerticalBox(QuestDescriptionText);
 		if (DescriptionSlot)
 		{

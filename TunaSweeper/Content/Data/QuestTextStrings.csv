@@ -8,6 +8,7 @@ quest.ui.select_prompt,우측 목록에서 퀘스트를 선택하세요.,Select 
 quest.ui.empty.available,수락 가능한 퀘스트가 없습니다.,No available quests.,受注可能なクエストはありません
 quest.ui.empty.in_progress,진행 중인 퀘스트가 없습니다.,No active quests.,進行中のクエストはありません
 quest.ui.empty.completed,보상을 완료한 퀘스트가 없습니다.,No completed reward quests.,報酬完了のクエストはありません
+quest.ui.empty.detail,퀘스트가 없습니다,No quests,クエストがありません
 quest.ui.objectives,목표,Objectives,目標
 quest.ui.rewards,보상,Rewards,報酬
 quest.ui.no_reward,없음,None,なし

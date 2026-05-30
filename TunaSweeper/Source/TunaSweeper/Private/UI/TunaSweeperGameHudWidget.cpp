@@ -768,6 +768,18 @@ void UTunaSweeperGameHudWidget::SetHudMode(ETunaSweeperHudMode InHudMode)
 		return;
 	}
 
+	if (ActiveHudMode == ETunaSweeperHudMode::Quest && InHudMode != ETunaSweeperHudMode::Quest)
+	{
+		if (MenuQuestPanelWidget)
+		{
+			MenuQuestPanelWidget->ResetQuestSelection();
+		}
+		if (InteractionQuestPanelWidget)
+		{
+			InteractionQuestPanelWidget->ResetQuestSelection();
+		}
+	}
+
 	if (InHudMode != ETunaSweeperHudMode::Quest)
 	{
 		bQuestPanelOpenedFromInteraction = false;

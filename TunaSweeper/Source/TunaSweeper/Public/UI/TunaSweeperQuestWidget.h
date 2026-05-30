@@ -69,6 +69,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Quest")
 	void RefreshQuestView();
 
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Quest")
+	void ResetQuestSelection();
+
 protected:
 	virtual TSharedRef<SWidget> RebuildWidget() override;
 	virtual void NativeConstruct() override;
@@ -107,6 +110,8 @@ private:
 	void ApplySelectedQuest(const TArray<FTunaSweeperQuestDefinition>& QuestDefinitions);
 	void SetSelectedQuestId(FName InQuestId);
 	void SetActiveFilter(EQuestListFilter InFilter);
+	FName GetSavedSelectedQuestId(EQuestListFilter Filter) const;
+	void SetSavedSelectedQuestId(EQuestListFilter Filter, FName InQuestId);
 	void HandleQuestProgressChanged();
 	void UpdateTabButtonStates();
 	void UpdateDetailView();
@@ -173,6 +178,12 @@ private:
 	TObjectPtr<UTextBlock> DetailRewardText;
 
 	UPROPERTY(Transient)
+	TObjectPtr<UTextBlock> DetailEmptyText;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UVerticalBox> DetailStack;
+
+	UPROPERTY(Transient)
 	TObjectPtr<UButton> PrimaryButton;
 
 	UPROPERTY(Transient)
@@ -180,6 +191,9 @@ private:
 
 	EQuestListFilter ActiveFilter = EQuestListFilter::Available;
 	FName QuestId = NAME_None;
+	FName AvailableSelectedQuestId = NAME_None;
+	FName InProgressSelectedQuestId = NAME_None;
+	FName CompletedSelectedQuestId = NAME_None;
 };
 
 UCLASS(BlueprintType, Blueprintable)
