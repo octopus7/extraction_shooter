@@ -3,6 +3,8 @@
 #include "Blueprint/WidgetTree.h"
 #include "Components/Border.h"
 #include "Components/Button.h"
+#include "Components/HorizontalBox.h"
+#include "Components/HorizontalBoxSlot.h"
 #include "Components/Image.h"
 #include "Components/SizeBox.h"
 #include "Components/TextBlock.h"
@@ -12,6 +14,7 @@
 #include "Game/TunaSweeperGameInstance.h"
 #include "Styling/SlateBrush.h"
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
+#include "UI/TunaSweeperCurrencyDisplayWidget.h"
 #include "UI/TunaSweeperUIFont.h"
 #include "UI/TunaSweeperUiText.h"
 #include "Widgets/SWidget.h"
@@ -87,8 +90,14 @@ void UTunaSweeperShopSellPanelWidget::RefreshSelectedItem()
 	if (SalePriceText)
 	{
 		SalePriceText->SetText(FText::Format(
-			TunaSweeperShopSellPanel::ResolveUiText(TunaGameInstance, TEXT("ui.shop.sell_price_pattern"), TEXT("\ud310\ub9e4\uac00 ${0}")),
+			TunaSweeperShopSellPanel::ResolveUiText(TunaGameInstance, TEXT("ui.shop.sell_price_pattern"), TEXT("\ud310\ub9e4\uac00 {0}")),
 			FText::AsNumber(SalePrice)));
+	}
+	if (SalePriceCoinImage)
+	{
+		SalePriceCoinImage->SetBrushFromTexture(UTunaSweeperCurrencyDisplayWidget::LoadCurrencyCoinIconTexture(), true);
+		SalePriceCoinImage->SetBrushTintColor(FSlateColor(FLinearColor::White));
+		SalePriceCoinImage->SetOpacity(1.0f);
 	}
 	if (SellButtonText)
 	{
@@ -199,15 +208,20 @@ void UTunaSweeperShopSellPanelWidget::BuildNativeWidgetTree()
 	USizeBox* IconSizeBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("ItemIconSizeBox"));
 	ItemIconImage = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("ItemIconImage"));
 	ItemNameText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("ItemNameText"));
+	UHorizontalBox* SalePriceRowBox = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("SalePriceRow"));
+	USizeBox* SalePriceCoinSizeBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("SalePriceCoinSizeBox"));
+	SalePriceCoinImage = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("SalePriceCoinImage"));
 	SalePriceText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("SalePriceText"));
 	USizeBox* SellButtonSizeBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("SellButtonSizeBox"));
 	SellButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("SellButton"));
 	SellButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("SellButtonText"));
 	if (!RootSizeBox || !PanelBackground || !PanelStack || !IconSizeBox || !ItemIconImage ||
-		!ItemNameText || !SalePriceText || !SellButtonSizeBox || !SellButton || !SellButtonText)
+		!ItemNameText || !SalePriceRowBox || !SalePriceCoinSizeBox || !SalePriceCoinImage ||
+		!SalePriceText || !SellButtonSizeBox || !SellButton || !SellButtonText)
 	{
 		return;
 	}
+	SalePriceRow = SalePriceRowBox;
 
 	WidgetTree->RootWidget = RootSizeBox;
 	RootSizeBox->SetWidthOverride(TunaSweeperShopSellPanel::PanelWidth);
@@ -247,7 +261,23 @@ void UTunaSweeperShopSellPanelWidget::BuildNativeWidgetTree()
 
 	SalePriceText->SetColorAndOpacity(FSlateColor(FLinearColor(0.92f, 0.96f, 0.92f, 1.0f)));
 	TunaSweeperUIFont::ApplyFont(SalePriceText, 17);
-	UVerticalBoxSlot* PriceSlot = PanelStack->AddChildToVerticalBox(SalePriceText);
+	SalePriceCoinSizeBox->SetWidthOverride(18.0f);
+	SalePriceCoinSizeBox->SetHeightOverride(18.0f);
+	SalePriceCoinSizeBox->SetContent(SalePriceCoinImage);
+	UHorizontalBoxSlot* SaleIconSlot = SalePriceRowBox->AddChildToHorizontalBox(SalePriceCoinSizeBox);
+	if (SaleIconSlot)
+	{
+		SaleIconSlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
+		SaleIconSlot->SetVerticalAlignment(VAlign_Center);
+	}
+	UHorizontalBoxSlot* SaleTextSlot = SalePriceRowBox->AddChildToHorizontalBox(SalePriceText);
+	if (SaleTextSlot)
+	{
+		SaleTextSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+		SaleTextSlot->SetVerticalAlignment(VAlign_Center);
+		SaleTextSlot->SetPadding(FMargin(7.0f, 0.0f, 0.0f, 0.0f));
+	}
+	UVerticalBoxSlot* PriceSlot = PanelStack->AddChildToVerticalBox(SalePriceRowBox);
 	if (PriceSlot)
 	{
 		PriceSlot->SetHorizontalAlignment(HAlign_Fill);
@@ -289,6 +319,14 @@ void UTunaSweeperShopSellPanelWidget::CacheNamedWidgets()
 	if (!SalePriceText)
 	{
 		SalePriceText = Cast<UTextBlock>(WidgetTree->FindWidget(FName(TEXT("SalePriceText"))));
+	}
+	if (!SalePriceRow)
+	{
+		SalePriceRow = WidgetTree->FindWidget(FName(TEXT("SalePriceRow")));
+	}
+	if (!SalePriceCoinImage)
+	{
+		SalePriceCoinImage = Cast<UImage>(WidgetTree->FindWidget(FName(TEXT("SalePriceCoinImage"))));
 	}
 	if (!SellButton)
 	{

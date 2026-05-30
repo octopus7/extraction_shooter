@@ -74,6 +74,7 @@ private:
 	bool HandleWorkbenchCraftInteraction(UTunaSweeperInteractableComponent* Interactable, APawn* InstigatorPawn);
 	bool HandleWorkbenchDismantleInteraction(UTunaSweeperInteractableComponent* Interactable, APawn* InstigatorPawn);
 	bool HandleWorkbenchBlueprintRegisterInteraction(UTunaSweeperInteractableComponent* Interactable, APawn* InstigatorPawn);
+	bool HandlePiggyBankInteraction(UTunaSweeperInteractableComponent* Interactable, APawn* InstigatorPawn);
 
 	TSet<TWeakObjectPtr<UTunaSweeperInteractableComponent>> RegisteredInteractables;
 	TWeakObjectPtr<UTunaSweeperInteractableComponent> FocusedInteractable;

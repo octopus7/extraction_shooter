@@ -9,6 +9,7 @@ class UButton;
 class UImage;
 class UTextBlock;
 class UTexture2D;
+class UWidget;
 
 UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API UTunaSweeperShopSellPanelWidget : public UUserWidget
@@ -39,6 +40,12 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Shop", meta = (BindWidgetOptional))
 	TObjectPtr<UTextBlock> SalePriceText;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Shop", meta = (BindWidgetOptional))
+	TObjectPtr<UWidget> SalePriceRow;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Shop", meta = (BindWidgetOptional))
+	TObjectPtr<UImage> SalePriceCoinImage;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Shop", meta = (BindWidgetOptional))
 	TObjectPtr<UButton> SellButton;

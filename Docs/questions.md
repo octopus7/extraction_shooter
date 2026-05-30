@@ -1434,3 +1434,23 @@ A. 아니다. 현재 저장소에는 창고 C++ 액터(`ATunaSweeperStorageActor
 ### Answer
 
 코드만 수정하는 범위다. 깨짐 원인은 WBP/에셋 자체가 아니라 `RebuildMultiOptionList()`에서 런타임 생성한 `UTextBlock`들이 공용 한글 폰트 적용 시점을 놓친 것이다. 따라서 생성 직후 `TunaSweeperUIFont::ApplyFont()`를 적용하거나 런타임 row 생성 뒤 폰트 적용 패스를 다시 태우는 식으로 C++ 위젯 코드에서 해결하면 된다.
+
+## 2026-05-30 17:43:09 (elapsed: 00:00:30)
+
+### Question
+
+문서 하위 경로에 스토리 보이지?
+
+### Answer
+
+보인다. `Docs/Story` 아래에 스토리 요약, 대화집, 이미지, 영상 컷 추천 문서가 있고, 주요 파일은 `tuna_sweeper_story_summary.md`, `tuna_dialogue/tuna_sweeper_dialogue_book.md`, `story_video_cut_recommendations.md`, `first_dinner_ending_video_prompt.md`다.
+
+## 2026-05-30 17:52:01 (elapsed: 00:00:00)
+
+### Question
+
+롤링봄이 출혈 30%인데 아무런 동작이 일어나지 않는 원인을 검토할 것.
+
+### Answer
+
+롤링봄 투사체 피해량과 상한이 1이고, 플레이어 방어력이 1 이상이면 `TakeDamage`가 적용 피해 0을 반환한다. 기존 투사체 코드는 `AppliedDamage > 0`일 때만 출혈 판정을 시도해서 방어력에 피해가 막히는 경우 30% 확률 판정 자체가 실행되지 않았다. 출혈 판정을 실제 적용 피해가 아니라 데미지 시도가 있었던 투사체 히트 기준으로 분리해 해결한다.

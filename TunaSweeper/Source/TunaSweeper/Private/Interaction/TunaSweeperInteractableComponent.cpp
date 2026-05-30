@@ -63,6 +63,8 @@ namespace TunaSweeperInteractionMarkerLayout
 			return FName(TEXT("ui.interaction.workbench_dismantle"));
 		case ETunaSweeperInteractionType::WorkbenchBlueprintRegister:
 			return FName(TEXT("ui.interaction.workbench_blueprint_register"));
+		case ETunaSweeperInteractionType::PiggyBank:
+			return FName(TEXT("ui.interaction.piggy_bank"));
 		default:
 			return NAME_None;
 		}

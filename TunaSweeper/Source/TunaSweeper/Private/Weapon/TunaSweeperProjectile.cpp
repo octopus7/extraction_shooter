@@ -445,7 +445,8 @@ void ATunaSweeperProjectile::HandleHit(
 	}
 
 	float AppliedDamage = 0.0f;
-	if (DamageAmount > 0.0f)
+	const bool bAttemptedDamage = DamageAmount > 0.0f;
+	if (bAttemptedDamage)
 	{
 		FHitResult DamageHit = Hit;
 		if (OtherComp)
@@ -463,13 +464,16 @@ void ATunaSweeperProjectile::HandleHit(
 			UDamageType::StaticClass());
 	}
 
-	if (AppliedDamage > 0.0f)
+	if (bAttemptedDamage)
 	{
 		if (ATunaSweeperEnemyCharacter* EnemyOwner = Cast<ATunaSweeperEnemyCharacter>(GetOwner()))
 		{
 			EnemyOwner->TryApplyBleedTo(OtherActor);
 		}
+	}
 
+	if (AppliedDamage > 0.0f)
+	{
 		SpawnHitEffect(Hit, OtherActor, OtherComp);
 		if (ATunaSweeperPlayerController* TunaPlayerController =
 			Cast<ATunaSweeperPlayerController>(GetInstigatorController()))

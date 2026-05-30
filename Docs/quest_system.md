@@ -98,9 +98,9 @@ RewardCompleted
 - `State`
 - 목표별 `ObjectiveId`, `CurrentCount`
 - HUD 추적 대상 `TrackedQuestId`
-- 퀘스트 코인 잔액 `QuestCoinBalance`
+- 코인 재화 잔액 `QuestCoinBalance`
 
-세이브 슬롯을 바꾸거나 새 게임을 시작하면 퀘스트 진행, 추적 대상, 퀘스트 코인이 슬롯별로 분리된다.
+세이브 슬롯을 바꾸거나 새 게임을 시작하면 퀘스트 진행, 추적 대상, 코인 재화가 슬롯별로 분리된다.
 
 ## 목표 이벤트
 

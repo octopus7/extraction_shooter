@@ -1,7 +1,10 @@
 #include "UI/TunaSweeperLootContainerWidget.h"
 
 #include "Blueprint/DragDropOperation.h"
+#include "Blueprint/WidgetTree.h"
 #include "Components/Button.h"
+#include "Components/HorizontalBox.h"
+#include "Components/HorizontalBoxSlot.h"
 #include "Components/SizeBox.h"
 #include "Components/TextBlock.h"
 #include "Components/TileView.h"
@@ -9,6 +12,7 @@
 #include "Game/TunaSweeperGameInstance.h"
 #include "GameFramework/PlayerController.h"
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
+#include "UI/TunaSweeperCurrencyDisplayWidget.h"
 #include "UI/TunaSweeperItemDragDropOperation.h"
 #include "UI/TunaSweeperItemStackSplitPopupWidget.h"
 #include "UI/TunaSweeperItemStackTileItemObject.h"
@@ -591,6 +595,7 @@ void UTunaSweeperItemContainerPanelWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
+	EnsureShopCurrencyDisplayWidget();
 
 	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
 	{
@@ -616,6 +621,8 @@ void UTunaSweeperItemContainerPanelWidget::NativeDestruct()
 
 void UTunaSweeperItemContainerPanelWidget::RefreshHeaderControls()
 {
+	EnsureShopCurrencyDisplayWidget();
+
 	if (ShopRefreshStockButton)
 	{
 		ShopRefreshStockButton->SetVisibility(ESlateVisibility::Collapsed);
@@ -628,6 +635,43 @@ void UTunaSweeperItemContainerPanelWidget::RefreshHeaderControls()
 			TEXT("ui.shop.debug_refresh_stock"),
 			TEXT("\uAC31\uC2E0")));
 	}
+	if (ShopCurrencyDisplayWidget)
+	{
+		ShopCurrencyDisplayWidget->SetVisibility(ESlateVisibility::Collapsed);
+	}
+}
+
+void UTunaSweeperItemContainerPanelWidget::EnsureShopCurrencyDisplayWidget()
+{
+	if (ShopCurrencyDisplayWidget || !WidgetTree)
+	{
+		return;
+	}
+
+	UHorizontalBox* ContainerHeaderRow = Cast<UHorizontalBox>(WidgetTree->FindWidget(FName(TEXT("ContainerHeaderRow"))));
+	if (!ContainerHeaderRow)
+	{
+		return;
+	}
+
+	ShopCurrencyDisplayWidget = WidgetTree->ConstructWidget<UTunaSweeperCurrencyDisplayWidget>(
+		UTunaSweeperCurrencyDisplayWidget::StaticClass(),
+		TEXT("ShopCurrencyDisplayWidget"));
+	if (!ShopCurrencyDisplayWidget)
+	{
+		return;
+	}
+
+	UHorizontalBoxSlot* CurrencySlot = ContainerHeaderRow->AddChildToHorizontalBox(ShopCurrencyDisplayWidget);
+	if (CurrencySlot)
+	{
+		CurrencySlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
+		CurrencySlot->SetHorizontalAlignment(HAlign_Right);
+		CurrencySlot->SetVerticalAlignment(VAlign_Center);
+		CurrencySlot->SetPadding(FMargin(12.0f, 0.0f, 0.0f, 0.0f));
+	}
+
+	ShopCurrencyDisplayWidget->SetVisibility(ESlateVisibility::Collapsed);
 }
 
 bool UTunaSweeperItemContainerPanelWidget::TryResolveDropSlotFromCursor(
@@ -1009,6 +1053,8 @@ void UTunaSweeperShopContainerWidget::NativeDestruct()
 
 void UTunaSweeperShopContainerWidget::RefreshHeaderControls()
 {
+	EnsureShopCurrencyDisplayWidget();
+
 	if (ShopRefreshStockButton)
 	{
 		ShopRefreshStockButton->SetVisibility(ESlateVisibility::Visible);
@@ -1020,6 +1066,11 @@ void UTunaSweeperShopContainerWidget::RefreshHeaderControls()
 			GetGameInstance<UTunaSweeperGameInstance>(),
 			TEXT("ui.shop.debug_refresh_stock"),
 			TEXT("\uAC31\uC2E0")));
+	}
+	if (ShopCurrencyDisplayWidget)
+	{
+		ShopCurrencyDisplayWidget->SetVisibility(ESlateVisibility::HitTestInvisible);
+		ShopCurrencyDisplayWidget->RefreshCurrencyBalance();
 	}
 }
 

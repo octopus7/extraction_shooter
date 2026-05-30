@@ -12,6 +12,7 @@ class UButton;
 class UProgressBar;
 class USizeBox;
 class UTextBlock;
+class UTunaSweeperCurrencyDisplayWidget;
 struct FTunaSweeperItemSlotReference;
 
 UCLASS(BlueprintType, Blueprintable)
@@ -65,6 +66,9 @@ protected:
 	TObjectPtr<UTextBlock> SortInventoryButtonText;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
+	TObjectPtr<UTunaSweeperCurrencyDisplayWidget> CurrencyDisplayWidget;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
 	TObjectPtr<UWidget> InventoryWeightPanel;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
@@ -83,6 +87,7 @@ protected:
 	TObjectPtr<UTextBlock> InventoryWeightWarningText;
 
 private:
+	void EnsureCurrencyDisplayWidget();
 	void ApplyHudState();
 
 	bool TryResolveDropSlotFromCursor(

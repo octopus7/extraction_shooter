@@ -13,6 +13,7 @@
 #include "Interaction/TunaSweeperLootContainerSpawnInteractableActor.h"
 #include "Interaction/TunaSweeperMemoActor.h"
 #include "Interaction/TunaSweeperPersistentDoorActor.h"
+#include "Interaction/TunaSweeperPiggyBankActor.h"
 #include "Interaction/TunaSweeperPickupItemActor.h"
 #include "Interaction/TunaSweeperSelfDestructInteractableActor.h"
 #include "Interaction/TunaSweeperShopActor.h"
@@ -76,6 +77,8 @@ namespace TunaSweeperInteractionQuestEvents
 			return FName(TEXT("workbench_dismantle"));
 		case ETunaSweeperInteractionType::WorkbenchBlueprintRegister:
 			return FName(TEXT("workbench_blueprint_register"));
+		case ETunaSweeperInteractionType::PiggyBank:
+			return FName(TEXT("piggy_bank"));
 		default:
 			return NAME_None;
 		}
@@ -248,6 +251,9 @@ bool UTunaSweeperInteractionSubsystem::RequestInteraction(UTunaSweeperInteractab
 	case ETunaSweeperInteractionType::WorkbenchBlueprintRegister:
 		bHandled = HandleWorkbenchBlueprintRegisterInteraction(Interactable, InstigatorPawn);
 		break;
+	case ETunaSweeperInteractionType::PiggyBank:
+		bHandled = HandlePiggyBankInteraction(Interactable, InstigatorPawn);
+		break;
 	default:
 		return false;
 	}
@@ -303,6 +309,11 @@ bool UTunaSweeperInteractionSubsystem::CanOfferInteraction(const UTunaSweeperInt
 	if (Interactable->GetInteractionType() == ETunaSweeperInteractionType::WorkbenchCraft ||
 		Interactable->GetInteractionType() == ETunaSweeperInteractionType::WorkbenchDismantle ||
 		Interactable->GetInteractionType() == ETunaSweeperInteractionType::WorkbenchBlueprintRegister)
+	{
+		return TunaSweeperInteractionQuestEvents::IsBunkerMap(GetWorld());
+	}
+
+	if (Interactable->GetInteractionType() == ETunaSweeperInteractionType::PiggyBank)
 	{
 		return TunaSweeperInteractionQuestEvents::IsBunkerMap(GetWorld());
 	}
@@ -787,6 +798,16 @@ bool UTunaSweeperInteractionSubsystem::HandleWorkbenchBlueprintRegisterInteracti
 
 	TunaPlayerController->OpenWorkbenchBlueprintRegisterPanel(WorkbenchActor->GetWorkbenchId());
 	return true;
+}
+
+bool UTunaSweeperInteractionSubsystem::HandlePiggyBankInteraction(
+	UTunaSweeperInteractableComponent* Interactable,
+	APawn* InstigatorPawn)
+{
+	ATunaSweeperPiggyBankActor* PiggyBankActor = Interactable
+		? Cast<ATunaSweeperPiggyBankActor>(Interactable->GetOwner())
+		: nullptr;
+	return PiggyBankActor && PiggyBankActor->GrantCurrency(InstigatorPawn);
 }
 
 void UTunaSweeperInteractionSubsystem::RefreshFocusedInteractable()

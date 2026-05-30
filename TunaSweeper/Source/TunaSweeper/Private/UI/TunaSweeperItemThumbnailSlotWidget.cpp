@@ -3,9 +3,12 @@
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Blueprint/WidgetTree.h"
 #include "Components/Border.h"
+#include "Components/HorizontalBox.h"
+#include "Components/HorizontalBoxSlot.h"
 #include "Components/Image.h"
 #include "Components/Overlay.h"
 #include "Components/OverlaySlot.h"
+#include "Components/SizeBox.h"
 #include "Components/TextBlock.h"
 #include "Components/Widget.h"
 #include "Engine/Texture2D.h"
@@ -13,6 +16,7 @@
 #include "Game/TunaSweeperGameInstance.h"
 #include "InputCoreTypes.h"
 #include "Input/Reply.h"
+#include "UI/TunaSweeperCurrencyDisplayWidget.h"
 #include "UI/TunaSweeperItemDragDropOperation.h"
 #include "UI/TunaSweeperItemHoverPromptWidget.h"
 #include "UI/TunaSweeperItemStackSplitPopupWidget.h"
@@ -273,6 +277,7 @@ void UTunaSweeperItemThumbnailSlotWidget::ApplyTileData()
 	}
 
 	EnsureAttachmentSlotIndicatorWidget();
+	EnsureItemPriceCoinWidget();
 
 	const bool bIsEquipmentSlot = CachedTileData.Source == ETunaSweeperItemSlotSource::Equipment;
 	if (EquipmentSlotNameText)
@@ -385,7 +390,7 @@ void UTunaSweeperItemThumbnailSlotWidget::ApplyTileData()
 	}
 
 	const FText PriceText = (!CachedTileData.bIsEmpty && CachedTileData.Source == ETunaSweeperItemSlotSource::Shop)
-		? FText::Format(FText::FromString(TEXT("${0}")), FText::AsNumber(FMath::Max(0, CachedTileData.ShopPrice)))
+		? FText::AsNumber(FMath::Max(0, CachedTileData.ShopPrice))
 		: FText::GetEmpty();
 	if (ItemPriceText)
 	{
@@ -397,6 +402,13 @@ void UTunaSweeperItemThumbnailSlotWidget::ApplyTileData()
 	{
 		ItemPricePlate->SetBrushColor(FLinearColor::Transparent);
 		ItemPricePlate->SetVisibility(PriceText.IsEmpty() ? ESlateVisibility::Collapsed : ESlateVisibility::HitTestInvisible);
+	}
+	if (ItemPriceCoinImage)
+	{
+		ItemPriceCoinImage->SetBrushFromTexture(UTunaSweeperCurrencyDisplayWidget::LoadCurrencyCoinIconTexture(), true);
+		ItemPriceCoinImage->SetBrushTintColor(FSlateColor(FLinearColor::White));
+		ItemPriceCoinImage->SetVisibility(PriceText.IsEmpty() ? ESlateVisibility::Collapsed : ESlateVisibility::HitTestInvisible);
+		ItemPriceCoinImage->SetOpacity(PriceText.IsEmpty() ? 0.0f : 1.0f);
 	}
 }
 
@@ -454,6 +466,54 @@ void UTunaSweeperItemThumbnailSlotWidget::EnsureAttachmentSlotIndicatorWidget()
 		IndicatorSlot->SetHorizontalAlignment(HAlign_Left);
 		IndicatorSlot->SetVerticalAlignment(VAlign_Top);
 		IndicatorSlot->SetPadding(FMargin(0.0f));
+	}
+}
+
+void UTunaSweeperItemThumbnailSlotWidget::EnsureItemPriceCoinWidget()
+{
+	if (ItemPriceCoinImage == nullptr && WidgetTree)
+	{
+		ItemPriceCoinImage = Cast<UImage>(WidgetTree->FindWidget(FName(TEXT("ItemPriceCoinImage"))));
+	}
+
+	if ((ItemPriceCoinImage || !WidgetTree || !ItemPricePlate || !ItemPriceText))
+	{
+		return;
+	}
+
+	UHorizontalBox* PriceRow = WidgetTree->ConstructWidget<UHorizontalBox>(
+		UHorizontalBox::StaticClass(),
+		TEXT("ItemPriceRow"));
+	USizeBox* CoinSizeBox = WidgetTree->ConstructWidget<USizeBox>(
+		USizeBox::StaticClass(),
+		TEXT("ItemPriceCoinSizeBox"));
+	ItemPriceCoinImage = WidgetTree->ConstructWidget<UImage>(
+		UImage::StaticClass(),
+		TEXT("ItemPriceCoinImage"));
+	if (!PriceRow || !CoinSizeBox || !ItemPriceCoinImage)
+	{
+		return;
+	}
+
+	ItemPriceText->RemoveFromParent();
+	ItemPricePlate->SetContent(PriceRow);
+
+	CoinSizeBox->SetWidthOverride(13.0f);
+	CoinSizeBox->SetHeightOverride(13.0f);
+	CoinSizeBox->SetContent(ItemPriceCoinImage);
+	UHorizontalBoxSlot* CoinSlot = PriceRow->AddChildToHorizontalBox(CoinSizeBox);
+	if (CoinSlot)
+	{
+		CoinSlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
+		CoinSlot->SetVerticalAlignment(VAlign_Center);
+	}
+
+	UHorizontalBoxSlot* TextSlot = PriceRow->AddChildToHorizontalBox(ItemPriceText);
+	if (TextSlot)
+	{
+		TextSlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
+		TextSlot->SetVerticalAlignment(VAlign_Center);
+		TextSlot->SetPadding(FMargin(3.0f, 0.0f, 0.0f, 0.0f));
 	}
 }
 

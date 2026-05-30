@@ -119,6 +119,7 @@
 #include "UI/TunaSweeperHudQuickSlotBarWidget.h"
 #include "UI/TunaSweeperHudStatusRingWidget.h"
 #include "UI/TunaSweeperHudTopReserveWidget.h"
+#include "UI/TunaSweeperCurrencyDisplayWidget.h"
 #include "UI/TunaSweeperUIFont.h"
 #include "UI/TunaSweeperItemThumbnailSlotWidget.h"
 #include "UI/TunaSweeperIntroMenuWidget.h"
@@ -158,6 +159,7 @@ namespace TunaSweeperEditorSetup
 	const FString WorkbenchPanelWidgetTaskId = TEXT("2026-05-29_CreateWorkbenchPanelWidgetV6");
 	const FString ShopRefreshStockButtonTaskId = TEXT("2026-05-29_AddShopRefreshStockButtonV1");
 	const FString SplitExternalContainerPanelTaskId = TEXT("2026-05-30_SplitExternalContainerPanelsV1");
+	const FString CurrencyCoinUiTaskId = TEXT("2026-05-30_AddCurrencyCoinUiV1");
 	const FString ItemThumbnailSlotLayoutTaskId = TEXT("2026-05-30_RebuildItemThumbnailSlotLayoutV1");
 	const FString InventoryInputTaskId = TEXT("2026-05-11_AddInventoryInput");
 	const FString QuickSlotInputTaskId = TEXT("2026-05-28_AddMeleeQuickSlotInputV1");
@@ -7341,11 +7343,15 @@ namespace TunaSweeperEditorSetup
 		UBorder* ItemNamePlate = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("ItemNamePlate"));
 		UTextBlock* ItemNameText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("ItemNameText"));
 		UBorder* ItemPricePlate = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("ItemPricePlate"));
+		UHorizontalBox* ItemPriceRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("ItemPriceRow"));
+		USizeBox* ItemPriceCoinSizeBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("ItemPriceCoinSizeBox"));
+		UImage* ItemPriceCoinImage = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("ItemPriceCoinImage"));
 		UTextBlock* ItemPriceText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("ItemPriceText"));
 
 		if (!RootSizeBox || !RootStack || !EquipmentSlotNameText || !SlotSizeBox || !SlotBackground || !SlotOverlay ||
 			!IconBox || !ItemIconImage || !SlotLabelStack || !ItemQuantityPlate || !ItemQuantityText ||
-			!AttachmentSlotIndicatorText || !ItemNamePlate || !ItemNameText || !ItemPricePlate || !ItemPriceText)
+			!AttachmentSlotIndicatorText || !ItemNamePlate || !ItemNameText || !ItemPricePlate ||
+			!ItemPriceRow || !ItemPriceCoinSizeBox || !ItemPriceCoinImage || !ItemPriceText)
 		{
 			return false;
 		}
@@ -7457,10 +7463,28 @@ namespace TunaSweeperEditorSetup
 			FLinearColor::Transparent,
 			FLinearColor::Transparent,
 			0.0f));
-		ConfigureTextBlock(ItemPriceText, FText::FromString(TEXT("$0")), FLinearColor(0.92f, 0.96f, 0.92f, 1.0f), 12);
+		ConfigureTextBlock(ItemPriceText, FText::FromString(TEXT("0")), FLinearColor(0.92f, 0.96f, 0.92f, 1.0f), 12);
 		ItemPriceText->SetJustification(ETextJustify::Right);
 		ItemPriceText->SetAutoWrapText(false);
-		ItemPricePlate->SetContent(ItemPriceText);
+		ItemPriceCoinSizeBox->SetWidthOverride(13.0f);
+		ItemPriceCoinSizeBox->SetHeightOverride(13.0f);
+		ItemPriceCoinImage->SetBrushFromTexture(UTunaSweeperCurrencyDisplayWidget::LoadCurrencyCoinIconTexture(), true);
+		ItemPriceCoinImage->SetBrushTintColor(FSlateColor(FLinearColor::White));
+		ItemPriceCoinSizeBox->SetContent(ItemPriceCoinImage);
+		UHorizontalBoxSlot* PriceIconSlot = ItemPriceRow->AddChildToHorizontalBox(ItemPriceCoinSizeBox);
+		if (PriceIconSlot)
+		{
+			PriceIconSlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
+			PriceIconSlot->SetVerticalAlignment(VAlign_Center);
+		}
+		UHorizontalBoxSlot* PriceTextSlot = ItemPriceRow->AddChildToHorizontalBox(ItemPriceText);
+		if (PriceTextSlot)
+		{
+			PriceTextSlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
+			PriceTextSlot->SetVerticalAlignment(VAlign_Center);
+			PriceTextSlot->SetPadding(FMargin(3.0f, 0.0f, 0.0f, 0.0f));
+		}
+		ItemPricePlate->SetContent(ItemPriceRow);
 		ItemPricePlate->SetVisibility(ESlateVisibility::Collapsed);
 		UVerticalBoxSlot* PriceSlot = RootStack->AddChildToVerticalBox(ItemPricePlate);
 		if (PriceSlot)
@@ -7479,6 +7503,7 @@ namespace TunaSweeperEditorSetup
 		RegisterWidgetVariable(WidgetBlueprint, ItemNamePlate);
 		RegisterWidgetVariable(WidgetBlueprint, ItemNameText);
 		RegisterWidgetVariable(WidgetBlueprint, ItemPricePlate);
+		RegisterWidgetVariable(WidgetBlueprint, ItemPriceCoinImage);
 		RegisterWidgetVariable(WidgetBlueprint, ItemPriceText);
 		WidgetBlueprint->MarkPackageDirty();
 		return true;
@@ -8251,6 +8276,10 @@ namespace TunaSweeperEditorSetup
 		UVerticalBox* InventoryStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("InventoryStack"));
 		UHorizontalBox* InventoryHeaderRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("InventoryHeaderRow"));
 		UTextBlock* InventoryTitleText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("InventoryTitleText"));
+		UTunaSweeperCurrencyDisplayWidget* CurrencyDisplayWidget =
+			WidgetTree->ConstructWidget<UTunaSweeperCurrencyDisplayWidget>(
+				UTunaSweeperCurrencyDisplayWidget::StaticClass(),
+				TEXT("CurrencyDisplayWidget"));
 		UButton* SortInventoryButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("SortInventoryButton"));
 		UTextBlock* SortInventoryButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("SortInventoryButtonText"));
 		USizeBox* EquipmentReserveSizeBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("EquipmentReserveSizeBox"));
@@ -8269,7 +8298,7 @@ namespace TunaSweeperEditorSetup
 		UTextBlock* InventoryWeightWarningText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("InventoryWeightWarningText"));
 
 		if (!RootSizeBox || !RootRow || !MainInventorySizeBox || !InventoryPanel || !InventoryStack || !InventoryHeaderRow ||
-			!InventoryTitleText || !SortInventoryButton || !SortInventoryButtonText || !EquipmentReserveSizeBox ||
+			!InventoryTitleText || !CurrencyDisplayWidget || !SortInventoryButton || !SortInventoryButtonText || !EquipmentReserveSizeBox ||
 			!EquipmentReserveTileView || !AuxiliaryBagPanel || !AuxiliaryBagBackground || !AuxiliaryBagTileView || !InventoryTileView ||
 			!InventoryWeightPanel || !InventoryWeightRow || !InventoryWeightLabelText || !InventoryWeightGaugeBox ||
 			!InventoryWeightGauge || !InventoryWeightText || !InventoryWeightWarningIcon || !InventoryWeightWarningText)
@@ -8304,6 +8333,15 @@ namespace TunaSweeperEditorSetup
 			TitleSlot->SetHorizontalAlignment(HAlign_Fill);
 			TitleSlot->SetVerticalAlignment(VAlign_Center);
 			TitleSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+		}
+
+		UHorizontalBoxSlot* CurrencySlot = InventoryHeaderRow->AddChildToHorizontalBox(CurrencyDisplayWidget);
+		if (CurrencySlot)
+		{
+			CurrencySlot->SetHorizontalAlignment(HAlign_Right);
+			CurrencySlot->SetVerticalAlignment(VAlign_Center);
+			CurrencySlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
+			CurrencySlot->SetPadding(FMargin(12.0f, 0.0f, 0.0f, 0.0f));
 		}
 
 		FButtonStyle SortButtonStyle;
@@ -8455,6 +8493,7 @@ namespace TunaSweeperEditorSetup
 		RegisterWidgetVariable(WidgetBlueprint, InventoryStack);
 		RegisterWidgetVariable(WidgetBlueprint, InventoryHeaderRow);
 		RegisterWidgetVariable(WidgetBlueprint, InventoryTitleText);
+		RegisterWidgetVariable(WidgetBlueprint, CurrencyDisplayWidget);
 		RegisterWidgetVariable(WidgetBlueprint, SortInventoryButton);
 		RegisterWidgetVariable(WidgetBlueprint, SortInventoryButtonText);
 		RegisterWidgetVariable(WidgetBlueprint, EquipmentReserveSizeBox);
@@ -8654,13 +8693,17 @@ namespace TunaSweeperEditorSetup
 		UHorizontalBox* ContainerHeaderRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("ContainerHeaderRow"));
 		UTextBlock* ContainerTitleText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("ContainerTitleText"));
 		UTextBlock* ContainerOccupancyText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("ContainerOccupancyText"));
+		UTunaSweeperCurrencyDisplayWidget* ShopCurrencyDisplayWidget =
+			WidgetTree->ConstructWidget<UTunaSweeperCurrencyDisplayWidget>(
+				UTunaSweeperCurrencyDisplayWidget::StaticClass(),
+				TEXT("ShopCurrencyDisplayWidget"));
 		USizeBox* ShopRefreshStockButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("ShopRefreshStockButtonBox"));
 		UButton* ShopRefreshStockButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("ShopRefreshStockButton"));
 		UTextBlock* ShopRefreshStockButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("ShopRefreshStockButtonText"));
 		UTileView* ContainerTileView = WidgetTree->ConstructWidget<UTileView>(UTileView::StaticClass(), TEXT("ContainerTileView"));
 
 		if (!RootSizeBox || !PanelBackground || !PanelStack || !ContainerHeaderRow ||
-			!ContainerTitleText || !ContainerOccupancyText || !ShopRefreshStockButtonBox ||
+			!ContainerTitleText || !ContainerOccupancyText || !ShopCurrencyDisplayWidget || !ShopRefreshStockButtonBox ||
 			!ShopRefreshStockButton || !ShopRefreshStockButtonText || !ContainerTileView)
 		{
 			return false;
@@ -8688,6 +8731,7 @@ namespace TunaSweeperEditorSetup
 		ShopRefreshStockButtonBox->SetWidthOverride(62.0f);
 		ShopRefreshStockButtonBox->SetHeightOverride(30.0f);
 		ShopRefreshStockButtonBox->SetContent(ShopRefreshStockButton);
+		ShopCurrencyDisplayWidget->SetVisibility(ESlateVisibility::Collapsed);
 
 		UHorizontalBoxSlot* TitleTextSlot = ContainerHeaderRow->AddChildToHorizontalBox(ContainerTitleText);
 		if (TitleTextSlot)
@@ -8704,6 +8748,15 @@ namespace TunaSweeperEditorSetup
 			OccupancyTextSlot->SetHorizontalAlignment(HAlign_Left);
 			OccupancyTextSlot->SetVerticalAlignment(VAlign_Center);
 			OccupancyTextSlot->SetPadding(FMargin(8.0f, 0.0f, 0.0f, 0.0f));
+		}
+
+		UHorizontalBoxSlot* CurrencySlot = ContainerHeaderRow->AddChildToHorizontalBox(ShopCurrencyDisplayWidget);
+		if (CurrencySlot)
+		{
+			CurrencySlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
+			CurrencySlot->SetHorizontalAlignment(HAlign_Right);
+			CurrencySlot->SetVerticalAlignment(VAlign_Center);
+			CurrencySlot->SetPadding(FMargin(12.0f, 0.0f, 0.0f, 0.0f));
 		}
 
 		UHorizontalBoxSlot* ShopRefreshButtonSlot = ContainerHeaderRow->AddChildToHorizontalBox(ShopRefreshStockButtonBox);
@@ -8738,6 +8791,7 @@ namespace TunaSweeperEditorSetup
 		RegisterWidgetVariable(WidgetBlueprint, ContainerHeaderRow);
 		RegisterWidgetVariable(WidgetBlueprint, ContainerTitleText);
 		RegisterWidgetVariable(WidgetBlueprint, ContainerOccupancyText);
+		RegisterWidgetVariable(WidgetBlueprint, ShopCurrencyDisplayWidget);
 		RegisterWidgetVariable(WidgetBlueprint, ShopRefreshStockButton);
 		RegisterWidgetVariable(WidgetBlueprint, ShopRefreshStockButtonText);
 		RegisterWidgetVariable(WidgetBlueprint, ContainerTileView);
@@ -11913,6 +11967,12 @@ public:
 				{
 					return TunaSweeperEditorSetup::EnsureCommonGameHudAssets();
 				});
+			FTunaSweeperEditorRunOnce::Run(
+				TunaSweeperEditorSetup::CurrencyCoinUiTaskId,
+				[]()
+				{
+					return TunaSweeperEditorSetup::EnsureCommonGameHudAssets();
+				});
 			FPlatformMisc::RequestExit(false);
 			return;
 		}
@@ -12224,6 +12284,13 @@ public:
 
 		FTunaSweeperEditorRunOnce::Run(
 			TunaSweeperEditorSetup::SplitExternalContainerPanelTaskId,
+			[]()
+			{
+				return TunaSweeperEditorSetup::EnsureCommonGameHudAssets();
+			});
+
+		FTunaSweeperEditorRunOnce::Run(
+			TunaSweeperEditorSetup::CurrencyCoinUiTaskId,
 			[]()
 			{
 				return TunaSweeperEditorSetup::EnsureCommonGameHudAssets();

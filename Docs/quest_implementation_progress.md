@@ -9,7 +9,7 @@ Last updated: 2026-05-25 17:34:26
 - 퀘스트 정의는 `TunaSweeper/Content/Data/QuestDefinitions.json`에서 데이터 기반으로 읽는다.
 - 퀘스트 런타임 소유자는 `UTunaSweeperQuestSubsystem`이다.
 - 퀘스트 상태 `Available`, `Accepted`, `RewardAvailable`, `RewardCompleted`가 구현되어 있다.
-- 퀘스트 상태, 목표별 진행도, HUD 추적 퀘스트, 퀘스트 코인 잔액이 세이브 슬롯별로 저장된다.
+- 퀘스트 상태, 목표별 진행도, HUD 추적 퀘스트, 코인 재화 잔액이 세이브 슬롯별로 저장된다.
 - 퀘스트 UI는 수락, 진행 상태 표시, 보상 수령, 완료 상태 표시를 지원한다.
 - HUD는 추적 중인 퀘스트의 목표 진행도를 표시한다.
 - 코인 보상이 구현되어 있다.

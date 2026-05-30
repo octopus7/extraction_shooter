@@ -6,6 +6,7 @@
 #include "TunaSweeperItemHoverPromptWidget.generated.h"
 
 class UBorder;
+class UImage;
 class USizeBox;
 class UTextBlock;
 class UWidget;
@@ -45,6 +46,12 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Hover Prompt", meta = (BindWidgetOptional))
 	TObjectPtr<UTextBlock> ItemPriceText;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Hover Prompt", meta = (BindWidgetOptional))
+	TObjectPtr<UWidget> ItemPriceRow;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Hover Prompt", meta = (BindWidgetOptional))
+	TObjectPtr<UImage> ItemPriceCoinImage;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Hover Prompt", meta = (BindWidgetOptional))
 	TObjectPtr<UTextBlock> TakeKeyText;
@@ -87,6 +94,7 @@ private:
 	FText BuildNameText() const;
 	FText BuildWeightText() const;
 	FText BuildPriceText() const;
+	bool ShouldShowCurrencyIconForPrice() const;
 	bool CanUseCachedItem() const;
 
 	UPROPERTY(Transient)

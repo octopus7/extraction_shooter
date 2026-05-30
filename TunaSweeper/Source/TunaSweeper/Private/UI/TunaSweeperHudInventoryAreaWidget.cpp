@@ -1,7 +1,10 @@
 #include "UI/TunaSweeperHudInventoryAreaWidget.h"
 
 #include "Blueprint/DragDropOperation.h"
+#include "Blueprint/WidgetTree.h"
 #include "Components/Button.h"
+#include "Components/HorizontalBox.h"
+#include "Components/HorizontalBoxSlot.h"
 #include "Components/ProgressBar.h"
 #include "Components/SizeBox.h"
 #include "Components/TextBlock.h"
@@ -13,6 +16,7 @@
 #include "GameFramework/PlayerController.h"
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
 #include "UI/TunaSweeperItemDragDropOperation.h"
+#include "UI/TunaSweeperCurrencyDisplayWidget.h"
 #include "UI/TunaSweeperItemStackSplitPopupWidget.h"
 #include "UI/TunaSweeperItemStackTileItemObject.h"
 #include "UI/TunaSweeperUIFont.h"
@@ -368,6 +372,7 @@ void UTunaSweeperHudInventoryAreaWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
+	EnsureCurrencyDisplayWidget();
 
 	if (SortInventoryButton)
 	{
@@ -395,6 +400,10 @@ void UTunaSweeperHudInventoryAreaWidget::NativeConstruct()
 	}
 
 	RefreshInventoryItems();
+	if (CurrencyDisplayWidget)
+	{
+		CurrencyDisplayWidget->RefreshCurrencyBalance();
+	}
 	ApplyHudState();
 }
 
@@ -432,6 +441,37 @@ void UTunaSweeperHudInventoryAreaWidget::SetHudState(const FTunaSweeperPlayerHud
 	PreviewHudState = InHudState;
 	PreviewHudState.NormalizeWeightLimits();
 	ApplyHudState();
+}
+
+void UTunaSweeperHudInventoryAreaWidget::EnsureCurrencyDisplayWidget()
+{
+	if (CurrencyDisplayWidget || !WidgetTree)
+	{
+		return;
+	}
+
+	UHorizontalBox* InventoryHeaderRow = Cast<UHorizontalBox>(WidgetTree->FindWidget(FName(TEXT("InventoryHeaderRow"))));
+	if (!InventoryHeaderRow)
+	{
+		return;
+	}
+
+	CurrencyDisplayWidget = WidgetTree->ConstructWidget<UTunaSweeperCurrencyDisplayWidget>(
+		UTunaSweeperCurrencyDisplayWidget::StaticClass(),
+		TEXT("CurrencyDisplayWidget"));
+	if (!CurrencyDisplayWidget)
+	{
+		return;
+	}
+
+	UHorizontalBoxSlot* CurrencySlot = InventoryHeaderRow->AddChildToHorizontalBox(CurrencyDisplayWidget);
+	if (CurrencySlot)
+	{
+		CurrencySlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
+		CurrencySlot->SetHorizontalAlignment(HAlign_Right);
+		CurrencySlot->SetVerticalAlignment(VAlign_Center);
+		CurrencySlot->SetPadding(FMargin(12.0f, 0.0f, 0.0f, 0.0f));
+	}
 }
 
 void UTunaSweeperHudInventoryAreaWidget::ApplyHudState()

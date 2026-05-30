@@ -3117,3 +3117,36 @@
 ## 2026-05-30 17:31:12 (elapsed: 00:00:00)
 
 - 롤링봄만 임시로 출혈 확률 추가 수치 30%를 적용할 것.
+
+## 2026-05-30 17:37:03 (elapsed: 00:00:00)
+
+- 데이터상 모든 확률 표기는 10000분율 정수 원본을 사용하고, UI에서는 필요 시 소수점 %로 변환할 것.
+- 이 확률 표기 규칙을 SSOT 문서에도 반영할 것.
+
+## 2026-05-30 17:39:18 (elapsed: 00:00:00)
+
+- 확률 필드명에는 `per_10000` 같은 분모 표기를 넣지 말 것.
+- 아무 언급이 없는 확률 필드는 10000분율 정수 표기로 해석하는 규칙을 사용할 것.
+
+## 2026-05-30 17:43:17 (elapsed: 00:00:00)
+
+- 출혈뿐 아니라 게임플레이에서 사용되는 모든 확률/비율 데이터도 찾아서 10000 기준 정수 원본 규칙에 맞게 수정할 것.
+
+## 2026-05-30 17:44:25 (elapsed: 00:00:00)
+
+- Create an English-named idea notes path for story documents.
+- Add a README.md that states the folder is for collecting fragmentary story ideas.
+
+## 2026-05-30 17:46:52 (elapsed: 00:00:00)
+
+- Add a Korean story idea note for a piggy bank.
+- Use an English Markdown filename.
+- Link the new idea note from the idea notes README.
+
+## 2026-05-30 17:49:44 (elapsed: 00:00:00)
+
+- 재화가 없다는 문서 내용과 부품 조각을 재화로 취급하는 문서 내용을 삭제할 것.
+- 인벤토리 UI와 상점 인벤토리 UI 상단에 재화 표기를 추가할 것.
+- 재화 단위는 코인 형태의 흰색 단색 아이콘 이미지로 표기할 것.
+- 기존 `$` 표기 UI를 모두 고칠 것.
+- 개발자 상자 옆에 디버그용 돼지 저금통 액터를 만들고, 상호작용 `돈내놔` 시 1000 재화를 증가시키며 돈통 소리를 재생할 것.

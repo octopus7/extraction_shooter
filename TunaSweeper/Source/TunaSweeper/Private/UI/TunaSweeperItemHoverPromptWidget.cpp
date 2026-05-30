@@ -5,12 +5,14 @@
 #include "Components/Border.h"
 #include "Components/HorizontalBox.h"
 #include "Components/HorizontalBoxSlot.h"
+#include "Components/Image.h"
 #include "Components/SizeBox.h"
 #include "Components/TextBlock.h"
 #include "Components/VerticalBox.h"
 #include "Components/VerticalBoxSlot.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "Styling/SlateBrush.h"
+#include "UI/TunaSweeperCurrencyDisplayWidget.h"
 #include "UI/TunaSweeperUIFont.h"
 #include "UI/TunaSweeperUiText.h"
 #include "Widgets/SWidget.h"
@@ -224,14 +226,19 @@ void UTunaSweeperItemHoverPromptWidget::BuildNativeWidgetTree()
 	ItemNameText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("ItemNameText"));
 	ItemWeightText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("ItemWeightText"));
 	ItemDescriptionText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("ItemDescriptionText"));
+	UHorizontalBox* ItemPriceRowBox = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("ItemPriceRow"));
+	USizeBox* ItemPriceCoinSizeBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("ItemPriceCoinSizeBox"));
+	ItemPriceCoinImage = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("ItemPriceCoinImage"));
 	ItemPriceText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("ItemPriceText"));
 
 	if (!RootSizeBox || !PromptRootRow || !InfoSizeBox || !ItemInfoBackground || !ItemInfoStack ||
 		!ActionSizeBox || !ActionHintsBackground || !ActionHintsStack ||
-		!ItemNameText || !ItemWeightText || !ItemDescriptionText || !ItemPriceText)
+		!ItemNameText || !ItemWeightText || !ItemDescriptionText ||
+		!ItemPriceRowBox || !ItemPriceCoinSizeBox || !ItemPriceCoinImage || !ItemPriceText)
 	{
 		return;
 	}
+	ItemPriceRow = ItemPriceRowBox;
 
 	WidgetTree->RootWidget = RootSizeBox;
 	RootSizeBox->SetWidthOverride(TunaSweeperItemHoverPrompt::PromptWidth);
@@ -261,7 +268,29 @@ void UTunaSweeperItemHoverPromptWidget::BuildNativeWidgetTree()
 	TunaSweeperItemHoverPrompt::AddTextLine(ItemInfoStack, ItemNameText, 8.0f);
 	TunaSweeperItemHoverPrompt::AddTextLine(ItemInfoStack, ItemWeightText, 8.0f);
 	TunaSweeperItemHoverPrompt::AddTextLine(ItemInfoStack, ItemDescriptionText, 8.0f);
-	TunaSweeperItemHoverPrompt::AddTextLine(ItemInfoStack, ItemPriceText, 0.0f);
+
+	ItemPriceCoinSizeBox->SetWidthOverride(18.0f);
+	ItemPriceCoinSizeBox->SetHeightOverride(18.0f);
+	ItemPriceCoinSizeBox->SetContent(ItemPriceCoinImage);
+	UHorizontalBoxSlot* PriceIconSlot = ItemPriceRowBox->AddChildToHorizontalBox(ItemPriceCoinSizeBox);
+	if (PriceIconSlot)
+	{
+		PriceIconSlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
+		PriceIconSlot->SetVerticalAlignment(VAlign_Center);
+	}
+	UHorizontalBoxSlot* PriceTextSlot = ItemPriceRowBox->AddChildToHorizontalBox(ItemPriceText);
+	if (PriceTextSlot)
+	{
+		PriceTextSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+		PriceTextSlot->SetVerticalAlignment(VAlign_Center);
+		PriceTextSlot->SetPadding(FMargin(7.0f, 0.0f, 0.0f, 0.0f));
+	}
+	UVerticalBoxSlot* PriceRowSlot = ItemInfoStack->AddChildToVerticalBox(ItemPriceRowBox);
+	if (PriceRowSlot)
+	{
+		PriceRowSlot->SetHorizontalAlignment(HAlign_Fill);
+		PriceRowSlot->SetVerticalAlignment(VAlign_Top);
+	}
 
 	ActionSizeBox->SetWidthOverride(TunaSweeperItemHoverPrompt::ActionBoxWidth);
 	ActionSizeBox->SetMinDesiredHeight(TunaSweeperItemHoverPrompt::MinPromptHeight);
@@ -389,6 +418,14 @@ void UTunaSweeperItemHoverPromptWidget::CacheNamedWidgets()
 	{
 		ItemPriceText = Cast<UTextBlock>(WidgetTree->FindWidget(FName(TEXT("ItemPriceText"))));
 	}
+	if (!ItemPriceRow)
+	{
+		ItemPriceRow = WidgetTree->FindWidget(FName(TEXT("ItemPriceRow")));
+	}
+	if (!ItemPriceCoinImage)
+	{
+		ItemPriceCoinImage = Cast<UImage>(WidgetTree->FindWidget(FName(TEXT("ItemPriceCoinImage"))));
+	}
 	if (!TakeKeyText)
 	{
 		TakeKeyText = Cast<UTextBlock>(WidgetTree->FindWidget(FName(TEXT("TakeKeyText"))));
@@ -460,7 +497,21 @@ void UTunaSweeperItemHoverPromptWidget::ApplyTileData()
 	}
 	if (ItemPriceText)
 	{
-		ItemPriceText->SetText(BuildPriceText());
+		const FText PriceText = BuildPriceText();
+		ItemPriceText->SetText(PriceText);
+		if (ItemPriceRow)
+		{
+			ItemPriceRow->SetVisibility(PriceText.IsEmpty() ? ESlateVisibility::Collapsed : ESlateVisibility::HitTestInvisible);
+		}
+		if (ItemPriceCoinImage)
+		{
+			ItemPriceCoinImage->SetBrushFromTexture(UTunaSweeperCurrencyDisplayWidget::LoadCurrencyCoinIconTexture(), true);
+			ItemPriceCoinImage->SetBrushTintColor(FSlateColor(FLinearColor::White));
+			ItemPriceCoinImage->SetVisibility(
+				!PriceText.IsEmpty() && ShouldShowCurrencyIconForPrice()
+					? ESlateVisibility::HitTestInvisible
+					: ESlateVisibility::Collapsed);
+		}
 	}
 	if (TakeKeyText)
 	{
@@ -694,8 +745,15 @@ FText UTunaSweeperItemHoverPromptWidget::BuildPriceText() const
 		TunaSweeperItemHoverPrompt::ResolveUiText(
 			GetGameInstance<UTunaSweeperGameInstance>(),
 			TEXT("ui.item_hover.price_pattern"),
-			TEXT("${0}")),
+			TEXT("{0}")),
 		FText::AsNumber(Price));
+}
+
+bool UTunaSweeperItemHoverPromptWidget::ShouldShowCurrencyIconForPrice() const
+{
+	return CachedTileData.Source != ETunaSweeperItemSlotSource::WorkbenchRecipe &&
+		CachedTileData.Source != ETunaSweeperItemSlotSource::WorkbenchDismantleItem &&
+		CachedTileData.Source != ETunaSweeperItemSlotSource::WorkbenchBlueprintItem;
 }
 
 bool UTunaSweeperItemHoverPromptWidget::CanUseCachedItem() const

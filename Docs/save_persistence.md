@@ -162,7 +162,7 @@ Each `FTunaSweeperQuestProgressSaveData` preserves:
 - `State`: `Available`, `Accepted`, `RewardAvailable`, or `RewardCompleted`.
 - `ObjectiveProgress`: per-objective `ObjectiveId` and `CurrentCount`.
 
-`TrackedQuestId` stores the HUD-tracked quest for the active save slot. `QuestCoinBalance` stores quest reward currency separately from item instances. New save slots initialize with no quest progress, no tracked quest, and zero quest coins.
+`TrackedQuestId` stores the HUD-tracked quest for the active save slot. `QuestCoinBalance` stores the player coin currency balance separately from item instances; the field name is legacy and is kept for save compatibility. New save slots initialize with no quest progress, no tracked quest, and zero coins.
 
 ### Experience Progress
 
