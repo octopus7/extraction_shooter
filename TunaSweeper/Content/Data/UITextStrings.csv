@@ -23,7 +23,6 @@ ui.title.delete_confirm_message,선택한 저장 데이터를 삭제할까요?,D
 ui.title.slot_label,슬롯 {0},Slot {0},スロット {0}
 ui.title.empty_slot,빈 슬롯,Empty Slot,空き
 ui.title.start_new_game,새 게임 시작,Start New Game,新しく開始
-ui.title.play_time,플레이 시간 {0},Play Time {0},プレイ時間 {0}
 ui.title.has_progress_data,진행 데이터 있음,Progress Data Exists,進行データあり
 ui.settings.graphics,그래픽,Graphics,グラフィック
 ui.settings.interface,인터페이스,Interface,インターフェース

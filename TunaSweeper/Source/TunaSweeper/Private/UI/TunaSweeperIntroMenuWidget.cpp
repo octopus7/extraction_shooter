@@ -1558,13 +1558,8 @@ FText UTunaSweeperIntroMenuWidget::BuildCurrentSaveSlotText(int32 SaveSlotIndex)
 	}
 
 	return FText::Format(
-		FText::FromString(TEXT("{0} - {1}")),
-		FText::Format(
-			ResolveUiText(FName(TEXT("ui.title.slot_label")), FText::FromString(TEXT("\uC2AC\uB86F {0}"))),
-			FText::AsNumber(SaveSlotIndex)),
-		FText::Format(
-			ResolveUiText(FName(TEXT("ui.title.play_time")), FText::FromString(TEXT("\uD50C\uB808\uC774 \uC2DC\uAC04 {0}"))),
-			FText::FromString(FormatPlayTime(Summary.TotalPlaySeconds))));
+		ResolveUiText(FName(TEXT("ui.title.slot_label")), FText::FromString(TEXT("\uC2AC\uB86F {0}"))),
+		FText::AsNumber(SaveSlotIndex));
 }
 
 FText UTunaSweeperIntroMenuWidget::BuildSaveSlotButtonText(int32 SaveSlotIndex) const
@@ -1595,9 +1590,6 @@ FText UTunaSweeperIntroMenuWidget::BuildSaveSlotButtonText(int32 SaveSlotIndex) 
 		FText::Format(
 			ResolveUiText(FName(TEXT("ui.title.slot_label")), FText::FromString(TEXT("\uC2AC\uB86F {0}"))),
 			FText::AsNumber(SaveSlotIndex)).ToString(),
-		FText::Format(
-			ResolveUiText(FName(TEXT("ui.title.play_time")), FText::FromString(TEXT("\uD50C\uB808\uC774 \uC2DC\uAC04 {0}"))),
-			FText::FromString(FormatPlayTime(Summary.TotalPlaySeconds))).ToString(),
 		ResolveUiText(FName(TEXT("ui.title.has_progress_data")), FText::FromString(TEXT("\uC9C4\uD589 \uB370\uC774\uD130 \uC788\uC74C"))).ToString()
 	};
 	return FText::FromString(FString::Join(Lines, LINE_TERMINATOR));
@@ -1659,15 +1651,6 @@ FString UTunaSweeperIntroMenuWidget::BuildCreditsColumnText(int32 ColumnIndex) c
 	}
 
 	return ColumnText;
-}
-
-FString UTunaSweeperIntroMenuWidget::FormatPlayTime(float TotalSeconds) const
-{
-	const int32 ClampedTotalSeconds = FMath::Max(0, FMath::RoundToInt(TotalSeconds));
-	const int32 Hours = ClampedTotalSeconds / 3600;
-	const int32 Minutes = (ClampedTotalSeconds / 60) % 60;
-	const int32 Seconds = ClampedTotalSeconds % 60;
-	return FString::Printf(TEXT("%02d:%02d:%02d"), Hours, Minutes, Seconds);
 }
 
 FString UTunaSweeperIntroMenuWidget::FormatSaveTime(int64 LastSavedAtTicks) const

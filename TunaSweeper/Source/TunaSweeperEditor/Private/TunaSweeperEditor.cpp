@@ -164,7 +164,7 @@ namespace TunaSweeperEditorSetup
 	const FString CannedTunaIconImportTaskId = TEXT("2026-05-11_ImportCannedTunaIconV1");
 	const FString BackpackInventoryTaskId = TEXT("2026-05-16_CreateEquipmentInventoryAssetsV3");
 	const FString IntroMenuAndLevelTravelTaskId = TEXT("2026-05-24_CreateTitleIntroMenuPersistentSaveSlotSelectionLevelTravelLadderInitialScaleV1");
-	const FString IntroMenuGraphicsSettingsTaskId = TEXT("2026-05-28_AddTitleFullscreenSettingsLayoutV1");
+	const FString IntroMenuGraphicsSettingsTaskId = TEXT("2026-05-30_RemoveTitlePlayTimeAndWidenSaveSlotV1");
 	const FString OpeningScenarioPresentationTaskId = TEXT("2026-05-19_CreateOpeningScenarioPresentationV2");
 	const FString LevelTransitionVideoTaskId = TEXT("2026-05-16_AddBidirectionalLevelTransitionVideoV3");
 	const FString FirstOutingQuestTaskId = TEXT("2026-05-15_CreateFirstOutingQuestNpcV2");
@@ -3917,12 +3917,12 @@ namespace TunaSweeperEditorSetup
 			FVector2D(440.0f, 72.0f),
 			true);
 
-		CurrentSaveSlotBox->SetWidthOverride(220.0f);
+		CurrentSaveSlotBox->SetWidthOverride(260.0f);
 		CurrentSaveSlotBox->SetHeightOverride(38.0f);
 		CurrentSaveSlotBox->SetContent(CurrentSaveSlotBorder);
 		CurrentSaveSlotBorder->SetPadding(FMargin(14.0f, 4.0f));
 		CurrentSaveSlotBorder->SetBrush(MakeRoundedBoxBrush(
-			FVector2D(220.0f, 38.0f),
+			FVector2D(260.0f, 38.0f),
 			FLinearColor(0.025f, 0.045f, 0.050f, 0.52f),
 			FLinearColor(0.78f, 0.84f, 0.82f, 0.74f),
 			1.0f,

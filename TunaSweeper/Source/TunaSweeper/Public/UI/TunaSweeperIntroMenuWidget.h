@@ -376,7 +376,6 @@ private:
 	FText BuildSaveSlotButtonText(int32 SaveSlotIndex) const;
 	FString BuildCreditsRollText() const;
 	FString BuildCreditsColumnText(int32 ColumnIndex) const;
-	FString FormatPlayTime(float TotalSeconds) const;
 	FString FormatSaveTime(int64 LastSavedAtTicks) const;
 	bool IsSaveSlotSelectionVisible() const;
 	bool IsCreditsPanelVisible() const;
