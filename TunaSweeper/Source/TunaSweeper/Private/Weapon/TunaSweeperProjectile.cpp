@@ -1,7 +1,9 @@
 #include "Weapon/TunaSweeperProjectile.h"
 
 #include "AI/TunaSweeperEnemyCharacter.h"
+#include "AI/TunaSweeperRollingBomberSpawner.h"
 #include "Character/TunaSweeperTopDownCharacter.h"
+#include "Component/TunaSweeperVitalsComponent.h"
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Effect/TunaSweeperProjectileHitBurstActor.h"
@@ -9,6 +11,9 @@
 #include "Game/TunaSweeperGameInstance.h"
 #include "GameFramework/DamageType.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "Interaction/TunaSweeperExplosiveBarrelActor.h"
+#include "Interaction/TunaSweeperSandbagCoverActor.h"
+#include "Interaction/TunaSweeperShootingPracticeDummyActor.h"
 #include "Kismet/GameplayStatics.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Materials/MaterialInterface.h"
@@ -51,6 +56,22 @@ namespace
 		FVector BoundsExtent = FVector::ZeroVector;
 		OtherActor->GetActorBounds(false, BoundsOrigin, BoundsExtent);
 		return FVector(Hit.ImpactPoint.X, Hit.ImpactPoint.Y, BoundsOrigin.Z + BoundsExtent.Z + 34.0f);
+	}
+
+	bool ShouldShowDamageNumberForActor(const AActor* OtherActor)
+	{
+		if (!OtherActor)
+		{
+			return false;
+		}
+
+		return
+			OtherActor->FindComponentByClass<UTunaSweeperVitalsComponent>() ||
+			Cast<ATunaSweeperEnemyCharacter>(OtherActor) ||
+			Cast<ATunaSweeperRollingBomberSpawner>(OtherActor) ||
+			Cast<ATunaSweeperExplosiveBarrelActor>(OtherActor) ||
+			Cast<ATunaSweeperSandbagCoverActor>(OtherActor) ||
+			Cast<ATunaSweeperShootingPracticeDummyActor>(OtherActor);
 	}
 }
 
@@ -475,17 +496,20 @@ void ATunaSweeperProjectile::HandleHit(
 	if (AppliedDamage > 0.0f)
 	{
 		SpawnHitEffect(Hit, OtherActor, OtherComp);
-		if (ATunaSweeperPlayerController* TunaPlayerController =
-			Cast<ATunaSweeperPlayerController>(GetInstigatorController()))
+		if (ShouldShowDamageNumberForActor(OtherActor))
 		{
-			if (TunaPlayerController->IsLocalController())
+			if (ATunaSweeperPlayerController* TunaPlayerController =
+				Cast<ATunaSweeperPlayerController>(GetInstigatorController()))
 			{
-				if (UTunaSweeperGameHudWidget* GameHudWidget = TunaPlayerController->GetGameHudWidget())
+				if (TunaPlayerController->IsLocalController())
 				{
-					GameHudWidget->ShowDamageNumber(
-						AppliedDamage,
-						ResolveDamageNumberLocation(Hit, OtherActor),
-						ResolveDamageNumberType(DamageAmount, AppliedDamage));
+					if (UTunaSweeperGameHudWidget* GameHudWidget = TunaPlayerController->GetGameHudWidget())
+					{
+						GameHudWidget->ShowDamageNumber(
+							AppliedDamage,
+							ResolveDamageNumberLocation(Hit, OtherActor),
+							ResolveDamageNumberType(DamageAmount, AppliedDamage));
+					}
 				}
 			}
 		}
