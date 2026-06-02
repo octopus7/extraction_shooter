@@ -34,6 +34,11 @@ void UTunaSweeperLaserSightComponent::SetBeamEnd(const FVector& InBeamEnd)
 	ApplyLaserSightParameters();
 }
 
+void UTunaSweeperLaserSightComponent::SetLaserSightDebugEnabled(bool bEnabled)
+{
+	bLaserSightDebugEnabled = bEnabled;
+}
+
 void UTunaSweeperLaserSightComponent::SetLaserSightEnabled(bool bEnabled)
 {
 	bLaserSightEnabled = bEnabled;

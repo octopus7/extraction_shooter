@@ -37,9 +37,10 @@ namespace
 	constexpr uint8 LaserSightDebugDepthPriority = 0;
 	constexpr float LaserSightDebugLifeTime = 0.0f;
 
-	bool IsLaserSightDebugEnabled()
+	bool IsLaserSightDebugEnabled(const UTunaSweeperLaserSightComponent& LaserSightComponent)
 	{
-		return CVarTunaSweeperLaserSightDebug.GetValueOnGameThread() != 0;
+		return LaserSightComponent.IsLaserSightDebugEnabled() &&
+			CVarTunaSweeperLaserSightDebug.GetValueOnGameThread() != 0;
 	}
 
 	void DrawLaserSightDebug(
@@ -336,7 +337,7 @@ void ATunaSweeperWeapon::UpdateLaserSightBeam(
 	const FVector BeamEndLocal = LaserSightComponent->GetComponentTransform().InverseTransformPosition(BeamEndWorld);
 	LaserSightComponent->SetBeamEnd(BeamEndWorld);
 
-	if (World && IsLaserSightDebugEnabled())
+	if (World && IsLaserSightDebugEnabled(*LaserSightComponent))
 	{
 		const float DebugRange = FMath::Max(1.0f, LaserSightFallbackRange);
 		const FVector MuzzleSightDirection = ResolveMuzzleLevelAimDirection(

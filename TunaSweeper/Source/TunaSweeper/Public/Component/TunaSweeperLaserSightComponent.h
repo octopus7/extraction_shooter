@@ -24,6 +24,12 @@ public:
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Laser Sight")
 	FVector GetBeamEnd() const { return BeamEnd; }
 
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Laser Sight|Debug")
+	void SetLaserSightDebugEnabled(bool bEnabled);
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Laser Sight|Debug")
+	bool IsLaserSightDebugEnabled() const { return bLaserSightDebugEnabled; }
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -32,6 +38,9 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Laser Sight", meta = (AllowPrivateAccess = "true"))
 	FVector BeamEnd = FVector(200.0f, 0.0f, 0.0f);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Laser Sight|Debug", meta = (AllowPrivateAccess = "true"))
+	bool bLaserSightDebugEnabled = false;
 
 	UPROPERTY(Transient)
 	bool bLaserSightEnabled = false;
