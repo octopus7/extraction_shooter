@@ -60,6 +60,7 @@ private:
 	void SetAmmoSelectorPanelPosition(int32 WeaponSlotNumber);
 	void SetAmmoSelectorPromptVisible(const FText& PromptText, bool bVisible);
 	void SetAmmoSelectorKeyHintVisible(bool bVisible);
+	void ApplyCancelableActionLayout();
 	UTunaSweeperItemRaritySlotAccentWidget* EnsureQuickSlotRarityAccentWidget(
 		UImage* IconImage,
 		const FName& WidgetName);
