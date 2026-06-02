@@ -460,6 +460,13 @@ void ATunaSweeperSandbagCoverActor::BeginCollapse()
 			static_cast<float>(Index % 5) * 8.0f;
 		CollapseState.TargetLocation = StartLocation + SpillDirection * ScatterDistance;
 		CollapseState.TargetLocation.Z = FMath::Max(8.0f, BoxExtent.Z * 0.12f) + static_cast<float>(Index % 3) * 1.5f;
+		CollapseState.BurstOffset =
+			SpillDirection *
+			(FMath::Lerp(BoxExtent.X * 0.55f, BoxExtent.X * 1.2f, HeightAlpha) +
+				static_cast<float>((Index * 7) % 5) * 2.5f);
+		CollapseState.BurstLift =
+			FMath::Lerp(BoxExtent.Z * 0.12f, BoxExtent.Z * 0.34f, HeightAlpha) +
+			static_cast<float>(Index % 3) * 1.25f;
 
 		const float DirectionRoll = SpillDirection.X >= 0.0f ? 82.0f : -82.0f;
 		const float DirectionPitch = SpillDirection.Y >= 0.0f ? -48.0f : 48.0f;
@@ -467,7 +474,11 @@ void ATunaSweeperSandbagCoverActor::BeginCollapse()
 			CollapseState.StartRotation.Pitch + DirectionPitch + static_cast<float>((Index % 3) - 1) * 8.0f,
 			CollapseState.StartRotation.Yaw + FMath::RadiansToDegrees(AngleRadians) * 0.12f,
 			CollapseState.StartRotation.Roll + DirectionRoll + static_cast<float>((Index % 4) - 1) * 6.0f);
-		CollapseState.DelaySeconds = static_cast<float>(Index % 6) * 0.035f;
+		CollapseState.BurstRotation = FRotator(
+			SpillDirection.Y >= 0.0f ? -14.0f : 14.0f,
+			static_cast<float>((Index % 5) - 2) * 5.0f,
+			SpillDirection.X >= 0.0f ? 18.0f : -18.0f);
+		CollapseState.DelaySeconds = static_cast<float>(Index % 6) * 0.018f;
 	}
 }
 
@@ -491,12 +502,22 @@ void ATunaSweeperSandbagCoverActor::UpdateCollapse(float DeltaSeconds)
 			0.0f,
 			1.0f);
 		const float MoveAlpha = RawAlpha * RawAlpha * (3.0f - 2.0f * RawAlpha);
-		const float FallAlpha = FMath::Clamp(FMath::Pow(RawAlpha, 0.72f), 0.0f, 1.0f);
+		const float FallAlpha = FMath::Clamp(FMath::Pow(RawAlpha, 1.15f), 0.0f, 1.0f);
+		const float BurstRiseAlpha = 1.0f - FMath::Square(1.0f - FMath::Clamp(RawAlpha / 0.28f, 0.0f, 1.0f));
+		const float BurstFallAlpha = FMath::Square(1.0f - FMath::Clamp((RawAlpha - 0.24f) / 0.58f, 0.0f, 1.0f));
+		const float BurstAlpha = BurstRiseAlpha * BurstFallAlpha;
 
 		FVector NewLocation = FMath::Lerp(CollapseState.StartLocation, CollapseState.TargetLocation, MoveAlpha);
 		NewLocation.Z = FMath::Lerp(CollapseState.StartLocation.Z, CollapseState.TargetLocation.Z, FallAlpha);
+		NewLocation += CollapseState.BurstOffset * BurstAlpha;
+		NewLocation.Z += CollapseState.BurstLift * BurstAlpha;
 		SandbagMesh->SetRelativeLocation(NewLocation);
-		SandbagMesh->SetRelativeRotation(LerpRotatorComponentWise(CollapseState.StartRotation, CollapseState.TargetRotation, MoveAlpha));
+
+		FRotator NewRotation = LerpRotatorComponentWise(CollapseState.StartRotation, CollapseState.TargetRotation, MoveAlpha);
+		NewRotation.Pitch += CollapseState.BurstRotation.Pitch * BurstAlpha;
+		NewRotation.Yaw += CollapseState.BurstRotation.Yaw * BurstAlpha;
+		NewRotation.Roll += CollapseState.BurstRotation.Roll * BurstAlpha;
+		SandbagMesh->SetRelativeRotation(NewRotation);
 	}
 
 	if (CollapseElapsedSeconds >= SafeCollapseDuration + CollapseHoldSeconds)

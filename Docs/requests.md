@@ -3732,3 +3732,9 @@
 - 각 모래주머니별 impulse 회전값을 더해 초반에 바깥쪽으로 기울고 흔들린 뒤 기존 붕괴 타겟 회전으로 정리되게 한 것.
 - 낙하 곡선을 `RawAlpha^1.15`로 바꿔 초반에 바로 처지지 않고, 짧은 impulse가 사라진 뒤 바닥 위치로 내려앉게 한 것.
 - `TunaSweeperEditor Win64 Development` 빌드를 통과시키고 Unreal Editor를 다시 실행해 둔 것.
+
+## 2026-06-02 19:54:06 (소요시간: 00:00:30)
+
+- `TS_SandbagCover_Central` 런타임 스폰 위치를 기존 `[660, -420, 0]`에서 위쪽 파란 메모보다 북쪽인 `[1120, 180, 0]`으로 이동한 것.
+- `Docs/runtime_actor_spawns.md`에 새 모래주머니 엄폐물 배치 위치를 반영한 것.
+- `GameplayInteractionSpawns.json` 파싱 검증을 통과한 것.

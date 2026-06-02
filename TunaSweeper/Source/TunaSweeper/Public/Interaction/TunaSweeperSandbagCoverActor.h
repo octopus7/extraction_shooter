@@ -16,8 +16,11 @@ struct FTunaSweeperSandbagCollapseState
 {
 	FVector StartLocation = FVector::ZeroVector;
 	FVector TargetLocation = FVector::ZeroVector;
+	FVector BurstOffset = FVector::ZeroVector;
 	FRotator StartRotation = FRotator::ZeroRotator;
 	FRotator TargetRotation = FRotator::ZeroRotator;
+	FRotator BurstRotation = FRotator::ZeroRotator;
+	float BurstLift = 0.0f;
 	float DelaySeconds = 0.0f;
 };
 

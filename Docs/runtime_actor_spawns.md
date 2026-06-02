@@ -26,7 +26,7 @@
 | `TS_Interact_LootContainerSpawn` | `loot_container_spawn` | `BP_LootContainer` 랜덤 스폰, 반경 `180~440` |
 | `TS_Interact_SelfDestruct` | `self_destruct` | 3초 카운트다운, 반경 `200`, 피해 `100` |
 | `TS_RollingBomberSpawner_West` | `rolling_bomber_spawner` | 서쪽 롤링 봄버 스포너, 웨이브 스폰 |
-| `TS_SandbagCover_Central` | `sandbag_cover` | 모래주머니 임시 엄폐물. 내구도 `70`, 근접 통과 반경 `62.5` |
+| `TS_SandbagCover_Central` | `sandbag_cover` | 모래주머니 임시 엄폐물. `RaidMap` 위쪽 파란 메모보다 북쪽인 `[1120, 180, 0]` 배치, 내구도 `70`, 근접 통과 반경 `62.5` |
 | `TS_ExplosiveBarrel_01~03` | `explosive_barrel` | 회색 폭발 드럼통. 내구도 `30`, 파괴 시 폭발 이펙트와 밑둥 메시로 전환 |
 
 `TS_Travel_ToBunker`와 `TS_ExtractionPoint_East`는 서로 대체 관계가 아니다. 둘 다 `RaidMap`에서 `BunkerMap`으로 연결되는 복귀 루트이며, 직접 상호작용 복귀와 추출 지점 복귀를 동시에 지원한다.
