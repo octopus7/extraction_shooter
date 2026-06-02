@@ -1824,3 +1824,23 @@ NS `DynamicBeam`의 `Local Space`가 꺼져 있으니 레이저 End를 월드 �
 ### 답변
 
 맞다. 현재 precision crosshair 대상인 권총/라이플은 비조준 상태에서 좌우 괄호형 arc가 커서를 감싸고, 조준 상태로 전환되면 괄호 알파가 줄어들면서 상하좌우 4개 막대가 나타나 십자형 조준선처럼 구성된다. 샷건은 이 방식이 아니라 별도 원형 크로스헤어를 그린다.
+
+## 2026-06-02 18:02:38 (소요시간: 00:00:33)
+
+### 질문
+
+라이브코딩 말고 일반 빌드 명령이 커맨드로 뭐야?
+
+### 답변
+
+일반 C++ 빌드는 UnrealBuildTool 배치 파일을 직접 호출하면 된다. 에디터용 개발 빌드는 `& "C:\Program Files\Epic Games\UE_5.7\Engine\Build\BatchFiles\Build.bat" TunaSweeperEditor Win64 Development -Project="D:\github\extraction_shooter\TunaSweeper\TunaSweeper.uproject" -WaitMutex`를 사용하고, 게임 실행 파일 타깃만 빌드하려면 타깃 이름을 `TunaSweeper`로 바꾼다. 엔진 설치 경로가 다르면 앞의 UE 경로만 맞추면 된다.
+
+## 2026-06-02 18:03:43 (소요시간: 00:01:24)
+
+### 질문
+
+프로젝트 파일과 같은 폴더경로에 bat로 만들어서 실행 가능할까?
+
+### 답변
+
+가능하다. 최종 요청에 맞춰 프로젝트 루트 바로 아래가 아니라 `TunaSweeper/BatchScripts/BuildTunaSweeper.bat`에 배치 파일을 만들었고, 배치 파일 내부에서 `..\TunaSweeper.uproject`를 상대경로로 찾아 `TunaSweeperEditor Win64 Development` 빌드를 실행하게 했다. UE 설치 경로는 기본 `C:\Program Files\Epic Games\UE_5.7`을 사용하고, 다른 위치라면 `UE_5_7_ROOT` 환경변수로 덮어쓸 수 있다.

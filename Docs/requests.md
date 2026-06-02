@@ -3617,3 +3617,23 @@
 - 무기 스프레드 정의에 `AimedSpreadMultiplier`를 추가하고, 플레이어 조준 시에만 최종 스프레드 반각을 줄이도록 적용한 것
 - 적 발사 경로는 조준 개념을 적용하지 않고 기존 힙파이어 스프레드 조회를 유지한 것
 - `TunaSweeperEditor Win64 Development` 빌드는 UHT까지 통과했으나, 현재 Unreal Editor Live Coding이 활성화되어 외부 C++ 컴파일 단계가 차단된 것
+
+## 2026-06-02 18:03:43 (소요시간: 00:01:24)
+
+- `TunaSweeper/BatchScripts/BuildTunaSweeper.bat`를 추가해 일반 `TunaSweeperEditor Win64 Development` 빌드를 실행할 수 있게 할 것.
+- 배치 파일은 `TunaSweeper.uproject` 위치를 상대경로로 찾고, UE 5.7 기본 설치 경로 또는 `UE_5_7_ROOT` 환경변수를 사용하게 할 것.
+- 프로젝트 루트 `TunaSweeper/`에는 배치 파일을 두지 않고 `TunaSweeper/BatchScripts/` 아래에 둘 것.
+
+## 2026-06-02 18:06:06 (소요시간: 00:00:33)
+
+- `TunaSweeper/BatchScripts/PackageTunaSweeperWin64.bat`를 추가해 Win64 cook/package를 실행할 수 있게 할 것.
+- 배치 파일은 `RunUAT.bat BuildCookRun`을 사용하고, `TunaSweeper.uproject`와 패키징 출력 경로를 상대경로로 계산하게 할 것.
+- 기본 패키징 설정은 `Development`, 출력 경로는 `TunaSweeper/PackagedBuilds/Windows`로 둘 것.
+- 실제 Windows 패키징 실행은 하지 않고, RunUAT 기본 경로 존재 여부와 배치 파일 내용만 확인할 것.
+
+## 2026-06-02 18:07:27 (소요시간: 00:01:44)
+
+- `TunaSweeper/BatchScripts/KillTunaSweeperEditor.bat`를 추가해 `UnrealEditor.exe` 프로세스의 커맨드라인 인자를 확인하고 TunaSweeper 프로젝트일 때만 종료하게 할 것.
+- 배치 파일은 `TunaSweeper.uproject`를 상대경로로 계산하고, `Win32_Process.CommandLine`에 해당 프로젝트 경로 또는 `TunaSweeper.uproject`가 들어간 프로세스만 대상으로 삼게 할 것.
+- 매칭된 PID는 커맨드라인을 출력한 뒤 `taskkill /PID <PID> /T /F`로 종료하게 할 것.
+- 실제 프로세스 종료는 실행하지 않았고, 샌드박스에서는 `Get-CimInstance` 프로세스 커맨드라인 조회가 접근 거부되어 런타임 조회 검증은 수행하지 못한 것.
