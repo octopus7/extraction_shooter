@@ -23,7 +23,7 @@ namespace TunaSweeperHudStatus
 			: 0.0f;
 	}
 
-	const FLinearColor StatusTrackColor(0.0f, 0.0f, 0.0f, 0.0f);
+	const FLinearColor StatusTrackColor(0.015f, 0.018f, 0.022f, 0.92f);
 	const FLinearColor HealthFillColor(0.95f, 0.24f, 0.32f, 1.0f);
 	const FLinearColor HungerFillColor(0.96f, 0.68f, 0.22f, 1.0f);
 	const FLinearColor HydrationFillColor(0.23f, 0.63f, 1.0f, 1.0f);
@@ -95,7 +95,7 @@ void UTunaSweeperHudBottomStatusWidget::ApplyHudState()
 	if (HealthText)
 	{
 		HealthText->SetText(FText::Format(
-			ResolveText(TEXT("ui.hud.health_pattern"), TEXT("HP {0} / {1}")),
+			FText::FromString(TEXT("{0} / {1}")),
 			TunaSweeperHudStatus::MakeVitalsText(PreviewHudState.Health),
 			TunaSweeperHudStatus::MakeVitalsText(PreviewHudState.MaxHealth)));
 	}

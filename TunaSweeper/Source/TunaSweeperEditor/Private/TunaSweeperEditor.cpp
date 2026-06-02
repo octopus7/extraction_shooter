@@ -107,6 +107,7 @@
 #include "Player/TunaSweeperPlayerController.h"
 #include "Sound/SoundWave.h"
 #include "StaticMeshAttributes.h"
+#include "Styling/SlateTypes.h"
 #include "TunaSweeperExperimentalVegetation.h"
 #include "TunaSweeperFMSoundTool.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
@@ -150,14 +151,14 @@ namespace TunaSweeperEditorSetup
 	const FString InteractionInputTaskId = TEXT("2026-05-29_SetInteractInputAndFocusWheelV1");
 	const FString InteractionMarkerAlignmentTaskId = TEXT("2026-05-25_RebuildInteractionMarkerRequirementPreviewV1");
 	const FString PickupItemAndSpawnerTaskId = TEXT("2026-05-11_CreatePickupItemAndSpawnerAssetsV3");
-	const FString CommonGameHudTaskId = TEXT("2026-05-30_StretchInventoryStorageAndFilterHeaderV1");
+	const FString CommonGameHudTaskId = TEXT("2026-06-02_RebuildBottomHudStatusAndQuickSlotKeysV1");
 	constexpr float GameplayBottomQuickSlotWidth = 694.0f;
-	constexpr float GameplayBottomQuickSlotHeight = 174.0f;
-	constexpr float GameplayBottomStatusWidth = 194.0f;
-	constexpr float GameplayBottomStatusHeight = 70.0f;
+	constexpr float GameplayBottomQuickSlotHeight = 190.0f;
+	constexpr float GameplayBottomStatusWidth = 274.0f;
+	constexpr float GameplayBottomStatusHeight = 58.0f;
 	constexpr float GameplayBottomStatusGap = 12.0f;
 	constexpr float GameplayBottomPanelWidth = 1120.0f;
-	constexpr float GameplayBottomPanelHeight = 174.0f;
+	constexpr float GameplayBottomPanelHeight = 190.0f;
 	constexpr float HudDebuffBarLeftOffset = 24.0f;
 	constexpr float HudDebuffBarBottomOffset = 40.0f;
 	const FString WorkbenchPanelWidgetTaskId = TEXT("2026-05-29_CreateWorkbenchPanelWidgetV6");
@@ -7776,11 +7777,11 @@ namespace TunaSweeperEditorSetup
 		USizeBox* HealthBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("HealthBox"));
 		UOverlay* HealthOverlay = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), TEXT("HealthOverlay"));
 		UBorder* HealthBackdrop = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("HealthBackdrop"));
-		UTunaSweeperHudStatusRingWidget* HealthRing = WidgetTree->ConstructWidget<UTunaSweeperHudStatusRingWidget>(
-			UTunaSweeperHudStatusRingWidget::StaticClass(),
-			TEXT("HealthRing"));
+		UProgressBar* HealthGauge = WidgetTree->ConstructWidget<UProgressBar>(UProgressBar::StaticClass(), TEXT("HealthGauge"));
+		UBorder* HealthIconBackdrop = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("HealthIconBackdrop"));
 		USizeBox* HealthIconBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("HealthIconBox"));
 		UImage* HealthIcon = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("HealthIcon"));
+		UTextBlock* HealthText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("HealthText"));
 		USizeBox* HydrationBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("HydrationBox"));
 		UOverlay* HydrationOverlay = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), TEXT("HydrationOverlay"));
 		UBorder* HydrationBackdrop = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("HydrationBackdrop"));
@@ -7799,7 +7800,7 @@ namespace TunaSweeperEditorSetup
 		UImage* HungerIcon = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("HungerIcon"));
 
 		if (!RootSizeBox || !RootOverlay || !VitalsRow ||
-			!HealthBox || !HealthOverlay || !HealthBackdrop || !HealthRing || !HealthIconBox || !HealthIcon ||
+			!HealthBox || !HealthOverlay || !HealthBackdrop || !HealthGauge || !HealthIconBackdrop || !HealthIconBox || !HealthIcon || !HealthText ||
 			!HydrationBox || !HydrationOverlay || !HydrationBackdrop || !HydrationRing || !HydrationIconBox || !HydrationIcon ||
 			!HungerBox || !HungerOverlay || !HungerBackdrop || !HungerRing || !HungerIconBox || !HungerIcon)
 		{
@@ -7828,7 +7829,87 @@ namespace TunaSweeperEditorSetup
 			VitalsRowSlot->SetVerticalAlignment(VAlign_Center);
 		}
 
-		auto ConfigureStatusSlot = [](
+		HealthBox->SetWidthOverride(154.0f);
+		HealthBox->SetHeightOverride(42.0f);
+		HealthBox->SetContent(HealthOverlay);
+
+		HealthBackdrop->SetBrush(MakeRoundedBoxBrush(
+			FVector2D(154.0f, 42.0f),
+			FLinearColor(0.012f, 0.015f, 0.018f, 0.88f),
+			FLinearColor(0.0f, 0.0f, 0.0f, 0.72f),
+			1.0f,
+			12.0f));
+		UOverlaySlot* HealthBackdropSlot = HealthOverlay->AddChildToOverlay(HealthBackdrop);
+		if (HealthBackdropSlot)
+		{
+			HealthBackdropSlot->SetHorizontalAlignment(HAlign_Fill);
+			HealthBackdropSlot->SetVerticalAlignment(VAlign_Fill);
+		}
+
+		FProgressBarStyle HealthGaugeStyle;
+		HealthGaugeStyle.SetBackgroundImage(MakeRoundedBoxBrush(
+			FVector2D(146.0f, 26.0f),
+			FLinearColor(0.02f, 0.022f, 0.026f, 0.95f),
+			FLinearColor(0.02f, 0.022f, 0.026f, 0.95f),
+			0.0f,
+			10.0f));
+		HealthGaugeStyle.SetFillImage(MakeRoundedBoxBrush(
+			FVector2D(146.0f, 26.0f),
+			FLinearColor(0.96f, 0.28f, 0.34f, 1.0f),
+			FLinearColor(1.0f, 0.55f, 0.60f, 0.88f),
+			1.0f,
+			10.0f));
+		HealthGauge->SetWidgetStyle(HealthGaugeStyle);
+		HealthGauge->SetBarFillType(EProgressBarFillType::LeftToRight);
+		HealthGauge->SetFillColorAndOpacity(FLinearColor::White);
+		HealthGauge->SetPercent(1.0f);
+		UOverlaySlot* HealthGaugeSlot = HealthOverlay->AddChildToOverlay(HealthGauge);
+		if (HealthGaugeSlot)
+		{
+			HealthGaugeSlot->SetHorizontalAlignment(HAlign_Fill);
+			HealthGaugeSlot->SetVerticalAlignment(VAlign_Fill);
+			HealthGaugeSlot->SetPadding(FMargin(4.0f, 8.0f, 4.0f, 8.0f));
+		}
+
+		HealthIconBackdrop->SetPadding(FMargin(4.0f));
+		HealthIconBackdrop->SetBrush(MakeCircularBrush(
+			FVector2D(30.0f, 30.0f),
+			FLinearColor(0.18f, 0.018f, 0.035f, 0.96f),
+			FLinearColor(1.0f, 0.45f, 0.55f, 0.95f),
+			1.0f));
+		HealthIconBox->SetWidthOverride(20.0f);
+		HealthIconBox->SetHeightOverride(20.0f);
+		HealthIconBox->SetContent(HealthIcon);
+		if (HealthIconTexture)
+		{
+			HealthIcon->SetBrushFromTexture(HealthIconTexture, true);
+			FSlateBrush HealthIconBrush = HealthIcon->GetBrush();
+			HealthIconBrush.SetImageSize(FVector2D(20.0f, 20.0f));
+			HealthIcon->SetBrush(HealthIconBrush);
+			HealthIcon->SetColorAndOpacity(FLinearColor::White);
+		}
+		HealthIconBackdrop->SetContent(HealthIconBox);
+		UOverlaySlot* HealthIconBackdropSlot = HealthOverlay->AddChildToOverlay(HealthIconBackdrop);
+		if (HealthIconBackdropSlot)
+		{
+			HealthIconBackdropSlot->SetHorizontalAlignment(HAlign_Left);
+			HealthIconBackdropSlot->SetVerticalAlignment(VAlign_Center);
+			HealthIconBackdropSlot->SetPadding(FMargin(2.0f, 0.0f, 0.0f, 0.0f));
+		}
+
+		ConfigureTextBlock(HealthText, FText::FromString(TEXT("40 / 40")), FLinearColor(0.98f, 0.98f, 0.98f, 1.0f), 11);
+		TunaSweeperUIFont::ApplyFont(HealthText, 11.0f, ETunaSweeperUIFontWeight::Bold);
+		HealthText->SetShadowOffset(FVector2D(0.0f, 1.0f));
+		HealthText->SetShadowColorAndOpacity(FLinearColor(0.0f, 0.0f, 0.0f, 0.72f));
+		UOverlaySlot* HealthTextSlot = HealthOverlay->AddChildToOverlay(HealthText);
+		if (HealthTextSlot)
+		{
+			HealthTextSlot->SetHorizontalAlignment(HAlign_Center);
+			HealthTextSlot->SetVerticalAlignment(VAlign_Center);
+			HealthTextSlot->SetPadding(FMargin(26.0f, 0.0f, 6.0f, 0.0f));
+		}
+
+		auto ConfigureRingStatusSlot = [](
 			USizeBox* Box,
 			UOverlay* Overlay,
 			UBorder* Backdrop,
@@ -7838,15 +7919,16 @@ namespace TunaSweeperEditorSetup
 			UTexture2D* IconTexture,
 			const FLinearColor& FillColor)
 		{
-			Box->SetWidthOverride(58.0f);
-			Box->SetHeightOverride(58.0f);
+			const FLinearColor TrackColor(0.015f, 0.018f, 0.022f, 0.92f);
+			Box->SetWidthOverride(52.0f);
+			Box->SetHeightOverride(52.0f);
 			Box->SetContent(Overlay);
 
 			Backdrop->SetBrush(MakeCircularBrush(
-				FVector2D(58.0f, 58.0f),
-				FLinearColor::Transparent,
-				FLinearColor::Transparent,
-				0.0f));
+				FVector2D(52.0f, 52.0f),
+				FLinearColor(0.008f, 0.010f, 0.013f, 0.72f),
+				FLinearColor(0.0f, 0.0f, 0.0f, 0.84f),
+				1.0f));
 			UOverlaySlot* BackdropSlot = Overlay->AddChildToOverlay(Backdrop);
 			if (BackdropSlot)
 			{
@@ -7854,7 +7936,7 @@ namespace TunaSweeperEditorSetup
 				BackdropSlot->SetVerticalAlignment(VAlign_Fill);
 			}
 
-			Ring->SetRingColors(FLinearColor::Transparent, FillColor);
+			Ring->SetRingColors(TrackColor, FillColor);
 			Ring->SetStatusPercent(1.0f);
 			UOverlaySlot* RingSlot = Overlay->AddChildToOverlay(Ring);
 			if (RingSlot)
@@ -7863,14 +7945,14 @@ namespace TunaSweeperEditorSetup
 				RingSlot->SetVerticalAlignment(VAlign_Fill);
 			}
 
-			IconBox->SetWidthOverride(30.0f);
-			IconBox->SetHeightOverride(30.0f);
+			IconBox->SetWidthOverride(26.0f);
+			IconBox->SetHeightOverride(26.0f);
 			IconBox->SetContent(Icon);
 			if (IconTexture)
 			{
 				Icon->SetBrushFromTexture(IconTexture, true);
 				FSlateBrush IconBrush = Icon->GetBrush();
-				IconBrush.SetImageSize(FVector2D(30.0f, 30.0f));
+				IconBrush.SetImageSize(FVector2D(26.0f, 26.0f));
 				Icon->SetBrush(IconBrush);
 				Icon->SetColorAndOpacity(FLinearColor::White);
 			}
@@ -7891,16 +7973,7 @@ namespace TunaSweeperEditorSetup
 			}
 		};
 
-		ConfigureStatusSlot(
-			HealthBox,
-			HealthOverlay,
-			HealthBackdrop,
-			HealthRing,
-			HealthIconBox,
-			HealthIcon,
-			HealthIconTexture,
-			FLinearColor(0.95f, 0.24f, 0.32f, 1.0f));
-		ConfigureStatusSlot(
+		ConfigureRingStatusSlot(
 			HydrationBox,
 			HydrationOverlay,
 			HydrationBackdrop,
@@ -7909,7 +7982,7 @@ namespace TunaSweeperEditorSetup
 			HydrationIcon,
 			HydrationIconTexture,
 			FLinearColor(0.23f, 0.63f, 1.0f, 1.0f));
-		ConfigureStatusSlot(
+		ConfigureRingStatusSlot(
 			HungerBox,
 			HungerOverlay,
 			HungerBackdrop,
@@ -7927,17 +8000,18 @@ namespace TunaSweeperEditorSetup
 		UHorizontalBoxSlot* HydrationBoxSlot = VitalsRow->AddChildToHorizontalBox(HydrationBox);
 		if (HydrationBoxSlot)
 		{
-			HydrationBoxSlot->SetPadding(FMargin(10.0f, 0.0f, 0.0f, 0.0f));
+			HydrationBoxSlot->SetPadding(FMargin(8.0f, 0.0f, 0.0f, 0.0f));
 			HydrationBoxSlot->SetVerticalAlignment(VAlign_Center);
 		}
 		UHorizontalBoxSlot* HungerBoxSlot = VitalsRow->AddChildToHorizontalBox(HungerBox);
 		if (HungerBoxSlot)
 		{
-			HungerBoxSlot->SetPadding(FMargin(10.0f, 0.0f, 0.0f, 0.0f));
+			HungerBoxSlot->SetPadding(FMargin(8.0f, 0.0f, 0.0f, 0.0f));
 			HungerBoxSlot->SetVerticalAlignment(VAlign_Center);
 		}
 
-		RegisterWidgetVariable(WidgetBlueprint, HealthRing);
+		RegisterWidgetVariable(WidgetBlueprint, HealthGauge);
+		RegisterWidgetVariable(WidgetBlueprint, HealthText);
 		RegisterWidgetVariable(WidgetBlueprint, HungerRing);
 		RegisterWidgetVariable(WidgetBlueprint, HydrationRing);
 		RegisterWidgetVariable(WidgetBlueprint, HealthIcon);
@@ -8155,7 +8229,7 @@ namespace TunaSweeperEditorSetup
 			SlotRowCanvasSlot->SetAnchors(FAnchors(0.5f, 1.0f, 0.5f, 1.0f));
 			SlotRowCanvasSlot->SetAlignment(FVector2D(0.5f, 1.0f));
 			SlotRowCanvasSlot->SetPosition(FVector2D(0.0f, 0.0f));
-			SlotRowCanvasSlot->SetSize(FVector2D(690.0f, 126.0f));
+			SlotRowCanvasSlot->SetSize(FVector2D(690.0f, 146.0f));
 		}
 
 		const FString DefaultIconPaths[8] = {
@@ -8225,6 +8299,9 @@ namespace TunaSweeperEditorSetup
 			UImage* SlotIcon = WidgetTree->ConstructWidget<UImage>(
 				UImage::StaticClass(),
 				FName(*(SlotWidgetPrefix + TEXT("Icon"))));
+			UBorder* SlotNumberBackground = WidgetTree->ConstructWidget<UBorder>(
+				UBorder::StaticClass(),
+				FName(*(SlotWidgetPrefix + TEXT("NumberBackground"))));
 			UTextBlock* SlotNumberText = WidgetTree->ConstructWidget<UTextBlock>(
 				UTextBlock::StaticClass(),
 				FName(*(SlotWidgetPrefix + TEXT("NumberText"))));
@@ -8234,7 +8311,7 @@ namespace TunaSweeperEditorSetup
 
 			if (!SlotStack || !SlotAmmoTypeContainer || !SlotAmmoTypeRow || !SlotAmmoTypeBackground || !SlotAmmoTypeText ||
 				!SlotAmmoKeyBackground || !SlotAmmoKeyText || !SlotAmmoTextContainer || !SlotAmmoTextBackground || !SlotAmmoText ||
-				!SlotSizeBox || !SlotBackground || !SlotOverlay || !SlotIcon || !SlotNumberText || !SelectionFrame)
+				!SlotSizeBox || !SlotBackground || !SlotOverlay || !SlotIcon || !SlotNumberBackground || !SlotNumberText || !SelectionFrame)
 			{
 				return false;
 			}
@@ -8335,15 +8412,6 @@ namespace TunaSweeperEditorSetup
 				IconSlot->SetPadding(FMargin((SlotSize - IconSize) * 0.25f));
 			}
 
-			ConfigureTextBlock(SlotNumberText, SlotLabelText, FLinearColor(0.82f, 0.88f, 0.94f, 1.0f), bWeaponSlot ? 16 : 13);
-			UOverlaySlot* NumberSlot = SlotOverlay->AddChildToOverlay(SlotNumberText);
-			if (NumberSlot)
-			{
-				NumberSlot->SetHorizontalAlignment(HAlign_Left);
-				NumberSlot->SetVerticalAlignment(VAlign_Top);
-				NumberSlot->SetPadding(FMargin(3.0f, 1.0f, 0.0f, 0.0f));
-			}
-
 			SelectionFrame->SetVisibility(!bMeleeSlot && SlotNumber == 1 ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Hidden);
 			SelectionFrame->SetBrush(MakeRoundedBoxBrush(
 				FVector2D(SlotSize, SlotSize),
@@ -8361,6 +8429,23 @@ namespace TunaSweeperEditorSetup
 			if (SlotBoxStackSlot)
 			{
 				SlotBoxStackSlot->SetHorizontalAlignment(HAlign_Center);
+			}
+
+			SlotNumberBackground->SetPadding(FMargin(7.0f, 1.0f));
+			SlotNumberBackground->SetBrush(MakeRoundedBoxBrush(
+				FVector2D(24.0f, 18.0f),
+				FLinearColor(0.98f, 0.98f, 0.96f, 0.96f),
+				FLinearColor(0.0f, 0.0f, 0.0f, 0.78f),
+				1.0f,
+				4.0f));
+			ConfigureTextBlock(SlotNumberText, SlotLabelText, FLinearColor(0.02f, 0.024f, 0.028f, 1.0f), 11);
+			TunaSweeperUIFont::ApplyFont(SlotNumberText, 11.0f, ETunaSweeperUIFontWeight::Bold);
+			SlotNumberBackground->SetContent(SlotNumberText);
+			UVerticalBoxSlot* SlotNumberStackSlot = SlotStack->AddChildToVerticalBox(SlotNumberBackground);
+			if (SlotNumberStackSlot)
+			{
+				SlotNumberStackSlot->SetHorizontalAlignment(HAlign_Center);
+				SlotNumberStackSlot->SetPadding(FMargin(0.0f, 1.0f, 0.0f, 0.0f));
 			}
 
 			UHorizontalBoxSlot* SlotRowSlot = SlotRow->AddChildToHorizontalBox(SlotStack);
@@ -9712,7 +9797,7 @@ namespace TunaSweeperEditorSetup
 		{
 			BottomSlot->SetAnchors(FAnchors(0.5f, 1.0f, 0.5f, 1.0f));
 			BottomSlot->SetAlignment(FVector2D(0.5f, 1.0f));
-			BottomSlot->SetPosition(FVector2D(0.0f, -20.0f));
+			BottomSlot->SetPosition(FVector2D(0.0f, 0.0f));
 			BottomSlot->SetSize(FVector2D(GameplayBottomPanelWidth, GameplayBottomPanelHeight));
 		}
 
