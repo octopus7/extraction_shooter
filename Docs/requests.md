@@ -3703,3 +3703,32 @@
 - 파괴가 시작되면 `bCoverDestroyed`로 커버 통과 조건을 끄고, actor/box collision과 overlay material을 즉시 비활성화해 붕괴 연출 중 아웃라인과 커버 효과가 적용되지 않게 확인한 것.
 - projectile 발사/충돌 흐름을 다시 확인해, 파괴 중에는 커버 collision이 꺼져 총알 hit가 발생하지 않고 통과하는 구조임을 검증한 것.
 - `TunaSweeperEditor Win64 Development` 빌드를 통과시키고 에디터 실행 로그에서 `SM_Sandbag_LowPoly` bounds가 `extent=X=42 Y=56 Z=18`로 정상 생성된 것을 확인한 것.
+
+## 2026-06-02 19:31:32 (소요시간: 00:04:49)
+
+- 레벨 전환 원형 구멍 연출이 새 맵 로드 직후 너무 빨리 열리고 이동 입력이 풀릴 수 있는 흐름을 확인한 것.
+- `UTunaSweeperLevelTransitionSubsystem`에서 전환 위젯이 이미 viewport에 남아 있을 때도 새 PlayerController에 UI-only 입력 모드와 이동/시점 입력 잠금을 다시 적용하도록 한 것.
+- 전환 입력 잠금이 중복 누적되지 않도록 잠근 PlayerController를 추적하고, 연출 종료 시 기본 입력 모드 복구 흐름으로 정리되게 한 것.
+- 새 맵 로드 후 0.2초 동안 검은 원형 마스크를 유지하고, 원형 구멍 초기/유지/확장 시간을 기존 약 0.6초에서 약 1.35초로 늘린 것.
+- `TunaSweeperEditor Win64 Development` 빌드를 통과시키고, 지침에 따라 `TunaSweeper.uproject`를 Unreal Editor로 실행한 것.
+
+## 2026-06-02 19:32:54 (소요시간: 00:04:01)
+
+- 개별 모래주머니 static mesh 기준 extents를 `42,56,18`에서 `21,28,9`로 절반 축소한 것.
+- 모래주머니 커버 기본 `box_extent`를 `37.5,160,45`로 낮추고, 런타임 JSON 스폰과 스폰 정의 기본값도 같은 절반 크기로 맞춘 것.
+- 근접 사격 통과 반경을 `62.5`로 줄이고, vertical tolerance, outline thickness, collapse scatter도 커버 extents 기준으로 절반 비율을 따르게 한 것.
+- `SM_Sandbag_LowPoly`, `M_SandbagCover_OverlayOutline`, `BP_SandbagCover`를 에디터 시작 시 재생성/저장했고, 로그에서 `SM_Sandbag_LowPoly` bounds가 `extent=X=21 Y=28 Z=9`로 확인된 것.
+- `TunaSweeperEditor Win64 Development` 빌드를 통과시키고 Unreal Editor를 다시 실행해 둔 것.
+
+## 2026-06-02 19:38:08 (소요시간: 00:01:48)
+
+- 모래주머니 overlay outline material의 facing mask를 다시 뒤집어, 현재 UE overlay 렌더 경로에서 원본 앞면을 덮는 fill이 아니라 확장된 outline shell만 보이도록 수정한 것.
+- `M_SandbagCover_OverlayOutline` 재생성을 위해 sandbag setup task id를 `2026-06-02_SandbagOutlineFacingFixV1`로 갱신한 것.
+- `TunaSweeperEditor Win64 Development` 빌드를 통과시키고 Unreal Editor를 실행해 `M_SandbagCover_OverlayOutline`, `SM_Sandbag_LowPoly`, `BP_SandbagCover`가 다시 저장된 것을 확인한 것.
+
+## 2026-06-02 19:41:24 (소요시간: 00:02:05)
+
+- 모래주머니 파괴 붕괴 연출에 초반 방사형 impulse offset과 lift를 추가해, 단순히 힘없이 흘러내리는 움직임이 아니라 약하게 밀려난 뒤 내려앉는 느낌으로 조정한 것.
+- 각 모래주머니별 impulse 회전값을 더해 초반에 바깥쪽으로 기울고 흔들린 뒤 기존 붕괴 타겟 회전으로 정리되게 한 것.
+- 낙하 곡선을 `RawAlpha^1.15`로 바꿔 초반에 바로 처지지 않고, 짧은 impulse가 사라진 뒤 바닥 위치로 내려앉게 한 것.
+- `TunaSweeperEditor Win64 Development` 빌드를 통과시키고 Unreal Editor를 다시 실행해 둔 것.

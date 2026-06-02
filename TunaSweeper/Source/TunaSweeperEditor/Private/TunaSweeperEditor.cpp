@@ -200,7 +200,7 @@ namespace TunaSweeperEditorSetup
 	const FString ProjectileHitEffectAssetTaskId = TEXT("2026-05-28_CreateProjectileHitEffectAssetsV1");
 	const FString WeaponSpreadRecoilAssetTaskId = TEXT("2026-05-28_CreateWeaponSpreadRecoilAssetsV1");
 	const FString BaseballBatAssetTaskId = TEXT("2026-05-28_CreateBaseballBatStaticMeshAssetsV1");
-	const FString SandbagCoverAssetTaskId = TEXT("2026-06-02_SandbagHalfScaleV1");
+	const FString SandbagCoverAssetTaskId = TEXT("2026-06-02_SandbagOutlineFacingFixV1");
 	const FString VoxelMeshAssetTaskId = TEXT("2026-05-19_CreateSharedVoxelMeshAssetsV1");
 	const FString LumberjackMeleeSwingArcAssetTaskId = TEXT("2026-05-20_CreateLumberjackMeleeSwingArcAssetsV2");
 	const FString LedExpressionMaterialTaskId = TEXT("2026-05-26_CreateLedExpressionMaterialV1");
@@ -6766,9 +6766,9 @@ namespace TunaSweeperEditorSetup
 		BackFaceOnlyMask->Material = Material;
 		BackFaceOnlyMask->A.Connect(0, TwoSidedSignExpression);
 		BackFaceOnlyMask->ConstB = 0.0f;
-		BackFaceOnlyMask->AGreaterThanB.Connect(0, HiddenFaceMaskValue);
+		BackFaceOnlyMask->AGreaterThanB.Connect(0, InvertedFaceMaskValue);
 		BackFaceOnlyMask->AEqualsB.Connect(0, HiddenFaceMaskValue);
-		BackFaceOnlyMask->ALessThanB.Connect(0, InvertedFaceMaskValue);
+		BackFaceOnlyMask->ALessThanB.Connect(0, HiddenFaceMaskValue);
 		BackFaceOnlyMask->MaterialExpressionEditorX = 40;
 		BackFaceOnlyMask->MaterialExpressionEditorY = 500;
 		Material->GetExpressionCollection().AddExpression(BackFaceOnlyMask);
