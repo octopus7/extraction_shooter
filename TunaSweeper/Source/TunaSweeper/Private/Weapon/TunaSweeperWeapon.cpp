@@ -334,7 +334,7 @@ void ATunaSweeperWeapon::UpdateLaserSightBeam(
 	}
 
 	const FVector BeamEndLocal = LaserSightComponent->GetComponentTransform().InverseTransformPosition(BeamEndWorld);
-	LaserSightComponent->SetBeamEnd(BeamEndLocal);
+	LaserSightComponent->SetBeamEnd(BeamEndWorld);
 
 	if (World && IsLaserSightDebugEnabled())
 	{

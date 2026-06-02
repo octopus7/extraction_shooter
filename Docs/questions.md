@@ -1685,3 +1685,43 @@ main 병합 후 남은 작업은 빌드/에디터 검증, 언어 전환 실기 �
 ### Answer
 
 대체로 맞다. 에디터 저장 파일은 `TunaSweeper/Saved/SaveGames`에 있고, 패키징된 Windows 빌드는 `%LOCALAPPDATA%\TunaSweeper\Saved\SaveGames`를 사용한다. `TunaSweeperSave_Slot01.sav` 같은 슬롯 파일을 같은 이름으로 복사하면 된다. 현재 선택 슬롯까지 맞추려면 `TunaSweeperSaveSettings.sav`도 같이 복사한다. 단, 실행 중인 게임이나 에디터가 저장 파일을 다시 쓸 수 있으므로 둘 다 끈 상태에서 복사하고, 대상 폴더의 기존 `.sav`는 백업해 두는 편이 안전하다.
+
+## 2026-06-02 13:38:13 (elapsed: 00:00:00)
+
+### Question
+
+레이저 컴포넌트 End 지점 어떻게 지정하고 있어? 전혀 엉뚱한 지점으로 바라보고 있는데.
+
+### Answer
+
+현재 레이저 End는 플레이어 컨트롤러가 마우스 ray와 총구 높이 평면의 교차점으로 `AimWorldPoint`를 만들고, 무기가 그 XY 방향으로 `ECC_Visibility` 라인트레이스를 쏜 뒤 히트가 있으면 히트 지점, 없으면 5000cm fallback 지점을 사용한다. 최종 값은 `LaserSightComponent` 로컬 좌표로 변환되어 Niagara `User.BeamEnd`에 들어간다. WorldStatic 벽 히트는 실제 `AimHit.ImpactPoint`를 조준점으로 쓰지 않고 평면 교차점만 사용하므로, 벽을 볼 때 레이저가 엉뚱해 보일 수 있다.
+
+## 2026-06-02 13:40:38 (elapsed: 00:00:00)
+
+### Question
+
+컴포넌트 기준 로컬 좌표를 넣어야 하는데 월드를 넣어서 레이저 End가 틀어졌을 가능성이 높은가?
+
+### Answer
+
+현재 C++은 `BeamEndWorld`를 `LaserSightComponent->GetComponentTransform().InverseTransformPosition(BeamEndWorld)`로 컴포넌트 로컬 좌표로 변환한 뒤 `User.BeamEnd`에 넣고 있다. 따라서 월드 좌표를 그대로 넣는 문제일 가능성은 낮다. 좌표공간 문제가 맞다면 오히려 Niagara 쪽 `User.BeamEnd`가 월드 좌표로 해석되는데 C++이 로컬 좌표를 넣고 있거나, Niagara asset의 local space 설정/beam end 입력 좌표공간이 C++ 가정과 다른 경우가 더 유력하다.
+
+## 2026-06-02 13:42:01 (elapsed: 00:00:00)
+
+### Question
+
+그럼 NS를 열어서 좌표계를 봐야 하는가?
+
+### Answer
+
+그렇다. `NS_LaserSight`를 열어서 emitter `Local Space` 설정과 `BeamEmitterSetup.Beam End`가 `User.BeamEnd`를 어떤 좌표공간으로 받는지 확인해야 한다. C++은 현재 컴포넌트 로컬 좌표를 넣고 있으므로, Niagara가 월드 좌표를 기대하거나 beam end 입력이 world space로 평가되면 렌더가 엉뚱한 위치로 갈 수 있다.
+
+## 2026-06-02 13:46:26 (elapsed: 00:00:00)
+
+### Question
+
+NS `DynamicBeam`의 `Local Space`가 꺼져 있으니 레이저 End를 월드 좌표로 넣으면 정상 처리될 것 같은가?
+
+### Answer
+
+그 가능성이 높다. 현재 `DynamicBeam` emitter의 `Local Space`가 꺼져 있으면 beam position 입력도 월드 공간으로 평가될 가능성이 높으므로, C++에서 컴포넌트 로컬 좌표로 변환하지 않고 `BeamEndWorld`를 그대로 `User.BeamEnd`에 넣는 방식이 asset 설정과 더 일관된다. 다만 `Beam Start`도 같은 좌표공간으로 맞아야 하므로 Niagara의 `Beam Start`가 owner/component 위치 또는 world-space start로 설정되어 있는지도 함께 확인해야 한다.
