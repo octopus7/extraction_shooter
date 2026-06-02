@@ -2476,6 +2476,7 @@ namespace TunaSweeperEditorSetup
 		AddRecoilDefinition(TEXT("weapon.type.pistol"), 1.2f, 1.4f, 7.0f, 5.0f);
 		AddRecoilDefinition(TEXT("weapon.type.rifle"), 0.8f, 1.0f, 6.0f, 6.5f);
 		AddRecoilDefinition(TEXT("weapon.type.shotgun"), 2.0f, 4.5f, 12.0f, 4.5f);
+		AddRecoilDefinition(TEXT("weapon.type.smg"), 1.0f, 1.8f, 8.5f, 7.5f);
 
 		RecoilDataAsset->MarkPackageDirty();
 		if (!SaveAsset(RecoilDataAsset))

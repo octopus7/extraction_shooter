@@ -6,8 +6,8 @@
 - Prefer UE 5.7-compatible APIs and build settings when editing C++ or project configuration.
 - After a build finishes and Unreal Editor can be launched, open the editor for `TunaSweeper/TunaSweeper.uproject` unless the user says not to.
 - For Windows packaging with `RunUAT BuildCookRun`, request escalated permissions up front because AutomationTool writes AppData logs/caches and fails under the sandbox.
-- Record user instructions in `Docs/requests.md` with the current timestamp and elapsed duration next to the timestamp. Do not include a timezone suffix in request log timestamps.
-- Record user questions and their answers separately in `Docs/questions.md` with the current timestamp and elapsed duration next to the timestamp. Do not include a timezone suffix in question log timestamps. Do not duplicate questions in `Docs/requests.md`.
+- Record completed user instructions in `Docs/requests.md` at the end of the task, using `## YYYY-MM-DD HH:mm:ss (소요시간: HH:MM:SS)` as the entry heading. The timestamp is when the user request was received or work began, and elapsed time is measured from that start time until the task is completed or the final response is being prepared. Do not include a timezone suffix, do not use `(elapsed: ...)`, and do not write `00:00:00` as a placeholder.
+- Record user questions and their answers separately in `Docs/questions.md` at the end of the response, using the same Korean timestamp and elapsed-time heading format. Do not include a timezone suffix in question log timestamps. Do not duplicate questions in `Docs/requests.md`.
 - Use `Docs/game_conventions.md` for project-wide gameplay conventions such as direction, distance, units, and currency.
 - Use `Docs/save_persistence.md` to track gameplay/runtime state that must survive save/load. Update it whenever adding or changing persisted save data.
 - For project-local transparent icon or icon-sheet generation, use `.codex/skills/icon-alpha-from-solid-bg`: generate one muted mid-value solid-background source image, derive matched black/white background images locally, then extract alpha from their difference.

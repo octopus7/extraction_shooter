@@ -58,6 +58,71 @@
     "attachment_slot_tags": []
   },
   {
+    "id": 1006,
+    "name_string_key": "item.smg",
+    "description_string_key": "item.smg.desc",
+    "shop_sell_price": 300,
+    "experience_value": 82,
+    "item_grade": "rare",
+    "icon_file_name": "T_UIIcon_SMG.uasset",
+    "category_tag": "item.category.weapon.gun",
+    "equipment_slot_tag": "equipment.slot.gun",
+    "weapon_type_tag": "weapon.type.smg",
+    "compatible_ammo_type_tags": [
+      "ammo.type.smg"
+    ],
+    "magazine_capacity": 32,
+    "reload_seconds": 1.9,
+    "attachment_slot_tags": [
+      "attachment.slot.magazine",
+      "attachment.slot.tactical"
+    ]
+  },
+  {
+    "id": 1007,
+    "name_string_key": "item.advanced_rifle",
+    "description_string_key": "item.advanced_rifle.desc",
+    "shop_sell_price": 620,
+    "experience_value": 140,
+    "item_grade": "epic",
+    "icon_file_name": "T_UIIcon_AdvancedRifle.uasset",
+    "category_tag": "item.category.weapon.gun",
+    "equipment_slot_tag": "equipment.slot.gun",
+    "weapon_type_tag": "weapon.type.rifle",
+    "compatible_ammo_type_tags": [
+      "ammo.type.rifle"
+    ],
+    "magazine_capacity": 36,
+    "reload_seconds": 2.0,
+    "attachment_slot_tags": [
+      "attachment.slot.magazine",
+      "attachment.slot.optic",
+      "attachment.slot.tactical"
+    ]
+  },
+  {
+    "id": 1008,
+    "name_string_key": "item.advanced_smg",
+    "description_string_key": "item.advanced_smg.desc",
+    "shop_sell_price": 560,
+    "experience_value": 132,
+    "item_grade": "epic",
+    "icon_file_name": "T_UIIcon_AdvancedSMG.uasset",
+    "category_tag": "item.category.weapon.gun",
+    "equipment_slot_tag": "equipment.slot.gun",
+    "weapon_type_tag": "weapon.type.smg",
+    "compatible_ammo_type_tags": [
+      "ammo.type.smg"
+    ],
+    "magazine_capacity": 40,
+    "reload_seconds": 1.7,
+    "attachment_slot_tags": [
+      "attachment.slot.magazine",
+      "attachment.slot.optic",
+      "attachment.slot.tactical"
+    ]
+  },
+  {
     "id": 1004,
     "name_string_key": "item.combat_knife",
     "description_string_key": "item.combat_knife.desc",
@@ -122,6 +187,132 @@
     "projectile_damage_bonus": 1
   },
   {
+    "id": 2011,
+    "name_string_key": "item.rusty_pistol_ammo",
+    "description_string_key": "item.rusty_pistol_ammo.desc",
+    "shop_sell_price": 7,
+    "experience_value": 1,
+    "item_grade": "common",
+    "icon_file_name": "T_UIIcon_RustyPistolAmmo.uasset",
+    "category_tag": "item.category.ammo",
+    "ammo_type_tag": "ammo.type.pistol",
+    "projectile_hit_effect_id": "hit.red_burst",
+    "projectile_damage_multiplier": 8500,
+    "projectile_damage_bonus": 0
+  },
+  {
+    "id": 2012,
+    "name_string_key": "item.pistol_ap_ammo",
+    "description_string_key": "item.pistol_ap_ammo.desc",
+    "shop_sell_price": 24,
+    "experience_value": 5,
+    "item_grade": "rare",
+    "icon_file_name": "T_UIIcon_PistolAPAmmo.uasset",
+    "category_tag": "item.category.ammo",
+    "ammo_type_tag": "ammo.type.pistol",
+    "projectile_hit_effect_id": "hit.red_burst",
+    "projectile_damage_multiplier": 11000,
+    "projectile_damage_bonus": 3
+  },
+  {
+    "id": 2021,
+    "name_string_key": "item.rusty_rifle_ammo",
+    "description_string_key": "item.rusty_rifle_ammo.desc",
+    "shop_sell_price": 10,
+    "experience_value": 2,
+    "item_grade": "common",
+    "icon_file_name": "T_UIIcon_RustyRifleAmmo.uasset",
+    "category_tag": "item.category.ammo",
+    "ammo_type_tag": "ammo.type.rifle",
+    "projectile_hit_effect_id": "hit.red_burst",
+    "projectile_damage_multiplier": 8500,
+    "projectile_damage_bonus": 1
+  },
+  {
+    "id": 2022,
+    "name_string_key": "item.rifle_ap_ammo",
+    "description_string_key": "item.rifle_ap_ammo.desc",
+    "shop_sell_price": 36,
+    "experience_value": 7,
+    "item_grade": "rare",
+    "icon_file_name": "T_UIIcon_RifleAPAmmo.uasset",
+    "category_tag": "item.category.ammo",
+    "ammo_type_tag": "ammo.type.rifle",
+    "projectile_hit_effect_id": "hit.red_burst",
+    "projectile_damage_multiplier": 11500,
+    "projectile_damage_bonus": 5
+  },
+  {
+    "id": 2031,
+    "name_string_key": "item.rusty_shotgun_ammo",
+    "description_string_key": "item.rusty_shotgun_ammo.desc",
+    "shop_sell_price": 9,
+    "experience_value": 2,
+    "item_grade": "common",
+    "icon_file_name": "T_UIIcon_RustyShotgunAmmo.uasset",
+    "category_tag": "item.category.ammo",
+    "ammo_type_tag": "ammo.type.shotgun",
+    "projectile_hit_effect_id": "hit.red_burst",
+    "projectile_damage_multiplier": 8500,
+    "projectile_damage_bonus": 0
+  },
+  {
+    "id": 2032,
+    "name_string_key": "item.shotgun_ap_ammo",
+    "description_string_key": "item.shotgun_ap_ammo.desc",
+    "shop_sell_price": 34,
+    "experience_value": 7,
+    "item_grade": "rare",
+    "icon_file_name": "T_UIIcon_ShotgunAPAmmo.uasset",
+    "category_tag": "item.category.ammo",
+    "ammo_type_tag": "ammo.type.shotgun",
+    "projectile_hit_effect_id": "hit.red_burst",
+    "projectile_damage_multiplier": 11000,
+    "projectile_damage_bonus": 4
+  },
+  {
+    "id": 2041,
+    "name_string_key": "item.rusty_smg_ammo",
+    "description_string_key": "item.rusty_smg_ammo.desc",
+    "shop_sell_price": 8,
+    "experience_value": 1,
+    "item_grade": "common",
+    "icon_file_name": "T_UIIcon_RustySMGAmmo.uasset",
+    "category_tag": "item.category.ammo",
+    "ammo_type_tag": "ammo.type.smg",
+    "projectile_hit_effect_id": "hit.red_burst",
+    "projectile_damage_multiplier": 8500,
+    "projectile_damage_bonus": 0
+  },
+  {
+    "id": 2042,
+    "name_string_key": "item.smg_ammo",
+    "description_string_key": "item.smg_ammo.desc",
+    "shop_sell_price": 15,
+    "experience_value": 3,
+    "item_grade": "common",
+    "icon_file_name": "T_UIIcon_SMGAmmo.uasset",
+    "category_tag": "item.category.ammo",
+    "ammo_type_tag": "ammo.type.smg",
+    "projectile_hit_effect_id": "hit.red_burst",
+    "projectile_damage_multiplier": 10000,
+    "projectile_damage_bonus": 1
+  },
+  {
+    "id": 2043,
+    "name_string_key": "item.smg_ap_ammo",
+    "description_string_key": "item.smg_ap_ammo.desc",
+    "shop_sell_price": 30,
+    "experience_value": 6,
+    "item_grade": "rare",
+    "icon_file_name": "T_UIIcon_SMGAPAmmo.uasset",
+    "category_tag": "item.category.ammo",
+    "ammo_type_tag": "ammo.type.smg",
+    "projectile_hit_effect_id": "hit.red_burst",
+    "projectile_damage_multiplier": 11250,
+    "projectile_damage_bonus": 3
+  },
+  {
     "id": 2004,
     "name_string_key": "item.rifle_extended_magazine",
     "description_string_key": "item.rifle_extended_magazine.desc",
@@ -132,7 +323,8 @@
     "category_tag": "item.category.attachment",
     "attachment_slot_tag": "attachment.slot.magazine",
     "compatible_weapon_type_tags": [
-      "weapon.type.rifle"
+      "weapon.type.rifle",
+      "weapon.type.smg"
     ],
     "magazine_capacity_bonus": 15
   },
@@ -147,7 +339,8 @@
     "category_tag": "item.category.attachment",
     "attachment_slot_tag": "attachment.slot.optic",
     "compatible_weapon_type_tags": [
-      "weapon.type.rifle"
+      "weapon.type.rifle",
+      "weapon.type.smg"
     ]
   },
   {
@@ -161,7 +354,8 @@
     "category_tag": "item.category.attachment",
     "attachment_slot_tag": "attachment.slot.tactical",
     "compatible_weapon_type_tags": [
-      "weapon.type.rifle"
+      "weapon.type.rifle",
+      "weapon.type.smg"
     ]
   },
   {

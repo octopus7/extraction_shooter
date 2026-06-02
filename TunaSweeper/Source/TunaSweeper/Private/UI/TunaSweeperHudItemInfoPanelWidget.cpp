@@ -384,12 +384,12 @@ void UTunaSweeperHudItemInfoPanelWidget::RefreshSelectedItemInfo()
 
 	if (ModdingText)
 	{
-		const bool bHasRifleModding = SelectedItemDefinition.WeaponTypeTag == TEXT("weapon.type.rifle") && AttachmentSlots.Num() > 0;
-		ModdingText->SetText(bHasRifleModding
+		const bool bHasWeaponModding = !SelectedItemDefinition.WeaponTypeTag.IsNone() && AttachmentSlots.Num() > 0;
+		ModdingText->SetText(bHasWeaponModding
 			? TunaSweeperItemInfoPanel::ResolveUiText(
 				TunaGameInstance,
-				TEXT("ui.item_info.rifle_modding"),
-				TEXT("\uC18C\uCD1D \uBAA8\uB529: \uB300\uC6A9\uB7C9 \uD0C4\uCC3D / \uAD11\uD559 \uC7A5\uBE44"))
+				TEXT("ui.item_info.weapon_modding"),
+				TEXT("\uCD1D\uAE30 \uBAA8\uB529"))
 			: TunaSweeperItemInfoPanel::ResolveUiText(
 				TunaGameInstance,
 				TEXT("ui.item_info.attachments"),

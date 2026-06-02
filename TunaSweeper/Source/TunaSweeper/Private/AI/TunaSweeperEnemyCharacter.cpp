@@ -4,7 +4,9 @@
 #include "Component/TunaSweeperDebuffComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/PrimitiveComponent.h"
+#include "Components/SceneComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/WidgetComponent.h"
 #include "Game/TunaSweeperDataValueTypes.h"
 #include "Effect/TunaSweeperMeleeImpactBurstActor.h"
 #include "Effect/TunaSweeperMeleeSwingTrailActor.h"
@@ -20,10 +22,14 @@
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraSystem.h"
 #include "Debuff/TunaSweeperDebuffTypes.h"
+#include "Subsystem/TunaSweeperItemDataSubsystem.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
 #include "TimerManager.h"
+#include "UI/TunaSweeperReloadRingWidget.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Weapon/TunaSweeperProjectile.h"
+#include "Weapon/TunaSweeperWeapon.h"
+#include "Weapon/TunaSweeperWeaponSpreadRecoilDataAsset.h"
 
 namespace
 {
@@ -42,7 +48,16 @@ namespace
 	constexpr float LumberjackMeleeKnockbackVelocity = 680.0f;
 	constexpr float LumberjackMeleeImpactHeight = 55.0f;
 	constexpr float LumberjackMeleeImpactLifetimeSeconds = 0.55f;
+	constexpr int32 DefaultEnemyWeaponItemId = 1002;
+	constexpr int32 DefaultEnemyAmmoItemId = 2002;
+	constexpr int32 DefaultEnemyReserveMagazineCount = 2;
+	constexpr float DefaultEnemyReloadSeconds = 1.8f;
+	constexpr float DefaultProjectileDamageAmount = 10.0f;
 	const FLinearColor LumberjackMeleeImpactColor(0.0f, 0.92f, 1.0f, 1.0f);
+	const FName PistolWeaponTypeTag(TEXT("weapon.type.pistol"));
+	const FName RifleWeaponTypeTag(TEXT("weapon.type.rifle"));
+	const FName ShotgunWeaponTypeTag(TEXT("weapon.type.shotgun"));
+	const FName SmgWeaponTypeTag(TEXT("weapon.type.smg"));
 	const TCHAR* EnemyVoxelBodyMeshPath = TEXT("/Game/Characters/Enemy/SM_Enemy_VoxelBody.SM_Enemy_VoxelBody");
 	const TCHAR* EnemyVoxelForwardMarkerMeshPath =
 		TEXT("/Game/Characters/Enemy/SM_Enemy_VoxelForwardMarker.SM_Enemy_VoxelForwardMarker");
@@ -54,11 +69,37 @@ namespace
 		const float MaxOffset = FMath::Max(OffsetRange.X, OffsetRange.Y);
 		return FMath::Max(MinValue, BaseValue + FMath::FRandRange(MinOffset, MaxOffset));
 	}
+
+	int32 GetDefaultAmmoItemIdForWeaponType(FName WeaponTypeTag)
+	{
+		if (WeaponTypeTag == PistolWeaponTypeTag)
+		{
+			return 2001;
+		}
+		if (WeaponTypeTag == ShotgunWeaponTypeTag)
+		{
+			return 2003;
+		}
+		if (WeaponTypeTag == SmgWeaponTypeTag)
+		{
+			return 2042;
+		}
+
+		return DefaultEnemyAmmoItemId;
+	}
+
+	bool IsAmmoCompatibleWithWeapon(
+		const FTunaSweeperItemDefinition& WeaponDefinition,
+		const FTunaSweeperItemDefinition& AmmoDefinition)
+	{
+		return !AmmoDefinition.AmmoTypeTag.IsNone() &&
+			WeaponDefinition.CompatibleAmmoTypeTags.Contains(AmmoDefinition.AmmoTypeTag);
+	}
 }
 
 ATunaSweeperEnemyCharacter::ATunaSweeperEnemyCharacter()
 {
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 
 	AIControllerClass = ATunaSweeperEnemyAIController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
@@ -94,8 +135,22 @@ ATunaSweeperEnemyCharacter::ATunaSweeperEnemyCharacter()
 		ForwardMarkerMesh->SetStaticMesh(CylinderMesh.Object);
 	}
 
+	EnemyWeaponAttachPoint = CreateDefaultSubobject<USceneComponent>(TEXT("EnemyWeaponAttachPoint"));
+	EnemyWeaponAttachPoint->SetupAttachment(RootComponent);
+	EnemyWeaponAttachPoint->SetRelativeLocation(FVector(48.0f, 0.0f, 55.0f));
+
+	EnemyReloadWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("EnemyReloadWidgetComponent"));
+	EnemyReloadWidgetComponent->SetupAttachment(RootComponent);
+	EnemyReloadWidgetComponent->SetWidgetSpace(EWidgetSpace::Screen);
+	EnemyReloadWidgetComponent->SetWidgetClass(UTunaSweeperReloadRingWidget::StaticClass());
+	EnemyReloadWidgetComponent->SetDrawSize(FVector2D(58.0f, 58.0f));
+	EnemyReloadWidgetComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 138.0f));
+	EnemyReloadWidgetComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	EnemyReloadWidgetComponent->SetVisibility(false);
+
 	ApplyVoxelVisualMeshes();
 
+	EnemyWeaponClass = ATunaSweeperWeapon::StaticClass();
 	ProjectileClass = TSoftClassPtr<ATunaSweeperProjectile>(
 		FSoftObjectPath(TEXT("/Game/Weapons/BP_TunaSweeperProjectile.BP_TunaSweeperProjectile_C")));
 	BodyMaterial = TSoftObjectPtr<UMaterialInterface>(
@@ -119,6 +174,35 @@ void ATunaSweeperEnemyCharacter::BeginPlay()
 	GetCharacterMovement()->MaxWalkSpeed = GetRandomizedEnemyValue(MovementSpeed, MovementSpeedRandomOffset, 0.0f);
 	ApplyVoxelVisualMeshes();
 	ApplyVisualMaterials();
+	if (!UsesMeleeAttack())
+	{
+		InitializeEnemyWeaponRuntime();
+	}
+	UpdateEnemyReloadWidget();
+}
+
+void ATunaSweeperEnemyCharacter::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	if (bIsDead)
+	{
+		return;
+	}
+
+	CompleteEnemyReloadIfReady();
+	UpdateEnemyReloadWidget();
+}
+
+void ATunaSweeperEnemyCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	if (EnemyWeapon)
+	{
+		EnemyWeapon->Destroy();
+		EnemyWeapon = nullptr;
+	}
+
+	Super::EndPlay(EndPlayReason);
 }
 
 float ATunaSweeperEnemyCharacter::TakeDamage(
@@ -155,7 +239,12 @@ void ATunaSweeperEnemyCharacter::ConfigureSpawnData(
 	float InMaxHealth,
 	int32 InExperienceValue,
 	int32 InBleedingChanceBonus,
-	float InBleedingDurationBonusSeconds)
+	float InBleedingDurationBonusSeconds,
+	int32 InWeaponItemId,
+	int32 InAmmoItemId,
+	int32 InReserveAmmoCount,
+	float InLootLoadedAmmoDeductionRatio,
+	int32 InLootLoadedAmmoFlatDeduction)
 {
 	if (!InBodyMaterial.IsNull())
 	{
@@ -174,6 +263,12 @@ void ATunaSweeperEnemyCharacter::ConfigureSpawnData(
 	ExperienceValue = FMath::Max(0, InExperienceValue);
 	BleedingChanceBonus = TunaSweeperDataValues::ClampProbabilityValue(InBleedingChanceBonus);
 	BleedingDurationBonusSeconds = FMath::Max(0.0f, InBleedingDurationBonusSeconds);
+	EnemyWeaponItemId = InWeaponItemId;
+	EnemyAmmoItemId = InAmmoItemId;
+	EnemyReserveAmmoCount = InReserveAmmoCount;
+	LootLoadedAmmoDeductionRatio = FMath::Clamp(InLootLoadedAmmoDeductionRatio, 0.0f, 1.0f);
+	LootLoadedAmmoFlatDeduction = FMath::Max(0, InLootLoadedAmmoFlatDeduction);
+	bEnemyWeaponRuntimeInitialized = false;
 	ApplyVisualMaterials();
 }
 
@@ -198,6 +293,307 @@ void ATunaSweeperEnemyCharacter::ApplyVoxelVisualMeshes()
 			ForwardMarkerMesh->SetRelativeScale3D(FVector::OneVector);
 		}
 	}
+}
+
+void ATunaSweeperEnemyCharacter::InitializeEnemyWeaponRuntime()
+{
+	if (bEnemyWeaponRuntimeInitialized || UsesMeleeAttack())
+	{
+		return;
+	}
+
+	bEnemyWeaponRuntimeInitialized = true;
+	EnemyWeaponTypeTag = NAME_None;
+	EnemyProjectileHitEffectId = ProjectileHitEffectId;
+	EnemyProjectileDamageMultiplier = 1.0f;
+	EnemyProjectileDamageBonus = 0;
+	EnemyMagazineCapacity = 0;
+	EnemyLoadedAmmoCount = 0;
+	PendingEnemyReloadAmmoCount = 0;
+	EnemyReloadSeconds = DefaultEnemyReloadSeconds;
+
+	UTunaSweeperItemDataSubsystem* ItemDataSubsystem = nullptr;
+	UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+	if (TunaGameInstance)
+	{
+		ItemDataSubsystem = TunaGameInstance->GetSubsystem<UTunaSweeperItemDataSubsystem>();
+	}
+	if (!ItemDataSubsystem)
+	{
+		return;
+	}
+
+	FTunaSweeperItemDefinition WeaponDefinition;
+	const int32 RequestedWeaponItemId = EnemyWeaponItemId != INDEX_NONE
+		? EnemyWeaponItemId
+		: DefaultEnemyWeaponItemId;
+	if (!ItemDataSubsystem->TryGetItemDefinition(RequestedWeaponItemId, WeaponDefinition) ||
+		WeaponDefinition.WeaponTypeTag.IsNone())
+	{
+		if (!ItemDataSubsystem->TryGetItemDefinition(DefaultEnemyWeaponItemId, WeaponDefinition) ||
+			WeaponDefinition.WeaponTypeTag.IsNone())
+		{
+			return;
+		}
+	}
+
+	FTunaSweeperItemDefinition AmmoDefinition;
+	const int32 RequestedAmmoItemId = EnemyAmmoItemId != INDEX_NONE
+		? EnemyAmmoItemId
+		: GetDefaultAmmoItemIdForWeaponType(WeaponDefinition.WeaponTypeTag);
+	if (!ItemDataSubsystem->TryGetItemDefinition(RequestedAmmoItemId, AmmoDefinition) ||
+		!IsAmmoCompatibleWithWeapon(WeaponDefinition, AmmoDefinition))
+	{
+		const int32 DefaultAmmoItemId = GetDefaultAmmoItemIdForWeaponType(WeaponDefinition.WeaponTypeTag);
+		if (!ItemDataSubsystem->TryGetItemDefinition(DefaultAmmoItemId, AmmoDefinition) ||
+			!IsAmmoCompatibleWithWeapon(WeaponDefinition, AmmoDefinition))
+		{
+			return;
+		}
+	}
+
+	EnemyWeaponItemId = WeaponDefinition.Id;
+	EnemyAmmoItemId = AmmoDefinition.Id;
+	EnemyWeaponTypeTag = WeaponDefinition.WeaponTypeTag;
+	EnemyMagazineCapacity = FMath::Max(1, WeaponDefinition.MagazineCapacity);
+	EnemyLoadedAmmoCount = EnemyMagazineCapacity;
+	EnemyReloadSeconds = WeaponDefinition.ReloadSeconds > 0.0f
+		? WeaponDefinition.ReloadSeconds
+		: DefaultEnemyReloadSeconds;
+	EnemyProjectileHitEffectId = AmmoDefinition.ProjectileHitEffectId;
+	EnemyProjectileDamageMultiplier = TunaSweeperDataValues::ToRatioFloat(AmmoDefinition.ProjectileDamageMultiplier);
+	EnemyProjectileDamageBonus = AmmoDefinition.ProjectileDamageBonus;
+
+	if (EnemyReserveAmmoCount == INDEX_NONE)
+	{
+		EnemyReserveAmmoCount = EnemyMagazineCapacity * DefaultEnemyReserveMagazineCount;
+	}
+	else
+	{
+		EnemyReserveAmmoCount = FMath::Max(0, EnemyReserveAmmoCount);
+	}
+
+	if (EnsureEnemyWeaponActor() && TunaGameInstance)
+	{
+		FTunaSweeperWeaponSpreadRecoilDefinition RecoilDefinition;
+		if (TunaGameInstance->TryGetWeaponSpreadRecoilDefinition(EnemyWeaponTypeTag, RecoilDefinition))
+		{
+			EnemyWeapon->ConfigureRuntimeSpreadRecoil(EnemyWeaponTypeTag, RecoilDefinition);
+		}
+	}
+}
+
+bool ATunaSweeperEnemyCharacter::EnsureEnemyWeaponActor()
+{
+	if (EnemyWeapon)
+	{
+		return true;
+	}
+
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		return false;
+	}
+
+	TSubclassOf<ATunaSweeperWeapon> LoadedWeaponClass = EnemyWeaponClass;
+	if (!LoadedWeaponClass)
+	{
+		LoadedWeaponClass = ATunaSweeperWeapon::StaticClass();
+	}
+
+	FActorSpawnParameters SpawnParameters;
+	SpawnParameters.Owner = this;
+	SpawnParameters.Instigator = this;
+	SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	EnemyWeapon = World->SpawnActor<ATunaSweeperWeapon>(
+		LoadedWeaponClass,
+		GetActorLocation(),
+		GetActorRotation(),
+		SpawnParameters);
+	if (!EnemyWeapon)
+	{
+		return false;
+	}
+
+	EnemyWeapon->SetActorEnableCollision(false);
+	EnemyWeapon->SetActorHiddenInGame(true);
+	EnemyWeapon->ConfigureGunVisual();
+	USceneComponent* AttachParent = EnemyWeaponAttachPoint ? EnemyWeaponAttachPoint.Get() : GetRootComponent();
+	if (AttachParent)
+	{
+		EnemyWeapon->AttachToComponent(AttachParent, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+	}
+
+	return true;
+}
+
+bool ATunaSweeperEnemyCharacter::StartEnemyReload()
+{
+	if (!EnemyWeapon || EnemyWeapon->IsReloadRuntimeActive() || EnemyMagazineCapacity <= 0)
+	{
+		return false;
+	}
+
+	const int32 MissingAmmoCount = EnemyMagazineCapacity - EnemyLoadedAmmoCount;
+	if (MissingAmmoCount <= 0 || EnemyReserveAmmoCount <= 0)
+	{
+		return false;
+	}
+
+	PendingEnemyReloadAmmoCount = FMath::Min(MissingAmmoCount, EnemyReserveAmmoCount);
+	if (PendingEnemyReloadAmmoCount <= 0)
+	{
+		return false;
+	}
+
+	return EnemyWeapon->StartReloadRuntime(EnemyReloadSeconds);
+}
+
+void ATunaSweeperEnemyCharacter::CompleteEnemyReloadIfReady()
+{
+	if (!EnemyWeapon || !EnemyWeapon->HasReloadRuntimeFinished())
+	{
+		return;
+	}
+
+	const int32 ReloadedAmmoCount = FMath::Clamp(
+		PendingEnemyReloadAmmoCount,
+		0,
+		FMath::Min(EnemyMagazineCapacity - EnemyLoadedAmmoCount, EnemyReserveAmmoCount));
+	EnemyLoadedAmmoCount = FMath::Clamp(EnemyLoadedAmmoCount + ReloadedAmmoCount, 0, EnemyMagazineCapacity);
+	EnemyReserveAmmoCount = FMath::Max(0, EnemyReserveAmmoCount - ReloadedAmmoCount);
+	PendingEnemyReloadAmmoCount = 0;
+	EnemyWeapon->FinishReloadRuntime();
+}
+
+void ATunaSweeperEnemyCharacter::UpdateEnemyReloadWidget()
+{
+	if (!EnemyReloadWidgetComponent)
+	{
+		return;
+	}
+
+	const bool bShowReloadWidget = !bIsDead && EnemyWeapon && EnemyWeapon->IsReloadRuntimeActive();
+	EnemyReloadWidgetComponent->SetVisibility(bShowReloadWidget);
+	EnemyReloadWidgetComponent->SetHiddenInGame(!bShowReloadWidget);
+	if (!bShowReloadWidget)
+	{
+		return;
+	}
+
+	EnemyReloadWidgetComponent->InitWidget();
+	if (UTunaSweeperReloadRingWidget* ReloadWidget =
+		Cast<UTunaSweeperReloadRingWidget>(EnemyReloadWidgetComponent->GetUserWidgetObject()))
+	{
+		ReloadWidget->SetReloadProgress(EnemyWeapon->GetReloadRuntimeProgress(), true);
+	}
+}
+
+int32 ATunaSweeperEnemyCharacter::ResolveLootLoadedAmmoCount(
+	int32& OutSourceLoadedAmmoCount,
+	int32& OutDeductedLoadedAmmoCount) const
+{
+	OutSourceLoadedAmmoCount = FMath::Clamp(EnemyLoadedAmmoCount, 0, FMath::Max(0, EnemyMagazineCapacity));
+	const float SafeDeductionRatio = FMath::Clamp(LootLoadedAmmoDeductionRatio, 0.0f, 1.0f);
+	const int32 RatioDeduction = FMath::FloorToInt(static_cast<float>(OutSourceLoadedAmmoCount) * SafeDeductionRatio);
+	const int32 FlatDeduction = FMath::Max(0, LootLoadedAmmoFlatDeduction);
+	OutDeductedLoadedAmmoCount = FMath::Clamp(RatioDeduction + FlatDeduction, 0, OutSourceLoadedAmmoCount);
+
+	return FMath::Max(0, OutSourceLoadedAmmoCount - OutDeductedLoadedAmmoCount);
+}
+
+bool ATunaSweeperEnemyCharacter::TryCreateEnemyWeaponLootInstance(
+	UTunaSweeperGameInstance* TunaGameInstance,
+	UTunaSweeperItemDataSubsystem* ItemDataSubsystem,
+	FGuid& OutWeaponUid) const
+{
+	OutWeaponUid.Invalidate();
+	if (!TunaGameInstance || !ItemDataSubsystem || EnemyWeaponItemId == INDEX_NONE)
+	{
+		return false;
+	}
+
+	FTunaSweeperItemDefinition WeaponDefinition;
+	if (!ItemDataSubsystem->TryGetItemDefinition(EnemyWeaponItemId, WeaponDefinition))
+	{
+		return false;
+	}
+
+	FTunaSweeperItemInstance WeaponInstance;
+	WeaponInstance.ItemId = EnemyWeaponItemId;
+	WeaponInstance.Quantity = 1;
+	WeaponInstance.LoadedAmmoItemId = EnemyAmmoItemId;
+	WeaponInstance.SelectedAmmoItemId = EnemyAmmoItemId;
+
+	int32 SourceLoadedAmmoCount = 0;
+	int32 DeductedLoadedAmmoCount = 0;
+	WeaponInstance.LoadedAmmoCount = ResolveLootLoadedAmmoCount(SourceLoadedAmmoCount, DeductedLoadedAmmoCount);
+	WeaponInstance.LootLoadedAmmoSourceCount = SourceLoadedAmmoCount;
+	WeaponInstance.LootLoadedAmmoDeductedCount = DeductedLoadedAmmoCount;
+	WeaponInstance.LootLoadedAmmoDeductionRatio = FMath::Clamp(LootLoadedAmmoDeductionRatio, 0.0f, 1.0f);
+	WeaponInstance.LootLoadedAmmoFlatDeduction = FMath::Max(0, LootLoadedAmmoFlatDeduction);
+
+	OutWeaponUid = TunaGameInstance->CreateItemInstanceFromTemplate(WeaponInstance);
+	return OutWeaponUid.IsValid();
+}
+
+bool ATunaSweeperEnemyCharacter::TryBuildDeathLootRuntimeItemUids(
+	FTunaSweeperLootContainerInstance& OutContainerInstance,
+	TArray<FGuid>& OutRuntimeItemUids) const
+{
+	OutContainerInstance = FTunaSweeperLootContainerInstance();
+	OutRuntimeItemUids.Reset();
+
+	UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+	UTunaSweeperItemDataSubsystem* ItemDataSubsystem = TunaGameInstance
+		? TunaGameInstance->GetSubsystem<UTunaSweeperItemDataSubsystem>()
+		: nullptr;
+	if (!TunaGameInstance || !ItemDataSubsystem)
+	{
+		return false;
+	}
+
+	const ETunaSweeperItemTextLanguage Language = TunaGameInstance->GetCurrentTextLanguage();
+	if (!ItemDataSubsystem->TryBuildLootContainerInstance(
+		DropContainerDefinitionId,
+		DropContentsId,
+		Language,
+		OutContainerInstance))
+	{
+		return false;
+	}
+
+	bool bCreatedEnemyWeapon = false;
+	for (const FTunaSweeperItemStack& ItemStack : OutContainerInstance.Items)
+	{
+		if (OutRuntimeItemUids.Num() >= OutContainerInstance.Capacity)
+		{
+			break;
+		}
+
+		if (!bCreatedEnemyWeapon && ItemStack.ItemId == EnemyWeaponItemId)
+		{
+			FGuid WeaponUid;
+			if (TryCreateEnemyWeaponLootInstance(TunaGameInstance, ItemDataSubsystem, WeaponUid))
+			{
+				OutRuntimeItemUids.Add(WeaponUid);
+				bCreatedEnemyWeapon = true;
+				continue;
+			}
+		}
+
+		FTunaSweeperItemInstance ItemInstance;
+		ItemInstance.ItemId = ItemStack.ItemId;
+		ItemInstance.Quantity = ItemStack.Quantity;
+		const FGuid ItemUid = TunaGameInstance->CreateItemInstanceFromTemplate(ItemInstance);
+		if (ItemUid.IsValid())
+		{
+			OutRuntimeItemUids.Add(ItemUid);
+		}
+	}
+
+	return OutRuntimeItemUids.Num() > 0;
 }
 
 bool ATunaSweeperEnemyCharacter::AttackTarget(AActor* TargetActor)
@@ -266,10 +662,19 @@ bool ATunaSweeperEnemyCharacter::FireProjectileAt(AActor* TargetActor)
 		return false;
 	}
 
-	TSubclassOf<ATunaSweeperProjectile> LoadedProjectileClass = ProjectileClass.LoadSynchronous();
-	if (!LoadedProjectileClass)
+	InitializeEnemyWeaponRuntime();
+	if (!EnemyWeapon || EnemyWeaponTypeTag.IsNone() || EnemyMagazineCapacity <= 0)
 	{
-		LoadedProjectileClass = ATunaSweeperProjectile::StaticClass();
+		return false;
+	}
+	if (EnemyWeapon->IsReloadRuntimeActive())
+	{
+		return false;
+	}
+	if (EnemyLoadedAmmoCount <= 0)
+	{
+		StartEnemyReload();
+		return false;
 	}
 
 	const FVector ActorLocation = GetActorLocation();
@@ -284,25 +689,35 @@ bool ATunaSweeperEnemyCharacter::FireProjectileAt(AActor* TargetActor)
 	const FRotator FireRotation = FireDirection.Rotation();
 	SetActorRotation(FRotator(0.0f, FireRotation.Yaw, 0.0f));
 
-	const FVector SpawnLocation = ActorLocation + GetActorRotation().RotateVector(ProjectileSpawnOffset);
-
-	FActorSpawnParameters SpawnParameters;
-	SpawnParameters.Owner = this;
-	SpawnParameters.Instigator = this;
-	SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-
-	ATunaSweeperProjectile* SpawnedProjectile = World->SpawnActor<ATunaSweeperProjectile>(
-		LoadedProjectileClass,
-		SpawnLocation,
-		FireRotation,
-		SpawnParameters);
-	if (!SpawnedProjectile)
+	const float ProjectileDamageScale = ProjectileDamage > 0.0f
+		? ProjectileDamage / DefaultProjectileDamageAmount
+		: 0.0f;
+	const bool bFired = EnemyWeapon->FireWithAimIntent(
+		FireDirection,
+		this,
+		EnemyProjectileHitEffectId,
+		EnemyWeaponTypeTag,
+		ProjectileDamageScale * EnemyProjectileDamageMultiplier,
+		EnemyProjectileDamageBonus,
+		EnemyWeapon->GetRuntimeSpreadHalfAngleDegrees(),
+		TargetLocation,
+		true,
+		TargetActor,
+		nullptr,
+		TargetLocation,
+		true);
+	if (!bFired)
 	{
 		return false;
 	}
 
-	SpawnedProjectile->SetDamageAmount(ProjectileDamage);
-	SpawnedProjectile->SetHitEffectId(ProjectileHitEffectId);
+	EnemyLoadedAmmoCount = FMath::Max(0, EnemyLoadedAmmoCount - 1);
+	EnemyWeapon->AddRuntimeSpreadRecoilShot();
+	if (EnemyLoadedAmmoCount <= 0)
+	{
+		StartEnemyReload();
+	}
+
 	return true;
 }
 
@@ -537,6 +952,15 @@ bool ATunaSweeperEnemyCharacter::SpawnDeathLootContainer(AActor* DamageCauser)
 	}
 
 	SpawnedContainer->SetContainerDataIds(DropContainerDefinitionId, DropContentsId);
+	if (!UsesMeleeAttack())
+	{
+		FTunaSweeperLootContainerInstance RuntimeContainerInstance;
+		TArray<FGuid> RuntimeItemUids;
+		if (TryBuildDeathLootRuntimeItemUids(RuntimeContainerInstance, RuntimeItemUids))
+		{
+			SpawnedContainer->SetRuntimeContainerItemUids(RuntimeContainerInstance, RuntimeItemUids);
+		}
+	}
 	return true;
 }
 

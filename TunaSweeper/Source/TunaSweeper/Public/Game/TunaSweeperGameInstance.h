@@ -722,6 +722,7 @@ public:
 		const FTunaSweeperLootContainerInstance& InContainerInstance,
 		const TArray<FTunaSweeperInventorySlot>& InRuntimeSlots,
 		UObject* InOwner = nullptr);
+	FGuid CreateItemInstanceFromTemplate(const FTunaSweeperItemInstance& ItemInstanceTemplate);
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Inventory")
 	void NotifyActiveLootContainerUiClosed();
 	void SaveGameState();

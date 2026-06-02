@@ -2,9 +2,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Weapon/TunaSweeperWeaponSpreadRecoilDataAsset.h"
 #include "TunaSweeperWeapon.generated.h"
 
 class ATunaSweeperProjectile;
+class UTunaSweeperWeaponCombatComponent;
 class UMaterialInterface;
 class UPrimitiveComponent;
 class USceneComponent;
@@ -22,13 +24,13 @@ public:
 	ATunaSweeperWeapon();
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Weapon")
-	void Fire(
+	bool Fire(
 		const FVector& AimDirection,
 		APawn* InstigatorPawn,
 		FName ProjectileHitEffectId = NAME_None,
 		FName WeaponTypeTag = NAME_None);
 
-	void FireWithAimIntent(
+	bool FireWithAimIntent(
 		const FVector& AimDirection,
 		APawn* InstigatorPawn,
 		FName ProjectileHitEffectId,
@@ -48,6 +50,24 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Weapon")
 	void ConfigureMeleeVisual();
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Weapon")
+	UTunaSweeperWeaponCombatComponent* GetCombatComponent() const { return CombatComponent; }
+
+	void ConfigureRuntimeSpreadRecoil(
+		FName WeaponTypeTag,
+		const FTunaSweeperWeaponSpreadRecoilDefinition& RecoilDefinition);
+
+	void ClearRuntimeSpreadRecoil();
+	void ResetRuntimeSpreadRecoil();
+	float GetRuntimeSpreadHalfAngleDegrees() const;
+	void AddRuntimeSpreadRecoilShot();
+	bool StartReloadRuntime(float ReloadSeconds);
+	void FinishReloadRuntime();
+	void CancelReloadRuntime();
+	bool IsReloadRuntimeActive() const;
+	bool HasReloadRuntimeFinished() const;
+	float GetReloadRuntimeProgress() const;
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Weapon")
 	void SetLaserSightEnabled(bool bEnabled);
@@ -83,6 +103,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
 	TObjectPtr<UTunaSweeperLaserSightComponent> LaserSightComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
+	TObjectPtr<UTunaSweeperWeaponCombatComponent> CombatComponent;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
 	TSoftClassPtr<ATunaSweeperProjectile> ProjectileClass;

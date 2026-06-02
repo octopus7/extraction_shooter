@@ -151,6 +151,8 @@ struct TUNASWEEPER_API FTunaSweeperLootContainerItemQuantity
 	int32 QuantityMin = 1;
 
 	int32 QuantityMax = 1;
+
+	float DropChance = 1.0f;
 };
 
 USTRUCT(BlueprintType)

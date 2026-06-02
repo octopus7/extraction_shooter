@@ -299,9 +299,11 @@ namespace TunaSweeperInventory
 	const FName PistolWeaponTypeTag(TEXT("weapon.type.pistol"));
 	const FName RifleWeaponTypeTag(TEXT("weapon.type.rifle"));
 	const FName ShotgunWeaponTypeTag(TEXT("weapon.type.shotgun"));
+	const FName SmgWeaponTypeTag(TEXT("weapon.type.smg"));
 	const FName PistolAmmoTypeTag(TEXT("ammo.type.pistol"));
 	const FName RifleAmmoTypeTag(TEXT("ammo.type.rifle"));
 	const FName ShotgunAmmoTypeTag(TEXT("ammo.type.shotgun"));
+	const FName SmgAmmoTypeTag(TEXT("ammo.type.smg"));
 	const FName MagazineAttachmentSlotTag(TEXT("attachment.slot.magazine"));
 	const FName OpticAttachmentSlotTag(TEXT("attachment.slot.optic"));
 	constexpr int32 DefaultWeaponMagazineCapacity = 12;
@@ -350,6 +352,11 @@ namespace TunaSweeperInventory
 		if (WeaponTypeTag == ShotgunWeaponTypeTag)
 		{
 			return ShotgunAmmoTypeTag;
+		}
+
+		if (WeaponTypeTag == SmgWeaponTypeTag)
+		{
+			return SmgAmmoTypeTag;
 		}
 
 		return NAME_None;
@@ -425,6 +432,15 @@ namespace TunaSweeperWeaponSpreadRecoil
 			OutDefinition.MinimumSpreadHalfAngleDegrees = 4.5f;
 			OutDefinition.MaximumSpreadHalfAngleDegrees = 12.0f;
 			OutDefinition.DecreasePerSecond = 4.5f;
+			return true;
+		}
+
+		if (WeaponTypeTag == TunaSweeperInventory::SmgWeaponTypeTag)
+		{
+			OutDefinition.IncreasePerShot = 1.0f;
+			OutDefinition.MinimumSpreadHalfAngleDegrees = 1.8f;
+			OutDefinition.MaximumSpreadHalfAngleDegrees = 8.5f;
+			OutDefinition.DecreasePerSecond = 7.5f;
 			return true;
 		}
 
@@ -3839,6 +3855,36 @@ void UTunaSweeperGameInstance::SetActiveLootContainerRuntimeSlots(
 
 	bHasActiveLootContainer = true;
 	BroadcastInventoryStateChanged();
+}
+
+FGuid UTunaSweeperGameInstance::CreateItemInstanceFromTemplate(const FTunaSweeperItemInstance& ItemInstanceTemplate)
+{
+	EnsureInventoryStateInitialized();
+
+	if (ItemInstanceTemplate.ItemId == INDEX_NONE || ItemInstanceTemplate.Quantity <= 0)
+	{
+		return FGuid();
+	}
+
+	FTunaSweeperItemInstance ItemInstance = ItemInstanceTemplate;
+	ItemInstance.Uid = FGuid::NewGuid();
+	ItemInstance.Quantity = FMath::Max(1, ItemInstance.Quantity);
+	ItemInstance.LoadedAmmoCount = FMath::Max(0, ItemInstance.LoadedAmmoCount);
+	ItemInstance.LootLoadedAmmoSourceCount = FMath::Max(0, ItemInstance.LootLoadedAmmoSourceCount);
+	ItemInstance.LootLoadedAmmoDeductedCount = FMath::Max(0, ItemInstance.LootLoadedAmmoDeductedCount);
+	ItemInstance.LootLoadedAmmoDeductionRatio = FMath::Clamp(ItemInstance.LootLoadedAmmoDeductionRatio, 0.0f, 1.0f);
+	ItemInstance.LootLoadedAmmoFlatDeduction = FMath::Max(0, ItemInstance.LootLoadedAmmoFlatDeduction);
+	if (ItemInstance.LoadedAmmoItemId != INDEX_NONE)
+	{
+		ItemInstance.SelectedAmmoItemId = ItemInstance.LoadedAmmoItemId;
+	}
+	else
+	{
+		ItemInstance.LoadedAmmoCount = 0;
+	}
+
+	ItemInstancesByUid.Add(ItemInstance.Uid, ItemInstance);
+	return ItemInstance.Uid;
 }
 
 void UTunaSweeperGameInstance::NotifyActiveLootContainerUiClosed()

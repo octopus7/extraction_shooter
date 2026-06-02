@@ -128,6 +128,32 @@ void ATunaSweeperLootContainerActor::SetContainerDataIds(int32 InContainerDefini
 	RefreshContainerPresentation();
 }
 
+void ATunaSweeperLootContainerActor::SetRuntimeContainerItemUids(
+	const FTunaSweeperLootContainerInstance& InContainerInstance,
+	const TArray<FGuid>& InRuntimeItemUids)
+{
+	ContainerDefinitionId = InContainerInstance.ContainerDefinitionId;
+	ContentsId = InContainerInstance.ContentsId;
+	RuntimeContainerDefinitionId = InContainerInstance.ContainerDefinitionId;
+	RuntimeContentsId = InContainerInstance.ContentsId;
+	RuntimeDisplayName = InContainerInstance.DisplayName;
+	RuntimeCapacity = FMath::Max(0, InContainerInstance.Capacity);
+	RuntimeSlots.Reset();
+	RuntimeSlots.SetNum(RuntimeCapacity);
+
+	for (int32 ItemIndex = 0; ItemIndex < InRuntimeItemUids.Num() && RuntimeSlots.IsValidIndex(ItemIndex); ++ItemIndex)
+	{
+		if (InRuntimeItemUids[ItemIndex].IsValid())
+		{
+			RuntimeSlots[ItemIndex].ItemUid = InRuntimeItemUids[ItemIndex];
+		}
+	}
+
+	bHasRuntimeContainerState = true;
+	ApplyOpenedMarkerState();
+	RefreshContainerPresentation();
+}
+
 bool ATunaSweeperLootContainerActor::BuildContainerInstance(FTunaSweeperLootContainerInstance& OutInstance) const
 {
 	UTunaSweeperItemDataSubsystem* ItemDataSubsystem = GetItemDataSubsystem();

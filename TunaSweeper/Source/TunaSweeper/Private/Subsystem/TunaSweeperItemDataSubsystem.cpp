@@ -32,11 +32,23 @@ namespace TunaSweeperItemDataFiles
 		int32 ItemId,
 		int32 QuantityMin,
 		int32 QuantityMax,
+		float DropChance,
 		FTunaSweeperLootContainerItemQuantity& OutEntry)
 	{
 		OutEntry.ItemId = ItemId;
 		OutEntry.QuantityMin = FMath::Max(1, FMath::Min(QuantityMin, QuantityMax));
 		OutEntry.QuantityMax = FMath::Max(OutEntry.QuantityMin, FMath::Max(QuantityMin, QuantityMax));
+		OutEntry.DropChance = FMath::Clamp(DropChance, 0.0f, 1.0f);
+	}
+
+	float NormalizeDropChanceValue(float RawChance)
+	{
+		if (RawChance > 1.0f)
+		{
+			return TunaSweeperDataValues::ToRatioFloat(FMath::RoundToInt(RawChance));
+		}
+
+		return FMath::Clamp(RawChance, 0.0f, 1.0f);
 	}
 
 	ETunaSweeperItemGrade ResolveItemGradeFromString(const FString& GradeString)
@@ -101,6 +113,11 @@ namespace TunaSweeperItemDataFiles
 			for (const FTunaSweeperLootContainerItemQuantity& ItemQuantity : Contents.ItemQuantities)
 			{
 				if (ItemQuantity.ItemId == INDEX_NONE)
+				{
+					continue;
+				}
+				if (ItemQuantity.DropChance <= 0.0f ||
+					(ItemQuantity.DropChance < 1.0f && FMath::FRand() > ItemQuantity.DropChance))
 				{
 					continue;
 				}
@@ -1146,6 +1163,7 @@ bool UTunaSweeperItemDataSubsystem::LoadLootContainerContentsJson()
 			double NumericQuantity = 0.0;
 			double NumericQuantityMin = 0.0;
 			double NumericQuantityMax = 0.0;
+			double NumericDropChance = 1.0;
 			const bool bHasFixedQuantity = (*ItemObject)->TryGetNumberField(TEXT("quantity"), NumericQuantity);
 			const bool bHasQuantityMin =
 				(*ItemObject)->TryGetNumberField(TEXT("quantity_min"), NumericQuantityMin) ||
@@ -1153,6 +1171,10 @@ bool UTunaSweeperItemDataSubsystem::LoadLootContainerContentsJson()
 			const bool bHasQuantityMax =
 				(*ItemObject)->TryGetNumberField(TEXT("quantity_max"), NumericQuantityMax) ||
 				(*ItemObject)->TryGetNumberField(TEXT("max_quantity"), NumericQuantityMax);
+			(*ItemObject)->TryGetNumberField(TEXT("drop_chance"), NumericDropChance) ||
+				(*ItemObject)->TryGetNumberField(TEXT("chance"), NumericDropChance) ||
+				(*ItemObject)->TryGetNumberField(TEXT("probability"), NumericDropChance) ||
+				(*ItemObject)->TryGetNumberField(TEXT("drop_chance_ratio"), NumericDropChance);
 			if (!(*ItemObject)->TryGetNumberField(TEXT("item_id"), NumericItemId) ||
 				(!bHasFixedQuantity && (!bHasQuantityMin || !bHasQuantityMax)))
 			{
@@ -1178,6 +1200,7 @@ bool UTunaSweeperItemDataSubsystem::LoadLootContainerContentsJson()
 				ItemId,
 				QuantityMin,
 				QuantityMax,
+				TunaSweeperItemDataFiles::NormalizeDropChanceValue(static_cast<float>(NumericDropChance)),
 				QuantityEntry);
 			Contents.ItemQuantities.Add(QuantityEntry);
 

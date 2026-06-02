@@ -62,6 +62,18 @@ struct TUNASWEEPER_API FTunaSweeperItemInstance
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Inventory")
 	int32 SelectedAmmoItemId = INDEX_NONE;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Inventory")
+	int32 LootLoadedAmmoSourceCount = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Inventory")
+	int32 LootLoadedAmmoDeductedCount = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Inventory")
+	float LootLoadedAmmoDeductionRatio = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Inventory")
+	int32 LootLoadedAmmoFlatDeduction = 0;
+
 	bool IsValid() const
 	{
 		return Uid.IsValid() && ItemId != INDEX_NONE && Quantity > 0;

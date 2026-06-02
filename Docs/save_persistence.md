@@ -200,6 +200,7 @@ Raid-to-bunker travel keeps the entering vitals ratios in runtime memory only so
 - `SelectedAmmoItemId` is kept in sync for legacy/compatibility paths.
 - Loading an older save that only has `SelectedAmmoItemId` migrates that value into `LoadedAmmoItemId`.
 - If an item has no ammo item id, its loaded ammo count is normalized to `0`.
+- `LootLoadedAmmoSourceCount`, `LootLoadedAmmoDeductedCount`, `LootLoadedAmmoDeductionRatio`, and `LootLoadedAmmoFlatDeduction` record enemy-loot conversion metadata when a dropped weapon keeps only part of the enemy's loaded magazine. These fields are informational rule traces; `LoadedAmmoCount` remains the playable loaded-ammo value.
 
 ## Maintenance Rule
 

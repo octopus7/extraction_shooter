@@ -62,11 +62,58 @@
       { "item_id": 2002, "quantity": 100 },
       { "item_id": 1003, "quantity": 1 },
       { "item_id": 2003, "quantity": 100 },
+      { "item_id": 1006, "quantity": 1 },
+      { "item_id": 2042, "quantity": 100 },
+      { "item_id": 1007, "quantity": 1 },
+      { "item_id": 2022, "quantity": 60 },
+      { "item_id": 1008, "quantity": 1 },
+      { "item_id": 2043, "quantity": 60 },
       { "item_id": 1005, "quantity": 1 },
       { "item_id": 2006, "quantity": 1 },
       { "item_id": 7001, "quantity": 1 },
       { "item_id": 7002, "quantity": 20 },
       { "item_id": 7003, "quantity": 3 }
+    ]
+  },
+  {
+    "id": 8008,
+    "items": [
+      { "item_id": 1001, "quantity": 1 },
+      { "item_id": 2001, "quantity": 24 },
+      { "item_id": 2011, "quantity": 18 },
+      { "item_id": 4001, "quantity": 1 }
+    ]
+  },
+  {
+    "id": 8009,
+    "items": [
+      { "item_id": 1002, "quantity": 1 },
+      { "item_id": 2002, "quantity": 45 },
+      { "item_id": 2021, "quantity": 30 },
+      { "item_id": 2004, "quantity": 1, "drop_chance": 0.65 },
+      { "item_id": 2006, "quantity": 1, "drop_chance": 0.45 },
+      { "item_id": 3003, "quantity": 1 }
+    ]
+  },
+  {
+    "id": 8010,
+    "items": [
+      { "item_id": 1007, "quantity": 1 },
+      { "item_id": 2022, "quantity": 36 },
+      { "item_id": 2002, "quantity": 36 },
+      { "item_id": 2004, "quantity": 1, "drop_chance": 0.75 },
+      { "item_id": 2005, "quantity": 1, "drop_chance": 0.55 },
+      { "item_id": 2006, "quantity": 1, "drop_chance": 0.55 },
+      { "item_id": 4002, "quantity": 1 }
+    ]
+  },
+  {
+    "id": 8011,
+    "items": [
+      { "item_id": 1006, "quantity": 1 },
+      { "item_id": 2042, "quantity": 64 },
+      { "item_id": 2041, "quantity": 32 },
+      { "item_id": 4003, "quantity": 1 }
     ]
   }
 ]

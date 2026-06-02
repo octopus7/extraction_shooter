@@ -515,7 +515,12 @@ bool UTunaSweeperEnemySpawnSubsystem::EnsureRaidRuntimeActorsSpawnedForWorld(UWo
 					SpawnDefinition.MaxHealth,
 					SpawnDefinition.ExperienceValue,
 					SpawnDefinition.BleedingChanceBonus,
-					SpawnDefinition.BleedingDurationBonusSeconds);
+					SpawnDefinition.BleedingDurationBonusSeconds,
+					SpawnDefinition.WeaponItemId,
+					SpawnDefinition.AmmoItemId,
+					SpawnDefinition.ReserveAmmoCount,
+					SpawnDefinition.LootLoadedAmmoDeductionRatio,
+					SpawnDefinition.LootLoadedAmmoFlatDeduction);
 				UGameplayStatics::FinishSpawningActor(SpawnedEnemy, SpawnTransform);
 				++SpawnedCount;
 			}
@@ -880,6 +885,11 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadEnemySpawnData(bool bForceReload)
 		FRotator Rotation = FRotator::ZeroRotator;
 		double NumericDropContainerDefinitionId = INDEX_NONE;
 		double NumericDropContentsId = INDEX_NONE;
+		double NumericWeaponItemId = INDEX_NONE;
+		double NumericAmmoItemId = INDEX_NONE;
+		double NumericReserveAmmoCount = INDEX_NONE;
+		double NumericLootLoadedAmmoDeductionRatio = 0.35;
+		double NumericLootLoadedAmmoFlatDeduction = 0.0;
 		double NumericMaxHealth = 30.0;
 		double NumericExperienceValue = 30.0;
 		double NumericBleedingChanceBonus = 0.0;
@@ -896,6 +906,11 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadEnemySpawnData(bool bForceReload)
 		JsonObject->TryGetStringField(TEXT("body_material"), BodyMaterialPath);
 		JsonObject->TryGetNumberField(TEXT("drop_container_definition_id"), NumericDropContainerDefinitionId);
 		JsonObject->TryGetNumberField(TEXT("drop_contents_id"), NumericDropContentsId);
+		JsonObject->TryGetNumberField(TEXT("weapon_item_id"), NumericWeaponItemId);
+		JsonObject->TryGetNumberField(TEXT("ammo_item_id"), NumericAmmoItemId);
+		JsonObject->TryGetNumberField(TEXT("reserve_ammo_count"), NumericReserveAmmoCount);
+		JsonObject->TryGetNumberField(TEXT("loot_loaded_ammo_deduction_ratio"), NumericLootLoadedAmmoDeductionRatio);
+		JsonObject->TryGetNumberField(TEXT("loot_loaded_ammo_flat_deduction"), NumericLootLoadedAmmoFlatDeduction);
 		JsonObject->TryGetNumberField(TEXT("max_health"), NumericMaxHealth);
 		JsonObject->TryGetNumberField(TEXT("experience_value"), NumericExperienceValue);
 		JsonObject->TryGetNumberField(TEXT("bleeding_chance_bonus"), NumericBleedingChanceBonus) ||
@@ -923,6 +938,13 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadEnemySpawnData(bool bForceReload)
 		SpawnDefinition.Rotation = Rotation;
 		SpawnDefinition.DropContainerDefinitionId = static_cast<int32>(NumericDropContainerDefinitionId);
 		SpawnDefinition.DropContentsId = static_cast<int32>(NumericDropContentsId);
+		SpawnDefinition.WeaponItemId = static_cast<int32>(NumericWeaponItemId);
+		SpawnDefinition.AmmoItemId = static_cast<int32>(NumericAmmoItemId);
+		SpawnDefinition.ReserveAmmoCount = static_cast<int32>(NumericReserveAmmoCount);
+		SpawnDefinition.LootLoadedAmmoDeductionRatio =
+			FMath::Clamp(static_cast<float>(NumericLootLoadedAmmoDeductionRatio), 0.0f, 1.0f);
+		SpawnDefinition.LootLoadedAmmoFlatDeduction =
+			FMath::Max(0, FMath::RoundToInt(NumericLootLoadedAmmoFlatDeduction));
 		SpawnDefinition.ExperienceValue = FMath::Max(0, static_cast<int32>(NumericExperienceValue));
 		SpawnDefinition.MaxHealth = FMath::Max(1.0f, static_cast<float>(NumericMaxHealth));
 		SpawnDefinition.BleedingChanceBonus = TunaSweeperDataValues::ClampProbabilityValue(

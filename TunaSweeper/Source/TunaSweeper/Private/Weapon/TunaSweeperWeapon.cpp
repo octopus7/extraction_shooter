@@ -2,6 +2,7 @@
 
 #include "CollisionQueryParams.h"
 #include "Component/TunaSweeperLaserSightComponent.h"
+#include "Component/TunaSweeperWeaponCombatComponent.h"
 #include "Components/SceneComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "DrawDebugHelpers.h"
@@ -239,6 +240,8 @@ ATunaSweeperWeapon::ATunaSweeperWeapon()
 	LaserSightComponent = CreateDefaultSubobject<UTunaSweeperLaserSightComponent>(TEXT("LaserSightComponent"));
 	LaserSightComponent->SetupAttachment(MuzzlePoint);
 
+	CombatComponent = CreateDefaultSubobject<UTunaSweeperWeaponCombatComponent>(TEXT("CombatComponent"));
+
 	ProjectileClass = TSoftClassPtr<ATunaSweeperProjectile>(FSoftObjectPath(TEXT("/Game/Weapons/BP_TunaSweeperProjectile.BP_TunaSweeperProjectile_C")));
 }
 
@@ -264,6 +267,81 @@ void ATunaSweeperWeapon::ConfigureMeleeVisual()
 	WeaponMesh->SetRelativeLocation(FVector(26.0f, 0.0f, 0.0f));
 	WeaponMesh->SetRelativeRotation(FRotator::ZeroRotator);
 	WeaponMesh->SetRelativeScale3D(FVector(0.52f, 0.075f, 0.075f));
+}
+
+void ATunaSweeperWeapon::ConfigureRuntimeSpreadRecoil(
+	FName WeaponTypeTag,
+	const FTunaSweeperWeaponSpreadRecoilDefinition& RecoilDefinition)
+{
+	if (CombatComponent)
+	{
+		CombatComponent->ConfigureSpreadRecoilDefinition(WeaponTypeTag, RecoilDefinition);
+	}
+}
+
+void ATunaSweeperWeapon::ClearRuntimeSpreadRecoil()
+{
+	if (CombatComponent)
+	{
+		CombatComponent->ClearSpreadRecoilDefinition();
+	}
+}
+
+void ATunaSweeperWeapon::ResetRuntimeSpreadRecoil()
+{
+	if (CombatComponent)
+	{
+		CombatComponent->ResetSpreadRecoil();
+	}
+}
+
+float ATunaSweeperWeapon::GetRuntimeSpreadHalfAngleDegrees() const
+{
+	return CombatComponent ? CombatComponent->GetSpreadHalfAngleDegrees() : 0.0f;
+}
+
+void ATunaSweeperWeapon::AddRuntimeSpreadRecoilShot()
+{
+	if (CombatComponent)
+	{
+		CombatComponent->AddSpreadRecoilShot();
+	}
+}
+
+bool ATunaSweeperWeapon::StartReloadRuntime(float ReloadSeconds)
+{
+	return CombatComponent ? CombatComponent->StartReload(ReloadSeconds) : false;
+}
+
+void ATunaSweeperWeapon::FinishReloadRuntime()
+{
+	if (CombatComponent)
+	{
+		CombatComponent->FinishReload();
+	}
+}
+
+void ATunaSweeperWeapon::CancelReloadRuntime()
+{
+	if (CombatComponent)
+	{
+		CombatComponent->CancelReload();
+	}
+}
+
+bool ATunaSweeperWeapon::IsReloadRuntimeActive() const
+{
+	return CombatComponent && CombatComponent->IsReloading();
+}
+
+bool ATunaSweeperWeapon::HasReloadRuntimeFinished() const
+{
+	return CombatComponent && CombatComponent->HasReloadFinished();
+}
+
+float ATunaSweeperWeapon::GetReloadRuntimeProgress() const
+{
+	return CombatComponent ? CombatComponent->GetReloadProgress() : 0.0f;
 }
 
 void ATunaSweeperWeapon::SetLaserSightEnabled(bool bEnabled)
@@ -430,13 +508,13 @@ void ATunaSweeperWeapon::SetWeaponMeshOverride(
 	WeaponMesh->SetRelativeScale3D(RelativeScale);
 }
 
-void ATunaSweeperWeapon::Fire(
+bool ATunaSweeperWeapon::Fire(
 	const FVector& AimDirection,
 	APawn* InstigatorPawn,
 	FName ProjectileHitEffectId,
 	FName WeaponTypeTag)
 {
-	FireWithAimIntent(
+	return FireWithAimIntent(
 		AimDirection,
 		InstigatorPawn,
 		ProjectileHitEffectId,
@@ -452,7 +530,7 @@ void ATunaSweeperWeapon::Fire(
 		false);
 }
 
-void ATunaSweeperWeapon::FireWithAimIntent(
+bool ATunaSweeperWeapon::FireWithAimIntent(
 	const FVector& AimDirection,
 	APawn* InstigatorPawn,
 	FName ProjectileHitEffectId,
@@ -470,13 +548,13 @@ void ATunaSweeperWeapon::FireWithAimIntent(
 	UWorld* World = GetWorld();
 	if (!World)
 	{
-		return;
+		return false;
 	}
 
 	const float CurrentTime = World->GetTimeSeconds();
 	if (CurrentTime - LastFireTimeSeconds < FireCooldown)
 	{
-		return;
+		return false;
 	}
 
 	const FVector SpawnLocation = GetMuzzleWorldLocation();
@@ -498,10 +576,11 @@ void ATunaSweeperWeapon::FireWithAimIntent(
 		const FVector CenterDirection = ApplyRandomConeSpread(ShotDirection, SpreadHalfAngleDegrees);
 		const int32 ProjectileCount = FMath::Max(1, ShotgunProjectileCount);
 		const float SpreadHalfAngle = FMath::Max(0.0f, ShotgunSpreadAngleDegrees) * 0.5f;
+		bool bSpawnedAnyProjectile = false;
 		for (int32 ProjectileIndex = 0; ProjectileIndex < ProjectileCount; ++ProjectileIndex)
 		{
 			const FVector PelletDirection = ApplyRandomConeSpread(CenterDirection, SpreadHalfAngle);
-			SpawnProjectile(
+			bSpawnedAnyProjectile |= SpawnProjectile(
 				*World,
 				LoadedProjectileClass,
 				PelletDirection,
@@ -512,13 +591,17 @@ void ATunaSweeperWeapon::FireWithAimIntent(
 				AimIntentActor,
 				AimIntentComponent,
 				AimIntentWorldPoint,
-				bHasAimIntentWorldPoint);
+				bHasAimIntentWorldPoint) != nullptr;
+		}
+		if (!bSpawnedAnyProjectile)
+		{
+			return false;
 		}
 	}
 	else
 	{
 		const FVector SpreadDirection = ApplyRandomConeSpread(ShotDirection, SpreadHalfAngleDegrees);
-		SpawnProjectile(
+		if (!SpawnProjectile(
 			*World,
 			LoadedProjectileClass,
 			SpreadDirection,
@@ -529,10 +612,14 @@ void ATunaSweeperWeapon::FireWithAimIntent(
 			AimIntentActor,
 			AimIntentComponent,
 			AimIntentWorldPoint,
-			bHasAimIntentWorldPoint);
+			bHasAimIntentWorldPoint))
+		{
+			return false;
+		}
 	}
 
 	LastFireTimeSeconds = CurrentTime;
+	return true;
 }
 
 ATunaSweeperProjectile* ATunaSweeperWeapon::SpawnProjectile(

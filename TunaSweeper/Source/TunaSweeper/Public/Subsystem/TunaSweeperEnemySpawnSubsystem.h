@@ -130,6 +130,11 @@ private:
 		FRotator Rotation = FRotator::ZeroRotator;
 		int32 DropContainerDefinitionId = INDEX_NONE;
 		int32 DropContentsId = INDEX_NONE;
+		int32 WeaponItemId = INDEX_NONE;
+		int32 AmmoItemId = INDEX_NONE;
+		int32 ReserveAmmoCount = INDEX_NONE;
+		float LootLoadedAmmoDeductionRatio = 0.35f;
+		int32 LootLoadedAmmoFlatDeduction = 0;
 		int32 ExperienceValue = 30;
 		float MaxHealth = 30.0f;
 		int32 BleedingChanceBonus = 0;

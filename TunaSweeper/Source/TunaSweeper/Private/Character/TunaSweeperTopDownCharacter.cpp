@@ -261,7 +261,6 @@ void ATunaSweeperTopDownCharacter::Tick(float DeltaSeconds)
 	UpdateSprintAndStamina(DeltaSeconds);
 	UpdateMovementSpeed();
 	UpdateStaminaGauge(DeltaSeconds);
-	UpdateWeaponSpreadRecoil(DeltaSeconds);
 	UpdateAimingVisuals(DeltaSeconds);
 }
 
@@ -1060,20 +1059,13 @@ void ATunaSweeperTopDownCharacter::FireWeapon()
 	const UWorld* World = GetWorld();
 	const bool bIsBunkerMap = World &&
 		World->GetMapName().EndsWith(TEXT("BunkerMap"));
-	if (bIsBunkerMap)
-	{
-		if (TunaGameInstance->GetWeaponLoadedAmmoCount(SelectedWeaponSlotNumber) <= 0)
-		{
-			return;
-		}
-	}
-	else if (!TunaGameInstance->TryConsumeLoadedAmmoForWeaponSlot(SelectedWeaponSlotNumber))
+	if (TunaGameInstance->GetWeaponLoadedAmmoCount(SelectedWeaponSlotNumber) <= 0)
 	{
 		return;
 	}
 
 	const float SpreadHalfAngleDegrees = ResolveWeaponSpreadHalfAngleDegrees(WeaponTypeTag);
-	EquippedWeapon->FireWithAimIntent(
+	const bool bFired = EquippedWeapon->FireWithAimIntent(
 		AimDirection,
 		this,
 		ProjectileHitEffectId,
@@ -1087,6 +1079,16 @@ void ATunaSweeperTopDownCharacter::FireWeapon()
 		bHasAimIntent ? AimIntentComponent.Get() : nullptr,
 		AimIntentWorldPoint,
 		bHasAimIntent);
+	if (!bFired)
+	{
+		return;
+	}
+
+	if (!bIsBunkerMap && !TunaGameInstance->TryConsumeLoadedAmmoForWeaponSlot(SelectedWeaponSlotNumber))
+	{
+		return;
+	}
+
 	AddWeaponSpreadRecoilShot(WeaponTypeTag);
 }
 
@@ -1471,6 +1473,11 @@ float ATunaSweeperTopDownCharacter::GetReloadProgress() const
 		return 0.0f;
 	}
 
+	if (EquippedWeapon && EquippedWeapon->IsReloadRuntimeActive())
+	{
+		return EquippedWeapon->GetReloadRuntimeProgress();
+	}
+
 	const UWorld* World = GetWorld();
 	const float CurrentTime = World ? World->GetTimeSeconds() : ReloadStartWorldSeconds;
 	return FMath::Clamp((CurrentTime - ReloadStartWorldSeconds) / ReloadDurationSeconds, 0.0f, 1.0f);
@@ -1550,6 +1557,11 @@ void ATunaSweeperTopDownCharacter::StartReload()
 	ReloadStartWorldSeconds = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.0f;
 	bIsReloading = true;
 	CloseAmmoSelection();
+	EnsureEquippedWeaponActor();
+	if (EquippedWeapon)
+	{
+		EquippedWeapon->StartReloadRuntime(ReloadDurationSeconds);
+	}
 
 	if (GetWorld())
 	{
@@ -1566,7 +1578,20 @@ void ATunaSweeperTopDownCharacter::CompleteReload()
 {
 	const int32 ReloadSlotNumber = SelectedWeaponSlotNumber;
 	const int32 ReloadAmmoItemId = PendingReloadAmmoItemId;
-	CancelReload();
+	if (GetWorld())
+	{
+		GetWorldTimerManager().ClearTimer(ReloadTimerHandle);
+	}
+
+	if (EquippedWeapon)
+	{
+		EquippedWeapon->FinishReloadRuntime();
+	}
+
+	bIsReloading = false;
+	PendingReloadAmmoItemId = INDEX_NONE;
+	ReloadStartWorldSeconds = 0.0f;
+	ReloadDurationSeconds = 0.0f;
 
 	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
 	{
@@ -1586,6 +1611,10 @@ void ATunaSweeperTopDownCharacter::CancelReload()
 	PendingReloadAmmoItemId = INDEX_NONE;
 	ReloadStartWorldSeconds = 0.0f;
 	ReloadDurationSeconds = 0.0f;
+	if (EquippedWeapon)
+	{
+		EquippedWeapon->CancelReloadRuntime();
+	}
 }
 
 bool ATunaSweeperTopDownCharacter::StartItemUseFromSlot(const FTunaSweeperItemSlotReference& SlotReference)
@@ -2619,20 +2648,6 @@ void ATunaSweeperTopDownCharacter::UpdateWeaponSpreadRecoil(float DeltaSeconds)
 		return;
 	}
 
-	if (WeaponRecoilTypeTag != SelectedWeaponTypeTag)
-	{
-		WeaponRecoilTypeTag = SelectedWeaponTypeTag;
-		WeaponRecoilOffsetDegrees = FVector2D::ZeroVector;
-		return;
-	}
-
-	const float CurrentMagnitude = WeaponRecoilOffsetDegrees.Size();
-	if (CurrentMagnitude <= KINDA_SMALL_NUMBER)
-	{
-		WeaponRecoilOffsetDegrees = FVector2D::ZeroVector;
-		return;
-	}
-
 	UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
 	FTunaSweeperWeaponSpreadRecoilDefinition RecoilDefinition;
 	if (!TunaGameInstance || !TunaGameInstance->TryGetWeaponSpreadRecoilDefinition(SelectedWeaponTypeTag, RecoilDefinition))
@@ -2641,22 +2656,18 @@ void ATunaSweeperTopDownCharacter::UpdateWeaponSpreadRecoil(float DeltaSeconds)
 		return;
 	}
 
-	const float NewMagnitude = FMath::Max(
-		0.0f,
-		CurrentMagnitude - RecoilDefinition.DecreasePerSecond * FMath::Max(0.0f, DeltaSeconds));
-	if (NewMagnitude <= KINDA_SMALL_NUMBER)
+	if (EquippedWeapon)
 	{
-		WeaponRecoilOffsetDegrees = FVector2D::ZeroVector;
-		return;
+		EquippedWeapon->ConfigureRuntimeSpreadRecoil(SelectedWeaponTypeTag, RecoilDefinition);
 	}
-
-	WeaponRecoilOffsetDegrees *= NewMagnitude / CurrentMagnitude;
 }
 
 void ATunaSweeperTopDownCharacter::ResetWeaponSpreadRecoil()
 {
-	WeaponRecoilOffsetDegrees = FVector2D::ZeroVector;
-	WeaponRecoilTypeTag = NAME_None;
+	if (EquippedWeapon)
+	{
+		EquippedWeapon->ResetRuntimeSpreadRecoil();
+	}
 }
 
 bool ATunaSweeperTopDownCharacter::TryGetSelectedWeaponTypeTag(FName& OutWeaponTypeTag) const
@@ -2689,47 +2700,30 @@ float ATunaSweeperTopDownCharacter::ResolveWeaponSpreadHalfAngleDegrees(FName We
 {
 	UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
 	FTunaSweeperWeaponSpreadRecoilDefinition RecoilDefinition;
-	if (!TunaGameInstance || !TunaGameInstance->TryGetWeaponSpreadRecoilDefinition(WeaponTypeTag, RecoilDefinition))
+	if (!EquippedWeapon ||
+		!TunaGameInstance ||
+		!TunaGameInstance->TryGetWeaponSpreadRecoilDefinition(WeaponTypeTag, RecoilDefinition))
 	{
 		return 0.0f;
 	}
 
-	return FMath::Clamp(
-		FMath::Max(RecoilDefinition.MinimumSpreadHalfAngleDegrees, WeaponRecoilOffsetDegrees.Size()),
-		RecoilDefinition.MinimumSpreadHalfAngleDegrees,
-		RecoilDefinition.MaximumSpreadHalfAngleDegrees);
+	EquippedWeapon->ConfigureRuntimeSpreadRecoil(WeaponTypeTag, RecoilDefinition);
+	return EquippedWeapon->GetRuntimeSpreadHalfAngleDegrees();
 }
 
 void ATunaSweeperTopDownCharacter::AddWeaponSpreadRecoilShot(FName WeaponTypeTag)
 {
 	UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
 	FTunaSweeperWeaponSpreadRecoilDefinition RecoilDefinition;
-	if (!TunaGameInstance || !TunaGameInstance->TryGetWeaponSpreadRecoilDefinition(WeaponTypeTag, RecoilDefinition))
+	if (!EquippedWeapon ||
+		!TunaGameInstance ||
+		!TunaGameInstance->TryGetWeaponSpreadRecoilDefinition(WeaponTypeTag, RecoilDefinition))
 	{
 		return;
 	}
 
-	if (WeaponRecoilTypeTag != WeaponTypeTag)
-	{
-		WeaponRecoilTypeTag = WeaponTypeTag;
-		WeaponRecoilOffsetDegrees = FVector2D::ZeroVector;
-	}
-
-	const float KickMagnitude = FMath::Max(0.0f, RecoilDefinition.IncreasePerShot);
-	if (KickMagnitude <= 0.0f)
-	{
-		return;
-	}
-
-	const float KickAngleRadians = FMath::FRandRange(0.0f, 2.0f * PI);
-	WeaponRecoilOffsetDegrees += FVector2D(FMath::Cos(KickAngleRadians), FMath::Sin(KickAngleRadians)) * KickMagnitude;
-
-	const float MaxMagnitude = FMath::Max(0.0f, RecoilDefinition.MaximumSpreadHalfAngleDegrees);
-	const float CurrentMagnitude = WeaponRecoilOffsetDegrees.Size();
-	if (MaxMagnitude > 0.0f && CurrentMagnitude > MaxMagnitude)
-	{
-		WeaponRecoilOffsetDegrees *= MaxMagnitude / CurrentMagnitude;
-	}
+	EquippedWeapon->ConfigureRuntimeSpreadRecoil(WeaponTypeTag, RecoilDefinition);
+	EquippedWeapon->AddRuntimeSpreadRecoilShot();
 }
 
 bool ATunaSweeperTopDownCharacter::HasActiveMoveInput() const

@@ -37,6 +37,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Loot Container")
 	void SetContainerDataIds(int32 InContainerDefinitionId, int32 InContentsId);
 
+	void SetRuntimeContainerItemUids(
+		const FTunaSweeperLootContainerInstance& InContainerInstance,
+		const TArray<FGuid>& InRuntimeItemUids);
+
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Loot Container")
 	int32 GetContainerDefinitionId() const { return ContainerDefinitionId; }
 

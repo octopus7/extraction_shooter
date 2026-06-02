@@ -2,12 +2,16 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Subsystem/TunaSweeperItemDataSubsystem.h"
 #include "TunaSweeperEnemyCharacter.generated.h"
 
 class UStaticMeshComponent;
+class USceneComponent;
+class UWidgetComponent;
 class UMaterialInterface;
 class UNiagaraSystem;
 class ATunaSweeperProjectile;
+class ATunaSweeperWeapon;
 class ATunaSweeperLootContainerActor;
 class ATunaSweeperMeleeImpactBurstActor;
 class ATunaSweeperMeleeSwingTrailActor;
@@ -48,10 +52,17 @@ public:
 		float InMaxHealth,
 		int32 InExperienceValue,
 		int32 InBleedingChanceBonus = 0,
-		float InBleedingDurationBonusSeconds = 0.0f);
+		float InBleedingDurationBonusSeconds = 0.0f,
+		int32 InWeaponItemId = INDEX_NONE,
+		int32 InAmmoItemId = INDEX_NONE,
+		int32 InReserveAmmoCount = INDEX_NONE,
+		float InLootLoadedAmmoDeductionRatio = 0.35f,
+		int32 InLootLoadedAmmoFlatDeduction = 0);
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaSeconds) override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UStaticMeshComponent> VisualMesh;
@@ -59,8 +70,17 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UStaticMeshComponent> ForwardMarkerMesh;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<USceneComponent> EnemyWeaponAttachPoint;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UWidgetComponent> EnemyReloadWidgetComponent;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat")
 	TSoftClassPtr<ATunaSweeperProjectile> ProjectileClass;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat|Weapon")
+	TSubclassOf<ATunaSweeperWeapon> EnemyWeaponClass;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat")
 	FVector ProjectileSpawnOffset = FVector(60.0f, 0.0f, 55.0f);
@@ -116,9 +136,37 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Experience", meta = (ClampMin = "0", UIMin = "0"))
 	int32 ExperienceValue = 30;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat|Weapon")
+	int32 EnemyWeaponItemId = INDEX_NONE;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat|Weapon")
+	int32 EnemyAmmoItemId = INDEX_NONE;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat|Weapon")
+	int32 EnemyReserveAmmoCount = INDEX_NONE;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Loot|Weapon", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+	float LootLoadedAmmoDeductionRatio = 0.35f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Loot|Weapon", meta = (ClampMin = "0", UIMin = "0"))
+	int32 LootLoadedAmmoFlatDeduction = 0;
+
 private:
 	void ApplyVoxelVisualMeshes();
 	void ApplyVisualMaterials();
+	void InitializeEnemyWeaponRuntime();
+	bool EnsureEnemyWeaponActor();
+	bool StartEnemyReload();
+	void CompleteEnemyReloadIfReady();
+	void UpdateEnemyReloadWidget();
+	bool TryCreateEnemyWeaponLootInstance(
+		class UTunaSweeperGameInstance* TunaGameInstance,
+		class UTunaSweeperItemDataSubsystem* ItemDataSubsystem,
+		FGuid& OutWeaponUid) const;
+	bool TryBuildDeathLootRuntimeItemUids(
+		FTunaSweeperLootContainerInstance& OutContainerInstance,
+		TArray<FGuid>& OutRuntimeItemUids) const;
+	int32 ResolveLootLoadedAmmoCount(int32& OutSourceLoadedAmmoCount, int32& OutDeductedLoadedAmmoCount) const;
 	void HandleDeath(AController* KillerController, AActor* DamageCauser);
 	bool ApplyMeleeDamageTo(AActor* TargetActor);
 	void ApplyMeleeKnockbackTo(AActor* TargetActor, const FVector& AttackDirection) const;
@@ -127,6 +175,18 @@ private:
 	bool SpawnDeathLootContainer(AActor* DamageCauser);
 	FVector ResolveLootDropLocation(AActor* IgnoredActor) const;
 
+	UPROPERTY(Transient)
+	TObjectPtr<ATunaSweeperWeapon> EnemyWeapon;
+
 	float CurrentHealth = 30.0f;
+	FName EnemyWeaponTypeTag = NAME_None;
+	FName EnemyProjectileHitEffectId = NAME_None;
+	float EnemyProjectileDamageMultiplier = 1.0f;
+	float EnemyReloadSeconds = 1.8f;
+	int32 EnemyProjectileDamageBonus = 0;
+	int32 EnemyMagazineCapacity = 0;
+	int32 EnemyLoadedAmmoCount = 0;
+	int32 PendingEnemyReloadAmmoCount = 0;
 	bool bIsDead = false;
+	bool bEnemyWeaponRuntimeInitialized = false;
 };
