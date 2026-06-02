@@ -2,6 +2,8 @@
 /chatgpt/Candidates
 *.blend1
 /Release
+
+# .NET
 **/bin/
 **/obj/
 **/.vs/
@@ -9,8 +11,11 @@
 **/.idea/
 **/TestResults/
 **/publish/
+**/artifacts/
 *.user
+*.userosscache
 *.suo
+*.sln.docstates
 *.rsuser
 *.nupkg
 *.snupkg

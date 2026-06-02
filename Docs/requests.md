@@ -3637,3 +3637,30 @@
 - 배치 파일은 `TunaSweeper.uproject`를 상대경로로 계산하고, `Win32_Process.CommandLine`에 해당 프로젝트 경로 또는 `TunaSweeper.uproject`가 들어간 프로세스만 대상으로 삼게 할 것.
 - 매칭된 PID는 커맨드라인을 출력한 뒤 `taskkill /PID <PID> /T /F`로 종료하게 할 것.
 - 실제 프로세스 종료는 실행하지 않았고, 샌드박스에서는 `Get-CimInstance` 프로세스 커맨드라인 조회가 접근 거부되어 런타임 조회 검증은 수행하지 못한 것.
+
+## 2026-06-02 18:17:27 (소요시간: 00:03:53)
+
+- `Tools/TunaBuildHelper`에 .NET 10 WPF 기반 빌드 헬퍼 툴을 추가한 것.
+- 창은 48px 아이콘 버튼 2개, Topmost, 보더 드래그 이동, 보더 지연 호버 시 빨간 닫기 버튼 표시로 구성한 것.
+- 아이콘은 WPF 도형으로 `KillTunaSweeperEditor.bat`와 `BuildTunaSweeper.bat` 실행 용도에 맞게 만든 것.
+- `TunaSweeper/BatchScripts/BuildHelper`에 Release publish 산출물을 배치한 것.
+- 루트 `.gitignore`에 .NET 출력물과 사용자 파일 무시 규칙을 명시한 것.
+
+## 2026-06-02 18:23:03 (소요시간: 00:01:33)
+
+- `BuildTunaSweeper.bat`를 `BuildAndRunTunaSweeper.bat`로 이름 변경한 것.
+- 빌드 성공 후 `UnrealEditor.exe`로 `TunaSweeper.uproject`를 열도록 배치 파일에 에디터 실행 단계를 추가한 것.
+- WPF 빌드 헬퍼의 빌드 버튼이 새 배치 파일명을 호출하도록 수정하고 Release publish 산출물을 갱신한 것.
+
+## 2026-06-02 18:26:00 (소요시간: 00:01:42)
+
+- WPF 빌드 헬퍼의 아이콘 버튼 2개를 원형 버튼 디자인으로 변경한 것.
+- 닫기 버튼을 보더 오른쪽 바깥으로 튀어나오게 배치한 것.
+- 닫기 버튼 숨김 처리를 즉시 숨김에서 1초 유예 후 숨김으로 변경한 것.
+- Release publish 산출물을 `TunaSweeper/BatchScripts/BuildHelper`에 다시 갱신한 것.
+
+## 2026-06-02 18:29:44 (소요시간: 00:00:33)
+
+- WPF 빌드 헬퍼에서 `BuildAndRunTunaSweeper.bat` 실행은 성공 시 터미널이 닫히도록 `cmd /c` 방식으로 변경한 것.
+- 빌드 실패나 에디터 실행 경로 오류처럼 종료 코드가 실패인 경우에는 `pause`로 터미널을 남겨 로그를 볼 수 있게 한 것.
+- Release publish 산출물을 `TunaSweeper/BatchScripts/BuildHelper`에 다시 갱신한 것.
