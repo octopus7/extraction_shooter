@@ -890,6 +890,10 @@ void UTunaSweeperInteractionMarkerWidget::ApplyState()
 {
 	SetRenderOpacity(1.0f);
 	const bool bUseMultiOptionList = CachedOptionTexts.Num() > 0;
+	const bool bShowLabelContent = CachedLabelAlpha > 0.01f;
+	const ESlateVisibility LabelVisibility = bShowLabelContent
+		? ESlateVisibility::HitTestInvisible
+		: ESlateVisibility::Collapsed;
 
 	if (MarkerRoot)
 	{
@@ -967,12 +971,14 @@ void UTunaSweeperInteractionMarkerWidget::ApplyState()
 		}
 		if (CachedMultiOptionListRoot)
 		{
-			CachedMultiOptionListRoot->SetRenderOpacity(CachedLabelAlpha);
+			CachedMultiOptionListRoot->SetVisibility(LabelVisibility);
+			CachedMultiOptionListRoot->SetRenderOpacity(1.0f);
 		}
 		if (LabelBackground)
 		{
+			LabelBackground->SetVisibility(LabelVisibility);
 			LabelBackground->SetBrushColor(FLinearColor::Transparent);
-			LabelBackground->SetRenderOpacity(1.0f);
+			LabelBackground->SetRenderOpacity(CachedLabelAlpha);
 		}
 	}
 	else
@@ -982,21 +988,23 @@ void UTunaSweeperInteractionMarkerWidget::ApplyState()
 		if (DisplayNameText)
 		{
 			DisplayNameText->SetText(CachedDisplayText);
-			ApplyPaintOpacity(DisplayNameText, CachedLabelAlpha);
+			DisplayNameText->SetVisibility(LabelVisibility);
+			ApplyPaintOpacity(DisplayNameText, 1.0f);
 		}
 
 		if (LabelBackground)
 		{
+			LabelBackground->SetVisibility(LabelVisibility);
 			LabelBackground->SetBrushColor(FLinearColor::White);
-			ApplyPaintOpacity(LabelBackground, CachedLabelAlpha);
+			LabelBackground->SetRenderOpacity(CachedLabelAlpha);
 		}
 	}
 
-	const bool bShowRequirement = !bUseMultiOptionList && bCachedShowRequirement && CachedRequiredQuantity > 0;
+	const bool bShowRequirement = bShowLabelContent && !bUseMultiOptionList && bCachedShowRequirement && CachedRequiredQuantity > 0;
 	if (RequirementRoot)
 	{
 		RequirementRoot->SetVisibility(bShowRequirement ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
-		ApplyPaintOpacity(RequirementRoot, CachedLabelAlpha);
+		ApplyPaintOpacity(RequirementRoot, 1.0f);
 	}
 
 	if (RequirementIconImage)
@@ -1011,7 +1019,7 @@ void UTunaSweeperInteractionMarkerWidget::ApplyState()
 			RequirementIconImage->SetBrushFromTexture(nullptr, false);
 			RequirementIconImage->SetOpacity(0.0f);
 		}
-		ApplyPaintOpacity(RequirementIconImage, CachedLabelAlpha);
+		ApplyPaintOpacity(RequirementIconImage, 1.0f);
 	}
 
 	if (RequirementQuantityText)
@@ -1020,6 +1028,6 @@ void UTunaSweeperInteractionMarkerWidget::ApplyState()
 			bShowRequirement
 				? FText::Format(FText::FromString(TEXT("x{0}")), FText::AsNumber(CachedRequiredQuantity))
 				: FText::GetEmpty());
-		ApplyPaintOpacity(RequirementQuantityText, CachedLabelAlpha);
+		ApplyPaintOpacity(RequirementQuantityText, 1.0f);
 	}
 }
