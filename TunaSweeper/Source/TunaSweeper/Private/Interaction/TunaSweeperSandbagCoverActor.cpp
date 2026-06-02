@@ -2,17 +2,24 @@
 
 #include "Components/BoxComponent.h"
 #include "Components/SceneComponent.h"
+#include "Components/StaticMeshComponent.h"
+#include "Engine/StaticMesh.h"
 #include "Kismet/GameplayStatics.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Materials/MaterialInterface.h"
-#include "ProceduralMeshComponent.h"
 #include "TunaSweeperCollisionChannels.h"
 
 namespace
 {
 	const TCHAR* DefaultSandbagMaterialPath = TEXT("/Game/Interaction/M_SandbagCover_Burlap.M_SandbagCover_Burlap");
-	const TCHAR* DefaultSandbagOutlineMaterialPath = TEXT("/Game/Interaction/M_SandbagCover_Outline.M_SandbagCover_Outline");
+	const TCHAR* DefaultSandbagOutlineMaterialPath = TEXT("/Game/Interaction/M_SandbagCover_OverlayOutline.M_SandbagCover_OverlayOutline");
+	const TCHAR* DefaultSandbagStaticMeshPath = TEXT("/Game/Interaction/SM_Sandbag_LowPoly.SM_Sandbag_LowPoly");
 	const TCHAR* FallbackVertexColorMaterialPath = TEXT("/Game/Prototype/M_Voxel_VertexColor.M_Voxel_VertexColor");
+
+	constexpr int32 SandbagLayerCount = 3;
+	constexpr int32 SandbagDepthCount = 2;
+	constexpr int32 MaxSandbagMeshComponentCount = 26;
+	const FVector BaseSandbagMeshExtent(21.0f, 28.0f, 9.0f);
 
 	FVector MakeSafeBoxExtent(const FVector& InBoxExtent)
 	{
@@ -22,83 +29,27 @@ namespace
 			FMath::Max(1.0f, InBoxExtent.Z));
 	}
 
-	void AddQuad(
-		TArray<FVector>& Vertices,
-		TArray<int32>& Triangles,
-		TArray<FVector>& Normals,
-		TArray<FVector2D>& UVs,
-		TArray<FLinearColor>& VertexColors,
-		TArray<FProcMeshTangent>& Tangents,
-		const FVector& P0,
-		const FVector& P1,
-		const FVector& P2,
-		const FVector& P3,
-		const FLinearColor& VertexColor)
+	FVector MakeScaleFromExtents(const FVector& DesiredExtent, const FVector& BaseExtent)
 	{
-		const int32 BaseIndex = Vertices.Num();
-		Vertices.Add(P0);
-		Vertices.Add(P1);
-		Vertices.Add(P2);
-		Vertices.Add(P3);
-
-		Triangles.Add(BaseIndex);
-		Triangles.Add(BaseIndex + 1);
-		Triangles.Add(BaseIndex + 2);
-		Triangles.Add(BaseIndex);
-		Triangles.Add(BaseIndex + 2);
-		Triangles.Add(BaseIndex + 3);
-
-		const FVector Normal = FVector::CrossProduct(P1 - P0, P2 - P0).GetSafeNormal();
-		const FVector TangentDirection = (P1 - P0).GetSafeNormal();
-		const FProcMeshTangent Tangent(TangentDirection.IsNearlyZero() ? FVector::ForwardVector : TangentDirection, false);
-		for (int32 Index = 0; Index < 4; ++Index)
-		{
-			Normals.Add(Normal);
-			VertexColors.Add(VertexColor);
-			Tangents.Add(Tangent);
-		}
-
-		UVs.Add(FVector2D(0.0f, 0.0f));
-		UVs.Add(FVector2D(1.0f, 0.0f));
-		UVs.Add(FVector2D(1.0f, 1.0f));
-		UVs.Add(FVector2D(0.0f, 1.0f));
+		return FVector(
+			DesiredExtent.X / FMath::Max(1.0f, BaseExtent.X),
+			DesiredExtent.Y / FMath::Max(1.0f, BaseExtent.Y),
+			DesiredExtent.Z / FMath::Max(1.0f, BaseExtent.Z));
 	}
 
-	void AddBox(
-		TArray<FVector>& Vertices,
-		TArray<int32>& Triangles,
-		TArray<FVector>& Normals,
-		TArray<FVector2D>& UVs,
-		TArray<FLinearColor>& VertexColors,
-		TArray<FProcMeshTangent>& Tangents,
-		const FVector& Center,
-		const FVector& Extent,
-		const FLinearColor& VertexColor)
+	FRotator LerpRotatorComponentWise(const FRotator& A, const FRotator& B, float Alpha)
 	{
-		const FVector Min = Center - Extent;
-		const FVector Max = Center + Extent;
-		const FVector P000(Min.X, Min.Y, Min.Z);
-		const FVector P001(Min.X, Min.Y, Max.Z);
-		const FVector P010(Min.X, Max.Y, Min.Z);
-		const FVector P011(Min.X, Max.Y, Max.Z);
-		const FVector P100(Max.X, Min.Y, Min.Z);
-		const FVector P101(Max.X, Min.Y, Max.Z);
-		const FVector P110(Max.X, Max.Y, Min.Z);
-		const FVector P111(Max.X, Max.Y, Max.Z);
-
-		AddQuad(Vertices, Triangles, Normals, UVs, VertexColors, Tangents, P001, P101, P111, P011, VertexColor);
-		AddQuad(Vertices, Triangles, Normals, UVs, VertexColors, Tangents, P000, P010, P110, P100, VertexColor);
-		AddQuad(Vertices, Triangles, Normals, UVs, VertexColors, Tangents, P100, P110, P111, P101, VertexColor);
-		AddQuad(Vertices, Triangles, Normals, UVs, VertexColors, Tangents, P000, P001, P011, P010, VertexColor);
-		AddQuad(Vertices, Triangles, Normals, UVs, VertexColors, Tangents, P010, P011, P111, P110, VertexColor);
-		AddQuad(Vertices, Triangles, Normals, UVs, VertexColors, Tangents, P000, P100, P101, P001, VertexColor);
+		return FRotator(
+			FMath::Lerp(A.Pitch, B.Pitch, Alpha),
+			FMath::Lerp(A.Yaw, B.Yaw, Alpha),
+			FMath::Lerp(A.Roll, B.Roll, Alpha));
 	}
 }
 
 ATunaSweeperSandbagCoverActor::ATunaSweeperSandbagCoverActor()
 {
 	PrimaryActorTick.bCanEverTick = true;
-	PrimaryActorTick.TickInterval = 0.08f;
+	PrimaryActorTick.TickInterval = 0.0f;
 
 	SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("SceneRoot"));
 	RootComponent = SceneRoot;
@@ -109,27 +60,28 @@ ATunaSweeperSandbagCoverActor::ATunaSweeperSandbagCoverActor()
 	BlockingCollision->SetVisibility(false);
 	BlockingCollision->SetCanEverAffectNavigation(true);
 
-	VisualMesh = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("VisualMesh"));
-	VisualMesh->SetupAttachment(RootComponent);
-	VisualMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	VisualMesh->SetGenerateOverlapEvents(false);
-
-	OutlineMesh = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("OutlineMesh"));
-	OutlineMesh->SetupAttachment(RootComponent);
-	OutlineMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	OutlineMesh->SetGenerateOverlapEvents(false);
-	OutlineMesh->SetCastShadow(false);
-	OutlineMesh->SetRenderInMainPass(false);
-	OutlineMesh->SetRenderCustomDepth(false);
-	OutlineMesh->SetCustomDepthStencilValue(3);
-	OutlineMesh->SetHiddenInGame(false);
-	OutlineMesh->SetVisibility(true);
+	SandbagMeshComponents.Reserve(MaxSandbagMeshComponentCount);
+	for (int32 ComponentIndex = 0; ComponentIndex < MaxSandbagMeshComponentCount; ++ComponentIndex)
+	{
+		const FName ComponentName(*FString::Printf(TEXT("SandbagMesh_%02d"), ComponentIndex));
+		UStaticMeshComponent* SandbagMesh = CreateDefaultSubobject<UStaticMeshComponent>(ComponentName);
+		SandbagMesh->SetupAttachment(RootComponent);
+		SandbagMesh->SetMobility(EComponentMobility::Movable);
+		SandbagMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		SandbagMesh->SetGenerateOverlapEvents(false);
+		SandbagMesh->SetCanEverAffectNavigation(false);
+		SandbagMesh->SetRenderCustomDepth(false);
+		SandbagMesh->SetCustomDepthStencilValue(3);
+		SandbagMesh->SetOverlayMaterial(nullptr);
+		SandbagMesh->SetOverlayMaterialMaxDrawDistance(0.0f);
+		SandbagMeshComponents.Add(SandbagMesh);
+	}
 
 	VisualMaterial = TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath(DefaultSandbagMaterialPath));
 	OutlineMaterial = TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath(DefaultSandbagOutlineMaterialPath));
+	SandbagStaticMesh = TSoftObjectPtr<UStaticMesh>(FSoftObjectPath(DefaultSandbagStaticMeshPath));
 
 	ApplyCollisionDefaults();
-	RebuildMeshes();
 }
 
 void ATunaSweeperSandbagCoverActor::OnConstruction(const FTransform& Transform)
@@ -142,7 +94,11 @@ void ATunaSweeperSandbagCoverActor::OnConstruction(const FTransform& Transform)
 	PassthroughRadius = FMath::Max(0.0f, PassthroughRadius);
 	PassthroughVerticalTolerance = FMath::Max(0.0f, PassthroughVerticalTolerance);
 	OutlineThickness = FMath::Max(0.5f, OutlineThickness);
+	CollapseDurationSeconds = FMath::Max(0.05f, CollapseDurationSeconds);
+	CollapseHoldSeconds = FMath::Max(0.0f, CollapseHoldSeconds);
+	CollapseScatterDistance = FMath::Max(0.0f, CollapseScatterDistance);
 
+	ResetCollapseState();
 	ApplyCollisionDefaults();
 	RebuildMeshes();
 	ApplyMaterials();
@@ -156,8 +112,8 @@ void ATunaSweeperSandbagCoverActor::BeginPlay()
 	BoxExtent = MakeSafeBoxExtent(BoxExtent);
 	MaxHealth = FMath::Max(1.0f, MaxHealth);
 	CurrentHealth = MaxHealth;
-	bCoverDestroyed = false;
 
+	ResetCollapseState();
 	ApplyCollisionDefaults();
 	RebuildMeshes();
 	ApplyMaterials();
@@ -168,6 +124,13 @@ void ATunaSweeperSandbagCoverActor::BeginPlay()
 void ATunaSweeperSandbagCoverActor::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
+
+	if (bCoverDestroyed)
+	{
+		UpdateCollapse(DeltaSeconds);
+		return;
+	}
+
 	UpdatePassthroughOutline();
 }
 
@@ -205,7 +168,11 @@ void ATunaSweeperSandbagCoverActor::ConfigureCoverDefaults(
 	MaxHealth = FMath::Max(1.0f, InMaxHealth);
 	CurrentHealth = MaxHealth;
 	PassthroughRadius = FMath::Max(0.0f, InPassthroughRadius);
+	PassthroughVerticalTolerance = FMath::Max(0.0f, BoxExtent.Z);
+	OutlineThickness = FMath::Max(0.5f, BoxExtent.Z / 15.0f);
+	CollapseScatterDistance = FMath::Max(0.0f, BoxExtent.X * 1.8f);
 
+	ResetCollapseState();
 	ApplyCollisionDefaults();
 	RebuildMeshes();
 	ApplyMaterials();
@@ -225,6 +192,18 @@ void ATunaSweeperSandbagCoverActor::ConfigureCoverVisualDefaults(
 		OutlineMaterial = InOutlineMaterial;
 	}
 
+	ApplyMaterials();
+	UpdateDamageVisual();
+}
+
+void ATunaSweeperSandbagCoverActor::ConfigureCoverMeshDefaults(TSoftObjectPtr<UStaticMesh> InSandbagMesh)
+{
+	if (!InSandbagMesh.IsNull())
+	{
+		SandbagStaticMesh = InSandbagMesh;
+	}
+
+	RebuildMeshes();
 	ApplyMaterials();
 	UpdateDamageVisual();
 }
@@ -260,7 +239,7 @@ void ATunaSweeperSandbagCoverActor::ApplyCollisionDefaults()
 
 	BlockingCollision->SetRelativeLocation(FVector(0.0f, 0.0f, BoxExtent.Z));
 	BlockingCollision->SetBoxExtent(BoxExtent);
-	BlockingCollision->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	BlockingCollision->SetCollisionEnabled(bCoverDestroyed ? ECollisionEnabled::NoCollision : ECollisionEnabled::QueryAndPhysics);
 	BlockingCollision->SetCollisionObjectType(ECC_WorldStatic);
 	BlockingCollision->SetCollisionResponseToAllChannels(ECR_Ignore);
 	BlockingCollision->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
@@ -271,120 +250,114 @@ void ATunaSweeperSandbagCoverActor::ApplyCollisionDefaults()
 	BlockingCollision->CanCharacterStepUpOn = ECB_No;
 	BlockingCollision->SetHiddenInGame(true);
 	BlockingCollision->SetVisibility(false);
+	BlockingCollision->SetCanEverAffectNavigation(!bCoverDestroyed);
 }
 
 void ATunaSweeperSandbagCoverActor::RebuildMeshes()
 {
-	if (!VisualMesh || !OutlineMesh)
-	{
-		return;
-	}
+	UStaticMesh* LoadedSandbagMesh = SandbagStaticMesh.LoadSynchronous();
 
-	TArray<FVector> Vertices;
-	TArray<int32> Triangles;
-	TArray<FVector> Normals;
-	TArray<FVector2D> UVs;
-	TArray<FLinearColor> VertexColors;
-	TArray<FProcMeshTangent> Tangents;
-
-	constexpr int32 LayerCount = 3;
-	constexpr int32 DepthCount = 2;
-	const float LayerHeight = BoxExtent.Z * 2.0f / static_cast<float>(LayerCount);
+	int32 ComponentIndex = 0;
+	const float LayerHeight = BoxExtent.Z * 2.0f / static_cast<float>(SandbagLayerCount);
 	const float DepthCenterOffset = BoxExtent.X * 0.34f;
 	const float DepthExtent = BoxExtent.X * 0.43f;
 
-	for (int32 LayerIndex = 0; LayerIndex < LayerCount; ++LayerIndex)
+	for (int32 LayerIndex = 0; LayerIndex < SandbagLayerCount; ++LayerIndex)
 	{
 		const int32 ColumnCount = (LayerIndex % 2 == 0) ? 4 : 5;
 		const float SegmentLength = BoxExtent.Y * 2.0f / static_cast<float>(ColumnCount);
 		const float ZCenter = LayerHeight * (static_cast<float>(LayerIndex) + 0.5f);
-		const float LayerShade = 1.0f - static_cast<float>(LayerIndex) * 0.035f;
 
-		for (int32 DepthIndex = 0; DepthIndex < DepthCount; ++DepthIndex)
+		for (int32 DepthIndex = 0; DepthIndex < SandbagDepthCount; ++DepthIndex)
 		{
 			const float XCenter = DepthIndex == 0 ? -DepthCenterOffset : DepthCenterOffset;
-			const float DepthShade = DepthIndex == 0 ? 0.94f : 1.0f;
 			for (int32 ColumnIndex = 0; ColumnIndex < ColumnCount; ++ColumnIndex)
 			{
+				if (!SandbagMeshComponents.IsValidIndex(ComponentIndex))
+				{
+					return;
+				}
+
+				UStaticMeshComponent* SandbagMesh = SandbagMeshComponents[ComponentIndex];
+				++ComponentIndex;
+				if (!SandbagMesh)
+				{
+					continue;
+				}
+
 				const float YCenter = -BoxExtent.Y + SegmentLength * (static_cast<float>(ColumnIndex) + 0.5f);
 				const FVector BagCenter(XCenter, YCenter, ZCenter);
 				const FVector BagExtent(DepthExtent, SegmentLength * 0.455f, LayerHeight * 0.42f);
-				const float ColumnShade = 0.96f + 0.02f * static_cast<float>((ColumnIndex + LayerIndex) % 2);
-				const float Shade = LayerShade * DepthShade * ColumnShade;
-				const FLinearColor BagColor(
-					0.92f * Shade,
-					0.78f * Shade,
-					0.52f * Shade,
-					1.0f);
-				AddBox(Vertices, Triangles, Normals, UVs, VertexColors, Tangents, BagCenter, BagExtent, BagColor);
+				const float AlternatingYaw = static_cast<float>(((ColumnIndex + LayerIndex + DepthIndex) % 3) - 1) * 2.0f;
+				const float AlternatingRoll = DepthIndex == 0 ? -1.4f : 1.4f;
+
+				SandbagMesh->SetStaticMesh(LoadedSandbagMesh);
+				SandbagMesh->SetRelativeLocation(BagCenter);
+				SandbagMesh->SetRelativeRotation(FRotator(0.0f, AlternatingYaw, AlternatingRoll));
+				SandbagMesh->SetRelativeScale3D(MakeScaleFromExtents(BagExtent, BaseSandbagMeshExtent));
+				SandbagMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+				SandbagMesh->SetGenerateOverlapEvents(false);
+				SandbagMesh->SetRenderCustomDepth(false);
+				SandbagMesh->SetCustomDepthStencilValue(3);
+				SandbagMesh->SetOverlayMaterial(bOutlineActive && !bCoverDestroyed ? DynamicOutlineMaterial.Get() : nullptr);
+				SandbagMesh->SetOverlayMaterialMaxDrawDistance(0.0f);
+				SandbagMesh->SetHiddenInGame(false);
+				SandbagMesh->SetVisibility(true, true);
 			}
 		}
 	}
 
-	VisualMesh->ClearAllMeshSections();
-	VisualMesh->CreateMeshSection_LinearColor(
-		0,
-		Vertices,
-		Triangles,
-		Normals,
-		UVs,
-		VertexColors,
-		Tangents,
-		false);
-	VisualMesh->SetRenderCustomDepth(false);
-
-	Vertices.Reset();
-	Triangles.Reset();
-	Normals.Reset();
-	UVs.Reset();
-	VertexColors.Reset();
-	Tangents.Reset();
-
-	const float ProxyOutset = FMath::Max(1.0f, OutlineThickness);
-	AddBox(
-		Vertices,
-		Triangles,
-		Normals,
-		UVs,
-		VertexColors,
-		Tangents,
-		FVector(0.0f, 0.0f, BoxExtent.Z),
-		BoxExtent + FVector(ProxyOutset, ProxyOutset, ProxyOutset * 0.35f),
-		FLinearColor::White);
-	OutlineMesh->ClearAllMeshSections();
-	OutlineMesh->CreateMeshSection_LinearColor(
-		0,
-		Vertices,
-		Triangles,
-		Normals,
-		UVs,
-		VertexColors,
-		Tangents,
-		false);
-	OutlineMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	OutlineMesh->SetRenderInMainPass(false);
-	OutlineMesh->SetHiddenInGame(false);
-	OutlineMesh->SetVisibility(true, true);
-	SetOutlineActive(bOutlineActive);
+	for (; ComponentIndex < SandbagMeshComponents.Num(); ++ComponentIndex)
+	{
+		if (UStaticMeshComponent* SandbagMesh = SandbagMeshComponents[ComponentIndex])
+		{
+			SandbagMesh->SetStaticMesh(nullptr);
+			SandbagMesh->SetHiddenInGame(true);
+			SandbagMesh->SetVisibility(false, true);
+			SandbagMesh->SetRenderCustomDepth(false);
+			SandbagMesh->SetOverlayMaterial(nullptr);
+		}
+	}
 }
 
 void ATunaSweeperSandbagCoverActor::ApplyMaterials()
 {
-	if (VisualMesh)
+	DynamicVisualMaterial = nullptr;
+	DynamicOutlineMaterial = nullptr;
+
+	UMaterialInterface* LoadedVisualMaterial = VisualMaterial.LoadSynchronous();
+	if (!LoadedVisualMaterial)
 	{
-		DynamicVisualMaterial = nullptr;
-		UMaterialInterface* LoadedVisualMaterial = VisualMaterial.LoadSynchronous();
-		if (!LoadedVisualMaterial)
+		LoadedVisualMaterial = LoadObject<UMaterialInterface>(nullptr, FallbackVertexColorMaterialPath);
+	}
+	if (LoadedVisualMaterial)
+	{
+		DynamicVisualMaterial = UMaterialInstanceDynamic::Create(LoadedVisualMaterial, this);
+	}
+
+	if (UMaterialInterface* LoadedOutlineMaterial = OutlineMaterial.LoadSynchronous())
+	{
+		DynamicOutlineMaterial = UMaterialInstanceDynamic::Create(LoadedOutlineMaterial, this);
+		if (DynamicOutlineMaterial)
 		{
-			LoadedVisualMaterial = LoadObject<UMaterialInterface>(nullptr, FallbackVertexColorMaterialPath);
-		}
-		if (LoadedVisualMaterial)
-		{
-			DynamicVisualMaterial = VisualMesh->CreateDynamicMaterialInstance(0, LoadedVisualMaterial);
+			DynamicOutlineMaterial->SetScalarParameterValue(TEXT("OutlineThickness"), FMath::Max(0.5f, OutlineThickness));
+			DynamicOutlineMaterial->SetVectorParameterValue(TEXT("OutlineColor"), FLinearColor(0.78f, 0.98f, 0.32f, 1.0f));
 		}
 	}
 
-	DynamicOutlineMaterial = nullptr;
+	for (UStaticMeshComponent* SandbagMesh : SandbagMeshComponents)
+	{
+		if (!SandbagMesh)
+		{
+			continue;
+		}
+		if (DynamicVisualMaterial)
+		{
+			SandbagMesh->SetMaterial(0, DynamicVisualMaterial);
+		}
+		SandbagMesh->SetOverlayMaterial(bOutlineActive && !bCoverDestroyed ? DynamicOutlineMaterial.Get() : nullptr);
+		SandbagMesh->SetOverlayMaterialMaxDrawDistance(0.0f);
+	}
 }
 
 void ATunaSweeperSandbagCoverActor::UpdateDamageVisual()
@@ -409,21 +382,28 @@ void ATunaSweeperSandbagCoverActor::SetOutlineActive(bool bEnabled)
 {
 	bOutlineActive = bEnabled && !bCoverDestroyed;
 
-	if (VisualMesh)
+	for (UStaticMeshComponent* SandbagMesh : SandbagMeshComponents)
 	{
-		VisualMesh->SetRenderCustomDepth(false);
-		VisualMesh->SetCustomDepthStencilValue(3);
-	}
-	if (OutlineMesh)
-	{
-		OutlineMesh->SetRenderCustomDepth(bOutlineActive);
-		OutlineMesh->SetCustomDepthStencilValue(3);
-		OutlineMesh->SetHiddenInGame(false);
-		OutlineMesh->SetVisibility(true, true);
+		if (SandbagMesh)
+		{
+			SandbagMesh->SetRenderCustomDepth(false);
+			SandbagMesh->SetCustomDepthStencilValue(3);
+			if (DynamicOutlineMaterial)
+			{
+				DynamicOutlineMaterial->SetScalarParameterValue(TEXT("OutlineThickness"), FMath::Max(0.5f, OutlineThickness));
+			}
+			SandbagMesh->SetOverlayMaterial(bOutlineActive ? DynamicOutlineMaterial.Get() : nullptr);
+			SandbagMesh->SetOverlayMaterialMaxDrawDistance(0.0f);
+		}
 	}
 }
 
 void ATunaSweeperSandbagCoverActor::DestroyCover()
+{
+	BeginCollapse();
+}
+
+void ATunaSweeperSandbagCoverActor::BeginCollapse()
 {
 	if (bCoverDestroyed)
 	{
@@ -431,18 +411,105 @@ void ATunaSweeperSandbagCoverActor::DestroyCover()
 	}
 
 	bCoverDestroyed = true;
-	SetOutlineActive(false);
-	SetActorEnableCollision(false);
+	bOutlineActive = false;
+	CollapseElapsedSeconds = 0.0f;
+	CollapseStates.Reset();
+	CollapseStates.SetNum(SandbagMeshComponents.Num());
 
+	SetActorEnableCollision(false);
 	if (BlockingCollision)
 	{
 		BlockingCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		BlockingCollision->SetCanEverAffectNavigation(false);
 	}
-	if (VisualMesh)
+	for (UStaticMeshComponent* SandbagMesh : SandbagMeshComponents)
 	{
-		VisualMesh->SetHiddenInGame(true);
-		VisualMesh->SetVisibility(false, true);
+		if (SandbagMesh)
+		{
+			SandbagMesh->SetOverlayMaterial(nullptr);
+		}
 	}
 
-	Destroy();
+	const float SafeHeight = FMath::Max(1.0f, BoxExtent.Z * 2.0f);
+	for (int32 Index = 0; Index < SandbagMeshComponents.Num(); ++Index)
+	{
+		UStaticMeshComponent* SandbagMesh = SandbagMeshComponents[Index];
+		if (!SandbagMesh)
+		{
+			continue;
+		}
+
+		FTunaSweeperSandbagCollapseState& CollapseState = CollapseStates[Index];
+		CollapseState.StartLocation = SandbagMesh->GetRelativeLocation();
+		CollapseState.StartRotation = SandbagMesh->GetRelativeRotation();
+
+		const FVector StartLocation = CollapseState.StartLocation;
+		const float HeightAlpha = FMath::Clamp(StartLocation.Z / SafeHeight, 0.0f, 1.0f);
+		const float AngleRadians = FMath::DegreesToRadians(FMath::Fmod(static_cast<float>(Index) * 137.507f, 360.0f));
+		const FVector SpiralDirection(FMath::Cos(AngleRadians), FMath::Sin(AngleRadians), 0.0f);
+		FVector SpillDirection(StartLocation.X * 1.7f, StartLocation.Y * 0.32f, 0.0f);
+		SpillDirection += SpiralDirection * FMath::Max(24.0f, BoxExtent.X * 0.65f);
+		SpillDirection = SpillDirection.GetSafeNormal();
+		if (SpillDirection.IsNearlyZero())
+		{
+			SpillDirection = SpiralDirection;
+		}
+
+		const float ScatterDistance =
+			FMath::Lerp(BoxExtent.X * 0.4f, CollapseScatterDistance, HeightAlpha) +
+			static_cast<float>(Index % 5) * 8.0f;
+		CollapseState.TargetLocation = StartLocation + SpillDirection * ScatterDistance;
+		CollapseState.TargetLocation.Z = FMath::Max(8.0f, BoxExtent.Z * 0.12f) + static_cast<float>(Index % 3) * 1.5f;
+
+		const float DirectionRoll = SpillDirection.X >= 0.0f ? 82.0f : -82.0f;
+		const float DirectionPitch = SpillDirection.Y >= 0.0f ? -48.0f : 48.0f;
+		CollapseState.TargetRotation = FRotator(
+			CollapseState.StartRotation.Pitch + DirectionPitch + static_cast<float>((Index % 3) - 1) * 8.0f,
+			CollapseState.StartRotation.Yaw + FMath::RadiansToDegrees(AngleRadians) * 0.12f,
+			CollapseState.StartRotation.Roll + DirectionRoll + static_cast<float>((Index % 4) - 1) * 6.0f);
+		CollapseState.DelaySeconds = static_cast<float>(Index % 6) * 0.035f;
+	}
+}
+
+void ATunaSweeperSandbagCoverActor::UpdateCollapse(float DeltaSeconds)
+{
+	CollapseElapsedSeconds += FMath::Max(0.0f, DeltaSeconds);
+
+	const float SafeCollapseDuration = FMath::Max(0.05f, CollapseDurationSeconds);
+	for (int32 Index = 0; Index < SandbagMeshComponents.Num() && Index < CollapseStates.Num(); ++Index)
+	{
+		UStaticMeshComponent* SandbagMesh = SandbagMeshComponents[Index];
+		if (!SandbagMesh)
+		{
+			continue;
+		}
+
+		const FTunaSweeperSandbagCollapseState& CollapseState = CollapseStates[Index];
+		const float LocalDuration = FMath::Max(0.05f, SafeCollapseDuration - CollapseState.DelaySeconds);
+		const float RawAlpha = FMath::Clamp(
+			(CollapseElapsedSeconds - CollapseState.DelaySeconds) / LocalDuration,
+			0.0f,
+			1.0f);
+		const float MoveAlpha = RawAlpha * RawAlpha * (3.0f - 2.0f * RawAlpha);
+		const float FallAlpha = FMath::Clamp(FMath::Pow(RawAlpha, 0.72f), 0.0f, 1.0f);
+
+		FVector NewLocation = FMath::Lerp(CollapseState.StartLocation, CollapseState.TargetLocation, MoveAlpha);
+		NewLocation.Z = FMath::Lerp(CollapseState.StartLocation.Z, CollapseState.TargetLocation.Z, FallAlpha);
+		SandbagMesh->SetRelativeLocation(NewLocation);
+		SandbagMesh->SetRelativeRotation(LerpRotatorComponentWise(CollapseState.StartRotation, CollapseState.TargetRotation, MoveAlpha));
+	}
+
+	if (CollapseElapsedSeconds >= SafeCollapseDuration + CollapseHoldSeconds)
+	{
+		Destroy();
+	}
+}
+
+void ATunaSweeperSandbagCoverActor::ResetCollapseState()
+{
+	bCoverDestroyed = false;
+	bOutlineActive = false;
+	CollapseElapsedSeconds = 0.0f;
+	CollapseStates.Reset();
+	SetActorEnableCollision(true);
 }

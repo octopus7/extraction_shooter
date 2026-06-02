@@ -3606,6 +3606,12 @@
 - 진행바 활성화 후 탄약 선택 UI 캐시 갱신이 취소 프롬프트를 다시 접는 문제를 수정할 것.
 - 새로 생성된 취소 프롬프트 위젯만 기본 접힘 상태로 두고, 이미 활성화된 프롬프트는 캐시 갱신 중에도 표시 상태를 유지하게 할 것.
 
+## 2026-06-02 18:54:03 (소요시간: 00:03:25)
+
+- 우측 하단 사거리 UI의 거리 수치 왼쪽에 흰색 단색 원형 조준선/거리계 레티클 아이콘을 추가할 것.
+- 거리 수치 텍스트 색상은 보간 없이 3단계로 끊어 흰색, 주황, 빨강을 적용할 것.
+- 사거리 UI 내부를 아이콘과 텍스트가 나란히 들어가는 행 구성으로 바꾸고, 기본 임계값은 0-15M 흰색, 16-30M 주황, 31M 이상 빨강으로 둘 것.
+
 ## 2026-06-02 17:20:00 (소요시간: 00:11:32)
 
 - 수리하기 상호작용의 필요 아이템 표기를 상호작용 이름 박스 오른쪽의 별도 라운딩 박스로 분리할 것.
@@ -3670,3 +3676,30 @@
 - WPF 빌드 헬퍼에서 `KillTunaSweeperEditor.bat` 실행은 성공/실패와 관계없이 종료 후 터미널이 닫히도록 `cmd /c` 방식으로 변경한 것.
 - 빌드 버튼의 실패 시 터미널 유지 동작은 그대로 유지한 것.
 - Release publish 산출물을 `TunaSweeper/BatchScripts/BuildHelper`에 다시 갱신한 것.
+
+## 2026-06-02 18:46:43 (소요시간: 00:14:28)
+
+- 모래주머니 엄폐물의 기존 런타임 절차적 박스 메시 구현을 개별 StaticMeshComponent 스택 방식으로 교체한 것.
+- 에디터 셋업에서 코드 생성 저폴리 개별 모래주머니 `SM_Sandbag_LowPoly`와 CustomDepth용 더미 메시 `SM_SandbagCover_OutlineProxy`를 StaticMesh 애셋으로 생성/저장하도록 한 것.
+- `BP_SandbagCover` 기본값이 새 메시 애셋과 머티리얼을 사용하도록 갱신한 것.
+- 내구도 0 도달 시 즉시 충돌을 끄고, 각 모래주머니 메시를 코드 보간으로 바닥 쪽에 흘러내리듯 이동/회전시킨 뒤 잠시 유지하고 액터를 파괴하도록 한 것.
+- 플레이어가 바짝 붙어 사격 통과 가능한 상태에서는 개별 주머니가 아니라 더미 메시만 stencil `3` CustomDepth를 기록해 내부 경계선 없는 아웃라인을 그리도록 한 것.
+- `Docs/runtime_actor_spawns.md`에 새 StaticMesh 스택, scripted collapse, 더미 아웃라인 동작을 반영한 것.
+- `TunaSweeperEditor Win64 Development` 빌드를 통과시키고, 에디터를 실행해 새 모래주머니 메시/BP 애셋 생성을 확인한 것.
+
+## 2026-06-02 18:59:30 (소요시간: 00:04:30)
+
+- 우측 하단 사거리 UI의 거리 수치 영역을 고정 폭으로 감싸 한 자리/두 자리 거리 표기에서 배지 폭이 흔들리지 않게 한 것.
+- 거리 수치 영역 폭을 46px로 고정해 `14M` 같은 두 자리 표기가 충분히 들어가게 한 것.
+- 거리 색상 경계를 5M, 10M로 바꿔 `0-4M` 흰색, `5-9M` 주황, `10M+` 빨강으로 3단계 표시되게 한 것.
+
+## 2026-06-02 19:02:09 (소요시간: 00:29:45)
+
+- 모래주머니 커버 아웃라인의 더미/proxy 메시 방식을 폐기하고 실제 개별 모래주머니 메시의 overlay material inverted-hull 방식으로 변경한 것.
+- 예전 CustomDepth/postprocess outline 생성 함수와 소스 참조를 제거해 현재 샌드백 경로에는 overlay outline만 남긴 것.
+- `/Game/Interaction/M_SandbagCover_OverlayOutline`가 `VertexNormalWS * OutlineThickness`로 확장하고 `TwoSidedSign < 0` backface만 masked 렌더링하도록 수정한 것.
+- `/Game/Interaction/SM_Sandbag_LowPoly`를 코드 생성 StaticMesh로 다시 만들되, 링 버텍스를 공유하고 같은 위치의 vertex instance에 동일 smooth normal/tangent를 넣어 노멀 확장 시 페이스 단위로 벌어지지 않게 한 것.
+- `BP_SandbagCover`가 `/Game/Interaction/SM_Sandbag_LowPoly`와 overlay outline material을 사용하도록 재생성/저장한 것.
+- 파괴가 시작되면 `bCoverDestroyed`로 커버 통과 조건을 끄고, actor/box collision과 overlay material을 즉시 비활성화해 붕괴 연출 중 아웃라인과 커버 효과가 적용되지 않게 확인한 것.
+- projectile 발사/충돌 흐름을 다시 확인해, 파괴 중에는 커버 collision이 꺼져 총알 hit가 발생하지 않고 통과하는 구조임을 검증한 것.
+- `TunaSweeperEditor Win64 Development` 빌드를 통과시키고 에디터 실행 로그에서 `SM_Sandbag_LowPoly` bounds가 `extent=X=42 Y=56 Z=18`로 정상 생성된 것을 확인한 것.

@@ -1844,3 +1844,23 @@ NS `DynamicBeam`의 `Local Space`가 꺼져 있으니 레이저 End를 월드 �
 ### 답변
 
 가능하다. 최종 요청에 맞춰 프로젝트 루트 바로 아래가 아니라 `TunaSweeper/BatchScripts/BuildTunaSweeper.bat`에 배치 파일을 만들었고, 배치 파일 내부에서 `..\TunaSweeper.uproject`를 상대경로로 찾아 `TunaSweeperEditor Win64 Development` 빌드를 실행하게 했다. UE 설치 경로는 기본 `C:\Program Files\Epic Games\UE_5.7`을 사용하고, 다른 위치라면 `UE_5_7_ROOT` 환경변수로 덮어쓸 수 있다.
+
+## 2026-06-02 18:41:39 (소요시간: 00:00:37)
+
+### 질문
+
+엄폐물 모래주머니 액터 있었나?
+
+### 답변
+
+있다. C++ 액터는 `ATunaSweeperSandbagCoverActor`이고, 블루프린트 에셋은 `/Game/Interaction/BP_SandbagCover`다. 런타임 스폰 정의에도 `TS_SandbagCover_Central` 항목이 있으며 `spawn_type`은 `sandbag_cover`, 클래스는 `/Game/Interaction/BP_SandbagCover.BP_SandbagCover_C`, 근접 통과 반경은 `125`로 기록되어 있다. 별도로 AI 엄폐 지점용 `ATunaSweeperCoverPointActor`와 `/Game/AI/Cover/BP_TunaSweeperCoverPoint`도 존재하지만, 모래주머니 자체는 파괴 가능한 임시 엄폐물 액터다.
+
+## 2026-06-02 18:52:14 (소요시간: 00:01:10)
+
+### 질문
+
+우측 하단 사거리 UI 왼쪽에 넣을 단색 아이콘으로 깃발과 원형 조준선 중 어떤 내용이 좋은가?
+
+### 답변
+
+사거리 UI에는 깃발보다 원형 조준선이나 거리계 레티클이 더 적합하다. 깃발은 목적지, 체크포인트, 지도 마커처럼 읽히기 쉬워 사거리/거리 측정 의미와 겹치지 않는다. 단색 아이콘은 작은 원형 레티클에 중심점과 네 방향 짧은 틱을 넣는 식으로 만들고, UI가 너무 공격적으로 보이면 십자선을 줄이고 얇은 링과 점만 남기는 방향이 좋다.

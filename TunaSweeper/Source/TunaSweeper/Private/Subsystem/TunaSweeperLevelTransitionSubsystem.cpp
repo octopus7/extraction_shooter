@@ -1,9 +1,12 @@
 #include "Subsystem/TunaSweeperLevelTransitionSubsystem.h"
 
 #include "Blueprint/UserWidget.h"
+#include "Character/TunaSweeperTopDownCharacter.h"
 #include "Engine/Engine.h"
 #include "Engine/GameViewportClient.h"
 #include "Engine/GameInstance.h"
+#include "GameFramework/Pawn.h"
+#include "GameFramework/PawnMovementComponent.h"
 #include "GameFramework/PlayerController.h"
 #include "HAL/PlatformTime.h"
 #include "Kismet/GameplayStatics.h"
@@ -20,9 +23,10 @@
 namespace
 {
 	constexpr float CircularRevealHoldHoleDiameterScreenHeightRatio = 0.30f;
-	constexpr float CircularRevealInitialDurationSeconds = 0.2f;
-	constexpr float CircularRevealHoldDurationSeconds = 0.1f;
-	constexpr float CircularRevealFinalDurationSeconds = 0.3f;
+	constexpr float CircularRevealPostLoadBlackHoldDurationSeconds = 0.2f;
+	constexpr float CircularRevealInitialDurationSeconds = 0.35f;
+	constexpr float CircularRevealHoldDurationSeconds = 0.25f;
+	constexpr float CircularRevealFinalDurationSeconds = 0.55f;
 
 	bool ShouldUseLetterboxForMediaSource(UMediaSource* MediaSource, const TSoftObjectPtr<UMediaSource>& MediaSourceReference)
 	{
@@ -120,6 +124,7 @@ void UTunaSweeperLevelTransitionSubsystem::Tick(float DeltaTime)
 		}
 		break;
 
+	case ETransitionPhase::CircularRevealPostLoadHold:
 	case ETransitionPhase::CircularRevealInitialElastic:
 	case ETransitionPhase::CircularRevealHold:
 	case ETransitionPhase::CircularRevealFinalExpand:
@@ -278,6 +283,7 @@ bool UTunaSweeperLevelTransitionSubsystem::EnsureTransitionWidget(UObject* World
 {
 	if (ActiveWidget && ActiveWidget->IsInViewport())
 	{
+		ApplyTransitionInputMode(WorldContextObject);
 		return true;
 	}
 
@@ -301,14 +307,7 @@ bool UTunaSweeperLevelTransitionSubsystem::EnsureTransitionWidget(UObject* World
 	ActiveWidget->SetBlackOpacity(0.0f);
 	ActiveWidget->SetCircularRevealMask(0.0f, false);
 
-	if (APlayerController* PlayerController = UGameplayStatics::GetPlayerController(WorldContextObject ? WorldContextObject : GameInstance, 0))
-	{
-		FInputModeUIOnly InputMode;
-		InputMode.SetWidgetToFocus(ActiveWidget->TakeWidget());
-		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-		PlayerController->SetInputMode(InputMode);
-		PlayerController->bShowMouseCursor = false;
-	}
+	ApplyTransitionInputMode(WorldContextObject);
 
 	return true;
 }
@@ -350,7 +349,8 @@ void UTunaSweeperLevelTransitionSubsystem::BeginCircularReveal()
 	FadeElapsedSeconds = 0.0f;
 	SetBlackOpacity(0.0f);
 	SetCircularRevealMask(0.0f, true);
-	Phase = ETransitionPhase::CircularRevealInitialElastic;
+	ApplyTransitionInputMode(GetGameInstance());
+	Phase = ETransitionPhase::CircularRevealPostLoadHold;
 }
 
 void UTunaSweeperLevelTransitionSubsystem::UpdateCircularReveal(float DeltaTime)
@@ -359,6 +359,15 @@ void UTunaSweeperLevelTransitionSubsystem::UpdateCircularReveal(float DeltaTime)
 
 	switch (Phase)
 	{
+	case ETransitionPhase::CircularRevealPostLoadHold:
+		SetCircularRevealMask(0.0f, true);
+		if (FadeElapsedSeconds >= CircularRevealPostLoadBlackHoldDurationSeconds)
+		{
+			FadeElapsedSeconds = 0.0f;
+			Phase = ETransitionPhase::CircularRevealInitialElastic;
+		}
+		break;
+
 	case ETransitionPhase::CircularRevealInitialElastic:
 	{
 		const float Alpha = CircularRevealInitialDurationSeconds > 0.0f
@@ -403,6 +412,46 @@ void UTunaSweeperLevelTransitionSubsystem::UpdateCircularReveal(float DeltaTime)
 
 	default:
 		break;
+	}
+}
+
+void UTunaSweeperLevelTransitionSubsystem::ApplyTransitionInputMode(UObject* WorldContextObject)
+{
+	UObject* ResolvedWorldContextObject = WorldContextObject ? WorldContextObject : GetGameInstance();
+	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(ResolvedWorldContextObject, 0);
+	if (!PlayerController)
+	{
+		return;
+	}
+
+	if (ActiveWidget)
+	{
+		FInputModeUIOnly InputMode;
+		InputMode.SetWidgetToFocus(ActiveWidget->TakeWidget());
+		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+		PlayerController->SetInputMode(InputMode);
+	}
+
+	PlayerController->bShowMouseCursor = false;
+	if (!InputLockedPlayerController.IsValid() || InputLockedPlayerController.Get() != PlayerController)
+	{
+		PlayerController->SetIgnoreMoveInput(true);
+		PlayerController->SetIgnoreLookInput(true);
+		InputLockedPlayerController = PlayerController;
+	}
+
+	if (ATunaSweeperTopDownCharacter* ControlledCharacter = Cast<ATunaSweeperTopDownCharacter>(PlayerController->GetPawn()))
+	{
+		ControlledCharacter->CancelActiveGameplayActions();
+		return;
+	}
+
+	if (APawn* ControlledPawn = PlayerController->GetPawn())
+	{
+		if (UPawnMovementComponent* MovementComponent = ControlledPawn->GetMovementComponent())
+		{
+			MovementComponent->StopMovementImmediately();
+		}
 	}
 }
 
@@ -460,6 +509,7 @@ void UTunaSweeperLevelTransitionSubsystem::FinishTransition()
 	LastWorldContextObject = nullptr;
 	TargetLevelName = NAME_None;
 	TransitionMessage = FText::GetEmpty();
+	InputLockedPlayerController.Reset();
 	Phase = ETransitionPhase::Idle;
 	FadeElapsedSeconds = 0.0f;
 	CircularRevealHoldRadius = 0.0f;

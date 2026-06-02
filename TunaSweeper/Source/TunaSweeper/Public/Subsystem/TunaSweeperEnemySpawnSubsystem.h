@@ -261,9 +261,9 @@ private:
 		float RollingBomberSpawnerMaxHealth = 80.0f;
 		int32 RollingBomberSpawnerExperienceValue = 120;
 
-		FVector SandbagCoverBoxExtent = FVector(75.0f, 320.0f, 90.0f);
+		FVector SandbagCoverBoxExtent = FVector(37.5f, 160.0f, 45.0f);
 		float SandbagCoverMaxHealth = 70.0f;
-		float SandbagCoverPassthroughRadius = 125.0f;
+		float SandbagCoverPassthroughRadius = 62.5f;
 
 		float ExplosiveBarrelMaxHealth = 30.0f;
 		TSoftObjectPtr<UStaticMesh> ExplosiveBarrelIntactMesh;

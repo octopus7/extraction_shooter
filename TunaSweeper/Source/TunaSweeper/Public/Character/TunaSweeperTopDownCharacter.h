@@ -474,7 +474,6 @@ private:
 	void CacheBaseSurvivalStats();
 	void ApplyExperienceLevelStatBonuses();
 	void ApplyBunkerPeaceZoneVitalsRules();
-	void ApplySandbagCoverOutlinePostProcess();
 	float ResolveCameraCursorLeadRatio() const;
 	void UpdateAimingVisuals(float DeltaSeconds);
 	void UpdateSprintAndStamina(float DeltaSeconds);

@@ -9,6 +9,7 @@ class UMediaPlayer;
 class UMediaSource;
 class UMediaTexture;
 class UTunaSweeperLevelTransitionWidget;
+class APlayerController;
 
 UCLASS()
 class TUNASWEEPER_API UTunaSweeperLevelTransitionSubsystem : public UGameInstanceSubsystem, public FTickableGameObject
@@ -39,6 +40,7 @@ private:
 		FadingFromBlackToVideo,
 		LoadingLevel,
 		WaitingForMinimumVideoTime,
+		CircularRevealPostLoadHold,
 		CircularRevealInitialElastic,
 		CircularRevealHold,
 		CircularRevealFinalExpand
@@ -58,6 +60,7 @@ private:
 	void BeginVideoReveal();
 	void BeginCircularReveal();
 	void UpdateCircularReveal(float DeltaTime);
+	void ApplyTransitionInputMode(UObject* WorldContextObject);
 	void OpenTargetLevel();
 	void FinishTransition();
 	void SetBlackOpacity(float InOpacity);
@@ -92,4 +95,5 @@ private:
 	bool bOpenLevelRequested = false;
 	bool bUseLetterbox = false;
 	FDelegateHandle PostLoadMapHandle;
+	TWeakObjectPtr<APlayerController> InputLockedPlayerController;
 };

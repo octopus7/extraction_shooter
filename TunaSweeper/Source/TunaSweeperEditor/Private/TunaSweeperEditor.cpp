@@ -74,9 +74,9 @@
 #include "Materials/MaterialExpressionConstant2Vector.h"
 #include "Materials/MaterialExpressionComponentMask.h"
 #include "Materials/MaterialExpressionConstant3Vector.h"
-#include "Materials/MaterialExpressionCustom.h"
 #include "Materials/MaterialExpressionDivide.h"
 #include "Materials/MaterialExpressionFresnel.h"
+#include "Materials/MaterialExpressionIf.h"
 #include "Materials/MaterialExpressionLength.h"
 #include "Materials/MaterialExpressionLinearInterpolate.h"
 #include "Materials/MaterialExpressionMultiply.h"
@@ -84,11 +84,12 @@
 #include "Materials/MaterialExpressionOneMinus.h"
 #include "Materials/MaterialExpressionPanner.h"
 #include "Materials/MaterialExpressionScalarParameter.h"
-#include "Materials/MaterialExpressionSceneTexture.h"
 #include "Materials/MaterialExpressionSaturate.h"
 #include "Materials/MaterialExpressionSubtract.h"
 #include "Materials/MaterialExpressionTextureCoordinate.h"
 #include "Materials/MaterialExpressionTextureSampleParameter2D.h"
+#include "Materials/MaterialExpressionTwoSidedSign.h"
+#include "Materials/MaterialExpressionVertexNormalWS.h"
 #include "Materials/MaterialExpressionVectorParameter.h"
 #include "Materials/MaterialExpressionVertexColor.h"
 #include "MeshDescription.h"
@@ -199,7 +200,7 @@ namespace TunaSweeperEditorSetup
 	const FString ProjectileHitEffectAssetTaskId = TEXT("2026-05-28_CreateProjectileHitEffectAssetsV1");
 	const FString WeaponSpreadRecoilAssetTaskId = TEXT("2026-05-28_CreateWeaponSpreadRecoilAssetsV1");
 	const FString BaseballBatAssetTaskId = TEXT("2026-05-28_CreateBaseballBatStaticMeshAssetsV1");
-	const FString SandbagCoverAssetTaskId = TEXT("2026-05-29_CreateSandbagCoverAssetsV3");
+	const FString SandbagCoverAssetTaskId = TEXT("2026-06-02_SandbagHalfScaleV1");
 	const FString VoxelMeshAssetTaskId = TEXT("2026-05-19_CreateSharedVoxelMeshAssetsV1");
 	const FString LumberjackMeleeSwingArcAssetTaskId = TEXT("2026-05-20_CreateLumberjackMeleeSwingArcAssetsV2");
 	const FString LedExpressionMaterialTaskId = TEXT("2026-05-26_CreateLedExpressionMaterialV1");
@@ -376,7 +377,8 @@ namespace TunaSweeperEditorSetup
 	const FString RollingBomberSpawnerMaterialAssetName = TEXT("M_RollingBomberSpawner_Mechanic");
 	const FString SandbagCoverTextureAssetName = TEXT("T_SandbagCover_Burlap");
 	const FString SandbagCoverMaterialAssetName = TEXT("M_SandbagCover_Burlap");
-	const FString SandbagCoverOutlineMaterialAssetName = TEXT("M_SandbagCover_Outline");
+	const FString SandbagCoverOverlayOutlineMaterialAssetName = TEXT("M_SandbagCover_OverlayOutline");
+	const FString SandbagCoverBagMeshAssetName = TEXT("SM_Sandbag_LowPoly");
 	const FString SandbagCoverAssetName = TEXT("BP_SandbagCover");
 	const FString TransparentObstacleAssetName = TEXT("BP_TransparentObstacle");
 	const FString WorldProgressBrokenBridgeAssetName = TEXT("BP_WorldProgress_BrokenBridge");
@@ -2950,6 +2952,16 @@ namespace TunaSweeperEditorSetup
 		BuildParams.bMarkPackageDirty = true;
 		BuildParams.bUseHashAsGuid = false;
 		StaticMesh->BuildFromMeshDescriptions(MeshDescriptions, BuildParams);
+
+		if (StaticMesh->GetNumSourceModels() > 0)
+		{
+			FMeshBuildSettings& BuildSettings = StaticMesh->GetSourceModel(0).BuildSettings;
+			BuildSettings.bRecomputeNormals = false;
+			BuildSettings.bRecomputeTangents = false;
+			BuildSettings.bComputeWeightedNormals = false;
+			BuildSettings.bUseMikkTSpace = false;
+		}
+
 		StaticMesh->PostEditChange();
 		StaticMesh->MarkPackageDirty();
 
@@ -6285,7 +6297,7 @@ namespace TunaSweeperEditorSetup
 		Material->GetExpressionCollection().Empty();
 		Material->BlendMode = BLEND_Opaque;
 		Material->SetShadingModel(MSM_DefaultLit);
-		Material->TwoSided = false;
+		Material->TwoSided = true;
 
 		UMaterialEditorOnlyData* MaterialEditorOnly = Material->GetEditorOnlyData();
 		if (!MaterialEditorOnly)
@@ -6658,9 +6670,9 @@ namespace TunaSweeperEditorSetup
 		return Material;
 	}
 
-	UMaterial* EnsureSandbagCoverOutlineMaterial()
+	UMaterial* EnsureSandbagCoverOverlayOutlineMaterial()
 	{
-		const FString ObjectPath = GetAssetObjectPath(InteractionAssetPath, SandbagCoverOutlineMaterialAssetName);
+		const FString ObjectPath = GetAssetObjectPath(InteractionAssetPath, SandbagCoverOverlayOutlineMaterialAssetName);
 		UMaterial* Material = LoadObject<UMaterial>(nullptr, *ObjectPath);
 		if (!Material)
 		{
@@ -6668,7 +6680,7 @@ namespace TunaSweeperEditorSetup
 
 			FAssetToolsModule& AssetToolsModule = FModuleManager::LoadModuleChecked<FAssetToolsModule>(TEXT("AssetTools"));
 			UObject* CreatedAsset = AssetToolsModule.Get().CreateAsset(
-				SandbagCoverOutlineMaterialAssetName,
+				SandbagCoverOverlayOutlineMaterialAssetName,
 				InteractionAssetPath,
 				UMaterial::StaticClass(),
 				MaterialFactory);
@@ -6685,10 +6697,13 @@ namespace TunaSweeperEditorSetup
 
 		Material->Modify();
 		Material->GetExpressionCollection().Empty();
-		Material->MaterialDomain = MD_PostProcess;
-		Material->BlendMode = BLEND_Additive;
+		Material->MaterialDomain = MD_Surface;
+		Material->BlendMode = BLEND_Masked;
 		Material->SetShadingModel(MSM_Unlit);
-		Material->TwoSided = false;
+		Material->TwoSided = true;
+		Material->OpacityMaskClipValue = 0.5f;
+		Material->MaxWorldPositionOffsetDisplacement = 24.0f;
+		Material->bAlwaysEvaluateWorldPositionOffset = true;
 
 		UMaterialEditorOnlyData* MaterialEditorOnly = Material->GetEditorOnlyData();
 		if (!MaterialEditorOnly)
@@ -6700,106 +6715,67 @@ namespace TunaSweeperEditorSetup
 		UMaterialExpressionVectorParameter* ColorParameter = NewObject<UMaterialExpressionVectorParameter>(Material);
 		ColorParameter->Material = Material;
 		ColorParameter->ParameterName = TEXT("OutlineColor");
-		ColorParameter->DefaultValue = FLinearColor(0.09f, 0.13f, 0.13f, 1.0f);
-		ColorParameter->MaterialExpressionEditorX = -360;
-		ColorParameter->MaterialExpressionEditorY = -90;
+		ColorParameter->DefaultValue = FLinearColor(0.78f, 0.98f, 0.32f, 1.0f);
+		ColorParameter->MaterialExpressionEditorX = -540;
+		ColorParameter->MaterialExpressionEditorY = -180;
 		Material->GetExpressionCollection().AddExpression(ColorParameter);
-
-		UMaterialExpressionScalarParameter* StencilParameter = NewObject<UMaterialExpressionScalarParameter>(Material);
-		StencilParameter->Material = Material;
-		StencilParameter->ParameterName = TEXT("StencilValue");
-		StencilParameter->DefaultValue = 3.0f;
-		StencilParameter->MaterialExpressionEditorX = -360;
-		StencilParameter->MaterialExpressionEditorY = 70;
-		Material->GetExpressionCollection().AddExpression(StencilParameter);
 
 		UMaterialExpressionScalarParameter* ThicknessParameter = NewObject<UMaterialExpressionScalarParameter>(Material);
 		ThicknessParameter->Material = Material;
 		ThicknessParameter->ParameterName = TEXT("OutlineThickness");
-		ThicknessParameter->DefaultValue = 2.0f;
-		ThicknessParameter->MaterialExpressionEditorX = -360;
-		ThicknessParameter->MaterialExpressionEditorY = 230;
+		ThicknessParameter->DefaultValue = 3.0f;
+		ThicknessParameter->MaterialExpressionEditorX = -540;
+		ThicknessParameter->MaterialExpressionEditorY = 80;
 		Material->GetExpressionCollection().AddExpression(ThicknessParameter);
 
-		UMaterialExpressionScalarParameter* OpacityParameter = NewObject<UMaterialExpressionScalarParameter>(Material);
-		OpacityParameter->Material = Material;
-		OpacityParameter->ParameterName = TEXT("OutlineOpacity");
-		OpacityParameter->DefaultValue = 0.92f;
-		OpacityParameter->MaterialExpressionEditorX = -360;
-		OpacityParameter->MaterialExpressionEditorY = 390;
-		Material->GetExpressionCollection().AddExpression(OpacityParameter);
+		UMaterialExpressionVertexNormalWS* VertexNormalExpression = NewObject<UMaterialExpressionVertexNormalWS>(Material);
+		VertexNormalExpression->Material = Material;
+		VertexNormalExpression->MaterialExpressionEditorX = -540;
+		VertexNormalExpression->MaterialExpressionEditorY = 220;
+		Material->GetExpressionCollection().AddExpression(VertexNormalExpression);
 
-		UMaterialExpressionSceneTexture* SceneColorExpression = NewObject<UMaterialExpressionSceneTexture>(Material);
-		SceneColorExpression->Material = Material;
-		SceneColorExpression->SceneTextureId = PPI_PostProcessInput0;
-		SceneColorExpression->MaterialExpressionEditorX = -360;
-		SceneColorExpression->MaterialExpressionEditorY = 550;
-		Material->GetExpressionCollection().AddExpression(SceneColorExpression);
+		UMaterialExpressionMultiply* NormalOffsetExpression = NewObject<UMaterialExpressionMultiply>(Material);
+		NormalOffsetExpression->Material = Material;
+		NormalOffsetExpression->A.Connect(0, VertexNormalExpression);
+		NormalOffsetExpression->B.Connect(0, ThicknessParameter);
+		NormalOffsetExpression->MaterialExpressionEditorX = -230;
+		NormalOffsetExpression->MaterialExpressionEditorY = 180;
+		Material->GetExpressionCollection().AddExpression(NormalOffsetExpression);
 
-		UMaterialExpressionSceneTexture* CustomStencilExpression = NewObject<UMaterialExpressionSceneTexture>(Material);
-		CustomStencilExpression->Material = Material;
-		CustomStencilExpression->SceneTextureId = PPI_CustomStencil;
-		CustomStencilExpression->MaterialExpressionEditorX = -360;
-		CustomStencilExpression->MaterialExpressionEditorY = 710;
-		Material->GetExpressionCollection().AddExpression(CustomStencilExpression);
+		UMaterialExpressionTwoSidedSign* TwoSidedSignExpression = NewObject<UMaterialExpressionTwoSidedSign>(Material);
+		TwoSidedSignExpression->Material = Material;
+		TwoSidedSignExpression->MaterialExpressionEditorX = -540;
+		TwoSidedSignExpression->MaterialExpressionEditorY = 480;
+		Material->GetExpressionCollection().AddExpression(TwoSidedSignExpression);
 
-		UMaterialExpressionCustom* OutlineExpression = NewObject<UMaterialExpressionCustom>(Material);
-		OutlineExpression->Material = Material;
-		OutlineExpression->Description = TEXT("Sandbag custom stencil outline");
-		OutlineExpression->OutputType = CMOT_Float4;
-		OutlineExpression->MaterialExpressionEditorX = -40;
-		OutlineExpression->MaterialExpressionEditorY = 40;
-		OutlineExpression->Code = TEXT(
-			"float thickness = max(1.0, OutlineThickness);\n"
-			"float targetRaw = StencilValue;\n"
-			"float targetNorm = StencilValue / 255.0;\n"
-			"#define MATCH_STENCIL(Value) max(1.0 - step(0.5, abs((Value) - targetRaw)), 1.0 - step(0.5 / 255.0, abs((Value) - targetNorm)))\n"
-			"float centerMask = MATCH_STENCIL(StencilCenter.r);\n"
-			"float neighborMask = 0.0;\n"
-			"neighborMask = max(neighborMask, MATCH_STENCIL(SceneTextureFetch(PPI_CustomStencil, float2(thickness, 0.0)).r));\n"
-			"neighborMask = max(neighborMask, MATCH_STENCIL(SceneTextureFetch(PPI_CustomStencil, float2(-thickness, 0.0)).r));\n"
-			"neighborMask = max(neighborMask, MATCH_STENCIL(SceneTextureFetch(PPI_CustomStencil, float2(0.0, thickness)).r));\n"
-			"neighborMask = max(neighborMask, MATCH_STENCIL(SceneTextureFetch(PPI_CustomStencil, float2(0.0, -thickness)).r));\n"
-			"neighborMask = max(neighborMask, MATCH_STENCIL(SceneTextureFetch(PPI_CustomStencil, float2(thickness, thickness)).r));\n"
-			"neighborMask = max(neighborMask, MATCH_STENCIL(SceneTextureFetch(PPI_CustomStencil, float2(-thickness, thickness)).r));\n"
-			"neighborMask = max(neighborMask, MATCH_STENCIL(SceneTextureFetch(PPI_CustomStencil, float2(thickness, -thickness)).r));\n"
-			"neighborMask = max(neighborMask, MATCH_STENCIL(SceneTextureFetch(PPI_CustomStencil, float2(-thickness, -thickness)).r));\n"
-			"float edgeMask = saturate(neighborMask - centerMask);\n"
-			"#undef MATCH_STENCIL\n"
-			"return lerp(SceneInputColor, float4(OutlineColor.rgb, 1.0), edgeMask * saturate(OutlineOpacity));\n");
+		UMaterialExpressionConstant* HiddenFaceMaskValue = NewObject<UMaterialExpressionConstant>(Material);
+		HiddenFaceMaskValue->Material = Material;
+		HiddenFaceMaskValue->R = 0.0f;
+		HiddenFaceMaskValue->MaterialExpressionEditorX = -260;
+		HiddenFaceMaskValue->MaterialExpressionEditorY = 420;
+		Material->GetExpressionCollection().AddExpression(HiddenFaceMaskValue);
 
-		FCustomInput OutlineColorInput;
-		OutlineColorInput.InputName = TEXT("OutlineColor");
-		OutlineColorInput.Input.Connect(0, ColorParameter);
-		OutlineExpression->Inputs.Add(OutlineColorInput);
+		UMaterialExpressionConstant* InvertedFaceMaskValue = NewObject<UMaterialExpressionConstant>(Material);
+		InvertedFaceMaskValue->Material = Material;
+		InvertedFaceMaskValue->R = 1.0f;
+		InvertedFaceMaskValue->MaterialExpressionEditorX = -260;
+		InvertedFaceMaskValue->MaterialExpressionEditorY = 560;
+		Material->GetExpressionCollection().AddExpression(InvertedFaceMaskValue);
 
-		FCustomInput StencilInput;
-		StencilInput.InputName = TEXT("StencilValue");
-		StencilInput.Input.Connect(0, StencilParameter);
-		OutlineExpression->Inputs.Add(StencilInput);
+		UMaterialExpressionIf* BackFaceOnlyMask = NewObject<UMaterialExpressionIf>(Material);
+		BackFaceOnlyMask->Material = Material;
+		BackFaceOnlyMask->A.Connect(0, TwoSidedSignExpression);
+		BackFaceOnlyMask->ConstB = 0.0f;
+		BackFaceOnlyMask->AGreaterThanB.Connect(0, HiddenFaceMaskValue);
+		BackFaceOnlyMask->AEqualsB.Connect(0, HiddenFaceMaskValue);
+		BackFaceOnlyMask->ALessThanB.Connect(0, InvertedFaceMaskValue);
+		BackFaceOnlyMask->MaterialExpressionEditorX = 40;
+		BackFaceOnlyMask->MaterialExpressionEditorY = 500;
+		Material->GetExpressionCollection().AddExpression(BackFaceOnlyMask);
 
-		FCustomInput ThicknessInput;
-		ThicknessInput.InputName = TEXT("OutlineThickness");
-		ThicknessInput.Input.Connect(0, ThicknessParameter);
-		OutlineExpression->Inputs.Add(ThicknessInput);
-
-		FCustomInput OpacityInput;
-		OpacityInput.InputName = TEXT("OutlineOpacity");
-		OpacityInput.Input.Connect(0, OpacityParameter);
-		OutlineExpression->Inputs.Add(OpacityInput);
-
-		FCustomInput SceneColorInput;
-		SceneColorInput.InputName = TEXT("SceneInputColor");
-		SceneColorInput.Input.Connect(0, SceneColorExpression);
-		OutlineExpression->Inputs.Add(SceneColorInput);
-
-		FCustomInput StencilCenterInput;
-		StencilCenterInput.InputName = TEXT("StencilCenter");
-		StencilCenterInput.Input.Connect(0, CustomStencilExpression);
-		OutlineExpression->Inputs.Add(StencilCenterInput);
-
-		Material->GetExpressionCollection().AddExpression(OutlineExpression);
-		MaterialEditorOnly->EmissiveColor.Connect(0, OutlineExpression);
+		MaterialEditorOnly->EmissiveColor.Connect(0, ColorParameter);
+		MaterialEditorOnly->WorldPositionOffset.Connect(0, NormalOffsetExpression);
+		MaterialEditorOnly->OpacityMask.Connect(0, BackFaceOnlyMask);
 
 		Material->PostEditChange();
 		Material->MarkPackageDirty();
@@ -6811,6 +6787,276 @@ namespace TunaSweeperEditorSetup
 		}
 
 		return Material;
+	}
+
+	FVector3f MakeSandbagCoverSafeTangent(const FVector3f& Normal, const FVector3f& PreferredTangent)
+	{
+		FVector3f Tangent = PreferredTangent - Normal * FVector3f::DotProduct(Normal, PreferredTangent);
+		if (Tangent.IsNearlyZero())
+		{
+			const FVector3f Fallback = FMath::Abs(Normal.Z) < 0.85f
+				? FVector3f(0.0f, 0.0f, 1.0f)
+				: FVector3f(1.0f, 0.0f, 0.0f);
+			Tangent = Fallback - Normal * FVector3f::DotProduct(Normal, Fallback);
+		}
+
+		return Tangent.IsNearlyZero() ? FVector3f(1.0f, 0.0f, 0.0f) : Tangent.GetSafeNormal();
+	}
+
+	void BuildSandbagLoafMeshDescription(
+		FMeshDescription& MeshDescription,
+		const FVector3f& Extent,
+		int32 SegmentCount,
+		const TArray<float>& RingPositions,
+		const TArray<float>& RingWidthScales,
+		const TArray<float>& RingHeightScales,
+		const FLinearColor& VertexColor)
+	{
+		FStaticMeshAttributes Attributes(MeshDescription);
+		Attributes.Register();
+		Attributes.GetVertexInstanceUVs().SetNumChannels(1);
+
+		const FPolygonGroupID PolygonGroupId = MeshDescription.CreatePolygonGroup();
+		Attributes.GetPolygonGroupMaterialSlotNames()[PolygonGroupId] = FName(TEXT("Sandbag"));
+
+		const int32 RingCount = RingPositions.Num();
+		if (RingCount < 2 || RingWidthScales.Num() != RingCount || RingHeightScales.Num() != RingCount || SegmentCount < 3)
+		{
+			return;
+		}
+
+		TVertexAttributesRef<FVector3f> VertexPositions = Attributes.GetVertexPositions();
+		TVertexInstanceAttributesRef<FVector3f> VertexInstanceNormals = Attributes.GetVertexInstanceNormals();
+		TVertexInstanceAttributesRef<FVector3f> VertexInstanceTangents = Attributes.GetVertexInstanceTangents();
+		TVertexInstanceAttributesRef<float> VertexInstanceBinormalSigns = Attributes.GetVertexInstanceBinormalSigns();
+		TVertexInstanceAttributesRef<FVector2f> VertexInstanceUVs = Attributes.GetVertexInstanceUVs();
+		TVertexInstanceAttributesRef<FVector4f> VertexInstanceColors = Attributes.GetVertexInstanceColors();
+
+		TArray<FVector3f> RingVertices;
+		TArray<FVector3f> RingNormals;
+		TArray<FVector3f> RingTangents;
+		TArray<FVertexID> RingVertexIds;
+		RingVertices.SetNum(RingCount * SegmentCount);
+		RingNormals.SetNum(RingCount * SegmentCount);
+		RingTangents.SetNum(RingCount * SegmentCount);
+		RingVertexIds.SetNum(RingCount * SegmentCount);
+
+		auto GetRingArrayIndex = [SegmentCount](int32 RingIndex, int32 SegmentIndex) -> int32
+		{
+			return RingIndex * SegmentCount + (SegmentIndex % SegmentCount);
+		};
+
+		auto GetRingNormal = [&RingNormals, &GetRingArrayIndex](int32 RingIndex, int32 SegmentIndex) -> const FVector3f&
+		{
+			return RingNormals[GetRingArrayIndex(RingIndex, SegmentIndex)];
+		};
+
+		auto GetRingTangent = [&RingTangents, &GetRingArrayIndex](int32 RingIndex, int32 SegmentIndex) -> const FVector3f&
+		{
+			return RingTangents[GetRingArrayIndex(RingIndex, SegmentIndex)];
+		};
+
+		auto GetRingVertexId = [&RingVertexIds, &GetRingArrayIndex](int32 RingIndex, int32 SegmentIndex) -> FVertexID
+		{
+			return RingVertexIds[GetRingArrayIndex(RingIndex, SegmentIndex)];
+		};
+
+		auto CreateMeshVertex = [&MeshDescription, &VertexPositions](const FVector3f& Position) -> FVertexID
+		{
+			const FVertexID VertexId = MeshDescription.CreateVertex();
+			VertexPositions[VertexId] = Position;
+			return VertexId;
+		};
+
+		auto CreateSandbagVertexInstance =
+			[&MeshDescription, &VertexInstanceNormals, &VertexInstanceTangents, &VertexInstanceBinormalSigns, &VertexInstanceUVs, &VertexInstanceColors, &VertexColor](
+				FVertexID VertexId,
+				const FVector3f& Normal,
+				const FVector3f& Tangent,
+				const FVector2f& UV) -> FVertexInstanceID
+		{
+			const FVertexInstanceID VertexInstanceId = MeshDescription.CreateVertexInstance(VertexId);
+			VertexInstanceNormals[VertexInstanceId] = Normal;
+			VertexInstanceTangents[VertexInstanceId] = Tangent;
+			VertexInstanceBinormalSigns[VertexInstanceId] = 1.0f;
+			VertexInstanceUVs.Set(VertexInstanceId, 0, UV);
+			VertexInstanceColors[VertexInstanceId] = FVector4f(VertexColor.R, VertexColor.G, VertexColor.B, VertexColor.A);
+			return VertexInstanceId;
+		};
+
+		for (int32 RingIndex = 0; RingIndex < RingCount; ++RingIndex)
+		{
+			const float RingY = RingPositions[RingIndex] * Extent.Y;
+			const float WidthScale = RingWidthScales[RingIndex];
+			const float HeightScale = RingHeightScales[RingIndex];
+			const float SafeWidth = FMath::Max(1.0f, Extent.X * WidthScale);
+			const float SafeHeight = FMath::Max(1.0f, Extent.Z * HeightScale);
+			for (int32 SegmentIndex = 0; SegmentIndex < SegmentCount; ++SegmentIndex)
+			{
+				const float Alpha = static_cast<float>(SegmentIndex) / static_cast<float>(SegmentCount);
+				const float Angle = Alpha * 2.0f * UE_PI;
+				const int32 RingArrayIndex = GetRingArrayIndex(RingIndex, SegmentIndex);
+				RingVertices[RingArrayIndex] = FVector3f(
+					FMath::Cos(Angle) * Extent.X * WidthScale,
+					RingY,
+					FMath::Sin(Angle) * Extent.Z * HeightScale);
+				RingNormals[RingArrayIndex] = FVector3f(
+					FMath::Cos(Angle) / SafeWidth,
+					0.0f,
+					FMath::Sin(Angle) / SafeHeight).GetSafeNormal();
+				if (RingNormals[RingArrayIndex].IsNearlyZero())
+				{
+					RingNormals[RingArrayIndex] = FVector3f(0.0f, 0.0f, 1.0f);
+				}
+				RingTangents[RingArrayIndex] = MakeSandbagCoverSafeTangent(RingNormals[RingArrayIndex], FVector3f(0.0f, 1.0f, 0.0f));
+				RingVertexIds[RingArrayIndex] = CreateMeshVertex(RingVertices[RingArrayIndex]);
+			}
+		}
+
+		for (int32 RingIndex = 0; RingIndex < RingCount - 1; ++RingIndex)
+		{
+			const float V0 = static_cast<float>(RingIndex) / static_cast<float>(RingCount - 1);
+			const float V1 = static_cast<float>(RingIndex + 1) / static_cast<float>(RingCount - 1);
+			for (int32 SegmentIndex = 0; SegmentIndex < SegmentCount; ++SegmentIndex)
+			{
+				const int32 NextSegmentIndex = (SegmentIndex + 1) % SegmentCount;
+				const float U0 = static_cast<float>(SegmentIndex) / static_cast<float>(SegmentCount);
+				const float U1 = static_cast<float>(SegmentIndex + 1) / static_cast<float>(SegmentCount);
+
+				{
+					TArray<FVertexInstanceID> VertexInstances;
+					VertexInstances.Reserve(3);
+					VertexInstances.Add(CreateSandbagVertexInstance(GetRingVertexId(RingIndex, SegmentIndex), GetRingNormal(RingIndex, SegmentIndex), GetRingTangent(RingIndex, SegmentIndex), FVector2f(U0, V0)));
+					VertexInstances.Add(CreateSandbagVertexInstance(GetRingVertexId(RingIndex + 1, SegmentIndex), GetRingNormal(RingIndex + 1, SegmentIndex), GetRingTangent(RingIndex + 1, SegmentIndex), FVector2f(U0, V1)));
+					VertexInstances.Add(CreateSandbagVertexInstance(GetRingVertexId(RingIndex + 1, NextSegmentIndex), GetRingNormal(RingIndex + 1, NextSegmentIndex), GetRingTangent(RingIndex + 1, NextSegmentIndex), FVector2f(U1, V1)));
+					MeshDescription.CreatePolygon(PolygonGroupId, VertexInstances);
+				}
+				{
+					TArray<FVertexInstanceID> VertexInstances;
+					VertexInstances.Reserve(3);
+					VertexInstances.Add(CreateSandbagVertexInstance(GetRingVertexId(RingIndex, SegmentIndex), GetRingNormal(RingIndex, SegmentIndex), GetRingTangent(RingIndex, SegmentIndex), FVector2f(U0, V0)));
+					VertexInstances.Add(CreateSandbagVertexInstance(GetRingVertexId(RingIndex + 1, NextSegmentIndex), GetRingNormal(RingIndex + 1, NextSegmentIndex), GetRingTangent(RingIndex + 1, NextSegmentIndex), FVector2f(U1, V1)));
+					VertexInstances.Add(CreateSandbagVertexInstance(GetRingVertexId(RingIndex, NextSegmentIndex), GetRingNormal(RingIndex, NextSegmentIndex), GetRingTangent(RingIndex, NextSegmentIndex), FVector2f(U1, V0)));
+					MeshDescription.CreatePolygon(PolygonGroupId, VertexInstances);
+				}
+			}
+		}
+
+		const FVector3f MinEndCenter(0.0f, RingPositions[0] * Extent.Y, 0.0f);
+		const FVector3f MaxEndCenter(0.0f, RingPositions.Last() * Extent.Y, 0.0f);
+		const FVertexID MinEndCenterVertexId = CreateMeshVertex(MinEndCenter);
+		const FVertexID MaxEndCenterVertexId = CreateMeshVertex(MaxEndCenter);
+		const FVector3f MinEndNormal(0.0f, -1.0f, 0.0f);
+		const FVector3f MaxEndNormal(0.0f, 1.0f, 0.0f);
+		const FVector3f EndTangent(1.0f, 0.0f, 0.0f);
+		for (int32 SegmentIndex = 0; SegmentIndex < SegmentCount; ++SegmentIndex)
+		{
+			const int32 NextSegmentIndex = (SegmentIndex + 1) % SegmentCount;
+			const float U0 = static_cast<float>(SegmentIndex) / static_cast<float>(SegmentCount);
+			const float U1 = static_cast<float>(SegmentIndex + 1) / static_cast<float>(SegmentCount);
+
+			{
+				TArray<FVertexInstanceID> VertexInstances;
+				VertexInstances.Reserve(3);
+				VertexInstances.Add(CreateSandbagVertexInstance(MinEndCenterVertexId, MinEndNormal, EndTangent, FVector2f(0.5f, 0.5f)));
+				VertexInstances.Add(CreateSandbagVertexInstance(GetRingVertexId(0, SegmentIndex), GetRingNormal(0, SegmentIndex), GetRingTangent(0, SegmentIndex), FVector2f(U0, 0.0f)));
+				VertexInstances.Add(CreateSandbagVertexInstance(GetRingVertexId(0, NextSegmentIndex), GetRingNormal(0, NextSegmentIndex), GetRingTangent(0, NextSegmentIndex), FVector2f(U1, 0.0f)));
+				MeshDescription.CreatePolygon(PolygonGroupId, VertexInstances);
+			}
+			{
+				TArray<FVertexInstanceID> VertexInstances;
+				VertexInstances.Reserve(3);
+				VertexInstances.Add(CreateSandbagVertexInstance(MaxEndCenterVertexId, MaxEndNormal, EndTangent, FVector2f(0.5f, 0.5f)));
+				VertexInstances.Add(CreateSandbagVertexInstance(GetRingVertexId(RingCount - 1, NextSegmentIndex), GetRingNormal(RingCount - 1, NextSegmentIndex), GetRingTangent(RingCount - 1, NextSegmentIndex), FVector2f(U1, 1.0f)));
+				VertexInstances.Add(CreateSandbagVertexInstance(GetRingVertexId(RingCount - 1, SegmentIndex), GetRingNormal(RingCount - 1, SegmentIndex), GetRingTangent(RingCount - 1, SegmentIndex), FVector2f(U0, 1.0f)));
+				MeshDescription.CreatePolygon(PolygonGroupId, VertexInstances);
+			}
+		}
+	}
+
+	void BuildSandbagLowPolyMeshDescription(FMeshDescription& MeshDescription)
+	{
+		BuildSandbagLoafMeshDescription(
+			MeshDescription,
+			FVector3f(21.0f, 28.0f, 9.0f),
+			8,
+			{ -1.0f, -0.68f, -0.24f, 0.24f, 0.68f, 1.0f },
+			{ 0.46f, 0.88f, 1.0f, 1.0f, 0.88f, 0.46f },
+			{ 0.58f, 0.92f, 1.0f, 1.0f, 0.92f, 0.58f },
+			FLinearColor(0.94f, 0.82f, 0.58f, 1.0f));
+	}
+
+	UStaticMesh* EnsureSandbagCoverStaticMeshAsset(
+		const FString& AssetName,
+		UMaterialInterface* SandbagMaterial,
+		TFunctionRef<void(FMeshDescription&)> BuildMeshDescription)
+	{
+		if (!SandbagMaterial)
+		{
+			return nullptr;
+		}
+
+		const FString ObjectPath = GetAssetObjectPath(InteractionAssetPath, AssetName);
+		UStaticMesh* StaticMesh = LoadObject<UStaticMesh>(nullptr, *ObjectPath);
+		if (!StaticMesh)
+		{
+			const FString PackageName = FString::Printf(TEXT("%s/%s"), *InteractionAssetPath, *AssetName);
+			UPackage* Package = CreatePackage(*PackageName);
+			if (!Package)
+			{
+				return nullptr;
+			}
+
+			StaticMesh = NewObject<UStaticMesh>(
+				Package,
+				*AssetName,
+				RF_Public | RF_Standalone | RF_Transactional);
+			if (!StaticMesh)
+			{
+				return nullptr;
+			}
+
+			FAssetRegistryModule::AssetCreated(StaticMesh);
+		}
+
+		StaticMesh->Modify();
+		FMeshDescription MeshDescription;
+		BuildMeshDescription(MeshDescription);
+
+		StaticMesh->GetStaticMaterials().Reset();
+		StaticMesh->GetStaticMaterials().Add(FStaticMaterial(SandbagMaterial, FName(TEXT("Sandbag"))));
+
+		TArray<const FMeshDescription*> MeshDescriptions;
+		MeshDescriptions.Add(&MeshDescription);
+		UStaticMesh::FBuildMeshDescriptionsParams BuildParams;
+		BuildParams.bFastBuild = true;
+		BuildParams.bCommitMeshDescription = true;
+		BuildParams.bMarkPackageDirty = true;
+		BuildParams.bUseHashAsGuid = false;
+		StaticMesh->BuildFromMeshDescriptions(MeshDescriptions, BuildParams);
+
+		if (StaticMesh->GetNumSourceModels() > 0)
+		{
+			FMeshBuildSettings& BuildSettings = StaticMesh->GetSourceModel(0).BuildSettings;
+			BuildSettings.bRecomputeNormals = false;
+			BuildSettings.bRecomputeTangents = false;
+			BuildSettings.bComputeWeightedNormals = false;
+			BuildSettings.bUseMikkTSpace = false;
+		}
+
+		const FBoxSphereBounds MeshBounds = StaticMesh->GetBounds();
+		UE_LOG(
+			LogTunaSweeperEditor,
+			Display,
+			TEXT("Built low-poly sandbag mesh %s bounds origin=%s extent=%s radius=%.2f"),
+			*AssetName,
+			*MeshBounds.Origin.ToString(),
+			*MeshBounds.BoxExtent.ToString(),
+			MeshBounds.SphereRadius);
+		StaticMesh->PostEditChange();
+		StaticMesh->MarkPackageDirty();
+
+		return SaveAsset(StaticMesh) ? StaticMesh : nullptr;
 	}
 
 	bool EnsureSandbagCoverAssets()
@@ -6830,12 +7076,16 @@ namespace TunaSweeperEditorSetup
 		}
 
 		UMaterial* SandbagMaterial = EnsureSandbagCoverMaterial(SandbagTexture);
-		UMaterial* OutlineMaterial = EnsureSandbagCoverOutlineMaterial();
+		UMaterial* OverlayOutlineMaterial = EnsureSandbagCoverOverlayOutlineMaterial();
+		UStaticMesh* SandbagMesh = EnsureSandbagCoverStaticMeshAsset(
+			SandbagCoverBagMeshAssetName,
+			SandbagMaterial,
+			BuildSandbagLowPolyMeshDescription);
 		UBlueprint* SandbagBlueprint = EnsureBlueprint(
 			InteractionAssetPath,
 			SandbagCoverAssetName,
 			ATunaSweeperSandbagCoverActor::StaticClass());
-		if (!SandbagMaterial || !OutlineMaterial || !SandbagBlueprint)
+		if (!SandbagMaterial || !OverlayOutlineMaterial || !SandbagMesh || !SandbagBlueprint)
 		{
 			return false;
 		}
@@ -6854,12 +7104,14 @@ namespace TunaSweeperEditorSetup
 		Defaults->Modify();
 		Defaults->ConfigureCoverDefaults(
 			FName(TEXT("TS_SandbagCover_Default")),
-			FVector(75.0f, 320.0f, 90.0f),
+			FVector(37.5f, 160.0f, 45.0f),
 			70.0f,
-			125.0f);
+			62.5f);
 		Defaults->ConfigureCoverVisualDefaults(
 			TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath(GetAssetObjectPath(InteractionAssetPath, SandbagCoverMaterialAssetName))),
-			TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath(GetAssetObjectPath(InteractionAssetPath, SandbagCoverOutlineMaterialAssetName))));
+			TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath(GetAssetObjectPath(InteractionAssetPath, SandbagCoverOverlayOutlineMaterialAssetName))));
+		Defaults->ConfigureCoverMeshDefaults(
+			TSoftObjectPtr<UStaticMesh>(FSoftObjectPath(GetAssetObjectPath(InteractionAssetPath, SandbagCoverBagMeshAssetName))));
 		FBlueprintEditorUtils::MarkBlueprintAsModified(SandbagBlueprint);
 		FKismetEditorUtilities::CompileBlueprint(SandbagBlueprint);
 		SandbagBlueprint->MarkPackageDirty();

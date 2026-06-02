@@ -58,11 +58,6 @@ namespace TunaSweeperStaminaGauge
 	const FVector RelativeLocation(0.0f, 0.0f, -92.0f);
 }
 
-namespace TunaSweeperSandbagCoverOutline
-{
-	const TCHAR* PostProcessMaterialPath = TEXT("/Game/Interaction/M_SandbagCover_Outline.M_SandbagCover_Outline");
-}
-
 ATunaSweeperTopDownCharacter::ATunaSweeperTopDownCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -187,7 +182,6 @@ void ATunaSweeperTopDownCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	RefreshCharacterVisualVisibility();
-	ApplySandbagCoverOutlinePostProcess();
 
 	DefaultCameraFOV = TopDownCamera ? TopDownCamera->FieldOfView : DefaultCameraFOV;
 	CurrentCameraBaseFOV = DefaultCameraFOV;
@@ -229,22 +223,6 @@ void ATunaSweeperTopDownCharacter::BeginPlay()
 	UpdateMovementSpeed();
 	RefreshCarryWeightConditionDebuffs();
 	UpdateStaminaGauge(0.0f);
-}
-
-void ATunaSweeperTopDownCharacter::ApplySandbagCoverOutlinePostProcess()
-{
-	if (!TopDownCamera)
-	{
-		return;
-	}
-
-	UMaterialInterface* OutlineMaterial = LoadObject<UMaterialInterface>(
-		nullptr,
-		TunaSweeperSandbagCoverOutline::PostProcessMaterialPath);
-	if (OutlineMaterial)
-	{
-		TopDownCamera->AddOrUpdateBlendable(OutlineMaterial, 1.0f);
-	}
 }
 
 void ATunaSweeperTopDownCharacter::Tick(float DeltaSeconds)

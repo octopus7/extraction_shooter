@@ -8,8 +8,18 @@ class APawn;
 class UBoxComponent;
 class UMaterialInstanceDynamic;
 class UMaterialInterface;
-class UProceduralMeshComponent;
 class USceneComponent;
+class UStaticMesh;
+class UStaticMeshComponent;
+
+struct FTunaSweeperSandbagCollapseState
+{
+	FVector StartLocation = FVector::ZeroVector;
+	FVector TargetLocation = FVector::ZeroVector;
+	FRotator StartRotation = FRotator::ZeroRotator;
+	FRotator TargetRotation = FRotator::ZeroRotator;
+	float DelaySeconds = 0.0f;
+};
 
 UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API ATunaSweeperSandbagCoverActor : public AActor
@@ -40,6 +50,9 @@ public:
 		TSoftObjectPtr<UMaterialInterface> InVisualMaterial,
 		TSoftObjectPtr<UMaterialInterface> InOutlineMaterial);
 
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Sandbag Cover")
+	void ConfigureCoverMeshDefaults(TSoftObjectPtr<UStaticMesh> InSandbagMesh);
+
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Sandbag Cover")
 	FName GetCoverId() const { return CoverId; }
 
@@ -60,6 +73,9 @@ protected:
 	void UpdatePassthroughOutline();
 	void SetOutlineActive(bool bEnabled);
 	void DestroyCover();
+	void BeginCollapse();
+	void UpdateCollapse(float DeltaSeconds);
+	void ResetCollapseState();
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<USceneComponent> SceneRoot;
@@ -68,34 +84,43 @@ protected:
 	TObjectPtr<UBoxComponent> BlockingCollision;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<UProceduralMeshComponent> VisualMesh;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<UProceduralMeshComponent> OutlineMesh;
+	TArray<TObjectPtr<UStaticMeshComponent>> SandbagMeshComponents;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sandbag Cover")
 	FName CoverId = NAME_None;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sandbag Cover", meta = (ClampMin = "1.0", UIMin = "1.0"))
-	FVector BoxExtent = FVector(75.0f, 320.0f, 90.0f);
+	FVector BoxExtent = FVector(37.5f, 160.0f, 45.0f);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sandbag Cover", meta = (ClampMin = "1.0", UIMin = "1.0"))
 	float MaxHealth = 70.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sandbag Cover|Passthrough", meta = (ClampMin = "0.0", UIMin = "0.0"))
-	float PassthroughRadius = 125.0f;
+	float PassthroughRadius = 62.5f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sandbag Cover|Passthrough", meta = (ClampMin = "0.0", UIMin = "0.0"))
-	float PassthroughVerticalTolerance = 90.0f;
+	float PassthroughVerticalTolerance = 45.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sandbag Cover|Visual", meta = (ClampMin = "0.5", UIMin = "0.5"))
-	float OutlineThickness = 6.0f;
+	float OutlineThickness = 3.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sandbag Cover|Visual")
 	TSoftObjectPtr<UMaterialInterface> VisualMaterial;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sandbag Cover|Visual")
 	TSoftObjectPtr<UMaterialInterface> OutlineMaterial;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sandbag Cover|Visual")
+	TSoftObjectPtr<UStaticMesh> SandbagStaticMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sandbag Cover|Collapse", meta = (ClampMin = "0.05", UIMin = "0.05"))
+	float CollapseDurationSeconds = 1.25f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sandbag Cover|Collapse", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float CollapseHoldSeconds = 0.85f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sandbag Cover|Collapse", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float CollapseScatterDistance = 67.5f;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UMaterialInstanceDynamic> DynamicVisualMaterial;
@@ -111,4 +136,9 @@ protected:
 
 	UPROPERTY(Transient)
 	bool bOutlineActive = false;
+
+	UPROPERTY(Transient)
+	float CollapseElapsedSeconds = 0.0f;
+
+	TArray<FTunaSweeperSandbagCollapseState> CollapseStates;
 };
