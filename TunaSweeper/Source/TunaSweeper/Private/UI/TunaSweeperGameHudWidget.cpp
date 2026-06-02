@@ -10,6 +10,8 @@
 #include "Components/CanvasPanelSlot.h"
 #include "Components/HorizontalBox.h"
 #include "Components/HorizontalBoxSlot.h"
+#include "Components/Overlay.h"
+#include "Components/OverlaySlot.h"
 #include "Components/ProgressBar.h"
 #include "Components/SizeBox.h"
 #include "Components/TextBlock.h"
@@ -58,7 +60,9 @@ namespace
 	constexpr float InventoryQuickSlotTileScale = 1.12f;
 	constexpr float CursorDistanceRightOffset = 34.0f;
 	constexpr float CursorDistanceBottomOffset = 40.0f;
-	constexpr float CursorDistanceMinTextWidth = 42.0f;
+	constexpr float CursorDistanceTextWidth = 46.0f;
+	constexpr int32 CursorDistanceMediumMeters = 5;
+	constexpr int32 CursorDistanceFarMeters = 10;
 	constexpr float DebuffBarLeftOffset = 24.0f;
 	constexpr float DebuffBarBottomOffset = CursorDistanceBottomOffset;
 	constexpr float HudWidgetTransitionDurationSeconds = 0.18f;
@@ -191,6 +195,19 @@ namespace
 		}
 
 		return FString::Printf(TEXT("%.1f"), DamageAmount);
+	}
+
+	FLinearColor GetCursorDistanceTextColor(int32 DistanceMeters)
+	{
+		if (DistanceMeters >= CursorDistanceFarMeters)
+		{
+			return FLinearColor(1.0f, 0.20f, 0.14f, 1.0f);
+		}
+		if (DistanceMeters >= CursorDistanceMediumMeters)
+		{
+			return FLinearColor(1.0f, 0.58f, 0.16f, 1.0f);
+		}
+		return FLinearColor::White;
 	}
 
 	bool IsPrecisionCrosshairWeaponType(FName WeaponTypeTag)
@@ -1741,27 +1758,111 @@ void UTunaSweeperGameHudWidget::EnsureCursorDistanceWidget()
 	}
 
 	CursorDistancePanel = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("CursorDistancePanel"));
+	UHorizontalBox* CursorDistanceRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("CursorDistanceRow"));
+	USizeBox* CursorDistanceIconBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("CursorDistanceIconBox"));
+	UOverlay* CursorDistanceIconOverlay = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), TEXT("CursorDistanceIconOverlay"));
+	USizeBox* CursorDistanceTextBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("CursorDistanceTextBox"));
 	CursorDistanceText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("CursorDistanceText"));
-	if (!CursorDistancePanel || !CursorDistanceText)
+	if (!CursorDistancePanel || !CursorDistanceRow || !CursorDistanceIconBox || !CursorDistanceIconOverlay || !CursorDistanceTextBox || !CursorDistanceText)
 	{
 		return;
 	}
 
 	CursorDistancePanel->SetVisibility(ESlateVisibility::Collapsed);
-	CursorDistancePanel->SetPadding(FMargin(12.0f, 5.0f, 12.0f, 5.0f));
+	CursorDistancePanel->SetPadding(FMargin(9.0f, 5.0f, 11.0f, 5.0f));
 	CursorDistancePanel->SetBrush(MakeHudRoundedBoxBrush(
-		FVector2D(64.0f, 30.0f),
+		FVector2D(86.0f, 30.0f),
 		FLinearColor(0.0f, 0.0f, 0.0f, 0.70f),
 		8.0f,
 		FLinearColor(0.0f, 0.0f, 0.0f, 0.0f),
 		0.0f));
-	CursorDistancePanel->SetContent(CursorDistanceText);
+	CursorDistancePanel->SetContent(CursorDistanceRow);
+
+	CursorDistanceIconBox->SetWidthOverride(18.0f);
+	CursorDistanceIconBox->SetHeightOverride(18.0f);
+	CursorDistanceIconBox->SetContent(CursorDistanceIconOverlay);
+
+	auto AddCursorDistanceIconPart = [this](
+		UWidgetTree* InWidgetTree,
+		UOverlay* IconOverlay,
+		const TCHAR* PartName,
+		const FVector2D& Size,
+		EHorizontalAlignment HorizontalAlignment,
+		EVerticalAlignment VerticalAlignment,
+		const FMargin& InPadding,
+		float Radius)
+	{
+		USizeBox* PartBox = InWidgetTree->ConstructWidget<USizeBox>(
+			USizeBox::StaticClass(),
+			FName(FString::Printf(TEXT("CursorDistance%sBox"), PartName)));
+		UBorder* Part = InWidgetTree->ConstructWidget<UBorder>(
+			UBorder::StaticClass(),
+			FName(FString::Printf(TEXT("CursorDistance%s"), PartName)));
+		if (!PartBox || !Part)
+		{
+			return;
+		}
+
+		PartBox->SetWidthOverride(Size.X);
+		PartBox->SetHeightOverride(Size.Y);
+		Part->SetBrush(MakeHudRoundedBoxBrush(
+			Size,
+			FLinearColor::White,
+			Radius,
+			FLinearColor(0.0f, 0.0f, 0.0f, 0.0f),
+			0.0f));
+		PartBox->SetContent(Part);
+
+		if (UOverlaySlot* PartSlot = IconOverlay->AddChildToOverlay(PartBox))
+		{
+			PartSlot->SetHorizontalAlignment(HorizontalAlignment);
+			PartSlot->SetVerticalAlignment(VerticalAlignment);
+			PartSlot->SetPadding(InPadding);
+		}
+	};
+
+	USizeBox* RingBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("CursorDistanceReticleRingBox"));
+	UBorder* Ring = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("CursorDistanceReticleRing"));
+	if (RingBox && Ring)
+	{
+		RingBox->SetWidthOverride(13.0f);
+		RingBox->SetHeightOverride(13.0f);
+		Ring->SetBrush(MakeHudRoundedBoxBrush(
+			FVector2D(13.0f, 13.0f),
+			FLinearColor(0.0f, 0.0f, 0.0f, 0.0f),
+			6.5f,
+			FLinearColor::White,
+			1.4f));
+		RingBox->SetContent(Ring);
+		if (UOverlaySlot* RingSlot = CursorDistanceIconOverlay->AddChildToOverlay(RingBox))
+		{
+			RingSlot->SetHorizontalAlignment(HAlign_Center);
+			RingSlot->SetVerticalAlignment(VAlign_Center);
+		}
+	}
+
+	AddCursorDistanceIconPart(WidgetTree, CursorDistanceIconOverlay, TEXT("ReticleCenterDot"), FVector2D(3.0f, 3.0f), HAlign_Center, VAlign_Center, FMargin(0.0f), 1.5f);
+	AddCursorDistanceIconPart(WidgetTree, CursorDistanceIconOverlay, TEXT("ReticleTopTick"), FVector2D(1.5f, 3.2f), HAlign_Center, VAlign_Top, FMargin(0.0f), 0.75f);
+	AddCursorDistanceIconPart(WidgetTree, CursorDistanceIconOverlay, TEXT("ReticleBottomTick"), FVector2D(1.5f, 3.2f), HAlign_Center, VAlign_Bottom, FMargin(0.0f), 0.75f);
+	AddCursorDistanceIconPart(WidgetTree, CursorDistanceIconOverlay, TEXT("ReticleLeftTick"), FVector2D(3.2f, 1.5f), HAlign_Left, VAlign_Center, FMargin(0.0f), 0.75f);
+	AddCursorDistanceIconPart(WidgetTree, CursorDistanceIconOverlay, TEXT("ReticleRightTick"), FVector2D(3.2f, 1.5f), HAlign_Right, VAlign_Center, FMargin(0.0f), 0.75f);
+
+	if (UHorizontalBoxSlot* IconSlot = CursorDistanceRow->AddChildToHorizontalBox(CursorDistanceIconBox))
+	{
+		IconSlot->SetVerticalAlignment(VAlign_Center);
+	}
 
 	CursorDistanceText->SetText(FText::FromString(TEXT("0M")));
 	CursorDistanceText->SetColorAndOpacity(FSlateColor(FLinearColor::White));
 	CursorDistanceText->SetJustification(ETextJustify::Right);
-	CursorDistanceText->SetMinDesiredWidth(CursorDistanceMinTextWidth);
 	TunaSweeperUIFont::ApplyFont(CursorDistanceText, 18.0f, ETunaSweeperUIFontWeight::Bold);
+	CursorDistanceTextBox->SetWidthOverride(CursorDistanceTextWidth);
+	CursorDistanceTextBox->SetContent(CursorDistanceText);
+	if (UHorizontalBoxSlot* TextSlot = CursorDistanceRow->AddChildToHorizontalBox(CursorDistanceTextBox))
+	{
+		TextSlot->SetPadding(FMargin(6.0f, 0.0f, 0.0f, 0.0f));
+		TextSlot->SetVerticalAlignment(VAlign_Center);
+	}
 
 	UCanvasPanelSlot* CanvasSlot = RootCanvas->AddChildToCanvas(CursorDistancePanel);
 	if (CanvasSlot)
@@ -2904,6 +3005,7 @@ void UTunaSweeperGameHudWidget::RefreshCursorDistanceWidget()
 	if (CursorDistanceText && LastCursorDistanceMeters != RoundedDistanceMeters)
 	{
 		CursorDistanceText->SetText(FText::FromString(FString::Printf(TEXT("%dM"), RoundedDistanceMeters)));
+		CursorDistanceText->SetColorAndOpacity(FSlateColor(GetCursorDistanceTextColor(RoundedDistanceMeters)));
 		LastCursorDistanceMeters = RoundedDistanceMeters;
 	}
 
