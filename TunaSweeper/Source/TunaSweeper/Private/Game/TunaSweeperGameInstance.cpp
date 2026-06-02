@@ -399,6 +399,9 @@ namespace TunaSweeperWeaponSpreadRecoil
 		Definition.MaximumSpreadHalfAngleDegrees = FMath::Max(
 			Definition.MinimumSpreadHalfAngleDegrees,
 			Definition.MaximumSpreadHalfAngleDegrees);
+		Definition.AimedSpreadMultiplier = Definition.AimedSpreadMultiplier > 0.0f
+			? FMath::Max(0.01f, Definition.AimedSpreadMultiplier)
+			: FTunaSweeperWeaponSpreadRecoilDefinition().AimedSpreadMultiplier;
 		Definition.DecreasePerSecond = FMath::Max(0.0f, Definition.DecreasePerSecond);
 	}
 
@@ -412,6 +415,7 @@ namespace TunaSweeperWeaponSpreadRecoil
 			OutDefinition.IncreasePerShot = 1.2f;
 			OutDefinition.MinimumSpreadHalfAngleDegrees = 1.4f;
 			OutDefinition.MaximumSpreadHalfAngleDegrees = 7.0f;
+			OutDefinition.AimedSpreadMultiplier = 0.5f;
 			OutDefinition.DecreasePerSecond = 5.0f;
 			return true;
 		}
@@ -421,6 +425,7 @@ namespace TunaSweeperWeaponSpreadRecoil
 			OutDefinition.IncreasePerShot = 0.8f;
 			OutDefinition.MinimumSpreadHalfAngleDegrees = 1.0f;
 			OutDefinition.MaximumSpreadHalfAngleDegrees = 6.0f;
+			OutDefinition.AimedSpreadMultiplier = 0.45f;
 			OutDefinition.DecreasePerSecond = 6.5f;
 			return true;
 		}
@@ -430,6 +435,7 @@ namespace TunaSweeperWeaponSpreadRecoil
 			OutDefinition.IncreasePerShot = 2.0f;
 			OutDefinition.MinimumSpreadHalfAngleDegrees = 4.5f;
 			OutDefinition.MaximumSpreadHalfAngleDegrees = 12.0f;
+			OutDefinition.AimedSpreadMultiplier = 0.65f;
 			OutDefinition.DecreasePerSecond = 4.5f;
 			return true;
 		}
@@ -439,6 +445,7 @@ namespace TunaSweeperWeaponSpreadRecoil
 			OutDefinition.IncreasePerShot = 1.0f;
 			OutDefinition.MinimumSpreadHalfAngleDegrees = 1.8f;
 			OutDefinition.MaximumSpreadHalfAngleDegrees = 8.5f;
+			OutDefinition.AimedSpreadMultiplier = 0.5f;
 			OutDefinition.DecreasePerSecond = 7.5f;
 			return true;
 		}
@@ -446,6 +453,7 @@ namespace TunaSweeperWeaponSpreadRecoil
 		OutDefinition.IncreasePerShot = 1.0f;
 		OutDefinition.MinimumSpreadHalfAngleDegrees = 1.0f;
 		OutDefinition.MaximumSpreadHalfAngleDegrees = 8.0f;
+		OutDefinition.AimedSpreadMultiplier = 0.5f;
 		OutDefinition.DecreasePerSecond = 5.0f;
 		return true;
 	}

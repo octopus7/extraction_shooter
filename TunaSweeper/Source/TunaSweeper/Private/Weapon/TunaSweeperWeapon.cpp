@@ -300,6 +300,11 @@ float ATunaSweeperWeapon::GetRuntimeSpreadHalfAngleDegrees() const
 	return CombatComponent ? CombatComponent->GetSpreadHalfAngleDegrees() : 0.0f;
 }
 
+float ATunaSweeperWeapon::GetRuntimeAimedSpreadHalfAngleDegrees() const
+{
+	return CombatComponent ? CombatComponent->GetAimedSpreadHalfAngleDegrees() : 0.0f;
+}
+
 void ATunaSweeperWeapon::AddRuntimeSpreadRecoilShot()
 {
 	if (CombatComponent)

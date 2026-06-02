@@ -24,6 +24,7 @@
 #include "InputCoreTypes.h"
 #include "Player/TunaSweeperPlayerController.h"
 #include "Rendering/DrawElements.h"
+#include "Styling/CoreStyle.h"
 #include "Subsystem/TunaSweeperHousingSubsystem.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
 #include "UI/TunaSweeperExtractionProgressWidget.h"
@@ -106,6 +107,16 @@ namespace
 		Brush.OutlineSettings = FSlateBrushOutlineSettings(Radius, FSlateColor(OutlineColor), OutlineWidth);
 		Brush.OutlineSettings.bUseBrushTransparency = false;
 		return Brush;
+	}
+
+	FPaintGeometry MakeHudLocalBoxGeometry(
+		const FGeometry& AllottedGeometry,
+		const FVector2D& Position,
+		const FVector2D& Size)
+	{
+		return AllottedGeometry.ToPaintGeometry(
+			FVector2f(static_cast<float>(Size.X), static_cast<float>(Size.Y)),
+			FSlateLayoutTransform(FVector2f(static_cast<float>(Position.X), static_cast<float>(Position.Y))));
 	}
 
 	bool IsSlateVisibilityShown(ESlateVisibility Visibility)
@@ -473,63 +484,48 @@ int32 UTunaSweeperGameHudWidget::NativePaint(
 	}
 
 	const float AimAlpha = SmoothTransitionAlpha(PrecisionCrosshairAimAlpha);
-	const float ParenthesisAlpha = 1.0f - AimAlpha;
-	if (ParenthesisAlpha > 0.01f)
-	{
-		FLinearColor ParenthesisColor = PrecisionCrosshairColor;
-		ParenthesisColor.A *= ParenthesisAlpha;
+	FLinearColor BarColor = PrecisionCrosshairColor;
 
-		const int32 ParenthesisSegments = 18;
-		const float ParenthesisOffset = FMath::Max(1.0f, PrecisionCrosshairParenthesisOffset);
-		const float ParenthesisRadius = FMath::Max(1.0f, PrecisionCrosshairParenthesisRadius);
-		TArray<FVector2D> ParenthesisPoints;
-		BuildArcPoints(
-			CrosshairLocalPosition + FVector2D(-ParenthesisOffset, 0.0f),
-			ParenthesisRadius,
-			110.0f,
-			250.0f,
-			ParenthesisSegments,
-			ParenthesisPoints);
-		DrawLineStrip(ParenthesisPoints, ParenthesisColor, PrecisionCrosshairThickness, PaintedLayerId + 1);
+	const float BarDistance = FMath::Lerp(
+		FMath::Max(1.0f, PrecisionCrosshairAimBarStartDistance),
+		FMath::Max(1.0f, PrecisionCrosshairAimBarEndDistance),
+		AimAlpha);
+	const float BarLength = FMath::Max(1.0f, PrecisionCrosshairAimBarLength);
 
-		BuildArcPoints(
-			CrosshairLocalPosition + FVector2D(ParenthesisOffset, 0.0f),
-			ParenthesisRadius,
-			-70.0f,
-			70.0f,
-			ParenthesisSegments,
-			ParenthesisPoints);
-		DrawLineStrip(ParenthesisPoints, ParenthesisColor, PrecisionCrosshairThickness, PaintedLayerId + 1);
-	}
+	TArray<FVector2D> SegmentPoints;
+	SegmentPoints.SetNum(2);
+	SegmentPoints[0] = CrosshairLocalPosition + FVector2D(-BarDistance - BarLength, 0.0f);
+	SegmentPoints[1] = CrosshairLocalPosition + FVector2D(-BarDistance, 0.0f);
+	DrawLineStrip(SegmentPoints, BarColor, PrecisionCrosshairThickness, PaintedLayerId + 1);
+
+	SegmentPoints[0] = CrosshairLocalPosition + FVector2D(BarDistance, 0.0f);
+	SegmentPoints[1] = CrosshairLocalPosition + FVector2D(BarDistance + BarLength, 0.0f);
+	DrawLineStrip(SegmentPoints, BarColor, PrecisionCrosshairThickness, PaintedLayerId + 1);
+
+	SegmentPoints[0] = CrosshairLocalPosition + FVector2D(0.0f, -BarDistance - BarLength);
+	SegmentPoints[1] = CrosshairLocalPosition + FVector2D(0.0f, -BarDistance);
+	DrawLineStrip(SegmentPoints, BarColor, PrecisionCrosshairThickness, PaintedLayerId + 1);
+
+	SegmentPoints[0] = CrosshairLocalPosition + FVector2D(0.0f, BarDistance);
+	SegmentPoints[1] = CrosshairLocalPosition + FVector2D(0.0f, BarDistance + BarLength);
+	DrawLineStrip(SegmentPoints, BarColor, PrecisionCrosshairThickness, PaintedLayerId + 1);
 
 	if (AimAlpha > 0.01f)
 	{
-		FLinearColor BarColor = PrecisionCrosshairColor;
-		BarColor.A *= AimAlpha;
-
-		const float BarDistance = FMath::Lerp(
-			FMath::Max(1.0f, PrecisionCrosshairAimBarStartDistance),
-			FMath::Max(1.0f, PrecisionCrosshairAimBarEndDistance),
-			AimAlpha);
-		const float BarLength = FMath::Max(1.0f, PrecisionCrosshairAimBarLength);
-
-		TArray<FVector2D> SegmentPoints;
-		SegmentPoints.SetNum(2);
-		SegmentPoints[0] = CrosshairLocalPosition + FVector2D(-BarDistance - BarLength, 0.0f);
-		SegmentPoints[1] = CrosshairLocalPosition + FVector2D(-BarDistance, 0.0f);
-		DrawLineStrip(SegmentPoints, BarColor, PrecisionCrosshairThickness, PaintedLayerId + 2);
-
-		SegmentPoints[0] = CrosshairLocalPosition + FVector2D(BarDistance, 0.0f);
-		SegmentPoints[1] = CrosshairLocalPosition + FVector2D(BarDistance + BarLength, 0.0f);
-		DrawLineStrip(SegmentPoints, BarColor, PrecisionCrosshairThickness, PaintedLayerId + 2);
-
-		SegmentPoints[0] = CrosshairLocalPosition + FVector2D(0.0f, -BarDistance - BarLength);
-		SegmentPoints[1] = CrosshairLocalPosition + FVector2D(0.0f, -BarDistance);
-		DrawLineStrip(SegmentPoints, BarColor, PrecisionCrosshairThickness, PaintedLayerId + 2);
-
-		SegmentPoints[0] = CrosshairLocalPosition + FVector2D(0.0f, BarDistance);
-		SegmentPoints[1] = CrosshairLocalPosition + FVector2D(0.0f, BarDistance + BarLength);
-		DrawLineStrip(SegmentPoints, BarColor, PrecisionCrosshairThickness, PaintedLayerId + 2);
+		if (const FSlateBrush* WhiteBrush = FCoreStyle::Get().GetBrush(TEXT("WhiteBrush")))
+		{
+			FLinearColor DotColor = PrecisionCrosshairCenterDotColor;
+			DotColor.A *= AimAlpha;
+			const float DotDiameter = FMath::Max(1.0f, PrecisionCrosshairCenterDotDiameter);
+			const FVector2D DotSize(DotDiameter, DotDiameter);
+			FSlateDrawElement::MakeBox(
+				OutDrawElements,
+				PaintedLayerId + 2,
+				MakeHudLocalBoxGeometry(AllottedGeometry, CrosshairLocalPosition - DotSize * 0.5f, DotSize),
+				WhiteBrush,
+				ESlateDrawEffect::None,
+				DotColor);
+		}
 	}
 
 	return PaintedLayerId + 2;

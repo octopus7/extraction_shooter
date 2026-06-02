@@ -2462,6 +2462,7 @@ namespace TunaSweeperEditorSetup
 			float IncreasePerShot,
 			float MinimumSpreadHalfAngleDegrees,
 			float MaximumSpreadHalfAngleDegrees,
+			float AimedSpreadMultiplier,
 			float DecreasePerSecond)
 		{
 			FTunaSweeperWeaponSpreadRecoilDefinition Definition;
@@ -2469,14 +2470,15 @@ namespace TunaSweeperEditorSetup
 			Definition.IncreasePerShot = IncreasePerShot;
 			Definition.MinimumSpreadHalfAngleDegrees = MinimumSpreadHalfAngleDegrees;
 			Definition.MaximumSpreadHalfAngleDegrees = MaximumSpreadHalfAngleDegrees;
+			Definition.AimedSpreadMultiplier = AimedSpreadMultiplier;
 			Definition.DecreasePerSecond = DecreasePerSecond;
 			RecoilDataAsset->WeaponTypeDefinitions.Add(Definition);
 		};
 
-		AddRecoilDefinition(TEXT("weapon.type.pistol"), 1.2f, 1.4f, 7.0f, 5.0f);
-		AddRecoilDefinition(TEXT("weapon.type.rifle"), 0.8f, 1.0f, 6.0f, 6.5f);
-		AddRecoilDefinition(TEXT("weapon.type.shotgun"), 2.0f, 4.5f, 12.0f, 4.5f);
-		AddRecoilDefinition(TEXT("weapon.type.smg"), 1.0f, 1.8f, 8.5f, 7.5f);
+		AddRecoilDefinition(TEXT("weapon.type.pistol"), 1.2f, 1.4f, 7.0f, 0.5f, 5.0f);
+		AddRecoilDefinition(TEXT("weapon.type.rifle"), 0.8f, 1.0f, 6.0f, 0.45f, 6.5f);
+		AddRecoilDefinition(TEXT("weapon.type.shotgun"), 2.0f, 4.5f, 12.0f, 0.65f, 4.5f);
+		AddRecoilDefinition(TEXT("weapon.type.smg"), 1.0f, 1.8f, 8.5f, 0.5f, 7.5f);
 
 		RecoilDataAsset->MarkPackageDirty();
 		if (!SaveAsset(RecoilDataAsset))

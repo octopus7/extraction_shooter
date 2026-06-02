@@ -61,6 +61,7 @@ public:
 	void ClearRuntimeSpreadRecoil();
 	void ResetRuntimeSpreadRecoil();
 	float GetRuntimeSpreadHalfAngleDegrees() const;
+	float GetRuntimeAimedSpreadHalfAngleDegrees() const;
 	void AddRuntimeSpreadRecoilShot();
 	bool StartReloadRuntime(float ReloadSeconds);
 	void FinishReloadRuntime();

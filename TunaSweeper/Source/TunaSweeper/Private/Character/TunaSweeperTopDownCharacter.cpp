@@ -2708,7 +2708,9 @@ float ATunaSweeperTopDownCharacter::ResolveWeaponSpreadHalfAngleDegrees(FName We
 	}
 
 	EquippedWeapon->ConfigureRuntimeSpreadRecoil(WeaponTypeTag, RecoilDefinition);
-	return EquippedWeapon->GetRuntimeSpreadHalfAngleDegrees();
+	return bIsAiming
+		? EquippedWeapon->GetRuntimeAimedSpreadHalfAngleDegrees()
+		: EquippedWeapon->GetRuntimeSpreadHalfAngleDegrees();
 }
 
 void ATunaSweeperTopDownCharacter::AddWeaponSpreadRecoilShot(FName WeaponTypeTag)

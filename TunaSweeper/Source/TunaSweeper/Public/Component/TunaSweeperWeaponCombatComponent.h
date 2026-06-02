@@ -45,6 +45,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Weapon|Spread")
 	float GetSpreadHalfAngleDegrees() const;
 
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Weapon|Spread")
+	float GetAimedSpreadHalfAngleDegrees() const;
+
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Weapon|Spread")
 	void AddSpreadRecoilShot();
 
@@ -76,6 +79,7 @@ public:
 	FTunaSweeperWeaponReloadProgressChangedSignature OnReloadProgressChanged;
 
 private:
+	float CalculateBaseSpreadHalfAngleDegrees() const;
 	void DecaySpreadRecoil(float DeltaSeconds);
 	void BroadcastReloadProgressIfNeeded(bool bForceBroadcast = false);
 

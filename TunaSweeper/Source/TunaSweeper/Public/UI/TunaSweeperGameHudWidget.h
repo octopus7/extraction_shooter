@@ -245,21 +245,15 @@ protected:
 	FLinearColor ShotgunCrosshairColor = FLinearColor(1.0f, 1.0f, 1.0f, 0.78f);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Crosshair", meta = (ClampMin = "1.0", UIMin = "1.0"))
-	float PrecisionCrosshairParenthesisOffset = 32.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Crosshair", meta = (ClampMin = "1.0", UIMin = "1.0"))
-	float PrecisionCrosshairParenthesisRadius = 18.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Crosshair", meta = (ClampMin = "1.0", UIMin = "1.0"))
 	float PrecisionCrosshairThickness = 2.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Crosshair", meta = (ClampMin = "1.0", UIMin = "1.0"))
 	float PrecisionCrosshairAimBarLength = 18.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Crosshair", meta = (ClampMin = "1.0", UIMin = "1.0"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Crosshair", meta = (ClampMin = "1.0", UIMin = "1.0", DisplayName = "Precision Crosshair Hip Fire Bar Distance"))
 	float PrecisionCrosshairAimBarStartDistance = 54.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Crosshair", meta = (ClampMin = "1.0", UIMin = "1.0"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Crosshair", meta = (ClampMin = "1.0", UIMin = "1.0", DisplayName = "Precision Crosshair Aimed Bar Distance"))
 	float PrecisionCrosshairAimBarEndDistance = 24.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Crosshair", meta = (ClampMin = "0.0", UIMin = "0.0"))
@@ -267,6 +261,12 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Crosshair")
 	FLinearColor PrecisionCrosshairColor = FLinearColor(1.0f, 1.0f, 1.0f, 0.82f);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Crosshair", meta = (ClampMin = "1.0", UIMin = "1.0"))
+	float PrecisionCrosshairCenterDotDiameter = 4.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Crosshair")
+	FLinearColor PrecisionCrosshairCenterDotColor = FLinearColor(1.0f, 1.0f, 1.0f, 0.95f);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Extraction", meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float ExtractionProgressTopOffset = 72.0f;

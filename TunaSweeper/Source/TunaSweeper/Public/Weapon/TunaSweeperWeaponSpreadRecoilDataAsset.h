@@ -21,6 +21,9 @@ struct TUNASWEEPER_API FTunaSweeperWeaponSpreadRecoilDefinition
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TunaSweeper|Weapon Spread Recoil", meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float MaximumSpreadHalfAngleDegrees = 8.0f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TunaSweeper|Weapon Spread Recoil", meta = (ClampMin = "0.01", UIMin = "0.01", UIMax = "1.0"))
+	float AimedSpreadMultiplier = 0.5f;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TunaSweeper|Weapon Spread Recoil", meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float DecreasePerSecond = 5.0f;
 };

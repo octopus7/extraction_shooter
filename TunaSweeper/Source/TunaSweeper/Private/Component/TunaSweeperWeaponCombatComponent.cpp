@@ -44,6 +44,9 @@ void UTunaSweeperWeaponCombatComponent::ConfigureSpreadRecoilDefinition(
 	SpreadRecoilDefinition.MaximumSpreadHalfAngleDegrees = FMath::Max(
 		SpreadRecoilDefinition.MinimumSpreadHalfAngleDegrees,
 		SpreadRecoilDefinition.MaximumSpreadHalfAngleDegrees);
+	SpreadRecoilDefinition.AimedSpreadMultiplier = SpreadRecoilDefinition.AimedSpreadMultiplier > 0.0f
+		? FMath::Max(0.01f, SpreadRecoilDefinition.AimedSpreadMultiplier)
+		: FTunaSweeperWeaponSpreadRecoilDefinition().AimedSpreadMultiplier;
 	SpreadRecoilDefinition.DecreasePerSecond = FMath::Max(0.0f, SpreadRecoilDefinition.DecreasePerSecond);
 
 	SpreadRecoilWeaponTypeTag = InWeaponTypeTag;
@@ -68,6 +71,16 @@ void UTunaSweeperWeaponCombatComponent::ResetSpreadRecoil()
 }
 
 float UTunaSweeperWeaponCombatComponent::GetSpreadHalfAngleDegrees() const
+{
+	return CalculateBaseSpreadHalfAngleDegrees();
+}
+
+float UTunaSweeperWeaponCombatComponent::GetAimedSpreadHalfAngleDegrees() const
+{
+	return CalculateBaseSpreadHalfAngleDegrees() * FMath::Max(0.01f, SpreadRecoilDefinition.AimedSpreadMultiplier);
+}
+
+float UTunaSweeperWeaponCombatComponent::CalculateBaseSpreadHalfAngleDegrees() const
 {
 	if (!bHasSpreadRecoilDefinition)
 	{
