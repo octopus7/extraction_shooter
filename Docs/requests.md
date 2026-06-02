@@ -3738,3 +3738,10 @@
 - `TS_SandbagCover_Central` 런타임 스폰 위치를 기존 `[660, -420, 0]`에서 위쪽 파란 메모보다 북쪽인 `[1120, 180, 0]`으로 이동한 것.
 - `Docs/runtime_actor_spawns.md`에 새 모래주머니 엄폐물 배치 위치를 반영한 것.
 - `GameplayInteractionSpawns.json` 파싱 검증을 통과한 것.
+
+## 2026-06-02 19:59:46 (소요시간: 00:05:25)
+
+- 모래주머니 아웃라인 활성 시 각 원본 모래주머니 메시가 CustomDepth/CustomStencil 값 `3`을 쓰도록 변경한 것.
+- `M_SandbagCover_OverlayOutline`을 translucent unlit 머터리얼로 재구성하고, `CustomStencil == 3`인 원본 실루엣 내부 픽셀은 `Opacity=0`이 되게 스텐실 마스크를 추가한 것.
+- 파괴 붕괴 시작 및 아웃라인 비활성 상태에서는 overlay material과 CustomDepth를 함께 끄도록 확인/정리한 것.
+- `TunaSweeperEditor Win64 Development` 빌드를 통과시키고 Unreal Editor를 실행해 모래주머니 관련 자산이 다시 저장된 것을 확인한 것.

@@ -84,6 +84,8 @@
 #include "Materials/MaterialExpressionOneMinus.h"
 #include "Materials/MaterialExpressionPanner.h"
 #include "Materials/MaterialExpressionScalarParameter.h"
+#include "Materials/MaterialExpressionSceneTexture.h"
+#include "Materials/MaterialExpressionScreenPosition.h"
 #include "Materials/MaterialExpressionSaturate.h"
 #include "Materials/MaterialExpressionSubtract.h"
 #include "Materials/MaterialExpressionTextureCoordinate.h"
@@ -200,7 +202,7 @@ namespace TunaSweeperEditorSetup
 	const FString ProjectileHitEffectAssetTaskId = TEXT("2026-05-28_CreateProjectileHitEffectAssetsV1");
 	const FString WeaponSpreadRecoilAssetTaskId = TEXT("2026-05-28_CreateWeaponSpreadRecoilAssetsV1");
 	const FString BaseballBatAssetTaskId = TEXT("2026-05-28_CreateBaseballBatStaticMeshAssetsV1");
-	const FString SandbagCoverAssetTaskId = TEXT("2026-06-02_SandbagOutlineFacingFixV1");
+	const FString SandbagCoverAssetTaskId = TEXT("2026-06-02_SandbagStencilOutlineMaskV1");
 	const FString VoxelMeshAssetTaskId = TEXT("2026-05-19_CreateSharedVoxelMeshAssetsV1");
 	const FString LumberjackMeleeSwingArcAssetTaskId = TEXT("2026-05-20_CreateLumberjackMeleeSwingArcAssetsV2");
 	const FString LedExpressionMaterialTaskId = TEXT("2026-05-26_CreateLedExpressionMaterialV1");
@@ -6698,10 +6700,9 @@ namespace TunaSweeperEditorSetup
 		Material->Modify();
 		Material->GetExpressionCollection().Empty();
 		Material->MaterialDomain = MD_Surface;
-		Material->BlendMode = BLEND_Masked;
+		Material->BlendMode = BLEND_Translucent;
 		Material->SetShadingModel(MSM_Unlit);
 		Material->TwoSided = true;
-		Material->OpacityMaskClipValue = 0.5f;
 		Material->MaxWorldPositionOffsetDisplacement = 24.0f;
 		Material->bAlwaysEvaluateWorldPositionOffset = true;
 
@@ -6727,6 +6728,14 @@ namespace TunaSweeperEditorSetup
 		ThicknessParameter->MaterialExpressionEditorX = -540;
 		ThicknessParameter->MaterialExpressionEditorY = 80;
 		Material->GetExpressionCollection().AddExpression(ThicknessParameter);
+
+		UMaterialExpressionScalarParameter* StencilMaskValueParameter = NewObject<UMaterialExpressionScalarParameter>(Material);
+		StencilMaskValueParameter->Material = Material;
+		StencilMaskValueParameter->ParameterName = TEXT("StencilMaskValue");
+		StencilMaskValueParameter->DefaultValue = 3.0f;
+		StencilMaskValueParameter->MaterialExpressionEditorX = -540;
+		StencilMaskValueParameter->MaterialExpressionEditorY = 620;
+		Material->GetExpressionCollection().AddExpression(StencilMaskValueParameter);
 
 		UMaterialExpressionVertexNormalWS* VertexNormalExpression = NewObject<UMaterialExpressionVertexNormalWS>(Material);
 		VertexNormalExpression->Material = Material;
@@ -6773,9 +6782,53 @@ namespace TunaSweeperEditorSetup
 		BackFaceOnlyMask->MaterialExpressionEditorY = 500;
 		Material->GetExpressionCollection().AddExpression(BackFaceOnlyMask);
 
+		UMaterialExpressionScreenPosition* ScreenPositionExpression = NewObject<UMaterialExpressionScreenPosition>(Material);
+		ScreenPositionExpression->Material = Material;
+		ScreenPositionExpression->MaterialExpressionEditorX = -540;
+		ScreenPositionExpression->MaterialExpressionEditorY = 780;
+		Material->GetExpressionCollection().AddExpression(ScreenPositionExpression);
+
+		UMaterialExpressionSceneTexture* CustomStencilTexture = NewObject<UMaterialExpressionSceneTexture>(Material);
+		CustomStencilTexture->Material = Material;
+		CustomStencilTexture->SceneTextureId = PPI_CustomStencil;
+		CustomStencilTexture->Coordinates.Connect(0, ScreenPositionExpression);
+		CustomStencilTexture->MaterialExpressionEditorX = -250;
+		CustomStencilTexture->MaterialExpressionEditorY = 760;
+		Material->GetExpressionCollection().AddExpression(CustomStencilTexture);
+
+		UMaterialExpressionComponentMask* CustomStencilValue = NewObject<UMaterialExpressionComponentMask>(Material);
+		CustomStencilValue->Material = Material;
+		CustomStencilValue->Input.Connect(0, CustomStencilTexture);
+		CustomStencilValue->R = true;
+		CustomStencilValue->G = false;
+		CustomStencilValue->B = false;
+		CustomStencilValue->A = false;
+		CustomStencilValue->MaterialExpressionEditorX = 40;
+		CustomStencilValue->MaterialExpressionEditorY = 760;
+		Material->GetExpressionCollection().AddExpression(CustomStencilValue);
+
+		UMaterialExpressionIf* StencilOutsideMask = NewObject<UMaterialExpressionIf>(Material);
+		StencilOutsideMask->Material = Material;
+		StencilOutsideMask->A.Connect(0, CustomStencilValue);
+		StencilOutsideMask->B.Connect(0, StencilMaskValueParameter);
+		StencilOutsideMask->AGreaterThanB.Connect(0, InvertedFaceMaskValue);
+		StencilOutsideMask->AEqualsB.Connect(0, HiddenFaceMaskValue);
+		StencilOutsideMask->ALessThanB.Connect(0, InvertedFaceMaskValue);
+		StencilOutsideMask->MaterialExpressionEditorX = 310;
+		StencilOutsideMask->MaterialExpressionEditorY = 720;
+		Material->GetExpressionCollection().AddExpression(StencilOutsideMask);
+
+		UMaterialExpressionMultiply* FinalOpacity = NewObject<UMaterialExpressionMultiply>(Material);
+		FinalOpacity->Material = Material;
+		FinalOpacity->A.Connect(0, BackFaceOnlyMask);
+		FinalOpacity->B.Connect(0, StencilOutsideMask);
+		FinalOpacity->MaterialExpressionEditorX = 580;
+		FinalOpacity->MaterialExpressionEditorY = 590;
+		Material->GetExpressionCollection().AddExpression(FinalOpacity);
+
 		MaterialEditorOnly->EmissiveColor.Connect(0, ColorParameter);
 		MaterialEditorOnly->WorldPositionOffset.Connect(0, NormalOffsetExpression);
-		MaterialEditorOnly->OpacityMask.Connect(0, BackFaceOnlyMask);
+		MaterialEditorOnly->Opacity.Connect(0, FinalOpacity);
 
 		Material->PostEditChange();
 		Material->MarkPackageDirty();

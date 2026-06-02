@@ -19,6 +19,7 @@ namespace
 	constexpr int32 SandbagLayerCount = 3;
 	constexpr int32 SandbagDepthCount = 2;
 	constexpr int32 MaxSandbagMeshComponentCount = 26;
+	constexpr int32 SandbagOutlineStencilValue = 3;
 	const FVector BaseSandbagMeshExtent(21.0f, 28.0f, 9.0f);
 
 	FVector MakeSafeBoxExtent(const FVector& InBoxExtent)
@@ -71,7 +72,7 @@ ATunaSweeperSandbagCoverActor::ATunaSweeperSandbagCoverActor()
 		SandbagMesh->SetGenerateOverlapEvents(false);
 		SandbagMesh->SetCanEverAffectNavigation(false);
 		SandbagMesh->SetRenderCustomDepth(false);
-		SandbagMesh->SetCustomDepthStencilValue(3);
+		SandbagMesh->SetCustomDepthStencilValue(SandbagOutlineStencilValue);
 		SandbagMesh->SetOverlayMaterial(nullptr);
 		SandbagMesh->SetOverlayMaterialMaxDrawDistance(0.0f);
 		SandbagMeshComponents.Add(SandbagMesh);
@@ -297,8 +298,8 @@ void ATunaSweeperSandbagCoverActor::RebuildMeshes()
 				SandbagMesh->SetRelativeScale3D(MakeScaleFromExtents(BagExtent, BaseSandbagMeshExtent));
 				SandbagMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 				SandbagMesh->SetGenerateOverlapEvents(false);
-				SandbagMesh->SetRenderCustomDepth(false);
-				SandbagMesh->SetCustomDepthStencilValue(3);
+				SandbagMesh->SetRenderCustomDepth(bOutlineActive && !bCoverDestroyed);
+				SandbagMesh->SetCustomDepthStencilValue(SandbagOutlineStencilValue);
 				SandbagMesh->SetOverlayMaterial(bOutlineActive && !bCoverDestroyed ? DynamicOutlineMaterial.Get() : nullptr);
 				SandbagMesh->SetOverlayMaterialMaxDrawDistance(0.0f);
 				SandbagMesh->SetHiddenInGame(false);
@@ -315,6 +316,7 @@ void ATunaSweeperSandbagCoverActor::RebuildMeshes()
 			SandbagMesh->SetHiddenInGame(true);
 			SandbagMesh->SetVisibility(false, true);
 			SandbagMesh->SetRenderCustomDepth(false);
+			SandbagMesh->SetCustomDepthStencilValue(SandbagOutlineStencilValue);
 			SandbagMesh->SetOverlayMaterial(nullptr);
 		}
 	}
@@ -341,6 +343,7 @@ void ATunaSweeperSandbagCoverActor::ApplyMaterials()
 		if (DynamicOutlineMaterial)
 		{
 			DynamicOutlineMaterial->SetScalarParameterValue(TEXT("OutlineThickness"), FMath::Max(0.5f, OutlineThickness));
+			DynamicOutlineMaterial->SetScalarParameterValue(TEXT("StencilMaskValue"), static_cast<float>(SandbagOutlineStencilValue));
 			DynamicOutlineMaterial->SetVectorParameterValue(TEXT("OutlineColor"), FLinearColor(0.78f, 0.98f, 0.32f, 1.0f));
 		}
 	}
@@ -386,12 +389,13 @@ void ATunaSweeperSandbagCoverActor::SetOutlineActive(bool bEnabled)
 	{
 		if (SandbagMesh)
 		{
-			SandbagMesh->SetRenderCustomDepth(false);
-			SandbagMesh->SetCustomDepthStencilValue(3);
+			SandbagMesh->SetCustomDepthStencilValue(SandbagOutlineStencilValue);
 			if (DynamicOutlineMaterial)
 			{
 				DynamicOutlineMaterial->SetScalarParameterValue(TEXT("OutlineThickness"), FMath::Max(0.5f, OutlineThickness));
+				DynamicOutlineMaterial->SetScalarParameterValue(TEXT("StencilMaskValue"), static_cast<float>(SandbagOutlineStencilValue));
 			}
+			SandbagMesh->SetRenderCustomDepth(bOutlineActive && SandbagMesh->GetStaticMesh() != nullptr);
 			SandbagMesh->SetOverlayMaterial(bOutlineActive ? DynamicOutlineMaterial.Get() : nullptr);
 			SandbagMesh->SetOverlayMaterialMaxDrawDistance(0.0f);
 		}
@@ -426,6 +430,7 @@ void ATunaSweeperSandbagCoverActor::BeginCollapse()
 	{
 		if (SandbagMesh)
 		{
+			SandbagMesh->SetRenderCustomDepth(false);
 			SandbagMesh->SetOverlayMaterial(nullptr);
 		}
 	}
