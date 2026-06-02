@@ -1,6 +1,7 @@
 [
   {
     "id": 8001,
+    "memo_ko": "초반 생존 보급: 통조림, 생수, 붕대 중심",
     "items": [
       { "item_id": 3001, "quantity": 2 },
       { "item_id": 3002, "quantity": 1 },
@@ -9,6 +10,7 @@
   },
   {
     "id": 8002,
+    "memo_ko": "권총 전투 보급: 권총탄, 붕대, 진통제, 간식, 귀중품 상자",
     "items": [
       { "item_id": 2001, "quantity": 36 },
       { "item_id": 4001, "quantity": 2 },
@@ -19,6 +21,7 @@
   },
   {
     "id": 8003,
+    "memo_ko": "중급 종합 보급: 소총탄/산탄, 모딩 파츠, 근접무기, 의료품, 물자 장비",
     "items": [
       { "item_id": 2002, "quantity": 60 },
       { "item_id": 2003, "quantity": 12 },
@@ -37,24 +40,28 @@
   },
   {
     "id": 8004,
+    "memo_ko": "권총 탄약 상자: 일반 권총탄만 대량 지급",
     "items": [
       { "item_id": 2001, "quantity": 60 }
     ]
   },
   {
     "id": 8005,
+    "memo_ko": "소총 탄약 상자: 일반 소총탄만 대량 지급",
     "items": [
       { "item_id": 2002, "quantity": 90 }
     ]
   },
   {
     "id": 8006,
+    "memo_ko": "벌목기 전용 잔해: 목재 1~2개",
     "items": [
       { "item_id": 6002, "quantity_min": 1, "quantity_max": 2 }
     ]
   },
   {
     "id": 8007,
+    "memo_ko": "개발 확인용 풀세트: 주요 총기와 탄약, 근접무기, 전술장비, 설계도, 화폐",
     "items": [
       { "item_id": 1001, "quantity": 1 },
       { "item_id": 2001, "quantity": 100 },
@@ -63,11 +70,11 @@
       { "item_id": 1003, "quantity": 1 },
       { "item_id": 2003, "quantity": 100 },
       { "item_id": 1006, "quantity": 1 },
-      { "item_id": 2042, "quantity": 100 },
+      { "item_id": 2001, "quantity": 100 },
       { "item_id": 1007, "quantity": 1 },
       { "item_id": 2022, "quantity": 60 },
       { "item_id": 1008, "quantity": 1 },
-      { "item_id": 2043, "quantity": 60 },
+      { "item_id": 2012, "quantity": 60 },
       { "item_id": 1005, "quantity": 1 },
       { "item_id": 2006, "quantity": 1 },
       { "item_id": 7001, "quantity": 1 },
@@ -77,6 +84,7 @@
   },
   {
     "id": 8008,
+    "memo_ko": "권총 적 사망 전리품: 권총, 일반/녹슨 권총탄, 붕대",
     "items": [
       { "item_id": 1001, "quantity": 1 },
       { "item_id": 2001, "quantity": 24 },
@@ -86,6 +94,7 @@
   },
   {
     "id": 8009,
+    "memo_ko": "소총 적 사망 전리품: 소총, 일반/녹슨 소총탄, 확률 모딩 파츠, 에너지바",
     "items": [
       { "item_id": 1002, "quantity": 1 },
       { "item_id": 2002, "quantity": 45 },
@@ -97,6 +106,7 @@
   },
   {
     "id": 8010,
+    "memo_ko": "강화 소총 적 사망 전리품: 강화 소총, 철갑/일반 소총탄, 확률 모딩 파츠, 응급키트",
     "items": [
       { "item_id": 1007, "quantity": 1 },
       { "item_id": 2022, "quantity": 36 },
@@ -109,10 +119,11 @@
   },
   {
     "id": 8011,
+    "memo_ko": "기관단총 적 사망 전리품: SMG, 일반/녹슨 권총탄 공유, 진통제",
     "items": [
       { "item_id": 1006, "quantity": 1 },
-      { "item_id": 2042, "quantity": 64 },
-      { "item_id": 2041, "quantity": 32 },
+      { "item_id": 2001, "quantity": 64 },
+      { "item_id": 2011, "quantity": 32 },
       { "item_id": 4003, "quantity": 1 }
     ]
   }

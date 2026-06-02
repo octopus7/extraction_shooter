@@ -151,14 +151,14 @@ namespace TunaSweeperEditorSetup
 	const FString InteractionInputTaskId = TEXT("2026-05-29_SetInteractInputAndFocusWheelV1");
 	const FString InteractionMarkerAlignmentTaskId = TEXT("2026-05-25_RebuildInteractionMarkerRequirementPreviewV1");
 	const FString PickupItemAndSpawnerTaskId = TEXT("2026-05-11_CreatePickupItemAndSpawnerAssetsV3");
-	const FString CommonGameHudTaskId = TEXT("2026-06-02_BottomHudStatusFineTuneV1");
+	const FString CommonGameHudTaskId = TEXT("2026-06-02_BottomActionProgressCuteLayoutV1");
 	constexpr float GameplayBottomQuickSlotWidth = 694.0f;
-	constexpr float GameplayBottomQuickSlotHeight = 190.0f;
+	constexpr float GameplayBottomQuickSlotHeight = 208.0f;
 	constexpr float GameplayBottomStatusWidth = 274.0f;
 	constexpr float GameplayBottomStatusHeight = 58.0f;
 	constexpr float GameplayBottomStatusGap = 12.0f;
 	constexpr float GameplayBottomPanelWidth = 1120.0f;
-	constexpr float GameplayBottomPanelHeight = 190.0f;
+	constexpr float GameplayBottomPanelHeight = 208.0f;
 	constexpr float HudDebuffBarLeftOffset = 24.0f;
 	constexpr float HudDebuffBarBottomOffset = 40.0f;
 	const FString WorkbenchPanelWidgetTaskId = TEXT("2026-05-29_CreateWorkbenchPanelWidgetV6");
@@ -8174,21 +8174,21 @@ namespace TunaSweeperEditorSetup
 		{
 			CancelableActionPromptSlot->SetAnchors(FAnchors(0.5f, 0.0f, 0.5f, 0.0f));
 			CancelableActionPromptSlot->SetAlignment(FVector2D(0.5f, 0.0f));
-			CancelableActionPromptSlot->SetPosition(FVector2D(0.0f, 4.0f));
+			CancelableActionPromptSlot->SetPosition(FVector2D(0.0f, 6.0f));
 			CancelableActionPromptSlot->SetAutoSize(true);
 			CancelableActionPromptSlot->SetZOrder(12);
 		}
 
-		CancelableActionCancelKeyBackground->SetPadding(FMargin(7.0f, 2.0f));
+		CancelableActionCancelKeyBackground->SetPadding(FMargin(8.0f, 2.0f));
 		CancelableActionCancelKeyBackground->SetVisibility(ESlateVisibility::Collapsed);
 		CancelableActionCancelKeyBackground->SetBrush(MakeRoundedBoxBrush(
-			FVector2D(24.0f, 22.0f),
+			FVector2D(28.0f, 24.0f),
 			FLinearColor(1.0f, 1.0f, 1.0f, 0.98f),
-			FLinearColor(0.0f, 0.0f, 0.0f, 1.0f),
-			1.0f,
-			4.0f));
-		ConfigureTextBlock(CancelableActionCancelKeyText, FText::FromString(TEXT("X")), FLinearColor(0.0f, 0.0f, 0.0f, 1.0f), 11);
-		TunaSweeperUIFont::ApplyFont(CancelableActionCancelKeyText, 11.0f, ETunaSweeperUIFontWeight::Bold);
+			FLinearColor(1.0f, 1.0f, 1.0f, 0.98f),
+			0.0f,
+			7.0f));
+		ConfigureTextBlock(CancelableActionCancelKeyText, FText::FromString(TEXT("X")), FLinearColor(0.0f, 0.0f, 0.0f, 1.0f), 12);
+		TunaSweeperUIFont::ApplyFont(CancelableActionCancelKeyText, 12.0f, ETunaSweeperUIFontWeight::Bold);
 		CancelableActionCancelKeyText->SetVisibility(ESlateVisibility::Collapsed);
 		CancelableActionCancelKeyBackground->SetContent(CancelableActionCancelKeyText);
 		UHorizontalBoxSlot* CancelableActionCancelKeySlot = CancelableActionPromptRoot->AddChildToHorizontalBox(CancelableActionCancelKeyBackground);
@@ -8197,31 +8197,53 @@ namespace TunaSweeperEditorSetup
 			CancelableActionCancelKeySlot->SetVerticalAlignment(VAlign_Center);
 		}
 
-		ConfigureTextBlock(CancelableActionCancelText, FText::FromString(TEXT("\uC911\uC9C0")), FLinearColor(0.92f, 0.96f, 1.0f, 1.0f), 13);
-		TunaSweeperUIFont::ApplyFont(CancelableActionCancelText, 13.0f, ETunaSweeperUIFontWeight::Bold);
+		ConfigureTextBlock(CancelableActionCancelText, FText::FromString(TEXT("\uB3D9\uC791 \uCDE8\uC18C")), FLinearColor(0.92f, 0.96f, 1.0f, 1.0f), 14);
+		TunaSweeperUIFont::ApplyFont(CancelableActionCancelText, 14.0f, ETunaSweeperUIFontWeight::Bold);
 		CancelableActionCancelText->SetShadowOffset(FVector2D(0.0f, 1.0f));
 		CancelableActionCancelText->SetShadowColorAndOpacity(FLinearColor(0.0f, 0.0f, 0.0f, 0.7f));
 		CancelableActionCancelText->SetVisibility(ESlateVisibility::Collapsed);
 		UHorizontalBoxSlot* CancelableActionCancelTextSlot = CancelableActionPromptRoot->AddChildToHorizontalBox(CancelableActionCancelText);
 		if (CancelableActionCancelTextSlot)
 		{
-			CancelableActionCancelTextSlot->SetPadding(FMargin(6.0f, 0.0f, 0.0f, 0.0f));
+			CancelableActionCancelTextSlot->SetPadding(FMargin(8.0f, 0.0f, 0.0f, 0.0f));
 			CancelableActionCancelTextSlot->SetVerticalAlignment(VAlign_Center);
 		}
 
-		CancelableActionProgressPanel->SetWidthOverride(420.0f);
-		CancelableActionProgressPanel->SetHeightOverride(10.0f);
+		CancelableActionProgressPanel->SetWidthOverride(210.0f);
+		CancelableActionProgressPanel->SetHeightOverride(18.0f);
 		CancelableActionProgressPanel->SetVisibility(ESlateVisibility::Collapsed);
 		CancelableActionProgressBar->SetPercent(0.0f);
-		CancelableActionProgressBar->SetFillColorAndOpacity(FLinearColor(0.62f, 0.98f, 0.62f, 1.0f));
+		FProgressBarStyle CancelableActionProgressStyle;
+		CancelableActionProgressStyle.SetBackgroundImage(MakeRoundedBoxBrush(
+			FVector2D(210.0f, 18.0f),
+			FLinearColor(0.012f, 0.016f, 0.020f, 0.88f),
+			FLinearColor(0.90f, 1.0f, 0.88f, 0.42f),
+			1.0f,
+			9.0f));
+		CancelableActionProgressStyle.SetFillImage(MakeRoundedBoxBrush(
+			FVector2D(210.0f, 18.0f),
+			FLinearColor(0.50f, 1.0f, 0.68f, 1.0f),
+			FLinearColor(0.0f, 0.0f, 0.0f, 0.0f),
+			0.0f,
+			9.0f));
+		CancelableActionProgressStyle.SetMarqueeImage(MakeRoundedBoxBrush(
+			FVector2D(210.0f, 18.0f),
+			FLinearColor(0.64f, 1.0f, 0.78f, 1.0f),
+			FLinearColor(0.0f, 0.0f, 0.0f, 0.0f),
+			0.0f,
+			9.0f));
+		CancelableActionProgressBar->SetWidgetStyle(CancelableActionProgressStyle);
+		CancelableActionProgressBar->SetBarFillType(EProgressBarFillType::LeftToRight);
+		CancelableActionProgressBar->SetFillColorAndOpacity(FLinearColor::White);
 		CancelableActionProgressPanel->SetContent(CancelableActionProgressBar);
 		UCanvasPanelSlot* CancelableActionProgressSlot = RootCanvas->AddChildToCanvas(CancelableActionProgressPanel);
 		if (CancelableActionProgressSlot)
 		{
 			CancelableActionProgressSlot->SetAnchors(FAnchors(0.5f, 0.0f, 0.5f, 0.0f));
 			CancelableActionProgressSlot->SetAlignment(FVector2D(0.5f, 0.0f));
-			CancelableActionProgressSlot->SetPosition(FVector2D(0.0f, 34.0f));
-			CancelableActionProgressSlot->SetSize(FVector2D(420.0f, 10.0f));
+			CancelableActionProgressSlot->SetPosition(FVector2D(0.0f, 36.0f));
+			CancelableActionProgressSlot->SetSize(FVector2D(210.0f, 18.0f));
+			CancelableActionProgressSlot->SetZOrder(11);
 		}
 
 		UCanvasPanelSlot* SlotRowCanvasSlot = RootCanvas->AddChildToCanvas(SlotRow);

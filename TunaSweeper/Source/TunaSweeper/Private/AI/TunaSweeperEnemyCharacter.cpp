@@ -82,7 +82,7 @@ namespace
 		}
 		if (WeaponTypeTag == SmgWeaponTypeTag)
 		{
-			return 2042;
+			return 2001;
 		}
 
 		return DefaultEnemyAmmoItemId;

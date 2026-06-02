@@ -303,7 +303,6 @@ namespace TunaSweeperInventory
 	const FName PistolAmmoTypeTag(TEXT("ammo.type.pistol"));
 	const FName RifleAmmoTypeTag(TEXT("ammo.type.rifle"));
 	const FName ShotgunAmmoTypeTag(TEXT("ammo.type.shotgun"));
-	const FName SmgAmmoTypeTag(TEXT("ammo.type.smg"));
 	const FName MagazineAttachmentSlotTag(TEXT("attachment.slot.magazine"));
 	const FName OpticAttachmentSlotTag(TEXT("attachment.slot.optic"));
 	constexpr int32 DefaultWeaponMagazineCapacity = 12;
@@ -356,7 +355,7 @@ namespace TunaSweeperInventory
 
 		if (WeaponTypeTag == SmgWeaponTypeTag)
 		{
-			return SmgAmmoTypeTag;
+			return PistolAmmoTypeTag;
 		}
 
 		return NAME_None;

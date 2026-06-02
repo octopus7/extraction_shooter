@@ -17,9 +17,6 @@ item.rusty_rifle_ammo,녹슨 소총탄,Rusty Rifle Ammo,錆びたライフル弾
 item.rifle_ap_ammo,소총 철갑탄,Rifle AP Ammo,ライフル徹甲弾
 item.rusty_shotgun_ammo,녹슨 산탄,Rusty Shotgun Ammo,錆びた散弾
 item.shotgun_ap_ammo,산탄총 철갑탄,Shotgun AP Ammo,ショットガン徹甲弾
-item.rusty_smg_ammo,녹슨 기관단총탄,Rusty SMG Ammo,錆びたSMG弾
-item.smg_ammo,기관단총 탄약,SMG Ammo,SMG弾薬
-item.smg_ap_ammo,기관단총 철갑탄,SMG AP Ammo,SMG徹甲弾
 item.rifle_extended_magazine,소총 대용량 탄창,Rifle Extended Magazine,ライフル拡張マガジン
 item.red_dot_optic,레드닷 광학장비,Red Dot Optic,レッドドットサイト
 item.laser_sight,레이저 사이트,Laser Sight,レーザーサイト
@@ -64,9 +61,6 @@ item.rusty_rifle_ammo.desc,상태가 나빠 위력이 낮은 소총탄이다,Low
 item.rifle_ap_ammo.desc,장갑 관통력을 높인 소총탄이다,Armor-piercing rifle rounds with higher impact,装甲貫通力を高めたライフル弾
 item.rusty_shotgun_ammo.desc,상태가 나빠 위력이 낮은 산탄이다,Low-grade shotgun shells with reduced impact,状態が悪く威力の低い散弾
 item.shotgun_ap_ammo.desc,단단한 표적에 강한 산탄총 철갑탄이다,Armor-piercing shotgun shells for harder targets,硬い標的に強いショットガン徹甲弾
-item.rusty_smg_ammo.desc,상태가 나빠 위력이 낮은 기관단총탄이다,Low-grade SMG rounds with reduced impact,状態が悪く威力の低いSMG弾
-item.smg_ammo.desc,기관단총에 사용하는 표준 탄약 묶음이다,A standard bundle of SMG rounds,SMG用の標準弾薬の束
-item.smg_ap_ammo.desc,장갑 관통력을 높인 기관단총탄이다,Armor-piercing SMG rounds with higher impact,装甲貫通力を高めたSMG弾
 item.rifle_extended_magazine.desc,소총의 탄창 슬롯에 장착하는 대용량 탄창이다,An extended magazine that fits the rifle magazine slot,ライフルのマガジンスロットに装着する拡張マガジン
 item.red_dot_optic.desc,소총의 광학 슬롯에 장착하는 간단한 조준 장비다,A simple sight that fits the rifle optic slot,ライフルの光学スロットに装着する簡易照準器
 item.laser_sight.desc,소총의 전술 장비 슬롯에 장착하는 레이저 조준 장치다,A laser aiming device that fits the rifle tactical slot,ライフルの戦術装備スロットに装着するレーザー照準器
