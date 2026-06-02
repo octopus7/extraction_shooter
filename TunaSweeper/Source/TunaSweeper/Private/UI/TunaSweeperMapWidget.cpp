@@ -2,6 +2,7 @@
 
 #include "Blueprint/WidgetTree.h"
 #include "Components/BackgroundBlur.h"
+#include "Components/Border.h"
 #include "Components/Button.h"
 #include "Components/CanvasPanel.h"
 #include "Components/CanvasPanelSlot.h"
@@ -308,13 +309,14 @@ void UTunaSweeperMapWidget::BuildMapWidget()
 	UCanvasPanel* ControlCanvas = WidgetTree->ConstructWidget<UCanvasPanel>(UCanvasPanel::StaticClass(), TEXT("MapControlCanvas"));
 	USizeBox* ZoomSliderBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("MapZoomSliderBox"));
 	ZoomSlider = WidgetTree->ConstructWidget<USlider>(USlider::StaticClass(), TEXT("MapZoomSlider"));
+	UBorder* PaletteBackground = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("MapMarkerPaletteBackground"));
 	UVerticalBox* PaletteStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("MapMarkerPaletteStack"));
 	UTextBlock* PaletteHelpText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("MapMarkerHelpText"));
 	UHorizontalBox* PaletteRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("MapMarkerPaletteRow"));
 	USizeBox* PaletteGap = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("MapMarkerPaletteGap"));
 
 	if (!RootOverlay || !BackgroundBlur || !MapCanvas || !ControlCanvas || !ZoomSliderBox || !ZoomSlider ||
-		!PaletteStack || !PaletteHelpText || !PaletteRow || !PaletteGap)
+		!PaletteBackground || !PaletteStack || !PaletteHelpText || !PaletteRow || !PaletteGap)
 	{
 		return;
 	}
@@ -436,7 +438,16 @@ void UTunaSweeperMapWidget::BuildMapWidget()
 		RowSlot->SetHorizontalAlignment(HAlign_Left);
 	}
 
-	UCanvasPanelSlot* PaletteSlot = ControlCanvas->AddChildToCanvas(PaletteStack);
+	PaletteBackground->SetBrush(TunaSweeperMap::MakeMapBoxBrush(
+		FVector2D(322.0f, 72.0f),
+		FLinearColor(0.006f, 0.008f, 0.012f, 0.84f),
+		FLinearColor::Transparent,
+		0.0f,
+		6.0f));
+	PaletteBackground->SetPadding(FMargin(10.0f, 8.0f, 6.0f, 8.0f));
+	PaletteBackground->SetContent(PaletteStack);
+
+	UCanvasPanelSlot* PaletteSlot = ControlCanvas->AddChildToCanvas(PaletteBackground);
 	if (PaletteSlot)
 	{
 		PaletteSlot->SetAnchors(FAnchors(0.0f, 1.0f));
