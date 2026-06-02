@@ -151,7 +151,7 @@ namespace TunaSweeperEditorSetup
 	const FString InteractionInputTaskId = TEXT("2026-05-29_SetInteractInputAndFocusWheelV1");
 	const FString InteractionMarkerAlignmentTaskId = TEXT("2026-05-25_RebuildInteractionMarkerRequirementPreviewV1");
 	const FString PickupItemAndSpawnerTaskId = TEXT("2026-05-11_CreatePickupItemAndSpawnerAssetsV3");
-	const FString CommonGameHudTaskId = TEXT("2026-06-02_RebuildBottomHudStatusAndQuickSlotKeysV1");
+	const FString CommonGameHudTaskId = TEXT("2026-06-02_BottomHudStatusFineTuneV1");
 	constexpr float GameplayBottomQuickSlotWidth = 694.0f;
 	constexpr float GameplayBottomQuickSlotHeight = 190.0f;
 	constexpr float GameplayBottomStatusWidth = 274.0f;
@@ -7835,8 +7835,8 @@ namespace TunaSweeperEditorSetup
 
 		HealthBackdrop->SetBrush(MakeRoundedBoxBrush(
 			FVector2D(154.0f, 42.0f),
-			FLinearColor(0.012f, 0.015f, 0.018f, 0.88f),
-			FLinearColor(0.0f, 0.0f, 0.0f, 0.72f),
+			FLinearColor(0.012f, 0.015f, 0.018f, 0.54f),
+			FLinearColor(0.0f, 0.0f, 0.0f, 0.42f),
 			1.0f,
 			12.0f));
 		UOverlaySlot* HealthBackdropSlot = HealthOverlay->AddChildToOverlay(HealthBackdrop);
@@ -7849,8 +7849,8 @@ namespace TunaSweeperEditorSetup
 		FProgressBarStyle HealthGaugeStyle;
 		HealthGaugeStyle.SetBackgroundImage(MakeRoundedBoxBrush(
 			FVector2D(146.0f, 26.0f),
-			FLinearColor(0.02f, 0.022f, 0.026f, 0.95f),
-			FLinearColor(0.02f, 0.022f, 0.026f, 0.95f),
+			FLinearColor(0.02f, 0.022f, 0.026f, 0.72f),
+			FLinearColor(0.02f, 0.022f, 0.026f, 0.72f),
 			0.0f,
 			10.0f));
 		HealthGaugeStyle.SetFillImage(MakeRoundedBoxBrush(
@@ -9896,7 +9896,7 @@ namespace TunaSweeperEditorSetup
 		{
 			BottomStatusSlot->SetAnchors(FAnchors(0.5f, 1.0f, 0.5f, 1.0f));
 			BottomStatusSlot->SetAlignment(FVector2D(1.0f, 1.0f));
-			BottomStatusSlot->SetPosition(FVector2D(-(GameplayBottomQuickSlotWidth * 0.5f + GameplayBottomStatusGap), 0.0f));
+			BottomStatusSlot->SetPosition(FVector2D(-(GameplayBottomQuickSlotWidth * 0.5f + GameplayBottomStatusGap), -20.0f));
 			BottomStatusSlot->SetSize(FVector2D(GameplayBottomStatusWidth, GameplayBottomStatusHeight));
 		}
 
