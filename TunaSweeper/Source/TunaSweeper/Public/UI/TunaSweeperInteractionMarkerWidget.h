@@ -55,6 +55,9 @@ protected:
 	TObjectPtr<UTextBlock> DisplayNameText;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Interaction", meta = (BindWidgetOptional))
+	TObjectPtr<UBorder> RequirementBackground;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Interaction", meta = (BindWidgetOptional))
 	TObjectPtr<UWidget> RequirementRoot;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Interaction", meta = (BindWidgetOptional))

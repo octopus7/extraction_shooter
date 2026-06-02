@@ -10286,6 +10286,7 @@ namespace TunaSweeperEditorSetup
 		UBorder* LabelBackground = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("LabelBackground"));
 		UHorizontalBox* LabelContentRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("LabelContentRow"));
 		UTextBlock* DisplayNameText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("DisplayNameText"));
+		UBorder* RequirementBackground = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("RequirementBackground"));
 		UHorizontalBox* RequirementRoot = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("RequirementRoot"));
 		USizeBox* RequirementIconBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("RequirementIconBox"));
 		UImage* RequirementIconImage = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("RequirementIconImage"));
@@ -10293,7 +10294,8 @@ namespace TunaSweeperEditorSetup
 
 		if (!RootCanvas || !MarkerRoot || !MarkerSizeBox || !MarkerOverlay || !RingImage || !RingBrushImage ||
 			!FilledImage || !FilledBrushImage || !LabelBackground || !LabelContentRow || !DisplayNameText ||
-			!RequirementRoot || !RequirementIconBox || !RequirementIconImage || !RequirementQuantityText)
+			!RequirementBackground || !RequirementRoot || !RequirementIconBox || !RequirementIconImage ||
+			!RequirementQuantityText)
 		{
 			return false;
 		}
@@ -10306,7 +10308,7 @@ namespace TunaSweeperEditorSetup
 			RootSlot->SetAnchors(FAnchors(0.5f, 0.5f, 0.5f, 0.5f));
 			RootSlot->SetAlignment(FVector2D(0.5f, 0.5f));
 			RootSlot->SetPosition(FVector2D::ZeroVector);
-			RootSlot->SetSize(FVector2D(360.0f, 56.0f));
+			RootSlot->SetSize(FVector2D(400.0f, 56.0f));
 		}
 
 		MarkerRoot->SetRenderOpacity(0.0f);
@@ -10347,6 +10349,12 @@ namespace TunaSweeperEditorSetup
 			FilledSlot->SetVerticalAlignment(VAlign_Center);
 		}
 
+		LabelBackground->SetBrush(MakeRoundedBoxBrush(
+			FVector2D(128.0f, 28.0f),
+			FLinearColor::White,
+			FLinearColor::Transparent,
+			0.0f,
+			5.0f));
 		LabelBackground->SetBrushColor(FLinearColor::White);
 		LabelBackground->SetPadding(FMargin(12.0f, 4.0f, 10.0f, 4.0f));
 
@@ -10372,7 +10380,7 @@ namespace TunaSweeperEditorSetup
 			RequirementIconSlot->SetVerticalAlignment(VAlign_Center);
 		}
 
-		ConfigureTextBlock(RequirementQuantityText, FText::FromString(TEXT("x0")), FLinearColor::Black, 17);
+		ConfigureTextBlock(RequirementQuantityText, FText::FromString(TEXT("x0")), FLinearColor::White, 17);
 		if (UHorizontalBoxSlot* RequirementQuantitySlot = RequirementRoot->AddChildToHorizontalBox(RequirementQuantityText))
 		{
 			RequirementQuantitySlot->SetPadding(FMargin(4.0f, 0.0f, 0.0f, 0.0f));
@@ -10381,12 +10389,15 @@ namespace TunaSweeperEditorSetup
 		}
 
 		RequirementRoot->SetVisibility(ESlateVisibility::Collapsed);
-		if (UHorizontalBoxSlot* RequirementSlot = LabelContentRow->AddChildToHorizontalBox(RequirementRoot))
-		{
-			RequirementSlot->SetPadding(FMargin(10.0f, 0.0f, 0.0f, 0.0f));
-			RequirementSlot->SetHorizontalAlignment(HAlign_Left);
-			RequirementSlot->SetVerticalAlignment(VAlign_Center);
-		}
+		RequirementBackground->SetBrush(MakeRoundedBoxBrush(
+			FVector2D(58.0f, 30.0f),
+			FLinearColor(0.03f, 0.50f, 0.68f, 0.96f),
+			FLinearColor(0.72f, 0.95f, 1.0f, 0.30f),
+			1.0f,
+			5.0f));
+		RequirementBackground->SetPadding(FMargin(8.0f, 3.0f, 9.0f, 3.0f));
+		RequirementBackground->SetContent(RequirementRoot);
+		RequirementBackground->SetVisibility(ESlateVisibility::Collapsed);
 
 		UHorizontalBoxSlot* LabelSlot = MarkerRoot->AddChildToHorizontalBox(LabelBackground);
 		if (LabelSlot)
@@ -10394,6 +10405,13 @@ namespace TunaSweeperEditorSetup
 			LabelSlot->SetPadding(FMargin(8.0f, 0.0f, 0.0f, 0.0f));
 			LabelSlot->SetHorizontalAlignment(HAlign_Left);
 			LabelSlot->SetVerticalAlignment(VAlign_Center);
+		}
+
+		if (UHorizontalBoxSlot* RequirementSlot = MarkerRoot->AddChildToHorizontalBox(RequirementBackground))
+		{
+			RequirementSlot->SetPadding(FMargin(-6.0f, 0.0f, 0.0f, 0.0f));
+			RequirementSlot->SetHorizontalAlignment(HAlign_Left);
+			RequirementSlot->SetVerticalAlignment(VAlign_Center);
 		}
 
 		RegisterAllWidgetsInTree(WidgetBlueprint);

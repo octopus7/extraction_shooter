@@ -20,6 +20,11 @@
 namespace
 {
 	const TCHAR* OpenedCheckTexturePath = TEXT("/Game/UI/Interaction/T_InteractionMarkerOpenedCheck.T_InteractionMarkerOpenedCheck");
+	const FLinearColor RequirementBackgroundFillColor(0.03f, 0.50f, 0.68f, 0.96f);
+	const FLinearColor RequirementBackgroundOutlineColor(0.72f, 0.95f, 1.0f, 0.30f);
+	const FLinearColor RequirementForegroundColor = FLinearColor::White;
+	constexpr float LabelCornerRadius = 5.0f;
+	constexpr float RequirementOverlapPadding = -6.0f;
 
 	void ApplyPaintOpacity(UWidget* Widget, float Opacity)
 	{
@@ -434,6 +439,11 @@ void UTunaSweeperInteractionMarkerWidget::CacheNamedWidgets()
 		DisplayNameText = Cast<UTextBlock>(WidgetTree->FindWidget(TEXT("DisplayNameText")));
 	}
 
+	if (!RequirementBackground)
+	{
+		RequirementBackground = Cast<UBorder>(WidgetTree->FindWidget(TEXT("RequirementBackground")));
+	}
+
 	if (!RequirementRoot)
 	{
 		RequirementRoot = WidgetTree->FindWidget(TEXT("RequirementRoot"));
@@ -475,7 +485,7 @@ UTexture2D* UTunaSweeperInteractionMarkerWidget::ResolveIndicatorTriangleTexture
 
 void UTunaSweeperInteractionMarkerWidget::EnsureRequirementWidgets()
 {
-	if (!WidgetTree || !LabelBackground || (RequirementRoot && RequirementIconImage && RequirementQuantityText))
+	if (!WidgetTree || !LabelBackground)
 	{
 		return;
 	}
@@ -502,6 +512,37 @@ void UTunaSweeperInteractionMarkerWidget::EnsureRequirementWidgets()
 				DisplayNameSlot->SetVerticalAlignment(VAlign_Center);
 			}
 		}
+	}
+
+	if (DisplayNameText && DisplayNameText->GetParent() != CachedLabelContentRow)
+	{
+		DisplayNameText->RemoveFromParent();
+		if (UHorizontalBoxSlot* DisplayNameSlot = CachedLabelContentRow->AddChildToHorizontalBox(DisplayNameText))
+		{
+			DisplayNameSlot->SetHorizontalAlignment(HAlign_Left);
+			DisplayNameSlot->SetVerticalAlignment(VAlign_Center);
+		}
+	}
+
+	if (!RequirementBackground)
+	{
+		RequirementBackground = Cast<UBorder>(WidgetTree->FindWidget(TEXT("RequirementBackground")));
+	}
+	if (!RequirementBackground)
+	{
+		RequirementBackground = WidgetTree->ConstructWidget<UBorder>(
+			UBorder::StaticClass(),
+			TEXT("RequirementBackground_Runtime"));
+	}
+	if (RequirementBackground)
+	{
+		RequirementBackground->SetBrush(BuildRoundedOutlineBrush(
+			FVector2D(58.0f, 30.0f),
+			RequirementBackgroundFillColor,
+			RequirementBackgroundOutlineColor,
+			LabelCornerRadius,
+			1.0f));
+		RequirementBackground->SetPadding(FMargin(8.0f, 3.0f, 9.0f, 3.0f));
 	}
 
 	UHorizontalBox* RequirementHorizontalBox = Cast<UHorizontalBox>(RequirementRoot.Get());
@@ -546,10 +587,7 @@ void UTunaSweeperInteractionMarkerWidget::EnsureRequirementWidgets()
 			TEXT("RequirementQuantityText_Runtime"));
 		if (RequirementQuantityText)
 		{
-			if (DisplayNameText)
-			{
-				RequirementQuantityText->SetColorAndOpacity(DisplayNameText->GetColorAndOpacity());
-			}
+			RequirementQuantityText->SetColorAndOpacity(FSlateColor(RequirementForegroundColor));
 			ApplyRuntimeTextFont(RequirementQuantityText, DisplayNameText, -1.0f);
 			RequirementQuantityText->SetJustification(ETextJustify::Left);
 
@@ -561,12 +599,30 @@ void UTunaSweeperInteractionMarkerWidget::EnsureRequirementWidgets()
 			}
 		}
 	}
-
-	if (RequirementRoot && RequirementRoot->GetParent() != CachedLabelContentRow)
+	else
 	{
-		if (UHorizontalBoxSlot* RequirementSlot = CachedLabelContentRow->AddChildToHorizontalBox(RequirementRoot))
+		RequirementQuantityText->SetColorAndOpacity(FSlateColor(RequirementForegroundColor));
+	}
+
+	if (RequirementIconImage)
+	{
+		RequirementIconImage->SetColorAndOpacity(RequirementForegroundColor);
+		RequirementIconImage->SetBrushTintColor(FSlateColor(RequirementForegroundColor));
+	}
+
+	if (RequirementBackground && RequirementRoot && RequirementBackground->GetContent() != RequirementRoot)
+	{
+		RequirementRoot->RemoveFromParent();
+		RequirementBackground->SetContent(RequirementRoot);
+	}
+
+	UHorizontalBox* MarkerRootBox = Cast<UHorizontalBox>(MarkerRoot.Get());
+	if (RequirementBackground && MarkerRootBox && RequirementBackground->GetParent() != MarkerRootBox)
+	{
+		RequirementBackground->RemoveFromParent();
+		if (UHorizontalBoxSlot* RequirementSlot = MarkerRootBox->AddChildToHorizontalBox(RequirementBackground))
 		{
-			RequirementSlot->SetPadding(FMargin(10.0f, 0.0f, 0.0f, 0.0f));
+			RequirementSlot->SetPadding(FMargin(RequirementOverlapPadding, 0.0f, 0.0f, 0.0f));
 			RequirementSlot->SetHorizontalAlignment(HAlign_Left);
 			RequirementSlot->SetVerticalAlignment(VAlign_Center);
 		}
@@ -787,8 +843,28 @@ void UTunaSweeperInteractionMarkerWidget::RebuildMultiOptionList()
 			TextSlot->SetVerticalAlignment(VAlign_Center);
 		}
 
+		UBorder* RowRequirementBackground = nullptr;
 		if (bShowRequirementInRow)
 		{
+			UHorizontalBox* RowRequirementContent = WidgetTree->ConstructWidget<UHorizontalBox>(
+				UHorizontalBox::StaticClass(),
+				*FString::Printf(TEXT("InteractionOptionRequirementContent_%d"), OptionIndex));
+			RowRequirementBackground = WidgetTree->ConstructWidget<UBorder>(
+				UBorder::StaticClass(),
+				*FString::Printf(TEXT("InteractionOptionRequirementBackground_%d"), OptionIndex));
+
+			if (RowRequirementBackground && RowRequirementContent)
+			{
+				RowRequirementBackground->SetBrush(BuildRoundedOutlineBrush(
+					FVector2D(58.0f, 30.0f),
+					RequirementBackgroundFillColor,
+					RequirementBackgroundOutlineColor,
+					LabelCornerRadius,
+					1.0f));
+				RowRequirementBackground->SetPadding(FMargin(8.0f, 3.0f, 9.0f, 3.0f));
+				RowRequirementBackground->SetContent(RowRequirementContent);
+			}
+
 			if (CachedRequirementIconTexture)
 			{
 				USizeBox* RowRequirementIconBox = WidgetTree->ConstructWidget<USizeBox>(
@@ -804,12 +880,15 @@ void UTunaSweeperInteractionMarkerWidget::RebuildMultiOptionList()
 					RowRequirementIconBox->SetHeightOverride(18.0f);
 					RowRequirementIcon->SetBrushFromTexture(CachedRequirementIconTexture, true);
 					RowRequirementIcon->SetColorAndOpacity(FLinearColor::White);
+					RowRequirementIcon->SetBrushTintColor(FSlateColor(FLinearColor::White));
 					RowRequirementIconBox->SetContent(RowRequirementIcon);
-					if (UHorizontalBoxSlot* RequirementIconSlot = OptionContent->AddChildToHorizontalBox(RowRequirementIconBox))
+					if (RowRequirementContent)
 					{
-						RequirementIconSlot->SetPadding(FMargin(8.0f, 0.0f, 0.0f, 0.0f));
-						RequirementIconSlot->SetHorizontalAlignment(HAlign_Left);
-						RequirementIconSlot->SetVerticalAlignment(VAlign_Center);
+						if (UHorizontalBoxSlot* RequirementIconSlot = RowRequirementContent->AddChildToHorizontalBox(RowRequirementIconBox))
+						{
+							RequirementIconSlot->SetHorizontalAlignment(HAlign_Left);
+							RequirementIconSlot->SetVerticalAlignment(VAlign_Center);
+						}
 					}
 				}
 			}
@@ -824,15 +903,19 @@ void UTunaSweeperInteractionMarkerWidget::RebuildMultiOptionList()
 					FText::AsNumber(CachedRequiredQuantity)));
 				RowRequirementQuantityText->SetJustification(ETextJustify::Left);
 				ApplyRuntimeTextFont(RowRequirementQuantityText, DisplayNameText, -1.0f);
-				RowRequirementQuantityText->SetColorAndOpacity(FSlateColor(FLinearColor::Black));
-				if (UHorizontalBoxSlot* RequirementQuantitySlot = OptionContent->AddChildToHorizontalBox(RowRequirementQuantityText))
+				RowRequirementQuantityText->SetColorAndOpacity(FSlateColor(RequirementForegroundColor));
+				if (RowRequirementContent)
 				{
-					RequirementQuantitySlot->SetPadding(FMargin(CachedRequirementIconTexture ? 3.0f : 8.0f, 0.0f, 0.0f, 0.0f));
-					RequirementQuantitySlot->SetHorizontalAlignment(HAlign_Left);
-					RequirementQuantitySlot->SetVerticalAlignment(VAlign_Center);
+					if (UHorizontalBoxSlot* RequirementQuantitySlot = RowRequirementContent->AddChildToHorizontalBox(RowRequirementQuantityText))
+					{
+						RequirementQuantitySlot->SetPadding(FMargin(CachedRequirementIconTexture ? 3.0f : 0.0f, 0.0f, 0.0f, 0.0f));
+						RequirementQuantitySlot->SetHorizontalAlignment(HAlign_Left);
+						RequirementQuantitySlot->SetVerticalAlignment(VAlign_Center);
+					}
 				}
 			}
 		}
+		const bool bUseSeparateRequirementInRow = bShowRequirementInRow && RowRequirementBackground;
 
 		KeyPromptBackground->SetVisibility(bFocused ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
 		KeyPromptBackground->SetBrush(BuildRoundedOutlineBrush(
@@ -847,17 +930,36 @@ void UTunaSweeperInteractionMarkerWidget::RebuildMultiOptionList()
 		ApplyRuntimeTextFont(KeyPromptText, DisplayNameText, -2.0f);
 		KeyPromptText->SetColorAndOpacity(FSlateColor(FLinearColor::Black));
 		KeyPromptBackground->SetContent(KeyPromptText);
-		if (UHorizontalBoxSlot* KeySlot = OptionContent->AddChildToHorizontalBox(KeyPromptBackground))
+		if (!bUseSeparateRequirementInRow)
 		{
-			KeySlot->SetPadding(FMargin(8.0f, 0.0f, 0.0f, 0.0f));
-			KeySlot->SetHorizontalAlignment(HAlign_Left);
-			KeySlot->SetVerticalAlignment(VAlign_Center);
+			if (UHorizontalBoxSlot* KeySlot = OptionContent->AddChildToHorizontalBox(KeyPromptBackground))
+			{
+				KeySlot->SetPadding(FMargin(8.0f, 0.0f, 0.0f, 0.0f));
+				KeySlot->SetHorizontalAlignment(HAlign_Left);
+				KeySlot->SetVerticalAlignment(VAlign_Center);
+			}
 		}
 
 		if (UHorizontalBoxSlot* BackgroundSlot = Row->AddChildToHorizontalBox(OptionBackground))
 		{
 			BackgroundSlot->SetHorizontalAlignment(HAlign_Left);
 			BackgroundSlot->SetVerticalAlignment(VAlign_Center);
+		}
+		if (bUseSeparateRequirementInRow)
+		{
+			if (UHorizontalBoxSlot* RequirementSlot = Row->AddChildToHorizontalBox(RowRequirementBackground))
+			{
+				RequirementSlot->SetPadding(FMargin(RequirementOverlapPadding, 0.0f, 0.0f, 0.0f));
+				RequirementSlot->SetHorizontalAlignment(HAlign_Left);
+				RequirementSlot->SetVerticalAlignment(VAlign_Center);
+			}
+
+			if (UHorizontalBoxSlot* KeySlot = Row->AddChildToHorizontalBox(KeyPromptBackground))
+			{
+				KeySlot->SetPadding(FMargin(5.0f, 0.0f, 0.0f, 0.0f));
+				KeySlot->SetHorizontalAlignment(HAlign_Left);
+				KeySlot->SetVerticalAlignment(VAlign_Center);
+			}
 		}
 
 		if (UVerticalBoxSlot* RowSlot = CachedMultiOptionListRoot->AddChildToVerticalBox(Row))
@@ -995,12 +1097,24 @@ void UTunaSweeperInteractionMarkerWidget::ApplyState()
 		if (LabelBackground)
 		{
 			LabelBackground->SetVisibility(LabelVisibility);
+			LabelBackground->SetBrush(BuildRoundedBrush(FVector2D(128.0f, 28.0f), FLinearColor::White, LabelCornerRadius));
 			LabelBackground->SetBrushColor(FLinearColor::White);
 			LabelBackground->SetRenderOpacity(CachedLabelAlpha);
 		}
 	}
 
 	const bool bShowRequirement = bShowLabelContent && !bUseMultiOptionList && bCachedShowRequirement && CachedRequiredQuantity > 0;
+	if (RequirementBackground)
+	{
+		RequirementBackground->SetVisibility(bShowRequirement ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
+		RequirementBackground->SetBrush(BuildRoundedOutlineBrush(
+			FVector2D(58.0f, 30.0f),
+			RequirementBackgroundFillColor,
+			RequirementBackgroundOutlineColor,
+			LabelCornerRadius,
+			1.0f));
+		RequirementBackground->SetRenderOpacity(CachedLabelAlpha);
+	}
 	if (RequirementRoot)
 	{
 		RequirementRoot->SetVisibility(bShowRequirement ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
@@ -1024,6 +1138,7 @@ void UTunaSweeperInteractionMarkerWidget::ApplyState()
 
 	if (RequirementQuantityText)
 	{
+		RequirementQuantityText->SetColorAndOpacity(FSlateColor(RequirementForegroundColor));
 		RequirementQuantityText->SetText(
 			bShowRequirement
 				? FText::Format(FText::FromString(TEXT("x{0}")), FText::AsNumber(CachedRequiredQuantity))

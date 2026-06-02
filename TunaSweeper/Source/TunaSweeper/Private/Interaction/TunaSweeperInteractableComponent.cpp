@@ -8,9 +8,9 @@
 
 namespace TunaSweeperInteractionMarkerLayout
 {
-	constexpr float DrawWidth = 430.0f;
+	constexpr float DrawWidth = 470.0f;
 	constexpr float DrawHeight = 80.0f;
-	constexpr float MarkerRootWidth = 360.0f;
+	constexpr float MarkerRootWidth = 400.0f;
 	constexpr float MarkerBoxWidth = 56.0f;
 	constexpr float VisibleRingScale = 1.0f;
 	constexpr float HiddenRingScale = 3.0f;
