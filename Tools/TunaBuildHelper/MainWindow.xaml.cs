@@ -48,7 +48,7 @@ public partial class MainWindow : Window
 
     private void KillButton_Click(object sender, RoutedEventArgs e)
     {
-        RunBatch("KillTunaSweeperEditor.bat");
+        RunBatch("KillTunaSweeperEditor.bat", closeAlways: true);
     }
 
     private void BuildButton_Click(object sender, RoutedEventArgs e)
@@ -177,7 +177,7 @@ public partial class MainWindow : Window
                position.Y >= height - DragBandThickness;
     }
 
-    private static void RunBatch(string scriptName, bool closeOnSuccess = false)
+    private static void RunBatch(string scriptName, bool closeOnSuccess = false, bool closeAlways = false)
     {
         string? scriptPath = FindScript(scriptName);
         if (scriptPath is null)
@@ -193,14 +193,27 @@ public partial class MainWindow : Window
         var startInfo = new ProcessStartInfo
         {
             FileName = "cmd.exe",
-            Arguments = closeOnSuccess
-                ? $"/c \"call \"\"{scriptPath}\"\" & if errorlevel 1 pause\""
-                : $"/k \"\"{scriptPath}\"\"",
+            Arguments = GetCmdArguments(scriptPath, closeOnSuccess, closeAlways),
             WorkingDirectory = Path.GetDirectoryName(scriptPath) ?? AppContext.BaseDirectory,
             UseShellExecute = true
         };
 
         Process.Start(startInfo);
+    }
+
+    private static string GetCmdArguments(string scriptPath, bool closeOnSuccess, bool closeAlways)
+    {
+        if (closeAlways)
+        {
+            return $"/c \"call \"\"{scriptPath}\"\"\"";
+        }
+
+        if (closeOnSuccess)
+        {
+            return $"/c \"call \"\"{scriptPath}\"\" & if errorlevel 1 pause\"";
+        }
+
+        return $"/k \"\"{scriptPath}\"\"";
     }
 
     private static string? FindScript(string scriptName)

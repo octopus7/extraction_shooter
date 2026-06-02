@@ -3664,3 +3664,9 @@
 - WPF 빌드 헬퍼에서 `BuildAndRunTunaSweeper.bat` 실행은 성공 시 터미널이 닫히도록 `cmd /c` 방식으로 변경한 것.
 - 빌드 실패나 에디터 실행 경로 오류처럼 종료 코드가 실패인 경우에는 `pause`로 터미널을 남겨 로그를 볼 수 있게 한 것.
 - Release publish 산출물을 `TunaSweeper/BatchScripts/BuildHelper`에 다시 갱신한 것.
+
+## 2026-06-02 18:31:41 (소요시간: 00:00:37)
+
+- WPF 빌드 헬퍼에서 `KillTunaSweeperEditor.bat` 실행은 성공/실패와 관계없이 종료 후 터미널이 닫히도록 `cmd /c` 방식으로 변경한 것.
+- 빌드 버튼의 실패 시 터미널 유지 동작은 그대로 유지한 것.
+- Release publish 산출물을 `TunaSweeper/BatchScripts/BuildHelper`에 다시 갱신한 것.
