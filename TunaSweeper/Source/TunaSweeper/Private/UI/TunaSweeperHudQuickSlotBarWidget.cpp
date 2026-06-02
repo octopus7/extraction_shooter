@@ -554,6 +554,7 @@ void UTunaSweeperHudQuickSlotBarWidget::EnsureCancelableActionPromptWidgets()
 	}
 
 	UCanvasPanel* RootCanvas = Cast<UCanvasPanel>(WidgetTree->FindWidget(FName(TEXT("RootCanvas"))));
+	const bool bCreatedPromptRoot = !CancelableActionPromptRoot;
 	if (!CancelableActionPromptRoot)
 	{
 		CancelableActionPromptRoot = WidgetTree->ConstructWidget<UHorizontalBox>(
@@ -573,18 +574,21 @@ void UTunaSweeperHudQuickSlotBarWidget::EnsureCancelableActionPromptWidgets()
 		}
 	}
 
+	const bool bCreatedCancelKeyBackground = !CancelableActionCancelKeyBackground;
 	if (!CancelableActionCancelKeyBackground)
 	{
 		CancelableActionCancelKeyBackground = WidgetTree->ConstructWidget<UBorder>(
 			UBorder::StaticClass(),
 			FName(TEXT("CancelableActionCancelKeyBackground")));
 	}
+	const bool bCreatedCancelKeyText = !CancelableActionCancelKeyText;
 	if (!CancelableActionCancelKeyText)
 	{
 		CancelableActionCancelKeyText = WidgetTree->ConstructWidget<UTextBlock>(
 			UTextBlock::StaticClass(),
 			FName(TEXT("CancelableActionCancelKeyText")));
 	}
+	const bool bCreatedCancelText = !CancelableActionCancelText;
 	if (!CancelableActionCancelText)
 	{
 		CancelableActionCancelText = WidgetTree->ConstructWidget<UTextBlock>(
@@ -592,7 +596,7 @@ void UTunaSweeperHudQuickSlotBarWidget::EnsureCancelableActionPromptWidgets()
 			FName(TEXT("CancelableActionCancelText")));
 	}
 
-	if (CancelableActionPromptRoot)
+	if (bCreatedPromptRoot && CancelableActionPromptRoot)
 	{
 		CancelableActionPromptRoot->SetVisibility(ESlateVisibility::Collapsed);
 	}
@@ -600,7 +604,10 @@ void UTunaSweeperHudQuickSlotBarWidget::EnsureCancelableActionPromptWidgets()
 	if (CancelableActionCancelKeyBackground)
 	{
 		CancelableActionCancelKeyBackground->SetPadding(FMargin(8.0f, 2.0f));
-		CancelableActionCancelKeyBackground->SetVisibility(ESlateVisibility::Collapsed);
+		if (bCreatedCancelKeyBackground)
+		{
+			CancelableActionCancelKeyBackground->SetVisibility(ESlateVisibility::Collapsed);
+		}
 		CancelableActionCancelKeyBackground->SetBrush(MakeRoundedBoxBrush(
 			FVector2D(28.0f, 24.0f),
 			FLinearColor(1.0f, 1.0f, 1.0f, 0.98f),
@@ -625,7 +632,10 @@ void UTunaSweeperHudQuickSlotBarWidget::EnsureCancelableActionPromptWidgets()
 	{
 		CancelableActionCancelKeyText->SetColorAndOpacity(FSlateColor(FLinearColor(0.0f, 0.0f, 0.0f, 1.0f)));
 		CancelableActionCancelKeyText->SetJustification(ETextJustify::Center);
-		CancelableActionCancelKeyText->SetVisibility(ESlateVisibility::Collapsed);
+		if (bCreatedCancelKeyText)
+		{
+			CancelableActionCancelKeyText->SetVisibility(ESlateVisibility::Collapsed);
+		}
 		TunaSweeperUIFont::ApplyFont(CancelableActionCancelKeyText, 12.0f, ETunaSweeperUIFontWeight::Bold);
 	}
 
@@ -635,7 +645,10 @@ void UTunaSweeperHudQuickSlotBarWidget::EnsureCancelableActionPromptWidgets()
 		CancelableActionCancelText->SetShadowOffset(FVector2D(0.0f, 1.0f));
 		CancelableActionCancelText->SetShadowColorAndOpacity(FLinearColor(0.0f, 0.0f, 0.0f, 0.7f));
 		CancelableActionCancelText->SetJustification(ETextJustify::Center);
-		CancelableActionCancelText->SetVisibility(ESlateVisibility::Collapsed);
+		if (bCreatedCancelText)
+		{
+			CancelableActionCancelText->SetVisibility(ESlateVisibility::Collapsed);
+		}
 		TunaSweeperUIFont::ApplyFont(CancelableActionCancelText, 14.0f, ETunaSweeperUIFontWeight::Bold);
 		if (CancelableActionPromptRoot && !CancelableActionCancelText->Slot)
 		{
