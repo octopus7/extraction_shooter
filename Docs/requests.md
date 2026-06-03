@@ -3929,3 +3929,16 @@
 - `LootContainerSpawns.json`의 `BunkerMap` 개발자 상자 위치를 스크린샷의 Transform Location 기준 `[441.322, 548.9291, 40.0]`으로 옮긴 것.
 - `Docs/runtime_actor_spawns.md`에 개발자 상자의 현재 스폰 데이터 위치를 기록한 것.
 - `LootContainerSpawns.json` 파싱으로 개발자 상자 행의 새 위치가 반영된 것을 확인한 것.
+
+## 2026-06-03 16:31:32 (소요시간: 00:29:14)
+
+- 세로 카드 배치에 맞지 않던 기존 가로 바 스타일 난이도 버튼 이미지를 카드 전용 프레임 이미지로 새로 생성하고, 하단 액션 버튼도 별도 가로 버튼 프레임 이미지로 새로 생성한 것.
+- 참치 아이콘 3종을 개별 이미지로 다시 생성해 기존 시트 크롭/검은 배경/alpha 잔상 문제를 수정하고, 외곽 배경 제거 방식으로 투명 PNG를 다시 만든 것.
+- `/Game/UI/Difficulty`에 `T_DifficultyCardFrame`, `T_DifficultyActionButton`, `T_DifficultyIcon_Farming`, `T_DifficultyIcon_Normal`, `T_DifficultyIcon_Hard`를 다시 임포트한 것.
+- 난이도 카드 배경과 하단 액션 버튼 배경이 서로 다른 텍스처를 쓰도록 코드를 분리하고, 새 카드 비율에 맞춰 카드 크기와 내부 아이콘/텍스트 여백을 보정한 것.
+- `TunaSweeperEditor Win64 Development` 빌드 통과 및 Unreal Editor 재실행을 확인한 것.
+
+## 2026-06-03 17:04:31 (소요시간: 00:01:44)
+
+- `GeneratedImages/UI/Difficulty`에서 alpha 추출을 위해 만든 source, preview, black/white debug 중간 파일을 제거한 것.
+- 현재 사용하는 최종 난이도 UI PNG 5개와 배경 원본만 남긴 것.
