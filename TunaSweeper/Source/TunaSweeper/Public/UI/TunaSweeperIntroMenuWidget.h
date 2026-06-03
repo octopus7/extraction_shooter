@@ -87,16 +87,25 @@ protected:
 	TObjectPtr<UTextBlock> SaveSlot1Text;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UImage> SaveSlot1DeleteHoldProgressFill;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
 	TObjectPtr<UButton> SaveSlot2Button;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
 	TObjectPtr<UTextBlock> SaveSlot2Text;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UImage> SaveSlot2DeleteHoldProgressFill;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
 	TObjectPtr<UButton> SaveSlot3Button;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
 	TObjectPtr<UTextBlock> SaveSlot3Text;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UImage> SaveSlot3DeleteHoldProgressFill;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
 	TObjectPtr<UButton> PrimarySaveSlotButton;
@@ -382,10 +391,18 @@ private:
 	bool CanDeleteSelectedSaveSlot() const;
 	void ApplyDisplaySettings(EWindowMode::Type WindowMode);
 	void ApplyResolutionSetting(const FIntPoint& Resolution);
+	void ExecuteSelectedSaveSlotDelete();
 	void ResetDeleteHoldProgress();
 	void SetDeleteHoldProgress(float Progress);
 	void ShowDeleteConfirmDialog();
 	void HideDeleteConfirmDialog();
+	void HideLegacyDeleteHoldGaugeWidgets();
+	void EnsureSaveSlotHoldProgressWidgets();
+	void EnsureSaveSlotHoldProgressWidget(
+		UButton* SlotButton,
+		UTextBlock* SlotText,
+		TObjectPtr<UImage>& ProgressFill,
+		FName ProgressFillWidgetName);
 	void ResetTitleViewportLayoutState();
 	void EnsureTitleWindParticleOverlay();
 	void ApplyTitleMenuButtonContentLayout();

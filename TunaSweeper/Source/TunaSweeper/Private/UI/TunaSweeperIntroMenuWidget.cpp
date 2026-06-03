@@ -8,6 +8,8 @@
 #include "Components/HorizontalBox.h"
 #include "Components/HorizontalBoxSlot.h"
 #include "Components/Image.h"
+#include "Components/Overlay.h"
+#include "Components/OverlaySlot.h"
 #include "Components/ScrollBox.h"
 #include "Components/SizeBox.h"
 #include "Components/TextBlock.h"
@@ -25,6 +27,7 @@
 #include "Misc/Paths.h"
 #include "Slate/WidgetTransform.h"
 #include "Subsystem/TunaSweeperBgmSubsystem.h"
+#include "Subsystem/TunaSweeperToastSubsystem.h"
 #include "TimerManager.h"
 #include "UI/TunaSweeperScreenFadeWidget.h"
 #include "UI/TunaSweeperTitleWindParticleWidget.h"
@@ -90,6 +93,8 @@ void UTunaSweeperIntroMenuWidget::PrepareForInitialViewport()
 	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
 	ApplyTitleMenuButtonContentLayout();
 	EnsureAlwaysNewStartButton();
+	EnsureSaveSlotHoldProgressWidgets();
+	HideLegacyDeleteHoldGaugeWidgets();
 	EnsureTitleWindParticleOverlay();
 	InvalidateLayoutAndVolatility();
 	ForceLayoutPrepass();
@@ -99,6 +104,7 @@ void UTunaSweeperIntroMenuWidget::NativePreConstruct()
 {
 	Super::NativePreConstruct();
 	ResetTitleViewportLayoutState();
+	HideLegacyDeleteHoldGaugeWidgets();
 }
 
 void UTunaSweeperIntroMenuWidget::NativeConstruct()
@@ -108,6 +114,8 @@ void UTunaSweeperIntroMenuWidget::NativeConstruct()
 	SetIsFocusable(true);
 	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
 	EnsureTitleWindParticleOverlay();
+	EnsureSaveSlotHoldProgressWidgets();
+	HideLegacyDeleteHoldGaugeWidgets();
 
 	if (StartButton)
 	{
@@ -455,8 +463,7 @@ void UTunaSweeperIntroMenuWidget::NativeTick(const FGeometry& MyGeometry, float 
 
 	if (HoldProgress >= 1.0f)
 	{
-		bDeleteHoldActive = false;
-		ShowDeleteConfirmDialog();
+		ExecuteSelectedSaveSlotDelete();
 	}
 }
 
@@ -614,7 +621,7 @@ void UTunaSweeperIntroMenuWidget::HandleDeleteSaveSlotClicked()
 
 void UTunaSweeperIntroMenuWidget::HandleDeleteSaveSlotPressed()
 {
-	if (!CanDeleteSelectedSaveSlot() || bDeleteConfirmVisible)
+	if (!CanDeleteSelectedSaveSlot())
 	{
 		ResetDeleteHoldProgress();
 		return;
@@ -627,14 +634,7 @@ void UTunaSweeperIntroMenuWidget::HandleDeleteSaveSlotPressed()
 
 void UTunaSweeperIntroMenuWidget::HandleDeleteSaveSlotReleased()
 {
-	if (!bDeleteConfirmVisible)
-	{
-		ResetDeleteHoldProgress();
-	}
-	else
-	{
-		bDeleteHoldActive = false;
-	}
+	ResetDeleteHoldProgress();
 }
 
 void UTunaSweeperIntroMenuWidget::HandleBackToMainMenuClicked()
@@ -644,18 +644,7 @@ void UTunaSweeperIntroMenuWidget::HandleBackToMainMenuClicked()
 
 void UTunaSweeperIntroMenuWidget::HandleConfirmDeleteClicked()
 {
-	if (CanDeleteSelectedSaveSlot())
-	{
-		if (UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GetGameInstance()))
-		{
-			TunaGameInstance->DeleteSaveSlot(SelectedSaveSlotIndex);
-		}
-	}
-
-	HideDeleteConfirmDialog();
-	ResetDeleteHoldProgress();
-	RefreshSaveSlotMenu();
-	RefreshMainMenu();
+	ExecuteSelectedSaveSlotDelete();
 }
 
 void UTunaSweeperIntroMenuWidget::HandleCancelDeleteClicked()
@@ -1722,6 +1711,38 @@ void UTunaSweeperIntroMenuWidget::ApplyResolutionSetting(const FIntPoint& Resolu
 	RefreshSettingsPanel();
 }
 
+void UTunaSweeperIntroMenuWidget::ExecuteSelectedSaveSlotDelete()
+{
+	const int32 DeletedSaveSlotIndex = SelectedSaveSlotIndex;
+	if (!CanDeleteSelectedSaveSlot())
+	{
+		ResetDeleteHoldProgress();
+		return;
+	}
+
+	bool bDeleted = false;
+	if (UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GetGameInstance()))
+	{
+		bDeleted = TunaGameInstance->DeleteSaveSlot(DeletedSaveSlotIndex);
+	}
+
+	HideDeleteConfirmDialog();
+	ResetDeleteHoldProgress();
+	RefreshSaveSlotMenu();
+	RefreshMainMenu();
+
+	if (bDeleted)
+	{
+		if (UGameInstance* GameInstance = GetGameInstance())
+		{
+			if (UTunaSweeperToastSubsystem* ToastSubsystem = GameInstance->GetSubsystem<UTunaSweeperToastSubsystem>())
+			{
+				ToastSubsystem->ShowSaveSlotDeletedToast();
+			}
+		}
+	}
+}
+
 void UTunaSweeperIntroMenuWidget::ResetDeleteHoldProgress()
 {
 	bDeleteHoldActive = false;
@@ -1731,15 +1752,27 @@ void UTunaSweeperIntroMenuWidget::ResetDeleteHoldProgress()
 
 void UTunaSweeperIntroMenuWidget::SetDeleteHoldProgress(float Progress)
 {
-	if (!DeleteHoldGaugeFill)
-	{
-		return;
-	}
+	EnsureSaveSlotHoldProgressWidgets();
+	HideLegacyDeleteHoldGaugeWidgets();
 
 	const float ClampedProgress = FMath::Clamp(Progress, 0.0f, 1.0f);
-	DeleteHoldGaugeFill->SetRenderOpacity(ClampedProgress > 0.0f ? 1.0f : 0.0f);
-	DeleteHoldGaugeFill->SetRenderTransformPivot(FVector2D(0.5f, 0.5f));
-	DeleteHoldGaugeFill->SetRenderScale(FVector2D(ClampedProgress, ClampedProgress));
+
+	auto ApplyProgressFill = [this, ClampedProgress](UImage* ProgressFill, int32 SaveSlotIndex)
+	{
+		if (!ProgressFill)
+		{
+			return;
+		}
+
+		const float SlotProgress = SelectedSaveSlotIndex == SaveSlotIndex ? ClampedProgress : 0.0f;
+		ProgressFill->SetRenderOpacity(SlotProgress > 0.0f ? 1.0f : 0.0f);
+		ProgressFill->SetRenderTransformPivot(FVector2D(0.0f, 0.5f));
+		ProgressFill->SetRenderScale(FVector2D(SlotProgress, 1.0f));
+	};
+
+	ApplyProgressFill(SaveSlot1DeleteHoldProgressFill, 1);
+	ApplyProgressFill(SaveSlot2DeleteHoldProgressFill, 2);
+	ApplyProgressFill(SaveSlot3DeleteHoldProgressFill, 3);
 }
 
 void UTunaSweeperIntroMenuWidget::ShowDeleteConfirmDialog()
@@ -1760,6 +1793,120 @@ void UTunaSweeperIntroMenuWidget::HideDeleteConfirmDialog()
 	if (DeleteConfirmPanel)
 	{
 		DeleteConfirmPanel->SetVisibility(ESlateVisibility::Collapsed);
+	}
+}
+
+void UTunaSweeperIntroMenuWidget::HideLegacyDeleteHoldGaugeWidgets()
+{
+	if (DeleteHoldGaugeFill)
+	{
+		DeleteHoldGaugeFill->SetVisibility(ESlateVisibility::Collapsed);
+		DeleteHoldGaugeFill->SetRenderOpacity(0.0f);
+		DeleteHoldGaugeFill->SetRenderTransformPivot(FVector2D(0.5f, 0.5f));
+		DeleteHoldGaugeFill->SetRenderScale(FVector2D::ZeroVector);
+	}
+
+	if (!WidgetTree)
+	{
+		return;
+	}
+
+	static const FName LegacyGaugeWidgetNames[] = {
+		FName(TEXT("DeleteHoldGaugeBox")),
+		FName(TEXT("DeleteHoldGaugeOverlay")),
+		FName(TEXT("DeleteHoldGaugeRing")),
+		FName(TEXT("DeleteHoldGaugeFill")),
+	};
+
+	for (const FName& WidgetName : LegacyGaugeWidgetNames)
+	{
+		if (UWidget* GaugeWidget = WidgetTree->FindWidget(WidgetName))
+		{
+			GaugeWidget->SetVisibility(ESlateVisibility::Collapsed);
+			GaugeWidget->SetRenderOpacity(0.0f);
+		}
+	}
+}
+
+void UTunaSweeperIntroMenuWidget::EnsureSaveSlotHoldProgressWidgets()
+{
+	EnsureSaveSlotHoldProgressWidget(
+		SaveSlot1Button,
+		SaveSlot1Text,
+		SaveSlot1DeleteHoldProgressFill,
+		FName(TEXT("SaveSlot1DeleteHoldProgressFill")));
+	EnsureSaveSlotHoldProgressWidget(
+		SaveSlot2Button,
+		SaveSlot2Text,
+		SaveSlot2DeleteHoldProgressFill,
+		FName(TEXT("SaveSlot2DeleteHoldProgressFill")));
+	EnsureSaveSlotHoldProgressWidget(
+		SaveSlot3Button,
+		SaveSlot3Text,
+		SaveSlot3DeleteHoldProgressFill,
+		FName(TEXT("SaveSlot3DeleteHoldProgressFill")));
+}
+
+void UTunaSweeperIntroMenuWidget::EnsureSaveSlotHoldProgressWidget(
+	UButton* SlotButton,
+	UTextBlock* SlotText,
+	TObjectPtr<UImage>& ProgressFill,
+	FName ProgressFillWidgetName)
+{
+	if (!WidgetTree || !SlotButton || !SlotText || ProgressFillWidgetName.IsNone())
+	{
+		return;
+	}
+
+	if (!ProgressFill)
+	{
+		ProgressFill = Cast<UImage>(WidgetTree->FindWidget(ProgressFillWidgetName));
+	}
+
+	if (ProgressFill)
+	{
+		ProgressFill->SetVisibility(ESlateVisibility::HitTestInvisible);
+		ProgressFill->SetRenderOpacity(0.0f);
+		ProgressFill->SetRenderTransformPivot(FVector2D(0.0f, 0.5f));
+		ProgressFill->SetRenderScale(FVector2D(0.0f, 1.0f));
+		return;
+	}
+
+	UOverlay* SlotOverlay = WidgetTree->ConstructWidget<UOverlay>(
+		UOverlay::StaticClass(),
+		FName(*(ProgressFillWidgetName.ToString() + TEXT("Overlay"))));
+	ProgressFill = WidgetTree->ConstructWidget<UImage>(
+		UImage::StaticClass(),
+		ProgressFillWidgetName);
+	if (!SlotOverlay || !ProgressFill)
+	{
+		ProgressFill = nullptr;
+		return;
+	}
+
+	FSlateBrush ProgressFillBrush;
+	ProgressFillBrush.DrawAs = ESlateBrushDrawType::Box;
+	ProgressFillBrush.TintColor = FSlateColor(FLinearColor(0.86f, 0.26f, 0.18f, 0.42f));
+	ProgressFill->SetBrush(ProgressFillBrush);
+	ProgressFill->SetVisibility(ESlateVisibility::HitTestInvisible);
+	ProgressFill->SetRenderOpacity(0.0f);
+	ProgressFill->SetRenderTransformPivot(FVector2D(0.0f, 0.5f));
+	ProgressFill->SetRenderScale(FVector2D(0.0f, 1.0f));
+
+	SlotText->RemoveFromParent();
+	SlotText->SetVisibility(ESlateVisibility::HitTestInvisible);
+	SlotButton->SetContent(SlotOverlay);
+
+	if (UOverlaySlot* ProgressFillSlot = SlotOverlay->AddChildToOverlay(ProgressFill))
+	{
+		ProgressFillSlot->SetHorizontalAlignment(HAlign_Fill);
+		ProgressFillSlot->SetVerticalAlignment(VAlign_Fill);
+	}
+
+	if (UOverlaySlot* TextSlot = SlotOverlay->AddChildToOverlay(SlotText))
+	{
+		TextSlot->SetHorizontalAlignment(HAlign_Fill);
+		TextSlot->SetVerticalAlignment(VAlign_Center);
 	}
 }
 
