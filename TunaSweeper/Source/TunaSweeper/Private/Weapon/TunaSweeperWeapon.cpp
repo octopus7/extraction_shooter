@@ -11,6 +11,7 @@
 #include "HAL/IConsoleManager.h"
 #include "Interaction/TunaSweeperSandbagCoverActor.h"
 #include "Materials/MaterialInterface.h"
+#include "Subsystem/TunaSweeperNoiseSubsystem.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Weapon/TunaSweeperProjectile.h"
 
@@ -19,6 +20,11 @@ DEFINE_LOG_CATEGORY_STATIC(LogTunaSweeperLaserSight, Log, All);
 namespace TunaSweeperWeaponTags
 {
 	const FName ShotgunWeaponTypeTag(TEXT("weapon.type.shotgun"));
+	const FName GunshotNoiseTag(TEXT("noise.gunshot"));
+	constexpr float GunshotNoiseLoudness = 1.0f;
+	constexpr float ShotgunNoiseLoudness = 1.15f;
+	constexpr float GunshotNoiseMaxRange = 2200.0f;
+	constexpr float ShotgunNoiseMaxRange = 2400.0f;
 }
 
 namespace
@@ -621,6 +627,19 @@ bool ATunaSweeperWeapon::FireWithAimIntent(
 		{
 			return false;
 		}
+	}
+
+	if (UTunaSweeperNoiseSubsystem* NoiseSubsystem = World->GetSubsystem<UTunaSweeperNoiseSubsystem>())
+	{
+		const bool bIsShotgun = WeaponTypeTag == TunaSweeperWeaponTags::ShotgunWeaponTypeTag;
+		AActor* NoiseInstigator = InstigatorPawn ? static_cast<AActor*>(InstigatorPawn) : GetOwner();
+		NoiseSubsystem->ReportNoiseAtLocation(
+			SpawnLocation,
+			bIsShotgun ? TunaSweeperWeaponTags::ShotgunNoiseLoudness : TunaSweeperWeaponTags::GunshotNoiseLoudness,
+			bIsShotgun ? TunaSweeperWeaponTags::ShotgunNoiseMaxRange : TunaSweeperWeaponTags::GunshotNoiseMaxRange,
+			TunaSweeperWeaponTags::GunshotNoiseTag,
+			this,
+			NoiseInstigator);
 	}
 
 	LastFireTimeSeconds = CurrentTime;

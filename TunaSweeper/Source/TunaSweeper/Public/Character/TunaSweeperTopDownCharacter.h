@@ -11,6 +11,7 @@ class ATunaSweeperWeapon;
 class ATunaSweeperMeleeImpactBurstActor;
 class ATunaSweeperMeleeSwingTrailActor;
 class UTunaSweeperDebuffComponent;
+class UTunaSweeperHeadphoneListenerComponent;
 class UCameraComponent;
 class UInputAction;
 class UInputMappingContext;
@@ -139,6 +140,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Vision")
 	UTunaSweeperPlayerVisionComponent* GetPlayerVisionComponent() const { return PlayerVisionComponent; }
 
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Noise")
+	UTunaSweeperHeadphoneListenerComponent* GetHeadphoneListenerComponent() const { return HeadphoneListenerComponent; }
+
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Camera")
 	ETunaSweeperPlayerCameraMode GetPlayerCameraMode() const { return CurrentCameraMode; }
 
@@ -245,6 +249,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UTunaSweeperPlayerVisionComponent> PlayerVisionComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UTunaSweeperHeadphoneListenerComponent> HeadphoneListenerComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UWidgetComponent> StaminaGaugeWidgetComponent;

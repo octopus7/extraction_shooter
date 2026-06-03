@@ -8,6 +8,7 @@
 #include "Materials/MaterialInterface.h"
 #include "NiagaraComponent.h"
 #include "NiagaraSystem.h"
+#include "Subsystem/TunaSweeperNoiseSubsystem.h"
 #include "TunaSweeperCollisionChannels.h"
 
 namespace
@@ -18,6 +19,11 @@ namespace
 	const TCHAR* DefaultDestroyedBarrelMaterialPath = TEXT("/Game/Interaction/M_ExplosiveBarrel_CharredGray.M_ExplosiveBarrel_CharredGray");
 	const TCHAR* DefaultBarrelDetailMaterialPath = TEXT("/Game/Interaction/M_ExplosiveBarrel_Detail.M_ExplosiveBarrel_Detail");
 	const TCHAR* DefaultExplosionEffectClassPath = TEXT("/Script/TunaSweeper.TunaSweeperLocalExplosionEffectActor");
+	const FName ExplosionNoiseTag(TEXT("noise.explosion"));
+	constexpr float ExplosionNoiseLoudness = 1.25f;
+	constexpr float ExplosionNoiseRangeMultiplier = 10.0f;
+	constexpr float MinExplosionNoiseRange = 2000.0f;
+	constexpr float MaxExplosionNoiseRange = 4200.0f;
 
 	FVector MakeSafeExtent(const FVector& Extent)
 	{
@@ -258,6 +264,8 @@ void ATunaSweeperExplosiveBarrelActor::SpawnExplosionEffect()
 		LoadedExplosionClass = ATunaSweeperLocalExplosionEffectActor::StaticClass();
 	}
 
+	const FVector EffectLocation = GetActorLocation() + GetActorTransform().TransformVectorNoScale(ExplosionEffectOffset);
+
 	FActorSpawnParameters SpawnParameters;
 	SpawnParameters.Owner = this;
 	SpawnParameters.Instigator = GetInstigator();
@@ -266,11 +274,25 @@ void ATunaSweeperExplosiveBarrelActor::SpawnExplosionEffect()
 	ATunaSweeperLocalExplosionEffectActor* ExplosionActor =
 		World->SpawnActor<ATunaSweeperLocalExplosionEffectActor>(
 			LoadedExplosionClass,
-			GetActorLocation() + GetActorTransform().TransformVectorNoScale(ExplosionEffectOffset),
+			EffectLocation,
 			GetActorRotation(),
 			SpawnParameters);
 	if (ExplosionActor)
 	{
 		ExplosionActor->ConfigureExplosion(ExplosionVisualRadiusCm, ExplosionDurationSeconds);
+	}
+
+	if (UTunaSweeperNoiseSubsystem* NoiseSubsystem = World->GetSubsystem<UTunaSweeperNoiseSubsystem>())
+	{
+		NoiseSubsystem->ReportNoiseAtLocation(
+			EffectLocation,
+			ExplosionNoiseLoudness,
+			FMath::Clamp(
+				ExplosionVisualRadiusCm * ExplosionNoiseRangeMultiplier,
+				MinExplosionNoiseRange,
+				MaxExplosionNoiseRange),
+			ExplosionNoiseTag,
+			this,
+			GetInstigator());
 	}
 }

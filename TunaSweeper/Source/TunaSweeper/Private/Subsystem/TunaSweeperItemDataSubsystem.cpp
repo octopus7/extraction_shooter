@@ -665,6 +665,9 @@ bool UTunaSweeperItemDataSubsystem::LoadItemTableJson()
 		double NumericWeightKg = 0.0;
 		double NumericInventorySlotCapacity = 0.0;
 		double NumericCarryStrengthBonus = 0.0;
+		double NumericHeadphoneHearingRange = 0.0;
+		double NumericHeadphoneSensitivity = 0.0;
+		double NumericHeadphoneMinStrength = 0.0;
 		double NumericMagazineCapacity = 0.0;
 		double NumericMagazineCapacityBonus = 0.0;
 		double NumericReloadSeconds = 0.0;
@@ -839,6 +842,24 @@ bool UTunaSweeperItemDataSubsystem::LoadItemTableJson()
 			(*JsonObject)->TryGetNumberField(TEXT("strength_bonus"), NumericCarryStrengthBonus))
 		{
 			ItemDefinition.CarryStrengthBonus = FMath::Max(0.0f, static_cast<float>(NumericCarryStrengthBonus));
+		}
+		if ((*JsonObject)->TryGetNumberField(TEXT("headphone_hearing_range"), NumericHeadphoneHearingRange) ||
+			(*JsonObject)->TryGetNumberField(TEXT("hearing_range"), NumericHeadphoneHearingRange) ||
+			(*JsonObject)->TryGetNumberField(TEXT("noise_hearing_range"), NumericHeadphoneHearingRange))
+		{
+			ItemDefinition.HeadphoneHearingRange = FMath::Max(0.0f, static_cast<float>(NumericHeadphoneHearingRange));
+		}
+		if ((*JsonObject)->TryGetNumberField(TEXT("headphone_sensitivity"), NumericHeadphoneSensitivity) ||
+			(*JsonObject)->TryGetNumberField(TEXT("hearing_sensitivity"), NumericHeadphoneSensitivity) ||
+			(*JsonObject)->TryGetNumberField(TEXT("noise_sensitivity"), NumericHeadphoneSensitivity))
+		{
+			ItemDefinition.HeadphoneSensitivity = FMath::Max(0.0f, static_cast<float>(NumericHeadphoneSensitivity));
+		}
+		if ((*JsonObject)->TryGetNumberField(TEXT("headphone_min_strength"), NumericHeadphoneMinStrength) ||
+			(*JsonObject)->TryGetNumberField(TEXT("hearing_min_strength"), NumericHeadphoneMinStrength) ||
+			(*JsonObject)->TryGetNumberField(TEXT("noise_min_strength"), NumericHeadphoneMinStrength))
+		{
+			ItemDefinition.HeadphoneMinStrength = FMath::Max(0.0f, static_cast<float>(NumericHeadphoneMinStrength));
 		}
 		if ((*JsonObject)->TryGetNumberField(TEXT("use_health_delta"), NumericUseHealthDelta))
 		{

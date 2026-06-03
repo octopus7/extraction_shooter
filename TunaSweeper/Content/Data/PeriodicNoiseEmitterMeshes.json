@@ -1,0 +1,80 @@
+{
+  "mesh_definitions": [
+    {
+      "id": "mesh.test_noise_quad_horn",
+      "base_material": "/Game/Prototype/M_Voxel_VertexColor.M_Voxel_VertexColor",
+      "materials": {
+        "horn_red": [0.86, 0.05, 0.04, 1.0],
+        "pillar_white": [0.96, 0.95, 0.88, 1.0]
+      },
+      "parts": [
+        {
+          "name": "center_pillar",
+          "type": "box",
+          "material": "pillar_white",
+          "center": [0.0, 0.0, 74.0],
+          "extent": [16.0, 16.0, 74.0]
+        },
+        {
+          "name": "speaker_hub",
+          "type": "box",
+          "material": "pillar_white",
+          "center": [0.0, 0.0, 154.0],
+          "extent": [34.0, 34.0, 18.0]
+        },
+        {
+          "name": "north_horn",
+          "type": "horn",
+          "material": "horn_red",
+          "base_center": [34.0, 0.0, 154.0],
+          "axis": [1.0, 0.0, 0.0],
+          "length": 118.0,
+          "inner_radius": 18.0,
+          "outer_radius": 52.0,
+          "sides": 8,
+          "cap_back": true,
+          "cap_front": false
+        },
+        {
+          "name": "south_horn",
+          "type": "horn",
+          "material": "horn_red",
+          "base_center": [-34.0, 0.0, 154.0],
+          "axis": [-1.0, 0.0, 0.0],
+          "length": 118.0,
+          "inner_radius": 18.0,
+          "outer_radius": 52.0,
+          "sides": 8,
+          "cap_back": true,
+          "cap_front": false
+        },
+        {
+          "name": "east_horn",
+          "type": "horn",
+          "material": "horn_red",
+          "base_center": [0.0, 34.0, 154.0],
+          "axis": [0.0, 1.0, 0.0],
+          "length": 118.0,
+          "inner_radius": 18.0,
+          "outer_radius": 52.0,
+          "sides": 8,
+          "cap_back": true,
+          "cap_front": false
+        },
+        {
+          "name": "west_horn",
+          "type": "horn",
+          "material": "horn_red",
+          "base_center": [0.0, -34.0, 154.0],
+          "axis": [0.0, -1.0, 0.0],
+          "length": 118.0,
+          "inner_radius": 18.0,
+          "outer_radius": 52.0,
+          "sides": 8,
+          "cap_back": true,
+          "cap_front": false
+        }
+      ]
+    }
+  ]
+}

@@ -4,6 +4,7 @@
 #include "CollisionQueryParams.h"
 #include "CollisionShape.h"
 #include "Component/TunaSweeperDebuffComponent.h"
+#include "Component/TunaSweeperHeadphoneListenerComponent.h"
 #include "Component/TunaSweeperPlayerVisionComponent.h"
 #include "Component/TunaSweeperVitalsComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -123,6 +124,7 @@ ATunaSweeperTopDownCharacter::ATunaSweeperTopDownCharacter()
 	VitalsComponent = CreateDefaultSubobject<UTunaSweeperVitalsComponent>(TEXT("VitalsComponent"));
 	DebuffComponent = CreateDefaultSubobject<UTunaSweeperDebuffComponent>(TEXT("DebuffComponent"));
 	PlayerVisionComponent = CreateDefaultSubobject<UTunaSweeperPlayerVisionComponent>(TEXT("PlayerVisionComponent"));
+	HeadphoneListenerComponent = CreateDefaultSubobject<UTunaSweeperHeadphoneListenerComponent>(TEXT("HeadphoneListenerComponent"));
 	StaminaGaugeWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("StaminaGaugeWidget"));
 	StaminaGaugeWidgetComponent->SetupAttachment(RootComponent);
 	StaminaGaugeWidgetComponent->SetRelativeLocation(TunaSweeperStaminaGauge::RelativeLocation);

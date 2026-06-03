@@ -3981,3 +3981,40 @@
 - `SogSplatEditor`와 실험 식생 생성을 제외하고, 나머지 에디터 메시 생성 코드를 삭제할 때 기존 메시 에셋이 삭제되거나 삭제에 준하는 효과가 생길 수 있는지 검토한 것.
 - 해당 경로에는 대상 메시 `.uasset`을 직접 삭제하는 호출이 없고, 코드 제거 자체는 이미 존재하는 `Content` 메시 파일을 삭제하지 않음을 확인한 것.
 - 다만 일부 `Ensure*` 경로는 호출 시 기존 메시를 다시 `BuildFromMeshDescriptions()`로 덮어쓰므로, 해당 코드를 제거하면 삭제가 아니라 재생성/보정/복구 경로가 사라지는 영향이 있음을 정리한 것.
+
+## 2026-06-03 18:01:51 (소요시간: 00:02:35)
+
+- SOG와 식생 메시 생성기를 제외하고, 나머지 에디터 메시 생성/에셋 보정 코드 제거 후보를 기능 단위로 분류한 것.
+- 각 후보별 현재 `TunaSweeperEditor.cpp` 라인 범위와 삭제 예상 라인수를 산정하고, 기존 메시 삭제가 아니라 자동 생성/재생성/보정 경로 제거에 해당한다고 정리한 것.
+
+## 2026-06-03 18:01:19 (소요시간: 00:01:30)
+
+- `UTunaSweeperInteractionSubsystem::CanOfferInteraction()`에 추가했던 `Interactable->IsActive()` 조건 때문에 기존 상호작용 컴포넌트가 전부 후보에서 제외될 수 있던 문제를 수정한 것.
+- 숨김 액터 차단 조건은 유지하고, 기존 구조처럼 상호작용 가능 여부는 등록 상태와 interaction type, 거리, 맵/하우징 상태 조건으로 판단하게 되돌린 것.
+- `TunaSweeperEditor Win64 Development` 빌드를 통과시키고 Unreal Editor를 다시 실행한 것.
+
+## 2026-06-03 18:07:31 (소요시간: 00:11:19)
+
+- 헤드폰/이어폰 착용 시 원거리 소음 방향을 캐릭터 주변 모래알 원형 리플로 표시하는 `UTunaSweeperHeadphoneListenerComponent`와 `ATunaSweeperHeadphoneRippleActor`를 추가한 것
+- 소음 방향 쪽 입자가 더 두껍고 촘촘해지며 바스라지는 모래/소행성 띠처럼 보이도록 리플 입자 밀도, 반경 흔들림, 높이 흔들림을 조정한 것
+- 총기 발사, 롤링 봄버 자폭, 폭발 배럴, 자폭 인터랙터블에서 `UTunaSweeperNoiseSubsystem`으로 소음 이벤트를 보고하고 거리 감쇠로 청취 강도와 방향을 계산하게 한 것
+- 시야로 이미 확인 가능한 10m 이내 소음은 헤드폰 시각 효과가 동작하지 않도록 최소 표시 거리를 1000cm로 제한한 것
+- 기존 전술 이어폰 1/2티어 아이템에 청각 범위, 감도, 최소 강도 데이터를 추가하고, 장비 슬롯 저장 구조는 기존 데이터를 그대로 사용해 새 저장 필드는 추가하지 않은 것
+- `TunaSweeperEditor Win64 Development` 빌드를 통과시키고 Unreal Editor를 실행한 것
+
+## 2026-06-03 20:24:52 (소요시간: 00:06:17)
+
+- 테스트용 주기 소음 발생 액터 `ATunaSweeperPeriodicNoiseEmitterActor`를 추가하고, 지정 간격마다 `UTunaSweeperNoiseSubsystem`에 소음 이벤트를 보고하게 한 것
+- 액터가 `PeriodicNoiseEmitterMeshes.json`의 메시 정의를 런타임에 읽어 `UProceduralMeshComponent`로 4방향 콘 타입 확성기 로우폴리 메시를 구성하게 한 것
+- 확성기 혼은 붉은색, 중앙 기둥과 허브는 흰색 vertex color 머터리얼로 표시되도록 JSON 메시 파트와 머터리얼 색상을 정의한 것
+- `GameplayInteractionSpawns.json`에 시작 위치와 `TS_RollingBomberSpawner_West` 사이 중간 지점에 테스트 소음 액터를 배치한 것
+- JSON 파싱 검증과 `TunaSweeperEditor Win64 Development` 빌드를 통과시키고 Unreal Editor를 실행한 것
+
+## 2026-06-03 20:37:10 (소요시간: 00:06:56)
+
+- 헤드폰 소음 시각화를 월드 메시 액터 방식에서 스크린 스페이스 UMG/Slate 페인트 방식으로 변경한 것
+- FHD 기준 입자가 1픽셀 수준으로 보이도록 `UTunaSweeperHeadphoneRippleWidget`에서 작은 Slate 박스를 직접 그리게 한 것
+- 플레이어 화면 위치 주변에 고정 반경의 원형 입자 띠를 그리고, 소음 방향 중심각 기준 좌우 30도 범위에만 강조 입자가 나타나게 한 것
+- 소음 방향 중심점에서 입자 밀도, 투명도, 일렁임 진폭이 최대가 되고 인접 각도로 멀어질수록 모두 감쇠되도록 각도 가중치를 적용한 것
+- 소음 강도는 반경 스케일이 아니라 강조 구간의 입자 수량과 알파에 반영되도록 조정한 것
+- `TunaSweeperEditor Win64 Development` 빌드를 통과시키고 Unreal Editor를 실행한 것

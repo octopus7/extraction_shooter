@@ -9,9 +9,19 @@
 #include "Engine/OverlapResult.h"
 #include "Engine/World.h"
 #include "Interaction/TunaSweeperInteractableComponent.h"
+#include "Subsystem/TunaSweeperNoiseSubsystem.h"
 #include "TimerManager.h"
 #include "UI/TunaSweeperSpeechBubbleWidget.h"
 #include "UObject/ConstructorHelpers.h"
+
+namespace
+{
+	const FName ExplosionNoiseTag(TEXT("noise.explosion"));
+	constexpr float ExplosionNoiseLoudness = 1.35f;
+	constexpr float ExplosionNoiseRangeMultiplier = 10.0f;
+	constexpr float MinExplosionNoiseRange = 2200.0f;
+	constexpr float MaxExplosionNoiseRange = 4500.0f;
+}
 
 ATunaSweeperSelfDestructInteractableActor::ATunaSweeperSelfDestructInteractableActor()
 {
@@ -207,6 +217,20 @@ void ATunaSweeperSelfDestructInteractableActor::SpawnExplosionEffect()
 		ExplosionActor->ConfigureExplosion(
 			ExplosionRadius * FMath::Max(0.1f, ExplosionVisualRadiusMultiplier),
 			ExplosionVisualDurationSeconds);
+	}
+
+	if (UTunaSweeperNoiseSubsystem* NoiseSubsystem = World->GetSubsystem<UTunaSweeperNoiseSubsystem>())
+	{
+		NoiseSubsystem->ReportNoiseAtLocation(
+			EffectLocation,
+			ExplosionNoiseLoudness,
+			FMath::Clamp(
+				ExplosionRadius * ExplosionNoiseRangeMultiplier,
+				MinExplosionNoiseRange,
+				MaxExplosionNoiseRange),
+			ExplosionNoiseTag,
+			this,
+			CountdownInstigator.Get());
 	}
 }
 

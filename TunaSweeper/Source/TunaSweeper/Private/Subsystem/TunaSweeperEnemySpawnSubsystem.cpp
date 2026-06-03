@@ -18,6 +18,7 @@
 #include "Interaction/TunaSweeperLevelTravelInteractableActor.h"
 #include "Interaction/TunaSweeperLootContainerActor.h"
 #include "Interaction/TunaSweeperLootContainerSpawnInteractableActor.h"
+#include "Interaction/TunaSweeperPeriodicNoiseEmitterActor.h"
 #include "Interaction/TunaSweeperPiggyBankActor.h"
 #include "Interaction/TunaSweeperPickupItemActor.h"
 #include "Interaction/TunaSweeperSandbagCoverActor.h"
@@ -66,6 +67,7 @@ namespace TunaSweeperEnemySpawn
 	const TCHAR* DefaultShopClassPath = TEXT("/Script/TunaSweeper.TunaSweeperShopActor");
 	const TCHAR* DefaultWorkbenchClassPath = TEXT("/Script/TunaSweeper.TunaSweeperWorkbenchActor");
 	const TCHAR* DefaultPiggyBankClassPath = TEXT("/Script/TunaSweeper.TunaSweeperPiggyBankActor");
+	const TCHAR* DefaultPeriodicNoiseEmitterClassPath = TEXT("/Script/TunaSweeper.TunaSweeperPeriodicNoiseEmitterActor");
 	const TCHAR* DefaultRollingBomberClassPath = TEXT("/Script/TunaSweeper.TunaSweeperRollingBomber");
 	const TCHAR* DefaultRollingBomberLaunchSoundPath =
 		TEXT("/Game/Audio/SFX/SFX_RollingBomberSpawnerLaunch_FM.SFX_RollingBomberSpawnerLaunch_FM");
@@ -295,6 +297,13 @@ namespace TunaSweeperEnemySpawn
 		{
 			return UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::PiggyBank;
 		}
+		if (SpawnType == TEXT("periodic_noise_emitter") ||
+			SpawnType == TEXT("noise_emitter") ||
+			SpawnType == TEXT("test_noise_emitter") ||
+			SpawnType == TEXT("speaker_noise_emitter"))
+		{
+			return UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::PeriodicNoiseEmitter;
+		}
 		if (SpawnType == TEXT("self_destruct") || SpawnType == TEXT("selfdestruct"))
 		{
 			return UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::SelfDestruct;
@@ -378,6 +387,8 @@ namespace TunaSweeperEnemySpawn
 			return DefaultWorkbenchClassPath;
 		case UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::PiggyBank:
 			return DefaultPiggyBankClassPath;
+		case UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::PeriodicNoiseEmitter:
+			return DefaultPeriodicNoiseEmitterClassPath;
 		default:
 			return nullptr;
 		}
@@ -414,6 +425,8 @@ namespace TunaSweeperEnemySpawn
 			return FText::FromString(TEXT("\uC791\uC5C5\uB300"));
 		case UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::PiggyBank:
 			return FText::FromString(TEXT("\uB3C8\uB0B4\uB194"));
+		case UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::PeriodicNoiseEmitter:
+			return FText::GetEmpty();
 		default:
 			return FText::GetEmpty();
 		}
@@ -1891,6 +1904,45 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadGameplayInteractionActorSpawnData(bool
 		SpawnDefinition.PracticeDummyHealthRecoverySeconds =
 			FMath::Max(0.05f, static_cast<float>(NumericPracticeDummyHealthRecoverySeconds));
 
+		FString NoiseEmitterMeshDefinitionId;
+		FString NoiseEmitterMeshDefinitionJsonPath;
+		FString NoiseEmitterTag;
+		double NumericNoiseEmitterIntervalSeconds = SpawnDefinition.NoiseEmitterIntervalSeconds;
+		double NumericNoiseEmitterLoudness = SpawnDefinition.NoiseEmitterLoudness;
+		double NumericNoiseEmitterMaxRange = SpawnDefinition.NoiseEmitterMaxRange;
+		bool bNoiseEmitterStartEnabled = SpawnDefinition.bNoiseEmitterStartEnabled;
+		FVector NoiseEmitterSourceLocalOffset = SpawnDefinition.NoiseEmitterSourceLocalOffset;
+		JsonObject->TryGetStringField(TEXT("mesh_definition_id"), NoiseEmitterMeshDefinitionId);
+		JsonObject->TryGetStringField(TEXT("noise_emitter_mesh_definition_id"), NoiseEmitterMeshDefinitionId);
+		JsonObject->TryGetStringField(TEXT("mesh_definition_json"), NoiseEmitterMeshDefinitionJsonPath);
+		JsonObject->TryGetStringField(TEXT("mesh_definition_json_path"), NoiseEmitterMeshDefinitionJsonPath);
+		JsonObject->TryGetNumberField(TEXT("noise_interval_seconds"), NumericNoiseEmitterIntervalSeconds);
+		JsonObject->TryGetNumberField(TEXT("noise_loudness"), NumericNoiseEmitterLoudness);
+		JsonObject->TryGetNumberField(TEXT("noise_max_range"), NumericNoiseEmitterMaxRange);
+		JsonObject->TryGetStringField(TEXT("noise_tag"), NoiseEmitterTag);
+		JsonObject->TryGetBoolField(TEXT("noise_emitter_start_enabled"), bNoiseEmitterStartEnabled);
+		JsonObject->TryGetBoolField(TEXT("emit_on_begin_play"), bNoiseEmitterStartEnabled);
+		TunaSweeperEnemySpawn::TryReadVectorField(JsonObject, TEXT("noise_source_local_offset"), NoiseEmitterSourceLocalOffset);
+		if (!NoiseEmitterMeshDefinitionId.TrimStartAndEnd().IsEmpty())
+		{
+			SpawnDefinition.NoiseEmitterMeshDefinitionId = FName(*NoiseEmitterMeshDefinitionId.TrimStartAndEnd());
+		}
+		if (!NoiseEmitterMeshDefinitionJsonPath.TrimStartAndEnd().IsEmpty())
+		{
+			SpawnDefinition.NoiseEmitterMeshDefinitionJsonRelativePath =
+				NoiseEmitterMeshDefinitionJsonPath.TrimStartAndEnd();
+		}
+		SpawnDefinition.NoiseEmitterIntervalSeconds =
+			FMath::Max(0.05f, static_cast<float>(NumericNoiseEmitterIntervalSeconds));
+		SpawnDefinition.NoiseEmitterLoudness = FMath::Max(0.0f, static_cast<float>(NumericNoiseEmitterLoudness));
+		SpawnDefinition.NoiseEmitterMaxRange = FMath::Max(0.0f, static_cast<float>(NumericNoiseEmitterMaxRange));
+		if (!NoiseEmitterTag.TrimStartAndEnd().IsEmpty())
+		{
+			SpawnDefinition.NoiseEmitterTag = FName(*NoiseEmitterTag.TrimStartAndEnd());
+		}
+		SpawnDefinition.NoiseEmitterSourceLocalOffset = NoiseEmitterSourceLocalOffset;
+		SpawnDefinition.bNoiseEmitterStartEnabled = bNoiseEmitterStartEnabled;
+
 		if (SpawnDefinition.SpawnType == EGameplayInteractionActorSpawnType::LevelTravel &&
 			SpawnDefinition.TargetLevelName.IsNone())
 		{
@@ -2192,6 +2244,20 @@ void UTunaSweeperEnemySpawnSubsystem::ConfigureGameplayInteractionActor(
 				SpawnDefinition.InteractionDisplayName,
 				SpawnDefinition.MarkerWidgetClass,
 				SpawnDefinition.SpawnId);
+		}
+		break;
+	case EGameplayInteractionActorSpawnType::PeriodicNoiseEmitter:
+		if (ATunaSweeperPeriodicNoiseEmitterActor* NoiseEmitterActor = Cast<ATunaSweeperPeriodicNoiseEmitterActor>(SpawnedActor))
+		{
+			NoiseEmitterActor->ConfigureNoiseEmitterDefaults(
+				SpawnDefinition.NoiseEmitterMeshDefinitionId,
+				SpawnDefinition.NoiseEmitterMeshDefinitionJsonRelativePath,
+				SpawnDefinition.NoiseEmitterIntervalSeconds,
+				SpawnDefinition.NoiseEmitterLoudness,
+				SpawnDefinition.NoiseEmitterMaxRange,
+				SpawnDefinition.NoiseEmitterTag,
+				SpawnDefinition.NoiseEmitterSourceLocalOffset,
+				SpawnDefinition.bNoiseEmitterStartEnabled);
 		}
 		break;
 	case EGameplayInteractionActorSpawnType::SelfDestruct:

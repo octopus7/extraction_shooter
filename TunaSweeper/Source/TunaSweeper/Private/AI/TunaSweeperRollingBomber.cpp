@@ -15,6 +15,7 @@
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Materials/MaterialInterface.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
+#include "Subsystem/TunaSweeperNoiseSubsystem.h"
 #include "TunaSweeperCollisionChannels.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Weapon/TunaSweeperProjectile.h"
@@ -29,10 +30,15 @@ namespace TunaSweeperRollingBomber
 	const TCHAR* LegMetalFallbackMaterialPath = TEXT("/Game/Interaction/M_Container_Metal.M_Container_Metal");
 	const TCHAR* RollChargeCylinderMeshPath = TEXT("/Game/Effects/SM_RollingBomberChargeCylinder_Open.SM_RollingBomberChargeCylinder_Open");
 	const TCHAR* RollChargeCylinderMaterialPath = TEXT("/Game/Effects/M_RollingBomberChargeCylinder.M_RollingBomberChargeCylinder");
+	const FName ExplosionNoiseTag(TEXT("noise.explosion"));
 	constexpr float MinFootGroundNormalZ = 0.25f;
 	constexpr float SpawnGroundTraceExtraDistance = 9.0f;
 	constexpr float SpawnPhysicsLinearDamping = 0.18f;
 	constexpr float SpawnPhysicsAngularDamping = 0.35f;
+	constexpr float ExplosionNoiseLoudness = 1.35f;
+	constexpr float ExplosionNoiseRangeMultiplier = 10.0f;
+	constexpr float MinExplosionNoiseRange = 2400.0f;
+	constexpr float MaxExplosionNoiseRange = 4500.0f;
 }
 
 ATunaSweeperRollingBomber::ATunaSweeperRollingBomber()
@@ -1225,6 +1231,20 @@ void ATunaSweeperRollingBomber::SpawnSelfDestructBurst()
 		ExplosionActor->ConfigureExplosion(
 			ExplosionRadius * FMath::Max(0.1f, SelfDestructExplosionVisualRadiusMultiplier),
 			SelfDestructExplosionDurationSeconds);
+	}
+
+	if (UTunaSweeperNoiseSubsystem* NoiseSubsystem = World->GetSubsystem<UTunaSweeperNoiseSubsystem>())
+	{
+		NoiseSubsystem->ReportNoiseAtLocation(
+			BurstLocation,
+			TunaSweeperRollingBomber::ExplosionNoiseLoudness,
+			FMath::Clamp(
+				ExplosionRadius * TunaSweeperRollingBomber::ExplosionNoiseRangeMultiplier,
+				TunaSweeperRollingBomber::MinExplosionNoiseRange,
+				TunaSweeperRollingBomber::MaxExplosionNoiseRange),
+			TunaSweeperRollingBomber::ExplosionNoiseTag,
+			this,
+			this);
 	}
 }
 

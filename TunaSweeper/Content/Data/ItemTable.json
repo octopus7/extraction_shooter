@@ -545,7 +545,10 @@
     "item_grade": "uncommon",
     "icon_file_name": "T_UIIcon_TacticalEarphones_Tier1.uasset",
     "category_tag": "item.category.ear",
-    "equipment_slot_tag": "equipment.slot.ear"
+    "equipment_slot_tag": "equipment.slot.ear",
+    "headphone_hearing_range": 1800,
+    "headphone_sensitivity": 1.0,
+    "headphone_min_strength": 0.12
   },
   {
     "id": 5009,
@@ -556,7 +559,10 @@
     "item_grade": "rare",
     "icon_file_name": "T_UIIcon_TacticalEarphones_Tier2.uasset",
     "category_tag": "item.category.ear",
-    "equipment_slot_tag": "equipment.slot.ear"
+    "equipment_slot_tag": "equipment.slot.ear",
+    "headphone_hearing_range": 2600,
+    "headphone_sensitivity": 1.25,
+    "headphone_min_strength": 0.08
   },
   {
     "id": 5010,

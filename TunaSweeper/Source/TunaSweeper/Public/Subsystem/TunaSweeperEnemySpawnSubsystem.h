@@ -13,6 +13,7 @@ class ATunaSweeperItemSpawnInteractableActor;
 class ATunaSweeperLevelTravelInteractableActor;
 class ATunaSweeperLootContainerActor;
 class ATunaSweeperLootContainerSpawnInteractableActor;
+class ATunaSweeperPeriodicNoiseEmitterActor;
 class ATunaSweeperPickupItemActor;
 class ATunaSweeperRollingBomber;
 class ATunaSweeperRollingBomberSpawner;
@@ -116,7 +117,8 @@ public:
 		ShootingPracticeDummy,
 		Shop,
 		Workbench,
-		PiggyBank
+		PiggyBank,
+		PeriodicNoiseEmitter
 	};
 
 private:
@@ -284,6 +286,15 @@ private:
 		float PracticeDummyCriticalDamageMultiplier = 3.0f;
 		float PracticeDummyHeadshotDamageMultiplier = 6.0f;
 		float PracticeDummyHealthRecoverySeconds = 2.0f;
+
+		FName NoiseEmitterMeshDefinitionId = FName(TEXT("mesh.test_noise_quad_horn"));
+		FString NoiseEmitterMeshDefinitionJsonRelativePath = TEXT("Data/PeriodicNoiseEmitterMeshes.json");
+		float NoiseEmitterIntervalSeconds = 2.0f;
+		float NoiseEmitterLoudness = 1.0f;
+		float NoiseEmitterMaxRange = 2600.0f;
+		FName NoiseEmitterTag = FName(TEXT("noise.test_periodic"));
+		FVector NoiseEmitterSourceLocalOffset = FVector(0.0f, 0.0f, 160.0f);
+		bool bNoiseEmitterStartEnabled = true;
 
 		FTunaSweeperMapOverlayDefinition MapOverlay;
 		bool bHasMapOverlay = false;

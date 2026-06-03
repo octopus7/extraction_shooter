@@ -117,6 +117,15 @@ struct TUNASWEEPER_API FTunaSweeperItemDefinition
 	float CarryStrengthBonus = 0.0f;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
+	float HeadphoneHearingRange = 0.0f;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
+	float HeadphoneSensitivity = 0.0f;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
+	float HeadphoneMinStrength = 0.0f;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
 	float UseHealthDelta = 0.0f;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
