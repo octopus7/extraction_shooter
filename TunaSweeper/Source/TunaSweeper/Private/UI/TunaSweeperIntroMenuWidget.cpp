@@ -15,6 +15,7 @@
 #include "Components/TextBlock.h"
 #include "Components/Widget.h"
 #include "Engine/Engine.h"
+#include "Engine/Texture2D.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "GameFramework/GameUserSettings.h"
 #include "GameFramework/PlayerController.h"
@@ -25,7 +26,9 @@
 #include "Misc/ConfigCacheIni.h"
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
+#include "PixelFormat.h"
 #include "Slate/WidgetTransform.h"
+#include "Styling/SlateBrush.h"
 #include "Subsystem/TunaSweeperBgmSubsystem.h"
 #include "Subsystem/TunaSweeperToastSubsystem.h"
 #include "TimerManager.h"
@@ -115,6 +118,7 @@ void UTunaSweeperIntroMenuWidget::NativeConstruct()
 	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
 	EnsureTitleWindParticleOverlay();
 	EnsureDeleteSaveSlotHoldProgressWidget();
+	EnsureSaveSlotSelectionRingWidgets();
 	HideLegacyDeleteHoldGaugeWidgets();
 
 	if (StartButton)
@@ -445,6 +449,8 @@ void UTunaSweeperIntroMenuWidget::NativeTick(const FGeometry& MyGeometry, float 
 	{
 		SelectSaveSlot(3);
 	}
+
+	UpdateSaveSlotSelectionRingAnimation(InDeltaTime);
 
 	if (!bDeleteHoldActive)
 	{
@@ -821,6 +827,7 @@ void UTunaSweeperIntroMenuWidget::ShowSaveSlotSelection()
 	}
 
 	SelectedSaveSlotIndex = INDEX_NONE;
+	SaveSlotSelectionRingAngle = 0.0f;
 	SetAlwaysNewStartButtonVisible(false);
 	RefreshSaveSlotMenu();
 }
@@ -996,6 +1003,7 @@ void UTunaSweeperIntroMenuWidget::SelectSaveSlot(int32 SaveSlotIndex)
 	HideDeleteConfirmDialog();
 	ResetDeleteHoldProgress();
 	SelectedSaveSlotIndex = FMath::Clamp(SaveSlotIndex, 1, 3);
+	SaveSlotSelectionRingAngle = 0.0f;
 	RefreshSaveSlotMenu();
 }
 
@@ -1063,13 +1071,13 @@ void UTunaSweeperIntroMenuWidget::RefreshSaveSlotMenu()
 	{
 		DeleteSaveSlotButtonBox->SetVisibility(Summary.bHasData
 			? ESlateVisibility::Visible
-			: ESlateVisibility::Collapsed);
+			: ESlateVisibility::Hidden);
 	}
 	else if (DeleteSaveSlotButton)
 	{
 		DeleteSaveSlotButton->SetVisibility(Summary.bHasData
 			? ESlateVisibility::Visible
-			: ESlateVisibility::Collapsed);
+			: ESlateVisibility::Hidden);
 	}
 
 	if (DeleteSaveSlotButtonText)
@@ -1077,6 +1085,8 @@ void UTunaSweeperIntroMenuWidget::RefreshSaveSlotMenu()
 		DeleteSaveSlotButtonText->SetText(ResolveUiText(
 			FName(TEXT("ui.title.delete_hold")),
 			FText::FromString(TEXT("\uAE38\uAC8C \uB20C\uB7EC \uC0AD\uC81C\uD558\uAE30"))));
+		DeleteSaveSlotButtonText->SetJustification(ETextJustify::Center);
+		DeleteSaveSlotButtonText->SetMargin(FMargin(0.0f));
 		DeleteSaveSlotButtonText->SetColorAndOpacity(FSlateColor(Summary.bHasData
 			? FLinearColor::White
 			: FLinearColor(0.55f, 0.60f, 0.62f, 1.0f)));
@@ -1285,10 +1295,14 @@ void UTunaSweeperIntroMenuWidget::RefreshLocalizedTexts()
 
 void UTunaSweeperIntroMenuWidget::RefreshSaveSlotButton(int32 SaveSlotIndex, UButton* SlotButton, UTextBlock* SlotText)
 {
+	const bool bSelected = SaveSlotIndex == SelectedSaveSlotIndex;
+
 	if (SlotText)
 	{
 		SlotText->SetText(BuildSaveSlotButtonText(SaveSlotIndex));
-		SlotText->SetColorAndOpacity(FSlateColor(SaveSlotIndex == SelectedSaveSlotIndex
+		SlotText->SetJustification(ETextJustify::Center);
+		SlotText->SetMargin(FMargin(0.0f));
+		SlotText->SetColorAndOpacity(FSlateColor(bSelected
 			? FLinearColor::White
 			: FLinearColor(0.74f, 0.80f, 0.84f, 1.0f)));
 	}
@@ -1296,6 +1310,306 @@ void UTunaSweeperIntroMenuWidget::RefreshSaveSlotButton(int32 SaveSlotIndex, UBu
 	if (SlotButton)
 	{
 		SlotButton->SetIsEnabled(true);
+		ApplySaveSlotButtonStyle(SlotButton, bSelected);
+	}
+
+	UImage* RingImage = nullptr;
+	switch (SaveSlotIndex)
+	{
+	case 1:
+		RingImage = SaveSlot1SelectionRingImage;
+		break;
+	case 2:
+		RingImage = SaveSlot2SelectionRingImage;
+		break;
+	case 3:
+		RingImage = SaveSlot3SelectionRingImage;
+		break;
+	default:
+		break;
+	}
+
+	SetSaveSlotSelectionRingSelected(RingImage, bSelected);
+}
+
+void UTunaSweeperIntroMenuWidget::ApplySaveSlotButtonStyle(UButton* SlotButton, bool bSelected)
+{
+	if (!SlotButton)
+	{
+		return;
+	}
+
+	const FVector2D ButtonSize(700.0f, 112.0f);
+	const float CornerRadius = 11.0f;
+	const FLinearColor NormalFill(0.025f, 0.045f, 0.050f, 0.56f);
+	const FLinearColor HoveredFill(0.055f, 0.095f, 0.105f, 0.76f);
+	const FLinearColor PressedFill = NormalFill * 0.75f;
+	const FLinearColor NormalOutline = bSelected
+		? FLinearColor(0.98f, 1.0f, 0.92f, 1.0f)
+		: FLinearColor(0.78f, 0.84f, 0.82f, 0.88f);
+	const FLinearColor HoveredOutline = bSelected
+		? FLinearColor(1.0f, 1.0f, 0.96f, 1.0f)
+		: FLinearColor(0.96f, 0.98f, 0.95f, 1.0f);
+	const FLinearColor PressedOutline = bSelected
+		? FLinearColor(0.94f, 0.98f, 0.88f, 1.0f)
+		: FLinearColor(0.60f, 0.68f, 0.68f, 0.90f);
+
+	auto MakeSlotBrush = [ButtonSize, CornerRadius](const FLinearColor& FillColor, const FLinearColor& OutlineColor, float OutlineWidth)
+	{
+		FSlateBrush Brush;
+		Brush.DrawAs = ESlateBrushDrawType::RoundedBox;
+		Brush.TintColor = FSlateColor(FillColor);
+		Brush.SetImageSize(ButtonSize);
+		Brush.OutlineSettings = FSlateBrushOutlineSettings(CornerRadius, FSlateColor(OutlineColor), OutlineWidth);
+		Brush.OutlineSettings.bUseBrushTransparency = false;
+		return Brush;
+	};
+
+	FButtonStyle ButtonStyle;
+	ButtonStyle.SetNormal(MakeSlotBrush(NormalFill, NormalOutline, bSelected ? 2.8f : 1.3f));
+	ButtonStyle.SetHovered(MakeSlotBrush(HoveredFill, HoveredOutline, bSelected ? 3.2f : 1.7f));
+	ButtonStyle.SetPressed(MakeSlotBrush(PressedFill, PressedOutline, bSelected ? 2.2f : 1.0f));
+	ButtonStyle.SetNormalPadding(FMargin(0.0f));
+	ButtonStyle.SetPressedPadding(FMargin(0.0f, 1.0f, 0.0f, 0.0f));
+	SlotButton->SetStyle(ButtonStyle);
+	SlotButton->SetClickMethod(EButtonClickMethod::DownAndUp);
+}
+
+void UTunaSweeperIntroMenuWidget::EnsureSaveSlotSelectionRingWidgets()
+{
+	EnsureSaveSlotSelectionRingContent(
+		SaveSlot1Button,
+		SaveSlot1Text,
+		SaveSlot1SelectionRingImage,
+		TEXT("SaveSlot1Content"),
+		TEXT("SaveSlot1SelectionRingImage"));
+	EnsureSaveSlotSelectionRingContent(
+		SaveSlot2Button,
+		SaveSlot2Text,
+		SaveSlot2SelectionRingImage,
+		TEXT("SaveSlot2Content"),
+		TEXT("SaveSlot2SelectionRingImage"));
+	EnsureSaveSlotSelectionRingContent(
+		SaveSlot3Button,
+		SaveSlot3Text,
+		SaveSlot3SelectionRingImage,
+		TEXT("SaveSlot3Content"),
+		TEXT("SaveSlot3SelectionRingImage"));
+}
+
+void UTunaSweeperIntroMenuWidget::EnsureSaveSlotSelectionRingContent(
+	UButton* SlotButton,
+	UTextBlock* SlotText,
+	TObjectPtr<UImage>& RingImage,
+	const TCHAR* ContentWidgetName,
+	const TCHAR* RingWidgetName)
+{
+	if (!WidgetTree || !SlotButton || !SlotText)
+	{
+		return;
+	}
+
+	const FName ContentName(ContentWidgetName);
+	const FName RingName(RingWidgetName);
+	UOverlay* ContentOverlay = Cast<UOverlay>(WidgetTree->FindWidget(ContentName));
+	if (!ContentOverlay)
+	{
+		ContentOverlay = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), ContentName);
+	}
+	if (!ContentOverlay)
+	{
+		return;
+	}
+
+	ContentOverlay->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+	ContentOverlay->SetClipping(EWidgetClipping::ClipToBounds);
+
+	if (!RingImage)
+	{
+		RingImage = Cast<UImage>(WidgetTree->FindWidget(RingName));
+	}
+	if (!RingImage)
+	{
+		RingImage = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), RingName);
+	}
+	if (RingImage)
+	{
+		ConfigureSaveSlotSelectionRingImage(RingImage);
+		if (RingImage->GetParent() != ContentOverlay)
+		{
+			RingImage->RemoveFromParent();
+			UOverlaySlot* RingSlot = ContentOverlay->AddChildToOverlay(RingImage);
+			if (RingSlot)
+			{
+				RingSlot->SetHorizontalAlignment(HAlign_Right);
+				RingSlot->SetVerticalAlignment(VAlign_Center);
+				RingSlot->SetPadding(FMargin(0.0f, 0.0f, 28.0f, 0.0f));
+			}
+		}
+	}
+
+	if (SlotButton->GetContent() != ContentOverlay)
+	{
+		SlotButton->SetContent(ContentOverlay);
+	}
+
+	SlotText->RemoveFromParent();
+	UOverlaySlot* TextSlot = ContentOverlay->AddChildToOverlay(SlotText);
+	if (TextSlot)
+	{
+		TextSlot->SetHorizontalAlignment(HAlign_Fill);
+		TextSlot->SetVerticalAlignment(VAlign_Center);
+		TextSlot->SetPadding(FMargin(56.0f, 0.0f));
+	}
+	SlotText->SetJustification(ETextJustify::Center);
+	SlotText->SetMargin(FMargin(0.0f));
+}
+
+void UTunaSweeperIntroMenuWidget::ConfigureSaveSlotSelectionRingImage(UImage* RingImage)
+{
+	if (!RingImage)
+	{
+		return;
+	}
+
+	FSlateBrush RingBrush;
+	RingBrush.DrawAs = ESlateBrushDrawType::Image;
+	RingBrush.SetResourceObject(GetOrCreateSaveSlotSelectionRingTexture());
+	RingBrush.TintColor = FSlateColor(FLinearColor(1.0f, 1.0f, 1.0f, 0.95f));
+	RingBrush.SetImageSize(FVector2D(28.0f, 28.0f));
+
+	RingImage->SetBrush(RingBrush);
+	RingImage->SetVisibility(ESlateVisibility::Collapsed);
+	RingImage->SetRenderOpacity(0.0f);
+	RingImage->SetRenderTransformPivot(FVector2D(0.5f, 0.5f));
+}
+
+UTexture2D* UTunaSweeperIntroMenuWidget::GetOrCreateSaveSlotSelectionRingTexture()
+{
+	if (SaveSlotSelectionRingTexture)
+	{
+		return SaveSlotSelectionRingTexture;
+	}
+
+	constexpr int32 TextureSize = 32;
+	constexpr float InnerRadius = 9.5f;
+	constexpr float OuterRadius = 13.5f;
+	constexpr float GapStart = 0.72f;
+	constexpr float GapEnd = 0.96f;
+	const FVector2D Center((TextureSize - 1) * 0.5f, (TextureSize - 1) * 0.5f);
+
+	TArray<FColor> Pixels;
+	Pixels.SetNumZeroed(TextureSize * TextureSize);
+
+	for (int32 Y = 0; Y < TextureSize; ++Y)
+	{
+		for (int32 X = 0; X < TextureSize; ++X)
+		{
+			const FVector2D Delta(static_cast<float>(X) - Center.X, static_cast<float>(Y) - Center.Y);
+			const float Radius = Delta.Size();
+			if (Radius < InnerRadius || Radius > OuterRadius)
+			{
+				continue;
+			}
+
+			float Angle = FMath::Atan2(Delta.Y, Delta.X) / (2.0f * PI);
+			if (Angle < 0.0f)
+			{
+				Angle += 1.0f;
+			}
+			if (Angle >= GapStart && Angle <= GapEnd)
+			{
+				continue;
+			}
+
+			const float RingEdgeAlpha = FMath::Clamp(
+				FMath::Min(Radius - InnerRadius, OuterRadius - Radius) / 1.35f,
+				0.0f,
+				1.0f);
+			const float TailAlpha = Angle < GapStart
+				? FMath::Lerp(0.45f, 1.0f, Angle / GapStart)
+				: 0.85f;
+			const uint8 Alpha = static_cast<uint8>(FMath::RoundToInt(220.0f * RingEdgeAlpha * TailAlpha));
+			Pixels[Y * TextureSize + X] = FColor(236, 255, 221, Alpha);
+		}
+	}
+
+	SaveSlotSelectionRingTexture = UTexture2D::CreateTransient(TextureSize, TextureSize, PF_B8G8R8A8);
+	if (!SaveSlotSelectionRingTexture)
+	{
+		return nullptr;
+	}
+
+	SaveSlotSelectionRingTexture->NeverStream = true;
+	SaveSlotSelectionRingTexture->SRGB = true;
+
+	FTexturePlatformData* PlatformData = SaveSlotSelectionRingTexture->GetPlatformData();
+	if (!PlatformData || PlatformData->Mips.Num() == 0)
+	{
+		SaveSlotSelectionRingTexture->UpdateResource();
+		return SaveSlotSelectionRingTexture;
+	}
+
+	void* TextureData = PlatformData->Mips[0].BulkData.Lock(LOCK_READ_WRITE);
+	FMemory::Memcpy(TextureData, Pixels.GetData(), Pixels.Num() * sizeof(FColor));
+	PlatformData->Mips[0].BulkData.Unlock();
+	SaveSlotSelectionRingTexture->UpdateResource();
+
+	return SaveSlotSelectionRingTexture;
+}
+
+void UTunaSweeperIntroMenuWidget::UpdateSaveSlotSelectionRingAnimation(float InDeltaTime)
+{
+	if (SelectedSaveSlotIndex == INDEX_NONE || !IsSaveSlotSelectionVisible())
+	{
+		SetSaveSlotSelectionRingSelected(SaveSlot1SelectionRingImage, false);
+		SetSaveSlotSelectionRingSelected(SaveSlot2SelectionRingImage, false);
+		SetSaveSlotSelectionRingSelected(SaveSlot3SelectionRingImage, false);
+		return;
+	}
+
+	SaveSlotSelectionRingAngle = FMath::Fmod(SaveSlotSelectionRingAngle + InDeltaTime * 140.0f, 360.0f);
+	const float RingOpacity = 0.82f + 0.08f * FMath::Sin(FMath::DegreesToRadians(SaveSlotSelectionRingAngle));
+
+	auto ApplyRingTransform = [this, RingOpacity](UImage* RingImage, bool bSelected)
+	{
+		if (!RingImage)
+		{
+			return;
+		}
+
+		if (!bSelected)
+		{
+			RingImage->SetVisibility(ESlateVisibility::Collapsed);
+			RingImage->SetRenderOpacity(0.0f);
+			return;
+		}
+
+		FWidgetTransform RingTransform;
+		RingTransform.Angle = SaveSlotSelectionRingAngle;
+		RingTransform.Scale = FVector2D(1.0f, 1.0f);
+
+		RingImage->SetVisibility(ESlateVisibility::HitTestInvisible);
+		RingImage->SetRenderTransform(RingTransform);
+		RingImage->SetRenderOpacity(RingOpacity);
+	};
+
+	ApplyRingTransform(SaveSlot1SelectionRingImage, SelectedSaveSlotIndex == 1);
+	ApplyRingTransform(SaveSlot2SelectionRingImage, SelectedSaveSlotIndex == 2);
+	ApplyRingTransform(SaveSlot3SelectionRingImage, SelectedSaveSlotIndex == 3);
+}
+
+void UTunaSweeperIntroMenuWidget::SetSaveSlotSelectionRingSelected(UImage* RingImage, bool bSelected) const
+{
+	if (!RingImage)
+	{
+		return;
+	}
+
+	RingImage->SetVisibility(bSelected ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
+	if (!bSelected)
+	{
+		RingImage->SetRenderOpacity(0.0f);
 	}
 }
 
@@ -1591,7 +1905,12 @@ FText UTunaSweeperIntroMenuWidget::BuildSaveSlotButtonText(int32 SaveSlotIndex) 
 		FText::Format(
 			ResolveUiText(FName(TEXT("ui.title.slot_label")), FText::FromString(TEXT("\uC2AC\uB86F {0}"))),
 			FText::AsNumber(SaveSlotIndex)).ToString(),
-		ResolveUiText(FName(TEXT("ui.title.has_progress_data")), FText::FromString(TEXT("\uC9C4\uD589 \uB370\uC774\uD130 \uC788\uC74C"))).ToString()
+		FText::Format(
+			ResolveUiText(FName(TEXT("ui.title.play_time_pattern")), FText::FromString(TEXT("\uD50C\uB808\uC774\uC2DC\uAC04 : {0}"))),
+			FText::FromString(FormatPlayTime(Summary.TotalPlaySeconds))).ToString(),
+		FText::Format(
+			ResolveUiText(FName(TEXT("ui.title.difficulty_pattern")), FText::FromString(TEXT("\uB09C\uC774\uB3C4 : {0}"))),
+			BuildSaveSlotDifficultyText(Summary.DifficultyStage)).ToString()
 	};
 	return FText::FromString(FString::Join(Lines, LINE_TERMINATOR));
 }
@@ -1662,6 +1981,29 @@ FString UTunaSweeperIntroMenuWidget::FormatSaveTime(int64 LastSavedAtTicks) cons
 	}
 
 	return FDateTime(LastSavedAtTicks).ToString(TEXT("%Y-%m-%d %H:%M"));
+}
+
+FString UTunaSweeperIntroMenuWidget::FormatPlayTime(float TotalPlaySeconds) const
+{
+	const int32 TotalMinutes = FMath::FloorToInt(FMath::Max(0.0f, TotalPlaySeconds) / 60.0f);
+	const int32 Hours = TotalMinutes / 60;
+	const int32 Minutes = TotalMinutes % 60;
+	return FString::Printf(TEXT("%02d:%02d"), Hours, Minutes);
+}
+
+FText UTunaSweeperIntroMenuWidget::BuildSaveSlotDifficultyText(int32 DifficultyStage) const
+{
+	switch (FMath::Clamp(DifficultyStage, 1, 3))
+	{
+	case 1:
+		return ResolveUiText(FName(TEXT("ui.title.difficulty.farming")), FText::FromString(TEXT("\uD30C\uBC0D")));
+	case 2:
+		return FText::FromString(TEXT("2\uB2E8\uACC4"));
+	case 3:
+		return FText::FromString(TEXT("3\uB2E8\uACC4"));
+	default:
+		return ResolveUiText(FName(TEXT("ui.title.difficulty.farming")), FText::FromString(TEXT("\uD30C\uBC0D")));
+	}
 }
 
 bool UTunaSweeperIntroMenuWidget::IsSaveSlotSelectionVisible() const
@@ -1906,6 +2248,8 @@ void UTunaSweeperIntroMenuWidget::EnsureDeleteSaveSlotHoldProgressWidget()
 	}
 
 	DeleteSaveSlotButtonText->SetVisibility(ESlateVisibility::HitTestInvisible);
+	DeleteSaveSlotButtonText->SetJustification(ETextJustify::Center);
+	DeleteSaveSlotButtonText->SetMargin(FMargin(0.0f));
 }
 
 void UTunaSweeperIntroMenuWidget::ConfigureDeleteSaveSlotHoldProgressFill()

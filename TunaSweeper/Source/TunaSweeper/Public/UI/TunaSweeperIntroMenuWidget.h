@@ -12,6 +12,7 @@ class UImage;
 class UScrollBox;
 class USizeBox;
 class UTextBlock;
+class UTexture2D;
 class UWidget;
 class UTunaSweeperScreenFadeWidget;
 class UTunaSweeperTitleWindParticleWidget;
@@ -366,6 +367,18 @@ private:
 	void RefreshInterfaceSettingsPanel();
 	void RefreshLocalizedTexts();
 	void RefreshSaveSlotButton(int32 SaveSlotIndex, UButton* SlotButton, UTextBlock* SlotText);
+	void ApplySaveSlotButtonStyle(UButton* SlotButton, bool bSelected);
+	void EnsureSaveSlotSelectionRingWidgets();
+	void EnsureSaveSlotSelectionRingContent(
+		UButton* SlotButton,
+		UTextBlock* SlotText,
+		TObjectPtr<UImage>& RingImage,
+		const TCHAR* ContentWidgetName,
+		const TCHAR* RingWidgetName);
+	void ConfigureSaveSlotSelectionRingImage(UImage* RingImage);
+	UTexture2D* GetOrCreateSaveSlotSelectionRingTexture();
+	void UpdateSaveSlotSelectionRingAnimation(float InDeltaTime);
+	void SetSaveSlotSelectionRingSelected(UImage* RingImage, bool bSelected) const;
 	void LoadTitleGraphicsSettings();
 	void SaveTitleGraphicsSettings() const;
 	void ApplyDLSSSetting(ETunaSweeperTitleDLSSMode DLSSMode);
@@ -384,6 +397,8 @@ private:
 	FString BuildCreditsRollText() const;
 	FString BuildCreditsColumnText(int32 ColumnIndex) const;
 	FString FormatSaveTime(int64 LastSavedAtTicks) const;
+	FString FormatPlayTime(float TotalPlaySeconds) const;
+	FText BuildSaveSlotDifficultyText(int32 DifficultyStage) const;
 	bool IsSaveSlotSelectionVisible() const;
 	bool IsCreditsPanelVisible() const;
 	bool CanDeleteSelectedSaveSlot() const;
@@ -414,6 +429,7 @@ private:
 	int32 SelectedSaveSlotIndex = INDEX_NONE;
 	float DeleteHoldElapsedSeconds = 0.0f;
 	float CreditsScrollOffset = 0.0f;
+	float SaveSlotSelectionRingAngle = 0.0f;
 	bool bDeleteHoldActive = false;
 	bool bDeleteConfirmVisible = false;
 	bool bStartTravelPending = false;
@@ -426,6 +442,18 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<UWidget> AlwaysNewStartButtonContainer;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UImage> SaveSlot1SelectionRingImage;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UImage> SaveSlot2SelectionRingImage;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UImage> SaveSlot3SelectionRingImage;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTexture2D> SaveSlotSelectionRingTexture;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UTunaSweeperScreenFadeWidget> StartTravelFadeWidget;

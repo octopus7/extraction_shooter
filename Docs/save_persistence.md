@@ -6,7 +6,7 @@ Update it whenever a new state field is expected to persist across save slots, l
 ## Current Save Container
 
 - Save object: `UTunaSweeperSaveGame`
-- Current save version: `16`
+- Current save version: `17`
 - Runtime owner: `UTunaSweeperGameInstance`
 - Save entry point: `UTunaSweeperGameInstance::SaveGameStateInternal()`
 - Load entry point: `UTunaSweeperGameInstance::LoadGameState()`
@@ -32,6 +32,7 @@ Raid item changes keep their existing extraction/death/level-travel save rules a
 - `SaveVersion`
 - `SaveSlotIndex`
 - `TotalPlaySeconds`
+- `DifficultyStage`: save-slot difficulty stage, clamped to `1..3`; `1` is the default and currently displays as `파밍`.
 - `LastSavedAtTicks`
 
 ### Scenario Progress Flags

@@ -185,6 +185,7 @@ namespace TunaSweeperEditorSetup
 	const FString CannedTunaIconImportTaskId = TEXT("2026-05-11_ImportCannedTunaIconV1");
 	const FString BackpackInventoryTaskId = TEXT("2026-05-16_CreateEquipmentInventoryAssetsV3");
 	const FString IntroMenuAndLevelTravelTaskId = TEXT("2026-05-24_CreateTitleIntroMenuPersistentSaveSlotSelectionLevelTravelLadderInitialScaleV1");
+	const FString DeployToRaidLadderLocationTaskId = TEXT("2026-06-03_UpdateDeployToRaidLadderLocationV1");
 	const FString IntroMenuGraphicsSettingsTaskId = TEXT("2026-05-30_CenterTitleSaveSlotInfoV1");
 	const FString OpeningScenarioPresentationTaskId = TEXT("2026-05-19_CreateOpeningScenarioPresentationV2");
 	const FString LevelTransitionVideoTaskId = TEXT("2026-05-16_AddBidirectionalLevelTransitionVideoV3");
@@ -4151,25 +4152,59 @@ namespace TunaSweeperEditorSetup
 			SaveTitleSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 20.0f));
 		}
 
-		auto ConfigureSaveSlotButton = [&ConfigureButtonStyle](
+		auto ConfigureSaveSlotButton = [&ConfigureButtonStyle, WidgetTree](
 			USizeBox* ButtonBox,
 			UButton* Button,
 			UTextBlock* TextBlock,
 			int32 SlotIndex)
 		{
+			UOverlay* SlotContent = WidgetTree->ConstructWidget<UOverlay>(
+				UOverlay::StaticClass(),
+				*FString::Printf(TEXT("SaveSlot%dContent"), SlotIndex));
+			UImage* SelectionRingImage = WidgetTree->ConstructWidget<UImage>(
+				UImage::StaticClass(),
+				*FString::Printf(TEXT("SaveSlot%dSelectionRingImage"), SlotIndex));
+
 			ButtonBox->SetWidthOverride(700.0f);
 			ButtonBox->SetHeightOverride(112.0f);
 			ButtonBox->SetContent(Button);
 			ConfigureButtonStyle(Button, FVector2D(700.0f, 112.0f), false);
 
-			ConfigureTextBlockLeft(
+			ConfigureTextBlock(
 				TextBlock,
 				FText::FromString(FString::Printf(TEXT("\uC2AC\uB86F %d\n\uBE48 \uC2AC\uB86F\n\uC0C8 \uAC8C\uC784 \uC2DC\uC791"), SlotIndex)),
 				FLinearColor(0.82f, 0.86f, 0.84f, 1.0f),
 				18);
-			TextBlock->SetMargin(FMargin(26.0f, 10.0f));
+			TextBlock->SetMargin(FMargin(0.0f));
 			TextBlock->SetAutoWrapText(true);
-			Button->SetContent(TextBlock);
+
+			if (SlotContent)
+			{
+				SlotContent->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+				SlotContent->SetClipping(EWidgetClipping::ClipToBounds);
+
+				if (SelectionRingImage)
+				{
+					SelectionRingImage->SetVisibility(ESlateVisibility::Collapsed);
+					UOverlaySlot* RingSlot = SlotContent->AddChildToOverlay(SelectionRingImage);
+					if (RingSlot)
+					{
+						RingSlot->SetHorizontalAlignment(HAlign_Right);
+						RingSlot->SetVerticalAlignment(VAlign_Center);
+						RingSlot->SetPadding(FMargin(0.0f, 0.0f, 28.0f, 0.0f));
+					}
+				}
+
+				UOverlaySlot* TextSlot = SlotContent->AddChildToOverlay(TextBlock);
+				if (TextSlot)
+				{
+					TextSlot->SetHorizontalAlignment(HAlign_Fill);
+					TextSlot->SetVerticalAlignment(VAlign_Center);
+					TextSlot->SetPadding(FMargin(56.0f, 0.0f));
+				}
+
+				Button->SetContent(SlotContent);
+			}
 		};
 
 		ConfigureSaveSlotButton(SaveSlot1ButtonBox, SaveSlot1Button, SaveSlot1Text, 1);
@@ -4206,12 +4241,12 @@ namespace TunaSweeperEditorSetup
 		DeleteSaveSlotHoldProgressFill->SetRenderTransformPivot(FVector2D(0.0f, 0.5f));
 		DeleteSaveSlotHoldProgressFill->SetRenderScale(FVector2D(0.0f, 1.0f));
 
-		ConfigureTextBlockLeft(
+		ConfigureTextBlock(
 			DeleteSaveSlotButtonText,
 			FText::FromString(TEXT("\uAE38\uAC8C \uB20C\uB7EC \uC0AD\uC81C\uD558\uAE30")),
 			FLinearColor::White,
 			18);
-		DeleteSaveSlotButtonText->SetMargin(FMargin(22.0f, 0.0f));
+		DeleteSaveSlotButtonText->SetMargin(FMargin(0.0f));
 		DeleteSaveSlotButtonText->SetVisibility(ESlateVisibility::HitTestInvisible);
 
 		if (UOverlaySlot* DeleteButtonSlot = DeleteSaveSlotButtonContent->AddChildToOverlay(DeleteSaveSlotButton))
@@ -12158,7 +12193,7 @@ namespace TunaSweeperEditorSetup
 				BunkerWorld,
 				LevelTravelBlueprint,
 				TEXT("TS_Travel_DeployToRaid"),
-				FVector(220.0f, -220.0f, 4.0f),
+				FVector(577.426f, 359.909f, 4.0f),
 				FName(TEXT("RaidMap")),
 				FText::FromString(TEXT("Deploy")),
 				BunkerToRaidMediaSource,
@@ -12195,6 +12230,21 @@ namespace TunaSweeperEditorSetup
 			ConfigureLevelTravelBlueprint(LevelTravelBlueprint);
 
 		return bConfigured && PlaceLevelTravelActorsInBunkerAndRaidMaps(LevelTravelBlueprint);
+	}
+
+	bool EnsureDeployToRaidLadderLocationSetup()
+	{
+		UBlueprint* LevelTravelBlueprint = EnsureBlueprint(
+			InteractionAssetPath,
+			LevelTravelInteractionAssetName,
+			ATunaSweeperLevelTravelInteractableActor::StaticClass());
+
+		if (!LevelTravelBlueprint)
+		{
+			return false;
+		}
+
+		return PlaceLevelTravelActorsInBunkerAndRaidMaps(LevelTravelBlueprint);
 	}
 
 	bool EnsureIntroMenuGraphicsSettingsSetup()
@@ -12437,6 +12487,41 @@ namespace TunaSweeperEditorSetup
 					if (bCompleted &&
 						(FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperSetupQuit")) ||
 							FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperIntroSetupQuit"))))
+					{
+						FPlatformMisc::RequestExit(false);
+					}
+
+					return !bCompleted;
+				}),
+			1.0f);
+	}
+
+	void ScheduleDeployToRaidLadderLocationSetup()
+	{
+		if (FTunaSweeperEditorRunOnce::HasCompleted(DeployToRaidLadderLocationTaskId))
+		{
+			return;
+		}
+
+		FTSTicker::GetCoreTicker().AddTicker(
+			FTickerDelegate::CreateLambda(
+				[](float)
+				{
+					UWorld* EditorWorld = GEditor ? GEditor->GetEditorWorldContext().World() : nullptr;
+					if (!EditorWorld)
+					{
+						return true;
+					}
+
+					FTunaSweeperEditorRunOnce::Run(
+						DeployToRaidLadderLocationTaskId,
+						[]()
+						{
+							return EnsureDeployToRaidLadderLocationSetup();
+						});
+
+					const bool bCompleted = FTunaSweeperEditorRunOnce::HasCompleted(DeployToRaidLadderLocationTaskId);
+					if (bCompleted && FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperSetupQuit")))
 					{
 						FPlatformMisc::RequestExit(false);
 					}
@@ -13069,6 +13154,7 @@ public:
 		TunaSweeperEditorSetup::ScheduleLootContainerAndSpawnerAssetsAndMapPlacement();
 		TunaSweeperEditorSetup::ScheduleEditorMapCaptureSetup();
 		TunaSweeperEditorSetup::ScheduleIntroMenuAndLevelTravelSetup();
+		TunaSweeperEditorSetup::ScheduleDeployToRaidLadderLocationSetup();
 		TunaSweeperEditorSetup::ScheduleOpeningScenarioPresentationSetup();
 		TunaSweeperEditorSetup::ScheduleBunkerToRaidTransitionVideoSetup();
 		TunaSweeperEditorSetup::ScheduleFirstOutingQuestSetup();

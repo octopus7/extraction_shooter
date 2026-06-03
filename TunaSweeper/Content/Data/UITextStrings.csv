@@ -30,6 +30,9 @@ ui.title.slot_label,슬롯 {0},Slot {0},スロット {0}
 ui.title.empty_slot,빈 슬롯,Empty Slot,空き
 ui.title.start_new_game,새 게임 시작,Start New Game,新しく開始
 ui.title.has_progress_data,진행 데이터 있음,Progress Data Exists,進行データあり
+ui.title.play_time_pattern,플레이시간 : {0},Play Time: {0},プレイ時間：{0}
+ui.title.difficulty_pattern,난이도 : {0},Difficulty: {0},難易度：{0}
+ui.title.difficulty.farming,파밍,Farming,ファーミング
 ui.settings.graphics,그래픽,Graphics,グラフィック
 ui.settings.interface,인터페이스,Interface,インターフェース
 ui.settings.current_graphics,현재: {0} / {1}x{2} / DLSS {3},Current: {0} / {1}x{2} / DLSS {3},現在: {0} / {1}x{2} / DLSS {3}

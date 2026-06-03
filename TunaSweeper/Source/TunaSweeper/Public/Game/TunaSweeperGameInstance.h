@@ -67,6 +67,9 @@ struct TUNASWEEPER_API FTunaSweeperSaveSlotSummary
 	float TotalPlaySeconds = 0.0f;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Save")
+	int32 DifficultyStage = 1;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Save")
 	int64 LastSavedAtTicks = 0;
 };
 
@@ -1056,6 +1059,9 @@ private:
 
 	UPROPERTY(Transient)
 	int32 ActiveSaveSlotIndex = 1;
+
+	UPROPERTY(Transient)
+	int32 ActiveSaveSlotDifficultyStage = 1;
 
 	UPROPERTY(Transient)
 	ETunaSweeperItemTextLanguage CurrentTextLanguage = ETunaSweeperItemTextLanguage::English;

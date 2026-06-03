@@ -87,13 +87,16 @@ class TUNASWEEPER_API UTunaSweeperSaveGame : public USaveGame
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Save")
-	int32 SaveVersion = 16;
+	int32 SaveVersion = 17;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Save")
 	int32 SaveSlotIndex = 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Save")
 	float TotalPlaySeconds = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Save", meta = (ClampMin = "1", ClampMax = "3", UIMin = "1", UIMax = "3"))
+	int32 DifficultyStage = 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Save")
 	int64 LastSavedAtTicks = 0;
