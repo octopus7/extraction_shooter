@@ -723,12 +723,12 @@ void ATunaSweeperTopDownCharacter::HandleInteract(const FInputActionValue& Value
 
 	if (ATunaSweeperPlayerController* TunaPlayerController = Cast<ATunaSweeperPlayerController>(GetController()))
 	{
-		if (TunaPlayerController->TryHandleHoveredItemInteract())
+		if (TunaPlayerController->IsHousingModeOpen())
 		{
 			return;
 		}
 
-		if (TunaPlayerController->IsHousingModeOpen())
+		if (TunaPlayerController->TryHandleHoveredItemInteract())
 		{
 			return;
 		}

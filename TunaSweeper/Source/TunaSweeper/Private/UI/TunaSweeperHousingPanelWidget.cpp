@@ -188,11 +188,17 @@ void UTunaSweeperHousingFacilityEntryWidget::RefreshEntryView()
 
 	if (DetailText)
 	{
-		const FString Detail = FString::Printf(
-			TEXT("%dx%d  %s"),
-			FMath::Max(1, View.SizeX),
-			FMath::Max(1, View.SizeY),
-			*View.MaterialsText.ToString());
+		const FString MaterialsText = View.MaterialsText.ToString();
+		const FString Detail = MaterialsText.IsEmpty()
+			? FString::Printf(
+				TEXT("%dx%d"),
+				FMath::Max(1, View.SizeX),
+				FMath::Max(1, View.SizeY))
+			: FString::Printf(
+				TEXT("%dx%d  %s"),
+				FMath::Max(1, View.SizeX),
+				FMath::Max(1, View.SizeY),
+				*MaterialsText);
 		DetailText->SetText(FText::FromString(Detail));
 		DetailText->SetColorAndOpacity(FSlateColor(FLinearColor(0.70f, 0.78f, 0.80f, 1.0f)));
 	}

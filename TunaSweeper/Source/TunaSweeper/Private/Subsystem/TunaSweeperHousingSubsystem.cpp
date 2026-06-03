@@ -384,7 +384,7 @@ void UTunaSweeperHousingSubsystem::GetFacilityViews(TArray<FTunaSweeperHousingFa
 			View.FacilityId = Definition.FacilityId;
 			View.DisplayName = ResolveFacilityDisplayName(Definition);
 			View.Description = ResolveFacilityDescription(Definition);
-			View.MaterialsText = BuildMaterialsText(Definition);
+			View.MaterialsText = FText::GetEmpty();
 			View.BuildState = SavedFacility.bStored
 				? ETunaSweeperHousingFacilityBuildState::Stored
 				: ETunaSweeperHousingFacilityBuildState::Placed;

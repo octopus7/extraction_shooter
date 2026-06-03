@@ -25,6 +25,7 @@
 #include "Player/TunaSweeperPlayerController.h"
 #include "GameFramework/Actor.h"
 #include "Stats/Stats.h"
+#include "Subsystem/TunaSweeperHousingSubsystem.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
 #include "Subsystem/TunaSweeperMemoSubsystem.h"
 
@@ -33,6 +34,15 @@ namespace TunaSweeperInteractionQuestEvents
 	bool IsBunkerMap(const UWorld* World)
 	{
 		return World && World->GetMapName().EndsWith(TEXT("BunkerMap"));
+	}
+
+	bool IsHousingInteractionSuppressed(const UWorld* World)
+	{
+		const UGameInstance* GameInstance = World ? World->GetGameInstance() : nullptr;
+		const UTunaSweeperHousingSubsystem* HousingSubsystem = GameInstance
+			? GameInstance->GetSubsystem<UTunaSweeperHousingSubsystem>()
+			: nullptr;
+		return HousingSubsystem && HousingSubsystem->IsHousingModeOpen();
 	}
 
 	FName GetInteractionTypeName(ETunaSweeperInteractionType InteractionType)
@@ -104,6 +114,14 @@ namespace TunaSweeperInteractionQuestEvents
 
 void UTunaSweeperInteractionSubsystem::Tick(float DeltaTime)
 {
+	if (TunaSweeperInteractionQuestEvents::IsHousingInteractionSuppressed(GetWorld()))
+	{
+		FocusedInteractable.Reset();
+		FocusedInteractionOwner.Reset();
+		FocusedInteractionIndex = 0;
+		return;
+	}
+
 	RefreshFocusedInteractable();
 }
 
@@ -287,6 +305,11 @@ bool UTunaSweeperInteractionSubsystem::RequestInteraction(UTunaSweeperInteractab
 bool UTunaSweeperInteractionSubsystem::CanOfferInteraction(const UTunaSweeperInteractableComponent* Interactable) const
 {
 	if (!IsValid(Interactable) || Interactable->GetInteractionType() == ETunaSweeperInteractionType::None)
+	{
+		return false;
+	}
+
+	if (TunaSweeperInteractionQuestEvents::IsHousingInteractionSuppressed(GetWorld()))
 	{
 		return false;
 	}

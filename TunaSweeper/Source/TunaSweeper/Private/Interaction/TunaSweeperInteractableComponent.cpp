@@ -3,6 +3,7 @@
 #include "Components/WidgetComponent.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "Kismet/GameplayStatics.h"
+#include "Subsystem/TunaSweeperHousingSubsystem.h"
 #include "Subsystem/TunaSweeperInteractionSubsystem.h"
 #include "UI/TunaSweeperInteractionMarkerWidget.h"
 
@@ -73,6 +74,16 @@ namespace TunaSweeperInteractionMarkerLayout
 		default:
 			return NAME_None;
 		}
+	}
+
+	bool IsHousingInteractionSuppressed(const UObject* WorldContextObject)
+	{
+		const UWorld* World = WorldContextObject ? WorldContextObject->GetWorld() : nullptr;
+		const UGameInstance* GameInstance = World ? World->GetGameInstance() : nullptr;
+		const UTunaSweeperHousingSubsystem* HousingSubsystem = GameInstance
+			? GameInstance->GetSubsystem<UTunaSweeperHousingSubsystem>()
+			: nullptr;
+		return HousingSubsystem && HousingSubsystem->IsHousingModeOpen();
 	}
 }
 
@@ -339,6 +350,15 @@ void UTunaSweeperInteractableComponent::EnsureMarkerWidgetClass()
 
 void UTunaSweeperInteractableComponent::UpdateMarker(float DeltaSeconds)
 {
+	if (TunaSweeperInteractionMarkerLayout::IsHousingInteractionSuppressed(this))
+	{
+		MarkerRingScale = TunaSweeperInteractionMarkerLayout::HiddenRingScale;
+		MarkerAlpha = 0.0f;
+		LabelAlpha = 0.0f;
+		ApplyMarkerState();
+		return;
+	}
+
 	const APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(this, 0);
 	bool bCanInteract = InteractionType != ETunaSweeperInteractionType::None;
 	bool bCanDisplayMarker = bCanInteract;

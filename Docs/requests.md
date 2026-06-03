@@ -3790,3 +3790,11 @@
 - 메뉴 위치를 `GetMousePosition()` 원시 좌표가 아니라 HUD 루트 캔버스의 Slate absolute-to-local 변환 좌표 기준으로 배치하게 한 것.
 - 컨텍스트 메뉴 표시 로그에 원시 마우스 좌표, 변환된 로컬 좌표, 최종 메뉴 좌표, 캔버스 bounds를 함께 남기게 한 것.
 - `TunaSweeperEditor Win64 Development` 빌드 및 Unreal Editor 재실행을 완료한 것.
+
+## 2026-06-03 14:01:15 (소요시간: 00:03:33)
+
+- 하우징 모드 중 상호작용 마커와 상호작용 표시명이 보이지 않도록 `UTunaSweeperInteractableComponent`에서 마커를 즉시 숨기게 한 것.
+- 하우징 모드 중 `UTunaSweeperInteractionSubsystem`이 상호작용 후보를 제공하지 않고 포커스도 비우게 한 것.
+- 하우징 모드 중 `F` 입력이 hover item 상호작용보다 먼저 차단되도록 입력 처리 순서를 조정한 것.
+- 이미 보유한 하우징 시설 항목은 배치됨/보관됨 상태에서 재료 요구량을 표시하지 않고 크기만 표시하게 한 것.
+- `TunaSweeperEditor Win64 Development` 빌드 및 Unreal Editor 재실행을 완료한 것.

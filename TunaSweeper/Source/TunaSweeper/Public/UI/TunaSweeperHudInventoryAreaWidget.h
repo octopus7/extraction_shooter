@@ -103,6 +103,7 @@ protected:
 private:
 	void EnsureCurrencyDisplayWidget();
 	void AttachCurrencyDisplayAboveInventoryPanel();
+	void EnsureSortInventoryButtonPlacement();
 	void EnsureWeightThresholdMarkerWidgets();
 	void RefreshWeightThresholdMarker();
 	void ApplyHudState();
