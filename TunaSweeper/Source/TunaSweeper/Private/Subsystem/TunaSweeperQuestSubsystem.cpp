@@ -7,6 +7,7 @@
 #include "Serialization/Csv/CsvParser.h"
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
+#include "Subsystem/TunaSweeperToastSubsystem.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogTunaSweeperQuest, Log, All);
 
@@ -1322,6 +1323,7 @@ void UTunaSweeperQuestSubsystem::AdvanceMatchingObjectives(
 		if (bQuestChanged && AreAllObjectivesComplete(QuestPair.Key))
 		{
 			SetQuestState(QuestPair.Key, ETunaSweeperQuestState::RewardAvailable);
+			ShowQuestCompletedToast(QuestPair.Key);
 		}
 
 		bChanged |= bQuestChanged;
@@ -1338,6 +1340,23 @@ void UTunaSweeperQuestSubsystem::SetQuestState(FName QuestId, ETunaSweeperQuestS
 	if (FindQuestDefinition(QuestId))
 	{
 		GetOrCreateQuestProgress(QuestId).State = NewState;
+	}
+}
+
+void UTunaSweeperQuestSubsystem::ShowQuestCompletedToast(FName QuestId) const
+{
+	FTunaSweeperQuestDefinition Definition;
+	if (!TryGetQuestDefinition(QuestId, Definition))
+	{
+		return;
+	}
+
+	if (UGameInstance* GameInstance = GetGameInstance())
+	{
+		if (UTunaSweeperToastSubsystem* ToastSubsystem = GameInstance->GetSubsystem<UTunaSweeperToastSubsystem>())
+		{
+			ToastSubsystem->ShowQuestCompletedToast(Definition.Title);
+		}
 	}
 }
 

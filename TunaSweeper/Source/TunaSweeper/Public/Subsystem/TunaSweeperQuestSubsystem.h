@@ -139,6 +139,7 @@ private:
 		int32 Amount,
 		bool bSaveImmediately = true);
 	void SetQuestState(FName QuestId, ETunaSweeperQuestState NewState);
+	void ShowQuestCompletedToast(FName QuestId) const;
 	bool AreDefinitionPrerequisitesMet(const FTunaSweeperQuestDefinition& Definition) const;
 	bool IsQuestForProvider(const FTunaSweeperQuestDefinition& Definition, FName ProviderId) const;
 	bool AreAllObjectivesComplete(FName QuestId) const;
