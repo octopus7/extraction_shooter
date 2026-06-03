@@ -93,7 +93,7 @@ protected:
 	FName CoverId = NAME_None;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sandbag Cover", meta = (ClampMin = "1.0", UIMin = "1.0"))
-	FVector BoxExtent = FVector(37.5f, 160.0f, 45.0f);
+	FVector BoxExtent = FVector(37.5f, 160.0f, 60.0f);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sandbag Cover", meta = (ClampMin = "1.0", UIMin = "1.0"))
 	float MaxHealth = 70.0f;
@@ -102,10 +102,10 @@ protected:
 	float PassthroughRadius = 62.5f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sandbag Cover|Passthrough", meta = (ClampMin = "0.0", UIMin = "0.0"))
-	float PassthroughVerticalTolerance = 45.0f;
+	float PassthroughVerticalTolerance = 60.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sandbag Cover|Visual", meta = (ClampMin = "0.5", UIMin = "0.5"))
-	float OutlineThickness = 3.0f;
+	float OutlineThickness = 4.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sandbag Cover|Visual")
 	TSoftObjectPtr<UMaterialInterface> VisualMaterial;
