@@ -16,9 +16,9 @@ namespace
 	const TCHAR* DefaultSandbagStaticMeshPath = TEXT("/Game/Interaction/SM_Sandbag_LowPoly.SM_Sandbag_LowPoly");
 	const TCHAR* FallbackVertexColorMaterialPath = TEXT("/Game/Prototype/M_Voxel_VertexColor.M_Voxel_VertexColor");
 
-	constexpr int32 SandbagLayerCount = 3;
+	constexpr int32 SandbagLayerCount = 4;
 	constexpr int32 SandbagDepthCount = 2;
-	constexpr int32 MaxSandbagMeshComponentCount = 26;
+	constexpr int32 MaxSandbagMeshComponentCount = 36;
 	constexpr int32 SandbagOutlineStencilValue = 3;
 	const FVector BaseSandbagMeshExtent(21.0f, 28.0f, 9.0f);
 

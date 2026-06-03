@@ -165,7 +165,7 @@
     "spawn_id": "TS_SandbagCover_Central",
     "spawn_type": "sandbag_cover",
     "actor_class": "/Game/Interaction/BP_SandbagCover.BP_SandbagCover_C",
-    "box_extent": [37.5, 160.0, 45.0],
+    "box_extent": [37.5, 160.0, 60.0],
     "max_health": 70.0,
     "passthrough_radius": 62.5,
     "location": [1120.0, 180.0, 0.0],

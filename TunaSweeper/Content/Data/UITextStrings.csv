@@ -76,6 +76,7 @@ ui.item_info.weapon_modding,총기 모딩,Weapon Mods,銃器改造
 ui.item_hover.take,줍기/배치,Take/Place,拾う/配置
 ui.item_hover.use,사용,Use,使用
 ui.item_hover.drop,버리기,Drop,捨てる
+ui.item_hover.split_drag,+ 드래그 : 분할,+ Drag: Split,+ ドラッグ: 分割
 ui.item_hover.assign_dismantle_target,분해 슬롯 지정,Assign Dismantle Slot,分解スロット指定
 ui.item_hover.assign_blueprint_target,설계도 슬롯 지정,Assign Blueprint Slot,設計図スロット指定
 ui.item_hover.name_pattern,{0} #{1},{0} #{1},{0} #{1}
