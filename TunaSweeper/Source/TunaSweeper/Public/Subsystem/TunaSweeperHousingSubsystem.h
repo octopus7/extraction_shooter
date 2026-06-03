@@ -138,6 +138,12 @@ private:
 		AActor* Actor,
 		const FTunaSweeperHousingFacilityDefinition& Definition,
 		const FTunaSweeperHousingPlacedFacilitySaveData& Placement) const;
+	void ConfigureFacilityActor(
+		AActor* Actor,
+		const FTunaSweeperHousingFacilityDefinition& Definition,
+		const FTunaSweeperHousingPlacedFacilitySaveData& Placement,
+		bool bPreview,
+		bool bPlacementValid) const;
 	bool TryGetDefinition(FName FacilityId, FTunaSweeperHousingFacilityDefinition& OutDefinition) const;
 	bool IsFacilityFunctionUnlocked(const FTunaSweeperHousingFacilityDefinition& Definition) const;
 	bool HasEnoughMaterials(const FTunaSweeperHousingFacilityDefinition& Definition) const;
@@ -170,7 +176,7 @@ private:
 	TMap<FGuid, TObjectPtr<AActor>> SpawnedFacilityActors;
 
 	UPROPERTY(Transient)
-	TObjectPtr<ATunaSweeperHousingFacilityActor> PreviewActor;
+	TObjectPtr<AActor> PreviewActor;
 
 	UPROPERTY(Transient)
 	TWeakObjectPtr<ATunaSweeperHousingManagementActor> RuntimeHousingManagementActor;

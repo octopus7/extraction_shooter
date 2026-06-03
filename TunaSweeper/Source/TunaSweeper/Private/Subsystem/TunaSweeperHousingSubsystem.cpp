@@ -2,6 +2,7 @@
 
 #include "Dom/JsonObject.h"
 #include "DrawDebugHelpers.h"
+#include "Components/PrimitiveComponent.h"
 #include "Engine/GameInstance.h"
 #include "Engine/World.h"
 #include "EngineUtils.h"
@@ -578,23 +579,29 @@ bool UTunaSweeperHousingSubsystem::UpdatePlacementPreview(APlayerController* Pla
 		return false;
 	}
 
+	const TSubclassOf<AActor> DesiredPreviewActorClass = ResolveFacilityActorClass(Definition);
+	if (IsValid(PreviewActor) && !PreviewActor->IsA(DesiredPreviewActorClass))
+	{
+		DestroyPreviewActor();
+	}
+
 	if (!PreviewActor)
 	{
 		UWorld* World = PlayerController->GetWorld();
 		PreviewActor = World
-			? World->SpawnActor<ATunaSweeperHousingFacilityActor>(
-				ATunaSweeperHousingFacilityActor::StaticClass(),
-				FTransform::Identity)
+			? World->SpawnActor<AActor>(
+				DesiredPreviewActorClass,
+				BuildPlacedActorWorldTransform(Definition, PreviewPlacement))
 			: nullptr;
 	}
 
 	const bool bPlacementValid = PlacementStatus == ETunaSweeperHousingPlacementStatus::Valid;
 	if (PreviewActor)
 	{
-		PreviewActor->ConfigureFacilityVisual(
+		ConfigureFacilityActor(
+			PreviewActor,
 			Definition,
 			PreviewPlacement,
-			BuildFacilityWorldTransform(Definition, PreviewPlacement),
 			true,
 			bPlacementValid);
 	}
@@ -1363,6 +1370,16 @@ void UTunaSweeperHousingSubsystem::ConfigurePlacedFacilityActor(
 	const FTunaSweeperHousingFacilityDefinition& Definition,
 	const FTunaSweeperHousingPlacedFacilitySaveData& Placement) const
 {
+	ConfigureFacilityActor(Actor, Definition, Placement, false, true);
+}
+
+void UTunaSweeperHousingSubsystem::ConfigureFacilityActor(
+	AActor* Actor,
+	const FTunaSweeperHousingFacilityDefinition& Definition,
+	const FTunaSweeperHousingPlacedFacilitySaveData& Placement,
+	bool bPreview,
+	bool bPlacementValid) const
+{
 	if (!Actor)
 	{
 		return;
@@ -1374,32 +1391,55 @@ void UTunaSweeperHousingSubsystem::ConfigurePlacedFacilityActor(
 			Definition,
 			Placement,
 			BuildFacilityWorldTransform(Definition, Placement),
-			false,
-			true);
+			bPreview,
+			bPlacementValid);
 	}
 	else
 	{
 		Actor->SetActorTransform(BuildPlacedActorWorldTransform(Definition, Placement));
-		Actor->SetActorEnableCollision(true);
 	}
 
-	const FName ActorId = BuildPlacedFacilityActorId(Placement);
-	Actor->Tags.AddUnique(ActorId);
-	if (ATunaSweeperPiggyBankActor* PiggyBankActor = Cast<ATunaSweeperPiggyBankActor>(Actor))
+	Actor->SetActorEnableCollision(!bPreview);
+	if (bPreview)
 	{
-		PiggyBankActor->SetPiggyBankId(ActorId);
+		TArray<UPrimitiveComponent*> PrimitiveComponents;
+		Actor->GetComponents(PrimitiveComponents);
+		for (UPrimitiveComponent* PrimitiveComponent : PrimitiveComponents)
+		{
+			if (!PrimitiveComponent)
+			{
+				continue;
+			}
+
+			PrimitiveComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			PrimitiveComponent->SetGenerateOverlapEvents(false);
+			PrimitiveComponent->SetVisibility(true, true);
+			PrimitiveComponent->SetHiddenInGame(false, true);
+			PrimitiveComponent->SetRenderCustomDepth(true);
+			PrimitiveComponent->SetCustomDepthStencilValue(bPlacementValid ? 1 : 2);
+		}
 	}
-	if (ATunaSweeperWorkbenchActor* WorkbenchActor = Cast<ATunaSweeperWorkbenchActor>(Actor))
+
+	if (!bPreview)
 	{
-		WorkbenchActor->ConfigureWorkbenchDefaults(1);
-	}
+		const FName ActorId = BuildPlacedFacilityActorId(Placement);
+		Actor->Tags.AddUnique(ActorId);
+		if (ATunaSweeperPiggyBankActor* PiggyBankActor = Cast<ATunaSweeperPiggyBankActor>(Actor))
+		{
+			PiggyBankActor->SetPiggyBankId(ActorId);
+		}
+		if (ATunaSweeperWorkbenchActor* WorkbenchActor = Cast<ATunaSweeperWorkbenchActor>(Actor))
+		{
+			WorkbenchActor->ConfigureWorkbenchDefaults(1);
+		}
 
 #if WITH_EDITOR
-	if (!ActorId.IsNone())
-	{
-		Actor->SetActorLabel(ActorId.ToString());
-	}
+		if (!ActorId.IsNone())
+		{
+			Actor->SetActorLabel(ActorId.ToString());
+		}
 #endif
+	}
 }
 
 bool UTunaSweeperHousingSubsystem::TryGetDefinition(

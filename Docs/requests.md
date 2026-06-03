@@ -3798,3 +3798,10 @@
 - 하우징 모드 중 `F` 입력이 hover item 상호작용보다 먼저 차단되도록 입력 처리 순서를 조정한 것.
 - 이미 보유한 하우징 시설 항목은 배치됨/보관됨 상태에서 재료 요구량을 표시하지 않고 크기만 표시하게 한 것.
 - `TunaSweeperEditor Win64 Development` 빌드 및 Unreal Editor 재실행을 완료한 것.
+
+## 2026-06-03 14:07:47 (소요시간: 00:01:01)
+
+- 하우징 배치 프리뷰가 임시 큐브 메시를 쓰지 않고 시설 정의의 실제 `actor_class` 액터를 스폰해 표시하게 한 것.
+- 프리뷰 액터는 실제 배치와 같은 transform 경로를 사용하되, 배치 판정에 영향을 주지 않도록 프리뷰 중 collision과 overlap을 비활성화한 것.
+- 실제 배치 액터는 기존 액터 클래스/컴포넌트 설정을 유지하고, fallback 하우징 전용 액터일 때만 기존 footprint 시각화를 사용하게 한 것.
+- `TunaSweeperEditor Win64 Development` 빌드 및 Unreal Editor 재실행을 완료한 것.
