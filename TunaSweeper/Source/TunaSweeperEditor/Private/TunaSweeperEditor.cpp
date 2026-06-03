@@ -202,7 +202,7 @@ namespace TunaSweeperEditorSetup
 	const FString ProjectileHitEffectAssetTaskId = TEXT("2026-05-28_CreateProjectileHitEffectAssetsV1");
 	const FString WeaponSpreadRecoilAssetTaskId = TEXT("2026-05-28_CreateWeaponSpreadRecoilAssetsV1");
 	const FString BaseballBatAssetTaskId = TEXT("2026-05-28_CreateBaseballBatStaticMeshAssetsV1");
-	const FString SandbagCoverAssetTaskId = TEXT("2026-06-02_SandbagStencilOutlineMaskV1");
+	const FString SandbagCoverAssetTaskId = TEXT("2026-06-02_SandbagFourLayerCoverV1");
 	const FString VoxelMeshAssetTaskId = TEXT("2026-05-19_CreateSharedVoxelMeshAssetsV1");
 	const FString LumberjackMeleeSwingArcAssetTaskId = TEXT("2026-05-20_CreateLumberjackMeleeSwingArcAssetsV2");
 	const FString LedExpressionMaterialTaskId = TEXT("2026-05-26_CreateLedExpressionMaterialV1");
@@ -330,6 +330,7 @@ namespace TunaSweeperEditorSetup
 	constexpr float EquipmentReserveEntryHeight = 124.0f;
 	constexpr float EquipmentReserveWidth = EquipmentReserveColumnCount * EquipmentReserveEntryWidth;
 	constexpr float EquipmentReserveHeight = 2.0f * EquipmentReserveEntryHeight;
+	constexpr float InventorySortControlAreaHeight = 34.0f;
 	constexpr float AuxiliaryBagPanelPadding = 6.0f;
 	constexpr float AuxiliaryBagPanelGap = 4.0f;
 	constexpr float AuxiliaryBagPanelWidth = AuxiliaryBagPanelPadding * 2.0f + InventoryTileWidth;
@@ -7157,7 +7158,7 @@ namespace TunaSweeperEditorSetup
 		Defaults->Modify();
 		Defaults->ConfigureCoverDefaults(
 			FName(TEXT("TS_SandbagCover_Default")),
-			FVector(37.5f, 160.0f, 45.0f),
+			FVector(37.5f, 160.0f, 60.0f),
 			70.0f,
 			62.5f);
 		Defaults->ConfigureCoverVisualDefaults(
@@ -8878,6 +8879,9 @@ namespace TunaSweeperEditorSetup
 				TEXT("CurrencyDisplayWidget"));
 		UButton* SortInventoryButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("SortInventoryButton"));
 		UTextBlock* SortInventoryButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("SortInventoryButtonText"));
+		USizeBox* InventorySortControlArea = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("InventorySortControlArea"));
+		UHorizontalBox* InventorySortControlRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("InventorySortControlRow"));
+		USizeBox* InventorySortControlSpacer = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("InventorySortControlSpacer"));
 		USizeBox* EquipmentReserveSizeBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("EquipmentReserveSizeBox"));
 		UTileView* EquipmentReserveTileView = WidgetTree->ConstructWidget<UTileView>(UTileView::StaticClass(), TEXT("EquipmentReserveTileView"));
 		USizeBox* AuxiliaryBagPanel = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("AuxiliaryBagPanel"));
@@ -8897,7 +8901,8 @@ namespace TunaSweeperEditorSetup
 		UTextBlock* InventoryWeightWarningText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("InventoryWeightWarningText"));
 
 		if (!RootSizeBox || !RootRow || !MainInventorySizeBox || !InventoryPanel || !InventoryStack || !InventoryHeaderRow ||
-			!InventoryTitleText || !CurrencyDisplayWidget || !SortInventoryButton || !SortInventoryButtonText || !EquipmentReserveSizeBox ||
+			!InventoryTitleText || !CurrencyDisplayWidget || !SortInventoryButton || !SortInventoryButtonText ||
+			!InventorySortControlArea || !InventorySortControlRow || !InventorySortControlSpacer || !EquipmentReserveSizeBox ||
 			!EquipmentReserveTileView || !AuxiliaryBagPanel || !AuxiliaryBagBackground || !AuxiliaryBagTileView || !InventoryTileView ||
 			!InventoryWeightPanel || !InventoryWeightRow || !InventoryWeightLabelText || !InventoryWeightGaugeBox ||
 			!InventoryWeightGaugeOverlay || !InventoryWeightGauge || !InventoryWeightMarkerCanvas || !InventoryWeightOverweightMarker ||
@@ -8966,12 +8971,6 @@ namespace TunaSweeperEditorSetup
 		SortInventoryButton->SetClickMethod(EButtonClickMethod::DownAndUp);
 		ConfigureTextBlock(SortInventoryButtonText, FText::FromString(TEXT("\uC815\uB9AC")), FLinearColor::White, 14);
 		SortInventoryButton->SetContent(SortInventoryButtonText);
-		UHorizontalBoxSlot* SortButtonSlot = InventoryHeaderRow->AddChildToHorizontalBox(SortInventoryButton);
-		if (SortButtonSlot)
-		{
-			SortButtonSlot->SetHorizontalAlignment(HAlign_Right);
-			SortButtonSlot->SetVerticalAlignment(VAlign_Center);
-		}
 
 		UVerticalBoxSlot* HeaderSlot = InventoryStack->AddChildToVerticalBox(InventoryHeaderRow);
 		if (HeaderSlot)
@@ -8990,9 +8989,31 @@ namespace TunaSweeperEditorSetup
 		UVerticalBoxSlot* ReserveRowSlot = InventoryStack->AddChildToVerticalBox(EquipmentReserveSizeBox);
 		if (ReserveRowSlot)
 		{
-			ReserveRowSlot->SetPadding(FMargin(0.0f, 12.0f, 0.0f, 12.0f));
+			ReserveRowSlot->SetPadding(FMargin(0.0f, 12.0f, 0.0f, 0.0f));
 			ReserveRowSlot->SetHorizontalAlignment(HAlign_Left);
 			ReserveRowSlot->SetVerticalAlignment(VAlign_Top);
+		}
+
+		InventorySortControlArea->SetHeightOverride(InventorySortControlAreaHeight);
+		InventorySortControlArea->SetContent(InventorySortControlRow);
+		UHorizontalBoxSlot* SortSpacerSlot = InventorySortControlRow->AddChildToHorizontalBox(InventorySortControlSpacer);
+		if (SortSpacerSlot)
+		{
+			SortSpacerSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+			SortSpacerSlot->SetVerticalAlignment(VAlign_Center);
+		}
+		UHorizontalBoxSlot* SortButtonSlot = InventorySortControlRow->AddChildToHorizontalBox(SortInventoryButton);
+		if (SortButtonSlot)
+		{
+			SortButtonSlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
+			SortButtonSlot->SetHorizontalAlignment(HAlign_Right);
+			SortButtonSlot->SetVerticalAlignment(VAlign_Center);
+		}
+		UVerticalBoxSlot* SortControlSlot = InventoryStack->AddChildToVerticalBox(InventorySortControlArea);
+		if (SortControlSlot)
+		{
+			SortControlSlot->SetHorizontalAlignment(HAlign_Fill);
+			SortControlSlot->SetVerticalAlignment(VAlign_Top);
 		}
 
 		AuxiliaryBagPanel->SetWidthOverride(AuxiliaryBagPanelWidth);

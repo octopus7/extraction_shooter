@@ -2654,6 +2654,11 @@
 ## 2026-05-29 16:51:09 (elapsed: 00:09:14)
 
 - 하우징 모드에서 Tab 키가 먹통이 되지 않고 하우징을 닫아 게임 플레이 상태로 복귀하게 할 것.
+
+## 2026-06-03 13:29:17 (소요시간: 00:13:22)
+
+- 하우징 우측 패널의 길게 눌러 수납 기능이 동작하지 않는 문제를 확인하고 필요하면 로그를 남길 것.
+- 이미 배치된 시설에 우클릭하면 작은 컨텍스트 메뉴 UI가 나오고, 메뉴에서 수납을 선택할 수 있는 방식을 추가할 것.
 ## 2026-05-29 16:51:07 (elapsed: 00:00:00)
 
 - Set the experience-table maximum level to 30.
@@ -3745,3 +3750,43 @@
 - `M_SandbagCover_OverlayOutline`을 translucent unlit 머터리얼로 재구성하고, `CustomStencil == 3`인 원본 실루엣 내부 픽셀은 `Opacity=0`이 되게 스텐실 마스크를 추가한 것.
 - 파괴 붕괴 시작 및 아웃라인 비활성 상태에서는 overlay material과 CustomDepth를 함께 끄도록 확인/정리한 것.
 - `TunaSweeperEditor Win64 Development` 빌드를 통과시키고 Unreal Editor를 실행해 모래주머니 관련 자산이 다시 저장된 것을 확인한 것.
+
+## 2026-06-02 20:10:45 (소요시간: 00:03:19)
+
+- 모래주머니 엄폐물 시각 스택을 3층에서 4층으로 늘리고, 필요한 static mesh component 풀을 26개에서 36개로 확장한 것.
+- 커버 기본 높이를 `box_extent=[37.5, 160.0, 45.0]`에서 `[37.5, 160.0, 60.0]`으로 올려 총알 차단 높이와 보이는 모래주머니 높이를 함께 맞춘 것.
+- 런타임 JSON, 스폰 서브시스템 기본값, `BP_SandbagCover` 에디터 생성 기본값, 문서의 모래주머니 높이 설명을 같은 기준으로 갱신한 것.
+- `GameplayInteractionSpawns.json` 파싱 검증과 `TunaSweeperEditor Win64 Development` 빌드를 통과시키고, Unreal Editor를 실행해 모래주머니 관련 자산이 다시 저장된 것을 확인한 것.
+
+## 2026-06-03 13:29:00 (소요시간: 00:06:20)
+
+- 아이템 hover 액션 힌트의 `버리기` 아래에 `Ctrl + 드래그 : 분할` 안내를 추가한 것.
+- `Ctrl`은 기존 F/L/X 키와 같은 흰색 라운딩 키캡 안의 검은 글자 스타일을 재사용하게 한 것.
+- 분할 힌트는 상점/작업대 항목이 아니고, 수량이 2개 이상이며 부착물/장전 탄약 같은 개별 상태가 없는 아이템에서만 표시되게 한 것.
+- `UITextStrings.csv`에 분할 드래그 문구를 추가하고, `TunaSweeperEditor Win64 Development` 빌드 및 Unreal Editor 실행을 완료한 것.
+
+## 2026-06-03 13:43:43 (소요시간: 00:00:57)
+
+- `Ctrl + 드래그 : 분할` 안내 문구가 살짝 잘리지 않도록 아이템 hover 액션 힌트 패널 폭을 넓힌 것.
+- 오른쪽 액션 패널 폭을 `154`에서 `174`로 조정하고, 전체 hover prompt 폭도 같은 기준으로 자동 확장되게 둔 것.
+- `TunaSweeperEditor Win64 Development` 빌드 및 Unreal Editor 실행을 완료한 것.
+
+## 2026-06-03 13:48:55 (소요시간: 00:01:35)
+
+- 아이템 hover 액션 힌트 패널 폭을 `174`에서 `200`으로 다시 조정한 것.
+- 실행 중인 Unreal Editor의 Live Coding 때문에 첫 빌드가 막혀 에디터를 닫은 뒤 다시 빌드한 것.
+- `TunaSweeperEditor Win64 Development` 빌드 및 Unreal Editor 재실행을 완료한 것.
+
+## 2026-06-03 13:51:00 (소요시간: 00:04:15)
+
+- 인벤토리 정리 버튼을 헤더 영역에서 장비 슬롯과 인벤토리 타일 사이의 새 컨트롤 영역으로 옮긴 것.
+- 새 컨트롤 영역은 높이 `34`로 두고, 장비 슬롯 아래 기존 하단 여백은 제거해 버튼 영역이 별도 행처럼 보이게 한 것.
+- 기존 `WBP_HudInventoryArea` 자산에도 런타임 재배치가 적용되도록 `UTunaSweeperHudInventoryAreaWidget`에서 버튼을 재부착하게 한 것.
+- 에디터 위젯 재생성 코드도 같은 구조로 맞추고, `TunaSweeperEditor Win64 Development` 빌드 및 Unreal Editor 실행을 완료한 것.
+
+## 2026-06-03 13:53:55 (소요시간: 00:00:47)
+
+- 하우징 시설 우클릭 컨텍스트 메뉴가 PIE/뷰포트에서 커서보다 한참 위에 표시되는 문제를 수정한 것.
+- 메뉴 위치를 `GetMousePosition()` 원시 좌표가 아니라 HUD 루트 캔버스의 Slate absolute-to-local 변환 좌표 기준으로 배치하게 한 것.
+- 컨텍스트 메뉴 표시 로그에 원시 마우스 좌표, 변환된 로컬 좌표, 최종 메뉴 좌표, 캔버스 bounds를 함께 남기게 한 것.
+- `TunaSweeperEditor Win64 Development` 빌드 및 Unreal Editor 재실행을 완료한 것.

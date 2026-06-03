@@ -13,6 +13,7 @@
 #include "Components/SizeBox.h"
 #include "Components/TextBlock.h"
 #include "Components/TileView.h"
+#include "Components/VerticalBox.h"
 #include "Components/VerticalBoxSlot.h"
 #include "Components/Widget.h"
 #include "Engine/Texture2D.h"
@@ -38,6 +39,7 @@ namespace TunaSweeperInventoryArea
 	constexpr float EquipmentReserveEntryHeight = 124.0f;
 	constexpr float EquipmentReserveWidth = EquipmentReserveColumnCount * EquipmentReserveEntryWidth;
 	constexpr float EquipmentReserveHeight = 2.0f * EquipmentReserveEntryHeight;
+	constexpr float SortControlAreaHeight = 34.0f;
 	constexpr float AuxiliaryBagTileWidth = 96.0f;
 	constexpr float AuxiliaryBagTileHeight = 96.0f;
 	constexpr float CurrencyExteriorOffset = 26.0f;
@@ -380,6 +382,7 @@ void UTunaSweeperHudInventoryAreaWidget::NativeConstruct()
 	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
 	EnsureCurrencyDisplayWidget();
 	EnsureWeightThresholdMarkerWidgets();
+	EnsureSortInventoryButtonPlacement();
 	if (InventoryWeightPanel)
 	{
 		InventoryWeightPanel->SetVisibility(ESlateVisibility::Collapsed);
@@ -407,6 +410,7 @@ void UTunaSweeperHudInventoryAreaWidget::NativeConstruct()
 		if (UVerticalBoxSlot* ReserveSlot = Cast<UVerticalBoxSlot>(EquipmentReserveSizeBox->Slot))
 		{
 			ReserveSlot->SetHorizontalAlignment(HAlign_Left);
+			ReserveSlot->SetPadding(FMargin(0.0f, 12.0f, 0.0f, 0.0f));
 		}
 	}
 
@@ -563,6 +567,107 @@ void UTunaSweeperHudInventoryAreaWidget::AttachCurrencyDisplayAboveInventoryPane
 	CurrencyDisplayWidget->SetRenderTranslation(FVector2D::ZeroVector);
 	CurrencyDisplayWidget->SetVisibility(ESlateVisibility::HitTestInvisible);
 	CurrencyDisplayWidget->RefreshCurrencyBalance();
+}
+
+void UTunaSweeperHudInventoryAreaWidget::EnsureSortInventoryButtonPlacement()
+{
+	if (!WidgetTree || !SortInventoryButton)
+	{
+		return;
+	}
+
+	UVerticalBox* InventoryStack = Cast<UVerticalBox>(WidgetTree->FindWidget(FName(TEXT("InventoryStack"))));
+	if (!InventoryStack)
+	{
+		return;
+	}
+
+	USizeBox* SortControlArea = Cast<USizeBox>(WidgetTree->FindWidget(FName(TEXT("InventorySortControlArea"))));
+	if (!SortControlArea)
+	{
+		SortControlArea = WidgetTree->ConstructWidget<USizeBox>(
+			USizeBox::StaticClass(),
+			TEXT("InventorySortControlArea"));
+	}
+
+	UHorizontalBox* SortControlRow = Cast<UHorizontalBox>(WidgetTree->FindWidget(FName(TEXT("InventorySortControlRow"))));
+	if (!SortControlRow)
+	{
+		SortControlRow = WidgetTree->ConstructWidget<UHorizontalBox>(
+			UHorizontalBox::StaticClass(),
+			TEXT("InventorySortControlRow"));
+	}
+
+	USizeBox* SortControlSpacer = Cast<USizeBox>(WidgetTree->FindWidget(FName(TEXT("InventorySortControlSpacer"))));
+	if (!SortControlSpacer)
+	{
+		SortControlSpacer = WidgetTree->ConstructWidget<USizeBox>(
+			USizeBox::StaticClass(),
+			TEXT("InventorySortControlSpacer"));
+	}
+
+	if (!SortControlArea || !SortControlRow || !SortControlSpacer)
+	{
+		return;
+	}
+
+	SortControlArea->SetHeightOverride(TunaSweeperInventoryArea::SortControlAreaHeight);
+	if (SortControlArea->GetContent() != SortControlRow)
+	{
+		SortControlRow->RemoveFromParent();
+		SortControlArea->SetContent(SortControlRow);
+	}
+
+	SortControlRow->ClearChildren();
+	SortControlSpacer->RemoveFromParent();
+	SortInventoryButton->RemoveFromParent();
+
+	if (UHorizontalBoxSlot* SpacerSlot = SortControlRow->AddChildToHorizontalBox(SortControlSpacer))
+	{
+		SpacerSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+		SpacerSlot->SetVerticalAlignment(VAlign_Center);
+	}
+
+	if (UHorizontalBoxSlot* ButtonSlot = SortControlRow->AddChildToHorizontalBox(SortInventoryButton))
+	{
+		ButtonSlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
+		ButtonSlot->SetHorizontalAlignment(HAlign_Right);
+		ButtonSlot->SetVerticalAlignment(VAlign_Center);
+	}
+
+	SortControlArea->RemoveFromParent();
+	int32 InsertIndex = INDEX_NONE;
+	if (EquipmentReserveSizeBox)
+	{
+		const int32 EquipmentIndex = InventoryStack->GetChildIndex(EquipmentReserveSizeBox);
+		if (EquipmentIndex != INDEX_NONE)
+		{
+			InsertIndex = EquipmentIndex + 1;
+		}
+	}
+	if (InsertIndex == INDEX_NONE && InventoryTileView)
+	{
+		const int32 InventoryIndex = InventoryStack->GetChildIndex(InventoryTileView);
+		if (InventoryIndex != INDEX_NONE)
+		{
+			InsertIndex = InventoryIndex;
+		}
+	}
+
+	if (InsertIndex != INDEX_NONE)
+	{
+		InventoryStack->InsertChildAt(InsertIndex, SortControlArea);
+	}
+	else
+	{
+		InventoryStack->AddChildToVerticalBox(SortControlArea);
+	}
+
+	if (UVerticalBoxSlot* SortAreaSlot = Cast<UVerticalBoxSlot>(SortControlArea->Slot))
+	{
+		SortAreaSlot->SetHorizontalAlignment(HAlign_Fill);
+		SortAreaSlot->SetVerticalAlignment(VAlign_Top);
+	}
 }
 
 void UTunaSweeperHudInventoryAreaWidget::EnsureWeightThresholdMarkerWidgets()
