@@ -1923,3 +1923,13 @@ NS `DynamicBeam`의 `Local Space`가 꺼져 있으니 레이저 End를 월드 �
 ### 답변
 
 회전하는 작은 아이콘이 더 낫다. sweep은 버튼 전체가 아니라 content 영역 기준으로 잘려 어색해 보이므로 제거하고, 선택된 슬롯에만 작은 회전 링을 표시하면서 밝은 outline은 유지하는 쪽이 선택 상태를 더 명확하게 보여준다.
+
+## 2026-06-03 16:42:37 (소요시간: 00:00:33)
+
+### 질문
+
+교관과 사다리는 레벨 직접 배치였어?
+
+### 답변
+
+둘 다 런타임 스폰 데이터가 아니라 `BunkerMap`의 레벨 액터로 저장되는 배치다. 다만 사용자가 손으로만 둔 순수 수동 배치라기보다는 `TunaSweeperEditor.cpp`의 에디터 셋업 루틴이 `PlaceQuestNpcActor()`와 `PlaceLevelTravelActor()`로 같은 라벨의 기존 액터를 찾고, 없으면 PersistentLevel에 스폰한 뒤 맵을 저장하는 방식이다. 그래서 에디터 월드 아웃라이너에는 `TS_NPC_Instructor`와 `TS_Travel_DeployToRaid`가 직접 배치된 액터처럼 보이며, 게임 실행 중 별도 스폰 테이블에서 생성되는 대상은 아니다.

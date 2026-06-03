@@ -3895,3 +3895,37 @@
 - 레이드 이동 사다리 `TS_Travel_DeployToRaid`의 배치 좌표를 `X=577.426, Y=359.909, Z=4.0`로 변경한 것
 - 기존 RunOnce 완료 이력이 있어도 새 위치가 반영되도록 사다리 위치 전용 에디터 셋업을 추가한 것
 - 셋업을 실행해 `BunkerMap`의 기존 액터 위치를 저장하고, `TunaSweeperEditor Win64 Development` 빌드 통과 및 Unreal Editor 재실행을 완료한 것
+
+## 2026-06-03 15:40:42 (소요시간: 00:35:33)
+
+- 새 게임 시작 흐름에 난이도 선택 화면을 끼워 넣고, 난이도를 확정해야 인트로 시나리오 레벨로 이동하게 한 것.
+- 난이도 옵션 `파밍`, `일반`, `어려움`을 JSON 설명 데이터와 generated UI 텍스처 기반 버튼/아이콘으로 표시하고, 선택한 버튼은 포커스/선택 테두리 상태로 갱신되게 한 것.
+- 새 슬롯은 `bDifficultySelected=false`로 저장해 난이도 화면에서 나간 뒤 이어하기를 누르면 다시 난이도 선택 화면으로 들어가게 하고, 난이도 확정 시 `DifficultyStage`와 선택 완료 상태를 저장하게 한 것.
+- 해저 시설 분위기가 아닌 귀여운 플랫 패턴 배경으로 난이도 선택 배경을 교체하고 UI 텍스처 에셋을 `/Game/UI/Difficulty`에 임포트한 것.
+- 세이브 버전을 18로 올리고 `Docs/save_persistence.md`에 난이도 선택 완료 플래그의 저장/호환 규칙을 기록한 것.
+
+## 2026-06-03 16:25:03 (소요시간: 00:00:49)
+
+- 난이도 선택 옵션을 세로 목록이 아닌 가로로 나열된 3개 카드 배치로 변경한 것.
+- 각 난이도 카드는 카드 내부에서 아이콘, 제목, 설명을 정렬해 좁은 카드 폭에서도 텍스트가 감싸지도록 조정한 것.
+- 카드형 배치에 맞춰 난이도 버튼 배경 브러시와 아이콘 기준 크기를 조정하고 `TunaSweeperEditor Win64 Development` 빌드 통과를 확인한 것.
+
+## 2026-06-03 16:28:05 (소요시간: 00:02:29)
+
+- `WBP_IntroMenu` 컴파일 중 `SaveSlot1SelectionRingImage` 계열 위젯 변수와 C++ `UPROPERTY`가 같은 이름으로 충돌하던 문제를 수정한 것.
+- 세이브 슬롯 선택 링의 C++ 내부 캐시 멤버명을 `GeneratedSaveSlot1/2/3SelectionRingImage`로 변경하고, 실제 위젯 트리 이름 문자열은 기존 이름 그대로 유지한 것.
+- `TunaSweeperEditor Win64 Development` 빌드와 Unreal Editor 재실행 로그에서 동일한 Internal Compiler Error가 재발하지 않음을 확인한 것.
+
+## 2026-06-03 16:43:41 (소요시간: 00:08:14)
+
+- `TS_NPC_Instructor`와 `TS_Travel_DeployToRaid`를 `GameplayInteractionSpawns.json`의 `BunkerMap` 런타임 스폰 행으로 옮긴 것.
+- `UTunaSweeperEnemySpawnSubsystem`에 `quest_npc` 스폰 타입을 추가하고, 교관 NPC의 quest id, provider id, 표시명, 상호작용 표시명을 JSON에서 설정하도록 한 것.
+- 과거 레벨 직접 배치 액터가 남아 있어도 `spawn_id`, 에디터 라벨, 오브젝트 이름, 동일 클래스/좌표 기준으로 제거한 뒤 JSON 액터를 스폰하도록 중복 제거를 보강한 것.
+- `TunaSweeperEditor.cpp`에서 교관과 레이드 이동 사다리를 `BunkerMap`에 직접 배치/저장하던 에디터 셋업 함수와 스케줄러를 제거한 것.
+- `GameplayInteractionSpawns.json` 파싱, 잔여 에디터 배치 참조 검색, `TunaSweeperEditor Win64 Development` 빌드 및 Unreal Editor 실행을 확인한 것.
+
+## 2026-06-03 16:53:38 (소요시간: 00:00:37)
+
+- `LootContainerSpawns.json`의 `BunkerMap` 개발자 상자 위치를 스크린샷의 Transform Location 기준 `[441.322, 548.9291, 40.0]`으로 옮긴 것.
+- `Docs/runtime_actor_spawns.md`에 개발자 상자의 현재 스폰 데이터 위치를 기록한 것.
+- `LootContainerSpawns.json` 파싱으로 개발자 상자 행의 새 위치가 반영된 것을 확인한 것.

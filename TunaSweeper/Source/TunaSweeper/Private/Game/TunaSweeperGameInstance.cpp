@@ -27,7 +27,7 @@ namespace TunaSweeperSave
 {
 	const TCHAR* SaveSlotNamePrefix = TEXT("TunaSweeperSave_Slot");
 	const TCHAR* SaveSettingsSlotName = TEXT("TunaSweeperSaveSettings");
-	constexpr int32 CurrentSaveVersion = 17;
+	constexpr int32 CurrentSaveVersion = 18;
 	constexpr int32 SaveUserIndex = 0;
 	constexpr int32 MinSaveSlotIndex = 1;
 	constexpr int32 MaxSaveSlotIndex = 3;
@@ -768,6 +768,10 @@ FTunaSweeperSaveSlotSummary UTunaSweeperGameInstance::GetSaveSlotSummary(int32 S
 	Summary.bHasData = true;
 	Summary.TotalPlaySeconds = FMath::Max(0.0f, SaveGame->TotalPlaySeconds);
 	Summary.DifficultyStage = TunaSweeperSave::SanitizeDifficultyStage(SaveGame->DifficultyStage);
+	Summary.bDifficultySelected =
+		SaveGame->SaveVersion < 18 ||
+		SaveGame->bDifficultySelected ||
+		SaveGame->CompletedScenarioFlags.Contains(TunaSweeperScenario::OpeningScenarioFlag);
 	Summary.LastSavedAtTicks = SaveGame->LastSavedAtTicks;
 	return Summary;
 }
@@ -781,6 +785,7 @@ bool UTunaSweeperGameInstance::ActivateSaveSlot(int32 SaveSlotIndex, bool bStart
 		LoadedSlotTotalPlaySeconds = 0.0f;
 		ActiveSlotStartTimeSeconds = FPlatformTime::Seconds();
 		ActiveSaveSlotDifficultyStage = TunaSweeperSave::DefaultDifficultyStage;
+		bActiveSaveSlotDifficultySelected = false;
 		GenerateDefaultInventoryState();
 		bInventoryStateInitialized = true;
 		RefreshLegacyPlayerInventoryItems();
@@ -793,6 +798,16 @@ bool UTunaSweeperGameInstance::ActivateSaveSlot(int32 SaveSlotIndex, bool bStart
 
 	EnsureInventoryStateInitialized();
 	return true;
+}
+
+bool UTunaSweeperGameInstance::SetActiveSaveSlotDifficultyStage(int32 DifficultyStage, bool bSaveImmediately)
+{
+	EnsureInventoryStateInitialized();
+
+	ActiveSaveSlotDifficultyStage = TunaSweeperSave::SanitizeDifficultyStage(DifficultyStage);
+	bActiveSaveSlotDifficultySelected = true;
+
+	return !bSaveImmediately || SaveGameStateInternal();
 }
 
 bool UTunaSweeperGameInstance::SetActiveSaveSlotIndex(int32 SaveSlotIndex)
@@ -856,6 +871,11 @@ void UTunaSweeperGameInstance::MarkScenarioProgressFlag(FName ScenarioFlag, bool
 FName UTunaSweeperGameInstance::ResolveInitialGameplayLevelName()
 {
 	EnsureInventoryStateInitialized();
+	if (!bActiveSaveSlotDifficultySelected)
+	{
+		return FName(TEXT("IntroMap"));
+	}
+
 	return IsScenarioProgressFlagSet(TunaSweeperScenario::OpeningScenarioFlag)
 		? TunaSweeperScenario::BunkerMapName
 		: TunaSweeperScenario::OpeningScenarioMapName;
@@ -4117,6 +4137,7 @@ bool UTunaSweeperGameInstance::LoadGameState()
 	LoadedSlotTotalPlaySeconds = FMath::Max(0.0f, SaveGame->TotalPlaySeconds);
 	ActiveSlotStartTimeSeconds = FPlatformTime::Seconds();
 	ActiveSaveSlotDifficultyStage = TunaSweeperSave::SanitizeDifficultyStage(SaveGame->DifficultyStage);
+	bActiveSaveSlotDifficultySelected = SaveGame->SaveVersion < 18 || SaveGame->bDifficultySelected;
 	TotalExperiencePoints = FMath::Max<int64>(0, SaveGame->TotalExperiencePoints);
 	RaidStartExperiencePoints = TotalExperiencePoints;
 	PendingRaidExperiencePoints = 0;
@@ -4130,6 +4151,10 @@ bool UTunaSweeperGameInstance::LoadGameState()
 		{
 			CompletedScenarioFlags.Add(ScenarioFlag);
 		}
+	}
+	if (CompletedScenarioFlags.Contains(TunaSweeperScenario::OpeningScenarioFlag))
+	{
+		bActiveSaveSlotDifficultySelected = true;
 	}
 	AcquiredMemoIds.Reset();
 	for (int32 MemoId : SaveGame->AcquiredMemoIds)
@@ -4389,6 +4414,7 @@ bool UTunaSweeperGameInstance::SaveGameStateInternal(
 	SaveGame->SaveSlotIndex = ActiveSaveSlotIndex;
 	SaveGame->TotalPlaySeconds = GetCurrentActiveSlotTotalPlaySeconds();
 	SaveGame->DifficultyStage = TunaSweeperSave::SanitizeDifficultyStage(ActiveSaveSlotDifficultyStage);
+	SaveGame->bDifficultySelected = bActiveSaveSlotDifficultySelected;
 	SaveGame->LastSavedAtTicks = FDateTime::Now().GetTicks();
 	SaveGame->TotalExperiencePoints = FMath::Max<int64>(0, TotalExperiencePoints);
 	SaveGame->CompletedScenarioFlags = CompletedScenarioFlags.Array();
@@ -4590,6 +4616,7 @@ void UTunaSweeperGameInstance::ResetRuntimeStateForSaveSlotSelection()
 	LoadedSlotTotalPlaySeconds = 0.0f;
 	ActiveSlotStartTimeSeconds = FPlatformTime::Seconds();
 	ActiveSaveSlotDifficultyStage = TunaSweeperSave::DefaultDifficultyStage;
+	bActiveSaveSlotDifficultySelected = false;
 	TotalExperiencePoints = 0;
 	RaidStartExperiencePoints = 0;
 	PendingRaidExperiencePoints = 0;
@@ -4621,6 +4648,7 @@ void UTunaSweeperGameInstance::GenerateDefaultInventoryState()
 {
 	ItemInstancesByUid.Reset();
 	ActiveSaveSlotDifficultyStage = TunaSweeperSave::DefaultDifficultyStage;
+	bActiveSaveSlotDifficultySelected = false;
 	TotalExperiencePoints = 0;
 	RaidStartExperiencePoints = 0;
 	PendingRaidExperiencePoints = 0;

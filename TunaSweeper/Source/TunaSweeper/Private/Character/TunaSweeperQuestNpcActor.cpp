@@ -113,7 +113,9 @@ void ATunaSweeperQuestNpcActor::ConfigureQuestNpcDefaults(
 	FName InQuestId,
 	const FText& InNpcDisplayName,
 	TSoftClassPtr<UTunaSweeperInteractionMarkerWidget> InMarkerWidgetClass,
-	FName InProviderId)
+	FName InProviderId,
+	const FText& InInteractionDisplayName,
+	FName InInteractionDisplayNameStringKey)
 {
 	Modify();
 	QuestId = InQuestId;
@@ -121,8 +123,9 @@ void ATunaSweeperQuestNpcActor::ConfigureQuestNpcDefaults(
 	NpcDisplayName = InNpcDisplayName;
 	ConfigureInteractionDefaults(
 		ETunaSweeperInteractionType::Quest,
-		FText::FromString(TEXT("\uD018\uC2A4\uD2B8")),
-		InMarkerWidgetClass);
+		InInteractionDisplayName.IsEmpty() ? FText::FromString(TEXT("\uD018\uC2A4\uD2B8")) : InInteractionDisplayName,
+		InMarkerWidgetClass,
+		InInteractionDisplayNameStringKey.IsNone() ? FName(TEXT("ui.quest.interaction_name")) : InInteractionDisplayNameStringKey);
 }
 
 void ATunaSweeperQuestNpcActor::RefreshQuestNoticeVisibility()

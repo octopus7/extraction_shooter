@@ -6,7 +6,7 @@ Update it whenever a new state field is expected to persist across save slots, l
 ## Current Save Container
 
 - Save object: `UTunaSweeperSaveGame`
-- Current save version: `17`
+- Current save version: `18`
 - Runtime owner: `UTunaSweeperGameInstance`
 - Save entry point: `UTunaSweeperGameInstance::SaveGameStateInternal()`
 - Load entry point: `UTunaSweeperGameInstance::LoadGameState()`
@@ -32,7 +32,8 @@ Raid item changes keep their existing extraction/death/level-travel save rules a
 - `SaveVersion`
 - `SaveSlotIndex`
 - `TotalPlaySeconds`
-- `DifficultyStage`: save-slot difficulty stage, clamped to `1..3`; `1` is the default and currently displays as `파밍`.
+- `DifficultyStage`: save-slot difficulty stage, clamped to `1..3`; `1` is Farming, `2` is Normal, and `3` is Hard. New slots keep the default `1` until the player confirms a difficulty.
+- `bDifficultySelected`: whether the active slot has confirmed the difficulty selection screen. New save slots start as `false`, so continuing a slot created at the difficulty screen returns to that screen until the player presses game start. Saves older than version 18 are treated as already selected for compatibility.
 - `LastSavedAtTicks`
 
 ### Scenario Progress Flags

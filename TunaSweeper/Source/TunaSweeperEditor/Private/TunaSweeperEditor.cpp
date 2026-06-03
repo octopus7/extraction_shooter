@@ -185,7 +185,6 @@ namespace TunaSweeperEditorSetup
 	const FString CannedTunaIconImportTaskId = TEXT("2026-05-11_ImportCannedTunaIconV1");
 	const FString BackpackInventoryTaskId = TEXT("2026-05-16_CreateEquipmentInventoryAssetsV3");
 	const FString IntroMenuAndLevelTravelTaskId = TEXT("2026-05-24_CreateTitleIntroMenuPersistentSaveSlotSelectionLevelTravelLadderInitialScaleV1");
-	const FString DeployToRaidLadderLocationTaskId = TEXT("2026-06-03_UpdateDeployToRaidLadderLocationV1");
 	const FString IntroMenuGraphicsSettingsTaskId = TEXT("2026-05-30_CenterTitleSaveSlotInfoV1");
 	const FString OpeningScenarioPresentationTaskId = TEXT("2026-05-19_CreateOpeningScenarioPresentationV2");
 	const FString LevelTransitionVideoTaskId = TEXT("2026-05-16_AddBidirectionalLevelTransitionVideoV3");
@@ -11197,41 +11196,6 @@ namespace TunaSweeperEditorSetup
 		return SaveAsset(WarpPointBlueprint);
 	}
 
-	bool ConfigureLevelTravelActorInstance(
-		AActor* Actor,
-		FName TargetLevelName,
-		const FText& DisplayName,
-		TSoftObjectPtr<UMediaSource> TransitionMediaSource = TSoftObjectPtr<UMediaSource>(),
-		const FText& TransitionMessage = FText::GetEmpty(),
-		TSoftObjectPtr<UStaticMesh> VisualMeshOverride = TSoftObjectPtr<UStaticMesh>(),
-		const FVector& VisualMeshScale = FVector(0.75f, 0.75f, 0.75f),
-		const FVector& VisualMeshRelativeLocation = FVector::ZeroVector)
-	{
-		ATunaSweeperLevelTravelInteractableActor* LevelTravelActor = Cast<ATunaSweeperLevelTravelInteractableActor>(Actor);
-		if (!LevelTravelActor)
-		{
-			UE_LOG(LogTunaSweeperEditor, Error, TEXT("%s is not an ATunaSweeperLevelTravelInteractableActor."), *GetNameSafe(Actor));
-			return false;
-		}
-
-		LevelTravelActor->Modify();
-		LevelTravelActor->ConfigureLevelTravelDefaults(
-			TargetLevelName,
-			DisplayName,
-			TSoftClassPtr<UTunaSweeperInteractionMarkerWidget>(
-				FSoftObjectPath(GetAssetClassPath(UIAssetPath, InteractionMarkerAssetName))),
-			TransitionMediaSource,
-			TSoftClassPtr<UTunaSweeperLevelTransitionWidget>(
-				FSoftObjectPath(GetAssetClassPath(UIAssetPath, LevelTransitionVideoWidgetAssetName))),
-			TransitionMessage);
-		LevelTravelActor->ConfigureLevelTravelVisualDefaults(
-			VisualMeshOverride,
-			VisualMeshScale,
-			VisualMeshRelativeLocation);
-		LevelTravelActor->MarkPackageDirty();
-		return true;
-	}
-
 	bool ConfigureSelfDestructBlueprint(UBlueprint* SelfDestructBlueprint)
 	{
 		if (!SelfDestructBlueprint)
@@ -11312,26 +11276,6 @@ namespace TunaSweeperEditorSetup
 		FKismetEditorUtilities::CompileBlueprint(QuestNpcBlueprint);
 		QuestNpcBlueprint->MarkPackageDirty();
 		return SaveAsset(QuestNpcBlueprint);
-	}
-
-	bool ConfigureQuestNpcActorInstance(AActor* Actor)
-	{
-		ATunaSweeperQuestNpcActor* QuestNpcActor = Cast<ATunaSweeperQuestNpcActor>(Actor);
-		if (!QuestNpcActor)
-		{
-			UE_LOG(LogTunaSweeperEditor, Error, TEXT("%s is not an ATunaSweeperQuestNpcActor."), *GetNameSafe(Actor));
-			return false;
-		}
-
-		QuestNpcActor->Modify();
-		QuestNpcActor->ConfigureQuestNpcDefaults(
-			UTunaSweeperQuestSubsystem::GetFirstOutingQuestId(),
-			FText::FromString(TEXT("\uAD50\uAD00")),
-			TSoftClassPtr<UTunaSweeperInteractionMarkerWidget>(
-				FSoftObjectPath(GetAssetClassPath(UIAssetPath, InteractionMarkerAssetName))),
-			UTunaSweeperQuestSubsystem::GetInstructorProviderId());
-		QuestNpcActor->MarkPackageDirty();
-		return true;
 	}
 
 	bool ConfigurePickupItemIconWidgetBlueprint(UWidgetBlueprint* WidgetBlueprint)
@@ -11723,107 +11667,6 @@ namespace TunaSweeperEditorSetup
 		return EnsureOpeningScenarioUiTextures() && EnsureOpeningScenarioMap();
 	}
 
-	bool PlaceLevelTravelActor(
-		UWorld* World,
-		UBlueprint* ActorBlueprint,
-		const FString& ActorLabel,
-		const FVector& Location,
-		FName TargetLevelName,
-		const FText& DisplayName,
-		TSoftObjectPtr<UMediaSource> TransitionMediaSource = TSoftObjectPtr<UMediaSource>(),
-		const FText& TransitionMessage = FText::GetEmpty(),
-		TSoftObjectPtr<UStaticMesh> VisualMeshOverride = TSoftObjectPtr<UStaticMesh>(),
-		const FVector& VisualMeshScale = FVector(0.75f, 0.75f, 0.75f),
-		const FVector& VisualMeshRelativeLocation = FVector::ZeroVector)
-	{
-		if (!World || !ActorBlueprint || !ActorBlueprint->GeneratedClass)
-		{
-			return false;
-		}
-
-		if (AActor* ExistingActor = FindActorByLabel(World, ActorLabel))
-		{
-			ExistingActor->Modify();
-			ExistingActor->SetActorLocation(Location);
-			ExistingActor->SetActorRotation(FRotator::ZeroRotator);
-			return ConfigureLevelTravelActorInstance(
-				ExistingActor,
-				TargetLevelName,
-				DisplayName,
-				TransitionMediaSource,
-				TransitionMessage,
-				VisualMeshOverride,
-				VisualMeshScale,
-				VisualMeshRelativeLocation);
-		}
-
-		World->PersistentLevel->Modify();
-
-		FActorSpawnParameters SpawnParameters;
-		SpawnParameters.OverrideLevel = World->PersistentLevel;
-		SpawnParameters.Name = MakeUniqueObjectName(World->PersistentLevel, ActorBlueprint->GeneratedClass, FName(*ActorLabel));
-		SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-
-		AActor* SpawnedActor = World->SpawnActor<AActor>(ActorBlueprint->GeneratedClass, Location, FRotator::ZeroRotator, SpawnParameters);
-		if (!SpawnedActor)
-		{
-			return false;
-		}
-
-		SpawnedActor->SetActorLabel(ActorLabel);
-		if (!ConfigureLevelTravelActorInstance(
-			SpawnedActor,
-			TargetLevelName,
-			DisplayName,
-			TransitionMediaSource,
-			TransitionMessage,
-			VisualMeshOverride,
-			VisualMeshScale,
-			VisualMeshRelativeLocation))
-		{
-			return false;
-		}
-		SpawnedActor->MarkPackageDirty();
-		return true;
-	}
-
-	bool PlaceQuestNpcActor(UWorld* World, UBlueprint* ActorBlueprint, const FString& ActorLabel, const FVector& Location)
-	{
-		if (!World || !ActorBlueprint || !ActorBlueprint->GeneratedClass)
-		{
-			return false;
-		}
-
-		if (AActor* ExistingActor = FindActorByLabel(World, ActorLabel))
-		{
-			ExistingActor->Modify();
-			ExistingActor->SetActorLocation(Location);
-			ExistingActor->SetActorRotation(FRotator::ZeroRotator);
-			return ConfigureQuestNpcActorInstance(ExistingActor);
-		}
-
-		World->PersistentLevel->Modify();
-
-		FActorSpawnParameters SpawnParameters;
-		SpawnParameters.OverrideLevel = World->PersistentLevel;
-		SpawnParameters.Name = MakeUniqueObjectName(World->PersistentLevel, ActorBlueprint->GeneratedClass, FName(*ActorLabel));
-		SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-
-		AActor* SpawnedActor = World->SpawnActor<AActor>(ActorBlueprint->GeneratedClass, Location, FRotator::ZeroRotator, SpawnParameters);
-		if (!SpawnedActor)
-		{
-			return false;
-		}
-
-		SpawnedActor->SetActorLabel(ActorLabel);
-		if (!ConfigureQuestNpcActorInstance(SpawnedActor))
-		{
-			return false;
-		}
-		SpawnedActor->MarkPackageDirty();
-		return true;
-	}
-
 	bool PlacePickupItemActor(UWorld* World, UBlueprint* ActorBlueprint, const FString& ActorLabel, const FVector& Location, int32 ItemId)
 	{
 		if (!World || !ActorBlueprint || !ActorBlueprint->GeneratedClass)
@@ -12169,44 +12012,6 @@ namespace TunaSweeperEditorSetup
 		return bConfigured;
 	}
 
-	bool PlaceLevelTravelActorsInBunkerAndRaidMaps(UBlueprint* LevelTravelBlueprint)
-	{
-		if (!LevelTravelBlueprint)
-		{
-			return false;
-		}
-
-		const TSoftObjectPtr<UMediaSource> BunkerToRaidMediaSource(
-			FSoftObjectPath(GetAssetObjectPath(VideoAssetPath, BunkerToRaidMediaSourceAssetName)));
-		if (!EnsureLevelTravelLadderMeshAsset())
-		{
-			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to create %s."), *LevelTravelLadderMeshAssetName);
-			return false;
-		}
-		const TSoftObjectPtr<UStaticMesh> LevelTravelLadderMesh(
-			FSoftObjectPath(GetAssetObjectPath(InteractionAssetPath, LevelTravelLadderMeshAssetName)));
-
-		UWorld* BunkerWorld = LoadEditorMapForSetup(BunkerMapPackagePath);
-		const bool bBunkerPlaced =
-			BunkerWorld &&
-			PlaceLevelTravelActor(
-				BunkerWorld,
-				LevelTravelBlueprint,
-				TEXT("TS_Travel_DeployToRaid"),
-				FVector(577.426f, 359.909f, 4.0f),
-				FName(TEXT("RaidMap")),
-				FText::FromString(TEXT("Deploy")),
-				BunkerToRaidMediaSource,
-				FText::FromString(TEXT("Deploying to Raid")),
-				LevelTravelLadderMesh,
-				FVector::OneVector,
-				FVector::ZeroVector) &&
-			UEditorLoadingAndSavingUtils::SaveMap(BunkerWorld, BunkerMapPackagePath);
-
-		LoadEditorMapForSetup(IntroMapPackagePath);
-		return bBunkerPlaced;
-	}
-
 	bool EnsureIntroMenuAndLevelTravelSetup()
 	{
 		UWidgetBlueprint* IntroMenuWidgetBlueprint = EnsureWidgetBlueprint(
@@ -12229,22 +12034,7 @@ namespace TunaSweeperEditorSetup
 			ConfigureIntroMenuWidgetBlueprint(IntroMenuWidgetBlueprint) &&
 			ConfigureLevelTravelBlueprint(LevelTravelBlueprint);
 
-		return bConfigured && PlaceLevelTravelActorsInBunkerAndRaidMaps(LevelTravelBlueprint);
-	}
-
-	bool EnsureDeployToRaidLadderLocationSetup()
-	{
-		UBlueprint* LevelTravelBlueprint = EnsureBlueprint(
-			InteractionAssetPath,
-			LevelTravelInteractionAssetName,
-			ATunaSweeperLevelTravelInteractableActor::StaticClass());
-
-		if (!LevelTravelBlueprint)
-		{
-			return false;
-		}
-
-		return PlaceLevelTravelActorsInBunkerAndRaidMaps(LevelTravelBlueprint);
+		return bConfigured;
 	}
 
 	bool EnsureIntroMenuGraphicsSettingsSetup()
@@ -12281,28 +12071,7 @@ namespace TunaSweeperEditorSetup
 			ConfigureLevelTransitionVideoWidgetBlueprint(LevelTransitionWidgetBlueprint) &&
 			ConfigureLevelTravelBlueprint(LevelTravelBlueprint);
 
-		return bConfigured && PlaceLevelTravelActorsInBunkerAndRaidMaps(LevelTravelBlueprint);
-	}
-
-	bool PlaceFirstOutingQuestNpcInBunkerMap(UBlueprint* QuestNpcBlueprint)
-	{
-		if (!QuestNpcBlueprint)
-		{
-			return false;
-		}
-
-		UWorld* BunkerWorld = LoadEditorMapForSetup(BunkerMapPackagePath);
-		const bool bNpcPlaced =
-			BunkerWorld &&
-			PlaceQuestNpcActor(
-				BunkerWorld,
-				QuestNpcBlueprint,
-				TEXT("TS_NPC_Instructor"),
-				FVector(700.0f, 0.0f, 100.0f)) &&
-			UEditorLoadingAndSavingUtils::SaveMap(BunkerWorld, BunkerMapPackagePath);
-
-		LoadEditorMapForSetup(IntroMapPackagePath);
-		return bNpcPlaced;
+		return bConfigured;
 	}
 
 	bool EnsureFirstOutingQuestSetup()
@@ -12330,7 +12099,7 @@ namespace TunaSweeperEditorSetup
 			ConfigureQuestWidgetBlueprint(QuestInteractionWidgetBlueprint) &&
 			ConfigureQuestNpcBlueprint(QuestNpcBlueprint);
 
-		return bConfigured && PlaceFirstOutingQuestNpcInBunkerMap(QuestNpcBlueprint);
+		return bConfigured;
 	}
 
 	bool EnsureWorldProgressInteractionAssets()
@@ -12487,41 +12256,6 @@ namespace TunaSweeperEditorSetup
 					if (bCompleted &&
 						(FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperSetupQuit")) ||
 							FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperIntroSetupQuit"))))
-					{
-						FPlatformMisc::RequestExit(false);
-					}
-
-					return !bCompleted;
-				}),
-			1.0f);
-	}
-
-	void ScheduleDeployToRaidLadderLocationSetup()
-	{
-		if (FTunaSweeperEditorRunOnce::HasCompleted(DeployToRaidLadderLocationTaskId))
-		{
-			return;
-		}
-
-		FTSTicker::GetCoreTicker().AddTicker(
-			FTickerDelegate::CreateLambda(
-				[](float)
-				{
-					UWorld* EditorWorld = GEditor ? GEditor->GetEditorWorldContext().World() : nullptr;
-					if (!EditorWorld)
-					{
-						return true;
-					}
-
-					FTunaSweeperEditorRunOnce::Run(
-						DeployToRaidLadderLocationTaskId,
-						[]()
-						{
-							return EnsureDeployToRaidLadderLocationSetup();
-						});
-
-					const bool bCompleted = FTunaSweeperEditorRunOnce::HasCompleted(DeployToRaidLadderLocationTaskId);
-					if (bCompleted && FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperSetupQuit")))
 					{
 						FPlatformMisc::RequestExit(false);
 					}
@@ -13154,7 +12888,6 @@ public:
 		TunaSweeperEditorSetup::ScheduleLootContainerAndSpawnerAssetsAndMapPlacement();
 		TunaSweeperEditorSetup::ScheduleEditorMapCaptureSetup();
 		TunaSweeperEditorSetup::ScheduleIntroMenuAndLevelTravelSetup();
-		TunaSweeperEditorSetup::ScheduleDeployToRaidLadderLocationSetup();
 		TunaSweeperEditorSetup::ScheduleOpeningScenarioPresentationSetup();
 		TunaSweeperEditorSetup::ScheduleBunkerToRaidTransitionVideoSetup();
 		TunaSweeperEditorSetup::ScheduleFirstOutingQuestSetup();

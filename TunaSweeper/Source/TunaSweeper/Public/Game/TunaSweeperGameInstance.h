@@ -70,6 +70,9 @@ struct TUNASWEEPER_API FTunaSweeperSaveSlotSummary
 	int32 DifficultyStage = 1;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Save")
+	bool bDifficultySelected = false;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Save")
 	int64 LastSavedAtTicks = 0;
 };
 
@@ -343,6 +346,15 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Save")
 	bool ActivateSaveSlot(int32 SaveSlotIndex, bool bStartNewGame);
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Save")
+	int32 GetActiveSaveSlotDifficultyStage() const { return ActiveSaveSlotDifficultyStage; }
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Save")
+	bool IsActiveSaveSlotDifficultySelected() const { return bActiveSaveSlotDifficultySelected; }
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Save")
+	bool SetActiveSaveSlotDifficultyStage(int32 DifficultyStage, bool bSaveImmediately = true);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Save")
 	bool DeleteSaveSlot(int32 SaveSlotIndex);
@@ -1062,6 +1074,9 @@ private:
 
 	UPROPERTY(Transient)
 	int32 ActiveSaveSlotDifficultyStage = 1;
+
+	UPROPERTY(Transient)
+	bool bActiveSaveSlotDifficultySelected = false;
 
 	UPROPERTY(Transient)
 	ETunaSweeperItemTextLanguage CurrentTextLanguage = ETunaSweeperItemTextLanguage::English;

@@ -8,11 +8,14 @@
 #include "TunaSweeperIntroMenuWidget.generated.h"
 
 class UButton;
+class UBorder;
+class UHorizontalBox;
 class UImage;
 class UScrollBox;
 class USizeBox;
 class UTextBlock;
 class UTexture2D;
+class UVerticalBox;
 class UWidget;
 class UTunaSweeperScreenFadeWidget;
 class UTunaSweeperTitleWindParticleWidget;
@@ -258,6 +261,21 @@ private:
 	void HandleAlwaysNewStartClicked();
 
 	UFUNCTION()
+	void HandleDifficultyFarmingClicked();
+
+	UFUNCTION()
+	void HandleDifficultyNormalClicked();
+
+	UFUNCTION()
+	void HandleDifficultyHardClicked();
+
+	UFUNCTION()
+	void HandleDifficultyStartClicked();
+
+	UFUNCTION()
+	void HandleDifficultyBackClicked();
+
+	UFUNCTION()
 	void HandleSaveSlot1Focused();
 
 	UFUNCTION()
@@ -353,6 +371,7 @@ private:
 	void HandleLanguageChanged();
 
 	void ShowMainMenu();
+	void ShowDifficultySelection();
 	void ShowSaveSlotSelection();
 	void ShowSettingsPanel();
 	void ShowGraphicsSettingsTab();
@@ -362,6 +381,7 @@ private:
 	void SetTitleLogoVisible(bool bVisible);
 	void SelectSaveSlot(int32 SaveSlotIndex);
 	void RefreshMainMenu();
+	void RefreshDifficultySelectionPanel();
 	void RefreshSaveSlotMenu();
 	void RefreshSettingsPanel();
 	void RefreshInterfaceSettingsPanel();
@@ -390,6 +410,24 @@ private:
 	FText BuildLanguageOptionText(ETunaSweeperItemTextLanguage Language, bool bSelected) const;
 	FText ResolveUiText(FName StringKey, const FText& FallbackText) const;
 	void SetNamedText(FName WidgetName, const FText& Text) const;
+	void EnsureDifficultySelectionPanel();
+	void SelectDifficultyStage(int32 DifficultyStage);
+	void RefreshDifficultyOption(
+		int32 DifficultyStage,
+		UButton* Button,
+		UImage* BackgroundImage,
+		UBorder* SelectionBorder,
+		UTextBlock* TitleText,
+		UTextBlock* DescriptionText);
+	void ApplyDifficultyButtonStyle(UButton* Button) const;
+	void ConfigureDifficultyCardBackground(UImage* BackgroundImage, bool bSelected);
+	void ConfigureDifficultyActionButtonBackground(UImage* BackgroundImage, bool bSelected);
+	void ConfigureDifficultySelectionBorder(UBorder* SelectionBorder, bool bSelected);
+	void ConfigureDifficultyIcon(UImage* IconImage, int32 DifficultyStage);
+	void LoadDifficultyDefinitions();
+	FText BuildDifficultyTitleText(int32 DifficultyStage) const;
+	FText BuildDifficultyDescriptionText(int32 DifficultyStage) const;
+	UTexture2D* LoadDifficultyTexture(TObjectPtr<UTexture2D>& TextureCache, const TCHAR* TexturePath);
 	void EnsureAlwaysNewStartButton();
 	void SetAlwaysNewStartButtonVisible(bool bVisible);
 	FText BuildCurrentSaveSlotText(int32 SaveSlotIndex) const;
@@ -398,8 +436,9 @@ private:
 	FString BuildCreditsColumnText(int32 ColumnIndex) const;
 	FString FormatSaveTime(int64 LastSavedAtTicks) const;
 	FString FormatPlayTime(float TotalPlaySeconds) const;
-	FText BuildSaveSlotDifficultyText(int32 DifficultyStage) const;
+	FText BuildSaveSlotDifficultyText(int32 DifficultyStage, bool bDifficultySelected = true) const;
 	bool IsSaveSlotSelectionVisible() const;
+	bool IsDifficultySelectionVisible() const;
 	bool IsCreditsPanelVisible() const;
 	bool CanDeleteSelectedSaveSlot() const;
 	void ApplyDisplaySettings(EWindowMode::Type WindowMode);
@@ -421,12 +460,21 @@ private:
 		const FText& Label,
 		int32 LabelFontSize,
 		int32 IconFontSize);
+	void BeginTravelToLevel(FName TargetLevelName);
 	void BeginStartTravel(bool bAlwaysNewStart);
 	void ReloadIntroLevel();
 	void OpenPendingStartTargetLevel();
 	void SetStartTravelControlsEnabled(bool bEnabled);
 
+	struct FDifficultyOptionText
+	{
+		int32 DifficultyStage = 1;
+		FText Title;
+		FText Description;
+	};
+
 	int32 SelectedSaveSlotIndex = INDEX_NONE;
+	int32 SelectedDifficultyStage = INDEX_NONE;
 	float DeleteHoldElapsedSeconds = 0.0f;
 	float CreditsScrollOffset = 0.0f;
 	float SaveSlotSelectionRingAngle = 0.0f;
@@ -435,6 +483,7 @@ private:
 	bool bStartTravelPending = false;
 	bool bTitleMenuButtonContentLayoutApplied = false;
 	bool bShowingInterfaceSettingsTab = false;
+	bool bDifficultyDefinitionsLoaded = false;
 	ETunaSweeperTitleDLSSMode PreferredDLSSMode = ETunaSweeperTitleDLSSMode::Performance;
 	ETunaSweeperItemTextLanguage PendingInterfaceLanguage = ETunaSweeperItemTextLanguage::English;
 	FName PendingStartTargetLevelName = NAME_None;
@@ -444,13 +493,88 @@ private:
 	TObjectPtr<UWidget> AlwaysNewStartButtonContainer;
 
 	UPROPERTY(Transient)
-	TObjectPtr<UImage> SaveSlot1SelectionRingImage;
+	TObjectPtr<UWidget> DifficultySelectPanel;
 
 	UPROPERTY(Transient)
-	TObjectPtr<UImage> SaveSlot2SelectionRingImage;
+	TObjectPtr<UImage> DifficultyBackgroundImage;
 
 	UPROPERTY(Transient)
-	TObjectPtr<UImage> SaveSlot3SelectionRingImage;
+	TObjectPtr<UButton> DifficultyFarmingButton;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UButton> DifficultyNormalButton;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UButton> DifficultyHardButton;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UButton> DifficultyStartButton;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UButton> DifficultyBackButton;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UImage> DifficultyFarmingBackgroundImage;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UImage> DifficultyNormalBackgroundImage;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UImage> DifficultyHardBackgroundImage;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UBorder> DifficultyFarmingSelectionBorder;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UBorder> DifficultyNormalSelectionBorder;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UBorder> DifficultyHardSelectionBorder;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UImage> DifficultyFarmingIconImage;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UImage> DifficultyNormalIconImage;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UImage> DifficultyHardIconImage;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTextBlock> DifficultyTitleText;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTextBlock> DifficultyFarmingTitleText;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTextBlock> DifficultyNormalTitleText;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTextBlock> DifficultyHardTitleText;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTextBlock> DifficultyFarmingDescriptionText;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTextBlock> DifficultyNormalDescriptionText;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTextBlock> DifficultyHardDescriptionText;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTextBlock> DifficultyStartButtonText;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTextBlock> DifficultyBackButtonText;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UImage> GeneratedSaveSlot1SelectionRingImage;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UImage> GeneratedSaveSlot2SelectionRingImage;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UImage> GeneratedSaveSlot3SelectionRingImage;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UTexture2D> SaveSlotSelectionRingTexture;
@@ -460,6 +584,26 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<UTunaSweeperTitleWindParticleWidget> TitleWindParticleOverlay;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTexture2D> DifficultyBackgroundTexture;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTexture2D> DifficultyCardFrameTexture;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTexture2D> DifficultyActionButtonTexture;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTexture2D> DifficultyFarmingIconTexture;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTexture2D> DifficultyNormalIconTexture;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTexture2D> DifficultyHardIconTexture;
+
+	TArray<FDifficultyOptionText> DifficultyOptionTexts;
 
 	static constexpr float DeleteHoldDurationSeconds = 3.0f;
 	static constexpr float CreditsScrollSpeed = 34.0f;

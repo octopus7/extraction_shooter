@@ -34,7 +34,9 @@ public:
 		FName InQuestId,
 		const FText& InNpcDisplayName,
 		TSoftClassPtr<UTunaSweeperInteractionMarkerWidget> InMarkerWidgetClass,
-		FName InProviderId = NAME_None);
+		FName InProviderId = NAME_None,
+		const FText& InInteractionDisplayName = FText::GetEmpty(),
+		FName InInteractionDisplayNameStringKey = NAME_None);
 
 protected:
 	void RefreshQuestNoticeVisibility();

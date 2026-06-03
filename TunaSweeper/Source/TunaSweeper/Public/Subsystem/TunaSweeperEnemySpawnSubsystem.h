@@ -14,6 +14,7 @@ class ATunaSweeperLevelTravelInteractableActor;
 class ATunaSweeperLootContainerActor;
 class ATunaSweeperLootContainerSpawnInteractableActor;
 class ATunaSweeperPickupItemActor;
+class ATunaSweeperQuestNpcActor;
 class ATunaSweeperRollingBomber;
 class ATunaSweeperRollingBomberSpawner;
 class ATunaSweeperSandbagCoverActor;
@@ -116,7 +117,8 @@ public:
 		ShootingPracticeDummy,
 		Shop,
 		Workbench,
-		PiggyBank
+		PiggyBank,
+		QuestNpc
 	};
 
 private:
@@ -237,6 +239,9 @@ private:
 		int32 ShopId = 1;
 		int32 WorkbenchId = 1;
 		int32 CurrencyGrantAmount = 1000;
+		FName QuestId;
+		FName QuestProviderId;
+		FText NpcDisplayName;
 		float MinSpawnRadius = 160.0f;
 		float MaxSpawnRadius = 420.0f;
 		float SpawnTraceHeight = 800.0f;
