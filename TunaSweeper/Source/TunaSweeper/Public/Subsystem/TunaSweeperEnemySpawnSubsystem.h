@@ -261,7 +261,7 @@ private:
 		float RollingBomberSpawnerMaxHealth = 80.0f;
 		int32 RollingBomberSpawnerExperienceValue = 120;
 
-		FVector SandbagCoverBoxExtent = FVector(37.5f, 160.0f, 45.0f);
+		FVector SandbagCoverBoxExtent = FVector(37.5f, 160.0f, 60.0f);
 		float SandbagCoverMaxHealth = 70.0f;
 		float SandbagCoverPassthroughRadius = 62.5f;
 
