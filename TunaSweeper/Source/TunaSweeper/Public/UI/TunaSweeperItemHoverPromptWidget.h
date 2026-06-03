@@ -86,6 +86,15 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Hover Prompt", meta = (BindWidgetOptional))
 	TObjectPtr<UTextBlock> SortLockActionText;
 
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Hover Prompt", meta = (BindWidgetOptional))
+	TObjectPtr<UWidget> SplitDragActionRow;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Hover Prompt", meta = (BindWidgetOptional))
+	TObjectPtr<UTextBlock> SplitDragKeyText;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item Hover Prompt", meta = (BindWidgetOptional))
+	TObjectPtr<UTextBlock> SplitDragActionText;
+
 private:
 	void BuildNativeWidgetTree();
 	void CacheNamedWidgets();
@@ -96,6 +105,7 @@ private:
 	FText BuildPriceText() const;
 	bool ShouldShowCurrencyIconForPrice() const;
 	bool CanUseCachedItem() const;
+	bool CanSplitDragCachedItem() const;
 
 	UPROPERTY(Transient)
 	FTunaSweeperItemStackTileData CachedTileData;

@@ -22,7 +22,7 @@ namespace TunaSweeperItemHoverPrompt
 	constexpr float PromptOffsetX = 16.0f;
 	constexpr float PromptOffsetY = 16.0f;
 	constexpr float InfoBoxWidth = 300.0f;
-	constexpr float ActionBoxWidth = 154.0f;
+	constexpr float ActionBoxWidth = 200.0f;
 	constexpr float PromptGap = 6.0f;
 	constexpr float PromptWidth = InfoBoxWidth + ActionBoxWidth + PromptGap;
 	constexpr float MinPromptHeight = 124.0f;
@@ -367,6 +367,22 @@ void UTunaSweeperItemHoverPromptWidget::BuildNativeWidgetTree()
 	DropKeyText = RawDropKeyText;
 	DropActionText = RawDropActionText;
 
+	UTextBlock* RawSplitDragKeyText = nullptr;
+	UTextBlock* RawSplitDragActionText = nullptr;
+	SplitDragActionRow = TunaSweeperItemHoverPrompt::AddActionRow(
+		WidgetTree,
+		ActionHintsStack,
+		TEXT("SplitDrag"),
+		FText::FromString(TEXT("Ctrl")),
+		TunaSweeperItemHoverPrompt::ResolveUiText(
+			GetGameInstance<UTunaSweeperGameInstance>(),
+			TEXT("ui.item_hover.split_drag"),
+			TEXT("+ \uB4DC\uB798\uADF8 : \uBD84\uD560")),
+		RawSplitDragKeyText,
+		RawSplitDragActionText);
+	SplitDragKeyText = RawSplitDragKeyText;
+	SplitDragActionText = RawSplitDragActionText;
+
 	UHorizontalBoxSlot* InfoSlot = PromptRootRow->AddChildToHorizontalBox(InfoSizeBox);
 	if (InfoSlot)
 	{
@@ -469,6 +485,18 @@ void UTunaSweeperItemHoverPromptWidget::CacheNamedWidgets()
 	if (!SortLockActionText)
 	{
 		SortLockActionText = Cast<UTextBlock>(WidgetTree->FindWidget(FName(TEXT("SortLockActionText"))));
+	}
+	if (!SplitDragActionRow)
+	{
+		SplitDragActionRow = WidgetTree->FindWidget(FName(TEXT("SplitDragActionRow")));
+	}
+	if (!SplitDragKeyText)
+	{
+		SplitDragKeyText = Cast<UTextBlock>(WidgetTree->FindWidget(FName(TEXT("SplitDragKeyText"))));
+	}
+	if (!SplitDragActionText)
+	{
+		SplitDragActionText = Cast<UTextBlock>(WidgetTree->FindWidget(FName(TEXT("SplitDragActionText"))));
 	}
 }
 
@@ -577,6 +605,24 @@ void UTunaSweeperItemHoverPromptWidget::ApplyTileData()
 			CachedTileData.Source == ETunaSweeperItemSlotSource::WorkbenchBlueprintItem
 				? ESlateVisibility::Collapsed
 				: ESlateVisibility::HitTestInvisible);
+	}
+	if (SplitDragActionRow)
+	{
+		SplitDragActionRow->SetVisibility(
+			CanSplitDragCachedItem()
+				? ESlateVisibility::HitTestInvisible
+				: ESlateVisibility::Collapsed);
+	}
+	if (SplitDragKeyText)
+	{
+		SplitDragKeyText->SetText(FText::FromString(TEXT("Ctrl")));
+	}
+	if (SplitDragActionText)
+	{
+		SplitDragActionText->SetText(TunaSweeperItemHoverPrompt::ResolveUiText(
+			GetGameInstance<UTunaSweeperGameInstance>(),
+			TEXT("ui.item_hover.split_drag"),
+			TEXT("+ \uB4DC\uB798\uADF8 : \uBD84\uD560")));
 	}
 	if (UseActionRow)
 	{
@@ -766,4 +812,22 @@ bool UTunaSweeperItemHoverPromptWidget::CanUseCachedItem() const
 	return !FMath::IsNearlyZero(CachedTileData.ItemDefinition.UseHealthDelta) ||
 		!FMath::IsNearlyZero(CachedTileData.ItemDefinition.UseFoodDelta) ||
 		!FMath::IsNearlyZero(CachedTileData.ItemDefinition.UseHydrationDelta);
+}
+
+bool UTunaSweeperItemHoverPromptWidget::CanSplitDragCachedItem() const
+{
+	if (CachedTileData.bIsEmpty ||
+		CachedTileData.Source == ETunaSweeperItemSlotSource::Shop ||
+		CachedTileData.Source == ETunaSweeperItemSlotSource::WorkbenchRecipe ||
+		CachedTileData.Source == ETunaSweeperItemSlotSource::WorkbenchDismantleItem ||
+		CachedTileData.Source == ETunaSweeperItemSlotSource::WorkbenchBlueprintItem ||
+		CachedTileData.ItemInstance.Quantity <= 1)
+	{
+		return false;
+	}
+
+	return CachedTileData.ItemInstance.AttachmentSlots.IsEmpty() &&
+		CachedTileData.ItemInstance.LoadedAmmoItemId == INDEX_NONE &&
+		CachedTileData.ItemInstance.LoadedAmmoCount <= 0 &&
+		CachedTileData.ItemInstance.SelectedAmmoItemId == INDEX_NONE;
 }
