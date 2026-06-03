@@ -10,6 +10,7 @@
 class UButton;
 class UImage;
 class UScrollBox;
+class USizeBox;
 class UTextBlock;
 class UWidget;
 class UTunaSweeperScreenFadeWidget;
@@ -87,16 +88,10 @@ protected:
 	TObjectPtr<UTextBlock> SaveSlot1Text;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
-	TObjectPtr<UImage> SaveSlot1DeleteHoldProgressFill;
-
-	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
 	TObjectPtr<UButton> SaveSlot2Button;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
 	TObjectPtr<UTextBlock> SaveSlot2Text;
-
-	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
-	TObjectPtr<UImage> SaveSlot2DeleteHoldProgressFill;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
 	TObjectPtr<UButton> SaveSlot3Button;
@@ -105,19 +100,22 @@ protected:
 	TObjectPtr<UTextBlock> SaveSlot3Text;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
-	TObjectPtr<UImage> SaveSlot3DeleteHoldProgressFill;
-
-	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
 	TObjectPtr<UButton> PrimarySaveSlotButton;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
 	TObjectPtr<UTextBlock> PrimarySaveSlotButtonText;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<USizeBox> DeleteSaveSlotButtonBox;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
 	TObjectPtr<UButton> DeleteSaveSlotButton;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
 	TObjectPtr<UTextBlock> DeleteSaveSlotButtonText;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UImage> DeleteSaveSlotHoldProgressFill;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
 	TObjectPtr<UImage> DeleteHoldGaugeFill;
@@ -397,12 +395,8 @@ private:
 	void ShowDeleteConfirmDialog();
 	void HideDeleteConfirmDialog();
 	void HideLegacyDeleteHoldGaugeWidgets();
-	void EnsureSaveSlotHoldProgressWidgets();
-	void EnsureSaveSlotHoldProgressWidget(
-		UButton* SlotButton,
-		UTextBlock* SlotText,
-		TObjectPtr<UImage>& ProgressFill,
-		FName ProgressFillWidgetName);
+	void EnsureDeleteSaveSlotHoldProgressWidget();
+	void ConfigureDeleteSaveSlotHoldProgressFill();
 	void ResetTitleViewportLayoutState();
 	void EnsureTitleWindParticleOverlay();
 	void ApplyTitleMenuButtonContentLayout();

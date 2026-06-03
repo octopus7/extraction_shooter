@@ -93,7 +93,7 @@ void UTunaSweeperIntroMenuWidget::PrepareForInitialViewport()
 	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
 	ApplyTitleMenuButtonContentLayout();
 	EnsureAlwaysNewStartButton();
-	EnsureSaveSlotHoldProgressWidgets();
+	EnsureDeleteSaveSlotHoldProgressWidget();
 	HideLegacyDeleteHoldGaugeWidgets();
 	EnsureTitleWindParticleOverlay();
 	InvalidateLayoutAndVolatility();
@@ -114,7 +114,7 @@ void UTunaSweeperIntroMenuWidget::NativeConstruct()
 	SetIsFocusable(true);
 	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
 	EnsureTitleWindParticleOverlay();
-	EnsureSaveSlotHoldProgressWidgets();
+	EnsureDeleteSaveSlotHoldProgressWidget();
 	HideLegacyDeleteHoldGaugeWidgets();
 
 	if (StartButton)
@@ -1059,6 +1059,18 @@ void UTunaSweeperIntroMenuWidget::RefreshSaveSlotMenu()
 	{
 		DeleteSaveSlotButton->SetIsEnabled(Summary.bHasData);
 	}
+	if (DeleteSaveSlotButtonBox)
+	{
+		DeleteSaveSlotButtonBox->SetVisibility(Summary.bHasData
+			? ESlateVisibility::Visible
+			: ESlateVisibility::Collapsed);
+	}
+	else if (DeleteSaveSlotButton)
+	{
+		DeleteSaveSlotButton->SetVisibility(Summary.bHasData
+			? ESlateVisibility::Visible
+			: ESlateVisibility::Collapsed);
+	}
 
 	if (DeleteSaveSlotButtonText)
 	{
@@ -1752,27 +1764,21 @@ void UTunaSweeperIntroMenuWidget::ResetDeleteHoldProgress()
 
 void UTunaSweeperIntroMenuWidget::SetDeleteHoldProgress(float Progress)
 {
-	EnsureSaveSlotHoldProgressWidgets();
+	EnsureDeleteSaveSlotHoldProgressWidget();
 	HideLegacyDeleteHoldGaugeWidgets();
 
 	const float ClampedProgress = FMath::Clamp(Progress, 0.0f, 1.0f);
-
-	auto ApplyProgressFill = [this, ClampedProgress](UImage* ProgressFill, int32 SaveSlotIndex)
+	if (!DeleteSaveSlotHoldProgressFill)
 	{
-		if (!ProgressFill)
-		{
-			return;
-		}
+		return;
+	}
 
-		const float SlotProgress = SelectedSaveSlotIndex == SaveSlotIndex ? ClampedProgress : 0.0f;
-		ProgressFill->SetRenderOpacity(SlotProgress > 0.0f ? 1.0f : 0.0f);
-		ProgressFill->SetRenderTransformPivot(FVector2D(0.0f, 0.5f));
-		ProgressFill->SetRenderScale(FVector2D(SlotProgress, 1.0f));
-	};
-
-	ApplyProgressFill(SaveSlot1DeleteHoldProgressFill, 1);
-	ApplyProgressFill(SaveSlot2DeleteHoldProgressFill, 2);
-	ApplyProgressFill(SaveSlot3DeleteHoldProgressFill, 3);
+	DeleteSaveSlotHoldProgressFill->SetVisibility(ClampedProgress > 0.0f
+		? ESlateVisibility::HitTestInvisible
+		: ESlateVisibility::Collapsed);
+	DeleteSaveSlotHoldProgressFill->SetRenderOpacity(ClampedProgress > 0.0f ? 1.0f : 0.0f);
+	DeleteSaveSlotHoldProgressFill->SetRenderTransformPivot(FVector2D(0.0f, 0.5f));
+	DeleteSaveSlotHoldProgressFill->SetRenderScale(FVector2D(ClampedProgress, 1.0f));
 }
 
 void UTunaSweeperIntroMenuWidget::ShowDeleteConfirmDialog()
@@ -1828,86 +1834,95 @@ void UTunaSweeperIntroMenuWidget::HideLegacyDeleteHoldGaugeWidgets()
 	}
 }
 
-void UTunaSweeperIntroMenuWidget::EnsureSaveSlotHoldProgressWidgets()
+void UTunaSweeperIntroMenuWidget::EnsureDeleteSaveSlotHoldProgressWidget()
 {
-	EnsureSaveSlotHoldProgressWidget(
-		SaveSlot1Button,
-		SaveSlot1Text,
-		SaveSlot1DeleteHoldProgressFill,
-		FName(TEXT("SaveSlot1DeleteHoldProgressFill")));
-	EnsureSaveSlotHoldProgressWidget(
-		SaveSlot2Button,
-		SaveSlot2Text,
-		SaveSlot2DeleteHoldProgressFill,
-		FName(TEXT("SaveSlot2DeleteHoldProgressFill")));
-	EnsureSaveSlotHoldProgressWidget(
-		SaveSlot3Button,
-		SaveSlot3Text,
-		SaveSlot3DeleteHoldProgressFill,
-		FName(TEXT("SaveSlot3DeleteHoldProgressFill")));
+	if (!WidgetTree || !DeleteSaveSlotButton || !DeleteSaveSlotButtonText)
+	{
+		return;
+	}
+
+	if (!DeleteSaveSlotHoldProgressFill)
+	{
+		DeleteSaveSlotHoldProgressFill = Cast<UImage>(WidgetTree->FindWidget(TEXT("DeleteSaveSlotHoldProgressFill")));
+	}
+
+	if (DeleteSaveSlotHoldProgressFill)
+	{
+		ConfigureDeleteSaveSlotHoldProgressFill();
+		return;
+	}
+
+	UOverlay* ButtonOverlay = WidgetTree->ConstructWidget<UOverlay>(
+		UOverlay::StaticClass(),
+		TEXT("DeleteSaveSlotButtonFullProgressOverlay"));
+	DeleteSaveSlotHoldProgressFill = WidgetTree->ConstructWidget<UImage>(
+		UImage::StaticClass(),
+		TEXT("DeleteSaveSlotHoldProgressFill"));
+	if (!ButtonOverlay || !DeleteSaveSlotHoldProgressFill)
+	{
+		DeleteSaveSlotHoldProgressFill = nullptr;
+		return;
+	}
+
+	ConfigureDeleteSaveSlotHoldProgressFill();
+
+	if (DeleteSaveSlotButtonBox)
+	{
+		DeleteSaveSlotButton->RemoveFromParent();
+		DeleteSaveSlotButtonText->RemoveFromParent();
+		DeleteSaveSlotButtonBox->SetContent(ButtonOverlay);
+
+		if (UOverlaySlot* ButtonSlot = ButtonOverlay->AddChildToOverlay(DeleteSaveSlotButton))
+		{
+			ButtonSlot->SetHorizontalAlignment(HAlign_Fill);
+			ButtonSlot->SetVerticalAlignment(VAlign_Fill);
+		}
+		if (UOverlaySlot* ProgressFillSlot = ButtonOverlay->AddChildToOverlay(DeleteSaveSlotHoldProgressFill))
+		{
+			ProgressFillSlot->SetHorizontalAlignment(HAlign_Fill);
+			ProgressFillSlot->SetVerticalAlignment(VAlign_Fill);
+		}
+		if (UOverlaySlot* TextSlot = ButtonOverlay->AddChildToOverlay(DeleteSaveSlotButtonText))
+		{
+			TextSlot->SetHorizontalAlignment(HAlign_Fill);
+			TextSlot->SetVerticalAlignment(VAlign_Center);
+		}
+	}
+	else
+	{
+		DeleteSaveSlotButtonText->RemoveFromParent();
+		DeleteSaveSlotButton->SetContent(ButtonOverlay);
+
+		if (UOverlaySlot* ProgressFillSlot = ButtonOverlay->AddChildToOverlay(DeleteSaveSlotHoldProgressFill))
+		{
+			ProgressFillSlot->SetHorizontalAlignment(HAlign_Fill);
+			ProgressFillSlot->SetVerticalAlignment(VAlign_Fill);
+		}
+		if (UOverlaySlot* TextSlot = ButtonOverlay->AddChildToOverlay(DeleteSaveSlotButtonText))
+		{
+			TextSlot->SetHorizontalAlignment(HAlign_Fill);
+			TextSlot->SetVerticalAlignment(VAlign_Center);
+		}
+	}
+
+	DeleteSaveSlotButtonText->SetVisibility(ESlateVisibility::HitTestInvisible);
 }
 
-void UTunaSweeperIntroMenuWidget::EnsureSaveSlotHoldProgressWidget(
-	UButton* SlotButton,
-	UTextBlock* SlotText,
-	TObjectPtr<UImage>& ProgressFill,
-	FName ProgressFillWidgetName)
+void UTunaSweeperIntroMenuWidget::ConfigureDeleteSaveSlotHoldProgressFill()
 {
-	if (!WidgetTree || !SlotButton || !SlotText || ProgressFillWidgetName.IsNone())
+	if (!DeleteSaveSlotHoldProgressFill)
 	{
-		return;
-	}
-
-	if (!ProgressFill)
-	{
-		ProgressFill = Cast<UImage>(WidgetTree->FindWidget(ProgressFillWidgetName));
-	}
-
-	if (ProgressFill)
-	{
-		ProgressFill->SetVisibility(ESlateVisibility::HitTestInvisible);
-		ProgressFill->SetRenderOpacity(0.0f);
-		ProgressFill->SetRenderTransformPivot(FVector2D(0.0f, 0.5f));
-		ProgressFill->SetRenderScale(FVector2D(0.0f, 1.0f));
-		return;
-	}
-
-	UOverlay* SlotOverlay = WidgetTree->ConstructWidget<UOverlay>(
-		UOverlay::StaticClass(),
-		FName(*(ProgressFillWidgetName.ToString() + TEXT("Overlay"))));
-	ProgressFill = WidgetTree->ConstructWidget<UImage>(
-		UImage::StaticClass(),
-		ProgressFillWidgetName);
-	if (!SlotOverlay || !ProgressFill)
-	{
-		ProgressFill = nullptr;
 		return;
 	}
 
 	FSlateBrush ProgressFillBrush;
 	ProgressFillBrush.DrawAs = ESlateBrushDrawType::Box;
-	ProgressFillBrush.TintColor = FSlateColor(FLinearColor(0.86f, 0.26f, 0.18f, 0.42f));
-	ProgressFill->SetBrush(ProgressFillBrush);
-	ProgressFill->SetVisibility(ESlateVisibility::HitTestInvisible);
-	ProgressFill->SetRenderOpacity(0.0f);
-	ProgressFill->SetRenderTransformPivot(FVector2D(0.0f, 0.5f));
-	ProgressFill->SetRenderScale(FVector2D(0.0f, 1.0f));
-
-	SlotText->RemoveFromParent();
-	SlotText->SetVisibility(ESlateVisibility::HitTestInvisible);
-	SlotButton->SetContent(SlotOverlay);
-
-	if (UOverlaySlot* ProgressFillSlot = SlotOverlay->AddChildToOverlay(ProgressFill))
-	{
-		ProgressFillSlot->SetHorizontalAlignment(HAlign_Fill);
-		ProgressFillSlot->SetVerticalAlignment(VAlign_Fill);
-	}
-
-	if (UOverlaySlot* TextSlot = SlotOverlay->AddChildToOverlay(SlotText))
-	{
-		TextSlot->SetHorizontalAlignment(HAlign_Fill);
-		TextSlot->SetVerticalAlignment(VAlign_Center);
-	}
+	ProgressFillBrush.TintColor = FSlateColor(FLinearColor(0.86f, 0.26f, 0.18f, 0.50f));
+	DeleteSaveSlotHoldProgressFill->SetBrush(ProgressFillBrush);
+	DeleteSaveSlotHoldProgressFill->SetVisibility(ESlateVisibility::Collapsed);
+	DeleteSaveSlotHoldProgressFill->SetRenderOpacity(0.0f);
+	DeleteSaveSlotHoldProgressFill->SetRenderTransformPivot(FVector2D(0.0f, 0.5f));
+	DeleteSaveSlotHoldProgressFill->SetRenderScale(FVector2D(0.0f, 1.0f));
 }
 
 void UTunaSweeperIntroMenuWidget::ResetTitleViewportLayoutState()
