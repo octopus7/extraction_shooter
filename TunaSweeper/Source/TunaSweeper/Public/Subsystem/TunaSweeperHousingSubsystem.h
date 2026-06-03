@@ -154,7 +154,9 @@ private:
 	FText BuildStateText(ETunaSweeperHousingFacilityBuildState BuildState) const;
 	FString GetHousingFacilityDefinitionsJsonPath() const;
 	void DrawPlacementDebug(const FTunaSweeperHousingPlacedFacilitySaveData& Placement, bool bPlacementValid) const;
-	void DrawHousingGridDebug(const FTunaSweeperHousingPlacedFacilitySaveData* InvalidPlacement) const;
+	void DrawHousingGridDebug(
+		const FTunaSweeperHousingPlacedFacilitySaveData* HighlightPlacement,
+		bool bHighlightValid = true) const;
 	void DrawRoundedCellDebug(const FIntPoint& Cell, const FColor& Color, float Thickness, uint8 DepthPriority, float ZOffset) const;
 
 	UPROPERTY(Transient)

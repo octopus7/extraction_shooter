@@ -40,6 +40,7 @@ namespace TunaSweeperHousing
 	constexpr float CellRoundRadiusMax = 18.0f;
 	constexpr float CellOutlineMargin = 8.0f;
 	constexpr float CellOutlineThickness = 2.0f;
+	constexpr float PlacementCellOutlineThickness = 4.0f;
 	constexpr float InvalidCellOutlineThickness = 4.0f;
 	constexpr float PlacedActorZOffset = 2.0f;
 	const FColor HousingCellColor(70, 210, 255, 255);
@@ -1644,23 +1645,54 @@ void UTunaSweeperHousingSubsystem::DrawPlacementDebug(
 	const FTunaSweeperHousingPlacedFacilitySaveData& Placement,
 	bool bPlacementValid) const
 {
-	DrawHousingGridDebug(bPlacementValid ? nullptr : &Placement);
+	DrawHousingGridDebug(&Placement, bPlacementValid);
 }
 
 void UTunaSweeperHousingSubsystem::DrawHousingGridDebug(
-	const FTunaSweeperHousingPlacedFacilitySaveData* InvalidPlacement) const
+	const FTunaSweeperHousingPlacedFacilitySaveData* HighlightPlacement,
+	bool bHighlightValid) const
 {
 	if (!ActiveHousingArea.IsValid() || !ActiveHousingArea->GetWorld())
 	{
 		return;
 	}
 
+	TSet<FIntPoint> OccupiedCells;
+	for (const FTunaSweeperHousingPlacedFacilitySaveData& SavedFacility : SavedFacilities)
+	{
+		if (SavedFacility.bStored || !SavedFacility.IsValid())
+		{
+			continue;
+		}
+
+		FTunaSweeperHousingFacilityDefinition SavedDefinition;
+		if (!TryGetDefinition(SavedFacility.FacilityId, SavedDefinition))
+		{
+			continue;
+		}
+
+		const FIntPoint SavedFootprintSize = GetRotatedFootprintSize(SavedDefinition, SavedFacility.RotationQuarterTurns);
+		for (int32 OffsetY = 0; OffsetY < SavedFootprintSize.Y; ++OffsetY)
+		{
+			for (int32 OffsetX = 0; OffsetX < SavedFootprintSize.X; ++OffsetX)
+			{
+				OccupiedCells.Add(FIntPoint(SavedFacility.AnchorCell.X + OffsetX, SavedFacility.AnchorCell.Y + OffsetY));
+			}
+		}
+	}
+
 	for (int32 CellY = 0; CellY < ActiveHousingArea->GetGridSizeY(); ++CellY)
 	{
 		for (int32 CellX = 0; CellX < ActiveHousingArea->GetGridSizeX(); ++CellX)
 		{
+			const FIntPoint Cell(CellX, CellY);
+			if (OccupiedCells.Contains(Cell))
+			{
+				continue;
+			}
+
 			DrawRoundedCellDebug(
-				FIntPoint(CellX, CellY),
+				Cell,
 				TunaSweeperHousing::HousingCellColor,
 				TunaSweeperHousing::CellOutlineThickness,
 				SDPG_World,
@@ -1668,26 +1700,32 @@ void UTunaSweeperHousingSubsystem::DrawHousingGridDebug(
 		}
 	}
 
-	if (!InvalidPlacement || InvalidPlacement->FacilityId.IsNone())
+	if (!HighlightPlacement || HighlightPlacement->FacilityId.IsNone())
 	{
 		return;
 	}
 
 	FTunaSweeperHousingFacilityDefinition Definition;
-	if (!TryGetDefinition(InvalidPlacement->FacilityId, Definition))
+	if (!TryGetDefinition(HighlightPlacement->FacilityId, Definition))
 	{
 		return;
 	}
 
-	const FIntPoint FootprintSize = GetRotatedFootprintSize(Definition, InvalidPlacement->RotationQuarterTurns);
+	const FColor& HighlightColor = bHighlightValid
+		? TunaSweeperHousing::HousingCellColor
+		: TunaSweeperHousing::InvalidCellColor;
+	const float HighlightThickness = bHighlightValid
+		? TunaSweeperHousing::PlacementCellOutlineThickness
+		: TunaSweeperHousing::InvalidCellOutlineThickness;
+	const FIntPoint FootprintSize = GetRotatedFootprintSize(Definition, HighlightPlacement->RotationQuarterTurns);
 	for (int32 OffsetY = 0; OffsetY < FootprintSize.Y; ++OffsetY)
 	{
 		for (int32 OffsetX = 0; OffsetX < FootprintSize.X; ++OffsetX)
 		{
 			DrawRoundedCellDebug(
-				FIntPoint(InvalidPlacement->AnchorCell.X + OffsetX, InvalidPlacement->AnchorCell.Y + OffsetY),
-				TunaSweeperHousing::InvalidCellColor,
-				TunaSweeperHousing::InvalidCellOutlineThickness,
+				FIntPoint(HighlightPlacement->AnchorCell.X + OffsetX, HighlightPlacement->AnchorCell.Y + OffsetY),
+				HighlightColor,
+				HighlightThickness,
 				SDPG_Foreground,
 				TunaSweeperHousing::InvalidCellDebugZOffset);
 		}
