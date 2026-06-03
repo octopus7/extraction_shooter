@@ -26,6 +26,7 @@ class UTunaSweeperMemoWidget;
 class UTunaSweeperQuestWidget;
 class UTunaSweeperReloadRingWidget;
 class UBorder;
+class UButton;
 class UHorizontalBox;
 class UProgressBar;
 class UTextBlock;
@@ -145,6 +146,12 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|HUD")
 	UTunaSweeperHudBottomStatusWidget* GetBottomStatusWidget() const { return BottomStatusWidget; }
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD|Housing")
+	void ShowHousingFacilityContextMenu(FGuid InstanceId, FVector2D ScreenPosition);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD|Housing")
+	void HideHousingFacilityContextMenu();
 
 protected:
 	virtual void NativeConstruct() override;
@@ -311,6 +318,7 @@ private:
 	void EnsureInventoryWeightPanelWidget();
 	void EnsureInventoryQuickSlotPanelWidget();
 	void EnsureHousingPanelWidget();
+	void EnsureHousingFacilityContextMenuWidget();
 	void EnsureMapPanelWidget();
 	void EnsureMemoPanelWidget();
 	void EnsureQuestPanelWidgets();
@@ -356,6 +364,9 @@ private:
 
 	UFUNCTION()
 	void HandleHudModeTabSelected(ETunaSweeperHudMode SelectedMode);
+
+	UFUNCTION()
+	void HandleHousingContextStoreClicked();
 
 	UPROPERTY(Transient)
 	ETunaSweeperHudMode ActiveHudMode = ETunaSweeperHudMode::None;
@@ -422,6 +433,15 @@ private:
 	TObjectPtr<UTunaSweeperHousingPanelWidget> HousingPanelWidget;
 
 	UPROPERTY(Transient)
+	TObjectPtr<UBorder> HousingContextMenuPanel;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UButton> HousingContextStoreButton;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTextBlock> HousingContextStoreText;
+
+	UPROPERTY(Transient)
 	TObjectPtr<UTunaSweeperMapWidget> MapPanelWidget;
 
 	UPROPERTY(Transient)
@@ -451,4 +471,5 @@ private:
 	TMap<TWeakObjectPtr<UWidget>, FWidgetTransform> HudTransitionBaseTransforms;
 	TMap<TWeakObjectPtr<UWidget>, float> HudTransitionBaseOpacities;
 	bool bQuestPanelOpenedFromInteraction = false;
+	FGuid HousingContextMenuInstanceId;
 };

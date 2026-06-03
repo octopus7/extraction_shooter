@@ -671,6 +671,7 @@ bool UTunaSweeperHousingSubsystem::StoreFacility(FGuid InstanceId, bool bSaveImm
 {
 	if (!InstanceId.IsValid())
 	{
+		UE_LOG(LogTunaSweeperHousing, Warning, TEXT("StoreFacility failed: invalid instance id."));
 		return false;
 	}
 
@@ -682,6 +683,11 @@ bool UTunaSweeperHousingSubsystem::StoreFacility(FGuid InstanceId, bool bSaveImm
 		});
 	if (!ExistingFacility || ExistingFacility->bStored)
 	{
+		UE_LOG(
+			LogTunaSweeperHousing,
+			Warning,
+			TEXT("StoreFacility failed: instance not found or already stored. InstanceId=%s"),
+			*InstanceId.ToString());
 		return false;
 	}
 
@@ -696,7 +702,129 @@ bool UTunaSweeperHousingSubsystem::StoreFacility(FGuid InstanceId, bool bSaveImm
 	PersistSavedFacilitiesToGameInstance(bSaveImmediately);
 	RefreshSpawnedFacilities();
 	BroadcastHousingChanged();
+	UE_LOG(LogTunaSweeperHousing, Log, TEXT("Stored housing facility. InstanceId=%s"), *InstanceId.ToString());
 	return true;
+}
+
+bool UTunaSweeperHousingSubsystem::TryGetPlacedFacilityAtMouse(
+	APlayerController* PlayerController,
+	FTunaSweeperHousingPlacedFacilitySaveData& OutFacility)
+{
+	OutFacility = FTunaSweeperHousingPlacedFacilitySaveData();
+	if (!PlayerController || !bHousingModeOpen)
+	{
+		return false;
+	}
+
+	EnsureHousingForWorld(PlayerController->GetWorld());
+	LoadSavedFacilitiesFromGameInstance();
+	if (!ActiveHousingArea.IsValid())
+	{
+		return false;
+	}
+
+	auto TryFindByInstanceId = [this, &OutFacility](const FGuid& InstanceId)
+	{
+		if (!InstanceId.IsValid())
+		{
+			return false;
+		}
+
+		const FTunaSweeperHousingPlacedFacilitySaveData* FoundFacility = SavedFacilities.FindByPredicate(
+			[InstanceId](const FTunaSweeperHousingPlacedFacilitySaveData& SavedFacility)
+			{
+				return SavedFacility.InstanceId == InstanceId && !SavedFacility.bStored && SavedFacility.IsValid();
+			});
+		if (!FoundFacility)
+		{
+			return false;
+		}
+
+		OutFacility = *FoundFacility;
+		return true;
+	};
+
+	auto TryFindByActor = [this, &OutFacility, &TryFindByInstanceId](const AActor* Actor)
+	{
+		if (!Actor)
+		{
+			return false;
+		}
+
+		if (const ATunaSweeperHousingFacilityActor* FacilityActor = Cast<ATunaSweeperHousingFacilityActor>(Actor))
+		{
+			if (TryFindByInstanceId(FacilityActor->GetInstanceId()))
+			{
+				return true;
+			}
+		}
+
+		for (const FTunaSweeperHousingPlacedFacilitySaveData& SavedFacility : SavedFacilities)
+		{
+			if (SavedFacility.bStored || !SavedFacility.IsValid())
+			{
+				continue;
+			}
+
+			const FName ActorId = BuildPlacedFacilityActorId(SavedFacility);
+			if (!ActorId.IsNone() && Actor->Tags.Contains(ActorId))
+			{
+				OutFacility = SavedFacility;
+				return true;
+			}
+		}
+
+		return false;
+	};
+
+	FHitResult CursorHit;
+	if (PlayerController->GetHitResultUnderCursor(ECC_Visibility, false, CursorHit))
+	{
+		if (TryFindByActor(CursorHit.GetActor()))
+		{
+			return true;
+		}
+	}
+
+	FVector MouseWorldPoint;
+	if (!TryGetMouseWorldPoint(PlayerController, MouseWorldPoint))
+	{
+		return false;
+	}
+
+	const float CellSize = FMath::Max(1.0f, ActiveHousingArea->GetCellSize());
+	const float HalfWidth = static_cast<float>(FMath::Max(1, ActiveHousingArea->GetGridSizeX())) * CellSize * 0.5f;
+	const float HalfHeight = static_cast<float>(FMath::Max(1, ActiveHousingArea->GetGridSizeY())) * CellSize * 0.5f;
+	const FVector LocalLocation = ActiveHousingArea->GetActorTransform().InverseTransformPosition(MouseWorldPoint);
+	const FVector2D FractionalCell(
+		(LocalLocation.X + HalfWidth) / CellSize,
+		(LocalLocation.Y + HalfHeight) / CellSize);
+
+	for (const FTunaSweeperHousingPlacedFacilitySaveData& SavedFacility : SavedFacilities)
+	{
+		if (SavedFacility.bStored || !SavedFacility.IsValid())
+		{
+			continue;
+		}
+
+		FTunaSweeperHousingFacilityDefinition Definition;
+		if (!TryGetDefinition(SavedFacility.FacilityId, Definition))
+		{
+			continue;
+		}
+
+		const FIntPoint FootprintSize = GetRotatedFootprintSize(Definition, SavedFacility.RotationQuarterTurns);
+		if (FractionalCell.X >= static_cast<float>(SavedFacility.AnchorCell.X) &&
+			FractionalCell.X < static_cast<float>(SavedFacility.AnchorCell.X + FootprintSize.X) &&
+			FractionalCell.Y >= static_cast<float>(SavedFacility.AnchorCell.Y) &&
+			FractionalCell.Y < static_cast<float>(SavedFacility.AnchorCell.Y + FootprintSize.Y))
+		{
+			OutFacility = SavedFacility;
+			return true;
+		}
+	}
+
+	return false;
 }
 
 void UTunaSweeperHousingSubsystem::HandlePostLoadMapWithWorld(UWorld* LoadedWorld)

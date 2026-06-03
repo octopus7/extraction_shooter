@@ -228,6 +228,12 @@ void UTunaSweeperHousingFacilityEntryWidget::HandleEntryPressed()
 
 	if (View.bCanStore && View.InstanceId.IsValid() && StoreDelegate.IsBound())
 	{
+		UE_LOG(
+			LogTunaSweeperHousingPanel,
+			Log,
+			TEXT("Housing store hold started. FacilityId=%s InstanceId=%s"),
+			*View.FacilityId.ToString(),
+			*View.InstanceId.ToString());
 		if (UWorld* World = GetWorld())
 		{
 			World->GetTimerManager().SetTimer(
@@ -261,12 +267,28 @@ void UTunaSweeperHousingFacilityEntryWidget::HandleStoreHoldElapsed()
 	ClearStoreHoldTimer();
 	if (!bPressed || bLongPressTriggered || !View.bCanStore || !View.InstanceId.IsValid() || !StoreDelegate.IsBound())
 	{
+		UE_LOG(
+			LogTunaSweeperHousingPanel,
+			Warning,
+			TEXT("Housing store hold elapsed but rejected. Pressed=%d LongPress=%d CanStore=%d InstanceValid=%d DelegateBound=%d InstanceId=%s"),
+			bPressed,
+			bLongPressTriggered,
+			View.bCanStore,
+			View.InstanceId.IsValid(),
+			StoreDelegate.IsBound(),
+			*View.InstanceId.ToString());
 		return;
 	}
 
 	bLongPressTriggered = true;
 	bPressed = false;
 	PressedSeconds = 0.0f;
+	UE_LOG(
+		LogTunaSweeperHousingPanel,
+		Log,
+		TEXT("Housing store hold elapsed. Requesting store. FacilityId=%s InstanceId=%s"),
+		*View.FacilityId.ToString(),
+		*View.InstanceId.ToString());
 	StoreDelegate.Execute(View.InstanceId);
 }
 
@@ -496,7 +518,15 @@ void UTunaSweeperHousingPanelWidget::HandleFacilityStoreRequested(FGuid Instance
 		? GetGameInstance()->GetSubsystem<UTunaSweeperHousingSubsystem>()
 		: nullptr)
 	{
-		if (!HousingSubsystem->StoreFacility(InstanceId, true))
+		if (HousingSubsystem->StoreFacility(InstanceId, true))
+		{
+			UE_LOG(
+				LogTunaSweeperHousingPanel,
+				Log,
+				TEXT("Stored housing facility from panel. InstanceId=%s"),
+				*InstanceId.ToString());
+		}
+		else
 		{
 			UE_LOG(
 				LogTunaSweeperHousingPanel,

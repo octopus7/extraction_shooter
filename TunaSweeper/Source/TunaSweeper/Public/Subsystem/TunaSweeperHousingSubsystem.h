@@ -69,6 +69,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Housing")
 	bool StoreFacility(FGuid InstanceId, bool bSaveImmediately = true);
 
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Housing")
+	bool TryGetPlacedFacilityAtMouse(
+		APlayerController* PlayerController,
+		FTunaSweeperHousingPlacedFacilitySaveData& OutFacility);
+
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Housing")
 	bool HasActivePlacement() const { return ActivePlacement.FacilityId != NAME_None; }
 

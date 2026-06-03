@@ -196,6 +196,7 @@ private:
 	void HandleHousingRotateLeft();
 	void HandleHousingRotateRight();
 	void HandleHousingCancel();
+	void HandleHousingFacilityContextMenuPressed();
 	void RestoreGameplayState(float HousingCameraBlendSeconds);
 	void BeginHousingCameraMode();
 	void EndHousingCameraMode(float BlendSeconds);

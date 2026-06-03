@@ -440,6 +440,7 @@ void ATunaSweeperPlayerController::SetupInputComponent()
 		InputComponent->BindKey(EKeys::Q, IE_Pressed, this, &ATunaSweeperPlayerController::HandleHousingRotateLeft);
 		InputComponent->BindKey(EKeys::E, IE_Pressed, this, &ATunaSweeperPlayerController::HandleHousingRotateRight);
 		InputComponent->BindKey(EKeys::Escape, IE_Pressed, this, &ATunaSweeperPlayerController::HandleHousingCancel);
+		InputComponent->BindKey(EKeys::RightMouseButton, IE_Pressed, this, &ATunaSweeperPlayerController::HandleHousingFacilityContextMenuPressed);
 		InputComponent->BindKey(EKeys::W, IE_Pressed, this, &ATunaSweeperPlayerController::HandleHousingMoveForwardPressed);
 		InputComponent->BindKey(EKeys::W, IE_Released, this, &ATunaSweeperPlayerController::HandleHousingMoveForwardReleased);
 		InputComponent->BindKey(EKeys::S, IE_Pressed, this, &ATunaSweeperPlayerController::HandleHousingMoveBackwardPressed);
@@ -1475,6 +1476,48 @@ void ATunaSweeperPlayerController::HandleHousingCancel()
 			RestoreGameplayState(TunaSweeperHousingCamera::BlendSeconds);
 		}
 	}
+}
+
+void ATunaSweeperPlayerController::HandleHousingFacilityContextMenuPressed()
+{
+	if (!IsHousingModeOpen())
+	{
+		return;
+	}
+
+	EnsureGameHudWidget();
+	if (!GameHudWidget)
+	{
+		return;
+	}
+
+	if (IsHousingPlacementActive())
+	{
+		GameHudWidget->HideHousingFacilityContextMenu();
+		return;
+	}
+
+	UTunaSweeperHousingSubsystem* HousingSubsystem = GetGameInstance()
+		? GetGameInstance()->GetSubsystem<UTunaSweeperHousingSubsystem>()
+		: nullptr;
+	if (!HousingSubsystem)
+	{
+		GameHudWidget->HideHousingFacilityContextMenu();
+		return;
+	}
+
+	FTunaSweeperHousingPlacedFacilitySaveData PlacedFacility;
+	if (!HousingSubsystem->TryGetPlacedFacilityAtMouse(this, PlacedFacility) || !PlacedFacility.InstanceId.IsValid())
+	{
+		GameHudWidget->HideHousingFacilityContextMenu();
+		UE_LOG(LogTunaSweeperHousingInput, Verbose, TEXT("Housing context menu ignored: no placed facility under cursor."));
+		return;
+	}
+
+	float MouseX = 0.0f;
+	float MouseY = 0.0f;
+	GetMousePosition(MouseX, MouseY);
+	GameHudWidget->ShowHousingFacilityContextMenu(PlacedFacility.InstanceId, FVector2D(MouseX, MouseY));
 }
 
 void ATunaSweeperPlayerController::RestoreGameplayState(float HousingCameraBlendSeconds)

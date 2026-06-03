@@ -6,6 +6,7 @@
 #include "Component/TunaSweeperDebuffComponent.h"
 #include "Component/TunaSweeperVitalsComponent.h"
 #include "Components/Border.h"
+#include "Components/Button.h"
 #include "Components/CanvasPanel.h"
 #include "Components/CanvasPanelSlot.h"
 #include "Components/HorizontalBox.h"
@@ -284,6 +285,8 @@ namespace
 		return TileData;
 	}
 }
+
+DEFINE_LOG_CATEGORY_STATIC(LogTunaSweeperGameHud, Log, All);
 
 void UTunaSweeperGameHudWidget::NativeConstruct()
 {
@@ -776,8 +779,88 @@ void UTunaSweeperGameHudWidget::ShowMenuQuestPanel(FName QuestId)
 	}
 }
 
+void UTunaSweeperGameHudWidget::ShowHousingFacilityContextMenu(FGuid InstanceId, FVector2D ScreenPosition)
+{
+	if (!InstanceId.IsValid())
+	{
+		HideHousingFacilityContextMenu();
+		return;
+	}
+
+	EnsureHousingFacilityContextMenuWidget();
+	if (!HousingContextMenuPanel)
+	{
+		return;
+	}
+
+	HousingContextMenuInstanceId = InstanceId;
+	if (HousingContextStoreText)
+	{
+		HousingContextStoreText->SetText(ResolveUiText(
+			GetGameInstance<UTunaSweeperGameInstance>(),
+			TEXT("ui.housing.context.store"),
+			TEXT("수납")));
+	}
+
+	const FVector2D MenuSize(132.0f, 42.0f);
+	const FVector2D CursorOffset(10.0f, 10.0f);
+	FVector2D MenuPosition = ScreenPosition;
+	FVector2D MenuBounds = UWidgetLayoutLibrary::GetViewportSize(this);
+	if (const UCanvasPanel* RootCanvas = WidgetTree
+		? Cast<UCanvasPanel>(WidgetTree->RootWidget)
+		: nullptr)
+	{
+		const FGeometry& RootGeometry = RootCanvas->GetCachedGeometry();
+		const FVector2D LocalSize = RootGeometry.GetLocalSize();
+		if (LocalSize.X > 1.0f && LocalSize.Y > 1.0f)
+		{
+			MenuPosition = RootGeometry.AbsoluteToLocal(FSlateApplication::Get().GetCursorPos());
+			MenuBounds = LocalSize;
+		}
+	}
+
+	const FVector2D ClampedPosition(
+		FMath::Clamp(MenuPosition.X + CursorOffset.X, 0.0f, FMath::Max(0.0f, MenuBounds.X - MenuSize.X - 8.0f)),
+		FMath::Clamp(MenuPosition.Y + CursorOffset.Y, 0.0f, FMath::Max(0.0f, MenuBounds.Y - MenuSize.Y - 8.0f)));
+
+	if (UCanvasPanelSlot* CanvasSlot = Cast<UCanvasPanelSlot>(HousingContextMenuPanel->Slot))
+	{
+		CanvasSlot->SetPosition(ClampedPosition);
+		CanvasSlot->SetSize(MenuSize);
+	}
+
+	HousingContextMenuPanel->SetVisibility(ESlateVisibility::Visible);
+	UE_LOG(
+		LogTunaSweeperGameHud,
+		Log,
+		TEXT("Showing housing facility context menu. InstanceId=%s RawMouse=(%.1f, %.1f) LocalMouse=(%.1f, %.1f) Menu=(%.1f, %.1f) Bounds=(%.1f, %.1f)"),
+		*InstanceId.ToString(),
+		ScreenPosition.X,
+		ScreenPosition.Y,
+		MenuPosition.X,
+		MenuPosition.Y,
+		ClampedPosition.X,
+		ClampedPosition.Y,
+		MenuBounds.X,
+		MenuBounds.Y);
+}
+
+void UTunaSweeperGameHudWidget::HideHousingFacilityContextMenu()
+{
+	HousingContextMenuInstanceId.Invalidate();
+	if (HousingContextMenuPanel)
+	{
+		HousingContextMenuPanel->SetVisibility(ESlateVisibility::Collapsed);
+	}
+}
+
 void UTunaSweeperGameHudWidget::SetHudMode(ETunaSweeperHudMode InHudMode)
 {
+	if (InHudMode != ETunaSweeperHudMode::None)
+	{
+		HideHousingFacilityContextMenu();
+	}
+
 	if (InHudMode != ETunaSweeperHudMode::None && IsHousingModeActive())
 	{
 		return;
@@ -1490,10 +1573,6 @@ void UTunaSweeperGameHudWidget::ApplyHudModeVisibility()
 			HousingPanelWidget,
 			bShowHousingPanel ? ESlateVisibility::SelfHitTestInvisible : ESlateVisibility::Collapsed,
 			ETunaSweeperHudTransitionEdge::Right);
-		if (bShowHousingPanel)
-		{
-			HousingPanelWidget->RefreshHousingPanel();
-		}
 	}
 
 	EnsureMapPanelWidget();
@@ -2207,6 +2286,70 @@ void UTunaSweeperGameHudWidget::EnsureHousingPanelWidget()
 		CanvasSlot->SetAlignment(FVector2D(0.0f, 0.0f));
 		CanvasSlot->SetOffsets(FMargin(-(PanelWidth + EdgeMargin), EdgeMargin, PanelWidth, EdgeMargin));
 		CanvasSlot->SetZOrder(42);
+	}
+}
+
+void UTunaSweeperGameHudWidget::EnsureHousingFacilityContextMenuWidget()
+{
+	if (HousingContextMenuPanel || !WidgetTree)
+	{
+		return;
+	}
+
+	UCanvasPanel* RootCanvas = Cast<UCanvasPanel>(WidgetTree->RootWidget);
+	if (!RootCanvas)
+	{
+		return;
+	}
+
+	HousingContextMenuPanel = WidgetTree->ConstructWidget<UBorder>(
+		UBorder::StaticClass(),
+		TEXT("HousingFacilityContextMenu"));
+	UVerticalBox* MenuStack = WidgetTree->ConstructWidget<UVerticalBox>(
+		UVerticalBox::StaticClass(),
+		TEXT("HousingFacilityContextMenuStack"));
+	HousingContextStoreButton = WidgetTree->ConstructWidget<UButton>(
+		UButton::StaticClass(),
+		TEXT("HousingFacilityContextStoreButton"));
+	HousingContextStoreText = WidgetTree->ConstructWidget<UTextBlock>(
+		UTextBlock::StaticClass(),
+		TEXT("HousingFacilityContextStoreText"));
+	if (!HousingContextMenuPanel || !MenuStack || !HousingContextStoreButton || !HousingContextStoreText)
+	{
+		return;
+	}
+
+	HousingContextMenuPanel->SetPadding(FMargin(5.0f));
+	HousingContextMenuPanel->SetBrush(MakeHudRoundedBoxBrush(
+		FVector2D(132.0f, 42.0f),
+		FLinearColor(0.018f, 0.024f, 0.028f, 0.96f),
+		6.0f,
+		FLinearColor(0.42f, 0.82f, 0.94f, 0.60f),
+		1.0f));
+	HousingContextMenuPanel->SetVisibility(ESlateVisibility::Collapsed);
+	HousingContextMenuPanel->SetContent(MenuStack);
+
+	HousingContextStoreText->SetJustification(ETextJustify::Center);
+	HousingContextStoreText->SetColorAndOpacity(FSlateColor(FLinearColor(0.88f, 0.98f, 1.0f, 1.0f)));
+	TunaSweeperUIFont::ApplyFont(HousingContextStoreText, 14, ETunaSweeperUIFontWeight::Bold);
+
+	HousingContextStoreButton->SetContent(HousingContextStoreText);
+	HousingContextStoreButton->SetBackgroundColor(FLinearColor(0.08f, 0.22f, 0.25f, 0.96f));
+	HousingContextStoreButton->OnClicked.RemoveDynamic(this, &UTunaSweeperGameHudWidget::HandleHousingContextStoreClicked);
+	HousingContextStoreButton->OnClicked.AddDynamic(this, &UTunaSweeperGameHudWidget::HandleHousingContextStoreClicked);
+	if (UVerticalBoxSlot* ButtonSlot = MenuStack->AddChildToVerticalBox(HousingContextStoreButton))
+	{
+		ButtonSlot->SetPadding(FMargin(0.0f));
+	}
+
+	UCanvasPanelSlot* CanvasSlot = RootCanvas->AddChildToCanvas(HousingContextMenuPanel);
+	if (CanvasSlot)
+	{
+		CanvasSlot->SetAnchors(FAnchors(0.0f, 0.0f, 0.0f, 0.0f));
+		CanvasSlot->SetAlignment(FVector2D::ZeroVector);
+		CanvasSlot->SetPosition(FVector2D::ZeroVector);
+		CanvasSlot->SetSize(FVector2D(132.0f, 42.0f));
+		CanvasSlot->SetZOrder(60);
 	}
 }
 
@@ -3334,6 +3477,10 @@ void UTunaSweeperGameHudWidget::HandleQuestProgressChanged()
 
 void UTunaSweeperGameHudWidget::HandleHousingStateChanged()
 {
+	if (!IsHousingModeActive())
+	{
+		HideHousingFacilityContextMenu();
+	}
 	ApplyHudModeVisibility();
 	RefreshDialogueHudVisibility();
 	RefreshCancelableActionWidgets();
@@ -3367,6 +3514,42 @@ void UTunaSweeperGameHudWidget::HandleLanguageChanged()
 	{
 		InteractionQuestPanelWidget->RefreshQuestView();
 	}
+}
+
+void UTunaSweeperGameHudWidget::HandleHousingContextStoreClicked()
+{
+	const FGuid InstanceId = HousingContextMenuInstanceId;
+	HideHousingFacilityContextMenu();
+	if (!InstanceId.IsValid())
+	{
+		UE_LOG(LogTunaSweeperGameHud, Warning, TEXT("Housing context store failed: invalid context instance id."));
+		return;
+	}
+
+	UTunaSweeperHousingSubsystem* HousingSubsystem = GetGameInstance()
+		? GetGameInstance()->GetSubsystem<UTunaSweeperHousingSubsystem>()
+		: nullptr;
+	if (!HousingSubsystem)
+	{
+		UE_LOG(
+			LogTunaSweeperGameHud,
+			Warning,
+			TEXT("Housing context store failed: housing subsystem is missing. InstanceId=%s"),
+			*InstanceId.ToString());
+		return;
+	}
+
+	if (!HousingSubsystem->StoreFacility(InstanceId, true))
+	{
+		UE_LOG(
+			LogTunaSweeperGameHud,
+			Warning,
+			TEXT("Housing context store failed: subsystem rejected store. InstanceId=%s"),
+			*InstanceId.ToString());
+		return;
+	}
+
+	UE_LOG(LogTunaSweeperGameHud, Log, TEXT("Housing context store succeeded. InstanceId=%s"), *InstanceId.ToString());
 }
 
 void UTunaSweeperGameHudWidget::HandleHudModeTabSelected(ETunaSweeperHudMode SelectedMode)
