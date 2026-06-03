@@ -20,7 +20,7 @@
     "loot_container_class": "/Game/Interaction/BP_LootContainer.BP_LootContainer_C",
     "container_definition_id": 7008,
     "contents_id": 8007,
-    "location": [0.0, -1000.0, 40.0],
+    "location": [441.322, 548.9291, 40.0],
     "rotation": [0.0, 0.0, 0.0]
   }
 ]

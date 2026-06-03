@@ -25,6 +25,37 @@
     "scale": [1.0, 1.0, 1.0]
   },
   {
+    "level_name": "BunkerMap",
+    "spawn_id": "TS_NPC_Instructor",
+    "spawn_type": "quest_npc",
+    "actor_class": "/Game/Characters/NPC/BP_NPC_InstructorQuest.BP_NPC_InstructorQuest_C",
+    "quest_id": "quest_first_outing",
+    "provider_id": "provider.instructor",
+    "npc_display_name": "\uAD50\uAD00",
+    "interaction_display_name": "Quest",
+    "interaction_display_name_key": "ui.quest.interaction_name",
+    "location": [700.0, 0.0, 100.0],
+    "rotation": [0.0, 0.0, 0.0],
+    "scale": [1.0, 1.0, 1.0]
+  },
+  {
+    "level_name": "BunkerMap",
+    "spawn_id": "TS_Travel_DeployToRaid",
+    "spawn_type": "level_travel",
+    "actor_class": "/Game/Interaction/BP_Interact_LevelTravel.BP_Interact_LevelTravel_C",
+    "target_level_name": "RaidMap",
+    "interaction_display_name": "Deploy",
+    "transition_media_source": "/Game/Movies/MS_BunkerToRaid.MS_BunkerToRaid",
+    "transition_widget_class": "/Game/UI/WBP_LevelTransitionVideo.WBP_LevelTransitionVideo_C",
+    "transition_message": "Deploying to Raid",
+    "location": [577.426, 359.909, 4.0],
+    "rotation": [0.0, 0.0, 0.0],
+    "scale": [1.0, 1.0, 1.0],
+    "level_travel_visual_mesh": "/Game/Interaction/SM_LevelTravel_Ladder.SM_LevelTravel_Ladder",
+    "level_travel_visual_scale": [1.0, 1.0, 1.0],
+    "level_travel_visual_relative_location": [0.0, 0.0, 0.0]
+  },
+  {
     "level_name": "RaidMap",
     "spawn_id": "TS_Travel_ToBunker",
     "spawn_type": "level_travel",
