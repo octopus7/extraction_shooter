@@ -28,5 +28,29 @@
     "function_unlocked": false,
     "unlock_when_ever_acquired_items": [7002, 7003],
     "actor_class": "/Script/TunaSweeper.TunaSweeperPiggyBankActor"
+  },
+  {
+    "facility_id": "housing_signal_control",
+    "display_name_key": "ui.housing.facility.signal_control",
+    "description_key": "ui.housing.facility.signal_control.desc",
+    "display_name": "Signal Control Facility",
+    "description": "A bunker console for maps, route signals, and warp point management. Signal Bot appears here in play mode.",
+    "size_cells": [3, 2],
+    "required_materials": [],
+    "sort_order": 30,
+    "function_unlocked": false,
+    "actor_class": "/Script/TunaSweeper.TunaSweeperSignalControlFacilityActor"
+  },
+  {
+    "facility_id": "housing_supply",
+    "display_name_key": "ui.housing.facility.supply",
+    "description_key": "ui.housing.facility.supply.desc",
+    "display_name": "Supply Facility",
+    "description": "A compact bunker supply station for food, return rewards, and consumable restocking. Rice Pot Bot appears here in play mode.",
+    "size_cells": [3, 2],
+    "required_materials": [],
+    "sort_order": 40,
+    "function_unlocked": false,
+    "actor_class": "/Script/TunaSweeper.TunaSweeperSupplyFacilityActor"
   }
 ]

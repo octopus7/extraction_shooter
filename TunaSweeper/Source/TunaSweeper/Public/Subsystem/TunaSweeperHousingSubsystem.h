@@ -145,6 +145,9 @@ private:
 		const FTunaSweeperHousingPlacedFacilitySaveData& Placement,
 		bool bPreview,
 		bool bPlacementValid) const;
+	bool HasPlacedFacility(FName FacilityId) const;
+	void UnlockWorkbenchDependentFacilitiesIfReady();
+	void ShowFacilityUnlockedToast(const FTunaSweeperHousingFacilityDefinition& Definition) const;
 	bool TryGetDefinition(FName FacilityId, FTunaSweeperHousingFacilityDefinition& OutDefinition) const;
 	bool IsFacilityFunctionUnlocked(const FTunaSweeperHousingFacilityDefinition& Definition) const;
 	bool HasEnoughMaterials(const FTunaSweeperHousingFacilityDefinition& Definition) const;

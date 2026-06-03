@@ -169,7 +169,7 @@ Housing placement state is owned at runtime by `UTunaSweeperHousingSubsystem`. C
 
 Unlocked housing facility functions are saved through `UTunaSweeperSaveGame::UnlockedHousingFacilityIds`.
 
-Each entry is a stable facility definition id from `Content/Data/HousingFacilityDefinitions.json`. Quest rewards can add ids to this set, and older saves also derive missing unlocks from already completed quest rewards during load.
+Each entry is a stable facility definition id from `Content/Data/HousingFacilityDefinitions.json`. Quest rewards can add ids to this set, and older saves also derive missing unlocks from already completed quest rewards during load. As a temporary progression rule, closing housing mode after a placed `housing_workbench` exists also unlocks `housing_signal_control` and `housing_supply` into this same set.
 
 ### Quest Progress
 

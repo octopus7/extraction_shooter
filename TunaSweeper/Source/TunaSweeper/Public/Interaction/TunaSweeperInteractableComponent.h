@@ -102,6 +102,8 @@ public:
 
 	void SetInteractionOrder(int32 InInteractionOrder);
 
+	void SetObjectiveEventId(FName InObjectiveEventId);
+
 	void SetInteractionRequirementPreview(
 		UTexture2D* InIconTexture,
 		int32 InRequiredQuantity,

@@ -2,6 +2,7 @@
 
 #include "Engine/Engine.h"
 #include "Engine/World.h"
+#include "Character/TunaSweeperFacilityNpcActor.h"
 #include "Character/TunaSweeperLedRobotCharacterActor.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "Interaction/TunaSweeperDoorActor.h"
@@ -43,6 +44,21 @@ namespace TunaSweeperInteractionQuestEvents
 			? GameInstance->GetSubsystem<UTunaSweeperHousingSubsystem>()
 			: nullptr;
 		return HousingSubsystem && HousingSubsystem->IsHousingModeOpen();
+	}
+
+	FName ResolveQuestIdForActor(const AActor* Actor)
+	{
+		if (const ATunaSweeperLedRobotCharacterActor* LedRobotActor = Cast<ATunaSweeperLedRobotCharacterActor>(Actor))
+		{
+			return LedRobotActor->ResolveQuestId();
+		}
+
+		if (const ATunaSweeperFacilityNpcActor* FacilityNpcActor = Cast<ATunaSweeperFacilityNpcActor>(Actor))
+		{
+			return FacilityNpcActor->ResolveQuestId();
+		}
+
+		return NAME_None;
 	}
 
 	FName GetInteractionTypeName(ETunaSweeperInteractionType InteractionType)
@@ -314,6 +330,11 @@ bool UTunaSweeperInteractionSubsystem::CanOfferInteraction(const UTunaSweeperInt
 		return false;
 	}
 
+	if (!IsValid(Interactable->GetOwner()) || Interactable->GetOwner()->IsHidden())
+	{
+		return false;
+	}
+
 	if (TunaSweeperInteractionQuestEvents::IsHousingInteractionSuppressed(GetWorld()))
 	{
 		return false;
@@ -369,8 +390,7 @@ bool UTunaSweeperInteractionSubsystem::CanOfferInteraction(const UTunaSweeperInt
 		return true;
 	}
 
-	const ATunaSweeperLedRobotCharacterActor* CanBotActor = Cast<ATunaSweeperLedRobotCharacterActor>(Interactable->GetOwner());
-	return CanBotActor && !CanBotActor->ResolveQuestId().IsNone();
+	return !TunaSweeperInteractionQuestEvents::ResolveQuestIdForActor(Interactable->GetOwner()).IsNone();
 }
 
 bool UTunaSweeperInteractionSubsystem::ShouldDisplayMarkerForInteractable(
@@ -599,10 +619,8 @@ bool UTunaSweeperInteractionSubsystem::HandleQuestInteraction(
 	UTunaSweeperInteractableComponent* Interactable,
 	APawn* InstigatorPawn)
 {
-	ATunaSweeperLedRobotCharacterActor* CanBotActor = Interactable
-		? Cast<ATunaSweeperLedRobotCharacterActor>(Interactable->GetOwner())
-		: nullptr;
-	if (!CanBotActor || !InstigatorPawn)
+	AActor* QuestOwner = Interactable ? Interactable->GetOwner() : nullptr;
+	if (!QuestOwner || !InstigatorPawn)
 	{
 		return false;
 	}
@@ -613,7 +631,7 @@ bool UTunaSweeperInteractionSubsystem::HandleQuestInteraction(
 		return false;
 	}
 
-	const FName ResolvedQuestId = CanBotActor->ResolveQuestId();
+	const FName ResolvedQuestId = TunaSweeperInteractionQuestEvents::ResolveQuestIdForActor(QuestOwner);
 	if (ResolvedQuestId.IsNone())
 	{
 		return false;

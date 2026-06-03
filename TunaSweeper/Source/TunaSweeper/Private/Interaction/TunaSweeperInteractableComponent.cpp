@@ -236,6 +236,12 @@ void UTunaSweeperInteractableComponent::SetInteractionOrder(int32 InInteractionO
 	InteractionOrder = InInteractionOrder;
 }
 
+void UTunaSweeperInteractableComponent::SetObjectiveEventId(FName InObjectiveEventId)
+{
+	Modify();
+	ObjectiveEventId = InObjectiveEventId;
+}
+
 void UTunaSweeperInteractableComponent::SetInteractionRequirementPreview(
 	UTexture2D* InIconTexture,
 	int32 InRequiredQuantity,

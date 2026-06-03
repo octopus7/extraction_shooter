@@ -3947,6 +3947,12 @@
 
 - 사용자가 그림이 마음에 들어 일부러 보존한 `GeneratedImages/UI/Difficulty/T_DifficultyTunaIcons_Source.png`를 다시 복구한 것.
 
+## 2026-06-03 17:27:36 (소요시간: 00:01:37)
+
+- 시설 확장/하우징이 없다는 과거 기준이 현재 구현 상태와 맞지 않으므로 `Docs/Story/tuna_sweeper_story_summary.md`의 NPC/시설 설명을 현재 기준으로 수정한 것.
+- 자판기 구현으로 거래가 존재하므로 `Docs/Story/tuna_sweeper_story_summary.md`의 "상점 없음" 기준을 "NPC 상점은 없음, 벙커 자판기 거래는 있음"으로 수정한 것.
+- `Docs/document_conflict_summary.md`의 상점 존재 여부와 NPC 퀘스트 제공자 충돌 항목을 해결 상태로 바꾸고, 현재 기준을 벙커 자판기 거래 및 캔봇/시설 NPC의 제한된 퀘스트·기능 접점 존재로 정리한 것.
+
 ## 2026-06-03 17:07:40 (소요시간: 00:11:27)
 
 - 임시 교관 모델/액터 경로를 제거하고, `BP_NPC_InstructorQuest` 에셋과 `ATunaSweeperQuestNpcActor` 네이티브 클래스를 삭제한 것.
@@ -3954,3 +3960,24 @@
 - 캔봇 액터에 대화 상호작용과 퀘스트 상호작용을 직접 추가하고, 퀘스트 provider를 `provider.canbot`으로 변경한 것.
 - 캔봇 인트로 대화를 상호작용으로 다시 재생할 수 있게 연결하고, 자동 1회 완료 플래그와 재시청 흐름을 분리한 것.
 - 교관 기준 문서/데이터 설명을 캔봇 기준으로 정리하고, JSON 검증과 `TunaSweeperEditor Win64 Development` 빌드 및 Unreal Editor 실행을 확인한 것.
+
+## 2026-06-03 17:37:31 (소요시간: 00:16:53)
+
+- `housing_signal_control` 통신 관제 시설과 `housing_supply` 보급 시설을 하우징 시설 정의에 추가한 것.
+- 통신 관제 시설에는 `ATunaSweeperSignalBotActor`, 보급 시설에는 `ATunaSweeperRicePotBotActor`가 플레이 모드에서만 나타나도록 시설/NPC 액터를 추가한 것.
+- 작업대가 실제 배치된 뒤 하우징 모드를 닫아 플레이 모드로 돌아오는 순간 통신 관제 시설과 보급 시설을 순차 해금하고, 해금 토스트를 큐에 넣어 표시하게 한 것.
+- 신호봇/밥통봇 provider와 임시 퀘스트를 추가하고, 퀘스트 UI/하우징 UI 문자열 테이블을 갱신한 것.
+- 벙커 내부 시설, 시설 NPC, 단독 NPC 기준을 `Docs/bunker_internal_facilities.md`에 정리한 것.
+- 새 저장 필드는 없지만 임시 시설 해금이 `UnlockedHousingFacilityIds`에 저장되는 점을 `Docs/save_persistence.md`에 반영한 것.
+- JSON/CSV 파싱 검증은 통과했으며, 전체 빌드는 실행 중인 Unreal Editor Live Coding 때문에 차단된 것을 확인한 것.
+
+## 2026-06-03 17:49:00 (소요시간: 00:05:30)
+
+- 메시 에셋을 생성하는 에디터 모듈 코드를 전역 검색하고, `UStaticMesh`, `FMeshDescription`, `BuildFromMeshDescriptions`, `NewObject<UStaticMesh>`, `CreatePackage`, `FAssetRegistryModule::AssetCreated` 호출 기준으로 관련 위치를 정리한 것.
+- 실제 정적 메시 에셋 생성 코드는 `TunaSweeperEditor.cpp`와 `TunaSweeperExperimentalVegetation.cpp`에 집중되어 있고, `SogSplatEditor`는 `.sog` 커스텀 에셋/머티리얼/배치 등록용이며 `UStaticMesh` 에셋 생성 경로가 없음을 확인한 것.
+
+## 2026-06-03 17:54:30 (소요시간: 00:02:48)
+
+- `SogSplatEditor`와 실험 식생 생성을 제외하고, 나머지 에디터 메시 생성 코드를 삭제할 때 기존 메시 에셋이 삭제되거나 삭제에 준하는 효과가 생길 수 있는지 검토한 것.
+- 해당 경로에는 대상 메시 `.uasset`을 직접 삭제하는 호출이 없고, 코드 제거 자체는 이미 존재하는 `Content` 메시 파일을 삭제하지 않음을 확인한 것.
+- 다만 일부 `Ensure*` 경로는 호출 시 기존 메시를 다시 `BuildFromMeshDescriptions()`로 덮어쓰므로, 해당 코드를 제거하면 삭제가 아니라 재생성/보정/복구 경로가 사라지는 영향이 있음을 정리한 것.

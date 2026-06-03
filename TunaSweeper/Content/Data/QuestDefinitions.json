@@ -62,6 +62,50 @@
     }
   },
   {
+    "quest_id": "quest_signalbot_map_check",
+    "provider_id": "provider.signalbot",
+    "sort_order": 100,
+    "title_string_key": "quest.signalbot_map_check.title",
+    "description_string_key": "quest.signalbot_map_check.description",
+    "auto_track_on_accept": true,
+    "objectives": [
+      {
+        "objective_id": "talk_to_signalbot",
+        "type": "interaction_completed",
+        "text_string_key": "quest.signalbot_map_check.objective.talk_to_signalbot",
+        "required_count": 1,
+        "interaction_event_id": "interaction.signalbot.quest",
+        "interaction_type": "quest"
+      }
+    ],
+    "rewards": {
+      "coins": 25,
+      "items": []
+    }
+  },
+  {
+    "quest_id": "quest_ricepotbot_supply_check",
+    "provider_id": "provider.ricepotbot",
+    "sort_order": 110,
+    "title_string_key": "quest.ricepotbot_supply_check.title",
+    "description_string_key": "quest.ricepotbot_supply_check.description",
+    "auto_track_on_accept": true,
+    "objectives": [
+      {
+        "objective_id": "talk_to_ricepotbot",
+        "type": "interaction_completed",
+        "text_string_key": "quest.ricepotbot_supply_check.objective.talk_to_ricepotbot",
+        "required_count": 1,
+        "interaction_event_id": "interaction.ricepotbot.quest",
+        "interaction_type": "quest"
+      }
+    ],
+    "rewards": {
+      "coins": 25,
+      "items": []
+    }
+  },
+  {
     "quest_id": "quest_rescue_cart_return",
     "sort_order": 9000,
     "title_string_key": "quest.rescue_cart_return.title",

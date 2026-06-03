@@ -34,6 +34,12 @@ quest.first_outing.accept.line2,왼쪽 이동 사다리를 사용하면 레이�
 quest.lumberjack_first_kill.title,벌목기 제거,Remove the Lumberjack,伐採機の排除
 quest.lumberjack_first_kill.description,레이드 구역에서 벌목기를 처치하고 생환하세요.,Eliminate a lumberjack in the raid zone and return alive.,レイド区域で伐採機を排除して生還しましょう
 quest.lumberjack_first_kill.objective.kill_lumberjack,벌목기 처치,Eliminate a lumberjack,伐採機を排除
+quest.signalbot_map_check.title,신호 관제 확인,Signal Control Check,通信管制確認
+quest.signalbot_map_check.description,신호봇과 함께 새 통신 관제 시설을 확인하세요.,Check the new signal control facility with Signal Bot.,シグナルボットと新しい通信管制施設を確認しましょう
+quest.signalbot_map_check.objective.talk_to_signalbot,신호봇과 대화,Talk to Signal Bot,シグナルボットと話す
+quest.ricepotbot_supply_check.title,보급 시설 확인,Supply Facility Check,補給施設確認
+quest.ricepotbot_supply_check.description,밥통봇과 함께 새 보급 시설을 확인하세요.,Check the new supply facility with Rice Pot Bot.,ライスポットボットと新しい補給施設を確認しましょう
+quest.ricepotbot_supply_check.objective.talk_to_ricepotbot,밥통봇과 대화,Talk to Rice Pot Bot,ライスポットボットと話す
 quest.rescue_cart_return.title,구조 복귀 확인,Rescue Return Check,救助帰還確認
 quest.rescue_cart_return.description,작전 중 이상 상태가 감지되면 구급 카트 전송 절차에 따라 벙커로 돌아옵니다.,If abnormal status is detected during a sortie the rescue cart returns you to the bunker.,作戦中に異常状態を検知すると救急カート転送手順でバンカーへ戻ります
 quest.rescue_cart_return.objective.return_by_rescue_cart,구급 카트에 실려 벙커로 돌아오기,Return to the bunker by rescue cart,救急カートでバンカーへ戻る

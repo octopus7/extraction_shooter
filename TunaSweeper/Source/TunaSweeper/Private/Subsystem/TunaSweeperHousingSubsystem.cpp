@@ -10,6 +10,7 @@
 #include "Housing/TunaSweeperHousingAreaActor.h"
 #include "Housing/TunaSweeperHousingFacilityActor.h"
 #include "Housing/TunaSweeperHousingGridVisualActor.h"
+#include "Housing/TunaSweeperNpcFacilityActor.h"
 #include "Interaction/TunaSweeperHousingManagementActor.h"
 #include "Interaction/TunaSweeperPiggyBankActor.h"
 #include "Interaction/TunaSweeperWorkbenchActor.h"
@@ -20,6 +21,7 @@
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
+#include "Subsystem/TunaSweeperToastSubsystem.h"
 #include "UI/TunaSweeperUiText.h"
 #include "UObject/SoftObjectPath.h"
 #include "UObject/SoftObjectPtr.h"
@@ -30,6 +32,9 @@ namespace TunaSweeperHousing
 {
 	const TCHAR* FacilityDefinitionsJsonRelativePath = TEXT("Data/HousingFacilityDefinitions.json");
 	const FName BunkerMapName(TEXT("BunkerMap"));
+	const FName WorkbenchFacilityId(TEXT("housing_workbench"));
+	const FName SignalControlFacilityId(TEXT("housing_signal_control"));
+	const FName SupplyFacilityId(TEXT("housing_supply"));
 	constexpr float DefaultFacilityHeight = 70.0f;
 	constexpr float PreviewFacilityHeight = 42.0f;
 	constexpr float PlacedActorZOffset = 2.0f;
@@ -442,6 +447,7 @@ void UTunaSweeperHousingSubsystem::CloseHousingMode()
 	DestroyGridVisualActor();
 	if (bWasOpen)
 	{
+		UnlockWorkbenchDependentFacilitiesIfReady();
 		BroadcastHousingChanged();
 	}
 }
@@ -1397,7 +1403,16 @@ void UTunaSweeperHousingSubsystem::ConfigureFacilityActor(
 		return;
 	}
 
-	if (ATunaSweeperHousingFacilityActor* FacilityActor = Cast<ATunaSweeperHousingFacilityActor>(Actor))
+	if (ATunaSweeperNpcFacilityActor* NpcFacilityActor = Cast<ATunaSweeperNpcFacilityActor>(Actor))
+	{
+		NpcFacilityActor->ConfigureNpcFacility(
+			Definition,
+			Placement,
+			BuildFacilityWorldTransform(Definition, Placement),
+			bPreview,
+			bPlacementValid);
+	}
+	else if (ATunaSweeperHousingFacilityActor* FacilityActor = Cast<ATunaSweeperHousingFacilityActor>(Actor))
 	{
 		FacilityActor->ConfigureFacilityVisual(
 			Definition,
@@ -1452,6 +1467,91 @@ void UTunaSweeperHousingSubsystem::ConfigureFacilityActor(
 		}
 #endif
 	}
+}
+
+bool UTunaSweeperHousingSubsystem::HasPlacedFacility(FName FacilityId) const
+{
+	if (FacilityId.IsNone())
+	{
+		return false;
+	}
+
+	for (const FTunaSweeperHousingPlacedFacilitySaveData& SavedFacility : SavedFacilities)
+	{
+		if (!SavedFacility.bStored && SavedFacility.IsValid() && SavedFacility.FacilityId == FacilityId)
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+void UTunaSweeperHousingSubsystem::UnlockWorkbenchDependentFacilitiesIfReady()
+{
+	LoadHousingFacilityDefinitions(false);
+	LoadSavedFacilitiesFromGameInstance();
+
+	if (!HasPlacedFacility(TunaSweeperHousing::WorkbenchFacilityId))
+	{
+		return;
+	}
+
+	UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GetGameInstance());
+	if (!TunaGameInstance)
+	{
+		return;
+	}
+
+	const FName FacilitiesToUnlock[] =
+	{
+		TunaSweeperHousing::SignalControlFacilityId,
+		TunaSweeperHousing::SupplyFacilityId
+	};
+
+	bool bUnlockedAnyFacility = false;
+	for (const FName FacilityId : FacilitiesToUnlock)
+	{
+		FTunaSweeperHousingFacilityDefinition Definition;
+		if (!TryGetDefinition(FacilityId, Definition))
+		{
+			continue;
+		}
+
+		if (TunaGameInstance->UnlockHousingFacility(FacilityId, false))
+		{
+			bUnlockedAnyFacility = true;
+			ShowFacilityUnlockedToast(Definition);
+		}
+	}
+
+	if (bUnlockedAnyFacility)
+	{
+		TunaGameInstance->SaveGameState();
+	}
+}
+
+void UTunaSweeperHousingSubsystem::ShowFacilityUnlockedToast(
+	const FTunaSweeperHousingFacilityDefinition& Definition) const
+{
+	UGameInstance* GameInstance = GetGameInstance();
+	UTunaSweeperToastSubsystem* ToastSubsystem = GameInstance
+		? GameInstance->GetSubsystem<UTunaSweeperToastSubsystem>()
+		: nullptr;
+	if (!ToastSubsystem)
+	{
+		return;
+	}
+
+	FFormatOrderedArguments Arguments;
+	Arguments.Add(ResolveFacilityDisplayName(Definition));
+	const FText ToastPattern = TunaSweeperHousing::ResolveUiText(
+		GameInstance,
+		TEXT("ui.toast.facility_unlocked"),
+		TEXT("Facility Unlocked: {0}"));
+	ToastSubsystem->ShowToast(
+		FText::Format(ToastPattern, Arguments),
+		2.5f);
 }
 
 bool UTunaSweeperHousingSubsystem::TryGetDefinition(
