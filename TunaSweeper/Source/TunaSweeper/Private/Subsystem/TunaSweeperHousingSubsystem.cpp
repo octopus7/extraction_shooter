@@ -1,7 +1,6 @@
 #include "Subsystem/TunaSweeperHousingSubsystem.h"
 
 #include "Dom/JsonObject.h"
-#include "DrawDebugHelpers.h"
 #include "Components/PrimitiveComponent.h"
 #include "Engine/GameInstance.h"
 #include "Engine/World.h"
@@ -10,6 +9,7 @@
 #include "GameFramework/Actor.h"
 #include "Housing/TunaSweeperHousingAreaActor.h"
 #include "Housing/TunaSweeperHousingFacilityActor.h"
+#include "Housing/TunaSweeperHousingGridVisualActor.h"
 #include "Interaction/TunaSweeperHousingManagementActor.h"
 #include "Interaction/TunaSweeperPiggyBankActor.h"
 #include "Interaction/TunaSweeperWorkbenchActor.h"
@@ -17,7 +17,6 @@
 #include "Misc/FileHelper.h"
 #include "Misc/PackageName.h"
 #include "Misc/Paths.h"
-#include "SceneManagement.h"
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
@@ -33,18 +32,7 @@ namespace TunaSweeperHousing
 	const FName BunkerMapName(TEXT("BunkerMap"));
 	constexpr float DefaultFacilityHeight = 70.0f;
 	constexpr float PreviewFacilityHeight = 42.0f;
-	constexpr float DebugLifeTime = 0.035f;
-	constexpr float CellDebugZOffset = 3.0f;
-	constexpr float InvalidCellDebugZOffset = 9.0f;
-	constexpr float CellRoundRadiusRatio = 0.18f;
-	constexpr float CellRoundRadiusMax = 18.0f;
-	constexpr float CellOutlineMargin = 8.0f;
-	constexpr float CellOutlineThickness = 2.0f;
-	constexpr float PlacementCellOutlineThickness = 4.0f;
-	constexpr float InvalidCellOutlineThickness = 4.0f;
 	constexpr float PlacedActorZOffset = 2.0f;
-	const FColor HousingCellColor(70, 210, 255, 255);
-	const FColor InvalidCellColor(255, 38, 38, 255);
 	const FVector DefaultManagementActorLocation(-420.0f, -560.0f, 60.0f);
 	const FRotator DefaultManagementActorRotation(0.0f, 18.0f, 0.0f);
 
@@ -222,6 +210,7 @@ void UTunaSweeperHousingSubsystem::UnregisterHousingArea(ATunaSweeperHousingArea
 		ActiveHousingArea.Reset();
 		DestroySpawnedFacilities();
 		DestroyPreviewActor();
+		DestroyGridVisualActor();
 		ActivePlacement = FActiveHousingPlacement();
 		ActivePlacementStatus = ETunaSweeperHousingPlacementStatus::None;
 		BroadcastHousingChanged();
@@ -436,6 +425,7 @@ bool UTunaSweeperHousingSubsystem::OpenHousingMode(APlayerController* PlayerCont
 	}
 
 	bHousingModeOpen = true;
+	RefreshGridVisual(nullptr);
 	BroadcastHousingChanged();
 	return true;
 }
@@ -449,6 +439,7 @@ void UTunaSweeperHousingSubsystem::CloseHousingMode()
 	}
 
 	bHousingModeOpen = false;
+	DestroyGridVisualActor();
 	if (bWasOpen)
 	{
 		BroadcastHousingChanged();
@@ -472,7 +463,7 @@ bool UTunaSweeperHousingSubsystem::UpdateHousingMode(APlayerController* PlayerCo
 		return UpdatePlacementPreview(PlayerController);
 	}
 
-	DrawHousingGridDebug(nullptr);
+	RefreshGridVisual(nullptr);
 	return true;
 }
 
@@ -527,6 +518,7 @@ void UTunaSweeperHousingSubsystem::CancelPlacement()
 	ActivePlacement = FActiveHousingPlacement();
 	ActivePlacementStatus = ETunaSweeperHousingPlacementStatus::None;
 	DestroyPreviewActor();
+	RefreshGridVisual(nullptr);
 	BroadcastHousingChanged();
 }
 
@@ -553,7 +545,7 @@ bool UTunaSweeperHousingSubsystem::UpdatePlacementPreview(APlayerController* Pla
 
 	if (!PlayerController)
 	{
-		DrawHousingGridDebug(nullptr);
+		RefreshGridVisual(nullptr);
 		return false;
 	}
 
@@ -565,7 +557,7 @@ bool UTunaSweeperHousingSubsystem::UpdatePlacementPreview(APlayerController* Pla
 	ActivePlacementStatus = PlacementStatus;
 	if (!bResolvedPlacement)
 	{
-		DrawHousingGridDebug(nullptr);
+		RefreshGridVisual(nullptr);
 		return false;
 	}
 
@@ -576,7 +568,7 @@ bool UTunaSweeperHousingSubsystem::UpdatePlacementPreview(APlayerController* Pla
 	FTunaSweeperHousingFacilityDefinition Definition;
 	if (!TryGetDefinition(PreviewPlacement.FacilityId, Definition) || !ActiveHousingArea.IsValid())
 	{
-		DrawHousingGridDebug(&PreviewPlacement);
+		RefreshGridVisual(&PreviewPlacement, false);
 		return false;
 	}
 
@@ -607,7 +599,7 @@ bool UTunaSweeperHousingSubsystem::UpdatePlacementPreview(APlayerController* Pla
 			bPlacementValid);
 	}
 
-	DrawPlacementDebug(PreviewPlacement, bPlacementValid);
+	RefreshGridVisual(&PreviewPlacement, bPlacementValid);
 	return bPlacementValid;
 }
 
@@ -626,7 +618,7 @@ bool UTunaSweeperHousingSubsystem::TryCommitPlacement(APlayerController* PlayerC
 		ActivePlacementStatus = PlacementStatus;
 		if (Placement.FacilityId != NAME_None)
 		{
-			DrawPlacementDebug(Placement, false);
+			RefreshGridVisual(&Placement, false);
 		}
 		BroadcastHousingChanged();
 		return false;
@@ -671,6 +663,7 @@ bool UTunaSweeperHousingSubsystem::TryCommitPlacement(APlayerController* PlayerC
 	DestroyPreviewActor();
 	PersistSavedFacilitiesToGameInstance(true);
 	RefreshSpawnedFacilities();
+	RefreshGridVisual(nullptr);
 	BroadcastHousingChanged();
 	return true;
 }
@@ -709,6 +702,7 @@ bool UTunaSweeperHousingSubsystem::StoreFacility(FGuid InstanceId, bool bSaveImm
 
 	PersistSavedFacilitiesToGameInstance(bSaveImmediately);
 	RefreshSpawnedFacilities();
+	RefreshGridVisual(nullptr);
 	BroadcastHousingChanged();
 	UE_LOG(LogTunaSweeperHousing, Log, TEXT("Stored housing facility. InstanceId=%s"), *InstanceId.ToString());
 	return true;
@@ -859,6 +853,7 @@ void UTunaSweeperHousingSubsystem::ResetRuntimeWorldState()
 	RegisteredHousingAreas.Reset();
 	DestroySpawnedFacilities();
 	DestroyPreviewActor();
+	DestroyGridVisualActor();
 	ActivePlacement = FActiveHousingPlacement();
 	ActivePlacementStatus = ETunaSweeperHousingPlacementStatus::None;
 	bHousingModeOpen = false;
@@ -1186,15 +1181,19 @@ bool UTunaSweeperHousingSubsystem::TryResolvePlacementAtMouse(
 	OutPlacement.bStored = false;
 
 	const FIntPoint FootprintSize = GetRotatedFootprintSize(Definition, OutPlacement.RotationQuarterTurns);
-	const bool bInsideArea = ActiveHousingArea->TryGetAnchorCellForWorldLocation(
+	ActiveHousingArea->TryGetAnchorCellForWorldLocation(
 		MouseWorldPoint,
 		FootprintSize,
 		OutPlacement.AnchorCell);
-	if (!bInsideArea)
-	{
-		OutStatus = ETunaSweeperHousingPlacementStatus::OutsideArea;
-		return true;
-	}
+
+	OutPlacement.AnchorCell.X = FMath::Clamp(
+		OutPlacement.AnchorCell.X,
+		0,
+		FMath::Max(0, ActiveHousingArea->GetGridSizeX() - FootprintSize.X));
+	OutPlacement.AnchorCell.Y = FMath::Clamp(
+		OutPlacement.AnchorCell.Y,
+		0,
+		FMath::Max(0, ActiveHousingArea->GetGridSizeY() - FootprintSize.Y));
 
 	return ValidatePlacement(OutPlacement, ActivePlacement.ExistingInstanceId, OutStatus);
 }
@@ -1641,19 +1640,13 @@ FString UTunaSweeperHousingSubsystem::GetHousingFacilityDefinitionsJsonPath() co
 	return FPaths::Combine(FPaths::ProjectContentDir(), TunaSweeperHousing::FacilityDefinitionsJsonRelativePath);
 }
 
-void UTunaSweeperHousingSubsystem::DrawPlacementDebug(
-	const FTunaSweeperHousingPlacedFacilitySaveData& Placement,
-	bool bPlacementValid) const
-{
-	DrawHousingGridDebug(&Placement, bPlacementValid);
-}
-
-void UTunaSweeperHousingSubsystem::DrawHousingGridDebug(
+void UTunaSweeperHousingSubsystem::RefreshGridVisual(
 	const FTunaSweeperHousingPlacedFacilitySaveData* HighlightPlacement,
-	bool bHighlightValid) const
+	bool bHighlightValid)
 {
-	if (!ActiveHousingArea.IsValid() || !ActiveHousingArea->GetWorld())
+	if (!bHousingModeOpen || !ActiveHousingArea.IsValid() || !ActiveHousingArea->GetWorld())
 	{
+		DestroyGridVisualActor();
 		return;
 	}
 
@@ -1681,136 +1674,87 @@ void UTunaSweeperHousingSubsystem::DrawHousingGridDebug(
 		}
 	}
 
+	TArray<FIntPoint> HighlightCells;
+	TSet<FIntPoint> HighlightCellSet;
+	if (HighlightPlacement && !HighlightPlacement->FacilityId.IsNone())
+	{
+		FTunaSweeperHousingFacilityDefinition Definition;
+		if (TryGetDefinition(HighlightPlacement->FacilityId, Definition))
+		{
+			const FIntPoint FootprintSize = GetRotatedFootprintSize(Definition, HighlightPlacement->RotationQuarterTurns);
+			for (int32 OffsetY = 0; OffsetY < FootprintSize.Y; ++OffsetY)
+			{
+				for (int32 OffsetX = 0; OffsetX < FootprintSize.X; ++OffsetX)
+				{
+					const FIntPoint HighlightCell(HighlightPlacement->AnchorCell.X + OffsetX, HighlightPlacement->AnchorCell.Y + OffsetY);
+					if (ActiveHousingArea->IsCellRectInside(HighlightCell, FIntPoint(1, 1)))
+					{
+						HighlightCells.Add(HighlightCell);
+						HighlightCellSet.Add(HighlightCell);
+					}
+				}
+			}
+		}
+		else
+		{
+			bHighlightValid = false;
+		}
+	}
+
+	TSet<FIntPoint> BaseCells;
 	for (int32 CellY = 0; CellY < ActiveHousingArea->GetGridSizeY(); ++CellY)
 	{
 		for (int32 CellX = 0; CellX < ActiveHousingArea->GetGridSizeX(); ++CellX)
 		{
 			const FIntPoint Cell(CellX, CellY);
-			if (OccupiedCells.Contains(Cell))
+			if (!OccupiedCells.Contains(Cell) && !HighlightCellSet.Contains(Cell))
 			{
-				continue;
+				BaseCells.Add(Cell);
 			}
-
-			DrawRoundedCellDebug(
-				Cell,
-				TunaSweeperHousing::HousingCellColor,
-				TunaSweeperHousing::CellOutlineThickness,
-				SDPG_World,
-				TunaSweeperHousing::CellDebugZOffset);
 		}
 	}
 
-	if (!HighlightPlacement || HighlightPlacement->FacilityId.IsNone())
+	if (ATunaSweeperHousingGridVisualActor* VisualActor = EnsureGridVisualActor())
 	{
-		return;
-	}
-
-	FTunaSweeperHousingFacilityDefinition Definition;
-	if (!TryGetDefinition(HighlightPlacement->FacilityId, Definition))
-	{
-		return;
-	}
-
-	const FColor& HighlightColor = bHighlightValid
-		? TunaSweeperHousing::HousingCellColor
-		: TunaSweeperHousing::InvalidCellColor;
-	const float HighlightThickness = bHighlightValid
-		? TunaSweeperHousing::PlacementCellOutlineThickness
-		: TunaSweeperHousing::InvalidCellOutlineThickness;
-	const FIntPoint FootprintSize = GetRotatedFootprintSize(Definition, HighlightPlacement->RotationQuarterTurns);
-	for (int32 OffsetY = 0; OffsetY < FootprintSize.Y; ++OffsetY)
-	{
-		for (int32 OffsetX = 0; OffsetX < FootprintSize.X; ++OffsetX)
-		{
-			DrawRoundedCellDebug(
-				FIntPoint(HighlightPlacement->AnchorCell.X + OffsetX, HighlightPlacement->AnchorCell.Y + OffsetY),
-				HighlightColor,
-				HighlightThickness,
-				SDPG_Foreground,
-				TunaSweeperHousing::InvalidCellDebugZOffset);
-		}
+		VisualActor->RefreshVisual(ActiveHousingArea.Get(), BaseCells, HighlightCells, bHighlightValid);
 	}
 }
 
-void UTunaSweeperHousingSubsystem::DrawRoundedCellDebug(
-	const FIntPoint& Cell,
-	const FColor& Color,
-	float Thickness,
-	uint8 DepthPriority,
-	float ZOffset) const
+ATunaSweeperHousingGridVisualActor* UTunaSweeperHousingSubsystem::EnsureGridVisualActor()
 {
-	if (!ActiveHousingArea.IsValid() || !ActiveHousingArea->GetWorld())
+	if (!ActiveHousingArea.IsValid())
 	{
-		return;
+		return nullptr;
 	}
-
-	const float CellSize = FMath::Max(1.0f, ActiveHousingArea->GetCellSize());
-	const float Margin = FMath::Clamp(TunaSweeperHousing::CellOutlineMargin, 0.0f, CellSize * 0.25f);
-	const float Radius = FMath::Clamp(
-		CellSize * TunaSweeperHousing::CellRoundRadiusRatio,
-		2.0f,
-		FMath::Min(TunaSweeperHousing::CellRoundRadiusMax, CellSize * 0.5f - Margin));
-
-	const FVector Origin = ActiveHousingArea->GetWorldLocationForCellCorner(Cell) + FVector(0.0f, 0.0f, ZOffset);
-	const FVector XCorner = ActiveHousingArea->GetWorldLocationForCellCorner(FIntPoint(Cell.X + 1, Cell.Y)) + FVector(0.0f, 0.0f, ZOffset);
-	const FVector YCorner = ActiveHousingArea->GetWorldLocationForCellCorner(FIntPoint(Cell.X, Cell.Y + 1)) + FVector(0.0f, 0.0f, ZOffset);
-	const FVector XAxis = (XCorner - Origin).GetSafeNormal();
-	const FVector YAxis = (YCorner - Origin).GetSafeNormal();
-	if (XAxis.IsNearlyZero() || YAxis.IsNearlyZero())
-	{
-		return;
-	}
-
-	auto ToWorld = [&Origin, &XAxis, &YAxis](float X, float Y)
-	{
-		return Origin + XAxis * X + YAxis * Y;
-	};
 
 	UWorld* World = ActiveHousingArea->GetWorld();
-	auto DrawSegment = [World, Color, Thickness, DepthPriority](const FVector& Start, const FVector& End)
+	if (!World)
 	{
-		DrawDebugLine(
-			World,
-			Start,
-			End,
-			Color,
-			false,
-			TunaSweeperHousing::DebugLifeTime,
-			DepthPriority,
-			Thickness);
-	};
+		return nullptr;
+	}
 
-	const float Min = Margin;
-	const float Max = CellSize - Margin;
-	DrawSegment(ToWorld(Min + Radius, Min), ToWorld(Max - Radius, Min));
-	DrawSegment(ToWorld(Max, Min + Radius), ToWorld(Max, Max - Radius));
-	DrawSegment(ToWorld(Max - Radius, Max), ToWorld(Min + Radius, Max));
-	DrawSegment(ToWorld(Min, Max - Radius), ToWorld(Min, Min + Radius));
-
-	auto DrawArc = [&ToWorld, &DrawSegment](
-		const FVector2D& Center,
-		float InRadius,
-		float StartDegrees,
-		float EndDegrees)
+	if (IsValid(GridVisualActor) && GridVisualActor->GetWorld() == World)
 	{
-		constexpr int32 SegmentCount = 5;
-		FVector PreviousPoint = ToWorld(
-			Center.X + FMath::Cos(FMath::DegreesToRadians(StartDegrees)) * InRadius,
-			Center.Y + FMath::Sin(FMath::DegreesToRadians(StartDegrees)) * InRadius);
-		for (int32 SegmentIndex = 1; SegmentIndex <= SegmentCount; ++SegmentIndex)
-		{
-			const float Alpha = static_cast<float>(SegmentIndex) / static_cast<float>(SegmentCount);
-			const float AngleDegrees = FMath::Lerp(StartDegrees, EndDegrees, Alpha);
-			const FVector CurrentPoint = ToWorld(
-				Center.X + FMath::Cos(FMath::DegreesToRadians(AngleDegrees)) * InRadius,
-				Center.Y + FMath::Sin(FMath::DegreesToRadians(AngleDegrees)) * InRadius);
-			DrawSegment(PreviousPoint, CurrentPoint);
-			PreviousPoint = CurrentPoint;
-		}
-	};
+		return GridVisualActor;
+	}
 
-	DrawArc(FVector2D(Min + Radius, Min + Radius), Radius, 180.0f, 270.0f);
-	DrawArc(FVector2D(Max - Radius, Min + Radius), Radius, 270.0f, 360.0f);
-	DrawArc(FVector2D(Max - Radius, Max - Radius), Radius, 0.0f, 90.0f);
-	DrawArc(FVector2D(Min + Radius, Max - Radius), Radius, 90.0f, 180.0f);
+	DestroyGridVisualActor();
+
+	FActorSpawnParameters SpawnParameters;
+	SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	SpawnParameters.ObjectFlags |= RF_Transient;
+	GridVisualActor = World->SpawnActor<ATunaSweeperHousingGridVisualActor>(
+		ATunaSweeperHousingGridVisualActor::StaticClass(),
+		ActiveHousingArea->GetActorTransform(),
+		SpawnParameters);
+	return GridVisualActor;
+}
+
+void UTunaSweeperHousingSubsystem::DestroyGridVisualActor()
+{
+	if (IsValid(GridVisualActor))
+	{
+		GridVisualActor->Destroy();
+	}
+	GridVisualActor = nullptr;
 }

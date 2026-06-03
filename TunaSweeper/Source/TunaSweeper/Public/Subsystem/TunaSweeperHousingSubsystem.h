@@ -9,6 +9,7 @@ class APlayerController;
 class AActor;
 class ATunaSweeperHousingAreaActor;
 class ATunaSweeperHousingFacilityActor;
+class ATunaSweeperHousingGridVisualActor;
 class ATunaSweeperHousingManagementActor;
 class UWorld;
 
@@ -153,11 +154,11 @@ private:
 	FText BuildMaterialsText(const FTunaSweeperHousingFacilityDefinition& Definition) const;
 	FText BuildStateText(ETunaSweeperHousingFacilityBuildState BuildState) const;
 	FString GetHousingFacilityDefinitionsJsonPath() const;
-	void DrawPlacementDebug(const FTunaSweeperHousingPlacedFacilitySaveData& Placement, bool bPlacementValid) const;
-	void DrawHousingGridDebug(
+	void RefreshGridVisual(
 		const FTunaSweeperHousingPlacedFacilitySaveData* HighlightPlacement,
-		bool bHighlightValid = true) const;
-	void DrawRoundedCellDebug(const FIntPoint& Cell, const FColor& Color, float Thickness, uint8 DepthPriority, float ZOffset) const;
+		bool bHighlightValid = true);
+	ATunaSweeperHousingGridVisualActor* EnsureGridVisualActor();
+	void DestroyGridVisualActor();
 
 	UPROPERTY(Transient)
 	TMap<FName, FTunaSweeperHousingFacilityDefinition> FacilityDefinitionsById;
@@ -179,6 +180,9 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<AActor> PreviewActor;
+
+	UPROPERTY(Transient)
+	TObjectPtr<ATunaSweeperHousingGridVisualActor> GridVisualActor;
 
 	UPROPERTY(Transient)
 	TWeakObjectPtr<ATunaSweeperHousingManagementActor> RuntimeHousingManagementActor;

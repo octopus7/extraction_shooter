@@ -3805,3 +3805,54 @@
 - 프리뷰 액터는 실제 배치와 같은 transform 경로를 사용하되, 배치 판정에 영향을 주지 않도록 프리뷰 중 collision과 overlap을 비활성화한 것.
 - 실제 배치 액터는 기존 액터 클래스/컴포넌트 설정을 유지하고, fallback 하우징 전용 액터일 때만 기존 footprint 시각화를 사용하게 한 것.
 - `TunaSweeperEditor Win64 Development` 빌드 및 Unreal Editor 재실행을 완료한 것.
+
+## 2026-06-03 14:25:39 (소요시간: 00:02:26)
+
+- 하우징 바닥 격자는 이미 배치된 시설이 점유한 셀을 제외한 빈 셀 공간에 기본 파란 outline으로 표시되게 한 것.
+- 배치 중인 시설의 footprint 셀은 유효한 위치일 때 파란색 foreground outline으로 한 번 더 표시되게 한 것.
+- 배치 중인 시설의 footprint가 기존 시설과 겹치거나 하우징 영역 밖으로 벗어나면 해당 footprint 셀을 빨간색 foreground outline으로 표시되게 한 것.
+- `TunaSweeperEditor Win64 Development` 빌드 및 Unreal Editor 재실행을 완료한 것.
+
+## 2026-06-03 14:29:12 (소요시간: 00:13:32)
+
+- 세이브 슬롯 삭제 롱프레스가 완료되면 확인창 없이 즉시 선택 슬롯을 삭제하게 할 것.
+- 기존 삭제 버튼 안의 원형 게이지는 사용하지 않고 숨기며, 선택된 슬롯 버튼 자체에 가로 방향 진행 fill이 차오르게 할 것.
+- 삭제 완료 시 임시 토스트를 통해 `삭제 되었습니다` 메시지를 표시하게 할 것.
+
+## 2026-06-03 14:43:10 (소요시간: 00:07:18)
+
+- 세이브 슬롯 삭제 롱프레스 진행 fill 위치를 슬롯 버튼이 아니라 `길게 눌러 삭제하기` 삭제 버튼으로 정정할 것.
+- 삭제 버튼 텍스트 일부 영역이 아니라 삭제 버튼 전체 면적이 가로 방향 progress fill 영역이 되게 할 것.
+- 빈 슬롯에서는 삭제 버튼 자체가 숨겨지도록 유지/정리할 것.
+
+## 2026-06-03 14:31:41 (소요시간: 00:12:49)
+
+- 세이브 슬롯 삭제 완료 토스트를 인트로 메뉴 내부 임시 구현에서 공용 `UTunaSweeperToastSubsystem` 호출 방식으로 바꾼 것.
+- 공용 네이티브 `UTunaSweeperToastWidget`을 추가하고, 토스트 큐/페이드/현지화 키 처리를 서브시스템에서 관리하게 한 것.
+- 퀘스트 목표가 모두 완료되어 `RewardAvailable` 상태가 되는 순간 해당 퀘스트 제목 기반 달성 토스트를 같은 서브시스템으로 표시하게 한 것.
+- `UITextStrings.csv`에 세이브 삭제/퀘스트 달성 토스트 문구를 추가하고, `TunaSweeperEditor Win64 Development` 빌드 및 Unreal Editor 실행을 완료한 것.
+
+## 2026-06-03 14:30:47 (소요시간: 00:16:20)
+
+- 하우징 셀 표시를 `DrawDebugLine` 디버그 렌더링에서 `ATunaSweeperHousingGridVisualActor` 절차적 메시 렌더링으로 교체한 것.
+- 빈 셀은 셀 안쪽으로 여유 있는 inset을 둔 속 빈 파란 라운딩 박스 outline으로 표시하고, 배치 중인 footprint는 유효하면 파랑, 불가하면 빨강 outline으로 갱신하게 한 것.
+- 붉은 배치 불가 footprint는 별도 하이라이트 메시와 높은 Z offset/정렬 우선순위로 실제 시설 메시 위에서도 보이도록 처리한 것.
+- `TunaSweeperEditor Win64 Development` 빌드 통과 및 Unreal Editor 재실행을 완료한 것.
+
+## 2026-06-03 14:55:16 (소요시간: 00:01:05)
+
+- 세이브 슬롯 삭제 완료 알림이 인트로 메뉴 전용 임시 토스트가 아니라 공용 `UTunaSweeperToastSubsystem::ShowSaveSlotDeletedToast()` 경로로 표시되는지 확인하고 적용 상태를 확정한 것.
+- `UITextStrings.csv`의 `ui.toast.save_slot_deleted` 문구를 `삭제 되었습니다`로 유지하고, 임시 `SaveSlotToast` 위젯/키 잔여 참조가 없음을 확인한 것.
+
+## 2026-06-03 14:48:12 (소요시간: 00:08:15)
+
+- 하우징 배치 footprint 셀이 기본 빈 셀 렌더링과 겹치지 않도록 하이라이트 셀을 기본 셀 목록에서 제외해 한 셀에는 하나의 상태만 표시되게 한 것.
+- 마우스가 하우징 영역 밖으로 나가도 배치 anchor를 영역 안으로 clamp해서 시설 footprint가 배치 가능 범위를 벗어나지 않게 한 것.
+- 빈 셀 색상을 파란색에서 낮은 밝기의 흐린 흰색 outline으로 변경하고, 배치 가능 footprint만 파란색으로 유지한 것.
+- `TunaSweeperEditor Win64 Development` 빌드 통과 및 Unreal Editor 재실행을 완료한 것.
+
+## 2026-06-03 14:58:25 (소요시간: 00:01:10)
+
+- 하우징 배치 불가 상태의 빨간 셀 outline이 바닥에서 붕 떠 보이지 않도록 invalid 하이라이트 Z offset을 `140.0`에서 `26.0`으로 낮춘 것.
+- 파란 배치 가능 하이라이트 높이 `22.0`과 거의 같은 평면대에서 표시되도록 조정한 것.
+- `TunaSweeperEditor Win64 Development` 빌드 통과 및 Unreal Editor 재실행을 완료한 것.

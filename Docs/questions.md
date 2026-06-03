@@ -1894,3 +1894,22 @@ NS `DynamicBeam`의 `Local Space`가 꺼져 있으니 레이저 End를 월드 �
 ### 답변
 
 구현되어 있다. `UTunaSweeperGameInstance`에 `CanSplitItemStackBetweenSlots()`와 `SplitItemStackBetweenSlots()`가 있고, 원본 스택 수량이 2 이상이며 대상 슬롯이 비어 있고 해당 슬롯이 아이템을 받을 수 있을 때만 분할한다. 기본 분할 수량은 원래 수량의 50%를 소수점 내림으로 계산하고, 실제 분할 시 원본 수량을 줄인 뒤 새 아이템 인스턴스를 만들어 대상 슬롯에 넣는다. UI 쪽도 `UTunaSweeperItemStackSplitPopupWidget`로 연결되어 있으며, 인벤토리/컨테이너/썸네일 슬롯 드롭 처리에서 `Ctrl`을 누른 채 빈 슬롯에 드롭하면 수량 입력 팝업을 열고 OK 또는 Enter로 분할을 실행한다. 단, 별도 컨텍스트 메뉴나 독립 버튼이 아니라 Ctrl+드래그 드롭 기반이다.
+## 2026-06-03 14:27:08 (소요시간: 00:01:06)
+
+### 질문
+
+세이브 슬롯 삭제시 꾹 누를때 원형 게이지가 차오르고 있지?
+
+### 답변
+
+맞다. `UTunaSweeperIntroMenuWidget`에서 삭제 버튼 `OnPressed`가 홀드 상태를 시작하고, `NativeTick()`이 `DeleteHoldElapsedSeconds / DeleteHoldDurationSeconds`로 3초 진행률을 계산해 `SetDeleteHoldProgress()`에 넘긴다. 이 함수는 `DeleteHoldGaugeFill`의 투명도와 중심 기준 스케일을 진행률만큼 키우므로 버튼 안의 원형 게이지가 차오르는 것처럼 보인다. 다만 현재 구현은 원형 호/파이 조각이 채워지는 방식이 아니라 원형 fill 이미지가 0에서 1까지 커지는 방식이다.
+
+## 2026-06-03 14:30:47 (소요시간: 00:16:20)
+
+### 질문
+
+하우징 모드의 셀 표시는 속이 빈 라운딩 사각형이 맞는가?
+
+### 답변
+
+맞다. 이제 디버그 라인이 아니라 `ATunaSweeperHousingGridVisualActor`가 절차적 메시로 그리는 속 빈 라운딩 박스 outline이며, 셀 사이에는 충분한 빈틈을 두도록 inset을 적용한다.
