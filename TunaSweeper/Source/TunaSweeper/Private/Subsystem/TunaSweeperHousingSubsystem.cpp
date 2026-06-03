@@ -453,9 +453,13 @@ bool UTunaSweeperHousingSubsystem::UpdateHousingMode(APlayerController* PlayerCo
 		return false;
 	}
 
-	if (PlayerController)
+	UWorld* PlayerWorld = PlayerController ? PlayerController->GetWorld() : nullptr;
+	if (PlayerWorld && (!ActiveHousingArea.IsValid() || !DoesAreaBelongToWorld(ActiveHousingArea.Get(), PlayerWorld)))
 	{
-		EnsureHousingForWorld(PlayerController->GetWorld());
+		if (!EnsureHousingForWorld(PlayerWorld))
+		{
+			return false;
+		}
 	}
 
 	if (HasActivePlacement())
@@ -549,7 +553,15 @@ bool UTunaSweeperHousingSubsystem::UpdatePlacementPreview(APlayerController* Pla
 		return false;
 	}
 
-	EnsureHousingForWorld(PlayerController->GetWorld());
+	UWorld* PlayerWorld = PlayerController->GetWorld();
+	if (PlayerWorld && (!ActiveHousingArea.IsValid() || !DoesAreaBelongToWorld(ActiveHousingArea.Get(), PlayerWorld)))
+	{
+		if (!EnsureHousingForWorld(PlayerWorld))
+		{
+			RefreshGridVisual(nullptr);
+			return false;
+		}
+	}
 
 	FTunaSweeperHousingPlacedFacilitySaveData PreviewPlacement;
 	ETunaSweeperHousingPlacementStatus PlacementStatus = ETunaSweeperHousingPlacementStatus::None;
@@ -580,7 +592,7 @@ bool UTunaSweeperHousingSubsystem::UpdatePlacementPreview(APlayerController* Pla
 
 	if (!PreviewActor)
 	{
-		UWorld* World = PlayerController->GetWorld();
+		UWorld* World = PlayerWorld;
 		PreviewActor = World
 			? World->SpawnActor<AActor>(
 				DesiredPreviewActorClass,
