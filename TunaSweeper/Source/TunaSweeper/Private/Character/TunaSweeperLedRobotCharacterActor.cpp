@@ -4,9 +4,15 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/SceneComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/WidgetComponent.h"
 #include "Engine/StaticMesh.h"
+#include "Engine/GameInstance.h"
+#include "Engine/World.h"
+#include "Interaction/TunaSweeperInteractableComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Materials/MaterialInterface.h"
+#include "Subsystem/TunaSweeperQuestSubsystem.h"
+#include "UI/TunaSweeperQuestNoticeWidget.h"
 #include "UObject/ConstructorHelpers.h"
 
 ATunaSweeperLedRobotCharacterActor::ATunaSweeperLedRobotCharacterActor()
@@ -42,6 +48,45 @@ ATunaSweeperLedRobotCharacterActor::ATunaSweeperLedRobotCharacterActor()
 	ExpressionComponent->SetRelativeLocation(FVector(52.0f, 0.0f, 122.0f));
 	ExpressionComponent->SetRelativeRotation(FRotator::ZeroRotator);
 	ExpressionComponent->bEditableWhenInherited = true;
+
+	InteractionMarkerWidgetClass = TSoftClassPtr<UTunaSweeperInteractionMarkerWidget>(
+		FSoftObjectPath(TEXT("/Game/UI/WBP_InteractionMarker.WBP_InteractionMarker_C")));
+	QuestFallbackId = UTunaSweeperQuestSubsystem::GetFirstOutingQuestId();
+	QuestProviderId = UTunaSweeperQuestSubsystem::GetCanBotProviderId();
+
+	DialogueInteractableComponent = CreateDefaultSubobject<UTunaSweeperInteractableComponent>(TEXT("DialogueInteractable"));
+	DialogueInteractableComponent->SetupAttachment(SceneRoot);
+	DialogueInteractableComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 155.0f));
+	DialogueInteractableComponent->ConfigureInteractionDefaults(
+		ETunaSweeperInteractionType::CanBotDialogue,
+		FText::FromString(TEXT("\uB300\uD654")),
+		InteractionMarkerWidgetClass,
+		FName(TEXT("ui.interaction.canbot_dialogue")));
+	DialogueInteractableComponent->SetInteractionOrder(0);
+	DialogueInteractableComponent->bEditableWhenInherited = true;
+
+	QuestInteractableComponent = CreateDefaultSubobject<UTunaSweeperInteractableComponent>(TEXT("QuestInteractable"));
+	QuestInteractableComponent->SetupAttachment(SceneRoot);
+	QuestInteractableComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 155.0f));
+	QuestInteractableComponent->ConfigureInteractionDefaults(
+		ETunaSweeperInteractionType::Quest,
+		FText::FromString(TEXT("\uD018\uC2A4\uD2B8")),
+		InteractionMarkerWidgetClass,
+		FName(TEXT("ui.quest.interaction_name")));
+	QuestInteractableComponent->SetInteractionOrder(1);
+	QuestInteractableComponent->bEditableWhenInherited = true;
+
+	QuestNoticeWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("QuestNoticeWidget"));
+	QuestNoticeWidgetComponent->SetupAttachment(SceneRoot);
+	QuestNoticeWidgetComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 228.0f));
+	QuestNoticeWidgetComponent->SetWidgetSpace(EWidgetSpace::Screen);
+	QuestNoticeWidgetComponent->SetWidgetClass(UTunaSweeperQuestNoticeWidget::StaticClass());
+	QuestNoticeWidgetComponent->SetDrawSize(FVector2D(56.0f, 56.0f));
+	QuestNoticeWidgetComponent->SetPivot(FVector2D(0.5f, 0.5f));
+	QuestNoticeWidgetComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	QuestNoticeWidgetComponent->SetVisibility(false);
+	QuestNoticeWidgetComponent->SetHiddenInGame(false);
+	QuestNoticeWidgetComponent->bEditableWhenInherited = true;
 
 	BodyMeshOverride = TSoftObjectPtr<UStaticMesh>(FSoftObjectPath(TEXT("/Engine/BasicShapes/Cylinder.Cylinder")));
 	ExpressionPresetFilePath = TEXT("Data/LedExpressionPresets.txt");
@@ -144,6 +189,64 @@ void ATunaSweeperLedRobotCharacterActor::BeginPlay()
 	LookAtReactionDelay = FMath::FRandRange(LookAtMinReactionDelay, FMath::Max(LookAtMinReactionDelay, LookAtMaxReactionDelay));
 	RefreshRobotVisuals();
 	SetExpressionByName(InitialExpressionName);
+
+	if (UWorld* World = GetWorld())
+	{
+		if (UGameInstance* GameInstance = World->GetGameInstance())
+		{
+			if (UTunaSweeperQuestSubsystem* QuestSubsystem = GameInstance->GetSubsystem<UTunaSweeperQuestSubsystem>())
+			{
+				QuestSubsystem->OnQuestProgressChanged.RemoveAll(this);
+				QuestSubsystem->OnQuestProgressChanged.AddUObject(
+					this,
+					&ATunaSweeperLedRobotCharacterActor::RefreshQuestNoticeVisibility);
+			}
+		}
+	}
+
+	RefreshQuestNoticeVisibility();
+}
+
+void ATunaSweeperLedRobotCharacterActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	if (UWorld* World = GetWorld())
+	{
+		if (UGameInstance* GameInstance = World->GetGameInstance())
+		{
+			if (UTunaSweeperQuestSubsystem* QuestSubsystem = GameInstance->GetSubsystem<UTunaSweeperQuestSubsystem>())
+			{
+				QuestSubsystem->OnQuestProgressChanged.RemoveAll(this);
+			}
+		}
+	}
+
+	Super::EndPlay(EndPlayReason);
+}
+
+FName ATunaSweeperLedRobotCharacterActor::ResolveQuestId() const
+{
+	const FName EffectiveProviderId = QuestProviderId.IsNone()
+		? UTunaSweeperQuestSubsystem::GetCanBotProviderId()
+		: QuestProviderId;
+
+	if (UWorld* World = GetWorld())
+	{
+		if (UGameInstance* GameInstance = World->GetGameInstance())
+		{
+			if (const UTunaSweeperQuestSubsystem* QuestSubsystem = GameInstance->GetSubsystem<UTunaSweeperQuestSubsystem>())
+			{
+				FName ResolvedQuestId = NAME_None;
+				if (QuestSubsystem->TryResolveQuestForProvider(EffectiveProviderId, QuestFallbackId, ResolvedQuestId))
+				{
+					return ResolvedQuestId;
+				}
+
+				return NAME_None;
+			}
+		}
+	}
+
+	return QuestFallbackId;
 }
 
 void ATunaSweeperLedRobotCharacterActor::RefreshRobotVisuals()
@@ -194,6 +297,37 @@ void ATunaSweeperLedRobotCharacterActor::RefreshExpressionDemoSettings()
 
 	ExpressionComponent->SetDemoExpressionIntervalSeconds(FMath::Max(0.1f, ResolvedIntervalSeconds));
 	ExpressionComponent->SetDemoModeEnabled(bResolvedDemoModeEnabled);
+}
+
+void ATunaSweeperLedRobotCharacterActor::RefreshQuestNoticeVisibility()
+{
+	if (QuestNoticeWidgetComponent)
+	{
+		QuestNoticeWidgetComponent->SetVisibility(ShouldShowQuestNotice());
+	}
+}
+
+bool ATunaSweeperLedRobotCharacterActor::ShouldShowQuestNotice() const
+{
+	const FName ResolvedQuestId = ResolveQuestId();
+	if (ResolvedQuestId.IsNone())
+	{
+		return false;
+	}
+
+	const UWorld* World = GetWorld();
+	const UGameInstance* GameInstance = World ? World->GetGameInstance() : nullptr;
+	const UTunaSweeperQuestSubsystem* QuestSubsystem = GameInstance
+		? GameInstance->GetSubsystem<UTunaSweeperQuestSubsystem>()
+		: nullptr;
+	if (!QuestSubsystem)
+	{
+		return false;
+	}
+
+	const ETunaSweeperQuestState State = QuestSubsystem->GetQuestState(ResolvedQuestId);
+	return (State == ETunaSweeperQuestState::Available && QuestSubsystem->CanAcceptQuest(ResolvedQuestId)) ||
+		State == ETunaSweeperQuestState::RewardAvailable;
 }
 
 void ATunaSweeperLedRobotCharacterActor::UpdatePlayerLookAt(float DeltaSeconds)

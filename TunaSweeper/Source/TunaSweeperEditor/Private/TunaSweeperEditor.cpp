@@ -6,7 +6,6 @@
 #include "AI/TunaSweeperCoverPointActor.h"
 #include "AutomatedAssetImportData.h"
 #include "Blueprint/WidgetTree.h"
-#include "Character/TunaSweeperQuestNpcActor.h"
 #include "Character/TunaSweeperLedRobotCharacterActor.h"
 #include "Character/TunaSweeperTopDownCharacter.h"
 #include "Components/Border.h"
@@ -214,8 +213,6 @@ namespace TunaSweeperEditorSetup
 	const FString GameModeAssetName = TEXT("BP_TunaSweeperGameMode");
 	const FString PlayerAssetPath = TEXT("/Game/Characters/Player");
 	const FString PlayerAssetName = TEXT("BP_TunaSweeperPlayerCharacter");
-	const FString NpcAssetPath = TEXT("/Game/Characters/NPC");
-	const FString InstructorQuestNpcAssetName = TEXT("BP_NPC_InstructorQuest");
 	const FString CanBotAssetPath = TEXT("/Game/Characters/CanBot");
 	const FString CanBotAssetName = TEXT("BP_CanBot");
 	const FString EnemyAssetPath = TEXT("/Game/Characters/Enemy");
@@ -11246,38 +11243,6 @@ namespace TunaSweeperEditorSetup
 		return true;
 	}
 
-	bool ConfigureQuestNpcBlueprint(UBlueprint* QuestNpcBlueprint)
-	{
-		if (!QuestNpcBlueprint)
-		{
-			return false;
-		}
-
-		FKismetEditorUtilities::CompileBlueprint(QuestNpcBlueprint);
-
-		ATunaSweeperQuestNpcActor* Defaults = QuestNpcBlueprint->GeneratedClass
-			? Cast<ATunaSweeperQuestNpcActor>(QuestNpcBlueprint->GeneratedClass->GetDefaultObject())
-			: nullptr;
-		if (!Defaults)
-		{
-			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to configure %s defaults."), *GetNameSafe(QuestNpcBlueprint));
-			return false;
-		}
-
-		QuestNpcBlueprint->Modify();
-		Defaults->Modify();
-		Defaults->ConfigureQuestNpcDefaults(
-			UTunaSweeperQuestSubsystem::GetFirstOutingQuestId(),
-			FText::FromString(TEXT("\uAD50\uAD00")),
-			TSoftClassPtr<UTunaSweeperInteractionMarkerWidget>(
-				FSoftObjectPath(GetAssetClassPath(UIAssetPath, InteractionMarkerAssetName))),
-			UTunaSweeperQuestSubsystem::GetInstructorProviderId());
-		FBlueprintEditorUtils::MarkBlueprintAsModified(QuestNpcBlueprint);
-		FKismetEditorUtilities::CompileBlueprint(QuestNpcBlueprint);
-		QuestNpcBlueprint->MarkPackageDirty();
-		return SaveAsset(QuestNpcBlueprint);
-	}
-
 	bool ConfigurePickupItemIconWidgetBlueprint(UWidgetBlueprint* WidgetBlueprint)
 	{
 		if (!WidgetBlueprint || !BuildPickupItemIconWidgetTree(WidgetBlueprint))
@@ -12084,20 +12049,15 @@ namespace TunaSweeperEditorSetup
 			UIAssetPath,
 			QuestInteractionWidgetAssetName,
 			UTunaSweeperInteractionQuestWidget::StaticClass());
-		UBlueprint* QuestNpcBlueprint = EnsureBlueprint(
-			NpcAssetPath,
-			InstructorQuestNpcAssetName,
-			ATunaSweeperQuestNpcActor::StaticClass());
 
-		if (!QuestMenuWidgetBlueprint || !QuestInteractionWidgetBlueprint || !QuestNpcBlueprint)
+		if (!QuestMenuWidgetBlueprint || !QuestInteractionWidgetBlueprint)
 		{
 			return false;
 		}
 
 		const bool bConfigured =
 			ConfigureQuestWidgetBlueprint(QuestMenuWidgetBlueprint) &&
-			ConfigureQuestWidgetBlueprint(QuestInteractionWidgetBlueprint) &&
-			ConfigureQuestNpcBlueprint(QuestNpcBlueprint);
+			ConfigureQuestWidgetBlueprint(QuestInteractionWidgetBlueprint);
 
 		return bConfigured;
 	}

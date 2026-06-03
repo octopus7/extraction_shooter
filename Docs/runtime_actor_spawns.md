@@ -19,7 +19,6 @@
 | --- | --- | --- |
 | `TS_ShootingPracticeDummy_01` | `shooting_practice_dummy` | `BunkerMap` 사격 연습용 허수아비. 체력 `100`, 크리티컬 `3x`, 헤드샷 `6x`, 2초 회복 |
 | `TS_VendingMachine_Shop_01` | `vending_machine` | `BunkerMap` 상점 액터. `shop_id=1`, `ui.interaction.shop_open` |
-| `TS_NPC_Instructor` | `quest_npc` | `BunkerMap` 교관 NPC. `quest_first_outing`, `provider.instructor`, `ui.quest.interaction_name` |
 | `TS_Travel_DeployToRaid` | `level_travel` | `BunkerMap` 레이드 출동 사다리. `RaidMap` 이동, `Deploy`, 사다리 메시와 전환 영상/문구 |
 | `TS_Travel_ToBunker` | `level_travel` | 레이드 시작 위치의 직접 진입 복귀 루트. `BunkerMap` 이동, `To Bunker`, 전환 영상/문구 |
 | `TS_ExtractionPoint_East` | `extraction_point` | 추출 포인트 복귀 루트. `BunkerMap` 이동, 4초 체류, 반경 `200`, 경계원 두께 `2` |
@@ -34,13 +33,13 @@
 
 `TS_Travel_ToBunker`와 `TS_ExtractionPoint_East`는 서로 대체 관계가 아니다. 둘 다 `RaidMap`에서 `BunkerMap`으로 연결되는 복귀 루트이며, 직접 상호작용 복귀와 추출 지점 복귀를 동시에 지원한다.
 
-`TS_NPC_Instructor`와 `TS_Travel_DeployToRaid`는 더 이상 에디터 셋업 코드가 `BunkerMap`에 직접 저장 배치하지 않는다. 같은 이름의 과거 레벨 배치 액터가 남아 있더라도 런타임 스포너가 `spawn_id`, 에디터 라벨, 오브젝트 이름, 또는 동일 클래스/좌표를 기준으로 제거한 뒤 JSON 행을 기준으로 다시 스폰한다.
+`TS_Travel_DeployToRaid`는 더 이상 에디터 셋업 코드가 `BunkerMap`에 직접 저장 배치하지 않는다. 같은 이름의 과거 레벨 배치 액터가 남아 있더라도 런타임 스포너가 `spawn_id`, 에디터 라벨, 오브젝트 이름, 또는 동일 클래스/좌표를 기준으로 제거한 뒤 JSON 행을 기준으로 다시 스폰한다.
 
-## Quest NPC
+## Bunker CanBot
 
-File: `TunaSweeper/Content/Data/GameplayInteractionSpawns.json`
+File: `TunaSweeper/Content/Data/BunkerCharacterSpawns.json`
 
-`quest_npc` rows create `ATunaSweeperQuestNpcActor` through `BP_NPC_InstructorQuest`. Supported fields include `quest_id`, `provider_id`, `npc_display_name`, `interaction_display_name`, `interaction_display_name_key`, and `marker_widget_class`. If omitted, the default quest provider is `provider.instructor` and the default quest is `quest_first_outing`.
+`TS_Bunker_LED_Robot` spawns `BP_CanBot` through `UTunaSweeperBunkerRuntimeSpawnSubsystem`. `ATunaSweeperLedRobotCharacterActor` owns the CanBot dialogue and quest interactables directly. Its quest provider is `provider.canbot`, with `quest_first_outing` as the fallback quest.
 
 ## 기존 데이터 파일
 

@@ -71,6 +71,8 @@ namespace TunaSweeperInteractionMarkerLayout
 			return FName(TEXT("ui.interaction.piggy_bank_deposit"));
 		case ETunaSweeperInteractionType::PiggyBankWithdraw:
 			return FName(TEXT("ui.interaction.piggy_bank_withdraw"));
+		case ETunaSweeperInteractionType::CanBotDialogue:
+			return FName(TEXT("ui.interaction.canbot_dialogue"));
 		default:
 			return NAME_None;
 		}

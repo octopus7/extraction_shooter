@@ -260,7 +260,7 @@ namespace TunaSweeperCanBotIntro
 	constexpr float CameraReturnBlendSeconds = 0.9f;
 	constexpr float DialogueCameraDistance = 1200.0f;
 	const FRotator DialogueCameraRotation(-60.0f, 0.0f, 0.0f);
-	const FVector DeployLadderFocusLocation(220.0f, -220.0f, 4.0f);
+	const FVector DeployLadderFocusLocation(577.426f, 359.909f, 4.0f);
 
 	FVector CalculateCameraLocationForFocus(const FVector& FocusLocation)
 	{
@@ -669,21 +669,35 @@ bool ATunaSweeperPlayerController::ShowBunkerEntryFadeIfNeeded()
 
 void ATunaSweeperPlayerController::MaybeStartCanBotIntroDialogue()
 {
+	StartCanBotIntroDialogue(false);
+}
+
+bool ATunaSweeperPlayerController::StartCanBotIntroDialogue(bool bForceReplay)
+{
 	if (!IsBunkerMap() || !IsLocalController() || bDialogueSequenceActive)
 	{
-		return;
+		return false;
 	}
 
 	UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
-	if (!TunaGameInstance ||
-		TunaGameInstance->IsScenarioProgressFlagSet(TunaSweeperCanBotIntro::DialogueCompletionFlag))
+	if (!TunaGameInstance)
 	{
-		return;
+		return false;
+	}
+
+	const bool bDialogueAlreadyCompleted =
+		TunaGameInstance->IsScenarioProgressFlagSet(TunaSweeperCanBotIntro::DialogueCompletionFlag);
+	if (bDialogueAlreadyCompleted && !bForceReplay)
+	{
+		return false;
 	}
 
 	TArray<FTunaSweeperDialogueLine> DialogueLines;
 	BuildCanBotIntroDialogueLines(DialogueLines);
-	StartDialogueSequence(DialogueLines, TunaSweeperCanBotIntro::DialogueCompletionFlag);
+	const FName CompletionFlag = bDialogueAlreadyCompleted
+		? NAME_None
+		: TunaSweeperCanBotIntro::DialogueCompletionFlag;
+	return StartDialogueSequence(DialogueLines, CompletionFlag);
 }
 
 void ATunaSweeperPlayerController::BuildCanBotIntroDialogueLines(TArray<FTunaSweeperDialogueLine>& OutDialogueLines) const
@@ -851,9 +865,12 @@ void ATunaSweeperPlayerController::HandleDialogueFinished()
 		DialogueWidget = nullptr;
 	}
 
-	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
+	if (!ActiveDialogueCompletionFlag.IsNone())
 	{
-		TunaGameInstance->MarkScenarioProgressFlag(ActiveDialogueCompletionFlag, true);
+		if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
+		{
+			TunaGameInstance->MarkScenarioProgressFlag(ActiveDialogueCompletionFlag, true);
+		}
 	}
 
 	const float ReturnBlendSeconds = bDialogueCameraHasFocus

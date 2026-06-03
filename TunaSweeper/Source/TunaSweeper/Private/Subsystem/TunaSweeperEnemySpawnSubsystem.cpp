@@ -3,7 +3,6 @@
 #include "AI/TunaSweeperEnemyCharacter.h"
 #include "AI/TunaSweeperRollingBomber.h"
 #include "AI/TunaSweeperRollingBomberSpawner.h"
-#include "Character/TunaSweeperQuestNpcActor.h"
 #include "Components/StaticMeshComponent.h"
 #include "Game/TunaSweeperDataValueTypes.h"
 #include "Debuff/TunaSweeperDebuffTypes.h"
@@ -38,7 +37,6 @@
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
 #include "Sound/SoundBase.h"
-#include "Subsystem/TunaSweeperQuestSubsystem.h"
 #include "UI/TunaSweeperInteractionMarkerWidget.h"
 #include "UObject/UObjectGlobals.h"
 
@@ -68,7 +66,6 @@ namespace TunaSweeperEnemySpawn
 	const TCHAR* DefaultShopClassPath = TEXT("/Script/TunaSweeper.TunaSweeperShopActor");
 	const TCHAR* DefaultWorkbenchClassPath = TEXT("/Script/TunaSweeper.TunaSweeperWorkbenchActor");
 	const TCHAR* DefaultPiggyBankClassPath = TEXT("/Script/TunaSweeper.TunaSweeperPiggyBankActor");
-	const TCHAR* DefaultQuestNpcClassPath = TEXT("/Game/Characters/NPC/BP_NPC_InstructorQuest.BP_NPC_InstructorQuest_C");
 	const TCHAR* DefaultRollingBomberClassPath = TEXT("/Script/TunaSweeper.TunaSweeperRollingBomber");
 	const TCHAR* DefaultRollingBomberLaunchSoundPath =
 		TEXT("/Game/Audio/SFX/SFX_RollingBomberSpawnerLaunch_FM.SFX_RollingBomberSpawnerLaunch_FM");
@@ -298,14 +295,6 @@ namespace TunaSweeperEnemySpawn
 		{
 			return UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::PiggyBank;
 		}
-		if (SpawnType == TEXT("quest_npc") ||
-			SpawnType == TEXT("questnpc") ||
-			SpawnType == TEXT("npc_quest") ||
-			SpawnType == TEXT("instructor_npc") ||
-			SpawnType == TEXT("instructor"))
-		{
-			return UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::QuestNpc;
-		}
 		if (SpawnType == TEXT("self_destruct") || SpawnType == TEXT("selfdestruct"))
 		{
 			return UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::SelfDestruct;
@@ -389,8 +378,6 @@ namespace TunaSweeperEnemySpawn
 			return DefaultWorkbenchClassPath;
 		case UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::PiggyBank:
 			return DefaultPiggyBankClassPath;
-		case UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::QuestNpc:
-			return DefaultQuestNpcClassPath;
 		default:
 			return nullptr;
 		}
@@ -427,8 +414,6 @@ namespace TunaSweeperEnemySpawn
 			return FText::FromString(TEXT("\uC791\uC5C5\uB300"));
 		case UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::PiggyBank:
 			return FText::FromString(TEXT("\uB3C8\uB0B4\uB194"));
-		case UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::QuestNpc:
-			return FText::FromString(TEXT("\uD018\uC2A4\uD2B8"));
 		default:
 			return FText::GetEmpty();
 		}
@@ -1666,31 +1651,6 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadGameplayInteractionActorSpawnData(bool
 		}
 		SpawnDefinition.CurrencyGrantAmount = FMath::Max(1, static_cast<int32>(NumericCurrencyGrantAmount));
 
-		const FString QuestId = TunaSweeperEnemySpawn::ReadFirstStringField(
-			JsonObject,
-			TEXT("quest_id"),
-			TEXT("quest"),
-			TEXT("questId"));
-		const FString QuestProviderId = TunaSweeperEnemySpawn::ReadFirstStringField(
-			JsonObject,
-			TEXT("provider_id"),
-			TEXT("quest_provider_id"),
-			TEXT("providerId"));
-		const FString NpcDisplayName = TunaSweeperEnemySpawn::ReadFirstStringField(
-			JsonObject,
-			TEXT("npc_display_name"),
-			TEXT("display_name"),
-			TEXT("npcDisplayName"));
-		SpawnDefinition.QuestId = QuestId.IsEmpty()
-			? UTunaSweeperQuestSubsystem::GetFirstOutingQuestId()
-			: FName(*QuestId);
-		SpawnDefinition.QuestProviderId = QuestProviderId.IsEmpty()
-			? UTunaSweeperQuestSubsystem::GetInstructorProviderId()
-			: FName(*QuestProviderId);
-		SpawnDefinition.NpcDisplayName = NpcDisplayName.IsEmpty()
-			? FText::FromString(TEXT("\uAD50\uAD00"))
-			: FText::FromString(NpcDisplayName);
-
 		FString SpeechBubbleWidgetClassPath;
 		double NumericCountdownStartNumber = 3.0;
 		double NumericCountdownStepSeconds = 1.0;
@@ -2232,18 +2192,6 @@ void UTunaSweeperEnemySpawnSubsystem::ConfigureGameplayInteractionActor(
 				SpawnDefinition.InteractionDisplayName,
 				SpawnDefinition.MarkerWidgetClass,
 				SpawnDefinition.SpawnId);
-		}
-		break;
-	case EGameplayInteractionActorSpawnType::QuestNpc:
-		if (ATunaSweeperQuestNpcActor* QuestNpcActor = Cast<ATunaSweeperQuestNpcActor>(SpawnedActor))
-		{
-			QuestNpcActor->ConfigureQuestNpcDefaults(
-				SpawnDefinition.QuestId,
-				SpawnDefinition.NpcDisplayName,
-				SpawnDefinition.MarkerWidgetClass,
-				SpawnDefinition.QuestProviderId,
-				SpawnDefinition.InteractionDisplayName,
-				SpawnDefinition.InteractionDisplayNameStringKey);
 		}
 		break;
 	case EGameplayInteractionActorSpawnType::SelfDestruct:

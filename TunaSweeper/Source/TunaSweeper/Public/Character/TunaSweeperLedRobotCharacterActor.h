@@ -9,7 +9,10 @@ class UCapsuleComponent;
 class USceneComponent;
 class UStaticMesh;
 class UStaticMeshComponent;
+class UTunaSweeperInteractableComponent;
+class UTunaSweeperInteractionMarkerWidget;
 class UTunaSweeperLedExpressionComponent;
+class UWidgetComponent;
 
 UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API ATunaSweeperLedRobotCharacterActor : public AActor
@@ -54,13 +57,19 @@ public:
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|LED Robot")
 	UTunaSweeperLedExpressionComponent* GetExpressionComponent() const { return ExpressionComponent; }
 
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Quest")
+	FName ResolveQuestId() const;
+
 protected:
 	virtual void OnConstruction(const FTransform& Transform) override;
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 private:
 	void RefreshRobotVisuals();
 	void RefreshExpressionDemoSettings();
+	void RefreshQuestNoticeVisibility();
+	bool ShouldShowQuestNotice() const;
 	void UpdatePlayerLookAt(float DeltaSeconds);
 	bool TryGetPlayerLookYaw(float& OutYaw, float& OutDistance2D) const;
 	float ResolveNonMechanicalYawOffset(float DeltaSeconds);
@@ -76,6 +85,15 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LED Robot", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UTunaSweeperLedExpressionComponent> ExpressionComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LED Robot|Interaction", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UTunaSweeperInteractableComponent> DialogueInteractableComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LED Robot|Interaction", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UTunaSweeperInteractableComponent> QuestInteractableComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LED Robot|Interaction", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UWidgetComponent> QuestNoticeWidgetComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LED Robot", meta = (AllowPrivateAccess = "true"))
 	FName RobotId = TEXT("BunkerRobot");
@@ -109,6 +127,15 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LED Robot|Face", meta = (AllowPrivateAccess = "true", ClampMin = "0.1", UIMin = "0.1"))
 	float ExpressionDemoIntervalSeconds = 2.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LED Robot|Quest", meta = (AllowPrivateAccess = "true"))
+	FName QuestFallbackId;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LED Robot|Quest", meta = (AllowPrivateAccess = "true"))
+	FName QuestProviderId;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LED Robot|Interaction", meta = (AllowPrivateAccess = "true"))
+	TSoftClassPtr<UTunaSweeperInteractionMarkerWidget> InteractionMarkerWidgetClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LED Robot|Look At", meta = (AllowPrivateAccess = "true"))
 	bool bLookAtNearbyPlayer = true;

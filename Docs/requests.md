@@ -3942,3 +3942,15 @@
 
 - `GeneratedImages/UI/Difficulty`에서 alpha 추출을 위해 만든 source, preview, black/white debug 중간 파일을 제거한 것.
 - 현재 사용하는 최종 난이도 UI PNG 5개와 배경 원본만 남긴 것.
+
+## 2026-06-03 17:10:12 (소요시간: 00:00:41)
+
+- 사용자가 그림이 마음에 들어 일부러 보존한 `GeneratedImages/UI/Difficulty/T_DifficultyTunaIcons_Source.png`를 다시 복구한 것.
+
+## 2026-06-03 17:07:40 (소요시간: 00:11:27)
+
+- 임시 교관 모델/액터 경로를 제거하고, `BP_NPC_InstructorQuest` 에셋과 `ATunaSweeperQuestNpcActor` 네이티브 클래스를 삭제한 것.
+- `GameplayInteractionSpawns.json`의 `TS_NPC_Instructor`/`quest_npc` 행과 `UTunaSweeperEnemySpawnSubsystem`의 `quest_npc` 스폰 타입을 제거한 것.
+- 캔봇 액터에 대화 상호작용과 퀘스트 상호작용을 직접 추가하고, 퀘스트 provider를 `provider.canbot`으로 변경한 것.
+- 캔봇 인트로 대화를 상호작용으로 다시 재생할 수 있게 연결하고, 자동 1회 완료 플래그와 재시청 흐름을 분리한 것.
+- 교관 기준 문서/데이터 설명을 캔봇 기준으로 정리하고, JSON 검증과 `TunaSweeperEditor Win64 Development` 빌드 및 Unreal Editor 실행을 확인한 것.

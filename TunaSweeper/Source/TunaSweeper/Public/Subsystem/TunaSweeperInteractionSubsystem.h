@@ -61,6 +61,7 @@ private:
 	bool HandleLootContainerSpawnInteraction(UTunaSweeperInteractableComponent* Interactable, APawn* InstigatorPawn);
 	bool HandleLevelTravelInteraction(UTunaSweeperInteractableComponent* Interactable, APawn* InstigatorPawn);
 	bool HandleQuestInteraction(UTunaSweeperInteractableComponent* Interactable, APawn* InstigatorPawn);
+	bool HandleCanBotDialogueInteraction(UTunaSweeperInteractableComponent* Interactable, APawn* InstigatorPawn);
 	bool HandleSelfDestructInteraction(UTunaSweeperInteractableComponent* Interactable, APawn* InstigatorPawn);
 	bool HandleWorldProgressInteraction(UTunaSweeperInteractableComponent* Interactable, APawn* InstigatorPawn);
 	bool HandlePersistentDoorInteraction(UTunaSweeperInteractableComponent* Interactable);

@@ -179,7 +179,7 @@ ui.housing.facility.piggy_bank,돼지저금통,Piggy Bank,豚の貯金箱
 ui.housing.facility.piggy_bank.desc,옛 문명의 동전과 지폐를 저금하는 돼지저금통,A piggy bank for storing ancient coins and banknotes,古代文明の硬貨と紙幣を預ける豚の貯金箱
 ui.interaction.boom,Boom!,Boom!,Boom!
 ui.notification.rescue_cart,구급 카트 후송 중,Rescue cart returning,救急カート搬送中
-ui.npc.instructor,교관,Instructor,教官
+ui.interaction.canbot_dialogue,대화,Dialogue,会話
 ui.quest.interaction_name,퀘스트,Quest,クエスト
 ui.map_overlay.start_location,시작 위치,Start Position,開始位置
 ui.map_overlay.extraction_point,추출 포인트,Extraction Point,抽出地点

@@ -99,6 +99,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Dialogue")
 	bool StartDialogueSequence(const TArray<FTunaSweeperDialogueLine>& DialogueLines, FName CompletionFlag);
 
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Dialogue")
+	bool StartCanBotIntroDialogue(bool bForceReplay = false);
+
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Quest")
 	bool PlayQuestPresentation(FName QuestId, ETunaSweeperQuestPresentationTrigger Trigger);
 

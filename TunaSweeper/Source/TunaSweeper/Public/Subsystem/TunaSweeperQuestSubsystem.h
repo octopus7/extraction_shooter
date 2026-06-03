@@ -19,7 +19,7 @@ public:
 	static FName GetFirstOutingQuestId();
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Quest")
-	static FName GetInstructorProviderId();
+	static FName GetCanBotProviderId();
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Quest")
 	bool LoadQuestData(bool bForceReload = false);

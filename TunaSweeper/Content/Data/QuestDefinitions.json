@@ -1,7 +1,7 @@
 [
   {
     "quest_id": "quest_first_outing",
-    "provider_id": "provider.instructor",
+    "provider_id": "provider.canbot",
     "sort_order": 10,
     "title_string_key": "quest.first_outing.title",
     "description_string_key": "quest.first_outing.description",
@@ -15,7 +15,7 @@
         "speaker_name_string_key": "quest.speaker.canbot",
         "dialogue_text_string_key": "quest.first_outing.accept.line2",
         "use_camera_focus": true,
-        "camera_focus_location": [220.0, -220.0, 4.0],
+        "camera_focus_location": [577.426, 359.909, 4.0],
         "camera_blend_seconds": 0.8
       }
     ],
@@ -36,7 +36,7 @@
   },
   {
     "quest_id": "quest_lumberjack_first_kill",
-    "provider_id": "provider.instructor",
+    "provider_id": "provider.canbot",
     "sort_order": 20,
     "required_completed_quest_ids": [
       "quest_first_outing"

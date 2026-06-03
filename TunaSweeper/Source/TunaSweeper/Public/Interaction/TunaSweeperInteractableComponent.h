@@ -35,7 +35,8 @@ enum class ETunaSweeperInteractionType : uint8
 	WorkbenchBlueprintRegister = 21 UMETA(DisplayName = "Workbench Blueprint Register"),
 	PiggyBank = 22 UMETA(DisplayName = "Piggy Bank"),
 	PiggyBankDeposit = 23 UMETA(DisplayName = "Piggy Bank Deposit"),
-	PiggyBankWithdraw = 24 UMETA(DisplayName = "Piggy Bank Withdraw")
+	PiggyBankWithdraw = 24 UMETA(DisplayName = "Piggy Bank Withdraw"),
+	CanBotDialogue = 25 UMETA(DisplayName = "CanBot Dialogue")
 };
 
 UCLASS(BlueprintType, Blueprintable, ClassGroup=(TunaSweeper), meta=(BlueprintSpawnableComponent))

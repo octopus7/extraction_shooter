@@ -26,20 +26,6 @@
   },
   {
     "level_name": "BunkerMap",
-    "spawn_id": "TS_NPC_Instructor",
-    "spawn_type": "quest_npc",
-    "actor_class": "/Game/Characters/NPC/BP_NPC_InstructorQuest.BP_NPC_InstructorQuest_C",
-    "quest_id": "quest_first_outing",
-    "provider_id": "provider.instructor",
-    "npc_display_name": "\uAD50\uAD00",
-    "interaction_display_name": "Quest",
-    "interaction_display_name_key": "ui.quest.interaction_name",
-    "location": [700.0, 0.0, 100.0],
-    "rotation": [0.0, 0.0, 0.0],
-    "scale": [1.0, 1.0, 1.0]
-  },
-  {
-    "level_name": "BunkerMap",
     "spawn_id": "TS_Travel_DeployToRaid",
     "spawn_type": "level_travel",
     "actor_class": "/Game/Interaction/BP_Interact_LevelTravel.BP_Interact_LevelTravel_C",
