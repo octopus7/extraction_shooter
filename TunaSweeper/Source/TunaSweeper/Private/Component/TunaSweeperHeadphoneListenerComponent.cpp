@@ -274,7 +274,11 @@ void UTunaSweeperHeadphoneListenerComponent::HandleNoiseReported(const FTunaSwee
 
 	LastRippleSpawnTimeSeconds = CurrentTimeSeconds;
 	LogNoiseGateDebug(TEXT("queued_hud_ripple"), NoiseEvent, SourceDistance, HeardNoise.Strength);
-	GameHudWidget->AddHeadphoneNoiseRipple(HeardNoise.DirectionFromListener, HeardNoise.Strength);
+	GameHudWidget->AddHeadphoneNoiseRippleFromSource(
+		HeardNoise.SourceLocation,
+		HeardNoise.SourceActor.Get(),
+		HeardNoise.DirectionFromListener,
+		HeardNoise.Strength);
 }
 
 void UTunaSweeperHeadphoneListenerComponent::LogNoiseGateDebug(

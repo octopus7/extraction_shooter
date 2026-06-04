@@ -8,6 +8,7 @@
 #include "Widgets/Layout/Anchors.h"
 #include "TunaSweeperGameHudWidget.generated.h"
 
+class AActor;
 class ATunaSweeperTopDownCharacter;
 struct FGeometry;
 class UTunaSweeperHudBottomStatusWidget;
@@ -143,6 +144,13 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD|Noise")
 	void AddHeadphoneNoiseRipple(const FVector& DirectionFromListener, float Strength);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD|Noise")
+	void AddHeadphoneNoiseRippleFromSource(
+		const FVector& SourceLocation,
+		AActor* SourceActor,
+		const FVector& DirectionFromListener,
+		float Strength);
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|HUD")
 	UTunaSweeperHudQuickSlotBarWidget* GetQuickSlotBarWidget() const { return QuickSlotBarWidget; }
@@ -309,25 +317,25 @@ protected:
 	float HeadphoneNoiseRingRadius = 122.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Noise", meta = (ClampMin = "0.25", UIMin = "0.25"))
-	float HeadphoneNoiseParticleSize = 1.0f;
+	float HeadphoneNoiseParticleSize = 4.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Noise", meta = (ClampMin = "1.0", ClampMax = "90.0", UIMin = "1.0", UIMax = "90.0"))
 	float HeadphoneNoiseSectorHalfAngleDegrees = 30.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Noise", meta = (ClampMin = "0.05", UIMin = "0.05"))
-	float HeadphoneNoiseRippleLifetimeSeconds = 0.82f;
+	float HeadphoneNoiseRippleLifetimeSeconds = 1.15f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Noise", meta = (ClampMin = "0", UIMin = "0"))
-	int32 HeadphoneNoiseBaseRingParticleCount = 80;
+	int32 HeadphoneNoiseBaseRingParticleCount = 112;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Noise", meta = (ClampMin = "0", UIMin = "0"))
-	int32 HeadphoneNoiseMinSectorParticleCount = 18;
+	int32 HeadphoneNoiseMinSectorParticleCount = 64;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Noise", meta = (ClampMin = "1", UIMin = "1"))
-	int32 HeadphoneNoiseMaxSectorParticleCount = 112;
+	int32 HeadphoneNoiseMaxSectorParticleCount = 240;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Noise")
-	FLinearColor HeadphoneNoiseParticleColor = FLinearColor(0.78f, 0.68f, 0.42f, 1.0f);
+	FLinearColor HeadphoneNoiseParticleColor = FLinearColor::White;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Extraction", meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float ExtractionProgressTopOffset = 72.0f;
@@ -366,9 +374,12 @@ private:
 	struct FHeadphoneNoiseRipple
 	{
 		FVector DirectionFromListener = FVector::ForwardVector;
+		FVector SourceLocation = FVector::ZeroVector;
+		TWeakObjectPtr<AActor> SourceActor;
 		float Strength = 1.0f;
 		float ElapsedSeconds = 0.0f;
 		int32 Seed = 1;
+		bool bTrackSourceLocation = false;
 	};
 
 	void ApplyHudModeVisibility();
@@ -421,6 +432,12 @@ private:
 	void UpdateCenterCancelableActionGaugePlacement(const FGeometry& AllottedGeometry, bool bUseCrosshairPosition);
 	void UpdateMouseCursorForReloadGauge(bool bShouldHideCursor);
 	void UpdateCrosshairState(float InDeltaTime);
+	void QueueHeadphoneNoiseRipple(
+		const FVector& DirectionFromListener,
+		float Strength,
+		const FVector& SourceLocation,
+		AActor* SourceActor,
+		bool bTrackSourceLocation);
 	void TickHeadphoneNoiseRipples(float InDeltaTime);
 	void DrawHeadphoneNoiseRipples(
 		const FGeometry& AllottedGeometry,

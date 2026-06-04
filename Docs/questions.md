@@ -2032,3 +2032,13 @@ Niagara나 Cascade 파티클 시스템이 아니라 `ATunaSweeperHeadphoneRipple
 ### 답변
 
 진단은 소음 이벤트 수신, 헤드폰 리스너 게이트, 스크린 위젯 생성, 위젯 기하 크기, `NativePaint()` 진입, 실제 Slate draw 호출의 6단계로 나누는 것이 좋다. 현재 코드에서 가장 의심되는 지점은 별도 `UTunaSweeperHeadphoneRippleWidget`의 viewport slot 또는 empty root canvas 때문에 `NativePaint()`가 0 크기 기하를 받거나 아예 표시 레이어에 충분히 올라가지 않는 경우다. 기존 `UTunaSweeperGameHudWidget::NativePaint()`는 이미 화면에 잘 그려지는 경로이므로, 진단 후에도 별도 위젯이 불안정하면 HUD `NativePaint()`에 리플 페인트를 통합하는 쪽이 안전하다.
+
+## 2026-06-04 14:20:00 (소요시간: 00:04:01)
+
+### 질문
+
+소음원이 확정되면 방위가 캐싱되는 느낌인데, 플레이어 위치가 이동하면 소음원 방위도 추적해서 변하는 방식이 맞는지, 아니면 현재처럼 최초 방위를 유지하는 것이 맞는지.
+
+### 답변
+
+현 구현은 HUD 리플에 `DirectionFromListener`만 저장하므로 최초로 들은 순간의 방위가 캐싱되는 방식이었다. 하드코어한 정보 제한보다 유저 편의를 우선한다면, 소음원의 월드 위치나 소스 액터를 리플에 저장하고 화면에 그릴 때마다 현재 플레이어 위치 기준으로 방위를 다시 계산하는 추적 방식이 더 적합하다. 따라서 헤드폰 리스너가 HUD에 `SourceLocation`과 `SourceActor`를 함께 넘기고, HUD가 리플 수명 동안 매 페인트마다 소음원 방향을 갱신하도록 변경했다.
