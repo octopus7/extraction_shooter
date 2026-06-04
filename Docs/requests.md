@@ -4162,3 +4162,10 @@
 - 소음 리플이 사라지기 0.4초 전부터만 0.6에서 0으로 `SmoothTransitionAlpha()` 기반 페이드되도록 변경한 것.
 - 방향 섹터 입자와 버스트 파편 모두 같은 `ParticleAlpha` 곡선을 사용하게 해 구간별 알파 변화가 계단 없이 이어지도록 한 것.
 - `TunaSweeperEditor Win64 Development` 빌드를 통과시키고 Unreal Editor를 실행한 것.
+
+## 2026-06-04 16:00:20 (소요시간: 00:01:30)
+
+- `GameplayInteractionSpawns.json`에 테스트용 주기 소음 발생 액터 `TS_PeriodicNoiseEmitter_TestHorn_East20m`를 하나 더 추가한 것.
+- 기존 `TS_PeriodicNoiseEmitter_TestHorn` 위치 `[220.0, -1690.0, 0.0]`에서 동쪽 `+Y 2000cm` 지점인 `[220.0, 310.0, 0.0]`에 배치한 것.
+- 새 소음원은 기존 테스트 확성기와 같은 메시, 소음 간격, 소음 세기, 최대 범위, 소음 태그, 소스 오프셋 설정을 사용하게 한 것.
+- JSON 파싱과 `spawn_id` 중복 검사를 통과시킨 것.

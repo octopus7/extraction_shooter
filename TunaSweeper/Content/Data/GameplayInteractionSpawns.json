@@ -175,6 +175,23 @@
   },
   {
     "level_name": "RaidMap",
+    "spawn_id": "TS_PeriodicNoiseEmitter_TestHorn_East20m",
+    "spawn_type": "periodic_noise_emitter",
+    "actor_class": "/Script/TunaSweeper.TunaSweeperPeriodicNoiseEmitterActor",
+    "mesh_definition_id": "mesh.test_noise_quad_horn",
+    "mesh_definition_json": "Data/PeriodicNoiseEmitterMeshes.json",
+    "noise_interval_seconds": 2.0,
+    "noise_loudness": 1.0,
+    "noise_max_range": 2600.0,
+    "noise_tag": "noise.test_periodic",
+    "noise_source_local_offset": [0.0, 0.0, 154.0],
+    "emit_on_begin_play": true,
+    "location": [220.0, 310.0, 0.0],
+    "rotation": [0.0, 0.0, 0.0],
+    "scale": [1.0, 1.0, 1.0]
+  },
+  {
+    "level_name": "RaidMap",
     "spawn_id": "TS_RollingBomberSpawner_West",
     "spawn_type": "rolling_bomber_spawner",
     "actor_class": "/Script/TunaSweeper.TunaSweeperRollingBomberSpawner",
