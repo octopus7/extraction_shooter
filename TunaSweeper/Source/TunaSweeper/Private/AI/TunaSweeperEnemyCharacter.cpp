@@ -23,6 +23,7 @@
 #include "NiagaraSystem.h"
 #include "Debuff/TunaSweeperDebuffTypes.h"
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
+#include "Subsystem/TunaSweeperNoiseSubsystem.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
 #include "TimerManager.h"
 #include "UI/TunaSweeperReloadRingWidget.h"
@@ -190,6 +191,7 @@ void ATunaSweeperEnemyCharacter::Tick(float DeltaSeconds)
 		return;
 	}
 
+	TickFootstepNoise(DeltaSeconds);
 	CompleteEnemyReloadIfReady();
 	UpdateEnemyReloadWidget();
 }
@@ -487,6 +489,45 @@ void ATunaSweeperEnemyCharacter::UpdateEnemyReloadWidget()
 		Cast<UTunaSweeperReloadRingWidget>(EnemyReloadWidgetComponent->GetUserWidgetObject()))
 	{
 		ReloadWidget->SetReloadProgress(EnemyWeapon->GetReloadRuntimeProgress(), true);
+	}
+}
+
+void ATunaSweeperEnemyCharacter::TickFootstepNoise(float DeltaSeconds)
+{
+	if (FootstepNoiseLoudness <= 0.0f || FootstepNoiseMaxRange <= 0.0f || FootstepNoiseIntervalSeconds <= 0.0f)
+	{
+		FootstepNoiseElapsedSeconds = 0.0f;
+		return;
+	}
+
+	FVector HorizontalVelocity = GetVelocity();
+	HorizontalVelocity.Z = 0.0f;
+	if (HorizontalVelocity.Size() < FootstepNoiseMinSpeed)
+	{
+		FootstepNoiseElapsedSeconds = 0.0f;
+		return;
+	}
+
+	const float SafeIntervalSeconds = FMath::Max(0.05f, FootstepNoiseIntervalSeconds);
+	FootstepNoiseElapsedSeconds += FMath::Max(0.0f, DeltaSeconds);
+	if (FootstepNoiseElapsedSeconds < SafeIntervalSeconds)
+	{
+		return;
+	}
+
+	FootstepNoiseElapsedSeconds = FMath::Fmod(FootstepNoiseElapsedSeconds, SafeIntervalSeconds);
+	if (UWorld* World = GetWorld())
+	{
+		if (UTunaSweeperNoiseSubsystem* NoiseSubsystem = World->GetSubsystem<UTunaSweeperNoiseSubsystem>())
+		{
+			NoiseSubsystem->ReportNoiseAtLocation(
+				GetActorTransform().TransformPosition(FootstepNoiseSourceOffset),
+				FootstepNoiseLoudness,
+				FootstepNoiseMaxRange,
+				FootstepNoiseTag,
+				this,
+				this);
+		}
 	}
 }
 

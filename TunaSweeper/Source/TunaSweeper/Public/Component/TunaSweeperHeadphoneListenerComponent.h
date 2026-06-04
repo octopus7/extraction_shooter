@@ -40,6 +40,12 @@ protected:
 	float MinVisualNoiseDistance = 1000.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TunaSweeper|Noise", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float MaxVisualNoiseDistance = 2000.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TunaSweeper|Noise", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float VisualNoiseMinStrength = 0.005f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TunaSweeper|Noise", meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float RippleCooldownSeconds = 0.08f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TunaSweeper|Noise Debug")

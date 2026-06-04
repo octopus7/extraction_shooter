@@ -115,6 +115,24 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement|Randomization")
 	FVector2D MovementSpeedRandomOffset = FVector2D(-35.0f, 45.0f);
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Noise|Footstep", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float FootstepNoiseLoudness = 0.3f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Noise|Footstep", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float FootstepNoiseMaxRange = 2000.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Noise|Footstep", meta = (ClampMin = "0.05", UIMin = "0.05"))
+	float FootstepNoiseIntervalSeconds = 0.42f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Noise|Footstep", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float FootstepNoiseMinSpeed = 70.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Noise|Footstep")
+	FName FootstepNoiseTag = FName(TEXT("noise.enemy_footstep"));
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Noise|Footstep")
+	FVector FootstepNoiseSourceOffset = FVector(0.0f, 0.0f, 42.0f);
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Visual")
 	TSoftObjectPtr<UMaterialInterface> BodyMaterial;
 
@@ -174,6 +192,7 @@ private:
 	void SpawnMeleeImpactBurst(const FVector& HitLocation, const FVector& BurstDirection);
 	bool SpawnDeathLootContainer(AActor* DamageCauser);
 	FVector ResolveLootDropLocation(AActor* IgnoredActor) const;
+	void TickFootstepNoise(float DeltaSeconds);
 
 	UPROPERTY(Transient)
 	TObjectPtr<ATunaSweeperWeapon> EnemyWeapon;
@@ -189,4 +208,5 @@ private:
 	int32 PendingEnemyReloadAmmoCount = 0;
 	bool bIsDead = false;
 	bool bEnemyWeaponRuntimeInitialized = false;
+	float FootstepNoiseElapsedSeconds = 0.0f;
 };

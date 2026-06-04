@@ -817,6 +817,7 @@ void UTunaSweeperGameHudWidget::DrawHeadphoneNoiseRipples(
 	for (const FHeadphoneNoiseRipple& Ripple : HeadphoneNoiseRipples)
 	{
 		const float Alpha = FMath::Clamp(Ripple.ElapsedSeconds / Lifetime, 0.0f, 1.0f);
+		const float StrengthAlpha = FMath::Clamp(Ripple.Strength, 0.0f, 1.0f);
 		const float BurstPeakSeconds = FMath::Min(0.085f, BurstDurationSeconds * 0.45f);
 		const float BurstRiseAlpha = FMath::Clamp(Ripple.ElapsedSeconds / FMath::Max(0.01f, BurstPeakSeconds), 0.0f, 1.0f);
 		const float BurstFallAlpha = FMath::Clamp(
@@ -828,19 +829,23 @@ void UTunaSweeperGameHudWidget::DrawHeadphoneNoiseRipples(
 		const float ElasticKick = FMath::Sin(BurstRiseAlpha * PI) * 0.12f * BurstDecay;
 		const float BurstAmount = FMath::Clamp(BurstRise * BurstDecay * (1.0f + ElasticKick), 0.0f, 1.15f);
 		const float RemainingSeconds = Lifetime - Ripple.ElapsedSeconds;
-		const float BurstParticleAlpha = FMath::Lerp(
+		const float BaseBurstParticleAlpha = FMath::Lerp(
 			ParticleSustainAlpha,
 			ParticleBurstAlpha,
 			SmoothTransitionAlpha(FMath::Clamp(BurstAmount, 0.0f, 1.0f)));
-		const float FadeOutParticleAlpha = ParticleSustainAlpha * SmoothTransitionAlpha(FMath::Clamp(
+		const float BaseFadeOutParticleAlpha = ParticleSustainAlpha * SmoothTransitionAlpha(FMath::Clamp(
 			RemainingSeconds / ParticleFadeOutDurationSeconds,
 			0.0f,
 			1.0f));
-		const float ParticleAlpha = RemainingSeconds <= ParticleFadeOutDurationSeconds
-			? FadeOutParticleAlpha
-			: BurstParticleAlpha;
+		const float BaseParticleAlpha = RemainingSeconds <= ParticleFadeOutDurationSeconds
+			? BaseFadeOutParticleAlpha
+			: BaseBurstParticleAlpha;
+		const float ParticleMaxAlpha = BaseParticleAlpha * StrengthAlpha;
 		const float CurrentParticleSize = ParticleSize;
-		const float CurrentRingThickness = RingThickness * FMath::Lerp(0.34f, 1.0f, BurstAmount);
+		const float CurrentRingThickness =
+			RingThickness *
+			FMath::Lerp(0.34f, 1.0f, BurstAmount) *
+			FMath::Clamp(StrengthAlpha, 0.05f, 1.0f);
 
 		FVector DirectionFromListener = Ripple.DirectionFromListener.GetSafeNormal2D();
 		if (DirectionFromListener.IsNearlyZero())
@@ -889,7 +894,6 @@ void UTunaSweeperGameHudWidget::DrawHeadphoneNoiseRipples(
 
 		const FVector2D ScreenRight(-ScreenDirection.Y, ScreenDirection.X);
 		const float DirectionAngle = FMath::Atan2(ScreenDirection.Y, ScreenDirection.X);
-		const float StrengthAlpha = FMath::Clamp(Ripple.Strength, 0.0f, 1.0f);
 
 		const int32 EffectiveMinSectorParticleCount = FMath::Max(128, HeadphoneNoiseMinSectorParticleCount);
 		const int32 EffectiveMaxSectorParticleCount = FMath::Max(
@@ -898,7 +902,7 @@ void UTunaSweeperGameHudWidget::DrawHeadphoneNoiseRipples(
 		const int32 SectorCount = FMath::RoundToInt(FMath::Lerp(
 			static_cast<float>(EffectiveMinSectorParticleCount),
 			static_cast<float>(EffectiveMaxSectorParticleCount),
-			FMath::Sqrt(StrengthAlpha)));
+			SmoothTransitionAlpha(StrengthAlpha)));
 		const float SectorHalfAngle = FMath::DegreesToRadians(FMath::Clamp(HeadphoneNoiseSectorHalfAngleDegrees, 1.0f, 90.0f));
 		for (int32 Index = 0; Index < SectorCount; ++Index)
 		{
@@ -928,7 +932,7 @@ void UTunaSweeperGameHudWidget::DrawHeadphoneNoiseRipples(
 				FMath::Lerp(0.08f, 1.0f, BurstAmount);
 
 			FLinearColor ParticleColor = FLinearColor::White;
-			ParticleColor.A = ParticleAlpha;
+			ParticleColor.A = ParticleMaxAlpha * FMath::Lerp(0.12f, 1.0f, Influence);
 			const float SizeNoise = HeadphoneNoiseHash01(Ripple.Seed, Index, 5.13f);
 			const float SandParticleSize = CurrentParticleSize * FMath::Lerp(0.86f, 1.20f, SizeNoise);
 			const FVector2D SandParticleCenter =
@@ -942,7 +946,6 @@ void UTunaSweeperGameHudWidget::DrawHeadphoneNoiseRipples(
 			if (BurstAmount > 0.12f && Influence > 0.48f && HeadphoneNoiseHash01(Ripple.Seed, Index, 6.29f) < 0.32f)
 			{
 				FLinearColor FragmentColor = ParticleColor;
-				FragmentColor.A = ParticleAlpha;
 				const FVector2D FragmentOffset =
 					ArcDirection * CurrentRingThickness * (HeadphoneNoiseHash01(Ripple.Seed, Index, 7.01f) * 0.7f - 0.35f) +
 					ScreenRight * CurrentRingThickness * (HeadphoneNoiseHash01(Ripple.Seed, Index, 7.79f) * 1.1f - 0.55f);

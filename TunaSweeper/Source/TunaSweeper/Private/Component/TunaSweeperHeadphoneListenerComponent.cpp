@@ -14,6 +14,7 @@ namespace
 {
 	const FName EarCategoryTag(TEXT("item.category.ear"));
 	const FName EarEquipmentSlotTag(TEXT("equipment.slot.ear"));
+	constexpr float VisualNoiseFalloffExponent = 1.35f;
 }
 
 DEFINE_LOG_CATEGORY_STATIC(LogTunaSweeperHeadphoneNoise, Log, All);
@@ -223,9 +224,18 @@ void UTunaSweeperHeadphoneListenerComponent::HandleNoiseReported(const FTunaSwee
 
 	const FVector ListenerLocation = OwnerActor->GetActorLocation();
 	const float SourceDistance = FVector::Dist2D(ListenerLocation, NoiseEvent.SourceLocation);
-	if (SourceDistance <= SelfNoiseIgnoreDistance || SourceDistance < MinVisualNoiseDistance)
+	const float SafeMinVisualNoiseDistance = FMath::Max(0.0f, MinVisualNoiseDistance);
+	const float SafeMaxVisualNoiseDistance = MaxVisualNoiseDistance > 0.0f
+		? FMath::Max(SafeMinVisualNoiseDistance, MaxVisualNoiseDistance)
+		: 0.0f;
+	if (SourceDistance <= SelfNoiseIgnoreDistance || SourceDistance < SafeMinVisualNoiseDistance)
 	{
 		LogNoiseGateDebug(TEXT("too_close"), NoiseEvent, SourceDistance);
+		return;
+	}
+	if (SafeMaxVisualNoiseDistance > 0.0f && SourceDistance > SafeMaxVisualNoiseDistance)
+	{
+		LogNoiseGateDebug(TEXT("too_far"), NoiseEvent, SourceDistance);
 		return;
 	}
 
@@ -236,16 +246,39 @@ void UTunaSweeperHeadphoneListenerComponent::HandleNoiseReported(const FTunaSwee
 		return;
 	}
 
+	const float VisualHearingRange = SafeMaxVisualNoiseDistance > 0.0f
+		? (CachedHearingRange > 0.0f ? FMath::Min(CachedHearingRange, SafeMaxVisualNoiseDistance) : SafeMaxVisualNoiseDistance)
+		: CachedHearingRange;
 	FTunaSweeperHeardNoiseEvent HeardNoise;
 	if (!NoiseSubsystem->CalculateHeardNoiseAtLocation(
 		NoiseEvent,
 		ListenerLocation,
-		CachedHearingRange,
-		CachedSensitivity,
-		CachedMinStrength,
+		VisualHearingRange,
+		1.0f,
+		0.0f,
 		HeardNoise))
 	{
 		LogNoiseGateDebug(TEXT("attenuation_rejected"), NoiseEvent, SourceDistance);
+		return;
+	}
+
+	if (SafeMaxVisualNoiseDistance > SafeMinVisualNoiseDistance)
+	{
+		const float VisualDistanceAlpha = FMath::Clamp(
+			(SourceDistance - SafeMinVisualNoiseDistance) /
+				FMath::Max(1.0f, SafeMaxVisualNoiseDistance - SafeMinVisualNoiseDistance),
+			0.0f,
+			1.0f);
+		const float VisualAttenuation = FMath::Pow(1.0f - VisualDistanceAlpha, VisualNoiseFalloffExponent);
+		HeardNoise.Strength = FMath::Clamp(FMath::Max(0.0f, NoiseEvent.Loudness) * VisualAttenuation, 0.0f, 1.0f);
+	}
+	else
+	{
+		HeardNoise.Strength = FMath::Clamp(FMath::Max(0.0f, NoiseEvent.Loudness), 0.0f, 1.0f);
+	}
+	if (HeardNoise.Strength < VisualNoiseMinStrength)
+	{
+		LogNoiseGateDebug(TEXT("visual_strength_rejected"), NoiseEvent, SourceDistance, HeardNoise.Strength);
 		return;
 	}
 
