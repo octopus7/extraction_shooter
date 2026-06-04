@@ -293,7 +293,7 @@ protected:
 	int32 HeadphoneDebugIdleRingParticleCount = 72;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Noise Debug", meta = (ClampMin = "16.0", UIMin = "16.0"))
-	float HeadphoneDebugIdleRingRadius = 122.0f;
+	float HeadphoneDebugIdleRingRadius = 244.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Noise Debug", meta = (ClampMin = "0.5", UIMin = "0.5"))
 	float HeadphoneDebugIdleRingParticleSize = 2.0f;
@@ -314,7 +314,7 @@ protected:
 	FLinearColor HeadphoneDebugNoiseDirectionSolidCircleColor = FLinearColor(1.0f, 0.02f, 0.01f, 0.95f);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Noise", meta = (ClampMin = "16.0", UIMin = "16.0"))
-	float HeadphoneNoiseRingRadius = 122.0f;
+	float HeadphoneNoiseRingRadius = 244.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Noise", meta = (ClampMin = "0.25", UIMin = "0.25"))
 	float HeadphoneNoiseParticleSize = 4.0f;
@@ -329,10 +329,10 @@ protected:
 	int32 HeadphoneNoiseBaseRingParticleCount = 112;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Noise", meta = (ClampMin = "0", UIMin = "0"))
-	int32 HeadphoneNoiseMinSectorParticleCount = 64;
+	int32 HeadphoneNoiseMinSectorParticleCount = 128;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Noise", meta = (ClampMin = "1", UIMin = "1"))
-	int32 HeadphoneNoiseMaxSectorParticleCount = 240;
+	int32 HeadphoneNoiseMaxSectorParticleCount = 480;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Noise")
 	FLinearColor HeadphoneNoiseParticleColor = FLinearColor::White;

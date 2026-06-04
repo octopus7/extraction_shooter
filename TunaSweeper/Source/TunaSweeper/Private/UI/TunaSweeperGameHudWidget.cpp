@@ -489,7 +489,7 @@ int32 UTunaSweeperGameHudWidget::NativePaint(
 				}
 
 				const int32 ParticleCount = FMath::Clamp(HeadphoneDebugIdleRingParticleCount, 8, 256);
-				const float Radius = FMath::Max(16.0f, HeadphoneDebugIdleRingRadius);
+				const float Radius = FMath::Max(16.0f, FMath::Max(244.0f, HeadphoneDebugIdleRingRadius));
 				const float ParticleSize = FMath::Max(0.5f, HeadphoneDebugIdleRingParticleSize);
 				const FVector2D ParticleDrawSize(ParticleSize, ParticleSize);
 				const float AnimationSeconds = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.0f;
@@ -754,12 +754,14 @@ void UTunaSweeperGameHudWidget::DrawHeadphoneNoiseRipples(
 	}
 
 	const float ResolutionScale = FMath::Clamp(static_cast<float>(LocalSize.Y / 1080.0), 0.72f, 1.6f);
-	const float Radius = FMath::Max(16.0f, HeadphoneNoiseRingRadius * ResolutionScale);
+	const float Radius = FMath::Max(16.0f, FMath::Max(244.0f, HeadphoneNoiseRingRadius) * ResolutionScale);
 	const float RingThickness = FMath::Max(1.0f, 18.0f * ResolutionScale);
 	const float ParticleSize = FMath::Max(4.0f, HeadphoneNoiseParticleSize);
 	const float Lifetime = FMath::Max(1.05f, HeadphoneNoiseRippleLifetimeSeconds);
 	const float BurstDurationSeconds = FMath::Min(0.24f, Lifetime * 0.42f);
-	constexpr float ParticleFadeOutDurationSeconds = 0.2f;
+	constexpr float ParticleFadeOutDurationSeconds = 0.4f;
+	constexpr float ParticleSustainAlpha = 0.6f;
+	constexpr float ParticleBurstAlpha = 1.0f;
 	const int32 DrawLayerId = InOutLayerId + 1;
 	const bool bDrawDebugNoiseDirectionSolidCircle = bShowHeadphoneDebugNoiseDirectionSolidCircle &&
 		HeadphoneDebugNoiseDirectionSolidCircleColor.A > 0.0f &&
@@ -770,7 +772,7 @@ void UTunaSweeperGameHudWidget::DrawHeadphoneNoiseRipples(
 		DebugNoiseDirectionSolidCircleDiameter,
 		DebugNoiseDirectionSolidCircleDiameter);
 	const float DebugNoiseDirectionSolidCircleOrbitRadius =
-		FMath::Max(16.0f, HeadphoneDebugIdleRingRadius * ResolutionScale);
+		FMath::Max(16.0f, FMath::Max(244.0f, HeadphoneDebugIdleRingRadius) * ResolutionScale);
 	const float DebugNoiseDirectionSolidCircleLifetime =
 		FMath::Max(0.05f, HeadphoneDebugNoiseDirectionSolidCircleFadeSeconds);
 	FSlateBrush DebugNoiseDirectionSolidCircleBrush = MakeHudRoundedBoxBrush(
@@ -815,10 +817,6 @@ void UTunaSweeperGameHudWidget::DrawHeadphoneNoiseRipples(
 	for (const FHeadphoneNoiseRipple& Ripple : HeadphoneNoiseRipples)
 	{
 		const float Alpha = FMath::Clamp(Ripple.ElapsedSeconds / Lifetime, 0.0f, 1.0f);
-		const float ParticleFadeAlpha = SmoothTransitionAlpha(FMath::Clamp(
-			(Lifetime - Ripple.ElapsedSeconds) / ParticleFadeOutDurationSeconds,
-			0.0f,
-			1.0f));
 		const float BurstPeakSeconds = FMath::Min(0.085f, BurstDurationSeconds * 0.45f);
 		const float BurstRiseAlpha = FMath::Clamp(Ripple.ElapsedSeconds / FMath::Max(0.01f, BurstPeakSeconds), 0.0f, 1.0f);
 		const float BurstFallAlpha = FMath::Clamp(
@@ -829,6 +827,18 @@ void UTunaSweeperGameHudWidget::DrawHeadphoneNoiseRipples(
 		const float BurstDecay = 1.0f - SmoothTransitionAlpha(BurstFallAlpha);
 		const float ElasticKick = FMath::Sin(BurstRiseAlpha * PI) * 0.12f * BurstDecay;
 		const float BurstAmount = FMath::Clamp(BurstRise * BurstDecay * (1.0f + ElasticKick), 0.0f, 1.15f);
+		const float RemainingSeconds = Lifetime - Ripple.ElapsedSeconds;
+		const float BurstParticleAlpha = FMath::Lerp(
+			ParticleSustainAlpha,
+			ParticleBurstAlpha,
+			SmoothTransitionAlpha(FMath::Clamp(BurstAmount, 0.0f, 1.0f)));
+		const float FadeOutParticleAlpha = ParticleSustainAlpha * SmoothTransitionAlpha(FMath::Clamp(
+			RemainingSeconds / ParticleFadeOutDurationSeconds,
+			0.0f,
+			1.0f));
+		const float ParticleAlpha = RemainingSeconds <= ParticleFadeOutDurationSeconds
+			? FadeOutParticleAlpha
+			: BurstParticleAlpha;
 		const float CurrentParticleSize = ParticleSize;
 		const float CurrentRingThickness = RingThickness * FMath::Lerp(0.34f, 1.0f, BurstAmount);
 
@@ -881,10 +891,10 @@ void UTunaSweeperGameHudWidget::DrawHeadphoneNoiseRipples(
 		const float DirectionAngle = FMath::Atan2(ScreenDirection.Y, ScreenDirection.X);
 		const float StrengthAlpha = FMath::Clamp(Ripple.Strength, 0.0f, 1.0f);
 
-		const int32 EffectiveMinSectorParticleCount = FMath::Max(64, HeadphoneNoiseMinSectorParticleCount);
+		const int32 EffectiveMinSectorParticleCount = FMath::Max(128, HeadphoneNoiseMinSectorParticleCount);
 		const int32 EffectiveMaxSectorParticleCount = FMath::Max(
 			EffectiveMinSectorParticleCount,
-			FMath::Max(240, HeadphoneNoiseMaxSectorParticleCount));
+			FMath::Max(480, HeadphoneNoiseMaxSectorParticleCount));
 		const int32 SectorCount = FMath::RoundToInt(FMath::Lerp(
 			static_cast<float>(EffectiveMinSectorParticleCount),
 			static_cast<float>(EffectiveMaxSectorParticleCount),
@@ -918,7 +928,7 @@ void UTunaSweeperGameHudWidget::DrawHeadphoneNoiseRipples(
 				FMath::Lerp(0.08f, 1.0f, BurstAmount);
 
 			FLinearColor ParticleColor = FLinearColor::White;
-			ParticleColor.A = ParticleFadeAlpha;
+			ParticleColor.A = ParticleAlpha;
 			const float SizeNoise = HeadphoneNoiseHash01(Ripple.Seed, Index, 5.13f);
 			const float SandParticleSize = CurrentParticleSize * FMath::Lerp(0.86f, 1.20f, SizeNoise);
 			const FVector2D SandParticleCenter =
@@ -932,7 +942,7 @@ void UTunaSweeperGameHudWidget::DrawHeadphoneNoiseRipples(
 			if (BurstAmount > 0.12f && Influence > 0.48f && HeadphoneNoiseHash01(Ripple.Seed, Index, 6.29f) < 0.32f)
 			{
 				FLinearColor FragmentColor = ParticleColor;
-				FragmentColor.A = ParticleFadeAlpha;
+				FragmentColor.A = ParticleAlpha;
 				const FVector2D FragmentOffset =
 					ArcDirection * CurrentRingThickness * (HeadphoneNoiseHash01(Ripple.Seed, Index, 7.01f) * 0.7f - 0.35f) +
 					ScreenRight * CurrentRingThickness * (HeadphoneNoiseHash01(Ripple.Seed, Index, 7.79f) * 1.1f - 0.55f);
