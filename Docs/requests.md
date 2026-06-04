@@ -4029,3 +4029,16 @@
 - 소음 보고가 실제로 발생한 `EmitNoise()` 시점에 펄스를 시작하고, 전체 액터나 흰색 기둥이 아니라 `horn` 메시 섹션만 `UpdateMeshSection_LinearColor()`로 갱신하게 한 것
 - 확성기 꼬깔의 축 방향 길이와 입구 반지름이 약 0.24초 동안 커졌다 감쇠되며, 붉은 vertex color와 머터리얼 색상도 짧게 밝아지도록 한 것
 - `TunaSweeperEditor Win64 Development` 빌드를 통과시키고 Unreal Editor를 실행한 것
+
+## 2026-06-04 13:35:20 (소요시간: 00:07:07)
+
+- `WBP_IntroMenu` 로드/컴파일 시 `DeleteHoldGaugeBox`, `DeleteHoldGaugeOverlay`, `DeleteHoldGaugeRing`, `DeleteHoldGaugeFill`의 stale GUID 때문에 UMG 컴파일 ensure가 반복되던 문제를 수정한 것
+- 위젯 블루프린트 재빌드 helper에 `SyncWidgetVariableGuidsToSource()`를 추가해 실제 source widget/animation 이름과 `WidgetVariableNameToGuidMap`을 컴파일 전에 동기화하게 한 것
+- 재빌드 직전 기존 widget variable GUID map을 비우고, 실제 트리에 붙지 않는 legacy `DeleteHoldGauge*` orphan 위젯 생성 코드를 제거한 것
+- 인트로 메뉴 재생성 run-once task id를 갱신해 `WBP_IntroMenu.uasset`이 다시 컴파일/저장되게 한 것
+- `TunaSweeperEditor Win64 Development` 빌드를 통과시키고 Unreal Editor를 실행해 `WBP_IntroMenu` 재저장을 확인한 것
+
+## 2026-06-04 13:44:13 (소요시간: 00:01:05)
+
+- `WBP_IntroMenu` stale GUID로 인한 에디터 시작/PIE 지연 원인을 `Docs/editor_startup_intro_menu_guid_issue.md`에 한국어 문서로 별도 정리한 것
+- 원인 문서, `TunaSweeperEditor.cpp`, `WBP_IntroMenu.uasset`, 관련 요청 기록을 포함해 커밋 준비를 진행한 것

@@ -4,6 +4,7 @@
 #include "AssetToolsModule.h"
 #include "AI/TunaSweeperEnemyCharacter.h"
 #include "AI/TunaSweeperCoverPointActor.h"
+#include "Animation/WidgetAnimation.h"
 #include "AutomatedAssetImportData.h"
 #include "Blueprint/WidgetTree.h"
 #include "Character/TunaSweeperLedRobotCharacterActor.h"
@@ -184,7 +185,7 @@ namespace TunaSweeperEditorSetup
 	const FString CannedTunaIconImportTaskId = TEXT("2026-05-11_ImportCannedTunaIconV1");
 	const FString BackpackInventoryTaskId = TEXT("2026-05-16_CreateEquipmentInventoryAssetsV3");
 	const FString IntroMenuAndLevelTravelTaskId = TEXT("2026-05-24_CreateTitleIntroMenuPersistentSaveSlotSelectionLevelTravelLadderInitialScaleV1");
-	const FString IntroMenuGraphicsSettingsTaskId = TEXT("2026-05-30_CenterTitleSaveSlotInfoV1");
+	const FString IntroMenuGraphicsSettingsTaskId = TEXT("2026-06-04_RebuildIntroMenuWidgetVariableGuidMapV1");
 	const FString OpeningScenarioPresentationTaskId = TEXT("2026-05-19_CreateOpeningScenarioPresentationV2");
 	const FString LevelTransitionVideoTaskId = TEXT("2026-05-16_AddBidirectionalLevelTransitionVideoV3");
 	const FString FirstOutingQuestTaskId = TEXT("2026-05-30_UpdateQuestPanelEmptyStateSelectionV2");
@@ -3163,6 +3164,69 @@ namespace TunaSweeperEditorSetup
 		}
 	}
 
+	void SyncWidgetVariableGuidsToSource(UWidgetBlueprint* WidgetBlueprint)
+	{
+		if (!WidgetBlueprint)
+		{
+			return;
+		}
+
+		TSet<FName> SourceVariableNames;
+		WidgetBlueprint->ForEachSourceWidget([&SourceVariableNames](UWidget* Widget)
+		{
+			if (Widget)
+			{
+				SourceVariableNames.Add(Widget->GetFName());
+			}
+		});
+
+		for (UWidgetAnimation* Animation : WidgetBlueprint->Animations)
+		{
+			if (Animation)
+			{
+				SourceVariableNames.Add(Animation->GetFName());
+			}
+		}
+
+		bool bModified = false;
+		auto ModifyIfNeeded = [&WidgetBlueprint, &bModified]()
+		{
+			if (!bModified)
+			{
+				WidgetBlueprint->Modify();
+				bModified = true;
+			}
+		};
+
+		TSet<FGuid> SeenGuids;
+		for (auto It = WidgetBlueprint->WidgetVariableNameToGuidMap.CreateIterator(); It; ++It)
+		{
+			if (!SourceVariableNames.Contains(It.Key()))
+			{
+				ModifyIfNeeded();
+				It.RemoveCurrent();
+				continue;
+			}
+
+			if (!It.Value().IsValid() || SeenGuids.Contains(It.Value()))
+			{
+				ModifyIfNeeded();
+				It.Value() = FGuid::NewGuid();
+			}
+
+			SeenGuids.Add(It.Value());
+		}
+
+		for (const FName& SourceVariableName : SourceVariableNames)
+		{
+			if (!WidgetBlueprint->WidgetVariableNameToGuidMap.Contains(SourceVariableName))
+			{
+				ModifyIfNeeded();
+				WidgetBlueprint->WidgetVariableNameToGuidMap.Add(SourceVariableName, FGuid::NewGuid());
+			}
+		}
+	}
+
 	void RegisterAllWidgetsInTree(UWidgetBlueprint* WidgetBlueprint)
 	{
 		if (!WidgetBlueprint || !WidgetBlueprint->WidgetTree)
@@ -3176,6 +3240,8 @@ namespace TunaSweeperEditorSetup
 		{
 			RegisterWidgetVariable(WidgetBlueprint, Widget);
 		}
+
+		SyncWidgetVariableGuidsToSource(WidgetBlueprint);
 	}
 
 	void ClearWidgetTreeForRebuild(UWidgetBlueprint* WidgetBlueprint)
@@ -3194,6 +3260,7 @@ namespace TunaSweeperEditorSetup
 		{
 			UnregisterWidgetVariable(WidgetBlueprint, ExistingVariableName);
 		}
+		WidgetBlueprint->WidgetVariableNameToGuidMap.Empty();
 
 		if (WidgetBlueprint->WidgetTree->RootWidget)
 		{
@@ -3681,10 +3748,6 @@ namespace TunaSweeperEditorSetup
 		UTextBlock* DeleteSaveSlotButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("DeleteSaveSlotButtonText"));
 		UOverlay* DeleteSaveSlotButtonContent = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), TEXT("DeleteSaveSlotButtonContent"));
 		UImage* DeleteSaveSlotHoldProgressFill = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("DeleteSaveSlotHoldProgressFill"));
-		USizeBox* DeleteHoldGaugeBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("DeleteHoldGaugeBox"));
-		UOverlay* DeleteHoldGaugeOverlay = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), TEXT("DeleteHoldGaugeOverlay"));
-		UBorder* DeleteHoldGaugeRing = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("DeleteHoldGaugeRing"));
-		UImage* DeleteHoldGaugeFill = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("DeleteHoldGaugeFill"));
 		USizeBox* BackToMainMenuButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("BackToMainMenuButtonBox"));
 		UButton* BackToMainMenuButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("BackToMainMenuButton"));
 		UTextBlock* BackToMainMenuButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("BackToMainMenuButtonText"));
@@ -3806,7 +3869,7 @@ namespace TunaSweeperEditorSetup
 			!SaveSlot3Text || !SaveSlotActionRow || !PrimarySaveSlotButtonBox ||
 			!PrimarySaveSlotButton || !PrimarySaveSlotButtonText || !DeleteSaveSlotButtonBox || !DeleteSaveSlotButton ||
 			!DeleteSaveSlotButtonText || !DeleteSaveSlotButtonContent || !DeleteSaveSlotHoldProgressFill ||
-			!DeleteHoldGaugeBox || !DeleteHoldGaugeOverlay || !DeleteHoldGaugeRing || !DeleteHoldGaugeFill || !BackToMainMenuButtonBox || !BackToMainMenuButton ||
+			!BackToMainMenuButtonBox || !BackToMainMenuButton ||
 			!BackToMainMenuButtonText || !DeleteConfirmPanel || !DeleteConfirmStack || !DeleteConfirmTitleText ||
 			!DeleteConfirmMessageText || !DeleteConfirmButtonRow || !ConfirmDeleteButtonBox || !ConfirmDeleteButton ||
 			!ConfirmDeleteButtonText || !CancelDeleteButtonBox || !CancelDeleteButton || !CancelDeleteButtonText ||
@@ -4260,13 +4323,6 @@ namespace TunaSweeperEditorSetup
 			DeleteTextSlot->SetHorizontalAlignment(HAlign_Fill);
 			DeleteTextSlot->SetVerticalAlignment(VAlign_Center);
 		}
-
-		DeleteHoldGaugeBox->SetVisibility(ESlateVisibility::Collapsed);
-		DeleteHoldGaugeRing->SetVisibility(ESlateVisibility::Collapsed);
-		DeleteHoldGaugeFill->SetVisibility(ESlateVisibility::Collapsed);
-		DeleteHoldGaugeFill->SetRenderOpacity(0.0f);
-		DeleteHoldGaugeFill->SetRenderTransformPivot(FVector2D(0.5f, 0.5f));
-		DeleteHoldGaugeFill->SetRenderScale(FVector2D::ZeroVector);
 
 		SaveSlotActionRow->SetVisibility(ESlateVisibility::Collapsed);
 		for (UWidget* ActionButton : { static_cast<UWidget*>(PrimarySaveSlotButtonBox), static_cast<UWidget*>(DeleteSaveSlotButtonBox) })
