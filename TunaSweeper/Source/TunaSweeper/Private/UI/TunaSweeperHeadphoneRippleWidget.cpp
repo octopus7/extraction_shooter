@@ -63,6 +63,7 @@ void UTunaSweeperHeadphoneRippleWidget::NativeTick(const FGeometry& MyGeometry, 
 	Super::NativeTick(MyGeometry, InDeltaTime);
 
 	const float DeltaSeconds = FMath::Max(0.0f, InDeltaTime);
+	AnimationSeconds += DeltaSeconds;
 	for (FScreenRipple& Ripple : ActiveRipples)
 	{
 		Ripple.ElapsedSeconds += DeltaSeconds;
@@ -73,7 +74,7 @@ void UTunaSweeperHeadphoneRippleWidget::NativeTick(const FGeometry& MyGeometry, 
 		return Ripple.ElapsedSeconds >= FMath::Max(0.05f, RippleLifetimeSeconds);
 	});
 
-	if (ActiveRipples.Num() > 0)
+	if (bShowIdleRing || ActiveRipples.Num() > 0)
 	{
 		Invalidate(EInvalidateWidgetReason::Paint);
 	}
@@ -136,7 +137,7 @@ int32 UTunaSweeperHeadphoneRippleWidget::NativePaint(
 		bParentEnabled);
 
 	const FVector2D LocalSize = AllottedGeometry.GetLocalSize();
-	if (ActiveRipples.Num() == 0 || LocalSize.X <= 1.0f || LocalSize.Y <= 1.0f)
+	if ((!bShowIdleRing && ActiveRipples.Num() == 0) || LocalSize.X <= 1.0f || LocalSize.Y <= 1.0f)
 	{
 		return PaintedLayerId;
 	}
@@ -153,6 +154,18 @@ int32 UTunaSweeperHeadphoneRippleWidget::NativePaint(
 	const float ParticleSize = GetLocalPixelSize();
 	const float Lifetime = FMath::Max(0.05f, RippleLifetimeSeconds);
 	const int32 DrawLayerId = PaintedLayerId + 1;
+
+	if (bShowIdleRing)
+	{
+		DrawIdleRing(
+			AllottedGeometry,
+			OutDrawElements,
+			DrawLayerId,
+			ListenerCenter,
+			Radius,
+			RingThickness,
+			ParticleSize);
+	}
 
 	for (const FScreenRipple& Ripple : ActiveRipples)
 	{
@@ -323,6 +336,38 @@ float UTunaSweeperHeadphoneRippleWidget::GetLocalPixelSize() const
 {
 	const float ViewportScale = FMath::Max(0.25f, UWidgetLayoutLibrary::GetViewportScale(this));
 	return FMath::Max(0.25f, ParticlePixelSize / ViewportScale);
+}
+
+void UTunaSweeperHeadphoneRippleWidget::DrawIdleRing(
+	const FGeometry& AllottedGeometry,
+	FSlateWindowElementList& OutDrawElements,
+	int32 LayerId,
+	const FVector2D& Center,
+	float Radius,
+	float RingThickness,
+	float ParticleSize) const
+{
+	const int32 ParticleCount = FMath::Clamp(IdleRingParticleCount, 0, 256);
+	if (ParticleCount <= 0 || IdleRingParticleAlpha <= 0.0f)
+	{
+		return;
+	}
+
+	FLinearColor IdleColor = RippleColor;
+	IdleColor.A = FMath::Clamp(IdleRingParticleAlpha, 0.0f, 1.0f);
+	for (int32 Index = 0; Index < ParticleCount; ++Index)
+	{
+		const float Angle = (static_cast<float>(Index) / static_cast<float>(ParticleCount)) * 2.0f * PI;
+		const float Wave = FMath::Sin(AnimationSeconds * 2.7f + Angle * 5.0f) * RingThickness * 0.12f;
+		const FVector2D UnitDirection(FMath::Cos(Angle), FMath::Sin(Angle));
+		DrawParticle(
+			AllottedGeometry,
+			OutDrawElements,
+			LayerId,
+			Center + UnitDirection * (Radius + Wave),
+			ParticleSize,
+			IdleColor);
+	}
 }
 
 void UTunaSweeperHeadphoneRippleWidget::DrawParticle(

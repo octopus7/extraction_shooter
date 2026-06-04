@@ -142,6 +142,28 @@ namespace
 		return ClampedAlpha * ClampedAlpha * (3.0f - 2.0f * ClampedAlpha);
 	}
 
+	float HeadphoneNoiseHash01(int32 Seed, int32 Index, float Salt)
+	{
+		const float RawValue = FMath::Sin(
+			(static_cast<float>(Seed) + 1.0f) * 12.9898f +
+			(static_cast<float>(Index) + 1.0f) * (37.719f + Salt) +
+			Salt * 78.233f) * 43758.5453f;
+		return RawValue - FMath::FloorToFloat(RawValue);
+	}
+
+	float HeadphoneNoiseCenterWeightedSignedUnit(float Value01, float Exponent)
+	{
+		const float SignedValue = Value01 * 2.0f - 1.0f;
+		const float Magnitude = FMath::Pow(FMath::Abs(SignedValue), FMath::Max(1.0f, Exponent));
+		return FMath::Sign(SignedValue) * Magnitude;
+	}
+
+	float HeadphoneNoiseAngularInfluence(float NormalizedAngle)
+	{
+		const float ClampedAngle = FMath::Clamp(NormalizedAngle, 0.0f, 1.0f);
+		return FMath::Pow(1.0f - FMath::SmoothStep(0.0f, 1.0f, ClampedAngle), 1.35f);
+	}
+
 	float EaseOutCubic(float Alpha)
 	{
 		const float ClampedAlpha = FMath::Clamp(Alpha, 0.0f, 1.0f);
@@ -386,6 +408,7 @@ void UTunaSweeperGameHudWidget::NativeTick(const FGeometry& MyGeometry, float In
 	RefreshCursorDistanceWidget();
 	TickHudTransitions(InDeltaTime);
 	UpdateCrosshairState(InDeltaTime);
+	TickHeadphoneNoiseRipples(InDeltaTime);
 	TickDamageNumberPopups(InDeltaTime);
 	Invalidate(EInvalidateWidgetReason::Paint);
 }
@@ -433,10 +456,70 @@ int32 UTunaSweeperGameHudWidget::NativePaint(
 		LayerId,
 		InWidgetStyle,
 		bParentEnabled);
+	int32 CurrentLayerId = PaintedLayerId;
 
-	if (IsWeaponCrosshairSuppressed() || !FSlateApplication::IsInitialized())
+	if (!FSlateApplication::IsInitialized())
 	{
-		return PaintedLayerId;
+		return CurrentLayerId;
+	}
+
+	if (bShowHeadphoneDebugIdleRing)
+	{
+		if (const FSlateBrush* WhiteBrush = FCoreStyle::Get().GetBrush(TEXT("WhiteBrush")))
+		{
+			const FVector2D LocalSize = AllottedGeometry.GetLocalSize();
+			if (LocalSize.X > 1.0f && LocalSize.Y > 1.0f)
+			{
+				FVector2D RingCenter = LocalSize * 0.5f;
+				if (APlayerController* PlayerController = GetOwningPlayer())
+				{
+					if (APawn* PlayerPawn = PlayerController->GetPawn())
+					{
+						FVector2D ProjectedPlayerPosition = FVector2D::ZeroVector;
+						if (UWidgetLayoutLibrary::ProjectWorldLocationToWidgetPosition(
+							PlayerController,
+							PlayerPawn->GetActorLocation(),
+							ProjectedPlayerPosition,
+							true))
+						{
+							RingCenter.X = FMath::Clamp(ProjectedPlayerPosition.X, 0.0, LocalSize.X);
+							RingCenter.Y = FMath::Clamp(ProjectedPlayerPosition.Y, 0.0, LocalSize.Y);
+						}
+					}
+				}
+
+				const int32 ParticleCount = FMath::Clamp(HeadphoneDebugIdleRingParticleCount, 8, 256);
+				const float Radius = FMath::Max(16.0f, HeadphoneDebugIdleRingRadius);
+				const float ParticleSize = FMath::Max(0.5f, HeadphoneDebugIdleRingParticleSize);
+				const FVector2D ParticleDrawSize(ParticleSize, ParticleSize);
+				const float AnimationSeconds = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.0f;
+				for (int32 ParticleIndex = 0; ParticleIndex < ParticleCount; ++ParticleIndex)
+				{
+					const float Angle = (static_cast<float>(ParticleIndex) / static_cast<float>(ParticleCount)) * 2.0f * PI;
+					const float RadiusWave = FMath::Sin(AnimationSeconds * 2.8f + Angle * 5.0f) * 2.5f;
+					const FVector2D UnitDirection(FMath::Cos(Angle), FMath::Sin(Angle));
+					const FVector2D ParticleCenter = RingCenter + UnitDirection * (Radius + RadiusWave);
+					FSlateDrawElement::MakeBox(
+						OutDrawElements,
+						CurrentLayerId + 1,
+						MakeHudLocalBoxGeometry(
+							AllottedGeometry,
+							ParticleCenter - ParticleDrawSize * 0.5f,
+							ParticleDrawSize),
+						WhiteBrush,
+						ESlateDrawEffect::None,
+						HeadphoneDebugIdleRingColor);
+				}
+				CurrentLayerId += 1;
+			}
+		}
+	}
+
+	DrawHeadphoneNoiseRipples(AllottedGeometry, OutDrawElements, CurrentLayerId);
+
+	if (IsWeaponCrosshairSuppressed())
+	{
+		return CurrentLayerId;
 	}
 
 	const FName WeaponTypeTag = GetSelectedWeaponTypeTag();
@@ -444,13 +527,13 @@ int32 UTunaSweeperGameHudWidget::NativePaint(
 	const bool bPrecisionCrosshair = IsPrecisionCrosshairWeaponType(WeaponTypeTag);
 	if (!bShotgunCrosshair && !bPrecisionCrosshair)
 	{
-		return PaintedLayerId;
+		return CurrentLayerId;
 	}
 
 	FVector2D CrosshairLocalPosition = FVector2D::ZeroVector;
 	if (!TryGetWeaponCrosshairLocalPosition(AllottedGeometry, CrosshairLocalPosition))
 	{
-		return PaintedLayerId;
+		return CurrentLayerId;
 	}
 
 	auto DrawLineStrip = [&](
@@ -499,8 +582,8 @@ int32 UTunaSweeperGameHudWidget::NativePaint(
 		const int32 SegmentCount = FMath::Clamp(ShotgunCrosshairSegmentCount, 8, 128);
 		TArray<FVector2D> CirclePoints;
 		BuildArcPoints(CrosshairLocalPosition, FMath::Max(1.0f, ShotgunCrosshairRadius), 0.0f, 360.0f, SegmentCount, CirclePoints);
-		DrawLineStrip(CirclePoints, ShotgunCrosshairColor, ShotgunCrosshairThickness, PaintedLayerId + 1);
-		return PaintedLayerId + 1;
+		DrawLineStrip(CirclePoints, ShotgunCrosshairColor, ShotgunCrosshairThickness, CurrentLayerId + 1);
+		return CurrentLayerId + 1;
 	}
 
 	const float AimAlpha = SmoothTransitionAlpha(PrecisionCrosshairAimAlpha);
@@ -516,19 +599,19 @@ int32 UTunaSweeperGameHudWidget::NativePaint(
 	SegmentPoints.SetNum(2);
 	SegmentPoints[0] = CrosshairLocalPosition + FVector2D(-BarDistance - BarLength, 0.0f);
 	SegmentPoints[1] = CrosshairLocalPosition + FVector2D(-BarDistance, 0.0f);
-	DrawLineStrip(SegmentPoints, BarColor, PrecisionCrosshairThickness, PaintedLayerId + 1);
+	DrawLineStrip(SegmentPoints, BarColor, PrecisionCrosshairThickness, CurrentLayerId + 1);
 
 	SegmentPoints[0] = CrosshairLocalPosition + FVector2D(BarDistance, 0.0f);
 	SegmentPoints[1] = CrosshairLocalPosition + FVector2D(BarDistance + BarLength, 0.0f);
-	DrawLineStrip(SegmentPoints, BarColor, PrecisionCrosshairThickness, PaintedLayerId + 1);
+	DrawLineStrip(SegmentPoints, BarColor, PrecisionCrosshairThickness, CurrentLayerId + 1);
 
 	SegmentPoints[0] = CrosshairLocalPosition + FVector2D(0.0f, -BarDistance - BarLength);
 	SegmentPoints[1] = CrosshairLocalPosition + FVector2D(0.0f, -BarDistance);
-	DrawLineStrip(SegmentPoints, BarColor, PrecisionCrosshairThickness, PaintedLayerId + 1);
+	DrawLineStrip(SegmentPoints, BarColor, PrecisionCrosshairThickness, CurrentLayerId + 1);
 
 	SegmentPoints[0] = CrosshairLocalPosition + FVector2D(0.0f, BarDistance);
 	SegmentPoints[1] = CrosshairLocalPosition + FVector2D(0.0f, BarDistance + BarLength);
-	DrawLineStrip(SegmentPoints, BarColor, PrecisionCrosshairThickness, PaintedLayerId + 1);
+	DrawLineStrip(SegmentPoints, BarColor, PrecisionCrosshairThickness, CurrentLayerId + 1);
 
 	if (AimAlpha > 0.01f)
 	{
@@ -540,7 +623,7 @@ int32 UTunaSweeperGameHudWidget::NativePaint(
 			const FVector2D DotSize(DotDiameter, DotDiameter);
 			FSlateDrawElement::MakeBox(
 				OutDrawElements,
-				PaintedLayerId + 2,
+				CurrentLayerId + 2,
 				MakeHudLocalBoxGeometry(AllottedGeometry, CrosshairLocalPosition - DotSize * 0.5f, DotSize),
 				WhiteBrush,
 				ESlateDrawEffect::None,
@@ -548,7 +631,284 @@ int32 UTunaSweeperGameHudWidget::NativePaint(
 		}
 	}
 
-	return PaintedLayerId + 2;
+	return CurrentLayerId + 2;
+}
+
+void UTunaSweeperGameHudWidget::AddHeadphoneNoiseRipple(const FVector& DirectionFromListener, float Strength)
+{
+	FHeadphoneNoiseRipple NewRipple;
+	NewRipple.DirectionFromListener = DirectionFromListener.GetSafeNormal2D();
+	if (NewRipple.DirectionFromListener.IsNearlyZero())
+	{
+		NewRipple.DirectionFromListener = FVector::ForwardVector;
+	}
+	NewRipple.Strength = FMath::Clamp(Strength, 0.0f, 1.0f);
+	NewRipple.ElapsedSeconds = 0.0f;
+	NewRipple.Seed = NextHeadphoneNoiseRippleSeed++;
+	if (NextHeadphoneNoiseRippleSeed <= 0)
+	{
+		NextHeadphoneNoiseRippleSeed = 1;
+	}
+
+	HeadphoneNoiseRipples.Add(NewRipple);
+	constexpr int32 MaxActiveHeadphoneNoiseRipples = 6;
+	if (HeadphoneNoiseRipples.Num() > MaxActiveHeadphoneNoiseRipples)
+	{
+		HeadphoneNoiseRipples.RemoveAt(0, HeadphoneNoiseRipples.Num() - MaxActiveHeadphoneNoiseRipples, EAllowShrinking::No);
+	}
+
+	UE_LOG(
+		LogTunaSweeperGameHud,
+		Log,
+		TEXT("Headphone HUD ripple queued: strength=%.3f direction=(%.2f, %.2f, %.2f) activeRipples=%d"),
+		NewRipple.Strength,
+		NewRipple.DirectionFromListener.X,
+		NewRipple.DirectionFromListener.Y,
+		NewRipple.DirectionFromListener.Z,
+		HeadphoneNoiseRipples.Num());
+
+	Invalidate(EInvalidateWidgetReason::Paint);
+}
+
+void UTunaSweeperGameHudWidget::TickHeadphoneNoiseRipples(float InDeltaTime)
+{
+	const float DeltaSeconds = FMath::Max(0.0f, InDeltaTime);
+	for (FHeadphoneNoiseRipple& Ripple : HeadphoneNoiseRipples)
+	{
+		Ripple.ElapsedSeconds += DeltaSeconds;
+	}
+
+	const float Lifetime = FMath::Max(
+		FMath::Max(0.05f, HeadphoneNoiseRippleLifetimeSeconds),
+		bShowHeadphoneDebugNoiseDirectionSolidCircle
+			? FMath::Max(0.05f, HeadphoneDebugNoiseDirectionSolidCircleFadeSeconds)
+			: 0.0f);
+	HeadphoneNoiseRipples.RemoveAllSwap([Lifetime](const FHeadphoneNoiseRipple& Ripple)
+	{
+		return Ripple.ElapsedSeconds >= Lifetime;
+	});
+}
+
+void UTunaSweeperGameHudWidget::DrawHeadphoneNoiseRipples(
+	const FGeometry& AllottedGeometry,
+	FSlateWindowElementList& OutDrawElements,
+	int32& InOutLayerId) const
+{
+	if (HeadphoneNoiseRipples.IsEmpty())
+	{
+		return;
+	}
+
+	const FSlateBrush* WhiteBrush = FCoreStyle::Get().GetBrush(TEXT("WhiteBrush"));
+	if (!WhiteBrush)
+	{
+		return;
+	}
+
+	const FVector2D LocalSize = AllottedGeometry.GetLocalSize();
+	if (LocalSize.X <= 1.0f || LocalSize.Y <= 1.0f)
+	{
+		return;
+	}
+
+	FVector2D RingCenter = LocalSize * 0.5f;
+	APawn* PlayerPawn = nullptr;
+	APlayerController* PlayerController = GetOwningPlayer();
+	if (PlayerController)
+	{
+		PlayerPawn = PlayerController->GetPawn();
+		if (PlayerPawn)
+		{
+			FVector2D ProjectedPlayerPosition = FVector2D::ZeroVector;
+			if (UWidgetLayoutLibrary::ProjectWorldLocationToWidgetPosition(
+				PlayerController,
+				PlayerPawn->GetActorLocation(),
+				ProjectedPlayerPosition,
+				true))
+			{
+				RingCenter.X = FMath::Clamp(ProjectedPlayerPosition.X, 0.0, LocalSize.X);
+				RingCenter.Y = FMath::Clamp(ProjectedPlayerPosition.Y, 0.0, LocalSize.Y);
+			}
+		}
+	}
+
+	const float ResolutionScale = FMath::Clamp(static_cast<float>(LocalSize.Y / 1080.0), 0.72f, 1.6f);
+	const float Radius = FMath::Max(16.0f, HeadphoneNoiseRingRadius * ResolutionScale);
+	const float RingThickness = FMath::Max(0.5f, 13.0f * ResolutionScale);
+	const float ParticleSize = FMath::Max(0.25f, HeadphoneNoiseParticleSize);
+	const float Lifetime = FMath::Max(0.05f, HeadphoneNoiseRippleLifetimeSeconds);
+	const int32 DrawLayerId = InOutLayerId + 1;
+	const bool bDrawDebugNoiseDirectionSolidCircle = bShowHeadphoneDebugNoiseDirectionSolidCircle &&
+		HeadphoneDebugNoiseDirectionSolidCircleColor.A > 0.0f &&
+		HeadphoneDebugNoiseDirectionSolidCircleDiameter > 0.0f;
+	const float DebugNoiseDirectionSolidCircleDiameter =
+		FMath::Max(1.0f, HeadphoneDebugNoiseDirectionSolidCircleDiameter);
+	const FVector2D DebugNoiseDirectionSolidCircleSize(
+		DebugNoiseDirectionSolidCircleDiameter,
+		DebugNoiseDirectionSolidCircleDiameter);
+	const float DebugNoiseDirectionSolidCircleOrbitRadius =
+		FMath::Max(16.0f, HeadphoneDebugIdleRingRadius * ResolutionScale);
+	const float DebugNoiseDirectionSolidCircleLifetime =
+		FMath::Max(0.05f, HeadphoneDebugNoiseDirectionSolidCircleFadeSeconds);
+	FSlateBrush DebugNoiseDirectionSolidCircleBrush = MakeHudRoundedBoxBrush(
+		DebugNoiseDirectionSolidCircleSize,
+		FLinearColor::White,
+		DebugNoiseDirectionSolidCircleDiameter * 0.5f,
+		FLinearColor::Transparent,
+		0.0f);
+
+	auto DrawParticle = [&](
+		const FVector2D& ParticleCenter,
+		float Size,
+		const FLinearColor& Color,
+		int32 LayerId)
+	{
+		if (Color.A <= 0.0f || Size <= 0.0f)
+		{
+			return;
+		}
+
+		const FVector2D DrawSize(Size, Size);
+		FSlateDrawElement::MakeBox(
+			OutDrawElements,
+			LayerId,
+			MakeHudLocalBoxGeometry(
+				AllottedGeometry,
+				FVector2D(
+					FMath::RoundToDouble(ParticleCenter.X - DrawSize.X * 0.5),
+					FMath::RoundToDouble(ParticleCenter.Y - DrawSize.Y * 0.5)),
+				DrawSize),
+			WhiteBrush,
+			ESlateDrawEffect::None,
+			Color);
+	};
+
+	for (const FHeadphoneNoiseRipple& Ripple : HeadphoneNoiseRipples)
+	{
+		const float Alpha = FMath::Clamp(Ripple.ElapsedSeconds / Lifetime, 0.0f, 1.0f);
+		const float Fade = FMath::Sin(Alpha * PI);
+		if (Fade <= KINDA_SMALL_NUMBER)
+		{
+			continue;
+		}
+
+		FVector2D ScreenDirection = FVector2D(1.0f, 0.0f);
+		if (PlayerController && PlayerPawn)
+		{
+			FVector2D DirectionTarget = FVector2D::ZeroVector;
+			const FVector TargetLocation = PlayerPawn->GetActorLocation() + Ripple.DirectionFromListener.GetSafeNormal2D() * 240.0f;
+			if (UWidgetLayoutLibrary::ProjectWorldLocationToWidgetPosition(
+				PlayerController,
+				TargetLocation,
+				DirectionTarget,
+				true))
+			{
+				const FVector2D ProjectedDirection = DirectionTarget - RingCenter;
+				if (!ProjectedDirection.IsNearlyZero())
+				{
+					ScreenDirection = ProjectedDirection.GetSafeNormal();
+				}
+			}
+		}
+		else
+		{
+			const FVector Direction = Ripple.DirectionFromListener.GetSafeNormal2D();
+			const FVector2D FallbackDirection(Direction.X, -Direction.Y);
+			if (!FallbackDirection.IsNearlyZero())
+			{
+				ScreenDirection = FallbackDirection.GetSafeNormal();
+			}
+		}
+
+		const FVector2D ScreenRight(-ScreenDirection.Y, ScreenDirection.X);
+		const float DirectionAngle = FMath::Atan2(ScreenDirection.Y, ScreenDirection.X);
+		const float StrengthAlpha = FMath::Clamp(Ripple.Strength, 0.0f, 1.0f);
+
+		const int32 RingCount = FMath::Clamp(HeadphoneNoiseBaseRingParticleCount, 0, 512);
+		FLinearColor BaseRingColor = HeadphoneNoiseParticleColor;
+		BaseRingColor.A = 0.07f * Fade * FMath::Lerp(0.55f, 1.0f, StrengthAlpha);
+		for (int32 Index = 0; Index < RingCount; ++Index)
+		{
+			const float Angle = (static_cast<float>(Index) / static_cast<float>(RingCount)) * 2.0f * PI;
+			const float Wave = FMath::Sin(Alpha * 2.0f * PI + Angle * 3.0f + Ripple.Seed * 0.17f);
+			const float RadiusJitter = Wave * RingThickness * 0.18f;
+			const FVector2D UnitDirection(FMath::Cos(Angle), FMath::Sin(Angle));
+			DrawParticle(
+				RingCenter + UnitDirection * (Radius + RadiusJitter),
+				ParticleSize,
+				BaseRingColor,
+				DrawLayerId);
+		}
+
+		const int32 SectorCount = FMath::RoundToInt(FMath::Lerp(
+			static_cast<float>(FMath::Max(0, HeadphoneNoiseMinSectorParticleCount)),
+			static_cast<float>(FMath::Max(HeadphoneNoiseMinSectorParticleCount, HeadphoneNoiseMaxSectorParticleCount)),
+			StrengthAlpha));
+		const float SectorHalfAngle = FMath::DegreesToRadians(FMath::Clamp(HeadphoneNoiseSectorHalfAngleDegrees, 1.0f, 90.0f));
+		for (int32 Index = 0; Index < SectorCount; ++Index)
+		{
+			const float SignedAngleUnit = HeadphoneNoiseCenterWeightedSignedUnit(
+				HeadphoneNoiseHash01(Ripple.Seed, Index, 0.13f),
+				1.85f);
+			const float NormalizedAngle = FMath::Abs(SignedAngleUnit);
+			const float Influence = HeadphoneNoiseAngularInfluence(NormalizedAngle);
+			if (Influence <= 0.01f)
+			{
+				continue;
+			}
+
+			const float Angle = DirectionAngle + SignedAngleUnit * SectorHalfAngle;
+			const FVector2D ArcDirection(FMath::Cos(Angle), FMath::Sin(Angle));
+			const float RadiusNoise = HeadphoneNoiseHash01(Ripple.Seed, Index, 1.73f) * 2.0f - 1.0f;
+			const float PhaseNoise = HeadphoneNoiseHash01(Ripple.Seed, Index, 2.41f) * 2.0f * PI;
+			const float Wobble =
+				FMath::Sin(Alpha * 2.0f * PI * 1.65f + PhaseNoise) *
+				RingThickness *
+				FMath::Lerp(0.08f, 0.42f, Influence);
+			const float RadiusOffset = RadiusNoise * RingThickness * FMath::Lerp(0.2f, 1.0f, Influence) + Wobble;
+			const float TangentScatter =
+				(HeadphoneNoiseHash01(Ripple.Seed, Index, 3.29f) * 2.0f - 1.0f) *
+				RingThickness *
+				FMath::Lerp(0.04f, 0.45f, Influence) *
+				FMath::Pow(Alpha, 1.25f);
+
+			FLinearColor ParticleColor = HeadphoneNoiseParticleColor;
+			ParticleColor.A =
+				Fade *
+				FMath::Lerp(0.34f, 0.82f, StrengthAlpha) *
+				FMath::Lerp(0.18f, 1.0f, Influence);
+			DrawParticle(
+				RingCenter + ArcDirection * (Radius + RadiusOffset) + ScreenRight * TangentScatter,
+				ParticleSize,
+				ParticleColor,
+				DrawLayerId + 1);
+		}
+
+		if (bDrawDebugNoiseDirectionSolidCircle)
+		{
+			const float DebugFadeAlpha = FMath::Clamp(Ripple.ElapsedSeconds / DebugNoiseDirectionSolidCircleLifetime, 0.0f, 1.0f);
+			const float DebugFade = 1.0f - SmoothTransitionAlpha(DebugFadeAlpha);
+			if (DebugFade > KINDA_SMALL_NUMBER)
+			{
+				FLinearColor DebugCircleColor = HeadphoneDebugNoiseDirectionSolidCircleColor;
+				DebugCircleColor.A *= DebugFade;
+				const FVector2D DebugCircleCenter =
+					RingCenter + ScreenDirection * DebugNoiseDirectionSolidCircleOrbitRadius;
+				FSlateDrawElement::MakeBox(
+					OutDrawElements,
+					DrawLayerId + 2,
+					MakeHudLocalBoxGeometry(
+						AllottedGeometry,
+						DebugCircleCenter - DebugNoiseDirectionSolidCircleSize * 0.5f,
+						DebugNoiseDirectionSolidCircleSize),
+					&DebugNoiseDirectionSolidCircleBrush,
+					ESlateDrawEffect::None,
+					DebugCircleColor);
+			}
+		}
+	}
+
+	InOutLayerId += 3;
 }
 
 void UTunaSweeperGameHudWidget::SetCenterPanelsVisible(bool bVisible)

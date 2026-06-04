@@ -4030,6 +4030,29 @@
 - 확성기 꼬깔의 축 방향 길이와 입구 반지름이 약 0.24초 동안 커졌다 감쇠되며, 붉은 vertex color와 머터리얼 색상도 짧게 밝아지도록 한 것
 - `TunaSweeperEditor Win64 Development` 빌드를 통과시키고 Unreal Editor를 실행한 것
 
+## 2026-06-04 13:31:32 (소요시간: 00:02:00)
+
+- 스크린 스페이스 헤드폰 리플 위젯의 표시 경로를 진단하기 위해 소음 발생 조건과 관계없이 상시 보이는 원형 기준 입자를 추가한 것
+- 헤드폰 착용이 확인되는 시점에 `EnsureRippleWidget()`을 호출해 소음 이벤트가 없어도 리플 위젯을 viewport에 올리게 한 것
+- 리플 위젯에 `bShowIdleRing`, `IdleRingParticleCount`, `IdleRingParticleAlpha` 설정을 추가하고, `NativePaint()`에서 `ActiveRipples`가 없어도 플레이어 화면 위치 주변에 원형 입자를 그리게 한 것
+- 빈 네이티브 위젯의 크기 문제를 줄이기 위해 viewport 크기를 `SetDesiredSizeInViewport()`로 명시한 것
+- unity build에서 폭발 소음 상수명이 충돌하던 `TunaSweeperSelfDestructInteractableActor.cpp`의 내부 상수 이름을 고유화해 `TunaSweeperEditor Win64 Development` 빌드를 통과시키고 Unreal Editor를 실행한 것
+
+## 2026-06-04 13:34:00 (소요시간: 00:03:39)
+
+- 별도 `UTunaSweeperHeadphoneRippleWidget`의 viewport/geometry 경로가 보이지 않는 문제를 분리하기 위해, 이미 화면에 보이는 크로스헤어와 같은 `UTunaSweeperGameHudWidget::NativePaint()` 경로에 진단용 원형 입자 링을 직접 추가한 것
+- 플레이어 pawn의 월드 위치를 화면 좌표로 투영하고, 실패 시 HUD 중앙을 기준으로 72개의 노란 2px 입자를 원형으로 그리게 한 것
+- 진단용 설정 `bShowHeadphoneDebugIdleRing`, `HeadphoneDebugIdleRingParticleCount`, `HeadphoneDebugIdleRingRadius`, `HeadphoneDebugIdleRingParticleSize`, `HeadphoneDebugIdleRingColor`를 HUD에 추가한 것
+- `TunaSweeperEditor Win64 Development` 빌드를 통과시키고 Unreal Editor를 실행한 것
+
+## 2026-06-04 13:41:32 (소요시간: 00:04:38)
+
+- 실제 헤드폰 소음 리플 표시를 별도 `UTunaSweeperHeadphoneRippleWidget` viewport 경로에서 이미 보이는 `UTunaSweeperGameHudWidget::NativePaint()` 경로로 옮긴 것
+- `UTunaSweeperHeadphoneListenerComponent`가 소음 이벤트를 들은 뒤 `HeardNoise.DirectionFromListener`와 `HeardNoise.Strength`를 `GameHudWidget->AddHeadphoneNoiseRipple()`로 전달하게 한 것
+- HUD가 소음 리플 이벤트를 수명 동안 보관하고, 플레이어 화면 위치 주변 고정 반경 원에서 소음 방향 ±30도 구간에 강도 기반 입자 수, 투명도, 일렁임 진폭을 적용해 그리게 한 것
+- 진단용 상시 링 `bShowHeadphoneDebugIdleRing`의 기본값을 꺼서 실제 소음 이벤트가 들어올 때만 리플이 보이도록 한 것
+- `TunaSweeperEditor Win64 Development` 빌드를 통과시키고 Unreal Editor를 실행한 것
+
 ## 2026-06-04 13:35:20 (소요시간: 00:07:07)
 
 - `WBP_IntroMenu` 로드/컴파일 시 `DeleteHoldGaugeBox`, `DeleteHoldGaugeOverlay`, `DeleteHoldGaugeRing`, `DeleteHoldGaugeFill`의 stale GUID 때문에 UMG 컴파일 ensure가 반복되던 문제를 수정한 것
@@ -4042,3 +4065,22 @@
 
 - `WBP_IntroMenu` stale GUID로 인한 에디터 시작/PIE 지연 원인을 `Docs/editor_startup_intro_menu_guid_issue.md`에 한국어 문서로 별도 정리한 것
 - 원인 문서, `TunaSweeperEditor.cpp`, `WBP_IntroMenu.uasset`, 관련 요청 기록을 포함해 커밋 준비를 진행한 것
+
+## 2026-06-04 13:48:18 (소요시간: 00:06:45)
+
+- 5009 이어폰 착용 상태에서 12m 거리의 테스트 소음에 반응하지 않는 원인을 좁히기 위해 `UTunaSweeperHeadphoneListenerComponent`의 소음 처리 게이트마다 진단 로그를 추가한 것
+- 소음 이벤트 수신 시 장비 캐시가 비어 있으면 즉시 `RefreshEquippedHeadphone()`을 재시도해 레벨 진입/저장 로드 순서로 장비 상태가 늦게 준비되는 경우를 보강한 것
+- 장비 갱신 결과, 거리 게이트, 감쇠 계산, 쿨다운, 플레이어 컨트롤러, HUD 위젯, HUD 리플 큐 등록 여부를 `Headphone noise ...` 로그로 확인할 수 있게 한 것
+- HUD까지 도달한 경우 `UTunaSweeperGameHudWidget::AddHeadphoneNoiseRipple()`에서도 `Headphone HUD ripple queued ...` 로그를 남겨 이벤트 전달과 화면 그리기 문제를 분리할 수 있게 한 것
+- `TunaSweeperEditor Win64 Development` 빌드를 통과시키고 Unreal Editor를 실행한 것
+
+## 2026-06-04 13:55:50 (소요시간: 00:04:01)
+
+- 헤드폰 소음 방향 디버깅을 위해 `UTunaSweeperGameHudWidget`에 `HeadphoneDebugNoiseDirectionSolidCircle` 계열 설정을 추가한 것
+- 소음 리플이 들어오면 기존 상시 디버그 링 반경의 원형 궤도 위, 실제 소음 방향 화면 좌표에 붉은 솔리드 원을 그리게 한 것
+- 붉은 원이 `HeadphoneDebugNoiseDirectionSolidCircleFadeSeconds` 동안 `SmoothTransitionAlpha()` 기반으로 서서히 사라지게 하고, 실제 모래 입자 리플 수명과 별도로 유지되게 한 것
+- `TunaSweeperEditor Win64 Development` 빌드를 통과시키고 Unreal Editor를 실행한 것
+
+## 2026-06-04 13:56:01 (elapsed: 00:00:00)
+
+- 라이플에서도 레이저 장착 즉시에는 레이저가 켜지지 않고, 다른 무기를 선택했다가 돌아오면 정상 표시되는 조건으로 원인을 다시 파악할 것.

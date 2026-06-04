@@ -59,6 +59,15 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Noise|Screen Space")
 	FLinearColor RippleColor = FLinearColor(0.78f, 0.68f, 0.42f, 1.0f);
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Noise|Screen Space|Debug")
+	bool bShowIdleRing = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Noise|Screen Space|Debug", meta = (ClampMin = "0", UIMin = "0"))
+	int32 IdleRingParticleCount = 48;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Noise|Screen Space|Debug", meta = (ClampMin = "0.0", ClampMax = "1.0", UIMin = "0.0", UIMax = "1.0"))
+	float IdleRingParticleAlpha = 0.46f;
+
 private:
 	struct FScreenRipple
 	{
@@ -72,6 +81,14 @@ private:
 	bool TryGetListenerScreenCenter(const FGeometry& AllottedGeometry, FVector2D& OutCenter) const;
 	FVector2D ResolveScreenDirection(const FGeometry& AllottedGeometry, const FScreenRipple& Ripple, const FVector2D& Center) const;
 	float GetLocalPixelSize() const;
+	void DrawIdleRing(
+		const FGeometry& AllottedGeometry,
+		FSlateWindowElementList& OutDrawElements,
+		int32 LayerId,
+		const FVector2D& Center,
+		float Radius,
+		float RingThickness,
+		float ParticleSize) const;
 	void DrawParticle(
 		const FGeometry& AllottedGeometry,
 		FSlateWindowElementList& OutDrawElements,
@@ -85,5 +102,6 @@ private:
 
 	TWeakObjectPtr<AActor> ListenerActor;
 	TArray<FScreenRipple> ActiveRipples;
+	float AnimationSeconds = 0.0f;
 	int32 NextSeed = 1;
 };

@@ -1,14 +1,14 @@
 #include "Component/TunaSweeperHeadphoneListenerComponent.h"
 
-#include "Blueprint/UserWidget.h"
 #include "Engine/World.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
 #include "Inventory/TunaSweeperInventoryTypes.h"
+#include "Player/TunaSweeperPlayerController.h"
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
 #include "Subsystem/TunaSweeperNoiseSubsystem.h"
-#include "UI/TunaSweeperHeadphoneRippleWidget.h"
+#include "UI/TunaSweeperGameHudWidget.h"
 
 namespace
 {
@@ -16,10 +16,11 @@ namespace
 	const FName EarEquipmentSlotTag(TEXT("equipment.slot.ear"));
 }
 
+DEFINE_LOG_CATEGORY_STATIC(LogTunaSweeperHeadphoneNoise, Log, All);
+
 UTunaSweeperHeadphoneListenerComponent::UTunaSweeperHeadphoneListenerComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
-	RippleWidgetClass = UTunaSweeperHeadphoneRippleWidget::StaticClass();
 }
 
 void UTunaSweeperHeadphoneListenerComponent::BeginPlay()
@@ -32,7 +33,6 @@ void UTunaSweeperHeadphoneListenerComponent::BeginPlay()
 
 void UTunaSweeperHeadphoneListenerComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	RemoveRippleWidget();
 	UnbindDelegates();
 	Super::EndPlay(EndPlayReason);
 }
@@ -134,10 +134,30 @@ void UTunaSweeperHeadphoneListenerComponent::RefreshEquippedHeadphone()
 		CachedMinStrength = ItemDefinition.HeadphoneMinStrength > 0.0f
 			? ItemDefinition.HeadphoneMinStrength
 			: DefaultMinStrength;
+		if (bEnableNoiseGateDebugLog)
+		{
+			UE_LOG(
+				LogTunaSweeperHeadphoneNoise,
+				Log,
+				TEXT("Headphone equipped: owner=%s itemId=%d range=%.1fcm sensitivity=%.2f minStrength=%.3f"),
+				*GetNameSafe(GetOwner()),
+				ItemInstance.ItemId,
+				CachedHearingRange,
+				CachedSensitivity,
+				CachedMinStrength);
+		}
 		return;
 	}
 
-	RemoveRippleWidget();
+	if (bEnableNoiseGateDebugLog)
+	{
+		UE_LOG(
+			LogTunaSweeperHeadphoneNoise,
+			Log,
+			TEXT("Headphone not equipped after refresh: owner=%s equipmentSlots=%d"),
+			*GetNameSafe(GetOwner()),
+			EquipmentSlots.Num());
+	}
 }
 
 bool UTunaSweeperHeadphoneListenerComponent::IsListenerPawnReady() const
@@ -169,8 +189,26 @@ bool UTunaSweeperHeadphoneListenerComponent::ShouldIgnoreNoiseSource(const FTuna
 
 void UTunaSweeperHeadphoneListenerComponent::HandleNoiseReported(const FTunaSweeperNoiseEvent& NoiseEvent)
 {
-	if (!bHeadphoneEquipped || !IsListenerPawnReady() || ShouldIgnoreNoiseSource(NoiseEvent))
+	if (!bHeadphoneEquipped)
 	{
+		RefreshEquippedHeadphone();
+	}
+
+	if (!bHeadphoneEquipped)
+	{
+		LogNoiseGateDebug(TEXT("no_headphone_equipped"), NoiseEvent);
+		return;
+	}
+
+	if (!IsListenerPawnReady())
+	{
+		LogNoiseGateDebug(TEXT("listener_not_ready"), NoiseEvent);
+		return;
+	}
+
+	if (ShouldIgnoreNoiseSource(NoiseEvent))
+	{
+		LogNoiseGateDebug(TEXT("ignored_source"), NoiseEvent);
 		return;
 	}
 
@@ -178,6 +216,7 @@ void UTunaSweeperHeadphoneListenerComponent::HandleNoiseReported(const FTunaSwee
 	AActor* OwnerActor = GetOwner();
 	if (!World || !OwnerActor)
 	{
+		LogNoiseGateDebug(TEXT("missing_world_or_owner"), NoiseEvent);
 		return;
 	}
 
@@ -185,12 +224,14 @@ void UTunaSweeperHeadphoneListenerComponent::HandleNoiseReported(const FTunaSwee
 	const float SourceDistance = FVector::Dist2D(ListenerLocation, NoiseEvent.SourceLocation);
 	if (SourceDistance <= SelfNoiseIgnoreDistance || SourceDistance < MinVisualNoiseDistance)
 	{
+		LogNoiseGateDebug(TEXT("too_close"), NoiseEvent, SourceDistance);
 		return;
 	}
 
 	UTunaSweeperNoiseSubsystem* NoiseSubsystem = World->GetSubsystem<UTunaSweeperNoiseSubsystem>();
 	if (!NoiseSubsystem)
 	{
+		LogNoiseGateDebug(TEXT("missing_noise_subsystem"), NoiseEvent, SourceDistance);
 		return;
 	}
 
@@ -203,80 +244,65 @@ void UTunaSweeperHeadphoneListenerComponent::HandleNoiseReported(const FTunaSwee
 		CachedMinStrength,
 		HeardNoise))
 	{
+		LogNoiseGateDebug(TEXT("attenuation_rejected"), NoiseEvent, SourceDistance);
 		return;
 	}
 
 	const float CurrentTimeSeconds = World->GetTimeSeconds();
 	if (CurrentTimeSeconds - LastRippleSpawnTimeSeconds < RippleCooldownSeconds)
 	{
+		LogNoiseGateDebug(TEXT("cooldown"), NoiseEvent, SourceDistance, HeardNoise.Strength);
 		return;
 	}
 
-	UTunaSweeperHeadphoneRippleWidget* EffectiveRippleWidget = EnsureRippleWidget();
-	if (!EffectiveRippleWidget)
+	APawn* OwnerPawn = Cast<APawn>(OwnerActor);
+	ATunaSweeperPlayerController* TunaPlayerController = OwnerPawn
+		? Cast<ATunaSweeperPlayerController>(OwnerPawn->GetController())
+		: nullptr;
+	if (!TunaPlayerController)
 	{
+		LogNoiseGateDebug(TEXT("missing_player_controller"), NoiseEvent, SourceDistance, HeardNoise.Strength);
+		return;
+	}
+
+	UTunaSweeperGameHudWidget* GameHudWidget = TunaPlayerController->GetGameHudWidget();
+	if (!GameHudWidget)
+	{
+		LogNoiseGateDebug(TEXT("missing_game_hud_widget"), NoiseEvent, SourceDistance, HeardNoise.Strength);
 		return;
 	}
 
 	LastRippleSpawnTimeSeconds = CurrentTimeSeconds;
-	EffectiveRippleWidget->AddNoiseRipple(OwnerActor, HeardNoise.DirectionFromListener, HeardNoise.Strength);
+	LogNoiseGateDebug(TEXT("queued_hud_ripple"), NoiseEvent, SourceDistance, HeardNoise.Strength);
+	GameHudWidget->AddHeadphoneNoiseRipple(HeardNoise.DirectionFromListener, HeardNoise.Strength);
 }
 
-UTunaSweeperHeadphoneRippleWidget* UTunaSweeperHeadphoneListenerComponent::EnsureRippleWidget()
+void UTunaSweeperHeadphoneListenerComponent::LogNoiseGateDebug(
+	const TCHAR* GateName,
+	const FTunaSweeperNoiseEvent& NoiseEvent,
+	float SourceDistance,
+	float HeardStrength) const
 {
-	if (RippleWidget && RippleWidget->IsInViewport())
-	{
-		RippleWidget->SetListenerActor(GetOwner());
-		return RippleWidget;
-	}
-
-	AActor* OwnerActor = GetOwner();
-	APawn* OwnerPawn = Cast<APawn>(OwnerActor);
-	APlayerController* PlayerController = OwnerPawn
-		? Cast<APlayerController>(OwnerPawn->GetController())
-		: nullptr;
-	if (!PlayerController)
-	{
-		UWorld* World = GetWorld();
-		PlayerController = World ? World->GetFirstPlayerController() : nullptr;
-	}
-	if (!PlayerController)
-	{
-		return nullptr;
-	}
-
-	TSubclassOf<UTunaSweeperHeadphoneRippleWidget> EffectiveWidgetClass = RippleWidgetClass;
-	if (!EffectiveWidgetClass)
-	{
-		EffectiveWidgetClass = UTunaSweeperHeadphoneRippleWidget::StaticClass();
-	}
-	if (!EffectiveWidgetClass)
-	{
-		return nullptr;
-	}
-
-	RippleWidget = CreateWidget<UTunaSweeperHeadphoneRippleWidget>(PlayerController, EffectiveWidgetClass);
-	if (!RippleWidget)
-	{
-		return nullptr;
-	}
-
-	RippleWidget->SetListenerActor(OwnerActor);
-	RippleWidget->SetVisibility(ESlateVisibility::HitTestInvisible);
-	RippleWidget->SetAnchorsInViewport(FAnchors(0.0f, 0.0f, 1.0f, 1.0f));
-	RippleWidget->SetAlignmentInViewport(FVector2D::ZeroVector);
-	RippleWidget->SetPositionInViewport(FVector2D::ZeroVector, false);
-	RippleWidget->AddToViewport(35);
-	return RippleWidget;
-}
-
-void UTunaSweeperHeadphoneListenerComponent::RemoveRippleWidget()
-{
-	if (!RippleWidget)
+	if (!bEnableNoiseGateDebugLog)
 	{
 		return;
 	}
 
-	RippleWidget->RemoveFromParent();
-	RippleWidget = nullptr;
+	UE_LOG(
+		LogTunaSweeperHeadphoneNoise,
+		Log,
+		TEXT("Headphone noise %s: owner=%s source=%s instigator=%s tag=%s distance=%.1fcm hearingRange=%.1fcm sensitivity=%.2f minStrength=%.3f loudness=%.2f noiseRange=%.1fcm heardStrength=%.3f equipped=%s"),
+		GateName ? GateName : TEXT("unknown"),
+		*GetNameSafe(GetOwner()),
+		*GetNameSafe(NoiseEvent.SourceActor.Get()),
+		*GetNameSafe(NoiseEvent.InstigatorActor.Get()),
+		*NoiseEvent.NoiseTag.ToString(),
+		SourceDistance,
+		CachedHearingRange,
+		CachedSensitivity,
+		CachedMinStrength,
+		NoiseEvent.Loudness,
+		NoiseEvent.MaxRange,
+		HeardStrength,
+		bHeadphoneEquipped ? TEXT("true") : TEXT("false"));
 }

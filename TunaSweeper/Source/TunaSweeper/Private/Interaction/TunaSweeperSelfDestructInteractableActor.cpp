@@ -16,11 +16,11 @@
 
 namespace
 {
-	const FName ExplosionNoiseTag(TEXT("noise.explosion"));
-	constexpr float ExplosionNoiseLoudness = 1.35f;
-	constexpr float ExplosionNoiseRangeMultiplier = 10.0f;
-	constexpr float MinExplosionNoiseRange = 2200.0f;
-	constexpr float MaxExplosionNoiseRange = 4500.0f;
+	const FName SelfDestructExplosionNoiseTag(TEXT("noise.explosion"));
+	constexpr float SelfDestructExplosionNoiseLoudness = 1.35f;
+	constexpr float SelfDestructExplosionNoiseRangeMultiplier = 10.0f;
+	constexpr float SelfDestructMinExplosionNoiseRange = 2200.0f;
+	constexpr float SelfDestructMaxExplosionNoiseRange = 4500.0f;
 }
 
 ATunaSweeperSelfDestructInteractableActor::ATunaSweeperSelfDestructInteractableActor()
@@ -223,12 +223,12 @@ void ATunaSweeperSelfDestructInteractableActor::SpawnExplosionEffect()
 	{
 		NoiseSubsystem->ReportNoiseAtLocation(
 			EffectLocation,
-			ExplosionNoiseLoudness,
+			SelfDestructExplosionNoiseLoudness,
 			FMath::Clamp(
-				ExplosionRadius * ExplosionNoiseRangeMultiplier,
-				MinExplosionNoiseRange,
-				MaxExplosionNoiseRange),
-			ExplosionNoiseTag,
+				ExplosionRadius * SelfDestructExplosionNoiseRangeMultiplier,
+				SelfDestructMinExplosionNoiseRange,
+				SelfDestructMaxExplosionNoiseRange),
+			SelfDestructExplosionNoiseTag,
 			this,
 			CountdownInstigator.Get());
 	}

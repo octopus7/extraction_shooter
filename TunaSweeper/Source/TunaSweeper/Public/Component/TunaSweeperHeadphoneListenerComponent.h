@@ -2,11 +2,9 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "Templates/SubclassOf.h"
 #include "TunaSweeperHeadphoneListenerComponent.generated.h"
 
 struct FTunaSweeperNoiseEvent;
-class UTunaSweeperHeadphoneRippleWidget;
 
 UCLASS(ClassGroup = (TunaSweeper), meta = (BlueprintSpawnableComponent))
 class TUNASWEEPER_API UTunaSweeperHeadphoneListenerComponent : public UActorComponent
@@ -26,9 +24,6 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TunaSweeper|Noise")
-	TSubclassOf<UTunaSweeperHeadphoneRippleWidget> RippleWidgetClass;
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TunaSweeper|Noise", meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float DefaultHearingRange = 1600.0f;
 
@@ -47,21 +42,24 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TunaSweeper|Noise", meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float RippleCooldownSeconds = 0.08f;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TunaSweeper|Noise Debug")
+	bool bEnableNoiseGateDebugLog = true;
+
 private:
 	void BindDelegates();
 	void UnbindDelegates();
 	void HandleNoiseReported(const FTunaSweeperNoiseEvent& NoiseEvent);
-	UTunaSweeperHeadphoneRippleWidget* EnsureRippleWidget();
-	void RemoveRippleWidget();
 	bool ShouldIgnoreNoiseSource(const FTunaSweeperNoiseEvent& NoiseEvent) const;
 	bool IsListenerPawnReady() const;
+	void LogNoiseGateDebug(
+		const TCHAR* GateName,
+		const FTunaSweeperNoiseEvent& NoiseEvent,
+		float SourceDistance = -1.0f,
+		float HeardStrength = -1.0f) const;
 
 	bool bHeadphoneEquipped = false;
 	float CachedHearingRange = 0.0f;
 	float CachedSensitivity = 0.0f;
 	float CachedMinStrength = 0.0f;
 	float LastRippleSpawnTimeSeconds = -1000.0f;
-
-	UPROPERTY(Transient)
-	TObjectPtr<UTunaSweeperHeadphoneRippleWidget> RippleWidget;
 };
