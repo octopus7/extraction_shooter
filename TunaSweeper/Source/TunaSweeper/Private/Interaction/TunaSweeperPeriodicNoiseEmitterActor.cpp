@@ -340,7 +340,8 @@ namespace
 
 ATunaSweeperPeriodicNoiseEmitterActor::ATunaSweeperPeriodicNoiseEmitterActor()
 {
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bStartWithTickEnabled = false;
 
 	SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("SceneRoot"));
 	SetRootComponent(SceneRoot);
@@ -349,6 +350,30 @@ ATunaSweeperPeriodicNoiseEmitterActor::ATunaSweeperPeriodicNoiseEmitterActor()
 	ProceduralMesh->SetupAttachment(SceneRoot);
 	ProceduralMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	ProceduralMesh->SetCastShadow(false);
+}
+
+void ATunaSweeperPeriodicNoiseEmitterActor::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	if (!bHornPulseActive)
+	{
+		SetActorTickEnabled(false);
+		return;
+	}
+
+	HornPulseElapsedSeconds += FMath::Max(0.0f, DeltaSeconds);
+	const float Duration = FMath::Max(0.05f, HornPulseDurationSeconds);
+	if (HornPulseElapsedSeconds >= Duration)
+	{
+		bHornPulseActive = false;
+		HornPulseElapsedSeconds = Duration;
+		ApplyHornPulse(0.0f);
+		SetActorTickEnabled(false);
+		return;
+	}
+
+	ApplyHornPulse(CalculateHornPulseAmount());
 }
 
 void ATunaSweeperPeriodicNoiseEmitterActor::ConfigureNoiseEmitterDefaults(
@@ -412,6 +437,7 @@ void ATunaSweeperPeriodicNoiseEmitterActor::EmitNoise()
 			NoiseTag,
 			this,
 			this);
+		TriggerHornPulse();
 	}
 }
 
@@ -458,6 +484,10 @@ void ATunaSweeperPeriodicNoiseEmitterActor::RebuildProceduralMesh()
 
 	ProceduralMesh->ClearAllMeshSections();
 	DynamicMaterials.Reset();
+	RuntimeMeshSections.Reset();
+	bHornPulseActive = false;
+	HornPulseElapsedSeconds = 0.0f;
+	SetActorTickEnabled(false);
 
 	FString JsonContent;
 	const FString JsonPath = ResolveMeshDefinitionJsonPath();
@@ -598,6 +628,19 @@ void ATunaSweeperPeriodicNoiseEmitterActor::RebuildProceduralMesh()
 			Tangents,
 			false);
 
+		FRuntimeMeshSection RuntimeSection;
+		RuntimeSection.SectionIndex = SectionIndex;
+		RuntimeSection.bIsHorn = Part.Type == TEXT("horn");
+		RuntimeSection.HornBaseCenter = Part.BaseCenter;
+		RuntimeSection.HornAxis = Part.Axis.GetSafeNormal();
+		RuntimeSection.HornLength = FMath::Max(1.0f, Part.Length);
+		RuntimeSection.BaseColor = PartColor;
+		RuntimeSection.BaseVertices = Vertices;
+		RuntimeSection.Normals = Normals;
+		RuntimeSection.UVs = UVs;
+		RuntimeSection.VertexColors = VertexColors;
+		RuntimeSection.Tangents = Tangents;
+
 		if (BaseMaterial)
 		{
 			UMaterialInstanceDynamic* DynamicMaterial = UMaterialInstanceDynamic::Create(BaseMaterial, this);
@@ -606,8 +649,108 @@ void ATunaSweeperPeriodicNoiseEmitterActor::RebuildProceduralMesh()
 				DynamicMaterial->SetVectorParameterValue(TEXT("Color"), PartColor);
 				DynamicMaterial->SetVectorParameterValue(TEXT("BaseColor"), PartColor);
 				DynamicMaterial->SetVectorParameterValue(TEXT("EmissiveColor"), PartColor);
+				RuntimeSection.DynamicMaterialIndex = DynamicMaterials.Num();
 				DynamicMaterials.Add(DynamicMaterial);
 				ProceduralMesh->SetMaterial(SectionIndex, DynamicMaterial);
+			}
+		}
+
+		RuntimeMeshSections.Add(MoveTemp(RuntimeSection));
+	}
+}
+
+void ATunaSweeperPeriodicNoiseEmitterActor::TriggerHornPulse()
+{
+	if (!ProceduralMesh || RuntimeMeshSections.IsEmpty())
+	{
+		return;
+	}
+
+	bHornPulseActive = true;
+	HornPulseElapsedSeconds = 0.0f;
+	ApplyHornPulse(CalculateHornPulseAmount());
+	SetActorTickEnabled(true);
+}
+
+float ATunaSweeperPeriodicNoiseEmitterActor::CalculateHornPulseAmount() const
+{
+	const float Duration = FMath::Max(0.05f, HornPulseDurationSeconds);
+	const float Alpha = FMath::Clamp(HornPulseElapsedSeconds / Duration, 0.0f, 1.0f);
+	const float Decay = FMath::Pow(1.0f - Alpha, 2.15f);
+	const float ElasticBounce = 1.0f + FMath::Sin(Alpha * PI * 5.0f) * 0.16f;
+	return FMath::Clamp(Decay * ElasticBounce, 0.0f, 1.1f);
+}
+
+void ATunaSweeperPeriodicNoiseEmitterActor::ApplyHornPulse(float PulseAmount)
+{
+	if (!ProceduralMesh)
+	{
+		return;
+	}
+
+	const float ClampedPulseAmount = FMath::Clamp(PulseAmount, 0.0f, 1.1f);
+	const float LengthScale = FMath::Lerp(1.0f, FMath::Max(1.0f, HornPulseLengthScale), ClampedPulseAmount);
+	const float MouthRadiusScale = FMath::Lerp(1.0f, FMath::Max(1.0f, HornPulseMouthRadiusScale), ClampedPulseAmount);
+	const float ColorScale = 1.0f + FMath::Max(0.0f, HornPulseColorBoost) * ClampedPulseAmount;
+
+	for (const FRuntimeMeshSection& RuntimeSection : RuntimeMeshSections)
+	{
+		if (!RuntimeSection.bIsHorn || RuntimeSection.SectionIndex == INDEX_NONE)
+		{
+			continue;
+		}
+
+		FVector Axis = RuntimeSection.HornAxis.GetSafeNormal();
+		if (Axis.IsNearlyZero())
+		{
+			Axis = FVector::ForwardVector;
+		}
+
+		TArray<FVector> UpdatedVertices;
+		UpdatedVertices.Reserve(RuntimeSection.BaseVertices.Num());
+		for (const FVector& BaseVertex : RuntimeSection.BaseVertices)
+		{
+			const FVector FromBase = BaseVertex - RuntimeSection.HornBaseCenter;
+			const float AxialDistance = FMath::Max(0.0f, FVector::DotProduct(FromBase, Axis));
+			const float AxialAlpha = FMath::Clamp(AxialDistance / FMath::Max(1.0f, RuntimeSection.HornLength), 0.0f, 1.0f);
+			const FVector AxialComponent = Axis * AxialDistance;
+			const FVector RadialComponent = FromBase - AxialComponent;
+			const float MouthInfluence = FMath::SmoothStep(0.12f, 1.0f, AxialAlpha);
+
+			const FVector UpdatedVertex =
+				RuntimeSection.HornBaseCenter +
+				AxialComponent * LengthScale +
+				RadialComponent * FMath::Lerp(1.0f, MouthRadiusScale, MouthInfluence);
+			UpdatedVertices.Add(UpdatedVertex);
+		}
+
+		TArray<FLinearColor> UpdatedColors = RuntimeSection.VertexColors;
+		for (FLinearColor& VertexColor : UpdatedColors)
+		{
+			VertexColor.R = FMath::Min(VertexColor.R * ColorScale, 1.0f);
+			VertexColor.G = FMath::Min(VertexColor.G * ColorScale, 1.0f);
+			VertexColor.B = FMath::Min(VertexColor.B * ColorScale, 1.0f);
+		}
+
+		ProceduralMesh->UpdateMeshSection_LinearColor(
+			RuntimeSection.SectionIndex,
+			UpdatedVertices,
+			RuntimeSection.Normals,
+			RuntimeSection.UVs,
+			UpdatedColors,
+			RuntimeSection.Tangents);
+
+		if (DynamicMaterials.IsValidIndex(RuntimeSection.DynamicMaterialIndex))
+		{
+			if (UMaterialInstanceDynamic* DynamicMaterial = DynamicMaterials[RuntimeSection.DynamicMaterialIndex])
+			{
+				FLinearColor PulseColor = RuntimeSection.BaseColor;
+				PulseColor.R = FMath::Min(PulseColor.R * ColorScale, 1.0f);
+				PulseColor.G = FMath::Min(PulseColor.G * ColorScale, 1.0f);
+				PulseColor.B = FMath::Min(PulseColor.B * ColorScale, 1.0f);
+				DynamicMaterial->SetVectorParameterValue(TEXT("Color"), PulseColor);
+				DynamicMaterial->SetVectorParameterValue(TEXT("BaseColor"), PulseColor);
+				DynamicMaterial->SetVectorParameterValue(TEXT("EmissiveColor"), PulseColor);
 			}
 		}
 	}

@@ -44,6 +44,12 @@ namespace TunaSweeperHeadphoneRipple
 	}
 }
 
+TSharedRef<SWidget> UTunaSweeperHeadphoneRippleWidget::RebuildWidget()
+{
+	EnsureNativeRoot();
+	return Super::RebuildWidget();
+}
+
 void UTunaSweeperHeadphoneRippleWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
@@ -230,7 +236,12 @@ int32 UTunaSweeperHeadphoneRippleWidget::NativePaint(
 
 void UTunaSweeperHeadphoneRippleWidget::EnsureNativeRoot()
 {
-	if (!WidgetTree || WidgetTree->RootWidget)
+	if (!WidgetTree)
+	{
+		WidgetTree = NewObject<UWidgetTree>(this, TEXT("WidgetTree"), RF_Transient);
+	}
+
+	if (WidgetTree->RootWidget)
 	{
 		return;
 	}

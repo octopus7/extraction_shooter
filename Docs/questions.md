@@ -1992,3 +1992,33 @@ Niagara나 Cascade 파티클 시스템이 아니라 `ATunaSweeperHeadphoneRipple
 ### 답변
 
 월드에 찍히는 방식이다. `UTunaSweeperHeadphoneListenerComponent`가 `ATunaSweeperHeadphoneRippleActor`를 월드에 스폰하고, 리플 액터가 매 틱 캐릭터 월드 위치에 맞춰 이동한다. 모래알은 리플 액터 루트에 붙은 `UStaticMeshComponent`들이며, 화면 좌표나 UMG/HUD가 아니라 월드 공간 상대 좌표로 배치된다.
+
+## 2026-06-03 20:47:30 (소요시간: 00:03:21)
+
+### 질문
+
+스크린 스페이스 헤드폰 소음 표시가 보이지 않는 이유가 무엇일 수 있는지.
+
+### 답변
+
+가장 가능성이 큰 원인은 새 `UTunaSweeperHeadphoneRippleWidget`이 네이티브 C++ 위젯인데 루트 위젯을 `NativeConstruct()`에서 만들고 있던 점이다. 이 시점은 Slate 위젯이 이미 재구성된 뒤라서 빈 위젯처럼 잡히고 `NativePaint()`에 충분한 기하 영역이 들어오지 않을 수 있다. `RebuildWidget()`에서 `WidgetTree`와 루트 `CanvasPanel`을 먼저 만들도록 수정했고, 그 뒤 `TunaSweeperEditor Win64 Development` 빌드와 에디터 재실행을 완료했다.
+
+## 2026-06-04 13:08:40 (소요시간: 00:08:41)
+
+### 질문
+
+에디터를 실행해서 열면 화면이 멈춘 상태로 상당 시간 걸리는데, 시작할 때 무거운 작업이 들어간 것인지.
+
+### 답변
+
+최신 `TunaSweeper.log` 기준으로 에디터 프로세스 시작 자체는 `Total Editor Startup Time, took 28.171`로 끝났고, 확정적으로 무거웠던 구간은 PIE/인트로 메뉴 생성 시 `WBP_IntroMenu` 컴파일 ensure가 4회 반복되는 부분이다. 로그에는 `DeleteHoldGaugeBox`, `DeleteHoldGaugeOverlay`, `DeleteHoldGaugeRing`, `DeleteHoldGaugeFill`이 삭제됐지만 GUID가 남아 있다는 UMG 컴파일러 ensure가 있고, 각 ensure가 오류 리포트 전송으로 약 4.1초, 11.3초, 2.6초, 2.7초를 소비했다. DLSS feature 생성 뒤 `/Game/BunkerMap` 전환 전까지 약 61초 공백도 있지만, 이 구간은 인트로 메뉴 대기/사용자 입력 대기일 수도 있으므로 멈춤 증거로 단정하지 않았다. 체감 지연의 우선 후보는 단순 DDC나 에셋 스캔보다 `WBP_IntroMenu`의 stale GUID ensure 쪽이다.
+
+## 2026-06-04 13:20:49 (소요시간: 00:00:08)
+
+### 질문
+
+소음 발생 테스트 액터가 시각적으로 변화가 없어 무음 환경에서 소음 발생 여부를 알기 어렵기 때문에, 확성기 꼬깔에 엘라스틱한 스케일을 거는 방법이 어떤지.
+
+### 답변
+
+테스트 피드백으로 적합한 방향이다. 소음 발생 액터의 본래 목적이 "소음이 실제로 발생했는지 확인"이므로, 소리 발생 타이밍에 맞춰 확성기 꼬깔이 짧게 팽창했다 돌아오는 연출을 넣으면 무음 환경에서도 검증이 쉬워진다. 다만 전체 액터 스케일을 키우면 기둥과 위치감까지 흔들리므로, JSON 메시의 `horn` 파트만 축 방향으로 1.08~1.18 정도 늘리고 외곽 반지름을 약간 키운 뒤 0.2초 안팎으로 감쇠시키는 방식이 가장 안전하다.

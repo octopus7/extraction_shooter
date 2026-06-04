@@ -4018,3 +4018,14 @@
 - 소음 방향 중심점에서 입자 밀도, 투명도, 일렁임 진폭이 최대가 되고 인접 각도로 멀어질수록 모두 감쇠되도록 각도 가중치를 적용한 것
 - 소음 강도는 반경 스케일이 아니라 강조 구간의 입자 수량과 알파에 반영되도록 조정한 것
 - `TunaSweeperEditor Win64 Development` 빌드를 통과시키고 Unreal Editor를 실행한 것
+
+## 2026-06-04 13:16:18 (elapsed: 00:00:00)
+
+- 이미 들고 있는 총에 레이저를 장착해도 바로 켜지지 않는 문제의 원인만 파악할 것.
+
+## 2026-06-04 13:23:24 (소요시간: 00:02:20)
+
+- 소음 발생 테스트 액터 `ATunaSweeperPeriodicNoiseEmitterActor`가 소리를 낼 때 확성기 꼬깔만 짧게 튕기는 엘라스틱 펄스 연출을 추가한 것
+- 소음 보고가 실제로 발생한 `EmitNoise()` 시점에 펄스를 시작하고, 전체 액터나 흰색 기둥이 아니라 `horn` 메시 섹션만 `UpdateMeshSection_LinearColor()`로 갱신하게 한 것
+- 확성기 꼬깔의 축 방향 길이와 입구 반지름이 약 0.24초 동안 커졌다 감쇠되며, 붉은 vertex color와 머터리얼 색상도 짧게 밝아지도록 한 것
+- `TunaSweeperEditor Win64 Development` 빌드를 통과시키고 Unreal Editor를 실행한 것

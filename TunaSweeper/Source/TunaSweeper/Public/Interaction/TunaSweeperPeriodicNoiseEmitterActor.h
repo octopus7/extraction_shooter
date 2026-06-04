@@ -2,10 +2,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "ProceduralMeshComponent.h"
 #include "TunaSweeperPeriodicNoiseEmitterActor.generated.h"
 
 class UMaterialInstanceDynamic;
-class UProceduralMeshComponent;
 class USceneComponent;
 
 UCLASS(BlueprintType, Blueprintable)
@@ -31,6 +31,7 @@ public:
 	void EmitNoise();
 
 protected:
+	virtual void Tick(float DeltaSeconds) override;
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
@@ -64,14 +65,48 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TunaSweeper|Noise")
 	bool bStartEnabled = true;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TunaSweeper|Noise|Pulse", meta = (ClampMin = "0.05", UIMin = "0.05"))
+	float HornPulseDurationSeconds = 0.24f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TunaSweeper|Noise|Pulse", meta = (ClampMin = "1.0", UIMin = "1.0"))
+	float HornPulseLengthScale = 1.15f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TunaSweeper|Noise|Pulse", meta = (ClampMin = "1.0", UIMin = "1.0"))
+	float HornPulseMouthRadiusScale = 1.07f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TunaSweeper|Noise|Pulse", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float HornPulseColorBoost = 0.35f;
+
 private:
+	struct FRuntimeMeshSection
+	{
+		int32 SectionIndex = INDEX_NONE;
+		bool bIsHorn = false;
+		FVector HornBaseCenter = FVector::ZeroVector;
+		FVector HornAxis = FVector::ForwardVector;
+		float HornLength = 1.0f;
+		int32 DynamicMaterialIndex = INDEX_NONE;
+		FLinearColor BaseColor = FLinearColor::White;
+		TArray<FVector> BaseVertices;
+		TArray<FVector> Normals;
+		TArray<FVector2D> UVs;
+		TArray<FLinearColor> VertexColors;
+		TArray<FProcMeshTangent> Tangents;
+	};
+
 	void RebuildProceduralMesh();
 	FString ResolveMeshDefinitionJsonPath() const;
 	void StartNoiseTimer();
 	void StopNoiseTimer();
+	void TriggerHornPulse();
+	void ApplyHornPulse(float PulseAmount);
+	float CalculateHornPulseAmount() const;
 
 	UPROPERTY(Transient)
 	TArray<TObjectPtr<UMaterialInstanceDynamic>> DynamicMaterials;
 
+	TArray<FRuntimeMeshSection> RuntimeMeshSections;
 	FTimerHandle NoiseTimerHandle;
+	float HornPulseElapsedSeconds = 0.0f;
+	bool bHornPulseActive = false;
 };
