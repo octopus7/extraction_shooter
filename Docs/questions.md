@@ -2042,3 +2042,29 @@ Niagara나 Cascade 파티클 시스템이 아니라 `ATunaSweeperHeadphoneRipple
 ### 답변
 
 현 구현은 HUD 리플에 `DirectionFromListener`만 저장하므로 최초로 들은 순간의 방위가 캐싱되는 방식이었다. 하드코어한 정보 제한보다 유저 편의를 우선한다면, 소음원의 월드 위치나 소스 액터를 리플에 저장하고 화면에 그릴 때마다 현재 플레이어 위치 기준으로 방위를 다시 계산하는 추적 방식이 더 적합하다. 따라서 헤드폰 리스너가 HUD에 `SourceLocation`과 `SourceActor`를 함께 넘기고, HUD가 리플 수명 동안 매 페인트마다 소음원 방향을 갱신하도록 변경했다.
+## 2026-06-04 16:43:30 (소요시간: 00:01:30)
+
+### 질문
+
+발소리 애셋은 무엇을 쓰면 좋은지, 추천하는 무료 애셋이 있는지.
+
+### 답변
+
+현재 구현한 적 발소리 헤드폰 시각화는 실제 오디오 애셋 없이 `UTunaSweeperNoiseSubsystem` 이벤트만으로 동작한다. 나중에 실제 발소리 재생까지 붙일 경우 프로토타입은 CC0로 표기된 OpenGameArt의 Different Steps on Wood, Stone, Leaves, Gravel and Mud 팩이 가장 부담이 적다. 빠르게 다양한 후보를 듣고 고르려면 Pixabay의 footstep 검색 결과도 쓸 수 있지만 개별 파일 라이선스를 확인해야 한다. 더 많은 재질/상황음을 확보하려면 Sonniss GDC Game Audio Bundle이 무료 번들 후보지만 용량이 크고 프로젝트 포함 전 라이선스 문구를 검토하는 편이 좋다.
+
+- OpenGameArt: https://opengameart.org/content/different-steps-on-wood-stone-leaves-gravel-and-mud
+- Pixabay: https://pixabay.com/sound-effects/search/footstep/
+- Sonniss GDC Bundle: https://gdc.sonniss.com/gdc-game-audio-bundle/
+## 2026-06-04 17:05:00 (소요시간: 00:03:00)
+
+### 질문
+
+에픽에서 제공하는 발소리 사운드 애셋이 있는지.
+
+### 답변
+
+발소리만 따로 배포되는 Epic Games 퍼블리셔 전용 독립 사운드 팩은 확인되지 않았다. 가장 직접적인 에픽 제공 후보는 Epic Developer Community의 `Add Footstep Sounds to a Character` 공식 튜토리얼 샘플/콘텐츠 팩이며, 여기에는 `S_Metal-1~3`, `S_Stone-1~3`, `S_DefaultStep-1~3` Sound Wave가 포함된다고 문서화되어 있다. Fab의 Epic Games 퍼블리셔 무료 샘플 중 `Lyra Starter Game`과 `Game Animation Sample`은 학습/구현 참고용으로 적합하지만, 발소리 오디오 팩 자체로 쓰기보다는 프로젝트 구조나 애니메이션/플레이어 시스템 참고용에 가깝다. Fab에는 무료 `Essential Footsteps SFX`도 있지만 퍼블리셔가 Sound Kajiya라서 Epic Games 직접 제공 애셋은 아니다.
+
+- Epic 공식 발소리 튜토리얼: https://dev.epicgames.com/documentation/unreal-engine/artist-11-add-footstep-sounds-to-a-character
+- Game Animation Sample: https://www.fab.com/listings/880e319a-a59e-4ed2-b268-b32dac7fa016
+- Lyra Starter Game: https://www.fab.com/listings/93faede1-4434-47c0-85f1-bf27c0820ad0

@@ -302,7 +302,7 @@ protected:
 	FLinearColor HeadphoneDebugIdleRingColor = FLinearColor(1.0f, 0.82f, 0.34f, 0.88f);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Noise Debug")
-	bool bShowHeadphoneDebugNoiseDirectionSolidCircle = true;
+	bool bShowHeadphoneDebugNoiseDirectionSolidCircle = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Noise Debug", meta = (ClampMin = "1.0", UIMin = "1.0"))
 	float HeadphoneDebugNoiseDirectionSolidCircleDiameter = 14.0f;
