@@ -34,6 +34,7 @@ void UTunaSweeperHeadphoneListenerComponent::BeginPlay()
 void UTunaSweeperHeadphoneListenerComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	UnbindDelegates();
+	LastRippleSpawnTimeSecondsBySource.Reset();
 	Super::EndPlay(EndPlayReason);
 }
 
@@ -249,7 +250,10 @@ void UTunaSweeperHeadphoneListenerComponent::HandleNoiseReported(const FTunaSwee
 	}
 
 	const float CurrentTimeSeconds = World->GetTimeSeconds();
-	if (CurrentTimeSeconds - LastRippleSpawnTimeSeconds < RippleCooldownSeconds)
+	const FString NoiseSourceCooldownKey = MakeNoiseSourceCooldownKey(NoiseEvent);
+	const float* LastSourceRippleSpawnTimeSeconds = LastRippleSpawnTimeSecondsBySource.Find(NoiseSourceCooldownKey);
+	if (LastSourceRippleSpawnTimeSeconds &&
+		CurrentTimeSeconds - *LastSourceRippleSpawnTimeSeconds < RippleCooldownSeconds)
 	{
 		LogNoiseGateDebug(TEXT("cooldown"), NoiseEvent, SourceDistance, HeardNoise.Strength);
 		return;
@@ -272,13 +276,32 @@ void UTunaSweeperHeadphoneListenerComponent::HandleNoiseReported(const FTunaSwee
 		return;
 	}
 
-	LastRippleSpawnTimeSeconds = CurrentTimeSeconds;
+	LastRippleSpawnTimeSecondsBySource.FindOrAdd(NoiseSourceCooldownKey) = CurrentTimeSeconds;
 	LogNoiseGateDebug(TEXT("queued_hud_ripple"), NoiseEvent, SourceDistance, HeardNoise.Strength);
 	GameHudWidget->AddHeadphoneNoiseRippleFromSource(
 		HeardNoise.SourceLocation,
 		HeardNoise.SourceActor.Get(),
 		HeardNoise.DirectionFromListener,
 		HeardNoise.Strength);
+}
+
+FString UTunaSweeperHeadphoneListenerComponent::MakeNoiseSourceCooldownKey(const FTunaSweeperNoiseEvent& NoiseEvent) const
+{
+	if (NoiseEvent.SourceActor)
+	{
+		return FString::Printf(TEXT("actor:%s"), *NoiseEvent.SourceActor->GetPathName());
+	}
+
+	const FIntVector QuantizedSourceLocation(
+		FMath::RoundToInt(NoiseEvent.SourceLocation.X / 10.0f),
+		FMath::RoundToInt(NoiseEvent.SourceLocation.Y / 10.0f),
+		FMath::RoundToInt(NoiseEvent.SourceLocation.Z / 10.0f));
+	return FString::Printf(
+		TEXT("location:%s:%d:%d:%d"),
+		*NoiseEvent.NoiseTag.ToString(),
+		QuantizedSourceLocation.X,
+		QuantizedSourceLocation.Y,
+		QuantizedSourceLocation.Z);
 }
 
 void UTunaSweeperHeadphoneListenerComponent::LogNoiseGateDebug(

@@ -4169,3 +4169,11 @@
 - 기존 `TS_PeriodicNoiseEmitter_TestHorn` 위치 `[220.0, -1690.0, 0.0]`에서 동쪽 `+Y 2000cm` 지점인 `[220.0, 310.0, 0.0]`에 배치한 것.
 - 새 소음원은 기존 테스트 확성기와 같은 메시, 소음 간격, 소음 세기, 최대 범위, 소음 태그, 소스 오프셋 설정을 사용하게 한 것.
 - JSON 파싱과 `spawn_id` 중복 검사를 통과시킨 것.
+
+## 2026-06-04 16:32:30 (소요시간: 00:03:50)
+
+- 헤드폰 소음 시각화가 한 번에 하나만 활성화되는 원인으로 `UTunaSweeperHeadphoneListenerComponent`의 전역 `LastRippleSpawnTimeSeconds` 쿨다운을 확인한 것.
+- 전역 쿨다운을 소음원별 `LastRippleSpawnTimeSecondsBySource` 맵으로 바꿔, 같은 소음원은 짧은 쿨다운을 유지하되 서로 다른 소음원은 같은 프레임에도 각각 HUD 리플로 큐잉되도록 변경한 것.
+- 액터 소음원은 actor path를, 액터가 없는 소음은 태그와 10cm 단위로 양자화한 위치를 쿨다운 키로 사용하게 한 것.
+- 동시에 들어오는 여러 소음 리플이 빨리 밀려나지 않도록 HUD 활성 헤드폰 소음 리플 제한을 6개에서 12개로 늘린 것.
+- `TunaSweeperEditor Win64 Development` 빌드를 통과시키고 Unreal Editor를 실행한 것.

@@ -673,7 +673,7 @@ void UTunaSweeperGameHudWidget::QueueHeadphoneNoiseRipple(
 	}
 
 	HeadphoneNoiseRipples.Add(NewRipple);
-	constexpr int32 MaxActiveHeadphoneNoiseRipples = 6;
+	constexpr int32 MaxActiveHeadphoneNoiseRipples = 12;
 	if (HeadphoneNoiseRipples.Num() > MaxActiveHeadphoneNoiseRipples)
 	{
 		HeadphoneNoiseRipples.RemoveAt(0, HeadphoneNoiseRipples.Num() - MaxActiveHeadphoneNoiseRipples, EAllowShrinking::No);

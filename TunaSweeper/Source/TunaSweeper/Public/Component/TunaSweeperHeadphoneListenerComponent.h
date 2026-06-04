@@ -51,6 +51,7 @@ private:
 	void HandleNoiseReported(const FTunaSweeperNoiseEvent& NoiseEvent);
 	bool ShouldIgnoreNoiseSource(const FTunaSweeperNoiseEvent& NoiseEvent) const;
 	bool IsListenerPawnReady() const;
+	FString MakeNoiseSourceCooldownKey(const FTunaSweeperNoiseEvent& NoiseEvent) const;
 	void LogNoiseGateDebug(
 		const TCHAR* GateName,
 		const FTunaSweeperNoiseEvent& NoiseEvent,
@@ -61,5 +62,5 @@ private:
 	float CachedHearingRange = 0.0f;
 	float CachedSensitivity = 0.0f;
 	float CachedMinStrength = 0.0f;
-	float LastRippleSpawnTimeSeconds = -1000.0f;
+	TMap<FString, float> LastRippleSpawnTimeSecondsBySource;
 };
