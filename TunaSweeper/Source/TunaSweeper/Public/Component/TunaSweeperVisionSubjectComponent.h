@@ -11,6 +11,7 @@ struct FTunaSweeperVisionSubjectPrimitiveRenderState
 	TWeakObjectPtr<UPrimitiveComponent> Component;
 	bool bRenderInMainPass = true;
 	bool bRenderInDepthPass = true;
+	bool bCastShadow = true;
 };
 
 UCLASS(ClassGroup = (TunaSweeper), BlueprintType, Blueprintable, meta = (BlueprintSpawnableComponent))

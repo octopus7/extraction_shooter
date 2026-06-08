@@ -85,6 +85,7 @@ void UTunaSweeperVisionSubjectComponent::ResetVisionVisibility()
 		{
 			PrimitiveComponent->SetRenderInMainPass(RenderState.bRenderInMainPass);
 			PrimitiveComponent->SetRenderInDepthPass(RenderState.bRenderInDepthPass);
+			PrimitiveComponent->SetCastShadow(RenderState.bCastShadow);
 		}
 	}
 
@@ -113,6 +114,7 @@ void UTunaSweeperVisionSubjectComponent::HideSubjectPrimitives()
 		CachePrimitiveRenderState(PrimitiveComponent);
 		PrimitiveComponent->SetRenderInMainPass(false);
 		PrimitiveComponent->SetRenderInDepthPass(false);
+		PrimitiveComponent->SetCastShadow(false);
 	}
 
 	bVisionHidden = true;
@@ -129,6 +131,7 @@ void UTunaSweeperVisionSubjectComponent::CachePrimitiveRenderState(UPrimitiveCom
 	RenderState.Component = PrimitiveComponent;
 	RenderState.bRenderInMainPass = PrimitiveComponent->bRenderInMainPass;
 	RenderState.bRenderInDepthPass = PrimitiveComponent->bRenderInDepthPass;
+	RenderState.bCastShadow = PrimitiveComponent->CastShadow;
 	CachedPrimitiveRenderStates.Add(RenderState);
 }
 

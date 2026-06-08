@@ -428,10 +428,7 @@ void UTunaSweeperPlayerVisionComponent::TickComponent(
 		return;
 	}
 
-	if (bRenderVisionOverlay)
-	{
-		EnsureOverlayWidget(PlayerController);
-	}
+	EnsureOverlayWidget(PlayerController);
 	ForceRefreshVisionMask();
 }
 
@@ -454,24 +451,31 @@ void UTunaSweeperPlayerVisionComponent::ForceRefreshVisionMask()
 		return;
 	}
 
-	bool bHasValidViewport = false;
-	if (bRenderVisionOverlay)
+	if (!bRenderVisionOverlay)
 	{
-		int32 ViewportX = 0;
-		int32 ViewportY = 0;
-		PlayerController->GetViewportSize(ViewportX, ViewportY);
-		if (ViewportX > 0 && ViewportY > 0)
-		{
-			ViewportSize = FIntPoint(ViewportX, ViewportY);
-			bHasValidViewport = true;
-		}
-		else if (VisionMaskWidget)
+		if (VisionMaskWidget)
 		{
 			VisionMaskWidget->SetMaskVisible(false);
 		}
-
-		EnsureOverlayWidget(PlayerController);
+		ResetVisionSubjectVisibility();
+		return;
 	}
+
+	bool bHasValidViewport = false;
+	int32 ViewportX = 0;
+	int32 ViewportY = 0;
+	PlayerController->GetViewportSize(ViewportX, ViewportY);
+	if (ViewportX > 0 && ViewportY > 0)
+	{
+		ViewportSize = FIntPoint(ViewportX, ViewportY);
+		bHasValidViewport = true;
+	}
+	else if (VisionMaskWidget)
+	{
+		VisionMaskWidget->SetMaskVisible(false);
+	}
+
+	EnsureOverlayWidget(PlayerController);
 
 	TArray<FTunaSweeperVisionRaySample> RaySamples;
 	FVector TraceOrigin = FVector::ZeroVector;
@@ -494,15 +498,6 @@ void UTunaSweeperPlayerVisionComponent::ForceRefreshVisionMask()
 	else
 	{
 		ResetVisionSubjectVisibility();
-	}
-
-	if (!bRenderVisionOverlay)
-	{
-		if (VisionMaskWidget)
-		{
-			VisionMaskWidget->SetMaskVisible(false);
-		}
-		return;
 	}
 
 	if (!bHasValidViewport)
@@ -601,7 +596,7 @@ bool UTunaSweeperPlayerVisionComponent::IsVisionWorldEnabled() const
 
 bool UTunaSweeperPlayerVisionComponent::ShouldUpdateVision() const
 {
-	return bRenderVisionOverlay || bApplyVisionSubjectVisibility;
+	return bRenderVisionOverlay;
 }
 
 bool UTunaSweeperPlayerVisionComponent::IsVisionDebugEnabled() const

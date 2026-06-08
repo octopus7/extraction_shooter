@@ -4216,3 +4216,9 @@
 - 적, 롤링봄버 스포너, 투사체, 전투 이펙트, 픽업 아이템, 루팅 컨테이너에 시야 subject 컴포넌트를 부착한 것.
 - 시야가 비활성화되거나 subject 표시 제어가 꺼질 때 원래 primitive 렌더 패스 상태를 복원하도록 처리한 것.
 - `TunaSweeperEditor Win64 Development` 빌드를 통과시키고 Unreal Editor를 실행한 것.
+
+## 2026-06-08 21:49:45 (소요시간: 00:02:10)
+
+- 시야 마스크 렌더링이 꺼져 있으면 동적 오브젝트 숨김도 동작하지 않고 기존 렌더 상태를 복원하도록 수정한 것.
+- 시야 밖 subject를 숨길 때 primitive main/depth pass와 함께 shadow casting도 꺼서 오브젝트 그림자만 남지 않게 한 것.
+- `TunaSweeperEditor Win64 Development` 빌드를 통과시키고 Unreal Editor를 실행한 것.
