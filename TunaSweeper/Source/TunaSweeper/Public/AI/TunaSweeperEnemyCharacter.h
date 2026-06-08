@@ -7,6 +7,7 @@
 
 class UStaticMeshComponent;
 class USceneComponent;
+class UTunaSweeperVisionSubjectComponent;
 class UWidgetComponent;
 class UMaterialInterface;
 class UNiagaraSystem;
@@ -75,6 +76,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UWidgetComponent> EnemyReloadWidgetComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UTunaSweeperVisionSubjectComponent> VisionSubjectComponent;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat")
 	TSoftClassPtr<ATunaSweeperProjectile> ProjectileClass;

@@ -7,6 +7,7 @@
 
 class UTunaSweeperInteractableComponent;
 class UTunaSweeperPickupItemIconWidget;
+class UTunaSweeperVisionSubjectComponent;
 class USceneComponent;
 class UTexture2D;
 class UWidgetComponent;
@@ -64,6 +65,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UTunaSweeperInteractableComponent> InteractableComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UTunaSweeperVisionSubjectComponent> VisionSubjectComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pickup Item")
 	int32 ItemId = 1001;

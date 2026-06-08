@@ -1,5 +1,6 @@
 #include "Interaction/TunaSweeperLootContainerActor.h"
 
+#include "Component/TunaSweeperVisionSubjectComponent.h"
 #include "Components/SceneComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/GameInstance.h"
@@ -48,6 +49,8 @@ ATunaSweeperLootContainerActor::ATunaSweeperLootContainerActor()
 		ETunaSweeperInteractionType::LootContainerOpen,
 		FText::FromString(TEXT("\uC5F4\uAE30")),
 		FName(TEXT("ui.interaction.open")));
+
+	VisionSubjectComponent = CreateDefaultSubobject<UTunaSweeperVisionSubjectComponent>(TEXT("VisionSubject"));
 }
 
 void ATunaSweeperLootContainerActor::OnConstruction(const FTransform& Transform)

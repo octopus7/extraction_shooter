@@ -2,6 +2,7 @@
 
 #include "AI/TunaSweeperRollingBomber.h"
 #include "Character/TunaSweeperTopDownCharacter.h"
+#include "Component/TunaSweeperVisionSubjectComponent.h"
 #include "Components/SceneComponent.h"
 #include "Engine/World.h"
 #include "Game/TunaSweeperGameInstance.h"
@@ -162,6 +163,8 @@ ATunaSweeperRollingBomberSpawner::ATunaSweeperRollingBomberSpawner()
 	LaunchPoint = CreateDefaultSubobject<USceneComponent>(TEXT("LaunchPoint"));
 	LaunchPoint->SetupAttachment(SceneRoot);
 	LaunchPoint->SetRelativeLocation(FVector(0.0f, 0.0f, TunaSweeperRollingBomberSpawner::LaunchPointHeight));
+
+	VisionSubjectComponent = CreateDefaultSubobject<UTunaSweeperVisionSubjectComponent>(TEXT("VisionSubject"));
 
 	RollingBomberClass = TSoftClassPtr<ATunaSweeperRollingBomber>(
 		FSoftObjectPath(TunaSweeperRollingBomberSpawner::DefaultRollingBomberClassPath));

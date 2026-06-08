@@ -9,6 +9,7 @@
 class APlayerController;
 class UTexture2D;
 class UTunaSweeperVisionMaskWidget;
+class UTunaSweeperVisionSubjectComponent;
 
 struct FTunaSweeperVisionRaySample
 {
@@ -82,6 +83,9 @@ protected:
 	bool bRenderVisionOverlay = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Vision")
+	bool bApplyVisionSubjectVisibility = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Vision")
 	int32 OverlayZOrder = 1;
 
 	UPROPERTY()
@@ -112,6 +116,16 @@ private:
 		const FVector& TraceOrigin,
 		float FacingYawDegrees,
 		float RayAngleStepDegrees);
+	void ApplyVisionSubjectVisibility(
+		const TArray<FTunaSweeperVisionRaySample>& RaySamples,
+		const FVector& TraceOrigin,
+		float FacingYawDegrees) const;
+	void ResetVisionSubjectVisibility() const;
+	bool IsVisionSubjectVisible(
+		const UTunaSweeperVisionSubjectComponent* VisionSubject,
+		const TArray<FTunaSweeperVisionRaySample>& RaySamples,
+		const FVector& TraceOrigin,
+		float FacingYawDegrees) const;
 	void ApplyBlurToMask();
 	void RebuildTexturePixels();
 	void UploadMaskTexture();

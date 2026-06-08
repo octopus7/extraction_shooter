@@ -6,6 +6,7 @@
 
 class UProjectileMovementComponent;
 class UPrimitiveComponent;
+class UTunaSweeperVisionSubjectComponent;
 class UMaterialInstanceDynamic;
 class UMaterialInterface;
 class UProceduralMeshComponent;
@@ -76,6 +77,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Projectile")
 	TObjectPtr<UProjectileMovementComponent> ProjectileMovement;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Projectile")
+	TObjectPtr<UTunaSweeperVisionSubjectComponent> VisionSubjectComponent;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UMaterialInstanceDynamic> DynamicVisualMaterial;

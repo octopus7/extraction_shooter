@@ -3,6 +3,7 @@
 #include "Camera/PlayerCameraManager.h"
 #include "Components/SceneComponent.h"
 #include "Components/WidgetComponent.h"
+#include "Component/TunaSweeperVisionSubjectComponent.h"
 #include "Engine/GameInstance.h"
 #include "Engine/Texture2D.h"
 #include "Engine/World.h"
@@ -44,6 +45,8 @@ ATunaSweeperPickupItemActor::ATunaSweeperPickupItemActor()
 	InteractableComponent->SetInteractionTypeAndDisplayName(
 		ETunaSweeperInteractionType::ItemPickup,
 		FText::FromString(TEXT("Item")));
+
+	VisionSubjectComponent = CreateDefaultSubobject<UTunaSweeperVisionSubjectComponent>(TEXT("VisionSubject"));
 
 	FloorIconWidgetClass = TSoftClassPtr<UTunaSweeperPickupItemIconWidget>(
 		FSoftObjectPath(TEXT("/Game/UI/WBP_PickupItemIcon.WBP_PickupItemIcon_C")));

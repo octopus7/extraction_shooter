@@ -8,6 +8,7 @@
 
 class UTunaSweeperInteractableComponent;
 class UTunaSweeperGameInstance;
+class UTunaSweeperVisionSubjectComponent;
 class USceneComponent;
 class UStaticMeshComponent;
 class UStaticMesh;
@@ -93,6 +94,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UTunaSweeperInteractableComponent> InteractableComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UTunaSweeperVisionSubjectComponent> VisionSubjectComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Loot Container")
 	int32 ContainerDefinitionId = 7001;

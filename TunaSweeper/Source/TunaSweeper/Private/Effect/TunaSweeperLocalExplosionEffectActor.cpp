@@ -1,5 +1,6 @@
 #include "Effect/TunaSweeperLocalExplosionEffectActor.h"
 
+#include "Component/TunaSweeperVisionSubjectComponent.h"
 #include "Components/PointLightComponent.h"
 #include "Components/SceneComponent.h"
 #include "Components/StaticMeshComponent.h"
@@ -118,6 +119,8 @@ ATunaSweeperLocalExplosionEffectActor::ATunaSweeperLocalExplosionEffectActor()
 	FlashLight->SetLightColor(FLinearColor(1.0f, 0.48f, 0.13f));
 	FlashLight->SetIntensity(0.0f);
 	FlashLight->SetAttenuationRadius(EffectRadiusCm * 2.0f);
+
+	VisionSubjectComponent = CreateDefaultSubobject<UTunaSweeperVisionSubjectComponent>(TEXT("VisionSubject"));
 
 	ExplosionFlipbookMaterial = TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath(ExplosionMaterialPath));
 	ExplosionDistortionMaterial = TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath(DistortionMaterialPath));

@@ -4,6 +4,7 @@
 #include "AI/TunaSweeperRollingBomberSpawner.h"
 #include "Character/TunaSweeperTopDownCharacter.h"
 #include "Component/TunaSweeperVitalsComponent.h"
+#include "Component/TunaSweeperVisionSubjectComponent.h"
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Effect/TunaSweeperProjectileHitBurstActor.h"
@@ -104,6 +105,8 @@ ATunaSweeperProjectile::ATunaSweeperProjectile()
 	TrailMesh->SetCastShadow(false);
 	TrailMesh->SetHiddenInGame(true);
 	TrailMesh->SetVisibility(false);
+
+	VisionSubjectComponent = CreateDefaultSubobject<UTunaSweeperVisionSubjectComponent>(TEXT("VisionSubject"));
 
 	ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement"));
 	ProjectileMovement->InitialSpeed = 2200.0f;

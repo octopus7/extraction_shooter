@@ -1,5 +1,6 @@
 #include "Effect/TunaSweeperMeleeSwingTrailActor.h"
 
+#include "Component/TunaSweeperVisionSubjectComponent.h"
 #include "Components/SceneComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMesh.h"
@@ -28,6 +29,8 @@ ATunaSweeperMeleeSwingTrailActor::ATunaSweeperMeleeSwingTrailActor()
 	SwingArcMesh->SetupAttachment(RootComponent);
 	SwingArcMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	SwingArcMesh->SetCastShadow(false);
+
+	VisionSubjectComponent = CreateDefaultSubobject<UTunaSweeperVisionSubjectComponent>(TEXT("VisionSubject"));
 }
 
 void ATunaSweeperMeleeSwingTrailActor::BeginPlay()

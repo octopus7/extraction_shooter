@@ -7,6 +7,7 @@
 class USceneComponent;
 class UStaticMeshComponent;
 class UMaterialInstanceDynamic;
+class UTunaSweeperVisionSubjectComponent;
 
 UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API ATunaSweeperMeleeSwingTrailActor : public AActor
@@ -26,6 +27,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UStaticMeshComponent> SwingArcMesh;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UTunaSweeperVisionSubjectComponent> VisionSubjectComponent;
 
 private:
 	UPROPERTY(Transient)

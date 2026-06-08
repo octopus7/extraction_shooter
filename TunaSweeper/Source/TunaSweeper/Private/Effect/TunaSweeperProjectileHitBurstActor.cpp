@@ -1,5 +1,6 @@
 #include "Effect/TunaSweeperProjectileHitBurstActor.h"
 
+#include "Component/TunaSweeperVisionSubjectComponent.h"
 #include "Components/SceneComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMesh.h"
@@ -78,6 +79,8 @@ ATunaSweeperProjectileHitBurstActor::ATunaSweeperProjectileHitBurstActor()
 		BurstTargetLocations.Add(ProjectileHitBurstParticleConfigs[Index].TargetLocation);
 		BurstBaseScales.Add(ProjectileHitBurstParticleConfigs[Index].Scale);
 	}
+
+	VisionSubjectComponent = CreateDefaultSubobject<UTunaSweeperVisionSubjectComponent>(TEXT("VisionSubject"));
 }
 
 void ATunaSweeperProjectileHitBurstActor::BeginPlay()

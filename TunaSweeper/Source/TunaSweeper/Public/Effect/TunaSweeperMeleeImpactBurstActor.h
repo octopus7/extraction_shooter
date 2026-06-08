@@ -7,6 +7,7 @@
 class USceneComponent;
 class UStaticMeshComponent;
 class UMaterialInstanceDynamic;
+class UTunaSweeperVisionSubjectComponent;
 
 UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API ATunaSweeperMeleeImpactBurstActor : public AActor
@@ -29,6 +30,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TArray<TObjectPtr<UStaticMeshComponent>> BurstParticles;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UTunaSweeperVisionSubjectComponent> VisionSubjectComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Effect")
 	FLinearColor BurstColor = FLinearColor(0.0f, 1.0f, 1.0f, 1.0f);

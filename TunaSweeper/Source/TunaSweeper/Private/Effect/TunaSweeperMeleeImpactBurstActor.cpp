@@ -1,5 +1,6 @@
 #include "Effect/TunaSweeperMeleeImpactBurstActor.h"
 
+#include "Component/TunaSweeperVisionSubjectComponent.h"
 #include "Components/SceneComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMesh.h"
@@ -106,6 +107,8 @@ ATunaSweeperMeleeImpactBurstActor::ATunaSweeperMeleeImpactBurstActor()
 			BurstBaseScales.Add(Config.Scale);
 		}
 	}
+
+	VisionSubjectComponent = CreateDefaultSubobject<UTunaSweeperVisionSubjectComponent>(TEXT("VisionSubject"));
 }
 
 void ATunaSweeperMeleeImpactBurstActor::BeginPlay()

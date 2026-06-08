@@ -9,6 +9,7 @@ class UMaterialInterface;
 class UPointLightComponent;
 class USceneComponent;
 class UStaticMeshComponent;
+class UTunaSweeperVisionSubjectComponent;
 
 UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API ATunaSweeperLocalExplosionEffectActor : public AActor
@@ -67,6 +68,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UPointLightComponent> FlashLight;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UTunaSweeperVisionSubjectComponent> VisionSubjectComponent;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TunaSweeper|Effect")
 	TSoftObjectPtr<UMaterialInterface> ExplosionFlipbookMaterial;

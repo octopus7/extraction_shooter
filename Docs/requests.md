@@ -4209,3 +4209,10 @@
 - static mesh prop JSON에 `reveal_occluder` 및 reveal 스케일 옵션을 추가하고, `TS_TurbulentConiferPrototype_01`에 적용한 것.
 - `/Game/Prototype/M_TurbulentConiferCanopy`를 masked reveal 패턴을 읽는 머티리얼로 재생성하고 `/Game/Effects/MPC_TunaSweeperOcclusionReveal` 에셋을 생성한 것.
 - `TunaSweeperEditor Win64 Development` 빌드를 통과시키고 Unreal Editor를 실행해 reveal 에셋 run-once 작업 성공 로그를 확인한 것.
+
+## 2026-06-08 21:22:15 (소요시간: 00:02:28)
+
+- 전투 시야 샘플 결과를 동적 월드 오브젝트 렌더 표시 제어에도 적용하도록 `UTunaSweeperVisionSubjectComponent`와 `UTunaSweeperVisionVisibilitySubsystem`을 추가한 것.
+- 적, 롤링봄버 스포너, 투사체, 전투 이펙트, 픽업 아이템, 루팅 컨테이너에 시야 subject 컴포넌트를 부착한 것.
+- 시야가 비활성화되거나 subject 표시 제어가 꺼질 때 원래 primitive 렌더 패스 상태를 복원하도록 처리한 것.
+- `TunaSweeperEditor Win64 Development` 빌드를 통과시키고 Unreal Editor를 실행한 것.

@@ -1,12 +1,14 @@
 #include "Component/TunaSweeperPlayerVisionComponent.h"
 
 #include "Blueprint/UserWidget.h"
+#include "Component/TunaSweeperVisionSubjectComponent.h"
 #include "DrawDebugHelpers.h"
 #include "Engine/Texture2D.h"
 #include "Engine/World.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
+#include "Subsystem/TunaSweeperVisionVisibilitySubsystem.h"
 #include "TunaSweeperCollisionChannels.h"
 #include "UI/TunaSweeperVisionMaskWidget.h"
 
@@ -371,6 +373,8 @@ void UTunaSweeperPlayerVisionComponent::BeginPlay()
 
 void UTunaSweeperPlayerVisionComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
+	ResetVisionSubjectVisibility();
+
 	if (VisionMaskWidget)
 	{
 		VisionMaskWidget->RemoveFromParent();
@@ -393,6 +397,7 @@ void UTunaSweeperPlayerVisionComponent::TickComponent(
 		{
 			VisionMaskWidget->SetMaskVisible(false);
 		}
+		ResetVisionSubjectVisibility();
 		return;
 	}
 
@@ -403,6 +408,7 @@ void UTunaSweeperPlayerVisionComponent::TickComponent(
 		{
 			VisionMaskWidget->SetMaskVisible(false);
 		}
+		ResetVisionSubjectVisibility();
 		return;
 	}
 
@@ -418,10 +424,14 @@ void UTunaSweeperPlayerVisionComponent::TickComponent(
 		{
 			VisionMaskWidget->SetMaskVisible(false);
 		}
+		ResetVisionSubjectVisibility();
 		return;
 	}
 
-	EnsureOverlayWidget(PlayerController);
+	if (bRenderVisionOverlay)
+	{
+		EnsureOverlayWidget(PlayerController);
+	}
 	ForceRefreshVisionMask();
 }
 
@@ -433,27 +443,33 @@ void UTunaSweeperPlayerVisionComponent::ForceRefreshVisionMask()
 		{
 			VisionMaskWidget->SetMaskVisible(false);
 		}
+		ResetVisionSubjectVisibility();
 		return;
 	}
 
 	APlayerController* PlayerController = ResolveLocalPlayerController();
 	if (!PlayerController)
 	{
+		ResetVisionSubjectVisibility();
 		return;
 	}
 
-	int32 ViewportX = 0;
-	int32 ViewportY = 0;
-	PlayerController->GetViewportSize(ViewportX, ViewportY);
-	if (ViewportX <= 0 || ViewportY <= 0)
-	{
-		return;
-	}
-
-	ViewportSize = FIntPoint(ViewportX, ViewportY);
-
+	bool bHasValidViewport = false;
 	if (bRenderVisionOverlay)
 	{
+		int32 ViewportX = 0;
+		int32 ViewportY = 0;
+		PlayerController->GetViewportSize(ViewportX, ViewportY);
+		if (ViewportX > 0 && ViewportY > 0)
+		{
+			ViewportSize = FIntPoint(ViewportX, ViewportY);
+			bHasValidViewport = true;
+		}
+		else if (VisionMaskWidget)
+		{
+			VisionMaskWidget->SetMaskVisible(false);
+		}
+
 		EnsureOverlayWidget(PlayerController);
 	}
 
@@ -467,6 +483,30 @@ void UTunaSweeperPlayerVisionComponent::ForceRefreshVisionMask()
 		{
 			VisionMaskWidget->SetMaskVisible(false);
 		}
+		ResetVisionSubjectVisibility();
+		return;
+	}
+
+	if (bApplyVisionSubjectVisibility)
+	{
+		ApplyVisionSubjectVisibility(RaySamples, TraceOrigin, FacingYawDegrees);
+	}
+	else
+	{
+		ResetVisionSubjectVisibility();
+	}
+
+	if (!bRenderVisionOverlay)
+	{
+		if (VisionMaskWidget)
+		{
+			VisionMaskWidget->SetMaskVisible(false);
+		}
+		return;
+	}
+
+	if (!bHasValidViewport)
+	{
 		return;
 	}
 
@@ -561,7 +601,7 @@ bool UTunaSweeperPlayerVisionComponent::IsVisionWorldEnabled() const
 
 bool UTunaSweeperPlayerVisionComponent::ShouldUpdateVision() const
 {
-	return bRenderVisionOverlay;
+	return bRenderVisionOverlay || bApplyVisionSubjectVisibility;
 }
 
 bool UTunaSweeperPlayerVisionComponent::IsVisionDebugEnabled() const
@@ -828,6 +868,81 @@ int32 UTunaSweeperPlayerVisionComponent::RasterizeVisionMaskFromView(
 	}
 
 	return VisiblePixelCount;
+}
+
+void UTunaSweeperPlayerVisionComponent::ApplyVisionSubjectVisibility(
+	const TArray<FTunaSweeperVisionRaySample>& RaySamples,
+	const FVector& TraceOrigin,
+	float FacingYawDegrees) const
+{
+	UWorld* World = GetWorld();
+	UTunaSweeperVisionVisibilitySubsystem* VisionSubsystem =
+		World ? World->GetSubsystem<UTunaSweeperVisionVisibilitySubsystem>() : nullptr;
+	if (!VisionSubsystem)
+	{
+		return;
+	}
+
+	const AActor* OwnerActor = GetOwner();
+	VisionSubsystem->ForEachVisionSubject(
+		[this, &RaySamples, &TraceOrigin, FacingYawDegrees, OwnerActor](
+			UTunaSweeperVisionSubjectComponent* VisionSubject)
+		{
+			if (!VisionSubject || VisionSubject->GetOwner() == OwnerActor)
+			{
+				return;
+			}
+
+			VisionSubject->ApplyVisionVisible(
+				IsVisionSubjectVisible(VisionSubject, RaySamples, TraceOrigin, FacingYawDegrees));
+		});
+}
+
+void UTunaSweeperPlayerVisionComponent::ResetVisionSubjectVisibility() const
+{
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		return;
+	}
+
+	if (UTunaSweeperVisionVisibilitySubsystem* VisionSubsystem =
+		World->GetSubsystem<UTunaSweeperVisionVisibilitySubsystem>())
+	{
+		VisionSubsystem->RestoreAllVisionSubjects();
+	}
+}
+
+bool UTunaSweeperPlayerVisionComponent::IsVisionSubjectVisible(
+	const UTunaSweeperVisionSubjectComponent* VisionSubject,
+	const TArray<FTunaSweeperVisionRaySample>& RaySamples,
+	const FVector& TraceOrigin,
+	float FacingYawDegrees) const
+{
+	if (!VisionSubject || !VisionSubject->IsVisionVisibilityEnabled())
+	{
+		return true;
+	}
+
+	FVector Delta = VisionSubject->GetVisionTestLocation() - TraceOrigin;
+	Delta.Z = 0.0f;
+	const float Distance = Delta.Size();
+	const float Padding = VisionSubject->GetVisibilityPaddingCm();
+	const float AlwaysVisibleRadius = FMath::Max(0.0f, VisionSettings.AlwaysVisibleRadius);
+	if (Distance <= AlwaysVisibleRadius + Padding || Distance <= KINDA_SMALL_NUMBER)
+	{
+		return true;
+	}
+
+	const float HalfFieldOfViewDegrees = FMath::Clamp(VisionSettings.FieldOfViewDegrees, 1.0f, 360.0f) * 0.5f;
+	const float SubjectYawDegrees = FRotator::NormalizeAxis(Delta.Rotation().Yaw);
+	const float RelativeAngleDegrees = FMath::FindDeltaAngleDegrees(FacingYawDegrees, SubjectYawDegrees);
+	const float VisibleDistance = TunaSweeperVision::SampleVisibleDistanceForRelativeAngle(
+		RelativeAngleDegrees,
+		HalfFieldOfViewDegrees,
+		AlwaysVisibleRadius,
+		RaySamples);
+	return Distance <= VisibleDistance + Padding;
 }
 
 void UTunaSweeperPlayerVisionComponent::ApplyBlurToMask()

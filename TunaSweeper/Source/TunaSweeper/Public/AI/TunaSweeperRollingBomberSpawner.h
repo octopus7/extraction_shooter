@@ -11,6 +11,7 @@ class UProceduralMeshComponent;
 class USceneComponent;
 class USoundBase;
 class USoundWaveProcedural;
+class UTunaSweeperVisionSubjectComponent;
 
 UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API ATunaSweeperRollingBomberSpawner : public AActor
@@ -56,6 +57,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<USceneComponent> LaunchPoint;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UTunaSweeperVisionSubjectComponent> VisionSubjectComponent;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Rolling Bomber Spawner|Spawn")
 	TSoftClassPtr<ATunaSweeperRollingBomber> RollingBomberClass;
