@@ -3,5 +3,6 @@
 namespace TunaSweeperExperimentalVegetation
 {
 	bool EnsureExperimentalVegetationAssets();
+	bool EnsureTurbulentConiferOcclusionRevealAssets();
 	bool EnsureTurbulentConiferPrototypeAssets();
 }

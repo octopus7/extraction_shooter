@@ -2068,3 +2068,40 @@ Niagara나 Cascade 파티클 시스템이 아니라 `ATunaSweeperHeadphoneRipple
 - Epic 공식 발소리 튜토리얼: https://dev.epicgames.com/documentation/unreal-engine/artist-11-add-footstep-sounds-to-a-character
 - Game Animation Sample: https://www.fab.com/listings/880e319a-a59e-4ed2-b268-b32dac7fa016
 - Lyra Starter Game: https://www.fab.com/listings/93faede1-4434-47c0-85f1-bf27c0820ad0
+## 2026-06-08 19:32:25 (소요시간: 00:01:14)
+
+### 질문
+
+배경 오브젝트 중 나무나 풀처럼 캐릭터를 덮는 높은 메시에 대해 캐릭터 주변과 커서 주변이 부드럽게 투과되거나 패턴 처리되게 하고, 컴포넌트 레벨에서 적용 가능한 메시 목록을 들고 있는 형태로 구현하려면 어떻게 하면 좋은지.
+
+### 답변
+
+권장 방식은 진짜 Translucent 투명도가 아니라 Masked 머티리얼의 월드 위치 기반 디더/패턴 컷아웃이다. 플레이어 쪽 컴포넌트나 월드 서브시스템이 캐릭터 위치와 `ATunaSweeperPlayerController::TryGetCursorWorldPointOnPlane()`으로 구한 커서 월드 위치를 Material Parameter Collection에 매 프레임 넣고, `UTunaSweeperRevealOccluderComponent`는 자신이 가진 `UStaticMeshComponent`/`UInstancedStaticMeshComponent` 목록에 오클루더용 머티리얼 함수 또는 머티리얼 인스턴스를 적용한다. 머티리얼은 캐릭터/커서 중심과 픽셀 월드 위치의 XY 거리로 `smoothstep` 원형 마스크를 만들고, 그 값을 opacity mask threshold, blue-noise, 해칭 같은 패턴 컷아웃에 반영한다. 이렇게 하면 정렬 문제가 있는 Translucent보다 싸고 안정적이며, 컴포넌트는 적용 대상 메시와 반경/페더/강도 같은 per-object 설정만 관리하면 된다.
+## 2026-06-08 19:34:52 (소요시간: 00:00:20)
+
+### 질문
+
+나무는 캐릭터 키보다 작은 줄기 메시와 줄기와 연결되지 않은 윗부분 수관/두껑 메시를 분리해서 쓸 예정인데, 이 구조를 이해했는지.
+
+### 답변
+
+이해했다. 이 구조라면 줄기는 일반 불투명/충돌 메시로 그대로 두고, 캐릭터를 덮는 수관/두껑 메시만 `UTunaSweeperRevealOccluderComponent`의 적용 대상 목록에 넣는 방식이 가장 적합하다. 캐릭터와 커서 주변의 디더/패턴 컷아웃은 수관 메시 머티리얼에만 적용되므로 줄기 가독성, 충돌, 그림자는 유지하면서 실제 시야를 가리는 높은 부분만 부드럽게 비워낼 수 있다.
+## 2026-06-08 19:35:31 (소요시간: 00:00:24)
+
+### 질문
+
+수관이 무엇인지.
+
+### 답변
+
+수관은 나무의 잎과 가지가 모여 있는 위쪽 덩어리, 즉 영어로 tree crown/canopy에 해당하는 부분이다. 이 프로젝트 설명에서는 혼동을 줄이기 위해 `수관` 대신 `나무 윗부분 메시`, `잎/가지 덩어리 메시`, 또는 사용자가 말한 `뚜껑 메시`라고 부르는 편이 낫다.
+
+## 2026-06-08 19:37:26 (소요시간: 00:02:23)
+
+### 질문
+
+전투 시야 구현에서 마스크는 덮이지만 마스크의 어두운 부분에서도 캐릭터나 투사체 같은 배경이 아닌 오브젝트가 계속 렌더링되므로, 시야 판정을 벗어난 위치의 오브젝트를 숨기려면 어떻게 구현하는 것이 좋은지.
+
+### 답변
+
+현재 `UTunaSweeperPlayerVisionComponent`는 시야 레이 샘플을 만들고 Slate 오버레이 마스크만 갱신하므로, 같은 샘플 결과를 월드 렌더 대상에도 적용해야 한다. 권장 구현은 `UTunaSweeperVisionSubjectComponent` 같은 표시 대상 컴포넌트를 적, 투사체, 픽업, 전투 이펙트 등에 붙이고 월드 서브시스템에 등록한 뒤, 플레이어 시야 컴포넌트가 매 갱신마다 actor 위치와 `SampleVisibleDistanceForRelativeAngle()` 결과를 비교해 subject를 보이거나 숨기는 방식이다. 숨김은 `SetVisibility()`보다 기존 표시 상태와 덜 충돌하는 `UPrimitiveComponent::SetRenderInMainPass(false)` 계열 렌더 패스 제어를 우선 검토하고, 시야가 비활성화되거나 컴포넌트가 종료될 때 모든 subject의 원래 렌더 상태를 복원해야 한다.

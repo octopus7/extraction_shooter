@@ -1,5 +1,6 @@
 #include "TunaSweeperExperimentalVegetation.h"
 
+#include "Component/TunaSweeperOcclusionRevealTypes.h"
 #include "CoreMinimal.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "AssetToolsModule.h"
@@ -9,6 +10,7 @@
 #include "HAL/FileManager.h"
 #include "ImageUtils.h"
 #include "Materials/Material.h"
+#include "Materials/MaterialExpressionCollectionParameter.h"
 #include "Materials/MaterialExpressionConstant3Vector.h"
 #include "Materials/MaterialExpressionCustom.h"
 #include "Materials/MaterialExpressionMultiply.h"
@@ -18,6 +20,7 @@
 #include "Materials/MaterialExpressionTime.h"
 #include "Materials/MaterialExpressionVertexColor.h"
 #include "Materials/MaterialExpressionWorldPosition.h"
+#include "Materials/MaterialParameterCollection.h"
 #include "MeshDescription.h"
 #include "Misc/CommandLine.h"
 #include "Misc/PackageName.h"
@@ -25,6 +28,7 @@
 #include "Misc/Paths.h"
 #include "Modules/ModuleManager.h"
 #include "StaticMeshAttributes.h"
+#include "Factories/MaterialParameterCollectionFactoryNew.h"
 #include "UObject/SavePackage.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogTunaSweeperExperimentalVegetation, Log, All);
@@ -125,6 +129,166 @@ namespace TunaSweeperExperimentalVegetation
 		SaveArgs.SaveFlags = SAVE_NoError;
 
 		return UPackage::SavePackage(Package, Asset, *PackageFileName, SaveArgs);
+	}
+
+	void EnsureCollectionScalarParameter(
+		UMaterialParameterCollection* Collection,
+		FName ParameterName,
+		float DefaultValue)
+	{
+		if (!Collection)
+		{
+			return;
+		}
+
+		for (FCollectionScalarParameter& ExistingParameter : Collection->ScalarParameters)
+		{
+			if (ExistingParameter.ParameterName == ParameterName)
+			{
+				ExistingParameter.DefaultValue = DefaultValue;
+				return;
+			}
+		}
+
+		FCollectionScalarParameter Parameter;
+		Parameter.ParameterName = ParameterName;
+		Parameter.DefaultValue = DefaultValue;
+		Collection->ScalarParameters.Add(Parameter);
+	}
+
+	void EnsureCollectionVectorParameter(
+		UMaterialParameterCollection* Collection,
+		FName ParameterName,
+		const FLinearColor& DefaultValue)
+	{
+		if (!Collection)
+		{
+			return;
+		}
+
+		for (FCollectionVectorParameter& ExistingParameter : Collection->VectorParameters)
+		{
+			if (ExistingParameter.ParameterName == ParameterName)
+			{
+				ExistingParameter.DefaultValue = DefaultValue;
+				return;
+			}
+		}
+
+		FCollectionVectorParameter Parameter;
+		Parameter.ParameterName = ParameterName;
+		Parameter.DefaultValue = DefaultValue;
+		Collection->VectorParameters.Add(Parameter);
+	}
+
+	UMaterialParameterCollection* EnsureOcclusionRevealParameterCollection()
+	{
+		const FString AssetPath = TEXT("/Game/Effects");
+		const FString AssetName = TEXT("MPC_TunaSweeperOcclusionReveal");
+		const FString ObjectPath = GetAssetObjectPath(AssetPath, AssetName);
+
+		UMaterialParameterCollection* Collection = LoadObject<UMaterialParameterCollection>(nullptr, *ObjectPath);
+		if (!Collection)
+		{
+			UMaterialParameterCollectionFactoryNew* CollectionFactory = NewObject<UMaterialParameterCollectionFactoryNew>();
+			FAssetToolsModule& AssetToolsModule = FModuleManager::LoadModuleChecked<FAssetToolsModule>(TEXT("AssetTools"));
+			UObject* CreatedAsset = AssetToolsModule.Get().CreateAsset(
+				AssetName,
+				AssetPath,
+				UMaterialParameterCollection::StaticClass(),
+				CollectionFactory);
+			Collection = Cast<UMaterialParameterCollection>(CreatedAsset);
+			if (!Collection)
+			{
+				UE_LOG(LogTunaSweeperExperimentalVegetation, Error, TEXT("Failed to create %s."), *ObjectPath);
+				return nullptr;
+			}
+
+			FAssetRegistryModule::AssetCreated(Collection);
+		}
+
+		Collection->Modify();
+		EnsureCollectionVectorParameter(
+			Collection,
+			TunaSweeperOcclusionReveal::CharacterCenterParameterName(),
+			FLinearColor::Black);
+		EnsureCollectionVectorParameter(
+			Collection,
+			TunaSweeperOcclusionReveal::CursorCenterParameterName(),
+			FLinearColor::Black);
+		EnsureCollectionScalarParameter(
+			Collection,
+			TunaSweeperOcclusionReveal::CharacterRadiusParameterName(),
+			190.0f);
+		EnsureCollectionScalarParameter(
+			Collection,
+			TunaSweeperOcclusionReveal::CursorRadiusParameterName(),
+			150.0f);
+		EnsureCollectionScalarParameter(
+			Collection,
+			TunaSweeperOcclusionReveal::RevealFeatherParameterName(),
+			95.0f);
+		EnsureCollectionScalarParameter(
+			Collection,
+			TunaSweeperOcclusionReveal::RevealStrengthParameterName(),
+			1.0f);
+		EnsureCollectionScalarParameter(
+			Collection,
+			TunaSweeperOcclusionReveal::CursorValidParameterName(),
+			0.0f);
+		Collection->StateId = FGuid::NewGuid();
+		Collection->PostEditChange();
+		Collection->MarkPackageDirty();
+		return SaveAsset(Collection) ? Collection : nullptr;
+	}
+
+	UMaterialExpressionCollectionParameter* AddCollectionParameterExpression(
+		UMaterial* Material,
+		UMaterialParameterCollection* Collection,
+		FName ParameterName,
+		int32 EditorX,
+		int32 EditorY)
+	{
+		if (!Material || !Collection)
+		{
+			return nullptr;
+		}
+
+		UMaterialExpressionCollectionParameter* Expression = NewObject<UMaterialExpressionCollectionParameter>(Material);
+		Expression->Material = Material;
+		Expression->Collection = Collection;
+		Expression->ParameterName = ParameterName;
+		Expression->ParameterId = Collection->GetParameterId(ParameterName);
+		Expression->ExpressionGUID = FGuid::NewGuid();
+		Expression->MaterialExpressionEditorX = EditorX;
+		Expression->MaterialExpressionEditorY = EditorY;
+		Material->GetExpressionCollection().AddExpression(Expression);
+		return Expression;
+	}
+
+	UMaterialExpressionScalarParameter* AddCustomPrimitiveScalarExpression(
+		UMaterial* Material,
+		FName ParameterName,
+		float DefaultValue,
+		int32 PrimitiveDataIndex,
+		int32 EditorX,
+		int32 EditorY)
+	{
+		if (!Material)
+		{
+			return nullptr;
+		}
+
+		UMaterialExpressionScalarParameter* Expression = NewObject<UMaterialExpressionScalarParameter>(Material);
+		Expression->Material = Material;
+		Expression->ParameterName = ParameterName;
+		Expression->DefaultValue = DefaultValue;
+		Expression->bUseCustomPrimitiveData = true;
+		Expression->PrimitiveDataIndex = static_cast<uint8>(FMath::Clamp(PrimitiveDataIndex, 0, 255));
+		Expression->MaterialExpressionEditorX = EditorX;
+		Expression->MaterialExpressionEditorY = EditorY;
+		Material->GetExpressionCollection().AddExpression(Expression);
+		return Expression;
 	}
 
 	bool SavePixelsAsPng(const FString& FilePath, const TArray<FColor>& Pixels, int32 Width, int32 Height)
@@ -1927,10 +2091,13 @@ namespace TunaSweeperExperimentalVegetation
 			FAssetRegistryModule::AssetCreated(Material);
 		}
 
+		UMaterialParameterCollection* RevealParameterCollection = EnsureOcclusionRevealParameterCollection();
+
 		Material->Modify();
 		Material->GetExpressionCollection().Empty();
 		Material->TwoSided = true;
-		Material->BlendMode = BLEND_Opaque;
+		Material->BlendMode = BLEND_Masked;
+		Material->OpacityMaskClipValue = 0.5f;
 		Material->SetShadingModel(MSM_DefaultLit);
 		Material->MaxWorldPositionOffsetDisplacement = 48.0f;
 		Material->bAlwaysEvaluateWorldPositionOffset = true;
@@ -2078,8 +2245,170 @@ namespace TunaSweeperExperimentalVegetation
 		TurbulentOffsetExpression->MaterialExpressionEditorY = 420;
 		Material->GetExpressionCollection().AddExpression(TurbulentOffsetExpression);
 
+		UMaterialExpressionCustom* RevealOpacityMaskExpression = nullptr;
+		if (RevealParameterCollection)
+		{
+			UMaterialExpressionCollectionParameter* CharacterCenterExpression = AddCollectionParameterExpression(
+				Material,
+				RevealParameterCollection,
+				TunaSweeperOcclusionReveal::CharacterCenterParameterName(),
+				-980,
+				960);
+			UMaterialExpressionCollectionParameter* CursorCenterExpression = AddCollectionParameterExpression(
+				Material,
+				RevealParameterCollection,
+				TunaSweeperOcclusionReveal::CursorCenterParameterName(),
+				-980,
+				1120);
+			UMaterialExpressionCollectionParameter* CharacterRadiusExpression = AddCollectionParameterExpression(
+				Material,
+				RevealParameterCollection,
+				TunaSweeperOcclusionReveal::CharacterRadiusParameterName(),
+				-700,
+				930);
+			UMaterialExpressionCollectionParameter* CursorRadiusExpression = AddCollectionParameterExpression(
+				Material,
+				RevealParameterCollection,
+				TunaSweeperOcclusionReveal::CursorRadiusParameterName(),
+				-700,
+				1090);
+			UMaterialExpressionCollectionParameter* RevealFeatherExpression = AddCollectionParameterExpression(
+				Material,
+				RevealParameterCollection,
+				TunaSweeperOcclusionReveal::RevealFeatherParameterName(),
+				-700,
+				1250);
+			UMaterialExpressionCollectionParameter* RevealStrengthExpression = AddCollectionParameterExpression(
+				Material,
+				RevealParameterCollection,
+				TunaSweeperOcclusionReveal::RevealStrengthParameterName(),
+				-700,
+				1410);
+			UMaterialExpressionCollectionParameter* CursorValidExpression = AddCollectionParameterExpression(
+				Material,
+				RevealParameterCollection,
+				TunaSweeperOcclusionReveal::CursorValidParameterName(),
+				-700,
+				1570);
+
+			UMaterialExpressionScalarParameter* RevealIntensityExpression = AddCustomPrimitiveScalarExpression(
+				Material,
+				TEXT("OcclusionRevealIntensity"),
+				1.0f,
+				TunaSweeperOcclusionReveal::RevealIntensityPrimitiveDataIndex,
+				-420,
+				930);
+			UMaterialExpressionScalarParameter* CharacterRadiusScaleExpression = AddCustomPrimitiveScalarExpression(
+				Material,
+				TEXT("OcclusionRevealCharacterRadiusScale"),
+				1.0f,
+				TunaSweeperOcclusionReveal::CharacterRadiusScalePrimitiveDataIndex,
+				-420,
+				1090);
+			UMaterialExpressionScalarParameter* CursorRadiusScaleExpression = AddCustomPrimitiveScalarExpression(
+				Material,
+				TEXT("OcclusionRevealCursorRadiusScale"),
+				1.0f,
+				TunaSweeperOcclusionReveal::CursorRadiusScalePrimitiveDataIndex,
+				-420,
+				1250);
+			UMaterialExpressionScalarParameter* PatternScaleExpression = AddCustomPrimitiveScalarExpression(
+				Material,
+				TEXT("OcclusionRevealPatternScale"),
+				1.0f,
+				TunaSweeperOcclusionReveal::PatternScalePrimitiveDataIndex,
+				-420,
+				1410);
+
+			RevealOpacityMaskExpression = NewObject<UMaterialExpressionCustom>(Material);
+			RevealOpacityMaskExpression->Material = Material;
+			RevealOpacityMaskExpression->Description = TEXT("World-space character/cursor reveal pattern");
+			RevealOpacityMaskExpression->OutputType = CMOT_Float1;
+			RevealOpacityMaskExpression->Code =
+				TEXT("float2 worldXY = WorldPos.xy;\n")
+				TEXT("float feather = max(RevealFeatherCm, 1.0f);\n")
+				TEXT("float characterRadius = max(0.0f, CharacterRevealRadiusCm * max(CharacterRadiusScale, 0.0f));\n")
+				TEXT("float cursorRadius = max(0.0f, CursorRevealRadiusCm * max(CursorRadiusScale, 0.0f));\n")
+				TEXT("float characterReveal = saturate((characterRadius - length(worldXY - CharacterCenter.xy)) / feather);\n")
+				TEXT("float cursorReveal = saturate((cursorRadius - length(worldXY - CursorCenter.xy)) / feather) * saturate(CursorRevealValid);\n")
+				TEXT("float reveal = max(characterReveal, cursorReveal) * saturate(RevealStrength) * saturate(RevealIntensity);\n")
+				TEXT("float keepFraction = lerp(1.0f, 0.16f, reveal);\n")
+				TEXT("float cellSize = max(3.0f, 9.0f * max(PatternScale, 0.1f));\n")
+				TEXT("float2 cell = floor(worldXY / cellSize);\n")
+				TEXT("float hash = frac(sin(dot(cell, float2(12.9898f, 78.233f))) * 43758.5453f);\n")
+				TEXT("return (hash < keepFraction) ? 1.0f : 0.0f;");
+
+			FCustomInput RevealWorldPosInput;
+			RevealWorldPosInput.InputName = TEXT("WorldPos");
+			RevealWorldPosInput.Input.Connect(0, WorldPositionExpression);
+			RevealOpacityMaskExpression->Inputs.Add(RevealWorldPosInput);
+
+			FCustomInput CharacterCenterInput;
+			CharacterCenterInput.InputName = TEXT("CharacterCenter");
+			CharacterCenterInput.Input.Connect(0, CharacterCenterExpression);
+			RevealOpacityMaskExpression->Inputs.Add(CharacterCenterInput);
+
+			FCustomInput CursorCenterInput;
+			CursorCenterInput.InputName = TEXT("CursorCenter");
+			CursorCenterInput.Input.Connect(0, CursorCenterExpression);
+			RevealOpacityMaskExpression->Inputs.Add(CursorCenterInput);
+
+			FCustomInput CharacterRadiusInput;
+			CharacterRadiusInput.InputName = TEXT("CharacterRevealRadiusCm");
+			CharacterRadiusInput.Input.Connect(0, CharacterRadiusExpression);
+			RevealOpacityMaskExpression->Inputs.Add(CharacterRadiusInput);
+
+			FCustomInput CursorRadiusInput;
+			CursorRadiusInput.InputName = TEXT("CursorRevealRadiusCm");
+			CursorRadiusInput.Input.Connect(0, CursorRadiusExpression);
+			RevealOpacityMaskExpression->Inputs.Add(CursorRadiusInput);
+
+			FCustomInput RevealFeatherInput;
+			RevealFeatherInput.InputName = TEXT("RevealFeatherCm");
+			RevealFeatherInput.Input.Connect(0, RevealFeatherExpression);
+			RevealOpacityMaskExpression->Inputs.Add(RevealFeatherInput);
+
+			FCustomInput RevealStrengthInput;
+			RevealStrengthInput.InputName = TEXT("RevealStrength");
+			RevealStrengthInput.Input.Connect(0, RevealStrengthExpression);
+			RevealOpacityMaskExpression->Inputs.Add(RevealStrengthInput);
+
+			FCustomInput CursorValidInput;
+			CursorValidInput.InputName = TEXT("CursorRevealValid");
+			CursorValidInput.Input.Connect(0, CursorValidExpression);
+			RevealOpacityMaskExpression->Inputs.Add(CursorValidInput);
+
+			FCustomInput RevealIntensityInput;
+			RevealIntensityInput.InputName = TEXT("RevealIntensity");
+			RevealIntensityInput.Input.Connect(0, RevealIntensityExpression);
+			RevealOpacityMaskExpression->Inputs.Add(RevealIntensityInput);
+
+			FCustomInput CharacterRadiusScaleInput;
+			CharacterRadiusScaleInput.InputName = TEXT("CharacterRadiusScale");
+			CharacterRadiusScaleInput.Input.Connect(0, CharacterRadiusScaleExpression);
+			RevealOpacityMaskExpression->Inputs.Add(CharacterRadiusScaleInput);
+
+			FCustomInput CursorRadiusScaleInput;
+			CursorRadiusScaleInput.InputName = TEXT("CursorRadiusScale");
+			CursorRadiusScaleInput.Input.Connect(0, CursorRadiusScaleExpression);
+			RevealOpacityMaskExpression->Inputs.Add(CursorRadiusScaleInput);
+
+			FCustomInput PatternScaleInput;
+			PatternScaleInput.InputName = TEXT("PatternScale");
+			PatternScaleInput.Input.Connect(0, PatternScaleExpression);
+			RevealOpacityMaskExpression->Inputs.Add(PatternScaleInput);
+
+			RevealOpacityMaskExpression->MaterialExpressionEditorX = -120;
+			RevealOpacityMaskExpression->MaterialExpressionEditorY = 1180;
+			Material->GetExpressionCollection().AddExpression(RevealOpacityMaskExpression);
+		}
+
 		MaterialEditorOnly->BaseColor.Connect(0, TintedTextureMultiply);
 		MaterialEditorOnly->WorldPositionOffset.Connect(0, TurbulentOffsetExpression);
+		if (RevealOpacityMaskExpression)
+		{
+			MaterialEditorOnly->OpacityMask.Connect(0, RevealOpacityMaskExpression);
+		}
 		MaterialEditorOnly->Roughness.UseConstant = true;
 		MaterialEditorOnly->Roughness.Constant = 0.88f;
 		MaterialEditorOnly->Metallic.UseConstant = true;
@@ -2424,6 +2753,43 @@ namespace TunaSweeperExperimentalVegetation
 				StumpMaterial ? *StumpMaterial->GetPathName() : TEXT("<none>"),
 				ConiferMesh ? *ConiferMesh->GetPathName() : TEXT("<none>"));
 		}
+		return bSucceeded;
+	}
+
+	bool EnsureTurbulentConiferOcclusionRevealAssets()
+	{
+		UMaterialParameterCollection* RevealParameterCollection = EnsureOcclusionRevealParameterCollection();
+		const FString TextureObjectPath = GetAssetObjectPath(VegetationAssetPath, TurbulentConiferTextureAssetName);
+		UTexture2D* ExistingCanopyTexture = LoadObject<UTexture2D>(nullptr, *TextureObjectPath);
+		if (!ExistingCanopyTexture)
+		{
+			ExistingCanopyTexture = EnsureTurbulentConiferTexture();
+		}
+
+		UMaterial* CanopyMaterial = ExistingCanopyTexture
+			? EnsureTurbulentConiferCanopyMaterial(ExistingCanopyTexture)
+			: nullptr;
+
+		const bool bSucceeded = RevealParameterCollection && CanopyMaterial;
+		if (bSucceeded)
+		{
+			UE_LOG(
+				LogTunaSweeperExperimentalVegetation,
+				Log,
+				TEXT("Turbulent conifer occlusion reveal assets updated. Collection=%s CanopyMaterial=%s"),
+				*RevealParameterCollection->GetPathName(),
+				*CanopyMaterial->GetPathName());
+		}
+		else
+		{
+			UE_LOG(
+				LogTunaSweeperExperimentalVegetation,
+				Error,
+				TEXT("Turbulent conifer occlusion reveal asset update failed. Collection=%s CanopyMaterial=%s"),
+				RevealParameterCollection ? *RevealParameterCollection->GetPathName() : TEXT("<none>"),
+				CanopyMaterial ? *CanopyMaterial->GetPathName() : TEXT("<none>"));
+		}
+
 		return bSucceeded;
 	}
 

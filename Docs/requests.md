@@ -4200,3 +4200,12 @@
 - `README_SSOT_v0.6.1.md`를 SSOT 색인 대상이 아닌 v0.6.1 패키지 설명용 README로 명시한 것.
 - 새 퀘스트/아이템 SSOT 기준에 맞춰 지역 개방, 구현 진행, 스토리, 영상 컷, 플레이타임, Steam 스코프, 충돌 요약 문서를 동기화한 것.
 - 기존 문서의 강제형 시설 복구, 워프포인트 직접 해금, 검문초소/북쪽 보급 창고 관문, 프리미엄 참치, 후속 지역 떡밥 기준을 새 SSOT 기준으로 정리한 것.
+
+## 2026-06-08 19:36:00 (소요시간: 00:23:22)
+
+- 캐릭터/커서 주변의 높은 배경 메시를 masked 패턴으로 비우는 `UTunaSweeperOcclusionRevealSourceComponent`와 `UTunaSweeperRevealOccluderComponent`를 추가한 것.
+- 플레이어 캐릭터가 `/Game/Effects/MPC_TunaSweeperOcclusionReveal`에 캐릭터 위치, 커서 위치, 반경, feather, 강도를 매 프레임 쓰도록 연결한 것.
+- reveal 대상 메시 컴포넌트가 CustomPrimitiveData로 개별 강도, 캐릭터/커서 반경 스케일, 패턴 스케일을 제공하도록 한 것.
+- static mesh prop JSON에 `reveal_occluder` 및 reveal 스케일 옵션을 추가하고, `TS_TurbulentConiferPrototype_01`에 적용한 것.
+- `/Game/Prototype/M_TurbulentConiferCanopy`를 masked reveal 패턴을 읽는 머티리얼로 재생성하고 `/Game/Effects/MPC_TunaSweeperOcclusionReveal` 에셋을 생성한 것.
+- `TunaSweeperEditor Win64 Development` 빌드를 통과시키고 Unreal Editor를 실행해 reveal 에셋 run-once 작업 성공 로그를 확인한 것.

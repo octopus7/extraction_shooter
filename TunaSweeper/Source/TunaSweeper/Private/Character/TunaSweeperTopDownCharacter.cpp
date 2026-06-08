@@ -5,6 +5,7 @@
 #include "CollisionShape.h"
 #include "Component/TunaSweeperDebuffComponent.h"
 #include "Component/TunaSweeperHeadphoneListenerComponent.h"
+#include "Component/TunaSweeperOcclusionRevealSourceComponent.h"
 #include "Component/TunaSweeperPlayerVisionComponent.h"
 #include "Component/TunaSweeperVitalsComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -124,6 +125,7 @@ ATunaSweeperTopDownCharacter::ATunaSweeperTopDownCharacter()
 	VitalsComponent = CreateDefaultSubobject<UTunaSweeperVitalsComponent>(TEXT("VitalsComponent"));
 	DebuffComponent = CreateDefaultSubobject<UTunaSweeperDebuffComponent>(TEXT("DebuffComponent"));
 	PlayerVisionComponent = CreateDefaultSubobject<UTunaSweeperPlayerVisionComponent>(TEXT("PlayerVisionComponent"));
+	OcclusionRevealSourceComponent = CreateDefaultSubobject<UTunaSweeperOcclusionRevealSourceComponent>(TEXT("OcclusionRevealSourceComponent"));
 	HeadphoneListenerComponent = CreateDefaultSubobject<UTunaSweeperHeadphoneListenerComponent>(TEXT("HeadphoneListenerComponent"));
 	StaminaGaugeWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("StaminaGaugeWidget"));
 	StaminaGaugeWidgetComponent->SetupAttachment(RootComponent);

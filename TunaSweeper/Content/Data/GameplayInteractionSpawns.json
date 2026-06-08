@@ -278,6 +278,11 @@
       "/Game/Prototype/M_TurbulentConiferCanopy.M_TurbulentConiferCanopy",
       "/Game/Prototype/M_TurbulentConiferShortTrunk.M_TurbulentConiferShortTrunk"
     ],
+    "reveal_occluder": true,
+    "reveal_intensity": 1.0,
+    "reveal_character_radius_scale": 1.0,
+    "reveal_cursor_radius_scale": 1.0,
+    "reveal_pattern_scale": 1.0,
     "location": [3000.0, -760.0, 0.0],
     "rotation": [0.0, 32.0, 0.0],
     "scale": [1.0, 1.0, 1.0]
