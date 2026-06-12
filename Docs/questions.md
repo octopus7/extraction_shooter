@@ -2105,3 +2105,23 @@ Niagara나 Cascade 파티클 시스템이 아니라 `ATunaSweeperHeadphoneRipple
 ### 답변
 
 현재 `UTunaSweeperPlayerVisionComponent`는 시야 레이 샘플을 만들고 Slate 오버레이 마스크만 갱신하므로, 같은 샘플 결과를 월드 렌더 대상에도 적용해야 한다. 권장 구현은 `UTunaSweeperVisionSubjectComponent` 같은 표시 대상 컴포넌트를 적, 투사체, 픽업, 전투 이펙트 등에 붙이고 월드 서브시스템에 등록한 뒤, 플레이어 시야 컴포넌트가 매 갱신마다 actor 위치와 `SampleVisibleDistanceForRelativeAngle()` 결과를 비교해 subject를 보이거나 숨기는 방식이다. 숨김은 `SetVisibility()`보다 기존 표시 상태와 덜 충돌하는 `UPrimitiveComponent::SetRenderInMainPass(false)` 계열 렌더 패스 제어를 우선 검토하고, 시야가 비활성화되거나 컴포넌트가 종료될 때 모든 subject의 원래 렌더 상태를 복원해야 한다.
+
+## 2026-06-13 00:01:59 (소요시간: 00:00:34)
+
+### 질문
+
+구르기 기능이 구현되어 있는지, 스페이스키에 `IA_` 매핑을 하면 되는지.
+
+### 답변
+
+플레이어 구르기 기능은 이미 C++에 구현되어 있다. `ATunaSweeperTopDownCharacter`가 `/Game/Input/IA_Roll.IA_Roll`을 `RollAction`으로 로드하고, 입력 바인딩에서 `Started` 이벤트를 `BeginRoll()`에 연결한다. `BeginRoll()`은 사망, 이미 구르는 중, 액션 입력 잠금, 방향 없음, 스태미나 부족이면 중단하고, 성공 시 스태미나를 소모하며 구르기 상태와 회피 중 피격 무적 상태를 켠다. `Tick()`의 `UpdateRoll()`이 `RollDurationSeconds` 동안 `RollDirection`으로 이동 입력을 넣고 완료 시 `FinishRoll()`로 원상 복구한다. `IA_Roll.uasset`와 `IMC_Player.uasset`도 존재하며, `IMC_Player.uasset` 내부 문자열에 `SpaceBar`와 `IA_Roll`이 모두 보인다. 다만 바이너리 에셋 구조상 SpaceBar가 IA_Roll에 정확히 연결되어 있는지는 에디터에서 `IMC_Player`를 열어 최종 확인하는 것이 가장 확실하다.
+
+## 2026-06-13 00:03:30 (소요시간: 00:00:10)
+
+### 질문
+
+구르는 상태가 무적이고, 현재는 애니메이션만 미적용된 상태인지.
+
+### 답변
+
+맞다. `IsDamageInvulnerable()`이 `bIsRolling`을 그대로 반환하고, `TakeDamage()` 초입에서 `IsDamageInvulnerable()`이면 `0.0f`를 반환하므로 구르는 동안 실제 데미지는 무시된다. 애니메이션 쪽은 별도 구르기 몽타주나 애님 재생 호출이 아니라 `ApplyTemporaryRollVisualRotation()`에서 스켈레탈 메시와 임시 비주얼 메시를 오른쪽 축 기준으로 회전시키는 방식의 임시 연출만 들어가 있다. 에디터 보정 코드도 `IA_Roll`을 `SpaceBar`에 매핑하도록 되어 있으므로, 남은 작업은 실제 캐릭터 애니메이션/몽타주 적용 쪽으로 보는 것이 맞다.
