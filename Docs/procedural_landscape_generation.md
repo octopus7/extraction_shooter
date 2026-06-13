@@ -1,5 +1,82 @@
 # Procedural Landscape Generation
 
+## 2026-06-14 기초 지형 테스트 레벨
+
+기존 imagegen/소품 배치 실험과 분리해서, 먼저 Landscape 자동 생성 자체를 검증하기 위한 단순 테스트 레벨을 만들었다.
+
+- 생성 맵: `/Game/PrototypeTerrainPathCreekMap`
+- 생성 코드: `TunaSweeper/Source/TunaSweeperEditor/Private/TunaSweeperProceduralTerrainTest.cpp`
+- 실행 플래그: `-TunaSweeperRebuildProceduralTerrainTest -TunaSweeperProceduralTerrainTestQuit`
+- 생성 에셋 경로: `/Game/Prototype/TerrainTest`
+- Landscape 크기: 4 components x 63 quads, 총 252 quads / 253 verts, `ScaleXY=40`, 약 100.8m 정사각형
+- Landscape 레이어: `Dirt`, `Grass`, `Rock`, `DarkDirt`
+- 소품 scatter 없음. 시각 확인용 개울 물면은 `USplineComponent`와 `USplineMeshComponent`로 이어 붙이고, `SM_TerrainTest_CreekWater`는 각 스플라인 구간이 구부려 쓰는 짧은 물면 타일 메시로 사용한다.
+
+이 단계의 목적은 "좋은 최종 맵"이 아니라, 코드로 만든 heightmap/weightmap이 실제 UE Landscape에 안정적으로 들어가고 네 레이어가 구분되어 보이는지 확인하는 것이다.
+
+지형 규칙:
+
+- 기본 바탕은 `Grass`다.
+- `Dirt`는 남쪽에서 북쪽으로 이어지는 S자 오솔길 중심과 가장자리에 강하게 칠한다.
+- `DarkDirt`는 개울 바닥과 젖은 둔덕 주변에 강하게 칠한다.
+- `Rock`은 둔덕, 개울가 bank, 노출된 자갈 패치에 섞는다.
+- heightmap은 완만한 노이즈 지형 위에 오솔길을 낮고 평평하게 만들고, 개울은 더 깊게 판다.
+
+재생성 명령:
+
+```powershell
+& 'C:\Program Files\Epic Games\UE_5.7\Engine\Binaries\Win64\UnrealEditor.exe' 'D:\github\extraction_shooter\TunaSweeper\TunaSweeper.uproject' -TunaSweeperRebuildProceduralTerrainTest -TunaSweeperProceduralTerrainTestQuit -unattended -nop4 -nosplash -log
+```
+
+확인용 실행:
+
+```powershell
+Start-Process -FilePath 'C:\Program Files\Epic Games\UE_5.7\Engine\Binaries\Win64\UnrealEditor.exe' -ArgumentList @('D:\github\extraction_shooter\TunaSweeper\TunaSweeper.uproject','D:\github\extraction_shooter\TunaSweeper\Content\PrototypeTerrainPathCreekMap.umap','-nop4')
+```
+
+주의:
+
+- `StartupModule()`에서 바로 `NewBlankMap()`을 호출하면 초기 `/Temp/Untitled_0` 월드 정리 중 fatal이 날 수 있다. 커맨드 플래그 실행은 `FTSTicker`로 한 tick 이상 미뤄서 에디터 월드가 준비된 뒤 처리한다.
+- 현재 레이어 텍스처는 `SourceArt/TerrainTest`의 imagegen PNG를 필수 입력으로 사용한다.
+- 조명 상태에 의존하지 않도록 Landscape 머티리얼은 `MSM_Unlit`이고, 레이어 블렌드 결과를 `BaseColor`와 `EmissiveColor`에 모두 연결한다.
+
+### 개울 스플라인 구성
+
+개울 물면은 끊어진 긴 절차 메시처럼 보이지 않도록 UE 기본 스플라인 메시 기능으로 배치한다.
+
+- `TS_ProceduralCreekWaterSpline` 배우를 생성한다.
+- 배우 안에 `CreekSpline` `USplineComponent`를 만들고, `GetCreekCenterX()`와 `EvaluateTerrainHeightCm()`으로 같은 개울 중심선 위의 스플라인 포인트를 계산한다.
+- `SM_TerrainTest_CreekWater`는 전체 개울 메시가 아니라 `SplineMeshComponent`가 구부려 쓰는 짧은 직선 물면 타일이다.
+- 각 인접 스플라인 포인트마다 `USplineMeshComponent`를 만들고 `SetStartAndEnd()`로 위치와 tangent를 넣어 구간을 이어 붙인다.
+- 이 방식은 나중에 개울 폭, 포인트 수, 중심선 함수를 바꾸는 것만으로 흐름을 다시 구성할 수 있다.
+
+### Imagegen 텍스처 교체
+
+2026-06-14에 기초 지형 테스트 레벨의 4개 Landscape 레이어를 imagegen 원본 텍스처로 교체했다.
+
+- 원본 PNG 경로: `TunaSweeper/Content/SourceArt/TerrainTest/`
+- 생성 에셋 경로: `/Game/Prototype/TerrainTest`
+- 원본 파일:
+  - `T_TerrainTest_Dirt_Imagegen.png`
+  - `T_TerrainTest_Grass_Imagegen.png`
+  - `T_TerrainTest_Rock_Imagegen.png`
+  - `T_TerrainTest_DarkDirt_Imagegen.png`
+- import 코드: `EnsureTerrainTextureAsset()`에서 SourceArt PNG를 `FImageUtils::LoadImage()`로 읽고 1024x1024로 리샘플한다.
+- SourceArt PNG가 없으면 생성에 실패한다. 이전 C++ 절차 노이즈 텍스처 fallback은 제거했다.
+- cube 스케일 확인 결과 기존 `MappingScale=420`은 지형 디테일이 너무 크게 보였다. 현재는 레이어별 mapping scale을 분리한다.
+  - `Grass`: 115cm
+  - `Dirt`: 180cm
+  - `Rock`: 170cm
+  - `DarkDirt`: 160cm
+- 원본 PNG는 1024x1024 UE Texture2D로 리샘플한다. 512x512 리샘플은 가까운 확인에서 디테일이 쉽게 뭉개진다.
+
+아트 방향:
+
+- 귀엽고 아기자기한 게임 지형용 top-down tile texture.
+- 너무 사실적이거나 거칠지 않은 hand-painted anime illustration 질감.
+- 흐릿하거나 붕 떠 있는 diffuse noise가 아니라, 작은 형태와 명암이 또렷한 표면.
+- 지형 레이어끼리 섞였을 때도 읽히도록 `Dirt`, `Grass`, `Rock`, `DarkDirt`의 색상/value 차이를 유지한다.
+
 이 문서는 imagegen 기반 프로토타입 환경에서 UE Landscape를 코드로 만들고, 여러 지형 텍스처 레이어를 절차적 weightmap으로 자동 페인팅하는 과정을 나중에 다시 구현할 수 있도록 정리한 것이다.
 
 ## 목표

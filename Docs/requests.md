@@ -4270,3 +4270,48 @@
 - 소품 배치를 수동 16개에서 구역별 절차 배치로 바꿔 나무, 풀, 바위, 콘크리트 slab 밀도를 크게 늘린 것.
 - `Docs/procedural_landscape_generation.md`에 랜덤 노이즈보다 SSOT 구역 마스크를 먼저 만들어야 한다는 절차를 추가한 것.
 - `TunaSweeperEditor Win64 Development` 빌드와 재생성 플래그 실행을 통과시키고 `/Game/PrototypeImagegenEnvironmentMap`을 다시 열어둔 것.
+
+## 2026-06-14 01:54:49 (소요시간: 00:06:43)
+
+- 이전 imagegen/소품 배치 실험 산출물을 버리고, 처음 단계로 오브젝트 배치 없는 절차적 Landscape 테스트 레벨을 새로 만든 것.
+- `/Game/PrototypeTerrainPathCreekMap`에 약 100.8m 정사각형 Landscape를 생성하고, `Dirt`, `Grass`, `Rock`, `DarkDirt` 4개 레이어 weightmap을 코드로 자동 페인팅한 것.
+- 오솔길은 남쪽에서 북쪽으로 이어지는 S자 dirt path로, 개울은 낮게 파인 dark dirt stream bed와 water strip 메시로 보이도록 구성한 것.
+- `/Game/Prototype/TerrainTest`에 4개 절차 텍스처, LayerInfo 4개, Landscape 머티리얼, 개울 물면 머티리얼/메시를 자동 생성하도록 한 것.
+- `-TunaSweeperRebuildProceduralTerrainTest -TunaSweeperProceduralTerrainTestQuit` 플래그를 추가하고, `StartupModule()` 직후 `NewBlankMap()` fatal을 피하려고 생성 실행을 `FTSTicker`로 지연시킨 것.
+- `Docs/procedural_landscape_generation.md`에 이번 기초 지형 테스트 레벨의 생성 규칙, 산출물, 재생성 명령, 주의점을 기록한 것.
+- `TunaSweeperEditor Win64 Development` 빌드, 무인 재생성, `/Game/PrototypeTerrainPathCreekMap` 직접 로드, MapCheck 0 Error / 0 Warning을 확인한 것.
+
+## 2026-06-14 02:07:10 (소요시간: 00:11:05)
+
+- 기초 지형 테스트 레벨의 `Dirt`, `Grass`, `Rock`, `DarkDirt` 4개 Landscape 레이어 텍스처를 imagegen으로 새로 생성한 것.
+- 텍스처 방향을 귀엽고 아기자기하지만 흐릿하지 않은 hand-painted anime illustration 질감으로 맞추고, 풍부한 명암과 선명한 표면 디테일을 갖도록 한 것.
+- 생성 원본 PNG를 `TunaSweeper/Content/SourceArt/TerrainTest/`에 `T_TerrainTest_*_Imagegen.png` 파일로 보관한 것.
+- `TunaSweeperProceduralTerrainTest.cpp`에서 SourceArt PNG가 있으면 `FImageUtils::LoadImage()`로 읽어 512x512 UE 텍스처 에셋을 만들고, 없을 때만 기존 절차 노이즈 fallback을 쓰도록 수정한 것.
+- `/Game/Prototype/TerrainTest` 텍스처 에셋과 `/Game/PrototypeTerrainPathCreekMap`을 재생성하고, 맵 직접 로드와 MapCheck 0 Error / 0 Warning을 확인한 것.
+- `Docs/procedural_landscape_generation.md`에 imagegen 텍스처 교체 경로와 아트 방향을 기록한 것.
+
+## 2026-06-14 02:19:02 (소요시간: 00:05:25)
+
+- imagegen 이전에 만든 절차 텍스처/머티리얼 산출물이 별도 에셋으로 남아 있는지 확인한 것.
+- `/Game/Prototype/TerrainTest/T_TerrainTest_*` 텍스처는 현재 imagegen SourceArt PNG에서 재생성되는 실제 사용 에셋이고, `M_TerrainTest_Landscape`, `M_TerrainTest_CreekWater`, `SM_TerrainTest_CreekWater`도 맵/머티리얼 참조에 걸려 있어 삭제 대상이 아님을 확인한 것.
+- C++ 안에 남아 있던 SourceArt 미존재 시 절차 노이즈 텍스처를 생성하는 fallback 경로와 관련 함수들을 제거한 것.
+- `Docs/procedural_landscape_generation.md`에서 이전 절차 노이즈 fallback 설명을 제거하고, SourceArt imagegen PNG가 필수 입력이며 없으면 생성 실패하도록 바뀐 현재 절차를 기록한 것.
+- `TunaSweeperEditor Win64 Development` 빌드와 절차 지형 테스트 레벨 재생성을 통과시키고, MapCheck 0 Error / 0 Warning을 확인한 것.
+
+## 2026-06-14 02:28:43 (소요시간: 00:03:03)
+
+- 기본 큐브 기준으로 지형 텍스처 밀도가 너무 낮고 잎/흙 패치가 크게 보이던 문제를 수정한 것.
+- Landscape 텍스처 import 크기를 512x512에서 1024x1024로 올려 imagegen 원본 디테일 손실을 줄인 것.
+- 기존 단일 `MappingScale=420`을 제거하고, 레이어별 mapping scale을 `Grass=115cm`, `Dirt=180cm`, `Rock=170cm`, `DarkDirt=160cm`로 분리한 것.
+- `/Game/Prototype/TerrainTest` 텍스처/머티리얼과 `/Game/PrototypeTerrainPathCreekMap`을 재생성하고, MapCheck 0 Error / 0 Warning을 확인한 것.
+- `Docs/procedural_landscape_generation.md`에 큐브 스케일 기준의 텍스처 밀도 조정값을 기록한 것.
+
+## 2026-06-14 02:36:30 (소요시간: 00:14:26)
+
+- `/Game/PrototypeTerrainPathCreekMap`의 개울 물면을 기존 긴 절차 메시 배치에서 `USplineComponent`와 `USplineMeshComponent` 기반 배치로 교체한 것.
+- `TS_ProceduralCreekWaterSpline` 배우 안에 `CreekSpline`과 `CreekWaterSplineMesh_00`부터 `CreekWaterSplineMesh_13`까지의 스플라인 메시 컴포넌트를 자동 생성하도록 한 것.
+- `SM_TerrainTest_CreekWater`를 전체 개울 메시가 아니라 스플라인 구간이 구부려 쓰는 짧은 물면 타일 메시로 재생성하도록 바꾼 것.
+- 물 타일은 2cm 두께의 얇은 slab 형태로 만들고, 스플라인 메시와 정적 메시 `BodySetup`의 불필요한 collision cook을 꺼서 `UBodySetup` 물리 경고가 남지 않도록 한 것.
+- `M_TerrainTest_CreekWater`에 `bUsedWithSplineMeshes` usage flag를 설정해 맵 로드 시 스플라인 메시 머티리얼 경고가 나지 않도록 한 것.
+- `Docs/procedural_landscape_generation.md`에 개울 스플라인 구성 절차를 기록한 것.
+- `TunaSweeperEditor Win64 Development` 빌드, 절차 지형 테스트 레벨 재생성, `/Game/PrototypeTerrainPathCreekMap` 직접 로드, MapCheck 0 Error / 0 Warning을 확인한 것.

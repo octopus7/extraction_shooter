@@ -22,6 +22,7 @@ public class TunaSweeperEditor : ModuleRules
 			"AssetRegistry",
 			"AudioEditor",
 			"KismetCompiler",
+			"Landscape",
 			"LevelEditor",
 			"BlueprintGraph",
 			"UMG",

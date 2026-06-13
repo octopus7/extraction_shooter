@@ -113,6 +113,7 @@
 #include "Styling/SlateTypes.h"
 #include "TunaSweeperExperimentalVegetation.h"
 #include "TunaSweeperFMSoundTool.h"
+#include "TunaSweeperProceduralTerrainTest.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
 #include "TunaSweeperEditorRunOnce.h"
 #include "UI/TunaSweeperInteractionMarkerWidget.h"
@@ -12569,6 +12570,22 @@ public:
 				FPlatformMisc::RequestExit(false);
 				return;
 			}
+		}
+
+		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperRebuildProceduralTerrainTest")))
+		{
+			FTSTicker::GetCoreTicker().AddTicker(
+				FTickerDelegate::CreateLambda(
+					[](float)
+					{
+						const bool bCompleted = TunaSweeperProceduralTerrainTest::EnsureProceduralTerrainTestLevel();
+						if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperProceduralTerrainTestQuit")))
+						{
+							FPlatformMisc::RequestExit(false);
+						}
+						return !bCompleted;
+					}),
+				1.0f);
 		}
 
 		FTunaSweeperEditorRunOnce::Run(
