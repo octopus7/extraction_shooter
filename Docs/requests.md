@@ -4386,3 +4386,11 @@
 - `TS_ProceduralCreekWaterSpline` 배우에 `CreekWaterWhiteRipples` `UStaticMeshComponent`를 추가하고, 같은 `SM_TerrainTest_CreekWater` 리본을 수면 본체보다 3cm 위에 배치해 z-fighting을 피하도록 한 것.
 - `Docs/procedural_landscape_generation.md`에 흰 물결 오버레이와 이후 shoreline/foam edge 구현 범위를 구분해 기록한 것.
 - `TunaSweeperEditor Win64 Development` 빌드, 절차 지형 테스트 레벨 재생성, 새 리플 머터리얼/맵 참조 저장, Unreal Editor 실행을 확인한 것.
+
+## 2026-06-14 04:32:00 (소요시간: 00:04:10)
+
+- `/Game/PrototypeTerrainPathCreekMap`의 바닥이 unlit 상태에서도 너무 밝게 보이는 문제를 줄이기 위해 procedural terrain landscape material 생성 코드를 수정한 것.
+- `TunaSweeperProceduralTerrainTest.cpp`의 terrain layer 정의에 `BaseColorTint`를 추가하고, `Dirt`, `Grass`, `Rock`, `DarkDirt` 텍스처 샘플을 레이어별 tint와 곱한 뒤 `LandscapeLayerBlend`에 넣도록 한 것.
+- `Grass`는 붕 떠 보이는 노란 값을 줄이도록 red/blue 대비 green을 조금 남기고 전체 값을 낮췄고, `Dirt`, `Rock`, `DarkDirt`도 전체 BaseColor 값을 낮춘 것.
+- `TunaSweeperEditor Win64 Development` 빌드 성공을 확인하고, `-TunaSweeperRebuildProceduralTerrainTest -TunaSweeperProceduralTerrainTestQuit`로 terrain test map/material 에셋을 재생성한 것.
+- 변경된 `/Game/PrototypeTerrainPathCreekMap`을 확인할 수 있도록 Unreal Editor를 실행한 것.
