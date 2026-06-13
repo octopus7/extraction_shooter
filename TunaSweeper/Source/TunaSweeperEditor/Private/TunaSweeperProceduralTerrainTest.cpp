@@ -26,13 +26,20 @@
 #include "LandscapeInfo.h"
 #include "LandscapeLayerInfoObject.h"
 #include "Materials/Material.h"
+#include "Materials/MaterialExpressionAbs.h"
+#include "Materials/MaterialExpressionAdd.h"
 #include "Materials/MaterialExpressionComponentMask.h"
 #include "Materials/MaterialExpressionConstant.h"
 #include "Materials/MaterialExpressionConstant3Vector.h"
 #include "Materials/MaterialExpressionLandscapeLayerBlend.h"
 #include "Materials/MaterialExpressionLandscapeLayerCoords.h"
 #include "Materials/MaterialExpressionMultiply.h"
+#include "Materials/MaterialExpressionSine.h"
+#include "Materials/MaterialExpressionSmoothStep.h"
+#include "Materials/MaterialExpressionSubtract.h"
+#include "Materials/MaterialExpressionTextureCoordinate.h"
 #include "Materials/MaterialExpressionTextureSample.h"
+#include "Materials/MaterialExpressionTime.h"
 #include "Materials/MaterialExpressionWorldPosition.h"
 #include "MeshDescription.h"
 #include "Misc/PackageName.h"
@@ -497,6 +504,119 @@ namespace TunaSweeperProceduralTerrainTest
 		WaterTextureSample->AutoSetSampleType();
 		Material->GetExpressionCollection().AddExpression(WaterTextureSample);
 
+		UMaterialExpressionTextureCoordinate* RibbonUV = NewObject<UMaterialExpressionTextureCoordinate>(Material);
+		RibbonUV->Material = Material;
+		RibbonUV->CoordinateIndex = 0;
+		RibbonUV->MaterialExpressionEditorX = -920;
+		RibbonUV->MaterialExpressionEditorY = 250;
+		Material->GetExpressionCollection().AddExpression(RibbonUV);
+
+		UMaterialExpressionComponentMask* RibbonU = NewObject<UMaterialExpressionComponentMask>(Material);
+		RibbonU->Material = Material;
+		RibbonU->Input.Connect(0, RibbonUV);
+		RibbonU->R = 1;
+		RibbonU->G = 0;
+		RibbonU->B = 0;
+		RibbonU->A = 0;
+		RibbonU->MaterialExpressionEditorX = -720;
+		RibbonU->MaterialExpressionEditorY = 250;
+		Material->GetExpressionCollection().AddExpression(RibbonU);
+
+		UMaterialExpressionSubtract* EdgeCentered = NewObject<UMaterialExpressionSubtract>(Material);
+		EdgeCentered->Material = Material;
+		EdgeCentered->A.Connect(0, RibbonU);
+		EdgeCentered->ConstB = 0.5f;
+		EdgeCentered->MaterialExpressionEditorX = -540;
+		EdgeCentered->MaterialExpressionEditorY = 250;
+		Material->GetExpressionCollection().AddExpression(EdgeCentered);
+
+		UMaterialExpressionAbs* EdgeAbs = NewObject<UMaterialExpressionAbs>(Material);
+		EdgeAbs->Material = Material;
+		EdgeAbs->Input.Connect(0, EdgeCentered);
+		EdgeAbs->MaterialExpressionEditorX = -380;
+		EdgeAbs->MaterialExpressionEditorY = 250;
+		Material->GetExpressionCollection().AddExpression(EdgeAbs);
+
+		UMaterialExpressionMultiply* EdgeDistance = NewObject<UMaterialExpressionMultiply>(Material);
+		EdgeDistance->Material = Material;
+		EdgeDistance->A.Connect(0, EdgeAbs);
+		EdgeDistance->ConstB = 2.0f;
+		EdgeDistance->MaterialExpressionEditorX = -220;
+		EdgeDistance->MaterialExpressionEditorY = 250;
+		Material->GetExpressionCollection().AddExpression(EdgeDistance);
+
+		UMaterialExpressionSmoothStep* EdgeMask = NewObject<UMaterialExpressionSmoothStep>(Material);
+		EdgeMask->Material = Material;
+		EdgeMask->Value.Connect(0, EdgeDistance);
+		EdgeMask->ConstMin = 0.58f;
+		EdgeMask->ConstMax = 0.95f;
+		EdgeMask->MaterialExpressionEditorX = -40;
+		EdgeMask->MaterialExpressionEditorY = 250;
+		Material->GetExpressionCollection().AddExpression(EdgeMask);
+
+		UMaterialExpressionTime* Time = NewObject<UMaterialExpressionTime>(Material);
+		Time->Material = Material;
+		Time->bIgnorePause = true;
+		Time->MaterialExpressionEditorX = -540;
+		Time->MaterialExpressionEditorY = 480;
+		Material->GetExpressionCollection().AddExpression(Time);
+
+		UMaterialExpressionMultiply* TimeScale = NewObject<UMaterialExpressionMultiply>(Material);
+		TimeScale->Material = Material;
+		TimeScale->A.Connect(0, Time);
+		TimeScale->ConstB = 0.16f;
+		TimeScale->MaterialExpressionEditorX = -360;
+		TimeScale->MaterialExpressionEditorY = 480;
+		Material->GetExpressionCollection().AddExpression(TimeScale);
+
+		UMaterialExpressionSine* EdgeSine = NewObject<UMaterialExpressionSine>(Material);
+		EdgeSine->Material = Material;
+		EdgeSine->Input.Connect(0, TimeScale);
+		EdgeSine->Period = 1.0f;
+		EdgeSine->MaterialExpressionEditorX = -180;
+		EdgeSine->MaterialExpressionEditorY = 480;
+		Material->GetExpressionCollection().AddExpression(EdgeSine);
+
+		UMaterialExpressionMultiply* EdgeSineHalf = NewObject<UMaterialExpressionMultiply>(Material);
+		EdgeSineHalf->Material = Material;
+		EdgeSineHalf->A.Connect(0, EdgeSine);
+		EdgeSineHalf->ConstB = 0.5f;
+		EdgeSineHalf->MaterialExpressionEditorX = 0;
+		EdgeSineHalf->MaterialExpressionEditorY = 480;
+		Material->GetExpressionCollection().AddExpression(EdgeSineHalf);
+
+		UMaterialExpressionAdd* EdgeSineNormalized = NewObject<UMaterialExpressionAdd>(Material);
+		EdgeSineNormalized->Material = Material;
+		EdgeSineNormalized->A.Connect(0, EdgeSineHalf);
+		EdgeSineNormalized->ConstB = 0.5f;
+		EdgeSineNormalized->MaterialExpressionEditorX = 180;
+		EdgeSineNormalized->MaterialExpressionEditorY = 480;
+		Material->GetExpressionCollection().AddExpression(EdgeSineNormalized);
+
+		UMaterialExpressionMultiply* EdgePulseMask = NewObject<UMaterialExpressionMultiply>(Material);
+		EdgePulseMask->Material = Material;
+		EdgePulseMask->A.Connect(0, EdgeMask);
+		EdgePulseMask->B.Connect(0, EdgeSineNormalized);
+		EdgePulseMask->MaterialExpressionEditorX = 350;
+		EdgePulseMask->MaterialExpressionEditorY = 330;
+		Material->GetExpressionCollection().AddExpression(EdgePulseMask);
+
+		UMaterialExpressionMultiply* EdgeEmissivePulse = NewObject<UMaterialExpressionMultiply>(Material);
+		EdgeEmissivePulse->Material = Material;
+		EdgeEmissivePulse->A.Connect(0, EdgePulseMask);
+		EdgeEmissivePulse->ConstB = 0.10f;
+		EdgeEmissivePulse->MaterialExpressionEditorX = 540;
+		EdgeEmissivePulse->MaterialExpressionEditorY = 250;
+		Material->GetExpressionCollection().AddExpression(EdgeEmissivePulse);
+
+		UMaterialExpressionMultiply* EdgeOpacityPulse = NewObject<UMaterialExpressionMultiply>(Material);
+		EdgeOpacityPulse->Material = Material;
+		EdgeOpacityPulse->A.Connect(0, EdgePulseMask);
+		EdgeOpacityPulse->ConstB = 0.055f;
+		EdgeOpacityPulse->MaterialExpressionEditorX = 540;
+		EdgeOpacityPulse->MaterialExpressionEditorY = 410;
+		Material->GetExpressionCollection().AddExpression(EdgeOpacityPulse);
+
 		UMaterialExpressionMultiply* EmissiveLift = NewObject<UMaterialExpressionMultiply>(Material);
 		EmissiveLift->Material = Material;
 		EmissiveLift->A.Connect(0, WaterTextureSample);
@@ -505,6 +625,14 @@ namespace TunaSweeperProceduralTerrainTest
 		EmissiveLift->MaterialExpressionEditorY = 120;
 		Material->GetExpressionCollection().AddExpression(EmissiveLift);
 
+		UMaterialExpressionAdd* EmissiveWithEdgePulse = NewObject<UMaterialExpressionAdd>(Material);
+		EmissiveWithEdgePulse->Material = Material;
+		EmissiveWithEdgePulse->A.Connect(0, EmissiveLift);
+		EmissiveWithEdgePulse->B.Connect(0, EdgeEmissivePulse);
+		EmissiveWithEdgePulse->MaterialExpressionEditorX = 720;
+		EmissiveWithEdgePulse->MaterialExpressionEditorY = 160;
+		Material->GetExpressionCollection().AddExpression(EmissiveWithEdgePulse);
+
 		UMaterialExpressionConstant* Opacity = NewObject<UMaterialExpressionConstant>(Material);
 		Opacity->Material = Material;
 		Opacity->R = 0.38f;
@@ -512,9 +640,17 @@ namespace TunaSweeperProceduralTerrainTest
 		Opacity->MaterialExpressionEditorY = 280;
 		Material->GetExpressionCollection().AddExpression(Opacity);
 
+		UMaterialExpressionAdd* OpacityWithEdgePulse = NewObject<UMaterialExpressionAdd>(Material);
+		OpacityWithEdgePulse->Material = Material;
+		OpacityWithEdgePulse->A.Connect(0, Opacity);
+		OpacityWithEdgePulse->B.Connect(0, EdgeOpacityPulse);
+		OpacityWithEdgePulse->MaterialExpressionEditorX = 720;
+		OpacityWithEdgePulse->MaterialExpressionEditorY = 330;
+		Material->GetExpressionCollection().AddExpression(OpacityWithEdgePulse);
+
 		MaterialEditorOnly->BaseColor.Connect(0, WaterTextureSample);
-		MaterialEditorOnly->EmissiveColor.Connect(0, EmissiveLift);
-		MaterialEditorOnly->Opacity.Connect(0, Opacity);
+		MaterialEditorOnly->EmissiveColor.Connect(0, EmissiveWithEdgePulse);
+		MaterialEditorOnly->Opacity.Connect(0, OpacityWithEdgePulse);
 		MaterialEditorOnly->Roughness.UseConstant = true;
 		MaterialEditorOnly->Roughness.Constant = 0.24f;
 		MaterialEditorOnly->Specular.UseConstant = true;

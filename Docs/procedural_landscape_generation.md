@@ -54,6 +54,7 @@ Start-Process -FilePath 'C:\Program Files\Epic Games\UE_5.7\Engine\Binaries\Win6
 - 현재 수면은 shoreline 전 단계의 가시성 확보용이지만, 바닥이 비치는 얕은 개울처럼 보이도록 `BLEND_Translucent` + `MSM_Unlit` 재질에 imagegen 수면 텍스처를 연결한다. 불투명 단색 수면은 개울 바닥을 가려 인공 도로처럼 보이므로 사용하지 않는다.
 - 수면 텍스처 원본은 `TunaSweeper/Content/SourceArt/TerrainTest/T_TerrainTest_CreekWater_Imagegen.png`이고, 생성 에셋은 `/Game/Prototype/TerrainTest/T_TerrainTest_CreekWater`다.
 - 스플라인 메시 UV는 긴 구간에서 수면 텍스처가 늘어지므로 사용하지 않는다. `M_TerrainTest_CreekWater`는 `AbsoluteWorldPosition.xy * 0.0018`을 텍스처 좌표로 사용해 스플라인 구간 길이와 무관한 월드 기준 반복 밀도를 유지한다.
+- 수면 자체를 흐르게 만들지는 않는다. 대신 리본 메시의 폭 방향 UV에서 양쪽 가장자리만 `SmoothStep`으로 마스크하고, `Time` + `Sine`으로 그 shoreline edge의 emissive와 opacity만 약하게 변조한다. 즉 물가 주변이 잔잔하게 살아 움직이는 느낌만 준다.
 - 수면 폭은 기준 half width 180cm, 변형 범위 148~212cm, 지형 위 offset은 42cm, opacity는 0.38이다. shoreline/foam edge는 이후 별도 리본 메시나 머티리얼 레이어로 추가한다.
 
 ### Imagegen 텍스처 교체
