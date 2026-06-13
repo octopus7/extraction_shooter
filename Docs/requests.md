@@ -4254,3 +4254,19 @@
 
 - Landscape 절차적 생성 과정을 나중에 다시 구현할 수 있도록 `Docs/procedural_landscape_generation.md` 문서를 새로 작성한 것.
 - imagegen 지형 아틀라스, LayerInfo, Landscape 머티리얼, heightmap/weightmap 생성, `ALandscape::Import()` 호출 순서, 재생성 명령, 주의점을 정리한 것.
+
+## 2026-06-14 00:54:16 (소요시간: 00:01:45)
+
+- 프로토타입 맵에 조명이 없어 `M_ImagegenLandscape_AutoPainted`가 `DefaultLit` 상태에서 검게 보이던 문제를 수정한 것.
+- Landscape 머티리얼 생성 코드를 `MSM_Unlit`으로 바꾸고 레이어 블렌드 결과를 `EmissiveColor`에도 연결해 Lit 뷰포트에서도 지형 텍스처가 보이게 한 것.
+- `Docs/procedural_landscape_generation.md`에 조명 없는 확인용 맵에서는 Landscape 머티리얼을 unlit/emissive로 구성해야 한다는 주의점을 추가한 것.
+- `TunaSweeperEditor Win64 Development` 빌드와 재생성 플래그 실행을 통과시키고 `/Game/PrototypeImagegenEnvironmentMap`을 다시 열어둔 것.
+
+## 2026-06-14 01:00:03 (소요시간: 00:04:33)
+
+- 프로토타입 Landscape가 게임 설계상의 맵 배치 없이 랜덤 지형처럼 보이고 소품 밀도도 낮던 문제를 수정한 것.
+- `Docs/SSOT/area_unlocking.md` 기준을 반영해 남쪽 시작/초기 외부, 중앙 저위험 파밍권, 숲길, 서쪽 우회로, 콘크리트 더미, 동쪽 선택 파밍 pocket, 북쪽 고급보안구역, 외곽 숲 마스크를 Landscape 생성에 추가한 것.
+- heightmap과 weightmap을 구역 마스크 기반으로 재작성해 주요 동선은 콘크리트, 중앙 파밍권은 흙/풀, 숲길/우회로는 풀/흙, 콘크리트 더미는 slab/균열, 고급보안구역은 어두운 균열/콘크리트 비중이 높게 보이도록 한 것.
+- 소품 배치를 수동 16개에서 구역별 절차 배치로 바꿔 나무, 풀, 바위, 콘크리트 slab 밀도를 크게 늘린 것.
+- `Docs/procedural_landscape_generation.md`에 랜덤 노이즈보다 SSOT 구역 마스크를 먼저 만들어야 한다는 절차를 추가한 것.
+- `TunaSweeperEditor Win64 Development` 빌드와 재생성 플래그 실행을 통과시키고 `/Game/PrototypeImagegenEnvironmentMap`을 다시 열어둔 것.
