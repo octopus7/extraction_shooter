@@ -4349,3 +4349,23 @@
 - `M_TerrainTest_CreekWater`를 `BLEND_Opaque` + `MSM_Unlit` 밝은 청록색 emissive 재질로 바꿔 조명/그림자에 묻히지 않게 한 것.
 - `Docs/procedural_landscape_generation.md`에 현재 개울 물면 구성 방식을 갱신한 것.
 - `TunaSweeperEditor Win64 Development` 빌드, 절차 지형 테스트 레벨 재생성, `/Game/PrototypeTerrainPathCreekMap` 직접 로드, MapCheck 0 Error / 0 Warning을 확인한 것.
+
+## 2026-06-14 03:36:30 (소요시간: 00:07:08)
+
+- `/Game/PrototypeTerrainPathCreekMap`의 개울 물면이 인공적인 단색 도로처럼 보이고 바닥을 가리던 문제를 수정한 것.
+- imagegen으로 손그림풍 수면 텍스처를 생성하고 `TunaSweeper/Content/SourceArt/TerrainTest/T_TerrainTest_CreekWater_Imagegen.png`로 보관한 것.
+- 생성 루틴에서 해당 PNG를 `/Game/Prototype/TerrainTest/T_TerrainTest_CreekWater` 에셋으로 자동 임포트하도록 추가한 것.
+- `M_TerrainTest_CreekWater`를 `BLEND_Opaque` 단색 재질에서 `BLEND_Translucent` + `MSM_Unlit` 텍스처 재질로 바꿔 얕은 개울 바닥이 비치도록 한 것.
+- 수면 폭을 half width 180cm, 전체 폭 360cm로 넓히고 opacity를 0.46으로 설정한 것.
+- `Docs/procedural_landscape_generation.md`에 반투명 imagegen 수면 텍스처 구성과 수면 폭/opacity 기준을 갱신한 것.
+- `TunaSweeperEditor Win64 Development` 빌드, 절차 지형 테스트 레벨 재생성, `/Game/PrototypeTerrainPathCreekMap` 직접 로드, MapCheck 0 Error / 0 Warning을 확인한 것.
+
+## 2026-06-14 03:50:44 (소요시간: 00:11:16)
+
+- `/Game/PrototypeTerrainPathCreekMap`의 수면 텍스처 밀도가 너무 촘촘하고 원본 imagegen 텍스처와 렌더 결과의 괴리가 크던 문제를 수정한 것.
+- `M_TerrainTest_CreekWater`의 월드 좌표 텍스처 반복 배율을 `AbsoluteWorldPosition.xy * 0.004`에서 `* 0.0018`로 낮춰 물결 패턴이 지형/캐릭터 스케일에 비해 과하게 촘촘하지 않도록 한 것.
+- 수면 opacity를 0.46에서 0.38로 낮추고 emissive lift를 0.38에서 0.24로 낮춰 원본 텍스처가 반투명 합성 중 과하게 밝거나 바쁘게 보이지 않도록 한 것.
+- 구간별 `/Engine/BasicShapes/Cube` + `USplineMeshComponent` 수면을 제거하고, `SM_TerrainTest_CreekWater` 하나의 연속 리본 메시를 `UStaticMeshComponent`로 배치하도록 바꿔 반투명 end cap/겹침 이음매 아티팩트를 제거한 것.
+- 연속 리본은 96개 샘플로 만들고 기준 half width 180cm에 노이즈/사인 변형을 더해 148~212cm 범위로 자연스럽게 폭이 변하도록 한 것.
+- `Docs/procedural_landscape_generation.md`에 연속 리본 메시, 월드 좌표 텍스처 밀도, opacity 기준을 갱신한 것.
+- `TunaSweeperEditor Win64 Development` 빌드, 절차 지형 테스트 레벨 재생성, `/Game/PrototypeTerrainPathCreekMap` 직접 로드, MapCheck 0 Error / 0 Warning을 확인한 것.

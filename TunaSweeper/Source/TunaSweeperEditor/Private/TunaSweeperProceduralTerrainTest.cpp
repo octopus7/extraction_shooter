@@ -5,6 +5,7 @@
 #include "Components/SceneComponent.h"
 #include "Components/SplineComponent.h"
 #include "Components/SplineMeshComponent.h"
+#include "Components/StaticMeshComponent.h"
 #include "Components/LightComponent.h"
 #include "Components/SkyLightComponent.h"
 #include "CoreMinimal.h"
@@ -25,12 +26,14 @@
 #include "LandscapeInfo.h"
 #include "LandscapeLayerInfoObject.h"
 #include "Materials/Material.h"
+#include "Materials/MaterialExpressionComponentMask.h"
 #include "Materials/MaterialExpressionConstant.h"
 #include "Materials/MaterialExpressionConstant3Vector.h"
 #include "Materials/MaterialExpressionLandscapeLayerBlend.h"
 #include "Materials/MaterialExpressionLandscapeLayerCoords.h"
 #include "Materials/MaterialExpressionMultiply.h"
 #include "Materials/MaterialExpressionTextureSample.h"
+#include "Materials/MaterialExpressionWorldPosition.h"
 #include "MeshDescription.h"
 #include "Misc/PackageName.h"
 #include "Misc/Paths.h"
@@ -48,6 +51,8 @@ namespace TunaSweeperProceduralTerrainTest
 	const FString LandscapeMaterialAssetName = TEXT("M_TerrainTest_Landscape");
 	const FString CreekWaterMaterialAssetName = TEXT("M_TerrainTest_CreekWater");
 	const FString CreekWaterMeshAssetName = TEXT("SM_TerrainTest_CreekWater");
+	const FString CreekWaterTextureAssetName = TEXT("T_TerrainTest_CreekWater");
+	const FString CreekWaterSourceArtFileName = TEXT("T_TerrainTest_CreekWater_Imagegen.png");
 
 	constexpr int32 TextureSize = 1024;
 	constexpr int32 ComponentCount = 4;
@@ -60,12 +65,11 @@ namespace TunaSweeperProceduralTerrainTest
 	constexpr float LandscapeWorldSize = LandscapeQuads * LandscapeScaleXY;
 	constexpr float LandscapeHalfWorldSize = LandscapeWorldSize * 0.5f;
 	constexpr float CreekSplineMargin = 420.0f;
-	constexpr float CreekWaterHalfWidth = 118.0f;
+	constexpr float CreekWaterHalfWidth = 180.0f;
 	constexpr float CreekWaterZOffset = 42.0f;
-	constexpr float CreekWaterVisualThickness = 5.0f;
-	constexpr float EngineBasicShapeSize = 100.0f;
+	constexpr float CreekWaterTextureWorldScale = 0.0018f;
 	constexpr int32 CreekSplinePointCount = 15;
-	constexpr int32 CreekWaterTileLengthSubdivisions = 10;
+	constexpr int32 CreekWaterRibbonSampleCount = 96;
 	constexpr float PlayerStartX = 520.0f;
 	constexpr float PlayerStartY = -220.0f;
 	constexpr float PlayerStartGroundClearance = 120.0f;
@@ -194,24 +198,24 @@ namespace TunaSweeperProceduralTerrainTest
 		return FPaths::Combine(FPaths::ProjectContentDir(), TEXT("SourceArt/TerrainTest"), FileName);
 	}
 
-	bool LoadImagegenTerrainTexturePixels(const FTerrainLayerDefinition& Definition, TArray<FColor>& OutPixels)
+	bool LoadSourceArtTexturePixels(const FString& SourceArtFileName, const FString& DebugName, TArray<FColor>& OutPixels)
 	{
-		if (Definition.SourceArtFileName.IsEmpty())
+		if (SourceArtFileName.IsEmpty())
 		{
 			return false;
 		}
 
-		const FString SourceFile = GetTerrainSourceArtPath(Definition.SourceArtFileName);
+		const FString SourceFile = GetTerrainSourceArtPath(SourceArtFileName);
 		if (!FPaths::FileExists(SourceFile))
 		{
-			UE_LOG(LogTunaSweeperProceduralTerrainTest, Error, TEXT("Missing required terrain source art %s."), *SourceFile);
+			UE_LOG(LogTunaSweeperProceduralTerrainTest, Error, TEXT("Missing required source art for %s: %s."), *DebugName, *SourceFile);
 			return false;
 		}
 
 		FImage SourceImage;
 		if (!FImageUtils::LoadImage(*SourceFile, SourceImage))
 		{
-			UE_LOG(LogTunaSweeperProceduralTerrainTest, Error, TEXT("Failed to load terrain source art %s."), *SourceFile);
+			UE_LOG(LogTunaSweeperProceduralTerrainTest, Error, TEXT("Failed to load source art for %s: %s."), *DebugName, *SourceFile);
 			return false;
 		}
 
@@ -245,17 +249,17 @@ namespace TunaSweeperProceduralTerrainTest
 		return OutPixels.Num() == TextureSize * TextureSize;
 	}
 
-	UTexture2D* EnsureTerrainTextureAsset(const FTerrainLayerDefinition& Definition)
+	UTexture2D* EnsureTextureAssetFromSourceArt(const FString& TextureAssetName, const FString& SourceArtFileName)
 	{
-		const FString ObjectPath = GetAssetObjectPath(AssetPath, Definition.TextureAssetName);
+		const FString ObjectPath = GetAssetObjectPath(AssetPath, TextureAssetName);
 		UTexture2D* Texture = LoadObject<UTexture2D>(nullptr, *ObjectPath);
 		if (!Texture)
 		{
-			const FString PackageName = FString::Printf(TEXT("%s/%s"), *AssetPath, *Definition.TextureAssetName);
+			const FString PackageName = FString::Printf(TEXT("%s/%s"), *AssetPath, *TextureAssetName);
 			UPackage* Package = CreatePackage(*PackageName);
 			Texture = NewObject<UTexture2D>(
 				Package,
-				*Definition.TextureAssetName,
+				*TextureAssetName,
 				RF_Public | RF_Standalone | RF_Transactional);
 
 			if (!Texture)
@@ -268,7 +272,7 @@ namespace TunaSweeperProceduralTerrainTest
 		}
 
 		TArray<FColor> Pixels;
-		if (!LoadImagegenTerrainTexturePixels(Definition, Pixels))
+		if (!LoadSourceArtTexturePixels(SourceArtFileName, TextureAssetName, Pixels))
 		{
 			return nullptr;
 		}
@@ -278,10 +282,17 @@ namespace TunaSweeperProceduralTerrainTest
 		Texture->SRGB = true;
 		Texture->CompressionSettings = TC_Default;
 		Texture->MipGenSettings = TMGS_FromTextureGroup;
+		Texture->AddressX = TA_Wrap;
+		Texture->AddressY = TA_Wrap;
 		Texture->PostEditChange();
 		Texture->MarkPackageDirty();
 
 		return SaveAsset(Texture) ? Texture : nullptr;
+	}
+
+	UTexture2D* EnsureTerrainTextureAsset(const FTerrainLayerDefinition& Definition)
+	{
+		return EnsureTextureAssetFromSourceArt(Definition.TextureAssetName, Definition.SourceArtFileName);
 	}
 
 	ULandscapeLayerInfoObject* EnsureLayerInfoAsset(const FTerrainLayerDefinition& Definition)
@@ -425,8 +436,13 @@ namespace TunaSweeperProceduralTerrainTest
 		return SaveAsset(Material) ? Material : nullptr;
 	}
 
-	UMaterial* EnsureCreekWaterMaterial()
+	UMaterial* EnsureCreekWaterMaterial(UTexture2D* WaterTexture)
 	{
+		if (!WaterTexture)
+		{
+			return nullptr;
+		}
+
 		UMaterial* Material = FindOrCreateMaterial(CreekWaterMaterialAssetName);
 		if (!Material)
 		{
@@ -435,7 +451,7 @@ namespace TunaSweeperProceduralTerrainTest
 
 		Material->Modify();
 		Material->GetExpressionCollection().Empty();
-		Material->BlendMode = BLEND_Opaque;
+		Material->BlendMode = BLEND_Translucent;
 		Material->TwoSided = true;
 		Material->bUsedWithSplineMeshes = true;
 		Material->SetShadingModel(MSM_Unlit);
@@ -446,24 +462,59 @@ namespace TunaSweeperProceduralTerrainTest
 			return nullptr;
 		}
 
-		UMaterialExpressionConstant3Vector* WaterColor = NewObject<UMaterialExpressionConstant3Vector>(Material);
-		WaterColor->Material = Material;
-		WaterColor->Constant = FLinearColor(0.05f, 0.68f, 0.95f, 1.0f);
-		WaterColor->MaterialExpressionEditorX = -420;
-		WaterColor->MaterialExpressionEditorY = -80;
-		Material->GetExpressionCollection().AddExpression(WaterColor);
+		UMaterialExpressionWorldPosition* WorldPosition = NewObject<UMaterialExpressionWorldPosition>(Material);
+		WorldPosition->Material = Material;
+		WorldPosition->WorldPositionShaderOffset = WPT_ExcludeAllShaderOffsets;
+		WorldPosition->MaterialExpressionEditorX = -920;
+		WorldPosition->MaterialExpressionEditorY = -170;
+		Material->GetExpressionCollection().AddExpression(WorldPosition);
+
+		UMaterialExpressionComponentMask* WorldPositionXY = NewObject<UMaterialExpressionComponentMask>(Material);
+		WorldPositionXY->Material = Material;
+		WorldPositionXY->Input.Connect(0, WorldPosition);
+		WorldPositionXY->R = 1;
+		WorldPositionXY->G = 1;
+		WorldPositionXY->B = 0;
+		WorldPositionXY->A = 0;
+		WorldPositionXY->MaterialExpressionEditorX = -700;
+		WorldPositionXY->MaterialExpressionEditorY = -170;
+		Material->GetExpressionCollection().AddExpression(WorldPositionXY);
+
+		UMaterialExpressionMultiply* WaterTextureCoordinates = NewObject<UMaterialExpressionMultiply>(Material);
+		WaterTextureCoordinates->Material = Material;
+		WaterTextureCoordinates->A.Connect(0, WorldPositionXY);
+		WaterTextureCoordinates->ConstB = CreekWaterTextureWorldScale;
+		WaterTextureCoordinates->MaterialExpressionEditorX = -520;
+		WaterTextureCoordinates->MaterialExpressionEditorY = -170;
+		Material->GetExpressionCollection().AddExpression(WaterTextureCoordinates);
+
+		UMaterialExpressionTextureSample* WaterTextureSample = NewObject<UMaterialExpressionTextureSample>(Material);
+		WaterTextureSample->Material = Material;
+		WaterTextureSample->Texture = WaterTexture;
+		WaterTextureSample->Coordinates.Connect(0, WaterTextureCoordinates);
+		WaterTextureSample->MaterialExpressionEditorX = -300;
+		WaterTextureSample->MaterialExpressionEditorY = -80;
+		WaterTextureSample->AutoSetSampleType();
+		Material->GetExpressionCollection().AddExpression(WaterTextureSample);
 
 		UMaterialExpressionMultiply* EmissiveLift = NewObject<UMaterialExpressionMultiply>(Material);
 		EmissiveLift->Material = Material;
-		EmissiveLift->A.Connect(0, WaterColor);
-		EmissiveLift->ConstB = 1.35f;
-		EmissiveLift->MaterialExpressionEditorX = -120;
+		EmissiveLift->A.Connect(0, WaterTextureSample);
+		EmissiveLift->ConstB = 0.24f;
+		EmissiveLift->MaterialExpressionEditorX = -160;
 		EmissiveLift->MaterialExpressionEditorY = 120;
 		Material->GetExpressionCollection().AddExpression(EmissiveLift);
 
-		MaterialEditorOnly->BaseColor.Connect(0, WaterColor);
+		UMaterialExpressionConstant* Opacity = NewObject<UMaterialExpressionConstant>(Material);
+		Opacity->Material = Material;
+		Opacity->R = 0.38f;
+		Opacity->MaterialExpressionEditorX = -160;
+		Opacity->MaterialExpressionEditorY = 280;
+		Material->GetExpressionCollection().AddExpression(Opacity);
+
+		MaterialEditorOnly->BaseColor.Connect(0, WaterTextureSample);
 		MaterialEditorOnly->EmissiveColor.Connect(0, EmissiveLift);
-		MaterialEditorOnly->Opacity.Expression = nullptr;
+		MaterialEditorOnly->Opacity.Connect(0, Opacity);
 		MaterialEditorOnly->Roughness.UseConstant = true;
 		MaterialEditorOnly->Roughness.Constant = 0.24f;
 		MaterialEditorOnly->Specular.UseConstant = true;
@@ -644,69 +695,71 @@ namespace TunaSweeperProceduralTerrainTest
 		return VertexInstanceId;
 	}
 
-	void BuildCreekWaterSplineSegmentMeshDescription(FMeshDescription& MeshDescription)
+	FVector GetCreekSplinePointAt(float T)
+	{
+		const float ClampedT = FMath::Clamp(T, 0.0f, 1.0f);
+		const float WorldY = FMath::Lerp(-LandscapeHalfWorldSize + CreekSplineMargin, LandscapeHalfWorldSize - CreekSplineMargin, ClampedT);
+		const float WorldX = GetCreekCenterX(WorldY);
+		const float WorldZ = EvaluateTerrainHeightCm(WorldX, WorldY) + CreekWaterZOffset;
+		return FVector(WorldX, WorldY, WorldZ);
+	}
+
+	float GetCreekWaterHalfWidthAt(float T, const FVector& Center)
+	{
+		const float SineVariation = 22.0f * FMath::Sin(T * UE_TWO_PI * 2.7f + 0.4f);
+		const float NoiseVariation = (Noise01(Center.X, Center.Y, 0.0011f, 511.0f) - 0.5f) * 22.0f;
+		return FMath::Clamp(CreekWaterHalfWidth + SineVariation + NoiseVariation, 148.0f, 212.0f);
+	}
+
+	void BuildCreekWaterRibbonMeshDescription(FMeshDescription& MeshDescription)
 	{
 		FStaticMeshAttributes Attributes(MeshDescription);
 		Attributes.Register();
 		Attributes.GetVertexInstanceUVs().SetNumChannels(1);
 
 		const FPolygonGroupID PolygonGroupId = MeshDescription.CreatePolygonGroup();
-		constexpr float TileLength = 100.0f;
-		constexpr float TileThickness = 2.0f;
-		const FLinearColor VertexColor(0.18f, 0.56f, 0.62f, 0.58f);
+		const FLinearColor VertexColor(0.18f, 0.56f, 0.62f, 0.46f);
 
-		for (int32 SegmentIndex = 0; SegmentIndex < CreekWaterTileLengthSubdivisions; ++SegmentIndex)
+		TArray<FVector> LeftEdgePoints;
+		TArray<FVector> RightEdgePoints;
+		LeftEdgePoints.Reserve(CreekWaterRibbonSampleCount + 1);
+		RightEdgePoints.Reserve(CreekWaterRibbonSampleCount + 1);
+
+		for (int32 PointIndex = 0; PointIndex <= CreekWaterRibbonSampleCount; ++PointIndex)
 		{
-			const float T0 = static_cast<float>(SegmentIndex) / static_cast<float>(CreekWaterTileLengthSubdivisions);
-			const float T1 = static_cast<float>(SegmentIndex + 1) / static_cast<float>(CreekWaterTileLengthSubdivisions);
-			const float X0 = TileLength * T0;
-			const float X1 = TileLength * T1;
+			const float T = static_cast<float>(PointIndex) / static_cast<float>(CreekWaterRibbonSampleCount);
+			const FVector Center = GetCreekSplinePointAt(T);
+			const FVector Previous = GetCreekSplinePointAt(T - (1.0f / CreekWaterRibbonSampleCount));
+			const FVector Next = GetCreekSplinePointAt(T + (1.0f / CreekWaterRibbonSampleCount));
 
-			TArray<FVertexInstanceID> VertexInstances;
-			VertexInstances.Add(AddWaterVertex(MeshDescription, Attributes, FVector3f(X0, -CreekWaterHalfWidth, 0.0f), FVector2f(0.0f, T0), VertexColor));
-			VertexInstances.Add(AddWaterVertex(MeshDescription, Attributes, FVector3f(X0, CreekWaterHalfWidth, 0.0f), FVector2f(1.0f, T0), VertexColor));
-			VertexInstances.Add(AddWaterVertex(MeshDescription, Attributes, FVector3f(X1, CreekWaterHalfWidth, 0.0f), FVector2f(1.0f, T1), VertexColor));
-			VertexInstances.Add(AddWaterVertex(MeshDescription, Attributes, FVector3f(X1, -CreekWaterHalfWidth, 0.0f), FVector2f(0.0f, T1), VertexColor));
-			MeshDescription.CreatePolygon(PolygonGroupId, VertexInstances);
+			FVector Tangent = Next - Previous;
+			Tangent.Z = 0.0f;
+			if (!Tangent.Normalize())
+			{
+				Tangent = FVector::ForwardVector;
+			}
 
-			TArray<FVertexInstanceID> BottomVertexInstances;
-			BottomVertexInstances.Add(AddWaterVertex(MeshDescription, Attributes, FVector3f(X0, CreekWaterHalfWidth, -TileThickness), FVector2f(1.0f, T0), VertexColor));
-			BottomVertexInstances.Add(AddWaterVertex(MeshDescription, Attributes, FVector3f(X0, -CreekWaterHalfWidth, -TileThickness), FVector2f(0.0f, T0), VertexColor));
-			BottomVertexInstances.Add(AddWaterVertex(MeshDescription, Attributes, FVector3f(X1, -CreekWaterHalfWidth, -TileThickness), FVector2f(0.0f, T1), VertexColor));
-			BottomVertexInstances.Add(AddWaterVertex(MeshDescription, Attributes, FVector3f(X1, CreekWaterHalfWidth, -TileThickness), FVector2f(1.0f, T1), VertexColor));
-			MeshDescription.CreatePolygon(PolygonGroupId, BottomVertexInstances);
-
-			TArray<FVertexInstanceID> LeftSideVertexInstances;
-			LeftSideVertexInstances.Add(AddWaterVertex(MeshDescription, Attributes, FVector3f(X0, -CreekWaterHalfWidth, -TileThickness), FVector2f(0.0f, T0), VertexColor));
-			LeftSideVertexInstances.Add(AddWaterVertex(MeshDescription, Attributes, FVector3f(X0, -CreekWaterHalfWidth, 0.0f), FVector2f(1.0f, T0), VertexColor));
-			LeftSideVertexInstances.Add(AddWaterVertex(MeshDescription, Attributes, FVector3f(X1, -CreekWaterHalfWidth, 0.0f), FVector2f(1.0f, T1), VertexColor));
-			LeftSideVertexInstances.Add(AddWaterVertex(MeshDescription, Attributes, FVector3f(X1, -CreekWaterHalfWidth, -TileThickness), FVector2f(0.0f, T1), VertexColor));
-			MeshDescription.CreatePolygon(PolygonGroupId, LeftSideVertexInstances);
-
-			TArray<FVertexInstanceID> RightSideVertexInstances;
-			RightSideVertexInstances.Add(AddWaterVertex(MeshDescription, Attributes, FVector3f(X0, CreekWaterHalfWidth, 0.0f), FVector2f(1.0f, T0), VertexColor));
-			RightSideVertexInstances.Add(AddWaterVertex(MeshDescription, Attributes, FVector3f(X0, CreekWaterHalfWidth, -TileThickness), FVector2f(0.0f, T0), VertexColor));
-			RightSideVertexInstances.Add(AddWaterVertex(MeshDescription, Attributes, FVector3f(X1, CreekWaterHalfWidth, -TileThickness), FVector2f(0.0f, T1), VertexColor));
-			RightSideVertexInstances.Add(AddWaterVertex(MeshDescription, Attributes, FVector3f(X1, CreekWaterHalfWidth, 0.0f), FVector2f(1.0f, T1), VertexColor));
-			MeshDescription.CreatePolygon(PolygonGroupId, RightSideVertexInstances);
+			const FVector RightVector(Tangent.Y, -Tangent.X, 0.0f);
+			const float HalfWidth = GetCreekWaterHalfWidthAt(T, Center);
+			LeftEdgePoints.Add(Center - RightVector * HalfWidth);
+			RightEdgePoints.Add(Center + RightVector * HalfWidth);
 		}
 
-		TArray<FVertexInstanceID> StartCapVertexInstances;
-		StartCapVertexInstances.Add(AddWaterVertex(MeshDescription, Attributes, FVector3f(0.0f, -CreekWaterHalfWidth, -TileThickness), FVector2f(0.0f, 0.0f), VertexColor));
-		StartCapVertexInstances.Add(AddWaterVertex(MeshDescription, Attributes, FVector3f(0.0f, CreekWaterHalfWidth, -TileThickness), FVector2f(1.0f, 0.0f), VertexColor));
-		StartCapVertexInstances.Add(AddWaterVertex(MeshDescription, Attributes, FVector3f(0.0f, CreekWaterHalfWidth, 0.0f), FVector2f(1.0f, 1.0f), VertexColor));
-		StartCapVertexInstances.Add(AddWaterVertex(MeshDescription, Attributes, FVector3f(0.0f, -CreekWaterHalfWidth, 0.0f), FVector2f(0.0f, 1.0f), VertexColor));
-		MeshDescription.CreatePolygon(PolygonGroupId, StartCapVertexInstances);
+		for (int32 SegmentIndex = 0; SegmentIndex < CreekWaterRibbonSampleCount; ++SegmentIndex)
+		{
+			const float T0 = static_cast<float>(SegmentIndex) / static_cast<float>(CreekWaterRibbonSampleCount);
+			const float T1 = static_cast<float>(SegmentIndex + 1) / static_cast<float>(CreekWaterRibbonSampleCount);
 
-		TArray<FVertexInstanceID> EndCapVertexInstances;
-		EndCapVertexInstances.Add(AddWaterVertex(MeshDescription, Attributes, FVector3f(TileLength, -CreekWaterHalfWidth, 0.0f), FVector2f(0.0f, 1.0f), VertexColor));
-		EndCapVertexInstances.Add(AddWaterVertex(MeshDescription, Attributes, FVector3f(TileLength, CreekWaterHalfWidth, 0.0f), FVector2f(1.0f, 1.0f), VertexColor));
-		EndCapVertexInstances.Add(AddWaterVertex(MeshDescription, Attributes, FVector3f(TileLength, CreekWaterHalfWidth, -TileThickness), FVector2f(1.0f, 0.0f), VertexColor));
-		EndCapVertexInstances.Add(AddWaterVertex(MeshDescription, Attributes, FVector3f(TileLength, -CreekWaterHalfWidth, -TileThickness), FVector2f(0.0f, 0.0f), VertexColor));
-		MeshDescription.CreatePolygon(PolygonGroupId, EndCapVertexInstances);
+			TArray<FVertexInstanceID> VertexInstances;
+			VertexInstances.Add(AddWaterVertex(MeshDescription, Attributes, FVector3f(LeftEdgePoints[SegmentIndex]), FVector2f(0.0f, T0), VertexColor));
+			VertexInstances.Add(AddWaterVertex(MeshDescription, Attributes, FVector3f(RightEdgePoints[SegmentIndex]), FVector2f(1.0f, T0), VertexColor));
+			VertexInstances.Add(AddWaterVertex(MeshDescription, Attributes, FVector3f(RightEdgePoints[SegmentIndex + 1]), FVector2f(1.0f, T1), VertexColor));
+			VertexInstances.Add(AddWaterVertex(MeshDescription, Attributes, FVector3f(LeftEdgePoints[SegmentIndex + 1]), FVector2f(0.0f, T1), VertexColor));
+			MeshDescription.CreatePolygon(PolygonGroupId, VertexInstances);
+		}
 	}
 
-	UStaticMesh* EnsureCreekWaterSplineSegmentMesh(UMaterialInterface* WaterMaterial)
+	UStaticMesh* EnsureCreekWaterRibbonMesh(UMaterialInterface* WaterMaterial)
 	{
 		const FString ObjectPath = GetAssetObjectPath(AssetPath, CreekWaterMeshAssetName);
 		UStaticMesh* StaticMesh = LoadObject<UStaticMesh>(nullptr, *ObjectPath);
@@ -733,7 +786,7 @@ namespace TunaSweeperProceduralTerrainTest
 		StaticMesh->GetStaticMaterials().Add(FStaticMaterial(WaterMaterial));
 
 		FMeshDescription MeshDescription;
-		BuildCreekWaterSplineSegmentMeshDescription(MeshDescription);
+		BuildCreekWaterRibbonMeshDescription(MeshDescription);
 
 		TArray<const FMeshDescription*> MeshDescriptions;
 		MeshDescriptions.Add(&MeshDescription);
@@ -756,17 +809,6 @@ namespace TunaSweeperProceduralTerrainTest
 		StaticMesh->MarkPackageDirty();
 
 		return SaveAsset(StaticMesh) ? StaticMesh : nullptr;
-	}
-
-	UStaticMesh* LoadCreekWaterSplineSegmentMesh()
-	{
-		UStaticMesh* StaticMesh = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Cube.Cube"));
-		if (!StaticMesh)
-		{
-			UE_LOG(LogTunaSweeperProceduralTerrainTest, Error, TEXT("Failed to load /Engine/BasicShapes/Cube.Cube for creek water spline."));
-		}
-
-		return StaticMesh;
 	}
 
 	ALandscape* SpawnLandscape(
@@ -857,9 +899,9 @@ namespace TunaSweeperProceduralTerrainTest
 		return FVector(WorldX, WorldY, WorldZ);
 	}
 
-	bool SpawnCreekWaterSpline(UWorld* World, UStaticMesh* WaterSegmentMesh, UMaterialInterface* WaterMaterial)
+	bool SpawnCreekWaterSpline(UWorld* World, UStaticMesh* WaterRibbonMesh, UMaterialInterface* WaterMaterial)
 	{
-		if (!World || !WaterSegmentMesh || !WaterMaterial)
+		if (!World || !WaterRibbonMesh || !WaterMaterial)
 		{
 			return false;
 		}
@@ -911,43 +953,24 @@ namespace TunaSweeperProceduralTerrainTest
 
 		CreekSpline->UpdateSpline();
 
-		for (int32 SegmentIndex = 0; SegmentIndex < CreekSplinePointCount - 1; ++SegmentIndex)
+		UStaticMeshComponent* WaterMeshComponent = NewObject<UStaticMeshComponent>(WaterActor, TEXT("CreekWaterRibbon"));
+		if (!WaterMeshComponent)
 		{
-			const FName ComponentName(*FString::Printf(TEXT("CreekWaterSplineMesh_%02d"), SegmentIndex));
-			USplineMeshComponent* SplineMesh = NewObject<USplineMeshComponent>(WaterActor, ComponentName);
-			if (!SplineMesh)
-			{
-				return false;
-			}
-
-			SplineMesh->SetMobility(EComponentMobility::Static);
-			SplineMesh->SetbNeverNeedsCookedCollisionData(true);
-			SplineMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-			SplineMesh->SetCollisionResponseToAllChannels(ECR_Ignore);
-			SplineMesh->SetGenerateOverlapEvents(false);
-			SplineMesh->SetStaticMesh(WaterSegmentMesh);
-			SplineMesh->SetMaterial(0, WaterMaterial);
-			SplineMesh->SetCastShadow(false);
-			SplineMesh->SetForwardAxis(ESplineMeshAxis::X, false);
-			SplineMesh->SetSplineUpDir(FVector::UpVector, false);
-			SplineMesh->SetStartScale(FVector2D((CreekWaterHalfWidth * 2.0f) / EngineBasicShapeSize, CreekWaterVisualThickness / EngineBasicShapeSize), false);
-			SplineMesh->SetEndScale(FVector2D((CreekWaterHalfWidth * 2.0f) / EngineBasicShapeSize, CreekWaterVisualThickness / EngineBasicShapeSize), false);
-			SplineMesh->SetVisibility(true, false);
-			SplineMesh->SetHiddenInGame(false);
-
-			FVector StartLocation;
-			FVector StartTangent;
-			FVector EndLocation;
-			FVector EndTangent;
-			CreekSpline->GetLocationAndTangentAtSplinePoint(SegmentIndex, StartLocation, StartTangent, ESplineCoordinateSpace::Local);
-			CreekSpline->GetLocationAndTangentAtSplinePoint(SegmentIndex + 1, EndLocation, EndTangent, ESplineCoordinateSpace::Local);
-			SplineMesh->SetStartAndEnd(StartLocation, StartTangent, EndLocation, EndTangent, false);
-			SplineMesh->SetbNeverNeedsCookedCollisionData(true);
-			SplineMesh->SetupAttachment(RootComponent);
-			WaterActor->AddInstanceComponent(SplineMesh);
-			SplineMesh->RegisterComponent();
-			SplineMesh->UpdateMesh();
+			return false;
 		}
+
+		WaterMeshComponent->SetMobility(EComponentMobility::Static);
+		WaterMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		WaterMeshComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
+		WaterMeshComponent->SetGenerateOverlapEvents(false);
+		WaterMeshComponent->SetStaticMesh(WaterRibbonMesh);
+		WaterMeshComponent->SetMaterial(0, WaterMaterial);
+		WaterMeshComponent->SetCastShadow(false);
+		WaterMeshComponent->SetVisibility(true, false);
+		WaterMeshComponent->SetHiddenInGame(false);
+		WaterMeshComponent->SetupAttachment(RootComponent);
+		WaterActor->AddInstanceComponent(WaterMeshComponent);
+		WaterMeshComponent->RegisterComponent();
 
 		WaterActor->MarkPackageDirty();
 		return true;
@@ -1062,9 +1085,10 @@ namespace TunaSweeperProceduralTerrainTest
 		}
 
 		UMaterial* LandscapeMaterial = EnsureLandscapeMaterial(Textures);
-		UMaterial* WaterMaterial = EnsureCreekWaterMaterial();
-		UStaticMesh* WaterSegmentMesh = LoadCreekWaterSplineSegmentMesh();
-		if (!LandscapeMaterial || !WaterMaterial || !WaterSegmentMesh)
+		UTexture2D* WaterTexture = EnsureTextureAssetFromSourceArt(CreekWaterTextureAssetName, CreekWaterSourceArtFileName);
+		UMaterial* WaterMaterial = EnsureCreekWaterMaterial(WaterTexture);
+		UStaticMesh* WaterRibbonMesh = EnsureCreekWaterRibbonMesh(WaterMaterial);
+		if (!LandscapeMaterial || !WaterMaterial || !WaterRibbonMesh)
 		{
 			return false;
 		}
@@ -1078,7 +1102,7 @@ namespace TunaSweeperProceduralTerrainTest
 
 		World->PersistentLevel->Modify();
 		ALandscape* Landscape = SpawnLandscape(World, LandscapeMaterial, LayerInfos);
-		if (!Landscape || !SpawnCreekWaterSpline(World, WaterSegmentMesh, WaterMaterial) || !SpawnProceduralLighting(World) || !SpawnPlayerStart(World))
+		if (!Landscape || !SpawnCreekWaterSpline(World, WaterRibbonMesh, WaterMaterial) || !SpawnProceduralLighting(World) || !SpawnPlayerStart(World))
 		{
 			return false;
 		}

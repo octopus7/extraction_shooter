@@ -10,7 +10,7 @@
 - 생성 에셋 경로: `/Game/Prototype/TerrainTest`
 - Landscape 크기: 4 components x 63 quads, 총 252 quads / 253 verts, `ScaleXY=40`, 약 100.8m 정사각형
 - Landscape 레이어: `Dirt`, `Grass`, `Rock`, `DarkDirt`
-- 소품 scatter 없음. 시각 확인용 개울 물면은 `USplineComponent`와 `USplineMeshComponent`로 이어 붙이고, 현재는 렌더 안정성을 위해 `/Engine/BasicShapes/Cube`를 얇은 청록색 spline strip으로 구부려 사용한다.
+- 소품 scatter 없음. 시각 확인용 개울 물면은 `USplineComponent`를 중심선 가이드로 두고, 실제 렌더는 하나의 연속 `SM_TerrainTest_CreekWater` 리본 메시로 만든다.
 - 플레이 테스트 확인용 조명으로 `TS_ProceduralTerrain_Sun` DirectionalLight와 `TS_ProceduralTerrain_SkyLight` SkyLight를 자동 배치한다.
 - 플레이 테스트 시작점으로 `TS_ProceduralPlayerStart`를 랜드스케이프 중심부 근처의 마른 지점 `(X=520, Y=-220)`에 자동 배치한다. Z는 `EvaluateTerrainHeightCm()` 결과에 120cm를 더해 캐릭터 캡슐이 지면 아래에서 시작하지 않도록 한다.
 
@@ -44,15 +44,17 @@ Start-Process -FilePath 'C:\Program Files\Epic Games\UE_5.7\Engine\Binaries\Win6
 
 ### 개울 스플라인 구성
 
-개울 물면은 끊어진 긴 절차 메시처럼 보이지 않도록 UE 기본 스플라인 메시 기능으로 배치한다.
+개울 물면은 구간 이음매가 보이지 않도록 하나의 연속 리본 메시로 배치한다. `USplineComponent`는 편집/디버그용 중심선 가이드로 남긴다.
 
 - `TS_ProceduralCreekWaterSpline` 배우를 생성한다.
 - 배우 안에 `CreekSpline` `USplineComponent`를 만들고, `GetCreekCenterX()`와 `EvaluateTerrainHeightCm()`으로 같은 개울 중심선 위의 스플라인 포인트를 계산한다.
-- 물면 렌더는 커스텀 정적 메시 대신 `/Engine/BasicShapes/Cube`를 사용한다. 기본 큐브를 폭 236cm, 두께 5cm 단면으로 스케일한 뒤 `SplineMeshComponent`가 각 구간을 구부린다.
-- 각 인접 스플라인 포인트마다 `USplineMeshComponent`를 만들고 `SetStartAndEnd()`로 위치와 tangent를 넣어 구간을 이어 붙인다.
+- 물면 렌더는 `SM_TerrainTest_CreekWater` 하나를 `UStaticMeshComponent`로 붙인다. 이 메시 자체가 96개 샘플로 만든 연속 리본이므로 구간별 end cap이나 반투명 중첩 이음매가 없다.
+- 리본 폭은 중심선 주변에서 약간 변형된다. 기준 half width는 180cm이고, 노이즈/사인 변형을 더해 148~212cm 범위로 바뀐다.
 - 이 방식은 나중에 개울 폭, 포인트 수, 중심선 함수를 바꾸는 것만으로 흐름을 다시 구성할 수 있다.
-- 현재 수면은 shoreline 전 단계의 가시성 확보용이다. `M_TerrainTest_CreekWater`는 지형 조명과 그림자에 묻히지 않도록 `BLEND_Opaque` + `MSM_Unlit`의 밝은 청록색 emissive 재질을 사용한다.
-- 수면 폭은 half width 118cm, 지형 위 offset은 42cm, 두께는 5cm다. shoreline/foam edge는 이후 별도 스플라인 메시나 머티리얼 레이어로 추가한다.
+- 현재 수면은 shoreline 전 단계의 가시성 확보용이지만, 바닥이 비치는 얕은 개울처럼 보이도록 `BLEND_Translucent` + `MSM_Unlit` 재질에 imagegen 수면 텍스처를 연결한다. 불투명 단색 수면은 개울 바닥을 가려 인공 도로처럼 보이므로 사용하지 않는다.
+- 수면 텍스처 원본은 `TunaSweeper/Content/SourceArt/TerrainTest/T_TerrainTest_CreekWater_Imagegen.png`이고, 생성 에셋은 `/Game/Prototype/TerrainTest/T_TerrainTest_CreekWater`다.
+- 스플라인 메시 UV는 긴 구간에서 수면 텍스처가 늘어지므로 사용하지 않는다. `M_TerrainTest_CreekWater`는 `AbsoluteWorldPosition.xy * 0.0018`을 텍스처 좌표로 사용해 스플라인 구간 길이와 무관한 월드 기준 반복 밀도를 유지한다.
+- 수면 폭은 기준 half width 180cm, 변형 범위 148~212cm, 지형 위 offset은 42cm, opacity는 0.38이다. shoreline/foam edge는 이후 별도 리본 메시나 머티리얼 레이어로 추가한다.
 
 ### Imagegen 텍스처 교체
 
