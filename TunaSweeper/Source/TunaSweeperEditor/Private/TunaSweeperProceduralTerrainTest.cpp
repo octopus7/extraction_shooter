@@ -57,6 +57,7 @@ namespace TunaSweeperProceduralTerrainTest
 	const FString MapPackagePath = TEXT("/Game/PrototypeTerrainPathCreekMap");
 	const FString LandscapeMaterialAssetName = TEXT("M_TerrainTest_Landscape");
 	const FString CreekWaterMaterialAssetName = TEXT("M_TerrainTest_CreekWater");
+	const FString CreekWaterRippleMaterialAssetName = TEXT("M_TerrainTest_CreekWater_Ripples");
 	const FString CreekWaterMeshAssetName = TEXT("SM_TerrainTest_CreekWater");
 	const FString CreekWaterTextureAssetName = TEXT("T_TerrainTest_CreekWater");
 	const FString CreekWaterSourceArtFileName = TEXT("T_TerrainTest_CreekWater_Imagegen.png");
@@ -74,6 +75,7 @@ namespace TunaSweeperProceduralTerrainTest
 	constexpr float CreekSplineMargin = 420.0f;
 	constexpr float CreekWaterHalfWidth = 180.0f;
 	constexpr float CreekWaterZOffset = 42.0f;
+	constexpr float CreekWaterRippleOverlayZOffset = 3.0f;
 	constexpr float CreekWaterTextureWorldScale = 0.0018f;
 	constexpr int32 CreekSplinePointCount = 15;
 	constexpr int32 CreekWaterRibbonSampleCount = 96;
@@ -662,6 +664,112 @@ namespace TunaSweeperProceduralTerrainTest
 		return SaveAsset(Material) ? Material : nullptr;
 	}
 
+	UMaterial* EnsureCreekWaterRippleMaterial(UTexture2D* WaterTexture)
+	{
+		if (!WaterTexture)
+		{
+			return nullptr;
+		}
+
+		UMaterial* Material = FindOrCreateMaterial(CreekWaterRippleMaterialAssetName);
+		if (!Material)
+		{
+			return nullptr;
+		}
+
+		Material->Modify();
+		Material->GetExpressionCollection().Empty();
+		Material->BlendMode = BLEND_Masked;
+		Material->OpacityMaskClipValue = 0.42f;
+		Material->TwoSided = true;
+		Material->bUsedWithSplineMeshes = true;
+		Material->SetShadingModel(MSM_Unlit);
+
+		UMaterialEditorOnlyData* MaterialEditorOnly = Material->GetEditorOnlyData();
+		if (!MaterialEditorOnly)
+		{
+			return nullptr;
+		}
+
+		UMaterialExpressionWorldPosition* WorldPosition = NewObject<UMaterialExpressionWorldPosition>(Material);
+		WorldPosition->Material = Material;
+		WorldPosition->WorldPositionShaderOffset = WPT_ExcludeAllShaderOffsets;
+		WorldPosition->MaterialExpressionEditorX = -920;
+		WorldPosition->MaterialExpressionEditorY = -120;
+		Material->GetExpressionCollection().AddExpression(WorldPosition);
+
+		UMaterialExpressionComponentMask* WorldPositionXY = NewObject<UMaterialExpressionComponentMask>(Material);
+		WorldPositionXY->Material = Material;
+		WorldPositionXY->Input.Connect(0, WorldPosition);
+		WorldPositionXY->R = 1;
+		WorldPositionXY->G = 1;
+		WorldPositionXY->B = 0;
+		WorldPositionXY->A = 0;
+		WorldPositionXY->MaterialExpressionEditorX = -700;
+		WorldPositionXY->MaterialExpressionEditorY = -120;
+		Material->GetExpressionCollection().AddExpression(WorldPositionXY);
+
+		UMaterialExpressionMultiply* WaterTextureCoordinates = NewObject<UMaterialExpressionMultiply>(Material);
+		WaterTextureCoordinates->Material = Material;
+		WaterTextureCoordinates->A.Connect(0, WorldPositionXY);
+		WaterTextureCoordinates->ConstB = CreekWaterTextureWorldScale;
+		WaterTextureCoordinates->MaterialExpressionEditorX = -520;
+		WaterTextureCoordinates->MaterialExpressionEditorY = -120;
+		Material->GetExpressionCollection().AddExpression(WaterTextureCoordinates);
+
+		UMaterialExpressionTextureSample* WaterTextureSample = NewObject<UMaterialExpressionTextureSample>(Material);
+		WaterTextureSample->Material = Material;
+		WaterTextureSample->Texture = WaterTexture;
+		WaterTextureSample->Coordinates.Connect(0, WaterTextureCoordinates);
+		WaterTextureSample->MaterialExpressionEditorX = -300;
+		WaterTextureSample->MaterialExpressionEditorY = -120;
+		WaterTextureSample->AutoSetSampleType();
+		Material->GetExpressionCollection().AddExpression(WaterTextureSample);
+
+		UMaterialExpressionComponentMask* BrightRippleSource = NewObject<UMaterialExpressionComponentMask>(Material);
+		BrightRippleSource->Material = Material;
+		BrightRippleSource->Input.Connect(0, WaterTextureSample);
+		BrightRippleSource->R = 1;
+		BrightRippleSource->G = 0;
+		BrightRippleSource->B = 0;
+		BrightRippleSource->A = 0;
+		BrightRippleSource->MaterialExpressionEditorX = -80;
+		BrightRippleSource->MaterialExpressionEditorY = 30;
+		Material->GetExpressionCollection().AddExpression(BrightRippleSource);
+
+		UMaterialExpressionSmoothStep* RippleMask = NewObject<UMaterialExpressionSmoothStep>(Material);
+		RippleMask->Material = Material;
+		RippleMask->Value.Connect(0, BrightRippleSource);
+		RippleMask->ConstMin = 0.62f;
+		RippleMask->ConstMax = 0.86f;
+		RippleMask->MaterialExpressionEditorX = 120;
+		RippleMask->MaterialExpressionEditorY = 30;
+		Material->GetExpressionCollection().AddExpression(RippleMask);
+
+		UMaterialExpressionConstant3Vector* RippleColor = NewObject<UMaterialExpressionConstant3Vector>(Material);
+		RippleColor->Material = Material;
+		RippleColor->Constant = FLinearColor(0.94f, 0.98f, 1.0f, 1.0f);
+		RippleColor->MaterialExpressionEditorX = 120;
+		RippleColor->MaterialExpressionEditorY = -150;
+		Material->GetExpressionCollection().AddExpression(RippleColor);
+
+		MaterialEditorOnly->BaseColor.Connect(0, RippleColor);
+		MaterialEditorOnly->EmissiveColor.Connect(0, RippleColor);
+		MaterialEditorOnly->Opacity.Expression = nullptr;
+		MaterialEditorOnly->Opacity.UseConstant = true;
+		MaterialEditorOnly->Opacity.Constant = 1.0f;
+		MaterialEditorOnly->OpacityMask.Connect(0, RippleMask);
+		MaterialEditorOnly->Roughness.UseConstant = true;
+		MaterialEditorOnly->Roughness.Constant = 0.18f;
+		MaterialEditorOnly->Specular.UseConstant = true;
+		MaterialEditorOnly->Specular.Constant = 0.35f;
+
+		Material->PostEditChange();
+		Material->MarkPackageDirty();
+
+		return SaveAsset(Material) ? Material : nullptr;
+	}
+
 	float GetPathCenterY(float WorldX)
 	{
 		const float T = FMath::Clamp((WorldX + LandscapeHalfWorldSize) / LandscapeWorldSize, 0.0f, 1.0f);
@@ -1035,9 +1143,9 @@ namespace TunaSweeperProceduralTerrainTest
 		return FVector(WorldX, WorldY, WorldZ);
 	}
 
-	bool SpawnCreekWaterSpline(UWorld* World, UStaticMesh* WaterRibbonMesh, UMaterialInterface* WaterMaterial)
+	bool SpawnCreekWaterSpline(UWorld* World, UStaticMesh* WaterRibbonMesh, UMaterialInterface* WaterMaterial, UMaterialInterface* RippleMaterial)
 	{
-		if (!World || !WaterRibbonMesh || !WaterMaterial)
+		if (!World || !WaterRibbonMesh || !WaterMaterial || !RippleMaterial)
 		{
 			return false;
 		}
@@ -1107,6 +1215,26 @@ namespace TunaSweeperProceduralTerrainTest
 		WaterMeshComponent->SetupAttachment(RootComponent);
 		WaterActor->AddInstanceComponent(WaterMeshComponent);
 		WaterMeshComponent->RegisterComponent();
+
+		UStaticMeshComponent* RippleMeshComponent = NewObject<UStaticMeshComponent>(WaterActor, TEXT("CreekWaterWhiteRipples"));
+		if (!RippleMeshComponent)
+		{
+			return false;
+		}
+
+		RippleMeshComponent->SetMobility(EComponentMobility::Static);
+		RippleMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		RippleMeshComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
+		RippleMeshComponent->SetGenerateOverlapEvents(false);
+		RippleMeshComponent->SetStaticMesh(WaterRibbonMesh);
+		RippleMeshComponent->SetMaterial(0, RippleMaterial);
+		RippleMeshComponent->SetCastShadow(false);
+		RippleMeshComponent->SetVisibility(true, false);
+		RippleMeshComponent->SetHiddenInGame(false);
+		RippleMeshComponent->SetupAttachment(RootComponent);
+		RippleMeshComponent->SetRelativeLocation(FVector(0.0f, 0.0f, CreekWaterRippleOverlayZOffset));
+		WaterActor->AddInstanceComponent(RippleMeshComponent);
+		RippleMeshComponent->RegisterComponent();
 
 		WaterActor->MarkPackageDirty();
 		return true;
@@ -1223,8 +1351,9 @@ namespace TunaSweeperProceduralTerrainTest
 		UMaterial* LandscapeMaterial = EnsureLandscapeMaterial(Textures);
 		UTexture2D* WaterTexture = EnsureTextureAssetFromSourceArt(CreekWaterTextureAssetName, CreekWaterSourceArtFileName);
 		UMaterial* WaterMaterial = EnsureCreekWaterMaterial(WaterTexture);
+		UMaterial* WaterRippleMaterial = EnsureCreekWaterRippleMaterial(WaterTexture);
 		UStaticMesh* WaterRibbonMesh = EnsureCreekWaterRibbonMesh(WaterMaterial);
-		if (!LandscapeMaterial || !WaterMaterial || !WaterRibbonMesh)
+		if (!LandscapeMaterial || !WaterMaterial || !WaterRippleMaterial || !WaterRibbonMesh)
 		{
 			return false;
 		}
@@ -1238,7 +1367,7 @@ namespace TunaSweeperProceduralTerrainTest
 
 		World->PersistentLevel->Modify();
 		ALandscape* Landscape = SpawnLandscape(World, LandscapeMaterial, LayerInfos);
-		if (!Landscape || !SpawnCreekWaterSpline(World, WaterRibbonMesh, WaterMaterial) || !SpawnProceduralLighting(World) || !SpawnPlayerStart(World))
+		if (!Landscape || !SpawnCreekWaterSpline(World, WaterRibbonMesh, WaterMaterial, WaterRippleMaterial) || !SpawnProceduralLighting(World) || !SpawnPlayerStart(World))
 		{
 			return false;
 		}

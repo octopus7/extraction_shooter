@@ -4369,3 +4369,20 @@
 - 연속 리본은 96개 샘플로 만들고 기준 half width 180cm에 노이즈/사인 변형을 더해 148~212cm 범위로 자연스럽게 폭이 변하도록 한 것.
 - `Docs/procedural_landscape_generation.md`에 연속 리본 메시, 월드 좌표 텍스처 밀도, opacity 기준을 갱신한 것.
 - `TunaSweeperEditor Win64 Development` 빌드, 절차 지형 테스트 레벨 재생성, `/Game/PrototypeTerrainPathCreekMap` 직접 로드, MapCheck 0 Error / 0 Warning을 확인한 것.
+
+## 2026-06-14 04:08:05 (소요시간: 00:07:12)
+
+- `/Game/PrototypeTerrainPathCreekMap`의 수면이 너무 정적으로 보이던 문제를 완화하기 위해 물가 주변에 시간 기반 머티리얼 변화를 추가한 것.
+- 물을 한 방향으로 흐르게 하지 않고, `SM_TerrainTest_CreekWater` 리본의 폭 방향 UV에서 양쪽 shoreline edge만 `SmoothStep`으로 마스킹하도록 한 것.
+- `M_TerrainTest_CreekWater`에 `Time` + `Sine` 노드를 추가해 edge mask 영역의 emissive와 opacity만 천천히 변조하도록 한 것.
+- edge emissive pulse 강도는 0.10, edge opacity pulse 강도는 0.055로 낮게 잡아 물 전체가 깜빡이지 않고 물가만 잔잔하게 살아 보이도록 한 것.
+- `Docs/procedural_landscape_generation.md`에 수면은 흐르지 않고 shoreline edge만 시간 변화한다는 기준을 기록한 것.
+- `TunaSweeperEditor Win64 Development` 빌드, 절차 지형 테스트 레벨 재생성, `/Game/PrototypeTerrainPathCreekMap` 직접 로드와 PIE 월드 생성, MapCheck 0 Error / 0 Warning을 확인한 것.
+
+## 2026-06-14 04:19:06 (소요시간: 00:11:01)
+
+- `/Game/PrototypeTerrainPathCreekMap`의 투명 수면 위에 불투명한 흰 물결 오버레이를 추가한 것.
+- `M_TerrainTest_CreekWater_Ripples`를 새로 생성해 같은 imagegen 수면 텍스처를 월드 좌표로 샘플링하고, 밝은 red channel 영역만 `SmoothStep(0.62, 0.86)`으로 뽑아 `BLEND_Masked` + `MSM_Unlit` 흰 물결로 렌더하도록 한 것.
+- `TS_ProceduralCreekWaterSpline` 배우에 `CreekWaterWhiteRipples` `UStaticMeshComponent`를 추가하고, 같은 `SM_TerrainTest_CreekWater` 리본을 수면 본체보다 3cm 위에 배치해 z-fighting을 피하도록 한 것.
+- `Docs/procedural_landscape_generation.md`에 흰 물결 오버레이와 이후 shoreline/foam edge 구현 범위를 구분해 기록한 것.
+- `TunaSweeperEditor Win64 Development` 빌드, 절차 지형 테스트 레벨 재생성, 새 리플 머터리얼/맵 참조 저장, Unreal Editor 실행을 확인한 것.

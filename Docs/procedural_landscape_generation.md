@@ -55,7 +55,10 @@ Start-Process -FilePath 'C:\Program Files\Epic Games\UE_5.7\Engine\Binaries\Win6
 - 수면 텍스처 원본은 `TunaSweeper/Content/SourceArt/TerrainTest/T_TerrainTest_CreekWater_Imagegen.png`이고, 생성 에셋은 `/Game/Prototype/TerrainTest/T_TerrainTest_CreekWater`다.
 - 스플라인 메시 UV는 긴 구간에서 수면 텍스처가 늘어지므로 사용하지 않는다. `M_TerrainTest_CreekWater`는 `AbsoluteWorldPosition.xy * 0.0018`을 텍스처 좌표로 사용해 스플라인 구간 길이와 무관한 월드 기준 반복 밀도를 유지한다.
 - 수면 자체를 흐르게 만들지는 않는다. 대신 리본 메시의 폭 방향 UV에서 양쪽 가장자리만 `SmoothStep`으로 마스크하고, `Time` + `Sine`으로 그 shoreline edge의 emissive와 opacity만 약하게 변조한다. 즉 물가 주변이 잔잔하게 살아 움직이는 느낌만 준다.
-- 수면 폭은 기준 half width 180cm, 변형 범위 148~212cm, 지형 위 offset은 42cm, opacity는 0.38이다. shoreline/foam edge는 이후 별도 리본 메시나 머티리얼 레이어로 추가한다.
+- 수면 폭은 기준 half width 180cm, 변형 범위 148~212cm, 지형 위 offset은 42cm, opacity는 0.38이다.
+- 투명 수면 안의 하이라이트가 흐릿한 이너 글로우처럼 보이는 문제를 줄이기 위해 `M_TerrainTest_CreekWater_Ripples`를 추가했다. 이 재질은 같은 수면 텍스처를 `AbsoluteWorldPosition.xy * 0.0018`로 샘플링한 뒤 red channel의 밝은 영역만 `SmoothStep(0.62, 0.86)`으로 뽑아 `BLEND_Masked` + `MSM_Unlit`의 불투명한 흰 물결로 그린다.
+- `TS_ProceduralCreekWaterSpline` 배우에는 `CreekWaterRibbon` 외에 같은 `SM_TerrainTest_CreekWater`를 쓰는 `CreekWaterWhiteRipples` 컴포넌트를 하나 더 붙인다. 이 컴포넌트는 Z를 3cm 올려 수면 본체와 z-fighting이 생기지 않게 한다.
+- 위 흰 물결은 수면 내부의 ripple highlight다. 물가에 붙는 shoreline/foam edge는 이후 별도 리본 메시나 머티리얼 레이어로 추가한다.
 
 ### Imagegen 텍스처 교체
 
