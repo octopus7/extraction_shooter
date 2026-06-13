@@ -4324,3 +4324,28 @@
 - `LandscapeLayerCoords`의 `MappingScale`은 내부적으로 `1 / MappingScale`을 사용하므로 값이 클수록 텍스처가 커진다는 점을 확인하고, 레이어별 scale을 `Grass=34cm`, `Dirt=55cm`, `Rock=72cm`, `DarkDirt=58cm`로 줄인 것.
 - `/Game/Prototype/TerrainTest` 머티리얼/텍스처와 `/Game/PrototypeTerrainPathCreekMap`을 재생성하고, 에디터 직접 로드와 PIE 월드 생성 로그, MapCheck 0 Error / 0 Warning을 확인한 것.
 - `Docs/procedural_landscape_generation.md`에 현재 라이팅/머티리얼/텍스처 밀도 기준을 갱신한 것.
+
+## 2026-06-14 03:09:30 (소요시간: 00:10:38)
+
+- `/Game/PrototypeTerrainPathCreekMap`에서 개울 물이 잘 보이지 않던 문제를 우선 해결한 것.
+- `M_TerrainTest_CreekWater`를 어두운 `BLEND_Translucent`/`MSM_Unlit` 단색 재질에서 `BLEND_Opaque`/`MSM_DefaultLit` 청록색 재질로 바꾼 것.
+- 수면이 그림자나 지형 색에 묻히지 않도록 약한 emissive lift를 추가하고, `Roughness=0.24`, `Specular=0.72`로 조정한 것.
+- 개울 수면 폭을 half width 92cm에서 118cm로 넓히고, 지형 위 offset을 8cm에서 22cm로 올려 terrain z-fighting/묻힘 가능성을 줄인 것.
+- shoreline/foam edge는 아직 추가하지 않고, 이후 별도 요청 때 본체 수면과 분리된 스플라인 메시 또는 머티리얼 레이어로 붙일 수 있도록 절차 문서에 남긴 것.
+- `TunaSweeperEditor Win64 Development` 빌드, 절차 지형 테스트 레벨 재생성, `/Game/PrototypeTerrainPathCreekMap` 직접 로드, MapCheck 0 Error / 0 Warning을 확인한 것.
+
+## 2026-06-14 03:24:03 (소요시간: 00:03:08)
+
+- `/Game/PrototypeTerrainPathCreekMap`에 플레이 테스트 시작점 `TS_ProceduralPlayerStart`를 자동 생성하도록 추가한 것.
+- 시작 위치는 랜드스케이프 중심부 근처의 마른 지점 `(X=520, Y=-220)`으로 잡고, Z는 `EvaluateTerrainHeightCm()` 결과에 120cm를 더해 지면 아래에서 스폰되지 않도록 한 것.
+- `Docs/procedural_landscape_generation.md`에 PlayerStart 자동 배치 기준을 기록한 것.
+- `TunaSweeperEditor Win64 Development` 빌드, 절차 지형 테스트 레벨 재생성, `/Game/PrototypeTerrainPathCreekMap` 직접 로드, MapCheck 0 Error / 0 Warning을 확인한 것.
+
+## 2026-06-14 03:28:20 (소요시간: 00:04:31)
+
+- `/Game/PrototypeTerrainPathCreekMap`에서 스플라인 선만 보이고 실제 개울 물면이 보이지 않던 문제를 다시 수정한 것.
+- 커스텀 물 타일 메시 대신 `/Engine/BasicShapes/Cube`를 `USplineMeshComponent`로 구부려 쓰도록 바꿔 렌더 안정성을 높인 것.
+- 물 단면을 폭 236cm, 두께 5cm로 스케일하고, 지형 위 offset을 42cm로 올려 지형에 묻히거나 z-fighting이 나지 않도록 한 것.
+- `M_TerrainTest_CreekWater`를 `BLEND_Opaque` + `MSM_Unlit` 밝은 청록색 emissive 재질로 바꿔 조명/그림자에 묻히지 않게 한 것.
+- `Docs/procedural_landscape_generation.md`에 현재 개울 물면 구성 방식을 갱신한 것.
+- `TunaSweeperEditor Win64 Development` 빌드, 절차 지형 테스트 레벨 재생성, `/Game/PrototypeTerrainPathCreekMap` 직접 로드, MapCheck 0 Error / 0 Warning을 확인한 것.

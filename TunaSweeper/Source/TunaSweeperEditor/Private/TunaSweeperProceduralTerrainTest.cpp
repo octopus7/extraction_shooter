@@ -17,6 +17,7 @@
 #include "Factories/MaterialFactoryNew.h"
 #include "FileHelpers.h"
 #include "GameFramework/Actor.h"
+#include "GameFramework/PlayerStart.h"
 #include "GameFramework/WorldSettings.h"
 #include "HAL/FileManager.h"
 #include "ImageUtils.h"
@@ -28,6 +29,7 @@
 #include "Materials/MaterialExpressionConstant3Vector.h"
 #include "Materials/MaterialExpressionLandscapeLayerBlend.h"
 #include "Materials/MaterialExpressionLandscapeLayerCoords.h"
+#include "Materials/MaterialExpressionMultiply.h"
 #include "Materials/MaterialExpressionTextureSample.h"
 #include "MeshDescription.h"
 #include "Misc/PackageName.h"
@@ -58,10 +60,15 @@ namespace TunaSweeperProceduralTerrainTest
 	constexpr float LandscapeWorldSize = LandscapeQuads * LandscapeScaleXY;
 	constexpr float LandscapeHalfWorldSize = LandscapeWorldSize * 0.5f;
 	constexpr float CreekSplineMargin = 420.0f;
-	constexpr float CreekWaterHalfWidth = 92.0f;
-	constexpr float CreekWaterZOffset = 8.0f;
+	constexpr float CreekWaterHalfWidth = 118.0f;
+	constexpr float CreekWaterZOffset = 42.0f;
+	constexpr float CreekWaterVisualThickness = 5.0f;
+	constexpr float EngineBasicShapeSize = 100.0f;
 	constexpr int32 CreekSplinePointCount = 15;
 	constexpr int32 CreekWaterTileLengthSubdivisions = 10;
+	constexpr float PlayerStartX = 520.0f;
+	constexpr float PlayerStartY = -220.0f;
+	constexpr float PlayerStartGroundClearance = 120.0f;
 
 	enum class ETerrainLayer : uint8
 	{
@@ -428,7 +435,7 @@ namespace TunaSweeperProceduralTerrainTest
 
 		Material->Modify();
 		Material->GetExpressionCollection().Empty();
-		Material->BlendMode = BLEND_Translucent;
+		Material->BlendMode = BLEND_Opaque;
 		Material->TwoSided = true;
 		Material->bUsedWithSplineMeshes = true;
 		Material->SetShadingModel(MSM_Unlit);
@@ -441,25 +448,26 @@ namespace TunaSweeperProceduralTerrainTest
 
 		UMaterialExpressionConstant3Vector* WaterColor = NewObject<UMaterialExpressionConstant3Vector>(Material);
 		WaterColor->Material = Material;
-		WaterColor->Constant = FLinearColor(0.05f, 0.20f, 0.22f, 1.0f);
+		WaterColor->Constant = FLinearColor(0.05f, 0.68f, 0.95f, 1.0f);
 		WaterColor->MaterialExpressionEditorX = -420;
 		WaterColor->MaterialExpressionEditorY = -80;
 		Material->GetExpressionCollection().AddExpression(WaterColor);
 
-		UMaterialExpressionConstant* Opacity = NewObject<UMaterialExpressionConstant>(Material);
-		Opacity->Material = Material;
-		Opacity->R = 0.58f;
-		Opacity->MaterialExpressionEditorX = -420;
-		Opacity->MaterialExpressionEditorY = 140;
-		Material->GetExpressionCollection().AddExpression(Opacity);
+		UMaterialExpressionMultiply* EmissiveLift = NewObject<UMaterialExpressionMultiply>(Material);
+		EmissiveLift->Material = Material;
+		EmissiveLift->A.Connect(0, WaterColor);
+		EmissiveLift->ConstB = 1.35f;
+		EmissiveLift->MaterialExpressionEditorX = -120;
+		EmissiveLift->MaterialExpressionEditorY = 120;
+		Material->GetExpressionCollection().AddExpression(EmissiveLift);
 
 		MaterialEditorOnly->BaseColor.Connect(0, WaterColor);
-		MaterialEditorOnly->EmissiveColor.Connect(0, WaterColor);
-		MaterialEditorOnly->Opacity.Connect(0, Opacity);
+		MaterialEditorOnly->EmissiveColor.Connect(0, EmissiveLift);
+		MaterialEditorOnly->Opacity.Expression = nullptr;
 		MaterialEditorOnly->Roughness.UseConstant = true;
-		MaterialEditorOnly->Roughness.Constant = 0.18f;
+		MaterialEditorOnly->Roughness.Constant = 0.24f;
 		MaterialEditorOnly->Specular.UseConstant = true;
-		MaterialEditorOnly->Specular.Constant = 0.55f;
+		MaterialEditorOnly->Specular.Constant = 0.72f;
 
 		Material->PostEditChange();
 		Material->MarkPackageDirty();
@@ -750,6 +758,17 @@ namespace TunaSweeperProceduralTerrainTest
 		return SaveAsset(StaticMesh) ? StaticMesh : nullptr;
 	}
 
+	UStaticMesh* LoadCreekWaterSplineSegmentMesh()
+	{
+		UStaticMesh* StaticMesh = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Cube.Cube"));
+		if (!StaticMesh)
+		{
+			UE_LOG(LogTunaSweeperProceduralTerrainTest, Error, TEXT("Failed to load /Engine/BasicShapes/Cube.Cube for creek water spline."));
+		}
+
+		return StaticMesh;
+	}
+
 	ALandscape* SpawnLandscape(
 		UWorld* World,
 		UMaterialInterface* LandscapeMaterial,
@@ -908,8 +927,13 @@ namespace TunaSweeperProceduralTerrainTest
 			SplineMesh->SetGenerateOverlapEvents(false);
 			SplineMesh->SetStaticMesh(WaterSegmentMesh);
 			SplineMesh->SetMaterial(0, WaterMaterial);
+			SplineMesh->SetCastShadow(false);
 			SplineMesh->SetForwardAxis(ESplineMeshAxis::X, false);
 			SplineMesh->SetSplineUpDir(FVector::UpVector, false);
+			SplineMesh->SetStartScale(FVector2D((CreekWaterHalfWidth * 2.0f) / EngineBasicShapeSize, CreekWaterVisualThickness / EngineBasicShapeSize), false);
+			SplineMesh->SetEndScale(FVector2D((CreekWaterHalfWidth * 2.0f) / EngineBasicShapeSize, CreekWaterVisualThickness / EngineBasicShapeSize), false);
+			SplineMesh->SetVisibility(true, false);
+			SplineMesh->SetHiddenInGame(false);
 
 			FVector StartLocation;
 			FVector StartTangent;
@@ -922,6 +946,7 @@ namespace TunaSweeperProceduralTerrainTest
 			SplineMesh->SetupAttachment(RootComponent);
 			WaterActor->AddInstanceComponent(SplineMesh);
 			SplineMesh->RegisterComponent();
+			SplineMesh->UpdateMesh();
 		}
 
 		WaterActor->MarkPackageDirty();
@@ -989,6 +1014,35 @@ namespace TunaSweeperProceduralTerrainTest
 		return true;
 	}
 
+	bool SpawnPlayerStart(UWorld* World)
+	{
+		if (!World)
+		{
+			return false;
+		}
+
+		const float GroundZ = EvaluateTerrainHeightCm(PlayerStartX, PlayerStartY);
+		const FVector StartLocation(PlayerStartX, PlayerStartY, GroundZ + PlayerStartGroundClearance);
+
+		FActorSpawnParameters SpawnParameters;
+		SpawnParameters.OverrideLevel = World->PersistentLevel;
+		SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		SpawnParameters.Name = MakeUniqueObjectName(World->PersistentLevel, APlayerStart::StaticClass(), TEXT("TS_ProceduralPlayerStart"));
+
+		APlayerStart* PlayerStart = World->SpawnActor<APlayerStart>(
+			StartLocation,
+			FRotator(0.0f, 25.0f, 0.0f),
+			SpawnParameters);
+		if (!PlayerStart)
+		{
+			return false;
+		}
+
+		PlayerStart->SetActorLabel(TEXT("TS_ProceduralPlayerStart"));
+		PlayerStart->MarkPackageDirty();
+		return true;
+	}
+
 	bool EnsureProceduralTerrainTestLevel()
 	{
 		TMap<ETerrainLayer, UTexture2D*> Textures;
@@ -1009,7 +1063,7 @@ namespace TunaSweeperProceduralTerrainTest
 
 		UMaterial* LandscapeMaterial = EnsureLandscapeMaterial(Textures);
 		UMaterial* WaterMaterial = EnsureCreekWaterMaterial();
-		UStaticMesh* WaterSegmentMesh = EnsureCreekWaterSplineSegmentMesh(WaterMaterial);
+		UStaticMesh* WaterSegmentMesh = LoadCreekWaterSplineSegmentMesh();
 		if (!LandscapeMaterial || !WaterMaterial || !WaterSegmentMesh)
 		{
 			return false;
@@ -1024,7 +1078,7 @@ namespace TunaSweeperProceduralTerrainTest
 
 		World->PersistentLevel->Modify();
 		ALandscape* Landscape = SpawnLandscape(World, LandscapeMaterial, LayerInfos);
-		if (!Landscape || !SpawnCreekWaterSpline(World, WaterSegmentMesh, WaterMaterial) || !SpawnProceduralLighting(World))
+		if (!Landscape || !SpawnCreekWaterSpline(World, WaterSegmentMesh, WaterMaterial) || !SpawnProceduralLighting(World) || !SpawnPlayerStart(World))
 		{
 			return false;
 		}

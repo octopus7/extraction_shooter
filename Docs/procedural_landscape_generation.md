@@ -10,8 +10,9 @@
 - 생성 에셋 경로: `/Game/Prototype/TerrainTest`
 - Landscape 크기: 4 components x 63 quads, 총 252 quads / 253 verts, `ScaleXY=40`, 약 100.8m 정사각형
 - Landscape 레이어: `Dirt`, `Grass`, `Rock`, `DarkDirt`
-- 소품 scatter 없음. 시각 확인용 개울 물면은 `USplineComponent`와 `USplineMeshComponent`로 이어 붙이고, `SM_TerrainTest_CreekWater`는 각 스플라인 구간이 구부려 쓰는 짧은 물면 타일 메시로 사용한다.
+- 소품 scatter 없음. 시각 확인용 개울 물면은 `USplineComponent`와 `USplineMeshComponent`로 이어 붙이고, 현재는 렌더 안정성을 위해 `/Engine/BasicShapes/Cube`를 얇은 청록색 spline strip으로 구부려 사용한다.
 - 플레이 테스트 확인용 조명으로 `TS_ProceduralTerrain_Sun` DirectionalLight와 `TS_ProceduralTerrain_SkyLight` SkyLight를 자동 배치한다.
+- 플레이 테스트 시작점으로 `TS_ProceduralPlayerStart`를 랜드스케이프 중심부 근처의 마른 지점 `(X=520, Y=-220)`에 자동 배치한다. Z는 `EvaluateTerrainHeightCm()` 결과에 120cm를 더해 캐릭터 캡슐이 지면 아래에서 시작하지 않도록 한다.
 
 이 단계의 목적은 "좋은 최종 맵"이 아니라, 코드로 만든 heightmap/weightmap이 실제 UE Landscape에 안정적으로 들어가고 네 레이어가 구분되어 보이는지 확인하는 것이다.
 
@@ -47,9 +48,11 @@ Start-Process -FilePath 'C:\Program Files\Epic Games\UE_5.7\Engine\Binaries\Win6
 
 - `TS_ProceduralCreekWaterSpline` 배우를 생성한다.
 - 배우 안에 `CreekSpline` `USplineComponent`를 만들고, `GetCreekCenterX()`와 `EvaluateTerrainHeightCm()`으로 같은 개울 중심선 위의 스플라인 포인트를 계산한다.
-- `SM_TerrainTest_CreekWater`는 전체 개울 메시가 아니라 `SplineMeshComponent`가 구부려 쓰는 짧은 직선 물면 타일이다.
+- 물면 렌더는 커스텀 정적 메시 대신 `/Engine/BasicShapes/Cube`를 사용한다. 기본 큐브를 폭 236cm, 두께 5cm 단면으로 스케일한 뒤 `SplineMeshComponent`가 각 구간을 구부린다.
 - 각 인접 스플라인 포인트마다 `USplineMeshComponent`를 만들고 `SetStartAndEnd()`로 위치와 tangent를 넣어 구간을 이어 붙인다.
 - 이 방식은 나중에 개울 폭, 포인트 수, 중심선 함수를 바꾸는 것만으로 흐름을 다시 구성할 수 있다.
+- 현재 수면은 shoreline 전 단계의 가시성 확보용이다. `M_TerrainTest_CreekWater`는 지형 조명과 그림자에 묻히지 않도록 `BLEND_Opaque` + `MSM_Unlit`의 밝은 청록색 emissive 재질을 사용한다.
+- 수면 폭은 half width 118cm, 지형 위 offset은 42cm, 두께는 5cm다. shoreline/foam edge는 이후 별도 스플라인 메시나 머티리얼 레이어로 추가한다.
 
 ### Imagegen 텍스처 교체
 
