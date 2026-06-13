@@ -11,6 +11,7 @@
 - Landscape 크기: 4 components x 63 quads, 총 252 quads / 253 verts, `ScaleXY=40`, 약 100.8m 정사각형
 - Landscape 레이어: `Dirt`, `Grass`, `Rock`, `DarkDirt`
 - 소품 scatter 없음. 시각 확인용 개울 물면은 `USplineComponent`와 `USplineMeshComponent`로 이어 붙이고, `SM_TerrainTest_CreekWater`는 각 스플라인 구간이 구부려 쓰는 짧은 물면 타일 메시로 사용한다.
+- 플레이 테스트 확인용 조명으로 `TS_ProceduralTerrain_Sun` DirectionalLight와 `TS_ProceduralTerrain_SkyLight` SkyLight를 자동 배치한다.
 
 이 단계의 목적은 "좋은 최종 맵"이 아니라, 코드로 만든 heightmap/weightmap이 실제 UE Landscape에 안정적으로 들어가고 네 레이어가 구분되어 보이는지 확인하는 것이다.
 
@@ -38,7 +39,7 @@ Start-Process -FilePath 'C:\Program Files\Epic Games\UE_5.7\Engine\Binaries\Win6
 
 - `StartupModule()`에서 바로 `NewBlankMap()`을 호출하면 초기 `/Temp/Untitled_0` 월드 정리 중 fatal이 날 수 있다. 커맨드 플래그 실행은 `FTSTicker`로 한 tick 이상 미뤄서 에디터 월드가 준비된 뒤 처리한다.
 - 현재 레이어 텍스처는 `SourceArt/TerrainTest`의 imagegen PNG를 필수 입력으로 사용한다.
-- 조명 상태에 의존하지 않도록 Landscape 머티리얼은 `MSM_Unlit`이고, 레이어 블렌드 결과를 `BaseColor`와 `EmissiveColor`에 모두 연결한다.
+- 플레이 테스트에서 조명 명암이 보이도록 Landscape 머티리얼은 `MSM_DefaultLit`를 사용하고, 레이어 블렌드 결과는 `BaseColor`에만 연결한다. 이전 확인용 `MSM_Unlit`/`EmissiveColor` 연결은 인게임에서 라이팅이 먹지 않아 제거했다.
 
 ### 개울 스플라인 구성
 
@@ -63,11 +64,11 @@ Start-Process -FilePath 'C:\Program Files\Epic Games\UE_5.7\Engine\Binaries\Win6
   - `T_TerrainTest_DarkDirt_Imagegen.png`
 - import 코드: `EnsureTerrainTextureAsset()`에서 SourceArt PNG를 `FImageUtils::LoadImage()`로 읽고 1024x1024로 리샘플한다.
 - SourceArt PNG가 없으면 생성에 실패한다. 이전 C++ 절차 노이즈 텍스처 fallback은 제거했다.
-- cube 스케일 확인 결과 기존 `MappingScale=420`은 지형 디테일이 너무 크게 보였다. 현재는 레이어별 mapping scale을 분리한다.
-  - `Grass`: 115cm
-  - `Dirt`: 180cm
-  - `Rock`: 170cm
-  - `DarkDirt`: 160cm
+- cube와 플레이어 스케일 확인 결과 기존 `MappingScale=420`, 이후 `115~180cm` 계열 값도 지형 디테일이 너무 크게 보였다. `LandscapeLayerCoords`는 내부적으로 `1 / MappingScale`을 쓰므로 값이 클수록 텍스처가 크게 보인다. 현재는 플레이어 발밑 기준으로 더 촘촘한 레이어별 mapping scale을 쓴다.
+  - `Grass`: 34cm
+  - `Dirt`: 55cm
+  - `Rock`: 72cm
+  - `DarkDirt`: 58cm
 - 원본 PNG는 1024x1024 UE Texture2D로 리샘플한다. 512x512 리샘플은 가까운 확인에서 디테일이 쉽게 뭉개진다.
 
 아트 방향:

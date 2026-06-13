@@ -5,13 +5,19 @@
 #include "Components/SceneComponent.h"
 #include "Components/SplineComponent.h"
 #include "Components/SplineMeshComponent.h"
+#include "Components/LightComponent.h"
+#include "Components/SkyLightComponent.h"
 #include "CoreMinimal.h"
 #include "Editor.h"
+#include "Engine/DirectionalLight.h"
+#include "Engine/SkyLight.h"
 #include "Engine/StaticMesh.h"
 #include "Engine/Texture2D.h"
+#include "Engine/World.h"
 #include "Factories/MaterialFactoryNew.h"
 #include "FileHelpers.h"
 #include "GameFramework/Actor.h"
+#include "GameFramework/WorldSettings.h"
 #include "HAL/FileManager.h"
 #include "ImageUtils.h"
 #include "Landscape.h"
@@ -89,7 +95,7 @@ namespace TunaSweeperProceduralTerrainTest
 				TEXT("LI_TerrainTest_Dirt"),
 				TEXT("T_TerrainTest_Dirt_Imagegen.png"),
 				FLinearColor(0.54f, 0.34f, 0.18f, 1.0f),
-				180.0f,
+				55.0f,
 				0.30f
 			},
 			{
@@ -99,7 +105,7 @@ namespace TunaSweeperProceduralTerrainTest
 				TEXT("LI_TerrainTest_Grass"),
 				TEXT("T_TerrainTest_Grass_Imagegen.png"),
 				FLinearColor(0.16f, 0.45f, 0.11f, 1.0f),
-				115.0f,
+				34.0f,
 				0.45f
 			},
 			{
@@ -109,7 +115,7 @@ namespace TunaSweeperProceduralTerrainTest
 				TEXT("LI_TerrainTest_Rock"),
 				TEXT("T_TerrainTest_Rock_Imagegen.png"),
 				FLinearColor(0.42f, 0.42f, 0.38f, 1.0f),
-				170.0f,
+				72.0f,
 				0.15f
 			},
 			{
@@ -119,7 +125,7 @@ namespace TunaSweeperProceduralTerrainTest
 				TEXT("LI_TerrainTest_DarkDirt"),
 				TEXT("T_TerrainTest_DarkDirt_Imagegen.png"),
 				FLinearColor(0.16f, 0.11f, 0.08f, 1.0f),
-				160.0f,
+				58.0f,
 				0.10f
 			}
 		};
@@ -345,7 +351,7 @@ namespace TunaSweeperProceduralTerrainTest
 		Material->GetExpressionCollection().Empty();
 		Material->BlendMode = BLEND_Opaque;
 		Material->TwoSided = false;
-		Material->SetShadingModel(MSM_Unlit);
+		Material->SetShadingModel(MSM_DefaultLit);
 
 		UMaterialEditorOnlyData* MaterialEditorOnly = Material->GetEditorOnlyData();
 		if (!MaterialEditorOnly)
@@ -396,11 +402,13 @@ namespace TunaSweeperProceduralTerrainTest
 		}
 
 		MaterialEditorOnly->BaseColor.Connect(0, LayerBlend);
-		MaterialEditorOnly->EmissiveColor.Connect(0, LayerBlend);
+		MaterialEditorOnly->EmissiveColor.Expression = nullptr;
+		MaterialEditorOnly->EmissiveColor.UseConstant = true;
+		MaterialEditorOnly->EmissiveColor.Constant = FLinearColor::Black;
 		MaterialEditorOnly->Roughness.UseConstant = true;
-		MaterialEditorOnly->Roughness.Constant = 0.92f;
+		MaterialEditorOnly->Roughness.Constant = 0.86f;
 		MaterialEditorOnly->Specular.UseConstant = true;
-		MaterialEditorOnly->Specular.Constant = 0.12f;
+		MaterialEditorOnly->Specular.Constant = 0.18f;
 		MaterialEditorOnly->Metallic.UseConstant = true;
 		MaterialEditorOnly->Metallic.Constant = 0.0f;
 
@@ -920,6 +928,67 @@ namespace TunaSweeperProceduralTerrainTest
 		return true;
 	}
 
+	bool SpawnProceduralLighting(UWorld* World)
+	{
+		if (!World)
+		{
+			return false;
+		}
+
+		if (AWorldSettings* WorldSettings = World->GetWorldSettings())
+		{
+			WorldSettings->Modify();
+			WorldSettings->bForceNoPrecomputedLighting = true;
+			WorldSettings->MarkPackageDirty();
+		}
+
+		FActorSpawnParameters SpawnParameters;
+		SpawnParameters.OverrideLevel = World->PersistentLevel;
+		SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+		SpawnParameters.Name = MakeUniqueObjectName(World->PersistentLevel, ADirectionalLight::StaticClass(), TEXT("TS_ProceduralTerrain_Sun"));
+		ADirectionalLight* SunLight = World->SpawnActor<ADirectionalLight>(
+			FVector(0.0f, -1200.0f, 2600.0f),
+			FRotator(-48.0f, -34.0f, 0.0f),
+			SpawnParameters);
+		if (!SunLight)
+		{
+			return false;
+		}
+
+		SunLight->SetActorLabel(TEXT("TS_ProceduralTerrain_Sun"));
+		SunLight->SetMobility(EComponentMobility::Movable);
+		if (ULightComponent* LightComponent = SunLight->GetLightComponent())
+		{
+			LightComponent->SetMobility(EComponentMobility::Movable);
+			LightComponent->SetIntensity(3.6f);
+			LightComponent->SetLightColor(FLinearColor(1.0f, 0.93f, 0.82f), false);
+		}
+		SunLight->MarkPackageDirty();
+
+		SpawnParameters.Name = MakeUniqueObjectName(World->PersistentLevel, ASkyLight::StaticClass(), TEXT("TS_ProceduralTerrain_SkyLight"));
+		ASkyLight* SkyLight = World->SpawnActor<ASkyLight>(
+			FVector(0.0f, 0.0f, 1600.0f),
+			FRotator::ZeroRotator,
+			SpawnParameters);
+		if (!SkyLight)
+		{
+			return false;
+		}
+
+		SkyLight->SetActorLabel(TEXT("TS_ProceduralTerrain_SkyLight"));
+		if (USkyLightComponent* SkyLightComponent = SkyLight->GetLightComponent())
+		{
+			SkyLightComponent->SetMobility(EComponentMobility::Movable);
+			SkyLightComponent->SetIntensity(0.45f);
+			SkyLightComponent->SetLightColor(FLinearColor(0.76f, 0.84f, 1.0f));
+			SkyLightComponent->SetRealTimeCapture(false);
+		}
+		SkyLight->MarkPackageDirty();
+
+		return true;
+	}
+
 	bool EnsureProceduralTerrainTestLevel()
 	{
 		TMap<ETerrainLayer, UTexture2D*> Textures;
@@ -955,7 +1024,7 @@ namespace TunaSweeperProceduralTerrainTest
 
 		World->PersistentLevel->Modify();
 		ALandscape* Landscape = SpawnLandscape(World, LandscapeMaterial, LayerInfos);
-		if (!Landscape || !SpawnCreekWaterSpline(World, WaterSegmentMesh, WaterMaterial))
+		if (!Landscape || !SpawnCreekWaterSpline(World, WaterSegmentMesh, WaterMaterial) || !SpawnProceduralLighting(World))
 		{
 			return false;
 		}

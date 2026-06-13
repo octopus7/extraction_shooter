@@ -4315,3 +4315,12 @@
 - `M_TerrainTest_CreekWater`에 `bUsedWithSplineMeshes` usage flag를 설정해 맵 로드 시 스플라인 메시 머티리얼 경고가 나지 않도록 한 것.
 - `Docs/procedural_landscape_generation.md`에 개울 스플라인 구성 절차를 기록한 것.
 - `TunaSweeperEditor Win64 Development` 빌드, 절차 지형 테스트 레벨 재생성, `/Game/PrototypeTerrainPathCreekMap` 직접 로드, MapCheck 0 Error / 0 Warning을 확인한 것.
+
+## 2026-06-14 02:54:00 (소요시간: 00:10:22)
+
+- 플레이어를 임의 배치해 플레이했을 때 기초 지형 테스트 레벨에 실제 라이팅이 없고, Landscape 텍스처 디테일이 여전히 플레이어 기준으로 크게 보이던 문제를 수정한 것.
+- `M_TerrainTest_Landscape`를 `MSM_Unlit`/`EmissiveColor` 확인용 구성에서 `MSM_DefaultLit`로 바꾸고, 레이어 블렌드 결과는 `BaseColor`에만 연결하도록 수정한 것.
+- `/Game/PrototypeTerrainPathCreekMap` 생성 시 `TS_ProceduralTerrain_Sun` DirectionalLight와 `TS_ProceduralTerrain_SkyLight` SkyLight를 자동 배치하도록 한 것.
+- `LandscapeLayerCoords`의 `MappingScale`은 내부적으로 `1 / MappingScale`을 사용하므로 값이 클수록 텍스처가 커진다는 점을 확인하고, 레이어별 scale을 `Grass=34cm`, `Dirt=55cm`, `Rock=72cm`, `DarkDirt=58cm`로 줄인 것.
+- `/Game/Prototype/TerrainTest` 머티리얼/텍스처와 `/Game/PrototypeTerrainPathCreekMap`을 재생성하고, 에디터 직접 로드와 PIE 월드 생성 로그, MapCheck 0 Error / 0 Warning을 확인한 것.
+- `Docs/procedural_landscape_generation.md`에 현재 라이팅/머티리얼/텍스처 밀도 기준을 갱신한 것.
