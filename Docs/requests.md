@@ -4438,3 +4438,11 @@
 - 기존 shoreline edge emissive는 base emissive 위에 더하도록 바꾸고, edge tint를 `(0.018, 0.052, 0.060)`으로 낮춰 과한 내곽 발광을 줄인 것.
 - shoreline edge mask를 `SmoothStep(0.965, 0.995)`로 더 얇게 줄인 것.
 - `TunaSweeperEditor Win64 Development` 빌드와 절차 지형 테스트 레벨 재생성을 완료하고, 새 `M_TerrainTest_CreekWater` 저장 및 material compile fallback 없음, MapCheck 0 Error / 0 Warning을 확인한 것.
+## 2026-06-14 06:33:00 (소요시간: 00:11:06)
+
+- NS 전용 룩뎁/캡처 테스트 레벨을 만들고, Niagara Fluids 기반 고비용 폭발 이펙트를 배치할 것.
+- `/Game/EditorOnly/Lookdev/NS_LookdevFluidExplosion_HighCost`를 NiagaraFluids `Grid3D_Gas_Explosion` 템플릿 기반으로 준비한 것.
+- `/Game/EditorOnly/Lookdev/Lookdev_NiagaraExplosion` 전용 레벨을 생성하고 바닥, 백월, 키라이트, 스카이라이트, 코어 포인트라이트, Niagara actor, 고정 카메라, PlayerStart, 카메라 디렉터를 배치한 것.
+- `ATunaSweeperLookdevCameraDirectorActor`가 PIE/캡처 실행 시 고정 카메라를 view target으로 강제하고 Niagara 폭발을 한 번 재시작하도록 구성한 것.
+- `StartupModule()`에서 바로 `NewBlankMap()`을 호출하면 `/Temp/Untitled` 월드 메모리 누수 fatal이 발생하므로, 기존 맵 셋업 패턴처럼 `FTSTicker` 지연 실행으로 전용 레벨 생성을 처리한 것.
+- `TunaSweeperEditor` 빌드를 통과시키고, `-TunaSweeperLookdevFluidExplosionSetupQuit` 무인 에디터 실행으로 에셋과 레벨 저장을 확인한 뒤 전용 레벨을 에디터에서 열어둔 것.
