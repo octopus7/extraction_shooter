@@ -4394,3 +4394,47 @@
 - `Grass`는 붕 떠 보이는 노란 값을 줄이도록 red/blue 대비 green을 조금 남기고 전체 값을 낮췄고, `Dirt`, `Rock`, `DarkDirt`도 전체 BaseColor 값을 낮춘 것.
 - `TunaSweeperEditor Win64 Development` 빌드 성공을 확인하고, `-TunaSweeperRebuildProceduralTerrainTest -TunaSweeperProceduralTerrainTestQuit`로 terrain test map/material 에셋을 재생성한 것.
 - 변경된 `/Game/PrototypeTerrainPathCreekMap`을 확인할 수 있도록 Unreal Editor를 실행한 것.
+
+## 2026-06-14 04:36:30 (소요시간: 00:07:36)
+
+- `/Game/PrototypeTerrainPathCreekMap`의 수면 본체를 `BLEND_Translucent` + `MSM_Unlit`에서 `BLEND_Opaque` + `MSM_SingleLayerWater`로 다시 구현한 것.
+- `M_TerrainTest_CreekWater` 생성 코드에 `UMaterialExpressionSingleLayerWaterMaterialOutput`을 추가하고 scattering/absorption/phase/color scale 입력을 연결해 SingleLayerWater 패스가 depth 기반 수색 변화를 처리하도록 한 것.
+- `SM_TerrainTest_CreekWater` 리본 메시를 길이 방향 96샘플, 폭 방향 5열 구조로 재생성하고, 각 vertex color alpha에 `water surface z - terrain z` 기반 깊이값을 저장하도록 한 것.
+- 머터리얼에서 vertex alpha를 `Power(1.25)`로 정리한 뒤 얕은 청록색과 깊은 남청색을 `Lerp`해 스타일라이즈드 깊이색도 직접 반영하도록 한 것.
+- 기존 `M_TerrainTest_CreekWater_Ripples` 흰 물결 오버레이는 유지하고, 본체 수면보다 3cm 위에 그대로 배치되도록 한 것.
+- `TunaSweeperEditor Win64 Development` 빌드, 절차 지형 테스트 레벨 재생성, 저장된 `M_TerrainTest_CreekWater`에 `MSM_SingleLayerWater`와 `SingleLayerWaterMaterialOutput`이 들어간 것을 확인한 것.
+
+## 2026-06-14 04:48:27 (소요시간: 00:04:33)
+
+- `/Game/PrototypeTerrainPathCreekMap`의 `SingleLayerWater` 수면이 여전히 투명하게 보이던 문제를 줄이기 위해 물 뒤 배경 합성 수치를 조정한 것.
+- `M_TerrainTest_CreekWater`의 `ColorScaleBehindWater` 기본값을 `(0.88, 0.98, 1.02)`에서 `(0.22, 0.52, 0.66)`으로 낮추고, 수면 텍스처 가산 배율을 `0.12`에서 `0.035`로 낮춘 것.
+- SingleLayerWater opacity 입력을 `0.72`에서 `0.96`으로 올리고, absorption/scattering coefficient를 강화해 개울 바닥색이 그대로 통과하지 않도록 한 것.
+- `Docs/procedural_landscape_generation.md`에 해당 수면이 mesh distance field가 아니라 scene depth와 SingleLayerWater coefficient에 의해 결정된다는 내용을 기록한 것.
+- `TunaSweeperEditor Win64 Development` 빌드와 절차 지형 테스트 레벨 재생성을 완료하고, 저장된 `M_TerrainTest_CreekWater`가 `BLEND_Opaque` + `MSM_SingleLayerWater` 상태임을 확인한 것.
+
+## 2026-06-14 05:09:07 (소요시간: 00:12:45)
+
+- `/Game/PrototypeTerrainPathCreekMap`에서 수면 아래쪽이 회색 기본 재질처럼 보이던 문제를 `M_TerrainTest_CreekWater` 머티리얼 컴파일 실패로 확인한 것.
+- 실패 원인은 UE 5.7 SM6 컴파일에서 `VertexColor` 출력이 float3로 처리되는 경로에 alpha `ComponentMask A`를 연결한 것이었고, 이 때문에 엔진이 수면 본체를 기본 재질로 fallback한 것으로 판단한 것.
+- `M_TerrainTest_CreekWater` 생성 코드에서 vertex color alpha 기반 수심 마스크를 제거하고, 리본 메시의 폭 방향 UV `U=0.5` 중앙을 깊은 곳으로 보는 center mask 기반 수심색 계산으로 바꾼 것.
+- 수면 본체는 계속 `BLEND_Opaque` + `MSM_SingleLayerWater` + `SingleLayerWaterMaterialOutput` 구조를 유지하고, `TwoSided=true` 상태로 아래쪽에서도 같은 재질이 적용되도록 한 것.
+- `Docs/procedural_landscape_generation.md`에 vertex color alpha 방식이 제거된 이유와 현재 폭 방향 UV 기반 수심색 기준을 기록한 것.
+- `TunaSweeperEditor Win64 Development` 빌드와 절차 지형 테스트 레벨 재생성을 완료하고, 최신 재생성 로그에서 map 저장과 `MapCheck` 완료를 확인한 것.
+- `/Game/PrototypeTerrainPathCreekMap`을 Unreal Editor로 다시 열고, 새 로그에서 `M_TerrainTest_CreekWater`의 material compile failure/default material fallback이 다시 발생하지 않는 것을 확인한 것.
+
+## 2026-06-14 05:24:25 (소요시간: 00:07:10)
+
+- `/Game/PrototypeTerrainPathCreekMap`의 수면이 위에서 볼 때 너무 검게 죽고, 아래에서 본 산뜻한 청록색과 괴리가 크던 문제를 줄이도록 `M_TerrainTest_CreekWater` 생성 값을 조정한 것.
+- 얕은 물 색을 `(0.22, 0.88, 0.92)`, 깊은 물 색을 `(0.02, 0.42, 0.78)`로 올리고, 수심 마스크 `Power`를 `1.25`에서 `0.85`로 낮춰 중앙부가 검게 꺼지지 않게 한 것.
+- `ColorScaleBehindWater` 기본값을 `(0.58, 0.90, 0.98)`로 올리고, imagegen 수면 텍스처 가산 배율을 `0.075`로 조정한 것.
+- SingleLayerWater absorption을 `(0.010, 0.0040, 0.0012)`, scattering을 `(0.010, 0.030, 0.042)`로 바꿔 검정 중심부를 줄이고 산뜻한 푸른 베이스를 유지하도록 한 것.
+- shoreline edge inner glow를 `SmoothStep(0.90, 0.985)`로 얇게 줄이고, 시간 변조가 `0.70..1.00` 범위에서만 움직이도록 `Sine * 0.15 + 0.85`로 바꾼 것.
+- `TunaSweeperEditor Win64 Development` 빌드와 절차 지형 테스트 레벨 재생성을 완료하고, 새 `M_TerrainTest_CreekWater`와 `/Game/PrototypeTerrainPathCreekMap` 저장 및 material compile fallback 없음, MapCheck 0 Error / 0 Warning을 확인한 것.
+
+## 2026-06-14 05:35:07 (소요시간: 00:04:22)
+
+- `/Game/PrototypeTerrainPathCreekMap`의 수면이 여전히 검게 보이던 문제를 `SingleLayerWater` 계수 튜닝만으로는 안정적으로 해결되지 않는 상태로 판단하고, 스타일라이즈드 수면 베이스를 emissive로 보강한 것.
+- `M_TerrainTest_CreekWater` 생성 코드에 `DepthTint * 0.46 + (0.018, 0.18, 0.24)` base emissive lift를 추가해 중앙부가 검정으로 떨어지지 않도록 한 것.
+- 기존 shoreline edge emissive는 base emissive 위에 더하도록 바꾸고, edge tint를 `(0.018, 0.052, 0.060)`으로 낮춰 과한 내곽 발광을 줄인 것.
+- shoreline edge mask를 `SmoothStep(0.965, 0.995)`로 더 얇게 줄인 것.
+- `TunaSweeperEditor Win64 Development` 빌드와 절차 지형 테스트 레벨 재생성을 완료하고, 새 `M_TerrainTest_CreekWater` 저장 및 material compile fallback 없음, MapCheck 0 Error / 0 Warning을 확인한 것.

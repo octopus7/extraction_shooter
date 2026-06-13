@@ -48,15 +48,19 @@ Start-Process -FilePath 'C:\Program Files\Epic Games\UE_5.7\Engine\Binaries\Win6
 
 - `TS_ProceduralCreekWaterSpline` 배우를 생성한다.
 - 배우 안에 `CreekSpline` `USplineComponent`를 만들고, `GetCreekCenterX()`와 `EvaluateTerrainHeightCm()`으로 같은 개울 중심선 위의 스플라인 포인트를 계산한다.
-- 물면 렌더는 `SM_TerrainTest_CreekWater` 하나를 `UStaticMeshComponent`로 붙인다. 이 메시 자체가 96개 샘플로 만든 연속 리본이므로 구간별 end cap이나 반투명 중첩 이음매가 없다.
+- 물면 렌더는 `SM_TerrainTest_CreekWater` 하나를 `UStaticMeshComponent`로 붙인다. 이 메시 자체가 길이 방향 96개 샘플, 폭 방향 5열로 만든 연속 리본이므로 구간별 end cap이나 반투명 중첩 이음매가 없다.
 - 리본 폭은 중심선 주변에서 약간 변형된다. 기준 half width는 180cm이고, 노이즈/사인 변형을 더해 148~212cm 범위로 바뀐다.
 - 이 방식은 나중에 개울 폭, 포인트 수, 중심선 함수를 바꾸는 것만으로 흐름을 다시 구성할 수 있다.
-- 현재 수면은 shoreline 전 단계의 가시성 확보용이지만, 바닥이 비치는 얕은 개울처럼 보이도록 `BLEND_Translucent` + `MSM_Unlit` 재질에 imagegen 수면 텍스처를 연결한다. 불투명 단색 수면은 개울 바닥을 가려 인공 도로처럼 보이므로 사용하지 않는다.
+- 현재 수면 본체는 `BLEND_Opaque` + `MSM_SingleLayerWater` 재질이다. `SingleLayerWaterMaterialOutput`에 scattering/absorption coefficient를 연결해 엔진의 SingleLayerWater 패스가 물 뒤쪽 scene depth를 이용해 얕은 곳은 바닥색이 더 살아 있고, 깊은 곳은 푸른색으로 흡수되도록 한다.
+- 이 구성은 mesh distance field에 의존하지 않는다. 프로젝트 설정의 `r.GenerateMeshDistanceFields=True` 여부와 별개로, 현재 개울 수면의 깊이/투명도 느낌은 SingleLayerWater의 scene depth 합성과 머티리얼 coefficient 값이 지배한다.
 - 수면 텍스처 원본은 `TunaSweeper/Content/SourceArt/TerrainTest/T_TerrainTest_CreekWater_Imagegen.png`이고, 생성 에셋은 `/Game/Prototype/TerrainTest/T_TerrainTest_CreekWater`다.
 - 스플라인 메시 UV는 긴 구간에서 수면 텍스처가 늘어지므로 사용하지 않는다. `M_TerrainTest_CreekWater`는 `AbsoluteWorldPosition.xy * 0.0018`을 텍스처 좌표로 사용해 스플라인 구간 길이와 무관한 월드 기준 반복 밀도를 유지한다.
-- 수면 자체를 흐르게 만들지는 않는다. 대신 리본 메시의 폭 방향 UV에서 양쪽 가장자리만 `SmoothStep`으로 마스크하고, `Time` + `Sine`으로 그 shoreline edge의 emissive와 opacity만 약하게 변조한다. 즉 물가 주변이 잔잔하게 살아 움직이는 느낌만 준다.
-- 수면 폭은 기준 half width 180cm, 변형 범위 148~212cm, 지형 위 offset은 42cm, opacity는 0.38이다.
-- 투명 수면 안의 하이라이트가 흐릿한 이너 글로우처럼 보이는 문제를 줄이기 위해 `M_TerrainTest_CreekWater_Ripples`를 추가했다. 이 재질은 같은 수면 텍스처를 `AbsoluteWorldPosition.xy * 0.0018`로 샘플링한 뒤 red channel의 밝은 영역만 `SmoothStep(0.62, 0.86)`으로 뽑아 `BLEND_Masked` + `MSM_Unlit`의 불투명한 흰 물결로 그린다.
+- 수심색은 현재 리본 메시 vertex color가 아니라 폭 방향 UV로 계산한다. `U=0.5`에 가까운 중앙은 깊고 양쪽 edge는 얕다고 보고, `1 - abs(U - 0.5) * 2` 값을 `Power(0.85)`로 정리한 뒤 얕은 청록색 `(0.22, 0.88, 0.92)`과 깊은 푸른색 `(0.02, 0.42, 0.78)`을 `Lerp`한다. 이전 vertex color alpha 기반 방식은 UE 5.7 SM6에서 vertex color가 float3로 컴파일되어 alpha 마스크가 실패했기 때문에 제거했다.
+- 산뜻한 푸른 물 베이스가 유지되도록 `ColorScaleBehindWater`의 기본값은 `(0.58, 0.90, 0.98)`로 두고, imagegen 수면 텍스처 가산은 `0.075`를 사용한다. absorption은 `(0.010, 0.0040, 0.0012)`, scattering은 `(0.010, 0.030, 0.042)`로 잡아 수면이 검게 죽지 않으면서 바닥색이 그대로 통과하지 않게 한다.
+- 위에서 본 `SingleLayerWater` 중앙부가 scene depth 합성에 의해 검게 죽는 경우가 있어, 스타일라이즈드 수면색은 emissive lift로도 보장한다. 본체 emissive는 `DepthTint * 0.46 + (0.018, 0.18, 0.24)`를 기본으로 더하고, shoreline edge emissive는 그 위에 더한다.
+- 수면 자체를 흐르게 만들지는 않는다. 대신 리본 메시의 폭 방향 UV에서 양쪽 가장자리만 `SmoothStep(0.965, 0.995)`로 매우 얇게 마스크하고, `Time` + `Sine`으로 그 shoreline edge의 emissive만 70%~100% 범위에서 약하게 변조한다. 즉 물가 주변이 잔잔하게 살아 움직이는 느낌만 준다.
+- 수면 폭은 기준 half width 180cm, 변형 범위 148~212cm, 지형 위 offset은 42cm, SingleLayerWater opacity 입력은 0.96이다.
+- 수면 위의 흰 물결을 확실히 보이게 하기 위해 `M_TerrainTest_CreekWater_Ripples`를 별도 오버레이로 둔다. 이 재질은 같은 수면 텍스처를 `AbsoluteWorldPosition.xy * 0.0018`로 샘플링한 뒤 red channel의 밝은 영역만 `SmoothStep(0.62, 0.86)`으로 뽑아 `BLEND_Masked` + `MSM_Unlit`의 불투명한 흰 물결로 그린다.
 - `TS_ProceduralCreekWaterSpline` 배우에는 `CreekWaterRibbon` 외에 같은 `SM_TerrainTest_CreekWater`를 쓰는 `CreekWaterWhiteRipples` 컴포넌트를 하나 더 붙인다. 이 컴포넌트는 Z를 3cm 올려 수면 본체와 z-fighting이 생기지 않게 한다.
 - 위 흰 물결은 수면 내부의 ripple highlight다. 물가에 붙는 shoreline/foam edge는 이후 별도 리본 메시나 머티리얼 레이어로 추가한다.
 

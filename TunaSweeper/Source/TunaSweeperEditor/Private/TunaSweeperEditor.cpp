@@ -7,6 +7,8 @@
 #include "Animation/WidgetAnimation.h"
 #include "AutomatedAssetImportData.h"
 #include "Blueprint/WidgetTree.h"
+#include "Camera/CameraActor.h"
+#include "Camera/CameraComponent.h"
 #include "Character/TunaSweeperLedRobotCharacterActor.h"
 #include "Character/TunaSweeperTopDownCharacter.h"
 #include "Components/Border.h"
@@ -21,9 +23,14 @@
 #include "Components/ListViewBase.h"
 #include "Components/Overlay.h"
 #include "Components/OverlaySlot.h"
+#include "Components/DirectionalLightComponent.h"
+#include "Components/LightComponent.h"
+#include "Components/PointLightComponent.h"
 #include "Components/ProgressBar.h"
 #include "Components/ScrollBox.h"
 #include "Components/SizeBox.h"
+#include "Components/SkyLightComponent.h"
+#include "Components/StaticMeshComponent.h"
 #include "Components/TextBlock.h"
 #include "Components/TileView.h"
 #include "Components/VerticalBox.h"
@@ -32,7 +39,11 @@
 #include "Effect/TunaSweeperProjectileHitBurstActor.h"
 #include "Effect/TunaSweeperProjectileHitEffectDataAsset.h"
 #include "Engine/Blueprint.h"
+#include "Engine/DirectionalLight.h"
+#include "Engine/PointLight.h"
+#include "Engine/SkyLight.h"
 #include "Engine/StaticMesh.h"
+#include "Engine/StaticMeshActor.h"
 #include "Engine/Texture2D.h"
 #include "EngineUtils.h"
 #include "Editor.h"
@@ -41,6 +52,7 @@
 #include "Game/TunaSweeperGameMode.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "GameMapsSettings.h"
+#include "GameFramework/PlayerStart.h"
 #include "HAL/FileManager.h"
 #include "IAssetTools.h"
 #include "InputAction.h"
@@ -59,6 +71,7 @@
 #include "Interaction/TunaSweeperTransparentObstacleActor.h"
 #include "Interaction/TunaSweeperWarpPointActor.h"
 #include "Interaction/TunaSweeperWorldProgressActor.h"
+#include "Lookdev/TunaSweeperLookdevCameraDirectorActor.h"
 #include "Kismet2/BlueprintEditorUtils.h"
 #include "Kismet2/KismetEditorUtilities.h"
 #include "Map/TunaSweeperMapCaptureActor.h"
@@ -101,6 +114,8 @@
 #include "Misc/Parse.h"
 #include "Misc/Paths.h"
 #include "NiagaraEmitter.h"
+#include "NiagaraActor.h"
+#include "NiagaraComponent.h"
 #include "NiagaraParameterStore.h"
 #include "NiagaraScript.h"
 #include "NiagaraSystem.h"
@@ -200,6 +215,7 @@ namespace TunaSweeperEditorSetup
 	const FString RollingBomberChargeCylinderEffectTaskId = TEXT("2026-05-28_CreateRollingBomberChargeCylinderEffectV1");
 	const FString LocalExplosionEffectTaskId = TEXT("2026-05-29_CreateLocalExplosionFlipbookEffectV3");
 	const FString ExtractionSmokeSignalNiagaraSystemTaskId = TEXT("2026-05-29_CreateExtractionSmokeSignalNiagaraSystemV4");
+	const FString LookdevFluidExplosionTaskId = TEXT("2026-06-14_CreateLookdevFluidExplosionNiagaraLevelV1");
 	const FString ProjectileHitEffectAssetTaskId = TEXT("2026-05-28_CreateProjectileHitEffectAssetsV1");
 	const FString WeaponSpreadRecoilAssetTaskId = TEXT("2026-05-28_CreateWeaponSpreadRecoilAssetsV1");
 	const FString BaseballBatAssetTaskId = TEXT("2026-05-28_CreateBaseballBatStaticMeshAssetsV1");
@@ -259,6 +275,8 @@ namespace TunaSweeperEditorSetup
 	const FString VoxelAssetPath = TEXT("/Game/Prototype");
 	const FString VoxelVertexColorMaterialAssetName = TEXT("M_Voxel_VertexColor");
 	const FString EffectsAssetPath = TEXT("/Game/Effects");
+	const FString LookdevAssetPath = TEXT("/Game/EditorOnly/Lookdev");
+	const FString LookdevFluidExplosionMapPackagePath = TEXT("/Game/EditorOnly/Lookdev/Lookdev_NiagaraExplosion");
 	const FString RollingBomberChargeCylinderMaskTextureAssetName = TEXT("T_RollingBomberChargeCylinderMask");
 	const FString RollingBomberChargeCylinderMaterialAssetName = TEXT("M_RollingBomberChargeCylinder");
 	const FString RollingBomberChargeCylinderMeshAssetName = TEXT("SM_RollingBomberChargeCylinder_Open");
@@ -267,6 +285,8 @@ namespace TunaSweeperEditorSetup
 	const FString LocalExplosionDistortionMaterialAssetName = TEXT("M_LocalExplosionDistortion");
 	const FString LocalExplosionSmokeMaterialAssetName = TEXT("M_LocalExplosionSmoke");
 	const FString ExtractionSmokeSignalNiagaraSystemAssetName = TEXT("NS_ExtractionSmokeSignal");
+	const FString LookdevFluidExplosionNiagaraSystemAssetName = TEXT("NS_LookdevFluidExplosion_HighCost");
+	const FString LookdevExplosionFloorMaterialAssetName = TEXT("M_LookdevExplosionFloor");
 	const FString ProjectileHitEffectDataAssetName = TEXT("DA_ProjectileHitEffects");
 	const FString ProjectileHitRedBurstActorAssetName = TEXT("BP_ProjectileHit_RedBurst");
 	const FString LumberjackMeleeSwingArcMaterialAssetName = TEXT("M_LumberjackMeleeSwingArc");
@@ -6351,6 +6371,473 @@ namespace TunaSweeperEditorSetup
 		return SaveAsset(DuplicatedSystem);
 	}
 
+	int32 ConfigureLookdevFluidExplosionNiagaraScript(UNiagaraScript* Script)
+	{
+		if (!Script)
+		{
+			return 0;
+		}
+
+		FNiagaraParameterStore& Store = Script->RapidIterationParameters;
+		const FVector WorldSpaceSize(920.0f, 920.0f, 760.0f);
+		const FVector SourceOffset(0.0f, 0.0f, 38.0f);
+		const FVector SourceScale(1.0f, 1.0f, 0.78f);
+		const FVector SourceVelocity(0.0f, 0.0f, 460.0f);
+		const FLinearColor HotCoreColor(1.0f, 0.46f, 0.08f, 1.0f);
+		const FLinearColor SmokeColor(0.22f, 0.18f, 0.14f, 1.0f);
+
+		int32 AppliedCount = 0;
+		auto ApplyBool = [&Store, &AppliedCount](const TCHAR* Name, bool bValue)
+		{
+			AppliedCount += SetNiagaraStoreBoolByName(Store, FName(Name), bValue) ? 1 : 0;
+		};
+		auto ApplyFloat = [&Store, &AppliedCount](const TCHAR* Name, float Value)
+		{
+			AppliedCount += SetNiagaraStoreFloatByName(Store, FName(Name), Value) ? 1 : 0;
+		};
+		auto ApplyVec3 = [&Store, &AppliedCount](const TCHAR* Name, const FVector& Value)
+		{
+			AppliedCount += SetNiagaraStoreVec3ByName(Store, FName(Name), Value) ? 1 : 0;
+		};
+		auto ApplyColor = [&Store, &AppliedCount](const TCHAR* Name, const FLinearColor& Value)
+		{
+			AppliedCount += SetNiagaraStoreColorByName(Store, FName(Name), Value) ? 1 : 0;
+		};
+
+		ApplyBool(TEXT("Grid3D_Gas_Master_Emitter.Debug Draw"), false);
+		ApplyBool(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_InitializeEmitter.Debug Collision Volume"), false);
+		ApplyBool(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_DebugDisplay.Debug Collision Volume"), false);
+		ApplyBool(TEXT("Emitter.Debug Draw"), false);
+		ApplyVec3(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_InitializeEmitter.World Size"), WorldSpaceSize);
+		ApplyVec3(TEXT("Emitter.Grid3D_Gas_InitializeEmitter.World Size"), WorldSpaceSize);
+		ApplyFloat(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_InitializeEmitter.Resolution Max Axis"), 192.0f);
+		ApplyFloat(TEXT("Grid3D_Gas_Master_Emitter.Resolution Max Axis"), 192.0f);
+		ApplyBool(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_SphereSource.Enable"), true);
+		ApplyVec3(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_SphereSource.Emit Position"), SourceOffset);
+		ApplyVec3(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_SphereSource.Non Uniform Scale"), SourceScale);
+		ApplyVec3(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_SphereSource.Velocity"), SourceVelocity);
+		ApplyFloat(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_SphereSource.Emit Radius"), 92.0f);
+		ApplyFloat(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_SphereSource.Density"), 2.25f);
+		ApplyFloat(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_SphereSource.Temperature"), 3.2f);
+		ApplyColor(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_SphereSource.Color"), HotCoreColor);
+		ApplyFloat(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_Buoyancy.TemperatureBuoyancy"), 2.8f);
+		ApplyFloat(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_Buoyancy.DensityBuoyancy"), -0.12f);
+		ApplyColor(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_MaterialControls.Fire Color"), HotCoreColor);
+		ApplyColor(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_MaterialControls.Smoke Color"), SmokeColor);
+		ApplyFloat(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_MaterialControls.Density Mult"), 1.55f);
+		ApplyFloat(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_MaterialControls.Emissive Mult"), 2.8f);
+
+		if (AppliedCount > 0)
+		{
+			Script->Modify();
+		}
+
+		return AppliedCount;
+	}
+
+	bool ConfigureLookdevFluidExplosionNiagaraSystem(UNiagaraSystem* System)
+	{
+		if (!System)
+		{
+			return false;
+		}
+
+		System->Modify();
+
+		const FVector WorldSpaceSize(920.0f, 920.0f, 760.0f);
+		FNiagaraUserRedirectionParameterStore& UserParameters = System->GetExposedParameters();
+		SetNiagaraStoreBoolByName(UserParameters, FName(TEXT("User.DrawBounds")), false);
+		SetNiagaraStoreVec3ByName(UserParameters, FName(TEXT("User.WorldSpaceSize")), WorldSpaceSize);
+		SetNiagaraStoreFloatByName(UserParameters, FName(TEXT("User.ResolutionMaxAxis")), 192.0f);
+		SetNiagaraStoreFloatByName(UserParameters, FName(TEXT("User.SourceRadius")), 92.0f);
+		SetNiagaraStoreFloatByName(UserParameters, FName(TEXT("User.Density")), 2.25f);
+		SetNiagaraStoreFloatByName(UserParameters, FName(TEXT("User.Temperature")), 3.2f);
+		SetNiagaraStoreColorByName(UserParameters, FName(TEXT("User.FireColor")), FLinearColor(1.0f, 0.46f, 0.08f, 1.0f));
+		SetNiagaraStoreColorByName(UserParameters, FName(TEXT("User.SmokeColor")), FLinearColor(0.22f, 0.18f, 0.14f, 1.0f));
+
+		for (FNiagaraEmitterHandle& EmitterHandle : System->GetEmitterHandles())
+		{
+			EmitterHandle.SetDebugShowBounds(false);
+			if (FVersionedNiagaraEmitterData* EmitterData = EmitterHandle.GetEmitterData())
+			{
+				EmitterData->bLocalSpace = false;
+				EmitterData->CalculateBoundsMode = ENiagaraEmitterCalculateBoundMode::Fixed;
+				EmitterData->FixedBounds = FBox(FVector(-520.0f, -520.0f, -30.0f), FVector(520.0f, 520.0f, 760.0f));
+			}
+		}
+
+		int32 AppliedScriptParameterCount = 0;
+		System->ForEachScript(
+			[&AppliedScriptParameterCount](UNiagaraScript* Script)
+			{
+				AppliedScriptParameterCount += ConfigureLookdevFluidExplosionNiagaraScript(Script);
+			});
+
+		System->InvalidateCachedData();
+		System->RequestCompile(true);
+		System->PollForCompilationComplete(true);
+		System->PostEditChange();
+		System->MarkPackageDirty();
+
+		UE_LOG(
+			LogTunaSweeperEditor,
+			Log,
+			TEXT("Configured lookdev fluid explosion Niagara system. Applied %d rapid iteration parameter updates."),
+			AppliedScriptParameterCount);
+		return true;
+	}
+
+	UObject* LoadLookdevFluidExplosionSourceTemplate()
+	{
+		const TCHAR* SourceSystemPath =
+			TEXT("/NiagaraFluids/Templates/Gas/3D/Systems/Grid3D_Gas_Explosion.Grid3D_Gas_Explosion");
+		UObject* SourceSystem = LoadObject<UObject>(nullptr, SourceSystemPath);
+		if (!SourceSystem)
+		{
+			UE_LOG(
+				LogTunaSweeperEditor,
+				Error,
+				TEXT("Failed to load lookdev fluid explosion source template: %s"),
+				SourceSystemPath);
+		}
+		return SourceSystem;
+	}
+
+	bool DeleteExistingLookdevFluidExplosionNiagaraSystem(const FString& ObjectPath)
+	{
+		UObject* ExistingSystem = LoadObject<UObject>(nullptr, *ObjectPath);
+		if (!ExistingSystem)
+		{
+			return true;
+		}
+
+		TArray<UObject*> ObjectsToDelete;
+		ObjectsToDelete.Add(ExistingSystem);
+		const int32 DeletedCount = ObjectTools::ForceDeleteObjects(ObjectsToDelete, false);
+		if (DeletedCount != ObjectsToDelete.Num())
+		{
+			UE_LOG(
+				LogTunaSweeperEditor,
+				Error,
+				TEXT("Failed to recreate %s because the existing asset could not be deleted."),
+				*ObjectPath);
+			return false;
+		}
+
+		CollectGarbage(RF_NoFlags);
+		return true;
+	}
+
+	UNiagaraSystem* EnsureLookdevFluidExplosionNiagaraSystem()
+	{
+		const FString ObjectPath = GetAssetObjectPath(LookdevAssetPath, LookdevFluidExplosionNiagaraSystemAssetName);
+		if (!DeleteExistingLookdevFluidExplosionNiagaraSystem(ObjectPath))
+		{
+			return nullptr;
+		}
+
+		UObject* SourceSystem = LoadLookdevFluidExplosionSourceTemplate();
+		if (!SourceSystem)
+		{
+			return nullptr;
+		}
+
+		FAssetToolsModule& AssetToolsModule = FModuleManager::LoadModuleChecked<FAssetToolsModule>(TEXT("AssetTools"));
+		UObject* DuplicatedSystem = AssetToolsModule.Get().DuplicateAsset(
+			LookdevFluidExplosionNiagaraSystemAssetName,
+			LookdevAssetPath,
+			SourceSystem);
+		UNiagaraSystem* NiagaraSystem = Cast<UNiagaraSystem>(DuplicatedSystem);
+		if (!NiagaraSystem)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to duplicate %s."), *ObjectPath);
+			return nullptr;
+		}
+
+		ConfigureLookdevFluidExplosionNiagaraSystem(NiagaraSystem);
+		return SaveAsset(NiagaraSystem) ? NiagaraSystem : nullptr;
+	}
+
+	void ApplyLookdevNiagaraComponentOverrides(UNiagaraComponent* NiagaraComponent)
+	{
+		if (!NiagaraComponent)
+		{
+			return;
+		}
+
+		NiagaraComponent->SetVariableBool(FName(TEXT("User.DrawBounds")), false);
+		NiagaraComponent->SetVariableVec3(FName(TEXT("User.WorldSpaceSize")), FVector(920.0f, 920.0f, 760.0f));
+		NiagaraComponent->SetVariableFloat(FName(TEXT("User.ResolutionMaxAxis")), 192.0f);
+		NiagaraComponent->SetVariableFloat(FName(TEXT("User.SourceRadius")), 92.0f);
+		NiagaraComponent->SetVariableFloat(FName(TEXT("User.Density")), 2.25f);
+		NiagaraComponent->SetVariableFloat(FName(TEXT("User.Temperature")), 3.2f);
+		NiagaraComponent->SetVariableLinearColor(FName(TEXT("User.FireColor")), FLinearColor(1.0f, 0.46f, 0.08f, 1.0f));
+		NiagaraComponent->SetVariableLinearColor(FName(TEXT("User.SmokeColor")), FLinearColor(0.22f, 0.18f, 0.14f, 1.0f));
+
+		NiagaraComponent->SetVariableBool(FName(TEXT("Grid3D_Gas_Master_Emitter.Debug Draw")), false);
+		NiagaraComponent->SetVariableVec3(
+			FName(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_InitializeEmitter.World Size")),
+			FVector(920.0f, 920.0f, 760.0f));
+		NiagaraComponent->SetVariableFloat(
+			FName(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_InitializeEmitter.Resolution Max Axis")),
+			192.0f);
+		NiagaraComponent->SetVariableFloat(
+			FName(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_SphereSource.Emit Radius")),
+			92.0f);
+		NiagaraComponent->SetVariableFloat(
+			FName(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_SphereSource.Density")),
+			2.25f);
+		NiagaraComponent->SetVariableFloat(
+			FName(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_SphereSource.Temperature")),
+			3.2f);
+	}
+
+	AStaticMeshActor* SpawnLookdevStaticMeshActor(
+		UWorld* World,
+		const TCHAR* ActorName,
+		const TCHAR* ActorLabel,
+		UStaticMesh* StaticMesh,
+		UMaterialInterface* Material,
+		const FVector& Location,
+		const FRotator& Rotation,
+		const FVector& Scale)
+	{
+		if (!World || !StaticMesh)
+		{
+			return nullptr;
+		}
+
+		FActorSpawnParameters SpawnParameters;
+		SpawnParameters.OverrideLevel = World->PersistentLevel;
+		SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		SpawnParameters.Name = MakeUniqueObjectName(World->PersistentLevel, AStaticMeshActor::StaticClass(), ActorName);
+
+		AStaticMeshActor* MeshActor = World->SpawnActor<AStaticMeshActor>(Location, Rotation, SpawnParameters);
+		if (!MeshActor)
+		{
+			return nullptr;
+		}
+
+		MeshActor->SetActorLabel(ActorLabel);
+		MeshActor->SetActorScale3D(Scale);
+		UStaticMeshComponent* MeshComponent = MeshActor->GetStaticMeshComponent();
+		if (MeshComponent)
+		{
+			MeshComponent->SetMobility(EComponentMobility::Static);
+			MeshComponent->SetStaticMesh(StaticMesh);
+			MeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+			MeshComponent->SetCollisionResponseToAllChannels(ECR_Block);
+			MeshComponent->SetGenerateOverlapEvents(false);
+			if (Material)
+			{
+				MeshComponent->SetMaterial(0, Material);
+			}
+		}
+		MeshActor->MarkPackageDirty();
+		return MeshActor;
+	}
+
+	bool EnsureLookdevFluidExplosionCaptureLevel(UNiagaraSystem* NiagaraSystem)
+	{
+		if (!NiagaraSystem)
+		{
+			return false;
+		}
+
+		UMaterial* FloorMaterial = EnsureSolidColorMaterial(
+			LookdevAssetPath,
+			LookdevExplosionFloorMaterialAssetName,
+			FLinearColor(0.045f, 0.043f, 0.038f, 1.0f),
+			0.88f,
+			0.0f,
+			0.18f);
+		UStaticMesh* CubeMesh = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Cube.Cube"));
+		if (!FloorMaterial || !CubeMesh)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to load lookdev floor assets."));
+			return false;
+		}
+
+		UWorld* World = UEditorLoadingAndSavingUtils::NewBlankMap(false);
+		if (!World)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to create lookdev fluid explosion map."));
+			return false;
+		}
+
+		World->PersistentLevel->Modify();
+		if (AWorldSettings* WorldSettings = World->GetWorldSettings())
+		{
+			WorldSettings->Modify();
+			WorldSettings->bForceNoPrecomputedLighting = true;
+			WorldSettings->MarkPackageDirty();
+		}
+
+		SpawnLookdevStaticMeshActor(
+			World,
+			TEXT("TS_LookdevExplosion_Floor"),
+			TEXT("TS_LookdevExplosion_Floor"),
+			CubeMesh,
+			FloorMaterial,
+			FVector(0.0f, 0.0f, -8.0f),
+			FRotator::ZeroRotator,
+			FVector(18.0f, 18.0f, 0.16f));
+
+		SpawnLookdevStaticMeshActor(
+			World,
+			TEXT("TS_LookdevExplosion_BackWall"),
+			TEXT("TS_LookdevExplosion_BackWall"),
+			CubeMesh,
+			FloorMaterial,
+			FVector(430.0f, 500.0f, 245.0f),
+			FRotator(0.0f, -38.0f, 0.0f),
+			FVector(13.0f, 0.16f, 5.0f));
+
+		FActorSpawnParameters SpawnParameters;
+		SpawnParameters.OverrideLevel = World->PersistentLevel;
+		SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+		SpawnParameters.Name = MakeUniqueObjectName(World->PersistentLevel, ADirectionalLight::StaticClass(), TEXT("TS_LookdevExplosion_KeyLight"));
+		ADirectionalLight* KeyLight = World->SpawnActor<ADirectionalLight>(
+			FVector(-460.0f, -620.0f, 920.0f),
+			FRotator(-47.0f, 34.0f, 0.0f),
+			SpawnParameters);
+		if (KeyLight)
+		{
+			KeyLight->SetActorLabel(TEXT("TS_LookdevExplosion_KeyLight"));
+			KeyLight->SetMobility(EComponentMobility::Movable);
+			if (ULightComponent* LightComponent = KeyLight->GetLightComponent())
+			{
+				LightComponent->SetMobility(EComponentMobility::Movable);
+				LightComponent->SetIntensity(3.4f);
+				LightComponent->SetLightColor(FLinearColor(1.0f, 0.88f, 0.72f), false);
+			}
+			KeyLight->MarkPackageDirty();
+		}
+
+		SpawnParameters.Name = MakeUniqueObjectName(World->PersistentLevel, ASkyLight::StaticClass(), TEXT("TS_LookdevExplosion_SkyLight"));
+		ASkyLight* SkyLight = World->SpawnActor<ASkyLight>(
+			FVector(0.0f, 0.0f, 760.0f),
+			FRotator::ZeroRotator,
+			SpawnParameters);
+		if (SkyLight)
+		{
+			SkyLight->SetActorLabel(TEXT("TS_LookdevExplosion_SkyLight"));
+			if (USkyLightComponent* SkyLightComponent = SkyLight->GetLightComponent())
+			{
+				SkyLightComponent->SetMobility(EComponentMobility::Movable);
+				SkyLightComponent->SetIntensity(0.34f);
+				SkyLightComponent->SetLightColor(FLinearColor(0.62f, 0.72f, 0.95f));
+				SkyLightComponent->SetRealTimeCapture(false);
+			}
+			SkyLight->MarkPackageDirty();
+		}
+
+		SpawnParameters.Name = MakeUniqueObjectName(World->PersistentLevel, APointLight::StaticClass(), TEXT("TS_LookdevExplosion_CoreLight"));
+		APointLight* CoreLight = World->SpawnActor<APointLight>(
+			FVector(0.0f, 0.0f, 95.0f),
+			FRotator::ZeroRotator,
+			SpawnParameters);
+		if (CoreLight)
+		{
+			CoreLight->SetActorLabel(TEXT("TS_LookdevExplosion_CoreLight"));
+			if (UPointLightComponent* PointLightComponent = CoreLight->PointLightComponent)
+			{
+				PointLightComponent->SetMobility(EComponentMobility::Movable);
+				PointLightComponent->SetIntensity(1300.0f);
+				PointLightComponent->SetAttenuationRadius(620.0f);
+				PointLightComponent->SetLightColor(FLinearColor(1.0f, 0.39f, 0.08f), false);
+				PointLightComponent->SetCastShadows(false);
+			}
+			CoreLight->MarkPackageDirty();
+		}
+
+		SpawnParameters.Name = MakeUniqueObjectName(World->PersistentLevel, ANiagaraActor::StaticClass(), TEXT("TS_LookdevExplosion_NS"));
+		ANiagaraActor* NiagaraActor = World->SpawnActor<ANiagaraActor>(
+			FVector(0.0f, 0.0f, 0.0f),
+			FRotator::ZeroRotator,
+			SpawnParameters);
+		if (!NiagaraActor || !NiagaraActor->GetNiagaraComponent())
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to spawn lookdev Niagara actor."));
+			return false;
+		}
+
+		NiagaraActor->SetActorLabel(TEXT("TS_LookdevExplosion_NS"));
+		NiagaraActor->SetDestroyOnSystemFinish(false);
+		UNiagaraComponent* NiagaraComponent = NiagaraActor->GetNiagaraComponent();
+		NiagaraComponent->SetAsset(NiagaraSystem);
+		NiagaraComponent->SetAutoActivate(true);
+		NiagaraComponent->SetRelativeScale3D(FVector(1.0f));
+		ApplyLookdevNiagaraComponentOverrides(NiagaraComponent);
+		NiagaraActor->MarkPackageDirty();
+
+		const FVector CameraLocation(-690.0f, -740.0f, 430.0f);
+		const FVector CameraTarget(0.0f, 0.0f, 150.0f);
+		const FRotator CameraRotation = (CameraTarget - CameraLocation).Rotation();
+		SpawnParameters.Name = MakeUniqueObjectName(World->PersistentLevel, ACameraActor::StaticClass(), TEXT("TS_LookdevExplosion_Camera"));
+		ACameraActor* CameraActor = World->SpawnActor<ACameraActor>(
+			CameraLocation,
+			CameraRotation,
+			SpawnParameters);
+		if (!CameraActor || !CameraActor->GetCameraComponent())
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to spawn lookdev camera actor."));
+			return false;
+		}
+
+		CameraActor->SetActorLabel(TEXT("TS_LookdevExplosion_Camera"));
+		UCameraComponent* CameraComponent = CameraActor->GetCameraComponent();
+		CameraComponent->SetFieldOfView(38.0f);
+		CameraComponent->SetAspectRatio(16.0f / 9.0f);
+		CameraComponent->SetConstraintAspectRatio(true);
+		CameraActor->MarkPackageDirty();
+
+		SpawnParameters.Name = MakeUniqueObjectName(World->PersistentLevel, APlayerStart::StaticClass(), TEXT("TS_LookdevExplosion_PlayerStart"));
+		APlayerStart* PlayerStart = World->SpawnActor<APlayerStart>(
+			CameraLocation + FVector(80.0f, 80.0f, -60.0f),
+			CameraRotation,
+			SpawnParameters);
+		if (PlayerStart)
+		{
+			PlayerStart->SetActorLabel(TEXT("TS_LookdevExplosion_PlayerStart"));
+			PlayerStart->MarkPackageDirty();
+		}
+
+		SpawnParameters.Name = MakeUniqueObjectName(
+			World->PersistentLevel,
+			ATunaSweeperLookdevCameraDirectorActor::StaticClass(),
+			TEXT("TS_LookdevExplosion_CameraDirector"));
+		ATunaSweeperLookdevCameraDirectorActor* CameraDirector =
+			World->SpawnActor<ATunaSweeperLookdevCameraDirectorActor>(
+				FVector(-140.0f, -140.0f, 80.0f),
+				FRotator::ZeroRotator,
+				SpawnParameters);
+		if (CameraDirector)
+		{
+			CameraDirector->SetActorLabel(TEXT("TS_LookdevExplosion_CameraDirector"));
+			CameraDirector->ConfigureLookdev(CameraActor, NiagaraActor);
+			CameraDirector->MarkPackageDirty();
+		}
+
+		World->MarkPackageDirty();
+		const bool bSaved = UEditorLoadingAndSavingUtils::SaveMap(World, LookdevFluidExplosionMapPackagePath);
+		if (!bSaved)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to save %s."), *LookdevFluidExplosionMapPackagePath);
+			return false;
+		}
+
+		UE_LOG(LogTunaSweeperEditor, Display, TEXT("Lookdev fluid explosion capture map saved: %s"), *LookdevFluidExplosionMapPackagePath);
+		return true;
+	}
+
+	bool EnsureLookdevFluidExplosionAssetsAndLevel()
+	{
+		UNiagaraSystem* NiagaraSystem = EnsureLookdevFluidExplosionNiagaraSystem();
+		return NiagaraSystem && EnsureLookdevFluidExplosionCaptureLevel(NiagaraSystem);
+	}
+
 	UMaterial* EnsureMemoStorageDeviceMaterial(UTexture2D* StorageTexture)
 	{
 		if (!StorageTexture)
@@ -12243,6 +12730,44 @@ namespace TunaSweeperEditorSetup
 
 					return !bCompleted;
 				}),
+				1.0f);
+	}
+
+	void ScheduleLookdevFluidExplosionSetup()
+	{
+		if (FTunaSweeperEditorRunOnce::HasCompleted(LookdevFluidExplosionTaskId))
+		{
+			if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperLookdevFluidExplosionSetupQuit")))
+			{
+				FPlatformMisc::RequestExit(false);
+			}
+			return;
+		}
+
+		FTSTicker::GetCoreTicker().AddTicker(
+			FTickerDelegate::CreateLambda(
+				[](float)
+				{
+					if (!IsEditorWorldReadyForMapSetup())
+					{
+						return true;
+					}
+
+					FTunaSweeperEditorRunOnce::Run(
+						LookdevFluidExplosionTaskId,
+						[]()
+						{
+							return EnsureLookdevFluidExplosionAssetsAndLevel();
+						});
+
+					const bool bCompleted = FTunaSweeperEditorRunOnce::HasCompleted(LookdevFluidExplosionTaskId);
+					if (bCompleted && FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperLookdevFluidExplosionSetupQuit")))
+					{
+						FPlatformMisc::RequestExit(false);
+					}
+
+					return !bCompleted;
+				}),
 			1.0f);
 	}
 
@@ -12588,6 +13113,36 @@ public:
 				1.0f);
 		}
 
+		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperCheckProceduralTerrainWater")))
+		{
+			TSharedRef<int32> WaterCheckTickCount = MakeShared<int32>(0);
+			FTSTicker::GetCoreTicker().AddTicker(
+				FTickerDelegate::CreateLambda(
+					[WaterCheckTickCount](float)
+					{
+						if (*WaterCheckTickCount == 0)
+						{
+							TunaSweeperProceduralTerrainTest::LoadProceduralTerrainTestLevelForWaterCheck();
+							++(*WaterCheckTickCount);
+							return true;
+						}
+
+						if (*WaterCheckTickCount < 8)
+						{
+							++(*WaterCheckTickCount);
+							return true;
+						}
+
+						TunaSweeperProceduralTerrainTest::RunProceduralTerrainWaterVisualCheck();
+						if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperProceduralTerrainWaterCheckQuit")))
+						{
+							FPlatformMisc::RequestExit(false);
+						}
+						return false;
+					}),
+				1.0f);
+		}
+
 		FTunaSweeperEditorRunOnce::Run(
 			TunaSweeperEditorSetup::GameInstanceTaskId,
 			[]()
@@ -12928,6 +13483,7 @@ public:
 		TunaSweeperEditorSetup::SchedulePickupItemAndSpawnerAssetsAndMapPlacement();
 		TunaSweeperEditorSetup::ScheduleLootContainerAndSpawnerAssetsAndMapPlacement();
 		TunaSweeperEditorSetup::ScheduleEditorMapCaptureSetup();
+		TunaSweeperEditorSetup::ScheduleLookdevFluidExplosionSetup();
 		TunaSweeperEditorSetup::ScheduleIntroMenuAndLevelTravelSetup();
 		TunaSweeperEditorSetup::ScheduleOpeningScenarioPresentationSetup();
 		TunaSweeperEditorSetup::ScheduleBunkerToRaidTransitionVideoSetup();

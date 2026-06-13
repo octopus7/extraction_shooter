@@ -2225,3 +2225,61 @@ Landscape나 지형 텍스처 페인팅을 코드로 처리할 수 있는지에 
 ### 답변
 
 unlit 뷰에서도 바닥이 밝다면 조명이나 톤매퍼 미드톤이 1차 원인이 아니라 지형 텍스처와 landscape material의 `BaseColor` 알베도가 너무 높은 상태로 보는 것이 맞다. 그래서 이번 수정은 포스트프로세스나 조명보다 `Dirt`, `Grass`, `Rock`, `DarkDirt` 레이어의 `BaseColorTint`를 낮춰 재생성된 머티리얼에서 바닥 값을 직접 누르는 방식으로 처리했다.
+
+## 2026-06-14 04:48:27 (소요시간: 00:04:33)
+
+### 질문
+
+`SingleLayerWater`로 바꾼 수면이 여전히 투명하게 보이는데, 프로젝트 설정의 distance field 관련 문제인지에 대한 질문.
+
+### 답변
+
+distance field 문제일 가능성은 낮다. 프로젝트 설정에는 `r.GenerateMeshDistanceFields=True`가 이미 켜져 있고, `SingleLayerWater` 수면은 mesh distance field보다 opaque/masked 수면, scene depth, 그리고 `SingleLayerWaterMaterialOutput`의 scattering/absorption/color scale 값에 의해 물 뒤 배경을 합성한다. 이번 경우는 `ColorScaleBehindWater`가 너무 높아 개울 바닥색을 거의 그대로 통과시키고, absorption/scattering이 약해서 물색 흡수가 충분히 보이지 않은 쪽이 원인으로 판단했다.
+
+## 2026-06-14 05:09:07 (소요시간: 00:12:45)
+
+### 질문
+
+수면 아래 방향에서 회색 체크/기본 재질처럼 보이는 상태가 실패인지에 대한 질문.
+
+### 답변
+
+맞다. 그 화면은 정상적인 `SingleLayerWater` 렌더가 아니라 `M_TerrainTest_CreekWater` 머티리얼 컴파일 실패로 엔진 기본 재질이 fallback된 상태로 판단했다. 원인은 vertex color alpha를 alpha `ComponentMask A`로 읽는 머티리얼 노드 경로였고, UE 5.7 SM6에서 해당 입력이 float3로 컴파일되면서 실패했다. 수심색 계산은 vertex alpha 대신 리본 폭 방향 UV 중심 마스크로 바꿨고, 재생성 후 최신 로그에서는 해당 컴파일 실패가 다시 나오지 않는 것을 확인했다.
+
+## 2026-06-14 05:24:25 (소요시간: 00:07:10)
+
+### 질문
+
+수면이 너무 검고, 기대한 산뜻한 푸른색 베이스가 아니며, edge inner glow가 너무 두껍고 시간 변조 최저값이 0%처럼 보인다는 지적.
+
+### 답변
+
+맞다. 위에서 본 수면은 deep color, `ColorScaleBehindWater`, absorption 값이 한꺼번에 어두운 쪽으로 과하게 잡혀 중앙부가 검게 죽은 상태였다. 아래에서 본 청록색은 기대 방향에 더 가까우므로, 수면 색과 뒤 배경 합성값을 밝은 청록/푸른 계열로 올리고 absorption을 낮췄다. edge inner glow는 `SmoothStep(0.90, 0.985)`로 더 얇게 만들었고, 시간 변조는 `Sine * 0.15 + 0.85`로 바꿔 70%~100% 범위에서만 움직이게 했다.
+
+## 2026-06-14 05:35:07 (소요시간: 00:04:22)
+
+### 질문
+
+수면 색상 값을 조정했는데도 여전히 검게 보인다는 지적.
+
+### 답변
+
+맞다. 이 상태는 `SingleLayerWater`의 absorption/scattering이나 `ColorScaleBehindWater` 계수만 올려서는 충분히 제어되지 않고, 위에서 볼 때 중앙부 scene depth 합성이 계속 검게 떨어지는 문제로 판단했다. 그래서 `SingleLayerWater` 구조는 유지하되 `DepthTint * 0.46 + (0.018, 0.18, 0.24)`를 emissive에 직접 더해 산뜻한 푸른 수면 베이스가 항상 보이도록 보강했다. edge inner glow는 `SmoothStep(0.965, 0.995)`로 더 얇게 줄였다.
+## 2026-06-14 06:30:42 (소요시간: 00:00:40)
+
+### 질문
+
+룩뎁 개선을 위해 사용자가 매번 캡쳐해 줄 수 없으니 캡쳐 자동화를 만들어야 할 것 같은데, 구현은 하지 말고 어떤 방식으로 할지 제안해 달라는 질문. 배경생성 대화에서 시도한 방식은 계속 검은 화면만 가져갔으므로 첫 접근 방식이 잘못된 것 아닌지에 대한 우려.
+
+### 답변
+
+맞다. 룩뎁 검증용 캡처는 단순 `SceneCapture2D` 렌더타겟을 생성 직후 읽는 방식보다, Unreal Editor에서 실제 레벨을 열고 게임/에디터 뷰포트가 몇 프레임 렌더링된 뒤 active viewport나 자동화 스크린샷 경로에서 읽는 방식이 적합하다. 명령행 플래그로 룩뎁 캡처 세트를 실행하고, 맵/카메라/해상도/워밍업 프레임/출력 경로를 데이터화하며, 캡처 직후 평균 밝기와 비검정 픽셀 비율 같은 검증으로 검은 화면을 실패 처리하는 구조를 제안했다.
+## 2026-06-14 06:32:31 (소요시간: 00:00:25)
+
+### 질문
+
+나이아가라도 룩뎁 캡처 자동화에 포함할 수 있는지, 테스트용 레벨에 특정 카메라뷰를 강제하고 캡처하는 방식이 가능한지에 대한 질문.
+
+### 답변
+
+가능하다. Niagara까지 포함하려면 `SceneCapture2D` 단독보다 테스트용 룩뎁 레벨을 열고, 고정 `CameraActor` 또는 `CineCameraActor`를 `SetViewTargetWithBlend`로 강제한 뒤, Niagara 워밍업 프레임을 충분히 돌리고 실제 뷰포트/자동화 스크린샷 경로에서 캡처하는 방식이 적합하다. Niagara는 카메라 프러스텀, bounds, scalability, GPU particle tick, warmup 상태에 영향을 받으므로 캡처 세트에 카메라, 해상도, FX quality, warmup frame/time, 검은 화면 검증 기준을 데이터화해야 한다.
