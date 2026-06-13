@@ -4222,3 +4222,35 @@
 - 시야 마스크 렌더링이 꺼져 있으면 동적 오브젝트 숨김도 동작하지 않고 기존 렌더 상태를 복원하도록 수정한 것.
 - 시야 밖 subject를 숨길 때 primitive main/depth pass와 함께 shadow casting도 꺼서 오브젝트 그림자만 남지 않게 한 것.
 - `TunaSweeperEditor Win64 Development` 빌드를 통과시키고 Unreal Editor를 실행한 것.
+
+## 2026-06-14 00:13:00 (소요시간: 00:12:30)
+
+- imagegen으로 임시 환경 파츠 시트와 지면 타일 텍스처를 생성하고 `TunaSweeper/Content/SourceArt/EnvironmentPrototype`에 보관한 것.
+- 파츠 시트의 마젠타 배경을 에디터 셋업에서 알파로 해석해 나무 3종, 풀 3종, 바위 클러스터, 콘크리트 잔해 StaticMesh를 생성하도록 한 것.
+- 지면 텍스처를 `/Game/Prototype/Environment/T_ImagegenGround_ConcreteDirt`로 만들고, 약한 높낮이 그리드가 있는 바닥 StaticMesh와 unlit 지면 머티리얼을 생성하도록 한 것.
+- 플레이 연결 없이 확인용 별도 레벨 `/Game/PrototypeImagegenEnvironmentMap`을 만들고, 반복 파츠를 회전/스케일 변형해서 배치한 것.
+- `-TunaSweeperRebuildImagegenEnvironmentPrototype -TunaSweeperImagegenEnvironmentPrototypeQuit` 에디터 플래그로 프로토타입 레벨을 재생성할 수 있게 한 것.
+- `TunaSweeperEditor Win64 Development` 빌드를 통과시키고 프로토타입 레벨/에셋 생성 로그 성공을 확인한 것.
+
+## 2026-06-14 00:26:00 (소요시간: 00:07:08)
+
+- imagegen 환경 파츠 메시가 알파 내부 구멍마다 지면까지 extrude되어 칩처럼 보이던 문제를 수정한 것.
+- 파츠 메시 생성용 occupancy mask에 내부 구멍 채움/외곽 정리 단계를 추가해 잎 사이 구멍이 옆벽으로 내려오지 않게 한 것.
+- prop sheet 알파 처리 후 투명 픽셀 색상을 주변 불투명 색으로 확장해 마젠타 fringe를 줄인 것.
+- 나무 파츠는 canopy side를 지면까지 내리지 않고 공중 덩어리로 만들며, 별도 불투명 줄기/가지 프록시 geometry와 `M_ImagegenTreeTrunk_Opaque` 머티리얼을 추가한 것.
+- 나무/풀/바위/잔해의 top surface에 타입별 heightfield를 적용해 평평한 판이 아니라 완만한 깊이 변화가 보이게 한 것.
+- `TunaSweeperEditor Win64 Development` 빌드 통과 후 `/Game/PrototypeImagegenEnvironmentMap`과 `/Game/Prototype/Environment` 에셋을 재생성하고 에디터에서 맵을 다시 열어둔 것.
+
+## 2026-06-14 00:36:50 (소요시간: 00:13:37)
+
+- imagegen으로 콘크리트, 흙자갈, 풀이끼, 어두운 균열 4분면 지형 레이어 아틀라스를 생성하고 `TunaSweeper/Content/SourceArt/EnvironmentPrototype/T_PrototypeLandscapeLayerAtlas_Source.png`에 보관한 것.
+- `TunaSweeperEditor` 모듈에 `Landscape`와 `Foliage` 의존성을 추가해 에디터 C++에서 UE Landscape 생성/임포트 API를 사용할 수 있게 한 것.
+- `/Game/Prototype/Environment/T_ImagegenLandscapeLayerAtlas`, `M_ImagegenLandscape_AutoPainted`, `LI_ImagegenLandscape_Concrete`, `LI_ImagegenLandscape_DirtGravel`, `LI_ImagegenLandscape_MossGrass`, `LI_ImagegenLandscape_DarkCracks`를 자동 생성하도록 한 것.
+- `/Game/PrototypeImagegenEnvironmentMap` 재생성 시 기존 평면 StaticMesh 바닥 대신 약 5,040cm 정사각형 Landscape를 만들고, heightmap과 4개 레이어 weightmap을 코드로 절차 생성해 자동 페인팅되도록 한 것.
+- 소품 배치 위치를 같은 height 평가식으로 보정해 나무, 풀, 바위, 콘크리트 잔해가 새 Landscape 위에 놓이도록 한 것.
+- 직접 UE `Build.bat`로 `TunaSweeperEditor Win64 Development` 빌드를 통과시키고, 재생성 플래그로 맵/에셋 저장 성공을 확인한 뒤 에디터를 `/Game/PrototypeImagegenEnvironmentMap`으로 열어둔 것.
+
+## 2026-06-14 00:51:12 (소요시간: 00:00:55)
+
+- Landscape 절차적 생성 과정을 나중에 다시 구현할 수 있도록 `Docs/procedural_landscape_generation.md` 문서를 새로 작성한 것.
+- imagegen 지형 아틀라스, LayerInfo, Landscape 머티리얼, heightmap/weightmap 생성, `ALandscape::Import()` 호출 순서, 재생성 명령, 주의점을 정리한 것.
