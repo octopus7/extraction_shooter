@@ -4446,3 +4446,12 @@
 - `ATunaSweeperLookdevCameraDirectorActor`가 PIE/캡처 실행 시 고정 카메라를 view target으로 강제하고 Niagara 폭발을 한 번 재시작하도록 구성한 것.
 - `StartupModule()`에서 바로 `NewBlankMap()`을 호출하면 `/Temp/Untitled` 월드 메모리 누수 fatal이 발생하므로, 기존 맵 셋업 패턴처럼 `FTSTicker` 지연 실행으로 전용 레벨 생성을 처리한 것.
 - `TunaSweeperEditor` 빌드를 통과시키고, `-TunaSweeperLookdevFluidExplosionSetupQuit` 무인 에디터 실행으로 에셋과 레벨 저장을 확인한 뒤 전용 레벨을 에디터에서 열어둔 것.
+
+## 2026-06-15 00:32:30 (소요시간: 00:08:45)
+
+- 부시 메시 애셋 생성을 위한 `BushMeshBuilder` 프로젝트 플러그인을 추가하고 `TunaSweeper.uproject`에서 활성화한 것.
+- `BushMeshBuilderEditor` Editor 모듈을 만들고, `FGlobalTabmanager` Nomad Tab + `SDockTab` + Slate `SCompoundWidget` 기반 도킹 가능한 에디터 툴 창을 구현한 것.
+- `Window > TunaSweeper > Bush Mesh Builder` 메뉴에서 툴을 열 수 있도록 `UToolMenus` 진입점을 등록한 것.
+- Content Browser에서 선택한 `UStaticMesh` 부품들을 툴 목록에 추가하고, 출력 경로/에셋명/시드/반경/높이 편차/스케일/피치롤/부품별 인스턴스 수를 조정할 수 있게 한 것.
+- Generate 실행 시 각 부품 메시의 LOD0 `MeshDescription` 삼각형을 랜덤 배치 변환으로 합쳐 새 `UStaticMesh` 에셋을 생성하고, 소스 머티리얼 슬롯을 보존해 패키지 저장까지 처리하도록 한 것.
+- `TunaSweeperEditor Win64 Development` 빌드를 완료하고, 최신 빌드 로그에서 경고 없이 성공했으며 Unreal Editor가 실행되고 프로젝트 플러그인 `BushMeshBuilder`가 마운트되는 것을 확인한 것.

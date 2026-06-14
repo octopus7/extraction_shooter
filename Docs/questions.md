@@ -2283,3 +2283,13 @@ distance field 문제일 가능성은 낮다. 프로젝트 설정에는 `r.Gener
 ### 답변
 
 가능하다. Niagara까지 포함하려면 `SceneCapture2D` 단독보다 테스트용 룩뎁 레벨을 열고, 고정 `CameraActor` 또는 `CineCameraActor`를 `SetViewTargetWithBlend`로 강제한 뒤, Niagara 워밍업 프레임을 충분히 돌리고 실제 뷰포트/자동화 스크린샷 경로에서 캡처하는 방식이 적합하다. Niagara는 카메라 프러스텀, bounds, scalability, GPU particle tick, warmup 상태에 영향을 받으므로 캡처 세트에 카메라, 해상도, FX quality, warmup frame/time, 검은 화면 검증 기준을 데이터화해야 한다.
+
+## 2026-06-19 00:32:01 (소요시간: 00:00:15)
+
+### 질문
+
+부시 메시 애셋을 생성하는 플러그인 툴을 만들 때, 부품 메시를 배치 조합하는 단독 윈도우를 에디터상에서 도킹하고 배치 가능하게 하려면 어떤 기술을 써야 하는지에 대한 질문.
+
+### 답변
+
+도킹 가능한 에디터 단독 창은 Unreal Editor C++ 플러그인의 Editor Module에서 Slate 기반 Nomad Tab을 등록하는 방식이 가장 적합하다. `FGlobalTabmanager` 또는 레벨 에디터 탭 매니저에 `RegisterNomadTabSpawner`를 등록하고, `SDockTab` 안에 `SCompoundWidget` 기반 Slate UI를 넣으며, `UToolMenus`로 상단 메뉴나 툴바 진입점을 추가하는 구조다. 빠른 프로토타입은 Editor Utility Widget도 가능하지만, 부품 메시 선택, 프리뷰, 옵션 패널, 애셋 생성, 커스텀 디테일 패널, 향후 뷰포트 인터랙션까지 고려하면 C++ Editor Module + Slate가 더 안정적인 선택이다.

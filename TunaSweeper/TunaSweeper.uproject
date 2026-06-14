@@ -38,6 +38,10 @@
 			"Enabled": true
 		},
 		{
+			"Name": "BushMeshBuilder",
+			"Enabled": true
+		},
+		{
 			"Name": "ProceduralMeshComponent",
 			"Enabled": true
 		},
