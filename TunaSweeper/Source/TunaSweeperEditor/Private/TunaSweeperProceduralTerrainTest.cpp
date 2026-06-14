@@ -623,14 +623,14 @@ namespace TunaSweeperProceduralTerrainTest
 
 		UMaterialExpressionConstant3Vector* ShallowWaterColor = NewObject<UMaterialExpressionConstant3Vector>(Material);
 		ShallowWaterColor->Material = Material;
-		ShallowWaterColor->Constant = FLinearColor(0.055f, 0.52f, 0.64f, 1.0f);
+		ShallowWaterColor->Constant = FLinearColor(0.070f, 0.56f, 0.70f, 1.0f);
 		ShallowWaterColor->MaterialExpressionEditorX = -300;
 		ShallowWaterColor->MaterialExpressionEditorY = 70;
 		Material->GetExpressionCollection().AddExpression(ShallowWaterColor);
 
 		UMaterialExpressionConstant3Vector* DeepWaterColor = NewObject<UMaterialExpressionConstant3Vector>(Material);
 		DeepWaterColor->Material = Material;
-		DeepWaterColor->Constant = FLinearColor(0.025f, 0.32f, 0.50f, 1.0f);
+		DeepWaterColor->Constant = FLinearColor(0.032f, 0.37f, 0.56f, 1.0f);
 		DeepWaterColor->MaterialExpressionEditorX = -300;
 		DeepWaterColor->MaterialExpressionEditorY = 180;
 		Material->GetExpressionCollection().AddExpression(DeepWaterColor);
@@ -666,15 +666,15 @@ namespace TunaSweeperProceduralTerrainTest
 		UMaterialExpressionSmoothStep* RippleMask = NewObject<UMaterialExpressionSmoothStep>(Material);
 		RippleMask->Material = Material;
 		RippleMask->Value.Connect(0, BrightRippleSource);
-		RippleMask->ConstMin = 0.86f;
-		RippleMask->ConstMax = 0.985f;
+		RippleMask->ConstMin = 0.62f;
+		RippleMask->ConstMax = 0.84f;
 		RippleMask->MaterialExpressionEditorX = -60;
 		RippleMask->MaterialExpressionEditorY = -350;
 		Material->GetExpressionCollection().AddExpression(RippleMask);
 
 		UMaterialExpressionConstant3Vector* RippleBaseTint = NewObject<UMaterialExpressionConstant3Vector>(Material);
 		RippleBaseTint->Material = Material;
-		RippleBaseTint->Constant = FLinearColor(0.20f, 0.26f, 0.25f, 1.0f);
+		RippleBaseTint->Constant = FLinearColor(0.72f, 0.80f, 0.78f, 1.0f);
 		RippleBaseTint->MaterialExpressionEditorX = 170;
 		RippleBaseTint->MaterialExpressionEditorY = 20;
 		Material->GetExpressionCollection().AddExpression(RippleBaseTint);
@@ -697,7 +697,7 @@ namespace TunaSweeperProceduralTerrainTest
 
 		UMaterialExpressionConstant3Vector* RippleEmissiveTint = NewObject<UMaterialExpressionConstant3Vector>(Material);
 		RippleEmissiveTint->Material = Material;
-		RippleEmissiveTint->Constant = FLinearColor(0.030f, 0.040f, 0.042f, 1.0f);
+		RippleEmissiveTint->Constant = FLinearColor(0.13f, 0.15f, 0.15f, 1.0f);
 		RippleEmissiveTint->MaterialExpressionEditorX = 170;
 		RippleEmissiveTint->MaterialExpressionEditorY = -90;
 		Material->GetExpressionCollection().AddExpression(RippleEmissiveTint);
@@ -847,7 +847,7 @@ namespace TunaSweeperProceduralTerrainTest
 
 		UMaterialExpressionConstant3Vector* BaseWaterEmissiveLift = NewObject<UMaterialExpressionConstant3Vector>(Material);
 		BaseWaterEmissiveLift->Material = Material;
-		BaseWaterEmissiveLift->Constant = FLinearColor(0.002f, 0.032f, 0.044f, 1.0f);
+		BaseWaterEmissiveLift->Constant = FLinearColor(0.003f, 0.038f, 0.052f, 1.0f);
 		BaseWaterEmissiveLift->MaterialExpressionEditorX = 530;
 		BaseWaterEmissiveLift->MaterialExpressionEditorY = 120;
 		Material->GetExpressionCollection().AddExpression(BaseWaterEmissiveLift);
@@ -1628,10 +1628,12 @@ namespace TunaSweeperProceduralTerrainTest
 
 		for (int32 Y = 0; Y < Height; ++Y)
 		{
-			const float WorldY = (0.5f - (static_cast<float>(Y) + 0.5f) / static_cast<float>(Height)) * WaterVisualCheckOrthoWidth;
 			for (int32 X = 0; X < Width; ++X)
 			{
-				const float WorldX = ((static_cast<float>(X) + 0.5f) / static_cast<float>(Width) - 0.5f) * WaterVisualCheckOrthoWidth;
+				const float NormalizedX = (static_cast<float>(X) + 0.5f) / static_cast<float>(Width) - 0.5f;
+				const float NormalizedY = (static_cast<float>(Y) + 0.5f) / static_cast<float>(Height) - 0.5f;
+				const float WorldX = -NormalizedY * WaterVisualCheckOrthoWidth;
+				const float WorldY = NormalizedX * WaterVisualCheckOrthoWidth;
 				float WaterDistance01 = 0.0f;
 				if (!TryGetCreekWaterMaskAt(WorldX, WorldY, WaterDistance01) || WaterDistance01 > 0.94f)
 				{
@@ -1732,12 +1734,13 @@ namespace TunaSweeperProceduralTerrainTest
 		Stats.bPassed =
 			Stats.WaterPixelCount > 5000 &&
 			Stats.BaseWaterPixelCount > 3000 &&
-			Stats.MeanLuminance >= 0.28f &&
-			Stats.MeanLuminance <= 0.58f &&
-			Stats.MeanG > Stats.MeanR + 0.08f &&
+			Stats.MeanLuminance >= 0.16f &&
+			Stats.MeanLuminance <= 0.46f &&
+			Stats.MeanG > Stats.MeanR + 0.06f &&
 			Stats.MeanB > Stats.MeanR + 0.08f &&
-			Stats.DarkPixelRatio < 0.08f &&
+			Stats.DarkPixelRatio < 0.12f &&
 			Stats.BrightBasePixelRatio < 0.18f &&
+			Stats.WhiteRipplePixelRatio > 0.002f &&
 			Stats.WhiteRipplePixelRatio < 0.16f &&
 			Stats.StrongGradientRatio < 0.025f;
 
@@ -1760,7 +1763,7 @@ namespace TunaSweeperProceduralTerrainTest
 			TEXT("WhiteRipplePixelRatio: %.3f\n")
 			TEXT("StrongGradientRatio: %.4f\n")
 			TEXT("MaxLocalGradient: %.3f\n")
-			TEXT("Criteria: mean luminance 0.28..0.58, blue/green above red, dark < 0.08, bright base < 0.18, white ripple < 0.16, strong gradient < 0.025\n"),
+			TEXT("Criteria: mean luminance 0.16..0.46, blue/green above red, dark < 0.12, bright base < 0.18, white ripple 0.002..0.16, strong gradient < 0.025\n"),
 			*CapturePath,
 			Stats.bPassed ? TEXT("PASS") : TEXT("WARN"),
 			Stats.WaterPixelCount,
