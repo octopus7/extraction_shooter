@@ -1307,9 +1307,27 @@ void FTunaSweeperFMSoundTool::Shutdown()
 void FTunaSweeperFMSoundTool::RegisterMenus()
 {
 	FToolMenuOwnerScoped OwnerScoped(this);
-	UToolMenu* WindowMenu = UToolMenus::Get()->ExtendMenu(TEXT("LevelEditor.MainMenu.Window"));
-	FToolMenuSection& Section = WindowMenu->FindOrAddSection(TEXT("TunaSweeper"));
-	Section.Label = LOCTEXT("TunaSweeperMenuSection", "TunaSweeper");
+
+	UToolMenu* MainMenu = UToolMenus::Get()->ExtendMenu(TEXT("LevelEditor.MainMenu"));
+	FToolMenuSection& MainSection = MainMenu->FindOrAddSection(NAME_None);
+	if (!MainSection.FindEntry(TEXT("TunaSweeper")))
+	{
+		FToolMenuEntry& TunaSweeperEntry = MainSection.AddSubMenu(
+			TEXT("TunaSweeper"),
+			LOCTEXT("TunaSweeperTopMenu", "TunaSweeper"),
+			LOCTEXT("TunaSweeperTopMenuTooltip", "Open TunaSweeper editor tools."),
+			FNewToolMenuChoice());
+		TunaSweeperEntry.InsertPosition = FToolMenuInsert(TEXT("Tools"), EToolMenuInsertType::After);
+	}
+
+	UToolMenu* TunaSweeperMenu = UToolMenus::Get()->RegisterMenu(
+		TEXT("LevelEditor.MainMenu.TunaSweeper"),
+		NAME_None,
+		EMultiBoxType::Menu,
+		false);
+	FToolMenuSection& Section = TunaSweeperMenu->FindOrAddSection(
+		TEXT("Audio"),
+		LOCTEXT("TunaSweeperAudioMenuSection", "Audio"));
 	Section.AddMenuEntry(
 		TEXT("OpenTunaSweeperFMSoundComposer"),
 		LOCTEXT("MenuEntry", "FM Sound Composer"),

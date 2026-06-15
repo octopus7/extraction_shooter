@@ -4455,3 +4455,24 @@
 - Content Browser에서 선택한 `UStaticMesh` 부품들을 툴 목록에 추가하고, 출력 경로/에셋명/시드/반경/높이 편차/스케일/피치롤/부품별 인스턴스 수를 조정할 수 있게 한 것.
 - Generate 실행 시 각 부품 메시의 LOD0 `MeshDescription` 삼각형을 랜덤 배치 변환으로 합쳐 새 `UStaticMesh` 에셋을 생성하고, 소스 머티리얼 슬롯을 보존해 패키지 저장까지 처리하도록 한 것.
 - `TunaSweeperEditor Win64 Development` 빌드를 완료하고, 최신 빌드 로그에서 경고 없이 성공했으며 Unreal Editor가 실행되고 프로젝트 플러그인 `BushMeshBuilder`가 마운트되는 것을 확인한 것.
+
+## 2026-06-16 00:57:17 (소요시간: 00:03:17)
+
+- `BushMeshBuilder` 툴 탭을 좌측 제어 패널과 중앙 프리뷰 영역으로 나누는 `SSplitter` 기반 레이아웃으로 변경한 것.
+- 중앙 프리뷰 영역에 `SEditorViewport` 기반 `SBushMeshPreviewViewport`를 추가하고, `FAdvancedPreviewScene`과 `FEditorViewportClient`를 사용해 툴 내부에서 조합 결과를 렌더링하도록 한 것.
+- 프리뷰 씬에 `UStaticMeshComponent`를 배치하고, 임시로 생성한 조합 `UStaticMesh`를 적용해 저장 전 결과물을 회전/줌/프레임 이동으로 확인할 수 있게 한 것.
+- 기존 메시 조합 코드를 `BuildCombinedMeshDescription()`과 `ApplyMeshDescriptionToStaticMesh()`로 분리해 프리뷰용 임시 메시와 저장용 에셋 생성이 같은 지오메트리 경로를 사용하도록 정리한 것.
+- `Rebuild Preview`, `Frame`, `Clear Preview` 버튼을 추가하고, 부품 추가/시드 변경/Generate 이후 중앙 뷰포트가 최신 조합 결과를 표시하도록 연결한 것.
+- `BushMeshBuilderEditor` 모듈에 `AdvancedPreviewScene` 의존성을 추가하고, `TunaSweeperEditor Win64 Development` 빌드를 경고 없이 통과시킨 뒤 Unreal Editor 실행과 `BushMeshBuilder` 플러그인 마운트를 확인한 것.
+
+## 2026-06-16 01:02:50 (소요시간: 00:02:47)
+
+- `Window` 메뉴 하단에 묻히던 프로젝트 툴 진입점을 정리하기 위해 Level Editor 상단 메뉴바에 `TunaSweeper` 전용 상위 메뉴를 추가한 것.
+- `Bush Mesh Builder`를 `TunaSweeper > Asset Tools > Bush Mesh Builder` 섹션으로 이동한 것.
+- 기존 `FM Sound Composer`도 같은 전용 메뉴 아래 `TunaSweeper > Audio > FM Sound Composer` 섹션으로 이동해 프로젝트 제작 툴을 한 곳에 묶은 것.
+- `Window > TunaSweeper` 하단 섹션 등록은 제거해 메뉴 스크롤 하단 중복 진입점을 없앤 것.
+- `TunaSweeperEditor Win64 Development` 빌드를 완료하고 Unreal Editor를 다시 실행했으며, 최신 로그에서 `BushMeshBuilder` 프로젝트 플러그인 마운트를 확인한 것.
+
+## 2026-06-16 01:01:04 (소요시간: 00:00:49)
+
+- 지도 이미지 생성 사용법을 별도 문서로 만들 것.

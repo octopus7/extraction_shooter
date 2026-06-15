@@ -2293,3 +2293,33 @@ distance field 문제일 가능성은 낮다. 프로젝트 설정에는 `r.Gener
 ### 답변
 
 도킹 가능한 에디터 단독 창은 Unreal Editor C++ 플러그인의 Editor Module에서 Slate 기반 Nomad Tab을 등록하는 방식이 가장 적합하다. `FGlobalTabmanager` 또는 레벨 에디터 탭 매니저에 `RegisterNomadTabSpawner`를 등록하고, `SDockTab` 안에 `SCompoundWidget` 기반 Slate UI를 넣으며, `UToolMenus`로 상단 메뉴나 툴바 진입점을 추가하는 구조다. 빠른 프로토타입은 Editor Utility Widget도 가능하지만, 부품 메시 선택, 프리뷰, 옵션 패널, 애셋 생성, 커스텀 디테일 패널, 향후 뷰포트 인터랙션까지 고려하면 C++ Editor Module + Slate가 더 안정적인 선택이다.
+
+## 2026-06-16 00:55:53 (소요시간: 00:00:20)
+
+### 질문
+
+부시 메시 빌더 툴에서 중앙 뷰포트에 최종 결과물이 렌더링되도록 구현 가능한지에 대한 질문.
+
+### 답변
+
+가능하다. 가장 적합한 구현은 도킹 탭 내부를 좌측 설정 패널, 중앙 프리뷰 뷰포트, 우측 결과/속성 패널로 나누고, 중앙에는 `SEditorViewport` 기반 커스텀 Slate 뷰포트와 `FAdvancedPreviewScene`, `FEditorViewportClient`를 붙이는 방식이다. 툴 옵션이 바뀔 때마다 실제 에셋을 저장하지 않고 임시 `UStaticMesh` 또는 `UPreviewMesh`를 다시 만들어 프리뷰 씬의 `UStaticMeshComponent`에 적용하면 최종 조합 결과를 에디터 안에서 회전/줌/프레임 이동하며 확인할 수 있다. 레벨 중앙 뷰포트에 임시 액터를 띄우는 방식도 가능하지만, 툴 전용 검증과 도킹 레이아웃을 생각하면 탭 내부 전용 프리뷰 뷰포트가 더 안정적이다.
+
+## 2026-06-16 00:59:39 (소요시간: 00:00:22)
+
+### 질문
+
+지도 이미지 생성 사용법을 정리해 달라는 요청과, 기존 사용법 문서가 있는지 먼저 확인하고 있으면 내용이 맞는지 확인해 달라는 질문.
+
+### 답변
+
+전용 지도 이미지 생성 사용법 문서는 `Docs` 안에 없고, 관련 내용은 `Docs/questions.md`에 설계 답변 형태로만 남아 있다. 해당 설계 답변은 현재 코드의 핵심 방향과 맞지만, 실제 사용자 절차로는 부족하다. 현재 구현 기준 사용법은 `/Game/EditorOnly/MapCapture/BP_Editor_MapCaptureActor` 또는 레벨에 배치된 `TS_Editor_MapCapture_Raid` 액터를 선택하고, `AutoDetectCaptureBounds`, `CaptureOpaqueRgbPng`, `AutoDetectBoundsAndCaptureOpaqueRgbPng` CallInEditor 버튼을 사용하는 방식이다. 출력은 기본적으로 `Saved/MapCaptures/{level}_Map_RGB.png`에 불투명 RGB PNG로 저장되며, 마스크는 같은 크기의 `Saved/MapCaptures/{level}_Map_Mask.png`를 수동 제작해 런타임 표시용 자산으로 따로 가져오는 전제다.
+
+## 2026-06-16 01:02:12 (소요시간: 00:01:20)
+
+### 질문
+
+`Window` 메뉴 하단에 있는 `Bush Mesh Builder` 진입점이 너무 아래에 있으므로, `Window`가 맞는지 `Tools`가 좋은지 또는 전용 상위 메뉴를 만드는 것이 좋은지에 대한 의견 요청.
+
+### 답변
+
+`Window`는 도킹 탭을 다시 여는 위치로는 기술적으로 맞지만, 부시 메시 빌더처럼 콘텐츠를 생성하는 제작 툴의 주 진입점으로는 적합하지 않다. 기본 권장은 `Tools > TunaSweeper > Bush Mesh Builder`를 주 진입점으로 두고, 필요하면 `Window > TunaSweeper`에는 보조 진입점만 남기는 방식이다. 프로젝트 전용 툴이 FM Sound Composer, Bush Mesh Builder, 지형/지도/룩뎁 캡처처럼 계속 늘어날 계획이면 상단에 `TunaSweeper` 전용 메뉴를 만드는 것도 타당하다. 단, 툴이 1~2개뿐이면 전용 상위 메뉴는 과하고, 여러 제작 파이프라인 툴을 묶는 허브가 될 때 가장 좋다.

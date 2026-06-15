@@ -8,6 +8,7 @@ public class BushMeshBuilderEditor : ModuleRules
 
 		PrivateDependencyModuleNames.AddRange(new string[]
 		{
+			"AdvancedPreviewScene",
 			"AssetRegistry",
 			"AssetTools",
 			"ContentBrowser",

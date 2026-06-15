@@ -1,7 +1,10 @@
+#include "AdvancedPreviewScene.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "AssetToolsModule.h"
+#include "Components/StaticMeshComponent.h"
 #include "ContentBrowserModule.h"
 #include "Engine/StaticMesh.h"
+#include "EditorViewportClient.h"
 #include "Framework/Docking/TabManager.h"
 #include "IAssetTools.h"
 #include "IContentBrowserSingleton.h"
@@ -15,6 +18,7 @@
 #include "Styling/CoreStyle.h"
 #include "ToolMenus.h"
 #include "UObject/SavePackage.h"
+#include "UObject/StrongObjectPtr.h"
 #include "Widgets/Docking/SDockTab.h"
 #include "Widgets/Input/SButton.h"
 #include "Widgets/Input/SEditableTextBox.h"
@@ -23,6 +27,8 @@
 #include "Widgets/Layout/SBox.h"
 #include "Widgets/Layout/SScrollBox.h"
 #include "Widgets/Layout/SSeparator.h"
+#include "Widgets/Layout/SSplitter.h"
+#include "SEditorViewport.h"
 #include "Widgets/SBoxPanel.h"
 #include "Widgets/SCompoundWidget.h"
 #include "Widgets/Text/STextBlock.h"
@@ -141,6 +147,100 @@ namespace BushMeshBuilder
 		return Attribute.IsValid() ? Attribute[VertexInstanceID] : 1.0f;
 	}
 
+	class SBushMeshPreviewViewport final : public SEditorViewport
+	{
+	public:
+		SLATE_BEGIN_ARGS(SBushMeshPreviewViewport) {}
+		SLATE_END_ARGS()
+
+		void Construct(const FArguments& InArgs)
+		{
+			PreviewScene = MakeShared<FAdvancedPreviewScene>(FPreviewScene::ConstructionValues());
+			PreviewScene->SetFloorVisibility(true, true);
+			PreviewScene->SetEnvironmentVisibility(true, true);
+
+			PreviewMeshComponent = NewObject<UStaticMeshComponent>(GetTransientPackage(), NAME_None, RF_Transient);
+			PreviewMeshComponent->SetMobility(EComponentMobility::Movable);
+			PreviewMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			PreviewScene->AddComponent(PreviewMeshComponent, FTransform::Identity);
+
+			SEditorViewport::Construct(SEditorViewport::FArguments());
+		}
+
+		virtual ~SBushMeshPreviewViewport() override
+		{
+			if (ViewportClient.IsValid())
+			{
+				ViewportClient->Viewport = nullptr;
+			}
+
+			if (PreviewScene.IsValid() && PreviewMeshComponent)
+			{
+				PreviewScene->RemoveComponent(PreviewMeshComponent);
+			}
+			PreviewMeshComponent = nullptr;
+		}
+
+		void SetPreviewMesh(UStaticMesh* Mesh)
+		{
+			if (!PreviewMeshComponent)
+			{
+				return;
+			}
+
+			PreviewMeshComponent->SetStaticMesh(Mesh);
+			PreviewMeshComponent->SetRelativeTransform(FTransform::Identity);
+			PreviewMeshComponent->UpdateBounds();
+			FocusPreviewMesh();
+			Invalidate();
+		}
+
+		void ClearPreviewMesh()
+		{
+			SetPreviewMesh(nullptr);
+		}
+
+		void FocusPreviewMesh()
+		{
+			if (!ViewportClient.IsValid() || !PreviewMeshComponent || !PreviewMeshComponent->GetStaticMesh())
+			{
+				return;
+			}
+
+			PreviewMeshComponent->UpdateBounds();
+			const FBox Bounds = PreviewMeshComponent->Bounds.GetBox();
+			if (Bounds.IsValid)
+			{
+				ViewportClient->FocusViewportOnBox(Bounds);
+			}
+		}
+
+		virtual bool IsVisible() const override
+		{
+			return ViewportWidget.IsValid() && SEditorViewport::IsVisible();
+		}
+
+	private:
+		virtual TSharedRef<FEditorViewportClient> MakeEditorViewportClient() override
+		{
+			ViewportClient = MakeShared<FEditorViewportClient>(nullptr, PreviewScene.Get(), SharedThis(this));
+			ViewportClient->SetViewLocation(FVector(-260.0, -360.0, 220.0));
+			ViewportClient->SetViewRotation(FRotator(-24.0, 42.0, 0.0));
+			ViewportClient->SetViewLocationForOrbiting(FVector::ZeroVector);
+			ViewportClient->SetRealtime(true);
+			ViewportClient->bSetListenerPosition = false;
+			ViewportClient->EngineShowFlags.EnableAdvancedFeatures();
+			ViewportClient->EngineShowFlags.SetLighting(true);
+			ViewportClient->EngineShowFlags.SetPostProcessing(true);
+			ViewportClient->VisibilityDelegate.BindSP(this, &SBushMeshPreviewViewport::IsVisible);
+			return ViewportClient.ToSharedRef();
+		}
+
+		TSharedPtr<FAdvancedPreviewScene> PreviewScene;
+		TSharedPtr<FEditorViewportClient> ViewportClient;
+		UStaticMeshComponent* PreviewMeshComponent = nullptr;
+	};
+
 	class SBushMeshBuilder final : public SCompoundWidget
 	{
 	public:
@@ -170,32 +270,19 @@ namespace BushMeshBuilder
 						.Text(LOCTEXT("Subtitle", "Compose one generated Static Mesh asset from selected Static Mesh part assets."))
 					]
 					+ SVerticalBox::Slot()
-					.AutoHeight()
-					[
-						MakePartActionRow()
-					]
-					+ SVerticalBox::Slot()
 					.FillHeight(1.0f)
-					.Padding(0.0f, 8.0f, 0.0f, 8.0f)
 					[
-						MakePartList()
-					]
-					+ SVerticalBox::Slot()
-					.AutoHeight()
-					[
-						SNew(SSeparator)
-					]
-					+ SVerticalBox::Slot()
-					.AutoHeight()
-					.Padding(0.0f, 8.0f, 0.0f, 0.0f)
-					[
-						MakeSettingsPanel()
-					]
-					+ SVerticalBox::Slot()
-					.AutoHeight()
-					.Padding(0.0f, 10.0f, 0.0f, 0.0f)
-					[
-						MakeGenerateRow()
+						SNew(SSplitter)
+						+ SSplitter::Slot()
+						.Value(0.34f)
+						[
+							MakeControlPanel()
+						]
+						+ SSplitter::Slot()
+						.Value(0.66f)
+						[
+							MakePreviewPanel()
+						]
 					]
 					+ SVerticalBox::Slot()
 					.AutoHeight()
@@ -214,7 +301,10 @@ namespace BushMeshBuilder
 		TArray<TSharedPtr<FBushPart>> Parts;
 		TSharedPtr<SVerticalBox> PartListBox;
 		TSharedPtr<STextBlock> StatusText;
+		TSharedPtr<SBushMeshPreviewViewport> PreviewViewport;
+		TStrongObjectPtr<UStaticMesh> PreviewMesh;
 		FText Status = LOCTEXT("Ready", "Ready.");
+		bool bPreviewDirty = true;
 
 		FString OutputPath = DefaultOutputPath;
 		FString AssetName = DefaultAssetName;
@@ -225,6 +315,93 @@ namespace BushMeshBuilder
 		float MinScale = 0.85f;
 		float MaxScale = 1.25f;
 		float PitchRollDegrees = 8.0f;
+
+		TSharedRef<SWidget> MakeControlPanel()
+		{
+			return SNew(SBorder)
+				.Padding(8.0f)
+				[
+					SNew(SVerticalBox)
+					+ SVerticalBox::Slot()
+					.AutoHeight()
+					[
+						MakePartActionRow()
+					]
+					+ SVerticalBox::Slot()
+					.FillHeight(0.44f)
+					.Padding(0.0f, 8.0f, 0.0f, 8.0f)
+					[
+						MakePartList()
+					]
+					+ SVerticalBox::Slot()
+					.AutoHeight()
+					[
+						SNew(SSeparator)
+					]
+					+ SVerticalBox::Slot()
+					.FillHeight(0.56f)
+					.Padding(0.0f, 8.0f, 0.0f, 0.0f)
+					[
+						SNew(SScrollBox)
+						+ SScrollBox::Slot()
+						[
+							MakeSettingsPanel()
+						]
+					]
+					+ SVerticalBox::Slot()
+					.AutoHeight()
+					.Padding(0.0f, 10.0f, 0.0f, 0.0f)
+					[
+						MakeGenerateRow()
+					]
+				];
+		}
+
+		TSharedRef<SWidget> MakePreviewPanel()
+		{
+			return SNew(SBorder)
+				.Padding(8.0f)
+				[
+					SNew(SVerticalBox)
+					+ SVerticalBox::Slot()
+					.AutoHeight()
+					[
+						SNew(SHorizontalBox)
+						+ SHorizontalBox::Slot()
+						.FillWidth(1.0f)
+						.VAlign(VAlign_Center)
+						[
+							SNew(STextBlock)
+							.Text(this, &SBushMeshBuilder::GetPreviewTitleText)
+							.Font(FCoreStyle::GetDefaultFontStyle("Bold", 12))
+						]
+						+ SHorizontalBox::Slot()
+						.AutoWidth()
+						.Padding(6.0f, 0.0f, 0.0f, 0.0f)
+						[
+							SNew(SButton)
+							.Text(LOCTEXT("RebuildPreview", "Rebuild Preview"))
+							.IsEnabled(this, &SBushMeshBuilder::CanGenerate)
+							.OnClicked(this, &SBushMeshBuilder::HandleRebuildPreview)
+						]
+						+ SHorizontalBox::Slot()
+						.AutoWidth()
+						.Padding(6.0f, 0.0f, 0.0f, 0.0f)
+						[
+							SNew(SButton)
+							.Text(LOCTEXT("FramePreview", "Frame"))
+							.IsEnabled(this, &SBushMeshBuilder::HasPreviewMesh)
+							.OnClicked(this, &SBushMeshBuilder::HandleFramePreview)
+						]
+					]
+					+ SVerticalBox::Slot()
+					.FillHeight(1.0f)
+					.Padding(0.0f, 8.0f, 0.0f, 0.0f)
+					[
+						SAssignNew(PreviewViewport, SBushMeshPreviewViewport)
+					]
+				];
+		}
 
 		TSharedRef<SWidget> MakePartActionRow()
 		{
@@ -328,9 +505,10 @@ namespace BushMeshBuilder
 					.MinValue(Min)
 					.MaxValue(Max)
 					.Value_Lambda([ValuePtr]() { return *ValuePtr; })
-					.OnValueChanged_Lambda([ValuePtr, Min, Max](int32 NewValue)
+					.OnValueChanged_Lambda([this, ValuePtr, Min, Max](int32 NewValue)
 					{
 						*ValuePtr = FMath::Clamp(NewValue, Min, Max);
+						MarkPreviewDirty();
 					})
 				];
 		}
@@ -357,9 +535,10 @@ namespace BushMeshBuilder
 					.MaxSliderValue(Max)
 					.Delta(Delta)
 					.Value_Lambda([ValuePtr]() { return *ValuePtr; })
-					.OnValueChanged_Lambda([ValuePtr, Min, Max](float NewValue)
+					.OnValueChanged_Lambda([this, ValuePtr, Min, Max](float NewValue)
 					{
 						*ValuePtr = FMath::Clamp(NewValue, Min, Max);
+						MarkPreviewDirty();
 					})
 				];
 		}
@@ -378,16 +557,37 @@ namespace BushMeshBuilder
 				]
 				+ SHorizontalBox::Slot()
 				.AutoWidth()
+				.Padding(0.0f, 0.0f, 6.0f, 0.0f)
 				[
 					SNew(SButton)
 					.Text(LOCTEXT("NextSeed", "Next Seed"))
 					.OnClicked(this, &SBushMeshBuilder::HandleNextSeed)
+				]
+				+ SHorizontalBox::Slot()
+				.AutoWidth()
+				[
+					SNew(SButton)
+					.Text(LOCTEXT("ClearPreview", "Clear Preview"))
+					.IsEnabled(this, &SBushMeshBuilder::HasPreviewMesh)
+					.OnClicked(this, &SBushMeshBuilder::HandleClearPreview)
 				];
 		}
 
 		FText GetPartSummaryText() const
 		{
 			return FText::Format(LOCTEXT("PartSummary", "{0} part mesh(es)"), Parts.Num());
+		}
+
+		FText GetPreviewTitleText() const
+		{
+			if (!CanGenerate())
+			{
+				return LOCTEXT("PreviewEmptyTitle", "Preview Viewport - add Static Mesh parts");
+			}
+
+			return bPreviewDirty
+				? LOCTEXT("PreviewDirtyTitle", "Preview Viewport - stale")
+				: LOCTEXT("PreviewReadyTitle", "Preview Viewport");
 		}
 
 		FReply HandleAddSelectedMeshes()
@@ -412,6 +612,11 @@ namespace BushMeshBuilder
 			}
 
 			RefreshPartList();
+			MarkPreviewDirty();
+			if (AddedCount > 0)
+			{
+				RebuildPreviewMesh();
+			}
 			SetStatus(FText::Format(LOCTEXT("PartsAdded", "Added {0} Static Mesh part(s)."), AddedCount));
 			return FReply::Handled();
 		}
@@ -419,6 +624,12 @@ namespace BushMeshBuilder
 		FReply HandleClearParts()
 		{
 			Parts.Reset();
+			PreviewMesh.Reset();
+			if (PreviewViewport.IsValid())
+			{
+				PreviewViewport->ClearPreviewMesh();
+			}
+			bPreviewDirty = true;
 			RefreshPartList();
 			SetStatus(LOCTEXT("PartsCleared", "Part list cleared."));
 			return FReply::Handled();
@@ -437,7 +648,36 @@ namespace BushMeshBuilder
 		FReply HandleNextSeed()
 		{
 			Seed = FMath::Max(1, Seed + 101);
+			MarkPreviewDirty();
+			RebuildPreviewMesh();
 			SetStatus(FText::Format(LOCTEXT("SeedChanged", "Seed changed to {0}."), Seed));
+			return FReply::Handled();
+		}
+
+		FReply HandleRebuildPreview()
+		{
+			RebuildPreviewMesh();
+			return FReply::Handled();
+		}
+
+		FReply HandleFramePreview()
+		{
+			if (PreviewViewport.IsValid())
+			{
+				PreviewViewport->FocusPreviewMesh();
+			}
+			return FReply::Handled();
+		}
+
+		FReply HandleClearPreview()
+		{
+			PreviewMesh.Reset();
+			if (PreviewViewport.IsValid())
+			{
+				PreviewViewport->ClearPreviewMesh();
+			}
+			bPreviewDirty = true;
+			SetStatus(LOCTEXT("PreviewCleared", "Preview cleared."));
 			return FReply::Handled();
 		}
 
@@ -451,6 +691,11 @@ namespace BushMeshBuilder
 				}
 			}
 			return false;
+		}
+
+		bool HasPreviewMesh() const
+		{
+			return PreviewMesh.IsValid();
 		}
 
 		bool ContainsPart(UStaticMesh* Mesh) const
@@ -507,6 +752,11 @@ namespace BushMeshBuilder
 			{
 				StatusText->SetText(Status);
 			}
+		}
+
+		void MarkPreviewDirty()
+		{
+			bPreviewDirty = true;
 		}
 
 		FName MakeOutputMaterialSlotName(UStaticMesh* SourceMesh, FPolygonGroupID SourceGroupID, const TPolygonGroupAttributesConstRef<FName>& SourceSlotNames) const
@@ -657,9 +907,14 @@ namespace BushMeshBuilder
 			return true;
 		}
 
-		bool GenerateBushMesh(FString& OutObjectPath)
+		bool BuildCombinedMeshDescription(
+			FMeshDescription& MeshDescription,
+			TArray<FOutputMaterialSlot>& OutputSlots,
+			int32& OutAppendedMeshCount)
 		{
-			FMeshDescription MeshDescription;
+			OutputSlots.Reset();
+			OutAppendedMeshCount = 0;
+
 			FStaticMeshAttributes OutputAttributes(MeshDescription);
 			OutputAttributes.Register();
 
@@ -667,10 +922,7 @@ namespace BushMeshBuilder
 			Builder.SetMeshDescription(&MeshDescription);
 			Builder.SetNumUVLayers(8);
 
-			TArray<FOutputMaterialSlot> OutputSlots;
 			FRandomStream RandomStream(Seed);
-			int32 AppendedMeshCount = 0;
-
 			for (const TSharedPtr<FBushPart>& Part : Parts)
 			{
 				UStaticMesh* SourceMesh = Part.IsValid() ? Part->Mesh.Get() : nullptr;
@@ -683,12 +935,91 @@ namespace BushMeshBuilder
 				{
 					if (AppendStaticMesh(SourceMesh, MakePartTransform(RandomStream), Builder, OutputSlots))
 					{
-						++AppendedMeshCount;
+						++OutAppendedMeshCount;
 					}
 				}
 			}
 
-			if (AppendedMeshCount == 0 || MeshDescription.Triangles().Num() == 0)
+			return OutAppendedMeshCount > 0 && MeshDescription.Triangles().Num() > 0;
+		}
+
+		bool ApplyMeshDescriptionToStaticMesh(
+			UStaticMesh* StaticMesh,
+			FMeshDescription& MeshDescription,
+			const TArray<FOutputMaterialSlot>& OutputSlots,
+			bool bBuildSimpleCollision,
+			bool bMarkPackageDirty)
+		{
+			if (!StaticMesh)
+			{
+				return false;
+			}
+
+			StaticMesh->GetStaticMaterials().Reset();
+			for (const FOutputMaterialSlot& Slot : OutputSlots)
+			{
+				StaticMesh->GetStaticMaterials().Add(FStaticMaterial(Slot.Material, Slot.SlotName));
+			}
+
+			UStaticMesh::FBuildMeshDescriptionsParams BuildParams;
+			BuildParams.bBuildSimpleCollision = bBuildSimpleCollision;
+			BuildParams.bCommitMeshDescription = true;
+			BuildParams.bMarkPackageDirty = bMarkPackageDirty;
+			BuildParams.bAllowCpuAccess = true;
+
+			const TArray<const FMeshDescription*> MeshDescriptions = { &MeshDescription };
+			if (!StaticMesh->BuildFromMeshDescriptions(MeshDescriptions, BuildParams))
+			{
+				return false;
+			}
+
+			StaticMesh->PostEditChange();
+			return true;
+		}
+
+		bool RebuildPreviewMesh()
+		{
+			FMeshDescription MeshDescription;
+			TArray<FOutputMaterialSlot> OutputSlots;
+			int32 AppendedMeshCount = 0;
+			if (!BuildCombinedMeshDescription(MeshDescription, OutputSlots, AppendedMeshCount))
+			{
+				PreviewMesh.Reset();
+				if (PreviewViewport.IsValid())
+				{
+					PreviewViewport->ClearPreviewMesh();
+				}
+				SetStatus(LOCTEXT("NoPreviewGeometry", "No preview geometry was generated. Check that the part meshes have LOD0 geometry."));
+				return false;
+			}
+
+			const FName PreviewName = MakeUniqueObjectName(GetTransientPackage(), UStaticMesh::StaticClass(), TEXT("BushMeshPreview"));
+			UStaticMesh* NewPreviewMesh = NewObject<UStaticMesh>(GetTransientPackage(), PreviewName, RF_Transient);
+			if (!ApplyMeshDescriptionToStaticMesh(NewPreviewMesh, MeshDescription, OutputSlots, false, false))
+			{
+				SetStatus(LOCTEXT("PreviewBuildFailed", "Preview Static Mesh build failed."));
+				return false;
+			}
+
+			PreviewMesh.Reset(NewPreviewMesh);
+			if (PreviewViewport.IsValid())
+			{
+				PreviewViewport->SetPreviewMesh(PreviewMesh.Get());
+			}
+
+			bPreviewDirty = false;
+			SetStatus(FText::Format(
+				LOCTEXT("PreviewBuilt", "Preview rebuilt from {0} placed part mesh instance(s)."),
+				AppendedMeshCount));
+			return true;
+		}
+
+		bool GenerateBushMesh(FString& OutObjectPath)
+		{
+			FMeshDescription MeshDescription;
+			TArray<FOutputMaterialSlot> OutputSlots;
+			int32 AppendedMeshCount = 0;
+			if (!BuildCombinedMeshDescription(MeshDescription, OutputSlots, AppendedMeshCount))
 			{
 				SetStatus(LOCTEXT("NoGeometry", "No geometry was generated. Check that the part meshes have LOD0 geometry."));
 				return false;
@@ -717,24 +1048,12 @@ namespace BushMeshBuilder
 				return false;
 			}
 
-			for (const FOutputMaterialSlot& Slot : OutputSlots)
-			{
-				StaticMesh->GetStaticMaterials().Add(FStaticMaterial(Slot.Material, Slot.SlotName));
-			}
-
-			UStaticMesh::FBuildMeshDescriptionsParams BuildParams;
-			BuildParams.bBuildSimpleCollision = true;
-			BuildParams.bCommitMeshDescription = true;
-			BuildParams.bMarkPackageDirty = true;
-
-			const TArray<const FMeshDescription*> MeshDescriptions = { &MeshDescription };
-			if (!StaticMesh->BuildFromMeshDescriptions(MeshDescriptions, BuildParams))
+			if (!ApplyMeshDescriptionToStaticMesh(StaticMesh, MeshDescription, OutputSlots, true, true))
 			{
 				SetStatus(LOCTEXT("BuildFailed", "Static Mesh build failed."));
 				return false;
 			}
 
-			StaticMesh->PostEditChange();
 			FAssetRegistryModule::AssetCreated(StaticMesh);
 			Package->MarkPackageDirty();
 
@@ -753,6 +1072,12 @@ namespace BushMeshBuilder
 			OutObjectPath = UniquePackageName + TEXT(".") + UniqueAssetName;
 			OutputPath = CleanOutputPath;
 			AssetName = CleanAssetName;
+			PreviewMesh.Reset(StaticMesh);
+			if (PreviewViewport.IsValid())
+			{
+				PreviewViewport->SetPreviewMesh(PreviewMesh.Get());
+			}
+			bPreviewDirty = false;
 			return true;
 		}
 	};
@@ -789,9 +1114,27 @@ private:
 	void RegisterMenus()
 	{
 		FToolMenuOwnerScoped OwnerScoped(this);
-		UToolMenu* WindowMenu = UToolMenus::Get()->ExtendMenu(TEXT("LevelEditor.MainMenu.Window"));
-		FToolMenuSection& Section = WindowMenu->FindOrAddSection(TEXT("TunaSweeper"));
-		Section.Label = LOCTEXT("TunaSweeperMenuSection", "TunaSweeper");
+
+		UToolMenu* MainMenu = UToolMenus::Get()->ExtendMenu(TEXT("LevelEditor.MainMenu"));
+		FToolMenuSection& MainSection = MainMenu->FindOrAddSection(NAME_None);
+		if (!MainSection.FindEntry(TEXT("TunaSweeper")))
+		{
+			FToolMenuEntry& TunaSweeperEntry = MainSection.AddSubMenu(
+				TEXT("TunaSweeper"),
+				LOCTEXT("TunaSweeperTopMenu", "TunaSweeper"),
+				LOCTEXT("TunaSweeperTopMenuTooltip", "Open TunaSweeper editor tools."),
+				FNewToolMenuChoice());
+			TunaSweeperEntry.InsertPosition = FToolMenuInsert(TEXT("Tools"), EToolMenuInsertType::After);
+		}
+
+		UToolMenu* TunaSweeperMenu = UToolMenus::Get()->RegisterMenu(
+			TEXT("LevelEditor.MainMenu.TunaSweeper"),
+			NAME_None,
+			EMultiBoxType::Menu,
+			false);
+		FToolMenuSection& Section = TunaSweeperMenu->FindOrAddSection(
+			TEXT("AssetTools"),
+			LOCTEXT("TunaSweeperAssetToolsMenuSection", "Asset Tools"));
 		Section.AddMenuEntry(
 			TEXT("OpenBushMeshBuilder"),
 			LOCTEXT("MenuEntry", "Bush Mesh Builder"),
