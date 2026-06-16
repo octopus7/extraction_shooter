@@ -18,10 +18,10 @@
 
 1. Unreal Editor에서 `RaidMap`을 연다.
 2. World Outliner에서 `TS_Editor_MapCapture_Raid`를 선택한다.
-3. Details 패널의 `TunaSweeper|Map Capture` CallInEditor 버튼 중 하나를 누른다.
-   - `AutoDetectCaptureBounds`: 캡처 영역만 자동 검출한다.
-   - `CaptureOpaqueRgbPng`: 현재 캡처 영역 기준으로 RGB PNG를 저장한다.
-   - `AutoDetectBoundsAndCaptureOpaqueRgbPng`: 자동 검출 후 바로 RGB PNG를 저장한다.
+3. Details 패널의 `Map Capture` 카테고리 상단 액션 버튼 중 하나를 누른다.
+   - `Auto Detect Bounds`: 캡처 영역만 자동 검출한다.
+   - `Capture RGB PNG`: 현재 캡처 영역 기준으로 RGB PNG를 저장한다.
+   - `Auto Detect + Capture`: 자동 검출 후 바로 RGB PNG를 저장한다.
 4. 기본 설정이면 다음 파일이 생성된다.
    - `TunaSweeper/Saved/MapCaptures/RaidMap_Map_RGB.png`
 5. 이 PNG를 확인하고, 필요하면 바운더리나 해상도를 조정한 뒤 다시 캡처한다.

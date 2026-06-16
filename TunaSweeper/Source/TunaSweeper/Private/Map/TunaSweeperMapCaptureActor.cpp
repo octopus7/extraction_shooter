@@ -3,6 +3,7 @@
 #include "Components/BoxComponent.h"
 #include "Components/SceneCaptureComponent2D.h"
 #include "Components/SceneComponent.h"
+#include "Engine/SceneCapture2D.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "Engine/World.h"
 #include "HAL/FileManager.h"
@@ -49,7 +50,8 @@ ATunaSweeperMapCaptureActor::ATunaSweeperMapCaptureActor()
 	SceneCaptureComponent->bCaptureEveryFrame = false;
 	SceneCaptureComponent->bCaptureOnMovement = false;
 	SceneCaptureComponent->bAlwaysPersistRenderingState = true;
-	SceneCaptureComponent->SetHiddenInGame(true);
+	SceneCaptureComponent->PrimitiveRenderMode = ESceneCapturePrimitiveRenderMode::PRM_RenderScenePrimitives;
+	SceneCaptureComponent->SetHiddenInGame(false);
 
 	IncludedActorTags.Add(FName(TEXT("MapCapture")));
 	UpdatePreviewComponents();
@@ -253,16 +255,54 @@ bool ATunaSweeperMapCaptureActor::CaptureOpaqueRgbPngInternal()
 	RenderTarget->UpdateResourceImmediate(true);
 
 	UpdatePreviewComponents();
-	SceneCaptureComponent->TextureTarget = RenderTarget;
-	SceneCaptureComponent->OrthoWidth = FMath::Max(100.0, CaptureWorldSize.Y);
-	SceneCaptureComponent->CaptureScene();
+
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		UE_LOG(LogTunaSweeperMapCapture, Warning, TEXT("Map capture failed: no world."));
+		return false;
+	}
+
+	World->UpdateWorldComponents(true, false);
+	FlushRenderingCommands();
+
+	FActorSpawnParameters SpawnParameters;
+	SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	SpawnParameters.ObjectFlags |= RF_Transient;
+
+	const FVector CaptureLocation = GetActorLocation() + FVector(0.0f, 0.0f, TunaSweeperMapCapture::CaptureHeight);
+	const FRotator CaptureRotation(-90.0f, GetActorRotation().Yaw, 0.0f);
+	ASceneCapture2D* CaptureActor = World->SpawnActor<ASceneCapture2D>(
+		CaptureLocation,
+		CaptureRotation,
+		SpawnParameters);
+	if (!CaptureActor || !CaptureActor->GetCaptureComponent2D())
+	{
+		UE_LOG(LogTunaSweeperMapCapture, Warning, TEXT("Map capture failed: could not spawn scene capture actor."));
+		return false;
+	}
+
+	USceneCaptureComponent2D* CaptureComponent = CaptureActor->GetCaptureComponent2D();
+	CaptureComponent->TextureTarget = RenderTarget;
+	CaptureComponent->ProjectionType = ECameraProjectionMode::Orthographic;
+	CaptureComponent->OrthoWidth = FMath::Max(100.0, CaptureWorldSize.Y);
+	CaptureComponent->CaptureSource = ESceneCaptureSource::SCS_FinalColorLDR;
+	CaptureComponent->bCaptureEveryFrame = false;
+	CaptureComponent->bCaptureOnMovement = false;
+	CaptureComponent->bAlwaysPersistRenderingState = true;
+	CaptureComponent->PrimitiveRenderMode = ESceneCapturePrimitiveRenderMode::PRM_RenderScenePrimitives;
+	CaptureComponent->ShowFlags.SetTemporalAA(false);
+	CaptureComponent->SetHiddenInGame(false);
+	CaptureComponent->MarkRenderStateDirty();
+	CaptureComponent->CaptureScene();
 	FlushRenderingCommands();
 
 	FTextureRenderTargetResource* RenderTargetResource = RenderTarget->GameThread_GetRenderTargetResource();
 	if (!RenderTargetResource)
 	{
 		UE_LOG(LogTunaSweeperMapCapture, Warning, TEXT("Map capture failed: no render target resource."));
-		SceneCaptureComponent->TextureTarget = nullptr;
+		CaptureComponent->TextureTarget = nullptr;
+		CaptureActor->Destroy();
 		return false;
 	}
 
@@ -270,9 +310,13 @@ bool ATunaSweeperMapCaptureActor::CaptureOpaqueRgbPngInternal()
 	if (!RenderTargetResource->ReadPixels(Pixels) || Pixels.Num() != Resolution.X * Resolution.Y)
 	{
 		UE_LOG(LogTunaSweeperMapCapture, Warning, TEXT("Map capture failed: could not read pixels."));
-		SceneCaptureComponent->TextureTarget = nullptr;
+		CaptureComponent->TextureTarget = nullptr;
+		CaptureActor->Destroy();
 		return false;
 	}
+
+	CaptureComponent->TextureTarget = nullptr;
+	CaptureActor->Destroy();
 
 	for (FColor& Pixel : Pixels)
 	{
@@ -281,7 +325,6 @@ bool ATunaSweeperMapCaptureActor::CaptureOpaqueRgbPngInternal()
 
 	const FString OutputPath = ResolveRgbOutputPath();
 	const bool bSaved = WritePngFile(OutputPath, Pixels, Resolution.X, Resolution.Y);
-	SceneCaptureComponent->TextureTarget = nullptr;
 
 	if (!bSaved)
 	{

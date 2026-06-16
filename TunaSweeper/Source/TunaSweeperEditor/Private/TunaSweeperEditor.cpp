@@ -132,6 +132,7 @@
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
 #include "TunaSweeperEditorRunOnce.h"
 #include "UI/TunaSweeperInteractionMarkerWidget.h"
+#include "TunaSweeperMapCaptureActorDetails.h"
 #include "UI/TunaSweeperGameHudWidget.h"
 #include "UI/TunaSweeperHudBottomStatusWidget.h"
 #include "UI/TunaSweeperHudDebuffBarWidget.h"
@@ -12953,6 +12954,8 @@ public:
 			return;
 		}
 
+		TunaSweeperMapCaptureActorDetails::Register();
+
 		FString UiTextureImportSource;
 		if (FParse::Value(FCommandLine::Get(), TEXT("TunaSweeperImportUiTextureSource="), UiTextureImportSource))
 		{
@@ -13493,6 +13496,8 @@ public:
 
 	virtual void ShutdownModule() override
 	{
+		TunaSweeperMapCaptureActorDetails::Unregister();
+
 		if (FMSoundTool)
 		{
 			FMSoundTool->Shutdown();

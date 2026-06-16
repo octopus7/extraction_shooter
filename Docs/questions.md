@@ -1,5 +1,15 @@
 # 질문 기록
 
+## 2026-06-17 01:11:04 (소요시간: 00:03:50)
+
+### 질문
+
+`TS_Editor_MapCapture_Raid`를 선택했을 때 Details 패널에 지도 캡처 버튼이 따로 보이지 않는데 어디에 있는지 질문.
+
+### 답변
+
+기존 구현에는 `CallInEditor` 함수가 있었지만 현재 Details 패널에서 버튼이 안정적으로 노출되지 않는 상태로 확인했다. 에디터 모듈에 `ATunaSweeperMapCaptureActor` 전용 Details 커스터마이즈를 추가해 `Map Capture` 카테고리 상단에 `Auto Detect Bounds`, `Capture RGB PNG`, `Auto Detect + Capture` 버튼이 항상 보이도록 수정했다. 문서도 해당 위치 기준으로 갱신했다. 다만 현재 열린 Unreal Editor에서 Live Coding이 활성화되어 일반 빌드가 막혔으므로, 열린 에디터에서 `Ctrl+Alt+F11`로 Live Coding 컴파일을 실행하거나 에디터를 닫은 뒤 다시 빌드해야 새 버튼이 보인다.
+
 ## 2026-05-15 18:01:20 (소요시간: 1분 미만)
 
 ### 질문
