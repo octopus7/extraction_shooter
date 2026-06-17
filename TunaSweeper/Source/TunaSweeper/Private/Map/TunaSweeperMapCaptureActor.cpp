@@ -69,6 +69,47 @@ void ATunaSweeperMapCaptureActor::PostEditChangeProperty(FPropertyChangedEvent& 
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 	UpdatePreviewComponents();
 }
+
+bool ATunaSweeperMapCaptureActor::RunCaptureOpaqueRgbPngForEditor()
+{
+	return CaptureOpaqueRgbPngInternal();
+}
+
+bool ATunaSweeperMapCaptureActor::RunAutoDetectBoundsAndCaptureOpaqueRgbPngForEditor()
+{
+	if (!AutoDetectCaptureBoundsInternal())
+	{
+		return false;
+	}
+
+	const bool bOriginalAutoDetectBeforeCapture = bAutoDetectBoundsBeforeCapture;
+	bAutoDetectBoundsBeforeCapture = false;
+	const bool bCaptured = CaptureOpaqueRgbPngInternal();
+	bAutoDetectBoundsBeforeCapture = bOriginalAutoDetectBeforeCapture;
+	return bCaptured;
+}
+
+FString ATunaSweeperMapCaptureActor::GetLastWrittenRgbPngAbsolutePathForEditor() const
+{
+	return LastWrittenRgbPngAbsolutePath;
+}
+
+FString ATunaSweeperMapCaptureActor::ResolveImportDestinationPathForEditor() const
+{
+	return ImportDestinationPath.IsEmpty() ? TEXT("/Game/UI/Map") : ImportDestinationPath;
+}
+
+FString ATunaSweeperMapCaptureActor::ResolveImportAssetNameForEditor() const
+{
+	FString ResolvedName = ImportAssetNamePattern;
+	if (ResolvedName.IsEmpty())
+	{
+		ResolvedName = TEXT("T_UIMap_{level}_RGB");
+	}
+
+	ResolvedName.ReplaceInline(TEXT("{level}"), *ResolveLevelName(), ESearchCase::IgnoreCase);
+	return FPaths::GetBaseFilename(ResolvedName);
+}
 #endif
 
 void ATunaSweeperMapCaptureActor::AutoDetectCaptureBounds()
@@ -404,6 +445,15 @@ FString ATunaSweeperMapCaptureActor::ResolveRgbOutputPath() const
 		ResolvedPath = TEXT("Saved/MapCaptures/{level}_Map_RGB.png");
 	}
 
+	ResolvedPath.ReplaceInline(TEXT("{level}"), *ResolveLevelName(), ESearchCase::IgnoreCase);
+	return FPaths::ConvertRelativePathToFull(
+		FPaths::IsRelative(ResolvedPath)
+			? FPaths::Combine(FPaths::ProjectDir(), ResolvedPath)
+			: ResolvedPath);
+}
+
+FString ATunaSweeperMapCaptureActor::ResolveLevelName() const
+{
 	FString LevelName = TEXT("Level");
 	if (const UWorld* World = GetWorld())
 	{
@@ -413,11 +463,7 @@ FString ATunaSweeperMapCaptureActor::ResolveRgbOutputPath() const
 		}
 	}
 
-	ResolvedPath.ReplaceInline(TEXT("{level}"), *LevelName, ESearchCase::IgnoreCase);
-	return FPaths::ConvertRelativePathToFull(
-		FPaths::IsRelative(ResolvedPath)
-			? FPaths::Combine(FPaths::ProjectDir(), ResolvedPath)
-			: ResolvedPath);
+	return LevelName;
 }
 
 bool ATunaSweeperMapCaptureActor::WritePngFile(const FString& AbsolutePath, const TArray<FColor>& Pixels, int32 Width, int32 Height) const

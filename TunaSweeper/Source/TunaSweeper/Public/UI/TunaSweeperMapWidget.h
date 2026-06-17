@@ -158,6 +158,7 @@ private:
 	FVector2D LastMapViewportSize = FVector2D::ZeroVector;
 	FVector2D MapPan = FVector2D::ZeroVector;
 	FVector2D LastPanMouseLocalPosition = FVector2D::ZeroVector;
+	FString ActiveMapTexturePath;
 	float MapZoom = 1.0f;
 	int32 SelectedMarkerIconIndex = 0;
 	int32 SelectedMarkerColorIndex = 3;

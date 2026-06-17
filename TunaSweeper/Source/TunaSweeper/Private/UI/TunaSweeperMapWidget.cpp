@@ -17,6 +17,7 @@
 #include "Components/VerticalBox.h"
 #include "Components/VerticalBoxSlot.h"
 #include "Engine/Texture2D.h"
+#include "Engine/World.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
@@ -29,14 +30,56 @@
 namespace TunaSweeperMap
 {
 	const TCHAR* PlaceholderMapTexturePath = TEXT("/Game/UI/Map/T_UIMap_PlaceholderAlpha.T_UIMap_PlaceholderAlpha");
+	const TCHAR* BunkerMapTexturePath = TEXT("/Game/UI/Map/T_UIMap_BunkerMap_RGB.T_UIMap_BunkerMap_RGB");
+	const TCHAR* RaidMapTexturePath = TEXT("/Game/UI/Map/T_UIMap_RaidMap_RGB.T_UIMap_RaidMap_RGB");
 	const TCHAR* PlayerIconTexturePath = TEXT("/Game/UI/Map/T_UIMap_PlayerLocation_Transparent.T_UIMap_PlayerLocation_Transparent");
 	constexpr float MinZoom = 0.65f;
 	constexpr float MaxZoom = 2.75f;
 	constexpr float MarkerHitDistance = 26.0f;
 	constexpr int32 FallbackMapWidth = 768;
 	constexpr int32 FallbackMapHeight = 512;
-	const FVector2D WorldMin(-3000.0, -3000.0);
-	const FVector2D WorldMax(3000.0, 3000.0);
+
+	struct FMapRuntimeDefinition
+	{
+		const TCHAR* TexturePath = PlaceholderMapTexturePath;
+		FVector2D WorldMin = FVector2D(-3000.0, -3000.0);
+		FVector2D WorldMax = FVector2D(3000.0, 3000.0);
+	};
+
+	bool IsWorldMapName(const UWorld* World, const TCHAR* ExpectedMapName)
+	{
+		if (!World || !ExpectedMapName)
+		{
+			return false;
+		}
+
+		const FString WorldMapName = World->GetMapName();
+		const FString PackageName = World->GetOutermost() ? World->GetOutermost()->GetName() : FString();
+		return WorldMapName.EndsWith(ExpectedMapName) || PackageName.EndsWith(ExpectedMapName);
+	}
+
+	FMapRuntimeDefinition ResolveRuntimeMapDefinition(const UWorld* World)
+	{
+		if (IsWorldMapName(World, TEXT("BunkerMap")))
+		{
+			FMapRuntimeDefinition BunkerDefinition;
+			BunkerDefinition.TexturePath = BunkerMapTexturePath;
+			BunkerDefinition.WorldMin = FVector2D(-1751.3, -1787.5);
+			BunkerDefinition.WorldMax = FVector2D(1948.7, 1912.5);
+			return BunkerDefinition;
+		}
+
+		if (IsWorldMapName(World, TEXT("RaidMap")))
+		{
+			FMapRuntimeDefinition RaidDefinition;
+			RaidDefinition.TexturePath = RaidMapTexturePath;
+			RaidDefinition.WorldMin = FVector2D(-12700.0, -13950.0);
+			RaidDefinition.WorldMax = FVector2D(9700.0, 10450.0);
+			return RaidDefinition;
+		}
+
+		return FMapRuntimeDefinition();
+	}
 
 	FSlateBrush MakeMapBoxBrush(
 		const FVector2D& ImageSize,
@@ -462,9 +505,12 @@ void UTunaSweeperMapWidget::BuildMapWidget()
 
 void UTunaSweeperMapWidget::EnsureMapTextures()
 {
-	if (!MapTexture)
+	const TunaSweeperMap::FMapRuntimeDefinition MapDefinition = TunaSweeperMap::ResolveRuntimeMapDefinition(GetWorld());
+	const FString DesiredMapTexturePath(MapDefinition.TexturePath);
+	if (!MapTexture || !ActiveMapTexturePath.Equals(DesiredMapTexturePath, ESearchCase::CaseSensitive))
 	{
-		MapTexture = LoadObject<UTexture2D>(nullptr, TunaSweeperMap::PlaceholderMapTexturePath);
+		MapTexture = LoadObject<UTexture2D>(nullptr, MapDefinition.TexturePath);
+		ActiveMapTexturePath = MapTexture ? DesiredMapTexturePath : FString();
 	}
 	if (!MapTexture)
 	{
@@ -983,11 +1029,12 @@ bool UTunaSweeperMapWidget::UpdatePlayerMapPosition()
 
 FVector2D UTunaSweeperMapWidget::ProjectWorldLocationToMapPosition(const FVector& WorldLocation) const
 {
-	const double WorldWidth = FMath::Max(1.0, TunaSweeperMap::WorldMax.Y - TunaSweeperMap::WorldMin.Y);
-	const double WorldHeight = FMath::Max(1.0, TunaSweeperMap::WorldMax.X - TunaSweeperMap::WorldMin.X);
+	const TunaSweeperMap::FMapRuntimeDefinition MapDefinition = TunaSweeperMap::ResolveRuntimeMapDefinition(GetWorld());
+	const double WorldWidth = FMath::Max(1.0, MapDefinition.WorldMax.Y - MapDefinition.WorldMin.Y);
+	const double WorldHeight = FMath::Max(1.0, MapDefinition.WorldMax.X - MapDefinition.WorldMin.X);
 	return FVector2D(
-		FMath::Clamp((WorldLocation.Y - TunaSweeperMap::WorldMin.Y) / WorldWidth, 0.0, 1.0),
-		FMath::Clamp(1.0 - ((WorldLocation.X - TunaSweeperMap::WorldMin.X) / WorldHeight), 0.0, 1.0));
+		FMath::Clamp((WorldLocation.Y - MapDefinition.WorldMin.Y) / WorldWidth, 0.0, 1.0),
+		FMath::Clamp(1.0 - ((WorldLocation.X - MapDefinition.WorldMin.X) / WorldHeight), 0.0, 1.0));
 }
 
 void UTunaSweeperMapWidget::HandleMapMarkersChanged()

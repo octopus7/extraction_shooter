@@ -22,9 +22,12 @@
    - `Auto Detect Bounds`: 캡처 영역만 자동 검출한다.
    - `Capture RGB PNG`: 현재 캡처 영역 기준으로 RGB PNG를 저장한다.
    - `Auto Detect + Capture`: 자동 검출 후 바로 RGB PNG를 저장한다.
+   - `Capture + Import`: 현재 캡처 영역 기준으로 RGB PNG를 저장한 뒤 `/Game/UI/Map/T_UIMap_{level}_RGB` 에셋으로 임포트한다.
+   - `Auto Detect + Capture + Import`: 자동 검출, RGB PNG 저장, UI 텍스처 임포트를 한 번에 실행한다.
 4. 기본 설정이면 다음 파일이 생성된다.
    - `TunaSweeper/Saved/MapCaptures/RaidMap_Map_RGB.png`
-5. 이 PNG를 확인하고, 필요하면 바운더리나 해상도를 조정한 뒤 다시 캡처한다.
+5. 임포트 버튼을 사용하면 같은 이름의 기존 텍스처 에셋은 덮어쓴다.
+6. 이 PNG를 확인하고, 필요하면 바운더리나 해상도를 조정한 뒤 다시 캡처한다.
 
 ## 주요 설정
 
@@ -50,6 +53,12 @@
 - `bAutoDetectBoundsBeforeCapture`: 켜져 있으면 `CaptureOpaqueRgbPng`를 누를 때도 먼저 자동 검출을 실행한다.
 - `RgbPngOutputPath`: RGB PNG 저장 경로다. `{level}`은 현재 레벨 이름으로 치환된다.
 - `MaskPngPath`: 수동 제작할 마스크 PNG 경로를 기록하는 값이다. 현재 액터가 마스크를 자동 생성하지는 않는다.
+
+`Map Capture|Import`
+
+- `ImportDestinationPath`: 캡처 PNG를 임포트할 콘텐츠 경로다. 기본값은 `/Game/UI/Map`이다.
+- `ImportAssetNamePattern`: 임포트할 텍스처 에셋 이름 규칙이다. 기본값은 `T_UIMap_{level}_RGB`이며 `{level}`은 현재 레벨 이름으로 치환된다.
+- 임포트 버튼은 기존 에셋이 있으면 항상 덮어쓴다.
 
 `Map Capture|Last Result`
 
@@ -90,12 +99,28 @@
 
 1. 생성된 RGB PNG를 확인한다.
 2. 같은 크기의 마스크 PNG를 만든다.
-3. 둘 다 패키징 대상 콘텐츠 경로로 임포트한다.
-   - 예: `/Game/UI/Map`
-4. 런타임 지도 위젯이나 지도 표시 머티리얼이 새 텍스처를 참조하게 바꾼다.
-5. 좌표가 실제 레벨과 맞아야 한다면 캡처 액터의 중심, yaw, `CaptureWorldSize` 값을 런타임 데이터로 별도 보존한다.
+3. RGB PNG는 Details 패널의 `Capture + Import` 또는 `Auto Detect + Capture + Import` 버튼으로 패키징 대상 콘텐츠 경로에 임포트할 수 있다.
+   - 기본 경로: `/Game/UI/Map/T_UIMap_{level}_RGB`
+   - 기존 에셋이 있으면 덮어쓴다.
+4. 마스크 PNG는 아직 수동으로 임포트한다.
+5. 런타임 지도 위젯이나 지도 표시 머티리얼이 새 텍스처를 참조하게 바꾼다.
+6. 좌표가 실제 레벨과 맞아야 한다면 캡처 액터의 중심, yaw, `CaptureWorldSize` 값을 런타임 데이터로 별도 보존한다.
 
 주의: 런타임 코드가 `/Game/EditorOnly/MapCapture/BP_Editor_MapCaptureActor`나 `TS_Editor_MapCapture_Raid`를 직접 찾거나 참조하면 안 된다. 이 액터는 제작 도구이고 cooked 빌드에서는 제외된다.
+
+## 현재 런타임 연결
+
+`RaidMap`과 `BunkerMap` 캡처 결과는 현재 UI 텍스처로 임포트되어 지도 시스템에서 사용한다.
+
+- 소스 PNG: `TunaSweeper/Saved/MapCaptures/RaidMap_Map_RGB.png`
+- 런타임 텍스처: `/Game/UI/Map/T_UIMap_RaidMap_RGB`
+- `RaidMap` 월드 바운즈: X `-12700.0` ~ `9700.0`, Y `-13950.0` ~ `10450.0`
+
+- 소스 PNG: `TunaSweeper/Saved/MapCaptures/BunkerMap_Map_RGB.png`
+- 런타임 텍스처: `/Game/UI/Map/T_UIMap_BunkerMap_RGB`
+- `BunkerMap` 월드 바운즈: X `-1751.3` ~ `1948.7`, Y `-1787.5` ~ `1912.5`
+
+적용 코드는 `UTunaSweeperMapWidget`이다. 신규 레벨 지도는 별도 텍스처와 월드 바운즈를 추가해야 한다.
 
 ## 좌표 매핑 기준
 
@@ -136,6 +161,7 @@
 ## 현재 제한
 
 - 마스크 PNG는 자동 생성하지 않는다.
-- 생성된 PNG를 런타임 UI 텍스처로 자동 임포트하지 않는다.
+- 신규 레벨의 생성된 RGB PNG는 버튼으로 UI 텍스처 임포트까지 할 수 있지만, 마스크 임포트는 수동이다.
+- `RaidMap`, `BunkerMap` 외 레벨의 런타임 지도 텍스처 연결은 별도 구현이 필요하다.
 - 런타임 지도 위젯이 캡처 액터를 직접 읽는 구조가 아니다.
-- 캡처 결과와 좌표 메타데이터를 실제 지도 UI에 연결하는 작업은 별도 구현이 필요하다.
+- 마스크 텍스처를 런타임 지도 표시 알파로 적용하는 작업은 별도 구현이 필요하다.

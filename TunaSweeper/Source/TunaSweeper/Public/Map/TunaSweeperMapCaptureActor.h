@@ -21,6 +21,11 @@ public:
 	virtual void OnConstruction(const FTransform& Transform) override;
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+	bool RunCaptureOpaqueRgbPngForEditor();
+	bool RunAutoDetectBoundsAndCaptureOpaqueRgbPngForEditor();
+	FString GetLastWrittenRgbPngAbsolutePathForEditor() const;
+	FString ResolveImportDestinationPathForEditor() const;
+	FString ResolveImportAssetNameForEditor() const;
 #endif
 
 	UFUNCTION(CallInEditor, Category = "TunaSweeper|Map Capture")
@@ -90,6 +95,12 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map Capture|Output")
 	FString MaskPngPath = TEXT("Saved/MapCaptures/{level}_Map_Mask.png");
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map Capture|Import")
+	FString ImportDestinationPath = TEXT("/Game/UI/Map");
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map Capture|Import")
+	FString ImportAssetNamePattern = TEXT("T_UIMap_{level}_RGB");
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Map Capture|Last Result")
 	FVector2D LastDetectedLocalMin = FVector2D::ZeroVector;
 
@@ -108,6 +119,7 @@ private:
 	bool CaptureOpaqueRgbPngInternal();
 	bool IsBoundsHitUsable(const FHitResult& Hit) const;
 	FIntPoint ResolveCaptureResolution() const;
+	FString ResolveLevelName() const;
 	FString ResolveRgbOutputPath() const;
 	bool WritePngFile(const FString& AbsolutePath, const TArray<FColor>& Pixels, int32 Width, int32 Height) const;
 };
