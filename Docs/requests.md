@@ -4527,3 +4527,11 @@
 
 - `Docs/UE5ExtractionShooterCourse/CoursePlan.md`를 추가해 강의 운영 계획, 전체 산출물, 15차시 계획, 실습 진행 순서, 세부 문서 작성 순서, 각 장의 권장 내부 구성을 정리한 것.
 - `Docs/UE5ExtractionShooterCourse/README.md`에 `CoursePlan.md`로 이동하는 운영 계획 링크를 추가한 것.
+
+## 2026-07-03 14:03:35 (소요시간: 00:02:52)
+
+- 퀘스트 관계 그래프 생성을 위한 .NET 10 콘솔 도구 `Tools/QuestGraphGenerator`를 추가한 것.
+- `TunaSweeper/Content/Data/QuestDefinitions.json`과 `QuestTextStrings.csv`를 읽어 `Docs/quest_graph.md`에 Mermaid 선행 조건 그래프, provider별 표, 목표 요약, 검증 결과를 생성하도록 구현한 것.
+- 누락된 선행 퀘스트, 중복 퀘스트 ID, 빈 목표, 중복 provider sort order, 선행 조건 순환 참조, 누락된 텍스트 키를 검증하도록 추가한 것.
+- 탐색기에서 더블클릭으로 실행할 수 있는 `Tools/QuestGraphGenerator/GenerateQuestGraph.bat`를 추가한 것.
+- `dotnet build`와 `dotnet run`으로 생성기 빌드 및 `Docs/quest_graph.md` 생성을 확인한 것.

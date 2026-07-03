@@ -2373,3 +2373,23 @@ distance field 문제일 가능성은 낮다. 프로젝트 설정에는 `r.Gener
 ### 답변
 
 현재 프로젝트에는 퀘스트 선행 조건과 진행 관계를 전용 그래프나 에디터 도구로 보여주는 기능은 없다. 관계의 원본 데이터는 `TunaSweeper/Content/Data/QuestDefinitions.json`의 `required_completed_quest_ids`, `provider_id`, `objectives`, `rewards` 필드이며, 런타임은 `UTunaSweeperQuestSubsystem`에서 이를 읽어 수락 가능 여부와 제공자별 후보 퀘스트를 계산한다. 따라서 지금은 JSON 또는 관련 문서를 보는 방식이 기본이지만, JSON을 읽어 Markdown 표, Mermaid 그래프, CSV, 또는 Unreal Editor 탭으로 관계도를 출력하는 보조 도구를 추가하면 직접 JSON을 열지 않고도 파악할 수 있다.
+
+## 2026-07-03 13:52:10 (소요시간: 00:00:25)
+
+### 질문
+
+퀘스트 관계 그래프 뷰어를 UE 에디터로 만드는 것이 좋은지, 외부 도구로 만드는 것이 좋은지에 대한 질문.
+
+### 답변
+
+초기 구현은 외부 자동 생성 도구가 적합하다. 퀘스트 원본이 JSON이므로 Unreal Editor 실행 없이 빠르게 `Docs/quest_graph.md` 같은 Mermaid 그래프나 정적 HTML을 생성할 수 있고, Git diff와 코드 리뷰, 누락 선행 조건/순환 참조 검증을 함께 처리하기 쉽다. UE 에디터 탭은 디자이너가 에디터 안에서 노드를 선택하고 실제 퀘스트 데이터를 편집하거나 레벨 액터와 연결해야 할 때 2단계로 추가하는 편이 좋다. 권장 순서는 외부 Markdown/HTML 그래프 생성기, 검증 로직 추가, 필요 시 같은 분석 코드를 재사용하는 UE Editor Nomad Tab 확장이다.
+
+## 2026-07-03 13:53:13 (소요시간: 00:00:55)
+
+### 질문
+
+퀘스트 그래프 생성기를 어떤 기술 스택으로 만들지에 대한 질문.
+
+### 답변
+
+프로젝트의 기존 `Tools` 폴더에 있는 보조 도구들이 C#/.NET 기반이므로, 퀘스트 그래프 생성기도 C# 콘솔 도구로 만드는 것이 적합하다. `System.Text.Json`으로 `TunaSweeper/Content/Data/QuestDefinitions.json`을 읽고, 의존성 없이 `Docs/quest_graph.md`에 Mermaid 그래프와 요약 표, 검증 결과를 출력하는 구조가 좋다. 초기 버전은 WPF나 웹 UI 없이 콘솔 생성기로 두고, 필요해지면 같은 파서/검증 코드를 재사용해 정적 HTML 또는 UE Editor Nomad Tab으로 확장한다.
