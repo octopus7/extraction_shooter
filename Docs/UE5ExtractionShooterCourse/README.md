@@ -39,6 +39,10 @@
 - 주요 데이터: `TunaSweeper/Content/Data`
 - 개발 기준 문서: `Docs/game_conventions.md`, `Docs/save_persistence.md`, `Docs/runtime_actor_spawns.md`
 
+## 운영 계획
+
+- [강의 운영 계획](CoursePlan.md)
+
 ## 문서 구조
 
 - [00. 오리엔테이션](00_Orientation/)

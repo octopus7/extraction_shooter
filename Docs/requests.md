@@ -4522,3 +4522,8 @@
 - `Docs/UE5ExtractionShooterCourse/README.md`에 강의 목표, 수강 전제, 진행 원칙, 기준 프로젝트 정보를 추가한 것.
 - `00_Orientation`부터 `14_TestingBalancingPackaging`, `99_Appendices`까지 각 하위 `README.md`에 학습 목표, 강의 흐름, 핵심 개념, 기준 프로젝트에서 볼 지점, 실습, 확인 포인트를 채운 것.
 - 강의 문서가 실제 개발 기준으로 역전파되지 않도록 기존 적용 범위 문구를 유지하면서, 기존 개발 문서는 참조 대상으로만 다루도록 작성한 것.
+
+## 2026-07-03 13:49:14 (소요시간: 00:00:41)
+
+- `Docs/UE5ExtractionShooterCourse/CoursePlan.md`를 추가해 강의 운영 계획, 전체 산출물, 15차시 계획, 실습 진행 순서, 세부 문서 작성 순서, 각 장의 권장 내부 구성을 정리한 것.
+- `Docs/UE5ExtractionShooterCourse/README.md`에 `CoursePlan.md`로 이동하는 운영 계획 링크를 추가한 것.
