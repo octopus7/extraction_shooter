@@ -2333,3 +2333,23 @@ distance field 문제일 가능성은 낮다. 프로젝트 설정에는 `r.Gener
 ### 답변
 
 `Window`는 도킹 탭을 다시 여는 위치로는 기술적으로 맞지만, 부시 메시 빌더처럼 콘텐츠를 생성하는 제작 툴의 주 진입점으로는 적합하지 않다. 기본 권장은 `Tools > TunaSweeper > Bush Mesh Builder`를 주 진입점으로 두고, 필요하면 `Window > TunaSweeper`에는 보조 진입점만 남기는 방식이다. 프로젝트 전용 툴이 FM Sound Composer, Bush Mesh Builder, 지형/지도/룩뎁 캡처처럼 계속 늘어날 계획이면 상단에 `TunaSweeper` 전용 메뉴를 만드는 것도 타당하다. 단, 툴이 1~2개뿐이면 전용 상위 메뉴는 과하고, 여러 제작 파이프라인 툴을 묶는 허브가 될 때 가장 좋다.
+
+## 2026-06-25 09:58:54 (소요시간: 00:01:02)
+
+### 질문
+
+언리얼에 부시 메시를 올렸을 때 멀리서는 녹색이 붕 떠 보이고, 가까이 가서 찍으면 톤이 안정적인 이유가 자동 노출 때문인지에 대한 질문.
+
+### 답변
+
+자동 노출은 유력한 원인 중 하나지만, 자동 노출만으로 보기보다는 부시 텍스처 mip/알파 패딩, LOD 머티리얼, Two Sided Foliage의 subsurface 색과 그림자/접촉 음영 부족이 함께 겹친 현상으로 보는 것이 맞다. 자동 노출은 화면 전체 밝기를 바꾸므로, Post Process Volume에서 노출을 Manual로 잠그거나 Min/Max EV100을 같은 값으로 맞춰 먼저 확인한다. 노출을 고정해도 부시만 멀리서 연한 민트색 덩어리처럼 뜨면 Texture Viewer에서 낮은 mip를 확인하고, 투명 픽셀 RGB 패딩을 잎 색으로 확장하거나 alpha coverage/mip 설정을 조정한다. LOD 0 강제와 BaseColor/Lighting Only 뷰모드 확인으로 LOD 머티리얼, foliage subsurface, contact shadow 문제를 분리해 보는 순서가 적합하다.
+
+## 2026-07-03 13:16:07 (소요시간: 00:00:19)
+
+### 질문
+
+문서 경로가 `Docs`인지에 대한 질문.
+
+### 답변
+
+맞다. 이 프로젝트의 문서 경로는 `Docs`이며, AGENTS 지침에서도 요청 기록은 `Docs/requests.md`, 질문 기록은 `Docs/questions.md`, 게임 규칙은 `Docs/game_conventions.md`, 저장 지속성 문서는 `Docs/save_persistence.md`를 사용하도록 되어 있다.
