@@ -2413,3 +2413,33 @@ distance field 문제일 가능성은 낮다. 프로젝트 설정에는 `r.Gener
 ### 답변
 
 우선순위는 전투 피드백과 핵심 이동/위험 연출을 먼저 두는 것이 적합하다. 1순위는 탄 트레일, 피격 잔해, 폭발/파괴 파티클, 구르기처럼 플레이 조작과 전투 판독성에 직접 영향을 주는 작업이다. 2순위는 벙커 입구, 창고, 문, 나무다리, 취수시설처럼 레벨 목표와 길 읽기에 쓰이는 구조물이다. 3순위는 덤불, 풀, 바위, 무너진 시설, 고장난 기계처럼 분위기와 엄폐/경계 표현에 재사용 가능한 환경 프랍이다. 폭포와 쓰러짐 애니메이션은 연출 가치는 크지만 제작 비용과 사용 빈도를 고려해 별도 컷신/보스/사망 루프 확정 뒤로 미루는 편이 좋다.
+
+## 2026-07-04 13:27:54 (소요시간: 00:01:33)
+
+### 질문
+
+코드 설명 요청. 맨 처음 엔트리 레벨에서 UI를 제어하는 코드가 무엇인지부터 설명해 달라는 질문.
+
+### 답변
+
+프로젝트 시작점은 `TunaSweeper/Config/DefaultEngine.ini`의 `GameDefaultMap=/Game/IntroMap.IntroMap`이고, 기본 GameMode는 `/Game/Core/BP_TunaSweeperGameMode`이다. GameMode의 C++ 부모인 `ATunaSweeperGameMode`가 `ATunaSweeperPlayerController`를 기본 PlayerController로 지정한다. 실제 최초 UI 생성은 `ATunaSweeperPlayerController::BeginPlay()`에서 현재 맵이 `IntroMap`인지 확인한 뒤 `EnsureIntroMenuWidget()`을 호출하면서 시작된다. 이 함수가 `/Game/UI/WBP_IntroMenu`를 로드하고 `CreateWidget`, `AddToViewport`, `FInputModeUIOnly`로 타이틀 UI를 화면에 붙인다. 타이틀 위젯의 버튼 바인딩과 시작/난이도/세이브 슬롯 흐름은 `UTunaSweeperIntroMenuWidget`에서 처리하며, 시작이 확정되면 페이드 후 `UGameplayStatics::OpenLevel()`로 `OpeningScenarioMap` 또는 `BunkerMap`으로 이동한다. 인게임 레벨에서는 같은 PlayerController가 `EnsureGameHudWidget()`으로 `/Game/UI/WBP_GameHud`를 붙이고, `UTunaSweeperGameHudWidget`이 `ETunaSweeperHudMode`로 인벤토리, 지도, 퀘스트, 메모, 외부 패널 상태를 제어한다.
+
+## 2026-07-04 13:30:45 (소요시간: 00:00:50)
+
+### 질문
+
+인트로부터 시작해서 벙커와 레이드맵으로 이어지는 과정을 상세히 설명해 달라는 질문.
+
+### 답변
+
+시작 맵은 `DefaultEngine.ini`의 `IntroMap`이며, `ATunaSweeperPlayerController::BeginPlay()`가 맵 이름에 따라 인트로 메뉴, 오프닝 시나리오 위젯, 인게임 HUD 중 하나를 붙인다. 인트로 메뉴의 시작 흐름은 `UTunaSweeperIntroMenuWidget::BeginStartTravel()`에서 세이브 슬롯과 난이도 선택 여부를 확인하고, `UTunaSweeperGameInstance::ResolveInitialGameplayLevelName()`이 오프닝 완료 플래그에 따라 `OpeningScenarioMap` 또는 `BunkerMap`을 결정한다. 첫 플레이는 `OpeningScenarioMap`에서 `UTunaSweeperScenarioPresentationWidget`이 독백과 intro.mp4를 재생한 뒤 `BeginScenarioBunkerEntry()`로 오프닝 완료 pending 플래그를 잡고 `BunkerMap`을 연다. 벙커 로드 후 PlayerController가 `CompletePendingScenarioBunkerEntryIfNeeded()`로 플래그를 저장하고 HUD, 벙커 BGM, 진입 페이드, CanBot 대화를 처리한다. 벙커에서 레이드로 가는 `Deploy`는 `GameplayInteractionSpawns.json`의 `TS_Travel_DeployToRaid` 레코드로 스폰되는 `ATunaSweeperLevelTravelInteractableActor`이며, 상호작용 입력이 `UTunaSweeperInteractionSubsystem::TryInteract()`를 거쳐 `TravelToTargetLevel()`을 호출한다. 이때 `HandleLevelTravelPersistence()`로 벙커 상태를 저장하고 레이드 경험치 세션을 시작한 뒤, `UTunaSweeperLevelTransitionSubsystem`이 전환 영상/페이드/원형 리빌을 처리하고 `RaidMap`을 연다.
+
+## 2026-07-04 13:35:48 (소요시간: 00:00:31)
+
+### 질문
+
+식생 생성하는 에디터 코드가 있는지에 대한 질문.
+
+### 답변
+
+있다. 식생 에셋 생성 코드는 `TunaSweeper/Source/TunaSweeperEditor/Private/TunaSweeperExperimentalVegetation.cpp`와 `.h`에 있으며, `EnsureExperimentalVegetationAssets()`가 마스크/페인트 텍스처, 머티리얼, 여러 Static Mesh 변형을 `/Game/Prototype`에 생성한다. 에디터 시작 경로는 `TunaSweeperEditor.cpp`에 연결되어 있고 `-TunaSweeperRebuildExperimentalVegetation`, `-TunaSweeperExperimentalVegetationPaintSource=...`, `-TunaSweeperExperimentalVegetationQuit` 플래그로 실행된다. 같은 파일에는 `EnsureTurbulentConiferPrototypeAssets()`와 `EnsureTurbulentConiferOcclusionRevealAssets()`도 있어 침엽수 프로토타입 및 가림 해제 머티리얼 관련 에셋을 생성한다.

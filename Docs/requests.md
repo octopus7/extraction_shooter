@@ -4551,3 +4551,15 @@
 
 - `Docs/art_work_priority.md`를 생성해 아트 작업 우선순위 문서를 작성한 것.
 - 전투 이펙트, 구르기 애니메이션, 핵심 배경 구조물, 재사용 환경 프랍, 특수 연출/저빈도 작업 순으로 정리하고 각 우선순위의 판단 사유를 함께 기록한 것.
+
+## 2026-07-04 13:32:28 (소요시간: 00:02:45)
+
+- `Docs/level_transition_flow.md`를 생성해 인트로, 오프닝 시나리오, 벙커, 레이드 간 전환 코드 흐름을 정리한 것.
+- `IntroMap`, `OpeningScenarioMap`, `BunkerMap`, `RaidMap`에서 `PlayerController`, 인트로 메뉴, 시나리오 위젯, 레벨 전환 서브시스템, 인터랙션 액터가 어떤 순서로 동작하는지 설명한 것.
+- 새 게임/기존 진행, 난이도 선택, 오프닝 완료 플래그, 벙커 배치, 레이드 복귀, 추출 지점, 저장/XP 정산, 전환 영상 실패 등 주요 분기별 동작 표와 디버깅 체크리스트를 추가한 것.
+
+## 2026-07-04 13:35:49 (소요시간: 00:06:37)
+
+- `Docs/item_container_drag_flow.md`를 생성해 아이템 컨테이너 위젯과 드래그/드롭 흐름을 코드 기준으로 정리한 것.
+- 전리품, 상점, 인벤토리, 장비칸, 보조가방뿐 아니라 창고, 퀵슬롯, 선택 무기 부착물, 작업대 레시피/분해/설계도 표시 슬롯까지 누락 없이 포함한 것.
+- `UTunaSweeperItemThumbnailSlotWidget`, `UTunaSweeperItemDragDropOperation`, `UTunaSweeperHudInventoryAreaWidget`, `UItemContainerWidget`, `UTunaSweeperHudItemInfoPanelWidget`, `UTunaSweeperWorkbenchPanelWidget`, `UTunaSweeperGameInstance`의 드래그 시작, hover, drop, 부모 fallback, 이동 허용/거부, Ctrl 분할, 작업대 특수 drop 분기를 상세히 설명한 것.
