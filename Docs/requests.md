@@ -4610,3 +4610,28 @@
 - `Open Level` 하위 항목으로 `Intro`, `Raid`, `Bunker`를 추가하고 각각 `/Game/IntroMap`, `/Game/RaidMap`, `/Game/BunkerMap`을 에디터에서 열도록 연결한 것.
 - `FTunaSweeperLevelOpenTool`을 새로 추가하고 `TunaSweeperEditor` 모듈 시작/종료 수명 주기에 연결한 것.
 - `TunaSweeperEditor Win64 Development` 빌드를 통과시키고 Unreal Editor를 실행한 것.
+## 2026-07-05 20:20:03 (소요시간: 00:03:01)
+
+- 폴리지로 심을 수 있는 로우폴리 잔디 클러스터 OBJ를 작성한 것.
+- `TunaSweeper/SourceArt/Foliage/SM_GrassCluster_7Blades_LowPoly.obj`에 약 75cm 높이, 7줄기 클러스터, 35개 정점, 28개 면, Z-up/바닥 중심 원점 구조로 추가한 것.
+- OBJ 참조용 `TunaSweeper/SourceArt/Foliage/SM_GrassCluster_7Blades_LowPoly.mtl`을 함께 추가한 것.
+
+## 2026-07-05 22:29:36 (소요시간: 00:00:26)
+
+- `TS_TurbulentConiferPrototype_01` 레이드맵 배치 위치를 북쪽으로 20m 이동한 것.
+- `Docs/game_conventions.md` 기준 북쪽이 `+X`이고 `1m = 100` Unreal 단위이므로, `GameplayInteractionSpawns.json`의 위치를 `[3000.0, -760.0, 0.0]`에서 `[5000.0, -760.0, 0.0]`로 변경한 것.
+- 변경 후 `GameplayInteractionSpawns.json`을 JSON으로 파싱해 정상임을 확인한 것.
+
+## 2026-07-05 22:54:55 (소요시간: 00:02:12)
+
+- 런타임 JSON 스폰 액터의 Details Transform이 항상 0/0/1로 남는 원인을 조사한 것.
+- `UTunaSweeperEnemySpawnSubsystem::EnsureRaidRuntimeActorsSpawnedForWorld()`의 gameplay interaction actor 스폰 경로에서 `FinishSpawningActor` 후 `SetActorTransform(SpawnTransform, false, nullptr, ETeleportType::TeleportPhysics)`를 호출하도록 수정해 JSON `location`, `rotation`, `scale`을 최종 Actor Transform에 명시 적용한 것.
+- `Docs/runtime_actor_spawns.md`의 `TS_TurbulentConiferPrototype_01` 좌표 문서도 `[5000.0, -760.0, 0.0]`로 갱신한 것.
+- `TunaSweeperEditor Win64 Development` 빌드는 UBT AppData 로그 권한 문제로 1회 실패한 뒤 권한 상승으로 재시도했으나, 현재 Unreal Editor Live Coding 활성화 때문에 일반 빌드가 차단된 것.
+
+## 2026-07-05 23:05:17 (소요시간: 00:06:37)
+
+- Win64 Development 패키징을 실행한 것.
+- `TunaSweeper/BatchScripts/PackageTunaSweeperWin64.bat Development`로 `RunUAT BuildCookRun`을 실행해 build, cook, stage, package, archive 단계를 완료한 것.
+- 패키징 산출물이 `TunaSweeper/PackagedBuilds/Windows`에 생성됐고, 루트 실행 파일 `TunaSweeper/PackagedBuilds/Windows/TunaSweeper.exe`를 확인한 것.
+- 패키징 성공 후 프로젝트 지침에 따라 Unreal Editor를 `TunaSweeper/TunaSweeper.uproject`로 실행한 것.

@@ -2473,3 +2473,43 @@ distance field 문제일 가능성은 낮다. 프로젝트 설정에는 `r.Gener
 ### 답변
 
 확인 결과 문서가 중간에서 크게 끊긴 상태는 아니었지만, 요약 표와 상세 섹션 사이에 두 가지 누락이 있었다. 요약 표에는 `런타임 UMG/텍스트`가 있는데 상세 섹션이 없었고, 상세 섹션에는 `런타임 데이터에 남은 테스트/디버그 흔적`이 있는데 요약 표 행이 없었다. `Docs/code_maintainability_audit.md`에 `런타임 데이터` 요약 행과 `P2. 런타임 UMG/텍스트 하드코딩` 상세 섹션을 추가했고, 이후 heading 구조와 placeholder/충돌 마커 검색까지 재확인했다.
+
+## 2026-07-05 22:27:37 (소요시간: 00:00:39)
+
+### 질문
+
+JSON 배치된 레이드맵 오브젝트 중 일렁이는 나무 이름이 무엇인지에 대한 질문.
+
+### 답변
+
+레이드맵 JSON 배치 항목의 스폰 ID는 `TS_TurbulentConiferPrototype_01`이고, 실제 Static Mesh 에셋은 `/Game/Prototype/SM_TurbulentConiferPrototype.SM_TurbulentConiferPrototype`이다. 관련 재질은 `/Game/Prototype/M_TurbulentConiferCanopy.M_TurbulentConiferCanopy`와 `/Game/Prototype/M_TurbulentConiferShortTrunk.M_TurbulentConiferShortTrunk`이다.
+
+## 2026-07-05 22:28:52 (소요시간: 00:00:17)
+
+### 질문
+
+레이드맵 JSON 배치 항목 중 사운드소스 이름이 무엇인지에 대한 질문.
+
+### 답변
+
+주기적 소음 발생기 기준 스폰 ID는 `TS_PeriodicNoiseEmitter_TestHorn`과 `TS_PeriodicNoiseEmitter_TestHorn_East20m`이다. 두 항목 모두 `noise_tag`는 `noise.test_periodic`, `mesh_definition_id`는 `mesh.test_noise_quad_horn`을 사용한다. 실제 SoundBase 에셋을 묻는 것이라면 롤링 봄버 스포너의 `launch_sound`인 `/Game/Audio/SFX/SFX_RollingBomberSpawnerLaunch_FM.SFX_RollingBomberSpawnerLaunch_FM`이다.
+
+## 2026-07-05 22:33:34 (소요시간: 00:02:45)
+
+### 질문
+
+`GameplayInteractionSpawns.json`의 위치 수정은 확인했는데 Unreal Editor를 재시작해도 레이드맵에서 반영되지 않는 이유에 대한 질문.
+
+### 답변
+
+`GameplayInteractionSpawns.json`은 저장된 에디터 레벨 액터를 즉시 이동시키는 데이터가 아니라 `UTunaSweeperEnemySpawnSubsystem::EnsureRaidRuntimeActorsSpawnedForWorld()`가 게임 월드 로드 시 읽어 런타임 액터를 스폰하는 데이터이다. 해당 함수는 `World->IsGameWorld()`가 아니면 바로 반환하므로, 일반 에디터 뷰포트에서 `RaidMap`을 열어 보는 것만으로는 JSON 위치 변경이 반영되지 않는다. PIE/Standalone처럼 게임 월드가 시작될 때 적용되며, 이미 레벨에 배치된 미리보기/직접 배치 액터가 있다면 그 액터는 별도 에디터 배치 데이터라 JSON 변경으로 자동 이동하지 않는다. 스크린샷의 LF->CRLF 경고는 줄바꿈 차이 경고일 뿐 위치 반영 문제의 원인은 아니다.
+
+## 2026-07-05 22:54:55 (소요시간: 00:02:12)
+
+### 질문
+
+`TS_TurbulentConiferPrototype_01` 런타임 인스턴스의 Details Transform이 항상 Location `[0, 0, 0]`, Rotation `[0, 0, 0]`, Scale `[1, 1, 1]`로 보이는 원인에 대한 질문.
+
+### 답변
+
+원인은 `GameplayInteractionSpawns.json`의 `location`, `rotation`, `scale` 값이 파싱되더라도 `UTunaSweeperEnemySpawnSubsystem::EnsureRaidRuntimeActorsSpawnedForWorld()`의 gameplay interaction actor 공통 스폰 경로에서 이를 `SpawnActorDeferred`와 `FinishSpawningActor`에만 넘기고, 스폰 완료 후 실제 Actor Transform으로 명시 확정하지 않았기 때문이다. 런타임 Details에서 Actor Transform이 0/0/1로 남는 증상은 이 경로에서 JSON Transform이 최종 Actor Transform에 안정적으로 반영되지 않았음을 보여준다. 스폰 완료 직후 `SpawnedActor->SetActorTransform(SpawnTransform, false, nullptr, ETeleportType::TeleportPhysics)`를 호출하도록 수정했다. 빌드는 UBT AppData 로그 권한 문제로 한 번 실패한 뒤 권한 상승으로 재시도했으나, 현재 Unreal Editor Live Coding이 활성화되어 일반 빌드가 막힌 상태다.
