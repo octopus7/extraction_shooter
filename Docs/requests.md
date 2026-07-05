@@ -4563,3 +4563,50 @@
 - `Docs/item_container_drag_flow.md`를 생성해 아이템 컨테이너 위젯과 드래그/드롭 흐름을 코드 기준으로 정리한 것.
 - 전리품, 상점, 인벤토리, 장비칸, 보조가방뿐 아니라 창고, 퀵슬롯, 선택 무기 부착물, 작업대 레시피/분해/설계도 표시 슬롯까지 누락 없이 포함한 것.
 - `UTunaSweeperItemThumbnailSlotWidget`, `UTunaSweeperItemDragDropOperation`, `UTunaSweeperHudInventoryAreaWidget`, `UItemContainerWidget`, `UTunaSweeperHudItemInfoPanelWidget`, `UTunaSweeperWorkbenchPanelWidget`, `UTunaSweeperGameInstance`의 드래그 시작, hover, drop, 부모 fallback, 이동 허용/거부, Ctrl 분할, 작업대 특수 drop 분기를 상세히 설명한 것.
+
+## 2026-07-04 13:50:14 (소요시간: 00:02:50)
+
+- Interaction, Housing, runtime actor spawn, world progress 관련 C++와 `Docs/runtime_actor_spawns.md`를 코드 변경 없이 검토해 유지보수가 어려운 에이전트 생성 코드 흔적 후보를 우선순위로 정리한 것.
+- `UTunaSweeperEnemySpawnSubsystem`, `UTunaSweeperBunkerRuntimeSpawnSubsystem`, `UTunaSweeperMemoSubsystem`, `UTunaSweeperHousingSubsystem`, `UTunaSweeperGameInstance`, 관련 Interaction/Housing 액터 구현에서 JSON 스폰 반복, 상호작용 타입별 복붙, 저장 책임 분산, 에디터 산출물과 런타임 코드 결합 정황을 확인한 것.
+## 2026-07-04 13:50:10 (소요시간: 00:03:37)
+
+- 코드 변경 없이 데이터 로딩, 저장/런타임 지속성, Subsystem, Quest/Item/Memo/LevelTransition 관련 C++와 `Content/Data` JSON/CSV 연결부를 검토한 것.
+- `UTunaSweeperGameInstance`, `UTunaSweeperItemDataSubsystem`, `UTunaSweeperQuestSubsystem`, `UTunaSweeperMemoSubsystem`, `UTunaSweeperEnemySpawnSubsystem`, `UTunaSweeperBunkerRuntimeSpawnSubsystem`, 텍스트/경험치 로더와 관련 데이터 파일의 거대 함수, 중복 파서, 하드코딩, 검증용 데이터 잔존, 문서/코드 불일치 가능성을 우선순위 후보로 정리한 것.
+- `LootContainerContents.json`의 JSON 파싱 오류를 확인하고, 이 오류가 `LoadItemData()` 전체 실패로 전파될 수 있음을 별도 P0 후보로 식별한 것.
+
+## 2026-07-04 13:50:14 (소요시간: 00:03:48)
+
+- 코드 변경 없이 `TunaSweeper/Source/TunaSweeper/Private/UI`와 `Public/UI`의 UI 위젯/HUD/Inventory/Shop/Quest/Intro 관련 C++를 검토한 것.
+- 거대 위젯 클래스, 반복되는 런타임 UMG 생성, 하드코딩된 스타일/문구, 위젯과 GameInstance/Subsystem 간 결합, 테스트 어려움이 큰 유지보수 후보를 우선순위로 정리한 것.
+
+## 2026-07-04 13:50:09 (소요시간: 00:05:17)
+
+- 코드 변경 없이 AI, Enemy, Weapon, Combat component, Effect 관련 C++ 파일을 검토해 유지보수가 어려운 에이전트 생성 코드 흔적 후보를 우선순위로 정리한 것.
+- `ATunaSweeperRollingBomber`, `ATunaSweeperEnemyCharacter`, `ATunaSweeperEnemyAIController`, `ATunaSweeperRollingBomberSpawner`, `ATunaSweeperWeapon`, `ATunaSweeperProjectile`, `UTunaSweeperWeaponCombatComponent`, Effect 액터 구현에서 거대 Tick/상태 머신, 수치 하드코딩, 컴포넌트 결합, 복제된 전투 계산, 디버그/시각화 코드 혼재 정황을 확인한 것.
+
+## 2026-07-04 13:50:13 (소요시간: 27:05:10)
+
+- 에이전트 생성 코드처럼 누적되어 사람이 유지보수하기 어려운 영역을 병렬 에이전트와 로컬 정적 분석으로 평가한 뒤, `Docs/code_maintainability_audit.md` 문서를 작성한 것.
+- `GameInstance` 저장/인벤토리 집중, runtime spawn union parser, 공용 데이터 로더 부재, HUD/Intro/ItemContainer/Workbench 위젯 과대 책임, AI/전투 상태 머신과 수치 하드코딩, 월드 진행/하우징 저장 책임 분산, 에셋 경로 하드코딩을 우선순위별로 정리한 것.
+- `TunaSweeper/Content/Data/*.json` 파싱을 재검증해 `LootContainerContents.json` 문법 오류가 현재 작업트리 기준 P0 후보임을 확인하고 문서에 해결/검증 방법을 기록한 것.
+- 이번 작업은 문서 작성과 정적 검토이며, 빌드나 Unreal Editor 실행은 하지 않은 것.
+
+## 2026-07-05 16:54:23 (소요시간: 00:03:14)
+
+- 병렬 워커를 사용해 `Docs/interaction_system_flow.md`, `Docs/save_load_runtime_persistence_flow.md`, `Docs/quest_dialogue_scenario_flow.md` 문서를 생성한 것.
+- 상호작용 시스템 전체 흐름, 저장/로드와 런타임 상태 영속화, 퀘스트/대화/시나리오 플래그 연결을 각각 코드 기준으로 정리한 것.
+- 각 문서에 핵심 코드/데이터 경로, 전체 흐름 다이어그램, 주요 분기 표, HUD/서브시스템/액터 연결, 디버깅 체크리스트를 포함한 것.
+- 이번 작업은 문서 작성과 정적 검토이며, 빌드나 Unreal Editor 실행은 하지 않은 것.
+
+## 2026-07-05 16:58:44 (소요시간: 00:00:43)
+
+- `Docs/code_maintainability_audit.md`가 한도 도달로 덜 작성됐는지 문서 구조, 마지막 섹션, placeholder/충돌 마커, 요청/질문 로그를 다시 확인한 것.
+- 요약 표와 상세 섹션 사이의 불일치를 발견해 `런타임 데이터` 요약 행과 `P2. 런타임 UMG/텍스트 하드코딩` 상세 섹션을 보강한 것.
+- 보강 후 heading 구조, 문서 마지막 섹션, placeholder/충돌 마커 검색을 다시 확인한 것.
+
+## 2026-07-05 16:56:59 (소요시간: 00:04:47)
+
+- Unreal Editor 상단 `TunaSweeper` 메뉴 아래에 영어 서브메뉴 `Open Level`을 추가한 것.
+- `Open Level` 하위 항목으로 `Intro`, `Raid`, `Bunker`를 추가하고 각각 `/Game/IntroMap`, `/Game/RaidMap`, `/Game/BunkerMap`을 에디터에서 열도록 연결한 것.
+- `FTunaSweeperLevelOpenTool`을 새로 추가하고 `TunaSweeperEditor` 모듈 시작/종료 수명 주기에 연결한 것.
+- `TunaSweeperEditor Win64 Development` 빌드를 통과시키고 Unreal Editor를 실행한 것.

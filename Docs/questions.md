@@ -2443,3 +2443,33 @@ distance field 문제일 가능성은 낮다. 프로젝트 설정에는 `r.Gener
 ### 답변
 
 있다. 식생 에셋 생성 코드는 `TunaSweeper/Source/TunaSweeperEditor/Private/TunaSweeperExperimentalVegetation.cpp`와 `.h`에 있으며, `EnsureExperimentalVegetationAssets()`가 마스크/페인트 텍스처, 머티리얼, 여러 Static Mesh 변형을 `/Game/Prototype`에 생성한다. 에디터 시작 경로는 `TunaSweeperEditor.cpp`에 연결되어 있고 `-TunaSweeperRebuildExperimentalVegetation`, `-TunaSweeperExperimentalVegetationPaintSource=...`, `-TunaSweeperExperimentalVegetationQuit` 플래그로 실행된다. 같은 파일에는 `EnsureTurbulentConiferPrototypeAssets()`와 `EnsureTurbulentConiferOcclusionRevealAssets()`도 있어 침엽수 프로토타입 및 가림 해제 머티리얼 관련 에셋을 생성한다.
+
+## 2026-07-04 13:43:13 (소요시간: 00:00:07)
+
+### 질문
+
+인트로/전환, 아이템 컨테이너 드래그처럼 여러 코드에 걸쳐 있어 문서화할 만한 기능이 더 무엇인지에 대한 질문.
+
+### 답변
+
+우선순위가 높은 후보는 상호작용 시스템 전체 흐름, 저장/로드와 런타임 상태 영속화, 퀘스트/대화/시나리오 플래그 연결, 전투/무기/탄약/재장전/피해 처리, 적 스폰과 런타임 월드 스폰, 추출/사망/레이드 결과 정산, HUD 모드와 입력 모드 전환, 작업대 제작/분해/설계도 등록, 하우징/시설/NPC 기능, 월드 진행 오브젝트/문/워프/수리 상태, 텍스트/언어/아이콘 데이터 로딩 흐름이다. 특히 디버깅 비용이 큰 것은 상호작용, 저장/로드, 전투, 퀘스트, 스폰, HUD 입력 전환 순서다.
+
+## 2026-07-05 16:54:41 (소요시간: 00:00:42)
+
+### 질문
+
+작업 중단된거지?
+
+### 답변
+
+아니다. 병렬 에이전트 결과를 기다리는 동안 로컬 조사를 계속했고, 결과가 모두 들어온 뒤 중복 항목을 통합해 `Docs/code_maintainability_audit.md` 작성, 요청 로그, 질문 로그까지 이어서 진행했다.
+
+## 2026-07-05 16:58:44 (소요시간: 00:00:43)
+
+### 질문
+
+혹시 덜 작성 된 부분 있는지 확인해볼래? 한도 도달로 작업이 멈춘거라서 확인이 필요해
+
+### 답변
+
+확인 결과 문서가 중간에서 크게 끊긴 상태는 아니었지만, 요약 표와 상세 섹션 사이에 두 가지 누락이 있었다. 요약 표에는 `런타임 UMG/텍스트`가 있는데 상세 섹션이 없었고, 상세 섹션에는 `런타임 데이터에 남은 테스트/디버그 흔적`이 있는데 요약 표 행이 없었다. `Docs/code_maintainability_audit.md`에 `런타임 데이터` 요약 행과 `P2. 런타임 UMG/텍스트 하드코딩` 상세 섹션을 추가했고, 이후 heading 구조와 placeholder/충돌 마커 검색까지 재확인했다.
