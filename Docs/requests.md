@@ -4635,3 +4635,10 @@
 - `TunaSweeper/BatchScripts/PackageTunaSweeperWin64.bat Development`로 `RunUAT BuildCookRun`을 실행해 build, cook, stage, package, archive 단계를 완료한 것.
 - 패키징 산출물이 `TunaSweeper/PackagedBuilds/Windows`에 생성됐고, 루트 실행 파일 `TunaSweeper/PackagedBuilds/Windows/TunaSweeper.exe`를 확인한 것.
 - 패키징 성공 후 프로젝트 지침에 따라 Unreal Editor를 `TunaSweeper/TunaSweeper.uproject`로 실행한 것.
+
+## 2026-07-06 00:38:35 (소요시간: 00:03:06)
+
+- 레이저 사이트 라인트레이스가 플레이어가 쏜 발사체에 막히는 문제를 수정한 것.
+- 레이저 사이트 끝점 트레이스를 `ECC_Visibility`에서 실제 탄도 판정과 같은 `TunaSweeperCollisionChannels::Projectile` 채널로 변경한 것.
+- 발사체 기본 콜리전에서 `ECC_Visibility`를 Ignore하도록 해 레이저/마우스 조준용 Visibility 쿼리가 날아가는 발사체를 목표로 잡지 않게 한 것.
+- `git diff --check`는 줄 끝 경고 외 오류 없이 통과했으나, `TunaSweeperEditor Win64 Development` 빌드는 Unreal Editor Live Coding 활성화 때문에 일반 외부 빌드가 차단된 것.

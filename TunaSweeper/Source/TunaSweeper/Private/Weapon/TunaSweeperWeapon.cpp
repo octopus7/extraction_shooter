@@ -12,6 +12,7 @@
 #include "Interaction/TunaSweeperSandbagCoverActor.h"
 #include "Materials/MaterialInterface.h"
 #include "Subsystem/TunaSweeperNoiseSubsystem.h"
+#include "TunaSweeperCollisionChannels.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Weapon/TunaSweeperProjectile.h"
 
@@ -414,7 +415,7 @@ void ATunaSweeperWeapon::UpdateLaserSightBeam(
 			LaserHit,
 			BeamStartWorld,
 			TraceEndWorld,
-			ECC_Visibility,
+			TunaSweeperCollisionChannels::Projectile,
 			QueryParams) &&
 			LaserHit.bBlockingHit)
 		{
