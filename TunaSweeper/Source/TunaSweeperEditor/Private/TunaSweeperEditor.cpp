@@ -128,6 +128,7 @@
 #include "Styling/SlateTypes.h"
 #include "TunaSweeperExperimentalVegetation.h"
 #include "TunaSweeperFMSoundTool.h"
+#include "TunaSweeperLevelOpenTool.h"
 #include "TunaSweeperProceduralTerrainTest.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
 #include "TunaSweeperEditorRunOnce.h"
@@ -13006,6 +13007,9 @@ public:
 			}
 		}
 
+		LevelOpenTool = MakeUnique<FTunaSweeperLevelOpenTool>();
+		LevelOpenTool->Startup();
+
 		FMSoundTool = MakeUnique<FTunaSweeperFMSoundTool>();
 		FMSoundTool->Startup();
 
@@ -13498,6 +13502,12 @@ public:
 	{
 		TunaSweeperMapCaptureActorDetails::Unregister();
 
+		if (LevelOpenTool)
+		{
+			LevelOpenTool->Shutdown();
+			LevelOpenTool.Reset();
+		}
+
 		if (FMSoundTool)
 		{
 			FMSoundTool->Shutdown();
@@ -13506,6 +13516,7 @@ public:
 	}
 
 private:
+	TUniquePtr<FTunaSweeperLevelOpenTool> LevelOpenTool;
 	TUniquePtr<FTunaSweeperFMSoundTool> FMSoundTool;
 };
 
