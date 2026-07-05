@@ -845,6 +845,7 @@ bool UTunaSweeperEnemySpawnSubsystem::EnsureRaidRuntimeActorsSpawnedForWorld(UWo
 #endif
 				}
 				UGameplayStatics::FinishSpawningActor(SpawnedActor, SpawnTransform);
+				SpawnedActor->SetActorTransform(SpawnTransform, false, nullptr, ETeleportType::TeleportPhysics);
 				++SpawnedGameplayInteractionActorCount;
 			}
 		}
