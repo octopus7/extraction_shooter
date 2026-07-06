@@ -2513,3 +2513,13 @@ JSON 배치된 레이드맵 오브젝트 중 일렁이는 나무 이름이 무�
 ### 답변
 
 원인은 `GameplayInteractionSpawns.json`의 `location`, `rotation`, `scale` 값이 파싱되더라도 `UTunaSweeperEnemySpawnSubsystem::EnsureRaidRuntimeActorsSpawnedForWorld()`의 gameplay interaction actor 공통 스폰 경로에서 이를 `SpawnActorDeferred`와 `FinishSpawningActor`에만 넘기고, 스폰 완료 후 실제 Actor Transform으로 명시 확정하지 않았기 때문이다. 런타임 Details에서 Actor Transform이 0/0/1로 남는 증상은 이 경로에서 JSON Transform이 최종 Actor Transform에 안정적으로 반영되지 않았음을 보여준다. 스폰 완료 직후 `SpawnedActor->SetActorTransform(SpawnTransform, false, nullptr, ETeleportType::TeleportPhysics)`를 호출하도록 수정했다. 빌드는 UBT AppData 로그 권한 문제로 한 번 실패한 뒤 권한 상승으로 재시도했으나, 현재 Unreal Editor Live Coding이 활성화되어 일반 빌드가 막힌 상태다.
+
+## 2026-07-06 00:59:34 (소요시간: 00:00:28)
+
+### 질문
+
+물웅덩이 평면에 비친 구름이 있는 푸른 하늘 머터리얼을 큐브맵 없이 만들 때, 카메라 이동에 따라 반사 이미지가 시프팅되도록 머터리얼을 어떻게 구성하면 좋은지에 대한 질문.
+
+### 답변
+
+큐브맵 대신 2D 하늘/구름 텍스처를 가상 하늘 평면에 투영하고, 웅덩이 표면에서 반사된 시선 벡터가 그 평면과 만나는 위치를 UV로 사용하는 방식이 적합하다. 머터리얼에서는 `AbsoluteWorldPosition`, `CameraPositionWS` 또는 `CameraVectorWS`, 표면 월드 노멀을 이용해 반사 벡터를 구하고, `CloudHeight` 평면과의 교차점 XY를 스케일링해 구름 텍스처를 샘플링한다. 여기에 물결 노멀로 UV 또는 반사 노멀을 왜곡하고, `Fresnel`, 낮은 `Roughness`, 반사 강도 마스크를 조합하면 카메라 이동과 각도 변화에 따라 자연스럽게 시프팅되는 가짜 하늘 반사를 만들 수 있다.

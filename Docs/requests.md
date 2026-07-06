@@ -4642,3 +4642,20 @@
 - 레이저 사이트 끝점 트레이스를 `ECC_Visibility`에서 실제 탄도 판정과 같은 `TunaSweeperCollisionChannels::Projectile` 채널로 변경한 것.
 - 발사체 기본 콜리전에서 `ECC_Visibility`를 Ignore하도록 해 레이저/마우스 조준용 Visibility 쿼리가 날아가는 발사체를 목표로 잡지 않게 한 것.
 - `git diff --check`는 줄 끝 경고 외 오류 없이 통과했으나, `TunaSweeperEditor Win64 Development` 빌드는 Unreal Editor Live Coding 활성화 때문에 일반 외부 빌드가 차단된 것.
+
+## 2026-07-06 01:16:53 (소요시간: 00:11:33)
+
+- 물웅덩이 평면에 큐브맵 없이 2D 하늘/구름 텍스처를 반사시키는 머터리얼을 구현한 것.
+- `TunaSweeperPuddleSkyReflectionMaterial` 에디터 셋업 코드를 추가해 `/Game/Prototype/Water/M_PuddleSkyReflection`, `/Game/Prototype/Water/MI_PuddleSkyReflection`, `/Game/Prototype/Water/T_PuddleSkyReflection_DefaultSkyClouds`를 생성하도록 한 것.
+- 머터리얼은 `AbsoluteWorldPosition`, `CameraPositionWS`, `PixelNormalWS` 기반 Custom 노드에서 반사 시선과 가상 하늘 평면 교차 UV를 계산하며, `SkyCloudTexture` 텍스처 파라미터와 `CloudHeight`, `CloudScale`, `WindSpeed`, `RippleScale`, `RippleStrength`, `Opacity` 등의 인스턴스 파라미터를 노출한 것.
+- `-TunaSweeperRebuildPuddleSkyReflectionMaterial -TunaSweeperPuddleSkyReflectionMaterialQuit` 에디터 플래그로 재생성할 수 있게 하고, 일반 에디터 시작 시 1회 생성되도록 연결한 것.
+- `TunaSweeperEditor Win64 Development` 빌드를 통과시키고, 에디터 실행으로 에셋 저장을 확인한 뒤 Unreal Editor를 다시 실행한 것.
+- 무인 생성 실행은 에셋 저장 후 종료 과정에서 `InteractiveToolsFramework` 접근 위반 로그를 남겼지만, 이후 일반 GUI 에디터 실행은 프로세스가 유지됐고 머터리얼 컴파일 오류는 확인되지 않은 것.
+
+## 2026-07-06 01:37:46 (소요시간: 00:02:44)
+
+- 물웅덩이 하늘 반사 머터리얼에서 일렁임이 필요 없다는 요청에 맞춰 `M_PuddleSkyReflection`을 흔들림 없는 반사 UV 구성으로 다시 생성한 것.
+- `RippleScale`, `RippleStrength` 파라미터와 Custom 노드 내부 `waveA`, `waveB`, 노멀 흔들림 계산을 제거하고, `reflect(viewRay, baseNormal)` 기반 가상 하늘 평면 교차만 남긴 것.
+- 기본 `WindSpeed`를 `0.0`으로 바꿔 텍스처가 시간에 따라 흐르지 않고 카메라 이동/시선 변화에 의한 시프팅만 보이도록 한 것.
+- 기존 1회 생성 ID를 `2026-07-06_PuddleSkyReflectionMaterialNoRippleV2`로 갱신하고, 재생성 플래그와 일반 에디터 시작으로 `/Game/Prototype/Water/M_PuddleSkyReflection`, `/Game/Prototype/Water/MI_PuddleSkyReflection`을 다시 저장한 것.
+- `TunaSweeperEditor Win64 Development` 빌드를 통과시키고, 저장된 에셋에서 `RippleScale`, `RippleStrength`, `waveA`, `waveB` 문자열이 남아 있지 않음을 확인한 것.
