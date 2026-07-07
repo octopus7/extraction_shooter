@@ -16,7 +16,6 @@ ATunaSweeperPhysicsAppleActor::ATunaSweeperPhysicsAppleActor()
 
 	CollisionComponent = CreateDefaultSubobject<USphereComponent>(TEXT("Collision"));
 	CollisionComponent->InitSphereRadius(CollisionRadiusCm);
-	CollisionComponent->SetSimulatePhysics(true);
 	CollisionComponent->SetNotifyRigidBodyCollision(false);
 	CollisionComponent->SetCanEverAffectNavigation(false);
 	RootComponent = CollisionComponent;
@@ -29,8 +28,6 @@ ATunaSweeperPhysicsAppleActor::ATunaSweeperPhysicsAppleActor()
 	AppleMeshComponent->SetCastShadow(true);
 
 	AppleMesh = TSoftObjectPtr<UStaticMesh>(FSoftObjectPath(DefaultAppleMeshPath));
-
-	ApplyAppleDefaults();
 }
 
 void ATunaSweeperPhysicsAppleActor::OnConstruction(const FTransform& Transform)
