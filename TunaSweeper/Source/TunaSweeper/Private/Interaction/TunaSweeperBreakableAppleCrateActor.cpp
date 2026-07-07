@@ -6,13 +6,21 @@
 #include "Engine/DamageEvents.h"
 #include "Engine/StaticMesh.h"
 #include "Engine/World.h"
+#include "Chaos/Particle/ObjectState.h"
+#include "GeometryCollection/GeometryCollectionComponent.h"
+#include "GeometryCollection/GeometryCollectionObject.h"
+#include "GeometryCollection/GeometryCollectionSimulationTypes.h"
+#include "Interaction/TunaSweeperPhysicsCrateFragmentActor.h"
 #include "Interaction/TunaSweeperPhysicsAppleActor.h"
+#include "Materials/MaterialInterface.h"
 #include "TunaSweeperCollisionChannels.h"
 
 namespace
 {
 	const TCHAR* DefaultCrateMeshPath = TEXT("/Game/Nature/Wood/SM_CrateB.SM_CrateB");
+	const TCHAR* DefaultCrateGeometryCollectionPath = TEXT("/Game/Interaction/GC_CrateB_Fractured.GC_CrateB_Fractured");
 	const TCHAR* DefaultAppleMeshPath = TEXT("/Game/AXTemp/SM_Apple.SM_Apple");
+	const TCHAR* DefaultCrateFragmentMeshPath = TEXT("/Engine/BasicShapes/Cube.Cube");
 
 	FVector MakeSafeExtent(const FVector& Extent)
 	{
@@ -58,11 +66,25 @@ ATunaSweeperBreakableAppleCrateActor::ATunaSweeperBreakableAppleCrateActor()
 	CrateMeshComponent->SetCanEverAffectNavigation(false);
 	CrateMeshComponent->SetCastShadow(true);
 
-	CrateMesh = TSoftObjectPtr<UStaticMesh>(FSoftObjectPath(DefaultCrateMeshPath));
-	AppleMesh = TSoftObjectPtr<UStaticMesh>(FSoftObjectPath(DefaultAppleMeshPath));
-	AppleActorClass = ATunaSweeperPhysicsAppleActor::StaticClass();
+	CrateGeometryCollectionComponent =
+		CreateDefaultSubobject<UGeometryCollectionComponent>(TEXT("CrateGeometryCollection"));
+	CrateGeometryCollectionComponent->SetupAttachment(RootComponent);
+	CrateGeometryCollectionComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	CrateGeometryCollectionComponent->SetGenerateOverlapEvents(false);
+	CrateGeometryCollectionComponent->SetCanEverAffectNavigation(false);
+	CrateGeometryCollectionComponent->SetHiddenInGame(true);
+	CrateGeometryCollectionComponent->SetVisibility(false, true);
+	CrateGeometryCollectionComponent->SetNotifyBreaks(false);
+	CrateGeometryCollectionComponent->ObjectType = EObjectStateTypeEnum::Chaos_Object_Dynamic;
+	CrateGeometryCollectionComponent->EnableClustering = true;
+	CrateGeometryCollectionComponent->MaxClusterLevel = 1;
 
-	ApplyCrateDefaults();
+	CrateMesh = TSoftObjectPtr<UStaticMesh>(FSoftObjectPath(DefaultCrateMeshPath));
+	CrateGeometryCollection = TSoftObjectPtr<UGeometryCollection>(FSoftObjectPath(DefaultCrateGeometryCollectionPath));
+	AppleMesh = TSoftObjectPtr<UStaticMesh>(FSoftObjectPath(DefaultAppleMeshPath));
+	CrateFragmentMesh = TSoftObjectPtr<UStaticMesh>(FSoftObjectPath(DefaultCrateFragmentMeshPath));
+	AppleActorClass = ATunaSweeperPhysicsAppleActor::StaticClass();
+	CrateFragmentActorClass = ATunaSweeperPhysicsCrateFragmentActor::StaticClass();
 }
 
 void ATunaSweeperBreakableAppleCrateActor::OnConstruction(const FTransform& Transform)
@@ -84,6 +106,26 @@ void ATunaSweeperBreakableAppleCrateActor::OnConstruction(const FTransform& Tran
 	VerticalSpeedRange.Y = FMath::Max(VerticalSpeedRange.X, VerticalSpeedRange.Y);
 	RandomScatterWeight = FMath::Max(0.0f, RandomScatterWeight);
 	AngularSpeedDegrees = FMath::Max(0.0f, AngularSpeedDegrees);
+	GeometryCollectionBreakRadius = FMath::Max(0.0f, GeometryCollectionBreakRadius);
+	GeometryCollectionRadialImpulse = FMath::Max(0.0f, GeometryCollectionRadialImpulse);
+	GeometryCollectionDirectionalImpulse = FMath::Max(0.0f, GeometryCollectionDirectionalImpulse);
+	GeometryCollectionUpwardImpulse = FMath::Max(0.0f, GeometryCollectionUpwardImpulse);
+	GeometryCollectionDamageThreshold = FMath::Max(0.0f, GeometryCollectionDamageThreshold);
+	MinCrateFragmentCount = FMath::Max(0, MinCrateFragmentCount);
+	MaxCrateFragmentCount = FMath::Max(MinCrateFragmentCount, MaxCrateFragmentCount);
+	CrateFragmentLifeSeconds = FMath::Max(0.0f, CrateFragmentLifeSeconds);
+	FragmentThicknessRange.X = FMath::Max(0.5f, FragmentThicknessRange.X);
+	FragmentThicknessRange.Y = FMath::Max(FragmentThicknessRange.X, FragmentThicknessRange.Y);
+	FragmentWidthRange.X = FMath::Max(0.5f, FragmentWidthRange.X);
+	FragmentWidthRange.Y = FMath::Max(FragmentWidthRange.X, FragmentWidthRange.Y);
+	FragmentLengthRange.X = FMath::Max(0.5f, FragmentLengthRange.X);
+	FragmentLengthRange.Y = FMath::Max(FragmentLengthRange.X, FragmentLengthRange.Y);
+	FragmentHorizontalSpeedRange.X = FMath::Max(0.0f, FragmentHorizontalSpeedRange.X);
+	FragmentHorizontalSpeedRange.Y = FMath::Max(FragmentHorizontalSpeedRange.X, FragmentHorizontalSpeedRange.Y);
+	FragmentVerticalSpeedRange.X = FMath::Max(0.0f, FragmentVerticalSpeedRange.X);
+	FragmentVerticalSpeedRange.Y = FMath::Max(FragmentVerticalSpeedRange.X, FragmentVerticalSpeedRange.Y);
+	FragmentRandomScatterWeight = FMath::Max(0.0f, FragmentRandomScatterWeight);
+	FragmentAngularSpeedDegrees = FMath::Max(0.0f, FragmentAngularSpeedDegrees);
 
 	ApplyCrateDefaults();
 }
@@ -130,8 +172,11 @@ void ATunaSweeperBreakableAppleCrateActor::ConfigureBreakableAppleCrateDefaults(
 	FName InCrateId,
 	float InMaxHealth,
 	const TSoftObjectPtr<UStaticMesh>& InCrateMesh,
+	const TSoftObjectPtr<UGeometryCollection>& InCrateGeometryCollection,
 	TSubclassOf<ATunaSweeperPhysicsAppleActor> InAppleActorClass,
-	const TSoftObjectPtr<UStaticMesh>& InAppleMesh)
+	const TSoftObjectPtr<UStaticMesh>& InAppleMesh,
+	TSubclassOf<ATunaSweeperPhysicsCrateFragmentActor> InCrateFragmentActorClass,
+	const TSoftObjectPtr<UStaticMesh>& InCrateFragmentMesh)
 {
 	CrateId = InCrateId;
 	MaxHealth = FMath::Max(1.0f, InMaxHealth);
@@ -139,6 +184,10 @@ void ATunaSweeperBreakableAppleCrateActor::ConfigureBreakableAppleCrateDefaults(
 	if (!InCrateMesh.IsNull())
 	{
 		CrateMesh = InCrateMesh;
+	}
+	if (!InCrateGeometryCollection.IsNull())
+	{
+		CrateGeometryCollection = InCrateGeometryCollection;
 	}
 	if (InAppleActorClass)
 	{
@@ -148,6 +197,21 @@ void ATunaSweeperBreakableAppleCrateActor::ConfigureBreakableAppleCrateDefaults(
 	{
 		AppleMesh = InAppleMesh;
 	}
+	if (InCrateFragmentActorClass)
+	{
+		CrateFragmentActorClass = InCrateFragmentActorClass;
+	}
+	if (!InCrateFragmentMesh.IsNull())
+	{
+		CrateFragmentMesh = InCrateFragmentMesh;
+	}
+	bUseGeometryCollectionOnBreak = true;
+	bSpawnCrateFragmentsOnBreak = false;
+	GeometryCollectionBreakRadius = 95.0f;
+	GeometryCollectionRadialImpulse = 120.0f;
+	GeometryCollectionDirectionalImpulse = 2400.0f;
+	GeometryCollectionUpwardImpulse = 350.0f;
+	GeometryCollectionDamageThreshold = 25.0f;
 
 	ApplyCrateDefaults();
 }
@@ -186,6 +250,34 @@ void ATunaSweeperBreakableAppleCrateActor::ApplyCrateDefaults()
 		CrateMeshComponent->SetHiddenInGame(bCrateBroken && bHideCrateMeshOnBreak);
 		CrateMeshComponent->SetVisibility(!(bCrateBroken && bHideCrateMeshOnBreak), true);
 	}
+
+	if (CrateGeometryCollectionComponent)
+	{
+		UGeometryCollection* LoadedGeometryCollection = CrateGeometryCollection.LoadSynchronous();
+		if (CrateGeometryCollectionComponent->GetRestCollection() != LoadedGeometryCollection)
+		{
+			CrateGeometryCollectionComponent->SetRestCollection(LoadedGeometryCollection, true);
+		}
+
+		const bool bShowBrokenCollection =
+			bCrateBroken && bUseGeometryCollectionOnBreak && LoadedGeometryCollection != nullptr;
+		CrateGeometryCollectionComponent->SetRelativeLocation(FVector::ZeroVector);
+		CrateGeometryCollectionComponent->SetRelativeRotation(FRotator::ZeroRotator);
+		CrateGeometryCollectionComponent->SetRelativeScale3D(FVector::OneVector);
+		CrateGeometryCollectionComponent->ObjectType = EObjectStateTypeEnum::Chaos_Object_Dynamic;
+		CrateGeometryCollectionComponent->EnableClustering = true;
+		CrateGeometryCollectionComponent->MaxClusterLevel = 1;
+		CrateGeometryCollectionComponent->SetDamageThreshold({ FMath::Max(0.0f, GeometryCollectionDamageThreshold) });
+		CrateGeometryCollectionComponent->SetCollisionObjectType(ECC_WorldDynamic);
+		CrateGeometryCollectionComponent->SetCollisionResponseToAllChannels(ECR_Block);
+		CrateGeometryCollectionComponent->SetGenerateOverlapEvents(false);
+		CrateGeometryCollectionComponent->SetCanEverAffectNavigation(false);
+		CrateGeometryCollectionComponent->SetHiddenInGame(!bShowBrokenCollection);
+		CrateGeometryCollectionComponent->SetVisibility(bShowBrokenCollection, true);
+		CrateGeometryCollectionComponent->SetCollisionEnabled(
+			bShowBrokenCollection ? ECollisionEnabled::QueryAndPhysics : ECollisionEnabled::NoCollision);
+		CrateGeometryCollectionComponent->SetSimulatePhysics(bShowBrokenCollection);
+	}
 }
 
 void ATunaSweeperBreakableAppleCrateActor::BreakCrateFromDirection(const FVector& SpillDirection)
@@ -200,7 +292,43 @@ void ATunaSweeperBreakableAppleCrateActor::BreakCrateFromDirection(const FVector
 	SetCanBeDamaged(false);
 
 	ApplyCrateDefaults();
+	if (!BreakGeometryCollection(SpillDirection))
+	{
+		SpawnCrateFragments(SpillDirection);
+	}
 	SpawnApples(SpillDirection);
+}
+
+bool ATunaSweeperBreakableAppleCrateActor::BreakGeometryCollection(const FVector& SpillDirection)
+{
+	if (!bUseGeometryCollectionOnBreak || !CrateGeometryCollectionComponent ||
+		!CrateGeometryCollectionComponent->GetRestCollection())
+	{
+		return false;
+	}
+
+	const FVector BreakCenter = GetCrateCenterWorldLocation();
+	const FVector SafeSpillDirection = GetSafeHorizontalDirection(SpillDirection, GetActorForwardVector());
+
+	CrateGeometryCollectionComponent->SetHiddenInGame(false);
+	CrateGeometryCollectionComponent->SetVisibility(true, true);
+	CrateGeometryCollectionComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	CrateGeometryCollectionComponent->SetSimulatePhysics(true);
+	CrateGeometryCollectionComponent->SetDynamicState(Chaos::EObjectStateType::Dynamic);
+	CrateGeometryCollectionComponent->ApplyKinematicField(GeometryCollectionBreakRadius, BreakCenter);
+	CrateGeometryCollectionComponent->CrumbleActiveClusters();
+	CrateGeometryCollectionComponent->AddRadialImpulse(
+		BreakCenter,
+		GeometryCollectionBreakRadius,
+		GeometryCollectionRadialImpulse,
+		RIF_Linear,
+		false);
+	CrateGeometryCollectionComponent->AddImpulseAtLocation(
+		SafeSpillDirection * GeometryCollectionDirectionalImpulse +
+			FVector::UpVector * GeometryCollectionUpwardImpulse,
+		BreakCenter);
+
+	return true;
 }
 
 FVector ATunaSweeperBreakableAppleCrateActor::ResolveSpillDirection(
@@ -229,6 +357,11 @@ FVector ATunaSweeperBreakableAppleCrateActor::ResolveSpillDirection(
 	}
 
 	return GetSafeHorizontalDirection(Direction, GetActorForwardVector());
+}
+
+FVector ATunaSweeperBreakableAppleCrateActor::GetCrateCenterWorldLocation() const
+{
+	return GetActorTransform().TransformPosition(CollisionCenterOffset);
 }
 
 void ATunaSweeperBreakableAppleCrateActor::SpawnApples(const FVector& SpillDirection)
@@ -272,6 +405,131 @@ void ATunaSweeperBreakableAppleCrateActor::SpawnApples(const FVector& SpillDirec
 		AppleActor->ConfigurePhysicsAppleDefaults(AppleMesh, AppleCollisionRadiusCm, AppleVisualScale, AppleLifeSeconds);
 		AppleActor->LaunchApple(BuildRandomAppleVelocity(SpillDirection), BuildRandomAppleAngularVelocity());
 	}
+}
+
+void ATunaSweeperBreakableAppleCrateActor::SpawnCrateFragments(const FVector& SpillDirection)
+{
+	if (!bSpawnCrateFragmentsOnBreak)
+	{
+		return;
+	}
+
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		return;
+	}
+
+	TSubclassOf<ATunaSweeperPhysicsCrateFragmentActor> LoadedFragmentClass = CrateFragmentActorClass;
+	if (!LoadedFragmentClass)
+	{
+		LoadedFragmentClass = ATunaSweeperPhysicsCrateFragmentActor::StaticClass();
+	}
+
+	UMaterialInterface* FragmentMaterial = ResolveCrateFragmentMaterial();
+	const int32 FragmentCount = FMath::RandRange(
+		FMath::Max(0, MinCrateFragmentCount),
+		FMath::Max(MinCrateFragmentCount, MaxCrateFragmentCount));
+	for (int32 FragmentIndex = 0; FragmentIndex < FragmentCount; ++FragmentIndex)
+	{
+		const FVector SpawnLocation = BuildRandomCrateFragmentSpawnLocation();
+		const FRotator SpawnRotation(
+			FMath::FRandRange(-180.0f, 180.0f),
+			FMath::FRandRange(-180.0f, 180.0f),
+			FMath::FRandRange(-180.0f, 180.0f));
+
+		FActorSpawnParameters SpawnParameters;
+		SpawnParameters.Owner = this;
+		SpawnParameters.Instigator = GetInstigator();
+		SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+		ATunaSweeperPhysicsCrateFragmentActor* FragmentActor =
+			World->SpawnActor<ATunaSweeperPhysicsCrateFragmentActor>(
+				LoadedFragmentClass,
+				SpawnLocation,
+				SpawnRotation,
+				SpawnParameters);
+		if (!FragmentActor)
+		{
+			continue;
+		}
+
+		FragmentActor->ConfigureCrateFragmentDefaults(
+			CrateFragmentMesh,
+			FragmentMaterial,
+			BuildRandomCrateFragmentHalfExtent(),
+			CrateFragmentLifeSeconds);
+		FragmentActor->LaunchFragment(
+			BuildRandomCrateFragmentVelocity(SpillDirection),
+			BuildRandomCrateFragmentAngularVelocity());
+	}
+}
+
+FVector ATunaSweeperBreakableAppleCrateActor::BuildRandomCrateFragmentSpawnLocation() const
+{
+	const FVector LocalOffset(
+		FMath::FRandRange(-CollisionExtent.X * 0.75f, CollisionExtent.X * 0.75f),
+		FMath::FRandRange(-CollisionExtent.Y * 0.75f, CollisionExtent.Y * 0.75f),
+		FMath::FRandRange(-CollisionExtent.Z * 0.75f, CollisionExtent.Z * 0.75f));
+	return GetActorTransform().TransformPosition(CollisionCenterOffset + LocalOffset);
+}
+
+FVector ATunaSweeperBreakableAppleCrateActor::BuildRandomCrateFragmentHalfExtent() const
+{
+	const float Thickness = FMath::FRandRange(FragmentThicknessRange.X, FragmentThicknessRange.Y);
+	const float Width = FMath::FRandRange(FragmentWidthRange.X, FragmentWidthRange.Y);
+	const float Length = FMath::FRandRange(FragmentLengthRange.X, FragmentLengthRange.Y);
+
+	switch (FMath::RandRange(0, 2))
+	{
+	case 0:
+		return FVector(Length, Width, Thickness);
+	case 1:
+		return FVector(Width, Length, Thickness);
+	default:
+		return FVector(Thickness, Width, Length);
+	}
+}
+
+FVector ATunaSweeperBreakableAppleCrateActor::BuildRandomCrateFragmentVelocity(const FVector& SpillDirection) const
+{
+	const float RandomAngleRadians = FMath::FRandRange(0.0f, UE_PI * 2.0f);
+	const FVector RandomHorizontalDirection(FMath::Cos(RandomAngleRadians), FMath::Sin(RandomAngleRadians), 0.0f);
+	const FVector WeightedDirection = GetSafeHorizontalDirection(
+		SpillDirection + RandomHorizontalDirection * FragmentRandomScatterWeight,
+		GetActorForwardVector());
+	const float HorizontalSpeed = FMath::FRandRange(FragmentHorizontalSpeedRange.X, FragmentHorizontalSpeedRange.Y);
+	const float VerticalSpeed = FMath::FRandRange(FragmentVerticalSpeedRange.X, FragmentVerticalSpeedRange.Y);
+
+	return WeightedDirection * HorizontalSpeed + FVector::UpVector * VerticalSpeed;
+}
+
+FVector ATunaSweeperBreakableAppleCrateActor::BuildRandomCrateFragmentAngularVelocity() const
+{
+	const float SafeAngularSpeed = FMath::Max(0.0f, FragmentAngularSpeedDegrees);
+	return FVector(
+		FMath::FRandRange(-SafeAngularSpeed, SafeAngularSpeed),
+		FMath::FRandRange(-SafeAngularSpeed, SafeAngularSpeed),
+		FMath::FRandRange(-SafeAngularSpeed, SafeAngularSpeed));
+}
+
+UMaterialInterface* ATunaSweeperBreakableAppleCrateActor::ResolveCrateFragmentMaterial() const
+{
+	if (CrateMeshComponent)
+	{
+		if (UMaterialInterface* ComponentMaterial = CrateMeshComponent->GetMaterial(0))
+		{
+			return ComponentMaterial;
+		}
+	}
+
+	UStaticMesh* LoadedCrateMesh = CrateMesh.LoadSynchronous();
+	if (LoadedCrateMesh && LoadedCrateMesh->GetStaticMaterials().Num() > 0)
+	{
+		return LoadedCrateMesh->GetStaticMaterials()[0].MaterialInterface.Get();
+	}
+
+	return nullptr;
 }
 
 FVector ATunaSweeperBreakableAppleCrateActor::BuildRandomAppleSpawnLocation() const

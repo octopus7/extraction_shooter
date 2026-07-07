@@ -4683,3 +4683,20 @@
 - 기본적으로 메시 바운드 기반으로 물리 구 반지름을 최소 보정하도록 `bUseMeshBoundsForCollisionRadius`를 추가한 것.
 - 기존 `BP_PhysicsApple`을 새 기본값으로 다시 저장하도록 사과 상자 에셋 생성 run-once ID를 갱신한 것.
 - `TunaSweeperEditor Win64 Development` 빌드를 통과시키고, Unreal Editor 실행 후 `BP_PhysicsApple.uasset` 재저장을 확인한 것.
+
+## 2026-07-07 15:55:42 (소요시간: 00:03:39)
+
+- 부서지는 사과 상자가 단순히 숨겨지는 것이 아니라 나무 조각 파편을 같이 흩뿌리도록 수정한 것.
+- `ATunaSweeperPhysicsCrateFragmentActor`를 추가해 박스 물리 충돌과 큐브 메시 스케일 기반 나무 판자/조각 파편을 지원하도록 한 것.
+- `ATunaSweeperBreakableAppleCrateActor`가 파괴 시 8~14개의 나무 조각 파편과 5~8개의 사과를 함께 스폰하도록 한 것.
+- 파편은 상자 메시의 0번 머터리얼을 사용해 나무 상자와 같은 재질로 보이도록 한 것.
+- `/Game/Interaction/BP_CrateFragment` Blueprint 에셋을 자동 생성하고 `/Game/Interaction/BP_BreakableAppleCrate`가 이 BP를 사용하도록 재저장한 것.
+- `TunaSweeperEditor Win64 Development` 빌드를 통과시키고, Unreal Editor 실행 후 `BP_CrateFragment.uasset`와 `BP_BreakableAppleCrate.uasset` 저장을 확인한 것.
+## 2026-07-07 16:02:19 (소요시간: 00:12:12)
+
+- 기존 큐브/널빤지 프록시 파편을 기본 경로에서 끄고, `SM_CrateB` 기반 Chaos Geometry Collection 파괴 경로로 전환한 것.
+- `ATunaSweeperBreakableAppleCrateActor`에 `UGeometryCollectionComponent`를 추가하고, 파괴 시 정적 상자 메시를 숨긴 뒤 `GC_CrateB_Fractured`를 dynamic 상태로 켜서 `CrumbleActiveClusters`, radial impulse, 방향성 impulse를 적용하도록 수정한 것.
+- `/Game/Interaction/GC_CrateB_Fractured`를 에디터 셋업에서 자동 생성하도록 `EnsureBreakableAppleCrateGeometryCollection()`을 추가하고, `/Game/Interaction/BP_BreakableAppleCrate` 기본값에 해당 Geometry Collection을 연결한 것.
+- Chaos/Geometry Collection/Fracture 관련 모듈 및 플러그인 의존성을 `TunaSweeper.Build.cs`, `TunaSweeperEditor.Build.cs`, `TunaSweeper.uproject`에 추가한 것.
+- `TunaSweeperEditor Win64 Development` 빌드를 통과시키고, 강제 셋업으로 `GC_CrateB_Fractured.uasset`, `BP_BreakableAppleCrate.uasset`, `BP_CrateFragment.uasset`, `BP_PhysicsApple.uasset` 저장을 확인한 것.
+- 셋업 전용 에디터 실행은 저장 후 종료 과정에서 한 차례 crash log를 남겼지만, 이후 일반 에디터 실행은 정상 유지되며 최신 로그에 치명 오류가 없음을 확인한 것.

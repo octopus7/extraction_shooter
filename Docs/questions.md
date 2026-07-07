@@ -2573,3 +2573,21 @@ JSON 배치된 레이드맵 오브젝트 중 일렁이는 나무 이름이 무�
 ### 답변
 
 가능하다. `ATunaSweeperWeapon`의 `ProjectileClass`가 `EditDefaultsOnly`로 노출되어 있으므로 무기 BP의 Class Defaults에서 `Projectile Class`를 `ATunaSweeperProjectile` 파생 BP로 지정하면 발사 시 해당 클래스를 `LoadSynchronous()`로 로드해 스폰한다. 다만 현재 플레이어 기본 총기는 `BP_AssaultRifle`을 사용하므로 `BP_TunaSweeperWeapon`이 아니라 실제 장착되는 `BP_AssaultRifle`에서 지정해야 적용된다. 모든 무기에 동일 투사체를 쓰려면 C++ 기본값을 유지하거나 부모 무기 BP에 설정하고, 무기별 투사체를 다르게 하려면 무기 BP별로 오버라이드하는 방식이 맞다.
+## 2026-07-07 16:02:19 (소요시간: 00:12:12)
+
+### 질문
+
+나무 상자가 너무 큰 널빤지 모양 프록시로 깨지는 것이 어색하며, UE4에서 쓰던 메시 자체 파괴 기능처럼 실제 메시를 부수는 기능이 있는지에 대한 질문.
+
+### 답변
+
+UE4 APEX Destruction 방식은 UE5 계열에서 Chaos Destruction/Geometry Collection 방식으로 대체되었고, 효율적인 구조는 런타임에서 매번 메시를 자르는 것이 아니라 `SM_CrateB`로 미리 프랙처된 Geometry Collection 에셋을 만들고 파괴 순간에 해당 컴포넌트를 dynamic 상태로 켜는 것이다. 이번 구현은 `/Game/Interaction/GC_CrateB_Fractured`를 자동 생성하고 `BP_BreakableAppleCrate`가 파괴 시 그 Geometry Collection을 깨뜨리며 사과를 스폰하도록 구성했다.
+## 2026-07-07 16:16:05 (소요시간: 00:00:45)
+
+### 질문
+
+`BP_BreakableAppleCrate`를 새로 레벨에 올려야 하는지, 아니면 기존에 배치된 인스턴스가 그대로 새 파괴 방식으로 동작하는지에 대한 질문.
+
+### 답변
+
+기존 레벨에 배치된 액터가 같은 `/Game/Interaction/BP_BreakableAppleCrate` Blueprint 인스턴스라면 새로 배치할 필요 없이 새 C++ 컴포넌트와 Blueprint 기본값을 따라 동작한다. 다만 인스턴스 Details에서 `CrateGeometryCollection`, `bUseGeometryCollectionOnBreak`, `bSpawnCrateFragmentsOnBreak` 같은 값을 개별 오버라이드해 둔 경우에는 기존 오버라이드가 남을 수 있으므로 해당 인스턴스의 오버라이드를 리셋하거나 다시 배치하면 된다.
