@@ -59,12 +59,14 @@
 #include "InputCoreTypes.h"
 #include "InputMappingContext.h"
 #include "InputModifiers.h"
+#include "Interaction/TunaSweeperBreakableAppleCrateActor.h"
 #include "Interaction/TunaSweeperExplosiveBarrelActor.h"
 #include "Interaction/TunaSweeperInteractableComponent.h"
 #include "Interaction/TunaSweeperItemSpawnInteractableActor.h"
 #include "Interaction/TunaSweeperLevelTravelInteractableActor.h"
 #include "Interaction/TunaSweeperLootContainerActor.h"
 #include "Interaction/TunaSweeperLootContainerSpawnInteractableActor.h"
+#include "Interaction/TunaSweeperPhysicsAppleActor.h"
 #include "Interaction/TunaSweeperPickupItemActor.h"
 #include "Interaction/TunaSweeperSandbagCoverActor.h"
 #include "Interaction/TunaSweeperSelfDestructInteractableActor.h"
@@ -213,6 +215,7 @@ namespace TunaSweeperEditorSetup
 	const FString WarpPointInteractionTaskId = TEXT("2026-05-25_CreateWarpPointInteractionAssetsV1");
 	const FString EnemyVisualMaterialTaskId = TEXT("2026-05-19_CreateEnemyAndContainerVisualMaterialsV3");
 	const FString ExplosiveBarrelTaskId = TEXT("2026-05-29_CreateExplosiveBarrelAssetsV8");
+	const FString BreakableAppleCrateTaskId = TEXT("2026-07-07_CreateBreakableAppleCrateAssetsV1");
 	const FString RollingBomberBodyMaterialTaskId = TEXT("2026-05-28_CreateRollingBomberBodyGrayMaterialV1");
 	const FString RollingBomberLegMaterialTaskId = TEXT("2026-05-28_CreateRollingBomberLegMetalMaterialV1");
 	const FString RollingBomberChargeCylinderEffectTaskId = TEXT("2026-05-28_CreateRollingBomberChargeCylinderEffectV1");
@@ -412,6 +415,8 @@ namespace TunaSweeperEditorSetup
 	const FString BrokenBridgeVoxelMeshAssetName = TEXT("SM_Bridge_Broken_Voxel");
 	const FString RepairedBridgeVoxelMeshAssetName = TEXT("SM_Bridge_Repaired_Voxel");
 	const FString ExplosiveBarrelAssetName = TEXT("BP_ExplosiveBarrel");
+	const FString BreakableAppleCrateAssetName = TEXT("BP_BreakableAppleCrate");
+	const FString PhysicsAppleAssetName = TEXT("BP_PhysicsApple");
 	const FString ExplosiveBarrelIntactMeshAssetName = TEXT("SM_ExplosiveBarrel_Intact");
 	const FString ExplosiveBarrelDestroyedMeshAssetName = TEXT("SM_ExplosiveBarrel_DestroyedBase");
 	const FString ExplosiveBarrelGrayMaterialAssetName = TEXT("M_ExplosiveBarrel_Gray");
@@ -3076,6 +3081,73 @@ namespace TunaSweeperEditorSetup
 
 		return IntactMaterial && DestroyedMaterial && DetailMaterial && IntactMesh && DestroyedMesh &&
 			ConfigureExplosiveBarrelBlueprint(ExplosiveBarrelBlueprint);
+	}
+
+	bool EnsureBreakableAppleCrateAssets()
+	{
+		UBlueprint* AppleBlueprint = EnsureBlueprint(
+			InteractionAssetPath,
+			PhysicsAppleAssetName,
+			ATunaSweeperPhysicsAppleActor::StaticClass());
+		UBlueprint* AppleCrateBlueprint = EnsureBlueprint(
+			InteractionAssetPath,
+			BreakableAppleCrateAssetName,
+			ATunaSweeperBreakableAppleCrateActor::StaticClass());
+		if (!AppleBlueprint || !AppleCrateBlueprint)
+		{
+			return false;
+		}
+
+		FKismetEditorUtilities::CompileBlueprint(AppleBlueprint);
+		ATunaSweeperPhysicsAppleActor* AppleDefaults = AppleBlueprint->GeneratedClass
+			? Cast<ATunaSweeperPhysicsAppleActor>(AppleBlueprint->GeneratedClass->GetDefaultObject())
+			: nullptr;
+		if (!AppleDefaults)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to configure %s defaults."), *GetNameSafe(AppleBlueprint));
+			return false;
+		}
+
+		AppleBlueprint->Modify();
+		AppleDefaults->Modify();
+		AppleDefaults->ConfigurePhysicsAppleDefaults(
+			TSoftObjectPtr<UStaticMesh>(FSoftObjectPath(TEXT("/Game/AXTemp/SM_Apple.SM_Apple"))),
+			14.0f,
+			1.0f,
+			12.0f);
+		FBlueprintEditorUtils::MarkBlueprintAsModified(AppleBlueprint);
+		FKismetEditorUtilities::CompileBlueprint(AppleBlueprint);
+		AppleBlueprint->MarkPackageDirty();
+
+		FKismetEditorUtilities::CompileBlueprint(AppleCrateBlueprint);
+		ATunaSweeperBreakableAppleCrateActor* CrateDefaults = AppleCrateBlueprint->GeneratedClass
+			? Cast<ATunaSweeperBreakableAppleCrateActor>(AppleCrateBlueprint->GeneratedClass->GetDefaultObject())
+			: nullptr;
+		if (!CrateDefaults)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to configure %s defaults."), *GetNameSafe(AppleCrateBlueprint));
+			return false;
+		}
+
+		TSubclassOf<ATunaSweeperPhysicsAppleActor> AppleActorClass = ATunaSweeperPhysicsAppleActor::StaticClass();
+		if (AppleBlueprint->GeneratedClass &&
+			AppleBlueprint->GeneratedClass->IsChildOf(ATunaSweeperPhysicsAppleActor::StaticClass()))
+		{
+			AppleActorClass = AppleBlueprint->GeneratedClass;
+		}
+		AppleCrateBlueprint->Modify();
+		CrateDefaults->Modify();
+		CrateDefaults->ConfigureBreakableAppleCrateDefaults(
+			FName(TEXT("TS_BreakableAppleCrate_Default")),
+			1.0f,
+			TSoftObjectPtr<UStaticMesh>(FSoftObjectPath(TEXT("/Game/Nature/Wood/SM_CrateB.SM_CrateB"))),
+			AppleActorClass,
+			TSoftObjectPtr<UStaticMesh>(FSoftObjectPath(TEXT("/Game/AXTemp/SM_Apple.SM_Apple"))));
+		FBlueprintEditorUtils::MarkBlueprintAsModified(AppleCrateBlueprint);
+		FKismetEditorUtilities::CompileBlueprint(AppleCrateBlueprint);
+		AppleCrateBlueprint->MarkPackageDirty();
+
+		return SaveAsset(AppleBlueprint) && SaveAsset(AppleCrateBlueprint);
 	}
 
 	bool EnsureSharedVoxelMeshAssets()
@@ -13105,6 +13177,20 @@ public:
 			}
 		}
 
+		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperRebuildBreakableAppleCrate")))
+		{
+			if (TunaSweeperEditorSetup::EnsureBreakableAppleCrateAssets())
+			{
+				FTunaSweeperEditorRunOnce::MarkCompleted(TunaSweeperEditorSetup::BreakableAppleCrateTaskId);
+			}
+
+			if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperBreakableAppleCrateSetupQuit")))
+			{
+				FPlatformMisc::RequestExit(false);
+				return;
+			}
+		}
+
 		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperRebuildProceduralTerrainTest")))
 		{
 			FTSTicker::GetCoreTicker().AddTicker(
@@ -13208,6 +13294,13 @@ public:
 			[]()
 			{
 				return TunaSweeperEditorSetup::EnsureExplosiveBarrelAssets();
+			});
+
+		FTunaSweeperEditorRunOnce::Run(
+			TunaSweeperEditorSetup::BreakableAppleCrateTaskId,
+			[]()
+			{
+				return TunaSweeperEditorSetup::EnsureBreakableAppleCrateAssets();
 			});
 
 		FTunaSweeperEditorRunOnce::Run(

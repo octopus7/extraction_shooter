@@ -12,6 +12,7 @@
 #include "Game/TunaSweeperGameInstance.h"
 #include "GameFramework/DamageType.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "Interaction/TunaSweeperBreakableAppleCrateActor.h"
 #include "Interaction/TunaSweeperExplosiveBarrelActor.h"
 #include "Interaction/TunaSweeperSandbagCoverActor.h"
 #include "Interaction/TunaSweeperShootingPracticeDummyActor.h"
@@ -70,6 +71,7 @@ namespace
 			OtherActor->FindComponentByClass<UTunaSweeperVitalsComponent>() ||
 			Cast<ATunaSweeperEnemyCharacter>(OtherActor) ||
 			Cast<ATunaSweeperRollingBomberSpawner>(OtherActor) ||
+			Cast<ATunaSweeperBreakableAppleCrateActor>(OtherActor) ||
 			Cast<ATunaSweeperExplosiveBarrelActor>(OtherActor) ||
 			Cast<ATunaSweeperSandbagCoverActor>(OtherActor) ||
 			Cast<ATunaSweeperShootingPracticeDummyActor>(OtherActor);

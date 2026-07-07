@@ -4659,3 +4659,19 @@
 - 기본 `WindSpeed`를 `0.0`으로 바꿔 텍스처가 시간에 따라 흐르지 않고 카메라 이동/시선 변화에 의한 시프팅만 보이도록 한 것.
 - 기존 1회 생성 ID를 `2026-07-06_PuddleSkyReflectionMaterialNoRippleV2`로 갱신하고, 재생성 플래그와 일반 에디터 시작으로 `/Game/Prototype/Water/M_PuddleSkyReflection`, `/Game/Prototype/Water/MI_PuddleSkyReflection`을 다시 저장한 것.
 - `TunaSweeperEditor Win64 Development` 빌드를 통과시키고, 저장된 에셋에서 `RippleScale`, `RippleStrength`, `waveA`, `waveB` 문자열이 남아 있지 않음을 확인한 것.
+
+## 2026-07-07 15:22:23 (소요시간: 00:20:28)
+
+- `SM_CrateB`와 `SM_Apple`을 기본 에셋으로 사용하는 부서지는 사과 상자 클래스를 별도로 추가한 것.
+- `ATunaSweeperBreakableAppleCrateActor`를 추가해 기본 내구도 `1`로 한 방에 파괴되지만 내부적으로 `MaxHealth`/`CurrentHealth`를 유지하도록 한 것.
+- 상자 파괴 시 상자 메시/충돌을 비활성화하고 5~8개의 사과를 내부 박스 범위에서 스폰해 파괴 방향과 랜덤 산포를 섞은 속도로 굴러가게 한 것.
+- `ATunaSweeperPhysicsAppleActor`를 추가해 사과 메시와 물리 구 충돌을 분리하고, `SM_Apple` 자체의 단순 충돌 유무와 무관하게 굴러가도록 한 것.
+- 투사체 피해 숫자 표시 대상에 `ATunaSweeperBreakableAppleCrateActor`를 추가한 것.
+- `TunaSweeperEditor Win64 Development` 빌드가 성공했고, 지침에 따라 Unreal Editor를 실행한 것.
+
+## 2026-07-07 15:43:47 (소요시간: 00:04:00)
+
+- 레벨에 바로 배치할 수 있도록 `/Game/Interaction/BP_BreakableAppleCrate`와 `/Game/Interaction/BP_PhysicsApple` Blueprint 에셋을 생성한 것.
+- 에디터 모듈에 `EnsureBreakableAppleCrateAssets()`를 추가해 두 BP를 자동 생성/저장하고, 상자 BP가 사과 BP를 스폰하도록 기본값을 구성한 것.
+- `-TunaSweeperRebuildBreakableAppleCrate -TunaSweeperBreakableAppleCrateSetupQuit` 명령줄 플래그와 run-once 등록을 추가해 이후에도 에셋을 재생성할 수 있게 한 것.
+- `TunaSweeperEditor Win64 Development` 빌드를 통과시키고, Unreal Editor 실행 후 `BP_BreakableAppleCrate.uasset`와 `BP_PhysicsApple.uasset` 저장을 확인한 것.

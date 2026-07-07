@@ -2523,3 +2523,53 @@ JSON 배치된 레이드맵 오브젝트 중 일렁이는 나무 이름이 무�
 ### 답변
 
 큐브맵 대신 2D 하늘/구름 텍스처를 가상 하늘 평면에 투영하고, 웅덩이 표면에서 반사된 시선 벡터가 그 평면과 만나는 위치를 UV로 사용하는 방식이 적합하다. 머터리얼에서는 `AbsoluteWorldPosition`, `CameraPositionWS` 또는 `CameraVectorWS`, 표면 월드 노멀을 이용해 반사 벡터를 구하고, `CloudHeight` 평면과의 교차점 XY를 스케일링해 구름 텍스처를 샘플링한다. 여기에 물결 노멀로 UV 또는 반사 노멀을 왜곡하고, `Fresnel`, 낮은 `Roughness`, 반사 강도 마스크를 조합하면 카메라 이동과 각도 변화에 따라 자연스럽게 시프팅되는 가짜 하늘 반사를 만들 수 있다.
+
+## 2026-07-07 15:18:42 (소요시간: 00:00:52)
+
+### 질문
+
+나무 상자 메시를 부수면 내부에 있던 사과들이 흘러나와 물리 적용되어 굴러다니는 연출을 UE 5.7에서 효율적으로 만드는 방법에 대한 질문.
+
+### 답변
+
+효율적인 구조는 실제 상자 내부를 시뮬레이션하지 않고, 파괴 시점에 사과 물리 액터를 소량 스폰해 눈속임하는 방식이다. 상자는 체력/파괴 인터페이스를 가진 단일 액터로 두고, 파괴되면 온전한 메시와 충돌을 끄거나 깨진 메시로 교체한 뒤 Niagara 먼지, 소리, 짧은 판자 파편을 재생한다. 사과는 `UStaticMeshComponent` 기반 액터로 만들고 `SetSimulatePhysics(true)`, `PhysicsActor` 충돌, 단순 구/볼록 충돌을 사용해 4~8개 정도만 스폰한다. 스폰 위치는 상자 내부 소켓이나 박스 범위에서 정하고, 바깥 방향 및 위쪽 랜덤 임펄스를 `AddImpulseAtLocation` 등으로 주면 자연스럽게 흘러나오는 것처럼 보인다. 성능 관점에서는 런타임 Geometry Collection 파괴나 장시간 물리 유지를 피하고, 일정 시간이 지나면 물리를 끄거나 픽업/장식 상태로 전환하며 필요하면 풀링을 적용하는 것이 좋다. 실제 루팅 아이템이라면 물리 사과 전체를 저장하지 말고, 대표 픽업 1개 또는 아이템 수량 데이터만 게임플레이 상태로 관리하는 편이 안전하다.
+
+## 2026-07-07 15:21:56 (소요시간: 00:00:29)
+
+### 질문
+
+상자 메시는 이미 들어가 있는 상태에서, 부서진 상자 안에서 사과가 굴러나오는 연출을 위해 무엇을 준비해야 하는지와 사과 메시만 준비하면 되는지에 대한 질문.
+
+### 답변
+
+사과 메시만 있으면 최소 구현은 가능하지만, 자연스럽고 안정적인 연출을 위해서는 사과 메시 외에도 단순 물리 충돌, 파괴 후 상자 표시 방식, 스폰 위치 기준, 짧은 파괴 이펙트/사운드가 필요하다. 준비 우선순위는 사과 Static Mesh와 단순 Sphere/Convex Collision, 피직스용 물리 머터리얼, 상자 내부 스폰 포인트 또는 박스 범위, 깨진 상자 메시나 온전한 메시 숨김 처리, 먼지/나무 파편 Niagara와 파괴 사운드 순서가 적합하다. 실제 루팅이 필요한 경우에는 굴러다니는 사과를 모두 저장 대상으로 보지 말고, 대표 픽업 또는 아이템 수량 데이터로 분리하는 편이 좋다.
+
+## 2026-07-07 15:48:25 (소요시간: 00:00:17)
+
+### 질문
+
+부서지는 사과 상자에서 흘러나올 사과 수량이 몇 개인지에 대한 질문.
+
+### 답변
+
+현재 기본값은 `MinAppleCount = 5`, `MaxAppleCount = 8`이라 `BP_BreakableAppleCrate`가 파괴될 때마다 랜덤으로 5~8개의 `BP_PhysicsApple`이 스폰된다. 수량은 `BP_BreakableAppleCrate` Details의 `Apple Crate|Apple Spawn` 카테고리에서 조정할 수 있다.
+
+## 2026-07-07 15:27:21 (소요시간: 00:01:23)
+
+### 질문
+
+플레이어 투사체 BP를 어디서 가져오는지에 대한 질문.
+
+### 답변
+
+플레이어가 직접 투사체 BP를 로드하지 않고, 장착 무기 `ATunaSweeperWeapon`의 `ProjectileClass` 기본값에서 `/Game/Weapons/BP_TunaSweeperProjectile.BP_TunaSweeperProjectile_C`를 `LoadSynchronous()`로 로드한 뒤 `SpawnActor`로 생성한다. 플레이어 기본 무기는 `ATunaSweeperTopDownCharacter`의 `DefaultWeaponClass`가 `/Game/Weapons/BP_AssaultRifle.BP_AssaultRifle_C`를 가리키며, 해당 BP는 `ATunaSweeperWeapon` 부모 기본값을 통해 투사체 클래스를 사용한다.
+
+## 2026-07-07 15:40:14 (소요시간: 00:00:36)
+
+### 질문
+
+플레이어 투사체 클래스를 무기 BP에서 직접 지정하면 되는지에 대한 질문.
+
+### 답변
+
+가능하다. `ATunaSweeperWeapon`의 `ProjectileClass`가 `EditDefaultsOnly`로 노출되어 있으므로 무기 BP의 Class Defaults에서 `Projectile Class`를 `ATunaSweeperProjectile` 파생 BP로 지정하면 발사 시 해당 클래스를 `LoadSynchronous()`로 로드해 스폰한다. 다만 현재 플레이어 기본 총기는 `BP_AssaultRifle`을 사용하므로 `BP_TunaSweeperWeapon`이 아니라 실제 장착되는 `BP_AssaultRifle`에서 지정해야 적용된다. 모든 무기에 동일 투사체를 쓰려면 C++ 기본값을 유지하거나 부모 무기 BP에 설정하고, 무기별 투사체를 다르게 하려면 무기 BP별로 오버라이드하는 방식이 맞다.
