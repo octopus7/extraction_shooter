@@ -73,7 +73,7 @@ void ATunaSweeperPhysicsAppleActor::ConfigurePhysicsAppleDefaults(
 	LifeSeconds = FMath::Max(0.0f, InLifeSeconds);
 
 	ApplyAppleDefaults();
-	if (LifeSeconds > 0.0f)
+	if (LifeSeconds > 0.0f && GetWorld() && GetWorld()->IsGameWorld())
 	{
 		SetLifeSpan(LifeSeconds);
 	}
@@ -94,9 +94,29 @@ void ATunaSweeperPhysicsAppleActor::LaunchApple(
 
 void ATunaSweeperPhysicsAppleActor::ApplyAppleDefaults()
 {
+	const float SafeVisualScale = FMath::Max(0.01f, VisualScale);
+	UStaticMesh* LoadedAppleMesh = AppleMesh.LoadSynchronous();
+	float EffectiveCollisionRadius = FMath::Max(1.0f, CollisionRadiusCm);
+	FVector VisualMeshOffset = FVector::ZeroVector;
+
+	if (LoadedAppleMesh)
+	{
+		const FBoxSphereBounds MeshBounds = LoadedAppleMesh->GetBounds();
+		if (bCenterMeshOnCollision)
+		{
+			VisualMeshOffset = -MeshBounds.Origin * SafeVisualScale;
+		}
+		if (bUseMeshBoundsForCollisionRadius)
+		{
+			EffectiveCollisionRadius = FMath::Max(
+				EffectiveCollisionRadius,
+				MeshBounds.BoxExtent.GetMax() * SafeVisualScale);
+		}
+	}
+
 	if (CollisionComponent)
 	{
-		CollisionComponent->SetSphereRadius(FMath::Max(1.0f, CollisionRadiusCm), true);
+		CollisionComponent->SetSphereRadius(EffectiveCollisionRadius, true);
 		CollisionComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		CollisionComponent->SetCollisionObjectType(ECC_PhysicsBody);
 		CollisionComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
@@ -115,10 +135,10 @@ void ATunaSweeperPhysicsAppleActor::ApplyAppleDefaults()
 
 	if (AppleMeshComponent)
 	{
-		AppleMeshComponent->SetStaticMesh(AppleMesh.LoadSynchronous());
-		AppleMeshComponent->SetRelativeLocation(FVector::ZeroVector);
+		AppleMeshComponent->SetStaticMesh(LoadedAppleMesh);
+		AppleMeshComponent->SetRelativeLocation(VisualMeshOffset);
 		AppleMeshComponent->SetRelativeRotation(FRotator::ZeroRotator);
-		AppleMeshComponent->SetRelativeScale3D(FVector(FMath::Max(0.01f, VisualScale)));
+		AppleMeshComponent->SetRelativeScale3D(FVector(SafeVisualScale));
 		AppleMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		AppleMeshComponent->SetGenerateOverlapEvents(false);
 		AppleMeshComponent->SetCanEverAffectNavigation(false);

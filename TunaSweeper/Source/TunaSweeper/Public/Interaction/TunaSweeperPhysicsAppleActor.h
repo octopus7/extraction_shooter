@@ -42,6 +42,12 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Physics Apple|Collision", meta = (ClampMin = "1.0", UIMin = "1.0"))
 	float CollisionRadiusCm = 14.0f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Physics Apple|Collision")
+	bool bUseMeshBoundsForCollisionRadius = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Physics Apple|Visual")
+	bool bCenterMeshOnCollision = true;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Physics Apple|Visual", meta = (ClampMin = "0.01", UIMin = "0.01"))
 	float VisualScale = 1.0f;
 
@@ -60,4 +66,3 @@ protected:
 private:
 	void ApplyAppleDefaults();
 };
-

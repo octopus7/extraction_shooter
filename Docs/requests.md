@@ -4675,3 +4675,11 @@
 - 에디터 모듈에 `EnsureBreakableAppleCrateAssets()`를 추가해 두 BP를 자동 생성/저장하고, 상자 BP가 사과 BP를 스폰하도록 기본값을 구성한 것.
 - `-TunaSweeperRebuildBreakableAppleCrate -TunaSweeperBreakableAppleCrateSetupQuit` 명령줄 플래그와 run-once 등록을 추가해 이후에도 에셋을 재생성할 수 있게 한 것.
 - `TunaSweeperEditor Win64 Development` 빌드를 통과시키고, Unreal Editor 실행 후 `BP_BreakableAppleCrate.uasset`와 `BP_PhysicsApple.uasset` 저장을 확인한 것.
+
+## 2026-07-07 15:50:28 (소요시간: 00:02:54)
+
+- `BP_PhysicsApple`에서 `SM_Apple`의 피벗/바운드 중심이 물리 구 중심과 어긋나 보이는 문제를 수정한 것.
+- `ATunaSweeperPhysicsAppleActor`가 Static Mesh 바운드 중심을 읽어 시각 메시를 물리 구 중심으로 자동 오프셋하도록 한 것.
+- 기본적으로 메시 바운드 기반으로 물리 구 반지름을 최소 보정하도록 `bUseMeshBoundsForCollisionRadius`를 추가한 것.
+- 기존 `BP_PhysicsApple`을 새 기본값으로 다시 저장하도록 사과 상자 에셋 생성 run-once ID를 갱신한 것.
+- `TunaSweeperEditor Win64 Development` 빌드를 통과시키고, Unreal Editor 실행 후 `BP_PhysicsApple.uasset` 재저장을 확인한 것.

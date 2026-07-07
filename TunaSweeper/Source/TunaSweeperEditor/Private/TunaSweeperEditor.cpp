@@ -215,7 +215,7 @@ namespace TunaSweeperEditorSetup
 	const FString WarpPointInteractionTaskId = TEXT("2026-05-25_CreateWarpPointInteractionAssetsV1");
 	const FString EnemyVisualMaterialTaskId = TEXT("2026-05-19_CreateEnemyAndContainerVisualMaterialsV3");
 	const FString ExplosiveBarrelTaskId = TEXT("2026-05-29_CreateExplosiveBarrelAssetsV8");
-	const FString BreakableAppleCrateTaskId = TEXT("2026-07-07_CreateBreakableAppleCrateAssetsV1");
+	const FString BreakableAppleCrateTaskId = TEXT("2026-07-07_CreateBreakableAppleCrateAssetsV2");
 	const FString RollingBomberBodyMaterialTaskId = TEXT("2026-05-28_CreateRollingBomberBodyGrayMaterialV1");
 	const FString RollingBomberLegMaterialTaskId = TEXT("2026-05-28_CreateRollingBomberLegMetalMaterialV1");
 	const FString RollingBomberChargeCylinderEffectTaskId = TEXT("2026-05-28_CreateRollingBomberChargeCylinderEffectV1");
