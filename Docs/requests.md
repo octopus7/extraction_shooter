@@ -4700,3 +4700,48 @@
 - Chaos/Geometry Collection/Fracture 관련 모듈 및 플러그인 의존성을 `TunaSweeper.Build.cs`, `TunaSweeperEditor.Build.cs`, `TunaSweeper.uproject`에 추가한 것.
 - `TunaSweeperEditor Win64 Development` 빌드를 통과시키고, 강제 셋업으로 `GC_CrateB_Fractured.uasset`, `BP_BreakableAppleCrate.uasset`, `BP_CrateFragment.uasset`, `BP_PhysicsApple.uasset` 저장을 확인한 것.
 - 셋업 전용 에디터 실행은 저장 후 종료 과정에서 한 차례 crash log를 남겼지만, 이후 일반 에디터 실행은 정상 유지되며 최신 로그에 치명 오류가 없음을 확인한 것.
+## 2026-07-07 16:41:26 (소요시간: 00:02:21)
+
+- 사용자가 미커밋 내역을 모두 버린 현재 시점에서 프로젝트를 다시 빌드하고 Unreal Editor를 실행해 달라고 요청한 것.
+- 클린 워크트리 상태에서 `TunaSweeperEditor Win64 Development` 빌드를 시도했으나 Unity 빌드에서 `MakeSafeExtent` anonymous namespace 함수명 충돌로 실패한 것을 확인한 것.
+- `ATunaSweeperBreakableAppleCrateActor` 내부 helper 이름을 `MakeSafeCrateExtent`로 변경하여 `ATunaSweeperExplosiveBarrelActor`의 `MakeSafeExtent`와 Unity 빌드 심볼 충돌이 나지 않게 최소 수정한 것.
+- 수정 후 `TunaSweeperEditor Win64 Development` 빌드를 통과시키고, `TunaSweeper/TunaSweeper.uproject`를 Unreal Editor로 실행한 것.
+- 실행된 Unreal Editor 프로세스가 정상 응답 중이며 최신 로그에서 fatal/critical 오류가 보이지 않음을 확인한 것.
+## 2026-07-07 17:15:51 (소요시간: 00:03:23)
+
+- 사용자가 TunaSweeper Windows 패키징을 요청한 것.
+- 기존 `PackageTunaSweeperWin64.bat`를 `Development` 구성으로 실행했으며, 첫 시도는 `Content/Characters/Robot/ABP_RobotDog.uasset`의 누락된 `/Script/MiyakovCharacterSystem` 의존성과 블루프린트 컴파일 오류로 Cook 단계에서 실패한 것.
+- `DefaultGame.ini`의 강제 cook 범위를 `/Game/Characters` 전체에서 실제 런타임에 필요한 `/Game/Characters/CanBot`, `/Game/Characters/Enemy`, `/Game/Characters/NPC`, `/Game/Characters/Player`로 좁혀 깨진 실험용 Robot 애셋이 패키징 대상에 들어가지 않게 한 것.
+- 수정 후 `RunUAT BuildCookRun` 재실행이 성공했으며 최신 패키지 산출물이 `D:\github\extraction_shooter\TunaSweeper\PackagedBuilds\Windows`에 생성된 것을 확인한 것.
+- 패키징 완료 후 `TunaSweeper/TunaSweeper.uproject`를 UE 5.7 Unreal Editor로 실행하고 `UnrealEditor` 프로세스가 올라온 것을 확인한 것.
+## 2026-07-07 17:20:03 (소요시간: 00:03:03)
+
+- 내부 비우기 처리가 적용된 `SM_CrateB` 자체를 기준으로 `/Game/Interaction/GC_CrateB_Fractured`를 다시 구성해 달라는 요청을 처리한 것.
+- 별도 hollow proxy 메시 생성이나 추가 내부 비우기 처리 없이, 현재 `EnsureBreakableAppleCrateGeometryCollection()`의 `/Game/Nature/Wood/SM_CrateB.SM_CrateB` 직접 변환 경로를 사용한 것.
+- `TunaSweeperEditor Win64 Development` 빌드가 최신 상태로 성공함을 확인한 것.
+- `-TunaSweeperRebuildBreakableAppleCrate -TunaSweeperBreakableAppleCrateSetupQuit` 무인 셋업으로 `GC_CrateB_Fractured.uasset`와 `BP_BreakableAppleCrate.uasset`를 재저장한 것.
+- `/Game/Interaction/SM_CrateB_HollowFractureSource` 같은 별도 hollow source 에셋이 존재하지 않음을 확인한 것.
+- 무인 셋업 종료 중 에디터 종료 fatal 로그가 있었지만 에셋 저장 이후였고, 일반 Unreal Editor 실행은 정상 응답 중이며 최신 로그에 fatal/critical 오류가 없음을 확인한 것.
+## 2026-07-07 17:24:12 (소요시간: 00:04:39)
+
+- `BP_BreakableAppleCrate` 파괴 후 Geometry Collection이 조각나지 않는 문제를 수정한 것.
+- 단순 Dynamic 전환과 `CrumbleActiveClusters()`만으로 루트 클러스터가 풀리지 않을 수 있어, 파괴 시 `EGeometryCollectionPhysicsTypeEnum::Chaos_ExternalClusterStrain` 필드를 적용하도록 변경한 것.
+- `URadialFalloff`와 `UFieldSystemMetaDataFilter`를 사용해 상자 전체 반경에 충분히 큰 `GeometryCollectionExternalClusterStrain` 값을 주고, 그 뒤 `CrumbleActiveClusters()`와 impulse를 적용하도록 순서를 보강한 것.
+- `GeometryCollectionExternalClusterStrain` 기본값을 `50000`으로 추가하고 `ConfigureBreakableAppleCrateDefaults()`가 BP 기본값 재생성 시 해당 값을 적용하도록 한 것.
+- `FieldSystemEngine` 모듈 의존성을 추가하고, `BreakableAppleCrateTaskId`를 V4로 갱신해 BP 기본값 재저장 경로가 다시 실행되도록 한 것.
+- `TunaSweeperEditor Win64 Development` 빌드를 통과시키고, 무인 셋업으로 `GC_CrateB_Fractured.uasset`와 `BP_BreakableAppleCrate.uasset` 재저장을 확인한 것.
+- 무인 셋업 종료 중 에디터 종료 fatal 로그가 있었지만 에셋 저장 이후였고, 일반 Unreal Editor 실행은 정상 응답 중이며 최신 로그에 fatal/critical 오류가 없음을 확인한 것.
+## 2026-07-07 17:30:19 (소요시간: 00:01:44)
+
+- `M_WoodCommon`이 에디터 종료 때 저장 대상으로 뜨는 원인을 코드와 로그 기준으로 검토한 것.
+- `TunaSweeperEditor` 시작 경로의 `BreakableAppleCrateTaskId` run-once 실행 여부와 완료 플래그 저장 위치를 확인한 것.
+- 최신 에디터 로그에서 `M_WoodCommon`에 `bUsedWithGeometryCollections` usage flag가 자동 추가되며 dirty 처리되는 근거를 확인한 것.
+- `M_WoodCommon`을 직접 수정하는 프로젝트 코드가 아니라, `SM_CrateB`가 Geometry Collection 경로에 사용되면서 Unreal Engine 머티리얼 usage flag 자동 설정이 발생한 것으로 판단한 것.
+## 2026-07-07 17:31:08 (소요시간: 00:06:15)
+
+- `BP_BreakableAppleCrate` 파괴 시 `SM_CrateB`의 외부와 노멀이 뒤집힌 내부 상자만 큰 덩어리로 분리되고 실제 조각 파편이 나오지 않는 문제를 수정한 것.
+- `/Game/Nature/Wood/SM_CrateB`를 Geometry Collection으로 변환할 때 component/island 분리를 끄고, 전체 메시를 하나의 fracture 입력으로 사용하도록 `ConvertStaticMeshToGeometryCollection` 및 `GeometrySource` 설정을 변경한 것.
+- Uniform Voronoi fracture 사이트 수를 36~48개로 늘리고 `GroupFracture`, `SplitIslands`를 꺼서 외피/내피 섬 분리가 아니라 실제 조각 fracture가 생성되도록 한 것.
+- 파괴용 Geometry Collection 에셋과 `CrateGeometryCollectionComponent`의 clustering을 끄고 damage threshold를 0으로 맞춰, 숨겨진 파괴 메시가 노출되는 즉시 leaf 조각들이 물리 시뮬레이션되도록 한 것.
+- `BreakableAppleCrateTaskId`를 V5로 갱신하고 무인 에디터 setup으로 `GC_CrateB_Fractured.uasset`, `BP_BreakableAppleCrate.uasset`를 재저장한 것.
+- `TunaSweeperEditor Win64 Development` 빌드를 통과시켰고, 일반 Unreal Editor를 실행해 프로세스가 응답 중이며 최신 일반 실행 로그에 fatal/critical 오류가 없음을 확인한 것.

@@ -224,7 +224,7 @@ namespace TunaSweeperEditorSetup
 	const FString WarpPointInteractionTaskId = TEXT("2026-05-25_CreateWarpPointInteractionAssetsV1");
 	const FString EnemyVisualMaterialTaskId = TEXT("2026-05-19_CreateEnemyAndContainerVisualMaterialsV3");
 	const FString ExplosiveBarrelTaskId = TEXT("2026-05-29_CreateExplosiveBarrelAssetsV8");
-	const FString BreakableAppleCrateTaskId = TEXT("2026-07-07_CreateBreakableAppleCrateAssetsV3");
+	const FString BreakableAppleCrateTaskId = TEXT("2026-07-07_CreateBreakableAppleCrateAssetsV5");
 	const FString RollingBomberBodyMaterialTaskId = TEXT("2026-05-28_CreateRollingBomberBodyGrayMaterialV1");
 	const FString RollingBomberLegMaterialTaskId = TEXT("2026-05-28_CreateRollingBomberLegMetalMaterialV1");
 	const FString RollingBomberChargeCylinderEffectTaskId = TEXT("2026-05-28_CreateRollingBomberChargeCylinderEffectV1");
@@ -3146,26 +3146,21 @@ namespace TunaSweeperEditorSetup
 			Collection,
 			Materials,
 			AutoInstanceMeshes,
-			true,
-			true);
+			false,
+			false);
 
 		FDataflowTransformSelection TransformSelection;
-		TransformSelection.InitializeFromCollection(Collection, false);
-		FFractureEngineSelection::GetRootBones(Collection, TransformSelection);
-		if (!TransformSelection.AnySelected())
-		{
-			TransformSelection.InitializeFromCollection(Collection, true);
-		}
+		TransformSelection.InitializeFromCollection(Collection, true);
 
 		FUniformFractureSettings FractureSettings{};
 		FractureSettings.Transform = FTransform::Identity;
-		FractureSettings.MinVoronoiSites = 16;
-		FractureSettings.MaxVoronoiSites = 20;
+		FractureSettings.MinVoronoiSites = 36;
+		FractureSettings.MaxVoronoiSites = 48;
 		FractureSettings.InternalMaterialID = 0;
 		FractureSettings.RandomSeed = 5707;
 		FractureSettings.ChanceToFracture = 1.0f;
-		FractureSettings.GroupFracture = true;
-		FractureSettings.SplitIslands = true;
+		FractureSettings.GroupFracture = false;
+		FractureSettings.SplitIslands = false;
 		FractureSettings.Grout = 0.0f;
 		FractureSettings.NoiseSettings.Amplitude = 0.0f;
 		FractureSettings.NoiseSettings.Frequency = 0.1f;
@@ -3188,11 +3183,11 @@ namespace TunaSweeperEditorSetup
 		GeometryCollection->Modify();
 		GeometryCollection->ResetFrom(Collection, Materials, false);
 		GeometryCollection->SetAutoInstanceMeshes(AutoInstanceMeshes);
-		GeometryCollection->EnableClustering = true;
+		GeometryCollection->EnableClustering = false;
 		GeometryCollection->ClusterGroupIndex = 0;
-		GeometryCollection->MaxClusterLevel = 1;
+		GeometryCollection->MaxClusterLevel = 0;
 		GeometryCollection->DamageModel = EDamageModelTypeEnum::Chaos_Damage_Model_UserDefined_Damage_Threshold;
-		GeometryCollection->DamageThreshold = { 25.0f };
+		GeometryCollection->DamageThreshold = { 0.0f };
 		GeometryCollection->bUseSizeSpecificDamageThreshold = false;
 		GeometryCollection->bUseMaterialDamageModifiers = false;
 		GeometryCollection->PerClusterOnlyDamageThreshold = false;
@@ -3204,7 +3199,7 @@ namespace TunaSweeperEditorSetup
 		GeometryCollection->SizeSpecificData.Reset();
 		FGeometryCollectionSizeSpecificData SizeData =
 			UGeometryCollection::GeometryCollectionSizeSpecificDataDefaults();
-		SizeData.DamageThreshold = 25;
+		SizeData.DamageThreshold = 0;
 		if (SizeData.CollisionShapes.Num() > 0)
 		{
 			SizeData.CollisionShapes[0].CollisionType = ECollisionTypeEnum::Chaos_Volumetric;
@@ -3224,8 +3219,8 @@ namespace TunaSweeperEditorSetup
 			FSoftObjectPath(SourceMesh),
 			FTransform::Identity,
 			SourceMaterials,
-			true,
-			true);
+			false,
+			false);
 		GeometryCollection->SetRootProxiesFromGeometrySources();
 #endif
 

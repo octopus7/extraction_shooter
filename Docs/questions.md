@@ -2591,3 +2591,60 @@ UE4 APEX Destruction 방식은 UE5 계열에서 Chaos Destruction/Geometry Colle
 ### 답변
 
 기존 레벨에 배치된 액터가 같은 `/Game/Interaction/BP_BreakableAppleCrate` Blueprint 인스턴스라면 새로 배치할 필요 없이 새 C++ 컴포넌트와 Blueprint 기본값을 따라 동작한다. 다만 인스턴스 Details에서 `CrateGeometryCollection`, `bUseGeometryCollectionOnBreak`, `bSpawnCrateFragmentsOnBreak` 같은 값을 개별 오버라이드해 둔 경우에는 기존 오버라이드가 남을 수 있으므로 해당 인스턴스의 오버라이드를 리셋하거나 다시 배치하면 된다.
+## 2026-07-07 17:14:35 (소요시간: 00:00:32)
+
+### 질문
+
+패키지 경로가 어디인지에 대한 질문.
+
+### 답변
+
+최신 패키징 산출물 경로는 `D:\github\extraction_shooter\TunaSweeper\PackagedBuilds\Windows`이며, 실행 파일은 `D:\github\extraction_shooter\TunaSweeper\PackagedBuilds\Windows\TunaSweeper.exe`이다. 루트의 `D:\github\extraction_shooter\Release\Windows`와 `D:\github\extraction_shooter\Release\Win64_20260531_0156`에도 이전 릴리스 패키지가 있다.
+
+## 2026-07-07 17:26:26 (소요시간: 00:00:35)
+
+### 질문
+
+에디터를 켤 때마다 `M_WoodCommon` 에셋이 변경되는 느낌인데 착각인지에 대한 질문.
+
+### 답변
+
+현재 Git 기준으로 `TunaSweeper/Content/Nature/Wood/M_WoodCommon.uasset`는 수정 목록에 없으므로, 지금 확인 가능한 상태만 보면 에디터 실행 때마다 실제 파일이 매번 변경되는 것은 아니다. 파일 마지막 쓰기 시각은 2026-07-07 16:40:28이고, Git 수정 상태도 깨끗하다. 다만 Unreal Editor가 머티리얼 썸네일, 셰이더/Derived Data Cache, 미리보기 상태를 다시 계산하면서 화면상으로 달라 보일 수는 있다. 다음에 같은 느낌이 들면 에디터를 켠 직후 `git status --short -- TunaSweeper/Content/Nature/Wood/M_WoodCommon.uasset`로 실제 변경 여부를 확인하면 된다.
+## 2026-07-07 17:24:12 (소요시간: 00:04:39)
+
+### 질문
+
+`BP_BreakableAppleCrate`가 파괴된 뒤 상자가 실제 조각으로 풀리지 않는 이유에 대한 질문.
+
+### 답변
+
+원인은 Geometry Collection 컴포넌트를 dynamic 상태로 바꾸고 `CrumbleActiveClusters()`를 호출하는 것만으로는 루트 클러스터의 내부 결합이 충분히 손상되지 않아 통째로 남을 수 있기 때문이다. 파괴 시 `Chaos_ExternalClusterStrain` 필드를 상자 전체 반경에 적용하도록 수정했고, 기본 strain 값을 `50000`으로 설정해 GC damage threshold보다 확실히 큰 값으로 클러스터를 끊게 했다. 이후 기존 impulse를 적용하므로 사과가 나오면서 상자도 조각 단위로 풀려야 한다.
+
+## 2026-07-07 17:30:19 (소요시간: 00:01:44)
+
+### 질문
+
+에디터를 닫을 때마다 `M_WoodCommon` 저장 여부를 묻는데, 에디터를 켤 때 해당 에셋을 변경하는 코드가 있는지에 대한 질문.
+
+### 답변
+
+`M_WoodCommon`을 직접 수정하는 프로젝트 코드는 확인되지 않았다. 대신 최신 로그에 `Material /Game/Nature/Wood/M_WoodCommon.M_WoodCommon needed to have new flag set bUsedWithGeometryCollections !`가 찍혀 있어, `SM_CrateB`를 기반으로 만든 `/Game/Interaction/GC_CrateB_Fractured`가 사용될 때 Unreal Engine이 머티리얼의 `bUsedWithGeometryCollections` usage flag를 자동으로 켜면서 에셋을 dirty 상태로 만드는 것이 원인이다. 이 플래그가 저장되지 않으면 다음 실행 때도 Geometry Collection 사용 시 다시 dirty가 되므로, 저장 프롬프트가 반복될 수 있다. `TunaSweeperEditor`의 `BreakableAppleCrate` run-once 셋업 경로는 일반 시작 시 실행될 수 있는 구조지만 현재 완료 플래그에는 V4가 기록되어 있어 정상 실행에서는 다시 돌지 않아야 한다.
+
+## 2026-07-07 17:35:45 (소요시간: 00:00:20)
+
+### 질문
+
+다음에 `M_WoodCommon` 저장 여부를 물을 때 저장하면 더 이상 같은 저장 프롬프트가 뜨지 않는지에 대한 질문.
+
+### 답변
+
+같은 원인, 즉 `bUsedWithGeometryCollections` usage flag 자동 추가 때문이라면 다음 저장 프롬프트에서 `M_WoodCommon`을 저장하면 그 플래그가 `.uasset`에 반영되므로 이후에는 같은 이유로 반복해서 묻지 않아야 한다. 저장 후 `TunaSweeper/Content/Nature/Wood/M_WoodCommon.uasset`가 Git 변경으로 잡히는 것은 정상이며, 그 변경은 Geometry Collection 사용을 위한 머티리얼 설정 저장으로 보면 된다. 다만 이후 다른 머티리얼 옵션을 바꾸거나 새 사용 플래그가 필요해지는 별도 상황이 생기면 다시 저장을 물을 수 있다.
+## 2026-07-07 17:31:08 (소요시간: 00:06:15)
+
+### 질문
+
+`BP_BreakableAppleCrate` 파괴 시 외부 상자와 노멀이 뒤집힌 내부 상자만 분리되고 실제 작은 조각으로 깨지지 않는 이유에 대한 질문.
+
+### 답변
+
+원인은 Geometry Collection 생성 단계에서 `SM_CrateB`를 component/island 단위로 분리해 변환하고 `SplitIslands`까지 켜 둔 탓에, Voronoi fracture 결과보다 외피/내피 섬 분리가 먼저 크게 드러났기 때문이다. 또한 런타임 컴포넌트가 클러스터 상태로 유지되어 숨겨진 파괴 메시를 보여도 leaf 조각이 바로 흩어지지 않았다. 이를 `bSplitComponents=false`, `SplitIslands=false`, `GroupFracture=false`로 바꾸고 Voronoi 사이트 수를 늘렸으며, 파괴용 GC와 컴포넌트의 clustering을 꺼서 파괴 시 leaf 조각들이 즉시 물리 시뮬레이션되도록 수정했다.

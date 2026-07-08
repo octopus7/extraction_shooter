@@ -106,7 +106,10 @@ protected:
 	float GeometryCollectionUpwardImpulse = 350.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Apple Crate|Break", meta = (ClampMin = "0.0", UIMin = "0.0"))
-	float GeometryCollectionDamageThreshold = 25.0f;
+	float GeometryCollectionDamageThreshold = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Apple Crate|Break", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float GeometryCollectionExternalClusterStrain = 50000.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Apple Crate|Apple Spawn")
 	TSubclassOf<ATunaSweeperPhysicsAppleActor> AppleActorClass;

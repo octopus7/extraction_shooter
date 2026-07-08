@@ -6,6 +6,7 @@
 #include "Engine/DamageEvents.h"
 #include "Engine/StaticMesh.h"
 #include "Engine/World.h"
+#include "Field/FieldSystemObjects.h"
 #include "Chaos/Particle/ObjectState.h"
 #include "GeometryCollection/GeometryCollectionComponent.h"
 #include "GeometryCollection/GeometryCollectionObject.h"
@@ -22,7 +23,7 @@ namespace
 	const TCHAR* DefaultAppleMeshPath = TEXT("/Game/AXTemp/SM_Apple.SM_Apple");
 	const TCHAR* DefaultCrateFragmentMeshPath = TEXT("/Engine/BasicShapes/Cube.Cube");
 
-	FVector MakeSafeExtent(const FVector& Extent)
+	FVector MakeSafeCrateExtent(const FVector& Extent)
 	{
 		return FVector(
 			FMath::Max(0.0f, Extent.X),
@@ -76,8 +77,8 @@ ATunaSweeperBreakableAppleCrateActor::ATunaSweeperBreakableAppleCrateActor()
 	CrateGeometryCollectionComponent->SetVisibility(false, true);
 	CrateGeometryCollectionComponent->SetNotifyBreaks(false);
 	CrateGeometryCollectionComponent->ObjectType = EObjectStateTypeEnum::Chaos_Object_Dynamic;
-	CrateGeometryCollectionComponent->EnableClustering = true;
-	CrateGeometryCollectionComponent->MaxClusterLevel = 1;
+	CrateGeometryCollectionComponent->EnableClustering = false;
+	CrateGeometryCollectionComponent->MaxClusterLevel = 0;
 
 	CrateMesh = TSoftObjectPtr<UStaticMesh>(FSoftObjectPath(DefaultCrateMeshPath));
 	CrateGeometryCollection = TSoftObjectPtr<UGeometryCollection>(FSoftObjectPath(DefaultCrateGeometryCollectionPath));
@@ -93,8 +94,8 @@ void ATunaSweeperBreakableAppleCrateActor::OnConstruction(const FTransform& Tran
 
 	MaxHealth = FMath::Max(1.0f, MaxHealth);
 	CurrentHealth = bCrateBroken ? 0.0f : MaxHealth;
-	CollisionExtent = MakeSafeExtent(CollisionExtent);
-	AppleSpawnExtent = MakeSafeExtent(AppleSpawnExtent);
+	CollisionExtent = MakeSafeCrateExtent(CollisionExtent);
+	AppleSpawnExtent = MakeSafeCrateExtent(AppleSpawnExtent);
 	MinAppleCount = FMath::Max(0, MinAppleCount);
 	MaxAppleCount = FMath::Max(MinAppleCount, MaxAppleCount);
 	AppleCollisionRadiusCm = FMath::Max(1.0f, AppleCollisionRadiusCm);
@@ -111,6 +112,7 @@ void ATunaSweeperBreakableAppleCrateActor::OnConstruction(const FTransform& Tran
 	GeometryCollectionDirectionalImpulse = FMath::Max(0.0f, GeometryCollectionDirectionalImpulse);
 	GeometryCollectionUpwardImpulse = FMath::Max(0.0f, GeometryCollectionUpwardImpulse);
 	GeometryCollectionDamageThreshold = FMath::Max(0.0f, GeometryCollectionDamageThreshold);
+	GeometryCollectionExternalClusterStrain = FMath::Max(0.0f, GeometryCollectionExternalClusterStrain);
 	MinCrateFragmentCount = FMath::Max(0, MinCrateFragmentCount);
 	MaxCrateFragmentCount = FMath::Max(MinCrateFragmentCount, MaxCrateFragmentCount);
 	CrateFragmentLifeSeconds = FMath::Max(0.0f, CrateFragmentLifeSeconds);
@@ -211,7 +213,8 @@ void ATunaSweeperBreakableAppleCrateActor::ConfigureBreakableAppleCrateDefaults(
 	GeometryCollectionRadialImpulse = 120.0f;
 	GeometryCollectionDirectionalImpulse = 2400.0f;
 	GeometryCollectionUpwardImpulse = 350.0f;
-	GeometryCollectionDamageThreshold = 25.0f;
+	GeometryCollectionDamageThreshold = 0.0f;
+	GeometryCollectionExternalClusterStrain = 50000.0f;
 
 	ApplyCrateDefaults();
 }
@@ -265,8 +268,8 @@ void ATunaSweeperBreakableAppleCrateActor::ApplyCrateDefaults()
 		CrateGeometryCollectionComponent->SetRelativeRotation(FRotator::ZeroRotator);
 		CrateGeometryCollectionComponent->SetRelativeScale3D(FVector::OneVector);
 		CrateGeometryCollectionComponent->ObjectType = EObjectStateTypeEnum::Chaos_Object_Dynamic;
-		CrateGeometryCollectionComponent->EnableClustering = true;
-		CrateGeometryCollectionComponent->MaxClusterLevel = 1;
+		CrateGeometryCollectionComponent->EnableClustering = false;
+		CrateGeometryCollectionComponent->MaxClusterLevel = 0;
 		CrateGeometryCollectionComponent->SetDamageThreshold({ FMath::Max(0.0f, GeometryCollectionDamageThreshold) });
 		CrateGeometryCollectionComponent->SetCollisionObjectType(ECC_WorldDynamic);
 		CrateGeometryCollectionComponent->SetCollisionResponseToAllChannels(ECR_Block);
@@ -316,6 +319,33 @@ bool ATunaSweeperBreakableAppleCrateActor::BreakGeometryCollection(const FVector
 	CrateGeometryCollectionComponent->SetSimulatePhysics(true);
 	CrateGeometryCollectionComponent->SetDynamicState(Chaos::EObjectStateType::Dynamic);
 	CrateGeometryCollectionComponent->ApplyKinematicField(GeometryCollectionBreakRadius, BreakCenter);
+
+	const float StrainRadius = FMath::Max(
+		GeometryCollectionBreakRadius,
+		FMath::Max3(CollisionExtent.X, CollisionExtent.Y, CollisionExtent.Z) * 2.25f);
+	UFieldSystemMetaDataFilter* StrainMetaData = NewObject<UFieldSystemMetaDataFilter>(this);
+	URadialFalloff* StrainField = NewObject<URadialFalloff>(this);
+	if (StrainMetaData && StrainField)
+	{
+		StrainMetaData->SetMetaDataFilterType(
+			Field_Filter_All,
+			Field_Object_Destruction,
+			Field_Position_CenterOfMass);
+		StrainField->SetRadialFalloff(
+			FMath::Max(GeometryCollectionExternalClusterStrain, GeometryCollectionDamageThreshold * 10.0f),
+			0.0f,
+			1.0f,
+			0.0f,
+			StrainRadius,
+			BreakCenter,
+			Field_Falloff_Linear);
+		CrateGeometryCollectionComponent->ApplyPhysicsField(
+			true,
+			EGeometryCollectionPhysicsTypeEnum::Chaos_ExternalClusterStrain,
+			StrainMetaData,
+			StrainField);
+	}
+
 	CrateGeometryCollectionComponent->CrumbleActiveClusters();
 	CrateGeometryCollectionComponent->AddRadialImpulse(
 		BreakCenter,
