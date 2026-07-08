@@ -2533,3 +2533,31 @@ JSON 배치된 레이드맵 오브젝트 중 일렁이는 나무 이름이 무�
 ### 답변
 
 그렇다. 이전 수정 방향에는 `UTunaSweeperIntroMenuWidget::EnsureSettingsPanelLayout()`에서 설정 패널 위젯을 찾거나 생성하고, 부모/자식 관계와 버튼 콘텐츠를 런타임에 다시 붙이는 코드가 포함되어 있었다. 해당 런타임 트리 구성 경로를 제거하고, `TunaSweeperEditorSetupWidgets.cpp`가 `WBP_IntroMenu` 자체에 설정 섹션과 버튼/텍스트 계층을 완성해 저장하도록 수정했다.
+
+## 2026-07-08 18:51:14 (소요시간: 00:01:42)
+
+### 질문
+
+`../miyakov/Miyakov` 경로의 UE 프로젝트가 보이는지 질문.
+
+### 답변
+
+현재 워크스페이스 기준 상대 경로 `../miyakov/Miyakov`는 `D:\github\miyakov\Miyakov`로 접근 가능하며, `Miyakov.uproject` 파일이 확인되었다.
+## 2026-07-08 18:59:30 (소요시간: 00:01:05)
+
+### 질문
+
+남은 클래스는?
+
+### 답변
+
+1,000줄 이상 남은 분리 후보는 `ATunaSweeperTopDownCharacter`, `UTunaSweeperEnemySpawnSubsystem`, `ATunaSweeperPlayerController`, `UItemContainerWidget`, `ATunaSweeperRollingBomber`, `UTunaSweeperHousingSubsystem`, `UTunaSweeperItemDataSubsystem`, `UTunaSweeperQuestSubsystem`, `UTunaSweeperQuestWidget`, `UTunaSweeperWorkbenchPanelWidget`, `UTunaSweeperPlayerVisionComponent`, `UTunaSweeperMapWidget`, `UTunaSweeperItemThumbnailSlotWidget`, `UTunaSweeperInteractionMarkerWidget`, `ATunaSweeperEnemyCharacter` 순서다. 이미 분리한 클래스 안에서는 `TunaSweeperGameInstanceInventory.cpp`, `TunaSweeperGameInstanceEquipmentWeapon.cpp`, `TunaSweeperGameHudWidgetLayout.cpp`, `TunaSweeperGameInstance.h`가 아직 1,000줄 이상이다.
+## 2026-07-08 19:01:30 (소요시간: 00:01:31)
+
+### 질문
+
+캐릭터 클래스 어떤식으로 분리할거야?
+
+### 답변
+
+`ATunaSweeperTopDownCharacter`는 우선 public header와 UCLASS 구조를 유지하고 implementation만 역할별 `.cpp`로 나누는 방식이 안전하다. `Shared`, `Core`, `Input`, `Weapon`, `Melee`, `CancelableActions`, `InventorySurvival`, `DeathRespawn`, `Camera`, `MovementRoll` 단위가 적합하며, 컴포넌트 추출은 블루프린트/직렬화 영향이 있어 별도 단계로 둔다.
