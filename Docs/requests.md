@@ -4788,3 +4788,14 @@
 - `ATunaSweeperTopDownCharacter` 구현을 lifecycle, input, weapon, melee, cancelable actions, state, vitals/death, camera, movement/roll 역할별 `.cpp` 파일로 분리한 것.
 - 공통 include와 장착 무기/스태미나 게이지 helper namespace를 `TunaSweeperTopDownCharacterShared.h`로 이동하고, 여러 translation unit에서 안전하게 공유되도록 helper 상수를 inline 처리한 것.
 - 분할 경계 보정과 중복 spread/recoil 범위 제거 후 `TunaSweeperEditor Win64 Development` 빌드를 성공시키고, UE 5.7 `UnrealEditor.exe`로 `TunaSweeper/TunaSweeper.uproject` 실행을 확인한 것.
+
+## 2026-07-08 19:06:11 (소요시간: 00:06:49)
+
+- Miyakov의 `PetCompanionCharacter`, `PetCompanionAIController` 기능을 TunaSweeper 네이티브 `ATunaSweeperPetCompanionCharacter`, `ATunaSweeperPetCompanionAIController`로 이식한 것.
+- `UTunaSweeperGameInstance`에 펫 클래스 설정, 플레이어/폰 대상 스폰, 현재 펫 조회, 펫 제거 API를 추가하고 저장 슬롯 런타임 초기화 시 현재 펫을 제거하도록 연결한 것.
+- `TunaSweeperEditor Win64 Development` 빌드를 성공시키고, UE 5.7 `UnrealEditor.exe`로 `TunaSweeper/TunaSweeper.uproject` 실행을 확인한 것.
+
+## 2026-07-08 19:14:18 (소요시간: 00:00:50)
+
+- 펫 동행 기능 이식 변경분과 요청 기록을 별도 Git 커밋으로 기록한 것.
+- 기존 작업트리에 남아 있던 질문 로그와 UI 분리 파일은 이번 커밋 범위에서 제외한 것.

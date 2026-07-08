@@ -11,6 +11,7 @@
 #include "TunaSweeperGameInstance.generated.h"
 
 class APawn;
+class ATunaSweeperPetCompanionCharacter;
 class UTunaSweeperVitalsComponent;
 
 USTRUCT(BlueprintType)
@@ -280,6 +281,12 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TunaSweeper|Weapon Spread Recoil")
 	TSoftObjectPtr<UTunaSweeperWeaponSpreadRecoilDataAsset> WeaponSpreadRecoilDataAsset;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TunaSweeper|Pet Companion")
+	TSubclassOf<ATunaSweeperPetCompanionCharacter> PetCompanionClass;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TunaSweeper|Pet Companion", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float PetCompanionSpawnDistance = 200.0f;
+
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Gameplay Info")
 	void SetGameplayInfo(FName Key, const FString& Value);
 
@@ -334,6 +341,18 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|State")
 	void ClearRuntimeState();
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Pet Companion")
+	ATunaSweeperPetCompanionCharacter* SpawnPetCompanionForPlayer(bool bReplaceExisting = true);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Pet Companion")
+	ATunaSweeperPetCompanionCharacter* SpawnPetCompanionForPawn(APawn* TargetPawn, bool bReplaceExisting = true);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Pet Companion")
+	void DespawnPetCompanion();
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Pet Companion")
+	ATunaSweeperPetCompanionCharacter* GetCurrentPetCompanion() const { return CurrentPetCompanion.Get(); }
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Save")
 	int32 GetActiveSaveSlotIndex() const { return ActiveSaveSlotIndex; }
@@ -973,6 +992,9 @@ private:
 
 	UPROPERTY(Transient)
 	bool bHasRuntimeSelectedWeaponSelection = false;
+
+	UPROPERTY(Transient)
+	TObjectPtr<ATunaSweeperPetCompanionCharacter> CurrentPetCompanion;
 
 	UPROPERTY(Transient)
 	TArray<FTunaSweeperInventorySlot> ActiveLootContainerSlots;

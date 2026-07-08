@@ -596,6 +596,8 @@ bool UTunaSweeperGameInstance::SaveGameStateInternal(
 
 void UTunaSweeperGameInstance::ResetRuntimeStateForSaveSlotSelection()
 {
+	DespawnPetCompanion();
+
 	GameplayInfo.Reset();
 	NumberSettings.Reset();
 	BoolSettings.Reset();
