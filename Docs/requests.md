@@ -4799,3 +4799,9 @@
 
 - 펫 동행 기능 이식 변경분과 요청 기록을 별도 Git 커밋으로 기록한 것.
 - 기존 작업트리에 남아 있던 질문 로그와 UI 분리 파일은 이번 커밋 범위에서 제외한 것.
+
+## 2026-07-08 19:15:31 (소요시간: 00:02:35)
+
+- Miyakov의 `ThrowableGrenade`, throwable damage type 코드를 TunaSweeper 네이티브 `ATunaSweeperThrowableGrenade`, `UTunaSweeperThrowableDamageType` 계열 클래스로 이식한 것.
+- 요청대로 기존 아이템/무기/입력 흐름에는 연결하지 않고, 신규 `Weapon` 소스/헤더 파일만 추가한 것.
+- `TunaSweeperEditor Win64 Development` 빌드를 성공시킨 뒤 수류탄 코드 이식 변경분과 요청 기록을 별도 Git 커밋으로 기록한 것.
