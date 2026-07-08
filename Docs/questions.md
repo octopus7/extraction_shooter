@@ -2523,3 +2523,13 @@ JSON 배치된 레이드맵 오브젝트 중 일렁이는 나무 이름이 무�
 ### 답변
 
 큐브맵 대신 2D 하늘/구름 텍스처를 가상 하늘 평면에 투영하고, 웅덩이 표면에서 반사된 시선 벡터가 그 평면과 만나는 위치를 UV로 사용하는 방식이 적합하다. 머터리얼에서는 `AbsoluteWorldPosition`, `CameraPositionWS` 또는 `CameraVectorWS`, 표면 월드 노멀을 이용해 반사 벡터를 구하고, `CloudHeight` 평면과의 교차점 XY를 스케일링해 구름 텍스처를 샘플링한다. 여기에 물결 노멀로 UV 또는 반사 노멀을 왜곡하고, `Fresnel`, 낮은 `Roughness`, 반사 강도 마스크를 조합하면 카메라 이동과 각도 변화에 따라 자연스럽게 시프팅되는 가짜 하늘 반사를 만들 수 있다.
+
+## 2026-07-08 16:12:00 (소요시간: 00:10:05)
+
+### 질문
+
+`WBP_IntroMenu`가 있는데도 런타임 코드에서 설정 UI 트리를 구성하고 있었는지에 대한 질문.
+
+### 답변
+
+그렇다. 이전 수정 방향에는 `UTunaSweeperIntroMenuWidget::EnsureSettingsPanelLayout()`에서 설정 패널 위젯을 찾거나 생성하고, 부모/자식 관계와 버튼 콘텐츠를 런타임에 다시 붙이는 코드가 포함되어 있었다. 해당 런타임 트리 구성 경로를 제거하고, `TunaSweeperEditorSetupWidgets.cpp`가 `WBP_IntroMenu` 자체에 설정 섹션과 버튼/텍스트 계층을 완성해 저장하도록 수정했다.

@@ -4740,3 +4740,16 @@
 - 사용자 승인 후 실행 중인 `UnrealEditor.exe`를 종료하고 잠겨 있던 프로젝트 DLL 링크를 해제한 것.
 - `TunaSweeperEditor Win64 Development` 빌드를 다시 실행해 링크까지 성공시킨 것.
 - 빌드 성공 후 UE 5.7 `UnrealEditor.exe`로 `TunaSweeper/TunaSweeper.uproject`를 다시 실행하고 새 에디터 프로세스가 떠 있음을 확인한 것.
+
+## 2026-07-08 16:12:00 (소요시간: 00:10:05)
+
+- 설정 UI를 런타임에서 `WidgetTree`로 재구성하던 `UTunaSweeperIntroMenuWidget::EnsureSettingsPanelLayout()` 경로와 호출을 제거한 것.
+- `TunaSweeperEditorSetupWidgets.cpp`의 `WBP_IntroMenu` 생성 루틴에서 설정 패널, 탭, 화면 모드/해상도/DLSS/언어 섹션과 각 버튼/텍스트를 에디터 WBP 계층으로 직접 구성하도록 수정한 것.
+- 원샷 task id를 `2026-07-08_BuildCompleteTitleSettingsWbpV1`로 갱신하고, `TunaSweeperEditor Win64 Development` 빌드를 성공시킨 뒤 UE 5.7 에디터를 다시 실행해 `WBP_IntroMenu.uasset`이 컴파일 및 저장되었음을 확인한 것.
+- 생성된 `WBP_IntroMenu.uasset` 안에 `SettingsWindowModeSection`, `SettingsResolutionSection`, `SettingsDLSSSection`, `SettingsLanguageSection` 위젯 이름이 포함되어 있음을 확인한 것.
+
+## 2026-07-08 15:46:00 (소요시간: 00:52:54)
+
+- `UTunaSweeperGameInstance` 구현을 역할별 `.cpp` 파일로 분리하고, 공통 include/helper/log 선언은 `TunaSweeperGameInstanceShared.h`로 이동한 것.
+- `UTunaSweeperGameHudWidget` 구현을 lifecycle, feedback, panels, transitions, layout, refresh, gameplay, handlers 역할별 `.cpp` 파일로 분리하고, 공통 UI helper/log 선언은 `TunaSweeperGameHudWidgetShared.h`로 이동한 것.
+- 병렬 에이전트 분석 결과를 반영해 public header는 유지하고 implementation split만 수행했으며, UE 첫 include 규칙과 함수 경계를 보정한 뒤 `TunaSweeperEditor Win64 Development` 빌드 성공 및 UE 5.7 에디터 실행까지 확인한 것.

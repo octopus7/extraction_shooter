@@ -1,0 +1,964 @@
+#include "TunaSweeperGameInstanceShared.h"
+
+void UTunaSweeperGameInstance::ClearRuntimeState()
+{
+	ResetRuntimeStateForSaveSlotSelection();
+	EnsureInventoryStateInitialized();
+}
+
+FTunaSweeperSaveSlotSummary UTunaSweeperGameInstance::GetSaveSlotSummary(int32 SaveSlotIndex) const
+{
+	FTunaSweeperSaveSlotSummary Summary;
+	Summary.SaveSlotIndex = SanitizeSaveSlotIndex(SaveSlotIndex);
+
+	const FString ExistingSlotName = GetExistingSaveGameSlotName(Summary.SaveSlotIndex);
+	if (ExistingSlotName.IsEmpty())
+	{
+		return Summary;
+	}
+
+	UTunaSweeperSaveGame* SaveGame = Cast<UTunaSweeperSaveGame>(UGameplayStatics::LoadGameFromSlot(
+		ExistingSlotName,
+		TunaSweeperSave::SaveUserIndex));
+	if (!SaveGame)
+	{
+		return Summary;
+	}
+
+	Summary.bHasData = true;
+	Summary.TotalPlaySeconds = FMath::Max(0.0f, SaveGame->TotalPlaySeconds);
+	Summary.DifficultyStage = TunaSweeperSave::SanitizeDifficultyStage(SaveGame->DifficultyStage);
+	Summary.bDifficultySelected =
+		SaveGame->SaveVersion < 18 ||
+		SaveGame->bDifficultySelected ||
+		SaveGame->CompletedScenarioFlags.Contains(TunaSweeperScenario::OpeningScenarioFlag);
+	Summary.LastSavedAtTicks = SaveGame->LastSavedAtTicks;
+	return Summary;
+}
+
+bool UTunaSweeperGameInstance::ActivateSaveSlot(int32 SaveSlotIndex, bool bStartNewGame)
+{
+	SetActiveSaveSlotIndex(SaveSlotIndex);
+
+	if (bStartNewGame)
+	{
+		LoadedSlotTotalPlaySeconds = 0.0f;
+		ActiveSlotStartTimeSeconds = FPlatformTime::Seconds();
+		ActiveSaveSlotDifficultyStage = TunaSweeperSave::DefaultDifficultyStage;
+		bActiveSaveSlotDifficultySelected = false;
+		GenerateDefaultInventoryState();
+		bInventoryStateInitialized = true;
+		RefreshLegacyPlayerInventoryItems();
+		if (SaveGameStateInternal(EUsableQuickSlotSaveMode::Clear))
+		{
+			bPendingBunkerItemStateSave = false;
+		}
+		return true;
+	}
+
+	EnsureInventoryStateInitialized();
+	return true;
+}
+
+bool UTunaSweeperGameInstance::SetActiveSaveSlotDifficultyStage(int32 DifficultyStage, bool bSaveImmediately)
+{
+	EnsureInventoryStateInitialized();
+
+	ActiveSaveSlotDifficultyStage = TunaSweeperSave::SanitizeDifficultyStage(DifficultyStage);
+	bActiveSaveSlotDifficultySelected = true;
+
+	return !bSaveImmediately || SaveGameStateInternal();
+}
+
+bool UTunaSweeperGameInstance::SetActiveSaveSlotIndex(int32 SaveSlotIndex)
+{
+	ActiveSaveSlotIndex = SanitizeSaveSlotIndex(SaveSlotIndex);
+	ResetRuntimeStateForSaveSlotSelection();
+	return SaveActiveSaveSlotSelection();
+}
+
+bool UTunaSweeperGameInstance::DeleteSaveSlot(int32 SaveSlotIndex)
+{
+	const int32 SanitizedSlotIndex = SanitizeSaveSlotIndex(SaveSlotIndex);
+	const FString SlotName = GetSaveGameSlotName(SanitizedSlotIndex);
+	const bool bDeleted = UGameplayStatics::DoesSaveGameExist(SlotName, TunaSweeperSave::SaveUserIndex) &&
+		UGameplayStatics::DeleteGameInSlot(SlotName, TunaSweeperSave::SaveUserIndex);
+
+	if (ActiveSaveSlotIndex == SanitizedSlotIndex)
+	{
+		ResetRuntimeStateForSaveSlotSelection();
+		ActiveSaveSlotIndex = SanitizedSlotIndex;
+	}
+
+	return bDeleted;
+}
+
+bool UTunaSweeperGameInstance::DeleteSaveSlotAndStartNewGame(int32 SaveSlotIndex)
+{
+	const int32 SanitizedSlotIndex = SanitizeSaveSlotIndex(SaveSlotIndex);
+	const FString SlotName = GetSaveGameSlotName(SanitizedSlotIndex);
+	if (UGameplayStatics::DoesSaveGameExist(SlotName, TunaSweeperSave::SaveUserIndex) &&
+		!UGameplayStatics::DeleteGameInSlot(SlotName, TunaSweeperSave::SaveUserIndex))
+	{
+		return false;
+	}
+
+	ResetRuntimeStateForSaveSlotSelection();
+	return ActivateSaveSlot(SanitizedSlotIndex, true);
+}
+
+void UTunaSweeperGameInstance::GeneratePlayerInventoryItems()
+{
+	EnsureInventoryStateInitialized();
+	RefreshLegacyPlayerInventoryItems();
+}
+
+void UTunaSweeperGameInstance::EnsureInventoryStateInitialized()
+{
+	if (bInventoryStateInitialized)
+	{
+		return;
+	}
+
+	if (!LoadGameState())
+	{
+		LoadedSlotTotalPlaySeconds = 0.0f;
+		ActiveSlotStartTimeSeconds = FPlatformTime::Seconds();
+		GenerateDefaultInventoryState();
+	}
+
+	bInventoryStateInitialized = true;
+	RefreshLegacyPlayerInventoryItems();
+}
+
+bool UTunaSweeperGameInstance::LoadGameState()
+{
+	const FString ExistingSlotName = GetExistingSaveGameSlotName(ActiveSaveSlotIndex);
+	if (ExistingSlotName.IsEmpty())
+	{
+		return false;
+	}
+
+	UTunaSweeperSaveGame* SaveGame = Cast<UTunaSweeperSaveGame>(UGameplayStatics::LoadGameFromSlot(
+		ExistingSlotName,
+		TunaSweeperSave::SaveUserIndex));
+	if (!SaveGame)
+	{
+		return false;
+	}
+
+	LoadedSlotTotalPlaySeconds = FMath::Max(0.0f, SaveGame->TotalPlaySeconds);
+	ActiveSlotStartTimeSeconds = FPlatformTime::Seconds();
+	ActiveSaveSlotDifficultyStage = TunaSweeperSave::SanitizeDifficultyStage(SaveGame->DifficultyStage);
+	bActiveSaveSlotDifficultySelected = SaveGame->SaveVersion < 18 || SaveGame->bDifficultySelected;
+	TotalExperiencePoints = FMath::Max<int64>(0, SaveGame->TotalExperiencePoints);
+	RaidStartExperiencePoints = TotalExperiencePoints;
+	PendingRaidExperiencePoints = 0;
+	bRaidExperienceSessionActive = false;
+	bHasPendingRaidExperienceAnimationState = false;
+	PendingRaidExperienceAnimationState = FTunaSweeperExperienceAnimationState();
+	CompletedScenarioFlags.Reset();
+	for (const FName& ScenarioFlag : SaveGame->CompletedScenarioFlags)
+	{
+		if (!ScenarioFlag.IsNone())
+		{
+			CompletedScenarioFlags.Add(ScenarioFlag);
+		}
+	}
+	if (CompletedScenarioFlags.Contains(TunaSweeperScenario::OpeningScenarioFlag))
+	{
+		bActiveSaveSlotDifficultySelected = true;
+	}
+	AcquiredMemoIds.Reset();
+	for (int32 MemoId : SaveGame->AcquiredMemoIds)
+	{
+		if (MemoId > 0)
+		{
+			AcquiredMemoIds.Add(MemoId);
+		}
+	}
+	EverAcquiredItemIds.Reset();
+	for (int32 ItemId : SaveGame->EverAcquiredItemIds)
+	{
+		if (ItemId != INDEX_NONE)
+		{
+			EverAcquiredItemIds.Add(ItemId);
+		}
+	}
+	MapMarkers.Reset();
+	NextMapMarkerId = 1;
+	TSet<int32> LoadedMapMarkerIds;
+	for (const FTunaSweeperMapMarkerSaveData& SavedMapMarker : SaveGame->MapMarkers)
+	{
+		if (SavedMapMarker.MarkerId <= 0 || LoadedMapMarkerIds.Contains(SavedMapMarker.MarkerId))
+		{
+			continue;
+		}
+
+		FTunaSweeperMapMarkerSaveData LoadedMapMarker = TunaSweeperMapMarkers::SanitizeMarker(SavedMapMarker);
+		MapMarkers.Add(LoadedMapMarker);
+		LoadedMapMarkerIds.Add(LoadedMapMarker.MarkerId);
+		NextMapMarkerId = FMath::Max(NextMapMarkerId, LoadedMapMarker.MarkerId + 1);
+	}
+	MapMarkers.Sort([](
+		const FTunaSweeperMapMarkerSaveData& Left,
+		const FTunaSweeperMapMarkerSaveData& Right)
+	{
+		return Left.MarkerId < Right.MarkerId;
+	});
+	WorldProgressStatesById.Reset();
+	for (const FTunaSweeperWorldProgressSaveData& SavedWorldProgressState : SaveGame->WorldProgressStates)
+	{
+		if (SavedWorldProgressState.ObjectId.IsNone())
+		{
+			continue;
+		}
+
+		FTunaSweeperWorldProgressSaveData LoadedWorldProgressState = SavedWorldProgressState;
+		LoadedWorldProgressState.ProgressQuantity = FMath::Max(0, LoadedWorldProgressState.ProgressQuantity);
+		WorldProgressStatesById.Add(LoadedWorldProgressState.ObjectId, LoadedWorldProgressState);
+	}
+	PiggyBankStatesById.Reset();
+	for (const FTunaSweeperPiggyBankSaveData& SavedPiggyBankState : SaveGame->PiggyBankStates)
+	{
+		if (SavedPiggyBankState.PiggyBankId.IsNone())
+		{
+			continue;
+		}
+
+		FTunaSweeperPiggyBankSaveData LoadedPiggyBankState = SavedPiggyBankState;
+		LoadedPiggyBankState.StoredAncientCoinValue = FMath::Max(0, LoadedPiggyBankState.StoredAncientCoinValue);
+		PiggyBankStatesById.Add(LoadedPiggyBankState.PiggyBankId, LoadedPiggyBankState);
+	}
+	HousingFacilities.Reset();
+	TSet<FGuid> LoadedHousingFacilityIds;
+	for (const FTunaSweeperHousingPlacedFacilitySaveData& SavedHousingFacility : SaveGame->HousingFacilities)
+	{
+		if (!SavedHousingFacility.IsValid() || LoadedHousingFacilityIds.Contains(SavedHousingFacility.InstanceId))
+		{
+			continue;
+		}
+
+		FTunaSweeperHousingPlacedFacilitySaveData LoadedHousingFacility = SavedHousingFacility;
+		LoadedHousingFacility.RotationQuarterTurns = FMath::Clamp(LoadedHousingFacility.RotationQuarterTurns, 0, 3);
+		HousingFacilities.Add(LoadedHousingFacility);
+		LoadedHousingFacilityIds.Add(LoadedHousingFacility.InstanceId);
+	}
+	UnlockedHousingFacilityIds.Reset();
+	for (const FName& FacilityId : SaveGame->UnlockedHousingFacilityIds)
+	{
+		if (!FacilityId.IsNone())
+		{
+			UnlockedHousingFacilityIds.Add(FacilityId);
+		}
+	}
+	UnlockedWorkbenchRecipeIds.Reset();
+	for (const FName& RecipeId : SaveGame->UnlockedWorkbenchRecipeIds)
+	{
+		if (!RecipeId.IsNone())
+		{
+			UnlockedWorkbenchRecipeIds.Add(RecipeId);
+		}
+	}
+	if (UTunaSweeperQuestSubsystem* QuestSubsystem = GetSubsystem<UTunaSweeperQuestSubsystem>())
+	{
+		QuestSubsystem->LoadQuestProgressFromSave(
+			SaveGame->QuestProgressStates,
+			SaveGame->TrackedQuestId,
+			SaveGame->QuestCoinBalance);
+
+		TArray<FTunaSweeperQuestDefinition> QuestDefinitions;
+		if (QuestSubsystem->GetAllQuestDefinitions(QuestDefinitions))
+		{
+			for (const FTunaSweeperQuestDefinition& QuestDefinition : QuestDefinitions)
+			{
+				if (QuestSubsystem->GetQuestState(QuestDefinition.QuestId) != ETunaSweeperQuestState::RewardCompleted)
+				{
+					continue;
+				}
+
+				for (const FName& FacilityId : QuestDefinition.Rewards.HousingFacilityUnlocks)
+				{
+					if (!FacilityId.IsNone())
+					{
+						UnlockedHousingFacilityIds.Add(FacilityId);
+					}
+				}
+
+				for (const FName& RecipeId : QuestDefinition.Rewards.WorkbenchRecipeUnlocks)
+				{
+					if (!RecipeId.IsNone())
+					{
+						UnlockedWorkbenchRecipeIds.Add(RecipeId);
+					}
+				}
+			}
+		}
+	}
+	PendingScenarioCompletionFlag = NAME_None;
+
+	ItemInstancesByUid.Reset();
+	for (const FTunaSweeperItemInstance& ItemInstance : SaveGame->ItemInstances)
+	{
+		FTunaSweeperItemInstance LoadedItemInstance = ItemInstance;
+		TunaSweeperInventory::NormalizeLoadedAmmoPersistenceFields(LoadedItemInstance);
+		if (LoadedItemInstance.IsValid())
+		{
+			ItemInstancesByUid.Add(LoadedItemInstance.Uid, LoadedItemInstance);
+		}
+	}
+
+	PlayerInventorySlots = SaveGame->InventorySlots;
+	EquipmentSlots = SaveGame->EquipmentSlots;
+	AuxiliaryBagSlots = SaveGame->AuxiliaryBagSlots;
+	UsableQuickSlots = SaveGame->UsableQuickSlots;
+	StorageSlotCapacity = NormalizeStorageSlotCapacity(SaveGame->StorageSlotCapacity);
+	StorageSlots = SaveGame->StorageSlots;
+	ShopStockStatesByKey.Reset();
+	for (const FTunaSweeperShopStockSaveData& SavedShopStockState : SaveGame->ShopStockStates)
+	{
+		if (!TunaSweeperShop::IsValidShopSlotKey(
+			SavedShopStockState.ShopId,
+			SavedShopStockState.SlotIndex,
+			SavedShopStockState.ItemId))
+		{
+			continue;
+		}
+
+		FTunaSweeperShopStockSaveData LoadedShopStockState = SavedShopStockState;
+		LoadedShopStockState.StockQuantity = FMath::Max(0, LoadedShopStockState.StockQuantity);
+		ShopStockStatesByKey.Add(
+			TunaSweeperShop::MakeStockKey(
+				LoadedShopStockState.ShopId,
+				LoadedShopStockState.SlotIndex,
+				LoadedShopStockState.ItemId),
+			LoadedShopStockState);
+	}
+	RemoveInvalidSlotReferences(PlayerInventorySlots);
+	RemoveInvalidSlotReferences(EquipmentSlots);
+	RemoveInvalidSlotReferences(AuxiliaryBagSlots);
+	RemoveInvalidSlotReferences(UsableQuickSlots);
+	RemoveInvalidSlotReferences(StorageSlots);
+
+	EnsureSlotArraySize(EquipmentSlots, FMath::Max(TunaSweeperInventory::RequiredEquipmentSlots, GameplaySettings.EquipmentSlotCount));
+	EnsureSlotArraySize(AuxiliaryBagSlots, FMath::Max(0, GameplaySettings.AuxiliaryBagSlotCount));
+	EnsureSlotArraySize(UsableQuickSlots, TunaSweeperInventory::UsableQuickSlotCount);
+	for (int32 SlotIndex = StorageSlots.Num() - 1; SlotIndex >= StorageSlotCapacity; --SlotIndex)
+	{
+		if (StorageSlots[SlotIndex].ItemUid.IsValid())
+		{
+			StorageSlotCapacity = NormalizeStorageSlotCapacity(SlotIndex + 1);
+			break;
+		}
+	}
+	EnsureSlotArraySize(StorageSlots, StorageSlotCapacity);
+	for (FTunaSweeperInventorySlot& UsableQuickSlot : UsableQuickSlots)
+	{
+		if (UsableQuickSlot.ItemUid.IsValid() && !IsItemCompatibleWithUsableQuickSlot(UsableQuickSlot.ItemUid))
+		{
+			UsableQuickSlot.Clear();
+		}
+	}
+	MigrateLegacyEquipmentSlots();
+	BackfillEverAcquiredItemIdsFromCurrentItems();
+
+	int32 InventoryCapacity = CalculateInventoryCapacityForEquipmentSlots(EquipmentSlots);
+	for (int32 SlotIndex = PlayerInventorySlots.Num() - 1; SlotIndex >= InventoryCapacity; --SlotIndex)
+	{
+		if (PlayerInventorySlots[SlotIndex].ItemUid.IsValid())
+		{
+			InventoryCapacity = FMath::Min(
+				FMath::Max(TunaSweeperInventory::RequiredMaxInventorySlots, GameplaySettings.MaxInventorySlots),
+				SlotIndex + 1);
+			break;
+		}
+	}
+	EnsureSlotArraySize(PlayerInventorySlots, InventoryCapacity);
+
+	ActiveLootContainerSlots.Reset();
+	ActiveLootContainerOwner.Reset();
+	ActiveLootContainerDisplayName = FText::GetEmpty();
+	ActiveLootContainerCapacity = 0;
+	bHasActiveLootContainer = false;
+	ActiveShopId = INDEX_NONE;
+	bHasActiveShop = false;
+	ActiveWorkbenchId = INDEX_NONE;
+	ActiveWorkbenchMode = ETunaSweeperWorkbenchMode::Craft;
+	bHasActiveWorkbench = false;
+	SelectedItemSlotReference = FTunaSweeperItemSlotReference();
+	HoveredItemSlotReference = FTunaSweeperItemSlotReference();
+	SelectedWeaponAttachmentSlotTags.Reset();
+	SelectedWeaponAttachmentSlots.Reset();
+	return true;
+}
+
+bool UTunaSweeperGameInstance::SaveGameStateInternal(
+	UTunaSweeperGameInstance::EUsableQuickSlotSaveMode UsableQuickSlotSaveMode) const
+{
+	const FString ExistingSlotName = GetExistingSaveGameSlotName(ActiveSaveSlotIndex);
+	UTunaSweeperSaveGame* ExistingSaveGame = nullptr;
+	if (UsableQuickSlotSaveMode == EUsableQuickSlotSaveMode::PreserveExisting && !ExistingSlotName.IsEmpty())
+	{
+		ExistingSaveGame = Cast<UTunaSweeperSaveGame>(UGameplayStatics::LoadGameFromSlot(
+			ExistingSlotName,
+			TunaSweeperSave::SaveUserIndex));
+	}
+
+	UTunaSweeperSaveGame* SaveGame = Cast<UTunaSweeperSaveGame>(
+		UGameplayStatics::CreateSaveGameObject(UTunaSweeperSaveGame::StaticClass()));
+	if (!SaveGame)
+	{
+		return false;
+	}
+
+	TSet<FGuid> PlayerOwnedItemUids;
+	CollectPlayerOwnedItemUids(
+		PlayerOwnedItemUids,
+		UsableQuickSlotSaveMode == EUsableQuickSlotSaveMode::PersistRuntime);
+	for (const FGuid& ItemUid : PlayerOwnedItemUids)
+	{
+		if (const FTunaSweeperItemInstance* ItemInstance = ItemInstancesByUid.Find(ItemUid))
+		{
+			SaveGame->ItemInstances.Add(TunaSweeperInventory::MakeItemInstanceForSave(*ItemInstance));
+		}
+	}
+
+	SaveGame->SaveVersion = TunaSweeperSave::CurrentSaveVersion;
+	SaveGame->SaveSlotIndex = ActiveSaveSlotIndex;
+	SaveGame->TotalPlaySeconds = GetCurrentActiveSlotTotalPlaySeconds();
+	SaveGame->DifficultyStage = TunaSweeperSave::SanitizeDifficultyStage(ActiveSaveSlotDifficultyStage);
+	SaveGame->bDifficultySelected = bActiveSaveSlotDifficultySelected;
+	SaveGame->LastSavedAtTicks = FDateTime::Now().GetTicks();
+	SaveGame->TotalExperiencePoints = FMath::Max<int64>(0, TotalExperiencePoints);
+	SaveGame->CompletedScenarioFlags = CompletedScenarioFlags.Array();
+	SaveGame->AcquiredMemoIds = AcquiredMemoIds.Array();
+	SaveGame->AcquiredMemoIds.Sort();
+	SaveGame->EverAcquiredItemIds = EverAcquiredItemIds.Array();
+	SaveGame->EverAcquiredItemIds.Sort();
+	SaveGame->MapMarkers = MapMarkers;
+	SaveGame->MapMarkers.Sort([](
+		const FTunaSweeperMapMarkerSaveData& Left,
+		const FTunaSweeperMapMarkerSaveData& Right)
+	{
+		return Left.MarkerId < Right.MarkerId;
+	});
+	WorldProgressStatesById.GenerateValueArray(SaveGame->WorldProgressStates);
+	SaveGame->WorldProgressStates.Sort([](
+		const FTunaSweeperWorldProgressSaveData& Left,
+		const FTunaSweeperWorldProgressSaveData& Right)
+	{
+		return Left.ObjectId.LexicalLess(Right.ObjectId);
+	});
+	PiggyBankStatesById.GenerateValueArray(SaveGame->PiggyBankStates);
+	SaveGame->PiggyBankStates.Sort([](
+		const FTunaSweeperPiggyBankSaveData& Left,
+		const FTunaSweeperPiggyBankSaveData& Right)
+	{
+		return Left.PiggyBankId.LexicalLess(Right.PiggyBankId);
+	});
+	SaveGame->HousingFacilities = HousingFacilities;
+	SaveGame->HousingFacilities.Sort([](
+		const FTunaSweeperHousingPlacedFacilitySaveData& Left,
+		const FTunaSweeperHousingPlacedFacilitySaveData& Right)
+	{
+		return Left.FacilityId.LexicalLess(Right.FacilityId) ||
+			(Left.FacilityId == Right.FacilityId && Left.InstanceId.ToString() < Right.InstanceId.ToString());
+	});
+	SaveGame->UnlockedHousingFacilityIds = UnlockedHousingFacilityIds.Array();
+	SaveGame->UnlockedHousingFacilityIds.Sort([](const FName& Left, const FName& Right)
+	{
+		return Left.LexicalLess(Right);
+	});
+	SaveGame->UnlockedWorkbenchRecipeIds = UnlockedWorkbenchRecipeIds.Array();
+	SaveGame->UnlockedWorkbenchRecipeIds.Sort([](const FName& Left, const FName& Right)
+	{
+		return Left.LexicalLess(Right);
+	});
+	if (const UTunaSweeperQuestSubsystem* QuestSubsystem = GetSubsystem<UTunaSweeperQuestSubsystem>())
+	{
+		QuestSubsystem->ExportQuestProgressForSave(
+			SaveGame->QuestProgressStates,
+			SaveGame->TrackedQuestId,
+			SaveGame->QuestCoinBalance);
+	}
+	SaveGame->InventorySlots = PlayerInventorySlots;
+	SaveGame->EquipmentSlots = EquipmentSlots;
+	SaveGame->AuxiliaryBagSlots = AuxiliaryBagSlots;
+	SaveGame->StorageSlotCapacity = NormalizeStorageSlotCapacity(StorageSlotCapacity);
+	SaveGame->StorageSlots = StorageSlots;
+	EnsureSlotArraySize(SaveGame->StorageSlots, SaveGame->StorageSlotCapacity);
+	ShopStockStatesByKey.GenerateValueArray(SaveGame->ShopStockStates);
+	SaveGame->ShopStockStates.Sort([](
+		const FTunaSweeperShopStockSaveData& Left,
+		const FTunaSweeperShopStockSaveData& Right)
+	{
+		if (Left.ShopId != Right.ShopId)
+		{
+			return Left.ShopId < Right.ShopId;
+		}
+		if (Left.SlotIndex != Right.SlotIndex)
+		{
+			return Left.SlotIndex < Right.SlotIndex;
+		}
+		return Left.ItemId < Right.ItemId;
+	});
+
+	switch (UsableQuickSlotSaveMode)
+	{
+	case EUsableQuickSlotSaveMode::PersistRuntime:
+		SaveGame->UsableQuickSlots = UsableQuickSlots;
+		break;
+	case EUsableQuickSlotSaveMode::PreserveExisting:
+		if (ExistingSaveGame)
+		{
+			TMap<FGuid, FTunaSweeperItemInstance> ExistingItemInstancesByUid;
+			for (const FTunaSweeperItemInstance& ExistingItemInstance : ExistingSaveGame->ItemInstances)
+			{
+				FTunaSweeperItemInstance NormalizedItemInstance = ExistingItemInstance;
+				TunaSweeperInventory::NormalizeLoadedAmmoPersistenceFields(NormalizedItemInstance);
+				if (NormalizedItemInstance.IsValid())
+				{
+					ExistingItemInstancesByUid.Add(NormalizedItemInstance.Uid, NormalizedItemInstance);
+				}
+			}
+
+			TSet<FGuid> SavedItemUids;
+			for (const FTunaSweeperItemInstance& SavedItemInstance : SaveGame->ItemInstances)
+			{
+				if (SavedItemInstance.Uid.IsValid())
+				{
+					SavedItemUids.Add(SavedItemInstance.Uid);
+				}
+			}
+
+			TFunction<void(const FGuid&)> AppendExistingItemUid;
+			AppendExistingItemUid = [
+				&AppendExistingItemUid,
+				&ExistingItemInstancesByUid,
+				&SavedItemUids,
+				SaveGame](const FGuid& ItemUid)
+			{
+				if (!ItemUid.IsValid() || SavedItemUids.Contains(ItemUid))
+				{
+					return;
+				}
+
+				const FTunaSweeperItemInstance* ExistingItemInstance = ExistingItemInstancesByUid.Find(ItemUid);
+				if (!ExistingItemInstance)
+				{
+					return;
+				}
+
+				SavedItemUids.Add(ItemUid);
+				SaveGame->ItemInstances.Add(TunaSweeperInventory::MakeItemInstanceForSave(*ExistingItemInstance));
+				for (const TPair<FName, FGuid>& AttachmentSlot : ExistingItemInstance->AttachmentSlots)
+				{
+					AppendExistingItemUid(AttachmentSlot.Value);
+				}
+			};
+
+			SaveGame->UsableQuickSlots = ExistingSaveGame->UsableQuickSlots;
+			EnsureSlotArraySize(SaveGame->UsableQuickSlots, TunaSweeperInventory::UsableQuickSlotCount);
+			for (FTunaSweeperInventorySlot& UsableQuickSlot : SaveGame->UsableQuickSlots)
+			{
+				if (!UsableQuickSlot.ItemUid.IsValid())
+				{
+					continue;
+				}
+
+				if (!ExistingItemInstancesByUid.Contains(UsableQuickSlot.ItemUid))
+				{
+					UsableQuickSlot.Clear();
+					continue;
+				}
+
+				AppendExistingItemUid(UsableQuickSlot.ItemUid);
+			}
+		}
+		break;
+	case EUsableQuickSlotSaveMode::Clear:
+	default:
+		SaveGame->UsableQuickSlots.Reset();
+		break;
+	}
+	EnsureSlotArraySize(SaveGame->UsableQuickSlots, TunaSweeperInventory::UsableQuickSlotCount);
+
+	if (!ExistingSlotName.IsEmpty() && !BackupExistingSaveGame(ExistingSlotName))
+	{
+		return false;
+	}
+
+	return UGameplayStatics::SaveGameToSlot(
+		SaveGame,
+		GetSaveGameSlotName(ActiveSaveSlotIndex),
+		TunaSweeperSave::SaveUserIndex);
+}
+
+void UTunaSweeperGameInstance::ResetRuntimeStateForSaveSlotSelection()
+{
+	GameplayInfo.Reset();
+	NumberSettings.Reset();
+	BoolSettings.Reset();
+	PlayerHudState = FTunaSweeperPlayerHudState();
+	PlayerInventoryItems.Reset();
+	bHasGeneratedPlayerInventoryItems = false;
+	ItemInstancesByUid.Reset();
+	PlayerInventorySlots.Reset();
+	EquipmentSlots.Reset();
+	AuxiliaryBagSlots.Reset();
+	UsableQuickSlots.Reset();
+	StorageSlots.Reset();
+	StorageSlotCapacity = GetDefaultStorageSlotCapacity();
+	ShopStockStatesByKey.Reset();
+	ActiveShopId = INDEX_NONE;
+	bHasActiveShop = false;
+	ActiveWorkbenchId = INDEX_NONE;
+	ActiveWorkbenchMode = ETunaSweeperWorkbenchMode::Craft;
+	bHasActiveWorkbench = false;
+	ActiveLootContainerSlots.Reset();
+	ActiveLootContainerOwner.Reset();
+	SelectedWeaponAttachmentSlotTags.Reset();
+	SelectedWeaponAttachmentSlots.Reset();
+	SelectedItemSlotReference = FTunaSweeperItemSlotReference();
+	HoveredItemSlotReference = FTunaSweeperItemSlotReference();
+	ActiveLootContainerDisplayName = FText::GetEmpty();
+	ActiveLootContainerCapacity = 0;
+	bHasActiveLootContainer = false;
+	bInventoryStateInitialized = false;
+	bPendingBunkerItemStateSave = false;
+	LoadedSlotTotalPlaySeconds = 0.0f;
+	ActiveSlotStartTimeSeconds = FPlatformTime::Seconds();
+	ActiveSaveSlotDifficultyStage = TunaSweeperSave::DefaultDifficultyStage;
+	bActiveSaveSlotDifficultySelected = false;
+	TotalExperiencePoints = 0;
+	RaidStartExperiencePoints = 0;
+	PendingRaidExperiencePoints = 0;
+	PendingRaidExperienceAnimationState = FTunaSweeperExperienceAnimationState();
+	bRaidExperienceSessionActive = false;
+	bHasPendingRaidExperienceAnimationState = false;
+	bHasPendingBunkerEntryVitals = false;
+	PendingBunkerEntryHealthRatio = 1.0f;
+	PendingBunkerEntryFoodRatio = 1.0f;
+	PendingBunkerEntryHydrationRatio = 1.0f;
+	CompletedScenarioFlags.Reset();
+	AcquiredMemoIds.Reset();
+	EverAcquiredItemIds.Reset();
+	MapMarkers.Reset();
+	NextMapMarkerId = 1;
+	WorldProgressStatesById.Reset();
+	PiggyBankStatesById.Reset();
+	HousingFacilities.Reset();
+	UnlockedHousingFacilityIds.Reset();
+	UnlockedWorkbenchRecipeIds.Reset();
+	PendingScenarioCompletionFlag = NAME_None;
+	if (UTunaSweeperQuestSubsystem* QuestSubsystem = GetSubsystem<UTunaSweeperQuestSubsystem>())
+	{
+		QuestSubsystem->ResetQuestProgressForNewGame();
+	}
+}
+
+void UTunaSweeperGameInstance::GenerateDefaultInventoryState()
+{
+	ItemInstancesByUid.Reset();
+	ActiveSaveSlotDifficultyStage = TunaSweeperSave::DefaultDifficultyStage;
+	bActiveSaveSlotDifficultySelected = false;
+	TotalExperiencePoints = 0;
+	RaidStartExperiencePoints = 0;
+	PendingRaidExperiencePoints = 0;
+	PendingRaidExperienceAnimationState = FTunaSweeperExperienceAnimationState();
+	bRaidExperienceSessionActive = false;
+	bHasPendingRaidExperienceAnimationState = false;
+	bHasPendingBunkerEntryVitals = false;
+	bPendingBunkerItemStateSave = false;
+	PendingBunkerEntryHealthRatio = 1.0f;
+	PendingBunkerEntryFoodRatio = 1.0f;
+	PendingBunkerEntryHydrationRatio = 1.0f;
+	CompletedScenarioFlags.Reset();
+	AcquiredMemoIds.Reset();
+	EverAcquiredItemIds.Reset();
+	MapMarkers.Reset();
+	NextMapMarkerId = 1;
+	WorldProgressStatesById.Reset();
+	PiggyBankStatesById.Reset();
+	HousingFacilities.Reset();
+	UnlockedHousingFacilityIds.Reset();
+	UnlockedWorkbenchRecipeIds.Reset();
+	PendingScenarioCompletionFlag = NAME_None;
+	if (UTunaSweeperQuestSubsystem* QuestSubsystem = GetSubsystem<UTunaSweeperQuestSubsystem>())
+	{
+		QuestSubsystem->ResetQuestProgressForNewGame();
+	}
+	ResetPlayerSlotArrays();
+	StorageSlotCapacity = GetDefaultStorageSlotCapacity();
+	StorageSlots.Reset();
+	EnsureSlotArraySize(StorageSlots, StorageSlotCapacity);
+	ShopStockStatesByKey.Reset();
+	ActiveShopId = INDEX_NONE;
+	bHasActiveShop = false;
+	ActiveWorkbenchId = INDEX_NONE;
+	ActiveWorkbenchMode = ETunaSweeperWorkbenchMode::Craft;
+	bHasActiveWorkbench = false;
+	ActiveLootContainerSlots.Reset();
+	ActiveLootContainerOwner.Reset();
+	ActiveLootContainerDisplayName = FText::GetEmpty();
+	ActiveLootContainerCapacity = 0;
+	bHasActiveLootContainer = false;
+	SelectedItemSlotReference = FTunaSweeperItemSlotReference();
+	HoveredItemSlotReference = FTunaSweeperItemSlotReference();
+	SelectedWeaponAttachmentSlotTags.Reset();
+	SelectedWeaponAttachmentSlots.Reset();
+}
+
+void UTunaSweeperGameInstance::ResetPlayerSlotArrays()
+{
+	EquipmentSlots.Reset();
+	AuxiliaryBagSlots.Reset();
+	UsableQuickSlots.Reset();
+	PlayerInventorySlots.Reset();
+	EnsureSlotArraySize(EquipmentSlots, FMath::Max(TunaSweeperInventory::RequiredEquipmentSlots, GameplaySettings.EquipmentSlotCount));
+	EnsureSlotArraySize(AuxiliaryBagSlots, FMath::Max(0, GameplaySettings.AuxiliaryBagSlotCount));
+	EnsureSlotArraySize(UsableQuickSlots, TunaSweeperInventory::UsableQuickSlotCount);
+	EnsureSlotArraySize(PlayerInventorySlots, FMath::Max(TunaSweeperInventory::RequiredBareInventorySlots, GameplaySettings.BareInventorySlots));
+}
+
+void UTunaSweeperGameInstance::RefreshLegacyPlayerInventoryItems()
+{
+	PlayerInventoryItems.Reset();
+	for (const FTunaSweeperInventorySlot& InventorySlot : PlayerInventorySlots)
+	{
+		FTunaSweeperItemStack ItemStack;
+		if (const FTunaSweeperItemInstance* ItemInstance = ItemInstancesByUid.Find(InventorySlot.ItemUid))
+		{
+			ItemStack.ItemId = ItemInstance->ItemId;
+			ItemStack.Quantity = ItemInstance->Quantity;
+		}
+		else
+		{
+			ItemStack.ItemId = INDEX_NONE;
+		}
+
+		PlayerInventoryItems.Add(ItemStack);
+	}
+
+	bHasGeneratedPlayerInventoryItems = true;
+}
+
+bool UTunaSweeperGameInstance::BackupExistingSaveGame(const FString& ExistingSlotName) const
+{
+	if (ExistingSlotName.IsEmpty())
+	{
+		return true;
+	}
+
+	const FString SourceFilePath = GetSaveGameFilePath(ExistingSlotName);
+	if (!FPaths::FileExists(SourceFilePath))
+	{
+		return false;
+	}
+
+	const FString BackupDirectory = GetSaveGameBackupDirectory();
+	if (!IFileManager::Get().MakeDirectory(*BackupDirectory, true))
+	{
+		return false;
+	}
+
+	const int32 BackupSlotIndex = SanitizeSaveSlotIndex(ActiveSaveSlotIndex);
+	const FString BackupFilePath = CreateSaveGameBackupFilePath(BackupSlotIndex, FDateTime::Now());
+	bool bBackupWritten = false;
+
+	if (UTunaSweeperSaveGame* ExistingSaveGame = Cast<UTunaSweeperSaveGame>(
+		UGameplayStatics::LoadGameFromSlot(ExistingSlotName, TunaSweeperSave::SaveUserIndex)))
+	{
+		ExistingSaveGame->SaveSlotIndex = BackupSlotIndex;
+
+		TArray<uint8> BackupData;
+		bBackupWritten =
+			UGameplayStatics::SaveGameToMemory(ExistingSaveGame, BackupData) &&
+			FFileHelper::SaveArrayToFile(BackupData, *BackupFilePath);
+	}
+
+	if (!bBackupWritten)
+	{
+		TArray<uint8> RawSaveData;
+		bBackupWritten =
+			FFileHelper::LoadFileToArray(RawSaveData, *SourceFilePath) &&
+			FFileHelper::SaveArrayToFile(RawSaveData, *BackupFilePath);
+	}
+
+	if (!bBackupWritten)
+	{
+		return false;
+	}
+
+	TrimSaveGameBackups();
+	return true;
+}
+
+void UTunaSweeperGameInstance::TrimSaveGameBackups() const
+{
+	const FString BackupDirectory = GetSaveGameBackupDirectory();
+	TArray<FString> BackupFiles;
+	IFileManager::Get().FindFilesRecursive(
+		BackupFiles,
+		*BackupDirectory,
+		TEXT("*.sav"),
+		true,
+		false);
+
+	if (BackupFiles.Num() <= TunaSweeperSave::MaxSaveGameBackupCount)
+	{
+		return;
+	}
+
+	BackupFiles.Sort([](const FString& Left, const FString& Right)
+	{
+		const FDateTime LeftTime = IFileManager::Get().GetTimeStamp(*Left);
+		const FDateTime RightTime = IFileManager::Get().GetTimeStamp(*Right);
+		return LeftTime == RightTime ? Left < Right : LeftTime < RightTime;
+	});
+
+	const int32 DeleteCount = BackupFiles.Num() - TunaSweeperSave::MaxSaveGameBackupCount;
+	for (int32 BackupIndex = 0; BackupIndex < DeleteCount; ++BackupIndex)
+	{
+		IFileManager::Get().Delete(*BackupFiles[BackupIndex], false, true);
+	}
+}
+
+bool UTunaSweeperGameInstance::LoadActiveSaveSlotSelection(int32& OutSaveSlotIndex) const
+{
+	if (!UGameplayStatics::DoesSaveGameExist(GetSaveSettingsSlotName(), TunaSweeperSave::SaveUserIndex))
+	{
+		OutSaveSlotIndex = 1;
+		return false;
+	}
+
+	const UTunaSweeperSaveSettings* SaveSettings = Cast<UTunaSweeperSaveSettings>(
+		UGameplayStatics::LoadGameFromSlot(GetSaveSettingsSlotName(), TunaSweeperSave::SaveUserIndex));
+	if (!SaveSettings)
+	{
+		OutSaveSlotIndex = 1;
+		return false;
+	}
+
+	OutSaveSlotIndex = SanitizeSaveSlotIndex(SaveSettings->LastSelectedSaveSlotIndex);
+	return true;
+}
+
+bool UTunaSweeperGameInstance::SaveActiveSaveSlotSelection() const
+{
+	UTunaSweeperSaveSettings* SaveSettings = Cast<UTunaSweeperSaveSettings>(
+		UGameplayStatics::CreateSaveGameObject(UTunaSweeperSaveSettings::StaticClass()));
+	if (!SaveSettings)
+	{
+		return false;
+	}
+
+	SaveSettings->LastSelectedSaveSlotIndex = SanitizeSaveSlotIndex(ActiveSaveSlotIndex);
+	return UGameplayStatics::SaveGameToSlot(
+		SaveSettings,
+		GetSaveSettingsSlotName(),
+		TunaSweeperSave::SaveUserIndex);
+}
+
+int32 UTunaSweeperGameInstance::FindFirstExistingSaveSlotIndex() const
+{
+	for (int32 SaveSlotIndex = TunaSweeperSave::MinSaveSlotIndex;
+		SaveSlotIndex <= TunaSweeperSave::MaxSaveSlotIndex;
+		++SaveSlotIndex)
+	{
+		if (!GetExistingSaveGameSlotName(SaveSlotIndex).IsEmpty())
+		{
+			return SaveSlotIndex;
+		}
+	}
+
+	return TunaSweeperSave::MinSaveSlotIndex;
+}
+
+int32 UTunaSweeperGameInstance::SanitizeSaveSlotIndex(int32 SaveSlotIndex) const
+{
+	return FMath::Clamp(
+		SaveSlotIndex,
+		TunaSweeperSave::MinSaveSlotIndex,
+		TunaSweeperSave::MaxSaveSlotIndex);
+}
+
+FString UTunaSweeperGameInstance::GetSaveGameSlotName(int32 SaveSlotIndex) const
+{
+	return FString::Printf(
+		TEXT("%s%02d"),
+		TunaSweeperSave::SaveSlotNamePrefix,
+		SanitizeSaveSlotIndex(SaveSlotIndex));
+}
+
+FString UTunaSweeperGameInstance::GetSaveSettingsSlotName() const
+{
+	return FString(TunaSweeperSave::SaveSettingsSlotName);
+}
+
+FString UTunaSweeperGameInstance::GetExistingSaveGameSlotName(int32 SaveSlotIndex) const
+{
+	const int32 SanitizedSlotIndex = SanitizeSaveSlotIndex(SaveSlotIndex);
+	const FString SlotName = GetSaveGameSlotName(SanitizedSlotIndex);
+	if (UGameplayStatics::DoesSaveGameExist(SlotName, TunaSweeperSave::SaveUserIndex))
+	{
+		return SlotName;
+	}
+
+	return FString();
+}
+
+FString UTunaSweeperGameInstance::GetSaveGameFilePath(const FString& SaveSlotName) const
+{
+	return FPaths::Combine(
+		FPaths::ProjectSavedDir(),
+		TEXT("SaveGames"),
+		SaveSlotName + TEXT(".sav"));
+}
+
+FString UTunaSweeperGameInstance::GetSaveGameBackupDirectory() const
+{
+	return FPaths::Combine(FPaths::ProjectSavedDir(), TEXT("SaveGames"), TEXT("Backups"));
+}
+
+FString UTunaSweeperGameInstance::CreateSaveGameBackupFilePath(int32 SaveSlotIndex, FDateTime BackupTime) const
+{
+	const FString BackupFileName = FString::Printf(
+		TEXT("SaveSlot%02d_%s_%lld.sav"),
+		SanitizeSaveSlotIndex(SaveSlotIndex),
+		*BackupTime.ToString(TEXT("%Y%m%d_%H%M%S")),
+		BackupTime.GetTicks());
+
+	return FPaths::Combine(GetSaveGameBackupDirectory(), BackupFileName);
+}
+
+float UTunaSweeperGameInstance::GetCurrentActiveSlotTotalPlaySeconds() const
+{
+	const double SessionSeconds = ActiveSlotStartTimeSeconds > 0.0
+		? FPlatformTime::Seconds() - ActiveSlotStartTimeSeconds
+		: 0.0;
+	return LoadedSlotTotalPlaySeconds + static_cast<float>(FMath::Max(0.0, SessionSeconds));
+}
+
+bool UTunaSweeperGameInstance::IsCurrentWorldBunkerMap() const
+{
+	const UWorld* World = GetWorld();
+	return World && World->GetMapName().EndsWith(TEXT("BunkerMap"));
+}
+
+bool UTunaSweeperGameInstance::IsBunkerToRaidTravel(FName SourceLevelName, FName TargetLevelName) const
+{
+	return IsMapNameMatch(SourceLevelName, TEXT("BunkerMap")) &&
+		IsMapNameMatch(TargetLevelName, TEXT("RaidMap"));
+}
+
+bool UTunaSweeperGameInstance::IsRaidToBunkerTravel(FName SourceLevelName, FName TargetLevelName) const
+{
+	return IsMapNameMatch(SourceLevelName, TEXT("RaidMap")) &&
+		IsMapNameMatch(TargetLevelName, TEXT("BunkerMap"));
+}
+
+bool UTunaSweeperGameInstance::IsMapNameMatch(FName MapName, const TCHAR* ExpectedMapName) const
+{
+	return MapName.ToString().EndsWith(ExpectedMapName);
+}
