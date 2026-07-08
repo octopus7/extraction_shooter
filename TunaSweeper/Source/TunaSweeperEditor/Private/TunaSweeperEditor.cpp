@@ -215,7 +215,7 @@ namespace TunaSweeperEditorSetup
 	const FString CannedTunaIconImportTaskId = TEXT("2026-05-11_ImportCannedTunaIconV1");
 	const FString BackpackInventoryTaskId = TEXT("2026-05-16_CreateEquipmentInventoryAssetsV3");
 	const FString IntroMenuAndLevelTravelTaskId = TEXT("2026-05-24_CreateTitleIntroMenuPersistentSaveSlotSelectionLevelTravelLadderInitialScaleV1");
-	const FString IntroMenuGraphicsSettingsTaskId = TEXT("2026-06-04_RebuildIntroMenuWidgetVariableGuidMapV1");
+	const FString IntroMenuGraphicsSettingsTaskId = TEXT("2026-07-08_CompactTitleSettingsUiV1");
 	const FString OpeningScenarioPresentationTaskId = TEXT("2026-05-19_CreateOpeningScenarioPresentationV2");
 	const FString LevelTransitionVideoTaskId = TEXT("2026-05-16_AddBidirectionalLevelTransitionVideoV3");
 	const FString FirstOutingQuestTaskId = TEXT("2026-05-30_UpdateQuestPanelEmptyStateSelectionV2");
@@ -4710,49 +4710,55 @@ namespace TunaSweeperEditorSetup
 		FillCanvas(RootCanvas->AddChildToCanvas(SettingsPanel));
 		SettingsBackdrop->SetBrush(MakeRoundedBoxBrush(
 			FVector2D(1920.0f, 1080.0f),
-			FLinearColor(0.006f, 0.010f, 0.012f, 0.96f),
+			FLinearColor(0.006f, 0.010f, 0.012f, 0.58f),
 			FLinearColor::Transparent,
 			0.0f,
 			0.0f));
 		FillCanvas(SettingsPanel->AddChildToCanvas(SettingsBackdrop));
 
-		SettingsContentBackground->SetPadding(FMargin(72.0f, 42.0f, 56.0f, 44.0f));
+		SettingsContentBackground->SetPadding(FMargin(32.0f, 28.0f, 32.0f, 24.0f));
 		SettingsContentBackground->SetBrush(MakeRoundedBoxBrush(
-			FVector2D(1920.0f, 1080.0f),
-			FLinearColor::Transparent,
-			FLinearColor::Transparent,
-			0.0f,
-			0.0f));
+			FVector2D(840.0f, 780.0f),
+			FLinearColor(0.015f, 0.025f, 0.030f, 0.86f),
+			FLinearColor(0.58f, 0.70f, 0.70f, 0.62f),
+			1.2f,
+			8.0f));
 		SettingsContentBackground->SetContent(SettingsContentStack);
 		UCanvasPanelSlot* SettingsContentSlot = SettingsPanel->AddChildToCanvas(SettingsContentBackground);
 		if (SettingsContentSlot)
 		{
-			FillCanvas(SettingsContentSlot);
+			SettingsContentSlot->SetAnchors(FAnchors(0.0f, 0.5f));
+			SettingsContentSlot->SetAlignment(FVector2D(0.0f, 0.5f));
+			SettingsContentSlot->SetPosition(FVector2D(164.0f, 0.0f));
+			SettingsContentSlot->SetSize(FVector2D(840.0f, 780.0f));
 		}
 
 		ConfigurePlainButton(BackFromSettingsButtonBox, BackFromSettingsButton, BackFromSettingsButtonText, FText::FromString(TEXT("\u2190")), FVector2D(52.0f, 52.0f), false);
-		UVerticalBoxSlot* SettingsBackSlot = SettingsContentStack->AddChildToVerticalBox(BackFromSettingsButtonBox);
+		UCanvasPanelSlot* SettingsBackSlot = SettingsPanel->AddChildToCanvas(BackFromSettingsButtonBox);
 		if (SettingsBackSlot)
 		{
-			SettingsBackSlot->SetHorizontalAlignment(HAlign_Left);
-			SettingsBackSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 18.0f));
+			SettingsBackSlot->SetAnchors(FAnchors(0.0f, 0.0f));
+			SettingsBackSlot->SetAlignment(FVector2D::ZeroVector);
+			SettingsBackSlot->SetPosition(FVector2D(34.0f, 24.0f));
+			SettingsBackSlot->SetSize(FVector2D(52.0f, 52.0f));
+			SettingsBackSlot->SetZOrder(2);
 		}
 
-		ConfigureTextBlockLeft(SettingsTitleText, FText::FromString(TEXT("\uC124\uC815")), FLinearColor::White, 30);
+		ConfigureTextBlockLeft(SettingsTitleText, FText::FromString(TEXT("\uC124\uC815")), FLinearColor::White, 32);
 		UVerticalBoxSlot* SettingsTitleSlot = SettingsContentStack->AddChildToVerticalBox(SettingsTitleText);
 		if (SettingsTitleSlot)
 		{
 			SettingsTitleSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 10.0f));
 		}
-		ConfigureTextBlockLeft(SettingsStatusText, FText::FromString(TEXT("\uD604\uC7AC: --")), FLinearColor(0.82f, 0.86f, 0.84f, 1.0f), 17);
+		ConfigureTextBlockLeft(SettingsStatusText, FText::FromString(TEXT("\uD604\uC7AC: --")), FLinearColor(0.70f, 0.80f, 0.79f, 1.0f), 15);
 		UVerticalBoxSlot* SettingsStatusSlot = SettingsContentStack->AddChildToVerticalBox(SettingsStatusText);
 		if (SettingsStatusSlot)
 		{
 			SettingsStatusSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 12.0f));
 		}
 
-		ConfigurePlainButton(GraphicsTabButtonBox, SettingsGraphicsTabButton, SettingsGraphicsTabButtonText, FText::FromString(TEXT("\uADF8\uB798\uD53D")), FVector2D(158.0f, 44.0f), true);
-		ConfigurePlainButton(InterfaceTabButtonBox, SettingsInterfaceTabButton, SettingsInterfaceTabButtonText, FText::FromString(TEXT("\uC778\uD130\uD398\uC774\uC2A4")), FVector2D(158.0f, 44.0f), false);
+		ConfigurePlainButton(GraphicsTabButtonBox, SettingsGraphicsTabButton, SettingsGraphicsTabButtonText, FText::FromString(TEXT("\uADF8\uB798\uD53D")), FVector2D(142.0f, 38.0f), true);
+		ConfigurePlainButton(InterfaceTabButtonBox, SettingsInterfaceTabButton, SettingsInterfaceTabButtonText, FText::FromString(TEXT("\uC778\uD130\uD398\uC774\uC2A4")), FVector2D(158.0f, 38.0f), false);
 		for (UWidget* TabButtonBox : { static_cast<UWidget*>(GraphicsTabButtonBox), static_cast<UWidget*>(InterfaceTabButtonBox) })
 		{
 			UHorizontalBoxSlot* TabButtonSlot = SettingsTabRow->AddChildToHorizontalBox(TabButtonBox);
@@ -4778,9 +4784,9 @@ namespace TunaSweeperEditorSetup
 		{
 			WindowModeLabelSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 6.0f));
 		}
-		ConfigurePlainButton(WindowedModeButtonBox, WindowedModeButton, WindowedModeButtonText, FText::FromString(TEXT("\uCC3D\uBAA8\uB4DC")), FVector2D(160.0f, 48.0f), false);
-		ConfigurePlainButton(BorderlessWindowModeButtonBox, BorderlessWindowModeButton, BorderlessWindowModeButtonText, FText::FromString(TEXT("\uD14C\uB450\uB9AC \uC5C6\uB294 \uCC3D\uBAA8\uB4DC")), FVector2D(252.0f, 48.0f), false);
-		ConfigurePlainButton(FullscreenModeButtonBox, FullscreenModeButton, FullscreenModeButtonText, FText::FromString(TEXT("\uC804\uCCB4\uD654\uBA74\uBAA8\uB4DC")), FVector2D(190.0f, 48.0f), false);
+		ConfigurePlainButton(WindowedModeButtonBox, WindowedModeButton, WindowedModeButtonText, FText::FromString(TEXT("\uCC3D\uBAA8\uB4DC")), FVector2D(160.0f, 44.0f), false);
+		ConfigurePlainButton(BorderlessWindowModeButtonBox, BorderlessWindowModeButton, BorderlessWindowModeButtonText, FText::FromString(TEXT("\uD14C\uB450\uB9AC \uC5C6\uB294 \uCC3D\uBAA8\uB4DC")), FVector2D(236.0f, 44.0f), false);
+		ConfigurePlainButton(FullscreenModeButtonBox, FullscreenModeButton, FullscreenModeButtonText, FText::FromString(TEXT("\uC804\uCCB4\uD654\uBA74\uBAA8\uB4DC")), FVector2D(184.0f, 44.0f), false);
 		for (UWidget* WindowModeButtonBox : {
 				static_cast<UWidget*>(WindowedModeButtonBox),
 				static_cast<UWidget*>(BorderlessWindowModeButtonBox),
@@ -4804,11 +4810,11 @@ namespace TunaSweeperEditorSetup
 		{
 			ResolutionLabelSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 6.0f));
 		}
-		ConfigurePlainButton(Resolution1280ButtonBox, Resolution1280Button, Resolution1280ButtonText, FText::FromString(TEXT("1280 x 720")), FVector2D(940.0f, 40.0f), false);
-		ConfigurePlainButton(Resolution1600ButtonBox, Resolution1600Button, Resolution1600ButtonText, FText::FromString(TEXT("1600 x 900")), FVector2D(940.0f, 40.0f), false);
-		ConfigurePlainButton(Resolution1920ButtonBox, Resolution1920Button, Resolution1920ButtonText, FText::FromString(TEXT("1920 x 1080")), FVector2D(940.0f, 40.0f), false);
-		ConfigurePlainButton(Resolution2560ButtonBox, Resolution2560Button, Resolution2560ButtonText, FText::FromString(TEXT("2560 x 1440")), FVector2D(940.0f, 40.0f), false);
-		ConfigurePlainButton(Resolution3840ButtonBox, Resolution3840Button, Resolution3840ButtonText, FText::FromString(TEXT("3840 x 2160")), FVector2D(940.0f, 40.0f), false);
+		ConfigurePlainButton(Resolution1280ButtonBox, Resolution1280Button, Resolution1280ButtonText, FText::FromString(TEXT("1280 x 720")), FVector2D(660.0f, 42.0f), false);
+		ConfigurePlainButton(Resolution1600ButtonBox, Resolution1600Button, Resolution1600ButtonText, FText::FromString(TEXT("1600 x 900")), FVector2D(660.0f, 42.0f), false);
+		ConfigurePlainButton(Resolution1920ButtonBox, Resolution1920Button, Resolution1920ButtonText, FText::FromString(TEXT("1920 x 1080")), FVector2D(660.0f, 42.0f), false);
+		ConfigurePlainButton(Resolution2560ButtonBox, Resolution2560Button, Resolution2560ButtonText, FText::FromString(TEXT("2560 x 1440")), FVector2D(660.0f, 42.0f), false);
+		ConfigurePlainButton(Resolution3840ButtonBox, Resolution3840Button, Resolution3840ButtonText, FText::FromString(TEXT("3840 x 2160")), FVector2D(660.0f, 42.0f), false);
 		for (UWidget* ResolutionButtonBox : {
 				static_cast<UWidget*>(Resolution1280ButtonBox),
 				static_cast<UWidget*>(Resolution1600ButtonBox),
@@ -4834,10 +4840,10 @@ namespace TunaSweeperEditorSetup
 		{
 			DLSSLabelSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 6.0f));
 		}
-		ConfigurePlainButton(DLSSOffButtonBox, DLSSOffButton, DLSSOffButtonText, FText::FromString(TEXT("\uB044\uAE30")), FVector2D(142.0f, 44.0f), false);
-		ConfigurePlainButton(DLSSQualityButtonBox, DLSSQualityButton, DLSSQualityButtonText, FText::FromString(TEXT("\uD488\uC9C8")), FVector2D(142.0f, 44.0f), false);
-		ConfigurePlainButton(DLSSBalancedButtonBox, DLSSBalancedButton, DLSSBalancedButtonText, FText::FromString(TEXT("\uADE0\uD615")), FVector2D(142.0f, 44.0f), false);
-		ConfigurePlainButton(DLSSPerformanceButtonBox, DLSSPerformanceButton, DLSSPerformanceButtonText, FText::FromString(TEXT("\uC131\uB2A5")), FVector2D(142.0f, 44.0f), false);
+		ConfigurePlainButton(DLSSOffButtonBox, DLSSOffButton, DLSSOffButtonText, FText::FromString(TEXT("\uB044\uAE30")), FVector2D(146.0f, 42.0f), false);
+		ConfigurePlainButton(DLSSQualityButtonBox, DLSSQualityButton, DLSSQualityButtonText, FText::FromString(TEXT("\uD488\uC9C8")), FVector2D(146.0f, 42.0f), false);
+		ConfigurePlainButton(DLSSBalancedButtonBox, DLSSBalancedButton, DLSSBalancedButtonText, FText::FromString(TEXT("\uADE0\uD615")), FVector2D(146.0f, 42.0f), false);
+		ConfigurePlainButton(DLSSPerformanceButtonBox, DLSSPerformanceButton, DLSSPerformanceButtonText, FText::FromString(TEXT("\uC131\uB2A5")), FVector2D(146.0f, 42.0f), false);
 		for (UWidget* DLSSButtonBox : {
 				static_cast<UWidget*>(DLSSOffButtonBox),
 				static_cast<UWidget*>(DLSSQualityButtonBox),
@@ -4870,9 +4876,9 @@ namespace TunaSweeperEditorSetup
 			LanguageLabelSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 8.0f));
 		}
 
-		ConfigurePlainButton(LanguageEnglishButtonBox, LanguageEnglishButton, LanguageEnglishButtonText, FText::FromString(TEXT("[x] English")), FVector2D(940.0f, 48.0f), false);
-		ConfigurePlainButton(LanguageKoreanButtonBox, LanguageKoreanButton, LanguageKoreanButtonText, FText::FromString(TEXT("[ ] \uD55C\uAD6D\uC5B4")), FVector2D(940.0f, 48.0f), false);
-		ConfigurePlainButton(LanguageJapaneseButtonBox, LanguageJapaneseButton, LanguageJapaneseButtonText, FText::FromString(TEXT("[ ] \u65E5\u672C\u8A9E")), FVector2D(940.0f, 48.0f), false);
+		ConfigurePlainButton(LanguageEnglishButtonBox, LanguageEnglishButton, LanguageEnglishButtonText, FText::FromString(TEXT("[x] English")), FVector2D(660.0f, 46.0f), false);
+		ConfigurePlainButton(LanguageKoreanButtonBox, LanguageKoreanButton, LanguageKoreanButtonText, FText::FromString(TEXT("[ ] \uD55C\uAD6D\uC5B4")), FVector2D(660.0f, 46.0f), false);
+		ConfigurePlainButton(LanguageJapaneseButtonBox, LanguageJapaneseButton, LanguageJapaneseButtonText, FText::FromString(TEXT("[ ] \u65E5\u672C\u8A9E")), FVector2D(660.0f, 46.0f), false);
 		for (UWidget* LanguageButtonBox : {
 				static_cast<UWidget*>(LanguageEnglishButtonBox),
 				static_cast<UWidget*>(LanguageKoreanButtonBox),
@@ -4890,8 +4896,8 @@ namespace TunaSweeperEditorSetup
 			LanguageStackSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 22.0f));
 		}
 
-		ConfigurePlainButton(ConfirmInterfaceSettingsButtonBox, ConfirmInterfaceSettingsButton, ConfirmInterfaceSettingsButtonText, FText::FromString(TEXT("\uACB0\uC815")), FVector2D(180.0f, 50.0f), true);
-		ConfigurePlainButton(CancelInterfaceSettingsButtonBox, CancelInterfaceSettingsButton, CancelInterfaceSettingsButtonText, FText::FromString(TEXT("\uCDE8\uC18C")), FVector2D(180.0f, 50.0f), false);
+		ConfigurePlainButton(ConfirmInterfaceSettingsButtonBox, ConfirmInterfaceSettingsButton, ConfirmInterfaceSettingsButtonText, FText::FromString(TEXT("\uACB0\uC815")), FVector2D(160.0f, 46.0f), true);
+		ConfigurePlainButton(CancelInterfaceSettingsButtonBox, CancelInterfaceSettingsButton, CancelInterfaceSettingsButtonText, FText::FromString(TEXT("\uCDE8\uC18C")), FVector2D(160.0f, 46.0f), false);
 		UHorizontalBoxSlot* ConfirmInterfaceSlot = InterfaceActionButtonRow->AddChildToHorizontalBox(ConfirmInterfaceSettingsButtonBox);
 		if (ConfirmInterfaceSlot)
 		{

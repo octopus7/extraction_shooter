@@ -383,8 +383,11 @@ private:
 	void RefreshMainMenu();
 	void RefreshDifficultySelectionPanel();
 	void RefreshSaveSlotMenu();
+	void EnsureSettingsPanelLayout();
 	void RefreshSettingsPanel();
 	void RefreshInterfaceSettingsPanel();
+	void RefreshSettingsSelectionStyles(const FIntPoint& CurrentResolution, EWindowMode::Type CurrentWindowMode);
+	void RefreshInterfaceSelectionStyles();
 	void RefreshLocalizedTexts();
 	void RefreshSaveSlotButton(int32 SaveSlotIndex, UButton* SlotButton, UTextBlock* SlotText);
 	void ApplySaveSlotButtonStyle(UButton* SlotButton, bool bSelected);
@@ -404,6 +407,12 @@ private:
 	void ApplyDLSSSetting(ETunaSweeperTitleDLSSMode DLSSMode);
 	void ApplyDLSSModeToRuntime(ETunaSweeperTitleDLSSMode DLSSMode) const;
 	bool IsDLSSModeAvailable(ETunaSweeperTitleDLSSMode DLSSMode) const;
+	void ApplySettingsChoiceButtonStyle(
+		UButton* Button,
+		const FVector2D& ButtonSize,
+		bool bSelected,
+		bool bPrimary = false) const;
+	void ApplySettingsTabButtonStyle(UButton* Button, const FVector2D& ButtonSize, bool bSelected) const;
 	FText BuildWindowModeText(EWindowMode::Type WindowMode) const;
 	FText BuildDLSSModeText(ETunaSweeperTitleDLSSMode DLSSMode) const;
 	FText BuildLanguageNameText(ETunaSweeperItemTextLanguage Language) const;
