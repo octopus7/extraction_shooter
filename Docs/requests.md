@@ -4698,7 +4698,31 @@
 - 전투 결과 UI 목업의 밀도와 디자인 방향은 유지하되, 큰 외곽 프레임과 SF HUD 느낌을 제거한 새 이미지 목업을 만든 것.
 - 단순한 게임 톤에 맞도록 금속 프레임, 각진 코너, 네온/사이버 장식 대신 어두운 배경 오버레이, 얇은 구분선, 식물 장식, 간결한 경험치 바로 구성한 것.
 
+## 2026-07-08 15:25:58 (소요시간: 00:01:43)
+
+- 전투 결과 UI 목업에서 `레이드 경험치` 라벨과 해당 라벨 양옆 장식선이 불필요하다는 피드백을 반영해 새 이미지 목업을 만든 것.
+- 상단 `레이드 결과` 이후 곧바로 `레벨 5`가 보이도록 구성하고, 중간 섹션 라벨은 제거한 것.
+
+## 2026-07-08 15:28:13 (소요시간: 00:01:42)
+
+- 전투 결과 UI 목업에서 게이지 구간 숫자 `0`, `150`, `300`과 내부 눈금 표기가 불필요하다는 피드백을 반영해 새 이미지 목업을 만든 것.
+- 경험치 바를 구간 표기 없는 단순 연속 바 형태로 정리하고, `108 / 300 EXP`, `+164 EXP`, `보상 정산 중...` 정보만 남긴 것.
+
 ## 2026-07-08 15:18:07 (소요시간: 00:02:39)
 
 - `TunaSweeper/Source` 아래 C++ 관련 파일(`.cpp`, `.h`, `.hpp`, `.inl`)의 물리 라인 수를 집계해 과도하게 긴 파일 여부를 검토한 것.
 - 3,000라인 이상 4개, 2,000라인 이상 8개, 1,000라인 이상 23개 파일이 있음을 확인하고, 특히 `TunaSweeperEditor.cpp`, `TunaSweeperGameInstance.cpp`, HUD/인트로 메뉴 위젯, 플레이어 캐릭터/컨트롤러, 적 스폰 서브시스템을 분리 우선 후보로 정리한 것.
+
+## 2026-07-08 15:21:00 (소요시간: 00:18:41)
+
+- `TunaSweeperEditor.cpp`의 대형 에디터 setup 코드를 역할별 파일로 분리해 메인 모듈 파일을 모듈 진입점 중심으로 축소한 것.
+- 공통 선언/상수는 `TunaSweeperEditorSetupShared.h`, 핵심 에셋/입력은 `TunaSweeperEditorSetupCore.cpp`, 위젯 생성은 `TunaSweeperEditorSetupWidgets.cpp`, 효과/머티리얼은 `TunaSweeperEditorSetupEffects.cpp`, import 처리는 `TunaSweeperEditorSetupImports.cpp`, 월드/상호작용 배치는 `TunaSweeperEditorSetupWorld.cpp`로 분리한 것.
+- 한 번 실행하고 정리될 에디터 bootstrap/예약 코드는 `TunaSweeperEditorOneShot_ToCleanupOnExplicitRequest.cpp`와 `RunEditorOneShotSetup_ToCleanupOnExplicitRequest` 이름으로 표시하고, `Docs/editor_one_shot_cleanup.md`에 정리 대상 목록을 남긴 것.
+- unity build에서 기존 인트로 메뉴 위젯의 `MakeRoundedBoxBrush` 이름 충돌이 발생해 해당 호출을 명시적 namespace 한정으로 수정한 것.
+- `TunaSweeperEditor` 타깃 빌드에서 컴파일과 에디터 모듈 lib 링크는 통과했으나, 실행 중인 `UnrealEditor.exe`가 DLL을 잠그고 있어 최종 DLL 링크는 실패한 것을 확인한 것.
+
+## 2026-07-08 15:43:58 (소요시간: 00:01:51)
+
+- 실행 중인 `UnrealEditor.exe`가 `UnrealEditor-TunaSweeper.dll`과 `UnrealEditor-TunaSweeperEditor.dll`을 잠그고 있어 첫 빌드가 링크 단계에서 실패한 것을 확인한 것.
+- 정상 종료 요청이 실패해 사용자 승인 후 기존 `UnrealEditor.exe` 프로세스를 종료하고, `TunaSweeperEditor Win64 Development` 빌드를 다시 실행해 성공시킨 것.
+- 빌드 성공 후 UE 5.7 `UnrealEditor.exe`로 `TunaSweeper/TunaSweeper.uproject`를 실행한 것.

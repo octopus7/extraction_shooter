@@ -1537,7 +1537,7 @@ void UTunaSweeperIntroMenuWidget::EnsureSettingsPanelLayout()
 		SettingsBackdrop->RemoveFromParent();
 		SettingsCanvas->AddChildToCanvas(SettingsBackdrop);
 	}
-	SettingsBackdrop->SetBrush(MakeRoundedBoxBrush(
+	SettingsBackdrop->SetBrush(TunaSweeperSettingsUi::MakeRoundedBoxBrush(
 		FVector2D(1920.0f, 1080.0f),
 		FLinearColor(0.006f, 0.010f, 0.012f, 0.58f),
 		FLinearColor::Transparent,
@@ -1551,7 +1551,7 @@ void UTunaSweeperIntroMenuWidget::EnsureSettingsPanelLayout()
 		SettingsCanvas->AddChildToCanvas(SettingsContentBackground);
 	}
 	SettingsContentBackground->SetPadding(FMargin(32.0f, 28.0f, 32.0f, 24.0f));
-	SettingsContentBackground->SetBrush(MakeRoundedBoxBrush(
+	SettingsContentBackground->SetBrush(TunaSweeperSettingsUi::MakeRoundedBoxBrush(
 		FVector2D(PanelWidth, PanelHeight),
 		PanelFill,
 		PanelOutline,
@@ -1981,25 +1981,25 @@ void UTunaSweeperIntroMenuWidget::ApplySettingsChoiceButtonStyle(
 		: FLinearColor(0.56f, 0.66f, 0.66f, 0.70f);
 
 	FButtonStyle ButtonStyle;
-	ButtonStyle.SetNormal(MakeRoundedBoxBrush(
+	ButtonStyle.SetNormal(TunaSweeperSettingsUi::MakeRoundedBoxBrush(
 		ButtonSize,
 		NormalFill,
 		Outline,
 		bSelected || bPrimary ? 1.8f : 1.0f,
 		ButtonCornerRadius));
-	ButtonStyle.SetHovered(MakeRoundedBoxBrush(
+	ButtonStyle.SetHovered(TunaSweeperSettingsUi::MakeRoundedBoxBrush(
 		ButtonSize,
 		HoveredFill,
 		FLinearColor(0.82f, 0.98f, 1.0f, 1.0f),
 		bSelected || bPrimary ? 2.2f : 1.4f,
 		ButtonCornerRadius));
-	ButtonStyle.SetPressed(MakeRoundedBoxBrush(
+	ButtonStyle.SetPressed(TunaSweeperSettingsUi::MakeRoundedBoxBrush(
 		ButtonSize,
 		PressedFill,
 		Outline * 0.84f,
 		1.0f,
 		ButtonCornerRadius));
-	ButtonStyle.SetDisabled(MakeRoundedBoxBrush(
+	ButtonStyle.SetDisabled(TunaSweeperSettingsUi::MakeRoundedBoxBrush(
 		ButtonSize,
 		bSelected ? NormalFill : FLinearColor(0.018f, 0.024f, 0.028f, 0.58f),
 		bSelected ? Outline : FLinearColor(0.30f, 0.36f, 0.36f, 0.42f),
@@ -2035,25 +2035,25 @@ void UTunaSweeperIntroMenuWidget::ApplySettingsTabButtonStyle(
 		: FLinearColor(0.46f, 0.56f, 0.56f, 0.68f);
 
 	FButtonStyle ButtonStyle;
-	ButtonStyle.SetNormal(MakeRoundedBoxBrush(
+	ButtonStyle.SetNormal(TunaSweeperSettingsUi::MakeRoundedBoxBrush(
 		ButtonSize,
 		Fill,
 		Outline,
 		bSelected ? 1.8f : 1.0f,
 		TunaSweeperSettingsUi::ButtonCornerRadius));
-	ButtonStyle.SetHovered(MakeRoundedBoxBrush(
+	ButtonStyle.SetHovered(TunaSweeperSettingsUi::MakeRoundedBoxBrush(
 		ButtonSize,
 		HoveredFill,
 		FLinearColor(0.78f, 0.98f, 1.0f, 1.0f),
 		2.0f,
 		TunaSweeperSettingsUi::ButtonCornerRadius));
-	ButtonStyle.SetPressed(MakeRoundedBoxBrush(
+	ButtonStyle.SetPressed(TunaSweeperSettingsUi::MakeRoundedBoxBrush(
 		ButtonSize,
 		Fill * 0.78f,
 		Outline,
 		1.0f,
 		TunaSweeperSettingsUi::ButtonCornerRadius));
-	ButtonStyle.SetDisabled(MakeRoundedBoxBrush(
+	ButtonStyle.SetDisabled(TunaSweeperSettingsUi::MakeRoundedBoxBrush(
 		ButtonSize,
 		Fill,
 		Outline,
