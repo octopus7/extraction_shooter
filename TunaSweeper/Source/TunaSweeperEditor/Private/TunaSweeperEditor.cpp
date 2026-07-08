@@ -36,6 +36,7 @@
 #include "Components/VerticalBox.h"
 #include "Components/VerticalBoxSlot.h"
 #include "Containers/Ticker.h"
+#include "Dataflow/DataflowSelection.h"
 #include "Effect/TunaSweeperProjectileHitBurstActor.h"
 #include "Effect/TunaSweeperProjectileHitEffectDataAsset.h"
 #include "Engine/Blueprint.h"
@@ -48,6 +49,8 @@
 #include "EngineUtils.h"
 #include "Editor.h"
 #include "Factories/BlueprintFactory.h"
+#include "FractureEngineFracturing.h"
+#include "FractureEngineSelection.h"
 #include "FileHelpers.h"
 #include "Game/TunaSweeperGameMode.h"
 #include "Game/TunaSweeperGameInstance.h"
@@ -59,12 +62,20 @@
 #include "InputCoreTypes.h"
 #include "InputMappingContext.h"
 #include "InputModifiers.h"
+#include "GeometryCollection/GeometryCollectionEngineConversion.h"
+#include "GeometryCollection/GeometryCollectionObject.h"
+#include "GeometryCollection/GeometryCollectionSimulationTypes.h"
+#include "GeometryCollection/GeometryCollectionUtility.h"
+#include "GeometryCollection/ManagedArrayCollection.h"
+#include "Interaction/TunaSweeperBreakableAppleCrateActor.h"
 #include "Interaction/TunaSweeperExplosiveBarrelActor.h"
 #include "Interaction/TunaSweeperInteractableComponent.h"
 #include "Interaction/TunaSweeperItemSpawnInteractableActor.h"
 #include "Interaction/TunaSweeperLevelTravelInteractableActor.h"
 #include "Interaction/TunaSweeperLootContainerActor.h"
 #include "Interaction/TunaSweeperLootContainerSpawnInteractableActor.h"
+#include "Interaction/TunaSweeperPhysicsAppleActor.h"
+#include "Interaction/TunaSweeperPhysicsCrateFragmentActor.h"
 #include "Interaction/TunaSweeperPickupItemActor.h"
 #include "Interaction/TunaSweeperSandbagCoverActor.h"
 #include "Interaction/TunaSweeperSelfDestructInteractableActor.h"
@@ -213,6 +224,7 @@ namespace TunaSweeperEditorSetup
 	const FString WarpPointInteractionTaskId = TEXT("2026-05-25_CreateWarpPointInteractionAssetsV1");
 	const FString EnemyVisualMaterialTaskId = TEXT("2026-05-19_CreateEnemyAndContainerVisualMaterialsV3");
 	const FString ExplosiveBarrelTaskId = TEXT("2026-05-29_CreateExplosiveBarrelAssetsV8");
+	const FString BreakableAppleCrateTaskId = TEXT("2026-07-07_CreateBreakableAppleCrateAssetsV5");
 	const FString RollingBomberBodyMaterialTaskId = TEXT("2026-05-28_CreateRollingBomberBodyGrayMaterialV1");
 	const FString RollingBomberLegMaterialTaskId = TEXT("2026-05-28_CreateRollingBomberLegMetalMaterialV1");
 	const FString RollingBomberChargeCylinderEffectTaskId = TEXT("2026-05-28_CreateRollingBomberChargeCylinderEffectV1");
@@ -412,6 +424,10 @@ namespace TunaSweeperEditorSetup
 	const FString BrokenBridgeVoxelMeshAssetName = TEXT("SM_Bridge_Broken_Voxel");
 	const FString RepairedBridgeVoxelMeshAssetName = TEXT("SM_Bridge_Repaired_Voxel");
 	const FString ExplosiveBarrelAssetName = TEXT("BP_ExplosiveBarrel");
+	const FString BreakableAppleCrateAssetName = TEXT("BP_BreakableAppleCrate");
+	const FString PhysicsAppleAssetName = TEXT("BP_PhysicsApple");
+	const FString CrateFragmentAssetName = TEXT("BP_CrateFragment");
+	const FString CrateGeometryCollectionAssetName = TEXT("GC_CrateB_Fractured");
 	const FString ExplosiveBarrelIntactMeshAssetName = TEXT("SM_ExplosiveBarrel_Intact");
 	const FString ExplosiveBarrelDestroyedMeshAssetName = TEXT("SM_ExplosiveBarrel_DestroyedBase");
 	const FString ExplosiveBarrelGrayMaterialAssetName = TEXT("M_ExplosiveBarrel_Gray");
@@ -3076,6 +3092,261 @@ namespace TunaSweeperEditorSetup
 
 		return IntactMaterial && DestroyedMaterial && DetailMaterial && IntactMesh && DestroyedMesh &&
 			ConfigureExplosiveBarrelBlueprint(ExplosiveBarrelBlueprint);
+	}
+
+	UGeometryCollection* EnsureBreakableAppleCrateGeometryCollection()
+	{
+		const FString PackageName = FString::Printf(
+			TEXT("%s/%s"),
+			*InteractionAssetPath,
+			*CrateGeometryCollectionAssetName);
+		const FString ObjectPath = FString::Printf(
+			TEXT("%s.%s"),
+			*PackageName,
+			*CrateGeometryCollectionAssetName);
+
+		UGeometryCollection* GeometryCollection = LoadObject<UGeometryCollection>(nullptr, *ObjectPath);
+		const bool bCreatedGeometryCollection = GeometryCollection == nullptr;
+		UPackage* Package = GeometryCollection ? GeometryCollection->GetOutermost() : CreatePackage(*PackageName);
+		if (!Package)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to create package for %s."), *ObjectPath);
+			return nullptr;
+		}
+
+		if (!GeometryCollection)
+		{
+			GeometryCollection = NewObject<UGeometryCollection>(
+				Package,
+				*CrateGeometryCollectionAssetName,
+				RF_Public | RF_Standalone | RF_Transactional);
+		}
+		if (!GeometryCollection)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to create %s."), *ObjectPath);
+			return nullptr;
+		}
+
+		UStaticMesh* SourceMesh = LoadObject<UStaticMesh>(
+			nullptr,
+			TEXT("/Game/Nature/Wood/SM_CrateB.SM_CrateB"));
+		if (!SourceMesh)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to load SM_CrateB for crate fracture."));
+			return nullptr;
+		}
+
+		FManagedArrayCollection Collection;
+		TArray<TObjectPtr<UMaterialInterface>> Materials;
+		TArray<FGeometryCollectionAutoInstanceMesh> AutoInstanceMeshes;
+		TObjectPtr<UStaticMesh> SourceMeshObject = SourceMesh;
+		FGeometryCollectionEngineConversion::ConvertStaticMeshToGeometryCollection(
+			SourceMeshObject,
+			FTransform::Identity,
+			Collection,
+			Materials,
+			AutoInstanceMeshes,
+			false,
+			false);
+
+		FDataflowTransformSelection TransformSelection;
+		TransformSelection.InitializeFromCollection(Collection, true);
+
+		FUniformFractureSettings FractureSettings{};
+		FractureSettings.Transform = FTransform::Identity;
+		FractureSettings.MinVoronoiSites = 36;
+		FractureSettings.MaxVoronoiSites = 48;
+		FractureSettings.InternalMaterialID = 0;
+		FractureSettings.RandomSeed = 5707;
+		FractureSettings.ChanceToFracture = 1.0f;
+		FractureSettings.GroupFracture = false;
+		FractureSettings.SplitIslands = false;
+		FractureSettings.Grout = 0.0f;
+		FractureSettings.NoiseSettings.Amplitude = 0.0f;
+		FractureSettings.NoiseSettings.Frequency = 0.1f;
+		FractureSettings.NoiseSettings.Octaves = 1;
+		FractureSettings.NoiseSettings.PointSpacing = 2.0f;
+		FractureSettings.NoiseSettings.Lacunarity = 2.0f;
+		FractureSettings.NoiseSettings.Persistence = 0.5f;
+		FractureSettings.AddSamplesForCollision = true;
+		FractureSettings.CollisionSampleSpacing = 8.0f;
+
+		const int32 FractureResult = FFractureEngineFracturing::UniformFracture(
+			Collection,
+			TransformSelection,
+			FractureSettings);
+		if (FractureResult == INDEX_NONE)
+		{
+			UE_LOG(LogTunaSweeperEditor, Warning, TEXT("Uniform fracture returned no result for %s."), *ObjectPath);
+		}
+
+		GeometryCollection->Modify();
+		GeometryCollection->ResetFrom(Collection, Materials, false);
+		GeometryCollection->SetAutoInstanceMeshes(AutoInstanceMeshes);
+		GeometryCollection->EnableClustering = false;
+		GeometryCollection->ClusterGroupIndex = 0;
+		GeometryCollection->MaxClusterLevel = 0;
+		GeometryCollection->DamageModel = EDamageModelTypeEnum::Chaos_Damage_Model_UserDefined_Damage_Threshold;
+		GeometryCollection->DamageThreshold = { 0.0f };
+		GeometryCollection->bUseSizeSpecificDamageThreshold = false;
+		GeometryCollection->bUseMaterialDamageModifiers = false;
+		GeometryCollection->PerClusterOnlyDamageThreshold = false;
+		GeometryCollection->bMassAsDensity = false;
+		GeometryCollection->Mass = 12.0f;
+		GeometryCollection->MinimumMassClamp = 0.05f;
+		GeometryCollection->bImportCollisionFromSource = false;
+		GeometryCollection->bOptimizeConvexes = true;
+		GeometryCollection->SizeSpecificData.Reset();
+		FGeometryCollectionSizeSpecificData SizeData =
+			UGeometryCollection::GeometryCollectionSizeSpecificDataDefaults();
+		SizeData.DamageThreshold = 0;
+		if (SizeData.CollisionShapes.Num() > 0)
+		{
+			SizeData.CollisionShapes[0].CollisionType = ECollisionTypeEnum::Chaos_Volumetric;
+			SizeData.CollisionShapes[0].ImplicitType = EImplicitTypeEnum::Chaos_Implicit_Convex;
+			SizeData.CollisionShapes[0].CollisionObjectReductionPercentage = 0.0f;
+		}
+		GeometryCollection->SizeSpecificData.Add(SizeData);
+
+#if WITH_EDITORONLY_DATA
+		TArray<TObjectPtr<UMaterialInterface>> SourceMaterials;
+		for (const FStaticMaterial& StaticMaterial : SourceMesh->GetStaticMaterials())
+		{
+			SourceMaterials.Add(StaticMaterial.MaterialInterface);
+		}
+		GeometryCollection->GeometrySource.Reset();
+		GeometryCollection->GeometrySource.Emplace(
+			FSoftObjectPath(SourceMesh),
+			FTransform::Identity,
+			SourceMaterials,
+			false,
+			false);
+		GeometryCollection->SetRootProxiesFromGeometrySources();
+#endif
+
+		if (GeometryCollection->GetGeometryCollection().IsValid())
+		{
+			::GeometryCollection::GenerateTemporaryGuids(
+				GeometryCollection->GetGeometryCollection().Get(),
+				0,
+				true);
+		}
+		GeometryCollection->InvalidateCollection();
+		GeometryCollection->CreateSimulationData();
+		GeometryCollection->RebuildRenderData();
+		GeometryCollection->MarkPackageDirty();
+		Package->SetDirtyFlag(true);
+
+		if (bCreatedGeometryCollection)
+		{
+			FAssetRegistryModule::AssetCreated(GeometryCollection);
+		}
+
+		return SaveAsset(GeometryCollection) ? GeometryCollection : nullptr;
+	}
+
+	bool EnsureBreakableAppleCrateAssets()
+	{
+		UGeometryCollection* CrateGeometryCollection = EnsureBreakableAppleCrateGeometryCollection();
+		UBlueprint* AppleBlueprint = EnsureBlueprint(
+			InteractionAssetPath,
+			PhysicsAppleAssetName,
+			ATunaSweeperPhysicsAppleActor::StaticClass());
+		UBlueprint* CrateFragmentBlueprint = EnsureBlueprint(
+			InteractionAssetPath,
+			CrateFragmentAssetName,
+			ATunaSweeperPhysicsCrateFragmentActor::StaticClass());
+		UBlueprint* AppleCrateBlueprint = EnsureBlueprint(
+			InteractionAssetPath,
+			BreakableAppleCrateAssetName,
+			ATunaSweeperBreakableAppleCrateActor::StaticClass());
+		if (!CrateGeometryCollection || !AppleBlueprint || !CrateFragmentBlueprint || !AppleCrateBlueprint)
+		{
+			return false;
+		}
+
+		FKismetEditorUtilities::CompileBlueprint(AppleBlueprint);
+		ATunaSweeperPhysicsAppleActor* AppleDefaults = AppleBlueprint->GeneratedClass
+			? Cast<ATunaSweeperPhysicsAppleActor>(AppleBlueprint->GeneratedClass->GetDefaultObject())
+			: nullptr;
+		if (!AppleDefaults)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to configure %s defaults."), *GetNameSafe(AppleBlueprint));
+			return false;
+		}
+
+		AppleBlueprint->Modify();
+		AppleDefaults->Modify();
+		AppleDefaults->ConfigurePhysicsAppleDefaults(
+			TSoftObjectPtr<UStaticMesh>(FSoftObjectPath(TEXT("/Game/Meshes/Props/Apple/SM_Apple.SM_Apple"))),
+			14.0f,
+			1.0f,
+			12.0f);
+		FBlueprintEditorUtils::MarkBlueprintAsModified(AppleBlueprint);
+		FKismetEditorUtilities::CompileBlueprint(AppleBlueprint);
+		AppleBlueprint->MarkPackageDirty();
+
+		FKismetEditorUtilities::CompileBlueprint(CrateFragmentBlueprint);
+		ATunaSweeperPhysicsCrateFragmentActor* FragmentDefaults = CrateFragmentBlueprint->GeneratedClass
+			? Cast<ATunaSweeperPhysicsCrateFragmentActor>(CrateFragmentBlueprint->GeneratedClass->GetDefaultObject())
+			: nullptr;
+		if (!FragmentDefaults)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to configure %s defaults."), *GetNameSafe(CrateFragmentBlueprint));
+			return false;
+		}
+
+		CrateFragmentBlueprint->Modify();
+		FragmentDefaults->Modify();
+		FragmentDefaults->ConfigureCrateFragmentDefaults(
+			TSoftObjectPtr<UStaticMesh>(FSoftObjectPath(TEXT("/Engine/BasicShapes/Cube.Cube"))),
+			nullptr,
+			FVector(6.0f, 18.0f, 44.0f),
+			8.0f);
+		FBlueprintEditorUtils::MarkBlueprintAsModified(CrateFragmentBlueprint);
+		FKismetEditorUtilities::CompileBlueprint(CrateFragmentBlueprint);
+		CrateFragmentBlueprint->MarkPackageDirty();
+
+		FKismetEditorUtilities::CompileBlueprint(AppleCrateBlueprint);
+		ATunaSweeperBreakableAppleCrateActor* CrateDefaults = AppleCrateBlueprint->GeneratedClass
+			? Cast<ATunaSweeperBreakableAppleCrateActor>(AppleCrateBlueprint->GeneratedClass->GetDefaultObject())
+			: nullptr;
+		if (!CrateDefaults)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to configure %s defaults."), *GetNameSafe(AppleCrateBlueprint));
+			return false;
+		}
+
+		TSubclassOf<ATunaSweeperPhysicsAppleActor> AppleActorClass = ATunaSweeperPhysicsAppleActor::StaticClass();
+		if (AppleBlueprint->GeneratedClass &&
+			AppleBlueprint->GeneratedClass->IsChildOf(ATunaSweeperPhysicsAppleActor::StaticClass()))
+		{
+			AppleActorClass = AppleBlueprint->GeneratedClass;
+		}
+		TSubclassOf<ATunaSweeperPhysicsCrateFragmentActor> CrateFragmentActorClass =
+			ATunaSweeperPhysicsCrateFragmentActor::StaticClass();
+		if (CrateFragmentBlueprint->GeneratedClass &&
+			CrateFragmentBlueprint->GeneratedClass->IsChildOf(ATunaSweeperPhysicsCrateFragmentActor::StaticClass()))
+		{
+			CrateFragmentActorClass = CrateFragmentBlueprint->GeneratedClass;
+		}
+		AppleCrateBlueprint->Modify();
+		CrateDefaults->Modify();
+		CrateDefaults->ConfigureBreakableAppleCrateDefaults(
+			FName(TEXT("TS_BreakableAppleCrate_Default")),
+			1.0f,
+			TSoftObjectPtr<UStaticMesh>(FSoftObjectPath(TEXT("/Game/Nature/Wood/SM_CrateB.SM_CrateB"))),
+			TSoftObjectPtr<UGeometryCollection>(
+				FSoftObjectPath(TEXT("/Game/Interaction/GC_CrateB_Fractured.GC_CrateB_Fractured"))),
+			AppleActorClass,
+			TSoftObjectPtr<UStaticMesh>(FSoftObjectPath(TEXT("/Game/Meshes/Props/Apple/SM_Apple.SM_Apple"))),
+			CrateFragmentActorClass,
+			TSoftObjectPtr<UStaticMesh>(FSoftObjectPath(TEXT("/Engine/BasicShapes/Cube.Cube"))));
+		FBlueprintEditorUtils::MarkBlueprintAsModified(AppleCrateBlueprint);
+		FKismetEditorUtilities::CompileBlueprint(AppleCrateBlueprint);
+		AppleCrateBlueprint->MarkPackageDirty();
+
+		return SaveAsset(AppleBlueprint) && SaveAsset(CrateFragmentBlueprint) && SaveAsset(AppleCrateBlueprint);
 	}
 
 	bool EnsureSharedVoxelMeshAssets()
@@ -13105,6 +13376,20 @@ public:
 			}
 		}
 
+		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperRebuildBreakableAppleCrate")))
+		{
+			if (TunaSweeperEditorSetup::EnsureBreakableAppleCrateAssets())
+			{
+				FTunaSweeperEditorRunOnce::MarkCompleted(TunaSweeperEditorSetup::BreakableAppleCrateTaskId);
+			}
+
+			if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperBreakableAppleCrateSetupQuit")))
+			{
+				FPlatformMisc::RequestExit(false);
+				return;
+			}
+		}
+
 		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperRebuildProceduralTerrainTest")))
 		{
 			FTSTicker::GetCoreTicker().AddTicker(
@@ -13208,6 +13493,13 @@ public:
 			[]()
 			{
 				return TunaSweeperEditorSetup::EnsureExplosiveBarrelAssets();
+			});
+
+		FTunaSweeperEditorRunOnce::Run(
+			TunaSweeperEditorSetup::BreakableAppleCrateTaskId,
+			[]()
+			{
+				return TunaSweeperEditorSetup::EnsureBreakableAppleCrateAssets();
 			});
 
 		FTunaSweeperEditorRunOnce::Run(

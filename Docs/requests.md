@@ -4659,3 +4659,21 @@
 - 기본 `WindSpeed`를 `0.0`으로 바꿔 텍스처가 시간에 따라 흐르지 않고 카메라 이동/시선 변화에 의한 시프팅만 보이도록 한 것.
 - 기존 1회 생성 ID를 `2026-07-06_PuddleSkyReflectionMaterialNoRippleV2`로 갱신하고, 재생성 플래그와 일반 에디터 시작으로 `/Game/Prototype/Water/M_PuddleSkyReflection`, `/Game/Prototype/Water/MI_PuddleSkyReflection`을 다시 저장한 것.
 - `TunaSweeperEditor Win64 Development` 빌드를 통과시키고, 저장된 에셋에서 `RippleScale`, `RippleStrength`, `waveA`, `waveB` 문자열이 남아 있지 않음을 확인한 것.
+
+## 2026-07-08 14:24:09 (소요시간: 00:04:18)
+
+- `mig_miya` 브랜치의 부서지는 사과 상자 구현과 `main..mig_miya` 변경 파일 목록을 검토한 것.
+- `ATunaSweeperBreakableAppleCrateActor`, 물리 사과/파편 액터, 발사체 피해 숫자 연결, Chaos Geometry Collection 에디터 생성 경로를 확인한 것.
+- 변경 범위에 사과 상자 외 로봇/물 VFX/실험 BP/문서 변경도 포함되어 있음을 확인하고, 머지 전 분리 검토가 필요하다고 정리한 것.
+
+## 2026-07-08 14:29:06 (소요시간: 00:03:16)
+
+- `mig_miya` 브랜치의 최종 상태에서 부서지는 사과 상자 기능에 필요한 파일만 `main` 워킹트리로 가져온 것.
+- `RaidMap.umap`은 가져오지 않았고, 로봇 에셋, 물 VFX, 실험 발사체 BP, branch 쪽 문서 로그, `DefaultGame.ini` cook 범위 변경도 제외한 것.
+- 레벨에 `BP_BreakableAppleCrate`를 수동 배치하면 동작하도록 C++ 클래스, BP/GeometryCollection/사과 에셋, 목재 상자 에셋, Chaos/GeometryCollection 설정과 에디터 재생성 코드를 포함한 것.
+
+## 2026-07-08 14:47:50 (소요시간: 00:01:26)
+
+- 사과 메시가 `/Game/Meshes/Props/Apple/SM_Apple`로 이동된 상태에 맞춰 코드의 하드코딩 경로를 찾고 수정한 것.
+- `ATunaSweeperBreakableAppleCrateActor`, `ATunaSweeperPhysicsAppleActor`, `TunaSweeperEditor` 에셋 생성 경로의 기존 임시 사과 메시 참조를 새 `/Game/Meshes/Props/Apple/SM_Apple.SM_Apple` 경로로 변경한 것.
+- 텍스트/소스 검색에서 남은 기존 임시 사과 메시 경로 참조가 없고, `BP_PhysicsApple` 에셋도 새 메시 경로를 참조 중임을 확인한 것.
