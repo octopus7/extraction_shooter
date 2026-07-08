@@ -4782,3 +4782,9 @@
 
 - Miyakov 분석 문서와 요청 로그 변경분을 별도 Git 커밋으로 기록한 것.
 - 기존 작업트리에 남아 있던 질문 로그와 UI 분리 파일은 이번 커밋 범위에서 제외한 것.
+
+## 2026-07-08 19:04:00 (소요시간: 00:04:48)
+
+- `ATunaSweeperTopDownCharacter` 구현을 lifecycle, input, weapon, melee, cancelable actions, state, vitals/death, camera, movement/roll 역할별 `.cpp` 파일로 분리한 것.
+- 공통 include와 장착 무기/스태미나 게이지 helper namespace를 `TunaSweeperTopDownCharacterShared.h`로 이동하고, 여러 translation unit에서 안전하게 공유되도록 helper 상수를 inline 처리한 것.
+- 분할 경계 보정과 중복 spread/recoil 범위 제거 후 `TunaSweeperEditor Win64 Development` 빌드를 성공시키고, UE 5.7 `UnrealEditor.exe`로 `TunaSweeper/TunaSweeper.uproject` 실행을 확인한 것.
