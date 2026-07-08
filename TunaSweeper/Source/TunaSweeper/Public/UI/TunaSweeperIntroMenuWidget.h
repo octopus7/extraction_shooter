@@ -383,7 +383,6 @@ private:
 	void RefreshMainMenu();
 	void RefreshDifficultySelectionPanel();
 	void RefreshSaveSlotMenu();
-	void EnsureSettingsPanelLayout();
 	void RefreshSettingsPanel();
 	void RefreshInterfaceSettingsPanel();
 	void RefreshSettingsSelectionStyles(const FIntPoint& CurrentResolution, EWindowMode::Type CurrentWindowMode);

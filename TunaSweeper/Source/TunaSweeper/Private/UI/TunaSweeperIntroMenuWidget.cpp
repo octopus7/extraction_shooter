@@ -145,17 +145,7 @@ namespace TunaSweeperDifficultySelect
 
 namespace TunaSweeperSettingsUi
 {
-	constexpr float PanelWidth = 840.0f;
-	constexpr float PanelHeight = 780.0f;
-	constexpr float PanelLeft = 164.0f;
-	constexpr float SectionCornerRadius = 8.0f;
 	constexpr float ButtonCornerRadius = 7.0f;
-	const FLinearColor PanelFill(0.015f, 0.025f, 0.030f, 0.86f);
-	const FLinearColor PanelOutline(0.58f, 0.70f, 0.70f, 0.62f);
-	const FLinearColor SectionFill(0.018f, 0.038f, 0.044f, 0.64f);
-	const FLinearColor SectionOutline(0.46f, 0.58f, 0.58f, 0.40f);
-	const FLinearColor TextPrimary(0.95f, 0.98f, 0.97f, 1.0f);
-	const FLinearColor TextMuted(0.70f, 0.80f, 0.79f, 1.0f);
 	const FLinearColor Accent(0.32f, 0.90f, 0.96f, 1.0f);
 
 	FSlateBrush MakeRoundedBoxBrush(
@@ -176,160 +166,12 @@ namespace TunaSweeperSettingsUi
 		Brush.OutlineSettings.bUseBrushTransparency = false;
 		return Brush;
 	}
-
-	template <typename WidgetType>
-	WidgetType* FindWidget(UWidgetTree* WidgetTree, const TCHAR* WidgetName)
-	{
-		return WidgetTree
-			? Cast<WidgetType>(WidgetTree->FindWidget(FName(WidgetName)))
-			: nullptr;
-	}
-
-	template <typename WidgetType>
-	WidgetType* FindOrConstructWidget(UWidgetTree* WidgetTree, const TCHAR* WidgetName)
-	{
-		if (!WidgetTree)
-		{
-			return nullptr;
-		}
-
-		if (WidgetType* ExistingWidget = FindWidget<WidgetType>(WidgetTree, WidgetName))
-		{
-			return ExistingWidget;
-		}
-
-		return WidgetTree->ConstructWidget<WidgetType>(
-			WidgetType::StaticClass(),
-			FName(WidgetName));
-	}
-
-	void ConfigureCanvasSlot(
-		UWidget* Widget,
-		const FAnchors& Anchors,
-		const FVector2D& Alignment,
-		const FVector2D& Position,
-		const FVector2D& Size,
-		int32 ZOrder)
-	{
-		if (UCanvasPanelSlot* CanvasSlot = Widget ? Cast<UCanvasPanelSlot>(Widget->Slot) : nullptr)
-		{
-			CanvasSlot->SetAnchors(Anchors);
-			CanvasSlot->SetAlignment(Alignment);
-			CanvasSlot->SetPosition(Position);
-			CanvasSlot->SetSize(Size);
-			CanvasSlot->SetZOrder(ZOrder);
-		}
-	}
-
-	void ConfigureFillCanvasSlot(UWidget* Widget, int32 ZOrder)
-	{
-		if (UCanvasPanelSlot* CanvasSlot = Widget ? Cast<UCanvasPanelSlot>(Widget->Slot) : nullptr)
-		{
-			CanvasSlot->SetAnchors(FAnchors(0.0f, 0.0f, 1.0f, 1.0f));
-			CanvasSlot->SetOffsets(FMargin(0.0f));
-			CanvasSlot->SetAlignment(FVector2D::ZeroVector);
-			CanvasSlot->SetZOrder(ZOrder);
-		}
-	}
-
-	void ConfigureSizeBox(UWidgetTree* WidgetTree, const TCHAR* WidgetName, float Width, float Height)
-	{
-		if (USizeBox* SizeBox = FindWidget<USizeBox>(WidgetTree, WidgetName))
-		{
-			SizeBox->SetWidthOverride(Width);
-			SizeBox->SetHeightOverride(Height);
-		}
-	}
-
-	void ConfigureTextBlock(
-		UWidgetTree* WidgetTree,
-		const TCHAR* WidgetName,
-		float FontSize,
-		const FLinearColor& Color,
-		ETunaSweeperUIFontWeight Weight = ETunaSweeperUIFontWeight::Preserve,
-		ETextJustify::Type Justification = ETextJustify::Left)
-	{
-		if (UTextBlock* TextBlock = FindWidget<UTextBlock>(WidgetTree, WidgetName))
-		{
-			TextBlock->SetColorAndOpacity(FSlateColor(Color));
-			TextBlock->SetJustification(Justification);
-			TextBlock->SetMargin(FMargin(0.0f));
-			TextBlock->SetAutoWrapText(true);
-			TunaSweeperUIFont::ApplyFont(TextBlock, FontSize, Weight);
-		}
-	}
-
-	void AddVerticalChild(UVerticalBox* Parent, UWidget* Child, const FMargin& Padding)
-	{
-		if (!Parent || !Child)
-		{
-			return;
-		}
-
-		Child->RemoveFromParent();
-		if (UVerticalBoxSlot* Slot = Parent->AddChildToVerticalBox(Child))
-		{
-			Slot->SetPadding(Padding);
-			Slot->SetHorizontalAlignment(HAlign_Fill);
-			Slot->SetVerticalAlignment(VAlign_Center);
-			Slot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
-		}
-	}
-
-	void AddHorizontalChild(UHorizontalBox* Parent, UWidget* Child, const FMargin& Padding)
-	{
-		if (!Parent || !Child)
-		{
-			return;
-		}
-
-		Child->RemoveFromParent();
-		if (UHorizontalBoxSlot* Slot = Parent->AddChildToHorizontalBox(Child))
-		{
-			Slot->SetPadding(Padding);
-			Slot->SetHorizontalAlignment(HAlign_Fill);
-			Slot->SetVerticalAlignment(VAlign_Center);
-			Slot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
-		}
-	}
-
-	void BuildSettingsSection(
-		UWidgetTree* WidgetTree,
-		UVerticalBox* Parent,
-		const TCHAR* SectionBorderName,
-		const TCHAR* SectionStackName,
-		UWidget* LabelWidget,
-		UWidget* ControlWidget,
-		const FMargin& OuterPadding)
-	{
-		UBorder* SectionBorder = FindOrConstructWidget<UBorder>(WidgetTree, SectionBorderName);
-		UVerticalBox* SectionStack = FindOrConstructWidget<UVerticalBox>(WidgetTree, SectionStackName);
-		if (!SectionBorder || !SectionStack)
-		{
-			return;
-		}
-
-		SectionStack->ClearChildren();
-		SectionBorder->SetPadding(FMargin(18.0f, 14.0f, 18.0f, 16.0f));
-		SectionBorder->SetBrush(MakeRoundedBoxBrush(
-			FVector2D(760.0f, 116.0f),
-			SectionFill,
-			SectionOutline,
-			1.0f,
-			SectionCornerRadius));
-		SectionBorder->SetContent(SectionStack);
-
-		AddVerticalChild(SectionStack, LabelWidget, FMargin(0.0f, 0.0f, 0.0f, 10.0f));
-		AddVerticalChild(SectionStack, ControlWidget, FMargin(0.0f));
-		AddVerticalChild(Parent, SectionBorder, OuterPadding);
-	}
 }
 
 void UTunaSweeperIntroMenuWidget::PrepareForInitialViewport()
 {
 	ResetTitleViewportLayoutState();
 	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
-	EnsureSettingsPanelLayout();
 	ApplyTitleMenuButtonContentLayout();
 	EnsureAlwaysNewStartButton();
 	EnsureDifficultySelectionPanel();
@@ -358,7 +200,6 @@ void UTunaSweeperIntroMenuWidget::NativeConstruct()
 	EnsureSaveSlotSelectionRingWidgets();
 	EnsureDifficultySelectionPanel();
 	HideLegacyDeleteHoldGaugeWidgets();
-	EnsureSettingsPanelLayout();
 
 	if (StartButton)
 	{
@@ -1221,7 +1062,6 @@ void UTunaSweeperIntroMenuWidget::ShowSettingsPanel()
 	{
 		CreditsPanel->SetVisibility(ESlateVisibility::Collapsed);
 	}
-	EnsureSettingsPanelLayout();
 	if (SettingsPanel)
 	{
 		SettingsPanel->SetVisibility(ESlateVisibility::Visible);
@@ -1491,252 +1331,8 @@ void UTunaSweeperIntroMenuWidget::RefreshSaveSlotMenu()
 	}
 }
 
-void UTunaSweeperIntroMenuWidget::EnsureSettingsPanelLayout()
-{
-	using namespace TunaSweeperSettingsUi;
-
-	if (!WidgetTree || !SettingsPanel)
-	{
-		return;
-	}
-
-	UCanvasPanel* SettingsCanvas = Cast<UCanvasPanel>(SettingsPanel.Get());
-	if (!SettingsCanvas)
-	{
-		return;
-	}
-
-	UBorder* SettingsBackdrop = FindOrConstructWidget<UBorder>(WidgetTree, TEXT("SettingsBackdrop"));
-	UBorder* SettingsContentBackground = FindOrConstructWidget<UBorder>(WidgetTree, TEXT("SettingsContentBackground"));
-	UVerticalBox* SettingsContentStack = FindOrConstructWidget<UVerticalBox>(WidgetTree, TEXT("SettingsContentStack"));
-	UTextBlock* SettingsTitleText = FindOrConstructWidget<UTextBlock>(WidgetTree, TEXT("SettingsTitleText"));
-	if (!SettingsStatusText)
-	{
-		SettingsStatusText = FindOrConstructWidget<UTextBlock>(WidgetTree, TEXT("SettingsStatusText"));
-	}
-	UHorizontalBox* SettingsTabRow = FindOrConstructWidget<UHorizontalBox>(WidgetTree, TEXT("SettingsTabRow"));
-	if (!GraphicsSettingsPanel)
-	{
-		GraphicsSettingsPanel = FindOrConstructWidget<UVerticalBox>(WidgetTree, TEXT("GraphicsSettingsPanel"));
-	}
-	if (!InterfaceSettingsPanel)
-	{
-		InterfaceSettingsPanel = FindOrConstructWidget<UVerticalBox>(WidgetTree, TEXT("InterfaceSettingsPanel"));
-	}
-
-	UVerticalBox* GraphicsPanel = Cast<UVerticalBox>(GraphicsSettingsPanel.Get());
-	UVerticalBox* InterfacePanel = Cast<UVerticalBox>(InterfaceSettingsPanel.Get());
-	if (!SettingsBackdrop || !SettingsContentBackground || !SettingsContentStack || !SettingsTitleText ||
-		!SettingsStatusText || !SettingsTabRow || !GraphicsPanel || !InterfacePanel)
-	{
-		return;
-	}
-
-	if (SettingsBackdrop->GetParent() != SettingsCanvas)
-	{
-		SettingsBackdrop->RemoveFromParent();
-		SettingsCanvas->AddChildToCanvas(SettingsBackdrop);
-	}
-	SettingsBackdrop->SetBrush(TunaSweeperSettingsUi::MakeRoundedBoxBrush(
-		FVector2D(1920.0f, 1080.0f),
-		FLinearColor(0.006f, 0.010f, 0.012f, 0.58f),
-		FLinearColor::Transparent,
-		0.0f,
-		0.0f));
-	ConfigureFillCanvasSlot(SettingsBackdrop, 0);
-
-	if (SettingsContentBackground->GetParent() != SettingsCanvas)
-	{
-		SettingsContentBackground->RemoveFromParent();
-		SettingsCanvas->AddChildToCanvas(SettingsContentBackground);
-	}
-	SettingsContentBackground->SetPadding(FMargin(32.0f, 28.0f, 32.0f, 24.0f));
-	SettingsContentBackground->SetBrush(TunaSweeperSettingsUi::MakeRoundedBoxBrush(
-		FVector2D(PanelWidth, PanelHeight),
-		PanelFill,
-		PanelOutline,
-		1.2f,
-		8.0f));
-	SettingsContentBackground->SetContent(SettingsContentStack);
-	ConfigureCanvasSlot(
-		SettingsContentBackground,
-		FAnchors(0.0f, 0.5f),
-		FVector2D(0.0f, 0.5f),
-		FVector2D(PanelLeft, 0.0f),
-		FVector2D(PanelWidth, PanelHeight),
-		1);
-
-	if (USizeBox* BackButtonBox = FindWidget<USizeBox>(WidgetTree, TEXT("BackFromSettingsButtonBox")))
-	{
-		BackButtonBox->RemoveFromParent();
-		if (BackButtonBox->GetParent() != SettingsCanvas)
-		{
-			SettingsCanvas->AddChildToCanvas(BackButtonBox);
-		}
-		BackButtonBox->SetWidthOverride(52.0f);
-		BackButtonBox->SetHeightOverride(52.0f);
-		ConfigureCanvasSlot(
-			BackButtonBox,
-			FAnchors(0.0f, 0.0f),
-			FVector2D::ZeroVector,
-			FVector2D(34.0f, 24.0f),
-			FVector2D(52.0f, 52.0f),
-			2);
-	}
-
-	ConfigureTextBlock(WidgetTree, TEXT("SettingsTitleText"), 32.0f, TextPrimary, ETunaSweeperUIFontWeight::Bold);
-	ConfigureTextBlock(WidgetTree, TEXT("SettingsStatusText"), 15.0f, TextMuted);
-	ConfigureTextBlock(WidgetTree, TEXT("SettingsGraphicsTabButtonText"), 15.0f, TextPrimary, ETunaSweeperUIFontWeight::Bold, ETextJustify::Center);
-	ConfigureTextBlock(WidgetTree, TEXT("SettingsInterfaceTabButtonText"), 15.0f, TextPrimary, ETunaSweeperUIFontWeight::Bold, ETextJustify::Center);
-	ConfigureTextBlock(WidgetTree, TEXT("WindowModeLabelText"), 15.0f, TextMuted, ETunaSweeperUIFontWeight::Bold);
-	ConfigureTextBlock(WidgetTree, TEXT("ResolutionLabelText"), 15.0f, TextMuted, ETunaSweeperUIFontWeight::Bold);
-	ConfigureTextBlock(WidgetTree, TEXT("DLSSLabelText"), 15.0f, TextMuted, ETunaSweeperUIFontWeight::Bold);
-	ConfigureTextBlock(WidgetTree, TEXT("LanguageLabelText"), 15.0f, TextMuted, ETunaSweeperUIFontWeight::Bold);
-
-	for (const TCHAR* ButtonTextName : {
-		TEXT("WindowedModeButtonText"),
-		TEXT("BorderlessWindowModeButtonText"),
-		TEXT("FullscreenModeButtonText"),
-		TEXT("Resolution1280ButtonText"),
-		TEXT("Resolution1600ButtonText"),
-		TEXT("Resolution1920ButtonText"),
-		TEXT("Resolution2560ButtonText"),
-		TEXT("Resolution3840ButtonText"),
-		TEXT("DLSSOffButtonText"),
-		TEXT("DLSSQualityButtonText"),
-		TEXT("DLSSBalancedButtonText"),
-		TEXT("DLSSPerformanceButtonText"),
-		TEXT("LanguageEnglishButtonText"),
-		TEXT("LanguageKoreanButtonText"),
-		TEXT("LanguageJapaneseButtonText"),
-		TEXT("ConfirmInterfaceSettingsButtonText"),
-		TEXT("CancelInterfaceSettingsButtonText"),
-		TEXT("BackFromSettingsButtonText")
-		})
-	{
-		ConfigureTextBlock(WidgetTree, ButtonTextName, 15.0f, TextPrimary, ETunaSweeperUIFontWeight::Bold, ETextJustify::Center);
-	}
-
-	ConfigureSizeBox(WidgetTree, TEXT("GraphicsTabButtonBox"), 142.0f, 38.0f);
-	ConfigureSizeBox(WidgetTree, TEXT("InterfaceTabButtonBox"), 158.0f, 38.0f);
-	ConfigureSizeBox(WidgetTree, TEXT("WindowedModeButtonBox"), 160.0f, 44.0f);
-	ConfigureSizeBox(WidgetTree, TEXT("BorderlessWindowModeButtonBox"), 236.0f, 44.0f);
-	ConfigureSizeBox(WidgetTree, TEXT("FullscreenModeButtonBox"), 184.0f, 44.0f);
-	ConfigureSizeBox(WidgetTree, TEXT("Resolution1280ButtonBox"), 660.0f, 42.0f);
-	ConfigureSizeBox(WidgetTree, TEXT("Resolution1600ButtonBox"), 660.0f, 42.0f);
-	ConfigureSizeBox(WidgetTree, TEXT("Resolution1920ButtonBox"), 660.0f, 42.0f);
-	ConfigureSizeBox(WidgetTree, TEXT("Resolution2560ButtonBox"), 660.0f, 42.0f);
-	ConfigureSizeBox(WidgetTree, TEXT("Resolution3840ButtonBox"), 660.0f, 42.0f);
-	ConfigureSizeBox(WidgetTree, TEXT("DLSSOffButtonBox"), 146.0f, 42.0f);
-	ConfigureSizeBox(WidgetTree, TEXT("DLSSQualityButtonBox"), 146.0f, 42.0f);
-	ConfigureSizeBox(WidgetTree, TEXT("DLSSBalancedButtonBox"), 146.0f, 42.0f);
-	ConfigureSizeBox(WidgetTree, TEXT("DLSSPerformanceButtonBox"), 146.0f, 42.0f);
-	ConfigureSizeBox(WidgetTree, TEXT("LanguageEnglishButtonBox"), 660.0f, 46.0f);
-	ConfigureSizeBox(WidgetTree, TEXT("LanguageKoreanButtonBox"), 660.0f, 46.0f);
-	ConfigureSizeBox(WidgetTree, TEXT("LanguageJapaneseButtonBox"), 660.0f, 46.0f);
-	ConfigureSizeBox(WidgetTree, TEXT("ConfirmInterfaceSettingsButtonBox"), 160.0f, 46.0f);
-	ConfigureSizeBox(WidgetTree, TEXT("CancelInterfaceSettingsButtonBox"), 160.0f, 46.0f);
-
-	SettingsContentStack->ClearChildren();
-	AddVerticalChild(SettingsContentStack, SettingsTitleText, FMargin(0.0f, 0.0f, 0.0f, 8.0f));
-	AddVerticalChild(SettingsContentStack, SettingsStatusText, FMargin(0.0f, 0.0f, 0.0f, 16.0f));
-
-	SettingsTabRow->ClearChildren();
-	AddHorizontalChild(SettingsTabRow, FindWidget<USizeBox>(WidgetTree, TEXT("GraphicsTabButtonBox")), FMargin(0.0f, 0.0f, 8.0f, 0.0f));
-	AddHorizontalChild(SettingsTabRow, FindWidget<USizeBox>(WidgetTree, TEXT("InterfaceTabButtonBox")), FMargin(0.0f));
-	AddVerticalChild(SettingsContentStack, SettingsTabRow, FMargin(0.0f, 0.0f, 0.0f, 12.0f));
-
-	UHorizontalBox* WindowModeRow = FindOrConstructWidget<UHorizontalBox>(WidgetTree, TEXT("WindowModeRow"));
-	UVerticalBox* ResolutionButtonStack = FindOrConstructWidget<UVerticalBox>(WidgetTree, TEXT("ResolutionButtonStack"));
-	UHorizontalBox* DLSSButtonRow = FindOrConstructWidget<UHorizontalBox>(WidgetTree, TEXT("DLSSButtonRow"));
-	if (WindowModeRow && ResolutionButtonStack && DLSSButtonRow)
-	{
-		WindowModeRow->ClearChildren();
-		AddHorizontalChild(WindowModeRow, FindWidget<USizeBox>(WidgetTree, TEXT("WindowedModeButtonBox")), FMargin(0.0f, 0.0f, 10.0f, 0.0f));
-		AddHorizontalChild(WindowModeRow, FindWidget<USizeBox>(WidgetTree, TEXT("BorderlessWindowModeButtonBox")), FMargin(0.0f, 0.0f, 10.0f, 0.0f));
-		AddHorizontalChild(WindowModeRow, FindWidget<USizeBox>(WidgetTree, TEXT("FullscreenModeButtonBox")), FMargin(0.0f));
-
-		ResolutionButtonStack->ClearChildren();
-		AddVerticalChild(ResolutionButtonStack, FindWidget<USizeBox>(WidgetTree, TEXT("Resolution1280ButtonBox")), FMargin(0.0f, 0.0f, 0.0f, 5.0f));
-		AddVerticalChild(ResolutionButtonStack, FindWidget<USizeBox>(WidgetTree, TEXT("Resolution1600ButtonBox")), FMargin(0.0f, 0.0f, 0.0f, 5.0f));
-		AddVerticalChild(ResolutionButtonStack, FindWidget<USizeBox>(WidgetTree, TEXT("Resolution1920ButtonBox")), FMargin(0.0f, 0.0f, 0.0f, 5.0f));
-		AddVerticalChild(ResolutionButtonStack, FindWidget<USizeBox>(WidgetTree, TEXT("Resolution2560ButtonBox")), FMargin(0.0f, 0.0f, 0.0f, 5.0f));
-		AddVerticalChild(ResolutionButtonStack, FindWidget<USizeBox>(WidgetTree, TEXT("Resolution3840ButtonBox")), FMargin(0.0f));
-
-		DLSSButtonRow->ClearChildren();
-		AddHorizontalChild(DLSSButtonRow, FindWidget<USizeBox>(WidgetTree, TEXT("DLSSOffButtonBox")), FMargin(0.0f, 0.0f, 10.0f, 0.0f));
-		AddHorizontalChild(DLSSButtonRow, FindWidget<USizeBox>(WidgetTree, TEXT("DLSSQualityButtonBox")), FMargin(0.0f, 0.0f, 10.0f, 0.0f));
-		AddHorizontalChild(DLSSButtonRow, FindWidget<USizeBox>(WidgetTree, TEXT("DLSSBalancedButtonBox")), FMargin(0.0f, 0.0f, 10.0f, 0.0f));
-		AddHorizontalChild(DLSSButtonRow, FindWidget<USizeBox>(WidgetTree, TEXT("DLSSPerformanceButtonBox")), FMargin(0.0f));
-
-		GraphicsPanel->ClearChildren();
-		BuildSettingsSection(
-			WidgetTree,
-			GraphicsPanel,
-			TEXT("SettingsWindowModeSection"),
-			TEXT("SettingsWindowModeSectionStack"),
-			FindWidget<UTextBlock>(WidgetTree, TEXT("WindowModeLabelText")),
-			WindowModeRow,
-			FMargin(0.0f, 0.0f, 0.0f, 12.0f));
-		BuildSettingsSection(
-			WidgetTree,
-			GraphicsPanel,
-			TEXT("SettingsResolutionSection"),
-			TEXT("SettingsResolutionSectionStack"),
-			FindWidget<UTextBlock>(WidgetTree, TEXT("ResolutionLabelText")),
-			ResolutionButtonStack,
-			FMargin(0.0f, 0.0f, 0.0f, 12.0f));
-		BuildSettingsSection(
-			WidgetTree,
-			GraphicsPanel,
-			TEXT("SettingsDLSSSection"),
-			TEXT("SettingsDLSSSectionStack"),
-			FindWidget<UTextBlock>(WidgetTree, TEXT("DLSSLabelText")),
-			DLSSButtonRow,
-			FMargin(0.0f));
-	}
-
-	UVerticalBox* LanguageButtonStack = FindOrConstructWidget<UVerticalBox>(WidgetTree, TEXT("LanguageButtonStack"));
-	UHorizontalBox* InterfaceActionButtonRow = FindOrConstructWidget<UHorizontalBox>(WidgetTree, TEXT("InterfaceActionButtonRow"));
-	if (LanguageButtonStack && InterfaceActionButtonRow)
-	{
-		LanguageButtonStack->ClearChildren();
-		AddVerticalChild(LanguageButtonStack, FindWidget<USizeBox>(WidgetTree, TEXT("LanguageEnglishButtonBox")), FMargin(0.0f, 0.0f, 0.0f, 8.0f));
-		AddVerticalChild(LanguageButtonStack, FindWidget<USizeBox>(WidgetTree, TEXT("LanguageKoreanButtonBox")), FMargin(0.0f, 0.0f, 0.0f, 8.0f));
-		AddVerticalChild(LanguageButtonStack, FindWidget<USizeBox>(WidgetTree, TEXT("LanguageJapaneseButtonBox")), FMargin(0.0f));
-
-		InterfaceActionButtonRow->ClearChildren();
-		AddHorizontalChild(InterfaceActionButtonRow, FindWidget<USizeBox>(WidgetTree, TEXT("CancelInterfaceSettingsButtonBox")), FMargin(0.0f, 0.0f, 10.0f, 0.0f));
-		AddHorizontalChild(InterfaceActionButtonRow, FindWidget<USizeBox>(WidgetTree, TEXT("ConfirmInterfaceSettingsButtonBox")), FMargin(0.0f));
-
-		InterfacePanel->ClearChildren();
-		BuildSettingsSection(
-			WidgetTree,
-			InterfacePanel,
-			TEXT("SettingsLanguageSection"),
-			TEXT("SettingsLanguageSectionStack"),
-			FindWidget<UTextBlock>(WidgetTree, TEXT("LanguageLabelText")),
-			LanguageButtonStack,
-			FMargin(0.0f, 0.0f, 0.0f, 18.0f));
-		AddVerticalChild(InterfacePanel, InterfaceActionButtonRow, FMargin(0.0f));
-	}
-
-	AddVerticalChild(SettingsContentStack, GraphicsPanel, FMargin(0.0f));
-	AddVerticalChild(SettingsContentStack, InterfacePanel, FMargin(0.0f));
-
-	GraphicsPanel->SetVisibility(bShowingInterfaceSettingsTab ? ESlateVisibility::Collapsed : ESlateVisibility::Visible);
-	InterfacePanel->SetVisibility(bShowingInterfaceSettingsTab ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
-
-	ApplySettingsTabButtonStyle(SettingsGraphicsTabButton, FVector2D(142.0f, 38.0f), !bShowingInterfaceSettingsTab);
-	ApplySettingsTabButtonStyle(SettingsInterfaceTabButton, FVector2D(158.0f, 38.0f), bShowingInterfaceSettingsTab);
-	ApplySettingsChoiceButtonStyle(BackFromSettingsButton, FVector2D(52.0f, 52.0f), false);
-	InvalidateLayoutAndVolatility();
-}
-
 void UTunaSweeperIntroMenuWidget::RefreshSettingsPanel()
 {
-	EnsureSettingsPanelLayout();
-
 	if (bShowingInterfaceSettingsTab)
 	{
 		RefreshInterfaceSettingsPanel();
@@ -1810,8 +1406,6 @@ void UTunaSweeperIntroMenuWidget::RefreshSettingsPanel()
 
 void UTunaSweeperIntroMenuWidget::RefreshInterfaceSettingsPanel()
 {
-	EnsureSettingsPanelLayout();
-
 	const UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GetGameInstance());
 	const ETunaSweeperItemTextLanguage CurrentLanguage = TunaGameInstance
 		? TunaGameInstance->GetCurrentTextLanguage()

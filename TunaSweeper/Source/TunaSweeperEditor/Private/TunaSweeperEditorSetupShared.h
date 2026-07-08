@@ -218,7 +218,7 @@ namespace TunaSweeperEditorSetup
 	const FString CannedTunaIconImportTaskId = TEXT("2026-05-11_ImportCannedTunaIconV1");
 	const FString BackpackInventoryTaskId = TEXT("2026-05-16_CreateEquipmentInventoryAssetsV3");
 	const FString IntroMenuAndLevelTravelTaskId = TEXT("2026-05-24_CreateTitleIntroMenuPersistentSaveSlotSelectionLevelTravelLadderInitialScaleV1");
-	const FString IntroMenuGraphicsSettingsTaskId = TEXT("2026-07-08_CompactTitleSettingsUiV1");
+	const FString IntroMenuGraphicsSettingsTaskId = TEXT("2026-07-08_BuildCompleteTitleSettingsWbpV1");
 	const FString OpeningScenarioPresentationTaskId = TEXT("2026-05-19_CreateOpeningScenarioPresentationV2");
 	const FString LevelTransitionVideoTaskId = TEXT("2026-05-16_AddBidirectionalLevelTransitionVideoV3");
 	const FString FirstOutingQuestTaskId = TEXT("2026-05-30_UpdateQuestPanelEmptyStateSelectionV2");

@@ -4726,3 +4726,17 @@
 - 실행 중인 `UnrealEditor.exe`가 `UnrealEditor-TunaSweeper.dll`과 `UnrealEditor-TunaSweeperEditor.dll`을 잠그고 있어 첫 빌드가 링크 단계에서 실패한 것을 확인한 것.
 - 정상 종료 요청이 실패해 사용자 승인 후 기존 `UnrealEditor.exe` 프로세스를 종료하고, `TunaSweeperEditor Win64 Development` 빌드를 다시 실행해 성공시킨 것.
 - 빌드 성공 후 UE 5.7 `UnrealEditor.exe`로 `TunaSweeper/TunaSweeper.uproject`를 실행한 것.
+
+## 2026-07-08 15:55:48 (소요시간: 00:05:45)
+
+- 깨진 설정 UI 스크린샷을 기준으로 현재 워킹트리를 재검토하고, 소스 변경은 없고 `WBP_IntroMenu.uasset`만 수정된 상태였음을 확인한 것.
+- 설정 패널 런타임 보정 코드가 기존 WBP의 버튼/라벨 TextBlock 존재를 전제로 해서, WBP 재생성 또는 외부 수정 후 텍스트가 빠지면 빈 버튼만 남을 수 있음을 확인한 것.
+- `UTunaSweeperIntroMenuWidget::EnsureSettingsPanelLayout()`에서 필요한 TextBlock을 직접 보장하고 각 버튼 콘텐츠에 다시 연결하도록 수정해, WBP 에셋 계층이 깨져 있어도 설정 탭/화면 모드/해상도/DLSS/언어 버튼 텍스트가 복원되게 한 것.
+- `TunaSweeper Win64 Development` 게임 타깃 빌드가 성공해 수정된 위젯 C++ 컴파일을 확인한 것.
+- `TunaSweeperEditor Win64 Development`는 실행 중인 `UnrealEditor.exe`가 프로젝트 DLL을 잠그고 있어 링크 단계에서 실패했으며, 저장되지 않은 에디터 작업 손실 위험 때문에 에디터 강제 종료는 수행하지 않은 것.
+
+## 2026-07-08 16:03:00 (소요시간: 00:00:36)
+
+- 사용자 승인 후 실행 중인 `UnrealEditor.exe`를 종료하고 잠겨 있던 프로젝트 DLL 링크를 해제한 것.
+- `TunaSweeperEditor Win64 Development` 빌드를 다시 실행해 링크까지 성공시킨 것.
+- 빌드 성공 후 UE 5.7 `UnrealEditor.exe`로 `TunaSweeper/TunaSweeper.uproject`를 다시 실행하고 새 에디터 프로세스가 떠 있음을 확인한 것.
