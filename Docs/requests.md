@@ -4753,3 +4753,32 @@
 - `UTunaSweeperGameInstance` 구현을 역할별 `.cpp` 파일로 분리하고, 공통 include/helper/log 선언은 `TunaSweeperGameInstanceShared.h`로 이동한 것.
 - `UTunaSweeperGameHudWidget` 구현을 lifecycle, feedback, panels, transitions, layout, refresh, gameplay, handlers 역할별 `.cpp` 파일로 분리하고, 공통 UI helper/log 선언은 `TunaSweeperGameHudWidgetShared.h`로 이동한 것.
 - 병렬 에이전트 분석 결과를 반영해 public header는 유지하고 implementation split만 수행했으며, UE 첫 include 규칙과 함수 경계를 보정한 뒤 `TunaSweeperEditor Win64 Development` 빌드 성공 및 UE 5.7 에디터 실행까지 확인한 것.
+
+## 2026-07-08 17:25:00 (소요시간: 00:08:53)
+
+- `UTunaSweeperIntroMenuWidget` 구현을 lifecycle, actions, travel, panels, refresh/styles, save-slot visuals, settings, difficulty, start options, text helpers, delete flow, layout/effects 역할별 `.cpp` 파일로 분리한 것.
+- 공통 include와 helper namespace를 `TunaSweeperIntroMenuWidgetShared.h`로 이동하고, 여러 translation unit에서 안전하게 공유되도록 helper 함수와 문자열 상수를 inline 처리한 것.
+- `TunaSweeperEditor Win64 Development` 빌드를 성공시키고, 빌드 후 UE 5.7 `UnrealEditor.exe`로 `TunaSweeper/TunaSweeper.uproject` 실행을 확인한 것.
+
+## 2026-07-08 18:53:49 (소요시간: 00:05:58)
+
+- ../miyakov/Miyakov 프로젝트의 사족보행 관련 MiyakovCharacterSystem C++ 클래스 중 QuadrupedCharacter, QuadrupedComponent를 현재 프로젝트용 최소 런타임 플러그인으로 TunaSweeper/Plugins/MiyakovCharacterSystem에 이식한 것.
+- TunaSweeper.uproject에 MiyakovCharacterSystem 플러그인을 활성화 항목으로 추가한 것.
+- 원본 애셋 참조 경로를 유지하기 위해 /Game/Characters/Robot의 ABP_RobotDog, SKM_Robot, 스켈레톤, 물리 애셋, 로봇 머티리얼/텍스처와 /Game/Blueprints/BP_QuadrupedDog를 현재 프로젝트 Content로 복사한 것.
+- TunaSweeperEditor Win64 Development 빌드가 성공했으며, 빌드 후 UE 5.7 에디터를 TunaSweeper/TunaSweeper.uproject로 실행 요청한 것.
+
+## 2026-07-08 18:55:05 (소요시간: 00:05:21)
+
+- `../miyakov/Miyakov` 프로젝트의 본체 모듈과 플러그인 C++ 클래스를 훑고, TunaSweeper로 가져올 만한 클래스/시스템 후보를 분석한 것.
+- TunaSweeper에 이미 있는 인벤토리, 아이템 데이터, 상호작용, 레벨 전환, 시야, 무기/투사체 시스템과 Miyakov 구현의 중복도를 비교한 것.
+- 직접 포팅 후보, 부분 참고 후보, 포팅 비추천 후보를 구분해 최종 답변으로 정리한 것.
+
+## 2026-07-08 19:02:06 (소요시간: 00:02:05)
+
+- Miyakov 클래스 이식 후보 분석 결과를 `Docs/miyakov_import_candidate_analysis.md` 문서로 정리한 것.
+- 직접 포팅 후보, 부분 참고 후보, 포팅 비추천 후보와 권장 작업 순서를 문서화한 것.
+
+## 2026-07-08 19:04:31 (소요시간: 00:00:50)
+
+- Miyakov 분석 문서와 요청 로그 변경분을 별도 Git 커밋으로 기록한 것.
+- 기존 작업트리에 남아 있던 질문 로그와 UI 분리 파일은 이번 커밋 범위에서 제외한 것.
