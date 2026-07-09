@@ -4938,3 +4938,15 @@
 - 자동 평가 결과 `Baseline`이 평균점수 `97.8`, 생존율 `100%`, 원거리 Hold 비율 `55%`, Advance 비율 `6%`, 근접위험 비율 `0%`로 최상위라 현재 `combat_tuning.json` 값은 자동 변경하지 않고 유지한다고 판단한 것.
 - `Docs/combat_movement_simulator.md`에 헤드리스 자동 평가 실행 명령과 산출물 위치를 문서화한 것.
 - 새 출력 경로 `Tools/CombatMovementSimulator/obj/BuildCheckOutput_AutoEvalFinalCheck`로 `dotnet build`를 실행해 경고와 오류 없이 성공시킨 것.
+
+## 2026-07-09 23:37:30 (소요시간: 00:00:25)
+
+- `Tools/ItemDataCsvViewer` .NET 10 WinForms 뷰어를 `dotnet run --project Tools/ItemDataCsvViewer/ItemDataCsvViewer.csproj` 경로로 실행한 것.
+- 실행 후 `ItemDataCsvViewer` 프로세스가 떠 있는 것을 확인한 것.
+## 2026-07-09 23:38:00 (소요시간: 00:06:35)
+
+- `ItemDataCsvViewer`의 CSV 관계 로드 단계에 데이터 검증 결과를 추가한 것.
+- 아이템/상점/루팅/제작/분해 뷰 행에 `validation_severity`, `validation_messages` 컬럼을 붙이고, `ERROR` 행은 붉은색, `WARN` 행은 노란색으로 하이라이트하도록 구현한 것.
+- 검증 기준으로 누락/중복 ID, 없는 아이템 참조, 없는 텍스트 키, 잘못된 수량/확률 범위, 누락 필수값을 확인하도록 한 것.
+- 뷰어 상태 표시줄에 검증 오류/경고 행 개수를 보여주고, 툴바에 `ERROR red / WARN amber` 범례를 추가한 것.
+- `dotnet build Tools/ItemDataCsvViewer/ItemDataCsvViewer.csproj -o Tools/ItemDataCsvViewer/obj/BuildCheckOutput`와 `dotnet Tools/ItemDataCsvViewer/obj/BuildCheckOutput/ItemDataCsvViewer.dll --check` 검증을 통과한 뒤 최신 뷰어를 실행한 것.

@@ -94,6 +94,15 @@ internal sealed class ViewerForm : Form
 		searchTextBox.TextChanged += (_, _) => ApplyFilter();
 		toolbar.Controls.Add(searchTextBox);
 
+		Label validationLegendLabel = new()
+		{
+			Text = "ERROR red / WARN amber",
+			AutoSize = true,
+			TextAlign = ContentAlignment.MiddleLeft,
+			Margin = new Padding(16, 7, 4, 0)
+		};
+		toolbar.Controls.Add(validationLegendLabel);
+
 		SplitContainer splitContainer = new()
 		{
 			Dock = DockStyle.Fill,
@@ -141,6 +150,7 @@ internal sealed class ViewerForm : Form
 			RowHeadersVisible = false
 		};
 		grid.SelectionChanged += (_, _) => UpdateDetails(tabName, grid);
+		grid.DataBindingComplete += (_, _) => ApplyValidationHighlighting(grid);
 		tabPage.Controls.Add(grid);
 		tabControl.TabPages.Add(tabPage);
 		gridsByTab[tabName] = grid;
@@ -199,7 +209,9 @@ internal sealed class ViewerForm : Form
 			recipeRows = currentStore.RecipeRows;
 			dismantleRows = currentStore.DismantleRows;
 			ApplyFilter();
-			statusLabel.Text = $"Loaded CSV from {ProjectPaths.ExportDirectory(projectRoot)}";
+			statusLabel.Text =
+				$"Loaded CSV from {ProjectPaths.ExportDirectory(projectRoot)}. " +
+				$"Validation: {currentStore.ValidationErrorCount} error row(s), {currentStore.ValidationWarningCount} warning row(s).";
 		}
 		catch (Exception exception) when (exception is IOException or FormatException or InvalidOperationException)
 		{
@@ -236,6 +248,42 @@ internal sealed class ViewerForm : Form
 
 		DataTable table = CsvRelationDataStore.ToDataTable(rows);
 		grid.DataSource = table;
+		ApplyValidationHighlighting(grid);
+	}
+
+	private static void ApplyValidationHighlighting(DataGridView grid)
+	{
+		if (!grid.Columns.Contains("validation_severity"))
+		{
+			return;
+		}
+
+		foreach (DataGridViewRow row in grid.Rows)
+		{
+			string severity = Convert.ToString(row.Cells["validation_severity"].Value, System.Globalization.CultureInfo.InvariantCulture) ?? string.Empty;
+			if (string.Equals(severity, "ERROR", StringComparison.OrdinalIgnoreCase))
+			{
+				row.DefaultCellStyle.BackColor = Color.FromArgb(94, 38, 42);
+				row.DefaultCellStyle.ForeColor = Color.FromArgb(255, 242, 242);
+				row.DefaultCellStyle.SelectionBackColor = Color.FromArgb(130, 48, 54);
+				row.DefaultCellStyle.SelectionForeColor = Color.White;
+			}
+			else if (string.Equals(severity, "WARN", StringComparison.OrdinalIgnoreCase))
+			{
+				row.DefaultCellStyle.BackColor = Color.FromArgb(92, 76, 38);
+				row.DefaultCellStyle.ForeColor = Color.FromArgb(255, 249, 230);
+				row.DefaultCellStyle.SelectionBackColor = Color.FromArgb(130, 102, 42);
+				row.DefaultCellStyle.SelectionForeColor = Color.White;
+			}
+			else
+			{
+				row.DefaultCellStyle.BackColor = grid.DefaultCellStyle.BackColor;
+				row.DefaultCellStyle.ForeColor = grid.DefaultCellStyle.ForeColor;
+				row.DefaultCellStyle.SelectionBackColor = grid.DefaultCellStyle.SelectionBackColor;
+				row.DefaultCellStyle.SelectionForeColor = grid.DefaultCellStyle.SelectionForeColor;
+			}
+		}
+
 	}
 
 	private void UpdateDetails(string tabName, DataGridView grid)

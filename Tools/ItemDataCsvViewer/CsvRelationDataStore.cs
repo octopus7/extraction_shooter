@@ -8,6 +8,11 @@ internal sealed class CsvRelationDataStore
 	private readonly Dictionary<string, CsvTable> tables = new(StringComparer.OrdinalIgnoreCase);
 	private readonly Dictionary<string, Dictionary<string, string>> textStringsByKey = new(StringComparer.OrdinalIgnoreCase);
 	private readonly Dictionary<int, Dictionary<string, string>> itemsById = [];
+	private readonly Dictionary<int, int> itemIdCounts = [];
+	private readonly Dictionary<int, int> shopIdCounts = [];
+	private readonly Dictionary<string, int> lootContentIdCounts = new(StringComparer.OrdinalIgnoreCase);
+	private readonly Dictionary<string, int> recipeIdCounts = new(StringComparer.OrdinalIgnoreCase);
+	private readonly Dictionary<int, int> dismantleSourceItemIdCounts = [];
 
 	public IReadOnlyList<Dictionary<string, string>> ItemRows { get; private set; } = [];
 
@@ -18,6 +23,10 @@ internal sealed class CsvRelationDataStore
 	public IReadOnlyList<Dictionary<string, string>> RecipeRows { get; private set; } = [];
 
 	public IReadOnlyList<Dictionary<string, string>> DismantleRows { get; private set; } = [];
+
+	public int ValidationErrorCount { get; private set; }
+
+	public int ValidationWarningCount { get; private set; }
 
 	public RelationGraph BuildItemGraph(string itemId)
 	{
@@ -191,11 +200,52 @@ internal sealed class CsvRelationDataStore
 	private void BuildIndexes()
 	{
 		itemsById.Clear();
+		itemIdCounts.Clear();
+		shopIdCounts.Clear();
+		lootContentIdCounts.Clear();
+		recipeIdCounts.Clear();
+		dismantleSourceItemIdCounts.Clear();
+
 		foreach (Dictionary<string, string> item in Rows("item_definitions"))
 		{
 			if (TryGetInt(item, "id", out int itemId))
 			{
+				Increment(itemIdCounts, itemId);
 				itemsById[itemId] = item;
+			}
+		}
+
+		foreach (Dictionary<string, string> shop in Rows("shop_definitions"))
+		{
+			if (TryGetInt(shop, "shop_id", out int shopId))
+			{
+				Increment(shopIdCounts, shopId);
+			}
+		}
+
+		foreach (Dictionary<string, string> contents in Rows("loot_container_contents"))
+		{
+			string contentsId = Get(contents, "contents_id");
+			if (!string.IsNullOrWhiteSpace(contentsId))
+			{
+				Increment(lootContentIdCounts, contentsId);
+			}
+		}
+
+		foreach (Dictionary<string, string> recipe in Rows("workbench_recipes"))
+		{
+			string recipeId = Get(recipe, "recipe_id");
+			if (!string.IsNullOrWhiteSpace(recipeId))
+			{
+				Increment(recipeIdCounts, recipeId);
+			}
+		}
+
+		foreach (Dictionary<string, string> dismantle in Rows("workbench_dismantle_recipes"))
+		{
+			if (TryGetInt(dismantle, "source_item_id", out int sourceItemId))
+			{
+				Increment(dismantleSourceItemIdCounts, sourceItemId);
 			}
 		}
 	}
@@ -207,6 +257,7 @@ internal sealed class CsvRelationDataStore
 		LootRows = BuildLootRows();
 		RecipeRows = BuildRecipeRows();
 		DismantleRows = BuildDismantleRows();
+		RefreshValidationCounts();
 	}
 
 	private IReadOnlyList<Dictionary<string, string>> BuildItemRows()
@@ -257,6 +308,7 @@ internal sealed class CsvRelationDataStore
 			row["dismantle_result_of"] = string.Join("; ", Rows("workbench_dismantle_results")
 				.Where(result => Same(result, "item_id", itemId))
 				.Select(result => $"{ItemLabel(Get(result, "source_item_id"))} x{Get(result, "quantity")}"));
+			ApplyItemValidation(row, item);
 			rows.Add(row);
 		}
 
@@ -276,6 +328,7 @@ internal sealed class CsvRelationDataStore
 			row["item"] = ItemLabel(Get(shopItem, "item_id"));
 			row["item_name_en"] = ItemText(Get(shopItem, "item_id"), "name_string_key", "en");
 			row["item_category"] = ItemField(Get(shopItem, "item_id"), "category_tag");
+			ApplyShopValidation(row, shopItem, shopDefinition);
 			rows.Add(row);
 		}
 
@@ -294,6 +347,7 @@ internal sealed class CsvRelationDataStore
 			row["item_name_en"] = ItemText(Get(lootItem, "item_id"), "name_string_key", "en");
 			row["item_category"] = ItemField(Get(lootItem, "item_id"), "category_tag");
 			row["memo_ko"] = contents is null ? string.Empty : Get(contents, "memo_ko");
+			ApplyLootValidation(row, lootItem, contents);
 			rows.Add(row);
 		}
 
@@ -312,6 +366,7 @@ internal sealed class CsvRelationDataStore
 			row["ingredients"] = string.Join("; ", Rows("workbench_recipe_ingredients")
 				.Where(ingredient => Same(ingredient, "recipe_id", recipeId))
 				.Select(ingredient => $"{ItemLabel(Get(ingredient, "item_id"))} x{Get(ingredient, "quantity")}"));
+			ApplyRecipeValidation(row, recipe);
 			rows.Add(row);
 		}
 
@@ -329,6 +384,7 @@ internal sealed class CsvRelationDataStore
 			row["results"] = string.Join("; ", Rows("workbench_dismantle_results")
 				.Where(result => Same(result, "source_item_id", sourceItemId))
 				.Select(result => $"{ItemLabel(Get(result, "item_id"))} x{Get(result, "quantity")}"));
+			ApplyDismantleValidation(row, recipe);
 			rows.Add(row);
 		}
 
@@ -377,6 +433,175 @@ internal sealed class CsvRelationDataStore
 		return textStringsByKey.TryGetValue(key, out Dictionary<string, string>? row) ? Get(row, languageColumn) : string.Empty;
 	}
 
+	private void ApplyItemValidation(Dictionary<string, string> row, IReadOnlyDictionary<string, string> item)
+	{
+		List<string> errors = [];
+		List<string> warnings = [];
+		string itemId = Get(item, "id");
+		if (!TryGetInt(item, "id", out int parsedItemId))
+		{
+			errors.Add("Item id is missing or not an integer.");
+		}
+		else if (itemIdCounts.TryGetValue(parsedItemId, out int duplicateCount) && duplicateCount > 1)
+		{
+			errors.Add($"Duplicate item id: {parsedItemId}.");
+		}
+
+		ValidateTextKey(Get(item, "name_string_key"), "name_string_key", errors, warnings);
+		ValidateTextKey(Get(item, "description_string_key"), "description_string_key", errors, warnings);
+		RequireNonEmpty(Get(item, "icon_file_name"), "icon_file_name", errors);
+		ValidateNonNegativeInt(item, "shop_sell_price", errors);
+		ValidatePositiveInt(item, "resolved_max_stack_quantity", errors);
+		ValidateNonNegativeDouble(item, "weight_kg", errors, allowEmpty: true);
+
+		string categoryTag = Get(item, "category_tag");
+		if (string.Equals(categoryTag, "item.category.weapon.gun", StringComparison.OrdinalIgnoreCase) &&
+			string.IsNullOrWhiteSpace(Get(row, "compatible_ammo_types")))
+		{
+			warnings.Add("Gun item has no compatible ammo type tags.");
+		}
+		if (string.Equals(categoryTag, "item.category.attachment", StringComparison.OrdinalIgnoreCase) &&
+			string.IsNullOrWhiteSpace(Get(item, "attachment_slot_tag")))
+		{
+			warnings.Add("Attachment item has no attachment_slot_tag.");
+		}
+
+		string blueprintRecipeId = Get(item, "blueprint_recipe_id");
+		if (!string.IsNullOrWhiteSpace(blueprintRecipeId) && !recipeIdCounts.ContainsKey(blueprintRecipeId))
+		{
+			errors.Add($"Blueprint recipe id does not exist: {blueprintRecipeId}.");
+		}
+
+		SetValidation(row, errors, warnings);
+	}
+
+	private void ApplyShopValidation(
+		Dictionary<string, string> row,
+		IReadOnlyDictionary<string, string> shopItem,
+		IReadOnlyDictionary<string, string>? shopDefinition)
+	{
+		List<string> errors = [];
+		List<string> warnings = [];
+		if (!TryGetInt(shopItem, "shop_id", out int shopId))
+		{
+			errors.Add("Shop id is missing or not an integer.");
+		}
+		else if (shopDefinition is null)
+		{
+			errors.Add($"Shop definition does not exist: {shopId}.");
+		}
+		else if (shopIdCounts.TryGetValue(shopId, out int duplicateCount) && duplicateCount > 1)
+		{
+			errors.Add($"Duplicate shop id: {shopId}.");
+		}
+
+		ValidateKnownItem(Get(shopItem, "item_id"), "shop item", errors);
+		ValidatePositiveInt(shopItem, "stock_quantity", errors);
+		ValidateNonNegativeInt(shopItem, "resolved_buy_price", errors);
+
+		SetValidation(row, errors, warnings);
+	}
+
+	private void ApplyLootValidation(
+		Dictionary<string, string> row,
+		IReadOnlyDictionary<string, string> lootItem,
+		IReadOnlyDictionary<string, string>? contents)
+	{
+		List<string> errors = [];
+		List<string> warnings = [];
+		string contentsId = Get(lootItem, "contents_id");
+		if (string.IsNullOrWhiteSpace(contentsId))
+		{
+			errors.Add("Contents id is missing.");
+		}
+		else if (contents is null)
+		{
+			errors.Add($"Loot contents definition does not exist: {contentsId}.");
+		}
+		else if (lootContentIdCounts.TryGetValue(contentsId, out int duplicateCount) && duplicateCount > 1)
+		{
+			errors.Add($"Duplicate loot contents id: {contentsId}.");
+		}
+
+		ValidateKnownItem(Get(lootItem, "item_id"), "loot item", errors);
+		ValidatePositiveInt(lootItem, "quantity_min", errors);
+		ValidatePositiveInt(lootItem, "quantity_max", errors);
+		if (TryGetInt(lootItem, "quantity_min", out int minQuantity) &&
+			TryGetInt(lootItem, "quantity_max", out int maxQuantity) &&
+			minQuantity > maxQuantity)
+		{
+			errors.Add("quantity_min is greater than quantity_max.");
+		}
+		ValidateRatio(lootItem, "drop_chance", errors);
+
+		SetValidation(row, errors, warnings);
+	}
+
+	private void ApplyRecipeValidation(Dictionary<string, string> row, IReadOnlyDictionary<string, string> recipe)
+	{
+		List<string> errors = [];
+		List<string> warnings = [];
+		string recipeId = Get(recipe, "recipe_id");
+		if (string.IsNullOrWhiteSpace(recipeId))
+		{
+			errors.Add("Recipe id is missing.");
+		}
+		else if (recipeIdCounts.TryGetValue(recipeId, out int duplicateCount) && duplicateCount > 1)
+		{
+			errors.Add($"Duplicate recipe id: {recipeId}.");
+		}
+
+		ValidateKnownItem(Get(recipe, "output_item_id"), "recipe output item", errors);
+		ValidatePositiveInt(recipe, "workbench_id", errors);
+		ValidatePositiveInt(recipe, "output_quantity", errors);
+		ValidateTextKey(Get(recipe, "name_string_key"), "name_string_key", errors, warnings, allowEmpty: true);
+
+		List<Dictionary<string, string>> ingredients = Rows("workbench_recipe_ingredients")
+			.Where(ingredient => Same(ingredient, "recipe_id", recipeId))
+			.ToList();
+		if (ingredients.Count <= 0)
+		{
+			warnings.Add("Recipe has no ingredients.");
+		}
+		foreach (Dictionary<string, string> ingredient in ingredients)
+		{
+			ValidateKnownItem(Get(ingredient, "item_id"), $"ingredient {Get(ingredient, "ingredient_index")}", errors);
+			ValidatePositiveInt(ingredient, "quantity", errors);
+		}
+
+		SetValidation(row, errors, warnings);
+	}
+
+	private void ApplyDismantleValidation(Dictionary<string, string> row, IReadOnlyDictionary<string, string> recipe)
+	{
+		List<string> errors = [];
+		List<string> warnings = [];
+		string sourceItemId = Get(recipe, "source_item_id");
+		bool bHasKnownSourceItem = ValidateKnownItem(sourceItemId, "dismantle source item", errors);
+		if (bHasKnownSourceItem &&
+			TryGetInt(recipe, "source_item_id", out int parsedSourceItemId) &&
+			dismantleSourceItemIdCounts.TryGetValue(parsedSourceItemId, out int duplicateCount) &&
+			duplicateCount > 1)
+		{
+			errors.Add($"Duplicate dismantle source item id: {parsedSourceItemId}.");
+		}
+
+		List<Dictionary<string, string>> results = Rows("workbench_dismantle_results")
+			.Where(result => Same(result, "source_item_id", sourceItemId))
+			.ToList();
+		if (results.Count <= 0)
+		{
+			warnings.Add("Dismantle recipe has no results.");
+		}
+		foreach (Dictionary<string, string> result in results)
+		{
+			ValidateKnownItem(Get(result, "item_id"), $"dismantle result {Get(result, "result_index")}", errors);
+			ValidatePositiveInt(result, "quantity", errors);
+		}
+
+		SetValidation(row, errors, warnings);
+	}
+
 	private string ItemLabel(string itemId)
 	{
 		string name = ItemText(itemId, "name_string_key", "en");
@@ -397,6 +622,113 @@ internal sealed class CsvRelationDataStore
 			itemsById.TryGetValue(parsedItemId, out Dictionary<string, string>? item)
 				? Get(item, fieldName)
 				: string.Empty;
+	}
+
+	private void ValidateTextKey(string key, string fieldName, List<string> errors, List<string> warnings, bool allowEmpty = false)
+	{
+		if (string.IsNullOrWhiteSpace(key))
+		{
+			if (!allowEmpty)
+			{
+				errors.Add($"{fieldName} is missing.");
+			}
+			return;
+		}
+
+		if (!textStringsByKey.TryGetValue(key, out Dictionary<string, string>? textRow))
+		{
+			errors.Add($"{fieldName} is not in ItemNameStrings.csv: {key}.");
+			return;
+		}
+
+		if (string.IsNullOrWhiteSpace(Get(textRow, "en")))
+		{
+			warnings.Add($"{fieldName} has no English text: {key}.");
+		}
+		if (string.IsNullOrWhiteSpace(Get(textRow, "ko")))
+		{
+			warnings.Add($"{fieldName} has no Korean text: {key}.");
+		}
+	}
+
+	private bool ValidateKnownItem(string itemId, string label, List<string> errors)
+	{
+		if (!int.TryParse(itemId, NumberStyles.Integer, CultureInfo.InvariantCulture, out int parsedItemId))
+		{
+			errors.Add($"{label} id is missing or not an integer.");
+			return false;
+		}
+		if (!itemsById.ContainsKey(parsedItemId))
+		{
+			errors.Add($"{label} id does not exist: {parsedItemId}.");
+			return false;
+		}
+
+		return true;
+	}
+
+	private static void ValidatePositiveInt(IReadOnlyDictionary<string, string> row, string column, List<string> errors)
+	{
+		if (!TryGetInt(row, column, out int value) || value <= 0)
+		{
+			errors.Add($"{column} must be a positive integer.");
+		}
+	}
+
+	private static void ValidateNonNegativeInt(IReadOnlyDictionary<string, string> row, string column, List<string> errors)
+	{
+		if (!TryGetInt(row, column, out int value) || value < 0)
+		{
+			errors.Add($"{column} must be zero or a positive integer.");
+		}
+	}
+
+	private static void ValidateNonNegativeDouble(IReadOnlyDictionary<string, string> row, string column, List<string> errors, bool allowEmpty)
+	{
+		string rawValue = Get(row, column);
+		if (allowEmpty && string.IsNullOrWhiteSpace(rawValue))
+		{
+			return;
+		}
+		if (!double.TryParse(rawValue, NumberStyles.Float, CultureInfo.InvariantCulture, out double value) || value < 0.0)
+		{
+			errors.Add($"{column} must be zero or a positive number.");
+		}
+	}
+
+	private static void ValidateRatio(IReadOnlyDictionary<string, string> row, string column, List<string> errors)
+	{
+		if (!double.TryParse(Get(row, column), NumberStyles.Float, CultureInfo.InvariantCulture, out double value) ||
+			value < 0.0 ||
+			value > 1.0)
+		{
+			errors.Add($"{column} must be between 0 and 1.");
+		}
+	}
+
+	private static void RequireNonEmpty(string value, string fieldName, List<string> errors)
+	{
+		if (string.IsNullOrWhiteSpace(value))
+		{
+			errors.Add($"{fieldName} is missing.");
+		}
+	}
+
+	private void RefreshValidationCounts()
+	{
+		IEnumerable<Dictionary<string, string>> rows = ItemRows
+			.Concat(ShopRows)
+			.Concat(LootRows)
+			.Concat(RecipeRows)
+			.Concat(DismantleRows);
+		ValidationErrorCount = rows.Count(row => string.Equals(Get(row, "validation_severity"), "ERROR", StringComparison.OrdinalIgnoreCase));
+		ValidationWarningCount = rows.Count(row => string.Equals(Get(row, "validation_severity"), "WARN", StringComparison.OrdinalIgnoreCase));
+	}
+
+	private static void SetValidation(Dictionary<string, string> row, IReadOnlyList<string> errors, IReadOnlyList<string> warnings)
+	{
+		row["validation_severity"] = errors.Count > 0 ? "ERROR" : warnings.Count > 0 ? "WARN" : "OK";
+		row["validation_messages"] = string.Join("; ", errors.Concat(warnings));
 	}
 
 	private static string QuantitySummary(IReadOnlyDictionary<string, string> row)
@@ -436,5 +768,11 @@ internal sealed class CsvRelationDataStore
 	private static bool TryGetInt(IReadOnlyDictionary<string, string> row, string column, out int value)
 	{
 		return int.TryParse(Get(row, column), NumberStyles.Integer, CultureInfo.InvariantCulture, out value);
+	}
+
+	private static void Increment<TKey>(Dictionary<TKey, int> counts, TKey key)
+		where TKey : notnull
+	{
+		counts[key] = counts.TryGetValue(key, out int count) ? count + 1 : 1;
 	}
 }
