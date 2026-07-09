@@ -4821,3 +4821,42 @@
 - `B`, `1`, `2`, `3`, `4`, 우클릭, Delete 기반 적/장애물 배치 및 제거 기능을 추가한 것.
 - `Docs/combat_movement_simulator.md`에 실행 방법, 조작법, 구현 범위, 튜닝 데이터, UE 이식 메모, 현재 한계를 문서화한 것.
 - `dotnet build Tools/CombatMovementSimulator/CombatMovementSimulator.csproj` 빌드를 경고와 오류 없이 성공시킨 것.
+
+## 2026-07-09 22:04:07 (소요시간: 00:00:32)
+
+- 시뮬레이터의 총기 적이 추적 중 계속 접근만 하던 문제를 보정하기 위해 UE 본체 `ATunaSweeperEnemyAIController`의 원거리 교전 상태 흐름을 이식한 것.
+- 총기 적 상태를 `AdvanceBurst`, `HoldFire`, `SeekLineOfFire`, `KeepDistance` 중심으로 바꾸고, 짧게 전진한 뒤 일정 시간 멈춰 사격하도록 변경한 것.
+- 장거리/중거리 전진 거리, 거리별 정지 사격 시간, 화선 탐색 시간, 거리 벌리기 시간, 측면 이동 가중치, 이동 목표 허용 반경을 `combat_tuning.json`에 추가한 것.
+- `Docs/combat_movement_simulator.md`에 변경된 총기 적 교전 리듬과 튜닝 항목을 반영한 것.
+- 실행 중인 `CombatMovementSimulator.exe`가 기본 출력 파일을 잠그고 있어 기본 `dotnet build`는 출력 복사 단계에서 실패했으나, 별도 `obj/BuildCheckOutput` 출력 경로로 빌드해 경고와 오류 없이 성공시킨 것.
+
+## 2026-07-09 22:06:28 (소요시간: 00:01:48)
+
+- `CombatMovementSimulator`가 실행 직후 곧바로 시뮬레이션을 시작하지 않고 편집 모드로 시작하도록 변경한 것.
+- 우측 패널에 `Start` 버튼을 추가하고, 버튼을 누른 뒤에만 플레이어 이동, 사격, 적 AI, 투사체 업데이트가 진행되도록 분리한 것.
+- 편집 모드에서는 적/장애물 배치와 삭제만 가능하게 하고, 시뮬레이션 중에는 배치 단축키와 우클릭 배치가 동작하지 않도록 정리한 것.
+- `R` 입력은 시나리오를 리셋하고 다시 편집 모드로 돌아가도록 변경한 것.
+- `Docs/combat_movement_simulator.md`에 편집 모드 시작, `Start` 버튼, 현재 상태 enum 설명을 갱신한 것.
+- 별도 `obj/BuildCheckOutput` 출력 경로로 `dotnet build`를 실행해 경고와 오류 없이 성공시킨 것.
+
+## 2026-07-09 22:20:33 (소요시간: 00:00:30)
+
+- 작업 완료 후 `CombatMovementSimulator` GUI 앱을 실행한 것.
+- 기본 출력 파일이 기존 실행 프로세스에 잠겨 있을 수 있어, 최신 변경 검증에 사용한 `Tools/CombatMovementSimulator/obj/BuildCheckOutput/CombatMovementSimulator.dll`을 `dotnet`으로 실행한 것.
+
+## 2026-07-09 22:22:53 (소요시간: 00:00:36)
+
+- `CombatMovementSimulator` 총기 적 홀드 시간을 거리 구간별로 각각 2배씩 늘린 것.
+- 장거리 홀드를 `0.8~1.2초`에서 `1.6~2.4초`로, 중거리 홀드를 `1.2~1.8초`에서 `2.4~3.6초`로, 선호 거리 홀드를 `1.4~2.2초`에서 `2.8~4.4초`로 변경한 것.
+- `Docs/combat_movement_simulator.md`에 현재 총기 적 정지 사격 시간 범위를 추가한 것.
+- 새 출력 경로 `Tools/CombatMovementSimulator/obj/BuildCheckOutput_Hold2x`로 `dotnet build`를 실행해 경고와 오류 없이 성공시킨 것.
+- 홀드 시간이 2배로 반영된 빌드를 `dotnet`으로 실행한 것.
+
+## 2026-07-09 22:24:02 (소요시간: 00:00:48)
+
+- `CombatMovementSimulator`에 `Shift` 스프린트 입력을 추가한 것.
+- `Shift`가 눌린 동안 플레이어 이동 속도에 `SprintSpeedMultiplier`를 적용하도록 변경하고, 기본 배율을 `2.0`으로 설정한 것.
+- `combat_tuning.json`에 `Player.SprintSpeedMultiplier` 값을 추가한 것.
+- `Docs/combat_movement_simulator.md`에 스프린트 조작과 튜닝 항목을 문서화한 것.
+- 새 출력 경로 `Tools/CombatMovementSimulator/obj/BuildCheckOutput_Sprint`로 `dotnet build`를 실행해 경고와 오류 없이 성공시킨 것.
+- 스프린트가 반영된 빌드를 `dotnet`으로 실행한 것.

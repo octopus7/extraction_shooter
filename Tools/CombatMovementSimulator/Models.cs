@@ -12,10 +12,13 @@ internal enum EnemyKind
 internal enum EnemyState
 {
 	Idle,
+	AdvanceBurst,
+	HoldFire,
 	Approach,
 	HoldRange,
 	Strafe,
 	Retreat,
+	KeepDistance,
 	SeekLineOfFire,
 	AttackCommit,
 	Recover
@@ -53,10 +56,17 @@ internal sealed class PlayerTuning
 {
 	public float Radius { get; set; } = 42.0f;
 	public float MoveSpeed { get; set; } = 520.0f;
+	public float SprintSpeedMultiplier { get; set; } = 2.0f;
 	public float Health { get; set; } = 100.0f;
 	public float ProjectileSpeed { get; set; } = 2400.0f;
 	public float ProjectileDamage { get; set; } = 18.0f;
 	public float FireCooldown { get; set; } = 0.105f;
+}
+
+internal sealed class FloatRange
+{
+	public float Min { get; set; }
+	public float Max { get; set; }
 }
 
 internal sealed class EnemyTuning
@@ -73,6 +83,19 @@ internal sealed class EnemyTuning
 	public float RangedPreferredMin { get; set; } = 650.0f;
 	public float RangedPreferredMax { get; set; } = 1000.0f;
 	public float RangedDangerClose { get; set; } = 430.0f;
+	public float RangedLongAdvanceThreshold { get; set; } = 1600.0f;
+	public float RangedMediumAdvanceThreshold { get; set; } = 1200.0f;
+	public FloatRange RangedLongAdvanceDistance { get; set; } = new() { Min = 400.0f, Max = 600.0f };
+	public FloatRange RangedMediumAdvanceDistance { get; set; } = new() { Min = 250.0f, Max = 400.0f };
+	public FloatRange RangedLongHoldSeconds { get; set; } = new() { Min = 0.8f, Max = 1.2f };
+	public FloatRange RangedMediumHoldSeconds { get; set; } = new() { Min = 1.2f, Max = 1.8f };
+	public FloatRange RangedPreferredHoldSeconds { get; set; } = new() { Min = 1.4f, Max = 2.2f };
+	public FloatRange RangedSeekLineOfFireSeconds { get; set; } = new() { Min = 0.8f, Max = 1.4f };
+	public FloatRange RangedKeepDistanceSeconds { get; set; } = new() { Min = 0.5f, Max = 0.9f };
+	public float RangedAdvanceStrafeWeight { get; set; } = 0.22f;
+	public float RangedSeekForwardWeight { get; set; } = 0.25f;
+	public float RangedKeepDistanceStrafeWeight { get; set; } = 0.45f;
+	public float RangedMoveGoalAcceptanceRadius { get; set; } = 55.0f;
 	public float RangedAttackRange { get; set; } = 1450.0f;
 	public float RangedProjectileSpeed { get; set; } = 1750.0f;
 	public float RangedProjectileDamage { get; set; } = 9.0f;
@@ -135,6 +158,8 @@ internal sealed class EnemyAgent
 	public float StateTimer { get; set; }
 	public float StrafeTimer { get; set; }
 	public float StrafeSign { get; set; } = 1.0f;
+	public Vector2 RangedMoveDirection { get; set; }
+	public Vector2 RangedMoveGoal { get; set; }
 	public bool HasAppliedAttack { get; set; }
 }
 
@@ -165,4 +190,5 @@ internal sealed class SimulationInput
 	public Vector2 MoveDirection { get; set; }
 	public Vector2 AimWorld { get; set; }
 	public bool FireHeld { get; set; }
+	public bool SprintHeld { get; set; }
 }

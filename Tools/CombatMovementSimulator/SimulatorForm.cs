@@ -10,10 +10,12 @@ internal sealed class SimulatorForm : Form
 	private readonly HashSet<Keys> keysDown = [];
 	private readonly Stopwatch stopwatch = Stopwatch.StartNew();
 	private readonly System.Windows.Forms.Timer timer = new();
+	private readonly Button startButton = new();
 	private readonly SimulationWorld world;
 	private Vector2 mouseWorld;
 	private Point mouseScreen;
 	private bool fireHeld;
+	private bool isSimulationRunning;
 	private bool paused;
 	private bool showDebug = true;
 	private BuildMode buildMode = BuildMode.None;
@@ -33,6 +35,7 @@ internal sealed class SimulatorForm : Form
 		CombatTuning tuning = CombatTuning.LoadOrDefault(AppContext.BaseDirectory);
 		renderScale = tuning.World.SimulationScale;
 		world = new SimulationWorld(tuning);
+		InitializePanelControls();
 
 		timer.Interval = 16;
 		timer.Tick += HandleTick;
@@ -47,56 +50,95 @@ internal sealed class SimulatorForm : Form
 		switch (e.KeyCode)
 		{
 			case Keys.R:
-				world.ResetScenario();
+				ResetToEditMode();
 				break;
 			case Keys.P:
-				paused = !paused;
+				if (isSimulationRunning)
+				{
+					paused = !paused;
+				}
 				break;
 			case Keys.T:
 				showDebug = !showDebug;
 				break;
 			case Keys.F:
-				world.FreezeEnemies = !world.FreezeEnemies;
+				if (isSimulationRunning)
+				{
+					world.FreezeEnemies = !world.FreezeEnemies;
+				}
 				break;
 			case Keys.B:
-				buildMode = buildMode switch
+				if (!isSimulationRunning)
 				{
-					BuildMode.None => BuildMode.Destructible,
-					BuildMode.Destructible => BuildMode.Indestructible,
-					BuildMode.Indestructible => BuildMode.MeleeEnemy,
-					BuildMode.MeleeEnemy => BuildMode.RangedEnemy,
-					_ => BuildMode.None
-				};
+					buildMode = buildMode switch
+					{
+						BuildMode.None => BuildMode.Destructible,
+						BuildMode.Destructible => BuildMode.Indestructible,
+						BuildMode.Indestructible => BuildMode.MeleeEnemy,
+						BuildMode.MeleeEnemy => BuildMode.RangedEnemy,
+						_ => BuildMode.None
+					};
+				}
 				break;
 			case Keys.D1:
-				buildMode = BuildMode.MeleeEnemy;
+				if (!isSimulationRunning)
+				{
+					buildMode = BuildMode.MeleeEnemy;
+				}
 				break;
 			case Keys.D2:
-				buildMode = BuildMode.RangedEnemy;
+				if (!isSimulationRunning)
+				{
+					buildMode = BuildMode.RangedEnemy;
+				}
 				break;
 			case Keys.D3:
-				buildMode = BuildMode.Destructible;
+				if (!isSimulationRunning)
+				{
+					buildMode = BuildMode.Destructible;
+				}
 				break;
 			case Keys.D4:
-				buildMode = BuildMode.Indestructible;
+				if (!isSimulationRunning)
+				{
+					buildMode = BuildMode.Indestructible;
+				}
 				break;
 			case Keys.Delete:
-				world.RemoveObstacleAt(mouseWorld);
+				if (!isSimulationRunning)
+				{
+					world.RemoveObstacleAt(mouseWorld);
+				}
 				break;
 			case Keys.Escape:
-				buildMode = BuildMode.None;
+				if (!isSimulationRunning)
+				{
+					buildMode = BuildMode.None;
+				}
 				break;
 			case Keys.OemOpenBrackets:
-				previewSize.Y = MathF.Max(60.0f, previewSize.Y - 20.0f);
+				if (!isSimulationRunning)
+				{
+					previewSize.Y = MathF.Max(60.0f, previewSize.Y - 20.0f);
+				}
 				break;
 			case Keys.OemCloseBrackets:
-				previewSize.Y += 20.0f;
+				if (!isSimulationRunning)
+				{
+					previewSize.Y += 20.0f;
+				}
 				break;
 			case Keys.OemMinus:
-				previewSize.X = MathF.Max(80.0f, previewSize.X - 30.0f);
+				if (!isSimulationRunning)
+				{
+					previewSize.X = MathF.Max(80.0f, previewSize.X - 30.0f);
+				}
 				break;
 			case Keys.Oemplus:
-				previewSize.X += 30.0f;
+				if (!isSimulationRunning)
+				{
+					previewSize.X += 30.0f;
+				}
 				break;
 		}
 	}
@@ -110,11 +152,11 @@ internal sealed class SimulatorForm : Form
 	protected override void OnMouseDown(MouseEventArgs e)
 	{
 		base.OnMouseDown(e);
-		if (e.Button == MouseButtons.Left)
+		if (e.Button == MouseButtons.Left && isSimulationRunning)
 		{
 			fireHeld = true;
 		}
-		else if (e.Button == MouseButtons.Right && buildMode != BuildMode.None)
+		else if (e.Button == MouseButtons.Right && !isSimulationRunning && buildMode != BuildMode.None)
 		{
 			PlaceCurrentPreview();
 		}
@@ -139,7 +181,7 @@ internal sealed class SimulatorForm : Form
 	protected override void OnMouseWheel(MouseEventArgs e)
 	{
 		base.OnMouseWheel(e);
-		if (buildMode != BuildMode.None)
+		if (!isSimulationRunning && buildMode != BuildMode.None)
 		{
 			previewRotationRadians += e.Delta > 0 ? MathF.PI / 36.0f : -MathF.PI / 36.0f;
 		}
@@ -172,26 +214,81 @@ internal sealed class SimulatorForm : Form
 		float dt = (float)stopwatch.Elapsed.TotalSeconds;
 		stopwatch.Restart();
 
-		if (keysDown.Contains(Keys.Q) && buildMode != BuildMode.None)
+		if (!isSimulationRunning && keysDown.Contains(Keys.Q) && buildMode != BuildMode.None)
 		{
 			previewRotationRadians -= dt * 2.4f;
 		}
 
-		if (keysDown.Contains(Keys.E) && buildMode != BuildMode.None)
+		if (!isSimulationRunning && keysDown.Contains(Keys.E) && buildMode != BuildMode.None)
 		{
 			previewRotationRadians += dt * 2.4f;
 		}
 
-		if (!paused)
+		if (isSimulationRunning && !paused)
 		{
 			world.Update(new SimulationInput
 			{
 				MoveDirection = ReadMoveDirection(),
 				AimWorld = mouseWorld,
-				FireHeld = fireHeld
+				FireHeld = fireHeld,
+				SprintHeld = IsSprintHeld()
 			}, dt);
 		}
 
+		Invalidate();
+	}
+
+	private void InitializePanelControls()
+	{
+		startButton.Text = "Start";
+		startButton.Font = new Font("Segoe UI", 10.0f, FontStyle.Bold);
+		startButton.FlatStyle = FlatStyle.Flat;
+		startButton.BackColor = Color.FromArgb(64, 122, 214);
+		startButton.ForeColor = Color.White;
+		startButton.FlatAppearance.BorderColor = Color.FromArgb(114, 164, 238);
+		startButton.Size = new Size(264, 34);
+		startButton.Click += (_, _) => StartSimulation();
+		Controls.Add(startButton);
+		PositionPanelControls();
+	}
+
+	protected override void OnResize(EventArgs e)
+	{
+		base.OnResize(e);
+		PositionPanelControls();
+	}
+
+	private void PositionPanelControls()
+	{
+		int panelLeft = Math.Max(0, ClientSize.Width - PanelWidth);
+		startButton.Location = new Point(panelLeft + 18, 138);
+	}
+
+	private void StartSimulation()
+	{
+		isSimulationRunning = true;
+		paused = false;
+		fireHeld = false;
+		buildMode = BuildMode.None;
+		startButton.Enabled = false;
+		startButton.Text = "Running";
+		startButton.BackColor = Color.FromArgb(75, 90, 105);
+		stopwatch.Restart();
+		Invalidate();
+	}
+
+	private void ResetToEditMode()
+	{
+		world.ResetScenario();
+		isSimulationRunning = false;
+		paused = false;
+		fireHeld = false;
+		buildMode = BuildMode.None;
+		keysDown.Clear();
+		startButton.Enabled = true;
+		startButton.Text = "Start";
+		startButton.BackColor = Color.FromArgb(64, 122, 214);
+		stopwatch.Restart();
 		Invalidate();
 	}
 
@@ -219,6 +316,13 @@ internal sealed class SimulatorForm : Form
 		}
 
 		return Geometry.NormalizeOrZero(move);
+	}
+
+	private bool IsSprintHeld()
+	{
+		return keysDown.Contains(Keys.ShiftKey) ||
+			keysDown.Contains(Keys.LShiftKey) ||
+			keysDown.Contains(Keys.RShiftKey);
 	}
 
 	private Rectangle GetViewport()
@@ -377,7 +481,7 @@ internal sealed class SimulatorForm : Form
 
 	private void DrawBuildPreview(Graphics graphics)
 	{
-		if (buildMode == BuildMode.None)
+		if (isSimulationRunning || buildMode == BuildMode.None)
 		{
 			return;
 		}
@@ -454,16 +558,19 @@ internal sealed class SimulatorForm : Form
 		y += 20;
 		DrawText(graphics, $"Enemies {world.Enemies.Count}  Obstacles {world.Obstacles.Count}", x, y, 9.5f, Color.FromArgb(210, 230, 235, 241));
 		y += 20;
-		DrawText(graphics, $"Mode {buildMode}  Paused {paused}  FreezeAI {world.FreezeEnemies}", x, y, 9.5f, Color.FromArgb(210, 230, 235, 241));
-		y += 32;
+		string runMode = isSimulationRunning ? (paused ? "Paused" : "Simulation") : "Edit";
+		DrawText(graphics, $"Run {runMode}  Placement {buildMode}", x, y, 9.5f, Color.FromArgb(210, 230, 235, 241));
+		y += 72;
 
 		DrawText(graphics, "Controls", x, y, 11.0f, Color.White, FontStyle.Bold);
 		y += 24;
 		foreach (string line in new[]
 		{
-			"WASD: move (+X north, +Y east)",
-			"Mouse: aim",
-			"LMB: fire",
+			"Start button: enter simulation",
+			"WASD: move after start",
+			"Shift: sprint x2 after start",
+			"Mouse: aim after start",
+			"LMB: fire after start",
 			"R: reset scenario",
 			"P: pause",
 			"T: debug overlay",
