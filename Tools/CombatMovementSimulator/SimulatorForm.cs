@@ -76,6 +76,7 @@ internal sealed class SimulatorForm : Form
 						BuildMode.Destructible => BuildMode.Indestructible,
 						BuildMode.Indestructible => BuildMode.MeleeEnemy,
 						BuildMode.MeleeEnemy => BuildMode.RangedEnemy,
+						BuildMode.RangedEnemy => BuildMode.FlankerEnemy,
 						_ => BuildMode.None
 					};
 				}
@@ -95,10 +96,16 @@ internal sealed class SimulatorForm : Form
 			case Keys.D3:
 				if (!isSimulationRunning)
 				{
-					buildMode = BuildMode.Destructible;
+					buildMode = BuildMode.FlankerEnemy;
 				}
 				break;
 			case Keys.D4:
+				if (!isSimulationRunning)
+				{
+					buildMode = BuildMode.Destructible;
+				}
+				break;
+			case Keys.D5:
 				if (!isSimulationRunning)
 				{
 					buildMode = BuildMode.Indestructible;
@@ -410,10 +417,88 @@ internal sealed class SimulatorForm : Form
 
 	private void DrawAgents(Graphics graphics)
 	{
+		if (showDebug)
+		{
+			DrawCombatDisengageLines(graphics);
+		}
+
 		DrawPlayer(graphics);
 		foreach (EnemyAgent enemy in world.Enemies)
 		{
 			DrawEnemy(graphics, enemy);
+		}
+	}
+
+	private void DrawCombatDisengageLines(Graphics graphics)
+	{
+		float trackingRange = MathF.Max(0.0f, world.Tuning.Enemy.TrackingRange);
+		float disengageRange = MathF.Max(world.Tuning.Enemy.TrackingRange, world.Tuning.Enemy.CombatDisengageRange);
+		if (trackingRange <= 0.0f && disengageRange <= 0.0f)
+		{
+			return;
+		}
+
+		foreach (EnemyAgent enemy in world.Enemies)
+		{
+			Vector2 toPlayer = world.Player.Position - enemy.Position;
+			float distanceToPlayer = toPlayer.Length();
+			if (distanceToPlayer <= 1.0f)
+			{
+				continue;
+			}
+
+			Vector2 directionToPlayer = toPlayer / distanceToPlayer;
+			PointF playerPoint = WorldToScreen(world.Player.Position);
+
+			if (!enemy.IsCombatEngaged)
+			{
+				DrawCombatVisionConeOutline(graphics, enemy, trackingRange);
+				continue;
+			}
+
+			if (distanceToPlayer < disengageRange)
+			{
+				Vector2 disengageEnd = enemy.Position + directionToPlayer * disengageRange;
+				using Pen remainingPen = new(Color.FromArgb(64, 255, 255, 255), 2.0f)
+				{
+					DashStyle = DashStyle.Dash
+				};
+				graphics.DrawLine(remainingPen, playerPoint, WorldToScreen(disengageEnd));
+			}
+		}
+	}
+
+	private void DrawCombatVisionConeOutline(Graphics graphics, EnemyAgent enemy, float range)
+	{
+		Vector2 facing = Geometry.NormalizeOrZero(enemy.Facing);
+		if (facing == Vector2.Zero || range <= 0.0f)
+		{
+			return;
+		}
+
+		float angleDegrees = Math.Clamp(world.Tuning.Enemy.CombatVisionAngleDegrees, 0.0f, 360.0f);
+		float halfAngleRadians = MathF.Min(MathF.PI, angleDegrees * MathF.PI / 360.0f);
+		const int ArcSegments = 24;
+
+		using Pen conePen = new(Color.FromArgb(64, 255, 255, 255), 1.0f)
+		{
+			DashStyle = DashStyle.Dash
+		};
+
+		PointF origin = WorldToScreen(enemy.Position);
+		Vector2 leftDirection = Geometry.Rotate(facing, -halfAngleRadians);
+		Vector2 rightDirection = Geometry.Rotate(facing, halfAngleRadians);
+		graphics.DrawLine(conePen, origin, WorldToScreen(enemy.Position + leftDirection * range));
+		graphics.DrawLine(conePen, origin, WorldToScreen(enemy.Position + rightDirection * range));
+
+		PointF previousPoint = WorldToScreen(enemy.Position + leftDirection * range);
+		for (int i = 1; i <= ArcSegments; ++i)
+		{
+			float t = i / (float)ArcSegments;
+			float angle = -halfAngleRadians + halfAngleRadians * 2.0f * t;
+			PointF nextPoint = WorldToScreen(enemy.Position + Geometry.Rotate(facing, angle) * range);
+			graphics.DrawLine(conePen, previousPoint, nextPoint);
+			previousPoint = nextPoint;
 		}
 	}
 
@@ -436,10 +521,16 @@ internal sealed class SimulatorForm : Form
 	{
 		PointF enemyPoint = WorldToScreen(enemy.Position);
 		float radius = ToPixels(world.Tuning.Enemy.Radius);
-		Color fill = enemy.Kind == EnemyKind.Melee ? Color.FromArgb(232, 218, 79, 74) : Color.FromArgb(232, 184, 99, 224);
+		Color fill = enemy.Kind switch
+		{
+			EnemyKind.Melee => Color.FromArgb(232, 218, 79, 74),
+			EnemyKind.Flanker => Color.FromArgb(232, 74, 205, 142),
+			_ => Color.FromArgb(232, 184, 99, 224)
+		};
 		Color outlineColor = enemy.State switch
 		{
 			EnemyState.SeekLineOfFire => Color.FromArgb(255, 255, 204, 95),
+			EnemyState.Strafe => Color.FromArgb(255, 118, 242, 174),
 			EnemyState.Retreat => Color.FromArgb(255, 93, 202, 255),
 			EnemyState.AttackCommit => Color.FromArgb(255, 255, 255, 255),
 			_ => Color.FromArgb(255, 35, 35, 40)
@@ -457,7 +548,12 @@ internal sealed class SimulatorForm : Form
 		if (showDebug)
 		{
 			using Pen rangePen = new(Color.FromArgb(60, outlineColor), 1.0f);
-			float range = enemy.Kind == EnemyKind.Melee ? world.Tuning.Enemy.MeleeAttackRange : world.Tuning.Enemy.RangedPreferredMax;
+			float range = enemy.Kind switch
+			{
+				EnemyKind.Melee => world.Tuning.Enemy.MeleeAttackRange,
+				EnemyKind.Flanker => world.Tuning.Enemy.FlankerPreferredMax,
+				_ => world.Tuning.Enemy.RangedPreferredMax
+			};
 			graphics.DrawEllipse(rangePen, enemyPoint.X - ToPixels(range), enemyPoint.Y - ToPixels(range), ToPixels(range) * 2.0f, ToPixels(range) * 2.0f);
 			DrawCenteredText(graphics, enemy.State.ToString(), enemy.Position + new Vector2(-145.0f, 0.0f), Color.FromArgb(225, 235, 238, 244));
 		}
@@ -486,7 +582,7 @@ internal sealed class SimulatorForm : Form
 			return;
 		}
 
-		if (buildMode is BuildMode.MeleeEnemy or BuildMode.RangedEnemy)
+		if (buildMode is BuildMode.MeleeEnemy or BuildMode.RangedEnemy or BuildMode.FlankerEnemy)
 		{
 			DrawEnemyPlacementPreview(graphics);
 			return;
@@ -512,15 +608,24 @@ internal sealed class SimulatorForm : Form
 	{
 		PointF point = WorldToScreen(mouseWorld);
 		float radius = ToPixels(world.Tuning.Enemy.Radius);
-		Color color = buildMode == BuildMode.MeleeEnemy
-			? Color.FromArgb(150, 218, 79, 74)
-			: Color.FromArgb(150, 184, 99, 224);
+		Color color = buildMode switch
+		{
+			BuildMode.MeleeEnemy => Color.FromArgb(150, 218, 79, 74),
+			BuildMode.FlankerEnemy => Color.FromArgb(150, 74, 205, 142),
+			_ => Color.FromArgb(150, 184, 99, 224)
+		};
 
 		using SolidBrush brush = new(color);
 		using Pen pen = new(Color.FromArgb(230, 255, 255, 255), 2.0f) { DashStyle = DashStyle.Dash };
 		graphics.FillEllipse(brush, point.X - radius, point.Y - radius, radius * 2.0f, radius * 2.0f);
 		graphics.DrawEllipse(pen, point.X - radius, point.Y - radius, radius * 2.0f, radius * 2.0f);
-		DrawCenteredText(graphics, buildMode == BuildMode.MeleeEnemy ? "Melee" : "Ranged", mouseWorld + new Vector2(-120.0f, 0.0f), Color.White);
+		string label = buildMode switch
+		{
+			BuildMode.MeleeEnemy => "Melee",
+			BuildMode.FlankerEnemy => "Flanker",
+			_ => "Ranged"
+		};
+		DrawCenteredText(graphics, label, mouseWorld + new Vector2(-120.0f, 0.0f), Color.White);
 	}
 
 	private void PlaceCurrentPreview()
@@ -538,6 +643,9 @@ internal sealed class SimulatorForm : Form
 				break;
 			case BuildMode.RangedEnemy:
 				world.SpawnEnemy(EnemyKind.Ranged, mouseWorld);
+				break;
+			case BuildMode.FlankerEnemy:
+				world.SpawnEnemy(EnemyKind.Flanker, mouseWorld);
 				break;
 		}
 	}
@@ -576,8 +684,8 @@ internal sealed class SimulatorForm : Form
 			"T: debug overlay",
 			"F: freeze enemies",
 			"B: cycle placement mode",
-			"1/2: melee/ranged placement",
-			"3/4: destructible/indestructible",
+			"1/2/3: melee/ranged/flanker",
+			"4/5: destructible/indestructible",
 			"RMB: place current preview",
 			"Wheel or Q/E: rotate obstacle",
 			"-/+: obstacle width",

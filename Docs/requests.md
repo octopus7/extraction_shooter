@@ -4860,3 +4860,60 @@
 - `Docs/combat_movement_simulator.md`에 스프린트 조작과 튜닝 항목을 문서화한 것.
 - 새 출력 경로 `Tools/CombatMovementSimulator/obj/BuildCheckOutput_Sprint`로 `dotnet build`를 실행해 경고와 오류 없이 성공시킨 것.
 - 스프린트가 반영된 빌드를 `dotnet`으로 실행한 것.
+
+## 2026-07-09 22:27:40 (소요시간: 00:01:00)
+
+- `CombatMovementSimulator`의 교전 시작 거리와 교전 중 이탈 거리를 분리한 것.
+- 기존 `TrackingRange` `2300cm`는 교전 시작 거리로 유지하고, 새 `CombatDisengageRange`를 `3600cm`로 추가한 것.
+- 적이 한번 교전에 들어가면 `CombatDisengageRange` 밖으로 나가기 전까지 전투 상태를 유지하도록 `IsCombatEngaged` 상태를 추가한 것.
+- `Docs/combat_movement_simulator.md`에 교전 시작 거리와 교전 중 이탈 거리를 문서화한 것.
+- 새 출력 경로 `Tools/CombatMovementSimulator/obj/BuildCheckOutput_DisengageRange`로 `dotnet build`를 실행해 경고와 오류 없이 성공시킨 것.
+- 전투 이탈 거리가 늘어난 빌드를 `dotnet`으로 실행한 것.
+
+## 2026-07-09 22:38:15 (소요시간: 00:01:09)
+
+- `CombatMovementSimulator` 디버그 표시에서 적과 플레이어 사이의 교전 이탈 거리 점선을 추가한 것.
+- 적에서 플레이어까지는 50% 투명도 점선으로 표시하고, 플레이어를 지나 `CombatDisengageRange`까지 남은 구간은 두께 2의 25% 투명도 점선으로 표시하도록 구현한 것.
+- `Docs/combat_movement_simulator.md`에 교전 이탈 거리 점선 표시 규칙을 문서화한 것.
+- 새 출력 경로 `Tools/CombatMovementSimulator/obj/BuildCheckOutput_DisengageLine`로 `dotnet build`를 실행해 경고와 오류 없이 성공시킨 것.
+- 교전 이탈 거리 점선 표시가 반영된 빌드를 `dotnet`으로 실행한 것.
+
+## 2026-07-09 22:41:25 (소요시간: 00:00:51)
+
+- `CombatMovementSimulator` 디버그 점선 표시를 교전 여부별로 분리한 것.
+- 비교전 상태의 적은 플레이어 방향으로 `TrackingRange`까지만 25% 투명도 점선으로 표시하도록 변경한 것.
+- 교전 중인 적은 기존대로 적에서 플레이어까지 50% 투명도 점선, 플레이어 이후 `CombatDisengageRange`까지 남은 구간은 두께 2의 25% 투명도 점선으로 표시하도록 유지한 것.
+- `Docs/combat_movement_simulator.md`에 비교전/교전 중 점선 표시 규칙을 문서화한 것.
+- 새 출력 경로 `Tools/CombatMovementSimulator/obj/BuildCheckOutput_TrackingLine`로 `dotnet build`를 실행해 경고와 오류 없이 성공시킨 것.
+- 비교전 인지거리 점선 표시가 반영된 빌드를 `dotnet`으로 실행한 것.
+
+## 2026-07-09 22:45:12 (소요시간: 00:03:01)
+
+- `CombatMovementSimulator` 비교전 적이 항상 플레이어를 바라보지 않도록 변경한 것.
+- 비교전 적에 `Idle`/`Wander` 반복 상태를 추가하고, `IdleSeconds`, `WanderSeconds`, `WanderMoveSpeed` 튜닝값으로 랜덤 시간 범위 기반 배회가 일어나도록 구현한 것.
+- 비교전 적이 자신의 전방 `CombatVisionAngleDegrees` 부채꼴 안에 플레이어를 포착하고 무적 장애물에 시야가 막히지 않을 때만 교전에 진입하도록 변경한 것.
+- 비교전 디버그 표시는 기존 교전 가능 거리 선 대신 시야 부채꼴 25% 투명도 점선 외곽선으로 바꾼 것.
+- 교전 중 디버그 표시에서 적에서 플레이어까지 이어지던 50% 투명도 점선을 제거하고, 플레이어 이후 `CombatDisengageRange`까지 남은 초과 구간만 두께 2의 25% 투명도 점선으로 표시하도록 변경한 것.
+- `Docs/combat_movement_simulator.md`에 배회 상태, 시야 부채꼴 교전 진입, 변경된 점선 표시 규칙, `Wander` 상태 enum을 문서화한 것.
+- 새 출력 경로 `Tools/CombatMovementSimulator/obj/BuildCheckOutput_WanderVision`로 `dotnet build`를 실행해 경고와 오류 없이 성공시킨 것.
+- 배회/시야 부채꼴 표시가 반영된 빌드를 `dotnet`으로 실행한 것.
+
+## 2026-07-09 22:50:49 (소요시간: 00:03:25)
+
+- `CombatMovementSimulator`의 총기 적이 교전 진입 즉시 접근하지 않고 먼저 `HoldFire` 상태로 들어가 사격을 시도하도록 변경한 것.
+- 원거리 적 교전 진입 시 사격 쿨다운을 즉시 발사 가능한 상태로 정리해 첫 홀드 중 바로 사격 판단이 일어나도록 한 것.
+- 첫 `HoldFire` 중에는 감지 직후 접근보다 사격이 먼저 보이도록 `TrackingRange`까지 사격 판정을 허용하고, 이후 일반 사격 판정은 기존 `RangedAttackRange`를 따르도록 분리한 것.
+- `Docs/combat_movement_simulator.md`에 총기 적의 교전 진입 첫 행동이 `HoldFire`임을 문서화한 것.
+- 새 출력 경로 `Tools/CombatMovementSimulator/obj/BuildCheckOutput_OpeningHoldShot`로 `dotnet build`를 실행해 경고와 오류 없이 성공시킨 것.
+- 교전 진입 첫 홀드 변경이 반영된 빌드를 `dotnet`으로 실행한 것.
+
+## 2026-07-09 22:51:18 (소요시간: 00:07:38)
+
+- `CombatMovementSimulator`에 새 적 타입 `Flanker`를 추가한 것.
+- 기본 시나리오에 측면기동형 적 2마리를 배치한 것.
+- 측면기동형이 선호 거리 안에서는 `Strafe` 상태로 좌우 원호 이동하며 사격하고, 멀면 측면 가중 접근, 가까우면 대각 후퇴, 무적 장애물에 막히면 측면 화선 탐색을 하도록 구현한 것.
+- 측면기동형 전용 이동 속도, 선호 거리, 위험 근접 거리, 원호 이동 시간, 접근 거리, 사거리, 탄속, 피해량, 발사 쿨다운 튜닝값을 `combat_tuning.json`에 추가한 것.
+- 배치 모드에서 `3` 키로 측면기동형 적을 선택하고, 장애물 배치 단축키를 `4/5`로 조정한 것.
+- 총기형 적이 `RangedPreferredMax` 안에 들어오면 기본적으로 더 이상 거리를 좁히지 않고 유지하도록 접근 버스트의 목표 거리와 중단 조건을 `RangedPreferredMax` 기준으로 변경한 것.
+- `Docs/combat_movement_simulator.md`에 측면기동형 동작과 총기형 거리 유지 규칙을 문서화한 것.
+- 새 출력 경로 `Tools/CombatMovementSimulator/obj/BuildCheckOutput_Flanker`로 `dotnet build`를 실행해 경고와 오류 없이 성공시킨 것.

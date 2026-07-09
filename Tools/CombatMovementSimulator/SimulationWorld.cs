@@ -42,6 +42,8 @@ internal sealed class SimulationWorld
 		SpawnEnemy(EnemyKind.Melee, new Vector2(-920.0f, -720.0f));
 		SpawnEnemy(EnemyKind.Ranged, new Vector2(1260.0f, 760.0f));
 		SpawnEnemy(EnemyKind.Ranged, new Vector2(-1120.0f, 580.0f));
+		SpawnEnemy(EnemyKind.Flanker, new Vector2(480.0f, 1280.0f));
+		SpawnEnemy(EnemyKind.Flanker, new Vector2(-1420.0f, -120.0f));
 	}
 
 	public void AddObstacle(ObstacleKind kind, Vector2 center, Vector2 size, float rotationRadians)
@@ -62,8 +64,10 @@ internal sealed class SimulationWorld
 		{
 			Kind = kind,
 			Position = position,
+			Facing = RandomUnitVector(),
 			Health = Tuning.Enemy.Health,
 			State = EnemyState.Idle,
+			StateTimer = RandomRange(Tuning.Enemy.IdleSeconds, 0.05f),
 			StrafeSign = random.Next(0, 2) == 0 ? -1.0f : 1.0f
 		});
 	}
@@ -160,6 +164,7 @@ internal sealed class SimulationWorld
 		if (enemy.Health <= 0.0f || Player.Health <= 0.0f)
 		{
 			enemy.State = EnemyState.Idle;
+			enemy.IsOpeningHold = false;
 			return;
 		}
 
@@ -175,22 +180,121 @@ internal sealed class SimulationWorld
 		Vector2 toPlayer = Player.Position - enemy.Position;
 		float distance = toPlayer.Length();
 		Vector2 directionToPlayer = distance > 0.001f ? toPlayer / distance : enemy.Facing;
-		enemy.Facing = directionToPlayer;
 
-		if (distance > Tuning.Enemy.TrackingRange)
+		float trackingRange = MathF.Max(0.0f, Tuning.Enemy.TrackingRange);
+		float disengageRange = MathF.Max(trackingRange, Tuning.Enemy.CombatDisengageRange);
+		if (!enemy.IsCombatEngaged)
 		{
+			if (!CanAcquireCombat(enemy, directionToPlayer, distance, trackingRange))
+			{
+				UpdateNonCombatEnemy(enemy, dt);
+				return;
+			}
+
+			enemy.IsCombatEngaged = true;
+			enemy.Facing = directionToPlayer;
+			if (enemy.Kind == EnemyKind.Ranged)
+			{
+				StartRangedHold(enemy, distance, isOpeningHold: true);
+				enemy.FireCooldownRemaining = 0.0f;
+			}
+			else if (enemy.Kind == EnemyKind.Flanker)
+			{
+				StartFlankerOrbit(enemy, directionToPlayer, distance);
+				enemy.FireCooldownRemaining = 0.0f;
+			}
+		}
+
+		if (enemy.IsCombatEngaged && distance > disengageRange)
+		{
+			enemy.IsCombatEngaged = false;
 			enemy.State = EnemyState.Idle;
+			enemy.RangedMoveDirection = Vector2.Zero;
+			enemy.RangedMoveGoal = Vector2.Zero;
+			enemy.IsOpeningHold = false;
 			return;
 		}
+
+		enemy.Facing = directionToPlayer;
 
 		if (enemy.Kind == EnemyKind.Melee)
 		{
 			UpdateMeleeEnemy(enemy, directionToPlayer, distance, dt);
 		}
+		else if (enemy.Kind == EnemyKind.Flanker)
+		{
+			UpdateFlankerEnemy(enemy, directionToPlayer, distance, dt);
+		}
 		else
 		{
 			UpdateRangedEnemy(enemy, directionToPlayer, distance, dt);
 		}
+	}
+
+	private bool CanAcquireCombat(EnemyAgent enemy, Vector2 directionToPlayer, float distance, float trackingRange)
+	{
+		if (distance > trackingRange)
+		{
+			return false;
+		}
+
+		Vector2 facing = Geometry.NormalizeOrZero(enemy.Facing);
+		if (facing == Vector2.Zero)
+		{
+			facing = new Vector2(1.0f, 0.0f);
+		}
+
+		float angleDegrees = Math.Clamp(Tuning.Enemy.CombatVisionAngleDegrees, 0.0f, 360.0f);
+		if (angleDegrees < 360.0f)
+		{
+			float halfAngleRadians = DegreesToRadians(angleDegrees * 0.5f);
+			float dot = Vector2.Dot(facing, Geometry.NormalizeOrZero(directionToPlayer));
+			if (dot < MathF.Cos(halfAngleRadians))
+			{
+				return false;
+			}
+		}
+
+		return EvaluateLineOfFire(enemy.Position, Player.Position) != LineOfFire.BlockedByIndestructible;
+	}
+
+	private void UpdateNonCombatEnemy(EnemyAgent enemy, float dt)
+	{
+		if (enemy.State is not (EnemyState.Idle or EnemyState.Wander))
+		{
+			StartIdle(enemy);
+		}
+
+		if (enemy.StateTimer <= 0.0f)
+		{
+			if (enemy.State == EnemyState.Wander)
+			{
+				StartIdle(enemy);
+			}
+			else
+			{
+				StartWander(enemy);
+			}
+		}
+
+		if (enemy.State == EnemyState.Wander)
+		{
+			MoveEnemy(enemy, enemy.Facing, Tuning.Enemy.WanderMoveSpeed, dt);
+		}
+	}
+
+	private void StartIdle(EnemyAgent enemy)
+	{
+		enemy.State = EnemyState.Idle;
+		enemy.StateTimer = RandomRange(Tuning.Enemy.IdleSeconds, 0.05f);
+		enemy.IsOpeningHold = false;
+	}
+
+	private void StartWander(EnemyAgent enemy)
+	{
+		enemy.State = EnemyState.Wander;
+		enemy.StateTimer = RandomRange(Tuning.Enemy.WanderSeconds, 0.05f);
+		enemy.Facing = RandomUnitVector();
 	}
 
 	private void UpdateMeleeEnemy(EnemyAgent enemy, Vector2 directionToPlayer, float distance, float dt)
@@ -263,7 +367,7 @@ internal sealed class SimulationWorld
 				}
 
 				if (enemy.StateTimer <= 0.0f ||
-					distance <= preferredMin ||
+					distance <= preferredMax ||
 					Vector2.DistanceSquared(enemy.Position, enemy.RangedMoveGoal) <= MathF.Pow(MathF.Max(1.0f, Tuning.Enemy.RangedMoveGoalAcceptanceRadius), 2.0f))
 				{
 					StartRangedHold(enemy, distance);
@@ -288,6 +392,7 @@ internal sealed class SimulationWorld
 				}
 
 				enemy.State = EnemyState.Idle;
+				enemy.IsOpeningHold = false;
 				break;
 
 			case EnemyState.SeekLineOfFire:
@@ -335,6 +440,123 @@ internal sealed class SimulationWorld
 		TryRangedAttack(enemy, directionToPlayer, distance, lineOfFire);
 	}
 
+	private void UpdateFlankerEnemy(EnemyAgent enemy, Vector2 directionToPlayer, float distance, float dt)
+	{
+		LineOfFire lineOfFire = EvaluateLineOfFire(enemy.Position, Player.Position);
+		float dangerCloseRange = MathF.Max(0.0f, Tuning.Enemy.FlankerDangerClose);
+		float preferredMin = MathF.Max(dangerCloseRange, Tuning.Enemy.FlankerPreferredMin);
+		float preferredMax = MathF.Max(preferredMin, Tuning.Enemy.FlankerPreferredMax);
+
+		if (distance <= dangerCloseRange)
+		{
+			if (enemy.State != EnemyState.KeepDistance || enemy.StateTimer <= 0.0f)
+			{
+				StartFlankerKeepDistance(enemy, directionToPlayer);
+			}
+
+			MoveFlankerCombatState(enemy, dt);
+			return;
+		}
+
+		switch (enemy.State)
+		{
+			case EnemyState.AdvanceBurst:
+				if (lineOfFire == LineOfFire.BlockedByIndestructible)
+				{
+					StartFlankerSeekLineOfFire(enemy, distance, directionToPlayer);
+					MoveFlankerCombatState(enemy, dt);
+					return;
+				}
+
+				if (enemy.StateTimer <= 0.0f ||
+					distance <= preferredMax ||
+					Vector2.DistanceSquared(enemy.Position, enemy.RangedMoveGoal) <= MathF.Pow(MathF.Max(1.0f, Tuning.Enemy.FlankerMoveGoalAcceptanceRadius), 2.0f))
+				{
+					StartFlankerOrbit(enemy, directionToPlayer, distance);
+					return;
+				}
+
+				TryFlankerAttack(enemy, directionToPlayer, distance, lineOfFire);
+				MoveFlankerCombatState(enemy, dt);
+				return;
+
+			case EnemyState.Strafe:
+				if (lineOfFire == LineOfFire.BlockedByIndestructible)
+				{
+					StartFlankerSeekLineOfFire(enemy, distance, directionToPlayer);
+					MoveFlankerCombatState(enemy, dt);
+					return;
+				}
+
+				if (distance < preferredMin)
+				{
+					StartFlankerKeepDistance(enemy, directionToPlayer);
+					MoveFlankerCombatState(enemy, dt);
+					return;
+				}
+
+				if (distance > preferredMax)
+				{
+					StartFlankerAdvance(enemy, distance, directionToPlayer);
+					MoveFlankerCombatState(enemy, dt);
+					return;
+				}
+
+				TryFlankerAttack(enemy, directionToPlayer, distance, lineOfFire);
+				if (enemy.StateTimer <= 0.0f)
+				{
+					StartFlankerOrbit(enemy, directionToPlayer, distance);
+				}
+
+				MoveFlankerCombatState(enemy, dt);
+				return;
+
+			case EnemyState.SeekLineOfFire:
+				if (lineOfFire != LineOfFire.BlockedByIndestructible)
+				{
+					StartFlankerOrbit(enemy, directionToPlayer, distance);
+					TryFlankerAttack(enemy, directionToPlayer, distance, lineOfFire);
+					return;
+				}
+
+				if (enemy.StateTimer > 0.0f)
+				{
+					MoveFlankerCombatState(enemy, dt);
+					return;
+				}
+
+				enemy.State = EnemyState.Idle;
+				break;
+
+			case EnemyState.KeepDistance:
+				if (distance >= preferredMin || enemy.StateTimer <= 0.0f)
+				{
+					StartFlankerOrbit(enemy, directionToPlayer, distance);
+					return;
+				}
+
+				MoveFlankerCombatState(enemy, dt);
+				return;
+		}
+
+		if (lineOfFire == LineOfFire.BlockedByIndestructible)
+		{
+			StartFlankerSeekLineOfFire(enemy, distance, directionToPlayer);
+			MoveFlankerCombatState(enemy, dt);
+			return;
+		}
+
+		if (distance > preferredMax)
+		{
+			StartFlankerAdvance(enemy, distance, directionToPlayer);
+			MoveFlankerCombatState(enemy, dt);
+			return;
+		}
+
+		StartFlankerOrbit(enemy, directionToPlayer, distance);
+		TryFlankerAttack(enemy, directionToPlayer, distance, lineOfFire);
+	}
+
 	private void MoveRangedCombatState(EnemyAgent enemy, float dt)
 	{
 		if (dt <= 0.0f ||
@@ -356,7 +578,8 @@ internal sealed class SimulationWorld
 	private void StartRangedAdvance(EnemyAgent enemy, float distance, Vector2 directionToPlayer)
 	{
 		float preferredMin = MathF.Max(MathF.Max(0.0f, Tuning.Enemy.RangedDangerClose), Tuning.Enemy.RangedPreferredMin);
-		float maxUsefulAdvanceDistance = MathF.Max(0.0f, distance - preferredMin);
+		float preferredMax = MathF.Max(preferredMin, Tuning.Enemy.RangedPreferredMax);
+		float maxUsefulAdvanceDistance = MathF.Max(0.0f, distance - preferredMax);
 		float advanceDistance = MathF.Min(ResolveRangedAdvanceDistance(distance), maxUsefulAdvanceDistance);
 		if (advanceDistance <= Tuning.Enemy.RangedMoveGoalAcceptanceRadius)
 		{
@@ -371,14 +594,16 @@ internal sealed class SimulationWorld
 		enemy.RangedMoveGoal = enemy.Position + enemy.RangedMoveDirection * advanceDistance;
 		enemy.State = EnemyState.AdvanceBurst;
 		enemy.StateTimer = ResolveRangedMoveDuration(advanceDistance);
+		enemy.IsOpeningHold = false;
 	}
 
-	private void StartRangedHold(EnemyAgent enemy, float distance)
+	private void StartRangedHold(EnemyAgent enemy, float distance, bool isOpeningHold = false)
 	{
 		enemy.State = EnemyState.HoldFire;
 		enemy.RangedMoveDirection = Vector2.Zero;
 		enemy.RangedMoveGoal = Vector2.Zero;
 		enemy.StateTimer = ResolveRangedHoldSeconds(distance);
+		enemy.IsOpeningHold = isOpeningHold;
 	}
 
 	private void StartRangedSeekLineOfFire(EnemyAgent enemy, float distance, Vector2 directionToPlayer)
@@ -392,6 +617,7 @@ internal sealed class SimulationWorld
 		enemy.RangedMoveGoal = Vector2.Zero;
 		enemy.State = EnemyState.SeekLineOfFire;
 		enemy.StateTimer = RandomRange(Tuning.Enemy.RangedSeekLineOfFireSeconds, 0.05f);
+		enemy.IsOpeningHold = false;
 	}
 
 	private void StartRangedKeepDistance(EnemyAgent enemy, Vector2 directionToPlayer)
@@ -402,18 +628,109 @@ internal sealed class SimulationWorld
 		enemy.RangedMoveGoal = Vector2.Zero;
 		enemy.State = EnemyState.KeepDistance;
 		enemy.StateTimer = RandomRange(Tuning.Enemy.RangedKeepDistanceSeconds, 0.05f);
+		enemy.IsOpeningHold = false;
+	}
+
+	private void MoveFlankerCombatState(EnemyAgent enemy, float dt)
+	{
+		if (dt <= 0.0f ||
+			enemy.State is not (EnemyState.AdvanceBurst or EnemyState.Strafe or EnemyState.SeekLineOfFire or EnemyState.KeepDistance) ||
+			enemy.StateTimer <= 0.0f)
+		{
+			return;
+		}
+
+		if (enemy.State == EnemyState.AdvanceBurst &&
+			Vector2.DistanceSquared(enemy.Position, enemy.RangedMoveGoal) <= MathF.Pow(MathF.Max(1.0f, Tuning.Enemy.FlankerMoveGoalAcceptanceRadius), 2.0f))
+		{
+			return;
+		}
+
+		MoveEnemy(enemy, enemy.RangedMoveDirection, Tuning.Enemy.FlankerMoveSpeed, dt);
+	}
+
+	private void StartFlankerAdvance(EnemyAgent enemy, float distance, Vector2 directionToPlayer)
+	{
+		float preferredMin = MathF.Max(MathF.Max(0.0f, Tuning.Enemy.FlankerDangerClose), Tuning.Enemy.FlankerPreferredMin);
+		float preferredMax = MathF.Max(preferredMin, Tuning.Enemy.FlankerPreferredMax);
+		float maxUsefulAdvanceDistance = MathF.Max(0.0f, distance - preferredMax);
+		float advanceDistance = MathF.Min(RandomRange(Tuning.Enemy.FlankerAdvanceDistance, 0.0f), maxUsefulAdvanceDistance);
+		if (advanceDistance <= Tuning.Enemy.FlankerMoveGoalAcceptanceRadius)
+		{
+			StartFlankerOrbit(enemy, directionToPlayer, distance);
+			return;
+		}
+
+		Vector2 strafeDirection = Geometry.Perpendicular(directionToPlayer) * enemy.StrafeSign;
+		Vector2 moveDirection = Geometry.NormalizeOrZero(directionToPlayer + strafeDirection * MathF.Max(0.0f, Tuning.Enemy.FlankerAdvanceStrafeWeight));
+		enemy.RangedMoveDirection = moveDirection == Vector2.Zero ? directionToPlayer : moveDirection;
+		enemy.RangedMoveGoal = enemy.Position + enemy.RangedMoveDirection * advanceDistance;
+		enemy.State = EnemyState.AdvanceBurst;
+		enemy.StateTimer = ResolveFlankerMoveDuration(advanceDistance);
+		enemy.IsOpeningHold = false;
+	}
+
+	private void StartFlankerOrbit(EnemyAgent enemy, Vector2 directionToPlayer, float distance)
+	{
+		float preferredMin = MathF.Max(MathF.Max(0.0f, Tuning.Enemy.FlankerDangerClose), Tuning.Enemy.FlankerPreferredMin);
+		float preferredMax = MathF.Max(preferredMin, Tuning.Enemy.FlankerPreferredMax);
+		float targetDistance = (preferredMin + preferredMax) * 0.5f;
+		float radialError = Math.Clamp((distance - targetDistance) / MathF.Max(1.0f, targetDistance), -1.0f, 1.0f);
+		Vector2 strafeDirection = Geometry.Perpendicular(directionToPlayer) * enemy.StrafeSign;
+		Vector2 radialCorrection = directionToPlayer * radialError * MathF.Max(0.0f, Tuning.Enemy.FlankerOrbitRadialCorrectionWeight);
+		enemy.RangedMoveDirection = Geometry.NormalizeOrZero(strafeDirection + radialCorrection);
+		enemy.RangedMoveGoal = Vector2.Zero;
+		enemy.State = EnemyState.Strafe;
+		enemy.StateTimer = RandomRange(Tuning.Enemy.FlankerOrbitSeconds, 0.05f);
+		enemy.IsOpeningHold = false;
+	}
+
+	private void StartFlankerSeekLineOfFire(EnemyAgent enemy, float distance, Vector2 directionToPlayer)
+	{
+		Vector2 strafeDirection = Geometry.Perpendicular(directionToPlayer) * enemy.StrafeSign;
+		float forwardWeight = distance > MathF.Max(Tuning.Enemy.FlankerPreferredMin, Tuning.Enemy.FlankerDangerClose)
+			? MathF.Max(0.0f, Tuning.Enemy.FlankerSeekForwardWeight)
+			: 0.0f;
+		enemy.RangedMoveDirection = Geometry.NormalizeOrZero(strafeDirection + directionToPlayer * forwardWeight);
+		enemy.RangedMoveGoal = Vector2.Zero;
+		enemy.State = EnemyState.SeekLineOfFire;
+		enemy.StateTimer = RandomRange(Tuning.Enemy.FlankerSeekLineOfFireSeconds, 0.05f);
+		enemy.IsOpeningHold = false;
+	}
+
+	private void StartFlankerKeepDistance(EnemyAgent enemy, Vector2 directionToPlayer)
+	{
+		Vector2 strafeDirection = Geometry.Perpendicular(directionToPlayer) * enemy.StrafeSign;
+		enemy.RangedMoveDirection = Geometry.NormalizeOrZero(-directionToPlayer + strafeDirection * MathF.Max(0.0f, Tuning.Enemy.FlankerKeepDistanceStrafeWeight));
+		enemy.RangedMoveGoal = Vector2.Zero;
+		enemy.State = EnemyState.KeepDistance;
+		enemy.StateTimer = RandomRange(Tuning.Enemy.FlankerKeepDistanceSeconds, 0.05f);
+		enemy.IsOpeningHold = false;
 	}
 
 	private void TryRangedAttack(EnemyAgent enemy, Vector2 directionToPlayer, float distance, LineOfFire lineOfFire)
 	{
-		if (distance <= Tuning.Enemy.RangedAttackRange &&
+		float attackRange = enemy.IsOpeningHold
+			? MathF.Max(Tuning.Enemy.RangedAttackRange, Tuning.Enemy.TrackingRange)
+			: Tuning.Enemy.RangedAttackRange;
+		TryEnemyProjectileAttack(enemy, directionToPlayer, distance, lineOfFire, attackRange, Tuning.Enemy.RangedProjectileSpeed, Tuning.Enemy.RangedProjectileDamage, Tuning.Enemy.RangedFireCooldown);
+	}
+
+	private void TryFlankerAttack(EnemyAgent enemy, Vector2 directionToPlayer, float distance, LineOfFire lineOfFire)
+	{
+		TryEnemyProjectileAttack(enemy, directionToPlayer, distance, lineOfFire, Tuning.Enemy.FlankerAttackRange, Tuning.Enemy.FlankerProjectileSpeed, Tuning.Enemy.FlankerProjectileDamage, Tuning.Enemy.FlankerFireCooldown);
+	}
+
+	private void TryEnemyProjectileAttack(EnemyAgent enemy, Vector2 directionToPlayer, float distance, LineOfFire lineOfFire, float attackRange, float projectileSpeed, float damage, float fireCooldown)
+	{
+		if (distance <= attackRange &&
 			lineOfFire != LineOfFire.BlockedByIndestructible &&
 			enemy.FireCooldownRemaining <= 0.0f)
 		{
 			float spreadRadians = DegreesToRadians(lineOfFire == LineOfFire.BlockedByDestructible ? 1.0f : 3.0f);
 			Vector2 shotDirection = Geometry.Rotate(directionToPlayer, RandomRange(-spreadRadians, spreadRadians));
-			FireProjectile(ProjectileOwner.Enemy, enemy.Position + shotDirection * (Tuning.Enemy.Radius + 14.0f), shotDirection, Tuning.Enemy.RangedProjectileSpeed, Tuning.Enemy.RangedProjectileDamage);
-			enemy.FireCooldownRemaining = Tuning.Enemy.RangedFireCooldown * RandomRange(0.82f, 1.22f);
+			FireProjectile(ProjectileOwner.Enemy, enemy.Position + shotDirection * (Tuning.Enemy.Radius + 14.0f), shotDirection, projectileSpeed, damage);
+			enemy.FireCooldownRemaining = fireCooldown * RandomRange(0.82f, 1.22f);
 		}
 	}
 
@@ -442,6 +759,12 @@ internal sealed class SimulationWorld
 	private float ResolveRangedMoveDuration(float moveDistance)
 	{
 		float moveSpeed = MathF.Max(1.0f, Tuning.Enemy.RangedMoveSpeed);
+		return MathF.Max(0.25f, moveDistance / moveSpeed + 0.25f);
+	}
+
+	private float ResolveFlankerMoveDuration(float moveDistance)
+	{
+		float moveSpeed = MathF.Max(1.0f, Tuning.Enemy.FlankerMoveSpeed);
 		return MathF.Max(0.25f, moveDistance / moveSpeed + 0.25f);
 	}
 
@@ -578,6 +901,12 @@ internal sealed class SimulationWorld
 		float min = MathF.Min(range.Min, range.Max);
 		float max = MathF.Max(range.Min, range.Max);
 		return MathF.Max(minValue, RandomRange(min, max));
+	}
+
+	private Vector2 RandomUnitVector()
+	{
+		float angle = RandomRange(0.0f, MathF.PI * 2.0f);
+		return new Vector2(MathF.Cos(angle), MathF.Sin(angle));
 	}
 
 	private static float DegreesToRadians(float degrees)

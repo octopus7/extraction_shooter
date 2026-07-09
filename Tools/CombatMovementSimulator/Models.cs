@@ -6,12 +6,14 @@ namespace CombatMovementSimulator;
 internal enum EnemyKind
 {
 	Melee,
-	Ranged
+	Ranged,
+	Flanker
 }
 
 internal enum EnemyState
 {
 	Idle,
+	Wander,
 	AdvanceBurst,
 	HoldFire,
 	Approach,
@@ -42,7 +44,8 @@ internal enum BuildMode
 	Destructible,
 	Indestructible,
 	MeleeEnemy,
-	RangedEnemy
+	RangedEnemy,
+	FlankerEnemy
 }
 
 internal enum LineOfFire
@@ -76,6 +79,11 @@ internal sealed class EnemyTuning
 	public float RangedMoveSpeed { get; set; } = 340.0f;
 	public float Health { get; set; } = 70.0f;
 	public float TrackingRange { get; set; } = 2300.0f;
+	public float CombatDisengageRange { get; set; } = 3600.0f;
+	public float CombatVisionAngleDegrees { get; set; } = 100.0f;
+	public FloatRange IdleSeconds { get; set; } = new() { Min = 1.4f, Max = 3.7f };
+	public FloatRange WanderSeconds { get; set; } = new() { Min = 0.9f, Max = 2.4f };
+	public float WanderMoveSpeed { get; set; } = 120.0f;
 	public float MeleeAttackRange { get; set; } = 115.0f;
 	public float MeleeWindupSeconds { get; set; } = 0.2f;
 	public float MeleeRecoverSeconds { get; set; } = 0.45f;
@@ -87,9 +95,9 @@ internal sealed class EnemyTuning
 	public float RangedMediumAdvanceThreshold { get; set; } = 1200.0f;
 	public FloatRange RangedLongAdvanceDistance { get; set; } = new() { Min = 400.0f, Max = 600.0f };
 	public FloatRange RangedMediumAdvanceDistance { get; set; } = new() { Min = 250.0f, Max = 400.0f };
-	public FloatRange RangedLongHoldSeconds { get; set; } = new() { Min = 0.8f, Max = 1.2f };
-	public FloatRange RangedMediumHoldSeconds { get; set; } = new() { Min = 1.2f, Max = 1.8f };
-	public FloatRange RangedPreferredHoldSeconds { get; set; } = new() { Min = 1.4f, Max = 2.2f };
+	public FloatRange RangedLongHoldSeconds { get; set; } = new() { Min = 1.6f, Max = 2.4f };
+	public FloatRange RangedMediumHoldSeconds { get; set; } = new() { Min = 2.4f, Max = 3.6f };
+	public FloatRange RangedPreferredHoldSeconds { get; set; } = new() { Min = 2.8f, Max = 4.4f };
 	public FloatRange RangedSeekLineOfFireSeconds { get; set; } = new() { Min = 0.8f, Max = 1.4f };
 	public FloatRange RangedKeepDistanceSeconds { get; set; } = new() { Min = 0.5f, Max = 0.9f };
 	public float RangedAdvanceStrafeWeight { get; set; } = 0.22f;
@@ -102,6 +110,23 @@ internal sealed class EnemyTuning
 	public float RangedFireCooldown { get; set; } = 0.75f;
 	public float RangedStrafeChangeSeconds { get; set; } = 1.1f;
 	public float SeekLineOfFireStrafeWeight { get; set; } = 0.86f;
+	public float FlankerMoveSpeed { get; set; } = 370.0f;
+	public float FlankerPreferredMin { get; set; } = 560.0f;
+	public float FlankerPreferredMax { get; set; } = 880.0f;
+	public float FlankerDangerClose { get; set; } = 360.0f;
+	public FloatRange FlankerOrbitSeconds { get; set; } = new() { Min = 0.9f, Max = 1.6f };
+	public FloatRange FlankerSeekLineOfFireSeconds { get; set; } = new() { Min = 0.7f, Max = 1.2f };
+	public FloatRange FlankerKeepDistanceSeconds { get; set; } = new() { Min = 0.45f, Max = 0.8f };
+	public FloatRange FlankerAdvanceDistance { get; set; } = new() { Min = 260.0f, Max = 430.0f };
+	public float FlankerOrbitRadialCorrectionWeight { get; set; } = 0.55f;
+	public float FlankerAdvanceStrafeWeight { get; set; } = 0.85f;
+	public float FlankerSeekForwardWeight { get; set; } = 0.18f;
+	public float FlankerKeepDistanceStrafeWeight { get; set; } = 0.9f;
+	public float FlankerMoveGoalAcceptanceRadius { get; set; } = 55.0f;
+	public float FlankerAttackRange { get; set; } = 1150.0f;
+	public float FlankerProjectileSpeed { get; set; } = 1650.0f;
+	public float FlankerProjectileDamage { get; set; } = 7.0f;
+	public float FlankerFireCooldown { get; set; } = 0.65f;
 }
 
 internal sealed class WorldTuning
@@ -161,6 +186,8 @@ internal sealed class EnemyAgent
 	public Vector2 RangedMoveDirection { get; set; }
 	public Vector2 RangedMoveGoal { get; set; }
 	public bool HasAppliedAttack { get; set; }
+	public bool IsCombatEngaged { get; set; }
+	public bool IsOpeningHold { get; set; }
 }
 
 internal sealed class Obstacle
