@@ -2,6 +2,7 @@
 
 #include "AI/TunaSweeperEnemyCharacter.h"
 #include "Character/TunaSweeperTopDownCharacter.h"
+#include "DrawDebugHelpers.h"
 #include "Engine/World.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -41,8 +42,10 @@ void ATunaSweeperEnemyAIController::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
+	UpdateNonCombatState(DeltaSeconds);
 	MoveRangedCombatState(DeltaSeconds);
 	MoveTowardCurrentTarget(DeltaSeconds);
+	DrawCombatDebug();
 }
 
 void ATunaSweeperEnemyAIController::BeginPlay()
@@ -65,6 +68,7 @@ void ATunaSweeperEnemyAIController::OnPossess(APawn* InPawn)
 	Super::OnPossess(InPawn);
 
 	RandomizeCombatTuning();
+	StartNonCombatIdle();
 	UpdateAttackTarget();
 }
 
@@ -102,9 +106,17 @@ void ATunaSweeperEnemyAIController::UpdateAttackTarget()
 
 	APawn* ControlledPawn = GetPawn();
 	APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(this, 0);
-	if (!ControlledPawn || !PlayerPawn)
+	if (!ControlledPawn)
 	{
 		ClearCombatTarget();
+		return;
+	}
+	if (!PlayerPawn)
+	{
+		if (bIsCombatEngaged || CurrentTargetActor.IsValid())
+		{
+			ClearCombatTarget();
+		}
 		return;
 	}
 
@@ -118,12 +130,27 @@ void ATunaSweeperEnemyAIController::UpdateAttackTarget()
 	}
 
 	const float DistanceToPlayer = FMath::Sqrt(FVector::DistSquared2D(ControlledPawn->GetActorLocation(), PlayerPawn->GetActorLocation()));
-	if (DistanceToPlayer > ResolveTrackingRange())
+	if (bIsCombatEngaged && DistanceToPlayer > ResolveCombatDisengageRange())
 	{
 		ClearCombatTarget();
 		return;
 	}
 
+	if (!bIsCombatEngaged && !CanAcquireCombatTarget(PlayerPawn, DistanceToPlayer))
+	{
+		if (CurrentTargetActor.IsValid())
+		{
+			ClearCombatTarget();
+		}
+		else
+		{
+			ClearFocus(EAIFocusPriority::Gameplay);
+		}
+		return;
+	}
+
+	const bool bNewEngagement = !bIsCombatEngaged;
+	bIsCombatEngaged = true;
 	CurrentTargetActor = PlayerPawn;
 	SetFocus(PlayerPawn, EAIFocusPriority::Gameplay);
 
@@ -131,6 +158,15 @@ void ATunaSweeperEnemyAIController::UpdateAttackTarget()
 	if (EnemyCharacter && !EnemyCharacter->UsesMeleeAttack())
 	{
 		bIsClosingDistance = false;
+		if (bNewEngagement)
+		{
+			UWorld* World = GetWorld();
+			const double CurrentTimeSeconds = World ? World->GetTimeSeconds() : 0.0;
+			LastAttackTimeSeconds = CurrentTimeSeconds - ResolveAttackCooldownSeconds();
+			StartRangedHold(DistanceToPlayer, true);
+			TryRangedAttack(DistanceToPlayer, PlayerPawn, EnemyCharacter, EvaluateLineOfFire(PlayerPawn));
+			return;
+		}
 		UpdateRangedCombatState(DistanceToPlayer, PlayerPawn, EnemyCharacter);
 		return;
 	}
@@ -154,6 +190,76 @@ void ATunaSweeperEnemyAIController::UpdateAttackTarget()
 	{
 		LastAttackTimeSeconds = CurrentTimeSeconds;
 	}
+}
+
+void ATunaSweeperEnemyAIController::UpdateNonCombatState(float DeltaSeconds)
+{
+	if (DeltaSeconds <= 0.0f || bIsCombatEngaged || CurrentTargetActor.IsValid())
+	{
+		return;
+	}
+
+	APawn* ControlledPawn = GetPawn();
+	UWorld* World = GetWorld();
+	if (!ControlledPawn || !World)
+	{
+		return;
+	}
+
+	const double CurrentTimeSeconds = World->GetTimeSeconds();
+	if (CurrentTimeSeconds >= NonCombatStateEndTimeSeconds)
+	{
+		if (NonCombatState == ETunaSweeperNonCombatState::Idle)
+		{
+			StartNonCombatWander();
+		}
+		else
+		{
+			StartNonCombatIdle();
+		}
+	}
+
+	if (NonCombatState != ETunaSweeperNonCombatState::Wander)
+	{
+		return;
+	}
+
+	if (NonCombatFacingDirection.IsNearlyZero())
+	{
+		NonCombatFacingDirection = GetRandomPlanarDirection();
+	}
+
+	ControlledPawn->SetActorRotation(FRotator(0.0f, NonCombatFacingDirection.Rotation().Yaw, 0.0f));
+
+	float InputScale = 1.0f;
+	if (const ACharacter* ControlledCharacter = Cast<ACharacter>(ControlledPawn))
+	{
+		if (const UCharacterMovementComponent* MovementComponent = ControlledCharacter->GetCharacterMovement())
+		{
+			const float MaxWalkSpeed = FMath::Max(1.0f, MovementComponent->MaxWalkSpeed);
+			InputScale = FMath::Clamp(FMath::Max(0.0f, WanderMoveSpeed) / MaxWalkSpeed, 0.0f, 1.0f);
+		}
+	}
+
+	ControlledPawn->AddMovementInput(NonCombatFacingDirection, InputScale, true);
+}
+
+void ATunaSweeperEnemyAIController::StartNonCombatIdle()
+{
+	UWorld* World = GetWorld();
+	NonCombatState = ETunaSweeperNonCombatState::Idle;
+	NonCombatStateEndTimeSeconds =
+		(World ? World->GetTimeSeconds() : 0.0) + GetRandomRangeValue(IdleSeconds, 0.05f);
+	StopMovement();
+}
+
+void ATunaSweeperEnemyAIController::StartNonCombatWander()
+{
+	UWorld* World = GetWorld();
+	NonCombatState = ETunaSweeperNonCombatState::Wander;
+	NonCombatFacingDirection = GetRandomPlanarDirection();
+	NonCombatStateEndTimeSeconds =
+		(World ? World->GetTimeSeconds() : 0.0) + GetRandomRangeValue(WanderSeconds, 0.05f);
 }
 
 void ATunaSweeperEnemyAIController::UpdateApproachState(
@@ -258,7 +364,7 @@ void ATunaSweeperEnemyAIController::UpdateRangedCombatState(
 			return;
 		}
 		if (CurrentTimeSeconds >= RangedCombatStateEndTimeSeconds ||
-			DistanceToTarget <= SafePreferredRangeMin ||
+			DistanceToTarget <= SafePreferredRangeMax ||
 			FVector::DistSquared2D(EnemyCharacter->GetActorLocation(), RangedMoveGoal) <=
 				FMath::Square(FMath::Max(1.0f, RangedMoveGoalAcceptanceRadius)))
 		{
@@ -279,6 +385,7 @@ void ATunaSweeperEnemyAIController::UpdateRangedCombatState(
 			return;
 		}
 		RangedCombatState = ETunaSweeperRangedCombatState::Idle;
+		bIsOpeningHold = false;
 		break;
 
 	case ETunaSweeperRangedCombatState::SeekLineOfFire:
@@ -380,7 +487,8 @@ void ATunaSweeperEnemyAIController::StartRangedAdvance(
 	}
 
 	const float PreferredRangeMin = FMath::Max(FMath::Max(0.0f, RangedDangerCloseRange), RangedPreferredRangeMin);
-	const float MaxUsefulAdvanceDistance = FMath::Max(0.0f, DistanceToTarget - PreferredRangeMin);
+	const float PreferredRangeMax = FMath::Max(PreferredRangeMin, RangedPreferredRangeMax);
+	const float MaxUsefulAdvanceDistance = FMath::Max(0.0f, DistanceToTarget - PreferredRangeMax);
 	const float AdvanceDistance = FMath::Min(
 		ResolveRangedAdvanceDistance(DistanceToTarget),
 		MaxUsefulAdvanceDistance);
@@ -403,15 +511,17 @@ void ATunaSweeperEnemyAIController::StartRangedAdvance(
 
 	RangedMoveGoal = ControlledPawn->GetActorLocation() + RangedMoveDirection * AdvanceDistance;
 	RangedCombatState = ETunaSweeperRangedCombatState::AdvanceBurst;
+	bIsOpeningHold = false;
 	RangedCombatStateEndTimeSeconds = World->GetTimeSeconds() + ResolveRangedMoveDuration(AdvanceDistance);
 }
 
-void ATunaSweeperEnemyAIController::StartRangedHold(float DistanceToTarget)
+void ATunaSweeperEnemyAIController::StartRangedHold(float DistanceToTarget, bool bOpeningHold)
 {
 	UWorld* World = GetWorld();
 	RangedCombatState = ETunaSweeperRangedCombatState::HoldFire;
 	RangedMoveDirection = FVector::ZeroVector;
 	RangedMoveGoal = FVector::ZeroVector;
+	bIsOpeningHold = bOpeningHold;
 	RangedCombatStateEndTimeSeconds =
 		(World ? World->GetTimeSeconds() : 0.0) + ResolveRangedHoldSeconds(DistanceToTarget);
 	StopMovement();
@@ -435,6 +545,7 @@ void ATunaSweeperEnemyAIController::StartRangedSeekLineOfFire(
 		: 0.0f;
 	RangedMoveDirection = (StrafeDirection + DirectionToTarget * ForwardWeight).GetSafeNormal();
 	RangedCombatState = ETunaSweeperRangedCombatState::SeekLineOfFire;
+	bIsOpeningHold = false;
 	RangedCombatStateEndTimeSeconds =
 		World->GetTimeSeconds() + GetRandomRangeValue(RangedSeekLineOfFireSeconds, 0.05f);
 }
@@ -454,6 +565,7 @@ void ATunaSweeperEnemyAIController::StartRangedKeepDistance(const FVector& Direc
 		-DirectionToTarget +
 		StrafeDirection * FMath::Max(0.0f, RangedKeepDistanceStrafeWeight)).GetSafeNormal();
 	RangedCombatState = ETunaSweeperRangedCombatState::KeepDistance;
+	bIsOpeningHold = false;
 	RangedCombatStateEndTimeSeconds =
 		World->GetTimeSeconds() + GetRandomRangeValue(RangedKeepDistanceSeconds, 0.05f);
 }
@@ -466,7 +578,9 @@ void ATunaSweeperEnemyAIController::TryRangedAttack(
 {
 	if (!TargetActor || !EnemyCharacter ||
 		LineOfFireResult == ETunaSweeperLineOfFireResult::BlockedByIndestructible ||
-		DistanceToTarget > ResolveRangedAttackRange())
+		DistanceToTarget > (bIsOpeningHold
+			? FMath::Max(ResolveRangedAttackRange(), ResolveTrackingRange())
+			: ResolveRangedAttackRange()))
 	{
 		return;
 	}
@@ -524,6 +638,145 @@ ETunaSweeperLineOfFireResult ATunaSweeperEnemyAIController::EvaluateLineOfFire(A
 		: ETunaSweeperLineOfFireResult::BlockedByIndestructible;
 }
 
+bool ATunaSweeperEnemyAIController::CanAcquireCombatTarget(AActor* TargetActor, float DistanceToTarget) const
+{
+	const APawn* ControlledPawn = GetPawn();
+	if (!ControlledPawn || !TargetActor || DistanceToTarget > ResolveTrackingRange())
+	{
+		return false;
+	}
+
+	FVector DirectionToTarget = TargetActor->GetActorLocation() - ControlledPawn->GetActorLocation();
+	DirectionToTarget.Z = 0.0f;
+	if (DirectionToTarget.IsNearlyZero())
+	{
+		return true;
+	}
+	DirectionToTarget.Normalize();
+
+	const float SafeVisionAngleDegrees = FMath::Clamp(CombatVisionAngleDegrees, 0.0f, 360.0f);
+	if (SafeVisionAngleDegrees < 360.0f)
+	{
+		FVector ForwardDirection = ControlledPawn->GetActorForwardVector();
+		ForwardDirection.Z = 0.0f;
+		if (ForwardDirection.IsNearlyZero())
+		{
+			ForwardDirection = NonCombatFacingDirection.IsNearlyZero()
+				? FVector::ForwardVector
+				: NonCombatFacingDirection;
+		}
+		ForwardDirection.Normalize();
+
+		const float MinForwardDot = FMath::Cos(FMath::DegreesToRadians(SafeVisionAngleDegrees * 0.5f));
+		if (FVector::DotProduct(ForwardDirection, DirectionToTarget) < MinForwardDot)
+		{
+			return false;
+		}
+	}
+
+	return EvaluateLineOfFire(TargetActor) != ETunaSweeperLineOfFireResult::BlockedByIndestructible;
+}
+
+void ATunaSweeperEnemyAIController::DrawCombatDebug() const
+{
+	if (!bDrawCombatDebug)
+	{
+		return;
+	}
+
+	const APawn* ControlledPawn = GetPawn();
+	UWorld* World = GetWorld();
+	if (!ControlledPawn || !World)
+	{
+		return;
+	}
+
+	const FVector Origin = ControlledPawn->GetActorLocation() + FVector(0.0f, 0.0f, 16.0f);
+	if (!bIsCombatEngaged)
+	{
+		const float Range = FMath::Max(0.0f, ResolveTrackingRange());
+		if (Range <= 0.0f)
+		{
+			return;
+		}
+
+		FVector ForwardDirection = ControlledPawn->GetActorForwardVector();
+		ForwardDirection.Z = 0.0f;
+		if (ForwardDirection.IsNearlyZero())
+		{
+			ForwardDirection = NonCombatFacingDirection.IsNearlyZero()
+				? FVector::ForwardVector
+				: NonCombatFacingDirection;
+		}
+		ForwardDirection.Normalize();
+
+		const float HalfAngleDegrees = FMath::Clamp(CombatVisionAngleDegrees, 0.0f, 360.0f) * 0.5f;
+		const FVector LeftDirection = ForwardDirection.RotateAngleAxis(-HalfAngleDegrees, FVector::UpVector);
+		const FVector RightDirection = ForwardDirection.RotateAngleAxis(HalfAngleDegrees, FVector::UpVector);
+		const FColor VisionColor(0, 190, 255, 80);
+		DrawDebugLine(World, Origin, Origin + LeftDirection * Range, VisionColor, false, 0.0f, 0, 1.0f);
+		DrawDebugLine(World, Origin, Origin + RightDirection * Range, VisionColor, false, 0.0f, 0, 1.0f);
+
+		const int32 SegmentCount = 24;
+		for (int32 SegmentIndex = 0; SegmentIndex < SegmentCount; ++SegmentIndex)
+		{
+			if ((SegmentIndex % 2) != 0)
+			{
+				continue;
+			}
+
+			const float StartAlpha = static_cast<float>(SegmentIndex) / static_cast<float>(SegmentCount);
+			const float EndAlpha = static_cast<float>(SegmentIndex + 1) / static_cast<float>(SegmentCount);
+			const float StartAngle = FMath::Lerp(-HalfAngleDegrees, HalfAngleDegrees, StartAlpha);
+			const float EndAngle = FMath::Lerp(-HalfAngleDegrees, HalfAngleDegrees, EndAlpha);
+			const FVector SegmentStart = Origin + ForwardDirection.RotateAngleAxis(StartAngle, FVector::UpVector) * Range;
+			const FVector SegmentEnd = Origin + ForwardDirection.RotateAngleAxis(EndAngle, FVector::UpVector) * Range;
+			DrawDebugLine(World, SegmentStart, SegmentEnd, VisionColor, false, 0.0f, 0, 1.0f);
+		}
+		return;
+	}
+
+	const AActor* TargetActor = CurrentTargetActor.Get();
+	if (!TargetActor)
+	{
+		return;
+	}
+
+	FVector DirectionBeyondTarget = TargetActor->GetActorLocation() - ControlledPawn->GetActorLocation();
+	DirectionBeyondTarget.Z = 0.0f;
+	const float DistanceToTarget = DirectionBeyondTarget.Size();
+	const float ExtraDisengageDistance = ResolveCombatDisengageRange() - DistanceToTarget;
+	if (ExtraDisengageDistance <= 0.0f || DirectionBeyondTarget.IsNearlyZero())
+	{
+		return;
+	}
+
+	DirectionBeyondTarget.Normalize();
+	const FVector SegmentStart = TargetActor->GetActorLocation() + FVector(0.0f, 0.0f, 16.0f);
+	const FVector SegmentEnd = SegmentStart + DirectionBeyondTarget * ExtraDisengageDistance;
+	const int32 SegmentCount = 12;
+	const FColor DisengageColor(255, 160, 40, 64);
+	for (int32 SegmentIndex = 0; SegmentIndex < SegmentCount; ++SegmentIndex)
+	{
+		if ((SegmentIndex % 2) != 0)
+		{
+			continue;
+		}
+
+		const float StartAlpha = static_cast<float>(SegmentIndex) / static_cast<float>(SegmentCount);
+		const float EndAlpha = static_cast<float>(SegmentIndex + 1) / static_cast<float>(SegmentCount);
+		DrawDebugLine(
+			World,
+			FMath::Lerp(SegmentStart, SegmentEnd, StartAlpha),
+			FMath::Lerp(SegmentStart, SegmentEnd, EndAlpha),
+			DisengageColor,
+			false,
+			0.0f,
+			0,
+			2.0f);
+	}
+}
+
 float ATunaSweeperEnemyAIController::ResolveRangedAttackRange() const
 {
 	return FMath::Max(ResolveAttackRange(), FMath::Max(RangedPreferredRangeMin, RangedPreferredRangeMax));
@@ -563,11 +816,22 @@ float ATunaSweeperEnemyAIController::ResolveRangedMoveDuration(float MoveDistanc
 	return FMath::Max(0.25f, MoveDistance / MoveSpeed + 0.25f);
 }
 
+float ATunaSweeperEnemyAIController::ResolveCombatDisengageRange() const
+{
+	return FMath::Max(ResolveTrackingRange(), CombatDisengageRange);
+}
+
 float ATunaSweeperEnemyAIController::GetRandomRangeValue(const FVector2D& ValueRange, float MinValue)
 {
 	const float MinRange = FMath::Min(ValueRange.X, ValueRange.Y);
 	const float MaxRange = FMath::Max(ValueRange.X, ValueRange.Y);
 	return FMath::Max(MinValue, FMath::FRandRange(MinRange, MaxRange));
+}
+
+FVector ATunaSweeperEnemyAIController::GetRandomPlanarDirection()
+{
+	const float AngleRadians = FMath::FRandRange(0.0f, 2.0f * PI);
+	return FVector(FMath::Cos(AngleRadians), FMath::Sin(AngleRadians), 0.0f).GetSafeNormal();
 }
 
 float ATunaSweeperEnemyAIController::ResolveTrackingRange() const
@@ -613,11 +877,14 @@ float ATunaSweeperEnemyAIController::ResolveAttackCooldownSeconds() const
 void ATunaSweeperEnemyAIController::ClearCombatTarget()
 {
 	CurrentTargetActor.Reset();
+	bIsCombatEngaged = false;
 	bIsClosingDistance = false;
+	bIsOpeningHold = false;
 	RangedCombatState = ETunaSweeperRangedCombatState::Idle;
 	RangedCombatStateEndTimeSeconds = 0.0;
 	RangedMoveDirection = FVector::ZeroVector;
 	RangedMoveGoal = FVector::ZeroVector;
 	StopMovement();
 	ClearFocus(EAIFocusPriority::Gameplay);
+	StartNonCombatIdle();
 }

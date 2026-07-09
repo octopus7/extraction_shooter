@@ -45,7 +45,7 @@ namespace
 	constexpr float LumberjackMeleeAttackRange = 150.0f;
 	constexpr float LumberjackMeleeApproachStartRange = 130.0f;
 	constexpr float LumberjackMeleeApproachStopRange = 95.0f;
-	constexpr float LumberjackMeleeTrackingRange = 1800.0f;
+	constexpr float LumberjackMeleeTrackingRange = 2300.0f;
 	constexpr float LumberjackMeleeAttackCooldownSeconds = 1.25f;
 	constexpr float LumberjackMeleeKnockbackVelocity = 680.0f;
 	constexpr float LumberjackMeleeImpactHeight = 55.0f;

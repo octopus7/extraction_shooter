@@ -4950,3 +4950,16 @@
 - 검증 기준으로 누락/중복 ID, 없는 아이템 참조, 없는 텍스트 키, 잘못된 수량/확률 범위, 누락 필수값을 확인하도록 한 것.
 - 뷰어 상태 표시줄에 검증 오류/경고 행 개수를 보여주고, 툴바에 `ERROR red / WARN amber` 범례를 추가한 것.
 - `dotnet build Tools/ItemDataCsvViewer/ItemDataCsvViewer.csproj -o Tools/ItemDataCsvViewer/obj/BuildCheckOutput`와 `dotnet Tools/ItemDataCsvViewer/obj/BuildCheckOutput/ItemDataCsvViewer.dll --check` 검증을 통과한 뒤 최신 뷰어를 실행한 것.
+
+## 2026-07-09 23:46:58 (소요시간: 00:06:10)
+
+- 시뮬레이터에서 검증한 적 행동 일부를 UE5 프로젝트의 `ATunaSweeperEnemyAIController`로 이식한 것.
+- 플레이어 캐릭터/컨트롤러 코드는 수정하지 않고 적 AI 컨트롤러 중심으로 구현한 것.
+- 비전투 적에 랜덤 `Idle`/`Wander` 상태를 추가해 항상 플레이어를 바라보지 않도록 변경한 것.
+- 교전 진입 조건을 2300cm 인지 거리, 전방 100도 시야각, 발사선 평가 기반으로 변경한 것.
+- 교전 중 전투 해제 거리를 3600cm로 늘린 것.
+- 총기 적이 교전 즉시 접근하지 않고 첫 `HoldFire` 사격을 먼저 시도하도록 변경한 것.
+- 총기 적 선호 사격권, 근접 위험권, 전진 중단 기준, 홀드 시간을 시뮬레이터 튜닝에 맞게 조정한 것.
+- 근접형 벌목기 적의 인지 거리도 2300cm로 맞춘 것.
+- `Docs/SSOT/ranged_enemy_combat_pattern.md`와 `Docs/ue_enemy_ai_port.md`에 UE 이식 동작과 검증 결과를 문서화한 것.
+- `TunaSweeperEditor Win64 Development` 빌드를 성공시키고 UE 5.7 에디터 실행 명령을 완료한 것.
