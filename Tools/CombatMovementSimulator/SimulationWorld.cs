@@ -4,19 +4,23 @@ namespace CombatMovementSimulator;
 
 internal sealed class SimulationWorld
 {
-	private readonly Random random = new(1337);
+	private readonly Random random;
 
-	public SimulationWorld(CombatTuning tuning)
+	public SimulationWorld(CombatTuning tuning, int seed = 1337)
 	{
+		Seed = seed;
+		random = new Random(seed);
 		Tuning = tuning;
 		ResetScenario();
 	}
 
+	public int Seed { get; }
 	public CombatTuning Tuning { get; }
 	public PlayerAgent Player { get; } = new();
 	public List<EnemyAgent> Enemies { get; } = [];
 	public List<Obstacle> Obstacles { get; } = [];
 	public List<Projectile> Projectiles { get; } = [];
+	public SimulationTelemetry Telemetry { get; } = new();
 	public bool FreezeEnemies { get; set; }
 	public float ElapsedSeconds { get; private set; }
 
@@ -26,6 +30,7 @@ internal sealed class SimulationWorld
 		Enemies.Clear();
 		Obstacles.Clear();
 		Projectiles.Clear();
+		Telemetry.Reset();
 
 		Player.Position = Vector2.Zero;
 		Player.AimDirection = new Vector2(1.0f, 0.0f);
@@ -306,6 +311,7 @@ internal sealed class SimulationWorld
 				if (distance <= Tuning.Enemy.MeleeAttackRange + Tuning.Player.Radius)
 				{
 					Player.Health = MathF.Max(0.0f, Player.Health - Tuning.Enemy.MeleeDamage);
+					Telemetry.RecordPlayerDamage(Tuning.Enemy.MeleeDamage);
 				}
 
 				enemy.HasAppliedAttack = true;
@@ -729,7 +735,7 @@ internal sealed class SimulationWorld
 		{
 			float spreadRadians = DegreesToRadians(lineOfFire == LineOfFire.BlockedByDestructible ? 1.0f : 3.0f);
 			Vector2 shotDirection = Geometry.Rotate(directionToPlayer, RandomRange(-spreadRadians, spreadRadians));
-			FireProjectile(ProjectileOwner.Enemy, enemy.Position + shotDirection * (Tuning.Enemy.Radius + 14.0f), shotDirection, projectileSpeed, damage);
+			FireProjectile(ProjectileOwner.Enemy, enemy.Position + shotDirection * (Tuning.Enemy.Radius + 14.0f), shotDirection, projectileSpeed, damage, enemy.Kind);
 			enemy.FireCooldownRemaining = fireCooldown * RandomRange(0.82f, 1.22f);
 		}
 	}
@@ -849,12 +855,14 @@ internal sealed class SimulationWorld
 		if (hitEnemy != null)
 		{
 			hitEnemy.Health -= projectile.Damage;
+			Telemetry.RecordEnemyDamage(projectile.Damage);
 			return true;
 		}
 
 		if (hitPlayer)
 		{
 			Player.Health = MathF.Max(0.0f, Player.Health - projectile.Damage);
+			Telemetry.RecordPlayerDamage(projectile.Damage);
 			return true;
 		}
 
@@ -872,7 +880,7 @@ internal sealed class SimulationWorld
 		}
 	}
 
-	private void FireProjectile(ProjectileOwner owner, Vector2 start, Vector2 direction, float speed, float damage)
+	private void FireProjectile(ProjectileOwner owner, Vector2 start, Vector2 direction, float speed, float damage, EnemyKind? sourceEnemyKind = null)
 	{
 		Vector2 normalized = Geometry.NormalizeOrZero(direction);
 		if (normalized == Vector2.Zero)
@@ -883,12 +891,14 @@ internal sealed class SimulationWorld
 		Projectiles.Add(new Projectile
 		{
 			Owner = owner,
+			SourceEnemyKind = sourceEnemyKind,
 			Position = start,
 			PreviousPosition = start,
 			Velocity = normalized * speed,
 			Damage = damage,
 			Radius = Tuning.World.ProjectileRadius
 		});
+		Telemetry.RecordProjectileFired(owner, sourceEnemyKind);
 	}
 
 	private float RandomRange(float min, float max)

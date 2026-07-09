@@ -1,0 +1,9 @@
+﻿source_row_index,id,name_string_key,capacity,static_mesh_path,material_path,mesh_scale_x,mesh_scale_y,mesh_scale_z
+0,7001,container.wooden_crate,10,/Engine/BasicShapes/Cube.Cube,/Game/Interaction/M_Container_Wood.M_Container_Wood,1.1,0.8,0.55
+1,7002,container.metal_case,15,/Engine/BasicShapes/Cube.Cube,/Game/Interaction/M_Container_Metal.M_Container_Metal,1.35,0.95,0.6
+2,7003,container.supply_cache,15,/Engine/BasicShapes/Cube.Cube,/Game/Interaction/M_Container_Supply.M_Container_Supply,1.65,1.1,0.7
+3,7004,container.cardboard_box,5,/Engine/BasicShapes/Cube.Cube,/Game/Interaction/M_Container_Cardboard.M_Container_Cardboard,0.95,0.7,0.48
+4,7005,container.pistol_ammo_box,5,/Engine/BasicShapes/Cube.Cube,/Game/Interaction/M_Container_Cardboard.M_Container_Cardboard,0.85,0.65,0.42
+5,7006,container.rifle_ammo_box,5,/Engine/BasicShapes/Cube.Cube,/Game/Interaction/M_Container_Metal.M_Container_Metal,1.15,0.72,0.45
+6,7007,container.lumber_crate,5,/Engine/BasicShapes/Cube.Cube,/Game/Interaction/M_Container_Wood.M_Container_Wood,0.95,0.7,0.48
+7,7008,container.developer_crate,24,/Engine/BasicShapes/Cube.Cube,/Game/Interaction/M_Container_Supply.M_Container_Supply,1,0.75,0.5

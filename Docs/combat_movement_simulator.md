@@ -18,6 +18,17 @@ Tools\CombatMovementSimulator\RunCombatMovementSimulator.bat
 dotnet run --project Tools\CombatMovementSimulator\CombatMovementSimulator.csproj
 ```
 
+헤드리스 자동 평가는 GUI 없이 실행한다.
+
+```bat
+dotnet run --project Tools\CombatMovementSimulator\CombatMovementSimulator.csproj -- --headless-eval --runs=16 --seconds=45
+```
+
+- 자동 평가는 `EvaluationCandidate`가 만든 튜닝 후보를 여러 시드로 반복 실행한다.
+- 자동 플레이어는 `BalancedKite`, `PressureStrafe`, `SurvivalKite`, `CoverProbe` 프로필로 WASD/조준/사격 입력을 생성한다.
+- 평가기는 플레이어 파일럿 내부 판단을 보지 않고 `SimulationWorld` 상태와 `SimulationTelemetry` 결과만 읽는다.
+- 실행 결과는 `Tools/CombatMovementSimulator/evaluation_logs/*.jsonl`과 `Docs/combat_movement_self_eval.md`에 타임스탬프와 함께 기록된다.
+
 ## 현재 구현
 
 - .NET 10 WinForms 기반 2D 시뮬레이터.

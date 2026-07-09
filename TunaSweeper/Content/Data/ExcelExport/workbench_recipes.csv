@@ -1,0 +1,3 @@
+﻿source_row_index,recipe_id,workbench_id,name_string_key,output_item_id,output_quantity,auto_unlocked
+0,recipe.large_water_bottle,1,item.large_water_bottle,3005,1,true
+1,recipe.king_water_bottle,1,item.king_water_bottle,3006,1,false

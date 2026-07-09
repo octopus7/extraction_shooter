@@ -4917,3 +4917,24 @@
 - 총기형 적이 `RangedPreferredMax` 안에 들어오면 기본적으로 더 이상 거리를 좁히지 않고 유지하도록 접근 버스트의 목표 거리와 중단 조건을 `RangedPreferredMax` 기준으로 변경한 것.
 - `Docs/combat_movement_simulator.md`에 측면기동형 동작과 총기형 거리 유지 규칙을 문서화한 것.
 - 새 출력 경로 `Tools/CombatMovementSimulator/obj/BuildCheckOutput_Flanker`로 `dotnet build`를 실행해 경고와 오류 없이 성공시킨 것.
+
+## 2026-07-09 22:55:00 (소요시간: 00:18:04)
+
+- `TunaSweeper/Content/Data`의 아이템 데이터 JSON을 엑셀에서 읽을 수 있는 CSV 테이블 15개로 변환한 것.
+- 중첩 배열 구조는 `item_attachment_slot_tags.csv`, `item_compatible_weapon_type_tags.csv`, `item_compatible_ammo_type_tags.csv`, `item_clears_debuff_ids.csv`, `loot_container_items.csv`, `shop_items.csv`, `workbench_recipe_ingredients.csv`, `workbench_dismantle_results.csv` 같은 별도 관계 테이블로 분리한 것.
+- 기존 텍스트 CSV인 `ItemNameStrings.csv`는 중복 변환하지 않고, `name_string_key`/`description_string_key`로 조인하도록 유지한 것.
+- 관계 설명 문서 `Docs/item_json_excel_relations.md`를 추가해 각 CSV의 원본, 키, 릴레이션을 정리한 것.
+- .NET 10 WinForms 기반 `Tools/ItemDataCsvViewer`를 추가해 CSV 재생성, 변환 후 즉시 재로드, 관계 적용 그리드 조회, 아이템 선택 기반 릴레이션 그래프 표시를 구현한 것.
+
+## 2026-07-09 23:07:43 (소요시간: 00:12:08)
+
+- `CombatMovementSimulator`에 GUI 없이 반복 실행하는 `--headless-eval` 자동 평가 모드를 추가한 것.
+- `SimulationWorld`를 시드 기반으로 생성할 수 있게 하고, `SimulationTelemetry`로 플레이어/적 사격 수, 원거리/측면기동형 사격 수, 피해 이벤트, 누적 피해량을 기록하도록 구현한 것.
+- 자동 플레이어 에이전트 `AutomatedPlayerPilot`를 추가해 `BalancedKite`, `PressureStrafe`, `SurvivalKite`, `CoverProbe` 프로필로 이동, 조준, 사격, 스프린트 입력을 생성하도록 한 것.
+- 평가 에이전트 `CombatRunEvaluator`를 추가해 플레이어 에이전트 내부 판단을 보지 않고 월드 상태와 텔레메트리만으로 생존율, 처치 수, 원거리 첫 사격 지연, Hold/Advance 비율, 근접위험 비율, 점수를 계산하도록 분리한 것.
+- 제작 후보 `EvaluationCandidate`를 통해 `Baseline`, `DisciplinedOpeningFire`, `ReadablePressure` 튜닝 후보를 메모리상에서 비교하도록 구현한 것.
+- `Tools/CombatMovementSimulator/evaluation_logs`에 타임스탬프 포함 JSONL/요약 로그를 남기고, 최신 평가 요약을 `Docs/combat_movement_self_eval.md`에 기록하도록 한 것.
+- 후보 3개, 자동 플레이어 프로필 4개, 후보별 16시드로 총 192표본을 실행해 누적 시뮬레이션 전투 시간 `01:01:53`을 확보한 것.
+- 자동 평가 결과 `Baseline`이 평균점수 `97.8`, 생존율 `100%`, 원거리 Hold 비율 `55%`, Advance 비율 `6%`, 근접위험 비율 `0%`로 최상위라 현재 `combat_tuning.json` 값은 자동 변경하지 않고 유지한다고 판단한 것.
+- `Docs/combat_movement_simulator.md`에 헤드리스 자동 평가 실행 명령과 산출물 위치를 문서화한 것.
+- 새 출력 경로 `Tools/CombatMovementSimulator/obj/BuildCheckOutput_AutoEvalFinalCheck`로 `dotnet build`를 실행해 경고와 오류 없이 성공시킨 것.

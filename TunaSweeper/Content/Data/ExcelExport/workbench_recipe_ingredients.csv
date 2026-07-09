@@ -1,0 +1,4 @@
+﻿recipe_id,ingredient_index,item_id,quantity
+recipe.large_water_bottle,0,3002,2
+recipe.king_water_bottle,0,3002,1
+recipe.king_water_bottle,1,3005,1

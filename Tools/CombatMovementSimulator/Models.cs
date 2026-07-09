@@ -204,6 +204,7 @@ internal sealed class Obstacle
 internal sealed class Projectile
 {
 	public ProjectileOwner Owner { get; set; }
+	public EnemyKind? SourceEnemyKind { get; set; }
 	public Vector2 Position { get; set; }
 	public Vector2 PreviousPosition { get; set; }
 	public Vector2 Velocity { get; set; }
@@ -218,4 +219,60 @@ internal sealed class SimulationInput
 	public Vector2 AimWorld { get; set; }
 	public bool FireHeld { get; set; }
 	public bool SprintHeld { get; set; }
+}
+
+internal sealed class SimulationTelemetry
+{
+	public int PlayerProjectilesFired { get; private set; }
+	public int EnemyProjectilesFired { get; private set; }
+	public int RangedEnemyProjectilesFired { get; private set; }
+	public int FlankerEnemyProjectilesFired { get; private set; }
+	public int PlayerDamageEvents { get; private set; }
+	public int EnemyDamageEvents { get; private set; }
+	public float DamageToPlayer { get; private set; }
+	public float DamageToEnemies { get; private set; }
+
+	public void Reset()
+	{
+		PlayerProjectilesFired = 0;
+		EnemyProjectilesFired = 0;
+		RangedEnemyProjectilesFired = 0;
+		FlankerEnemyProjectilesFired = 0;
+		PlayerDamageEvents = 0;
+		EnemyDamageEvents = 0;
+		DamageToPlayer = 0.0f;
+		DamageToEnemies = 0.0f;
+	}
+
+	public void RecordProjectileFired(ProjectileOwner owner, EnemyKind? enemyKind)
+	{
+		if (owner == ProjectileOwner.Player)
+		{
+			PlayerProjectilesFired++;
+		}
+		else
+		{
+			EnemyProjectilesFired++;
+			if (enemyKind == EnemyKind.Ranged)
+			{
+				RangedEnemyProjectilesFired++;
+			}
+			else if (enemyKind == EnemyKind.Flanker)
+			{
+				FlankerEnemyProjectilesFired++;
+			}
+		}
+	}
+
+	public void RecordPlayerDamage(float damage)
+	{
+		PlayerDamageEvents++;
+		DamageToPlayer += MathF.Max(0.0f, damage);
+	}
+
+	public void RecordEnemyDamage(float damage)
+	{
+		EnemyDamageEvents++;
+		DamageToEnemies += MathF.Max(0.0f, damage);
+	}
 }
