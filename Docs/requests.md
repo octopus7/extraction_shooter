@@ -4805,3 +4805,19 @@
 - Miyakov의 `ThrowableGrenade`, throwable damage type 코드를 TunaSweeper 네이티브 `ATunaSweeperThrowableGrenade`, `UTunaSweeperThrowableDamageType` 계열 클래스로 이식한 것.
 - 요청대로 기존 아이템/무기/입력 흐름에는 연결하지 않고, 신규 `Weapon` 소스/헤더 파일만 추가한 것.
 - `TunaSweeperEditor Win64 Development` 빌드를 성공시킨 뒤 수류탄 코드 이식 변경분과 요청 기록을 별도 Git 커밋으로 기록한 것.
+
+## 2026-07-09 20:15:29 (소요시간: 00:00:15)
+
+- 교전 AI 이동을 빠르게 반복 조정하기 위한 .NET 2D 시뮬레이터 작업 계획을 수립한 것.
+- Unreal 프로젝트 본체, 플레이어 캐릭터, 플레이어 컨트롤러에 직접 영향이 가지 않도록 `Tools` 하위 독립 도구로 구성하는 방향을 제안한 것.
+- 나중에 UE로 이식하기 쉽도록 단위, 상태 머신, 튜닝 데이터, 디버그 시각화, 이식 경계를 분리하는 단계별 계획을 정리한 것.
+
+## 2026-07-09 20:18:43 (소요시간: 00:07:54)
+
+- `Tools/CombatMovementSimulator`에 .NET 10 WinForms 기반 2D 교전 이동 시뮬레이터를 추가한 것.
+- 플레이어 WASD 이동, 마우스 조준, 좌클릭 사격, cm 단위 월드 좌표, 프로젝트 기준 `+X` 북쪽/`+Y` 오른쪽 방향 렌더링을 구현한 것.
+- 회전 가능한 직사각형 파괴 가능 장애물과 무적/불멸 장애물을 구현하고, 총알 충돌 및 파괴 가능 장애물 내구도 감소/제거를 처리한 것.
+- 근접 적과 총기 적 두 유형을 추가하고, 근접 접근/공격 선딜/후딜, 총기 적 선호 거리 유지/후퇴/측면 이동/직사 화선 탐색/사격을 구현한 것.
+- `B`, `1`, `2`, `3`, `4`, 우클릭, Delete 기반 적/장애물 배치 및 제거 기능을 추가한 것.
+- `Docs/combat_movement_simulator.md`에 실행 방법, 조작법, 구현 범위, 튜닝 데이터, UE 이식 메모, 현재 한계를 문서화한 것.
+- `dotnet build Tools/CombatMovementSimulator/CombatMovementSimulator.csproj` 빌드를 경고와 오류 없이 성공시킨 것.
