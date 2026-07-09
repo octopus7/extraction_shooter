@@ -153,6 +153,7 @@ ui.interaction.piggy_bank_withdraw,빼기,Withdraw,引き出す
 ui.interaction.housing_management,시설관리,Facility Management,施設管理
 ui.interaction.storage_open,창고 열기,Open Storage,倉庫を開く
 ui.interaction.shop_open,상점,Shop,ショップ
+ui.interaction.difficulty_adjustment,난이도 조정,Adjust Difficulty,難易度調整
 ui.interaction.workbench_open,작업대,Workbench,作業台
 ui.interaction.workbench_craft,제조,Craft,製造
 ui.interaction.workbench_dismantle,분해,Dismantle,分解

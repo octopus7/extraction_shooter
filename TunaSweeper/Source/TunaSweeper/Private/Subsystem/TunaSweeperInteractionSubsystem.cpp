@@ -5,6 +5,7 @@
 #include "Character/TunaSweeperFacilityNpcActor.h"
 #include "Character/TunaSweeperLedRobotCharacterActor.h"
 #include "Game/TunaSweeperGameInstance.h"
+#include "Interaction/TunaSweeperDifficultyAdjustmentActor.h"
 #include "Interaction/TunaSweeperDoorActor.h"
 #include "Interaction/TunaSweeperHousingManagementActor.h"
 #include "Interaction/TunaSweeperItemSpawnInteractableActor.h"
@@ -111,6 +112,8 @@ namespace TunaSweeperInteractionQuestEvents
 			return FName(TEXT("piggy_bank_withdraw"));
 		case ETunaSweeperInteractionType::CanBotDialogue:
 			return FName(TEXT("canbot_dialogue"));
+		case ETunaSweeperInteractionType::DifficultyAdjustment:
+			return FName(TEXT("difficulty_adjustment"));
 		default:
 			return NAME_None;
 		}
@@ -303,6 +306,9 @@ bool UTunaSweeperInteractionSubsystem::RequestInteraction(UTunaSweeperInteractab
 	case ETunaSweeperInteractionType::CanBotDialogue:
 		bHandled = HandleCanBotDialogueInteraction(Interactable, InstigatorPawn);
 		break;
+	case ETunaSweeperInteractionType::DifficultyAdjustment:
+		bHandled = HandleDifficultyAdjustmentInteraction(Interactable, InstigatorPawn);
+		break;
 	default:
 		return false;
 	}
@@ -383,6 +389,12 @@ bool UTunaSweeperInteractionSubsystem::CanOfferInteraction(const UTunaSweeperInt
 	{
 		return TunaSweeperInteractionQuestEvents::IsBunkerMap(GetWorld()) &&
 			Cast<ATunaSweeperLedRobotCharacterActor>(Interactable->GetOwner());
+	}
+
+	if (Interactable->GetInteractionType() == ETunaSweeperInteractionType::DifficultyAdjustment)
+	{
+		return TunaSweeperInteractionQuestEvents::IsBunkerMap(GetWorld()) &&
+			Cast<ATunaSweeperDifficultyAdjustmentActor>(Interactable->GetOwner());
 	}
 
 	if (Interactable->GetInteractionType() != ETunaSweeperInteractionType::Quest)
@@ -908,6 +920,22 @@ bool UTunaSweeperInteractionSubsystem::HandlePiggyBankWithdrawInteraction(
 		? Cast<ATunaSweeperPiggyBankActor>(Interactable->GetOwner())
 		: nullptr;
 	return PiggyBankActor && PiggyBankActor->ShowWithdrawNotImplemented(InstigatorPawn);
+}
+
+bool UTunaSweeperInteractionSubsystem::HandleDifficultyAdjustmentInteraction(
+	UTunaSweeperInteractableComponent* Interactable,
+	APawn* InstigatorPawn)
+{
+	const ATunaSweeperDifficultyAdjustmentActor* DifficultyAdjustmentActor = Interactable
+		? Cast<ATunaSweeperDifficultyAdjustmentActor>(Interactable->GetOwner())
+		: nullptr;
+	if (!DifficultyAdjustmentActor || !InstigatorPawn || !TunaSweeperInteractionQuestEvents::IsBunkerMap(GetWorld()))
+	{
+		return false;
+	}
+
+	ATunaSweeperPlayerController* TunaPlayerController = Cast<ATunaSweeperPlayerController>(InstigatorPawn->GetController());
+	return TunaPlayerController && TunaPlayerController->OpenDifficultyAdjustmentPanel();
 }
 
 void UTunaSweeperInteractionSubsystem::RefreshFocusedInteractable()

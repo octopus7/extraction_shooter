@@ -1924,6 +1924,77 @@ void ATunaSweeperPlayerController::OpenWorkbenchBlueprintRegisterPanel(int32 Wor
 	}
 }
 
+bool ATunaSweeperPlayerController::OpenDifficultyAdjustmentPanel()
+{
+	if (!IsLocalController() || !IsBunkerMap() || IsIntroMap() || IsOpeningScenarioMap() || bDialogueSequenceActive || IsHousingModeOpen())
+	{
+		return false;
+	}
+
+	EnsureGameHudWidget();
+	if (GameHudWidget)
+	{
+		GameHudWidget->SetHudMode(ETunaSweeperHudMode::None);
+	}
+
+	if (DifficultyAdjustmentWidget && DifficultyAdjustmentWidget->IsInViewport())
+	{
+		FInputModeUIOnly InputMode;
+		InputMode.SetWidgetToFocus(DifficultyAdjustmentWidget->TakeWidget());
+		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+		SetInputMode(InputMode);
+		SetIgnoreMoveInput(true);
+		SetIgnoreLookInput(true);
+		bShowMouseCursor = true;
+		DifficultyAdjustmentWidget->SetKeyboardFocus();
+		return true;
+	}
+
+	TSubclassOf<UTunaSweeperIntroMenuWidget> LoadedIntroMenuWidgetClass = IntroMenuWidgetClass.LoadSynchronous();
+	if (!LoadedIntroMenuWidgetClass)
+	{
+		return false;
+	}
+
+	DifficultyAdjustmentWidget = CreateWidget<UTunaSweeperIntroMenuWidget>(this, LoadedIntroMenuWidgetClass);
+	if (!DifficultyAdjustmentWidget)
+	{
+		return false;
+	}
+
+	DifficultyAdjustmentWidget->OnDifficultyAdjustmentClosed.RemoveAll(this);
+	DifficultyAdjustmentWidget->OnDifficultyAdjustmentClosed.AddUObject(
+		this,
+		&ATunaSweeperPlayerController::HandleDifficultyAdjustmentWidgetClosed);
+	DifficultyAdjustmentWidget->PrepareForInitialViewport();
+	DifficultyAdjustmentWidget->AddToViewport(80);
+	DifficultyAdjustmentWidget->OpenForDifficultyAdjustment();
+	DifficultyAdjustmentWidget->ForceLayoutPrepass();
+
+	CancelPawnGameplayActions();
+	SetIgnoreMoveInput(true);
+	SetIgnoreLookInput(true);
+	bShowMouseCursor = true;
+
+	FInputModeUIOnly InputMode;
+	InputMode.SetWidgetToFocus(DifficultyAdjustmentWidget->TakeWidget());
+	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+	SetInputMode(InputMode);
+	DifficultyAdjustmentWidget->SetKeyboardFocus();
+	return true;
+}
+
+void ATunaSweeperPlayerController::HandleDifficultyAdjustmentWidgetClosed()
+{
+	if (DifficultyAdjustmentWidget)
+	{
+		DifficultyAdjustmentWidget->OnDifficultyAdjustmentClosed.RemoveAll(this);
+		DifficultyAdjustmentWidget = nullptr;
+	}
+
+	ApplyDefaultGameInputMode();
+}
+
 void ATunaSweeperPlayerController::DropWorkbenchOverflowItems(const TArray<FTunaSweeperItemStack>& OverflowItems)
 {
 	for (const FTunaSweeperItemStack& OverflowItem : OverflowItems)

@@ -2,6 +2,7 @@
 
 void UTunaSweeperIntroMenuWidget::ShowMainMenu()
 {
+	bDifficultyAdjustmentMode = false;
 	HideOverlayPanels();
 	HideDeleteConfirmDialog();
 	ResetDeleteHoldProgress();
@@ -55,6 +56,42 @@ void UTunaSweeperIntroMenuWidget::ShowDifficultySelection()
 	}
 
 	RefreshDifficultySelectionPanel();
+}
+
+void UTunaSweeperIntroMenuWidget::OpenForDifficultyAdjustment()
+{
+	bDifficultyAdjustmentMode = true;
+	bClosingDifficultyAdjustment = false;
+	ShowDifficultySelection();
+
+	if (SelectedDifficultyStage == INDEX_NONE)
+	{
+		SelectedDifficultyStage = 1;
+		if (const UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GetGameInstance()))
+		{
+			SelectedDifficultyStage = FMath::Clamp(TunaGameInstance->GetActiveSaveSlotDifficultyStage(), 1, 3);
+		}
+		RefreshDifficultySelectionPanel();
+	}
+
+	if (DifficultyStartButton)
+	{
+		DifficultyStartButton->SetUserFocus(GetOwningPlayer());
+	}
+}
+
+void UTunaSweeperIntroMenuWidget::CloseDifficultyAdjustment()
+{
+	if (!bDifficultyAdjustmentMode || bClosingDifficultyAdjustment)
+	{
+		return;
+	}
+
+	bClosingDifficultyAdjustment = true;
+	bDifficultyAdjustmentMode = false;
+	RemoveFromParent();
+	OnDifficultyAdjustmentClosed.Broadcast();
+	bClosingDifficultyAdjustment = false;
 }
 
 void UTunaSweeperIntroMenuWidget::ShowSaveSlotSelection()

@@ -428,15 +428,24 @@ void UTunaSweeperIntroMenuWidget::RefreshDifficultySelectionPanel()
 
 	if (DifficultyTitleText)
 	{
-		DifficultyTitleText->SetText(FText::FromString(TEXT("\uB09C\uC774\uB3C4 \uC120\uD0DD")));
+		DifficultyTitleText->SetText(FText::FromString(
+			bDifficultyAdjustmentMode
+				? TEXT("\uB09C\uC774\uB3C4 \uC870\uC815")
+				: TEXT("\uB09C\uC774\uB3C4 \uC120\uD0DD")));
 	}
 	if (DifficultyStartButtonText)
 	{
-		DifficultyStartButtonText->SetText(FText::FromString(TEXT("\uAC8C\uC784 \uC2DC\uC791")));
+		DifficultyStartButtonText->SetText(FText::FromString(
+			bDifficultyAdjustmentMode
+				? TEXT("\uC801\uC6A9")
+				: TEXT("\uAC8C\uC784 \uC2DC\uC791")));
 	}
 	if (DifficultyBackButtonText)
 	{
-		DifficultyBackButtonText->SetText(FText::FromString(TEXT("\uB3CC\uC544\uAC00\uAE30")));
+		DifficultyBackButtonText->SetText(FText::FromString(
+			bDifficultyAdjustmentMode
+				? TEXT("\uCDE8\uC18C")
+				: TEXT("\uB3CC\uC544\uAC00\uAE30")));
 	}
 
 	RefreshDifficultyOption(

@@ -12,6 +12,7 @@
 #include "Engine/StaticMesh.h"
 #include "Engine/World.h"
 #include "GameFramework/Actor.h"
+#include "Interaction/TunaSweeperDifficultyAdjustmentActor.h"
 #include "Interaction/TunaSweeperExplosiveBarrelActor.h"
 #include "Interaction/TunaSweeperExtractionPointActor.h"
 #include "Interaction/TunaSweeperInteractableComponent.h"
@@ -69,6 +70,7 @@ namespace TunaSweeperEnemySpawn
 	const TCHAR* DefaultWorkbenchClassPath = TEXT("/Script/TunaSweeper.TunaSweeperWorkbenchActor");
 	const TCHAR* DefaultPiggyBankClassPath = TEXT("/Script/TunaSweeper.TunaSweeperPiggyBankActor");
 	const TCHAR* DefaultPeriodicNoiseEmitterClassPath = TEXT("/Script/TunaSweeper.TunaSweeperPeriodicNoiseEmitterActor");
+	const TCHAR* DefaultDifficultyAdjustmentClassPath = TEXT("/Script/TunaSweeper.TunaSweeperDifficultyAdjustmentActor");
 	const TCHAR* DefaultRollingBomberClassPath = TEXT("/Script/TunaSweeper.TunaSweeperRollingBomber");
 	const TCHAR* DefaultRollingBomberLaunchSoundPath =
 		TEXT("/Game/Audio/SFX/SFX_RollingBomberSpawnerLaunch_FM.SFX_RollingBomberSpawnerLaunch_FM");
@@ -305,6 +307,12 @@ namespace TunaSweeperEnemySpawn
 		{
 			return UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::PeriodicNoiseEmitter;
 		}
+		if (SpawnType == TEXT("difficulty_adjustment") ||
+			SpawnType == TEXT("difficulty_adjuster") ||
+			SpawnType == TEXT("difficulty_terminal"))
+		{
+			return UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::DifficultyAdjustment;
+		}
 		if (SpawnType == TEXT("self_destruct") || SpawnType == TEXT("selfdestruct"))
 		{
 			return UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::SelfDestruct;
@@ -390,6 +398,8 @@ namespace TunaSweeperEnemySpawn
 			return DefaultPiggyBankClassPath;
 		case UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::PeriodicNoiseEmitter:
 			return DefaultPeriodicNoiseEmitterClassPath;
+		case UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::DifficultyAdjustment:
+			return DefaultDifficultyAdjustmentClassPath;
 		default:
 			return nullptr;
 		}
@@ -428,6 +438,8 @@ namespace TunaSweeperEnemySpawn
 			return FText::FromString(TEXT("\uB3C8\uB0B4\uB194"));
 		case UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::PeriodicNoiseEmitter:
 			return FText::GetEmpty();
+		case UTunaSweeperEnemySpawnSubsystem::EGameplayInteractionActorSpawnType::DifficultyAdjustment:
+			return FText::FromString(TEXT("\uB09C\uC774\uB3C4 \uC870\uC815"));
 		default:
 			return FText::GetEmpty();
 		}
@@ -2284,6 +2296,17 @@ void UTunaSweeperEnemySpawnSubsystem::ConfigureGameplayInteractionActor(
 				SpawnDefinition.NoiseEmitterTag,
 				SpawnDefinition.NoiseEmitterSourceLocalOffset,
 				SpawnDefinition.bNoiseEmitterStartEnabled);
+		}
+		break;
+	case EGameplayInteractionActorSpawnType::DifficultyAdjustment:
+		if (ATunaSweeperDifficultyAdjustmentActor* DifficultyAdjustmentActor = Cast<ATunaSweeperDifficultyAdjustmentActor>(SpawnedActor))
+		{
+			DifficultyAdjustmentActor->ConfigureDifficultyAdjustmentDefaults(
+				SpawnDefinition.InteractionDisplayName,
+				SpawnDefinition.MarkerWidgetClass,
+				SpawnDefinition.InteractionDisplayNameStringKey.IsNone()
+					? FName(TEXT("ui.interaction.difficulty_adjustment"))
+					: SpawnDefinition.InteractionDisplayNameStringKey);
 		}
 		break;
 	case EGameplayInteractionActorSpawnType::SelfDestruct:

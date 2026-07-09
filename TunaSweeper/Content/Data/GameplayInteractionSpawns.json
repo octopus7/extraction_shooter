@@ -26,6 +26,17 @@
   },
   {
     "level_name": "BunkerMap",
+    "spawn_id": "TS_DifficultyAdjustment_01",
+    "spawn_type": "difficulty_adjustment",
+    "actor_class": "/Script/TunaSweeper.TunaSweeperDifficultyAdjustmentActor",
+    "interaction_display_name": "Adjust Difficulty",
+    "interaction_display_name_key": "ui.interaction.difficulty_adjustment",
+    "location": [620.0, 180.0, 0.0],
+    "rotation": [0.0, 180.0, 0.0],
+    "scale": [1.0, 1.0, 1.0]
+  },
+  {
+    "level_name": "BunkerMap",
     "spawn_id": "TS_Travel_DeployToRaid",
     "spawn_type": "level_travel",
     "actor_class": "/Game/Interaction/BP_Interact_LevelTravel.BP_Interact_LevelTravel_C",

@@ -71,11 +71,23 @@ void UTunaSweeperIntroMenuWidget::HandleDifficultyStartClicked()
 		return;
 	}
 
+	if (bDifficultyAdjustmentMode)
+	{
+		CloseDifficultyAdjustment();
+		return;
+	}
+
 	BeginTravelToLevel(TunaGameInstance->ResolveInitialGameplayLevelName());
 }
 
 void UTunaSweeperIntroMenuWidget::HandleDifficultyBackClicked()
 {
+	if (bDifficultyAdjustmentMode)
+	{
+		CloseDifficultyAdjustment();
+		return;
+	}
+
 	ShowMainMenu();
 }
 

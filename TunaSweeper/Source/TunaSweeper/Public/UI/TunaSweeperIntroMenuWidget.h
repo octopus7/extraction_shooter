@@ -35,6 +35,10 @@ class TUNASWEEPER_API UTunaSweeperIntroMenuWidget : public UUserWidget
 
 public:
 	void PrepareForInitialViewport();
+	void OpenForDifficultyAdjustment();
+	void CloseDifficultyAdjustment();
+
+	FSimpleMulticastDelegate OnDifficultyAdjustmentClosed;
 
 protected:
 	virtual void NativePreConstruct() override;
@@ -492,6 +496,8 @@ private:
 	bool bTitleMenuButtonContentLayoutApplied = false;
 	bool bShowingInterfaceSettingsTab = false;
 	bool bDifficultyDefinitionsLoaded = false;
+	bool bDifficultyAdjustmentMode = false;
+	bool bClosingDifficultyAdjustment = false;
 	ETunaSweeperTitleDLSSMode PreferredDLSSMode = ETunaSweeperTitleDLSSMode::Performance;
 	ETunaSweeperItemTextLanguage PendingInterfaceLanguage = ETunaSweeperItemTextLanguage::English;
 	FName PendingStartTargetLevelName = NAME_None;

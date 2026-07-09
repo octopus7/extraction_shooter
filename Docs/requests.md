@@ -4963,3 +4963,11 @@
 - 근접형 벌목기 적의 인지 거리도 2300cm로 맞춘 것.
 - `Docs/SSOT/ranged_enemy_combat_pattern.md`와 `Docs/ue_enemy_ai_port.md`에 UE 이식 동작과 검증 결과를 문서화한 것.
 - `TunaSweeperEditor Win64 Development` 빌드를 성공시키고 UE 5.7 에디터 실행 명령을 완료한 것.
+
+## 2026-07-09 23:54:44 (소요시간: 00:09:27)
+
+- 벙커 런타임 스폰 데이터에 `TS_DifficultyAdjustment_01` 난이도 조정 액터를 추가한 것.
+- `ATunaSweeperDifficultyAdjustmentActor`와 `DifficultyAdjustment` 상호작용 타입을 추가하고, 벙커에서 상호작용 시 전체화면 난이도 조정 UI가 열리도록 연결한 것.
+- 기존 새게임 난이도 선택 UI인 `UTunaSweeperIntroMenuWidget`을 조정 모드로 재사용해 적용 시 저장 후 게임으로 복귀하고, 취소/Escape 시 저장 없이 복귀하도록 변경한 것.
+- 난이도 조정 마커 문자열 `ui.interaction.difficulty_adjustment`를 다국어 UI 문자열 데이터에 추가한 것.
+- `GameplayInteractionSpawns.json`/`DifficultyDefinitions.json` 파싱을 확인하고, `TunaSweeperEditor Win64 Development` 빌드를 성공시킨 뒤 UE 5.7 에디터를 다시 실행한 것.

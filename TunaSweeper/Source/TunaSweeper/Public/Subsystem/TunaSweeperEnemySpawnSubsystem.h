@@ -5,6 +5,7 @@
 #include "TunaSweeperEnemySpawnSubsystem.generated.h"
 
 class AActor;
+class ATunaSweeperDifficultyAdjustmentActor;
 class ATunaSweeperEnemyCharacter;
 class ATunaSweeperExplosiveBarrelActor;
 class ATunaSweeperExtractionPointActor;
@@ -119,7 +120,8 @@ public:
 		Shop,
 		Workbench,
 		PiggyBank,
-		PeriodicNoiseEmitter
+		PeriodicNoiseEmitter,
+		DifficultyAdjustment
 	};
 
 private:

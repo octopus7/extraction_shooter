@@ -61,6 +61,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
 	void OpenWorkbenchBlueprintRegisterPanel(int32 WorkbenchId);
 
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
+	bool OpenDifficultyAdjustmentPanel();
+
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Workbench")
 	void DropWorkbenchOverflowItems(const TArray<FTunaSweeperItemStack>& OverflowItems);
 
@@ -126,6 +129,9 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Intro")
 	TObjectPtr<UTunaSweeperIntroMenuWidget> IntroMenuWidget;
 
+	UPROPERTY(BlueprintReadOnly, Category = "HUD")
+	TObjectPtr<UTunaSweeperIntroMenuWidget> DifficultyAdjustmentWidget;
+
 	UPROPERTY(BlueprintReadOnly, Category = "Scenario")
 	TObjectPtr<UTunaSweeperScenarioPresentationWidget> ScenarioPresentationWidget;
 
@@ -162,6 +168,7 @@ private:
 	void EnsureScenarioPresentationWidget();
 	void BindHousingStateChanged();
 	void HandleHousingStateChanged();
+	void HandleDifficultyAdjustmentWidgetClosed();
 	void ApplyInitialTitleDisplaySettings();
 	void ApplyLevelBgmState();
 	bool ShowBunkerEntryFadeIfNeeded();

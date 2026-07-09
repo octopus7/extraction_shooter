@@ -324,6 +324,12 @@ void UTunaSweeperIntroMenuWidget::NativeDestruct()
 		TunaGameInstance->OnLanguageChanged.RemoveAll(this);
 	}
 
+	if (bDifficultyAdjustmentMode && !bClosingDifficultyAdjustment)
+	{
+		bDifficultyAdjustmentMode = false;
+		OnDifficultyAdjustmentClosed.Broadcast();
+	}
+
 	Super::NativeDestruct();
 }
 
@@ -331,7 +337,13 @@ FReply UTunaSweeperIntroMenuWidget::NativeOnPreviewKeyDown(
 	const FGeometry& InGeometry,
 	const FKeyEvent& InKeyEvent)
 {
-	if (!InKeyEvent.IsRepeat() && InKeyEvent.GetKey() == EKeys::R)
+	if (!InKeyEvent.IsRepeat() && bDifficultyAdjustmentMode && InKeyEvent.GetKey() == EKeys::Escape)
+	{
+		CloseDifficultyAdjustment();
+		return FReply::Handled();
+	}
+
+	if (!InKeyEvent.IsRepeat() && !bDifficultyAdjustmentMode && InKeyEvent.GetKey() == EKeys::R)
 	{
 		ReloadIntroLevel();
 		return FReply::Handled();
