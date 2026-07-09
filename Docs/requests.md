@@ -4978,3 +4978,11 @@
 - react-konva/konva/zustand 기반 캔버스, point/rect/path 오브젝트 추가, 선택, 이동, 삭제, 속성 패널 편집, 고정 크기 라벨, LocalStorage 자동 저장/복원, JSON Export/Import, Reset View/Project를 구현한 것.
 - 프로젝트 기준 `+X` 북쪽, `+Y` 오른쪽, `1m = 100 UE units` 좌표계를 반영하고, `Docs/map_layout_editor.md`와 툴 README에 실행 방법과 테스트 체크리스트를 기록한 것.
 - `npm run build`를 성공시키고, 로컬 Vite 서버와 브라우저에서 데스크톱/좁은 화면 렌더링 및 오브젝트 추가 동작을 확인한 것.
+
+## 2026-07-12 18:21:44 (소요시간: 00:00:14)
+
+- Git 작업 트리의 언트랙드 파일 목록을 확인하고 10개를 사용자에게 보여준 것.
+
+## 2026-07-12 18:22:30 (소요시간: 00:00:12)
+
+- `Docs/DemoDesign`의 언트랙드 파일 10개에 대한 생성일과 마지막 수정일을 확인한 것.
