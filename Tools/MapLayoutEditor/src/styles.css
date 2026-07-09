@@ -1,0 +1,384 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  min-width: 900px;
+  overflow: hidden;
+  background: #191a17;
+  color: #24251f;
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  border: 0;
+}
+
+.app-shell {
+  display: grid;
+  grid-template-rows: 58px minmax(0, 1fr);
+  width: 100%;
+  height: 100%;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 14px;
+  color: #f6f1e7;
+  background: #20231f;
+  border-bottom: 1px solid #373b32;
+  overflow-x: auto;
+}
+
+.toolbar-title {
+  display: grid;
+  gap: 2px;
+  min-width: 230px;
+  padding-right: 8px;
+}
+
+.toolbar-title strong {
+  font-size: 14px;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.toolbar-title span {
+  color: #b8c1ad;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+
+.tool-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 76px;
+  height: 36px;
+  padding: 0 10px;
+  color: #f4f0e6;
+  background: #30342d;
+  border: 1px solid #43483d;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.tool-button:hover:not(:disabled) {
+  background: #3b4239;
+}
+
+.tool-button.is-active {
+  color: #12140f;
+  background: #f0c55c;
+  border-color: #ffd97d;
+}
+
+.tool-button.danger {
+  border-color: #6b3d38;
+}
+
+.tool-button:disabled {
+  color: #858a7d;
+  cursor: default;
+  opacity: 0.6;
+}
+
+.hidden-file-input {
+  display: none;
+}
+
+.workspace-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 330px;
+  min-height: 0;
+  background: #141512;
+}
+
+.canvas-column {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) 30px;
+  min-width: 0;
+  min-height: 0;
+}
+
+.map-canvas-shell {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 30% 20%, rgba(83, 110, 87, 0.22), transparent 34%),
+    linear-gradient(135deg, #23251f 0%, #171813 100%);
+}
+
+.status-bar {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  min-width: 0;
+  padding: 0 12px;
+  color: #d9ddcf;
+  background: #20231f;
+  border-top: 1px solid #373b32;
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.status-bar span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.autosave-status.saved {
+  color: #92d49f;
+}
+
+.autosave-status.pending {
+  color: #f0c55c;
+}
+
+.autosave-status.error {
+  color: #ff8b7d;
+}
+
+.properties-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: #f4f5ef;
+  border-left: 1px solid #cbd0c0;
+  color: #252720;
+  overflow: hidden;
+}
+
+.panel-section {
+  padding: 14px;
+  border-bottom: 1px solid #d7dccf;
+}
+
+.panel-heading {
+  flex: 0 0 auto;
+}
+
+.panel-heading h2,
+.object-list-section h3 {
+  margin: 0;
+  color: #20231f;
+  font-size: 15px;
+  line-height: 1.15;
+}
+
+.panel-heading p {
+  margin: 4px 0 0;
+  color: #777d6f;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.fields-section {
+  display: grid;
+  gap: 10px;
+  flex: 0 0 auto;
+  overflow-y: auto;
+}
+
+.field {
+  display: grid;
+  gap: 5px;
+  color: #34362e;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  min-width: 0;
+  color: #22241f;
+  background: #ffffff;
+  border: 1px solid #bfc7b8;
+  border-radius: 6px;
+  padding: 7px 8px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.field input[type="color"] {
+  height: 35px;
+  padding: 3px;
+}
+
+.field textarea {
+  resize: vertical;
+}
+
+.field input:disabled,
+.field select:disabled {
+  color: #7a8072;
+  background: #e6e9df;
+}
+
+.field-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.field-grid.two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.check-row {
+  display: grid;
+  gap: 6px;
+  padding-top: 3px;
+}
+
+.check-row label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #30332b;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.check-row input {
+  width: auto;
+}
+
+.ue-position {
+  padding: 8px;
+  color: #4f574a;
+  background: #e6eadf;
+  border: 1px solid #cad2c2;
+  border-radius: 6px;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.empty-state {
+  padding: 18px 14px;
+  color: #687062;
+  border-bottom: 1px solid #d7dccf;
+  font-size: 13px;
+}
+
+.object-list-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+  flex: 1 1 auto;
+  border-bottom: 0;
+}
+
+.object-list {
+  display: grid;
+  gap: 6px;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 3px;
+}
+
+.object-list-item {
+  display: grid;
+  grid-template-columns: 14px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 34px;
+  padding: 6px 8px;
+  color: #2b2d27;
+  text-align: left;
+  background: #ffffff;
+  border: 1px solid #d2d8ca;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.object-list-item.is-selected {
+  border-color: #b98517;
+  box-shadow: inset 0 0 0 1px #b98517;
+}
+
+.object-list-item:hover {
+  background: #f9faf6;
+}
+
+.object-color {
+  width: 14px;
+  height: 14px;
+  border: 1px solid rgba(0, 0, 0, 0.28);
+  border-radius: 3px;
+}
+
+.object-list-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.object-list-type {
+  color: #687062;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+@media (max-width: 980px) {
+  body {
+    min-width: 0;
+    overflow: auto;
+  }
+
+  .app-shell {
+    min-height: 720px;
+  }
+
+  .toolbar {
+    align-items: flex-start;
+  }
+
+  .workspace-shell {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(420px, 1fr) minmax(360px, 42vh);
+  }
+
+  .properties-panel {
+    border-left: 0;
+    border-top: 1px solid #cbd0c0;
+  }
+}

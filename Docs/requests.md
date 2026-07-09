@@ -4971,3 +4971,10 @@
 - 기존 새게임 난이도 선택 UI인 `UTunaSweeperIntroMenuWidget`을 조정 모드로 재사용해 적용 시 저장 후 게임으로 복귀하고, 취소/Escape 시 저장 없이 복귀하도록 변경한 것.
 - 난이도 조정 마커 문자열 `ui.interaction.difficulty_adjustment`를 다국어 UI 문자열 데이터에 추가한 것.
 - `GameplayInteractionSpawns.json`/`DifficultyDefinitions.json` 파싱을 확인하고, `TunaSweeperEditor Win64 Development` 빌드를 성공시킨 뒤 UE 5.7 에디터를 다시 실행한 것.
+
+## 2026-07-10 00:10:51 (소요시간: 00:12:54)
+
+- `C:/Users/blendue/Downloads/ue5_map_layout_editor_plan.md` 문서를 기준으로 `Tools/MapLayoutEditor` React/Vite 기반 2D 맵 배치 에디터 MVP를 추가한 것.
+- react-konva/konva/zustand 기반 캔버스, point/rect/path 오브젝트 추가, 선택, 이동, 삭제, 속성 패널 편집, 고정 크기 라벨, LocalStorage 자동 저장/복원, JSON Export/Import, Reset View/Project를 구현한 것.
+- 프로젝트 기준 `+X` 북쪽, `+Y` 오른쪽, `1m = 100 UE units` 좌표계를 반영하고, `Docs/map_layout_editor.md`와 툴 README에 실행 방법과 테스트 체크리스트를 기록한 것.
+- `npm run build`를 성공시키고, 로컬 Vite 서버와 브라우저에서 데스크톱/좁은 화면 렌더링 및 오브젝트 추가 동작을 확인한 것.
