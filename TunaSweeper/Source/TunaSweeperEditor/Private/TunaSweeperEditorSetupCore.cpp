@@ -2504,6 +2504,7 @@ namespace TunaSweeperEditorSetup
 		MeshDescription.CreatePolygon(PolygonGroupId, VertexInstances);
 	}
 
+#if 0 // Removed temporary procedural barrel mesh, texture, and material generation.
 	void BuildExplosiveBarrelIntactMeshDescription(FMeshDescription& MeshDescription)
 	{
 		FStaticMeshAttributes Attributes(MeshDescription);
@@ -2825,6 +2826,8 @@ namespace TunaSweeperEditorSetup
 		return SaveAsset(Material) ? Material : nullptr;
 	}
 
+#endif
+
 	UNiagaraSystem* EnsureExplosiveBarrelSmokeEffect(const FString& AssetName, float Strength, bool bBlackSmokeOnly = false)
 	{
 		const FString ObjectPath = GetAssetObjectPath(EffectsAssetPath, AssetName);
@@ -2974,8 +2977,8 @@ namespace TunaSweeperEditorSetup
 		Defaults->ConfigureExplosiveBarrelDefaults(
 			NAME_None,
 			30.0f,
-			TSoftObjectPtr<UStaticMesh>(FSoftObjectPath(GetAssetObjectPath(InteractionAssetPath, ExplosiveBarrelIntactMeshAssetName))),
-			TSoftObjectPtr<UStaticMesh>(FSoftObjectPath(GetAssetObjectPath(InteractionAssetPath, ExplosiveBarrelDestroyedMeshAssetName))),
+			TSoftObjectPtr<UStaticMesh>(),
+			TSoftObjectPtr<UStaticMesh>(),
 			TSoftObjectPtr<UNiagaraSystem>(),
 			TSoftClassPtr<ATunaSweeperLocalExplosionEffectActor>(
 				FSoftObjectPath(TEXT("/Script/TunaSweeper.TunaSweeperLocalExplosionEffectActor"))),
@@ -2989,69 +2992,16 @@ namespace TunaSweeperEditorSetup
 
 	bool EnsureExplosiveBarrelAssets()
 	{
-		UTexture2D* IntactTexture = nullptr;
-		UTexture2D* LightDamageTexture = nullptr;
-		UTexture2D* HeavyDamageTexture = nullptr;
-		UTexture2D* DestroyedTexture = nullptr;
-		const bool bImportedTextures =
-			ImportWorldTexture(GetExplosiveBarrelTextureSourcePath(TEXT("T_ExplosiveBarrel_Intact_Source.png")), InteractionAssetPath, ExplosiveBarrelIntactTextureAssetName, &IntactTexture) &&
-			ImportWorldTexture(GetExplosiveBarrelTextureSourcePath(TEXT("T_ExplosiveBarrel_DamagedLight_Source.png")), InteractionAssetPath, ExplosiveBarrelDamagedLightTextureAssetName, &LightDamageTexture) &&
-			ImportWorldTexture(GetExplosiveBarrelTextureSourcePath(TEXT("T_ExplosiveBarrel_DamagedHeavy_Source.png")), InteractionAssetPath, ExplosiveBarrelDamagedHeavyTextureAssetName, &HeavyDamageTexture) &&
-			ImportWorldTexture(GetExplosiveBarrelTextureSourcePath(TEXT("T_ExplosiveBarrel_Destroyed_Source.png")), InteractionAssetPath, ExplosiveBarrelDestroyedTextureAssetName, &DestroyedTexture);
-		if (!bImportedTextures) return false;
-		UMaterial* IntactMaterial = EnsureExplosiveBarrelTexturedMaterial(ExplosiveBarrelIntactMaterialAssetName, IntactTexture, 0.78f);
-		UMaterial* LightDamageMaterial = EnsureExplosiveBarrelTexturedMaterial(ExplosiveBarrelDamagedLightMaterialAssetName, LightDamageTexture, 0.82f);
-		UMaterial* HeavyDamageMaterial = EnsureExplosiveBarrelTexturedMaterial(ExplosiveBarrelDamagedHeavyMaterialAssetName, HeavyDamageTexture, 0.88f);
-		UMaterial* DestroyedMaterial = EnsureExplosiveBarrelTexturedMaterial(ExplosiveBarrelDestroyedMaterialAssetName, DestroyedTexture, 0.94f);
-		UMaterial* DetailMaterial = EnsureSolidColorMaterial(
-			InteractionAssetPath,
-			ExplosiveBarrelDetailMaterialAssetName,
-			FLinearColor(0.22f, 0.23f, 0.22f, 1.0f),
-			0.94f,
-			0.0f,
-			0.04f);
 		UNiagaraSystem* LightSmoke = EnsureExplosiveBarrelSmokeEffect(TEXT("NS_ExplosiveBarrel_SmokeLight"), 0.65f);
 		UNiagaraSystem* HeavySmoke = EnsureExplosiveBarrelSmokeEffect(TEXT("NS_ExplosiveBarrel_SmokeHeavy"), 1.05f);
 		UNiagaraSystem* BurningEffect = EnsureExplosiveBarrelSmokeEffect(TEXT("NS_ExplosiveBarrel_Burning"), 1.35f, true);
 		UMaterial* DamageRadiusMaterial = EnsureExplosiveBarrelDamageRadiusMaterial();
-		UStaticMesh* IntactMesh = EnsureExplosiveBarrelStaticMesh(
-			ExplosiveBarrelIntactMeshAssetName,
-			IntactMaterial,
-			DetailMaterial,
-			[](FMeshDescription& MeshDescription)
-			{
-				BuildExplosiveBarrelIntactMeshDescription(MeshDescription);
-			});
-		UStaticMesh* LightDamageMesh = EnsureExplosiveBarrelStaticMesh(
-			ExplosiveBarrelDamagedLightMeshAssetName,
-			LightDamageMaterial,
-			DetailMaterial,
-			[](FMeshDescription& MeshDescription)
-			{
-				BuildExplosiveBarrelDamagedMeshDescription(MeshDescription, 0.52f);
-			});
-		UStaticMesh* HeavyDamageMesh = EnsureExplosiveBarrelStaticMesh(
-			ExplosiveBarrelDamagedHeavyMeshAssetName,
-			HeavyDamageMaterial,
-			DetailMaterial,
-			[](FMeshDescription& MeshDescription)
-			{
-				BuildExplosiveBarrelDamagedMeshDescription(MeshDescription, 1.0f);
-			});
-		UStaticMesh* DestroyedMesh = EnsureExplosiveBarrelStaticMesh(
-			ExplosiveBarrelDestroyedMeshAssetName,
-			DestroyedMaterial,
-			DetailMaterial,
-			[](FMeshDescription& MeshDescription)
-			{
-				BuildExplosiveBarrelDestroyedMeshDescription(MeshDescription);
-			});
 		UBlueprint* ExplosiveBarrelBlueprint = EnsureBlueprint(
 			InteractionAssetPath,
 			ExplosiveBarrelAssetName,
 			ATunaSweeperExplosiveBarrelActor::StaticClass());
 
-		return IntactMaterial && LightDamageMaterial && HeavyDamageMaterial && DestroyedMaterial && DetailMaterial && DamageRadiusMaterial && LightSmoke && HeavySmoke && BurningEffect && IntactMesh && LightDamageMesh && HeavyDamageMesh && DestroyedMesh &&
+		return DamageRadiusMaterial && LightSmoke && HeavySmoke && BurningEffect &&
 			ConfigureExplosiveBarrelBlueprint(ExplosiveBarrelBlueprint);
 	}
 

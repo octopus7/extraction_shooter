@@ -84,8 +84,6 @@ namespace TunaSweeperEnemySpawn
 	const TCHAR* DefaultLevelTransitionWidgetClassPath = TEXT("/Game/UI/WBP_LevelTransitionVideo.WBP_LevelTransitionVideo_C");
 	const TCHAR* DefaultPickupItemIconWidgetClassPath = TEXT("/Game/UI/WBP_PickupItemIcon.WBP_PickupItemIcon_C");
 	const TCHAR* DefaultSpeechBubbleWidgetClassPath = TEXT("/Game/UI/WBP_SpeechBubble.WBP_SpeechBubble_C");
-	const TCHAR* DefaultExplosiveBarrelIntactMeshPath = TEXT("/Game/Interaction/SM_ExplosiveBarrel_Intact.SM_ExplosiveBarrel_Intact");
-	const TCHAR* DefaultExplosiveBarrelDestroyedMeshPath = TEXT("/Game/Interaction/SM_ExplosiveBarrel_DestroyedBase.SM_ExplosiveBarrel_DestroyedBase");
 	const TCHAR* DefaultExplosionEffectActorClassPath = TEXT("/Script/TunaSweeper.TunaSweeperLocalExplosionEffectActor");
 
 	FString NormalizeLevelName(const FString& RawLevelName)
@@ -1797,14 +1795,12 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadGameplayInteractionActorSpawnData(bool
 		const FString TrimmedExplosiveBarrelDestroyedLoopEffectPath = ExplosiveBarrelDestroyedLoopEffectPath.TrimStartAndEnd();
 		const FString TrimmedExplosiveBarrelExplosionEffectClassPath = ExplosiveBarrelExplosionEffectClassPath.TrimStartAndEnd();
 		SpawnDefinition.ExplosiveBarrelMaxHealth = FMath::Max(1.0f, static_cast<float>(NumericExplosiveBarrelMaxHealth));
-		SpawnDefinition.ExplosiveBarrelIntactMesh = TSoftObjectPtr<UStaticMesh>(
-			FSoftObjectPath(TrimmedExplosiveBarrelIntactMeshPath.IsEmpty()
-				? FString(TunaSweeperEnemySpawn::DefaultExplosiveBarrelIntactMeshPath)
-				: TrimmedExplosiveBarrelIntactMeshPath));
-		SpawnDefinition.ExplosiveBarrelDestroyedMesh = TSoftObjectPtr<UStaticMesh>(
-			FSoftObjectPath(TrimmedExplosiveBarrelDestroyedMeshPath.IsEmpty()
-				? FString(TunaSweeperEnemySpawn::DefaultExplosiveBarrelDestroyedMeshPath)
-				: TrimmedExplosiveBarrelDestroyedMeshPath));
+		SpawnDefinition.ExplosiveBarrelIntactMesh = TrimmedExplosiveBarrelIntactMeshPath.IsEmpty()
+			? TSoftObjectPtr<UStaticMesh>()
+			: TSoftObjectPtr<UStaticMesh>(FSoftObjectPath(TrimmedExplosiveBarrelIntactMeshPath));
+		SpawnDefinition.ExplosiveBarrelDestroyedMesh = TrimmedExplosiveBarrelDestroyedMeshPath.IsEmpty()
+			? TSoftObjectPtr<UStaticMesh>()
+			: TSoftObjectPtr<UStaticMesh>(FSoftObjectPath(TrimmedExplosiveBarrelDestroyedMeshPath));
 		if (!TrimmedExplosiveBarrelDestroyedLoopEffectPath.IsEmpty())
 		{
 			SpawnDefinition.ExplosiveBarrelDestroyedLoopEffect = TSoftObjectPtr<UNiagaraSystem>(
