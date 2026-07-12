@@ -365,7 +365,9 @@ void UTunaSweeperGameHudWidget::DrawEnemyCombatDebugOverlay(
 		return;
 	}
 
-	TMap<int32, int32> BearingLaneCounts;
+	TArray<FVector2D> PlacedWidgetCenters;
+	TArray<float> PlacedWidgetCollisionRadii;
+	float MaxPlacedWidgetCollisionRadius = 0.0f;
 	const FVector PlayerLocation = PlayerPawn->GetActorLocation();
 	for (TActorIterator<ATunaSweeperEnemyCharacter> EnemyIt(GetWorld()); EnemyIt; ++EnemyIt)
 	{
@@ -412,15 +414,88 @@ void UTunaSweeperGameHudWidget::DrawEnemyCombatDebugOverlay(
 			OrbitDirection = FVector2D(1.0f, 0.0f);
 		}
 
-		const float BearingDegrees = FMath::RadiansToDegrees(FMath::Atan2(OrbitDirection.Y, OrbitDirection.X));
-		const int32 BearingBucket = FMath::RoundToInt(BearingDegrees / 12.0f);
-		const int32 LaneIndex = BearingLaneCounts.FindOrAdd(BearingBucket)++;
-		const FVector2D Tangent(-OrbitDirection.Y, OrbitDirection.X);
-		const FVector2D WidgetCenter = PlayerScreenPosition + OrbitDirection * EnemyCombatDebugOrbitRadius + Tangent * (LaneIndex * 28.0f);
 		const float Scale = bOnScreen ? 1.0f : 0.5f;
 		const float Diameter = 110.0f * Scale;
 		const float Radius = Diameter * 0.5f;
+		const int32 DistanceFontSize = FMath::Max(22, FMath::RoundToInt(28.0f * Scale));
+		const int32 StateFontSize = FMath::Max(10, FMath::RoundToInt(11.0f * Scale));
+		const FString DistanceText = FString::Printf(TEXT("%.1fm"), DistanceMeters);
+		const FString StatePrefix = bOnScreen ? TEXT("AI: ") : FString();
+		const float DistanceTextWidth = DistanceText.Len() * DistanceFontSize * 0.56f;
+		const float StateTextWidth = (StatePrefix.Len() + Snapshot.StateLabel.Len()) * StateFontSize * 0.52f;
+		const float CollisionRadius = FMath::Max3(
+			Radius + 16.0f,
+			DistanceTextWidth * 0.5f + 12.0f,
+			StateTextWidth * 0.5f + 12.0f);
+		const float BaseBearingRadians = FMath::Atan2(OrbitDirection.Y, OrbitDirection.X);
+		const FVector2D ActorBearingDirection = OrbitDirection;
+		const FVector2D BaseAnchor = PlayerScreenPosition + ActorBearingDirection * EnemyCombatDebugOrbitRadius;
+		FVector2D WidgetCenter = BaseAnchor;
+		const float RingSpacing = FMath::Max(
+			Diameter + 46.0f,
+			2.0f * FMath::Max(CollisionRadius, MaxPlacedWidgetCollisionRadius) + 24.0f);
+		constexpr int32 MaxLayoutRings = 12;
+		constexpr int32 MaxInnerRingAngleSteps = 2;
+		constexpr int32 MaxOuterRingAngleSteps = 6;
+		constexpr float LayoutAngleStepRadians = 8.0f * PI / 180.0f;
+		bool bFoundLayout = false;
+		for (int32 RingIndex = 0; RingIndex < MaxLayoutRings && !bFoundLayout; ++RingIndex)
+		{
+			const int32 MaxAngleSteps = RingIndex == 0 ? MaxInnerRingAngleSteps : MaxOuterRingAngleSteps;
+			const float OrbitRadius = EnemyCombatDebugOrbitRadius + RingSpacing * RingIndex;
+			for (int32 AttemptIndex = 0; AttemptIndex <= MaxAngleSteps * 2; ++AttemptIndex)
+			{
+				float AngleOffsetRadians = 0.0f;
+				if (AttemptIndex > 0)
+				{
+					const int32 OffsetStep = (AttemptIndex + 1) / 2;
+					const float OffsetSign = (AttemptIndex % 2) == 1 ? 1.0f : -1.0f;
+					AngleOffsetRadians = OffsetSign * OffsetStep * LayoutAngleStepRadians;
+				}
+
+				const float LayoutBearingRadians = BaseBearingRadians + AngleOffsetRadians;
+				const FVector2D CandidateDirection(FMath::Cos(LayoutBearingRadians), FMath::Sin(LayoutBearingRadians));
+				const FVector2D CandidateCenter = PlayerScreenPosition + CandidateDirection * OrbitRadius;
+				bool bOverlapsPlacedWidget = false;
+				for (int32 PlacedIndex = 0; PlacedIndex < PlacedWidgetCenters.Num(); ++PlacedIndex)
+				{
+					const float RequiredSpacing = CollisionRadius + PlacedWidgetCollisionRadii[PlacedIndex];
+					if (FVector2D::DistSquared(CandidateCenter, PlacedWidgetCenters[PlacedIndex]) < FMath::Square(RequiredSpacing))
+					{
+						bOverlapsPlacedWidget = true;
+						break;
+					}
+				}
+
+				if (!bOverlapsPlacedWidget)
+				{
+					WidgetCenter = CandidateCenter;
+					bFoundLayout = true;
+					break;
+				}
+			}
+		}
+		if (!bFoundLayout)
+		{
+			// Do not draw a marker in an overlapping fallback position. The next frame retries the layout.
+			continue;
+		}
+		PlacedWidgetCenters.Add(WidgetCenter);
+		PlacedWidgetCollisionRadii.Add(CollisionRadius);
+		MaxPlacedWidgetCollisionRadius = FMath::Max(MaxPlacedWidgetCollisionRadius, CollisionRadius);
 		const FVector2D WidgetTopLeft = WidgetCenter - FVector2D(Radius, Radius);
+		if (!WidgetCenter.Equals(BaseAnchor, 1.0f))
+		{
+			FSlateDrawElement::MakeLines(
+				OutDrawElements,
+				InOutLayerId + 1,
+				AllottedGeometry.ToPaintGeometry(),
+				TArray<FVector2D>{ BaseAnchor, WidgetCenter },
+				ESlateDrawEffect::None,
+				FLinearColor(1.0f, 0.46f, 0.10f, 0.55f),
+				true,
+				1.0f);
+		}
 
 		FSlateRoundedBoxBrush CircleBrush(FLinearColor(0.035f, 0.018f, 0.012f, 0.90f), Radius);
 		FSlateDrawElement::MakeBox(
@@ -450,7 +525,7 @@ void UTunaSweeperGameHudWidget::DrawEnemyCombatDebugOverlay(
 		FVector2D FacingDirection = bFacingProjected ? (FacingProbe - EnemyBaseScreen).GetSafeNormal() : FVector2D::ZeroVector;
 		if (FacingDirection.IsNearlyZero())
 		{
-			FacingDirection = OrbitDirection;
+			FacingDirection = ActorBearingDirection;
 		}
 		const FVector2D FacingPerpendicular(-FacingDirection.Y, FacingDirection.X);
 		const FVector2D TriangleTip = WidgetCenter + FacingDirection * (Radius + 8.0f * Scale);
@@ -485,12 +560,18 @@ void UTunaSweeperGameHudWidget::DrawEnemyCombatDebugOverlay(
 			DrawTextAt(Text, FVector2D(WidgetCenter.X - ApproximateWidth * 0.5f, WidgetCenter.Y + OffsetY * Scale), FontSize, MinimumFontSize, bBold, Color);
 		};
 
-		DrawCenteredText(FString::Printf(TEXT("%.1fm"), DistanceMeters), -26.0f, 14, 11, true, FLinearColor(1.0f, 0.96f, 0.87f, 1.0f));
-		const FString StatePrefix = bOnScreen ? TEXT("AI: ") : FString();
-		const int32 StateFontSize = FMath::Max(10, FMath::RoundToInt(11.0f * Scale));
+		const float DistanceTopY = -Radius + 4.0f * Scale;
+		DrawCenteredText(
+			DistanceText,
+			DistanceTopY / Scale,
+			28,
+			22,
+			true,
+			FLinearColor(1.0f, 0.96f, 0.87f, 1.0f));
 		const float PrefixWidth = StatePrefix.Len() * StateFontSize * 0.52f;
 		const float StateWidth = Snapshot.StateLabel.Len() * StateFontSize * 0.52f;
-		const FVector2D StateStart(WidgetCenter.X - (PrefixWidth + StateWidth) * 0.5f, WidgetCenter.Y - 7.0f * Scale);
+		const float StateTopY = DistanceTopY + DistanceFontSize + 4.0f;
+		const FVector2D StateStart(WidgetCenter.X - (PrefixWidth + StateWidth) * 0.5f, WidgetCenter.Y + StateTopY);
 		if (!StatePrefix.IsEmpty())
 		{
 			DrawTextAt(StatePrefix, StateStart, 11, 10, false, FLinearColor(0.78f, 0.80f, 0.82f, 1.0f));
@@ -498,7 +579,14 @@ void UTunaSweeperGameHudWidget::DrawEnemyCombatDebugOverlay(
 		DrawTextAt(Snapshot.StateLabel, StateStart + FVector2D(PrefixWidth, 0.0f), 11, 10, true, FLinearColor(0.64f, 0.96f, 1.0f, 1.0f));
 		if (Snapshot.MaxStateSeconds > 0.0f)
 		{
-			DrawCenteredText(FString::Printf(TEXT("%.1f / %.1fs"), Snapshot.RemainingStateSeconds, Snapshot.MaxStateSeconds), 11.0f, 10, 9, false, FLinearColor(1.0f, 0.93f, 0.76f, 1.0f));
+			const float TimeTopY = StateTopY + StateFontSize + 4.0f;
+			DrawCenteredText(
+				FString::Printf(TEXT("%.1f / %.1fs"), Snapshot.RemainingStateSeconds, Snapshot.MaxStateSeconds),
+				TimeTopY / Scale,
+				10,
+				9,
+				false,
+				FLinearColor(1.0f, 0.93f, 0.76f, 1.0f));
 		}
 
 		InOutLayerId += 4;
