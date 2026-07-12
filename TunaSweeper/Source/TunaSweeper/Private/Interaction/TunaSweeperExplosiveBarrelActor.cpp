@@ -460,7 +460,7 @@ void ATunaSweeperExplosiveBarrelActor::RefreshDamageSmokeEffect()
 
 void ATunaSweeperExplosiveBarrelActor::BeginStageSmokeCrossFade()
 {
-	if (!bUseNiagaraStageSmoke || StageSmokeCrossFadeSeconds <= 0.0f || !DamageSmokeEffectComponent || !DamageSmokeEffectComponent->IsActive())
+	if (!bUseNiagaraStageSmoke || StageSmokeCrossFadeSeconds <= 0.0f || !DamageSmokeEffectComponent)
 	{
 		return;
 	}
@@ -474,6 +474,7 @@ void ATunaSweeperExplosiveBarrelActor::BeginStageSmokeCrossFade()
 	FadingStageSmokeEffectComponents.Add(DamageSmokeEffectComponent);
 	FadingStageSmokeElapsedSeconds.Add(0.0f);
 	FadingStageSmokeStrengths.Add(GetConfiguredSmokeStrength(VisualStates[StateIndex]));
+	UE_LOG(LogTemp, Log, TEXT("Explosive barrel '%s': preserving stage %d smoke for %.2fs cross-fade."), *GetName(), StateIndex, StageSmokeCrossFadeSeconds);
 	DamageSmokeEffectComponent = CreateIncomingStageSmokeComponent();
 	IncomingStageSmokeElapsedSeconds = 0.0f;
 	IncomingStageSmokeStrength = 1.0f;
@@ -496,6 +497,7 @@ UNiagaraComponent* ATunaSweeperExplosiveBarrelActor::CreateIncomingStageSmokeCom
 
 	IncomingComponent->SetupAttachment(RootComponent);
 	IncomingComponent->SetAutoActivate(false);
+	AddInstanceComponent(IncomingComponent);
 	IncomingComponent->RegisterComponent();
 	return IncomingComponent;
 }

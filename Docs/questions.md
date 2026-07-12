@@ -2842,3 +2842,12 @@ PC에서 Niagara Fluids 3D Gas 폭발·연기 효과를 한 화면에 하나 정
 ### 답변
 
 가능하다. 단발 폭발은 밝은 화염·섬광을 그대로 두고, 마지막 `NS_ExplosiveBarrel_Burning` 루프만 Gas Source의 Temperature와 화염 Color를 0에 가깝게 낮추며 Smoke Color를 거의 검정으로 설정한다. 필요하다면 볼륨 머티리얼의 발광·백색 산란도 비활성화해 밝은 하이라이트가 남지 않게 한다. 이렇게 하면 잔여 이펙트는 검은 연기만 지속되고, 초기 폭발의 타격감과 분리된다.
+## 2026-07-13 02:31:30 (소요시간: 00:00:20)
+
+### 질문
+
+폭발 배럴의 2단계 이펙트 이름 질문.
+
+### 답변
+
+두 번째 손상 상태(State Index 2)의 Niagara System은 `NS_ExplosiveBarrel_SmokeHeavy`이며, 경로는 `/Game/Effects/NS_ExplosiveBarrel_SmokeHeavy`다. 첫 번째 손상 상태는 `NS_ExplosiveBarrel_SmokeLight`, 파괴 후 잔여 루프는 `NS_ExplosiveBarrel_Burning`이다.

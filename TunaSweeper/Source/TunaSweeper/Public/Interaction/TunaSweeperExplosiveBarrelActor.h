@@ -181,7 +181,7 @@ protected:
 
 	/** Time in seconds used to cross-fade the previous persistent smoke state into the next one. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Explosive Barrel|Visual", meta = (ClampMin = "0.0", UIMin = "0.0", ForceUnits = "s"))
-	float StageSmokeCrossFadeSeconds = 0.55f;
+	float StageSmokeCrossFadeSeconds = 0.85f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Explosive Barrel|Visual")
 	TSoftObjectPtr<UMaterialInterface> AttachedSmokeMaterial;

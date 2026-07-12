@@ -5194,3 +5194,8 @@
 - 마지막 `NS_ExplosiveBarrel_Burning` 루프를 검은 연기 전용으로 변경. 런타임에는 Gas Source Temperature를 0으로, Source Color와 Smoke Color를 검정으로 오버라이드해 백색·화염 하이라이트가 남지 않게 했다.
 - 에디터의 배럴 Niagara 자산 생성 경로도 `bBlackSmokeOnly` 옵션을 지원하도록 수정해, 이후 자산 재생성 시에도 Burning 시스템만 같은 검은 연기 설정으로 저장된다.
 - 단발 `ATunaSweeperLocalExplosionEffectActor`는 변경하지 않아 마지막 폭발의 밝은 버스트와 섬광은 유지된다.
+## 2026-07-13 02:28:00 (소요시간: 00:02:00)
+
+- 열린 Unreal Editor를 종료한 뒤 최신 배럴 Niagara 전환 및 검은 잔여 연기 코드를 `TunaSweeperEditor Win64 Development`로 전체 빌드.
+- 빌드가 성공했으며 `UnrealEditor-TunaSweeper.dll`과 `UnrealEditor-TunaSweeperEditor.dll`은 2026-07-13 02:29에 갱신되었다.
+- 최신 모듈을 로드하도록 `TunaSweeper/TunaSweeper.uproject`를 Unreal Engine 5.7 Editor로 다시 실행했다.
