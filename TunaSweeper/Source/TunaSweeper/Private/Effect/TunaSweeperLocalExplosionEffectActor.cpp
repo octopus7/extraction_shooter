@@ -7,6 +7,9 @@
 #include "Engine/StaticMesh.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Materials/MaterialInterface.h"
+#include "NiagaraComponent.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraSystem.h"
 #include "UObject/ConstructorHelpers.h"
 
 namespace
@@ -125,6 +128,8 @@ ATunaSweeperLocalExplosionEffectActor::ATunaSweeperLocalExplosionEffectActor()
 	ExplosionFlipbookMaterial = TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath(ExplosionMaterialPath));
 	ExplosionDistortionMaterial = TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath(DistortionMaterialPath));
 	ExplosionSmokeMaterial = TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath(SmokeMaterialPath));
+	FireBurstNiagaraSystem = TSoftObjectPtr<UNiagaraSystem>(FSoftObjectPath(TEXT("/Game/Effects/ExplosionTuna/NS_Explosion_Tuna.NS_Explosion_Tuna")));
+	SmokeBurstNiagaraSystem = TSoftObjectPtr<UNiagaraSystem>(FSoftObjectPath(TEXT("/Game/Effects/NS_ExplosiveBarrel_ExplosionSmoke.NS_ExplosiveBarrel_ExplosionSmoke")));
 }
 
 void ATunaSweeperLocalExplosionEffectActor::BeginPlay()
@@ -132,6 +137,7 @@ void ATunaSweeperLocalExplosionEffectActor::BeginPlay()
 	Super::BeginPlay();
 
 	ApplyDynamicMaterials();
+	SpawnNiagaraBurstEffects();
 	SetLifeSpan(FMath::Max(0.08f, TotalDurationSeconds * FMath::Max(1.0f, ResidualSmokeDurationMultiplier) + 0.08f));
 	UpdateEffect(0.0f);
 }
@@ -326,6 +332,68 @@ void ATunaSweeperLocalExplosionEffectActor::SetSpriteDiameter(
 
 	const float Scale = FMath::Max(0.0f, DiameterCm) / PlaneMeshSizeCm;
 	SpriteComponent->SetRelativeScale3D(FVector(Scale, Scale, 1.0f));
+}
+
+void ATunaSweeperLocalExplosionEffectActor::SpawnNiagaraBurstEffects()
+{
+	if (!RootComponent)
+	{
+		return;
+	}
+
+	const FVector BurstScale(EffectRadiusCm / 210.0f);
+	if (UNiagaraSystem* FireSystem = FireBurstNiagaraSystem.LoadSynchronous())
+	{
+		UNiagaraFunctionLibrary::SpawnSystemAttached(
+			FireSystem,
+			RootComponent,
+			NAME_None,
+			FVector(0.0f, 0.0f, SpriteBaseHeightCm),
+			FRotator::ZeroRotator,
+			BurstScale,
+			EAttachLocation::KeepRelativeOffset,
+			true,
+			ENCPoolMethod::AutoRelease,
+			true,
+			false);
+	}
+
+	if (UNiagaraSystem* SmokeSystem = SmokeBurstNiagaraSystem.LoadSynchronous())
+	{
+		if (UNiagaraComponent* SmokeComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
+			SmokeSystem,
+			RootComponent,
+			NAME_None,
+			FVector(0.0f, 0.0f, SpriteBaseHeightCm),
+			FRotator::ZeroRotator,
+			FVector(1.75f),
+			EAttachLocation::KeepRelativeOffset,
+			false,
+			ENCPoolMethod::None,
+			true,
+			false))
+		{
+			SmokeComponent->SetVariableVec3(FName(TEXT("User.SourceOffset")), FVector::ZeroVector);
+			SmokeComponent->SetVariableFloat(FName(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_SphereSource.Temperature")), 0.06f);
+			SmokeComponent->SetVariableLinearColor(FName(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_SphereSource.Color")), FLinearColor::Black);
+			SmokeComponent->SetVariableLinearColor(FName(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_MaterialControls.Smoke Color")), FLinearColor(0.004f, 0.004f, 0.004f, 1.0f));
+		}
+	}
+}
+
+void ATunaSweeperLocalExplosionEffectActor::HideLegacyCardLayers()
+{
+	for (UStaticMeshComponent* Component : {
+		ShockwaveSprite.Get(),
+		GroundSmokeSpriteA.Get(), GroundSmokeSpriteB.Get(), GroundSmokeSpriteC.Get(),
+		GroundSmokeSpriteD.Get(), GroundSmokeSpriteE.Get(), GroundSmokeSpriteF.Get(),
+		FireSprite.Get(), SmokeSprite.Get(), SmokeOffsetSpriteA.Get(), SmokeOffsetSpriteB.Get()})
+	{
+		if (Component)
+		{
+			Component->SetVisibility(false);
+		}
+	}
 }
 
 void ATunaSweeperLocalExplosionEffectActor::UpdateEffect(float DeltaSeconds)
@@ -573,4 +641,7 @@ void ATunaSweeperLocalExplosionEffectActor::UpdateEffect(float DeltaSeconds)
 		FlashLight->SetIntensity(4200.0f * LightFade);
 		FlashLight->SetAttenuationRadius(EffectRadiusCm * FMath::Lerp(1.1f, 2.35f, SmoothStep01(RangeAlpha(0.0f, 0.22f, NormalizedTime))));
 	}
+
+	// Fire, shockwave, and smoke cards are superseded by Niagara. DistortionSprite remains active.
+	HideLegacyCardLayers();
 }

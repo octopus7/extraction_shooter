@@ -6,6 +6,7 @@
 
 class UMaterialInstanceDynamic;
 class UMaterialInterface;
+class UNiagaraSystem;
 class UPointLightComponent;
 class USceneComponent;
 class UStaticMeshComponent;
@@ -81,6 +82,14 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TunaSweeper|Effect")
 	TSoftObjectPtr<UMaterialInterface> ExplosionSmokeMaterial;
 
+	/** One-shot Niagara fireball; replaces the legacy fire flipbook card. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TunaSweeper|Effect|Niagara")
+	TSoftObjectPtr<UNiagaraSystem> FireBurstNiagaraSystem;
+
+	/** Short, large 3D Gas simulation that injects soot after the fireball. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TunaSweeper|Effect|Niagara")
+	TSoftObjectPtr<UNiagaraSystem> SmokeBurstNiagaraSystem;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Effect", meta = (ClampMin = "1", UIMin = "1"))
 	int32 FlipbookColumns = 4;
 
@@ -114,6 +123,8 @@ private:
 		float Opacity) const;
 	void UpdateDistortionMaterial(float WavePosition, float WaveWidth, float DistortionStrength, float RefractionAmount, float Opacity) const;
 	void SetSpriteDiameter(UStaticMeshComponent* SpriteComponent, float DiameterCm) const;
+	void SpawnNiagaraBurstEffects();
+	void HideLegacyCardLayers();
 	void UpdateEffect(float DeltaSeconds);
 
 	UPROPERTY(Transient)

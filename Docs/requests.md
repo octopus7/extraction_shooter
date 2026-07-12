@@ -5199,3 +5199,15 @@
 - 열린 Unreal Editor를 종료한 뒤 최신 배럴 Niagara 전환 및 검은 잔여 연기 코드를 `TunaSweeperEditor Win64 Development`로 전체 빌드.
 - 빌드가 성공했으며 `UnrealEditor-TunaSweeper.dll`과 `UnrealEditor-TunaSweeperEditor.dll`은 2026-07-13 02:29에 갱신되었다.
 - 최신 모듈을 로드하도록 `TunaSweeper/TunaSweeper.uproject`를 Unreal Engine 5.7 Editor로 다시 실행했다.
+
+## 2026-07-13 04:33:51 (소요시간: 00:33:01)
+
+- 에픽 예제 `NS_Explosion`을 `/Game/Effects/ExplosionTuna/NS_Explosion_Tuna`으로 복제하고, 새로 만든 언리얼 에셋 이름을 모두 `_Tuna`로 끝나도록 구성.
+- 원본 8×8 폭발 아틀라스를 구조 참조로 사용해 built-in Imagegen 편집 모드로 유사하지만 구별되는 플립북을 제작하고, 2048×2048 HDR EOO 텍스처의 R(Emission), G(Occlusion), A(Opacity) 채널로 재구성.
+- 새 텍스처와 머티리얼 인스턴스를 복제한 Niagara 시스템에 연결하고 폭발 배럴 액터가 `NS_Explosion_Tuna`를 사용하도록 변경.
+- UE 5.7 에셋 검증과 `TunaSweeperEditor Win64 Development` 빌드를 통과시킨 뒤 Unreal Editor를 다시 실행.
+
+## 2026-07-13 05:11:22 (소요시간: 00:02:30)
+
+- 요청에 따라 Tuna 폭발 플립북·Niagara 에셋, 원본 이미지 및 런타임 연결 변경을 하나의 Git 커밋 대상으로 선별.
+- 작업 트리에 남아 있던 무관한 무기·맵·배럴·문서 변경은 커밋 대상에서 제외.
