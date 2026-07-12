@@ -422,7 +422,7 @@ void UTunaSweeperGameHudWidget::DrawEnemyCombatDebugOverlay(
 		const float Radius = Diameter * 0.5f;
 		const FVector2D WidgetTopLeft = WidgetCenter - FVector2D(Radius, Radius);
 
-		FSlateRoundedBoxBrush CircleBrush(FLinearColor(0.08f, 0.025f, 0.01f, 0.78f), Radius);
+		FSlateRoundedBoxBrush CircleBrush(FLinearColor(0.035f, 0.018f, 0.012f, 0.90f), Radius);
 		FSlateDrawElement::MakeBox(
 			OutDrawElements,
 			InOutLayerId + 1,
@@ -463,21 +463,42 @@ void UTunaSweeperGameHudWidget::DrawEnemyCombatDebugOverlay(
 			OutDrawElements, InOutLayerId + 3, AllottedGeometry.ToPaintGeometry(), TrianglePoints,
 			ESlateDrawEffect::None, FLinearColor(1.0f, 0.76f, 0.28f, 1.0f), true, 1.5f * Scale);
 
-		auto DrawCenteredText = [&](const FString& Text, float OffsetY, int32 FontSize, const FLinearColor& Color)
+		auto DrawTextAt = [&](const FString& Text, const FVector2D& Position, int32 FontSize, int32 MinimumFontSize, bool bBold, const FLinearColor& Color)
 		{
-			const FSlateFontInfo Font = FCoreStyle::GetDefaultFontStyle("Regular", FMath::Max(8, FMath::RoundToInt(FontSize * Scale)));
-			const float ApproximateWidth = Text.Len() * FontSize * Scale * 0.48f;
+			const int32 ResolvedFontSize = FMath::Max(MinimumFontSize, FMath::RoundToInt(FontSize * Scale));
+			const FSlateFontInfo Font = FCoreStyle::GetDefaultFontStyle(bBold ? "Bold" : "Regular", ResolvedFontSize);
+			const FVector2D TextSize(Diameter, FMath::Max(18.0f * Scale, static_cast<float>(ResolvedFontSize + 4)));
 			FSlateDrawElement::MakeText(
 				OutDrawElements, InOutLayerId + 4,
-				MakeHudLocalBoxGeometry(AllottedGeometry, FVector2D(WidgetCenter.X - ApproximateWidth * 0.5f, WidgetCenter.Y + OffsetY * Scale), FVector2D(Diameter, 18.0f * Scale)),
+				MakeHudLocalBoxGeometry(AllottedGeometry, Position + FVector2D(1.0f, 1.0f), TextSize),
+				Text, Font, ESlateDrawEffect::None, FLinearColor(0.0f, 0.0f, 0.0f, 0.92f));
+			FSlateDrawElement::MakeText(
+				OutDrawElements, InOutLayerId + 4,
+				MakeHudLocalBoxGeometry(AllottedGeometry, Position, TextSize),
 				Text, Font, ESlateDrawEffect::None, Color);
 		};
 
-		DrawCenteredText(FString::Printf(TEXT("%.1fm"), DistanceMeters), -26.0f, 14, FLinearColor(1.0f, 0.88f, 0.67f, 1.0f));
-		DrawCenteredText(FString::Printf(TEXT("AI: %s"), *Snapshot.StateLabel), -7.0f, 10, FLinearColor(1.0f, 0.63f, 0.36f, 1.0f));
+		auto DrawCenteredText = [&](const FString& Text, float OffsetY, int32 FontSize, int32 MinimumFontSize, bool bBold, const FLinearColor& Color)
+		{
+			const int32 ResolvedFontSize = FMath::Max(MinimumFontSize, FMath::RoundToInt(FontSize * Scale));
+			const float ApproximateWidth = Text.Len() * ResolvedFontSize * 0.52f;
+			DrawTextAt(Text, FVector2D(WidgetCenter.X - ApproximateWidth * 0.5f, WidgetCenter.Y + OffsetY * Scale), FontSize, MinimumFontSize, bBold, Color);
+		};
+
+		DrawCenteredText(FString::Printf(TEXT("%.1fm"), DistanceMeters), -26.0f, 14, 11, true, FLinearColor(1.0f, 0.96f, 0.87f, 1.0f));
+		const FString StatePrefix = bOnScreen ? TEXT("AI: ") : FString();
+		const int32 StateFontSize = FMath::Max(10, FMath::RoundToInt(11.0f * Scale));
+		const float PrefixWidth = StatePrefix.Len() * StateFontSize * 0.52f;
+		const float StateWidth = Snapshot.StateLabel.Len() * StateFontSize * 0.52f;
+		const FVector2D StateStart(WidgetCenter.X - (PrefixWidth + StateWidth) * 0.5f, WidgetCenter.Y - 7.0f * Scale);
+		if (!StatePrefix.IsEmpty())
+		{
+			DrawTextAt(StatePrefix, StateStart, 11, 10, false, FLinearColor(0.78f, 0.80f, 0.82f, 1.0f));
+		}
+		DrawTextAt(Snapshot.StateLabel, StateStart + FVector2D(PrefixWidth, 0.0f), 11, 10, true, FLinearColor(0.64f, 0.96f, 1.0f, 1.0f));
 		if (Snapshot.MaxStateSeconds > 0.0f)
 		{
-			DrawCenteredText(FString::Printf(TEXT("%.1f / %.1fs"), Snapshot.RemainingStateSeconds, Snapshot.MaxStateSeconds), 11.0f, 10, FLinearColor(1.0f, 0.82f, 0.54f, 1.0f));
+			DrawCenteredText(FString::Printf(TEXT("%.1f / %.1fs"), Snapshot.RemainingStateSeconds, Snapshot.MaxStateSeconds), 11.0f, 10, 9, false, FLinearColor(1.0f, 0.93f, 0.76f, 1.0f));
 		}
 
 		InOutLayerId += 4;
