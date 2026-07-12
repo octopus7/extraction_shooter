@@ -8,6 +8,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Interaction/TunaSweeperSandbagCoverActor.h"
 #include "Kismet/GameplayStatics.h"
+#include "Subsystem/TunaSweeperNoiseSubsystem.h"
 #include "TunaSweeperCollisionChannels.h"
 #include "TimerManager.h"
 
@@ -71,6 +72,21 @@ bool ATunaSweeperEnemyAIController::GetCombatDebugSnapshot(FTunaSweeperEnemyComb
 			: 0.0f;
 	};
 
+	if (AwarenessState == ETunaSweeperEnemyAwarenessState::Suspicious)
+	{
+		SetTimedState(TEXT("Suspicious Search"), AwarenessStateEndTimeSeconds, FMath::Max(SuspicionSearchSeconds.X, SuspicionSearchSeconds.Y));
+		return true;
+	}
+
+	if (AwarenessState == ETunaSweeperEnemyAwarenessState::Alerted)
+	{
+		SetTimedState(
+			TEXT("Alerted"),
+			AwarenessStateEndTimeSeconds,
+			FMath::Max(0.0f, AlertReactionSeconds) + FMath::Max(0.0f, AlertPreCombatDelaySeconds));
+		return true;
+	}
+
 	if (!bIsCombatEngaged)
 	{
 		if (NonCombatState == ETunaSweeperNonCombatState::Wander)
@@ -116,6 +132,7 @@ void ATunaSweeperEnemyAIController::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
+	UpdateAwarenessState(DeltaSeconds);
 	UpdateNonCombatState(DeltaSeconds);
 	MoveRangedCombatState(DeltaSeconds);
 	MoveTowardCurrentTarget(DeltaSeconds);
@@ -135,6 +152,27 @@ void ATunaSweeperEnemyAIController::BeginPlay()
 		EffectiveUpdateInterval,
 		true,
 		InitialUpdateDelay);
+
+	if (UWorld* World = GetWorld())
+	{
+		if (UTunaSweeperNoiseSubsystem* NoiseSubsystem = World->GetSubsystem<UTunaSweeperNoiseSubsystem>())
+		{
+			NoiseSubsystem->OnNoiseReported.AddUObject(this, &ATunaSweeperEnemyAIController::HandleNoiseReported);
+		}
+	}
+}
+
+void ATunaSweeperEnemyAIController::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	if (UWorld* World = GetWorld())
+	{
+		if (UTunaSweeperNoiseSubsystem* NoiseSubsystem = World->GetSubsystem<UTunaSweeperNoiseSubsystem>())
+		{
+			NoiseSubsystem->OnNoiseReported.RemoveAll(this);
+		}
+	}
+
+	Super::EndPlay(EndPlayReason);
 }
 
 void ATunaSweeperEnemyAIController::OnPossess(APawn* InPawn)
@@ -204,6 +242,20 @@ void ATunaSweeperEnemyAIController::UpdateAttackTarget()
 	}
 
 	const float DistanceToPlayer = FMath::Sqrt(FVector::DistSquared2D(ControlledPawn->GetActorLocation(), PlayerPawn->GetActorLocation()));
+	if (AwarenessState == ETunaSweeperEnemyAwarenessState::Alerted)
+	{
+		return;
+	}
+
+	if (AwarenessState == ETunaSweeperEnemyAwarenessState::Suspicious)
+	{
+		if (CanAcquireCombatTarget(PlayerPawn, DistanceToPlayer))
+		{
+			StartAlerted(PlayerPawn);
+		}
+		return;
+	}
+
 	if (bIsCombatEngaged && DistanceToPlayer > ResolveCombatDisengageRange())
 	{
 		ClearCombatTarget();
@@ -223,24 +275,16 @@ void ATunaSweeperEnemyAIController::UpdateAttackTarget()
 		return;
 	}
 
-	const bool bNewEngagement = !bIsCombatEngaged;
-	bIsCombatEngaged = true;
-	CurrentTargetActor = PlayerPawn;
-	SetFocus(PlayerPawn, EAIFocusPriority::Gameplay);
+	if (!bIsCombatEngaged)
+	{
+		StartAlerted(PlayerPawn);
+		return;
+	}
 
 	ATunaSweeperEnemyCharacter* EnemyCharacter = Cast<ATunaSweeperEnemyCharacter>(ControlledPawn);
 	if (EnemyCharacter && !EnemyCharacter->UsesMeleeAttack())
 	{
 		bIsClosingDistance = false;
-		if (bNewEngagement)
-		{
-			UWorld* World = GetWorld();
-			const double CurrentTimeSeconds = World ? World->GetTimeSeconds() : 0.0;
-			LastAttackTimeSeconds = CurrentTimeSeconds - ResolveAttackCooldownSeconds();
-			StartRangedHold(DistanceToPlayer, true);
-			TryRangedAttack(DistanceToPlayer, PlayerPawn, EnemyCharacter, EvaluateLineOfFire(PlayerPawn));
-			return;
-		}
 		UpdateRangedCombatState(DistanceToPlayer, PlayerPawn, EnemyCharacter);
 		return;
 	}
@@ -266,9 +310,75 @@ void ATunaSweeperEnemyAIController::UpdateAttackTarget()
 	}
 }
 
+void ATunaSweeperEnemyAIController::NotifySuspicionAtLocation(const FVector& InSuspicionLocation)
+{
+	if (InSuspicionLocation.ContainsNaN() || bIsCombatEngaged || AwarenessState == ETunaSweeperEnemyAwarenessState::Alerted)
+	{
+		return;
+	}
+
+	StartSuspicion(InSuspicionLocation);
+}
+
+void ATunaSweeperEnemyAIController::UpdateAwarenessState(float DeltaSeconds)
+{
+	if (AwarenessState == ETunaSweeperEnemyAwarenessState::Unaware ||
+		AwarenessState == ETunaSweeperEnemyAwarenessState::Combat)
+	{
+		return;
+	}
+
+	APawn* ControlledPawn = GetPawn();
+	UWorld* World = GetWorld();
+	if (!ControlledPawn || !World)
+	{
+		ClearCombatTarget();
+		return;
+	}
+
+	const double CurrentTimeSeconds = World->GetTimeSeconds();
+	if (AwarenessState == ETunaSweeperEnemyAwarenessState::Alerted)
+	{
+		AActor* TargetActor = CurrentTargetActor.Get();
+		if (!TargetActor)
+		{
+			ClearCombatTarget();
+			return;
+		}
+
+		FVector DirectionToTarget = TargetActor->GetActorLocation() - ControlledPawn->GetActorLocation();
+		DirectionToTarget.Z = 0.0f;
+		if (!DirectionToTarget.IsNearlyZero())
+		{
+			ControlledPawn->SetActorRotation(FRotator(0.0f, DirectionToTarget.Rotation().Yaw, 0.0f));
+		}
+
+		if (CurrentTimeSeconds >= AwarenessStateEndTimeSeconds)
+		{
+			EnterCombat();
+		}
+		return;
+	}
+
+	FVector DirectionToSuspicion = SuspicionLocation - ControlledPawn->GetActorLocation();
+	DirectionToSuspicion.Z = 0.0f;
+	if (!DirectionToSuspicion.IsNearlyZero())
+	{
+		const float ElapsedSeconds = FMath::Max(0.0f, static_cast<float>(CurrentTimeSeconds - AwarenessStateStartTimeSeconds));
+		const float SweepAngleDegrees = FMath::Sin(ElapsedSeconds * 4.0f) * FMath::Max(0.0f, SearchSweepHalfAngleDegrees);
+		const FVector SearchDirection = DirectionToSuspicion.GetSafeNormal().RotateAngleAxis(SweepAngleDegrees, FVector::UpVector);
+		ControlledPawn->SetActorRotation(FRotator(0.0f, SearchDirection.Rotation().Yaw, 0.0f));
+	}
+
+	if (CurrentTimeSeconds >= AwarenessStateEndTimeSeconds)
+	{
+		ClearCombatTarget();
+	}
+}
+
 void ATunaSweeperEnemyAIController::UpdateNonCombatState(float DeltaSeconds)
 {
-	if (DeltaSeconds <= 0.0f || bIsCombatEngaged || CurrentTargetActor.IsValid())
+	if (DeltaSeconds <= 0.0f || AwarenessState != ETunaSweeperEnemyAwarenessState::Unaware || bIsCombatEngaged || CurrentTargetActor.IsValid())
 	{
 		return;
 	}
@@ -334,6 +444,90 @@ void ATunaSweeperEnemyAIController::StartNonCombatWander()
 	NonCombatFacingDirection = GetRandomPlanarDirection();
 	NonCombatStateEndTimeSeconds =
 		(World ? World->GetTimeSeconds() : 0.0) + GetRandomRangeValue(WanderSeconds, 0.05f);
+}
+
+void ATunaSweeperEnemyAIController::StartSuspicion(const FVector& InSuspicionLocation)
+{
+	APawn* ControlledPawn = GetPawn();
+	UWorld* World = GetWorld();
+	if (!ControlledPawn || !World)
+	{
+		return;
+	}
+
+	AwarenessState = ETunaSweeperEnemyAwarenessState::Suspicious;
+	AwarenessStateStartTimeSeconds = World->GetTimeSeconds();
+	AwarenessStateEndTimeSeconds = AwarenessStateStartTimeSeconds + GetRandomRangeValue(SuspicionSearchSeconds, 0.05f);
+	SuspicionLocation = InSuspicionLocation;
+	CurrentTargetActor.Reset();
+	bIsClosingDistance = false;
+	bIsOpeningHold = false;
+	StopMovement();
+	ClearFocus(EAIFocusPriority::Gameplay);
+
+	if (ATunaSweeperEnemyCharacter* EnemyCharacter = Cast<ATunaSweeperEnemyCharacter>(ControlledPawn))
+	{
+		EnemyCharacter->SetAlertIndicatorVisible(false);
+	}
+}
+
+void ATunaSweeperEnemyAIController::StartAlerted(AActor* TargetActor)
+{
+	APawn* ControlledPawn = GetPawn();
+	UWorld* World = GetWorld();
+	if (!ControlledPawn || !World || !TargetActor)
+	{
+		ClearCombatTarget();
+		return;
+	}
+
+	AwarenessState = ETunaSweeperEnemyAwarenessState::Alerted;
+	AwarenessStateStartTimeSeconds = World->GetTimeSeconds();
+	AwarenessStateEndTimeSeconds = AwarenessStateStartTimeSeconds +
+		FMath::Max(0.0f, AlertReactionSeconds) + FMath::Max(0.0f, AlertPreCombatDelaySeconds);
+	CurrentTargetActor = TargetActor;
+	bIsCombatEngaged = false;
+	bIsClosingDistance = false;
+	bIsOpeningHold = false;
+	RangedCombatState = ETunaSweeperRangedCombatState::Idle;
+	StopMovement();
+	SetFocus(TargetActor, EAIFocusPriority::Gameplay);
+
+	if (ATunaSweeperEnemyCharacter* EnemyCharacter = Cast<ATunaSweeperEnemyCharacter>(ControlledPawn))
+	{
+		EnemyCharacter->SetAlertIndicatorVisible(true);
+	}
+}
+
+void ATunaSweeperEnemyAIController::EnterCombat()
+{
+	APawn* ControlledPawn = GetPawn();
+	AActor* TargetActor = CurrentTargetActor.Get();
+	if (!ControlledPawn || !TargetActor)
+	{
+		ClearCombatTarget();
+		return;
+	}
+
+	AwarenessState = ETunaSweeperEnemyAwarenessState::Combat;
+	bIsCombatEngaged = true;
+	SetFocus(TargetActor, EAIFocusPriority::Gameplay);
+
+	ATunaSweeperEnemyCharacter* EnemyCharacter = Cast<ATunaSweeperEnemyCharacter>(ControlledPawn);
+	if (EnemyCharacter)
+	{
+		EnemyCharacter->SetAlertIndicatorVisible(false);
+	}
+
+	const float DistanceToTarget = FMath::Sqrt(FVector::DistSquared2D(ControlledPawn->GetActorLocation(), TargetActor->GetActorLocation()));
+	if (EnemyCharacter && !EnemyCharacter->UsesMeleeAttack())
+	{
+		bIsClosingDistance = false;
+		StartRangedHold(DistanceToTarget);
+		return;
+	}
+
+	UpdateApproachState(DistanceToTarget, ResolveApproachStartRange(), ResolveApproachStopRange());
 }
 
 void ATunaSweeperEnemyAIController::UpdateApproachState(
@@ -751,6 +945,45 @@ bool ATunaSweeperEnemyAIController::CanAcquireCombatTarget(AActor* TargetActor, 
 	return EvaluateLineOfFire(TargetActor) != ETunaSweeperLineOfFireResult::BlockedByIndestructible;
 }
 
+void ATunaSweeperEnemyAIController::HandleNoiseReported(const FTunaSweeperNoiseEvent& NoiseEvent)
+{
+	if (bIsCombatEngaged || AwarenessState == ETunaSweeperEnemyAwarenessState::Alerted ||
+		NoiseEvent.Loudness <= 0.0f || NoiseEvent.MaxRange <= 0.0f)
+	{
+		return;
+	}
+
+	APawn* ControlledPawn = GetPawn();
+	UWorld* World = GetWorld();
+	if (!ControlledPawn || !World ||
+		NoiseEvent.SourceActor == ControlledPawn || NoiseEvent.InstigatorActor == ControlledPawn ||
+		(NoiseEvent.SourceActor && NoiseEvent.SourceActor->GetOwner() == ControlledPawn) ||
+		(NoiseEvent.InstigatorActor && NoiseEvent.InstigatorActor->GetOwner() == ControlledPawn))
+	{
+		return;
+	}
+
+	UTunaSweeperNoiseSubsystem* NoiseSubsystem = World->GetSubsystem<UTunaSweeperNoiseSubsystem>();
+	if (!NoiseSubsystem)
+	{
+		return;
+	}
+
+	FTunaSweeperHeardNoiseEvent HeardNoise;
+	if (!NoiseSubsystem->CalculateHeardNoiseAtLocation(
+		NoiseEvent,
+		ControlledPawn->GetActorLocation(),
+		HearingRange,
+		HearingSensitivity,
+		HearingMinimumStrength,
+		HeardNoise))
+	{
+		return;
+	}
+
+	StartSuspicion(HeardNoise.SourceLocation);
+}
+
 void ATunaSweeperEnemyAIController::DrawCombatDebug() const
 {
 	if (!bDrawCombatDebug)
@@ -950,10 +1183,19 @@ float ATunaSweeperEnemyAIController::ResolveAttackCooldownSeconds() const
 
 void ATunaSweeperEnemyAIController::ClearCombatTarget()
 {
+	if (ATunaSweeperEnemyCharacter* EnemyCharacter = Cast<ATunaSweeperEnemyCharacter>(GetPawn()))
+	{
+		EnemyCharacter->SetAlertIndicatorVisible(false);
+	}
+
 	CurrentTargetActor.Reset();
 	bIsCombatEngaged = false;
 	bIsClosingDistance = false;
 	bIsOpeningHold = false;
+	AwarenessState = ETunaSweeperEnemyAwarenessState::Unaware;
+	AwarenessStateStartTimeSeconds = 0.0;
+	AwarenessStateEndTimeSeconds = 0.0;
+	SuspicionLocation = FVector::ZeroVector;
 	RangedCombatState = ETunaSweeperRangedCombatState::Idle;
 	RangedCombatStateEndTimeSeconds = 0.0;
 	RangedMoveDirection = FVector::ZeroVector;

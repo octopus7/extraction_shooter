@@ -1,11 +1,11 @@
-# 적 AI 상태 전이
+# 적 AI 인지·전투 상태 전이
 
 기준 구현: `ATunaSweeperEnemyAIController`와 `ATunaSweeperEnemyCharacter`.
-거리는 Unreal 단위인 cm이며, 아래 기본값은 인스턴스별 랜덤 오프셋이 적용되기 전의 값이다.
+거리는 Unreal 단위인 cm이다.
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Idle: Possess / 전투 대상 해제
+    [*] --> Idle: Possess / 전투·인지 해제
 
     state "비전투" as NonCombat {
         Idle: Idle\n1.4~3.7초 정지
@@ -14,16 +14,23 @@ stateDiagram-v2
         Wander --> Idle: 배회 타이머 만료
     }
 
-    Idle --> TargetAcquired: 플레이어 감지
-    Wander --> TargetAcquired: 플레이어 감지
-
-    state "전투 진입 조건" as TargetAcquired {
-        [*] --> Checks
-        Checks: 플레이어 생존\n평면 거리 ≤ 추적 범위(기본 2300cm)\n전방 시야각 100° 이내\n비파괴물로 사선이 막히지 않음
+    state "의심 수색" as Suspicious {
+        Search: Suspicious Search\n소음 또는 피격 방향을 향해 회전·좌우 수색
     }
 
-    TargetAcquired --> Melee: 근접 적
-    TargetAcquired --> RangedOpeningHold: 원거리 적
+    state "발견 경고" as Alerted {
+        Alert: Alerted\n정지·대상 주시·머리 위 ! 표시\n0.85초 반응 + 0.55초 대기
+    }
+
+    Idle --> Search: 청각 감지 / 피격
+    Wander --> Search: 청각 감지 / 피격
+    Search --> Alert: 플레이어를 시야로 확인
+    Search --> Idle: 2.6~3.8초 수색해도 미발견
+
+    Idle --> Alert: 플레이어를 시야로 확인
+    Wander --> Alert: 플레이어를 시야로 확인
+    Alert --> Melee: 경고·대기 완료 (근접 적)
+    Alert --> Ranged: 경고·대기 완료 (원거리 적)
 
     state "근접 전투" as Melee {
         MeleeAdvance: Advance\n거리 > 130cm이면 접근
@@ -34,19 +41,16 @@ stateDiagram-v2
     }
 
     state "원거리 전투" as Ranged {
-        RangedOpeningHold: Opening Hold Fire\n첫 전투 진입 시
-        AdvanceBurst: Advance Burst\n전진 + 약한 좌우 이동
         HoldFire: Hold Fire\n정지, 사격 시도
+        AdvanceBurst: Advance Burst\n전진 + 약한 좌우 이동
         SeekLine: Seek Line of Fire\n좌우 이동으로 사선 탐색
         KeepDistance: Keep Distance\n후퇴 + 좌우 이동
-        RangedOpeningHold --> HoldFire: 초기 홀드 지속
         HoldFire --> AdvanceBurst: 거리 > 1000cm
         AdvanceBurst --> HoldFire: 타이머 만료 / 목표 도달 / 거리 ≤ 1000cm
         HoldFire --> SeekLine: 비파괴물에 사선 차단
         AdvanceBurst --> SeekLine: 비파괴물에 사선 차단
-        SeekLine --> HoldFire: 사선 확보
-        SeekLine --> AdvanceBurst: 탐색 타이머 만료, 거리 > 1000cm
-        SeekLine --> HoldFire: 탐색 타이머 만료, 거리 ≤ 1000cm
+        SeekLine --> HoldFire: 사선 확보 또는 탐색 만료·거리 ≤ 1000cm
+        SeekLine --> AdvanceBurst: 탐색 만료·거리 > 1000cm
         HoldFire --> KeepDistance: 거리 ≤ 430cm
         AdvanceBurst --> KeepDistance: 거리 ≤ 430cm
         SeekLine --> KeepDistance: 거리 ≤ 430cm
@@ -58,11 +62,13 @@ stateDiagram-v2
     Ranged --> Idle: 플레이어 사망 / 대상 없음 / 거리 > 3600cm
 ```
 
-## 전투 갱신과 이탈
+## 인지 규칙
 
-- 대상 감지와 전투 판단은 기본 `0.25초`마다 실행된다. 개체마다 `-0.04~+0.06초`의 오프셋이 적용된다.
-- 전투에 진입한 뒤에는 시야각과 사선으로 전투를 해제하지 않는다. 플레이어가 죽거나 대상이 없어지거나, 평면 거리가 이탈 범위(기본 `3600cm`, 추적 범위보다 작게 설정할 수 없음)를 넘을 때만 비전투 `Idle`로 복귀한다.
-- 모래주머니는 파괴 가능한 사선 차단물이다. 원거리 적은 이를 통과해 사격할 수 있지만, 비파괴 차단물은 `Seek Line of Fire` 상태를 유발한다.
+- 소음은 `UTunaSweeperNoiseSubsystem` 이벤트를 구독해, 기본 청각 범위 `1800cm`와 최소 강도 `0.08`을 만족하면 `Suspicious Search`를 시작한다. 자신의 소음은 무시한다.
+- 시야 확인은 플레이어 생존, 평면 거리 `≤2300cm`, 전방 시야각 `100°` 이내, 비파괴 차단물이 없는 사선을 모두 만족해야 한다.
+- 적이 죽지 않고 피해를 받으면 공격자 방향을 의심 위치로 사용한다. 이 경우에도 즉시 전투로 넘어가지 않고 수색으로 시작한다.
+- 직접 시야로 플레이어를 찾은 경우에도 즉시 공격하지 않는다. `Alerted` 상태에서 이동을 멈추고 플레이어를 바라보며 느낌표를 표시한 뒤, 총 `1.4초`가 지나야 실제 전투로 진입한다.
+- `SM_Enemy_AlertExclamation` 메시를 적의 머리 위에 붙이고, 표시 중에는 로컬 플레이어를 향하는 빌보드로 회전한다.
 
 ## 원거리 거리별 동작
 
@@ -73,10 +79,9 @@ stateDiagram-v2
 | `>1000cm` | `Advance Burst` | 250~400cm(중거리) 또는 400~600cm(장거리) 전진 |
 | 비파괴물에 사선 차단 | `Seek Line of Fire` | 0.8~1.4초 좌우 이동 |
 
-원거리 적은 전투 최초 진입 시 `Opening Hold Fire`에 들어가며, 이때에는 추적 범위 안이면 즉시 사격을 시도할 수 있다. 이후 `Hold Fire` 사격은 원거리 공격 범위(기본적으로 선호 최대 거리 `1000cm` 이상) 안에서만 시도한다.
-
 ## 구현 위치
 
-- 상태 갱신과 전이: `TunaSweeper/Source/TunaSweeper/Private/AI/TunaSweeperEnemyAIController.cpp`
-- 상태 열거형·기본값: `TunaSweeper/Source/TunaSweeper/Public/AI/TunaSweeperEnemyAIController.h`
-- 근접 적 판별 및 근접 수치: `TunaSweeper/Source/TunaSweeper/Private/AI/TunaSweeperEnemyCharacter.cpp`
+- 인지·전투 상태: `TunaSweeper/Source/TunaSweeper/Private/AI/TunaSweeperEnemyAIController.cpp`
+- 인지 기본값: `TunaSweeper/Source/TunaSweeper/Public/AI/TunaSweeperEnemyAIController.h`
+- 피격 의심과 느낌표 표시: `TunaSweeper/Source/TunaSweeper/Private/AI/TunaSweeperEnemyCharacter.cpp`
+- 느낌표 메시: `TunaSweeper/Content/Characters/Enemy/SM_Enemy_AlertExclamation.uasset`

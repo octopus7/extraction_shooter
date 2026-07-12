@@ -20,6 +20,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Materials/MaterialInterface.h"
 #include "Materials/MaterialInstanceDynamic.h"
+#include "Math/RotationMatrix.h"
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraSystem.h"
@@ -64,7 +65,10 @@ namespace
 	const TCHAR* EnemyVoxelBodyMeshPath = TEXT("/Game/Characters/Enemy/SM_Enemy_VoxelBody.SM_Enemy_VoxelBody");
 	const TCHAR* EnemyVoxelForwardMarkerMeshPath =
 		TEXT("/Game/Characters/Enemy/SM_Enemy_VoxelForwardMarker.SM_Enemy_VoxelForwardMarker");
+	const TCHAR* EnemyAlertIndicatorMeshPath =
+		TEXT("/Game/Characters/Enemy/SM_Enemy_AlertExclamation.SM_Enemy_AlertExclamation");
 	const TCHAR* EnemyVoxelMaterialPath = TEXT("/Game/Prototype/M_Voxel_VertexColor.M_Voxel_VertexColor");
+	const TCHAR* EnemyAlertIndicatorMaterialPath = TEXT("/Game/Characters/Enemy/M_Enemy_Red.M_Enemy_Red");
 
 	float GetRandomizedEnemyValue(float BaseValue, const FVector2D& OffsetRange, float MinValue)
 	{
@@ -138,6 +142,16 @@ ATunaSweeperEnemyCharacter::ATunaSweeperEnemyCharacter()
 		ForwardMarkerMesh->SetStaticMesh(CylinderMesh.Object);
 	}
 
+	AlertIndicatorMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("AlertIndicatorMesh"));
+	AlertIndicatorMesh->SetupAttachment(RootComponent);
+	AlertIndicatorMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	AlertIndicatorMesh->SetCastShadow(false);
+	AlertIndicatorMesh->SetReceivesDecals(false);
+	AlertIndicatorMesh->SetRelativeLocation(FVector(0.0f, 0.0f, 176.0f));
+	AlertIndicatorMesh->SetRelativeScale3D(FVector(0.9f));
+	AlertIndicatorMesh->SetVisibility(false);
+	AlertIndicatorMesh->SetHiddenInGame(true);
+
 	EnemyWeaponAttachPoint = CreateDefaultSubobject<USceneComponent>(TEXT("EnemyWeaponAttachPoint"));
 	EnemyWeaponAttachPoint->SetupAttachment(RootComponent);
 	EnemyWeaponAttachPoint->SetRelativeLocation(FVector(48.0f, 0.0f, 55.0f));
@@ -199,6 +213,7 @@ void ATunaSweeperEnemyCharacter::Tick(float DeltaSeconds)
 	TickFootstepNoise(DeltaSeconds);
 	CompleteEnemyReloadIfReady();
 	UpdateEnemyReloadWidget();
+	UpdateAlertIndicatorFacing();
 }
 
 void ATunaSweeperEnemyCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -225,6 +240,22 @@ float ATunaSweeperEnemyCharacter::TakeDamage(
 
 	const float AppliedDamage = FMath::Min(CurrentHealth, DamageAmount);
 	CurrentHealth = FMath::Max(0.0f, CurrentHealth - DamageAmount);
+	if (CurrentHealth > 0.0f)
+	{
+		AActor* SuspectedActor = EventInstigator ? EventInstigator->GetPawn() : nullptr;
+		if (!SuspectedActor && DamageCauser)
+		{
+			SuspectedActor = DamageCauser->GetOwner() ? DamageCauser->GetOwner() : DamageCauser;
+		}
+
+		if (SuspectedActor)
+		{
+			if (ATunaSweeperEnemyAIController* EnemyController = Cast<ATunaSweeperEnemyAIController>(GetController()))
+			{
+				EnemyController->NotifySuspicionAtLocation(SuspectedActor->GetActorLocation());
+			}
+		}
+	}
 	if (CurrentHealth <= 0.0f)
 	{
 		HandleDeath(EventInstigator, DamageCauser);
@@ -299,6 +330,16 @@ void ATunaSweeperEnemyCharacter::ApplyVoxelVisualMeshes()
 			ForwardMarkerMesh->SetRelativeRotation(FRotator::ZeroRotator);
 			ForwardMarkerMesh->SetRelativeScale3D(FVector::OneVector);
 		}
+	}
+
+	if (AlertIndicatorMesh)
+	{
+		if (UStaticMesh* AlertMesh = LoadObject<UStaticMesh>(nullptr, EnemyAlertIndicatorMeshPath))
+		{
+			AlertIndicatorMesh->SetStaticMesh(AlertMesh);
+		}
+		AlertIndicatorMesh->SetRelativeLocation(FVector(0.0f, 0.0f, 176.0f));
+		AlertIndicatorMesh->SetRelativeScale3D(FVector(0.9f));
 	}
 }
 
@@ -389,6 +430,43 @@ void ATunaSweeperEnemyCharacter::InitializeEnemyWeaponRuntime()
 		{
 			EnemyWeapon->ConfigureRuntimeSpreadRecoil(EnemyWeaponTypeTag, RecoilDefinition);
 		}
+	}
+
+}
+
+void ATunaSweeperEnemyCharacter::SetAlertIndicatorVisible(bool bVisible)
+{
+	if (!AlertIndicatorMesh)
+	{
+		return;
+	}
+
+	AlertIndicatorMesh->SetVisibility(bVisible, true);
+	AlertIndicatorMesh->SetHiddenInGame(!bVisible, true);
+	if (bVisible)
+	{
+		UpdateAlertIndicatorFacing();
+	}
+}
+
+void ATunaSweeperEnemyCharacter::UpdateAlertIndicatorFacing()
+{
+	if (!AlertIndicatorMesh || !AlertIndicatorMesh->IsVisible())
+	{
+		return;
+	}
+
+	APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(this, 0);
+	if (!PlayerPawn)
+	{
+		return;
+	}
+
+	FVector DirectionToPlayer = PlayerPawn->GetActorLocation() - AlertIndicatorMesh->GetComponentLocation();
+	DirectionToPlayer.Z = 0.0f;
+	if (!DirectionToPlayer.IsNearlyZero())
+	{
+		AlertIndicatorMesh->SetWorldRotation(FRotationMatrix::MakeFromY(DirectionToPlayer.GetSafeNormal()).Rotator());
 	}
 }
 
@@ -536,6 +614,7 @@ void ATunaSweeperEnemyCharacter::TickFootstepNoise(float DeltaSeconds)
 				this);
 		}
 	}
+
 }
 
 int32 ATunaSweeperEnemyCharacter::ResolveLootLoadedAmmoCount(
@@ -1067,5 +1146,13 @@ void ATunaSweeperEnemyCharacter::ApplyVisualMaterials()
 	else if (ForwardMarkerMesh && LoadedBodyMaterial)
 	{
 		ForwardMarkerMesh->SetMaterial(0, LoadedBodyMaterial);
+	}
+
+	if (AlertIndicatorMesh)
+	{
+		if (UMaterialInterface* AlertMaterial = LoadObject<UMaterialInterface>(nullptr, EnemyAlertIndicatorMaterialPath))
+		{
+			AlertIndicatorMesh->SetMaterial(0, AlertMaterial);
+		}
 	}
 }

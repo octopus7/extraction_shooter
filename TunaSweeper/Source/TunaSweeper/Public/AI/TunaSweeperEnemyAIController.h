@@ -19,6 +19,14 @@ enum class ETunaSweeperNonCombatState : uint8
 	Wander
 };
 
+enum class ETunaSweeperEnemyAwarenessState : uint8
+{
+	Unaware,
+	Suspicious,
+	Alerted,
+	Combat
+};
+
 enum class ETunaSweeperLineOfFireResult : uint8
 {
 	Clear,
@@ -48,9 +56,13 @@ public:
 	/** Returns runtime AI data used exclusively by the local combat debug presentation. */
 	bool GetCombatDebugSnapshot(FTunaSweeperEnemyCombatDebugSnapshot& OutSnapshot) const;
 
+	/** Makes a non-engaged enemy turn toward a possible threat and search for it. */
+	void NotifySuspicionAtLocation(const FVector& SuspicionLocation);
+
 protected:
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void OnPossess(APawn* InPawn) override;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI")
@@ -70,6 +82,27 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI|Perception", meta = (ClampMin = "0.0", ClampMax = "360.0", UIMin = "0.0", UIMax = "360.0"))
 	float CombatVisionAngleDegrees = 100.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI|Perception", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float HearingRange = 1800.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI|Perception", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float HearingSensitivity = 1.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI|Perception", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float HearingMinimumStrength = 0.08f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI|Suspicion")
+	FVector2D SuspicionSearchSeconds = FVector2D(2.6f, 3.8f);
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI|Suspicion", meta = (ClampMin = "0.0", ClampMax = "180.0", UIMin = "0.0", UIMax = "180.0"))
+	float SearchSweepHalfAngleDegrees = 48.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI|Alert", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float AlertReactionSeconds = 0.85f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI|Alert", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float AlertPreCombatDelaySeconds = 0.55f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI|NonCombat")
 	FVector2D IdleSeconds = FVector2D(1.4f, 3.7f);
@@ -167,9 +200,13 @@ protected:
 private:
 	void RandomizeCombatTuning();
 	void UpdateAttackTarget();
+	void UpdateAwarenessState(float DeltaSeconds);
 	void UpdateNonCombatState(float DeltaSeconds);
 	void StartNonCombatIdle();
 	void StartNonCombatWander();
+	void StartSuspicion(const FVector& SuspicionLocation);
+	void StartAlerted(AActor* TargetActor);
+	void EnterCombat();
 	void UpdateApproachState(float DistanceToTarget, float InApproachStartRange, float InApproachStopRange);
 	void MoveTowardCurrentTarget(float DeltaSeconds);
 	void UpdateRangedCombatState(float DistanceToTarget, AActor* TargetActor, class ATunaSweeperEnemyCharacter* EnemyCharacter);
@@ -181,6 +218,7 @@ private:
 	void TryRangedAttack(float DistanceToTarget, AActor* TargetActor, class ATunaSweeperEnemyCharacter* EnemyCharacter, ETunaSweeperLineOfFireResult LineOfFireResult);
 	ETunaSweeperLineOfFireResult EvaluateLineOfFire(AActor* TargetActor) const;
 	bool CanAcquireCombatTarget(AActor* TargetActor, float DistanceToTarget) const;
+	void HandleNoiseReported(const struct FTunaSweeperNoiseEvent& NoiseEvent);
 	void DrawCombatDebug() const;
 	float ResolveRangedAttackRange() const;
 	float ResolveRangedAdvanceDistance(float DistanceToTarget) const;
@@ -207,11 +245,15 @@ private:
 	double LastAttackTimeSeconds = -1000.0;
 	double NonCombatStateEndTimeSeconds = 0.0;
 	double RangedCombatStateEndTimeSeconds = 0.0;
+	double AwarenessStateStartTimeSeconds = 0.0;
+	double AwarenessStateEndTimeSeconds = 0.0;
 	FVector NonCombatFacingDirection = FVector::ForwardVector;
+	FVector SuspicionLocation = FVector::ZeroVector;
 	FVector RangedMoveDirection = FVector::ZeroVector;
 	FVector RangedMoveGoal = FVector::ZeroVector;
 	ETunaSweeperNonCombatState NonCombatState = ETunaSweeperNonCombatState::Idle;
 	ETunaSweeperRangedCombatState RangedCombatState = ETunaSweeperRangedCombatState::Idle;
+	ETunaSweeperEnemyAwarenessState AwarenessState = ETunaSweeperEnemyAwarenessState::Unaware;
 	bool bIsCombatEngaged = false;
 	bool bIsClosingDistance = false;
 	bool bIsOpeningHold = false;

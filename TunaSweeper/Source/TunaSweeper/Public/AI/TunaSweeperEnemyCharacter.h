@@ -45,6 +45,7 @@ public:
 	float GetMeleeTrackingRange() const;
 	float GetMeleeAttackCooldownSeconds() const;
 	bool TryApplyBleedTo(AActor* TargetActor) const;
+	void SetAlertIndicatorVisible(bool bVisible);
 
 	void ConfigureSpawnData(
 		const TSoftObjectPtr<UMaterialInterface>& InBodyMaterial,
@@ -71,6 +72,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UStaticMeshComponent> ForwardMarkerMesh;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UStaticMeshComponent> AlertIndicatorMesh;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<USceneComponent> EnemyWeaponAttachPoint;
@@ -185,6 +189,7 @@ protected:
 private:
 	void ApplyVoxelVisualMeshes();
 	void ApplyVisualMaterials();
+	void UpdateAlertIndicatorFacing();
 	void InitializeEnemyWeaponRuntime();
 	bool EnsureEnemyWeaponActor();
 	bool StartEnemyReload();
