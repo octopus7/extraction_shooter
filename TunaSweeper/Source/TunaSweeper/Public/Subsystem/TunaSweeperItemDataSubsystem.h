@@ -84,6 +84,9 @@ struct TUNASWEEPER_API FTunaSweeperItemDefinition
 	FName AmmoTypeTag;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
+	FName ImpactProfileId;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
 	FName ProjectileHitEffectId;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item", meta = (ClampMin = "0", UIMin = "0"))

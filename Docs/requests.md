@@ -4993,3 +4993,15 @@
 - 프로젝트 FM 도구로 발사, 재장전 시작, 재장전 완료 SoundWave와 편집 가능한 WAV 원본을 생성한 것.
 - 발사체 생성 성공 시에만 발사 연출을 한 번 재생하고, 실제 재장전 시작·정상 완료 시에만 해당 SFX를 재생하도록 구현한 것.
 - `TunaSweeperEditor Win64 Development` UE 5.7 빌드를 통과시키고, 무인 에디터 셋업으로 DA·SFX·BP 참조를 저장한 뒤 Unreal Editor를 다시 실행한 것.
+
+## 2026-07-12 18:57:12 (소요시간: 00:03:22)
+
+- `UE5_Impact_Effect_Architecture_for_Codex.md`의 탄환 피격 이펙트 아키텍처를 TunaSweeper의 현재 투사체·탄약·피격 이펙트 흐름과 대조해 적용 방안을 검토한 것.
+- 구현 변경 없이, 월드 서브시스템의 Resolver 책임과 기존 `DA_ProjectileHitEffects` 마이그레이션 단계를 정리한 것.
+
+## 2026-07-12 19:01:10 (소요시간: 00:12:22)
+
+- `UTunaSweeperImpactEffectSubsystem` 월드 서브시스템으로 탄약 Impact Profile, Physical Surface, 대상 Response Tag를 해석해 Niagara·사운드·데칼을 생성하는 피격 이펙트 경로를 구현한 것.
+- 탄약 JSON의 `impact_profile_id`를 투사체까지 전달하고, 일반탄과 철갑탄에 `DA_Impact_Ballistic`/`DA_Impact_BallisticAP` 프로필을 연결한 것. 기존 `hit.red_burst`는 설정 누락 시 호환 fallback으로 유지한 것.
+- Physical Surface와 Impact Response Gameplay Tag를 설정하고, 프로필 Data Asset 두 개를 생성한 것.
+- `TunaSweeperEditor Win64 Development` UE 5.7 빌드를 성공시키고 Unreal Editor를 열어 둔 것.

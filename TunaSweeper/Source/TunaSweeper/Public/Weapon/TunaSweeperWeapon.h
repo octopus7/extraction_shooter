@@ -34,6 +34,7 @@ public:
 	bool FireWithAimIntent(
 		const FVector& AimDirection,
 		APawn* InstigatorPawn,
+		FName ImpactProfileId,
 		FName ProjectileHitEffectId,
 		FName WeaponTypeTag,
 		float ProjectileDamageMultiplier = 1.0f,
@@ -135,6 +136,7 @@ protected:
 		TSubclassOf<ATunaSweeperProjectile> ProjectileClassToSpawn,
 		const FVector& ShotDirection,
 		APawn* InstigatorPawn,
+		FName ImpactProfileId,
 		FName ProjectileHitEffectId,
 		float ProjectileDamageMultiplier,
 		int32 ProjectileDamageBonus,

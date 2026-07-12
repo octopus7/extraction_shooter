@@ -203,6 +203,7 @@ private:
 
 	float CurrentHealth = 30.0f;
 	FName EnemyWeaponTypeTag = NAME_None;
+	FName EnemyImpactProfileId = NAME_None;
 	FName EnemyProjectileHitEffectId = NAME_None;
 	float EnemyProjectileDamageMultiplier = 1.0f;
 	float EnemyReloadSeconds = 1.8f;

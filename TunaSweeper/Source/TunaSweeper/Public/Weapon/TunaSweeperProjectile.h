@@ -23,6 +23,8 @@ public:
 
 	void SetDamageAmount(float InDamageAmount) { DamageAmount = FMath::Max(0.0f, InDamageAmount); }
 	float GetDamageAmount() const { return DamageAmount; }
+	void SetImpactProfileId(FName InImpactProfileId) { ImpactProfileId = InImpactProfileId; }
+	FName GetImpactProfileId() const { return ImpactProfileId; }
 	void SetHitEffectId(FName InHitEffectId) { HitEffectId = InHitEffectId; }
 	FName GetHitEffectId() const { return HitEffectId; }
 	void SetAimIntent(
@@ -104,6 +106,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Projectile|Camera", meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float CameraHitReactionScale = 1.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Projectile|Hit Effect")
+	FName ImpactProfileId = NAME_None;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Projectile|Hit Effect")
 	FName HitEffectId = NAME_None;

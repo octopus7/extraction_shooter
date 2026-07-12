@@ -689,6 +689,7 @@ bool UTunaSweeperItemDataSubsystem::LoadItemTableJson()
 		FString WeaponTypeTag;
 		FString AttachmentSlotTag;
 		FString AmmoTypeTag;
+		FString ImpactProfileId;
 		FString ProjectileHitEffectId;
 		if (!(*JsonObject)->TryGetNumberField(TEXT("id"), NumericId) ||
 			!(*JsonObject)->TryGetStringField(TEXT("name_string_key"), NameStringKey) ||
@@ -761,6 +762,10 @@ bool UTunaSweeperItemDataSubsystem::LoadItemTableJson()
 		if ((*JsonObject)->TryGetStringField(TEXT("ammo_type_tag"), AmmoTypeTag))
 		{
 			ItemDefinition.AmmoTypeTag = FName(*AmmoTypeTag.TrimStartAndEnd());
+		}
+		if ((*JsonObject)->TryGetStringField(TEXT("impact_profile_id"), ImpactProfileId))
+		{
+			ItemDefinition.ImpactProfileId = FName(*ImpactProfileId.TrimStartAndEnd());
 		}
 		if ((*JsonObject)->TryGetStringField(TEXT("projectile_hit_effect_id"), ProjectileHitEffectId) ||
 			(*JsonObject)->TryGetStringField(TEXT("hit_effect_id"), ProjectileHitEffectId))

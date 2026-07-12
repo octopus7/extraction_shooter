@@ -184,6 +184,7 @@ void ATunaSweeperTopDownCharacter::FireWeapon()
 	}
 
 	FName ProjectileHitEffectId = NAME_None;
+	FName ImpactProfileId = NAME_None;
 	FName WeaponTypeTag = NAME_None;
 	float ProjectileDamageMultiplier = 1.0f;
 	int32 ProjectileDamageBonus = 0;
@@ -202,6 +203,7 @@ void ATunaSweeperTopDownCharacter::FireWeapon()
 				FTunaSweeperItemDefinition AmmoDefinition;
 				if (ItemDataSubsystem->TryGetItemDefinition(LoadedAmmoItemId, AmmoDefinition))
 				{
+					ImpactProfileId = AmmoDefinition.ImpactProfileId;
 					ProjectileHitEffectId = AmmoDefinition.ProjectileHitEffectId;
 					ProjectileDamageMultiplier =
 						TunaSweeperDataValues::ToRatioFloat(AmmoDefinition.ProjectileDamageMultiplier);
@@ -223,6 +225,7 @@ void ATunaSweeperTopDownCharacter::FireWeapon()
 	const bool bFired = EquippedWeapon->FireWithAimIntent(
 		AimDirection,
 		this,
+		ImpactProfileId,
 		ProjectileHitEffectId,
 		WeaponTypeTag,
 		ProjectileDamageMultiplier,

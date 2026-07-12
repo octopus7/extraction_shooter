@@ -21,6 +21,7 @@
 #include "Materials/MaterialInterface.h"
 #include "Player/TunaSweeperPlayerController.h"
 #include "ProceduralMeshComponent.h"
+#include "Subsystem/TunaSweeperImpactEffectSubsystem.h"
 #include "TunaSweeperCollisionChannels.h"
 #include "UI/TunaSweeperGameHudWidget.h"
 #include "UObject/ConstructorHelpers.h"
@@ -366,7 +367,7 @@ void ATunaSweeperProjectile::SpawnHitEffect(
 	AActor* OtherActor,
 	UPrimitiveComponent* OtherComp) const
 {
-	if (HitEffectId.IsNone())
+	if (ImpactProfileId.IsNone() && HitEffectId.IsNone())
 	{
 		return;
 	}
@@ -377,59 +378,17 @@ void ATunaSweeperProjectile::SpawnHitEffect(
 		return;
 	}
 
-	FTunaSweeperProjectileHitEffectDefinition HitEffectDefinition;
-	if (const UTunaSweeperGameInstance* TunaGameInstance = World->GetGameInstance<UTunaSweeperGameInstance>())
+	FHitResult EffectHit = Hit;
+	EffectHit.ImpactPoint = ResolveHitEffectLocation(Hit, OtherActor);
+	if (UTunaSweeperImpactEffectSubsystem* ImpactSubsystem =
+		World->GetSubsystem<UTunaSweeperImpactEffectSubsystem>())
 	{
-		TunaGameInstance->TryGetProjectileHitEffectDefinition(HitEffectId, HitEffectDefinition);
-	}
-
-	TSubclassOf<ATunaSweeperProjectileHitBurstActor> HitEffectClass =
-		HitEffectDefinition.EffectActorClass.LoadSynchronous();
-	if (!HitEffectClass && HitEffectId == FName(TEXT("hit.red_burst")))
-	{
-		HitEffectClass = ATunaSweeperProjectileHitBurstActor::StaticClass();
-		HitEffectDefinition.BurstColor = FLinearColor(1.0f, 0.03f, 0.0f, 1.0f);
-		HitEffectDefinition.SpawnScale = FVector::OneVector;
-		HitEffectDefinition.SurfaceOffsetCm = 1.0f;
-	}
-
-	if (!HitEffectClass)
-	{
-		return;
-	}
-
-	FVector EffectNormal = Hit.ImpactNormal.GetSafeNormal();
-	if (EffectNormal.IsNearlyZero())
-	{
-		EffectNormal = -GetVelocity().GetSafeNormal();
-	}
-	if (EffectNormal.IsNearlyZero())
-	{
-		EffectNormal = -GetActorForwardVector();
-	}
-
-	const FVector EffectLocation =
-		ResolveHitEffectLocation(Hit, OtherActor) +
-		EffectNormal * FMath::Max(0.0f, HitEffectDefinition.SurfaceOffsetCm);
-	const FRotator EffectRotation = EffectNormal.Rotation();
-	const FVector EffectScale = HitEffectDefinition.SpawnScale.IsNearlyZero()
-		? FVector::OneVector
-		: HitEffectDefinition.SpawnScale;
-
-	FActorSpawnParameters SpawnParameters;
-	SpawnParameters.Owner = GetOwner();
-	SpawnParameters.Instigator = GetInstigator();
-	SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-
-	ATunaSweeperProjectileHitBurstActor* HitEffectActor = World->SpawnActor<ATunaSweeperProjectileHitBurstActor>(
-		HitEffectClass,
-		EffectLocation,
-		EffectRotation,
-		SpawnParameters);
-	if (HitEffectActor)
-	{
-		HitEffectActor->SetActorScale3D(EffectScale);
-		HitEffectActor->SetBurstColor(HitEffectDefinition.BurstColor);
+		ImpactSubsystem->ResolveAndSpawnImpactEffect(
+			ImpactProfileId,
+			HitEffectId,
+			EffectHit,
+			GetOwner(),
+			GetInstigator());
 	}
 }
 
@@ -499,9 +458,10 @@ void ATunaSweeperProjectile::HandleHit(
 		}
 	}
 
+	SpawnHitEffect(Hit, OtherActor, OtherComp);
+
 	if (AppliedDamage > 0.0f)
 	{
-		SpawnHitEffect(Hit, OtherActor, OtherComp);
 		if (ShouldShowDamageNumberForActor(OtherActor))
 		{
 			if (ATunaSweeperPlayerController* TunaPlayerController =

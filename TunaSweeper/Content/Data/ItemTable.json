@@ -154,6 +154,7 @@
     "icon_file_name": "T_UIIcon_PistolAmmo.uasset",
     "category_tag": "item.category.ammo",
     "ammo_type_tag": "ammo.type.pistol",
+    "impact_profile_id": "DA_Impact_Ballistic",
     "projectile_hit_effect_id": "hit.red_burst",
     "projectile_damage_multiplier": 10000,
     "projectile_damage_bonus": 1
@@ -168,6 +169,7 @@
     "icon_file_name": "T_UIIcon_RifleAmmo.uasset",
     "category_tag": "item.category.ammo",
     "ammo_type_tag": "ammo.type.rifle",
+    "impact_profile_id": "DA_Impact_Ballistic",
     "projectile_hit_effect_id": "hit.red_burst",
     "projectile_damage_multiplier": 10000,
     "projectile_damage_bonus": 2
@@ -182,6 +184,7 @@
     "icon_file_name": "T_UIIcon_ShotgunAmmo.uasset",
     "category_tag": "item.category.ammo",
     "ammo_type_tag": "ammo.type.shotgun",
+    "impact_profile_id": "DA_Impact_Ballistic",
     "projectile_hit_effect_id": "hit.red_burst",
     "projectile_damage_multiplier": 10000,
     "projectile_damage_bonus": 1
@@ -196,6 +199,7 @@
     "icon_file_name": "T_UIIcon_RustyPistolAmmo.uasset",
     "category_tag": "item.category.ammo",
     "ammo_type_tag": "ammo.type.pistol",
+    "impact_profile_id": "DA_Impact_Ballistic",
     "projectile_hit_effect_id": "hit.red_burst",
     "projectile_damage_multiplier": 8500,
     "projectile_damage_bonus": 0
@@ -210,6 +214,7 @@
     "icon_file_name": "T_UIIcon_PistolAPAmmo.uasset",
     "category_tag": "item.category.ammo",
     "ammo_type_tag": "ammo.type.pistol",
+    "impact_profile_id": "DA_Impact_BallisticAP",
     "projectile_hit_effect_id": "hit.red_burst",
     "projectile_damage_multiplier": 11000,
     "projectile_damage_bonus": 3
@@ -224,6 +229,7 @@
     "icon_file_name": "T_UIIcon_RustyRifleAmmo.uasset",
     "category_tag": "item.category.ammo",
     "ammo_type_tag": "ammo.type.rifle",
+    "impact_profile_id": "DA_Impact_Ballistic",
     "projectile_hit_effect_id": "hit.red_burst",
     "projectile_damage_multiplier": 8500,
     "projectile_damage_bonus": 1
@@ -238,6 +244,7 @@
     "icon_file_name": "T_UIIcon_RifleAPAmmo.uasset",
     "category_tag": "item.category.ammo",
     "ammo_type_tag": "ammo.type.rifle",
+    "impact_profile_id": "DA_Impact_BallisticAP",
     "projectile_hit_effect_id": "hit.red_burst",
     "projectile_damage_multiplier": 11500,
     "projectile_damage_bonus": 5
@@ -252,6 +259,7 @@
     "icon_file_name": "T_UIIcon_RustyShotgunAmmo.uasset",
     "category_tag": "item.category.ammo",
     "ammo_type_tag": "ammo.type.shotgun",
+    "impact_profile_id": "DA_Impact_Ballistic",
     "projectile_hit_effect_id": "hit.red_burst",
     "projectile_damage_multiplier": 8500,
     "projectile_damage_bonus": 0
@@ -266,6 +274,7 @@
     "icon_file_name": "T_UIIcon_ShotgunAPAmmo.uasset",
     "category_tag": "item.category.ammo",
     "ammo_type_tag": "ammo.type.shotgun",
+    "impact_profile_id": "DA_Impact_BallisticAP",
     "projectile_hit_effect_id": "hit.red_burst",
     "projectile_damage_multiplier": 11000,
     "projectile_damage_bonus": 4

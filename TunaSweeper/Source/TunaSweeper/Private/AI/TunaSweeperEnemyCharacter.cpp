@@ -309,6 +309,7 @@ void ATunaSweeperEnemyCharacter::InitializeEnemyWeaponRuntime()
 
 	bEnemyWeaponRuntimeInitialized = true;
 	EnemyWeaponTypeTag = NAME_None;
+	EnemyImpactProfileId = NAME_None;
 	EnemyProjectileHitEffectId = ProjectileHitEffectId;
 	EnemyProjectileDamageMultiplier = 1.0f;
 	EnemyProjectileDamageBonus = 0;
@@ -365,6 +366,7 @@ void ATunaSweeperEnemyCharacter::InitializeEnemyWeaponRuntime()
 	EnemyReloadSeconds = WeaponDefinition.ReloadSeconds > 0.0f
 		? WeaponDefinition.ReloadSeconds
 		: DefaultEnemyReloadSeconds;
+	EnemyImpactProfileId = AmmoDefinition.ImpactProfileId;
 	EnemyProjectileHitEffectId = AmmoDefinition.ProjectileHitEffectId;
 	EnemyProjectileDamageMultiplier = TunaSweeperDataValues::ToRatioFloat(AmmoDefinition.ProjectileDamageMultiplier);
 	EnemyProjectileDamageBonus = AmmoDefinition.ProjectileDamageBonus;
@@ -739,6 +741,7 @@ bool ATunaSweeperEnemyCharacter::FireProjectileAt(AActor* TargetActor)
 	const bool bFired = EnemyWeapon->FireWithAimIntent(
 		FireDirection,
 		this,
+		EnemyImpactProfileId,
 		EnemyProjectileHitEffectId,
 		EnemyWeaponTypeTag,
 		ProjectileDamageScale * EnemyProjectileDamageMultiplier,
