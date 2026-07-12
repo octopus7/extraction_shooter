@@ -152,6 +152,12 @@ public:
 		const FVector& DirectionFromListener,
 		float Strength);
 
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD|Enemy Combat Debug")
+	void SetEnemyCombatDebugVisible(bool bVisible) { bShowEnemyCombatDebug = bVisible; }
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|HUD|Enemy Combat Debug")
+	bool IsEnemyCombatDebugVisible() const { return bShowEnemyCombatDebug; }
+
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|HUD")
 	UTunaSweeperHudQuickSlotBarWidget* GetQuickSlotBarWidget() const { return QuickSlotBarWidget; }
 
@@ -313,6 +319,12 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Noise Debug")
 	FLinearColor HeadphoneDebugNoiseDirectionSolidCircleColor = FLinearColor(1.0f, 0.02f, 0.01f, 0.95f);
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Enemy Combat Debug")
+	bool bShowEnemyCombatDebug = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Enemy Combat Debug", meta = (ClampMin = "32.0", UIMin = "32.0"))
+	float EnemyCombatDebugOrbitRadius = 240.0f;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Noise", meta = (ClampMin = "16.0", UIMin = "16.0"))
 	float HeadphoneNoiseRingRadius = 244.0f;
 
@@ -440,6 +452,10 @@ private:
 		bool bTrackSourceLocation);
 	void TickHeadphoneNoiseRipples(float InDeltaTime);
 	void DrawHeadphoneNoiseRipples(
+		const FGeometry& AllottedGeometry,
+		FSlateWindowElementList& OutDrawElements,
+		int32& InOutLayerId) const;
+	void DrawEnemyCombatDebugOverlay(
 		const FGeometry& AllottedGeometry,
 		FSlateWindowElementList& OutDrawElements,
 		int32& InOutLayerId) const;

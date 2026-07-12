@@ -308,6 +308,14 @@ namespace TunaSweeperEditorSetup
 				return TunaSweeperEditorSetup::EnsureWeaponSpreadRecoilAssets();
 			});
 
+		FTunaSweeperEditorRunOnce::Run(
+			TunaSweeperEditorSetup::EnemyCombatDebugAssetsTaskId,
+			[]()
+			{
+				return TunaSweeperEditorSetup::EnsureEnemyCombatDebugInputAssets() &&
+					TunaSweeperEditorSetup::EnsureEnemySensorDebugMaterial() != nullptr;
+			});
+
 		const bool bWeaponPresentationTaskRan = FTunaSweeperEditorRunOnce::Run(
 			TunaSweeperEditorSetup::WeaponPresentationAssetTaskId,
 			[]()

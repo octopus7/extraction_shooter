@@ -24,6 +24,7 @@ namespace TunaSweeperEditorSetup
 
 	bool SaveAsset(UObject* Asset);
 	UMaterial* EnsureLedExpressionMaterial();
+	UMaterial* EnsureEnemySensorDebugMaterial();
 
 	void AddBoxQuad(
 		FMeshDescription& MeshDescription,
@@ -2100,6 +2101,28 @@ namespace TunaSweeperEditorSetup
 		return SaveAsset(GameInstanceBlueprint);
 	}
 
+	bool EnsureEnemyCombatDebugInputAssets()
+	{
+		UInputAction* ToggleAction = EnsureInputAction(
+			ToggleEnemyCombatDebugActionName,
+			EInputActionValueType::Boolean,
+			EInputActionAccumulationBehavior::TakeHighestAbsoluteValue);
+		UInputMappingContext* MappingContext = LoadObject<UInputMappingContext>(
+			nullptr,
+			*GetAssetObjectPath(InputAssetPath, MappingContextName));
+		if (!ToggleAction || !MappingContext)
+		{
+			return false;
+		}
+		if (!HasInputMapping(MappingContext, ToggleAction, EKeys::F8))
+		{
+			MappingContext->MapKey(ToggleAction, EKeys::F8);
+		}
+		MappingContext->ContextDescription = FText::FromString(TEXT("TunaSweeper player input including enemy combat debug toggle."));
+		MappingContext->MarkPackageDirty();
+		return SaveAsset(MappingContext);
+	}
+
 	bool EnsureWeaponPresentationAssets()
 	{
 		FString FireWavPath;
@@ -2289,6 +2312,45 @@ namespace TunaSweeperEditorSetup
 
 		return RedMaterial && GreenMaterial && BlueMaterial && SightlineMaterial &&
 			CardboardMaterial && WoodMaterial && MetalMaterial && SupplyMaterial;
+	}
+
+	UMaterial* EnsureEnemySensorDebugMaterial()
+	{
+		const FString ObjectPath = GetAssetObjectPath(EnemyAssetPath, EnemySensorDebugMaterialAssetName);
+		UMaterial* Material = LoadObject<UMaterial>(nullptr, *ObjectPath);
+		if (!Material)
+		{
+			UMaterialFactoryNew* MaterialFactory = NewObject<UMaterialFactoryNew>();
+			FAssetToolsModule& AssetToolsModule = FModuleManager::LoadModuleChecked<FAssetToolsModule>(TEXT("AssetTools"));
+			Material = Cast<UMaterial>(AssetToolsModule.Get().CreateAsset(
+				EnemySensorDebugMaterialAssetName, EnemyAssetPath, UMaterial::StaticClass(), MaterialFactory));
+			if (!Material)
+			{
+				return nullptr;
+			}
+			FAssetRegistryModule::AssetCreated(Material);
+		}
+
+		Material->Modify();
+		Material->GetExpressionCollection().Empty();
+		Material->BlendMode = BLEND_Translucent;
+		Material->SetShadingModel(MSM_Unlit);
+		Material->TwoSided = true;
+		UMaterialEditorOnlyData* MaterialEditorOnly = Material->GetEditorOnlyData();
+		if (!MaterialEditorOnly)
+		{
+			return nullptr;
+		}
+		UMaterialExpressionVertexColor* VertexColor = NewObject<UMaterialExpressionVertexColor>(Material);
+		VertexColor->Material = Material;
+		VertexColor->MaterialExpressionEditorX = -320;
+		Material->GetExpressionCollection().AddExpression(VertexColor);
+		MaterialEditorOnly->BaseColor.Connect(0, VertexColor);
+		MaterialEditorOnly->EmissiveColor.Connect(0, VertexColor);
+		MaterialEditorOnly->Opacity.Connect(4, VertexColor);
+		Material->PostEditChange();
+		Material->MarkPackageDirty();
+		return SaveAsset(Material) ? Material : nullptr;
 	}
 
 	bool EnsureRollingBomberBodyGrayMaterial()

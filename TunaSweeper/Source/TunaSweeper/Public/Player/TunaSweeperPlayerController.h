@@ -159,6 +159,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	TSoftObjectPtr<UInputAction> DropAction;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input|Debug")
+	TSoftObjectPtr<UInputAction> ToggleEnemyCombatDebugAction;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Loot")
 	TSoftClassPtr<ATunaSweeperPickupItemActor> PickupItemActorClass;
 
@@ -194,6 +197,8 @@ private:
 	void HandleUseHoveredItem();
 	void HandleToggleHoveredInventorySortLock();
 	void HandleDrop(const FInputActionValue& Value);
+	void HandleToggleEnemyCombatDebug(const FInputActionValue& Value);
+	void ToggleEnemyCombatDebug();
 	void HandleMeleeQuickSlot(const FInputActionValue& Value);
 	void HandleQuickSlot1(const FInputActionValue& Value);
 	void HandleQuickSlot2(const FInputActionValue& Value);

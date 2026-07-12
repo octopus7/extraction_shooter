@@ -4,6 +4,8 @@
 #include "Camera/CameraActor.h"
 #include "Camera/CameraComponent.h"
 #include "Character/TunaSweeperTopDownCharacter.h"
+#include "AI/TunaSweeperEnemyCharacter.h"
+#include "Component/TunaSweeperEnemySensorDebugComponent.h"
 #include "CollisionQueryParams.h"
 #include "CollisionShape.h"
 #include "Components/PrimitiveComponent.h"
@@ -12,6 +14,7 @@
 #include "Engine/Engine.h"
 #include "Engine/OverlapResult.h"
 #include "Engine/World.h"
+#include "EngineUtils.h"
 #include "EngineUtils.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "GameFramework/GameUserSettings.h"
@@ -289,6 +292,8 @@ ATunaSweeperPlayerController::ATunaSweeperPlayerController()
 	QuestWidgetClass = TSoftClassPtr<UTunaSweeperQuestWidget>(FSoftObjectPath(TEXT("/Game/UI/WBP_Quest.WBP_Quest_C")));
 	MeleeQuickSlotAction = TSoftObjectPtr<UInputAction>(FSoftObjectPath(TEXT("/Game/Input/IA_MeleeQuickSlot.IA_MeleeQuickSlot")));
 	DropAction = TSoftObjectPtr<UInputAction>(FSoftObjectPath(TEXT("/Game/Input/IA_Drop.IA_Drop")));
+	ToggleEnemyCombatDebugAction = TSoftObjectPtr<UInputAction>(
+		FSoftObjectPath(TEXT("/Game/Input/IA_ToggleEnemyCombatDebug.IA_ToggleEnemyCombatDebug")));
 	PickupItemActorClass = TSoftClassPtr<ATunaSweeperPickupItemActor>(
 		FSoftObjectPath(TEXT("/Game/Interaction/BP_PickupItem.BP_PickupItem_C")));
 
@@ -488,11 +493,38 @@ void ATunaSweeperPlayerController::SetupInputComponent()
 	{
 		EnhancedInputComponent->BindAction(LoadedDropAction, ETriggerEvent::Started, this, &ATunaSweeperPlayerController::HandleDrop);
 	}
+
+	if (UInputAction* LoadedToggleDebugAction = ToggleEnemyCombatDebugAction.LoadSynchronous())
+	{
+		EnhancedInputComponent->BindAction(
+			LoadedToggleDebugAction,
+			ETriggerEvent::Started,
+			this,
+			&ATunaSweeperPlayerController::HandleToggleEnemyCombatDebug);
+	}
+	else if (InputComponent)
+	{
+		// The editor bootstrap creates the Enhanced Input asset. Keep F8 usable in a running editor session
+		// that predates the asset creation without double-binding once the asset exists.
+		InputComponent->BindKey(EKeys::F8, IE_Pressed, this, &ATunaSweeperPlayerController::ToggleEnemyCombatDebug);
+	}
 }
 
 void ATunaSweeperPlayerController::PlayerTick(float DeltaTime)
 {
 	Super::PlayerTick(DeltaTime);
+
+	if (GameHudWidget && GameHudWidget->IsEnemyCombatDebugVisible())
+	{
+		for (TActorIterator<ATunaSweeperEnemyCharacter> EnemyIt(GetWorld()); EnemyIt; ++EnemyIt)
+		{
+			if (UTunaSweeperEnemySensorDebugComponent* SensorDebug = EnemyIt->GetSensorDebugComponent();
+				SensorDebug && !SensorDebug->IsSensorDebugVisible())
+			{
+				SensorDebug->SetSensorDebugVisible(true);
+			}
+		}
+	}
 
 	if (bHousingCameraActive && !IsHousingModeOpen())
 	{
@@ -1228,6 +1260,36 @@ bool ATunaSweeperPlayerController::TryHandleHoveredItemInteract()
 	}
 
 	return true;
+}
+
+void ATunaSweeperPlayerController::HandleToggleEnemyCombatDebug(const FInputActionValue& Value)
+{
+	ToggleEnemyCombatDebug();
+}
+
+void ATunaSweeperPlayerController::ToggleEnemyCombatDebug()
+{
+	if (!IsLocalController())
+	{
+		return;
+	}
+
+	const bool bEnableDebug = !(GameHudWidget && GameHudWidget->IsEnemyCombatDebugVisible());
+	if (GameHudWidget)
+	{
+		GameHudWidget->SetEnemyCombatDebugVisible(bEnableDebug);
+	}
+
+	if (UWorld* World = GetWorld())
+	{
+		for (TActorIterator<ATunaSweeperEnemyCharacter> EnemyIt(World); EnemyIt; ++EnemyIt)
+		{
+			if (UTunaSweeperEnemySensorDebugComponent* SensorDebug = EnemyIt->GetSensorDebugComponent())
+			{
+				SensorDebug->SetSensorDebugVisible(bEnableDebug);
+			}
+		}
+	}
 }
 
 void ATunaSweeperPlayerController::HandleQuickSlot(int32 SlotNumber)

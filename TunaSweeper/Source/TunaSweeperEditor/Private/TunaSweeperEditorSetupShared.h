@@ -209,6 +209,7 @@ namespace TunaSweeperEditorSetup
 	const FString InventoryInputTaskId = TEXT("2026-05-11_AddInventoryInput");
 	const FString QuickSlotInputTaskId = TEXT("2026-05-28_AddMeleeQuickSlotInputV1");
 	const FString DropInputTaskId = TEXT("2026-05-18_AddDropInputAction");
+	const FString EnemyCombatDebugAssetsTaskId = TEXT("2026-07-12_AddEnemyCombatDebugAssetsV1");
 	const FString AmmoReloadInputTaskId = TEXT("2026-05-19_AddAmmoReloadInputActionsV1");
 	const FString CameraModeInputTaskId = TEXT("2026-05-26_AddCameraModeInputV1");
 	const FString SprintInputTaskId = TEXT("2026-05-28_AddSprintInputV1");
@@ -261,6 +262,7 @@ namespace TunaSweeperEditorSetup
 	const FString EnemyGreenMaterialAssetName = TEXT("M_Enemy_Green");
 	const FString EnemyBlueMaterialAssetName = TEXT("M_Enemy_Blue");
 	const FString EnemySightlineMaterialAssetName = TEXT("M_Enemy_Sightline");
+	const FString EnemySensorDebugMaterialAssetName = TEXT("M_EnemySensorDebug");
 	const FString RollingBomberBodyGrayMaterialAssetName = TEXT("M_RollingBomberBodyGray");
 	const FString RollingBomberLegMetalMaterialAssetName = TEXT("M_RollingBomberLegMetal");
 	const FString EnemyVoxelBodyMeshAssetName = TEXT("SM_Enemy_VoxelBody");
@@ -288,6 +290,7 @@ namespace TunaSweeperEditorSetup
 	const FString InteractionFocusActionName = TEXT("IA_InteractionFocus");
 	const FString InventoryActionName = TEXT("IA_Inventory");
 	const FString DropActionName = TEXT("IA_Drop");
+	const FString ToggleEnemyCombatDebugActionName = TEXT("IA_ToggleEnemyCombatDebug");
 	const FString ReloadActionName = TEXT("IA_Reload");
 	const FString AmmoSelectActionName = TEXT("IA_AmmoSelect");
 	const FString AmmoFocusActionName = TEXT("IA_AmmoFocus");
@@ -492,6 +495,7 @@ FString GetAssetObjectPath(const FString& AssetPath, const FString& AssetName);
 FString GetAssetClassPath(const FString& AssetPath, const FString& AssetName);
 bool SaveAsset(UObject* Asset);
 UMaterial* EnsureLedExpressionMaterial();
+UMaterial* EnsureEnemySensorDebugMaterial();
 void AddBoxQuad(
 		FMeshDescription& MeshDescription,
 		FStaticMeshAttributes& Attributes,
@@ -611,6 +615,7 @@ bool EnsureInteractionInputAssets();
 bool EnsureInventoryInputAssets();
 bool EnsureQuickSlotInputAssets();
 bool EnsureDropInputAssets();
+bool EnsureEnemyCombatDebugInputAssets();
 bool EnsureAmmoReloadInputAssets();
 bool EnsureCameraModeInputAssets();
 bool EnsureSprintInputAssets();

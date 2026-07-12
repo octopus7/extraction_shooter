@@ -38,6 +38,80 @@ ATunaSweeperEnemyAIController::ATunaSweeperEnemyAIController()
 	PrimaryActorTick.bCanEverTick = true;
 }
 
+bool ATunaSweeperEnemyAIController::GetCombatDebugSnapshot(FTunaSweeperEnemyCombatDebugSnapshot& OutSnapshot) const
+{
+	const APawn* ControlledPawn = GetPawn();
+	if (!ControlledPawn)
+	{
+		return false;
+	}
+
+	OutSnapshot = FTunaSweeperEnemyCombatDebugSnapshot();
+	OutSnapshot.bIsCombatEngaged = bIsCombatEngaged;
+	OutSnapshot.TrackingRange = ResolveTrackingRange();
+	OutSnapshot.VisionAngleDegrees = FMath::Clamp(CombatVisionAngleDegrees, 0.0f, 360.0f);
+	OutSnapshot.FacingDirection = ControlledPawn->GetActorForwardVector().GetSafeNormal2D();
+	if (OutSnapshot.FacingDirection.IsNearlyZero())
+	{
+		OutSnapshot.FacingDirection = NonCombatFacingDirection.GetSafeNormal2D();
+	}
+	if (OutSnapshot.FacingDirection.IsNearlyZero())
+	{
+		OutSnapshot.FacingDirection = FVector::ForwardVector;
+	}
+
+	const UWorld* World = GetWorld();
+	const double CurrentTimeSeconds = World ? World->GetTimeSeconds() : 0.0;
+	auto SetTimedState = [&OutSnapshot, CurrentTimeSeconds](const TCHAR* Label, double EndTimeSeconds, float MaxSeconds)
+	{
+		OutSnapshot.StateLabel = Label;
+		OutSnapshot.MaxStateSeconds = FMath::Max(0.0f, MaxSeconds);
+		OutSnapshot.RemainingStateSeconds = OutSnapshot.MaxStateSeconds > 0.0f
+			? FMath::Clamp(static_cast<float>(EndTimeSeconds - CurrentTimeSeconds), 0.0f, OutSnapshot.MaxStateSeconds)
+			: 0.0f;
+	};
+
+	if (!bIsCombatEngaged)
+	{
+		if (NonCombatState == ETunaSweeperNonCombatState::Wander)
+		{
+			SetTimedState(TEXT("Wander"), NonCombatStateEndTimeSeconds, FMath::Max(IdleSeconds.Y, IdleSeconds.X));
+		}
+		else
+		{
+			SetTimedState(TEXT("Idle"), NonCombatStateEndTimeSeconds, FMath::Max(IdleSeconds.X, IdleSeconds.Y));
+		}
+		return true;
+	}
+
+	if (const ATunaSweeperEnemyCharacter* EnemyCharacter = Cast<ATunaSweeperEnemyCharacter>(ControlledPawn); EnemyCharacter && EnemyCharacter->UsesMeleeAttack())
+	{
+		OutSnapshot.StateLabel = bIsClosingDistance ? TEXT("Advance") : TEXT("Attack");
+		return true;
+	}
+
+	switch (RangedCombatState)
+	{
+	case ETunaSweeperRangedCombatState::AdvanceBurst:
+		SetTimedState(TEXT("Advance Burst"), RangedCombatStateEndTimeSeconds, FMath::Max(RangedLongHoldSeconds.Y, RangedMediumHoldSeconds.Y));
+		break;
+	case ETunaSweeperRangedCombatState::HoldFire:
+		SetTimedState(TEXT("Hold Fire"), RangedCombatStateEndTimeSeconds, FMath::Max(RangedPreferredHoldSeconds.X, RangedPreferredHoldSeconds.Y));
+		break;
+	case ETunaSweeperRangedCombatState::SeekLineOfFire:
+		SetTimedState(TEXT("Seek Line"), RangedCombatStateEndTimeSeconds, FMath::Max(RangedSeekLineOfFireSeconds.X, RangedSeekLineOfFireSeconds.Y));
+		break;
+	case ETunaSweeperRangedCombatState::KeepDistance:
+		SetTimedState(TEXT("Keep Distance"), RangedCombatStateEndTimeSeconds, FMath::Max(RangedKeepDistanceSeconds.X, RangedKeepDistanceSeconds.Y));
+		break;
+	default:
+		OutSnapshot.StateLabel = TEXT("Combat");
+		break;
+	}
+
+	return true;
+}
+
 void ATunaSweeperEnemyAIController::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);

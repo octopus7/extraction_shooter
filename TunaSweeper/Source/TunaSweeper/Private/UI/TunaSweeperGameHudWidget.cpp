@@ -1,6 +1,10 @@
 #include "UI/TunaSweeperGameHudWidget.h"
 #include "TunaSweeperGameHudWidgetShared.h"
 
+#include "AI/TunaSweeperEnemyAIController.h"
+#include "AI/TunaSweeperEnemyCharacter.h"
+#include "EngineUtils.h"
+
 DEFINE_LOG_CATEGORY(LogTunaSweeperGameHud);
 
 void UTunaSweeperGameHudWidget::NativeConstruct()
@@ -209,6 +213,7 @@ int32 UTunaSweeperGameHudWidget::NativePaint(
 	}
 
 	DrawHeadphoneNoiseRipples(AllottedGeometry, OutDrawElements, CurrentLayerId);
+	DrawEnemyCombatDebugOverlay(AllottedGeometry, OutDrawElements, CurrentLayerId);
 
 	if (IsWeaponCrosshairSuppressed())
 	{
@@ -325,5 +330,157 @@ int32 UTunaSweeperGameHudWidget::NativePaint(
 	}
 
 	return CurrentLayerId + 2;
+}
+
+void UTunaSweeperGameHudWidget::DrawEnemyCombatDebugOverlay(
+	const FGeometry& AllottedGeometry,
+	FSlateWindowElementList& OutDrawElements,
+	int32& InOutLayerId) const
+{
+	if (!bShowEnemyCombatDebug || !GetWorld())
+	{
+		return;
+	}
+
+	APlayerController* PlayerController = GetOwningPlayer();
+	APawn* PlayerPawn = PlayerController ? PlayerController->GetPawn() : nullptr;
+	const FVector2D LocalSize = AllottedGeometry.GetLocalSize();
+	if (!PlayerController || !PlayerPawn || LocalSize.X <= 1.0f || LocalSize.Y <= 1.0f)
+	{
+		return;
+	}
+
+	FVector2D PlayerScreenPosition = LocalSize * 0.5f;
+	UWidgetLayoutLibrary::ProjectWorldLocationToWidgetPosition(
+		PlayerController,
+		PlayerPawn->GetActorLocation(),
+		PlayerScreenPosition,
+		true);
+	PlayerScreenPosition.X = FMath::Clamp(PlayerScreenPosition.X, 0.0f, LocalSize.X);
+	PlayerScreenPosition.Y = FMath::Clamp(PlayerScreenPosition.Y, 0.0f, LocalSize.Y);
+
+	const FSlateBrush* WhiteBrush = FCoreStyle::Get().GetBrush(TEXT("WhiteBrush"));
+	if (!WhiteBrush)
+	{
+		return;
+	}
+
+	TMap<int32, int32> BearingLaneCounts;
+	const FVector PlayerLocation = PlayerPawn->GetActorLocation();
+	for (TActorIterator<ATunaSweeperEnemyCharacter> EnemyIt(GetWorld()); EnemyIt; ++EnemyIt)
+	{
+		ATunaSweeperEnemyCharacter* Enemy = *EnemyIt;
+		ATunaSweeperEnemyAIController* EnemyController = Enemy
+			? Cast<ATunaSweeperEnemyAIController>(Enemy->GetController())
+			: nullptr;
+		FTunaSweeperEnemyCombatDebugSnapshot Snapshot;
+		if (!Enemy || !EnemyController || !EnemyController->GetCombatDebugSnapshot(Snapshot))
+		{
+			continue;
+		}
+
+		FVector2D EnemyScreenPosition = FVector2D::ZeroVector;
+		const bool bProjected = UWidgetLayoutLibrary::ProjectWorldLocationToWidgetPosition(
+			PlayerController, Enemy->GetActorLocation(), EnemyScreenPosition, true);
+		const bool bOnScreen = bProjected &&
+			EnemyScreenPosition.X >= 0.0f && EnemyScreenPosition.X <= LocalSize.X &&
+			EnemyScreenPosition.Y >= 0.0f && EnemyScreenPosition.Y <= LocalSize.Y;
+		if (!bOnScreen && !Snapshot.bIsCombatEngaged)
+		{
+			continue;
+		}
+
+		FVector ToEnemy = Enemy->GetActorLocation() - PlayerLocation;
+		ToEnemy.Z = 0.0f;
+		if (ToEnemy.IsNearlyZero())
+		{
+			continue;
+		}
+		const float DistanceMeters = ToEnemy.Size() / 100.0f;
+		ToEnemy.Normalize();
+
+		FVector2D DirectionProbe = FVector2D::ZeroVector;
+		UWidgetLayoutLibrary::ProjectWorldLocationToWidgetPosition(
+			PlayerController, PlayerLocation + ToEnemy * 1000.0f, DirectionProbe, true);
+		FVector2D OrbitDirection = (DirectionProbe - PlayerScreenPosition).GetSafeNormal();
+		if (OrbitDirection.IsNearlyZero() && bProjected)
+		{
+			OrbitDirection = (EnemyScreenPosition - PlayerScreenPosition).GetSafeNormal();
+		}
+		if (OrbitDirection.IsNearlyZero())
+		{
+			OrbitDirection = FVector2D(1.0f, 0.0f);
+		}
+
+		const float BearingDegrees = FMath::RadiansToDegrees(FMath::Atan2(OrbitDirection.Y, OrbitDirection.X));
+		const int32 BearingBucket = FMath::RoundToInt(BearingDegrees / 12.0f);
+		const int32 LaneIndex = BearingLaneCounts.FindOrAdd(BearingBucket)++;
+		const FVector2D Tangent(-OrbitDirection.Y, OrbitDirection.X);
+		const FVector2D WidgetCenter = PlayerScreenPosition + OrbitDirection * EnemyCombatDebugOrbitRadius + Tangent * (LaneIndex * 28.0f);
+		const float Scale = bOnScreen ? 1.0f : 0.5f;
+		const float Diameter = 110.0f * Scale;
+		const float Radius = Diameter * 0.5f;
+		const FVector2D WidgetTopLeft = WidgetCenter - FVector2D(Radius, Radius);
+
+		FSlateRoundedBoxBrush CircleBrush(FLinearColor(0.08f, 0.025f, 0.01f, 0.78f), Radius);
+		FSlateDrawElement::MakeBox(
+			OutDrawElements,
+			InOutLayerId + 1,
+			MakeHudLocalBoxGeometry(AllottedGeometry, WidgetTopLeft, FVector2D(Diameter, Diameter)),
+			&CircleBrush,
+			ESlateDrawEffect::None,
+			FLinearColor::White);
+
+		TArray<FVector2D> CirclePoints;
+		constexpr int32 CircleSegments = 28;
+		CirclePoints.Reserve(CircleSegments + 1);
+		for (int32 SegmentIndex = 0; SegmentIndex <= CircleSegments; ++SegmentIndex)
+		{
+			const float Angle = 2.0f * PI * static_cast<float>(SegmentIndex) / CircleSegments;
+			CirclePoints.Add(WidgetCenter + FVector2D(FMath::Cos(Angle), FMath::Sin(Angle)) * (Radius - Scale));
+		}
+		FSlateDrawElement::MakeLines(
+			OutDrawElements, InOutLayerId + 2, AllottedGeometry.ToPaintGeometry(), CirclePoints,
+			ESlateDrawEffect::None, FLinearColor(1.0f, 0.39f, 0.08f, 0.92f), true, 1.5f * Scale);
+
+		FVector2D FacingProbe = FVector2D::ZeroVector;
+		FVector2D EnemyBaseScreen = EnemyScreenPosition;
+		const bool bFacingProjected = UWidgetLayoutLibrary::ProjectWorldLocationToWidgetPosition(
+			PlayerController, Enemy->GetActorLocation() + Snapshot.FacingDirection * 180.0f, FacingProbe, true);
+		FVector2D FacingDirection = bFacingProjected ? (FacingProbe - EnemyBaseScreen).GetSafeNormal() : FVector2D::ZeroVector;
+		if (FacingDirection.IsNearlyZero())
+		{
+			FacingDirection = OrbitDirection;
+		}
+		const FVector2D FacingPerpendicular(-FacingDirection.Y, FacingDirection.X);
+		const FVector2D TriangleTip = WidgetCenter + FacingDirection * (Radius + 8.0f * Scale);
+		TArray<FVector2D> TrianglePoints;
+		TrianglePoints.Add(TriangleTip);
+		TrianglePoints.Add(TriangleTip - FacingDirection * (13.0f * Scale) + FacingPerpendicular * (6.0f * Scale));
+		TrianglePoints.Add(TriangleTip - FacingDirection * (13.0f * Scale) - FacingPerpendicular * (6.0f * Scale));
+		TrianglePoints.Add(TriangleTip);
+		FSlateDrawElement::MakeLines(
+			OutDrawElements, InOutLayerId + 3, AllottedGeometry.ToPaintGeometry(), TrianglePoints,
+			ESlateDrawEffect::None, FLinearColor(1.0f, 0.76f, 0.28f, 1.0f), true, 1.5f * Scale);
+
+		auto DrawCenteredText = [&](const FString& Text, float OffsetY, int32 FontSize, const FLinearColor& Color)
+		{
+			const FSlateFontInfo Font = FCoreStyle::GetDefaultFontStyle("Regular", FMath::Max(8, FMath::RoundToInt(FontSize * Scale)));
+			const float ApproximateWidth = Text.Len() * FontSize * Scale * 0.48f;
+			FSlateDrawElement::MakeText(
+				OutDrawElements, InOutLayerId + 4,
+				MakeHudLocalBoxGeometry(AllottedGeometry, FVector2D(WidgetCenter.X - ApproximateWidth * 0.5f, WidgetCenter.Y + OffsetY * Scale), FVector2D(Diameter, 18.0f * Scale)),
+				Text, Font, ESlateDrawEffect::None, Color);
+		};
+
+		DrawCenteredText(FString::Printf(TEXT("%.1fm"), DistanceMeters), -26.0f, 14, FLinearColor(1.0f, 0.88f, 0.67f, 1.0f));
+		DrawCenteredText(FString::Printf(TEXT("AI: %s"), *Snapshot.StateLabel), -7.0f, 10, FLinearColor(1.0f, 0.63f, 0.36f, 1.0f));
+		if (Snapshot.MaxStateSeconds > 0.0f)
+		{
+			DrawCenteredText(FString::Printf(TEXT("%.1f / %.1fs"), Snapshot.RemainingStateSeconds, Snapshot.MaxStateSeconds), 11.0f, 10, FLinearColor(1.0f, 0.82f, 0.54f, 1.0f));
+		}
+
+		InOutLayerId += 4;
+	}
 }
 

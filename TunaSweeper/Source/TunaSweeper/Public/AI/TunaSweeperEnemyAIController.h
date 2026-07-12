@@ -26,6 +26,17 @@ enum class ETunaSweeperLineOfFireResult : uint8
 	BlockedByIndestructible
 };
 
+struct FTunaSweeperEnemyCombatDebugSnapshot
+{
+	bool bIsCombatEngaged = false;
+	FString StateLabel;
+	float RemainingStateSeconds = 0.0f;
+	float MaxStateSeconds = 0.0f;
+	float TrackingRange = 0.0f;
+	float VisionAngleDegrees = 0.0f;
+	FVector FacingDirection = FVector::ForwardVector;
+};
+
 UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API ATunaSweeperEnemyAIController : public AAIController
 {
@@ -33,6 +44,9 @@ class TUNASWEEPER_API ATunaSweeperEnemyAIController : public AAIController
 
 public:
 	ATunaSweeperEnemyAIController();
+
+	/** Returns runtime AI data used exclusively by the local combat debug presentation. */
+	bool GetCombatDebugSnapshot(FTunaSweeperEnemyCombatDebugSnapshot& OutSnapshot) const;
 
 protected:
 	virtual void Tick(float DeltaSeconds) override;

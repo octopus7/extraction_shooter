@@ -2,6 +2,7 @@
 
 #include "AI/TunaSweeperEnemyAIController.h"
 #include "Component/TunaSweeperDebuffComponent.h"
+#include "Component/TunaSweeperEnemySensorDebugComponent.h"
 #include "Component/TunaSweeperVisionSubjectComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/PrimitiveComponent.h"
@@ -151,6 +152,7 @@ ATunaSweeperEnemyCharacter::ATunaSweeperEnemyCharacter()
 	EnemyReloadWidgetComponent->SetVisibility(false);
 
 	VisionSubjectComponent = CreateDefaultSubobject<UTunaSweeperVisionSubjectComponent>(TEXT("VisionSubject"));
+	SensorDebugComponent = CreateDefaultSubobject<UTunaSweeperEnemySensorDebugComponent>(TEXT("SensorDebug"));
 
 	ApplyVoxelVisualMeshes();
 

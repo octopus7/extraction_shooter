@@ -4994,6 +4994,56 @@
 - 발사체 생성 성공 시에만 발사 연출을 한 번 재생하고, 실제 재장전 시작·정상 완료 시에만 해당 SFX를 재생하도록 구현한 것.
 - `TunaSweeperEditor Win64 Development` UE 5.7 빌드를 통과시키고, 무인 에디터 셋업으로 DA·SFX·BP 참조를 저장한 뒤 Unreal Editor를 다시 실행한 것.
 
+## 2026-07-12 19:02:00 (소요시간: 00:06:18)
+
+## 2026-07-12 19:15:20 (소요시간: 00:00:23)
+
+## 2026-07-12 19:59:00 (소요시간: 00:01:54)
+
+## 2026-07-12 20:06:00 (소요시간: 00:00:24)
+
+## 2026-07-12 20:07:00 (소요시간: 00:03:38)
+
+## 2026-07-12 20:11:00 (소요시간: 00:02:26)
+
+## 2026-07-12 20:17:00 (소요시간: 00:05:28)
+
+## 2026-07-12 20:29:00 (소요시간: 00:01:37)
+
+## 2026-07-12 20:36:30 (소요시간: 00:00:26)
+
+- `Tools/GlbTextureExtractor` 소스만 스테이징해 `fd2517b Add GLB texture extractor tool` 커밋을 생성한 것.
+- 기존에 수정되어 있던 Docs, Unreal 소스·에셋, Blender 파일은 사용자 작업으로 보고 커밋에 포함하지 않은 것.
+
+- 입력 GLB 파일을 선택할 때 출력 대상 경로를 `UE_Extracted` 하위 폴더가 아닌 원본 GLB와 동일한 폴더로 자동 설정하도록 변경한 것.
+- Release 빌드를 경고·오류 없이 완료하고, 갱신된 Release 도구 창을 연 것.
+
+- 이름 정리 GLB의 머티리얼 텍스처 슬롯이 비어 있던 동작을 외부 상대 경로 참조 방식으로 변경한 것.
+- `Textures/T_*.png` 파일에 맞춰 이미지·텍스처 항목을 새로 생성하고, Base Color/Normal/MetallicRoughness/Occlusion/Emissive 머티리얼 슬롯을 다시 연결한 것. 원래 texture coordinate 정보와 sampler 참조는 유지한 것.
+- 이전 Release 도구 창이 실행 파일을 잠가 종료한 뒤, Release 빌드를 경고·오류 없이 완료하고 최신 창을 다시 연 것.
+
+- `texture_manifest.json`을 생성하지 않고, 추출 파일·머티리얼 슬롯·원본/결과 해상도·건너뜀 사유를 도구 실행 로그에만 표시하도록 변경한 것.
+- 이름 정리 및 텍스처 제거 GLB 파일을 `UE_Extracted/Models` 하위 폴더가 아닌 선택한 `UE_Extracted` 출력 폴더 바로 아래에 생성하도록 변경한 것.
+- 도구 실행 배치 파일과 README 실행 명령을 Release 구성으로 변경하고, `dotnet build --configuration Release` 빌드를 경고·오류 없이 완료한 뒤 Release 실행 파일을 연 것.
+
+- 이름 정리 GLB 복사본이 기존 BIN 청크를 그대로 보존해 임베딩 텍스처가 남던 문제를 수정한 것.
+- 외부 PNG 언팩이 완료된 뒤, GLB 복사본에서 이미지·텍스처·샘플러 참조와 머티리얼 텍스처 슬롯을 제거하고, 이미지 bufferView 바이트를 제외한 메시 BIN 데이터만 재배치해 저장하도록 구현한 것.
+- GLB 로그에 제거한 이미지 수, bufferView 수, 바이트 수를 표시하고, 갱신된 도구를 빌드·실행한 것.
+
+- 갱신된 `GlbTextureExtractor.exe` 창을 다시 실행한 것.
+
+- GLB Texture Extractor의 `작은 텍스처 목표 크기까지 확대` 체크박스를 제거한 것.
+- Base Color와 기타 텍스처의 긴 변 목표 해상도를 각각 드롭다운에서 선택하도록 변경하고, 권장 해상도 1024px 및 512px를 기본 선택 상태로 둔 것.
+- 작은 원본 텍스처는 확대하지 않는 정책을 고정하고, 갱신된 WinForms 도구를 다시 빌드·실행한 것.
+
+- `GlbTextureExtractor` WinForms 도구를 `dotnet run --no-build`로 실행한 것.
+
+- .NET 10 WinForms 기반 `Tools/GlbTextureExtractor` 도구를 추가한 것.
+- 입력 GLB의 Base Color 텍스처는 1024px, Normal/MetallicRoughness/Occlusion/Emissive 텍스처는 512/256/128/64px 중 원본보다 크지 않은 최대 크기로 리샘플해 외부 PNG로 언팩하고, UE 접두사 `T_` 파일명과 `texture_manifest.json` 매핑을 생성한 것.
+- 선택적으로 텍스처를 다시 패킹하지 않은 이름 정리 GLB 복사본을 생성하며, 내부 머티리얼은 `M_{입력파일명}`, 메시와 메시 노드는 `SM_{입력파일명}` 규칙으로 이름을 정리한 것. 복수 항목에는 순번 접미사를 붙이는 것.
+- KTX2/BasisU와 해석할 수 없는 이미지 형식은 언팩 결과 manifest에 건너뜀 사유를 기록하도록 처리한 것.
+- `dotnet build Tools/GlbTextureExtractor/GlbTextureExtractor.csproj --no-restore` 빌드를 경고·오류 없이 통과시킨 것.
+
 ## 2026-07-12 18:57:12 (소요시간: 00:03:22)
 
 - `UE5_Impact_Effect_Architecture_for_Codex.md`의 탄환 피격 이펙트 아키텍처를 TunaSweeper의 현재 투사체·탄약·피격 이펙트 흐름과 대조해 적용 방안을 검토한 것.
@@ -5005,3 +5055,31 @@
 - 탄약 JSON의 `impact_profile_id`를 투사체까지 전달하고, 일반탄과 철갑탄에 `DA_Impact_Ballistic`/`DA_Impact_BallisticAP` 프로필을 연결한 것. 기존 `hit.red_burst`는 설정 누락 시 호환 fallback으로 유지한 것.
 - Physical Surface와 Impact Response Gameplay Tag를 설정하고, 프로필 Data Asset 두 개를 생성한 것.
 - `TunaSweeperEditor Win64 Development` UE 5.7 빌드를 성공시키고 Unreal Editor를 열어 둔 것.
+
+## 2026-07-12 19:59:17 (소요시간: 00:11:00)
+
+- 적 전투 상태·거리·남은 시간/최대 시간·방향을 플레이어 주변 궤도형 원형 Slate HUD로 표시하고, 화면 밖 교전 적은 50% 크기로 축소하는 F8 통합 디버그를 추가한 것.
+- 적마다 주황색 청각 3구역과 시야 부채꼴/밝은 호 경계를 절차 메시로 표시하는 로컬 전용 센서 디버그 컴포넌트를 추가한 것.
+- `IA_ToggleEnemyCombatDebug` 및 센서용 반투명 버텍스 컬러 머티리얼을 에디터 자동 설정 단계에서 생성하도록 추가하고, UE 5.7 Live Coding 빌드를 성공적으로 검증한 것.
+
+## 2026-07-12 20:31:17 (소요시간: 00:02:16)
+
+- Unreal Editor의 `TunaSweeper` 메뉴에 `Asset Tools > GLB Texture Extractor` 항목을 추가한 것.
+- 프로젝트 기준 상대 경로 `../Tools/GlbTextureExtractor/bin/Release/net10.0-windows/GlbTextureExtractor.exe`에서 릴리스 실행 파일을 찾아 독립 프로세스로 실행하도록 연결한 것.
+- 실행 파일이 없거나 프로세스 시작에 실패하면 해당 경로를 포함한 에디터 메시지 박스로 안내하도록 예외 처리한 것.
+- `TunaSweeperEditor Win64 Development` 빌드는 UBT AppData 로그 권한 문제를 권한 상승으로 해소한 뒤 재시도했으나, 현재 Unreal Editor Live Coding 활성화 때문에 일반 외부 빌드가 차단된 것.
+
+## 2026-07-12 20:35:51 (소요시간: 00:00:42)
+
+- `TunaSweeperEditor Win64 Development` UE 5.7 빌드를 성공적으로 완료한 것.
+- Unreal Editor를 `TunaSweeper/TunaSweeper.uproject`로 다시 실행한 것.
+
+## 2026-07-12 20:37:00 (소요시간: 00:01:24)
+
+- GLB 메뉴 기능 파일 네 개만 선택해 `GLB 변환툴 메뉴` 제목으로 커밋한 것.
+
+## 2026-07-12 20:38:40 (소요시간: 00:00:28)
+
+- GLB Texture Extractor 메뉴 실행 시 UE 5.7 Windows `CreateProc`가 null 인수 포인터를 검증해 중단되던 문제를 확인한 것.
+- `CreateProc`의 인수를 `nullptr` 대신 빈 문자열로 전달하도록 수정한 것.
+- 일반 `TunaSweeperEditor Win64 Development` 빌드는 실행 중인 Unreal Editor의 Live Coding 활성화로 차단된 것.

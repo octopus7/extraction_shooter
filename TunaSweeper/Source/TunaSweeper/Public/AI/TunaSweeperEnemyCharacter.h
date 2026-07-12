@@ -8,6 +8,7 @@
 class UStaticMeshComponent;
 class USceneComponent;
 class UTunaSweeperVisionSubjectComponent;
+class UTunaSweeperEnemySensorDebugComponent;
 class UWidgetComponent;
 class UMaterialInterface;
 class UNiagaraSystem;
@@ -79,6 +80,14 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UTunaSweeperVisionSubjectComponent> VisionSubjectComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UTunaSweeperEnemySensorDebugComponent> SensorDebugComponent;
+
+public:
+	UTunaSweeperEnemySensorDebugComponent* GetSensorDebugComponent() const { return SensorDebugComponent; }
+
+protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat")
 	TSoftClassPtr<ATunaSweeperProjectile> ProjectileClass;
