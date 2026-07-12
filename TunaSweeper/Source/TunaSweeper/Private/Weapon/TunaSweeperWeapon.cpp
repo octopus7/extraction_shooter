@@ -10,11 +10,16 @@
 #include "EngineUtils.h"
 #include "HAL/IConsoleManager.h"
 #include "Interaction/TunaSweeperSandbagCoverActor.h"
+#include "Kismet/GameplayStatics.h"
 #include "Materials/MaterialInterface.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraSystem.h"
+#include "Sound/SoundBase.h"
 #include "Subsystem/TunaSweeperNoiseSubsystem.h"
 #include "TunaSweeperCollisionChannels.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Weapon/TunaSweeperProjectile.h"
+#include "Weapon/TunaSweeperWeaponPresentationDataAsset.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogTunaSweeperLaserSight, Log, All);
 
@@ -322,14 +327,27 @@ void ATunaSweeperWeapon::AddRuntimeSpreadRecoilShot()
 
 bool ATunaSweeperWeapon::StartReloadRuntime(float ReloadSeconds)
 {
-	return CombatComponent ? CombatComponent->StartReload(ReloadSeconds) : false;
+	const bool bStartedReload = CombatComponent && CombatComponent->StartReload(ReloadSeconds);
+	if (bStartedReload)
+	{
+		if (UTunaSweeperWeaponPresentationDataAsset* PresentationData = WeaponPresentationDataAsset.LoadSynchronous())
+		{
+			PlayReloadPresentation(PresentationData->ReloadStartSound);
+		}
+	}
+
+	return bStartedReload;
 }
 
 void ATunaSweeperWeapon::FinishReloadRuntime()
 {
-	if (CombatComponent)
+	if (CombatComponent && CombatComponent->IsReloading())
 	{
 		CombatComponent->FinishReload();
+		if (UTunaSweeperWeaponPresentationDataAsset* PresentationData = WeaponPresentationDataAsset.LoadSynchronous())
+		{
+			PlayReloadPresentation(PresentationData->ReloadCompleteSound);
+		}
 	}
 }
 
@@ -520,6 +538,12 @@ void ATunaSweeperWeapon::SetWeaponMeshOverride(
 	WeaponMesh->SetRelativeScale3D(RelativeScale);
 }
 
+void ATunaSweeperWeapon::SetWeaponPresentationDataAsset(
+	TSoftObjectPtr<UTunaSweeperWeaponPresentationDataAsset> InWeaponPresentationDataAsset)
+{
+	WeaponPresentationDataAsset = MoveTemp(InWeaponPresentationDataAsset);
+}
+
 bool ATunaSweeperWeapon::Fire(
 	const FVector& AimDirection,
 	APawn* InstigatorPawn,
@@ -644,7 +668,45 @@ bool ATunaSweeperWeapon::FireWithAimIntent(
 	}
 
 	LastFireTimeSeconds = CurrentTime;
+	PlayFirePresentation();
 	return true;
+}
+
+void ATunaSweeperWeapon::PlayFirePresentation()
+{
+	UTunaSweeperWeaponPresentationDataAsset* PresentationData = WeaponPresentationDataAsset.LoadSynchronous();
+	if (!PresentationData)
+	{
+		return;
+	}
+
+	if (MuzzlePoint)
+	{
+		if (UNiagaraSystem* MuzzleFlashEffect = PresentationData->MuzzleFlashEffect.LoadSynchronous())
+		{
+			UNiagaraFunctionLibrary::SpawnSystemAttached(
+				MuzzleFlashEffect,
+				MuzzlePoint,
+				NAME_None,
+				FVector::ZeroVector,
+				FRotator::ZeroRotator,
+				EAttachLocation::SnapToTarget,
+				true);
+		}
+	}
+
+	if (USoundBase* FireSound = PresentationData->FireSound.LoadSynchronous())
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetMuzzleWorldLocation());
+	}
+}
+
+void ATunaSweeperWeapon::PlayReloadPresentation(TSoftObjectPtr<USoundBase> ReloadSound)
+{
+	if (USoundBase* LoadedReloadSound = ReloadSound.LoadSynchronous())
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, LoadedReloadSound, GetActorLocation());
+	}
 }
 
 ATunaSweeperProjectile* ATunaSweeperWeapon::SpawnProjectile(

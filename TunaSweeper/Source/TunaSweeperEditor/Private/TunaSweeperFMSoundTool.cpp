@@ -1280,6 +1280,88 @@ namespace TunaSweeperFMSound
 	};
 }
 
+bool FTunaSweeperFMSoundTool::RenderWeaponPresentationWavs(
+	FString& OutFireWavPath,
+	FString& OutReloadStartWavPath,
+	FString& OutReloadCompleteWavPath)
+{
+	using namespace TunaSweeperFMSound;
+
+	OutFireWavPath.Reset();
+	OutReloadStartWavPath.Reset();
+	OutReloadCompleteWavPath.Reset();
+
+	const FString SourceDirectory = FPaths::Combine(
+		FPaths::ProjectContentDir(),
+		TEXT("Audio/SFX/Weapons/FMSource"));
+
+	auto RenderWeaponSound = [&SourceDirectory](
+		FPreset Preset,
+		FString& OutWavPath)
+	{
+		FRenderResult RenderResult;
+		if (!RenderPreset(Preset, DefaultSampleRate, RenderResult))
+		{
+			return false;
+		}
+
+		OutWavPath = FPaths::Combine(SourceDirectory, Preset.Id + TEXT(".wav"));
+		return WriteWavFile(OutWavPath, RenderResult);
+	};
+
+	FPreset Fire;
+	Fire.Id = TEXT("SFX_Rifle_Fire_FM");
+	Fire.Kind = EPresetKind::Gunshot;
+	Fire.DurationSeconds = 0.22f;
+	Fire.BasePitchHz = 170.0f;
+	Fire.PitchSweepSemitones = -7.0f;
+	Fire.Decay = 0.10f;
+	Fire.FmRatio = 2.8f;
+	Fire.FmAmount = 4.8f;
+	Fire.NoiseAmount = 0.80f;
+	Fire.Brightness = 0.75f;
+	Fire.Distortion = 0.35f;
+	Fire.Randomness = 0.14f;
+	Fire.OutputGainDb = -4.0f;
+	Fire.Seed = 7101;
+
+	FPreset ReloadStart;
+	ReloadStart.Id = TEXT("SFX_Rifle_ReloadStart_FM");
+	ReloadStart.Kind = EPresetKind::Hit;
+	ReloadStart.DurationSeconds = 0.18f;
+	ReloadStart.BasePitchHz = 215.0f;
+	ReloadStart.PitchSweepSemitones = -11.0f;
+	ReloadStart.Decay = 0.12f;
+	ReloadStart.FmRatio = 1.4f;
+	ReloadStart.FmAmount = 2.2f;
+	ReloadStart.NoiseAmount = 0.25f;
+	ReloadStart.Brightness = 0.40f;
+	ReloadStart.Distortion = 0.10f;
+	ReloadStart.Randomness = 0.08f;
+	ReloadStart.OutputGainDb = -12.0f;
+	ReloadStart.Seed = 7102;
+
+	FPreset ReloadComplete;
+	ReloadComplete.Id = TEXT("SFX_Rifle_ReloadComplete_FM");
+	ReloadComplete.Kind = EPresetKind::Ricochet;
+	ReloadComplete.DurationSeconds = 0.15f;
+	ReloadComplete.BasePitchHz = 940.0f;
+	ReloadComplete.PitchSweepSemitones = 2.0f;
+	ReloadComplete.Decay = 0.09f;
+	ReloadComplete.FmRatio = 2.1f;
+	ReloadComplete.FmAmount = 3.2f;
+	ReloadComplete.NoiseAmount = 0.10f;
+	ReloadComplete.Brightness = 0.70f;
+	ReloadComplete.Distortion = 0.08f;
+	ReloadComplete.Randomness = 0.06f;
+	ReloadComplete.OutputGainDb = -13.0f;
+	ReloadComplete.Seed = 7103;
+
+	return RenderWeaponSound(Fire, OutFireWavPath) &&
+		RenderWeaponSound(ReloadStart, OutReloadStartWavPath) &&
+		RenderWeaponSound(ReloadComplete, OutReloadCompleteWavPath);
+}
+
 void FTunaSweeperFMSoundTool::Startup()
 {
 	FGlobalTabmanager::Get()->RegisterNomadTabSpawner(

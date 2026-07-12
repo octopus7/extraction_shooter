@@ -6,6 +6,21 @@ namespace TunaSweeperEditorSetup
 	// One-shot editor bootstrap. Remove only after an explicit cleanup request; see Docs/editor_one_shot_cleanup.md.
 	void RunEditorOneShotSetup_ToCleanupOnExplicitRequest()
 	{
+		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperWeaponPresentationSetup")))
+		{
+			if (TunaSweeperEditorSetup::EnsureWeaponPresentationAssets())
+			{
+				FTunaSweeperEditorRunOnce::MarkCompleted(
+					TunaSweeperEditorSetup::WeaponPresentationAssetTaskId);
+			}
+
+			if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperWeaponPresentationSetupQuit")))
+			{
+				FPlatformMisc::RequestExit(false);
+				return;
+			}
+		}
+
 		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperCommonHudSetupQuit")))
 		{
 			FTunaSweeperEditorRunOnce::Run(
@@ -292,6 +307,20 @@ namespace TunaSweeperEditorSetup
 			{
 				return TunaSweeperEditorSetup::EnsureWeaponSpreadRecoilAssets();
 			});
+
+		const bool bWeaponPresentationTaskRan = FTunaSweeperEditorRunOnce::Run(
+			TunaSweeperEditorSetup::WeaponPresentationAssetTaskId,
+			[]()
+			{
+				return TunaSweeperEditorSetup::EnsureWeaponPresentationAssets();
+			});
+		if ((bWeaponPresentationTaskRan ||
+				FTunaSweeperEditorRunOnce::HasCompleted(TunaSweeperEditorSetup::WeaponPresentationAssetTaskId)) &&
+			FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperWeaponPresentationSetupQuit")))
+		{
+			FPlatformMisc::RequestExit(false);
+			return;
+		}
 
 		FTunaSweeperEditorRunOnce::Run(
 			TunaSweeperEditorSetup::BaseballBatAssetTaskId,

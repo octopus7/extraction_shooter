@@ -7,6 +7,7 @@
 
 class ATunaSweeperProjectile;
 class UTunaSweeperWeaponCombatComponent;
+class UTunaSweeperWeaponPresentationDataAsset;
 class UMaterialInterface;
 class UPrimitiveComponent;
 class USceneComponent;
@@ -92,6 +93,9 @@ public:
 		FRotator RelativeRotation,
 		FVector RelativeScale);
 
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Weapon|Presentation")
+	void SetWeaponPresentationDataAsset(TSoftObjectPtr<UTunaSweeperWeaponPresentationDataAsset> InWeaponPresentationDataAsset);
+
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
 	TObjectPtr<USceneComponent> SceneRoot;
@@ -110,6 +114,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
 	TSoftClassPtr<ATunaSweeperProjectile> ProjectileClass;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon|Presentation")
+	TSoftObjectPtr<UTunaSweeperWeaponPresentationDataAsset> WeaponPresentationDataAsset;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
 	float FireCooldown = 0.1f;
@@ -135,6 +142,9 @@ protected:
 		UPrimitiveComponent* AimIntentComponent,
 		const FVector& AimIntentWorldPoint,
 		bool bHasAimIntentWorldPoint);
+
+	void PlayFirePresentation();
+	void PlayReloadPresentation(TSoftObjectPtr<class USoundBase> ReloadSound);
 
 private:
 	float LastFireTimeSeconds = -1000.0f;

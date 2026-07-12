@@ -8,6 +8,12 @@ public:
 	void Startup();
 	void Shutdown();
 
+	/** Renders the default rifle presentation SFX as editable WAV source files. */
+	static bool RenderWeaponPresentationWavs(
+		FString& OutFireWavPath,
+		FString& OutReloadStartWavPath,
+		FString& OutReloadCompleteWavPath);
+
 private:
 	void RegisterMenus();
 	void OpenToolWindow();

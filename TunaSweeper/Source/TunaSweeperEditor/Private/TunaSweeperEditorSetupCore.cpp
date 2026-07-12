@@ -2100,6 +2100,112 @@ namespace TunaSweeperEditorSetup
 		return SaveAsset(GameInstanceBlueprint);
 	}
 
+	bool EnsureWeaponPresentationAssets()
+	{
+		FString FireWavPath;
+		FString ReloadStartWavPath;
+		FString ReloadCompleteWavPath;
+		if (!FTunaSweeperFMSoundTool::RenderWeaponPresentationWavs(
+			FireWavPath,
+			ReloadStartWavPath,
+			ReloadCompleteWavPath))
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to render rifle weapon-presentation WAV files."));
+			return false;
+		}
+
+		auto ImportWeaponSound = [](const FString& SourceFile, const FString& AssetName, USoundWave*& OutSoundWave)
+		{
+			FAudioImportArgs ImportArgs;
+			ImportArgs.SourceFile = SourceFile;
+			ImportArgs.DestinationPath = WeaponPresentationAudioAssetPath;
+			ImportArgs.AssetName = AssetName;
+			ImportArgs.bReplaceExisting = true;
+			ImportArgs.bLooping = false;
+			if (!ImportAudioAsset(ImportArgs, &OutSoundWave) || !OutSoundWave)
+			{
+				return false;
+			}
+
+			OutSoundWave->Modify();
+			OutSoundWave->SoundGroup = SOUNDGROUP_Effects;
+			OutSoundWave->PostEditChange();
+			OutSoundWave->MarkPackageDirty();
+			return SaveAsset(OutSoundWave);
+		};
+
+		USoundWave* FireSound = nullptr;
+		USoundWave* ReloadStartSound = nullptr;
+		USoundWave* ReloadCompleteSound = nullptr;
+		if (!ImportWeaponSound(FireWavPath, RifleFireSoundAssetName, FireSound) ||
+			!ImportWeaponSound(ReloadStartWavPath, RifleReloadStartSoundAssetName, ReloadStartSound) ||
+			!ImportWeaponSound(ReloadCompleteWavPath, RifleReloadCompleteSoundAssetName, ReloadCompleteSound))
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to import rifle weapon-presentation SoundWave assets."));
+			return false;
+		}
+
+		UTunaSweeperWeaponPresentationDataAsset* PresentationDataAsset =
+			EnsureDataAsset<UTunaSweeperWeaponPresentationDataAsset>(
+				WeaponPresentationAssetPath,
+				WeaponPresentationRifleDataAssetName);
+		if (!PresentationDataAsset)
+		{
+			return false;
+		}
+
+		PresentationDataAsset->Modify();
+		PresentationDataAsset->WeaponTypeTag = FName(TEXT("weapon.type.rifle"));
+		PresentationDataAsset->MuzzleFlashEffect = TSoftObjectPtr<UNiagaraSystem>(
+			FSoftObjectPath(TEXT("/Game/BallisticsVFX/Particles/Muzzle/MuzzleFlash/NS_Muzzle_Flash_Med2.NS_Muzzle_Flash_Med2")));
+		PresentationDataAsset->FireSound = TSoftObjectPtr<USoundBase>(FireSound);
+		PresentationDataAsset->ReloadStartSound = TSoftObjectPtr<USoundBase>(ReloadStartSound);
+		PresentationDataAsset->ReloadCompleteSound = TSoftObjectPtr<USoundBase>(ReloadCompleteSound);
+		PresentationDataAsset->MarkPackageDirty();
+		if (!SaveAsset(PresentationDataAsset))
+		{
+			UE_LOG(
+				LogTunaSweeperEditor,
+				Error,
+				TEXT("Failed to save %s."),
+				*GetAssetObjectPath(WeaponPresentationAssetPath, WeaponPresentationRifleDataAssetName));
+			return false;
+		}
+
+		UBlueprint* AssaultRifleBlueprint = LoadObject<UBlueprint>(
+			nullptr,
+			TEXT("/Game/Weapons/BP_AssaultRifle.BP_AssaultRifle"));
+		if (!AssaultRifleBlueprint)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to load /Game/Weapons/BP_AssaultRifle."));
+			return false;
+		}
+
+		if (!AssaultRifleBlueprint->GeneratedClass)
+		{
+			FKismetEditorUtilities::CompileBlueprint(AssaultRifleBlueprint);
+		}
+
+		ATunaSweeperWeapon* AssaultRifleDefaults = AssaultRifleBlueprint->GeneratedClass
+			? Cast<ATunaSweeperWeapon>(AssaultRifleBlueprint->GeneratedClass->GetDefaultObject())
+			: nullptr;
+		if (!AssaultRifleDefaults)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to access BP_AssaultRifle defaults."));
+			return false;
+		}
+
+		AssaultRifleBlueprint->Modify();
+		AssaultRifleDefaults->Modify();
+		AssaultRifleDefaults->SetWeaponPresentationDataAsset(
+			TSoftObjectPtr<UTunaSweeperWeaponPresentationDataAsset>(
+				FSoftObjectPath(GetAssetObjectPath(WeaponPresentationAssetPath, WeaponPresentationRifleDataAssetName))));
+		AssaultRifleBlueprint->MarkPackageDirty();
+		FKismetEditorUtilities::CompileBlueprint(AssaultRifleBlueprint);
+
+		return SaveAsset(AssaultRifleBlueprint);
+	}
+
 	bool EnsureTopDownShooterAssets()
 	{
 		UInputAction* MoveAction = EnsureInputAction(MoveActionName, EInputActionValueType::Axis2D, EInputActionAccumulationBehavior::Cumulative);

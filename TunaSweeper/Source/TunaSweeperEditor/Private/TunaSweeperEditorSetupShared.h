@@ -173,6 +173,7 @@
 #include "UObject/UnrealType.h"
 #include "Weapon/TunaSweeperProjectile.h"
 #include "Weapon/TunaSweeperWeapon.h"
+#include "Weapon/TunaSweeperWeaponPresentationDataAsset.h"
 #include "Weapon/TunaSweeperWeaponSpreadRecoilDataAsset.h"
 #include "WidgetBlueprint.h"
 #include "WidgetBlueprintFactory.h"
@@ -236,6 +237,7 @@ namespace TunaSweeperEditorSetup
 	const FString LookdevFluidExplosionTaskId = TEXT("2026-06-14_CreateLookdevFluidExplosionNiagaraLevelV1");
 	const FString ProjectileHitEffectAssetTaskId = TEXT("2026-05-28_CreateProjectileHitEffectAssetsV1");
 	const FString WeaponSpreadRecoilAssetTaskId = TEXT("2026-05-28_CreateWeaponSpreadRecoilAssetsV1");
+	const FString WeaponPresentationAssetTaskId = TEXT("2026-07-12_CreateWeaponPresentationAssetsV1");
 	const FString BaseballBatAssetTaskId = TEXT("2026-05-28_CreateBaseballBatStaticMeshAssetsV1");
 	const FString SandbagCoverAssetTaskId = TEXT("2026-06-02_SandbagFourLayerCoverV1");
 	const FString VoxelMeshAssetTaskId = TEXT("2026-05-19_CreateSharedVoxelMeshAssetsV1");
@@ -268,6 +270,12 @@ namespace TunaSweeperEditorSetup
 	const FString WeaponAssetName = TEXT("BP_TunaSweeperWeapon");
 	const FString ProjectileAssetName = TEXT("BP_TunaSweeperProjectile");
 	const FString WeaponSpreadRecoilDataAssetName = TEXT("DA_WeaponSpreadRecoil");
+	const FString WeaponPresentationAssetPath = TEXT("/Game/Weapons/AudioVisual");
+	const FString WeaponPresentationRifleDataAssetName = TEXT("DA_WeaponPresentation_Rifle");
+	const FString WeaponPresentationAudioAssetPath = TEXT("/Game/Audio/SFX/Weapons");
+	const FString RifleFireSoundAssetName = TEXT("SFX_Rifle_Fire_FM");
+	const FString RifleReloadStartSoundAssetName = TEXT("SFX_Rifle_ReloadStart_FM");
+	const FString RifleReloadCompleteSoundAssetName = TEXT("SFX_Rifle_ReloadComplete_FM");
 	const FString BaseballBatWoodTextureAssetName = TEXT("T_BaseballBat_WoodGrain");
 	const FString BaseballBatMaterialAssetName = TEXT("M_BaseballBat_Wood");
 	const FString BaseballBatMeshAssetName = TEXT("SM_BaseballBat");
@@ -613,6 +621,7 @@ bool SetProjectStartupMapsToIntro();
 bool EnsureGameInstanceBlueprint();
 bool EnsureProjectileHitEffectAssets();
 bool EnsureWeaponSpreadRecoilAssets();
+bool EnsureWeaponPresentationAssets();
 bool EnsureTopDownShooterAssets();
 bool EnsureCanBotBlueprint();
 bool EnsureEnemyVisualMaterialAssets();
