@@ -2851,3 +2851,75 @@ PC에서 Niagara Fluids 3D Gas 폭발·연기 효과를 한 화면에 하나 정
 ### 답변
 
 두 번째 손상 상태(State Index 2)의 Niagara System은 `NS_ExplosiveBarrel_SmokeHeavy`이며, 경로는 `/Game/Effects/NS_ExplosiveBarrel_SmokeHeavy`다. 첫 번째 손상 상태는 `NS_ExplosiveBarrel_SmokeLight`, 파괴 후 잔여 루프는 `NS_ExplosiveBarrel_Burning`이다.
+## 2026-07-13 02:36:18 (소요시간: 00:00:30)
+
+### 질문
+
+배럴 최종 폭발의 1회성 이펙트가 스프라이트 한 장인지 질문.
+
+### 답변
+
+한 장이 아니다. `ATunaSweeperLocalExplosionEffectActor`가 Fire Flipbook, Shockwave, Distortion, 중앙 Smoke, 오프셋 Smoke 2장, Ground Smoke 6장을 평면 스프라이트로 겹치고, 짧은 Point Light를 더하는 단발 효과다. 모두 평면 카드 기반이므로 완전한 3D 폭발은 아니지만, 여러 층의 크기·회전·프레임·알파 변화를 합성해 보이게 한다.
+## 2026-07-13 02:37:13 (소요시간: 00:00:45)
+
+### 질문
+
+배럴의 실제 1회성 폭발 이펙트가 여러 스프라이트 카드인지 다시 확인 요청.
+
+### 답변
+
+실제 스폰 데이터 `GameplayInteractionSpawns.json`의 `explosion_effect_actor_class`는 `/Script/TunaSweeper.TunaSweeperLocalExplosionEffectActor`다. 해당 네이티브 클래스는 Fire, Shockwave, Distortion, 중앙 Smoke, 오프셋 Smoke 2장, Ground Smoke 6장을 각각 `UStaticMeshComponent`로 생성한다. 따라서 구현상 한 장이 아니며, 폭발 직후에는 큰 Fire 카드가 다른 층을 가려 한 장처럼 보일 수 있다.
+## 2026-07-13 02:38:33 (소요시간: 00:00:30)
+
+### 질문
+
+최종 폭발에서 쇼크웨이브가 실제로 보이지 않았는데 구현되어 있는지 질문.
+
+### 답변
+
+컴포넌트는 존재하지만, 전용 링/왜곡 자산이 아니라 `ExplosionFlipbookMaterial`을 재사용한 평면 레이어다. 코드상 0.02~0.18의 정규화 시간에만 알파가 유지되어 0.72초 폭발 기준 약 0.13초에 사라지므로 실제 화면에서 쇼크웨이브로 인지되기 어렵다. 따라서 시각적으로는 쇼크웨이브가 구현되지 않은 것과 같으며, 전용 링 텍스처 또는 Screen-Space Distortion 머티리얼로 교체해야 한다.
+## 2026-07-13 03:36:18 (소요시간: 00:00:30)
+
+### 질문
+
+폭발 배럴의 마지막 폭발 단계에서 나오는 이펙트 목록 질문.
+
+### 답변
+
+파괴 전 단계 루프(`NS_ExplosiveBarrel_SmokeHeavy`)는 짧게 감쇠하며 남고, 파괴 순간에는 `NS_ExplosiveBarrel_FireBurst` 화염 버스트, `NS_ExplosiveBarrel_DebrisBurst` 3D 메시 파편/불씨, `NS_ExplosiveBarrel_ExplosionSmoke` 대형 3D Gas 매연, `M_LocalExplosionDistortion` 화면 왜곡, 짧은 Point Light가 재생된다. 이후에는 `NS_ExplosiveBarrel_Burning` 검은 잔여 연기 루프만 남는다. 기존 불꽃·쇼크웨이브·연기 카드 레이어는 비가시 상태다.
+## 2026-07-13 03:46:39 (소요시간: 00:01:39)
+
+### 질문
+
+에픽 예제 `NS_Explosion`과 같은 폭발 이펙트를 만들 수 있는지, 실제 작업 없이 제작 과정까지 검토 요청.
+
+### 답변
+
+재현 가능하다. 원본 시스템뿐 아니라 `NE_Explosion`, `NE_GroundDust`, `NE_Debris`, `NE_SparkDebris`, `NE_PostProcess`, 카메라 셰이크, 플립북 머티리얼과 텍스처, 파편 메시가 모두 프로젝트에 있어 복제 기반의 시각·동작 일치는 높은 확률로 가능하다. 시스템은 화염/매연 플립북과 라이트, 지면 먼지, 메시 파편, 불씨와 리본 스트리머, 데칼, 포스트프로세스, 카메라 셰이크를 시간차로 합성한다. 제작 시에는 기준 장면을 고정한 뒤 핵심 폭발, 지면 먼지, 불씨·스트리머, 파편, 보조 효과 순서로 구성하고 노출·거리·충돌·랜덤 시드를 맞춰 비교해야 한다. 동일 에셋 복제는 사실상 동일하게 만들 수 있지만, 빈 시스템에서의 재제작은 곡선과 랜덤값까지 조정해야 하며 환경이 다르면 픽셀 단위 결과는 달라질 수 있다.
+## 2026-07-13 04:31:03 (소요시간: 00:00:41)
+
+### 질문
+
+에픽 예제 폭발 시스템을 복제하고 핵심 플립북 이미지만 `imagegen`으로 유사하게 새로 만드는 접근에 대한 의견.
+
+### 답변
+
+권장할 만한 하이브리드 접근이다. Niagara의 타이밍, 메시 파편, 라이트, 지면 먼지, 스트리머와 성능 설정은 복제하고 화염·매연의 시각 정체성을 결정하는 플립북과 대응 머티리얼만 프로젝트 전용으로 교체하면 원본의 완성도 높은 동작 구조를 유지하면서 다른 외형을 만들 수 있다. 다만 `imagegen`으로 8×8 64프레임 시트를 한 번에 생성하면 셀 정렬과 시간적 일관성이 깨질 가능성이 크므로, 먼저 단일 프레임 스타일 시안을 고른 뒤 폭발의 점화·팽창·말림·감쇠 키 프레임을 순차 편집하고 중간 프레임을 보완하여 고정 격자 아틀라스로 조립하는 방식이 안전하다. 연기처럼 부드러운 반투명 경계는 크로마키보다 검은 배경의 발광/마스크 제작 또는 별도 알파 채널 구성이 적합하며, 원본의 채널 패킹과 노멀 플립북 사용 방식은 머티리얼을 열어 확인한 뒤 맞춰야 한다.
+## 2026-07-13 03:52:00 (소요시간: 00:02:20)
+
+### 질문
+
+`NS_Explosion.uasset`가 배럴 폭발에서 보이지 않는 것 같으며, 배럴이 코드로 해당 Niagara 시스템을 호출하는지 확인 요청.
+
+### 답변
+
+호출한다. 배럴은 내구도가 0이 되면 `DestroyBarrel`에서 `ATunaSweeperLocalExplosionEffectActor`를 생성하고, 이 액터의 생성자에서 `/Game/NiagaraExamples/FX_Explosions/NS_Explosion.NS_Explosion`을 `FireBurstNiagaraSystem`으로 지정한다. 액터 `BeginPlay`에서 `SpawnNiagaraBurstEffects`를 실행해 해당 시스템을 루트에 부착하여 스폰한다. 따라서 BP_ExplosiveBarrel이 직접 호출하는 구조는 아니며, C++ 폭발 액터를 통한 간접 호출이다. 다만 방금 생성한 Windows 쿠킹 결과에는 이 자산이 포함되지 않아, 패키지 실행에서 보이지 않는 직접 원인이 될 수 있다. C++ 소프트 경로만으로는 쿠커가 의존 자산으로 수집하지 못한 상태다.
+## 2026-07-13 05:19:25 (소요시간: 00:00:03)
+
+### 질문
+
+머즐 파이어 위치가 안 맞는데, 어떤 기준으로 생성되는지 확인 요청.
+
+### 답변
+
+현재 머즐 파이어는 메시의 총구나 소켓을 기준으로 찾지 않는다. `ATunaSweeperWeapon`의 `MuzzlePoint` 씬 컴포넌트가 무기 루트의 로컬 `+X 80cm` 위치에 고정되어 있고, Niagara는 이 컴포넌트에 상대 위치·회전 0으로 부착된다. 따라서 라이플 메시의 실제 총구 위치와 어긋난다. 같은 `MuzzlePoint`를 투사체 생성, 레이저 시작점, 발사음 위치도 함께 사용한다.

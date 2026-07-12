@@ -9,6 +9,8 @@
 #include "Engine/StaticMesh.h"
 #include "Engine/World.h"
 #include "GameFramework/DamageType.h"
+#include "GameFramework/Pawn.h"
+#include "Interaction/TunaSweeperCookableChickenActor.h"
 #include "Kismet/GameplayStatics.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Materials/MaterialInterface.h"
@@ -140,7 +142,11 @@ ATunaSweeperExplosiveBarrelActor::ATunaSweeperExplosiveBarrelActor()
 	DamageRadiusDecal->SetHiddenInGame(true);
 	DamageRadiusDecal->SetVisibility(false);
 	DamageRadiusDecal->bUseAttachParentBound = true;
+	// Visualization component metadata is editor-only in UE 5.7, so do not
+	// reference the editor-only API from a Shipping build.
+#if WITH_EDITORONLY_DATA
 	DamageRadiusDecal->SetIsVisualizationComponent(true);
+#endif
 	VisualStates = {
 		MakeDefaultVisualState(FVector(42.0f, 42.0f, 62.0f), FVector(0.0f, 0.0f, 118.0f), FVector::OneVector, 1.0f),
 		MakeDefaultVisualState(FVector(44.0f, 42.0f, 61.0f), FVector(0.0f, 0.0f, 122.0f), FVector(0.62f), 0.65f),
@@ -654,6 +660,7 @@ void ATunaSweeperExplosiveBarrelActor::ApplyExplosionDamage()
 	TArray<FOverlapResult> Overlaps;
 	FCollisionObjectQueryParams ObjectQuery;
 	ObjectQuery.AddObjectTypesToQuery(ECC_Pawn);
+	ObjectQuery.AddObjectTypesToQuery(ECC_WorldDynamic);
 	FCollisionQueryParams Query(SCENE_QUERY_STAT(TunaSweeperExplosiveBarrelOverlap), false, this);
 	if (!World->OverlapMultiByObjectType(Overlaps, GetActorLocation(), FQuat::Identity, ObjectQuery, FCollisionShape::MakeSphere(ExplosionVisualRadiusCm), Query)) return;
 	TSet<AActor*> DamagedActors;
@@ -661,6 +668,7 @@ void ATunaSweeperExplosiveBarrelActor::ApplyExplosionDamage()
 	{
 		AActor* Target = Result.GetActor();
 		if (!IsValid(Target) || Target == this || DamagedActors.Contains(Target)) continue;
+		if (!Target->IsA<APawn>() && !Target->IsA<ATunaSweeperCookableChickenActor>()) continue;
 		DamagedActors.Add(Target);
 		const float Distance = FVector::Distance(GetActorLocation(), Target->GetActorLocation());
 		const float Alpha = FMath::Clamp((Distance - ExplosionDamageInnerRadiusCm) / FMath::Max(1.0f, ExplosionVisualRadiusCm - ExplosionDamageInnerRadiusCm), 0.0f, 1.0f);

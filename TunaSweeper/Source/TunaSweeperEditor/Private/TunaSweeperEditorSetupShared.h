@@ -70,6 +70,7 @@
 #include "GeometryCollection/GeometryCollectionUtility.h"
 #include "GeometryCollection/ManagedArrayCollection.h"
 #include "Interaction/TunaSweeperBreakableAppleCrateActor.h"
+#include "Interaction/TunaSweeperCookableChickenActor.h"
 #include "Interaction/TunaSweeperExplosiveBarrelActor.h"
 #include "Interaction/TunaSweeperInteractableComponent.h"
 #include "Interaction/TunaSweeperItemSpawnInteractableActor.h"
@@ -231,6 +232,7 @@ namespace TunaSweeperEditorSetup
 	const FString WarpPointInteractionTaskId = TEXT("2026-05-25_CreateWarpPointInteractionAssetsV1");
 	const FString EnemyVisualMaterialTaskId = TEXT("2026-05-19_CreateEnemyAndContainerVisualMaterialsV3");
 	const FString ExplosiveBarrelTaskId = TEXT("2026-07-12_CreateStagedExplosiveBarrelAssetsV9");
+	const FString CookableChickenTaskId = TEXT("2026-07-13_CreateCookableChickenBlueprintV1");
 	const FString BreakableAppleCrateTaskId = TEXT("2026-07-07_CreateBreakableAppleCrateAssetsV5");
 	const FString RollingBomberBodyMaterialTaskId = TEXT("2026-05-28_CreateRollingBomberBodyGrayMaterialV1");
 	const FString RollingBomberLegMaterialTaskId = TEXT("2026-05-28_CreateRollingBomberLegMetalMaterialV1");
@@ -443,6 +445,7 @@ namespace TunaSweeperEditorSetup
 	const FString BrokenBridgeVoxelMeshAssetName = TEXT("SM_Bridge_Broken_Voxel");
 	const FString RepairedBridgeVoxelMeshAssetName = TEXT("SM_Bridge_Repaired_Voxel");
 	const FString ExplosiveBarrelAssetName = TEXT("BP_ExplosiveBarrel");
+	const FString CookableChickenAssetName = TEXT("BP_CookableChicken");
 	const FString BreakableAppleCrateAssetName = TEXT("BP_BreakableAppleCrate");
 	const FString PhysicsAppleAssetName = TEXT("BP_PhysicsApple");
 	const FString CrateFragmentAssetName = TEXT("BP_CrateFragment");
@@ -662,6 +665,7 @@ void AddBarrelQuad(
 		float V1);
 bool ConfigureExplosiveBarrelBlueprint(UBlueprint* ExplosiveBarrelBlueprint);
 bool EnsureExplosiveBarrelAssets();
+bool EnsureCookableChickenBlueprint();
 bool ImportWorldTexture(const FString& InSourceFile, const FString& DestinationPath, const FString& AssetName, UTexture2D** OutTexture);
 UGeometryCollection* EnsureBreakableAppleCrateGeometryCollection();
 bool EnsureBreakableAppleCrateAssets();

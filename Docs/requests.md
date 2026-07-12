@@ -5200,6 +5200,47 @@
 - 빌드가 성공했으며 `UnrealEditor-TunaSweeper.dll`과 `UnrealEditor-TunaSweeperEditor.dll`은 2026-07-13 02:29에 갱신되었다.
 - 최신 모듈을 로드하도록 `TunaSweeper/TunaSweeper.uproject`를 Unreal Engine 5.7 Editor로 다시 실행했다.
 
+## 2026-07-13 02:43:00 (소요시간: 00:03:00)
+
+- 폭발 배럴 피해를 한 번 받으면 생닭 메시에서 통닭 메시로 전환되는 `ATunaSweeperCookableChickenActor`를 추가한 것.
+- 블루프린트에서 `RawChickenMesh`와 `CookedChickenMesh`를 각각 지정할 수 있게 하고, `CookChicken` 및 `ResetToRawChicken` 함수도 노출한 것.
+- 폭발 배럴의 피해 범위가 이 월드 액터도 감지하되 기존 Pawn 대상 외에는 새 닭 액터만 처리하도록 제한한 것.
+- `TunaSweeperEditor Win64 Development` 빌드 성공 및 Unreal Engine 5.7 Editor 실행을 확인한 것.
+## 2026-07-13 02:39:00 (소요시간: 00:10:11)
+
+- 최종 폭발의 기존 불꽃·쇼크웨이브·연기 카드 레이어를 화면에서 비활성화하고, 왜곡 전용 `DistortionSprite`만 유지.
+- 불꽃은 `NS_ExplosiveBarrel_FireBurst` Niagara 단발 버스트, 매연은 크게 확대한 `NS_ExplosiveBarrel_ExplosionSmoke` 3D Gas Niagara, 파편/불씨는 `NS_ExplosiveBarrel_DebrisBurst`의 Mesh Burst emitter로 분리해 `ATunaSweeperLocalExplosionEffectActor`에서 재생하도록 변경.
+- 새 Niagara 자산 세 종을 `/Game/Effects`에 생성·저장했고, `TunaSweeperEditor Win64 Development` 빌드를 성공적으로 완료한 뒤 Unreal Engine 5.7 Editor를 다시 실행했다.
+
+## 2026-07-13 02:47:00 (소요시간: 00:03:00)
+
+- `ATunaSweeperCookableChickenActor`를 부모 클래스로 하는 `/Game/Interaction/BP_CookableChicken` 블루프린트 에셋을 생성·저장한 것.
+- `RawChickenMesh`와 `CookedChickenMesh`는 의도적으로 비워 두어 콘텐츠 제작자가 에디터에서 지정할 수 있게 한 것.
+- `TunaSweeperEditor Win64 Development` 빌드를 성공시키고 Unreal Engine 5.7 Editor를 다시 실행한 것.
+## 2026-07-13 03:38:00 (소요시간: 00:00:44)
+
+- 최종 폭발 화염 Niagara 참조를 `/Game/NiagaraExamples/FX_Explosions/NS_Explosion`으로 교체.
+- 기존 `/Game/Effects/NS_ExplosiveBarrel_FireBurst` 생성 경로를 제거하고, `NS_ExplosiveBarrel_FireBurst.uasset`를 삭제.
+- `TunaSweeperEditor Win64 Development` 전체 빌드에 성공하고 Unreal Engine 5.7 Editor를 다시 실행했다.
+## 2026-07-13 03:39:00 (소요시간: 00:01:19)
+
+- 최종 폭발의 `NS_ExplosiveBarrel_DebrisBurst` 참조와 Mesh Debris 생성 경로를 제거하고 해당 `.uasset`를 삭제.
+- 열린 Unreal Editor 때문에 클래스 속성 제거를 포함한 C++ 변경의 전체 빌드는 아직 실행하지 않았다. 에디터 종료 후 전체 빌드가 필요하다.
+## 2026-07-13 03:41:00 (소요시간: 00:00:46)
+
+- Debris Burst 제거 변경을 이어서 `TunaSweeperEditor Win64 Development`로 빌드. UHT와 C++ 링크를 포함한 전체 빌드가 성공했다.
+- 최신 모듈을 로드하도록 Unreal Engine 5.7 Editor를 다시 실행했다.
+## 2026-07-13 03:45:00 (소요시간: 00:05:30)
+
+- UE 5.7 `TunaSweeper` 프로젝트의 Win64 Shipping 패키징을 완료. 빌드, 쿠킹, 스테이징, pak/IoStore 생성 및 사전 요구사항 포함 아카이브를 `TunaSweeper/PackagedBuilds/Windows`에 생성.
+- Shipping 빌드에서 사용할 수 없는 `UDecalComponent::SetIsVisualizationComponent` 호출을 `WITH_EDITORONLY_DATA`로 감싸 UE 5.7 호환성을 확보.
+- 콘텐츠 자산 폴더 `Content/Meshes/Props/Apple`이 배포 제한 폴더명으로 감지되지 않도록 `DefaultGame.ini`의 `[Staging]` 허용 목록에 추가.
+- 패키징 성공 후 Unreal Engine 5.7 Editor로 `TunaSweeper/TunaSweeper.uproject`를 실행.
+## 2026-07-13 03:57:00 (소요시간: 00:03:00)
+
+- C++ 소프트 경로로 참조되는 `/Game/NiagaraExamples/FX_Explosions/NS_Explosion`이 Shipping 쿠킹에서 누락되지 않도록 `DefaultGame.ini`의 항상 쿠킹할 디렉터리에 `/Game/NiagaraExamples/FX_Explosions`을 추가.
+- Win64 Shipping 빌드·쿠킹·스테이징·pak/IoStore 아카이브를 다시 완료했고, 쿠킹 산출물에 `NS_Explosion.uasset`가 포함된 것을 확인.
+
 ## 2026-07-13 04:33:51 (소요시간: 00:33:01)
 
 - 에픽 예제 `NS_Explosion`을 `/Game/Effects/ExplosionTuna/NS_Explosion_Tuna`으로 복제하고, 새로 만든 언리얼 에셋 이름을 모두 `_Tuna`로 끝나도록 구성.
@@ -5217,3 +5258,9 @@
 
 - 요청에 따라 Tuna 폭발 플립북·Niagara 에셋, 원본 이미지 및 런타임 연결 변경을 하나의 Git 커밋 대상으로 선별.
 - 작업 트리에 남아 있던 무관한 무기·맵·배럴·문서 변경은 커밋 대상에서 제외.
+## 2026-07-13 05:19:30 (소요시간: 00:10:42)
+
+- `SM_AssaultRifle`의 실제 총구 끝을 기준으로 `MuzzleSocket`을 생성하고, 머즐 파이어·투사체·레이저 시작점이 이 소켓을 우선 사용하도록 변경.
+- 탄피 배출 위치용 `ShellEjectionSocket`도 추가하고, 탄피 액터가 해당 소켓에서 생성되도록 변경.
+- `TunaSweeper.CreateShellCasingAssets` 실행이 탄피 자산 준비와 라이플 소켓 생성·저장을 함께 수행하도록 확장.
+- UE 5.7 `TunaSweeperEditor Win64 Development` 전체 빌드 성공 및 Unreal Editor 정상 실행 확인.

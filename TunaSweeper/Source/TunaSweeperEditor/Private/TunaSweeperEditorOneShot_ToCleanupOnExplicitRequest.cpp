@@ -122,6 +122,20 @@ namespace TunaSweeperEditorSetup
 			}
 		}
 
+		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperCreateCookableChickenBlueprint")))
+		{
+			if (TunaSweeperEditorSetup::EnsureCookableChickenBlueprint())
+			{
+				FTunaSweeperEditorRunOnce::MarkCompleted(TunaSweeperEditorSetup::CookableChickenTaskId);
+			}
+
+			if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperCookableChickenBlueprintQuit")))
+			{
+				FPlatformMisc::RequestExit(false);
+				return;
+			}
+		}
+
 		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperRebuildBreakableAppleCrate")))
 		{
 			if (TunaSweeperEditorSetup::EnsureBreakableAppleCrateAssets())
