@@ -70,6 +70,9 @@ public:
 		FMSoundTool = MakeUnique<FTunaSweeperFMSoundTool>();
 		FMSoundTool->Startup();
 
+		GlbTextureExtractorTool = MakeUnique<FTunaSweeperGlbTextureExtractorTool>();
+		GlbTextureExtractorTool->Startup();
+
 		TunaSweeperEditorSetup::RunEditorOneShotSetup_ToCleanupOnExplicitRequest();
 	}
 
@@ -88,11 +91,18 @@ public:
 			FMSoundTool->Shutdown();
 			FMSoundTool.Reset();
 		}
+
+		if (GlbTextureExtractorTool)
+		{
+			GlbTextureExtractorTool->Shutdown();
+			GlbTextureExtractorTool.Reset();
+		}
 	}
 
 private:
 	TUniquePtr<FTunaSweeperLevelOpenTool> LevelOpenTool;
 	TUniquePtr<FTunaSweeperFMSoundTool> FMSoundTool;
+	TUniquePtr<FTunaSweeperGlbTextureExtractorTool> GlbTextureExtractorTool;
 };
 
 IMPLEMENT_MODULE(FTunaSweeperEditorModule, TunaSweeperEditor)

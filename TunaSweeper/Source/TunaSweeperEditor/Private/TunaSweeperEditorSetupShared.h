@@ -141,6 +141,7 @@
 #include "Styling/SlateTypes.h"
 #include "TunaSweeperExperimentalVegetation.h"
 #include "TunaSweeperFMSoundTool.h"
+#include "TunaSweeperGlbTextureExtractorTool.h"
 #include "TunaSweeperLevelOpenTool.h"
 #include "TunaSweeperPuddleSkyReflectionMaterial.h"
 #include "TunaSweeperProceduralTerrainTest.h"
