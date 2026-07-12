@@ -73,7 +73,7 @@ void FTunaSweeperGlbTextureExtractorTool::OpenGlbTextureExtractor() const
 
 	FProcHandle ProcessHandle = FPlatformProcess::CreateProc(
 		*ExecutablePath,
-		nullptr,
+		TEXT(""),
 		true,
 		false,
 		false,
