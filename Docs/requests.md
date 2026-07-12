@@ -5207,6 +5207,12 @@
 - 새 텍스처와 머티리얼 인스턴스를 복제한 Niagara 시스템에 연결하고 폭발 배럴 액터가 `NS_Explosion_Tuna`를 사용하도록 변경.
 - UE 5.7 에셋 검증과 `TunaSweeperEditor Win64 Development` 빌드를 통과시킨 뒤 Unreal Editor를 다시 실행.
 
+## 2026-07-13 05:05:09 (소요시간: 00:19:19)
+
+- 무기 발사 성공 시마다 물리 탄피를 우측·상방으로 배출하도록 추가하고, 월드 충돌 후 5초가 지나면 자동 제거되도록 구현.
+- 원통형 탄피 OBJ를 `SourceArt/Weapons`에 작성해 `/Game/Weapons/Effects/SM_WeaponShellCasing`으로 임포트하고, 황동 기본색·금속성 0.9·거칠기 0.24의 머터리얼을 생성해 연결.
+- UE 5.7 `TunaSweeperEditor Win64 Development` 빌드 성공 및 Unreal Editor 실행 확인.
+
 ## 2026-07-13 05:11:22 (소요시간: 00:02:30)
 
 - 요청에 따라 Tuna 폭발 플립북·Niagara 에셋, 원본 이미지 및 런타임 연결 변경을 하나의 Git 커밋 대상으로 선별.

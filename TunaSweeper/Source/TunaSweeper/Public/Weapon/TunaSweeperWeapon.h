@@ -6,6 +6,7 @@
 #include "TunaSweeperWeapon.generated.h"
 
 class ATunaSweeperProjectile;
+class ATunaSweeperShellCasing;
 class UTunaSweeperWeaponCombatComponent;
 class UTunaSweeperWeaponPresentationDataAsset;
 class UMaterialInterface;
@@ -116,6 +117,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
 	TSoftClassPtr<ATunaSweeperProjectile> ProjectileClass;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon|Shell Casing")
+	TSubclassOf<ATunaSweeperShellCasing> ShellCasingClass;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon|Presentation")
 	TSoftObjectPtr<UTunaSweeperWeaponPresentationDataAsset> WeaponPresentationDataAsset;
 
@@ -147,8 +151,12 @@ protected:
 
 	void PlayFirePresentation();
 	void PlayReloadPresentation(TSoftObjectPtr<class USoundBase> ReloadSound);
+	void EjectShellCasing(UWorld& World, APawn* InstigatorPawn);
 
 private:
+	bool TryGetWeaponSocketWorldTransform(FName SocketName, FTransform& OutTransform) const;
+	FTransform GetMuzzleWorldTransform() const;
+
 	float LastFireTimeSeconds = -1000.0f;
 	float LastLaserSightDebugLogTimeSeconds = -1000.0f;
 };

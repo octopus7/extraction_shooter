@@ -19,6 +19,7 @@
 #include "TunaSweeperCollisionChannels.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Weapon/TunaSweeperProjectile.h"
+#include "Weapon/TunaSweeperShellCasing.h"
 #include "Weapon/TunaSweeperWeaponPresentationDataAsset.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogTunaSweeperLaserSight, Log, All);
@@ -27,6 +28,8 @@ namespace TunaSweeperWeaponTags
 {
 	const FName ShotgunWeaponTypeTag(TEXT("weapon.type.shotgun"));
 	const FName GunshotNoiseTag(TEXT("noise.gunshot"));
+	const FName MuzzleSocketName(TEXT("MuzzleSocket"));
+	const FName ShellEjectionSocketName(TEXT("ShellEjectionSocket"));
 	constexpr float GunshotNoiseLoudness = 1.0f;
 	constexpr float ShotgunNoiseLoudness = 1.15f;
 	constexpr float GunshotNoiseMaxRange = 2200.0f;
@@ -255,6 +258,7 @@ ATunaSweeperWeapon::ATunaSweeperWeapon()
 	CombatComponent = CreateDefaultSubobject<UTunaSweeperWeaponCombatComponent>(TEXT("CombatComponent"));
 
 	ProjectileClass = TSoftClassPtr<ATunaSweeperProjectile>(FSoftObjectPath(TEXT("/Game/Weapons/BP_TunaSweeperProjectile.BP_TunaSweeperProjectile_C")));
+	ShellCasingClass = ATunaSweeperShellCasing::StaticClass();
 }
 
 void ATunaSweeperWeapon::ConfigureGunVisual()
@@ -389,7 +393,29 @@ bool ATunaSweeperWeapon::IsLaserSightEnabled() const
 
 FVector ATunaSweeperWeapon::GetMuzzleWorldLocation() const
 {
-	return MuzzlePoint ? MuzzlePoint->GetComponentLocation() : GetActorLocation();
+	return GetMuzzleWorldTransform().GetLocation();
+}
+
+bool ATunaSweeperWeapon::TryGetWeaponSocketWorldTransform(FName SocketName, FTransform& OutTransform) const
+{
+	if (WeaponMesh && !SocketName.IsNone() && WeaponMesh->DoesSocketExist(SocketName))
+	{
+		OutTransform = WeaponMesh->GetSocketTransform(SocketName, RTS_World);
+		return true;
+	}
+
+	return false;
+}
+
+FTransform ATunaSweeperWeapon::GetMuzzleWorldTransform() const
+{
+	FTransform MuzzleTransform;
+	if (TryGetWeaponSocketWorldTransform(TunaSweeperWeaponTags::MuzzleSocketName, MuzzleTransform))
+	{
+		return MuzzleTransform;
+	}
+
+	return MuzzlePoint ? MuzzlePoint->GetComponentTransform() : GetActorTransform();
 }
 
 void ATunaSweeperWeapon::UpdateLaserSightBeam(
@@ -402,7 +428,9 @@ void ATunaSweeperWeapon::UpdateLaserSightBeam(
 		return;
 	}
 
-	const FVector BeamStartWorld = GetMuzzleWorldLocation();
+	const FTransform MuzzleWorldTransform = GetMuzzleWorldTransform();
+	const FVector BeamStartWorld = MuzzleWorldTransform.GetLocation();
+	LaserSightComponent->SetWorldTransform(MuzzleWorldTransform);
 	const FVector LaserDirection = ResolveMuzzleLevelAimDirection(
 		BeamStartWorld,
 		AimWorldPoint,
@@ -454,7 +482,7 @@ void ATunaSweeperWeapon::UpdateLaserSightBeam(
 			false,
 			AimDirection,
 			GetActorForwardVector());
-		FVector MuzzleForwardDirection = MuzzlePoint->GetForwardVector().GetSafeNormal2D();
+		FVector MuzzleForwardDirection = GetMuzzleWorldTransform().GetUnitAxis(EAxis::X).GetSafeNormal2D();
 		if (MuzzleForwardDirection.IsNearlyZero())
 		{
 			MuzzleForwardDirection = GetActorForwardVector().GetSafeNormal2D();
@@ -672,8 +700,73 @@ bool ATunaSweeperWeapon::FireWithAimIntent(
 	}
 
 	LastFireTimeSeconds = CurrentTime;
+	EjectShellCasing(*World, InstigatorPawn);
 	PlayFirePresentation();
 	return true;
+}
+
+void ATunaSweeperWeapon::EjectShellCasing(UWorld& World, APawn* InstigatorPawn)
+{
+	TSubclassOf<ATunaSweeperShellCasing> CasingClassToSpawn = ShellCasingClass;
+	if (!CasingClassToSpawn)
+	{
+		CasingClassToSpawn = ATunaSweeperShellCasing::StaticClass();
+	}
+
+	FTransform ShellEjectionTransform;
+	const bool bHasShellEjectionSocket = TryGetWeaponSocketWorldTransform(TunaSweeperWeaponTags::ShellEjectionSocketName, ShellEjectionTransform);
+
+	FVector WeaponForward = (bHasShellEjectionSocket
+		? ShellEjectionTransform.GetUnitAxis(EAxis::X)
+		: GetActorForwardVector()).GetSafeNormal2D();
+	if (WeaponForward.IsNearlyZero())
+	{
+		WeaponForward = FVector::ForwardVector;
+	}
+
+	FVector WeaponRight = (bHasShellEjectionSocket
+		? ShellEjectionTransform.GetUnitAxis(EAxis::Y)
+		: GetActorRightVector()).GetSafeNormal2D();
+	if (WeaponRight.IsNearlyZero())
+	{
+		WeaponRight = FVector::RightVector;
+	}
+
+	FActorSpawnParameters SpawnParameters;
+	SpawnParameters.Owner = this;
+	SpawnParameters.Instigator = InstigatorPawn;
+	SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+	const FVector EjectionLocation = bHasShellEjectionSocket
+		? ShellEjectionTransform.GetLocation()
+		: GetMuzzleWorldLocation() - WeaponForward * 38.0f + WeaponRight * 18.0f + FVector::UpVector * 12.0f;
+	const FRotator ShellEjectionRotation = bHasShellEjectionSocket
+		? ShellEjectionTransform.Rotator()
+		: WeaponForward.Rotation();
+	const FRotator EjectionRotation(
+		ShellEjectionRotation.Pitch + FMath::FRandRange(-35.0f, 35.0f),
+		ShellEjectionRotation.Yaw,
+		ShellEjectionRotation.Roll + FMath::FRandRange(-180.0f, 180.0f));
+
+	ATunaSweeperShellCasing* Casing = World.SpawnActor<ATunaSweeperShellCasing>(
+		CasingClassToSpawn,
+		EjectionLocation,
+		EjectionRotation,
+		SpawnParameters);
+	if (!Casing)
+	{
+		return;
+	}
+
+	const FVector EjectionVelocity =
+		WeaponRight * FMath::FRandRange(135.0f, 180.0f) +
+		FVector::UpVector * FMath::FRandRange(70.0f, 105.0f) +
+		WeaponForward * FMath::FRandRange(-25.0f, 18.0f);
+	const FVector AngularVelocity(
+		FMath::FRandRange(-1080.0f, 1080.0f),
+		FMath::FRandRange(-1080.0f, 1080.0f),
+		FMath::FRandRange(-1080.0f, 1080.0f));
+	Casing->LaunchCasing(EjectionVelocity, AngularVelocity);
 }
 
 void ATunaSweeperWeapon::PlayFirePresentation()
@@ -684,9 +777,20 @@ void ATunaSweeperWeapon::PlayFirePresentation()
 		return;
 	}
 
-	if (MuzzlePoint)
+	if (UNiagaraSystem* MuzzleFlashEffect = PresentationData->MuzzleFlashEffect.LoadSynchronous())
 	{
-		if (UNiagaraSystem* MuzzleFlashEffect = PresentationData->MuzzleFlashEffect.LoadSynchronous())
+		if (WeaponMesh && WeaponMesh->DoesSocketExist(TunaSweeperWeaponTags::MuzzleSocketName))
+		{
+			UNiagaraFunctionLibrary::SpawnSystemAttached(
+				MuzzleFlashEffect,
+				WeaponMesh,
+				TunaSweeperWeaponTags::MuzzleSocketName,
+				FVector::ZeroVector,
+				FRotator::ZeroRotator,
+				EAttachLocation::SnapToTarget,
+				true);
+		}
+		else if (MuzzlePoint)
 		{
 			UNiagaraFunctionLibrary::SpawnSystemAttached(
 				MuzzleFlashEffect,

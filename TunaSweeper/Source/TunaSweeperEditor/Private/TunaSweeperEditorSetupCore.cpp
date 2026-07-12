@@ -1,5 +1,9 @@
 #include "TunaSweeperEditorSetupShared.h"
 
+#include "Engine/StaticMeshSocket.h"
+#include "HAL/IConsoleManager.h"
+#include "StaticMeshResources.h"
+
 namespace TunaSweeperEditorSetup
 {
 	FString GetGameInstanceObjectPath()
@@ -2228,6 +2232,260 @@ namespace TunaSweeperEditorSetup
 
 		return SaveAsset(AssaultRifleBlueprint);
 	}
+
+	FVector ResolveMuzzleSocketLocation(const UStaticMesh& WeaponMesh)
+	{
+		const FBox MeshBounds = WeaponMesh.GetBoundingBox();
+		FVector SocketLocation = MeshBounds.GetCenter();
+		const float TipTolerance = FMath::Max(0.5f, MeshBounds.GetSize().X * 0.01f);
+
+		if (const FStaticMeshRenderData* RenderData = WeaponMesh.GetRenderData();
+			RenderData && !RenderData->LODResources.IsEmpty())
+		{
+			const FPositionVertexBuffer& PositionBuffer = RenderData->LODResources[0].VertexBuffers.PositionVertexBuffer;
+			FVector TipVertexSum = FVector::ZeroVector;
+			int32 TipVertexCount = 0;
+			for (uint32 VertexIndex = 0; VertexIndex < PositionBuffer.GetNumVertices(); ++VertexIndex)
+			{
+				const FVector VertexPosition(PositionBuffer.VertexPosition(VertexIndex));
+				if (VertexPosition.X >= MeshBounds.Max.X - TipTolerance)
+				{
+					TipVertexSum += VertexPosition;
+					++TipVertexCount;
+				}
+			}
+
+			if (TipVertexCount > 0)
+			{
+				SocketLocation = TipVertexSum / static_cast<float>(TipVertexCount);
+			}
+		}
+
+		// Place the emitter just outside the barrel, while preserving the barrel's real Y/Z centerline.
+		SocketLocation.X = MeshBounds.Max.X + 0.5f;
+		return SocketLocation;
+	}
+
+	bool EnsureAssaultRifleWeaponSockets()
+	{
+		UBlueprint* AssaultRifleBlueprint = LoadObject<UBlueprint>(
+			nullptr,
+			TEXT("/Game/Weapons/BP_AssaultRifle.BP_AssaultRifle"));
+		if (!AssaultRifleBlueprint)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to load /Game/Weapons/BP_AssaultRifle while configuring weapon sockets."));
+			return false;
+		}
+
+		if (!AssaultRifleBlueprint->GeneratedClass)
+		{
+			FKismetEditorUtilities::CompileBlueprint(AssaultRifleBlueprint);
+		}
+
+		ATunaSweeperWeapon* AssaultRifleDefaults = AssaultRifleBlueprint->GeneratedClass
+			? Cast<ATunaSweeperWeapon>(AssaultRifleBlueprint->GeneratedClass->GetDefaultObject())
+			: nullptr;
+		UStaticMeshComponent* WeaponMeshComponent = AssaultRifleDefaults
+			? AssaultRifleDefaults->FindComponentByClass<UStaticMeshComponent>()
+			: nullptr;
+		UStaticMesh* RifleMesh = WeaponMeshComponent ? WeaponMeshComponent->GetStaticMesh() : nullptr;
+		if (!RifleMesh)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("BP_AssaultRifle has no static WeaponMesh to receive weapon sockets."));
+			return false;
+		}
+
+		const FVector MuzzleSocketLocation = ResolveMuzzleSocketLocation(*RifleMesh);
+		const FBox MeshBounds = RifleMesh->GetBoundingBox();
+		const FVector ShellEjectionSocketLocation(
+			FMath::Lerp(MeshBounds.Min.X, MuzzleSocketLocation.X, 0.62f),
+			MeshBounds.Max.Y + 0.5f,
+			MuzzleSocketLocation.Z);
+
+		bool bMeshChanged = false;
+		auto EnsureSocket = [&RifleMesh, &bMeshChanged](FName SocketName, const FVector& Location)
+		{
+			if (RifleMesh->FindSocket(SocketName))
+			{
+				return;
+			}
+
+			if (!bMeshChanged)
+			{
+				RifleMesh->Modify();
+				RifleMesh->PreEditChange(nullptr);
+				bMeshChanged = true;
+			}
+
+			UStaticMeshSocket* Socket = NewObject<UStaticMeshSocket>(RifleMesh, SocketName, RF_Transactional);
+			Socket->SocketName = SocketName;
+			Socket->RelativeLocation = Location;
+			Socket->RelativeRotation = FRotator::ZeroRotator;
+			Socket->RelativeScale = FVector::OneVector;
+			RifleMesh->AddSocket(Socket);
+		};
+
+		EnsureSocket(TEXT("MuzzleSocket"), MuzzleSocketLocation);
+		EnsureSocket(TEXT("ShellEjectionSocket"), ShellEjectionSocketLocation);
+
+		if (!bMeshChanged)
+		{
+			return true;
+		}
+
+		RifleMesh->PostEditChange();
+		RifleMesh->MarkPackageDirty();
+		if (!SaveAsset(RifleMesh))
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to save rifle mesh sockets on %s."), *RifleMesh->GetPathName());
+			return false;
+		}
+
+		UE_LOG(
+			LogTunaSweeperEditor,
+			Display,
+			TEXT("Added MuzzleSocket=%s and ShellEjectionSocket=%s to %s."),
+			*MuzzleSocketLocation.ToString(),
+			*ShellEjectionSocketLocation.ToString(),
+			*RifleMesh->GetPathName());
+		return true;
+	}
+
+	bool EnsureShellCasingAssets()
+	{
+		const FString SourceFile = FPaths::ConvertRelativePathToFull(
+			FPaths::Combine(FPaths::ProjectDir(), TEXT("SourceArt/Weapons/SM_WeaponShellCasing.obj")));
+		if (!FPaths::FileExists(SourceFile))
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Missing shell casing OBJ source: %s"), *SourceFile);
+			return false;
+		}
+
+		const FString MeshObjectPath = GetAssetObjectPath(WeaponEffectsAssetPath, ShellCasingMeshAssetName);
+		UStaticMesh* ShellCasingMesh = LoadObject<UStaticMesh>(nullptr, *MeshObjectPath);
+		if (!ShellCasingMesh)
+		{
+			const FString InterchangeDefaultObjectPath = GetAssetObjectPath(WeaponEffectsAssetPath, TEXT("casing"));
+			ShellCasingMesh = FindObject<UStaticMesh>(nullptr, *InterchangeDefaultObjectPath);
+		}
+
+		if (!ShellCasingMesh)
+		{
+			UAutomatedAssetImportData* ImportData = NewObject<UAutomatedAssetImportData>();
+			ImportData->DestinationPath = WeaponEffectsAssetPath;
+			ImportData->Filenames.Add(SourceFile);
+			ImportData->bReplaceExisting = false;
+			ImportData->bSkipReadOnly = true;
+
+			FAssetToolsModule& AssetToolsModule = FModuleManager::LoadModuleChecked<FAssetToolsModule>(TEXT("AssetTools"));
+			const TArray<UObject*> ImportedAssets = AssetToolsModule.Get().ImportAssetsAutomated(ImportData);
+			for (UObject* ImportedAsset : ImportedAssets)
+			{
+				if (UStaticMesh* ImportedMesh = Cast<UStaticMesh>(ImportedAsset))
+				{
+					ShellCasingMesh = ImportedMesh;
+					break;
+				}
+			}
+			if (!ShellCasingMesh)
+			{
+				UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to import shell casing OBJ: %s"), *SourceFile);
+				return false;
+			}
+		}
+
+		if (ShellCasingMesh->GetName() != ShellCasingMeshAssetName)
+		{
+			FAssetToolsModule& AssetToolsModule = FModuleManager::LoadModuleChecked<FAssetToolsModule>(TEXT("AssetTools"));
+			TArray<FAssetRenameData> RenameData;
+			RenameData.Emplace(ShellCasingMesh, WeaponEffectsAssetPath, ShellCasingMeshAssetName);
+			if (!AssetToolsModule.Get().RenameAssets(RenameData))
+			{
+				UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to rename imported shell casing mesh to: %s"), *MeshObjectPath);
+				return false;
+			}
+
+			ShellCasingMesh = LoadObject<UStaticMesh>(nullptr, *MeshObjectPath);
+			if (!ShellCasingMesh)
+			{
+				UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to load renamed shell casing mesh: %s"), *MeshObjectPath);
+				return false;
+			}
+		}
+
+		const FString MaterialObjectPath = GetAssetObjectPath(WeaponEffectsAssetPath, ShellCasingMaterialAssetName);
+		UMaterial* ShellCasingMaterial = LoadObject<UMaterial>(nullptr, *MaterialObjectPath);
+		if (!ShellCasingMaterial)
+		{
+			UMaterialFactoryNew* MaterialFactory = NewObject<UMaterialFactoryNew>();
+			FAssetToolsModule& AssetToolsModule = FModuleManager::LoadModuleChecked<FAssetToolsModule>(TEXT("AssetTools"));
+			ShellCasingMaterial = Cast<UMaterial>(AssetToolsModule.Get().CreateAsset(
+				ShellCasingMaterialAssetName,
+				WeaponEffectsAssetPath,
+				UMaterial::StaticClass(),
+				MaterialFactory));
+			if (!ShellCasingMaterial)
+			{
+				UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to create shell casing material: %s"), *MaterialObjectPath);
+				return false;
+			}
+		}
+
+		ShellCasingMaterial->Modify();
+		ShellCasingMaterial->GetExpressionCollection().Empty();
+		ShellCasingMaterial->BlendMode = BLEND_Opaque;
+		ShellCasingMaterial->SetShadingModel(MSM_DefaultLit);
+		ShellCasingMaterial->TwoSided = false;
+
+		UMaterialEditorOnlyData* MaterialEditorOnly = ShellCasingMaterial->GetEditorOnlyData();
+		if (!MaterialEditorOnly)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to edit shell casing material: %s"), *MaterialObjectPath);
+			return false;
+		}
+
+		UMaterialExpressionConstant3Vector* BrassColor = NewObject<UMaterialExpressionConstant3Vector>(ShellCasingMaterial);
+		BrassColor->Material = ShellCasingMaterial;
+		BrassColor->Constant = FLinearColor(0.52f, 0.19f, 0.035f, 1.0f);
+		BrassColor->MaterialExpressionEditorX = -280;
+		BrassColor->MaterialExpressionEditorY = 0;
+		ShellCasingMaterial->GetExpressionCollection().AddExpression(BrassColor);
+
+		MaterialEditorOnly->BaseColor.Connect(0, BrassColor);
+		MaterialEditorOnly->Metallic.UseConstant = true;
+		MaterialEditorOnly->Metallic.Constant = 0.9f;
+		MaterialEditorOnly->Roughness.UseConstant = true;
+		MaterialEditorOnly->Roughness.Constant = 0.24f;
+		MaterialEditorOnly->Specular.UseConstant = true;
+		MaterialEditorOnly->Specular.Constant = 0.45f;
+		ShellCasingMaterial->PostEditChange();
+		ShellCasingMaterial->MarkPackageDirty();
+		if (!SaveAsset(ShellCasingMaterial))
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to save shell casing material: %s"), *MaterialObjectPath);
+			return false;
+		}
+
+		ShellCasingMesh->Modify();
+		ShellCasingMesh->SetMaterial(0, ShellCasingMaterial);
+		ShellCasingMesh->PostEditChange();
+		ShellCasingMesh->MarkPackageDirty();
+		if (!SaveAsset(ShellCasingMesh))
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to save shell casing mesh: %s"), *MeshObjectPath);
+			return false;
+		}
+
+		return EnsureAssaultRifleWeaponSockets();
+	}
+
+	static FAutoConsoleCommand CreateShellCasingAssetsConsoleCommand(
+		TEXT("TunaSweeper.CreateShellCasingAssets"),
+		TEXT("Imports the TunaSweeper shell casing OBJ, creates its brass material, and ensures rifle muzzle/ejection sockets."),
+		FConsoleCommandDelegate::CreateLambda([]()
+		{
+			EnsureShellCasingAssets();
+		}));
 
 	bool EnsureTopDownShooterAssets()
 	{

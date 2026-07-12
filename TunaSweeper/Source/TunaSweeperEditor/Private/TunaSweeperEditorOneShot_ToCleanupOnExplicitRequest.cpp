@@ -6,6 +6,16 @@ namespace TunaSweeperEditorSetup
 	// One-shot editor bootstrap. Remove only after an explicit cleanup request; see Docs/editor_one_shot_cleanup.md.
 	void RunEditorOneShotSetup_ToCleanupOnExplicitRequest()
 	{
+		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperShellCasingSetup")))
+		{
+			TunaSweeperEditorSetup::EnsureShellCasingAssets();
+			if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperShellCasingSetupQuit")))
+			{
+				FPlatformMisc::RequestExit(false);
+				return;
+			}
+		}
+
 		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperWeaponPresentationSetup")))
 		{
 			if (TunaSweeperEditorSetup::EnsureWeaponPresentationAssets())

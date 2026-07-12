@@ -277,6 +277,9 @@ namespace TunaSweeperEditorSetup
 	const FString WeaponPresentationAssetPath = TEXT("/Game/Weapons/AudioVisual");
 	const FString WeaponPresentationRifleDataAssetName = TEXT("DA_WeaponPresentation_Rifle");
 	const FString WeaponPresentationAudioAssetPath = TEXT("/Game/Audio/SFX/Weapons");
+	const FString WeaponEffectsAssetPath = TEXT("/Game/Weapons/Effects");
+	const FString ShellCasingMeshAssetName = TEXT("SM_WeaponShellCasing");
+	const FString ShellCasingMaterialAssetName = TEXT("M_WeaponShellCasing_Brass");
 	const FString RifleFireSoundAssetName = TEXT("SFX_Rifle_Fire_FM");
 	const FString RifleReloadStartSoundAssetName = TEXT("SFX_Rifle_ReloadStart_FM");
 	const FString RifleReloadCompleteSoundAssetName = TEXT("SFX_Rifle_ReloadComplete_FM");
@@ -624,6 +627,7 @@ bool EnsureGameInstanceBlueprint();
 bool EnsureProjectileHitEffectAssets();
 bool EnsureWeaponSpreadRecoilAssets();
 bool EnsureWeaponPresentationAssets();
+bool EnsureShellCasingAssets();
 bool EnsureTopDownShooterAssets();
 bool EnsureCanBotBlueprint();
 bool EnsureEnemyVisualMaterialAssets();
