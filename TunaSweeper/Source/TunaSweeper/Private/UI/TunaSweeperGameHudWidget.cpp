@@ -589,6 +589,37 @@ void UTunaSweeperGameHudWidget::DrawEnemyCombatDebugOverlay(
 				FLinearColor(1.0f, 0.93f, 0.76f, 1.0f));
 		}
 
+		if (!Snapshot.RecentEntryReason.IsEmpty() && Snapshot.RecentEntryReasonRemainingSeconds > 0.0f)
+		{
+			const float TooltipFadeAlpha = FMath::Clamp(Snapshot.RecentEntryReasonRemainingSeconds / 0.45f, 0.0f, 1.0f);
+			const float TooltipTextWidth = Snapshot.RecentEntryReason.Len() * DistanceFontSize * 0.56f;
+			const FVector2D TooltipSize(
+				TooltipTextWidth + 20.0f * Scale,
+				DistanceFontSize + 12.0f * Scale);
+			const FVector2D TooltipPosition(
+				WidgetCenter.X + Radius + 10.0f * Scale,
+				WidgetCenter.Y - TooltipSize.Y * 0.5f);
+			FSlateRoundedBoxBrush TooltipBrush(
+				FLinearColor(0.055f, 0.020f, 0.008f, 0.94f * TooltipFadeAlpha),
+				6.0f * Scale,
+				FLinearColor(1.0f, 0.46f, 0.10f, 0.80f * TooltipFadeAlpha),
+				1.0f * Scale);
+			FSlateDrawElement::MakeBox(
+				OutDrawElements,
+				InOutLayerId + 4,
+				MakeHudLocalBoxGeometry(AllottedGeometry, TooltipPosition, TooltipSize),
+				&TooltipBrush,
+				ESlateDrawEffect::None,
+				FLinearColor::White);
+			DrawTextAt(
+				Snapshot.RecentEntryReason,
+				TooltipPosition + FVector2D(10.0f * Scale, 4.0f * Scale),
+				28,
+				22,
+				true,
+				FLinearColor(1.0f, 0.92f, 0.72f, TooltipFadeAlpha));
+		}
+
 		InOutLayerId += 4;
 	}
 }

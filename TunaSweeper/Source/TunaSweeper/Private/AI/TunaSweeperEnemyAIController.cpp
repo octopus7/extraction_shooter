@@ -51,6 +51,7 @@ bool ATunaSweeperEnemyAIController::GetCombatDebugSnapshot(FTunaSweeperEnemyComb
 	OutSnapshot.bIsCombatEngaged = bIsCombatEngaged;
 	OutSnapshot.TrackingRange = ResolveTrackingRange();
 	OutSnapshot.VisionAngleDegrees = FMath::Clamp(CombatVisionAngleDegrees, 0.0f, 360.0f);
+	OutSnapshot.HearingRange = FMath::Max(0.0f, HearingRange);
 	OutSnapshot.FacingDirection = ControlledPawn->GetActorForwardVector().GetSafeNormal2D();
 	if (OutSnapshot.FacingDirection.IsNearlyZero())
 	{
@@ -63,6 +64,13 @@ bool ATunaSweeperEnemyAIController::GetCombatDebugSnapshot(FTunaSweeperEnemyComb
 
 	const UWorld* World = GetWorld();
 	const double CurrentTimeSeconds = World ? World->GetTimeSeconds() : 0.0;
+	OutSnapshot.RecentEntryReasonRemainingSeconds = FMath::Max(
+		0.0f,
+		CombatDebugEntryReasonDisplaySeconds - static_cast<float>(CurrentTimeSeconds - CombatDebugEntryReasonTimeSeconds));
+	if (OutSnapshot.RecentEntryReasonRemainingSeconds > 0.0f)
+	{
+		OutSnapshot.RecentEntryReason = CombatDebugEntryReason;
+	}
 	auto SetTimedState = [&OutSnapshot, CurrentTimeSeconds](const TCHAR* Label, double EndTimeSeconds, float MaxSeconds)
 	{
 		OutSnapshot.StateLabel = Label;
@@ -251,7 +259,7 @@ void ATunaSweeperEnemyAIController::UpdateAttackTarget()
 	{
 		if (CanAcquireCombatTarget(PlayerPawn, DistanceToPlayer))
 		{
-			StartAlerted(PlayerPawn);
+			StartAlerted(PlayerPawn, TEXT("Combat: sight reacquired"));
 		}
 		return;
 	}
@@ -277,7 +285,7 @@ void ATunaSweeperEnemyAIController::UpdateAttackTarget()
 
 	if (!bIsCombatEngaged)
 	{
-		StartAlerted(PlayerPawn);
+		StartAlerted(PlayerPawn, TEXT("Combat: line of sight"));
 		return;
 	}
 
@@ -317,7 +325,7 @@ void ATunaSweeperEnemyAIController::NotifySuspicionAtLocation(const FVector& InS
 		return;
 	}
 
-	StartSuspicion(InSuspicionLocation);
+	StartSuspicion(InSuspicionLocation, TEXT("Search: external alert"));
 }
 
 void ATunaSweeperEnemyAIController::UpdateAwarenessState(float DeltaSeconds)
@@ -446,7 +454,7 @@ void ATunaSweeperEnemyAIController::StartNonCombatWander()
 		(World ? World->GetTimeSeconds() : 0.0) + GetRandomRangeValue(WanderSeconds, 0.05f);
 }
 
-void ATunaSweeperEnemyAIController::StartSuspicion(const FVector& InSuspicionLocation)
+void ATunaSweeperEnemyAIController::StartSuspicion(const FVector& InSuspicionLocation, const TCHAR* EntryReason)
 {
 	APawn* ControlledPawn = GetPawn();
 	UWorld* World = GetWorld();
@@ -464,6 +472,7 @@ void ATunaSweeperEnemyAIController::StartSuspicion(const FVector& InSuspicionLoc
 	bIsOpeningHold = false;
 	StopMovement();
 	ClearFocus(EAIFocusPriority::Gameplay);
+	RecordCombatDebugEntryReason(EntryReason);
 
 	if (ATunaSweeperEnemyCharacter* EnemyCharacter = Cast<ATunaSweeperEnemyCharacter>(ControlledPawn))
 	{
@@ -471,7 +480,7 @@ void ATunaSweeperEnemyAIController::StartSuspicion(const FVector& InSuspicionLoc
 	}
 }
 
-void ATunaSweeperEnemyAIController::StartAlerted(AActor* TargetActor)
+void ATunaSweeperEnemyAIController::StartAlerted(AActor* TargetActor, const TCHAR* EntryReason)
 {
 	APawn* ControlledPawn = GetPawn();
 	UWorld* World = GetWorld();
@@ -492,6 +501,7 @@ void ATunaSweeperEnemyAIController::StartAlerted(AActor* TargetActor)
 	RangedCombatState = ETunaSweeperRangedCombatState::Idle;
 	StopMovement();
 	SetFocus(TargetActor, EAIFocusPriority::Gameplay);
+	RecordCombatDebugEntryReason(EntryReason);
 
 	if (ATunaSweeperEnemyCharacter* EnemyCharacter = Cast<ATunaSweeperEnemyCharacter>(ControlledPawn))
 	{
@@ -512,6 +522,9 @@ void ATunaSweeperEnemyAIController::EnterCombat()
 	AwarenessState = ETunaSweeperEnemyAwarenessState::Combat;
 	bIsCombatEngaged = true;
 	SetFocus(TargetActor, EAIFocusPriority::Gameplay);
+	RecordCombatDebugEntryReason(CombatDebugEntryReason.IsEmpty()
+		? TEXT("Combat: target acquired")
+		: *CombatDebugEntryReason);
 
 	ATunaSweeperEnemyCharacter* EnemyCharacter = Cast<ATunaSweeperEnemyCharacter>(ControlledPawn);
 	if (EnemyCharacter)
@@ -981,7 +994,16 @@ void ATunaSweeperEnemyAIController::HandleNoiseReported(const FTunaSweeperNoiseE
 		return;
 	}
 
-	StartSuspicion(HeardNoise.SourceLocation);
+	StartSuspicion(HeardNoise.SourceLocation, TEXT("Search: heard noise"));
+}
+
+void ATunaSweeperEnemyAIController::RecordCombatDebugEntryReason(const TCHAR* EntryReason)
+{
+	CombatDebugEntryReason = EntryReason ? EntryReason : TEXT("");
+	if (const UWorld* World = GetWorld())
+	{
+		CombatDebugEntryReasonTimeSeconds = World->GetTimeSeconds();
+	}
 }
 
 void ATunaSweeperEnemyAIController::DrawCombatDebug() const

@@ -2641,6 +2641,74 @@ namespace TunaSweeperEditorSetup
 		}
 	}
 
+	void BuildExplosiveBarrelDamagedMeshDescription(FMeshDescription& MeshDescription, float DamageAmount)
+	{
+		FStaticMeshAttributes Attributes(MeshDescription);
+		Attributes.Register();
+		Attributes.GetVertexInstanceUVs().SetNumChannels(1);
+		const FPolygonGroupID PolygonGroupId = MeshDescription.CreatePolygonGroup();
+		Attributes.GetPolygonGroupMaterialSlotNames()[PolygonGroupId] = FName(TEXT("Barrel"));
+		const FPolygonGroupID DetailPolygonGroupId = MeshDescription.CreatePolygonGroup();
+		Attributes.GetPolygonGroupMaterialSlotNames()[DetailPolygonGroupId] = FName(TEXT("BarrelDetail"));
+
+		constexpr int32 SegmentCount = 32;
+		const float Heights[] = { 0.0f, 6.0f, 13.0f, 25.0f, 58.0f, 95.0f, 107.0f, 114.0f, 120.0f };
+		const float Radii[] = { 31.0f, 35.0f, 35.0f, 32.5f, 34.0f, 32.5f, 35.0f, 35.0f, 31.0f };
+		for (int32 RingIndex = 0; RingIndex < UE_ARRAY_COUNT(Heights) - 1; ++RingIndex)
+		{
+			for (int32 SegmentIndex = 0; SegmentIndex < SegmentCount; ++SegmentIndex)
+			{
+				const float U0 = static_cast<float>(SegmentIndex) / SegmentCount;
+				const float U1 = static_cast<float>(SegmentIndex + 1) / SegmentCount;
+				auto MakeDamagedVertex = [&](float Angle, float Radius, float Height)
+				{
+					const float Dent = FMath::Pow(FMath::Max(0.0f, FMath::Cos(Angle - 0.55f)), 5.0f) * DamageAmount;
+					const float Crush = 1.0f - Dent * 0.43f;
+					FVector3f Vertex = MakeBarrelVertex(Angle, Radius * Crush, Height * (1.0f - DamageAmount * 0.07f));
+					Vertex.X += Dent * DamageAmount * 14.0f;
+					return Vertex;
+				};
+				const float Angle0 = U0 * 2.0f * UE_PI;
+				const float Angle1 = U1 * 2.0f * UE_PI;
+				AddBarrelQuad(MeshDescription, Attributes, PolygonGroupId,
+					MakeDamagedVertex(Angle0, Radii[RingIndex], Heights[RingIndex]),
+					MakeDamagedVertex(Angle1, Radii[RingIndex], Heights[RingIndex]),
+					MakeDamagedVertex(Angle1, Radii[RingIndex + 1], Heights[RingIndex + 1]),
+					MakeDamagedVertex(Angle0, Radii[RingIndex + 1], Heights[RingIndex + 1]),
+					U0, U1, Heights[RingIndex] / 120.0f, Heights[RingIndex + 1] / 120.0f);
+			}
+		}
+
+		// Keep the damaged drum closed: the lid follows the same dent profile as the upper wall.
+		auto MakeDamagedTopVertex = [DamageAmount](float Angle)
+		{
+			const float Dent = FMath::Pow(FMath::Max(0.0f, FMath::Cos(Angle - 0.55f)), 5.0f) * DamageAmount;
+			const float Crush = 1.0f - Dent * 0.43f;
+			FVector3f Vertex = MakeBarrelVertex(Angle, 31.0f * Crush, 120.0f * (1.0f - DamageAmount * 0.07f));
+			Vertex.X += Dent * DamageAmount * 14.0f;
+			return Vertex;
+		};
+		const FVector3f TopCenter(DamageAmount * DamageAmount * 6.0f, 0.0f, 118.0f * (1.0f - DamageAmount * 0.07f));
+		for (int32 SegmentIndex = 0; SegmentIndex < SegmentCount; ++SegmentIndex)
+		{
+			const float U0 = static_cast<float>(SegmentIndex) / SegmentCount;
+			const float U1 = static_cast<float>(SegmentIndex + 1) / SegmentCount;
+			const float Angle0 = U0 * 2.0f * UE_PI;
+			const float Angle1 = U1 * 2.0f * UE_PI;
+			AddBarrelTriangle(
+				MeshDescription,
+				Attributes,
+				PolygonGroupId,
+				TopCenter,
+				MakeDamagedTopVertex(Angle0),
+				MakeDamagedTopVertex(Angle1),
+				FVector2f(0.5f, 0.5f),
+				FVector2f(0.5f + FMath::Cos(Angle0) * 0.5f, 0.5f + FMath::Sin(Angle0) * 0.5f),
+				FVector2f(0.5f + FMath::Cos(Angle1) * 0.5f, 0.5f + FMath::Sin(Angle1) * 0.5f),
+				FVector3f(0.0f, 0.0f, 1.0f));
+		}
+	}
+
 	UStaticMesh* EnsureExplosiveBarrelStaticMesh(
 		const FString& AssetName,
 		UMaterialInterface* BarrelMaterial,
@@ -2710,6 +2778,179 @@ namespace TunaSweeperEditorSetup
 		return SaveAsset(StaticMesh) ? StaticMesh : nullptr;
 	}
 
+	FString GetExplosiveBarrelTextureSourcePath(const FString& FileName)
+	{
+		return GetWorkspaceFilePath(FString::Printf(TEXT("GeneratedImages/ExplosiveBarrel/%s"), *FileName));
+	}
+
+	UMaterial* EnsureExplosiveBarrelTexturedMaterial(const FString& MaterialAssetName, UTexture2D* Texture, float Roughness)
+	{
+		if (!Texture) return nullptr;
+		const FString ObjectPath = GetAssetObjectPath(InteractionAssetPath, MaterialAssetName);
+		UMaterial* Material = LoadObject<UMaterial>(nullptr, *ObjectPath);
+		if (!Material)
+		{
+			UMaterialFactoryNew* Factory = NewObject<UMaterialFactoryNew>();
+			Material = Cast<UMaterial>(FModuleManager::LoadModuleChecked<FAssetToolsModule>(TEXT("AssetTools")).Get().CreateAsset(MaterialAssetName, InteractionAssetPath, UMaterial::StaticClass(), Factory));
+			if (!Material) return nullptr;
+			FAssetRegistryModule::AssetCreated(Material);
+		}
+		Material->Modify();
+		Material->GetExpressionCollection().Empty();
+		Material->BlendMode = BLEND_Opaque;
+		Material->SetShadingModel(MSM_DefaultLit);
+		UMaterialEditorOnlyData* Data = Material->GetEditorOnlyData();
+		if (!Data) return nullptr;
+		auto* Coordinates = NewObject<UMaterialExpressionTextureCoordinate>(Material);
+		Coordinates->Material = Material;
+		Coordinates->UTiling = 1.0f;
+		Coordinates->VTiling = 1.0f;
+		Material->GetExpressionCollection().AddExpression(Coordinates);
+		auto* Sample = NewObject<UMaterialExpressionTextureSampleParameter2D>(Material);
+		Sample->Material = Material;
+		Sample->ParameterName = TEXT("BarrelTexture");
+		Sample->Texture = Texture;
+		Sample->SamplerType = SAMPLERTYPE_Color;
+		Sample->Coordinates.Connect(0, Coordinates);
+		Material->GetExpressionCollection().AddExpression(Sample);
+		auto* RoughnessParameter = NewObject<UMaterialExpressionScalarParameter>(Material);
+		RoughnessParameter->Material = Material;
+		RoughnessParameter->ParameterName = TEXT("Roughness");
+		RoughnessParameter->DefaultValue = Roughness;
+		Material->GetExpressionCollection().AddExpression(RoughnessParameter);
+		Data->BaseColor.Connect(0, Sample);
+		Data->Roughness.Connect(0, RoughnessParameter);
+		Material->PostEditChange();
+		Material->MarkPackageDirty();
+		return SaveAsset(Material) ? Material : nullptr;
+	}
+
+	UNiagaraSystem* EnsureExplosiveBarrelSmokeEffect(const FString& AssetName, float Strength, bool bBlackSmokeOnly = false)
+	{
+		const FString ObjectPath = GetAssetObjectPath(EffectsAssetPath, AssetName);
+		if (UNiagaraSystem* Existing = LoadObject<UNiagaraSystem>(nullptr, *ObjectPath))
+		{
+			return ConfigureExplosiveBarrelSmokeNiagaraSystem(Existing, Strength, bBlackSmokeOnly) ? Existing : nullptr;
+		}
+		UNiagaraSystem* Source = LoadObject<UNiagaraSystem>(nullptr, TEXT("/Game/Effects/NS_ExtractionSmokeSignal.NS_ExtractionSmokeSignal"));
+		if (!Source) return nullptr;
+		UNiagaraSystem* Effect = Cast<UNiagaraSystem>(FModuleManager::LoadModuleChecked<FAssetToolsModule>(TEXT("AssetTools")).Get().DuplicateAsset(AssetName, EffectsAssetPath, Source));
+		return Effect && ConfigureExplosiveBarrelSmokeNiagaraSystem(Effect, Strength, bBlackSmokeOnly) ? Effect : nullptr;
+	}
+
+	UMaterial* EnsureExplosiveBarrelDamageRadiusMaterial()
+	{
+		const FString AssetName(TEXT("M_ExplosiveBarrel_DamageRadius"));
+		const FString ObjectPath = GetAssetObjectPath(InteractionAssetPath, AssetName);
+		UMaterial* Material = LoadObject<UMaterial>(nullptr, *ObjectPath);
+		if (!Material)
+		{
+			Material = Cast<UMaterial>(FModuleManager::LoadModuleChecked<FAssetToolsModule>(TEXT("AssetTools")).Get().CreateAsset(AssetName, InteractionAssetPath, UMaterial::StaticClass(), NewObject<UMaterialFactoryNew>()));
+			if (!Material) return nullptr;
+			FAssetRegistryModule::AssetCreated(Material);
+		}
+		Material->Modify();
+		Material->GetExpressionCollection().Empty();
+		Material->MaterialDomain = MD_DeferredDecal;
+		Material->BlendMode = BLEND_Translucent;
+		Material->DecalBlendMode = DBM_Translucent;
+		UMaterialEditorOnlyData* Data = Material->GetEditorOnlyData();
+		if (!Data) return nullptr;
+		auto* Coordinates = NewObject<UMaterialExpressionTextureCoordinate>(Material);
+		Coordinates->Material = Material;
+		Material->GetExpressionCollection().AddExpression(Coordinates);
+		auto* Centre = NewObject<UMaterialExpressionConstant2Vector>(Material);
+		Centre->Material = Material;
+		Centre->R = 0.5f;
+		Centre->G = 0.5f;
+		Material->GetExpressionCollection().AddExpression(Centre);
+		auto* Offset = NewObject<UMaterialExpressionSubtract>(Material);
+		Offset->Material = Material;
+		Offset->A.Connect(0, Coordinates);
+		Offset->B.Connect(0, Centre);
+		Material->GetExpressionCollection().AddExpression(Offset);
+		auto* Distance = NewObject<UMaterialExpressionLength>(Material);
+		Distance->Material = Material;
+		Distance->Input.Connect(0, Offset);
+		Material->GetExpressionCollection().AddExpression(Distance);
+		auto* RadiusScale = NewObject<UMaterialExpressionConstant>(Material);
+		RadiusScale->Material = Material;
+		RadiusScale->R = 2.0f;
+		Material->GetExpressionCollection().AddExpression(RadiusScale);
+		auto* NormalizedDistance = NewObject<UMaterialExpressionMultiply>(Material);
+		NormalizedDistance->Material = Material;
+		NormalizedDistance->A.Connect(0, Distance);
+		NormalizedDistance->B.Connect(0, RadiusScale);
+		Material->GetExpressionCollection().AddExpression(NormalizedDistance);
+		auto* Zero = NewObject<UMaterialExpressionConstant>(Material);
+		Zero->Material = Material;
+		Zero->R = 0.0f;
+		Material->GetExpressionCollection().AddExpression(Zero);
+		auto* One = NewObject<UMaterialExpressionConstant>(Material);
+		One->Material = Material;
+		One->R = 1.0f;
+		Material->GetExpressionCollection().AddExpression(One);
+		auto* CircleMask = NewObject<UMaterialExpressionIf>(Material);
+		CircleMask->Material = Material;
+		CircleMask->A.Connect(0, NormalizedDistance);
+		CircleMask->ConstB = 1.0f;
+		CircleMask->AGreaterThanB.Connect(0, Zero);
+		CircleMask->AEqualsB.Connect(0, Zero);
+		CircleMask->ALessThanB.Connect(0, One);
+		Material->GetExpressionCollection().AddExpression(CircleMask);
+		auto* RingMask = NewObject<UMaterialExpressionIf>(Material);
+		RingMask->Material = Material;
+		RingMask->A.Connect(0, NormalizedDistance);
+		RingMask->ConstB = 0.94f;
+		RingMask->AGreaterThanB.Connect(0, One);
+		RingMask->AEqualsB.Connect(0, One);
+		RingMask->ALessThanB.Connect(0, Zero);
+		Material->GetExpressionCollection().AddExpression(RingMask);
+		auto* InteriorStrength = NewObject<UMaterialExpressionConstant>(Material);
+		InteriorStrength->Material = Material;
+		InteriorStrength->R = 0.34f;
+		Material->GetExpressionCollection().AddExpression(InteriorStrength);
+		auto* InteriorOpacity = NewObject<UMaterialExpressionMultiply>(Material);
+		InteriorOpacity->Material = Material;
+		InteriorOpacity->A.Connect(0, NormalizedDistance);
+		InteriorOpacity->B.Connect(0, InteriorStrength);
+		Material->GetExpressionCollection().AddExpression(InteriorOpacity);
+		auto* CombinedOpacity = NewObject<UMaterialExpressionAdd>(Material);
+		CombinedOpacity->Material = Material;
+		CombinedOpacity->A.Connect(0, InteriorOpacity);
+		CombinedOpacity->B.Connect(0, RingMask);
+		Material->GetExpressionCollection().AddExpression(CombinedOpacity);
+		auto* ClampedOpacity = NewObject<UMaterialExpressionSaturate>(Material);
+		ClampedOpacity->Material = Material;
+		ClampedOpacity->Input.Connect(0, CombinedOpacity);
+		Material->GetExpressionCollection().AddExpression(ClampedOpacity);
+		auto* Mask = NewObject<UMaterialExpressionMultiply>(Material);
+		Mask->Material = Material;
+		Mask->A.Connect(0, ClampedOpacity);
+		Mask->B.Connect(0, CircleMask);
+		Material->GetExpressionCollection().AddExpression(Mask);
+		auto* Color = NewObject<UMaterialExpressionVectorParameter>(Material);
+		Color->Material = Material;
+		Color->ParameterName = TEXT("PreviewColor");
+		Color->DefaultValue = FLinearColor(1.0f, 0.12f, 0.02f, 1.0f);
+		Material->GetExpressionCollection().AddExpression(Color);
+		auto* Opacity = NewObject<UMaterialExpressionScalarParameter>(Material);
+		Opacity->Material = Material;
+		Opacity->ParameterName = TEXT("PreviewOpacity");
+		Opacity->DefaultValue = 0.22f;
+		Material->GetExpressionCollection().AddExpression(Opacity);
+		auto* FinalOpacity = NewObject<UMaterialExpressionMultiply>(Material);
+		FinalOpacity->Material = Material;
+		FinalOpacity->A.Connect(0, Mask);
+		FinalOpacity->B.Connect(0, Opacity);
+		Material->GetExpressionCollection().AddExpression(FinalOpacity);
+		Data->BaseColor.Connect(0, Color);
+		Data->Opacity.Connect(0, FinalOpacity);
+		Material->PostEditChange();
+		Material->MarkPackageDirty();
+		return SaveAsset(Material) ? Material : nullptr;
+	}
+
 	bool ConfigureExplosiveBarrelBlueprint(UBlueprint* ExplosiveBarrelBlueprint)
 	{
 		if (!ExplosiveBarrelBlueprint)
@@ -2738,7 +2979,7 @@ namespace TunaSweeperEditorSetup
 			TSoftObjectPtr<UNiagaraSystem>(),
 			TSoftClassPtr<ATunaSweeperLocalExplosionEffectActor>(
 				FSoftObjectPath(TEXT("/Script/TunaSweeper.TunaSweeperLocalExplosionEffectActor"))),
-			210.0f,
+			420.0f,
 			0.72f);
 		FBlueprintEditorUtils::MarkBlueprintAsModified(ExplosiveBarrelBlueprint);
 		FKismetEditorUtilities::CompileBlueprint(ExplosiveBarrelBlueprint);
@@ -2748,20 +2989,20 @@ namespace TunaSweeperEditorSetup
 
 	bool EnsureExplosiveBarrelAssets()
 	{
-		UMaterial* IntactMaterial = EnsureSolidColorMaterial(
-			InteractionAssetPath,
-			ExplosiveBarrelGrayMaterialAssetName,
-			FLinearColor(0.42f, 0.44f, 0.43f, 1.0f),
-			0.92f,
-			0.0f,
-			0.06f);
-		UMaterial* DestroyedMaterial = EnsureSolidColorMaterial(
-			InteractionAssetPath,
-			ExplosiveBarrelCharredMaterialAssetName,
-			FLinearColor(0.12f, 0.12f, 0.11f, 1.0f),
-			0.86f,
-			0.0f,
-			0.05f);
+		UTexture2D* IntactTexture = nullptr;
+		UTexture2D* LightDamageTexture = nullptr;
+		UTexture2D* HeavyDamageTexture = nullptr;
+		UTexture2D* DestroyedTexture = nullptr;
+		const bool bImportedTextures =
+			ImportWorldTexture(GetExplosiveBarrelTextureSourcePath(TEXT("T_ExplosiveBarrel_Intact_Source.png")), InteractionAssetPath, ExplosiveBarrelIntactTextureAssetName, &IntactTexture) &&
+			ImportWorldTexture(GetExplosiveBarrelTextureSourcePath(TEXT("T_ExplosiveBarrel_DamagedLight_Source.png")), InteractionAssetPath, ExplosiveBarrelDamagedLightTextureAssetName, &LightDamageTexture) &&
+			ImportWorldTexture(GetExplosiveBarrelTextureSourcePath(TEXT("T_ExplosiveBarrel_DamagedHeavy_Source.png")), InteractionAssetPath, ExplosiveBarrelDamagedHeavyTextureAssetName, &HeavyDamageTexture) &&
+			ImportWorldTexture(GetExplosiveBarrelTextureSourcePath(TEXT("T_ExplosiveBarrel_Destroyed_Source.png")), InteractionAssetPath, ExplosiveBarrelDestroyedTextureAssetName, &DestroyedTexture);
+		if (!bImportedTextures) return false;
+		UMaterial* IntactMaterial = EnsureExplosiveBarrelTexturedMaterial(ExplosiveBarrelIntactMaterialAssetName, IntactTexture, 0.78f);
+		UMaterial* LightDamageMaterial = EnsureExplosiveBarrelTexturedMaterial(ExplosiveBarrelDamagedLightMaterialAssetName, LightDamageTexture, 0.82f);
+		UMaterial* HeavyDamageMaterial = EnsureExplosiveBarrelTexturedMaterial(ExplosiveBarrelDamagedHeavyMaterialAssetName, HeavyDamageTexture, 0.88f);
+		UMaterial* DestroyedMaterial = EnsureExplosiveBarrelTexturedMaterial(ExplosiveBarrelDestroyedMaterialAssetName, DestroyedTexture, 0.94f);
 		UMaterial* DetailMaterial = EnsureSolidColorMaterial(
 			InteractionAssetPath,
 			ExplosiveBarrelDetailMaterialAssetName,
@@ -2769,6 +3010,10 @@ namespace TunaSweeperEditorSetup
 			0.94f,
 			0.0f,
 			0.04f);
+		UNiagaraSystem* LightSmoke = EnsureExplosiveBarrelSmokeEffect(TEXT("NS_ExplosiveBarrel_SmokeLight"), 0.65f);
+		UNiagaraSystem* HeavySmoke = EnsureExplosiveBarrelSmokeEffect(TEXT("NS_ExplosiveBarrel_SmokeHeavy"), 1.05f);
+		UNiagaraSystem* BurningEffect = EnsureExplosiveBarrelSmokeEffect(TEXT("NS_ExplosiveBarrel_Burning"), 1.35f, true);
+		UMaterial* DamageRadiusMaterial = EnsureExplosiveBarrelDamageRadiusMaterial();
 		UStaticMesh* IntactMesh = EnsureExplosiveBarrelStaticMesh(
 			ExplosiveBarrelIntactMeshAssetName,
 			IntactMaterial,
@@ -2776,6 +3021,22 @@ namespace TunaSweeperEditorSetup
 			[](FMeshDescription& MeshDescription)
 			{
 				BuildExplosiveBarrelIntactMeshDescription(MeshDescription);
+			});
+		UStaticMesh* LightDamageMesh = EnsureExplosiveBarrelStaticMesh(
+			ExplosiveBarrelDamagedLightMeshAssetName,
+			LightDamageMaterial,
+			DetailMaterial,
+			[](FMeshDescription& MeshDescription)
+			{
+				BuildExplosiveBarrelDamagedMeshDescription(MeshDescription, 0.52f);
+			});
+		UStaticMesh* HeavyDamageMesh = EnsureExplosiveBarrelStaticMesh(
+			ExplosiveBarrelDamagedHeavyMeshAssetName,
+			HeavyDamageMaterial,
+			DetailMaterial,
+			[](FMeshDescription& MeshDescription)
+			{
+				BuildExplosiveBarrelDamagedMeshDescription(MeshDescription, 1.0f);
 			});
 		UStaticMesh* DestroyedMesh = EnsureExplosiveBarrelStaticMesh(
 			ExplosiveBarrelDestroyedMeshAssetName,
@@ -2790,7 +3051,7 @@ namespace TunaSweeperEditorSetup
 			ExplosiveBarrelAssetName,
 			ATunaSweeperExplosiveBarrelActor::StaticClass());
 
-		return IntactMaterial && DestroyedMaterial && DetailMaterial && IntactMesh && DestroyedMesh &&
+		return IntactMaterial && LightDamageMaterial && HeavyDamageMaterial && DestroyedMaterial && DetailMaterial && DamageRadiusMaterial && LightSmoke && HeavySmoke && BurningEffect && IntactMesh && LightDamageMesh && HeavyDamageMesh && DestroyedMesh &&
 			ConfigureExplosiveBarrelBlueprint(ExplosiveBarrelBlueprint);
 	}
 

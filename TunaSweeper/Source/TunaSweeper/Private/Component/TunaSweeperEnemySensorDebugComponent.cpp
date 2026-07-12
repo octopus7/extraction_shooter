@@ -4,14 +4,21 @@
 #include "Components/SceneComponent.h"
 #include "Engine/World.h"
 #include "GameFramework/Pawn.h"
+#include "GameFramework/PlayerController.h"
 #include "Materials/MaterialInterface.h"
 #include "ProceduralMeshComponent.h"
 
 namespace TunaSweeperEnemySensorDebug
 {
 	constexpr float MeshHeight = 4.0f;
-	constexpr int32 HearingSegments = 72;
 	constexpr int32 VisionSegments = 48;
+	constexpr int32 HearingArcSegments = 12;
+	constexpr float HearingArcHalfWidth = 14.0f;
+	constexpr float HearingGaugeWidth = 230.0f;
+	constexpr float HearingGaugeHalfHeight = 15.0f;
+	constexpr float HearingGaugeOffset = 38.0f;
+	constexpr float HearingGaugeTickHalfWidth = 3.0f;
+	constexpr float HearingGradientBandWidth = 300.0f;
 	const TCHAR* MaterialPath = TEXT("/Game/Characters/Enemy/M_EnemySensorDebug.M_EnemySensorDebug");
 
 	void AddTriangle(TArray<int32>& Triangles, int32 A, int32 B, int32 C)
@@ -101,6 +108,23 @@ void UTunaSweeperEnemySensorDebugComponent::TickComponent(
 	{
 		RebuildMeshes(Snapshot.TrackingRange, Snapshot.VisionAngleDegrees);
 	}
+
+	FVector LocalPlayerDirection;
+	float HearingProgress = 0.0f;
+	if (TryGetPlayerHearingState(
+		Snapshot.HearingRange > 0.0f ? Snapshot.HearingRange : HearingOuterRadius,
+		LocalPlayerDirection,
+		HearingProgress))
+	{
+		BuildHearingMesh(
+			Snapshot.HearingRange > 0.0f ? Snapshot.HearingRange : HearingOuterRadius,
+			LocalPlayerDirection,
+			HearingProgress);
+	}
+	else if (HearingMesh)
+	{
+		HearingMesh->ClearAllMeshSections();
+	}
 }
 
 void UTunaSweeperEnemySensorDebugComponent::EnsureMeshComponents()
@@ -127,7 +151,10 @@ void UTunaSweeperEnemySensorDebugComponent::EnsureMeshComponents()
 		Mesh->RegisterComponent();
 		if (UMaterialInterface* Material = LoadObject<UMaterialInterface>(nullptr, TunaSweeperEnemySensorDebug::MaterialPath))
 		{
-			Mesh->SetMaterial(0, Material);
+			for (int32 MaterialIndex = 0; MaterialIndex < 4; ++MaterialIndex)
+			{
+				Mesh->SetMaterial(MaterialIndex, Material);
+			}
 		}
 	};
 
@@ -137,58 +164,194 @@ void UTunaSweeperEnemySensorDebugComponent::EnsureMeshComponents()
 
 void UTunaSweeperEnemySensorDebugComponent::RebuildMeshes(float VisionRange, float VisionAngleDegrees)
 {
-	BuildHearingMesh();
 	BuildVisionMesh(VisionRange, VisionAngleDegrees);
 	CachedVisionRange = VisionRange;
 	CachedVisionAngleDegrees = VisionAngleDegrees;
 }
 
-void UTunaSweeperEnemySensorDebugComponent::BuildHearingMesh()
+bool UTunaSweeperEnemySensorDebugComponent::TryGetPlayerHearingState(
+	float HearingRange,
+	FVector& OutLocalPlayerDirection,
+	float& OutHearingProgress) const
+{
+	OutLocalPlayerDirection = FVector::ZeroVector;
+	OutHearingProgress = 0.0f;
+
+	const AActor* Owner = GetOwner();
+	const UWorld* World = GetWorld();
+	const APlayerController* PlayerController = World ? World->GetFirstPlayerController() : nullptr;
+	const APawn* PlayerPawn = PlayerController ? PlayerController->GetPawn() : nullptr;
+	if (!Owner || !PlayerPawn || HearingRange <= KINDA_SMALL_NUMBER)
+	{
+		return false;
+	}
+
+	FVector WorldDirection = PlayerPawn->GetActorLocation() - Owner->GetActorLocation();
+	WorldDirection.Z = 0.0f;
+	const float PlayerDistance = WorldDirection.Length();
+	if (PlayerDistance > HearingRange)
+	{
+		return false;
+	}
+
+	OutHearingProgress = FMath::Clamp(1.0f - PlayerDistance / HearingRange, 0.0f, 1.0f);
+	if (OutHearingProgress < HearingActivationProgress)
+	{
+		return false;
+	}
+
+	if (PlayerDistance <= KINDA_SMALL_NUMBER)
+	{
+		WorldDirection = Owner->GetActorForwardVector();
+	}
+	OutLocalPlayerDirection = Owner->GetActorTransform().InverseTransformVectorNoScale(WorldDirection).GetSafeNormal2D();
+	return !OutLocalPlayerDirection.IsNearlyZero();
+}
+
+void UTunaSweeperEnemySensorDebugComponent::BuildHearingMesh(
+	float HearingRange,
+	const FVector& LocalPlayerDirection,
+	float HearingProgress)
 {
 	if (!HearingMesh)
 	{
 		return;
 	}
 
-	const float OuterRadius = FMath::Max(1.0f, HearingOuterRadius);
-	const float Radii[] = { 0.0f, OuterRadius * 0.31f, OuterRadius / 3.0f, OuterRadius * 0.64f, OuterRadius * 2.0f / 3.0f, OuterRadius * 0.97f, OuterRadius };
-	const float Alphas[] = { 0.045f, 0.12f, 0.025f, 0.12f, 0.025f, 0.11f, 0.0f };
+	const FVector Direction = LocalPlayerDirection.GetSafeNormal2D();
+	if (Direction.IsNearlyZero())
+	{
+		HearingMesh->ClearAllMeshSections();
+		return;
+	}
+
+	const float PlayerDistance = FMath::Max(0.0f, HearingRange * (1.0f - HearingProgress));
+	const float HalfArcRadians = FMath::DegreesToRadians(FMath::Clamp(HearingArcDegrees, 1.0f, 180.0f) * 0.5f);
 	TArray<FVector> Vertices;
 	TArray<int32> Triangles;
 	TArray<FVector> Normals;
 	TArray<FVector2D> UVs;
 	TArray<FLinearColor> Colors;
 	TArray<FProcMeshTangent> Tangents;
-	Vertices.Reserve(UE_ARRAY_COUNT(Radii) * (TunaSweeperEnemySensorDebug::HearingSegments + 1));
 
-	for (int32 RingIndex = 0; RingIndex < UE_ARRAY_COUNT(Radii); ++RingIndex)
+	auto AddVertex = [&Vertices, &Normals, &UVs, &Colors, &Tangents](const FVector& Position, const FLinearColor& Color, const FVector2D& Uv)
 	{
-		for (int32 SegmentIndex = 0; SegmentIndex <= TunaSweeperEnemySensorDebug::HearingSegments; ++SegmentIndex)
+		Vertices.Add(Position);
+		Normals.Add(FVector::UpVector);
+		UVs.Add(Uv);
+		Colors.Add(Color);
+		Tangents.Add(FProcMeshTangent(1.0f, 0.0f, 0.0f));
+		return Vertices.Num() - 1;
+	};
+
+	// Keep the saturated gradient at a fixed world-space thickness instead of scaling it with player distance.
+	const float FillInnerRadius = FMath::Max(0.0f, PlayerDistance - TunaSweeperEnemySensorDebug::HearingGradientBandWidth);
+	const float FillBandWidth = PlayerDistance - FillInnerRadius;
+	const float FillRadii[] = {
+		FillInnerRadius,
+		FillInnerRadius + FillBandWidth * 0.48f,
+		FillInnerRadius + FillBandWidth * 0.78f,
+		PlayerDistance
+	};
+	const FLinearColor FillColors[] = {
+		FLinearColor(0.82f, 0.08f, 0.0f, 0.015f),
+		FLinearColor(0.96f, 0.12f, 0.0f, 0.09f),
+		FLinearColor(0.98f, 0.10f, 0.0f, 0.26f),
+		FLinearColor(0.92f, 0.055f, 0.0f, 0.48f)
+	};
+	for (int32 RingIndex = 0; RingIndex < UE_ARRAY_COUNT(FillRadii); ++RingIndex)
+	{
+		const float RingRadius = FillRadii[RingIndex];
+		for (int32 SegmentIndex = 0; SegmentIndex <= TunaSweeperEnemySensorDebug::HearingArcSegments; ++SegmentIndex)
 		{
-			const float Angle = (2.0f * PI * SegmentIndex) / TunaSweeperEnemySensorDebug::HearingSegments;
-			Vertices.Add(FVector(FMath::Cos(Angle) * Radii[RingIndex], FMath::Sin(Angle) * Radii[RingIndex], TunaSweeperEnemySensorDebug::MeshHeight));
-			Normals.Add(FVector::UpVector);
-			UVs.Add(FVector2D(static_cast<float>(SegmentIndex) / TunaSweeperEnemySensorDebug::HearingSegments, static_cast<float>(RingIndex) / (UE_ARRAY_COUNT(Radii) - 1)));
-			Colors.Add(FLinearColor(1.0f, 0.27f, 0.02f, Alphas[RingIndex]));
-			Tangents.Add(FProcMeshTangent(1.0f, 0.0f, 0.0f));
+			const float Alpha = static_cast<float>(SegmentIndex) / TunaSweeperEnemySensorDebug::HearingArcSegments;
+			const float AngleRadians = FMath::Lerp(-HalfArcRadians, HalfArcRadians, Alpha);
+			const FVector ArcDirection = Direction.RotateAngleAxis(FMath::RadiansToDegrees(AngleRadians), FVector::UpVector);
+			AddVertex(
+				ArcDirection * RingRadius + FVector(0.0f, 0.0f, TunaSweeperEnemySensorDebug::MeshHeight + 1.0f),
+				FillColors[RingIndex],
+				FVector2D(Alpha, static_cast<float>(RingIndex) / (UE_ARRAY_COUNT(FillRadii) - 1)));
 		}
 	}
-
-	const int32 RingStride = TunaSweeperEnemySensorDebug::HearingSegments + 1;
-	for (int32 RingIndex = 0; RingIndex < UE_ARRAY_COUNT(Radii) - 1; ++RingIndex)
+	const int32 FillRingStride = TunaSweeperEnemySensorDebug::HearingArcSegments + 1;
+	for (int32 RingIndex = 0; RingIndex < UE_ARRAY_COUNT(FillRadii) - 1; ++RingIndex)
 	{
-		for (int32 SegmentIndex = 0; SegmentIndex < TunaSweeperEnemySensorDebug::HearingSegments; ++SegmentIndex)
+		for (int32 SegmentIndex = 0; SegmentIndex < TunaSweeperEnemySensorDebug::HearingArcSegments; ++SegmentIndex)
 		{
-			const int32 A = RingIndex * RingStride + SegmentIndex;
+			const int32 A = RingIndex * FillRingStride + SegmentIndex;
 			const int32 B = A + 1;
-			const int32 C = A + RingStride;
+			const int32 C = A + FillRingStride;
 			const int32 D = C + 1;
 			TunaSweeperEnemySensorDebug::AddTriangle(Triangles, A, C, B);
 			TunaSweeperEnemySensorDebug::AddTriangle(Triangles, B, C, D);
 		}
 	}
 
+	for (int32 SegmentIndex = 0; SegmentIndex <= TunaSweeperEnemySensorDebug::HearingArcSegments; ++SegmentIndex)
+	{
+		const float Alpha = static_cast<float>(SegmentIndex) / TunaSweeperEnemySensorDebug::HearingArcSegments;
+		const float AngleRadians = FMath::Lerp(-HalfArcRadians, HalfArcRadians, Alpha);
+		const FVector ArcDirection = Direction.RotateAngleAxis(FMath::RadiansToDegrees(AngleRadians), FVector::UpVector);
+		AddVertex(
+			ArcDirection * (PlayerDistance - TunaSweeperEnemySensorDebug::HearingArcHalfWidth) + FVector(0.0f, 0.0f, TunaSweeperEnemySensorDebug::MeshHeight + 2.0f),
+			FLinearColor(1.0f, 0.24f, 0.015f, 0.72f),
+			FVector2D(Alpha, 0.0f));
+		AddVertex(
+			ArcDirection * (PlayerDistance + TunaSweeperEnemySensorDebug::HearingArcHalfWidth) + FVector(0.0f, 0.0f, TunaSweeperEnemySensorDebug::MeshHeight + 2.0f),
+			FLinearColor(1.0f, 0.62f, 0.10f, 0.96f),
+			FVector2D(Alpha, 1.0f));
+	}
+	for (int32 SegmentIndex = 0; SegmentIndex < TunaSweeperEnemySensorDebug::HearingArcSegments; ++SegmentIndex)
+	{
+		const int32 A = SegmentIndex * 2;
+		TunaSweeperEnemySensorDebug::AddTriangle(Triangles, A, A + 2, A + 1);
+		TunaSweeperEnemySensorDebug::AddTriangle(Triangles, A + 1, A + 2, A + 3);
+	}
 	HearingMesh->CreateMeshSection_LinearColor(0, Vertices, Triangles, Normals, UVs, Colors, Tangents, false);
+
+	Vertices.Reset(); Triangles.Reset(); Normals.Reset(); UVs.Reset(); Colors.Reset(); Tangents.Reset();
+	const FVector Tangent(Direction.Y, -Direction.X, 0.0f);
+	const FVector GaugeStart = Direction * PlayerDistance + Tangent * TunaSweeperEnemySensorDebug::HearingGaugeOffset;
+	auto AddQuad = [&AddVertex, &Triangles, &Direction](const FVector& Start, const FVector& End, float HalfHeight, float Height, const FLinearColor& StartColor, const FLinearColor& EndColor)
+	{
+		const FVector Vertical = FVector::UpVector * Height;
+		const FVector Normal = Direction * HalfHeight;
+		const int32 A = AddVertex(Start - Normal + Vertical, StartColor, FVector2D(0.0f, 0.0f));
+		const int32 B = AddVertex(Start + Normal + Vertical, StartColor, FVector2D(0.0f, 1.0f));
+		const int32 C = AddVertex(End - Normal + Vertical, EndColor, FVector2D(1.0f, 0.0f));
+		const int32 D = AddVertex(End + Normal + Vertical, EndColor, FVector2D(1.0f, 1.0f));
+		TunaSweeperEnemySensorDebug::AddTriangle(Triangles, A, C, B);
+		TunaSweeperEnemySensorDebug::AddTriangle(Triangles, B, C, D);
+	};
+
+	const FVector GaugeEnd = GaugeStart + Tangent * TunaSweeperEnemySensorDebug::HearingGaugeWidth;
+	AddQuad(
+		GaugeStart,
+		GaugeEnd,
+		TunaSweeperEnemySensorDebug::HearingGaugeHalfHeight,
+		TunaSweeperEnemySensorDebug::MeshHeight + 3.0f,
+		FLinearColor(0.14f, 0.04f, 0.01f, 0.52f),
+		FLinearColor(0.20f, 0.05f, 0.01f, 0.52f));
+	HearingMesh->CreateMeshSection_LinearColor(1, Vertices, Triangles, Normals, UVs, Colors, Tangents, false);
+
+	Vertices.Reset(); Triangles.Reset(); Normals.Reset(); UVs.Reset(); Colors.Reset(); Tangents.Reset();
+	const FVector GaugeFillEnd = GaugeStart + Tangent * (TunaSweeperEnemySensorDebug::HearingGaugeWidth * FMath::Clamp(HearingProgress, 0.0f, 1.0f));
+	AddQuad(
+		GaugeStart,
+		GaugeFillEnd,
+		TunaSweeperEnemySensorDebug::HearingGaugeHalfHeight - 4.0f,
+		TunaSweeperEnemySensorDebug::MeshHeight + 4.0f,
+		FLinearColor(1.0f, 0.22f, 0.01f, 0.78f),
+		FLinearColor(1.0f, 0.82f, 0.20f, 0.98f));
+	const FVector ThresholdCenter = GaugeStart + Tangent * (TunaSweeperEnemySensorDebug::HearingGaugeWidth * 0.5f);
+	AddQuad(
+		ThresholdCenter - Tangent * TunaSweeperEnemySensorDebug::HearingGaugeTickHalfWidth,
+		ThresholdCenter + Tangent * TunaSweeperEnemySensorDebug::HearingGaugeTickHalfWidth,
+		TunaSweeperEnemySensorDebug::HearingGaugeHalfHeight + 6.0f,
+		TunaSweeperEnemySensorDebug::MeshHeight + 5.0f,
+		FLinearColor(1.0f, 0.94f, 0.58f, 1.0f),
+		FLinearColor(1.0f, 0.94f, 0.58f, 1.0f));
+	HearingMesh->CreateMeshSection_LinearColor(2, Vertices, Triangles, Normals, UVs, Colors, Tangents, false);
 }
 
 void UTunaSweeperEnemySensorDebugComponent::BuildVisionMesh(float VisionRange, float VisionAngleDegrees)

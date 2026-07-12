@@ -34,6 +34,16 @@ public:
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|HUD")
 	UTunaSweeperGameHudWidget* GetGameHudWidget() const { return GameHudWidget; }
 
+	/** Device-local development preference; it is deliberately separate from save-slot data. */
+	static bool GetEnemyCombatDebugPreference();
+	static void SetEnemyCombatDebugPreference(bool bEnabled);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Debug")
+	void SetEnemyCombatDebugEnabled(bool bEnabled);
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Debug")
+	bool IsEnemyCombatDebugEnabled() const { return bEnemyCombatDebugEnabled; }
+
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
 	void ToggleInventoryOnlyPanel();
 
@@ -199,6 +209,7 @@ private:
 	void HandleDrop(const FInputActionValue& Value);
 	void HandleToggleEnemyCombatDebug(const FInputActionValue& Value);
 	void ToggleEnemyCombatDebug();
+	void ApplyEnemyCombatDebugVisibility();
 	void HandleMeleeQuickSlot(const FInputActionValue& Value);
 	void HandleQuickSlot1(const FInputActionValue& Value);
 	void HandleQuickSlot2(const FInputActionValue& Value);
@@ -246,4 +257,5 @@ private:
 	bool bHousingMoveBackwardHeld = false;
 	bool bHousingMoveRightHeld = false;
 	bool bHousingMoveLeftHeld = false;
+	bool bEnemyCombatDebugEnabled = false;
 };

@@ -1,4 +1,5 @@
 #include "TunaSweeperIntroMenuWidgetShared.h"
+#include "Player/TunaSweeperPlayerController.h"
 
 void UTunaSweeperIntroMenuWidget::RefreshMainMenu()
 {
@@ -106,6 +107,12 @@ void UTunaSweeperIntroMenuWidget::RefreshSaveSlotMenu()
 
 void UTunaSweeperIntroMenuWidget::RefreshSettingsPanel()
 {
+	if (bShowingDevelopmentSettingsTab)
+	{
+		RefreshDevelopmentSettingsPanel();
+		return;
+	}
+
 	if (bShowingInterfaceSettingsTab)
 	{
 		RefreshInterfaceSettingsPanel();
@@ -236,12 +243,39 @@ void UTunaSweeperIntroMenuWidget::RefreshInterfaceSettingsPanel()
 	RefreshInterfaceSelectionStyles();
 }
 
+void UTunaSweeperIntroMenuWidget::RefreshDevelopmentSettingsPanel()
+{
+	const bool bEnemyCombatDebugEnabled = ATunaSweeperPlayerController::GetEnemyCombatDebugPreference();
+
+	if (SettingsStatusText)
+	{
+		SettingsStatusText->SetText(FText::FromString(
+			bEnemyCombatDebugEnabled
+				? TEXT("전투 디버그: 켜짐 (F8)")
+				: TEXT("전투 디버그: 꺼짐 (F8)")));
+	}
+
+	SetNamedText(
+		FName(TEXT("EnemyCombatDebugToggleButtonText")),
+		FText::FromString(bEnemyCombatDebugEnabled
+			? TEXT("✓ 적 전투 디버그 표시")
+			: TEXT("적 전투 디버그 표시")));
+
+	if (EnemyCombatDebugToggleButton)
+	{
+		EnemyCombatDebugToggleButton->SetIsEnabled(true);
+	}
+
+	RefreshDevelopmentSelectionStyles();
+}
+
 void UTunaSweeperIntroMenuWidget::RefreshSettingsSelectionStyles(
 	const FIntPoint& CurrentResolution,
 	EWindowMode::Type CurrentWindowMode)
 {
 	ApplySettingsTabButtonStyle(SettingsGraphicsTabButton, FVector2D(142.0f, 38.0f), true);
 	ApplySettingsTabButtonStyle(SettingsInterfaceTabButton, FVector2D(158.0f, 38.0f), false);
+	ApplySettingsTabButtonStyle(SettingsDevelopmentTabButton, FVector2D(102.0f, 38.0f), false);
 
 	ApplySettingsChoiceButtonStyle(
 		WindowedModeButton,
@@ -299,6 +333,7 @@ void UTunaSweeperIntroMenuWidget::RefreshInterfaceSelectionStyles()
 {
 	ApplySettingsTabButtonStyle(SettingsGraphicsTabButton, FVector2D(142.0f, 38.0f), false);
 	ApplySettingsTabButtonStyle(SettingsInterfaceTabButton, FVector2D(158.0f, 38.0f), true);
+	ApplySettingsTabButtonStyle(SettingsDevelopmentTabButton, FVector2D(102.0f, 38.0f), false);
 
 	ApplySettingsChoiceButtonStyle(
 		LanguageEnglishButton,
@@ -321,6 +356,18 @@ void UTunaSweeperIntroMenuWidget::RefreshInterfaceSelectionStyles()
 		FVector2D(160.0f, 46.0f),
 		false,
 		true);
+}
+
+void UTunaSweeperIntroMenuWidget::RefreshDevelopmentSelectionStyles()
+{
+	const bool bEnemyCombatDebugEnabled = ATunaSweeperPlayerController::GetEnemyCombatDebugPreference();
+	ApplySettingsTabButtonStyle(SettingsGraphicsTabButton, FVector2D(142.0f, 38.0f), false);
+	ApplySettingsTabButtonStyle(SettingsInterfaceTabButton, FVector2D(158.0f, 38.0f), false);
+	ApplySettingsTabButtonStyle(SettingsDevelopmentTabButton, FVector2D(102.0f, 38.0f), true);
+	ApplySettingsChoiceButtonStyle(
+		EnemyCombatDebugToggleButton,
+		FVector2D(660.0f, 46.0f),
+		bEnemyCombatDebugEnabled);
 }
 
 void UTunaSweeperIntroMenuWidget::ApplySettingsChoiceButtonStyle(

@@ -556,6 +556,13 @@ namespace TunaSweeperEditorSetup
 				return TunaSweeperEditorSetup::EnsureIntroMenuGraphicsSettingsSetup();
 			});
 
+		FTunaSweeperEditorRunOnce::Run(
+			TunaSweeperEditorSetup::IntroMenuDevelopmentSettingsTaskId,
+			[]()
+			{
+				return TunaSweeperEditorSetup::EnsureIntroMenuGraphicsSettingsSetup();
+			});
+
 		TunaSweeperEditorSetup::SchedulePickupItemAndSpawnerAssetsAndMapPlacement();
 		TunaSweeperEditorSetup::ScheduleLootContainerAndSpawnerAssetsAndMapPlacement();
 		TunaSweeperEditorSetup::ScheduleEditorMapCaptureSetup();

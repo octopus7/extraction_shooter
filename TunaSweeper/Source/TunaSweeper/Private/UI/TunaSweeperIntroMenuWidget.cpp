@@ -170,6 +170,18 @@ void UTunaSweeperIntroMenuWidget::NativeConstruct()
 		SettingsInterfaceTabButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleSettingsInterfaceTabClicked);
 	}
 
+	if (SettingsDevelopmentTabButton)
+	{
+		SettingsDevelopmentTabButton->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleSettingsDevelopmentTabClicked);
+		SettingsDevelopmentTabButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleSettingsDevelopmentTabClicked);
+	}
+
+	if (EnemyCombatDebugToggleButton)
+	{
+		EnemyCombatDebugToggleButton->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleEnemyCombatDebugToggleClicked);
+		EnemyCombatDebugToggleButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleEnemyCombatDebugToggleClicked);
+	}
+
 	if (WindowedModeButton)
 	{
 		WindowedModeButton->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleWindowedModeClicked);

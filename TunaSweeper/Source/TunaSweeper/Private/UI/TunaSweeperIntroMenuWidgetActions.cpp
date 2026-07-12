@@ -1,4 +1,5 @@
 #include "TunaSweeperIntroMenuWidgetShared.h"
+#include "Player/TunaSweeperPlayerController.h"
 
 void UTunaSweeperIntroMenuWidget::HandleStartClicked()
 {
@@ -170,6 +171,24 @@ void UTunaSweeperIntroMenuWidget::HandleSettingsGraphicsTabClicked()
 void UTunaSweeperIntroMenuWidget::HandleSettingsInterfaceTabClicked()
 {
 	ShowInterfaceSettingsTab();
+}
+
+void UTunaSweeperIntroMenuWidget::HandleSettingsDevelopmentTabClicked()
+{
+	ShowDevelopmentSettingsTab();
+}
+
+void UTunaSweeperIntroMenuWidget::HandleEnemyCombatDebugToggleClicked()
+{
+	const bool bEnabled = !ATunaSweeperPlayerController::GetEnemyCombatDebugPreference();
+	ATunaSweeperPlayerController::SetEnemyCombatDebugPreference(bEnabled);
+
+	if (ATunaSweeperPlayerController* PlayerController = Cast<ATunaSweeperPlayerController>(GetOwningPlayer()))
+	{
+		PlayerController->SetEnemyCombatDebugEnabled(bEnabled);
+	}
+
+	RefreshDevelopmentSettingsPanel();
 }
 
 void UTunaSweeperIntroMenuWidget::HandleWindowedModeClicked()

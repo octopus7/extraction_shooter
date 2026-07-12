@@ -24,6 +24,7 @@
 #include "InputAction.h"
 #include "InputActionValue.h"
 #include "InputCoreTypes.h"
+#include "Misc/ConfigCacheIni.h"
 #include "Subsystem/TunaSweeperKeyboardInputSubsystem.h"
 #include "Subsystem/TunaSweeperBgmSubsystem.h"
 #include "Subsystem/TunaSweeperHousingSubsystem.h"
@@ -255,6 +256,12 @@ namespace TunaSweeperIntroMap
 	constexpr float EntryFadeFromBlackSeconds = 0.5f;
 }
 
+namespace TunaSweeperEnemyCombatDebugSettings
+{
+	const TCHAR* SectionName = TEXT("TunaSweeper.DevelopmentSettings");
+	const TCHAR* EnabledKey = TEXT("bEnemyCombatDebugEnabled");
+}
+
 namespace TunaSweeperCanBotIntro
 {
 	const FName DialogueCompletionFlag(TEXT("dialogue.canbot.bunker_intro"));
@@ -307,6 +314,36 @@ ATunaSweeperPlayerController::ATunaSweeperPlayerController()
 	}
 }
 
+bool ATunaSweeperPlayerController::GetEnemyCombatDebugPreference()
+{
+	bool bEnabled = false;
+	if (GConfig)
+	{
+		GConfig->GetBool(
+			TunaSweeperEnemyCombatDebugSettings::SectionName,
+			TunaSweeperEnemyCombatDebugSettings::EnabledKey,
+			bEnabled,
+			GGameUserSettingsIni);
+	}
+
+	return bEnabled;
+}
+
+void ATunaSweeperPlayerController::SetEnemyCombatDebugPreference(bool bEnabled)
+{
+	if (!GConfig)
+	{
+		return;
+	}
+
+	GConfig->SetBool(
+		TunaSweeperEnemyCombatDebugSettings::SectionName,
+		TunaSweeperEnemyCombatDebugSettings::EnabledKey,
+		bEnabled,
+		GGameUserSettingsIni);
+	GConfig->Flush(false, GGameUserSettingsIni);
+}
+
 void ATunaSweeperPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
@@ -337,6 +374,7 @@ void ATunaSweeperPlayerController::BeginPlay()
 	{
 		ApplyLevelBgmState();
 		EnsureGameHudWidget();
+		SetEnemyCombatDebugEnabled(GetEnemyCombatDebugPreference());
 		const bool bShowingBunkerEntryFade = ShowBunkerEntryFadeIfNeeded();
 		if (bShowingBunkerEntryFade && GetWorld())
 		{
@@ -514,7 +552,7 @@ void ATunaSweeperPlayerController::PlayerTick(float DeltaTime)
 {
 	Super::PlayerTick(DeltaTime);
 
-	if (GameHudWidget && GameHudWidget->IsEnemyCombatDebugVisible())
+	if (bEnemyCombatDebugEnabled)
 	{
 		for (TActorIterator<ATunaSweeperEnemyCharacter> EnemyIt(GetWorld()); EnemyIt; ++EnemyIt)
 		{
@@ -1274,10 +1312,21 @@ void ATunaSweeperPlayerController::ToggleEnemyCombatDebug()
 		return;
 	}
 
-	const bool bEnableDebug = !(GameHudWidget && GameHudWidget->IsEnemyCombatDebugVisible());
+	SetEnemyCombatDebugEnabled(!bEnemyCombatDebugEnabled);
+}
+
+void ATunaSweeperPlayerController::SetEnemyCombatDebugEnabled(bool bEnabled)
+{
+	bEnemyCombatDebugEnabled = bEnabled;
+	SetEnemyCombatDebugPreference(bEnabled);
+	ApplyEnemyCombatDebugVisibility();
+}
+
+void ATunaSweeperPlayerController::ApplyEnemyCombatDebugVisibility()
+{
 	if (GameHudWidget)
 	{
-		GameHudWidget->SetEnemyCombatDebugVisible(bEnableDebug);
+		GameHudWidget->SetEnemyCombatDebugVisible(bEnemyCombatDebugEnabled);
 	}
 
 	if (UWorld* World = GetWorld())
@@ -1286,7 +1335,7 @@ void ATunaSweeperPlayerController::ToggleEnemyCombatDebug()
 		{
 			if (UTunaSweeperEnemySensorDebugComponent* SensorDebug = EnemyIt->GetSensorDebugComponent())
 			{
-				SensorDebug->SetSensorDebugVisible(bEnableDebug);
+				SensorDebug->SetSensorDebugVisible(bEnemyCombatDebugEnabled);
 			}
 		}
 	}

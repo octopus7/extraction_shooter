@@ -42,6 +42,9 @@ struct FTunaSweeperEnemyCombatDebugSnapshot
 	float MaxStateSeconds = 0.0f;
 	float TrackingRange = 0.0f;
 	float VisionAngleDegrees = 0.0f;
+	float HearingRange = 0.0f;
+	FString RecentEntryReason;
+	float RecentEntryReasonRemainingSeconds = 0.0f;
 	FVector FacingDirection = FVector::ForwardVector;
 };
 
@@ -197,6 +200,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI|Debug")
 	bool bDrawCombatDebug = false;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AI|Debug", meta = (ClampMin = "0.0"))
+	float CombatDebugEntryReasonDisplaySeconds = 4.0f;
+
 private:
 	void RandomizeCombatTuning();
 	void UpdateAttackTarget();
@@ -204,9 +210,10 @@ private:
 	void UpdateNonCombatState(float DeltaSeconds);
 	void StartNonCombatIdle();
 	void StartNonCombatWander();
-	void StartSuspicion(const FVector& SuspicionLocation);
-	void StartAlerted(AActor* TargetActor);
+	void StartSuspicion(const FVector& SuspicionLocation, const TCHAR* EntryReason);
+	void StartAlerted(AActor* TargetActor, const TCHAR* EntryReason);
 	void EnterCombat();
+	void RecordCombatDebugEntryReason(const TCHAR* EntryReason);
 	void UpdateApproachState(float DistanceToTarget, float InApproachStartRange, float InApproachStopRange);
 	void MoveTowardCurrentTarget(float DeltaSeconds);
 	void UpdateRangedCombatState(float DistanceToTarget, AActor* TargetActor, class ATunaSweeperEnemyCharacter* EnemyCharacter);
@@ -247,6 +254,8 @@ private:
 	double RangedCombatStateEndTimeSeconds = 0.0;
 	double AwarenessStateStartTimeSeconds = 0.0;
 	double AwarenessStateEndTimeSeconds = 0.0;
+	double CombatDebugEntryReasonTimeSeconds = -1000.0;
+	FString CombatDebugEntryReason;
 	FVector NonCombatFacingDirection = FVector::ForwardVector;
 	FVector SuspicionLocation = FVector::ZeroVector;
 	FVector RangedMoveDirection = FVector::ZeroVector;

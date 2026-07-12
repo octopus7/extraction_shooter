@@ -222,6 +222,7 @@ namespace TunaSweeperEditorSetup
 	const FString BackpackInventoryTaskId = TEXT("2026-05-16_CreateEquipmentInventoryAssetsV3");
 	const FString IntroMenuAndLevelTravelTaskId = TEXT("2026-05-24_CreateTitleIntroMenuPersistentSaveSlotSelectionLevelTravelLadderInitialScaleV1");
 	const FString IntroMenuGraphicsSettingsTaskId = TEXT("2026-07-08_BuildCompleteTitleSettingsWbpV1");
+	const FString IntroMenuDevelopmentSettingsTaskId = TEXT("2026-07-12_AddTitleDevelopmentSettingsV1");
 	const FString OpeningScenarioPresentationTaskId = TEXT("2026-05-19_CreateOpeningScenarioPresentationV2");
 	const FString LevelTransitionVideoTaskId = TEXT("2026-05-16_AddBidirectionalLevelTransitionVideoV3");
 	const FString FirstOutingQuestTaskId = TEXT("2026-05-30_UpdateQuestPanelEmptyStateSelectionV2");
@@ -229,7 +230,7 @@ namespace TunaSweeperEditorSetup
 	const FString WorldProgressInteractionTaskId = TEXT("2026-05-19_CreateWorldProgressObstacleAssetsV1");
 	const FString WarpPointInteractionTaskId = TEXT("2026-05-25_CreateWarpPointInteractionAssetsV1");
 	const FString EnemyVisualMaterialTaskId = TEXT("2026-05-19_CreateEnemyAndContainerVisualMaterialsV3");
-	const FString ExplosiveBarrelTaskId = TEXT("2026-05-29_CreateExplosiveBarrelAssetsV8");
+	const FString ExplosiveBarrelTaskId = TEXT("2026-07-12_CreateStagedExplosiveBarrelAssetsV9");
 	const FString BreakableAppleCrateTaskId = TEXT("2026-07-07_CreateBreakableAppleCrateAssetsV5");
 	const FString RollingBomberBodyMaterialTaskId = TEXT("2026-05-28_CreateRollingBomberBodyGrayMaterialV1");
 	const FString RollingBomberLegMaterialTaskId = TEXT("2026-05-28_CreateRollingBomberLegMetalMaterialV1");
@@ -443,11 +444,6 @@ namespace TunaSweeperEditorSetup
 	const FString PhysicsAppleAssetName = TEXT("BP_PhysicsApple");
 	const FString CrateFragmentAssetName = TEXT("BP_CrateFragment");
 	const FString CrateGeometryCollectionAssetName = TEXT("GC_CrateB_Fractured");
-	const FString ExplosiveBarrelIntactMeshAssetName = TEXT("SM_ExplosiveBarrel_Intact");
-	const FString ExplosiveBarrelDestroyedMeshAssetName = TEXT("SM_ExplosiveBarrel_DestroyedBase");
-	const FString ExplosiveBarrelGrayMaterialAssetName = TEXT("M_ExplosiveBarrel_Gray");
-	const FString ExplosiveBarrelCharredMaterialAssetName = TEXT("M_ExplosiveBarrel_CharredGray");
-	const FString ExplosiveBarrelDetailMaterialAssetName = TEXT("M_ExplosiveBarrel_Detail");
 	const FString IntroMapPackagePath = TEXT("/Game/IntroMap");
 	const FString OpeningScenarioMapPackagePath = TEXT("/Game/OpeningScenarioMap");
 	const FString BunkerMapPackagePath = TEXT("/Game/BunkerMap");
@@ -660,15 +656,9 @@ void AddBarrelQuad(
 		float U1,
 		float V0,
 		float V1);
-void BuildExplosiveBarrelIntactMeshDescription(FMeshDescription& MeshDescription);
-void BuildExplosiveBarrelDestroyedMeshDescription(FMeshDescription& MeshDescription);
-UStaticMesh* EnsureExplosiveBarrelStaticMesh(
-		const FString& AssetName,
-		UMaterialInterface* BarrelMaterial,
-		UMaterialInterface* DetailMaterial,
-		TFunctionRef<void(FMeshDescription&)> BuildMeshDescription);
 bool ConfigureExplosiveBarrelBlueprint(UBlueprint* ExplosiveBarrelBlueprint);
 bool EnsureExplosiveBarrelAssets();
+bool ImportWorldTexture(const FString& InSourceFile, const FString& DestinationPath, const FString& AssetName, UTexture2D** OutTexture);
 UGeometryCollection* EnsureBreakableAppleCrateGeometryCollection();
 bool EnsureBreakableAppleCrateAssets();
 bool EnsureSharedVoxelMeshAssets();
@@ -733,6 +723,7 @@ bool SetNiagaraStoreVec3ByName(FNiagaraParameterStore& Store, FName ParameterNam
 bool SetNiagaraStoreColorByName(FNiagaraParameterStore& Store, FName ParameterName, const FLinearColor& Value);
 int32 ConfigureExtractionSmokeSignalNiagaraScript(UNiagaraScript* Script);
 bool ConfigureExtractionSmokeSignalNiagaraSystem(UNiagaraSystem* System);
+bool ConfigureExplosiveBarrelSmokeNiagaraSystem(UNiagaraSystem* System, float Strength, bool bBlackSmokeOnly = false);
 UObject* LoadExtractionSmokeSignalSourceTemplate();
 bool DeleteExistingExtractionSmokeSignalNiagaraSystem(const FString& ObjectPath);
 bool EnsureExtractionSmokeSignalNiagaraSystem();

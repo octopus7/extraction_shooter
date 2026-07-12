@@ -153,10 +153,19 @@ protected:
 	TObjectPtr<UButton> SettingsInterfaceTabButton;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UButton> SettingsDevelopmentTabButton;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
 	TObjectPtr<UWidget> GraphicsSettingsPanel;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
 	TObjectPtr<UWidget> InterfaceSettingsPanel;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UWidget> DevelopmentSettingsPanel;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UButton> EnemyCombatDebugToggleButton;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
 	TObjectPtr<UButton> WindowedModeButton;
@@ -316,6 +325,12 @@ private:
 	void HandleSettingsInterfaceTabClicked();
 
 	UFUNCTION()
+	void HandleSettingsDevelopmentTabClicked();
+
+	UFUNCTION()
+	void HandleEnemyCombatDebugToggleClicked();
+
+	UFUNCTION()
 	void HandleWindowedModeClicked();
 
 	UFUNCTION()
@@ -380,6 +395,7 @@ private:
 	void ShowSettingsPanel();
 	void ShowGraphicsSettingsTab();
 	void ShowInterfaceSettingsTab();
+	void ShowDevelopmentSettingsTab();
 	void ShowCreditsPanel();
 	void HideOverlayPanels();
 	void SetTitleLogoVisible(bool bVisible);
@@ -389,8 +405,10 @@ private:
 	void RefreshSaveSlotMenu();
 	void RefreshSettingsPanel();
 	void RefreshInterfaceSettingsPanel();
+	void RefreshDevelopmentSettingsPanel();
 	void RefreshSettingsSelectionStyles(const FIntPoint& CurrentResolution, EWindowMode::Type CurrentWindowMode);
 	void RefreshInterfaceSelectionStyles();
+	void RefreshDevelopmentSelectionStyles();
 	void RefreshLocalizedTexts();
 	void RefreshSaveSlotButton(int32 SaveSlotIndex, UButton* SlotButton, UTextBlock* SlotText);
 	void ApplySaveSlotButtonStyle(UButton* SlotButton, bool bSelected);
@@ -495,6 +513,7 @@ private:
 	bool bStartTravelPending = false;
 	bool bTitleMenuButtonContentLayoutApplied = false;
 	bool bShowingInterfaceSettingsTab = false;
+	bool bShowingDevelopmentSettingsTab = false;
 	bool bDifficultyDefinitionsLoaded = false;
 	bool bDifficultyAdjustmentMode = false;
 	bool bClosingDifficultyAdjustment = false;

@@ -154,6 +154,7 @@ void UTunaSweeperIntroMenuWidget::ShowSettingsPanel()
 void UTunaSweeperIntroMenuWidget::ShowGraphicsSettingsTab()
 {
 	bShowingInterfaceSettingsTab = false;
+	bShowingDevelopmentSettingsTab = false;
 
 	if (GraphicsSettingsPanel)
 	{
@@ -163,6 +164,10 @@ void UTunaSweeperIntroMenuWidget::ShowGraphicsSettingsTab()
 	{
 		InterfaceSettingsPanel->SetVisibility(ESlateVisibility::Collapsed);
 	}
+	if (DevelopmentSettingsPanel)
+	{
+		DevelopmentSettingsPanel->SetVisibility(ESlateVisibility::Collapsed);
+	}
 	if (SettingsGraphicsTabButton)
 	{
 		SettingsGraphicsTabButton->SetIsEnabled(false);
@@ -171,6 +176,10 @@ void UTunaSweeperIntroMenuWidget::ShowGraphicsSettingsTab()
 	{
 		SettingsInterfaceTabButton->SetIsEnabled(true);
 	}
+	if (SettingsDevelopmentTabButton)
+	{
+		SettingsDevelopmentTabButton->SetIsEnabled(true);
+	}
 
 	RefreshSettingsPanel();
 }
@@ -178,6 +187,7 @@ void UTunaSweeperIntroMenuWidget::ShowGraphicsSettingsTab()
 void UTunaSweeperIntroMenuWidget::ShowInterfaceSettingsTab()
 {
 	bShowingInterfaceSettingsTab = true;
+	bShowingDevelopmentSettingsTab = false;
 
 	if (const UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GetGameInstance()))
 	{
@@ -191,6 +201,10 @@ void UTunaSweeperIntroMenuWidget::ShowInterfaceSettingsTab()
 	{
 		InterfaceSettingsPanel->SetVisibility(ESlateVisibility::Visible);
 	}
+	if (DevelopmentSettingsPanel)
+	{
+		DevelopmentSettingsPanel->SetVisibility(ESlateVisibility::Collapsed);
+	}
 	if (SettingsGraphicsTabButton)
 	{
 		SettingsGraphicsTabButton->SetIsEnabled(true);
@@ -199,8 +213,45 @@ void UTunaSweeperIntroMenuWidget::ShowInterfaceSettingsTab()
 	{
 		SettingsInterfaceTabButton->SetIsEnabled(false);
 	}
+	if (SettingsDevelopmentTabButton)
+	{
+		SettingsDevelopmentTabButton->SetIsEnabled(true);
+	}
 
 	RefreshInterfaceSettingsPanel();
+}
+
+void UTunaSweeperIntroMenuWidget::ShowDevelopmentSettingsTab()
+{
+	bShowingInterfaceSettingsTab = false;
+	bShowingDevelopmentSettingsTab = true;
+
+	if (GraphicsSettingsPanel)
+	{
+		GraphicsSettingsPanel->SetVisibility(ESlateVisibility::Collapsed);
+	}
+	if (InterfaceSettingsPanel)
+	{
+		InterfaceSettingsPanel->SetVisibility(ESlateVisibility::Collapsed);
+	}
+	if (DevelopmentSettingsPanel)
+	{
+		DevelopmentSettingsPanel->SetVisibility(ESlateVisibility::Visible);
+	}
+	if (SettingsGraphicsTabButton)
+	{
+		SettingsGraphicsTabButton->SetIsEnabled(true);
+	}
+	if (SettingsInterfaceTabButton)
+	{
+		SettingsInterfaceTabButton->SetIsEnabled(true);
+	}
+	if (SettingsDevelopmentTabButton)
+	{
+		SettingsDevelopmentTabButton->SetIsEnabled(false);
+	}
+
+	RefreshDevelopmentSettingsPanel();
 }
 
 void UTunaSweeperIntroMenuWidget::ShowCreditsPanel()

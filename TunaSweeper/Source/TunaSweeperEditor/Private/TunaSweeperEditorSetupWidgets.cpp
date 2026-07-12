@@ -635,8 +635,18 @@ namespace TunaSweeperEditorSetup
 		USizeBox* InterfaceTabButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("InterfaceTabButtonBox"));
 		UButton* SettingsInterfaceTabButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("SettingsInterfaceTabButton"));
 		UTextBlock* SettingsInterfaceTabButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("SettingsInterfaceTabButtonText"));
+		USizeBox* DevelopmentTabButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("DevelopmentTabButtonBox"));
+		UButton* SettingsDevelopmentTabButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("SettingsDevelopmentTabButton"));
+		UTextBlock* SettingsDevelopmentTabButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("SettingsDevelopmentTabButtonText"));
 		UVerticalBox* GraphicsSettingsPanel = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("GraphicsSettingsPanel"));
 		UVerticalBox* InterfaceSettingsPanel = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("InterfaceSettingsPanel"));
+		UVerticalBox* DevelopmentSettingsPanel = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("DevelopmentSettingsPanel"));
+		UBorder* EnemyCombatDebugSection = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("EnemyCombatDebugSection"));
+		UVerticalBox* EnemyCombatDebugSectionStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("EnemyCombatDebugSectionStack"));
+		UTextBlock* EnemyCombatDebugLabelText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("EnemyCombatDebugLabelText"));
+		USizeBox* EnemyCombatDebugToggleButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("EnemyCombatDebugToggleButtonBox"));
+		UButton* EnemyCombatDebugToggleButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("EnemyCombatDebugToggleButton"));
+		UTextBlock* EnemyCombatDebugToggleButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("EnemyCombatDebugToggleButtonText"));
 		UBorder* SettingsWindowModeSection = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("SettingsWindowModeSection"));
 		UVerticalBox* SettingsWindowModeSectionStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("SettingsWindowModeSectionStack"));
 		UTextBlock* WindowModeLabelText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("WindowModeLabelText"));
@@ -744,8 +754,11 @@ namespace TunaSweeperEditorSetup
 			!SettingsPanel || !SettingsBackdrop || !SettingsContentBackground || !SettingsContentStack ||
 			!SettingsTitleText || !SettingsStatusText || !SettingsTabRow || !GraphicsTabButtonBox ||
 			!SettingsGraphicsTabButton || !SettingsGraphicsTabButtonText || !InterfaceTabButtonBox ||
-			!SettingsInterfaceTabButton || !SettingsInterfaceTabButtonText || !GraphicsSettingsPanel ||
-			!InterfaceSettingsPanel || !SettingsWindowModeSection || !SettingsWindowModeSectionStack ||
+			!SettingsInterfaceTabButton || !SettingsInterfaceTabButtonText || !DevelopmentTabButtonBox ||
+			!SettingsDevelopmentTabButton || !SettingsDevelopmentTabButtonText || !GraphicsSettingsPanel ||
+			!InterfaceSettingsPanel || !DevelopmentSettingsPanel || !EnemyCombatDebugSection ||
+			!EnemyCombatDebugSectionStack || !EnemyCombatDebugLabelText || !EnemyCombatDebugToggleButtonBox ||
+			!EnemyCombatDebugToggleButton || !EnemyCombatDebugToggleButtonText || !SettingsWindowModeSection || !SettingsWindowModeSectionStack ||
 			!WindowModeLabelText || !WindowModeRow ||
 			!WindowedModeButtonBox || !WindowedModeButton || !WindowedModeButtonText ||
 			!BorderlessWindowModeButtonBox || !BorderlessWindowModeButton || !BorderlessWindowModeButtonText ||
@@ -1377,7 +1390,11 @@ namespace TunaSweeperEditorSetup
 
 		ConfigurePlainButton(GraphicsTabButtonBox, SettingsGraphicsTabButton, SettingsGraphicsTabButtonText, FText::FromString(TEXT("\uADF8\uB798\uD53D")), FVector2D(142.0f, 38.0f), true);
 		ConfigurePlainButton(InterfaceTabButtonBox, SettingsInterfaceTabButton, SettingsInterfaceTabButtonText, FText::FromString(TEXT("\uC778\uD130\uD398\uC774\uC2A4")), FVector2D(158.0f, 38.0f), false);
-		for (UWidget* TabButtonBox : { static_cast<UWidget*>(GraphicsTabButtonBox), static_cast<UWidget*>(InterfaceTabButtonBox) })
+		ConfigurePlainButton(DevelopmentTabButtonBox, SettingsDevelopmentTabButton, SettingsDevelopmentTabButtonText, FText::FromString(TEXT("\uAC1C\uBC1C")), FVector2D(102.0f, 38.0f), false);
+		for (UWidget* TabButtonBox : {
+				static_cast<UWidget*>(GraphicsTabButtonBox),
+				static_cast<UWidget*>(InterfaceTabButtonBox),
+				static_cast<UWidget*>(DevelopmentTabButtonBox) })
 		{
 			UHorizontalBoxSlot* TabButtonSlot = SettingsTabRow->AddChildToHorizontalBox(TabButtonBox);
 			if (TabButtonSlot)
@@ -1518,6 +1535,30 @@ namespace TunaSweeperEditorSetup
 		{
 			InterfaceActionSlot->SetHorizontalAlignment(HAlign_Left);
 		}
+
+		DevelopmentSettingsPanel->SetVisibility(ESlateVisibility::Collapsed);
+		UVerticalBoxSlot* DevelopmentSettingsSlot = SettingsContentStack->AddChildToVerticalBox(DevelopmentSettingsPanel);
+		if (DevelopmentSettingsSlot)
+		{
+			DevelopmentSettingsSlot->SetPadding(FMargin(0.0f));
+		}
+
+		ConfigureTextBlockLeft(EnemyCombatDebugLabelText, FText::FromString(TEXT("\uC804\uD22C \uB514\uBC84\uADF8")), FLinearColor(0.72f, 0.80f, 0.78f, 1.0f), 15);
+		ConfigurePlainButton(
+			EnemyCombatDebugToggleButtonBox,
+			EnemyCombatDebugToggleButton,
+			EnemyCombatDebugToggleButtonText,
+			FText::FromString(TEXT("\uC801 \uC804\uD22C \uB514\uBC84\uADF8 \uD45C\uC2DC")),
+			FVector2D(660.0f, 46.0f),
+			false);
+		ConfigureSettingsSection(
+			EnemyCombatDebugSection,
+			EnemyCombatDebugSectionStack,
+			DevelopmentSettingsPanel,
+			EnemyCombatDebugLabelText,
+			EnemyCombatDebugToggleButtonBox,
+			FVector2D(760.0f, 104.0f),
+			FMargin(0.0f));
 
 		CreditsPanel->SetVisibility(ESlateVisibility::Collapsed);
 		FillCanvas(RootCanvas->AddChildToCanvas(CreditsPanel));
