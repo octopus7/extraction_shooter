@@ -5083,3 +5083,6 @@
 - GLB Texture Extractor 메뉴 실행 시 UE 5.7 Windows `CreateProc`가 null 인수 포인터를 검증해 중단되던 문제를 확인한 것.
 - `CreateProc`의 인수를 `nullptr` 대신 빈 문자열로 전달하도록 수정한 것.
 - 일반 `TunaSweeperEditor Win64 Development` 빌드는 실행 중인 Unreal Editor의 Live Coding 활성화로 차단된 것.
+## 2026-07-12 21:09:53 (소요시간: 00:02:00)
+
+- 현재 구현된 적 AI의 비전투·근접 전투·원거리 전투 상태 전이와 조건을 Mermaid Markdown 문서 `Docs/enemy_ai_state_flow.md`로 정리함.
