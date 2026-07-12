@@ -113,6 +113,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Loot Container|Meshes", meta = (DisplayName = "Lid Mesh"))
 	TObjectPtr<UStaticMesh> LidMeshOverride;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Loot Container|Lid Animation", meta = (MakeEditWidget = true))
+	FVector LidPivotRelativeLocation = FVector(0.0f, -40.0f, 55.0f);
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Loot Container|Lid Animation")
 	FRotator ClosedLidRelativeRotation = FRotator::ZeroRotator;
 
@@ -136,6 +139,7 @@ protected:
 
 private:
 	void RefreshContainerPresentation();
+	void ApplyLidPivotLocation();
 	void HandleLanguageChanged();
 	void ResetRuntimeContainerState();
 	void ApplyOpenedMarkerState();

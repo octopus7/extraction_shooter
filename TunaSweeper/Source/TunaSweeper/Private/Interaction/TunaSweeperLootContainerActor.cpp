@@ -27,7 +27,7 @@ ATunaSweeperLootContainerActor::ATunaSweeperLootContainerActor()
 
 	LidPivot = CreateDefaultSubobject<USceneComponent>(TEXT("LidPivot"));
 	LidPivot->SetupAttachment(RootComponent);
-	LidPivot->SetRelativeLocation(FVector(0.0f, -40.0f, 55.0f));
+	LidPivot->SetRelativeLocation(LidPivotRelativeLocation);
 
 	LidMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("LidMesh"));
 	LidMesh->SetupAttachment(LidPivot);
@@ -56,6 +56,7 @@ ATunaSweeperLootContainerActor::ATunaSweeperLootContainerActor()
 void ATunaSweeperLootContainerActor::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
+	ApplyLidPivotLocation();
 	RefreshContainerPresentation();
 	ApplyLidRotation(bLidOpen ? OpenLidRelativeRotation : ClosedLidRelativeRotation);
 }
@@ -63,6 +64,7 @@ void ATunaSweeperLootContainerActor::OnConstruction(const FTransform& Transform)
 void ATunaSweeperLootContainerActor::BeginPlay()
 {
 	Super::BeginPlay();
+	ApplyLidPivotLocation();
 	RefreshContainerPresentation();
 	ApplyLidRotation(bLidOpen ? OpenLidRelativeRotation : ClosedLidRelativeRotation);
 	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
@@ -336,6 +338,14 @@ void ATunaSweeperLootContainerActor::RefreshContainerPresentation()
 
 	VisualMesh->SetRelativeScale3D(Definition.MeshScale);
 	ApplyLidRotation(bLidOpen ? OpenLidRelativeRotation : ClosedLidRelativeRotation);
+}
+
+void ATunaSweeperLootContainerActor::ApplyLidPivotLocation()
+{
+	if (LidPivot)
+	{
+		LidPivot->SetRelativeLocation(LidPivotRelativeLocation);
+	}
 }
 
 void ATunaSweeperLootContainerActor::HandleLanguageChanged()
