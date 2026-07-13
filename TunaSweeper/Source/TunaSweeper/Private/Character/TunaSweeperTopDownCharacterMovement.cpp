@@ -1,5 +1,6 @@
 #include "TunaSweeperTopDownCharacterShared.h"
 
+#include "Character/TunaSweeperFootstepPresentationDataAsset.h"
 #include "Sound/SoundBase.h"
 #include "Sound/SoundWaveProcedural.h"
 #include "Subsystem/TunaSweeperNoiseSubsystem.h"
@@ -186,18 +187,13 @@ void ATunaSweeperTopDownCharacter::PlayPlayerFootstepSound(
 	bool bSprintFootstep)
 {
 	USoundBase* SoundToPlay = nullptr;
-	if (!FootstepSounds.IsEmpty())
+	const UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+	const UTunaSweeperFootstepPresentationDataAsset* PresentationData = TunaGameInstance
+		? TunaGameInstance->FootstepPresentationDataAsset.LoadSynchronous()
+		: nullptr;
+	if (PresentationData)
 	{
-		const int32 StartIndex = FMath::RandHelper(FootstepSounds.Num());
-		for (int32 Offset = 0; Offset < FootstepSounds.Num(); ++Offset)
-		{
-			const int32 SoundIndex = (StartIndex + Offset) % FootstepSounds.Num();
-			if (USoundBase* LoadedSound = FootstepSounds[SoundIndex].LoadSynchronous())
-			{
-				SoundToPlay = LoadedSound;
-				break;
-			}
-		}
+		SoundToPlay = PresentationData->BasicFootstepSound.LoadSynchronous();
 	}
 
 	USoundWaveProcedural* ProceduralSound = nullptr;

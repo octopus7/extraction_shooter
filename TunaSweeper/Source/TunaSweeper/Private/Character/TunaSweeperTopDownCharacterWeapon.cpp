@@ -218,6 +218,7 @@ void ATunaSweeperTopDownCharacter::FireWeapon()
 		World->GetMapName().EndsWith(TEXT("BunkerMap"));
 	if (TunaGameInstance->GetWeaponLoadedAmmoCount(SelectedWeaponSlotNumber) <= 0)
 	{
+		EquippedWeapon->TryPlayEmptyFirePresentation();
 		return;
 	}
 

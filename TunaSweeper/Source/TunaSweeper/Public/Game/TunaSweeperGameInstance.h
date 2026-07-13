@@ -12,6 +12,7 @@
 
 class APawn;
 class ATunaSweeperPetCompanionCharacter;
+class UTunaSweeperFootstepPresentationDataAsset;
 class UTunaSweeperVitalsComponent;
 
 USTRUCT(BlueprintType)
@@ -280,6 +281,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TunaSweeper|Weapon Spread Recoil")
 	TSoftObjectPtr<UTunaSweeperWeaponSpreadRecoilDataAsset> WeaponSpreadRecoilDataAsset;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TunaSweeper|Footstep Presentation")
+	TSoftObjectPtr<UTunaSweeperFootstepPresentationDataAsset> FootstepPresentationDataAsset;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TunaSweeper|Pet Companion")
 	TSubclassOf<ATunaSweeperPetCompanionCharacter> PetCompanionClass;

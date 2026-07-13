@@ -2127,6 +2127,76 @@ namespace TunaSweeperEditorSetup
 		return SaveAsset(MappingContext);
 	}
 
+	bool EnsurePlayerFootstepPresentationAssets()
+	{
+		USoundBase* BasicFootstepSound = LoadObject<USoundBase>(nullptr, *BasicFootstepSoundObjectPath);
+		if (!BasicFootstepSound)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to load %s."), *BasicFootstepSoundObjectPath);
+			return false;
+		}
+
+		UTunaSweeperFootstepPresentationDataAsset* PresentationDataAsset =
+			EnsureDataAsset<UTunaSweeperFootstepPresentationDataAsset>(
+				PlayerFootstepPresentationAssetPath,
+				PlayerFootstepPresentationDataAssetName);
+		if (!PresentationDataAsset)
+		{
+			return false;
+		}
+
+		PresentationDataAsset->Modify();
+		PresentationDataAsset->BasicFootstepSound = TSoftObjectPtr<USoundBase>(BasicFootstepSound);
+		PresentationDataAsset->MarkPackageDirty();
+		if (!SaveAsset(PresentationDataAsset))
+		{
+			UE_LOG(
+				LogTunaSweeperEditor,
+				Error,
+				TEXT("Failed to save %s."),
+				*GetAssetObjectPath(PlayerFootstepPresentationAssetPath, PlayerFootstepPresentationDataAssetName));
+			return false;
+		}
+
+		UBlueprint* GameInstanceBlueprint = LoadObject<UBlueprint>(nullptr, *GetGameInstanceObjectPath());
+		if (!GameInstanceBlueprint && !EnsureGameInstanceBlueprint())
+		{
+			return false;
+		}
+
+		GameInstanceBlueprint = LoadObject<UBlueprint>(nullptr, *GetGameInstanceObjectPath());
+		if (!GameInstanceBlueprint)
+		{
+			return false;
+		}
+
+		if (!GameInstanceBlueprint->GeneratedClass)
+		{
+			FKismetEditorUtilities::CompileBlueprint(GameInstanceBlueprint);
+		}
+
+		UTunaSweeperGameInstance* GameInstanceDefaults = GameInstanceBlueprint->GeneratedClass
+			? Cast<UTunaSweeperGameInstance>(GameInstanceBlueprint->GeneratedClass->GetDefaultObject())
+			: nullptr;
+		if (!GameInstanceDefaults)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to configure footstep presentation on %s."), *GetGameInstanceObjectPath());
+			return false;
+		}
+
+		GameInstanceBlueprint->Modify();
+		GameInstanceDefaults->Modify();
+		GameInstanceDefaults->FootstepPresentationDataAsset =
+			TSoftObjectPtr<UTunaSweeperFootstepPresentationDataAsset>(
+				FSoftObjectPath(GetAssetObjectPath(
+					PlayerFootstepPresentationAssetPath,
+					PlayerFootstepPresentationDataAssetName)));
+		GameInstanceBlueprint->MarkPackageDirty();
+		FKismetEditorUtilities::CompileBlueprint(GameInstanceBlueprint);
+
+		return SaveAsset(GameInstanceBlueprint);
+	}
+
 	bool EnsureWeaponPresentationAssets()
 	{
 		FString FireWavPath;
@@ -2231,6 +2301,35 @@ namespace TunaSweeperEditorSetup
 		FKismetEditorUtilities::CompileBlueprint(AssaultRifleBlueprint);
 
 		return SaveAsset(AssaultRifleBlueprint);
+	}
+
+	bool EnsureWeaponPresentationEmptyFireSoundAsset()
+	{
+		UTunaSweeperWeaponPresentationDataAsset* PresentationDataAsset =
+			LoadObject<UTunaSweeperWeaponPresentationDataAsset>(
+				nullptr,
+				*GetAssetObjectPath(WeaponPresentationAssetPath, WeaponPresentationRifleDataAssetName));
+		if (!PresentationDataAsset)
+		{
+			UE_LOG(
+				LogTunaSweeperEditor,
+				Error,
+				TEXT("Failed to load %s."),
+				*GetAssetObjectPath(WeaponPresentationAssetPath, WeaponPresentationRifleDataAssetName));
+			return false;
+		}
+
+		if (!LoadObject<USoundBase>(nullptr, *RifleEmptyFireSoundObjectPath))
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to load %s."), *RifleEmptyFireSoundObjectPath);
+			return false;
+		}
+
+		PresentationDataAsset->Modify();
+		PresentationDataAsset->EmptyFireSound = TSoftObjectPtr<USoundBase>(
+			FSoftObjectPath(RifleEmptyFireSoundObjectPath));
+		PresentationDataAsset->MarkPackageDirty();
+		return SaveAsset(PresentationDataAsset);
 	}
 
 	FVector ResolveMuzzleSocketLocation(const UStaticMesh& WeaponMesh)

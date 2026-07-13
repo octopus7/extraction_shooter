@@ -6,6 +6,36 @@ namespace TunaSweeperEditorSetup
 	// One-shot editor bootstrap. Remove only after an explicit cleanup request; see Docs/editor_one_shot_cleanup.md.
 	void RunEditorOneShotSetup_ToCleanupOnExplicitRequest()
 	{
+		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperFootstepPresentationSetup")))
+		{
+			if (TunaSweeperEditorSetup::EnsurePlayerFootstepPresentationAssets())
+			{
+				FTunaSweeperEditorRunOnce::MarkCompleted(
+					TunaSweeperEditorSetup::PlayerFootstepPresentationAssetTaskId);
+			}
+
+			if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperFootstepPresentationSetupQuit")))
+			{
+				FPlatformMisc::RequestExit(false);
+				return;
+			}
+		}
+
+		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperWeaponEmptyFireSetup")))
+		{
+			if (TunaSweeperEditorSetup::EnsureWeaponPresentationEmptyFireSoundAsset())
+			{
+				FTunaSweeperEditorRunOnce::MarkCompleted(
+					TunaSweeperEditorSetup::WeaponPresentationEmptyFireAssetTaskId);
+			}
+
+			if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperWeaponEmptyFireSetupQuit")))
+			{
+				FPlatformMisc::RequestExit(false);
+				return;
+			}
+		}
+
 		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperShellCasingSetup")))
 		{
 			TunaSweeperEditorSetup::EnsureShellCasingAssets();
@@ -340,6 +370,13 @@ namespace TunaSweeperEditorSetup
 			});
 
 		FTunaSweeperEditorRunOnce::Run(
+			TunaSweeperEditorSetup::PlayerFootstepPresentationAssetTaskId,
+			[]()
+			{
+				return TunaSweeperEditorSetup::EnsurePlayerFootstepPresentationAssets();
+			});
+
+		FTunaSweeperEditorRunOnce::Run(
 			TunaSweeperEditorSetup::EnemyCombatDebugAssetsTaskId,
 			[]()
 			{
@@ -360,6 +397,13 @@ namespace TunaSweeperEditorSetup
 			FPlatformMisc::RequestExit(false);
 			return;
 		}
+
+		FTunaSweeperEditorRunOnce::Run(
+			TunaSweeperEditorSetup::WeaponPresentationEmptyFireAssetTaskId,
+			[]()
+			{
+				return TunaSweeperEditorSetup::EnsureWeaponPresentationEmptyFireSoundAsset();
+			});
 
 		FTunaSweeperEditorRunOnce::Run(
 			TunaSweeperEditorSetup::BaseballBatAssetTaskId,

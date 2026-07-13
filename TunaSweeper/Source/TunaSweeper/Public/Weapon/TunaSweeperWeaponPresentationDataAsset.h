@@ -23,6 +23,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TunaSweeper|Weapon Presentation|Fire")
 	TSoftObjectPtr<USoundBase> FireSound;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TunaSweeper|Weapon Presentation|Fire")
+	TSoftObjectPtr<USoundBase> EmptyFireSound;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TunaSweeper|Weapon Presentation|Reload")
 	TSoftObjectPtr<USoundBase> ReloadStartSound;
 

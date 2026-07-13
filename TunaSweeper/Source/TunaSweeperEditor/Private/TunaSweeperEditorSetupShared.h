@@ -11,6 +11,7 @@
 #include "Blueprint/WidgetTree.h"
 #include "Camera/CameraActor.h"
 #include "Camera/CameraComponent.h"
+#include "Character/TunaSweeperFootstepPresentationDataAsset.h"
 #include "Character/TunaSweeperLedRobotCharacterActor.h"
 #include "Character/TunaSweeperTopDownCharacter.h"
 #include "Components/Border.h"
@@ -137,6 +138,7 @@
 #include "NiagaraTypes.h"
 #include "ObjectTools.h"
 #include "Player/TunaSweeperPlayerController.h"
+#include "Sound/SoundBase.h"
 #include "Sound/SoundWave.h"
 #include "StaticMeshAttributes.h"
 #include "Styling/SlateTypes.h"
@@ -244,7 +246,9 @@ namespace TunaSweeperEditorSetup
 	const FString LookdevFluidExplosionTaskId = TEXT("2026-06-14_CreateLookdevFluidExplosionNiagaraLevelV1");
 	const FString ProjectileHitEffectAssetTaskId = TEXT("2026-05-28_CreateProjectileHitEffectAssetsV1");
 	const FString WeaponSpreadRecoilAssetTaskId = TEXT("2026-05-28_CreateWeaponSpreadRecoilAssetsV1");
+	const FString PlayerFootstepPresentationAssetTaskId = TEXT("2026-07-14_CreatePlayerFootstepPresentationAssetsV1");
 	const FString WeaponPresentationAssetTaskId = TEXT("2026-07-12_CreateWeaponPresentationAssetsV1");
+	const FString WeaponPresentationEmptyFireAssetTaskId = TEXT("2026-07-14_SetWeaponPresentationEmptyFireSoundV1");
 	const FString BaseballBatAssetTaskId = TEXT("2026-05-28_CreateBaseballBatStaticMeshAssetsV1");
 	const FString SandbagCoverAssetTaskId = TEXT("2026-06-02_SandbagFourLayerCoverV1");
 	const FString VoxelMeshAssetTaskId = TEXT("2026-05-19_CreateSharedVoxelMeshAssetsV1");
@@ -259,6 +263,9 @@ namespace TunaSweeperEditorSetup
 	const FString GameModeAssetName = TEXT("BP_TunaSweeperGameMode");
 	const FString PlayerAssetPath = TEXT("/Game/Characters/Player");
 	const FString PlayerAssetName = TEXT("BP_TunaSweeperPlayerCharacter");
+	const FString PlayerFootstepPresentationAssetPath = TEXT("/Game/Characters/Player/AudioVisual");
+	const FString PlayerFootstepPresentationDataAssetName = TEXT("DA_PlayerFootstepPresentation");
+	const FString BasicFootstepSoundObjectPath = TEXT("/Game/Audio/Imported/SW_Footstep_Basic.SW_Footstep_Basic");
 	const FString CanBotAssetPath = TEXT("/Game/Characters/CanBot");
 	const FString CanBotAssetName = TEXT("BP_CanBot");
 	const FString EnemyAssetPath = TEXT("/Game/Characters/Enemy");
@@ -287,6 +294,7 @@ namespace TunaSweeperEditorSetup
 	const FString RifleFireSoundAssetName = TEXT("SFX_Rifle_Fire_FM");
 	const FString RifleReloadStartSoundAssetName = TEXT("SFX_Rifle_ReloadStart_FM");
 	const FString RifleReloadCompleteSoundAssetName = TEXT("SFX_Rifle_ReloadComplete_FM");
+	const FString RifleEmptyFireSoundObjectPath = TEXT("/Game/Audio/Imported/SW_Gun_Trigger.SW_Gun_Trigger");
 	const FString BaseballBatWoodTextureAssetName = TEXT("T_BaseballBat_WoodGrain");
 	const FString BaseballBatMaterialAssetName = TEXT("M_BaseballBat_Wood");
 	const FString BaseballBatMeshAssetName = TEXT("SM_BaseballBat");
@@ -632,7 +640,9 @@ bool SetProjectStartupMapsToIntro();
 bool EnsureGameInstanceBlueprint();
 bool EnsureProjectileHitEffectAssets();
 bool EnsureWeaponSpreadRecoilAssets();
+bool EnsurePlayerFootstepPresentationAssets();
 bool EnsureWeaponPresentationAssets();
+bool EnsureWeaponPresentationEmptyFireSoundAsset();
 bool EnsureShellCasingAssets();
 bool EnsureTopDownShooterAssets();
 bool EnsureCanBotBlueprint();

@@ -99,6 +99,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Weapon|Presentation")
 	void SetWeaponPresentationDataAsset(TSoftObjectPtr<UTunaSweeperWeaponPresentationDataAsset> InWeaponPresentationDataAsset);
 
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Weapon|Presentation")
+	bool TryPlayEmptyFirePresentation();
+
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
 	TObjectPtr<USceneComponent> SceneRoot;
@@ -177,6 +180,7 @@ private:
 	FTransform GetLaserSightWorldTransform() const;
 
 	float LastFireTimeSeconds = -1000.0f;
+	float LastEmptyFirePresentationTimeSeconds = -1000.0f;
 	float LastLaserSightDebugLogTimeSeconds = -1000.0f;
 	FTimerHandle MuzzleFlashLightTimerHandle;
 };

@@ -3209,3 +3209,23 @@ MP4 오디오 추출 도구에서 숫자로 시간을 입력하지 않고, 전�
 ### 답변
 
 가능하며 구현했다. 기존 Start/End 시간 입력 칸을 제거하고 A(주황)와 B(하늘색) 핸들을 드래그하는 범위 선택기로 교체했다. MP4를 선택하면 Windows Media Foundation으로 전체 오디오를 백그라운드 분석해 512개 피크의 실제 파형을 슬라이더에 표시한다. 파형 분석이 끝나기 전에도 A/B 핸들로 범위를 선택할 수 있으며, `Preview Selection`과 `Create Sound Wave`는 선택된 구간을 그대로 사용한다.
+
+## 2026-07-14 05:09:22 (소요시간: 00:00:35)
+
+### 질문
+
+플레이어 발소리 사운드를 어디에 연결하는지 문의.
+
+### 답변
+
+콘텐츠 브라우저에서 `/Game/Characters/Player/BP_TunaSweeperPlayerCharacter`를 열고 `Class Defaults`의 `Movement > Footstep > Audio > Footstep Sounds` 배열에 `SoundWave`, `SoundCue`, 또는 `MetaSound Source`를 추가하면 된다. 배열 항목은 발걸음마다 무작위로 선택되며 걷기와 달리기 모두 같은 배열을 사용한다. 현재 구현은 애니메이션 노티파이를 사용하지 않고 이동 속도와 보행 간격으로 자동 재생하며, 배열이 비어 있으면 절차적으로 만든 임시 발소리를 재생한다. 프로젝트에 이미 있는 후보 사운드는 `/Game/Audio/Imported/SW_Footstep_Basic`, `SW_Footstep_Gravel`, `SW_Footstep_Water`이다.
+
+## 2026-07-14 05:10:00 (소요시간: 00:05:00)
+
+### 질문
+
+탄약이 없는 빈총의 방아쇠 클릭음이 이미 코드에 구현되어 있는지 문의.
+
+### 답변
+
+기존에는 장전 탄약이 0이면 발사 입력을 즉시 종료해 공탄음을 재생하는 코드나 DA 슬롯이 없었다. `EmptyFireSound` 슬롯과 재생 로직을 추가해, 현재는 `/Game/Audio/Imported/SW_Gun_Trigger`가 발사 쿨다운 기준으로 한 번 재생된다. 이 경우 발사체·머즐 플래시·정상 발사음은 발생하지 않는다.

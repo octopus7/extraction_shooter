@@ -20,7 +20,6 @@ class UInputMappingContext;
 class UMediaSource;
 class UPrimitiveComponent;
 class USceneComponent;
-class USoundBase;
 class USoundWaveProcedural;
 class USpringArmComponent;
 class UStaticMeshComponent;
@@ -356,10 +355,6 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement")
 	float BaseWalkSpeed = 600.0f;
-
-	/** Optional authored variants. When empty, a short procedural placeholder thump is used. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement|Footstep|Audio")
-	TArray<TSoftObjectPtr<USoundBase>> FootstepSounds;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement|Footstep|Audio", meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float FootstepSoundVolumeMultiplier = 0.55f;

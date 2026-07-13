@@ -594,6 +594,37 @@ void ATunaSweeperWeapon::SetWeaponPresentationDataAsset(
 	WeaponPresentationDataAsset = MoveTemp(InWeaponPresentationDataAsset);
 }
 
+bool ATunaSweeperWeapon::TryPlayEmptyFirePresentation()
+{
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		return false;
+	}
+
+	const float CurrentTimeSeconds = World->GetTimeSeconds();
+	if (CurrentTimeSeconds - LastEmptyFirePresentationTimeSeconds < FireCooldown)
+	{
+		return false;
+	}
+
+	UTunaSweeperWeaponPresentationDataAsset* PresentationData = WeaponPresentationDataAsset.LoadSynchronous();
+	if (!PresentationData)
+	{
+		return false;
+	}
+
+	USoundBase* EmptyFireSound = PresentationData->EmptyFireSound.LoadSynchronous();
+	if (!EmptyFireSound)
+	{
+		return false;
+	}
+
+	LastEmptyFirePresentationTimeSeconds = CurrentTimeSeconds;
+	UGameplayStatics::PlaySoundAtLocation(this, EmptyFireSound, GetMuzzleWorldLocation());
+	return true;
+}
+
 bool ATunaSweeperWeapon::Fire(
 	const FVector& AimDirection,
 	APawn* InstigatorPawn,
