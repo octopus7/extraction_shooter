@@ -84,7 +84,8 @@ public:
 		float ListenerHearingRange,
 		float ListenerSensitivity,
 		float ListenerMinStrength,
-		FTunaSweeperHeardNoiseEvent& OutHeardNoise) const;
+		FTunaSweeperHeardNoiseEvent& OutHeardNoise,
+		AActor* ListenerActor = nullptr) const;
 
 	FTunaSweeperNoiseReportedSignature OnNoiseReported;
 };

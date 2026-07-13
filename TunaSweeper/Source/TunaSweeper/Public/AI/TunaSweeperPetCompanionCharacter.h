@@ -4,6 +4,8 @@
 #include "GameFramework/Character.h"
 #include "TunaSweeperPetCompanionCharacter.generated.h"
 
+class UTunaSweeperFactionComponent;
+
 UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API ATunaSweeperPetCompanionCharacter : public ACharacter
 {
@@ -23,6 +25,12 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Pet Companion")
 	bool HasValidFollowTarget() const;
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Faction")
+	UTunaSweeperFactionComponent* GetFactionComponent() const { return FactionComponent; }
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UTunaSweeperFactionComponent> FactionComponent;
 
 	UPROPERTY(Transient, BlueprintReadOnly, Category = "TunaSweeper|Pet Companion")
 	TObjectPtr<AActor> FollowTarget;

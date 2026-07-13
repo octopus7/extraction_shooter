@@ -30,6 +30,14 @@ enum class ETunaSweeperItemGrade : uint8
 	Legendary UMETA(DisplayName = "Legendary")
 };
 
+UENUM(BlueprintType)
+enum class ETunaSweeperWeaponFireMode : uint8
+{
+	NotApplicable UMETA(DisplayName = "Not Applicable"),
+	SemiAutomatic UMETA(DisplayName = "Semi Automatic"),
+	Automatic UMETA(DisplayName = "Automatic")
+};
+
 USTRUCT(BlueprintType)
 struct TUNASWEEPER_API FTunaSweeperItemDefinition
 {
@@ -76,6 +84,9 @@ struct TUNASWEEPER_API FTunaSweeperItemDefinition
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
 	FName WeaponTypeTag;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
+	ETunaSweeperWeaponFireMode FireMode = ETunaSweeperWeaponFireMode::NotApplicable;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
 	FName AttachmentSlotTag;

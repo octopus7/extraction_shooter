@@ -1,5 +1,7 @@
 #include "TunaSweeperTopDownCharacterShared.h"
 
+#include "Subsystem/TunaSweeperFactionSubsystem.h"
+
 float ATunaSweeperTopDownCharacter::TakeDamage(
 	float DamageAmount,
 	FDamageEvent const& DamageEvent,
@@ -9,6 +11,23 @@ float ATunaSweeperTopDownCharacter::TakeDamage(
 	if (bIsDead || DamageAmount <= 0.0f || !VitalsComponent)
 	{
 		return 0.0f;
+	}
+
+	if (const UWorld* World = GetWorld())
+	{
+		const AActor* FactionSource = DamageCauser;
+		if (!FactionSource && EventInstigator)
+		{
+			FactionSource = EventInstigator->GetPawn()
+				? static_cast<AActor*>(EventInstigator->GetPawn())
+				: static_cast<AActor*>(EventInstigator);
+		}
+		if (const UTunaSweeperFactionSubsystem* FactionSubsystem =
+			World->GetSubsystem<UTunaSweeperFactionSubsystem>();
+			FactionSubsystem && !FactionSubsystem->CanApplyCombatEffect(FactionSource, this))
+		{
+			return 0.0f;
+		}
 	}
 
 	if (IsDamageInvulnerable())

@@ -22,6 +22,7 @@
 #include "Player/TunaSweeperPlayerController.h"
 #include "ProceduralMeshComponent.h"
 #include "Subsystem/TunaSweeperImpactEffectSubsystem.h"
+#include "Subsystem/TunaSweeperFactionSubsystem.h"
 #include "TunaSweeperCollisionChannels.h"
 #include "UI/TunaSweeperGameHudWidget.h"
 #include "UObject/ConstructorHelpers.h"
@@ -126,6 +127,23 @@ void ATunaSweeperProjectile::BeginPlay()
 	ApplyProjectileCollisionDefaults();
 	IgnoreActor(GetOwner());
 	IgnoreActor(GetInstigator());
+	if (UWorld* World = GetWorld())
+	{
+		if (UTunaSweeperFactionSubsystem* FactionSubsystem =
+			World->GetSubsystem<UTunaSweeperFactionSubsystem>())
+		{
+			const AActor* FactionSource = GetInstigator() ? static_cast<AActor*>(GetInstigator()) : GetOwner();
+			TArray<AActor*> FriendlyActors;
+			FactionSubsystem->GetActorsWithAttitude(
+				FactionSource,
+				ETunaSweeperFactionAttitude::Friendly,
+				FriendlyActors);
+			for (AActor* FriendlyActor : FriendlyActors)
+			{
+				IgnoreActor(FriendlyActor);
+			}
+		}
+	}
 	SetLifeSpan(LifeSeconds);
 }
 
@@ -418,6 +436,17 @@ void ATunaSweeperProjectile::HandleHit(
 	{
 		IgnoreActor(OtherActor);
 		return;
+	}
+
+	if (UWorld* World = GetWorld())
+	{
+		if (const UTunaSweeperFactionSubsystem* FactionSubsystem =
+			World->GetSubsystem<UTunaSweeperFactionSubsystem>();
+			FactionSubsystem && !FactionSubsystem->CanApplyCombatEffect(this, OtherActor))
+		{
+			IgnoreActor(OtherActor);
+			return;
+		}
 	}
 
 	if (const ATunaSweeperTopDownCharacter* TunaCharacter = Cast<ATunaSweeperTopDownCharacter>(OtherActor);

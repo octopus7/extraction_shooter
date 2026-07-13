@@ -1,6 +1,8 @@
 #include "Character/TunaSweeperTopDownCharacter.h"
 #include "TunaSweeperTopDownCharacterShared.h"
 
+#include "Component/TunaSweeperFactionComponent.h"
+
 ATunaSweeperTopDownCharacter::ATunaSweeperTopDownCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -65,6 +67,8 @@ ATunaSweeperTopDownCharacter::ATunaSweeperTopDownCharacter()
 
 	VitalsComponent = CreateDefaultSubobject<UTunaSweeperVitalsComponent>(TEXT("VitalsComponent"));
 	DebuffComponent = CreateDefaultSubobject<UTunaSweeperDebuffComponent>(TEXT("DebuffComponent"));
+	FactionComponent = CreateDefaultSubobject<UTunaSweeperFactionComponent>(TEXT("FactionComponent"));
+	FactionComponent->SetFactionId(TunaSweeperFactionIds::Player);
 	PlayerVisionComponent = CreateDefaultSubobject<UTunaSweeperPlayerVisionComponent>(TEXT("PlayerVisionComponent"));
 	OcclusionRevealSourceComponent = CreateDefaultSubobject<UTunaSweeperOcclusionRevealSourceComponent>(TEXT("OcclusionRevealSourceComponent"));
 	HeadphoneListenerComponent = CreateDefaultSubobject<UTunaSweeperHeadphoneListenerComponent>(TEXT("HeadphoneListenerComponent"));

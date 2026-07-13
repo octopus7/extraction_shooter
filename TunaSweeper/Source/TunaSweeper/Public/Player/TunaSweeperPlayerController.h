@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GenericTeamAgentInterface.h"
 #include "GameFramework/PlayerController.h"
 #include "Quest/TunaSweeperQuestTypes.h"
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
@@ -19,7 +20,7 @@ class ATunaSweeperPickupItemActor;
 struct FInputActionValue;
 
 UCLASS(BlueprintType, Blueprintable)
-class TUNASWEEPER_API ATunaSweeperPlayerController : public APlayerController
+class TUNASWEEPER_API ATunaSweeperPlayerController : public APlayerController, public IGenericTeamAgentInterface
 {
 	GENERATED_BODY()
 
@@ -30,6 +31,9 @@ public:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void PlayerTick(float DeltaTime) override;
 	virtual void SetupInputComponent() override;
+	virtual void SetGenericTeamId(const FGenericTeamId& TeamID) override;
+	virtual FGenericTeamId GetGenericTeamId() const override;
+	virtual ETeamAttitude::Type GetTeamAttitudeTowards(const AActor& Other) const override;
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|HUD")
 	UTunaSweeperGameHudWidget* GetGameHudWidget() const { return GameHudWidget; }

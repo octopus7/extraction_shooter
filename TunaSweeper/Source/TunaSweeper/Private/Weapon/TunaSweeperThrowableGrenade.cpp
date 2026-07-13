@@ -7,6 +7,7 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "NiagaraFunctionLibrary.h"
+#include "Subsystem/TunaSweeperFactionSubsystem.h"
 #include "TimerManager.h"
 #include "Weapon/TunaSweeperThrowableDamageType.h"
 
@@ -121,6 +122,17 @@ void ATunaSweeperThrowableGrenade::Explode()
 	const FVector ExplosionLocation = GetActorLocation();
 
 	TArray<AActor*> IgnoreActors;
+	if (const UWorld* World = GetWorld())
+	{
+		if (const UTunaSweeperFactionSubsystem* FactionSubsystem =
+			World->GetSubsystem<UTunaSweeperFactionSubsystem>())
+		{
+			FactionSubsystem->GetActorsWithAttitude(
+				this,
+				ETunaSweeperFactionAttitude::Friendly,
+				IgnoreActors);
+		}
+	}
 	UGameplayStatics::ApplyRadialDamage(
 		this,
 		Damage,

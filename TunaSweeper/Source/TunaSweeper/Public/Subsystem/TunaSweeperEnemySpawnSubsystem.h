@@ -1,6 +1,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AI/TunaSweeperEnemyCombatProfile.h"
+#include "Component/TunaSweeperFactionTypes.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "TunaSweeperEnemySpawnSubsystem.generated.h"
 
@@ -66,6 +68,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Enemy Spawn")
 	bool LoadEnemySpawnData(bool bForceReload = false);
 
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Enemy Spawn")
+	bool LoadEnemyCombatProfileData(bool bForceReload = false);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Enemy Spawn")
+	bool TryGetEnemyCombatProfile(FName ProfileId, FTunaSweeperEnemyCombatProfile& OutProfile);
+
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Raid Runtime Spawn")
 	bool LoadLootContainerSpawnData(bool bForceReload = false);
 
@@ -85,6 +93,9 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Enemy Spawn")
 	bool IsEnemySpawnDataLoaded() const { return bEnemySpawnDataLoaded; }
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Enemy Spawn")
+	bool IsEnemyCombatProfileDataLoaded() const { return bEnemyCombatProfileDataLoaded; }
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Raid Runtime Spawn")
 	bool IsLootContainerSpawnDataLoaded() const { return bLootContainerSpawnDataLoaded; }
@@ -144,6 +155,11 @@ private:
 		float MaxHealth = 30.0f;
 		int32 BleedingChanceBonus = 0;
 		float BleedingDurationBonusSeconds = 0.0f;
+		FName CombatProfileId;
+		FTunaSweeperEnemyCombatProfile CombatProfile;
+		uint8 FactionId = TunaSweeperFactionIds::NoFaction;
+		FName SquadId;
+		int32 SquadSlot = INDEX_NONE;
 	};
 
 	struct FLootContainerSpawnDefinition
@@ -310,12 +326,14 @@ private:
 
 	void HandlePostLoadMapWithWorld(UWorld* LoadedWorld);
 	void ResetLoadedEnemySpawnData();
+	void ResetLoadedEnemyCombatProfileData();
 	void ResetLoadedLootContainerSpawnData();
 	void ResetLoadedTransparentObstacleSpawnData();
 	void ResetLoadedWorldProgressObjectSpawnData();
 	void ResetLoadedWarpPointSpawnData();
 	void ResetLoadedGameplayInteractionActorSpawnData();
 	FString GetEnemySpawnJsonPath() const;
+	FString GetEnemyCombatProfileJsonPath() const;
 	FString GetLootContainerSpawnJsonPath() const;
 	FString GetTransparentObstacleSpawnJsonPath() const;
 	FString GetWorldProgressObjectSpawnJsonPath() const;
@@ -327,6 +345,7 @@ private:
 		const FGameplayInteractionActorSpawnDefinition& SpawnDefinition) const;
 
 	TArray<FEnemySpawnDefinition> EnemySpawnDefinitions;
+	TMap<FName, FTunaSweeperEnemyCombatProfile> EnemyCombatProfilesById;
 	TArray<FLootContainerSpawnDefinition> LootContainerSpawnDefinitions;
 	TArray<FTransparentObstacleSpawnDefinition> TransparentObstacleSpawnDefinitions;
 	TArray<FWorldProgressObjectSpawnDefinition> WorldProgressObjectSpawnDefinitions;
@@ -336,6 +355,7 @@ private:
 	TWeakObjectPtr<UWorld> LastSpawnedWorld;
 	FDelegateHandle PostLoadMapHandle;
 	bool bEnemySpawnDataLoaded = false;
+	bool bEnemyCombatProfileDataLoaded = false;
 	bool bLootContainerSpawnDataLoaded = false;
 	bool bTransparentObstacleSpawnDataLoaded = false;
 	bool bWorldProgressObjectSpawnDataLoaded = false;

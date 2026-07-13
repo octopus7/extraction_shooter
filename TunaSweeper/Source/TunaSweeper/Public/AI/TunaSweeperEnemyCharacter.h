@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AI/TunaSweeperEnemyCombatProfile.h"
 #include "GameFramework/Character.h"
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
 #include "TunaSweeperEnemyCharacter.generated.h"
@@ -9,6 +10,8 @@ class UStaticMeshComponent;
 class USceneComponent;
 class UTunaSweeperVisionSubjectComponent;
 class UTunaSweeperEnemySensorDebugComponent;
+class UTunaSweeperFactionComponent;
+class UTunaSweeperSpeechBubbleWidget;
 class UWidgetComponent;
 class UMaterialInterface;
 class UNiagaraSystem;
@@ -17,6 +20,52 @@ class ATunaSweeperWeapon;
 class ATunaSweeperLootContainerActor;
 class ATunaSweeperMeleeImpactBurstActor;
 class ATunaSweeperMeleeSwingTrailActor;
+
+UENUM(BlueprintType)
+enum class ETunaSweeperEnemyFireResult : uint8
+{
+	Fired,
+	MagazineEmpty,
+	Reloading,
+	Cooldown,
+	OutOfAmmo,
+	FriendlyTarget,
+	Blocked
+};
+
+USTRUCT(BlueprintType)
+struct TUNASWEEPER_API FTunaSweeperEnemyWeaponRuntimeStatus
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Combat")
+	int32 MagazineCapacity = 0;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Combat")
+	int32 LoadedAmmo = 0;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Combat")
+	int32 ReserveAmmo = 0;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Combat")
+	bool bIsReloading = false;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Combat")
+	float ReloadProgress = 0.0f;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Combat")
+	float ReloadSeconds = 0.0f;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Combat")
+	ETunaSweeperWeaponFireMode FireMode = ETunaSweeperWeaponFireMode::NotApplicable;
+};
+
+enum class ETunaSweeperEnemyStatusBubble : uint8
+{
+	None,
+	Alert,
+	Reload
+};
 
 UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API ATunaSweeperEnemyCharacter : public ACharacter
@@ -37,6 +86,18 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Combat")
 	bool FireProjectileAt(AActor* TargetActor);
 
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Combat")
+	ETunaSweeperEnemyFireResult TryFireProjectileAt(AActor* TargetActor);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Combat")
+	bool StartEnemyReload();
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Combat")
+	FTunaSweeperEnemyWeaponRuntimeStatus GetEnemyWeaponRuntimeStatus();
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Combat")
+	bool IsDead() const { return bIsDead; }
+
 	bool AttackTarget(AActor* TargetActor);
 	bool UsesMeleeAttack() const;
 	float GetMeleeAttackRange() const;
@@ -46,6 +107,16 @@ public:
 	float GetMeleeAttackCooldownSeconds() const;
 	bool TryApplyBleedTo(AActor* TargetActor) const;
 	void SetAlertIndicatorVisible(bool bVisible);
+	void ShowAlertSpeechBubble();
+	void HideAlertSpeechBubble();
+	UTunaSweeperFactionComponent* GetFactionComponent() const { return FactionComponent; }
+	const FTunaSweeperEnemyCombatProfile& GetCombatProfile() const { return CombatProfile; }
+	FName GetCombatProfileId() const { return CombatProfile.ProfileId; }
+	void ConfigureCombatProfile(
+		const FTunaSweeperEnemyCombatProfile& InCombatProfile,
+		uint8 InFactionId,
+		FName InSquadId,
+		int32 InSquadSlot);
 
 	void ConfigureSpawnData(
 		const TSoftObjectPtr<UMaterialInterface>& InBodyMaterial,
@@ -83,6 +154,12 @@ protected:
 	TObjectPtr<UWidgetComponent> EnemyReloadWidgetComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UWidgetComponent> EnemyStatusBubbleWidgetComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UTunaSweeperFactionComponent> FactionComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UTunaSweeperVisionSubjectComponent> VisionSubjectComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
@@ -98,6 +175,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat|Weapon")
 	TSubclassOf<ATunaSweeperWeapon> EnemyWeaponClass;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "UI")
+	TSoftClassPtr<UTunaSweeperSpeechBubbleWidget> EnemyStatusBubbleWidgetClass;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat")
 	FVector ProjectileSpawnOffset = FVector(60.0f, 0.0f, 55.0f);
@@ -192,9 +272,12 @@ private:
 	void UpdateAlertIndicatorFacing();
 	void InitializeEnemyWeaponRuntime();
 	bool EnsureEnemyWeaponActor();
-	bool StartEnemyReload();
 	void CompleteEnemyReloadIfReady();
 	void UpdateEnemyReloadWidget();
+	void UpdateEnemyStatusSpeechBubble();
+	void SetEnemyStatusSpeechBubble(ETunaSweeperEnemyStatusBubble InStatus, const FText& InText, float DisplaySeconds);
+	void ClearEnemyStatusSpeechBubble(uint32 ExpectedRevision, ETunaSweeperEnemyStatusBubble ExpectedStatus);
+	FText ResolveEnemyStatusText(FName TextKey, const FText& FallbackText) const;
 	bool TryCreateEnemyWeaponLootInstance(
 		class UTunaSweeperGameInstance* TunaGameInstance,
 		class UTunaSweeperItemDataSubsystem* ItemDataSubsystem,
@@ -215,8 +298,11 @@ private:
 	UPROPERTY(Transient)
 	TObjectPtr<ATunaSweeperWeapon> EnemyWeapon;
 
+	FTunaSweeperEnemyCombatProfile CombatProfile;
+
 	float CurrentHealth = 30.0f;
 	FName EnemyWeaponTypeTag = NAME_None;
+	ETunaSweeperWeaponFireMode EnemyFireMode = ETunaSweeperWeaponFireMode::NotApplicable;
 	FName EnemyImpactProfileId = NAME_None;
 	FName EnemyProjectileHitEffectId = NAME_None;
 	float EnemyProjectileDamageMultiplier = 1.0f;
@@ -228,4 +314,7 @@ private:
 	bool bIsDead = false;
 	bool bEnemyWeaponRuntimeInitialized = false;
 	float FootstepNoiseElapsedSeconds = 0.0f;
+	ETunaSweeperEnemyStatusBubble EnemyStatusBubble = ETunaSweeperEnemyStatusBubble::None;
+	uint32 EnemyStatusBubbleRevision = 0;
+	FTimerHandle EnemyStatusBubbleTimerHandle;
 };

@@ -3,6 +3,7 @@
 #include "AI/TunaSweeperEnemyAIController.h"
 #include "Component/TunaSweeperDebuffComponent.h"
 #include "Component/TunaSweeperEnemySensorDebugComponent.h"
+#include "Component/TunaSweeperFactionComponent.h"
 #include "Component/TunaSweeperVisionSubjectComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/PrimitiveComponent.h"
@@ -26,10 +27,13 @@
 #include "NiagaraSystem.h"
 #include "Debuff/TunaSweeperDebuffTypes.h"
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
+#include "Subsystem/TunaSweeperFactionSubsystem.h"
 #include "Subsystem/TunaSweeperNoiseSubsystem.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
+#include "Subsystem/TunaSweeperTextSubsystem.h"
 #include "TimerManager.h"
 #include "UI/TunaSweeperReloadRingWidget.h"
+#include "UI/TunaSweeperSpeechBubbleWidget.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Weapon/TunaSweeperProjectile.h"
 #include "Weapon/TunaSweeperWeapon.h"
@@ -69,6 +73,8 @@ namespace
 		TEXT("/Game/Characters/Enemy/SM_Enemy_AlertExclamation.SM_Enemy_AlertExclamation");
 	const TCHAR* EnemyVoxelMaterialPath = TEXT("/Game/Prototype/M_Voxel_VertexColor.M_Voxel_VertexColor");
 	const TCHAR* EnemyAlertIndicatorMaterialPath = TEXT("/Game/Characters/Enemy/M_Enemy_Red.M_Enemy_Red");
+	const TCHAR* EnemyStatusBubbleWidgetClassPath = TEXT("/Game/UI/WBP_SpeechBubble.WBP_SpeechBubble_C");
+	const FName EnemyReloadTextKey(TEXT("ui.enemy.status.reload"));
 
 	float GetRandomizedEnemyValue(float BaseValue, const FVector2D& OffsetRange, float MinValue)
 	{
@@ -165,12 +171,28 @@ ATunaSweeperEnemyCharacter::ATunaSweeperEnemyCharacter()
 	EnemyReloadWidgetComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	EnemyReloadWidgetComponent->SetVisibility(false);
 
+	EnemyStatusBubbleWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("EnemyStatusBubbleWidgetComponent"));
+	EnemyStatusBubbleWidgetComponent->SetupAttachment(RootComponent);
+	EnemyStatusBubbleWidgetComponent->SetWidgetSpace(EWidgetSpace::Screen);
+	EnemyStatusBubbleWidgetComponent->SetWidgetClass(UTunaSweeperSpeechBubbleWidget::StaticClass());
+	EnemyStatusBubbleWidgetComponent->SetDrawSize(FVector2D(190.0f, 76.0f));
+	EnemyStatusBubbleWidgetComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 190.0f));
+	EnemyStatusBubbleWidgetComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	EnemyStatusBubbleWidgetComponent->SetVisibility(false);
+	EnemyStatusBubbleWidgetComponent->SetHiddenInGame(true);
+
+	FactionComponent = CreateDefaultSubobject<UTunaSweeperFactionComponent>(TEXT("FactionComponent"));
+	FactionComponent->SetFactionId(TunaSweeperFactionIds::Enemy);
+	FactionComponent->SetCanBeCombatTarget(true);
+
 	VisionSubjectComponent = CreateDefaultSubobject<UTunaSweeperVisionSubjectComponent>(TEXT("VisionSubject"));
 	SensorDebugComponent = CreateDefaultSubobject<UTunaSweeperEnemySensorDebugComponent>(TEXT("SensorDebug"));
 
 	ApplyVoxelVisualMeshes();
 
 	EnemyWeaponClass = ATunaSweeperWeapon::StaticClass();
+	EnemyStatusBubbleWidgetClass = TSoftClassPtr<UTunaSweeperSpeechBubbleWidget>(
+		FSoftObjectPath(EnemyStatusBubbleWidgetClassPath));
 	ProjectileClass = TSoftClassPtr<ATunaSweeperProjectile>(
 		FSoftObjectPath(TEXT("/Game/Weapons/BP_TunaSweeperProjectile.BP_TunaSweeperProjectile_C")));
 	BodyMaterial = TSoftObjectPtr<UMaterialInterface>(
@@ -194,6 +216,14 @@ void ATunaSweeperEnemyCharacter::BeginPlay()
 	GetCharacterMovement()->MaxWalkSpeed = GetRandomizedEnemyValue(MovementSpeed, MovementSpeedRandomOffset, 0.0f);
 	ApplyVoxelVisualMeshes();
 	ApplyVisualMaterials();
+	if (EnemyStatusBubbleWidgetComponent)
+	{
+		if (TSubclassOf<UTunaSweeperSpeechBubbleWidget> LoadedBubbleClass = EnemyStatusBubbleWidgetClass.LoadSynchronous())
+		{
+			EnemyStatusBubbleWidgetComponent->SetWidgetClass(LoadedBubbleClass);
+		}
+		EnemyStatusBubbleWidgetComponent->InitWidget();
+	}
 	if (!UsesMeleeAttack())
 	{
 		InitializeEnemyWeaponRuntime();
@@ -213,11 +243,12 @@ void ATunaSweeperEnemyCharacter::Tick(float DeltaSeconds)
 	TickFootstepNoise(DeltaSeconds);
 	CompleteEnemyReloadIfReady();
 	UpdateEnemyReloadWidget();
-	UpdateAlertIndicatorFacing();
+	UpdateEnemyStatusSpeechBubble();
 }
 
 void ATunaSweeperEnemyCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
+	GetWorldTimerManager().ClearTimer(EnemyStatusBubbleTimerHandle);
 	if (EnemyWeapon)
 	{
 		EnemyWeapon->Destroy();
@@ -238,21 +269,38 @@ float ATunaSweeperEnemyCharacter::TakeDamage(
 		return 0.0f;
 	}
 
+	AActor* SuspectedActor = DamageCauser;
+	if (!SuspectedActor && EventInstigator)
+	{
+		SuspectedActor = EventInstigator->GetPawn();
+	}
+	if (UWorld* World = GetWorld())
+	{
+		if (UTunaSweeperFactionSubsystem* FactionSubsystem = World->GetSubsystem<UTunaSweeperFactionSubsystem>();
+			FactionSubsystem && !FactionSubsystem->CanApplyCombatEffect(SuspectedActor, this))
+		{
+			return 0.0f;
+		}
+	}
+
 	const float AppliedDamage = FMath::Min(CurrentHealth, DamageAmount);
 	CurrentHealth = FMath::Max(0.0f, CurrentHealth - DamageAmount);
 	if (CurrentHealth > 0.0f)
 	{
-		AActor* SuspectedActor = EventInstigator ? EventInstigator->GetPawn() : nullptr;
-		if (!SuspectedActor && DamageCauser)
+		if (EventInstigator && EventInstigator->GetPawn())
 		{
-			SuspectedActor = DamageCauser->GetOwner() ? DamageCauser->GetOwner() : DamageCauser;
+			SuspectedActor = EventInstigator->GetPawn();
+		}
+		else if (DamageCauser && DamageCauser->GetOwner())
+		{
+			SuspectedActor = DamageCauser->GetOwner();
 		}
 
 		if (SuspectedActor)
 		{
 			if (ATunaSweeperEnemyAIController* EnemyController = Cast<ATunaSweeperEnemyAIController>(GetController()))
 			{
-				EnemyController->NotifySuspicionAtLocation(SuspectedActor->GetActorLocation());
+				EnemyController->NotifyDamageTaken(SuspectedActor);
 			}
 		}
 	}
@@ -310,6 +358,23 @@ void ATunaSweeperEnemyCharacter::ConfigureSpawnData(
 	ApplyVisualMaterials();
 }
 
+void ATunaSweeperEnemyCharacter::ConfigureCombatProfile(
+	const FTunaSweeperEnemyCombatProfile& InCombatProfile,
+	uint8 InFactionId,
+	FName InSquadId,
+	int32 InSquadSlot)
+{
+	CombatProfile = InCombatProfile;
+	MovementSpeed = FMath::Max(0.0f, CombatProfile.MovementSpeed);
+	if (FactionComponent)
+	{
+		FactionComponent->SetFactionId(InFactionId);
+		FactionComponent->SetSquadId(InSquadId);
+		FactionComponent->SetSquadSlot(InSquadSlot);
+		FactionComponent->SetCanBeCombatTarget(true);
+	}
+}
+
 void ATunaSweeperEnemyCharacter::ApplyVoxelVisualMeshes()
 {
 	if (VisualMesh)
@@ -352,6 +417,7 @@ void ATunaSweeperEnemyCharacter::InitializeEnemyWeaponRuntime()
 
 	bEnemyWeaponRuntimeInitialized = true;
 	EnemyWeaponTypeTag = NAME_None;
+	EnemyFireMode = ETunaSweeperWeaponFireMode::NotApplicable;
 	EnemyImpactProfileId = NAME_None;
 	EnemyProjectileHitEffectId = ProjectileHitEffectId;
 	EnemyProjectileDamageMultiplier = 1.0f;
@@ -404,6 +470,7 @@ void ATunaSweeperEnemyCharacter::InitializeEnemyWeaponRuntime()
 	EnemyWeaponItemId = WeaponDefinition.Id;
 	EnemyAmmoItemId = AmmoDefinition.Id;
 	EnemyWeaponTypeTag = WeaponDefinition.WeaponTypeTag;
+	EnemyFireMode = WeaponDefinition.FireMode;
 	EnemyMagazineCapacity = FMath::Max(1, WeaponDefinition.MagazineCapacity);
 	EnemyLoadedAmmoCount = EnemyMagazineCapacity;
 	EnemyReloadSeconds = WeaponDefinition.ReloadSeconds > 0.0f
@@ -436,17 +503,48 @@ void ATunaSweeperEnemyCharacter::InitializeEnemyWeaponRuntime()
 
 void ATunaSweeperEnemyCharacter::SetAlertIndicatorVisible(bool bVisible)
 {
-	if (!AlertIndicatorMesh)
+	// The old world-space mesh is intentionally disabled. Alert and reload now share
+	// the single speech-bubble channel, which prevents duplicate status markers.
+	if (AlertIndicatorMesh)
+	{
+		AlertIndicatorMesh->SetVisibility(false, true);
+		AlertIndicatorMesh->SetHiddenInGame(true, true);
+	}
+
+	if (bVisible)
+	{
+		ShowAlertSpeechBubble();
+	}
+	else
+	{
+		HideAlertSpeechBubble();
+	}
+}
+
+void ATunaSweeperEnemyCharacter::ShowAlertSpeechBubble()
+{
+	if (EnemyStatusBubble == ETunaSweeperEnemyStatusBubble::Reload)
 	{
 		return;
 	}
 
-	AlertIndicatorMesh->SetVisibility(bVisible, true);
-	AlertIndicatorMesh->SetHiddenInGame(!bVisible, true);
-	if (bVisible)
+	SetEnemyStatusSpeechBubble(
+		ETunaSweeperEnemyStatusBubble::Alert,
+		FText::FromString(TEXT("!")),
+		0.9f);
+}
+
+void ATunaSweeperEnemyCharacter::HideAlertSpeechBubble()
+{
+	if (EnemyStatusBubble != ETunaSweeperEnemyStatusBubble::Alert)
 	{
-		UpdateAlertIndicatorFacing();
+		return;
 	}
+
+	GetWorldTimerManager().ClearTimer(EnemyStatusBubbleTimerHandle);
+	++EnemyStatusBubbleRevision;
+	EnemyStatusBubble = ETunaSweeperEnemyStatusBubble::None;
+	UpdateEnemyStatusSpeechBubble();
 }
 
 void ATunaSweeperEnemyCharacter::UpdateAlertIndicatorFacing()
@@ -517,6 +615,7 @@ bool ATunaSweeperEnemyCharacter::EnsureEnemyWeaponActor()
 
 bool ATunaSweeperEnemyCharacter::StartEnemyReload()
 {
+	InitializeEnemyWeaponRuntime();
 	if (!EnemyWeapon || EnemyWeapon->IsReloadRuntimeActive() || EnemyMagazineCapacity <= 0)
 	{
 		return false;
@@ -534,7 +633,29 @@ bool ATunaSweeperEnemyCharacter::StartEnemyReload()
 		return false;
 	}
 
-	return EnemyWeapon->StartReloadRuntime(EnemyReloadSeconds);
+	const bool bStarted = EnemyWeapon->StartReloadRuntime(EnemyReloadSeconds);
+	if (bStarted)
+	{
+		SetEnemyStatusSpeechBubble(
+			ETunaSweeperEnemyStatusBubble::Reload,
+			ResolveEnemyStatusText(EnemyReloadTextKey, FText::FromString(TEXT("재장전"))),
+			0.0f);
+	}
+	return bStarted;
+}
+
+FTunaSweeperEnemyWeaponRuntimeStatus ATunaSweeperEnemyCharacter::GetEnemyWeaponRuntimeStatus()
+{
+	InitializeEnemyWeaponRuntime();
+	FTunaSweeperEnemyWeaponRuntimeStatus Status;
+	Status.MagazineCapacity = FMath::Max(0, EnemyMagazineCapacity);
+	Status.LoadedAmmo = FMath::Max(0, EnemyLoadedAmmoCount);
+	Status.ReserveAmmo = FMath::Max(0, EnemyReserveAmmoCount);
+	Status.bIsReloading = EnemyWeapon && EnemyWeapon->IsReloadRuntimeActive();
+	Status.ReloadProgress = Status.bIsReloading ? EnemyWeapon->GetReloadRuntimeProgress() : 0.0f;
+	Status.ReloadSeconds = FMath::Max(0.0f, EnemyReloadSeconds);
+	Status.FireMode = EnemyFireMode;
+	return Status;
 }
 
 void ATunaSweeperEnemyCharacter::CompleteEnemyReloadIfReady()
@@ -552,6 +673,12 @@ void ATunaSweeperEnemyCharacter::CompleteEnemyReloadIfReady()
 	EnemyReserveAmmoCount = FMath::Max(0, EnemyReserveAmmoCount - ReloadedAmmoCount);
 	PendingEnemyReloadAmmoCount = 0;
 	EnemyWeapon->FinishReloadRuntime();
+	if (EnemyStatusBubble == ETunaSweeperEnemyStatusBubble::Reload)
+	{
+		++EnemyStatusBubbleRevision;
+		EnemyStatusBubble = ETunaSweeperEnemyStatusBubble::None;
+		UpdateEnemyStatusSpeechBubble();
+	}
 }
 
 void ATunaSweeperEnemyCharacter::UpdateEnemyReloadWidget()
@@ -575,6 +702,82 @@ void ATunaSweeperEnemyCharacter::UpdateEnemyReloadWidget()
 	{
 		ReloadWidget->SetReloadProgress(EnemyWeapon->GetReloadRuntimeProgress(), true);
 	}
+}
+
+void ATunaSweeperEnemyCharacter::UpdateEnemyStatusSpeechBubble()
+{
+	if (!EnemyStatusBubbleWidgetComponent)
+	{
+		return;
+	}
+
+	const bool bShouldShow = !bIsDead && EnemyStatusBubble != ETunaSweeperEnemyStatusBubble::None;
+	EnemyStatusBubbleWidgetComponent->SetVisibility(bShouldShow);
+	EnemyStatusBubbleWidgetComponent->SetHiddenInGame(!bShouldShow);
+}
+
+void ATunaSweeperEnemyCharacter::SetEnemyStatusSpeechBubble(
+	ETunaSweeperEnemyStatusBubble InStatus,
+	const FText& InText,
+	float DisplaySeconds)
+{
+	const int32 CurrentPriority = EnemyStatusBubble == ETunaSweeperEnemyStatusBubble::Reload ? 2 :
+		EnemyStatusBubble == ETunaSweeperEnemyStatusBubble::Alert ? 1 : 0;
+	const int32 IncomingPriority = InStatus == ETunaSweeperEnemyStatusBubble::Reload ? 2 :
+		InStatus == ETunaSweeperEnemyStatusBubble::Alert ? 1 : 0;
+	if (IncomingPriority < CurrentPriority || !EnemyStatusBubbleWidgetComponent)
+	{
+		return;
+	}
+
+	GetWorldTimerManager().ClearTimer(EnemyStatusBubbleTimerHandle);
+	EnemyStatusBubble = InStatus;
+	const uint32 Revision = ++EnemyStatusBubbleRevision;
+	EnemyStatusBubbleWidgetComponent->InitWidget();
+	if (UTunaSweeperSpeechBubbleWidget* BubbleWidget =
+		Cast<UTunaSweeperSpeechBubbleWidget>(EnemyStatusBubbleWidgetComponent->GetUserWidgetObject()))
+	{
+		BubbleWidget->SetBubbleText(InText);
+	}
+	UpdateEnemyStatusSpeechBubble();
+
+	if (DisplaySeconds > 0.0f)
+	{
+		GetWorldTimerManager().SetTimer(
+			EnemyStatusBubbleTimerHandle,
+			FTimerDelegate::CreateUObject(
+				this,
+				&ATunaSweeperEnemyCharacter::ClearEnemyStatusSpeechBubble,
+				Revision,
+				InStatus),
+			FMath::Max(0.05f, DisplaySeconds),
+			false);
+	}
+}
+
+void ATunaSweeperEnemyCharacter::ClearEnemyStatusSpeechBubble(
+	uint32 ExpectedRevision,
+	ETunaSweeperEnemyStatusBubble ExpectedStatus)
+{
+	if (EnemyStatusBubbleRevision != ExpectedRevision || EnemyStatusBubble != ExpectedStatus)
+	{
+		return;
+	}
+
+	++EnemyStatusBubbleRevision;
+	EnemyStatusBubble = ETunaSweeperEnemyStatusBubble::None;
+	UpdateEnemyStatusSpeechBubble();
+}
+
+FText ATunaSweeperEnemyCharacter::ResolveEnemyStatusText(FName TextKey, const FText& FallbackText) const
+{
+	const UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+	const UTunaSweeperTextSubsystem* TextSubsystem = TunaGameInstance
+		? TunaGameInstance->GetSubsystem<UTunaSweeperTextSubsystem>()
+		: nullptr;
+	return TextSubsystem
+		? TextSubsystem->ResolveText(TextKey, TunaGameInstance->GetCurrentTextLanguage(), FallbackText)
+		: FallbackText;
 }
 
 void ATunaSweeperEnemyCharacter::TickFootstepNoise(float DeltaSeconds)
@@ -735,33 +938,32 @@ bool ATunaSweeperEnemyCharacter::AttackTarget(AActor* TargetActor)
 
 bool ATunaSweeperEnemyCharacter::UsesMeleeAttack() const
 {
-	return DropContainerDefinitionId == LumberjackDropContainerDefinitionId ||
-		DropContentsId == LumberjackDropContentsId;
+	return CombatProfile.AttackMode == ETunaSweeperEnemyAttackMode::Melee;
 }
 
 float ATunaSweeperEnemyCharacter::GetMeleeAttackRange() const
 {
-	return LumberjackMeleeAttackRange;
+	return FMath::Max(1.0f, CombatProfile.AttackRange);
 }
 
 float ATunaSweeperEnemyCharacter::GetMeleeApproachStartRange() const
 {
-	return LumberjackMeleeApproachStartRange;
+	return FMath::Max(0.0f, CombatProfile.MeleeApproachStartRange);
 }
 
 float ATunaSweeperEnemyCharacter::GetMeleeApproachStopRange() const
 {
-	return LumberjackMeleeApproachStopRange;
+	return FMath::Max(0.0f, CombatProfile.MeleeApproachStopRange);
 }
 
 float ATunaSweeperEnemyCharacter::GetMeleeTrackingRange() const
 {
-	return LumberjackMeleeTrackingRange;
+	return FMath::Max(GetMeleeApproachStartRange(), CombatProfile.TrackingRange);
 }
 
 float ATunaSweeperEnemyCharacter::GetMeleeAttackCooldownSeconds() const
 {
-	return LumberjackMeleeAttackCooldownSeconds;
+	return FMath::Max(0.05f, CombatProfile.AttackCooldownSeconds);
 }
 
 bool ATunaSweeperEnemyCharacter::TryApplyBleedTo(AActor* TargetActor) const
@@ -769,6 +971,14 @@ bool ATunaSweeperEnemyCharacter::TryApplyBleedTo(AActor* TargetActor) const
 	if (!TargetActor || TargetActor == this || bIsDead)
 	{
 		return false;
+	}
+	if (const UWorld* World = GetWorld())
+	{
+		if (const UTunaSweeperFactionSubsystem* FactionSubsystem = World->GetSubsystem<UTunaSweeperFactionSubsystem>();
+			FactionSubsystem && !FactionSubsystem->CanApplyCombatEffect(this, TargetActor))
+		{
+			return false;
+		}
 	}
 
 	UTunaSweeperDebuffComponent* DebuffComponent = TargetActor->FindComponentByClass<UTunaSweeperDebuffComponent>();
@@ -783,25 +993,44 @@ bool ATunaSweeperEnemyCharacter::TryApplyBleedTo(AActor* TargetActor) const
 
 bool ATunaSweeperEnemyCharacter::FireProjectileAt(AActor* TargetActor)
 {
+	return TryFireProjectileAt(TargetActor) == ETunaSweeperEnemyFireResult::Fired;
+}
+
+ETunaSweeperEnemyFireResult ATunaSweeperEnemyCharacter::TryFireProjectileAt(AActor* TargetActor)
+{
 	UWorld* World = GetWorld();
 	if (!World || !TargetActor || bIsDead || UsesMeleeAttack())
 	{
-		return false;
+		return ETunaSweeperEnemyFireResult::Blocked;
+	}
+
+	if (UTunaSweeperFactionSubsystem* FactionSubsystem = World->GetSubsystem<UTunaSweeperFactionSubsystem>())
+	{
+		const ETunaSweeperFactionAttitude Attitude = FactionSubsystem->GetFactionAttitude(this, TargetActor);
+		if (Attitude == ETunaSweeperFactionAttitude::Friendly)
+		{
+			return ETunaSweeperEnemyFireResult::FriendlyTarget;
+		}
+		if (!FactionSubsystem->CanTargetActor(this, TargetActor))
+		{
+			return ETunaSweeperEnemyFireResult::Blocked;
+		}
 	}
 
 	InitializeEnemyWeaponRuntime();
 	if (!EnemyWeapon || EnemyWeaponTypeTag.IsNone() || EnemyMagazineCapacity <= 0)
 	{
-		return false;
+		return ETunaSweeperEnemyFireResult::OutOfAmmo;
 	}
 	if (EnemyWeapon->IsReloadRuntimeActive())
 	{
-		return false;
+		return ETunaSweeperEnemyFireResult::Reloading;
 	}
 	if (EnemyLoadedAmmoCount <= 0)
 	{
-		StartEnemyReload();
-		return false;
+		return EnemyReserveAmmoCount > 0
+			? ETunaSweeperEnemyFireResult::MagazineEmpty
+			: ETunaSweeperEnemyFireResult::OutOfAmmo;
 	}
 
 	const FVector ActorLocation = GetActorLocation();
@@ -810,7 +1039,7 @@ bool ATunaSweeperEnemyCharacter::FireProjectileAt(AActor* TargetActor)
 	const FVector FireDirection = ToTarget.GetSafeNormal();
 	if (FireDirection.IsNearlyZero())
 	{
-		return false;
+		return ETunaSweeperEnemyFireResult::Blocked;
 	}
 
 	const FRotator FireRotation = FireDirection.Rotation();
@@ -836,24 +1065,28 @@ bool ATunaSweeperEnemyCharacter::FireProjectileAt(AActor* TargetActor)
 		true);
 	if (!bFired)
 	{
-		return false;
+		return ETunaSweeperEnemyFireResult::Cooldown;
 	}
 
 	EnemyLoadedAmmoCount = FMath::Max(0, EnemyLoadedAmmoCount - 1);
 	EnemyWeapon->AddRuntimeSpreadRecoilShot();
-	if (EnemyLoadedAmmoCount <= 0)
-	{
-		StartEnemyReload();
-	}
-
-	return true;
+	return ETunaSweeperEnemyFireResult::Fired;
 }
 
 bool ATunaSweeperEnemyCharacter::ApplyMeleeDamageTo(AActor* TargetActor)
 {
-	if (!TargetActor || TargetActor == this || bIsDead || LumberjackMeleeDamage <= 0.0f)
+	const float MeleeDamage = FMath::Max(0.0f, CombatProfile.MeleeAttackDamage);
+	if (!TargetActor || TargetActor == this || bIsDead || MeleeDamage <= 0.0f)
 	{
 		return false;
+	}
+	if (const UWorld* World = GetWorld())
+	{
+		if (const UTunaSweeperFactionSubsystem* FactionSubsystem = World->GetSubsystem<UTunaSweeperFactionSubsystem>();
+			FactionSubsystem && !FactionSubsystem->CanApplyCombatEffect(this, TargetActor))
+		{
+			return false;
+		}
 	}
 
 	const FVector ActorLocation = GetActorLocation();
@@ -876,7 +1109,7 @@ bool ATunaSweeperEnemyCharacter::ApplyMeleeDamageTo(AActor* TargetActor)
 
 	const float AppliedDamage = UGameplayStatics::ApplyDamage(
 		TargetActor,
-		LumberjackMeleeDamage,
+		MeleeDamage,
 		GetController(),
 		this,
 		UDamageType::StaticClass());

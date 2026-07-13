@@ -1,13 +1,53 @@
 #include "AI/TunaSweeperPetCompanionAIController.h"
 
 #include "AI/TunaSweeperPetCompanionCharacter.h"
+#include "Component/TunaSweeperFactionComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Navigation/PathFollowingComponent.h"
+#include "Subsystem/TunaSweeperFactionSubsystem.h"
 
 ATunaSweeperPetCompanionAIController::ATunaSweeperPetCompanionAIController()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	bAttachToPawn = true;
+}
+
+void ATunaSweeperPetCompanionAIController::SetGenericTeamId(const FGenericTeamId& InTeamId)
+{
+	if (PetCharacter && PetCharacter->GetFactionComponent())
+	{
+		PetCharacter->GetFactionComponent()->SetFactionId(InTeamId.GetId());
+	}
+}
+
+FGenericTeamId ATunaSweeperPetCompanionAIController::GetGenericTeamId() const
+{
+	const UTunaSweeperFactionComponent* FactionComponent =
+		PetCharacter ? PetCharacter->GetFactionComponent() : nullptr;
+	return FactionComponent && TunaSweeperFactionIds::IsValid(FactionComponent->GetFactionId())
+		? FGenericTeamId(FactionComponent->GetFactionId())
+		: FGenericTeamId::NoTeam;
+}
+
+ETeamAttitude::Type ATunaSweeperPetCompanionAIController::GetTeamAttitudeTowards(const AActor& Other) const
+{
+	const UWorld* World = GetWorld();
+	const UTunaSweeperFactionSubsystem* FactionSubsystem =
+		World ? World->GetSubsystem<UTunaSweeperFactionSubsystem>() : nullptr;
+	if (!FactionSubsystem || !PetCharacter)
+	{
+		return ETeamAttitude::Neutral;
+	}
+
+	switch (FactionSubsystem->GetFactionAttitude(PetCharacter, &Other))
+	{
+	case ETunaSweeperFactionAttitude::Friendly:
+		return ETeamAttitude::Friendly;
+	case ETunaSweeperFactionAttitude::Hostile:
+		return ETeamAttitude::Hostile;
+	default:
+		return ETeamAttitude::Neutral;
+	}
 }
 
 void ATunaSweeperPetCompanionAIController::BeginPlay()

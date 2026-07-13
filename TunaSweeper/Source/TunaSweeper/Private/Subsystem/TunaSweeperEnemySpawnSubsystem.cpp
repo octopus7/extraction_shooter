@@ -48,6 +48,8 @@ DEFINE_LOG_CATEGORY_STATIC(LogTunaSweeperEnemySpawn, Log, All);
 namespace TunaSweeperEnemySpawn
 {
 	const TCHAR* EnemySpawnsJsonRelativePath = TEXT("Data/EnemySpawns.json");
+	const TCHAR* EnemyCombatProfilesJsonRelativePath = TEXT("Data/EnemyCombatProfiles.json");
+	const FName DefaultEnemyCombatProfileId(TEXT("enemy.rifle_anchor"));
 	const TCHAR* LootContainerSpawnsJsonRelativePath = TEXT("Data/LootContainerSpawns.json");
 	const TCHAR* TransparentObstacleSpawnsJsonRelativePath = TEXT("Data/TransparentObstacleSpawns.json");
 	const TCHAR* WorldProgressObjectSpawnsJsonRelativePath = TEXT("Data/WorldProgressObjectSpawns.json");
@@ -85,6 +87,65 @@ namespace TunaSweeperEnemySpawn
 	const TCHAR* DefaultPickupItemIconWidgetClassPath = TEXT("/Game/UI/WBP_PickupItemIcon.WBP_PickupItemIcon_C");
 	const TCHAR* DefaultSpeechBubbleWidgetClassPath = TEXT("/Game/UI/WBP_SpeechBubble.WBP_SpeechBubble_C");
 	const TCHAR* DefaultExplosionEffectActorClassPath = TEXT("/Script/TunaSweeper.TunaSweeperLocalExplosionEffectActor");
+
+	float ReadNonNegativeFloatField(
+		const TSharedPtr<FJsonObject>& JsonObject,
+		const TCHAR* FieldName,
+		float DefaultValue)
+	{
+		double NumericValue = DefaultValue;
+		JsonObject->TryGetNumberField(FieldName, NumericValue);
+		return FMath::Max(0.0f, static_cast<float>(NumericValue));
+	}
+
+	int32 ReadNonNegativeIntField(
+		const TSharedPtr<FJsonObject>& JsonObject,
+		const TCHAR* FieldName,
+		int32 DefaultValue)
+	{
+		double NumericValue = DefaultValue;
+		JsonObject->TryGetNumberField(FieldName, NumericValue);
+		return FMath::Max(0, FMath::RoundToInt(NumericValue));
+	}
+
+	bool TryResolveEnemyAttackMode(const FString& AttackModeString, ETunaSweeperEnemyAttackMode& OutAttackMode)
+	{
+		const FString NormalizedAttackMode = AttackModeString.TrimStartAndEnd().ToLower();
+		if (NormalizedAttackMode == TEXT("ranged"))
+		{
+			OutAttackMode = ETunaSweeperEnemyAttackMode::Ranged;
+			return true;
+		}
+		if (NormalizedAttackMode == TEXT("melee"))
+		{
+			OutAttackMode = ETunaSweeperEnemyAttackMode::Melee;
+			return true;
+		}
+
+		return false;
+	}
+
+	bool TryResolveEnemyCombatRole(const FString& CombatRoleString, ETunaSweeperEnemyCombatRole& OutCombatRole)
+	{
+		const FString NormalizedCombatRole = CombatRoleString.TrimStartAndEnd().ToLower();
+		if (NormalizedCombatRole == TEXT("anchor"))
+		{
+			OutCombatRole = ETunaSweeperEnemyCombatRole::Anchor;
+			return true;
+		}
+		if (NormalizedCombatRole == TEXT("flanker"))
+		{
+			OutCombatRole = ETunaSweeperEnemyCombatRole::Flanker;
+			return true;
+		}
+		if (NormalizedCombatRole == TEXT("melee"))
+		{
+			OutCombatRole = ETunaSweeperEnemyCombatRole::Melee;
+			return true;
+		}
+
+		return false;
+	}
 
 	FString NormalizeLevelName(const FString& RawLevelName)
 	{
@@ -462,6 +523,7 @@ void UTunaSweeperEnemySpawnSubsystem::Deinitialize()
 	}
 
 	ResetLoadedEnemySpawnData();
+	ResetLoadedEnemyCombatProfileData();
 	ResetLoadedLootContainerSpawnData();
 	ResetLoadedTransparentObstacleSpawnData();
 	ResetLoadedWorldProgressObjectSpawnData();
@@ -531,6 +593,11 @@ bool UTunaSweeperEnemySpawnSubsystem::EnsureRaidRuntimeActorsSpawnedForWorld(UWo
 				ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
 			if (SpawnedEnemy)
 			{
+				SpawnedEnemy->ConfigureCombatProfile(
+					SpawnDefinition.CombatProfile,
+					SpawnDefinition.FactionId,
+					SpawnDefinition.SquadId,
+					SpawnDefinition.SquadSlot);
 				SpawnedEnemy->ConfigureSpawnData(
 					SpawnDefinition.BodyMaterial,
 					SpawnDefinition.EnemyId,
@@ -875,11 +942,211 @@ bool UTunaSweeperEnemySpawnSubsystem::EnsureRaidRuntimeActorsSpawnedForWorld(UWo
 	return true;
 }
 
+bool UTunaSweeperEnemySpawnSubsystem::LoadEnemyCombatProfileData(bool bForceReload)
+{
+	if (bEnemyCombatProfileDataLoaded && !bForceReload)
+	{
+		return true;
+	}
+
+	if (bForceReload)
+	{
+		ResetLoadedEnemySpawnData();
+	}
+	ResetLoadedEnemyCombatProfileData();
+
+	FString JsonContent;
+	const FString EnemyCombatProfileJsonPath = GetEnemyCombatProfileJsonPath();
+	if (!FFileHelper::LoadFileToString(JsonContent, *EnemyCombatProfileJsonPath))
+	{
+		UE_LOG(
+			LogTunaSweeperEnemySpawn,
+			Error,
+			TEXT("Failed to read enemy combat profile JSON: %s"),
+			*EnemyCombatProfileJsonPath);
+		return false;
+	}
+
+	TArray<TSharedPtr<FJsonValue>> JsonRows;
+	const TSharedRef<TJsonReader<>> JsonReader = TJsonReaderFactory<>::Create(JsonContent);
+	if (!FJsonSerializer::Deserialize(JsonReader, JsonRows))
+	{
+		UE_LOG(
+			LogTunaSweeperEnemySpawn,
+			Error,
+			TEXT("Failed to parse enemy combat profile JSON: %s"),
+			*EnemyCombatProfileJsonPath);
+		return false;
+	}
+
+	for (int32 RowIndex = 0; RowIndex < JsonRows.Num(); ++RowIndex)
+	{
+		const TSharedPtr<FJsonObject>* JsonObjectPtr = nullptr;
+		if (!JsonRows[RowIndex].IsValid() || !JsonRows[RowIndex]->TryGetObject(JsonObjectPtr) ||
+			!JsonObjectPtr || !JsonObjectPtr->IsValid())
+		{
+			UE_LOG(LogTunaSweeperEnemySpawn, Warning, TEXT("Skipping enemy combat profile row %d: row is not an object."), RowIndex);
+			continue;
+		}
+
+		const TSharedPtr<FJsonObject>& JsonObject = *JsonObjectPtr;
+		FString ProfileIdString;
+		FString AttackModeString;
+		FString CombatRoleString;
+		if (!JsonObject->TryGetStringField(TEXT("profile_id"), ProfileIdString) ||
+			!JsonObject->TryGetStringField(TEXT("attack_mode"), AttackModeString) ||
+			!JsonObject->TryGetStringField(TEXT("role"), CombatRoleString))
+		{
+			UE_LOG(LogTunaSweeperEnemySpawn, Warning, TEXT("Skipping enemy combat profile row %d: required field is missing."), RowIndex);
+			continue;
+		}
+
+		FTunaSweeperEnemyCombatProfile Profile;
+		Profile.ProfileId = FName(*ProfileIdString.TrimStartAndEnd());
+		if (Profile.ProfileId.IsNone() ||
+			!TunaSweeperEnemySpawn::TryResolveEnemyAttackMode(AttackModeString, Profile.AttackMode) ||
+			!TunaSweeperEnemySpawn::TryResolveEnemyCombatRole(CombatRoleString, Profile.Role))
+		{
+			UE_LOG(LogTunaSweeperEnemySpawn, Warning, TEXT("Skipping enemy combat profile row %d: profile_id, attack_mode, or role is invalid."), RowIndex);
+			continue;
+		}
+		if (EnemyCombatProfilesById.Contains(Profile.ProfileId))
+		{
+			UE_LOG(LogTunaSweeperEnemySpawn, Warning, TEXT("Skipping duplicate enemy combat profile '%s'."), *Profile.ProfileId.ToString());
+			continue;
+		}
+		if ((Profile.AttackMode == ETunaSweeperEnemyAttackMode::Melee) !=
+			(Profile.Role == ETunaSweeperEnemyCombatRole::Melee))
+		{
+			UE_LOG(LogTunaSweeperEnemySpawn, Warning, TEXT("Skipping enemy combat profile '%s': melee attack mode and role must agree."), *Profile.ProfileId.ToString());
+			continue;
+		}
+
+		Profile.MovementSpeed = TunaSweeperEnemySpawn::ReadNonNegativeFloatField(JsonObject, TEXT("movement_speed"), Profile.MovementSpeed);
+		Profile.TrackingRange = TunaSweeperEnemySpawn::ReadNonNegativeFloatField(JsonObject, TEXT("tracking_range"), Profile.TrackingRange);
+		Profile.AttackRange = TunaSweeperEnemySpawn::ReadNonNegativeFloatField(JsonObject, TEXT("attack_range"), Profile.AttackRange);
+		Profile.PreferredRangeMin = TunaSweeperEnemySpawn::ReadNonNegativeFloatField(JsonObject, TEXT("preferred_range_min"), Profile.PreferredRangeMin);
+		Profile.PreferredRangeMax = FMath::Max(
+			Profile.PreferredRangeMin,
+			TunaSweeperEnemySpawn::ReadNonNegativeFloatField(JsonObject, TEXT("preferred_range_max"), Profile.PreferredRangeMax));
+		Profile.DangerRange = FMath::Min(
+			Profile.PreferredRangeMin,
+			TunaSweeperEnemySpawn::ReadNonNegativeFloatField(JsonObject, TEXT("danger_range"), Profile.DangerRange));
+		Profile.AlertSeconds = TunaSweeperEnemySpawn::ReadNonNegativeFloatField(JsonObject, TEXT("alert_seconds"), Profile.AlertSeconds);
+		Profile.AimSecondsMin = TunaSweeperEnemySpawn::ReadNonNegativeFloatField(JsonObject, TEXT("aim_seconds_min"), Profile.AimSecondsMin);
+		Profile.AimSecondsMax = FMath::Max(
+			Profile.AimSecondsMin,
+			TunaSweeperEnemySpawn::ReadNonNegativeFloatField(JsonObject, TEXT("aim_seconds_max"), Profile.AimSecondsMax));
+		Profile.FiringShotCount = TunaSweeperEnemySpawn::ReadNonNegativeIntField(JsonObject, TEXT("firing_shot_count"), Profile.FiringShotCount);
+		Profile.OpeningFiringShotCount = TunaSweeperEnemySpawn::ReadNonNegativeIntField(JsonObject, TEXT("opening_firing_shot_count"), Profile.OpeningFiringShotCount);
+		Profile.ShotIntervalSecondsMin = TunaSweeperEnemySpawn::ReadNonNegativeFloatField(JsonObject, TEXT("shot_interval_seconds_min"), Profile.ShotIntervalSecondsMin);
+		Profile.ShotIntervalSecondsMax = FMath::Max(
+			Profile.ShotIntervalSecondsMin,
+			TunaSweeperEnemySpawn::ReadNonNegativeFloatField(JsonObject, TEXT("shot_interval_seconds_max"), Profile.ShotIntervalSecondsMax));
+		Profile.RecoverSecondsMin = TunaSweeperEnemySpawn::ReadNonNegativeFloatField(JsonObject, TEXT("recover_seconds_min"), Profile.RecoverSecondsMin);
+		Profile.RecoverSecondsMax = FMath::Max(
+			Profile.RecoverSecondsMin,
+			TunaSweeperEnemySpawn::ReadNonNegativeFloatField(JsonObject, TEXT("recover_seconds_max"), Profile.RecoverSecondsMax));
+		Profile.ObserveSecondsMin = TunaSweeperEnemySpawn::ReadNonNegativeFloatField(JsonObject, TEXT("observe_seconds_min"), Profile.ObserveSecondsMin);
+		Profile.ObserveSecondsMax = FMath::Max(
+			Profile.ObserveSecondsMin,
+			TunaSweeperEnemySpawn::ReadNonNegativeFloatField(JsonObject, TEXT("observe_seconds_max"), Profile.ObserveSecondsMax));
+		Profile.ReloadReadySecondsMin = TunaSweeperEnemySpawn::ReadNonNegativeFloatField(JsonObject, TEXT("reload_ready_seconds_min"), Profile.ReloadReadySecondsMin);
+		Profile.ReloadReadySecondsMax = FMath::Max(
+			Profile.ReloadReadySecondsMin,
+			TunaSweeperEnemySpawn::ReadNonNegativeFloatField(JsonObject, TEXT("reload_ready_seconds_max"), Profile.ReloadReadySecondsMax));
+		Profile.PositionFiringBudgetMin = TunaSweeperEnemySpawn::ReadNonNegativeIntField(JsonObject, TEXT("position_firing_budget_min"), Profile.PositionFiringBudgetMin);
+		Profile.PositionFiringBudgetMax = FMath::Max(
+			Profile.PositionFiringBudgetMin,
+			TunaSweeperEnemySpawn::ReadNonNegativeIntField(JsonObject, TEXT("position_firing_budget_max"), Profile.PositionFiringBudgetMax));
+		Profile.RepositionDistanceMin = TunaSweeperEnemySpawn::ReadNonNegativeFloatField(JsonObject, TEXT("reposition_distance_min"), Profile.RepositionDistanceMin);
+		Profile.RepositionDistanceMax = FMath::Max(
+			Profile.RepositionDistanceMin,
+			TunaSweeperEnemySpawn::ReadNonNegativeFloatField(JsonObject, TEXT("reposition_distance_max"), Profile.RepositionDistanceMax));
+		Profile.CrossRepositionChance = FMath::Clamp(
+			TunaSweeperEnemySpawn::ReadNonNegativeFloatField(JsonObject, TEXT("cross_reposition_chance"), Profile.CrossRepositionChance),
+			0.0f,
+			1.0f);
+		Profile.CrossRepositionCooldownSeconds = TunaSweeperEnemySpawn::ReadNonNegativeFloatField(
+			JsonObject,
+			TEXT("cross_reposition_cooldown_seconds"),
+			Profile.CrossRepositionCooldownSeconds);
+		Profile.CrossRepositionOrbitRadius = TunaSweeperEnemySpawn::ReadNonNegativeFloatField(
+			JsonObject,
+			TEXT("cross_reposition_orbit_radius"),
+			Profile.CrossRepositionOrbitRadius);
+		Profile.MeleeAttackDamage = TunaSweeperEnemySpawn::ReadNonNegativeFloatField(JsonObject, TEXT("melee_attack_damage"), Profile.MeleeAttackDamage);
+		Profile.MeleeApproachStartRange = TunaSweeperEnemySpawn::ReadNonNegativeFloatField(JsonObject, TEXT("melee_approach_start_range"), Profile.MeleeApproachStartRange);
+		Profile.MeleeApproachStopRange = FMath::Min(
+			Profile.MeleeApproachStartRange,
+			TunaSweeperEnemySpawn::ReadNonNegativeFloatField(JsonObject, TEXT("melee_approach_stop_range"), Profile.MeleeApproachStopRange));
+		Profile.AttackCooldownSeconds = TunaSweeperEnemySpawn::ReadNonNegativeFloatField(JsonObject, TEXT("attack_cooldown_seconds"), Profile.AttackCooldownSeconds);
+
+		if (Profile.AttackMode == ETunaSweeperEnemyAttackMode::Ranged)
+		{
+			Profile.FiringShotCount = FMath::Max(1, Profile.FiringShotCount);
+			Profile.OpeningFiringShotCount = FMath::Clamp(Profile.OpeningFiringShotCount, 1, Profile.FiringShotCount);
+			Profile.PositionFiringBudgetMin = FMath::Max(1, Profile.PositionFiringBudgetMin);
+			Profile.PositionFiringBudgetMax = FMath::Max(Profile.PositionFiringBudgetMin, Profile.PositionFiringBudgetMax);
+		}
+		else
+		{
+			Profile.FiringShotCount = 0;
+			Profile.OpeningFiringShotCount = 0;
+			Profile.PositionFiringBudgetMin = 0;
+			Profile.PositionFiringBudgetMax = 0;
+			Profile.CrossRepositionChance = 0.0f;
+		}
+
+		EnemyCombatProfilesById.Add(Profile.ProfileId, Profile);
+	}
+
+	if (!EnemyCombatProfilesById.Contains(TunaSweeperEnemySpawn::DefaultEnemyCombatProfileId))
+	{
+		UE_LOG(
+			LogTunaSweeperEnemySpawn,
+			Error,
+			TEXT("Enemy combat profile JSON is missing required default profile '%s': %s"),
+			*TunaSweeperEnemySpawn::DefaultEnemyCombatProfileId.ToString(),
+			*EnemyCombatProfileJsonPath);
+		ResetLoadedEnemyCombatProfileData();
+		return false;
+	}
+
+	bEnemyCombatProfileDataLoaded = true;
+	return true;
+}
+
+bool UTunaSweeperEnemySpawnSubsystem::TryGetEnemyCombatProfile(
+	FName ProfileId,
+	FTunaSweeperEnemyCombatProfile& OutProfile)
+{
+	OutProfile = FTunaSweeperEnemyCombatProfile();
+	if (ProfileId.IsNone() || !LoadEnemyCombatProfileData(false))
+	{
+		return false;
+	}
+
+	const FTunaSweeperEnemyCombatProfile* Profile = EnemyCombatProfilesById.Find(ProfileId);
+	if (!Profile)
+	{
+		return false;
+	}
+
+	OutProfile = *Profile;
+	return true;
+}
+
 bool UTunaSweeperEnemySpawnSubsystem::LoadEnemySpawnData(bool bForceReload)
 {
 	if (bEnemySpawnDataLoaded && !bForceReload)
 	{
 		return true;
+	}
+
+	if (!LoadEnemyCombatProfileData(bForceReload))
+	{
+		return false;
 	}
 
 	ResetLoadedEnemySpawnData();
@@ -916,6 +1183,8 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadEnemySpawnData(bool bForceReload)
 		FString EnemyId;
 		FString EnemyClassPath;
 		FString BodyMaterialPath;
+		FString CombatProfileIdString;
+		FString SquadIdString;
 		FVector Location = FVector::ZeroVector;
 		FRotator Rotation = FRotator::ZeroRotator;
 		double NumericDropContainerDefinitionId = INDEX_NONE;
@@ -929,6 +1198,8 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadEnemySpawnData(bool bForceReload)
 		double NumericExperienceValue = 30.0;
 		double NumericBleedingChanceBonus = 0.0;
 		double NumericBleedingDurationBonusSeconds = 0.0;
+		double NumericFactionId = TunaSweeperFactionIds::NoFaction;
+		double NumericSquadSlot = INDEX_NONE;
 		if (!JsonObject->TryGetStringField(TEXT("level_name"), LevelName) ||
 			!TunaSweeperEnemySpawn::TryReadVectorField(JsonObject, TEXT("location"), Location))
 		{
@@ -939,6 +1210,8 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadEnemySpawnData(bool bForceReload)
 		JsonObject->TryGetStringField(TEXT("enemy_id"), EnemyId);
 		JsonObject->TryGetStringField(TEXT("enemy_class"), EnemyClassPath);
 		JsonObject->TryGetStringField(TEXT("body_material"), BodyMaterialPath);
+		JsonObject->TryGetStringField(TEXT("combat_profile_id"), CombatProfileIdString);
+		JsonObject->TryGetStringField(TEXT("squad_id"), SquadIdString);
 		JsonObject->TryGetNumberField(TEXT("drop_container_definition_id"), NumericDropContainerDefinitionId);
 		JsonObject->TryGetNumberField(TEXT("drop_contents_id"), NumericDropContentsId);
 		JsonObject->TryGetNumberField(TEXT("weapon_item_id"), NumericWeaponItemId);
@@ -952,6 +1225,8 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadEnemySpawnData(bool bForceReload)
 			JsonObject->TryGetNumberField(TEXT("bleed_chance_bonus"), NumericBleedingChanceBonus);
 		JsonObject->TryGetNumberField(TEXT("bleeding_duration_bonus_seconds"), NumericBleedingDurationBonusSeconds) ||
 			JsonObject->TryGetNumberField(TEXT("bleed_duration_bonus_seconds"), NumericBleedingDurationBonusSeconds);
+		JsonObject->TryGetNumberField(TEXT("faction_id"), NumericFactionId);
+		JsonObject->TryGetNumberField(TEXT("squad_slot"), NumericSquadSlot);
 		TunaSweeperEnemySpawn::TryReadRotatorField(JsonObject, TEXT("rotation"), Rotation);
 
 		FEnemySpawnDefinition SpawnDefinition;
@@ -985,6 +1260,46 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadEnemySpawnData(bool bForceReload)
 		SpawnDefinition.BleedingChanceBonus = TunaSweeperDataValues::ClampProbabilityValue(
 			FMath::RoundToInt(NumericBleedingChanceBonus));
 		SpawnDefinition.BleedingDurationBonusSeconds = FMath::Max(0.0f, static_cast<float>(NumericBleedingDurationBonusSeconds));
+		SpawnDefinition.CombatProfileId = CombatProfileIdString.TrimStartAndEnd().IsEmpty()
+			? TunaSweeperEnemySpawn::DefaultEnemyCombatProfileId
+			: FName(*CombatProfileIdString.TrimStartAndEnd());
+		const FTunaSweeperEnemyCombatProfile* ResolvedCombatProfile =
+			EnemyCombatProfilesById.Find(SpawnDefinition.CombatProfileId);
+		if (!ResolvedCombatProfile)
+		{
+			UE_LOG(
+				LogTunaSweeperEnemySpawn,
+				Warning,
+				TEXT("Enemy spawn row %d references unknown combat profile '%s'; using '%s'."),
+				RowIndex,
+				*SpawnDefinition.CombatProfileId.ToString(),
+				*TunaSweeperEnemySpawn::DefaultEnemyCombatProfileId.ToString());
+			SpawnDefinition.CombatProfileId = TunaSweeperEnemySpawn::DefaultEnemyCombatProfileId;
+			ResolvedCombatProfile = EnemyCombatProfilesById.Find(SpawnDefinition.CombatProfileId);
+		}
+		if (!ResolvedCombatProfile)
+		{
+			UE_LOG(LogTunaSweeperEnemySpawn, Warning, TEXT("Skipping enemy spawn row %d: no combat profile could be resolved."), RowIndex);
+			continue;
+		}
+		SpawnDefinition.CombatProfile = *ResolvedCombatProfile;
+
+		const int32 ParsedFactionId = FMath::RoundToInt(NumericFactionId);
+		SpawnDefinition.FactionId = (ParsedFactionId >= 1 && ParsedFactionId <= 254) ||
+			ParsedFactionId == TunaSweeperFactionIds::NoFaction
+			? static_cast<uint8>(ParsedFactionId)
+			: TunaSweeperFactionIds::NoFaction;
+		if (SpawnDefinition.FactionId == TunaSweeperFactionIds::NoFaction &&
+			ParsedFactionId != TunaSweeperFactionIds::NoFaction)
+		{
+			UE_LOG(LogTunaSweeperEnemySpawn, Warning, TEXT("Enemy spawn row %d has invalid faction_id %d; using NoFaction (255)."), RowIndex, ParsedFactionId);
+		}
+		SpawnDefinition.SquadId = SquadIdString.TrimStartAndEnd().IsEmpty()
+			? NAME_None
+			: FName(*SquadIdString.TrimStartAndEnd());
+		SpawnDefinition.SquadSlot = SpawnDefinition.SquadId.IsNone()
+			? INDEX_NONE
+			: FMath::Max(0, FMath::RoundToInt(NumericSquadSlot));
 
 		if (SpawnDefinition.LevelName.IsNone())
 		{
@@ -2051,6 +2366,12 @@ void UTunaSweeperEnemySpawnSubsystem::ResetLoadedEnemySpawnData()
 	bEnemySpawnDataLoaded = false;
 }
 
+void UTunaSweeperEnemySpawnSubsystem::ResetLoadedEnemyCombatProfileData()
+{
+	EnemyCombatProfilesById.Reset();
+	bEnemyCombatProfileDataLoaded = false;
+}
+
 void UTunaSweeperEnemySpawnSubsystem::ResetLoadedLootContainerSpawnData()
 {
 	LootContainerSpawnDefinitions.Reset();
@@ -2084,6 +2405,11 @@ void UTunaSweeperEnemySpawnSubsystem::ResetLoadedGameplayInteractionActorSpawnDa
 FString UTunaSweeperEnemySpawnSubsystem::GetEnemySpawnJsonPath() const
 {
 	return FPaths::Combine(FPaths::ProjectContentDir(), TunaSweeperEnemySpawn::EnemySpawnsJsonRelativePath);
+}
+
+FString UTunaSweeperEnemySpawnSubsystem::GetEnemyCombatProfileJsonPath() const
+{
+	return FPaths::Combine(FPaths::ProjectContentDir(), TunaSweeperEnemySpawn::EnemyCombatProfilesJsonRelativePath);
 }
 
 FString UTunaSweeperEnemySpawnSubsystem::GetLootContainerSpawnJsonPath() const

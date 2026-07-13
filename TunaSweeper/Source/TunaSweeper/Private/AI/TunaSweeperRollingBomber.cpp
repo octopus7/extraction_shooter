@@ -16,6 +16,7 @@
 #include "Materials/MaterialInterface.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
 #include "Subsystem/TunaSweeperNoiseSubsystem.h"
+#include "Subsystem/TunaSweeperFactionSubsystem.h"
 #include "TunaSweeperCollisionChannels.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Weapon/TunaSweeperProjectile.h"
@@ -1027,6 +1028,15 @@ ATunaSweeperTopDownCharacter* ATunaSweeperRollingBomber::ResolvePlayerTarget() c
 	{
 		return nullptr;
 	}
+	if (const UWorld* World = GetWorld())
+	{
+		if (const UTunaSweeperFactionSubsystem* FactionSubsystem =
+			World->GetSubsystem<UTunaSweeperFactionSubsystem>();
+			FactionSubsystem && !FactionSubsystem->CanTargetActor(this, PlayerCharacter))
+		{
+			return nullptr;
+		}
+	}
 
 	return PlayerCharacter;
 }
@@ -1061,6 +1071,12 @@ bool ATunaSweeperRollingBomber::FireRollingBomberProjectileAt(AActor* TargetActo
 {
 	UWorld* World = GetWorld();
 	if (!World || !TargetActor)
+	{
+		return false;
+	}
+	if (const UTunaSweeperFactionSubsystem* FactionSubsystem =
+		World->GetSubsystem<UTunaSweeperFactionSubsystem>();
+		FactionSubsystem && !FactionSubsystem->CanTargetActor(this, TargetActor))
 	{
 		return false;
 	}
@@ -1274,10 +1290,16 @@ void ATunaSweeperRollingBomber::ApplyExplosionDamage()
 	}
 
 	TSet<AActor*> DamagedActors;
+	const UTunaSweeperFactionSubsystem* FactionSubsystem =
+		World->GetSubsystem<UTunaSweeperFactionSubsystem>();
 	for (const FOverlapResult& Overlap : Overlaps)
 	{
 		AActor* DamagedActor = Overlap.GetActor();
 		if (!IsValid(DamagedActor) || DamagedActor == this || DamagedActors.Contains(DamagedActor))
+		{
+			continue;
+		}
+		if (FactionSubsystem && !FactionSubsystem->CanApplyCombatEffect(this, DamagedActor))
 		{
 			continue;
 		}

@@ -5271,3 +5271,16 @@
 - `/Game/Characters/Robot/QRP_RobotDog_2Joint` 프리셋을 생성하고 기존 `/Game/Characters/Robot/ABP_RobotDog`의 네 Two Bone IK를 단일 노드로 교체했으며, 변경 전 AnimBP는 `ABP_RobotDog_LegacyTwoBone`로 백업.
 - 발 스텝 시작/종료점을 래치해 보간을 안정화하고 CharacterMovement → QuadrupedComponent → SkeletalMesh 틱 순서, 시작 시 지면 스냅, 잘못된 다리 수 및 본 체인 검증을 추가.
 - UE 5.7 `TunaSweeperEditor Win64 Development`와 `TunaSweeper Win64 Development` 빌드, 프리셋 반복 실행, AnimBP 컴파일·저장·정상 종료를 검증하고 사용 문서를 작성한 뒤 Unreal Editor를 실행.
+
+## 2026-07-13 16:00:40 (소요시간: 01:28:56)
+
+- 모든 전투 캐릭터에 숫자 팩션과 분대 정보를 부여하고, 중앙 관계 판정기를 통해 표적·시야·소음·투사체·근접·폭발·출혈·넉백·롤링 봄버 경로의 아군 판정을 통합. 현재 동일 팩션은 아군, 다른 팩션은 적대, 미지정은 중립으로 처리하고 후속 동맹 관계표를 추가할 경계를 마련.
+- `EnemyCombatProfiles.json`, `EnemySpawns.json`, `ItemTable.json`을 확장해 무기 발사 방식과 적 역할·사격 묶음·회복·관찰·재장전 준비·재배치 수치를 데이터화하고 전리품 ID 기반 역할 추론을 제거.
+- 적 FSM을 `Aim → Firing → Recover → Observe → Reposition` 호흡으로 개편하고 명시적 재장전, 피격 회피, 접근 이동, Flanker 전용 CrossReposition, `!`/`재장전` 상태 말풍선을 구현.
+- `(FactionId, SquadId)` 단위의 제압·재배치 lease와 역할 교대, 사수 간 침묵 시간, 사선 회복, 접촉 공유를 구현해 2인 분대의 동시 사격과 동시 일반 재배치를 방지.
+- `TunaSweeper` 및 `TunaSweeperEditor` Win64 Development 빌드, `TunaSweeper.Combat` 자동화 3종, RaidMap 15초 독립 런타임 검증을 통과. 최종 Unreal Editor GUI 실행은 데스크톱 승인 서비스 사용 한도로 거부되어 실행하지 못함.
+
+## 2026-07-13 17:38:48 (소요시간: 00:05:29)
+
+- 현재 C++ 구현과 전투 프로필·스폰 데이터를 다시 대조해 `Docs/enemy_ai_state_flow.md`를 최신화.
+- 대상 상실 시 `Suspicious` 수색으로 전환되는 실제 인지 흐름, 비전투 배회, 원거리 상태별 발사 제한, 재장전 이동, 2인 lease 교대, CrossReposition 안전 규칙, 근접 행동과 현재 팩션 배치를 통합 행동 명세로 정리.

@@ -6,6 +6,7 @@
 #include "Character/TunaSweeperTopDownCharacter.h"
 #include "AI/TunaSweeperEnemyCharacter.h"
 #include "Component/TunaSweeperEnemySensorDebugComponent.h"
+#include "Component/TunaSweeperFactionComponent.h"
 #include "CollisionQueryParams.h"
 #include "CollisionShape.h"
 #include "Components/PrimitiveComponent.h"
@@ -28,6 +29,7 @@
 #include "Subsystem/TunaSweeperKeyboardInputSubsystem.h"
 #include "Subsystem/TunaSweeperBgmSubsystem.h"
 #include "Subsystem/TunaSweeperHousingSubsystem.h"
+#include "Subsystem/TunaSweeperFactionSubsystem.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
 #include "UI/TunaSweeperGameHudWidget.h"
 #include "UI/TunaSweeperIntroMenuWidget.h"
@@ -288,6 +290,51 @@ namespace TunaSweeperHousingCamera
 }
 
 DEFINE_LOG_CATEGORY_STATIC(LogTunaSweeperHousingInput, Log, All);
+
+void ATunaSweeperPlayerController::SetGenericTeamId(const FGenericTeamId& TeamID)
+{
+	if (APawn* ControlledPawn = GetPawn())
+	{
+		if (UTunaSweeperFactionComponent* FactionComponent =
+			ControlledPawn->FindComponentByClass<UTunaSweeperFactionComponent>())
+		{
+			FactionComponent->SetFactionId(TeamID.GetId());
+		}
+	}
+}
+
+FGenericTeamId ATunaSweeperPlayerController::GetGenericTeamId() const
+{
+	const APawn* ControlledPawn = GetPawn();
+	const UTunaSweeperFactionComponent* FactionComponent = ControlledPawn
+		? ControlledPawn->FindComponentByClass<UTunaSweeperFactionComponent>()
+		: nullptr;
+	return FactionComponent && TunaSweeperFactionIds::IsValid(FactionComponent->GetFactionId())
+		? FGenericTeamId(FactionComponent->GetFactionId())
+		: FGenericTeamId::NoTeam;
+}
+
+ETeamAttitude::Type ATunaSweeperPlayerController::GetTeamAttitudeTowards(const AActor& Other) const
+{
+	const UWorld* World = GetWorld();
+	const UTunaSweeperFactionSubsystem* FactionSubsystem =
+		World ? World->GetSubsystem<UTunaSweeperFactionSubsystem>() : nullptr;
+	const APawn* ControlledPawn = GetPawn();
+	if (!FactionSubsystem || !ControlledPawn)
+	{
+		return ETeamAttitude::Neutral;
+	}
+
+	switch (FactionSubsystem->GetFactionAttitude(ControlledPawn, &Other))
+	{
+	case ETunaSweeperFactionAttitude::Friendly:
+		return ETeamAttitude::Friendly;
+	case ETunaSweeperFactionAttitude::Hostile:
+		return ETeamAttitude::Hostile;
+	default:
+		return ETeamAttitude::Neutral;
+	}
+}
 
 ATunaSweeperPlayerController::ATunaSweeperPlayerController()
 {

@@ -1,5 +1,7 @@
 #include "TunaSweeperTopDownCharacterShared.h"
 
+#include "Subsystem/TunaSweeperFactionSubsystem.h"
+
 void ATunaSweeperTopDownCharacter::StartMeleeAttack()
 {
 	if (bIsDead || bIsRolling || !bMeleeWeaponSelected || !CanUseSelectedMeleeWeapon())
@@ -184,10 +186,16 @@ void ATunaSweeperTopDownCharacter::ApplyMeleeAttackJudgement()
 	}
 
 	TSet<AActor*> HitActors;
+	const UTunaSweeperFactionSubsystem* FactionSubsystem =
+		World->GetSubsystem<UTunaSweeperFactionSubsystem>();
 	for (const FOverlapResult& Overlap : Overlaps)
 	{
 		AActor* TargetActor = Overlap.GetActor();
 		if (!IsValid(TargetActor) || TargetActor == this || HitActors.Contains(TargetActor))
+		{
+			continue;
+		}
+		if (FactionSubsystem && !FactionSubsystem->CanApplyCombatEffect(this, TargetActor))
 		{
 			continue;
 		}

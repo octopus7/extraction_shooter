@@ -256,7 +256,8 @@ void UTunaSweeperHeadphoneListenerComponent::HandleNoiseReported(const FTunaSwee
 		VisualHearingRange,
 		1.0f,
 		0.0f,
-		HeardNoise))
+		HeardNoise,
+		OwnerActor))
 	{
 		LogNoiseGateDebug(TEXT("attenuation_rejected"), NoiseEvent, SourceDistance);
 		return;

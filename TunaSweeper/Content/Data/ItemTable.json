@@ -10,6 +10,7 @@
     "category_tag": "item.category.weapon.gun",
     "equipment_slot_tag": "equipment.slot.gun",
     "weapon_type_tag": "weapon.type.pistol",
+    "fire_mode": "semi_automatic",
     "compatible_ammo_type_tags": [
       "ammo.type.pistol"
     ],
@@ -28,6 +29,7 @@
     "category_tag": "item.category.weapon.gun",
     "equipment_slot_tag": "equipment.slot.gun",
     "weapon_type_tag": "weapon.type.rifle",
+    "fire_mode": "automatic",
     "compatible_ammo_type_tags": [
       "ammo.type.rifle"
     ],
@@ -50,6 +52,7 @@
     "category_tag": "item.category.weapon.gun",
     "equipment_slot_tag": "equipment.slot.gun",
     "weapon_type_tag": "weapon.type.shotgun",
+    "fire_mode": "semi_automatic",
     "compatible_ammo_type_tags": [
       "ammo.type.shotgun"
     ],
@@ -68,6 +71,7 @@
     "category_tag": "item.category.weapon.gun",
     "equipment_slot_tag": "equipment.slot.gun",
     "weapon_type_tag": "weapon.type.smg",
+    "fire_mode": "automatic",
     "compatible_ammo_type_tags": [
       "ammo.type.pistol"
     ],
@@ -89,6 +93,7 @@
     "category_tag": "item.category.weapon.gun",
     "equipment_slot_tag": "equipment.slot.gun",
     "weapon_type_tag": "weapon.type.rifle",
+    "fire_mode": "automatic",
     "compatible_ammo_type_tags": [
       "ammo.type.rifle"
     ],
@@ -111,6 +116,7 @@
     "category_tag": "item.category.weapon.gun",
     "equipment_slot_tag": "equipment.slot.gun",
     "weapon_type_tag": "weapon.type.smg",
+    "fire_mode": "automatic",
     "compatible_ammo_type_tags": [
       "ammo.type.pistol"
     ],

@@ -189,3 +189,4 @@ ui.interaction.canbot_dialogue,대화,Dialogue,会話
 ui.quest.interaction_name,퀘스트,Quest,クエスト
 ui.map_overlay.start_location,시작 위치,Start Position,開始位置
 ui.map_overlay.extraction_point,추출 포인트,Extraction Point,抽出地点
+ui.enemy.status.reload,재장전,Reloading,リロード

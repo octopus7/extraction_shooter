@@ -1,6 +1,8 @@
 #include "Subsystem/TunaSweeperNoiseSubsystem.h"
 
+#include "Engine/World.h"
 #include "GameFramework/Actor.h"
+#include "Subsystem/TunaSweeperFactionSubsystem.h"
 
 namespace
 {
@@ -39,8 +41,21 @@ bool UTunaSweeperNoiseSubsystem::CalculateHeardNoiseAtLocation(
 	float ListenerHearingRange,
 	float ListenerSensitivity,
 	float ListenerMinStrength,
-	FTunaSweeperHeardNoiseEvent& OutHeardNoise) const
+	FTunaSweeperHeardNoiseEvent& OutHeardNoise,
+	AActor* ListenerActor) const
 {
+	const AActor* NoiseFactionSource = IsValid(NoiseEvent.InstigatorActor)
+		? NoiseEvent.InstigatorActor.Get()
+		: NoiseEvent.SourceActor.Get();
+	const UTunaSweeperFactionSubsystem* FactionSubsystem = GetWorld()
+		? GetWorld()->GetSubsystem<UTunaSweeperFactionSubsystem>()
+		: nullptr;
+	if (FactionSubsystem && IsValid(ListenerActor) && IsValid(NoiseFactionSource) &&
+		FactionSubsystem->AreActorsFriendly(ListenerActor, NoiseFactionSource))
+	{
+		return false;
+	}
+
 	const float SafeListenerRange = FMath::Max(0.0f, ListenerHearingRange);
 	const float SafeNoiseRange = FMath::Max(0.0f, NoiseEvent.MaxRange);
 	const float EffectiveRange = SafeListenerRange > 0.0f

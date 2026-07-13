@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "AIController.h"
+#include "GenericTeamAgentInterface.h"
 #include "TunaSweeperPetCompanionAIController.generated.h"
 
 class ATunaSweeperPetCompanionCharacter;
@@ -15,6 +16,9 @@ public:
 	ATunaSweeperPetCompanionAIController();
 
 	void OnFollowTargetChanged();
+	virtual void SetGenericTeamId(const FGenericTeamId& InTeamId) override;
+	virtual FGenericTeamId GetGenericTeamId() const override;
+	virtual ETeamAttitude::Type GetTeamAttitudeTowards(const AActor& Other) const override;
 
 protected:
 	virtual void BeginPlay() override;

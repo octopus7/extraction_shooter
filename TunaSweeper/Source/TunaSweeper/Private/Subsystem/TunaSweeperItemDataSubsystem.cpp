@@ -77,6 +77,24 @@ namespace TunaSweeperItemDataFiles
 		return ETunaSweeperItemGrade::Common;
 	}
 
+	ETunaSweeperWeaponFireMode ResolveWeaponFireModeFromString(const FString& FireModeString)
+	{
+		FString NormalizedFireMode = FireModeString.TrimStartAndEnd().ToLower();
+		NormalizedFireMode.ReplaceInline(TEXT("-"), TEXT("_"));
+		NormalizedFireMode.ReplaceInline(TEXT(" "), TEXT("_"));
+
+		if (NormalizedFireMode == TEXT("semi_automatic") || NormalizedFireMode == TEXT("semi_auto"))
+		{
+			return ETunaSweeperWeaponFireMode::SemiAutomatic;
+		}
+		if (NormalizedFireMode == TEXT("automatic") || NormalizedFireMode == TEXT("auto"))
+		{
+			return ETunaSweeperWeaponFireMode::Automatic;
+		}
+
+		return ETunaSweeperWeaponFireMode::NotApplicable;
+	}
+
 	FName ResolveDefaultMaxStackCategoryKey(FName ItemCategoryTag)
 	{
 		static const TMap<FName, FName> DefaultStackCategoryKeysByItemCategory =
@@ -687,6 +705,7 @@ bool UTunaSweeperItemDataSubsystem::LoadItemTableJson()
 		FString BlueprintRecipeId;
 		FString EquipmentSlotTag;
 		FString WeaponTypeTag;
+		FString FireModeString;
 		FString AttachmentSlotTag;
 		FString AmmoTypeTag;
 		FString ImpactProfileId;
@@ -754,6 +773,10 @@ bool UTunaSweeperItemDataSubsystem::LoadItemTableJson()
 		if ((*JsonObject)->TryGetStringField(TEXT("weapon_type_tag"), WeaponTypeTag))
 		{
 			ItemDefinition.WeaponTypeTag = FName(*WeaponTypeTag.TrimStartAndEnd());
+		}
+		if ((*JsonObject)->TryGetStringField(TEXT("fire_mode"), FireModeString))
+		{
+			ItemDefinition.FireMode = TunaSweeperItemDataFiles::ResolveWeaponFireModeFromString(FireModeString);
 		}
 		if ((*JsonObject)->TryGetStringField(TEXT("attachment_slot_tag"), AttachmentSlotTag))
 		{

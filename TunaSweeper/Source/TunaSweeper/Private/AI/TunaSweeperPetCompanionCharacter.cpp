@@ -1,6 +1,7 @@
 #include "AI/TunaSweeperPetCompanionCharacter.h"
 
 #include "AI/TunaSweeperPetCompanionAIController.h"
+#include "Component/TunaSweeperFactionComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -11,6 +12,9 @@ ATunaSweeperPetCompanionCharacter::ATunaSweeperPetCompanionCharacter()
 
 	AIControllerClass = ATunaSweeperPetCompanionAIController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+
+	FactionComponent = CreateDefaultSubobject<UTunaSweeperFactionComponent>(TEXT("FactionComponent"));
+	FactionComponent->SetFactionId(TunaSweeperFactionIds::Player);
 
 	if (UCapsuleComponent* PetCapsuleComponent = GetCapsuleComponent())
 	{

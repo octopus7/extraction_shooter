@@ -11,6 +11,7 @@ class ATunaSweeperWeapon;
 class ATunaSweeperMeleeImpactBurstActor;
 class ATunaSweeperMeleeSwingTrailActor;
 class UTunaSweeperDebuffComponent;
+class UTunaSweeperFactionComponent;
 class UTunaSweeperHeadphoneListenerComponent;
 class UTunaSweeperOcclusionRevealSourceComponent;
 class UCameraComponent;
@@ -138,6 +139,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Debuff")
 	UTunaSweeperDebuffComponent* GetDebuffComponent() const { return DebuffComponent; }
 
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Faction")
+	UTunaSweeperFactionComponent* GetFactionComponent() const { return FactionComponent; }
+
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Vision")
 	UTunaSweeperPlayerVisionComponent* GetPlayerVisionComponent() const { return PlayerVisionComponent; }
 
@@ -250,6 +254,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UTunaSweeperDebuffComponent> DebuffComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UTunaSweeperFactionComponent> FactionComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UTunaSweeperPlayerVisionComponent> PlayerVisionComponent;

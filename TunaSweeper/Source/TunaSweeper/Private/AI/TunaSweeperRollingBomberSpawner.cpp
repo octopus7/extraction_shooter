@@ -2,6 +2,7 @@
 
 #include "AI/TunaSweeperRollingBomber.h"
 #include "Character/TunaSweeperTopDownCharacter.h"
+#include "Component/TunaSweeperFactionComponent.h"
 #include "Component/TunaSweeperVisionSubjectComponent.h"
 #include "Components/SceneComponent.h"
 #include "Engine/World.h"
@@ -12,6 +13,7 @@
 #include "Sound/SoundBase.h"
 #include "Sound/SoundWaveProcedural.h"
 #include "TimerManager.h"
+#include "Subsystem/TunaSweeperFactionSubsystem.h"
 
 namespace TunaSweeperRollingBomberSpawner
 {
@@ -165,6 +167,8 @@ ATunaSweeperRollingBomberSpawner::ATunaSweeperRollingBomberSpawner()
 	LaunchPoint->SetRelativeLocation(FVector(0.0f, 0.0f, TunaSweeperRollingBomberSpawner::LaunchPointHeight));
 
 	VisionSubjectComponent = CreateDefaultSubobject<UTunaSweeperVisionSubjectComponent>(TEXT("VisionSubject"));
+	FactionComponent = CreateDefaultSubobject<UTunaSweeperFactionComponent>(TEXT("FactionComponent"));
+	FactionComponent->SetFactionId(TunaSweeperFactionIds::Enemy);
 
 	RollingBomberClass = TSoftClassPtr<ATunaSweeperRollingBomber>(
 		FSoftObjectPath(TunaSweeperRollingBomberSpawner::DefaultRollingBomberClassPath));
@@ -219,6 +223,18 @@ float ATunaSweeperRollingBomberSpawner::TakeDamage(
 	if (bSpawnerDestroyed || DamageAmount <= 0.0f)
 	{
 		return 0.0f;
+	}
+	if (const UWorld* World = GetWorld())
+	{
+		const AActor* FactionSource = DamageCauser
+			? DamageCauser
+			: static_cast<AActor*>(EventInstigator);
+		if (const UTunaSweeperFactionSubsystem* FactionSubsystem =
+			World->GetSubsystem<UTunaSweeperFactionSubsystem>();
+			FactionSubsystem && !FactionSubsystem->CanApplyCombatEffect(FactionSource, this))
+		{
+			return 0.0f;
+		}
 	}
 
 	const float AppliedDamage = FMath::Min(CurrentHealth, DamageAmount);
@@ -410,6 +426,12 @@ void ATunaSweeperRollingBomberSpawner::SpawnNextQueuedRollingBomber()
 		SpawnParameters);
 	if (SpawnedBomber)
 	{
+		if (UTunaSweeperFactionComponent* SpawnedFaction =
+			SpawnedBomber->FindComponentByClass<UTunaSweeperFactionComponent>())
+		{
+			SpawnedFaction->SetFactionId(
+				FactionComponent ? FactionComponent->GetFactionId() : TunaSweeperFactionIds::Enemy);
+		}
 		SpawnedBomber->LaunchFromSpawner(LaunchVelocity);
 		PlayLaunchSound();
 	}
@@ -462,6 +484,15 @@ ATunaSweeperTopDownCharacter* ATunaSweeperRollingBomberSpawner::ResolvePlayerTar
 	if (!PlayerCharacter || PlayerCharacter->IsDead())
 	{
 		return nullptr;
+	}
+	if (const UWorld* World = GetWorld())
+	{
+		if (const UTunaSweeperFactionSubsystem* FactionSubsystem =
+			World->GetSubsystem<UTunaSweeperFactionSubsystem>();
+			FactionSubsystem && !FactionSubsystem->CanTargetActor(this, PlayerCharacter))
+		{
+			return nullptr;
+		}
 	}
 
 	return PlayerCharacter;
