@@ -1,4 +1,5 @@
 #include "TunaSweeperEditorSetupShared.h"
+#include "TunaSweeperEnemyAIDebugTool.h"
 #include "TunaSweeperQuadrupedPresetSetup.h"
 
 #include "Containers/Ticker.h"
@@ -80,6 +81,9 @@ public:
 		LevelOpenTool = MakeUnique<FTunaSweeperLevelOpenTool>();
 		LevelOpenTool->Startup();
 
+		EnemyAIDebugTool = MakeUnique<FTunaSweeperEnemyAIDebugTool>();
+		EnemyAIDebugTool->Startup();
+
 		FMSoundTool = MakeUnique<FTunaSweeperFMSoundTool>();
 		FMSoundTool->Startup();
 
@@ -120,6 +124,12 @@ public:
 			FMSoundTool.Reset();
 		}
 
+		if (EnemyAIDebugTool)
+		{
+			EnemyAIDebugTool->Shutdown();
+			EnemyAIDebugTool.Reset();
+		}
+
 		if (GlbTextureExtractorTool)
 		{
 			GlbTextureExtractorTool->Shutdown();
@@ -154,6 +164,7 @@ private:
 	FDelegateHandle QuadrupedSetupInitializedHandle;
 	FTSTicker::FDelegateHandle QuadrupedSetupTickerHandle;
 	TUniquePtr<FTunaSweeperLevelOpenTool> LevelOpenTool;
+	TUniquePtr<FTunaSweeperEnemyAIDebugTool> EnemyAIDebugTool;
 	TUniquePtr<FTunaSweeperFMSoundTool> FMSoundTool;
 	TUniquePtr<FTunaSweeperGlbTextureExtractorTool> GlbTextureExtractorTool;
 };

@@ -125,6 +125,7 @@ bool ATunaSweeperEnemyAIController::GetCombatDebugSnapshot(
 
 	OutSnapshot = FTunaSweeperEnemyCombatDebugSnapshot();
 	OutSnapshot.bIsCombatEngaged = bIsCombatEngaged;
+	OutSnapshot.bHasDirectTargetSight = bHasDirectTargetSight;
 	OutSnapshot.TrackingRange = ResolveTrackingRange();
 	OutSnapshot.VisionAngleDegrees = FMath::Clamp(CombatVisionAngleDegrees, 0.0f, 360.0f);
 	OutSnapshot.HearingRange = FMath::Max(0.0f, HearingRange);

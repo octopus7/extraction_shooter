@@ -1,0 +1,531 @@
+#include "TunaSweeperEnemyAIDebugTool.h"
+
+#include "AI/TunaSweeperEnemyAIController.h"
+#include "AI/TunaSweeperEnemyCharacter.h"
+#include "Editor.h"
+#include "Engine/Engine.h"
+#include "Engine/World.h"
+#include "EngineUtils.h"
+#include "Framework/Docking/TabManager.h"
+#include "GameFramework/Pawn.h"
+#include "GameFramework/PlayerController.h"
+#include "Styling/AppStyle.h"
+#include "ToolMenus.h"
+#include "UObject/Package.h"
+#include "Widgets/Docking/SDockTab.h"
+#include "Widgets/Layout/SBorder.h"
+#include "Widgets/Layout/SBox.h"
+#include "Widgets/SBoxPanel.h"
+#include "Widgets/SCompoundWidget.h"
+#include "Widgets/SOverlay.h"
+#include "Widgets/Text/STextBlock.h"
+#include "Widgets/Views/SHeaderRow.h"
+#include "Widgets/Views/SListView.h"
+#include "Widgets/Views/STableRow.h"
+#include "Widgets/Views/STableViewBase.h"
+
+#define LOCTEXT_NAMESPACE "TunaSweeperEnemyAIDebugTool"
+
+namespace TunaSweeperEnemyAIDebug
+{
+	const FName TabName(TEXT("TunaSweeperEnemyAIDebug"));
+	const FName DistanceColumnName(TEXT("Distance"));
+	const FName EnemyColumnName(TEXT("Enemy"));
+	const FName StateColumnName(TEXT("State"));
+	const FName CombatColumnName(TEXT("Combat"));
+	const FName SightColumnName(TEXT("Sight"));
+	const FName TimeColumnName(TEXT("Time"));
+	const FName ReasonColumnName(TEXT("Reason"));
+	const FString RaidMapPackageName(TEXT("/Game/RaidMap"));
+
+	constexpr double RefreshIntervalSeconds = 0.25;
+
+	enum class EPanelState : uint8
+	{
+		RaidLevelOnly,
+		WaitingForPlay,
+		WaitingForPlayer,
+		NoEnemies,
+		Ready
+	};
+
+	struct FEnemyRow
+	{
+		TWeakObjectPtr<ATunaSweeperEnemyCharacter> Enemy;
+		FString EnemyName;
+		double DistanceSquared2D = 0.0;
+		FTunaSweeperEnemyCombatDebugSnapshot Snapshot;
+	};
+
+	class SEnemyRow final : public SMultiColumnTableRow<TSharedPtr<FEnemyRow>>
+	{
+	public:
+		SLATE_BEGIN_ARGS(SEnemyRow)
+		{
+		}
+			SLATE_ARGUMENT(TSharedPtr<FEnemyRow>, Item)
+		SLATE_END_ARGS()
+
+		void Construct(
+			const FArguments& InArgs,
+			const TSharedRef<STableViewBase>& InOwnerTableView)
+		{
+			Item = InArgs._Item;
+			SMultiColumnTableRow<TSharedPtr<FEnemyRow>>::Construct(
+				FSuperRowType::FArguments().Padding(FMargin(4.0f, 2.0f)),
+				InOwnerTableView);
+		}
+
+		virtual TSharedRef<SWidget> GenerateWidgetForColumn(const FName& ColumnName) override
+		{
+			FText Text = FText::GetEmpty();
+			FSlateColor Color = FSlateColor::UseForeground();
+
+			if (!Item.IsValid())
+			{
+				return SNew(STextBlock).Text(Text);
+			}
+
+			if (ColumnName == DistanceColumnName)
+			{
+				const double DistanceMeters = FMath::Sqrt(Item->DistanceSquared2D) / 100.0;
+				Text = FText::FromString(FString::Printf(TEXT("%.1f m"), DistanceMeters));
+			}
+			else if (ColumnName == EnemyColumnName)
+			{
+				Text = FText::FromString(Item->EnemyName);
+			}
+			else if (ColumnName == StateColumnName)
+			{
+				Text = FText::FromString(Item->Snapshot.StateLabel);
+				Color = Item->Snapshot.bIsCombatEngaged
+					? FSlateColor(FLinearColor(1.0f, 0.55f, 0.20f))
+					: FSlateColor(FLinearColor(0.65f, 0.85f, 1.0f));
+			}
+			else if (ColumnName == CombatColumnName)
+			{
+				Text = Item->Snapshot.bIsCombatEngaged
+					? LOCTEXT("CombatYes", "전투")
+					: LOCTEXT("CombatNo", "비전투");
+				Color = Item->Snapshot.bIsCombatEngaged
+					? FSlateColor(FLinearColor(1.0f, 0.36f, 0.18f))
+					: FSlateColor(FLinearColor(0.55f, 0.75f, 0.62f));
+			}
+			else if (ColumnName == SightColumnName)
+			{
+				Text = Item->Snapshot.bHasDirectTargetSight
+					? LOCTEXT("SightYes", "있음")
+					: LOCTEXT("SightNo", "없음");
+				Color = Item->Snapshot.bHasDirectTargetSight
+					? FSlateColor(FLinearColor(1.0f, 0.86f, 0.28f))
+					: FSlateColor(FLinearColor(0.55f, 0.55f, 0.55f));
+			}
+			else if (ColumnName == TimeColumnName)
+			{
+				Text = Item->Snapshot.MaxStateSeconds > 0.0f
+					? FText::FromString(FString::Printf(
+						TEXT("%.1f / %.1fs"),
+						Item->Snapshot.RemainingStateSeconds,
+						Item->Snapshot.MaxStateSeconds))
+					: FText::FromString(TEXT("-"));
+			}
+			else if (ColumnName == ReasonColumnName)
+			{
+				Text = Item->Snapshot.RecentEntryReason.IsEmpty()
+					? FText::FromString(TEXT("-"))
+					: FText::FromString(Item->Snapshot.RecentEntryReason);
+			}
+
+			return SNew(STextBlock)
+				.Text(Text)
+				.ColorAndOpacity(Color)
+				.OverflowPolicy(ETextOverflowPolicy::Ellipsis)
+				.ToolTipText(Text);
+		}
+
+	private:
+		TSharedPtr<FEnemyRow> Item;
+	};
+
+	class SEnemyAIDebugPanel final : public SCompoundWidget
+	{
+	public:
+		SLATE_BEGIN_ARGS(SEnemyAIDebugPanel)
+		{
+		}
+		SLATE_END_ARGS()
+
+		void Construct(const FArguments& InArgs)
+		{
+			ChildSlot
+			[
+				SNew(SVerticalBox)
+				+ SVerticalBox::Slot()
+				.AutoHeight()
+				.Padding(8.0f, 8.0f, 8.0f, 4.0f)
+				[
+					SNew(STextBlock)
+					.Text(this, &SEnemyAIDebugPanel::GetSummaryText)
+					.Font(FAppStyle::GetFontStyle(TEXT("BoldFont")))
+				]
+				+ SVerticalBox::Slot()
+				.FillHeight(1.0f)
+				.Padding(8.0f, 4.0f, 8.0f, 8.0f)
+				[
+					SNew(SOverlay)
+					+ SOverlay::Slot()
+					[
+						SAssignNew(ListView, SListView<TSharedPtr<FEnemyRow>>)
+						.ListItemsSource(&Rows)
+						.OnGenerateRow(this, &SEnemyAIDebugPanel::GenerateRow)
+						.OnMouseButtonDoubleClick(this, &SEnemyAIDebugPanel::HandleRowDoubleClicked)
+						.SelectionMode(ESelectionMode::Single)
+						.Visibility(this, &SEnemyAIDebugPanel::GetListVisibility)
+						.HeaderRow
+						(
+							SNew(SHeaderRow)
+							+ SHeaderRow::Column(DistanceColumnName)
+							.DefaultLabel(LOCTEXT("DistanceColumn", "거리"))
+							.FixedWidth(84.0f)
+							+ SHeaderRow::Column(EnemyColumnName)
+							.DefaultLabel(LOCTEXT("EnemyColumn", "적"))
+							.FillWidth(0.18f)
+							+ SHeaderRow::Column(StateColumnName)
+							.DefaultLabel(LOCTEXT("StateColumn", "상태"))
+							.FillWidth(0.16f)
+							+ SHeaderRow::Column(CombatColumnName)
+							.DefaultLabel(LOCTEXT("CombatColumn", "교전"))
+							.FixedWidth(68.0f)
+							+ SHeaderRow::Column(SightColumnName)
+							.DefaultLabel(LOCTEXT("SightColumn", "직접 시야"))
+							.FixedWidth(78.0f)
+							+ SHeaderRow::Column(TimeColumnName)
+							.DefaultLabel(LOCTEXT("TimeColumn", "남은 시간"))
+							.FixedWidth(104.0f)
+							+ SHeaderRow::Column(ReasonColumnName)
+							.DefaultLabel(LOCTEXT("ReasonColumn", "최근 진입 사유"))
+							.FillWidth(0.28f)
+						)
+					]
+					+ SOverlay::Slot()
+					.HAlign(HAlign_Fill)
+					.VAlign(VAlign_Fill)
+					[
+						SNew(SBorder)
+						.BorderImage(FAppStyle::GetBrush(TEXT("ToolPanel.GroupBorder")))
+						.Padding(24.0f)
+						.Visibility(this, &SEnemyAIDebugPanel::GetEmptyStateVisibility)
+						[
+							SNew(STextBlock)
+							.Text(this, &SEnemyAIDebugPanel::GetEmptyStateText)
+							.Justification(ETextJustify::Center)
+							.AutoWrapText(true)
+						]
+					]
+				]
+			];
+
+			RefreshRows();
+		}
+
+		virtual void Tick(
+			const FGeometry& AllottedGeometry,
+			const double InCurrentTime,
+			const float InDeltaTime) override
+		{
+			SCompoundWidget::Tick(AllottedGeometry, InCurrentTime, InDeltaTime);
+			SecondsUntilRefresh -= InDeltaTime;
+			if (SecondsUntilRefresh <= 0.0)
+			{
+				RefreshRows();
+			}
+		}
+
+	private:
+		static bool IsRaidWorld(const UWorld* World)
+		{
+			return World &&
+				UWorld::RemovePIEPrefix(World->GetOutermost()->GetName()).Equals(
+					RaidMapPackageName,
+					ESearchCase::CaseSensitive);
+		}
+
+		static APawn* FindLocalPlayerPawn(UWorld* World)
+		{
+			if (!World)
+			{
+				return nullptr;
+			}
+
+			for (FConstPlayerControllerIterator ControllerIt = World->GetPlayerControllerIterator();
+				ControllerIt;
+				++ControllerIt)
+			{
+				APlayerController* PlayerController = ControllerIt->Get();
+				if (PlayerController && PlayerController->IsLocalController() && PlayerController->GetPawn())
+				{
+					return PlayerController->GetPawn();
+				}
+			}
+
+			return nullptr;
+		}
+
+		static UWorld* ResolvePlayWorld()
+		{
+			if (!GEngine)
+			{
+				return nullptr;
+			}
+
+			UWorld* FallbackPlayWorld = nullptr;
+			for (const FWorldContext& WorldContext : GEngine->GetWorldContexts())
+			{
+				if (WorldContext.WorldType != EWorldType::PIE || WorldContext.RunAsDedicated)
+				{
+					continue;
+				}
+
+				UWorld* World = WorldContext.World();
+				if (!World)
+				{
+					continue;
+				}
+
+				if (!FallbackPlayWorld)
+				{
+					FallbackPlayWorld = World;
+				}
+				if (FindLocalPlayerPawn(World))
+				{
+					return World;
+				}
+			}
+
+			return FallbackPlayWorld;
+		}
+
+		void RefreshRows()
+		{
+			SecondsUntilRefresh = RefreshIntervalSeconds;
+			Rows.Reset();
+
+			UWorld* PlayWorld = ResolvePlayWorld();
+			if (!PlayWorld)
+			{
+				UWorld* EditorWorld = GEditor ? GEditor->GetEditorWorldContext().World() : nullptr;
+				PanelState = IsRaidWorld(EditorWorld)
+					? EPanelState::WaitingForPlay
+					: EPanelState::RaidLevelOnly;
+				RequestListRefresh();
+				return;
+			}
+
+			if (!IsRaidWorld(PlayWorld))
+			{
+				PanelState = EPanelState::RaidLevelOnly;
+				RequestListRefresh();
+				return;
+			}
+
+			APawn* PlayerPawn = FindLocalPlayerPawn(PlayWorld);
+			if (!PlayerPawn)
+			{
+				PanelState = EPanelState::WaitingForPlayer;
+				RequestListRefresh();
+				return;
+			}
+
+			const FVector PlayerLocation = PlayerPawn->GetActorLocation();
+			for (TActorIterator<ATunaSweeperEnemyCharacter> EnemyIt(PlayWorld); EnemyIt; ++EnemyIt)
+			{
+				ATunaSweeperEnemyCharacter* Enemy = *EnemyIt;
+				ATunaSweeperEnemyAIController* EnemyController = Enemy
+					? Cast<ATunaSweeperEnemyAIController>(Enemy->GetController())
+					: nullptr;
+				FTunaSweeperEnemyCombatDebugSnapshot Snapshot;
+				if (!EnemyController || !EnemyController->GetCombatDebugSnapshot(Snapshot))
+				{
+					continue;
+				}
+
+				TSharedPtr<FEnemyRow> Row = MakeShared<FEnemyRow>();
+				Row->Enemy = Enemy;
+				Row->EnemyName = Enemy->GetActorNameOrLabel();
+				Row->DistanceSquared2D = FVector::DistSquared2D(PlayerLocation, Enemy->GetActorLocation());
+				Row->Snapshot = MoveTemp(Snapshot);
+				Rows.Add(MoveTemp(Row));
+			}
+
+			Rows.Sort([](const TSharedPtr<FEnemyRow>& Left, const TSharedPtr<FEnemyRow>& Right)
+			{
+				if (!Left.IsValid() || !Right.IsValid())
+				{
+					return Left.IsValid();
+				}
+				if (Left->DistanceSquared2D != Right->DistanceSquared2D)
+				{
+					return Left->DistanceSquared2D < Right->DistanceSquared2D;
+				}
+				return Left->EnemyName < Right->EnemyName;
+			});
+
+			PanelState = Rows.IsEmpty() ? EPanelState::NoEnemies : EPanelState::Ready;
+			RequestListRefresh();
+		}
+
+		void RequestListRefresh() const
+		{
+			if (ListView.IsValid())
+			{
+				ListView->RequestListRefresh();
+			}
+		}
+
+		TSharedRef<ITableRow> GenerateRow(
+			TSharedPtr<FEnemyRow> Item,
+			const TSharedRef<STableViewBase>& OwnerTable) const
+		{
+			return SNew(SEnemyRow, OwnerTable)
+				.Item(MoveTemp(Item));
+		}
+
+		void HandleRowDoubleClicked(TSharedPtr<FEnemyRow> Item) const
+		{
+			ATunaSweeperEnemyCharacter* Enemy = Item.IsValid() ? Item->Enemy.Get() : nullptr;
+			if (!GEditor || !Enemy)
+			{
+				return;
+			}
+
+			GEditor->SelectNone(false, true, false);
+			GEditor->SelectActor(Enemy, true, true, true);
+			GEditor->MoveViewportCamerasToActor(*Enemy, false);
+		}
+
+		FText GetSummaryText() const
+		{
+			if (PanelState != EPanelState::Ready)
+			{
+				return LOCTEXT("SummaryIdle", "Enemy AI Monitor · RaidMap PIE/SIE 전용");
+			}
+
+			return FText::Format(
+				LOCTEXT("SummaryReady", "Enemy AI Monitor · 가까운 순 · 0.25초 갱신 · {0}명"),
+				FText::AsNumber(Rows.Num()));
+		}
+
+		FText GetEmptyStateText() const
+		{
+			switch (PanelState)
+			{
+			case EPanelState::WaitingForPlay:
+				return LOCTEXT("WaitingForPlay", "RaidMap에서 플레이 또는 시뮬레이트를 시작하세요");
+			case EPanelState::WaitingForPlayer:
+				return LOCTEXT("WaitingForPlayer", "플레이어를 기다리는 중입니다");
+			case EPanelState::NoEnemies:
+				return LOCTEXT("NoEnemies", "표시할 적 AI가 없습니다");
+			case EPanelState::RaidLevelOnly:
+			default:
+				return LOCTEXT("RaidLevelOnly", "전투 레벨에서만 동작합니다");
+			}
+		}
+
+		EVisibility GetListVisibility() const
+		{
+			return PanelState == EPanelState::Ready
+				? EVisibility::Visible
+				: EVisibility::Collapsed;
+		}
+
+		EVisibility GetEmptyStateVisibility() const
+		{
+			return PanelState == EPanelState::Ready
+				? EVisibility::Collapsed
+				: EVisibility::Visible;
+		}
+
+		EPanelState PanelState = EPanelState::RaidLevelOnly;
+		double SecondsUntilRefresh = 0.0;
+		TArray<TSharedPtr<FEnemyRow>> Rows;
+		TSharedPtr<SListView<TSharedPtr<FEnemyRow>>> ListView;
+	};
+}
+
+void FTunaSweeperEnemyAIDebugTool::Startup()
+{
+	FGlobalTabmanager::Get()->RegisterNomadTabSpawner(
+		TunaSweeperEnemyAIDebug::TabName,
+		FOnSpawnTab::CreateRaw(this, &FTunaSweeperEnemyAIDebugTool::SpawnToolTab))
+		.SetDisplayName(LOCTEXT("TabTitle", "Enemy AI Monitor"))
+		.SetTooltipText(LOCTEXT("TabTooltip", "Inspect RaidMap enemy AI states ordered by distance during PIE or SIE."))
+		.SetMenuType(ETabSpawnerMenuType::Hidden);
+
+	UToolMenus::RegisterStartupCallback(
+		FSimpleMulticastDelegate::FDelegate::CreateRaw(this, &FTunaSweeperEnemyAIDebugTool::RegisterMenus));
+}
+
+void FTunaSweeperEnemyAIDebugTool::Shutdown()
+{
+	if (UToolMenus::IsToolMenuUIEnabled())
+	{
+		UToolMenus::UnRegisterStartupCallback(this);
+		UToolMenus::UnregisterOwner(this);
+	}
+
+	if (TSharedPtr<SDockTab> LiveTab = FGlobalTabmanager::Get()->FindExistingLiveTab(
+		TunaSweeperEnemyAIDebug::TabName))
+	{
+		LiveTab->RequestCloseTab();
+	}
+
+	FGlobalTabmanager::Get()->UnregisterNomadTabSpawner(TunaSweeperEnemyAIDebug::TabName);
+}
+
+void FTunaSweeperEnemyAIDebugTool::RegisterMenus()
+{
+	FToolMenuOwnerScoped OwnerScoped(this);
+
+	UToolMenu* MainMenu = UToolMenus::Get()->ExtendMenu(TEXT("LevelEditor.MainMenu"));
+	FToolMenuSection& MainSection = MainMenu->FindOrAddSection(NAME_None);
+	if (!MainSection.FindEntry(TEXT("TunaSweeper")))
+	{
+		FToolMenuEntry& TunaSweeperEntry = MainSection.AddSubMenu(
+			TEXT("TunaSweeper"),
+			LOCTEXT("TunaSweeperTopMenu", "TunaSweeper"),
+			LOCTEXT("TunaSweeperTopMenuTooltip", "Open TunaSweeper editor tools."),
+			FNewToolMenuChoice());
+		TunaSweeperEntry.InsertPosition = FToolMenuInsert(TEXT("Tools"), EToolMenuInsertType::After);
+	}
+
+	UToolMenu* TunaSweeperMenu = UToolMenus::Get()->RegisterMenu(
+		TEXT("LevelEditor.MainMenu.TunaSweeper"),
+		NAME_None,
+		EMultiBoxType::Menu,
+		false);
+	FToolMenuSection& Section = TunaSweeperMenu->FindOrAddSection(
+		TEXT("Debug"),
+		LOCTEXT("DebugMenuSection", "Debug"));
+	Section.AddMenuEntry(
+		TEXT("OpenTunaSweeperEnemyAIDebug"),
+		LOCTEXT("MenuEntry", "Enemy AI Monitor"),
+		LOCTEXT("MenuEntryTooltip", "Open the RaidMap PIE/SIE enemy AI monitor."),
+		FSlateIcon(),
+		FUIAction(FExecuteAction::CreateRaw(this, &FTunaSweeperEnemyAIDebugTool::OpenToolWindow)));
+}
+
+void FTunaSweeperEnemyAIDebugTool::OpenToolWindow()
+{
+	FGlobalTabmanager::Get()->TryInvokeTab(TunaSweeperEnemyAIDebug::TabName);
+}
+
+TSharedRef<SDockTab> FTunaSweeperEnemyAIDebugTool::SpawnToolTab(const FSpawnTabArgs& SpawnTabArgs)
+{
+	return SNew(SDockTab)
+		.TabRole(ETabRole::NomadTab)
+		[
+			SNew(TunaSweeperEnemyAIDebug::SEnemyAIDebugPanel)
+		];
+}
+
+#undef LOCTEXT_NAMESPACE

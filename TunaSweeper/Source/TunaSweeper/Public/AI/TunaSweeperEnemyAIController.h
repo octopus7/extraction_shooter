@@ -60,6 +60,7 @@ enum class ETunaSweeperLineOfFireResult : uint8
 struct FTunaSweeperEnemyCombatDebugSnapshot
 {
 	bool bIsCombatEngaged = false;
+	bool bHasDirectTargetSight = false;
 	FString StateLabel;
 	float RemainingStateSeconds = 0.0f;
 	float MaxStateSeconds = 0.0f;
