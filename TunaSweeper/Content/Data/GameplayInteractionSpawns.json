@@ -37,6 +37,18 @@
   },
   {
     "level_name": "BunkerMap",
+    "spawn_id": "TS_DebugPiggyBank_01",
+    "spawn_type": "piggy_bank",
+    "actor_class": "/Script/TunaSweeper.TunaSweeperPiggyBankActor",
+    "requires_developer_piggy_bank": true,
+    "interaction_display_name": "돈내놔",
+    "currency_grant_amount": 1000,
+    "location": [180.0, -1000.0, 40.0],
+    "rotation": [0.0, 0.0, 0.0],
+    "scale": [1.0, 1.0, 1.0]
+  },
+  {
+    "level_name": "BunkerMap",
     "spawn_id": "TS_Travel_DeployToRaid",
     "spawn_type": "level_travel",
     "actor_class": "/Game/Interaction/BP_Interact_LevelTravel.BP_Interact_LevelTravel_C",

@@ -42,6 +42,10 @@ public:
 	static bool GetEnemyCombatDebugPreference();
 	static void SetEnemyCombatDebugPreference(bool bEnabled);
 
+	/** Device-local development preference; it controls the optional debug piggy-bank spawn. */
+	static bool GetDeveloperPiggyBankPreference();
+	static void SetDeveloperPiggyBankPreference(bool bEnabled);
+
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Debug")
 	void SetEnemyCombatDebugEnabled(bool bEnabled);
 

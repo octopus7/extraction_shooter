@@ -95,6 +95,88 @@ void UTunaSweeperIntroMenuWidget::ApplyTitleMenuButtonContentLayout()
 	bTitleMenuButtonContentLayoutApplied = true;
 }
 
+void UTunaSweeperIntroMenuWidget::EnsurePiggyBankToggleButton()
+{
+	if (PiggyBankToggleButton || !WidgetTree || !EnemyCombatDebugToggleButton)
+	{
+		return;
+	}
+
+	UVerticalBox* DevelopmentSettingsStack = nullptr;
+	UCanvasPanel* DevelopmentSettingsCanvas = nullptr;
+	for (UPanelWidget* Parent = EnemyCombatDebugToggleButton->GetParent(); Parent; Parent = Parent->GetParent())
+	{
+		DevelopmentSettingsStack = Cast<UVerticalBox>(Parent);
+		if (DevelopmentSettingsStack)
+		{
+			break;
+		}
+
+		DevelopmentSettingsCanvas = Cast<UCanvasPanel>(Parent);
+		if (DevelopmentSettingsCanvas)
+		{
+			break;
+		}
+	}
+
+	if (!DevelopmentSettingsStack && !DevelopmentSettingsCanvas)
+	{
+		return;
+	}
+
+	UButton* NewPiggyBankToggleButton = WidgetTree->ConstructWidget<UButton>(
+		UButton::StaticClass(),
+		TEXT("PiggyBankToggleButton"));
+	UTextBlock* PiggyBankToggleButtonText = WidgetTree->ConstructWidget<UTextBlock>(
+		UTextBlock::StaticClass(),
+		TEXT("PiggyBankToggleButtonText"));
+	if (!NewPiggyBankToggleButton || !PiggyBankToggleButtonText)
+	{
+		return;
+	}
+
+	PiggyBankToggleButtonText->SetText(FText::FromString(TEXT("\uB3FC\uC9C0\uC800\uAE08\uD1B5 \uCF1C\uAE30")));
+	PiggyBankToggleButtonText->SetJustification(ETextJustify::Center);
+	PiggyBankToggleButtonText->SetColorAndOpacity(FSlateColor(FLinearColor(0.90f, 0.96f, 0.96f, 1.0f)));
+	TunaSweeperUIFont::ApplyFont(PiggyBankToggleButtonText, 17, ETunaSweeperUIFontWeight::Bold);
+	NewPiggyBankToggleButton->SetContent(PiggyBankToggleButtonText);
+
+	bool bAdded = false;
+	if (DevelopmentSettingsStack)
+	{
+		if (UVerticalBoxSlot* AddedSlot = DevelopmentSettingsStack->AddChildToVerticalBox(NewPiggyBankToggleButton))
+		{
+			AddedSlot->SetHorizontalAlignment(HAlign_Fill);
+			AddedSlot->SetPadding(FMargin(0.0f, 8.0f, 0.0f, 0.0f));
+			bAdded = true;
+		}
+	}
+	else if (DevelopmentSettingsCanvas)
+	{
+		const UCanvasPanelSlot* ExistingSlot = Cast<UCanvasPanelSlot>(EnemyCombatDebugToggleButton->Slot);
+		if (UCanvasPanelSlot* NewSlot = DevelopmentSettingsCanvas->AddChildToCanvas(NewPiggyBankToggleButton))
+		{
+			if (ExistingSlot)
+			{
+				NewSlot->SetAnchors(ExistingSlot->GetAnchors());
+				NewSlot->SetAlignment(ExistingSlot->GetAlignment());
+				NewSlot->SetSize(ExistingSlot->GetSize());
+				NewSlot->SetPosition(ExistingSlot->GetPosition() + FVector2D(0.0f, ExistingSlot->GetSize().Y + 8.0f));
+			}
+			else
+			{
+				NewSlot->SetSize(FVector2D(660.0f, 46.0f));
+			}
+			bAdded = true;
+		}
+	}
+
+	if (bAdded)
+	{
+		PiggyBankToggleButton = NewPiggyBankToggleButton;
+	}
+}
+
 UWidget* UTunaSweeperIntroMenuWidget::BuildTitleMenuButtonContent(
 	const FText& Icon,
 	UTextBlock* LabelText,

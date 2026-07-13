@@ -191,6 +191,13 @@ void UTunaSweeperIntroMenuWidget::HandleEnemyCombatDebugToggleClicked()
 	RefreshDevelopmentSettingsPanel();
 }
 
+void UTunaSweeperIntroMenuWidget::HandlePiggyBankToggleClicked()
+{
+	const bool bEnabled = !ATunaSweeperPlayerController::GetDeveloperPiggyBankPreference();
+	ATunaSweeperPlayerController::SetDeveloperPiggyBankPreference(bEnabled);
+	RefreshDevelopmentSettingsPanel();
+}
+
 void UTunaSweeperIntroMenuWidget::HandleWindowedModeClicked()
 {
 	ApplyDisplaySettings(EWindowMode::Windowed);

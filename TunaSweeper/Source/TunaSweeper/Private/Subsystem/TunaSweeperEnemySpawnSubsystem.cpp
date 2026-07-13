@@ -22,6 +22,7 @@
 #include "Interaction/TunaSweeperLootContainerSpawnInteractableActor.h"
 #include "Interaction/TunaSweeperPeriodicNoiseEmitterActor.h"
 #include "Interaction/TunaSweeperPiggyBankActor.h"
+#include "Player/TunaSweeperPlayerController.h"
 #include "Interaction/TunaSweeperPickupItemActor.h"
 #include "Interaction/TunaSweeperSandbagCoverActor.h"
 #include "Interaction/TunaSweeperSelfDestructInteractableActor.h"
@@ -819,6 +820,11 @@ bool UTunaSweeperEnemySpawnSubsystem::EnsureRaidRuntimeActorsSpawnedForWorld(UWo
 		for (const FGameplayInteractionActorSpawnDefinition& SpawnDefinition : GameplayInteractionActorSpawnDefinitions)
 		{
 			if (!DoesLevelNameMatchWorld(SpawnDefinition.LevelName, World))
+			{
+				continue;
+			}
+			if (SpawnDefinition.bRequiresDeveloperPiggyBank &&
+				!ATunaSweeperPlayerController::GetDeveloperPiggyBankPreference())
 			{
 				continue;
 			}
@@ -1798,6 +1804,7 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadGameplayInteractionActorSpawnData(bool
 		FString InteractionDisplayName;
 		FString InteractionDisplayNameStringKey;
 		FString MarkerWidgetClassPath;
+		bool bRequiresDeveloperPiggyBank = false;
 		FVector Location = FVector::ZeroVector;
 		FRotator Rotation = FRotator::ZeroRotator;
 		FVector Scale = FVector::OneVector;
@@ -1834,6 +1841,7 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadGameplayInteractionActorSpawnData(bool
 		JsonObject->TryGetStringField(TEXT("interaction_display_name"), InteractionDisplayName);
 		JsonObject->TryGetStringField(TEXT("interaction_display_name_key"), InteractionDisplayNameStringKey);
 		JsonObject->TryGetStringField(TEXT("marker_widget_class"), MarkerWidgetClassPath);
+		JsonObject->TryGetBoolField(TEXT("requires_developer_piggy_bank"), bRequiresDeveloperPiggyBank);
 		TunaSweeperEnemySpawn::TryReadRotatorField(JsonObject, TEXT("rotation"), Rotation);
 		TunaSweeperEnemySpawn::TryReadVectorField(JsonObject, TEXT("scale"), Scale);
 
@@ -1857,6 +1865,7 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadGameplayInteractionActorSpawnData(bool
 			FSoftObjectPath(TrimmedMarkerWidgetClassPath.IsEmpty()
 				? FString(TunaSweeperEnemySpawn::DefaultInteractionMarkerWidgetClassPath)
 				: TrimmedMarkerWidgetClassPath));
+		SpawnDefinition.bRequiresDeveloperPiggyBank = bRequiresDeveloperPiggyBank;
 		SpawnDefinition.bHasMapOverlay = TunaSweeperEnemySpawn::TryReadMapOverlayDefinition(
 			JsonObject,
 			SpawnDefinition.LevelName,

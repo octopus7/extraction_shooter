@@ -33,6 +33,7 @@ void UTunaSweeperIntroMenuWidget::NativeConstruct()
 	EnsureSaveSlotSelectionRingWidgets();
 	EnsureDifficultySelectionPanel();
 	HideLegacyDeleteHoldGaugeWidgets();
+	EnsurePiggyBankToggleButton();
 
 	if (StartButton)
 	{
@@ -180,6 +181,12 @@ void UTunaSweeperIntroMenuWidget::NativeConstruct()
 	{
 		EnemyCombatDebugToggleButton->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleEnemyCombatDebugToggleClicked);
 		EnemyCombatDebugToggleButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleEnemyCombatDebugToggleClicked);
+	}
+
+	if (PiggyBankToggleButton)
+	{
+		PiggyBankToggleButton->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandlePiggyBankToggleClicked);
+		PiggyBankToggleButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandlePiggyBankToggleClicked);
 	}
 
 	if (WindowedModeButton)

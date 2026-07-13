@@ -168,6 +168,9 @@ protected:
 	TObjectPtr<UButton> EnemyCombatDebugToggleButton;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UButton> PiggyBankToggleButton;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
 	TObjectPtr<UButton> WindowedModeButton;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
@@ -331,6 +334,9 @@ private:
 	void HandleEnemyCombatDebugToggleClicked();
 
 	UFUNCTION()
+	void HandlePiggyBankToggleClicked();
+
+	UFUNCTION()
 	void HandleWindowedModeClicked();
 
 	UFUNCTION()
@@ -484,6 +490,7 @@ private:
 	void ResetTitleViewportLayoutState();
 	void EnsureTitleWindParticleOverlay();
 	void ApplyTitleMenuButtonContentLayout();
+	void EnsurePiggyBankToggleButton();
 	UWidget* BuildTitleMenuButtonContent(
 		const FText& Icon,
 		UTextBlock* LabelText,

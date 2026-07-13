@@ -246,13 +246,18 @@ void UTunaSweeperIntroMenuWidget::RefreshInterfaceSettingsPanel()
 void UTunaSweeperIntroMenuWidget::RefreshDevelopmentSettingsPanel()
 {
 	const bool bEnemyCombatDebugEnabled = ATunaSweeperPlayerController::GetEnemyCombatDebugPreference();
+	const bool bPiggyBankEnabled = ATunaSweeperPlayerController::GetDeveloperPiggyBankPreference();
 
 	if (SettingsStatusText)
 	{
-		SettingsStatusText->SetText(FText::FromString(
+		SettingsStatusText->SetText(FText::Format(
+			FText::FromString(TEXT("{0}\n\uB3FC\uC9C0\uC800\uAE08\uD1B5: {1} (\uB2E4\uC74C \uBC99\uCEE4 \uC785\uC7A5\uBD80\uD130)")),
 			bEnemyCombatDebugEnabled
-				? TEXT("전투 디버그: 켜짐 (F8)")
-				: TEXT("전투 디버그: 꺼짐 (F8)")));
+				? FText::FromString(TEXT("\uC804\uD22C \uB514\uBC84\uADF8: \uCF1C\uC9D0 (F8)"))
+				: FText::FromString(TEXT("\uC804\uD22C \uB514\uBC84\uADF8: \uAEBC\uC9D0 (F8)")),
+			bPiggyBankEnabled
+				? FText::FromString(TEXT("\uCF1C\uC9D0"))
+				: FText::FromString(TEXT("\uAEBC\uC9D0"))));
 	}
 
 	SetNamedText(
@@ -264,6 +269,16 @@ void UTunaSweeperIntroMenuWidget::RefreshDevelopmentSettingsPanel()
 	if (EnemyCombatDebugToggleButton)
 	{
 		EnemyCombatDebugToggleButton->SetIsEnabled(true);
+	}
+	SetNamedText(
+		FName(TEXT("PiggyBankToggleButtonText")),
+		FText::FromString(bPiggyBankEnabled
+			? TEXT("\uB3FC\uC9C0\uC800\uAE08\uD1B5 \uB044\uAE30")
+			: TEXT("\uB3FC\uC9C0\uC800\uAE08\uD1B5 \uCF1C\uAE30")));
+
+	if (PiggyBankToggleButton)
+	{
+		PiggyBankToggleButton->SetIsEnabled(true);
 	}
 
 	RefreshDevelopmentSelectionStyles();
@@ -361,6 +376,7 @@ void UTunaSweeperIntroMenuWidget::RefreshInterfaceSelectionStyles()
 void UTunaSweeperIntroMenuWidget::RefreshDevelopmentSelectionStyles()
 {
 	const bool bEnemyCombatDebugEnabled = ATunaSweeperPlayerController::GetEnemyCombatDebugPreference();
+	const bool bPiggyBankEnabled = ATunaSweeperPlayerController::GetDeveloperPiggyBankPreference();
 	ApplySettingsTabButtonStyle(SettingsGraphicsTabButton, FVector2D(142.0f, 38.0f), false);
 	ApplySettingsTabButtonStyle(SettingsInterfaceTabButton, FVector2D(158.0f, 38.0f), false);
 	ApplySettingsTabButtonStyle(SettingsDevelopmentTabButton, FVector2D(102.0f, 38.0f), true);
@@ -368,6 +384,10 @@ void UTunaSweeperIntroMenuWidget::RefreshDevelopmentSelectionStyles()
 		EnemyCombatDebugToggleButton,
 		FVector2D(660.0f, 46.0f),
 		bEnemyCombatDebugEnabled);
+	ApplySettingsChoiceButtonStyle(
+		PiggyBankToggleButton,
+		FVector2D(660.0f, 46.0f),
+		bPiggyBankEnabled);
 }
 
 void UTunaSweeperIntroMenuWidget::ApplySettingsChoiceButtonStyle(

@@ -230,6 +230,7 @@ private:
 		FText InteractionDisplayName;
 		FName InteractionDisplayNameStringKey;
 		TSoftClassPtr<UTunaSweeperInteractionMarkerWidget> MarkerWidgetClass;
+		bool bRequiresDeveloperPiggyBank = false;
 
 		FName TargetLevelName;
 		TSoftObjectPtr<UMediaSource> TransitionMediaSource;
