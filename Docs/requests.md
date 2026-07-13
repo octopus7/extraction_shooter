@@ -5460,3 +5460,8 @@
 
 - 적 사망 딸기 파티클의 각 `UBillboardComponent`에서 게임 중 숨김을 해제하고 가시성을 명시함.
 - `TunaSweeperEditor Win64 Development` 빌드를 성공시키고 최신 모듈로 Unreal Editor를 다시 열었음.
+
+## 2026-07-14 03:20:00 (소요시간: 00:01:11)
+
+- 적이 직접 시야로 대상을 인지했거나 전투 인지 상태인 경우 청각 센서 비주얼 메시를 즉시 숨기도록 처리함.
+- `TunaSweeperEditor Win64 Development` Live Coding 빌드를 성공함.

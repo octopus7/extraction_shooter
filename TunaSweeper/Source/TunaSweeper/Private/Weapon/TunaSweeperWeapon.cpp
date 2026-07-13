@@ -3,6 +3,7 @@
 #include "CollisionQueryParams.h"
 #include "Component/TunaSweeperLaserSightComponent.h"
 #include "Component/TunaSweeperWeaponCombatComponent.h"
+#include "Components/PointLightComponent.h"
 #include "Components/SceneComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "DrawDebugHelpers.h"
@@ -17,6 +18,7 @@
 #include "Sound/SoundBase.h"
 #include "Subsystem/TunaSweeperNoiseSubsystem.h"
 #include "TunaSweeperCollisionChannels.h"
+#include "TimerManager.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Weapon/TunaSweeperProjectile.h"
 #include "Weapon/TunaSweeperShellCasing.h"
@@ -252,6 +254,14 @@ ATunaSweeperWeapon::ATunaSweeperWeapon()
 	MuzzlePoint = CreateDefaultSubobject<USceneComponent>(TEXT("MuzzlePoint"));
 	MuzzlePoint->SetupAttachment(RootComponent);
 	MuzzlePoint->SetRelativeLocation(FVector(80.0f, 0.0f, 0.0f));
+
+	MuzzleFlashLight = CreateDefaultSubobject<UPointLightComponent>(TEXT("MuzzleFlashLight"));
+	MuzzleFlashLight->SetupAttachment(RootComponent);
+	MuzzleFlashLight->SetLightColor(MuzzleFlashLightColor);
+	MuzzleFlashLight->SetIntensity(0.0f);
+	MuzzleFlashLight->SetAttenuationRadius(MuzzleFlashLightAttenuationRadius);
+	MuzzleFlashLight->SetCastShadows(false);
+	MuzzleFlashLight->SetVisibility(false);
 
 	LaserSightComponent = CreateDefaultSubobject<UTunaSweeperLaserSightComponent>(TEXT("LaserSightComponent"));
 	LaserSightComponent->SetupAttachment(MuzzlePoint);
@@ -783,6 +793,8 @@ void ATunaSweeperWeapon::EjectShellCasing(UWorld& World, APawn* InstigatorPawn)
 
 void ATunaSweeperWeapon::PlayFirePresentation()
 {
+	TriggerMuzzleFlashLight();
+
 	UTunaSweeperWeaponPresentationDataAsset* PresentationData = WeaponPresentationDataAsset.LoadSynchronous();
 	if (!PresentationData)
 	{
@@ -818,6 +830,36 @@ void ATunaSweeperWeapon::PlayFirePresentation()
 	if (USoundBase* FireSound = PresentationData->FireSound.LoadSynchronous())
 	{
 		UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetMuzzleWorldLocation());
+	}
+}
+
+void ATunaSweeperWeapon::TriggerMuzzleFlashLight()
+{
+	if (!MuzzleFlashLight)
+	{
+		return;
+	}
+
+	MuzzleFlashLight->SetWorldTransform(GetMuzzleWorldTransform());
+	MuzzleFlashLight->SetLightColor(MuzzleFlashLightColor);
+	MuzzleFlashLight->SetIntensity(FMath::Max(0.0f, MuzzleFlashLightIntensity));
+	MuzzleFlashLight->SetAttenuationRadius(FMath::Max(1.0f, MuzzleFlashLightAttenuationRadius));
+	MuzzleFlashLight->SetVisibility(MuzzleFlashLightIntensity > 0.0f);
+
+	GetWorldTimerManager().ClearTimer(MuzzleFlashLightTimerHandle);
+	GetWorldTimerManager().SetTimer(
+		MuzzleFlashLightTimerHandle,
+		this,
+		&ATunaSweeperWeapon::DeactivateMuzzleFlashLight,
+		FMath::Max(0.01f, MuzzleFlashLightDuration),
+		false);
+}
+
+void ATunaSweeperWeapon::DeactivateMuzzleFlashLight()
+{
+	if (MuzzleFlashLight)
+	{
+		MuzzleFlashLight->SetVisibility(false);
 	}
 }
 

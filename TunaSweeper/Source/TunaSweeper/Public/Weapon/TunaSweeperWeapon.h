@@ -10,6 +10,7 @@ class ATunaSweeperShellCasing;
 class UTunaSweeperWeaponCombatComponent;
 class UTunaSweeperWeaponPresentationDataAsset;
 class UMaterialInterface;
+class UPointLightComponent;
 class UPrimitiveComponent;
 class USceneComponent;
 class UStaticMeshComponent;
@@ -108,6 +109,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
 	TObjectPtr<USceneComponent> MuzzlePoint;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon|Presentation")
+	TObjectPtr<UPointLightComponent> MuzzleFlashLight;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Weapon")
 	TObjectPtr<UTunaSweeperLaserSightComponent> LaserSightComponent;
 
@@ -122,6 +126,18 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon|Presentation")
 	TSoftObjectPtr<UTunaSweeperWeaponPresentationDataAsset> WeaponPresentationDataAsset;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon|Presentation|Muzzle Flash Light")
+	FLinearColor MuzzleFlashLightColor = FLinearColor(1.0f, 0.28f, 0.06f, 1.0f);
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon|Presentation|Muzzle Flash Light", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float MuzzleFlashLightIntensity = 500.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon|Presentation|Muzzle Flash Light", meta = (ClampMin = "1.0", UIMin = "1.0"))
+	float MuzzleFlashLightAttenuationRadius = 80.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon|Presentation|Muzzle Flash Light", meta = (ClampMin = "0.01", UIMin = "0.01", ClampMax = "0.2", UIMax = "0.2"))
+	float MuzzleFlashLightDuration = 0.04f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
 	float FireCooldown = 0.1f;
@@ -152,6 +168,8 @@ protected:
 	void PlayFirePresentation();
 	void PlayReloadPresentation(TSoftObjectPtr<class USoundBase> ReloadSound);
 	void EjectShellCasing(UWorld& World, APawn* InstigatorPawn);
+	void TriggerMuzzleFlashLight();
+	void DeactivateMuzzleFlashLight();
 
 private:
 	bool TryGetWeaponSocketWorldTransform(FName SocketName, FTransform& OutTransform) const;
@@ -160,4 +178,5 @@ private:
 
 	float LastFireTimeSeconds = -1000.0f;
 	float LastLaserSightDebugLogTimeSeconds = -1000.0f;
+	FTimerHandle MuzzleFlashLightTimerHandle;
 };
