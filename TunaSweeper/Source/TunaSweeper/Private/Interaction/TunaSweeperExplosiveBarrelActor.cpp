@@ -26,16 +26,7 @@ namespace
 {
 	const FName BurningFadeParameter(TEXT("User.Fade"));
 	const FName ExplosionNoiseTag(TEXT("noise.explosion"));
-	const FName FluidEmitPositionParameter(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_SphereSource.Emit Position"));
-	const FName FluidEmitPositionFallbackParameter(TEXT("Emitter.Grid3D_Gas_SphereSource.Emit Position"));
-	const FName FluidSourceOffsetParameter(TEXT("User.SourceOffset"));
 	const FName StageSmokeIntensityParameter(TEXT("User.StageSmokeIntensity"));
-	const FName FluidSourceDensityParameter(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_SphereSource.Density"));
-	const FName FluidSourceTemperatureParameter(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_SphereSource.Temperature"));
-	const FName FluidSourceRadiusParameter(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_SphereSource.Emit Radius"));
-	const FName FluidSourceScaleParameter(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_SphereSource.Non Uniform Scale"));
-	const FName FluidSourceColorParameter(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_SphereSource.Color"));
-	const FName FluidSmokeColorParameter(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_MaterialControls.Smoke Color"));
 
 	FVector SafeExtent(const FVector& Value)
 	{
@@ -50,34 +41,6 @@ namespace
 		State.SmokeScale = SmokeScale;
 		State.SmokeEmitterStrength = SmokeStrength;
 		return State;
-	}
-
-	void ResetBarrelSmokeInternalOffset(UNiagaraComponent* EffectComponent)
-	{
-		if (!EffectComponent)
-		{
-			return;
-		}
-
-		// The duplicated Fluid template keeps an emitter-space source offset. Override it
-		// at the component so the visible source begins exactly at SmokeRelativeLocation.
-		EffectComponent->SetVariableVec3(FluidSourceOffsetParameter, FVector::ZeroVector);
-		EffectComponent->SetVariableVec3(FluidEmitPositionParameter, FVector::ZeroVector);
-		EffectComponent->SetVariableVec3(FluidEmitPositionFallbackParameter, FVector::ZeroVector);
-	}
-
-	void ConfigureDestroyedLoopAsBlackSmoke(UNiagaraComponent* EffectComponent)
-	{
-		if (!EffectComponent)
-		{
-			return;
-		}
-
-		// This only affects the persistent Burning system. The short-lived explosion actor
-		// remains responsible for the bright fireball and flash.
-		EffectComponent->SetVariableFloat(FluidSourceTemperatureParameter, 0.0f);
-		EffectComponent->SetVariableLinearColor(FluidSourceColorParameter, FLinearColor::Black);
-		EffectComponent->SetVariableLinearColor(FluidSmokeColorParameter, FLinearColor(0.003f, 0.003f, 0.003f, 1.0f));
 	}
 
 	float GetConfiguredSmokeStrength(const FTunaSweeperExplosiveBarrelVisualState& State)
@@ -491,7 +454,6 @@ void ATunaSweeperExplosiveBarrelActor::RefreshDamageSmokeEffect()
 	if (UNiagaraSystem* Effect = State.SmokeEffect.LoadSynchronous())
 	{
 		DamageSmokeEffectComponent->SetAsset(Effect);
-		ResetBarrelSmokeInternalOffset(DamageSmokeEffectComponent);
 		SetStageSmokeIntensity(
 			DamageSmokeEffectComponent,
 			GetConfiguredSmokeStrength(State),
@@ -560,14 +522,9 @@ void ATunaSweeperExplosiveBarrelActor::SetStageSmokeIntensity(
 	const float SafeIntensity = FMath::Clamp(Intensity, 0.0f, 1.0f);
 	EffectComponent->SetFloatParameter(StageSmokeIntensityParameter, SafeIntensity);
 	EffectComponent->SetFloatParameter(BurningFadeParameter, SafeIntensity);
-	// These are the source inputs used by the duplicated Grid3D gas systems. Updating them
-	// preserves already-simulated volume while steadily reducing new gas injection.
-	EffectComponent->SetVariableFloat(FluidSourceDensityParameter, 1.45f * SafeStrength * SafeIntensity);
-	EffectComponent->SetVariableFloat(FluidSourceTemperatureParameter, 1.20f * SafeStrength * SafeIntensity);
-	EffectComponent->SetVariableFloat(FluidSourceRadiusParameter, 24.0f * SafeStrength * FMath::Sqrt(SafeIntensity));
-	EffectComponent->SetVariableVec3(
-		FluidSourceScaleParameter,
-		FVector(2.3f, 2.3f, 0.22f) * SafeStrength * FMath::Sqrt(SafeIntensity));
+	// Sprite smoke has no fluid source to inject. These optional user parameters let a
+	// compatible Niagara setup honour the existing stage-transition fade without Grid3D.
+	EffectComponent->SetFloatParameter(BurningFadeParameter, SafeIntensity * SafeStrength);
 }
 
 void ATunaSweeperExplosiveBarrelActor::UpdateStageSmokeCrossFade(float DeltaSeconds)
@@ -621,8 +578,6 @@ void ATunaSweeperExplosiveBarrelActor::RefreshDestroyedLoopEffect()
 	if (UNiagaraSystem* Effect = State.SmokeEffect.LoadSynchronous())
 	{
 		DestroyedLoopEffectComponent->SetAsset(Effect);
-		ResetBarrelSmokeInternalOffset(DestroyedLoopEffectComponent);
-		ConfigureDestroyedLoopAsBlackSmoke(DestroyedLoopEffectComponent);
 		DestroyedLoopEffectComponent->SetFloatParameter(BurningFadeParameter, 1.0f);
 		DestroyedLoopEffectComponent->Activate(true);
 		SetActorTickEnabled(BurningDurationSeconds > 0.0f);

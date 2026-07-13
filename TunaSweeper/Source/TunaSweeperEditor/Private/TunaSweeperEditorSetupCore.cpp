@@ -3103,25 +3103,10 @@ namespace TunaSweeperEditorSetup
 		{
 			return ConfigureExplosiveBarrelSmokeNiagaraSystem(Existing, Strength, bBlackSmokeOnly) ? Existing : nullptr;
 		}
-		UNiagaraSystem* Source = LoadObject<UNiagaraSystem>(nullptr, TEXT("/Game/Effects/NS_ExtractionSmokeSignal.NS_ExtractionSmokeSignal"));
+		UNiagaraSystem* Source = LoadObject<UNiagaraSystem>(nullptr, TEXT("/Game/FX/NS_ExtractionSmoke.NS_ExtractionSmoke"));
 		if (!Source) return nullptr;
 		UNiagaraSystem* Effect = Cast<UNiagaraSystem>(FModuleManager::LoadModuleChecked<FAssetToolsModule>(TEXT("AssetTools")).Get().DuplicateAsset(AssetName, EffectsAssetPath, Source));
 		return Effect && ConfigureExplosiveBarrelSmokeNiagaraSystem(Effect, Strength, bBlackSmokeOnly) ? Effect : nullptr;
-	}
-
-	UNiagaraSystem* EnsureExplosiveBarrelBurstSystem(const FString& AssetName, const TCHAR* SourceSystemPath)
-	{
-		const FString ObjectPath = GetAssetObjectPath(EffectsAssetPath, AssetName);
-		if (UNiagaraSystem* Existing = LoadObject<UNiagaraSystem>(nullptr, *ObjectPath)) return Existing;
-		UNiagaraSystem* Source = LoadObject<UNiagaraSystem>(nullptr, SourceSystemPath);
-		if (!Source)
-		{
-			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Missing Niagara burst source template: %s"), SourceSystemPath);
-			return nullptr;
-		}
-		UNiagaraSystem* Duplicated = Cast<UNiagaraSystem>(
-			FModuleManager::LoadModuleChecked<FAssetToolsModule>(TEXT("AssetTools")).Get().DuplicateAsset(AssetName, EffectsAssetPath, Source));
-		return Duplicated && SaveAsset(Duplicated) ? Duplicated : nullptr;
 	}
 
 	UMaterial* EnsureExplosiveBarrelDamageRadiusMaterial()
@@ -3277,15 +3262,14 @@ namespace TunaSweeperEditorSetup
 	{
 		UNiagaraSystem* LightSmoke = EnsureExplosiveBarrelSmokeEffect(TEXT("NS_ExplosiveBarrel_SmokeLight"), 0.65f);
 		UNiagaraSystem* HeavySmoke = EnsureExplosiveBarrelSmokeEffect(TEXT("NS_ExplosiveBarrel_SmokeHeavy"), 1.05f);
-		UNiagaraSystem* BurningEffect = EnsureExplosiveBarrelSmokeEffect(TEXT("NS_ExplosiveBarrel_Burning"), 1.35f, true);
-		UNiagaraSystem* ExplosionSmokeBurst = EnsureExplosiveBarrelBurstSystem(TEXT("NS_ExplosiveBarrel_ExplosionSmoke"), TEXT("/Game/Effects/NS_ExplosiveBarrel_SmokeHeavy.NS_ExplosiveBarrel_SmokeHeavy"));
+		UNiagaraSystem* BurningEffect = EnsureExplosiveBarrelSmokeEffect(TEXT("NS_ExplosiveBarrel_Burning"), 0.45f, true);
 		UMaterial* DamageRadiusMaterial = EnsureExplosiveBarrelDamageRadiusMaterial();
 		UBlueprint* ExplosiveBarrelBlueprint = EnsureBlueprint(
 			InteractionAssetPath,
 			ExplosiveBarrelAssetName,
 			ATunaSweeperExplosiveBarrelActor::StaticClass());
 
-		return DamageRadiusMaterial && LightSmoke && HeavySmoke && BurningEffect && ExplosionSmokeBurst &&
+		return DamageRadiusMaterial && LightSmoke && HeavySmoke && BurningEffect &&
 			ConfigureExplosiveBarrelBlueprint(ExplosiveBarrelBlueprint);
 	}
 

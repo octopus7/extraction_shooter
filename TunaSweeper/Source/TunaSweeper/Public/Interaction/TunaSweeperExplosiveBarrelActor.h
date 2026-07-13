@@ -46,7 +46,7 @@ struct TUNASWEEPER_API FTunaSweeperExplosiveBarrelVisualState
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Explosive Barrel")
 	FVector SmokeScale = FVector::OneVector;
 
-	/** Multiplier for the persistent gas source. It is also used to reduce the source cleanly during a state transition. */
+	/** Relative density multiplier for this stage's lightweight smoke particle effect. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Explosive Barrel", meta = (ClampMin = "0.01", UIMin = "0.01"))
 	float SmokeEmitterStrength = 1.0f;
 };

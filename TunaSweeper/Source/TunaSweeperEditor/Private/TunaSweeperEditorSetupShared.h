@@ -232,7 +232,7 @@ namespace TunaSweeperEditorSetup
 	const FString WorldProgressInteractionTaskId = TEXT("2026-05-19_CreateWorldProgressObstacleAssetsV1");
 	const FString WarpPointInteractionTaskId = TEXT("2026-05-25_CreateWarpPointInteractionAssetsV1");
 	const FString EnemyVisualMaterialTaskId = TEXT("2026-05-19_CreateEnemyAndContainerVisualMaterialsV3");
-	const FString ExplosiveBarrelTaskId = TEXT("2026-07-12_CreateStagedExplosiveBarrelAssetsV9");
+	const FString ExplosiveBarrelTaskId = TEXT("2026-07-14_ReplaceExplosiveBarrelFluidSmokeWithSpriteParticlesV10");
 	const FString CookableChickenTaskId = TEXT("2026-07-13_CreateCookableChickenBlueprintV1");
 	const FString BreakableAppleCrateTaskId = TEXT("2026-07-07_CreateBreakableAppleCrateAssetsV5");
 	const FString RollingBomberBodyMaterialTaskId = TEXT("2026-05-28_CreateRollingBomberBodyGrayMaterialV1");

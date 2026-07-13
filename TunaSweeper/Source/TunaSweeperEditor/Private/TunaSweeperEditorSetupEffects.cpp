@@ -1013,6 +1013,36 @@ namespace TunaSweeperEditorSetup
 			&& EnsureLocalExplosionDistortionMaterial() != nullptr;
 	}
 
+	bool EnsureEnemyDeathStrawberryEffectAssets()
+	{
+		FString SourcePath = FPaths::ConvertRelativePathToFull(FPaths::Combine(
+			FPaths::ProjectDir(),
+			TEXT(".."),
+			TEXT("GeneratedImages"),
+			TEXT("EnemyDeath"),
+			TEXT("T_EnemyDeathStrawberry.png")));
+		FPaths::CollapseRelativeDirectories(SourcePath);
+
+		UTexture2D* StrawberryTexture = nullptr;
+		if (!ImportWorldTexture(SourcePath, EffectsAssetPath, EnemyDeathStrawberryTextureAssetName, &StrawberryTexture) ||
+			!StrawberryTexture)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Missing enemy death strawberry texture source: %s"), *SourcePath);
+			return false;
+		}
+
+		StrawberryTexture->Modify();
+		StrawberryTexture->CompressionSettings = TC_Default;
+		StrawberryTexture->MipGenSettings = TMGS_NoMipmaps;
+		StrawberryTexture->LODGroup = TEXTUREGROUP_Pixels2D;
+		StrawberryTexture->Filter = TF_Nearest;
+		StrawberryTexture->SRGB = true;
+		StrawberryTexture->UpdateResource();
+		StrawberryTexture->PostEditChange();
+		StrawberryTexture->MarkPackageDirty();
+		return SaveAsset(StrawberryTexture);
+	}
+
 	bool SetNiagaraStoreBoolByName(FNiagaraParameterStore& Store, FName ParameterName, bool bValue)
 	{
 		bool bApplied = false;
@@ -1196,24 +1226,27 @@ namespace TunaSweeperEditorSetup
 		}
 
 		const float SafeStrength = FMath::Clamp(Strength, 0.35f, 2.0f);
+		const FLinearColor BaseColor = bBlackSmokeOnly
+			? FLinearColor(0.015f, 0.015f, 0.015f, 1.0f)
+			: FLinearColor(0.34f, 0.34f, 0.34f, 1.0f);
+		const FLinearColor DarkColor = bBlackSmokeOnly
+			? FLinearColor(0.004f, 0.004f, 0.004f, 1.0f)
+			: FLinearColor(0.18f, 0.18f, 0.18f, 1.0f);
 		System->Modify();
-		FNiagaraUserRedirectionParameterStore& UserParameters = System->GetExposedParameters();
-		SetNiagaraStoreVec3ByName(UserParameters, FName(TEXT("User.SourceOffset")), FVector::ZeroVector);
 		for (FNiagaraEmitterHandle& EmitterHandle : System->GetEmitterHandles())
 		{
 			if (FVersionedNiagaraEmitterData* EmitterData = EmitterHandle.GetEmitterData())
 			{
-				// Persistent barrel smoke must simulate around the component transform.
-				// World-space fluid grids can visually drift away from a moving/placed barrel.
+				// Persistent sprite particles remain in the barrel's local space and use tight bounds.
 				EmitterData->bLocalSpace = true;
 				EmitterData->CalculateBoundsMode = ENiagaraEmitterCalculateBoundMode::Fixed;
-				EmitterData->FixedBounds = FBox(FVector(-180.0f, -180.0f, -20.0f), FVector(180.0f, 180.0f, 440.0f));
+				EmitterData->FixedBounds = FBox(FVector(-140.0f, -140.0f, -20.0f), FVector(140.0f, 140.0f, 320.0f));
 			}
 		}
 
 		int32 AppliedCount = 0;
 		System->ForEachScript(
-			[SafeStrength, bBlackSmokeOnly, &AppliedCount](UNiagaraScript* Script)
+			[SafeStrength, BaseColor, DarkColor, &AppliedCount](UNiagaraScript* Script)
 			{
 				if (!Script) return;
 				FNiagaraParameterStore& Store = Script->RapidIterationParameters;
@@ -1221,22 +1254,17 @@ namespace TunaSweeperEditorSetup
 				{
 					AppliedCount += SetNiagaraStoreFloatByName(Store, FName(Name), Value) ? 1 : 0;
 				};
-				auto ApplyVec3 = [&Store, &AppliedCount](const TCHAR* Name, const FVector& Value)
-				{
-					AppliedCount += SetNiagaraStoreVec3ByName(Store, FName(Name), Value) ? 1 : 0;
-				};
 				auto ApplyColor = [&Store, &AppliedCount](const TCHAR* Name, const FLinearColor& Value)
 				{
 					AppliedCount += SetNiagaraStoreColorByName(Store, FName(Name), Value) ? 1 : 0;
 				};
-				ApplyVec3(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_InitializeEmitter.World Size"), FVector(300.0f, 300.0f, 510.0f));
-				ApplyVec3(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_SphereSource.Non Uniform Scale"), FVector(2.3f, 2.3f, 0.22f) * SafeStrength);
-				ApplyVec3(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_SphereSource.Velocity"), FVector(18.0f, 9.0f, 150.0f + 55.0f * SafeStrength));
-				ApplyFloat(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_SphereSource.Emit Radius"), 24.0f * SafeStrength);
-				ApplyFloat(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_SphereSource.Density"), 1.45f * SafeStrength);
-				ApplyFloat(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_SphereSource.Temperature"), bBlackSmokeOnly ? 0.0f : 1.2f * SafeStrength);
-				ApplyColor(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_SphereSource.Color"), bBlackSmokeOnly ? FLinearColor::Black : FLinearColor(1.0f, 0.055f, 0.006f, 1.0f));
-				ApplyColor(TEXT("Grid3D_Gas_Master_Emitter.Grid3D_Gas_MaterialControls.Smoke Color"), bBlackSmokeOnly ? FLinearColor(0.003f, 0.003f, 0.003f, 1.0f) : FLinearColor(0.012f, 0.004f, 0.002f, 1.0f));
+				ApplyFloat(TEXT("SpawnRate"), 14.0f * SafeStrength);
+				ApplyFloat(TEXT("SpriteSizeMin"), 22.0f * SafeStrength);
+				ApplyFloat(TEXT("SpriteSizeMax"), 58.0f * SafeStrength);
+				ApplyColor(TEXT("Color"), BaseColor);
+				ApplyColor(TEXT("ColorMin"), DarkColor);
+				ApplyColor(TEXT("ColorMax"), BaseColor);
+				ApplyColor(TEXT("Particles.Color"), BaseColor);
 			});
 
 		System->InvalidateCachedData();
@@ -1244,7 +1272,7 @@ namespace TunaSweeperEditorSetup
 		System->PollForCompilationComplete(true);
 		System->PostEditChange();
 		System->MarkPackageDirty();
-		UE_LOG(LogTunaSweeperEditor, Log, TEXT("Configured explosive barrel smoke (%0.2f, black smoke only: %s, %d parameter updates)."), SafeStrength, bBlackSmokeOnly ? TEXT("true") : TEXT("false"), AppliedCount);
+		UE_LOG(LogTunaSweeperEditor, Log, TEXT("Configured lightweight explosive barrel sprite smoke (%0.2f, black smoke only: %s, %d parameter updates)."), SafeStrength, bBlackSmokeOnly ? TEXT("true") : TEXT("false"), AppliedCount);
 		return SaveAsset(System);
 	}
 
