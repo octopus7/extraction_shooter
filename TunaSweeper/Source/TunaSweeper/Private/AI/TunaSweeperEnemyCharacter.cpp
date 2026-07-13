@@ -1042,9 +1042,6 @@ ETunaSweeperEnemyFireResult ATunaSweeperEnemyCharacter::TryFireProjectileAt(AAct
 		return ETunaSweeperEnemyFireResult::Blocked;
 	}
 
-	const FRotator FireRotation = FireDirection.Rotation();
-	SetActorRotation(FRotator(0.0f, FireRotation.Yaw, 0.0f));
-
 	const float ProjectileDamageScale = ProjectileDamage > 0.0f
 		? ProjectileDamage / DefaultProjectileDamageAmount
 		: 0.0f;
@@ -1100,11 +1097,6 @@ bool ATunaSweeperEnemyCharacter::ApplyMeleeDamageTo(AActor* TargetActor)
 	const FVector ToTarget = FVector(TargetLocation.X - ActorLocation.X, TargetLocation.Y - ActorLocation.Y, 0.0f);
 	const FVector AttackDirection = ToTarget.GetSafeNormal();
 	const FVector ResolvedAttackDirection = AttackDirection.IsNearlyZero() ? GetActorForwardVector() : AttackDirection;
-	if (!ResolvedAttackDirection.IsNearlyZero())
-	{
-		SetActorRotation(FRotator(0.0f, ResolvedAttackDirection.Rotation().Yaw, 0.0f));
-	}
-
 	SpawnMeleeSwingEffect(ResolvedAttackDirection);
 
 	const float AppliedDamage = UGameplayStatics::ApplyDamage(

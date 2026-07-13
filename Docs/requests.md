@@ -5284,3 +5284,9 @@
 
 - 현재 C++ 구현과 전투 프로필·스폰 데이터를 다시 대조해 `Docs/enemy_ai_state_flow.md`를 최신화.
 - 대상 상실 시 `Suspicious` 수색으로 전환되는 실제 인지 흐름, 비전투 배회, 원거리 상태별 발사 제한, 재장전 이동, 2인 lease 교대, CrossReposition 안전 규칙, 근접 행동과 현재 팩션 배치를 통합 행동 명세로 정리.
+
+## 2026-07-13 17:45:08 (소요시간: 00:02:43)
+
+- 과거 요청 기록을 검색해 사용량 한도로 남았던 AI 작업이 최종 Unreal Editor 실행뿐임을 확인하고, UE 5.7 Editor에서 `TunaSweeper.uproject`와 `/Game/RaidMap`을 다시 실행.
+- RaidMap 로드와 12.489초 Editor 시작 완료, 자동 PIE의 적 총성·발소리 이벤트 발생을 확인하고 에디터 프로세스를 실행 상태로 유지.
+- Fatal 또는 ensure는 없었으며, AI 변경과 별개인 기존 `InputMode:UIOnly` 비포커스 위젯 오류 3건은 잔여 관찰 사항으로 확인.

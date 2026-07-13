@@ -278,7 +278,7 @@ void ATunaSweeperEnemyAIController::Tick(float DeltaSeconds)
 		{
 			if (bHasDirectTargetSight)
 			{
-				UpdateMeleeCombat(DistanceToTarget, EnemyCharacter);
+				UpdateMeleeCombat(DistanceToTarget, EnemyCharacter, DeltaSeconds);
 				MoveTowardCurrentTarget(DeltaSeconds);
 			}
 		}
@@ -516,7 +516,10 @@ void ATunaSweeperEnemyAIController::UpdateAwarenessState(float DeltaSeconds)
 			static_cast<float>(CurrentTimeSeconds - AwarenessStateStartTimeSeconds));
 		const float SweepAngle = FMath::Sin(ElapsedSeconds * 4.0f) * FMath::Max(0.0f, SearchSweepHalfAngleDegrees);
 		const FVector SearchDirection = DirectionToSuspicion.RotateAngleAxis(SweepAngle, FVector::UpVector);
-		ControlledPawn->SetActorRotation(FRotator(0.0f, SearchDirection.Rotation().Yaw, 0.0f));
+		RotateTowardLocation(
+			ControlledPawn->GetActorLocation() + SearchDirection,
+			DeltaSeconds,
+			0.55f);
 	}
 	if (CurrentTimeSeconds >= AwarenessStateEndTimeSeconds)
 	{
@@ -697,7 +700,10 @@ void ATunaSweeperEnemyAIController::UpdateNonCombatState(float DeltaSeconds)
 		return;
 	}
 
-	ControlledPawn->SetActorRotation(FRotator(0.0f, NonCombatFacingDirection.Rotation().Yaw, 0.0f));
+	RotateTowardLocation(
+		ControlledPawn->GetActorLocation() + NonCombatFacingDirection,
+		DeltaSeconds,
+		0.75f);
 	float InputScale = 1.0f;
 	if (const ACharacter* ControlledCharacter = Cast<ACharacter>(ControlledPawn))
 	{
@@ -725,12 +731,14 @@ void ATunaSweeperEnemyAIController::StartNonCombatWander()
 
 void ATunaSweeperEnemyAIController::UpdateMeleeCombat(
 	float DistanceToTarget,
-	ATunaSweeperEnemyCharacter* EnemyCharacter)
+	ATunaSweeperEnemyCharacter* EnemyCharacter,
+	float DeltaSeconds)
 {
 	if (!EnemyCharacter || !CurrentTargetActor.IsValid())
 	{
 		return;
 	}
+	RotateTowardLocation(CurrentTargetActor->GetActorLocation(), DeltaSeconds);
 	if (bIsClosingDistance)
 	{
 		if (DistanceToTarget <= ResolveApproachStopRange())
@@ -746,6 +754,7 @@ void ATunaSweeperEnemyAIController::UpdateMeleeCombat(
 
 	const double CurrentTimeSeconds = GetWorldTimeSeconds(this);
 	if (!bIsClosingDistance && DistanceToTarget <= ResolveAttackRange() &&
+		IsFacingCurrentTarget() &&
 		CurrentTimeSeconds - LastMeleeAttackTimeSeconds >= ResolveAttackCooldownSeconds() &&
 		EnemyCharacter->AttackTarget(CurrentTargetActor.Get()))
 	{
@@ -768,7 +777,6 @@ void ATunaSweeperEnemyAIController::MoveTowardCurrentTarget(float DeltaSeconds)
 	const FVector Direction = GetPlanarDirection(ControlledPawn->GetActorLocation(), TargetActor->GetActorLocation());
 	if (!Direction.IsNearlyZero())
 	{
-		ControlledPawn->SetActorRotation(FRotator(0.0f, Direction.Rotation().Yaw, 0.0f));
 		ControlledPawn->AddMovementInput(Direction, 1.0f, true);
 	}
 }
@@ -966,11 +974,11 @@ void ATunaSweeperEnemyAIController::TickRangedCombat(
 		LineOfFireBlockedStartTimeSeconds = -1.0;
 		if (CurrentTimeSeconds >= RangedCombatStateEndTimeSeconds)
 		{
-			if (bHasDirectTargetSight && CanSquadMemberStartFiring())
+			if (bHasDirectTargetSight && CanSquadMemberStartFiring() && IsFacingCurrentTarget())
 			{
 				StartFiring(EnemyCharacter);
 			}
-			else
+			else if (!bHasDirectTargetSight || !CanSquadMemberStartFiring())
 			{
 				StartObserve(0.2f);
 			}
@@ -979,6 +987,7 @@ void ATunaSweeperEnemyAIController::TickRangedCombat(
 	}
 
 	case ETunaSweeperRangedCombatState::Firing:
+		FaceTarget(DeltaSeconds, false);
 		TickFiring(EnemyCharacter, TargetActor, CurrentTimeSeconds);
 		break;
 
@@ -1176,6 +1185,11 @@ void ATunaSweeperEnemyAIController::TickFiring(
 	{
 		return;
 	}
+	if (CurrentTimeSeconds >= RangedCombatStateEndTimeSeconds)
+	{
+		FinishFiring(EnemyCharacter, LastShotTimeSeconds);
+		return;
+	}
 	if (FVector::Dist2D(EnemyCharacter->GetActorLocation(), TargetActor->GetActorLocation()) > ResolveAttackRange())
 	{
 		FinishFiring(EnemyCharacter, LastShotTimeSeconds);
@@ -1184,6 +1198,11 @@ void ATunaSweeperEnemyAIController::TickFiring(
 	if (!bHasDirectTargetSight || !CanSquadMemberStartFiring())
 	{
 		FinishFiring(EnemyCharacter, LastShotTimeSeconds);
+		return;
+	}
+	if (!IsFacingCurrentTarget())
+	{
+		NextShotTimeSeconds = CurrentTimeSeconds + 0.02;
 		return;
 	}
 
@@ -2012,18 +2031,65 @@ void ATunaSweeperEnemyAIController::FaceTarget(float DeltaSeconds, bool bSlowly)
 	const FVector FacingLocation = bHasDirectTargetSight
 		? TargetActor->GetActorLocation()
 		: LastKnownTargetLocation;
+	RotateTowardLocation(FacingLocation, DeltaSeconds, bSlowly ? 0.45f : 1.0f);
+}
+
+bool ATunaSweeperEnemyAIController::RotateTowardLocation(
+	const FVector& FacingLocation,
+	float DeltaSeconds,
+	float SpeedScale)
+{
+	APawn* ControlledPawn = GetPawn();
+	if (!ControlledPawn || DeltaSeconds <= 0.0f)
+	{
+		return false;
+	}
 	const FVector Direction = GetPlanarDirection(ControlledPawn->GetActorLocation(), FacingLocation);
 	if (Direction.IsNearlyZero())
 	{
-		return;
+		return true;
 	}
+	const FRotator CurrentRotation = ControlledPawn->GetActorRotation();
 	const FRotator DesiredRotation(0.0f, Direction.Rotation().Yaw, 0.0f);
-	const FRotator NewRotation = FMath::RInterpTo(
-		ControlledPawn->GetActorRotation(),
+	const float TurnSpeed = FMath::Max(
+		1.0f,
+		CombatProfile.TurnSpeedDegreesPerSecond * FMath::Max(0.0f, SpeedScale));
+	const FRotator NewRotation = FMath::RInterpConstantTo(
+		CurrentRotation,
 		DesiredRotation,
 		DeltaSeconds,
-		bSlowly ? 2.0f : 10.0f);
+		TurnSpeed);
 	ControlledPawn->SetActorRotation(FRotator(0.0f, NewRotation.Yaw, 0.0f));
+	return IsFacingLocation(FacingLocation, CombatProfile.AttackFacingToleranceDegrees);
+}
+
+bool ATunaSweeperEnemyAIController::IsFacingLocation(
+	const FVector& FacingLocation,
+	float ToleranceDegrees) const
+{
+	const APawn* ControlledPawn = GetPawn();
+	if (!ControlledPawn)
+	{
+		return false;
+	}
+	const FVector Direction = GetPlanarDirection(ControlledPawn->GetActorLocation(), FacingLocation);
+	if (Direction.IsNearlyZero())
+	{
+		return true;
+	}
+	const float DesiredYaw = Direction.Rotation().Yaw;
+	const float DeltaYaw = FMath::Abs(FMath::FindDeltaAngleDegrees(
+		ControlledPawn->GetActorRotation().Yaw,
+		DesiredYaw));
+	return DeltaYaw <= FMath::Clamp(ToleranceDegrees, 0.0f, 90.0f);
+}
+
+bool ATunaSweeperEnemyAIController::IsFacingCurrentTarget() const
+{
+	const AActor* TargetActor = CurrentTargetActor.Get();
+	return TargetActor && IsFacingLocation(
+		TargetActor->GetActorLocation(),
+		CombatProfile.AttackFacingToleranceDegrees);
 }
 
 ETunaSweeperLineOfFireResult ATunaSweeperEnemyAIController::EvaluateLineOfFire(AActor* TargetActor) const

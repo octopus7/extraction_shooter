@@ -136,13 +136,15 @@ bool FTunaSweeperEnemyCombatDataTest::RunTest(const FString& Parameters)
 		float ShotIntervalMax;
 		float NonFiringMin;
 		float NonFiringMax;
+		float TurnSpeed;
+		float FacingTolerance;
 	};
 
 	const FExpectedRangedProfile ExpectedProfiles[] =
 	{
-		{ &PistolProfile, 1, 1, 0.0f, 0.0f, 2.0f, 2.6f },
-		{ &RifleProfile, 3, 2, 0.18f, 0.23f, 2.6f, 3.5f },
-		{ &EliteProfile, 4, 3, 0.15f, 0.19f, 3.0f, 4.0f }
+		{ &PistolProfile, 1, 1, 0.0f, 0.0f, 2.0f, 2.6f, 220.0f, 8.0f },
+		{ &RifleProfile, 3, 2, 0.18f, 0.23f, 2.6f, 3.5f, 180.0f, 8.0f },
+		{ &EliteProfile, 4, 3, 0.15f, 0.19f, 3.0f, 4.0f, 200.0f, 7.0f }
 	};
 
 	for (const FExpectedRangedProfile& Expected : ExpectedProfiles)
@@ -174,6 +176,16 @@ bool FTunaSweeperEnemyCombatDataTest::RunTest(const FString& Parameters)
 			FString::Printf(TEXT("%s maximum non-firing window"), *ProfileName),
 			Profile.RecoverSecondsMax + Profile.ObserveSecondsMax,
 			Expected.NonFiringMax);
+		TunaSweeperEnemyCombatTests::TestNearlyEqual(
+			*this,
+			FString::Printf(TEXT("%s turn speed"), *ProfileName),
+			Profile.TurnSpeedDegreesPerSecond,
+			Expected.TurnSpeed);
+		TunaSweeperEnemyCombatTests::TestNearlyEqual(
+			*this,
+			FString::Printf(TEXT("%s attack facing tolerance"), *ProfileName),
+			Profile.AttackFacingToleranceDegrees,
+			Expected.FacingTolerance);
 		TestEqual(
 			*FString::Printf(TEXT("%s uses ranged attack mode"), *ProfileName),
 			static_cast<uint8>(Profile.AttackMode),
@@ -236,6 +248,16 @@ bool FTunaSweeperEnemyCombatDataTest::RunTest(const FString& Parameters)
 	TestTrue(
 		TEXT("Melee approach stop is below approach start"),
 		MeleeProfile.MeleeApproachStopRange < MeleeProfile.MeleeApproachStartRange);
+	TunaSweeperEnemyCombatTests::TestNearlyEqual(
+		*this,
+		TEXT("Melee turn speed is capped at 240 degrees per second"),
+		MeleeProfile.TurnSpeedDegreesPerSecond,
+		240.0f);
+	TunaSweeperEnemyCombatTests::TestNearlyEqual(
+		*this,
+		TEXT("Melee attack requires a 14 degree facing cone"),
+		MeleeProfile.AttackFacingToleranceDegrees,
+		14.0f);
 
 	const bool bItemsLoaded = ItemDataSubsystem->LoadItemData(true);
 	TestTrue(TEXT("Item data loads for weapon fire-mode validation"), bItemsLoaded);

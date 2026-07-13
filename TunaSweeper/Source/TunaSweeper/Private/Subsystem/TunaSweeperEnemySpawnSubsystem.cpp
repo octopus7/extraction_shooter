@@ -1037,6 +1037,19 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadEnemyCombatProfileData(bool bForceRelo
 		Profile.AimSecondsMax = FMath::Max(
 			Profile.AimSecondsMin,
 			TunaSweeperEnemySpawn::ReadNonNegativeFloatField(JsonObject, TEXT("aim_seconds_max"), Profile.AimSecondsMax));
+		Profile.TurnSpeedDegreesPerSecond = FMath::Max(
+			1.0f,
+			TunaSweeperEnemySpawn::ReadNonNegativeFloatField(
+				JsonObject,
+				TEXT("turn_speed_degrees_per_second"),
+				Profile.TurnSpeedDegreesPerSecond));
+		Profile.AttackFacingToleranceDegrees = FMath::Clamp(
+			TunaSweeperEnemySpawn::ReadNonNegativeFloatField(
+				JsonObject,
+				TEXT("attack_facing_tolerance_degrees"),
+				Profile.AttackFacingToleranceDegrees),
+			0.0f,
+			90.0f);
 		Profile.FiringShotCount = TunaSweeperEnemySpawn::ReadNonNegativeIntField(JsonObject, TEXT("firing_shot_count"), Profile.FiringShotCount);
 		Profile.OpeningFiringShotCount = TunaSweeperEnemySpawn::ReadNonNegativeIntField(JsonObject, TEXT("opening_firing_shot_count"), Profile.OpeningFiringShotCount);
 		Profile.ShotIntervalSecondsMin = TunaSweeperEnemySpawn::ReadNonNegativeFloatField(JsonObject, TEXT("shot_interval_seconds_min"), Profile.ShotIntervalSecondsMin);

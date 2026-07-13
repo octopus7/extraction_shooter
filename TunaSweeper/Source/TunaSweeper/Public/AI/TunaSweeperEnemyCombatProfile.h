@@ -63,6 +63,14 @@ struct TUNASWEEPER_API FTunaSweeperEnemyCombatProfile
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Enemy Combat", meta = (ClampMin = "0.0"))
 	float AimSecondsMax = 0.5f;
 
+	/** Constant yaw turn-rate cap. Unlike RInterpTo, this never accelerates on large angle changes. */
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Enemy Combat", meta = (ClampMin = "1.0"))
+	float TurnSpeedDegreesPerSecond = 180.0f;
+
+	/** The pawn must face within this yaw angle before a ranged shot or melee hit is allowed. */
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Enemy Combat", meta = (ClampMin = "0.0", ClampMax = "90.0"))
+	float AttackFacingToleranceDegrees = 8.0f;
+
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Enemy Combat", meta = (ClampMin = "0"))
 	int32 FiringShotCount = 3;
 

@@ -178,7 +178,10 @@ private:
 	void ClearCombatTarget();
 	void RecordCombatDebugEntryReason(const TCHAR* EntryReason);
 
-	void UpdateMeleeCombat(float DistanceToTarget, class ATunaSweeperEnemyCharacter* EnemyCharacter);
+	void UpdateMeleeCombat(
+		float DistanceToTarget,
+		class ATunaSweeperEnemyCharacter* EnemyCharacter,
+		float DeltaSeconds);
 	void MoveTowardCurrentTarget(float DeltaSeconds);
 	void TickRangedCombat(float DeltaSeconds, class ATunaSweeperEnemyCharacter* EnemyCharacter, AActor* TargetActor);
 	void EnterRangedState(ETunaSweeperRangedCombatState NewState, float DurationSeconds);
@@ -206,6 +209,9 @@ private:
 	bool RequestCurrentMoveGoal();
 	void HandleMoveFinished(bool bSucceeded);
 	void FaceTarget(float DeltaSeconds, bool bSlowly);
+	bool RotateTowardLocation(const FVector& FacingLocation, float DeltaSeconds, float SpeedScale = 1.0f);
+	bool IsFacingLocation(const FVector& FacingLocation, float ToleranceDegrees) const;
+	bool IsFacingCurrentTarget() const;
 	ETunaSweeperLineOfFireResult EvaluateLineOfFire(AActor* TargetActor) const;
 	bool CanAcquireCombatTarget(AActor* TargetActor, float DistanceToTarget) const;
 	bool HasDirectSightTo(AActor* TargetActor) const;
