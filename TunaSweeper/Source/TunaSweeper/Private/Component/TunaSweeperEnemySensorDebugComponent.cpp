@@ -111,7 +111,8 @@ void UTunaSweeperEnemySensorDebugComponent::TickComponent(
 
 	FVector LocalPlayerDirection;
 	float HearingProgress = 0.0f;
-	if (!Snapshot.bHasDirectTargetSight && TryGetPlayerHearingState(
+	const bool bHasVisualAwareness = Snapshot.bHasDirectTargetSight || Snapshot.bIsCombatEngaged;
+	if (!bHasVisualAwareness && TryGetPlayerHearingState(
 		Snapshot.HearingRange > 0.0f ? Snapshot.HearingRange : HearingOuterRadius,
 		LocalPlayerDirection,
 		HearingProgress))
