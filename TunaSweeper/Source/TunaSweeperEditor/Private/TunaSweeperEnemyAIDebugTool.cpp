@@ -9,6 +9,7 @@
 #include "Framework/Docking/TabManager.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
+#include "Rendering/DrawElements.h"
 #include "Styling/AppStyle.h"
 #include "ToolMenus.h"
 #include "UObject/Package.h"
@@ -17,6 +18,7 @@
 #include "Widgets/Layout/SBox.h"
 #include "Widgets/SBoxPanel.h"
 #include "Widgets/SCompoundWidget.h"
+#include "Widgets/SLeafWidget.h"
 #include "Widgets/SOverlay.h"
 #include "Widgets/Text/STextBlock.h"
 #include "Widgets/Views/SHeaderRow.h"
@@ -52,9 +54,183 @@ namespace TunaSweeperEnemyAIDebug
 	struct FEnemyRow
 	{
 		TWeakObjectPtr<ATunaSweeperEnemyCharacter> Enemy;
+		TWeakObjectPtr<APlayerController> PlayerController;
 		FString EnemyName;
 		double DistanceSquared2D = 0.0;
 		FTunaSweeperEnemyCombatDebugSnapshot Snapshot;
+	};
+
+	class SScreenBearingIndicator final : public SLeafWidget
+	{
+	public:
+		SLATE_BEGIN_ARGS(SScreenBearingIndicator)
+		{
+		}
+			SLATE_ARGUMENT(TWeakObjectPtr<ATunaSweeperEnemyCharacter>, Enemy)
+			SLATE_ARGUMENT(TWeakObjectPtr<APlayerController>, PlayerController)
+		SLATE_END_ARGS()
+
+		void Construct(const FArguments& InArgs)
+		{
+			Enemy = InArgs._Enemy;
+			PlayerController = InArgs._PlayerController;
+			ForceVolatile(true);
+			SetToolTipText(LOCTEXT("ScreenBearingTooltip", "현재 플레이 화면 기준 적 방향"));
+		}
+
+		virtual int32 OnPaint(
+			const FPaintArgs& Args,
+			const FGeometry& AllottedGeometry,
+			const FSlateRect& MyCullingRect,
+			FSlateWindowElementList& OutDrawElements,
+			int32 LayerId,
+			const FWidgetStyle& InWidgetStyle,
+			bool bParentEnabled) const override
+		{
+			FVector2f ScreenDirection;
+			if (!ResolveScreenDirection(ScreenDirection))
+			{
+				return LayerId;
+			}
+
+			const FVector2D LocalSize = AllottedGeometry.GetLocalSize();
+			const float Radius = FMath::Max(
+				0.0f,
+				FMath::Min(static_cast<float>(LocalSize.X), static_cast<float>(LocalSize.Y)) * 0.5f - 1.0f);
+			if (Radius <= KINDA_SMALL_NUMBER)
+			{
+				return LayerId;
+			}
+
+			const FVector2f Center(
+				static_cast<float>(LocalSize.X) * 0.5f,
+				static_cast<float>(LocalSize.Y) * 0.5f);
+			const FVector2f Perpendicular(-ScreenDirection.Y, ScreenDirection.X);
+			const FVector2f Tip = Center + ScreenDirection * Radius;
+			const FVector2f RearCenter = Center - ScreenDirection * Radius * 0.55f;
+			const FVector2f RearLeft = RearCenter + Perpendicular * Radius * 0.43f;
+			const FVector2f RearRight = RearCenter - Perpendicular * Radius * 0.43f;
+
+			const ESlateDrawEffect DrawEffects = ShouldBeEnabled(bParentEnabled)
+				? ESlateDrawEffect::None
+				: ESlateDrawEffect::DisabledEffect;
+			const FLinearColor WidgetTint = InWidgetStyle.GetColorAndOpacityTint();
+			const FLinearColor TipColor =
+				FLinearColor(0.72f, 0.95f, 1.0f, 1.0f) * WidgetTint;
+			const FLinearColor RearColor =
+				FLinearColor(0.10f, 0.48f, 0.90f, 0.90f) * WidgetTint;
+
+			TArray<FSlateVertex> Vertices;
+			Vertices.Reserve(3);
+			auto AddVertex = [&AllottedGeometry, &Vertices](const FVector2f& LocalPoint, const FLinearColor& Color)
+			{
+				Vertices.AddZeroed();
+				FSlateVertex& Vertex = Vertices.Last();
+				Vertex.Position = FVector2f(AllottedGeometry.LocalToAbsolute(
+					FVector2D(LocalPoint.X, LocalPoint.Y)));
+				Vertex.Color = Color.ToFColor(false);
+			};
+			AddVertex(Tip, TipColor);
+			AddVertex(RearLeft, RearColor);
+			AddVertex(RearRight, RearColor);
+
+			const FSlateBrush* WhiteBrush = FAppStyle::GetBrush(TEXT("WhiteBrush"));
+			if (WhiteBrush)
+			{
+				const TArray<SlateIndex> Indices = { 0, 1, 2 };
+				FSlateDrawElement::MakeCustomVerts(
+					OutDrawElements,
+					LayerId,
+					WhiteBrush->GetRenderingResource(),
+					Vertices,
+					Indices,
+					nullptr,
+					0,
+					0,
+					DrawEffects);
+			}
+
+			TArray<FVector2f> OutlinePoints = { Tip, RearLeft, RearRight, Tip };
+			FSlateDrawElement::MakeLines(
+				OutDrawElements,
+				LayerId + 1,
+				AllottedGeometry.ToPaintGeometry(),
+				MoveTemp(OutlinePoints),
+				DrawEffects,
+				FLinearColor(0.72f, 0.95f, 1.0f, 0.95f) * WidgetTint,
+				true,
+				1.0f);
+
+			return LayerId + 2;
+		}
+
+		virtual FVector2D ComputeDesiredSize(float) const override
+		{
+			return FVector2D(16.0f, 16.0f);
+		}
+
+	private:
+		bool ResolveScreenDirection(FVector2f& OutScreenDirection) const
+		{
+			APlayerController* LocalPlayerController = PlayerController.Get();
+			ATunaSweeperEnemyCharacter* LocalEnemy = Enemy.Get();
+			APawn* PlayerPawn = LocalPlayerController ? LocalPlayerController->GetPawn() : nullptr;
+			if (!LocalPlayerController || !LocalEnemy || !PlayerPawn)
+			{
+				return false;
+			}
+
+			const FVector PlayerLocation = PlayerPawn->GetActorLocation();
+			FVector WorldDirection = LocalEnemy->GetActorLocation() - PlayerLocation;
+			WorldDirection.Z = 0.0f;
+			if (!WorldDirection.Normalize())
+			{
+				return false;
+			}
+
+			constexpr float DirectionProbeDistance = 1000.0f;
+			FVector2D PlayerScreenPosition;
+			FVector2D DirectionProbeScreenPosition;
+			if (LocalPlayerController->ProjectWorldLocationToScreen(
+					PlayerLocation,
+					PlayerScreenPosition,
+					true) &&
+				LocalPlayerController->ProjectWorldLocationToScreen(
+					PlayerLocation + WorldDirection * DirectionProbeDistance,
+					DirectionProbeScreenPosition,
+					true))
+			{
+				FVector2D ProjectedDirection = DirectionProbeScreenPosition - PlayerScreenPosition;
+				if (ProjectedDirection.Normalize())
+				{
+					OutScreenDirection = FVector2f(ProjectedDirection);
+					return true;
+				}
+			}
+
+			FVector ViewLocation;
+			FRotator ViewRotation;
+			LocalPlayerController->GetPlayerViewPoint(ViewLocation, ViewRotation);
+			const float ViewYawRadians = FMath::DegreesToRadians(ViewRotation.Yaw);
+			const FVector ViewForward(
+				FMath::Cos(ViewYawRadians),
+				FMath::Sin(ViewYawRadians),
+				0.0f);
+			const FVector ViewRight(-ViewForward.Y, ViewForward.X, 0.0f);
+			FVector2D FallbackDirection(
+				FVector::DotProduct(WorldDirection, ViewRight),
+				-FVector::DotProduct(WorldDirection, ViewForward));
+			if (!FallbackDirection.Normalize())
+			{
+				return false;
+			}
+
+			OutScreenDirection = FVector2f(FallbackDirection);
+			return true;
+		}
+
+		TWeakObjectPtr<ATunaSweeperEnemyCharacter> Enemy;
+		TWeakObjectPtr<APlayerController> PlayerController;
 	};
 
 	class SEnemyRow final : public SMultiColumnTableRow<TSharedPtr<FEnemyRow>>
@@ -90,6 +266,25 @@ namespace TunaSweeperEnemyAIDebug
 			{
 				const double DistanceMeters = FMath::Sqrt(Item->DistanceSquared2D) / 100.0;
 				Text = FText::FromString(FString::Printf(TEXT("%.1f m"), DistanceMeters));
+				return SNew(SHorizontalBox)
+					+ SHorizontalBox::Slot()
+					.AutoWidth()
+					.VAlign(VAlign_Center)
+					.Padding(0.0f, 0.0f, 5.0f, 0.0f)
+					[
+						SNew(SScreenBearingIndicator)
+						.Enemy(Item->Enemy)
+						.PlayerController(Item->PlayerController)
+					]
+					+ SHorizontalBox::Slot()
+					.FillWidth(1.0f)
+					.VAlign(VAlign_Center)
+					[
+						SNew(STextBlock)
+						.Text(Text)
+						.OverflowPolicy(ETextOverflowPolicy::Ellipsis)
+						.ToolTipText(Text)
+					];
 			}
 			else if (ColumnName == EnemyColumnName)
 			{
@@ -186,7 +381,7 @@ namespace TunaSweeperEnemyAIDebug
 							SNew(SHeaderRow)
 							+ SHeaderRow::Column(DistanceColumnName)
 							.DefaultLabel(LOCTEXT("DistanceColumn", "거리"))
-							.FixedWidth(84.0f)
+							.FixedWidth(108.0f)
 							+ SHeaderRow::Column(EnemyColumnName)
 							.DefaultLabel(LOCTEXT("EnemyColumn", "적"))
 							.FillWidth(0.18f)
@@ -250,7 +445,7 @@ namespace TunaSweeperEnemyAIDebug
 					ESearchCase::CaseSensitive);
 		}
 
-		static APawn* FindLocalPlayerPawn(UWorld* World)
+		static APlayerController* FindLocalPlayerController(UWorld* World)
 		{
 			if (!World)
 			{
@@ -264,11 +459,17 @@ namespace TunaSweeperEnemyAIDebug
 				APlayerController* PlayerController = ControllerIt->Get();
 				if (PlayerController && PlayerController->IsLocalController() && PlayerController->GetPawn())
 				{
-					return PlayerController->GetPawn();
+					return PlayerController;
 				}
 			}
 
 			return nullptr;
+		}
+
+		static APawn* FindLocalPlayerPawn(UWorld* World)
+		{
+			APlayerController* PlayerController = FindLocalPlayerController(World);
+			return PlayerController ? PlayerController->GetPawn() : nullptr;
 		}
 
 		static UWorld* ResolvePlayWorld()
@@ -328,7 +529,8 @@ namespace TunaSweeperEnemyAIDebug
 				return;
 			}
 
-			APawn* PlayerPawn = FindLocalPlayerPawn(PlayWorld);
+			APlayerController* PlayerController = FindLocalPlayerController(PlayWorld);
+			APawn* PlayerPawn = PlayerController ? PlayerController->GetPawn() : nullptr;
 			if (!PlayerPawn)
 			{
 				PanelState = EPanelState::WaitingForPlayer;
@@ -351,6 +553,7 @@ namespace TunaSweeperEnemyAIDebug
 
 				TSharedPtr<FEnemyRow> Row = MakeShared<FEnemyRow>();
 				Row->Enemy = Enemy;
+				Row->PlayerController = PlayerController;
 				Row->EnemyName = Enemy->GetActorNameOrLabel();
 				Row->DistanceSquared2D = FVector::DistSquared2D(PlayerLocation, Enemy->GetActorLocation());
 				Row->Snapshot = MoveTemp(Snapshot);
