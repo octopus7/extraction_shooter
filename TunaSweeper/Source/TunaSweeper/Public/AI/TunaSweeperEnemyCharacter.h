@@ -20,6 +20,7 @@ class ATunaSweeperWeapon;
 class ATunaSweeperLootContainerActor;
 class ATunaSweeperMeleeImpactBurstActor;
 class ATunaSweeperMeleeSwingTrailActor;
+class ATunaSweeperEnemyDeathStrawberryBurstActor;
 
 UENUM(BlueprintType)
 enum class ETunaSweeperEnemyFireResult : uint8
@@ -291,6 +292,7 @@ private:
 	void ApplyMeleeKnockbackTo(AActor* TargetActor, const FVector& AttackDirection) const;
 	void SpawnMeleeSwingEffect(const FVector& AttackDirection);
 	void SpawnMeleeImpactBurst(const FVector& HitLocation, const FVector& BurstDirection);
+	void SpawnDeathStrawberryBurst();
 	bool SpawnDeathLootContainer(AActor* DamageCauser);
 	FVector ResolveLootDropLocation(AActor* IgnoredActor) const;
 	void TickFootstepNoise(float DeltaSeconds);

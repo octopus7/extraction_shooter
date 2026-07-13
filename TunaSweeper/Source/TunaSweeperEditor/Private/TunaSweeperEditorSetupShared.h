@@ -239,6 +239,7 @@ namespace TunaSweeperEditorSetup
 	const FString RollingBomberLegMaterialTaskId = TEXT("2026-05-28_CreateRollingBomberLegMetalMaterialV1");
 	const FString RollingBomberChargeCylinderEffectTaskId = TEXT("2026-05-28_CreateRollingBomberChargeCylinderEffectV1");
 	const FString LocalExplosionEffectTaskId = TEXT("2026-05-29_CreateLocalExplosionFlipbookEffectV3");
+	const FString EnemyDeathStrawberryEffectTaskId = TEXT("2026-07-14_CreateEnemyDeathStrawberryParticleAssetsV1");
 	const FString ExtractionSmokeSignalNiagaraSystemTaskId = TEXT("2026-05-29_CreateExtractionSmokeSignalNiagaraSystemV4");
 	const FString LookdevFluidExplosionTaskId = TEXT("2026-06-14_CreateLookdevFluidExplosionNiagaraLevelV1");
 	const FString ProjectileHitEffectAssetTaskId = TEXT("2026-05-28_CreateProjectileHitEffectAssetsV1");
@@ -321,6 +322,7 @@ namespace TunaSweeperEditorSetup
 	const FString LocalExplosionFlipbookMaterialAssetName = TEXT("M_LocalExplosionFlipbook");
 	const FString LocalExplosionDistortionMaterialAssetName = TEXT("M_LocalExplosionDistortion");
 	const FString LocalExplosionSmokeMaterialAssetName = TEXT("M_LocalExplosionSmoke");
+	const FString EnemyDeathStrawberryTextureAssetName = TEXT("T_EnemyDeathStrawberry");
 	const FString ExtractionSmokeSignalNiagaraSystemAssetName = TEXT("NS_ExtractionSmokeSignal");
 	const FString LookdevFluidExplosionNiagaraSystemAssetName = TEXT("NS_LookdevFluidExplosion_HighCost");
 	const FString LookdevExplosionFloorMaterialAssetName = TEXT("M_LookdevExplosionFloor");
@@ -726,6 +728,7 @@ UMaterial* EnsureLocalExplosionFlipbookMaterial(
 		bool bSmokeMaterial);
 UMaterial* EnsureLocalExplosionDistortionMaterial();
 bool EnsureLocalExplosionEffectAssets();
+bool EnsureEnemyDeathStrawberryEffectAssets();
 bool SetNiagaraStoreBoolByName(FNiagaraParameterStore& Store, FName ParameterName, bool bValue);
 bool SetNiagaraStoreFloatByName(FNiagaraParameterStore& Store, FName ParameterName, float Value);
 bool SetNiagaraStoreVec3ByName(FNiagaraParameterStore& Store, FName ParameterName, const FVector& Value);

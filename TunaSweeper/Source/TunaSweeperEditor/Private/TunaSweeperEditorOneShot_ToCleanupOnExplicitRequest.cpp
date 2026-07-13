@@ -304,6 +304,13 @@ namespace TunaSweeperEditorSetup
 				return TunaSweeperEditorSetup::EnsureLocalExplosionEffectAssets();
 			});
 
+		FTunaSweeperEditorRunOnce::Run(
+			TunaSweeperEditorSetup::EnemyDeathStrawberryEffectTaskId,
+			[]()
+			{
+				return TunaSweeperEditorSetup::EnsureEnemyDeathStrawberryEffectAssets();
+			});
+
 		const bool bExtractionSmokeSignalNiagaraTaskRan = FTunaSweeperEditorRunOnce::Run(
 			TunaSweeperEditorSetup::ExtractionSmokeSignalNiagaraSystemTaskId,
 			[]()

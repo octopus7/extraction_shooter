@@ -13,6 +13,7 @@
 #include "Game/TunaSweeperDataValueTypes.h"
 #include "Effect/TunaSweeperMeleeImpactBurstActor.h"
 #include "Effect/TunaSweeperMeleeSwingTrailActor.h"
+#include "Effect/TunaSweeperEnemyDeathStrawberryBurstActor.h"
 #include "Engine/StaticMesh.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "GameFramework/DamageType.h"
@@ -1264,8 +1265,26 @@ void ATunaSweeperEnemyCharacter::HandleDeath(AController* KillerController, AAct
 			}
 		}
 	}
+	SpawnDeathStrawberryBurst();
 	SpawnDeathLootContainer(DamageCauser);
 	Destroy();
+}
+
+void ATunaSweeperEnemyCharacter::SpawnDeathStrawberryBurst()
+{
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		return;
+	}
+
+	FActorSpawnParameters SpawnParameters;
+	SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	World->SpawnActor<ATunaSweeperEnemyDeathStrawberryBurstActor>(
+		ATunaSweeperEnemyDeathStrawberryBurstActor::StaticClass(),
+		GetActorLocation() + FVector(0.0f, 0.0f, 88.0f),
+		FRotator::ZeroRotator,
+		SpawnParameters);
 }
 
 bool ATunaSweeperEnemyCharacter::SpawnDeathLootContainer(AActor* DamageCauser)
