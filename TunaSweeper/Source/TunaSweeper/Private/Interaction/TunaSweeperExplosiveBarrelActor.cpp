@@ -118,6 +118,7 @@ ATunaSweeperExplosiveBarrelActor::ATunaSweeperExplosiveBarrelActor()
 	DamageRadiusDecalMaterial = TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath(TEXT("/Game/Interaction/M_ExplosiveBarrel_DamageRadius.M_ExplosiveBarrel_DamageRadius")));
 	AttachedSmokeMaterial = TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath(TEXT("/Game/Effects/M_LocalExplosionSmoke.M_LocalExplosionSmoke")));
 	ExplosionEffectActorClass = TSoftClassPtr<ATunaSweeperLocalExplosionEffectActor>(FSoftObjectPath(TEXT("/Script/TunaSweeper.TunaSweeperLocalExplosionEffectActor")));
+	ExplosionSound = TSoftObjectPtr<USoundBase>(FSoftObjectPath(TEXT("/Game/Audio/Imported/SW_barrel_explosion.SW_barrel_explosion")));
 }
 
 void ATunaSweeperExplosiveBarrelActor::OnConstruction(const FTransform& Transform)
@@ -712,5 +713,6 @@ void ATunaSweeperExplosiveBarrelActor::SpawnExplosionEffect()
 	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	const FVector Location = GetActorLocation() + GetActorTransform().TransformVectorNoScale(ExplosionEffectOffset);
 	if (ATunaSweeperLocalExplosionEffectActor* Explosion = World->SpawnActor<ATunaSweeperLocalExplosionEffectActor>(Class, Location, GetActorRotation(), Params)) Explosion->ConfigureExplosion(ExplosionVisualRadiusCm, ExplosionDurationSeconds);
+	if (USoundBase* Sound = ExplosionSound.LoadSynchronous()) UGameplayStatics::PlaySoundAtLocation(this, Sound, Location);
 	if (UTunaSweeperNoiseSubsystem* Noise = World->GetSubsystem<UTunaSweeperNoiseSubsystem>()) Noise->ReportNoiseAtLocation(Location, 1.25f, FMath::Clamp(ExplosionVisualRadiusCm * 10.0f, 2000.0f, 4200.0f), ExplosionNoiseTag, this, GetInstigator());
 }

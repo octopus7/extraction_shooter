@@ -11,6 +11,7 @@ class UMaterialInstanceDynamic;
 class UMaterialInterface;
 class UNiagaraComponent;
 class UNiagaraSystem;
+class USoundBase;
 class USceneComponent;
 class UStaticMesh;
 class UStaticMeshComponent;
@@ -149,6 +150,10 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Explosive Barrel|Explosion")
 	TSoftClassPtr<ATunaSweeperLocalExplosionEffectActor> ExplosionEffectActorClass;
+
+	/** One-shot sound played at the explosion origin. Replace per BP or placed instance. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Explosive Barrel|Explosion")
+	TSoftObjectPtr<USoundBase> ExplosionSound;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Explosive Barrel|Explosion")
 	FVector ExplosionEffectOffset = FVector(0.0f, 0.0f, 62.0f);
