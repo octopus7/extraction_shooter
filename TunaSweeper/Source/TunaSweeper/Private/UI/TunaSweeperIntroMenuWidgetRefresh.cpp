@@ -273,8 +273,8 @@ void UTunaSweeperIntroMenuWidget::RefreshDevelopmentSettingsPanel()
 	SetNamedText(
 		FName(TEXT("PiggyBankToggleButtonText")),
 		FText::FromString(bPiggyBankEnabled
-			? TEXT("\uB3FC\uC9C0\uC800\uAE08\uD1B5 \uB044\uAE30")
-			: TEXT("\uB3FC\uC9C0\uC800\uAE08\uD1B5 \uCF1C\uAE30")));
+			? TEXT("\u2713 \uB3FC\uC9C0\uC800\uAE08\uD1B5")
+			: TEXT("\uB3FC\uC9C0\uC800\uAE08\uD1B5")));
 
 	if (PiggyBankToggleButton)
 	{

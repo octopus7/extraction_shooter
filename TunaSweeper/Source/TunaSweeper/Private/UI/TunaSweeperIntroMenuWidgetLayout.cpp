@@ -135,7 +135,7 @@ void UTunaSweeperIntroMenuWidget::EnsurePiggyBankToggleButton()
 		return;
 	}
 
-	PiggyBankToggleButtonText->SetText(FText::FromString(TEXT("\uB3FC\uC9C0\uC800\uAE08\uD1B5 \uCF1C\uAE30")));
+	PiggyBankToggleButtonText->SetText(FText::FromString(TEXT("\uB3FC\uC9C0\uC800\uAE08\uD1B5")));
 	PiggyBankToggleButtonText->SetJustification(ETextJustify::Center);
 	PiggyBankToggleButtonText->SetColorAndOpacity(FSlateColor(FLinearColor(0.90f, 0.96f, 0.96f, 1.0f)));
 	TunaSweeperUIFont::ApplyFont(PiggyBankToggleButtonText, 17, ETunaSweeperUIFontWeight::Bold);
