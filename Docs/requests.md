@@ -5465,3 +5465,17 @@
 
 - 적이 직접 시야로 대상을 인지했거나 전투 인지 상태인 경우 청각 센서 비주얼 메시를 즉시 숨기도록 처리함.
 - `TunaSweeperEditor Win64 Development` Live Coding 빌드를 성공함.
+## 2026-07-14 04:06:20 (소요시간: 00:13:19)
+
+- 독립적인 Windows 전용 UE 5.7 에디터 플러그인 `MP4SoundWaveExtractor`를 추가하고 프로젝트에서 활성화함. `TunaSweeper > Audio > MP4 Sound Wave Extractor`의 모든 메뉴·도구 창 문구는 영어로 제공함.
+- 도구 창에서 MP4 파일을 선택하면 Windows Media Foundation으로 재생 시간을 읽고, 시작·종료 시간, `/Game` 콘텐츠 폴더, Sound Wave 이름을 설정하도록 구현함. FFmpeg를 포함하거나 실행하지 않음.
+- `Preview Selection`은 선택 구간을 임시 WAV로 추출해 Unreal Editor의 미리듣기 장치에서 재생하고, `Stop Preview`는 해당 재생을 중지함. `Create Sound Wave`는 같은 구간을 WAV로 추출·자동 임포트해 저장하고 콘텐츠 브라우저에서 생성 에셋을 선택함.
+- `TunaSweeperEditor Win64 Development` UE 5.7 빌드를 성공했고, Unreal Editor를 열어 `UnrealEditor-MP4SoundWaveExtractorEditor.dll`이 로드된 것을 확인함. 플러그인 설명자 JSON과 `git diff --check`도 통과함.
+## 2026-07-14 04:20:00 (소요시간: 00:16:05)
+
+- `MP4 Sound Wave Extractor`의 숫자형 Start/End 시간 입력 UI를 제거하고, MP4 전체 길이 안에서 A(주황)·B(하늘색) 핸들을 마우스로 드래그하는 범위 선택기로 교체함. 현재 A/B 값과 선택 길이를 슬라이더 아래에 표시함.
+- 선택한 MP4의 16-bit PCM 오디오를 별도 스레드에서 샘플링해 512개 피크 파형을 생성하고, 분석 완료 후 선택 슬라이더에 실제 오디오 파형을 렌더링하도록 구현함. 분석에 실패하거나 진행 중인 경우에도 범위 선택과 추출은 사용할 수 있음.
+- `TunaSweeperEditor Win64 Development` UE 5.7 빌드를 성공했고, Unreal Editor를 다시 열어 `UnrealEditor-MP4SoundWaveExtractorEditor.dll`이 로드된 것과 실제 MP4 미리듣기 WAV 처리를 확인함. `git diff --check`도 통과함.
+## 2026-07-14 04:36:30 (소요시간: 00:03:09)
+
+- MP4 사운드 컨버터 플러그인 작업을 지정한 커밋 메시지 `MP4 사운드 컨버터`로 커밋하고, GitHub에 올릴 수 있도록 플러그인 소스만 포함한 독립 ZIP 파일을 저장할 것.
