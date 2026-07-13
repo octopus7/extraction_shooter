@@ -5494,3 +5494,10 @@
 - `DA_WeaponPresentation_Rifle`의 `EmptyFireSound` 기본값을 `/Game/Audio/Imported/SW_Gun_Trigger`로 연결하고, 기존 발사·재장전 사운드 참조는 유지함.
 - 공탄 클릭은 발사 쿨다운으로 제한하며, 발사체·머즐 플래시·정상 발사음은 생성하지 않음.
 - `TunaSweeperEditor Win64 Development` UE 5.7 빌드를 성공시키고 Unreal Editor를 다시 열었음.
+
+## 2026-07-14 05:11:40 (소요시간: 00:11:20)
+
+- 플레이어 발소리 오디오 참조를 캐릭터의 `FootstepSounds` 배열에서 `UTunaSweeperFootstepPresentationDataAsset`으로 분리하고 `/Game/Characters/Player/AudioVisual/DA_PlayerFootstepPresentation`을 생성함.
+- 발소리 DA에는 향후 재질별 리졸버 확장을 고려해 `BasicFootstepSound` 하나만 노출하고 `/Game/Audio/Imported/SW_Footstep_Basic`을 연결함.
+- `BP_TunaSweeperGameInstance`의 `FootstepPresentationDataAsset`에 해당 DA를 연결하고, 플레이어 캐릭터가 게임 인스턴스를 통해 기본 발소리를 읽도록 변경함. 기존 보행 간격·볼륨·피치·AI 소음 보고와 오디오 누락 시 절차적 대체음은 유지함.
+- `TunaSweeperEditor Win64 Development` UE 5.7 빌드를 성공시키고, 전용 에디터 설정의 DA 생성·직렬화·정상 종료를 검증함.

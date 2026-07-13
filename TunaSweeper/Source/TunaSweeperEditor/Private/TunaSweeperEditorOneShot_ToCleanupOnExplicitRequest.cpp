@@ -16,7 +16,12 @@ namespace TunaSweeperEditorSetup
 
 			if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperFootstepPresentationSetupQuit")))
 			{
-				FPlatformMisc::RequestExit(false);
+				FTSTicker::GetCoreTicker().AddTicker(
+					FTickerDelegate::CreateLambda([](float)
+					{
+						FPlatformMisc::RequestExit(false);
+						return false;
+					}));
 				return;
 			}
 		}
