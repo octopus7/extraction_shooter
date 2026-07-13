@@ -143,6 +143,10 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Explosive Barrel|Durability", meta = (ClampMin = "0.01", UIMin = "0.01", ForceUnits = "s"))
 	float DamageStageAdvanceDelaySeconds = 3.0f;
 
+	/** Delay before a nearby barrel detonates from this barrel's explosion. Chain reactions skip all normal damage stages. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Explosive Barrel|Explosion", meta = (ClampMin = "0.01", UIMin = "0.01", ForceUnits = "s"))
+	float ChainDetonationDelaySeconds = 0.1f;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Explosive Barrel|Explosion")
 	TSoftClassPtr<ATunaSweeperLocalExplosionEffectActor> ExplosionEffectActorClass;
 
@@ -201,6 +205,8 @@ private:
 	void UpdateDamageStageFromHealth();
 	void ScheduleAutomaticDamageStageAdvance();
 	void AdvanceDamageStageAutomatically();
+	void ScheduleChainDetonation();
+	void DetonateFromChainReaction();
 	void ValidateDamageStageAdvanceDelay();
 	int32 GetActiveVisualStateIndex() const;
 	int32 GetSupportedDamageStageCount() const;
@@ -218,9 +224,14 @@ private:
 	float BurningElapsedSeconds = 0.0f;
 
 	FTimerHandle DamageStageAdvanceTimerHandle;
+	FTimerHandle ChainDetonationTimerHandle;
 
 	UPROPERTY(Transient)
 	bool bBarrelDestroyed = false;
+
+	/** Prevents several barrels in the same blast from scheduling this barrel more than once. */
+	UPROPERTY(Transient)
+	bool bChainDetonationPending = false;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UMaterialInstanceDynamic> AttachedSmokeDynamicMaterial;

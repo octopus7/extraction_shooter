@@ -164,6 +164,7 @@ void ATunaSweeperExplosiveBarrelActor::OnConstruction(const FTransform& Transfor
 	ExplosionVisualRadiusCm = FMath::Max(1.0f, ExplosionVisualRadiusCm);
 	ExplosionDamageStrong = FMath::Max(0.0f, ExplosionDamageStrong);
 	ExplosionDamageWeak = FMath::Clamp(ExplosionDamageWeak, 0.0f, ExplosionDamageStrong);
+	ChainDetonationDelaySeconds = FMath::Max(0.01f, ChainDetonationDelaySeconds);
 	ValidateDamageStageAdvanceDelay();
 	DamageStageCount = GetSupportedDamageStageCount();
 	ApplyCollisionDefaults();
@@ -180,7 +181,9 @@ void ATunaSweeperExplosiveBarrelActor::BeginPlay()
 	CurrentHealth = MaxHealth;
 	CurrentDamageStage = 0;
 	bBarrelDestroyed = false;
+	bChainDetonationPending = false;
 	BurningElapsedSeconds = 0.0f;
+	ChainDetonationDelaySeconds = FMath::Max(0.01f, ChainDetonationDelaySeconds);
 	ValidateDamageStageAdvanceDelay();
 	ApplyCollisionDefaults();
 	ApplyVisualState();
@@ -256,10 +259,19 @@ void ATunaSweeperExplosiveBarrelActor::PostEditChangeProperty(FPropertyChangedEv
 
 float ATunaSweeperExplosiveBarrelActor::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	if (bBarrelDestroyed || DamageAmount <= 0.0f)
+	if (bBarrelDestroyed || bChainDetonationPending || DamageAmount <= 0.0f)
 	{
 		return 0.0f;
 	}
+
+	if (const ATunaSweeperExplosiveBarrelActor* ExplodingBarrel = Cast<ATunaSweeperExplosiveBarrelActor>(DamageCauser);
+		ExplodingBarrel && ExplodingBarrel != this)
+	{
+		const float AppliedDamage = FMath::Min(CurrentHealth, DamageAmount);
+		ScheduleChainDetonation();
+		return AppliedDamage;
+	}
+
 	const float AppliedDamage = FMath::Min(CurrentHealth, DamageAmount);
 	CurrentHealth = FMath::Max(0.0f, CurrentHealth - DamageAmount);
 	if (CurrentHealth <= 0.0f)
@@ -398,6 +410,32 @@ void ATunaSweeperExplosiveBarrelActor::AdvanceDamageStageAutomatically()
 		ScheduleAutomaticDamageStageAdvance();
 		return;
 	}
+	DestroyBarrel();
+}
+
+void ATunaSweeperExplosiveBarrelActor::ScheduleChainDetonation()
+{
+	UWorld* World = GetWorld();
+	if (!World || bBarrelDestroyed || bChainDetonationPending)
+	{
+		return;
+	}
+
+	bChainDetonationPending = true;
+	CurrentHealth = 0.0f;
+	World->GetTimerManager().ClearTimer(DamageStageAdvanceTimerHandle);
+	ChainDetonationDelaySeconds = FMath::Max(0.01f, ChainDetonationDelaySeconds);
+	World->GetTimerManager().SetTimer(
+		ChainDetonationTimerHandle,
+		this,
+		&ATunaSweeperExplosiveBarrelActor::DetonateFromChainReaction,
+		ChainDetonationDelaySeconds,
+		false);
+}
+
+void ATunaSweeperExplosiveBarrelActor::DetonateFromChainReaction()
+{
+	bChainDetonationPending = false;
 	DestroyBarrel();
 }
 
@@ -668,7 +706,7 @@ void ATunaSweeperExplosiveBarrelActor::ApplyExplosionDamage()
 	{
 		AActor* Target = Result.GetActor();
 		if (!IsValid(Target) || Target == this || DamagedActors.Contains(Target)) continue;
-		if (!Target->IsA<APawn>() && !Target->IsA<ATunaSweeperCookableChickenActor>()) continue;
+		if (!Target->IsA<APawn>() && !Target->IsA<ATunaSweeperCookableChickenActor>() && !Target->IsA<ATunaSweeperExplosiveBarrelActor>()) continue;
 		DamagedActors.Add(Target);
 		const float Distance = FVector::Distance(GetActorLocation(), Target->GetActorLocation());
 		const float Alpha = FMath::Clamp((Distance - ExplosionDamageInnerRadiusCm) / FMath::Max(1.0f, ExplosionVisualRadiusCm - ExplosionDamageInnerRadiusCm), 0.0f, 1.0f);
@@ -694,7 +732,9 @@ void ATunaSweeperExplosiveBarrelActor::DestroyBarrel()
 	if (bBarrelDestroyed) return;
 	BeginStageSmokeCrossFade();
 	bBarrelDestroyed = true;
+	bChainDetonationPending = false;
 	GetWorldTimerManager().ClearTimer(DamageStageAdvanceTimerHandle);
+	GetWorldTimerManager().ClearTimer(ChainDetonationTimerHandle);
 	CurrentDamageStage = GetSupportedDamageStageCount();
 	BurningElapsedSeconds = 0.0f;
 	SpawnExplosionEffect();
