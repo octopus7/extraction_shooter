@@ -5319,3 +5319,9 @@
 - 두 버튼의 라벨은 버튼 전체 기준 중앙 정렬로 유지되어 선택 상태 전환 또는 라벨 길이 변화에도 수평 위치가 흔들리지 않도록 구성함.
 - `TunaSweeper Win64 Development` 빌드는 성공했으며, `TunaSweeperEditor Win64 Development`는 실행 중인 Live Coding 잠금으로 링크가 차단됨.
 - Live Coding 세션을 종료한 뒤 `TunaSweeperEditor Win64 Development -NoHotReload` 전체 DLL 링크 빌드를 성공했고, 새 DLL을 로드하도록 `TunaSweeper.uproject`를 Unreal Editor에서 다시 열었음.
+
+## 2026-07-14 01:25:00 (소요시간: 00:04:27)
+
+- 전투 디버그와 돼지저금통 토글의 체크박스를 76px 고정 전용 영역으로 분리하고, 두 라벨을 해당 영역 다음부터 왼쪽 정렬해 동일한 X 시작 위치를 갖도록 수정함.
+- 체크박스와 라벨은 서로 다른 `UHorizontalBox` 슬롯을 사용하므로, 라벨이 체크박스 영역을 침범하거나 선택 상태에 따라 위치가 변하지 않음.
+- `TunaSweeper Win64 Development` 빌드를 성공함.

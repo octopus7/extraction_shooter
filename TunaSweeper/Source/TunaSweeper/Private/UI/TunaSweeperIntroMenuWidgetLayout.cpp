@@ -188,34 +188,50 @@ void UTunaSweeperIntroMenuWidget::EnsureDevelopmentToggleButtonContent(
 	}
 
 	UTextBlock* LabelText = Cast<UTextBlock>(WidgetTree->FindWidget(LabelWidgetName));
-	UOverlay* Content = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass());
+	constexpr float CheckBoxLaneWidth = 76.0f;
+	constexpr float CheckBoxLeftPadding = 26.0f;
+
+	UHorizontalBox* Content = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass());
+	USizeBox* IndicatorLane = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass());
+	UHorizontalBox* IndicatorLaneContent = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass());
 	USizeBox* IndicatorBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass());
 	UCheckBox* Indicator = WidgetTree->ConstructWidget<UCheckBox>(
 		UCheckBox::StaticClass(),
 		IndicatorWidgetName);
-	if (!LabelText || !Content || !IndicatorBox || !Indicator)
+	if (!LabelText || !Content || !IndicatorLane || !IndicatorLaneContent || !IndicatorBox || !Indicator)
 	{
 		return;
 	}
 
 	LabelText->RemoveFromParent();
-	LabelText->SetJustification(ETextJustify::Center);
-	if (UOverlaySlot* LabelSlot = Content->AddChildToOverlay(LabelText))
-	{
-		LabelSlot->SetHorizontalAlignment(HAlign_Fill);
-		LabelSlot->SetVerticalAlignment(VAlign_Center);
-	}
-
+	LabelText->SetJustification(ETextJustify::Left);
+	IndicatorLane->SetWidthOverride(CheckBoxLaneWidth);
 	IndicatorBox->SetWidthOverride(26.0f);
 	IndicatorBox->SetHeightOverride(26.0f);
 	Indicator->SetIsChecked(false);
 	Indicator->SetVisibility(ESlateVisibility::HitTestInvisible);
 	IndicatorBox->SetContent(Indicator);
-	if (UOverlaySlot* IndicatorSlot = Content->AddChildToOverlay(IndicatorBox))
+	if (UHorizontalBoxSlot* IndicatorSlot = IndicatorLaneContent->AddChildToHorizontalBox(IndicatorBox))
 	{
 		IndicatorSlot->SetHorizontalAlignment(HAlign_Left);
 		IndicatorSlot->SetVerticalAlignment(VAlign_Center);
-		IndicatorSlot->SetPadding(FMargin(26.0f, 0.0f, 0.0f, 0.0f));
+		IndicatorSlot->SetPadding(FMargin(CheckBoxLeftPadding, 0.0f, 0.0f, 0.0f));
+		IndicatorSlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
+	}
+	IndicatorLane->SetContent(IndicatorLaneContent);
+
+	if (UHorizontalBoxSlot* IndicatorLaneSlot = Content->AddChildToHorizontalBox(IndicatorLane))
+	{
+		IndicatorLaneSlot->SetHorizontalAlignment(HAlign_Fill);
+		IndicatorLaneSlot->SetVerticalAlignment(VAlign_Center);
+		IndicatorLaneSlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
+	}
+
+	if (UHorizontalBoxSlot* LabelSlot = Content->AddChildToHorizontalBox(LabelText))
+	{
+		LabelSlot->SetHorizontalAlignment(HAlign_Left);
+		LabelSlot->SetVerticalAlignment(VAlign_Center);
+		LabelSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
 	}
 
 	ToggleButton->SetContent(Content);
