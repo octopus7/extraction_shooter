@@ -5264,3 +5264,10 @@
 - 탄피 배출 위치용 `ShellEjectionSocket`도 추가하고, 탄피 액터가 해당 소켓에서 생성되도록 변경.
 - `TunaSweeper.CreateShellCasingAssets` 실행이 탄피 자산 준비와 라이플 소켓 생성·저장을 함께 수행하도록 확장.
 - UE 5.7 `TunaSweeperEditor Win64 Development` 전체 빌드 성공 및 Unreal Editor 정상 실행 확인.
+
+## 2026-07-13 15:10:04 (소요시간: 00:33:42)
+
+- `MiyakovCharacterSystem`에 스켈레톤별 본 바인딩을 담는 `UQuadrupedRigProfile`과 네 개의 2관절 다리를 한 번에 처리하는 `Quadruped Robot IK` 런타임/AnimGraph 노드를 구현.
+- `/Game/Characters/Robot/QRP_RobotDog_2Joint` 프리셋을 생성하고 기존 `/Game/Characters/Robot/ABP_RobotDog`의 네 Two Bone IK를 단일 노드로 교체했으며, 변경 전 AnimBP는 `ABP_RobotDog_LegacyTwoBone`로 백업.
+- 발 스텝 시작/종료점을 래치해 보간을 안정화하고 CharacterMovement → QuadrupedComponent → SkeletalMesh 틱 순서, 시작 시 지면 스냅, 잘못된 다리 수 및 본 체인 검증을 추가.
+- UE 5.7 `TunaSweeperEditor Win64 Development`와 `TunaSweeper Win64 Development` 빌드, 프리셋 반복 실행, AnimBP 컴파일·저장·정상 종료를 검증하고 사용 문서를 작성한 뒤 Unreal Editor를 실행.

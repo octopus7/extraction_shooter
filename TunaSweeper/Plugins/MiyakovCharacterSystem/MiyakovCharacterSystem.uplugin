@@ -6,7 +6,7 @@
 	"Description": "Minimal runtime quadruped character support migrated from Miyakov.",
 	"Category": "Gameplay",
 	"CreatedBy": "Miyakov Team",
-	"CanContainContent": false,
+	"CanContainContent": true,
 	"IsBetaVersion": false,
 	"IsExperimentalVersion": false,
 	"Installed": false,
@@ -14,7 +14,12 @@
 		{
 			"Name": "MiyakovCharacterSystem",
 			"Type": "Runtime",
-			"LoadingPhase": "Default"
+			"LoadingPhase": "PreDefault"
+		},
+		{
+			"Name": "MiyakovCharacterSystemEditor",
+			"Type": "UncookedOnly",
+			"LoadingPhase": "PreDefault"
 		}
 	]
 }

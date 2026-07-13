@@ -26,6 +26,13 @@ struct FQuadrupedLegData
 	UPROPERTY(BlueprintReadOnly, Category = "Leg")
 	FVector TargetPosition = FVector::ZeroVector;
 
+	// Latched positions for a stable swing trajectory.
+	UPROPERTY(BlueprintReadOnly, Category = "Leg")
+	FVector StepStartPosition = FVector::ZeroVector;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Leg")
+	FVector StepEndPosition = FVector::ZeroVector;
+
 	// Step interpolation progress (0 to 1)
 	UPROPERTY(BlueprintReadOnly, Category = "Leg")
 	float StepProgress = 0.0f;
@@ -55,6 +62,7 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	virtual void OnRegister() override;
+	virtual void OnUnregister() override;
 
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
@@ -98,6 +106,7 @@ public:
 
 private:
 	void UpdateLegTargets();
+	void ResetLegPositionsToTargets();
 	void ProcessGaitCycle(float DeltaTime);
 	void InterpolateLegPositions(float DeltaTime);
 	bool IsGaitGroupStepping(int32 GroupIndex) const;

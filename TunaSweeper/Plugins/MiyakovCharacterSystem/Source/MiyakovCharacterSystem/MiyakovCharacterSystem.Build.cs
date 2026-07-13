@@ -12,7 +12,10 @@ public class MiyakovCharacterSystem : ModuleRules
 		{
 			"Core",
 			"CoreUObject",
-			"Engine"
+			"Engine",
+			"AnimGraphRuntime"
 		});
+
+		PrivateDependencyModuleNames.Add("AnimationCore");
 	}
 }

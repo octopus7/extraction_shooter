@@ -2,12 +2,17 @@
 
 #include "QuadrupedComponent.h"
 
+#include "Components/SkeletalMeshComponent.h"
 #include "DrawDebugHelpers.h"
 #include "Engine/World.h"
+#include "GameFramework/Character.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "QuadrupedCharacter.h"
 
 UQuadrupedComponent::UQuadrupedComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.TickGroup = TG_PrePhysics;
 }
 
 void UQuadrupedComponent::BeginPlay()
@@ -16,14 +21,17 @@ void UQuadrupedComponent::BeginPlay()
 
 	if (Legs.Num() == 0)
 	{
-		InitializeDefaultLegs();
+		if (const AQuadrupedCharacter* QuadrupedCharacter = Cast<AQuadrupedCharacter>(GetOwner()))
+		{
+			InitializeDefaultLegs(QuadrupedCharacter->BodyLength, QuadrupedCharacter->BodyWidth);
+		}
+		else
+		{
+			InitializeDefaultLegs();
+		}
 	}
 
-	for (int32 i = 0; i < Legs.Num(); i++)
-	{
-		Legs[i].CurrentPosition = CalculateIdealFootPosition(i);
-		Legs[i].TargetPosition = Legs[i].CurrentPosition;
-	}
+	ResetLegPositionsToTargets();
 }
 
 void UQuadrupedComponent::OnRegister()
@@ -32,7 +40,29 @@ void UQuadrupedComponent::OnRegister()
 
 	if (Legs.Num() == 0)
 	{
-		InitializeDefaultLegs();
+		if (const AQuadrupedCharacter* QuadrupedCharacter = Cast<AQuadrupedCharacter>(GetOwner()))
+		{
+			InitializeDefaultLegs(QuadrupedCharacter->BodyLength, QuadrupedCharacter->BodyWidth);
+		}
+		else
+		{
+			InitializeDefaultLegs();
+		}
+	}
+
+	if (ACharacter* Character = Cast<ACharacter>(GetOwner()))
+	{
+		if (UCharacterMovementComponent* Movement = Character->GetCharacterMovement())
+		{
+			AddTickPrerequisiteComponent(Movement);
+		}
+
+	}
+
+	TInlineComponentArray<USkeletalMeshComponent*> SkeletalMeshes(GetOwner());
+	for (USkeletalMeshComponent* SkeletalMesh : SkeletalMeshes)
+	{
+		SkeletalMesh->AddTickPrerequisiteComponent(this);
 	}
 
 #if WITH_EDITOR
@@ -41,6 +71,26 @@ void UQuadrupedComponent::OnRegister()
 		RefreshLegsInEditor();
 	}
 #endif
+}
+
+void UQuadrupedComponent::OnUnregister()
+{
+	if (ACharacter* Character = Cast<ACharacter>(GetOwner()))
+	{
+		if (UCharacterMovementComponent* Movement = Character->GetCharacterMovement())
+		{
+			RemoveTickPrerequisiteComponent(Movement);
+		}
+
+	}
+
+	TInlineComponentArray<USkeletalMeshComponent*> SkeletalMeshes(GetOwner());
+	for (USkeletalMeshComponent* SkeletalMesh : SkeletalMeshes)
+	{
+		SkeletalMesh->RemoveTickPrerequisiteComponent(this);
+	}
+
+	Super::OnUnregister();
 }
 
 #if WITH_EDITOR
@@ -53,11 +103,7 @@ void UQuadrupedComponent::PostEditChangeProperty(FPropertyChangedEvent& Property
 
 void UQuadrupedComponent::RefreshLegsInEditor()
 {
-	UpdateLegTargets();
-	for (int32 i = 0; i < Legs.Num(); i++)
-	{
-		Legs[i].CurrentPosition = Legs[i].TargetPosition;
-	}
+	ResetLegPositionsToTargets();
 }
 #endif
 
@@ -96,6 +142,24 @@ void UQuadrupedComponent::InitializeDefaultLegs(float BodyLength, float BodyWidt
 
 	Legs[3].DefaultOffset = FVector(-BodyLength, BodyWidth, 0.0f);
 	Legs[3].GaitGroup = 0;
+
+	if (GetOwner())
+	{
+		ResetLegPositionsToTargets();
+	}
+}
+
+void UQuadrupedComponent::ResetLegPositionsToTargets()
+{
+	UpdateLegTargets();
+	for (FQuadrupedLegData& Leg : Legs)
+	{
+		Leg.CurrentPosition = Leg.TargetPosition;
+		Leg.StepStartPosition = Leg.CurrentPosition;
+		Leg.StepEndPosition = Leg.CurrentPosition;
+		Leg.StepProgress = 0.0f;
+		Leg.bIsMoving = false;
+	}
 }
 
 FVector UQuadrupedComponent::GetFootPosition(int32 LegIndex) const
@@ -147,7 +211,7 @@ void UQuadrupedComponent::ProcessGaitCycle(float DeltaTime)
 			continue;
 		}
 
-		const float Distance = FVector::Dist2D(Leg.CurrentPosition, Leg.TargetPosition);
+		const float Distance = FVector::Dist(Leg.CurrentPosition, Leg.TargetPosition);
 
 		if (Distance > StepThreshold)
 		{
@@ -159,9 +223,11 @@ void UQuadrupedComponent::ProcessGaitCycle(float DeltaTime)
 				{
 					if (GroupLeg.GaitGroup == Leg.GaitGroup)
 					{
-						const float GroupDistance = FVector::Dist2D(GroupLeg.CurrentPosition, GroupLeg.TargetPosition);
+						const float GroupDistance = FVector::Dist(GroupLeg.CurrentPosition, GroupLeg.TargetPosition);
 						if (GroupDistance > StepThreshold * 0.5f)
 						{
+							GroupLeg.StepStartPosition = GroupLeg.CurrentPosition;
+							GroupLeg.StepEndPosition = GroupLeg.TargetPosition;
 							GroupLeg.bIsMoving = true;
 							GroupLeg.StepProgress = 0.0f;
 						}
@@ -185,14 +251,14 @@ void UQuadrupedComponent::InterpolateLegPositions(float DeltaTime)
 
 			if (Leg.StepProgress >= 1.0f)
 			{
-				Leg.CurrentPosition = Leg.TargetPosition;
+				Leg.CurrentPosition = Leg.StepEndPosition;
 				Leg.StepProgress = 0.0f;
 				Leg.bIsMoving = false;
 			}
 			else
 			{
-				const FVector StartPos = Leg.CurrentPosition;
-				Leg.CurrentPosition = FMath::Lerp(StartPos, Leg.TargetPosition, FMath::Clamp(Leg.StepProgress, 0.0f, 1.0f));
+				const float Alpha = FMath::Clamp(Leg.StepProgress, 0.0f, 1.0f);
+				Leg.CurrentPosition = FMath::Lerp(Leg.StepStartPosition, Leg.StepEndPosition, Alpha);
 			}
 		}
 	}

@@ -20,6 +20,7 @@ public class TunaSweeperEditor : ModuleRules
 			"UnrealEd",
 			"AssetTools",
 			"AssetRegistry",
+			"AnimGraph",
 			"AudioEditor",
 			"Chaos",
 			"DataflowCore",
@@ -41,7 +42,9 @@ public class TunaSweeperEditor : ModuleRules
 			"SlateCore",
 			"StaticMeshDescription",
 			"ToolMenus",
-			"TunaSweeper"
+			"TunaSweeper",
+			"MiyakovCharacterSystem",
+			"MiyakovCharacterSystemEditor"
 		});
 	}
 }

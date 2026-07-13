@@ -1,4 +1,8 @@
 #include "TunaSweeperEditorSetupShared.h"
+#include "TunaSweeperQuadrupedPresetSetup.h"
+
+#include "Containers/Ticker.h"
+#include "Editor.h"
 
 DEFINE_LOG_CATEGORY(LogTunaSweeperEditor);
 
@@ -12,6 +16,15 @@ public:
 			return;
 		}
 
+		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperQuadrupedAnimSetup")))
+		{
+			QuadrupedSetupInitializedHandle = FEditorDelegates::OnEditorInitialized.AddRaw(
+				this,
+				&FTunaSweeperEditorModule::OnEditorInitializedForQuadrupedSetup);
+			return;
+		}
+
+		bStandardEditorSetupStarted = true;
 		TunaSweeperMapCaptureActorDetails::Register();
 
 		FString UiTextureImportSource;
@@ -78,7 +91,22 @@ public:
 
 	virtual void ShutdownModule() override
 	{
-		TunaSweeperMapCaptureActorDetails::Unregister();
+		if (QuadrupedSetupInitializedHandle.IsValid())
+		{
+			FEditorDelegates::OnEditorInitialized.Remove(QuadrupedSetupInitializedHandle);
+			QuadrupedSetupInitializedHandle.Reset();
+		}
+
+		if (QuadrupedSetupTickerHandle.IsValid())
+		{
+			FTSTicker::GetCoreTicker().RemoveTicker(QuadrupedSetupTickerHandle);
+			QuadrupedSetupTickerHandle.Reset();
+		}
+
+		if (bStandardEditorSetupStarted)
+		{
+			TunaSweeperMapCaptureActorDetails::Unregister();
+		}
 
 		if (LevelOpenTool)
 		{
@@ -100,6 +128,31 @@ public:
 	}
 
 private:
+	void OnEditorInitializedForQuadrupedSetup(double)
+	{
+		FEditorDelegates::OnEditorInitialized.Remove(QuadrupedSetupInitializedHandle);
+		QuadrupedSetupInitializedHandle.Reset();
+		QuadrupedSetupTickerHandle = FTSTicker::GetCoreTicker().AddTicker(
+			FTickerDelegate::CreateRaw(this, &FTunaSweeperEditorModule::RunQuadrupedSetupAfterInitialization));
+	}
+
+	bool RunQuadrupedSetupAfterInitialization(float)
+	{
+		QuadrupedSetupTickerHandle.Reset();
+		const bool bSucceeded = TunaSweeperQuadrupedPresetSetup::Run();
+		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperQuadrupedAnimSetupQuit")))
+		{
+			FPlatformMisc::RequestExitWithStatus(
+				false,
+				bSucceeded ? 0 : 1,
+				TEXT("TunaSweeperQuadrupedAnimSetup"));
+		}
+		return false;
+	}
+
+	bool bStandardEditorSetupStarted = false;
+	FDelegateHandle QuadrupedSetupInitializedHandle;
+	FTSTicker::FDelegateHandle QuadrupedSetupTickerHandle;
 	TUniquePtr<FTunaSweeperLevelOpenTool> LevelOpenTool;
 	TUniquePtr<FTunaSweeperFMSoundTool> FMSoundTool;
 	TUniquePtr<FTunaSweeperGlbTextureExtractorTool> GlbTextureExtractorTool;

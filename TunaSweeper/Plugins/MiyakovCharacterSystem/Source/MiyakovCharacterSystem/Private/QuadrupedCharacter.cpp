@@ -49,8 +49,6 @@ void AQuadrupedCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	ReinitializeLegs();
-
 	if (UCharacterMovementComponent* Movement = GetCharacterMovement())
 	{
 		Movement->MaxWalkSpeed = WalkSpeed;
