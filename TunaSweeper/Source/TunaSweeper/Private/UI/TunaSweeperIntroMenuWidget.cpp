@@ -34,6 +34,14 @@ void UTunaSweeperIntroMenuWidget::NativeConstruct()
 	EnsureDifficultySelectionPanel();
 	HideLegacyDeleteHoldGaugeWidgets();
 	EnsurePiggyBankToggleButton();
+	EnsureDevelopmentToggleButtonContent(
+		EnemyCombatDebugToggleButton,
+		FName(TEXT("EnemyCombatDebugToggleButtonText")),
+		FName(TEXT("EnemyCombatDebugToggleIndicator")));
+	EnsureDevelopmentToggleButtonContent(
+		PiggyBankToggleButton,
+		FName(TEXT("PiggyBankToggleButtonText")),
+		FName(TEXT("PiggyBankToggleIndicator")));
 
 	if (StartButton)
 	{

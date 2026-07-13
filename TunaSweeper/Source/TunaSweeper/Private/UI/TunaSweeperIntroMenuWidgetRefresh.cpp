@@ -260,11 +260,21 @@ void UTunaSweeperIntroMenuWidget::RefreshDevelopmentSettingsPanel()
 				: FText::FromString(TEXT("\uAEBC\uC9D0"))));
 	}
 
+	auto SetToggleIndicatorState = [this](FName IndicatorWidgetName, bool bChecked)
+	{
+		if (WidgetTree)
+		{
+			if (UCheckBox* Indicator = Cast<UCheckBox>(WidgetTree->FindWidget(IndicatorWidgetName)))
+			{
+				Indicator->SetIsChecked(bChecked);
+			}
+		}
+	};
+
 	SetNamedText(
 		FName(TEXT("EnemyCombatDebugToggleButtonText")),
-		FText::FromString(bEnemyCombatDebugEnabled
-			? TEXT("✓ 적 전투 디버그 표시")
-			: TEXT("적 전투 디버그 표시")));
+		FText::FromString(TEXT("\uC801 \uC804\uD22C \uB514\uBC84\uADF8 \uD45C\uC2DC")));
+	SetToggleIndicatorState(FName(TEXT("EnemyCombatDebugToggleIndicator")), bEnemyCombatDebugEnabled);
 
 	if (EnemyCombatDebugToggleButton)
 	{
@@ -272,9 +282,8 @@ void UTunaSweeperIntroMenuWidget::RefreshDevelopmentSettingsPanel()
 	}
 	SetNamedText(
 		FName(TEXT("PiggyBankToggleButtonText")),
-		FText::FromString(bPiggyBankEnabled
-			? TEXT("\u2713 \uB3FC\uC9C0\uC800\uAE08\uD1B5")
-			: TEXT("\uB3FC\uC9C0\uC800\uAE08\uD1B5")));
+		FText::FromString(TEXT("\uB3FC\uC9C0\uC800\uAE08\uD1B5")));
+	SetToggleIndicatorState(FName(TEXT("PiggyBankToggleIndicator")), bPiggyBankEnabled);
 
 	if (PiggyBankToggleButton)
 	{

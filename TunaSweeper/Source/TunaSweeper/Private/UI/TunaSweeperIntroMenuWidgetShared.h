@@ -7,6 +7,7 @@
 #include "Components/Button.h"
 #include "Components/CanvasPanel.h"
 #include "Components/CanvasPanelSlot.h"
+#include "Components/CheckBox.h"
 #include "DLSSLibrary.h"
 #include "Components/HorizontalBox.h"
 #include "Components/HorizontalBoxSlot.h"

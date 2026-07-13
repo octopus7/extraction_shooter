@@ -491,6 +491,10 @@ private:
 	void EnsureTitleWindParticleOverlay();
 	void ApplyTitleMenuButtonContentLayout();
 	void EnsurePiggyBankToggleButton();
+	void EnsureDevelopmentToggleButtonContent(
+		UButton* ToggleButton,
+		FName LabelWidgetName,
+		FName IndicatorWidgetName);
 	UWidget* BuildTitleMenuButtonContent(
 		const FText& Icon,
 		UTextBlock* LabelText,

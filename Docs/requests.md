@@ -5302,3 +5302,20 @@
 - 개발 탭에서 돼지저금통 토글이 보이지 않는 화면을 확인하고, 기존 전투 디버그 섹션의 버튼 스택에 항목이 추가되는 런타임 UI 구조를 재확인함.
 - 돼지저금통 버튼의 `켜기`·`끄기` 문구를 제거하고, 선택 시에만 전투 디버그와 동일하게 `✓ 돼지저금통`으로 표시하도록 수정함.
 - 패키지와 같은 `TunaSweeper Win64 Development` 게임 타깃 빌드를 성공함.
+
+## 2026-07-14 01:01:00 (소요시간: 00:03:45)
+
+- 코드 변경 없이 `TunaSweeper Win64 Development` 게임 타깃을 다시 빌드해 성공함.
+- 새 게임 실행 파일은 종료 코드 3으로 바로 종료되어, `TunaSweeper.uproject`를 Unreal Editor로 다시 열고 실행 상태를 확인함.
+
+## 2026-07-14 01:10:00 (소요시간: 00:02:11)
+
+- PIE가 이전 `UnrealEditor-TunaSweeper` 모듈을 사용해 돼지저금통 버튼을 계속 `켜기`·`끄기`로 표시한 상태를 확인함.
+- `TunaSweeperEditor Win64 Development` 타깃을 성공적으로 다시 빌드하고, 새 DLL을 로드하도록 Unreal Editor에서 프로젝트를 다시 열었음.
+
+## 2026-07-14 01:14:00 (소요시간: 00:03:50)
+
+- 전투 디버그와 돼지저금통의 선택 표시를 텍스트 앞 문자에서 분리해, 버튼 왼쪽 26px 위치의 비상호작용 `UCheckBox` 인디케이터로 구현함.
+- 두 버튼의 라벨은 버튼 전체 기준 중앙 정렬로 유지되어 선택 상태 전환 또는 라벨 길이 변화에도 수평 위치가 흔들리지 않도록 구성함.
+- `TunaSweeper Win64 Development` 빌드는 성공했으며, `TunaSweeperEditor Win64 Development`는 실행 중인 Live Coding 잠금으로 링크가 차단됨.
+- Live Coding 세션을 종료한 뒤 `TunaSweeperEditor Win64 Development -NoHotReload` 전체 DLL 링크 빌드를 성공했고, 새 DLL을 로드하도록 `TunaSweeper.uproject`를 Unreal Editor에서 다시 열었음.

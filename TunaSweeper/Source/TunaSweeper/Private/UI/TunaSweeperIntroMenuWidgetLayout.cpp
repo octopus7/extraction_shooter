@@ -177,6 +177,50 @@ void UTunaSweeperIntroMenuWidget::EnsurePiggyBankToggleButton()
 	}
 }
 
+void UTunaSweeperIntroMenuWidget::EnsureDevelopmentToggleButtonContent(
+	UButton* ToggleButton,
+	FName LabelWidgetName,
+	FName IndicatorWidgetName)
+{
+	if (!WidgetTree || !ToggleButton || WidgetTree->FindWidget(IndicatorWidgetName))
+	{
+		return;
+	}
+
+	UTextBlock* LabelText = Cast<UTextBlock>(WidgetTree->FindWidget(LabelWidgetName));
+	UOverlay* Content = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass());
+	USizeBox* IndicatorBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass());
+	UCheckBox* Indicator = WidgetTree->ConstructWidget<UCheckBox>(
+		UCheckBox::StaticClass(),
+		IndicatorWidgetName);
+	if (!LabelText || !Content || !IndicatorBox || !Indicator)
+	{
+		return;
+	}
+
+	LabelText->RemoveFromParent();
+	LabelText->SetJustification(ETextJustify::Center);
+	if (UOverlaySlot* LabelSlot = Content->AddChildToOverlay(LabelText))
+	{
+		LabelSlot->SetHorizontalAlignment(HAlign_Fill);
+		LabelSlot->SetVerticalAlignment(VAlign_Center);
+	}
+
+	IndicatorBox->SetWidthOverride(26.0f);
+	IndicatorBox->SetHeightOverride(26.0f);
+	Indicator->SetIsChecked(false);
+	Indicator->SetVisibility(ESlateVisibility::HitTestInvisible);
+	IndicatorBox->SetContent(Indicator);
+	if (UOverlaySlot* IndicatorSlot = Content->AddChildToOverlay(IndicatorBox))
+	{
+		IndicatorSlot->SetHorizontalAlignment(HAlign_Left);
+		IndicatorSlot->SetVerticalAlignment(VAlign_Center);
+		IndicatorSlot->SetPadding(FMargin(26.0f, 0.0f, 0.0f, 0.0f));
+	}
+
+	ToggleButton->SetContent(Content);
+}
+
 UWidget* UTunaSweeperIntroMenuWidget::BuildTitleMenuButtonContent(
 	const FText& Icon,
 	UTextBlock* LabelText,
