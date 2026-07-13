@@ -77,6 +77,16 @@ internal sealed class SimulationWorld
 		});
 	}
 
+	public float ResolveTrackingRange(EnemyAgent enemy)
+	{
+		return MathF.Max(0.0f, enemy.Kind switch
+		{
+			EnemyKind.Melee => Tuning.Enemy.MeleeTrackingRange,
+			EnemyKind.Flanker => Tuning.Enemy.FlankerTrackingRange,
+			_ => Tuning.Enemy.RangedTrackingRange
+		});
+	}
+
 	public void RemoveObstacleAt(Vector2 worldPoint)
 	{
 		for (int i = Enemies.Count - 1; i >= 0; --i)
@@ -186,7 +196,7 @@ internal sealed class SimulationWorld
 		float distance = toPlayer.Length();
 		Vector2 directionToPlayer = distance > 0.001f ? toPlayer / distance : enemy.Facing;
 
-		float trackingRange = MathF.Max(0.0f, Tuning.Enemy.TrackingRange);
+		float trackingRange = ResolveTrackingRange(enemy);
 		float disengageRange = MathF.Max(trackingRange, Tuning.Enemy.CombatDisengageRange);
 		if (!enemy.IsCombatEngaged)
 		{
@@ -308,7 +318,7 @@ internal sealed class SimulationWorld
 		{
 			if (!enemy.HasAppliedAttack && enemy.StateTimer <= Tuning.Enemy.MeleeWindupSeconds * 0.45f)
 			{
-				if (distance <= Tuning.Enemy.MeleeAttackRange + Tuning.Player.Radius)
+				if (distance <= EnemyCombatConstants.MeleeAttackRange)
 				{
 					Player.Health = MathF.Max(0.0f, Player.Health - Tuning.Enemy.MeleeDamage);
 					Telemetry.RecordPlayerDamage(Tuning.Enemy.MeleeDamage);
@@ -332,7 +342,7 @@ internal sealed class SimulationWorld
 			return;
 		}
 
-		if (distance <= Tuning.Enemy.MeleeAttackRange + Tuning.Player.Radius)
+		if (distance <= EnemyCombatConstants.MeleeAttackRange)
 		{
 			enemy.State = EnemyState.AttackCommit;
 			enemy.StateTimer = Tuning.Enemy.MeleeWindupSeconds;
@@ -391,7 +401,7 @@ internal sealed class SimulationWorld
 					return;
 				}
 
-				TryRangedAttack(enemy, directionToPlayer, distance, lineOfFire);
+				TryRangedAttack(enemy, directionToPlayer, lineOfFire);
 				if (enemy.StateTimer > 0.0f)
 				{
 					return;
@@ -443,7 +453,7 @@ internal sealed class SimulationWorld
 		}
 
 		StartRangedHold(enemy, distance);
-		TryRangedAttack(enemy, directionToPlayer, distance, lineOfFire);
+		TryRangedAttack(enemy, directionToPlayer, lineOfFire);
 	}
 
 	private void UpdateFlankerEnemy(EnemyAgent enemy, Vector2 directionToPlayer, float distance, float dt)
@@ -482,7 +492,7 @@ internal sealed class SimulationWorld
 					return;
 				}
 
-				TryFlankerAttack(enemy, directionToPlayer, distance, lineOfFire);
+				TryFlankerAttack(enemy, directionToPlayer, lineOfFire);
 				MoveFlankerCombatState(enemy, dt);
 				return;
 
@@ -508,7 +518,7 @@ internal sealed class SimulationWorld
 					return;
 				}
 
-				TryFlankerAttack(enemy, directionToPlayer, distance, lineOfFire);
+				TryFlankerAttack(enemy, directionToPlayer, lineOfFire);
 				if (enemy.StateTimer <= 0.0f)
 				{
 					StartFlankerOrbit(enemy, directionToPlayer, distance);
@@ -521,7 +531,7 @@ internal sealed class SimulationWorld
 				if (lineOfFire != LineOfFire.BlockedByIndestructible)
 				{
 					StartFlankerOrbit(enemy, directionToPlayer, distance);
-					TryFlankerAttack(enemy, directionToPlayer, distance, lineOfFire);
+					TryFlankerAttack(enemy, directionToPlayer, lineOfFire);
 					return;
 				}
 
@@ -560,7 +570,7 @@ internal sealed class SimulationWorld
 		}
 
 		StartFlankerOrbit(enemy, directionToPlayer, distance);
-		TryFlankerAttack(enemy, directionToPlayer, distance, lineOfFire);
+		TryFlankerAttack(enemy, directionToPlayer, lineOfFire);
 	}
 
 	private void MoveRangedCombatState(EnemyAgent enemy, float dt)
@@ -714,23 +724,19 @@ internal sealed class SimulationWorld
 		enemy.IsOpeningHold = false;
 	}
 
-	private void TryRangedAttack(EnemyAgent enemy, Vector2 directionToPlayer, float distance, LineOfFire lineOfFire)
+	private void TryRangedAttack(EnemyAgent enemy, Vector2 directionToPlayer, LineOfFire lineOfFire)
 	{
-		float attackRange = enemy.IsOpeningHold
-			? MathF.Max(Tuning.Enemy.RangedAttackRange, Tuning.Enemy.TrackingRange)
-			: Tuning.Enemy.RangedAttackRange;
-		TryEnemyProjectileAttack(enemy, directionToPlayer, distance, lineOfFire, attackRange, Tuning.Enemy.RangedProjectileSpeed, Tuning.Enemy.RangedProjectileDamage, Tuning.Enemy.RangedFireCooldown);
+		TryEnemyProjectileAttack(enemy, directionToPlayer, lineOfFire, Tuning.Enemy.RangedProjectileSpeed, Tuning.Enemy.RangedProjectileDamage, Tuning.Enemy.RangedFireCooldown);
 	}
 
-	private void TryFlankerAttack(EnemyAgent enemy, Vector2 directionToPlayer, float distance, LineOfFire lineOfFire)
+	private void TryFlankerAttack(EnemyAgent enemy, Vector2 directionToPlayer, LineOfFire lineOfFire)
 	{
-		TryEnemyProjectileAttack(enemy, directionToPlayer, distance, lineOfFire, Tuning.Enemy.FlankerAttackRange, Tuning.Enemy.FlankerProjectileSpeed, Tuning.Enemy.FlankerProjectileDamage, Tuning.Enemy.FlankerFireCooldown);
+		TryEnemyProjectileAttack(enemy, directionToPlayer, lineOfFire, Tuning.Enemy.FlankerProjectileSpeed, Tuning.Enemy.FlankerProjectileDamage, Tuning.Enemy.FlankerFireCooldown);
 	}
 
-	private void TryEnemyProjectileAttack(EnemyAgent enemy, Vector2 directionToPlayer, float distance, LineOfFire lineOfFire, float attackRange, float projectileSpeed, float damage, float fireCooldown)
+	private void TryEnemyProjectileAttack(EnemyAgent enemy, Vector2 directionToPlayer, LineOfFire lineOfFire, float projectileSpeed, float damage, float fireCooldown)
 	{
-		if (distance <= attackRange &&
-			lineOfFire != LineOfFire.BlockedByIndestructible &&
+		if (lineOfFire != LineOfFire.BlockedByIndestructible &&
 			enemy.FireCooldownRemaining <= 0.0f)
 		{
 			float spreadRadians = DegreesToRadians(lineOfFire == LineOfFire.BlockedByDestructible ? 1.0f : 3.0f);

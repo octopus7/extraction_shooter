@@ -18,6 +18,11 @@ enum class ETunaSweeperEnemyCombatRole : uint8
 	Melee UMETA(DisplayName = "Melee")
 };
 
+namespace TunaSweeperEnemyCombatConstants
+{
+	inline constexpr float MeleeAttackRange = 150.0f;
+}
+
 /**
  * Data-driven enemy combat rhythm and movement tuning.
  * EnemyCombatProfiles.json is the source of truth for these values.
@@ -40,10 +45,7 @@ struct TUNASWEEPER_API FTunaSweeperEnemyCombatProfile
 	float MovementSpeed = 340.0f;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Enemy Combat", meta = (ClampMin = "0.0"))
-	float TrackingRange = 2300.0f;
-
-	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Enemy Combat", meta = (ClampMin = "0.0"))
-	float AttackRange = 1450.0f;
+	float TrackingRange = 1150.0f;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Enemy Combat", meta = (ClampMin = "0.0"))
 	float PreferredRangeMin = 650.0f;
@@ -70,6 +72,10 @@ struct TUNASWEEPER_API FTunaSweeperEnemyCombatProfile
 	/** The pawn must face within this yaw angle before a ranged shot or melee hit is allowed. */
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Enemy Combat", meta = (ClampMin = "0.0", ClampMax = "90.0"))
 	float AttackFacingToleranceDegrees = 8.0f;
+
+	/** Multiplies the weapon's current spread half-angle for enemy shots only. */
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Enemy Combat", meta = (ClampMin = "0.01"))
+	float WeaponSpreadMultiplier = 1.0f;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Enemy Combat", meta = (ClampMin = "0"))
 	int32 FiringShotCount = 3;

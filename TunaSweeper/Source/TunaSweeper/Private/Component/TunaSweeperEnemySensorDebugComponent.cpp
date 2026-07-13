@@ -111,7 +111,7 @@ void UTunaSweeperEnemySensorDebugComponent::TickComponent(
 
 	FVector LocalPlayerDirection;
 	float HearingProgress = 0.0f;
-	if (TryGetPlayerHearingState(
+	if (!Snapshot.bHasDirectTargetSight && TryGetPlayerHearingState(
 		Snapshot.HearingRange > 0.0f ? Snapshot.HearingRange : HearingOuterRadius,
 		LocalPlayerDirection,
 		HearingProgress))
@@ -254,10 +254,10 @@ void UTunaSweeperEnemySensorDebugComponent::BuildHearingMesh(
 		PlayerDistance
 	};
 	const FLinearColor FillColors[] = {
-		FLinearColor(0.82f, 0.08f, 0.0f, 0.015f),
-		FLinearColor(0.96f, 0.12f, 0.0f, 0.09f),
-		FLinearColor(0.98f, 0.10f, 0.0f, 0.26f),
-		FLinearColor(0.92f, 0.055f, 0.0f, 0.48f)
+		FLinearColor(0.98f, 0.20f, 0.01f, 0.015f),
+		FLinearColor(1.0f, 0.34f, 0.015f, 0.09f),
+		FLinearColor(1.0f, 0.47f, 0.03f, 0.26f),
+		FLinearColor(1.0f, 0.58f, 0.06f, 0.48f)
 	};
 	for (int32 RingIndex = 0; RingIndex < UE_ARRAY_COUNT(FillRadii); ++RingIndex)
 	{
@@ -294,11 +294,11 @@ void UTunaSweeperEnemySensorDebugComponent::BuildHearingMesh(
 		const FVector ArcDirection = Direction.RotateAngleAxis(FMath::RadiansToDegrees(AngleRadians), FVector::UpVector);
 		AddVertex(
 			ArcDirection * (PlayerDistance - TunaSweeperEnemySensorDebug::HearingArcHalfWidth) + FVector(0.0f, 0.0f, TunaSweeperEnemySensorDebug::MeshHeight + 2.0f),
-			FLinearColor(1.0f, 0.24f, 0.015f, 0.72f),
+			FLinearColor(1.0f, 0.45f, 0.02f, 0.72f),
 			FVector2D(Alpha, 0.0f));
 		AddVertex(
 			ArcDirection * (PlayerDistance + TunaSweeperEnemySensorDebug::HearingArcHalfWidth) + FVector(0.0f, 0.0f, TunaSweeperEnemySensorDebug::MeshHeight + 2.0f),
-			FLinearColor(1.0f, 0.62f, 0.10f, 0.96f),
+			FLinearColor(1.0f, 0.72f, 0.12f, 0.96f),
 			FVector2D(Alpha, 1.0f));
 	}
 	for (int32 SegmentIndex = 0; SegmentIndex < TunaSweeperEnemySensorDebug::HearingArcSegments; ++SegmentIndex)
@@ -330,8 +330,8 @@ void UTunaSweeperEnemySensorDebugComponent::BuildHearingMesh(
 		GaugeEnd,
 		TunaSweeperEnemySensorDebug::HearingGaugeHalfHeight,
 		TunaSweeperEnemySensorDebug::MeshHeight + 3.0f,
-		FLinearColor(0.14f, 0.04f, 0.01f, 0.52f),
-		FLinearColor(0.20f, 0.05f, 0.01f, 0.52f));
+		FLinearColor(0.18f, 0.07f, 0.01f, 0.52f),
+		FLinearColor(0.26f, 0.10f, 0.01f, 0.52f));
 	HearingMesh->CreateMeshSection_LinearColor(1, Vertices, Triangles, Normals, UVs, Colors, Tangents, false);
 
 	Vertices.Reset(); Triangles.Reset(); Normals.Reset(); UVs.Reset(); Colors.Reset(); Tangents.Reset();
@@ -341,16 +341,16 @@ void UTunaSweeperEnemySensorDebugComponent::BuildHearingMesh(
 		GaugeFillEnd,
 		TunaSweeperEnemySensorDebug::HearingGaugeHalfHeight - 4.0f,
 		TunaSweeperEnemySensorDebug::MeshHeight + 4.0f,
-		FLinearColor(1.0f, 0.22f, 0.01f, 0.78f),
-		FLinearColor(1.0f, 0.82f, 0.20f, 0.98f));
+		FLinearColor(1.0f, 0.38f, 0.015f, 0.78f),
+		FLinearColor(1.0f, 0.76f, 0.16f, 0.98f));
 	const FVector ThresholdCenter = GaugeStart + Tangent * (TunaSweeperEnemySensorDebug::HearingGaugeWidth * 0.5f);
 	AddQuad(
 		ThresholdCenter - Tangent * TunaSweeperEnemySensorDebug::HearingGaugeTickHalfWidth,
 		ThresholdCenter + Tangent * TunaSweeperEnemySensorDebug::HearingGaugeTickHalfWidth,
 		TunaSweeperEnemySensorDebug::HearingGaugeHalfHeight + 6.0f,
 		TunaSweeperEnemySensorDebug::MeshHeight + 5.0f,
-		FLinearColor(1.0f, 0.94f, 0.58f, 1.0f),
-		FLinearColor(1.0f, 0.94f, 0.58f, 1.0f));
+		FLinearColor(1.0f, 0.84f, 0.38f, 1.0f),
+		FLinearColor(1.0f, 0.84f, 0.38f, 1.0f));
 	HearingMesh->CreateMeshSection_LinearColor(2, Vertices, Triangles, Normals, UVs, Colors, Tangents, false);
 }
 
@@ -381,7 +381,7 @@ void UTunaSweeperEnemySensorDebugComponent::BuildVisionMesh(float VisionRange, f
 		return Vertices.Num() - 1;
 	};
 
-	const int32 CenterIndex = AddVertex(FVector(0.0f, 0.0f, TunaSweeperEnemySensorDebug::MeshHeight + 1.0f), FLinearColor(1.0f, 0.27f, 0.02f, 0.11f), FVector2D(0.5f, 0.0f));
+	const int32 CenterIndex = AddVertex(FVector(0.0f, 0.0f, TunaSweeperEnemySensorDebug::MeshHeight + 1.0f), FLinearColor(0.02f, 0.85f, 0.96f, 0.11f), FVector2D(0.5f, 0.0f));
 	TArray<int32> OuterIndices;
 	OuterIndices.Reserve(SegmentCount + 1);
 	for (int32 SegmentIndex = 0; SegmentIndex <= SegmentCount; ++SegmentIndex)
@@ -390,7 +390,7 @@ void UTunaSweeperEnemySensorDebugComponent::BuildVisionMesh(float VisionRange, f
 		const float Angle = FMath::Lerp(-HalfAngle, HalfAngle, Alpha);
 		OuterIndices.Add(AddVertex(
 			FVector(FMath::Cos(Angle) * Range, FMath::Sin(Angle) * Range, TunaSweeperEnemySensorDebug::MeshHeight + 1.0f),
-			FLinearColor(1.0f, 0.27f, 0.02f, 0.01f), FVector2D(Alpha, 1.0f)));
+			FLinearColor(0.02f, 0.85f, 0.96f, 0.01f), FVector2D(Alpha, 1.0f)));
 	}
 	for (int32 SegmentIndex = 0; SegmentIndex < SegmentCount; ++SegmentIndex)
 	{
@@ -405,8 +405,8 @@ void UTunaSweeperEnemySensorDebugComponent::BuildVisionMesh(float VisionRange, f
 		const float Alpha = static_cast<float>(SegmentIndex) / SegmentCount;
 		const float Angle = FMath::Lerp(-HalfAngle, HalfAngle, Alpha);
 		const FVector Direction(FMath::Cos(Angle), FMath::Sin(Angle), 0.0f);
-		AddVertex(Direction * (Range - ArcHalfWidth) + FVector(0.0f, 0.0f, TunaSweeperEnemySensorDebug::MeshHeight + 2.0f), FLinearColor(1.0f, 0.47f, 0.08f, 0.72f), FVector2D(Alpha, 0.0f));
-		AddVertex(Direction * (Range + ArcHalfWidth) + FVector(0.0f, 0.0f, TunaSweeperEnemySensorDebug::MeshHeight + 2.0f), FLinearColor(1.0f, 0.47f, 0.08f, 0.0f), FVector2D(Alpha, 1.0f));
+		AddVertex(Direction * (Range - ArcHalfWidth) + FVector(0.0f, 0.0f, TunaSweeperEnemySensorDebug::MeshHeight + 2.0f), FLinearColor(0.06f, 0.95f, 1.0f, 0.72f), FVector2D(Alpha, 0.0f));
+		AddVertex(Direction * (Range + ArcHalfWidth) + FVector(0.0f, 0.0f, TunaSweeperEnemySensorDebug::MeshHeight + 2.0f), FLinearColor(0.06f, 0.95f, 1.0f, 0.0f), FVector2D(Alpha, 1.0f));
 	}
 	for (int32 SegmentIndex = 0; SegmentIndex < SegmentCount; ++SegmentIndex)
 	{

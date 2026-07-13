@@ -1,5 +1,6 @@
 #include "TunaSweeperIntroMenuWidgetShared.h"
 #include "Player/TunaSweeperPlayerController.h"
+#include "UI/TunaSweeperDebugDisplaySettings.h"
 
 void UTunaSweeperIntroMenuWidget::HandleStartClicked()
 {
@@ -188,6 +189,18 @@ void UTunaSweeperIntroMenuWidget::HandleEnemyCombatDebugToggleClicked()
 		PlayerController->SetEnemyCombatDebugEnabled(bEnabled);
 	}
 
+	RefreshDevelopmentSettingsPanel();
+}
+
+void UTunaSweeperIntroMenuWidget::HandleDebugDisplayLanguageKoreanClicked()
+{
+	TunaSweeperDebugDisplaySettings::SetDebugDisplayLanguage(ETunaSweeperDebugDisplayLanguage::Korean);
+	RefreshDevelopmentSettingsPanel();
+}
+
+void UTunaSweeperIntroMenuWidget::HandleDebugDisplayLanguageEnglishClicked()
+{
+	TunaSweeperDebugDisplaySettings::SetDebugDisplayLanguage(ETunaSweeperDebugDisplayLanguage::English);
 	RefreshDevelopmentSettingsPanel();
 }
 

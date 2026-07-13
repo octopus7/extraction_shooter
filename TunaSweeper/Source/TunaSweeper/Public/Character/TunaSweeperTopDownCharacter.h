@@ -20,6 +20,8 @@ class UInputMappingContext;
 class UMediaSource;
 class UPrimitiveComponent;
 class USceneComponent;
+class USoundBase;
+class USoundWaveProcedural;
 class USpringArmComponent;
 class UStaticMeshComponent;
 class UTunaSweeperStaminaGaugeWidget;
@@ -327,6 +329,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat|Spread Recoil", meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float WeaponRecoilScreenPixelsPerDegree = 5.0f;
 
+	/** Applied only while firing without ADS. Aimed spread remains unchanged. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat|Spread Recoil", meta = (ClampMin = "1.0", UIMin = "1.0"))
+	float HipFireSpreadMultiplier = 5.0f;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat|Melee", meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float MeleeAttackDamage = 8.0f;
 
@@ -350,6 +356,45 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement")
 	float BaseWalkSpeed = 600.0f;
+
+	/** Optional authored variants. When empty, a short procedural placeholder thump is used. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement|Footstep|Audio")
+	TArray<TSoftObjectPtr<USoundBase>> FootstepSounds;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement|Footstep|Audio", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float FootstepSoundVolumeMultiplier = 0.55f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement|Footstep|Audio")
+	FVector2D FootstepSoundPitchRange = FVector2D(0.92f, 1.08f);
+
+	/** A new interval is rolled after every walking footstep. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement|Footstep|Timing")
+	FVector2D WalkFootstepIntervalSeconds = FVector2D(0.42f, 0.58f);
+
+	/** A new interval is rolled after every sprinting footstep. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement|Footstep|Timing")
+	FVector2D SprintFootstepIntervalSeconds = FVector2D(0.26f, 0.36f);
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement|Footstep|Timing", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float FootstepMinimumSpeed = 80.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement|Footstep|Noise", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float WalkFootstepNoiseLoudness = 0.45f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement|Footstep|Noise", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float WalkFootstepNoiseMaxRange = 1600.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement|Footstep|Noise", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float SprintFootstepNoiseLoudness = 0.8f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement|Footstep|Noise", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float SprintFootstepNoiseMaxRange = 2200.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement|Footstep|Noise")
+	FName PlayerFootstepNoiseTag = FName(TEXT("noise.player_footstep"));
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement|Footstep|Noise")
+	FVector FootstepSourceOffset = FVector(0.0f, 0.0f, -80.0f);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement|Sprint", meta = (ClampMin = "1.0", UIMin = "1.0"))
 	float SprintSpeedMultiplier = 1.55f;
@@ -500,6 +545,11 @@ private:
 	void UpdateSprintAndStamina(float DeltaSeconds);
 	void UpdateRoll(float DeltaSeconds);
 	void UpdateMovementSpeed();
+	void UpdatePlayerFootsteps(float DeltaSeconds);
+	void EmitPlayerFootstep(bool bSprintFootstep);
+	void PlayPlayerFootstepSound(const FVector& SoundLocation, bool bSprintFootstep);
+	USoundWaveProcedural* CreateProceduralFootstepSound(bool bSprintFootstep);
+	float RollNextFootstepInterval(bool bSprintFootstep) const;
 	void UpdateStaminaGauge(float DeltaSeconds);
 	void UpdateWeaponSpreadRecoil(float DeltaSeconds);
 	void ResetWeaponSpreadRecoil();
@@ -528,6 +578,9 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<ATunaSweeperWeapon> EquippedWeapon;
+
+	UPROPERTY(Transient)
+	TArray<TObjectPtr<USoundWaveProcedural>> ActiveProceduralFootstepSounds;
 
 	FTimerHandle FireTimerHandle;
 	FTimerHandle ReloadTimerHandle;
@@ -571,6 +624,8 @@ private:
 	float CameraHitReactionElapsed = 0.0f;
 	float CameraHitReactionScale = 1.0f;
 	float CameraHitReactionPhase = 0.0f;
+	float FootstepElapsedSeconds = 0.0f;
+	float NextFootstepIntervalSeconds = 0.0f;
 	FVector RollDirection = FVector::ForwardVector;
 	FVector2D WeaponRecoilOffsetDegrees = FVector2D::ZeroVector;
 	FVector2D CurrentMoveInput = FVector2D::ZeroVector;
@@ -602,6 +657,8 @@ private:
 	bool bHasSavedProjectileCollisionResponse = false;
 	bool bRollVisualRotationApplied = false;
 	bool bWeaponAttachedForRoll = false;
+	bool bFootstepMovementStateInitialized = false;
+	bool bFootstepWasSprinting = false;
 	bool bHousingModeVisualHidden = false;
 	bool bBaseSurvivalStatsCached = false;
 };

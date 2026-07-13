@@ -647,6 +647,16 @@ namespace TunaSweeperEditorSetup
 		USizeBox* EnemyCombatDebugToggleButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("EnemyCombatDebugToggleButtonBox"));
 		UButton* EnemyCombatDebugToggleButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("EnemyCombatDebugToggleButton"));
 		UTextBlock* EnemyCombatDebugToggleButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("EnemyCombatDebugToggleButtonText"));
+		UBorder* DebugDisplayLanguageSection = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("DebugDisplayLanguageSection"));
+		UVerticalBox* DebugDisplayLanguageSectionStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("DebugDisplayLanguageSectionStack"));
+		UTextBlock* DebugDisplayLanguageLabelText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("DebugDisplayLanguageLabelText"));
+		UVerticalBox* DebugDisplayLanguageButtonStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("DebugDisplayLanguageButtonStack"));
+		USizeBox* DebugDisplayLanguageKoreanButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("DebugDisplayLanguageKoreanButtonBox"));
+		UButton* DebugDisplayLanguageKoreanButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("DebugDisplayLanguageKoreanButton"));
+		UTextBlock* DebugDisplayLanguageKoreanButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("DebugDisplayLanguageKoreanButtonText"));
+		USizeBox* DebugDisplayLanguageEnglishButtonBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("DebugDisplayLanguageEnglishButtonBox"));
+		UButton* DebugDisplayLanguageEnglishButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("DebugDisplayLanguageEnglishButton"));
+		UTextBlock* DebugDisplayLanguageEnglishButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("DebugDisplayLanguageEnglishButtonText"));
 		UBorder* SettingsWindowModeSection = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("SettingsWindowModeSection"));
 		UVerticalBox* SettingsWindowModeSectionStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("SettingsWindowModeSectionStack"));
 		UTextBlock* WindowModeLabelText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("WindowModeLabelText"));
@@ -758,7 +768,11 @@ namespace TunaSweeperEditorSetup
 			!SettingsDevelopmentTabButton || !SettingsDevelopmentTabButtonText || !GraphicsSettingsPanel ||
 			!InterfaceSettingsPanel || !DevelopmentSettingsPanel || !EnemyCombatDebugSection ||
 			!EnemyCombatDebugSectionStack || !EnemyCombatDebugLabelText || !EnemyCombatDebugToggleButtonBox ||
-			!EnemyCombatDebugToggleButton || !EnemyCombatDebugToggleButtonText || !SettingsWindowModeSection || !SettingsWindowModeSectionStack ||
+			!EnemyCombatDebugToggleButton || !EnemyCombatDebugToggleButtonText || !DebugDisplayLanguageSection ||
+			!DebugDisplayLanguageSectionStack || !DebugDisplayLanguageLabelText || !DebugDisplayLanguageButtonStack ||
+			!DebugDisplayLanguageKoreanButtonBox || !DebugDisplayLanguageKoreanButton || !DebugDisplayLanguageKoreanButtonText ||
+			!DebugDisplayLanguageEnglishButtonBox || !DebugDisplayLanguageEnglishButton || !DebugDisplayLanguageEnglishButtonText ||
+			!SettingsWindowModeSection || !SettingsWindowModeSectionStack ||
 			!WindowModeLabelText || !WindowModeRow ||
 			!WindowedModeButtonBox || !WindowedModeButton || !WindowedModeButtonText ||
 			!BorderlessWindowModeButtonBox || !BorderlessWindowModeButton || !BorderlessWindowModeButtonText ||
@@ -1559,6 +1573,39 @@ namespace TunaSweeperEditorSetup
 			EnemyCombatDebugToggleButtonBox,
 			FVector2D(760.0f, 104.0f),
 			FMargin(0.0f));
+
+		ConfigureTextBlockLeft(
+			DebugDisplayLanguageLabelText,
+			FText::FromString(TEXT("\uB514\uBC84\uADF8 \uD45C\uAE30 \uC5B8\uC5B4")),
+			FLinearColor(0.72f, 0.80f, 0.78f, 1.0f),
+			15);
+		ConfigurePlainButton(
+			DebugDisplayLanguageKoreanButtonBox,
+			DebugDisplayLanguageKoreanButton,
+			DebugDisplayLanguageKoreanButtonText,
+			FText::FromString(TEXT("\uD55C\uAD6D\uC5B4")),
+			FVector2D(660.0f, 46.0f),
+			false);
+		ConfigurePlainButton(
+			DebugDisplayLanguageEnglishButtonBox,
+			DebugDisplayLanguageEnglishButton,
+			DebugDisplayLanguageEnglishButtonText,
+			FText::FromString(TEXT("English")),
+			FVector2D(660.0f, 46.0f),
+			false);
+		if (UVerticalBoxSlot* DebugLanguageKoreanSlot = DebugDisplayLanguageButtonStack->AddChildToVerticalBox(DebugDisplayLanguageKoreanButtonBox))
+		{
+			DebugLanguageKoreanSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 8.0f));
+		}
+		DebugDisplayLanguageButtonStack->AddChildToVerticalBox(DebugDisplayLanguageEnglishButtonBox);
+		ConfigureSettingsSection(
+			DebugDisplayLanguageSection,
+			DebugDisplayLanguageSectionStack,
+			DevelopmentSettingsPanel,
+			DebugDisplayLanguageLabelText,
+			DebugDisplayLanguageButtonStack,
+			FVector2D(760.0f, 164.0f),
+			FMargin(0.0f, 12.0f, 0.0f, 0.0f));
 
 		CreditsPanel->SetVisibility(ESlateVisibility::Collapsed);
 		FillCanvas(RootCanvas->AddChildToCanvas(CreditsPanel));

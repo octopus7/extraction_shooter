@@ -48,10 +48,6 @@ namespace
 	constexpr int32 LumberjackDropContainerDefinitionId = 7007;
 	constexpr int32 LumberjackDropContentsId = 8006;
 	constexpr float LumberjackMeleeDamage = 1.0f;
-	constexpr float LumberjackMeleeAttackRange = 150.0f;
-	constexpr float LumberjackMeleeApproachStartRange = 130.0f;
-	constexpr float LumberjackMeleeApproachStopRange = 95.0f;
-	constexpr float LumberjackMeleeTrackingRange = 2300.0f;
 	constexpr float LumberjackMeleeAttackCooldownSeconds = 1.25f;
 	constexpr float LumberjackMeleeKnockbackVelocity = 680.0f;
 	constexpr float LumberjackMeleeImpactHeight = 55.0f;
@@ -943,7 +939,7 @@ bool ATunaSweeperEnemyCharacter::UsesMeleeAttack() const
 
 float ATunaSweeperEnemyCharacter::GetMeleeAttackRange() const
 {
-	return FMath::Max(1.0f, CombatProfile.AttackRange);
+	return TunaSweeperEnemyCombatConstants::MeleeAttackRange;
 }
 
 float ATunaSweeperEnemyCharacter::GetMeleeApproachStartRange() const
@@ -1053,7 +1049,7 @@ ETunaSweeperEnemyFireResult ATunaSweeperEnemyCharacter::TryFireProjectileAt(AAct
 		EnemyWeaponTypeTag,
 		ProjectileDamageScale * EnemyProjectileDamageMultiplier,
 		EnemyProjectileDamageBonus,
-		EnemyWeapon->GetRuntimeSpreadHalfAngleDegrees(),
+		EnemyWeapon->GetRuntimeSpreadHalfAngleDegrees() * FMath::Max(0.01f, CombatProfile.WeaponSpreadMultiplier),
 		TargetLocation,
 		true,
 		TargetActor,

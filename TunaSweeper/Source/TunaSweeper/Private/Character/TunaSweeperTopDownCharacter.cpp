@@ -187,6 +187,7 @@ void ATunaSweeperTopDownCharacter::Tick(float DeltaSeconds)
 	UpdateMeleeSwing(DeltaSeconds);
 	UpdateSprintAndStamina(DeltaSeconds);
 	UpdateMovementSpeed();
+	UpdatePlayerFootsteps(DeltaSeconds);
 	UpdateStaminaGauge(DeltaSeconds);
 	UpdateAimingVisuals(DeltaSeconds);
 }

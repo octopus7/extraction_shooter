@@ -95,7 +95,6 @@ internal static class HeadlessEvaluation
 				tuning.Enemy.RangedLongAdvanceDistance = new FloatRange { Min = 280.0f, Max = 440.0f };
 				tuning.Enemy.RangedMediumAdvanceDistance = new FloatRange { Min = 180.0f, Max = 320.0f };
 				tuning.Enemy.RangedAdvanceStrafeWeight = MathF.Max(tuning.Enemy.RangedAdvanceStrafeWeight, 0.34f);
-				tuning.Enemy.RangedAttackRange = MathF.Max(tuning.Enemy.RangedAttackRange, 1600.0f);
 				return tuning;
 			}),
 			new EvaluationCandidate("ReadablePressure", "플랭커와 총기 적이 조금 더 빨리 화선을 만들되 근접 압박은 과하지 않게 제한한 후보", () =>
@@ -105,7 +104,6 @@ internal static class HeadlessEvaluation
 				tuning.Enemy.RangedPreferredMax = MathF.Max(tuning.Enemy.RangedPreferredMax, 1080.0f);
 				tuning.Enemy.RangedFireCooldown = MathF.Max(0.72f, tuning.Enemy.RangedFireCooldown);
 				tuning.Enemy.FlankerPreferredMax = MathF.Max(tuning.Enemy.FlankerPreferredMax, 960.0f);
-				tuning.Enemy.FlankerAttackRange = MathF.Max(tuning.Enemy.FlankerAttackRange, 1230.0f);
 				return tuning;
 			})
 		];

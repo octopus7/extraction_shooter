@@ -3,9 +3,84 @@
 
 #include "AI/TunaSweeperEnemyAIController.h"
 #include "AI/TunaSweeperEnemyCharacter.h"
+#include "UI/TunaSweeperDebugDisplaySettings.h"
 #include "EngineUtils.h"
 
 DEFINE_LOG_CATEGORY(LogTunaSweeperGameHud);
+
+namespace
+{
+	FString GetLocalizedDebugDisplayText(
+		const FString& EnglishText,
+		ETunaSweeperDebugDisplayLanguage DebugDisplayLanguage)
+	{
+		if (DebugDisplayLanguage == ETunaSweeperDebugDisplayLanguage::English)
+		{
+			return EnglishText;
+		}
+
+		static const TMap<FString, FString> KoreanTextByEnglish = {
+			{ TEXT("Suspicious"), TEXT("\uC758\uC2EC \uD0D0\uC0C9") },
+			{ TEXT("Suspicious Search"), TEXT("\uC758\uC2EC \uD0D0\uC0C9") },
+			{ TEXT("Alerted"), TEXT("\uACBD\uACC4") },
+			{ TEXT("Wander"), TEXT("\uBC30\uD68C") },
+			{ TEXT("Idle"), TEXT("\uB300\uAE30") },
+			{ TEXT("Advance"), TEXT("\uC811\uADFC") },
+			{ TEXT("Melee"), TEXT("\uADFC\uC811 \uACF5\uACA9") },
+			{ TEXT("Aim"), TEXT("\uC870\uC900") },
+			{ TEXT("Firing"), TEXT("\uC0AC\uACA9") },
+			{ TEXT("Recover"), TEXT("\uD68C\uBCF5") },
+			{ TEXT("Observe"), TEXT("\uAD00\uCC30") },
+			{ TEXT("Reposition"), TEXT("\uC7AC\uBC30\uCE58") },
+			{ TEXT("Reload"), TEXT("\uC7AC\uC7A5\uC804") },
+			{ TEXT("Hit Evade"), TEXT("\uD53C\uACA9 \uD68C\uD53C") },
+			{ TEXT("Seek Line"), TEXT("\uC0AC\uC120 \uD655\uBCF4") },
+			{ TEXT("Combat"), TEXT("\uC804\uD22C") },
+			{ TEXT("Search: external alert"), TEXT("\uD0D0\uC0C9: \uC678\uBD80 \uACBD\uBCF4") },
+			{ TEXT("Search: heard noise"), TEXT("\uD0D0\uC0C9: \uC18C\uC74C \uAC10\uC9C0") },
+			{ TEXT("Search: target lost"), TEXT("\uD0D0\uC0C9: \uB300\uC0C1 \uC0C1\uC2E4") },
+			{ TEXT("Search: squad contact"), TEXT("\uD0D0\uC0C9: \uBD84\uB300 \uC811\uCD09") },
+			{ TEXT("Combat: sight reacquired"), TEXT("\uC804\uD22C: \uC2DC\uC57C \uC7AC\uD655\uBCF4") },
+			{ TEXT("Combat: line of sight"), TEXT("\uC804\uD22C: \uC2DC\uC57C \uD655\uBCF4") },
+			{ TEXT("Combat: target acquired"), TEXT("\uC804\uD22C: \uB300\uC0C1 \uD655\uBCF4") },
+			{ TEXT("Combat: hostile sighted"), TEXT("\uC804\uD22C: \uC801 \uBC1C\uACAC") },
+			{ TEXT("Combat: damage taken"), TEXT("\uC804\uD22C: \uD53C\uACA9") },
+			{ TEXT("Reposition failed: no valid goal"), TEXT("\uC7AC\uBC30\uCE58 \uC2E4\uD328: \uC720\uD6A8 \uBAA9\uD45C \uC5C6\uC74C") },
+			{ TEXT("Reposition failed: move request"), TEXT("\uC7AC\uBC30\uCE58 \uC2E4\uD328: \uC774\uB3D9 \uC694\uCCAD") },
+		};
+
+		if (const FString* KoreanText = KoreanTextByEnglish.Find(EnglishText))
+		{
+			return *KoreanText;
+		}
+
+		return EnglishText;
+	}
+
+	float EstimateDebugDisplayTextWidth(const FString& Text, const FSlateFontInfo& Font)
+	{
+		float Width = 0.0f;
+		for (const TCHAR Character : Text)
+		{
+			if (FChar::IsWhitespace(Character))
+			{
+				Width += static_cast<float>(Font.Size) * 0.36f;
+			}
+			else if (Character < 0x80)
+			{
+				// Match the existing numeric distance appearance while preserving Latin labels.
+				Width += static_cast<float>(Font.Size) * 0.56f;
+			}
+			else
+			{
+				// Korean glyphs are substantially wider than the prior all-character estimate.
+				Width += static_cast<float>(Font.Size) * 0.92f;
+			}
+		}
+
+		return Width;
+	}
+}
 
 void UTunaSweeperGameHudWidget::NativeConstruct()
 {
@@ -364,6 +439,8 @@ void UTunaSweeperGameHudWidget::DrawEnemyCombatDebugOverlay(
 	{
 		return;
 	}
+	const ETunaSweeperDebugDisplayLanguage DebugDisplayLanguage =
+		TunaSweeperDebugDisplaySettings::GetDebugDisplayLanguage();
 
 	TArray<FVector2D> PlacedWidgetCenters;
 	TArray<float> PlacedWidgetCollisionRadii;
@@ -391,6 +468,8 @@ void UTunaSweeperGameHudWidget::DrawEnemyCombatDebugOverlay(
 		{
 			continue;
 		}
+		const FString DisplayStateLabel = GetLocalizedDebugDisplayText(Snapshot.StateLabel, DebugDisplayLanguage);
+		const FString DisplayEntryReason = GetLocalizedDebugDisplayText(Snapshot.RecentEntryReason, DebugDisplayLanguage);
 
 		FVector ToEnemy = Enemy->GetActorLocation() - PlayerLocation;
 		ToEnemy.Z = 0.0f;
@@ -421,8 +500,13 @@ void UTunaSweeperGameHudWidget::DrawEnemyCombatDebugOverlay(
 		const int32 StateFontSize = FMath::Max(10, FMath::RoundToInt(11.0f * Scale));
 		const FString DistanceText = FString::Printf(TEXT("%.1fm"), DistanceMeters);
 		const FString StatePrefix = bOnScreen ? TEXT("AI: ") : FString();
-		const float DistanceTextWidth = DistanceText.Len() * DistanceFontSize * 0.56f;
-		const float StateTextWidth = (StatePrefix.Len() + Snapshot.StateLabel.Len()) * StateFontSize * 0.52f;
+		const FSlateFontInfo DistanceFont = FCoreStyle::GetDefaultFontStyle("Bold", DistanceFontSize);
+		const FSlateFontInfo StatePrefixFont = FCoreStyle::GetDefaultFontStyle("Regular", StateFontSize);
+		const FSlateFontInfo StateLabelFont = FCoreStyle::GetDefaultFontStyle("Bold", StateFontSize);
+		const float DistanceTextWidth = EstimateDebugDisplayTextWidth(DistanceText, DistanceFont);
+		const float StateTextWidth =
+			EstimateDebugDisplayTextWidth(StatePrefix, StatePrefixFont) +
+			EstimateDebugDisplayTextWidth(DisplayStateLabel, StateLabelFont);
 		const float CollisionRadius = FMath::Max3(
 			Radius + 16.0f,
 			DistanceTextWidth * 0.5f + 12.0f,
@@ -497,14 +581,15 @@ void UTunaSweeperGameHudWidget::DrawEnemyCombatDebugOverlay(
 				1.0f);
 		}
 
-		FSlateRoundedBoxBrush CircleBrush(FLinearColor(0.035f, 0.018f, 0.012f, 0.90f), Radius);
+		const FLinearColor CircleFillColor(0.025f, 0.055f, 0.085f, 0.96f);
+		FSlateRoundedBoxBrush CircleBrush(FLinearColor::White, Radius);
 		FSlateDrawElement::MakeBox(
 			OutDrawElements,
 			InOutLayerId + 1,
 			MakeHudLocalBoxGeometry(AllottedGeometry, WidgetTopLeft, FVector2D(Diameter, Diameter)),
 			&CircleBrush,
 			ESlateDrawEffect::None,
-			FLinearColor::White);
+			CircleFillColor);
 
 		TArray<FVector2D> CirclePoints;
 		constexpr int32 CircleSegments = 28;
@@ -556,8 +641,9 @@ void UTunaSweeperGameHudWidget::DrawEnemyCombatDebugOverlay(
 		auto DrawCenteredText = [&](const FString& Text, float OffsetY, int32 FontSize, int32 MinimumFontSize, bool bBold, const FLinearColor& Color)
 		{
 			const int32 ResolvedFontSize = FMath::Max(MinimumFontSize, FMath::RoundToInt(FontSize * Scale));
-			const float ApproximateWidth = Text.Len() * ResolvedFontSize * 0.52f;
-			DrawTextAt(Text, FVector2D(WidgetCenter.X - ApproximateWidth * 0.5f, WidgetCenter.Y + OffsetY * Scale), FontSize, MinimumFontSize, bBold, Color);
+			const FSlateFontInfo Font = FCoreStyle::GetDefaultFontStyle(bBold ? "Bold" : "Regular", ResolvedFontSize);
+			const float EstimatedWidth = EstimateDebugDisplayTextWidth(Text, Font);
+			DrawTextAt(Text, FVector2D(WidgetCenter.X - EstimatedWidth * 0.5f, WidgetCenter.Y + OffsetY * Scale), FontSize, MinimumFontSize, bBold, Color);
 		};
 
 		const float DistanceTopY = -Radius + 4.0f * Scale;
@@ -568,15 +654,15 @@ void UTunaSweeperGameHudWidget::DrawEnemyCombatDebugOverlay(
 			22,
 			true,
 			FLinearColor(1.0f, 0.96f, 0.87f, 1.0f));
-		const float PrefixWidth = StatePrefix.Len() * StateFontSize * 0.52f;
-		const float StateWidth = Snapshot.StateLabel.Len() * StateFontSize * 0.52f;
+		const float PrefixWidth = EstimateDebugDisplayTextWidth(StatePrefix, StatePrefixFont);
+		const float StateWidth = EstimateDebugDisplayTextWidth(DisplayStateLabel, StateLabelFont);
 		const float StateTopY = DistanceTopY + DistanceFontSize + 4.0f;
 		const FVector2D StateStart(WidgetCenter.X - (PrefixWidth + StateWidth) * 0.5f, WidgetCenter.Y + StateTopY);
 		if (!StatePrefix.IsEmpty())
 		{
 			DrawTextAt(StatePrefix, StateStart, 11, 10, false, FLinearColor(0.78f, 0.80f, 0.82f, 1.0f));
 		}
-		DrawTextAt(Snapshot.StateLabel, StateStart + FVector2D(PrefixWidth, 0.0f), 11, 10, true, FLinearColor(0.64f, 0.96f, 1.0f, 1.0f));
+		DrawTextAt(DisplayStateLabel, StateStart + FVector2D(PrefixWidth, 0.0f), 11, 10, true, FLinearColor(0.64f, 0.96f, 1.0f, 1.0f));
 		if (Snapshot.MaxStateSeconds > 0.0f)
 		{
 			const float TimeTopY = StateTopY + StateFontSize + 4.0f;
@@ -589,10 +675,10 @@ void UTunaSweeperGameHudWidget::DrawEnemyCombatDebugOverlay(
 				FLinearColor(1.0f, 0.93f, 0.76f, 1.0f));
 		}
 
-		if (!Snapshot.RecentEntryReason.IsEmpty() && Snapshot.RecentEntryReasonRemainingSeconds > 0.0f)
+		if (!DisplayEntryReason.IsEmpty() && Snapshot.RecentEntryReasonRemainingSeconds > 0.0f)
 		{
 			const float TooltipFadeAlpha = FMath::Clamp(Snapshot.RecentEntryReasonRemainingSeconds / 0.45f, 0.0f, 1.0f);
-			const float TooltipTextWidth = Snapshot.RecentEntryReason.Len() * DistanceFontSize * 0.56f;
+			const float TooltipTextWidth = EstimateDebugDisplayTextWidth(DisplayEntryReason, DistanceFont);
 			const FVector2D TooltipSize(
 				TooltipTextWidth + 20.0f * Scale,
 				DistanceFontSize + 12.0f * Scale);
@@ -610,9 +696,9 @@ void UTunaSweeperGameHudWidget::DrawEnemyCombatDebugOverlay(
 				MakeHudLocalBoxGeometry(AllottedGeometry, TooltipPosition, TooltipSize),
 				&TooltipBrush,
 				ESlateDrawEffect::None,
-				FLinearColor::White);
+				FLinearColor(0.055f, 0.020f, 0.008f, 0.94f * TooltipFadeAlpha));
 			DrawTextAt(
-				Snapshot.RecentEntryReason,
+				DisplayEntryReason,
 				TooltipPosition + FVector2D(10.0f * Scale, 4.0f * Scale),
 				28,
 				22,

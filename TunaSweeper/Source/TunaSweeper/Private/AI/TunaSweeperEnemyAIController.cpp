@@ -754,7 +754,8 @@ void ATunaSweeperEnemyAIController::UpdateMeleeCombat(
 	}
 
 	const double CurrentTimeSeconds = GetWorldTimeSeconds(this);
-	if (!bIsClosingDistance && DistanceToTarget <= ResolveAttackRange() &&
+	if (!bIsClosingDistance &&
+		DistanceToTarget <= TunaSweeperEnemyCombatConstants::MeleeAttackRange &&
 		IsFacingCurrentTarget() &&
 		CurrentTimeSeconds - LastMeleeAttackTimeSeconds >= ResolveAttackCooldownSeconds() &&
 		EnemyCharacter->AttackTarget(CurrentTargetActor.Get()))
@@ -860,37 +861,6 @@ void ATunaSweeperEnemyAIController::TickRangedCombat(
 		StartReposition(false, false, false);
 		return;
 	}
-	if (DistanceToTarget > ResolveAttackRange() &&
-		RangedCombatState != ETunaSweeperRangedCombatState::Firing &&
-		RangedCombatState != ETunaSweeperRangedCombatState::Recover &&
-		RangedCombatState != ETunaSweeperRangedCombatState::Reload &&
-		RangedCombatState != ETunaSweeperRangedCombatState::HitEvade &&
-		RangedCombatState != ETunaSweeperRangedCombatState::Reposition &&
-		RangedCombatState != ETunaSweeperRangedCombatState::SeekLineOfFire)
-	{
-		if (IsPairedSquadMember())
-		{
-			if (SquadState.Role == ETunaSweeperEnemySquadRole::Suppress)
-			{
-				RequestSquadLineOfFireRecovery();
-				StartObserve(0.15f);
-			}
-			else if (CanSquadMoverStartReposition())
-			{
-				StartReposition(false, false, true);
-			}
-			else
-			{
-				StartObserve(0.15f);
-			}
-		}
-		else
-		{
-			StartReposition(false, false, true);
-		}
-		return;
-	}
-
 	if (IsPairedSquadMember() && SquadState.Role == ETunaSweeperEnemySquadRole::Reposition &&
 		RangedCombatState == ETunaSweeperRangedCombatState::Firing)
 	{
@@ -1124,30 +1094,9 @@ void ATunaSweeperEnemyAIController::StartFiring(ATunaSweeperEnemyCharacter* Enem
 		StartObserve(0.15f);
 		return;
 	}
-	if (AActor* TargetActor = CurrentTargetActor.Get();
-		!TargetActor || FVector::Dist2D(EnemyCharacter->GetActorLocation(), TargetActor->GetActorLocation()) >
-			ResolveAttackRange())
+	if (!CurrentTargetActor.IsValid())
 	{
-		if (IsPairedSquadMember())
-		{
-			if (SquadState.Role == ETunaSweeperEnemySquadRole::Suppress)
-			{
-				RequestSquadLineOfFireRecovery();
-				StartObserve(0.15f);
-			}
-			else if (CanSquadMoverStartReposition())
-			{
-				StartReposition(false, false, true);
-			}
-			else
-			{
-				StartObserve(0.15f);
-			}
-		}
-		else
-		{
-			StartReposition(false, false, true);
-		}
+		StartObserve(0.15f);
 		return;
 	}
 	const FTunaSweeperEnemyWeaponRuntimeStatus WeaponStatus = EnemyCharacter->GetEnemyWeaponRuntimeStatus();
@@ -1187,11 +1136,6 @@ void ATunaSweeperEnemyAIController::TickFiring(
 		return;
 	}
 	if (CurrentTimeSeconds >= RangedCombatStateEndTimeSeconds)
-	{
-		FinishFiring(EnemyCharacter, LastShotTimeSeconds);
-		return;
-	}
-	if (FVector::Dist2D(EnemyCharacter->GetActorLocation(), TargetActor->GetActorLocation()) > ResolveAttackRange())
 	{
 		FinishFiring(EnemyCharacter, LastShotTimeSeconds);
 		return;
@@ -1585,7 +1529,10 @@ void ATunaSweeperEnemyAIController::StartReposition(
 			bApproachTarget,
 			RangedMoveGoal))
 		{
-			StartObserve(0.35f);
+			if (!TryResumeFiringAfterRepositionFailure(TEXT("Reposition failed: no valid goal")))
+			{
+				StartObserve(0.35f);
+			}
 			return;
 		}
 		RangedMoveKind = bApproachTarget
@@ -1641,41 +1588,90 @@ bool ATunaSweeperEnemyAIController::BuildNormalRepositionGoal(
 	{
 		RepositionSideSign = SquadState.SlotIndex == 0 ? -1.0f : 1.0f;
 	}
-	const FVector TangentDirection =
-		FVector::CrossProduct(FVector::UpVector, OutwardDirection).GetSafeNormal() * RepositionSideSign;
 	const float DistanceToTarget = FVector::Dist2D(PawnLocation, TargetLocation);
 	const float PreferredMin = FMath::Max(CombatProfile.DangerRange, CombatProfile.PreferredRangeMin);
 	const float PreferredMax = FMath::Max(PreferredMin, CombatProfile.PreferredRangeMax);
-
-	FVector MoveDirection = TangentDirection;
-	if (bApproachTarget)
-	{
-		MoveDirection = (TangentDirection * 0.3f - OutwardDirection).GetSafeNormal();
-	}
-	else if (bRetreat || DistanceToTarget < PreferredMin)
-	{
-		MoveDirection = (TangentDirection * 0.65f + OutwardDirection).GetSafeNormal();
-	}
-	else if (DistanceToTarget > PreferredMax)
-	{
-		MoveDirection = (TangentDirection - OutwardDirection * 0.55f).GetSafeNormal();
-	}
-	else if (bSeekLineOfFire)
-	{
-		MoveDirection = (TangentDirection - OutwardDirection * 0.1f).GetSafeNormal();
-	}
 	float MoveDistance = GetRandomRangeValue(
 		FVector2D(CombatProfile.RepositionDistanceMin, CombatProfile.RepositionDistanceMax),
 		150.0f);
 	if (bApproachTarget)
 	{
-		const float DesiredDistance = FMath::Max(0.0f, ResolveAttackRange() - 75.0f);
 		MoveDistance = FMath::Clamp(
-			DistanceToTarget - DesiredDistance,
+			DistanceToTarget - PreferredMax,
 			FMath::Max(150.0f, CombatProfile.RepositionDistanceMin),
 			FMath::Max(200.0f, CombatProfile.RepositionDistanceMax));
 	}
-	return ProjectAndValidateMoveGoal(PawnLocation + MoveDirection * MoveDistance, OutGoal);
+
+	TArray<FVector, TInlineAllocator<5>> CandidateDirections;
+	auto AddCandidateDirection = [&CandidateDirections](const FVector& Direction)
+	{
+		const FVector NormalizedDirection = Direction.GetSafeNormal2D();
+		if (NormalizedDirection.IsNearlyZero())
+		{
+			return;
+		}
+		for (const FVector& ExistingDirection : CandidateDirections)
+		{
+			if (FVector::DotProduct(ExistingDirection, NormalizedDirection) > 0.995f)
+			{
+				return;
+			}
+		}
+		CandidateDirections.Add(NormalizedDirection);
+	};
+
+	const float SideSigns[] = { RepositionSideSign, -RepositionSideSign };
+	for (const float SideSign : SideSigns)
+	{
+		const FVector TangentDirection =
+			FVector::CrossProduct(FVector::UpVector, OutwardDirection).GetSafeNormal() * SideSign;
+		FVector MoveDirection = TangentDirection;
+		if (bApproachTarget)
+		{
+			MoveDirection = TangentDirection * 0.3f - OutwardDirection;
+		}
+		else if (bRetreat || DistanceToTarget < PreferredMin)
+		{
+			MoveDirection = TangentDirection * 0.65f + OutwardDirection;
+		}
+		else if (DistanceToTarget > PreferredMax)
+		{
+			MoveDirection = TangentDirection - OutwardDirection * 0.55f;
+		}
+		else if (bSeekLineOfFire)
+		{
+			MoveDirection = TangentDirection - OutwardDirection * 0.1f;
+		}
+		AddCandidateDirection(MoveDirection);
+	}
+
+	// If both preferred diagonal candidates are blocked, try the direct tactical
+	// direction before giving up. This keeps a wall on one flank from deadlocking
+	// the ranged combat loop.
+	if (bApproachTarget || DistanceToTarget > PreferredMax)
+	{
+		AddCandidateDirection(-OutwardDirection);
+	}
+	else if (bRetreat || DistanceToTarget < PreferredMin)
+	{
+		AddCandidateDirection(OutwardDirection);
+	}
+
+	constexpr float DistanceScales[] = { 1.0f, 0.65f, 0.4f };
+	for (const FVector& CandidateDirection : CandidateDirections)
+	{
+		for (const float DistanceScale : DistanceScales)
+		{
+			const float CandidateDistance = FMath::Max(80.0f, MoveDistance * DistanceScale);
+			if (ProjectAndValidateMoveGoal(
+				PawnLocation + CandidateDirection * CandidateDistance,
+				OutGoal))
+			{
+				return true;
+			}
+		}
+	}
+	return false;
 }
 
 bool ATunaSweeperEnemyAIController::BuildCrossRepositionPath(TArray<FVector>& OutWaypoints)
@@ -1901,6 +1897,55 @@ bool ATunaSweeperEnemyAIController::RequestCurrentMoveGoal()
 	return true;
 }
 
+bool ATunaSweeperEnemyAIController::TryResumeFiringAfterRepositionFailure(const TCHAR* DebugReason)
+{
+	const int32 FailedMoveCycleId = ActiveMoveCycleId > 0
+		? ActiveMoveCycleId
+		: SquadState.CycleId;
+	bMoveRequestActive = false;
+	ActiveMoveRequestId = FAIRequestID::InvalidRequest;
+	ActiveMoveCycleId = 0;
+	bSquadMoverSettling = false;
+	SettleCycleId = 0;
+	StopMovement();
+	CrossRepositionWaypoints.Reset();
+	CrossWaypointIndex = INDEX_NONE;
+	RangedMoveKind = ETunaSweeperRangedMoveKind::None;
+	RecordCombatDebugEntryReason(DebugReason);
+
+	AActor* TargetActor = CurrentTargetActor.Get();
+	if (!TargetActor || !bHasDirectTargetSight)
+	{
+		return false;
+	}
+	const ETunaSweeperLineOfFireResult LineOfFire = EvaluateLineOfFire(TargetActor);
+	if (LineOfFire == ETunaSweeperLineOfFireResult::BlockedByFriendly ||
+		LineOfFire == ETunaSweeperLineOfFireResult::BlockedByIndestructible)
+	{
+		return false;
+	}
+
+	if (IsPairedSquadMember() && SquadState.Role == ETunaSweeperEnemySquadRole::Reposition)
+	{
+		CompleteSquadMoverRole(FailedMoveCycleId);
+		RefreshSquadState();
+	}
+	if (!CanSquadMemberStartFiring())
+	{
+		return false;
+	}
+
+	// A tactical move is optional; combat progress is not. If no valid NavMesh
+	// move exists while the target remains shootable, grant a fresh local firing
+	// budget and resume aiming from the current position.
+	FiringsAtCurrentPosition = 0;
+	PositionFiringBudget = FMath::RandRange(
+		FMath::Max(1, FMath::Min(CombatProfile.PositionFiringBudgetMin, CombatProfile.PositionFiringBudgetMax)),
+		FMath::Max(1, FMath::Max(CombatProfile.PositionFiringBudgetMin, CombatProfile.PositionFiringBudgetMax)));
+	StartAim(true);
+	return true;
+}
+
 void ATunaSweeperEnemyAIController::OnMoveCompleted(
 	FAIRequestID RequestId,
 	const FPathFollowingResult& Result)
@@ -1993,7 +2038,10 @@ void ATunaSweeperEnemyAIController::HandleMoveFinished(bool bSucceeded)
 	CrossWaypointIndex = INDEX_NONE;
 	if (!bSucceeded)
 	{
-		StartObserve(0.35f);
+		if (!TryResumeFiringAfterRepositionFailure(TEXT("Reposition failed: move request")))
+		{
+			StartObserve(0.35f);
+		}
 		return;
 	}
 	if (RangedMoveKind == ETunaSweeperRangedMoveKind::HitEvade)
@@ -2435,7 +2483,7 @@ void ATunaSweeperEnemyAIController::CompleteSquadMoverRole(int32 ExpectedCycleId
 
 void ATunaSweeperEnemyAIController::HandleNoiseReported(const FTunaSweeperNoiseEvent& NoiseEvent)
 {
-	if (bIsCombatEngaged || AwarenessState == ETunaSweeperEnemyAwarenessState::Alerted ||
+	if (bHasDirectTargetSight || bIsCombatEngaged || AwarenessState == ETunaSweeperEnemyAwarenessState::Alerted ||
 		NoiseEvent.Loudness <= 0.0f || NoiseEvent.MaxRange <= 0.0f)
 	{
 		return;
@@ -2499,11 +2547,6 @@ float ATunaSweeperEnemyAIController::ResolveCombatDisengageRange() const
 float ATunaSweeperEnemyAIController::ResolveTrackingRange() const
 {
 	return FMath::Max(0.0f, CombatProfile.TrackingRange);
-}
-
-float ATunaSweeperEnemyAIController::ResolveAttackRange() const
-{
-	return FMath::Max(0.0f, CombatProfile.AttackRange);
 }
 
 float ATunaSweeperEnemyAIController::ResolveApproachStartRange() const

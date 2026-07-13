@@ -1,5 +1,16 @@
 #include "TunaSweeperTopDownCharacterShared.h"
 
+#include "Sound/SoundBase.h"
+#include "Sound/SoundWaveProcedural.h"
+#include "Subsystem/TunaSweeperNoiseSubsystem.h"
+
+namespace TunaSweeperPlayerFootsteps
+{
+	constexpr int32 ProceduralSampleRate = 24000;
+	constexpr float ProceduralSoundDurationSeconds = 0.13f;
+	constexpr float MinimumIntervalSeconds = 0.05f;
+}
+
 void ATunaSweeperTopDownCharacter::UpdateRoll(float DeltaSeconds)
 {
 	if (!bIsRolling)
@@ -81,6 +92,207 @@ void ATunaSweeperTopDownCharacter::UpdateMovementSpeed()
 		BaseWalkSpeed *
 		FMath::Clamp(CarryWeightSpeedMultiplier, 0.0f, 1.0f) *
 		ActionSpeedMultiplier;
+}
+
+void ATunaSweeperTopDownCharacter::UpdatePlayerFootsteps(float DeltaSeconds)
+{
+	const UCharacterMovementComponent* MovementComponent = GetCharacterMovement();
+	FVector HorizontalVelocity = GetVelocity();
+	HorizontalVelocity.Z = 0.0f;
+	const bool bCanMakeFootsteps =
+		MovementComponent &&
+		MovementComponent->IsMovingOnGround() &&
+		!bIsRolling &&
+		HorizontalVelocity.Size() >= FMath::Max(0.0f, FootstepMinimumSpeed);
+	if (!bCanMakeFootsteps)
+	{
+		FootstepElapsedSeconds = 0.0f;
+		NextFootstepIntervalSeconds = 0.0f;
+		bFootstepMovementStateInitialized = false;
+		return;
+	}
+
+	const bool bSprintFootstep = bIsSprinting;
+	if (!bFootstepMovementStateInitialized)
+	{
+		bFootstepMovementStateInitialized = true;
+		bFootstepWasSprinting = bSprintFootstep;
+		NextFootstepIntervalSeconds = RollNextFootstepInterval(bSprintFootstep);
+	}
+	else if (bFootstepWasSprinting != bSprintFootstep)
+	{
+		const float PreviousStrideProgress = NextFootstepIntervalSeconds > KINDA_SMALL_NUMBER
+			? FMath::Clamp(FootstepElapsedSeconds / NextFootstepIntervalSeconds, 0.0f, 1.0f)
+			: 0.0f;
+		bFootstepWasSprinting = bSprintFootstep;
+		NextFootstepIntervalSeconds = RollNextFootstepInterval(bSprintFootstep);
+		FootstepElapsedSeconds = PreviousStrideProgress * NextFootstepIntervalSeconds;
+	}
+
+	FootstepElapsedSeconds += FMath::Max(0.0f, DeltaSeconds);
+	if (FootstepElapsedSeconds < NextFootstepIntervalSeconds)
+	{
+		return;
+	}
+
+	FootstepElapsedSeconds = FMath::Max(0.0f, FootstepElapsedSeconds - NextFootstepIntervalSeconds);
+	EmitPlayerFootstep(bSprintFootstep);
+	NextFootstepIntervalSeconds = RollNextFootstepInterval(bSprintFootstep);
+}
+
+float ATunaSweeperTopDownCharacter::RollNextFootstepInterval(bool bSprintFootstep) const
+{
+	const FVector2D IntervalRange = bSprintFootstep
+		? SprintFootstepIntervalSeconds
+		: WalkFootstepIntervalSeconds;
+	const float MinInterval = FMath::Max(
+		TunaSweeperPlayerFootsteps::MinimumIntervalSeconds,
+		FMath::Min(IntervalRange.X, IntervalRange.Y));
+	const float MaxInterval = FMath::Max(MinInterval, FMath::Max(IntervalRange.X, IntervalRange.Y));
+	return FMath::FRandRange(MinInterval, MaxInterval);
+}
+
+void ATunaSweeperTopDownCharacter::EmitPlayerFootstep(bool bSprintFootstep)
+{
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		return;
+	}
+
+	const FVector SourceLocation = GetActorTransform().TransformPosition(FootstepSourceOffset);
+	const float NoiseLoudness = bSprintFootstep
+		? SprintFootstepNoiseLoudness
+		: WalkFootstepNoiseLoudness;
+	const float NoiseMaxRange = bSprintFootstep
+		? SprintFootstepNoiseMaxRange
+		: WalkFootstepNoiseMaxRange;
+	if (UTunaSweeperNoiseSubsystem* NoiseSubsystem = World->GetSubsystem<UTunaSweeperNoiseSubsystem>())
+	{
+		NoiseSubsystem->ReportNoiseAtLocation(
+			SourceLocation,
+			NoiseLoudness,
+			NoiseMaxRange,
+			PlayerFootstepNoiseTag,
+			this,
+			this);
+	}
+
+	PlayPlayerFootstepSound(SourceLocation, bSprintFootstep);
+}
+
+void ATunaSweeperTopDownCharacter::PlayPlayerFootstepSound(
+	const FVector& SoundLocation,
+	bool bSprintFootstep)
+{
+	USoundBase* SoundToPlay = nullptr;
+	if (!FootstepSounds.IsEmpty())
+	{
+		const int32 StartIndex = FMath::RandHelper(FootstepSounds.Num());
+		for (int32 Offset = 0; Offset < FootstepSounds.Num(); ++Offset)
+		{
+			const int32 SoundIndex = (StartIndex + Offset) % FootstepSounds.Num();
+			if (USoundBase* LoadedSound = FootstepSounds[SoundIndex].LoadSynchronous())
+			{
+				SoundToPlay = LoadedSound;
+				break;
+			}
+		}
+	}
+
+	USoundWaveProcedural* ProceduralSound = nullptr;
+	if (!SoundToPlay)
+	{
+		ProceduralSound = CreateProceduralFootstepSound(bSprintFootstep);
+		SoundToPlay = ProceduralSound;
+		if (ProceduralSound)
+		{
+			ActiveProceduralFootstepSounds.Add(ProceduralSound);
+		}
+	}
+	if (!SoundToPlay)
+	{
+		return;
+	}
+
+	const float MinPitch = FMath::Max(0.01f, FMath::Min(FootstepSoundPitchRange.X, FootstepSoundPitchRange.Y));
+	const float MaxPitch = FMath::Max(MinPitch, FMath::Max(FootstepSoundPitchRange.X, FootstepSoundPitchRange.Y));
+	UGameplayStatics::PlaySoundAtLocation(
+		this,
+		SoundToPlay,
+		SoundLocation,
+		FMath::Max(0.0f, FootstepSoundVolumeMultiplier) * (bSprintFootstep ? 1.12f : 1.0f),
+		FMath::FRandRange(MinPitch, MaxPitch));
+
+	if (!ProceduralSound)
+	{
+		return;
+	}
+
+	const TWeakObjectPtr<ATunaSweeperTopDownCharacter> WeakThis(this);
+	const TWeakObjectPtr<USoundWaveProcedural> WeakSound(ProceduralSound);
+	FTimerHandle CleanupTimerHandle;
+	GetWorldTimerManager().SetTimer(
+		CleanupTimerHandle,
+		FTimerDelegate::CreateLambda([WeakThis, WeakSound]()
+		{
+			ATunaSweeperTopDownCharacter* Character = WeakThis.Get();
+			USoundWaveProcedural* Sound = WeakSound.Get();
+			if (!Character || !Sound)
+			{
+				return;
+			}
+			Character->ActiveProceduralFootstepSounds.RemoveAll(
+				[Sound](const TObjectPtr<USoundWaveProcedural>& Candidate)
+				{
+					return Candidate == Sound;
+				});
+		}),
+		TunaSweeperPlayerFootsteps::ProceduralSoundDurationSeconds + 0.25f,
+		false);
+}
+
+USoundWaveProcedural* ATunaSweeperTopDownCharacter::CreateProceduralFootstepSound(bool bSprintFootstep)
+{
+	USoundWaveProcedural* SoundWave = NewObject<USoundWaveProcedural>(this);
+	if (!SoundWave)
+	{
+		return nullptr;
+	}
+
+	const int32 SampleCount = FMath::CeilToInt(
+		TunaSweeperPlayerFootsteps::ProceduralSampleRate *
+		TunaSweeperPlayerFootsteps::ProceduralSoundDurationSeconds);
+	TArray<int16> Samples;
+	Samples.SetNumUninitialized(SampleCount);
+	FRandomStream NoiseStream(FMath::Rand());
+	const float BodyFrequency = bSprintFootstep ? 112.0f : 88.0f;
+	for (int32 SampleIndex = 0; SampleIndex < SampleCount; ++SampleIndex)
+	{
+		const float TimeSeconds = static_cast<float>(SampleIndex) /
+			static_cast<float>(TunaSweeperPlayerFootsteps::ProceduralSampleRate);
+		const float Attack = FMath::Min(1.0f, TimeSeconds * 180.0f);
+		const float BodyEnvelope = Attack * FMath::Exp(-TimeSeconds * 30.0f);
+		const float TextureEnvelope = Attack * FMath::Exp(-TimeSeconds * 48.0f);
+		const float Body = FMath::Sin(2.0f * UE_PI * BodyFrequency * TimeSeconds) * BodyEnvelope;
+		const float SoleSnap = FMath::Sin(2.0f * UE_PI * BodyFrequency * 4.3f * TimeSeconds) * TextureEnvelope;
+		const float Texture = NoiseStream.FRandRange(-1.0f, 1.0f) * TextureEnvelope;
+		const float Sample = FMath::Clamp(
+			Body * 0.58f + SoleSnap * 0.15f + Texture * 0.18f,
+			-0.9f,
+			0.9f);
+		Samples[SampleIndex] = static_cast<int16>(Sample * 32767.0f);
+	}
+
+	SoundWave->SetSampleRate(TunaSweeperPlayerFootsteps::ProceduralSampleRate);
+	SoundWave->NumChannels = 1;
+	SoundWave->Duration = TunaSweeperPlayerFootsteps::ProceduralSoundDurationSeconds;
+	SoundWave->SoundGroup = SOUNDGROUP_Effects;
+	SoundWave->bLooping = false;
+	SoundWave->QueueAudio(
+		reinterpret_cast<const uint8*>(Samples.GetData()),
+		Samples.Num() * sizeof(int16));
+	return SoundWave;
 }
 
 void ATunaSweeperTopDownCharacter::UpdateStaminaGauge(float DeltaSeconds)

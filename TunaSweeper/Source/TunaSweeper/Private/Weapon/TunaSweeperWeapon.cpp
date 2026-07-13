@@ -29,6 +29,7 @@ namespace TunaSweeperWeaponTags
 	const FName ShotgunWeaponTypeTag(TEXT("weapon.type.shotgun"));
 	const FName GunshotNoiseTag(TEXT("noise.gunshot"));
 	const FName MuzzleSocketName(TEXT("MuzzleSocket"));
+	const FName LaserSightSocketName(TEXT("LaserSightSocket"));
 	const FName ShellEjectionSocketName(TEXT("ShellEjectionSocket"));
 	constexpr float GunshotNoiseLoudness = 1.0f;
 	constexpr float ShotgunNoiseLoudness = 1.15f;
@@ -418,19 +419,30 @@ FTransform ATunaSweeperWeapon::GetMuzzleWorldTransform() const
 	return MuzzlePoint ? MuzzlePoint->GetComponentTransform() : GetActorTransform();
 }
 
+FTransform ATunaSweeperWeapon::GetLaserSightWorldTransform() const
+{
+	FTransform LaserSightTransform;
+	if (TryGetWeaponSocketWorldTransform(TunaSweeperWeaponTags::LaserSightSocketName, LaserSightTransform))
+	{
+		return LaserSightTransform;
+	}
+
+	return GetMuzzleWorldTransform();
+}
+
 void ATunaSweeperWeapon::UpdateLaserSightBeam(
 	const FVector& AimDirection,
 	const FVector& AimWorldPoint,
 	bool bHasAimWorldPoint)
 {
-	if (!LaserSightComponent || !MuzzlePoint)
+	if (!LaserSightComponent)
 	{
 		return;
 	}
 
-	const FTransform MuzzleWorldTransform = GetMuzzleWorldTransform();
-	const FVector BeamStartWorld = MuzzleWorldTransform.GetLocation();
-	LaserSightComponent->SetWorldTransform(MuzzleWorldTransform);
+	const FTransform LaserSightWorldTransform = GetLaserSightWorldTransform();
+	const FVector BeamStartWorld = LaserSightWorldTransform.GetLocation();
+	LaserSightComponent->SetWorldTransform(LaserSightWorldTransform);
 	const FVector LaserDirection = ResolveMuzzleLevelAimDirection(
 		BeamStartWorld,
 		AimWorldPoint,
@@ -476,27 +488,27 @@ void ATunaSweeperWeapon::UpdateLaserSightBeam(
 	if (World && IsLaserSightDebugEnabled(*LaserSightComponent))
 	{
 		const float DebugRange = FMath::Max(1.0f, LaserSightFallbackRange);
-		const FVector MuzzleSightDirection = ResolveMuzzleLevelAimDirection(
+		const FVector LaserSightDirection = ResolveMuzzleLevelAimDirection(
 			BeamStartWorld,
 			FVector::ZeroVector,
 			false,
 			AimDirection,
 			GetActorForwardVector());
-		FVector MuzzleForwardDirection = GetMuzzleWorldTransform().GetUnitAxis(EAxis::X).GetSafeNormal2D();
-		if (MuzzleForwardDirection.IsNearlyZero())
+		FVector LaserSightForwardDirection = GetLaserSightWorldTransform().GetUnitAxis(EAxis::X).GetSafeNormal2D();
+		if (LaserSightForwardDirection.IsNearlyZero())
 		{
-			MuzzleForwardDirection = GetActorForwardVector().GetSafeNormal2D();
+			LaserSightForwardDirection = GetActorForwardVector().GetSafeNormal2D();
 		}
-		if (MuzzleForwardDirection.IsNearlyZero())
+		if (LaserSightForwardDirection.IsNearlyZero())
 		{
-			MuzzleForwardDirection = FVector::ForwardVector;
+			LaserSightForwardDirection = FVector::ForwardVector;
 		}
 
 		DrawLaserSightDebug(
 			*World,
 			BeamStartWorld,
-			MuzzleSightDirection,
-			MuzzleForwardDirection,
+			LaserSightDirection,
+			LaserSightForwardDirection,
 			AimWorldPoint,
 			bHasAimWorldPoint,
 			TraceEndWorld,
@@ -518,15 +530,15 @@ void ATunaSweeperWeapon::UpdateLaserSightBeam(
 			UE_LOG(
 				LogTunaSweeperLaserSight,
 				Display,
-				TEXT("LaserSightDebug Weapon=%s HasAimWorld=%d AimWorld=%s AimDir=%s Muzzle=%s MuzzleRot=%s MuzzleSightDir=%s MuzzleForwardDir=%s ResolvedLaserDir=%s TraceEnd=%s Hit=%d HitActor=%s HitComponent=%s HitPoint=%s BeamEndWorld=%s BeamEndLocal=%s LaserComponentLocation=%s LaserComponentRotation=%s"),
+				TEXT("LaserSightDebug Weapon=%s HasAimWorld=%d AimWorld=%s AimDir=%s LaserSight=%s LaserSightRot=%s LaserSightDir=%s LaserSightForwardDir=%s ResolvedLaserDir=%s TraceEnd=%s Hit=%d HitActor=%s HitComponent=%s HitPoint=%s BeamEndWorld=%s BeamEndLocal=%s LaserComponentLocation=%s LaserComponentRotation=%s"),
 				*GetNameSafe(this),
 				bHasAimWorldPoint ? 1 : 0,
 				*AimWorldPoint.ToString(),
 				*AimDirection.ToString(),
 				*BeamStartWorld.ToString(),
-				*MuzzlePoint->GetComponentRotation().ToString(),
-				*MuzzleSightDirection.ToString(),
-				*MuzzleForwardDirection.ToString(),
+				*LaserSightWorldTransform.Rotator().ToString(),
+				*LaserSightDirection.ToString(),
+				*LaserSightForwardDirection.ToString(),
 				*LaserDirection.ToString(),
 				*TraceEndWorld.ToString(),
 				bLaserTraceHit ? 1 : 0,

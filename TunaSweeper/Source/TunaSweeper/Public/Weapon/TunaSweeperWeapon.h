@@ -156,6 +156,7 @@ protected:
 private:
 	bool TryGetWeaponSocketWorldTransform(FName SocketName, FTransform& OutTransform) const;
 	FTransform GetMuzzleWorldTransform() const;
+	FTransform GetLaserSightWorldTransform() const;
 
 	float LastFireTimeSeconds = -1000.0f;
 	float LastLaserSightDebugLogTimeSeconds = -1000.0f;

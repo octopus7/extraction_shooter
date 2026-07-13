@@ -3,6 +3,12 @@ using System.Text.Json;
 
 namespace CombatMovementSimulator;
 
+internal static class EnemyCombatConstants
+{
+	// Mirrors TunaSweeperEnemyCombatConstants::MeleeAttackRange in the UE runtime.
+	public const float MeleeAttackRange = 150.0f;
+}
+
 internal enum EnemyKind
 {
 	Melee,
@@ -78,13 +84,14 @@ internal sealed class EnemyTuning
 	public float MeleeMoveSpeed { get; set; } = 390.0f;
 	public float RangedMoveSpeed { get; set; } = 340.0f;
 	public float Health { get; set; } = 70.0f;
-	public float TrackingRange { get; set; } = 2300.0f;
+	public float MeleeTrackingRange { get; set; } = 900.0f;
+	public float RangedTrackingRange { get; set; } = 1150.0f;
+	public float FlankerTrackingRange { get; set; } = 1050.0f;
 	public float CombatDisengageRange { get; set; } = 3600.0f;
 	public float CombatVisionAngleDegrees { get; set; } = 100.0f;
 	public FloatRange IdleSeconds { get; set; } = new() { Min = 1.4f, Max = 3.7f };
 	public FloatRange WanderSeconds { get; set; } = new() { Min = 0.9f, Max = 2.4f };
 	public float WanderMoveSpeed { get; set; } = 120.0f;
-	public float MeleeAttackRange { get; set; } = 115.0f;
 	public float MeleeWindupSeconds { get; set; } = 0.2f;
 	public float MeleeRecoverSeconds { get; set; } = 0.45f;
 	public float MeleeDamage { get; set; } = 16.0f;
@@ -104,7 +111,6 @@ internal sealed class EnemyTuning
 	public float RangedSeekForwardWeight { get; set; } = 0.25f;
 	public float RangedKeepDistanceStrafeWeight { get; set; } = 0.45f;
 	public float RangedMoveGoalAcceptanceRadius { get; set; } = 55.0f;
-	public float RangedAttackRange { get; set; } = 1450.0f;
 	public float RangedProjectileSpeed { get; set; } = 1750.0f;
 	public float RangedProjectileDamage { get; set; } = 9.0f;
 	public float RangedFireCooldown { get; set; } = 0.75f;
@@ -123,7 +129,6 @@ internal sealed class EnemyTuning
 	public float FlankerSeekForwardWeight { get; set; } = 0.18f;
 	public float FlankerKeepDistanceStrafeWeight { get; set; } = 0.9f;
 	public float FlankerMoveGoalAcceptanceRadius { get; set; } = 55.0f;
-	public float FlankerAttackRange { get; set; } = 1150.0f;
 	public float FlankerProjectileSpeed { get; set; } = 1650.0f;
 	public float FlankerProjectileDamage { get; set; } = 7.0f;
 	public float FlankerFireCooldown { get; set; } = 0.65f;

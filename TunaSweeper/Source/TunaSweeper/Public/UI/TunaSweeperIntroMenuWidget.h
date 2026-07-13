@@ -168,6 +168,12 @@ protected:
 	TObjectPtr<UButton> EnemyCombatDebugToggleButton;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UButton> DebugDisplayLanguageKoreanButton;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UButton> DebugDisplayLanguageEnglishButton;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
 	TObjectPtr<UButton> PiggyBankToggleButton;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
@@ -332,6 +338,12 @@ private:
 
 	UFUNCTION()
 	void HandleEnemyCombatDebugToggleClicked();
+
+	UFUNCTION()
+	void HandleDebugDisplayLanguageKoreanClicked();
+
+	UFUNCTION()
+	void HandleDebugDisplayLanguageEnglishClicked();
 
 	UFUNCTION()
 	void HandlePiggyBankToggleClicked();

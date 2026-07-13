@@ -431,15 +431,15 @@ internal sealed class SimulatorForm : Form
 
 	private void DrawCombatDisengageLines(Graphics graphics)
 	{
-		float trackingRange = MathF.Max(0.0f, world.Tuning.Enemy.TrackingRange);
-		float disengageRange = MathF.Max(world.Tuning.Enemy.TrackingRange, world.Tuning.Enemy.CombatDisengageRange);
-		if (trackingRange <= 0.0f && disengageRange <= 0.0f)
-		{
-			return;
-		}
-
 		foreach (EnemyAgent enemy in world.Enemies)
 		{
+			float trackingRange = world.ResolveTrackingRange(enemy);
+			float disengageRange = MathF.Max(trackingRange, world.Tuning.Enemy.CombatDisengageRange);
+			if (trackingRange <= 0.0f && disengageRange <= 0.0f)
+			{
+				continue;
+			}
+
 			Vector2 toPlayer = world.Player.Position - enemy.Position;
 			float distanceToPlayer = toPlayer.Length();
 			if (distanceToPlayer <= 1.0f)
@@ -550,7 +550,7 @@ internal sealed class SimulatorForm : Form
 			using Pen rangePen = new(Color.FromArgb(60, outlineColor), 1.0f);
 			float range = enemy.Kind switch
 			{
-				EnemyKind.Melee => world.Tuning.Enemy.MeleeAttackRange,
+				EnemyKind.Melee => EnemyCombatConstants.MeleeAttackRange,
 				EnemyKind.Flanker => world.Tuning.Enemy.FlankerPreferredMax,
 				_ => world.Tuning.Enemy.RangedPreferredMax
 			};

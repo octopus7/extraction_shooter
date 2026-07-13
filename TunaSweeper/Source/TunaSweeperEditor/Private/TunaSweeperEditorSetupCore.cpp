@@ -2301,6 +2301,10 @@ namespace TunaSweeperEditorSetup
 			FMath::Lerp(MeshBounds.Min.X, MuzzleSocketLocation.X, 0.62f),
 			MeshBounds.Max.Y + 0.5f,
 			MuzzleSocketLocation.Z);
+		const FVector LaserSightSocketLocation(
+			FMath::Lerp(MeshBounds.Min.X, MuzzleSocketLocation.X, 0.58f),
+			MeshBounds.GetCenter().Y,
+			MeshBounds.Max.Z + 0.5f);
 
 		bool bMeshChanged = false;
 		auto EnsureSocket = [&RifleMesh, &bMeshChanged](FName SocketName, const FVector& Location)
@@ -2326,6 +2330,7 @@ namespace TunaSweeperEditorSetup
 		};
 
 		EnsureSocket(TEXT("MuzzleSocket"), MuzzleSocketLocation);
+		EnsureSocket(TEXT("LaserSightSocket"), LaserSightSocketLocation);
 		EnsureSocket(TEXT("ShellEjectionSocket"), ShellEjectionSocketLocation);
 
 		if (!bMeshChanged)
@@ -2344,8 +2349,9 @@ namespace TunaSweeperEditorSetup
 		UE_LOG(
 			LogTunaSweeperEditor,
 			Display,
-			TEXT("Added MuzzleSocket=%s and ShellEjectionSocket=%s to %s."),
+			TEXT("Added MuzzleSocket=%s, LaserSightSocket=%s, and ShellEjectionSocket=%s to %s."),
 			*MuzzleSocketLocation.ToString(),
+			*LaserSightSocketLocation.ToString(),
 			*ShellEjectionSocketLocation.ToString(),
 			*RifleMesh->GetPathName());
 		return true;
@@ -2353,6 +2359,10 @@ namespace TunaSweeperEditorSetup
 
 	bool EnsureShellCasingAssets()
 	{
+		// Weapon sockets are independent of the shell casing import.  Ensure them first so
+		// a pre-existing or read-only casing asset cannot prevent the rifle setup.
+		const bool bWeaponSocketsReady = EnsureAssaultRifleWeaponSockets();
+
 		const FString SourceFile = FPaths::ConvertRelativePathToFull(
 			FPaths::Combine(FPaths::ProjectDir(), TEXT("SourceArt/Weapons/SM_WeaponShellCasing.obj")));
 		if (!FPaths::FileExists(SourceFile))
@@ -2476,7 +2486,7 @@ namespace TunaSweeperEditorSetup
 			return false;
 		}
 
-		return EnsureAssaultRifleWeaponSockets();
+		return bWeaponSocketsReady;
 	}
 
 	static FAutoConsoleCommand CreateShellCasingAssetsConsoleCommand(

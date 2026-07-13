@@ -166,6 +166,10 @@ protected:
 	float CombatDebugEntryReasonDisplaySeconds = 4.0f;
 
 private:
+#if WITH_DEV_AUTOMATION_TESTS
+	friend class FTunaSweeperEnemyRepositionFallbackTest;
+#endif
+
 	void InitializeFromControlledCharacter();
 	void UpdateAttackTarget();
 	AActor* FindBestHostileTarget() const;
@@ -208,6 +212,7 @@ private:
 	bool ProjectAndValidateMoveGoal(const FVector& Candidate, FVector& OutProjectedGoal) const;
 	bool DoesMoveSegmentClearCurrentTarget(const FVector& SegmentEnd, float MinimumClearance) const;
 	bool RequestCurrentMoveGoal();
+	bool TryResumeFiringAfterRepositionFailure(const TCHAR* DebugReason);
 	void HandleMoveFinished(bool bSucceeded);
 	void FaceTarget(float DeltaSeconds, bool bSlowly);
 	bool RotateTowardLocation(const FVector& FacingLocation, float DeltaSeconds, float SpeedScale = 1.0f);
@@ -236,7 +241,6 @@ private:
 	void DrawCombatDebug() const;
 	float ResolveCombatDisengageRange() const;
 	float ResolveTrackingRange() const;
-	float ResolveAttackRange() const;
 	float ResolveApproachStartRange() const;
 	float ResolveApproachStopRange() const;
 	float ResolveAttackCooldownSeconds() const;

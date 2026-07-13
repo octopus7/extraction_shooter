@@ -1,6 +1,6 @@
 # 적 AI 행동·인지·전투 상태
 
-최종 코드 대조일은 2026-07-13이다. 기준 구현은 `ATunaSweeperEnemyAIController`, `ATunaSweeperEnemyCharacter`, `UTunaSweeperEnemySquadSubsystem`이며 거리 단위는 cm이다. 원거리 전투 수치는 `Content/Data/EnemyCombatProfiles.json`을 단일 원본으로 사용한다.
+최종 코드 대조일은 2026-07-13이다. 기준 구현은 `ATunaSweeperEnemyAIController`, `ATunaSweeperEnemyCharacter`, `UTunaSweeperEnemySquadSubsystem`이며 거리 단위는 cm이다. 원거리 전투 수치와 감지 거리는 `Content/Data/EnemyCombatProfiles.json`을 단일 원본으로 사용하고, 근접 타격 거리는 `TunaSweeperEnemyCombatConstants::MeleeAttackRange` 전역 상수를 사용한다.
 
 ## 전체 상태 흐름
 
@@ -58,6 +58,7 @@ stateDiagram-v2
 
 - `Idle`은 1.4~3.7초 동안 정지하고, `Wander`는 무작위 평면 방향으로 0.9~2.4초 동안 이동한다.
 - 배회 속도는 120cm/s이며 `Idle ↔ Wander`를 반복한다.
+- 배회 방향 전환은 프로필 회전 속도의 75%로 제한하므로 새 방향을 고를 때 즉시 회전하지 않는다.
 - 가장 가까운 적대 액터를 찾되 프로필의 `tracking_range`, 전방 100도 시야각, 직접 사선 검사를 모두 통과해야 `Alerted`가 된다.
 - 파괴 가능한 물체는 시야 확보 대상으로 간주하지만 아군과 파괴 불가능한 물체는 시야·사선을 차단한다.
 
@@ -65,6 +66,7 @@ stateDiagram-v2
 
 - 적대 소음, 외부 경고, 신선한 분대 마지막 목격 위치, 전투 중 시야 상실로 진입한다.
 - 이동을 멈추고 의심 위치를 중심으로 좌우 48도 범위를 훑는다.
+- 수색 회전은 프로필 회전 속도의 55%로 제한한다.
 - 2.6~3.8초 안에 직접 시야를 되찾으면 `Alerted`, 찾지 못하면 `Unaware`로 돌아간다.
 - `Unaware`에서 처음 진입할 때 `!` 말풍선을 0.9초 표시한다. 같은 인지 사이클에서는 반복하지 않으며 `Unaware` 복귀 때 표시 가능 상태가 초기화된다.
 
@@ -80,16 +82,19 @@ stateDiagram-v2
 
 - 기본 청각 범위는 1800cm, 민감도는 1.0, 최소 청취 강도는 0.08이다.
 - 실제 청취 범위는 청자 범위와 소음 이벤트의 최대 범위 중 작은 값이며 거리 감쇠를 적용한다.
+- 플레이어 걷기 발소리는 0.42~0.58초마다 강도 0.45, 최대 범위 1600cm로 발생하며 기본 적의 실질 청취 한계는 약 1150cm다.
+- 플레이어 질주 발소리는 0.26~0.36초마다 강도 0.8, 최대 범위 2200cm로 발생하며 기본 적의 실질 청취 한계는 약 1470cm다.
+- 발소리 간격은 애니메이션 노티가 아니라 실제 지상 이동 상태로 정하고 매번 다시 무작위 선택한다. 정지·공중·구르기 중에는 발생하지 않는다.
 - 같은 팩션이 낸 발소리·총성·폭발 소음은 무시한다. 이미 `Alerted` 또는 `Combat`이면 새 소음으로 인지 상태를 덮어쓰지 않는다.
 
 ## 현재 전투 프로필과 RaidMap 배치
 
-| 프로필 | 배치 | 역할 | 속도 | 추적 / 공격 거리 | 선호 거리 | 위험 거리 |
-| --- | --- | --- | ---: | ---: | ---: | ---: |
-| `enemy.pistol_flanker` | 권총 적, `raid_alpha` slot 1 | Flanker / 최초 Mover | 370 | 2300 / 1150 | 560~880 | 360 |
-| `enemy.rifle_anchor` | 일반 소총 적, `raid_alpha` slot 0 | Anchor / 최초 Suppressor | 340 | 2300 / 1450 | 650~1000 | 430 |
-| `enemy.elite_rifle_anchor` | 고급 소총 적, Solo | Anchor | 340 | 2300 / 1450 | 650~1000 | 430 |
-| `enemy.melee_lumberjack` | 근접 적 2명, Solo | Melee | 260 | 1800 / 150 | 해당 없음 | 해당 없음 |
+| 프로필 | 배치 | 역할 | 속도 | 회전 속도 / 공격 허용각 | 무기 확산 배율 | 감지 거리 | 선호 거리 | 위험 거리 |
+| --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| `enemy.pistol_flanker` | 권총 적, `raid_alpha` slot 1 | Flanker / 최초 Mover | 370 | 220°/s / ±8° | 2.5배 | 1050 | 560~880 | 360 |
+| `enemy.rifle_anchor` | 일반 소총 적, `raid_alpha` slot 0 | Anchor / 최초 Suppressor | 340 | 180°/s / ±8° | 2.0배 | 1150 | 650~1000 | 430 |
+| `enemy.elite_rifle_anchor` | 고급 소총 적, Solo | Anchor | 340 | 200°/s / ±7° | 1.75배 | 1250 | 650~1000 | 430 |
+| `enemy.melee_lumberjack` | 근접 적 2명, Solo | Melee | 260 | 240°/s / ±14° | 해당 없음 | 900 | 해당 없음 | 해당 없음 |
 
 전투 역할은 전리품이나 `enemy_id`로 추론하지 않고 스폰 데이터의 `combat_profile_id`로 결정한다.
 
@@ -106,18 +111,22 @@ stateDiagram-v2
 - 한 위치에서는 무작위로 1~2개의 `Firing`만 허용하고 이후 재배치를 시도한다.
 - 마지막 탄 시각에 `Recover 최소 + Observe 최소`를 더한 값을 다음 발사 가능 시각으로 별도 보존한다. 피격 회피나 짧은 상태 전환이 끼어도 최소 비사격 창을 건너뛸 수 없다.
 - 발사 API는 `Firing`에서만 호출한다. `Aim`, `Recover`, `Observe`, `Reload`, `Reposition`, `SeekLineOfFire`, `HitEvade`에서는 발사하지 않는다.
+- 총기에는 별도 공격 거리 조건이 없다. 교전에 진입한 뒤 직접 시야·사선, 조준각, 분대 발사 권한, 탄약 조건을 만족하면 표적 거리와 무관하게 현재 `Firing` 계획을 수행한다.
+- 적의 최종 확산 반각은 총종별 현재 확산·리코일 반각에 프로필의 `weapon_spread_multiplier`를 곱한다. 권총 Flanker 2.5배, 일반 소총 Anchor 2배, 고급 소총 Anchor 1.75배로 고급 적의 상대적인 명중 우위는 유지한다.
+- 전투 회전은 `RInterpConstantTo`와 프로필의 초당 각도 상한을 사용한다. 큰 각도 차이에서도 회전이 빨라지지 않으며 `Aim` 시간이 끝났더라도 공격 허용각 안에 들어올 때까지 발사하지 않는다.
+- `Firing` 중 표적이 옆이나 뒤로 이동하면 같은 속도로 추적하고, 허용각을 벗어난 동안 다음 탄을 보류한다. 발사 함수 자체는 캐릭터 방향을 표적으로 스냅하지 않는다.
 
 ### 원거리 상태별 의미
 
 | 상태 | 행동 | 종료 조건 |
 | --- | --- | --- |
 | `Idle` | 전투 FSM 진입 대기 | Suppressor/Solo는 사격 게이트 후 `Aim`, Mover는 이동 게이트 후 `Reposition` |
-| `Aim` | 0.3~0.5초 동안 표적 조준, 사선 확인 | 직접 시야와 사격 권한이 있으면 `Firing` |
-| `Firing` | 계획된 탄수만 발사 | 점사 종료 후 `Recover`, 빈 탄창이면 `Reload` |
+| `Aim` | 최소 0.3~0.5초 동안 제한 속도로 표적 조준, 사선 확인 | 직접 시야·사격 권한·공격 허용각을 모두 만족하면 `Firing` |
+| `Firing` | 제한 속도로 표적을 추적하며 허용각 안에서만 계획된 탄수 발사 | 점사 종료 후 `Recover`, 빈 탄창이면 `Reload` |
 | `Recover` | 정지하고 총구 방향 갱신도 멈추는 사격 후딜 | 프로필 시간이 끝나면 `Observe` |
-| `Observe` | 정지 상태로 표적 또는 마지막 목격 위치를 천천히 바라봄 | 사격 예산·분대 역할에 따라 `Aim` 또는 `Reposition` |
-| `Reposition` | `Orbit`, `Approach`, `Retreat`, `CrossReposition` 중 하나를 NavMesh `MoveTo`로 수행 | 도착 후 0.35~0.55초 정착 |
-| `SeekLineOfFire` | 막힌 사선을 벗어나는 좌우 이동 | 도착 후 정착, 실패하면 짧은 `Observe` |
+| `Observe` | 정지 상태에서 프로필 회전 속도의 45%로 표적 또는 마지막 목격 위치를 바라봄 | 사격 예산·분대 역할에 따라 `Aim` 또는 `Reposition` |
+| `Reposition` | `Orbit`, `Approach`, `Retreat`, `CrossReposition` 중 하나를 NavMesh `MoveTo`로 수행 | 도착 후 0.35~0.55초 정착, 모든 후보가 막히면 현재 위치 사격 복귀 |
+| `SeekLineOfFire` | 막힌 사선을 벗어나는 좌우 이동 | 도착 후 정착, 실패해도 직접 시야·사선이 열려 있으면 현재 위치 사격 복귀 |
 | `Reload` | 실제 무기 재장전과 필요 시 제한 이동 | 재장전 완료 후 0.35~0.55초 준비 |
 | `HitEvade` | 피격 방향의 측후방으로 150~250cm 회피 | 빈 탄창이면 `Reload`, 아니면 짧은 `Observe` |
 
@@ -173,10 +182,12 @@ Suppress가 Aim 후 첫 탄 발사
 ### 일반 이동
 
 - `Orbit`: 선호 거리 안에서는 접선 방향으로 이동한다.
-- `Approach`: 공격 거리 밖에서 접선 30%와 표적 방향을 섞어 프로필별 180~300cm 또는 200~300cm 범위로 접근한다. 분대에서는 Mover만 접근한다.
+- `Approach`: 선호 거리 상한 밖에서 접선 30%와 표적 방향을 섞어 프로필별 180~300cm 또는 200~300cm 범위로 접근한다. 분대에서는 Mover만 접근한다.
 - `Retreat`: 위험 거리 안이거나 안전 재장전 이동일 때 접선과 바깥 방향을 섞어 후퇴한다.
 - `SeekLineOfFire`: 막힌 사선을 벗어난다. 2인 분대는 slot 0과 slot 1이 서로 반대쪽 후보를 사용한다.
-- 목표점은 상태 진입 때 고정하고 NavMesh에 투영한 뒤 캡슐 겹침을 검사한다. `MoveTo` 실패 시 반대편 후보를 한 번만 시도하고 다시 실패하면 0.35초 `Observe`로 돌아간다. 직접 돌진, 순간이동은 사용하지 않는다.
+- 목표점은 상태 진입 때 고정하고 NavMesh에 투영한 뒤 캡슐 겹침을 검사한다. 우선 방향과 반대 방향, 직접 접근·후퇴 방향을 100%·65%·40% 이동 거리로 순서대로 검증한다.
+- 모든 목표 후보 또는 `MoveTo`가 실패해도 직접 시야와 사선이 열려 있고 사격 권한이 있으면 현 위치의 사격 예산을 갱신해 `Aim`으로 복귀한다. 분대 Mover는 역할 완료 조건을 먼저 확인하며, 아직 사격 권한이 없을 때만 짧은 `Observe`로 대기한다. 재배치 실패만으로 `Observe`가 무한 반복되어서는 안 된다.
+- 직접 돌진과 순간이동은 사용하지 않는다.
 
 ### CrossReposition
 
@@ -196,7 +207,8 @@ Suppress가 Aim 후 첫 탄 발사
 
 - 근접 프로필은 이번 원거리 사격 리듬과 분대 교대에서 제외되며 RaidMap의 두 근접 적은 Solo다.
 - 대상이 130cm보다 멀어지면 직접 이동 입력으로 추적하고 95cm 안쪽에 들어오면 이동을 멈춘다.
-- 공격 가능 거리는 150cm, 공격 쿨다운은 1.25초다.
+- 공격 가능 거리는 모든 근접 적이 공유하는 전역 상수 150cm이며 공격 쿨다운은 1.25초다.
+- 시선은 최대 240°/s로 회전하며 대상과의 각도 차이가 ±14° 안에 들어오기 전에는 타격하지 않는다. 타격 함수에서 즉시 방향을 덮어쓰지 않는다.
 - 근접 피해, 출혈, 넉백도 중앙 팩션 판정을 통과한 적대 대상에게만 적용된다.
 
 ## 팩션 규칙
@@ -220,6 +232,7 @@ Suppress가 Aim 후 첫 탄 발사
 - 스폰별 프로필·팩션·분대: `TunaSweeper/Content/Data/EnemySpawns.json`
 - 무기 `fire_mode`, 탄창, 재장전 시간: `TunaSweeper/Content/Data/ItemTable.json`
 - 전투 FSM: `TunaSweeper/Source/TunaSweeper/Private/AI/TunaSweeperEnemyAIController.cpp`
+- 근접 공격 거리 전역 상수: `TunaSweeper/Source/TunaSweeper/Public/AI/TunaSweeperEnemyCombatProfile.h`
 - 무기 런타임·말풍선: `TunaSweeper/Source/TunaSweeper/Private/AI/TunaSweeperEnemyCharacter.cpp`
 - 분대 lease: `TunaSweeper/Source/TunaSweeper/Private/Subsystem/TunaSweeperEnemySquadSubsystem.cpp`
 - 팩션 판정: `TunaSweeper/Source/TunaSweeper/Private/Subsystem/TunaSweeperFactionSubsystem.cpp`

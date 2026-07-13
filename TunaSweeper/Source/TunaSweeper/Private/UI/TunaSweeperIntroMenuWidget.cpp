@@ -190,6 +190,16 @@ void UTunaSweeperIntroMenuWidget::NativeConstruct()
 		EnemyCombatDebugToggleButton->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleEnemyCombatDebugToggleClicked);
 		EnemyCombatDebugToggleButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleEnemyCombatDebugToggleClicked);
 	}
+	if (DebugDisplayLanguageKoreanButton)
+	{
+		DebugDisplayLanguageKoreanButton->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleDebugDisplayLanguageKoreanClicked);
+		DebugDisplayLanguageKoreanButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleDebugDisplayLanguageKoreanClicked);
+	}
+	if (DebugDisplayLanguageEnglishButton)
+	{
+		DebugDisplayLanguageEnglishButton->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleDebugDisplayLanguageEnglishClicked);
+		DebugDisplayLanguageEnglishButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleDebugDisplayLanguageEnglishClicked);
+	}
 
 	if (PiggyBankToggleButton)
 	{

@@ -1,5 +1,6 @@
 #include "TunaSweeperIntroMenuWidgetShared.h"
 #include "Player/TunaSweeperPlayerController.h"
+#include "UI/TunaSweeperDebugDisplaySettings.h"
 
 void UTunaSweeperIntroMenuWidget::RefreshMainMenu()
 {
@@ -247,14 +248,19 @@ void UTunaSweeperIntroMenuWidget::RefreshDevelopmentSettingsPanel()
 {
 	const bool bEnemyCombatDebugEnabled = ATunaSweeperPlayerController::GetEnemyCombatDebugPreference();
 	const bool bPiggyBankEnabled = ATunaSweeperPlayerController::GetDeveloperPiggyBankPreference();
+	const ETunaSweeperDebugDisplayLanguage DebugDisplayLanguage =
+		TunaSweeperDebugDisplaySettings::GetDebugDisplayLanguage();
 
 	if (SettingsStatusText)
 	{
 		SettingsStatusText->SetText(FText::Format(
-			FText::FromString(TEXT("{0}\n\uB3FC\uC9C0\uC800\uAE08\uD1B5: {1} (\uB2E4\uC74C \uBC99\uCEE4 \uC785\uC7A5\uBD80\uD130)")),
+			FText::FromString(TEXT("{0}\n\uB514\uBC84\uADF8 \uD45C\uAE30 \uC5B8\uC5B4: {1}\n\uB3FC\uC9C0\uC800\uAE08\uD1B5: {2} (\uB2E4\uC74C \uBC99\uCEE4 \uC785\uC7A5\uBD80\uD130)")),
 			bEnemyCombatDebugEnabled
 				? FText::FromString(TEXT("\uC804\uD22C \uB514\uBC84\uADF8: \uCF1C\uC9D0 (F8)"))
 				: FText::FromString(TEXT("\uC804\uD22C \uB514\uBC84\uADF8: \uAEBC\uC9D0 (F8)")),
+			DebugDisplayLanguage == ETunaSweeperDebugDisplayLanguage::Korean
+				? FText::FromString(TEXT("\uD55C\uAD6D\uC5B4"))
+				: FText::FromString(TEXT("English")),
 			bPiggyBankEnabled
 				? FText::FromString(TEXT("\uCF1C\uC9D0"))
 				: FText::FromString(TEXT("\uAEBC\uC9D0"))));
@@ -279,6 +285,23 @@ void UTunaSweeperIntroMenuWidget::RefreshDevelopmentSettingsPanel()
 	if (EnemyCombatDebugToggleButton)
 	{
 		EnemyCombatDebugToggleButton->SetIsEnabled(true);
+	}
+	SetNamedText(
+		FName(TEXT("DebugDisplayLanguageLabelText")),
+		FText::FromString(TEXT("\uB514\uBC84\uADF8 \uD45C\uAE30 \uC5B8\uC5B4")));
+	SetNamedText(
+		FName(TEXT("DebugDisplayLanguageKoreanButtonText")),
+		FText::FromString(TEXT("\uD55C\uAD6D\uC5B4")));
+	SetNamedText(
+		FName(TEXT("DebugDisplayLanguageEnglishButtonText")),
+		FText::FromString(TEXT("English")));
+	if (DebugDisplayLanguageKoreanButton)
+	{
+		DebugDisplayLanguageKoreanButton->SetIsEnabled(true);
+	}
+	if (DebugDisplayLanguageEnglishButton)
+	{
+		DebugDisplayLanguageEnglishButton->SetIsEnabled(true);
 	}
 	SetNamedText(
 		FName(TEXT("PiggyBankToggleButtonText")),
@@ -386,6 +409,8 @@ void UTunaSweeperIntroMenuWidget::RefreshDevelopmentSelectionStyles()
 {
 	const bool bEnemyCombatDebugEnabled = ATunaSweeperPlayerController::GetEnemyCombatDebugPreference();
 	const bool bPiggyBankEnabled = ATunaSweeperPlayerController::GetDeveloperPiggyBankPreference();
+	const ETunaSweeperDebugDisplayLanguage DebugDisplayLanguage =
+		TunaSweeperDebugDisplaySettings::GetDebugDisplayLanguage();
 	ApplySettingsTabButtonStyle(SettingsGraphicsTabButton, FVector2D(142.0f, 38.0f), false);
 	ApplySettingsTabButtonStyle(SettingsInterfaceTabButton, FVector2D(158.0f, 38.0f), false);
 	ApplySettingsTabButtonStyle(SettingsDevelopmentTabButton, FVector2D(102.0f, 38.0f), true);
@@ -393,6 +418,14 @@ void UTunaSweeperIntroMenuWidget::RefreshDevelopmentSelectionStyles()
 		EnemyCombatDebugToggleButton,
 		FVector2D(660.0f, 46.0f),
 		bEnemyCombatDebugEnabled);
+	ApplySettingsChoiceButtonStyle(
+		DebugDisplayLanguageKoreanButton,
+		FVector2D(660.0f, 46.0f),
+		DebugDisplayLanguage == ETunaSweeperDebugDisplayLanguage::Korean);
+	ApplySettingsChoiceButtonStyle(
+		DebugDisplayLanguageEnglishButton,
+		FVector2D(660.0f, 46.0f),
+		DebugDisplayLanguage == ETunaSweeperDebugDisplayLanguage::English);
 	ApplySettingsChoiceButtonStyle(
 		PiggyBankToggleButton,
 		FVector2D(660.0f, 46.0f),

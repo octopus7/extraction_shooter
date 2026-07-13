@@ -1,5 +1,6 @@
 #if WITH_DEV_AUTOMATION_TESTS
 
+#include "AI/TunaSweeperEnemyAIController.h"
 #include "AI/TunaSweeperEnemyCombatProfile.h"
 #include "AI/TunaSweeperEnemySquadTypes.h"
 #include "Component/TunaSweeperFactionTypes.h"
@@ -11,6 +12,7 @@
 #include "Subsystem/TunaSweeperEnemySquadSubsystem.h"
 #include "Subsystem/TunaSweeperFactionSubsystem.h"
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
+#include "Subsystem/TunaSweeperNoiseSubsystem.h"
 #include "UObject/UObjectGlobals.h"
 
 namespace TunaSweeperEnemyCombatTests
@@ -85,6 +87,95 @@ bool FTunaSweeperFactionRelationshipTest::RunTest(const FString& Parameters)
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(
+	FTunaSweeperPlayerFootstepNoiseTest,
+	"TunaSweeper.Combat.Noise.PlayerFootsteps",
+	TunaSweeperEnemyCombatTests::TestFlags)
+
+bool FTunaSweeperPlayerFootstepNoiseTest::RunTest(const FString& Parameters)
+{
+	(void)Parameters;
+
+	const FName TestWorldName = MakeUniqueObjectName(
+		GetTransientPackage(),
+		UWorld::StaticClass(),
+		TEXT("TunaSweeperPlayerFootstepNoiseTestWorld"));
+	UWorld* TestWorld = UWorld::CreateWorld(
+		EWorldType::Game,
+		false,
+		TestWorldName,
+		GetTransientPackage());
+	TestNotNull(TEXT("Transient footstep noise world exists"), TestWorld);
+	if (!TestWorld)
+	{
+		return false;
+	}
+
+	UTunaSweeperNoiseSubsystem* NoiseSubsystem = TestWorld->GetSubsystem<UTunaSweeperNoiseSubsystem>();
+	TestNotNull(TEXT("Noise subsystem exists"), NoiseSubsystem);
+	if (!NoiseSubsystem)
+	{
+		TestWorld->DestroyWorld(false);
+		TestWorld->RemoveFromRoot();
+		return false;
+	}
+
+	int32 ReportedNoiseCount = 0;
+	FTunaSweeperNoiseEvent ReportedNoise;
+	const FDelegateHandle DelegateHandle = NoiseSubsystem->OnNoiseReported.AddLambda(
+		[&ReportedNoiseCount, &ReportedNoise](const FTunaSweeperNoiseEvent& NoiseEvent)
+		{
+			++ReportedNoiseCount;
+			ReportedNoise = NoiseEvent;
+		});
+	NoiseSubsystem->ReportNoiseAtLocation(
+		FVector(1000.0f, 0.0f, 0.0f),
+		0.45f,
+		1600.0f,
+		FName(TEXT("noise.player_footstep")));
+	TestEqual(TEXT("Player footstep reports exactly one noise event"), ReportedNoiseCount, 1);
+	TestEqual(TEXT("Player footstep uses its authored noise tag"), ReportedNoise.NoiseTag, FName(TEXT("noise.player_footstep")));
+
+	FTunaSweeperHeardNoiseEvent HeardNoise;
+	TestTrue(
+		TEXT("Default enemy hearing detects a walking footstep at 10 metres"),
+		NoiseSubsystem->CalculateHeardNoiseAtLocation(
+			ReportedNoise,
+			FVector::ZeroVector,
+			1800.0f,
+			1.0f,
+			0.08f,
+			HeardNoise));
+
+	ReportedNoise.SourceLocation = FVector(1400.0f, 0.0f, 0.0f);
+	TestFalse(
+		TEXT("Walking footstep falls below the hearing threshold at 14 metres"),
+		NoiseSubsystem->CalculateHeardNoiseAtLocation(
+			ReportedNoise,
+			FVector::ZeroVector,
+			1800.0f,
+			1.0f,
+			0.08f,
+			HeardNoise));
+
+	ReportedNoise.Loudness = 0.8f;
+	ReportedNoise.MaxRange = 2200.0f;
+	TestTrue(
+		TEXT("Default enemy hearing detects a sprinting footstep at 14 metres"),
+		NoiseSubsystem->CalculateHeardNoiseAtLocation(
+			ReportedNoise,
+			FVector::ZeroVector,
+			1800.0f,
+			1.0f,
+			0.08f,
+			HeardNoise));
+
+	NoiseSubsystem->OnNoiseReported.Remove(DelegateHandle);
+	TestWorld->DestroyWorld(false);
+	TestWorld->RemoveFromRoot();
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(
 	FTunaSweeperEnemyCombatDataTest,
 	"TunaSweeper.Combat.Data.ProfilesAndWeapons",
 	TunaSweeperEnemyCombatTests::TestFlags)
@@ -138,13 +229,15 @@ bool FTunaSweeperEnemyCombatDataTest::RunTest(const FString& Parameters)
 		float NonFiringMax;
 		float TurnSpeed;
 		float FacingTolerance;
+		float WeaponSpreadMultiplier;
+		float TrackingRange;
 	};
 
 	const FExpectedRangedProfile ExpectedProfiles[] =
 	{
-		{ &PistolProfile, 1, 1, 0.0f, 0.0f, 2.0f, 2.6f, 220.0f, 8.0f },
-		{ &RifleProfile, 3, 2, 0.18f, 0.23f, 2.6f, 3.5f, 180.0f, 8.0f },
-		{ &EliteProfile, 4, 3, 0.15f, 0.19f, 3.0f, 4.0f, 200.0f, 7.0f }
+		{ &PistolProfile, 1, 1, 0.0f, 0.0f, 2.0f, 2.6f, 220.0f, 8.0f, 2.5f, 1050.0f },
+		{ &RifleProfile, 3, 2, 0.18f, 0.23f, 2.6f, 3.5f, 180.0f, 8.0f, 2.0f, 1150.0f },
+		{ &EliteProfile, 4, 3, 0.15f, 0.19f, 3.0f, 4.0f, 200.0f, 7.0f, 1.75f, 1250.0f }
 	};
 
 	for (const FExpectedRangedProfile& Expected : ExpectedProfiles)
@@ -186,6 +279,16 @@ bool FTunaSweeperEnemyCombatDataTest::RunTest(const FString& Parameters)
 			FString::Printf(TEXT("%s attack facing tolerance"), *ProfileName),
 			Profile.AttackFacingToleranceDegrees,
 			Expected.FacingTolerance);
+		TunaSweeperEnemyCombatTests::TestNearlyEqual(
+			*this,
+			FString::Printf(TEXT("%s weapon spread multiplier"), *ProfileName),
+			Profile.WeaponSpreadMultiplier,
+			Expected.WeaponSpreadMultiplier);
+		TunaSweeperEnemyCombatTests::TestNearlyEqual(
+			*this,
+			FString::Printf(TEXT("%s tracking range"), *ProfileName),
+			Profile.TrackingRange,
+			Expected.TrackingRange);
 		TestEqual(
 			*FString::Printf(TEXT("%s uses ranged attack mode"), *ProfileName),
 			static_cast<uint8>(Profile.AttackMode),
@@ -258,6 +361,16 @@ bool FTunaSweeperEnemyCombatDataTest::RunTest(const FString& Parameters)
 		TEXT("Melee attack requires a 14 degree facing cone"),
 		MeleeProfile.AttackFacingToleranceDegrees,
 		14.0f);
+	TunaSweeperEnemyCombatTests::TestNearlyEqual(
+		*this,
+		TEXT("Melee tracking range is 9 metres"),
+		MeleeProfile.TrackingRange,
+		900.0f);
+	TunaSweeperEnemyCombatTests::TestNearlyEqual(
+		*this,
+		TEXT("Melee attack range is the global 1.5 metre constant"),
+		TunaSweeperEnemyCombatConstants::MeleeAttackRange,
+		150.0f);
 
 	const bool bItemsLoaded = ItemDataSubsystem->LoadItemData(true);
 	TestTrue(TEXT("Item data loads for weapon fire-mode validation"), bItemsLoaded);
@@ -294,6 +407,74 @@ bool FTunaSweeperEnemyCombatDataTest::RunTest(const FString& Parameters)
 		}
 	}
 
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(
+	FTunaSweeperEnemyRepositionFallbackTest,
+	"TunaSweeper.Combat.AI.RepositionFailureResumesFiring",
+	TunaSweeperEnemyCombatTests::TestFlags)
+
+bool FTunaSweeperEnemyRepositionFallbackTest::RunTest(const FString& Parameters)
+{
+	(void)Parameters;
+
+	const FName TestWorldName = MakeUniqueObjectName(
+		GetTransientPackage(),
+		UWorld::StaticClass(),
+		TEXT("TunaSweeperRepositionFallbackTestWorld"));
+	UWorld* TestWorld = UWorld::CreateWorld(
+		EWorldType::Game,
+		false,
+		TestWorldName,
+		GetTransientPackage());
+	TestNotNull(TEXT("Transient reposition fallback world exists"), TestWorld);
+	if (!TestWorld)
+	{
+		return false;
+	}
+
+	ATunaSweeperEnemyAIController* Controller =
+		TestWorld->SpawnActor<ATunaSweeperEnemyAIController>();
+	APawn* ControlledPawn = TestWorld->SpawnActor<APawn>();
+	APawn* TargetPawn = TestWorld->SpawnActor<APawn>();
+	TestNotNull(TEXT("Enemy AI controller exists"), Controller);
+	TestNotNull(TEXT("Controlled pawn exists"), ControlledPawn);
+	TestNotNull(TEXT("Target pawn exists"), TargetPawn);
+	if (!Controller || !ControlledPawn || !TargetPawn)
+	{
+		TestWorld->DestroyWorld(false);
+		TestWorld->RemoveFromRoot();
+		return false;
+	}
+
+	ControlledPawn->SetActorLocation(FVector::ZeroVector);
+	TargetPawn->SetActorLocation(FVector(600.0f, 0.0f, 0.0f));
+	Controller->Possess(ControlledPawn);
+	Controller->CurrentTargetActor = TargetPawn;
+	Controller->bHasDirectTargetSight = true;
+	Controller->bIsCombatEngaged = true;
+	Controller->AwarenessState = ETunaSweeperEnemyAwarenessState::Combat;
+	Controller->RangedCombatState = ETunaSweeperRangedCombatState::Observe;
+	Controller->FiringsAtCurrentPosition = 2;
+	Controller->PositionFiringBudget = 2;
+	Controller->NextAllowedFireTimeSeconds = 0.0;
+	Controller->CombatProfile.PositionFiringBudgetMin = 1;
+	Controller->CombatProfile.PositionFiringBudgetMax = 1;
+
+	TestTrue(
+		TEXT("Shootable solo enemy resumes combat when reposition is unavailable"),
+		Controller->TryResumeFiringAfterRepositionFailure(TEXT("Automation: reposition unavailable")));
+	TestEqual(
+		TEXT("Reposition failure resumes Aim instead of Observe"),
+		static_cast<uint8>(Controller->RangedCombatState),
+		static_cast<uint8>(ETunaSweeperRangedCombatState::Aim));
+	TestEqual(TEXT("Fallback clears the exhausted local firing count"), Controller->FiringsAtCurrentPosition, 0);
+	TestEqual(TEXT("Fallback grants a fresh local firing budget"), Controller->PositionFiringBudget, 1);
+
+	Controller->UnPossess();
+	TestWorld->DestroyWorld(false);
+	TestWorld->RemoveFromRoot();
 	return true;
 }
 
