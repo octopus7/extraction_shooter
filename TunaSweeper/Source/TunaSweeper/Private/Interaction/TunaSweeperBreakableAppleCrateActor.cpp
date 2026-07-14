@@ -13,7 +13,9 @@
 #include "GeometryCollection/GeometryCollectionSimulationTypes.h"
 #include "Interaction/TunaSweeperPhysicsCrateFragmentActor.h"
 #include "Interaction/TunaSweeperPhysicsAppleActor.h"
+#include "Kismet/GameplayStatics.h"
 #include "Materials/MaterialInterface.h"
+#include "Sound/SoundBase.h"
 #include "TunaSweeperCollisionChannels.h"
 
 namespace
@@ -22,6 +24,7 @@ namespace
 	const TCHAR* DefaultCrateGeometryCollectionPath = TEXT("/Game/Interaction/GC_CrateB_Fractured.GC_CrateB_Fractured");
 	const TCHAR* DefaultAppleMeshPath = TEXT("/Game/Meshes/Props/Apple/SM_Apple.SM_Apple");
 	const TCHAR* DefaultCrateFragmentMeshPath = TEXT("/Engine/BasicShapes/Cube.Cube");
+	const TCHAR* DefaultBreakSoundPath = TEXT("/Game/Audio/Imported/SW_CrateApple.SW_CrateApple");
 
 	FVector MakeSafeCrateExtent(const FVector& Extent)
 	{
@@ -84,6 +87,7 @@ ATunaSweeperBreakableAppleCrateActor::ATunaSweeperBreakableAppleCrateActor()
 	CrateGeometryCollection = TSoftObjectPtr<UGeometryCollection>(FSoftObjectPath(DefaultCrateGeometryCollectionPath));
 	AppleMesh = TSoftObjectPtr<UStaticMesh>(FSoftObjectPath(DefaultAppleMeshPath));
 	CrateFragmentMesh = TSoftObjectPtr<UStaticMesh>(FSoftObjectPath(DefaultCrateFragmentMeshPath));
+	BreakSound = TSoftObjectPtr<USoundBase>(FSoftObjectPath(DefaultBreakSoundPath));
 	AppleActorClass = ATunaSweeperPhysicsAppleActor::StaticClass();
 	CrateFragmentActorClass = ATunaSweeperPhysicsCrateFragmentActor::StaticClass();
 }
@@ -113,6 +117,9 @@ void ATunaSweeperBreakableAppleCrateActor::OnConstruction(const FTransform& Tran
 	GeometryCollectionUpwardImpulse = FMath::Max(0.0f, GeometryCollectionUpwardImpulse);
 	GeometryCollectionDamageThreshold = FMath::Max(0.0f, GeometryCollectionDamageThreshold);
 	GeometryCollectionExternalClusterStrain = FMath::Max(0.0f, GeometryCollectionExternalClusterStrain);
+	BreakSoundVolumeMultiplier = FMath::Max(0.0f, BreakSoundVolumeMultiplier);
+	BreakSoundPitchRange.X = FMath::Max(0.001f, BreakSoundPitchRange.X);
+	BreakSoundPitchRange.Y = FMath::Max(BreakSoundPitchRange.X, BreakSoundPitchRange.Y);
 	MinCrateFragmentCount = FMath::Max(0, MinCrateFragmentCount);
 	MaxCrateFragmentCount = FMath::Max(MinCrateFragmentCount, MaxCrateFragmentCount);
 	CrateFragmentLifeSeconds = FMath::Max(0.0f, CrateFragmentLifeSeconds);
@@ -207,6 +214,13 @@ void ATunaSweeperBreakableAppleCrateActor::ConfigureBreakableAppleCrateDefaults(
 	{
 		CrateFragmentMesh = InCrateFragmentMesh;
 	}
+	if (BreakSound.IsNull())
+	{
+		BreakSound = TSoftObjectPtr<USoundBase>(FSoftObjectPath(DefaultBreakSoundPath));
+	}
+	BreakSoundVolumeMultiplier = FMath::Max(0.0f, BreakSoundVolumeMultiplier);
+	BreakSoundPitchRange.X = FMath::Max(0.001f, BreakSoundPitchRange.X);
+	BreakSoundPitchRange.Y = FMath::Max(BreakSoundPitchRange.X, BreakSoundPitchRange.Y);
 	bUseGeometryCollectionOnBreak = true;
 	bSpawnCrateFragmentsOnBreak = false;
 	GeometryCollectionBreakRadius = 95.0f;
@@ -295,6 +309,7 @@ void ATunaSweeperBreakableAppleCrateActor::BreakCrateFromDirection(const FVector
 	SetCanBeDamaged(false);
 
 	ApplyCrateDefaults();
+	PlayBreakSound();
 	if (!BreakGeometryCollection(SpillDirection))
 	{
 		SpawnCrateFragments(SpillDirection);
@@ -392,6 +407,27 @@ FVector ATunaSweeperBreakableAppleCrateActor::ResolveSpillDirection(
 FVector ATunaSweeperBreakableAppleCrateActor::GetCrateCenterWorldLocation() const
 {
 	return GetActorTransform().TransformPosition(CollisionCenterOffset);
+}
+
+void ATunaSweeperBreakableAppleCrateActor::PlayBreakSound()
+{
+	USoundBase* LoadedBreakSound = BreakSound.LoadSynchronous();
+	if (!LoadedBreakSound)
+	{
+		return;
+	}
+
+	const float SafeVolumeMultiplier = FMath::Max(0.0f, BreakSoundVolumeMultiplier);
+	const float MinPitchMultiplier = FMath::Max(0.001f, BreakSoundPitchRange.X);
+	const float MaxPitchMultiplier = FMath::Max(MinPitchMultiplier, BreakSoundPitchRange.Y);
+	const float PitchMultiplier = FMath::FRandRange(MinPitchMultiplier, MaxPitchMultiplier);
+
+	UGameplayStatics::PlaySoundAtLocation(
+		this,
+		LoadedBreakSound,
+		GetCrateCenterWorldLocation(),
+		SafeVolumeMultiplier,
+		PitchMultiplier);
 }
 
 void ATunaSweeperBreakableAppleCrateActor::SpawnApples(const FVector& SpillDirection)

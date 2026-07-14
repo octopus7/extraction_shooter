@@ -180,7 +180,12 @@ namespace TunaSweeperEditorSetup
 
 			if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperBreakableAppleCrateSetupQuit")))
 			{
-				FPlatformMisc::RequestExit(false);
+				FTSTicker::GetCoreTicker().AddTicker(
+					FTickerDelegate::CreateLambda([](float)
+					{
+						FPlatformMisc::RequestExit(false);
+						return false;
+					}));
 				return;
 			}
 		}

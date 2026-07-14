@@ -5501,3 +5501,15 @@
 - 발소리 DA에는 향후 재질별 리졸버 확장을 고려해 `BasicFootstepSound` 하나만 노출하고 `/Game/Audio/Imported/SW_Footstep_Basic`을 연결함.
 - `BP_TunaSweeperGameInstance`의 `FootstepPresentationDataAsset`에 해당 DA를 연결하고, 플레이어 캐릭터가 게임 인스턴스를 통해 기본 발소리를 읽도록 변경함. 기존 보행 간격·볼륨·피치·AI 소음 보고와 오디오 누락 시 절차적 대체음은 유지함.
 - `TunaSweeperEditor Win64 Development` UE 5.7 빌드를 성공시키고, 전용 에디터 설정의 DA 생성·직렬화·정상 종료를 검증함.
+
+## 2026-07-14 05:36:00 (소요시간: 00:03:00)
+
+- 파괴 가능한 사과 상자 BP에서 파괴 사운드를 지정할 수 있도록 `BreakSound`, `BreakSoundVolumeMultiplier`, `BreakSoundPitchRange` 속성을 `Apple Crate|Audio` 카테고리로 노출함.
+- 기본 파괴 사운드를 `/Game/Audio/Imported/SW_CrateApple`로 설정하고, 상자가 실제로 파괴될 때 위치 기반 사운드를 1회 재생하도록 연결함.
+
+## 2026-07-14 05:45:35 (소요시간: 00:05:00)
+
+- `TunaSweeperEditor Win64 Development` UE 5.7 빌드를 성공시킴.
+- `BP_BreakableAppleCrate`가 새 C++ 오디오 속성을 반영하도록 기존 사과 상자 one-shot 갱신 경로로 관련 에셋을 재컴파일하고 저장함.
+- one-shot 갱신 후 종료 크래시가 반복되어 사과 상자 setup quit 경로를 한 틱 뒤 종료하도록 보정하고, 크래시 없이 저장 후 정상 종료되는 것을 로그로 확인함.
+- 빌드와 BP 갱신 완료 후 Unreal Editor를 다시 실행함.

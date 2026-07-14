@@ -11,6 +11,7 @@ class UGeometryCollection;
 class UGeometryCollectionComponent;
 class UMaterialInterface;
 class USceneComponent;
+class USoundBase;
 class UStaticMesh;
 class UStaticMeshComponent;
 
@@ -111,6 +112,15 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Apple Crate|Break", meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float GeometryCollectionExternalClusterStrain = 50000.0f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Apple Crate|Audio")
+	TSoftObjectPtr<USoundBase> BreakSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Apple Crate|Audio", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float BreakSoundVolumeMultiplier = 1.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Apple Crate|Audio", meta = (ClampMin = "0.001", UIMin = "0.001"))
+	FVector2D BreakSoundPitchRange = FVector2D(0.96f, 1.04f);
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Apple Crate|Apple Spawn")
 	TSubclassOf<ATunaSweeperPhysicsAppleActor> AppleActorClass;
 
@@ -192,6 +202,7 @@ private:
 	bool BreakGeometryCollection(const FVector& SpillDirection);
 	FVector ResolveSpillDirection(FDamageEvent const& DamageEvent, AActor* DamageCauser) const;
 	FVector GetCrateCenterWorldLocation() const;
+	void PlayBreakSound();
 	void SpawnApples(const FVector& SpillDirection);
 	void SpawnCrateFragments(const FVector& SpillDirection);
 	FVector BuildRandomCrateFragmentSpawnLocation() const;
