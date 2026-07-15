@@ -3331,3 +3331,23 @@ Chaos 토마토 파괴 단면용 과육 재질은 재질만 준비하면 되는�
 ### 답변
 
 가능하다. 기존 토마토 Static Mesh와 외피용 Base Color, Normal, ORM(없으면 Base Color만) 및 과육 단면용 Base Color 텍스처를 받으면 재질 슬롯·내부 단면 재질·Geometry Collection 베이크·피격 액터·점성 Niagara 효과·검증까지 진행할 수 있다. 과육 Normal/ORM과 스플랫용 마스크·노이즈 텍스처는 선택 사항이며, 없으면 프로젝트 기본 텍스처와 파라미터로 보완한다.
+
+## 2026-07-16 03:15:54 (소요시간: 00:13:02)
+
+### 질문
+
+최종적으로 Blueprint로 만들어 레벨에 배치하면 동작할 수 있어야 한다는 요구.
+
+### 답변
+
+`/Game/Interaction/BP_BreakableTomato`를 생성했다. 이 Blueprint는 `UTunaSweeperBreakableTomatoComponent`를 포함하며, 레벨에 배치만 하면 플레이어 근접 시 도약-휴식 접근, 피격 시 Chaos 파괴, 과육 단면, 점성 액체 Niagara가 독립적으로 동작한다. 특정 레벨에는 임의로 배치하지 않았다.
+
+## 2026-07-16 03:45:00 (소요시간: 00:16:30)
+
+### 질문
+
+`DropletActor`가 무엇이며 왜 파괴 뒤 공중에 남는지 문의.
+
+### 답변
+
+`TunaSweeperTomatoGooDropletActor`는 과거 연기 Niagara를 임시로 대체하기 위해 만든 물리 구체 파편이었다. 중력·충돌 상황에 따라 공중에 잔류할 수 있어 제거했고, 이제는 붉은 과육 방울 Niagara와 지면 데칼 자국으로 끈적한 착지를 표현한다.

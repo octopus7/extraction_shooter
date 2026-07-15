@@ -2034,6 +2034,7 @@ namespace TunaSweeperEditorSetup
 		};
 
 		constexpr FPhysicalMaterialDefinition Definitions[] = {
+			{ TEXT("PM_Flesh"), SurfaceType1 },
 			{ TEXT("PM_Wood"), SurfaceType4 },
 			{ TEXT("PM_Stone"), SurfaceType8 },
 			{ TEXT("PM_Dirt"), SurfaceType9 },
@@ -3755,6 +3756,396 @@ namespace TunaSweeperEditorSetup
 		AppleCrateBlueprint->MarkPackageDirty();
 
 		return SaveAsset(AppleBlueprint) && SaveAsset(CrateFragmentBlueprint) && SaveAsset(AppleCrateBlueprint);
+	}
+
+	UMaterial* EnsureTomatoFleshInteriorMaterial()
+	{
+		const FString MaterialAssetPath = TEXT("/Game/Meshes/Props/TomatoHead/Materials");
+		const FString ObjectPath = GetAssetObjectPath(MaterialAssetPath, TomatoFleshMaterialAssetName);
+		UTexture2D* FleshTexture = LoadObject<UTexture2D>(
+			nullptr,
+			TEXT("/Game/Meshes/Props/TomatoHead/Textures/T_TomatoFlesh.T_TomatoFlesh"));
+		if (!FleshTexture)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Missing tomato flesh texture for %s."), *ObjectPath);
+			return nullptr;
+		}
+
+		UMaterial* Material = LoadObject<UMaterial>(nullptr, *ObjectPath);
+		if (!Material)
+		{
+			Material = Cast<UMaterial>(
+				FModuleManager::LoadModuleChecked<FAssetToolsModule>(TEXT("AssetTools")).Get().CreateAsset(
+					TomatoFleshMaterialAssetName,
+					MaterialAssetPath,
+					UMaterial::StaticClass(),
+					NewObject<UMaterialFactoryNew>()));
+			if (!Material)
+			{
+				return nullptr;
+			}
+			FAssetRegistryModule::AssetCreated(Material);
+		}
+
+		Material->Modify();
+		Material->GetExpressionCollection().Empty();
+		Material->BlendMode = BLEND_Opaque;
+		Material->SetShadingModel(MSM_DefaultLit);
+		Material->TwoSided = true;
+		UMaterialEditorOnlyData* MaterialData = Material->GetEditorOnlyData();
+		if (!MaterialData)
+		{
+			return nullptr;
+		}
+
+		auto* Coordinates = NewObject<UMaterialExpressionTextureCoordinate>(Material);
+		Coordinates->Material = Material;
+		Material->GetExpressionCollection().AddExpression(Coordinates);
+		auto* FleshSample = NewObject<UMaterialExpressionTextureSampleParameter2D>(Material);
+		FleshSample->Material = Material;
+		FleshSample->ParameterName = TEXT("TomatoFleshTexture");
+		FleshSample->Texture = FleshTexture;
+		FleshSample->SamplerType = SAMPLERTYPE_Color;
+		FleshSample->Coordinates.Connect(0, Coordinates);
+		Material->GetExpressionCollection().AddExpression(FleshSample);
+		auto* Roughness = NewObject<UMaterialExpressionScalarParameter>(Material);
+		Roughness->Material = Material;
+		Roughness->ParameterName = TEXT("Roughness");
+		Roughness->DefaultValue = 0.38f;
+		Material->GetExpressionCollection().AddExpression(Roughness);
+		auto* Specular = NewObject<UMaterialExpressionScalarParameter>(Material);
+		Specular->Material = Material;
+		Specular->ParameterName = TEXT("Specular");
+		Specular->DefaultValue = 0.52f;
+		Material->GetExpressionCollection().AddExpression(Specular);
+		MaterialData->BaseColor.Connect(0, FleshSample);
+		MaterialData->Roughness.Connect(0, Roughness);
+		MaterialData->Specular.Connect(0, Specular);
+		Material->PostEditChange();
+		Material->MarkPackageDirty();
+		return SaveAsset(Material) ? Material : nullptr;
+	}
+
+	UMaterial* EnsureTomatoGooMaterial(const FString& AssetName, bool bDeferredDecal)
+	{
+		const FString MaterialAssetPath = TEXT("/Game/Meshes/Props/TomatoHead/Materials");
+		const FString ObjectPath = GetAssetObjectPath(MaterialAssetPath, AssetName);
+		UTexture2D* FleshTexture = LoadObject<UTexture2D>(
+			nullptr,
+			TEXT("/Game/Meshes/Props/TomatoHead/Textures/T_TomatoFlesh.T_TomatoFlesh"));
+		if (!FleshTexture)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Missing tomato flesh texture for %s."), *ObjectPath);
+			return nullptr;
+		}
+
+		UMaterial* Material = LoadObject<UMaterial>(nullptr, *ObjectPath);
+		if (!Material)
+		{
+			Material = Cast<UMaterial>(
+				FModuleManager::LoadModuleChecked<FAssetToolsModule>(TEXT("AssetTools")).Get().CreateAsset(
+					AssetName,
+					MaterialAssetPath,
+					UMaterial::StaticClass(),
+					NewObject<UMaterialFactoryNew>()));
+			if (!Material)
+			{
+				return nullptr;
+			}
+			FAssetRegistryModule::AssetCreated(Material);
+		}
+
+		Material->Modify();
+		Material->GetExpressionCollection().Empty();
+		Material->MaterialDomain = bDeferredDecal ? MD_DeferredDecal : MD_Surface;
+		Material->BlendMode = BLEND_Translucent;
+		Material->DecalBlendMode = bDeferredDecal ? DBM_Translucent : DBM_Translucent;
+		Material->SetShadingModel(MSM_Unlit);
+		Material->TwoSided = true;
+		Material->bUsedWithNiagaraSprites = !bDeferredDecal;
+		UMaterialEditorOnlyData* MaterialData = Material->GetEditorOnlyData();
+		if (!MaterialData)
+		{
+			return nullptr;
+		}
+
+		auto* Coordinates = NewObject<UMaterialExpressionTextureCoordinate>(Material);
+		Coordinates->Material = Material;
+		Material->GetExpressionCollection().AddExpression(Coordinates);
+		auto* FleshSample = NewObject<UMaterialExpressionTextureSampleParameter2D>(Material);
+		FleshSample->Material = Material;
+		FleshSample->ParameterName = TEXT("TomatoFleshTexture");
+		FleshSample->Texture = FleshTexture;
+		FleshSample->SamplerType = SAMPLERTYPE_Color;
+		FleshSample->Coordinates.Connect(0, Coordinates);
+		Material->GetExpressionCollection().AddExpression(FleshSample);
+		auto* Center = NewObject<UMaterialExpressionConstant2Vector>(Material);
+		Center->Material = Material;
+		Center->R = 0.5f;
+		Center->G = 0.5f;
+		Material->GetExpressionCollection().AddExpression(Center);
+		auto* Offset = NewObject<UMaterialExpressionSubtract>(Material);
+		Offset->Material = Material;
+		Offset->A.Connect(0, Coordinates);
+		Offset->B.Connect(0, Center);
+		Material->GetExpressionCollection().AddExpression(Offset);
+		auto* Distance = NewObject<UMaterialExpressionLength>(Material);
+		Distance->Material = Material;
+		Distance->Input.Connect(0, Offset);
+		Material->GetExpressionCollection().AddExpression(Distance);
+		auto* RadiusScale = NewObject<UMaterialExpressionConstant>(Material);
+		RadiusScale->Material = Material;
+		RadiusScale->R = 2.0f;
+		Material->GetExpressionCollection().AddExpression(RadiusScale);
+		auto* NormalizedDistance = NewObject<UMaterialExpressionMultiply>(Material);
+		NormalizedDistance->Material = Material;
+		NormalizedDistance->A.Connect(0, Distance);
+		NormalizedDistance->B.Connect(0, RadiusScale);
+		Material->GetExpressionCollection().AddExpression(NormalizedDistance);
+		auto* OneMinusDistance = NewObject<UMaterialExpressionOneMinus>(Material);
+		OneMinusDistance->Material = Material;
+		OneMinusDistance->Input.Connect(0, NormalizedDistance);
+		Material->GetExpressionCollection().AddExpression(OneMinusDistance);
+		auto* CircleMask = NewObject<UMaterialExpressionSaturate>(Material);
+		CircleMask->Material = Material;
+		CircleMask->Input.Connect(0, OneMinusDistance);
+		Material->GetExpressionCollection().AddExpression(CircleMask);
+
+		if (bDeferredDecal)
+		{
+			MaterialData->BaseColor.Connect(0, FleshSample);
+		}
+		else
+		{
+			MaterialData->EmissiveColor.Connect(0, FleshSample);
+		}
+		MaterialData->Opacity.Connect(0, CircleMask);
+		Material->PostEditChange();
+		Material->MarkPackageDirty();
+		return SaveAsset(Material) ? Material : nullptr;
+	}
+
+	bool ConfigureTomatoStickySplatterSystem(UNiagaraSystem* System, UMaterialInterface* ParticleMaterial)
+	{
+		if (!System || !ParticleMaterial)
+		{
+			return false;
+		}
+
+		bool bConfiguredSpriteRenderer = false;
+		System->Modify();
+		for (FNiagaraEmitterHandle& EmitterHandle : System->GetEmitterHandles())
+		{
+			if (FVersionedNiagaraEmitterData* EmitterData = EmitterHandle.GetEmitterData())
+			{
+				EmitterData->bLocalSpace = false;
+				EmitterData->CalculateBoundsMode = ENiagaraEmitterCalculateBoundMode::Fixed;
+				EmitterData->FixedBounds = FBox(FVector(-260.0f, -260.0f, -80.0f), FVector(260.0f, 260.0f, 300.0f));
+				for (UNiagaraRendererProperties* Renderer : EmitterData->GetRenderers())
+				{
+					if (UNiagaraSpriteRendererProperties* SpriteRenderer = Cast<UNiagaraSpriteRendererProperties>(Renderer))
+					{
+						SpriteRenderer->Modify();
+						SpriteRenderer->Material = ParticleMaterial;
+						bConfiguredSpriteRenderer = true;
+					}
+				}
+			}
+		}
+		System->InvalidateCachedData();
+		System->RequestCompile(true);
+		System->PollForCompilationComplete(true);
+		System->PostEditChange();
+		System->MarkPackageDirty();
+		return bConfiguredSpriteRenderer && SaveAsset(System);
+	}
+
+	UNiagaraSystem* EnsureTomatoStickySplatterSystem()
+	{
+		UMaterial* ParticleMaterial = EnsureTomatoGooMaterial(TomatoGooParticleMaterialAssetName, false);
+		if (!ParticleMaterial)
+		{
+			return nullptr;
+		}
+
+		const FString ObjectPath = GetAssetObjectPath(EffectsAssetPath, TomatoStickySplatterSystemAssetName);
+		UNiagaraSystem* Effect = LoadObject<UNiagaraSystem>(nullptr, *ObjectPath);
+		if (!Effect)
+		{
+			UNiagaraSystem* Source = LoadObject<UNiagaraSystem>(
+				nullptr,
+				TEXT("/Game/BallisticsVFX/Particles/Impacts/DynamicImpacts/_generic/NS_SizzleImpact_Liquid.NS_SizzleImpact_Liquid"));
+			if (!Source)
+			{
+				UE_LOG(LogTunaSweeperEditor, Error, TEXT("Missing liquid Niagara source for %s."), *ObjectPath);
+				return nullptr;
+			}
+			Effect = Cast<UNiagaraSystem>(
+				FModuleManager::LoadModuleChecked<FAssetToolsModule>(TEXT("AssetTools")).Get().DuplicateAsset(
+					TomatoStickySplatterSystemAssetName,
+					EffectsAssetPath,
+					Source));
+		}
+
+		return ConfigureTomatoStickySplatterSystem(Effect, ParticleMaterial) ? Effect : nullptr;
+	}
+
+	UGeometryCollection* EnsureBreakableTomatoGeometryCollection()
+	{
+		const FString PackageName = FString::Printf(TEXT("%s/%s"), *InteractionAssetPath, *TomatoGeometryCollectionAssetName);
+		const FString ObjectPath = FString::Printf(TEXT("%s.%s"), *PackageName, *TomatoGeometryCollectionAssetName);
+		UGeometryCollection* GeometryCollection = LoadObject<UGeometryCollection>(nullptr, *ObjectPath);
+		const bool bCreatedGeometryCollection = GeometryCollection == nullptr;
+		UPackage* Package = GeometryCollection ? GeometryCollection->GetOutermost() : CreatePackage(*PackageName);
+		if (!Package)
+		{
+			return nullptr;
+		}
+		if (!GeometryCollection)
+		{
+			GeometryCollection = NewObject<UGeometryCollection>(
+				Package,
+				*TomatoGeometryCollectionAssetName,
+				RF_Public | RF_Standalone | RF_Transactional);
+		}
+
+		UStaticMesh* SourceMesh = LoadObject<UStaticMesh>(
+			nullptr,
+			TEXT("/Game/Meshes/Props/TomatoHead/SM_Tomato.SM_Tomato"));
+		UMaterial* FleshMaterial = EnsureTomatoFleshInteriorMaterial();
+		if (!GeometryCollection || !SourceMesh || !FleshMaterial)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to prepare tomato fracture source assets."));
+			return nullptr;
+		}
+
+		FManagedArrayCollection Collection;
+		TArray<TObjectPtr<UMaterialInterface>> Materials;
+		TArray<FGeometryCollectionAutoInstanceMesh> AutoInstanceMeshes;
+		TObjectPtr<UStaticMesh> SourceMeshObject = SourceMesh;
+		FGeometryCollectionEngineConversion::ConvertStaticMeshToGeometryCollection(
+			SourceMeshObject,
+			FTransform::Identity,
+			Collection,
+			Materials,
+			AutoInstanceMeshes,
+			false,
+			false);
+		const int32 FleshMaterialId = Materials.AddUnique(FleshMaterial);
+
+		FDataflowTransformSelection TransformSelection;
+		TransformSelection.InitializeFromCollection(Collection, true);
+		FUniformFractureSettings FractureSettings{};
+		FractureSettings.Transform = FTransform::Identity;
+		FractureSettings.MinVoronoiSites = 10;
+		FractureSettings.MaxVoronoiSites = 14;
+		FractureSettings.InternalMaterialID = FleshMaterialId;
+		FractureSettings.RandomSeed = 7162026;
+		FractureSettings.ChanceToFracture = 1.0f;
+		FractureSettings.GroupFracture = false;
+		FractureSettings.SplitIslands = false;
+		FractureSettings.Grout = 0.0f;
+		FractureSettings.NoiseSettings.Amplitude = 0.0f;
+		FractureSettings.AddSamplesForCollision = true;
+		FractureSettings.CollisionSampleSpacing = 6.0f;
+		FFractureEngineFracturing::UniformFracture(Collection, TransformSelection, FractureSettings);
+
+		GeometryCollection->Modify();
+		GeometryCollection->ResetFrom(Collection, Materials, false);
+		GeometryCollection->SetAutoInstanceMeshes(AutoInstanceMeshes);
+		GeometryCollection->EnableClustering = false;
+		GeometryCollection->ClusterGroupIndex = 0;
+		GeometryCollection->MaxClusterLevel = 0;
+		GeometryCollection->DamageModel = EDamageModelTypeEnum::Chaos_Damage_Model_UserDefined_Damage_Threshold;
+		GeometryCollection->DamageThreshold = { 0.0f };
+		GeometryCollection->bUseSizeSpecificDamageThreshold = false;
+		GeometryCollection->bUseMaterialDamageModifiers = false;
+		GeometryCollection->PerClusterOnlyDamageThreshold = false;
+		GeometryCollection->bMassAsDensity = false;
+		GeometryCollection->Mass = 1.8f;
+		GeometryCollection->MinimumMassClamp = 0.02f;
+		GeometryCollection->bImportCollisionFromSource = false;
+		GeometryCollection->bOptimizeConvexes = true;
+		GeometryCollection->SizeSpecificData.Reset();
+		FGeometryCollectionSizeSpecificData SizeData = UGeometryCollection::GeometryCollectionSizeSpecificDataDefaults();
+		SizeData.DamageThreshold = 0;
+		if (SizeData.CollisionShapes.Num() > 0)
+		{
+			SizeData.CollisionShapes[0].CollisionType = ECollisionTypeEnum::Chaos_Volumetric;
+			SizeData.CollisionShapes[0].ImplicitType = EImplicitTypeEnum::Chaos_Implicit_Convex;
+			SizeData.CollisionShapes[0].CollisionObjectReductionPercentage = 0.0f;
+		}
+		GeometryCollection->SizeSpecificData.Add(SizeData);
+
+#if WITH_EDITORONLY_DATA
+		TArray<TObjectPtr<UMaterialInterface>> SourceMaterials;
+		for (const FStaticMaterial& StaticMaterial : SourceMesh->GetStaticMaterials())
+		{
+			SourceMaterials.Add(StaticMaterial.MaterialInterface);
+		}
+		GeometryCollection->GeometrySource.Reset();
+		GeometryCollection->GeometrySource.Emplace(FSoftObjectPath(SourceMesh), FTransform::Identity, SourceMaterials, false, false);
+		GeometryCollection->SetRootProxiesFromGeometrySources();
+#endif
+
+		if (GeometryCollection->GetGeometryCollection().IsValid())
+		{
+			::GeometryCollection::GenerateTemporaryGuids(GeometryCollection->GetGeometryCollection().Get(), 0, true);
+		}
+		GeometryCollection->InvalidateCollection();
+		GeometryCollection->CreateSimulationData();
+		GeometryCollection->RebuildRenderData();
+		GeometryCollection->MarkPackageDirty();
+		Package->SetDirtyFlag(true);
+		if (bCreatedGeometryCollection)
+		{
+			FAssetRegistryModule::AssetCreated(GeometryCollection);
+		}
+		return SaveAsset(GeometryCollection) ? GeometryCollection : nullptr;
+	}
+
+	bool EnsureBreakableTomatoAssets()
+	{
+		if (!EnsureImpactPhysicalMaterialAssets())
+		{
+			return false;
+		}
+		UGeometryCollection* TomatoGeometryCollection = EnsureBreakableTomatoGeometryCollection();
+		UMaterial* GooSplatMaterial = EnsureTomatoGooMaterial(TomatoGooSplatMaterialAssetName, true);
+		UNiagaraSystem* StickySplatterSystem = EnsureTomatoStickySplatterSystem();
+		UBlueprint* TomatoBlueprint = EnsureBlueprint(
+			InteractionAssetPath,
+			BreakableTomatoAssetName,
+			ATunaSweeperBreakableTomatoActor::StaticClass());
+		if (!TomatoGeometryCollection || !GooSplatMaterial || !StickySplatterSystem || !TomatoBlueprint)
+		{
+			return false;
+		}
+
+		FKismetEditorUtilities::CompileBlueprint(TomatoBlueprint);
+		ATunaSweeperBreakableTomatoActor* TomatoDefaults = TomatoBlueprint->GeneratedClass
+			? Cast<ATunaSweeperBreakableTomatoActor>(TomatoBlueprint->GeneratedClass->GetDefaultObject())
+			: nullptr;
+		if (!TomatoDefaults)
+		{
+			return false;
+		}
+		TomatoBlueprint->Modify();
+		TomatoDefaults->Modify();
+		TomatoDefaults->ConfigureBreakableTomatoDefaults(
+			FName(TEXT("TS_BreakableTomato_Default")),
+			1.0f,
+			TSoftObjectPtr<UStaticMesh>(FSoftObjectPath(TEXT("/Game/Meshes/Props/TomatoHead/SM_Tomato.SM_Tomato"))),
+			TSoftObjectPtr<UGeometryCollection>(FSoftObjectPath(TEXT("/Game/Interaction/GC_Tomato_Fractured.GC_Tomato_Fractured"))),
+			TSoftObjectPtr<UNiagaraSystem>(FSoftObjectPath(TEXT("/Game/Effects/NS_Tomato_StickySplatter.NS_Tomato_StickySplatter"))),
+			TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath(TEXT("/Game/Meshes/Props/TomatoHead/Materials/M_TomatoGooSplat.M_TomatoGooSplat"))),
+			TSoftObjectPtr<UPhysicalMaterial>(FSoftObjectPath(TEXT("/Game/Physics/PhysicalMaterials/PM_Flesh.PM_Flesh"))),
+			FVector(34.0f, 34.0f, 34.0f),
+			FVector(0.0f, 0.0f, 34.0f));
+		FBlueprintEditorUtils::MarkBlueprintAsModified(TomatoBlueprint);
+		FKismetEditorUtilities::CompileBlueprint(TomatoBlueprint);
+		TomatoBlueprint->MarkPackageDirty();
+		return SaveAsset(TomatoBlueprint);
 	}
 
 	bool EnsureSharedVoxelMeshAssets()

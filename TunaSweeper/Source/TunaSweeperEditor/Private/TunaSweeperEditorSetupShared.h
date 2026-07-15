@@ -71,6 +71,7 @@
 #include "GeometryCollection/GeometryCollectionUtility.h"
 #include "GeometryCollection/ManagedArrayCollection.h"
 #include "Interaction/TunaSweeperBreakableAppleCrateActor.h"
+#include "Interaction/TunaSweeperBreakableTomatoActor.h"
 #include "Interaction/TunaSweeperCookableChickenActor.h"
 #include "Interaction/TunaSweeperExplosiveBarrelActor.h"
 #include "Interaction/TunaSweeperInteractableComponent.h"
@@ -132,6 +133,7 @@
 #include "NiagaraActor.h"
 #include "NiagaraComponent.h"
 #include "NiagaraParameterStore.h"
+#include "NiagaraSpriteRendererProperties.h"
 #include "NiagaraScript.h"
 #include "NiagaraSystem.h"
 #include "NiagaraSystemImpl.h"
@@ -238,6 +240,7 @@ namespace TunaSweeperEditorSetup
 	const FString ExplosiveBarrelTaskId = TEXT("2026-07-14_ReplaceExplosiveBarrelFluidSmokeWithSpriteParticlesV10");
 	const FString CookableChickenTaskId = TEXT("2026-07-13_CreateCookableChickenBlueprintV1");
 	const FString BreakableAppleCrateTaskId = TEXT("2026-07-07_CreateBreakableAppleCrateAssetsV5");
+	const FString BreakableTomatoTaskId = TEXT("2026-07-16_CreateBreakableTomatoChaosAssetsV1");
 	const FString RollingBomberBodyMaterialTaskId = TEXT("2026-05-28_CreateRollingBomberBodyGrayMaterialV1");
 	const FString RollingBomberLegMaterialTaskId = TEXT("2026-05-28_CreateRollingBomberLegMetalMaterialV1");
 	const FString RollingBomberChargeCylinderEffectTaskId = TEXT("2026-05-28_CreateRollingBomberChargeCylinderEffectV1");
@@ -462,9 +465,15 @@ namespace TunaSweeperEditorSetup
 	const FString ExplosiveBarrelAssetName = TEXT("BP_ExplosiveBarrel");
 	const FString CookableChickenAssetName = TEXT("BP_CookableChicken");
 	const FString BreakableAppleCrateAssetName = TEXT("BP_BreakableAppleCrate");
+	const FString BreakableTomatoAssetName = TEXT("BP_BreakableTomato");
 	const FString PhysicsAppleAssetName = TEXT("BP_PhysicsApple");
 	const FString CrateFragmentAssetName = TEXT("BP_CrateFragment");
 	const FString CrateGeometryCollectionAssetName = TEXT("GC_CrateB_Fractured");
+	const FString TomatoGeometryCollectionAssetName = TEXT("GC_Tomato_Fractured");
+	const FString TomatoFleshMaterialAssetName = TEXT("M_TomatoFlesh_Interior");
+	const FString TomatoGooParticleMaterialAssetName = TEXT("M_TomatoGooParticle");
+	const FString TomatoGooSplatMaterialAssetName = TEXT("M_TomatoGooSplat");
+	const FString TomatoStickySplatterSystemAssetName = TEXT("NS_Tomato_StickySplatter");
 	const FString IntroMapPackagePath = TEXT("/Game/IntroMap");
 	const FString OpeningScenarioMapPackagePath = TEXT("/Game/OpeningScenarioMap");
 	const FString BunkerMapPackagePath = TEXT("/Game/BunkerMap");
@@ -688,6 +697,8 @@ bool EnsureCookableChickenBlueprint();
 bool ImportWorldTexture(const FString& InSourceFile, const FString& DestinationPath, const FString& AssetName, UTexture2D** OutTexture);
 UGeometryCollection* EnsureBreakableAppleCrateGeometryCollection();
 bool EnsureBreakableAppleCrateAssets();
+UGeometryCollection* EnsureBreakableTomatoGeometryCollection();
+bool EnsureBreakableTomatoAssets();
 bool EnsureSharedVoxelMeshAssets();
 bool EnsureCoverPointAssets();
 void RegisterWidgetVariable(UWidgetBlueprint* WidgetBlueprint, UWidget* Widget);

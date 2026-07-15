@@ -35,6 +35,9 @@ public:
 	void BreakCrate();
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Breakable Apple Crate")
+	void BreakCrateInDirection(const FVector& SpillDirection);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Breakable Apple Crate")
 	void ConfigureBreakableAppleCrateDefaults(
 		FName InCrateId,
 		float InMaxHealth,
@@ -114,6 +117,10 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Apple Crate|Audio")
 	TSoftObjectPtr<USoundBase> BreakSound;
+
+	/** Randomly selects one of these sounds when populated; BreakSound remains a single-sound fallback. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Breakable|Audio")
+	TArray<TSoftObjectPtr<USoundBase>> BreakSoundVariants;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Apple Crate|Audio", meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float BreakSoundVolumeMultiplier = 1.0f;

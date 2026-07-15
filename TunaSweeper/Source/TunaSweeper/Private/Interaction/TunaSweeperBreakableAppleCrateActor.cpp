@@ -177,6 +177,11 @@ void ATunaSweeperBreakableAppleCrateActor::BreakCrate()
 	BreakCrateFromDirection(GetActorForwardVector());
 }
 
+void ATunaSweeperBreakableAppleCrateActor::BreakCrateInDirection(const FVector& SpillDirection)
+{
+	BreakCrateFromDirection(SpillDirection);
+}
+
 void ATunaSweeperBreakableAppleCrateActor::ConfigureBreakableAppleCrateDefaults(
 	FName InCrateId,
 	float InMaxHealth,
@@ -411,7 +416,25 @@ FVector ATunaSweeperBreakableAppleCrateActor::GetCrateCenterWorldLocation() cons
 
 void ATunaSweeperBreakableAppleCrateActor::PlayBreakSound()
 {
-	USoundBase* LoadedBreakSound = BreakSound.LoadSynchronous();
+	USoundBase* LoadedBreakSound = nullptr;
+	TArray<USoundBase*> LoadedVariants;
+	LoadedVariants.Reserve(BreakSoundVariants.Num());
+	for (const TSoftObjectPtr<USoundBase>& SoundVariant : BreakSoundVariants)
+	{
+		if (USoundBase* LoadedVariant = SoundVariant.LoadSynchronous())
+		{
+			LoadedVariants.Add(LoadedVariant);
+		}
+	}
+
+	if (LoadedVariants.Num() > 0)
+	{
+		LoadedBreakSound = LoadedVariants[FMath::RandRange(0, LoadedVariants.Num() - 1)];
+	}
+	else
+	{
+		LoadedBreakSound = BreakSound.LoadSynchronous();
+	}
 	if (!LoadedBreakSound)
 	{
 		return;

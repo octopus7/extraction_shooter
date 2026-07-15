@@ -5537,3 +5537,42 @@
 ## 2026-07-16 03:00:33 (소요시간: 00:03:00)
 
 - 토마토 Static Mesh를 피격 시 Chaos 절차적 파괴 오브젝트로 구성하고, 끈적한 액체 파편 Niagara System을 연동할 구현 계획을 수립함. 요청에 따라 에셋·코드 구현은 수행하지 않음.
+
+## 2026-07-16 03:15:54 (소요시간: 00:13:02)
+
+- `SM_Tomato`와 `T_TomatoFlesh`를 사용해 `M_TomatoFlesh_Interior`, `GC_Tomato_Fractured`, `NS_Tomato_StickySplatter`, `PM_Flesh`, `BP_BreakableTomato`를 생성함.
+- 토마토의 파괴 상태를 `UTunaSweeperBreakableTomatoComponent`로 분리하고, 마지막 피해 시 Chaos 외부 변형·방사/방향 충격과 점성 액체 Niagara를 한 번 실행하도록 구현함.
+- 플레이어가 850cm 안에 들어오면 1~2초 통통 튀며 접근하고 2~3초 쉬는 동작을 반복하며, 110cm 이내에서는 더 접근하지 않도록 구성함.
+- UE 5.7 `TunaSweeperEditor Win64 Development` 전체 빌드에 성공했고 일반 Unreal Editor를 실행함. 기존 `RaidMap.umap` 사용자 변경은 수정하지 않음.
+
+## 2026-07-16 03:29:54 (소요시간: 00:01:30)
+
+- `Docs/breakable_tomato.md`에 토마토 파괴 관련 파일·에셋별 역할, 런타임 흐름, UE 5.7 수동 Geometry Collection 생성·분할·내부 과육 재질·Chaos 충돌 설정·Blueprint 배치 절차를 기록함.
+
+## 2026-07-16 03:35:42 (소요시간: 00:01:56)
+
+- 파괴음 다중 선택용 `BreakSoundVariants` 배열을 추가하고, 배열이 비어 있지 않으면 유효한 사운드 하나를 무작위로 재생하도록 구현함. 배열이 비었을 때는 기존 단일 `BreakSound`을 사용하므로 기존 사과 상자 동작은 유지됨.
+- `BP_BreakableTomato` 런타임 기본 배열에 `/Game/Audio/Imported/SW_Tomato_A`, `SW_Tomato_B`, `SW_Tomato_C`를 지정함.
+- UE 5.7 Live Coding 빌드에 성공했고 `Docs/breakable_tomato.md`에 파괴음 배열 사용법을 추가함.
+
+## 2026-07-16 03:38:00 (소요시간: 00:03:38)
+
+- 기존 `NS_Tomato_StickySplatter`가 연기성 범용 소스라서 기본 재생을 비활성화함.
+- 파괴 시 7~10개의 `ATunaSweeperTomatoGooDropletActor`를 생성하도록 변경함. 과즙 덩어리는 중력으로 비산하고, 바닥·벽 첫 충돌에서 납작한 형태로 고착된 뒤 6초 후 정리됨.
+- UE 5.7 Live Coding 빌드에 성공했고 `Docs/breakable_tomato.md`의 런타임 흐름과 에셋 역할을 갱신함.
+
+## 2026-07-16 03:42:55 (소요시간: 00:00:21)
+
+- 토마토 Chaos 파편의 방향 충격을 투사체 진행 방향의 반대로 적용하도록 수정하고, 기본 강도를 `620`에서 `1800`으로 올림.
+- `Tomato Impact Directional Impulse`를 `BP_BreakableTomato`에서 조정 가능한 값으로 노출함.
+- UE 5.7 Live Coding 빌드에 성공했고 `Docs/breakable_tomato.md`에 방향 규칙과 튜닝 값을 기록함.
+
+## 2026-07-16 03:43:58 (소요시간: 00:00:30)
+
+- UE 5.7 `TunaSweeperEditor Win64 Development` 일반 전체 빌드에 성공한 뒤, 새 바이너리로 Unreal Editor를 실행함.
+
+## 2026-07-16 03:45:00 (소요시간: 00:16:30)
+
+- 연기처럼 보이던 `NS_Tomato_StickySplatter`를 `T_TomatoFlesh` 기반의 붉은 과육 방울 Niagara로 교체하고, `M_TomatoGooParticle`과 `M_TomatoGooSplat` 머티리얼을 생성함.
+- 공중에 남는 임시 `TunaSweeperTomatoGooDropletActor` 물리 구체 방식은 제거하고, 파괴 지점 주변의 지면 추적 결과에 4~7개의 끈적한 과즙 데칼을 생성하도록 변경함.
+- UE 5.7 일반 에디터 빌드 성공 및 토마토 에셋 재생성을 확인함. 헤드리스 에디터는 저장 후 UI 종료 단계에서 충돌했으나, 새 머티리얼·Niagara·Blueprint 저장 로그와 파일 갱신을 확인함.

@@ -205,6 +205,20 @@ namespace TunaSweeperEditorSetup
 			}
 		}
 
+		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperRebuildBreakableTomato")))
+		{
+			if (TunaSweeperEditorSetup::EnsureBreakableTomatoAssets())
+			{
+				FTunaSweeperEditorRunOnce::MarkCompleted(TunaSweeperEditorSetup::BreakableTomatoTaskId);
+			}
+
+			if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperBreakableTomatoSetupQuit")))
+			{
+				FPlatformMisc::RequestExit(false);
+				return;
+			}
+		}
+
 		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperRebuildProceduralTerrainTest")))
 		{
 			FTSTicker::GetCoreTicker().AddTicker(
@@ -357,6 +371,13 @@ namespace TunaSweeperEditorSetup
 			[]()
 			{
 				return TunaSweeperEditorSetup::EnsureLocalExplosionEffectAssets();
+			});
+
+		FTunaSweeperEditorRunOnce::Run(
+			TunaSweeperEditorSetup::BreakableTomatoTaskId,
+			[]()
+			{
+				return TunaSweeperEditorSetup::EnsureBreakableTomatoAssets();
 			});
 
 		FTunaSweeperEditorRunOnce::Run(
