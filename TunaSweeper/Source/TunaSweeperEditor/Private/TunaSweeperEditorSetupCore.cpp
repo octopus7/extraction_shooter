@@ -2025,6 +2025,46 @@ namespace TunaSweeperEditorSetup
 		return SaveAsset(GameInstanceBlueprint);
 	}
 
+	bool EnsureImpactPhysicalMaterialAssets()
+	{
+		struct FPhysicalMaterialDefinition
+		{
+			const TCHAR* AssetName;
+			EPhysicalSurface SurfaceType;
+		};
+
+		constexpr FPhysicalMaterialDefinition Definitions[] = {
+			{ TEXT("PM_Wood"), SurfaceType4 },
+			{ TEXT("PM_Stone"), SurfaceType8 },
+			{ TEXT("PM_Dirt"), SurfaceType9 },
+			{ TEXT("PM_Metal"), SurfaceType2 },
+			{ TEXT("PM_Water"), SurfaceType6 }
+		};
+
+		const FString PhysicalMaterialAssetPath = TEXT("/Game/Physics/PhysicalMaterials");
+		for (const FPhysicalMaterialDefinition& Definition : Definitions)
+		{
+			UPhysicalMaterial* PhysicalMaterial = EnsureDataAsset<UPhysicalMaterial>(
+				PhysicalMaterialAssetPath,
+				Definition.AssetName);
+			if (!PhysicalMaterial)
+			{
+				return false;
+			}
+
+			PhysicalMaterial->Modify();
+			PhysicalMaterial->SurfaceType = Definition.SurfaceType;
+			PhysicalMaterial->MarkPackageDirty();
+			if (!SaveAsset(PhysicalMaterial))
+			{
+				UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to save %s."), *PhysicalMaterial->GetPathName());
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 	bool EnsureWeaponSpreadRecoilAssets()
 	{
 		UTunaSweeperWeaponSpreadRecoilDataAsset* RecoilDataAsset =

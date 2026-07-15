@@ -6,6 +6,21 @@ namespace TunaSweeperEditorSetup
 	// One-shot editor bootstrap. Remove only after an explicit cleanup request; see Docs/editor_one_shot_cleanup.md.
 	void RunEditorOneShotSetup_ToCleanupOnExplicitRequest()
 	{
+		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperImpactPhysicalMaterialSetup")))
+		{
+			if (TunaSweeperEditorSetup::EnsureImpactPhysicalMaterialAssets())
+			{
+				FTunaSweeperEditorRunOnce::MarkCompleted(
+					TunaSweeperEditorSetup::ImpactPhysicalMaterialAssetTaskId);
+			}
+
+			if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperImpactPhysicalMaterialSetupQuit")))
+			{
+				FPlatformMisc::RequestExit(false);
+				return;
+			}
+		}
+
 		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperFootstepPresentationSetup")))
 		{
 			if (TunaSweeperEditorSetup::EnsurePlayerFootstepPresentationAssets())
@@ -370,6 +385,13 @@ namespace TunaSweeperEditorSetup
 			[]()
 			{
 				return TunaSweeperEditorSetup::EnsureProjectileHitEffectAssets();
+			});
+
+		FTunaSweeperEditorRunOnce::Run(
+			TunaSweeperEditorSetup::ImpactPhysicalMaterialAssetTaskId,
+			[]()
+			{
+				return TunaSweeperEditorSetup::EnsureImpactPhysicalMaterialAssets();
 			});
 
 		FTunaSweeperEditorRunOnce::Run(

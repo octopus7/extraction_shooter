@@ -37,6 +37,7 @@ public class TunaSweeperEditor : ModuleRules
 			"Niagara",
 			"PropertyEditor",
 			"PlanarCut",
+			"PhysicsCore",
 			"RenderCore",
 			"Slate",
 			"SlateCore",

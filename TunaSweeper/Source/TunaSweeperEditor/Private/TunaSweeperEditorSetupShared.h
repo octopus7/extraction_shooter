@@ -138,6 +138,7 @@
 #include "NiagaraTypes.h"
 #include "ObjectTools.h"
 #include "Player/TunaSweeperPlayerController.h"
+#include "PhysicalMaterials/PhysicalMaterial.h"
 #include "Sound/SoundBase.h"
 #include "Sound/SoundWave.h"
 #include "StaticMeshAttributes.h"
@@ -245,6 +246,7 @@ namespace TunaSweeperEditorSetup
 	const FString ExtractionSmokeSignalNiagaraSystemTaskId = TEXT("2026-05-29_CreateExtractionSmokeSignalNiagaraSystemV4");
 	const FString LookdevFluidExplosionTaskId = TEXT("2026-06-14_CreateLookdevFluidExplosionNiagaraLevelV1");
 	const FString ProjectileHitEffectAssetTaskId = TEXT("2026-05-28_CreateProjectileHitEffectAssetsV1");
+	const FString ImpactPhysicalMaterialAssetTaskId = TEXT("2026-07-16_CreateImpactPhysicalMaterialsV1");
 	const FString WeaponSpreadRecoilAssetTaskId = TEXT("2026-05-28_CreateWeaponSpreadRecoilAssetsV1");
 	const FString PlayerFootstepPresentationAssetTaskId = TEXT("2026-07-14_CreatePlayerFootstepPresentationAssetsV1");
 	const FString WeaponPresentationAssetTaskId = TEXT("2026-07-12_CreateWeaponPresentationAssetsV1");
@@ -639,6 +641,7 @@ bool SetProjectGameModeToBlueprint();
 bool SetProjectStartupMapsToIntro();
 bool EnsureGameInstanceBlueprint();
 bool EnsureProjectileHitEffectAssets();
+bool EnsureImpactPhysicalMaterialAssets();
 bool EnsureWeaponSpreadRecoilAssets();
 bool EnsurePlayerFootstepPresentationAssets();
 bool EnsureWeaponPresentationAssets();
