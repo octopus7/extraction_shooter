@@ -251,6 +251,7 @@ namespace TunaSweeperEditorSetup
 	const FString PlayerFootstepPresentationAssetTaskId = TEXT("2026-07-14_CreatePlayerFootstepPresentationAssetsV1");
 	const FString WeaponPresentationAssetTaskId = TEXT("2026-07-12_CreateWeaponPresentationAssetsV1");
 	const FString WeaponPresentationEmptyFireAssetTaskId = TEXT("2026-07-14_SetWeaponPresentationEmptyFireSoundV1");
+	const FString EnemyWeaponFallbackPresentationAssetTaskId = TEXT("2026-07-16_CreateEnemyWeaponFallbackPresentationV1");
 	const FString BaseballBatAssetTaskId = TEXT("2026-05-28_CreateBaseballBatStaticMeshAssetsV1");
 	const FString SandbagCoverAssetTaskId = TEXT("2026-06-02_SandbagFourLayerCoverV1");
 	const FString VoxelMeshAssetTaskId = TEXT("2026-05-19_CreateSharedVoxelMeshAssetsV1");
@@ -289,6 +290,7 @@ namespace TunaSweeperEditorSetup
 	const FString WeaponSpreadRecoilDataAssetName = TEXT("DA_WeaponSpreadRecoil");
 	const FString WeaponPresentationAssetPath = TEXT("/Game/Weapons/AudioVisual");
 	const FString WeaponPresentationRifleDataAssetName = TEXT("DA_WeaponPresentation_Rifle");
+	const FString EnemyWeaponFallbackPresentationDataAssetName = TEXT("DA_EnemyWeaponPresentation_Fallback");
 	const FString WeaponPresentationAudioAssetPath = TEXT("/Game/Audio/SFX/Weapons");
 	const FString WeaponEffectsAssetPath = TEXT("/Game/Weapons/Effects");
 	const FString ShellCasingMeshAssetName = TEXT("SM_WeaponShellCasing");
@@ -646,6 +648,7 @@ bool EnsureWeaponSpreadRecoilAssets();
 bool EnsurePlayerFootstepPresentationAssets();
 bool EnsureWeaponPresentationAssets();
 bool EnsureWeaponPresentationEmptyFireSoundAsset();
+bool EnsureEnemyWeaponFallbackPresentationAsset();
 bool EnsureShellCasingAssets();
 bool EnsureTopDownShooterAssets();
 bool EnsureCanBotBlueprint();

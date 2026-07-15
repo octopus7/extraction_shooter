@@ -99,6 +99,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Weapon|Presentation")
 	void SetWeaponPresentationDataAsset(TSoftObjectPtr<UTunaSweeperWeaponPresentationDataAsset> InWeaponPresentationDataAsset);
 
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Weapon|Presentation")
+	bool HasWeaponPresentationDataAsset() const { return !WeaponPresentationDataAsset.IsNull(); }
+
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Weapon|Presentation")
 	bool TryPlayEmptyFirePresentation();
 

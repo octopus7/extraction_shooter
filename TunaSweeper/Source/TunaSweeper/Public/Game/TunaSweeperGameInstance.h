@@ -14,6 +14,7 @@ class APawn;
 class ATunaSweeperPetCompanionCharacter;
 class UTunaSweeperFootstepPresentationDataAsset;
 class UTunaSweeperVitalsComponent;
+class UTunaSweeperWeaponPresentationDataAsset;
 
 USTRUCT(BlueprintType)
 struct TUNASWEEPER_API FTunaSweeperGameplaySettings
@@ -281,6 +282,10 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TunaSweeper|Weapon Spread Recoil")
 	TSoftObjectPtr<UTunaSweeperWeaponSpreadRecoilDataAsset> WeaponSpreadRecoilDataAsset;
+
+	/** Shared presentation used by enemies whose weapon class has no presentation configured. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TunaSweeper|Enemy Weapon Presentation")
+	TSoftObjectPtr<UTunaSweeperWeaponPresentationDataAsset> EnemyWeaponFallbackPresentationDataAsset;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TunaSweeper|Footstep Presentation")
 	TSoftObjectPtr<UTunaSweeperFootstepPresentationDataAsset> FootstepPresentationDataAsset;

@@ -5513,3 +5513,14 @@
 - `BP_BreakableAppleCrate`가 새 C++ 오디오 속성을 반영하도록 기존 사과 상자 one-shot 갱신 경로로 관련 에셋을 재컴파일하고 저장함.
 - one-shot 갱신 후 종료 크래시가 반복되어 사과 상자 setup quit 경로를 한 틱 뒤 종료하도록 보정하고, 크래시 없이 저장 후 정상 종료되는 것을 로그로 확인함.
 - 빌드와 BP 갱신 완료 후 Unreal Editor를 다시 실행함.
+## 2026-07-16 01:12:00 (소요시간: 00:05:10)
+
+- 적 무기 클래스에 개별 프레젠테이션이 없을 때 사용할 `DA_EnemyWeaponPresentation_Fallback` 생성 경로를 추가함. DA에는 기존 소총 발사음만 연결하고, 머즐 플래시·재장전·빈 탄창 사운드는 비워 둠.
+- `BP_TunaSweeperGameInstance`의 `EnemyWeaponFallbackPresentationDataAsset`에 새 DA를 연결하도록 구성하고, 적은 자신의 무기에 프레젠테이션이 없는 경우에만 이 폴백을 적용하도록 변경함.
+- `TunaSweeperEditor Win64 Development` UE 5.7 빌드에 성공했고, 에디터 실행으로 DA 생성과 `BP_TunaSweeperGameInstance` 연결을 확인함.
+## 2026-07-16 01:18:17 (소요시간: 00:08:59)
+
+- `/Game/Physics/PhysicalMaterials`에 `PM_Wood`, `PM_Stone`, `PM_Dirt`, `PM_Metal`, `PM_Water` 물리 재질 에셋을 생성함.
+- 표면 타입은 각각 Wood(`SurfaceType4`), Stone(`SurfaceType8`), Dirt(`SurfaceType9`), Metal(`SurfaceType2`), Water(`SurfaceType6`)로 설정함.
+- 돌·흙을 독립적인 피격 리졸버 규칙으로 연결할 수 있도록 `DefaultEngine.ini`에 Stone과 Dirt 물리 표면을 등록함. 메시 할당은 사용자 작업 범위로 남김.
+- `TunaSweeperEditor Win64 Development` UE 5.7 빌드 성공을 확인함.

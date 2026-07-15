@@ -2372,6 +2372,79 @@ namespace TunaSweeperEditorSetup
 		return SaveAsset(PresentationDataAsset);
 	}
 
+	bool EnsureEnemyWeaponFallbackPresentationAsset()
+	{
+		USoundBase* FireSound = LoadObject<USoundBase>(
+			nullptr,
+			*GetAssetObjectPath(WeaponPresentationAudioAssetPath, RifleFireSoundAssetName));
+		if (!FireSound)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to load enemy fallback fire sound."));
+			return false;
+		}
+
+		UTunaSweeperWeaponPresentationDataAsset* PresentationDataAsset =
+			EnsureDataAsset<UTunaSweeperWeaponPresentationDataAsset>(
+				WeaponPresentationAssetPath,
+				EnemyWeaponFallbackPresentationDataAssetName);
+		if (!PresentationDataAsset)
+		{
+			return false;
+		}
+
+		PresentationDataAsset->Modify();
+		PresentationDataAsset->WeaponTypeTag = NAME_None;
+		PresentationDataAsset->MuzzleFlashEffect.Reset();
+		PresentationDataAsset->FireSound = TSoftObjectPtr<USoundBase>(FireSound);
+		PresentationDataAsset->ReloadStartSound.Reset();
+		PresentationDataAsset->ReloadCompleteSound.Reset();
+		PresentationDataAsset->EmptyFireSound.Reset();
+		PresentationDataAsset->MarkPackageDirty();
+		if (!SaveAsset(PresentationDataAsset))
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to save enemy fallback presentation data asset."));
+			return false;
+		}
+
+		UBlueprint* GameInstanceBlueprint = LoadObject<UBlueprint>(nullptr, *GetGameInstanceObjectPath());
+		if (!GameInstanceBlueprint && !EnsureGameInstanceBlueprint())
+		{
+			return false;
+		}
+
+		GameInstanceBlueprint = LoadObject<UBlueprint>(nullptr, *GetGameInstanceObjectPath());
+		if (!GameInstanceBlueprint)
+		{
+			return false;
+		}
+
+		if (!GameInstanceBlueprint->GeneratedClass)
+		{
+			FKismetEditorUtilities::CompileBlueprint(GameInstanceBlueprint);
+		}
+
+		UTunaSweeperGameInstance* GameInstanceDefaults = GameInstanceBlueprint->GeneratedClass
+			? Cast<UTunaSweeperGameInstance>(GameInstanceBlueprint->GeneratedClass->GetDefaultObject())
+			: nullptr;
+		if (!GameInstanceDefaults)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to configure enemy fallback weapon presentation on %s."), *GetGameInstanceObjectPath());
+			return false;
+		}
+
+		GameInstanceBlueprint->Modify();
+		GameInstanceDefaults->Modify();
+		GameInstanceDefaults->EnemyWeaponFallbackPresentationDataAsset =
+			TSoftObjectPtr<UTunaSweeperWeaponPresentationDataAsset>(
+				FSoftObjectPath(GetAssetObjectPath(
+					WeaponPresentationAssetPath,
+					EnemyWeaponFallbackPresentationDataAssetName)));
+		GameInstanceBlueprint->MarkPackageDirty();
+		FKismetEditorUtilities::CompileBlueprint(GameInstanceBlueprint);
+
+		return SaveAsset(GameInstanceBlueprint);
+	}
+
 	FVector ResolveMuzzleSocketLocation(const UStaticMesh& WeaponMesh)
 	{
 		const FBox MeshBounds = WeaponMesh.GetBoundingBox();

@@ -3229,3 +3229,48 @@ MP4 오디오 추출 도구에서 숫자로 시간을 입력하지 않고, 전�
 ### 답변
 
 기존에는 장전 탄약이 0이면 발사 입력을 즉시 종료해 공탄음을 재생하는 코드나 DA 슬롯이 없었다. `EmptyFireSound` 슬롯과 재생 로직을 추가해, 현재는 `/Game/Audio/Imported/SW_Gun_Trigger`가 발사 쿨다운 기준으로 한 번 재생된다. 이 경우 발사체·머즐 플래시·정상 발사음은 발생하지 않는다.
+## 2026-07-16 01:11:34 (소요시간: 00:01:20)
+
+### 질문
+
+적이 발사하는 총에 소리가 나지 않는 원인이 무기 미지정 상태인지 문의.
+
+### 답변
+
+아니다. 원거리 적 스폰 데이터에는 권총(1001), 소총(1002), 정예 소총(1007) 무기 아이템이 지정되어 있으며, 미지정이어도 코드가 기본 소총(1002)으로 대체한다. 실제 원인은 적이 생성하는 무기 액터가 `ATunaSweeperWeapon` 기본 클래스라 `WeaponPresentationDataAsset`이 비어 있는 점이다. 발사 자체는 성공하지만 `PlayFirePresentation()`이 즉시 반환되어 총성·머즐 플래시가 재생되지 않는다. 플레이어용 `BP_AssaultRifle`에는 해당 프레젠테이션 데이터가 지정되어 있다.
+## 2026-07-16 01:11:50 (소요시간: 00:00:26)
+
+### 질문
+
+총알 피격 시 사물에서 나는 소리를 리졸버 프로젝트에 구현했는지 문의.
+
+### 답변
+
+표면·태그 기반 피격 이펙트 리졸버에는 `Sound`를 해석하여 충돌 위치에서 재생하는 코드가 구현되어 있다. 다만 현재 일반/관통 탄약이 참조하는 `DA_Impact_Ballistic`, `DA_Impact_BallisticAP` 에셋에는 사운드(및 다른 외부 이펙트) 참조가 설정되어 있지 않아, 실제 사물 피격음은 재생되지 않는다.
+## 2026-07-16 01:13:33 (소요시간: 00:00:23)
+
+### 질문
+
+나무 상자 스태틱 메시로 총알 피격 나무 소리를 적용하는 설정 방법 문의.
+
+### 답변
+
+`PM_Wood` 물리 재질을 만들고 Surface Type을 프로젝트에 등록된 `Wood`(`SurfaceType4`)로 지정한 뒤, 실제 총알 충돌 컴포넌트에 물리 재질을 할당한다. 일반 스태틱 메시는 재질의 Physical Material 또는 Static Mesh의 Simple Collision Physical Material에 설정한다. 현재 사과 상자 액터는 메시가 아닌 `BlockingCollision` 박스가 총알을 받으므로, 해당 컴포넌트의 Phys Material Override에 `PM_Wood`를 지정해야 한다. `DA_Impact_Ballistic`/`DA_Impact_BallisticAP`의 Surface Rules에 Wood 규칙을 추가하고 그 Effect의 Sound에 나무 피격음을 연결한다. 또한 투사체의 CollisionComponent에서 Return Material on Move를 켜야 HitResult의 물리 재질을 확실히 받을 수 있다.
+## 2026-07-16 01:17:20 (소요시간: 00:00:20)
+
+### 질문
+
+다음 실행 시 적 무기 폴백 발사음 DA 생성과 게임 인스턴스 연결이 자동으로 진행되는지 문의.
+
+### 답변
+
+이번 C++ 변경이 한 번 빌드된 뒤 다음 Unreal Editor 실행 시 자동으로 진행된다. 새 one-shot 작업 ID가 기존 완료 기록과 별도로 실행되어 `DA_EnemyWeaponPresentation_Fallback`을 만들고 `BP_TunaSweeperGameInstance`에 연결한다. 빌드되지 않은 기존 Editor 바이너리로만 다시 실행하면 변경 코드가 없으므로 자동 실행되지 않는다.
+## 2026-07-16 01:31:30 (소요시간: 00:00:10)
+
+### 질문
+
+생성된 적 무기 폴백 발사음 DA 이름 문의.
+
+### 답변
+
+DA 이름은 `DA_EnemyWeaponPresentation_Fallback`이며, 경로는 `/Game/Weapons/AudioVisual/DA_EnemyWeaponPresentation_Fallback`이다.

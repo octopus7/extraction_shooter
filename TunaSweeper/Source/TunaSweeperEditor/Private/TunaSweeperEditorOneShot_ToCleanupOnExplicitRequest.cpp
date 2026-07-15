@@ -438,6 +438,13 @@ namespace TunaSweeperEditorSetup
 			});
 
 		FTunaSweeperEditorRunOnce::Run(
+			TunaSweeperEditorSetup::EnemyWeaponFallbackPresentationAssetTaskId,
+			[]()
+			{
+				return TunaSweeperEditorSetup::EnsureEnemyWeaponFallbackPresentationAsset();
+			});
+
+		FTunaSweeperEditorRunOnce::Run(
 			TunaSweeperEditorSetup::BaseballBatAssetTaskId,
 			[]()
 			{

@@ -489,6 +489,13 @@ void ATunaSweeperEnemyCharacter::InitializeEnemyWeaponRuntime()
 
 	if (EnsureEnemyWeaponActor() && TunaGameInstance)
 	{
+		if (!EnemyWeapon->HasWeaponPresentationDataAsset() &&
+			!TunaGameInstance->EnemyWeaponFallbackPresentationDataAsset.IsNull())
+		{
+			EnemyWeapon->SetWeaponPresentationDataAsset(
+				TunaGameInstance->EnemyWeaponFallbackPresentationDataAsset);
+		}
+
 		FTunaSweeperWeaponSpreadRecoilDefinition RecoilDefinition;
 		if (TunaGameInstance->TryGetWeaponSpreadRecoilDefinition(EnemyWeaponTypeTag, RecoilDefinition))
 		{
