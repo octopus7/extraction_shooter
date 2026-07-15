@@ -3274,3 +3274,30 @@ MP4 오디오 추출 도구에서 숫자로 시간을 입력하지 않고, 전�
 ### 답변
 
 DA 이름은 `DA_EnemyWeaponPresentation_Fallback`이며, 경로는 `/Game/Weapons/AudioVisual/DA_EnemyWeaponPresentation_Fallback`이다.
+## 2026-07-16 01:34:52 (소요시간: 00:00:05)
+
+### 질문
+
+`DA_Impact_Ballistic`와 `DA_Impact_BallisticAP`의 차이 문의.
+
+### 답변
+
+현재 두 Impact Profile Data Asset에는 서로 다른 이펙트·사운드·표면 규칙이 저장되어 있지 않아, 피격 연출은 동일하다. 두 프로필의 이름만 일반탄과 AP탄에 각각 연결되어 있으며, 실제 차이는 `ItemTable.json`의 AP 탄약이 더 높은 `projectile_damage_multiplier`와 `projectile_damage_bonus`를 갖는 피해 수치에 있다. 두 프로필을 분리한 목적은 이후 AP 전용 관통·금속 피격음·이펙트 규칙을 독립적으로 설정하기 위해서다.
+## 2026-07-16 01:39:17 (소요시간: 00:00:20)
+
+### 질문
+
+`SM_CrateB`의 Simple Collision Physical Material에 `PM_Wood`를 지정한 뒤 PM과 사운드 매핑 작업을 진행하면 되는지 문의.
+
+### 답변
+
+일반 Static Mesh 충돌을 사용하는 경우 해당 설정이 맞으며, 다음으로 `DA_Impact_Ballistic`과 `DA_Impact_BallisticAP`의 Surface Rules에 Wood 규칙을 각각 추가해 `SW_Wood_Hit`을 Sound로 지정하면 된다. `BP_BreakableAppleCrate`는 메시가 아닌 `BlockingCollision` 박스가 투사체를 받으므로 해당 컴포넌트의 Phys Material Override에도 `PM_Wood`를 지정해야 한다. 또한 투사체 CollisionComponent의 Return Material on Move가 켜져 있어야 피격 결과에서 물리 재질을 확실히 읽을 수 있다.
+## 2026-07-16 01:43:34 (소요시간: 00:00:20)
+
+### 질문
+
+Impact Profile의 Surface Rules에서 Wood를 추가할 수 없고 Default와 Dirt만 보이는 문제 문의.
+
+### 답변
+
+`DefaultEngine.ini`의 `PhysicalSurfaces` 설정이 배열 추가 문법 없이 반복되어 마지막 Dirt 항목이 앞선 항목들을 덮어쓴 것이 원인이다. 모든 물리 표면을 `+PhysicalSurfaces=` 형식으로 수정했으며, 열려 있는 Unreal Editor는 기존 설정을 메모리에 유지하므로 저장 후 재시작하면 Flesh, Metal, Concrete, Wood, Glass, Water, Energy, Stone, Dirt가 모두 Surface Type 드롭다운에 표시된다.

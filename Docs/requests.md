@@ -5524,3 +5524,12 @@
 - 표면 타입은 각각 Wood(`SurfaceType4`), Stone(`SurfaceType8`), Dirt(`SurfaceType9`), Metal(`SurfaceType2`), Water(`SurfaceType6`)로 설정함.
 - 돌·흙을 독립적인 피격 리졸버 규칙으로 연결할 수 있도록 `DefaultEngine.ini`에 Stone과 Dirt 물리 표면을 등록함. 메시 할당은 사용자 작업 범위로 남김.
 - `TunaSweeperEditor Win64 Development` UE 5.7 빌드 성공을 확인함.
+## 2026-07-16 01:43:34 (소요시간: 00:07:14)
+
+- 물리 표면 배열 설정을 `+PhysicalSurfaces=` 형식으로 수정해 Wood를 비롯한 모든 등록 표면이 에디터에 표시되도록 보정함.
+- 사용자가 기존 Unreal Editor를 종료한 뒤 UE 5.7 Editor를 다시 실행하여 변경된 프로젝트 설정을 반영함.
+## 2026-07-16 01:58:12 (소요시간: 00:02:45)
+
+- 피격 이펙트 리졸버에 충돌 대상·컴포넌트·물리 재질·해석 표면·선택 규칙·사운드 경로를 기록하는 `LogTunaSweeperImpactEffects` 진단 로그를 추가함.
+- 투사체 CollisionComponent에서 `bReturnMaterialOnMove`를 활성화해 충돌 `HitResult`가 물리 재질을 반환하도록 보정함.
+- UE 5.7 `TunaSweeperEditor Win64 Development` 빌드에 성공했고 Unreal Editor를 다시 실행함.
