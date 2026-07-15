@@ -5533,3 +5533,7 @@
 - 피격 이펙트 리졸버에 충돌 대상·컴포넌트·물리 재질·해석 표면·선택 규칙·사운드 경로를 기록하는 `LogTunaSweeperImpactEffects` 진단 로그를 추가함.
 - 투사체 CollisionComponent에서 `bReturnMaterialOnMove`를 활성화해 충돌 `HitResult`가 물리 재질을 반환하도록 보정함.
 - UE 5.7 `TunaSweeperEditor Win64 Development` 빌드에 성공했고 Unreal Editor를 다시 실행함.
+
+## 2026-07-16 03:00:33 (소요시간: 00:03:00)
+
+- 토마토 Static Mesh를 피격 시 Chaos 절차적 파괴 오브젝트로 구성하고, 끈적한 액체 파편 Niagara System을 연동할 구현 계획을 수립함. 요청에 따라 에셋·코드 구현은 수행하지 않음.

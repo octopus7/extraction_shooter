@@ -3301,3 +3301,33 @@ Impact Profile의 Surface Rules에서 Wood를 추가할 수 없고 Default와 Di
 ### 답변
 
 `DefaultEngine.ini`의 `PhysicalSurfaces` 설정이 배열 추가 문법 없이 반복되어 마지막 Dirt 항목이 앞선 항목들을 덮어쓴 것이 원인이다. 모든 물리 표면을 `+PhysicalSurfaces=` 형식으로 수정했으며, 열려 있는 Unreal Editor는 기존 설정을 메모리에 유지하므로 저장 후 재시작하면 Flesh, Metal, Concrete, Wood, Glass, Water, Energy, Stone, Dirt가 모두 Surface Type 드롭다운에 표시된다.
+
+## 2026-07-16 03:00:33 (소요시간: 00:03:00)
+
+### 질문
+
+토마토 Static Mesh를 피격 시 Chaos 절차적 파괴 오브젝트로 만들 때 이미 베이크되는 파괴 오브젝트의 진행 절차와, 끈적한 액체 파편 동작을 위한 Niagara 연동 계획 문의.
+
+### 답변
+
+정적 메시를 Geometry Collection으로 변환하고 사전 분할(베이크)한 뒤, 일반 Static Mesh 충돌체가 피격을 받아 체력을 소진하면 원본 메시를 숨기고 Geometry Collection을 표시한다. Chaos 외부 클러스터 변형 필드와 방사·방향 충격량으로 베이크된 조각을 해제·비산시키며, 같은 피격 지점에 일회성 Niagara를 한 번 재생한다. Niagara는 충돌하는 점성 방울, 충돌 표면에 멈춰 붙는 스플랫, 짧게 늘어졌다 사라지는 리본 실의 세 층으로 구성하고, 지속 잔흔이 필요하면 별도의 데칼로 보강한다.
+
+## 2026-07-16 03:08:53 (소요시간: 00:00:20)
+
+### 질문
+
+Chaos 토마토 파괴 단면용 과육 재질은 재질만 준비하면 되는지 문의.
+
+### 답변
+
+과육 재질 에셋 외에 원본 Static Mesh 또는 Geometry Collection에 Skin과 Flesh 재질 슬롯을 마련하고, 파괴 베이크의 Internal Material ID를 Flesh 슬롯으로 지정해야 한다. 그 설정이 있어야 새로 생긴 내부 단면 폴리곤에 과육 재질이 배정된다. 외피 표면에는 Skin 재질을 유지한다.
+
+## 2026-07-16 03:10:02 (소요시간: 00:00:15)
+
+### 질문
+
+토마토 텍스처만 준비하면 Chaos 파괴, 재질, Niagara 파편 연동을 진행할 수 있는지 문의.
+
+### 답변
+
+가능하다. 기존 토마토 Static Mesh와 외피용 Base Color, Normal, ORM(없으면 Base Color만) 및 과육 단면용 Base Color 텍스처를 받으면 재질 슬롯·내부 단면 재질·Geometry Collection 베이크·피격 액터·점성 Niagara 효과·검증까지 진행할 수 있다. 과육 Normal/ORM과 스플랫용 마스크·노이즈 텍스처는 선택 사항이며, 없으면 프로젝트 기본 텍스처와 파라미터로 보완한다.
