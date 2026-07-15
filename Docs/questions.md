@@ -3351,3 +3351,13 @@ Chaos 토마토 파괴 단면용 과육 재질은 재질만 준비하면 되는�
 ### 답변
 
 `TunaSweeperTomatoGooDropletActor`는 과거 연기 Niagara를 임시로 대체하기 위해 만든 물리 구체 파편이었다. 중력·충돌 상황에 따라 공중에 잔류할 수 있어 제거했고, 이제는 붉은 과육 방울 Niagara와 지면 데칼 자국으로 끈적한 착지를 표현한다.
+
+## 2026-07-16 04:05:00 (소요시간: 00:02:00)
+
+### 질문
+
+토마토 탄 피격음이 Metal처럼 들리며 `Flesh` 물리 머티리얼 부재 여부를 문의.
+
+### 답변
+
+`PM_Flesh`는 존재하고 `SurfaceType1 (Flesh)`로 설정돼 있으며 토마토의 충돌 박스에도 적용돼 있다. 문제는 `DA_Impact_Ballistic`에 Flesh(`SurfaceType1`) Surface Rule이 없어 기본 효과로 폴백되는 점이다. 기본 사운드가 `SW_BarrelHit`이므로 금속 소리로 들린다. Flesh 전용 피격음을 준비해 두 Impact Profile의 Surface Rule에 연결하면 해결된다.
