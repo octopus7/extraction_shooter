@@ -12,6 +12,8 @@
 #include "PhysicalMaterials/PhysicalMaterial.h"
 #include "Sound/SoundBase.h"
 
+DEFINE_LOG_CATEGORY_STATIC(LogTunaSweeperImpactEffects, Log, All);
+
 namespace
 {
 	bool DoesTagRuleMatch(const FTunaSweeperImpactTagRule& Rule, const FGameplayTagContainer& TargetTags)
@@ -28,10 +30,20 @@ bool UTunaSweeperImpactEffectSubsystem::ResolveAndSpawnImpactEffect(
 	APawn* EffectInstigator) const
 {
 	FTunaSweeperImpactResolveContext Context;
-	if (const UPhysicalMaterial* PhysicalMaterial = Hit.PhysMaterial.Get())
+	const UPhysicalMaterial* PhysicalMaterial = Hit.PhysMaterial.Get();
+	if (PhysicalMaterial)
 	{
 		Context.SurfaceType = PhysicalMaterial->SurfaceType;
 	}
+	UE_LOG(
+		LogTunaSweeperImpactEffects,
+		Log,
+		TEXT("Impact resolve: Profile=%s Actor=%s Component=%s PhysMaterial=%s Surface=%s"),
+		*ImpactProfileId.ToString(),
+		*GetNameSafe(Hit.GetActor()),
+		*GetNameSafe(Hit.GetComponent()),
+		*GetPathNameSafe(PhysicalMaterial),
+		*UEnum::GetValueAsString(Context.SurfaceType));
 
 	if (AActor* HitActor = Hit.GetActor(); IsValid(HitActor) &&
 		HitActor->GetClass()->ImplementsInterface(UTunaSweeperImpactResponseProvider::StaticClass()))
@@ -54,6 +66,12 @@ bool UTunaSweeperImpactEffectSubsystem::ResolveAndSpawnImpactEffect(
 		SpawnResolvedEffect(Effect, Hit, Context);
 		return true;
 	}
+	UE_LOG(
+		LogTunaSweeperImpactEffects,
+		Warning,
+		TEXT("Impact profile resolution failed: Profile=%s. Falling back to legacy effect=%s."),
+		*ImpactProfileId.ToString(),
+		*LegacyEffectId.ToString());
 
 	return SpawnLegacyEffect(LegacyEffectId, Hit, EffectOwner, EffectInstigator);
 }
@@ -76,6 +94,7 @@ bool UTunaSweeperImpactEffectSubsystem::ResolveImpactEffect(
 	if (BestTagRule)
 	{
 		OutEffect = BestTagRule->Effect;
+		UE_LOG(LogTunaSweeperImpactEffects, Log, TEXT("Impact effect rule: Tag (Priority=%d)."), BestTagRule->Priority);
 		return !OutEffect.IsEmpty();
 	}
 
@@ -84,11 +103,23 @@ bool UTunaSweeperImpactEffectSubsystem::ResolveImpactEffect(
 		if (Rule.SurfaceType == Context.SurfaceType)
 		{
 			OutEffect = Rule.Effect;
+			UE_LOG(
+				LogTunaSweeperImpactEffects,
+				Log,
+				TEXT("Impact effect rule: Surface=%s Sound=%s."),
+				*UEnum::GetValueAsString(Context.SurfaceType),
+				*OutEffect.Sound.ToSoftObjectPath().ToString());
 			return !OutEffect.IsEmpty();
 		}
 	}
 
 	OutEffect = Profile.DefaultEffect;
+	UE_LOG(
+		LogTunaSweeperImpactEffects,
+		Log,
+		TEXT("Impact effect rule: Default for Surface=%s Sound=%s."),
+		*UEnum::GetValueAsString(Context.SurfaceType),
+		*OutEffect.Sound.ToSoftObjectPath().ToString());
 	return !OutEffect.IsEmpty();
 }
 
@@ -127,6 +158,15 @@ void UTunaSweeperImpactEffectSubsystem::SpawnResolvedEffect(
 	if (USoundBase* Sound = Effect.Sound.LoadSynchronous())
 	{
 		UGameplayStatics::PlaySoundAtLocation(World, Sound, SpawnLocation);
+	}
+	else
+	{
+		UE_LOG(
+			LogTunaSweeperImpactEffects,
+			Warning,
+			TEXT("Impact sound is not configured or could not load: Surface=%s Sound=%s."),
+			*UEnum::GetValueAsString(Context.SurfaceType),
+			*Effect.Sound.ToSoftObjectPath().ToString());
 	}
 	if (!Context.bSuppressDecal && Effect.bSpawnDecal)
 	{

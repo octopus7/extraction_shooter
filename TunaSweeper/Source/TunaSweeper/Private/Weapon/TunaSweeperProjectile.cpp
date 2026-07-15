@@ -373,6 +373,7 @@ void ATunaSweeperProjectile::ApplyProjectileCollisionDefaults()
 	}
 
 	CollisionComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	CollisionComponent->bReturnMaterialOnMove = true;
 	CollisionComponent->SetCollisionObjectType(TunaSweeperCollisionChannels::Projectile);
 	CollisionComponent->SetCollisionResponseToAllChannels(ECR_Block);
 	CollisionComponent->SetCollisionResponseToChannel(ECC_Visibility, ECR_Ignore);
