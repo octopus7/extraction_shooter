@@ -5576,3 +5576,8 @@
 - 연기처럼 보이던 `NS_Tomato_StickySplatter`를 `T_TomatoFlesh` 기반의 붉은 과육 방울 Niagara로 교체하고, `M_TomatoGooParticle`과 `M_TomatoGooSplat` 머티리얼을 생성함.
 - 공중에 남는 임시 `TunaSweeperTomatoGooDropletActor` 물리 구체 방식은 제거하고, 파괴 지점 주변의 지면 추적 결과에 4~7개의 끈적한 과즙 데칼을 생성하도록 변경함.
 - UE 5.7 일반 에디터 빌드 성공 및 토마토 에셋 재생성을 확인함. 헤드리스 에디터는 저장 후 UI 종료 단계에서 충돌했으나, 새 머티리얼·Niagara·Blueprint 저장 로그와 파일 갱신을 확인함.
+
+## 2026-07-17 23:53:27 (소요시간: 00:03:00) Opus 4.6
+
+- Vitals UI(체력, 배부름, 수분) 수치를 소수점 없이 정수로 표시하도록 변경.
+- `TunaSweeperHudBottomStatusWidget.cpp`의 `MakeVitalsText` 함수에서 `MaximumFractionalDigits`를 `1`에서 `0`으로 변경하고, `FMath::FloorToFloat`로 버림 처리 적용.

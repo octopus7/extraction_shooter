@@ -12,8 +12,8 @@ namespace TunaSweeperHudStatus
 	{
 		FNumberFormattingOptions NumberFormat;
 		NumberFormat.MinimumFractionalDigits = 0;
-		NumberFormat.MaximumFractionalDigits = 1;
-		return FText::AsNumber(Value, &NumberFormat);
+		NumberFormat.MaximumFractionalDigits = 0;
+		return FText::AsNumber(FMath::FloorToFloat(Value), &NumberFormat);
 	}
 
 	float MakeVitalsPercent(float Value, float MaxValue)
