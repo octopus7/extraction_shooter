@@ -3490,3 +3490,23 @@ Chaos 토마토 파괴 단면용 과육 재질은 재질만 준비하면 되는�
 ### 답변
 
 가능하다. `BP_TunaSweeperPlayerCharacter > Movement > Roll > Roll Duration Seconds`를 `1.17`로 설정하면 이동·무적 시간도 함께 1.17초가 된다. 원본 1.17초 애니메이션을 그대로 쓸 경우 `Roll Montage Play Rate`는 `1.0`으로 설정한다. 이동 거리는 420cm를 유지하면 평균 속도가 기존보다 낮아지므로, 기존 속도감을 유지하려면 거리를 약 894cm로 함께 올려야 한다.
+
+## 2026-07-22 05:14:00 (소요시간: 00:00:30)
+
+### 질문
+
+구르기 몽타주가 전부 재생되기 전에 원래 포즈로 복귀하는 원인 문의.
+
+### 답변
+
+현재 C++ `FinishRoll()`은 몽타주를 정지시키지 않으므로, 우선 몽타주 설정을 확인한다. 1.17초 애니메이션과 `Roll Duration Seconds = 1.17` 조합에서는 `Roll Montage Play Rate = 1.0`, Montage Slot 세그먼트의 Rate Scale도 `1.0`이어야 한다. Blend Out 시간이 길면 종료 전부터 페이드되어 절반에서 복귀하는 것처럼 보일 수 있으므로 0.05~0.10초로 낮춘다. 이어서 타임라인의 Default 섹션이 전체 세그먼트를 포함하는지, 다른 DefaultGroup 몽타주가 같은 슬롯을 중단시키고 있지 않은지 확인한다.
+
+## 2026-07-22 05:15:00 (소요시간: 00:00:25)
+
+### 질문
+
+구르기 몽타주가 간헐적으로만 중간에 복귀하고, 정상 재생되는 경우도 있다고 추가 설명.
+
+### 답변
+
+프로젝트 C++에는 구르기 외의 Montage 재생/정지 호출이 없고 `FinishRoll()`도 몽타주를 정지하지 않는다. 따라서 ABP의 `DefaultSlot` 배치가 가장 유력하다. Slot 노드는 State Machine 내부 특정 상태가 아니라 `Locomotion State Machine 출력 → DefaultSlot → Output Pose`처럼 항상 통과하는 최종 AnimGraph 경로에 둬야 한다. 이동 상태 전환이나 Aim 분기 뒤에 Slot이 있으면 상황에 따라 몽타주가 우회되어 중간에 원래 포즈로 돌아올 수 있다.
