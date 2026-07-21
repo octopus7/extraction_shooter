@@ -2,8 +2,10 @@
 
 #include "Algo/AllOf.h"
 #include "Component/TunaSweeperOcclusionRevealComponent.h"
+#include "Component/TunaSweeperVerticalOcclusionRevealComponent.h"
 #include "Effect/TunaSweeperOcclusionRevealSettingsDataAsset.h"
 #include "Environment/TunaSweeperOcclusionRevealBox.h"
+#include "Environment/TunaSweeperVerticalOcclusionContainer.h"
 #include "Factories/DataAssetFactory.h"
 #include "Factories/MaterialFactoryNew.h"
 #include "Factories/MaterialParameterCollectionFactoryNew.h"
@@ -12,7 +14,9 @@
 #include "Materials/MaterialExpressionCollectionParameter.h"
 #include "Materials/MaterialExpressionConstant3Vector.h"
 #include "Materials/MaterialExpressionCustom.h"
+#include "Materials/MaterialExpressionScalarParameter.h"
 #include "Materials/MaterialExpressionScreenPosition.h"
+#include "Materials/MaterialExpressionWorldPosition.h"
 #include "Materials/MaterialParameterCollection.h"
 
 namespace TunaSweeperEditorSetup
@@ -25,6 +29,8 @@ namespace TunaSweeperEditorSetup
 		const FString RevealCollectionAssetName = TEXT("MPC_OcclusionReveal");
 		const FString RevealMaterialAssetName = TEXT("M_OcclusionRevealMasked");
 		const FString RevealBoxBlueprintAssetName = TEXT("BP_OcclusionRevealBox");
+		const FString VerticalRevealMaterialAssetName = TEXT("M_OcclusionVerticalRevealMasked");
+		const FString VerticalRevealContainerBlueprintAssetName = TEXT("BP_VerticalOcclusionContainer");
 
 		FString ObjectPath(const FString& AssetPath, const FString& AssetName)
 		{
@@ -43,6 +49,24 @@ namespace TunaSweeperEditorSetup
 			Expression->Collection = Collection;
 			Expression->ParameterName = ParameterName;
 			Expression->ParameterId = Collection->GetParameterId(ParameterName);
+			Expression->ExpressionGUID = FGuid::NewGuid();
+			Expression->MaterialExpressionEditorX = EditorX;
+			Expression->MaterialExpressionEditorY = EditorY;
+			Material->GetExpressionCollection().AddExpression(Expression);
+			return Expression;
+		}
+
+		UMaterialExpressionScalarParameter* AddMaterialScalarParameter(
+			UMaterial* Material,
+			const FName ParameterName,
+			float DefaultValue,
+			int32 EditorX,
+			int32 EditorY)
+		{
+			UMaterialExpressionScalarParameter* Expression = NewObject<UMaterialExpressionScalarParameter>(Material);
+			Expression->Material = Material;
+			Expression->ParameterName = ParameterName;
+			Expression->DefaultValue = DefaultValue;
 			Expression->ExpressionGUID = FGuid::NewGuid();
 			Expression->MaterialExpressionEditorX = EditorX;
 			Expression->MaterialExpressionEditorY = EditorY;
@@ -87,6 +111,9 @@ namespace TunaSweeperEditorSetup
 			Settings->Modify();
 			Settings->InnerDiameterCm = 400.0f;
 			Settings->OuterDiameterCm = 600.0f;
+			Settings->VerticalRevealProximityRadiusCm = 350.0f;
+			Settings->VerticalRevealStartAbovePlayerCm = 100.0f;
+			Settings->VerticalRevealFadeHeightCm = 50.0f;
 			Settings->MarkPackageDirty();
 			return SaveAsset(Settings) ? Settings : nullptr;
 		}
@@ -262,6 +289,94 @@ namespace TunaSweeperEditorSetup
 			return SaveAsset(Material) ? Material : nullptr;
 		}
 
+		UMaterial* EnsureVerticalRevealMaterial()
+		{
+			const FString AssetObjectPath = ObjectPath(OcclusionAssetPath, VerticalRevealMaterialAssetName);
+			UMaterial* Material = LoadObject<UMaterial>(nullptr, *AssetObjectPath);
+			if (!Material)
+			{
+				Material = Cast<UMaterial>(FModuleManager::LoadModuleChecked<FAssetToolsModule>(TEXT("AssetTools")).Get().CreateAsset(
+					VerticalRevealMaterialAssetName, OcclusionAssetPath, UMaterial::StaticClass(), NewObject<UMaterialFactoryNew>()));
+			}
+
+			if (!Material)
+			{
+				return nullptr;
+			}
+
+			Material->Modify();
+			Material->GetExpressionCollection().Empty();
+			Material->TwoSided = true;
+			Material->BlendMode = BLEND_Masked;
+			Material->OpacityMaskClipValue = 0.5f;
+			Material->SetShadingModel(MSM_DefaultLit);
+
+			UMaterialEditorOnlyData* EditorOnlyData = Material->GetEditorOnlyData();
+			if (!EditorOnlyData)
+			{
+				return nullptr;
+			}
+
+			UMaterialExpressionConstant3Vector* BaseColor = NewObject<UMaterialExpressionConstant3Vector>(Material);
+			BaseColor->Material = Material;
+			BaseColor->Constant = FLinearColor(0.13f, 0.25f, 0.18f, 1.0f);
+			BaseColor->MaterialExpressionEditorX = -900;
+			BaseColor->MaterialExpressionEditorY = 100;
+			Material->GetExpressionCollection().AddExpression(BaseColor);
+
+			UMaterialExpressionWorldPosition* WorldPosition = NewObject<UMaterialExpressionWorldPosition>(Material);
+			WorldPosition->Material = Material;
+			WorldPosition->WorldPositionShaderOffset = WPT_ExcludeAllShaderOffsets;
+			WorldPosition->MaterialExpressionEditorX = -1150;
+			WorldPosition->MaterialExpressionEditorY = 250;
+			Material->GetExpressionCollection().AddExpression(WorldPosition);
+
+			UMaterialExpressionScreenPosition* ScreenPosition = NewObject<UMaterialExpressionScreenPosition>(Material);
+			ScreenPosition->Material = Material;
+			ScreenPosition->MaterialExpressionEditorX = -1150;
+			ScreenPosition->MaterialExpressionEditorY = 400;
+			Material->GetExpressionCollection().AddExpression(ScreenPosition);
+
+			UMaterialExpressionScalarParameter* RevealActive = AddMaterialScalarParameter(Material, TEXT("VerticalRevealActive"), 0.0f, -880, 260);
+			UMaterialExpressionScalarParameter* RevealStartZ = AddMaterialScalarParameter(Material, TEXT("VerticalRevealStartZ"), 100.0f, -880, 380);
+			UMaterialExpressionScalarParameter* RevealFadeHeight = AddMaterialScalarParameter(Material, TEXT("VerticalRevealFadeHeightCm"), 50.0f, -880, 500);
+
+			UMaterialExpressionCustom* OpacityMask = NewObject<UMaterialExpressionCustom>(Material);
+			OpacityMask->Material = Material;
+			OpacityMask->Description = TEXT("Vertical player-height dissolve for a nearby occluder, with fine screen-space noise");
+			OpacityMask->OutputType = CMOT_Float1;
+			OpacityMask->Code =
+				TEXT("float verticalDissolve = saturate((WorldPos.z - RevealStartZ) / max(1.0f, RevealFadeHeightCm));\n")
+				TEXT("float dissolve = RevealActive > 0.5f ? verticalDissolve : 0.0f;\n")
+				TEXT("float2 pixel = floor(ScreenUv * 2048.0f);\n")
+				TEXT("float noise = frac(sin(dot(pixel, float2(127.1f, 311.7f))) * 43758.5453123f);\n")
+				TEXT("return noise >= dissolve ? 1.0f : 0.0f;");
+			OpacityMask->MaterialExpressionEditorX = -300;
+			OpacityMask->MaterialExpressionEditorY = 350;
+			Material->GetExpressionCollection().AddExpression(OpacityMask);
+
+			auto AddInput = [OpacityMask](const TCHAR* Name, UMaterialExpression* Expression)
+			{
+				FCustomInput Input;
+				Input.InputName = Name;
+				Input.Input.Connect(0, Expression);
+				OpacityMask->Inputs.Add(Input);
+			};
+			AddInput(TEXT("WorldPos"), WorldPosition);
+			AddInput(TEXT("ScreenUv"), ScreenPosition);
+			AddInput(TEXT("RevealActive"), RevealActive);
+			AddInput(TEXT("RevealStartZ"), RevealStartZ);
+			AddInput(TEXT("RevealFadeHeightCm"), RevealFadeHeight);
+
+			EditorOnlyData->BaseColor.Connect(0, BaseColor);
+			EditorOnlyData->OpacityMask.Connect(0, OpacityMask);
+			EditorOnlyData->Roughness.UseConstant = true;
+			EditorOnlyData->Roughness.Constant = 0.84f;
+			Material->PostEditChange();
+			Material->MarkPackageDirty();
+			return SaveAsset(Material) ? Material : nullptr;
+		}
+
 		bool AttachSettingsToGameInstance(UTunaSweeperOcclusionRevealSettingsDataAsset* Settings)
 		{
 			UBlueprint* GameInstanceBlueprint = LoadObject<UBlueprint>(nullptr, *GetGameInstanceObjectPath());
@@ -290,12 +405,17 @@ namespace TunaSweeperEditorSetup
 		UTunaSweeperOcclusionRevealSettingsDataAsset* Settings = EnsureRevealSettingsAsset();
 		UMaterialParameterCollection* Collection = EnsureRevealParameterCollection();
 		UMaterial* Material = EnsureRevealMaterial(Collection);
+		UMaterial* VerticalMaterial = EnsureVerticalRevealMaterial();
 		UBlueprint* RevealBoxBlueprint = EnsureBlueprint(
 			OcclusionEnvironmentAssetPath,
 			RevealBoxBlueprintAssetName,
 			ATunaSweeperOcclusionRevealBox::StaticClass());
+		UBlueprint* VerticalRevealContainerBlueprint = EnsureBlueprint(
+			OcclusionEnvironmentAssetPath,
+			VerticalRevealContainerBlueprintAssetName,
+			ATunaSweeperVerticalOcclusionContainer::StaticClass());
 
-		const bool bSucceeded = Settings && Collection && Material && RevealBoxBlueprint && AttachSettingsToGameInstance(Settings);
+		const bool bSucceeded = Settings && Collection && Material && VerticalMaterial && RevealBoxBlueprint && VerticalRevealContainerBlueprint && AttachSettingsToGameInstance(Settings);
 		if (bSucceeded)
 		{
 			UE_LOG(LogTunaSweeperEditor, Log, TEXT("Occlusion reveal assets created. Settings=%s Material=%s Blueprint=%s"),

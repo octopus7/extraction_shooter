@@ -19,6 +19,18 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TunaSweeper|Occlusion Reveal", meta = (ClampMin = "0.0", UIMin = "0.0", Units = "cm"))
 	float OuterDiameterCm = 600.0f;
 
+	/** Horizontal distance from a vertical occluder that activates its player/cursor proximity dissolve. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TunaSweeper|Occlusion Reveal|Vertical", meta = (ClampMin = "0.0", UIMin = "0.0", Units = "cm"))
+	float VerticalRevealProximityRadiusCm = 350.0f;
+
+	/** Height above the player's feet where a vertical occluder starts to dissolve. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TunaSweeper|Occlusion Reveal|Vertical", meta = (Units = "cm"))
+	float VerticalRevealStartAbovePlayerCm = 100.0f;
+
+	/** Height of the vertical dissolve band. The mesh is fully removed above this band. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TunaSweeper|Occlusion Reveal|Vertical", meta = (ClampMin = "1.0", UIMin = "1.0", Units = "cm"))
+	float VerticalRevealFadeHeightCm = 50.0f;
+
 	float GetInnerRadiusCm() const { return FMath::Max(0.0f, InnerDiameterCm * 0.5f); }
 	float GetOuterRadiusCm() const { return FMath::Max(GetInnerRadiusCm(), OuterDiameterCm * 0.5f); }
 };

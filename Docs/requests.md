@@ -5607,3 +5607,10 @@
 
 - 화면 투영 마스크가 반응하지 않던 원인을 수정. `ScreenPosition`의 픽셀 좌표 출력 대신 기본 Viewport UV 출력을 연결해, 0~1 화면 중심·반경 값과 같은 좌표계로 비교하도록 보정.
 - UE 5.7 `TunaSweeperEditor Win64 Development` 전체 빌드 성공 후 가림 머티리얼 에셋을 재생성.
+
+## 2026-07-22 02:39:00 (소요시간: 00:08:57)
+
+- 플레이어 또는 커서가 컨테이너 경계에 접근할 때만 작동하는 `TunaSweeperVerticalOcclusionRevealComponent`를 추가. 플레이어 발 위치 +100cm부터 +150cm까지 고운 화면 공간 노이즈로 세로 디졸브하고 그 위 메시를 제거.
+- `DA_OcclusionRevealSettings`에 세로 가림의 접근 반경 350cm, 시작 높이 100cm, 페이드 높이 50cm 설정을 추가.
+- 중앙 통로가 열린 충돌 비활성 U자형 기본 메시 BP `BP_VerticalOcclusionContainer`와 전용 Masked 머티리얼을 생성. 레벨에는 배치하지 않음.
+- UE 5.7 `TunaSweeperEditor Win64 Development` 전체 빌드 성공 및 전용 머티리얼·BP 에셋 생성 확인.
