@@ -394,7 +394,9 @@ void ATunaSweeperTopDownCharacter::BeginRoll(const FInputActionValue& Value)
 		return;
 	}
 
-	const float EffectiveRollStaminaCost = FMath::Max(0.0f, RollStaminaCost);
+	const UWorld* World = GetWorld();
+	const bool bIsBunkerMap = World && World->GetMapName().EndsWith(TEXT("BunkerMap"));
+	const float EffectiveRollStaminaCost = bIsBunkerMap ? 0.0f : FMath::Max(0.0f, RollStaminaCost);
 	CurrentStamina = FMath::Clamp(CurrentStamina, 0.0f, FMath::Max(0.0f, MaxStamina));
 	if (CurrentStamina < EffectiveRollStaminaCost)
 	{
@@ -431,5 +433,18 @@ void ATunaSweeperTopDownCharacter::BeginRoll(const FInputActionValue& Value)
 	AttachWeaponForRoll();
 	UpdateMovementSpeed();
 	ApplyTemporaryRollVisualRotation(0.0f);
+
+	if (USkeletalMeshComponent* CharacterMesh = GetMesh())
+	{
+		if (UAnimInstance* AnimInstance = CharacterMesh->GetAnimInstance())
+		{
+			if (UAnimMontage* LoadedRollMontage = RollMontage.LoadSynchronous())
+			{
+				AnimInstance->Montage_Play(
+					LoadedRollMontage,
+					FMath::Max(0.01f, RollMontagePlayRate));
+			}
+		}
+	}
 }
 

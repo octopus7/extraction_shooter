@@ -10,6 +10,7 @@
 class ATunaSweeperWeapon;
 class ATunaSweeperMeleeImpactBurstActor;
 class ATunaSweeperMeleeSwingTrailActor;
+class UAnimMontage;
 class UTunaSweeperDebuffComponent;
 class UTunaSweeperFactionComponent;
 class UTunaSweeperHeadphoneListenerComponent;
@@ -409,7 +410,13 @@ protected:
 	float RollStaminaCost = 30.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement|Roll")
-	bool bUseTemporaryRollVisualRotation = true;
+	TSoftObjectPtr<UAnimMontage> RollMontage;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement|Roll", meta = (ClampMin = "0.01", UIMin = "0.01"))
+	float RollMontagePlayRate = 1.33f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement|Roll")
+	bool bUseTemporaryRollVisualRotation = false;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement|Roll")
 	float TemporaryRollVisualRightAxisDegrees = 360.0f;

@@ -3,6 +3,8 @@
 #include "Character/TunaSweeperTopDownCharacter.h"
 
 #include "Camera/CameraComponent.h"
+#include "Animation/AnimInstance.h"
+#include "Animation/AnimMontage.h"
 #include "CollisionQueryParams.h"
 #include "CollisionShape.h"
 #include "Component/TunaSweeperDebuffComponent.h"

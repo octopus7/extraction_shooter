@@ -5589,6 +5589,17 @@
 - 캐릭터의 가림 위치 갱신 컴포넌트, 오클루더 컴포넌트, 파라미터 타입과 침엽수 에셋 생성/one-shot 실행 코드를 모두 삭제.
 - `TunaSweeperEditor Win64 Development` 빌드 성공 후 Unreal Editor로 프로젝트를 열었음.
 
+## 2026-07-22 05:10:30 (소요시간: 00:01:00)
+
+- `BunkerMap`에서 시작한 구르기는 스태미나 비용을 0으로 처리하도록 변경. 다른 맵은 기존 `Roll Stamina Cost`를 계속 사용.
+- 전체 UE 빌드는 열려 있는 Unreal Editor의 Live Coding 잠금으로 실행되지 않았음. 에디터에서 `Ctrl+Alt+F11`로 Live Coding 컴파일하면 변경 내용을 반영할 수 있음.
+
+## 2026-07-22 04:39:50 (소요시간: 00:02:00)
+
+- 구르기 애니메이션이 없을 때 사용하던 임시 메시 360도 강제 회전의 기본값을 비활성화.
+- `BP_TunaSweeperPlayerCharacter`의 `Use Temporary Roll Visual Rotation` bool은 계속 노출되어 있어, 필요 시 체크하면 이전 강제 회전 효과를 다시 사용할 수 있음.
+- `TunaSweeperEditor Win64 Development` 빌드 성공 후 Unreal Editor로 프로젝트를 열었음.
+
 ## 2026-07-22 01:08:00 (소요시간: 00:07:48)
 
 - 커서와 캐릭터 위치 주변의 가림을 제거하는 재사용형 `TunaSweeperOcclusionRevealComponent`와 박스 메시 기반 `BP_OcclusionRevealBox`를 생성. 레벨에는 배치하지 않음.
@@ -5619,3 +5630,8 @@
 
 - 세로 접근 디졸브의 시작 높이를 플레이어 발 위치 +100cm에서 +60cm로 낮추고, 페이드 폭을 50cm에서 30cm로 축소. 이제 +60~+90cm 구간에서 디졸브하고 그 위를 제거.
 - UE 5.7 `TunaSweeperEditor Win64 Development` 전체 빌드 성공 및 설정 에셋 갱신 확인.
+## 2026-07-22 04:33:30 (소요시간: 00:03:00)
+
+- 플레이어 캐릭터의 `Movement > Roll`에 `Roll Montage`와 `Roll Montage Play Rate`를 Blueprint에서 지정할 수 있도록 노출하고, `BeginRoll()`에서 Montage를 재생하도록 연결.
+- 기본 Montage는 `/Game/Characters/Player/Luna/Animations/AM_Luna_Roll`, 기본 재생 속도는 `1.33`으로 설정.
+- `TunaSweeperEditor Win64 Development` 빌드 성공 후 Unreal Editor로 프로젝트를 열었음.

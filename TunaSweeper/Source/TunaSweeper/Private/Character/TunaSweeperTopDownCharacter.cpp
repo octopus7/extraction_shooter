@@ -97,6 +97,8 @@ ATunaSweeperTopDownCharacter::ATunaSweeperTopDownCharacter()
 	CameraModeAction = TSoftObjectPtr<UInputAction>(FSoftObjectPath(TEXT("/Game/Input/IA_CameraMode.IA_CameraMode")));
 	SprintAction = TSoftObjectPtr<UInputAction>(FSoftObjectPath(TEXT("/Game/Input/IA_Sprint.IA_Sprint")));
 	RollAction = TSoftObjectPtr<UInputAction>(FSoftObjectPath(TEXT("/Game/Input/IA_Roll.IA_Roll")));
+	RollMontage = TSoftObjectPtr<UAnimMontage>(
+		FSoftObjectPath(TEXT("/Game/Characters/Player/Luna/Animations/AM_Luna_Roll.AM_Luna_Roll")));
 	DefaultWeaponClass = TSoftClassPtr<ATunaSweeperWeapon>(TunaSweeperEquippedWeaponVisual::AssaultRifleClassPath);
 	MeleeSwingTrailActorClass = TSoftClassPtr<ATunaSweeperMeleeSwingTrailActor>(
 		FSoftObjectPath(TEXT("/Script/TunaSweeper.TunaSweeperMeleeSwingTrailActor")));
