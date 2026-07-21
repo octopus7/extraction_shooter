@@ -261,6 +261,7 @@ namespace TunaSweeperEditorSetup
 	const FString LumberjackMeleeSwingArcAssetTaskId = TEXT("2026-05-20_CreateLumberjackMeleeSwingArcAssetsV2");
 	const FString LedExpressionMaterialTaskId = TEXT("2026-05-26_CreateLedExpressionMaterialV1");
 	const FString ExperimentalVegetationAssetTaskId = TEXT("2026-05-24_CreateExperimentalVegetationStaticMeshV4");
+	const FString OcclusionRevealAssetTaskId = TEXT("2026-07-22_CreateReusableOcclusionRevealV1");
 	const FString CoverPointAssetTaskId = TEXT("2026-05-16_CreateCoverPointBlueprintV1");
 	const FString CanBotBlueprintTaskId = TEXT("2026-05-25_CreateCanBotBlueprintV1");
 	const FString GameInstanceAssetPath = TEXT("/Game/Core");
@@ -565,6 +566,7 @@ void BuildVoxelMeshDescription(
 void BuildLevelTravelLadderMeshDescription(FMeshDescription& MeshDescription);
 UStaticMesh* EnsureLevelTravelLadderMeshAsset();
 bool SetProjectGameInstanceToBlueprint();
+bool EnsureOcclusionRevealAssets();
 UBlueprint* EnsureBlueprint(const FString& AssetPath, const FString& AssetName, UClass* ParentClass);
 UMaterial* EnsureSolidColorMaterial(
 		const FString& AssetPath,

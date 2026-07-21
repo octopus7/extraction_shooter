@@ -56,6 +56,21 @@ namespace TunaSweeperEditorSetup
 			}
 		}
 
+		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperOcclusionRevealSetup")))
+		{
+			const bool bSucceeded = TunaSweeperEditorSetup::EnsureOcclusionRevealAssets();
+			if (bSucceeded)
+			{
+				FTunaSweeperEditorRunOnce::MarkCompleted(TunaSweeperEditorSetup::OcclusionRevealAssetTaskId);
+			}
+
+			if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperOcclusionRevealSetupQuit")))
+			{
+				FPlatformMisc::RequestExitWithStatus(false, bSucceeded ? 0 : 1, TEXT("TunaSweeperOcclusionRevealSetup"));
+				return;
+			}
+		}
+
 		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperShellCasingSetup")))
 		{
 			TunaSweeperEditorSetup::EnsureShellCasingAssets();

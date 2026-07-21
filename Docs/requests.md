@@ -5588,3 +5588,10 @@
 - 테스트 침엽수의 Static Mesh·수관/줄기 머티리얼·수관 텍스처·MPC 및 원본 PNG 2개를 삭제.
 - 캐릭터의 가림 위치 갱신 컴포넌트, 오클루더 컴포넌트, 파라미터 타입과 침엽수 에셋 생성/one-shot 실행 코드를 모두 삭제.
 - `TunaSweeperEditor Win64 Development` 빌드 성공 후 Unreal Editor로 프로젝트를 열었음.
+
+## 2026-07-22 01:08:00 (소요시간: 00:07:48)
+
+- 커서와 캐릭터 위치 주변의 가림을 제거하는 재사용형 `TunaSweeperOcclusionRevealComponent`와 박스 메시 기반 `BP_OcclusionRevealBox`를 생성. 레벨에는 배치하지 않음.
+- 게임 인스턴스의 `DA_OcclusionRevealSettings`로 내·외측 직경을 관리하며, 기본값은 내측 직경 400cm(반경 2m 완전 제거), 외측 직경 600cm(2~3m 디졸브 구간)로 설정.
+- `MPC_OcclusionReveal`와 `M_OcclusionRevealMasked`를 생성하여 커서·캐릭터의 월드 XY 중심을 기준으로 내측 투명, 외곽 디더 디졸브를 적용. 임의 BP에는 컴포넌트만 추가해 동일 동작을 적용할 수 있도록 구성.
+- UE 5.7 `TunaSweeperEditor Win64 Development` 전체 빌드 성공 후 Unreal Editor를 일반 모드로 실행.

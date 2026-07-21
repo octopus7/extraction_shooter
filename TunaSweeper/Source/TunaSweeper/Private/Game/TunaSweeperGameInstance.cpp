@@ -1,7 +1,13 @@
 #include "Game/TunaSweeperGameInstance.h"
 #include "TunaSweeperGameInstanceShared.h"
+#include "Effect/TunaSweeperOcclusionRevealSettingsDataAsset.h"
 
 DEFINE_LOG_CATEGORY(LogTunaSweeperGameInstance);
+
+UTunaSweeperOcclusionRevealSettingsDataAsset* UTunaSweeperGameInstance::GetOcclusionRevealSettingsDataAsset() const
+{
+	return OcclusionRevealSettingsDataAsset.LoadSynchronous();
+}
 
 void FTunaSweeperExperienceLevelStatBonuses::ClampNonNegative()
 {

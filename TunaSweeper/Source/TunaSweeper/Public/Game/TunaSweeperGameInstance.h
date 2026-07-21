@@ -13,6 +13,7 @@
 class APawn;
 class ATunaSweeperPetCompanionCharacter;
 class UTunaSweeperFootstepPresentationDataAsset;
+class UTunaSweeperOcclusionRevealSettingsDataAsset;
 class UTunaSweeperVitalsComponent;
 class UTunaSweeperWeaponPresentationDataAsset;
 
@@ -289,6 +290,12 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TunaSweeper|Footstep Presentation")
 	TSoftObjectPtr<UTunaSweeperFootstepPresentationDataAsset> FootstepPresentationDataAsset;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TunaSweeper|Occlusion Reveal")
+	TSoftObjectPtr<UTunaSweeperOcclusionRevealSettingsDataAsset> OcclusionRevealSettingsDataAsset;
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Occlusion Reveal")
+	UTunaSweeperOcclusionRevealSettingsDataAsset* GetOcclusionRevealSettingsDataAsset() const;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TunaSweeper|Pet Companion")
 	TSubclassOf<ATunaSweeperPetCompanionCharacter> PetCompanionClass;
