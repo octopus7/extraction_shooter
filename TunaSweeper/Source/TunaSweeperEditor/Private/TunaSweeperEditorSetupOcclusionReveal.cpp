@@ -112,8 +112,8 @@ namespace TunaSweeperEditorSetup
 			Settings->InnerDiameterCm = 400.0f;
 			Settings->OuterDiameterCm = 600.0f;
 			Settings->VerticalRevealProximityRadiusCm = 350.0f;
-			Settings->VerticalRevealStartAbovePlayerCm = 100.0f;
-			Settings->VerticalRevealFadeHeightCm = 50.0f;
+			Settings->VerticalRevealStartAbovePlayerCm = 60.0f;
+			Settings->VerticalRevealFadeHeightCm = 30.0f;
 			Settings->MarkPackageDirty();
 			return SaveAsset(Settings) ? Settings : nullptr;
 		}

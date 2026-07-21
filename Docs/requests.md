@@ -5614,3 +5614,8 @@
 - `DA_OcclusionRevealSettings`에 세로 가림의 접근 반경 350cm, 시작 높이 100cm, 페이드 높이 50cm 설정을 추가.
 - 중앙 통로가 열린 충돌 비활성 U자형 기본 메시 BP `BP_VerticalOcclusionContainer`와 전용 Masked 머티리얼을 생성. 레벨에는 배치하지 않음.
 - UE 5.7 `TunaSweeperEditor Win64 Development` 전체 빌드 성공 및 전용 머티리얼·BP 에셋 생성 확인.
+
+## 2026-07-22 02:59:00 (소요시간: 00:02:57)
+
+- 세로 접근 디졸브의 시작 높이를 플레이어 발 위치 +100cm에서 +60cm로 낮추고, 페이드 폭을 50cm에서 30cm로 축소. 이제 +60~+90cm 구간에서 디졸브하고 그 위를 제거.
+- UE 5.7 `TunaSweeperEditor Win64 Development` 전체 빌드 성공 및 설정 에셋 갱신 확인.
