@@ -261,7 +261,6 @@ namespace TunaSweeperEditorSetup
 	const FString LumberjackMeleeSwingArcAssetTaskId = TEXT("2026-05-20_CreateLumberjackMeleeSwingArcAssetsV2");
 	const FString LedExpressionMaterialTaskId = TEXT("2026-05-26_CreateLedExpressionMaterialV1");
 	const FString ExperimentalVegetationAssetTaskId = TEXT("2026-05-24_CreateExperimentalVegetationStaticMeshV4");
-	const FString TurbulentConiferOcclusionRevealTaskId = TEXT("2026-06-08_UpdateTurbulentConiferOcclusionRevealV1");
 	const FString CoverPointAssetTaskId = TEXT("2026-05-16_CreateCoverPointBlueprintV1");
 	const FString CanBotBlueprintTaskId = TEXT("2026-05-25_CreateCanBotBlueprintV1");
 	const FString GameInstanceAssetPath = TEXT("/Game/Core");

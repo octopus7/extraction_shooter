@@ -13,7 +13,6 @@ class ATunaSweeperMeleeSwingTrailActor;
 class UTunaSweeperDebuffComponent;
 class UTunaSweeperFactionComponent;
 class UTunaSweeperHeadphoneListenerComponent;
-class UTunaSweeperOcclusionRevealSourceComponent;
 class UCameraComponent;
 class UInputAction;
 class UInputMappingContext;
@@ -146,9 +145,6 @@ public:
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Vision")
 	UTunaSweeperPlayerVisionComponent* GetPlayerVisionComponent() const { return PlayerVisionComponent; }
 
-	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Vision")
-	UTunaSweeperOcclusionRevealSourceComponent* GetOcclusionRevealSourceComponent() const { return OcclusionRevealSourceComponent; }
-
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Noise")
 	UTunaSweeperHeadphoneListenerComponent* GetHeadphoneListenerComponent() const { return HeadphoneListenerComponent; }
 
@@ -261,9 +257,6 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UTunaSweeperPlayerVisionComponent> PlayerVisionComponent;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<UTunaSweeperOcclusionRevealSourceComponent> OcclusionRevealSourceComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UTunaSweeperHeadphoneListenerComponent> HeadphoneListenerComponent;

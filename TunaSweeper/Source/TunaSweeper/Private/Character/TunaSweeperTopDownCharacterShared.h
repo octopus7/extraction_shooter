@@ -7,7 +7,6 @@
 #include "CollisionShape.h"
 #include "Component/TunaSweeperDebuffComponent.h"
 #include "Component/TunaSweeperHeadphoneListenerComponent.h"
-#include "Component/TunaSweeperOcclusionRevealSourceComponent.h"
 #include "Component/TunaSweeperPlayerVisionComponent.h"
 #include "Component/TunaSweeperVitalsComponent.h"
 #include "Components/CapsuleComponent.h"

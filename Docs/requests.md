@@ -5581,3 +5581,10 @@
 
 - Vitals UI(체력, 배부름, 수분) 수치를 소수점 없이 정수로 표시하도록 변경.
 - `TunaSweeperHudBottomStatusWidget.cpp`의 `MakeVitalsText` 함수에서 `MaximumFractionalDigits`를 `1`에서 `0`으로 변경하고, `FMath::FloorToFloat`로 버림 처리 적용.
+
+## 2026-07-22 00:57:30 (소요시간: 00:06:30)
+
+- `TS_TurbulentConiferPrototype_01` 런타임 배치와 침엽수 전용 static mesh spawn 가림 옵션을 제거.
+- 테스트 침엽수의 Static Mesh·수관/줄기 머티리얼·수관 텍스처·MPC 및 원본 PNG 2개를 삭제.
+- 캐릭터의 가림 위치 갱신 컴포넌트, 오클루더 컴포넌트, 파라미터 타입과 침엽수 에셋 생성/one-shot 실행 코드를 모두 삭제.
+- `TunaSweeperEditor Win64 Development` 빌드 성공 후 Unreal Editor로 프로젝트를 열었음.

@@ -145,19 +145,6 @@ namespace TunaSweeperEditorSetup
 			}
 		}
 
-		FString TurbulentConiferTextureSource;
-		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperRebuildTurbulentConifer")) ||
-			FParse::Value(FCommandLine::Get(), TEXT("TunaSweeperTurbulentConiferTextureSource="), TurbulentConiferTextureSource))
-		{
-			TunaSweeperExperimentalVegetation::EnsureTurbulentConiferPrototypeAssets();
-
-			if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperTurbulentConiferQuit")))
-			{
-				FPlatformMisc::RequestExit(false);
-				return;
-			}
-		}
-
 		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperRebuildExplosiveBarrel")))
 		{
 			if (TunaSweeperEditorSetup::EnsureExplosiveBarrelAssets())
@@ -497,13 +484,6 @@ namespace TunaSweeperEditorSetup
 			[]()
 			{
 				return TunaSweeperExperimentalVegetation::EnsureExperimentalVegetationAssets();
-			});
-
-		FTunaSweeperEditorRunOnce::Run(
-			TunaSweeperEditorSetup::TurbulentConiferOcclusionRevealTaskId,
-			[]()
-			{
-				return TunaSweeperExperimentalVegetation::EnsureTurbulentConiferOcclusionRevealAssets();
 			});
 
 		FTunaSweeperEditorRunOnce::Run(

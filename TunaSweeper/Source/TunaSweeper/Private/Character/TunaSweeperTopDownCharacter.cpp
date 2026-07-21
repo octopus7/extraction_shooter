@@ -70,7 +70,6 @@ ATunaSweeperTopDownCharacter::ATunaSweeperTopDownCharacter()
 	FactionComponent = CreateDefaultSubobject<UTunaSweeperFactionComponent>(TEXT("FactionComponent"));
 	FactionComponent->SetFactionId(TunaSweeperFactionIds::Player);
 	PlayerVisionComponent = CreateDefaultSubobject<UTunaSweeperPlayerVisionComponent>(TEXT("PlayerVisionComponent"));
-	OcclusionRevealSourceComponent = CreateDefaultSubobject<UTunaSweeperOcclusionRevealSourceComponent>(TEXT("OcclusionRevealSourceComponent"));
 	HeadphoneListenerComponent = CreateDefaultSubobject<UTunaSweeperHeadphoneListenerComponent>(TEXT("HeadphoneListenerComponent"));
 	StaminaGaugeWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("StaminaGaugeWidget"));
 	StaminaGaugeWidgetComponent->SetupAttachment(RootComponent);

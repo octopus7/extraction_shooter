@@ -33,7 +33,6 @@ class UNiagaraSystem;
 class USoundBase;
 class UWorld;
 class UStaticMesh;
-class UTunaSweeperRevealOccluderComponent;
 class UTunaSweeperInteractionMarkerWidget;
 class UTunaSweeperLevelTransitionWidget;
 class UTunaSweeperPickupItemIconWidget;
@@ -301,11 +300,6 @@ private:
 		FRotator StaticMeshPropRelativeRotation = FRotator::ZeroRotator;
 		FVector StaticMeshPropRelativeScale = FVector::OneVector;
 		bool bStaticMeshPropCollisionEnabled = true;
-		bool bStaticMeshPropRevealOccluder = false;
-		float StaticMeshPropRevealIntensity = 1.0f;
-		float StaticMeshPropRevealCharacterRadiusScale = 1.0f;
-		float StaticMeshPropRevealCursorRadiusScale = 1.0f;
-		float StaticMeshPropRevealPatternScale = 1.0f;
 
 		float PracticeDummyMaxHealth = 100.0f;
 		float PracticeDummyCriticalDamageMultiplier = 3.0f;

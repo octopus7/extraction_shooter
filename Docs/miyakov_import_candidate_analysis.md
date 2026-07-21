@@ -180,9 +180,7 @@ Miyakov의 펫 동료는 전투 없는 ghost-like companion이다. `AAIControlle
 
 판정: 필요 시 부분 참고
 
-플레이어가 나무 아래에 들어가면 머티리얼 파라미터로 dissolve를 거는 구조다. TunaSweeper에는 이미 `UTunaSweeperRevealOccluderComponent`, `UTunaSweeperOcclusionRevealSourceComponent`, transparent obstacle spawn 데이터가 있어 같은 문제를 다른 방식으로 풀고 있다.
-
-나무/식생 전용 fade가 필요하면 로직은 참고할 수 있지만, 기존 occlusion reveal 머티리얼 파라미터 컬렉션 구조와 합치는 편이 낫다.
+플레이어가 나무 아래에 들어가면 머티리얼 파라미터로 dissolve를 거는 구조다. TunaSweeper에는 현재 이와 같은 식생 가림 해제 구현이 없으므로, 도입 시 화면 공간 기준 표현을 별도로 설계해야 한다.
 
 ### Camera view interaction
 

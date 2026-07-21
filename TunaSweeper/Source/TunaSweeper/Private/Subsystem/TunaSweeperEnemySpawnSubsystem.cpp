@@ -3,7 +3,6 @@
 #include "AI/TunaSweeperEnemyCharacter.h"
 #include "AI/TunaSweeperRollingBomber.h"
 #include "AI/TunaSweeperRollingBomberSpawner.h"
-#include "Component/TunaSweeperRevealOccluderComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Game/TunaSweeperDataValueTypes.h"
 #include "Debuff/TunaSweeperDebuffTypes.h"
@@ -2219,36 +2218,12 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadGameplayInteractionActorSpawnData(bool
 		}
 		JsonObject->TryGetBoolField(TEXT("static_mesh_collision_enabled"), SpawnDefinition.bStaticMeshPropCollisionEnabled);
 		JsonObject->TryGetBoolField(TEXT("collision_enabled"), SpawnDefinition.bStaticMeshPropCollisionEnabled);
-		JsonObject->TryGetBoolField(TEXT("static_mesh_reveal_occluder"), SpawnDefinition.bStaticMeshPropRevealOccluder);
-		JsonObject->TryGetBoolField(TEXT("reveal_occluder"), SpawnDefinition.bStaticMeshPropRevealOccluder);
-		JsonObject->TryGetBoolField(TEXT("occlusion_reveal_enabled"), SpawnDefinition.bStaticMeshPropRevealOccluder);
 		SpawnDefinition.StaticMeshPropRelativeLocation = StaticMeshPropRelativeLocation;
 		SpawnDefinition.StaticMeshPropRelativeRotation = StaticMeshPropRelativeRotation;
 		SpawnDefinition.StaticMeshPropRelativeScale = FVector(
 			FMath::Max(0.01f, StaticMeshPropRelativeScale.X),
 			FMath::Max(0.01f, StaticMeshPropRelativeScale.Y),
 			FMath::Max(0.01f, StaticMeshPropRelativeScale.Z));
-		double NumericStaticMeshPropRevealIntensity = SpawnDefinition.StaticMeshPropRevealIntensity;
-		double NumericStaticMeshPropRevealCharacterRadiusScale = SpawnDefinition.StaticMeshPropRevealCharacterRadiusScale;
-		double NumericStaticMeshPropRevealCursorRadiusScale = SpawnDefinition.StaticMeshPropRevealCursorRadiusScale;
-		double NumericStaticMeshPropRevealPatternScale = SpawnDefinition.StaticMeshPropRevealPatternScale;
-		JsonObject->TryGetNumberField(TEXT("reveal_intensity"), NumericStaticMeshPropRevealIntensity);
-		JsonObject->TryGetNumberField(TEXT("reveal_character_radius_scale"), NumericStaticMeshPropRevealCharacterRadiusScale);
-		JsonObject->TryGetNumberField(TEXT("reveal_cursor_radius_scale"), NumericStaticMeshPropRevealCursorRadiusScale);
-		JsonObject->TryGetNumberField(TEXT("reveal_pattern_scale"), NumericStaticMeshPropRevealPatternScale);
-		SpawnDefinition.StaticMeshPropRevealIntensity = FMath::Clamp(
-			static_cast<float>(NumericStaticMeshPropRevealIntensity),
-			0.0f,
-			1.0f);
-		SpawnDefinition.StaticMeshPropRevealCharacterRadiusScale = FMath::Max(
-			0.0f,
-			static_cast<float>(NumericStaticMeshPropRevealCharacterRadiusScale));
-		SpawnDefinition.StaticMeshPropRevealCursorRadiusScale = FMath::Max(
-			0.0f,
-			static_cast<float>(NumericStaticMeshPropRevealCursorRadiusScale));
-		SpawnDefinition.StaticMeshPropRevealPatternScale = FMath::Max(
-			0.1f,
-			static_cast<float>(NumericStaticMeshPropRevealPatternScale));
 
 		double NumericPracticeDummyMaxHealth = SpawnDefinition.PracticeDummyMaxHealth;
 		double NumericPracticeDummyCriticalMultiplier =
@@ -2763,26 +2738,6 @@ void UTunaSweeperEnemySpawnSubsystem::ConfigureGameplayInteractionActor(
 					SpawnDefinition.bStaticMeshPropCollisionEnabled
 						? ECollisionEnabled::QueryAndPhysics
 						: ECollisionEnabled::NoCollision);
-				if (SpawnDefinition.bStaticMeshPropRevealOccluder)
-				{
-					UTunaSweeperRevealOccluderComponent* RevealOccluderComponent =
-						SpawnedActor->FindComponentByClass<UTunaSweeperRevealOccluderComponent>();
-					if (!RevealOccluderComponent)
-					{
-						RevealOccluderComponent = NewObject<UTunaSweeperRevealOccluderComponent>(
-							SpawnedActor,
-							TEXT("RevealOccluderComponent"));
-						SpawnedActor->AddInstanceComponent(RevealOccluderComponent);
-						RevealOccluderComponent->RegisterComponent();
-					}
-
-					RevealOccluderComponent->ConfigureRevealOccluderSettings(
-						SpawnDefinition.StaticMeshPropRevealIntensity,
-						SpawnDefinition.StaticMeshPropRevealCharacterRadiusScale,
-						SpawnDefinition.StaticMeshPropRevealCursorRadiusScale,
-						SpawnDefinition.StaticMeshPropRevealPatternScale);
-					RevealOccluderComponent->RegisterRevealMesh(MeshComponent);
-				}
 			}
 		}
 		break;

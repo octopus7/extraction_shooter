@@ -120,7 +120,7 @@ Landscape와 소품 배치는 랜덤 노이즈를 먼저 만들고 그 위에 �
 
 ## 현재 구현 위치
 
-- 에디터 생성 코드: `TunaSweeper/Source/TunaSweeperEditor/Private/TunaSweeperExperimentalVegetation.cpp`
+- 에디터 생성 코드: `TunaSweeper/Source/TunaSweeperEditor/Private/TunaSweeperExperimentalVegetation.cpp` (일반 실험 식생 전용; 테스트 침엽수 생성 코드는 제거됨)
 - 자동 실행 등록: `TunaSweeper/Source/TunaSweeperEditor/Private/TunaSweeperEditor.cpp`
 - 모듈 의존성: `TunaSweeper/Source/TunaSweeperEditor/TunaSweeperEditor.Build.cs`
 - source art: `TunaSweeper/Content/SourceArt/EnvironmentPrototype/`

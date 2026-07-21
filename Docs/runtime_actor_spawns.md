@@ -108,9 +108,7 @@ Current overlays mark `TS_Travel_ToBunker` as the start location and `TS_Extract
 
 File: `TunaSweeper/Content/Data/GameplayInteractionSpawns.json`
 
-`static_mesh_prop` rows create an `AStaticMeshActor` at runtime. Required fields are `level_name`, `spawn_id`, `spawn_type`, `location`, and `static_mesh`. Optional fields include `actor_class`, `static_mesh_materials`, `static_mesh_relative_location`, `static_mesh_relative_rotation`, `static_mesh_relative_scale`, `collision_enabled`, `reveal_occluder`, `reveal_intensity`, `reveal_character_radius_scale`, `reveal_cursor_radius_scale`, and `reveal_pattern_scale`.
-
-`TS_TurbulentConiferPrototype_01` places `/Game/Prototype/SM_TurbulentConiferPrototype` on `RaidMap` at `[5000.0, -760.0, 0.0]` with the generated canopy and short trunk materials assigned explicitly. It enables `reveal_occluder`; only `/Game/Prototype/M_TurbulentConiferCanopy` reads the reveal MPC/custom primitive data, so the short trunk material remains opaque.
+`static_mesh_prop` rows create an `AStaticMeshActor` at runtime. Required fields are `level_name`, `spawn_id`, `spawn_type`, `location`, and `static_mesh`. Optional fields include `actor_class`, `static_mesh_materials`, `static_mesh_relative_location`, `static_mesh_relative_rotation`, `static_mesh_relative_scale`, and `collision_enabled`.
 
 ## Shooting Practice Dummy
 

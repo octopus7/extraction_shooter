@@ -3361,3 +3361,23 @@ Chaos 토마토 파괴 단면용 과육 재질은 재질만 준비하면 되는�
 ### 답변
 
 `PM_Flesh`는 존재하고 `SurfaceType1 (Flesh)`로 설정돼 있으며 토마토의 충돌 박스에도 적용돼 있다. 문제는 `DA_Impact_Ballistic`에 Flesh(`SurfaceType1`) Surface Rule이 없어 기본 효과로 폴백되는 점이다. 기본 사운드가 `SW_BarrelHit`이므로 금속 소리로 들린다. Flesh 전용 피격음을 준비해 두 Impact Profile의 Surface Rule에 연결하면 해결된다.
+
+## 2026-07-22 00:55:30 (소요시간: 00:03:00)
+
+### 질문
+
+커서 위치와 캐릭터 위치에서 가림을 지우는 효과의 현재 구현 상태와 방식을 확인해 달라는 요청.
+
+### 답변
+
+플레이어의 `UTunaSweeperOcclusionRevealSourceComponent`가 매 프레임 캐릭터 위치와 조준 평면 위 커서 월드 위치를 MPC에 기록한다. `UTunaSweeperRevealOccluderComponent`는 대상 메시 Custom Primitive Data로 개별 강도와 반경 배율을 기록한다. 현재 `RaidMap`의 `TS_TurbulentConiferPrototype_01` 수관 머티리얼만 이 값을 읽으며, 캐릭터 반경 190cm·커서 반경 150cm·feather 95cm 안에서 masked 디더 패턴의 픽셀을 최대 약 84% 제거한다. 줄기와 일반 배경 메시에는 자동 적용되지 않는다.
+
+## 2026-07-22 00:57:09 (소요시간: 00:02:00)
+
+### 질문
+
+가림 제거 효과가 화면 공간 기준 중심 완전 제거와 외곽 디졸브 페이드 요구에 맞는지 검토 요청.
+
+### 답변
+
+현재 구현은 월드 XY 좌표 거리 기준이며 화면 공간 기준이 아니다. 중심부도 `keepFraction` 최소값 0.16으로 약 16% 픽셀이 남는다. 외곽 feather는 masked 디더의 제거 확률만 연속적으로 바꾸므로 투명 알파가 서서히 변하는 표현은 아니다. 따라서 요구한 중심 완전 제거와 화면 기준 반경, 외곽의 디졸브 페이드와는 일치하지 않는다.
