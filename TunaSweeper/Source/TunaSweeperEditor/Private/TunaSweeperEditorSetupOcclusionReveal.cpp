@@ -230,7 +230,7 @@ namespace TunaSweeperEditorSetup
 				Input.Input.Connect(OutputIndex, Expression);
 				OpacityMask->Inputs.Add(Input);
 			};
-			AddInput(TEXT("ScreenUv"), ScreenPosition, 1);
+			AddInput(TEXT("ScreenUv"), ScreenPosition);
 			AddInput(TEXT("CharacterCenter"), CharacterCenter);
 			AddInput(TEXT("CursorCenter"), CursorCenter);
 			AddInput(TEXT("CharacterValid"), CharacterValid);
