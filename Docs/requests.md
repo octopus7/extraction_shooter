@@ -5635,3 +5635,14 @@
 - 플레이어 캐릭터의 `Movement > Roll`에 `Roll Montage`와 `Roll Montage Play Rate`를 Blueprint에서 지정할 수 있도록 노출하고, `BeginRoll()`에서 Montage를 재생하도록 연결.
 - 기본 Montage는 `/Game/Characters/Player/Luna/Animations/AM_Luna_Roll`, 기본 재생 속도는 `1.33`으로 설정.
 - `TunaSweeperEditor Win64 Development` 빌드 성공 후 Unreal Editor로 프로젝트를 열었음.
+
+## 2026-07-24 16:02:13 (소요시간: 00:03:00)
+
+- 강제 조작 유도, 조건 기반 진입·완료, 완료 구간 재진입 방지 저장, 선택적 시간 정지, 특정 UI 강조 오버레이를 포함하는 범용 튜토리얼 시스템을 설계.
+- 튜토리얼 오케스트레이션, 공용 입력 정책, 플레이어별 프레젠테이션을 분리하고 Gameplay Tag 기반 행동 허용 및 성공 이벤트 보고 인터페이스를 정의.
+- 데이터 모델, 상태 머신, 조건 공급자, 위젯 앵커 레지스트리, 4면 입력 차단 오버레이, 일시정지 소유권, 저장 및 중단 복구 규칙, 단계별 구현 순서와 검수 기준을 `Docs/tutorial_system_design.md`에 기록.
+
+## 2026-07-24 16:07:36 (소요시간: 00:01:00)
+
+- 튜토리얼 시스템 설계 문서와 해당 요청 기록만 선별해 Git 커밋.
+- 기존 `Blender/SKM_Luna_sp3temp.blend` 및 `TunaSweeper/Content/RaidMap.umap` 변경은 커밋 대상에서 제외.
