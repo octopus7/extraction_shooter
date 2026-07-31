@@ -5683,3 +5683,7 @@
 - 현재 퀘스트 원본에서 공개 체험판 Q1~Q4 12단계, 인증 전용 M01~M20 20단계, UE5 현재 구현 스냅샷 6단계를 생성해 D1에 입력했다.
 - D1 `quest-flow-simulator`의 원격 마이그레이션과 시드를 적용하고 Worker `quest`를 `https://quest.oc7.workers.dev`에 Wrangler로 실제 배포했다.
 - 익명 공개 카탈로그 조회, 인증 전용 카탈로그 404 차단, 작업공간 API 401 차단, Pro 모드 전환, iPad Pro 세로 viewport, 브라우저 콘솔 오류 없음을 실제 배포 URL에서 확인했다.
+
+## 2026-07-31 16:23:05 (소요시간: 00:02:44)
+
+- Quest Flow Simulator 구현과 관련 질문·요청 기록을 커밋 `85683b6`(`feat: add quest flow simulator`)으로 생성해 GitHub `origin/main`에 푸시했다.
