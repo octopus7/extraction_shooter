@@ -335,7 +335,8 @@ function buildDemoCatalog(treeMarkdown, routeMarkdown) {
       yStart: 100,
       columnGap: 190,
       rowGap: 130,
-      columns: 3,
+      columns: 20,
+      existingColumns: 3,
       preserveExistingLayout: true,
     }),
     places,
@@ -445,7 +446,8 @@ function buildApproximateSimulationCatalog(
       yStart: 100,
       columnGap: 170,
       rowGap: 110,
-      columns: 5,
+      columns: 20,
+      existingColumns: 5,
       preserveExistingLayout: true,
     }),
     places,
@@ -531,10 +533,11 @@ function buildQuestNodes(quests, layout) {
     const branchIndex = rankQuests.indexOf(questId);
     const row = Math.floor(rank / layout.columns);
     const branchOffset = (branchIndex - (rankQuests.length - 1) / 2) * branchGap;
+    const existingColumns = layout.existingColumns ?? layout.columns;
     const existingX =
-      layout.xStart + (index % layout.columns) * layout.columnGap;
+      layout.xStart + (index % existingColumns) * layout.columnGap;
     const existingY =
-      layout.yStart + Math.floor(index / layout.columns) * layout.rowGap;
+      layout.yStart + Math.floor(index / existingColumns) * layout.rowGap;
     return {
       id: `quest-node-${String(quest.id).toLowerCase()}`,
       questId,

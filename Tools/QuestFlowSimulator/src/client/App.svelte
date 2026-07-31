@@ -164,7 +164,7 @@
   }
 
   function autoLayoutQuestNodes(nodes: QuestNode[]) {
-    const columns = Math.min(5, Math.max(3, Math.ceil(Math.sqrt(nodes.length))));
+    const columns = Math.min(20, Math.max(1, nodes.length));
     const xStart = 100;
     const yStart = 100;
     const columnGap = 170;
@@ -343,11 +343,11 @@
     return {
       x:
         canvasBounds.minX +
-        ((Math.min(920, Math.max(80, canvasX)) - 80) / 840) *
+        ((canvasX - 80) / 840) *
           canvasBounds.spanX,
       y:
         canvasBounds.minY +
-        ((Math.min(560, Math.max(60, canvasY)) - 60) / 500) *
+        ((canvasY - 60) / 500) *
           canvasBounds.spanY,
     };
   }
