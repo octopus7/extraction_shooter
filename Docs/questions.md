@@ -3510,3 +3510,103 @@ Chaos 토마토 파괴 단면용 과육 재질은 재질만 준비하면 되는�
 ### 답변
 
 프로젝트 C++에는 구르기 외의 Montage 재생/정지 호출이 없고 `FinishRoll()`도 몽타주를 정지하지 않는다. 따라서 ABP의 `DefaultSlot` 배치가 가장 유력하다. Slot 노드는 State Machine 내부 특정 상태가 아니라 `Locomotion State Machine 출력 → DefaultSlot → Output Pose`처럼 항상 통과하는 최종 AnimGraph 경로에 둬야 한다. 이동 상태 전환이나 Aim 분기 뒤에 Slot이 있으면 상황에 따라 몽타주가 우회되어 중간에 원래 포즈로 돌아올 수 있다.
+
+## 2026-07-31 15:01:00 (소요시간: 00:05:40)
+
+### 질문
+
+언리얼 엔진과 별도로 퀘스트 설계에 따른 플레이 시간 및 동선 반복 시뮬레이션 도구를 만들 때 사용할 기술 스택을 문의. 실제 이동을 완벽하게 재현할 필요는 없고, 장소 간 이동 시간 오차가 2~3m 이동분 정도인 근사 모델이면 충분하다고 보충 설명.
+
+### 답변
+
+근사 모델이면 별도 서버나 물리 엔진 없이 TypeScript 단일 스택을 권장한다. React, Vite, Zustand로 UI와 상태를 구성하고 기존 MapLayoutEditor와 동일하게 Konva로 장소 및 동선을 표시한다. 시뮬레이션 코어는 UI와 분리된 순수 TypeScript 모듈로 만들고 Web Worker에서 결정적 시드 기반 Monte Carlo 반복 실행을 수행한다. 공간은 연속 좌표나 NavMesh 대신 장소 노드와 이동 구간 간선으로 표현하고, 각 간선에 거리 또는 기본 이동 시간, 지형 및 이동수단 배율, 전환 지연을 둔다. 퀘스트 목표에는 전투, 탐색, 수집, 상호작용 시간 분포를 둔 뒤 Dijkstra 또는 A*로 동선을 선택한다. 입력은 Unreal과 공유하기 쉬운 JSON, 결과는 우선 JSONL/CSV로 내보내며 대규모 자동 배치나 CI가 필요해질 때만 .NET 10 콘솔 러너 또는 SQLite를 추가한다. Unreal은 소수 표본의 실제 이동 시간을 측정해 간선 계수를 보정하는 검증기로 사용한다.
+
+## 2026-07-31 15:07:50 (소요시간: 00:01:25)
+
+### 질문
+
+React, TypeScript, Vite, Konva 조합 외에 퀘스트 플레이 시간 및 동선 근사 시뮬레이션 도구에 사용할 수 있는 다른 기술 조합을 문의.
+
+### 답변
+
+Windows 전용 프로젝트 도구라면 C#/.NET 10, WPF, Canvas 또는 DrawingVisual, ScottPlot 조합을 1순위 대안으로 권장한다. 기존 QuestGraphGenerator와 CombatMovementSimulator의 모델, JSON 처리, 결정적 시드 및 병렬 반복 실행 코드를 재사용할 수 있고 별도 서버나 브라우저 없이 단일 데스크톱 프로그램으로 배포하기 쉽다. 크로스플랫폼이 필요하면 WPF 대신 Avalonia를 사용할 수 있다. 빠른 통계 실험과 모델 변경이 최우선이면 Python, PySide6, QGraphicsScene, NetworkX, NumPy 또는 Polars 조합이 좋지만 패키징과 장기 타입 안정성은 C#보다 불리하다. 지도 위 애니메이션과 게임 같은 조작감을 중시하면 Godot 4와 C#도 가능하지만, 표와 그래프 중심의 설계 도구에는 UI 작성 비용과 엔진 의존성이 더 크다. React만 피하려는 경우에는 Svelte, PixiJS, Tauri 조합도 가능하지만 현재 프로젝트에서는 새 Rust 및 웹 패키징 계층을 추가할 이점이 크지 않다.
+
+## 2026-07-31 15:10:00 (소요시간: 00:04:30)
+
+### 질문
+
+퀘스트 동선 시뮬레이션 도구를 Cloudflare Workers와 D1 기반으로 공개하고, 비로그인 사용자는 공개 퀘스트 설정을 열람하며 로그인 사용자는 JSON 작업 상태를 데이터베이스에 저장하도록 구성하는 방안이 적합한지 문의.
+
+### 답변
+
+해당 공개 및 사용자 저장 구조에는 Workers와 D1이 잘 맞는다. 프런트엔드는 Workers Static Assets로 같은 도메인에서 제공하고, Worker API는 공개된 퀘스트 리비전 조회와 인증된 사용자의 작업 상태 CRUD만 담당하도록 한다. 근사 Monte Carlo 계산은 기본적으로 브라우저 Web Worker에서 실행해 Cloudflare CPU 사용량을 줄이고, Worker에는 입력 JSON과 요약 결과만 저장한다. 공개 퀘스트 원본과 사용자 작업 상태는 별도 테이블로 분리하고, 작업 테이블에는 user_id, base_revision_id, schema_version, version, updated_at처럼 검색 및 권한 검사에 필요한 열을 정규화하며 실제 편집 상태만 JSON TEXT로 저장한다. 동일 사용자의 여러 탭에서 덮어쓰지 않도록 version을 이용한 낙관적 잠금을 적용한다. 인증은 고객용 OIDC/OAuth 공급자와 HttpOnly 세션 쿠키를 사용하고, Cloudflare Access는 내부 관리자 도구가 아니라 일반 고객 로그인 용도로는 사용하지 않는다. 공개 GET은 캐시 가능하게 하고 모든 저장 API는 세션에서 얻은 user_id로 소유권을 검사한다. 실행 궤적처럼 커질 수 있는 상세 로그는 D1에 누적하지 않고 필요할 때 R2에 저장하며, 서버에서 대량 시뮬레이션이 꼭 필요해질 경우에만 Queue 소비자로 작업을 분할한다.
+
+## 2026-07-31 15:16:50 (소요시간: 00:00:30)
+
+### 질문
+
+퀘스트 동선 시뮬레이션 웹 도구를 저장소의 `Tools` 하위 경로에 구현할 것인지 문의.
+
+### 답변
+
+`Tools/QuestFlowSimulator/`를 독립 프로젝트 루트로 사용하는 것이 적합하다. Unreal 프로젝트 및 기존 MapLayoutEditor와 소스와 의존성을 섞지 않고, 이 경로 아래에 자체 package.json, wrangler.jsonc, 프런트엔드, Worker API, D1 마이그레이션, 테스트 및 로컬 실행·배포 스크립트를 둔다. 공통 퀘스트 JSON은 필요한 경우 명시적인 import 또는 별도 공유 데이터 경로를 통해 연동한다.
+
+## 2026-07-31 15:17:30 (소요시간: 00:03:15)
+
+### 질문
+
+현재 Wrangler에 로그인된 계정 이메일의 로컬 파트가 `b`로 시작하고 `l`로 끝나는지, 그리고 중간에 `kim` 문자열이 포함되는지 문의.
+
+### 답변
+
+Wrangler `whoami`를 통해 전체 이메일을 노출하지 않고 확인했다. 이메일 로컬 파트는 `b`로 시작하지만 `l`로 끝나지는 않고 `m`으로 끝나며, 대소문자 구분 없이 `kim` 문자열을 포함한다. 전체 이메일 주소와 계정 식별자는 기록하지 않았다.
+
+## 2026-07-31 15:20:40 (소요시간: 00:01:15)
+
+### 질문
+
+현재 PC에서 Wrangler 인증 정보가 저장되는 위치를 문의.
+
+### 답변
+
+현재 인증은 환경 변수나 Windows Credential Manager가 아니라 `C:\Users\blendue\AppData\Roaming\xdg.config\.wrangler\config\default.toml`에 저장되어 있다. 파일에는 OAuth access token, refresh token, 만료 시각 및 scope 항목이 있으며 값은 확인하거나 기록하지 않았다. 현재 `default.enc`는 존재하지 않는다. 최신 Wrangler는 기본적으로 해당 TOML 파일에 평문으로 저장하며, `wrangler login --use-keyring`을 사용하면 인증 정보는 같은 위치의 AES-256-GCM 암호화 `default.enc`로 옮겨지고 암호화 키는 Windows Credential Manager에 저장된다.
+
+## 2026-07-31 15:21:40 (소요시간: 00:01:20)
+
+### 질문
+
+Wrangler에서 Cloudflare 계정을 변경하려면 기존 계정에서 반드시 로그아웃해야 하는지, 여러 계정에 로그인한 뒤 전환할 수 있는지 문의.
+
+### 답변
+
+최신 Wrangler는 named auth profile 기능을 제공하므로 로그아웃 없이 여러 OAuth 로그인을 보관하고 전환할 수 있다. `wrangler auth create <name>`으로 프로필을 만들고, `wrangler --profile <name> <command>` 또는 명령의 `--profile` 전역 옵션으로 일회성 선택을 할 수 있다. `wrangler auth activate <name> <directory>`로 특정 디렉터리와 하위 경로에 프로필을 결합할 수도 있다. `Tools/QuestFlowSimulator`에는 전용 프로필을 결합하고 `wrangler.jsonc`에도 대상 `account_id`를 명시해 잘못된 계정으로 배포되는 것을 이중으로 방지하는 구성을 권장한다. 해당 auth profile 명령은 현재 공식 문서에서 Experimental로 표시된다.
+
+## 2026-07-31 15:25:30 (소요시간: 00:01:20)
+
+### 질문
+
+Cloudflare Account ID가 저장소에 포함되어도 되는 비민감 정보인지 문의.
+
+### 답변
+
+Account ID는 계정을 지정하는 식별자일 뿐 인증이나 권한을 부여하는 자격 증명이 아니므로 `wrangler.jsonc`에 포함해 저장소에 커밋해도 된다. Cloudflare 공식 Wrangler 설정에도 `account_id`가 일반 구성값으로 정의되어 있다. 반대로 API token, OAuth access 및 refresh token, Global API Key, OAuth client secret, 비밀번호와 `.dev.vars` 또는 `.env`의 실제 비밀값은 저장소에 포함하면 안 된다. 실제 Account ID 값은 질문 기록에 남기지 않았다.
+
+## 2026-07-31 15:27:00 (소요시간: 00:00:40)
+
+### 질문
+
+인증 토큰은 Worker 원격 설정에만 남고 로컬 PC에는 저장되지 않는지 문의.
+
+### 답변
+
+토큰 종류에 따라 다르다. 현재 PC에서 `wrangler login`에 사용되는 OAuth access token과 refresh token은 로컬의 `C:\Users\blendue\AppData\Roaming\xdg.config\.wrangler\config\default.toml`에 저장되어 있으며 현재 방식은 평문 TOML이다. 이는 Wrangler가 Cloudflare 계정을 관리하고 배포하기 위한 CLI 인증 정보다. 반면 `wrangler secret put`으로 등록하는 Worker 애플리케이션 secret은 Cloudflare에 암호화되어 저장되고 `wrangler.jsonc`나 저장소에는 값이 남지 않으며, 등록 후 Wrangler나 대시보드에서 값을 다시 조회할 수 없다. 로컬 개발에서 같은 secret이 필요하면 별도의 `.dev.vars` 또는 `.env` 파일에 둘 수 있지만 반드시 Git에서 제외해야 한다. D1 binding에는 인증 토큰이 필요하지 않고 공개 가능한 account 및 database 식별자만 설정한다.
+
+## 2026-07-31 15:28:00 (소요시간: 00:01:40)
+
+### 질문
+
+현재 Wrangler의 기본 인증 정보에 `bleng`이라는 named auth profile 이름을 붙이는 방법을 문의.
+
+### 답변
+
+현재 Wrangler에는 기존 `default` 프로필을 이름만 바꾸는 rename 명령이 없다. `wrangler auth create bleng`을 실행하고 브라우저에서 현재와 같은 Cloudflare 계정으로 다시 OAuth 승인하면 `bleng` named profile이 추가되며 기존 기본 로그인은 유지된다. 평문 저장을 피하려면 먼저 `wrangler auth keyring enable`을 실행한다. 생성 후 `wrangler whoami --profile bleng`으로 확인하고, 도구 경로가 만들어진 뒤 `wrangler auth activate bleng D:\github\extraction_shooter\Tools\QuestFlowSimulator`로 해당 디렉터리와 하위 경로에 결합하는 순서를 권장한다. Auth profile 기능은 현재 Experimental이다.

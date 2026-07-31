@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.wrangler/
+
+# Local development secrets
+.dev.vars
+.dev.vars.*
+.env
+.env.*
+
+# Local logs
+*.log
