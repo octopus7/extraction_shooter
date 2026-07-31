@@ -183,6 +183,29 @@
     return dataset.questNodes.find((node) => node.questId === id);
   }
 
+  function questEdgePath(from: QuestNode, to: QuestNode) {
+    const nodePort = 79;
+    const startX = xOnCanvas(from.x) + nodePort;
+    const startY = yOnCanvas(from.y);
+    const endX = xOnCanvas(to.x) - nodePort;
+    const endY = yOnCanvas(to.y);
+    const horizontalDistance = endX - startX;
+
+    if (horizontalDistance >= 0) {
+      const curve = Math.min(
+        120,
+        Math.max(32, horizontalDistance * 0.35),
+      );
+      return `M ${startX} ${startY} C ${startX + curve} ${startY}, ${endX - curve} ${endY}, ${endX} ${endY}`;
+    }
+
+    // A wrapped edge goes around the right side of the source/target pair so
+    // the return trip cannot cut through a card in the next row.
+    const outerX =
+      Math.max(startX, endX) + Math.max(70, Math.abs(endY - startY) * 0.35);
+    return `M ${startX} ${startY} C ${outerX} ${startY}, ${outerX} ${endY}, ${endX} ${endY}`;
+  }
+
   function placeById(id: string) {
     return dataset.places.find((place) => place.id === id);
   }
@@ -781,12 +804,9 @@
                 {@const from = edge.from}
                 {@const to = edge.to}
                 {#if from && to}
-                  <line
+                  <path
                     class="quest-edge"
-                    x1={xOnCanvas(from.x)}
-                    y1={yOnCanvas(from.y)}
-                    x2={xOnCanvas(to.x)}
-                    y2={yOnCanvas(to.y)}
+                    d={questEdgePath(from, to)}
                     marker-end="url(#arrow)"
                   />
                 {/if}

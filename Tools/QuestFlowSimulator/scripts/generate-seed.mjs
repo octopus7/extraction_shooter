@@ -462,19 +462,82 @@ function buildApproximateSimulationCatalog(
 
 function buildQuestNodes(quests, layout) {
   const questIds = quests.map((quest) => String(quest.id));
-  return quests.map((quest, index) => ({
-    id: `quest-node-${String(quest.id).toLowerCase()}`,
-    questId: String(quest.id),
-    title: String(quest.title),
-    x: layout.xStart + (index % layout.columns) * layout.columnGap,
-    y: layout.yStart + Math.floor(index / layout.columns) * layout.rowGap,
-    prerequisiteQuestIds:
-      Array.isArray(quest.prerequisites) && quest.prerequisites.length > 0
-        ? quest.prerequisites.map(String)
-        : index === 0
-          ? []
-          : [questIds[index - 1]],
-  }));
+  const questIdSet = new Set(questIds);
+  const prerequisitesById = new Map(
+    quests.map((quest, index) => {
+      const parsed =
+        Array.isArray(quest.prerequisites) && quest.prerequisites.length > 0
+          ? quest.prerequisites.map(String).filter((id) => questIdSet.has(id))
+          : index === 0
+            ? []
+            : [questIds[index - 1]];
+      return [String(quest.id), [...new Set(parsed)]];
+    }),
+  );
+  const rankById = new Map();
+  const visiting = new Set();
+
+  const rankFor = (questId) => {
+    if (rankById.has(questId)) return rankById.get(questId);
+    if (visiting.has(questId)) return 0;
+    visiting.add(questId);
+    const rank = Math.max(
+      0,
+      ...(prerequisitesById.get(questId) ?? []).map(
+        (prerequisiteId) => rankFor(prerequisiteId) + 1,
+      ),
+    );
+    visiting.delete(questId);
+    rankById.set(questId, rank);
+    return rank;
+  };
+
+  const questsByRank = new Map();
+  for (const questId of questIds) {
+    const rank = rankFor(questId);
+    const rankQuests = questsByRank.get(rank) ?? [];
+    rankQuests.push(questId);
+    questsByRank.set(rank, rankQuests);
+  }
+
+  const branchGap = layout.branchGap ?? Math.round(layout.rowGap * 0.8);
+  const maxRank = Math.max(0, ...rankById.values());
+  const rowCount = Math.floor(maxRank / layout.columns) + 1;
+  const rowHeights = Array.from({ length: rowCount }, (_, row) => {
+    const rankStart = row * layout.columns;
+    const rankEnd = Math.min(maxRank, rankStart + layout.columns - 1);
+    const largestBranch = Math.max(
+      1,
+      ...Array.from(
+        { length: rankEnd - rankStart + 1 },
+        (_, offset) => questsByRank.get(rankStart + offset)?.length ?? 1,
+      ),
+    );
+    return layout.rowGap + ((largestBranch - 1) * branchGap) / 2;
+  });
+  const rowStarts = rowHeights.reduce((starts, _height, index) => {
+    starts[index] =
+      (starts[index - 1] ?? layout.yStart) +
+      (index === 0 ? 0 : rowHeights[index - 1]);
+    return starts;
+  }, []);
+
+  return quests.map((quest) => {
+    const questId = String(quest.id);
+    const rank = rankById.get(questId) ?? 0;
+    const rankQuests = questsByRank.get(rank) ?? [questId];
+    const branchIndex = rankQuests.indexOf(questId);
+    const row = Math.floor(rank / layout.columns);
+    const branchOffset = (branchIndex - (rankQuests.length - 1) / 2) * branchGap;
+    return {
+      id: `quest-node-${String(quest.id).toLowerCase()}`,
+      questId,
+      title: String(quest.title),
+      x: layout.xStart + (rank % layout.columns) * layout.columnGap,
+      y: rowStarts[row] + branchOffset,
+      prerequisiteQuestIds: prerequisitesById.get(questId) ?? [],
+    };
+  });
 }
 
 function parsePrerequisiteQuestIds(value) {

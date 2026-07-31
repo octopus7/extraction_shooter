@@ -4,7 +4,7 @@
   "title": "본편 메인 M01~M20",
   "visibility": "authenticated",
   "schemaVersion": 2,
-  "datasetVersion": "content-4a08498f27ba",
+  "datasetVersion": "content-046311826e5a",
   "sourceKind": "ssot-markdown",
   "sourceHash": "sha256:792305ea961bb346d607cb768f425031509bc5adf06f4f98fe4f810774aa5977",
   "sources": [
@@ -67,7 +67,7 @@
         "questId": "M06",
         "title": "이상한 균열",
         "x": 100,
-        "y": 210,
+        "y": 122,
         "prerequisiteQuestIds": [
           "M05"
         ]
@@ -76,7 +76,7 @@
         "id": "quest-node-m07",
         "questId": "M07",
         "title": "수상한 안전거리",
-        "x": 270,
+        "x": 100,
         "y": 210,
         "prerequisiteQuestIds": [
           "M05"
@@ -86,8 +86,8 @@
         "id": "quest-node-m08",
         "questId": "M08",
         "title": "막힌 숲길",
-        "x": 440,
-        "y": 210,
+        "x": 100,
+        "y": 298,
         "prerequisiteQuestIds": [
           "M05"
         ]
@@ -96,7 +96,7 @@
         "id": "quest-node-m09",
         "questId": "M09",
         "title": "수상한 자판기",
-        "x": 610,
+        "x": 270,
         "y": 210,
         "prerequisiteQuestIds": [
           "M06",
@@ -108,7 +108,7 @@
         "id": "quest-node-m10",
         "questId": "M10",
         "title": "자판기 관리자 권한",
-        "x": 780,
+        "x": 440,
         "y": 210,
         "prerequisiteQuestIds": [
           "M09"
@@ -118,8 +118,8 @@
         "id": "quest-node-m11",
         "questId": "M11",
         "title": "폭발물 취급 주의",
-        "x": 100,
-        "y": 320,
+        "x": 610,
+        "y": 210,
         "prerequisiteQuestIds": [
           "M10"
         ]
@@ -128,8 +128,8 @@
         "id": "quest-node-m12",
         "questId": "M12",
         "title": "콘크리트 더미 제거",
-        "x": 270,
-        "y": 320,
+        "x": 780,
+        "y": 210,
         "prerequisiteQuestIds": [
           "M11"
         ]
@@ -138,8 +138,8 @@
         "id": "quest-node-m13",
         "questId": "M13",
         "title": "고급보안구역 소문",
-        "x": 440,
-        "y": 320,
+        "x": 100,
+        "y": 408,
         "prerequisiteQuestIds": [
           "M12"
         ]
@@ -148,8 +148,8 @@
         "id": "quest-node-m14",
         "questId": "M14",
         "title": "더 튼튼하게",
-        "x": 610,
-        "y": 320,
+        "x": 270,
+        "y": 408,
         "prerequisiteQuestIds": [
           "M13"
         ]
@@ -158,8 +158,8 @@
         "id": "quest-node-m15",
         "questId": "M15",
         "title": "고급보안구역 진입",
-        "x": 780,
-        "y": 320,
+        "x": 440,
+        "y": 408,
         "prerequisiteQuestIds": [
           "M14"
         ]
@@ -168,8 +168,8 @@
         "id": "quest-node-m16",
         "questId": "M16",
         "title": "보안 로그 해독",
-        "x": 100,
-        "y": 430,
+        "x": 610,
+        "y": 408,
         "prerequisiteQuestIds": [
           "M15"
         ]
@@ -178,8 +178,8 @@
         "id": "quest-node-m17",
         "questId": "M17",
         "title": "마지막 외출 준비",
-        "x": 270,
-        "y": 430,
+        "x": 780,
+        "y": 408,
         "prerequisiteQuestIds": [
           "M16"
         ]
@@ -188,8 +188,8 @@
         "id": "quest-node-m18",
         "questId": "M18",
         "title": "최종보스전",
-        "x": 440,
-        "y": 430,
+        "x": 100,
+        "y": 518,
         "prerequisiteQuestIds": [
           "M17"
         ]
@@ -198,8 +198,8 @@
         "id": "quest-node-m19",
         "questId": "M19",
         "title": "고급참치 확보",
-        "x": 610,
-        "y": 430,
+        "x": 270,
+        "y": 518,
         "prerequisiteQuestIds": [
           "M18"
         ]
@@ -208,8 +208,8 @@
         "id": "quest-node-m20",
         "questId": "M20",
         "title": "오늘의 식탁",
-        "x": 780,
-        "y": 430,
+        "x": 440,
+        "y": 518,
         "prerequisiteQuestIds": [
           "M19"
         ]

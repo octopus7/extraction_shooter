@@ -4,7 +4,7 @@
   "title": "체험판 Q1~Q4",
   "visibility": "public",
   "schemaVersion": 2,
-  "datasetVersion": "content-50c872aa328f",
+  "datasetVersion": "content-4152eaa9563c",
   "sourceKind": "demo-design-markdown",
   "sourceHash": "sha256:e642ea6400af7e0e55b10f14f935b129269aa26f26fe2ea37de2571fbda1f9ff",
   "sources": [
@@ -38,7 +38,7 @@
         "questId": "q3-1",
         "title": "부러진 밸브 손잡이",
         "x": 480,
-        "y": 100,
+        "y": 48,
         "prerequisiteQuestIds": [
           "q2"
         ]
@@ -47,8 +47,8 @@
         "id": "quest-node-q3-2",
         "questId": "q3-2",
         "title": "새는 벙커 배관",
-        "x": 100,
-        "y": 230,
+        "x": 480,
+        "y": 152,
         "prerequisiteQuestIds": [
           "q2"
         ]
@@ -57,8 +57,8 @@
         "id": "quest-node-q4",
         "questId": "q4",
         "title": "오늘의 보상",
-        "x": 290,
-        "y": 230,
+        "x": 100,
+        "y": 282,
         "prerequisiteQuestIds": [
           "q3-1",
           "q3-2"
