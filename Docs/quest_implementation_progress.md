@@ -6,6 +6,9 @@ Last updated: 2026-05-25 17:34:26
 
 ## 완료된 것
 
+- 체험판 데모 퀘스트 데이터가 `TunaSweeper/Content/Data/QuestDefinitions.json`과 `TunaSweeper/Content/Data/QuestTextStrings.csv`의 Q1~Q4 체인으로 갱신되었다. Q3-1/Q3-2는 Q2 완료 후 병렬 해금되고, Q4는 두 수리 퀘스트의 보상 완료 후 해금된다.
+- 체험판 조사·청소·수리·참치캔 전달 목표는 `interaction.demo.*` 이벤트 ID를 사용하도록 등록되었다. 해당 이벤트를 실제 월드 인터랙션 액터가 발생시키는 연결은 남은 작업이다.
+
 - 퀘스트 정의는 `TunaSweeper/Content/Data/QuestDefinitions.json`에서 데이터 기반으로 읽는다.
 - 퀘스트 런타임 소유자는 `UTunaSweeperQuestSubsystem`이다.
 - 퀘스트 상태 `Available`, `Accepted`, `RewardAvailable`, `RewardCompleted`가 구현되어 있다.

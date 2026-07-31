@@ -4534,19 +4534,11 @@
 - `Docs/UE5ExtractionShooterCourse/CoursePlan.md`를 추가해 강의 운영 계획, 전체 산출물, 15차시 계획, 실습 진행 순서, 세부 문서 작성 순서, 각 장의 권장 내부 구성을 정리한 것.
 - `Docs/UE5ExtractionShooterCourse/README.md`에 `CoursePlan.md`로 이동하는 운영 계획 링크를 추가한 것.
 
-## 2026-07-03 14:03:35 (소요시간: 00:02:52)
-
-- 퀘스트 관계 그래프 생성을 위한 .NET 10 콘솔 도구 `Tools/QuestGraphGenerator`를 추가한 것.
-- `TunaSweeper/Content/Data/QuestDefinitions.json`과 `QuestTextStrings.csv`를 읽어 `Docs/quest_graph.md`에 Mermaid 선행 조건 그래프, provider별 표, 목표 요약, 검증 결과를 생성하도록 구현한 것.
-- 누락된 선행 퀘스트, 중복 퀘스트 ID, 빈 목표, 중복 provider sort order, 선행 조건 순환 참조, 누락된 텍스트 키를 검증하도록 추가한 것.
-- 탐색기에서 더블클릭으로 실행할 수 있는 `Tools/QuestGraphGenerator/GenerateQuestGraph.bat`를 추가한 것.
-- `dotnet build`와 `dotnet run`으로 생성기 빌드 및 `Docs/quest_graph.md` 생성을 확인한 것.
-
 ## 2026-07-04 11:30:15 (소요시간: 00:01:09)
 
 - 문서와 코드 상태를 대조해 다음 우선 작업을 파악한 것.
-- `TODO.md`, `Docs/quest_implementation_progress.md`, `Docs/quest_graph.md`, `Docs/SSOT/TunaSweeper_SSOT_Quest_Item_v0.6.md`, `Docs/SSOT/area_unlocking.md`, 퀘스트 데이터와 퀘스트 서브시스템 코드를 확인한 것.
-- 현재 상태는 퀘스트 프레임워크와 그래프 생성기는 있으나 본편 메인 퀘스트 데이터가 6개 검증/초기 흐름 수준에 머물러 있고, `visit_location` 및 월드 진행/수리 완료 퀘스트 목표 타입이 아직 없는 것으로 판단한 것.
+- `TODO.md`, `Docs/quest_implementation_progress.md`, `Docs/SSOT/TunaSweeper_SSOT_Quest_Item_v0.6.md`, `Docs/SSOT/area_unlocking.md`, 퀘스트 데이터와 퀘스트 서브시스템 코드를 확인한 것.
+- 현재 상태는 퀘스트 프레임워크가 있으나 본편 메인 퀘스트 데이터가 6개 검증/초기 흐름 수준에 머물러 있고, `visit_location` 및 월드 진행/수리 완료 퀘스트 목표 타입이 아직 없는 것으로 판단한 것.
 - 다음 작업은 본편 M01~M05를 바로 많이 추가하기보다 `visit_location` 목표 타입과 월드 진행 완료 목표 연결을 먼저 구현한 뒤, SSOT 기준 초반 메인 퀘스트 데이터를 넣는 순서가 적합하다고 정리한 것.
 
 ## 2026-07-04 11:38:56 (소요시간: 00:00:15)
@@ -5697,3 +5689,45 @@
 ## 2026-07-31 16:28:35 (소요시간: 00:01:15)
 
 - Quest Flow Simulator 배포 배치 파일과 README 사용법 변경을 커밋해 GitHub `origin/main`에 푸시했다.
+
+## 2026-07-31 16:37:45 (소요시간: 00:20:15)
+
+- `Tools/QuestFlowSimulator`의 Cloudflare Access JWT 인증을 단일 관리자 비밀번호 기반 인증으로 교체했다.
+- `ADMIN_PASSWORD` Worker Secret을 일정 시간 비교하고, 32바이트 난수 세션의 SHA-256 해시만 D1에 저장하도록 구현했다.
+- 운영용 `Secure`·`HttpOnly`·`SameSite=Strict`·`__Host-` 쿠키, 12시간 만료, 동일 출처 검사, HTTPS 강제, 동일 IP 로그인 실패 제한을 적용했다.
+- 로그인·로그아웃 API와 UI를 추가하고, 로그아웃 시 D1 세션을 삭제해 기존 쿠키가 즉시 무효화되도록 했다.
+- 인증 전용 카탈로그를 브라우저 `localStorage`에 저장하지 않도록 차단하고, 로그인 상태에서는 D1 작업공간을 우선 복원하며 로그아웃 시 구버전 비공개 초안을 제거하도록 했다.
+- Workers Vitest와 로컬 D1 마이그레이션 기반 통합 테스트 6개를 추가해 로그인, 병렬 실패 제한, 쿠키, 세션 폐기, CSRF·비보안 HTTP 차단, 비공개 카탈로그 경계를 검증했다.
+- `npm test`, `npm run test:typecheck`, `npm run build`를 통과하고 도구 README와 `Tools/QuestFlowSimulator/Docs/plan.md`의 인증 계획을 갱신했다.
+
+## 2026-07-31 16:58:00 (소요시간: 00:02:00)
+
+- 체험판 퀘스트 기획 문서와 퀘스트 데이터 구조를 분석해 Q1~Q4 진행 흐름, 스토리·플레이 루프, 목표 시간, 구현 상태 차이를 요약했다.
+
+## 2026-07-31 17:10:00 (소요시간: 00:12:37)
+
+- 문서 기준 체험판 Q1~Q4 퀘스트 정의와 한국어·영어·일본어 문구를 런타임 데이터에 반영했다.
+- Q3-1과 Q3-2의 병렬 선행 조건, Q4의 양쪽 수리 완료 선행 조건, 조사·청소·수리·참치캔 전달용 `interaction.demo.*` 이벤트 ID를 등록했다.
+- UE 5.7 에디터 빌드와 Windows 패키징을 성공시키고, 패키지 내부 퀘스트 데이터가 소스와 동일함을 확인했다.
+- `Docs/quest_implementation_progress.md`에 체험판 데이터 갱신 및 월드 이벤트 연결 잔여 사항을 기록했다.
+
+## 2026-07-31 17:52:30 (소요시간: 00:02:28)
+
+- Quest Flow Simulator의 문서에 없는 `선착장`, `마을 광장` 임의 fallback 데이터를 제거했다.
+- 프런트 fallback이 `generate-seed.mjs`가 체험판 문서에서 생성한 `data/demo.json`을 직접 사용하도록 변경해 공개 D1 데이터와 단일 출처를 공유하게 했다.
+- 문서 기반 장소 목록 회귀 테스트를 추가하고 전체 테스트 7개, 테스트 타입 검사, 프로덕션 빌드를 통과했다.
+- Worker `quest` 버전 `a6f89fa6-0b69-46e0-beef-d854a30798f3`을 배포하고 실서비스에서 임의 장소가 제거됐으며 `authConfigured: true`인 것을 확인했다.
+
+## 2026-07-31 17:56:53 (소요시간: 00:03:00)
+
+- `Tools/QuestGraphGenerator`와 생성 결과물 `Docs/quest_graph.md`를 제거했다.
+- `Docs/questions.md`와 `Docs/requests.md`에서 해당 정적 그래프 생성기와 관련된 질문·구현 기록 및 참조 내용을 제거했다.
+- `Tools/QuestFlowSimulator`와 퀘스트 런타임 데이터는 유지했으며, 커밋하지 않고 작업 트리에 보류했다.
+
+## 2026-07-31 17:57:05 (소요시간: 00:00:45)
+
+- 현재 `main` 브랜치를 `origin/main`으로 푸시하고 원격 저장소가 최신 상태임을 확인했다.
+
+## 2026-07-31 17:59:15 (소요시간: 00:01:30)
+
+- 체험판 Q1~Q4 런타임 데이터 갱신, 정적 퀘스트 그래프 생성기 제거, 관련 문서 변경을 검증한 뒤 커밋해 `origin/main`에 푸시했다.

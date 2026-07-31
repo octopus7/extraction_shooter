@@ -2374,36 +2374,6 @@ distance field 문제일 가능성은 낮다. 프로젝트 설정에는 `r.Gener
 
 다음 단계는 더 세부적인 내용을 작성하는 것이 맞지만, 모든 장을 한 번에 장문으로 확장하기보다 먼저 강의 운영 단위와 샘플 장을 정하는 것이 좋다. 우선 루트에 전체 강의 차시, 시간, 산출물, 실습 순서를 담는 계획 문서를 만들고, 그 다음 `00_Orientation`과 `01_UEProjectSetup`에 강의 원고와 실습 지시를 샘플로 작성한다. 형식이 맞으면 플레이 가능한 최소 루프인 플레이어/입력, 상호작용, 아이템/루팅, 레이드 탈출 순서로 세부 강의를 확장하는 흐름이 적합하다.
 
-## 2026-07-03 13:50:53 (소요시간: 00:00:35)
-
-### 질문
-
-퀘스트 진행이나 선행 조건 관련 관계를 파악하려면 JSON 파일을 직접 여는 것 말고는 방법이 없는지에 대한 질문.
-
-### 답변
-
-현재 프로젝트에는 퀘스트 선행 조건과 진행 관계를 전용 그래프나 에디터 도구로 보여주는 기능은 없다. 관계의 원본 데이터는 `TunaSweeper/Content/Data/QuestDefinitions.json`의 `required_completed_quest_ids`, `provider_id`, `objectives`, `rewards` 필드이며, 런타임은 `UTunaSweeperQuestSubsystem`에서 이를 읽어 수락 가능 여부와 제공자별 후보 퀘스트를 계산한다. 따라서 지금은 JSON 또는 관련 문서를 보는 방식이 기본이지만, JSON을 읽어 Markdown 표, Mermaid 그래프, CSV, 또는 Unreal Editor 탭으로 관계도를 출력하는 보조 도구를 추가하면 직접 JSON을 열지 않고도 파악할 수 있다.
-
-## 2026-07-03 13:52:10 (소요시간: 00:00:25)
-
-### 질문
-
-퀘스트 관계 그래프 뷰어를 UE 에디터로 만드는 것이 좋은지, 외부 도구로 만드는 것이 좋은지에 대한 질문.
-
-### 답변
-
-초기 구현은 외부 자동 생성 도구가 적합하다. 퀘스트 원본이 JSON이므로 Unreal Editor 실행 없이 빠르게 `Docs/quest_graph.md` 같은 Mermaid 그래프나 정적 HTML을 생성할 수 있고, Git diff와 코드 리뷰, 누락 선행 조건/순환 참조 검증을 함께 처리하기 쉽다. UE 에디터 탭은 디자이너가 에디터 안에서 노드를 선택하고 실제 퀘스트 데이터를 편집하거나 레벨 액터와 연결해야 할 때 2단계로 추가하는 편이 좋다. 권장 순서는 외부 Markdown/HTML 그래프 생성기, 검증 로직 추가, 필요 시 같은 분석 코드를 재사용하는 UE Editor Nomad Tab 확장이다.
-
-## 2026-07-03 13:53:13 (소요시간: 00:00:55)
-
-### 질문
-
-퀘스트 그래프 생성기를 어떤 기술 스택으로 만들지에 대한 질문.
-
-### 답변
-
-프로젝트의 기존 `Tools` 폴더에 있는 보조 도구들이 C#/.NET 기반이므로, 퀘스트 그래프 생성기도 C# 콘솔 도구로 만드는 것이 적합하다. `System.Text.Json`으로 `TunaSweeper/Content/Data/QuestDefinitions.json`을 읽고, 의존성 없이 `Docs/quest_graph.md`에 Mermaid 그래프와 요약 표, 검증 결과를 출력하는 구조가 좋다. 초기 버전은 WPF나 웹 UI 없이 콘솔 생성기로 두고, 필요해지면 같은 파서/검증 코드를 재사용해 정적 HTML 또는 UE Editor Nomad Tab으로 확장한다.
-
 ## 2026-07-04 11:34:50 (소요시간: 00:00:21)
 
 ### 질문
@@ -3529,7 +3499,7 @@ React, TypeScript, Vite, Konva 조합 외에 퀘스트 플레이 시간 및 동�
 
 ### 답변
 
-Windows 전용 프로젝트 도구라면 C#/.NET 10, WPF, Canvas 또는 DrawingVisual, ScottPlot 조합을 1순위 대안으로 권장한다. 기존 QuestGraphGenerator와 CombatMovementSimulator의 모델, JSON 처리, 결정적 시드 및 병렬 반복 실행 코드를 재사용할 수 있고 별도 서버나 브라우저 없이 단일 데스크톱 프로그램으로 배포하기 쉽다. 크로스플랫폼이 필요하면 WPF 대신 Avalonia를 사용할 수 있다. 빠른 통계 실험과 모델 변경이 최우선이면 Python, PySide6, QGraphicsScene, NetworkX, NumPy 또는 Polars 조합이 좋지만 패키징과 장기 타입 안정성은 C#보다 불리하다. 지도 위 애니메이션과 게임 같은 조작감을 중시하면 Godot 4와 C#도 가능하지만, 표와 그래프 중심의 설계 도구에는 UI 작성 비용과 엔진 의존성이 더 크다. React만 피하려는 경우에는 Svelte, PixiJS, Tauri 조합도 가능하지만 현재 프로젝트에서는 새 Rust 및 웹 패키징 계층을 추가할 이점이 크지 않다.
+Windows 전용 프로젝트 도구라면 C#/.NET 10, WPF, Canvas 또는 DrawingVisual, ScottPlot 조합을 1순위 대안으로 권장한다. 별도 서버나 브라우저 없이 단일 데스크톱 프로그램으로 배포하기 쉽다. 크로스플랫폼이 필요하면 WPF 대신 Avalonia를 사용할 수 있다. 빠른 통계 실험과 모델 변경이 최우선이면 Python, PySide6, QGraphicsScene, NetworkX, NumPy 또는 Polars 조합이 좋지만 패키징과 장기 타입 안정성은 C#보다 불리하다. 지도 위 애니메이션과 게임 같은 조작감을 중시하면 Godot 4와 C#도 가능하지만, 표와 그래프 중심의 설계 도구에는 UI 작성 비용과 엔진 의존성이 더 크다. React만 피하려는 경우에는 Svelte, PixiJS, Tauri 조합도 가능하지만 현재 프로젝트에서는 새 Rust 및 웹 패키징 계층을 추가할 이점이 크지 않다.
 
 ## 2026-07-31 15:10:00 (소요시간: 00:04:30)
 
@@ -3630,3 +3600,63 @@ Account ID는 계정을 지정하는 식별자일 뿐 인증이나 권한을 부
 ### 답변
 
 `Tools\QuestFlowSimulator` PowerShell에서 `npx wrangler auth keyring enable`, `npx wrangler auth create bleng`, `npx wrangler auth activate bleng .` 순서로 실행하도록 안내했다. 생성 과정에서 브라우저 OAuth 승인이 한 번 필요하며, `npx wrangler auth list`와 `npx wrangler whoami`로 적용 상태를 확인할 수 있다. 설치된 Wrangler 4.116.0의 도움말로 해당 구문을 확인했다.
+
+## 2026-07-31 16:30:15 (소요시간: 00:04:55)
+
+### 질문
+
+Quest Flow Simulator의 사용자 인증 방식을 문의.
+
+### 답변
+
+초기 인증은 Cloudflare Access와 Cloudflare 자체 IdP를 사용하고 Cloudflare 계정 멤버만 허용하는 구성을 권장했다. 공개 체험판은 비로그인 상태로 유지하고 인증 전용 API 경로만 Access로 보호하며, Worker는 `Cf-Access-Jwt-Assertion`의 서명·발급자·AUD를 검증한 뒤 `sub`를 D1 `owner_subject`로 사용한다. 외부 사용자를 받을 때는 허용 이메일을 제한한 OTP 또는 Google 같은 외부 IdP를 추가할 수 있다. 현재 `workers.dev`의 전체 Worker Access를 바로 활성화하면 공개 체험판까지 로그인으로 잠길 수 있으므로, 경로 단위 Access가 가능한 커스텀 도메인을 사용하거나 인증 API를 별도 Worker로 분리해야 한다.
+
+## 2026-07-31 16:35:30 (소요시간: 00:02:00)
+
+### 질문
+
+혼자 사용하는 도구라면 Cloudflare Access 대신 관리자 비밀번호 정도로 인증해도 무방한지 문의.
+
+### 답변
+
+혼자 사용하고 공개 체험판을 유지하는 현재 구조에서는 단일 관리자 비밀번호와 서명된 세션 쿠키 방식도 충분히 합리적이라고 답했다. 비밀번호 또는 검증값과 세션 서명 키는 Git, `wrangler.jsonc`, D1에 넣지 않고 Worker Secret으로 저장하며, 인증 성공 후 `Secure`, `HttpOnly`, `SameSite=Strict` 속성의 쿠키를 발급하도록 권장했다. 로그인 시도 제한, 일정 시간 후 세션 만료, 로그아웃, 동일 출처 검사도 함께 적용하고 사용자 소유자는 고정 `admin` 식별자로 단순화할 수 있다.
+
+## 2026-07-31 17:04:20 (소요시간: 00:00:48)
+
+### 질문
+
+현재 `ADMIN_PASSWORD` Secret이 로컬에는 남지 않고 Worker에만 존재하는 상태인지 문의.
+
+### 답변
+
+프로젝트 하위의 `.dev.vars`, `.env` 계열 파일은 0개이고, 현재 프로세스·사용자·시스템 환경 변수에도 `ADMIN_PASSWORD`가 설정되지 않았음을 값 노출 없이 확인했다. 원격 `wrangler secret list`에는 `ADMIN_PASSWORD`가 `secret_text`로 존재하므로 현재 애플리케이션 비밀번호는 Cloudflare Worker Secret에만 저장된 상태다. 단, Worker를 관리하기 위한 Wrangler OAuth 인증 정보는 별개이며 로컬의 암호화된 `default.enc`와 Windows Credential Manager에 남아 있다.
+
+## 2026-07-31 17:05:20 (소요시간: 00:00:47)
+
+### 질문
+
+관리자 비밀번호를 분실해도 Wrangler 권한으로 언제든 새 값을 설정할 수 있는지 문의.
+
+### 답변
+
+해당 Worker에 대한 쓰기 권한이 있는 Wrangler 인증을 유지하고 있다면 기존 비밀번호를 몰라도 `npx wrangler secret put ADMIN_PASSWORD`로 새 값을 덮어쓸 수 있다. Secret의 현재 값은 Wrangler나 대시보드에서 다시 조회할 수 없고 교체만 가능하다. 현재 구현에서는 비밀번호 교체만으로 이미 발급된 D1 세션이 즉시 폐기되지는 않으므로 유출 대응이라면 `admin_sessions` 테이블을 비워 기존 세션도 함께 무효화해야 한다.
+
+## 2026-07-31 17:06:35 (소요시간: 00:00:48)
+
+### 질문
+
+체험판 퀘스트 문서에 없는 `선착장`, `마을 광장` 장소가 웹 도구에 들어간 출처를 문의.
+
+### 답변
+
+두 장소는 체험판 문서에서 가져온 값이 아니라 초기 프런트엔드 MVP의 API 연결 실패용 `FALLBACK_DATASET`을 만들면서 임의로 넣은 잘못된 샘플 데이터임을 확인했다. 커밋 `85683b65`의 `Tools/QuestFlowSimulator/src/client/App.svelte`에만 존재하며, D1 체험판 seed는 문서에 있는 벙커, 공구 보관 장소, 취수 시설, 북쪽 파밍 지역, 외부 식량 창고를 사용한다. fallback은 첫 렌더 또는 API 실패 시 노출될 수 있으므로 원문 기반 데이터와 혼동되지 않게 제거하거나 실제 demo dataset과 동일하게 바꾸는 것이 맞다.
+
+## 2026-07-31 17:08:20 (소요시간: 00:01:05)
+
+### 질문
+
+Codex에서 Sol 모델은 유지한 채 reasoning effort만 낮추면 작업 품질이나 컨텍스트 패널티가 발생하는지 문의.
+
+### 답변
+
+같은 `gpt-5.6-sol`에서 reasoning effort만 낮추는 것은 모델 전환이 아니므로 기존 대화 컨텍스트를 버리거나 별도 모델 전환 패널티를 적용한다는 공식 문서는 없다. 이후 턴에 투입되는 추론량만 줄어 속도와 사용량은 개선되지만 복잡한 설계, 디버깅, 다단계 검증에서는 판단 깊이와 실수 방지 능력이 낮아질 수 있다. 모델을 바꾸더라도 컨텍스트가 즉시 삭제되는 것은 아니지만 Codex는 다음 턴에 일회성 모델 전환 지시를 적용하며, 새 모델의 컨텍스트 창이 더 작으면 요약 압축이 더 일찍 발생할 수 있다. 따라서 단순 구현은 Sol Low/Medium, 복잡한 설계·보안·배포 판단은 High 이상으로 올리는 운용이 적절하다.

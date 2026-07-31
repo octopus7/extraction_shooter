@@ -46,3 +46,24 @@ quest.rescue_cart_return.objective.return_by_rescue_cart,구급 카트에 실려
 quest.warp_point_used_test.title,워프 포인트 사용 확인,Warp Point Use Check,ワープポイント使用確認
 quest.warp_point_used_test.description,워프 포인트 사용 목표 검증용 데이터입니다. 실제 제공자나 진행 흐름에는 연결되지 않습니다.,Validation data for the warp point objective. It is not connected to a real provider flow.,ワープポイント使用目標の検証用データです。実際の提供者や進行には接続されません
 quest.warp_point_used_test.objective.use_raid_warp_point_a,워프 포인트 사용,Use a warp point,ワープポイントを使用
+quest.demo_q1.title,취수 시설 확인,Check the Water Intake Facility,取水施設を確認
+quest.demo_q1.description,외부 취수 시설을 확인하고 막힌 스크린의 원인을 조사하세요.,Check the external water intake facility and investigate the blocked screen.,外部の取水施設を確認し、詰まったスクリーンの原因を調べましょう
+quest.demo_q1.accept.line1,벙커 내부 급수 압력이 거의 없어. 취수 시설부터 확인해야 해.,Bunker water pressure is almost gone. Check the water intake facility first.,バンカー内部の給水圧がほとんどありません。まず取水施設を確認してください。
+quest.demo_q1.accept.line2,외부 취수 시설을 확인하고 이상이 있으면 알려줘.,Check the external intake facility and report anything unusual.,外部の取水施設を確認し、異常があれば報告してください。
+quest.demo_q1.objective.inspect,취수 시설 조사,Inspect the water intake facility,取水施設を調査
+quest.demo_q2.title,크로우바와 스크린 청소,Crowbar and Screen Cleaning,バールでスクリーンを清掃
+quest.demo_q2.description,크로우바를 가져와 취수 스크린의 수초와 이물질을 제거하세요.,Bring a crowbar and remove weeds and debris from the intake screen.,バールを持ってきて取水スクリーンの水草と異物を除去しましょう
+quest.demo_q2.accept.line1,취수 스크린이 온갖 쓰레기로 꽉 막혔어. 크로우바가 필요해.,The intake screen is clogged with debris. You need a crowbar.,取水スクリーンが異物で詰まっています。バールが必要です。
+quest.demo_q2.accept.line2,공구 보관대에서 크로우바를 가져와 스크린을 청소해.,Take the crowbar from the tool rack and clean the screen.,工具保管場所からバールを持ってきてスクリーンを清掃してください。
+quest.demo_q2.objective.clear,스크린 청소,Clear the intake screen,スクリーンを清掃
+quest.demo_q3a.title,부러진 밸브 손잡이,Broken Valve Handle,壊れたバルブハンドル
+quest.demo_q3a.description,교체용 밸브 손잡이를 확보해 취수 시설을 수리하세요.,Find a replacement valve handle and repair the intake facility.,交換用バルブハンドルを確保して取水施設を修理しましょう
+quest.demo_q3a.objective.repair,취수 시설 수리,Repair the water intake facility,取水施設を修理
+quest.demo_q3b.title,새는 벙커 배관,Leaking Bunker Pipe,漏れているバンカーパイプ
+quest.demo_q3b.description,방수 테이프를 확보해 벙커 내부의 손상된 배관을 수리하세요.,Find waterproof tape and repair the damaged bunker pipe.,防水テープを確保してバンカー内部の損傷したパイプを修理しましょう
+quest.demo_q3b.objective.repair,벙커 배관 수리,Repair the bunker pipe,バンカーパイプを修理
+quest.demo_q4.title,오늘의 보상,Today’s Reward,今日のごほうび
+quest.demo_q4.description,외부 식량 창고에서 참치캔을 가져와 캔봇에게 전달하세요.,Bring a can of tuna from the external food warehouse and deliver it to Canbot.,外部の食料倉庫からツナ缶を持ち帰り、キャンボットに届けましょう
+quest.demo_q4.accept.line1,취수 시설과 내부 배관 모두 정상 작동 중이야. 아직 한 가지 남았어.,The intake facility and internal pipe are working. One thing remains.,取水施設と内部パイプは正常に動作しています。まだ一つ残っています。
+quest.demo_q4.accept.line2,외부 식량 창고에 참치캔 하나가 남아 있어. 가져오면 같이 먹자.,There is one can of tuna left in the external food warehouse. Bring it back and we’ll eat it together.,外部の食料倉庫にツナ缶が一つ残っています。持ち帰れば一緒に食べましょう。
+quest.demo_q4.objective.deliver,참치캔 전달,Deliver the can of tuna,ツナ缶を届ける
