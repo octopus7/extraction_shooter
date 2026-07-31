@@ -5687,3 +5687,13 @@
 ## 2026-07-31 16:23:05 (소요시간: 00:02:44)
 
 - Quest Flow Simulator 구현과 관련 질문·요청 기록을 커밋 `85683b6`(`feat: add quest flow simulator`)으로 생성해 GitHub `origin/main`에 푸시했다.
+
+## 2026-07-31 16:26:20 (소요시간: 00:02:05)
+
+- `Tools/QuestFlowSimulator/deploy.bat`을 추가해 Windows 콘솔에서 빌드, Wrangler dry run, 원격 D1 마이그레이션·시드, Worker 배포 로그를 실시간으로 확인할 수 있게 했다.
+- 성공과 실패 모두 콘솔을 일시정지하고, D1 변경을 생략하는 `--worker-only` 및 자동화용 `--no-pause` 옵션을 제공했다.
+- README에 배치 파일 사용법을 추가하고 `deploy.bat --help --no-pause`로 구문과 옵션 처리를 확인했다.
+
+## 2026-07-31 16:28:35 (소요시간: 00:01:15)
+
+- Quest Flow Simulator 배포 배치 파일과 README 사용법 변경을 커밋해 GitHub `origin/main`에 푸시했다.

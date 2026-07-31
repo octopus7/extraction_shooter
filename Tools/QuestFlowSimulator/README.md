@@ -21,6 +21,24 @@ npm run dev
 
 ## 수동 배포
 
+Windows에서는 `deploy.bat`을 더블클릭하면 배포 로그를 콘솔에서 바로 볼 수
+있습니다. 성공하거나 실패해도 마지막에 일시정지하므로 창이 자동으로 닫히지
+않습니다.
+
+```powershell
+.\deploy.bat
+```
+
+기본 실행은 빌드, Wrangler dry run, 원격 D1 마이그레이션과 퀘스트 시드,
+Worker 배포까지 수행합니다. D1을 변경하지 않고 Worker만 배포하려면 다음
+옵션을 사용합니다.
+
+```powershell
+.\deploy.bat --worker-only
+```
+
+개별 명령으로 배포하려면 다음 순서로 실행합니다.
+
 ```powershell
 npm run db:migrate:remote
 npm run db:seed:remote
