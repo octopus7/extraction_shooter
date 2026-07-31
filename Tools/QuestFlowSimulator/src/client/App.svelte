@@ -57,6 +57,13 @@
   let activeProTab: "quests" | "properties" | "results" = "properties";
   let dragQuestNodeId: string | null = null;
   let dragPlaceId: string | null = null;
+  let dragPan = false;
+  let panX = 0;
+  let panY = 0;
+  let panStartClientX = 0;
+  let panStartClientY = 0;
+  let panOriginX = 0;
+  let panOriginY = 0;
   let zoom = 1;
   let simulator: Worker | null = null;
   let loginOpen = false;
@@ -186,8 +193,11 @@
     // recalculating during a drag makes the graph continuously rescale and shrink.
     canvasBounds = calculateCanvasBounds(value, dataset);
     zoom = 1;
+    panX = 0;
+    panY = 0;
     dragQuestNodeId = null;
     dragPlaceId = null;
+    dragPan = false;
     activeProTab = "properties";
   }
 
@@ -201,13 +211,29 @@
     zoom = 1;
   }
 
+  function handleCanvasPointerDown(event: PointerEvent) {
+    const target = event.currentTarget as SVGRectElement;
+    target.setPointerCapture(event.pointerId);
+    dragPan = true;
+    panStartClientX = event.clientX;
+    panStartClientY = event.clientY;
+    panOriginX = panX;
+    panOriginY = panY;
+  }
+
+  function stopDragging() {
+    dragQuestNodeId = null;
+    dragPlaceId = null;
+    dragPan = false;
+  }
+
   function canvasPointFromEvent(event: PointerEvent) {
     const svg = event.currentTarget as SVGSVGElement;
     const rect = svg.getBoundingClientRect();
     const rawX = ((event.clientX - rect.left) / rect.width) * 1000;
     const rawY = ((event.clientY - rect.top) / rect.height) * 620;
-    const canvasX = 500 + (rawX - 500) / zoom;
-    const canvasY = 310 + (rawY - 310) / zoom;
+    const canvasX = 500 + (rawX - panX - 500) / zoom;
+    const canvasY = 310 + (rawY - panY - 310) / zoom;
     return {
       x:
         canvasBounds.minX +
@@ -256,6 +282,8 @@
     }
     dataset = structuredClone(normalized);
     canvasBounds = calculateCanvasBounds(canvasMode, dataset);
+    panX = 0;
+    panY = 0;
     selectedQuestId = dataset.questNodes[0]?.questId ?? null;
     selectedPlaceId = dataset.places[0]?.id ?? null;
     selectedStepId = dataset.steps[0]?.id ?? null;
@@ -367,6 +395,13 @@
   }
 
   function handlePointerMove(event: PointerEvent) {
+    if (dragPan) {
+      const svg = event.currentTarget as SVGSVGElement;
+      const rect = svg.getBoundingClientRect();
+      panX = panOriginX + ((event.clientX - panStartClientX) / rect.width) * 1000;
+      panY = panOriginY + ((event.clientY - panStartClientY) / rect.height) * 620;
+      return;
+    }
     const point = canvasPointFromEvent(event);
     if (dragQuestNodeId) {
       updateQuestNode(dragQuestNodeId, {
@@ -714,14 +749,9 @@
           role="application"
           onwheel={handleWheel}
           onpointermove={handlePointerMove}
-          onpointerup={() => {
-            dragQuestNodeId = null;
-            dragPlaceId = null;
-          }}
-          onpointerleave={() => {
-            dragQuestNodeId = null;
-            dragPlaceId = null;
-          }}
+          onpointerup={stopDragging}
+          onpointercancel={stopDragging}
+          onpointerleave={stopDragging}
         >
           <defs>
             <pattern id="smallGrid" width="20" height="20" patternUnits="userSpaceOnUse">
@@ -735,9 +765,17 @@
               <path d="M 0 0 L 10 5 L 0 10 z" fill="#50d2a0" />
             </marker>
           </defs>
-          <rect width="1000" height="620" fill="url(#grid)" />
+          <rect
+            class="canvas-hit-area"
+            width="1000"
+            height="620"
+            fill="url(#grid)"
+            onpointerdown={handleCanvasPointerDown}
+            role="application"
+            aria-label="그래프 영역 이동"
+          />
 
-          <g transform={`translate(500 310) scale(${zoom}) translate(-500 -310)`}>
+          <g transform={`translate(${500 + panX} ${310 + panY}) scale(${zoom}) translate(-500 -310)`}>
             {#if canvasMode === "quest-chain"}
               {#each graphEdges as edge}
                 {@const from = edge.from}
@@ -891,10 +929,10 @@
         </svg>
         <div class="map-hint">
           {canvasMode === "quest-chain"
-            ? "퀘스트 노드 드래그 · 휠로 줌"
+            ? "빈 곳 드래그로 이동 · 노드 드래그 · 휠로 줌"
             : canvasMode === "quest-route"
-              ? "선택 퀘스트 동선 읽기 전용 · 휠로 줌"
-              : "장소 드래그·추가·형태 편집 · 휠로 줌"}
+              ? "빈 곳 드래그로 이동 · 선택 퀘스트 동선 읽기 전용 · 휠로 줌"
+              : "빈 곳 드래그로 이동 · 장소 드래그·추가·형태 편집 · 휠로 줌"}
         </div>
       </div>
     </section>

@@ -574,6 +574,14 @@ h2 {
   user-select: none;
 }
 
+.canvas-hit-area {
+  cursor: grab;
+}
+
+.canvas-hit-area:active {
+  cursor: grabbing;
+}
+
 .loading {
   position: absolute;
   z-index: 2;
