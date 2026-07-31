@@ -11,3 +11,4 @@
 - Use `Docs/game_conventions.md` for project-wide gameplay conventions such as direction, distance, units, and currency.
 - Use `Docs/save_persistence.md` to track gameplay/runtime state that must survive save/load. Update it whenever adding or changing persisted save data.
 - For project-local transparent icon or icon-sheet generation, use `.codex/skills/icon-alpha-from-solid-bg`: generate one muted mid-value solid-background source image, derive matched black/white background images locally, then extract alpha from their difference.
+- For `Tools/QuestFlowSimulator` changes, after implementation and pre-deployment verification pass, commit and push the verified source before deploying with Wrangler. Report build/test and deployment-command results, but leave final acceptance of live behavior to the user; do not claim that deployed functionality is confirmed working on the user's behalf.
