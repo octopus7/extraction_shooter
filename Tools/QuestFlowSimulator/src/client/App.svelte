@@ -11,6 +11,7 @@
     logoutAdmin,
     updateWorkspace,
   } from "./api";
+  import { readCatalogDraft, serializeCatalogDraft } from "./draft";
   import type {
     CatalogSummary,
     LocationNode,
@@ -146,7 +147,14 @@
       saveState = "로그인 전용 데이터 · D1 저장 필요";
       return;
     }
-    localStorage.setItem(localKey(), JSON.stringify(dataset));
+    if (!selectedCatalog?.datasetVersion) {
+      saveState = "데이터 버전 없음 · 저장 보류";
+      return;
+    }
+    localStorage.setItem(
+      localKey(),
+      serializeCatalogDraft(selectedCatalog.datasetVersion, dataset),
+    );
     saveState = `브라우저 저장 · ${new Date().toLocaleTimeString("ko-KR", {
       hour: "2-digit",
       minute: "2-digit",
@@ -175,19 +183,31 @@
         // Remove drafts created by older versions that persisted private data.
         localStorage.removeItem(draftKey);
       }
-      const saved =
+      const savedRaw =
         detail.catalog.visibility === "public" && !workspace
           ? localStorage.getItem(draftKey)
           : null;
+      const draft = readCatalogDraft(
+        savedRaw,
+        detail.catalog.datasetVersion,
+      );
+      if (draft.discarded) {
+        localStorage.removeItem(draftKey);
+        statusMessage =
+          "데이터가 갱신되어 구버전 브라우저 초안을 제거했습니다.";
+      }
       replaceDataset(
         workspace?.state ??
-          (saved ? (JSON.parse(saved) as QuestDataset) : detail.dataset),
+          draft.dataset ??
+          detail.dataset,
       );
       saveState = workspace
         ? "D1 작업공간 복원됨"
-        : saved
+        : draft.dataset
           ? "브라우저 초안 복원됨"
-          : "catalog 불러옴";
+          : draft.discarded
+            ? "구버전 초안 제거 · catalog 불러옴"
+            : "catalog 불러옴";
       runSimulation();
     } catch (error) {
       statusMessage =

@@ -275,14 +275,16 @@ iPad Pro 세로 작업을 위한 선택 모드다.
 - D1: `quest-flow-simulator`
 - D1 ID: `f2184cd9-0067-498e-a3e9-594e033f8130`
 - 공개 카탈로그: 체험판 Q1~Q4, 시뮬레이션 단계 12개
-- 인증 카탈로그: 본편 M01~M20 단계 20개, UE5 현재 구현 스냅샷 단계 6개
+- 인증 카탈로그: 본편 M01~M20 단계 20개, UE5 현재 구현 스냅샷 단계 5개
 - 화면 모드: Desktop 기본, Pro 선택 가능
 - 확인한 Pro viewport: iPad Pro 세로 `1024×1366`
 - 관리자 인증: `ADMIN_PASSWORD` Worker Secret과 D1 세션 방식 배포 완료
-- 배포 버전: `a6f89fa6-0b69-46e0-beef-d854a30798f3`
+- 배포 버전: `87f4a0c7-e795-4636-8cb1-b92a8853fec1`
 
 원격 D1에 `0002_admin_auth.sql`을 적용하고 Worker Secret
 `ADMIN_PASSWORD`를 설정했다. 실서비스 `/api/session`에서
 `authConfigured: true`를 확인했다. 공개 fallback은 별도 샘플을 두지 않고
 `generate-seed.mjs`가 체험판 문서에서 생성한 `data/demo.json`을 그대로
-사용한다.
+사용한다. `datasetVersion`은 생성된 데이터 내용의 해시를 사용하며, 공개
+브라우저 초안은 이 버전과 일치할 때만 복원한다. 따라서 데이터 생성 규칙이나
+장소가 바뀌면 구버전 초안이 새 카탈로그를 덮어쓰지 않는다.

@@ -123,20 +123,22 @@ function makeCatalog({
   data,
 }) {
   const sourceHash = hashSources(sourceNames);
+  const catalogData = {
+    schemaVersion: 1,
+    ...data,
+  };
+  const datasetHash = hashValue(catalogData);
   return {
     id,
     slug,
     title,
     visibility,
     schemaVersion: 1,
-    datasetVersion: `source-${sourceHash.slice(0, 12)}`,
+    datasetVersion: `content-${datasetHash.slice(0, 12)}`,
     sourceKind,
     sourceHash: `sha256:${sourceHash}`,
     sources: sourceNames.map((name) => relativeSourcePath(sources[name])),
-    data: {
-      schemaVersion: 1,
-      ...data,
-    },
+    data: catalogData,
   };
 }
 
@@ -574,6 +576,10 @@ function hashSources(sourceNames) {
     hash.update("\0");
   }
   return hash.digest("hex");
+}
+
+function hashValue(value) {
+  return createHash("sha256").update(JSON.stringify(value)).digest("hex");
 }
 
 function relativeSourcePath(path) {
