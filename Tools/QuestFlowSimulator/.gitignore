@@ -10,3 +10,7 @@ dist/
 
 # Local logs
 *.log
+
+# Generated from game/design source files
+data/seed.sql
+worker-configuration.d.ts

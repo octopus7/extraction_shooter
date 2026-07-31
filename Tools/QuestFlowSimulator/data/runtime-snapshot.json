@@ -1,0 +1,156 @@
+{
+  "id": "catalog-runtime-snapshot",
+  "slug": "runtime-snapshot",
+  "title": "UE5 현재 구현 스냅샷",
+  "visibility": "authenticated",
+  "schemaVersion": 1,
+  "datasetVersion": "source-7a6dec27f946",
+  "sourceKind": "ue5-json-csv",
+  "sourceHash": "sha256:7a6dec27f9464521ec1439335fefd746552d3fbeb20463438d691f09f8c7df5a",
+  "sources": [
+    "TunaSweeper/Content/Data/QuestDefinitions.json",
+    "TunaSweeper/Content/Data/QuestTextStrings.csv"
+  ],
+  "data": {
+    "schemaVersion": 1,
+    "title": "UE5 현재 구현 스냅샷",
+    "locations": [
+      {
+        "id": "route-origin",
+        "name": "기준 시작점",
+        "mapId": "approximation",
+        "xMeters": 0,
+        "yMeters": 0
+      },
+      {
+        "id": "location-quest_first_outing",
+        "name": "quest_first_outing 첫 외출",
+        "mapId": "approximation",
+        "xMeters": 80,
+        "yMeters": 0
+      },
+      {
+        "id": "location-quest_lumberjack_first_kill",
+        "name": "quest_lumberjack_first_kill 벌목기 제거",
+        "mapId": "approximation",
+        "xMeters": 80,
+        "yMeters": 90
+      },
+      {
+        "id": "location-quest_signalbot_map_check",
+        "name": "quest_signalbot_map_check 신호 관제 확인",
+        "mapId": "approximation",
+        "xMeters": 80,
+        "yMeters": 180
+      },
+      {
+        "id": "location-quest_ricepotbot_supply_check",
+        "name": "quest_ricepotbot_supply_check 보급 시설 확인",
+        "mapId": "approximation",
+        "xMeters": 80,
+        "yMeters": 270
+      },
+      {
+        "id": "location-quest_rescue_cart_return",
+        "name": "quest_rescue_cart_return 구조 복귀 확인",
+        "mapId": "approximation",
+        "xMeters": 200,
+        "yMeters": 0
+      },
+      {
+        "id": "location-quest_warp_point_used_test",
+        "name": "quest_warp_point_used_test 워프 포인트 사용 확인",
+        "mapId": "approximation",
+        "xMeters": 200,
+        "yMeters": 90
+      }
+    ],
+    "steps": [
+      {
+        "id": "step-quest_first_outing",
+        "questId": "quest_first_outing",
+        "questTitle": "첫 외출",
+        "name": "첫 외출",
+        "fromLocationId": "route-origin",
+        "toLocationId": "location-quest_first_outing",
+        "actionSeconds": 120,
+        "actionVariancePercent": 20,
+        "moveSpeedMps": 4,
+        "enabled": true
+      },
+      {
+        "id": "step-quest_lumberjack_first_kill",
+        "questId": "quest_lumberjack_first_kill",
+        "questTitle": "벌목기 제거",
+        "name": "벌목기 제거",
+        "fromLocationId": "location-quest_first_outing",
+        "toLocationId": "location-quest_lumberjack_first_kill",
+        "actionSeconds": 120,
+        "actionVariancePercent": 20,
+        "moveSpeedMps": 4,
+        "enabled": true
+      },
+      {
+        "id": "step-quest_signalbot_map_check",
+        "questId": "quest_signalbot_map_check",
+        "questTitle": "신호 관제 확인",
+        "name": "신호 관제 확인",
+        "fromLocationId": "location-quest_lumberjack_first_kill",
+        "toLocationId": "location-quest_signalbot_map_check",
+        "actionSeconds": 120,
+        "actionVariancePercent": 20,
+        "moveSpeedMps": 4,
+        "enabled": true
+      },
+      {
+        "id": "step-quest_ricepotbot_supply_check",
+        "questId": "quest_ricepotbot_supply_check",
+        "questTitle": "보급 시설 확인",
+        "name": "보급 시설 확인",
+        "fromLocationId": "location-quest_signalbot_map_check",
+        "toLocationId": "location-quest_ricepotbot_supply_check",
+        "actionSeconds": 120,
+        "actionVariancePercent": 20,
+        "moveSpeedMps": 4,
+        "enabled": true
+      },
+      {
+        "id": "step-quest_rescue_cart_return",
+        "questId": "quest_rescue_cart_return",
+        "questTitle": "구조 복귀 확인",
+        "name": "구조 복귀 확인",
+        "fromLocationId": "location-quest_ricepotbot_supply_check",
+        "toLocationId": "location-quest_rescue_cart_return",
+        "actionSeconds": 120,
+        "actionVariancePercent": 20,
+        "moveSpeedMps": 4,
+        "enabled": true
+      },
+      {
+        "id": "step-quest_warp_point_used_test",
+        "questId": "quest_warp_point_used_test",
+        "questTitle": "워프 포인트 사용 확인",
+        "name": "워프 포인트 사용 확인",
+        "fromLocationId": "location-quest_rescue_cart_return",
+        "toLocationId": "location-quest_warp_point_used_test",
+        "actionSeconds": 120,
+        "actionVariancePercent": 20,
+        "moveSpeedMps": 4,
+        "enabled": true
+      }
+    ],
+    "settings": {
+      "runs": 1000,
+      "mapTransitionSeconds": 0
+    },
+    "sourceNotes": [
+      "위치는 실제 UE5 좌표가 아닌 퀘스트 순서 시각화를 위한 근사 배치입니다.",
+      "quest_first_outing 첫 외출: leave_bunker",
+      "quest_lumberjack_first_kill 벌목기 제거: kill_lumberjack",
+      "quest_signalbot_map_check 신호 관제 확인: talk_to_signalbot",
+      "quest_ricepotbot_supply_check 보급 시설 확인: talk_to_ricepotbot",
+      "quest_rescue_cart_return 구조 복귀 확인: return_by_rescue_cart",
+      "quest_warp_point_used_test 워프 포인트 사용 확인: use_raid_warp_point_a"
+    ]
+  }
+}

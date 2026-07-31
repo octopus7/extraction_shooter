@@ -5671,3 +5671,15 @@
 - `Tools/QuestFlowSimulator`에 npm 프로젝트를 초기화하고 Wrangler `4.116.0`을 로컬 개발 의존성으로 설치.
 - 프로젝트 전용 `.gitignore`에 `node_modules`, `dist`, `.wrangler`, 로컬 `.dev.vars` 및 `.env`, 로그 파일을 추가.
 - Wrangler와 함께 설치된 esbuild `0.28.1` 및 workerd `2026-07-30` 실행을 확인하고 npm 감사 결과 취약점 0건을 확인.
+
+## 2026-07-31 15:36:30 (소요시간: 00:00:23)
+
+- `D:\github\extraction_shooter\Tools\QuestFlowSimulator`를 작업 경로로 하는 새 PowerShell 창을 열었다.
+
+## 2026-07-31 16:05:00 (소요시간: 00:17:09)
+
+- `Tools/QuestFlowSimulator`에 Svelte, TypeScript, Vite, Cloudflare Worker, D1 기반 퀘스트 동선·플레이시간 시뮬레이터 MVP를 구현했다.
+- 브라우저 Web Worker에서 반복 시뮬레이션을 수행하고, Desktop 기본 모드와 iPad Pro 세로 작업용 Pro 모드를 제공하도록 구성했다.
+- 현재 퀘스트 원본에서 공개 체험판 Q1~Q4 12단계, 인증 전용 M01~M20 20단계, UE5 현재 구현 스냅샷 6단계를 생성해 D1에 입력했다.
+- D1 `quest-flow-simulator`의 원격 마이그레이션과 시드를 적용하고 Worker `quest`를 `https://quest.oc7.workers.dev`에 Wrangler로 실제 배포했다.
+- 익명 공개 카탈로그 조회, 인증 전용 카탈로그 404 차단, 작업공간 API 401 차단, Pro 모드 전환, iPad Pro 세로 viewport, 브라우저 콘솔 오류 없음을 실제 배포 URL에서 확인했다.

@@ -3610,3 +3610,23 @@ Account ID는 계정을 지정하는 식별자일 뿐 인증이나 권한을 부
 ### 답변
 
 현재 Wrangler에는 기존 `default` 프로필을 이름만 바꾸는 rename 명령이 없다. `wrangler auth create bleng`을 실행하고 브라우저에서 현재와 같은 Cloudflare 계정으로 다시 OAuth 승인하면 `bleng` named profile이 추가되며 기존 기본 로그인은 유지된다. 평문 저장을 피하려면 먼저 `wrangler auth keyring enable`을 실행한다. 생성 후 `wrangler whoami --profile bleng`으로 확인하고, 도구 경로가 만들어진 뒤 `wrangler auth activate bleng D:\github\extraction_shooter\Tools\QuestFlowSimulator`로 해당 디렉터리와 하위 경로에 결합하는 순서를 권장한다. Auth profile 기능은 현재 Experimental이다.
+
+## 2026-07-31 15:35:00 (소요시간: 00:01:40)
+
+### 질문
+
+프로젝트에 로컬 설치한 Wrangler를 사용하려면 Cloudflare 계정 인증을 다시 해야 하는지 문의.
+
+### 답변
+
+현재 계정을 그대로 사용한다면 다시 인증할 필요가 없다. `Tools\QuestFlowSimulator`에 설치한 로컬 Wrangler에서 `whoami`를 실행한 결과 종료 코드 0으로 기존 `default` OAuth 인증을 정상 인식했다. 다만 `bleng`이라는 named auth profile을 새로 만들려면 `wrangler auth create bleng` 실행 시 브라우저 OAuth 승인이 한 번 필요하다.
+
+## 2026-07-31 15:36:55 (소요시간: 00:00:30)
+
+### 질문
+
+로컬 Wrangler에서 `bleng` named auth profile을 만들고 프로젝트에 적용하는 명령 안내를 요청.
+
+### 답변
+
+`Tools\QuestFlowSimulator` PowerShell에서 `npx wrangler auth keyring enable`, `npx wrangler auth create bleng`, `npx wrangler auth activate bleng .` 순서로 실행하도록 안내했다. 생성 과정에서 브라우저 OAuth 승인이 한 번 필요하며, `npx wrangler auth list`와 `npx wrangler whoami`로 적용 상태를 확인할 수 있다. 설치된 Wrangler 4.116.0의 도움말로 해당 구문을 확인했다.

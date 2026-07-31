@@ -1,0 +1,213 @@
+{
+  "id": "catalog-demo-q1-q4",
+  "slug": "demo",
+  "title": "체험판 Q1~Q4",
+  "visibility": "public",
+  "schemaVersion": 1,
+  "datasetVersion": "source-e642ea6400af",
+  "sourceKind": "demo-design-markdown",
+  "sourceHash": "sha256:e642ea6400af7e0e55b10f14f935b129269aa26f26fe2ea37de2571fbda1f9ff",
+  "sources": [
+    "Docs/DemoDesign/02_퀘스트_진행_트리.md",
+    "Docs/DemoDesign/05_맵_세션_동선_설계.md"
+  ],
+  "data": {
+    "schemaVersion": 1,
+    "title": "체험판 Q1~Q4",
+    "locations": [
+      {
+        "id": "bunker",
+        "name": "벙커",
+        "mapId": "demo",
+        "xMeters": 0,
+        "yMeters": 0
+      },
+      {
+        "id": "tool-cache",
+        "name": "공구 보관 장소",
+        "mapId": "demo",
+        "xMeters": 10,
+        "yMeters": 35
+      },
+      {
+        "id": "water-intake",
+        "name": "취수 시설",
+        "mapId": "demo",
+        "xMeters": 0,
+        "yMeters": 160
+      },
+      {
+        "id": "north-farm",
+        "name": "북쪽 파밍 지역",
+        "mapId": "demo",
+        "xMeters": 320,
+        "yMeters": 0
+      },
+      {
+        "id": "food-warehouse",
+        "name": "외부 식량 창고",
+        "mapId": "demo",
+        "xMeters": 480,
+        "yMeters": 20
+      }
+    ],
+    "steps": [
+      {
+        "id": "q1-outbound",
+        "questId": "q1",
+        "questTitle": "취수 시설 확인",
+        "name": "취수 시설로 이동 및 조사",
+        "fromLocationId": "bunker",
+        "toLocationId": "water-intake",
+        "actionSeconds": 20,
+        "actionVariancePercent": 15,
+        "moveSpeedMps": 4,
+        "enabled": true
+      },
+      {
+        "id": "q1-return",
+        "questId": "q1",
+        "questTitle": "취수 시설 확인",
+        "name": "벙커로 귀환",
+        "fromLocationId": "water-intake",
+        "toLocationId": "bunker",
+        "actionSeconds": 10,
+        "actionVariancePercent": 15,
+        "moveSpeedMps": 4,
+        "enabled": true
+      },
+      {
+        "id": "q2-tool",
+        "questId": "q2",
+        "questTitle": "막힌 스크린",
+        "name": "크로우바 획득",
+        "fromLocationId": "bunker",
+        "toLocationId": "tool-cache",
+        "actionSeconds": 15,
+        "actionVariancePercent": 15,
+        "moveSpeedMps": 4,
+        "enabled": true
+      },
+      {
+        "id": "q2-clean",
+        "questId": "q2",
+        "questTitle": "막힌 스크린",
+        "name": "스크린 청소",
+        "fromLocationId": "tool-cache",
+        "toLocationId": "water-intake",
+        "actionSeconds": 25,
+        "actionVariancePercent": 15,
+        "moveSpeedMps": 4,
+        "enabled": true
+      },
+      {
+        "id": "q2-return",
+        "questId": "q2",
+        "questTitle": "막힌 스크린",
+        "name": "벙커로 귀환",
+        "fromLocationId": "water-intake",
+        "toLocationId": "bunker",
+        "actionSeconds": 10,
+        "actionVariancePercent": 15,
+        "moveSpeedMps": 4,
+        "enabled": true
+      },
+      {
+        "id": "q3-1-part",
+        "questId": "q3-1",
+        "questTitle": "부러진 밸브 손잡이",
+        "name": "교체용 손잡이 획득",
+        "fromLocationId": "bunker",
+        "toLocationId": "north-farm",
+        "actionSeconds": 30,
+        "actionVariancePercent": 15,
+        "moveSpeedMps": 4,
+        "enabled": true
+      },
+      {
+        "id": "q3-1-repair",
+        "questId": "q3-1",
+        "questTitle": "부러진 밸브 손잡이",
+        "name": "취수 시설 수리",
+        "fromLocationId": "north-farm",
+        "toLocationId": "water-intake",
+        "actionSeconds": 25,
+        "actionVariancePercent": 15,
+        "moveSpeedMps": 4,
+        "enabled": true
+      },
+      {
+        "id": "q3-1-return",
+        "questId": "q3-1",
+        "questTitle": "부러진 밸브 손잡이",
+        "name": "벙커로 귀환",
+        "fromLocationId": "water-intake",
+        "toLocationId": "bunker",
+        "actionSeconds": 10,
+        "actionVariancePercent": 15,
+        "moveSpeedMps": 4,
+        "enabled": true
+      },
+      {
+        "id": "q3-2-tape",
+        "questId": "q3-2",
+        "questTitle": "새는 벙커 배관",
+        "name": "방수 테이프 획득",
+        "fromLocationId": "bunker",
+        "toLocationId": "north-farm",
+        "actionSeconds": 25,
+        "actionVariancePercent": 15,
+        "moveSpeedMps": 4,
+        "enabled": true
+      },
+      {
+        "id": "q3-2-repair",
+        "questId": "q3-2",
+        "questTitle": "새는 벙커 배관",
+        "name": "벙커 배관 수리",
+        "fromLocationId": "north-farm",
+        "toLocationId": "bunker",
+        "actionSeconds": 25,
+        "actionVariancePercent": 15,
+        "moveSpeedMps": 4,
+        "enabled": true
+      },
+      {
+        "id": "q4-outbound",
+        "questId": "q4",
+        "questTitle": "오늘의 보상",
+        "name": "식량 창고에서 참치캔 획득",
+        "fromLocationId": "bunker",
+        "toLocationId": "food-warehouse",
+        "actionSeconds": 30,
+        "actionVariancePercent": 15,
+        "moveSpeedMps": 4,
+        "enabled": true
+      },
+      {
+        "id": "q4-return",
+        "questId": "q4",
+        "questTitle": "오늘의 보상",
+        "name": "참치캔을 가지고 귀환",
+        "fromLocationId": "food-warehouse",
+        "toLocationId": "bunker",
+        "actionSeconds": 30,
+        "actionVariancePercent": 15,
+        "moveSpeedMps": 4,
+        "enabled": true
+      }
+    ],
+    "settings": {
+      "runs": 1000,
+      "mapTransitionSeconds": 0
+    },
+    "sourceNotes": [
+      "좌표는 문서의 벙커→취수 시설 단순 이동 약 40초를 4m/s로 환산한 근사치이며 UE5 실제 좌표가 아니다.",
+      "Q1 취수 시설 확인: ",
+      "Q2 막힌 스크린: ",
+      "Q3-1 부러진 밸브 손잡이: ",
+      "Q3-2 새는 벙커 배관: ",
+      "Q4 오늘의 보상: "
+    ]
+  }
+}
