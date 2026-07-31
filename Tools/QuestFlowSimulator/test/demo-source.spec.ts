@@ -34,26 +34,27 @@ describe("public demo fallback", () => {
     ).toBe(true);
   });
 
-  it("auto-layouts quests by prerequisite depth before wrapping rows", () => {
+  it("keeps the existing seeded coordinates unchanged until auto-layout is requested", () => {
     const nodes = demoCatalogSource.data.questNodes;
-    const nodeById = new Map(nodes.map((node) => [node.questId, node]));
-
-    expect(nodeById.get("q1")!.x).toBeLessThan(nodeById.get("q2")!.x);
-    expect(nodeById.get("q2")!.x).toBeLessThan(nodeById.get("q3-1")!.x);
-    expect(nodeById.get("q3-1")!.x).toBe(nodeById.get("q3-2")!.x);
-    expect(nodeById.get("q4")!.x).toBeLessThan(nodeById.get("q3-1")!.x);
-    expect(nodeById.get("q4")!.y).toBeGreaterThan(nodeById.get("q3-2")!.y);
+    expect(nodes.map((node) => [node.x, node.y])).toEqual([
+      [100, 100],
+      [290, 100],
+      [480, 100],
+      [100, 230],
+      [290, 230],
+    ]);
   });
 
-  it("wraps the long main chain without losing prerequisite order within a row", () => {
-    const nodes = mainCatalogSource.data.questNodes;
-    const nodeById = new Map(nodes.map((node) => [node.questId, node]));
-
-    expect(nodeById.get("M01")!.x).toBeLessThan(nodeById.get("M05")!.x);
-    expect(nodeById.get("M06")!.y).toBeGreaterThan(nodeById.get("M05")!.y);
-    expect(nodeById.get("M06")!.x).toBe(nodeById.get("M07")!.x);
-    expect(nodeById.get("M07")!.x).toBe(nodeById.get("M08")!.x);
-    expect(nodeById.get("M13")!.x).toBeLessThan(nodeById.get("M17")!.x);
-    expect(nodeById.get("M18")!.x).toBeLessThan(nodeById.get("M20")!.x);
+  it("keeps the existing main graph coordinates unchanged until auto-layout is requested", () => {
+    expect(mainCatalogSource.data.questNodes[0]).toMatchObject({
+      questId: "M01",
+      x: 100,
+      y: 100,
+    });
+    expect(mainCatalogSource.data.questNodes[19]).toMatchObject({
+      questId: "M20",
+      x: 780,
+      y: 430,
+    });
   });
 });
