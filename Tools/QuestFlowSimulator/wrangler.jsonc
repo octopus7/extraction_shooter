@@ -20,9 +20,10 @@
       "migrations_dir": "./migrations"
     }
   ],
-  "vars": {
-    "ACCESS_TEAM_DOMAIN": "",
-    "ACCESS_AUD": ""
+  "secrets": {
+    "required": [
+      "ADMIN_PASSWORD"
+    ]
   },
   "observability": {
     "enabled": true,

@@ -59,6 +59,7 @@ export async function getSession(): Promise<Session> {
     authenticated: Boolean(
       source.authenticated ?? source.isAuthenticated ?? source.loggedIn,
     ),
+    authConfigured: Boolean(source.authConfigured),
     subject: typeof source.subject === "string" ? source.subject : undefined,
     displayName:
       typeof source.displayName === "string"
@@ -67,6 +68,20 @@ export async function getSession(): Promise<Session> {
           ? source.name
           : undefined,
   };
+}
+
+export async function loginAdmin(password: string): Promise<Session> {
+  return request<Session>("/api/login", {
+    method: "POST",
+    body: JSON.stringify({ password }),
+  });
+}
+
+export async function logoutAdmin(): Promise<Session> {
+  return request<Session>("/api/logout", {
+    method: "POST",
+    body: JSON.stringify({}),
+  });
 }
 
 export async function getCatalogs(): Promise<CatalogSummary[]> {

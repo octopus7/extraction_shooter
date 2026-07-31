@@ -47,7 +47,7 @@ if errorlevel 1 goto :failed
 
 if "%QUEST_DEPLOY_WORKER_ONLY%"=="1" (
   echo.
-  echo [4/5] Skipping D1 migration and quest seed (--worker-only).
+  echo [4/5] Skipping D1 migration and quest seed - worker-only.
   goto :deploy_worker
 )
 

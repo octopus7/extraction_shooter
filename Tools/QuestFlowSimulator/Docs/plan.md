@@ -61,6 +61,17 @@ React와 Konva 없이 구성하며, 지도 편집 요구가 복잡해질 때만 
 
 본편 데이터는 정적 프런트엔드 번들에 포함하지 않는다. Worker API가 catalog 목록, 상세 조회, 익스포트 요청마다 인증 여부와 접근 등급을 검사한다. 비로그인 사용자가 본편 catalog ID나 URL을 직접 입력해도 데이터 존재 여부를 드러내지 않고 404로 처리한다.
 
+초기 운영자는 한 명이므로 인증 방식은 `ADMIN_PASSWORD` Worker Secret 기반의
+단일 관리자 로그인으로 확정했다. 로그인 성공 시 32바이트 난수 세션을 만들고
+D1에는 토큰의 SHA-256 해시만 저장한다. 운영 쿠키는 `Secure`, `HttpOnly`,
+`SameSite=Strict`, `__Host-` prefix를 사용하고 12시간 뒤 만료한다. 로그아웃
+시 D1 세션을 삭제해 기존 쿠키를 즉시 폐기한다. 같은 IP의 로그인 실패는
+15분 창에서 5회까지 허용하고 이후 15분 동안 차단한다.
+
+인증 전용 catalog와 그 편집 상태는 `localStorage`에 저장하지 않는다. 로그인
+상태에서는 D1 작업공간을 우선 복원하고, 로그아웃할 때 구버전이 남긴 인증
+catalog 브라우저 초안도 제거한다.
+
 ## 5. 초기 데이터 가져오기
 
 초기 단계에서는 현재 저장소의 퀘스트 자료를 D1 초기 데이터로 변환할 수 있다.
@@ -109,11 +120,16 @@ React와 Konva 없이 구성하며, 지도 편집 요구가 복잡해질 때만 
 
 작업 상태는 JSON으로 저장한다. `revision`을 이용해 여러 탭이나 기기에서 동시에 저장할 때 발생하는 덮어쓰기를 감지한다.
 
-인증을 자체 구현하는 경우에만 `users`, `sessions` 테이블을 추가한다. Cloudflare Access를 사용하는 경우에는 검증된 사용자 subject를 소유자 키로 사용한다. 최종 인증 방식은 구현 단계 시작 전에 확정한다.
+단일 관리자의 소유자 키는 고정 `admin`을 사용한다. `admin_sessions`에는
+세션 토큰 해시와 만료 시각을 저장하고, `admin_login_attempts`에는 해시된
+클라이언트 키별 실패 횟수와 차단 시각을 저장한다. 비밀번호 원문은 D1이나
+저장소에 저장하지 않는다.
 
 ## 7. API 경계 초안
 
 - `GET /api/session`: 로그인 상태 확인
+- `POST /api/login`: 관리자 비밀번호 확인 및 D1 세션 생성
+- `POST /api/logout`: 현재 D1 세션 폐기 및 쿠키 제거
 - `GET /api/catalogs`: 현재 사용자가 볼 수 있는 catalog 목록
 - `GET /api/catalogs/:slug`: 공개 또는 인증 권한을 만족하는 catalog 상세
 - `GET /api/workspaces`: 본인 작업 목록
@@ -217,7 +233,8 @@ iPad Pro 세로 작업을 위한 선택 모드다.
 
 ### 3단계: 인증과 개인 저장
 
-- 인증 방식 확정 및 연결
+- 단일 관리자 비밀번호와 폐기 가능한 D1 세션 연결
+- 로그인·로그아웃 UI 및 로그인 시도 제한
 - 본편 M01~M20 API 보호
 - D1 workspace 생성·수정·충돌 감지
 
@@ -243,8 +260,8 @@ iPad Pro 세로 작업을 위한 선택 모드다.
 
 ## 12. 현재 확정하지 않은 항목
 
-- 로그인 공급자와 세션 방식
-- 사용자 초대·가입 범위
+- 다중 사용자가 필요해질 때 도입할 외부 로그인 공급자와 계정 이전 방식
+- 향후 사용자 초대·가입 범위
 - 장소 좌표를 수동 입력할지 기존 맵 도구에서 가져올지
 - UE5 익스포트 JSON의 최종 스키마
 - 여러 사용자의 공동 편집 지원 여부
@@ -261,8 +278,11 @@ iPad Pro 세로 작업을 위한 선택 모드다.
 - 인증 카탈로그: 본편 M01~M20 단계 20개, UE5 현재 구현 스냅샷 단계 6개
 - 화면 모드: Desktop 기본, Pro 선택 가능
 - 확인한 Pro viewport: iPad Pro 세로 `1024×1366`
+- 관리자 인증: `ADMIN_PASSWORD` Worker Secret과 D1 세션 방식 배포 완료
+- 배포 버전: `a6f89fa6-0b69-46e0-beef-d854a30798f3`
 
-Cloudflare Access의 `ACCESS_TEAM_DOMAIN`과 `ACCESS_AUD`는 아직 설정하지
-않았다. 따라서 현재 배포는 익명 체험판만 사용할 수 있고, 인증 카탈로그와 D1
-개인 작업공간 API는 fail-closed로 차단된다. Access 애플리케이션을 연결한 뒤
-두 값을 설정하고 재배포하는 것을 다음 인증 단계로 둔다.
+원격 D1에 `0002_admin_auth.sql`을 적용하고 Worker Secret
+`ADMIN_PASSWORD`를 설정했다. 실서비스 `/api/session`에서
+`authConfigured: true`를 확인했다. 공개 fallback은 별도 샘플을 두지 않고
+`generate-seed.mjs`가 체험판 문서에서 생성한 `data/demo.json`을 그대로
+사용한다.

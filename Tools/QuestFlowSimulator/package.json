@@ -8,6 +8,7 @@
     "build": "npm run seed:generate && tsc --noEmit && vite build",
     "preview": "vite preview --host 127.0.0.1",
     "test": "vitest run",
+    "test:typecheck": "tsc -p test/tsconfig.json --noEmit",
     "worker:types": "wrangler types worker-configuration.d.ts",
     "seed:generate": "node scripts/generate-seed.mjs",
     "db:migrate:local": "wrangler d1 migrations apply quest-flow-simulator --local",
@@ -38,7 +39,6 @@
   },
   "dependencies": {
     "hono": "^4.12.32",
-    "jose": "^6.2.5",
     "svelte": "^5.56.8",
     "zod": "^4.4.3"
   }

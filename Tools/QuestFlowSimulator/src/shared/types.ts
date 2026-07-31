@@ -2,6 +2,7 @@ export type ViewMode = "desktop" | "pro";
 
 export interface Session {
   authenticated: boolean;
+  authConfigured: boolean;
   subject?: string;
   displayName?: string;
 }

@@ -1,11 +1,14 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import demoCatalogSource from "../../data/demo.json";
   import {
     createWorkspace,
     getCatalog,
     getCatalogs,
     getSession,
     getWorkspaces,
+    loginAdmin,
+    logoutAdmin,
     updateWorkspace,
   } from "./api";
   import type {
@@ -19,56 +22,13 @@
     Workspace,
   } from "../shared/types";
 
-  const EMPTY_SESSION: Session = { authenticated: false };
-  const FALLBACK_DATASET: QuestDataset = {
-    schemaVersion: 1,
-    title: "체험판 동선",
-    locations: [
-      { id: "dock", name: "선착장", xMeters: 10, yMeters: 22 },
-      { id: "village", name: "마을 광장", xMeters: 62, yMeters: 32 },
-      { id: "warehouse", name: "창고", xMeters: 118, yMeters: 68 },
-      { id: "bunker", name: "벙커", xMeters: 164, yMeters: 32 },
-    ],
-    steps: [
-      {
-        id: "q1",
-        questId: "Q1",
-        questTitle: "취수 시설 확인",
-        name: "취수 시설 확인",
-        fromLocationId: "dock",
-        toLocationId: "village",
-        actionSeconds: 28,
-        actionVariancePercent: 20,
-        moveSpeedMps: 3.8,
-        enabled: true,
-      },
-      {
-        id: "q2",
-        questId: "Q2",
-        questTitle: "보급품 획득",
-        name: "보급품 획득",
-        fromLocationId: "village",
-        toLocationId: "warehouse",
-        actionSeconds: 42,
-        actionVariancePercent: 20,
-        moveSpeedMps: 3.8,
-        enabled: true,
-      },
-      {
-        id: "q4",
-        questId: "Q4",
-        questTitle: "벙커 귀환",
-        name: "벙커 귀환",
-        fromLocationId: "warehouse",
-        toLocationId: "bunker",
-        actionSeconds: 64,
-        actionVariancePercent: 20,
-        moveSpeedMps: 3.8,
-        enabled: true,
-      },
-    ],
-    settings: { runs: 10_000 },
+  const EMPTY_SESSION: Session = {
+    authenticated: false,
+    authConfigured: false,
   };
+  // Generated from Docs/DemoDesign by scripts/generate-seed.mjs.
+  // Keeping the public fallback on the same source prevents invented map data.
+  const FALLBACK_DATASET: QuestDataset = demoCatalogSource.data;
 
   let mode: ViewMode = "desktop";
   let session = EMPTY_SESSION;
@@ -89,6 +49,10 @@
   let activeProTab: "quests" | "properties" | "results" = "properties";
   let dragLocationId: string | null = null;
   let simulator: Worker | null = null;
+  let loginOpen = false;
+  let loginBusy = false;
+  let loginError = "";
+  let adminPassword = "";
 
   $: selectedLocation =
     dataset.locations.find((location) => location.id === selectedLocationId) ??
@@ -178,6 +142,10 @@
   }
 
   function persistDraft() {
+    if (selectedCatalog?.visibility === "authenticated") {
+      saveState = "로그인 전용 데이터 · D1 저장 필요";
+      return;
+    }
     localStorage.setItem(localKey(), JSON.stringify(dataset));
     saveState = `브라우저 저장 · ${new Date().toLocaleTimeString("ko-KR", {
       hour: "2-digit",
@@ -198,17 +166,28 @@
     try {
       const detail = await getCatalog(catalog.slug);
       selectedCatalog = detail.catalog;
-      const saved = localStorage.getItem(
-        `quest-flow:draft:${detail.catalog.slug}`,
-      );
-      replaceDataset(
-        saved ? (JSON.parse(saved) as QuestDataset) : detail.dataset,
-      );
       const workspace = workspaces.find(
         (value) => value.catalogId === detail.catalog.id,
       );
       currentWorkspace = workspace ?? null;
-      saveState = saved ? "브라우저 초안 복원됨" : "catalog 불러옴";
+      const draftKey = `quest-flow:draft:${detail.catalog.slug}`;
+      if (detail.catalog.visibility === "authenticated") {
+        // Remove drafts created by older versions that persisted private data.
+        localStorage.removeItem(draftKey);
+      }
+      const saved =
+        detail.catalog.visibility === "public" && !workspace
+          ? localStorage.getItem(draftKey)
+          : null;
+      replaceDataset(
+        workspace?.state ??
+          (saved ? (JSON.parse(saved) as QuestDataset) : detail.dataset),
+      );
+      saveState = workspace
+        ? "D1 작업공간 복원됨"
+        : saved
+          ? "브라우저 초안 복원됨"
+          : "catalog 불러옴";
       runSimulation();
     } catch (error) {
       statusMessage =
@@ -300,6 +279,69 @@
     }
   }
 
+  function openLogin() {
+    if (!session.authConfigured) {
+      statusMessage = "관리자 비밀번호가 아직 설정되지 않았습니다.";
+      return;
+    }
+    loginError = "";
+    adminPassword = "";
+    loginOpen = true;
+  }
+
+  async function submitLogin(event: SubmitEvent) {
+    event.preventDefault();
+    if (loginBusy || !adminPassword) return;
+
+    loginBusy = true;
+    loginError = "";
+    try {
+      session = await loginAdmin(adminPassword);
+      adminPassword = "";
+      catalogs = await getCatalogs();
+      workspaces = await getWorkspaces();
+      loginOpen = false;
+      statusMessage = "관리자로 로그인했습니다.";
+
+      const current =
+        catalogs.find((catalog) => catalog.slug === selectedCatalog?.slug) ??
+        catalogs[0];
+      if (current) await selectCatalog(current);
+    } catch (error) {
+      loginError =
+        error instanceof Error ? error.message : "로그인하지 못했습니다.";
+    } finally {
+      loginBusy = false;
+    }
+  }
+
+  async function signOut() {
+    if (loginBusy) return;
+
+    loginBusy = true;
+    try {
+      for (const catalog of catalogs) {
+        if (catalog.visibility === "authenticated") {
+          localStorage.removeItem(`quest-flow:draft:${catalog.slug}`);
+        }
+      }
+      session = await logoutAdmin();
+      workspaces = [];
+      currentWorkspace = null;
+      catalogs = await getCatalogs();
+      const publicCatalog =
+        catalogs.find((catalog) => catalog.visibility === "public") ??
+        catalogs[0];
+      if (publicCatalog) await selectCatalog(publicCatalog);
+      statusMessage = "로그아웃했습니다.";
+    } catch (error) {
+      statusMessage =
+        error instanceof Error ? error.message : "로그아웃하지 못했습니다.";
+    } finally {
+      loginBusy = false;
+    }
+  }
+
   function formatTime(seconds: number) {
     if (!Number.isFinite(seconds)) return "—";
     const minutes = Math.floor(seconds / 60);
@@ -329,8 +371,17 @@
 
     <div class="top-actions">
       <span class:online={session.authenticated} class="session">
-        {session.authenticated ? session.displayName ?? "로그인됨" : "체험 모드"}
+        {session.authenticated ? session.displayName ?? "관리자" : "체험 모드"}
       </span>
+      {#if session.authenticated}
+        <button class="auth-action" disabled={loginBusy} onclick={signOut}>
+          로그아웃
+        </button>
+      {:else}
+        <button class="auth-action" disabled={loginBusy} onclick={openLogin}>
+          관리자 로그인
+        </button>
+      {/if}
       <span class="save-state">{saveState}</span>
       <div class="mode-switch" aria-label="화면 모드">
         <button
@@ -350,6 +401,69 @@
     <div class="notice" role="status">
       <span>{statusMessage}</span>
       <button aria-label="알림 닫기" onclick={() => (statusMessage = "")}>×</button>
+    </div>
+  {/if}
+
+  {#if loginOpen}
+    <div
+      class="login-backdrop"
+      role="presentation"
+      onclick={(event) => {
+        if (event.target === event.currentTarget && !loginBusy) {
+          loginOpen = false;
+        }
+      }}
+    >
+      <div
+        class="login-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="login-title"
+      >
+        <div class="login-heading">
+          <div>
+            <span class="eyebrow">ADMIN SESSION</span>
+            <h2 id="login-title">관리자 로그인</h2>
+          </div>
+          <button
+            class="dialog-close"
+            type="button"
+            aria-label="로그인 창 닫기"
+            disabled={loginBusy}
+            onclick={() => (loginOpen = false)}
+          >×</button>
+        </div>
+
+        <form onsubmit={submitLogin}>
+          <label>
+            <span>관리자 비밀번호</span>
+            <input
+              type="password"
+              name="password"
+              autocomplete="current-password"
+              maxlength="256"
+              required
+              bind:value={adminPassword}
+            />
+          </label>
+          {#if loginError}
+            <p class="login-error" role="alert">{loginError}</p>
+          {/if}
+          <div class="login-actions">
+            <button
+              class="secondary"
+              type="button"
+              disabled={loginBusy}
+              onclick={() => (loginOpen = false)}
+            >취소</button>
+            <button
+              class="primary"
+              type="submit"
+              disabled={loginBusy || !adminPassword}
+            >{loginBusy ? "확인 중…" : "로그인"}</button>
+          </div>
+        </form>
+      </div>
     </div>
   {/if}
 
@@ -430,6 +544,7 @@
         <svg
           viewBox="0 0 1000 620"
           aria-label="장소와 퀘스트 이동 동선 편집기"
+          role="application"
           onpointermove={handlePointerMove}
           onpointerup={() => (dragLocationId = null)}
           onpointerleave={() => (dragLocationId = null)}
@@ -456,6 +571,12 @@
                 class:active={step.id === selectedStepId}
                 class="route"
                 onclick={() => (selectedStepId = step.id)}
+                onkeydown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    selectedStepId = step.id;
+                  }
+                }}
                 role="button"
                 tabindex="0"
               >
@@ -677,7 +798,11 @@
           <span class="eyebrow">PERSISTENCE</span>
           <strong>{session.authenticated ? "D1 작업공간" : "브라우저 초안"}</strong>
         </div>
-        <button class="secondary" onclick={persistDraft}>임시저장</button>
+        <button
+          class="secondary"
+          disabled={selectedCatalog?.visibility === "authenticated"}
+          onclick={persistDraft}
+        >임시저장</button>
         <button
           class="primary"
           disabled={!session.authenticated}

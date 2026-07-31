@@ -202,6 +202,21 @@ button:disabled {
   background: var(--raised);
 }
 
+.auth-action {
+  min-height: 36px;
+  padding: 0 11px;
+  border: 1px solid var(--line-bright);
+  color: var(--text);
+  background: transparent;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.auth-action:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 .notice {
   display: flex;
   min-height: 40px;
@@ -220,6 +235,63 @@ button:disabled {
   color: inherit;
   background: transparent;
   font-size: 20px;
+}
+
+.login-backdrop {
+  position: fixed;
+  z-index: 100;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(2, 7, 12, 0.78);
+  backdrop-filter: blur(8px);
+}
+
+.login-dialog {
+  width: min(100%, 420px);
+  border: 1px solid var(--line-bright);
+  background: var(--surface);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
+}
+
+.login-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--line);
+}
+
+.login-heading h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.dialog-close {
+  width: 44px;
+  padding: 0;
+  border: 0;
+  color: var(--muted);
+  background: transparent;
+  font-size: 24px;
+}
+
+.login-dialog form {
+  padding: 20px;
+}
+
+.login-error {
+  margin: 12px 0 0;
+  color: #ff9e9e;
+  font-size: 12px;
+}
+
+.login-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 20px;
 }
 
 .workspace {
@@ -904,6 +976,12 @@ input:focus {
   .top-actions {
     gap: 6px;
     padding: 7px 8px;
+  }
+
+  .auth-action {
+    max-width: 92px;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .workspace,

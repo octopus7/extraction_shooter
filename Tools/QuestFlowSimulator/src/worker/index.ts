@@ -3,8 +3,15 @@ import type { Context, Next } from "hono";
 import { z } from "zod";
 import {
   type AuthenticatedUser,
-  authenticateAccessRequest,
-  isAccessConfigured,
+  LoginRateLimitError,
+  assertLoginAllowed,
+  authenticateAdminSession,
+  clearAdminSessionCookie,
+  createAdminSession,
+  isAdminAuthConfigured,
+  recordLoginFailure,
+  revokeAdminSession,
+  verifyAdminPassword,
 } from "./auth";
 import {
   ApiError,
@@ -50,6 +57,12 @@ const workspaceStateSchema = z
   .refine((state) => Object.keys(state).length <= 2_000, {
     message: "Workspace state has too many top-level keys.",
   });
+
+const loginSchema = z
+  .object({
+    password: z.string().min(1).max(256),
+  })
+  .strict();
 
 const workspaceCreateSchema = z
   .object({
@@ -104,7 +117,7 @@ app.use("/api/*", async (c: Context<AppEnvironment>, next: Next) => {
   c.set("requestId", id);
   c.header("x-request-id", id);
   c.header("cache-control", "no-store");
-  c.set("user", await authenticateAccessRequest(c.req.raw, c.env));
+  c.set("user", await authenticateAdminSession(c.req.raw, c.env));
   await next();
 });
 
@@ -123,12 +136,89 @@ function requireSameOrigin(c: Context<AppEnvironment>): void {
   }
 }
 
+function requireSecureLoginTransport(c: Context<AppEnvironment>): void {
+  const url = new URL(c.req.url);
+  const localDevelopment =
+    url.protocol === "http:" &&
+    (url.hostname === "localhost" ||
+      url.hostname === "127.0.0.1" ||
+      url.hostname === "[::1]");
+  if (url.protocol !== "https:" && !localDevelopment) {
+    throw new ApiError(
+      403,
+      "secure_transport_required",
+      "Administrator login requires HTTPS.",
+    );
+  }
+}
+
 app.get("/api/session", (c) => {
   const user = c.get("user");
   return c.json({
     authenticated: user !== null,
-    authConfigured: isAccessConfigured(c.env),
-    email: user?.email ?? null,
+    authConfigured: isAdminAuthConfigured(c.env),
+    subject: user?.subject ?? null,
+    displayName: user?.name ?? null,
+  });
+});
+
+app.post("/api/login", async (c) => {
+  requireSameOrigin(c);
+  requireSecureLoginTransport(c);
+  if (!isAdminAuthConfigured(c.env)) {
+    throw new ApiError(
+      503,
+      "authentication_not_configured",
+      "Administrator authentication is not configured.",
+    );
+  }
+
+  try {
+    await assertLoginAllowed(c.req.raw, c.env);
+  } catch (error) {
+    if (!(error instanceof LoginRateLimitError)) {
+      throw error;
+    }
+    c.header(
+      "retry-after",
+      String(Math.max(1, error.retryAt - Math.floor(Date.now() / 1000))),
+    );
+    throw new ApiError(
+      429,
+      "too_many_login_attempts",
+      "Too many login attempts. Try again later.",
+    );
+  }
+
+  const body = await readValidatedJson(c.req.raw, loginSchema);
+  if (!(await verifyAdminPassword(body.password, c.env))) {
+    await recordLoginFailure(c.req.raw, c.env);
+    console.warn(
+      JSON.stringify({
+        level: "warning",
+        event: "admin_login_failed",
+        requestId: c.get("requestId"),
+      }),
+    );
+    throw new ApiError(401, "invalid_credentials", "Invalid credentials.");
+  }
+
+  c.header("set-cookie", await createAdminSession(c.req.raw, c.env));
+  return c.json({
+    authenticated: true,
+    authConfigured: true,
+    subject: "admin",
+    displayName: "관리자",
+  });
+});
+
+app.post("/api/logout", async (c) => {
+  requireSameOrigin(c);
+  await revokeAdminSession(c.req.raw, c.env);
+  c.header("set-cookie", clearAdminSessionCookie(c.req.raw));
+  return c.json({
+    authenticated: false,
+    authConfigured: isAdminAuthConfigured(c.env),
   });
 });
 

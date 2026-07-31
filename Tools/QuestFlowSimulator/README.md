@@ -52,8 +52,44 @@ npm run deploy
 
 ## 인증
 
-현재 배포는 `ACCESS_TEAM_DOMAIN`과 `ACCESS_AUD`가 비어 있어 인증 기능이
-fail-closed 상태입니다. 따라서 비로그인 체험판만 공개되고, M01~M20과 개인
-작업공간 API는 차단됩니다. Cloudflare Access 애플리케이션을 만든 뒤 두 값을
-설정하고 다시 배포하면 Access JWT 검증을 통해 인증 전용 카탈로그와 D1 저장을
-사용할 수 있습니다.
+혼자 사용하는 도구라는 전제에서 Worker Secret `ADMIN_PASSWORD` 하나로
+관리자 로그인을 처리합니다. 비밀번호는 저장소나 D1에 넣지 않습니다. 로그인
+성공 시 12시간짜리 난수 세션을 발급하고 D1에는 원문 대신 SHA-256 해시만
+저장합니다. 로그아웃하면 해당 D1 세션이 즉시 삭제되므로 이전 쿠키를 다시
+사용할 수 없습니다.
+
+- 최소 비밀번호 길이: 16자(24자 이상의 무작위 값 권장)
+- 로그인 제한: 동일 IP에서 15분 내 5회 실패 시 15분 차단
+- 운영 쿠키: `Secure`, `HttpOnly`, `SameSite=Strict`, `__Host-` prefix
+- 비로그인: 공개 체험판만 조회
+- 로그인: M01~M20, UE5 스냅샷, D1 작업공간 사용
+
+최초 운영 설정은 인증 테이블을 먼저 만든 뒤 비밀번호를 대화형으로 입력한다.
+실제 값은 명령 기록이나 문서에 적지 않는다.
+
+```powershell
+npm run db:migrate:remote
+npx wrangler secret put ADMIN_PASSWORD
+.\deploy.bat --worker-only
+```
+
+로컬 개발에서는 Git에서 제외된 `.dev.vars` 파일에 다음 형식으로 넣는다.
+
+```dotenv
+ADMIN_PASSWORD="로컬에서만-사용할-16자-이상-비밀번호"
+```
+
+비밀번호를 바꾼 뒤 기존 세션도 즉시 모두 끊어야 하면 D1의
+`admin_sessions` 행을 삭제한다. 아무 비밀번호도 설정하지 않거나 16자보다
+짧으면 인증은 fail-closed 상태로 유지된다.
+
+## 테스트
+
+```powershell
+npm test
+npm run test:typecheck
+npm run build
+```
+
+Workers 런타임과 로컬 D1에 실제 마이그레이션을 적용해 로그인, 병렬 실패 제한,
+쿠키 속성, 로그아웃 세션 폐기, 비공개 카탈로그 경계를 검증한다.
