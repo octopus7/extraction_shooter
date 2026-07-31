@@ -44,6 +44,7 @@
   let selectedQuestId: string | null = dataset.questNodes[0]?.questId ?? null;
   let selectedPlaceId: string | null = dataset.places[0]?.id ?? null;
   let selectedStepId: string | null = dataset.steps[0]?.id ?? null;
+  let canvasBounds = calculateCanvasBounds(canvasMode, dataset);
   let workspaces: Workspace[] = [];
   let currentWorkspace: Workspace | null = null;
   let iterations = 10_000;
@@ -84,13 +85,6 @@
       to: node,
     })),
   ).filter((edge) => edge.from);
-  $: canvasBounds =
-    canvasMode === "quest-chain"
-      ? calculateBounds(dataset.questNodes.map((node) => ({ x: node.x, y: node.y })))
-      : calculateBounds(
-          dataset.places.map((place) => ({ x: place.xMeters, y: place.yMeters })),
-        );
-
   onMount(async () => {
     const savedMode = localStorage.getItem("quest-flow:view-mode");
     if (savedMode === "desktop" || savedMode === "pro") mode = savedMode;
@@ -142,12 +136,24 @@
     const ys = points.map((point) => point.y);
     const minX = Math.min(...xs);
     const minY = Math.min(...ys);
+    const rawSpanX = Math.max(30, Math.max(...xs) - minX);
+    const rawSpanY = Math.max(30, Math.max(...ys) - minY);
+    const paddingX = Math.max(30, rawSpanX * 0.12);
+    const paddingY = Math.max(30, rawSpanY * 0.12);
     return {
-      minX,
-      minY,
-      spanX: Math.max(30, Math.max(...xs) - minX),
-      spanY: Math.max(30, Math.max(...ys) - minY),
+      minX: minX - paddingX,
+      minY: minY - paddingY,
+      spanX: rawSpanX + paddingX * 2,
+      spanY: rawSpanY + paddingY * 2,
     };
+  }
+
+  function calculateCanvasBounds(value: CanvasMode, source: QuestDataset) {
+    const points =
+      value === "quest-chain"
+        ? source.questNodes.map((node) => ({ x: node.x, y: node.y }))
+        : source.places.map((place) => ({ x: place.xMeters, y: place.yMeters }));
+    return calculateBounds(points);
   }
 
   function xOnCanvas(value: number) {
@@ -176,6 +182,9 @@
 
   function setCanvasMode(value: CanvasMode) {
     canvasMode = value;
+    // Fit once when changing views. Do not derive this from live drag coordinates:
+    // recalculating during a drag makes the graph continuously rescale and shrink.
+    canvasBounds = calculateCanvasBounds(value, dataset);
     zoom = 1;
     dragQuestNodeId = null;
     dragPlaceId = null;
@@ -246,6 +255,7 @@
       return;
     }
     dataset = structuredClone(normalized);
+    canvasBounds = calculateCanvasBounds(canvasMode, dataset);
     selectedQuestId = dataset.questNodes[0]?.questId ?? null;
     selectedPlaceId = dataset.places[0]?.id ?? null;
     selectedStepId = dataset.steps[0]?.id ?? null;
