@@ -616,25 +616,58 @@ h2 {
   cursor: grabbing;
 }
 
-.quest-node circle {
-  fill: #0d2030;
-  stroke: var(--cyan);
-  stroke-width: 2;
-}
-
-.quest-node.active circle:first-child {
-  fill: #123729;
-  stroke: var(--accent);
-  stroke-width: 3;
-}
-
-.quest-node .core {
-  fill: var(--cyan);
+.quest-node .node-shell {
+  fill: #111820;
   stroke: none;
 }
 
-.quest-node.active .core {
-  fill: var(--accent);
+.quest-node .node-frame {
+  fill: none;
+  stroke: #465362;
+  stroke-width: 1.5;
+}
+
+.quest-node .node-header {
+  fill: rgba(102, 200, 232, 0.14);
+  stroke: none;
+}
+
+.quest-node .node-body {
+  fill: #171d24;
+  stroke: none;
+}
+
+.quest-node .node-footer {
+  fill: rgba(80, 210, 160, 0.1);
+  stroke: none;
+}
+
+.quest-node .node-start,
+.quest-node .node-end {
+  fill: none;
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.quest-node .node-start {
+  stroke: var(--cyan);
+}
+
+.quest-node .node-end {
+  stroke: var(--accent);
+}
+
+.quest-node.active .node-frame {
+  stroke: var(--accent);
+  stroke-width: 2.5;
+}
+
+.quest-node.active .node-header {
+  fill: rgba(102, 200, 232, 0.22);
+}
+
+.quest-node.active .node-footer {
+  fill: rgba(80, 210, 160, 0.18);
 }
 
 .place {
@@ -678,7 +711,6 @@ h2 {
   fill: var(--accent);
 }
 
-.quest-node text,
 .place text {
   fill: #dce8f4;
   font: 600 13px "Manrope", sans-serif;
@@ -688,10 +720,24 @@ h2 {
   text-anchor: middle;
 }
 
-.quest-node .coordinate,
+.quest-node .node-id {
+  fill: #a5d8e8;
+  font: 600 10px "IBM Plex Mono", monospace;
+  letter-spacing: 0.08em;
+  text-anchor: start;
+}
+
+.quest-node .node-title {
+  fill: #e0e5ea;
+  font: 600 12px "Manrope", sans-serif;
+  text-anchor: middle;
+}
+
+.quest-node .node-coordinate,
 .place .coordinate {
   fill: #7890a7;
   font: 500 10px "IBM Plex Mono", monospace;
+  text-anchor: middle;
 }
 
 .empty-canvas {

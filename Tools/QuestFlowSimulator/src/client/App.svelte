@@ -773,10 +773,16 @@
                   role="button"
                   tabindex="0"
                 >
-                  <circle r="25" />
-                  <circle class="core" r="7" />
-                  <text y="44">{node.questId} {node.title}</text>
-                  <text class="coordinate" y="62">{node.x}, {node.y}</text>
+                  <rect class="node-shell" x="-72" y="-29" width="144" height="58" rx="8" />
+                  <rect class="node-header" x="-72" y="-29" width="144" height="16" rx="8" />
+                  <rect class="node-body" x="-72" y="-13" width="144" height="29" />
+                  <rect class="node-footer" x="-72" y="16" width="144" height="13" rx="5" />
+                  <rect class="node-frame" x="-72" y="-29" width="144" height="58" rx="8" />
+                  <path class="node-start" d="M -79 0 H -72" />
+                  <path class="node-end" d="M 72 0 H 79" />
+                  <text class="node-id" x="-61" y="-17">{node.questId}</text>
+                  <text class="node-title" x="0" y="4">{node.title}</text>
+                  <text class="node-coordinate" x="0" y="26">{node.x}, {node.y}</text>
                 </g>
               {/each}
             {:else}
