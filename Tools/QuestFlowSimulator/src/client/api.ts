@@ -4,6 +4,7 @@ import type {
   Session,
   Workspace,
 } from "../shared/types";
+import { normalizeQuestDataset } from "../shared/dataset";
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(path, {
@@ -101,15 +102,16 @@ export async function getCatalog(
     response.catalog && typeof response.catalog === "object"
       ? response.catalog as Record<string, unknown>
       : response;
-  const dataset =
-    parseJson<QuestDataset>(
+  const dataset = normalizeQuestDataset(
+    parseJson<unknown>(
       response.dataset ??
         response.data ??
         response.dataJson ??
         response.data_json ??
         rawCatalog.data_json ??
         rawCatalog.dataJson,
-    );
+    ),
+  );
   if (!dataset) throw new Error("catalog 데이터 형식을 읽을 수 없습니다.");
 
   return {
@@ -143,8 +145,10 @@ export async function getWorkspaces(): Promise<Workspace[]> {
     ["workspaces", "items", "data"],
   );
   return raw.flatMap((item) => {
-    const state = parseJson<QuestDataset>(
-      item.state ?? item.stateJson ?? item.state_json,
+    const state = normalizeQuestDataset(
+      parseJson<unknown>(
+        item.state ?? item.stateJson ?? item.state_json,
+      ),
     );
     if (!state) return [];
     return [{

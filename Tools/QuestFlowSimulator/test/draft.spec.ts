@@ -4,18 +4,21 @@ import {
   readCatalogDraft,
   serializeCatalogDraft,
 } from "../src/client/draft";
+import { normalizeQuestDataset } from "../src/shared/dataset";
 
 describe("public catalog drafts", () => {
+  const dataset = normalizeQuestDataset(demoCatalogSource.data)!;
+
   it("restores a draft only when its dataset version matches", () => {
     const raw = serializeCatalogDraft(
       demoCatalogSource.datasetVersion,
-      demoCatalogSource.data,
+      dataset,
     );
 
     expect(
       readCatalogDraft(raw, demoCatalogSource.datasetVersion),
     ).toEqual({
-      dataset: demoCatalogSource.data,
+      dataset,
       discarded: false,
     });
   });
@@ -30,7 +33,7 @@ describe("public catalog drafts", () => {
 
     const stale = serializeCatalogDraft(
       "content-stale",
-      demoCatalogSource.data,
+      dataset,
     );
     expect(
       readCatalogDraft(stale, demoCatalogSource.datasetVersion),

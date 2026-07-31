@@ -124,7 +124,7 @@ function makeCatalog({
 }) {
   const sourceHash = hashSources(sourceNames);
   const catalogData = {
-    schemaVersion: 1,
+    schemaVersion: 2,
     ...data,
   };
   const datasetHash = hashValue(catalogData);
@@ -133,7 +133,7 @@ function makeCatalog({
     slug,
     title,
     visibility,
-    schemaVersion: 1,
+    schemaVersion: 2,
     datasetVersion: `content-${datasetHash.slice(0, 12)}`,
     sourceKind,
     sourceHash: `sha256:${sourceHash}`,
@@ -243,12 +243,13 @@ function buildDemoCatalog(treeMarkdown, routeMarkdown) {
   const titleById = Object.fromEntries(
     quests.map((quest) => [quest.id, quest.title]),
   );
-  const locations = [
-    { id: "bunker", name: "벙커", mapId: "demo", xMeters: 0, yMeters: 0 },
+  const places = [
+    { id: "bunker", name: "벙커", mapId: "demo", shape: "circle", xMeters: 0, yMeters: 0, radiusMeters: 25 },
     {
       id: "tool-cache",
       name: "공구 보관 장소",
       mapId: "demo",
+      shape: "point",
       xMeters: 10,
       yMeters: 35,
     },
@@ -256,6 +257,8 @@ function buildDemoCatalog(treeMarkdown, routeMarkdown) {
       id: "water-intake",
       name: "취수 시설",
       mapId: "demo",
+      shape: "circle",
+      radiusMeters: 18,
       xMeters: 0,
       yMeters: 160,
     },
@@ -263,6 +266,9 @@ function buildDemoCatalog(treeMarkdown, routeMarkdown) {
       id: "north-farm",
       name: "북쪽 파밍 지역",
       mapId: "demo",
+      shape: "rectangle",
+      widthMeters: 80,
+      heightMeters: 60,
       xMeters: 320,
       yMeters: 0,
     },
@@ -270,6 +276,9 @@ function buildDemoCatalog(treeMarkdown, routeMarkdown) {
       id: "food-warehouse",
       name: "외부 식량 창고",
       mapId: "demo",
+      shape: "rectangle",
+      widthMeters: 100,
+      heightMeters: 60,
       xMeters: 480,
       yMeters: 20,
     },
@@ -278,16 +287,16 @@ function buildDemoCatalog(treeMarkdown, routeMarkdown) {
     id,
     questId,
     name,
-    fromLocationId,
-    toLocationId,
+    fromPlaceId,
+    toPlaceId,
     actionSeconds,
   ) => ({
     id,
     questId,
     questTitle: titleById[questId],
     name,
-    fromLocationId,
-    toLocationId,
+    fromPlaceId,
+    toPlaceId,
     actionSeconds,
     actionVariancePercent: 15,
     moveSpeedMps: 4,
@@ -321,7 +330,14 @@ function buildDemoCatalog(treeMarkdown, routeMarkdown) {
 
   return {
     title: "체험판 Q1~Q4",
-    locations,
+    questNodes: buildQuestNodes(quests, {
+      xStart: 100,
+      yStart: 100,
+      columnGap: 190,
+      rowGap: 130,
+      columns: 3,
+    }),
+    places,
     steps,
     settings: {
       runs: 1_000,
@@ -373,6 +389,7 @@ function buildMainCatalog(markdown) {
       }
       return {
         ...row,
+        prerequisites: parsePrerequisiteQuestIds(row.prerequisiteText),
         description: details["내용"] ?? "",
         detailCategory: details["카테고리"] ?? row.category,
         detailRequiredItems:
@@ -400,28 +417,20 @@ function buildApproximateSimulationCatalog(
   sourceNotes,
   actionSeconds,
 ) {
-  const origin = {
-    id: "route-origin",
-    name: "기준 시작점",
-    mapId: "approximation",
-    xMeters: 0,
-    yMeters: 0,
-  };
-  const questLocations = quests.map((quest, index) => ({
-    id: `location-${String(quest.id).toLowerCase()}`,
-    name: `${quest.id} ${quest.title}`,
-    mapId: "approximation",
-    xMeters: 80 + Math.floor(index / 4) * 120,
-    yMeters: (index % 4) * 90,
-  }));
-  const locations = [origin, ...questLocations];
+  const places = createInferredPlaces(quests);
+  const mainQuestIds = new Set(
+    quests.filter((quest) => /^M\d{2}$/.test(String(quest.id))).map((quest) => String(quest.id)),
+  );
   const steps = quests.map((quest, index) => ({
     id: `step-${String(quest.id).toLowerCase()}`,
     questId: String(quest.id),
     questTitle: String(quest.title),
     name: String(quest.title),
-    fromLocationId: index === 0 ? origin.id : questLocations[index - 1].id,
-    toLocationId: questLocations[index].id,
+    ...inferredRouteForQuest(
+      quest,
+      index,
+      mainQuestIds.size > 0,
+    ),
     actionSeconds,
     actionVariancePercent: 20,
     moveSpeedMps: 4,
@@ -430,16 +439,194 @@ function buildApproximateSimulationCatalog(
 
   return {
     title,
-    locations,
+    questNodes: buildQuestNodes(quests, {
+      xStart: 100,
+      yStart: 100,
+      columnGap: 170,
+      rowGap: 110,
+      columns: 5,
+    }),
+    places,
     steps,
     settings: {
       runs: 1_000,
       mapTransitionSeconds: 0,
     },
     sourceNotes: [
-      "위치는 실제 UE5 좌표가 아닌 퀘스트 순서 시각화를 위한 근사 배치입니다.",
+      "퀘스트 노드 좌표는 그래프 시각화용이며 맵 장소 좌표가 아닙니다.",
+      "장소와 액터 데이터가 없는 항목은 퀘스트 문맥으로 추정한 임시 좌표입니다.",
       ...sourceNotes,
     ],
+  };
+}
+
+function buildQuestNodes(quests, layout) {
+  const questIds = quests.map((quest) => String(quest.id));
+  return quests.map((quest, index) => ({
+    id: `quest-node-${String(quest.id).toLowerCase()}`,
+    questId: String(quest.id),
+    title: String(quest.title),
+    x: layout.xStart + (index % layout.columns) * layout.columnGap,
+    y: layout.yStart + Math.floor(index / layout.columns) * layout.rowGap,
+    prerequisiteQuestIds:
+      Array.isArray(quest.prerequisites) && quest.prerequisites.length > 0
+        ? quest.prerequisites.map(String)
+        : index === 0
+          ? []
+          : [questIds[index - 1]],
+  }));
+}
+
+function parsePrerequisiteQuestIds(value) {
+  const text = String(value ?? "");
+  const rangeMatch = /M(\d{2})\s*[~〜-]\s*M(\d{2})/.exec(text);
+  if (rangeMatch) {
+    const start = Number(rangeMatch[1]);
+    const end = Number(rangeMatch[2]);
+    return Array.from(
+      { length: Math.max(0, end - start + 1) },
+      (_, index) => `M${String(start + index).padStart(2, "0")}`,
+    );
+  }
+  return [...text.matchAll(/M\d{2}/g)].map((match) => match[0]);
+}
+
+function createInferredPlaces(quests) {
+  const hasMainQuest = quests.some((quest) => /^M\d{2}$/.test(String(quest.id)));
+  if (!hasMainQuest) {
+    return [
+      {
+        id: "inferred-base",
+        name: "추정 거점",
+        mapId: "inferred",
+        shape: "circle",
+        xMeters: 0,
+        yMeters: 0,
+        radiusMeters: 25,
+      },
+      {
+        id: "inferred-outdoor",
+        name: "추정 외부 구역",
+        mapId: "inferred",
+        shape: "rectangle",
+        xMeters: 240,
+        yMeters: 30,
+        widthMeters: 100,
+        heightMeters: 70,
+      },
+      {
+        id: "inferred-interaction",
+        name: "추정 상호작용 지점",
+        mapId: "inferred",
+        shape: "point",
+        xMeters: 420,
+        yMeters: 60,
+        actorId: "inferred.interaction",
+      },
+    ];
+  }
+
+  return [
+    {
+      id: "main-bunker",
+      name: "벙커",
+      mapId: "inferred-main",
+      shape: "circle",
+      xMeters: 0,
+      yMeters: 0,
+      radiusMeters: 28,
+    },
+    {
+      id: "main-forest-trail",
+      name: "서쪽 숲길",
+      mapId: "inferred-main",
+      shape: "rectangle",
+      xMeters: 220,
+      yMeters: 40,
+      widthMeters: 130,
+      heightMeters: 80,
+    },
+    {
+      id: "main-concrete-blockage",
+      name: "콘크리트 더미",
+      mapId: "inferred-main",
+      shape: "circle",
+      xMeters: 300,
+      yMeters: 180,
+      radiusMeters: 20,
+    },
+    {
+      id: "main-vending-machine",
+      name: "수상한 자판기",
+      mapId: "inferred-main",
+      shape: "point",
+      xMeters: 430,
+      yMeters: 70,
+      actorId: "inferred.vending_machine",
+    },
+    {
+      id: "main-security-zone",
+      name: "고급보안구역",
+      mapId: "inferred-main",
+      shape: "rectangle",
+      xMeters: 570,
+      yMeters: 50,
+      widthMeters: 160,
+      heightMeters: 120,
+    },
+    {
+      id: "main-boss-zone",
+      name: "보스구역",
+      mapId: "inferred-main",
+      shape: "circle",
+      xMeters: 820,
+      yMeters: 100,
+      radiusMeters: 45,
+    },
+  ];
+}
+
+function inferredRouteForQuest(quest, index, isMainQuest) {
+  if (isMainQuest) {
+    const routeByQuestId = {
+      M01: ["main-bunker", "main-bunker"],
+      M02: ["main-bunker", "main-forest-trail"],
+      M03: ["main-bunker", "main-bunker"],
+      M04: ["main-bunker", "main-forest-trail"],
+      M05: ["main-bunker", "main-forest-trail"],
+      M06: ["main-forest-trail", "main-concrete-blockage"],
+      M07: ["main-forest-trail", "main-concrete-blockage"],
+      M08: ["main-forest-trail", "main-concrete-blockage"],
+      M09: ["main-forest-trail", "main-vending-machine"],
+      M10: ["main-vending-machine", "main-vending-machine"],
+      M11: ["main-vending-machine", "main-vending-machine"],
+      M12: ["main-vending-machine", "main-concrete-blockage"],
+      M13: ["main-concrete-blockage", "main-security-zone"],
+      M14: ["main-security-zone", "main-security-zone"],
+      M15: ["main-security-zone", "main-security-zone"],
+      M16: ["main-security-zone", "main-security-zone"],
+      M17: ["main-bunker", "main-bunker"],
+      M18: ["main-boss-zone", "main-boss-zone"],
+      M19: ["main-bunker", "main-bunker"],
+      M20: ["main-bunker", "main-bunker"],
+    };
+    const [fromPlaceId, toPlaceId] = routeByQuestId[String(quest.id)] ?? [
+      "main-bunker",
+      "main-bunker",
+    ];
+    return { fromPlaceId, toPlaceId };
+  }
+
+  const title = String(quest.title);
+  if (/자판기|상호작용|interaction/i.test(title)) {
+    return { fromPlaceId: "inferred-outdoor", toPlaceId: "inferred-interaction" };
+  }
+  if (/숲|외부|이동|취수|파밍|보스/i.test(title)) {
+    return { fromPlaceId: "inferred-base", toPlaceId: "inferred-outdoor" };
+  }
+  return {
+    fromPlaceId: index === 0 ? "inferred-base" : "inferred-outdoor",
+    toPlaceId: index === 0 ? "inferred-base" : "inferred-outdoor",
   };
 }
 

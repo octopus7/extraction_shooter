@@ -1,5 +1,8 @@
 export type ViewMode = "desktop" | "pro";
 
+export type CanvasMode = "quest-chain" | "quest-route" | "place-edit";
+export type PlaceShape = "point" | "circle" | "rectangle";
+
 export interface Session {
   authenticated: boolean;
   authConfigured: boolean;
@@ -16,12 +19,26 @@ export interface CatalogSummary {
   description?: string;
 }
 
-export interface LocationNode {
+export interface QuestNode {
+  id: string;
+  questId: string;
+  title: string;
+  x: number;
+  y: number;
+  prerequisiteQuestIds: string[];
+}
+
+export interface MapPlace {
   id: string;
   name: string;
   mapId?: string;
+  shape: PlaceShape;
   xMeters: number;
   yMeters: number;
+  radiusMeters?: number;
+  widthMeters?: number;
+  heightMeters?: number;
+  actorId?: string;
 }
 
 export interface QuestStep {
@@ -29,8 +46,8 @@ export interface QuestStep {
   questId: string;
   questTitle: string;
   name: string;
-  fromLocationId: string;
-  toLocationId: string;
+  fromPlaceId: string;
+  toPlaceId: string;
   actionSeconds: number;
   actionVariancePercent: number;
   moveSpeedMps: number;
@@ -40,7 +57,8 @@ export interface QuestStep {
 export interface QuestDataset {
   schemaVersion: number;
   title: string;
-  locations: LocationNode[];
+  questNodes: QuestNode[];
+  places: MapPlace[];
   steps: QuestStep[];
   settings: {
     runs: number;

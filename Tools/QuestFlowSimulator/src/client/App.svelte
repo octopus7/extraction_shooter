@@ -12,10 +12,14 @@
     updateWorkspace,
   } from "./api";
   import { readCatalogDraft, serializeCatalogDraft } from "./draft";
+  import { normalizeQuestDataset } from "../shared/dataset";
   import type {
+    CanvasMode,
     CatalogSummary,
-    LocationNode,
+    MapPlace,
+    PlaceShape,
     QuestDataset,
+    QuestNode,
     QuestStep,
     Session,
     SimulationResult,
@@ -36,7 +40,9 @@
   let catalogs: CatalogSummary[] = [];
   let selectedCatalog: CatalogSummary | null = null;
   let dataset: QuestDataset = structuredClone(FALLBACK_DATASET);
-  let selectedLocationId: string | null = dataset.locations[0]?.id ?? null;
+  let canvasMode: CanvasMode = "quest-chain";
+  let selectedQuestId: string | null = dataset.questNodes[0]?.questId ?? null;
+  let selectedPlaceId: string | null = dataset.places[0]?.id ?? null;
   let selectedStepId: string | null = dataset.steps[0]?.id ?? null;
   let workspaces: Workspace[] = [];
   let currentWorkspace: Workspace | null = null;
@@ -48,19 +54,42 @@
   let saveState = "브라우저 임시저장";
   let statusMessage = "";
   let activeProTab: "quests" | "properties" | "results" = "properties";
-  let dragLocationId: string | null = null;
+  let dragQuestNodeId: string | null = null;
+  let dragPlaceId: string | null = null;
+  let zoom = 1;
   let simulator: Worker | null = null;
   let loginOpen = false;
   let loginBusy = false;
   let loginError = "";
   let adminPassword = "";
 
-  $: selectedLocation =
-    dataset.locations.find((location) => location.id === selectedLocationId) ??
-    null;
+  $: selectedQuestNode =
+    dataset.questNodes.find((node) => node.questId === selectedQuestId) ?? null;
+  $: selectedPlace =
+    dataset.places.find((place) => place.id === selectedPlaceId) ?? null;
   $: selectedStep =
     dataset.steps.find((step) => step.id === selectedStepId) ?? null;
-  $: canvasBounds = calculateBounds(dataset.locations);
+  $: selectedQuestSteps = dataset.steps.filter(
+    (step) => step.questId === selectedQuestId && step.enabled,
+  );
+  $: selectedRouteSteps = selectedQuestSteps.filter(
+    (step) => step.fromPlaceId !== step.toPlaceId,
+  );
+  $: graphEdges = dataset.questNodes.flatMap((node) =>
+    node.prerequisiteQuestIds.map((prerequisiteQuestId) => ({
+      id: `${prerequisiteQuestId}-${node.questId}`,
+      from: dataset.questNodes.find(
+        (candidate) => candidate.questId === prerequisiteQuestId,
+      ),
+      to: node,
+    })),
+  ).filter((edge) => edge.from);
+  $: canvasBounds =
+    canvasMode === "quest-chain"
+      ? calculateBounds(dataset.questNodes.map((node) => ({ x: node.x, y: node.y })))
+      : calculateBounds(
+          dataset.places.map((place) => ({ x: place.xMeters, y: place.yMeters })),
+        );
 
   onMount(async () => {
     const savedMode = localStorage.getItem("quest-flow:view-mode");
@@ -107,10 +136,10 @@
     return () => simulator?.terminate();
   });
 
-  function calculateBounds(locations: LocationNode[]) {
-    if (locations.length === 0) return { minX: 0, minY: 0, spanX: 100, spanY: 100 };
-    const xs = locations.map((location) => location.xMeters);
-    const ys = locations.map((location) => location.yMeters);
+  function calculateBounds(points: Array<{ x: number; y: number }>) {
+    if (points.length === 0) return { minX: 0, minY: 0, spanX: 100, spanY: 100 };
+    const xs = points.map((point) => point.x);
+    const ys = points.map((point) => point.y);
     const minX = Math.min(...xs);
     const minY = Math.min(...ys);
     return {
@@ -129,8 +158,57 @@
     return 60 + ((value - canvasBounds.minY) / canvasBounds.spanY) * 500;
   }
 
-  function locationById(id: string) {
-    return dataset.locations.find((location) => location.id === id);
+  function widthOnCanvas(value: number) {
+    return Math.max(8, (value / canvasBounds.spanX) * 840);
+  }
+
+  function heightOnCanvas(value: number) {
+    return Math.max(8, (value / canvasBounds.spanY) * 500);
+  }
+
+  function questNodeById(id: string) {
+    return dataset.questNodes.find((node) => node.questId === id);
+  }
+
+  function placeById(id: string) {
+    return dataset.places.find((place) => place.id === id);
+  }
+
+  function setCanvasMode(value: CanvasMode) {
+    canvasMode = value;
+    zoom = 1;
+    dragQuestNodeId = null;
+    dragPlaceId = null;
+    activeProTab = "properties";
+  }
+
+  function handleWheel(event: WheelEvent) {
+    event.preventDefault();
+    const nextZoom = zoom * (event.deltaY < 0 ? 1.12 : 0.89);
+    zoom = Math.min(3, Math.max(0.5, Math.round(nextZoom * 100) / 100));
+  }
+
+  function resetZoom() {
+    zoom = 1;
+  }
+
+  function canvasPointFromEvent(event: PointerEvent) {
+    const svg = event.currentTarget as SVGSVGElement;
+    const rect = svg.getBoundingClientRect();
+    const rawX = ((event.clientX - rect.left) / rect.width) * 1000;
+    const rawY = ((event.clientY - rect.top) / rect.height) * 620;
+    const canvasX = 500 + (rawX - 500) / zoom;
+    const canvasY = 310 + (rawY - 310) / zoom;
+    return {
+      x:
+        canvasBounds.minX +
+        ((Math.min(920, Math.max(80, canvasX)) - 80) / 840) *
+          canvasBounds.spanX,
+      y:
+        canvasBounds.minY +
+        ((Math.min(560, Math.max(60, canvasY)) - 60) / 500) *
+          canvasBounds.spanY,
+    };
   }
 
   function setMode(value: ViewMode) {
@@ -162,8 +240,14 @@
   }
 
   function replaceDataset(next: QuestDataset) {
-    dataset = structuredClone(next);
-    selectedLocationId = dataset.locations[0]?.id ?? null;
+    const normalized = normalizeQuestDataset(next);
+    if (!normalized) {
+      statusMessage = "catalog 데이터 형식을 읽을 수 없습니다.";
+      return;
+    }
+    dataset = structuredClone(normalized);
+    selectedQuestId = dataset.questNodes[0]?.questId ?? null;
+    selectedPlaceId = dataset.places[0]?.id ?? null;
     selectedStepId = dataset.steps[0]?.id ?? null;
     result = null;
   }
@@ -217,16 +301,48 @@
     }
   }
 
-  function updateLocation(
+  function updatePlace(
     id: string,
-    patch: Partial<Pick<LocationNode, "name" | "xMeters" | "yMeters">>,
+    patch: Partial<MapPlace>,
   ) {
     dataset = {
       ...dataset,
-      locations: dataset.locations.map((location) =>
-        location.id === id ? { ...location, ...patch } : location,
+      places: dataset.places.map((place) =>
+        place.id === id ? { ...place, ...patch } : place,
       ),
     };
+    persistDraft();
+  }
+
+  function setPlaceShape(id: string, value: string) {
+    const shape: PlaceShape =
+      value === "circle" || value === "rectangle" ? value : "point";
+    updatePlace(id, { shape });
+  }
+
+  function updateQuestNode(id: string, patch: Partial<Pick<QuestNode, "x" | "y">>) {
+    dataset = {
+      ...dataset,
+      questNodes: dataset.questNodes.map((node) =>
+        node.id === id ? { ...node, ...patch } : node,
+      ),
+    };
+    persistDraft();
+  }
+
+  function addPlace() {
+    const id = `place-${Date.now()}`;
+    const place: MapPlace = {
+      id,
+      name: "새 장소",
+      mapId: "user-edit",
+      shape: "point",
+      xMeters: canvasBounds.minX + canvasBounds.spanX / 2,
+      yMeters: canvasBounds.minY + canvasBounds.spanY / 2,
+      actorId: "",
+    };
+    dataset = { ...dataset, places: [...dataset.places, place] };
+    selectedPlaceId = id;
     persistDraft();
   }
 
@@ -241,23 +357,19 @@
   }
 
   function handlePointerMove(event: PointerEvent) {
-    if (!dragLocationId) return;
-    const svg = event.currentTarget as SVGSVGElement;
-    const rect = svg.getBoundingClientRect();
-    const canvasX = ((event.clientX - rect.left) / rect.width) * 1000;
-    const canvasY = ((event.clientY - rect.top) / rect.height) * 620;
-    const x =
-      canvasBounds.minX +
-      ((Math.min(920, Math.max(80, canvasX)) - 80) / 840) *
-        canvasBounds.spanX;
-    const y =
-      canvasBounds.minY +
-      ((Math.min(560, Math.max(60, canvasY)) - 60) / 500) *
-        canvasBounds.spanY;
-    updateLocation(dragLocationId, {
-      xMeters: Math.round(x * 10) / 10,
-      yMeters: Math.round(y * 10) / 10,
-    });
+    const point = canvasPointFromEvent(event);
+    if (dragQuestNodeId) {
+      updateQuestNode(dragQuestNodeId, {
+        x: Math.round(point.x),
+        y: Math.round(point.y),
+      });
+    }
+    if (dragPlaceId) {
+      updatePlace(dragPlaceId, {
+        xMeters: Math.round(point.x * 10) / 10,
+        yMeters: Math.round(point.y * 10) / 10,
+      });
+    }
   }
 
   function runSimulation() {
@@ -523,21 +635,24 @@
       {/if}
 
       <div class="step-list">
-        <span class="eyebrow">FLOW STEPS</span>
-        {#each dataset.steps as step, index}
+        <span class="eyebrow">QUEST NODES</span>
+        {#each dataset.questNodes as node, index}
           <button
-            class:active={step.id === selectedStepId}
+            class:active={node.questId === selectedQuestId}
             onclick={() => {
-              selectedStepId = step.id;
+              selectedQuestId = node.questId;
+              selectedStepId = dataset.steps.find(
+                (step) => step.questId === node.questId,
+              )?.id ?? null;
               activeProTab = "properties";
             }}
           >
             <span>{String(index + 1).padStart(2, "0")}</span>
             <div>
-              <strong>{step.name}</strong>
+              <strong>{node.questId} {node.title}</strong>
               <small>
-                {locationById(step.fromLocationId)?.name ?? "?"} →
-                {locationById(step.toLocationId)?.name ?? "?"}
+                {dataset.steps.filter((step) => step.questId === node.questId).length}
+                개 동선 단계
               </small>
             </div>
           </button>
@@ -548,12 +663,34 @@
     <section class="canvas-panel">
       <div class="canvas-toolbar">
         <div>
-          <span class="eyebrow">ROUTE MAP · METERS</span>
+          <span class="eyebrow">
+            {canvasMode === "quest-chain"
+              ? "QUEST CHAIN · GRAPH"
+              : canvasMode === "quest-route"
+                ? "QUEST ROUTE · READ ONLY"
+                : "PLACE EDITOR · METERS"}
+          </span>
           <h1>{dataset.title}</h1>
         </div>
-        <div class="legend">
-          <span><i class="dot location-dot"></i>장소</span>
-          <span><i class="line"></i>이동</span>
+        <div class="canvas-controls">
+          <div class="canvas-mode-switch" aria-label="중앙 그래프 표시 모드">
+            <button
+              class:active={canvasMode === "quest-chain"}
+              onclick={() => setCanvasMode("quest-chain")}
+            >퀘스트 체인</button>
+            <button
+              class:active={canvasMode === "quest-route"}
+              onclick={() => setCanvasMode("quest-route")}
+            >선택 퀘스트 동선</button>
+            <button
+              class:active={canvasMode === "place-edit"}
+              onclick={() => setCanvasMode("place-edit")}
+            >장소 편집</button>
+          </div>
+          <div class="canvas-zoom">
+            <span>{Math.round(zoom * 100)}%</span>
+            <button class="secondary" onclick={resetZoom}>줌 초기화</button>
+          </div>
         </div>
       </div>
 
@@ -563,11 +700,18 @@
         {/if}
         <svg
           viewBox="0 0 1000 620"
-          aria-label="장소와 퀘스트 이동 동선 편집기"
+          aria-label="퀘스트 그래프와 맵 장소 편집기"
           role="application"
+          onwheel={handleWheel}
           onpointermove={handlePointerMove}
-          onpointerup={() => (dragLocationId = null)}
-          onpointerleave={() => (dragLocationId = null)}
+          onpointerup={() => {
+            dragQuestNodeId = null;
+            dragPlaceId = null;
+          }}
+          onpointerleave={() => {
+            dragQuestNodeId = null;
+            dragPlaceId = null;
+          }}
         >
           <defs>
             <pattern id="smallGrid" width="20" height="20" patternUnits="userSpaceOnUse">
@@ -583,69 +727,159 @@
           </defs>
           <rect width="1000" height="620" fill="url(#grid)" />
 
-          {#each dataset.steps.filter((step) => step.enabled) as step}
-            {@const from = locationById(step.fromLocationId)}
-            {@const to = locationById(step.toLocationId)}
-            {#if from && to}
-              <g
-                class:active={step.id === selectedStepId}
-                class="route"
-                onclick={() => (selectedStepId = step.id)}
-                onkeydown={(event) => {
-                  if (event.key === "Enter" || event.key === " ") {
-                    event.preventDefault();
-                    selectedStepId = step.id;
-                  }
-                }}
-                role="button"
-                tabindex="0"
-              >
-                <line
-                  x1={xOnCanvas(from.xMeters)}
-                  y1={yOnCanvas(from.yMeters)}
-                  x2={xOnCanvas(to.xMeters)}
-                  y2={yOnCanvas(to.yMeters)}
-                  marker-end="url(#arrow)"
-                />
-                <text
-                  x={(xOnCanvas(from.xMeters) + xOnCanvas(to.xMeters)) / 2}
-                  y={(yOnCanvas(from.yMeters) + yOnCanvas(to.yMeters)) / 2 - 10}
-                >
-                  {Math.hypot(
-                    to.xMeters - from.xMeters,
-                    to.yMeters - from.yMeters,
-                  ).toFixed(1)} m
-                </text>
-              </g>
-            {/if}
-          {/each}
+          <g transform={`translate(500 310) scale(${zoom}) translate(-500 -310)`}>
+            {#if canvasMode === "quest-chain"}
+              {#each graphEdges as edge}
+                {@const from = edge.from}
+                {@const to = edge.to}
+                {#if from && to}
+                  <line
+                    class="quest-edge"
+                    x1={xOnCanvas(from.x)}
+                    y1={yOnCanvas(from.y)}
+                    x2={xOnCanvas(to.x)}
+                    y2={yOnCanvas(to.y)}
+                    marker-end="url(#arrow)"
+                  />
+                {/if}
+              {/each}
 
-          {#each dataset.locations as location}
-            <g
-              class:active={location.id === selectedLocationId}
-              class="location"
-              transform={`translate(${xOnCanvas(location.xMeters)} ${yOnCanvas(location.yMeters)})`}
-              onpointerdown={(event) => {
-                (event.currentTarget as SVGGElement).setPointerCapture(
-                  event.pointerId,
-                );
-                dragLocationId = location.id;
-                selectedLocationId = location.id;
-                activeProTab = "properties";
-              }}
-              role="button"
-              tabindex="0"
-            >
-              <circle r="24" />
-              <circle class="core" r="7" />
-              <text y="44">{location.name}</text>
-              <text class="coordinate" y="62">
-                {location.xMeters.toFixed(1)}, {location.yMeters.toFixed(1)}
-              </text>
-            </g>
-          {/each}
+              {#each dataset.questNodes as node}
+                <g
+                  class:active={node.questId === selectedQuestId}
+                  class="quest-node"
+                  transform={`translate(${xOnCanvas(node.x)} ${yOnCanvas(node.y)})`}
+                  onpointerdown={(event) => {
+                    (event.currentTarget as SVGGElement).setPointerCapture(
+                      event.pointerId,
+                    );
+                    dragQuestNodeId = node.id;
+                    selectedQuestId = node.questId;
+                    selectedStepId = dataset.steps.find(
+                      (step) => step.questId === node.questId,
+                    )?.id ?? null;
+                    activeProTab = "properties";
+                  }}
+                  role="button"
+                  tabindex="0"
+                >
+                  <circle r="25" />
+                  <circle class="core" r="7" />
+                  <text y="44">{node.questId} {node.title}</text>
+                  <text class="coordinate" y="62">{node.x}, {node.y}</text>
+                </g>
+              {/each}
+            {:else}
+              {#each dataset.steps.filter((step) =>
+                step.enabled &&
+                (canvasMode === "place-edit" || step.questId === selectedQuestId) &&
+                step.fromPlaceId !== step.toPlaceId
+              ) as step}
+                {@const from = placeById(step.fromPlaceId)}
+                {@const to = placeById(step.toPlaceId)}
+                {#if from && to}
+                  <g
+                    class:active={step.id === selectedStepId}
+                    class="route"
+                    onclick={() => {
+                      selectedStepId = step.id;
+                      selectedQuestId = step.questId;
+                    }}
+                    onkeydown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        selectedStepId = step.id;
+                        selectedQuestId = step.questId;
+                      }
+                    }}
+                    role="button"
+                    tabindex="0"
+                  >
+                    <line
+                      x1={xOnCanvas(from.xMeters)}
+                      y1={yOnCanvas(from.yMeters)}
+                      x2={xOnCanvas(to.xMeters)}
+                      y2={yOnCanvas(to.yMeters)}
+                      marker-end="url(#arrow)"
+                    />
+                    <text
+                      x={(xOnCanvas(from.xMeters) + xOnCanvas(to.xMeters)) / 2}
+                      y={(yOnCanvas(from.yMeters) + yOnCanvas(to.yMeters)) / 2 - 10}
+                    >
+                      {Math.hypot(
+                        to.xMeters - from.xMeters,
+                        to.yMeters - from.yMeters,
+                      ).toFixed(1)} m
+                    </text>
+                  </g>
+                {/if}
+              {/each}
+
+              {#if canvasMode === "quest-route" && selectedRouteSteps.length === 0}
+                <text class="empty-canvas" x="500" y="310">
+                  선택한 퀘스트에는 등록된 맵 동선이 없습니다.
+                </text>
+              {/if}
+
+              {#each dataset.places.filter((place) =>
+                canvasMode === "place-edit" ||
+                selectedRouteSteps.some(
+                  (step) =>
+                    step.fromPlaceId === place.id || step.toPlaceId === place.id,
+                )
+              ) as place}
+                <g
+                  class:active={place.id === selectedPlaceId}
+                  class:readonly={canvasMode === "quest-route"}
+                  class="place"
+                  transform={`translate(${xOnCanvas(place.xMeters)} ${yOnCanvas(place.yMeters)})`}
+                  onpointerdown={(event) => {
+                    selectedPlaceId = place.id;
+                    activeProTab = "properties";
+                    if (canvasMode === "place-edit") {
+                      (event.currentTarget as SVGGElement).setPointerCapture(
+                        event.pointerId,
+                      );
+                      dragPlaceId = place.id;
+                    }
+                  }}
+                  role="button"
+                  tabindex="0"
+                >
+                  {#if place.shape === "circle"}
+                    <circle
+                      class="place-area"
+                      r={widthOnCanvas(place.radiusMeters ?? 20)}
+                    />
+                  {:else if place.shape === "rectangle"}
+                    <rect
+                      class="place-area"
+                      x={-widthOnCanvas(place.widthMeters ?? 50) / 2}
+                      y={-heightOnCanvas(place.heightMeters ?? 40) / 2}
+                      width={widthOnCanvas(place.widthMeters ?? 50)}
+                      height={heightOnCanvas(place.heightMeters ?? 40)}
+                      rx="8"
+                    />
+                  {:else}
+                    <circle class="place-point" r="18" />
+                    <circle class="core" r="6" />
+                  {/if}
+                  <text y="44">{place.name}</text>
+                  <text class="coordinate" y="62">
+                    {place.xMeters.toFixed(1)}, {place.yMeters.toFixed(1)}
+                  </text>
+                </g>
+              {/each}
+            {/if}
+          </g>
         </svg>
-        <div class="map-hint">드래그로 위치 이동 · 좌표 단위 1m</div>
+        <div class="map-hint">
+          {canvasMode === "quest-chain"
+            ? "퀘스트 노드 드래그 · 휠로 줌"
+            : canvasMode === "quest-route"
+              ? "선택 퀘스트 동선 읽기 전용 · 휠로 줌"
+              : "장소 드래그·추가·형태 편집 · 휠로 줌"}
+        </div>
       </div>
     </section>
 
@@ -673,18 +907,65 @@
           </div>
         </div>
 
-        {#if selectedLocation}
+        {#if canvasMode === "quest-chain" && selectedQuestNode}
+          <fieldset>
+            <legend>퀘스트 노드</legend>
+            <label>
+              <span>퀘스트</span>
+              <input value={`${selectedQuestNode.questId} ${selectedQuestNode.title}`} readonly />
+            </label>
+            <div class="field-row">
+              <label>
+                <span>그래프 X</span>
+                <input
+                  type="number"
+                  step="1"
+                  value={selectedQuestNode.x}
+                  oninput={(event) =>
+                    updateQuestNode(selectedQuestNode!.id, {
+                      x: event.currentTarget.valueAsNumber || 0,
+                    })}
+                />
+              </label>
+              <label>
+                <span>그래프 Y</span>
+                <input
+                  type="number"
+                  step="1"
+                  value={selectedQuestNode.y}
+                  oninput={(event) =>
+                    updateQuestNode(selectedQuestNode!.id, {
+                      y: event.currentTarget.valueAsNumber || 0,
+                    })}
+                />
+              </label>
+            </div>
+            <small class="field-note">그래프 배치 좌표이며 맵 좌표가 아닙니다.</small>
+          </fieldset>
+        {:else if selectedPlace}
           <fieldset>
             <legend>장소</legend>
             <label>
               <span>이름</span>
               <input
-                value={selectedLocation.name}
+                value={selectedPlace.name}
+                disabled={canvasMode !== "place-edit"}
                 oninput={(event) =>
-                  updateLocation(selectedLocation!.id, {
-                    name: event.currentTarget.value,
-                  })}
+                  updatePlace(selectedPlace!.id, { name: event.currentTarget.value })}
               />
+            </label>
+            <label>
+              <span>형태</span>
+              <select
+                value={selectedPlace.shape}
+                disabled={canvasMode !== "place-edit"}
+                onchange={(event) =>
+                  setPlaceShape(selectedPlace!.id, event.currentTarget.value)}
+              >
+                <option value="point">액터 지점</option>
+                <option value="circle">원형 영역</option>
+                <option value="rectangle">직사각형 영역</option>
+              </select>
             </label>
             <div class="field-row">
               <label>
@@ -692,9 +973,10 @@
                 <input
                   type="number"
                   step="0.1"
-                  value={selectedLocation.xMeters}
+                  value={selectedPlace.xMeters}
+                  disabled={canvasMode !== "place-edit"}
                   oninput={(event) =>
-                    updateLocation(selectedLocation!.id, {
+                    updatePlace(selectedPlace!.id, {
                       xMeters: event.currentTarget.valueAsNumber || 0,
                     })}
                 />
@@ -704,15 +986,82 @@
                 <input
                   type="number"
                   step="0.1"
-                  value={selectedLocation.yMeters}
+                  value={selectedPlace.yMeters}
+                  disabled={canvasMode !== "place-edit"}
                   oninput={(event) =>
-                    updateLocation(selectedLocation!.id, {
+                    updatePlace(selectedPlace!.id, {
                       yMeters: event.currentTarget.valueAsNumber || 0,
                     })}
                 />
               </label>
             </div>
+            {#if selectedPlace.shape === "circle"}
+              <label>
+                <span>반지름 (m)</span>
+                <input
+                  type="number"
+                  min="1"
+                  step="1"
+                  value={selectedPlace.radiusMeters ?? 20}
+                  disabled={canvasMode !== "place-edit"}
+                  oninput={(event) =>
+                    updatePlace(selectedPlace!.id, {
+                      radiusMeters: Math.max(1, event.currentTarget.valueAsNumber || 1),
+                    })}
+                />
+              </label>
+            {:else if selectedPlace.shape === "rectangle"}
+              <div class="field-row">
+                <label>
+                  <span>너비 (m)</span>
+                  <input
+                    type="number"
+                    min="1"
+                    step="1"
+                    value={selectedPlace.widthMeters ?? 50}
+                    disabled={canvasMode !== "place-edit"}
+                    oninput={(event) =>
+                      updatePlace(selectedPlace!.id, {
+                        widthMeters: Math.max(1, event.currentTarget.valueAsNumber || 1),
+                      })}
+                  />
+                </label>
+                <label>
+                  <span>높이 (m)</span>
+                  <input
+                    type="number"
+                    min="1"
+                    step="1"
+                    value={selectedPlace.heightMeters ?? 40}
+                    disabled={canvasMode !== "place-edit"}
+                    oninput={(event) =>
+                      updatePlace(selectedPlace!.id, {
+                        heightMeters: Math.max(1, event.currentTarget.valueAsNumber || 1),
+                      })}
+                  />
+                </label>
+              </div>
+            {:else}
+              <label>
+                <span>액터 ID</span>
+                <input
+                  value={selectedPlace.actorId ?? ""}
+                  disabled={canvasMode !== "place-edit"}
+                  oninput={(event) =>
+                    updatePlace(selectedPlace!.id, {
+                      actorId: event.currentTarget.value,
+                    })}
+                />
+              </label>
+            {/if}
+            {#if canvasMode === "quest-route"}
+              <small class="field-note">동선 확인 모드에서는 장소를 변경할 수 없습니다.</small>
+            {/if}
           </fieldset>
+        {/if}
+
+        {#if canvasMode === "place-edit"}
+          <button class="secondary add-place" onclick={addPlace}>+ 장소 추가</button>
         {/if}
 
         {#if selectedStep}
@@ -784,17 +1133,20 @@
       </div>
 
       <div class:hidden={activeProTab !== "quests"} class="property-content quests-mobile">
-        <span class="eyebrow">FLOW STEPS</span>
-        {#each dataset.steps as step, index}
+        <span class="eyebrow">QUEST NODES</span>
+        {#each dataset.questNodes as node, index}
           <button
-            class:active={step.id === selectedStepId}
+            class:active={node.questId === selectedQuestId}
             onclick={() => {
-              selectedStepId = step.id;
+              selectedQuestId = node.questId;
+              selectedStepId = dataset.steps.find(
+                (step) => step.questId === node.questId,
+              )?.id ?? null;
               activeProTab = "properties";
             }}
           >
             <span>{index + 1}</span>
-            <strong>{step.name}</strong>
+            <strong>{node.questId} {node.title}</strong>
           </button>
         {/each}
       </div>

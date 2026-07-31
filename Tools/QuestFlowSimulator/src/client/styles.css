@@ -468,9 +468,62 @@ h2 {
 }
 
 .canvas-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
   min-height: 80px;
   padding: 12px 18px;
   border-bottom: 1px solid var(--line);
+}
+
+.canvas-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.canvas-mode-switch {
+  display: flex;
+  overflow: hidden;
+  border: 1px solid var(--line-bright);
+  border-radius: 5px;
+}
+
+.canvas-mode-switch button {
+  min-height: 32px;
+  padding: 0 10px;
+  border: 0;
+  border-right: 1px solid var(--line);
+  color: var(--muted);
+  background: var(--raised);
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.canvas-mode-switch button:last-child {
+  border-right: 0;
+}
+
+.canvas-mode-switch button.active {
+  color: var(--text);
+  background: var(--accent-soft);
+  box-shadow: inset 0 -2px var(--accent);
+}
+
+.canvas-zoom {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font: 500 10px "IBM Plex Mono", monospace;
+  white-space: nowrap;
+}
+
+.canvas-zoom .secondary {
+  min-height: 32px;
+  padding-inline: 9px;
+  font-size: 10px;
 }
 
 .legend {
@@ -548,6 +601,105 @@ h2 {
   stroke-dasharray: none;
 }
 
+.quest-edge {
+  stroke: #3c8d76;
+  stroke-width: 3;
+  stroke-dasharray: 8 5;
+  opacity: 0.9;
+}
+
+.quest-node {
+  cursor: grab;
+}
+
+.quest-node:active {
+  cursor: grabbing;
+}
+
+.quest-node circle {
+  fill: #0d2030;
+  stroke: var(--cyan);
+  stroke-width: 2;
+}
+
+.quest-node.active circle:first-child {
+  fill: #123729;
+  stroke: var(--accent);
+  stroke-width: 3;
+}
+
+.quest-node .core {
+  fill: var(--cyan);
+  stroke: none;
+}
+
+.quest-node.active .core {
+  fill: var(--accent);
+}
+
+.place {
+  cursor: default;
+}
+
+.place:not(.readonly) {
+  cursor: grab;
+}
+
+.place:not(.readonly):active {
+  cursor: grabbing;
+}
+
+.place-area {
+  fill: rgba(102, 200, 232, 0.1);
+  stroke: var(--cyan);
+  stroke-width: 2;
+  stroke-dasharray: 6 4;
+}
+
+.place-point {
+  fill: #0d2030;
+  stroke: var(--cyan);
+  stroke-width: 2;
+}
+
+.place.active .place-area,
+.place.active .place-point {
+  fill: rgba(80, 210, 160, 0.16);
+  stroke: var(--accent);
+  stroke-width: 3;
+}
+
+.place .core {
+  fill: var(--cyan);
+  stroke: none;
+}
+
+.place.active .core {
+  fill: var(--accent);
+}
+
+.quest-node text,
+.place text {
+  fill: #dce8f4;
+  font: 600 13px "Manrope", sans-serif;
+  paint-order: stroke;
+  stroke: #08101a;
+  stroke-width: 4px;
+  text-anchor: middle;
+}
+
+.quest-node .coordinate,
+.place .coordinate {
+  fill: #7890a7;
+  font: 500 10px "IBM Plex Mono", monospace;
+}
+
+.empty-canvas {
+  fill: var(--muted);
+  font: 500 13px "Manrope", sans-serif;
+  text-anchor: middle;
+}
+
 .route text {
   fill: #8da4b8;
   font: 500 12px "IBM Plex Mono", monospace;
@@ -609,6 +761,19 @@ h2 {
   color: var(--muted);
   background: rgba(6, 11, 18, 0.8);
   font: 500 10px "IBM Plex Mono", monospace;
+}
+
+.add-place {
+  width: 100%;
+  margin-top: 12px;
+}
+
+.field-note {
+  display: block;
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.5;
 }
 
 .tabs {
@@ -995,7 +1160,26 @@ input:focus {
   }
 
   .canvas-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
     min-height: 68px;
+  }
+
+  .canvas-controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .canvas-mode-switch {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .canvas-mode-switch button {
+    min-width: 0;
+    flex: 1;
+    padding-inline: 6px;
   }
 
   .legend {

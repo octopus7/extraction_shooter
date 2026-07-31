@@ -29,13 +29,13 @@ function quantile(sorted: number[], fraction: number): number {
 worker.onmessage = (event: MessageEvent<SimulationRequest>) => {
   const { dataset, options } = event.data;
   const random = makeRandom(options.seed);
-  const locationById = new Map(
-    dataset.locations.map((location) => [location.id, location]),
+  const placeById = new Map(
+    dataset.places.map((place) => [place.id, place]),
   );
   const steps = dataset.steps.filter((step) => step.enabled);
   const distances = steps.map((step) => {
-    const from = locationById.get(step.fromLocationId);
-    const to = locationById.get(step.toLocationId);
+    const from = placeById.get(step.fromPlaceId);
+    const to = placeById.get(step.toPlaceId);
     if (!from || !to) return 0;
     return Math.hypot(
       to.xMeters - from.xMeters,

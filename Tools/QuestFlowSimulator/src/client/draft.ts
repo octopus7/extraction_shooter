@@ -1,7 +1,8 @@
 import type { QuestDataset } from "../shared/types";
+import { normalizeQuestDataset } from "../shared/dataset";
 
 interface StoredCatalogDraft {
-  schemaVersion: 1;
+  schemaVersion: 2;
   datasetVersion: string;
   dataset: QuestDataset;
 }
@@ -16,7 +17,7 @@ export function serializeCatalogDraft(
   dataset: QuestDataset,
 ): string {
   const draft: StoredCatalogDraft = {
-    schemaVersion: 1,
+    schemaVersion: 2,
     datasetVersion,
     dataset,
   };
@@ -35,27 +36,22 @@ export function readCatalogDraft(
     const value = JSON.parse(raw) as Partial<StoredCatalogDraft>;
     if (
       !expectedDatasetVersion ||
-      value.schemaVersion !== 1 ||
+      value.schemaVersion !== 2 ||
       value.datasetVersion !== expectedDatasetVersion ||
       !isQuestDataset(value.dataset)
     ) {
       return { dataset: null, discarded: true };
     }
-    return { dataset: value.dataset, discarded: false };
+    return {
+      dataset: normalizeQuestDataset(value.dataset),
+      discarded: false,
+    };
   } catch {
     return { dataset: null, discarded: true };
   }
 }
 
 function isQuestDataset(value: unknown): value is QuestDataset {
-  if (!value || typeof value !== "object") return false;
-  const dataset = value as Partial<QuestDataset>;
-  return (
-    typeof dataset.schemaVersion === "number" &&
-    typeof dataset.title === "string" &&
-    Array.isArray(dataset.locations) &&
-    Array.isArray(dataset.steps) &&
-    Boolean(dataset.settings) &&
-    typeof dataset.settings?.runs === "number"
-  );
+  const dataset = normalizeQuestDataset(value);
+  return dataset !== null && dataset.schemaVersion === 2;
 }

@@ -3,163 +3,274 @@
   "slug": "main-m01-m20",
   "title": "본편 메인 M01~M20",
   "visibility": "authenticated",
-  "schemaVersion": 1,
-  "datasetVersion": "content-0e70ad174178",
+  "schemaVersion": 2,
+  "datasetVersion": "content-4a08498f27ba",
   "sourceKind": "ssot-markdown",
   "sourceHash": "sha256:792305ea961bb346d607cb768f425031509bc5adf06f4f98fe4f810774aa5977",
   "sources": [
     "Docs/SSOT/TunaSweeper_SSOT_Quest_Item_v0.6.md"
   ],
   "data": {
-    "schemaVersion": 1,
+    "schemaVersion": 2,
     "title": "본편 메인 M01~M20",
-    "locations": [
+    "questNodes": [
       {
-        "id": "route-origin",
-        "name": "기준 시작점",
-        "mapId": "approximation",
+        "id": "quest-node-m01",
+        "questId": "M01",
+        "title": "눈 뜬 벙커",
+        "x": 100,
+        "y": 100,
+        "prerequisiteQuestIds": []
+      },
+      {
+        "id": "quest-node-m02",
+        "questId": "M02",
+        "title": "첫 번째 참치캔",
+        "x": 270,
+        "y": 100,
+        "prerequisiteQuestIds": [
+          "M01"
+        ]
+      },
+      {
+        "id": "quest-node-m03",
+        "questId": "M03",
+        "title": "벙커 공기 점검",
+        "x": 440,
+        "y": 100,
+        "prerequisiteQuestIds": [
+          "M02"
+        ]
+      },
+      {
+        "id": "quest-node-m04",
+        "questId": "M04",
+        "title": "캔봇의 체크리스트",
+        "x": 610,
+        "y": 100,
+        "prerequisiteQuestIds": [
+          "M03"
+        ]
+      },
+      {
+        "id": "quest-node-m05",
+        "questId": "M05",
+        "title": "숲길 확인",
+        "x": 780,
+        "y": 100,
+        "prerequisiteQuestIds": [
+          "M04"
+        ]
+      },
+      {
+        "id": "quest-node-m06",
+        "questId": "M06",
+        "title": "이상한 균열",
+        "x": 100,
+        "y": 210,
+        "prerequisiteQuestIds": [
+          "M05"
+        ]
+      },
+      {
+        "id": "quest-node-m07",
+        "questId": "M07",
+        "title": "수상한 안전거리",
+        "x": 270,
+        "y": 210,
+        "prerequisiteQuestIds": [
+          "M05"
+        ]
+      },
+      {
+        "id": "quest-node-m08",
+        "questId": "M08",
+        "title": "막힌 숲길",
+        "x": 440,
+        "y": 210,
+        "prerequisiteQuestIds": [
+          "M05"
+        ]
+      },
+      {
+        "id": "quest-node-m09",
+        "questId": "M09",
+        "title": "수상한 자판기",
+        "x": 610,
+        "y": 210,
+        "prerequisiteQuestIds": [
+          "M06",
+          "M07",
+          "M08"
+        ]
+      },
+      {
+        "id": "quest-node-m10",
+        "questId": "M10",
+        "title": "자판기 관리자 권한",
+        "x": 780,
+        "y": 210,
+        "prerequisiteQuestIds": [
+          "M09"
+        ]
+      },
+      {
+        "id": "quest-node-m11",
+        "questId": "M11",
+        "title": "폭발물 취급 주의",
+        "x": 100,
+        "y": 320,
+        "prerequisiteQuestIds": [
+          "M10"
+        ]
+      },
+      {
+        "id": "quest-node-m12",
+        "questId": "M12",
+        "title": "콘크리트 더미 제거",
+        "x": 270,
+        "y": 320,
+        "prerequisiteQuestIds": [
+          "M11"
+        ]
+      },
+      {
+        "id": "quest-node-m13",
+        "questId": "M13",
+        "title": "고급보안구역 소문",
+        "x": 440,
+        "y": 320,
+        "prerequisiteQuestIds": [
+          "M12"
+        ]
+      },
+      {
+        "id": "quest-node-m14",
+        "questId": "M14",
+        "title": "더 튼튼하게",
+        "x": 610,
+        "y": 320,
+        "prerequisiteQuestIds": [
+          "M13"
+        ]
+      },
+      {
+        "id": "quest-node-m15",
+        "questId": "M15",
+        "title": "고급보안구역 진입",
+        "x": 780,
+        "y": 320,
+        "prerequisiteQuestIds": [
+          "M14"
+        ]
+      },
+      {
+        "id": "quest-node-m16",
+        "questId": "M16",
+        "title": "보안 로그 해독",
+        "x": 100,
+        "y": 430,
+        "prerequisiteQuestIds": [
+          "M15"
+        ]
+      },
+      {
+        "id": "quest-node-m17",
+        "questId": "M17",
+        "title": "마지막 외출 준비",
+        "x": 270,
+        "y": 430,
+        "prerequisiteQuestIds": [
+          "M16"
+        ]
+      },
+      {
+        "id": "quest-node-m18",
+        "questId": "M18",
+        "title": "최종보스전",
+        "x": 440,
+        "y": 430,
+        "prerequisiteQuestIds": [
+          "M17"
+        ]
+      },
+      {
+        "id": "quest-node-m19",
+        "questId": "M19",
+        "title": "고급참치 확보",
+        "x": 610,
+        "y": 430,
+        "prerequisiteQuestIds": [
+          "M18"
+        ]
+      },
+      {
+        "id": "quest-node-m20",
+        "questId": "M20",
+        "title": "오늘의 식탁",
+        "x": 780,
+        "y": 430,
+        "prerequisiteQuestIds": [
+          "M19"
+        ]
+      }
+    ],
+    "places": [
+      {
+        "id": "main-bunker",
+        "name": "벙커",
+        "mapId": "inferred-main",
+        "shape": "circle",
         "xMeters": 0,
-        "yMeters": 0
+        "yMeters": 0,
+        "radiusMeters": 28
       },
       {
-        "id": "location-m01",
-        "name": "M01 눈 뜬 벙커",
-        "mapId": "approximation",
-        "xMeters": 80,
-        "yMeters": 0
+        "id": "main-forest-trail",
+        "name": "서쪽 숲길",
+        "mapId": "inferred-main",
+        "shape": "rectangle",
+        "xMeters": 220,
+        "yMeters": 40,
+        "widthMeters": 130,
+        "heightMeters": 80
       },
       {
-        "id": "location-m02",
-        "name": "M02 첫 번째 참치캔",
-        "mapId": "approximation",
-        "xMeters": 80,
-        "yMeters": 90
+        "id": "main-concrete-blockage",
+        "name": "콘크리트 더미",
+        "mapId": "inferred-main",
+        "shape": "circle",
+        "xMeters": 300,
+        "yMeters": 180,
+        "radiusMeters": 20
       },
       {
-        "id": "location-m03",
-        "name": "M03 벙커 공기 점검",
-        "mapId": "approximation",
-        "xMeters": 80,
-        "yMeters": 180
+        "id": "main-vending-machine",
+        "name": "수상한 자판기",
+        "mapId": "inferred-main",
+        "shape": "point",
+        "xMeters": 430,
+        "yMeters": 70,
+        "actorId": "inferred.vending_machine"
       },
       {
-        "id": "location-m04",
-        "name": "M04 캔봇의 체크리스트",
-        "mapId": "approximation",
-        "xMeters": 80,
-        "yMeters": 270
+        "id": "main-security-zone",
+        "name": "고급보안구역",
+        "mapId": "inferred-main",
+        "shape": "rectangle",
+        "xMeters": 570,
+        "yMeters": 50,
+        "widthMeters": 160,
+        "heightMeters": 120
       },
       {
-        "id": "location-m05",
-        "name": "M05 숲길 확인",
-        "mapId": "approximation",
-        "xMeters": 200,
-        "yMeters": 0
-      },
-      {
-        "id": "location-m06",
-        "name": "M06 이상한 균열",
-        "mapId": "approximation",
-        "xMeters": 200,
-        "yMeters": 90
-      },
-      {
-        "id": "location-m07",
-        "name": "M07 수상한 안전거리",
-        "mapId": "approximation",
-        "xMeters": 200,
-        "yMeters": 180
-      },
-      {
-        "id": "location-m08",
-        "name": "M08 막힌 숲길",
-        "mapId": "approximation",
-        "xMeters": 200,
-        "yMeters": 270
-      },
-      {
-        "id": "location-m09",
-        "name": "M09 수상한 자판기",
-        "mapId": "approximation",
-        "xMeters": 320,
-        "yMeters": 0
-      },
-      {
-        "id": "location-m10",
-        "name": "M10 자판기 관리자 권한",
-        "mapId": "approximation",
-        "xMeters": 320,
-        "yMeters": 90
-      },
-      {
-        "id": "location-m11",
-        "name": "M11 폭발물 취급 주의",
-        "mapId": "approximation",
-        "xMeters": 320,
-        "yMeters": 180
-      },
-      {
-        "id": "location-m12",
-        "name": "M12 콘크리트 더미 제거",
-        "mapId": "approximation",
-        "xMeters": 320,
-        "yMeters": 270
-      },
-      {
-        "id": "location-m13",
-        "name": "M13 고급보안구역 소문",
-        "mapId": "approximation",
-        "xMeters": 440,
-        "yMeters": 0
-      },
-      {
-        "id": "location-m14",
-        "name": "M14 더 튼튼하게",
-        "mapId": "approximation",
-        "xMeters": 440,
-        "yMeters": 90
-      },
-      {
-        "id": "location-m15",
-        "name": "M15 고급보안구역 진입",
-        "mapId": "approximation",
-        "xMeters": 440,
-        "yMeters": 180
-      },
-      {
-        "id": "location-m16",
-        "name": "M16 보안 로그 해독",
-        "mapId": "approximation",
-        "xMeters": 440,
-        "yMeters": 270
-      },
-      {
-        "id": "location-m17",
-        "name": "M17 마지막 외출 준비",
-        "mapId": "approximation",
-        "xMeters": 560,
-        "yMeters": 0
-      },
-      {
-        "id": "location-m18",
-        "name": "M18 최종보스전",
-        "mapId": "approximation",
-        "xMeters": 560,
-        "yMeters": 90
-      },
-      {
-        "id": "location-m19",
-        "name": "M19 고급참치 확보",
-        "mapId": "approximation",
-        "xMeters": 560,
-        "yMeters": 180
-      },
-      {
-        "id": "location-m20",
-        "name": "M20 오늘의 식탁",
-        "mapId": "approximation",
-        "xMeters": 560,
-        "yMeters": 270
+        "id": "main-boss-zone",
+        "name": "보스구역",
+        "mapId": "inferred-main",
+        "shape": "circle",
+        "xMeters": 820,
+        "yMeters": 100,
+        "radiusMeters": 45
       }
     ],
     "steps": [
@@ -168,8 +279,8 @@
         "questId": "M01",
         "questTitle": "눈 뜬 벙커",
         "name": "눈 뜬 벙커",
-        "fromLocationId": "route-origin",
-        "toLocationId": "location-m01",
+        "fromPlaceId": "main-bunker",
+        "toPlaceId": "main-bunker",
         "actionSeconds": 540,
         "actionVariancePercent": 20,
         "moveSpeedMps": 4,
@@ -180,8 +291,8 @@
         "questId": "M02",
         "questTitle": "첫 번째 참치캔",
         "name": "첫 번째 참치캔",
-        "fromLocationId": "location-m01",
-        "toLocationId": "location-m02",
+        "fromPlaceId": "main-bunker",
+        "toPlaceId": "main-forest-trail",
         "actionSeconds": 540,
         "actionVariancePercent": 20,
         "moveSpeedMps": 4,
@@ -192,8 +303,8 @@
         "questId": "M03",
         "questTitle": "벙커 공기 점검",
         "name": "벙커 공기 점검",
-        "fromLocationId": "location-m02",
-        "toLocationId": "location-m03",
+        "fromPlaceId": "main-bunker",
+        "toPlaceId": "main-bunker",
         "actionSeconds": 540,
         "actionVariancePercent": 20,
         "moveSpeedMps": 4,
@@ -204,8 +315,8 @@
         "questId": "M04",
         "questTitle": "캔봇의 체크리스트",
         "name": "캔봇의 체크리스트",
-        "fromLocationId": "location-m03",
-        "toLocationId": "location-m04",
+        "fromPlaceId": "main-bunker",
+        "toPlaceId": "main-forest-trail",
         "actionSeconds": 540,
         "actionVariancePercent": 20,
         "moveSpeedMps": 4,
@@ -216,8 +327,8 @@
         "questId": "M05",
         "questTitle": "숲길 확인",
         "name": "숲길 확인",
-        "fromLocationId": "location-m04",
-        "toLocationId": "location-m05",
+        "fromPlaceId": "main-bunker",
+        "toPlaceId": "main-forest-trail",
         "actionSeconds": 540,
         "actionVariancePercent": 20,
         "moveSpeedMps": 4,
@@ -228,8 +339,8 @@
         "questId": "M06",
         "questTitle": "이상한 균열",
         "name": "이상한 균열",
-        "fromLocationId": "location-m05",
-        "toLocationId": "location-m06",
+        "fromPlaceId": "main-forest-trail",
+        "toPlaceId": "main-concrete-blockage",
         "actionSeconds": 540,
         "actionVariancePercent": 20,
         "moveSpeedMps": 4,
@@ -240,8 +351,8 @@
         "questId": "M07",
         "questTitle": "수상한 안전거리",
         "name": "수상한 안전거리",
-        "fromLocationId": "location-m06",
-        "toLocationId": "location-m07",
+        "fromPlaceId": "main-forest-trail",
+        "toPlaceId": "main-concrete-blockage",
         "actionSeconds": 540,
         "actionVariancePercent": 20,
         "moveSpeedMps": 4,
@@ -252,8 +363,8 @@
         "questId": "M08",
         "questTitle": "막힌 숲길",
         "name": "막힌 숲길",
-        "fromLocationId": "location-m07",
-        "toLocationId": "location-m08",
+        "fromPlaceId": "main-forest-trail",
+        "toPlaceId": "main-concrete-blockage",
         "actionSeconds": 540,
         "actionVariancePercent": 20,
         "moveSpeedMps": 4,
@@ -264,8 +375,8 @@
         "questId": "M09",
         "questTitle": "수상한 자판기",
         "name": "수상한 자판기",
-        "fromLocationId": "location-m08",
-        "toLocationId": "location-m09",
+        "fromPlaceId": "main-forest-trail",
+        "toPlaceId": "main-vending-machine",
         "actionSeconds": 540,
         "actionVariancePercent": 20,
         "moveSpeedMps": 4,
@@ -276,8 +387,8 @@
         "questId": "M10",
         "questTitle": "자판기 관리자 권한",
         "name": "자판기 관리자 권한",
-        "fromLocationId": "location-m09",
-        "toLocationId": "location-m10",
+        "fromPlaceId": "main-vending-machine",
+        "toPlaceId": "main-vending-machine",
         "actionSeconds": 540,
         "actionVariancePercent": 20,
         "moveSpeedMps": 4,
@@ -288,8 +399,8 @@
         "questId": "M11",
         "questTitle": "폭발물 취급 주의",
         "name": "폭발물 취급 주의",
-        "fromLocationId": "location-m10",
-        "toLocationId": "location-m11",
+        "fromPlaceId": "main-vending-machine",
+        "toPlaceId": "main-vending-machine",
         "actionSeconds": 540,
         "actionVariancePercent": 20,
         "moveSpeedMps": 4,
@@ -300,8 +411,8 @@
         "questId": "M12",
         "questTitle": "콘크리트 더미 제거",
         "name": "콘크리트 더미 제거",
-        "fromLocationId": "location-m11",
-        "toLocationId": "location-m12",
+        "fromPlaceId": "main-vending-machine",
+        "toPlaceId": "main-concrete-blockage",
         "actionSeconds": 540,
         "actionVariancePercent": 20,
         "moveSpeedMps": 4,
@@ -312,8 +423,8 @@
         "questId": "M13",
         "questTitle": "고급보안구역 소문",
         "name": "고급보안구역 소문",
-        "fromLocationId": "location-m12",
-        "toLocationId": "location-m13",
+        "fromPlaceId": "main-concrete-blockage",
+        "toPlaceId": "main-security-zone",
         "actionSeconds": 540,
         "actionVariancePercent": 20,
         "moveSpeedMps": 4,
@@ -324,8 +435,8 @@
         "questId": "M14",
         "questTitle": "더 튼튼하게",
         "name": "더 튼튼하게",
-        "fromLocationId": "location-m13",
-        "toLocationId": "location-m14",
+        "fromPlaceId": "main-security-zone",
+        "toPlaceId": "main-security-zone",
         "actionSeconds": 540,
         "actionVariancePercent": 20,
         "moveSpeedMps": 4,
@@ -336,8 +447,8 @@
         "questId": "M15",
         "questTitle": "고급보안구역 진입",
         "name": "고급보안구역 진입",
-        "fromLocationId": "location-m14",
-        "toLocationId": "location-m15",
+        "fromPlaceId": "main-security-zone",
+        "toPlaceId": "main-security-zone",
         "actionSeconds": 540,
         "actionVariancePercent": 20,
         "moveSpeedMps": 4,
@@ -348,8 +459,8 @@
         "questId": "M16",
         "questTitle": "보안 로그 해독",
         "name": "보안 로그 해독",
-        "fromLocationId": "location-m15",
-        "toLocationId": "location-m16",
+        "fromPlaceId": "main-security-zone",
+        "toPlaceId": "main-security-zone",
         "actionSeconds": 540,
         "actionVariancePercent": 20,
         "moveSpeedMps": 4,
@@ -360,8 +471,8 @@
         "questId": "M17",
         "questTitle": "마지막 외출 준비",
         "name": "마지막 외출 준비",
-        "fromLocationId": "location-m16",
-        "toLocationId": "location-m17",
+        "fromPlaceId": "main-bunker",
+        "toPlaceId": "main-bunker",
         "actionSeconds": 540,
         "actionVariancePercent": 20,
         "moveSpeedMps": 4,
@@ -372,8 +483,8 @@
         "questId": "M18",
         "questTitle": "최종보스전",
         "name": "최종보스전",
-        "fromLocationId": "location-m17",
-        "toLocationId": "location-m18",
+        "fromPlaceId": "main-boss-zone",
+        "toPlaceId": "main-boss-zone",
         "actionSeconds": 540,
         "actionVariancePercent": 20,
         "moveSpeedMps": 4,
@@ -384,8 +495,8 @@
         "questId": "M19",
         "questTitle": "고급참치 확보",
         "name": "고급참치 확보",
-        "fromLocationId": "location-m18",
-        "toLocationId": "location-m19",
+        "fromPlaceId": "main-bunker",
+        "toPlaceId": "main-bunker",
         "actionSeconds": 540,
         "actionVariancePercent": 20,
         "moveSpeedMps": 4,
@@ -396,8 +507,8 @@
         "questId": "M20",
         "questTitle": "오늘의 식탁",
         "name": "오늘의 식탁",
-        "fromLocationId": "location-m19",
-        "toLocationId": "location-m20",
+        "fromPlaceId": "main-bunker",
+        "toPlaceId": "main-bunker",
         "actionSeconds": 540,
         "actionVariancePercent": 20,
         "moveSpeedMps": 4,
@@ -409,7 +520,8 @@
       "mapTransitionSeconds": 0
     },
     "sourceNotes": [
-      "위치는 실제 UE5 좌표가 아닌 퀘스트 순서 시각화를 위한 근사 배치입니다.",
+      "퀘스트 노드 좌표는 그래프 시각화용이며 맵 장소 좌표가 아닙니다.",
+      "장소와 액터 데이터가 없는 항목은 퀘스트 문맥으로 추정한 임시 좌표입니다.",
       "M01 눈 뜬 벙커 | 선행: 없음 | 내용:  | 요구: 없음 | 보상: 기본 조작, 벙커 상호작용",
       "M02 첫 번째 참치캔 | 선행: M01 | 내용:  | 요구: 찌그러진 참치캔 x1 | 보상: 보관함 안내, 파밍 루프",
       "M03 벙커 공기 점검 | 선행: M02 | 내용:  | 요구: 먼지 낀 필터 x2, 낡은 테이프 x1 | 보상: 중앙 파밍 구간 유도",
