@@ -45,6 +45,8 @@
   let selectedPlaceId: string | null = dataset.places[0]?.id ?? null;
   let selectedStepId: string | null = dataset.steps[0]?.id ?? null;
   let canvasBounds = calculateCanvasBounds(canvasMode, dataset);
+  let canvasWidth = 1000;
+  let canvasHeight = 620;
   let workspaces: Workspace[] = [];
   let currentWorkspace: Workspace | null = null;
   let iterations = 10_000;
@@ -64,6 +66,8 @@
   let panStartClientY = 0;
   let panOriginX = 0;
   let panOriginY = 0;
+  let dragOffsetX = 0;
+  let dragOffsetY = 0;
   let zoom = 1;
   let simulator: Worker | null = null;
   let loginOpen = false;
@@ -92,6 +96,8 @@
       to: node,
     })),
   ).filter((edge) => edge.from);
+  $: canvasWidth = Math.min(6000, Math.max(1000, Math.ceil(canvasBounds.spanX + 160)));
+  $: canvasHeight = Math.min(3000, Math.max(620, Math.ceil(canvasBounds.spanY + 120)));
   onMount(async () => {
     const savedMode = localStorage.getItem("quest-flow:view-mode");
     if (savedMode === "desktop" || savedMode === "pro") mode = savedMode;
@@ -247,19 +253,19 @@
   }
 
   function xOnCanvas(value: number) {
-    return 80 + ((value - canvasBounds.minX) / canvasBounds.spanX) * 840;
+    return 80 + ((value - canvasBounds.minX) / canvasBounds.spanX) * (canvasWidth - 160);
   }
 
   function yOnCanvas(value: number) {
-    return 60 + ((value - canvasBounds.minY) / canvasBounds.spanY) * 500;
+    return 60 + ((value - canvasBounds.minY) / canvasBounds.spanY) * (canvasHeight - 120);
   }
 
   function widthOnCanvas(value: number) {
-    return Math.max(8, (value / canvasBounds.spanX) * 840);
+    return Math.max(8, (value / canvasBounds.spanX) * (canvasWidth - 160));
   }
 
   function heightOnCanvas(value: number) {
-    return Math.max(8, (value / canvasBounds.spanY) * 500);
+    return Math.max(8, (value / canvasBounds.spanY) * (canvasHeight - 120));
   }
 
   function questNodeById(id: string) {
@@ -331,23 +337,24 @@
     dragQuestNodeId = null;
     dragPlaceId = null;
     dragPan = false;
+    dragOffsetX = 0;
+    dragOffsetY = 0;
   }
 
-  function canvasPointFromEvent(event: PointerEvent) {
-    const svg = event.currentTarget as SVGSVGElement;
+  function canvasPointFromEvent(event: PointerEvent, svg: SVGSVGElement) {
     const rect = svg.getBoundingClientRect();
-    const rawX = ((event.clientX - rect.left) / rect.width) * 1000;
-    const rawY = ((event.clientY - rect.top) / rect.height) * 620;
-    const canvasX = 500 + (rawX - panX - 500) / zoom;
-    const canvasY = 310 + (rawY - panY - 310) / zoom;
+    const rawX = ((event.clientX - rect.left) / rect.width) * canvasWidth;
+    const rawY = ((event.clientY - rect.top) / rect.height) * canvasHeight;
+    const canvasX = canvasWidth / 2 + (rawX - panX - canvasWidth / 2) / zoom;
+    const canvasY = canvasHeight / 2 + (rawY - panY - canvasHeight / 2) / zoom;
     return {
       x:
         canvasBounds.minX +
-        ((canvasX - 80) / 840) *
+        ((canvasX - 80) / (canvasWidth - 160)) *
           canvasBounds.spanX,
       y:
         canvasBounds.minY +
-        ((canvasY - 60) / 500) *
+        ((canvasY - 60) / (canvasHeight - 120)) *
           canvasBounds.spanY,
     };
   }
@@ -522,21 +529,28 @@
     if (dragPan) {
       const svg = event.currentTarget as SVGSVGElement;
       const rect = svg.getBoundingClientRect();
-      panX = panOriginX + ((event.clientX - panStartClientX) / rect.width) * 1000;
-      panY = panOriginY + ((event.clientY - panStartClientY) / rect.height) * 620;
+      panX =
+        panOriginX +
+        ((event.clientX - panStartClientX) / rect.width) * canvasWidth;
+      panY =
+        panOriginY +
+        ((event.clientY - panStartClientY) / rect.height) * canvasHeight;
       return;
     }
-    const point = canvasPointFromEvent(event);
+    const point = canvasPointFromEvent(
+      event,
+      event.currentTarget as SVGSVGElement,
+    );
     if (dragQuestNodeId) {
       updateQuestNode(dragQuestNodeId, {
-        x: Math.round(point.x),
-        y: Math.round(point.y),
+        x: Math.round(point.x - dragOffsetX),
+        y: Math.round(point.y - dragOffsetY),
       });
     }
     if (dragPlaceId) {
       updatePlace(dragPlaceId, {
-        xMeters: Math.round(point.x * 10) / 10,
-        yMeters: Math.round(point.y * 10) / 10,
+        xMeters: Math.round((point.x - dragOffsetX) * 10) / 10,
+        yMeters: Math.round((point.y - dragOffsetY) * 10) / 10,
       });
     }
   }
@@ -873,7 +887,10 @@
           <div class="loading">catalog 불러오는 중…</div>
         {/if}
         <svg
-          viewBox="0 0 1000 620"
+          viewBox={`0 0 ${canvasWidth} ${canvasHeight}`}
+          width={canvasWidth}
+          height={canvasHeight}
+          style={`width: ${canvasWidth}px; height: ${canvasHeight}px;`}
           aria-label="퀘스트 그래프와 맵 장소 편집기"
           role="application"
           onwheel={handleWheel}
@@ -893,18 +910,21 @@
             <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
               <path d="M 0 0 L 10 5 L 0 10 z" fill="#50d2a0" />
             </marker>
+            <marker id="quest-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="1.75" markerHeight="1.75" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#50d2a0" />
+            </marker>
           </defs>
           <rect
             class="canvas-hit-area"
-            width="1000"
-            height="620"
+            width={canvasWidth}
+            height={canvasHeight}
             fill="url(#grid)"
             onpointerdown={handleCanvasPointerDown}
             role="application"
             aria-label="그래프 영역 이동"
           />
 
-          <g transform={`translate(${500 + panX} ${310 + panY}) scale(${zoom}) translate(-500 -310)`}>
+          <g transform={`translate(${canvasWidth / 2 + panX} ${canvasHeight / 2 + panY}) scale(${zoom}) translate(${-canvasWidth / 2} ${-canvasHeight / 2})`}>
             {#if canvasMode === "quest-chain"}
               {#each graphEdges as edge}
                 {@const from = edge.from}
@@ -913,7 +933,7 @@
                   <path
                     class="quest-edge"
                     d={questEdgePath(from, to)}
-                    marker-end="url(#arrow)"
+                    marker-end="url(#quest-arrow)"
                   />
                 {/if}
               {/each}
@@ -924,6 +944,13 @@
                   class="quest-node"
                   transform={`translate(${xOnCanvas(node.x)} ${yOnCanvas(node.y)})`}
                   onpointerdown={(event) => {
+                    const svg = (event.currentTarget as SVGGElement).ownerSVGElement;
+                    if (svg) {
+                      const point = canvasPointFromEvent(event, svg);
+                      dragOffsetX = point.x - node.x;
+                      dragOffsetY = point.y - node.y;
+                    }
+                    dragPan = false;
                     (event.currentTarget as SVGGElement).setPointerCapture(
                       event.pointerId,
                     );
@@ -1017,6 +1044,13 @@
                     selectedPlaceId = place.id;
                     activeProTab = "properties";
                     if (canvasMode === "place-edit") {
+                      const svg = (event.currentTarget as SVGGElement).ownerSVGElement;
+                      if (svg) {
+                        const point = canvasPointFromEvent(event, svg);
+                        dragOffsetX = point.x - place.xMeters;
+                        dragOffsetY = point.y - place.yMeters;
+                      }
+                      dragPan = false;
                       (event.currentTarget as SVGGElement).setPointerCapture(
                         event.pointerId,
                       );
