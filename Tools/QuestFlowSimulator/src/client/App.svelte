@@ -839,7 +839,18 @@
             aria-expanded={catalogMenuOpen}
             aria-label={catalogMenuOpen ? "카탈로그 선택 닫기" : "카탈로그 선택 열기"}
             onclick={() => (catalogMenuOpen = !catalogMenuOpen)}
-          >{catalogs.length || 1}</button>
+          >
+            <span class="catalog-toggle-count">{catalogs.length || 1}</span>
+            <span class="catalog-toggle-caret" aria-hidden="true">▼</span>
+          </button>
+        </div>
+
+        <div class="catalog-current">
+          <span class="visibility">
+            {selectedCatalog?.visibility === "authenticated" ? "MEMBER" : "DEMO"}
+          </span>
+          <strong>{selectedCatalog?.title ?? "Q1–Q4 체험판"}</strong>
+          <small>{selectedCatalog?.description ?? selectedCatalog?.slug ?? "내장 예시 데이터"}</small>
         </div>
 
         {#if catalogMenuOpen && catalogs.length}
