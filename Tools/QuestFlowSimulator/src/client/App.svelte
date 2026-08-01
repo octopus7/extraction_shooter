@@ -44,6 +44,7 @@
   let selectedQuestId: string | null = dataset.questNodes[0]?.questId ?? null;
   let selectedPlaceId: string | null = dataset.places[0]?.id ?? null;
   let selectedStepId: string | null = dataset.steps[0]?.id ?? null;
+  let catalogMenuOpen = false;
   let canvasBounds = calculateCanvasBounds(canvasMode, dataset);
   let canvasWidth = 1000;
   let canvasHeight = 620;
@@ -465,6 +466,7 @@
   }
 
   async function selectCatalog(catalog: CatalogSummary) {
+    catalogMenuOpen = false;
     loading = true;
     statusMessage = "";
     try {
@@ -827,38 +829,45 @@
 
   <section class="workspace">
     <aside class="catalog-panel">
-      <div class="panel-heading">
-        <div>
+      <div class="catalog-picker">
+        <div class="panel-heading">
           <span class="eyebrow">QUEST CATALOG</span>
-          <h2>퀘스트</h2>
+          <button
+            class="count catalog-toggle"
+            type="button"
+            aria-controls="catalog-options"
+            aria-expanded={catalogMenuOpen}
+            aria-label={catalogMenuOpen ? "카탈로그 선택 닫기" : "카탈로그 선택 열기"}
+            onclick={() => (catalogMenuOpen = !catalogMenuOpen)}
+          >{catalogs.length || 1}</button>
         </div>
-        <span class="count">{catalogs.length || 1}</span>
-      </div>
 
-      {#if catalogs.length}
-        <nav class="catalog-list" aria-label="퀘스트 catalog">
-          {#each catalogs as catalog}
-            <button
-              class:active={catalog.slug === selectedCatalog?.slug}
-              onclick={() => selectCatalog(catalog)}
-            >
-              <span class="visibility">
-                {catalog.visibility === "public" ? "DEMO" : "MEMBER"}
-              </span>
-              <strong>{catalog.title}</strong>
-              <small>{catalog.description ?? catalog.slug}</small>
-            </button>
-          {/each}
-        </nav>
-      {:else}
-        <div class="catalog-list">
-          <button class="active">
-            <span class="visibility">DEMO</span>
-            <strong>Q1–Q4 체험판</strong>
-            <small>내장 예시 데이터</small>
-          </button>
-        </div>
-      {/if}
+        {#if catalogMenuOpen && catalogs.length}
+          <nav id="catalog-options" class="catalog-list" aria-label="퀘스트 catalog">
+            {#each catalogs as catalog}
+              <button
+                type="button"
+                class:active={catalog.slug === selectedCatalog?.slug}
+                onclick={() => selectCatalog(catalog)}
+              >
+                <span class="visibility">
+                  {catalog.visibility === "public" ? "DEMO" : "MEMBER"}
+                </span>
+                <strong>{catalog.title}</strong>
+                <small>{catalog.description ?? catalog.slug}</small>
+              </button>
+            {/each}
+          </nav>
+        {:else}
+          <div class="catalog-current">
+            <span class="visibility">
+              {selectedCatalog?.visibility === "authenticated" ? "MEMBER" : "DEMO"}
+            </span>
+            <strong>{selectedCatalog?.title ?? "Q1–Q4 체험판"}</strong>
+            <small>{selectedCatalog?.description ?? selectedCatalog?.slug ?? "내장 예시 데이터"}</small>
+          </div>
+        {/if}
+      </div>
 
       <div class="step-list">
         <span class="eyebrow">QUEST NODES</span>
