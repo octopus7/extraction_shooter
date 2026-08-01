@@ -282,6 +282,7 @@
 
   function questEdgePath(from: QuestNode, to: QuestNode) {
     const nodePort = 64;
+    const nodeHalfWidth = 72;
     const startX = xOnCanvas(from.x) + nodePort;
     const startY = yOnCanvas(from.y);
     const endX = xOnCanvas(to.x) - nodePort;
@@ -296,11 +297,34 @@
       return `M ${startX} ${startY} C ${startX + curve} ${startY}, ${endX - curve} ${endY}, ${endX} ${endY}`;
     }
 
-    // A wrapped edge goes around the right side of the source/target pair so
-    // the return trip cannot cut through a card in the next row.
-    const outerX =
-      Math.max(startX, endX) + Math.max(70, Math.abs(endY - startY) * 0.35);
-    return `M ${startX} ${startY} C ${outerX} ${startY}, ${outerX} ${endY}, ${endX} ${endY}`;
+    // A backward edge must enter the target's IN socket from the left. First
+    // clear both cards, then use a half-ellipse to turn back toward the
+    // target. This keeps the edge outside the cards even when a later quest
+    // is manually placed to the left of its prerequisite.
+    const routeGap = 28;
+    const sourceCenterX = xOnCanvas(from.x);
+    const targetCenterX = xOnCanvas(to.x);
+    const rightRouteX =
+      Math.max(sourceCenterX, targetCenterX) + nodeHalfWidth + routeGap;
+    const leftRouteX =
+      Math.min(sourceCenterX, targetCenterX) - nodeHalfWidth - routeGap;
+    const routeOffsetY = 44;
+    const routeY = endY + (endY >= startY ? routeOffsetY : -routeOffsetY);
+    const arcRadiusX = (rightRouteX - leftRouteX) / 2;
+    const arcRadiusY = 32;
+    const arcSweep = routeY > endY ? 1 : 0;
+    const returnCurve = Math.min(
+      32,
+      Math.max(12, (endX - leftRouteX) * 0.35),
+    );
+
+    return [
+      `M ${startX} ${startY}`,
+      `C ${startX + 40} ${startY}, ${rightRouteX} ${startY}, ${rightRouteX} ${routeY}`,
+      `A ${arcRadiusX} ${arcRadiusY} 0 0 ${arcSweep} ${leftRouteX} ${routeY}`,
+      `L ${leftRouteX} ${endY}`,
+      `C ${leftRouteX + returnCurve} ${endY}, ${endX - returnCurve} ${endY}, ${endX} ${endY}`,
+    ].join(" ");
   }
 
   function placeById(id: string) {
