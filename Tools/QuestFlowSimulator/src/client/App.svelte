@@ -667,8 +667,11 @@
 
   function formatTime(seconds: number) {
     if (!Number.isFinite(seconds)) return "—";
-    const minutes = Math.floor(seconds / 60);
-    const rest = Math.round(seconds % 60);
+    const totalSeconds = Math.max(0, Math.round(seconds));
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const rest = totalSeconds % 60;
+    if (hours > 0) return `${hours}시간 ${minutes}분 ${rest}초`;
     return minutes > 0 ? `${minutes}분 ${rest}초` : `${rest}초`;
   }
 </script>
