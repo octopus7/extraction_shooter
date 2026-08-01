@@ -731,12 +731,12 @@
     </div>
   </header>
 
-  {#if statusMessage}
-    <div class="notice" role="status">
+  <div class:empty={!statusMessage} class="notice" role="status">
+    {#if statusMessage}
       <span>{statusMessage}</span>
       <button aria-label="알림 닫기" onclick={() => (statusMessage = "")}>×</button>
-    </div>
-  {/if}
+    {/if}
+  </div>
 
   {#if loginOpen}
     <div

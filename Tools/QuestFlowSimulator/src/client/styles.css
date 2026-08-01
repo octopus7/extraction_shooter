@@ -237,6 +237,14 @@ button:disabled {
   font-size: 12px;
 }
 
+.notice.empty {
+  min-height: 0;
+  height: 0;
+  padding: 0;
+  border-bottom: 0;
+  overflow: hidden;
+}
+
 .notice button {
   min-width: 44px;
   border: 0;
