@@ -329,7 +329,9 @@ button:disabled {
   display: flex;
   flex-direction: column;
   border-right: 1px solid var(--line);
-  overflow: hidden;
+  overflow: visible;
+  position: relative;
+  z-index: 4;
 }
 
 .properties-panel {
@@ -385,20 +387,30 @@ h2 {
 }
 
 .catalog-list {
+  position: absolute;
+  z-index: 10;
+  top: calc(100% + 6px);
+  right: -1px;
+  left: -1px;
   padding: 8px;
-  border-top: 1px solid var(--line);
+  border: 1px solid var(--line-bright);
+  background: var(--surface);
+  box-shadow: 0 16px 28px rgba(0, 0, 0, 0.36);
 }
 
 .catalog-picker {
+  position: relative;
+  z-index: 5;
   flex: 0 0 auto;
-  margin: 10px 6px 0;
+  margin: 8px 6px 0;
   border: 1px solid var(--line-bright);
   background: rgba(13, 27, 42, 0.72);
 }
 
 .catalog-picker .panel-heading {
-  min-height: 66px;
-  padding: 14px 12px;
+  min-height: 42px;
+  height: 42px;
+  padding: 6px 8px;
   border-bottom: 0;
 }
 
@@ -410,19 +422,6 @@ h2 {
 .catalog-toggle:hover {
   border-color: var(--accent);
   color: var(--accent);
-}
-
-.catalog-current {
-  display: flex;
-  min-height: 80px;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
-  margin: 0 8px 8px;
-  padding: 12px;
-  border: 1px solid var(--line);
-  color: var(--text);
-  background: var(--raised);
 }
 
 .catalog-list button {
@@ -448,14 +447,6 @@ h2 {
 
 .catalog-list button.active {
   box-shadow: inset 3px 0 var(--accent);
-}
-
-.catalog-current strong,
-.catalog-current small {
-  overflow: hidden;
-  max-width: 100%;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .visibility {

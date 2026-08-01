@@ -858,14 +858,6 @@
               </button>
             {/each}
           </nav>
-        {:else}
-          <div class="catalog-current">
-            <span class="visibility">
-              {selectedCatalog?.visibility === "authenticated" ? "MEMBER" : "DEMO"}
-            </span>
-            <strong>{selectedCatalog?.title ?? "Q1–Q4 체험판"}</strong>
-            <small>{selectedCatalog?.description ?? selectedCatalog?.slug ?? "내장 예시 데이터"}</small>
-          </div>
         {/if}
       </div>
 
