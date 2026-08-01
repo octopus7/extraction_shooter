@@ -349,12 +349,23 @@
     dragOffsetY = 0;
   }
 
-  function canvasPointFromEvent(event: PointerEvent, svg: SVGSVGElement) {
+  function svgPointFromClient(svg: SVGSVGElement, clientX: number, clientY: number) {
+    const screenMatrix = svg.getScreenCTM();
+    if (screenMatrix) {
+      const point = new DOMPoint(clientX, clientY).matrixTransform(screenMatrix.inverse());
+      return { x: point.x, y: point.y };
+    }
     const rect = svg.getBoundingClientRect();
-    const rawX = ((event.clientX - rect.left) / rect.width) * canvasWidth;
-    const rawY = ((event.clientY - rect.top) / rect.height) * canvasHeight;
-    const canvasX = canvasWidth / 2 + (rawX - panX - canvasWidth / 2) / zoom;
-    const canvasY = canvasHeight / 2 + (rawY - panY - canvasHeight / 2) / zoom;
+    return {
+      x: ((clientX - rect.left) / rect.width) * canvasWidth,
+      y: ((clientY - rect.top) / rect.height) * canvasHeight,
+    };
+  }
+
+  function canvasPointFromEvent(event: PointerEvent, svg: SVGSVGElement) {
+    const rawPoint = svgPointFromClient(svg, event.clientX, event.clientY);
+    const canvasX = canvasWidth / 2 + (rawPoint.x - panX - canvasWidth / 2) / zoom;
+    const canvasY = canvasHeight / 2 + (rawPoint.y - panY - canvasHeight / 2) / zoom;
     return {
       x:
         canvasBounds.minX +
@@ -536,13 +547,10 @@
   function handlePointerMove(event: PointerEvent) {
     if (dragPan) {
       const svg = event.currentTarget as SVGSVGElement;
-      const rect = svg.getBoundingClientRect();
-      panX =
-        panOriginX +
-        ((event.clientX - panStartClientX) / rect.width) * canvasWidth;
-      panY =
-        panOriginY +
-        ((event.clientY - panStartClientY) / rect.height) * canvasHeight;
+      const startPoint = svgPointFromClient(svg, panStartClientX, panStartClientY);
+      const currentPoint = svgPointFromClient(svg, event.clientX, event.clientY);
+      panX = panOriginX + currentPoint.x - startPoint.x;
+      panY = panOriginY + currentPoint.y - startPoint.y;
       return;
     }
     const point = canvasPointFromEvent(
@@ -899,9 +907,7 @@
         {/if}
         <svg
           viewBox={`0 0 ${canvasWidth} ${canvasHeight}`}
-          width={canvasWidth}
-          height={canvasHeight}
-          style={`width: ${canvasWidth}px; height: ${canvasHeight}px;`}
+          preserveAspectRatio="xMidYMid meet"
           aria-label="퀘스트 그래프와 맵 장소 편집기"
           role="application"
           onwheel={handleWheel}
