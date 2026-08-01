@@ -272,8 +272,16 @@
     return dataset.questNodes.find((node) => node.questId === id);
   }
 
+  function hasIncomingQuestEdge(node: QuestNode) {
+    return graphEdges.some((edge) => edge.to.id === node.id);
+  }
+
+  function hasOutgoingQuestEdge(node: QuestNode) {
+    return graphEdges.some((edge) => edge.from?.id === node.id);
+  }
+
   function questEdgePath(from: QuestNode, to: QuestNode) {
-    const nodePort = 79;
+    const nodePort = 64;
     const startX = xOnCanvas(from.x) + nodePort;
     const startY = yOnCanvas(from.y);
     const endX = xOnCanvas(to.x) - nodePort;
@@ -969,11 +977,22 @@
                   <rect class="node-body" x="-72" y="-13" width="144" height="29" />
                   <rect class="node-footer" x="-72" y="16" width="144" height="13" rx="5" />
                   <rect class="node-frame" x="-72" y="-29" width="144" height="58" rx="8" />
-                  <path class="node-start" d="M -79 0 H -72" />
-                  <path class="node-end" d="M 72 0 H 79" />
+                  <circle
+                    class="node-socket node-in-socket"
+                    class:connected={hasIncomingQuestEdge(node)}
+                    cx="-64"
+                    cy="0"
+                    r="4"
+                  />
+                  <circle
+                    class="node-socket node-out-socket"
+                    class:connected={hasOutgoingQuestEdge(node)}
+                    cx="64"
+                    cy="0"
+                    r="4"
+                  />
                   <text class="node-id" x="-61" y="-17">{node.questId}</text>
-                  <text class="node-title" x="0" y="4">{node.title}</text>
-                  <text class="node-coordinate" x="0" y="26">{node.x}, {node.y}</text>
+                  <text class="node-title" x="-28" y="-17">{node.title}</text>
                 </g>
               {/each}
             {:else}

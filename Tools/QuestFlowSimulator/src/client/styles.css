@@ -657,19 +657,18 @@ h2 {
   stroke: none;
 }
 
-.quest-node .node-start,
-.quest-node .node-end {
-  fill: none;
-  stroke-width: 3;
-  stroke-linecap: round;
+.quest-node .node-socket {
+  fill: #59636e;
+  stroke: #111820;
+  stroke-width: 1.5;
 }
 
-.quest-node .node-start {
-  stroke: var(--cyan);
+.quest-node .node-in-socket.connected {
+  fill: var(--cyan);
 }
 
-.quest-node .node-end {
-  stroke: var(--accent);
+.quest-node .node-out-socket.connected {
+  fill: var(--accent);
 }
 
 .quest-node.active .node-frame {
@@ -744,11 +743,10 @@ h2 {
 
 .quest-node .node-title {
   fill: #e0e5ea;
-  font: 600 12px "Manrope", sans-serif;
-  text-anchor: middle;
+  font: 600 10px "Manrope", sans-serif;
+  text-anchor: start;
 }
 
-.quest-node .node-coordinate,
 .place .coordinate {
   fill: #7890a7;
   font: 500 10px "IBM Plex Mono", monospace;
