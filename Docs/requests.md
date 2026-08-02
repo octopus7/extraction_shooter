@@ -5834,3 +5834,22 @@
 - 적용 판정, 현재 코드 대응, 단일 Controller 호스트와 Brain Router, GameInstance 전역 모드, 안전한 실행 중 전환 규약, 전투 Skill 매핑, 단계별 완료 조건과 위험 대응을 문서화했다.
 - `Docs/reviews/README.md`를 검토 문서 메인 인덱스로 만들고 개별 검토 문서를 링크하는 관리 구조를 추가했다.
 - 메인 인덱스 상대 링크와 Markdown 기본 구조를 검사하고 `git diff --check`를 통과했다.
+
+## 2026-08-03 01:43:11 (소요시간: 00:00:33)
+
+- AI Native NPC 적용성 검토 문서에 현재 학습된 정책 모델, checkpoint, ONNX, Model Bundle, Unreal NNE ModelData와 inference Runtime이 없다는 확인 결과를 추가했다.
+- Utility Baseline은 학습 모델이 아니며 `phase0_fixture`도 실전 가중치가 아닌 연결·parity smoke 용도라는 차이를 명시했다.
+- Neural 적용에 필요한 Runtime Capture, Dataset 검증, 학습, ONNX export, Model Bundle, Unreal NNE import와 Runtime Gate 순서를 추가했다.
+- 검토 문서 메인 인덱스 요약에도 학습 모델 부재 확인을 반영했다.
+
+## 2026-08-03 01:44:02 (소요시간: 00:00:42)
+
+- AI Native NPC 검토 문서 초반에 외부 AI 작업자와 협업 연락을 주고받는 현재 관계와 역할 구분을 추가했다.
+- 요구사항·계약·Runtime·Utility·학습 checkpoint·ONNX·Model Bundle·Dataset·사용 권한의 전달 및 확인 상태를 현황표로 정리했다.
+- 현재 TunaSweeper 측 판단, 외부 작업자에게 우선 확인·요청할 10개 항목, commit/hash 기반 협업 갱신 규칙을 추가했다.
+- 문서 상태와 검토 문서 메인 인덱스를 `협업 검토 진행 중` 상태로 갱신했다.
+
+## 2026-08-03 01:45:55 (소요시간: 00:00:10)
+
+- AI Native NPC 검토 문서의 학습 모델 부재 및 외부 AI 작업자 협업 현황 추가분을 관련 질문·요청 로그와 함께 현재 `NativeNPC` 브랜치에 커밋하고 원격으로 푸시한다.
+- 직전에 취소된 다리 관련 요청은 변경 파일과 커밋 대상에 포함하지 않는다.

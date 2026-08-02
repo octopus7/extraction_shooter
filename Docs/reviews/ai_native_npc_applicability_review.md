@@ -1,11 +1,80 @@
 # AI Native NPC v0.4.6 TunaSweeper 적용성 검토
 
 - 검토일: 2026-08-03
-- 문서 상태: 검토 완료
+- 최종 갱신: 2026-08-03
+- 문서 상태: 초기 적용성 검토 완료 / 외부 AI 작업자 협업·산출물 대기
 - 대상 프로젝트: `TunaSweeper/TunaSweeper.uproject`
 - 대상 엔진: Unreal Engine 5.7
 - 대상 외부 계약: AI Native NPC 요구사항·UE 구현 계획 v0.4.6 / Schema 2.0 RC5
 - 검토 범위: 현재 표준 적 AI와 AI Native NPC 구현의 공존, GameInstance 전역 선택, 실행 중 안전한 전환
+
+## 0. 현 상황 요약
+
+### 0.1 협업 관계
+
+현재 사용자는 AI Native NPC 요구사항·계약·학습 파이프라인을 다루는 외부 AI 작업자와 협업 연락을 주고받고 있다. TunaSweeper 측에서는 전달받은 문서와 산출물을 현재 게임 코드에 대조하고, 실제 통합 가능 범위와 필요한 보완 사항을 검증한다.
+
+현재 역할 구분은 다음과 같이 본다.
+
+| 주체 | 현재 역할 |
+|---|---|
+| 외부 AI Native NPC 작업자 | 요구사항, Schema/Registry, 생성 계약, 학습·평가·Model Bundle 산출물 제공 및 보완 |
+| 사용자 | 양쪽 작업의 우선순위와 의사결정을 조정하고 질문·답변·산출물을 전달 |
+| TunaSweeper 통합 작업 | 현재 적 AI 분석, 호환 계층 설계, Runtime 구현, UE 5.7 빌드·회귀·패키징 검증 |
+
+이 문서는 TunaSweeper 내부 검토 결과이자 외부 작업자와 주고받아야 할 사실·질문·결정을 정리하는 협업 기준서로 사용한다.
+
+### 0.2 현재 전달·확인 상태
+
+| 항목 | 상태 | 현재 확인 내용 |
+|---|---|---|
+| 요구사항 문서 v0.4.6 | 전달·검토 완료 | RC5 Utility Baseline은 조건부 GO, V1 Neural/OOD/Calibration은 HOLD |
+| UE 5.7 구현 계획 v0.4.6 | 전달·검토 완료 | 목표 클래스·NNE·Commit·Skill 구조는 정의됐지만 Runtime 증거는 대기 |
+| Schema/Skill/Goal Registry | 외부 저장소에서 확인 | 계약은 존재하지만 TunaSweeper에 아직 고정 snapshot으로 반입하지 않음 |
+| 생성 Python/C++ 계약 | 외부 저장소에서 확인 | 프로젝트 Runtime과 연결하지 않음 |
+| Unreal Runtime 구현 | 미전달·미구현 | 외부 저장소 `main`에 바로 적용할 완성 Runtime이 없음 |
+| Utility Baseline 실행 코드 | 미전달·미구현 | 설계 계약만 확인됨 |
+| 학습 checkpoint | 미전달·없음 | TunaSweeper와 외부 저장소 `main` 모두에서 확인되지 않음 |
+| ONNX 정책 모델 | 미전달·없음 | Unreal NNE에서 실행할 실제 가중치가 없음 |
+| Model Bundle/manifest | 미전달·없음 | model/schema/registry/calibration hash 묶음이 없음 |
+| Dataset/Capture 산출물 | 미전달·없음 | 학습과 품질 평가를 재현할 데이터가 없음 |
+| 외부 계약 사용 권한 | 확인 대기 | 저장소 루트에서 명시적 `LICENSE`를 확인하지 못함 |
+| TunaSweeper 적용성 설계 | 1차 완료 | Legacy/Shadow/Utility/Neural Brain Router와 GameInstance 선택 구조 제안 완료 |
+| TunaSweeper 실제 구현 | 미착수 | 본 문서는 검토 단계이며 Runtime 코드는 아직 변경하지 않음 |
+
+### 0.3 현재 TunaSweeper 측 판단
+
+- 기존 AI를 제거하지 않는다.
+- GameInstance는 전역 선택값만 소유하고 실제 월드 적용은 WorldSubsystem이 담당한다.
+- 별도 AIController 재빙의 대신 단일 Controller 호스트 내부의 Brain을 교체한다.
+- 첫 비교 단계는 `AINativeShadow`, 첫 실행 단계는 `AINativeUtility`다.
+- 현재 학습 모델이 없으므로 `AINativeNeural`은 사용할 수 없다.
+- Neural 실패의 자동 fallback은 같은 계약을 공유하는 Utility로 한다.
+- Utility 전투 동등성과 장시간 회귀가 끝날 때까지 Legacy를 최종 rollback 경로로 유지한다.
+
+### 0.4 외부 AI 작업자에게 확인·요청할 항목
+
+다음 항목은 후속 연락에서 우선 확인해야 한다.
+
+1. TunaSweeper가 고정해야 할 정확한 외부 commit/tag와 Schema/Registry/Generated contract hash
+2. 계약 YAML, 생성 C++/Python 코드, 검증 도구와 향후 모델 가중치의 사용·수정·재배포 권한
+3. Requirements Remediation patch와 새 Decision Contract Hash의 제공 시점
+4. Phase 0 deterministic fixture ONNX와 golden input/output 제공 여부
+5. 학습 checkpoint, 실전 ONNX 정책 모델, Model Bundle manifest의 현재 존재 여부와 전달 계획
+6. Runtime Capture/Dataset schema, 예제 shard, provenance와 validator 제공 여부
+7. `CombatEngage`와 `Attack`을 TunaSweeper Phase 0 확장에 사용할 때 계약상 허용 범위
+8. 목표 UE 5.7 NNE Runtime backend, 지원 플랫폼과 packaged build 검증 환경
+9. Python↔ONNX Runtime↔UE NNE parity 기준과 허용 오차
+10. 외부 작업자가 맡을 범위와 TunaSweeper 저장소에서 직접 구현해야 할 범위의 최종 경계
+
+### 0.5 협업 갱신 규칙
+
+- 외부 답변이나 산출물을 받을 때 문서 버전, commit, hash, 전달일을 함께 기록한다.
+- `main`의 최신 파일을 무조건 추종하지 않고 검증된 snapshot을 contract lock으로 고정한다.
+- 수기 문서와 생성 계약이 충돌하면 Schema/Registry와 공식 generated output을 우선한다.
+- 생성 파일을 TunaSweeper에서 임의 수정하지 않고 원본 계약과 generator 변경을 요청한다.
+- 확인되지 않은 항목은 구현 완료로 간주하지 않고 `확인 대기` 또는 `미전달`로 유지한다.
+- 협업 상태가 바뀔 때 이 `현 상황 요약`을 먼저 갱신하고, 영향받는 판정·단계·위험 항목을 함께 수정한다.
 
 ## 1. 검토 결론
 
@@ -19,6 +88,7 @@ AI Native NPC 구조는 TunaSweeper에 적용할 수 있다. 다만 외부 저�
 | 이미 실행 중인 적의 모드 전환 | 조건부 GO | 전환 요청은 즉시 받고 실제 교체는 다음 안전한 Skill 경계에서 수행 |
 | AI Native Utility Baseline 수직 슬라이스 | 조건부 GO | 외부 문서가 RC5 Utility Baseline 구현을 허용 |
 | AI Native Neural을 기본 게임 AI로 사용 | NO-GO | V1 Neural·OOD·Calibration·최종 Freeze가 아직 보류 상태 |
+| 학습된 Neural 정책 모델 사용 | NO-GO | 현재 프로젝트와 외부 저장소 `main`에 학습 가중치·ONNX·Model Bundle이 없음 |
 | 기존 적 AI 제거 | NO-GO | 전투 기능 동등성, 회귀 검증, fallback 경로가 확보되지 않음 |
 
 권장 기본값은 `Legacy`다. 첫 신규 모드는 `AINativeShadow`, 첫 실제 행동 모드는 `AINativeUtility`로 한다. `AINativeNeural`은 상위 계약과 Runtime Gate가 닫힌 뒤에만 활성화한다.
@@ -62,6 +132,56 @@ Phase 0 공식 범위는 다음과 같다.
 TunaSweeper의 실제 적은 이미 근접·원거리 공격, 재장전, 사선 회복, 분대 제압/재배치 행동을 사용한다. 따라서 공식 Phase 0만으로는 현재 게임의 전투 기능을 대체할 수 없다.
 
 Registry에는 V1용 `CombatEngage` Goal과 `Attack` Skill이 존재한다. 초기 통합에서는 현재 전투 FSM 전체를 복합 `Attack` Skill Executor로 감싸 동등성을 유지하고, 이후 필요할 때 전술 행동을 더 세분화하는 방향이 안전하다.
+
+### 3.1 현재 학습 모델과 배포 산출물 보유 상태
+
+2026-08-03 기준으로 TunaSweeper에는 AI Native NPC에 사용할 학습된 정책 모델이 없다.
+
+프로젝트에서 다음 파일·참조를 확인했으나 실제 산출물을 찾지 못했다.
+
+- ONNX 모델: `.onnx`, `.ort` 없음
+- PyTorch 학습 checkpoint: `.pt`, `.pth`, `.ckpt`, `.safetensors` 없음
+- AI Native NPC Model Bundle 또는 manifest 없음
+- Unreal `UNNEModelData`/NNE ModelData asset 없음
+- AI Native NPC inference backend와 Runtime queue 구현 없음
+- `TunaSweeper.uproject`에 NNE Runtime plugin 활성화 없음
+- `TunaSweeper.Build.cs`에 NNE module 의존성 없음
+
+외부 AI Native NPC 저장소의 현재 `main`도 문서, YAML 계약, 생성 Python/C++ 계약 중심이며 학습된 가중치나 배포 Model Bundle을 포함하지 않는다.
+
+| 항목 | 현재 상태 | 의미 |
+|---|---|---|
+| Schema/Skill/Goal 계약 | 외부 저장소에 존재 | 입력·출력·ID·정규화 규칙은 정의됨 |
+| Utility Baseline | 설계 계약만 존재 | 학습 모델이 아니라 규칙 기반 비교·fallback 정책 |
+| `phase0_fixture` | smoke 계획만 존재 | ONNX→NNE 연결·shape·parity 검증용이며 실전 학습 모델이 아님 |
+| 학습 checkpoint | 없음 | 이어서 학습하거나 평가할 가중치가 없음 |
+| ONNX 정책 모델 | 없음 | Unreal NNE가 실행할 모델이 없음 |
+| Model Bundle | 없음 | model/schema/registry/calibration hash를 함께 배포할 묶음이 없음 |
+| Unreal NNE ModelData | 없음 | 프로젝트 Content에 import된 inference asset이 없음 |
+
+따라서 현재 가능한 AI Native 도입 범위는 다음과 같이 제한된다.
+
+- `Legacy`: 즉시 유지 가능
+- `AINativeShadow`: Utility 판단 비교부터 가능하며 Neural 비교는 모델 생성 후 가능
+- `AINativeUtility`: Candidate/Commit/Executor 구현 후 가능
+- `AINativeNeural`: fixture 또는 학습 모델, NNE backend, parity gate가 모두 준비된 뒤 가능
+
+단순 fixture 모델은 무작위 또는 고정 가중치로 입출력 연결을 검증할 수 있지만, 행동 품질을 검증하거나 학습된 AI라고 부를 수 없다.
+
+실제 Neural 정책 적용에는 다음 산출물이 순서대로 필요하다.
+
+```text
+Unreal Runtime Capture
+→ Dataset Record와 provenance
+→ Dataset validation과 split 고정
+→ Utility/Gold/DAgger label 준비
+→ Python 학습 checkpoint
+→ ONNX export
+→ Model Bundle과 contract hash
+→ Python↔ONNX Runtime parity
+→ Unreal NNE import와 descriptor 검사
+→ UE Runtime Golden·Safety·Performance Gate
+```
 
 ## 4. 현재 TunaSweeper 적 AI 구조
 
@@ -491,6 +611,7 @@ StateTree는 복합 Skill 구현에 선택적으로 사용할 수 있지만 Brai
 
 ### 단계 6 — Neural smoke와 승격
 
+- Phase 0 deterministic fixture model 생성
 - NNE backend adapter
 - descriptor/shape/dtype/hash 검증
 - World queue/batch와 response generation
@@ -569,7 +690,7 @@ StateTree는 복합 Skill 구현에 선택적으로 사용할 수 있지만 Brai
 5. Utility 기반 비전투 수직 슬라이스
 6. 기존 전투 FSM을 복합 `Attack` Skill로 연결
 
-기존 AI는 Neural이 아니라 Utility 전투 동등성과 장시간 회귀 검증이 끝날 때까지 유지한다. Neural은 같은 AI Native Candidate/Commit/Executor 위에 마지막으로 얹어야 한다.
+현재는 학습 모델이 없으므로 위 범위는 Utility 기반 통합과 데이터 Capture 준비까지다. 기존 AI는 Neural이 아니라 Utility 전투 동등성과 장시간 회귀 검증이 끝날 때까지 유지한다. Neural은 같은 AI Native Candidate/Commit/Executor 위에 마지막으로 얹어야 한다.
 
 최종 모드 운영 원칙:
 

@@ -3722,3 +3722,13 @@ AI Native NPC 요구사항·구현 계획 v0.4.6을 현재 TunaSweeper 적 AI에
 ### 답변
 
 처음에는 개별 문서만 작성했으나, `Docs/reviews/README.md`를 검토 문서 메인 인덱스로 추가하고 `Docs/reviews/ai_native_npc_applicability_review.md`를 링크하는 구조로 정리했다. 이후 검토 문서도 같은 디렉터리에 두고 메인 문서 목록에 상태와 요약을 함께 추가하도록 관리 규칙을 기록했다.
+
+## 2026-08-03 01:42:20 (소요시간: 00:00:16)
+
+### 질문
+
+현재 AI Native NPC에 사용할 학습된 모델이 없는 상태인지 문의.
+
+### 답변
+
+현재 TunaSweeper 저장소에는 ONNX, PyTorch checkpoint, Model Bundle, Unreal NNE ModelData 또는 AI Native NPC inference 구현이 없으므로 학습된 정책 모델이 없는 상태다. 외부 AI Native NPC 저장소의 현재 `main`도 문서·YAML 계약·생성 Python/C++ 계약 중심이며 실제 학습 가중치나 배포 Model Bundle을 제공하지 않는다. 문서의 Utility Baseline은 학습 모델이 아니라 규칙 기반 비교·fallback 정책이고, `phase0_fixture`는 ONNX→NNE 연결과 parity를 검증하기 위한 smoke fixture 계획으로 실전 학습 모델을 의미하지 않는다. 실제 Neural 적용에는 Runtime Capture, Dataset 검증, 학습, ONNX export, Model Bundle 생성, Unreal NNE import와 parity·safety gate가 추가로 필요하다.

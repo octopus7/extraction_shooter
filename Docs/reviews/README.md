@@ -6,7 +6,7 @@
 
 | 문서 | 상태 | 요약 |
 |---|---|---|
-| [AI Native NPC v0.4.6 TunaSweeper 적용성 검토](ai_native_npc_applicability_review.md) | 검토 완료 | 기존 적 AI와 AI Native NPC의 공존, GameInstance 전역 선택, 실행 중 안전한 Brain 전환 구조 |
+| [AI Native NPC v0.4.6 TunaSweeper 적용성 검토](ai_native_npc_applicability_review.md) | 협업 검토 진행 중 | 외부 AI 작업자와의 전달 현황, 기존 적 AI와 AI Native NPC의 공존, GameInstance 전역 선택, 학습 모델 부재, 안전한 Brain 전환 구조 |
 
 ## 관리 규칙
 
