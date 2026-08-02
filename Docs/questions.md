@@ -3690,3 +3690,35 @@ Codex에서 Sol 모델은 유지한 채 reasoning effort만 낮추면 작업 품
 ### 답변
 
 논리적인 캔버스 크기(`canvasWidth`, `canvasHeight`)를 SVG의 실제 CSS 픽셀 크기에도 적용하면서, 중앙 캔버스가 고정된 레이아웃 영역을 넘어 grid 최소 크기에 기여하는 것이 주원인이다. 현재 `map-frame`의 자동 스크롤은 부모 레이아웃 높이가 먼저 늘어난 뒤에 동작하므로 하단 UI를 보호하지 못한다. 논리 캔버스 크기는 `viewBox`와 좌표 계산에만 사용하고 SVG는 고정 뷰포트에 `width: 100%; height: 100%`로 맞춘 뒤, 바깥 앱을 `100dvh`와 `overflow: hidden`으로 고정한다. 중앙 캔버스는 `overflow: hidden`으로 두고 기존 패닝·줌 transform으로 내부에서만 이동·확대하며, 속성·결과 패널만 필요할 때 내부 스크롤하도록 수정하는 방향이 적합하다. 모바일·Pro 모드의 grid 행도 `minmax(0, 1fr)` 기준으로 재조정해야 브라우저 전체 스크롤 없이 동일한 동작을 보장할 수 있다.
+
+## 2026-08-03 01:17:11 (소요시간: 00:04:14)
+
+### 질문
+
+AI Native NPC 요구사항·구현 계획 v0.4.6을 현재 TunaSweeper 적 AI에 적용할 수 있는지, 기존 적 AI와 신규 구현을 GameInstance에서 언제든 선택·교체할 수 있는 구조가 가능한지 문의.
+
+### 답변
+
+적용은 가능하지만 즉시 전체 교체할 수 있는 완성 런타임은 아니다. 외부 저장소의 현재 `main`은 계약·문서·생성 Header 중심이고, 문서도 RC5 Utility Baseline 수직 슬라이스만 조건부 GO로 판정하며 V1 Neural/OOD/Calibration과 최종 Freeze는 보류한다. TunaSweeper는 UE 5.7, 커스텀 소음·팩션·분대 월드 서브시스템, 적 무기·이동·전투 실행기를 이미 보유하므로 Belief/Target/Skill Executor에 재사용할 수 있다. 반면 판단·지각·이동·사격이 `ATunaSweeperEnemyAIController`에 결합되어 있고 NNE 플러그인과 모듈 의존성, Stable Target ID/Revision, Goal Manager, Candidate/Commit 계층은 아직 없다.
+
+권장 구조는 적 캐릭터의 `AIControllerClass`를 두 클래스 사이에서 바꾸는 것이 아니라 현재 Controller를 공통 호스트로 유지하고, 내부 Brain만 `Legacy`, `AINativeUtility`, `AINativeNeural`, `Shadow` 모드로 교체하는 전략 구조다. `UTunaSweeperGameInstance`는 전역 기본 모드와 변경 API·delegate만 소유하고, 월드 서브시스템이 기존 Controller들에 안전 경계 전환을 전달한다. 캐릭터의 체력·탄약·무기, 팩션·분대 권한, 이동·공격 실행기는 공통으로 유지하며, Neural 실패는 동일 Native 계약의 Utility로 fallback한다. 실제 플레이 중 전환은 pending inference와 이동 요청을 취소하고 이미 발사된 투사체는 유지한 뒤, 표준 handoff snapshot을 넘겨 다음 안전한 Skill 경계에서 수행해야 한다. 우선 Router와 Legacy 무변경 경로, Shadow 모드, Utility 기반 비전투 수직 슬라이스, 기존 전투 FSM을 복합 `Attack` Skill Executor로 감싸는 순서가 안전하다. 외부 저장소 루트에 명시적 라이선스 파일이 보이지 않으므로 계약·생성 코드를 직접 복사하기 전 사용 권한도 확인해야 한다.
+
+## 2026-08-03 01:24:23 (소요시간: 00:00:08)
+
+### 질문
+
+현재 Git 작업 브랜치 이름 문의.
+
+### 답변
+
+현재 브랜치는 `NativeNPC`다.
+
+## 2026-08-03 01:28:13 (소요시간: 00:01:00)
+
+### 질문
+
+검토 문서 메인을 만들고 개별 검토 문서가 메인에서 링크되는 구조인지 문의.
+
+### 답변
+
+처음에는 개별 문서만 작성했으나, `Docs/reviews/README.md`를 검토 문서 메인 인덱스로 추가하고 `Docs/reviews/ai_native_npc_applicability_review.md`를 링크하는 구조로 정리했다. 이후 검토 문서도 같은 디렉터리에 두고 메인 문서 목록에 상태와 요약을 함께 추가하도록 관리 규칙을 기록했다.

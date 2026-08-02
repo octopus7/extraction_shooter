@@ -5827,3 +5827,10 @@
 
 - 선택된 카탈로그가 드롭다운을 닫았을 때도 항상 하나의 항목 슬롯을 차지하도록 복원했다.
 - 카운트 버튼 숫자 아래에 작은 하향 삼각형을 추가해 드롭다운 조작 가능 상태를 표시했다.
+
+## 2026-08-03 01:24:45 (소요시간: 00:04:39)
+
+- AI Native NPC v0.4.6의 TunaSweeper 적용 가능성 검토 결과를 `Docs/reviews/ai_native_npc_applicability_review.md`로 작성했다.
+- 적용 판정, 현재 코드 대응, 단일 Controller 호스트와 Brain Router, GameInstance 전역 모드, 안전한 실행 중 전환 규약, 전투 Skill 매핑, 단계별 완료 조건과 위험 대응을 문서화했다.
+- `Docs/reviews/README.md`를 검토 문서 메인 인덱스로 만들고 개별 검토 문서를 링크하는 관리 구조를 추가했다.
+- 메인 인덱스 상대 링크와 Markdown 기본 구조를 검사하고 `git diff --check`를 통과했다.
