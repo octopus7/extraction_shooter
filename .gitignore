@@ -33,3 +33,4 @@ YT/thumb_dev_c_001.png
 **/dist/
 **/*.tsbuildinfo
 Tools/MapLayoutEditor/*.log
+/chatgpt/temp
