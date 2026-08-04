@@ -12,6 +12,8 @@
 - 공개 저장소 누출 검사
 - 데이터셋별 전체 세이브 namespace 분리
 - 프로덕션 데모·정식 예시 3연퀘
+- `TunaSweeper` 에디터 메뉴 전환 UI
+- 플레이·Cook·Build 중 전환 차단과 재시작 안내
 - 데이터셋 자동화 테스트
 
 ## 데이터셋
@@ -33,10 +35,14 @@ TunaSweeper/Plugins/QuestDatasetSwitcher/
 ├─ Scripts/
 │  ├─ SwitchQuestDataset.ps1
 │  └─ VerifyPublicSafety.ps1
-└─ Source/QuestDatasetSwitcher/
-   ├─ QuestDatasetSwitcher.Build.cs
-   ├─ Public/QuestDatasetSwitcher.h
-   └─ Private/QuestDatasetSwitcher.cpp
+└─ Source/
+   ├─ QuestDatasetSwitcher/
+   │  ├─ QuestDatasetSwitcher.Build.cs
+   │  ├─ Public/QuestDatasetSwitcher.h
+   │  └─ Private/QuestDatasetSwitcher.cpp
+   └─ QuestDatasetSwitcherEditor/
+      ├─ QuestDatasetSwitcherEditor.Build.cs
+      └─ Private/QuestDatasetSwitcherEditorModule.cpp
 ```
 
 `FQuestDatasetSwitcherModule`은 `Content/Data/QuestDatasetGenerated/active-dataset.json`을 읽는다. marker가 없으면 `Public`을 선택한다. marker가 유효하면 `ProductionDemo` 또는 `ProductionRelease`를 선택하고 해당 생성 데이터 경로를 퀘스트 서브시스템에 제공한다. 지원하지 않는 ID, 잘못된 marker, 누락된 JSON/CSV는 프로덕션 데이터로 인정하지 않고 공개 데이터로 안전하게 fallback한다.
@@ -75,9 +81,30 @@ ProductionPayload/
 
 `QuestTextOverrides.csv`는 동기화할 때 공개 `QuestTextStrings.csv` 위에 key 기준으로 병합된다. 공통 UI 문자열은 공개 저장소에서 계속 관리하고 프로덕션 전용 퀘스트 문자열만 별도 저장소가 소유한다.
 
-## 전환 절차
+## 에디터 메뉴 전환
 
-Unreal Editor를 종료한 상태에서 공개 저장소 루트에서 실행한다.
+Unreal Editor의 최상위 `TunaSweeper` 메뉴에서 `Data Tools` 섹션의 `Quest Dataset Switcher`를 연다. 패널은 에디터가 현재 메모리에 로드한 데이터셋과 디스크에 적용된 데이터셋을 따로 표시한다.
+
+1. `공개`, `프로덕션 데모`, `프로덕션 정식` 중 하나를 선택한다.
+2. 적용 버튼 옆의 세이브 분리 및 재시작 주의사항을 확인한다.
+3. `적용`을 누르고 확인 대화상자를 승인한다.
+4. 디스크 적용 상태에 `에디터 재시작 필요`가 표시되면 즉시 Unreal Editor를 종료하고 다시 실행한다.
+
+UI 적용도 아래 PowerShell 스크립트를 실행하므로 manifest·퀘스트·문자열 검증 규칙은 명령줄과 동일하다. 적용 직후 현재 세션의 런타임 데이터셋을 강제로 reload하지 않는다. 따라서 데이터와 세이브 namespace는 다음 에디터 시작부터 함께 전환된다.
+
+다음 상태에서는 적용 버튼이 비활성화되며 상태별 차단 사유가 버튼 옆에 표시된다.
+
+- PIE, Simulate, Standalone 실행 또는 실행 예약
+- Cook 또는 Package
+- 에디터 Build
+- C++ Hot Reload
+- Live Coding 컴파일
+
+디스크 marker가 손상돼 상태를 판독할 수 없을 때에는 프로덕션 적용을 막고 `공개` 적용만 허용해 생성 폴더를 제거하고 복구할 수 있다.
+
+## 명령줄 전환
+
+자동화 또는 복구 작업에서는 Unreal Editor를 종료한 상태로 공개 저장소 루트에서 실행한다.
 
 ```powershell
 # Public
@@ -198,9 +225,10 @@ git -C TunaSweeper/Plugins/QuestDatasetSwitcher/ProductionPayload push -u origin
 2026-08-04 최종 검증 결과:
 
 - UE 5.7 `TunaSweeperEditor Win64 Development -NoHotReload` 전체 빌드 성공
-- `QuestDatasetSwitcher`, `TunaSweeper`, `TunaSweeperEditor` DLL 링크 성공
+- `QuestDatasetSwitcher`, `QuestDatasetSwitcherEditor`, `TunaSweeper`, `TunaSweeperEditor` DLL 링크 성공
 - `ProductionDemo`: 자동화 테스트 2개 성공
 - `ProductionRelease`: 자동화 테스트 2개 성공
 - `Public`: 자동화 테스트 2개 성공
+- 공개 데이터셋 상태에서 Win64 Development `BuildCookRun`의 Build·Cook·Stage·Pak 성공
 - 최종 활성 상태를 `Public`로 복귀하고 `QuestDatasetGenerated/` 제거 확인
 - `git diff --check` 통과

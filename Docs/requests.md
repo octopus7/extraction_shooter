@@ -5915,3 +5915,11 @@
 
 - 확정된 과거 기온은 D1에 캐싱하고, 작년 최고·최저는 50% 투명 점선, 올해 최고·최저는 오늘 잠정값을 포함한 실선으로 표시하는 그래프 규칙을 확정했다.
 - 기상청 API허브 회원가입·인증키 발급 페이지와 Worker Secret 등록 방식을 안내했다.
+
+## 2026-08-04 15:34:22 (소요시간: 00:56:34)
+
+- `QuestDatasetSwitcher`에 Editor 전용 모듈을 추가하고 최상위 `TunaSweeper` 메뉴의 `Data Tools` 섹션에서 `Quest Dataset Switcher`를 열어 공개·프로덕션 데모·프로덕션 정식 퀘스트 데이터셋을 선택·적용할 수 있게 했다.
+- 패널에 현재 런타임과 디스크 적용 상태, 세이브 namespace 전환 주의사항, 적용 후 재시작 필요 상태를 표시하고 PIE·Simulate·Standalone·Cook·Package·에디터 Build·Hot Reload·Live Coding 중 적용을 차단했다.
+- 손상된 디스크 marker는 공개 적용으로 복구할 수 있게 했으며 적용 스크립트의 기존 manifest·퀘스트·문자열 검증을 UI에서도 그대로 사용했다.
+- UE 5.7 에디터 빌드, 세 데이터셋별 자동화 테스트 2개, 공개 저장소 안전 검사, Win64 Development Build·Cook·Stage·Pak을 성공시키고 최종 데이터셋을 공개 상태로 복귀했다.
+- 기존 데이터셋 전환 구현 문서와 플러그인 README를 현재 에디터 메뉴·차단 조건·검증 결과에 맞게 갱신했다.

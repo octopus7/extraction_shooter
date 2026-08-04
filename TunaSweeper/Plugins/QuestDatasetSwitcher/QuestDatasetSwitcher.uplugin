@@ -12,6 +12,11 @@
       "Name": "QuestDatasetSwitcher",
       "Type": "Runtime",
       "LoadingPhase": "Default"
+    },
+    {
+      "Name": "QuestDatasetSwitcherEditor",
+      "Type": "Editor",
+      "LoadingPhase": "PostEngineInit"
     }
   ]
 }
