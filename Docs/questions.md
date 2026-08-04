@@ -3690,3 +3690,135 @@ Codex에서 Sol 모델은 유지한 채 reasoning effort만 낮추면 작업 품
 ### 답변
 
 논리적인 캔버스 크기(`canvasWidth`, `canvasHeight`)를 SVG의 실제 CSS 픽셀 크기에도 적용하면서, 중앙 캔버스가 고정된 레이아웃 영역을 넘어 grid 최소 크기에 기여하는 것이 주원인이다. 현재 `map-frame`의 자동 스크롤은 부모 레이아웃 높이가 먼저 늘어난 뒤에 동작하므로 하단 UI를 보호하지 못한다. 논리 캔버스 크기는 `viewBox`와 좌표 계산에만 사용하고 SVG는 고정 뷰포트에 `width: 100%; height: 100%`로 맞춘 뒤, 바깥 앱을 `100dvh`와 `overflow: hidden`으로 고정한다. 중앙 캔버스는 `overflow: hidden`으로 두고 기존 패닝·줌 transform으로 내부에서만 이동·확대하며, 속성·결과 패널만 필요할 때 내부 스크롤하도록 수정하는 방향이 적합하다. 모바일·Pro 모드의 grid 행도 `minmax(0, 1fr)` 기준으로 재조정해야 브라우저 전체 스크롤 없이 동일한 동작을 보장할 수 있다.
+
+## 2026-08-03 01:17:11 (소요시간: 00:04:14)
+
+### 질문
+
+AI Native NPC 요구사항·구현 계획 v0.4.6을 현재 TunaSweeper 적 AI에 적용할 수 있는지, 기존 적 AI와 신규 구현을 GameInstance에서 언제든 선택·교체할 수 있는 구조가 가능한지 문의.
+
+### 답변
+
+적용은 가능하지만 즉시 전체 교체할 수 있는 완성 런타임은 아니다. 외부 저장소의 현재 `main`은 계약·문서·생성 Header 중심이고, 문서도 RC5 Utility Baseline 수직 슬라이스만 조건부 GO로 판정하며 V1 Neural/OOD/Calibration과 최종 Freeze는 보류한다. TunaSweeper는 UE 5.7, 커스텀 소음·팩션·분대 월드 서브시스템, 적 무기·이동·전투 실행기를 이미 보유하므로 Belief/Target/Skill Executor에 재사용할 수 있다. 반면 판단·지각·이동·사격이 `ATunaSweeperEnemyAIController`에 결합되어 있고 NNE 플러그인과 모듈 의존성, Stable Target ID/Revision, Goal Manager, Candidate/Commit 계층은 아직 없다.
+
+권장 구조는 적 캐릭터의 `AIControllerClass`를 두 클래스 사이에서 바꾸는 것이 아니라 현재 Controller를 공통 호스트로 유지하고, 내부 Brain만 `Legacy`, `AINativeUtility`, `AINativeNeural`, `Shadow` 모드로 교체하는 전략 구조다. `UTunaSweeperGameInstance`는 전역 기본 모드와 변경 API·delegate만 소유하고, 월드 서브시스템이 기존 Controller들에 안전 경계 전환을 전달한다. 캐릭터의 체력·탄약·무기, 팩션·분대 권한, 이동·공격 실행기는 공통으로 유지하며, Neural 실패는 동일 Native 계약의 Utility로 fallback한다. 실제 플레이 중 전환은 pending inference와 이동 요청을 취소하고 이미 발사된 투사체는 유지한 뒤, 표준 handoff snapshot을 넘겨 다음 안전한 Skill 경계에서 수행해야 한다. 우선 Router와 Legacy 무변경 경로, Shadow 모드, Utility 기반 비전투 수직 슬라이스, 기존 전투 FSM을 복합 `Attack` Skill Executor로 감싸는 순서가 안전하다. 외부 저장소 루트에 명시적 라이선스 파일이 보이지 않으므로 계약·생성 코드를 직접 복사하기 전 사용 권한도 확인해야 한다.
+
+## 2026-08-03 01:24:23 (소요시간: 00:00:08)
+
+### 질문
+
+현재 Git 작업 브랜치 이름 문의.
+
+### 답변
+
+현재 브랜치는 `NativeNPC`다.
+
+## 2026-08-03 01:28:13 (소요시간: 00:01:00)
+
+### 질문
+
+검토 문서 메인을 만들고 개별 검토 문서가 메인에서 링크되는 구조인지 문의.
+
+### 답변
+
+처음에는 개별 문서만 작성했으나, `Docs/reviews/README.md`를 검토 문서 메인 인덱스로 추가하고 `Docs/reviews/ai_native_npc_applicability_review.md`를 링크하는 구조로 정리했다. 이후 검토 문서도 같은 디렉터리에 두고 메인 문서 목록에 상태와 요약을 함께 추가하도록 관리 규칙을 기록했다.
+
+## 2026-08-03 01:42:20 (소요시간: 00:00:16)
+
+### 질문
+
+현재 AI Native NPC에 사용할 학습된 모델이 없는 상태인지 문의.
+
+### 답변
+
+현재 TunaSweeper 저장소에는 ONNX, PyTorch checkpoint, Model Bundle, Unreal NNE ModelData 또는 AI Native NPC inference 구현이 없으므로 학습된 정책 모델이 없는 상태다. 외부 AI Native NPC 저장소의 현재 `main`도 문서·YAML 계약·생성 Python/C++ 계약 중심이며 실제 학습 가중치나 배포 Model Bundle을 제공하지 않는다. 문서의 Utility Baseline은 학습 모델이 아니라 규칙 기반 비교·fallback 정책이고, `phase0_fixture`는 ONNX→NNE 연결과 parity를 검증하기 위한 smoke fixture 계획으로 실전 학습 모델을 의미하지 않는다. 실제 Neural 적용에는 Runtime Capture, Dataset 검증, 학습, ONNX export, Model Bundle 생성, Unreal NNE import와 parity·safety gate가 추가로 필요하다.
+
+## 2026-08-03 18:40:37 (소요시간: 00:02:10)
+
+### 질문
+
+플레이어 이동속도 평상시, 스프린트 각각 얼마씩인지 문의.
+
+### 답변
+
+`ATunaSweeperTopDownCharacter` 기본값 기준 평상시 이동속도는 `600 cm/s`(6 m/s)이고, 스프린트 배율은 `1.55`이므로 스프린트 이동속도는 `930 cm/s`(9.3 m/s)다. 단, 중량 상태에서는 별도 운반중량 이동속도 배율이 추가 적용될 수 있다.
+
+## 2026-08-04 14:29:30 (소요시간: 00:05:10)
+
+### 질문
+
+레벨에 배치된 스태틱 메시를 런타임이 아니라 에디터에서 지정한 품질에 따라 원본 메시와 저용량 대체 메시로 전환할 때, 모든 메시에 Blueprint를 붙이지 않는 효율적인 방식 문의.
+
+### 답변
+
+기존 `TunaSweeperEditor` 모듈에 에디터 전용 메시 품질 전환 도구를 두는 방식을 권장했다. 에디터 전용 매핑 데이터에 원본·저용량 메시 쌍을 보관하고, 툴바 또는 Editor Utility Widget에서 현재 레벨이나 선택 액터의 모든 `UStaticMeshComponent`를 순회해 트랜잭션 기반으로 일괄 교체한다. 매핑은 양방향이어야 하며, 피벗·머티리얼 슬롯·콜리전·소켓 호환성을 검증하고 World Partition의 미로딩 액터를 별도로 처리한다. 단순 거리 최적화면 LOD/Nanite가 우선이고, 빌드별 실제 메모리·패키지 용량을 줄이려면 에디터 전환 후 선택 품질만 참조·쿠킹되도록 매핑 자산을 런타임 참조에서 분리해야 한다.
+
+## 2026-08-04 14:37:20 (소요시간: 00:00:50)
+
+### 질문
+
+저용량 메시로 전환한 뒤 페어 역참조를 통해 원본 메시로 되돌릴 수 있는지 문의.
+
+### 답변
+
+가능하다. 각 원본·저용량 페어를 기준으로 `Original → Pair`와 `Low → Pair` 역인덱스를 모두 구성하면 현재 컴포넌트가 어느 쪽 메시를 사용하든 같은 페어를 찾을 수 있다. `Low` 적용은 페어의 저용량 메시를, `Original` 적용은 원본 메시를 지정하면 된다. 동일 메시가 여러 페어에 중복 등록되지 않도록 검증해야 하며, 저용량 메시가 없는 페어는 원본을 유지하고 경고하는 정책이 안전하다.
+
+## 2026-08-04 14:38:20 (소요시간: 00:00:45)
+
+### 질문
+
+서로 다른 원본·저용량 페어가 동일한 저용량 메시를 참조하면 역참조에 문제가 생기는지 문의.
+
+### 답변
+
+문제가 생긴다. 하나의 저용량 메시가 여러 원본에 대응하면 `Low → Original` 역참조가 모호해져 원본을 확정할 수 없다. 기본 구현에서는 저용량 메시의 중복 등록을 검증 오류로 금지하는 것이 가장 단순하고 안전하다. 공용 저용량 메시가 반드시 필요하다면 메시 자체의 역참조에 의존하지 않고, 전환 전에 각 액터·컴포넌트 식별자와 원본 메시 경로를 에디터 전용 레벨 사이드카 데이터에 저장해 복구해야 한다. 세션 메모리 캐시만 사용하는 방식은 에디터 재시작 후 복구할 수 없으므로 피해야 한다.
+
+## 2026-08-04 14:50:51 (소요시간: 00:00:34)
+
+### 질문
+
+현재 임시 퀘스트 데이터는 공개 저장소에 유지하고, 별도 비공개 저장소에 연결된 예시 퀘스트 3개를 구성하여 단일 플러그인 방식으로 공개/비공개 퀘스트 데이터를 전환할 수 있는지와 추가 저장소 관리 안내 제공 가능 여부를 문의.
+
+### 답변
+
+구현 가능하다. 현재 퀘스트 시스템은 `Content/Data/QuestDefinitions.json`과 `QuestTextStrings.csv`를 함께 로드하므로 두 파일을 하나의 전환 단위로 다루는 것이 안전하다. 공개 저장소에는 현재 데이터를 fallback으로 유지하고 공개 플러그인 skeleton, 동기화·검증 스크립트와 데이터 선택 로직을 둔다. 비공개 nested 저장소의 `PrivatePayload`에는 별도 ID를 가진 3연속 퀘스트 정의·문자열과 호환 revision manifest를 두고, 동기화된 marker가 있으면 비공개 데이터 경로를 선택하며 없으면 기존 공개 데이터로 복귀하게 만들 수 있다. 공개 저장소 clone, 비공개 payload clone, 동기화, 공개 모드 복귀, 누출 검사, 커밋·푸시 순서를 별도 관리 안내서로 제공할 수 있다. 데이터셋 전환 시 현재 로더가 정의에 없는 저장 진행도를 건너뛰므로 예시 프라이빗 퀘스트는 별도 ID와 별도 테스트 세이브를 사용하는 것이 안전하다.
+
+## 2026-08-04 14:53:26 (소요시간: 00:00:35)
+
+### 질문
+
+공개/비공개 퀘스트 데이터셋이 전환될 때 세이브 데이터도 해당 데이터셋에 맞춰 자동으로 전환·분리하는 방식에 대한 의견을 문의.
+
+### 답변
+
+권장하는 방식이다. 현재 세이브 슬롯은 데이터셋 구분 없이 `TunaSweeperSaveSlot01`부터 `03`까지 사용하므로, 활성 데이터셋의 안정적인 `dataset_id`를 세이브 슬롯 namespace에 포함해 공개·비공개 세이브를 물리적으로 분리해야 한다. 세이브 객체에도 `DatasetId`를 기록하여 잘못된 데이터셋에서 로드하려는 경우 차단하는 이중 검증을 둔다. 기존 세이브 파일은 공개 데이터셋 소속으로 간주하여 파일명과 진행도를 보존하고, 비공개 데이터셋은 별도 슬롯 이름과 별도 최근 선택 슬롯 설정을 사용한다. 데이터 내용 revision은 세이브 namespace를 바꾸지 않고 호환성 정보로만 기록하며, 진행 구조가 깨지는 변경에만 별도의 `save_compatibility_id`를 올리는 것이 안전하다.
+
+## 2026-08-04 15:27:27 (소요시간: 00:00:06)
+
+### 질문
+
+구현된 `Public`, `ProductionDemo`, `ProductionRelease` 데이터셋을 어떤 수단으로 전환하는지 문의.
+
+### 답변
+
+현재 구현은 Unreal Editor UI가 아니라 `TunaSweeper/Plugins/QuestDatasetSwitcher/Scripts/SwitchQuestDataset.ps1` PowerShell 스크립트의 `-Dataset` 인자로 전환한다. Unreal Editor를 종료한 뒤 저장소 루트에서 `-Dataset Public`, `-Dataset ProductionDemo`, `-Dataset ProductionRelease` 중 하나를 실행하고 에디터를 다시 시작한다. 스크립트는 선택한 프로덕션 퀘스트 정의와 문자열을 ignored 생성 경로에 materialize하거나, `Public` 선택 시 생성 경로를 제거한다. 런타임 플러그인은 marker를 읽어 퀘스트 파일 경로와 대응하는 전체 세이브 namespace를 자동으로 선택한다.
+
+## 2026-08-04 15:28:26 (소요시간: 00:00:06)
+
+### 질문
+
+퀘스트 데이터셋 전환을 PowerShell 명령 대신 Unreal Editor UI로 제공할 수 있는지 문의.
+
+### 답변
+
+가능하다. `QuestDatasetSwitcherEditor` 에디터 전용 모듈을 추가하고 Tools 메뉴나 전용 탭에 현재 데이터셋, ProductionPayload 설치 상태, `Public`·`ProductionDemo`·`ProductionRelease` 선택 버튼을 제공할 수 있다. UI는 별도의 전환 로직을 중복 구현하지 않고 기존 검증·동기화 스크립트를 호출해야 한다. PIE·Cook·빌드 중에는 전환을 막고, 성공 후 현재 세션에서 hot switch하지 않으며 dirty package 저장 확인과 에디터 재시작을 요구하는 흐름이 안전하다. 전환 실패 시 기존 활성 데이터셋과 세이브 namespace를 유지하고 스크립트 출력과 원인을 UI에 표시해야 한다.
+
+## 2026-08-04 15:32:40 (소요시간: 00:00:05)
+
+### 질문
+
+에디터 UI 데이터셋 전환 제한이 게임 실행 중뿐 아니라 Cook과 Build 진행 중도 포함되는지 확인 요청.
+
+### 답변
+
+포함된다. PIE, Simulate, Standalone, 별도 게임 프로세스 실행, Cook, Package, Build가 진행 중일 때는 데이터셋 전환 버튼을 비활성화하거나 실행을 거부해야 한다. 에디터가 유휴 상태일 때만 동기화를 허용하며, 전환 성공 후에는 이전 퀘스트와 세이브 descriptor가 메모리에 남아 있을 수 있으므로 새 데이터셋을 사용하기 전에 에디터 재시작을 필수로 한다.
