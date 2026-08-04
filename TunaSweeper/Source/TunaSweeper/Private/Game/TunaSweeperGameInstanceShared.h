@@ -29,7 +29,7 @@ namespace TunaSweeperSave
 {
 	inline const TCHAR* SaveSlotNamePrefix = TEXT("TunaSweeperSave_Slot");
 	inline const TCHAR* SaveSettingsSlotName = TEXT("TunaSweeperSaveSettings");
-	constexpr int32 CurrentSaveVersion = 18;
+	constexpr int32 CurrentSaveVersion = 19;
 	constexpr int32 SaveUserIndex = 0;
 	constexpr int32 MinSaveSlotIndex = 1;
 	constexpr int32 MaxSaveSlotIndex = 3;
