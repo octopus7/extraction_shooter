@@ -203,7 +203,7 @@ git -C TunaSweeper/Plugins/QuestDatasetSwitcher/ProductionPayload push -u origin
 
 프로덕션 동기화와 빌드를 검증한 공개 commit hash와 production commit hash를 함께 릴리스 기록에 남긴다. 권장 태그 쌍은 `public/<version>`과 `production/<version>`이다.
 
-현재 로컬 `ProductionPayload` 저장소의 초기 예시 데이터 commit은 `3b76bc2`다. 아직 remote URL은 설정하지 않았으므로 별도 저장소를 생성한 뒤 위 명령으로 연결하고 push해야 한다.
+현재 `ProductionPayload` 저장소의 초기 예시 데이터 commit은 `3b76bc2`다. 접근 제한 원격 저장소의 `origin/main` 연결과 최초 push를 완료했으며, 로컬 `main`과 원격 `main`이 동일한 commit을 가리키는 것을 확인했다. 공개 구현 문서에는 원격 URL을 기록하지 않는다.
 
 ## 검증
 

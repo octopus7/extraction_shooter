@@ -3822,3 +3822,53 @@ AI Native NPC 요구사항·구현 계획 v0.4.6을 현재 TunaSweeper 적 AI에
 ### 답변
 
 포함된다. PIE, Simulate, Standalone, 별도 게임 프로세스 실행, Cook, Package, Build가 진행 중일 때는 데이터셋 전환 버튼을 비활성화하거나 실행을 거부해야 한다. 에디터가 유휴 상태일 때만 동기화를 허용하며, 전환 성공 후에는 이전 퀘스트와 세이브 descriptor가 메모리에 남아 있을 수 있으므로 새 데이터셋을 사용하기 전에 에디터 재시작을 필수로 한다.
+
+## 2026-08-04 17:34:50 (소요시간: 00:01:00)
+
+### 질문
+
+프로덕션 퀘스트 데이터를 보관할 접근 제한 Git 저장소를 현재 구조에 어떻게 설정하는지 문의.
+
+### 답변
+
+현재 `TunaSweeper/Plugins/QuestDatasetSwitcher/ProductionPayload`는 초기 예시 commit `3b76bc2`가 있는 독립 Git 저장소지만 remote는 아직 없다. Git 호스팅 서비스에 비공개 빈 저장소를 만든 뒤 이 중첩 저장소에 `origin`을 추가하고 `main`을 push한다. 다른 개발 환경에서는 공개 저장소를 먼저 clone한 다음 프로덕션 저장소를 정확히 같은 `ProductionPayload` 경로에 별도로 clone한다. 프로덕션 수정은 중첩 저장소의 `Datasets/ProductionDemo`와 `Datasets/ProductionRelease`에서만 수행하고, 두 데이터셋 검증 후 중첩 저장소에 독립적으로 commit·push한다. 공개 저장소 push 전에는 공개 데이터셋으로 복귀하고 `VerifyPublicSafety.ps1`을 실행한다.
+
+## 2026-08-04 17:35:55 (소요시간: 00:01:15)
+
+### 질문
+
+아직 원격 비공개 저장소가 없는 상태에서 중첩 저장소 경로가 어떻게 구성되며 GitHub Desktop으로 내부 경로에 다시 clone해야 하는지 문의.
+
+### 답변
+
+현재 정확한 `ProductionPayload` 경로 안에 `.git`과 초기 commit이 이미 있으므로 다시 clone하지 않는다. GitHub Desktop에서 해당 폴더를 기존 로컬 저장소로 직접 추가한 뒤 `Publish repository`를 사용하고 `Keep this code private`를 선택한 상태로 새 원격 비공개 저장소를 만든다. 공개 부모 저장소의 `.git`과 `ProductionPayload/.git`은 독립적으로 존재하며 부모는 전체 `ProductionPayload` 경로를 ignore한다. 다른 PC처럼 로컬 중첩 저장소가 아직 없는 환경에서만 공개 저장소 clone 후 정확한 `ProductionPayload` 경로로 비공개 저장소를 별도 clone한다.
+
+## 2026-08-04 17:37:35 (소요시간: 00:00:25)
+
+### 질문
+
+우선 GitHub에 빈 비공개 저장소를 만든 뒤 알려주면 다음 연결 명령을 순서대로 안내받는 흐름인지 확인 요청.
+
+### 답변
+
+그 순서가 맞다. GitHub에 README, `.gitignore`, License를 추가하지 않은 완전히 빈 비공개 저장소를 먼저 만든다. 생성 후 HTTPS 또는 SSH 저장소 URL을 전달하면 현재 로컬 `ProductionPayload` 저장소에 `origin`을 추가하고 `main` 브랜치를 최초 push하는 명령과 확인 절차를 한 단계씩 안내한다.
+
+## 2026-08-04 17:39:00 (소요시간: 00:01:00)
+
+### 질문
+
+GitHub Desktop에서 `ProductionPayload`를 로컬 저장소로 추가할 때 다른 사용자가 소유한 Git 저장소라는 `safe.directory` 경고가 표시된 화면을 공유하고 다음 조치를 요청.
+
+### 답변
+
+실제 ACL을 확인한 결과 `ProductionPayload` 작업 폴더는 자동화 계정 소유이고 내부 `.git`은 사용자 계정 소유여서 GitHub Desktop의 Git 보호 기능이 경고한 것이다. 이번 작업에서 만든 신뢰 가능한 정확한 저장소이므로 `D:/github/extraction_shooter/TunaSweeper/Plugins/QuestDatasetSwitcher/ProductionPayload` 하나만 전역 `safe.directory` 예외로 추가한 뒤 GitHub Desktop에서 다시 `Add repository`를 실행하면 된다. 상위 공개 저장소나 광범위한 경로는 예외로 추가하지 않는다.
+
+## 2026-08-04 17:44:00 (소요시간: 00:01:00)
+
+### 질문
+
+GitHub 인증이 이미 남아 있어 별도 인증 절차 없이 프로덕션 저장소가 push된 것인지 확인 요청.
+
+### 답변
+
+로컬 `ProductionPayload`의 브랜치 상태가 `main...origin/main`이고 upstream이 `origin/main`으로 설정된 것을 확인했다. 원격 `refs/heads/main`도 로컬 HEAD와 동일한 `3b76bc277690cfcd55383504f57c46691f752590`을 반환했으므로 최초 push가 정상 완료됐다.
