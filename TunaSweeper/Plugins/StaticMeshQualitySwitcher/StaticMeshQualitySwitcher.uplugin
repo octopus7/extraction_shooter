@@ -1,0 +1,17 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0.0",
+	"FriendlyName": "Static Mesh Quality Switcher",
+	"Description": "Editor-only tool for switching placed static mesh components between strictly paired original and low-quality assets.",
+	"Category": "Editor",
+	"CanContainContent": false,
+	"EnabledByDefault": false,
+	"Modules": [
+		{
+			"Name": "StaticMeshQualitySwitcherEditor",
+			"Type": "Editor",
+			"LoadingPhase": "PostEngineInit"
+		}
+	]
+}

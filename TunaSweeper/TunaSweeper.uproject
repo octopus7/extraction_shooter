@@ -42,6 +42,13 @@
 			"Enabled": true
 		},
 		{
+			"Name": "StaticMeshQualitySwitcher",
+			"Enabled": true,
+			"TargetAllowList": [
+				"Editor"
+			]
+		},
+		{
 			"Name": "MiyakovCharacterSystem",
 			"Enabled": true
 		},
