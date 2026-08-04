@@ -3831,7 +3831,7 @@ AI Native NPC 요구사항·구현 계획 v0.4.6을 현재 TunaSweeper 적 AI에
 
 ### 답변
 
-현재 `TunaSweeper/Plugins/QuestDatasetSwitcher/ProductionPayload`는 초기 예시 commit `3b76bc2`가 있는 독립 Git 저장소지만 remote는 아직 없다. Git 호스팅 서비스에 비공개 빈 저장소를 만든 뒤 이 중첩 저장소에 `origin`을 추가하고 `main`을 push한다. 다른 개발 환경에서는 공개 저장소를 먼저 clone한 다음 프로덕션 저장소를 정확히 같은 `ProductionPayload` 경로에 별도로 clone한다. 프로덕션 수정은 중첩 저장소의 `Datasets/ProductionDemo`와 `Datasets/ProductionRelease`에서만 수행하고, 두 데이터셋 검증 후 중첩 저장소에 독립적으로 commit·push한다. 공개 저장소 push 전에는 공개 데이터셋으로 복귀하고 `VerifyPublicSafety.ps1`을 실행한다.
+`ProductionPayload`는 공개 부모 저장소와 분리된 독립 Git 저장소로 관리한다. 다른 개발 환경에서는 공개 저장소를 먼저 clone한 다음 프로덕션 저장소를 정확히 같은 `ProductionPayload` 상대경로에 별도로 clone한다. 프로덕션 수정은 중첩 저장소의 `Datasets/ProductionDemo`와 `Datasets/ProductionRelease`에서만 수행하고, 두 데이터셋 검증 후 중첩 저장소에 독립적으로 commit·push한다. 공개 저장소 push 전에는 공개 데이터셋으로 복귀하고 `VerifyPublicSafety.ps1`을 실행한다.
 
 ## 2026-08-04 17:35:55 (소요시간: 00:01:15)
 
@@ -3861,7 +3861,7 @@ GitHub Desktop에서 `ProductionPayload`를 로컬 저장소로 추가할 때 �
 
 ### 답변
 
-실제 ACL을 확인한 결과 `ProductionPayload` 작업 폴더는 자동화 계정 소유이고 내부 `.git`은 사용자 계정 소유여서 GitHub Desktop의 Git 보호 기능이 경고한 것이다. 이번 작업에서 만든 신뢰 가능한 정확한 저장소이므로 `D:/github/extraction_shooter/TunaSweeper/Plugins/QuestDatasetSwitcher/ProductionPayload` 하나만 전역 `safe.directory` 예외로 추가한 뒤 GitHub Desktop에서 다시 `Add repository`를 실행하면 된다. 상위 공개 저장소나 광범위한 경로는 예외로 추가하지 않는다.
+실제 ACL을 확인한 결과 작업 폴더와 내부 `.git`의 소유 계정이 달라 GitHub Desktop의 Git 보호 기능이 경고한 것이다. 신뢰 가능한 정확한 `TunaSweeper/Plugins/QuestDatasetSwitcher/ProductionPayload` 저장소 하나만 전역 `safe.directory` 예외로 추가한 뒤 GitHub Desktop에서 다시 `Add repository`를 실행하면 된다. 상위 공개 저장소나 광범위한 경로는 예외로 추가하지 않는다.
 
 ## 2026-08-04 17:44:00 (소요시간: 00:01:00)
 
@@ -3871,4 +3871,24 @@ GitHub 인증이 이미 남아 있어 별도 인증 절차 없이 프로덕션 �
 
 ### 답변
 
-로컬 `ProductionPayload`의 브랜치 상태가 `main...origin/main`이고 upstream이 `origin/main`으로 설정된 것을 확인했다. 원격 `refs/heads/main`도 로컬 HEAD와 동일한 `3b76bc277690cfcd55383504f57c46691f752590`을 반환했으므로 최초 push가 정상 완료됐다.
+로컬과 원격의 브랜치 연결 및 최초 push 완료 여부를 확인했다. 공개 질문 기록에는 원격 주소, 브랜치 추적 상태, commit hash 같은 운영 세부정보를 남기지 않는다.
+
+## 2026-08-04 17:46:20 (소요시간: 00:00:25)
+
+### 질문
+
+원격 연결과 최초 push가 끝난 현재 `ProductionPayload` 로컬 저장소를 GitHub Desktop에 추가해도 정상 동작하는지 확인 요청.
+
+### 답변
+
+정상 동작한다. GitHub Desktop의 `File > Add local repository`에서 정확한 `ProductionPayload` 상대경로를 선택해 기존 로컬 저장소로 추가하면 된다. 이미 원격이 연결된 저장소이므로 `Publish repository`나 `Clone repository`는 사용하지 않으며, 추가 후에는 일반적인 원격 동기화 버튼이 표시된다. 저장소 선택 목록에서 공개 부모 저장소와 프로덕션 중첩 저장소를 독립적으로 전환해 관리한다.
+
+## 2026-08-04 17:47:45 (소요시간: 00:01:10)
+
+### 질문
+
+공개 저장소 문서에서 비공개 저장소의 과거 Git 이력까지 재작성하지 않고 최근 운영 상태 정보만 제거해도 된다고 요청.
+
+### 답변
+
+현재 `main` 문서에서 프로덕션 저장소의 commit hash, 원격 연결·upstream 검증 상태, 사용자 로컬 절대경로를 제거한다. 플러그인 설치와 운영에 필요한 `ProductionPayload` 상대경로, 데이터셋 디렉터리 이름, 일반 검증·동기화 절차는 유지하며 Git 과거 이력은 재작성하지 않는다.

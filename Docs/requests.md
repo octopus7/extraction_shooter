@@ -5889,7 +5889,7 @@
 - `QuestDatasetSwitcher` 런타임 플러그인과 전환·검증 스크립트를 구현하여 `Public`, `ProductionDemo`, `ProductionRelease` 세 데이터셋을 전환할 수 있게 했다.
 - 공개 퀘스트는 기존 경로와 기존 세이브 이름을 유지하고, 두 프로덕션 데이터셋은 ignored 생성 경로와 서로 다른 전체 세이브·최근 선택 슬롯·백업 namespace를 사용하게 했다.
 - 세이브 버전을 19로 올리고 `DatasetId`, `DatasetRevision`, `SaveCompatibilityId`를 저장하며 잘못된 데이터셋의 세이브 로드와 덮어쓰기를 차단했다.
-- 별도 로컬 `ProductionPayload` Git 저장소에 프로덕션 데모·정식용 직렬 3연퀘 예시와 manifest를 구성하고 초기 commit `3b76bc2`를 만들었다.
+- 별도 로컬 `ProductionPayload` Git 저장소에 프로덕션 데모·정식용 직렬 3연퀘 예시와 manifest를 구성했다.
 - 기존 계획 문서를 `Docs/Steam/TunaSweeper_Quest_Dataset_Switching_Implementation.md` 구현 문서로 교체하고 실제 경로·명령·세이브 규약·저장소 관리법·검증 결과를 반영했다.
 - UE 5.7 `TunaSweeperEditor Win64 Development` 전체 빌드와 세 데이터셋별 `TunaSweeper.QuestDataset` 자동화 테스트 2개를 모두 성공시키고 최종 상태를 `Public`로 복귀했다.
 - 공개 저장소 누출 검사와 `git diff --check`를 통과한 관련 변경만 현재 `NativeNPC` 브랜치에 커밋하여 원격으로 푸시한다.
@@ -5927,5 +5927,15 @@
 ## 2026-08-04 17:42:00 (소요시간: 00:02:54)
 
 - 사용자가 생성한 접근 제한 빈 Git 저장소를 기존 로컬 `ProductionPayload` 중첩 저장소의 `origin`으로 연결하는 절차를 안내했다.
-- 로컬 `main`의 upstream이 `origin/main`으로 설정되고 원격 `main`이 초기 예시 데이터 commit `3b76bc2`와 일치하는 것을 확인하여 최초 push 완료 상태를 검증했다.
-- 공개 구현 문서에는 원격 URL을 노출하지 않고 접근 제한 원격 저장소 연결 및 최초 push 완료 상태만 반영했다.
+- 프로덕션 저장소의 원격 연결과 최초 push 절차가 완료됐는지 검증했다.
+- 공개 구현 문서에는 원격 URL, 브랜치 추적 상태, commit hash 같은 운영 세부정보를 기록하지 않도록 정리했다.
+
+## 2026-08-04 17:47:45 (소요시간: 00:01:10)
+
+- 공개 저장소의 현재 문서에서 프로덕션 저장소 commit hash, 원격 연결·upstream 검증 상태, 사용자 로컬 절대경로를 제거했다.
+- 플러그인 운영에 필요한 `ProductionPayload` 상대경로와 일반 관리·검증 절차는 유지했으며 과거 Git 이력은 재작성하지 않았다.
+
+## 2026-08-04 17:49:30 (소요시간: 00:00:30)
+
+- 접근 제한 프로덕션 데이터 저장소의 원격 이름·URL·소유자 식별자를 민감 정보로 취급하도록 루트 에이전트 지침에 추가했다.
+- 공개 추적 문서와 질문·요청 로그에는 일반 명칭과 필요한 프로젝트 상대경로만 사용하도록 규칙을 명시했다.
