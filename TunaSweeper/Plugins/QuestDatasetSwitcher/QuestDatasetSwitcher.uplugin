@@ -1,0 +1,17 @@
+{
+  "FileVersion": 3,
+  "Version": 1,
+  "VersionName": "1.0.0",
+  "FriendlyName": "Quest Dataset Switcher",
+  "Description": "Selects Public, ProductionDemo, or ProductionRelease quest data and save namespaces.",
+  "Category": "Game",
+  "CanContainContent": false,
+  "EnabledByDefault": false,
+  "Modules": [
+    {
+      "Name": "QuestDatasetSwitcher",
+      "Type": "Runtime",
+      "LoadingPhase": "Default"
+    }
+  ]
+}
