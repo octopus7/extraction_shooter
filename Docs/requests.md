@@ -5827,3 +5827,91 @@
 
 - 선택된 카탈로그가 드롭다운을 닫았을 때도 항상 하나의 항목 슬롯을 차지하도록 복원했다.
 - 카운트 버튼 숫자 아래에 작은 하향 삼각형을 추가해 드롭다운 조작 가능 상태를 표시했다.
+
+## 2026-08-03 01:24:45 (소요시간: 00:04:39)
+
+- AI Native NPC v0.4.6의 TunaSweeper 적용 가능성 검토 결과를 `Docs/reviews/ai_native_npc_applicability_review.md`로 작성했다.
+- 적용 판정, 현재 코드 대응, 단일 Controller 호스트와 Brain Router, GameInstance 전역 모드, 안전한 실행 중 전환 규약, 전투 Skill 매핑, 단계별 완료 조건과 위험 대응을 문서화했다.
+- `Docs/reviews/README.md`를 검토 문서 메인 인덱스로 만들고 개별 검토 문서를 링크하는 관리 구조를 추가했다.
+- 메인 인덱스 상대 링크와 Markdown 기본 구조를 검사하고 `git diff --check`를 통과했다.
+
+## 2026-08-03 01:43:11 (소요시간: 00:00:33)
+
+- AI Native NPC 적용성 검토 문서에 현재 학습된 정책 모델, checkpoint, ONNX, Model Bundle, Unreal NNE ModelData와 inference Runtime이 없다는 확인 결과를 추가했다.
+- Utility Baseline은 학습 모델이 아니며 `phase0_fixture`도 실전 가중치가 아닌 연결·parity smoke 용도라는 차이를 명시했다.
+- Neural 적용에 필요한 Runtime Capture, Dataset 검증, 학습, ONNX export, Model Bundle, Unreal NNE import와 Runtime Gate 순서를 추가했다.
+- 검토 문서 메인 인덱스 요약에도 학습 모델 부재 확인을 반영했다.
+
+## 2026-08-03 01:44:02 (소요시간: 00:00:42)
+
+- AI Native NPC 검토 문서 초반에 외부 AI 작업자와 협업 연락을 주고받는 현재 관계와 역할 구분을 추가했다.
+- 요구사항·계약·Runtime·Utility·학습 checkpoint·ONNX·Model Bundle·Dataset·사용 권한의 전달 및 확인 상태를 현황표로 정리했다.
+- 현재 TunaSweeper 측 판단, 외부 작업자에게 우선 확인·요청할 10개 항목, commit/hash 기반 협업 갱신 규칙을 추가했다.
+- 문서 상태와 검토 문서 메인 인덱스를 `협업 검토 진행 중` 상태로 갱신했다.
+
+## 2026-08-03 01:45:55 (소요시간: 00:00:10)
+
+- AI Native NPC 검토 문서의 학습 모델 부재 및 외부 AI 작업자 협업 현황 추가분을 관련 질문·요청 로그와 함께 현재 `NativeNPC` 브랜치에 커밋하고 원격으로 푸시한다.
+- 직전에 취소된 다리 관련 요청은 변경 파일과 커밋 대상에 포함하지 않는다.
+
+## 2026-08-04 03:00:00 (소요시간: 00:07:39)
+
+- `NativeNPC` 브랜치의 `2ffea35`(취수장)와 `6beaab3`(프라이빗 데이터 분리 플러그인 문서) 두 커밋을 `main`에 체리픽하고 원격 `origin/main`에 반영했다.
+- 현재 작업 트리의 기존 변경사항은 보존했으며, 최종 원격 `main` 커밋은 `88da2b6`이다.
+
+## 2026-08-04 14:39:50 (소요시간: 00:00:50)
+
+- 에디터 메시 품질 전환 시스템의 원본·저용량 메시 관계를 `1:1`로 고정한다.
+- 서로 다른 페어가 동일한 저용량 메시를 참조하는 중복 등록을 철저히 금지한다.
+- 제작 번거로움이 있더라도 각 원본 메시마다 전용 저용량 메시를 제작하는 정책을 적용한다.
+
+## 2026-08-04 14:45:13 (소요시간: 00:00:33)
+
+- 공개 저장소와 비공개 저장소의 데이터·구현을 전환할 수 있는 단일 Unreal Engine 플러그인 구조 문서를 확인했다.
+- 당시 문서는 `Docs/Steam/UE_One_Plugin_Public_Private_Switching_Guide.md`였으며, 구현 완료 후 `Docs/Steam/TunaSweeper_Quest_Dataset_Switching_Implementation.md`로 제목·파일명·내용을 현재 구현 기준으로 전환했다.
+- 당시 `TunaSweeper/Plugins`에는 문서에서 제안한 payload, 동기화 스크립트, 빌드 전환 marker의 실제 구현이 아직 없는 것으로 확인했다.
+
+## 2026-08-04 14:40:00 (소요시간: 00:17:25)
+
+- 레벨에 배치된 스태틱 메시를 원본과 전용 저용량 메시 사이에서 에디터 시점에 전환하는 기능을 독립적인 `StaticMeshQualitySwitcher` UE 5.7 Editor 플러그인으로 구현했다.
+- 프로필의 모든 Original·Low 슬롯에 걸쳐 메시 자산의 전역 중복을 금지하고, 누락·중복·교차 역할 재사용 또는 자산 로드 실패 시 레벨을 전혀 변경하지 않도록 했다.
+- 선택 액터 및 현재 로딩된 레벨 전체 범위, Original·Low 양방향 전환, Undo/Redo, 레벨 Dirty 처리, Content Browser 자산 검증, 에디터 탭 UI를 추가했다.
+- `TunaSweeperEditor Win64 Development` 빌드와 `StaticMeshQualitySwitcher.Profile.StrictOneToOne` 자동화 테스트 성공 후 관련 변경만 커밋하여 현재 `NativeNPC` 브랜치에 푸시한다.
+
+## 2026-08-04 14:55:53 (소요시간: 00:00:04)
+
+- 퀘스트 데이터 전환 모드 명칭에서 `Private`를 사용하지 않고 `Production` 명칭을 사용한다.
+- 데이터셋 전환 구조를 `Public`, `ProductionDemo`, `ProductionRelease`의 세 가지 모드로 구성한다.
+- 각 데이터셋은 서로 분리된 세이브 namespace를 사용하여 공개, 프로덕션 데모, 프로덕션 정식 진행도가 섞이지 않게 한다.
+
+## 2026-08-04 14:57:17 (소요시간: 00:24:34)
+
+- `QuestDatasetSwitcher` 런타임 플러그인과 전환·검증 스크립트를 구현하여 `Public`, `ProductionDemo`, `ProductionRelease` 세 데이터셋을 전환할 수 있게 했다.
+- 공개 퀘스트는 기존 경로와 기존 세이브 이름을 유지하고, 두 프로덕션 데이터셋은 ignored 생성 경로와 서로 다른 전체 세이브·최근 선택 슬롯·백업 namespace를 사용하게 했다.
+- 세이브 버전을 19로 올리고 `DatasetId`, `DatasetRevision`, `SaveCompatibilityId`를 저장하며 잘못된 데이터셋의 세이브 로드와 덮어쓰기를 차단했다.
+- 별도 로컬 `ProductionPayload` Git 저장소에 프로덕션 데모·정식용 직렬 3연퀘 예시와 manifest를 구성하고 초기 commit `3b76bc2`를 만들었다.
+- 기존 계획 문서를 `Docs/Steam/TunaSweeper_Quest_Dataset_Switching_Implementation.md` 구현 문서로 교체하고 실제 경로·명령·세이브 규약·저장소 관리법·검증 결과를 반영했다.
+- UE 5.7 `TunaSweeperEditor Win64 Development` 전체 빌드와 세 데이터셋별 `TunaSweeper.QuestDataset` 자동화 테스트 2개를 모두 성공시키고 최종 상태를 `Public`로 복귀했다.
+- 공개 저장소 누출 검사와 `git diff --check`를 통과한 관련 변경만 현재 `NativeNPC` 브랜치에 커밋하여 원격으로 푸시한다.
+
+## 2026-08-04 15:26:40 (소요시간: 00:02:50)
+
+- `Static Mesh Quality Switcher` 실행 메뉴를 `Tools`에서 최상위 `TunaSweeper` 메뉴의 `Asset Tools` 섹션으로 이동했다.
+- 기존 TunaSweeper 메뉴가 없을 때에는 플러그인이 독립적으로 생성하고, 이미 등록돼 있으면 동일 메뉴를 재사용하도록 했다.
+- 실행 중인 에디터의 미저장 상태를 보존하기 위해 모듈 접미사 DLL로 UE 5.7 `TunaSweeperEditor Win64 Development` 링크 검증을 성공시켰다.
+
+## 2026-08-04 15:34:00 (소요시간: 00:09:06)
+
+- 이전 `main` 반영 이후 `NativeNPC`에 추가된 `3fbcef9`, `d965cde`, `e0ac4df` 세 커밋을 `main`에 체리픽하고 원격 `origin/main`에 반영했다.
+- `Docs/questions.md`와 `Docs/requests.md`의 충돌은 양쪽 기록을 보존하고 충돌 표식을 제거하여 해결했다.
+
+## 2026-08-04 15:45:00 (소요시간: 00:05:38)
+
+- 서울 ASOS 관측소의 작년 일별 최고·최저기온과 올해 어제까지의 확정 최고기온, 오늘 진행 중 최고기온을 동적으로 취득할 수 있는지 조사했다.
+- 기상청 ASOS 일자료·시간자료 및 API허브의 현재 일극값 API 조합으로 구현 가능하며, 인증키를 Worker Secret으로 보관하는 서버측 프록시가 필요하다는 결론을 냈다.
+- 월별 보조선과 5도 단위 가로선, 양쪽 온도축을 갖는 독립 페이지는 기존 Cloudflare Worker SPA에 별도 경로로 추가할 수 있다. 이번 단계에서는 구현하지 않았다.
+
+## 2026-08-04 15:52:00 (소요시간: 00:02:30)
+
+- 확정된 과거 기온은 D1에 캐싱하고, 작년 최고·최저는 50% 투명 점선, 올해 최고·최저는 오늘 잠정값을 포함한 실선으로 표시하는 그래프 규칙을 확정했다.
+- 기상청 API허브 회원가입·인증키 발급 페이지와 Worker Secret 등록 방식을 안내했다.
