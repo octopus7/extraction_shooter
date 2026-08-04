@@ -50,8 +50,27 @@ private:
 	void RegisterMenus()
 	{
 		FToolMenuOwnerScoped OwnerScoped(this);
-		UToolMenu* ToolsMenu = UToolMenus::Get()->ExtendMenu("LevelEditor.MainMenu.Tools");
-		FToolMenuSection& Section = ToolsMenu->FindOrAddSection("Tools");
+
+		UToolMenu* MainMenu = UToolMenus::Get()->ExtendMenu(TEXT("LevelEditor.MainMenu"));
+		FToolMenuSection& MainSection = MainMenu->FindOrAddSection(NAME_None);
+		if (!MainSection.FindEntry(TEXT("TunaSweeper")))
+		{
+			FToolMenuEntry& TunaSweeperEntry = MainSection.AddSubMenu(
+				TEXT("TunaSweeper"),
+				LOCTEXT("TunaSweeperTopMenu", "TunaSweeper"),
+				LOCTEXT("TunaSweeperTopMenuTooltip", "Open TunaSweeper editor tools."),
+				FNewToolMenuChoice());
+			TunaSweeperEntry.InsertPosition = FToolMenuInsert(TEXT("Tools"), EToolMenuInsertType::After);
+		}
+
+		UToolMenu* TunaSweeperMenu = UToolMenus::Get()->RegisterMenu(
+			TEXT("LevelEditor.MainMenu.TunaSweeper"),
+			NAME_None,
+			EMultiBoxType::Menu,
+			false);
+		FToolMenuSection& Section = TunaSweeperMenu->FindOrAddSection(
+			TEXT("AssetTools"),
+			LOCTEXT("TunaSweeperAssetToolsMenuSection", "Asset Tools"));
 		Section.AddMenuEntry(
 			"OpenStaticMeshQualitySwitcher",
 			LOCTEXT("OpenToolLabel", "Static Mesh Quality Switcher"),
