@@ -6,7 +6,7 @@ Update it whenever a new state field is expected to persist across save slots, l
 ## Current Save Container
 
 - Save object: `UTunaSweeperSaveGame`
-- Current save version: `18`
+- Current save version: `19`
 - Runtime owner: `UTunaSweeperGameInstance`
 - Save entry point: `UTunaSweeperGameInstance::SaveGameStateInternal()`
 - Load entry point: `UTunaSweeperGameInstance::LoadGameState()`
@@ -31,10 +31,15 @@ Raid item changes keep their existing extraction/death/level-travel save rules a
 
 - `SaveVersion`
 - `SaveSlotIndex`
+- `DatasetId`: active quest dataset id (`public`, `production_demo`, or `production_release`). Saves older than version 19 with no dataset id belong to `public`.
+- `DatasetRevision`: informational content revision written by the active dataset. Compatible content updates may change this value without changing the save namespace.
+- `SaveCompatibilityId`: stable save-lineage id. A save whose value does not match the active dataset is rejected; change this id only for intentionally incompatible progression changes.
 - `TotalPlaySeconds`
 - `DifficultyStage`: save-slot difficulty stage, clamped to `1..3`; `1` is Farming, `2` is Normal, and `3` is Hard. New slots keep the default `1` until the player confirms a difficulty.
 - `bDifficultySelected`: whether the active slot has confirmed the difficulty selection screen. New save slots start as `false`, so continuing a slot created at the difficulty screen returns to that screen until the player presses game start. Saves older than version 18 are treated as already selected for compatibility.
 - `LastSavedAtTicks`
+
+Public saves retain the legacy `TunaSweeperSave_Slot01` through `03` names. `ProductionDemo` and `ProductionRelease` use separate save-slot names, last-selected-slot settings, and backup directories. Switching quest datasets therefore switches the complete save profile, not only quest progress; production quest rewards cannot leak items, currency, unlocks, or world state into another dataset.
 
 ### Scenario Progress Flags
 

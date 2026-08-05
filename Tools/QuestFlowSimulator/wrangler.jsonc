@@ -1,0 +1,34 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "quest",
+  "main": "src/worker/index.ts",
+  "compatibility_date": "2026-07-31",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "assets": {
+    "not_found_handling": "single-page-application",
+    "run_worker_first": [
+      "/api/*"
+    ]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "quest-flow-simulator",
+      "database_id": "f2184cd9-0067-498e-a3e9-594e033f8130",
+      "migrations_dir": "./migrations"
+    }
+  ],
+  "secrets": {
+    "required": [
+      "ADMIN_PASSWORD"
+    ]
+  },
+  "observability": {
+    "enabled": true,
+    "logs": {
+      "head_sampling_rate": 1
+    }
+  }
+}

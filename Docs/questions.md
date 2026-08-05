@@ -2374,36 +2374,6 @@ distance field 문제일 가능성은 낮다. 프로젝트 설정에는 `r.Gener
 
 다음 단계는 더 세부적인 내용을 작성하는 것이 맞지만, 모든 장을 한 번에 장문으로 확장하기보다 먼저 강의 운영 단위와 샘플 장을 정하는 것이 좋다. 우선 루트에 전체 강의 차시, 시간, 산출물, 실습 순서를 담는 계획 문서를 만들고, 그 다음 `00_Orientation`과 `01_UEProjectSetup`에 강의 원고와 실습 지시를 샘플로 작성한다. 형식이 맞으면 플레이 가능한 최소 루프인 플레이어/입력, 상호작용, 아이템/루팅, 레이드 탈출 순서로 세부 강의를 확장하는 흐름이 적합하다.
 
-## 2026-07-03 13:50:53 (소요시간: 00:00:35)
-
-### 질문
-
-퀘스트 진행이나 선행 조건 관련 관계를 파악하려면 JSON 파일을 직접 여는 것 말고는 방법이 없는지에 대한 질문.
-
-### 답변
-
-현재 프로젝트에는 퀘스트 선행 조건과 진행 관계를 전용 그래프나 에디터 도구로 보여주는 기능은 없다. 관계의 원본 데이터는 `TunaSweeper/Content/Data/QuestDefinitions.json`의 `required_completed_quest_ids`, `provider_id`, `objectives`, `rewards` 필드이며, 런타임은 `UTunaSweeperQuestSubsystem`에서 이를 읽어 수락 가능 여부와 제공자별 후보 퀘스트를 계산한다. 따라서 지금은 JSON 또는 관련 문서를 보는 방식이 기본이지만, JSON을 읽어 Markdown 표, Mermaid 그래프, CSV, 또는 Unreal Editor 탭으로 관계도를 출력하는 보조 도구를 추가하면 직접 JSON을 열지 않고도 파악할 수 있다.
-
-## 2026-07-03 13:52:10 (소요시간: 00:00:25)
-
-### 질문
-
-퀘스트 관계 그래프 뷰어를 UE 에디터로 만드는 것이 좋은지, 외부 도구로 만드는 것이 좋은지에 대한 질문.
-
-### 답변
-
-초기 구현은 외부 자동 생성 도구가 적합하다. 퀘스트 원본이 JSON이므로 Unreal Editor 실행 없이 빠르게 `Docs/quest_graph.md` 같은 Mermaid 그래프나 정적 HTML을 생성할 수 있고, Git diff와 코드 리뷰, 누락 선행 조건/순환 참조 검증을 함께 처리하기 쉽다. UE 에디터 탭은 디자이너가 에디터 안에서 노드를 선택하고 실제 퀘스트 데이터를 편집하거나 레벨 액터와 연결해야 할 때 2단계로 추가하는 편이 좋다. 권장 순서는 외부 Markdown/HTML 그래프 생성기, 검증 로직 추가, 필요 시 같은 분석 코드를 재사용하는 UE Editor Nomad Tab 확장이다.
-
-## 2026-07-03 13:53:13 (소요시간: 00:00:55)
-
-### 질문
-
-퀘스트 그래프 생성기를 어떤 기술 스택으로 만들지에 대한 질문.
-
-### 답변
-
-프로젝트의 기존 `Tools` 폴더에 있는 보조 도구들이 C#/.NET 기반이므로, 퀘스트 그래프 생성기도 C# 콘솔 도구로 만드는 것이 적합하다. `System.Text.Json`으로 `TunaSweeper/Content/Data/QuestDefinitions.json`을 읽고, 의존성 없이 `Docs/quest_graph.md`에 Mermaid 그래프와 요약 표, 검증 결과를 출력하는 구조가 좋다. 초기 버전은 WPF나 웹 UI 없이 콘솔 생성기로 두고, 필요해지면 같은 파서/검증 코드를 재사용해 정적 HTML 또는 UE Editor Nomad Tab으로 확장한다.
-
 ## 2026-07-04 11:34:50 (소요시간: 00:00:21)
 
 ### 질문
@@ -3510,3 +3480,435 @@ Chaos 토마토 파괴 단면용 과육 재질은 재질만 준비하면 되는�
 ### 답변
 
 프로젝트 C++에는 구르기 외의 Montage 재생/정지 호출이 없고 `FinishRoll()`도 몽타주를 정지하지 않는다. 따라서 ABP의 `DefaultSlot` 배치가 가장 유력하다. Slot 노드는 State Machine 내부 특정 상태가 아니라 `Locomotion State Machine 출력 → DefaultSlot → Output Pose`처럼 항상 통과하는 최종 AnimGraph 경로에 둬야 한다. 이동 상태 전환이나 Aim 분기 뒤에 Slot이 있으면 상황에 따라 몽타주가 우회되어 중간에 원래 포즈로 돌아올 수 있다.
+
+## 2026-07-31 15:01:00 (소요시간: 00:05:40)
+
+### 질문
+
+언리얼 엔진과 별도로 퀘스트 설계에 따른 플레이 시간 및 동선 반복 시뮬레이션 도구를 만들 때 사용할 기술 스택을 문의. 실제 이동을 완벽하게 재현할 필요는 없고, 장소 간 이동 시간 오차가 2~3m 이동분 정도인 근사 모델이면 충분하다고 보충 설명.
+
+### 답변
+
+근사 모델이면 별도 서버나 물리 엔진 없이 TypeScript 단일 스택을 권장한다. React, Vite, Zustand로 UI와 상태를 구성하고 기존 MapLayoutEditor와 동일하게 Konva로 장소 및 동선을 표시한다. 시뮬레이션 코어는 UI와 분리된 순수 TypeScript 모듈로 만들고 Web Worker에서 결정적 시드 기반 Monte Carlo 반복 실행을 수행한다. 공간은 연속 좌표나 NavMesh 대신 장소 노드와 이동 구간 간선으로 표현하고, 각 간선에 거리 또는 기본 이동 시간, 지형 및 이동수단 배율, 전환 지연을 둔다. 퀘스트 목표에는 전투, 탐색, 수집, 상호작용 시간 분포를 둔 뒤 Dijkstra 또는 A*로 동선을 선택한다. 입력은 Unreal과 공유하기 쉬운 JSON, 결과는 우선 JSONL/CSV로 내보내며 대규모 자동 배치나 CI가 필요해질 때만 .NET 10 콘솔 러너 또는 SQLite를 추가한다. Unreal은 소수 표본의 실제 이동 시간을 측정해 간선 계수를 보정하는 검증기로 사용한다.
+
+## 2026-07-31 15:07:50 (소요시간: 00:01:25)
+
+### 질문
+
+React, TypeScript, Vite, Konva 조합 외에 퀘스트 플레이 시간 및 동선 근사 시뮬레이션 도구에 사용할 수 있는 다른 기술 조합을 문의.
+
+### 답변
+
+Windows 전용 프로젝트 도구라면 C#/.NET 10, WPF, Canvas 또는 DrawingVisual, ScottPlot 조합을 1순위 대안으로 권장한다. 별도 서버나 브라우저 없이 단일 데스크톱 프로그램으로 배포하기 쉽다. 크로스플랫폼이 필요하면 WPF 대신 Avalonia를 사용할 수 있다. 빠른 통계 실험과 모델 변경이 최우선이면 Python, PySide6, QGraphicsScene, NetworkX, NumPy 또는 Polars 조합이 좋지만 패키징과 장기 타입 안정성은 C#보다 불리하다. 지도 위 애니메이션과 게임 같은 조작감을 중시하면 Godot 4와 C#도 가능하지만, 표와 그래프 중심의 설계 도구에는 UI 작성 비용과 엔진 의존성이 더 크다. React만 피하려는 경우에는 Svelte, PixiJS, Tauri 조합도 가능하지만 현재 프로젝트에서는 새 Rust 및 웹 패키징 계층을 추가할 이점이 크지 않다.
+
+## 2026-07-31 15:10:00 (소요시간: 00:04:30)
+
+### 질문
+
+퀘스트 동선 시뮬레이션 도구를 Cloudflare Workers와 D1 기반으로 공개하고, 비로그인 사용자는 공개 퀘스트 설정을 열람하며 로그인 사용자는 JSON 작업 상태를 데이터베이스에 저장하도록 구성하는 방안이 적합한지 문의.
+
+### 답변
+
+해당 공개 및 사용자 저장 구조에는 Workers와 D1이 잘 맞는다. 프런트엔드는 Workers Static Assets로 같은 도메인에서 제공하고, Worker API는 공개된 퀘스트 리비전 조회와 인증된 사용자의 작업 상태 CRUD만 담당하도록 한다. 근사 Monte Carlo 계산은 기본적으로 브라우저 Web Worker에서 실행해 Cloudflare CPU 사용량을 줄이고, Worker에는 입력 JSON과 요약 결과만 저장한다. 공개 퀘스트 원본과 사용자 작업 상태는 별도 테이블로 분리하고, 작업 테이블에는 user_id, base_revision_id, schema_version, version, updated_at처럼 검색 및 권한 검사에 필요한 열을 정규화하며 실제 편집 상태만 JSON TEXT로 저장한다. 동일 사용자의 여러 탭에서 덮어쓰지 않도록 version을 이용한 낙관적 잠금을 적용한다. 인증은 고객용 OIDC/OAuth 공급자와 HttpOnly 세션 쿠키를 사용하고, Cloudflare Access는 내부 관리자 도구가 아니라 일반 고객 로그인 용도로는 사용하지 않는다. 공개 GET은 캐시 가능하게 하고 모든 저장 API는 세션에서 얻은 user_id로 소유권을 검사한다. 실행 궤적처럼 커질 수 있는 상세 로그는 D1에 누적하지 않고 필요할 때 R2에 저장하며, 서버에서 대량 시뮬레이션이 꼭 필요해질 경우에만 Queue 소비자로 작업을 분할한다.
+
+## 2026-07-31 15:16:50 (소요시간: 00:00:30)
+
+### 질문
+
+퀘스트 동선 시뮬레이션 웹 도구를 저장소의 `Tools` 하위 경로에 구현할 것인지 문의.
+
+### 답변
+
+`Tools/QuestFlowSimulator/`를 독립 프로젝트 루트로 사용하는 것이 적합하다. Unreal 프로젝트 및 기존 MapLayoutEditor와 소스와 의존성을 섞지 않고, 이 경로 아래에 자체 package.json, wrangler.jsonc, 프런트엔드, Worker API, D1 마이그레이션, 테스트 및 로컬 실행·배포 스크립트를 둔다. 공통 퀘스트 JSON은 필요한 경우 명시적인 import 또는 별도 공유 데이터 경로를 통해 연동한다.
+
+## 2026-07-31 15:17:30 (소요시간: 00:03:15)
+
+### 질문
+
+현재 Wrangler에 로그인된 계정 이메일의 로컬 파트가 `b`로 시작하고 `l`로 끝나는지, 그리고 중간에 `kim` 문자열이 포함되는지 문의.
+
+### 답변
+
+Wrangler `whoami`를 통해 전체 이메일을 노출하지 않고 확인했다. 이메일 로컬 파트는 `b`로 시작하지만 `l`로 끝나지는 않고 `m`으로 끝나며, 대소문자 구분 없이 `kim` 문자열을 포함한다. 전체 이메일 주소와 계정 식별자는 기록하지 않았다.
+
+## 2026-07-31 15:20:40 (소요시간: 00:01:15)
+
+### 질문
+
+현재 PC에서 Wrangler 인증 정보가 저장되는 위치를 문의.
+
+### 답변
+
+현재 인증은 환경 변수나 Windows Credential Manager가 아니라 `C:\Users\blendue\AppData\Roaming\xdg.config\.wrangler\config\default.toml`에 저장되어 있다. 파일에는 OAuth access token, refresh token, 만료 시각 및 scope 항목이 있으며 값은 확인하거나 기록하지 않았다. 현재 `default.enc`는 존재하지 않는다. 최신 Wrangler는 기본적으로 해당 TOML 파일에 평문으로 저장하며, `wrangler login --use-keyring`을 사용하면 인증 정보는 같은 위치의 AES-256-GCM 암호화 `default.enc`로 옮겨지고 암호화 키는 Windows Credential Manager에 저장된다.
+
+## 2026-07-31 15:21:40 (소요시간: 00:01:20)
+
+### 질문
+
+Wrangler에서 Cloudflare 계정을 변경하려면 기존 계정에서 반드시 로그아웃해야 하는지, 여러 계정에 로그인한 뒤 전환할 수 있는지 문의.
+
+### 답변
+
+최신 Wrangler는 named auth profile 기능을 제공하므로 로그아웃 없이 여러 OAuth 로그인을 보관하고 전환할 수 있다. `wrangler auth create <name>`으로 프로필을 만들고, `wrangler --profile <name> <command>` 또는 명령의 `--profile` 전역 옵션으로 일회성 선택을 할 수 있다. `wrangler auth activate <name> <directory>`로 특정 디렉터리와 하위 경로에 프로필을 결합할 수도 있다. `Tools/QuestFlowSimulator`에는 전용 프로필을 결합하고 `wrangler.jsonc`에도 대상 `account_id`를 명시해 잘못된 계정으로 배포되는 것을 이중으로 방지하는 구성을 권장한다. 해당 auth profile 명령은 현재 공식 문서에서 Experimental로 표시된다.
+
+## 2026-07-31 15:25:30 (소요시간: 00:01:20)
+
+### 질문
+
+Cloudflare Account ID가 저장소에 포함되어도 되는 비민감 정보인지 문의.
+
+### 답변
+
+Account ID는 계정을 지정하는 식별자일 뿐 인증이나 권한을 부여하는 자격 증명이 아니므로 `wrangler.jsonc`에 포함해 저장소에 커밋해도 된다. Cloudflare 공식 Wrangler 설정에도 `account_id`가 일반 구성값으로 정의되어 있다. 반대로 API token, OAuth access 및 refresh token, Global API Key, OAuth client secret, 비밀번호와 `.dev.vars` 또는 `.env`의 실제 비밀값은 저장소에 포함하면 안 된다. 실제 Account ID 값은 질문 기록에 남기지 않았다.
+
+## 2026-07-31 15:27:00 (소요시간: 00:00:40)
+
+### 질문
+
+인증 토큰은 Worker 원격 설정에만 남고 로컬 PC에는 저장되지 않는지 문의.
+
+### 답변
+
+토큰 종류에 따라 다르다. 현재 PC에서 `wrangler login`에 사용되는 OAuth access token과 refresh token은 로컬의 `C:\Users\blendue\AppData\Roaming\xdg.config\.wrangler\config\default.toml`에 저장되어 있으며 현재 방식은 평문 TOML이다. 이는 Wrangler가 Cloudflare 계정을 관리하고 배포하기 위한 CLI 인증 정보다. 반면 `wrangler secret put`으로 등록하는 Worker 애플리케이션 secret은 Cloudflare에 암호화되어 저장되고 `wrangler.jsonc`나 저장소에는 값이 남지 않으며, 등록 후 Wrangler나 대시보드에서 값을 다시 조회할 수 없다. 로컬 개발에서 같은 secret이 필요하면 별도의 `.dev.vars` 또는 `.env` 파일에 둘 수 있지만 반드시 Git에서 제외해야 한다. D1 binding에는 인증 토큰이 필요하지 않고 공개 가능한 account 및 database 식별자만 설정한다.
+
+## 2026-07-31 15:28:00 (소요시간: 00:01:40)
+
+### 질문
+
+현재 Wrangler의 기본 인증 정보에 `bleng`이라는 named auth profile 이름을 붙이는 방법을 문의.
+
+### 답변
+
+현재 Wrangler에는 기존 `default` 프로필을 이름만 바꾸는 rename 명령이 없다. `wrangler auth create bleng`을 실행하고 브라우저에서 현재와 같은 Cloudflare 계정으로 다시 OAuth 승인하면 `bleng` named profile이 추가되며 기존 기본 로그인은 유지된다. 평문 저장을 피하려면 먼저 `wrangler auth keyring enable`을 실행한다. 생성 후 `wrangler whoami --profile bleng`으로 확인하고, 도구 경로가 만들어진 뒤 `wrangler auth activate bleng D:\github\extraction_shooter\Tools\QuestFlowSimulator`로 해당 디렉터리와 하위 경로에 결합하는 순서를 권장한다. Auth profile 기능은 현재 Experimental이다.
+
+## 2026-07-31 15:35:00 (소요시간: 00:01:40)
+
+### 질문
+
+프로젝트에 로컬 설치한 Wrangler를 사용하려면 Cloudflare 계정 인증을 다시 해야 하는지 문의.
+
+### 답변
+
+현재 계정을 그대로 사용한다면 다시 인증할 필요가 없다. `Tools\QuestFlowSimulator`에 설치한 로컬 Wrangler에서 `whoami`를 실행한 결과 종료 코드 0으로 기존 `default` OAuth 인증을 정상 인식했다. 다만 `bleng`이라는 named auth profile을 새로 만들려면 `wrangler auth create bleng` 실행 시 브라우저 OAuth 승인이 한 번 필요하다.
+
+## 2026-07-31 15:36:55 (소요시간: 00:00:30)
+
+### 질문
+
+로컬 Wrangler에서 `bleng` named auth profile을 만들고 프로젝트에 적용하는 명령 안내를 요청.
+
+### 답변
+
+`Tools\QuestFlowSimulator` PowerShell에서 `npx wrangler auth keyring enable`, `npx wrangler auth create bleng`, `npx wrangler auth activate bleng .` 순서로 실행하도록 안내했다. 생성 과정에서 브라우저 OAuth 승인이 한 번 필요하며, `npx wrangler auth list`와 `npx wrangler whoami`로 적용 상태를 확인할 수 있다. 설치된 Wrangler 4.116.0의 도움말로 해당 구문을 확인했다.
+
+## 2026-07-31 16:30:15 (소요시간: 00:04:55)
+
+### 질문
+
+Quest Flow Simulator의 사용자 인증 방식을 문의.
+
+### 답변
+
+초기 인증은 Cloudflare Access와 Cloudflare 자체 IdP를 사용하고 Cloudflare 계정 멤버만 허용하는 구성을 권장했다. 공개 체험판은 비로그인 상태로 유지하고 인증 전용 API 경로만 Access로 보호하며, Worker는 `Cf-Access-Jwt-Assertion`의 서명·발급자·AUD를 검증한 뒤 `sub`를 D1 `owner_subject`로 사용한다. 외부 사용자를 받을 때는 허용 이메일을 제한한 OTP 또는 Google 같은 외부 IdP를 추가할 수 있다. 현재 `workers.dev`의 전체 Worker Access를 바로 활성화하면 공개 체험판까지 로그인으로 잠길 수 있으므로, 경로 단위 Access가 가능한 커스텀 도메인을 사용하거나 인증 API를 별도 Worker로 분리해야 한다.
+
+## 2026-07-31 16:35:30 (소요시간: 00:02:00)
+
+### 질문
+
+혼자 사용하는 도구라면 Cloudflare Access 대신 관리자 비밀번호 정도로 인증해도 무방한지 문의.
+
+### 답변
+
+혼자 사용하고 공개 체험판을 유지하는 현재 구조에서는 단일 관리자 비밀번호와 서명된 세션 쿠키 방식도 충분히 합리적이라고 답했다. 비밀번호 또는 검증값과 세션 서명 키는 Git, `wrangler.jsonc`, D1에 넣지 않고 Worker Secret으로 저장하며, 인증 성공 후 `Secure`, `HttpOnly`, `SameSite=Strict` 속성의 쿠키를 발급하도록 권장했다. 로그인 시도 제한, 일정 시간 후 세션 만료, 로그아웃, 동일 출처 검사도 함께 적용하고 사용자 소유자는 고정 `admin` 식별자로 단순화할 수 있다.
+
+## 2026-07-31 17:04:20 (소요시간: 00:00:48)
+
+### 질문
+
+현재 `ADMIN_PASSWORD` Secret이 로컬에는 남지 않고 Worker에만 존재하는 상태인지 문의.
+
+### 답변
+
+프로젝트 하위의 `.dev.vars`, `.env` 계열 파일은 0개이고, 현재 프로세스·사용자·시스템 환경 변수에도 `ADMIN_PASSWORD`가 설정되지 않았음을 값 노출 없이 확인했다. 원격 `wrangler secret list`에는 `ADMIN_PASSWORD`가 `secret_text`로 존재하므로 현재 애플리케이션 비밀번호는 Cloudflare Worker Secret에만 저장된 상태다. 단, Worker를 관리하기 위한 Wrangler OAuth 인증 정보는 별개이며 로컬의 암호화된 `default.enc`와 Windows Credential Manager에 남아 있다.
+
+## 2026-07-31 17:05:20 (소요시간: 00:00:47)
+
+### 질문
+
+관리자 비밀번호를 분실해도 Wrangler 권한으로 언제든 새 값을 설정할 수 있는지 문의.
+
+### 답변
+
+해당 Worker에 대한 쓰기 권한이 있는 Wrangler 인증을 유지하고 있다면 기존 비밀번호를 몰라도 `npx wrangler secret put ADMIN_PASSWORD`로 새 값을 덮어쓸 수 있다. Secret의 현재 값은 Wrangler나 대시보드에서 다시 조회할 수 없고 교체만 가능하다. 현재 구현에서는 비밀번호 교체만으로 이미 발급된 D1 세션이 즉시 폐기되지는 않으므로 유출 대응이라면 `admin_sessions` 테이블을 비워 기존 세션도 함께 무효화해야 한다.
+
+## 2026-07-31 17:06:35 (소요시간: 00:00:48)
+
+### 질문
+
+체험판 퀘스트 문서에 없는 `선착장`, `마을 광장` 장소가 웹 도구에 들어간 출처를 문의.
+
+### 답변
+
+두 장소는 체험판 문서에서 가져온 값이 아니라 초기 프런트엔드 MVP의 API 연결 실패용 `FALLBACK_DATASET`을 만들면서 임의로 넣은 잘못된 샘플 데이터임을 확인했다. 커밋 `85683b65`의 `Tools/QuestFlowSimulator/src/client/App.svelte`에만 존재하며, D1 체험판 seed는 문서에 있는 벙커, 공구 보관 장소, 취수 시설, 북쪽 파밍 지역, 외부 식량 창고를 사용한다. fallback은 첫 렌더 또는 API 실패 시 노출될 수 있으므로 원문 기반 데이터와 혼동되지 않게 제거하거나 실제 demo dataset과 동일하게 바꾸는 것이 맞다.
+
+## 2026-07-31 17:08:20 (소요시간: 00:01:05)
+
+### 질문
+
+Codex에서 Sol 모델은 유지한 채 reasoning effort만 낮추면 작업 품질이나 컨텍스트 패널티가 발생하는지 문의.
+
+### 답변
+
+같은 `gpt-5.6-sol`에서 reasoning effort만 낮추는 것은 모델 전환이 아니므로 기존 대화 컨텍스트를 버리거나 별도 모델 전환 패널티를 적용한다는 공식 문서는 없다. 이후 턴에 투입되는 추론량만 줄어 속도와 사용량은 개선되지만 복잡한 설계, 디버깅, 다단계 검증에서는 판단 깊이와 실수 방지 능력이 낮아질 수 있다. 모델을 바꾸더라도 컨텍스트가 즉시 삭제되는 것은 아니지만 Codex는 다음 턴에 일회성 모델 전환 지시를 적용하며, 새 모델의 컨텍스트 창이 더 작으면 요약 압축이 더 일찍 발생할 수 있다. 따라서 단순 구현은 Sol Low/Medium, 복잡한 설계·보안·배포 판단은 High 이상으로 올리는 운용이 적절하다.
+
+## 2026-07-31 18:22:10 (소요시간: 00:07:50)
+
+### 질문
+
+배포된 체험판 화면에 여전히 `선착장`이 보이므로 새 데이터가 실제로 배포됐는지 문의.
+
+### 답변
+
+실서비스 D1과 `/api/catalogs/demo`는 이미 문서 기반 장소를 반환하고 있었지만, 브라우저의 `quest-flow:draft:demo`에 남은 구버전 공개 초안을 카탈로그 데이터보다 우선 복원하는 문제였다. 초안을 `datasetVersion`과 함께 저장하고 버전 불일치·구형 형식 초안은 자동 폐기하도록 수정했다. 또한 `datasetVersion`이 원문 해시가 아니라 실제 생성 데이터 내용의 해시가 되도록 변경해 생성 규칙 변경도 버전 갱신에 반영했다. D1 시드와 Worker를 버전 `87f4a0c7-e795-4636-8cb1-b92a8853fec1`로 전체 재배포했으며, 실서비스 브라우저에서 `벙커`, `공구 보관 장소`, `취수 시설`, `북쪽 파밍 지역`, `외부 식량 창고`만 표시되고 `선착장`과 `마을 광장`은 없는 것을 확인했다.
+
+## 2026-07-31 18:56:00 (소요시간: 00:13:00)
+
+### 질문
+
+퀘스트 노드가 맵상의 장소처럼 취급되는 문제를 어떻게 분리할지, 그리고 3개 그래프 표기 모드와 휠 줌을 적용할 수 있는지 문의.
+
+### 답변
+
+퀘스트 노드는 체인 시각화용 좌표만 보유하도록 `questNodes`로 분리하고, 맵상의 장소는 `places`로 별도 모델링했다. 중앙 캔버스는 퀘스트 체인 모드(노드 이동 가능), 선택 퀘스트 동선 모드(읽기 전용), 장소 편집 모드(장소 추가·수정 가능)로 나눴으며, 모든 모드에서 휠 줌을 지원하도록 구현했다.
+
+## 2026-08-01 16:12:15 (소요시간: 00:10:00)
+
+### 질문
+
+캔버스 확장 이후 페이지 하단 UI가 브라우저 아래로 밀리고 브라우저 스크롤바가 생긴 문제의 원인과 수정 방향 문의.
+
+### 답변
+
+논리적인 캔버스 크기(`canvasWidth`, `canvasHeight`)를 SVG의 실제 CSS 픽셀 크기에도 적용하면서, 중앙 캔버스가 고정된 레이아웃 영역을 넘어 grid 최소 크기에 기여하는 것이 주원인이다. 현재 `map-frame`의 자동 스크롤은 부모 레이아웃 높이가 먼저 늘어난 뒤에 동작하므로 하단 UI를 보호하지 못한다. 논리 캔버스 크기는 `viewBox`와 좌표 계산에만 사용하고 SVG는 고정 뷰포트에 `width: 100%; height: 100%`로 맞춘 뒤, 바깥 앱을 `100dvh`와 `overflow: hidden`으로 고정한다. 중앙 캔버스는 `overflow: hidden`으로 두고 기존 패닝·줌 transform으로 내부에서만 이동·확대하며, 속성·결과 패널만 필요할 때 내부 스크롤하도록 수정하는 방향이 적합하다. 모바일·Pro 모드의 grid 행도 `minmax(0, 1fr)` 기준으로 재조정해야 브라우저 전체 스크롤 없이 동일한 동작을 보장할 수 있다.
+
+## 2026-08-03 01:17:11 (소요시간: 00:04:14)
+
+### 질문
+
+AI Native NPC 요구사항·구현 계획 v0.4.6을 현재 TunaSweeper 적 AI에 적용할 수 있는지, 기존 적 AI와 신규 구현을 GameInstance에서 언제든 선택·교체할 수 있는 구조가 가능한지 문의.
+
+### 답변
+
+적용은 가능하지만 즉시 전체 교체할 수 있는 완성 런타임은 아니다. 외부 저장소의 현재 `main`은 계약·문서·생성 Header 중심이고, 문서도 RC5 Utility Baseline 수직 슬라이스만 조건부 GO로 판정하며 V1 Neural/OOD/Calibration과 최종 Freeze는 보류한다. TunaSweeper는 UE 5.7, 커스텀 소음·팩션·분대 월드 서브시스템, 적 무기·이동·전투 실행기를 이미 보유하므로 Belief/Target/Skill Executor에 재사용할 수 있다. 반면 판단·지각·이동·사격이 `ATunaSweeperEnemyAIController`에 결합되어 있고 NNE 플러그인과 모듈 의존성, Stable Target ID/Revision, Goal Manager, Candidate/Commit 계층은 아직 없다.
+
+권장 구조는 적 캐릭터의 `AIControllerClass`를 두 클래스 사이에서 바꾸는 것이 아니라 현재 Controller를 공통 호스트로 유지하고, 내부 Brain만 `Legacy`, `AINativeUtility`, `AINativeNeural`, `Shadow` 모드로 교체하는 전략 구조다. `UTunaSweeperGameInstance`는 전역 기본 모드와 변경 API·delegate만 소유하고, 월드 서브시스템이 기존 Controller들에 안전 경계 전환을 전달한다. 캐릭터의 체력·탄약·무기, 팩션·분대 권한, 이동·공격 실행기는 공통으로 유지하며, Neural 실패는 동일 Native 계약의 Utility로 fallback한다. 실제 플레이 중 전환은 pending inference와 이동 요청을 취소하고 이미 발사된 투사체는 유지한 뒤, 표준 handoff snapshot을 넘겨 다음 안전한 Skill 경계에서 수행해야 한다. 우선 Router와 Legacy 무변경 경로, Shadow 모드, Utility 기반 비전투 수직 슬라이스, 기존 전투 FSM을 복합 `Attack` Skill Executor로 감싸는 순서가 안전하다. 외부 저장소 루트에 명시적 라이선스 파일이 보이지 않으므로 계약·생성 코드를 직접 복사하기 전 사용 권한도 확인해야 한다.
+
+## 2026-08-03 01:24:23 (소요시간: 00:00:08)
+
+### 질문
+
+현재 Git 작업 브랜치 이름 문의.
+
+### 답변
+
+현재 브랜치는 `NativeNPC`다.
+
+## 2026-08-03 01:28:13 (소요시간: 00:01:00)
+
+### 질문
+
+검토 문서 메인을 만들고 개별 검토 문서가 메인에서 링크되는 구조인지 문의.
+
+### 답변
+
+처음에는 개별 문서만 작성했으나, `Docs/reviews/README.md`를 검토 문서 메인 인덱스로 추가하고 `Docs/reviews/ai_native_npc_applicability_review.md`를 링크하는 구조로 정리했다. 이후 검토 문서도 같은 디렉터리에 두고 메인 문서 목록에 상태와 요약을 함께 추가하도록 관리 규칙을 기록했다.
+
+## 2026-08-03 01:42:20 (소요시간: 00:00:16)
+
+### 질문
+
+현재 AI Native NPC에 사용할 학습된 모델이 없는 상태인지 문의.
+
+### 답변
+
+현재 TunaSweeper 저장소에는 ONNX, PyTorch checkpoint, Model Bundle, Unreal NNE ModelData 또는 AI Native NPC inference 구현이 없으므로 학습된 정책 모델이 없는 상태다. 외부 AI Native NPC 저장소의 현재 `main`도 문서·YAML 계약·생성 Python/C++ 계약 중심이며 실제 학습 가중치나 배포 Model Bundle을 제공하지 않는다. 문서의 Utility Baseline은 학습 모델이 아니라 규칙 기반 비교·fallback 정책이고, `phase0_fixture`는 ONNX→NNE 연결과 parity를 검증하기 위한 smoke fixture 계획으로 실전 학습 모델을 의미하지 않는다. 실제 Neural 적용에는 Runtime Capture, Dataset 검증, 학습, ONNX export, Model Bundle 생성, Unreal NNE import와 parity·safety gate가 추가로 필요하다.
+
+## 2026-08-03 18:40:37 (소요시간: 00:02:10)
+
+### 질문
+
+플레이어 이동속도 평상시, 스프린트 각각 얼마씩인지 문의.
+
+### 답변
+
+`ATunaSweeperTopDownCharacter` 기본값 기준 평상시 이동속도는 `600 cm/s`(6 m/s)이고, 스프린트 배율은 `1.55`이므로 스프린트 이동속도는 `930 cm/s`(9.3 m/s)다. 단, 중량 상태에서는 별도 운반중량 이동속도 배율이 추가 적용될 수 있다.
+
+## 2026-08-04 14:29:30 (소요시간: 00:05:10)
+
+### 질문
+
+레벨에 배치된 스태틱 메시를 런타임이 아니라 에디터에서 지정한 품질에 따라 원본 메시와 저용량 대체 메시로 전환할 때, 모든 메시에 Blueprint를 붙이지 않는 효율적인 방식 문의.
+
+### 답변
+
+기존 `TunaSweeperEditor` 모듈에 에디터 전용 메시 품질 전환 도구를 두는 방식을 권장했다. 에디터 전용 매핑 데이터에 원본·저용량 메시 쌍을 보관하고, 툴바 또는 Editor Utility Widget에서 현재 레벨이나 선택 액터의 모든 `UStaticMeshComponent`를 순회해 트랜잭션 기반으로 일괄 교체한다. 매핑은 양방향이어야 하며, 피벗·머티리얼 슬롯·콜리전·소켓 호환성을 검증하고 World Partition의 미로딩 액터를 별도로 처리한다. 단순 거리 최적화면 LOD/Nanite가 우선이고, 빌드별 실제 메모리·패키지 용량을 줄이려면 에디터 전환 후 선택 품질만 참조·쿠킹되도록 매핑 자산을 런타임 참조에서 분리해야 한다.
+
+## 2026-08-04 14:37:20 (소요시간: 00:00:50)
+
+### 질문
+
+저용량 메시로 전환한 뒤 페어 역참조를 통해 원본 메시로 되돌릴 수 있는지 문의.
+
+### 답변
+
+가능하다. 각 원본·저용량 페어를 기준으로 `Original → Pair`와 `Low → Pair` 역인덱스를 모두 구성하면 현재 컴포넌트가 어느 쪽 메시를 사용하든 같은 페어를 찾을 수 있다. `Low` 적용은 페어의 저용량 메시를, `Original` 적용은 원본 메시를 지정하면 된다. 동일 메시가 여러 페어에 중복 등록되지 않도록 검증해야 하며, 저용량 메시가 없는 페어는 원본을 유지하고 경고하는 정책이 안전하다.
+
+## 2026-08-04 14:38:20 (소요시간: 00:00:45)
+
+### 질문
+
+서로 다른 원본·저용량 페어가 동일한 저용량 메시를 참조하면 역참조에 문제가 생기는지 문의.
+
+### 답변
+
+문제가 생긴다. 하나의 저용량 메시가 여러 원본에 대응하면 `Low → Original` 역참조가 모호해져 원본을 확정할 수 없다. 기본 구현에서는 저용량 메시의 중복 등록을 검증 오류로 금지하는 것이 가장 단순하고 안전하다. 공용 저용량 메시가 반드시 필요하다면 메시 자체의 역참조에 의존하지 않고, 전환 전에 각 액터·컴포넌트 식별자와 원본 메시 경로를 에디터 전용 레벨 사이드카 데이터에 저장해 복구해야 한다. 세션 메모리 캐시만 사용하는 방식은 에디터 재시작 후 복구할 수 없으므로 피해야 한다.
+
+## 2026-08-04 14:50:51 (소요시간: 00:00:34)
+
+### 질문
+
+현재 임시 퀘스트 데이터는 공개 저장소에 유지하고, 별도 비공개 저장소에 연결된 예시 퀘스트 3개를 구성하여 단일 플러그인 방식으로 공개/비공개 퀘스트 데이터를 전환할 수 있는지와 추가 저장소 관리 안내 제공 가능 여부를 문의.
+
+### 답변
+
+구현 가능하다. 현재 퀘스트 시스템은 `Content/Data/QuestDefinitions.json`과 `QuestTextStrings.csv`를 함께 로드하므로 두 파일을 하나의 전환 단위로 다루는 것이 안전하다. 공개 저장소에는 현재 데이터를 fallback으로 유지하고 공개 플러그인 skeleton, 동기화·검증 스크립트와 데이터 선택 로직을 둔다. 비공개 nested 저장소의 `PrivatePayload`에는 별도 ID를 가진 3연속 퀘스트 정의·문자열과 호환 revision manifest를 두고, 동기화된 marker가 있으면 비공개 데이터 경로를 선택하며 없으면 기존 공개 데이터로 복귀하게 만들 수 있다. 공개 저장소 clone, 비공개 payload clone, 동기화, 공개 모드 복귀, 누출 검사, 커밋·푸시 순서를 별도 관리 안내서로 제공할 수 있다. 데이터셋 전환 시 현재 로더가 정의에 없는 저장 진행도를 건너뛰므로 예시 프라이빗 퀘스트는 별도 ID와 별도 테스트 세이브를 사용하는 것이 안전하다.
+
+## 2026-08-04 14:53:26 (소요시간: 00:00:35)
+
+### 질문
+
+공개/비공개 퀘스트 데이터셋이 전환될 때 세이브 데이터도 해당 데이터셋에 맞춰 자동으로 전환·분리하는 방식에 대한 의견을 문의.
+
+### 답변
+
+권장하는 방식이다. 현재 세이브 슬롯은 데이터셋 구분 없이 `TunaSweeperSaveSlot01`부터 `03`까지 사용하므로, 활성 데이터셋의 안정적인 `dataset_id`를 세이브 슬롯 namespace에 포함해 공개·비공개 세이브를 물리적으로 분리해야 한다. 세이브 객체에도 `DatasetId`를 기록하여 잘못된 데이터셋에서 로드하려는 경우 차단하는 이중 검증을 둔다. 기존 세이브 파일은 공개 데이터셋 소속으로 간주하여 파일명과 진행도를 보존하고, 비공개 데이터셋은 별도 슬롯 이름과 별도 최근 선택 슬롯 설정을 사용한다. 데이터 내용 revision은 세이브 namespace를 바꾸지 않고 호환성 정보로만 기록하며, 진행 구조가 깨지는 변경에만 별도의 `save_compatibility_id`를 올리는 것이 안전하다.
+
+## 2026-08-04 15:27:27 (소요시간: 00:00:06)
+
+### 질문
+
+구현된 `Public`, `ProductionDemo`, `ProductionRelease` 데이터셋을 어떤 수단으로 전환하는지 문의.
+
+### 답변
+
+현재 구현은 Unreal Editor UI가 아니라 `TunaSweeper/Plugins/QuestDatasetSwitcher/Scripts/SwitchQuestDataset.ps1` PowerShell 스크립트의 `-Dataset` 인자로 전환한다. Unreal Editor를 종료한 뒤 저장소 루트에서 `-Dataset Public`, `-Dataset ProductionDemo`, `-Dataset ProductionRelease` 중 하나를 실행하고 에디터를 다시 시작한다. 스크립트는 선택한 프로덕션 퀘스트 정의와 문자열을 ignored 생성 경로에 materialize하거나, `Public` 선택 시 생성 경로를 제거한다. 런타임 플러그인은 marker를 읽어 퀘스트 파일 경로와 대응하는 전체 세이브 namespace를 자동으로 선택한다.
+
+## 2026-08-04 15:28:26 (소요시간: 00:00:06)
+
+### 질문
+
+퀘스트 데이터셋 전환을 PowerShell 명령 대신 Unreal Editor UI로 제공할 수 있는지 문의.
+
+### 답변
+
+가능하다. `QuestDatasetSwitcherEditor` 에디터 전용 모듈을 추가하고 Tools 메뉴나 전용 탭에 현재 데이터셋, ProductionPayload 설치 상태, `Public`·`ProductionDemo`·`ProductionRelease` 선택 버튼을 제공할 수 있다. UI는 별도의 전환 로직을 중복 구현하지 않고 기존 검증·동기화 스크립트를 호출해야 한다. PIE·Cook·빌드 중에는 전환을 막고, 성공 후 현재 세션에서 hot switch하지 않으며 dirty package 저장 확인과 에디터 재시작을 요구하는 흐름이 안전하다. 전환 실패 시 기존 활성 데이터셋과 세이브 namespace를 유지하고 스크립트 출력과 원인을 UI에 표시해야 한다.
+
+## 2026-08-04 15:32:40 (소요시간: 00:00:05)
+
+### 질문
+
+에디터 UI 데이터셋 전환 제한이 게임 실행 중뿐 아니라 Cook과 Build 진행 중도 포함되는지 확인 요청.
+
+### 답변
+
+포함된다. PIE, Simulate, Standalone, 별도 게임 프로세스 실행, Cook, Package, Build가 진행 중일 때는 데이터셋 전환 버튼을 비활성화하거나 실행을 거부해야 한다. 에디터가 유휴 상태일 때만 동기화를 허용하며, 전환 성공 후에는 이전 퀘스트와 세이브 descriptor가 메모리에 남아 있을 수 있으므로 새 데이터셋을 사용하기 전에 에디터 재시작을 필수로 한다.
+
+## 2026-08-04 17:34:50 (소요시간: 00:01:00)
+
+### 질문
+
+프로덕션 퀘스트 데이터를 보관할 접근 제한 Git 저장소를 현재 구조에 어떻게 설정하는지 문의.
+
+### 답변
+
+`ProductionPayload`는 공개 부모 저장소와 분리된 독립 Git 저장소로 관리한다. 다른 개발 환경에서는 공개 저장소를 먼저 clone한 다음 프로덕션 저장소를 정확히 같은 `ProductionPayload` 상대경로에 별도로 clone한다. 프로덕션 수정은 중첩 저장소의 `Datasets/ProductionDemo`와 `Datasets/ProductionRelease`에서만 수행하고, 두 데이터셋 검증 후 중첩 저장소에 독립적으로 commit·push한다. 공개 저장소 push 전에는 공개 데이터셋으로 복귀하고 `VerifyPublicSafety.ps1`을 실행한다.
+
+## 2026-08-04 17:35:55 (소요시간: 00:01:15)
+
+### 질문
+
+아직 원격 비공개 저장소가 없는 상태에서 중첩 저장소 경로가 어떻게 구성되며 GitHub Desktop으로 내부 경로에 다시 clone해야 하는지 문의.
+
+### 답변
+
+현재 정확한 `ProductionPayload` 경로 안에 `.git`과 초기 commit이 이미 있으므로 다시 clone하지 않는다. GitHub Desktop에서 해당 폴더를 기존 로컬 저장소로 직접 추가한 뒤 `Publish repository`를 사용하고 `Keep this code private`를 선택한 상태로 새 원격 비공개 저장소를 만든다. 공개 부모 저장소의 `.git`과 `ProductionPayload/.git`은 독립적으로 존재하며 부모는 전체 `ProductionPayload` 경로를 ignore한다. 다른 PC처럼 로컬 중첩 저장소가 아직 없는 환경에서만 공개 저장소 clone 후 정확한 `ProductionPayload` 경로로 비공개 저장소를 별도 clone한다.
+
+## 2026-08-04 17:37:35 (소요시간: 00:00:25)
+
+### 질문
+
+우선 GitHub에 빈 비공개 저장소를 만든 뒤 알려주면 다음 연결 명령을 순서대로 안내받는 흐름인지 확인 요청.
+
+### 답변
+
+그 순서가 맞다. GitHub에 README, `.gitignore`, License를 추가하지 않은 완전히 빈 비공개 저장소를 먼저 만든다. 생성 후 HTTPS 또는 SSH 저장소 URL을 전달하면 현재 로컬 `ProductionPayload` 저장소에 `origin`을 추가하고 `main` 브랜치를 최초 push하는 명령과 확인 절차를 한 단계씩 안내한다.
+
+## 2026-08-04 17:39:00 (소요시간: 00:01:00)
+
+### 질문
+
+GitHub Desktop에서 `ProductionPayload`를 로컬 저장소로 추가할 때 다른 사용자가 소유한 Git 저장소라는 `safe.directory` 경고가 표시된 화면을 공유하고 다음 조치를 요청.
+
+### 답변
+
+실제 ACL을 확인한 결과 작업 폴더와 내부 `.git`의 소유 계정이 달라 GitHub Desktop의 Git 보호 기능이 경고한 것이다. 신뢰 가능한 정확한 `TunaSweeper/Plugins/QuestDatasetSwitcher/ProductionPayload` 저장소 하나만 전역 `safe.directory` 예외로 추가한 뒤 GitHub Desktop에서 다시 `Add repository`를 실행하면 된다. 상위 공개 저장소나 광범위한 경로는 예외로 추가하지 않는다.
+
+## 2026-08-04 17:44:00 (소요시간: 00:01:00)
+
+### 질문
+
+GitHub 인증이 이미 남아 있어 별도 인증 절차 없이 프로덕션 저장소가 push된 것인지 확인 요청.
+
+### 답변
+
+로컬과 원격의 브랜치 연결 및 최초 push 완료 여부를 확인했다. 공개 질문 기록에는 원격 주소, 브랜치 추적 상태, commit hash 같은 운영 세부정보를 남기지 않는다.
+
+## 2026-08-04 17:46:20 (소요시간: 00:00:25)
+
+### 질문
+
+원격 연결과 최초 push가 끝난 현재 `ProductionPayload` 로컬 저장소를 GitHub Desktop에 추가해도 정상 동작하는지 확인 요청.
+
+### 답변
+
+정상 동작한다. GitHub Desktop의 `File > Add local repository`에서 정확한 `ProductionPayload` 상대경로를 선택해 기존 로컬 저장소로 추가하면 된다. 이미 원격이 연결된 저장소이므로 `Publish repository`나 `Clone repository`는 사용하지 않으며, 추가 후에는 일반적인 원격 동기화 버튼이 표시된다. 저장소 선택 목록에서 공개 부모 저장소와 프로덕션 중첩 저장소를 독립적으로 전환해 관리한다.
+
+## 2026-08-04 17:47:45 (소요시간: 00:01:10)
+
+### 질문
+
+공개 저장소 문서에서 비공개 저장소의 과거 Git 이력까지 재작성하지 않고 최근 운영 상태 정보만 제거해도 된다고 요청.
+
+### 답변
+
+현재 `main` 문서에서 프로덕션 저장소의 commit hash, 원격 연결·upstream 검증 상태, 사용자 로컬 절대경로를 제거한다. 플러그인 설치와 운영에 필요한 `ProductionPayload` 상대경로, 데이터셋 디렉터리 이름, 일반 검증·동기화 절차는 유지하며 Git 과거 이력은 재작성하지 않는다.
+
+## 2026-08-04 17:50:45 (소요시간: 00:02:30)
+
+### 질문
+
+아이템·메시·일반 정보는 공개 저장소에 둘 수 있지만 본편 스토리 텍스트는 공개하지 않기 위해, 데모 작업 이후 본편 서사 전체를 격리하고 데이터셋과 함께 전환하는 구조가 적절한지 문의.
+
+### 답변
+
+본편 작성 전에 공통 UI와 서사 데이터의 경계를 먼저 만들고 기존 데이터셋 선택 한 번으로 퀘스트와 서사 팩을 원자적으로 함께 전환하는 구성을 권장한다. 공개 저장소에는 공통 UI·아이템·메시·비서사 정보와 코드·스키마만 두고, 접근 제한 `ProductionPayload`의 각 데이터셋에는 퀘스트 제목·설명·대사, 인트로 독백, 메모·저널, 컷신 자막 등 모든 서사 원문과 번역을 완전한 팩으로 둔다. 런타임 C++에는 서사 fallback 문장을 남기지 않고 키 또는 비서사 오류 표시만 사용한다. 현재 공개 데이터에는 인트로 대사·독백, 퀘스트 수락 대사, 메모 본문과 C++ fallback 문장이 있으므로 구현 시 함께 분류·이관해야 한다. 데모 빌드에는 선택된 데모 팩만, 정식 빌드에는 정식 팩만 materialize·Cook하도록 검증해야 하며 저장 namespace도 현재처럼 동일한 데이터셋 선택에 결합한다.
+
+## 2026-08-04 18:49:00 (소요시간: 00:02:30)
+
+### 질문
+
+향후 Steam 연동을 별도 플러그인으로 구현하고 배포별 설정만 접근 제한 저장소에서 공급하는 구조가 가능한지 문의.
+
+### 답변
+
+가능하며 권장할 수 있는 구조다. 공개 저장소에는 Steam 초기화, 업적·Stats·Cloud 등의 공통 코드와 설정 스키마를 가진 독립 `SteamIntegration` 플러그인을 두고, 접근 제한 저장소에는 데모·정식별 App ID, 업적·Stat 키 매핑, 기능 플래그와 빌드 프로필만 둔다. 선택한 프로필은 빌드 전에 ignored 생성 경로로 materialize하고 Cook 사전 검증에서 활성 퀘스트 데이터셋과 Steam 프로필의 조합 및 단일 프로필 포함 여부를 확인한다. 비공개 설정이 없을 때 공개 저장소는 Steam 비활성 또는 개발용 mock 상태로 빌드 가능하게 한다. 클라이언트에 포함되는 App ID와 업적 키는 실질적인 비밀값이 아니므로 격리는 운영 분리를 위한 것이며, Steam Web API 키나 퍼블리셔 자격 증명 같은 실제 비밀값은 이 payload에도 넣지 않고 CI Secret 또는 서버에만 보관한다.

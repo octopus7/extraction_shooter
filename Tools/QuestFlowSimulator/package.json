@@ -1,0 +1,45 @@
+{
+  "name": "tunasweeper-quest-flow-simulator",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Browser-side quest route and playtime simulator backed by Cloudflare Workers and D1.",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "npm run seed:generate && tsc --noEmit && vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "test": "vitest run",
+    "test:typecheck": "tsc -p test/tsconfig.json --noEmit",
+    "worker:types": "wrangler types worker-configuration.d.ts",
+    "seed:generate": "node scripts/generate-seed.mjs",
+    "db:migrate:local": "wrangler d1 migrations apply quest-flow-simulator --local",
+    "db:seed:local": "npm run seed:generate && wrangler d1 execute quest-flow-simulator --local --file data/seed.sql",
+    "db:migrate:remote": "wrangler d1 migrations apply quest-flow-simulator --remote",
+    "db:seed:remote": "npm run seed:generate && wrangler d1 execute quest-flow-simulator --remote --file data/seed.sql",
+    "deploy:dry": "npm run build && wrangler deploy --dry-run",
+    "deploy": "npm run build && wrangler deploy"
+  },
+  "keywords": [
+    "cloudflare-workers",
+    "d1",
+    "quest-simulation"
+  ],
+  "license": "UNLICENSED",
+  "type": "module",
+  "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.49.0",
+    "@cloudflare/vitest-pool-workers": "^0.19.1",
+    "@cloudflare/workers-types": "^5.20260731.1",
+    "@sveltejs/vite-plugin-svelte": "^7.2.0",
+    "@types/node": "^26.1.2",
+    "csv-parse": "^7.0.1",
+    "typescript": "^7.0.2",
+    "vite": "^8.2.0",
+    "vitest": "^4.1.10",
+    "wrangler": "^4.116.0"
+  },
+  "dependencies": {
+    "hono": "^4.12.32",
+    "svelte": "^5.56.8",
+    "zod": "^4.4.3"
+  }
+}

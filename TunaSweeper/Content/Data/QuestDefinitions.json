@@ -1,151 +1,78 @@
 [
   {
-    "quest_id": "quest_first_outing",
+    "quest_id": "demo_q1_water_intake_check",
     "provider_id": "provider.canbot",
     "sort_order": 10,
-    "title_string_key": "quest.first_outing.title",
-    "description_string_key": "quest.first_outing.description",
+    "title_string_key": "quest.demo_q1.title",
+    "description_string_key": "quest.demo_q1.description",
     "auto_track_on_accept": true,
     "accept_presentation": [
-      {
-        "speaker_name_string_key": "quest.speaker.canbot",
-        "dialogue_text_string_key": "quest.first_outing.accept.line1"
-      },
-      {
-        "speaker_name_string_key": "quest.speaker.canbot",
-        "dialogue_text_string_key": "quest.first_outing.accept.line2",
-        "use_camera_focus": true,
-        "camera_focus_location": [577.426, 359.909, 4.0],
-        "camera_blend_seconds": 0.8
-      }
+      { "speaker_name_string_key": "quest.speaker.canbot", "dialogue_text_string_key": "quest.demo_q1.accept.line1" },
+      { "speaker_name_string_key": "quest.speaker.canbot", "dialogue_text_string_key": "quest.demo_q1.accept.line2" }
     ],
     "objectives": [
-      {
-        "objective_id": "leave_bunker",
-        "type": "level_travel",
-        "text_string_key": "quest.first_outing.objective.leave_bunker",
-        "required_count": 1,
-        "source_level": "BunkerMap",
-        "target_level": "RaidMap"
-      }
+      { "objective_id": "inspect_water_intake", "type": "interaction_completed", "text_string_key": "quest.demo_q1.objective.inspect", "required_count": 1, "interaction_event_id": "interaction.demo.water_intake.inspect", "interaction_type": "quest" }
     ],
-    "rewards": {
-      "coins": 100,
-      "items": []
-    }
+    "rewards": { "coins": 50, "items": [] }
   },
   {
-    "quest_id": "quest_lumberjack_first_kill",
+    "quest_id": "demo_q2_clear_water_screen",
     "provider_id": "provider.canbot",
     "sort_order": 20,
-    "required_completed_quest_ids": [
-      "quest_first_outing"
+    "required_completed_quest_ids": ["demo_q1_water_intake_check"],
+    "title_string_key": "quest.demo_q2.title",
+    "description_string_key": "quest.demo_q2.description",
+    "auto_track_on_accept": true,
+    "accept_presentation": [
+      { "speaker_name_string_key": "quest.speaker.canbot", "dialogue_text_string_key": "quest.demo_q2.accept.line1" },
+      { "speaker_name_string_key": "quest.speaker.canbot", "dialogue_text_string_key": "quest.demo_q2.accept.line2" }
     ],
-    "title_string_key": "quest.lumberjack_first_kill.title",
-    "description_string_key": "quest.lumberjack_first_kill.description",
+    "objectives": [
+      { "objective_id": "clear_water_screen", "type": "interaction_completed", "text_string_key": "quest.demo_q2.objective.clear", "required_count": 1, "interaction_event_id": "interaction.demo.water_screen.clear", "interaction_type": "quest" }
+    ],
+    "rewards": { "coins": 75, "items": [] }
+  },
+  {
+    "quest_id": "demo_q3a_repair_valve",
+    "provider_id": "provider.canbot",
+    "sort_order": 30,
+    "required_completed_quest_ids": ["demo_q2_clear_water_screen"],
+    "title_string_key": "quest.demo_q3a.title",
+    "description_string_key": "quest.demo_q3a.description",
     "auto_track_on_accept": true,
     "objectives": [
-      {
-        "objective_id": "kill_lumberjack",
-        "type": "enemy_killed",
-        "text_string_key": "quest.lumberjack_first_kill.objective.kill_lumberjack",
-        "required_count": 1,
-        "enemy_id": "enemy.lumberjack"
-      }
+      { "objective_id": "repair_valve", "type": "interaction_completed", "text_string_key": "quest.demo_q3a.objective.repair", "required_count": 1, "interaction_event_id": "interaction.demo.water_valve.repair", "interaction_type": "quest" }
     ],
-    "rewards": {
-      "coins": 150,
-      "items": [],
-      "housing_facilities": [
-        "housing_workbench"
-      ]
-    }
+    "rewards": { "coins": 100, "items": [] }
   },
   {
-    "quest_id": "quest_signalbot_map_check",
-    "provider_id": "provider.signalbot",
-    "sort_order": 100,
-    "title_string_key": "quest.signalbot_map_check.title",
-    "description_string_key": "quest.signalbot_map_check.description",
+    "quest_id": "demo_q3b_repair_bunker_pipe",
+    "provider_id": "provider.canbot",
+    "sort_order": 31,
+    "required_completed_quest_ids": ["demo_q2_clear_water_screen"],
+    "title_string_key": "quest.demo_q3b.title",
+    "description_string_key": "quest.demo_q3b.description",
     "auto_track_on_accept": true,
     "objectives": [
-      {
-        "objective_id": "talk_to_signalbot",
-        "type": "interaction_completed",
-        "text_string_key": "quest.signalbot_map_check.objective.talk_to_signalbot",
-        "required_count": 1,
-        "interaction_event_id": "interaction.signalbot.quest",
-        "interaction_type": "quest"
-      }
+      { "objective_id": "repair_bunker_pipe", "type": "interaction_completed", "text_string_key": "quest.demo_q3b.objective.repair", "required_count": 1, "interaction_event_id": "interaction.demo.bunker_pipe.repair", "interaction_type": "quest" }
     ],
-    "rewards": {
-      "coins": 25,
-      "items": []
-    }
+    "rewards": { "coins": 100, "items": [] }
   },
   {
-    "quest_id": "quest_ricepotbot_supply_check",
-    "provider_id": "provider.ricepotbot",
-    "sort_order": 110,
-    "title_string_key": "quest.ricepotbot_supply_check.title",
-    "description_string_key": "quest.ricepotbot_supply_check.description",
+    "quest_id": "demo_q4_todays_reward",
+    "provider_id": "provider.canbot",
+    "sort_order": 40,
+    "required_completed_quest_ids": ["demo_q3a_repair_valve", "demo_q3b_repair_bunker_pipe"],
+    "title_string_key": "quest.demo_q4.title",
+    "description_string_key": "quest.demo_q4.description",
     "auto_track_on_accept": true,
-    "objectives": [
-      {
-        "objective_id": "talk_to_ricepotbot",
-        "type": "interaction_completed",
-        "text_string_key": "quest.ricepotbot_supply_check.objective.talk_to_ricepotbot",
-        "required_count": 1,
-        "interaction_event_id": "interaction.ricepotbot.quest",
-        "interaction_type": "quest"
-      }
+    "accept_presentation": [
+      { "speaker_name_string_key": "quest.speaker.canbot", "dialogue_text_string_key": "quest.demo_q4.accept.line1" },
+      { "speaker_name_string_key": "quest.speaker.canbot", "dialogue_text_string_key": "quest.demo_q4.accept.line2" }
     ],
-    "rewards": {
-      "coins": 25,
-      "items": []
-    }
-  },
-  {
-    "quest_id": "quest_rescue_cart_return",
-    "sort_order": 9000,
-    "title_string_key": "quest.rescue_cart_return.title",
-    "description_string_key": "quest.rescue_cart_return.description",
-    "auto_track_on_accept": false,
     "objectives": [
-      {
-        "objective_id": "return_by_rescue_cart",
-        "type": "bunker_rescue_return",
-        "text_string_key": "quest.rescue_cart_return.objective.return_by_rescue_cart",
-        "required_count": 1,
-        "source_level": "RaidMap",
-        "target_level": "BunkerMap"
-      }
+      { "objective_id": "deliver_canned_tuna", "type": "interaction_completed", "text_string_key": "quest.demo_q4.objective.deliver", "required_count": 1, "interaction_event_id": "interaction.demo.canned_tuna.deliver", "interaction_type": "quest" }
     ],
-    "rewards": {
-      "coins": 50,
-      "items": []
-    }
-  },
-  {
-    "quest_id": "quest_warp_point_used_test",
-    "sort_order": 9100,
-    "title_string_key": "quest.warp_point_used_test.title",
-    "description_string_key": "quest.warp_point_used_test.description",
-    "auto_track_on_accept": false,
-    "objectives": [
-      {
-        "objective_id": "use_raid_warp_point_a",
-        "type": "warp_point_used",
-        "text_string_key": "quest.warp_point_used_test.objective.use_raid_warp_point_a",
-        "required_count": 1,
-        "source_level": "RaidMap",
-        "warp_point_id": "raid_warp_point_a",
-        "target_warp_point_id": "raid_warp_point_b"
-      }
-    ],
-    "rewards": {
-      "coins": 0,
-      "items": []
-    }
+    "rewards": { "coins": 250, "items": [{ "item_id": 3004, "quantity": 1 }] }
   }
 ]

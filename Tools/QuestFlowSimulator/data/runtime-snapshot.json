@@ -1,0 +1,173 @@
+{
+  "id": "catalog-runtime-snapshot",
+  "slug": "runtime-snapshot",
+  "title": "UE5 현재 구현 스냅샷",
+  "visibility": "authenticated",
+  "schemaVersion": 2,
+  "datasetVersion": "content-98a7f5e9a836",
+  "sourceKind": "ue5-json-csv",
+  "sourceHash": "sha256:2837294b10093af3bd4eb64b5bf002880f83acee2710555bf408131951bba31f",
+  "sources": [
+    "TunaSweeper/Content/Data/QuestDefinitions.json",
+    "TunaSweeper/Content/Data/QuestTextStrings.csv"
+  ],
+  "data": {
+    "schemaVersion": 2,
+    "title": "UE5 현재 구현 스냅샷",
+    "questNodes": [
+      {
+        "id": "quest-node-demo_q1_water_intake_check",
+        "questId": "demo_q1_water_intake_check",
+        "title": "취수 시설 확인",
+        "x": 100,
+        "y": 100,
+        "prerequisiteQuestIds": []
+      },
+      {
+        "id": "quest-node-demo_q2_clear_water_screen",
+        "questId": "demo_q2_clear_water_screen",
+        "title": "크로우바와 스크린 청소",
+        "x": 270,
+        "y": 100,
+        "prerequisiteQuestIds": [
+          "demo_q1_water_intake_check"
+        ]
+      },
+      {
+        "id": "quest-node-demo_q3a_repair_valve",
+        "questId": "demo_q3a_repair_valve",
+        "title": "부러진 밸브 손잡이",
+        "x": 440,
+        "y": 100,
+        "prerequisiteQuestIds": [
+          "demo_q2_clear_water_screen"
+        ]
+      },
+      {
+        "id": "quest-node-demo_q3b_repair_bunker_pipe",
+        "questId": "demo_q3b_repair_bunker_pipe",
+        "title": "새는 벙커 배관",
+        "x": 610,
+        "y": 100,
+        "prerequisiteQuestIds": [
+          "demo_q3a_repair_valve"
+        ]
+      },
+      {
+        "id": "quest-node-demo_q4_todays_reward",
+        "questId": "demo_q4_todays_reward",
+        "title": "오늘의 보상",
+        "x": 780,
+        "y": 100,
+        "prerequisiteQuestIds": [
+          "demo_q3b_repair_bunker_pipe"
+        ]
+      }
+    ],
+    "places": [
+      {
+        "id": "inferred-base",
+        "name": "추정 거점",
+        "mapId": "inferred",
+        "shape": "circle",
+        "xMeters": 0,
+        "yMeters": 0,
+        "radiusMeters": 25
+      },
+      {
+        "id": "inferred-outdoor",
+        "name": "추정 외부 구역",
+        "mapId": "inferred",
+        "shape": "rectangle",
+        "xMeters": 240,
+        "yMeters": 30,
+        "widthMeters": 100,
+        "heightMeters": 70
+      },
+      {
+        "id": "inferred-interaction",
+        "name": "추정 상호작용 지점",
+        "mapId": "inferred",
+        "shape": "point",
+        "xMeters": 420,
+        "yMeters": 60,
+        "actorId": "inferred.interaction"
+      }
+    ],
+    "steps": [
+      {
+        "id": "step-demo_q1_water_intake_check",
+        "questId": "demo_q1_water_intake_check",
+        "questTitle": "취수 시설 확인",
+        "name": "취수 시설 확인",
+        "fromPlaceId": "inferred-base",
+        "toPlaceId": "inferred-outdoor",
+        "actionSeconds": 120,
+        "actionVariancePercent": 20,
+        "moveSpeedMps": 4,
+        "enabled": true
+      },
+      {
+        "id": "step-demo_q2_clear_water_screen",
+        "questId": "demo_q2_clear_water_screen",
+        "questTitle": "크로우바와 스크린 청소",
+        "name": "크로우바와 스크린 청소",
+        "fromPlaceId": "inferred-outdoor",
+        "toPlaceId": "inferred-outdoor",
+        "actionSeconds": 120,
+        "actionVariancePercent": 20,
+        "moveSpeedMps": 4,
+        "enabled": true
+      },
+      {
+        "id": "step-demo_q3a_repair_valve",
+        "questId": "demo_q3a_repair_valve",
+        "questTitle": "부러진 밸브 손잡이",
+        "name": "부러진 밸브 손잡이",
+        "fromPlaceId": "inferred-outdoor",
+        "toPlaceId": "inferred-outdoor",
+        "actionSeconds": 120,
+        "actionVariancePercent": 20,
+        "moveSpeedMps": 4,
+        "enabled": true
+      },
+      {
+        "id": "step-demo_q3b_repair_bunker_pipe",
+        "questId": "demo_q3b_repair_bunker_pipe",
+        "questTitle": "새는 벙커 배관",
+        "name": "새는 벙커 배관",
+        "fromPlaceId": "inferred-outdoor",
+        "toPlaceId": "inferred-outdoor",
+        "actionSeconds": 120,
+        "actionVariancePercent": 20,
+        "moveSpeedMps": 4,
+        "enabled": true
+      },
+      {
+        "id": "step-demo_q4_todays_reward",
+        "questId": "demo_q4_todays_reward",
+        "questTitle": "오늘의 보상",
+        "name": "오늘의 보상",
+        "fromPlaceId": "inferred-outdoor",
+        "toPlaceId": "inferred-outdoor",
+        "actionSeconds": 120,
+        "actionVariancePercent": 20,
+        "moveSpeedMps": 4,
+        "enabled": true
+      }
+    ],
+    "settings": {
+      "runs": 1000,
+      "mapTransitionSeconds": 0
+    },
+    "sourceNotes": [
+      "퀘스트 노드 좌표는 그래프 시각화용이며 맵 장소 좌표가 아닙니다.",
+      "장소와 액터 데이터가 없는 항목은 퀘스트 문맥으로 추정한 임시 좌표입니다.",
+      "demo_q1_water_intake_check 취수 시설 확인: inspect_water_intake",
+      "demo_q2_clear_water_screen 크로우바와 스크린 청소: clear_water_screen",
+      "demo_q3a_repair_valve 부러진 밸브 손잡이: repair_valve",
+      "demo_q3b_repair_bunker_pipe 새는 벙커 배관: repair_bunker_pipe",
+      "demo_q4_todays_reward 오늘의 보상: deliver_canned_tuna"
+    ]
+  }
+}

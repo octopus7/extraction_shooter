@@ -4,6 +4,7 @@
 #include "Game/TunaSweeperGameInstance.h"
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
+#include "QuestDatasetSwitcher.h"
 #include "Serialization/Csv/CsvParser.h"
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
@@ -23,9 +24,6 @@ namespace TunaSweeperQuestProviders
 
 namespace TunaSweeperQuestData
 {
-	const TCHAR* QuestDefinitionsJsonRelativePath = TEXT("Data/QuestDefinitions.json");
-	const TCHAR* QuestTextStringsCsvRelativePath = TEXT("Data/QuestTextStrings.csv");
-
 	FString GetCsvCell(const TArray<const TCHAR*>& Row, int32 CellIndex)
 	{
 		return Row.IsValidIndex(CellIndex)
@@ -301,6 +299,7 @@ bool UTunaSweeperQuestSubsystem::LoadQuestData(bool bForceReload)
 	}
 
 	ResetLoadedQuestData();
+	FQuestDatasetSwitcherModule::Get().ReloadActiveDataset();
 	const bool bLoadedQuestTextStrings = LoadQuestTextStringsCsv();
 	if (!bLoadedQuestTextStrings || !LoadQuestDefinitionsJson())
 	{
@@ -1148,12 +1147,12 @@ void UTunaSweeperQuestSubsystem::ResetLoadedQuestData()
 
 FString UTunaSweeperQuestSubsystem::GetQuestDefinitionsJsonPath() const
 {
-	return FPaths::Combine(FPaths::ProjectContentDir(), TunaSweeperQuestData::QuestDefinitionsJsonRelativePath);
+	return FQuestDatasetSwitcherModule::Get().GetActiveDataset().QuestDefinitionsPath;
 }
 
 FString UTunaSweeperQuestSubsystem::GetQuestTextStringsCsvPath() const
 {
-	return FPaths::Combine(FPaths::ProjectContentDir(), TunaSweeperQuestData::QuestTextStringsCsvRelativePath);
+	return FQuestDatasetSwitcherModule::Get().GetActiveDataset().QuestTextStringsPath;
 }
 
 void UTunaSweeperQuestSubsystem::ResolveDefinitionText(FTunaSweeperQuestDefinition& Definition) const

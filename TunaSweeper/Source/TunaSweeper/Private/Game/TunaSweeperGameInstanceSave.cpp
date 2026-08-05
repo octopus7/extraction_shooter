@@ -1,5 +1,34 @@
 #include "TunaSweeperGameInstanceShared.h"
 
+#include "QuestDatasetSwitcher.h"
+
+namespace TunaSweeperSaveDataset
+{
+	const FQuestDatasetDescriptor& GetActiveDataset()
+	{
+		return FQuestDatasetSwitcherModule::Get().GetActiveDataset();
+	}
+
+	bool IsCompatible(const UTunaSweeperSaveGame& SaveGame)
+	{
+		const FQuestDatasetDescriptor& ActiveDataset = GetActiveDataset();
+		if (SaveGame.DatasetId.IsNone())
+		{
+			return SaveGame.SaveVersion < 19 && ActiveDataset.IsPublic();
+		}
+
+		return SaveGame.DatasetId == ActiveDataset.DatasetId &&
+			SaveGame.SaveCompatibilityId == ActiveDataset.SaveCompatibilityId;
+	}
+
+	FString MakeProductionSaveSlotPrefix()
+	{
+		return FString::Printf(
+			TEXT("TunaSweeperSave_%s_Slot"),
+			*GetActiveDataset().GetSaveNamespace());
+	}
+}
+
 void UTunaSweeperGameInstance::ClearRuntimeState()
 {
 	ResetRuntimeStateForSaveSlotSelection();
@@ -22,6 +51,16 @@ FTunaSweeperSaveSlotSummary UTunaSweeperGameInstance::GetSaveSlotSummary(int32 S
 		TunaSweeperSave::SaveUserIndex));
 	if (!SaveGame)
 	{
+		return Summary;
+	}
+	if (!TunaSweeperSaveDataset::IsCompatible(*SaveGame))
+	{
+		UE_LOG(
+			LogTunaSweeperGameInstance,
+			Warning,
+			TEXT("Save slot %d does not match active quest dataset '%s'."),
+			Summary.SaveSlotIndex,
+			*TunaSweeperSaveDataset::GetActiveDataset().DatasetId.ToString());
 		return Summary;
 	}
 
@@ -144,6 +183,16 @@ bool UTunaSweeperGameInstance::LoadGameState()
 		TunaSweeperSave::SaveUserIndex));
 	if (!SaveGame)
 	{
+		return false;
+	}
+	if (!TunaSweeperSaveDataset::IsCompatible(*SaveGame))
+	{
+		UE_LOG(
+			LogTunaSweeperGameInstance,
+			Error,
+			TEXT("Refusing to load save '%s' for active quest dataset '%s'."),
+			*ExistingSlotName,
+			*TunaSweeperSaveDataset::GetActiveDataset().DatasetId.ToString());
 		return false;
 	}
 
@@ -397,11 +446,25 @@ bool UTunaSweeperGameInstance::SaveGameStateInternal(
 {
 	const FString ExistingSlotName = GetExistingSaveGameSlotName(ActiveSaveSlotIndex);
 	UTunaSweeperSaveGame* ExistingSaveGame = nullptr;
-	if (UsableQuickSlotSaveMode == EUsableQuickSlotSaveMode::PreserveExisting && !ExistingSlotName.IsEmpty())
+	if (!ExistingSlotName.IsEmpty())
 	{
-		ExistingSaveGame = Cast<UTunaSweeperSaveGame>(UGameplayStatics::LoadGameFromSlot(
+		UTunaSweeperSaveGame* LoadedExistingSaveGame = Cast<UTunaSweeperSaveGame>(UGameplayStatics::LoadGameFromSlot(
 			ExistingSlotName,
 			TunaSweeperSave::SaveUserIndex));
+		if (!LoadedExistingSaveGame || !TunaSweeperSaveDataset::IsCompatible(*LoadedExistingSaveGame))
+		{
+			UE_LOG(
+				LogTunaSweeperGameInstance,
+				Error,
+				TEXT("Refusing to overwrite an incompatible dataset save: %s"),
+				*ExistingSlotName);
+			return false;
+		}
+
+		if (UsableQuickSlotSaveMode == EUsableQuickSlotSaveMode::PreserveExisting)
+		{
+			ExistingSaveGame = LoadedExistingSaveGame;
+		}
 	}
 
 	UTunaSweeperSaveGame* SaveGame = Cast<UTunaSweeperSaveGame>(
@@ -425,6 +488,10 @@ bool UTunaSweeperGameInstance::SaveGameStateInternal(
 
 	SaveGame->SaveVersion = TunaSweeperSave::CurrentSaveVersion;
 	SaveGame->SaveSlotIndex = ActiveSaveSlotIndex;
+	const FQuestDatasetDescriptor& ActiveDataset = TunaSweeperSaveDataset::GetActiveDataset();
+	SaveGame->DatasetId = ActiveDataset.DatasetId;
+	SaveGame->SaveCompatibilityId = ActiveDataset.SaveCompatibilityId;
+	SaveGame->DatasetRevision = ActiveDataset.DatasetRevision;
 	SaveGame->TotalPlaySeconds = GetCurrentActiveSlotTotalPlaySeconds();
 	SaveGame->DifficultyStage = TunaSweeperSave::SanitizeDifficultyStage(ActiveSaveSlotDifficultyStage);
 	SaveGame->bDifficultySelected = bActiveSaveSlotDifficultySelected;
@@ -887,15 +954,24 @@ int32 UTunaSweeperGameInstance::SanitizeSaveSlotIndex(int32 SaveSlotIndex) const
 
 FString UTunaSweeperGameInstance::GetSaveGameSlotName(int32 SaveSlotIndex) const
 {
+	const FString SaveSlotPrefix = TunaSweeperSaveDataset::GetActiveDataset().IsPublic()
+		? FString(TunaSweeperSave::SaveSlotNamePrefix)
+		: TunaSweeperSaveDataset::MakeProductionSaveSlotPrefix();
 	return FString::Printf(
 		TEXT("%s%02d"),
-		TunaSweeperSave::SaveSlotNamePrefix,
+		*SaveSlotPrefix,
 		SanitizeSaveSlotIndex(SaveSlotIndex));
 }
 
 FString UTunaSweeperGameInstance::GetSaveSettingsSlotName() const
 {
-	return FString(TunaSweeperSave::SaveSettingsSlotName);
+	const FQuestDatasetDescriptor& ActiveDataset = TunaSweeperSaveDataset::GetActiveDataset();
+	return ActiveDataset.IsPublic()
+		? FString(TunaSweeperSave::SaveSettingsSlotName)
+		: FString::Printf(
+			TEXT("%s_%s"),
+			TunaSweeperSave::SaveSettingsSlotName,
+			*ActiveDataset.GetSaveNamespace());
 }
 
 FString UTunaSweeperGameInstance::GetExistingSaveGameSlotName(int32 SaveSlotIndex) const
@@ -920,7 +996,14 @@ FString UTunaSweeperGameInstance::GetSaveGameFilePath(const FString& SaveSlotNam
 
 FString UTunaSweeperGameInstance::GetSaveGameBackupDirectory() const
 {
-	return FPaths::Combine(FPaths::ProjectSavedDir(), TEXT("SaveGames"), TEXT("Backups"));
+	const FQuestDatasetDescriptor& ActiveDataset = TunaSweeperSaveDataset::GetActiveDataset();
+	const FString BaseBackupDirectory = FPaths::Combine(
+		FPaths::ProjectSavedDir(),
+		TEXT("SaveGames"),
+		TEXT("Backups"));
+	return ActiveDataset.IsPublic()
+		? BaseBackupDirectory
+		: FPaths::Combine(BaseBackupDirectory, ActiveDataset.GetSaveNamespace());
 }
 
 FString UTunaSweeperGameInstance::CreateSaveGameBackupFilePath(int32 SaveSlotIndex, FDateTime BackupTime) const

@@ -42,6 +42,17 @@
 			"Enabled": true
 		},
 		{
+			"Name": "StaticMeshQualitySwitcher",
+			"Enabled": true,
+			"TargetAllowList": [
+				"Editor"
+			]
+		},
+		{
+			"Name": "QuestDatasetSwitcher",
+			"Enabled": true
+		},
+		{
 			"Name": "MiyakovCharacterSystem",
 			"Enabled": true
 		},
