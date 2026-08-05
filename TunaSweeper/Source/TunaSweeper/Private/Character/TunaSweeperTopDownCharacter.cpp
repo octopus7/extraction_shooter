@@ -97,6 +97,9 @@ ATunaSweeperTopDownCharacter::ATunaSweeperTopDownCharacter()
 	CameraModeAction = TSoftObjectPtr<UInputAction>(FSoftObjectPath(TEXT("/Game/Input/IA_CameraMode.IA_CameraMode")));
 	SprintAction = TSoftObjectPtr<UInputAction>(FSoftObjectPath(TEXT("/Game/Input/IA_Sprint.IA_Sprint")));
 	RollAction = TSoftObjectPtr<UInputAction>(FSoftObjectPath(TEXT("/Game/Input/IA_Roll.IA_Roll")));
+	JumpAction = TSoftObjectPtr<UInputAction>(FSoftObjectPath(TEXT("/Game/Input/IA_Jump.IA_Jump")));
+	SkirtBodyCollisionProxyPhysicsAsset = TSoftObjectPtr<UPhysicsAsset>(
+		FSoftObjectPath(TEXT("/Game/Characters/Player/Luna/Skirt/PA_Luna_SkirtBodyProxy.PA_Luna_SkirtBodyProxy")));
 	RollMontage = TSoftObjectPtr<UAnimMontage>(
 		FSoftObjectPath(TEXT("/Game/Characters/Player/Luna/Animations/AM_Luna_Roll.AM_Luna_Roll")));
 	DefaultWeaponClass = TSoftClassPtr<ATunaSweeperWeapon>(TunaSweeperEquippedWeaponVisual::AssaultRifleClassPath);
@@ -132,6 +135,7 @@ void ATunaSweeperTopDownCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	RefreshCharacterVisualVisibility();
+	ConfigureSkirtExternalPhysicsCollision();
 
 	DefaultCameraFOV = TopDownCamera ? TopDownCamera->FieldOfView : DefaultCameraFOV;
 	CurrentCameraBaseFOV = DefaultCameraFOV;
@@ -173,6 +177,38 @@ void ATunaSweeperTopDownCharacter::BeginPlay()
 	UpdateMovementSpeed();
 	RefreshCarryWeightConditionDebuffs();
 	UpdateStaminaGauge(0.0f);
+}
+
+void ATunaSweeperTopDownCharacter::ConfigureSkirtExternalPhysicsCollision()
+{
+	USkeletalMeshComponent* CharacterMesh = GetMesh();
+	UPhysicsAsset* ProxyPhysicsAsset = SkirtBodyCollisionProxyPhysicsAsset.LoadSynchronous();
+	if (!CharacterMesh || !ProxyPhysicsAsset)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Luna skirt body collision proxy could not be loaded."));
+		return;
+	}
+
+	TArray<USkeletalMeshComponent*> SkeletalMeshComponents;
+	GetComponents<USkeletalMeshComponent>(SkeletalMeshComponents);
+	for (USkeletalMeshComponent* Candidate : SkeletalMeshComponents)
+	{
+		if (!Candidate || Candidate == CharacterMesh || !Candidate->GetName().StartsWith(TEXT("Skirt")))
+		{
+			continue;
+		}
+
+		Candidate->AddClothCollisionSource(CharacterMesh, ProxyPhysicsAsset);
+		UE_LOG(
+			LogTemp,
+			Display,
+			TEXT("Registered Luna skirt external collision source: %s (%s)."),
+			*CharacterMesh->GetName(),
+			*ProxyPhysicsAsset->GetName());
+		return;
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("Could not find the Luna Skirt skeletal mesh component for external collision."));
 }
 
 void ATunaSweeperTopDownCharacter::Tick(float DeltaSeconds)

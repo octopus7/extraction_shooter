@@ -1784,6 +1784,32 @@ namespace TunaSweeperEditorSetup
 		return SaveAsset(MappingContext);
 	}
 
+	bool EnsureJumpInputAssets()
+	{
+		UInputAction* JumpAction = EnsureInputAction(
+			JumpActionName,
+			EInputActionValueType::Boolean,
+			EInputActionAccumulationBehavior::TakeHighestAbsoluteValue);
+
+		UInputMappingContext* MappingContext = LoadObject<UInputMappingContext>(
+			nullptr,
+			*GetAssetObjectPath(InputAssetPath, MappingContextName));
+
+		if (!JumpAction || !MappingContext)
+		{
+			return false;
+		}
+
+		if (!HasInputMapping(MappingContext, JumpAction, EKeys::J))
+		{
+			MappingContext->MapKey(JumpAction, EKeys::J);
+		}
+
+		MappingContext->ContextDescription = FText::FromString(TEXT("TunaSweeper player movement, combat, interaction, inventory, quick slot, ammo, reload, camera mode, sprint, roll, jump, and map input."));
+		MappingContext->MarkPackageDirty();
+		return SaveAsset(MappingContext);
+	}
+
 	bool EnsureMapInputAssets()
 	{
 		UInputAction* MapAction = EnsureInputAction(

@@ -18,6 +18,7 @@ class UCameraComponent;
 class UInputAction;
 class UInputMappingContext;
 class UMediaSource;
+class UPhysicsAsset;
 class UPrimitiveComponent;
 class USceneComponent;
 class USoundWaveProcedural;
@@ -307,6 +308,12 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	TSoftObjectPtr<UInputAction> RollAction;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+	TSoftObjectPtr<UInputAction> JumpAction;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement|Skirt Physics")
+	TSoftObjectPtr<UPhysicsAsset> SkirtBodyCollisionProxyPhysicsAsset;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat")
 	TSoftClassPtr<ATunaSweeperWeapon> DefaultWeaponClass;
 
@@ -504,6 +511,8 @@ private:
 	void BeginSprint(const FInputActionValue& Value);
 	void EndSprint(const FInputActionValue& Value);
 	void BeginRoll(const FInputActionValue& Value);
+	void BeginVerticalJump(const FInputActionValue& Value);
+	void EndVerticalJump(const FInputActionValue& Value);
 	void HandleMoveStopped(const FInputActionValue& Value);
 	void FireWeapon();
 	bool IsGameplayActionInputLocked() const;
@@ -531,6 +540,7 @@ private:
 	void HandleInventoryStateChanged();
 	void RefreshCarryWeightConditionDebuffs();
 	bool IsCarryWeightMovementBlocked() const;
+	void ConfigureSkirtExternalPhysicsCollision();
 	void RefreshCharacterVisualVisibility();
 	void CacheBaseSurvivalStats();
 	void ApplyExperienceLevelStatBonuses();

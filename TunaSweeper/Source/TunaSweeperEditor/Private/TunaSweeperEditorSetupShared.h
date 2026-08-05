@@ -220,6 +220,7 @@ namespace TunaSweeperEditorSetup
 	const FString CameraModeInputTaskId = TEXT("2026-05-26_AddCameraModeInputV1");
 	const FString SprintInputTaskId = TEXT("2026-05-28_AddSprintInputV1");
 	const FString RollInputTaskId = TEXT("2026-05-28_AddRollInputV1");
+	const FString JumpInputTaskId = TEXT("2026-08-06_AddVerticalJumpInputV1");
 	const FString MapInputTaskId = TEXT("2026-05-28_AddMapInputV1");
 	const FString EditorMapCaptureTaskId = TEXT("2026-05-28_CreateEditorMapCaptureBlueprintAndRaidPlacementV1");
 	const FString LootContainerAndSpawnerTaskId = TEXT("2026-05-11_CreateLootContainerAndSpawnerAssetsV1");
@@ -320,6 +321,7 @@ namespace TunaSweeperEditorSetup
 	const FString CameraModeActionName = TEXT("IA_CameraMode");
 	const FString SprintActionName = TEXT("IA_Sprint");
 	const FString RollActionName = TEXT("IA_Roll");
+	const FString JumpActionName = TEXT("IA_Jump");
 	const FString MapActionName = TEXT("IA_Map");
 	const FString QuickSlotActionNamePrefix = TEXT("IA_QuickSlot");
 	const FString MeleeQuickSlotActionName = TEXT("IA_MeleeQuickSlot");
@@ -647,6 +649,7 @@ bool EnsureAmmoReloadInputAssets();
 bool EnsureCameraModeInputAssets();
 bool EnsureSprintInputAssets();
 bool EnsureRollInputAssets();
+bool EnsureJumpInputAssets();
 bool EnsureMapInputAssets();
 bool ConfigureGameModeBlueprint(UBlueprint* GameModeBlueprint, UBlueprint* PlayerBlueprint);
 bool SetProjectGameModeToBlueprint();

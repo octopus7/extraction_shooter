@@ -11,5 +11,7 @@ public:
 private:
 	void RegisterMenus();
 	void OpenToolWindow();
+	void ToggleSkirtPhysicsDebugDraw();
+	bool IsSkirtPhysicsDebugDrawEnabled() const;
 	TSharedRef<class SDockTab> SpawnToolTab(const class FSpawnTabArgs& SpawnTabArgs);
 };

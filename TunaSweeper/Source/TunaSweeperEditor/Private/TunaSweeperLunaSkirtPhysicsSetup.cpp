@@ -36,6 +36,11 @@ namespace
 	const TCHAR* AnimBlueprintPackagePath = TEXT("/Game/Characters/Player/Luna/Skirt/Animations");
 	const TCHAR* AnimBlueprintObjectPath = TEXT("/Game/Characters/Player/Luna/Skirt/Animations/ABP_Luna_Skirt.ABP_Luna_Skirt");
 	const TCHAR* PlayerBlueprintObjectPath = TEXT("/Game/Characters/Player/BP_TunaSweeperPlayerCharacter.BP_TunaSweeperPlayerCharacter");
+	const TCHAR* PlayerSkeletalMeshObjectPath = TEXT("/Game/Characters/Player/Luna/SKM_Luna.SKM_Luna");
+	const TCHAR* PlayerPhysicsAssetObjectPath = TEXT("/Game/Characters/Player/Luna/SKM_Luna_PhysicsAsset.SKM_Luna_PhysicsAsset");
+	const TCHAR* SkirtBodyProxyPackagePath = TEXT("/Game/Characters/Player/Luna/Skirt");
+	const TCHAR* SkirtBodyProxyAssetName = TEXT("PA_Luna_SkirtBodyProxy");
+	const TCHAR* SkirtBodyProxyObjectPath = TEXT("/Game/Characters/Player/Luna/Skirt/PA_Luna_SkirtBodyProxy.PA_Luna_SkirtBodyProxy");
 
 	bool SaveAsset(UObject* Asset)
 	{
@@ -185,8 +190,8 @@ namespace
 
 			BodySetup->Modify();
 			BodySetup->PhysicsType = IsAnchorBone(SkeletalMesh, BodySetup->BoneName) ? PhysType_Kinematic : PhysType_Simulated;
-			BodySetup->DefaultInstance.LinearDamping = 2.5f;
-			BodySetup->DefaultInstance.AngularDamping = 5.0f;
+			BodySetup->DefaultInstance.LinearDamping = 0.3f;
+			BodySetup->DefaultInstance.AngularDamping = 1.0f;
 			BodySetup->DefaultInstance.MassScale = 0.25f;
 			BodySetup->DefaultInstance.SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics, false);
 			ReplaceWithThinChainCollider(BodySetup, SkeletalMesh);
@@ -210,9 +215,9 @@ namespace
 			Instance.SetAngularSwing2Limit(ACM_Limited, 38.0f);
 			Instance.SetAngularTwistLimit(ACM_Limited, 14.0f);
 			Instance.SetAngularDriveMode(EAngularDriveMode::SLERP);
-			Instance.SetOrientationDriveSLERP(true);
-			Instance.SetAngularDriveParams(18.0f, 2.5f, 0.0f);
-			Instance.SetAngularDriveAccelerationMode(true);
+			Instance.SetOrientationDriveSLERP(false);
+			Instance.SetAngularDriveParams(0.0f, 0.0f, 0.0f);
+			Instance.SetAngularDriveAccelerationMode(false);
 			Constraint->SetDefaultProfile(Instance);
 		}
 
@@ -254,6 +259,78 @@ namespace
 			SimulatedCount,
 			PhysicsAsset->ConstraintSetup.Num());
 		return KinematicCount == 16 && SimulatedCount == 48 && PhysicsAsset->ConstraintSetup.Num() == 48;
+	}
+
+	UPhysicsAsset* EnsureSkirtBodyCollisionProxy()
+	{
+		USkeletalMesh* PlayerSkeletalMesh = LoadObject<USkeletalMesh>(nullptr, PlayerSkeletalMeshObjectPath);
+		UPhysicsAsset* SourcePhysicsAsset = LoadObject<UPhysicsAsset>(nullptr, PlayerPhysicsAssetObjectPath);
+		UPhysicsAsset* ProxyPhysicsAsset = LoadObject<UPhysicsAsset>(nullptr, SkirtBodyProxyObjectPath);
+		if (!PlayerSkeletalMesh || !SourcePhysicsAsset)
+		{
+			UE_LOG(LogTemp, Error, TEXT("Could not load Luna's skeletal mesh or source PhysicsAsset for the skirt proxy."));
+			return nullptr;
+		}
+
+		if (!ProxyPhysicsAsset)
+		{
+			FAssetToolsModule& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>(TEXT("AssetTools"));
+			ProxyPhysicsAsset = Cast<UPhysicsAsset>(AssetTools.Get().DuplicateAsset(
+				SkirtBodyProxyAssetName,
+				SkirtBodyProxyPackagePath,
+				SourcePhysicsAsset));
+		}
+
+		if (!ProxyPhysicsAsset)
+		{
+			UE_LOG(LogTemp, Error, TEXT("Failed to create PA_Luna_SkirtBodyProxy."));
+			return nullptr;
+		}
+
+		ProxyPhysicsAsset->Modify();
+		while (ProxyPhysicsAsset->ConstraintSetup.Num() > 0)
+		{
+			FPhysicsAssetUtils::DestroyConstraint(ProxyPhysicsAsset, ProxyPhysicsAsset->ConstraintSetup.Num() - 1);
+		}
+
+		const TSet<FName> ProxyBoneNames = {
+			FName(TEXT("spine_02")),
+			FName(TEXT("cc_base_l_thightwist01")),
+			FName(TEXT("cc_base_r_thightwist01"))
+		};
+
+		for (int32 BodyIndex = ProxyPhysicsAsset->SkeletalBodySetups.Num() - 1; BodyIndex >= 0; --BodyIndex)
+		{
+			USkeletalBodySetup* BodySetup = ProxyPhysicsAsset->SkeletalBodySetups[BodyIndex];
+			if (!BodySetup || !ProxyBoneNames.Contains(BodySetup->BoneName))
+			{
+				FPhysicsAssetUtils::DestroyBody(ProxyPhysicsAsset, BodyIndex);
+				continue;
+			}
+
+			BodySetup->Modify();
+			BodySetup->PhysicsType = PhysType_Kinematic;
+			BodySetup->DefaultInstance.SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics, false);
+		}
+
+		ProxyPhysicsAsset->PreviewSkeletalMesh = PlayerSkeletalMesh;
+		ProxyPhysicsAsset->UpdateBodySetupIndexMap();
+		ProxyPhysicsAsset->UpdateBoundsBodiesArray();
+		ProxyPhysicsAsset->RefreshPhysicsAssetChange();
+		ProxyPhysicsAsset->MarkPackageDirty();
+		if (!SaveAsset(ProxyPhysicsAsset))
+		{
+			UE_LOG(LogTemp, Error, TEXT("Failed to save PA_Luna_SkirtBodyProxy."));
+			return nullptr;
+		}
+
+		UE_LOG(
+			LogTemp,
+			Display,
+			TEXT("Luna skirt body collision proxy configured with %d kinematic bodies and %d constraints."),
+			ProxyPhysicsAsset->SkeletalBodySetups.Num(),
+			ProxyPhysicsAsset->ConstraintSetup.Num());
+		return ProxyPhysicsAsset->SkeletalBodySetups.Num() == ProxyBoneNames.Num() ? ProxyPhysicsAsset : nullptr;
 	}
 
 	UEdGraphPin* FindPosePin(UEdGraphNode* Node, EEdGraphPinDirection Direction)
@@ -358,11 +435,12 @@ namespace
 		RigidBodyNode->Node.bDefaultToSkeletalMeshPhysicsAsset = true;
 		RigidBodyNode->Node.bUseDefaultAsSimulated = false;
 		RigidBodyNode->Node.SimulationSpace = ESimulationSpace::ComponentSpace;
-		RigidBodyNode->Node.ComponentLinearAccScale = FVector(0.75f);
+		RigidBodyNode->Node.ComponentLinearAccScale = FVector(1.5f);
 		RigidBodyNode->Node.ComponentLinearVelScale = FVector(0.05f);
 		RigidBodyNode->Node.ComponentAppliedLinearAccClamp = FVector(500.0f);
 		RigidBodyNode->Node.CachedBoundsScale = 1.25f;
 		RigidBodyNode->Node.bEnableWorldGeometry = false;
+		RigidBodyNode->Node.bUseExternalClothCollision = true;
 		RigidBodyNode->Node.bTransferBoneVelocities = true;
 		RigidBodyNode->Node.bForceDisableCollisionBetweenConstraintBodies = true;
 		RigidBodyNode->Node.EvaluationResetTime = 0.5f;
@@ -493,6 +571,11 @@ namespace TunaSweeperLunaSkirtPhysicsSetup
 
 		LogReferenceSkeleton(SkeletalMesh);
 		if (!RebuildPhysicsAsset(SkeletalMesh, PhysicsAsset))
+		{
+			return false;
+		}
+
+		if (!EnsureSkirtBodyCollisionProxy())
 		{
 			return false;
 		}

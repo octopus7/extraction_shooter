@@ -570,6 +570,13 @@ namespace TunaSweeperEditorSetup
 			});
 
 		FTunaSweeperEditorRunOnce::Run(
+			TunaSweeperEditorSetup::JumpInputTaskId,
+			[]()
+			{
+				return TunaSweeperEditorSetup::EnsureJumpInputAssets();
+			});
+
+		FTunaSweeperEditorRunOnce::Run(
 			TunaSweeperEditorSetup::MapInputTaskId,
 			[]()
 			{

@@ -26,6 +26,14 @@ public:
 			return;
 		}
 
+		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperJumpInputSetup")))
+		{
+			JumpInputSetupInitializedHandle = FEditorDelegates::OnEditorInitialized.AddRaw(
+				this,
+				&FTunaSweeperEditorModule::OnEditorInitializedForJumpInputSetup);
+			return;
+		}
+
 		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperQuadrupedAnimSetup")))
 		{
 			QuadrupedSetupInitializedHandle = FEditorDelegates::OnEditorInitialized.AddRaw(
@@ -116,6 +124,18 @@ public:
 			LunaSkirtSetupTickerHandle.Reset();
 		}
 
+		if (JumpInputSetupInitializedHandle.IsValid())
+		{
+			FEditorDelegates::OnEditorInitialized.Remove(JumpInputSetupInitializedHandle);
+			JumpInputSetupInitializedHandle.Reset();
+		}
+
+		if (JumpInputSetupTickerHandle.IsValid())
+		{
+			FTSTicker::GetCoreTicker().RemoveTicker(JumpInputSetupTickerHandle);
+			JumpInputSetupTickerHandle.Reset();
+		}
+
 		if (QuadrupedSetupInitializedHandle.IsValid())
 		{
 			FEditorDelegates::OnEditorInitialized.Remove(QuadrupedSetupInitializedHandle);
@@ -181,6 +201,28 @@ private:
 		return false;
 	}
 
+	void OnEditorInitializedForJumpInputSetup(double)
+	{
+		FEditorDelegates::OnEditorInitialized.Remove(JumpInputSetupInitializedHandle);
+		JumpInputSetupInitializedHandle.Reset();
+		JumpInputSetupTickerHandle = FTSTicker::GetCoreTicker().AddTicker(
+			FTickerDelegate::CreateRaw(this, &FTunaSweeperEditorModule::RunJumpInputSetupAfterInitialization));
+	}
+
+	bool RunJumpInputSetupAfterInitialization(float)
+	{
+		JumpInputSetupTickerHandle.Reset();
+		const bool bSucceeded = TunaSweeperEditorSetup::EnsureJumpInputAssets();
+		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperJumpInputSetupQuit")))
+		{
+			FPlatformMisc::RequestExitWithStatus(
+				false,
+				bSucceeded ? 0 : 1,
+				TEXT("TunaSweeperJumpInputSetup"));
+		}
+		return false;
+	}
+
 	void OnEditorInitializedForQuadrupedSetup(double)
 	{
 		FEditorDelegates::OnEditorInitialized.Remove(QuadrupedSetupInitializedHandle);
@@ -206,6 +248,8 @@ private:
 	bool bStandardEditorSetupStarted = false;
 	FDelegateHandle LunaSkirtSetupInitializedHandle;
 	FTSTicker::FDelegateHandle LunaSkirtSetupTickerHandle;
+	FDelegateHandle JumpInputSetupInitializedHandle;
+	FTSTicker::FDelegateHandle JumpInputSetupTickerHandle;
 	FDelegateHandle QuadrupedSetupInitializedHandle;
 	FTSTicker::FDelegateHandle QuadrupedSetupTickerHandle;
 	TUniquePtr<FTunaSweeperLevelOpenTool> LevelOpenTool;

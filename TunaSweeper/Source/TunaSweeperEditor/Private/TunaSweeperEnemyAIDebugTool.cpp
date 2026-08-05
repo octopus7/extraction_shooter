@@ -9,6 +9,7 @@
 #include "Framework/Docking/TabManager.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
+#include "HAL/IConsoleManager.h"
 #include "Rendering/DrawElements.h"
 #include "Styling/AppStyle.h"
 #include "ToolMenus.h"
@@ -39,6 +40,12 @@ namespace TunaSweeperEnemyAIDebug
 	const FName TimeColumnName(TEXT("Time"));
 	const FName ReasonColumnName(TEXT("Reason"));
 	const FString RaidMapPackageName(TEXT("/Game/RaidMap"));
+	const TCHAR* SkirtPhysicsDebugConsoleVariables[] = {
+		TEXT("p.Chaos.DebugDraw.Enabled"),
+		TEXT("p.RigidBodyNode.DebugDraw"),
+		TEXT("p.Chaos.ImmPhys.DebugDrawShapes"),
+		TEXT("p.Chaos.ImmPhys.DebugDrawJoints")
+	};
 
 	constexpr double RefreshIntervalSeconds = 0.25;
 
@@ -715,11 +722,55 @@ void FTunaSweeperEnemyAIDebugTool::RegisterMenus()
 		LOCTEXT("MenuEntryTooltip", "Open the RaidMap PIE/SIE enemy AI monitor."),
 		FSlateIcon(),
 		FUIAction(FExecuteAction::CreateRaw(this, &FTunaSweeperEnemyAIDebugTool::OpenToolWindow)));
+	Section.AddMenuEntry(
+		TEXT("ToggleTunaSweeperSkirtPhysicsDebugDraw"),
+		LOCTEXT("SkirtPhysicsDebugMenuEntry", "Skirt Physics Debug Draw"),
+		LOCTEXT(
+			"SkirtPhysicsDebugMenuEntryTooltip",
+			"Toggle the Chaos, Rigid Body AnimNode, Immediate Physics shape, and joint debug drawing used to inspect Luna's skirt during PIE or SIE."),
+		FSlateIcon(),
+		FUIAction(
+			FExecuteAction::CreateRaw(this, &FTunaSweeperEnemyAIDebugTool::ToggleSkirtPhysicsDebugDraw),
+			FCanExecuteAction(),
+			FIsActionChecked::CreateRaw(this, &FTunaSweeperEnemyAIDebugTool::IsSkirtPhysicsDebugDrawEnabled)),
+		EUserInterfaceActionType::ToggleButton);
 }
 
 void FTunaSweeperEnemyAIDebugTool::OpenToolWindow()
 {
 	FGlobalTabmanager::Get()->TryInvokeTab(TunaSweeperEnemyAIDebug::TabName);
+}
+
+void FTunaSweeperEnemyAIDebugTool::ToggleSkirtPhysicsDebugDraw()
+{
+	const int32 TargetValue = IsSkirtPhysicsDebugDrawEnabled() ? 0 : 1;
+	for (const TCHAR* ConsoleVariableName : TunaSweeperEnemyAIDebug::SkirtPhysicsDebugConsoleVariables)
+	{
+		if (IConsoleVariable* ConsoleVariable = IConsoleManager::Get().FindConsoleVariable(ConsoleVariableName))
+		{
+			ConsoleVariable->Set(TargetValue, ECVF_SetByConsole);
+		}
+	}
+
+	UE_LOG(
+		LogTemp,
+		Display,
+		TEXT("Luna skirt physics debug draw %s."),
+		TargetValue != 0 ? TEXT("enabled") : TEXT("disabled"));
+}
+
+bool FTunaSweeperEnemyAIDebugTool::IsSkirtPhysicsDebugDrawEnabled() const
+{
+	for (const TCHAR* ConsoleVariableName : TunaSweeperEnemyAIDebug::SkirtPhysicsDebugConsoleVariables)
+	{
+		const IConsoleVariable* ConsoleVariable = IConsoleManager::Get().FindConsoleVariable(ConsoleVariableName);
+		if (!ConsoleVariable || ConsoleVariable->GetInt() == 0)
+		{
+			return false;
+		}
+	}
+
+	return true;
 }
 
 TSharedRef<SDockTab> FTunaSweeperEnemyAIDebugTool::SpawnToolTab(const FSpawnTabArgs& SpawnTabArgs)

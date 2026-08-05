@@ -82,6 +82,13 @@ void ATunaSweeperTopDownCharacter::SetupPlayerInputComponent(UInputComponent* Pl
 	{
 		EnhancedInputComponent->BindAction(LoadedRollAction, ETriggerEvent::Started, this, &ATunaSweeperTopDownCharacter::BeginRoll);
 	}
+
+	if (UInputAction* LoadedJumpAction = JumpAction.LoadSynchronous())
+	{
+		EnhancedInputComponent->BindAction(LoadedJumpAction, ETriggerEvent::Started, this, &ATunaSweeperTopDownCharacter::BeginVerticalJump);
+		EnhancedInputComponent->BindAction(LoadedJumpAction, ETriggerEvent::Completed, this, &ATunaSweeperTopDownCharacter::EndVerticalJump);
+		EnhancedInputComponent->BindAction(LoadedJumpAction, ETriggerEvent::Canceled, this, &ATunaSweeperTopDownCharacter::EndVerticalJump);
+	}
 }
 
 void ATunaSweeperTopDownCharacter::AddDefaultInputMapping() const
@@ -446,5 +453,22 @@ void ATunaSweeperTopDownCharacter::BeginRoll(const FInputActionValue& Value)
 			}
 		}
 	}
+}
+
+void ATunaSweeperTopDownCharacter::BeginVerticalJump(const FInputActionValue& Value)
+{
+	(void)Value;
+	if (bIsDead || bIsRolling || IsGameplayActionInputLocked() || IsCarryWeightMovementBlocked())
+	{
+		return;
+	}
+
+	Jump();
+}
+
+void ATunaSweeperTopDownCharacter::EndVerticalJump(const FInputActionValue& Value)
+{
+	(void)Value;
+	StopJumping();
 }
 

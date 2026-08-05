@@ -33,6 +33,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Materials/MaterialInterface.h"
 #include "MediaSource.h"
+#include "PhysicsEngine/PhysicsAsset.h"
 #include "Player/TunaSweeperPlayerController.h"
 #include "Subsystem/TunaSweeperInteractionSubsystem.h"
 #include "Subsystem/TunaSweeperLevelTransitionSubsystem.h"
