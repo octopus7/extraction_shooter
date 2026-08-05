@@ -1,5 +1,6 @@
 #include "TunaSweeperEditorSetupShared.h"
 #include "TunaSweeperEnemyAIDebugTool.h"
+#include "TunaSweeperLunaSkirtPhysicsSetup.h"
 #include "TunaSweeperQuadrupedPresetSetup.h"
 
 #include "Containers/Ticker.h"
@@ -14,6 +15,14 @@ public:
 	{
 		if (IsRunningCommandlet())
 		{
+			return;
+		}
+
+		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperLunaSkirtPhysicsSetup")))
+		{
+			LunaSkirtSetupInitializedHandle = FEditorDelegates::OnEditorInitialized.AddRaw(
+				this,
+				&FTunaSweeperEditorModule::OnEditorInitializedForLunaSkirtSetup);
 			return;
 		}
 
@@ -95,6 +104,18 @@ public:
 
 	virtual void ShutdownModule() override
 	{
+		if (LunaSkirtSetupInitializedHandle.IsValid())
+		{
+			FEditorDelegates::OnEditorInitialized.Remove(LunaSkirtSetupInitializedHandle);
+			LunaSkirtSetupInitializedHandle.Reset();
+		}
+
+		if (LunaSkirtSetupTickerHandle.IsValid())
+		{
+			FTSTicker::GetCoreTicker().RemoveTicker(LunaSkirtSetupTickerHandle);
+			LunaSkirtSetupTickerHandle.Reset();
+		}
+
 		if (QuadrupedSetupInitializedHandle.IsValid())
 		{
 			FEditorDelegates::OnEditorInitialized.Remove(QuadrupedSetupInitializedHandle);
@@ -138,6 +159,28 @@ public:
 	}
 
 private:
+	void OnEditorInitializedForLunaSkirtSetup(double)
+	{
+		FEditorDelegates::OnEditorInitialized.Remove(LunaSkirtSetupInitializedHandle);
+		LunaSkirtSetupInitializedHandle.Reset();
+		LunaSkirtSetupTickerHandle = FTSTicker::GetCoreTicker().AddTicker(
+			FTickerDelegate::CreateRaw(this, &FTunaSweeperEditorModule::RunLunaSkirtSetupAfterInitialization));
+	}
+
+	bool RunLunaSkirtSetupAfterInitialization(float)
+	{
+		LunaSkirtSetupTickerHandle.Reset();
+		const bool bSucceeded = TunaSweeperLunaSkirtPhysicsSetup::Run();
+		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperLunaSkirtPhysicsSetupQuit")))
+		{
+			FPlatformMisc::RequestExitWithStatus(
+				false,
+				bSucceeded ? 0 : 1,
+				TEXT("TunaSweeperLunaSkirtPhysicsSetup"));
+		}
+		return false;
+	}
+
 	void OnEditorInitializedForQuadrupedSetup(double)
 	{
 		FEditorDelegates::OnEditorInitialized.Remove(QuadrupedSetupInitializedHandle);
@@ -161,6 +204,8 @@ private:
 	}
 
 	bool bStandardEditorSetupStarted = false;
+	FDelegateHandle LunaSkirtSetupInitializedHandle;
+	FTSTicker::FDelegateHandle LunaSkirtSetupTickerHandle;
 	FDelegateHandle QuadrupedSetupInitializedHandle;
 	FTSTicker::FDelegateHandle QuadrupedSetupTickerHandle;
 	TUniquePtr<FTunaSweeperLevelOpenTool> LevelOpenTool;
