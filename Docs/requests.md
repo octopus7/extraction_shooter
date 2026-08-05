@@ -5994,3 +5994,9 @@
 - 기존 `ComponentLinearAccScale`, `ComponentLinearVelScale`, `ComponentAppliedLinearAccClamp`를 모두 0으로 비활성화하고, 이동 속도·가속도와 회전 운동을 함께 처리하는 UE 5.7 `SimSpaceSettings` 방식으로 교체했다. Rigid Body 노드는 `ComponentSpace`를 유지하고 `bTransferBoneVelocities`를 활성화해 초기화·포즈 갱신 시 본 속도도 이어받도록 했다.
 - `SimSpaceSettings.WorldAlpha=0.8`, `VelocityScaleZ=0.75`, `DampingAlpha=1.0`을 적용하고, `MaxLinearVelocity=800cm/s`, `MaxLinearAcceleration=3000cm/s²`, `MaxAngularVelocity=10rad/s`, `MaxAngularAcceleration=100rad/s²`로 제한했다. 이로써 PIE에서는 캐릭터의 출발·정지·방향 전환 관성이 치마에 전달되면서도 Blueprint 뷰포트의 텔레포트성 이동에서 발생하는 과도한 펼침은 억제했다.
 - UE 5.7 에디터 빌드와 치마 PhysicsAsset·프록시·`ABP_Luna_Skirt` 재생성 및 Blueprint 컴파일·저장을 검증했다.
+
+## 2026-08-06 03:59:00 (소요시간: 00:06:30)
+
+- 치마 기본 물리·본체 충돌 프록시·수직 점프·디버그 메뉴 변경과 관성 전달 변경을 서로 다른 커밋으로 분리했다.
+- 관성 전달 요청 기록에 컴포넌트 공간에서 지속 속도와 회전 운동이 전달되지 않았던 원인, 비활성화한 기존 필드, 적용한 `SimSpaceSettings` 값과 과도한 텔레포트 반응 제한 의도를 상세히 보강했다.
+- 원본 치마 본과 Physics Asset 길이는 읽기 전용으로만 검토하고 관련 에셋은 수정하지 않았다.
