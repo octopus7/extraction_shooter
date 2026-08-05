@@ -5987,3 +5987,10 @@
 - 메뉴를 누르면 Chaos 전역 디버그, Rigid Body AnimNode, Immediate Physics 형상과 조인트 디버그 CVar 네 개를 실제 현재값에 따라 한꺼번에 켜거나 끄도록 구현했다.
 - PIE·SIE 실행 전과 실행 중 모두 사용할 수 있고, 네 CVar가 모두 활성화된 경우 메뉴에 체크가 표시되도록 했다.
 - UE 5.7 `TunaSweeperEditor Win64 Development` 빌드로 메뉴 코드 컴파일과 링크를 검증했다.
+
+## 2026-08-06 03:47:00 (소요시간: 00:04:30)
+
+- Luna 치마가 중력 정착 후 캐릭터 이동 관성에 반응하지 않는 현상을 UE 5.7 Rigid Body AnimNode의 컴포넌트 공간 운동 전달 방식에서 진단했다. 시뮬레이션 자체는 계속 실행되고 있었지만, 기존 설정은 `ComponentLinearAccScale`로 순간 선형 가속도만 넘기고 컴포넌트의 지속 속도와 회전 운동은 전달하지 않아 정착 뒤 치마가 컴포넌트 좌표계와 함께 통으로 이동해 보이는 것이 원인이었다.
+- 기존 `ComponentLinearAccScale`, `ComponentLinearVelScale`, `ComponentAppliedLinearAccClamp`를 모두 0으로 비활성화하고, 이동 속도·가속도와 회전 운동을 함께 처리하는 UE 5.7 `SimSpaceSettings` 방식으로 교체했다. Rigid Body 노드는 `ComponentSpace`를 유지하고 `bTransferBoneVelocities`를 활성화해 초기화·포즈 갱신 시 본 속도도 이어받도록 했다.
+- `SimSpaceSettings.WorldAlpha=0.8`, `VelocityScaleZ=0.75`, `DampingAlpha=1.0`을 적용하고, `MaxLinearVelocity=800cm/s`, `MaxLinearAcceleration=3000cm/s²`, `MaxAngularVelocity=10rad/s`, `MaxAngularAcceleration=100rad/s²`로 제한했다. 이로써 PIE에서는 캐릭터의 출발·정지·방향 전환 관성이 치마에 전달되면서도 Blueprint 뷰포트의 텔레포트성 이동에서 발생하는 과도한 펼침은 억제했다.
+- UE 5.7 에디터 빌드와 치마 PhysicsAsset·프록시·`ABP_Luna_Skirt` 재생성 및 Blueprint 컴파일·저장을 검증했다.
