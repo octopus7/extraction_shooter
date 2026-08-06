@@ -322,7 +322,6 @@ void UTunaSweeperIntroMenuWidget::EnsureTitleWindParticleOverlay()
 		}
 	};
 
-	SetCanvasZOrder(WidgetTree->FindWidget(TEXT("BackgroundImage")), 0);
 	SetCanvasZOrder(WidgetTree->FindWidget(TEXT("LeftScrim")), 2);
 	SetCanvasZOrder(WidgetTree->FindWidget(TEXT("LogoImage")), 3);
 	SetCanvasZOrder(MainMenuPanel, 4);

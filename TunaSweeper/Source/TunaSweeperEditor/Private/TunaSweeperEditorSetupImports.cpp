@@ -316,17 +316,7 @@ namespace TunaSweeperEditorSetup
 
 	bool EnsureTitleUiTextures()
 	{
-		UTexture2D* BackgroundTexture = nullptr;
 		UTexture2D* LogoTexture = nullptr;
-
-		const bool bBackgroundImported = ImportUiTexture(
-			FUiTextureImportArgs{
-				GetWorkspaceFilePath(TEXT("chatgpt/Title_C1.png")),
-				UITitleTextureAssetPath,
-				TitleBackgroundTextureAssetName,
-				true
-			},
-			&BackgroundTexture);
 
 		const bool bLogoImported = ImportUiTexture(
 			FUiTextureImportArgs{
@@ -337,7 +327,7 @@ namespace TunaSweeperEditorSetup
 			},
 			&LogoTexture);
 
-		return bBackgroundImported && bLogoImported && BackgroundTexture && LogoTexture;
+		return bLogoImported && LogoTexture;
 	}
 
 	bool EnsureOpeningScenarioUiTextures()

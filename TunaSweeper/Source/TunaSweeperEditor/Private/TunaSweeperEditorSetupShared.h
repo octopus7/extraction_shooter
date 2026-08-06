@@ -152,6 +152,7 @@
 #include "TunaSweeperPuddleSkyReflectionMaterial.h"
 #include "TunaSweeperProceduralTerrainTest.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
+#include "Title/TunaSweeperTitlePresentationActor.h"
 #include "TunaSweeperEditorRunOnce.h"
 #include "UI/TunaSweeperInteractionMarkerWidget.h"
 #include "TunaSweeperMapCaptureActorDetails.h"
@@ -227,7 +228,7 @@ namespace TunaSweeperEditorSetup
 	const FString LootContainerOccupancyHeaderTaskId = TEXT("2026-05-30_StorageFilterHeaderAboveGridV1");
 	const FString CannedTunaIconImportTaskId = TEXT("2026-05-11_ImportCannedTunaIconV1");
 	const FString BackpackInventoryTaskId = TEXT("2026-05-16_CreateEquipmentInventoryAssetsV3");
-	const FString IntroMenuAndLevelTravelTaskId = TEXT("2026-05-24_CreateTitleIntroMenuPersistentSaveSlotSelectionLevelTravelLadderInitialScaleV1");
+	const FString IntroMenuAndLevelTravelTaskId = TEXT("2026-08-06_CreateTitlePresentationActorAndRoomV7");
 	const FString IntroMenuGraphicsSettingsTaskId = TEXT("2026-07-08_BuildCompleteTitleSettingsWbpV1");
 	const FString IntroMenuDevelopmentSettingsTaskId = TEXT("2026-07-12_AddTitleDevelopmentSettingsV1");
 	const FString IntroMenuDebugDisplayLanguageTaskId = TEXT("2026-07-14_AddDebugDisplayLanguageSettingsV1");
@@ -358,8 +359,9 @@ namespace TunaSweeperEditorSetup
 	const FString HudStatusMeatIconAssetName = TEXT("T_UI_Hud_Status_Meat");
 	const FString UITitleTextureAssetPath = TEXT("/Game/UI/Title");
 	const FString UIStoryTextureAssetPath = TEXT("/Game/UI/Story");
-	const FString TitleBackgroundTextureAssetName = TEXT("Title_C1");
 	const FString TitleLogoTextureAssetName = TEXT("tuna_sweeper_logo_transparent");
+	const FString TitlePresentationActorAssetName = TEXT("BP_TitlePresentationActor");
+	const FString TitlePresentationActorLabel = TEXT("TS_TitlePresentation");
 	const FString OpeningScenarioBackgroundTextureAssetName = TEXT("T_Story_OpeningLightParticles");
 	const FString InteractionMarkerAssetName = TEXT("WBP_InteractionMarker");
 	const FString PickupItemIconWidgetAssetName = TEXT("WBP_PickupItemIcon");
@@ -913,6 +915,8 @@ bool PlaceLootContainerAndSpawnerActorsInRaidMap(UBlueprint* LootContainerBluepr
 bool EnsureLootContainerAndSpawnerAssetsAndMapPlacement();
 bool PlaceSelfDestructActorInRaidMap(UBlueprint* SelfDestructBlueprint);
 bool EnsureSelfDestructInteractionSetup();
+bool PlaceTitlePresentationActorInIntroMap(UBlueprint* TitlePresentationBlueprint);
+bool EnsureTitlePresentationSetup();
 bool EnsureIntroMenuAndLevelTravelSetup();
 bool EnsureIntroMenuGraphicsSettingsSetup();
 bool EnsureBunkerToRaidTransitionVideoSetup();

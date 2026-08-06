@@ -554,16 +554,12 @@ namespace TunaSweeperEditorSetup
 		WidgetBlueprint->WidgetTree->Modify();
 		ClearWidgetTreeForRebuild(WidgetBlueprint);
 
-		UTexture2D* BackgroundTexture = LoadObject<UTexture2D>(
-			nullptr,
-			*GetAssetObjectPath(UITitleTextureAssetPath, TitleBackgroundTextureAssetName));
 		UTexture2D* LogoTexture = LoadObject<UTexture2D>(
 			nullptr,
 			*GetAssetObjectPath(UITitleTextureAssetPath, TitleLogoTextureAssetName));
 
 		UWidgetTree* WidgetTree = WidgetBlueprint->WidgetTree;
 		UCanvasPanel* RootCanvas = WidgetTree->ConstructWidget<UCanvasPanel>(UCanvasPanel::StaticClass(), TEXT("RootCanvas"));
-		UImage* BackgroundImage = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("BackgroundImage"));
 		UBorder* LeftScrim = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("LeftScrim"));
 		UImage* LogoImage = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("LogoImage"));
 		UVerticalBox* MainMenuPanel = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("MainMenuPanel"));
@@ -747,7 +743,7 @@ namespace TunaSweeperEditorSetup
 		UTextBlock* BackFromCreditsButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("BackFromCreditsButtonText"));
 		UTextBlock* VersionText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("VersionText"));
 
-		if (!RootCanvas || !BackgroundImage || !LeftScrim || !LogoImage || !MainMenuPanel || !StartButtonBox ||
+		if (!RootCanvas || !LeftScrim || !LogoImage || !MainMenuPanel || !StartButtonBox ||
 			!StartButton || !StartButtonText || !CurrentSaveSlotBox || !CurrentSaveSlotBorder || !CurrentSaveSlotText ||
 			!SlotSelectButtonBox || !SlotSelectButton || !SlotSelectButtonText || !SettingsButtonBox || !SettingsButton ||
 			!SettingsButtonText || !CreditsButtonBox || !CreditsButton || !CreditsButtonText || !QuitButtonBox ||
@@ -980,16 +976,6 @@ namespace TunaSweeperEditorSetup
 				SectionSlot->SetVerticalAlignment(VAlign_Center);
 			}
 		};
-
-		if (BackgroundTexture)
-		{
-			BackgroundImage->SetBrushFromTexture(BackgroundTexture, false);
-			FSlateBrush BackgroundBrush = BackgroundImage->GetBrush();
-			BackgroundBrush.SetImageSize(FVector2D(1920.0f, 1080.0f));
-			BackgroundImage->SetBrush(BackgroundBrush);
-		}
-		BackgroundImage->SetColorAndOpacity(FLinearColor::White);
-		FillCanvas(RootCanvas->AddChildToCanvas(BackgroundImage));
 
 		FSlateBrush ScrimBrush;
 		ScrimBrush.DrawAs = ESlateBrushDrawType::Box;

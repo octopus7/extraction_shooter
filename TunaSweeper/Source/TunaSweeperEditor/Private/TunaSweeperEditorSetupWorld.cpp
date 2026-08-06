@@ -1064,6 +1064,86 @@ namespace TunaSweeperEditorSetup
 		return bConfigured;
 	}
 
+	bool PlaceTitlePresentationActorInIntroMap(UBlueprint* TitlePresentationBlueprint)
+	{
+		if (!TitlePresentationBlueprint || !TitlePresentationBlueprint->GeneratedClass)
+		{
+			return false;
+		}
+
+		UWorld* IntroWorld = LoadEditorMapForSetup(IntroMapPackagePath);
+		if (!IntroWorld)
+		{
+			return false;
+		}
+
+		IntroWorld->PersistentLevel->Modify();
+		AActor* TitlePresentationActor = FindActorByLabel(IntroWorld, TitlePresentationActorLabel);
+		if (TitlePresentationActor && TitlePresentationActor->GetClass() != TitlePresentationBlueprint->GeneratedClass)
+		{
+			IntroWorld->DestroyActor(TitlePresentationActor);
+			TitlePresentationActor = nullptr;
+		}
+
+		if (!TitlePresentationActor)
+		{
+			FActorSpawnParameters SpawnParameters;
+			SpawnParameters.OverrideLevel = IntroWorld->PersistentLevel;
+			SpawnParameters.Name = MakeUniqueObjectName(
+				IntroWorld->PersistentLevel,
+				TitlePresentationBlueprint->GeneratedClass,
+				FName(*TitlePresentationActorLabel));
+			SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+			TitlePresentationActor = IntroWorld->SpawnActor<AActor>(
+				TitlePresentationBlueprint->GeneratedClass,
+				FVector::ZeroVector,
+				FRotator::ZeroRotator,
+				SpawnParameters);
+		}
+
+		if (!TitlePresentationActor)
+		{
+			return false;
+		}
+
+		TitlePresentationActor->Modify();
+		TitlePresentationActor->SetActorLabel(TitlePresentationActorLabel);
+		TitlePresentationActor->SetActorLocationAndRotation(FVector::ZeroVector, FRotator::ZeroRotator);
+		if (ATunaSweeperTitlePresentationActor* TypedTitlePresentationActor =
+			Cast<ATunaSweeperTitlePresentationActor>(TitlePresentationActor))
+		{
+			TypedTitlePresentationActor->ApplyRecommendedPresentationLayout();
+		}
+		TitlePresentationActor->MarkPackageDirty();
+		return UEditorLoadingAndSavingUtils::SaveMap(IntroWorld, IntroMapPackagePath);
+	}
+
+	bool EnsureTitlePresentationSetup()
+	{
+		UBlueprint* TitlePresentationBlueprint = EnsureBlueprint(
+			UITitleTextureAssetPath,
+			TitlePresentationActorAssetName,
+			ATunaSweeperTitlePresentationActor::StaticClass());
+
+		if (!TitlePresentationBlueprint)
+		{
+			return false;
+		}
+
+		TitlePresentationBlueprint->Modify();
+		FKismetEditorUtilities::CompileBlueprint(TitlePresentationBlueprint);
+		if (ATunaSweeperTitlePresentationActor* BlueprintDefaults =
+			Cast<ATunaSweeperTitlePresentationActor>(TitlePresentationBlueprint->GeneratedClass->GetDefaultObject()))
+		{
+			BlueprintDefaults->Modify();
+			BlueprintDefaults->ApplyRecommendedPresentationLayout();
+		}
+		TitlePresentationBlueprint->MarkPackageDirty();
+		return SaveAsset(TitlePresentationBlueprint) &&
+			PlaceTitlePresentationActorInIntroMap(TitlePresentationBlueprint);
+	}
+
 	bool EnsureIntroMenuAndLevelTravelSetup()
 	{
 		UWidgetBlueprint* IntroMenuWidgetBlueprint = EnsureWidgetBlueprint(
@@ -1084,6 +1164,7 @@ namespace TunaSweeperEditorSetup
 			SetProjectStartupMapsToIntro() &&
 			EnsureTitleUiTextures() &&
 			ConfigureIntroMenuWidgetBlueprint(IntroMenuWidgetBlueprint) &&
+			EnsureTitlePresentationSetup() &&
 			ConfigureLevelTravelBlueprint(LevelTravelBlueprint);
 
 		return bConfigured;

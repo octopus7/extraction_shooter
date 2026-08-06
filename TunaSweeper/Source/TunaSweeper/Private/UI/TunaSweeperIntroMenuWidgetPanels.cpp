@@ -1,7 +1,11 @@
 #include "TunaSweeperIntroMenuWidgetShared.h"
 
+#include "EngineUtils.h"
+#include "Title/TunaSweeperTitlePresentationActor.h"
+
 void UTunaSweeperIntroMenuWidget::ShowMainMenu()
 {
+	SetTitlePresentationMainMenuActive(true);
 	bDifficultyAdjustmentMode = false;
 	HideOverlayPanels();
 	HideDeleteConfirmDialog();
@@ -25,6 +29,7 @@ void UTunaSweeperIntroMenuWidget::ShowMainMenu()
 
 void UTunaSweeperIntroMenuWidget::ShowDifficultySelection()
 {
+	SetTitlePresentationMainMenuActive(false);
 	EnsureDifficultySelectionPanel();
 	HideDeleteConfirmDialog();
 	ResetDeleteHoldProgress();
@@ -96,6 +101,7 @@ void UTunaSweeperIntroMenuWidget::CloseDifficultyAdjustment()
 
 void UTunaSweeperIntroMenuWidget::ShowSaveSlotSelection()
 {
+	SetTitlePresentationMainMenuActive(false);
 	HideDeleteConfirmDialog();
 	ResetDeleteHoldProgress();
 	HideOverlayPanels();
@@ -118,6 +124,7 @@ void UTunaSweeperIntroMenuWidget::ShowSaveSlotSelection()
 
 void UTunaSweeperIntroMenuWidget::ShowSettingsPanel()
 {
+	SetTitlePresentationMainMenuActive(false);
 	HideDeleteConfirmDialog();
 	ResetDeleteHoldProgress();
 
@@ -256,6 +263,7 @@ void UTunaSweeperIntroMenuWidget::ShowDevelopmentSettingsTab()
 
 void UTunaSweeperIntroMenuWidget::ShowCreditsPanel()
 {
+	SetTitlePresentationMainMenuActive(false);
 	HideDeleteConfirmDialog();
 	ResetDeleteHoldProgress();
 
@@ -305,6 +313,21 @@ void UTunaSweeperIntroMenuWidget::ShowCreditsPanel()
 	if (CreditsScrollBox3)
 	{
 		CreditsScrollBox3->SetScrollOffset(0.0f);
+	}
+}
+
+void UTunaSweeperIntroMenuWidget::SetTitlePresentationMainMenuActive(bool bActive)
+{
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		return;
+	}
+
+	for (TActorIterator<ATunaSweeperTitlePresentationActor> ActorIt(World); ActorIt; ++ActorIt)
+	{
+		ActorIt->SetMainMenuPresentationActive(bActive);
+		break;
 	}
 }
 

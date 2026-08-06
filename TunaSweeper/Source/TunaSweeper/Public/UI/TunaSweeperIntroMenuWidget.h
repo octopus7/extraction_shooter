@@ -408,6 +408,7 @@ private:
 	void HandleLanguageChanged();
 
 	void ShowMainMenu();
+	void SetTitlePresentationMainMenuActive(bool bActive);
 	void ShowDifficultySelection();
 	void ShowSaveSlotSelection();
 	void ShowSettingsPanel();
