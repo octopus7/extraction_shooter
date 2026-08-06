@@ -6021,3 +6021,17 @@
 - 타이틀 카메라를 캐릭터에서 약 500uu 떨어진 위치로 당기면서 화각을 14도로 좁히고 수평·수직 조준을 보정해, 원근 왜곡을 줄인 머리부터 허리까지의 상반신 구도로 변경했다.
 - 자동 설정 시 네이티브 기본값만 바뀌고 기존 BP 및 맵 인스턴스에 이전 값이 남는 문제를 막기 위해 권장 프레젠테이션 프리셋을 BP CDO와 `IntroMap` 배치 액터에 명시적으로 다시 적용하도록 했다.
 - UE 5.7 `TunaSweeperEditor Win64 Development` 빌드, 자동 BP·맵 저장, IntroMap 런타임 로드 및 최종 화면 캡처 검증을 완료했다.
+
+## 2026-08-06 17:08:30 (소요시간: 00:05:45)
+
+- 타이틀 전용 액터에 게임 플레이 캐릭터와 동일한 `Luna__Skirt_front` Skeletal Mesh Component와 `ABP_Luna_Skirt`를 추가했다.
+- 타이틀 시작 시 몸체 `BodyMesh`와 `PA_Luna_SkirtBodyProxy`를 치마의 외부 충돌 소스로 등록해 게임 캐릭터와 동일한 본 프록시 충돌 방식을 사용하도록 했다.
+- 하위 메뉴에서 캐릭터를 비활성화할 때 치마의 표시, Tick, 애니메이션 평가도 몸체·얼굴과 함께 중지하고 메인 메뉴 복귀 시 복원하도록 했다.
+- UE 5.7 Editor 빌드, 타이틀 BP·IntroMap 재저장, 런타임 화면 캡처와 `Registered title Luna skirt external collision source: BodyMesh (PA_Luna_SkirtBodyProxy)` 로그를 확인했다.
+
+## 2026-08-06 17:14:00 (소요시간: 00:14:00)
+
+- 정식 타이틀 Idle 애니메이션이 준비되기 전까지 사용할 임시 포즈 레이어를 타이틀 전용 Skeletal Mesh Component에 추가했다.
+- 공유 `ABP_Luna`가 만든 상체 움직임은 유지하면서 양쪽 `upperarm` 이하 체인을 레퍼런스 로컬 포즈로 다시 합성하고 팔을 어깨 아래로 내려, 소총 그립 포즈를 제거하고 손과 손가락을 기본 셋업 상태로 복원했다.
+- 양팔에는 약 11초 주기의 매우 작은 위상차 흔들림을 적용했으며, 정식 Idle 적용 시 `bApplyTemporaryRelaxedArms`를 끄는 것만으로 제거할 수 있게 분리했다.
+- UE 5.7 Editor 전체 빌드와 IntroMap 런타임 캡처를 반복 검증해 양팔이 내려가고 손이 열린 최종 포즈를 확인했다.

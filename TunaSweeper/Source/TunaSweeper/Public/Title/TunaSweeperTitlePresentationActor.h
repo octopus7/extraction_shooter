@@ -7,9 +7,11 @@
 
 class UCameraComponent;
 class UPointLightComponent;
+class UPhysicsAsset;
 class USceneComponent;
 class USkyLightComponent;
 class UStaticMeshComponent;
+struct FReferenceSkeleton;
 
 UCLASS(ClassGroup = (TunaSweeper), meta = (BlueprintSpawnableComponent))
 class TUNASWEEPER_API UTunaSweeperTitleSkeletalMeshComponent : public USkeletalMeshComponent
@@ -20,6 +22,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Title|Look")
 	void SetDirectHeadLookRotation(float YawDegrees, float PitchDegrees);
 
+	void SetTemporaryRelaxedArmPose(float BlendAlpha, float MotionPhaseSeconds);
+
 	virtual void FinalizeBoneTransform() override;
 
 protected:
@@ -29,12 +33,24 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Title|Look")
 	bool bApplyDirectHeadLook = true;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Title|Pose")
+	bool bApplyTemporaryRelaxedArms = true;
+
 private:
 	bool IsBoneDescendantOf(int32 BoneIndex, int32 ParentBoneIndex) const;
+	void ApplyTemporaryRelaxedArmPoseToEditablePose();
+	void ApplyRelaxedArmBranch(
+		TArray<FTransform>& ComponentSpaceTransforms,
+		const FReferenceSkeleton& ReferenceSkeleton,
+		FName UpperArmBoneName,
+		FName LowerArmBoneName,
+		float SidePhaseOffset) const;
 	void ApplyDirectHeadLookToEditablePose();
 
 	float DirectHeadLookYaw = 0.0f;
 	float DirectHeadLookPitch = 0.0f;
+	float TemporaryRelaxedArmBlendAlpha = 1.0f;
+	float TemporaryRelaxedArmMotionPhase = 0.0f;
 };
 
 UCLASS(BlueprintType, Blueprintable)
@@ -93,6 +109,9 @@ protected:
 	TObjectPtr<USkeletalMeshComponent> FaceMesh;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "TunaSweeper|Title|Components")
+	TObjectPtr<USkeletalMeshComponent> SkirtMesh;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "TunaSweeper|Title|Components")
 	TObjectPtr<USceneComponent> HeadLookTarget;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "TunaSweeper|Title|Components")
@@ -118,6 +137,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Title|Character")
 	FName FaceAttachmentSocketName = TEXT("head");
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TunaSweeper|Title|Character")
+	TSoftObjectPtr<UPhysicsAsset> SkirtBodyCollisionProxyPhysicsAsset;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Title|Character")
 	FVector CharacterRelativeLocation = FVector(120.0f, 210.0f, 0.0f);
@@ -157,6 +179,7 @@ protected:
 
 private:
 	void ApplyDesignTransforms();
+	void ConfigureSkirtExternalPhysicsCollision();
 	void UpdateCamera(float DeltaSeconds);
 	void UpdateCursorLook(float DeltaSeconds);
 	void UpdateCharacterPresentationState();
@@ -167,4 +190,5 @@ private:
 	bool bCharacterPresentationEnabled = true;
 	float CurrentHeadLookYaw = 0.0f;
 	float CurrentHeadLookPitch = 0.0f;
+	float CurrentRelaxedArmBlendAlpha = 1.0f;
 };

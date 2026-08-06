@@ -12,6 +12,7 @@
 #include "GameFramework/PlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "Materials/MaterialInterface.h"
+#include "PhysicsEngine/PhysicsAsset.h"
 #include "UObject/ConstructorHelpers.h"
 
 namespace TunaSweeperTitlePresentation
@@ -41,8 +42,17 @@ void UTunaSweeperTitleSkeletalMeshComponent::SetDirectHeadLookRotation(float Yaw
 	DirectHeadLookPitch = PitchDegrees;
 }
 
+void UTunaSweeperTitleSkeletalMeshComponent::SetTemporaryRelaxedArmPose(
+	float BlendAlpha,
+	float MotionPhaseSeconds)
+{
+	TemporaryRelaxedArmBlendAlpha = FMath::Clamp(BlendAlpha, 0.0f, 1.0f);
+	TemporaryRelaxedArmMotionPhase = MotionPhaseSeconds;
+}
+
 void UTunaSweeperTitleSkeletalMeshComponent::FinalizeBoneTransform()
 {
+	ApplyTemporaryRelaxedArmPoseToEditablePose();
 	ApplyDirectHeadLookToEditablePose();
 	Super::FinalizeBoneTransform();
 }
@@ -66,6 +76,116 @@ bool UTunaSweeperTitleSkeletalMeshComponent::IsBoneDescendantOf(int32 BoneIndex,
 		CurrentBoneIndex = ReferenceSkeleton.GetParentIndex(CurrentBoneIndex);
 	}
 	return false;
+}
+
+void UTunaSweeperTitleSkeletalMeshComponent::ApplyTemporaryRelaxedArmPoseToEditablePose()
+{
+	if (!bApplyTemporaryRelaxedArms || TemporaryRelaxedArmBlendAlpha <= KINDA_SMALL_NUMBER)
+	{
+		return;
+	}
+
+	const USkeletalMesh* TitleMeshAsset = GetSkeletalMeshAsset();
+	if (!TitleMeshAsset)
+	{
+		return;
+	}
+
+	TArray<FTransform>& ComponentSpaceTransforms = GetEditableComponentSpaceTransforms();
+	const FReferenceSkeleton& ReferenceSkeleton = TitleMeshAsset->GetRefSkeleton();
+	if (ComponentSpaceTransforms.IsEmpty())
+	{
+		return;
+	}
+
+	ApplyRelaxedArmBranch(
+		ComponentSpaceTransforms,
+		ReferenceSkeleton,
+		TEXT("upperarm_l"),
+		TEXT("lowerarm_l"),
+		0.0f);
+	ApplyRelaxedArmBranch(
+		ComponentSpaceTransforms,
+		ReferenceSkeleton,
+		TEXT("upperarm_r"),
+		TEXT("lowerarm_r"),
+		PI);
+}
+
+void UTunaSweeperTitleSkeletalMeshComponent::ApplyRelaxedArmBranch(
+	TArray<FTransform>& ComponentSpaceTransforms,
+	const FReferenceSkeleton& ReferenceSkeleton,
+	FName UpperArmBoneName,
+	FName LowerArmBoneName,
+	float SidePhaseOffset) const
+{
+	const int32 UpperArmBoneIndex = ReferenceSkeleton.FindBoneIndex(UpperArmBoneName);
+	const int32 LowerArmBoneIndex = ReferenceSkeleton.FindBoneIndex(LowerArmBoneName);
+	if (!ComponentSpaceTransforms.IsValidIndex(UpperArmBoneIndex) ||
+		!ComponentSpaceTransforms.IsValidIndex(LowerArmBoneIndex))
+	{
+		return;
+	}
+
+	const int32 UpperArmParentIndex = ReferenceSkeleton.GetParentIndex(UpperArmBoneIndex);
+	if (!ComponentSpaceTransforms.IsValidIndex(UpperArmParentIndex))
+	{
+		return;
+	}
+
+	const TArray<FTransform>& ReferenceLocalPose = ReferenceSkeleton.GetRefBonePose();
+	TArray<FTransform> TargetTransforms = ComponentSpaceTransforms;
+	for (int32 BoneIndex = UpperArmBoneIndex; BoneIndex < TargetTransforms.Num(); ++BoneIndex)
+	{
+		if (!IsBoneDescendantOf(BoneIndex, UpperArmBoneIndex))
+		{
+			continue;
+		}
+
+		const int32 ParentIndex = ReferenceSkeleton.GetParentIndex(BoneIndex);
+		if (!ReferenceLocalPose.IsValidIndex(BoneIndex) || !TargetTransforms.IsValidIndex(ParentIndex))
+		{
+			continue;
+		}
+		TargetTransforms[BoneIndex] = ReferenceLocalPose[BoneIndex] * TargetTransforms[ParentIndex];
+	}
+
+	const FVector ShoulderLocation = TargetTransforms[UpperArmBoneIndex].GetLocation();
+	const FVector ReferenceArmDirection =
+		(TargetTransforms[LowerArmBoneIndex].GetLocation() - ShoulderLocation).GetSafeNormal();
+	FVector OutwardDirection = FVector(ReferenceArmDirection.X, ReferenceArmDirection.Y, 0.0f).GetSafeNormal();
+	if (OutwardDirection.IsNearlyZero())
+	{
+		OutwardDirection = FVector::RightVector;
+	}
+
+	const float SlowSway = FMath::Sin(TemporaryRelaxedArmMotionPhase * 0.55f + SidePhaseOffset) * 0.025f;
+	const FVector DesiredArmDirection =
+		(-FVector::UpVector + OutwardDirection * (0.10f + SlowSway)).GetSafeNormal();
+	const FQuat ArmDropDelta = FQuat::FindBetweenNormals(ReferenceArmDirection, DesiredArmDirection);
+
+	for (int32 BoneIndex = UpperArmBoneIndex; BoneIndex < TargetTransforms.Num(); ++BoneIndex)
+	{
+		if (!IsBoneDescendantOf(BoneIndex, UpperArmBoneIndex))
+		{
+			continue;
+		}
+
+		FTransform& TargetTransform = TargetTransforms[BoneIndex];
+		TargetTransform.SetLocation(
+			ShoulderLocation + ArmDropDelta.RotateVector(TargetTransform.GetLocation() - ShoulderLocation));
+		TargetTransform.SetRotation((ArmDropDelta * TargetTransform.GetRotation()).GetNormalized());
+
+		FTransform& CurrentTransform = ComponentSpaceTransforms[BoneIndex];
+		CurrentTransform.SetLocation(FMath::Lerp(
+			CurrentTransform.GetLocation(),
+			TargetTransform.GetLocation(),
+			TemporaryRelaxedArmBlendAlpha));
+		CurrentTransform.SetRotation(FQuat::Slerp(
+			CurrentTransform.GetRotation(),
+			TargetTransform.GetRotation(),
+			TemporaryRelaxedArmBlendAlpha).GetNormalized());
+	}
 }
 
 void UTunaSweeperTitleSkeletalMeshComponent::ApplyDirectHeadLookToEditablePose()
@@ -140,6 +260,12 @@ ATunaSweeperTitlePresentationActor::ATunaSweeperTitlePresentationActor()
 	FaceMesh->SetGenerateOverlapEvents(false);
 	FaceMesh->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::OnlyTickPoseWhenRendered;
 
+	SkirtMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Skirt"));
+	SkirtMesh->SetupAttachment(CharacterAnchor);
+	SkirtMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	SkirtMesh->SetGenerateOverlapEvents(false);
+	SkirtMesh->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::OnlyTickPoseWhenRendered;
+
 	HeadLookTarget = CreateDefaultSubobject<USceneComponent>(TEXT("HeadLookTarget"));
 	HeadLookTarget->SetupAttachment(SceneRoot);
 
@@ -176,6 +302,24 @@ ATunaSweeperTitlePresentationActor::ATunaSweeperTitlePresentationActor()
 		BodyMesh->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 		BodyMesh->SetAnimInstanceClass(BodyAnimClassFinder.Class);
 	}
+
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> SkirtMeshFinder(
+		TEXT("/Game/Characters/Player/Luna/Skirt/Luna__Skirt_front.Luna__Skirt_front"));
+	if (SkirtMeshFinder.Succeeded())
+	{
+		SkirtMesh->SetSkeletalMeshAsset(SkirtMeshFinder.Object);
+	}
+
+	static ConstructorHelpers::FClassFinder<UAnimInstance> SkirtAnimClassFinder(
+		TEXT("/Game/Characters/Player/Luna/Skirt/Animations/ABP_Luna_Skirt"));
+	if (SkirtAnimClassFinder.Succeeded())
+	{
+		SkirtMesh->SetAnimationMode(EAnimationMode::AnimationBlueprint);
+		SkirtMesh->SetAnimInstanceClass(SkirtAnimClassFinder.Class);
+	}
+
+	SkirtBodyCollisionProxyPhysicsAsset = TSoftObjectPtr<UPhysicsAsset>(FSoftObjectPath(
+		TEXT("/Game/Characters/Player/Luna/Skirt/PA_Luna_SkirtBodyProxy.PA_Luna_SkirtBodyProxy")));
 
 	AmbientLight = CreateDefaultSubobject<USkyLightComponent>(TEXT("AmbientLight"));
 	AmbientLight->SetupAttachment(SceneRoot);
@@ -216,12 +360,22 @@ void ATunaSweeperTitlePresentationActor::OnConstruction(const FTransform& Transf
 void ATunaSweeperTitlePresentationActor::BeginPlay()
 {
 	Super::BeginPlay();
+	ConfigureSkirtExternalPhysicsCollision();
 	SetMainMenuPresentationActive(true);
 }
 
 void ATunaSweeperTitlePresentationActor::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
+	CurrentRelaxedArmBlendAlpha = FMath::FInterpTo(
+		CurrentRelaxedArmBlendAlpha,
+		1.0f,
+		DeltaSeconds,
+		1.6f);
+	if (BodyMesh)
+	{
+		BodyMesh->SetTemporaryRelaxedArmPose(CurrentRelaxedArmBlendAlpha, GetGameTimeSinceCreation());
+	}
 
 	UpdateCamera(DeltaSeconds);
 	UpdateCharacterPresentationState();
@@ -319,6 +473,24 @@ void ATunaSweeperTitlePresentationActor::ApplyDesignTransforms()
 	}
 }
 
+void ATunaSweeperTitlePresentationActor::ConfigureSkirtExternalPhysicsCollision()
+{
+	UPhysicsAsset* ProxyPhysicsAsset = SkirtBodyCollisionProxyPhysicsAsset.LoadSynchronous();
+	if (!BodyMesh || !SkirtMesh || !ProxyPhysicsAsset)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Title Luna skirt body collision proxy could not be loaded."));
+		return;
+	}
+
+	SkirtMesh->AddClothCollisionSource(BodyMesh, ProxyPhysicsAsset);
+	UE_LOG(
+		LogTemp,
+		Display,
+		TEXT("Registered title Luna skirt external collision source: %s (%s)."),
+		*BodyMesh->GetName(),
+		*ProxyPhysicsAsset->GetName());
+}
+
 void ATunaSweeperTitlePresentationActor::UpdateCamera(float DeltaSeconds)
 {
 	if (!TitleCamera)
@@ -402,7 +574,7 @@ void ATunaSweeperTitlePresentationActor::SetCharacterPresentationEnabled(bool bE
 	}
 
 	bCharacterPresentationEnabled = bEnabled;
-	USkeletalMeshComponent* MeshComponents[] = {BodyMesh.Get(), FaceMesh.Get()};
+	USkeletalMeshComponent* MeshComponents[] = {BodyMesh.Get(), FaceMesh.Get(), SkirtMesh.Get()};
 	for (USkeletalMeshComponent* MeshComponent : MeshComponents)
 	{
 		if (!MeshComponent)
