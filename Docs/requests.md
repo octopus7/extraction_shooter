@@ -1,5 +1,12 @@
 # 요청 기록
 
+## 2026-08-12 01:22:40 (소요시간: 00:05:40)
+
+- `Videos/devTunaCut.mp4`를 `TunaSweeper/Content/Movies/devTunaCut.mp4`로 복사하고 원본과 SHA-256 해시가 일치하는지 확인함.
+- `/Game/Movies/MS_DevTunaCut` `FileMediaSource` 에셋을 생성하고 패키징 가능한 상대 경로 `./Movies/devTunaCut.mp4`를 설정함.
+- UE 5.7 편집기 명령에서 미디어 소스 로드·경로 검증·저장을 수행해 오류와 경고 없이 통과함.
+- 요청에 따라 메뉴 진입 전 재생용 레벨과 자동 재생 흐름은 아직 추가하지 않음.
+
 ## 2026-07-12 21:19:30 (소요시간: 00:09:00)
 
 - 적 AI에 소음·피격 기반 `Suspicious Search`, 발견 후 느낌표 표시와 반응·대기를 거치는 `Alerted`, 이후 근접/원거리 실제 전투로 이어지는 인지 단계를 추가함.
