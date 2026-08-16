@@ -1,0 +1,12 @@
+# Blender 4.5.12 LTS MTL File: 'SKM_Luna_sp3temp.blend'
+# www.blender.org
+
+newmtl M_Luna.001
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+map_Kd tex/T_Luna_BaseColor.png
