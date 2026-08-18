@@ -115,6 +115,12 @@ protected:
 	TObjectPtr<UStaticMeshComponent> LedBarComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Garage Door|Components")
+	TObjectPtr<UStaticMeshComponent> CanopyRailLeftComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Garage Door|Components")
+	TObjectPtr<UStaticMeshComponent> CanopyRailRightComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Garage Door|Components")
 	TObjectPtr<USceneComponent> DoorCarrier;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Garage Door|Components")
@@ -178,7 +184,7 @@ protected:
 	TObjectPtr<UMaterialInterface> LedMaterial;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Garage Door|Geometry", meta = (ClampMin = "1.0"))
-	float DoorWidth = 600.0f;
+	float DoorWidth = 200.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Garage Door|Geometry", meta = (ClampMin = "1.0"))
 	float DoorThickness = 16.0f;
@@ -211,7 +217,7 @@ protected:
 	float FrameDepth = 45.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Garage Door|Geometry", meta = (ClampMin = "1.0"))
-	float LedBarWidth = 320.0f;
+	float LedBarWidth = 110.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Garage Door|Geometry", meta = (ClampMin = "1.0"))
 	float LedBarHeight = 10.0f;
@@ -228,31 +234,16 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Garage Door|Motion", meta = (ClampMin = "0.01", ClampMax = "1.0"))
 	float GroundDropEndAlpha = 0.12f;
 
-	/**
-	 * Optional offset applied to the hinge root while opening. Keep both carrier
-	 * travel values at zero for the standard canopy: its hinge remains attached
-	 * to the top of the frame through every intermediate pose.
-	 */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Garage Door|Motion")
-	float CarrierVerticalTravel = 0.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Garage Door|Motion")
-	float CarrierForwardTravel = 0.0f;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Garage Door|Motion")
 	float CarrierFinalRollDegrees = 90.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Garage Door|Motion", meta = (ClampMin = "0.0", ClampMax = "0.95"))
-	float PanelFoldDelay = 0.12f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Garage Door|Motion", meta = (ClampMin = "0.01", ClampMax = "1.0"))
-	float PanelFoldDuration = 0.48f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Garage Door|Motion", meta = (EditFixedSize))
-	TArray<float> PeakFoldAngles;
-
+	/** Fraction of one panel exposed beyond the preceding panel in the open rail stack. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Garage Door|Motion", meta = (ClampMin = "0.0", ClampMax = "1.0"))
-	float CanopySettleStartAlpha = 0.68f;
+	float CanopyPanelRevealRatio = 0.15f;
+
+	/** Vertical spacing between panel layers after they stack on the exterior rail. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Garage Door|Motion", meta = (ClampMin = "0.0"))
+	float CanopyPanelStackVerticalStep = 20.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Garage Door|Proximity")
 	bool bAutoOpenOnPlayerProximity = true;
@@ -294,16 +285,20 @@ protected:
 	bool bDrawDebugInterlock = false;
 
 private:
+	void EnforceIndependentPanelAttachments();
 	void NormalizeFixedSizeArrays();
 	void ApplyMeshes();
 	void ApplyClosedLayout();
 	void ApplyDoorPose(float PoseAlpha);
+	void ApplyCanopyRailPose(float TopPanelRollDegrees);
 	void ApplyMeshDimensions(UStaticMeshComponent* Component, const FVector& TargetDimensions) const;
 	void UpdateCollisionState(float PoseAlpha);
 	void DrawDebugLayout() const;
 	float GetEffectiveUpperPanelHeight(int32 PanelIndex) const;
 	float GetUpperTotalHeight() const;
-	float GetFoldAngle(int32 PanelIndex, float PoseAlpha) const;
+	float GetCanopyPanelRevealOffset(int32 PanelIndex) const;
+	float GetCanopyRailLength() const;
+	float GetCanopyRailHeight() const;
 	bool IsEligibleAutoOpenPawn(const AActor* Actor) const;
 	bool HasAutoOpenPawns();
 	void HandleDelayedAutoClose();

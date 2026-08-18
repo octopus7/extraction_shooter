@@ -263,8 +263,12 @@ namespace
 			return false;
 		}
 
-		const FVector DoorLocation(220.0f, 220.0f, 0.0f);
-		const FRotator DoorRotation = FRotator::ZeroRotator;
+		// Keep the visual door clear of the RaidMap player start. This is also the
+		// canonical placement used whenever the one-shot garage door setup is rerun.
+		const FVector DoorLocation(219.9999f, 1474.0253f, 0.0f);
+		// FRotator constructor order is Pitch(Y), Yaw(Z), Roll(X). The requested
+		// editor Z rotation must therefore be passed as Yaw, not Roll.
+		const FRotator DoorRotation(0.0f, -50.0f, 0.0f);
 		AActor* GarageDoorActor = TunaSweeperEditorSetup::FindActorByLabel(RaidWorld, GarageDoorActorLabel);
 		if (!GarageDoorActor)
 		{

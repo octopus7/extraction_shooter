@@ -54,6 +54,10 @@ AFoldingCanopyGarageDoor::AFoldingCanopyGarageDoor()
 	FrameRightComponent->SetupAttachment(SceneRoot);
 	LedBarComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("LedBar"));
 	LedBarComponent->SetupAttachment(FrameTopComponent);
+	CanopyRailLeftComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CanopyRailLeft"));
+	CanopyRailLeftComponent->SetupAttachment(SceneRoot);
+	CanopyRailRightComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CanopyRailRight"));
+	CanopyRailRightComponent->SetupAttachment(SceneRoot);
 
 	DoorCarrier = CreateDefaultSubobject<USceneComponent>(TEXT("DoorCarrier"));
 	DoorCarrier->SetupAttachment(SceneRoot);
@@ -62,15 +66,15 @@ AFoldingCanopyGarageDoor::AFoldingCanopyGarageDoor()
 	UpperPanel01 = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("UpperPanel01"));
 	UpperPanel01->SetupAttachment(Hinge01);
 	Hinge02 = CreateDefaultSubobject<USceneComponent>(TEXT("Hinge02"));
-	Hinge02->SetupAttachment(Hinge01);
+	Hinge02->SetupAttachment(DoorCarrier);
 	UpperPanel02 = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("UpperPanel02"));
 	UpperPanel02->SetupAttachment(Hinge02);
 	Hinge03 = CreateDefaultSubobject<USceneComponent>(TEXT("Hinge03"));
-	Hinge03->SetupAttachment(Hinge02);
+	Hinge03->SetupAttachment(DoorCarrier);
 	UpperPanel03 = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("UpperPanel03"));
 	UpperPanel03->SetupAttachment(Hinge03);
 	Hinge04 = CreateDefaultSubobject<USceneComponent>(TEXT("Hinge04"));
-	Hinge04->SetupAttachment(Hinge03);
+	Hinge04->SetupAttachment(DoorCarrier);
 	UpperPanel04 = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("UpperPanel04"));
 	UpperPanel04->SetupAttachment(Hinge04);
 
@@ -96,13 +100,13 @@ AFoldingCanopyGarageDoor::AFoldingCanopyGarageDoor()
 	UpperPanelMeshes.SetNum(FoldingCanopyGarageDoor::UpperPanelCount);
 	bOverrideUpperPanelHeight.Init(false, FoldingCanopyGarageDoor::UpperPanelCount);
 	UpperPanelHeightOverride.Init(SharedUpperPanelHeight, FoldingCanopyGarageDoor::UpperPanelCount);
-	PeakFoldAngles.Init(-100.0f, FoldingCanopyGarageDoor::UpperPanelCount);
 }
 
 void AFoldingCanopyGarageDoor::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
+	EnforceIndependentPanelAttachments();
 	NormalizeFixedSizeArrays();
 	ApplyMeshes();
 	ApplyClosedLayout();
@@ -121,6 +125,7 @@ void AFoldingCanopyGarageDoor::BeginPlay()
 {
 	Super::BeginPlay();
 
+	EnforceIndependentPanelAttachments();
 	NormalizeFixedSizeArrays();
 	ApplyMeshes();
 	ApplyClosedLayout();
@@ -250,6 +255,7 @@ void AFoldingCanopyGarageDoor::ConfigureVisualDefaults(
 	UMaterialInterface* InMetalMaterial,
 	UMaterialInterface* InLedMaterial)
 {
+	EnforceIndependentPanelAttachments();
 	NormalizeFixedSizeArrays();
 	FrameTopMesh = InFrameTopMesh;
 	FrameLeftMesh = InFrameLeftMesh;
@@ -258,11 +264,12 @@ void AFoldingCanopyGarageDoor::ConfigureVisualDefaults(
 	LedBarMesh = InLedBarMesh;
 	MetalMaterial = InMetalMaterial;
 	LedMaterial = InLedMaterial;
-	// The project art kit is a frame-anchored canopy, not an independently lifting door.
-	// Keeping these values explicit also migrates the first generated Blueprint from the
-	// temporary prototype motion values.
-	CarrierVerticalTravel = 0.0f;
-	CarrierForwardTravel = 0.0f;
+	// In the RaidMap placement, local +Y faces outdoors and local -Y faces the bunker interior.
+	CarrierFinalRollDegrees = 90.0f;
+	CanopyPanelRevealRatio = 0.15f;
+	CanopyPanelStackVerticalStep = 20.0f;
+	DoorWidth = 200.0f;
+	LedBarWidth = 110.0f;
 	for (TObjectPtr<UStaticMesh>& UpperPanelMesh : UpperPanelMeshes)
 	{
 		UpperPanelMesh = InUpperPanelMesh;
@@ -271,6 +278,35 @@ void AFoldingCanopyGarageDoor::ConfigureVisualDefaults(
 	ApplyMeshes();
 	ApplyClosedLayout();
 	ApplyDoorPose(OpenAlpha);
+}
+
+void AFoldingCanopyGarageDoor::EnforceIndependentPanelAttachments()
+{
+	if (!DoorCarrier)
+	{
+		return;
+	}
+
+	// Older Blueprint instances serialized the prototype's nested hinge chain.
+	// Each hinge must instead be a direct child of the neutral carrier so no panel
+	// inherits another panel's translation or rotation. Their coordinated motion is
+	// calculated independently from each panel's closed lower-edge height.
+	for (USceneComponent* Hinge : { Hinge01.Get(), Hinge02.Get(), Hinge03.Get(), Hinge04.Get() })
+	{
+		if (!Hinge || Hinge->GetAttachParent() == DoorCarrier)
+		{
+			continue;
+		}
+
+		if (Hinge->IsRegistered())
+		{
+			Hinge->AttachToComponent(DoorCarrier, FAttachmentTransformRules::KeepWorldTransform);
+		}
+		else
+		{
+			Hinge->SetupAttachment(DoorCarrier);
+		}
+	}
 }
 
 void AFoldingCanopyGarageDoor::HandleAutoOpenTriggerBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -323,12 +359,6 @@ void AFoldingCanopyGarageDoor::NormalizeFixedSizeArrays()
 	}
 	UpperPanelHeightOverride.SetNum(FoldingCanopyGarageDoor::UpperPanelCount);
 
-	while (PeakFoldAngles.Num() < FoldingCanopyGarageDoor::UpperPanelCount)
-	{
-		PeakFoldAngles.Add(-100.0f);
-	}
-	PeakFoldAngles.SetNum(FoldingCanopyGarageDoor::UpperPanelCount);
-
 	LowerPanelEmbedDepth = FMath::Clamp(LowerPanelEmbedDepth, 0.0f, FMath::Max(0.0f, LowerPanelHeight - KINDA_SMALL_NUMBER));
 }
 
@@ -338,13 +368,15 @@ void AFoldingCanopyGarageDoor::ApplyMeshes()
 	FrameLeftComponent->SetStaticMesh(FrameLeftMesh);
 	FrameRightComponent->SetStaticMesh(FrameRightMesh);
 	LedBarComponent->SetStaticMesh(LedBarMesh);
+	CanopyRailLeftComponent->SetStaticMesh(FrameLeftMesh);
+	CanopyRailRightComponent->SetStaticMesh(FrameRightMesh);
 	UpperPanel01->SetStaticMesh(UpperPanelMeshes[0]);
 	UpperPanel02->SetStaticMesh(UpperPanelMeshes[1]);
 	UpperPanel03->SetStaticMesh(UpperPanelMeshes[2]);
 	UpperPanel04->SetStaticMesh(UpperPanelMeshes[3]);
 	LowerPanelComponent->SetStaticMesh(LowerPanelMesh);
 
-	for (UStaticMeshComponent* MetalComponent : { FrameTopComponent.Get(), FrameLeftComponent.Get(), FrameRightComponent.Get(), UpperPanel01.Get(), UpperPanel02.Get(), UpperPanel03.Get(), UpperPanel04.Get(), LowerPanelComponent.Get() })
+	for (UStaticMeshComponent* MetalComponent : { FrameTopComponent.Get(), FrameLeftComponent.Get(), FrameRightComponent.Get(), CanopyRailLeftComponent.Get(), CanopyRailRightComponent.Get(), UpperPanel01.Get(), UpperPanel02.Get(), UpperPanel03.Get(), UpperPanel04.Get(), LowerPanelComponent.Get() })
 	{
 		MetalComponent->SetMaterial(0, MetalMaterial);
 	}
@@ -356,13 +388,15 @@ void AFoldingCanopyGarageDoor::ApplyMeshes()
 	ApplyMeshDimensions(FrameLeftComponent, FrameSideDimensions);
 	ApplyMeshDimensions(FrameRightComponent, FrameSideDimensions);
 	ApplyMeshDimensions(LedBarComponent, FVector(LedBarWidth, LedBarThickness, LedBarHeight));
+	ApplyMeshDimensions(CanopyRailLeftComponent, FVector(FrameSideWidth * 0.55f, GetCanopyRailLength(), GetCanopyRailHeight()));
+	ApplyMeshDimensions(CanopyRailRightComponent, FVector(FrameSideWidth * 0.55f, GetCanopyRailLength(), GetCanopyRailHeight()));
 	ApplyMeshDimensions(UpperPanel01, FVector(DoorWidth, DoorThickness, GetEffectiveUpperPanelHeight(0)));
 	ApplyMeshDimensions(UpperPanel02, FVector(DoorWidth, DoorThickness, GetEffectiveUpperPanelHeight(1)));
 	ApplyMeshDimensions(UpperPanel03, FVector(DoorWidth, DoorThickness, GetEffectiveUpperPanelHeight(2)));
 	ApplyMeshDimensions(UpperPanel04, FVector(DoorWidth, DoorThickness, GetEffectiveUpperPanelHeight(3)));
 	ApplyMeshDimensions(LowerPanelComponent, FVector(DoorWidth, DoorThickness, LowerPanelHeight));
 
-	for (UStaticMeshComponent* FrameComponent : { FrameTopComponent.Get(), FrameLeftComponent.Get(), FrameRightComponent.Get() })
+	for (UStaticMeshComponent* FrameComponent : { FrameTopComponent.Get(), FrameLeftComponent.Get(), FrameRightComponent.Get(), CanopyRailLeftComponent.Get(), CanopyRailRightComponent.Get() })
 	{
 		FrameComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		FrameComponent->SetCollisionResponseToAllChannels(ECR_Block);
@@ -386,12 +420,14 @@ void AFoldingCanopyGarageDoor::ApplyClosedLayout()
 	FrameRightComponent->SetRelativeLocation(FVector(DoorWidth * 0.5f + FrameSideWidth * 0.5f, 0.0f, UpperTopZ * 0.5f));
 	FrameTopComponent->SetRelativeLocation(FVector(0.0f, 0.0f, UpperTopZ + FrameTopHeight * 0.5f));
 	LedBarComponent->SetRelativeLocation(FVector(0.0f, -FrameDepth * 0.5f - LedBarThickness * 0.5f, -FrameTopHeight * 0.5f));
+	ApplyCanopyRailPose(0.0f);
 
-	DoorCarrier->SetRelativeLocation(FVector(0.0f, 0.0f, UpperTopZ));
-	Hinge01->SetRelativeLocation(FVector::ZeroVector);
-	Hinge02->SetRelativeLocation(FVector(0.0f, 0.0f, -GetEffectiveUpperPanelHeight(0)));
-	Hinge03->SetRelativeLocation(FVector(0.0f, 0.0f, -GetEffectiveUpperPanelHeight(1)));
-	Hinge04->SetRelativeLocation(FVector(0.0f, 0.0f, -GetEffectiveUpperPanelHeight(2)));
+	DoorCarrier->SetRelativeLocation(FVector::ZeroVector);
+	DoorCarrier->SetRelativeRotation(FRotator::ZeroRotator);
+	Hinge01->SetRelativeLocation(FVector(0.0f, 0.0f, UpperTopZ));
+	Hinge02->SetRelativeLocation(FVector(0.0f, 0.0f, UpperTopZ - GetEffectiveUpperPanelHeight(0)));
+	Hinge03->SetRelativeLocation(FVector(0.0f, 0.0f, UpperTopZ - GetEffectiveUpperPanelHeight(0) - GetEffectiveUpperPanelHeight(1)));
+	Hinge04->SetRelativeLocation(FVector(0.0f, 0.0f, UpperTopZ - GetEffectiveUpperPanelHeight(0) - GetEffectiveUpperPanelHeight(1) - GetEffectiveUpperPanelHeight(2)));
 	UpperPanel01->SetRelativeLocation(FVector(0.0f, 0.0f, -GetEffectiveUpperPanelHeight(0) * 0.5f));
 	UpperPanel02->SetRelativeLocation(FVector(0.0f, 0.0f, -GetEffectiveUpperPanelHeight(1) * 0.5f));
 	UpperPanel03->SetRelativeLocation(FVector(0.0f, 0.0f, -GetEffectiveUpperPanelHeight(2) * 0.5f));
@@ -409,23 +445,81 @@ void AFoldingCanopyGarageDoor::ApplyClosedLayout()
 void AFoldingCanopyGarageDoor::ApplyDoorPose(float PoseAlpha)
 {
 	const float ClampedAlpha = FMath::Clamp(PoseAlpha, 0.0f, 1.0f);
-	const float LiftAlpha = FoldingCanopyGarageDoor::SmoothRemap(ClampedAlpha, 0.10f, 0.90f);
-	const float RotationAlpha = FoldingCanopyGarageDoor::SmoothRemap(ClampedAlpha, 0.18f, 0.92f);
 	const float GroundAlpha = FoldingCanopyGarageDoor::SmoothRemap(ClampedAlpha, 0.0f, GroundDropEndAlpha);
 	const float LowerClosedCenterZ = LowerPanelHeight * 0.5f - LowerPanelEmbedDepth;
 	const float LowerDropDistance = (LowerPanelHeight - LowerPanelEmbedDepth) + InterlockClearance;
+	const float LowerTopZ = LowerPanelHeight - LowerPanelEmbedDepth;
+	const float UpperTotalHeight = GetUpperTotalHeight();
+	const float UpperTopZ = LowerTopZ + UpperTotalHeight;
 
-	DoorCarrier->SetRelativeLocation(
-		FVector(0.0f, CarrierForwardTravel * LiftAlpha, GetUpperTotalHeight() + LowerPanelHeight - LowerPanelEmbedDepth + CarrierVerticalTravel * LiftAlpha));
-	DoorCarrier->SetRelativeRotation(FRotator(0.0f, 0.0f, CarrierFinalRollDegrees * RotationAlpha));
-	Hinge01->SetRelativeRotation(FRotator(0.0f, 0.0f, GetFoldAngle(0, ClampedAlpha)));
-	Hinge02->SetRelativeRotation(FRotator(0.0f, 0.0f, GetFoldAngle(1, ClampedAlpha)));
-	Hinge03->SetRelativeRotation(FRotator(0.0f, 0.0f, GetFoldAngle(2, ClampedAlpha)));
-	Hinge04->SetRelativeRotation(FRotator(0.0f, 0.0f, GetFoldAngle(3, ClampedAlpha)));
+	DoorCarrier->SetRelativeLocation(FVector::ZeroVector);
+	DoorCarrier->SetRelativeRotation(FRotator::ZeroRotator);
+	USceneComponent* Hinges[] = { Hinge01.Get(), Hinge02.Get(), Hinge03.Get(), Hinge04.Get() };
+	float ClosedHingeZ = UpperTopZ;
+	float TopPanelRollDegrees = 0.0f;
+	for (int32 PanelIndex = 0; PanelIndex < FoldingCanopyGarageDoor::UpperPanelCount; ++PanelIndex)
+	{
+		const float PanelHeight = GetEffectiveUpperPanelHeight(PanelIndex);
+		const float ClosedLowerEdgeZ = ClosedHingeZ - PanelHeight;
+		const float InitialHeightProgress = UpperTotalHeight > KINDA_SMALL_NUMBER
+			? FMath::Clamp((ClosedLowerEdgeZ - LowerTopZ) / UpperTotalHeight, 0.0f, 1.0f)
+			: 0.0f;
+		const float HeightProgress = FMath::Min(InitialHeightProgress + ClampedAlpha, 1.0f);
+
+		// Every panel follows the same three rail zones, but begins at the zone matching
+		// its own closed lower-edge height: 0-50% vertical, 50-75% turn, 75-100% stack.
+		const float VerticalEndProgress = FMath::Min(HeightProgress, 0.75f);
+		const float VerticalStartProgress = FMath::Min(InitialHeightProgress, 0.75f);
+		const float VerticalLift = UpperTotalHeight * (VerticalEndProgress - VerticalStartProgress);
+		const float TurnAlpha = FoldingCanopyGarageDoor::SmoothRemap(HeightProgress, 0.5f, 0.75f);
+		const float InitialTurnAlpha = FoldingCanopyGarageDoor::SmoothRemap(InitialHeightProgress, 0.5f, 0.75f);
+		const float RelativeTurnAlpha = FMath::Clamp(TurnAlpha - InitialTurnAlpha, 0.0f, 1.0f);
+		const float StackAlpha = FoldingCanopyGarageDoor::SmoothRemap(HeightProgress, 0.75f, 1.0f);
+
+		const FVector RailLocation(0.0f, 0.0f, ClosedHingeZ + VerticalLift);
+		const FVector ExteriorStackLocation(
+			0.0f,
+			GetCanopyPanelRevealOffset(PanelIndex),
+			UpperTopZ - PanelIndex * CanopyPanelStackVerticalStep);
+		const FVector HingeLocation = FMath::Lerp(RailLocation, ExteriorStackLocation, StackAlpha);
+		const float TurnRoll = CarrierFinalRollDegrees * 0.5f * RelativeTurnAlpha;
+		const float HingeRoll = FMath::Lerp(TurnRoll, CarrierFinalRollDegrees, StackAlpha);
+		Hinges[PanelIndex]->SetRelativeLocation(HingeLocation);
+		Hinges[PanelIndex]->SetRelativeRotation(FRotator(0.0f, 0.0f, HingeRoll));
+		if (PanelIndex == 0)
+		{
+			TopPanelRollDegrees = HingeRoll;
+		}
+
+		ClosedHingeZ = ClosedLowerEdgeZ;
+	}
+	ApplyCanopyRailPose(TopPanelRollDegrees);
 	LowerPanelRoot->SetRelativeLocation(FVector(0.0f, 0.0f, LowerClosedCenterZ - LowerDropDistance * GroundAlpha));
 
 	UpdateCollisionState(ClampedAlpha);
 	DrawDebugLayout();
+}
+
+void AFoldingCanopyGarageDoor::ApplyCanopyRailPose(float TopPanelRollDegrees)
+{
+	const float RailLength = GetCanopyRailLength();
+	const float RailHeight = GetCanopyRailHeight();
+	const float UpperTopZ = LowerPanelHeight - LowerPanelEmbedDepth + GetUpperTotalHeight();
+	const float RailAnchorZ = UpperTopZ + RailHeight * 0.5f;
+	// The panel mesh and the rail use different local length axes. Rotate the rail
+	// in the opposite signed direction so both extend toward the same exterior side.
+	const float RailRollDegrees = -90.0f - TopPanelRollDegrees;
+	const FRotator RailRotation(0.0f, 0.0f, RailRollDegrees);
+	const FVector RailCenterOffset = RailRotation.RotateVector(FVector(0.0f, RailLength * 0.5f, 0.0f));
+	const float RailSideOffset = DoorWidth * 0.5f - FrameSideWidth * 0.5f;
+
+	// The rails are independent from the top panel hierarchy. They only copy its
+	// deployment angle, standing against the wall when closed and stopping once
+	// the top panel has completed its exterior rotation.
+	CanopyRailLeftComponent->SetRelativeLocation(FVector(-RailSideOffset, 0.0f, RailAnchorZ) + RailCenterOffset);
+	CanopyRailRightComponent->SetRelativeLocation(FVector(RailSideOffset, 0.0f, RailAnchorZ) + RailCenterOffset);
+	CanopyRailLeftComponent->SetRelativeRotation(RailRotation);
+	CanopyRailRightComponent->SetRelativeRotation(RailRotation);
 }
 
 void AFoldingCanopyGarageDoor::ApplyMeshDimensions(UStaticMeshComponent* Component, const FVector& TargetDimensions) const
@@ -501,19 +595,33 @@ float AFoldingCanopyGarageDoor::GetUpperTotalHeight() const
 	return TotalHeight;
 }
 
-float AFoldingCanopyGarageDoor::GetFoldAngle(int32 PanelIndex, float PoseAlpha) const
+float AFoldingCanopyGarageDoor::GetCanopyPanelRevealOffset(int32 PanelIndex) const
 {
-	const float StartAlpha = 0.08f + PanelIndex * PanelFoldDelay;
-	const float PeakAlpha = StartAlpha + PanelFoldDuration * 0.5f;
-	const float EndAlpha = FMath::Max(CanopySettleStartAlpha, PeakAlpha + KINDA_SMALL_NUMBER);
-	const float PeakAngle = PeakFoldAngles.IsValidIndex(PanelIndex) ? PeakFoldAngles[PanelIndex] : -100.0f;
-
-	if (PoseAlpha <= PeakAlpha)
+	float Offset = 0.0f;
+	for (int32 Index = 0; Index < PanelIndex; ++Index)
 	{
-		return PeakAngle * FoldingCanopyGarageDoor::SmoothRemap(PoseAlpha, StartAlpha, PeakAlpha);
+		Offset += GetEffectiveUpperPanelHeight(Index) * CanopyPanelRevealRatio;
 	}
+	return Offset;
+}
 
-	return PeakAngle * (1.0f - FoldingCanopyGarageDoor::SmoothRemap(PoseAlpha, PeakAlpha, EndAlpha));
+float AFoldingCanopyGarageDoor::GetCanopyRailLength() const
+{
+	float FurthestPanelEdge = 0.0f;
+	for (int32 PanelIndex = 0; PanelIndex < FoldingCanopyGarageDoor::UpperPanelCount; ++PanelIndex)
+	{
+		FurthestPanelEdge = FMath::Max(
+			FurthestPanelEdge,
+			GetCanopyPanelRevealOffset(PanelIndex) + GetEffectiveUpperPanelHeight(PanelIndex));
+	}
+	return FurthestPanelEdge + FrameSideWidth * 0.5f;
+}
+
+float AFoldingCanopyGarageDoor::GetCanopyRailHeight() const
+{
+	const float PreviousRailHeight = FrameSideWidth * 0.55f
+		+ CanopyPanelStackVerticalStep * (FoldingCanopyGarageDoor::UpperPanelCount - 1);
+	return PreviousRailHeight * 0.25f;
 }
 
 bool AFoldingCanopyGarageDoor::IsEligibleAutoOpenPawn(const AActor* Actor) const
