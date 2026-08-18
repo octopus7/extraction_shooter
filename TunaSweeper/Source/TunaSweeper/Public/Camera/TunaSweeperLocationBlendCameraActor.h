@@ -6,7 +6,6 @@
 
 class ACameraActor;
 class APlayerController;
-class UMaterialInstanceDynamic;
 class USceneComponent;
 class USphereComponent;
 class UStaticMeshComponent;
@@ -96,13 +95,13 @@ protected:
 
 #if WITH_EDITORONLY_DATA
 	UPROPERTY(Transient)
+	TObjectPtr<USphereComponent> BlendStartPreview;
+
+	UPROPERTY(Transient)
 	TObjectPtr<USphereComponent> BlendCompletePreview;
 
 	UPROPERTY(Transient)
-	TObjectPtr<UStaticMeshComponent> BlendStartSolidPreview;
-
-	UPROPERTY(Transient)
-	TObjectPtr<UMaterialInstanceDynamic> BlendStartSolidMaterial;
+	TObjectPtr<UStaticMeshComponent> EditorSelectionHandle;
 #endif
 
 private:
