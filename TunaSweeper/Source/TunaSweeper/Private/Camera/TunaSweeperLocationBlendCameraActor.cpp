@@ -1,12 +1,18 @@
 #include "Camera/TunaSweeperLocationBlendCameraActor.h"
 
 #include "Camera/CameraActor.h"
+#include "Components/StaticMeshComponent.h"
 #include "Components/SceneComponent.h"
 #include "Components/SphereComponent.h"
+#include "DrawDebugHelpers.h"
 #include "EngineUtils.h"
+#include "Engine/StaticMesh.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
 #include "Kismet/GameplayStatics.h"
+#include "Materials/MaterialInstanceDynamic.h"
+#include "Materials/MaterialInterface.h"
+#include "UObject/ConstructorHelpers.h"
 
 ATunaSweeperLocationBlendCameraActor::ATunaSweeperLocationBlendCameraActor()
 {
@@ -22,16 +28,31 @@ ATunaSweeperLocationBlendCameraActor::ATunaSweeperLocationBlendCameraActor()
 	BlendOrigin->SetupAttachment(CameraRigRoot);
 
 #if WITH_EDITORONLY_DATA
-	BlendStartPreview = CreateEditorOnlyDefaultSubobject<USphereComponent>(TEXT("BlendStartPreview"));
-	if (BlendStartPreview)
+	BlendStartSolidPreview = CreateEditorOnlyDefaultSubobject<UStaticMeshComponent>(TEXT("BlendStartSolidPreview"));
+	if (BlendStartSolidPreview)
 	{
-		BlendStartPreview->SetupAttachment(BlendOrigin);
-		BlendStartPreview->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		BlendStartPreview->SetGenerateOverlapEvents(false);
-		BlendStartPreview->SetHiddenInGame(true);
-		BlendStartPreview->ShapeColor = FColor(70, 150, 255);
-		BlendStartPreview->bDrawOnlyIfSelected = true;
-		BlendStartPreview->InitSphereRadius(BlendStartDistance);
+		BlendStartSolidPreview->SetupAttachment(BlendOrigin);
+		BlendStartSolidPreview->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		BlendStartSolidPreview->SetGenerateOverlapEvents(false);
+		BlendStartSolidPreview->SetHiddenInGame(true);
+		BlendStartSolidPreview->SetCastShadow(false);
+		BlendStartSolidPreview->SetVisibility(false);
+		BlendStartSolidPreview->SetIsVisualizationComponent(true);
+		BlendStartSolidPreview->bSelectable = false;
+
+		static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereMeshFinder(
+			TEXT("/Engine/BasicShapes/Sphere.Sphere"));
+		if (SphereMeshFinder.Succeeded())
+		{
+			BlendStartSolidPreview->SetStaticMesh(SphereMeshFinder.Object);
+		}
+
+		static ConstructorHelpers::FObjectFinder<UMaterialInterface> TranslucentMaterialFinder(
+			TEXT("/Engine/EngineDebugMaterials/M_SimpleUnlitTranslucent.M_SimpleUnlitTranslucent"));
+		if (TranslucentMaterialFinder.Succeeded())
+		{
+			BlendStartSolidPreview->SetMaterial(0, TranslucentMaterialFinder.Object);
+		}
 	}
 
 	BlendCompletePreview = CreateEditorOnlyDefaultSubobject<USphereComponent>(TEXT("BlendCompletePreview"));
@@ -48,9 +69,26 @@ ATunaSweeperLocationBlendCameraActor::ATunaSweeperLocationBlendCameraActor()
 #endif
 }
 
+void ATunaSweeperLocationBlendCameraActor::OnConstruction(const FTransform& Transform)
+{
+	Super::OnConstruction(Transform);
+
+#if WITH_EDITOR
+	RefreshEditorVisualization();
+#endif
+}
+
 void ATunaSweeperLocationBlendCameraActor::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
+
+#if WITH_EDITOR
+	if (GetWorld() && !GetWorld()->IsGameWorld())
+	{
+		UpdateEditorSelectionVisualization();
+		return;
+	}
+#endif
 
 	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(this, 0);
 	APawn* ControlledPawn = PlayerController ? PlayerController->GetPawn() : nullptr;
@@ -122,6 +160,11 @@ void ATunaSweeperLocationBlendCameraActor::EndPlay(const EEndPlayReason::Type En
 bool ATunaSweeperLocationBlendCameraActor::IsDefaultPreviewEnabled() const
 {
 	return false;
+}
+
+bool ATunaSweeperLocationBlendCameraActor::ShouldTickIfViewportsOnly() const
+{
+	return true;
 }
 
 void ATunaSweeperLocationBlendCameraActor::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
@@ -240,13 +283,61 @@ void ATunaSweeperLocationBlendCameraActor::RestorePawnViewTarget() const
 void ATunaSweeperLocationBlendCameraActor::RefreshEditorVisualization()
 {
 #if WITH_EDITORONLY_DATA
-	if (BlendStartPreview)
+	if (BlendStartSolidPreview && BlendStartSolidPreview->GetStaticMesh())
 	{
-		BlendStartPreview->SetSphereRadius(FMath::Max(1.0f, BlendStartDistance));
+		const float SourceRadius = FMath::Max(
+			BlendStartSolidPreview->GetStaticMesh()->GetBounds().BoxExtent.X,
+			1.0f);
+		const float RadiusScale = FMath::Max(1.0f, BlendStartDistance) / SourceRadius;
+		BlendStartSolidPreview->SetRelativeScale3D(FVector(RadiusScale));
+
+		if (!BlendStartSolidMaterial)
+		{
+			BlendStartSolidMaterial = BlendStartSolidPreview->CreateAndSetMaterialInstanceDynamic(0);
+		}
+		if (BlendStartSolidMaterial)
+		{
+			BlendStartSolidMaterial->SetVectorParameterValue(
+				TEXT("Color"),
+				FLinearColor(0.06f, 0.30f, 1.0f, 0.12f));
+		}
 	}
 	if (BlendCompletePreview)
 	{
 		BlendCompletePreview->SetSphereRadius(FMath::Max(0.0f, BlendCompleteDistance));
+	}
+#endif
+}
+
+void ATunaSweeperLocationBlendCameraActor::UpdateEditorSelectionVisualization()
+{
+#if WITH_EDITORONLY_DATA
+	const bool bSelected = IsSelectedInEditor();
+	if (BlendStartSolidPreview)
+	{
+		BlendStartSolidPreview->SetVisibility(bSelected);
+	}
+	if (BlendCompletePreview)
+	{
+		BlendCompletePreview->SetVisibility(bSelected);
+	}
+
+	if (!bSelected && GetWorld())
+	{
+		const FVector Origin = BlendOrigin ? BlendOrigin->GetComponentLocation() : GetActorLocation();
+		DrawDebugCircle(
+			GetWorld(),
+			Origin + FVector(0.0f, 0.0f, 2.0f),
+			FMath::Max(1.0f, BlendStartDistance),
+			96,
+			FColor(70, 150, 255),
+			false,
+			0.0f,
+			0,
+			2.0f,
+			FVector(0.0f, 1.0f, 0.0f),
+			FVector(0.0f, 0.0f, 1.0f),
+			false);
 	}
 #endif
 }

@@ -6,8 +6,10 @@
 
 class ACameraActor;
 class APlayerController;
+class UMaterialInstanceDynamic;
 class USceneComponent;
 class USphereComponent;
+class UStaticMeshComponent;
 
 /**
  * A placeable location camera that blends from the controlled pawn's live camera
@@ -26,11 +28,13 @@ public:
 	ATunaSweeperLocationBlendCameraActor();
 
 	virtual void Tick(float DeltaSeconds) override;
+	virtual void OnConstruction(const FTransform& Transform) override;
 	virtual void CalcCamera(float DeltaTime, FMinimalViewInfo& OutResult) override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 #if WITH_EDITOR
 	virtual bool IsDefaultPreviewEnabled() const override;
+	virtual bool ShouldTickIfViewportsOnly() const override;
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif
 
@@ -68,11 +72,11 @@ protected:
 	TObjectPtr<ACameraActor> TargetCameraActor;
 
 	/** Outer radius at which blending begins. Must be larger than Blend Complete Distance. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Distance Blend", meta = (ClampMin = "1.0", UIMin = "1.0", Units = "cm"))
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Distance Blend", meta = (ClampMin = "1.0", UIMin = "1.0", Units = "cm"))
 	float BlendStartDistance = 1600.0f;
 
 	/** Inner radius at which the location camera has full weight. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Distance Blend", meta = (ClampMin = "0.0", UIMin = "0.0", Units = "cm"))
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Distance Blend", meta = (ClampMin = "0.0", UIMin = "0.0", Units = "cm"))
 	float BlendCompleteDistance = 600.0f;
 
 	/** Ignores height differences when measuring player distance. */
@@ -91,11 +95,14 @@ protected:
 	bool bBlendEnabled = true;
 
 #if WITH_EDITORONLY_DATA
-	UPROPERTY(VisibleAnywhere, Category = "Editor Visualization")
-	TObjectPtr<USphereComponent> BlendStartPreview;
-
-	UPROPERTY(VisibleAnywhere, Category = "Editor Visualization")
+	UPROPERTY(Transient)
 	TObjectPtr<USphereComponent> BlendCompletePreview;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UStaticMeshComponent> BlendStartSolidPreview;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UMaterialInstanceDynamic> BlendStartSolidMaterial;
 #endif
 
 private:
@@ -109,6 +116,7 @@ private:
 
 #if WITH_EDITOR
 	void RefreshEditorVisualization();
+	void UpdateEditorSelectionVisualization();
 #endif
 
 	UPROPERTY(Transient)

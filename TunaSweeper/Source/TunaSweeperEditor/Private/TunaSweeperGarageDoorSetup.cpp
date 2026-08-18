@@ -17,8 +17,6 @@ namespace
 	const FString GarageDoorTextureAssetPath = GarageDoorAssetPath + TEXT("/Textures");
 	const FString GarageDoorMaterialAssetPath = GarageDoorAssetPath + TEXT("/Materials");
 	const FString GarageDoorBlueprintAssetName = TEXT("BP_RaidBunkerGarageDoor");
-	const FString GarageDoorActorLabel = TEXT("TS_RaidBunkerGarageDoor");
-	const FString RaidMapPackagePath = TEXT("/Game/RaidMap");
 
 	FString GetSourceArtPath(const FString& RelativePath)
 	{
@@ -260,54 +258,6 @@ namespace
 		return TunaSweeperEditorSetup::SaveAsset(OutBlueprint);
 	}
 
-	bool PlaceGarageDoorInRaidMap(UBlueprint* GarageDoorBlueprint)
-	{
-		if (!GarageDoorBlueprint || !GarageDoorBlueprint->GeneratedClass)
-		{
-			return false;
-		}
-
-		UWorld* RaidWorld = TunaSweeperEditorSetup::LoadEditorMapForSetup(RaidMapPackagePath);
-		if (!RaidWorld)
-		{
-			return false;
-		}
-
-		// Keep the visual door clear of the RaidMap player start. This is also the
-		// canonical placement used whenever the one-shot garage door setup is rerun.
-		const FVector DoorLocation(219.9999f, 1474.0253f, 0.0f);
-		// FRotator constructor order is Pitch(Y), Yaw(Z), Roll(X). The requested
-		// editor Z rotation must therefore be passed as Yaw, not Roll.
-		const FRotator DoorRotation(0.0f, -50.0f, 0.0f);
-		AActor* GarageDoorActor = TunaSweeperEditorSetup::FindActorByLabel(RaidWorld, GarageDoorActorLabel);
-		if (!GarageDoorActor)
-		{
-			RaidWorld->PersistentLevel->Modify();
-			FActorSpawnParameters SpawnParameters;
-			SpawnParameters.OverrideLevel = RaidWorld->PersistentLevel;
-			SpawnParameters.Name = MakeUniqueObjectName(
-				RaidWorld->PersistentLevel,
-				GarageDoorBlueprint->GeneratedClass,
-				FName(*GarageDoorActorLabel));
-			SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-			GarageDoorActor = RaidWorld->SpawnActor<AActor>(
-				GarageDoorBlueprint->GeneratedClass,
-				DoorLocation,
-				DoorRotation,
-				SpawnParameters);
-			if (!GarageDoorActor)
-			{
-				return false;
-			}
-			GarageDoorActor->SetActorLabel(GarageDoorActorLabel);
-		}
-
-		GarageDoorActor->Modify();
-		GarageDoorActor->SetActorLocationAndRotation(DoorLocation, DoorRotation);
-		GarageDoorActor->RerunConstructionScripts();
-		GarageDoorActor->MarkPackageDirty();
-		return UEditorLoadingAndSavingUtils::SaveMap(RaidWorld, RaidMapPackagePath);
-	}
 }
 
 bool TunaSweeperGarageDoorSetup::Run()
@@ -385,14 +335,10 @@ bool TunaSweeperGarageDoorSetup::Run()
 		return false;
 	}
 
-	const bool bPlaced = PlaceGarageDoorInRaidMap(GarageDoorBlueprint);
-	if (bPlaced)
-	{
-		UE_LOG(LogTunaSweeperEditor, Log, TEXT("Garage door setup completed. Blueprint=%s"), *GetNameSafe(GarageDoorBlueprint));
-	}
-	else
-	{
-		UE_LOG(LogTunaSweeperEditor, Error, TEXT("Garage door setup failed during RaidMap placement. Blueprint=%s"), *GetNameSafe(GarageDoorBlueprint));
-	}
-	return bPlaced;
+	UE_LOG(
+		LogTunaSweeperEditor,
+		Log,
+		TEXT("Garage door asset and Blueprint setup completed. Blueprint=%s"),
+		*GetNameSafe(GarageDoorBlueprint));
+	return true;
 }

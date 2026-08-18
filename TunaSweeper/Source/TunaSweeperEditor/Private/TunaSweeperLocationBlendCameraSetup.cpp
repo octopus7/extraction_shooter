@@ -22,6 +22,27 @@ bool TunaSweeperLocationBlendCameraSetup::Run()
 	}
 
 	FKismetEditorUtilities::CompileBlueprint(Blueprint);
+	ATunaSweeperLocationBlendCameraActor* Defaults = Blueprint->GeneratedClass
+		? Cast<ATunaSweeperLocationBlendCameraActor>(Blueprint->GeneratedClass->GetDefaultObject())
+		: nullptr;
+	if (!Defaults)
+	{
+		UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to read location blend camera Blueprint defaults."));
+		return false;
+	}
+
+	TArray<UCameraComponent*> EmbeddedCameraComponents;
+	Defaults->GetComponents<UCameraComponent>(EmbeddedCameraComponents);
+	if (!EmbeddedCameraComponents.IsEmpty())
+	{
+		UE_LOG(
+			LogTunaSweeperEditor,
+			Error,
+			TEXT("Location blend camera Blueprint still contains %d embedded CameraComponent(s)."),
+			EmbeddedCameraComponents.Num());
+		return false;
+	}
+
 	Blueprint->MarkPackageDirty();
 	if (!TunaSweeperEditorSetup::SaveAsset(Blueprint))
 	{
@@ -32,7 +53,7 @@ bool TunaSweeperLocationBlendCameraSetup::Run()
 	UE_LOG(
 		LogTunaSweeperEditor,
 		Display,
-		TEXT("Created location blend camera Blueprint: %s/%s"),
+		TEXT("Created location blend camera Blueprint without embedded cameras: %s/%s"),
 		*LocationCameraAssetPath,
 		*LocationCameraBlueprintAssetName);
 	return true;

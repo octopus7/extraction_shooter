@@ -470,8 +470,6 @@ void AFoldingCanopyGarageDoor::ApplyClosedLayout()
 	TemporaryWallRightComponent->SetRelativeLocation(FVector(TemporaryWallCenterX, 0.0f, TemporaryShellHeight * 0.5f));
 	// The temporary roof starts at the entrance plane and extends one door width into local +Y (indoors).
 	TemporaryRoofComponent->SetRelativeLocation(FVector(0.0f, DoorWidth * 0.5f, TemporaryShellHeight + FrameDepth * 0.5f));
-	ApplyCanopyRailPose(0.0f);
-
 	DoorCarrier->SetRelativeLocation(FVector::ZeroVector);
 	DoorCarrier->SetRelativeRotation(FRotator::ZeroRotator);
 	Hinge01->SetRelativeLocation(FVector(0.0f, 0.0f, UpperTopZ));
@@ -482,6 +480,7 @@ void AFoldingCanopyGarageDoor::ApplyClosedLayout()
 	UpperPanel02->SetRelativeLocation(FVector(0.0f, 0.0f, -GetEffectiveUpperPanelHeight(1) * 0.5f));
 	UpperPanel03->SetRelativeLocation(FVector(0.0f, 0.0f, -GetEffectiveUpperPanelHeight(2) * 0.5f));
 	UpperPanel04->SetRelativeLocation(FVector(0.0f, 0.0f, -GetEffectiveUpperPanelHeight(3) * 0.5f));
+	ApplyCanopyRailPose(0.0f);
 	LowerPanelRoot->SetRelativeLocation(FVector(0.0f, 0.0f, LowerClosedCenterZ));
 
 	const float DoorSpan = UpperTopZ - DoorBottomZ;
@@ -509,7 +508,6 @@ void AFoldingCanopyGarageDoor::ApplyDoorPose(float PoseAlpha)
 		.RotateVector(FVector(0.0f, 0.0f, -1.0f))
 		.GetSafeNormal2D();
 	float ClosedHingeZ = UpperTopZ;
-	float TopPanelRollDegrees = 0.0f;
 	for (int32 PanelIndex = 0; PanelIndex < FoldingCanopyGarageDoor::UpperPanelCount; ++PanelIndex)
 	{
 		const float PanelHeight = GetEffectiveUpperPanelHeight(PanelIndex);
@@ -549,14 +547,9 @@ void AFoldingCanopyGarageDoor::ApplyDoorPose(float PoseAlpha)
 		const float HingeRoll = FMath::Lerp(TurnRoll, CarrierFinalRollDegrees, StackAlpha);
 		Hinges[PanelIndex]->SetRelativeLocation(HingeLocation);
 		Hinges[PanelIndex]->SetRelativeRotation(FRotator(0.0f, 0.0f, HingeRoll));
-		if (PanelIndex == 0)
-		{
-			TopPanelRollDegrees = HingeRoll;
-		}
-
 		ClosedHingeZ = ClosedLowerEdgeZ;
 	}
-	ApplyCanopyRailPose(TopPanelRollDegrees);
+	ApplyCanopyRailPose(Hinge01 ? Hinge01->GetRelativeRotation().Roll : 0.0f);
 	LowerPanelRoot->SetRelativeLocation(FVector(0.0f, 0.0f, LowerClosedCenterZ - LowerDropDistance * GroundAlpha));
 
 	UpdateCollisionState(ClampedAlpha);
@@ -565,22 +558,34 @@ void AFoldingCanopyGarageDoor::ApplyDoorPose(float PoseAlpha)
 
 void AFoldingCanopyGarageDoor::ApplyCanopyRailPose(float TopPanelRollDegrees)
 {
+	if (!CanopyRailLeftComponent || !CanopyRailRightComponent)
+	{
+		return;
+	}
+
 	const float RailLength = GetCanopyRailLength();
-	const float RailHeight = GetCanopyRailHeight();
+	const float RailWidth = FrameSideWidth * 0.55f;
 	const float UpperTopZ = LowerPanelHeight - LowerPanelEmbedDepth + GetUpperTotalHeight();
-	const float RailAnchorZ = UpperTopZ + RailHeight * 0.5f;
-	// The panel mesh and the rail use different local length axes. Rotate the rail
-	// in the opposite signed direction so both extend toward the same exterior side.
+
+	// Closed, the rail runs downward beside panel 1 with its upper end aligned to
+	// the panel's upper edge. During deployment its lower pivot slides vertically
+	// from that closed position to the frame top while the rail rotates outward.
 	const float RailRollDegrees = -90.0f - TopPanelRollDegrees;
 	const FRotator RailRotation(0.0f, 0.0f, RailRollDegrees);
 	const FVector RailCenterOffset = RailRotation.RotateVector(FVector(0.0f, RailLength * 0.5f, 0.0f));
-	const float RailSideOffset = DoorWidth * 0.5f - FrameSideWidth * 0.5f;
+	const float RailSideOffset = DoorWidth * 0.5f + RailWidth * 0.5f;
+	const float RailDeployAlpha = FMath::Clamp(
+		FMath::Abs(TopPanelRollDegrees) / FMath::Max(FMath::Abs(CarrierFinalRollDegrees), KINDA_SMALL_NUMBER),
+		0.0f,
+		1.0f);
+	const float RailPivotZ = FMath::Lerp(UpperTopZ - RailLength, UpperTopZ, RailDeployAlpha);
+	const FVector RailPivot(0.0f, 0.0f, RailPivotZ);
+	const FVector RailCenter = RailPivot + RailCenterOffset;
 
-	// The rails are independent from the top panel hierarchy. They only copy its
-	// deployment angle, standing against the wall when closed and stopping once
-	// the top panel has completed its exterior rotation.
-	CanopyRailLeftComponent->SetRelativeLocation(FVector(-RailSideOffset, 0.0f, RailAnchorZ) + RailCenterOffset);
-	CanopyRailRightComponent->SetRelativeLocation(FVector(RailSideOffset, 0.0f, RailAnchorZ) + RailCenterOffset);
+	// The components remain independent. Panel 1 supplies only rail deployment
+	// progress; the rail owns its opposite rotation and vertical slide.
+	CanopyRailLeftComponent->SetRelativeLocation(RailCenter + FVector(-RailSideOffset, 0.0f, 0.0f));
+	CanopyRailRightComponent->SetRelativeLocation(RailCenter + FVector(RailSideOffset, 0.0f, 0.0f));
 	CanopyRailLeftComponent->SetRelativeRotation(RailRotation);
 	CanopyRailRightComponent->SetRelativeRotation(RailRotation);
 }
