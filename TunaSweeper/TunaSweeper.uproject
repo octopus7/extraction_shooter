@@ -17,6 +17,10 @@
 	],
 	"Plugins": [
 		{
+			"Name": "FoldingCanopyGarageDoor",
+			"Enabled": true
+		},
+		{
 			"Name": "ModelingToolsEditorMode",
 			"Enabled": true,
 			"TargetAllowList": [

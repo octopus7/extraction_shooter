@@ -6042,3 +6042,20 @@
 - 공유 `ABP_Luna`가 만든 상체 움직임은 유지하면서 양쪽 `upperarm` 이하 체인을 레퍼런스 로컬 포즈로 다시 합성하고 팔을 어깨 아래로 내려, 소총 그립 포즈를 제거하고 손과 손가락을 기본 셋업 상태로 복원했다.
 - 양팔에는 약 11초 주기의 매우 작은 위상차 흔들림을 적용했으며, 정식 Idle 적용 시 `bApplyTemporaryRelaxedArms`를 끄는 것만으로 제거할 수 있게 분리했다.
 - UE 5.7 Editor 전체 빌드와 IntroMap 런타임 캡처를 반복 검증해 양팔이 내려가고 손이 열린 최종 포즈를 확인했다.
+
+## 2026-08-18 15:30:00 (소요시간: 00:06:00)
+
+- 첨부 `GarageDoor_Codex_Package.zip`의 4단 접힘·처마형 상부 문, 지면 하강 하단 파츠, OpenAlpha 기반 결정론적 애니메이션 설계와 레퍼런스 이미지를 검토했다.
+- 구현 단계에서는 차고문 런타임 로직을 프로젝트 인터랙션에 의존하지 않는 코드 전용 플러그인으로 만들고, OBJ 원본·생성 텍스처·머터리얼·최종 Blueprint는 TunaSweeper 프로젝트 자산으로 두는 계획을 수립했다.
+- 박스 수준 UV 포함 OBJ는 상단 문틀, 좌·우 측면 문틀, 상부 낱장 패널, 하단 매립 파츠, 최상단 바형 LED로 분리하며, 상부 패널 OBJ 하나를 기본 4단에 재사용하되 Blueprint의 패널별 교체 슬롯은 유지하도록 계획했다.
+- 문틀을 한 메시로 합치지 않고 상단·좌·우 컴포넌트와 단순 충돌로 구성하고, 이동 패널 외형과 통행 차단 충돌을 분리하도록 계획했다.
+- 표면 텍스처는 ImageGen으로 산업용 다크 메탈 베이스 이미지를 생성·검수해 프로젝트에 저장하고, Unreal Editor 자동 임포트로 Static Mesh·텍스처·머터리얼·프로젝트 Blueprint를 생성하도록 계획했다.
+- 근접 개폐는 플러그인의 플레이어 근접 볼륨만 사용하며, 실제 레벨 이동은 기존 `BP_Interact_LevelTravel`과 `GameplayInteractionSpawns.json` 흐름을 수정하지 않고 별도 유지하도록 계획했다.
+
+## 2026-08-18 15:36:00 (소요시간: 00:27:16)
+
+- `FoldingCanopyGarageDoor` 코드 전용 Runtime 플러그인과 `AFoldingCanopyGarageDoor`를 추가했다. 액터는 상단·좌·우 문틀, LED 바, 4단 상부 패널 힌지 체인, 하단 매립 패널, 통행 차단 박스와 플레이어 근접 트리거를 분리해 구성한다.
+- 플러그인은 프로젝트 인터랙션 모듈을 참조하지 않는다. 근접 진입·이탈에는 외관상 Open/Close 연출만 수행하고, 기존 `TS_Travel_ToBunker`/`BP_Interact_LevelTravel` 레벨 이동 흐름은 그대로 유지했다.
+- UV0을 포함한 박스 수준 OBJ 원본(상단·좌·우 문틀, 상부 낱장, 하단 매립 파츠, LED 바)과 ImageGen 기반 산업용 다크 메탈 BaseColor를 `SourceArt/Environment/BunkerGarageDoor`에 저장했다.
+- 생성 원본을 임포트해 메쉬·텍스처·금속 및 LED 머터리얼을 만들고, 프로젝트 자산 `/Game/Environment/Bunker/GarageDoor/BP_RaidBunkerGarageDoor`를 생성했다. Blueprint는 플러그인 클래스를 부모로 하므로 프로젝트 쪽에서 추가 컴포넌트·개별 메쉬·값을 계속 편집할 수 있다.
+- `RaidMap`에 `TS_RaidBunkerGarageDoor`를 기존 입장 인터랙션 위치와 맞춰 배치했다. UE 5.7 Editor 빌드, Blueprint 컴파일, OBJ 재임포트, `RaidMap` 저장과 Map Check(오류·경고 0)를 완료하고 에디터를 `RaidMap`으로 열었다.

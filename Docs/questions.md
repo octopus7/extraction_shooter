@@ -4041,3 +4041,23 @@ Blender 원본 치마 본과 UE Physics Asset의 길이가 달라 보일 때 축
 ### 답변
 
 무방하다. 얼굴 전용 Skeletal Mesh의 모든 정점을 유일한 Root 본에 1.0으로 웨이트하고, 해당 Skeletal Mesh Component 전체를 몸체 Skeletal Mesh의 Head 소켓에 부착하면 머리 움직임은 컴포넌트 부착을 통해 추종하고 얼굴 표정은 얼굴 메시의 모프 타깃으로 독립 제어할 수 있다. 임포트 기준점과 Head 소켓의 방향 및 위치만 맞추고, 얼굴 본에 머리 변환을 다시 복사해 이중 변환이 생기지 않도록 해야 한다.
+
+## 2026-08-18 15:22:00 (소요시간: 00:06:00)
+
+### 질문
+
+레이드 레벨의 벙커 입구용 액터는 독립 플러그인으로 구현하고 최종 Blueprint는 프로젝트 애셋으로 둘 때, 플러그인이 프로젝트 인터랙션 기능을 참조하지 않으면서 Blueprint Child에 프로젝트 전용 인터랙션 컴포넌트를 추가해 연결할 수 있는지 문의.
+
+### 답변
+
+가능하며 권장되는 의존성 방향이다. 플러그인 C++ 액터는 문 메커니즘과 `ToggleDoor()` 같은 Blueprint 호출 API 및 상태 delegate만 제공하고, `/Game`의 Blueprint Child가 `UTunaSweeperInteractableComponent`와 프로젝트 전용 인터랙션 인터페이스를 추가해 연결하면 플러그인은 프로젝트 모듈을 참조하지 않는다. 다만 현재 `DoorOpen` 처리기는 소유 액터를 `ATunaSweeperDoorActor`로 강제 캐스팅하므로 컴포넌트만 추가해서는 동작하지 않는다. 프로젝트 측 `DoorOpen` 처리기를 인터페이스 우선 호출 방식으로 확장하고 기존 액터 캐스트를 호환용 fallback으로 유지한 뒤, Blueprint가 해당 인터페이스 이벤트에서 플러그인의 `ToggleDoor()`를 호출하도록 구성하는 것이 적합하다.
+
+## 2026-08-18 15:28:00 (소요시간: 00:02:00)
+
+### 질문
+
+벙커 입구 차고문의 근접 개폐는 레벨 이동 인터랙션이 아니라 가까이 가면 열리고 멀어지면 닫히는 외관 연출이며, 실제 입장은 기존 인터랙션을 별도로 이용한다는 역할 구분을 확인.
+
+### 답변
+
+차고문 액터에는 `DoorOpen` 또는 `LevelTravel` 인터랙션 컴포넌트를 붙이지 않고, 플러그인 내부의 범용 근접 감지 볼륨으로 플레이어가 들어오면 `OpenDoor()`, 마지막 유효 대상이 나가면 `CloseDoor()`를 호출하도록 분리하는 것이 적합하다. 실제 입장은 기존 `BP_Interact_LevelTravel` 액터를 문 앞에 별도 배치하거나 프로젝트 Blueprint의 Child Actor Component로 포함해 담당하게 한다. 특히 현재 `LevelTravel` 처리기는 컴포넌트 소유자를 `ATunaSweeperLevelTravelInteractableActor`로 캐스팅하므로, 해당 컴포넌트를 차고문 Blueprint 자체에 직접 추가하는 방식보다 기존 레벨 이동 액터를 독립 Actor 또는 Child Actor로 유지해야 기존 동작을 수정하지 않고 재사용할 수 있다.

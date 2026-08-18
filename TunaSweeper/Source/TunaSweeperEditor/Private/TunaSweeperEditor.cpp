@@ -2,6 +2,7 @@
 #include "TunaSweeperEnemyAIDebugTool.h"
 #include "TunaSweeperLunaSkirtPhysicsSetup.h"
 #include "TunaSweeperQuadrupedPresetSetup.h"
+#include "TunaSweeperGarageDoorSetup.h"
 
 #include "Containers/Ticker.h"
 #include "Editor.h"
@@ -23,6 +24,14 @@ public:
 			LunaSkirtSetupInitializedHandle = FEditorDelegates::OnEditorInitialized.AddRaw(
 				this,
 				&FTunaSweeperEditorModule::OnEditorInitializedForLunaSkirtSetup);
+			return;
+		}
+
+		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperGarageDoorSetup")))
+		{
+			GarageDoorSetupInitializedHandle = FEditorDelegates::OnEditorInitialized.AddRaw(
+				this,
+				&FTunaSweeperEditorModule::OnEditorInitializedForGarageDoorSetup);
 			return;
 		}
 
@@ -124,6 +133,18 @@ public:
 			LunaSkirtSetupTickerHandle.Reset();
 		}
 
+		if (GarageDoorSetupInitializedHandle.IsValid())
+		{
+			FEditorDelegates::OnEditorInitialized.Remove(GarageDoorSetupInitializedHandle);
+			GarageDoorSetupInitializedHandle.Reset();
+		}
+
+		if (GarageDoorSetupTickerHandle.IsValid())
+		{
+			FTSTicker::GetCoreTicker().RemoveTicker(GarageDoorSetupTickerHandle);
+			GarageDoorSetupTickerHandle.Reset();
+		}
+
 		if (JumpInputSetupInitializedHandle.IsValid())
 		{
 			FEditorDelegates::OnEditorInitialized.Remove(JumpInputSetupInitializedHandle);
@@ -201,6 +222,28 @@ private:
 		return false;
 	}
 
+	void OnEditorInitializedForGarageDoorSetup(double)
+	{
+		FEditorDelegates::OnEditorInitialized.Remove(GarageDoorSetupInitializedHandle);
+		GarageDoorSetupInitializedHandle.Reset();
+		GarageDoorSetupTickerHandle = FTSTicker::GetCoreTicker().AddTicker(
+			FTickerDelegate::CreateRaw(this, &FTunaSweeperEditorModule::RunGarageDoorSetupAfterInitialization));
+	}
+
+	bool RunGarageDoorSetupAfterInitialization(float)
+	{
+		GarageDoorSetupTickerHandle.Reset();
+		const bool bSucceeded = TunaSweeperGarageDoorSetup::Run();
+		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperGarageDoorSetupQuit")))
+		{
+			FPlatformMisc::RequestExitWithStatus(
+				false,
+				bSucceeded ? 0 : 1,
+				TEXT("TunaSweeperGarageDoorSetup"));
+		}
+		return false;
+	}
+
 	void OnEditorInitializedForJumpInputSetup(double)
 	{
 		FEditorDelegates::OnEditorInitialized.Remove(JumpInputSetupInitializedHandle);
@@ -248,6 +291,8 @@ private:
 	bool bStandardEditorSetupStarted = false;
 	FDelegateHandle LunaSkirtSetupInitializedHandle;
 	FTSTicker::FDelegateHandle LunaSkirtSetupTickerHandle;
+	FDelegateHandle GarageDoorSetupInitializedHandle;
+	FTSTicker::FDelegateHandle GarageDoorSetupTickerHandle;
 	FDelegateHandle JumpInputSetupInitializedHandle;
 	FTSTicker::FDelegateHandle JumpInputSetupTickerHandle;
 	FDelegateHandle QuadrupedSetupInitializedHandle;
