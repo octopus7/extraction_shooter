@@ -52,12 +52,16 @@ AFoldingCanopyGarageDoor::AFoldingCanopyGarageDoor()
 	FrameLeftComponent->SetupAttachment(SceneRoot);
 	FrameRightComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("FrameRight"));
 	FrameRightComponent->SetupAttachment(SceneRoot);
-	LedBarComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("LedBar"));
-	LedBarComponent->SetupAttachment(FrameTopComponent);
 	CanopyRailLeftComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CanopyRailLeft"));
 	CanopyRailLeftComponent->SetupAttachment(SceneRoot);
 	CanopyRailRightComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CanopyRailRight"));
 	CanopyRailRightComponent->SetupAttachment(SceneRoot);
+	TemporaryWallLeftComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("TemporaryWallLeft"));
+	TemporaryWallLeftComponent->SetupAttachment(SceneRoot);
+	TemporaryWallRightComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("TemporaryWallRight"));
+	TemporaryWallRightComponent->SetupAttachment(SceneRoot);
+	TemporaryRoofComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("TemporaryRoof"));
+	TemporaryRoofComponent->SetupAttachment(SceneRoot);
 
 	DoorCarrier = CreateDefaultSubobject<USceneComponent>(TEXT("DoorCarrier"));
 	DoorCarrier->SetupAttachment(SceneRoot);
@@ -65,6 +69,8 @@ AFoldingCanopyGarageDoor::AFoldingCanopyGarageDoor()
 	Hinge01->SetupAttachment(DoorCarrier);
 	UpperPanel01 = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("UpperPanel01"));
 	UpperPanel01->SetupAttachment(Hinge01);
+	LedBarComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("LedBar"));
+	LedBarComponent->SetupAttachment(Hinge01);
 	Hinge02 = CreateDefaultSubobject<USceneComponent>(TEXT("Hinge02"));
 	Hinge02->SetupAttachment(DoorCarrier);
 	UpperPanel02 = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("UpperPanel02"));
@@ -249,6 +255,11 @@ void AFoldingCanopyGarageDoor::ConfigureVisualDefaults(
 	UStaticMesh* InFrameTopMesh,
 	UStaticMesh* InFrameLeftMesh,
 	UStaticMesh* InFrameRightMesh,
+	UStaticMesh* InCanopyRailLeftMesh,
+	UStaticMesh* InCanopyRailRightMesh,
+	UStaticMesh* InTemporaryWallLeftMesh,
+	UStaticMesh* InTemporaryWallRightMesh,
+	UStaticMesh* InTemporaryRoofMesh,
 	UStaticMesh* InUpperPanelMesh,
 	UStaticMesh* InLowerPanelMesh,
 	UStaticMesh* InLedBarMesh,
@@ -260,11 +271,16 @@ void AFoldingCanopyGarageDoor::ConfigureVisualDefaults(
 	FrameTopMesh = InFrameTopMesh;
 	FrameLeftMesh = InFrameLeftMesh;
 	FrameRightMesh = InFrameRightMesh;
+	CanopyRailLeftMesh = InCanopyRailLeftMesh;
+	CanopyRailRightMesh = InCanopyRailRightMesh;
+	TemporaryWallLeftMesh = InTemporaryWallLeftMesh;
+	TemporaryWallRightMesh = InTemporaryWallRightMesh;
+	TemporaryRoofMesh = InTemporaryRoofMesh;
 	LowerPanelMesh = InLowerPanelMesh;
 	LedBarMesh = InLedBarMesh;
 	MetalMaterial = InMetalMaterial;
 	LedMaterial = InLedMaterial;
-	// In the RaidMap placement, local +Y faces outdoors and local -Y faces the bunker interior.
+	// With this mesh orientation, positive roll unfolds the panel toward local -Y (outdoors).
 	CarrierFinalRollDegrees = 90.0f;
 	CanopyPanelRevealRatio = 0.15f;
 	CanopyPanelStackVerticalStep = 20.0f;
@@ -305,6 +321,20 @@ void AFoldingCanopyGarageDoor::EnforceIndependentPanelAttachments()
 		else
 		{
 			Hinge->SetupAttachment(DoorCarrier);
+		}
+	}
+
+	// Migrate Blueprints created before the LED moved from the fixed frame to the
+	// leading edge of the independently animated top panel.
+	if (LedBarComponent && Hinge01 && LedBarComponent->GetAttachParent() != Hinge01)
+	{
+		if (LedBarComponent->IsRegistered())
+		{
+			LedBarComponent->AttachToComponent(Hinge01, FAttachmentTransformRules::KeepRelativeTransform);
+		}
+		else
+		{
+			LedBarComponent->SetupAttachment(Hinge01);
 		}
 	}
 }
@@ -368,15 +398,18 @@ void AFoldingCanopyGarageDoor::ApplyMeshes()
 	FrameLeftComponent->SetStaticMesh(FrameLeftMesh);
 	FrameRightComponent->SetStaticMesh(FrameRightMesh);
 	LedBarComponent->SetStaticMesh(LedBarMesh);
-	CanopyRailLeftComponent->SetStaticMesh(FrameLeftMesh);
-	CanopyRailRightComponent->SetStaticMesh(FrameRightMesh);
+	CanopyRailLeftComponent->SetStaticMesh(CanopyRailLeftMesh);
+	CanopyRailRightComponent->SetStaticMesh(CanopyRailRightMesh);
+	TemporaryWallLeftComponent->SetStaticMesh(TemporaryWallLeftMesh);
+	TemporaryWallRightComponent->SetStaticMesh(TemporaryWallRightMesh);
+	TemporaryRoofComponent->SetStaticMesh(TemporaryRoofMesh);
 	UpperPanel01->SetStaticMesh(UpperPanelMeshes[0]);
 	UpperPanel02->SetStaticMesh(UpperPanelMeshes[1]);
 	UpperPanel03->SetStaticMesh(UpperPanelMeshes[2]);
 	UpperPanel04->SetStaticMesh(UpperPanelMeshes[3]);
 	LowerPanelComponent->SetStaticMesh(LowerPanelMesh);
 
-	for (UStaticMeshComponent* MetalComponent : { FrameTopComponent.Get(), FrameLeftComponent.Get(), FrameRightComponent.Get(), CanopyRailLeftComponent.Get(), CanopyRailRightComponent.Get(), UpperPanel01.Get(), UpperPanel02.Get(), UpperPanel03.Get(), UpperPanel04.Get(), LowerPanelComponent.Get() })
+	for (UStaticMeshComponent* MetalComponent : { FrameTopComponent.Get(), FrameLeftComponent.Get(), FrameRightComponent.Get(), CanopyRailLeftComponent.Get(), CanopyRailRightComponent.Get(), TemporaryWallLeftComponent.Get(), TemporaryWallRightComponent.Get(), TemporaryRoofComponent.Get(), UpperPanel01.Get(), UpperPanel02.Get(), UpperPanel03.Get(), UpperPanel04.Get(), LowerPanelComponent.Get() })
 	{
 		MetalComponent->SetMaterial(0, MetalMaterial);
 	}
@@ -384,19 +417,24 @@ void AFoldingCanopyGarageDoor::ApplyMeshes()
 
 	const FVector FrameTopDimensions(DoorWidth + FrameSideWidth * 2.0f, FrameDepth, FrameTopHeight);
 	const FVector FrameSideDimensions(FrameSideWidth, FrameDepth, GetUpperTotalHeight() + LowerPanelHeight - LowerPanelEmbedDepth);
+	const float TemporaryShellHeight = GetUpperTotalHeight() + LowerPanelHeight - LowerPanelEmbedDepth + FrameTopHeight;
+	const float TemporaryShellWidth = DoorWidth * 3.0f + FrameSideWidth * 2.0f;
 	ApplyMeshDimensions(FrameTopComponent, FrameTopDimensions);
 	ApplyMeshDimensions(FrameLeftComponent, FrameSideDimensions);
 	ApplyMeshDimensions(FrameRightComponent, FrameSideDimensions);
 	ApplyMeshDimensions(LedBarComponent, FVector(LedBarWidth, LedBarThickness, LedBarHeight));
 	ApplyMeshDimensions(CanopyRailLeftComponent, FVector(FrameSideWidth * 0.55f, GetCanopyRailLength(), GetCanopyRailHeight()));
 	ApplyMeshDimensions(CanopyRailRightComponent, FVector(FrameSideWidth * 0.55f, GetCanopyRailLength(), GetCanopyRailHeight()));
+	ApplyMeshDimensions(TemporaryWallLeftComponent, FVector(DoorWidth, FrameDepth, TemporaryShellHeight));
+	ApplyMeshDimensions(TemporaryWallRightComponent, FVector(DoorWidth, FrameDepth, TemporaryShellHeight));
+	ApplyMeshDimensions(TemporaryRoofComponent, FVector(TemporaryShellWidth, DoorWidth, FrameDepth));
 	ApplyMeshDimensions(UpperPanel01, FVector(DoorWidth, DoorThickness, GetEffectiveUpperPanelHeight(0)));
 	ApplyMeshDimensions(UpperPanel02, FVector(DoorWidth, DoorThickness, GetEffectiveUpperPanelHeight(1)));
 	ApplyMeshDimensions(UpperPanel03, FVector(DoorWidth, DoorThickness, GetEffectiveUpperPanelHeight(2)));
 	ApplyMeshDimensions(UpperPanel04, FVector(DoorWidth, DoorThickness, GetEffectiveUpperPanelHeight(3)));
 	ApplyMeshDimensions(LowerPanelComponent, FVector(DoorWidth, DoorThickness, LowerPanelHeight));
 
-	for (UStaticMeshComponent* FrameComponent : { FrameTopComponent.Get(), FrameLeftComponent.Get(), FrameRightComponent.Get(), CanopyRailLeftComponent.Get(), CanopyRailRightComponent.Get() })
+	for (UStaticMeshComponent* FrameComponent : { FrameTopComponent.Get(), FrameLeftComponent.Get(), FrameRightComponent.Get(), CanopyRailLeftComponent.Get(), CanopyRailRightComponent.Get(), TemporaryWallLeftComponent.Get(), TemporaryWallRightComponent.Get(), TemporaryRoofComponent.Get() })
 	{
 		FrameComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		FrameComponent->SetCollisionResponseToAllChannels(ECR_Block);
@@ -419,7 +457,19 @@ void AFoldingCanopyGarageDoor::ApplyClosedLayout()
 	FrameLeftComponent->SetRelativeLocation(FVector(-DoorWidth * 0.5f - FrameSideWidth * 0.5f, 0.0f, UpperTopZ * 0.5f));
 	FrameRightComponent->SetRelativeLocation(FVector(DoorWidth * 0.5f + FrameSideWidth * 0.5f, 0.0f, UpperTopZ * 0.5f));
 	FrameTopComponent->SetRelativeLocation(FVector(0.0f, 0.0f, UpperTopZ + FrameTopHeight * 0.5f));
-	LedBarComponent->SetRelativeLocation(FVector(0.0f, -FrameDepth * 0.5f - LedBarThickness * 0.5f, -FrameTopHeight * 0.5f));
+	// Mounted on the leading edge of the top panel: when the panel unfolds, this
+	// becomes the visible exterior fascia at the far end of the canopy.
+	LedBarComponent->SetRelativeLocation(FVector(
+		0.0f,
+		-DoorThickness * 0.5f - LedBarThickness * 0.5f,
+		-GetEffectiveUpperPanelHeight(0)));
+	LedBarComponent->SetRelativeRotation(FRotator::ZeroRotator);
+	const float TemporaryShellHeight = UpperTopZ + FrameTopHeight;
+	const float TemporaryWallCenterX = DoorWidth + FrameSideWidth;
+	TemporaryWallLeftComponent->SetRelativeLocation(FVector(-TemporaryWallCenterX, 0.0f, TemporaryShellHeight * 0.5f));
+	TemporaryWallRightComponent->SetRelativeLocation(FVector(TemporaryWallCenterX, 0.0f, TemporaryShellHeight * 0.5f));
+	// The temporary roof starts at the entrance plane and extends one door width into local +Y (indoors).
+	TemporaryRoofComponent->SetRelativeLocation(FVector(0.0f, DoorWidth * 0.5f, TemporaryShellHeight + FrameDepth * 0.5f));
 	ApplyCanopyRailPose(0.0f);
 
 	DoorCarrier->SetRelativeLocation(FVector::ZeroVector);
@@ -455,6 +505,9 @@ void AFoldingCanopyGarageDoor::ApplyDoorPose(float PoseAlpha)
 	DoorCarrier->SetRelativeLocation(FVector::ZeroVector);
 	DoorCarrier->SetRelativeRotation(FRotator::ZeroRotator);
 	USceneComponent* Hinges[] = { Hinge01.Get(), Hinge02.Get(), Hinge03.Get(), Hinge04.Get() };
+	const FVector ExteriorSlideDirection = FRotator(0.0f, 0.0f, CarrierFinalRollDegrees)
+		.RotateVector(FVector(0.0f, 0.0f, -1.0f))
+		.GetSafeNormal2D();
 	float ClosedHingeZ = UpperTopZ;
 	float TopPanelRollDegrees = 0.0f;
 	for (int32 PanelIndex = 0; PanelIndex < FoldingCanopyGarageDoor::UpperPanelCount; ++PanelIndex)
@@ -464,7 +517,8 @@ void AFoldingCanopyGarageDoor::ApplyDoorPose(float PoseAlpha)
 		const float InitialHeightProgress = UpperTotalHeight > KINDA_SMALL_NUMBER
 			? FMath::Clamp((ClosedLowerEdgeZ - LowerTopZ) / UpperTotalHeight, 0.0f, 1.0f)
 			: 0.0f;
-		const float HeightProgress = FMath::Min(InitialHeightProgress + ClampedAlpha, 1.0f);
+		const float UnclampedHeightProgress = InitialHeightProgress + ClampedAlpha;
+		const float HeightProgress = FMath::Min(UnclampedHeightProgress, 1.0f);
 
 		// Every panel follows the same three rail zones, but begins at the zone matching
 		// its own closed lower-edge height: 0-50% vertical, 50-75% turn, 75-100% stack.
@@ -475,13 +529,22 @@ void AFoldingCanopyGarageDoor::ApplyDoorPose(float PoseAlpha)
 		const float InitialTurnAlpha = FoldingCanopyGarageDoor::SmoothRemap(InitialHeightProgress, 0.5f, 0.75f);
 		const float RelativeTurnAlpha = FMath::Clamp(TurnAlpha - InitialTurnAlpha, 0.0f, 1.0f);
 		const float StackAlpha = FoldingCanopyGarageDoor::SmoothRemap(HeightProgress, 0.75f, 1.0f);
+		const float PostStackSlideAlpha = PanelIndex < FoldingCanopyGarageDoor::UpperPanelCount - 1
+			? FoldingCanopyGarageDoor::SmoothRemap(UnclampedHeightProgress, 1.0f, 1.25f)
+			: 0.0f;
 
 		const FVector RailLocation(0.0f, 0.0f, ClosedHingeZ + VerticalLift);
 		const FVector ExteriorStackLocation(
 			0.0f,
 			GetCanopyPanelRevealOffset(PanelIndex),
 			UpperTopZ - PanelIndex * CanopyPanelStackVerticalStep);
-		const FVector HingeLocation = FMath::Lerp(RailLocation, ExteriorStackLocation, StackAlpha);
+		// Move the upper three as one already-spaced stack. Only the top panel reaches
+		// the rail end; the following panels retain their existing 15% reveal offsets.
+		const float PostStackSlideDistance = FMath::Max(
+			0.0f,
+			GetCanopyRailLength() - GetEffectiveUpperPanelHeight(0));
+		const FVector HingeLocation = FMath::Lerp(RailLocation, ExteriorStackLocation, StackAlpha)
+			+ ExteriorSlideDirection * PostStackSlideDistance * PostStackSlideAlpha;
 		const float TurnRoll = CarrierFinalRollDegrees * 0.5f * RelativeTurnAlpha;
 		const float HingeRoll = FMath::Lerp(TurnRoll, CarrierFinalRollDegrees, StackAlpha);
 		Hinges[PanelIndex]->SetRelativeLocation(HingeLocation);

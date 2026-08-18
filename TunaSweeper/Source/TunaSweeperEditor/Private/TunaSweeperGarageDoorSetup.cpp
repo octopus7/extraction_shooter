@@ -110,7 +110,7 @@ namespace
 
 		UMaterialExpressionTextureSampleParameter2D* TextureSample = NewObject<UMaterialExpressionTextureSampleParameter2D>(Material);
 		TextureSample->Material = Material;
-		TextureSample->ParameterName = TEXT("IndustrialMetalBaseColor");
+		TextureSample->ParameterName = TEXT("PartsAtlasBaseColor");
 		TextureSample->Texture = MetalTexture;
 		TextureSample->Coordinates.Connect(0, TextureCoordinates);
 		TextureSample->AutoSetSampleType();
@@ -208,6 +208,11 @@ namespace
 		UStaticMesh* FrameTop,
 		UStaticMesh* FrameLeft,
 		UStaticMesh* FrameRight,
+		UStaticMesh* CanopyRailLeft,
+		UStaticMesh* CanopyRailRight,
+		UStaticMesh* TemporaryWallLeft,
+		UStaticMesh* TemporaryWallRight,
+		UStaticMesh* TemporaryRoof,
 		UStaticMesh* UpperPanel,
 		UStaticMesh* LowerPanel,
 		UStaticMesh* LedBar,
@@ -239,6 +244,11 @@ namespace
 			FrameTop,
 			FrameLeft,
 			FrameRight,
+			CanopyRailLeft,
+			CanopyRailRight,
+			TemporaryWallLeft,
+			TemporaryWallRight,
+			TemporaryRoof,
 			UpperPanel,
 			LowerPanel,
 			LedBar,
@@ -303,7 +313,7 @@ namespace
 bool TunaSweeperGarageDoorSetup::Run()
 {
 	UTexture2D* MetalTexture = ImportAsset<UTexture2D>(
-		GetSourceArtPath(TEXT("Textures/T_GarageDoor_IndustrialMetal_BaseColor.png")),
+		GetSourceArtPath(TEXT("Textures/T_GarageDoor_PartsAtlas_BaseColor.png")),
 		GarageDoorTextureAssetPath);
 	if (!MetalTexture)
 	{
@@ -323,10 +333,16 @@ bool TunaSweeperGarageDoorSetup::Run()
 	UStaticMesh* FrameTop = ImportAsset<UStaticMesh>(GetSourceArtPath(TEXT("Models/SM_GarageDoor_FrameTop.obj")), GarageDoorMeshAssetPath);
 	UStaticMesh* FrameLeft = ImportAsset<UStaticMesh>(GetSourceArtPath(TEXT("Models/SM_GarageDoor_FrameLeft.obj")), GarageDoorMeshAssetPath);
 	UStaticMesh* FrameRight = ImportAsset<UStaticMesh>(GetSourceArtPath(TEXT("Models/SM_GarageDoor_FrameRight.obj")), GarageDoorMeshAssetPath);
+	UStaticMesh* CanopyRailLeft = ImportAsset<UStaticMesh>(GetSourceArtPath(TEXT("Models/SM_GarageDoor_CanopyRailLeft.obj")), GarageDoorMeshAssetPath);
+	UStaticMesh* CanopyRailRight = ImportAsset<UStaticMesh>(GetSourceArtPath(TEXT("Models/SM_GarageDoor_CanopyRailRight.obj")), GarageDoorMeshAssetPath);
+	UStaticMesh* TemporaryWallLeft = ImportAsset<UStaticMesh>(GetSourceArtPath(TEXT("Models/SM_GarageDoor_TemporaryWallLeft.obj")), GarageDoorMeshAssetPath);
+	UStaticMesh* TemporaryWallRight = ImportAsset<UStaticMesh>(GetSourceArtPath(TEXT("Models/SM_GarageDoor_TemporaryWallRight.obj")), GarageDoorMeshAssetPath);
+	UStaticMesh* TemporaryRoof = ImportAsset<UStaticMesh>(GetSourceArtPath(TEXT("Models/SM_GarageDoor_TemporaryRoof.obj")), GarageDoorMeshAssetPath);
 	UStaticMesh* UpperPanel = ImportAsset<UStaticMesh>(GetSourceArtPath(TEXT("Models/SM_GarageDoor_UpperPanel.obj")), GarageDoorMeshAssetPath);
 	UStaticMesh* LowerPanel = ImportAsset<UStaticMesh>(GetSourceArtPath(TEXT("Models/SM_GarageDoor_LowerEmbeddedPanel.obj")), GarageDoorMeshAssetPath);
 	UStaticMesh* LedBar = ImportAsset<UStaticMesh>(GetSourceArtPath(TEXT("Models/SM_GarageDoor_LEDBar.obj")), GarageDoorMeshAssetPath);
-	if (!FrameTop || !FrameLeft || !FrameRight || !UpperPanel || !LowerPanel || !LedBar)
+	if (!FrameTop || !FrameLeft || !FrameRight || !CanopyRailLeft || !CanopyRailRight ||
+		!TemporaryWallLeft || !TemporaryWallRight || !TemporaryRoof || !UpperPanel || !LowerPanel || !LedBar)
 	{
 		return false;
 	}
@@ -337,6 +353,11 @@ bool TunaSweeperGarageDoorSetup::Run()
 		!ConfigureGarageDoorMesh(FrameTop, MetalMaterial) ||
 		!ConfigureGarageDoorMesh(FrameLeft, MetalMaterial) ||
 		!ConfigureGarageDoorMesh(FrameRight, MetalMaterial) ||
+		!ConfigureGarageDoorMesh(CanopyRailLeft, MetalMaterial) ||
+		!ConfigureGarageDoorMesh(CanopyRailRight, MetalMaterial) ||
+		!ConfigureGarageDoorMesh(TemporaryWallLeft, MetalMaterial) ||
+		!ConfigureGarageDoorMesh(TemporaryWallRight, MetalMaterial) ||
+		!ConfigureGarageDoorMesh(TemporaryRoof, MetalMaterial) ||
 		!ConfigureGarageDoorMesh(UpperPanel, MetalMaterial) ||
 		!ConfigureGarageDoorMesh(LowerPanel, MetalMaterial) ||
 		!ConfigureGarageDoorMesh(LedBar, LedMaterial))
@@ -349,6 +370,11 @@ bool TunaSweeperGarageDoorSetup::Run()
 		FrameTop,
 		FrameLeft,
 		FrameRight,
+		CanopyRailLeft,
+		CanopyRailRight,
+		TemporaryWallLeft,
+		TemporaryWallRight,
+		TemporaryRoof,
 		UpperPanel,
 		LowerPanel,
 		LedBar,

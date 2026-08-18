@@ -72,6 +72,11 @@ public:
 		UStaticMesh* InFrameTopMesh,
 		UStaticMesh* InFrameLeftMesh,
 		UStaticMesh* InFrameRightMesh,
+		UStaticMesh* InCanopyRailLeftMesh,
+		UStaticMesh* InCanopyRailRightMesh,
+		UStaticMesh* InTemporaryWallLeftMesh,
+		UStaticMesh* InTemporaryWallRightMesh,
+		UStaticMesh* InTemporaryRoofMesh,
 		UStaticMesh* InUpperPanelMesh,
 		UStaticMesh* InLowerPanelMesh,
 		UStaticMesh* InLedBarMesh,
@@ -121,6 +126,15 @@ protected:
 	TObjectPtr<UStaticMeshComponent> CanopyRailRightComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Garage Door|Components")
+	TObjectPtr<UStaticMeshComponent> TemporaryWallLeftComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Garage Door|Components")
+	TObjectPtr<UStaticMeshComponent> TemporaryWallRightComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Garage Door|Components")
+	TObjectPtr<UStaticMeshComponent> TemporaryRoofComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Garage Door|Components")
 	TObjectPtr<USceneComponent> DoorCarrier;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Garage Door|Components")
@@ -167,6 +181,21 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Garage Door|Meshes")
 	TObjectPtr<UStaticMesh> FrameRightMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Garage Door|Meshes")
+	TObjectPtr<UStaticMesh> CanopyRailLeftMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Garage Door|Meshes")
+	TObjectPtr<UStaticMesh> CanopyRailRightMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Garage Door|Meshes")
+	TObjectPtr<UStaticMesh> TemporaryWallLeftMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Garage Door|Meshes")
+	TObjectPtr<UStaticMesh> TemporaryWallRightMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Garage Door|Meshes")
+	TObjectPtr<UStaticMesh> TemporaryRoofMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Garage Door|Meshes")
 	TObjectPtr<UStaticMesh> LedBarMesh;

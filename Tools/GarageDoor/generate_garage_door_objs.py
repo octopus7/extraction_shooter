@@ -1,19 +1,28 @@
 """Generate the editable, UV-mapped box-level source meshes for the bunker garage door.
 
 All geometry uses the plugin contract: X=width, Y=thickness/depth, Z=height,
-centred on the local origin. UV0 repeats at one tile per metre; UE generates a
-separate lightmap channel during import.
+centred on the local origin. Every visible metal part owns a distinct cell in a
+4x3 base-colour atlas; UE generates a separate lightmap channel during import.
 """
 
 from pathlib import Path
 
 
 TILE_SIZE_CM = 100.0
+ATLAS_COLUMNS = 4
+ATLAS_ROWS = 3
+ATLAS_PADDING = 0.006
 ROOT = Path(__file__).resolve().parents[2]
 OUTPUT = ROOT / "TunaSweeper" / "SourceArt" / "Environment" / "BunkerGarageDoor" / "Models"
 
 
-def write_box(path: Path, width: float, depth: float, height: float) -> None:
+def write_box(
+    path: Path,
+    width: float,
+    depth: float,
+    height: float,
+    atlas_cell: tuple[int, int] | None,
+) -> None:
     half_width = width * 0.5
     half_depth = depth * 0.5
     half_height = height * 0.5
@@ -52,18 +61,34 @@ def write_box(path: Path, width: float, depth: float, height: float) -> None:
     lines.extend(f"v {x:.6f} {y:.6f} {z:.6f}" for x, y, z in vertices)
     lines.extend(f"vn {x:.1f} {y:.1f} {z:.1f}" for x, y, z in normals)
 
+    if atlas_cell is not None:
+        column, row = atlas_cell
+        u_min = column / ATLAS_COLUMNS + ATLAS_PADDING
+        u_max = (column + 1) / ATLAS_COLUMNS - ATLAS_PADDING
+        # OBJ's V origin is bottom-left; rows are authored from the top of the PNG.
+        v_min = 1.0 - (row + 1) / ATLAS_ROWS + ATLAS_PADDING
+        v_max = 1.0 - row / ATLAS_ROWS - ATLAS_PADDING
+
     uv_index = 1
     face_lines = []
     for vertex_indices, normal_index, u_size, v_size in face_definitions:
-        u_repeat = u_size / TILE_SIZE_CM
-        v_repeat = v_size / TILE_SIZE_CM
+        if atlas_cell is None:
+            face_uvs = (
+                (0.0, 0.0),
+                (u_size / TILE_SIZE_CM, 0.0),
+                (u_size / TILE_SIZE_CM, v_size / TILE_SIZE_CM),
+                (0.0, v_size / TILE_SIZE_CM),
+            )
+        else:
+            face_uvs = (
+                (u_min, v_min),
+                (u_max, v_min),
+                (u_max, v_max),
+                (u_min, v_max),
+            )
         lines.extend(
-            [
-                "vt 0.000000 0.000000",
-                f"vt {u_repeat:.6f} 0.000000",
-                f"vt {u_repeat:.6f} {v_repeat:.6f}",
-                f"vt 0.000000 {v_repeat:.6f}",
-            ]
+            f"vt {u:.6f} {v:.6f}"
+            for u, v in face_uvs
         )
         face_vertices = [
             f"{vertex_index}/{uv_index + local_index}/{normal_index}"
@@ -79,16 +104,25 @@ def write_box(path: Path, width: float, depth: float, height: float) -> None:
 def main() -> None:
     OUTPUT.mkdir(parents=True, exist_ok=True)
     meshes = {
-        "SM_GarageDoor_FrameTop.obj": (670.0, 45.0, 35.0),
-        "SM_GarageDoor_FrameLeft.obj": (35.0, 45.0, 390.0),
-        "SM_GarageDoor_FrameRight.obj": (35.0, 45.0, 390.0),
-        "SM_GarageDoor_UpperPanel.obj": (600.0, 16.0, 90.0),
-        "SM_GarageDoor_LowerEmbeddedPanel.obj": (600.0, 16.0, 50.0),
-        "SM_GarageDoor_LEDBar.obj": (320.0, 6.0, 10.0),
+        # Top atlas row: three frame pieces receive independent gray double-stripe cells.
+        "SM_GarageDoor_FrameTop.obj": ((670.0, 45.0, 35.0), (0, 0)),
+        "SM_GarageDoor_FrameLeft.obj": ((35.0, 45.0, 390.0), (1, 0)),
+        "SM_GarageDoor_FrameRight.obj": ((35.0, 45.0, 390.0), (2, 0)),
+        # Middle row: moving panels and independently UV-mapped deployable rails.
+        "SM_GarageDoor_UpperPanel.obj": ((600.0, 16.0, 90.0), (0, 1)),
+        "SM_GarageDoor_LowerEmbeddedPanel.obj": ((600.0, 16.0, 50.0), (1, 1)),
+        "SM_GarageDoor_CanopyRailLeft.obj": ((20.0, 150.0, 20.0), (2, 1)),
+        "SM_GarageDoor_CanopyRailRight.obj": ((20.0, 150.0, 20.0), (3, 1)),
+        # Bottom row: temporary bunker shell pieces.
+        "SM_GarageDoor_TemporaryWallLeft.obj": ((200.0, 45.0, 425.0), (0, 2)),
+        "SM_GarageDoor_TemporaryWallRight.obj": ((200.0, 45.0, 425.0), (1, 2)),
+        "SM_GarageDoor_TemporaryRoof.obj": ((670.0, 200.0, 45.0), (2, 2)),
+        # LED keeps its dedicated emissive material and does not sample this atlas.
+        "SM_GarageDoor_LEDBar.obj": ((320.0, 6.0, 10.0), None),
     }
-    for filename, dimensions in meshes.items():
-        write_box(OUTPUT / filename, *dimensions)
-        print(f"Wrote {filename}: {dimensions}")
+    for filename, (dimensions, atlas_cell) in meshes.items():
+        write_box(OUTPUT / filename, *dimensions, atlas_cell)
+        print(f"Wrote {filename}: {dimensions}, atlas_cell={atlas_cell}")
 
 
 if __name__ == "__main__":
