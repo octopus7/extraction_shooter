@@ -21,6 +21,10 @@
 			"Enabled": true
 		},
 		{
+			"Name": "RegionalGroundFog",
+			"Enabled": true
+		},
+		{
 			"Name": "ModelingToolsEditorMode",
 			"Enabled": true,
 			"TargetAllowList": [

@@ -1,0 +1,22 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0.0",
+	"FriendlyName": "Regional Ground Fog",
+	"Description": "Self-contained, locally placed ground fog regions with soft radial falloff.",
+	"Category": "Rendering",
+	"CanContainContent": true,
+	"EnabledByDefault": false,
+	"Modules": [
+		{
+			"Name": "RegionalGroundFog",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "RegionalGroundFogEditor",
+			"Type": "UncookedOnly",
+			"LoadingPhase": "PostEngineInit"
+		}
+	]
+}
