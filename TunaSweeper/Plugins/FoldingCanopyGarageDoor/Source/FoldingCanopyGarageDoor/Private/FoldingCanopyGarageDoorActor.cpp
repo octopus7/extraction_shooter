@@ -258,6 +258,11 @@ void AFoldingCanopyGarageDoor::ConfigureVisualDefaults(
 	LedBarMesh = InLedBarMesh;
 	MetalMaterial = InMetalMaterial;
 	LedMaterial = InLedMaterial;
+	// The project art kit is a frame-anchored canopy, not an independently lifting door.
+	// Keeping these values explicit also migrates the first generated Blueprint from the
+	// temporary prototype motion values.
+	CarrierVerticalTravel = 0.0f;
+	CarrierForwardTravel = 0.0f;
 	for (TObjectPtr<UStaticMesh>& UpperPanelMesh : UpperPanelMeshes)
 	{
 		UpperPanelMesh = InUpperPanelMesh;

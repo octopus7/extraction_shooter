@@ -6059,3 +6059,9 @@
 - UV0을 포함한 박스 수준 OBJ 원본(상단·좌·우 문틀, 상부 낱장, 하단 매립 파츠, LED 바)과 ImageGen 기반 산업용 다크 메탈 BaseColor를 `SourceArt/Environment/BunkerGarageDoor`에 저장했다.
 - 생성 원본을 임포트해 메쉬·텍스처·금속 및 LED 머터리얼을 만들고, 프로젝트 자산 `/Game/Environment/Bunker/GarageDoor/BP_RaidBunkerGarageDoor`를 생성했다. Blueprint는 플러그인 클래스를 부모로 하므로 프로젝트 쪽에서 추가 컴포넌트·개별 메쉬·값을 계속 편집할 수 있다.
 - `RaidMap`에 `TS_RaidBunkerGarageDoor`를 기존 입장 인터랙션 위치와 맞춰 배치했다. UE 5.7 Editor 빌드, Blueprint 컴파일, OBJ 재임포트, `RaidMap` 저장과 Map Check(오류·경고 0)를 완료하고 에디터를 `RaidMap`으로 열었다.
+
+## 2026-08-18 16:17:00 (소요시간: 00:04:30)
+
+- 캐노피가 문틀 상단에서 분리돼 과도하게 높고 앞으로 이동하던 문제를 수정했다. 원인은 프로토타입용 `CarrierVerticalTravel=200cm`, `CarrierForwardTravel=190cm` 값이 매 프레임 힌지 루트에 더해졌기 때문이다.
+- 두 기본값과 자동 생성 Blueprint의 이전 값을 모두 0으로 재설정했다. 이제 캐노피 루트는 문틀 상단에 고정되고, 문 변형 중에는 회전·패널 힌지 포즈만 적용된다. 필요한 특수 연출은 BP에서 해당 값을 명시적으로 조정할 수 있다.
+- UE 5.7 Editor 빌드와 차고문 Blueprint·`RaidMap` 재저장을 완료했다.

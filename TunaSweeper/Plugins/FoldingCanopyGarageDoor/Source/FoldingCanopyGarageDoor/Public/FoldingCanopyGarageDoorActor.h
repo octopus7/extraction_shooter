@@ -228,11 +228,16 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Garage Door|Motion", meta = (ClampMin = "0.01", ClampMax = "1.0"))
 	float GroundDropEndAlpha = 0.12f;
 
+	/**
+	 * Optional offset applied to the hinge root while opening. Keep both carrier
+	 * travel values at zero for the standard canopy: its hinge remains attached
+	 * to the top of the frame through every intermediate pose.
+	 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Garage Door|Motion")
-	float CarrierVerticalTravel = 200.0f;
+	float CarrierVerticalTravel = 0.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Garage Door|Motion")
-	float CarrierForwardTravel = 190.0f;
+	float CarrierForwardTravel = 0.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Garage Door|Motion")
 	float CarrierFinalRollDegrees = 90.0f;
