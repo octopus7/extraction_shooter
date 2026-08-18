@@ -280,7 +280,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Garage Door|Proximity")
 	bool bPlayerControlledPawnsOnly = true;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Garage Door|Proximity", meta = (ClampMin = "0.0"))
+	/** Detection distance from the door plane, applied to both the indoor and exterior sides. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Garage Door|Proximity", meta = (ClampMin = "0.0", UIMin = "0.0", Units = "cm", DisplayName = "Auto Door Detection Distance"))
 	float AutoOpenDepth = 260.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Garage Door|Proximity", meta = (ClampMin = "0.0"))

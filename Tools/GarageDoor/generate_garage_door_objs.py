@@ -22,6 +22,7 @@ def write_box(
     depth: float,
     height: float,
     atlas_cell: tuple[int, int] | None,
+    preserve_face_aspect: bool = False,
 ) -> None:
     half_width = width * 0.5
     half_depth = depth * 0.5
@@ -79,6 +80,31 @@ def write_box(
                 (u_size / TILE_SIZE_CM, v_size / TILE_SIZE_CM),
                 (0.0, v_size / TILE_SIZE_CM),
             )
+        elif preserve_face_aspect:
+            # Atlas cells are square in pixel space even though U/V normalized
+            # spans differ on a 4x3 atlas. Fit each face into its cell using its
+            # physical aspect ratio so a 45-degree texture remains 45 degrees
+            # after mapping onto wide top and narrow side frame pieces.
+            longest_side = max(u_size, v_size)
+            u_fraction = u_size / longest_side
+            v_fraction = v_size / longest_side
+            cell_u_center = (column + 0.5) / ATLAS_COLUMNS
+            cell_v_center = 1.0 - (row + 0.5) / ATLAS_ROWS
+            cell_padding_fraction = ATLAS_PADDING * ATLAS_COLUMNS
+            available_u_span = (1.0 - cell_padding_fraction * 2.0) / ATLAS_COLUMNS
+            available_v_span = (1.0 - cell_padding_fraction * 2.0) / ATLAS_ROWS
+            face_u_span = available_u_span * u_fraction
+            face_v_span = available_v_span * v_fraction
+            face_u_min = cell_u_center - face_u_span * 0.5
+            face_u_max = cell_u_center + face_u_span * 0.5
+            face_v_min = cell_v_center - face_v_span * 0.5
+            face_v_max = cell_v_center + face_v_span * 0.5
+            face_uvs = (
+                (face_u_min, face_v_min),
+                (face_u_max, face_v_min),
+                (face_u_max, face_v_max),
+                (face_u_min, face_v_max),
+            )
         else:
             face_uvs = (
                 (u_min, v_min),
@@ -104,7 +130,7 @@ def write_box(
 def main() -> None:
     OUTPUT.mkdir(parents=True, exist_ok=True)
     meshes = {
-        # Top atlas row: three frame pieces receive independent gray double-stripe cells.
+        # Top atlas row: three frame pieces receive independent equal-width 45-degree stripe cells.
         "SM_GarageDoor_FrameTop.obj": ((670.0, 45.0, 35.0), (0, 0)),
         "SM_GarageDoor_FrameLeft.obj": ((35.0, 45.0, 390.0), (1, 0)),
         "SM_GarageDoor_FrameRight.obj": ((35.0, 45.0, 390.0), (2, 0)),
@@ -121,7 +147,13 @@ def main() -> None:
         "SM_GarageDoor_LEDBar.obj": ((320.0, 6.0, 10.0), None),
     }
     for filename, (dimensions, atlas_cell) in meshes.items():
-        write_box(OUTPUT / filename, *dimensions, atlas_cell)
+        preserve_face_aspect = filename.startswith("SM_GarageDoor_Frame")
+        write_box(
+            OUTPUT / filename,
+            *dimensions,
+            atlas_cell,
+            preserve_face_aspect=preserve_face_aspect,
+        )
         print(f"Wrote {filename}: {dimensions}, atlas_cell={atlas_cell}")
 
 
