@@ -32,11 +32,14 @@ def dot(a: tuple[float, ...], b: tuple[float, ...]) -> float:
 
 def validate_frame(path: Path) -> None:
     vertices: list[tuple[float, float, float]] = []
+    uvs: list[tuple[float, float]] = []
     normals: list[tuple[float, float, float]] = []
     faces: list[list[tuple[int, int, int]]] = []
     for line in path.read_text(encoding="utf-8").splitlines():
         if line.startswith("v "):
             vertices.append(tuple(map(float, line.split()[1:4])))
+        elif line.startswith("vt "):
+            uvs.append(tuple(map(float, line.split()[1:3])))
         elif line.startswith("vn "):
             normals.append(tuple(map(float, line.split()[1:4])))
         elif line.startswith("f "):
@@ -56,6 +59,11 @@ def validate_frame(path: Path) -> None:
         raise ValueError(f"{path.name}: unexpected bounds {bounds}")
 
     edge_counts: Counter[tuple[tuple[float, ...], tuple[float, ...]]] = Counter()
+    projected_frame_uvs: dict[
+        tuple[tuple[float, ...], tuple[float, ...]],
+        tuple[float, ...],
+    ] = {}
+    shared_projected_vertices = 0
     for face_index, face in enumerate(faces):
         if len(face) != 4:
             raise ValueError(f"{path.name}: face {face_index} is not a quad")
@@ -68,6 +76,20 @@ def validate_frame(path: Path) -> None:
         if dot(geometric_normal, normal) <= 0.0:
             raise ValueError(f"{path.name}: face {face_index} winding opposes its normal")
 
+        face_uvs = [uvs[uv_index] for _, uv_index, _ in face]
+        if sum(uv[1] for uv in face_uvs) / len(face_uvs) > 2.0 / 3.0:
+            for position, uv in zip(positions, face_uvs, strict=True):
+                key = (normal, position)
+                previous_uv = projected_frame_uvs.get(key)
+                if previous_uv is not None:
+                    shared_projected_vertices += 1
+                    if any(abs(previous_uv[index] - uv[index]) > 0.000001 for index in range(2)):
+                        raise ValueError(
+                            f"{path.name}: split exterior frame UV discontinuity at {position}"
+                        )
+                else:
+                    projected_frame_uvs[key] = uv
+
         for edge_index in range(4):
             start = positions[edge_index]
             end = positions[(edge_index + 1) % 4]
@@ -79,10 +101,12 @@ def validate_frame(path: Path) -> None:
             f"{path.name}: non-manifold edges={len(open_edges)}; "
             f"samples={open_edges[:8]}"
         )
+    if shared_projected_vertices == 0:
+        raise ValueError(f"{path.name}: no split exterior UV vertices were validated")
 
     print(
         f"VALID {path.name}: faces={len(faces)}, bounds={bounds}, "
-        f"winding=consistent, welded_edges=manifold"
+        f"winding=consistent, welded_edges=manifold, original_frame_uv=continuous"
     )
 
 

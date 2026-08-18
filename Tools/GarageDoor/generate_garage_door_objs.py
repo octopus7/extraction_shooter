@@ -77,6 +77,59 @@ def get_face_uvs(
     )
 
 
+def get_continuous_frame_uvs(
+    corners: tuple[tuple[float, float, float], ...],
+    normal: tuple[float, float, float],
+    atlas_cell: tuple[int, int],
+) -> tuple[tuple[float, float], ...]:
+    """Project split frame quads through the original unsplit box-face UVs."""
+
+    normal_x, normal_y, normal_z = normal
+    if abs(normal_y) > 0.5:
+        full_u_size = DEFAULT_FRAME_SIDE_WIDTH_CM
+        full_v_size = DEFAULT_FRAME_SIDE_HEIGHT_CM
+        projected = [
+            ((x if normal_y < 0.0 else -x), z)
+            for x, _, z in corners
+        ]
+        u_min, u_max = -DEFAULT_FRAME_SIDE_WIDTH_CM * 0.5, DEFAULT_FRAME_SIDE_WIDTH_CM * 0.5
+        v_min, v_max = -DEFAULT_FRAME_SIDE_HEIGHT_CM * 0.5, DEFAULT_FRAME_SIDE_HEIGHT_CM * 0.5
+    elif abs(normal_x) > 0.5:
+        full_u_size = DEFAULT_FRAME_DEPTH_CM
+        full_v_size = DEFAULT_FRAME_SIDE_HEIGHT_CM
+        projected = [
+            ((y if normal_x > 0.0 else -y), z)
+            for _, y, z in corners
+        ]
+        u_min, u_max = -DEFAULT_FRAME_DEPTH_CM * 0.5, DEFAULT_FRAME_DEPTH_CM * 0.5
+        v_min, v_max = -DEFAULT_FRAME_SIDE_HEIGHT_CM * 0.5, DEFAULT_FRAME_SIDE_HEIGHT_CM * 0.5
+    else:
+        full_u_size = DEFAULT_FRAME_SIDE_WIDTH_CM
+        full_v_size = DEFAULT_FRAME_DEPTH_CM
+        projected = [
+            (x, (y if normal_z > 0.0 else -y))
+            for x, y, _ in corners
+        ]
+        u_min, u_max = -DEFAULT_FRAME_SIDE_WIDTH_CM * 0.5, DEFAULT_FRAME_SIDE_WIDTH_CM * 0.5
+        v_min, v_max = -DEFAULT_FRAME_DEPTH_CM * 0.5, DEFAULT_FRAME_DEPTH_CM * 0.5
+
+    fitted_uvs = get_face_uvs(
+        atlas_cell,
+        full_u_size,
+        full_v_size,
+        preserve_face_aspect=True,
+    )
+    fitted_u_min, fitted_v_min = fitted_uvs[0]
+    fitted_u_max, fitted_v_max = fitted_uvs[2]
+    return tuple(
+        (
+            fitted_u_min + (projected_u - u_min) / (u_max - u_min) * (fitted_u_max - fitted_u_min),
+            fitted_v_min + (projected_v - v_min) / (v_max - v_min) * (fitted_v_max - fitted_v_min),
+        )
+        for projected_u, projected_v in projected
+    )
+
+
 def write_box(
     path: Path,
     width: float,
@@ -253,7 +306,11 @@ def write_recessed_frame_side(
     normal_index = 1
     for corners, normal, u_size, v_size, uv_cell in quads:
         lines.extend(f"v {x:.6f} {y:.6f} {z:.6f}" for x, y, z in corners)
-        face_uvs = get_face_uvs(uv_cell, u_size, v_size, preserve_face_aspect=True)
+        face_uvs = (
+            get_continuous_frame_uvs(corners, normal, frame_cell)
+            if uv_cell == frame_cell
+            else get_face_uvs(uv_cell, u_size, v_size, preserve_face_aspect=True)
+        )
         lines.extend(f"vt {u:.6f} {v:.6f}" for u, v in face_uvs)
         lines.append(f"vn {normal[0]:.1f} {normal[1]:.1f} {normal[2]:.1f}")
         face_lines.append(
