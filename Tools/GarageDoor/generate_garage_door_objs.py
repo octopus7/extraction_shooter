@@ -12,8 +12,69 @@ TILE_SIZE_CM = 100.0
 ATLAS_COLUMNS = 4
 ATLAS_ROWS = 3
 ATLAS_PADDING = 0.006
+DEFAULT_FRAME_SIDE_WIDTH_CM = 35.0
+DEFAULT_FRAME_DEPTH_CM = 45.0
+DEFAULT_FRAME_SIDE_HEIGHT_CM = 390.0
+DEFAULT_RAIL_WIDTH_CM = DEFAULT_FRAME_SIDE_WIDTH_CM * 0.55
+DEFAULT_RAIL_LENGTH_CM = 148.0
+DEFAULT_RAIL_CLOSED_DEPTH_CM = 19.8125
+RECESS_CLEARANCE_CM = 0.5
+RECESS_INTERIOR_CELL = (3, 2)
 ROOT = Path(__file__).resolve().parents[2]
 OUTPUT = ROOT / "TunaSweeper" / "SourceArt" / "Environment" / "BunkerGarageDoor" / "Models"
+
+
+def get_face_uvs(
+    atlas_cell: tuple[int, int] | None,
+    u_size: float,
+    v_size: float,
+    preserve_face_aspect: bool,
+) -> tuple[tuple[float, float], ...]:
+    if atlas_cell is None:
+        return (
+            (0.0, 0.0),
+            (u_size / TILE_SIZE_CM, 0.0),
+            (u_size / TILE_SIZE_CM, v_size / TILE_SIZE_CM),
+            (0.0, v_size / TILE_SIZE_CM),
+        )
+
+    column, row = atlas_cell
+    u_min = column / ATLAS_COLUMNS + ATLAS_PADDING
+    u_max = (column + 1) / ATLAS_COLUMNS - ATLAS_PADDING
+    # OBJ's V origin is bottom-left; rows are authored from the top of the PNG.
+    v_min = 1.0 - (row + 1) / ATLAS_ROWS + ATLAS_PADDING
+    v_max = 1.0 - row / ATLAS_ROWS - ATLAS_PADDING
+    if not preserve_face_aspect:
+        return (
+            (u_min, v_min),
+            (u_max, v_min),
+            (u_max, v_max),
+            (u_min, v_max),
+        )
+
+    # Atlas cells are square in pixel space even though U/V normalized spans
+    # differ on a 4x3 atlas. Fit the face by physical aspect ratio so the
+    # diagonal stripe angle remains unchanged on long and narrow parts.
+    longest_side = max(u_size, v_size)
+    u_fraction = u_size / longest_side
+    v_fraction = v_size / longest_side
+    cell_u_center = (column + 0.5) / ATLAS_COLUMNS
+    cell_v_center = 1.0 - (row + 0.5) / ATLAS_ROWS
+    cell_padding_fraction = ATLAS_PADDING * ATLAS_COLUMNS
+    available_u_span = (1.0 - cell_padding_fraction * 2.0) / ATLAS_COLUMNS
+    available_v_span = (1.0 - cell_padding_fraction * 2.0) / ATLAS_ROWS
+    face_u_span = available_u_span * u_fraction
+    face_v_span = available_v_span * v_fraction
+    face_u_min = cell_u_center - face_u_span * 0.5
+    face_u_max = cell_u_center + face_u_span * 0.5
+    face_v_min = cell_v_center - face_v_span * 0.5
+    face_v_max = cell_v_center + face_v_span * 0.5
+    return (
+        (face_u_min, face_v_min),
+        (face_u_max, face_v_min),
+        (face_u_max, face_v_max),
+        (face_u_min, face_v_max),
+    )
 
 
 def write_box(
@@ -62,56 +123,10 @@ def write_box(
     lines.extend(f"v {x:.6f} {y:.6f} {z:.6f}" for x, y, z in vertices)
     lines.extend(f"vn {x:.1f} {y:.1f} {z:.1f}" for x, y, z in normals)
 
-    if atlas_cell is not None:
-        column, row = atlas_cell
-        u_min = column / ATLAS_COLUMNS + ATLAS_PADDING
-        u_max = (column + 1) / ATLAS_COLUMNS - ATLAS_PADDING
-        # OBJ's V origin is bottom-left; rows are authored from the top of the PNG.
-        v_min = 1.0 - (row + 1) / ATLAS_ROWS + ATLAS_PADDING
-        v_max = 1.0 - row / ATLAS_ROWS - ATLAS_PADDING
-
     uv_index = 1
     face_lines = []
     for vertex_indices, normal_index, u_size, v_size in face_definitions:
-        if atlas_cell is None:
-            face_uvs = (
-                (0.0, 0.0),
-                (u_size / TILE_SIZE_CM, 0.0),
-                (u_size / TILE_SIZE_CM, v_size / TILE_SIZE_CM),
-                (0.0, v_size / TILE_SIZE_CM),
-            )
-        elif preserve_face_aspect:
-            # Atlas cells are square in pixel space even though U/V normalized
-            # spans differ on a 4x3 atlas. Fit each face into its cell using its
-            # physical aspect ratio so a 45-degree texture remains 45 degrees
-            # after mapping onto wide top and narrow side frame pieces.
-            longest_side = max(u_size, v_size)
-            u_fraction = u_size / longest_side
-            v_fraction = v_size / longest_side
-            cell_u_center = (column + 0.5) / ATLAS_COLUMNS
-            cell_v_center = 1.0 - (row + 0.5) / ATLAS_ROWS
-            cell_padding_fraction = ATLAS_PADDING * ATLAS_COLUMNS
-            available_u_span = (1.0 - cell_padding_fraction * 2.0) / ATLAS_COLUMNS
-            available_v_span = (1.0 - cell_padding_fraction * 2.0) / ATLAS_ROWS
-            face_u_span = available_u_span * u_fraction
-            face_v_span = available_v_span * v_fraction
-            face_u_min = cell_u_center - face_u_span * 0.5
-            face_u_max = cell_u_center + face_u_span * 0.5
-            face_v_min = cell_v_center - face_v_span * 0.5
-            face_v_max = cell_v_center + face_v_span * 0.5
-            face_uvs = (
-                (face_u_min, face_v_min),
-                (face_u_max, face_v_min),
-                (face_u_max, face_v_max),
-                (face_u_min, face_v_max),
-            )
-        else:
-            face_uvs = (
-                (u_min, v_min),
-                (u_max, v_min),
-                (u_max, v_max),
-                (u_min, v_max),
-            )
+        face_uvs = get_face_uvs(atlas_cell, u_size, v_size, preserve_face_aspect)
         lines.extend(
             f"vt {u:.6f} {v:.6f}"
             for u, v in face_uvs
@@ -127,13 +142,139 @@ def write_box(
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
+def write_recessed_frame_side(
+    path: Path,
+    frame_cell: tuple[int, int],
+) -> None:
+    """Write a side frame with a top-open rail pocket cut into its front face."""
+
+    half_width = DEFAULT_FRAME_SIDE_WIDTH_CM * 0.5
+    half_depth = DEFAULT_FRAME_DEPTH_CM * 0.5
+    half_height = DEFAULT_FRAME_SIDE_HEIGHT_CM * 0.5
+    recess_half_width = (DEFAULT_RAIL_WIDTH_CM + RECESS_CLEARANCE_CM * 2.0) * 0.5
+    recess_back_y = -half_depth + DEFAULT_RAIL_CLOSED_DEPTH_CM + RECESS_CLEARANCE_CM
+    recess_bottom_z = half_height - DEFAULT_RAIL_LENGTH_CM - RECESS_CLEARANCE_CM
+
+    x_min, x_max = -half_width, half_width
+    y_front, y_back = -half_depth, half_depth
+    z_bottom, z_top = -half_height, half_height
+    groove_x_min, groove_x_max = -recess_half_width, recess_half_width
+
+    # Each tuple is (corners, normal, physical U size, physical V size, UV cell).
+    # Only the four pocket walls use the plain interior cell; all exterior frame
+    # surfaces retain the frame's dedicated diagonal-stripe cell.
+    quads = [
+        # Exterior front strips beside the recessed rail opening.
+        (((x_min, y_front, recess_bottom_z), (groove_x_min, y_front, recess_bottom_z), (groove_x_min, y_front, z_top), (x_min, y_front, z_top)), (0.0, -1.0, 0.0), groove_x_min - x_min, z_top - recess_bottom_z, frame_cell),
+        (((groove_x_max, y_front, recess_bottom_z), (x_max, y_front, recess_bottom_z), (x_max, y_front, z_top), (groove_x_max, y_front, z_top)), (0.0, -1.0, 0.0), x_max - groove_x_max, z_top - recess_bottom_z, frame_cell),
+        # Top rim remaining around the top-open pocket.
+        (((x_min, y_front, z_top), (groove_x_min, y_front, z_top), (groove_x_min, recess_back_y, z_top), (x_min, recess_back_y, z_top)), (0.0, 0.0, 1.0), groove_x_min - x_min, recess_back_y - y_front, frame_cell),
+        (((x_min, recess_back_y, z_top), (groove_x_min, recess_back_y, z_top), (groove_x_min, y_back, z_top), (x_min, y_back, z_top)), (0.0, 0.0, 1.0), groove_x_min - x_min, y_back - recess_back_y, frame_cell),
+        (((groove_x_max, y_front, z_top), (x_max, y_front, z_top), (x_max, recess_back_y, z_top), (groove_x_max, recess_back_y, z_top)), (0.0, 0.0, 1.0), x_max - groove_x_max, recess_back_y - y_front, frame_cell),
+        (((groove_x_max, recess_back_y, z_top), (x_max, recess_back_y, z_top), (x_max, y_back, z_top), (groove_x_max, y_back, z_top)), (0.0, 0.0, 1.0), x_max - groove_x_max, y_back - recess_back_y, frame_cell),
+        (((groove_x_min, recess_back_y, z_top), (groove_x_max, recess_back_y, z_top), (groove_x_max, y_back, z_top), (groove_x_min, y_back, z_top)), (0.0, 0.0, 1.0), groove_x_max - groove_x_min, y_back - recess_back_y, frame_cell),
+        # Plain metal surfaces produced by the boolean recess.
+        (((groove_x_min, recess_back_y, recess_bottom_z), (groove_x_max, recess_back_y, recess_bottom_z), (groove_x_max, recess_back_y, z_top), (groove_x_min, recess_back_y, z_top)), (0.0, -1.0, 0.0), groove_x_max - groove_x_min, z_top - recess_bottom_z, RECESS_INTERIOR_CELL),
+        (((groove_x_min, y_front, recess_bottom_z), (groove_x_min, recess_back_y, recess_bottom_z), (groove_x_min, recess_back_y, z_top), (groove_x_min, y_front, z_top)), (1.0, 0.0, 0.0), recess_back_y - y_front, z_top - recess_bottom_z, RECESS_INTERIOR_CELL),
+        (((groove_x_max, recess_back_y, recess_bottom_z), (groove_x_max, y_front, recess_bottom_z), (groove_x_max, y_front, z_top), (groove_x_max, recess_back_y, z_top)), (-1.0, 0.0, 0.0), recess_back_y - y_front, z_top - recess_bottom_z, RECESS_INTERIOR_CELL),
+        (((groove_x_min, y_front, recess_bottom_z), (groove_x_max, y_front, recess_bottom_z), (groove_x_max, recess_back_y, recess_bottom_z), (groove_x_min, recess_back_y, recess_bottom_z)), (0.0, 0.0, 1.0), groove_x_max - groove_x_min, recess_back_y - y_front, RECESS_INTERIOR_CELL),
+    ]
+
+    x_sections = (
+        (x_min, groove_x_min),
+        (groove_x_min, groove_x_max),
+        (groove_x_max, x_max),
+    )
+    z_sections = (
+        (z_bottom, recess_bottom_z),
+        (recess_bottom_z, z_top),
+    )
+
+    # Split adjacent coplanar faces at the pocket boundaries. This avoids
+    # T-junctions and produces a closed manifold after OBJ vertex welding.
+    for section_x_min, section_x_max in x_sections:
+        section_width = section_x_max - section_x_min
+        quads.append((
+            ((section_x_min, y_front, z_bottom), (section_x_max, y_front, z_bottom), (section_x_max, y_front, recess_bottom_z), (section_x_min, y_front, recess_bottom_z)),
+            (0.0, -1.0, 0.0),
+            section_width,
+            recess_bottom_z - z_bottom,
+            frame_cell,
+        ))
+        for section_y_min, section_y_max in (
+            (y_front, recess_back_y),
+            (recess_back_y, y_back),
+        ):
+            quads.append((
+                ((section_x_min, section_y_max, z_bottom), (section_x_max, section_y_max, z_bottom), (section_x_max, section_y_min, z_bottom), (section_x_min, section_y_min, z_bottom)),
+                (0.0, 0.0, -1.0),
+                section_width,
+                section_y_max - section_y_min,
+                frame_cell,
+            ))
+        for section_z_min, section_z_max in z_sections:
+            quads.append((
+                ((section_x_max, y_back, section_z_min), (section_x_min, y_back, section_z_min), (section_x_min, y_back, section_z_max), (section_x_max, y_back, section_z_max)),
+                (0.0, 1.0, 0.0),
+                section_width,
+                section_z_max - section_z_min,
+                frame_cell,
+            ))
+
+    for section_z_min, section_z_max in z_sections:
+        section_height = section_z_max - section_z_min
+        for section_y_min, section_y_max in (
+            (y_front, recess_back_y),
+            (recess_back_y, y_back),
+        ):
+            quads.append((
+                ((x_min, section_y_max, section_z_min), (x_min, section_y_min, section_z_min), (x_min, section_y_min, section_z_max), (x_min, section_y_max, section_z_max)),
+                (-1.0, 0.0, 0.0),
+                section_y_max - section_y_min,
+                section_height,
+                frame_cell,
+            ))
+            quads.append((
+                ((x_max, section_y_min, section_z_min), (x_max, section_y_max, section_z_min), (x_max, section_y_max, section_z_max), (x_max, section_y_min, section_z_max)),
+                (1.0, 0.0, 0.0),
+                section_y_max - section_y_min,
+                section_height,
+                frame_cell,
+            ))
+
+    lines = [
+        "# Generated by Tools/GarageDoor/generate_garage_door_objs.py",
+        "# Side frame with a front-flush, top-open canopy-rail recess; centimetres.",
+        f"o {path.stem}",
+    ]
+    face_lines = []
+    vertex_index = 1
+    uv_index = 1
+    normal_index = 1
+    for corners, normal, u_size, v_size, uv_cell in quads:
+        lines.extend(f"v {x:.6f} {y:.6f} {z:.6f}" for x, y, z in corners)
+        face_uvs = get_face_uvs(uv_cell, u_size, v_size, preserve_face_aspect=True)
+        lines.extend(f"vt {u:.6f} {v:.6f}" for u, v in face_uvs)
+        lines.append(f"vn {normal[0]:.1f} {normal[1]:.1f} {normal[2]:.1f}")
+        face_lines.append(
+            "f " + " ".join(
+                f"{vertex_index + index}/{uv_index + index}/{normal_index}"
+                for index in range(4)
+            )
+        )
+        vertex_index += 4
+        uv_index += 4
+        normal_index += 1
+
+    lines.extend(face_lines)
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
 def main() -> None:
     OUTPUT.mkdir(parents=True, exist_ok=True)
     meshes = {
         # Top atlas row: three frame pieces receive independent equal-width 45-degree stripe cells.
         "SM_GarageDoor_FrameTop.obj": ((670.0, 45.0, 35.0), (0, 0)),
-        "SM_GarageDoor_FrameLeft.obj": ((35.0, 45.0, 390.0), (1, 0)),
-        "SM_GarageDoor_FrameRight.obj": ((35.0, 45.0, 390.0), (2, 0)),
         # Middle row: moving panels and independently UV-mapped deployable rails.
         "SM_GarageDoor_UpperPanel.obj": ((600.0, 16.0, 90.0), (0, 1)),
         "SM_GarageDoor_LowerEmbeddedPanel.obj": ((600.0, 16.0, 50.0), (1, 1)),
@@ -147,7 +288,7 @@ def main() -> None:
         "SM_GarageDoor_LEDBar.obj": ((320.0, 6.0, 10.0), None),
     }
     for filename, (dimensions, atlas_cell) in meshes.items():
-        preserve_face_aspect = filename.startswith("SM_GarageDoor_Frame")
+        preserve_face_aspect = filename.startswith("SM_GarageDoor_Frame") or filename.startswith("SM_GarageDoor_CanopyRail")
         write_box(
             OUTPUT / filename,
             *dimensions,
@@ -155,6 +296,10 @@ def main() -> None:
             preserve_face_aspect=preserve_face_aspect,
         )
         print(f"Wrote {filename}: {dimensions}, atlas_cell={atlas_cell}")
+
+    write_recessed_frame_side(OUTPUT / "SM_GarageDoor_FrameLeft.obj", (1, 0))
+    write_recessed_frame_side(OUTPUT / "SM_GarageDoor_FrameRight.obj", (2, 0))
+    print("Wrote recessed side frames with plain-metal rail-pocket interiors")
 
 
 if __name__ == "__main__":

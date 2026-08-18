@@ -579,7 +579,12 @@ void AFoldingCanopyGarageDoor::ApplyCanopyRailPose(float TopPanelRollDegrees)
 		0.0f,
 		1.0f);
 	const float RailPivotZ = FMath::Lerp(UpperTopZ - RailLength, UpperTopZ, RailDeployAlpha);
-	const FVector RailPivot(0.0f, 0.0f, RailPivotZ);
+	// In the closed pose the rotated rail's local Z dimension becomes its depth.
+	// Offset its centre toward the exterior so its front face is flush with the
+	// frame front instead of floating in the middle of the frame depth. The side
+	// frame source mesh contains a matching top-open recess at this location.
+	const float RailPivotY = -FrameDepth * 0.5f + GetCanopyRailHeight() * 0.5f;
+	const FVector RailPivot(0.0f, RailPivotY, RailPivotZ);
 	const FVector RailCenter = RailPivot + RailCenterOffset;
 
 	// The components remain independent. Panel 1 supplies only rail deployment

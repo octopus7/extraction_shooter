@@ -9,6 +9,7 @@
 #include "Materials/MaterialExpressionTextureCoordinate.h"
 #include "Materials/MaterialExpressionTextureSampleParameter2D.h"
 #include "Materials/MaterialExpressionVectorParameter.h"
+#include "PhysicsEngine/BodySetup.h"
 
 namespace
 {
@@ -188,7 +189,10 @@ namespace
 		return TunaSweeperEditorSetup::SaveAsset(Material) ? Material : nullptr;
 	}
 
-	bool ConfigureGarageDoorMesh(UStaticMesh* Mesh, UMaterialInterface* Material)
+	bool ConfigureGarageDoorMesh(
+		UStaticMesh* Mesh,
+		UMaterialInterface* Material,
+		bool bUseComplexAsSimpleCollision = false)
 	{
 		if (!Mesh || !Material)
 		{
@@ -197,6 +201,14 @@ namespace
 
 		Mesh->Modify();
 		Mesh->SetMaterial(0, Material);
+		if (bUseComplexAsSimpleCollision)
+		{
+			if (UBodySetup* BodySetup = Mesh->GetBodySetup())
+			{
+				BodySetup->Modify();
+				BodySetup->CollisionTraceFlag = CTF_UseComplexAsSimple;
+			}
+		}
 		Mesh->PostEditChange();
 		Mesh->MarkPackageDirty();
 		return TunaSweeperEditorSetup::SaveAsset(Mesh);
@@ -301,8 +313,8 @@ bool TunaSweeperGarageDoorSetup::Run()
 	UMaterial* LedMaterial = EnsureGarageDoorLedMaterial();
 	if (!MetalMaterial || !LedMaterial ||
 		!ConfigureGarageDoorMesh(FrameTop, MetalMaterial) ||
-		!ConfigureGarageDoorMesh(FrameLeft, MetalMaterial) ||
-		!ConfigureGarageDoorMesh(FrameRight, MetalMaterial) ||
+		!ConfigureGarageDoorMesh(FrameLeft, MetalMaterial, true) ||
+		!ConfigureGarageDoorMesh(FrameRight, MetalMaterial, true) ||
 		!ConfigureGarageDoorMesh(CanopyRailLeft, MetalMaterial) ||
 		!ConfigureGarageDoorMesh(CanopyRailRight, MetalMaterial) ||
 		!ConfigureGarageDoorMesh(TemporaryWallLeft, MetalMaterial) ||

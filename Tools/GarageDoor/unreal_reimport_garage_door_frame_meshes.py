@@ -1,4 +1,4 @@
-"""Run inside Unreal Editor to reimport only the three garage-door frame meshes."""
+"""Reimport the three garage-door frame meshes and two deployable rail meshes."""
 
 from pathlib import Path
 
@@ -14,14 +14,16 @@ SOURCE_DIR = (
     / "BunkerGarageDoor"
     / "Models"
 )
-FRAME_MESH_NAMES = (
+FRAME_AND_RAIL_MESH_NAMES = (
     "SM_GarageDoor_FrameTop",
     "SM_GarageDoor_FrameLeft",
     "SM_GarageDoor_FrameRight",
+    "SM_GarageDoor_CanopyRailLeft",
+    "SM_GarageDoor_CanopyRailRight",
 )
 
 tasks = []
-for mesh_name in FRAME_MESH_NAMES:
+for mesh_name in FRAME_AND_RAIL_MESH_NAMES:
     task = unreal.AssetImportTask()
     task.filename = str(SOURCE_DIR / f"{mesh_name}.obj")
     task.destination_path = "/Game/Environment/Bunker/GarageDoor/Meshes"
@@ -35,5 +37,5 @@ for mesh_name in FRAME_MESH_NAMES:
 unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks(tasks)
 for task in tasks:
     if not task.imported_object_paths:
-        raise RuntimeError(f"Frame mesh import returned no asset path: {task.filename}")
-    unreal.log("GARAGE_FRAME_IMPORTED=" + ",".join(task.imported_object_paths))
+        raise RuntimeError(f"Frame/rail mesh import returned no asset path: {task.filename}")
+    unreal.log("GARAGE_FRAME_RAIL_IMPORTED=" + ",".join(task.imported_object_paths))
