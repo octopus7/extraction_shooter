@@ -31,21 +31,23 @@ Pilot 상태에서는 일반 Perspective 뷰포트와 같은 방식으로 카메
 
 ## 연출 카메라 액터 사용 시 주의점
 
-장소 연출 카메라 액터는 촬영 위치와 플레이어 거리 측정 중심을 서로 독립적으로 다룬다.
+장소 연출은 지면의 거리 판정 액터와 독립된 촬영용 `CameraActor`를 사용한다.
 
-- Pilot으로 조정되는 값은 촬영 카메라 액터의 위치와 회전이다.
-- 거리 블렌딩은 별도의 `Blend Origin` 위치를 기준으로 계산한다.
-- Pilot으로 카메라 구도를 먼저 잡은 뒤 `Blend Origin`을 연출이 시작될 장소로 조정한다.
+- 지면에 `BP_LocationBlendCamera`를 배치하고 거리 판정 중심인 `Blend Origin`을 원하는 장소에 둔다.
+- 레벨에 일반 `CameraActor`를 별도로 배치한다.
+- `BP_LocationBlendCamera` 인스턴스의 `Target Camera Actor`에 외부 CameraActor를 스포이드로 지정한다.
+- Pilot은 외부 CameraActor에 사용하며, 지면의 판정 액터에는 사용하지 않는다.
+- 거리 블렌딩은 지면 액터의 `Blend Origin` 위치를 기준으로 계산한다.
 - `Blend Start Distance`는 블렌딩이 시작되는 바깥 반경이다.
 - `Blend Complete Distance`는 연출 카메라로 완전히 전환되는 안쪽 반경이다.
 
-장소 연출 카메라 액터는 선택 시 기본 카메라 프리뷰를 표시하지 않도록 설계한다. 따라서 작은 프리뷰 대신 Pilot을 명시적으로 시작해 전체 뷰포트에서 구도를 확인한다.
+지면의 장소 연출 액터에는 카메라 컴포넌트가 없으므로 선택 프리뷰가 표시되지 않는다. 촬영 구도는 참조된 외부 CameraActor를 Pilot해 전체 뷰포트에서 확인한다.
 
 ## 문제 해결
 
 ### Pilot 메뉴가 보이지 않는 경우
 
-선택한 액터에 활성 카메라 컴포넌트가 있는지 확인한다. 일반 Scene Actor나 카메라가 비활성화된 액터는 Pilot 대상으로 인식되지 않을 수 있다.
+지면의 `BP_LocationBlendCamera`가 아니라 참조된 외부 CameraActor를 선택했는지 확인한다. 일반 Scene Actor나 카메라가 비활성화된 액터는 Pilot 대상으로 인식되지 않을 수 있다.
 
 ### 다른 카메라가 게임 화면을 점유하는 경우
 
@@ -53,4 +55,4 @@ PIE 실행 전에 Pilot 상태를 종료한다. Pilot은 에디터 뷰포트 기
 
 ### 거리 판정 위치가 카메라와 함께 이동한 경우
 
-연출 액터 전체의 배치를 다시 확인하고 `Blend Origin` 컴포넌트를 목표 장소로 재배치한다. 촬영 구도와 거리 중심은 같은 위치일 필요가 없다.
+지면의 `BP_LocationBlendCamera`와 외부 CameraActor가 서로 붙어 있거나 부모·자식으로 연결되지 않았는지 확인한다. 둘을 독립된 레벨 액터로 유지하고 `Blend Origin`만 목표 장소에 배치한다.

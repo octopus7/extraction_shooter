@@ -4,8 +4,8 @@
 #include "GameFramework/Actor.h"
 #include "TunaSweeperLocationBlendCameraActor.generated.h"
 
+class ACameraActor;
 class APlayerController;
-class UCameraComponent;
 class USceneComponent;
 class USphereComponent;
 
@@ -35,7 +35,10 @@ public:
 #endif
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Location Camera")
-	UCameraComponent* GetLocationCameraComponent() const { return LocationCamera; }
+	ACameraActor* GetTargetCameraActor() const { return TargetCameraActor; }
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Location Camera")
+	void SetTargetCameraActor(ACameraActor* InTargetCameraActor);
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Location Camera")
 	USceneComponent* GetBlendOriginComponent() const { return BlendOrigin; }
@@ -53,13 +56,16 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<USceneComponent> CameraRigRoot;
 
-	/** Actual fixed camera used as the destination POV and for viewport Pilot. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<UCameraComponent> LocationCamera;
-
 	/** Independent world-space center used for player distance measurement. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<USceneComponent> BlendOrigin;
+
+	/**
+	 * Independently placed level camera used as the destination POV. Pilot this
+	 * CameraActor to adjust framing without moving this actor's distance zone.
+	 */
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Camera")
+	TObjectPtr<ACameraActor> TargetCameraActor;
 
 	/** Outer radius at which blending begins. Must be larger than Blend Complete Distance. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Distance Blend", meta = (ClampMin = "1.0", UIMin = "1.0", Units = "cm"))

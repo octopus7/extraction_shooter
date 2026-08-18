@@ -6157,3 +6157,16 @@
 - 기본 촬영 트랜스폼은 플레이어 기본 카메라와 유사한 상대 위치 `(-600, 0, 900)`, 회전 `(-55, 0, 0)`, FOV `70`으로 설정해 시점을 조금 낮췄다.
 - 프로젝트 애셋 `/Game/Camera/BP_LocationBlendCamera`를 생성·컴파일·저장했다. 레벨 배치와 레벨 애셋 수정은 수행하지 않았다.
 - UE 5.7 `TunaSweeperEditor Win64 Development` 빌드 및 Blueprint 컴파일 로그를 확인했다.
+
+## 2026-08-18 18:53:00 (소요시간: 00:01:00)
+
+- 작업 완료 후 Unreal Editor를 종료하지 않고 사용자가 이어서 작업할 수 있도록 열린 상태로 유지했다.
+
+## 2026-08-18 19:02:00 (소요시간: 00:03:00)
+
+- 지면의 거리 판정 액터와 촬영 카메라를 완전히 분리했다. `BP_LocationBlendCamera`의 내부 CameraComponent를 제거하고 레벨에 별도 배치한 `CameraActor`를 인스턴스 속성 `Target Camera Actor`로 직접 참조하도록 변경했다.
+- 외부 카메라가 지정되지 않았거나 제거된 상태에서는 거리 범위 안에서도 ViewTarget을 점유하지 않고 플레이어 카메라를 유지하도록 안전 처리를 추가했다.
+- 런타임 블렌딩은 참조된 외부 CameraActor의 `CalcCamera()` POV와 플레이어 Pawn POV를 기존 거리 가중치로 혼합한다. 외부 카메라는 지면 판정 액터에 부착하지 않으므로 Pilot으로 조정해도 `BlendOrigin`과 거리 반경이 움직이지 않는다.
+- Pilot 문서를 외부 CameraActor 배치·참조 방식에 맞게 갱신했다.
+- 사용자가 수정한 `RaidMap`은 보존하고 자동화에서 열거나 저장하지 않았다.
+- UE 5.7 Editor 빌드와 `/Game/Camera/BP_LocationBlendCamera` 재컴파일·저장을 완료했다.

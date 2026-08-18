@@ -1,6 +1,6 @@
 #include "Camera/TunaSweeperLocationBlendCameraActor.h"
 
-#include "Camera/CameraComponent.h"
+#include "Camera/CameraActor.h"
 #include "Components/SceneComponent.h"
 #include "Components/SphereComponent.h"
 #include "EngineUtils.h"
@@ -17,13 +17,6 @@ ATunaSweeperLocationBlendCameraActor::ATunaSweeperLocationBlendCameraActor()
 
 	CameraRigRoot = CreateDefaultSubobject<USceneComponent>(TEXT("CameraRigRoot"));
 	SetRootComponent(CameraRigRoot);
-
-	LocationCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("LocationCamera"));
-	LocationCamera->SetupAttachment(CameraRigRoot);
-	LocationCamera->SetRelativeLocation(FVector(-600.0f, 0.0f, 900.0f));
-	LocationCamera->SetRelativeRotation(FRotator(-55.0f, 0.0f, 0.0f));
-	LocationCamera->FieldOfView = 70.0f;
-	LocationCamera->bUsePawnControlRotation = false;
 
 	BlendOrigin = CreateDefaultSubobject<USceneComponent>(TEXT("BlendOrigin"));
 	BlendOrigin->SetupAttachment(CameraRigRoot);
@@ -68,7 +61,9 @@ void ATunaSweeperLocationBlendCameraActor::Tick(float DeltaSeconds)
 	}
 
 	const FVector PlayerLocation = ControlledPawn->GetActorLocation();
-	CurrentBlendWeight = bBlendEnabled ? GetBlendWeightAtLocation(PlayerLocation) : 0.0f;
+	CurrentBlendWeight = bBlendEnabled && IsValid(TargetCameraActor)
+		? GetBlendWeightAtLocation(PlayerLocation)
+		: 0.0f;
 	ATunaSweeperLocationBlendCameraActor* PreferredCamera = FindPreferredCamera(GetWorld(), PlayerLocation);
 	AActor* CurrentViewTarget = PlayerController->GetViewTarget();
 
@@ -91,7 +86,7 @@ void ATunaSweeperLocationBlendCameraActor::CalcCamera(float DeltaTime, FMinimalV
 {
 	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(this, 0);
 	APawn* ControlledPawn = PlayerController ? PlayerController->GetPawn() : nullptr;
-	if (!ControlledPawn || !LocationCamera)
+	if (!ControlledPawn)
 	{
 		Super::CalcCamera(DeltaTime, OutResult);
 		return;
@@ -100,8 +95,15 @@ void ATunaSweeperLocationBlendCameraActor::CalcCamera(float DeltaTime, FMinimalV
 	FMinimalViewInfo PlayerView;
 	ControlledPawn->CalcCamera(DeltaTime, PlayerView);
 
+	if (!IsValid(TargetCameraActor))
+	{
+		CurrentBlendWeight = 0.0f;
+		OutResult = PlayerView;
+		return;
+	}
+
 	FMinimalViewInfo LocationView;
-	LocationCamera->GetCameraView(DeltaTime, LocationView);
+	TargetCameraActor->CalcCamera(DeltaTime, LocationView);
 
 	CurrentBlendWeight = bBlendEnabled
 		? GetBlendWeightAtLocation(ControlledPawn->GetActorLocation())
@@ -133,7 +135,7 @@ void ATunaSweeperLocationBlendCameraActor::PostEditChangeProperty(FPropertyChang
 
 float ATunaSweeperLocationBlendCameraActor::GetBlendWeightAtLocation(const FVector& WorldLocation) const
 {
-	if (!bBlendEnabled)
+	if (!bBlendEnabled || !IsValid(TargetCameraActor))
 	{
 		return 0.0f;
 	}
@@ -144,6 +146,16 @@ float ATunaSweeperLocationBlendCameraActor::GetBlendWeightAtLocation(const FVect
 	float Weight = 1.0f - FMath::GetRangePct(CompleteDistance, StartDistance, Distance);
 	Weight = FMath::Clamp(Weight, 0.0f, 1.0f);
 	return bUseSmoothStep ? FMath::SmoothStep(0.0f, 1.0f, Weight) : Weight;
+}
+
+void ATunaSweeperLocationBlendCameraActor::SetTargetCameraActor(ACameraActor* InTargetCameraActor)
+{
+	TargetCameraActor = InTargetCameraActor;
+	if (!IsValid(TargetCameraActor))
+	{
+		CurrentBlendWeight = 0.0f;
+		RestorePawnViewTarget();
+	}
 }
 
 void ATunaSweeperLocationBlendCameraActor::SetBlendEnabled(bool bEnabled)
@@ -170,7 +182,7 @@ ATunaSweeperLocationBlendCameraActor* ATunaSweeperLocationBlendCameraActor::Find
 	for (TActorIterator<ATunaSweeperLocationBlendCameraActor> It(World); It; ++It)
 	{
 		ATunaSweeperLocationBlendCameraActor* Candidate = *It;
-		if (!IsValid(Candidate) || !Candidate->bBlendEnabled)
+		if (!IsValid(Candidate) || !Candidate->bBlendEnabled || !IsValid(Candidate->TargetCameraActor))
 		{
 			continue;
 		}
