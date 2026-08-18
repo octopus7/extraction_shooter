@@ -3,6 +3,7 @@
 #include "TunaSweeperLunaSkirtPhysicsSetup.h"
 #include "TunaSweeperQuadrupedPresetSetup.h"
 #include "TunaSweeperGarageDoorSetup.h"
+#include "TunaSweeperLocationBlendCameraSetup.h"
 
 #include "Containers/Ticker.h"
 #include "Editor.h"
@@ -32,6 +33,14 @@ public:
 			GarageDoorSetupInitializedHandle = FEditorDelegates::OnEditorInitialized.AddRaw(
 				this,
 				&FTunaSweeperEditorModule::OnEditorInitializedForGarageDoorSetup);
+			return;
+		}
+
+		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperLocationBlendCameraSetup")))
+		{
+			LocationBlendCameraSetupInitializedHandle = FEditorDelegates::OnEditorInitialized.AddRaw(
+				this,
+				&FTunaSweeperEditorModule::OnEditorInitializedForLocationBlendCameraSetup);
 			return;
 		}
 
@@ -145,6 +154,18 @@ public:
 			GarageDoorSetupTickerHandle.Reset();
 		}
 
+		if (LocationBlendCameraSetupInitializedHandle.IsValid())
+		{
+			FEditorDelegates::OnEditorInitialized.Remove(LocationBlendCameraSetupInitializedHandle);
+			LocationBlendCameraSetupInitializedHandle.Reset();
+		}
+
+		if (LocationBlendCameraSetupTickerHandle.IsValid())
+		{
+			FTSTicker::GetCoreTicker().RemoveTicker(LocationBlendCameraSetupTickerHandle);
+			LocationBlendCameraSetupTickerHandle.Reset();
+		}
+
 		if (JumpInputSetupInitializedHandle.IsValid())
 		{
 			FEditorDelegates::OnEditorInitialized.Remove(JumpInputSetupInitializedHandle);
@@ -244,6 +265,28 @@ private:
 		return false;
 	}
 
+	void OnEditorInitializedForLocationBlendCameraSetup(double)
+	{
+		FEditorDelegates::OnEditorInitialized.Remove(LocationBlendCameraSetupInitializedHandle);
+		LocationBlendCameraSetupInitializedHandle.Reset();
+		LocationBlendCameraSetupTickerHandle = FTSTicker::GetCoreTicker().AddTicker(
+			FTickerDelegate::CreateRaw(this, &FTunaSweeperEditorModule::RunLocationBlendCameraSetupAfterInitialization));
+	}
+
+	bool RunLocationBlendCameraSetupAfterInitialization(float)
+	{
+		LocationBlendCameraSetupTickerHandle.Reset();
+		const bool bSucceeded = TunaSweeperLocationBlendCameraSetup::Run();
+		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperLocationBlendCameraSetupQuit")))
+		{
+			FPlatformMisc::RequestExitWithStatus(
+				false,
+				bSucceeded ? 0 : 1,
+				TEXT("TunaSweeperLocationBlendCameraSetup"));
+		}
+		return false;
+	}
+
 	void OnEditorInitializedForJumpInputSetup(double)
 	{
 		FEditorDelegates::OnEditorInitialized.Remove(JumpInputSetupInitializedHandle);
@@ -293,6 +336,8 @@ private:
 	FTSTicker::FDelegateHandle LunaSkirtSetupTickerHandle;
 	FDelegateHandle GarageDoorSetupInitializedHandle;
 	FTSTicker::FDelegateHandle GarageDoorSetupTickerHandle;
+	FDelegateHandle LocationBlendCameraSetupInitializedHandle;
+	FTSTicker::FDelegateHandle LocationBlendCameraSetupTickerHandle;
 	FDelegateHandle JumpInputSetupInitializedHandle;
 	FTSTicker::FDelegateHandle JumpInputSetupTickerHandle;
 	FDelegateHandle QuadrupedSetupInitializedHandle;
