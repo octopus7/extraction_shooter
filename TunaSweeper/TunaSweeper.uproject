@@ -17,6 +17,10 @@
 	],
 	"Plugins": [
 		{
+			"Name": "SplineWorldBuilder",
+			"Enabled": true
+		},
+		{
 			"Name": "StylizedWater",
 			"Enabled": true
 		},
