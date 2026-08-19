@@ -17,6 +17,10 @@
 	],
 	"Plugins": [
 		{
+			"Name": "StylizedWater",
+			"Enabled": true
+		},
+		{
 			"Name": "FoldingCanopyGarageDoor",
 			"Enabled": true
 		},
