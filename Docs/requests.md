@@ -6483,3 +6483,8 @@
 
 - 사용자가 새로 넣은 `steamworks/capsule-images/LibraryHeader.png`의 그림 내용은 변경하지 않고, `1835×857` 원본을 Steam Library Header 규격 `920×430`으로 Lanczos 리샘플했다.
 - 결과가 `920×430` sRGB RGB PNG로 정상 디코딩되고 완전 불투명 상태와 원본 구도를 유지하는지 확인했다.
+
+## 2026-08-20 06:12:21 (소요시간: 00:01:49)
+
+- `steamworks/capsule-images/logo.png`를 비율 유지한 채 높이 `720px`로 Lanczos 리샘플하고, 검은 배경의 밝기에서 알파를 추출해 `steamworks/capsule-images/LibraryLogo.png`로 저장했다.
+- 검은 배경의 미세 압축 노이즈는 알파 하한 보정으로 제거하고 픽셀 색상을 역프리멀티플라이해 크림색 글자와 금빛 외곽 글로우를 보존했다. 최종 결과는 `1479×720` sRGB RGBA PNG이며 어두운 청록색과 밝은 회색 배경 합성 미리보기에서 검정 프린지가 없는지 확인했다.
