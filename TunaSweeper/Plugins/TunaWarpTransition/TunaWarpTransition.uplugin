@@ -1,0 +1,22 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0.0",
+	"FriendlyName": "Tuna Warp Transition",
+	"Description": "Reusable player-camera warp transition with radial post-process distortion, arrival rim lighting, and midpoint teleport handling.",
+	"Category": "Rendering",
+	"CanContainContent": true,
+	"EnabledByDefault": false,
+	"Modules": [
+		{
+			"Name": "TunaWarpTransition",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "TunaWarpTransitionEditor",
+			"Type": "UncookedOnly",
+			"LoadingPhase": "PostEngineInit"
+		}
+	]
+}

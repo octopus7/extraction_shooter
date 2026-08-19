@@ -6333,3 +6333,11 @@
 - Details 패널의 `Last Bake Result`에 트레이스 적중 수와 최소·최대 깊이 범위를 표시해 지형 충돌 채널 또는 수면 높이 문제를 바로 구분할 수 있게 했다.
 - ImageGen 원본·LUT 크기와 소스 경로 정적 검사를 통과하고, UE 5.7 UHT 및 `TunaSweeperEditor Win64 Development` 빌드에 성공했다. DX12·SM6 자동화 테스트에서 내부 T_/M_/MI_/BP_ 로드, 256x1 LUT 연결, 재질 컴파일, 서로 다른 두 지형 높이의 버텍스 깊이 차이를 검증했다.
 - 사용자가 수정한 `RaidMap`, `FoldingCanopyGarageDoor`, `TunaWarpTransition`, 프로젝트 설정·게임 소스와 기존 질문 문서는 수정하거나 이번 커밋에 포함하지 않았다.
+
+## 2026-08-20 00:20:30 (소요시간: 00:17:20)
+
+- `TunaSweeper/Plugins/TunaWarpTransition` UE 5.7 플러그인을 추가해 원 안쪽 핀치, 원 바깥쪽 방사형 스트레치·3탭 streak, 완전 가림 중간 지점 텔레포트, 도착 후 플레이어 중심 월드 노멀·깊이 림 파동과 선택적 무그림자 Point Light를 하나의 재사용 가능한 전환 컴포넌트로 구현했다.
+- 런타임 `UTunaWarpTransitionComponent`에 디자이너 조정용 `FWarpTransitionStyle`, Blueprint 호출 함수와 Started/Midpoint/Finished 이벤트, C++ 성공 콜백, 입력 잠금·복원, 중복 실행 방지, 머티리얼 또는 카메라 부재 시 즉시 텔레포트 폴백을 제공했다.
+- Editor 모듈이 버전 관리되는 내부 PP 부모 머티리얼 2종과 사람이 복제·수정할 공개 기본 Material Instance 2종을 플러그인 Content에 자동 생성·저장하도록 했고, 평상시 비용을 피하기 위해 전환 중에만 카메라 Blendable로 등록하도록 구성했다.
+- 기존 `ATunaSweeperWarpPointActor::WarpInstigator`가 즉시 이동하는 대신 전환 컴포넌트를 찾거나 동적으로 생성해 호출하고, 화면이 가려진 중간 시점의 실제 이동 성공 후에만 기존 워프 퀘스트 알림을 보내도록 연결했다.
+- UE 5.7 `TunaSweeperEditor Win64 Development` 빌드와 `TunaSweeper Win64 Development` 게임 타깃 전체 빌드에 성공했고, DX12·PCD3D_SM6 에디터에서 플러그인 자산 생성과 두 PP 머티리얼의 셰이더 컴파일 성공을 확인했다. 사용자가 수정한 `RaidMap`과 `FoldingCanopyGarageDoor` 변경은 수정하거나 이번 커밋에 포함하지 않았다.

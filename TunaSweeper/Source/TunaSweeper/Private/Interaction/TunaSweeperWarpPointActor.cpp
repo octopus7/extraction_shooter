@@ -8,6 +8,7 @@
 #include "Interaction/TunaSweeperInteractableComponent.h"
 #include "Materials/MaterialInterface.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
+#include "TunaWarpTransitionComponent.h"
 
 ATunaSweeperWarpPointActor::ATunaSweeperWarpPointActor()
 {
@@ -160,40 +161,47 @@ bool ATunaSweeperWarpPointActor::WarpInstigator(APawn* InstigatorPawn)
 		TargetWarpPoint->GetActorLocation() +
 		TargetWarpPoint->GetActorRotation().RotateVector(TargetWarpPoint->ExitOffset);
 
-	bool bWarped = InstigatorPawn->TeleportTo(TargetLocation, TargetRotation, false, true);
-	if (!bWarped)
+	UTunaWarpTransitionComponent* TransitionComponent = InstigatorPawn->FindComponentByClass<UTunaWarpTransitionComponent>();
+	if (!TransitionComponent)
 	{
-		bWarped = InstigatorPawn->SetActorLocationAndRotation(
-			TargetLocation,
-			TargetRotation,
-			false,
-			nullptr,
-			ETeleportType::TeleportPhysics);
+		TransitionComponent = NewObject<UTunaWarpTransitionComponent>(
+			InstigatorPawn,
+			UTunaWarpTransitionComponent::StaticClass(),
+			TEXT("RuntimeWarpTransition"));
+		if (TransitionComponent)
+		{
+			InstigatorPawn->AddInstanceComponent(TransitionComponent);
+			TransitionComponent->RegisterComponent();
+		}
 	}
-
-	if (!bWarped)
+	if (!TransitionComponent || TransitionComponent->IsTransitionActive())
 	{
 		return false;
 	}
 
-	if (bUseTargetRotation)
-	{
-		if (AController* Controller = InstigatorPawn->GetController())
+	const TWeakObjectPtr<ATunaSweeperWarpPointActor> WeakThis(this);
+	const FName UsedWarpPointId = WarpPointId;
+	const FName DestinationWarpPointId = TargetWarpPoint->GetWarpPointId();
+	return TransitionComponent->PlayWarpTransitionNative(
+		InstigatorPawn,
+		FTransform(TargetRotation, TargetLocation),
+		bUseTargetRotation,
+		[WeakThis, UsedWarpPointId, DestinationWarpPointId](const bool bWarped)
 		{
-			Controller->SetControlRotation(TargetRotation);
-		}
-	}
-
-	if (UGameInstance* GameInstance = GetGameInstance())
-	{
-		if (UTunaSweeperQuestSubsystem* QuestSubsystem = GameInstance->GetSubsystem<UTunaSweeperQuestSubsystem>())
-		{
-			QuestSubsystem->NotifyWarpPointUsed(
-				GetWorld() ? FName(*GetWorld()->GetMapName()) : NAME_None,
-				WarpPointId,
-				TargetWarpPoint->GetWarpPointId());
-		}
-	}
-
-	return true;
+			ATunaSweeperWarpPointActor* WarpPoint = WeakThis.Get();
+			if (!bWarped || !WarpPoint)
+			{
+				return;
+			}
+			if (UGameInstance* GameInstance = WarpPoint->GetGameInstance())
+			{
+				if (UTunaSweeperQuestSubsystem* QuestSubsystem = GameInstance->GetSubsystem<UTunaSweeperQuestSubsystem>())
+				{
+					QuestSubsystem->NotifyWarpPointUsed(
+						WarpPoint->GetWorld() ? FName(*WarpPoint->GetWorld()->GetMapName()) : NAME_None,
+						UsedWarpPointId,
+						DestinationWarpPointId);
+				}
+			}
+		});
 }
