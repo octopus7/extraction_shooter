@@ -1,4 +1,5 @@
 #include "TunaSweeperIntroMenuWidgetShared.h"
+#include "Component/TunaSweeperScratchComponent.h"
 #include "Player/TunaSweeperPlayerController.h"
 #include "UI/TunaSweeperDebugDisplaySettings.h"
 
@@ -208,6 +209,27 @@ void UTunaSweeperIntroMenuWidget::HandlePiggyBankToggleClicked()
 {
 	const bool bEnabled = !ATunaSweeperPlayerController::GetDeveloperPiggyBankPreference();
 	ATunaSweeperPlayerController::SetDeveloperPiggyBankPreference(bEnabled);
+	RefreshDevelopmentSettingsPanel();
+}
+
+void UTunaSweeperIntroMenuWidget::HandleAlwaysSlowPresentationToggleClicked()
+{
+	const bool bEnabled = !ATunaSweeperPlayerController::GetDeveloperAlwaysSlowPresentationPreference();
+	ATunaSweeperPlayerController::SetDeveloperAlwaysSlowPresentationPreference(bEnabled);
+
+	if (const ATunaSweeperPlayerController* PlayerController =
+		Cast<ATunaSweeperPlayerController>(GetOwningPlayer()))
+	{
+		if (APawn* PlayerPawn = PlayerController->GetPawn())
+		{
+			if (UTunaSweeperScratchComponent* ScratchComponent =
+				PlayerPawn->FindComponentByClass<UTunaSweeperScratchComponent>())
+			{
+				ScratchComponent->SetDeveloperAlwaysSlowPresentationEnabled(bEnabled);
+			}
+		}
+	}
+
 	RefreshDevelopmentSettingsPanel();
 }
 

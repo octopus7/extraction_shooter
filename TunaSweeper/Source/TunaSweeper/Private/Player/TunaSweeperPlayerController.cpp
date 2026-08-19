@@ -263,6 +263,7 @@ namespace TunaSweeperEnemyCombatDebugSettings
 	const TCHAR* SectionName = TEXT("TunaSweeper.DevelopmentSettings");
 	const TCHAR* EnabledKey = TEXT("bEnemyCombatDebugEnabled");
 	const TCHAR* DeveloperPiggyBankEnabledKey = TEXT("bDeveloperPiggyBankEnabled");
+	const TCHAR* DeveloperAlwaysSlowPresentationEnabledKey = TEXT("bDeveloperAlwaysSlowPresentationEnabled");
 }
 
 namespace TunaSweeperCanBotIntro
@@ -417,6 +418,36 @@ void ATunaSweeperPlayerController::SetDeveloperPiggyBankPreference(bool bEnabled
 	GConfig->SetBool(
 		TunaSweeperEnemyCombatDebugSettings::SectionName,
 		TunaSweeperEnemyCombatDebugSettings::DeveloperPiggyBankEnabledKey,
+		bEnabled,
+		GGameUserSettingsIni);
+	GConfig->Flush(false, GGameUserSettingsIni);
+}
+
+bool ATunaSweeperPlayerController::GetDeveloperAlwaysSlowPresentationPreference()
+{
+	bool bEnabled = false;
+	if (GConfig)
+	{
+		GConfig->GetBool(
+			TunaSweeperEnemyCombatDebugSettings::SectionName,
+			TunaSweeperEnemyCombatDebugSettings::DeveloperAlwaysSlowPresentationEnabledKey,
+			bEnabled,
+			GGameUserSettingsIni);
+	}
+
+	return bEnabled;
+}
+
+void ATunaSweeperPlayerController::SetDeveloperAlwaysSlowPresentationPreference(bool bEnabled)
+{
+	if (!GConfig)
+	{
+		return;
+	}
+
+	GConfig->SetBool(
+		TunaSweeperEnemyCombatDebugSettings::SectionName,
+		TunaSweeperEnemyCombatDebugSettings::DeveloperAlwaysSlowPresentationEnabledKey,
 		bEnabled,
 		GGameUserSettingsIni);
 	GConfig->Flush(false, GGameUserSettingsIni);

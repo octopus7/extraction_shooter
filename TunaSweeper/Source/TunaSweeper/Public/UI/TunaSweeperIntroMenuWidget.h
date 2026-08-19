@@ -177,6 +177,9 @@ protected:
 	TObjectPtr<UButton> PiggyBankToggleButton;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UButton> AlwaysSlowPresentationToggleButton;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
 	TObjectPtr<UButton> WindowedModeButton;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
@@ -349,6 +352,9 @@ private:
 	void HandlePiggyBankToggleClicked();
 
 	UFUNCTION()
+	void HandleAlwaysSlowPresentationToggleClicked();
+
+	UFUNCTION()
 	void HandleWindowedModeClicked();
 
 	UFUNCTION()
@@ -504,6 +510,7 @@ private:
 	void EnsureTitleWindParticleOverlay();
 	void ApplyTitleMenuButtonContentLayout();
 	void EnsurePiggyBankToggleButton();
+	void EnsureAlwaysSlowPresentationToggleButton();
 	void EnsureDevelopmentToggleButtonContent(
 		UButton* ToggleButton,
 		FName LabelWidgetName,

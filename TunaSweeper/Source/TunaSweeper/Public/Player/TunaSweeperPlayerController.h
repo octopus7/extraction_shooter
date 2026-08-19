@@ -46,6 +46,10 @@ public:
 	static bool GetDeveloperPiggyBankPreference();
 	static void SetDeveloperPiggyBankPreference(bool bEnabled);
 
+	/** Device-local development preference; it keeps the scratch slow-motion presentation active. */
+	static bool GetDeveloperAlwaysSlowPresentationPreference();
+	static void SetDeveloperAlwaysSlowPresentationPreference(bool bEnabled);
+
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Debug")
 	void SetEnemyCombatDebugEnabled(bool bEnabled);
 

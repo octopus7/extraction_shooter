@@ -8,6 +8,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Materials/MaterialInterface.h"
+#include "Player/TunaSweeperPlayerController.h"
 #include "Subsystem/TunaSweeperFactionSubsystem.h"
 
 namespace TunaSweeperScratchPresentation
@@ -33,6 +34,8 @@ void UTunaSweeperScratchComponent::BeginPlay()
 	Super::BeginPlay();
 	CurrentScratch = FMath::Clamp(CurrentScratch, 0.0f, GetMaxScratch());
 	OnScratchChanged.Broadcast(CurrentScratch, GetMaxScratch());
+	SetDeveloperAlwaysSlowPresentationEnabled(
+		ATunaSweeperPlayerController::GetDeveloperAlwaysSlowPresentationPreference());
 }
 
 void UTunaSweeperScratchComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -49,9 +52,14 @@ void UTunaSweeperScratchComponent::TickComponent(
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	(void)DeltaTime;
 
-	if (bPresentationActive)
+	const double RealTimeSeconds = FPlatformTime::Seconds();
+	if (bDeveloperAlwaysSlowPresentationEnabled && !bPresentationActive)
 	{
-		UpdatePresentation(FPlatformTime::Seconds());
+		TriggerPresentation(RealTimeSeconds);
+	}
+	else if (bPresentationActive)
+	{
+		UpdatePresentation(RealTimeSeconds);
 	}
 }
 
@@ -70,6 +78,26 @@ bool UTunaSweeperScratchComponent::TryConsumeScratch(float Amount)
 void UTunaSweeperScratchComponent::ResetScratch()
 {
 	SetCurrentScratch(0.0f);
+}
+
+void UTunaSweeperScratchComponent::SetDeveloperAlwaysSlowPresentationEnabled(bool bEnabled)
+{
+	if (bDeveloperAlwaysSlowPresentationEnabled == bEnabled)
+	{
+		return;
+	}
+
+	bDeveloperAlwaysSlowPresentationEnabled = bEnabled;
+	const double RealTimeSeconds = FPlatformTime::Seconds();
+	if (bEnabled)
+	{
+		TriggerPresentation(RealTimeSeconds);
+	}
+	else if (bPresentationActive)
+	{
+		PresentationReleaseRealSeconds = RealTimeSeconds;
+		UpdatePresentation(RealTimeSeconds);
+	}
 }
 
 bool UTunaSweeperScratchComponent::TryRegisterNearMiss(
@@ -173,7 +201,7 @@ void UTunaSweeperScratchComponent::UpdatePresentation(double RealTimeSeconds)
 			0.0f,
 			1.0f);
 	}
-	else if (RealTimeSeconds >= PresentationReleaseRealSeconds)
+	else if (!bDeveloperAlwaysSlowPresentationEnabled && RealTimeSeconds >= PresentationReleaseRealSeconds)
 	{
 		EffectAlpha = 1.0f - FMath::Clamp(
 			static_cast<float>((RealTimeSeconds - PresentationReleaseRealSeconds) / BlendOutSeconds),

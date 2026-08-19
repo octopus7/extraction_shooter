@@ -248,13 +248,15 @@ void UTunaSweeperIntroMenuWidget::RefreshDevelopmentSettingsPanel()
 {
 	const bool bEnemyCombatDebugEnabled = ATunaSweeperPlayerController::GetEnemyCombatDebugPreference();
 	const bool bPiggyBankEnabled = ATunaSweeperPlayerController::GetDeveloperPiggyBankPreference();
+	const bool bAlwaysSlowPresentationEnabled =
+		ATunaSweeperPlayerController::GetDeveloperAlwaysSlowPresentationPreference();
 	const ETunaSweeperDebugDisplayLanguage DebugDisplayLanguage =
 		TunaSweeperDebugDisplaySettings::GetDebugDisplayLanguage();
 
 	if (SettingsStatusText)
 	{
 		SettingsStatusText->SetText(FText::Format(
-			FText::FromString(TEXT("{0}\n\uB514\uBC84\uADF8 \uD45C\uAE30 \uC5B8\uC5B4: {1}\n\uB3FC\uC9C0\uC800\uAE08\uD1B5: {2} (\uB2E4\uC74C \uBC99\uCEE4 \uC785\uC7A5\uBD80\uD130)")),
+			FText::FromString(TEXT("{0}\n\uB514\uBC84\uADF8 \uD45C\uAE30 \uC5B8\uC5B4: {1}\n\uB3FC\uC9C0\uC800\uAE08\uD1B5: {2} (\uB2E4\uC74C \uBC99\uCEE4 \uC785\uC7A5\uBD80\uD130)\n\uC0C1\uC2DC \uC2AC\uB85C\uC6B0 \uC5F0\uCD9C: {3}")),
 			bEnemyCombatDebugEnabled
 				? FText::FromString(TEXT("\uC804\uD22C \uB514\uBC84\uADF8: \uCF1C\uC9D0 (F8)"))
 				: FText::FromString(TEXT("\uC804\uD22C \uB514\uBC84\uADF8: \uAEBC\uC9D0 (F8)")),
@@ -262,6 +264,9 @@ void UTunaSweeperIntroMenuWidget::RefreshDevelopmentSettingsPanel()
 				? FText::FromString(TEXT("\uD55C\uAD6D\uC5B4"))
 				: FText::FromString(TEXT("English")),
 			bPiggyBankEnabled
+				? FText::FromString(TEXT("\uCF1C\uC9D0"))
+				: FText::FromString(TEXT("\uAEBC\uC9D0")),
+			bAlwaysSlowPresentationEnabled
 				? FText::FromString(TEXT("\uCF1C\uC9D0"))
 				: FText::FromString(TEXT("\uAEBC\uC9D0"))));
 	}
@@ -311,6 +316,17 @@ void UTunaSweeperIntroMenuWidget::RefreshDevelopmentSettingsPanel()
 	if (PiggyBankToggleButton)
 	{
 		PiggyBankToggleButton->SetIsEnabled(true);
+	}
+	SetNamedText(
+		FName(TEXT("AlwaysSlowPresentationToggleButtonText")),
+		FText::FromString(TEXT("\uC0C1\uC2DC \uC2AC\uB85C\uC6B0 \uC5F0\uCD9C")));
+	SetToggleIndicatorState(
+		FName(TEXT("AlwaysSlowPresentationToggleIndicator")),
+		bAlwaysSlowPresentationEnabled);
+
+	if (AlwaysSlowPresentationToggleButton)
+	{
+		AlwaysSlowPresentationToggleButton->SetIsEnabled(true);
 	}
 
 	RefreshDevelopmentSelectionStyles();
@@ -409,6 +425,8 @@ void UTunaSweeperIntroMenuWidget::RefreshDevelopmentSelectionStyles()
 {
 	const bool bEnemyCombatDebugEnabled = ATunaSweeperPlayerController::GetEnemyCombatDebugPreference();
 	const bool bPiggyBankEnabled = ATunaSweeperPlayerController::GetDeveloperPiggyBankPreference();
+	const bool bAlwaysSlowPresentationEnabled =
+		ATunaSweeperPlayerController::GetDeveloperAlwaysSlowPresentationPreference();
 	const ETunaSweeperDebugDisplayLanguage DebugDisplayLanguage =
 		TunaSweeperDebugDisplaySettings::GetDebugDisplayLanguage();
 	ApplySettingsTabButtonStyle(SettingsGraphicsTabButton, FVector2D(142.0f, 38.0f), false);
@@ -430,6 +448,10 @@ void UTunaSweeperIntroMenuWidget::RefreshDevelopmentSelectionStyles()
 		PiggyBankToggleButton,
 		FVector2D(660.0f, 46.0f),
 		bPiggyBankEnabled);
+	ApplySettingsChoiceButtonStyle(
+		AlwaysSlowPresentationToggleButton,
+		FVector2D(660.0f, 46.0f),
+		bAlwaysSlowPresentationEnabled);
 }
 
 void UTunaSweeperIntroMenuWidget::ApplySettingsChoiceButtonStyle(

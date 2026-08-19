@@ -177,6 +177,100 @@ void UTunaSweeperIntroMenuWidget::EnsurePiggyBankToggleButton()
 	}
 }
 
+void UTunaSweeperIntroMenuWidget::EnsureAlwaysSlowPresentationToggleButton()
+{
+	UButton* AnchorButton = PiggyBankToggleButton ? PiggyBankToggleButton.Get() : EnemyCombatDebugToggleButton.Get();
+	if (AlwaysSlowPresentationToggleButton || !WidgetTree || !AnchorButton)
+	{
+		return;
+	}
+
+	UVerticalBox* DevelopmentSettingsStack = nullptr;
+	UCanvasPanel* DevelopmentSettingsCanvas = nullptr;
+	for (UPanelWidget* Parent = AnchorButton->GetParent(); Parent; Parent = Parent->GetParent())
+	{
+		DevelopmentSettingsStack = Cast<UVerticalBox>(Parent);
+		if (DevelopmentSettingsStack)
+		{
+			break;
+		}
+
+		DevelopmentSettingsCanvas = Cast<UCanvasPanel>(Parent);
+		if (DevelopmentSettingsCanvas)
+		{
+			break;
+		}
+	}
+
+	if (!DevelopmentSettingsStack && !DevelopmentSettingsCanvas)
+	{
+		return;
+	}
+
+	UButton* NewToggleButton = WidgetTree->ConstructWidget<UButton>(
+		UButton::StaticClass(),
+		TEXT("AlwaysSlowPresentationToggleButton"));
+	UTextBlock* NewToggleButtonText = WidgetTree->ConstructWidget<UTextBlock>(
+		UTextBlock::StaticClass(),
+		TEXT("AlwaysSlowPresentationToggleButtonText"));
+	if (!NewToggleButton || !NewToggleButtonText)
+	{
+		return;
+	}
+
+	NewToggleButtonText->SetText(FText::FromString(TEXT("\uC0C1\uC2DC \uC2AC\uB85C\uC6B0 \uC5F0\uCD9C")));
+	NewToggleButtonText->SetJustification(ETextJustify::Center);
+	NewToggleButtonText->SetColorAndOpacity(FSlateColor(FLinearColor(0.90f, 0.96f, 0.96f, 1.0f)));
+	TunaSweeperUIFont::ApplyFont(NewToggleButtonText, 17, ETunaSweeperUIFontWeight::Bold);
+	NewToggleButton->SetContent(NewToggleButtonText);
+
+	bool bAdded = false;
+	if (DevelopmentSettingsStack)
+	{
+		if (UVerticalBoxSlot* AddedSlot = DevelopmentSettingsStack->AddChildToVerticalBox(NewToggleButton))
+		{
+			AddedSlot->SetHorizontalAlignment(HAlign_Fill);
+			AddedSlot->SetPadding(FMargin(0.0f, 8.0f, 0.0f, 0.0f));
+			bAdded = true;
+		}
+	}
+	else if (DevelopmentSettingsCanvas)
+	{
+		const UCanvasPanelSlot* ExistingSlot = Cast<UCanvasPanelSlot>(AnchorButton->Slot);
+		if (UCanvasPanelSlot* NewSlot = DevelopmentSettingsCanvas->AddChildToCanvas(NewToggleButton))
+		{
+			if (ExistingSlot)
+			{
+				NewSlot->SetAnchors(ExistingSlot->GetAnchors());
+				NewSlot->SetAlignment(ExistingSlot->GetAlignment());
+				NewSlot->SetSize(ExistingSlot->GetSize());
+				NewSlot->SetPosition(ExistingSlot->GetPosition() + FVector2D(0.0f, ExistingSlot->GetSize().Y + 8.0f));
+			}
+			else
+			{
+				NewSlot->SetSize(FVector2D(660.0f, 46.0f));
+			}
+			bAdded = true;
+		}
+	}
+
+	if (!bAdded)
+	{
+		return;
+	}
+
+	AlwaysSlowPresentationToggleButton = NewToggleButton;
+	for (UPanelWidget* Parent = NewToggleButton->GetParent(); Parent; Parent = Parent->GetParent())
+	{
+		if (USizeBox* SectionBox = Cast<USizeBox>(Parent);
+			SectionBox && SectionBox->GetFName() == FName(TEXT("EnemyCombatDebugSection")))
+		{
+			SectionBox->SetHeightOverride(212.0f);
+			break;
+		}
+	}
+}
+
 void UTunaSweeperIntroMenuWidget::EnsureDevelopmentToggleButtonContent(
 	UButton* ToggleButton,
 	FName LabelWidgetName,

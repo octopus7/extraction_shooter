@@ -63,6 +63,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Scratch")
 	void ResetScratch();
 
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Scratch|Development")
+	void SetDeveloperAlwaysSlowPresentationEnabled(bool bEnabled);
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Scratch|Development")
+	bool IsDeveloperAlwaysSlowPresentationEnabled() const { return bDeveloperAlwaysSlowPresentationEnabled; }
+
 	bool TryRegisterNearMiss(
 		AActor* AttackSource,
 		int32 AttackId,
@@ -140,4 +146,5 @@ private:
 	double PresentationReleaseRealSeconds = 0.0;
 	double LastPresentationRealSeconds = -1000.0;
 	bool bPresentationActive = false;
+	bool bDeveloperAlwaysSlowPresentationEnabled = false;
 };
