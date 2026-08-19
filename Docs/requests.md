@@ -6478,3 +6478,8 @@
 - built-in imagegen으로 Git의 `LibraryCapsule.png` 고해상도 원본에서 기존 로고 뒤의 하늘과 구름을 자연스럽게 복원했다.
 - 원본의 `TUNA SWEEPER` 글자, 물고기, 별, 잎 장식과 밑줄을 픽셀 형태 그대로 추출해 약 `1.4×` 확대하고, 최종 이미지 높이의 약 29%를 차지하도록 상단 중앙에 재합성했다.
 - `steamworks/capsule-images/LibraryCapsule.png`를 `600×900` sRGB RGB PNG로 저장해 절반 크기에서도 로고가 잘 읽히도록 했으며, 완전 불투명한 불필요 알파 채널을 제거했다.
+
+## 2026-08-20 05:08:21 (소요시간: 00:00:31)
+
+- 사용자가 새로 넣은 `steamworks/capsule-images/LibraryHeader.png`의 그림 내용은 변경하지 않고, `1835×857` 원본을 Steam Library Header 규격 `920×430`으로 Lanczos 리샘플했다.
+- 결과가 `920×430` sRGB RGB PNG로 정상 디코딩되고 완전 불투명 상태와 원본 구도를 유지하는지 확인했다.
