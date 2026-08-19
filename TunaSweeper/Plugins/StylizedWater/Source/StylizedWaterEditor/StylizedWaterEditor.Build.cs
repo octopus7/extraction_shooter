@@ -14,6 +14,7 @@ public class StylizedWaterEditor : ModuleRules
 			"Core",
 			"CoreUObject",
 			"Engine",
+			"ImageCore",
 			"Kismet",
 			"LevelEditor",
 			"MaterialEditor",

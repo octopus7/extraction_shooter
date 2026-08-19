@@ -4,6 +4,8 @@
 #include "Materials/MaterialInterface.h"
 #include "ProceduralMeshComponent.h"
 
+DEFINE_LOG_CATEGORY_STATIC(LogStylizedWater, Log, All);
+
 namespace StylizedWater
 {
 	const TCHAR* GeneratedMaterialInstancePath = TEXT("/StylizedWater/Generated/Internal/MI_StylizedWater_CalmAnime.MI_StylizedWater_CalmAnime");
@@ -14,6 +16,7 @@ namespace StylizedWater
 	FName FoamColorName(TEXT("FoamColor"));
 	FName DepthColorRangeName(TEXT("DepthColorRangeCm"));
 	FName MidColorPositionName(TEXT("MidColorPosition"));
+	FName DepthGradientInfluenceName(TEXT("DepthGradientInfluence"));
 	FName OpacityName(TEXT("Opacity"));
 	FName RoughnessName(TEXT("Roughness"));
 	FName DistortionStrengthName(TEXT("DistortionStrength"));
@@ -105,6 +108,7 @@ void AStylizedWaterBodyActor::ApplyFlowingRiverPreset()
 
 void AStylizedWaterBodyActor::ApplyPreset(const EStylizedWaterPreset InPreset, const bool bRebuild)
 {
+	DepthGradientInfluence = 1.0f;
 	switch (InPreset)
 	{
 	case EStylizedWaterPreset::CalmLake:
@@ -185,8 +189,9 @@ void AStylizedWaterBodyActor::SetTemplateMaterialInstance(UMaterialInterface* In
 	UpdateMaterialParameters();
 }
 
-float AStylizedWaterBodyActor::SampleSignedDepthAtWorldPosition(const FVector& SurfaceWorldPosition) const
+float AStylizedWaterBodyActor::SampleSignedDepthAtWorldPosition(const FVector& SurfaceWorldPosition, bool& bOutHit) const
 {
+	bOutHit = false;
 	const UWorld* World = GetWorld();
 	if (!World)
 	{
@@ -207,6 +212,7 @@ float AStylizedWaterBodyActor::SampleSignedDepthAtWorldPosition(const FVector& S
 		return MaximumDepth;
 	}
 
+	bOutHit = true;
 	return FMath::Clamp(SurfaceWorldPosition.Z - Hit.ImpactPoint.Z, -MaximumDryHeight, MaximumDepth);
 }
 
@@ -241,6 +247,9 @@ void AStylizedWaterBodyActor::BuildWaterMesh(const bool bTraceTerrain)
 
 	const FTransform ActorTransform = GetActorTransform();
 	const float TotalDepthRange = MaximumDryHeight + MaximumDepth;
+	int32 HitSampleCount = 0;
+	float MinimumHitDepth = MaximumDepth;
+	float MaximumHitDepth = -MaximumDryHeight;
 	for (int32 Y = 0; Y <= ResolutionY; ++Y)
 	{
 		const float V = static_cast<float>(Y) / static_cast<float>(ResolutionY);
@@ -252,7 +261,14 @@ void AStylizedWaterBodyActor::BuildWaterMesh(const bool bTraceTerrain)
 				FMath::Lerp(-0.5 * SurfaceSize.Y, 0.5 * SurfaceSize.Y, V),
 				0.0);
 			const FVector WorldPosition = ActorTransform.TransformPosition(LocalPosition);
-			const float SignedDepth = bTraceTerrain ? SampleSignedDepthAtWorldPosition(WorldPosition) : MaximumDepth;
+			bool bHitTerrain = false;
+			const float SignedDepth = bTraceTerrain ? SampleSignedDepthAtWorldPosition(WorldPosition, bHitTerrain) : MaximumDepth;
+			if (bHitTerrain)
+			{
+				++HitSampleCount;
+				MinimumHitDepth = FMath::Min(MinimumHitDepth, SignedDepth);
+				MaximumHitDepth = FMath::Max(MaximumHitDepth, SignedDepth);
+			}
 			const float EncodedDepth = FMath::Clamp((SignedDepth + MaximumDryHeight) / TotalDepthRange, 0.0f, 1.0f);
 			const float BorderDistance = FMath::Clamp(2.0f * FMath::Min(FMath::Min(U, 1.0f - U), FMath::Min(V, 1.0f - V)), 0.0f, 1.0f);
 
@@ -262,6 +278,26 @@ void AStylizedWaterBodyActor::BuildWaterMesh(const bool bTraceTerrain)
 			VertexColors.Add(FLinearColor(EncodedDepth, BorderDistance, U, V));
 			Tangents.Add(FProcMeshTangent(FVector::ForwardVector, false));
 		}
+	}
+
+	if (!bTraceTerrain)
+	{
+		LastDepthBakeResult = FString::Printf(TEXT("Terrain trace skipped; uniform %.1f cm depth"), MaximumDepth);
+	}
+	else if (HitSampleCount == 0)
+	{
+		LastDepthBakeResult = FString::Printf(TEXT("0 / %d samples hit the selected trace channel"), VertexCount);
+		UE_LOG(LogStylizedWater, Warning, TEXT("StylizedWater: %s has no terrain depth hits. Check its Z position and Terrain Trace Channel."), *GetName());
+	}
+	else
+	{
+		LastDepthBakeResult = FString::Printf(
+			TEXT("%d / %d hits; %.1f to %.1f cm (range %.1f cm)"),
+			HitSampleCount,
+			VertexCount,
+			MinimumHitDepth,
+			MaximumHitDepth,
+			MaximumHitDepth - MinimumHitDepth);
 	}
 
 	for (int32 Y = 0; Y < ResolutionY; ++Y)
@@ -337,6 +373,7 @@ void AStylizedWaterBodyActor::UpdateMaterialParameters()
 	DynamicMaterial->SetVectorParameterValue(StylizedWater::FlowDirectionName, FLinearColor(SafeFlowDirection.X, SafeFlowDirection.Y, 0.0f, 0.0f));
 	DynamicMaterial->SetScalarParameterValue(StylizedWater::DepthColorRangeName, FMath::Max(DepthColorRange, 10.0f));
 	DynamicMaterial->SetScalarParameterValue(StylizedWater::MidColorPositionName, FMath::Clamp(MidColorPosition, 0.05f, 0.95f));
+	DynamicMaterial->SetScalarParameterValue(StylizedWater::DepthGradientInfluenceName, FMath::Clamp(DepthGradientInfluence, 0.0f, 1.0f));
 	DynamicMaterial->SetScalarParameterValue(StylizedWater::OpacityName, FMath::Clamp(Opacity, 0.0f, 1.0f));
 	DynamicMaterial->SetScalarParameterValue(StylizedWater::RoughnessName, FMath::Clamp(Roughness, 0.0f, 1.0f));
 	DynamicMaterial->SetScalarParameterValue(StylizedWater::DistortionStrengthName, FMath::Max(DistortionStrength, 0.0f));

@@ -73,6 +73,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stylized Water|Depth Bake")
 	TEnumAsByte<ECollisionChannel> TerrainTraceChannel = ECC_Visibility;
 
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Stylized Water|Depth Bake", meta = (DisplayName = "Last Bake Result"))
+	FString LastDepthBakeResult = TEXT("Not baked yet");
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stylized Water|Color")
 	FLinearColor ShallowColor = FLinearColor(0.16f, 0.72f, 0.76f, 1.0f);
 
@@ -90,6 +93,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stylized Water|Color", meta = (ClampMin = "0.05", ClampMax = "0.95", UIMin = "0.05", UIMax = "0.95"))
 	float MidColorPosition = 0.42f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stylized Water|Color", meta = (ClampMin = "0.0", ClampMax = "1.0", UIMin = "0.0", UIMax = "1.0", DisplayName = "ImageGen Depth Gradient Influence"))
+	float DepthGradientInfluence = 1.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stylized Water|Surface", meta = (ClampMin = "0.0", ClampMax = "1.0", UIMin = "0.0", UIMax = "1.0"))
 	float Opacity = 0.82f;
@@ -146,7 +152,7 @@ protected:
 	void BuildWaterMesh(bool bTraceTerrain);
 	void EnsureDynamicMaterial();
 	void UpdateMaterialParameters();
-	float SampleSignedDepthAtWorldPosition(const FVector& SurfaceWorldPosition) const;
+	float SampleSignedDepthAtWorldPosition(const FVector& SurfaceWorldPosition, bool& bOutHit) const;
 
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;

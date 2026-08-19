@@ -5,8 +5,11 @@
 #include "Engine/Blueprint.h"
 #include "Engine/BlueprintGeneratedClass.h"
 #include "Engine/Selection.h"
+#include "Engine/Texture2D.h"
 #include "Engine/World.h"
 #include "Framework/Commands/UIAction.h"
+#include "ImageUtils.h"
+#include "Interfaces/IPluginManager.h"
 #include "Kismet2/KismetEditorUtilities.h"
 #include "Materials/Material.h"
 #include "Materials/MaterialExpressionComponentMask.h"
@@ -15,12 +18,14 @@
 #include "Materials/MaterialExpressionScalarParameter.h"
 #include "Materials/MaterialExpressionSingleLayerWaterMaterialOutput.h"
 #include "Materials/MaterialExpressionTime.h"
+#include "Materials/MaterialExpressionTextureSampleParameter2D.h"
 #include "Materials/MaterialExpressionVectorParameter.h"
 #include "Materials/MaterialExpressionVertexColor.h"
 #include "Materials/MaterialExpressionWorldPosition.h"
 #include "Materials/MaterialInstanceConstant.h"
 #include "Misc/PackageName.h"
 #include "Misc/Parse.h"
+#include "Misc/Paths.h"
 #include "Misc/ScopedSlowTask.h"
 #include "Modules/ModuleManager.h"
 #include "ScopedTransaction.h"
@@ -35,21 +40,23 @@ DEFINE_LOG_CATEGORY_STATIC(LogStylizedWaterEditor, Log, All);
 namespace StylizedWaterEditor
 {
 	const FString InternalAssetPath = TEXT("/StylizedWater/Generated/Internal");
+	const FString DepthGradientTextureName = TEXT("T_WaterDepthGradient");
 	const FString MaterialName = TEXT("M_StylizedWaterSurface");
 	const FString MaterialInstanceName = TEXT("MI_StylizedWater_CalmAnime");
 	const FString BlueprintName = TEXT("BP_StylizedWaterBody_Internal");
 	const TCHAR* AssetVersionKey = TEXT("StylizedWaterAssetVersion");
-	const TCHAR* AssetVersion = TEXT("1");
+	const TCHAR* AssetVersion = TEXT("3");
 
 	struct FGeneratedAssets
 	{
+		TObjectPtr<UTexture2D> DepthGradientTexture;
 		TObjectPtr<UMaterial> Material;
 		TObjectPtr<UMaterialInstanceConstant> MaterialInstance;
 		TObjectPtr<UBlueprint> Blueprint;
 
 		bool IsComplete() const
 		{
-			return Material && MaterialInstance && Blueprint && Blueprint->GeneratedClass;
+			return DepthGradientTexture && Material && MaterialInstance && Blueprint && Blueprint->GeneratedClass;
 		}
 	};
 
@@ -138,6 +145,77 @@ namespace StylizedWaterEditor
 		Custom->Inputs.Add(Input);
 	}
 
+	UTexture2D* EnsureDepthGradientTexture(const bool bForceRebuild)
+	{
+		const FString TextureObjectPath = ObjectPath(InternalAssetPath, DepthGradientTextureName);
+		UTexture2D* Texture = LoadObject<UTexture2D>(nullptr, *TextureObjectPath);
+		if (Texture && !bForceRebuild && HasCurrentAssetVersion(Texture))
+		{
+			return Texture;
+		}
+
+		const TSharedPtr<IPlugin> Plugin = IPluginManager::Get().FindPlugin(TEXT("StylizedWater"));
+		const FString SourceFilename = Plugin.IsValid()
+			? FPaths::Combine(Plugin->GetBaseDir(), TEXT("Resources/SourceArt/WaterDepthGradient_1D.png"))
+			: FString();
+		FImage SourceImage;
+		if (SourceFilename.IsEmpty() || !FImageUtils::LoadImage(*SourceFilename, SourceImage))
+		{
+			UE_LOG(LogStylizedWaterEditor, Error, TEXT("StylizedWater: failed to load depth gradient source %s."), *SourceFilename);
+			return nullptr;
+		}
+		if (SourceImage.SizeX != 256 || SourceImage.SizeY != 1)
+		{
+			UE_LOG(
+				LogStylizedWaterEditor,
+				Error,
+				TEXT("StylizedWater: depth gradient source must be 256x1, but is %lldx%lld."),
+				SourceImage.SizeX,
+				SourceImage.SizeY);
+			return nullptr;
+		}
+
+		if (!Texture)
+		{
+			const FString PackageName = InternalAssetPath / DepthGradientTextureName;
+			UPackage* Package = CreatePackage(*PackageName);
+			Texture = Package
+				? Cast<UTexture2D>(FImageUtils::CreateTexture(
+					ETextureClass::TwoD,
+					SourceImage,
+					Package,
+					DepthGradientTextureName,
+					RF_Public | RF_Standalone | RF_Transactional,
+					false))
+				: nullptr;
+			if (Texture)
+			{
+				FAssetRegistryModule::AssetCreated(Texture);
+			}
+		}
+		else
+		{
+			Texture->Modify();
+			Texture->Source.Init(SourceImage);
+		}
+		if (!Texture)
+		{
+			return nullptr;
+		}
+
+		Texture->SRGB = true;
+		Texture->CompressionSettings = TC_Default;
+		Texture->MipGenSettings = TMGS_NoMipmaps;
+		Texture->Filter = TF_Bilinear;
+		Texture->AddressX = TA_Clamp;
+		Texture->AddressY = TA_Clamp;
+		Texture->LODGroup = TEXTUREGROUP_Effects;
+		StampAssetVersion(Texture);
+		Texture->PostEditChange();
+		Texture->MarkPackageDirty();
+		return SaveAsset(Texture) ? Texture : nullptr;
+	}
+
 	UMaterial* FindOrCreateMaterial()
 	{
 		const FString MaterialObjectPath = ObjectPath(InternalAssetPath, MaterialName);
@@ -158,8 +236,12 @@ namespace StylizedWaterEditor
 		return Material;
 	}
 
-	UMaterial* EnsureSurfaceMaterial(const bool bForceRebuild)
+	UMaterial* EnsureSurfaceMaterial(UTexture2D* DepthGradientTexture, const bool bForceRebuild)
 	{
+		if (!DepthGradientTexture)
+		{
+			return nullptr;
+		}
 		const FString MaterialObjectPath = ObjectPath(InternalAssetPath, MaterialName);
 		UMaterial* Material = FindOrCreateMaterial();
 		if (!Material)
@@ -211,6 +293,7 @@ namespace StylizedWaterEditor
 		UMaterialExpressionScalarParameter* WaterLevelOffset = AddScalarParameter(Material, TEXT("WaterLevelOffsetCm"), 0.0f, -1440, -90);
 		UMaterialExpressionScalarParameter* DepthColorRange = AddScalarParameter(Material, TEXT("DepthColorRangeCm"), 700.0f, -1440, -10);
 		UMaterialExpressionScalarParameter* MidColorPosition = AddScalarParameter(Material, TEXT("MidColorPosition"), 0.42f, -1440, 70);
+		UMaterialExpressionScalarParameter* DepthGradientInfluence = AddScalarParameter(Material, TEXT("DepthGradientInfluence"), 1.0f, -1440, 110);
 		UMaterialExpressionScalarParameter* WaterlineSoftness = AddScalarParameter(Material, TEXT("WaterlineSoftnessCm"), 8.0f, -1440, 150);
 		UMaterialExpressionScalarParameter* ShoreRunup = AddScalarParameter(Material, TEXT("ShoreRunupCm"), 28.0f, -1440, 230);
 		UMaterialExpressionScalarParameter* ShoreWavelength = AddScalarParameter(Material, TEXT("ShoreWavelengthCm"), 280.0f, -1440, 310);
@@ -227,7 +310,26 @@ namespace StylizedWaterEditor
 		UMaterialExpressionScalarParameter* Roughness = AddScalarParameter(Material, TEXT("Roughness"), 0.12f, -1080, 230);
 		UMaterialExpressionScalarParameter* Specular = AddScalarParameter(Material, TEXT("Specular"), 0.68f, -1080, 310);
 
-		UMaterialExpressionCustom* Style = AddExpression<UMaterialExpressionCustom>(Material, -680, -100);
+		UMaterialExpressionCustom* DepthCoordinates = AddExpression<UMaterialExpressionCustom>(Material, -1040, -440);
+		DepthCoordinates->Description = TEXT("Baked signed depth to 1D palette coordinate");
+		DepthCoordinates->OutputType = CMOT_Float2;
+		DepthCoordinates->Code =
+			TEXT("float signedDepth = lerp(-max(DryRangeCm, 1.0f), max(DepthRangeCm, 1.0f), saturate(EncodedDepth));\n")
+			TEXT("float depth01 = saturate((signedDepth + WaterLevelOffsetCm) / max(DepthColorRangeCm, 10.0f));\n")
+			TEXT("return float2(depth01, 0.5f);");
+		AddCustomInput(DepthCoordinates, TEXT("EncodedDepth"), EncodedDepth);
+		AddCustomInput(DepthCoordinates, TEXT("DryRangeCm"), DryRange);
+		AddCustomInput(DepthCoordinates, TEXT("DepthRangeCm"), DepthRange);
+		AddCustomInput(DepthCoordinates, TEXT("WaterLevelOffsetCm"), WaterLevelOffset);
+		AddCustomInput(DepthCoordinates, TEXT("DepthColorRangeCm"), DepthColorRange);
+
+		UMaterialExpressionTextureSampleParameter2D* DepthGradientSample = AddExpression<UMaterialExpressionTextureSampleParameter2D>(Material, -820, -440);
+		DepthGradientSample->ParameterName = TEXT("DepthGradientTexture");
+		DepthGradientSample->Texture = DepthGradientTexture;
+		DepthGradientSample->SamplerType = SAMPLERTYPE_Color;
+		DepthGradientSample->Coordinates.Connect(0, DepthCoordinates);
+
+		UMaterialExpressionCustom* Style = AddExpression<UMaterialExpressionCustom>(Material, -520, -100);
 		Style->Description = TEXT("Anime depth color, visual waterline, shore runup, and broken foam");
 		Style->OutputType = CMOT_Float4;
 		Style->Code =
@@ -247,8 +349,9 @@ namespace StylizedWaterEditor
 			TEXT("float middle = clamp(MidColorPosition, 0.05f, 0.95f);\n")
 			TEXT("float lower = smoothstep(0.0f, 1.0f, saturate(depth01 / middle));\n")
 			TEXT("float upper = smoothstep(0.0f, 1.0f, saturate((depth01 - middle) / max(1.0f - middle, 0.05f)));\n")
-			TEXT("float3 baseColor = lerp(ShallowColorValue.rgb, MidColorValue.rgb, lower);\n")
-			TEXT("baseColor = lerp(baseColor, DeepColorValue.rgb, upper);\n")
+			TEXT("float3 legacyColor = lerp(ShallowColorValue.rgb, MidColorValue.rgb, lower);\n")
+			TEXT("legacyColor = lerp(legacyColor, DeepColorValue.rgb, upper);\n")
+			TEXT("float3 baseColor = lerp(legacyColor, DepthGradientColorValue.rgb, saturate(DepthGradientInfluence));\n")
 			TEXT("float broadFlow = 0.5f + 0.5f * sin(dot(WorldPos.xy, flow) * WaveWorldScale - TimeValue * FlowSpeed + sin(dot(WorldPos.xy, across) * WaveWorldScale * 0.71f) * 0.6f);\n")
 			TEXT("baseColor *= lerp(0.978f, 1.024f, broadFlow);\n")
 			TEXT("float foamWidth = clamp(ShoreFoamWidth, 0.01f, 0.49f);\n")
@@ -266,12 +369,14 @@ namespace StylizedWaterEditor
 		AddCustomInput(Style, TEXT("ShallowColorValue"), ShallowColor);
 		AddCustomInput(Style, TEXT("MidColorValue"), MidColor);
 		AddCustomInput(Style, TEXT("DeepColorValue"), DeepColor);
+		AddCustomInput(Style, TEXT("DepthGradientColorValue"), DepthGradientSample);
 		AddCustomInput(Style, TEXT("FoamColorValue"), FoamColor);
 		AddCustomInput(Style, TEXT("DryRangeCm"), DryRange);
 		AddCustomInput(Style, TEXT("DepthRangeCm"), DepthRange);
 		AddCustomInput(Style, TEXT("WaterLevelOffsetCm"), WaterLevelOffset);
 		AddCustomInput(Style, TEXT("DepthColorRangeCm"), DepthColorRange);
 		AddCustomInput(Style, TEXT("MidColorPosition"), MidColorPosition);
+		AddCustomInput(Style, TEXT("DepthGradientInfluence"), DepthGradientInfluence);
 		AddCustomInput(Style, TEXT("WaterlineSoftnessCm"), WaterlineSoftness);
 		AddCustomInput(Style, TEXT("ShoreRunupCm"), ShoreRunup);
 		AddCustomInput(Style, TEXT("ShoreWavelengthCm"), ShoreWavelength);
@@ -351,13 +456,14 @@ namespace StylizedWaterEditor
 		UMaterialExpressionVectorParameter* Scattering = AddVectorParameter(Material, TEXT("ScatteringCoefficients"), FLinearColor(0.004f, 0.012f, 0.018f, 1.0f), 40, 180);
 		UMaterialExpressionVectorParameter* Absorption = AddVectorParameter(Material, TEXT("AbsorptionCoefficients"), FLinearColor(0.009f, 0.0035f, 0.0015f, 1.0f), 40, 270);
 		UMaterialExpressionScalarParameter* PhaseG = AddScalarParameter(Material, TEXT("PhaseG"), 0.18f, 40, 360);
-		UMaterialExpressionVectorParameter* BehindWaterColor = AddVectorParameter(Material, TEXT("BehindWaterColor"), FLinearColor(0.48f, 0.76f, 0.86f, 1.0f), 40, 450);
-
 		UMaterialExpressionSingleLayerWaterMaterialOutput* WaterOutput = AddExpression<UMaterialExpressionSingleLayerWaterMaterialOutput>(Material, 340, 280);
 		WaterOutput->ScatteringCoefficients.Connect(0, Scattering);
 		WaterOutput->AbsorptionCoefficients.Connect(0, Absorption);
 		WaterOutput->PhaseG.Connect(0, PhaseG);
-		WaterOutput->ColorScaleBehindWater.Connect(0, BehindWaterColor);
+		// Single Layer Water composites the scene behind the surface through this input.
+		// Feeding the baked depth color here keeps the depth palette visible instead of
+		// washing it out with one constant tint during the water composite pass.
+		WaterOutput->ColorScaleBehindWater.Connect(0, StyleColor);
 
 		EditorData->BaseColor.Connect(0, StyleColor);
 		EditorData->EmissiveColor.Connect(0, Emissive);
@@ -481,12 +587,13 @@ namespace StylizedWaterEditor
 	FGeneratedAssets EnsurePluginAssets(const bool bForceRebuild)
 	{
 		FGeneratedAssets Assets;
-		Assets.Material = EnsureSurfaceMaterial(bForceRebuild);
+		Assets.DepthGradientTexture = EnsureDepthGradientTexture(bForceRebuild);
+		Assets.Material = EnsureSurfaceMaterial(Assets.DepthGradientTexture, bForceRebuild);
 		Assets.MaterialInstance = EnsureMaterialInstance(Assets.Material, bForceRebuild);
 		Assets.Blueprint = EnsureBlueprintTemplate(Assets.MaterialInstance, bForceRebuild);
 		if (Assets.IsComplete())
 		{
-			UE_LOG(LogStylizedWaterEditor, Display, TEXT("StylizedWater: internal M_, MI_, and BP_ assets are ready."));
+			UE_LOG(LogStylizedWaterEditor, Display, TEXT("StylizedWater: internal T_, M_, MI_, and BP_ assets are ready."));
 		}
 		else
 		{

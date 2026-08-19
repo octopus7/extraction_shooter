@@ -3,11 +3,16 @@
 #if WITH_DEV_AUTOMATION_TESTS
 
 #include "AssetCompilingManager.h"
+#include "Components/BoxComponent.h"
 #include "Editor.h"
 #include "Engine/Blueprint.h"
+#include "Engine/Texture2D.h"
 #include "Engine/World.h"
 #include "MaterialShared.h"
 #include "Materials/Material.h"
+#include "Materials/MaterialExpressionComponentMask.h"
+#include "Materials/MaterialExpressionSingleLayerWaterMaterialOutput.h"
+#include "Materials/MaterialExpressionTextureSampleParameter2D.h"
 #include "Materials/MaterialInstanceConstant.h"
 #include "ProceduralMeshComponent.h"
 #include "RHI.h"
@@ -20,6 +25,9 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(
 
 bool FStylizedWaterGeneratedAssetsTest::RunTest(const FString& Parameters)
 {
+	UTexture2D* DepthGradientTexture = LoadObject<UTexture2D>(
+		nullptr,
+		TEXT("/StylizedWater/Generated/Internal/T_WaterDepthGradient.T_WaterDepthGradient"));
 	UMaterial* Material = LoadObject<UMaterial>(
 		nullptr,
 		TEXT("/StylizedWater/Generated/Internal/M_StylizedWaterSurface.M_StylizedWaterSurface"));
@@ -30,16 +38,43 @@ bool FStylizedWaterGeneratedAssetsTest::RunTest(const FString& Parameters)
 		nullptr,
 		TEXT("/StylizedWater/Generated/Internal/BP_StylizedWaterBody_Internal.BP_StylizedWaterBody_Internal"));
 
+	TestNotNull(TEXT("Generated depth gradient texture exists"), DepthGradientTexture);
 	TestNotNull(TEXT("Generated surface material exists"), Material);
 	TestNotNull(TEXT("Generated material instance exists"), MaterialInstance);
 	TestNotNull(TEXT("Generated internal Blueprint exists"), Blueprint);
-	if (!Material || !MaterialInstance || !Blueprint)
+	if (!DepthGradientTexture || !Material || !MaterialInstance || !Blueprint)
 	{
 		return false;
 	}
+	TestEqual(TEXT("Depth gradient texture is 256 pixels wide"), DepthGradientTexture->Source.GetSizeX(), static_cast<int64>(256));
+	TestEqual(TEXT("Depth gradient texture is one pixel high"), DepthGradientTexture->Source.GetSizeY(), static_cast<int64>(1));
 
 	TestEqual(TEXT("Surface material uses masked blending"), Material->BlendMode, BLEND_Masked);
 	TestTrue(TEXT("Surface material uses Single Layer Water"), Material->GetShadingModels().HasShadingModel(MSM_SingleLayerWater));
+	UMaterialExpressionSingleLayerWaterMaterialOutput* WaterOutput = nullptr;
+	UMaterialExpressionTextureSampleParameter2D* DepthGradientSample = nullptr;
+	for (UMaterialExpression* Expression : Material->GetExpressions())
+	{
+		if (UMaterialExpressionSingleLayerWaterMaterialOutput* Candidate = Cast<UMaterialExpressionSingleLayerWaterMaterialOutput>(Expression))
+		{
+			WaterOutput = Candidate;
+		}
+		if (UMaterialExpressionTextureSampleParameter2D* Candidate = Cast<UMaterialExpressionTextureSampleParameter2D>(Expression))
+		{
+			if (Candidate->ParameterName == TEXT("DepthGradientTexture"))
+			{
+				DepthGradientSample = Candidate;
+			}
+		}
+	}
+	TestNotNull(TEXT("Surface material has a Single Layer Water output"), WaterOutput);
+	TestNotNull(TEXT("Surface material samples the generated depth gradient"), DepthGradientSample);
+	TestTrue(
+		TEXT("Depth gradient sample uses the generated texture"),
+		DepthGradientSample && DepthGradientSample->Texture == DepthGradientTexture);
+	TestTrue(
+		TEXT("Depth style color drives the behind-water composite tint"),
+		WaterOutput && Cast<UMaterialExpressionComponentMask>(WaterOutput->ColorScaleBehindWater.Expression) != nullptr);
 	TestTrue(TEXT("Material instance parent is the generated material"), MaterialInstance->Parent == Material);
 	TestTrue(
 		TEXT("Internal Blueprint derives from the native water body"),
@@ -64,22 +99,53 @@ bool FStylizedWaterGeneratedAssetsTest::RunTest(const FString& Parameters)
 		return false;
 	}
 
-	FActorSpawnParameters SpawnParameters;
-	SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	SpawnParameters.ObjectFlags |= RF_Transient;
-	AStylizedWaterBodyActor* WaterBody = World->SpawnActor<AStylizedWaterBodyActor>(
+	const FTransform WaterTransform(FRotator::ZeroRotator, FVector(1000000.0, 1000000.0, 1000000.0));
+	AStylizedWaterBodyActor* WaterBody = World->SpawnActorDeferred<AStylizedWaterBodyActor>(
 		Blueprint->GeneratedClass,
-		FVector(1000000.0, 1000000.0, 1000000.0),
-		FRotator::ZeroRotator,
-		SpawnParameters);
+		WaterTransform,
+		nullptr,
+		nullptr,
+		ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
 	TestNotNull(TEXT("Internal Blueprint can spawn a water body"), WaterBody);
 	if (!WaterBody)
 	{
 		return false;
 	}
+	WaterBody->bSampleTerrainOnRebuild = false;
+	WaterBody->FinishSpawning(WaterTransform);
 
 	WaterBody->ApplyPreset(EStylizedWaterPreset::GentleBeach, false);
-	WaterBody->RebuildWithoutTerrainTrace();
+
+	auto SpawnDepthFloor = [World](const FVector& Location) -> AActor*
+	{
+		FActorSpawnParameters FloorSpawnParameters;
+		FloorSpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		FloorSpawnParameters.ObjectFlags |= RF_Transient;
+		AActor* FloorActor = World->SpawnActor<AActor>(AActor::StaticClass(), Location, FRotator::ZeroRotator, FloorSpawnParameters);
+		if (!FloorActor)
+		{
+			return nullptr;
+		}
+
+		UBoxComponent* FloorCollision = NewObject<UBoxComponent>(FloorActor, TEXT("DepthFloor"));
+		FloorActor->SetRootComponent(FloorCollision);
+		FloorCollision->SetBoxExtent(FVector(1100.0, 2100.0, 10.0));
+		FloorCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		FloorCollision->SetCollisionResponseToAllChannels(ECR_Ignore);
+		FloorCollision->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
+		FloorCollision->RegisterComponent();
+		FloorActor->SetActorLocation(Location);
+		return FloorActor;
+	};
+
+	const FVector WaterLocation = WaterBody->GetActorLocation();
+	AActor* ShallowFloor = SpawnDepthFloor(WaterLocation + FVector(-1000.0, 0.0, -110.0));
+	AActor* DeepFloor = SpawnDepthFloor(WaterLocation + FVector(1000.0, 0.0, -810.0));
+	TestNotNull(TEXT("Shallow depth test floor spawned"), ShallowFloor);
+	TestNotNull(TEXT("Deep depth test floor spawned"), DeepFloor);
+	WaterBody->bSampleTerrainOnRebuild = true;
+	WaterBody->RebuildAndBakeDepth();
+	TestTrue(TEXT("Depth bake result reports successful trace hits"), WaterBody->LastDepthBakeResult.Contains(TEXT("hits")));
 	TestNotNull(TEXT("Water body owns a procedural surface"), WaterBody->WaterSurface.Get());
 	if (WaterBody->WaterSurface)
 	{
@@ -93,10 +159,29 @@ bool FStylizedWaterGeneratedAssetsTest::RunTest(const FString& Parameters)
 				TEXT("Generated grid triangle index count matches the selected preset"),
 				Section->ProcIndexBuffer.Num(),
 				WaterBody->GridResolution.X * WaterBody->GridResolution.Y * 6);
+
+			uint8 MinimumEncodedDepth = MAX_uint8;
+			uint8 MaximumEncodedDepth = 0;
+			for (const FProcMeshVertex& Vertex : Section->ProcVertexBuffer)
+			{
+				MinimumEncodedDepth = FMath::Min(MinimumEncodedDepth, Vertex.Color.R);
+				MaximumEncodedDepth = FMath::Max(MaximumEncodedDepth, Vertex.Color.R);
+			}
+			TestTrue(
+				TEXT("Terrain depth bake produces visibly different encoded depths"),
+				static_cast<int32>(MaximumEncodedDepth) - static_cast<int32>(MinimumEncodedDepth) > 50);
 		}
 		TestNotNull(TEXT("Generated water body connects its material automatically"), WaterBody->WaterSurface->GetMaterial(0));
 	}
 
+	if (ShallowFloor)
+	{
+		ShallowFloor->Destroy();
+	}
+	if (DeepFloor)
+	{
+		DeepFloor->Destroy();
+	}
 	WaterBody->Destroy();
 	return !HasAnyErrors();
 }

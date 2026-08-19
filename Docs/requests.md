@@ -6323,3 +6323,13 @@
 - 액터 이동 완료 시 깊이를 다시 굽고, 수면 크기·해상도·색상·쇼어·흐름·왜곡을 사용자 인스턴스별로 조절할 수 있게 했다. 기존 레벨에는 액터를 배치하거나 맵을 저장하지 않았다.
 - 프로젝트와 플러그인 JSON, 내부 애셋 노출 경로, 변경 내용의 정적 검사를 통과했다. UE 5.7 UHT 경고 오류 검사와 `TunaSweeperEditor Win64 Development` 빌드에 성공했고, DX12·SM6 환경 자동화 테스트에서 생성 M_/MI_/BP_ 로드·계층·재질 컴파일·절차 메시 생성을 검증했다.
 - 기존 `FoldingCanopyGarageDoor` 미커밋 변경은 수정하거나 이번 커밋에 포함하지 않았다.
+
+## 2026-08-20 00:18:36 (소요시간: 00:14:20)
+
+- StylizedWater 수면이 깊이와 관계없이 밝은 청록색으로 보이던 원인을 조사해, UE 5.7 `Single Layer Water`의 고정 `ColorScaleBehindWater` 값이 깊이 기반 Base Color를 최종 합성에서 덮고 있음을 확인했다.
+- imagegen으로 얕은 민트 아쿠아에서 청록·세룰리안·코발트·딥 네이비로 이어지는 일본 애니메이션 배경풍 수심 팔레트를 생성하고, 원본을 `Resources/SourceArt/WaterDepthPalette_ImageGen.png`에 보존했다.
+- 생성 원본을 세로 평균한 결정적 `256x1` LUT와 확대 미리보기를 각각 `WaterDepthGradient_1D.png`, `WaterDepthGradient_Preview.png`로 보존하고, Editor 모듈이 내부 `T_WaterDepthGradient` 애셋을 자동 생성·버전 관리하도록 확장했다.
+- 재질이 베이크된 깊이를 0~1 LUT 좌표로 변환해 ImageGen 그라디언트를 샘플하고, 그 색을 Base Color와 behind-water 합성에 모두 사용하도록 변경했다. 기존 3색 설정은 `ImageGen Depth Gradient Influence`가 0일 때 사용할 수 있는 호환 경로로 유지했다.
+- Details 패널의 `Last Bake Result`에 트레이스 적중 수와 최소·최대 깊이 범위를 표시해 지형 충돌 채널 또는 수면 높이 문제를 바로 구분할 수 있게 했다.
+- ImageGen 원본·LUT 크기와 소스 경로 정적 검사를 통과하고, UE 5.7 UHT 및 `TunaSweeperEditor Win64 Development` 빌드에 성공했다. DX12·SM6 자동화 테스트에서 내부 T_/M_/MI_/BP_ 로드, 256x1 LUT 연결, 재질 컴파일, 서로 다른 두 지형 높이의 버텍스 깊이 차이를 검증했다.
+- 사용자가 수정한 `RaidMap`, `FoldingCanopyGarageDoor`, `TunaWarpTransition`, 프로젝트 설정·게임 소스와 기존 질문 문서는 수정하거나 이번 커밋에 포함하지 않았다.
