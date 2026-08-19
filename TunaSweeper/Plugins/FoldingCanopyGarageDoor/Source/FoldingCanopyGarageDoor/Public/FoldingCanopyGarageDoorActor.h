@@ -219,7 +219,7 @@ protected:
 	float DoorThickness = 16.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Garage Door|Geometry", meta = (ClampMin = "1.0"))
-	float SharedUpperPanelHeight = 90.0f;
+	float SharedUpperPanelHeight = 45.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Garage Door|Geometry", meta = (EditFixedSize))
 	TArray<bool> bOverrideUpperPanelHeight;
@@ -228,13 +228,13 @@ protected:
 	TArray<float> UpperPanelHeightOverride;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Garage Door|Geometry", meta = (ClampMin = "1.0"))
-	float LowerPanelHeight = 50.0f;
+	float LowerPanelHeight = 25.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Garage Door|Geometry", meta = (ClampMin = "0.0"))
-	float LowerPanelEmbedDepth = 20.0f;
+	float LowerPanelEmbedDepth = 10.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Garage Door|Geometry", meta = (ClampMin = "0.0"))
-	float InterlockClearance = 5.0f;
+	float InterlockClearance = 2.5f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Garage Door|Geometry", meta = (ClampMin = "1.0"))
 	float FrameSideWidth = 35.0f;
@@ -272,7 +272,7 @@ protected:
 
 	/** Vertical spacing between panel layers after they stack on the exterior rail. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Garage Door|Motion", meta = (ClampMin = "0.0"))
-	float CanopyPanelStackVerticalStep = 20.0f;
+	float CanopyPanelStackVerticalStep = 10.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Garage Door|Proximity")
 	bool bAutoOpenOnPlayerProximity = true;

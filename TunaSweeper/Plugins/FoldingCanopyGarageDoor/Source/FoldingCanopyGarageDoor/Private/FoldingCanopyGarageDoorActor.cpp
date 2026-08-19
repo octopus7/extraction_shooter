@@ -15,6 +15,12 @@ namespace FoldingCanopyGarageDoor
 {
 	constexpr int32 UpperPanelCount = 4;
 	constexpr float FullyOpenTolerance = KINDA_SMALL_NUMBER;
+	constexpr float DefaultUpperPanelHeight = 45.0f;
+	constexpr float DefaultLowerPanelHeight = 25.0f;
+	constexpr float DefaultLowerPanelEmbedDepth = 10.0f;
+	constexpr float DefaultInterlockClearance = 2.5f;
+	constexpr float DefaultCanopyPanelStackVerticalStep = 10.0f;
+	constexpr float CanopyRailEndClearanceToPanelHeight = 7.0f / 36.0f;
 
 	float RemapClamped(float Value, float InMin, float InMax)
 	{
@@ -281,11 +287,22 @@ void AFoldingCanopyGarageDoor::ConfigureVisualDefaults(
 	MetalMaterial = InMetalMaterial;
 	LedMaterial = InLedMaterial;
 	// With this mesh orientation, positive roll unfolds the panel toward local -Y (outdoors).
+	SharedUpperPanelHeight = FoldingCanopyGarageDoor::DefaultUpperPanelHeight;
+	LowerPanelHeight = FoldingCanopyGarageDoor::DefaultLowerPanelHeight;
+	LowerPanelEmbedDepth = FoldingCanopyGarageDoor::DefaultLowerPanelEmbedDepth;
+	InterlockClearance = FoldingCanopyGarageDoor::DefaultInterlockClearance;
 	CarrierFinalRollDegrees = 90.0f;
 	CanopyPanelRevealRatio = 0.15f;
-	CanopyPanelStackVerticalStep = 20.0f;
+	CanopyPanelStackVerticalStep = FoldingCanopyGarageDoor::DefaultCanopyPanelStackVerticalStep;
 	DoorWidth = 200.0f;
 	LedBarWidth = 110.0f;
+	for (int32 PanelIndex = 0; PanelIndex < FoldingCanopyGarageDoor::UpperPanelCount; ++PanelIndex)
+	{
+		if (!bOverrideUpperPanelHeight[PanelIndex])
+		{
+			UpperPanelHeightOverride[PanelIndex] = SharedUpperPanelHeight;
+		}
+	}
 	for (TObjectPtr<UStaticMesh>& UpperPanelMesh : UpperPanelMeshes)
 	{
 		UpperPanelMesh = InUpperPanelMesh;
@@ -687,7 +704,10 @@ float AFoldingCanopyGarageDoor::GetCanopyRailLength() const
 			FurthestPanelEdge,
 			GetCanopyPanelRevealOffset(PanelIndex) + GetEffectiveUpperPanelHeight(PanelIndex));
 	}
-	return FurthestPanelEdge + FrameSideWidth * 0.5f;
+	// Keep the rail-end allowance proportional to panel height. Halving the door
+	// therefore halves the full rail path and the post-stack slide distance too.
+	return FurthestPanelEdge
+		+ GetEffectiveUpperPanelHeight(0) * FoldingCanopyGarageDoor::CanopyRailEndClearanceToPanelHeight;
 }
 
 float AFoldingCanopyGarageDoor::GetCanopyRailHeight() const
