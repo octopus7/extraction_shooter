@@ -9,6 +9,7 @@ DEFINE_LOG_CATEGORY_STATIC(LogStylizedWater, Log, All);
 namespace StylizedWater
 {
 	const TCHAR* GeneratedMaterialInstancePath = TEXT("/StylizedWater/Generated/Internal/MI_StylizedWater_CalmAnime.MI_StylizedWater_CalmAnime");
+	const TCHAR* GeneratedShoreMaterialInstancePath = TEXT("/StylizedWater/Generated/Internal/MI_StylizedWater_ShoreOverlay.MI_StylizedWater_ShoreOverlay");
 
 	FName ShallowColorName(TEXT("ShallowColor"));
 	FName MidColorName(TEXT("MidColor"));
@@ -29,6 +30,8 @@ namespace StylizedWater
 	FName ShoreFoamDepthName(TEXT("ShoreFoamDepthCm"));
 	FName ShoreFoamWidthName(TEXT("ShoreFoamWidth"));
 	FName FoamIntensityName(TEXT("FoamIntensity"));
+	FName ShoreWaterOpacityName(TEXT("ShoreWaterOpacity"));
+	FName ShoreFoamOpacityName(TEXT("ShoreFoamOpacity"));
 	FName FlowDirectionName(TEXT("FlowDirection"));
 	FName FlowSpeedName(TEXT("FlowSpeed"));
 	FName WaveWorldScaleName(TEXT("WaveWorldScale"));
@@ -59,8 +62,10 @@ AStylizedWaterBodyActor::AStylizedWaterBodyActor()
 	ShoreOverlay->bUseAsyncCooking = true;
 	ShoreOverlay->SetCastShadow(false);
 	ShoreOverlay->SetCanEverAffectNavigation(false);
+	ShoreOverlay->TranslucencySortPriority = 1;
 
 	TemplateMaterialInstance = TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath(StylizedWater::GeneratedMaterialInstancePath));
+	TemplateShoreMaterialInstance = TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath(StylizedWater::GeneratedShoreMaterialInstancePath));
 }
 
 void AStylizedWaterBodyActor::OnConstruction(const FTransform& Transform)
@@ -134,6 +139,8 @@ void AStylizedWaterBodyActor::ApplyPreset(const EStylizedWaterPreset InPreset, c
 		ShoreFoamDepth = 90.0f;
 		ShoreFoamWidth = 0.09f;
 		FoamIntensity = 0.42f;
+		ShoreWaterOpacity = 0.12f;
+		ShoreFoamOpacity = 0.66f;
 		FlowSpeed = 0.06f;
 		GeometryWaveAmplitude = 1.5f;
 		break;
@@ -153,6 +160,8 @@ void AStylizedWaterBodyActor::ApplyPreset(const EStylizedWaterPreset InPreset, c
 		ShoreFoamDepth = 150.0f;
 		ShoreFoamWidth = 0.14f;
 		FoamIntensity = 0.95f;
+		ShoreWaterOpacity = 0.18f;
+		ShoreFoamOpacity = 0.86f;
 		FlowSpeed = 0.08f;
 		GeometryWaveAmplitude = 4.0f;
 		break;
@@ -172,6 +181,8 @@ void AStylizedWaterBodyActor::ApplyPreset(const EStylizedWaterPreset InPreset, c
 		ShoreFoamDepth = 75.0f;
 		ShoreFoamWidth = 0.08f;
 		FoamIntensity = 0.46f;
+		ShoreWaterOpacity = 0.10f;
+		ShoreFoamOpacity = 0.68f;
 		FlowSpeed = 0.32f;
 		WaveWorldScale = 0.0048f;
 		GeometryWaveAmplitude = 2.0f;
@@ -193,6 +204,14 @@ void AStylizedWaterBodyActor::SetTemplateMaterialInstance(UMaterialInterface* In
 {
 	TemplateMaterialInstance = InMaterial;
 	DynamicMaterial = nullptr;
+	EnsureDynamicMaterial();
+	UpdateMaterialParameters();
+}
+
+void AStylizedWaterBodyActor::SetTemplateShoreMaterialInstance(UMaterialInterface* InMaterial)
+{
+	TemplateShoreMaterialInstance = InMaterial;
+	ShoreDynamicMaterial = nullptr;
 	EnsureDynamicMaterial();
 	UpdateMaterialParameters();
 }
@@ -351,9 +370,10 @@ void AStylizedWaterBodyActor::BuildWaterMesh(const bool bTraceTerrain)
 
 			const bool bCellHasTerrain =
 				TerrainHitMask[I00] && TerrainHitMask[I10] && TerrainHitMask[I01] && TerrainHitMask[I11];
+			const float ShoreGeometryDepth = ShoreFoamDepth + FMath::Max(WaterlineSoftness, 0.1f);
 			const bool bCellTouchesShore =
-				SignedDepths[I00] <= ShoreFoamDepth || SignedDepths[I10] <= ShoreFoamDepth ||
-				SignedDepths[I01] <= ShoreFoamDepth || SignedDepths[I11] <= ShoreFoamDepth;
+				SignedDepths[I00] <= ShoreGeometryDepth || SignedDepths[I10] <= ShoreGeometryDepth ||
+				SignedDepths[I01] <= ShoreGeometryDepth || SignedDepths[I11] <= ShoreGeometryDepth;
 			if (bEnableTerrainShoreOverlay && bTraceTerrain && bCellHasTerrain && bCellTouchesShore)
 			{
 				ShoreTriangles.Add(I00);
@@ -383,6 +403,7 @@ void AStylizedWaterBodyActor::BuildWaterMesh(const bool bTraceTerrain)
 	}
 	bShoreOverlayBakeInitialized = true;
 	DynamicMaterial = nullptr;
+	ShoreDynamicMaterial = nullptr;
 	EnsureDynamicMaterial();
 	UpdateMaterialParameters();
 
@@ -395,30 +416,44 @@ void AStylizedWaterBodyActor::BuildWaterMesh(const bool bTraceTerrain)
 
 void AStylizedWaterBodyActor::EnsureDynamicMaterial()
 {
-	if (!WaterSurface || !ShoreOverlay || DynamicMaterial || HasAnyFlags(RF_ClassDefaultObject))
+	if (!WaterSurface || !ShoreOverlay || HasAnyFlags(RF_ClassDefaultObject))
 	{
 		return;
 	}
 
-	UMaterialInterface* ParentMaterial = TemplateMaterialInstance.LoadSynchronous();
-	if (!ParentMaterial)
+	if (!DynamicMaterial)
 	{
-		ParentMaterial = LoadObject<UMaterialInterface>(nullptr, StylizedWater::GeneratedMaterialInstancePath);
-	}
-	if (!ParentMaterial)
-	{
-		return;
+		UMaterialInterface* ParentMaterial = TemplateMaterialInstance.LoadSynchronous();
+		if (!ParentMaterial)
+		{
+			ParentMaterial = LoadObject<UMaterialInterface>(nullptr, StylizedWater::GeneratedMaterialInstancePath);
+		}
+		if (ParentMaterial)
+		{
+			DynamicMaterial = UMaterialInstanceDynamic::Create(ParentMaterial, this);
+			WaterSurface->SetMaterial(0, DynamicMaterial);
+		}
 	}
 
-	DynamicMaterial = UMaterialInstanceDynamic::Create(ParentMaterial, this);
-	WaterSurface->SetMaterial(0, DynamicMaterial);
-	ShoreOverlay->SetMaterial(0, DynamicMaterial);
+	if (!ShoreDynamicMaterial)
+	{
+		UMaterialInterface* ShoreParentMaterial = TemplateShoreMaterialInstance.LoadSynchronous();
+		if (!ShoreParentMaterial)
+		{
+			ShoreParentMaterial = LoadObject<UMaterialInterface>(nullptr, StylizedWater::GeneratedShoreMaterialInstancePath);
+		}
+		if (ShoreParentMaterial)
+		{
+			ShoreDynamicMaterial = UMaterialInstanceDynamic::Create(ShoreParentMaterial, this);
+			ShoreOverlay->SetMaterial(0, ShoreDynamicMaterial);
+		}
+	}
 }
 
 void AStylizedWaterBodyActor::UpdateMaterialParameters()
 {
 	EnsureDynamicMaterial();
-	if (!DynamicMaterial)
+	if (!DynamicMaterial || !ShoreDynamicMaterial)
 	{
 		return;
 	}
@@ -454,6 +489,25 @@ void AStylizedWaterBodyActor::UpdateMaterialParameters()
 	DynamicMaterial->SetScalarParameterValue(StylizedWater::GeometryWaveAmplitudeName, FMath::Max(GeometryWaveAmplitude, 0.0f));
 	DynamicMaterial->SetScalarParameterValue(StylizedWater::DryRangeName, FMath::Max(MaximumDryHeight, 10.0f));
 	DynamicMaterial->SetScalarParameterValue(StylizedWater::DepthRangeName, FMath::Max(MaximumDepth, 10.0f));
+
+	ShoreDynamicMaterial->SetVectorParameterValue(StylizedWater::ShallowColorName, ShallowColor);
+	ShoreDynamicMaterial->SetVectorParameterValue(StylizedWater::FoamColorName, FoamColor);
+	ShoreDynamicMaterial->SetVectorParameterValue(StylizedWater::FlowDirectionName, FLinearColor(SafeFlowDirection.X, SafeFlowDirection.Y, 0.0f, 0.0f));
+	ShoreDynamicMaterial->SetScalarParameterValue(StylizedWater::RoughnessName, FMath::Clamp(Roughness, 0.0f, 1.0f));
+	ShoreDynamicMaterial->SetScalarParameterValue(StylizedWater::WaterLevelOffsetName, WaterLevelOffset);
+	ShoreDynamicMaterial->SetScalarParameterValue(StylizedWater::WaterlineSoftnessName, FMath::Max(WaterlineSoftness, 0.1f));
+	ShoreDynamicMaterial->SetScalarParameterValue(StylizedWater::ShoreRunupName, FMath::Max(ShoreRunup, 0.0f));
+	ShoreDynamicMaterial->SetScalarParameterValue(StylizedWater::ShoreWavelengthName, FMath::Max(ShoreWavelength, 20.0f));
+	ShoreDynamicMaterial->SetScalarParameterValue(StylizedWater::ShoreWaveSpeedName, FMath::Max(ShoreWaveSpeed, 0.0f));
+	ShoreDynamicMaterial->SetScalarParameterValue(StylizedWater::ShoreFoamDepthName, FMath::Max(ShoreFoamDepth, 10.0f));
+	ShoreDynamicMaterial->SetScalarParameterValue(StylizedWater::ShoreFoamWidthName, FMath::Clamp(ShoreFoamWidth, 0.01f, 0.49f));
+	ShoreDynamicMaterial->SetScalarParameterValue(StylizedWater::FoamIntensityName, FMath::Max(FoamIntensity, 0.0f));
+	ShoreDynamicMaterial->SetScalarParameterValue(StylizedWater::ShoreWaterOpacityName, FMath::Clamp(ShoreWaterOpacity, 0.0f, 1.0f));
+	ShoreDynamicMaterial->SetScalarParameterValue(StylizedWater::ShoreFoamOpacityName, FMath::Clamp(ShoreFoamOpacity, 0.0f, 1.0f));
+	ShoreDynamicMaterial->SetScalarParameterValue(StylizedWater::FlowSpeedName, FMath::Max(FlowSpeed, 0.0f));
+	ShoreDynamicMaterial->SetScalarParameterValue(StylizedWater::WaveWorldScaleName, FMath::Max(WaveWorldScale, 0.00001f));
+	ShoreDynamicMaterial->SetScalarParameterValue(StylizedWater::DryRangeName, FMath::Max(MaximumDryHeight, 10.0f));
+	ShoreDynamicMaterial->SetScalarParameterValue(StylizedWater::DepthRangeName, FMath::Max(MaximumDepth, 10.0f));
 }
 
 #if WITH_EDITOR

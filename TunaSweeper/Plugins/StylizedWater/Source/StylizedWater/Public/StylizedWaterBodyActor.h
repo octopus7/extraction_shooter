@@ -45,6 +45,7 @@ public:
 
 	void ApplyPreset(EStylizedWaterPreset InPreset, bool bRebuild);
 	void SetTemplateMaterialInstance(UMaterialInterface* InMaterial);
+	void SetTemplateShoreMaterialInstance(UMaterialInterface* InMaterial);
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stylized Water")
 	TObjectPtr<USceneComponent> SceneRoot;
@@ -136,6 +137,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stylized Water|Shore Waves", meta = (ClampMin = "0.0", ClampMax = "2.0", UIMin = "0.0", UIMax = "2.0"))
 	float FoamIntensity = 0.82f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stylized Water|Shore Waves", meta = (ClampMin = "0.0", ClampMax = "1.0", UIMin = "0.0", UIMax = "0.5", DisplayName = "Shore Water Opacity"))
+	float ShoreWaterOpacity = 0.18f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stylized Water|Shore Waves", meta = (ClampMin = "0.0", ClampMax = "1.0", UIMin = "0.0", UIMax = "1.0", DisplayName = "Shore Foam Opacity"))
+	float ShoreFoamOpacity = 0.82f;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stylized Water|Shore Waves", meta = (DisplayName = "Enable Terrain-Following Runup"))
 	bool bEnableTerrainShoreOverlay = true;
 
@@ -157,6 +164,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Stylized Water|Internal", meta = (AllowedClasses = "/Script/Engine.MaterialInterface"))
 	TSoftObjectPtr<UMaterialInterface> TemplateMaterialInstance;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Stylized Water|Internal", meta = (AllowedClasses = "/Script/Engine.MaterialInterface"))
+	TSoftObjectPtr<UMaterialInterface> TemplateShoreMaterialInstance;
+
 protected:
 	void BuildWaterMesh(bool bTraceTerrain);
 	void EnsureDynamicMaterial();
@@ -174,4 +184,7 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<UMaterialInstanceDynamic> DynamicMaterial;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UMaterialInstanceDynamic> ShoreDynamicMaterial;
 };

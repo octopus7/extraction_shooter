@@ -43,20 +43,24 @@ namespace StylizedWaterEditor
 	const FString DepthGradientTextureName = TEXT("T_WaterDepthGradient");
 	const FString MaterialName = TEXT("M_StylizedWaterSurface");
 	const FString MaterialInstanceName = TEXT("MI_StylizedWater_CalmAnime");
+	const FString ShoreMaterialName = TEXT("M_StylizedWaterShoreOverlay");
+	const FString ShoreMaterialInstanceName = TEXT("MI_StylizedWater_ShoreOverlay");
 	const FString BlueprintName = TEXT("BP_StylizedWaterBody_Internal");
 	const TCHAR* AssetVersionKey = TEXT("StylizedWaterAssetVersion");
-	const TCHAR* AssetVersion = TEXT("4");
+	const TCHAR* AssetVersion = TEXT("5");
 
 	struct FGeneratedAssets
 	{
 		TObjectPtr<UTexture2D> DepthGradientTexture;
 		TObjectPtr<UMaterial> Material;
 		TObjectPtr<UMaterialInstanceConstant> MaterialInstance;
+		TObjectPtr<UMaterial> ShoreMaterial;
+		TObjectPtr<UMaterialInstanceConstant> ShoreMaterialInstance;
 		TObjectPtr<UBlueprint> Blueprint;
 
 		bool IsComplete() const
 		{
-			return DepthGradientTexture && Material && MaterialInstance && Blueprint && Blueprint->GeneratedClass;
+			return DepthGradientTexture && Material && MaterialInstance && ShoreMaterial && ShoreMaterialInstance && Blueprint && Blueprint->GeneratedClass;
 		}
 	};
 
@@ -228,6 +232,26 @@ namespace StylizedWaterEditor
 		UPackage* Package = CreatePackage(*PackageName);
 		UMaterial* Material = Package
 			? NewObject<UMaterial>(Package, *MaterialName, RF_Public | RF_Standalone | RF_Transactional)
+			: nullptr;
+		if (Material)
+		{
+			FAssetRegistryModule::AssetCreated(Material);
+		}
+		return Material;
+	}
+
+	UMaterial* FindOrCreateShoreMaterial()
+	{
+		const FString MaterialObjectPath = ObjectPath(InternalAssetPath, ShoreMaterialName);
+		if (UMaterial* Existing = LoadObject<UMaterial>(nullptr, *MaterialObjectPath))
+		{
+			return Existing;
+		}
+
+		const FString PackageName = InternalAssetPath / ShoreMaterialName;
+		UPackage* Package = CreatePackage(*PackageName);
+		UMaterial* Material = Package
+			? NewObject<UMaterial>(Package, *ShoreMaterialName, RF_Public | RF_Standalone | RF_Transactional)
 			: nullptr;
 		if (Material)
 		{
@@ -488,6 +512,150 @@ namespace StylizedWaterEditor
 		return Material;
 	}
 
+	UMaterial* EnsureShoreMaterial(const bool bForceRebuild)
+	{
+		const FString MaterialObjectPath = ObjectPath(InternalAssetPath, ShoreMaterialName);
+		UMaterial* Material = FindOrCreateShoreMaterial();
+		if (!Material)
+		{
+			UE_LOG(LogStylizedWaterEditor, Error, TEXT("StylizedWater: failed to create the internal shore overlay material."));
+			return nullptr;
+		}
+		if (!bForceRebuild && HasCurrentAssetVersion(Material))
+		{
+			return Material;
+		}
+
+		Material->Modify();
+		Material->GetExpressionCollection().Empty();
+		Material->BlendMode = BLEND_Translucent;
+		Material->TranslucencyLightingMode = TLM_Surface;
+		Material->TwoSided = true;
+		Material->bTangentSpaceNormal = false;
+		Material->SetShadingModel(MSM_DefaultLit);
+
+		UMaterialEditorOnlyData* EditorData = Material->GetEditorOnlyData();
+		if (!EditorData)
+		{
+			return nullptr;
+		}
+
+		UMaterialExpressionVertexColor* VertexColor = AddExpression<UMaterialExpressionVertexColor>(Material, -1700, -360);
+		UMaterialExpressionComponentMask* EncodedDepth = AddExpression<UMaterialExpressionComponentMask>(Material, -1500, -360);
+		EncodedDepth->Input.Connect(0, VertexColor);
+		EncodedDepth->R = 1;
+		EncodedDepth->G = 0;
+		EncodedDepth->B = 0;
+		EncodedDepth->A = 0;
+
+		UMaterialExpressionWorldPosition* WorldPosition = AddExpression<UMaterialExpressionWorldPosition>(Material, -1700, -210);
+		WorldPosition->WorldPositionShaderOffset = WPT_ExcludeAllShaderOffsets;
+		UMaterialExpressionTime* Time = AddExpression<UMaterialExpressionTime>(Material, -1700, -60);
+		Time->bIgnorePause = true;
+
+		UMaterialExpressionVectorParameter* ShallowColor = AddVectorParameter(Material, TEXT("ShallowColor"), FLinearColor(0.24f, 0.78f, 0.76f, 1.0f), -1450, -100);
+		UMaterialExpressionVectorParameter* FoamColor = AddVectorParameter(Material, TEXT("FoamColor"), FLinearColor(0.94f, 0.96f, 0.88f, 1.0f), -1450, -20);
+		UMaterialExpressionVectorParameter* FlowDirection = AddVectorParameter(Material, TEXT("FlowDirection"), FLinearColor(1.0f, 0.0f, 0.0f, 0.0f), -1450, 60);
+
+		UMaterialExpressionScalarParameter* DryRange = AddScalarParameter(Material, TEXT("DryRangeCm"), 300.0f, -1180, -360);
+		UMaterialExpressionScalarParameter* DepthRange = AddScalarParameter(Material, TEXT("DepthRangeCm"), 1500.0f, -1180, -290);
+		UMaterialExpressionScalarParameter* WaterLevelOffset = AddScalarParameter(Material, TEXT("WaterLevelOffsetCm"), 0.0f, -1180, -220);
+		UMaterialExpressionScalarParameter* WaterlineSoftness = AddScalarParameter(Material, TEXT("WaterlineSoftnessCm"), 8.0f, -1180, -150);
+		UMaterialExpressionScalarParameter* ShoreRunup = AddScalarParameter(Material, TEXT("ShoreRunupCm"), 28.0f, -1180, -80);
+		UMaterialExpressionScalarParameter* ShoreWavelength = AddScalarParameter(Material, TEXT("ShoreWavelengthCm"), 280.0f, -1180, -10);
+		UMaterialExpressionScalarParameter* ShoreWaveSpeed = AddScalarParameter(Material, TEXT("ShoreWaveSpeed"), 0.18f, -1180, 60);
+		UMaterialExpressionScalarParameter* ShoreFoamDepth = AddScalarParameter(Material, TEXT("ShoreFoamDepthCm"), 120.0f, -1180, 130);
+		UMaterialExpressionScalarParameter* ShoreFoamWidth = AddScalarParameter(Material, TEXT("ShoreFoamWidth"), 0.12f, -1180, 200);
+		UMaterialExpressionScalarParameter* FoamIntensity = AddScalarParameter(Material, TEXT("FoamIntensity"), 0.82f, -1180, 270);
+		UMaterialExpressionScalarParameter* ShoreWaterOpacity = AddScalarParameter(Material, TEXT("ShoreWaterOpacity"), 0.18f, -1180, 340);
+		UMaterialExpressionScalarParameter* ShoreFoamOpacity = AddScalarParameter(Material, TEXT("ShoreFoamOpacity"), 0.82f, -1180, 410);
+		UMaterialExpressionScalarParameter* FlowSpeed = AddScalarParameter(Material, TEXT("FlowSpeed"), 0.12f, -880, 270);
+		UMaterialExpressionScalarParameter* WaveWorldScale = AddScalarParameter(Material, TEXT("WaveWorldScale"), 0.0035f, -880, 340);
+		UMaterialExpressionScalarParameter* Roughness = AddScalarParameter(Material, TEXT("Roughness"), 0.16f, -880, 410);
+
+		UMaterialExpressionCustom* ShoreStyle = AddExpression<UMaterialExpressionCustom>(Material, -640, -80);
+		ShoreStyle->Description = TEXT("Continuous translucent terrain-following water film and broken foam");
+		ShoreStyle->OutputType = CMOT_Float4;
+		ShoreStyle->Code =
+			TEXT("float signedDepth = lerp(-max(DryRangeCm, 1.0f), max(DepthRangeCm, 1.0f), saturate(EncodedDepth));\n")
+			TEXT("float2 flow = FlowDirection.xy;\n")
+			TEXT("flow = dot(flow, flow) > 0.0001f ? normalize(flow) : float2(1.0f, 0.0f);\n")
+			TEXT("float2 across = float2(-flow.y, flow.x);\n")
+			TEXT("float alongCoast = dot(WorldPos.xy, across);\n")
+			TEXT("float coastWarp = sin(alongCoast * WaveWorldScale * 0.73f) + 0.5f * sin(alongCoast * WaveWorldScale * 1.91f + 1.7f);\n")
+			TEXT("float shorePhase = signedDepth / max(ShoreWavelengthCm, 20.0f) * 6.2831853f - TimeValue * ShoreWaveSpeed * 6.2831853f + coastWarp * 0.35f;\n")
+			TEXT("float wave01 = 0.5f + 0.5f * sin(shorePhase);\n")
+			TEXT("float runup = ShoreRunupCm * (wave01 - 0.35f);\n")
+			TEXT("float apparentDepth = signedDepth + WaterLevelOffsetCm + runup;\n")
+			TEXT("float softness = max(WaterlineSoftnessCm, 0.1f);\n")
+			TEXT("float waterMask = smoothstep(-softness, softness, apparentDepth);\n")
+			TEXT("float fadeEnd = max(ShoreFoamDepthCm, 10.0f);\n")
+			TEXT("float shallowMask = 1.0f - smoothstep(fadeEnd * 0.62f, fadeEnd, max(apparentDepth, 0.0f));\n")
+			TEXT("float coverage = saturate(waterMask * shallowMask);\n")
+			TEXT("float foamWidth = clamp(ShoreFoamWidth, 0.01f, 0.49f);\n")
+			TEXT("float crest = saturate(smoothstep(1.0f - foamWidth, 1.0f - foamWidth * 0.45f, wave01) - smoothstep(1.0f - foamWidth * 0.28f, 1.0f, wave01));\n")
+			TEXT("float breakupWave = 0.5f + 0.5f * sin(alongCoast * WaveWorldScale * 4.1f + sin(alongCoast * WaveWorldScale * 1.37f + TimeValue * FlowSpeed) * 2.0f);\n")
+			TEXT("float breakup = smoothstep(0.28f, 0.72f, breakupWave);\n")
+			TEXT("float contact = 1.0f - smoothstep(0.0f, softness * 3.0f, abs(apparentDepth));\n")
+			TEXT("float foam = saturate(max(crest * shallowMask, contact * 0.46f) * breakup * FoamIntensity) * waterMask;\n")
+			TEXT("float alpha = saturate(coverage * ShoreWaterOpacity + foam * ShoreFoamOpacity);\n")
+			TEXT("float3 color = lerp(ShallowColorValue.rgb, FoamColorValue.rgb, saturate(foam * 1.35f));\n")
+			TEXT("return float4(color, alpha);");
+		AddCustomInput(ShoreStyle, TEXT("EncodedDepth"), EncodedDepth);
+		AddCustomInput(ShoreStyle, TEXT("WorldPos"), WorldPosition);
+		AddCustomInput(ShoreStyle, TEXT("TimeValue"), Time);
+		AddCustomInput(ShoreStyle, TEXT("ShallowColorValue"), ShallowColor);
+		AddCustomInput(ShoreStyle, TEXT("FoamColorValue"), FoamColor);
+		AddCustomInput(ShoreStyle, TEXT("FlowDirection"), FlowDirection);
+		AddCustomInput(ShoreStyle, TEXT("DryRangeCm"), DryRange);
+		AddCustomInput(ShoreStyle, TEXT("DepthRangeCm"), DepthRange);
+		AddCustomInput(ShoreStyle, TEXT("WaterLevelOffsetCm"), WaterLevelOffset);
+		AddCustomInput(ShoreStyle, TEXT("WaterlineSoftnessCm"), WaterlineSoftness);
+		AddCustomInput(ShoreStyle, TEXT("ShoreRunupCm"), ShoreRunup);
+		AddCustomInput(ShoreStyle, TEXT("ShoreWavelengthCm"), ShoreWavelength);
+		AddCustomInput(ShoreStyle, TEXT("ShoreWaveSpeed"), ShoreWaveSpeed);
+		AddCustomInput(ShoreStyle, TEXT("ShoreFoamDepthCm"), ShoreFoamDepth);
+		AddCustomInput(ShoreStyle, TEXT("ShoreFoamWidth"), ShoreFoamWidth);
+		AddCustomInput(ShoreStyle, TEXT("FoamIntensity"), FoamIntensity);
+		AddCustomInput(ShoreStyle, TEXT("ShoreWaterOpacity"), ShoreWaterOpacity);
+		AddCustomInput(ShoreStyle, TEXT("ShoreFoamOpacity"), ShoreFoamOpacity);
+		AddCustomInput(ShoreStyle, TEXT("FlowSpeed"), FlowSpeed);
+		AddCustomInput(ShoreStyle, TEXT("WaveWorldScale"), WaveWorldScale);
+
+		UMaterialExpressionComponentMask* ShoreColor = AddExpression<UMaterialExpressionComponentMask>(Material, -360, -100);
+		ShoreColor->Input.Connect(0, ShoreStyle);
+		ShoreColor->R = 1;
+		ShoreColor->G = 1;
+		ShoreColor->B = 1;
+		ShoreColor->A = 0;
+
+		UMaterialExpressionComponentMask* ShoreOpacity = AddExpression<UMaterialExpressionComponentMask>(Material, -360, 40);
+		ShoreOpacity->Input.Connect(0, ShoreStyle);
+		ShoreOpacity->R = 0;
+		ShoreOpacity->G = 0;
+		ShoreOpacity->B = 0;
+		ShoreOpacity->A = 1;
+
+		EditorData->BaseColor.Connect(0, ShoreColor);
+		EditorData->Opacity.Connect(0, ShoreOpacity);
+		EditorData->Roughness.Connect(0, Roughness);
+		EditorData->Specular.UseConstant = true;
+		EditorData->Specular.Constant = 0.32f;
+		EditorData->Metallic.UseConstant = true;
+		EditorData->Metallic.Constant = 0.0f;
+
+		StampAssetVersion(Material);
+		Material->PostEditChange();
+		Material->MarkPackageDirty();
+		if (!SaveAsset(Material))
+		{
+			UE_LOG(LogStylizedWaterEditor, Error, TEXT("StylizedWater: failed to save %s."), *MaterialObjectPath);
+			return nullptr;
+		}
+
+		return Material;
+	}
+
 	UMaterialInstanceConstant* EnsureMaterialInstance(UMaterial* ParentMaterial, const bool bForceRebuild)
 	{
 		if (!ParentMaterial)
@@ -531,9 +699,55 @@ namespace StylizedWaterEditor
 		return SaveAsset(Instance) ? Instance : nullptr;
 	}
 
-	UBlueprint* EnsureBlueprintTemplate(UMaterialInstanceConstant* MaterialInstance, const bool bForceRebuild)
+	UMaterialInstanceConstant* EnsureShoreMaterialInstance(UMaterial* ParentMaterial, const bool bForceRebuild)
 	{
-		if (!MaterialInstance)
+		if (!ParentMaterial)
+		{
+			return nullptr;
+		}
+
+		const FString InstanceObjectPath = ObjectPath(InternalAssetPath, ShoreMaterialInstanceName);
+		UMaterialInstanceConstant* Instance = LoadObject<UMaterialInstanceConstant>(nullptr, *InstanceObjectPath);
+		if (!Instance)
+		{
+			const FString PackageName = InternalAssetPath / ShoreMaterialInstanceName;
+			UPackage* Package = CreatePackage(*PackageName);
+			Instance = Package
+				? NewObject<UMaterialInstanceConstant>(Package, *ShoreMaterialInstanceName, RF_Public | RF_Standalone | RF_Transactional)
+				: nullptr;
+			if (Instance)
+			{
+				FAssetRegistryModule::AssetCreated(Instance);
+			}
+		}
+		if (!Instance)
+		{
+			return nullptr;
+		}
+		if (!bForceRebuild && HasCurrentAssetVersion(Instance) && Instance->Parent == ParentMaterial)
+		{
+			return Instance;
+		}
+
+		Instance->Modify();
+		Instance->SetParentEditorOnly(ParentMaterial);
+		Instance->ClearParameterValuesEditorOnly();
+		Instance->SetVectorParameterValueEditorOnly(FMaterialParameterInfo(TEXT("ShallowColor")), FLinearColor(0.24f, 0.78f, 0.76f, 1.0f));
+		Instance->SetVectorParameterValueEditorOnly(FMaterialParameterInfo(TEXT("FoamColor")), FLinearColor(0.94f, 0.96f, 0.88f, 1.0f));
+		Instance->SetScalarParameterValueEditorOnly(FMaterialParameterInfo(TEXT("ShoreWaterOpacity")), 0.18f);
+		Instance->SetScalarParameterValueEditorOnly(FMaterialParameterInfo(TEXT("ShoreFoamOpacity")), 0.82f);
+		StampAssetVersion(Instance);
+		Instance->PostEditChange();
+		Instance->MarkPackageDirty();
+		return SaveAsset(Instance) ? Instance : nullptr;
+	}
+
+	UBlueprint* EnsureBlueprintTemplate(
+		UMaterialInstanceConstant* MaterialInstance,
+		UMaterialInstanceConstant* ShoreMaterialInstance,
+		const bool bForceRebuild)
+	{
+		if (!MaterialInstance || !ShoreMaterialInstance)
 		{
 			return nullptr;
 		}
@@ -571,6 +785,7 @@ namespace StylizedWaterEditor
 			{
 				Defaults->Modify();
 				Defaults->SetTemplateMaterialInstance(MaterialInstance);
+				Defaults->SetTemplateShoreMaterialInstance(ShoreMaterialInstance);
 				Defaults->ApplyPreset(EStylizedWaterPreset::GentleBeach, false);
 			}
 			StampAssetVersion(Blueprint);
@@ -590,10 +805,12 @@ namespace StylizedWaterEditor
 		Assets.DepthGradientTexture = EnsureDepthGradientTexture(bForceRebuild);
 		Assets.Material = EnsureSurfaceMaterial(Assets.DepthGradientTexture, bForceRebuild);
 		Assets.MaterialInstance = EnsureMaterialInstance(Assets.Material, bForceRebuild);
-		Assets.Blueprint = EnsureBlueprintTemplate(Assets.MaterialInstance, bForceRebuild);
+		Assets.ShoreMaterial = EnsureShoreMaterial(bForceRebuild);
+		Assets.ShoreMaterialInstance = EnsureShoreMaterialInstance(Assets.ShoreMaterial, bForceRebuild);
+		Assets.Blueprint = EnsureBlueprintTemplate(Assets.MaterialInstance, Assets.ShoreMaterialInstance, bForceRebuild);
 		if (Assets.IsComplete())
 		{
-			UE_LOG(LogStylizedWaterEditor, Display, TEXT("StylizedWater: internal T_, M_, MI_, and BP_ assets are ready."));
+			UE_LOG(LogStylizedWaterEditor, Display, TEXT("StylizedWater: internal T_, surface/shore M_ and MI_, and BP_ assets are ready."));
 		}
 		else
 		{
@@ -746,6 +963,7 @@ private:
 		WaterBody->Modify();
 		WaterBody->SetActorLabel(StylizedWaterEditor::PresetActorLabel(Preset));
 		WaterBody->SetTemplateMaterialInstance(Assets.MaterialInstance);
+		WaterBody->SetTemplateShoreMaterialInstance(Assets.ShoreMaterialInstance);
 		WaterBody->ApplyPreset(Preset, false);
 		WaterBody->FinishSpawning(SpawnTransform);
 		WaterBody->MarkPackageDirty();

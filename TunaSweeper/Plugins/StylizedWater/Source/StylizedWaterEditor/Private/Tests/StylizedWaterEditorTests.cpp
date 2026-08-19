@@ -34,6 +34,12 @@ bool FStylizedWaterGeneratedAssetsTest::RunTest(const FString& Parameters)
 	UMaterialInstanceConstant* MaterialInstance = LoadObject<UMaterialInstanceConstant>(
 		nullptr,
 		TEXT("/StylizedWater/Generated/Internal/MI_StylizedWater_CalmAnime.MI_StylizedWater_CalmAnime"));
+	UMaterial* ShoreMaterial = LoadObject<UMaterial>(
+		nullptr,
+		TEXT("/StylizedWater/Generated/Internal/M_StylizedWaterShoreOverlay.M_StylizedWaterShoreOverlay"));
+	UMaterialInstanceConstant* ShoreMaterialInstance = LoadObject<UMaterialInstanceConstant>(
+		nullptr,
+		TEXT("/StylizedWater/Generated/Internal/MI_StylizedWater_ShoreOverlay.MI_StylizedWater_ShoreOverlay"));
 	UBlueprint* Blueprint = LoadObject<UBlueprint>(
 		nullptr,
 		TEXT("/StylizedWater/Generated/Internal/BP_StylizedWaterBody_Internal.BP_StylizedWaterBody_Internal"));
@@ -41,8 +47,10 @@ bool FStylizedWaterGeneratedAssetsTest::RunTest(const FString& Parameters)
 	TestNotNull(TEXT("Generated depth gradient texture exists"), DepthGradientTexture);
 	TestNotNull(TEXT("Generated surface material exists"), Material);
 	TestNotNull(TEXT("Generated material instance exists"), MaterialInstance);
+	TestNotNull(TEXT("Generated translucent shore material exists"), ShoreMaterial);
+	TestNotNull(TEXT("Generated translucent shore material instance exists"), ShoreMaterialInstance);
 	TestNotNull(TEXT("Generated internal Blueprint exists"), Blueprint);
-	if (!DepthGradientTexture || !Material || !MaterialInstance || !Blueprint)
+	if (!DepthGradientTexture || !Material || !MaterialInstance || !ShoreMaterial || !ShoreMaterialInstance || !Blueprint)
 	{
 		return false;
 	}
@@ -51,6 +59,8 @@ bool FStylizedWaterGeneratedAssetsTest::RunTest(const FString& Parameters)
 
 	TestEqual(TEXT("Surface material uses masked blending"), Material->BlendMode, BLEND_Masked);
 	TestTrue(TEXT("Surface material uses Single Layer Water"), Material->GetShadingModels().HasShadingModel(MSM_SingleLayerWater));
+	TestEqual(TEXT("Shore material uses translucent blending"), ShoreMaterial->BlendMode, BLEND_Translucent);
+	TestTrue(TEXT("Shore material uses Default Lit shading"), ShoreMaterial->GetShadingModels().HasShadingModel(MSM_DefaultLit));
 	UMaterialExpressionSingleLayerWaterMaterialOutput* WaterOutput = nullptr;
 	UMaterialExpressionTextureSampleParameter2D* DepthGradientSample = nullptr;
 	for (UMaterialExpression* Expression : Material->GetExpressions())
@@ -76,6 +86,7 @@ bool FStylizedWaterGeneratedAssetsTest::RunTest(const FString& Parameters)
 		TEXT("Depth style color drives the behind-water composite tint"),
 		WaterOutput && Cast<UMaterialExpressionComponentMask>(WaterOutput->ColorScaleBehindWater.Expression) != nullptr);
 	TestTrue(TEXT("Material instance parent is the generated material"), MaterialInstance->Parent == Material);
+	TestTrue(TEXT("Shore material instance parent is the generated shore material"), ShoreMaterialInstance->Parent == ShoreMaterial);
 	TestTrue(
 		TEXT("Internal Blueprint derives from the native water body"),
 		Blueprint->GeneratedClass && Blueprint->GeneratedClass->IsChildOf(AStylizedWaterBodyActor::StaticClass()));
@@ -89,6 +100,15 @@ bool FStylizedWaterGeneratedAssetsTest::RunTest(const FString& Parameters)
 		for (const FString& CompileError : MaterialResource->GetCompileErrors())
 		{
 			AddError(FString::Printf(TEXT("Surface material compile error: %s"), *CompileError));
+		}
+	}
+	FMaterialResource* ShoreMaterialResource = ShoreMaterial->GetMaterialResource(GMaxRHIShaderPlatform);
+	TestNotNull(TEXT("Shore material has a resource for the active shader platform"), ShoreMaterialResource);
+	if (ShoreMaterialResource)
+	{
+		for (const FString& CompileError : ShoreMaterialResource->GetCompileErrors())
+		{
+			AddError(FString::Printf(TEXT("Shore material compile error: %s"), *CompileError));
 		}
 	}
 
@@ -189,7 +209,15 @@ bool FStylizedWaterGeneratedAssetsTest::RunTest(const FString& Parameters)
 			TestTrue(TEXT("Shore overlay reaches terrain above the flat water plane"), MaximumShoreHeight > 10.0f);
 			TestTrue(TEXT("Shore overlay has drawable shoreline triangles"), ShoreSection->ProcIndexBuffer.Num() > 0);
 		}
-		TestNotNull(TEXT("Shore overlay shares the automatic water material"), WaterBody->ShoreOverlay->GetMaterial(0));
+		UMaterialInterface* ShoreAssignedMaterial = WaterBody->ShoreOverlay->GetMaterial(0);
+		TestNotNull(TEXT("Shore overlay receives its automatic material"), ShoreAssignedMaterial);
+		TestTrue(
+			TEXT("Shore overlay uses a distinct material from the main surface"),
+			ShoreAssignedMaterial && ShoreAssignedMaterial != WaterBody->WaterSurface->GetMaterial(0));
+		TestEqual(
+			TEXT("Assigned shore overlay material remains translucent"),
+			ShoreAssignedMaterial ? ShoreAssignedMaterial->GetBlendMode() : BLEND_Opaque,
+			BLEND_Translucent);
 	}
 
 	if (DryShoreFloor)
