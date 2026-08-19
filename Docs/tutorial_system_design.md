@@ -516,7 +516,7 @@ ExclusiveGroup: tutorial.primary
 
 Entry:
   - Map == BunkerMap
-  - Scenario flag dialogue.canbot.bunker_intro is complete
+  - Scenario flag dialogue.mole.bunker_intro is complete
   - Section tutorial.bunker.inventory_open is complete
   - Inventory contains at least one movable item
 

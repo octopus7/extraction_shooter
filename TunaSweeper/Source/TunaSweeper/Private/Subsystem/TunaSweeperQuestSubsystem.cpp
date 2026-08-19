@@ -19,7 +19,7 @@ namespace TunaSweeperQuestIds
 
 namespace TunaSweeperQuestProviders
 {
-	const FName CanBot(TEXT("provider.canbot"));
+	const FName Mole(TEXT("provider.mole"));
 }
 
 namespace TunaSweeperQuestData
@@ -286,9 +286,9 @@ FName UTunaSweeperQuestSubsystem::GetFirstOutingQuestId()
 	return TunaSweeperQuestIds::FirstOuting;
 }
 
-FName UTunaSweeperQuestSubsystem::GetCanBotProviderId()
+FName UTunaSweeperQuestSubsystem::GetMoleProviderId()
 {
-	return TunaSweeperQuestProviders::CanBot;
+	return TunaSweeperQuestProviders::Mole;
 }
 
 bool UTunaSweeperQuestSubsystem::LoadQuestData(bool bForceReload)
@@ -1126,7 +1126,7 @@ void UTunaSweeperQuestSubsystem::RegisterFallbackQuest()
 
 	FTunaSweeperQuestDefinition FirstOuting;
 	FirstOuting.QuestId = GetFirstOutingQuestId();
-	FirstOuting.ProviderId = GetCanBotProviderId();
+	FirstOuting.ProviderId = GetMoleProviderId();
 	FirstOuting.SortOrder = 10;
 	FirstOuting.TitleStringKey = FName(TEXT("quest.first_outing.title"));
 	FirstOuting.Title = FText::FromString(TEXT("\uCCAB \uC678\uCD9C"));

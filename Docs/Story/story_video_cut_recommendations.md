@@ -24,7 +24,7 @@ Tuna Sweeper 본편의 핵심은 거대한 세계관 폭로가 아니라, 숲속
 |---|---:|---:|---|---|---|
 | 1 | 동면 장치 내부 기상 | 8~10초 | 새 게임 시작 직후 | 어두운 액체/유리 너머 빛, HUD 오류, 루나의 눈 점등, `POD-01 / SUPPORT UNIT / AWAKENED` | 기억 손상과 비상 기상을 짧게 압축하기 좋다. |
 | 2 | POD-02와 빈 POD-03 | 5초 | 초반 동면실 확인 전후 | POD-02의 희미한 생체 신호, 비어 있는 POD-03, 경고등 한 번 점멸 | 본편에서 남길 미스터리를 설명 없이 심을 수 있다. |
-| 3 | 벙커 조명 복구 | 5초 | 챕터 1 보상 | 천장등이 순서대로 켜지고 참치 선반, 작업대, 캔봇 실루엣이 드러남 | 벙커가 살아나는 첫 보상감을 강하게 보여준다. |
+| 3 | 벙커 조명 복구 | 5초 | 챕터 1 보상 | 천장등이 순서대로 켜지고 참치 선반, 작업대, 두더지 실루엣이 드러남 | 벙커가 살아나는 첫 보상감을 강하게 보여준다. |
 | 4 | 돌아오는 문 개방 | 5초 | 서쪽 우회로 끝 | 반대편 잠긴 문이 열리고 초기 구역으로 이어지는 짧은 길이 드러남 | SSOT 핵심인 "같은 맵이 짧아지는 경험"을 가장 직접적으로 보여준다. |
 | 5 | 오늘의 식탁 준비 | 5~8초 | M19~M20 | 고급참치, 작은 접시, 깨끗한 포크, 멀쩡한 식탁보가 정리됨 | 보스 처치 이후 목표를 전투 승리가 아니라 일상 안정화로 연결한다. |
 | 6 | 첫 저녁 | 10초 | 엔딩 | 따뜻한 조명, 가득 찬 참치 선반, 작은 식탁, 고급참치, POD-02 쪽 빈 접시 | 게임의 결론인 "오늘부터 여긴 집"을 가장 선명하게 마무리한다. |
@@ -72,7 +72,7 @@ WAKE AUTHORITY: NONE
 ### 3. 벙커 조명 복구
 
 - 컷 초반은 거의 암전 상태로 시작한다.
-- 조명이 켜질 때 참치 선반, 작업대, 캔봇이 차례로 드러나면 챕터 보상감이 좋다.
+- 조명이 켜질 때 참치 선반, 작업대, 두더지가 차례로 드러나면 챕터 보상감이 좋다.
 - 이 컷은 앞으로 벙커 복구 연출의 기준 샷으로 재사용할 수 있다.
 
 ### 4. 돌아오는 문 개방
@@ -121,10 +121,10 @@ WAKE AUTHORITY: NONE
 |---:|---|---|
 | 1 | [first_dinner_01_bunker_exterior.png](../../chatgpt/FirstDinnerEnding/first_dinner_01_bunker_exterior.png) | 밤의 숲과 따뜻한 벙커 입구 |
 | 2 | [first_dinner_02_tuna_shelf.png](../../chatgpt/FirstDinnerEnding/first_dinner_02_tuna_shelf.png) | 복구된 벙커 내부와 가득 찬 참치 선반 |
-| 3 | [first_dinner_03_table_setup.png](../../chatgpt/FirstDinnerEnding/first_dinner_03_table_setup.png) | 캔봇의 식탁 준비 |
+| 3 | [first_dinner_03_table_setup.png](../../chatgpt/FirstDinnerEnding/first_dinner_03_table_setup.png) | 두더지의 식탁 준비 |
 | 4 | [first_dinner_04_premium_tuna_open.png](../../chatgpt/FirstDinnerEnding/first_dinner_04_premium_tuna_open.png) | 고급참치 개봉과 간단한 식사 준비 |
 | 5 | [first_dinner_05_empty_plate_pod02.png](../../chatgpt/FirstDinnerEnding/first_dinner_05_empty_plate_pod02.png) | POD-02 방향에 놓는 빈 접시 |
-| 6 | [first_dinner_06_final_tableau.png](../../chatgpt/FirstDinnerEnding/first_dinner_06_final_tableau.png) | 루나, 캔봇, 식탁, POD-02 상태등이 함께 보이는 마지막 컷 |
+| 6 | [first_dinner_06_final_tableau.png](../../chatgpt/FirstDinnerEnding/first_dinner_06_final_tableau.png) | 루나, 두더지, 식탁, POD-02 상태등이 함께 보이는 마지막 컷 |
 
 ## 확장 제작 세트
 

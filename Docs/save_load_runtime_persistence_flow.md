@@ -357,7 +357,7 @@ flowchart TD
 3. `ATunaSweeperPersistentDoorActor::BeginPlay()`는 `ApplySavedState()`로 같은 `WorldProgressStates`를 읽어 문 열림 상태를 적용한다.
 4. `UTunaSweeperMemoSubsystem`이 메모 스폰 데이터를 읽고, `AcquiredMemoIds`에 이미 있는 `memo_id`는 스폰하지 않는다. 액터 자체도 `BeginPlay()`에서 `IsMemoAcquired()`를 검사해 이미 획득된 메모를 제거한다.
 5. `UTunaSweeperHousingSubsystem::EnsureHousingForWorld()`는 저장된 `HousingFacilities`를 불러오고 `RefreshSpawnedFacilities()`로 배치 액터를 다시 만든다. 저장된 시설이 보관 상태면 스폰하지 않는다.
-6. `UTunaSweeperBunkerRuntimeSpawnSubsystem`은 `BunkerCharacterSpawns.json`을 기준으로 CanBot 등 벙커 캐릭터를 스폰한다. 이 캐릭터의 대화 완료 여부는 `CompletedScenarioFlags`로 제어된다.
+6. `UTunaSweeperBunkerRuntimeSpawnSubsystem`은 `BunkerCharacterSpawns.json`을 기준으로 Mole 등 벙커 캐릭터를 스폰한다. 이 캐릭터의 대화 완료 여부는 `CompletedScenarioFlags`로 제어된다.
 7. 상점 UI는 열릴 때 `GetShopStockQuantity()`로 `ShopStockStatesByKey`를 조회한다. 저장 상태가 없으면 정적 `ShopDefinitions.json`의 기본 재고를 사용한다.
 8. 퀘스트 UI는 `UTunaSweeperQuestSubsystem`의 로드된 `QuestProgressById`, `TrackedQuestId`, `CoinBalance`를 본다.
 

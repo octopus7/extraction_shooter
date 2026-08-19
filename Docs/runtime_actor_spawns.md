@@ -35,11 +35,11 @@
 
 `TS_Travel_DeployToRaid`는 더 이상 에디터 셋업 코드가 `BunkerMap`에 직접 저장 배치하지 않는다. 같은 이름의 과거 레벨 배치 액터가 남아 있더라도 런타임 스포너가 `spawn_id`, 에디터 라벨, 오브젝트 이름, 또는 동일 클래스/좌표를 기준으로 제거한 뒤 JSON 행을 기준으로 다시 스폰한다.
 
-## Bunker CanBot
+## Bunker Mole
 
 File: `TunaSweeper/Content/Data/BunkerCharacterSpawns.json`
 
-`TS_Bunker_LED_Robot` spawns `BP_CanBot` through `UTunaSweeperBunkerRuntimeSpawnSubsystem`. `ATunaSweeperLedRobotCharacterActor` owns the CanBot dialogue and quest interactables directly. Its quest provider is `provider.canbot`, with `quest_first_outing` as the fallback quest.
+`TS_Bunker_LED_Robot` spawns `BP_Mole` through `UTunaSweeperBunkerRuntimeSpawnSubsystem`. `ATunaSweeperMoleCompanionActor` owns the Mole dialogue and quest interactables directly. Its quest provider is `provider.mole`, with `quest_first_outing` as the fallback quest.
 
 ## 기존 데이터 파일
 

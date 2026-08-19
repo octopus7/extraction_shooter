@@ -28,28 +28,28 @@ Create a 10-second silent cinematic anime ending video using the 6 attached imag
 Use the images in this exact sequence:
 Image 1: exterior night view of the forest bunker with warm light from the doorway.
 Image 2: restored bunker interior with the completed tuna shelf and Luna looking at it.
-Image 3: Canbot preparing the small folding dinner table.
+Image 3: Mole preparing the small folding dinner table.
 Image 4: Luna opening the premium tuna can and preparing a simple warm tuna meal.
 Image 5: Luna placing one empty plate toward POD-02.
-Image 6: final quiet tableau with Luna, Canbot, the dinner table, stocked tuna shelf, and POD-02 blue status light.
+Image 6: final quiet tableau with Luna, Mole, the dinner table, stocked tuna shelf, and POD-02 blue status light.
 
 The total video must be 10 seconds.
-Use gentle cinematic motion only: slow push-ins, small parallax, soft lamp flicker, subtle steam from the food, tiny Canbot arm movement, slight hair and fabric movement, and one soft blue blink from POD-02 near the end.
+Use gentle cinematic motion only: slow push-ins, small parallax, soft lamp flicker, subtle steam from the food, tiny Mole paw movement, slight hair, fur, and fabric movement, and one soft blue blink from POD-02 near the end.
 Use soft cross-dissolves or very gentle cuts between the six moments.
 
 Timing guide:
 0.0s-1.4s: Image 1, slow push toward the warm bunker entrance, quiet night forest.
 1.4s-2.8s: Image 2, warm interior shelf shot, subtle lamp flicker and Luna's quiet stillness.
-2.8s-4.2s: Image 3, Canbot finishes placing the plates and utensils.
+2.8s-4.2s: Image 3, Mole finishes placing the plates and utensils.
 4.2s-5.8s: Image 4, close warm moment of opening the premium tuna can and preparing the meal.
 5.8s-7.4s: Image 5, Luna gently places the empty plate toward POD-02, warm foreground and cool blue pod light.
-7.4s-10.0s: Image 6, final held shot; slow pullback, quiet table, stocked shelf, Canbot nearby, POD-02 status light softly blinks once around 9.2s.
+7.4s-10.0s: Image 6, final held shot; slow pullback, quiet table, stocked shelf, Mole nearby, POD-02 status light softly blinks once around 9.2s.
 
 Preserve Luna's appearance exactly across the whole video:
 petite young anime maid android, long silver twin-tail hair with black ribbons, white frilled maid headband, blue-violet eyes, black-and-white frilled maid dress with white apron, black collar ribbon, white thigh-high stockings, black Mary Jane shoes, and a small gold mechanical hair ornament.
 
 Preserve the setting and mood:
-a restored underground sci-fi bunker that now feels warm, safe, and lived-in; amber lamp light, quiet night atmosphere, stocked tuna shelf, small humble dinner table, Canbot as a compact can-shaped service robot, POD-02 as an unresolved but peaceful blue-lit stasis pod.
+a restored underground sci-fi bunker that now feels warm, safe, and lived-in; amber lamp light, quiet night atmosphere, stocked tuna shelf, small humble dinner table, Mole as a compact living mole companion with dark velvety fur, small black eyes, a pink snout, and broad digging paws, POD-02 as an unresolved but peaceful blue-lit stasis pod.
 
 No dialogue.
 No narration.
@@ -74,5 +74,5 @@ Final feeling: peaceful, warm, slightly bittersweet, complete but with a small u
 ## 짧은 버전
 
 ```text
-Create a 10-second silent cinematic anime ending video using the 6 attached images as ordered keyframes. Show the sequence from night bunker exterior, restored tuna shelf, Canbot setting the table, Luna opening premium tuna, Luna placing an empty plate toward POD-02, and the final warm dinner tableau. Preserve Luna's maid android appearance exactly. Use only gentle camera motion, soft lamp flicker, subtle steam, tiny Canbot movement, and one soft POD-02 blue light blink near the end. No dialogue, no narration, no subtitles, no on-screen text, no UI, no logos, no extra characters, and do not reveal POD-02's occupant. Mood: peaceful, warm, slightly bittersweet; the bunker has become a home.
+Create a 10-second silent cinematic anime ending video using the 6 attached images as ordered keyframes. Show the sequence from night bunker exterior, restored tuna shelf, Mole setting the table, Luna opening premium tuna, Luna placing an empty plate toward POD-02, and the final warm dinner tableau. Preserve Luna's maid android appearance exactly. Use only gentle camera motion, soft lamp flicker, subtle steam, tiny Mole movement, and one soft POD-02 blue light blink near the end. No dialogue, no narration, no subtitles, no on-screen text, no UI, no logos, no extra characters, and do not reveal POD-02's occupant. Mood: peaceful, warm, slightly bittersweet; the bunker has become a home.
 ```

@@ -6,7 +6,7 @@
   "schemaVersion": 2,
   "datasetVersion": "content-98a7f5e9a836",
   "sourceKind": "ue5-json-csv",
-  "sourceHash": "sha256:2837294b10093af3bd4eb64b5bf002880f83acee2710555bf408131951bba31f",
+  "sourceHash": "sha256:19c042013da05f73e976b9065ce88847b48918d038c8669d8ddd1c9c62c2bb0d",
   "sources": [
     "TunaSweeper/Content/Data/QuestDefinitions.json",
     "TunaSweeper/Content/Data/QuestTextStrings.csv"

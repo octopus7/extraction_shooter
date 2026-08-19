@@ -3,7 +3,7 @@
 #include "Engine/Engine.h"
 #include "Engine/World.h"
 #include "Character/TunaSweeperFacilityNpcActor.h"
-#include "Character/TunaSweeperLedRobotCharacterActor.h"
+#include "Character/TunaSweeperMoleCompanionActor.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "Interaction/TunaSweeperDifficultyAdjustmentActor.h"
 #include "Interaction/TunaSweeperDoorActor.h"
@@ -49,9 +49,9 @@ namespace TunaSweeperInteractionQuestEvents
 
 	FName ResolveQuestIdForActor(const AActor* Actor)
 	{
-		if (const ATunaSweeperLedRobotCharacterActor* LedRobotActor = Cast<ATunaSweeperLedRobotCharacterActor>(Actor))
+		if (const ATunaSweeperMoleCompanionActor* MoleActor = Cast<ATunaSweeperMoleCompanionActor>(Actor))
 		{
-			return LedRobotActor->ResolveQuestId();
+			return MoleActor->ResolveQuestId();
 		}
 
 		if (const ATunaSweeperFacilityNpcActor* FacilityNpcActor = Cast<ATunaSweeperFacilityNpcActor>(Actor))
@@ -110,8 +110,8 @@ namespace TunaSweeperInteractionQuestEvents
 			return FName(TEXT("piggy_bank_deposit"));
 		case ETunaSweeperInteractionType::PiggyBankWithdraw:
 			return FName(TEXT("piggy_bank_withdraw"));
-		case ETunaSweeperInteractionType::CanBotDialogue:
-			return FName(TEXT("canbot_dialogue"));
+		case ETunaSweeperInteractionType::MoleDialogue:
+			return FName(TEXT("mole_dialogue"));
 		case ETunaSweeperInteractionType::DifficultyAdjustment:
 			return FName(TEXT("difficulty_adjustment"));
 		default:
@@ -303,8 +303,8 @@ bool UTunaSweeperInteractionSubsystem::RequestInteraction(UTunaSweeperInteractab
 	case ETunaSweeperInteractionType::PiggyBankWithdraw:
 		bHandled = HandlePiggyBankWithdrawInteraction(Interactable, InstigatorPawn);
 		break;
-	case ETunaSweeperInteractionType::CanBotDialogue:
-		bHandled = HandleCanBotDialogueInteraction(Interactable, InstigatorPawn);
+	case ETunaSweeperInteractionType::MoleDialogue:
+		bHandled = HandleMoleDialogueInteraction(Interactable, InstigatorPawn);
 		break;
 	case ETunaSweeperInteractionType::DifficultyAdjustment:
 		bHandled = HandleDifficultyAdjustmentInteraction(Interactable, InstigatorPawn);
@@ -385,10 +385,10 @@ bool UTunaSweeperInteractionSubsystem::CanOfferInteraction(const UTunaSweeperInt
 		return TunaSweeperInteractionQuestEvents::IsBunkerMap(GetWorld());
 	}
 
-	if (Interactable->GetInteractionType() == ETunaSweeperInteractionType::CanBotDialogue)
+	if (Interactable->GetInteractionType() == ETunaSweeperInteractionType::MoleDialogue)
 	{
 		return TunaSweeperInteractionQuestEvents::IsBunkerMap(GetWorld()) &&
-			Cast<ATunaSweeperLedRobotCharacterActor>(Interactable->GetOwner());
+			Cast<ATunaSweeperMoleCompanionActor>(Interactable->GetOwner());
 	}
 
 	if (Interactable->GetInteractionType() == ETunaSweeperInteractionType::DifficultyAdjustment)
@@ -653,20 +653,20 @@ bool UTunaSweeperInteractionSubsystem::HandleQuestInteraction(
 	return true;
 }
 
-bool UTunaSweeperInteractionSubsystem::HandleCanBotDialogueInteraction(
+bool UTunaSweeperInteractionSubsystem::HandleMoleDialogueInteraction(
 	UTunaSweeperInteractableComponent* Interactable,
 	APawn* InstigatorPawn)
 {
-	ATunaSweeperLedRobotCharacterActor* CanBotActor = Interactable
-		? Cast<ATunaSweeperLedRobotCharacterActor>(Interactable->GetOwner())
+	ATunaSweeperMoleCompanionActor* MoleActor = Interactable
+		? Cast<ATunaSweeperMoleCompanionActor>(Interactable->GetOwner())
 		: nullptr;
-	if (!CanBotActor || !InstigatorPawn)
+	if (!MoleActor || !InstigatorPawn)
 	{
 		return false;
 	}
 
 	ATunaSweeperPlayerController* TunaPlayerController = Cast<ATunaSweeperPlayerController>(InstigatorPawn->GetController());
-	return TunaPlayerController && TunaPlayerController->StartCanBotIntroDialogue(true);
+	return TunaPlayerController && TunaPlayerController->StartMoleIntroDialogue(true);
 }
 
 bool UTunaSweeperInteractionSubsystem::HandleSelfDestructInteraction(

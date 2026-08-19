@@ -12,7 +12,7 @@
 #include "Camera/CameraActor.h"
 #include "Camera/CameraComponent.h"
 #include "Character/TunaSweeperFootstepPresentationDataAsset.h"
-#include "Character/TunaSweeperLedRobotCharacterActor.h"
+#include "Character/TunaSweeperMoleCompanionActor.h"
 #include "Character/TunaSweeperTopDownCharacter.h"
 #include "Components/Border.h"
 #include "Components/Button.h"
@@ -267,7 +267,7 @@ namespace TunaSweeperEditorSetup
 	const FString ExperimentalVegetationAssetTaskId = TEXT("2026-05-24_CreateExperimentalVegetationStaticMeshV4");
 	const FString OcclusionRevealAssetTaskId = TEXT("2026-07-22_CreateReusableOcclusionRevealV1");
 	const FString CoverPointAssetTaskId = TEXT("2026-05-16_CreateCoverPointBlueprintV1");
-	const FString CanBotBlueprintTaskId = TEXT("2026-05-25_CreateCanBotBlueprintV1");
+	const FString MoleBlueprintTaskId = TEXT("2026-08-20_CreateMoleCompanionBlueprintV1");
 	const FString GameInstanceAssetPath = TEXT("/Game/Core");
 	const FString GameInstanceAssetName = TEXT("BP_TunaSweeperGameInstance");
 	const FString GameModeAssetName = TEXT("BP_TunaSweeperGameMode");
@@ -276,8 +276,8 @@ namespace TunaSweeperEditorSetup
 	const FString PlayerFootstepPresentationAssetPath = TEXT("/Game/Characters/Player/AudioVisual");
 	const FString PlayerFootstepPresentationDataAssetName = TEXT("DA_PlayerFootstepPresentation");
 	const FString BasicFootstepSoundObjectPath = TEXT("/Game/Audio/Imported/SW_Footstep_Basic.SW_Footstep_Basic");
-	const FString CanBotAssetPath = TEXT("/Game/Characters/CanBot");
-	const FString CanBotAssetName = TEXT("BP_CanBot");
+	const FString MoleAssetPath = TEXT("/Game/Characters/Mole");
+	const FString MoleAssetName = TEXT("BP_Mole");
 	const FString EnemyAssetPath = TEXT("/Game/Characters/Enemy");
 	const FString EnemyAssetName = TEXT("BP_TunaSweeperEnemy");
 	const FString EnemyBodyMaterialAssetName = TEXT("M_Enemy_Red");
@@ -671,7 +671,7 @@ bool EnsureWeaponPresentationEmptyFireSoundAsset();
 bool EnsureEnemyWeaponFallbackPresentationAsset();
 bool EnsureShellCasingAssets();
 bool EnsureTopDownShooterAssets();
-bool EnsureCanBotBlueprint();
+bool EnsureMoleBlueprint();
 bool EnsureEnemyVisualMaterialAssets();
 bool EnsureRollingBomberBodyGrayMaterial();
 bool EnsureRollingBomberLegMetalMaterial();

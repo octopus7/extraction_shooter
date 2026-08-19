@@ -25,12 +25,12 @@ quest.ui.button.locked,잠김,Locked,ロック中
 quest.ui.button.in_progress,진행 중,In Progress,進行中
 quest.ui.button.claim_reward,보상 받기,Claim Reward,報酬を受け取る
 quest.ui.button.completed,완료,Complete,完了
-quest.speaker.canbot,캔봇,Canbot,キャンボット
+quest.speaker.mole,두더지,Mole,モグラ
 quest.first_outing.title,첫 외출,First Outing,初めての外出
 quest.first_outing.description,벙커 밖으로 나가 레이드 구역을 확인하고 돌아올 준비를 하세요.,Step outside the bunker and confirm the raid zone.,バンカーの外へ出てレイド区域を確認しましょう
 quest.first_outing.objective.leave_bunker,벙커 밖으로 이동,Move outside the bunker,バンカーの外へ移動
-quest.first_outing.accept.line1,기본 생체 수치와 장비 상태를 확인했습니다. 이제 외부 구역 이동 권한을 열겠습니다.,Vitals and equipment status are confirmed. I will unlock exterior access.,基本生体値と装備状態を確認しました。外部区域への移動権限を開放します
-quest.first_outing.accept.line2,왼쪽 이동 사다리를 사용하면 레이드 구역으로 출동할 수 있습니다. 준비가 끝나면 접근하세요.,Use the left transfer ladder to deploy into the raid zone. Approach it when ready.,左側の移動はしごからレイド区域へ出動できます。準備ができたら近づいてください
+quest.first_outing.accept.line1,몸은 괜찮아 보여. 장비도 챙겼으니 이제 밖으로 나갈 준비가 됐어.,You look all right and your gear is ready. You're set to head outside.,体は大丈夫そうだね。装備もそろったし、外へ出る準備はできたよ。
+quest.first_outing.accept.line2,왼쪽 사다리가 바깥 구역으로 이어져. 서두르지 말고 준비되면 가자.,The ladder on the left leads outside. Take your time and we'll go when you're ready.,左のはしごが外につながってる。焦らず、準備ができたら行こう。
 quest.lumberjack_first_kill.title,벌목기 제거,Remove the Lumberjack,伐採機の排除
 quest.lumberjack_first_kill.description,레이드 구역에서 벌목기를 처치하고 생환하세요.,Eliminate a lumberjack in the raid zone and return alive.,レイド区域で伐採機を排除して生還しましょう
 quest.lumberjack_first_kill.objective.kill_lumberjack,벌목기 처치,Eliminate a lumberjack,伐採機を排除
@@ -48,13 +48,13 @@ quest.warp_point_used_test.description,워프 포인트 사용 목표 검증용 
 quest.warp_point_used_test.objective.use_raid_warp_point_a,워프 포인트 사용,Use a warp point,ワープポイントを使用
 quest.demo_q1.title,취수 시설 확인,Check the Water Intake Facility,取水施設を確認
 quest.demo_q1.description,외부 취수 시설을 확인하고 막힌 스크린의 원인을 조사하세요.,Check the external water intake facility and investigate the blocked screen.,外部の取水施設を確認し、詰まったスクリーンの原因を調べましょう
-quest.demo_q1.accept.line1,벙커 내부 급수 압력이 거의 없어. 취수 시설부터 확인해야 해.,Bunker water pressure is almost gone. Check the water intake facility first.,バンカー内部の給水圧がほとんどありません。まず取水施設を確認してください。
-quest.demo_q1.accept.line2,외부 취수 시설을 확인하고 이상이 있으면 알려줘.,Check the external intake facility and report anything unusual.,外部の取水施設を確認し、異常があれば報告してください。
+quest.demo_q1.accept.line1,벙커에 물이 거의 안 나와. 취수 시설부터 살펴봐야겠어.,There's almost no water in the bunker. We should check the intake facility first.,バンカーの水がほとんど出ない。まず取水施設を見てこないと。
+quest.demo_q1.accept.line2,밖은 위험하니까 조심해. 이상한 게 보이면 바로 돌아와서 알려줘.,Be careful out there. If you find anything strange come right back and tell me.,外は危ないから気をつけて。変なものを見つけたら、すぐ戻って教えて。
 quest.demo_q1.objective.inspect,취수 시설 조사,Inspect the water intake facility,取水施設を調査
 quest.demo_q2.title,크로우바와 스크린 청소,Crowbar and Screen Cleaning,バールでスクリーンを清掃
 quest.demo_q2.description,크로우바를 가져와 취수 스크린의 수초와 이물질을 제거하세요.,Bring a crowbar and remove weeds and debris from the intake screen.,バールを持ってきて取水スクリーンの水草と異物を除去しましょう
-quest.demo_q2.accept.line1,취수 스크린이 온갖 쓰레기로 꽉 막혔어. 크로우바가 필요해.,The intake screen is clogged with debris. You need a crowbar.,取水スクリーンが異物で詰まっています。バールが必要です。
-quest.demo_q2.accept.line2,공구 보관대에서 크로우바를 가져와 스크린을 청소해.,Take the crowbar from the tool rack and clean the screen.,工具保管場所からバールを持ってきてスクリーンを清掃してください。
+quest.demo_q2.accept.line1,취수 스크린이 쓰레기로 꽉 막혔어. 크로우바가 있으면 걷어낼 수 있을 거야.,The intake screen is packed with debris. A crowbar should help clear it.,取水スクリーンがごみで詰まってる。バールがあれば取り除けるはずだよ。
+quest.demo_q2.accept.line2,공구 보관대에서 크로우바를 챙겨. 무리해서 휘두르지는 말고.,Grab the crowbar from the tool rack. Don't swing it too hard.,工具置き場からバールを持ってきて。無理に振り回さないでね。
 quest.demo_q2.objective.clear,스크린 청소,Clear the intake screen,スクリーンを清掃
 quest.demo_q3a.title,부러진 밸브 손잡이,Broken Valve Handle,壊れたバルブハンドル
 quest.demo_q3a.description,교체용 밸브 손잡이를 확보해 취수 시설을 수리하세요.,Find a replacement valve handle and repair the intake facility.,交換用バルブハンドルを確保して取水施設を修理しましょう
@@ -63,7 +63,7 @@ quest.demo_q3b.title,새는 벙커 배관,Leaking Bunker Pipe,漏れているバ
 quest.demo_q3b.description,방수 테이프를 확보해 벙커 내부의 손상된 배관을 수리하세요.,Find waterproof tape and repair the damaged bunker pipe.,防水テープを確保してバンカー内部の損傷したパイプを修理しましょう
 quest.demo_q3b.objective.repair,벙커 배관 수리,Repair the bunker pipe,バンカーパイプを修理
 quest.demo_q4.title,오늘의 보상,Today’s Reward,今日のごほうび
-quest.demo_q4.description,외부 식량 창고에서 참치캔을 가져와 캔봇에게 전달하세요.,Bring a can of tuna from the external food warehouse and deliver it to Canbot.,外部の食料倉庫からツナ缶を持ち帰り、キャンボットに届けましょう
-quest.demo_q4.accept.line1,취수 시설과 내부 배관 모두 정상 작동 중이야. 아직 한 가지 남았어.,The intake facility and internal pipe are working. One thing remains.,取水施設と内部パイプは正常に動作しています。まだ一つ残っています。
-quest.demo_q4.accept.line2,외부 식량 창고에 참치캔 하나가 남아 있어. 가져오면 같이 먹자.,There is one can of tuna left in the external food warehouse. Bring it back and we’ll eat it together.,外部の食料倉庫にツナ缶が一つ残っています。持ち帰れば一緒に食べましょう。
+quest.demo_q4.description,외부 식량 창고에서 참치캔을 가져와 두더지에게 전달하세요.,Bring a can of tuna from the external food warehouse and deliver it to Mole.,外部の食料倉庫からツナ缶を持ち帰り、モグラに届けましょう
+quest.demo_q4.accept.line1,이제 물도 잘 나오고 배관도 더는 안 새. 정말 고생 많았어.,The water is flowing and the pipes have stopped leaking. You did great.,水も出るようになったし、配管ももう漏れてない。本当にお疲れさま。
+quest.demo_q4.accept.line2,외부 식량 창고에 참치캔 하나가 남아 있어. 가져오면 같이 먹자.,There's one can of tuna left in the external food warehouse. Bring it back and we'll eat it together.,外の食料倉庫にツナ缶が一つ残ってる。持ち帰ったら一緒に食べよう。
 quest.demo_q4.objective.deliver,참치캔 전달,Deliver the can of tuna,ツナ缶を届ける

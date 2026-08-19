@@ -314,14 +314,14 @@ namespace TunaSweeperEditorSetup
 				return TunaSweeperEditorSetup::EnsureTopDownShooterAssets();
 			});
 
-		const bool bCanBotBlueprintTaskRan = FTunaSweeperEditorRunOnce::Run(
-			TunaSweeperEditorSetup::CanBotBlueprintTaskId,
+		const bool bMoleBlueprintTaskRan = FTunaSweeperEditorRunOnce::Run(
+			TunaSweeperEditorSetup::MoleBlueprintTaskId,
 			[]()
 			{
-				return TunaSweeperEditorSetup::EnsureCanBotBlueprint();
+				return TunaSweeperEditorSetup::EnsureMoleBlueprint();
 			});
-		if ((bCanBotBlueprintTaskRan || FTunaSweeperEditorRunOnce::HasCompleted(TunaSweeperEditorSetup::CanBotBlueprintTaskId)) &&
-			FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperCanBotSetupQuit")))
+		if ((bMoleBlueprintTaskRan || FTunaSweeperEditorRunOnce::HasCompleted(TunaSweeperEditorSetup::MoleBlueprintTaskId)) &&
+			FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperMoleSetupQuit")))
 		{
 			FPlatformMisc::RequestExit(false);
 			return;

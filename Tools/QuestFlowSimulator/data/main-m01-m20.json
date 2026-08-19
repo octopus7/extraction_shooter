@@ -4,9 +4,9 @@
   "title": "본편 메인 M01~M20",
   "visibility": "authenticated",
   "schemaVersion": 2,
-  "datasetVersion": "content-4a08498f27ba",
+  "datasetVersion": "content-0a22b12d74a8",
   "sourceKind": "ssot-markdown",
-  "sourceHash": "sha256:792305ea961bb346d607cb768f425031509bc5adf06f4f98fe4f810774aa5977",
+  "sourceHash": "sha256:901d788d436e70d0dc4be0c6bf3f7f07966139aa8e0efc16e371a50fb0c1c925",
   "sources": [
     "Docs/SSOT/TunaSweeper_SSOT_Quest_Item_v0.6.md"
   ],
@@ -45,7 +45,7 @@
       {
         "id": "quest-node-m04",
         "questId": "M04",
-        "title": "캔봇의 체크리스트",
+        "title": "두더지의 체크리스트",
         "x": 610,
         "y": 100,
         "prerequisiteQuestIds": [
@@ -313,8 +313,8 @@
       {
         "id": "step-m04",
         "questId": "M04",
-        "questTitle": "캔봇의 체크리스트",
-        "name": "캔봇의 체크리스트",
+        "questTitle": "두더지의 체크리스트",
+        "name": "두더지의 체크리스트",
         "fromPlaceId": "main-bunker",
         "toPlaceId": "main-forest-trail",
         "actionSeconds": 540,
@@ -525,7 +525,7 @@
       "M01 눈 뜬 벙커 | 선행: 없음 | 내용:  | 요구: 없음 | 보상: 기본 조작, 벙커 상호작용",
       "M02 첫 번째 참치캔 | 선행: M01 | 내용:  | 요구: 찌그러진 참치캔 x1 | 보상: 보관함 안내, 파밍 루프",
       "M03 벙커 공기 점검 | 선행: M02 | 내용:  | 요구: 먼지 낀 필터 x2, 낡은 테이프 x1 | 보상: 중앙 파밍 구간 유도",
-      "M04 캔봇의 체크리스트 | 선행: M03 | 내용:  | 요구: 클립보드 x1, 볼펜 x1, 반쯤 남은 건전지 x2 | 보상: 퀘스트 목록 안내, 숲길 탐색 유도",
+      "M04 두더지의 체크리스트 | 선행: M03 | 내용:  | 요구: 클립보드 x1, 볼펜 x1, 반쯤 남은 건전지 x2 | 보상: 퀘스트 목록 안내, 숲길 탐색 유도",
       "M05 숲길 확인 | 선행: M04 | 내용:  | 요구: 길가의 표식 리본 x3, 젖은 지도 조각 x1 | 보상: 숲길 구역 진행",
       "M06 이상한 균열 | 선행: M05 | 내용:  | 요구: 콘크리트 가루 x2, 금 간 표지판 x1 | 보상: 부술 수 있는 지형 암시",
       "M07 수상한 안전거리 | 선행: M05 | 내용:  | 요구: 경고 표지 조각 x2, 녹슨 말뚝 x2, 찢어진 안전선 x1 | 보상: 폭발물 사용 지형 암시",

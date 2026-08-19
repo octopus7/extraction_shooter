@@ -54,7 +54,7 @@ flowchart TD
 | --- | --- |
 | `IntroMap` | `ApplyInitialTitleDisplaySettings()` 후 다음 틱에 `EnsureIntroMenuWidget()`을 호출한다. `/Game/UI/WBP_IntroMenu`를 `AddToViewport(50)`로 붙이고 `FInputModeUIOnly`로 타이틀 입력 모드를 만든다. 타이틀 BGM도 시작한다. |
 | `OpeningScenarioMap` | `EnsureScenarioPresentationWidget()`을 호출한다. `UTunaSweeperScenarioPresentationWidget`을 `AddToViewport(60)`로 붙이고 UI 전용 입력, 이동/시점 입력 무시 상태로 둔다. |
-| 그 외 맵 | `ApplyLevelBgmState()`, `EnsureGameHudWidget()`을 실행한다. `BunkerMap`이면 벙커 BGM, `RaidMap`이면 BGM 정지다. 이후 `ShowBunkerEntryFadeIfNeeded()`와 CanBot 인트로 대화를 처리한다. |
+| 그 외 맵 | `ApplyLevelBgmState()`, `EnsureGameHudWidget()`을 실행한다. `BunkerMap`이면 벙커 BGM, `RaidMap`이면 BGM 정지다. 이후 `ShowBunkerEntryFadeIfNeeded()`와 Mole 인트로 대화를 처리한다. |
 
 인게임 HUD는 `/Game/UI/WBP_GameHud`이며 `UTunaSweeperGameHudWidget`이 인벤토리, 지도, 메모, 퀘스트, 외부 패널을 `ETunaSweeperHudMode`로 관리한다.
 
@@ -144,8 +144,8 @@ flowchart TD
 2. `EnsureGameHudWidget()`이 `/Game/UI/WBP_GameHud`를 붙인다.
 3. `ShowBunkerEntryFadeIfNeeded()`가 오프닝 완료 pending 플래그가 있는지 확인한다.
 4. pending 플래그가 있으면 저장 후 검은 화면 fade in을 보여준다.
-5. 오프닝 직후 진입이면 CanBot 인트로 대화를 약간 지연해서 시작한다.
-6. 일반 벙커 진입이면 CanBot 인트로 대화 조건만 바로 확인한다.
+5. 오프닝 직후 진입이면 Mole 인트로 대화를 약간 지연해서 시작한다.
+6. 일반 벙커 진입이면 Mole 인트로 대화 조건만 바로 확인한다.
 
 벙커 런타임 캐릭터는 `UTunaSweeperBunkerRuntimeSpawnSubsystem`이 `FCoreUObjectDelegates::PostLoadMapWithWorld`를 통해 맵 로드 후 스폰한다. `Content/Data/BunkerCharacterSpawns.json`의 `TS_Bunker_LED_Robot`이 대표 예시다.
 
@@ -306,8 +306,8 @@ flowchart TD
 | 새 세이브, 난이도 선택 완료, 오프닝 미완료 | `OpeningScenarioMap`으로 이동. |
 | 기존 세이브, 오프닝 완료 | 타이틀에서 바로 `BunkerMap`으로 이동. |
 | 오프닝 영상 실패 | 벙커 이동은 계속 진행. |
-| 오프닝 후 벙커 첫 진입 | pending 시나리오 플래그 저장, 벙커 진입 페이드, CanBot 대화 지연 시작. |
-| 일반 벙커 진입 | HUD/BGM 적용, CanBot 대화 조건만 확인. |
+| 오프닝 후 벙커 첫 진입 | pending 시나리오 플래그 저장, 벙커 진입 페이드, Mole 대화 지연 시작. |
+| 일반 벙커 진입 | HUD/BGM 적용, Mole 대화 조건만 확인. |
 | 벙커 Deploy | 벙커 상태 저장, 레이드 경험치 세션 시작, 전환 영상 후 `RaidMap`. |
 | 레이드 즉시 복귀 상호작용 | 레이드 상태 저장/경험치 커밋, 필요 시 경험치 정산 UI, 이후 `BunkerMap`. |
 | 레이드 추출 지점 | 반경 안에서 유지 시간이 차면 복귀 경로 실행. 반경 밖/사망 시 진행률 초기화. |

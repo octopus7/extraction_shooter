@@ -38,14 +38,14 @@ flowchart TD
 | 클래스/파일 | 경로 | 역할 |
 | --- | --- | --- |
 | `ATunaSweeperTopDownCharacter` | `TunaSweeper/Source/TunaSweeper/Private/Character/TunaSweeperTopDownCharacter.cpp` | `IA_Interact`, `IA_InteractionFocus` 입력을 받아 상호작용 서브시스템으로 위임한다. |
-| `ATunaSweeperPlayerController` | `TunaSweeper/Source/TunaSweeper/Private/Player/TunaSweeperPlayerController.cpp` | HUD 패널, 퀘스트/메모 패널, 하우징 모드, 캔봇 대화 시퀀스를 연다. |
+| `ATunaSweeperPlayerController` | `TunaSweeper/Source/TunaSweeper/Private/Player/TunaSweeperPlayerController.cpp` | HUD 패널, 퀘스트/메모 패널, 하우징 모드, 두더지 대화 시퀀스를 연다. |
 | `UTunaSweeperInteractionSubsystem` | `TunaSweeper/Source/TunaSweeper/Private/Subsystem/TunaSweeperInteractionSubsystem.cpp` | 상호작용 컴포넌트 등록, 포커스 선정, BunkerMap 제한, 타입별 분기를 담당한다. |
 | `UTunaSweeperInteractableComponent` | `TunaSweeper/Source/TunaSweeper/Private/Interaction/TunaSweeperInteractableComponent.cpp` | 상호작용 타입/이름/거리/목표 이벤트를 보관하고 마커 위젯을 생성/갱신한다. |
 | `ATunaSweeperInteractableActor` | `TunaSweeper/Source/TunaSweeper/Private/Interaction/TunaSweeperInteractableActor.cpp` | 기본 `SceneRoot`, `VisualMesh`, `InteractableComponent`를 가진 상호작용 액터 베이스다. |
 | 아이템/컨테이너 액터 | `TunaSweeper/Source/TunaSweeper/Private/Interaction/TunaSweeperPickupItemActor.cpp`, `TunaSweeperItemSpawnInteractableActor.cpp`, `TunaSweeperLootContainerActor.cpp`, `TunaSweeperLootContainerSpawnInteractableActor.cpp` | 픽업, 아이템 스폰, 루팅 컨테이너 열기/스폰을 처리한다. |
 | 이동/월드 액터 | `TunaSweeper/Source/TunaSweeper/Private/Interaction/TunaSweeperLevelTravelInteractableActor.cpp`, `TunaSweeperWorldProgressActor.cpp`, `TunaSweeperPersistentDoorActor.cpp`, `TunaSweeperDoorActor.cpp`, `TunaSweeperWarpPointActor.cpp`, `TunaSweeperMemoActor.cpp` | 레벨 이동, 월드 진행 수리, 영속 문, 일반 문, 워프, 메모 획득을 처리한다. |
 | 벙커 시설 액터 | `TunaSweeper/Source/TunaSweeper/Private/Interaction/TunaSweeperHousingManagementActor.cpp`, `TunaSweeperStorageActor.cpp`, `TunaSweeperShopActor.cpp`, `TunaSweeperWorkbenchActor.cpp`, `TunaSweeperPiggyBankActor.cpp` | 하우징, 창고, 상점, 작업대, 돼지저금통 상호작용을 처리한다. |
-| 퀘스트/캔봇 액터 | `TunaSweeper/Source/TunaSweeper/Private/Character/TunaSweeperLedRobotCharacterActor.cpp`, `TunaSweeperFacilityNpcActor.cpp` | 퀘스트 제공자/폴백 ID를 해석하고 퀘스트 알림 및 캔봇 대화 옵션을 제공한다. |
+| 퀘스트/두더지 액터 | `TunaSweeper/Source/TunaSweeper/Private/Character/TunaSweeperMoleCompanionActor.cpp`, `TunaSweeperFacilityNpcActor.cpp` | 퀘스트 제공자/폴백 ID를 해석하고 퀘스트 알림 및 두더지 대화 옵션을 제공한다. |
 | HUD 패널 | `TunaSweeper/Source/TunaSweeper/Private/UI/TunaSweeperGameHudWidget.cpp` | 루팅/창고/상점/작업대 외부 패널, 퀘스트 패널, 메모 패널, 하우징 패널 표시를 담당한다. |
 | 런타임 스폰 | `TunaSweeper/Source/TunaSweeper/Private/Subsystem/TunaSweeperEnemySpawnSubsystem.cpp`, `TunaSweeper/Content/Data/GameplayInteractionSpawns.json` | 맵 로드 후 JSON 기반 상호작용/런타임 액터를 생성하고 타입별 초기값을 주입한다. |
 
@@ -68,8 +68,8 @@ flowchart TD
 | `LootContainerOpen` | 맵 제한 없음 | `ATunaSweeperLootContainerActor::OpenRuntimeContainer()`가 새 컨테이너 인스턴스를 만들거나 기존 런타임 슬롯을 재사용한다. 그 뒤 뚜껑 열기 애니메이션을 재생하고 `ATunaSweeperPlayerController::OpenLootContainerPanel()`로 HUD를 연다. UI 닫힘/인벤토리 변경 시 런타임 슬롯을 다시 캡처한다. |
 | `LootContainerSpawn` | 맵 제한 없음 | `ATunaSweeperLootContainerSpawnInteractableActor`가 컨테이너 정의와 수용량에 맞는 contents 행을 무작위 선택해 `ATunaSweeperLootContainerActor`를 스폰하고 `SetContainerDataIds()`를 호출한다. |
 | `LevelTravel` | 맵 제한 없음 | `ATunaSweeperLevelTravelInteractableActor::TravelToTargetLevel()`이 `HandleLevelTravelPersistence()`, `NotifyLevelTravelRequested()`를 호출한다. 레이드 경험치 귀환 연출이 있으면 우선 실행하고, 아니면 레벨 전환 서브시스템 또는 `UGameplayStatics::OpenLevel()`로 이동한다. |
-| `Quest` | 맵 제한 없음, 단 해석 가능한 퀘스트 ID 필요 | `ATunaSweeperLedRobotCharacterActor` 또는 `ATunaSweeperFacilityNpcActor`에서 provider/fallback으로 퀘스트 ID를 해석한 뒤 `OpenQuestPanel(QuestId)`를 호출한다. 퀘스트 ID가 없으면 `CanOfferInteraction()`에서 후보 제외된다. |
-| `CanBotDialogue` | BunkerMap 전용 | 소유자가 `ATunaSweeperLedRobotCharacterActor`이고 현재 맵이 `BunkerMap`일 때만 제공된다. `StartCanBotIntroDialogue(true)`를 호출해 완료 플래그와 무관하게 캔봇 대화를 재생한다. |
+| `Quest` | 맵 제한 없음, 단 해석 가능한 퀘스트 ID 필요 | `ATunaSweeperMoleCompanionActor` 또는 `ATunaSweeperFacilityNpcActor`에서 provider/fallback으로 퀘스트 ID를 해석한 뒤 `OpenQuestPanel(QuestId)`를 호출한다. 퀘스트 ID가 없으면 `CanOfferInteraction()`에서 후보 제외된다. |
+| `MoleDialogue` | BunkerMap 전용 | 소유자가 `ATunaSweeperMoleCompanionActor`이고 현재 맵이 `BunkerMap`일 때만 제공된다. `StartMoleIntroDialogue(true)`를 호출해 완료 플래그와 무관하게 두더지 대화를 재생한다. |
 | `SelfDestruct` | 맵 제한 없음 | `ATunaSweeperSelfDestructInteractableActor::StartSelfDestruct()`가 말풍선 카운트다운을 시작한다. 종료 시 폭발 이펙트, 소음 리포트, 반경 내 `UTunaSweeperVitalsComponent` 피해를 적용하고 자기 자신을 제거한다. |
 | `WorldProgress` | 맵 제한 없음 | `ATunaSweeperWorldProgressActor::RepairUsingAvailableRequiredItems(true)`가 필요한 수량을 전부 보유한 경우 아이템을 소비하고 `WorldProgressStates`를 Completed로 저장한다. 완료 후 충돌/마커를 끄고 완료 대체 액터를 스폰한 뒤 자신을 제거한다. |
 | `PersistentDoor` | 맵 제한 없음 | `ATunaSweeperPersistentDoorActor::OpenDoor(true)`가 문 상태를 Completed로 저장하고, 충돌을 끄며 마커 타입을 `None`으로 바꾼다. 일반 토글이 아니라 영속적인 열기 전용이다. |
@@ -99,7 +99,7 @@ flowchart TD
 - `PiggyBank`
 - `PiggyBankDeposit`
 - `PiggyBankWithdraw`
-- `CanBotDialogue`
+- `MoleDialogue`
 
 추가로 `ATunaSweeperPlayerController::OpenStoragePanel()`, `OpenShopPanel()`, `OpenWorkbenchCraftPanel()`, `OpenWorkbenchDismantlePanel()`, `OpenWorkbenchBlueprintRegisterPanel()`도 `IsBunkerMap()`을 다시 검사한다. 반대로 pickup, item spawn, loot container open/spawn, level travel, quest, self destruct, world progress, persistent door, door open, warp point, memo, housing management에는 현재 상호작용 코드상 BunkerMap 제한이 없다.
 
@@ -116,7 +116,7 @@ flowchart TD
 | 퀘스트 | `OpenQuestPanel(QuestId)` | `ShowQuestPanel(QuestId)` | HUD 모드를 Quest로 바꾸고 상호작용 퀘스트 패널을 해당 퀘스트로 초기화한다. |
 | 메모 | `OpenMemoPanel(MemoId)` | `ShowMemoPanel(MemoId)` | HUD 모드를 Memo로 바꾸고 메모 패널에서 해당 메모를 연다. |
 | 하우징 | `OpenHousingMode()` | `SetHudMode(None)` 및 하우징 패널 갱신 | 하우징 서브시스템을 열고 별도 하우징 카메라로 전환한다. 하우징 중에는 월드 상호작용 포커스/마커가 억제된다. |
-| 캔봇 대화 | `StartCanBotIntroDialogue(true)` | `UTunaSweeperDialogueWidget` 직접 생성 | HUD 패널 모드가 아니라 대화 위젯을 viewport 90에 올리고 UI Only 입력 모드로 바꾼다. |
+| 두더지 대화 | `StartMoleIntroDialogue(true)` | `UTunaSweeperDialogueWidget` 직접 생성 | HUD 패널 모드가 아니라 대화 위젯을 viewport 90에 올리고 UI Only 입력 모드로 바꾼다. |
 
 ## JSON 런타임 스폰 흐름
 
@@ -163,7 +163,7 @@ flowchart TD
 4. 가까운데 상호작용이 안 되면 `InteractionDistance`가 기본 200이고 XY 2D 거리만 본다는 점을 확인한다. 마커 표시 거리 400과 실행 거리 200은 다르다.
 5. 여러 옵션이 있는 액터는 같은 `Owner`의 컴포넌트를 `InteractionOrder`로 정렬한다. 작업대와 돼지저금통에서 옵션 순서가 이상하면 각 컴포넌트의 `InteractionOrder`를 확인한다.
 6. 마커가 하나만 보이는 것은 정상이다. 같은 `Owner`의 대표 컴포넌트만 마커를 표시하고, 옵션 목록은 대표 마커에 합쳐진다.
-7. 창고/상점/작업대/돼지저금통/캔봇이 안 뜨면 현재 맵 이름이 실제로 `BunkerMap`으로 끝나는지 확인한다.
+7. 창고/상점/작업대/돼지저금통/두더지가 안 뜨면 현재 맵 이름이 실제로 `BunkerMap`으로 끝나는지 확인한다.
 8. HUD가 안 열리면 `ATunaSweeperPlayerController::EnsureGameHudWidget()`가 성공했는지, `GameHudWidgetClass`가 `/Game/UI/WBP_GameHud`로 로드되는지 확인한다.
 9. 루팅 컨테이너가 비거나 열리지 않으면 `ContainerDefinitionId`, `ContentsId`, `UTunaSweeperItemDataSubsystem::TryBuildLootContainerInstance()`를 확인한다.
 10. 메모가 안 보이면 `MemoId > 0`, `TryGetMemoDefinition()`, `UTunaSweeperGameInstance::IsMemoAcquired()` 상태를 확인한다. 획득한 메모 액터는 `BeginPlay()` 또는 상호작용 후 제거된다.

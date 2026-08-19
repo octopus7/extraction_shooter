@@ -125,7 +125,7 @@ public:
 	bool StartDialogueSequence(const TArray<FTunaSweeperDialogueLine>& DialogueLines, FName CompletionFlag);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Dialogue")
-	bool StartCanBotIntroDialogue(bool bForceReplay = false);
+	bool StartMoleIntroDialogue(bool bForceReplay = false);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Quest")
 	bool PlayQuestPresentation(FName QuestId, ETunaSweeperQuestPresentationTrigger Trigger);
@@ -197,8 +197,8 @@ private:
 	void ApplyInitialTitleDisplaySettings();
 	void ApplyLevelBgmState();
 	bool ShowBunkerEntryFadeIfNeeded();
-	void MaybeStartCanBotIntroDialogue();
-	void BuildCanBotIntroDialogueLines(TArray<FTunaSweeperDialogueLine>& OutDialogueLines) const;
+	void MaybeStartMoleIntroDialogue();
+	void BuildMoleIntroDialogueLines(TArray<FTunaSweeperDialogueLine>& OutDialogueLines) const;
 	void HandleDialogueLineActivated(const FTunaSweeperDialogueLine& DialogueLine);
 	void HandleDialogueFinished();
 	void FinishDialogueCameraReturn();
@@ -256,7 +256,7 @@ private:
 	void TryFlushPendingBunkerItemStateSave();
 	bool CanFlushPendingBunkerItemStateSave() const;
 
-	FTimerHandle CanBotIntroDialogueTimerHandle;
+	FTimerHandle MoleIntroDialogueTimerHandle;
 	FTimerHandle DialogueCameraReturnTimerHandle;
 	FName ActiveDialogueCompletionFlag;
 	UPROPERTY(Transient)

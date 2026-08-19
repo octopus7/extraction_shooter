@@ -1,12 +1,11 @@
-#include "Character/TunaSweeperLedRobotCharacterActor.h"
+#include "Character/TunaSweeperMoleCompanionActor.h"
 
-#include "Component/TunaSweeperLedExpressionComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SceneComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/WidgetComponent.h"
-#include "Engine/StaticMesh.h"
 #include "Engine/GameInstance.h"
+#include "Engine/StaticMesh.h"
 #include "Engine/World.h"
 #include "Interaction/TunaSweeperInteractableComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -15,18 +14,26 @@
 #include "UI/TunaSweeperQuestNoticeWidget.h"
 #include "UObject/ConstructorHelpers.h"
 
-ATunaSweeperLedRobotCharacterActor::ATunaSweeperLedRobotCharacterActor()
+ATunaSweeperMoleCompanionActor::ATunaSweeperMoleCompanionActor()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
 	SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("SceneRoot"));
 	SetRootComponent(SceneRoot);
 
-	BodyMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BodyMesh"));
-	BodyMesh->SetupAttachment(SceneRoot);
-	BodyMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	BodyMesh->SetGenerateOverlapEvents(false);
-	BodyMesh->SetCastShadow(true);
+	auto ConfigureVisualComponent = [this](const TCHAR* Name)
+	{
+		UStaticMeshComponent* MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(Name);
+		MeshComponent->SetupAttachment(SceneRoot);
+		MeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		MeshComponent->SetGenerateOverlapEvents(false);
+		MeshComponent->SetCastShadow(true);
+		return MeshComponent;
+	};
+
+	BodyMesh = ConfigureVisualComponent(TEXT("BodyMesh"));
+	HeadMesh = ConfigureVisualComponent(TEXT("HeadMesh"));
+	SnoutMesh = ConfigureVisualComponent(TEXT("SnoutMesh"));
 
 	BodyCollision = CreateDefaultSubobject<UCapsuleComponent>(TEXT("BodyCollision"));
 	BodyCollision->SetupAttachment(SceneRoot);
@@ -42,32 +49,25 @@ ATunaSweeperLedRobotCharacterActor::ATunaSweeperLedRobotCharacterActor()
 	BodyCollision->CanCharacterStepUpOn = ECB_No;
 	BodyCollision->bEditableWhenInherited = true;
 
-	ExpressionComponent = CreateDefaultSubobject<UTunaSweeperLedExpressionComponent>(TEXT("ExpressionComponent"));
-	ExpressionComponent->SetupAttachment(SceneRoot);
-	ExpressionComponent->SetMobility(EComponentMobility::Movable);
-	ExpressionComponent->SetRelativeLocation(FVector(52.0f, 0.0f, 122.0f));
-	ExpressionComponent->SetRelativeRotation(FRotator::ZeroRotator);
-	ExpressionComponent->bEditableWhenInherited = true;
-
 	InteractionMarkerWidgetClass = TSoftClassPtr<UTunaSweeperInteractionMarkerWidget>(
 		FSoftObjectPath(TEXT("/Game/UI/WBP_InteractionMarker.WBP_InteractionMarker_C")));
 	QuestFallbackId = UTunaSweeperQuestSubsystem::GetFirstOutingQuestId();
-	QuestProviderId = UTunaSweeperQuestSubsystem::GetCanBotProviderId();
+	QuestProviderId = UTunaSweeperQuestSubsystem::GetMoleProviderId();
 
 	DialogueInteractableComponent = CreateDefaultSubobject<UTunaSweeperInteractableComponent>(TEXT("DialogueInteractable"));
 	DialogueInteractableComponent->SetupAttachment(SceneRoot);
-	DialogueInteractableComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 155.0f));
+	DialogueInteractableComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 125.0f));
 	DialogueInteractableComponent->ConfigureInteractionDefaults(
-		ETunaSweeperInteractionType::CanBotDialogue,
+		ETunaSweeperInteractionType::MoleDialogue,
 		FText::FromString(TEXT("\uB300\uD654")),
 		InteractionMarkerWidgetClass,
-		FName(TEXT("ui.interaction.canbot_dialogue")));
+		FName(TEXT("ui.interaction.mole_dialogue")));
 	DialogueInteractableComponent->SetInteractionOrder(0);
 	DialogueInteractableComponent->bEditableWhenInherited = true;
 
 	QuestInteractableComponent = CreateDefaultSubobject<UTunaSweeperInteractableComponent>(TEXT("QuestInteractable"));
 	QuestInteractableComponent->SetupAttachment(SceneRoot);
-	QuestInteractableComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 155.0f));
+	QuestInteractableComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 125.0f));
 	QuestInteractableComponent->ConfigureInteractionDefaults(
 		ETunaSweeperInteractionType::Quest,
 		FText::FromString(TEXT("\uD018\uC2A4\uD2B8")),
@@ -78,7 +78,7 @@ ATunaSweeperLedRobotCharacterActor::ATunaSweeperLedRobotCharacterActor()
 
 	QuestNoticeWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("QuestNoticeWidget"));
 	QuestNoticeWidgetComponent->SetupAttachment(SceneRoot);
-	QuestNoticeWidgetComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 228.0f));
+	QuestNoticeWidgetComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 190.0f));
 	QuestNoticeWidgetComponent->SetWidgetSpace(EWidgetSpace::Screen);
 	QuestNoticeWidgetComponent->SetWidgetClass(UTunaSweeperQuestNoticeWidget::StaticClass());
 	QuestNoticeWidgetComponent->SetDrawSize(FVector2D(56.0f, 56.0f));
@@ -88,107 +88,62 @@ ATunaSweeperLedRobotCharacterActor::ATunaSweeperLedRobotCharacterActor()
 	QuestNoticeWidgetComponent->SetHiddenInGame(false);
 	QuestNoticeWidgetComponent->bEditableWhenInherited = true;
 
-	BodyMeshOverride = TSoftObjectPtr<UStaticMesh>(FSoftObjectPath(TEXT("/Engine/BasicShapes/Cylinder.Cylinder")));
-	ExpressionPresetFilePath = TEXT("Data/LedExpressionPresets.txt");
-
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> CylinderMesh(TEXT("/Engine/BasicShapes/Cylinder.Cylinder"));
-	if (CylinderMesh.Succeeded())
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereMesh(TEXT("/Engine/BasicShapes/Sphere.Sphere"));
+	if (SphereMesh.Succeeded())
 	{
-		BodyMesh->SetStaticMesh(CylinderMesh.Object);
+		BodyMesh->SetStaticMesh(SphereMesh.Object);
+		HeadMesh->SetStaticMesh(SphereMesh.Object);
+		SnoutMesh->SetStaticMesh(SphereMesh.Object);
 	}
 }
 
-void ATunaSweeperLedRobotCharacterActor::Tick(float DeltaSeconds)
+void ATunaSweeperMoleCompanionActor::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 	UpdatePlayerLookAt(DeltaSeconds);
 }
 
-void ATunaSweeperLedRobotCharacterActor::ConfigureRobotDefaults(
-	FName InRobotId,
-	const FString& InExpressionPresetFilePath,
-	FName InInitialExpressionName,
-	FLinearColor InLedColor,
-	FLinearColor InOffColor,
-	float InLedPitch,
-	float InLedRadius,
-	TSoftObjectPtr<UMaterialInterface> InBodyMaterial,
-	bool bOverrideLedColor,
-	bool bOverrideOffColor,
-	bool bOverrideLedPitch,
-	bool bOverrideLedRadius)
+void ATunaSweeperMoleCompanionActor::ConfigureCompanionDefaults(
+	FName InCompanionId,
+	TSoftObjectPtr<UStaticMesh> InBodyMesh,
+	TSoftObjectPtr<UStaticMesh> InHeadMesh,
+	TSoftObjectPtr<UStaticMesh> InSnoutMesh,
+	TSoftObjectPtr<UMaterialInterface> InVisualMaterial)
 {
-	RobotId = InRobotId.IsNone() ? RobotId : InRobotId;
-	if (!InExpressionPresetFilePath.TrimStartAndEnd().IsEmpty())
+	CompanionId = InCompanionId.IsNone() ? CompanionId : InCompanionId;
+	if (!InBodyMesh.IsNull())
 	{
-		ExpressionPresetFilePath = InExpressionPresetFilePath.TrimStartAndEnd();
+		BodyMeshOverride = InBodyMesh;
 	}
-	if (!InInitialExpressionName.IsNone())
+	if (!InHeadMesh.IsNull())
 	{
-		InitialExpressionName = InInitialExpressionName;
+		HeadMeshOverride = InHeadMesh;
 	}
-	if (!InBodyMaterial.IsNull())
+	if (!InSnoutMesh.IsNull())
 	{
-		BodyMaterial = InBodyMaterial;
+		SnoutMeshOverride = InSnoutMesh;
+	}
+	if (!InVisualMaterial.IsNull())
+	{
+		VisualMaterial = InVisualMaterial;
 	}
 
-	if (ExpressionComponent)
-	{
-		ExpressionComponent->ConfigureExpressionSource(ExpressionPresetFilePath, InitialExpressionName);
-		if (bOverrideLedColor || bOverrideOffColor || bOverrideLedPitch || bOverrideLedRadius)
-		{
-			ExpressionComponent->ConfigureLedAppearance(
-				bOverrideLedColor ? InLedColor : ExpressionComponent->GetLedColor(),
-				bOverrideOffColor ? InOffColor : ExpressionComponent->GetOffColor(),
-				bOverrideLedPitch ? InLedPitch : ExpressionComponent->GetLedPitch(),
-				bOverrideLedRadius ? InLedRadius : ExpressionComponent->GetLedRadius());
-		}
-		ExpressionComponent->SetExpressionByName(InitialExpressionName);
-	}
-
-	RefreshRobotVisuals();
+	RefreshCompanionVisuals();
 }
 
-bool ATunaSweeperLedRobotCharacterActor::SetExpressionByName(FName ExpressionName)
-{
-	return ExpressionComponent ? ExpressionComponent->SetExpressionByName(ExpressionName) : false;
-}
-
-void ATunaSweeperLedRobotCharacterActor::ConfigureExpressionDemo(bool bEnabled, float InIntervalSeconds)
-{
-	bExpressionDemoMode = bEnabled;
-	ExpressionDemoIntervalSeconds = FMath::Max(0.1f, InIntervalSeconds);
-	if (ExpressionComponent)
-	{
-		ExpressionComponent->SetDemoExpressionIntervalSeconds(ExpressionDemoIntervalSeconds);
-		ExpressionComponent->SetDemoModeEnabled(bExpressionDemoMode);
-	}
-}
-
-void ATunaSweeperLedRobotCharacterActor::SetExpressionDemoModeEnabled(bool bEnabled)
-{
-	ConfigureExpressionDemo(bEnabled, ExpressionDemoIntervalSeconds);
-}
-
-bool ATunaSweeperLedRobotCharacterActor::IsExpressionDemoModeEnabled() const
-{
-	return bExpressionDemoMode || (ExpressionComponent && ExpressionComponent->IsDemoModeEnabled());
-}
-
-void ATunaSweeperLedRobotCharacterActor::OnConstruction(const FTransform& Transform)
+void ATunaSweeperMoleCompanionActor::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
-	RefreshRobotVisuals();
+	RefreshCompanionVisuals();
 }
 
-void ATunaSweeperLedRobotCharacterActor::BeginPlay()
+void ATunaSweeperMoleCompanionActor::BeginPlay()
 {
 	Super::BeginPlay();
 	IdleActorRotation = GetActorRotation();
 	PendingLookAtYaw = IdleActorRotation.Yaw;
 	LookAtReactionDelay = FMath::FRandRange(LookAtMinReactionDelay, FMath::Max(LookAtMinReactionDelay, LookAtMaxReactionDelay));
-	RefreshRobotVisuals();
-	SetExpressionByName(InitialExpressionName);
+	RefreshCompanionVisuals();
 
 	if (UWorld* World = GetWorld())
 	{
@@ -199,7 +154,7 @@ void ATunaSweeperLedRobotCharacterActor::BeginPlay()
 				QuestSubsystem->OnQuestProgressChanged.RemoveAll(this);
 				QuestSubsystem->OnQuestProgressChanged.AddUObject(
 					this,
-					&ATunaSweeperLedRobotCharacterActor::RefreshQuestNoticeVisibility);
+					&ATunaSweeperMoleCompanionActor::RefreshQuestNoticeVisibility);
 			}
 		}
 	}
@@ -207,7 +162,7 @@ void ATunaSweeperLedRobotCharacterActor::BeginPlay()
 	RefreshQuestNoticeVisibility();
 }
 
-void ATunaSweeperLedRobotCharacterActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
+void ATunaSweeperMoleCompanionActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	if (UWorld* World = GetWorld())
 	{
@@ -223,10 +178,10 @@ void ATunaSweeperLedRobotCharacterActor::EndPlay(const EEndPlayReason::Type EndP
 	Super::EndPlay(EndPlayReason);
 }
 
-FName ATunaSweeperLedRobotCharacterActor::ResolveQuestId() const
+FName ATunaSweeperMoleCompanionActor::ResolveQuestId() const
 {
 	const FName EffectiveProviderId = QuestProviderId.IsNone()
-		? UTunaSweeperQuestSubsystem::GetCanBotProviderId()
+		? UTunaSweeperQuestSubsystem::GetMoleProviderId()
 		: QuestProviderId;
 
 	if (UWorld* World = GetWorld())
@@ -240,7 +195,6 @@ FName ATunaSweeperLedRobotCharacterActor::ResolveQuestId() const
 				{
 					return ResolvedQuestId;
 				}
-
 				return NAME_None;
 			}
 		}
@@ -249,57 +203,48 @@ FName ATunaSweeperLedRobotCharacterActor::ResolveQuestId() const
 	return QuestFallbackId;
 }
 
-void ATunaSweeperLedRobotCharacterActor::RefreshRobotVisuals()
+void ATunaSweeperMoleCompanionActor::RefreshCompanionVisuals()
 {
-	if (BodyMesh)
+	UStaticMesh* DefaultSphere = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Sphere.Sphere"));
+	auto ApplyVisual = [DefaultSphere, this](
+		UStaticMeshComponent* MeshComponent,
+		const TSoftObjectPtr<UStaticMesh>& MeshOverride,
+		const FVector& RelativeLocation,
+		const FVector& RelativeScale)
 	{
-		UStaticMesh* MeshToUse = BodyMeshOverride.IsNull()
-			? LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Cylinder.Cylinder"))
-			: BodyMeshOverride.LoadSynchronous();
+		if (!MeshComponent)
+		{
+			return;
+		}
+
+		UStaticMesh* MeshToUse = MeshOverride.IsNull() ? DefaultSphere : MeshOverride.LoadSynchronous();
 		if (MeshToUse)
 		{
-			BodyMesh->SetStaticMesh(MeshToUse);
+			MeshComponent->SetStaticMesh(MeshToUse);
 		}
-
-		if (!BodyMaterial.IsNull())
+		if (!VisualMaterial.IsNull())
 		{
-			if (UMaterialInterface* LoadedBodyMaterial = BodyMaterial.LoadSynchronous())
+			if (UMaterialInterface* LoadedMaterial = VisualMaterial.LoadSynchronous())
 			{
-				BodyMesh->SetMaterial(0, LoadedBodyMaterial);
+				MeshComponent->SetMaterial(0, LoadedMaterial);
 			}
 		}
+		MeshComponent->SetRelativeLocation(RelativeLocation);
+		MeshComponent->SetRelativeScale3D(RelativeScale);
+	};
 
-		BodyMesh->SetRelativeLocation(BodyRelativeLocation);
-		BodyMesh->SetRelativeScale3D(BodyScale);
-		BodyMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		BodyMesh->SetGenerateOverlapEvents(false);
-	}
+	ApplyVisual(BodyMesh, BodyMeshOverride, BodyRelativeLocation, BodyScale);
+	ApplyVisual(HeadMesh, HeadMeshOverride, HeadRelativeLocation, HeadScale);
+	ApplyVisual(SnoutMesh, SnoutMeshOverride, SnoutRelativeLocation, SnoutScale);
 
-	if (ExpressionComponent)
+	if (BodyCollision)
 	{
-		ExpressionComponent->ConfigureExpressionSource(ExpressionPresetFilePath, InitialExpressionName);
-		RefreshExpressionDemoSettings();
+		BodyCollision->SetRelativeLocation(BodyRelativeLocation);
+		BodyCollision->SetCapsuleSize(BodyCollisionRadius, BodyCollisionHalfHeight);
 	}
 }
 
-void ATunaSweeperLedRobotCharacterActor::RefreshExpressionDemoSettings()
-{
-	if (!ExpressionComponent)
-	{
-		return;
-	}
-
-	const bool bComponentDemoModeEnabled = ExpressionComponent->IsDemoModeEnabled();
-	const bool bResolvedDemoModeEnabled = bExpressionDemoMode || bComponentDemoModeEnabled;
-	const float ResolvedIntervalSeconds = bExpressionDemoMode
-		? ExpressionDemoIntervalSeconds
-		: ExpressionComponent->GetDemoExpressionIntervalSeconds();
-
-	ExpressionComponent->SetDemoExpressionIntervalSeconds(FMath::Max(0.1f, ResolvedIntervalSeconds));
-	ExpressionComponent->SetDemoModeEnabled(bResolvedDemoModeEnabled);
-}
-
-void ATunaSweeperLedRobotCharacterActor::RefreshQuestNoticeVisibility()
+void ATunaSweeperMoleCompanionActor::RefreshQuestNoticeVisibility()
 {
 	if (QuestNoticeWidgetComponent)
 	{
@@ -307,7 +252,7 @@ void ATunaSweeperLedRobotCharacterActor::RefreshQuestNoticeVisibility()
 	}
 }
 
-bool ATunaSweeperLedRobotCharacterActor::ShouldShowQuestNotice() const
+bool ATunaSweeperMoleCompanionActor::ShouldShowQuestNotice() const
 {
 	const FName ResolvedQuestId = ResolveQuestId();
 	if (ResolvedQuestId.IsNone())
@@ -330,7 +275,7 @@ bool ATunaSweeperLedRobotCharacterActor::ShouldShowQuestNotice() const
 		State == ETunaSweeperQuestState::RewardAvailable;
 }
 
-void ATunaSweeperLedRobotCharacterActor::UpdatePlayerLookAt(float DeltaSeconds)
+void ATunaSweeperMoleCompanionActor::UpdatePlayerLookAt(float DeltaSeconds)
 {
 	if (!bLookAtNearbyPlayer || DeltaSeconds <= 0.0f)
 	{
@@ -355,7 +300,6 @@ void ATunaSweeperLedRobotCharacterActor::UpdatePlayerLookAt(float DeltaSeconds)
 					FMath::Max(0.0f, LookAtMinReactionDelay),
 					FMath::Max(LookAtMinReactionDelay, LookAtMaxReactionDelay));
 			}
-
 			LookAtReactionElapsed += DeltaSeconds;
 			if (LookAtReactionElapsed >= LookAtReactionDelay)
 			{
@@ -387,30 +331,19 @@ void ATunaSweeperLedRobotCharacterActor::UpdatePlayerLookAt(float DeltaSeconds)
 			PendingLookAtYaw = PlayerYaw;
 			LookAtRefreshElapsed = 0.0f;
 		}
-
-		DesiredYaw = PendingLookAtYaw + ResolveNonMechanicalYawOffset(DeltaSeconds);
+		DesiredYaw = PendingLookAtYaw + ResolveOrganicYawOffset(DeltaSeconds);
 		InterpSpeed = LookAtInterpolationSpeed;
 	}
 
 	const FRotator CurrentRotation = GetActorRotation();
 	const FRotator TargetRotation(CurrentRotation.Pitch, DesiredYaw, CurrentRotation.Roll);
-	const FRotator NewRotation = FMath::RInterpTo(
-		CurrentRotation,
-		TargetRotation,
-		DeltaSeconds,
-		FMath::Max(0.0f, InterpSpeed));
-	SetActorRotation(NewRotation);
+	SetActorRotation(FMath::RInterpTo(CurrentRotation, TargetRotation, DeltaSeconds, FMath::Max(0.0f, InterpSpeed)));
 }
 
-bool ATunaSweeperLedRobotCharacterActor::TryGetPlayerLookYaw(float& OutYaw, float& OutDistance2D) const
+bool ATunaSweeperMoleCompanionActor::TryGetPlayerLookYaw(float& OutYaw, float& OutDistance2D) const
 {
 	const UWorld* World = GetWorld();
-	if (!World)
-	{
-		return false;
-	}
-
-	const APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(World, 0);
+	const APawn* PlayerPawn = World ? UGameplayStatics::GetPlayerPawn(World, 0) : nullptr;
 	if (!PlayerPawn)
 	{
 		return false;
@@ -428,7 +361,7 @@ bool ATunaSweeperLedRobotCharacterActor::TryGetPlayerLookYaw(float& OutYaw, floa
 	return true;
 }
 
-float ATunaSweeperLedRobotCharacterActor::ResolveNonMechanicalYawOffset(float DeltaSeconds)
+float ATunaSweeperMoleCompanionActor::ResolveOrganicYawOffset(float DeltaSeconds)
 {
 	const float MaxOffset = FMath::Max(0.0f, LookAtYawOffsetDegrees);
 	if (MaxOffset <= 0.0f)

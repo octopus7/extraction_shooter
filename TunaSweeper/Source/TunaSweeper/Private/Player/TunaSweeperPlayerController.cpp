@@ -266,10 +266,10 @@ namespace TunaSweeperEnemyCombatDebugSettings
 	const TCHAR* DeveloperAlwaysSlowPresentationEnabledKey = TEXT("bDeveloperAlwaysSlowPresentationEnabled");
 }
 
-namespace TunaSweeperCanBotIntro
+namespace TunaSweeperMoleIntro
 {
-	const FName DialogueCompletionFlag(TEXT("dialogue.canbot.bunker_intro"));
-	const FName SpeakerNameStringKey(TEXT("ui.dialogue.canbot.speaker"));
+	const FName DialogueCompletionFlag(TEXT("dialogue.mole.bunker_intro"));
+	const FName SpeakerNameStringKey(TEXT("ui.dialogue.mole.speaker"));
 	constexpr float StartDelayAfterBunkerFadeSeconds = 1.15f;
 	constexpr float CameraReturnBlendSeconds = 0.9f;
 	constexpr float DialogueCameraDistance = 1200.0f;
@@ -488,15 +488,15 @@ void ATunaSweeperPlayerController::BeginPlay()
 		if (bShowingBunkerEntryFade && GetWorld())
 		{
 			GetWorldTimerManager().SetTimer(
-				CanBotIntroDialogueTimerHandle,
+				MoleIntroDialogueTimerHandle,
 				this,
-				&ATunaSweeperPlayerController::MaybeStartCanBotIntroDialogue,
-				TunaSweeperCanBotIntro::StartDelayAfterBunkerFadeSeconds,
+				&ATunaSweeperPlayerController::MaybeStartMoleIntroDialogue,
+				TunaSweeperMoleIntro::StartDelayAfterBunkerFadeSeconds,
 				false);
 		}
 		else
 		{
-			MaybeStartCanBotIntroDialogue();
+			MaybeStartMoleIntroDialogue();
 		}
 	}
 }
@@ -846,12 +846,12 @@ bool ATunaSweeperPlayerController::ShowBunkerEntryFadeIfNeeded()
 	return true;
 }
 
-void ATunaSweeperPlayerController::MaybeStartCanBotIntroDialogue()
+void ATunaSweeperPlayerController::MaybeStartMoleIntroDialogue()
 {
-	StartCanBotIntroDialogue(false);
+	StartMoleIntroDialogue(false);
 }
 
-bool ATunaSweeperPlayerController::StartCanBotIntroDialogue(bool bForceReplay)
+bool ATunaSweeperPlayerController::StartMoleIntroDialogue(bool bForceReplay)
 {
 	if (!IsBunkerMap() || !IsLocalController() || bDialogueSequenceActive)
 	{
@@ -865,21 +865,21 @@ bool ATunaSweeperPlayerController::StartCanBotIntroDialogue(bool bForceReplay)
 	}
 
 	const bool bDialogueAlreadyCompleted =
-		TunaGameInstance->IsScenarioProgressFlagSet(TunaSweeperCanBotIntro::DialogueCompletionFlag);
+		TunaGameInstance->IsScenarioProgressFlagSet(TunaSweeperMoleIntro::DialogueCompletionFlag);
 	if (bDialogueAlreadyCompleted && !bForceReplay)
 	{
 		return false;
 	}
 
 	TArray<FTunaSweeperDialogueLine> DialogueLines;
-	BuildCanBotIntroDialogueLines(DialogueLines);
+	BuildMoleIntroDialogueLines(DialogueLines);
 	const FName CompletionFlag = bDialogueAlreadyCompleted
 		? NAME_None
-		: TunaSweeperCanBotIntro::DialogueCompletionFlag;
+		: TunaSweeperMoleIntro::DialogueCompletionFlag;
 	return StartDialogueSequence(DialogueLines, CompletionFlag);
 }
 
-void ATunaSweeperPlayerController::BuildCanBotIntroDialogueLines(TArray<FTunaSweeperDialogueLine>& OutDialogueLines) const
+void ATunaSweeperPlayerController::BuildMoleIntroDialogueLines(TArray<FTunaSweeperDialogueLine>& OutDialogueLines) const
 {
 	OutDialogueLines.Reset();
 
@@ -892,10 +892,10 @@ void ATunaSweeperPlayerController::BuildCanBotIntroDialogueLines(TArray<FTunaSwe
 	};
 
 	const FText SpeakerName = ResolveDialogueText(
-		TunaSweeperCanBotIntro::SpeakerNameStringKey,
-		FText::FromString(TEXT("\uCE94\uBD07")));
+		TunaSweeperMoleIntro::SpeakerNameStringKey,
+		FText::FromString(TEXT("\uB450\uB354\uC9C0")));
 
-	auto AddCanBotLine = [&OutDialogueLines, &SpeakerName](const FText& DialogueText)
+	auto AddMoleLine = [&OutDialogueLines, &SpeakerName](const FText& DialogueText)
 	{
 		FTunaSweeperDialogueLine Line;
 		Line.SpeakerName = SpeakerName;
@@ -903,29 +903,29 @@ void ATunaSweeperPlayerController::BuildCanBotIntroDialogueLines(TArray<FTunaSwe
 		OutDialogueLines.Add(Line);
 	};
 
-	AddCanBotLine(ResolveDialogueText(
-		FName(TEXT("ui.dialogue.canbot.intro1")),
-		FText::FromString(TEXT("Survivor confirmed. Neural response normal. Canbot responding."))));
-	AddCanBotLine(ResolveDialogueText(
-		FName(TEXT("ui.dialogue.canbot.intro2")),
-		FText::FromString(TEXT("This is B-07 bunker. It is your temporary base after waking."))));
+	AddMoleLine(ResolveDialogueText(
+		FName(TEXT("ui.dialogue.mole.intro1")),
+		FText::FromString(TEXT("Luna, you're awake. Are you hurt anywhere? I'm Mole."))));
+	AddMoleLine(ResolveDialogueText(
+		FName(TEXT("ui.dialogue.mole.intro2")),
+		FText::FromString(TEXT("This is the B-07 bunker. We'll be staying here together for a while."))));
 
 	FTunaSweeperDialogueLine CameraLine;
 	CameraLine.SpeakerName = SpeakerName;
 	CameraLine.DialogueText = ResolveDialogueText(
-		FName(TEXT("ui.dialogue.canbot.intro3")),
-		FText::FromString(TEXT("Use that travel ladder to deploy to the outside area. It is safer not to approach before you are ready.")));
+		FName(TEXT("ui.dialogue.mole.intro3")),
+		FText::FromString(TEXT("That ladder leads outside. It's dangerous, so don't go until you're ready.")));
 	CameraLine.bUseCameraFocus = true;
-	CameraLine.CameraFocusLocation = TunaSweeperCanBotIntro::DeployLadderFocusLocation;
+	CameraLine.CameraFocusLocation = TunaSweeperMoleIntro::DeployLadderFocusLocation;
 	CameraLine.CameraBlendSeconds = 0.8f;
 	OutDialogueLines.Add(CameraLine);
 
-	AddCanBotLine(ResolveDialogueText(
-		FName(TEXT("ui.dialogue.canbot.intro4")),
-		FText::FromString(TEXT("Basic vitals and equipment state confirmed. Returning control authority."))));
-	AddCanBotLine(ResolveDialogueText(
-		FName(TEXT("ui.dialogue.canbot.intro5")),
-		FText::FromString(TEXT("Speak to me again if you need guidance."))));
+	AddMoleLine(ResolveDialogueText(
+		FName(TEXT("ui.dialogue.mole.intro4")),
+		FText::FromString(TEXT("You and your gear look all right. Take it slow while you get moving."))));
+	AddMoleLine(ResolveDialogueText(
+		FName(TEXT("ui.dialogue.mole.intro5")),
+		FText::FromString(TEXT("If you need anything, just ask me."))));
 }
 
 bool ATunaSweeperPlayerController::StartDialogueSequence(
@@ -1053,7 +1053,7 @@ void ATunaSweeperPlayerController::HandleDialogueFinished()
 	}
 
 	const float ReturnBlendSeconds = bDialogueCameraHasFocus
-		? TunaSweeperCanBotIntro::CameraReturnBlendSeconds
+		? TunaSweeperMoleIntro::CameraReturnBlendSeconds
 		: 0.0f;
 	ReturnDialogueCameraToPlayer(ReturnBlendSeconds);
 
@@ -1097,8 +1097,8 @@ void ATunaSweeperPlayerController::MoveDialogueCameraToFocusLocation(FVector Foc
 	}
 
 	DialogueCameraActor->SetActorLocationAndRotation(
-		TunaSweeperCanBotIntro::CalculateCameraLocationForFocus(FocusLocation),
-		TunaSweeperCanBotIntro::DialogueCameraRotation);
+		TunaSweeperMoleIntro::CalculateCameraLocationForFocus(FocusLocation),
+		TunaSweeperMoleIntro::DialogueCameraRotation);
 	if (UCameraComponent* CameraComponent = DialogueCameraActor->GetCameraComponent())
 	{
 		CameraComponent->SetFieldOfView(70.0f);

@@ -2768,9 +2768,9 @@ namespace TunaSweeperEditorSetup
 		return ConfigureGameModeBlueprint(GameModeBlueprint, PlayerBlueprint) && SetProjectGameModeToBlueprint();
 	}
 
-	bool EnsureCanBotBlueprint()
+	bool EnsureMoleBlueprint()
 	{
-		return EnsureBlueprint(CanBotAssetPath, CanBotAssetName, ATunaSweeperLedRobotCharacterActor::StaticClass()) != nullptr;
+		return EnsureBlueprint(MoleAssetPath, MoleAssetName, ATunaSweeperMoleCompanionActor::StaticClass()) != nullptr;
 	}
 
 	bool EnsureEnemyVisualMaterialAssets()

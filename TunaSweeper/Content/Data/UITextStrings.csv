@@ -121,12 +121,12 @@ ui.memo.title,메모,Memo,メモ
 ui.memo.list_title,메모 목록,Memo List,メモ一覧
 ui.memo.none,획득한 메모가 없습니다.,No acquired memos.,取得したメモがありません。
 ui.dialogue.continue,계속,Continue,続行
-ui.dialogue.canbot.speaker,캔봇,Canbot,キャンボット
-ui.dialogue.canbot.intro1,생존자 확인. 신경 반응 정상. 캔봇이 응답합니다.,Survivor confirmed. Neural response normal. Canbot responding.,生存者確認。神経反応正常。キャンボットが応答します。
-ui.dialogue.canbot.intro2,이곳은 B-07 벙커입니다. 방금 깨어난 당신의 임시 거점입니다.,This is B-07 bunker. It is your temporary base after waking.,ここはB-07バンカーです。目覚めたばかりのあなたの一時拠点です。
-ui.dialogue.canbot.intro3,저쪽 이동 사다리를 사용하면 외부 구역으로 출동할 수 있습니다. 준비 전에는 접근하지 않는 편이 안전합니다.,Use that travel ladder to deploy to the outside area. It is safer not to approach before you are ready.,あちらの移動はしごを使えば外部区域へ出動できます。準備前は近づかない方が安全です。
-ui.dialogue.canbot.intro4,기본 생체 수치와 장비 상태를 확인했습니다. 조작 권한을 돌려드리겠습니다.,Basic vitals and equipment state confirmed. Returning control authority.,基本生体値と装備状態を確認しました。操作権限を返します。
-ui.dialogue.canbot.intro5,필요하면 다시 말을 걸어 안내를 요청하십시오.,Speak to me again if you need guidance.,必要ならもう一度話しかけて案内を要請してください。
+ui.dialogue.mole.speaker,두더지,Mole,モグラ
+ui.dialogue.mole.intro1,"루나, 깼구나. 어디 아픈 데는 없어? 난 두더지야.","Luna, you're awake. Are you hurt anywhere? I'm Mole.","ルナ、目が覚めたんだね。どこか痛くない？ 僕はモグラだよ。"
+ui.dialogue.mole.intro2,여긴 B-07 벙커야. 당분간 우리 둘이 지낼 곳이지.,This is the B-07 bunker. We'll be staying here together for a while.,ここはB-07バンカー。しばらくは僕たち二人で暮らす場所だよ。
+ui.dialogue.mole.intro3,저 사다리로 나가면 바깥 구역이야. 위험하니까 준비하기 전에는 나가지 마.,That ladder leads outside. It's dangerous so don't go until you're ready.,あのはしごの先は外だよ。危ないから準備ができるまでは出ないで。
+ui.dialogue.mole.intro4,몸도 장비도 괜찮아 보여. 서두르지 말고 천천히 움직여 봐.,You and your gear look all right. Take it slow while you get moving.,体も装備も大丈夫そうだね。焦らずゆっくり動いてみて。
+ui.dialogue.mole.intro5,궁금한 게 있거나 도움이 필요하면 언제든 나한테 말해.,If you need anything just ask me.,分からないことや困ったことがあったら、いつでも僕に言って。
 ui.scenario.title,재기동 기록,Reboot Log,再起動記録
 ui.scenario.status,B-07 벙커 / 비상 기상,B-07 Bunker / Emergency Wake,B-07 バンカー / 緊急起床
 ui.scenario.prompt,클릭해서 계속,Click to Continue,クリックして続行
@@ -185,7 +185,7 @@ ui.housing.facility.supply,보급 시설,Supply Facility,補給施設
 ui.housing.facility.supply.desc,식량과 소모품 보급을 관리하는 벙커 보급소,A bunker station for food and consumable supplies,食料と消耗品補給を管理するバンカー補給所
 ui.interaction.boom,Boom!,Boom!,Boom!
 ui.notification.rescue_cart,구급 카트 후송 중,Rescue cart returning,救急カート搬送中
-ui.interaction.canbot_dialogue,대화,Dialogue,会話
+ui.interaction.mole_dialogue,대화,Dialogue,会話
 ui.quest.interaction_name,퀘스트,Quest,クエスト
 ui.map_overlay.start_location,시작 위치,Start Position,開始位置
 ui.map_overlay.extraction_point,추출 포인트,Extraction Point,抽出地点

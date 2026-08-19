@@ -22,7 +22,7 @@ Scenario levels themselves are reusable presentation spaces. Do not block entry 
 | Flag | Meaning |
 | --- | --- |
 | `scenario.opening.awakening` | The first-start opening presentation has completed and the player successfully entered the bunker. |
-| `dialogue.canbot.bunker_intro` | The first bunker-entry CanBot dialogue tutorial has completed for the save slot. |
+| `dialogue.mole.bunker_intro` | The first bunker-entry Mole dialogue tutorial has completed for the save slot. |
 
 ## Current Routing
 
@@ -43,7 +43,7 @@ The opening scenario does not mark its flag immediately when the presentation st
 
 This means the flag represents successful bunker entry after the presentation, not merely seeing part of the presentation.
 
-The CanBot bunker intro dialogue flag is marked when the dialogue sequence finishes. The camera may still be blending back to the player, but the dialogue content has reached completion and the save slot should not replay it on the next bunker entry.
+The Mole bunker intro dialogue flag is marked when the dialogue sequence finishes. The camera may still be blending back to the player, but the dialogue content has reached completion and the save slot should not replay it on the next bunker entry.
 
 ## Reset Behavior
 

@@ -1,7 +1,8 @@
 #include "Subsystem/TunaSweeperBunkerRuntimeSpawnSubsystem.h"
 
-#include "Character/TunaSweeperLedRobotCharacterActor.h"
+#include "Character/TunaSweeperMoleCompanionActor.h"
 #include "Dom/JsonObject.h"
+#include "Engine/StaticMesh.h"
 #include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
 #include "Materials/MaterialInterface.h"
@@ -60,21 +61,6 @@ namespace TunaSweeperBunkerRuntimeSpawn
 		return true;
 	}
 
-	bool TryReadColorField(const TSharedPtr<FJsonObject>& JsonObject, const TCHAR* FieldName, FLinearColor& OutColor)
-	{
-		const TArray<TSharedPtr<FJsonValue>>* ColorArray = nullptr;
-		if (!JsonObject.IsValid() || !JsonObject->TryGetArrayField(FieldName, ColorArray) || !ColorArray || ColorArray->Num() < 3)
-		{
-			return false;
-		}
-
-		OutColor = FLinearColor(
-			static_cast<float>((*ColorArray)[0]->AsNumber()),
-			static_cast<float>((*ColorArray)[1]->AsNumber()),
-			static_cast<float>((*ColorArray)[2]->AsNumber()),
-			ColorArray->IsValidIndex(3) ? static_cast<float>((*ColorArray)[3]->AsNumber()) : 1.0f);
-		return true;
-	}
 }
 
 void UTunaSweeperBunkerRuntimeSpawnSubsystem::Initialize(FSubsystemCollectionBase& Collection)
@@ -126,61 +112,48 @@ bool UTunaSweeperBunkerRuntimeSpawnSubsystem::EnsureBunkerRuntimeActorsSpawnedFo
 			continue;
 		}
 
-		TSubclassOf<ATunaSweeperLedRobotCharacterActor> LoadedActorClass = SpawnDefinition.ActorClass.IsNull()
-			? ATunaSweeperLedRobotCharacterActor::StaticClass()
+		TSubclassOf<ATunaSweeperMoleCompanionActor> LoadedActorClass = SpawnDefinition.ActorClass.IsNull()
+			? ATunaSweeperMoleCompanionActor::StaticClass()
 			: SpawnDefinition.ActorClass.LoadSynchronous();
 		if (!LoadedActorClass)
 		{
 			UE_LOG(
 				LogTunaSweeperBunkerRuntimeSpawn,
 				Warning,
-				TEXT("Bunker character class failed to load for spawn %s. Falling back to native LED robot actor."),
+				TEXT("Bunker character class failed to load for spawn %s. Falling back to native mole companion actor."),
 				*SpawnDefinition.SpawnId.ToString());
-			LoadedActorClass = ATunaSweeperLedRobotCharacterActor::StaticClass();
+			LoadedActorClass = ATunaSweeperMoleCompanionActor::StaticClass();
 		}
 
 		const FTransform SpawnTransform(SpawnDefinition.Rotation, SpawnDefinition.Location, SpawnDefinition.Scale);
-		ATunaSweeperLedRobotCharacterActor* SpawnedRobot =
-			World->SpawnActorDeferred<ATunaSweeperLedRobotCharacterActor>(
+		ATunaSweeperMoleCompanionActor* SpawnedCompanion =
+			World->SpawnActorDeferred<ATunaSweeperMoleCompanionActor>(
 				LoadedActorClass,
 				SpawnTransform,
 				nullptr,
 				nullptr,
 				ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
-		if (!SpawnedRobot)
+		if (!SpawnedCompanion)
 		{
 			continue;
 		}
 
-		SpawnedRobot->ConfigureRobotDefaults(
+		SpawnedCompanion->ConfigureCompanionDefaults(
 			SpawnDefinition.SpawnId,
-			SpawnDefinition.ExpressionPresetFilePath,
-			SpawnDefinition.InitialExpressionName,
-			SpawnDefinition.LedColor,
-			SpawnDefinition.OffColor,
-			SpawnDefinition.LedPitch,
-			SpawnDefinition.LedRadius,
-			SpawnDefinition.BodyMaterial,
-			SpawnDefinition.bHasLedColorOverride,
-			SpawnDefinition.bHasOffColorOverride,
-			SpawnDefinition.bHasLedPitchOverride,
-			SpawnDefinition.bHasLedRadiusOverride);
-		if (SpawnDefinition.bHasExpressionDemoModeOverride || SpawnDefinition.bHasExpressionDemoIntervalOverride)
-		{
-			SpawnedRobot->ConfigureExpressionDemo(
-				SpawnDefinition.bExpressionDemoMode,
-				SpawnDefinition.ExpressionDemoIntervalSeconds);
-		}
+			SpawnDefinition.BodyMesh,
+			SpawnDefinition.HeadMesh,
+			SpawnDefinition.SnoutMesh,
+			SpawnDefinition.VisualMaterial);
 
 		if (!SpawnDefinition.SpawnId.IsNone())
 		{
-			SpawnedRobot->Tags.AddUnique(SpawnDefinition.SpawnId);
+			SpawnedCompanion->Tags.AddUnique(SpawnDefinition.SpawnId);
 #if WITH_EDITOR
-			SpawnedRobot->SetActorLabel(SpawnDefinition.SpawnId.ToString());
+			SpawnedCompanion->SetActorLabel(SpawnDefinition.SpawnId.ToString());
 #endif
 		}
 
-		UGameplayStatics::FinishSpawningActor(SpawnedRobot, SpawnTransform);
+		UGameplayStatics::FinishSpawningActor(SpawnedCompanion, SpawnTransform);
 		++SpawnedCount;
 	}
 
@@ -250,50 +223,25 @@ bool UTunaSweeperBunkerRuntimeSpawnSubsystem::LoadBunkerCharacterSpawnData(bool 
 		}
 
 		FString ActorClassPath;
-		FString ExpressionPresetFilePath;
-		FString InitialExpressionName;
-		FString BodyMaterialPath;
+		FString BodyMeshPath;
+		FString HeadMeshPath;
+		FString SnoutMeshPath;
+		FString VisualMaterialPath;
 		FVector Scale = FVector::OneVector;
 		FRotator Rotation = FRotator::ZeroRotator;
-		double NumericLedPitch = SpawnDefinition.LedPitch;
-		double NumericLedRadius = SpawnDefinition.LedRadius;
-		double NumericExpressionDemoIntervalSeconds = SpawnDefinition.ExpressionDemoIntervalSeconds;
 
 		JsonObject->TryGetStringField(TEXT("actor_class"), ActorClassPath);
-		JsonObject->TryGetStringField(TEXT("expression_preset_file"), ExpressionPresetFilePath);
-		if (ExpressionPresetFilePath.TrimStartAndEnd().IsEmpty())
-		{
-			JsonObject->TryGetStringField(TEXT("expression_file"), ExpressionPresetFilePath);
-		}
-		JsonObject->TryGetStringField(TEXT("initial_expression"), InitialExpressionName);
-		JsonObject->TryGetStringField(TEXT("body_material"), BodyMaterialPath);
+		JsonObject->TryGetStringField(TEXT("body_mesh"), BodyMeshPath);
+		JsonObject->TryGetStringField(TEXT("head_mesh"), HeadMeshPath);
+		JsonObject->TryGetStringField(TEXT("snout_mesh"), SnoutMeshPath);
+		JsonObject->TryGetStringField(TEXT("visual_material"), VisualMaterialPath);
 		TunaSweeperBunkerRuntimeSpawn::TryReadRotatorField(JsonObject, TEXT("rotation"), Rotation);
 		TunaSweeperBunkerRuntimeSpawn::TryReadVectorField(JsonObject, TEXT("scale"), Scale);
-		SpawnDefinition.bHasLedColorOverride =
-			TunaSweeperBunkerRuntimeSpawn::TryReadColorField(JsonObject, TEXT("led_color"), SpawnDefinition.LedColor);
-		SpawnDefinition.bHasOffColorOverride =
-			TunaSweeperBunkerRuntimeSpawn::TryReadColorField(JsonObject, TEXT("off_color"), SpawnDefinition.OffColor);
-		SpawnDefinition.bHasLedPitchOverride = JsonObject->TryGetNumberField(TEXT("led_pitch"), NumericLedPitch);
-		SpawnDefinition.bHasLedRadiusOverride = JsonObject->TryGetNumberField(TEXT("led_radius"), NumericLedRadius);
-		SpawnDefinition.bHasExpressionDemoModeOverride =
-			JsonObject->TryGetBoolField(TEXT("expression_demo_mode"), SpawnDefinition.bExpressionDemoMode);
-		if (!SpawnDefinition.bHasExpressionDemoModeOverride)
-		{
-			SpawnDefinition.bHasExpressionDemoModeOverride =
-				JsonObject->TryGetBoolField(TEXT("demo_mode"), SpawnDefinition.bExpressionDemoMode);
-		}
-		SpawnDefinition.bHasExpressionDemoIntervalOverride =
-			JsonObject->TryGetNumberField(TEXT("expression_demo_interval"), NumericExpressionDemoIntervalSeconds);
-		if (!SpawnDefinition.bHasExpressionDemoIntervalOverride)
-		{
-			SpawnDefinition.bHasExpressionDemoIntervalOverride =
-				JsonObject->TryGetNumberField(TEXT("demo_expression_interval"), NumericExpressionDemoIntervalSeconds);
-		}
 
 		const FString TrimmedActorClassPath = ActorClassPath.TrimStartAndEnd();
 		if (!TrimmedActorClassPath.IsEmpty())
 		{
-			SpawnDefinition.ActorClass = TSoftClassPtr<ATunaSweeperLedRobotCharacterActor>(
+			SpawnDefinition.ActorClass = TSoftClassPtr<ATunaSweeperMoleCompanionActor>(
 				FSoftObjectPath(TrimmedActorClassPath));
 		}
 		SpawnDefinition.Location = Location;
@@ -302,32 +250,23 @@ bool UTunaSweeperBunkerRuntimeSpawnSubsystem::LoadBunkerCharacterSpawnData(bool 
 			FMath::Max(0.01f, Scale.X),
 			FMath::Max(0.01f, Scale.Y),
 			FMath::Max(0.01f, Scale.Z));
-		SpawnDefinition.ExpressionPresetFilePath = ExpressionPresetFilePath.TrimStartAndEnd().IsEmpty()
-			? TEXT("Data/LedExpressionPresets.txt")
-			: ExpressionPresetFilePath.TrimStartAndEnd();
-		if (!InitialExpressionName.TrimStartAndEnd().IsEmpty())
-		{
-			SpawnDefinition.InitialExpressionName = FName(*InitialExpressionName.TrimStartAndEnd());
-		}
-		if (SpawnDefinition.bHasLedPitchOverride)
-		{
-			SpawnDefinition.LedPitch = FMath::Max(0.1f, static_cast<float>(NumericLedPitch));
-		}
-		if (SpawnDefinition.bHasLedRadiusOverride)
-		{
-			SpawnDefinition.LedRadius = FMath::Max(0.01f, static_cast<float>(NumericLedRadius));
-		}
-		if (SpawnDefinition.bHasExpressionDemoIntervalOverride)
-		{
-			SpawnDefinition.ExpressionDemoIntervalSeconds = FMath::Max(
-				0.1f,
-				static_cast<float>(NumericExpressionDemoIntervalSeconds));
-		}
 
-		const FString TrimmedBodyMaterialPath = BodyMaterialPath.TrimStartAndEnd();
-		if (!TrimmedBodyMaterialPath.IsEmpty())
+		auto ResolveStaticMesh = [](const FString& RawPath)
 		{
-			SpawnDefinition.BodyMaterial = TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath(TrimmedBodyMaterialPath));
+			const FString TrimmedPath = RawPath.TrimStartAndEnd();
+			return TrimmedPath.IsEmpty()
+				? TSoftObjectPtr<UStaticMesh>()
+				: TSoftObjectPtr<UStaticMesh>(FSoftObjectPath(TrimmedPath));
+		};
+		SpawnDefinition.BodyMesh = ResolveStaticMesh(BodyMeshPath);
+		SpawnDefinition.HeadMesh = ResolveStaticMesh(HeadMeshPath);
+		SpawnDefinition.SnoutMesh = ResolveStaticMesh(SnoutMeshPath);
+
+		const FString TrimmedVisualMaterialPath = VisualMaterialPath.TrimStartAndEnd();
+		if (!TrimmedVisualMaterialPath.IsEmpty())
+		{
+			SpawnDefinition.VisualMaterial = TSoftObjectPtr<UMaterialInterface>(
+				FSoftObjectPath(TrimmedVisualMaterialPath));
 		}
 
 		BunkerCharacterSpawnDefinitions.Add(SpawnDefinition);

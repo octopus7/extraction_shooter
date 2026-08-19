@@ -4,8 +4,9 @@
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "TunaSweeperBunkerRuntimeSpawnSubsystem.generated.h"
 
-class ATunaSweeperLedRobotCharacterActor;
+class ATunaSweeperMoleCompanionActor;
 class UMaterialInterface;
+class UStaticMesh;
 class UWorld;
 
 UCLASS()
@@ -31,25 +32,14 @@ private:
 	{
 		FName LevelName = NAME_None;
 		FName SpawnId = NAME_None;
-		TSoftClassPtr<ATunaSweeperLedRobotCharacterActor> ActorClass;
+		TSoftClassPtr<ATunaSweeperMoleCompanionActor> ActorClass;
 		FVector Location = FVector::ZeroVector;
 		FRotator Rotation = FRotator::ZeroRotator;
 		FVector Scale = FVector::OneVector;
-		FString ExpressionPresetFilePath;
-		FName InitialExpressionName = TEXT("Smile");
-		FLinearColor LedColor = FLinearColor(1.0f, 0.78f, 0.06f, 1.0f);
-		bool bHasLedColorOverride = false;
-		FLinearColor OffColor = FLinearColor::Transparent;
-		bool bHasOffColorOverride = false;
-		float LedPitch = 2.0f;
-		bool bHasLedPitchOverride = false;
-		float LedRadius = 0.68f;
-		bool bHasLedRadiusOverride = false;
-		bool bExpressionDemoMode = false;
-		bool bHasExpressionDemoModeOverride = false;
-		float ExpressionDemoIntervalSeconds = 2.0f;
-		bool bHasExpressionDemoIntervalOverride = false;
-		TSoftObjectPtr<UMaterialInterface> BodyMaterial;
+		TSoftObjectPtr<UStaticMesh> BodyMesh;
+		TSoftObjectPtr<UStaticMesh> HeadMesh;
+		TSoftObjectPtr<UStaticMesh> SnoutMesh;
+		TSoftObjectPtr<UMaterialInterface> VisualMaterial;
 	};
 
 	void HandlePostLoadMapWithWorld(UWorld* LoadedWorld);

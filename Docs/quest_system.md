@@ -13,7 +13,7 @@
 기본 필드:
 
 - `quest_id`: 저장과 이벤트 매칭에 쓰는 안정적인 퀘스트 ID.
-- `provider_id`: 퀘스트를 제공하는 소스 ID. 현재 캔봇은 `provider.canbot`을 쓴다.
+- `provider_id`: 퀘스트를 제공하는 소스 ID. 현재 두더지는 `provider.mole`을 쓴다.
 - `sort_order`: 같은 제공자 안에서 새 퀘스트 후보를 고를 때 쓰는 낮은 값 우선 순서.
 - `required_completed_quest_ids`: 수락 가능해지기 전에 보상 수령까지 끝나야 하는 선행 퀘스트 ID 목록.
 - `title`, `description`: 퀘스트 UI와 HUD 추적에 표시할 텍스트.
@@ -26,19 +26,19 @@
 | 항목 | 값 |
 | --- | --- |
 | QuestId | `quest_first_outing` |
-| ProviderId | `provider.canbot` |
+| ProviderId | `provider.mole` |
 | 제목 | `첫 외출` |
 | 목표 | `leave_bunker` |
 | 목표 타입 | `level_travel` |
 | 달성 조건 | `BunkerMap -> RaidMap` |
 | 보상 | 코인 100 |
 
-캔봇 후속 적 처치 퀘스트:
+두더지 후속 적 처치 퀘스트:
 
 | 항목 | 값 |
 | --- | --- |
 | QuestId | `quest_lumberjack_first_kill` |
-| ProviderId | `provider.canbot` |
+| ProviderId | `provider.mole` |
 | 선행 조건 | `quest_first_outing` 보상 완료 |
 | 제목 | `벌목기 제거` |
 | 목표 | `kill_lumberjack` |
@@ -46,9 +46,9 @@
 | 달성 조건 | `enemy.lumberjack` ID를 가진 적 처치 |
 | 보상 | 코인 150 |
 
-캔봇 액터는 고정된 퀘스트 하나만 열지 않고 `provider.canbot`에 연결된 퀘스트 중 현재 플레이어 상태에 맞는 항목을 선택한다. 보상 수령 가능 퀘스트가 가장 우선이고, 진행 중 퀘스트, 선행 조건을 만족한 신규 퀘스트 순서로 선택한다.
+두더지 액터는 고정된 퀘스트 하나만 열지 않고 `provider.mole`에 연결된 퀘스트 중 현재 플레이어 상태에 맞는 항목을 선택한다. 보상 수령 가능 퀘스트가 가장 우선이고, 진행 중 퀘스트, 선행 조건을 만족한 신규 퀘스트 순서로 선택한다.
 
-provider 체인에 보상 수령 가능, 진행 중, 신규 수락 가능 퀘스트가 모두 없으면 해당 퀘스트 상호작용은 마커와 포커스 후보에서 제외한다. 완료된 마지막 퀘스트를 다시 보여주는 동작은 캔봇 퀘스트 상호작용 흐름에 연결하지 않는다.
+provider 체인에 보상 수령 가능, 진행 중, 신규 수락 가능 퀘스트가 모두 없으면 해당 퀘스트 상호작용은 마커와 포커스 후보에서 제외한다. 완료된 마지막 퀘스트를 다시 보여주는 동작은 두더지 퀘스트 상호작용 흐름에 연결하지 않는다.
 
 `UTunaSweeperQuestSubsystem::TryGetLatestQuestInProviderChain`은 진행 중이거나 보상 가능하거나 이미 보상 완료된 provider 체인의 최종 퀘스트를 조회하는 내부용 함수다. 현재 UI/상호작용 흐름에서는 호출하지 않고, 나중에 퀘스트 로그나 회상 UI가 필요할 때 사용할 수 있도록 둔다.
 
