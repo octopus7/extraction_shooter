@@ -45,7 +45,7 @@ namespace StylizedWaterEditor
 	const FString MaterialInstanceName = TEXT("MI_StylizedWater_CalmAnime");
 	const FString BlueprintName = TEXT("BP_StylizedWaterBody_Internal");
 	const TCHAR* AssetVersionKey = TEXT("StylizedWaterAssetVersion");
-	const TCHAR* AssetVersion = TEXT("3");
+	const TCHAR* AssetVersion = TEXT("4");
 
 	struct FGeneratedAssets
 	{

@@ -52,6 +52,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stylized Water")
 	TObjectPtr<UProceduralMeshComponent> WaterSurface;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stylized Water")
+	TObjectPtr<UProceduralMeshComponent> ShoreOverlay;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stylized Water|Geometry", meta = (ClampMin = "100.0", UIMin = "100.0", Units = "cm"))
 	FVector2D SurfaceSize = FVector2D(4000.0, 4000.0);
 
@@ -133,6 +136,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stylized Water|Shore Waves", meta = (ClampMin = "0.0", ClampMax = "2.0", UIMin = "0.0", UIMax = "2.0"))
 	float FoamIntensity = 0.82f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stylized Water|Shore Waves", meta = (DisplayName = "Enable Terrain-Following Runup"))
+	bool bEnableTerrainShoreOverlay = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stylized Water|Shore Waves", meta = (ClampMin = "0.1", ClampMax = "10.0", UIMin = "0.5", UIMax = "5.0", Units = "cm", DisplayName = "Terrain Overlay Offset"))
+	float ShoreOverlayOffset = 1.5f;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Stylized Water|Flow")
 	FVector2D FlowDirection = FVector2D(1.0, 0.0);
 
@@ -152,7 +161,7 @@ protected:
 	void BuildWaterMesh(bool bTraceTerrain);
 	void EnsureDynamicMaterial();
 	void UpdateMaterialParameters();
-	float SampleSignedDepthAtWorldPosition(const FVector& SurfaceWorldPosition, bool& bOutHit) const;
+	float SampleSignedDepthAtWorldPosition(const FVector& SurfaceWorldPosition, FHitResult& OutHit) const;
 
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
@@ -160,6 +169,9 @@ protected:
 #endif
 
 private:
+	UPROPERTY()
+	bool bShoreOverlayBakeInitialized = false;
+
 	UPROPERTY(Transient)
 	TObjectPtr<UMaterialInstanceDynamic> DynamicMaterial;
 };

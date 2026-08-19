@@ -52,18 +52,26 @@ AStylizedWaterBodyActor::AStylizedWaterBodyActor()
 	WaterSurface->SetCastShadow(false);
 	WaterSurface->SetCanEverAffectNavigation(false);
 
+	ShoreOverlay = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("ShoreOverlay"));
+	ShoreOverlay->SetupAttachment(SceneRoot);
+	ShoreOverlay->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	ShoreOverlay->SetGenerateOverlapEvents(false);
+	ShoreOverlay->bUseAsyncCooking = true;
+	ShoreOverlay->SetCastShadow(false);
+	ShoreOverlay->SetCanEverAffectNavigation(false);
+
 	TemplateMaterialInstance = TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath(StylizedWater::GeneratedMaterialInstancePath));
 }
 
 void AStylizedWaterBodyActor::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
-	if (HasAnyFlags(RF_ClassDefaultObject) || !WaterSurface)
+	if (HasAnyFlags(RF_ClassDefaultObject) || !WaterSurface || !ShoreOverlay)
 	{
 		return;
 	}
 
-	if (WaterSurface->GetNumSections() == 0)
+	if (WaterSurface->GetNumSections() == 0 || !bShoreOverlayBakeInitialized)
 	{
 		BuildWaterMesh(bSampleTerrainOnRebuild);
 	}
@@ -189,16 +197,15 @@ void AStylizedWaterBodyActor::SetTemplateMaterialInstance(UMaterialInterface* In
 	UpdateMaterialParameters();
 }
 
-float AStylizedWaterBodyActor::SampleSignedDepthAtWorldPosition(const FVector& SurfaceWorldPosition, bool& bOutHit) const
+float AStylizedWaterBodyActor::SampleSignedDepthAtWorldPosition(const FVector& SurfaceWorldPosition, FHitResult& OutHit) const
 {
-	bOutHit = false;
+	OutHit = FHitResult();
 	const UWorld* World = GetWorld();
 	if (!World)
 	{
 		return MaximumDepth;
 	}
 
-	FHitResult Hit;
 	FCollisionQueryParams QueryParams(SCENE_QUERY_STAT(StylizedWaterDepthBake), true, this);
 	QueryParams.AddIgnoredActor(this);
 
@@ -207,18 +214,17 @@ float AStylizedWaterBodyActor::SampleSignedDepthAtWorldPosition(const FVector& S
 	FVector TraceEnd = SurfaceWorldPosition;
 	TraceEnd.Z -= MaximumDepth;
 
-	if (!World->LineTraceSingleByChannel(Hit, TraceStart, TraceEnd, TerrainTraceChannel, QueryParams))
+	if (!World->LineTraceSingleByChannel(OutHit, TraceStart, TraceEnd, TerrainTraceChannel, QueryParams))
 	{
 		return MaximumDepth;
 	}
 
-	bOutHit = true;
-	return FMath::Clamp(SurfaceWorldPosition.Z - Hit.ImpactPoint.Z, -MaximumDryHeight, MaximumDepth);
+	return FMath::Clamp(SurfaceWorldPosition.Z - OutHit.ImpactPoint.Z, -MaximumDryHeight, MaximumDepth);
 }
 
 void AStylizedWaterBodyActor::BuildWaterMesh(const bool bTraceTerrain)
 {
-	if (!WaterSurface || HasAnyFlags(RF_ClassDefaultObject))
+	if (!WaterSurface || !ShoreOverlay || HasAnyFlags(RF_ClassDefaultObject))
 	{
 		return;
 	}
@@ -234,16 +240,28 @@ void AStylizedWaterBodyActor::BuildWaterMesh(const bool bTraceTerrain)
 	const int32 VertexCount = (ResolutionX + 1) * (ResolutionY + 1);
 	TArray<FVector> Vertices;
 	TArray<int32> Triangles;
+	TArray<FVector> ShoreVertices;
+	TArray<int32> ShoreTriangles;
 	TArray<FVector> Normals;
+	TArray<FVector> ShoreNormals;
 	TArray<FVector2D> UVs;
 	TArray<FLinearColor> VertexColors;
 	TArray<FProcMeshTangent> Tangents;
+	TArray<FProcMeshTangent> ShoreTangents;
+	TArray<bool> TerrainHitMask;
+	TArray<float> SignedDepths;
 	Vertices.Reserve(VertexCount);
+	ShoreVertices.Reserve(VertexCount);
 	Normals.Reserve(VertexCount);
+	ShoreNormals.Reserve(VertexCount);
 	UVs.Reserve(VertexCount);
 	VertexColors.Reserve(VertexCount);
 	Tangents.Reserve(VertexCount);
+	ShoreTangents.Reserve(VertexCount);
+	TerrainHitMask.Reserve(VertexCount);
+	SignedDepths.Reserve(VertexCount);
 	Triangles.Reserve(ResolutionX * ResolutionY * 6);
+	ShoreTriangles.Reserve(ResolutionX * ResolutionY * 6);
 
 	const FTransform ActorTransform = GetActorTransform();
 	const float TotalDepthRange = MaximumDryHeight + MaximumDepth;
@@ -261,8 +279,9 @@ void AStylizedWaterBodyActor::BuildWaterMesh(const bool bTraceTerrain)
 				FMath::Lerp(-0.5 * SurfaceSize.Y, 0.5 * SurfaceSize.Y, V),
 				0.0);
 			const FVector WorldPosition = ActorTransform.TransformPosition(LocalPosition);
-			bool bHitTerrain = false;
-			const float SignedDepth = bTraceTerrain ? SampleSignedDepthAtWorldPosition(WorldPosition, bHitTerrain) : MaximumDepth;
+			FHitResult TerrainHit;
+			const float SignedDepth = bTraceTerrain ? SampleSignedDepthAtWorldPosition(WorldPosition, TerrainHit) : MaximumDepth;
+			const bool bHitTerrain = TerrainHit.bBlockingHit;
 			if (bHitTerrain)
 			{
 				++HitSampleCount;
@@ -273,13 +292,27 @@ void AStylizedWaterBodyActor::BuildWaterMesh(const bool bTraceTerrain)
 			const float BorderDistance = FMath::Clamp(2.0f * FMath::Min(FMath::Min(U, 1.0f - U), FMath::Min(V, 1.0f - V)), 0.0f, 1.0f);
 
 			Vertices.Add(LocalPosition);
+			if (bHitTerrain)
+			{
+				const FVector SafeImpactNormal = TerrainHit.ImpactNormal.GetSafeNormal(SMALL_NUMBER, FVector::UpVector);
+				const FVector OverlayWorldPosition = TerrainHit.ImpactPoint + SafeImpactNormal * ShoreOverlayOffset;
+				ShoreVertices.Add(ActorTransform.InverseTransformPosition(OverlayWorldPosition));
+				ShoreNormals.Add(ActorTransform.InverseTransformVectorNoScale(SafeImpactNormal).GetSafeNormal(SMALL_NUMBER, FVector::UpVector));
+			}
+			else
+			{
+				ShoreVertices.Add(LocalPosition - FVector(0.0, 0.0, MaximumDepth));
+				ShoreNormals.Add(FVector::UpVector);
+			}
 			Normals.Add(FVector::UpVector);
 			UVs.Add(FVector2D(U, V));
 			VertexColors.Add(FLinearColor(EncodedDepth, BorderDistance, U, V));
 			Tangents.Add(FProcMeshTangent(FVector::ForwardVector, false));
+			ShoreTangents.Add(FProcMeshTangent(FVector::ForwardVector, false));
+			TerrainHitMask.Add(bHitTerrain);
+			SignedDepths.Add(SignedDepth);
 		}
 	}
-
 	if (!bTraceTerrain)
 	{
 		LastDepthBakeResult = FString::Printf(TEXT("Terrain trace skipped; uniform %.1f cm depth"), MaximumDepth);
@@ -315,25 +348,54 @@ void AStylizedWaterBodyActor::BuildWaterMesh(const bool bTraceTerrain)
 			Triangles.Add(I00);
 			Triangles.Add(I01);
 			Triangles.Add(I11);
+
+			const bool bCellHasTerrain =
+				TerrainHitMask[I00] && TerrainHitMask[I10] && TerrainHitMask[I01] && TerrainHitMask[I11];
+			const bool bCellTouchesShore =
+				SignedDepths[I00] <= ShoreFoamDepth || SignedDepths[I10] <= ShoreFoamDepth ||
+				SignedDepths[I01] <= ShoreFoamDepth || SignedDepths[I11] <= ShoreFoamDepth;
+			if (bEnableTerrainShoreOverlay && bTraceTerrain && bCellHasTerrain && bCellTouchesShore)
+			{
+				ShoreTriangles.Add(I00);
+				ShoreTriangles.Add(I11);
+				ShoreTriangles.Add(I10);
+				ShoreTriangles.Add(I00);
+				ShoreTriangles.Add(I01);
+				ShoreTriangles.Add(I11);
+			}
 		}
+	}
+	if (bTraceTerrain)
+	{
+		LastDepthBakeResult += bEnableTerrainShoreOverlay
+			? FString::Printf(TEXT("; shore overlay %d triangles"), ShoreTriangles.Num() / 3)
+			: TEXT("; shore overlay disabled");
 	}
 
 	WaterSurface->ClearAllMeshSections();
 	WaterSurface->CreateMeshSection_LinearColor(0, Vertices, Triangles, Normals, UVs, VertexColors, Tangents, false);
 	WaterSurface->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	ShoreOverlay->ClearAllMeshSections();
+	if (!ShoreTriangles.IsEmpty())
+	{
+		ShoreOverlay->CreateMeshSection_LinearColor(0, ShoreVertices, ShoreTriangles, ShoreNormals, UVs, VertexColors, ShoreTangents, false);
+		ShoreOverlay->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+	bShoreOverlayBakeInitialized = true;
 	DynamicMaterial = nullptr;
 	EnsureDynamicMaterial();
 	UpdateMaterialParameters();
 
 #if WITH_EDITOR
 	WaterSurface->MarkRenderStateDirty();
+	ShoreOverlay->MarkRenderStateDirty();
 	MarkPackageDirty();
 #endif
 }
 
 void AStylizedWaterBodyActor::EnsureDynamicMaterial()
 {
-	if (!WaterSurface || DynamicMaterial || HasAnyFlags(RF_ClassDefaultObject))
+	if (!WaterSurface || !ShoreOverlay || DynamicMaterial || HasAnyFlags(RF_ClassDefaultObject))
 	{
 		return;
 	}
@@ -350,6 +412,7 @@ void AStylizedWaterBodyActor::EnsureDynamicMaterial()
 
 	DynamicMaterial = UMaterialInstanceDynamic::Create(ParentMaterial, this);
 	WaterSurface->SetMaterial(0, DynamicMaterial);
+	ShoreOverlay->SetMaterial(0, DynamicMaterial);
 }
 
 void AStylizedWaterBodyActor::UpdateMaterialParameters()
@@ -412,6 +475,9 @@ void AStylizedWaterBodyActor::PostEditChangeProperty(FPropertyChangedEvent& Prop
 		ChangedPropertyName == GET_MEMBER_NAME_CHECKED(AStylizedWaterBodyActor, MaximumDepth) ||
 		ChangedPropertyName == GET_MEMBER_NAME_CHECKED(AStylizedWaterBodyActor, TraceHeight) ||
 		ChangedPropertyName == GET_MEMBER_NAME_CHECKED(AStylizedWaterBodyActor, TerrainTraceChannel) ||
+		ChangedPropertyName == GET_MEMBER_NAME_CHECKED(AStylizedWaterBodyActor, bEnableTerrainShoreOverlay) ||
+		ChangedPropertyName == GET_MEMBER_NAME_CHECKED(AStylizedWaterBodyActor, ShoreOverlayOffset) ||
+		ChangedPropertyName == GET_MEMBER_NAME_CHECKED(AStylizedWaterBodyActor, ShoreFoamDepth) ||
 		ChangedPropertyName == GET_MEMBER_NAME_CHECKED(AStylizedWaterBodyActor, bSampleTerrainOnRebuild);
 
 	if (bGeometryChanged)

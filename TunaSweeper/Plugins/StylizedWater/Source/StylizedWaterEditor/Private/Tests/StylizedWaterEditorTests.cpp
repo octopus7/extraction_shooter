@@ -139,13 +139,14 @@ bool FStylizedWaterGeneratedAssetsTest::RunTest(const FString& Parameters)
 	};
 
 	const FVector WaterLocation = WaterBody->GetActorLocation();
-	AActor* ShallowFloor = SpawnDepthFloor(WaterLocation + FVector(-1000.0, 0.0, -110.0));
+	AActor* DryShoreFloor = SpawnDepthFloor(WaterLocation + FVector(-1000.0, 0.0, 10.0));
 	AActor* DeepFloor = SpawnDepthFloor(WaterLocation + FVector(1000.0, 0.0, -810.0));
-	TestNotNull(TEXT("Shallow depth test floor spawned"), ShallowFloor);
+	TestNotNull(TEXT("Dry shore test floor spawned above the water plane"), DryShoreFloor);
 	TestNotNull(TEXT("Deep depth test floor spawned"), DeepFloor);
 	WaterBody->bSampleTerrainOnRebuild = true;
 	WaterBody->RebuildAndBakeDepth();
 	TestTrue(TEXT("Depth bake result reports successful trace hits"), WaterBody->LastDepthBakeResult.Contains(TEXT("hits")));
+	TestTrue(TEXT("Depth bake result reports generated shore overlay geometry"), WaterBody->LastDepthBakeResult.Contains(TEXT("shore overlay")));
 	TestNotNull(TEXT("Water body owns a procedural surface"), WaterBody->WaterSurface.Get());
 	if (WaterBody->WaterSurface)
 	{
@@ -173,10 +174,27 @@ bool FStylizedWaterGeneratedAssetsTest::RunTest(const FString& Parameters)
 		}
 		TestNotNull(TEXT("Generated water body connects its material automatically"), WaterBody->WaterSurface->GetMaterial(0));
 	}
-
-	if (ShallowFloor)
+	TestNotNull(TEXT("Water body owns a terrain-following shore overlay"), WaterBody->ShoreOverlay.Get());
+	if (WaterBody->ShoreOverlay)
 	{
-		ShallowFloor->Destroy();
+		const FProcMeshSection* ShoreSection = WaterBody->ShoreOverlay->GetProcMeshSection(0);
+		TestNotNull(TEXT("Dry shoreline creates an overlay mesh section"), ShoreSection);
+		if (ShoreSection)
+		{
+			float MaximumShoreHeight = -MAX_flt;
+			for (const FProcMeshVertex& Vertex : ShoreSection->ProcVertexBuffer)
+			{
+				MaximumShoreHeight = FMath::Max(MaximumShoreHeight, Vertex.Position.Z);
+			}
+			TestTrue(TEXT("Shore overlay reaches terrain above the flat water plane"), MaximumShoreHeight > 10.0f);
+			TestTrue(TEXT("Shore overlay has drawable shoreline triangles"), ShoreSection->ProcIndexBuffer.Num() > 0);
+		}
+		TestNotNull(TEXT("Shore overlay shares the automatic water material"), WaterBody->ShoreOverlay->GetMaterial(0));
+	}
+
+	if (DryShoreFloor)
+	{
+		DryShoreFloor->Destroy();
 	}
 	if (DeepFloor)
 	{
