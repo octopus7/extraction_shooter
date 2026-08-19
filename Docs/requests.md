@@ -6493,3 +6493,8 @@
 
 - `LibraryLogo.png`의 기존 크림색 글자와 금빛 내부 글로우를 유지하면서 알파 실루엣 뒤에 `#17313A`, 불투명도 50%, 15px 블러의 짙은 청록색 외곽 글로우를 추가했다.
 - 밝은 하늘색과 어두운 청록색 배경 합성 미리보기에서 밝은 배경의 윤곽 대비가 개선되고 어두운 배경의 금빛 발광이 유지되는지 확인했으며, 결과는 기존 `1479×720` sRGB RGBA PNG 규격으로 저장했다.
+
+## 2026-08-20 06:51:27 (소요시간: 00:00:41)
+
+- Git 커밋 `fdeab29`의 `steamworks/capsule-images/LibraryCapsule.png` 원본을 가져와 파일명 끝에 `_old`를 붙인 `steamworks/capsule-images/LibraryCapsule_old.png`로 저장했다.
+- 그림 내용과 채널 구성은 변경하지 않고 `1024×1536` 원본을 Steam Library Capsule 규격 `600×900`으로 Lanczos 리샘플했으며, sRGB RGBA PNG와 완전 불투명 상태를 유지하는지 확인했다.
