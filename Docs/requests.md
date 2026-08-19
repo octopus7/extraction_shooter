@@ -1,5 +1,13 @@
 # 요청 기록
 
+## 2026-08-20 01:04:00 (소요시간: 00:09:04)
+
+- StylizedWater의 지형 추종 쇼어 오버레이가 불투명한 흰 조각과 날카로운 격자 경계로 보이던 문제를 수정했다.
+- 본 수면의 masked Single Layer Water와 분리된 Default Lit 반투명 `M_StylizedWaterShoreOverlay` 및 `MI_StylizedWater_ShoreOverlay`를 플러그인이 내부 생성·연결하도록 추가했다.
+- signed-depth 기반 연속 알파 페이드로 얕은 물막과 거품을 분리하고 `Shore Water Opacity`, `Shore Foam Opacity` 사용자 조절값을 추가했다. 오버레이의 깊은 쪽 메시 경계는 알파가 0이 된 뒤 끝나도록 여유 영역을 확보했다.
+- 내부 에셋 버전을 5로 올리고 BP 템플릿, 생성 에셋, 문서와 자동화 테스트를 갱신했다.
+- UE 5.7 UHT 및 StylizedWater 모듈 빌드, DX12/SM6 `StylizedWater.Editor.GeneratedAssetsAndBody` 자동화 테스트, 전체 `TunaSweeperEditor` 빌드와 `git diff --check`가 모두 성공했다.
+
 ## 2026-08-12 01:22:40 (소요시간: 00:05:40)
 
 - `Videos/devTunaCut.mp4`를 `TunaSweeper/Content/Movies/devTunaCut.mp4`로 복사하고 원본과 SHA-256 해시가 일치하는지 확인함.
@@ -6342,12 +6350,42 @@
 - 기존 `ATunaSweeperWarpPointActor::WarpInstigator`가 즉시 이동하는 대신 전환 컴포넌트를 찾거나 동적으로 생성해 호출하고, 화면이 가려진 중간 시점의 실제 이동 성공 후에만 기존 워프 퀘스트 알림을 보내도록 연결했다.
 - UE 5.7 `TunaSweeperEditor Win64 Development` 빌드와 `TunaSweeper Win64 Development` 게임 타깃 전체 빌드에 성공했고, DX12·PCD3D_SM6 에디터에서 플러그인 자산 생성과 두 PP 머티리얼의 셰이더 컴파일 성공을 확인했다. 사용자가 수정한 `RaidMap`과 `FoldingCanopyGarageDoor` 변경은 수정하거나 이번 커밋에 포함하지 않았다.
 
+## 2026-08-20 00:38:00 (소요시간: 00:08:45)
+
+- 동료 NPC 이름을 캔봇에서 두더지로 바꾸고 로봇이 아닌 생물로 전환하기 위한 공개 프로젝트 변경 범위를 조사했다.
+- 활성 텍스트 53개 파일의 캔봇 명칭 1,653건, 로봇 전용 액터 구조를 포함한 C++ 15개 파일, UE/Blender 캔봇 시각 리소스 10개를 변경 대상으로 분류했다. 과거 요청·질문 로그는 이력 보존 대상으로 제외했다.
+- 두더지의 말투는 반말과 루나를 챙기는 성격을 유지하고, 자기 진단·상태 보고·명령문·전자음·충전·센서·로봇 신체 묘사는 생물형 행동과 자연스러운 대사로 개작해야 함을 확인했다. 기존 청소 로봇·신호봇 등 다른 로봇 NPC는 이번 변경 범위에서 제외했다.
+- 기존 세이브는 전부 삭제할 예정이므로 `provider.canbot`, `dialogue.canbot.*` 등의 내부 ID에 대한 레거시 별칭·마이그레이션은 관리 범위에서 제외하고 일괄 개명할 수 있다고 정리했다.
+
+## 2026-08-20 00:43:30 (소요시간: 00:09:30)
+
+- 워프 전환 타이밍과 렌더링·입력 설정을 한 곳에서 관리하는 `UTunaWarpTransitionProfile` Data Asset 타입을 플러그인에 추가하고, 사람이 수정할 공개 기본 애셋 `/TunaWarpTransition/Profiles/DA_WarpTransition_Default`를 생성했다.
+- `UTunaSweeperGameInstance`가 기본 Warp Transition Profile을 제공하도록 연결하고, 런타임에서 동적으로 생성되는 전환 컴포넌트가 GameInstance 프로필을 자동 적용하도록 했다. Pawn 컴포넌트에 별도 프로필을 지정하면 전역 프로필보다 우선한다.
+- 기본 프로필 자동 생성기는 애셋이 없을 때만 생성해 이후 디자이너 편집을 보존하며, 사용 위치와 우선순위를 플러그인 README에 기록했다.
+- UE 5.7 `TunaSweeperEditor Win64 Development`와 `TunaSweeper Win64 Development` 빌드에 성공했고, 새 에디터에서 기본 DA의 실제 생성·저장과 플러그인 로드 로그를 확인했다. 기존의 다른 작업 트리 변경은 이번 커밋에서 제외했다.
+
+## 2026-08-20 00:37:08 (소요시간: 00:16:16)
+
+- StylizedWater의 런업·거품이 평평한 수면 메시에서만 계산되어, 수면보다 높은 물가 지형 아래에 가려지는 구조적 원인을 확인했다.
+- 깊이 베이크의 지형 충돌점을 따라가는 비충돌 `ShoreOverlay` 절차 메시를 런타임 액터에 추가하고, 기존 깊이 LUT·수선·런업·거품 Dynamic Material을 공유해 건조 지형 위에서도 잔파도가 보이도록 구현했다.
+- `Enable Terrain-Following Runup`과 `Terrain Overlay Offset` 설정을 제공하고, 기존 배치 액터도 다음 Construction 또는 깊이 재베이크에서 새 오버레이를 생성하도록 버전 상태를 저장했다. `Last Bake Result`에는 생성된 쇼어 삼각형 수도 표시한다.
+- 내부 T_/M_/MI_/BP_ 애셋 버전을 4로 갱신하고, 새 `ShoreOverlay` 컴포넌트가 포함된 Blueprint 템플릿을 재생성했다.
+- 별도 UE 5.7 검증 프로젝트의 전체 UHT·런타임·Editor 모듈 빌드와 원본 프로젝트의 StylizedWater 모듈 제한 빌드를 통과했다. DX12·SM6 자동화 테스트에서 물보다 20cm 높은 건조 지형과 800cm 깊은 지형을 함께 베이크해 오버레이가 육지 위까지 도달하고 삼각형·재질을 갖는지 검증했다.
+- 프로젝트 전체 빌드는 동시에 진행 중인 별도 `TunaSweeperProjectile.cpp` 컴파일 오류 때문에 실패했으며 해당 파일은 수정하지 않았다. `RaidMap`, 차고문, 워프, HUD·스크래치 및 두더지 전환 작업도 이번 커밋에서 제외했다.
+
 ## 2026-08-20 00:35:53 (소요시간: 00:19:55)
 
 - 굴러서 적의 투사체 또는 근접 공격을 실제 피격 범위 바로 바깥에서 회피하면 발동하는 런타임 전용 스크래치 시스템을 추가했다. 투사체는 프레임 이동 선분과 플레이어 캡슐 사이의 연속 최단거리로 판정하고, 근접 공격은 실제 타격 판정 시점의 사거리와 회피 상태를 함께 확인한다.
 - 스크래치 게이지는 0~100으로 관리하며 투사체 회피 8, 근접 회피 12를 기본 충전량으로 사용한다. 동일 공격의 중복 충전을 막고, 발동 시 실시간 기준의 짧은 월드 감속과 플레이어 속도 보정, 밝고 저채도인 시간 변화 무지개 오버레이를 적용한다.
 - 체력바 옆에 아래에서 위로 차오르는 세로형 무지개 게이지를 추가하고, 플레이어 오버레이 머티리얼과 UI 게이지 머티리얼을 에디터 일회성 생성 작업으로 제작·저장했다.
 - UE 5.7 모듈 컴파일·링크와 에디터 애셋 생성·셰이더 컴파일을 완료했으며, NullRHI 게임 실행에서 `RaidMap`과 게임 모드·플레이어·HUD 로드 및 정상 종료 코드 0을 확인했다. 기존의 다른 작업 트리 변경은 이번 커밋에서 제외했다.
+
+## 2026-08-20 01:05:01 (소요시간: 00:02:30)
+
+- 숲 오솔길, 울타리, 독립 벽, 건물 외벽, 벽 상단 장식과 T자·십자 교차점을 지원하는 UE 5.7 `SplineWorldBuilder` 플러그인 구현 계획을 수립했다.
+- 기존 프로젝트 플러그인 관례에 맞춰 런타임 코어와 `UncookedOnly` Editor 모듈을 분리하고, 스플라인 샘플링·모듈 분배·교차점 그래프·결정적 재생성은 C++ 공통 코어에 두며 PCG는 선택적 산포 확장으로 제한하는 구조를 제안했다.
+- 공용 프로필 Data Asset, 체인과 접합 노드, Spline Mesh·HISM·특수 접합 메시의 출력 구분, 지형 투영·개구부 마커·모서리 분류·재생성·동결/베이크·검증 기능을 공통 기반으로 계획했다.
+- 울타리 수직 슬라이스를 먼저 완성한 뒤 벽·상단 장식, 오솔길, 닫힌 건물 외벽, T자·십자 접합 그래프 순으로 확장하고, 자동화 테스트·성능 검증·에디터 UX·문서화를 마지막 안정화 단계로 두었다. 이번 요청에서는 플러그인이나 게임 애셋을 구현하지 않았다.
 
 ## 2026-08-20 00:58:10 (소요시간: 00:08:06)
 
@@ -6361,3 +6399,66 @@
 - 잔상은 깊이 테스트를 유지하고 카메라 반대 방향으로 3cm 이동시켜 실루엣이 겹쳐도 현재 플레이어 본체가 항상 잔상보다 앞에 그려지도록 했다.
 - 본체의 Additive 오버레이는 전체를 희게 덮지 않도록 내부 발광을 제거하고 약한 Fresnel 림만 남겼다. 별도의 Translucent 잔상 머터리얼과 Skeletal Mesh 사용 플래그를 생성·저장했다.
 - UE 5.7 UHT와 소스 컴파일을 통과하고, 열려 있는 다른 에디터를 유지한 채 접미사 런타임·Editor DLL 링크에 성공했다. 상시 연출 설정이 켜진 NullRHI 시작 화면에서 새 모듈과 머터리얼 참조, `IntroMap` 로드 및 정상 종료 코드 0을 확인했다.
+
+## 2026-08-20 01:08:30 (소요시간: 00:27:45)
+
+- `TunaSweeper/Plugins/SplineWorldBuilder` UE 5.7 플러그인을 추가하고 런타임 코어와 `UncookedOnly` Editor 모듈을 분리했다. 공용 프로필 Data Asset은 오솔길·울타리·벽·건물벽·상단 장식 용도를 구분하며, 현재 첫 수직 슬라이스는 강체 벽 모듈과 접합 그래프를 구현한다.
+- 비분기 `ASplineWorldBuilderActor`가 스플라인 구간에 Straight 메시를 HISM으로 배치하고 자유 끝·모서리·Junction 반경을 비워 End/Corner 특수 메시와 정확히 연결하도록 했다. 모듈 길이 오차는 프로필의 최소·최대 X 스케일 범위에서 분배하며 동일 입력의 반복 재생성 결과를 결정적으로 유지한다.
+- `ASplineWorldJunctionActor`가 연결된 체인의 시작·끝 탄젠트를 읽어 1방향 End, 2방향 Straight/Corner, 3방향 T, 4방향 Cross를 분류하고 프로필의 접합 메시를 방향에 맞춰 선택·회전하도록 구현했다. 5개 이상 연결은 명시적인 Unsupported 상태로 처리한다.
+- built-in imagegen으로 조명·원근·문자 없는 저채도 스타일라이즈드 사암 블록 심리스 텍스처를 생성해 `Resources/SourceArt/T_SplineWorldBuilder_StoneBlocks_ImageGen.png`에 원본 보존했다. Editor 모듈이 이를 Power-of-Two 패딩되는 UE 텍스처와 기본 Lit 석재 머티리얼로 변환하고 Straight/End/Corner/T/Cross 테스트 Static Mesh 5종 및 공개 `DA_SWB_TestStoneWall` 프로필을 자동 생성·버전 관리하도록 했다.
+- `TunaSweeper > World Building > Spline World Builder: Add Junction Test Set` 메뉴에서 End·직선·코너·T·십자 테스트 네트워크를 한 번에 배치하고 테스트 에셋을 강제 재생성할 수 있게 했다. 기존 레벨에는 테스트 액터를 배치하거나 저장하지 않았다.
+- UE 5.7 Editor 및 게임 타깃에서 새 Runtime/Editor 모듈 제한 빌드를 통과했고, 독립 검증 프로젝트 전체 빌드와 원본 TunaSweeper 헤드리스 로드를 확인했다. 원본 프로젝트에서 `GeneratedAssets`, `PlacementAndJunctions` 자동화 테스트 2개가 성공해 텍스처·머티리얼·메시·프로필 연결, 접합 분류·메시 선택, 체인 절단, 끝·모서리 생성과 반복 재생성 결정성을 검증했다.
+- 실행 중인 기존 Unreal Editor의 게임 DLL 점유로 프로젝트 전체 재링크는 수행할 수 없었으며, 새 플러그인 GUI 메뉴는 다음 정상 에디터 재시작부터 표시된다. 검증용 임시 프로젝트와 실패한 추가 에디터 인스턴스는 제거하고 기존 사용자 에디터 프로세스와 다른 작업 트리 변경은 유지했다.
+
+## 2026-08-20 00:56:31 (소요시간: 00:44:44)
+
+- 동료 NPC를 캔봇에서 두더지로 전환하고, 활성 문서·SSOT·데모 대본·소설·퀘스트 시뮬레이터·런타임 JSON/CSV·C++의 이름과 `provider.mole`, `quest.speaker.mole`, `ui.dialogue.mole.*`, `MoleDialogue` 식별자를 일관되게 적용했다.
+- 두더지의 대사를 반말로 유지하면서 루나의 안전·식사·피로를 먼저 챙기는 생물 동료 톤으로 고쳐 썼다. 센서·기능·상태·완료 보고식 대사와 LED·전자음·금속 몸체 묘사를 눈·수염·털·앞발 행동과 자연스러운 회화로 변경했고, 청소 로봇 등 다른 기계 캐릭터의 로봇 말투는 유지했다.
+- `ATunaSweeperMoleCompanionActor`를 추가해 두더지 실루엣의 몸·머리·코 메시 구조, 플레이어 바라보기, 대화·퀘스트 상호작을 구성하고 `/Game/Characters/Mole/BP_Mole`을 생성했다. 예전 LED 로봇 표정 설정은 두더지 스폰 데이터에서 제거했다.
+- 레거시 호환성을 관리 범위에서 제외하는 요청에 따라 기존 CanBot Blueprint·메시·머티리얼·텍스처·Blender/FBX 리소스 10개와 전용 C++ 로봇 클래스를 삭제했다. 다른 로봇과 효과가 공유하는 LED 표현 시스템은 보존했다.
+- JSON/CSV 파싱·문자열 키 참조·활성 레거시 문자열·바이너리 참조·두더지-로봇 서사 결합 검사를 통과했다. Quest Flow Simulator는 12개 테스트와 생산 빌드가 성공했고, UE 5.7 `TunaSweeper Win64 Development` 게임 타깃 빌드도 성공했다. 전체 Editor 타깃은 실행 중인 Unreal Editor의 DLL 점유와 별도 `SplineWorldBuilderEditor` 헤더 누락 때문에 완료되지 않았으며, 기존 에디터 프로세스는 유지했다.
+
+## 2026-08-20 01:43:41 (소요시간: 00:04:00)
+
+- 두더지 전환 관련 공개 코드·퀘스트 데이터·대사 문서·교체 리소스 변경만 파일별로 선별해 커밋했다.
+- 기존 스테이징과 `RaidMap`, 다른 플러그인, `SplineWorldBuilder`, 프로젝트 설정 등 별도 작업 변경은 커밋에서 제외하고 그대로 유지했다.
+
+## 2026-08-20 02:19:48 (소요시간: 00:00:37)
+
+- `SplineWorldBuilder` 플러그인 전체와 `TunaSweeper.uproject`의 플러그인 활성화 변경만 `053d954` (`feat: add spline world builder junction framework`)로 선별 커밋했다.
+- 기존에 스테이징되어 있던 `Docs/requests.md`와 다른 작업 트리 변경은 커밋에서 제외하고 그대로 유지했다.
+
+## 2026-08-20 03:19:07 (소요시간: 00:00:45)
+
+- `steamworks/capsule-images`의 캡슐 이미지 5종을 Steamworks 표준 해상도로 Lanczos 리샘플했다: 헤더 `920×430`, 메인 `1232×706`, 스몰 `462×174`, 세로형 2종 `748×896`.
+- 모든 결과가 sRGB PNG로 정상 디코딩되고 목표 치수와 기존 알파 채널 구성을 유지하는지 확인했다.
+
+## 2026-08-20 03:21:44 (소요시간: 00:00:35)
+
+- Steamworks 캡슐 이미지 리샘플 변경 5개만 선별해 `27e47e6` (`chore: resample Steam capsule images`)으로 커밋했다.
+- 기존 `Docs/requests.md`, `Docs/questions.md`, `RaidMap`의 별도 미커밋 변경은 커밋에서 제외하고 그대로 유지했다.
+
+## 2026-08-20 03:24:00 (소요시간: 00:03:18)
+
+- built-in imagegen으로 버티컬 캡슐 2종의 짙은 청록색과 은은한 금빛 안개, 페인터리 질감을 참조한 Steam 상점 페이지 배경을 생성했다.
+- 캐릭터·동물·로고·문자·구체적인 사물을 제외하고 콘텐츠와 경쟁하지 않는 저대비 구도로 구성했으며, `steamworks/capsule-images/page-background.png`에 정확한 `1438×810` sRGB PNG로 저장했다.
+
+## 2026-08-20 03:28:24 (소요시간: 00:04:41)
+
+- Git의 리샘플 전 `capsule-small.png` 고해상도 원본을 별도로 추출해 작은 Steam 목록 표시에서 로고가 더 잘 읽히도록 구도를 재구성했다.
+- 원본을 왼쪽 기준으로 약 `1.30×` 확대 크롭해 로고 비중을 키우면서 오른쪽의 루나 얼굴과 두더지 실루엣을 유지하고, 최종 `462×174` sRGB PNG로 `steamworks/capsule-images/capsule-small.png`를 교체했다.
+
+## 2026-08-20 03:34:34 (소요시간: 00:01:03)
+
+- built-in imagegen으로 기존 페이지 배경의 청록·금빛 팔레트, 저대비 조명, 어두운 가장자리와 중앙 하단의 금빛 안개를 유지하면서 서리 낀 스테인드글라스식 색면 컷아웃을 반영했다.
+- 검은 납선·고채도 보석색·강한 하이라이트·작은 모자이크 없이 넓고 반투명한 유리 색면만 추가하고, `steamworks/capsule-images/page-background.png`를 정확한 `1438×810` sRGB PNG로 교체했다.
+
+## 2026-08-20 03:20:30 (소요시간: 00:01:30)
+
+- 차고문 높이 절반 축소와 패널·레일·적층 동작 파생 계산을 담은 `FoldingCanopyGarageDoor` C++ 두 파일만 Git 커밋 `5fa2772`로 기록했다.
+- 요청한 이전 작업 제한을 유지해 빌드, Unreal Editor 실행, BP·uasset 재생성 또는 재임포트는 수행하지 않았으며 다른 작업 트리 변경은 커밋에서 제외했다.
+
+## 2026-08-20 03:37:16 (소요시간: 00:02:03)
+
+- `ChatGPT-Images-2`의 `detail_level: 1 — Clean Simplified` 기준과 프로젝트의 `image-detail-denoise` 스킬을 적용해 페이지 배경의 주름·오렌지필 같은 요철, 점묘, 노이즈성 미세 질감과 자글거리는 명암을 강하게 정리했다.
+- built-in imagegen 편집으로 청록·금빛 팔레트, 넓은 스테인드글라스 색면, 어두운 가장자리와 중앙 하단 조명을 유지하면서 매끈한 큰 명암 덩어리로 단순화하고, 최종 `1438×810` sRGB PNG에 반영했다.
