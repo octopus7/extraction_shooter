@@ -2,6 +2,7 @@
 #include "TunaSweeperTopDownCharacterShared.h"
 
 #include "Component/TunaSweeperFactionComponent.h"
+#include "Component/TunaSweeperScratchComponent.h"
 
 ATunaSweeperTopDownCharacter::ATunaSweeperTopDownCharacter()
 {
@@ -71,6 +72,7 @@ ATunaSweeperTopDownCharacter::ATunaSweeperTopDownCharacter()
 	FactionComponent->SetFactionId(TunaSweeperFactionIds::Player);
 	PlayerVisionComponent = CreateDefaultSubobject<UTunaSweeperPlayerVisionComponent>(TEXT("PlayerVisionComponent"));
 	HeadphoneListenerComponent = CreateDefaultSubobject<UTunaSweeperHeadphoneListenerComponent>(TEXT("HeadphoneListenerComponent"));
+	ScratchComponent = CreateDefaultSubobject<UTunaSweeperScratchComponent>(TEXT("ScratchComponent"));
 	StaminaGaugeWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("StaminaGaugeWidget"));
 	StaminaGaugeWidgetComponent->SetupAttachment(RootComponent);
 	StaminaGaugeWidgetComponent->SetRelativeLocation(TunaSweeperStaminaGauge::RelativeLocation);

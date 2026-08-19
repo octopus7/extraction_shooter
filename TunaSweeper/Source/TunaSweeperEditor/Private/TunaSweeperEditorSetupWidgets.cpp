@@ -2435,6 +2435,10 @@ namespace TunaSweeperEditorSetup
 		USizeBox* HealthIconBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("HealthIconBox"));
 		UImage* HealthIcon = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("HealthIcon"));
 		UTextBlock* HealthText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("HealthText"));
+		USizeBox* ScratchBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("ScratchBox"));
+		UOverlay* ScratchOverlay = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), TEXT("ScratchOverlay"));
+		UBorder* ScratchBackdrop = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("ScratchBackdrop"));
+		UProgressBar* ScratchGauge = WidgetTree->ConstructWidget<UProgressBar>(UProgressBar::StaticClass(), TEXT("ScratchGauge"));
 		USizeBox* HydrationBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("HydrationBox"));
 		UOverlay* HydrationOverlay = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), TEXT("HydrationOverlay"));
 		UBorder* HydrationBackdrop = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("HydrationBackdrop"));
@@ -2454,6 +2458,7 @@ namespace TunaSweeperEditorSetup
 
 		if (!RootSizeBox || !RootOverlay || !VitalsRow ||
 			!HealthBox || !HealthOverlay || !HealthBackdrop || !HealthGauge || !HealthIconBackdrop || !HealthIconBox || !HealthIcon || !HealthText ||
+			!ScratchBox || !ScratchOverlay || !ScratchBackdrop || !ScratchGauge ||
 			!HydrationBox || !HydrationOverlay || !HydrationBackdrop || !HydrationRing || !HydrationIconBox || !HydrationIcon ||
 			!HungerBox || !HungerOverlay || !HungerBackdrop || !HungerRing || !HungerIconBox || !HungerIcon)
 		{
@@ -2469,6 +2474,9 @@ namespace TunaSweeperEditorSetup
 		UTexture2D* HungerIconTexture = LoadObject<UTexture2D>(
 			nullptr,
 			*GetAssetObjectPath(UIIconAssetPath, HudStatusMeatIconAssetName));
+		UMaterialInterface* ScratchGaugeMaterial = LoadObject<UMaterialInterface>(
+			nullptr,
+			*GetAssetObjectPath(UIAssetPath, ScratchGaugeMaterialAssetName));
 
 		WidgetTree->RootWidget = RootSizeBox;
 		RootSizeBox->SetWidthOverride(GameplayBottomStatusWidth);
@@ -2562,6 +2570,57 @@ namespace TunaSweeperEditorSetup
 			HealthTextSlot->SetPadding(FMargin(26.0f, 0.0f, 6.0f, 0.0f));
 		}
 
+		ScratchBox->SetWidthOverride(14.0f);
+		ScratchBox->SetHeightOverride(44.0f);
+		ScratchBox->SetContent(ScratchOverlay);
+		ScratchBackdrop->SetBrush(MakeRoundedBoxBrush(
+			FVector2D(14.0f, 44.0f),
+			FLinearColor(0.012f, 0.015f, 0.02f, 0.9f),
+			FLinearColor(0.68f, 0.72f, 0.82f, 0.5f),
+			1.0f,
+			5.0f));
+		if (UOverlaySlot* ScratchBackdropSlot = ScratchOverlay->AddChildToOverlay(ScratchBackdrop))
+		{
+			ScratchBackdropSlot->SetHorizontalAlignment(HAlign_Fill);
+			ScratchBackdropSlot->SetVerticalAlignment(VAlign_Fill);
+		}
+
+		FProgressBarStyle ScratchGaugeStyle;
+		ScratchGaugeStyle.SetBackgroundImage(MakeRoundedBoxBrush(
+			FVector2D(8.0f, 38.0f),
+			FLinearColor::Transparent,
+			FLinearColor::Transparent,
+			0.0f,
+			3.0f));
+		if (ScratchGaugeMaterial)
+		{
+			FSlateBrush ScratchFillBrush;
+			ScratchFillBrush.DrawAs = ESlateBrushDrawType::Image;
+			ScratchFillBrush.SetImageSize(FVector2D(8.0f, 38.0f));
+			ScratchFillBrush.SetResourceObject(ScratchGaugeMaterial);
+			ScratchFillBrush.TintColor = FSlateColor(FLinearColor::White);
+			ScratchGaugeStyle.SetFillImage(ScratchFillBrush);
+		}
+		else
+		{
+			ScratchGaugeStyle.SetFillImage(MakeRoundedBoxBrush(
+				FVector2D(8.0f, 38.0f),
+				FLinearColor(0.62f, 0.9f, 1.0f, 1.0f),
+				FLinearColor::White,
+				0.0f,
+				3.0f));
+		}
+		ScratchGauge->SetWidgetStyle(ScratchGaugeStyle);
+		ScratchGauge->SetBarFillType(EProgressBarFillType::BottomToTop);
+		ScratchGauge->SetFillColorAndOpacity(FLinearColor::White);
+		ScratchGauge->SetPercent(0.0f);
+		if (UOverlaySlot* ScratchGaugeSlot = ScratchOverlay->AddChildToOverlay(ScratchGauge))
+		{
+			ScratchGaugeSlot->SetHorizontalAlignment(HAlign_Fill);
+			ScratchGaugeSlot->SetVerticalAlignment(VAlign_Fill);
+			ScratchGaugeSlot->SetPadding(FMargin(3.0f));
+		}
+
 		auto ConfigureRingStatusSlot = [](
 			USizeBox* Box,
 			UOverlay* Overlay,
@@ -2650,6 +2709,12 @@ namespace TunaSweeperEditorSetup
 		{
 			HealthBoxSlot->SetVerticalAlignment(VAlign_Center);
 		}
+		UHorizontalBoxSlot* ScratchBoxSlot = VitalsRow->AddChildToHorizontalBox(ScratchBox);
+		if (ScratchBoxSlot)
+		{
+			ScratchBoxSlot->SetPadding(FMargin(5.0f, 0.0f, 0.0f, 0.0f));
+			ScratchBoxSlot->SetVerticalAlignment(VAlign_Center);
+		}
 		UHorizontalBoxSlot* HydrationBoxSlot = VitalsRow->AddChildToHorizontalBox(HydrationBox);
 		if (HydrationBoxSlot)
 		{
@@ -2664,6 +2729,7 @@ namespace TunaSweeperEditorSetup
 		}
 
 		RegisterWidgetVariable(WidgetBlueprint, HealthGauge);
+		RegisterWidgetVariable(WidgetBlueprint, ScratchGauge);
 		RegisterWidgetVariable(WidgetBlueprint, HealthText);
 		RegisterWidgetVariable(WidgetBlueprint, HungerRing);
 		RegisterWidgetVariable(WidgetBlueprint, HydrationRing);

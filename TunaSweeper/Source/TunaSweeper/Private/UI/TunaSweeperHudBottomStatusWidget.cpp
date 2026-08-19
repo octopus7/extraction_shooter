@@ -62,6 +62,17 @@ void UTunaSweeperHudBottomStatusWidget::SetHudState(const FTunaSweeperPlayerHudS
 	ApplyHudState();
 }
 
+void UTunaSweeperHudBottomStatusWidget::SetScratchState(float CurrentScratch, float MaxScratch)
+{
+	ScratchPercent = MaxScratch > 0.0f
+		? FMath::Clamp(CurrentScratch / MaxScratch, 0.0f, 1.0f)
+		: 0.0f;
+	if (ScratchGauge)
+	{
+		ScratchGauge->SetPercent(ScratchPercent);
+	}
+}
+
 void UTunaSweeperHudBottomStatusWidget::ApplyHudState()
 {
 	PreviewHudState.NormalizeWeightLimits();
@@ -121,6 +132,11 @@ void UTunaSweeperHudBottomStatusWidget::ApplyHudState()
 	if (HealthGauge)
 	{
 		HealthGauge->SetPercent(HealthPercent);
+	}
+
+	if (ScratchGauge)
+	{
+		ScratchGauge->SetPercent(ScratchPercent);
 	}
 
 	if (HungerGauge)

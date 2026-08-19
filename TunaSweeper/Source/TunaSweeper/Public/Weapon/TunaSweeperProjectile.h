@@ -20,6 +20,7 @@ class TUNASWEEPER_API ATunaSweeperProjectile : public AActor
 
 public:
 	ATunaSweeperProjectile();
+	virtual void Tick(float DeltaSeconds) override;
 
 	void SetDamageAmount(float InDamageAmount) { DamageAmount = FMath::Max(0.0f, InDamageAmount); }
 	float GetDamageAmount() const { return DamageAmount; }
@@ -56,6 +57,7 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	void CheckPlayerNearMiss(const FVector& PreviousLocation, const FVector& CurrentLocation);
 	void ApplyProjectileCollisionDefaults();
 	void SpawnHitEffect(const FHitResult& Hit, AActor* OtherActor, UPrimitiveComponent* OtherComp) const;
 	FVector ResolveHitEffectLocation(const FHitResult& Hit, AActor* OtherActor) const;
@@ -96,7 +98,9 @@ protected:
 	TObjectPtr<UPrimitiveComponent> AimIntentComponent;
 
 	FVector AimIntentWorldPoint = FVector::ZeroVector;
+	FVector PreviousNearMissCheckLocation = FVector::ZeroVector;
 	bool bHasAimIntentWorldPoint = false;
+	bool bNearMissReported = false;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Projectile")
 	float LifeSeconds = 3.0f;

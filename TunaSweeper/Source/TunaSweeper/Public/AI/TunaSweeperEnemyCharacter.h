@@ -303,6 +303,7 @@ private:
 	FTunaSweeperEnemyCombatProfile CombatProfile;
 
 	float CurrentHealth = 30.0f;
+	int32 MeleeAttackSerial = 0;
 	FName EnemyWeaponTypeTag = NAME_None;
 	ETunaSweeperWeaponFireMode EnemyFireMode = ETunaSweeperWeaponFireMode::NotApplicable;
 	FName EnemyImpactProfileId = NAME_None;

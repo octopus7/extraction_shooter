@@ -6,6 +6,7 @@
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Character/TunaSweeperTopDownCharacter.h"
 #include "Component/TunaSweeperDebuffComponent.h"
+#include "Component/TunaSweeperScratchComponent.h"
 #include "Component/TunaSweeperVitalsComponent.h"
 #include "Components/Border.h"
 #include "Components/Button.h"

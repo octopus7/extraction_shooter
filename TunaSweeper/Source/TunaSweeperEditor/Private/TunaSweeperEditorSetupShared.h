@@ -102,6 +102,7 @@
 #include "Materials/MaterialExpressionConstant.h"
 #include "Materials/MaterialExpressionConstant2Vector.h"
 #include "Materials/MaterialExpressionComponentMask.h"
+#include "Materials/MaterialExpressionCustom.h"
 #include "Materials/MaterialExpressionConstant3Vector.h"
 #include "Materials/MaterialExpressionDivide.h"
 #include "Materials/MaterialExpressionFresnel.h"
@@ -197,9 +198,10 @@ namespace TunaSweeperEditorSetup
 	const FString InteractionMarkerAlignmentTaskId = TEXT("2026-05-25_RebuildInteractionMarkerRequirementPreviewV1");
 	const FString PickupItemAndSpawnerTaskId = TEXT("2026-05-11_CreatePickupItemAndSpawnerAssetsV3");
 	const FString CommonGameHudTaskId = TEXT("2026-06-02_BottomActionProgressCuteLayoutV1");
+	const FString ScratchPresentationTaskId = TEXT("2026-08-20_CreateScratchNearMissPresentationV1");
 	constexpr float GameplayBottomQuickSlotWidth = 694.0f;
 	constexpr float GameplayBottomQuickSlotHeight = 208.0f;
-	constexpr float GameplayBottomStatusWidth = 274.0f;
+	constexpr float GameplayBottomStatusWidth = 294.0f;
 	constexpr float GameplayBottomStatusHeight = 58.0f;
 	constexpr float GameplayBottomStatusGap = 12.0f;
 	constexpr float GameplayBottomPanelWidth = 1120.0f;
@@ -357,6 +359,8 @@ namespace TunaSweeperEditorSetup
 	const FString HudStatusHeartIconAssetName = TEXT("T_UI_Hud_Status_Heart");
 	const FString HudStatusWaterIconAssetName = TEXT("T_UI_Hud_Status_WaterDrop");
 	const FString HudStatusMeatIconAssetName = TEXT("T_UI_Hud_Status_Meat");
+	const FString ScratchGaugeMaterialAssetName = TEXT("M_UI_ScratchGauge");
+	const FString ScratchOverlayMaterialAssetName = TEXT("M_PlayerScratchRainbowOverlay");
 	const FString UITitleTextureAssetPath = TEXT("/Game/UI/Title");
 	const FString UIStoryTextureAssetPath = TEXT("/Game/UI/Story");
 	const FString TitleLogoTextureAssetName = TEXT("tuna_sweeper_logo_transparent");
@@ -866,6 +870,7 @@ bool BuildGameHudWidgetTree(
 		TSubclassOf<UUserWidget> ExternalPanelWidgetClass);
 bool BuildPickupItemIconWidgetTree(UWidgetBlueprint* WidgetBlueprint);
 bool EnsureCommonGameHudAssets();
+bool EnsureScratchPresentationAssets();
 bool EnsureLootContainerOccupancyHeaderAssets();
 bool EnsureBackpackInventoryAssets();
 bool BuildInteractionMarkerWidgetTree(UWidgetBlueprint* WidgetBlueprint);

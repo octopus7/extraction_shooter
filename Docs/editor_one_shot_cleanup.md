@@ -31,6 +31,7 @@
 - `InteractionMarkerAlignmentTaskId`: `2026-05-25_RebuildInteractionMarkerRequirementPreviewV1`
 - `PickupItemAndSpawnerTaskId`: `2026-05-11_CreatePickupItemAndSpawnerAssetsV3`
 - `CommonGameHudTaskId`: `2026-06-02_BottomActionProgressCuteLayoutV1`
+- `ScratchPresentationTaskId`: `2026-08-20_CreateScratchNearMissPresentationV1`
 - `WorkbenchPanelWidgetTaskId`: `2026-05-29_CreateWorkbenchPanelWidgetV6`
 - `ShopRefreshStockButtonTaskId`: `2026-05-29_AddShopRefreshStockButtonV1`
 - `SplitExternalContainerPanelTaskId`: `2026-05-30_SplitExternalContainerPanelsV1`
@@ -78,9 +79,8 @@
 - `ExperimentalVegetationAssetTaskId`: `2026-05-24_CreateExperimentalVegetationStaticMeshV4`
 - `TurbulentConiferOcclusionRevealTaskId`: `2026-06-08_UpdateTurbulentConiferOcclusionRevealV1`
 - `CoverPointAssetTaskId`: `2026-05-16_CreateCoverPointBlueprintV1`
-- `CanBotBlueprintTaskId`: `2026-05-25_CreateCanBotBlueprintV1`
+- `MoleBlueprintTaskId`: `2026-05-25_CreateMoleBlueprintV1`
 
 ## Inline literal RunOnce keys
 
 - `2026-07-06_PuddleSkyReflectionMaterialNoRippleV2`
-

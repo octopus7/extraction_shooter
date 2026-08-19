@@ -4,6 +4,7 @@
 #include "Component/TunaSweeperDebuffComponent.h"
 #include "Component/TunaSweeperEnemySensorDebugComponent.h"
 #include "Component/TunaSweeperFactionComponent.h"
+#include "Component/TunaSweeperScratchComponent.h"
 #include "Component/TunaSweeperVisionSubjectComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/PrimitiveComponent.h"
@@ -1101,6 +1102,17 @@ bool ATunaSweeperEnemyCharacter::ApplyMeleeDamageTo(AActor* TargetActor)
 	const FVector ToTarget = FVector(TargetLocation.X - ActorLocation.X, TargetLocation.Y - ActorLocation.Y, 0.0f);
 	const FVector AttackDirection = ToTarget.GetSafeNormal();
 	const FVector ResolvedAttackDirection = AttackDirection.IsNearlyZero() ? GetActorForwardVector() : AttackDirection;
+	++MeleeAttackSerial;
+	if (UTunaSweeperScratchComponent* ScratchComponent = TargetActor->FindComponentByClass<UTunaSweeperScratchComponent>())
+	{
+		const float ClearanceCm = FVector::Dist2D(ActorLocation, TargetLocation) - AttackRange;
+		ScratchComponent->TryRegisterNearMiss(
+			this,
+			MeleeAttackSerial,
+			ETunaSweeperNearMissAttackType::Melee,
+			ClearanceCm,
+			true);
+	}
 	SpawnMeleeSwingEffect(ResolvedAttackDirection);
 
 	const float AppliedDamage = UGameplayStatics::ApplyDamage(

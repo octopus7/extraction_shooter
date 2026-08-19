@@ -1,6 +1,9 @@
 #include "Weapon/TunaSweeperProjectile.h"
 
 #include "AI/TunaSweeperEnemyCharacter.h"
+#include "Character/TunaSweeperTopDownCharacter.h"
+#include "Component/TunaSweeperScratchComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "AI/TunaSweeperRollingBomberSpawner.h"
 #include "Character/TunaSweeperTopDownCharacter.h"
 #include "Component/TunaSweeperVitalsComponent.h"
@@ -82,6 +85,9 @@ namespace
 
 ATunaSweeperProjectile::ATunaSweeperProjectile()
 {
+	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bStartWithTickEnabled = true;
+
 	PrimaryActorTick.bCanEverTick = false;
 
 	CollisionComponent = CreateDefaultSubobject<USphereComponent>(TEXT("CollisionComponent"));
@@ -123,6 +129,7 @@ ATunaSweeperProjectile::ATunaSweeperProjectile()
 void ATunaSweeperProjectile::BeginPlay()
 {
 	Super::BeginPlay();
+	AddTickPrerequisiteComponent(ProjectileMovement);
 
 	ApplyProjectileCollisionDefaults();
 	IgnoreActor(GetOwner());
@@ -144,7 +151,72 @@ void ATunaSweeperProjectile::BeginPlay()
 			}
 		}
 	}
+	PreviousNearMissCheckLocation = GetActorLocation();
 	SetLifeSpan(LifeSeconds);
+}
+
+void ATunaSweeperProjectile::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+	(void)DeltaSeconds;
+
+	const FVector CurrentLocation = GetActorLocation();
+	if (!bNearMissReported)
+	{
+		CheckPlayerNearMiss(PreviousNearMissCheckLocation, CurrentLocation);
+	}
+	PreviousNearMissCheckLocation = CurrentLocation;
+}
+
+void ATunaSweeperProjectile::CheckPlayerNearMiss(
+	const FVector& PreviousLocation,
+	const FVector& CurrentLocation)
+{
+	UWorld* World = GetWorld();
+	ATunaSweeperTopDownCharacter* PlayerCharacter = World
+		? Cast<ATunaSweeperTopDownCharacter>(UGameplayStatics::GetPlayerPawn(World, 0))
+		: nullptr;
+	UTunaSweeperScratchComponent* ScratchComponent = PlayerCharacter
+		? PlayerCharacter->GetScratchComponent()
+		: nullptr;
+	UCapsuleComponent* PlayerCapsule = PlayerCharacter
+		? PlayerCharacter->GetCapsuleComponent()
+		: nullptr;
+	if (!PlayerCharacter || !PlayerCharacter->IsRolling() || !ScratchComponent || !PlayerCapsule || !CollisionComponent)
+	{
+		return;
+	}
+
+	const float CapsuleRadius = PlayerCapsule->GetScaledCapsuleRadius();
+	const float CapsuleHalfHeight = PlayerCapsule->GetScaledCapsuleHalfHeight();
+	const FVector CapsuleAxisOffset = PlayerCharacter->GetActorUpVector() *
+		FMath::Max(0.0f, CapsuleHalfHeight - CapsuleRadius);
+	const FVector CapsuleCenter = PlayerCapsule->GetComponentLocation();
+	const FVector CapsuleSegmentStart = CapsuleCenter - CapsuleAxisOffset;
+	const FVector CapsuleSegmentEnd = CapsuleCenter + CapsuleAxisOffset;
+
+	FVector ProjectileClosestPoint = FVector::ZeroVector;
+	FVector CapsuleClosestPoint = FVector::ZeroVector;
+	FMath::SegmentDistToSegmentSafe(
+		PreviousLocation,
+		CurrentLocation,
+		CapsuleSegmentStart,
+		CapsuleSegmentEnd,
+		ProjectileClosestPoint,
+		CapsuleClosestPoint);
+	const float CenterDistance = FVector::Distance(ProjectileClosestPoint, CapsuleClosestPoint);
+	const float ClearanceCm = CenterDistance - CapsuleRadius - CollisionComponent->GetScaledSphereRadius();
+	if (ClearanceCm > ScratchComponent->GetProjectileNearMissMarginCm())
+	{
+		return;
+	}
+
+	bNearMissReported = ScratchComponent->TryRegisterNearMiss(
+		this,
+		1,
+		ETunaSweeperNearMissAttackType::Projectile,
+		ClearanceCm,
+		ClearanceCm <= 0.0f);
 }
 
 void ATunaSweeperProjectile::IgnoreActor(AActor* ActorToIgnore)

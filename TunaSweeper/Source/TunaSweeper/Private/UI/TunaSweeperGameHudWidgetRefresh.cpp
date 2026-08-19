@@ -9,6 +9,7 @@ void UTunaSweeperGameHudWidget::RefreshBottomStatusFromGameInstance()
 
 	const UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
 	FTunaSweeperPlayerHudState HudState = TunaGameInstance ? TunaGameInstance->PlayerHudState : FTunaSweeperPlayerHudState();
+	const UTunaSweeperScratchComponent* ScratchComponent = nullptr;
 
 	if (const APlayerController* PlayerController = GetOwningPlayer())
 	{
@@ -17,6 +18,7 @@ void UTunaSweeperGameHudWidget::RefreshBottomStatusFromGameInstance()
 		if (const ATunaSweeperTopDownCharacter* TunaCharacter = Cast<ATunaSweeperTopDownCharacter>(Pawn))
 		{
 			VitalsComponent = TunaCharacter->GetVitalsComponent();
+			ScratchComponent = TunaCharacter->GetScratchComponent();
 		}
 		else if (Pawn)
 		{
@@ -38,6 +40,9 @@ void UTunaSweeperGameHudWidget::RefreshBottomStatusFromGameInstance()
 	if (BottomStatusWidget)
 	{
 		BottomStatusWidget->SetHudState(HudState);
+		BottomStatusWidget->SetScratchState(
+			ScratchComponent ? ScratchComponent->GetCurrentScratch() : 0.0f,
+			ScratchComponent ? ScratchComponent->GetMaxScratch() : 100.0f);
 	}
 
 	if (InventoryAreaWidget)

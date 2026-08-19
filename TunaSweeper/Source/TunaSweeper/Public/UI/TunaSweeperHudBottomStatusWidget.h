@@ -19,6 +19,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
 	void SetHudState(const FTunaSweeperPlayerHudState& InHudState);
 
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
+	void SetScratchState(float CurrentScratch, float MaxScratch);
+
 protected:
 	virtual void NativeConstruct() override;
 	virtual void NativePreConstruct() override;
@@ -43,6 +46,9 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
 	TObjectPtr<UProgressBar> HealthGauge;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
+	TObjectPtr<UProgressBar> ScratchGauge;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
 	TObjectPtr<UProgressBar> HungerGauge;
@@ -70,4 +76,6 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "TunaSweeper|HUD")
 	FTunaSweeperPlayerHudState PreviewHudState;
+
+	float ScratchPercent = 0.0f;
 };
