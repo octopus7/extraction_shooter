@@ -361,6 +361,7 @@ namespace TunaSweeperEditorSetup
 	const FString HudStatusMeatIconAssetName = TEXT("T_UI_Hud_Status_Meat");
 	const FString ScratchGaugeMaterialAssetName = TEXT("M_UI_ScratchGauge");
 	const FString ScratchOverlayMaterialAssetName = TEXT("M_PlayerScratchRainbowOverlay");
+	const FString ScratchAfterimageMaterialAssetName = TEXT("M_PlayerScratchAfterimage");
 	const FString UITitleTextureAssetPath = TEXT("/Game/UI/Title");
 	const FString UIStoryTextureAssetPath = TEXT("/Game/UI/Story");
 	const FString TitleLogoTextureAssetName = TEXT("tuna_sweeper_logo_transparent");

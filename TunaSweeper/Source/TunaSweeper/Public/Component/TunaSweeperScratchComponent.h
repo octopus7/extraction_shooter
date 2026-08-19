@@ -7,6 +7,7 @@
 class UMaterialInstanceDynamic;
 class UMaterialInterface;
 class UMeshComponent;
+class UPoseableMeshComponent;
 
 UENUM(BlueprintType)
 enum class ETunaSweeperNearMissAttackType : uint8
@@ -119,6 +120,25 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Presentation")
 	TSoftObjectPtr<UMaterialInterface> ScratchOverlayMaterial;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Presentation")
+	TSoftObjectPtr<UMaterialInterface> ScratchAfterimageMaterial;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Presentation", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+	float CharacterOverlayStrength = 0.16f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Presentation", meta = (ClampMin = "0.01", UIMin = "0.01"))
+	float AfterimageIntervalRealSeconds = 0.045f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Presentation", meta = (ClampMin = "0.01", UIMin = "0.01"))
+	float AfterimageLifetimeRealSeconds = 0.22f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Presentation", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float AfterimageMinimumTravelCm = 6.0f;
+
+	/** Pushes translucent ghosts away from the camera so the opaque player always wins overlapping depth tests. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Presentation", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float AfterimageDepthBiasCm = 3.0f;
+
 private:
 	void SetCurrentScratch(float NewValue);
 	void TriggerPresentation(double RealTimeSeconds);
@@ -127,6 +147,16 @@ private:
 	void ApplyOverlayToCharacterMeshes();
 	void RestoreCharacterMeshOverlays();
 	void UpdateOverlayMaterial(float EffectAlpha, double RealTimeSeconds);
+	void UpdateAfterimages(double RealTimeSeconds);
+	void SpawnAfterimage(double RealTimeSeconds);
+	void DestroyAllAfterimages();
+
+	struct FActiveAfterimage
+	{
+		TWeakObjectPtr<UPoseableMeshComponent> Mesh;
+		TWeakObjectPtr<UMaterialInstanceDynamic> Material;
+		double SpawnRealSeconds = 0.0;
+	};
 
 	UPROPERTY(Transient)
 	TObjectPtr<UMaterialInstanceDynamic> ScratchOverlayMaterialInstance;
@@ -138,13 +168,18 @@ private:
 	TArray<TObjectPtr<UMaterialInterface>> SavedOverlayMaterials;
 
 	TMap<TWeakObjectPtr<AActor>, int32> LastProcessedAttackIds;
+	TArray<FActiveAfterimage> ActiveAfterimages;
 
 	float CurrentScratch = 0.0f;
 	float SavedWorldTimeDilation = 1.0f;
 	float SavedOwnerCustomTimeDilation = 1.0f;
+	float PresentationEffectAlpha = 0.0f;
 	double PresentationStartRealSeconds = 0.0;
 	double PresentationReleaseRealSeconds = 0.0;
 	double LastPresentationRealSeconds = -1000.0;
+	double LastAfterimageSpawnRealSeconds = -1000.0;
+	FVector LastAfterimageLocation = FVector::ZeroVector;
 	bool bPresentationActive = false;
 	bool bDeveloperAlwaysSlowPresentationEnabled = false;
+	bool bHasLastAfterimageLocation = false;
 };

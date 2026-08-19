@@ -2,6 +2,8 @@
 
 #include "Character/TunaSweeperTopDownCharacter.h"
 #include "Components/MeshComponent.h"
+#include "Components/PoseableMeshComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "Engine/World.h"
 #include "GameFramework/WorldSettings.h"
 #include "HAL/PlatformTime.h"
@@ -17,7 +19,8 @@ namespace TunaSweeperScratchPresentation
 	const FName AlphaParameter(TEXT("EffectAlpha"));
 	const FName IntensityParameter(TEXT("ScratchIntensity"));
 	constexpr float EmissiveIntensity = 2.2f;
-	constexpr uint8 RainbowSaturation = 92;
+	constexpr uint8 OverlayRainbowSaturation = 112;
+	constexpr uint8 AfterimageRainbowSaturation = 168;
 	constexpr float RainbowCyclesPerSecond = 1.7f;
 }
 
@@ -27,6 +30,8 @@ UTunaSweeperScratchComponent::UTunaSweeperScratchComponent()
 	PrimaryComponentTick.bStartWithTickEnabled = true;
 	ScratchOverlayMaterial = TSoftObjectPtr<UMaterialInterface>(
 		FSoftObjectPath(TEXT("/Game/Effects/M_PlayerScratchRainbowOverlay.M_PlayerScratchRainbowOverlay")));
+	ScratchAfterimageMaterial = TSoftObjectPtr<UMaterialInterface>(
+		FSoftObjectPath(TEXT("/Game/Effects/M_PlayerScratchAfterimage.M_PlayerScratchAfterimage")));
 }
 
 void UTunaSweeperScratchComponent::BeginPlay()
@@ -41,6 +46,7 @@ void UTunaSweeperScratchComponent::BeginPlay()
 void UTunaSweeperScratchComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	RestorePresentation();
+	DestroyAllAfterimages();
 	Super::EndPlay(EndPlayReason);
 }
 
@@ -61,6 +67,8 @@ void UTunaSweeperScratchComponent::TickComponent(
 	{
 		UpdatePresentation(RealTimeSeconds);
 	}
+
+	UpdateAfterimages(RealTimeSeconds);
 }
 
 bool UTunaSweeperScratchComponent::TryConsumeScratch(float Amount)
@@ -173,6 +181,9 @@ void UTunaSweeperScratchComponent::TriggerPresentation(double RealTimeSeconds)
 		SavedOwnerCustomTimeDilation = FMath::Max(0.0001f, Owner->CustomTimeDilation);
 		PresentationStartRealSeconds = RealTimeSeconds;
 		ApplyOverlayToCharacterMeshes();
+		LastAfterimageLocation = Owner->GetActorLocation();
+		LastAfterimageSpawnRealSeconds = RealTimeSeconds - FMath::Max(0.01f, AfterimageIntervalRealSeconds);
+		bHasLastAfterimageLocation = true;
 		bPresentationActive = true;
 	}
 
@@ -215,6 +226,8 @@ void UTunaSweeperScratchComponent::UpdatePresentation(double RealTimeSeconds)
 		return;
 	}
 
+	PresentationEffectAlpha = EffectAlpha;
+
 	const float SlowScale = FMath::Clamp(WorldSlowMotionScale, 0.01f, 1.0f);
 	const float CurrentWorldDilation = FMath::Lerp(SavedWorldTimeDilation, SavedWorldTimeDilation * SlowScale, EffectAlpha);
 	UGameplayStatics::SetGlobalTimeDilation(World, CurrentWorldDilation);
@@ -244,6 +257,8 @@ void UTunaSweeperScratchComponent::RestorePresentation()
 	}
 
 	RestoreCharacterMeshOverlays();
+	PresentationEffectAlpha = 0.0f;
+	bHasLastAfterimageLocation = false;
 	bPresentationActive = false;
 }
 
@@ -311,15 +326,148 @@ void UTunaSweeperScratchComponent::UpdateOverlayMaterial(float EffectAlpha, doub
 	const uint8 Hue = static_cast<uint8>(FMath::RoundToInt(HueDegrees / 360.0f * 255.0f));
 	const FLinearColor RainbowColor = FLinearColor::MakeFromHSV8(
 		Hue,
-		TunaSweeperScratchPresentation::RainbowSaturation,
+		TunaSweeperScratchPresentation::OverlayRainbowSaturation,
 		255);
 	ScratchOverlayMaterialInstance->SetVectorParameterValue(
 		TunaSweeperScratchPresentation::ColorParameter,
 		RainbowColor);
 	ScratchOverlayMaterialInstance->SetScalarParameterValue(
 		TunaSweeperScratchPresentation::AlphaParameter,
-		FMath::Clamp(EffectAlpha, 0.0f, 1.0f));
+		FMath::Clamp(EffectAlpha * CharacterOverlayStrength, 0.0f, 1.0f));
 	ScratchOverlayMaterialInstance->SetScalarParameterValue(
 		TunaSweeperScratchPresentation::IntensityParameter,
 		TunaSweeperScratchPresentation::EmissiveIntensity);
+}
+
+void UTunaSweeperScratchComponent::UpdateAfterimages(double RealTimeSeconds)
+{
+	const float SafeLifetime = FMath::Max(0.01f, AfterimageLifetimeRealSeconds);
+	for (int32 AfterimageIndex = ActiveAfterimages.Num() - 1; AfterimageIndex >= 0; --AfterimageIndex)
+	{
+		FActiveAfterimage& Afterimage = ActiveAfterimages[AfterimageIndex];
+		UPoseableMeshComponent* GhostMesh = Afterimage.Mesh.Get();
+		UMaterialInstanceDynamic* GhostMaterial = Afterimage.Material.Get();
+		const float AgeAlpha = FMath::Clamp(
+			static_cast<float>((RealTimeSeconds - Afterimage.SpawnRealSeconds) / SafeLifetime),
+			0.0f,
+			1.0f);
+		if (!GhostMesh || AgeAlpha >= 1.0f)
+		{
+			if (GhostMesh)
+			{
+				GhostMesh->DestroyComponent();
+			}
+			ActiveAfterimages.RemoveAtSwap(AfterimageIndex, 1, EAllowShrinking::No);
+			continue;
+		}
+
+		if (GhostMaterial)
+		{
+			GhostMaterial->SetScalarParameterValue(
+				TunaSweeperScratchPresentation::AlphaParameter,
+				FMath::Square(1.0f - AgeAlpha));
+		}
+	}
+
+	AActor* Owner = GetOwner();
+	if (!bPresentationActive || PresentationEffectAlpha < 0.18f || !Owner)
+	{
+		return;
+	}
+
+	const double SafeInterval = FMath::Max(0.01f, AfterimageIntervalRealSeconds);
+	const FVector CurrentLocation = Owner->GetActorLocation();
+	const float MinimumTravelSquared = FMath::Square(FMath::Max(0.0f, AfterimageMinimumTravelCm));
+	if (RealTimeSeconds - LastAfterimageSpawnRealSeconds >= SafeInterval &&
+		(!bHasLastAfterimageLocation || FVector::DistSquared(CurrentLocation, LastAfterimageLocation) >= MinimumTravelSquared))
+	{
+		SpawnAfterimage(RealTimeSeconds);
+		LastAfterimageSpawnRealSeconds = RealTimeSeconds;
+		LastAfterimageLocation = CurrentLocation;
+		bHasLastAfterimageLocation = true;
+	}
+}
+
+void UTunaSweeperScratchComponent::SpawnAfterimage(double RealTimeSeconds)
+{
+	AActor* Owner = GetOwner();
+	UWorld* World = GetWorld();
+	UMaterialInterface* BaseAfterimageMaterial = ScratchAfterimageMaterial.LoadSynchronous();
+	if (!Owner || !World || !BaseAfterimageMaterial)
+	{
+		return;
+	}
+
+	const float HueDegrees = FMath::Fmod(
+		static_cast<float>(RealTimeSeconds) * TunaSweeperScratchPresentation::RainbowCyclesPerSecond * 360.0f,
+		360.0f);
+	const uint8 Hue = static_cast<uint8>(FMath::RoundToInt(HueDegrees / 360.0f * 255.0f));
+	const FLinearColor GhostColor = FLinearColor::MakeFromHSV8(
+		Hue,
+		TunaSweeperScratchPresentation::AfterimageRainbowSaturation,
+		255);
+	FVector CameraLocation = FVector::ZeroVector;
+	FRotator CameraRotation = FRotator::ZeroRotator;
+	const APlayerController* PlayerController = UGameplayStatics::GetPlayerController(World, 0);
+	const bool bHasCameraView = PlayerController != nullptr;
+	if (PlayerController)
+	{
+		PlayerController->GetPlayerViewPoint(CameraLocation, CameraRotation);
+	}
+
+	TArray<USkeletalMeshComponent*> SourceMeshes;
+	Owner->GetComponents<USkeletalMeshComponent>(SourceMeshes);
+	for (USkeletalMeshComponent* SourceMesh : SourceMeshes)
+	{
+		if (!SourceMesh || !SourceMesh->IsVisible() || !SourceMesh->GetSkeletalMeshAsset())
+		{
+			continue;
+		}
+
+		UPoseableMeshComponent* GhostMesh = NewObject<UPoseableMeshComponent>(Owner);
+		UMaterialInstanceDynamic* GhostMaterial = UMaterialInstanceDynamic::Create(BaseAfterimageMaterial, GhostMesh);
+		if (!GhostMesh || !GhostMaterial)
+		{
+			continue;
+		}
+
+		Owner->AddInstanceComponent(GhostMesh);
+		GhostMesh->SetSkinnedAssetAndUpdate(SourceMesh->GetSkeletalMeshAsset(), true);
+		FTransform GhostTransform = SourceMesh->GetComponentTransform();
+		if (bHasCameraView)
+		{
+			const FVector AwayFromCamera = (GhostTransform.GetLocation() - CameraLocation).GetSafeNormal();
+			GhostTransform.AddToTranslation(AwayFromCamera * FMath::Max(0.0f, AfterimageDepthBiasCm));
+		}
+		GhostMesh->SetWorldTransform(GhostTransform);
+		GhostMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		GhostMesh->SetGenerateOverlapEvents(false);
+		GhostMesh->SetCastShadow(false);
+		GhostMesh->SetReceivesDecals(false);
+		GhostMesh->SetComponentTickEnabled(false);
+		GhostMesh->RegisterComponentWithWorld(World);
+		GhostMesh->CopyPoseFromSkeletalComponent(SourceMesh);
+
+		const int32 MaterialCount = FMath::Max(1, SourceMesh->GetNumMaterials());
+		for (int32 MaterialIndex = 0; MaterialIndex < MaterialCount; ++MaterialIndex)
+		{
+			GhostMesh->SetMaterial(MaterialIndex, GhostMaterial);
+		}
+		GhostMaterial->SetVectorParameterValue(TunaSweeperScratchPresentation::ColorParameter, GhostColor);
+		GhostMaterial->SetScalarParameterValue(TunaSweeperScratchPresentation::AlphaParameter, 1.0f);
+		GhostMaterial->SetScalarParameterValue(TunaSweeperScratchPresentation::IntensityParameter, 0.85f);
+		ActiveAfterimages.Add({GhostMesh, GhostMaterial, RealTimeSeconds});
+	}
+}
+
+void UTunaSweeperScratchComponent::DestroyAllAfterimages()
+{
+	for (FActiveAfterimage& Afterimage : ActiveAfterimages)
+	{
+		if (UPoseableMeshComponent* GhostMesh = Afterimage.Mesh.Get())
+		{
+			GhostMesh->DestroyComponent();
+		}
+	}
+	ActiveAfterimages.Reset();
 }

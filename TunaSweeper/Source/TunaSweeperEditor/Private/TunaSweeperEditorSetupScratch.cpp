@@ -71,6 +71,7 @@ namespace TunaSweeperEditorSetup
 			Material->MaterialDomain = MD_Surface;
 			Material->BlendMode = BLEND_Additive;
 			Material->TwoSided = true;
+			Material->bUsedWithSkeletalMesh = true;
 			Material->SetShadingModel(MSM_Unlit);
 
 			UMaterialEditorOnlyData* EditorOnlyData = Material->GetEditorOnlyData();
@@ -111,7 +112,7 @@ namespace TunaSweeperEditorSetup
 			UMaterialExpressionAdd* RimFactor = NewObject<UMaterialExpressionAdd>(Material);
 			RimFactor->Material = Material;
 			RimFactor->A.Connect(0, FresnelScale);
-			RimFactor->B.Connect(0, AddConstant(Material, 0.55f, -500, 390));
+			RimFactor->B.Connect(0, AddConstant(Material, 0.0f, -500, 390));
 			RimFactor->MaterialExpressionEditorX = -290;
 			RimFactor->MaterialExpressionEditorY = 250;
 			Material->GetExpressionCollection().AddExpression(RimFactor);
@@ -142,6 +143,72 @@ namespace TunaSweeperEditorSetup
 
 			EditorOnlyData->EmissiveColor.Connect(0, FinalEmissive);
 			EditorOnlyData->Opacity.Connect(0, Alpha);
+			Material->PostEditChange();
+			Material->MarkPackageDirty();
+			return SaveAsset(Material) ? Material : nullptr;
+		}
+
+		UMaterial* EnsureScratchAfterimageMaterial()
+		{
+			UMaterial* Material = FindOrCreateMaterial(EffectsAssetPath, ScratchAfterimageMaterialAssetName);
+			if (!Material)
+			{
+				return nullptr;
+			}
+
+			Material->Modify();
+			Material->GetExpressionCollection().Empty();
+			Material->MaterialDomain = MD_Surface;
+			Material->BlendMode = BLEND_Translucent;
+			Material->TwoSided = true;
+			Material->bUsedWithSkeletalMesh = true;
+			Material->SetShadingModel(MSM_Unlit);
+
+			UMaterialEditorOnlyData* EditorOnlyData = Material->GetEditorOnlyData();
+			if (!EditorOnlyData)
+			{
+				return nullptr;
+			}
+
+			UMaterialExpressionVectorParameter* Color = NewObject<UMaterialExpressionVectorParameter>(Material);
+			Color->Material = Material;
+			Color->ParameterName = TEXT("ScratchColor");
+			Color->DefaultValue = FLinearColor(0.30f, 0.72f, 1.0f, 1.0f);
+			Color->MaterialExpressionEditorX = -760;
+			Color->MaterialExpressionEditorY = -130;
+			Material->GetExpressionCollection().AddExpression(Color);
+
+			UMaterialExpressionScalarParameter* Intensity = AddScalarParameter(
+				Material, TEXT("ScratchIntensity"), 0.85f, -760, 10);
+			UMaterialExpressionScalarParameter* Alpha = AddScalarParameter(
+				Material, TEXT("EffectAlpha"), 0.0f, -760, 150);
+
+			UMaterialExpressionMultiply* ColorIntensity = NewObject<UMaterialExpressionMultiply>(Material);
+			ColorIntensity->Material = Material;
+			ColorIntensity->A.Connect(0, Color);
+			ColorIntensity->B.Connect(0, Intensity);
+			ColorIntensity->MaterialExpressionEditorX = -510;
+			ColorIntensity->MaterialExpressionEditorY = -80;
+			Material->GetExpressionCollection().AddExpression(ColorIntensity);
+
+			UMaterialExpressionMultiply* EmissiveFade = NewObject<UMaterialExpressionMultiply>(Material);
+			EmissiveFade->Material = Material;
+			EmissiveFade->A.Connect(0, ColorIntensity);
+			EmissiveFade->B.Connect(0, Alpha);
+			EmissiveFade->MaterialExpressionEditorX = -260;
+			EmissiveFade->MaterialExpressionEditorY = -60;
+			Material->GetExpressionCollection().AddExpression(EmissiveFade);
+
+			UMaterialExpressionMultiply* OpacityFade = NewObject<UMaterialExpressionMultiply>(Material);
+			OpacityFade->Material = Material;
+			OpacityFade->A.Connect(0, Alpha);
+			OpacityFade->B.Connect(0, AddConstant(Material, 0.34f, -510, 250));
+			OpacityFade->MaterialExpressionEditorX = -260;
+			OpacityFade->MaterialExpressionEditorY = 170;
+			Material->GetExpressionCollection().AddExpression(OpacityFade);
+
+			EditorOnlyData->EmissiveColor.Connect(0, EmissiveFade);
+			EditorOnlyData->Opacity.Connect(0, OpacityFade);
 			Material->PostEditChange();
 			Material->MarkPackageDirty();
 			return SaveAsset(Material) ? Material : nullptr;
@@ -203,7 +270,9 @@ namespace TunaSweeperEditorSetup
 
 	bool EnsureScratchPresentationAssets()
 	{
-		if (!EnsureScratchOverlayMaterial() || !EnsureScratchGaugeMaterial())
+		if (!EnsureScratchOverlayMaterial() ||
+			!EnsureScratchAfterimageMaterial() ||
+			!EnsureScratchGaugeMaterial())
 		{
 			return false;
 		}

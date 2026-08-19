@@ -4321,3 +4321,13 @@ TunaSweeper에는 `Local Fog Volume`을 주 안개층으로 사용하고 저비�
 ### 답변
 
 기존에는 각 `Tuna Warp Transition` 컴포넌트의 `Style > Timing`에서 `Close Duration`과 `Open Duration`을 조정했지만, 공용 설정을 추가한 뒤에는 `/TunaWarpTransition/Profiles/DA_WarpTransition_Default`의 `Style > Timing`이 기본 조정 위치다. `Close Duration`은 출발 화면이 수축·가림 상태에 도달해 실제 텔레포트하기까지의 시간이고, `Open Duration`은 도착 직후 왜곡과 림 파동이 사라지는 시간이다. `BP_TunaSweeperGameInstance`는 네이티브 기본값으로 이 DA를 상속하며 런타임 생성 컴포넌트가 자동으로 읽는다. 특정 Pawn만 다른 연출이 필요하면 해당 컴포넌트의 `Transition Profile`에 별도 DA를 지정하면 전역 설정보다 우선한다.
+
+## 2026-08-20 01:12:30 (소요시간: 00:07:52)
+
+### 질문
+
+상시 슬로우 연출 화면에 잔상이 보이지 않고 플레이어 본체가 계속 흰색으로 보이는 상태가 아직 미구현인지 문의.
+
+### 답변
+
+초기 구현에는 시간 감속과 단일 Additive 오버레이만 있었고 실제 포즈 잔상은 없었다. Additive 오버레이가 낮은 채도의 밝은 색을 본체 전체에 더해 흰색처럼 보이는 문제도 있었다. 후속 구현에서는 이동 중 실제 스켈레탈 포즈를 짧게 복제하는 Translucent 무지개 잔상을 추가하고, 본체 오버레이는 약한 Fresnel 림으로 제한했다. 잔상에는 깊이 테스트와 카메라 반대 방향 바이어스를 적용해 겹치는 부분은 현재 본체가 항상 앞에서 가린다.
