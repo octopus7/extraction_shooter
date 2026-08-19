@@ -9,6 +9,7 @@ class UCameraComponent;
 class UMaterialInstanceDynamic;
 class UMaterialInterface;
 class UPointLightComponent;
+class UTunaWarpTransitionProfile;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FWarpTransitionStartedEvent);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FWarpTransitionMidpointEvent, bool, bTeleportSucceeded);
@@ -128,6 +129,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Tuna Warp Transition")
 	void CancelWarpTransition();
 
+	/** Copies a reusable profile into this component. The profile cannot be changed mid-transition. */
+	UFUNCTION(BlueprintCallable, Category = "Tuna Warp Transition")
+	bool ApplyTransitionProfile(UTunaWarpTransitionProfile* InProfile);
+
 	UPROPERTY(BlueprintAssignable, Category = "Tuna Warp Transition")
 	FWarpTransitionStartedEvent OnTransitionStarted;
 
@@ -139,6 +144,10 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tuna Warp Transition")
 	FWarpTransitionStyle Style;
+
+	/** Optional per-component override. When empty, the GameInstance profile provider is used. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tuna Warp Transition")
+	TSoftObjectPtr<UTunaWarpTransitionProfile> TransitionProfile;
 
 	/** Public material instances may be duplicated or replaced without editing plugin code. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tuna Warp Transition|Materials")
@@ -162,6 +171,7 @@ private:
 	};
 
 	bool InitializeEffectMaterials();
+	void ResolveTransitionProfile();
 	UCameraComponent* FindTargetCamera() const;
 	void AttachBlendables();
 	void DetachBlendables();
@@ -187,6 +197,9 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<UPointLightComponent> ArrivalPointLight;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTunaWarpTransitionProfile> AppliedTransitionProfile;
 
 	TWeakObjectPtr<AActor> PendingTeleportActor;
 	FTransform PendingTargetTransform = FTransform::Identity;

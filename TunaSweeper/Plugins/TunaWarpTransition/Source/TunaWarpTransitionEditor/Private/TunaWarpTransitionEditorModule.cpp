@@ -1,5 +1,6 @@
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Editor.h"
+#include "TunaWarpTransitionProfile.h"
 #include "Materials/Material.h"
 #include "Materials/MaterialExpressionAdd.h"
 #include "Materials/MaterialExpressionCameraPositionWS.h"
@@ -26,10 +27,12 @@ namespace TunaWarpTransitionEditor
 {
 	const FString InternalAssetPath = TEXT("/TunaWarpTransition/Generated/Internal");
 	const FString PublicMaterialPath = TEXT("/TunaWarpTransition/Materials");
+	const FString PublicProfilePath = TEXT("/TunaWarpTransition/Profiles");
 	const FString WarpMaterialName = TEXT("M_PP_TunaWarpRadial_Internal");
 	const FString RimMaterialName = TEXT("M_PP_TunaWarpArrivalRim_Internal");
 	const FString WarpInstanceName = TEXT("MI_PP_TunaWarpRadial_Default");
 	const FString RimInstanceName = TEXT("MI_PP_TunaWarpArrivalRim_Default");
+	const FString DefaultProfileName = TEXT("DA_WarpTransition_Default");
 	const TCHAR* AssetVersionKey = TEXT("TunaWarpTransitionAssetVersion");
 	const TCHAR* AssetVersion = TEXT("3");
 
@@ -456,18 +459,42 @@ namespace TunaWarpTransitionEditor
 		return Instance;
 	}
 
+	UTunaWarpTransitionProfile* EnsureDefaultProfile()
+	{
+		if (UTunaWarpTransitionProfile* Existing = LoadObject<UTunaWarpTransitionProfile>(
+			nullptr,
+			*ObjectPath(PublicProfilePath, DefaultProfileName)))
+		{
+			return Existing;
+		}
+
+		UPackage* Package = CreatePackage(*(PublicProfilePath / DefaultProfileName));
+		UTunaWarpTransitionProfile* Profile = Package
+			? NewObject<UTunaWarpTransitionProfile>(Package, *DefaultProfileName, RF_Public | RF_Standalone | RF_Transactional)
+			: nullptr;
+		if (!Profile)
+		{
+			return nullptr;
+		}
+
+		FAssetRegistryModule::AssetCreated(Profile);
+		Profile->MarkPackageDirty();
+		return SaveAsset(Profile) ? Profile : nullptr;
+	}
+
 	void EnsurePluginAssets()
 	{
 		UMaterial* WarpMaterial = EnsureWarpMaterial();
 		UMaterial* RimMaterial = EnsureRimMaterial();
 		UMaterialInstanceConstant* WarpInstance = EnsureMaterialInstance(WarpMaterial, WarpInstanceName);
 		UMaterialInstanceConstant* RimInstance = EnsureMaterialInstance(RimMaterial, RimInstanceName);
-		if (!WarpMaterial || !RimMaterial || !WarpInstance || !RimInstance)
+		UTunaWarpTransitionProfile* DefaultProfile = EnsureDefaultProfile();
+		if (!WarpMaterial || !RimMaterial || !WarpInstance || !RimInstance || !DefaultProfile)
 		{
-			UE_LOG(LogTunaWarpTransitionEditor, Error, TEXT("Tuna Warp Transition failed to generate one or more material assets."));
+			UE_LOG(LogTunaWarpTransitionEditor, Error, TEXT("Tuna Warp Transition failed to generate one or more default assets."));
 			return;
 		}
-		UE_LOG(LogTunaWarpTransitionEditor, Log, TEXT("Tuna Warp Transition material assets are ready."));
+		UE_LOG(LogTunaWarpTransitionEditor, Log, TEXT("Tuna Warp Transition material and profile assets are ready."));
 	}
 }
 

@@ -7,6 +7,7 @@
 #include "Inventory/TunaSweeperInventoryTypes.h"
 #include "Inventory/TunaSweeperSaveGame.h"
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
+#include "TunaWarpTransitionProfileProvider.h"
 #include "Weapon/TunaSweeperWeaponSpreadRecoilDataAsset.h"
 #include "TunaSweeperGameInstance.generated.h"
 
@@ -16,6 +17,7 @@ class UTunaSweeperFootstepPresentationDataAsset;
 class UTunaSweeperOcclusionRevealSettingsDataAsset;
 class UTunaSweeperVitalsComponent;
 class UTunaSweeperWeaponPresentationDataAsset;
+class UTunaWarpTransitionProfile;
 
 USTRUCT(BlueprintType)
 struct TUNASWEEPER_API FTunaSweeperGameplaySettings
@@ -256,12 +258,15 @@ struct TUNASWEEPER_API FTunaSweeperWorkbenchBlueprintItemView
 };
 
 UCLASS(BlueprintType, Blueprintable)
-class TUNASWEEPER_API UTunaSweeperGameInstance : public UGameInstance
+class TUNASWEEPER_API UTunaSweeperGameInstance : public UGameInstance, public ITunaWarpTransitionProfileProvider
 {
 	GENERATED_BODY()
 
 public:
+	UTunaSweeperGameInstance();
+
 	virtual void Init() override;
+	virtual UTunaWarpTransitionProfile* GetWarpTransitionProfile_Implementation() const override;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "TunaSweeper|Settings")
 	FTunaSweeperGameplaySettings GameplaySettings;
@@ -293,6 +298,10 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TunaSweeper|Occlusion Reveal")
 	TSoftObjectPtr<UTunaSweeperOcclusionRevealSettingsDataAsset> OcclusionRevealSettingsDataAsset;
+
+	/** Shared warp timing and presentation used by runtime-created transition components. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TunaSweeper|Warp Transition")
+	TSoftObjectPtr<UTunaWarpTransitionProfile> WarpTransitionProfile;
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Occlusion Reveal")
 	UTunaSweeperOcclusionRevealSettingsDataAsset* GetOcclusionRevealSettingsDataAsset() const;

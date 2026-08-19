@@ -4311,3 +4311,13 @@ TunaSweeper에는 `Local Fog Volume`을 주 안개층으로 사용하고 저비�
 ### 답변
 
 플레이어의 구르기 무적 여부만 확인하지 말고 각 공격이 별도의 `Near Miss` 이벤트를 보고하고 플레이어의 전용 스크래치 컴포넌트가 적대 관계, 구르기 상태, 공격별 중복 보상, 최근접 거리를 검증해 게이지와 연출을 한 번만 발동하는 구조가 적합하다. 현재 구르기는 Projectile 충돌을 Ignore로 바꾸므로 `TakeDamage()`의 피해 0만 감시하면 투사체 회피를 놓친다. 투사체는 이전·현재 위치의 연속 선분과 플레이어 캡슐 사이의 최근접 거리를 계산하고, 근접 공격은 실제 타격 프레임의 공격 부채꼴 또는 스윕과 바깥쪽 얇은 여유 구간을 함께 평가해야 한다. 슬로모션은 실시간 기준으로 복구되는 전용 월드 서브시스템이 전역 시간 배율을 짧게 낮추고 플레이어 `CustomTimeDilation`을 보정해 구르기 무적 시간이 과도하게 늘지 않도록 한다. 스크래치는 사용처가 정해지기 전까지 저장하지 않는 런타임 0~100 자원으로 두고, 체력 표시 옆 `BottomToTop` ProgressBar와 UI 머티리얼로 표시하는 편이 안전하다. 캐릭터 원본 머티리얼을 교체하기보다는 메인·치마·부속 Skeletal Mesh에 동적 Overlay Material을 적용하고, 실시간 경과값으로 저채도 HSV 색상, Emissive, Fresnel과 짧은 페이드를 제어하면 기존 질감과 의상을 보존하면서 원하는 밝은 무지개 연출을 만들 수 있다. 산데비스탄 인상을 더 강화할 필요가 있을 때만 3~4개의 짧은 포즈 잔상을 후속 단계로 추가한다.
+
+## 2026-08-20 00:43:30 (소요시간: 00:09:30)
+
+### 질문
+
+워프 연출 타이밍을 어디서 조정하는지와 GameInstance에 공용 Data Asset을 만들어 연결할 수 있는지 문의.
+
+### 답변
+
+기존에는 각 `Tuna Warp Transition` 컴포넌트의 `Style > Timing`에서 `Close Duration`과 `Open Duration`을 조정했지만, 공용 설정을 추가한 뒤에는 `/TunaWarpTransition/Profiles/DA_WarpTransition_Default`의 `Style > Timing`이 기본 조정 위치다. `Close Duration`은 출발 화면이 수축·가림 상태에 도달해 실제 텔레포트하기까지의 시간이고, `Open Duration`은 도착 직후 왜곡과 림 파동이 사라지는 시간이다. `BP_TunaSweeperGameInstance`는 네이티브 기본값으로 이 DA를 상속하며 런타임 생성 컴포넌트가 자동으로 읽는다. 특정 Pawn만 다른 연출이 필요하면 해당 컴포넌트의 `Transition Profile`에 별도 DA를 지정하면 전역 설정보다 우선한다.

@@ -1,8 +1,20 @@
 #include "Game/TunaSweeperGameInstance.h"
 #include "TunaSweeperGameInstanceShared.h"
 #include "Effect/TunaSweeperOcclusionRevealSettingsDataAsset.h"
+#include "TunaWarpTransitionProfile.h"
 
 DEFINE_LOG_CATEGORY(LogTunaSweeperGameInstance);
+
+UTunaSweeperGameInstance::UTunaSweeperGameInstance()
+{
+	WarpTransitionProfile = TSoftObjectPtr<UTunaWarpTransitionProfile>(
+		FSoftObjectPath(TEXT("/TunaWarpTransition/Profiles/DA_WarpTransition_Default.DA_WarpTransition_Default")));
+}
+
+UTunaWarpTransitionProfile* UTunaSweeperGameInstance::GetWarpTransitionProfile_Implementation() const
+{
+	return WarpTransitionProfile.LoadSynchronous();
+}
 
 UTunaSweeperOcclusionRevealSettingsDataAsset* UTunaSweeperGameInstance::GetOcclusionRevealSettingsDataAsset() const
 {

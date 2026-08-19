@@ -1,8 +1,12 @@
 #include "TunaWarpTransitionComponent.h"
 
+#include "TunaWarpTransitionProfile.h"
+#include "TunaWarpTransitionProfileProvider.h"
+
 #include "Camera/CameraComponent.h"
 #include "Components/PointLightComponent.h"
 #include "Engine/World.h"
+#include "Engine/GameInstance.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PawnMovementComponent.h"
@@ -54,6 +58,7 @@ UTunaWarpTransitionComponent::UTunaWarpTransitionComponent()
 void UTunaWarpTransitionComponent::BeginPlay()
 {
 	Super::BeginPlay();
+	ResolveTransitionProfile();
 	InitializeEffectMaterials();
 }
 
@@ -127,6 +132,8 @@ bool UTunaWarpTransitionComponent::PlayWarpTransitionNative(
 		return false;
 	}
 
+	ResolveTransitionProfile();
+
 	PendingTeleportActor = ActorToTeleport;
 	PendingTargetTransform = TargetTransform;
 	PendingMidpointCallback = MoveTemp(MidpointCallback);
@@ -183,6 +190,52 @@ void UTunaWarpTransitionComponent::CancelWarpTransition()
 	ReleaseInputLock();
 	PendingTeleportActor.Reset();
 	PendingMidpointCallback = nullptr;
+}
+
+bool UTunaWarpTransitionComponent::ApplyTransitionProfile(UTunaWarpTransitionProfile* InProfile)
+{
+	if (!InProfile || bTransitionActive)
+	{
+		return false;
+	}
+
+	const bool bMaterialsChanged = WarpMaterial != InProfile->WarpMaterial
+		|| ArrivalRimMaterial != InProfile->ArrivalRimMaterial;
+	if (bMaterialsChanged)
+	{
+		DetachBlendables();
+		WarpMaterialInstance = nullptr;
+		ArrivalRimMaterialInstance = nullptr;
+	}
+
+	Style = InProfile->Style;
+	WarpMaterial = InProfile->WarpMaterial;
+	ArrivalRimMaterial = InProfile->ArrivalRimMaterial;
+	bLockMovementInput = InProfile->bLockMovementInput;
+	bLockLookInput = InProfile->bLockLookInput;
+	AppliedTransitionProfile = InProfile;
+	return true;
+}
+
+void UTunaWarpTransitionComponent::ResolveTransitionProfile()
+{
+	UTunaWarpTransitionProfile* DesiredProfile = TransitionProfile.LoadSynchronous();
+	if (!DesiredProfile)
+	{
+		if (const UWorld* World = GetWorld())
+		{
+			UGameInstance* GameInstance = World->GetGameInstance();
+			if (GameInstance && GameInstance->GetClass()->ImplementsInterface(UTunaWarpTransitionProfileProvider::StaticClass()))
+			{
+				DesiredProfile = ITunaWarpTransitionProfileProvider::Execute_GetWarpTransitionProfile(GameInstance);
+			}
+		}
+	}
+
+	if (DesiredProfile && AppliedTransitionProfile != DesiredProfile)
+	{
+		ApplyTransitionProfile(DesiredProfile);
+	}
 }
 
 bool UTunaWarpTransitionComponent::InitializeEffectMaterials()
