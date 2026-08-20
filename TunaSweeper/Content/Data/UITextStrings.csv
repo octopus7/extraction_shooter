@@ -55,6 +55,7 @@ ui.hud.mode.quest,퀘스트,Quests,クエスト
 ui.hud.mode.map,지도,Map,地図
 ui.hud.mode.memo,메모,Memos,メモ
 ui.hud.quick_slot_guide,아이템을 슬롯으로 드래그하여 퀵슬롯을 설정하세요,Drag items into slots to set quick slots,アイテムをスロットへドラッグしてクイックスロットを設定
+ui.hud.reload_prompt,재장전,Reload,リロード
 ui.hud.ammo_unset,탄약 미지정,Ammo Not Set,弾薬未設定
 ui.hud.health_pattern,HP {0} / {1},HP {0} / {1},HP {0} / {1}
 ui.hud.food_pattern,배부름 {0},Fullness {0},満腹度 {0}

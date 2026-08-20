@@ -481,6 +481,9 @@ private:
 	TObjectPtr<UWidget> CenterReloadPromptRoot;
 
 	UPROPERTY(BlueprintReadOnly, Transient, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional, AllowPrivateAccess = "true"))
+	TObjectPtr<UTextBlock> CenterReloadPromptText;
+
+	UPROPERTY(BlueprintReadOnly, Transient, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional, AllowPrivateAccess = "true"))
 	TObjectPtr<UTextBlock> CenterCancelableActionPercentText;
 
 	bool bReloadGaugeHidMouseCursor = false;

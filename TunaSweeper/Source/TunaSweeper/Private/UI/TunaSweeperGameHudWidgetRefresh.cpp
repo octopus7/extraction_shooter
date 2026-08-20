@@ -322,6 +322,14 @@ void UTunaSweeperGameHudWidget::RefreshLocalizedTexts()
 			TEXT("\uC544\uC774\uD15C\uC744 \uC2AC\uB86F\uC73C\uB85C \uB4DC\uB798\uADF8\uD558\uC5EC \uD035\uC2AC\uB86F\uC744 \uC124\uC815\uD558\uC138\uC694")));
 	}
 
+	if (CenterReloadPromptText)
+	{
+		CenterReloadPromptText->SetText(ResolveUiText(
+			TunaGameInstance,
+			TEXT("ui.hud.reload_prompt"),
+			TEXT("\uC7AC\uC7A5\uC804")));
+	}
+
 	if (UnsupportedModeText)
 	{
 		UnsupportedModeText->SetText(ResolveUiText(
@@ -446,6 +454,7 @@ void UTunaSweeperGameHudWidget::CacheAmmoCancelableActionWidgets()
 		CenterCancelableActionRingWidget = Cast<UTunaSweeperReloadRingWidget>(WidgetTree->FindWidget(FName(TEXT("CenterReloadRingWidget"))));
 	}
 	CenterReloadPromptRoot = WidgetTree->FindWidget(FName(TEXT("CenterReloadPromptRoot")));
+	CenterReloadPromptText = Cast<UTextBlock>(WidgetTree->FindWidget(FName(TEXT("CenterReloadPromptText"))));
 	CenterCancelableActionPercentText = Cast<UTextBlock>(WidgetTree->FindWidget(FName(TEXT("CenterCancelableActionPercentText"))));
 	if (!CenterCancelableActionPercentText)
 	{
