@@ -20,7 +20,7 @@ namespace TunaSweeperScratchPresentation
 	const FName IntensityParameter(TEXT("ScratchIntensity"));
 	constexpr float EmissiveIntensity = 2.2f;
 	constexpr uint8 OverlayRainbowSaturation = 112;
-	constexpr uint8 AfterimageRainbowSaturation = 168;
+	constexpr uint8 AfterimageRainbowSaturation = 220;
 	constexpr float RainbowCyclesPerSecond = 1.7f;
 }
 
