@@ -59,8 +59,10 @@ void UTunaSweeperScratchComponent::TickComponent(
 	(void)DeltaTime;
 
 	const double RealTimeSeconds = FPlatformTime::Seconds();
-	if (bDeveloperAlwaysSlowPresentationEnabled && !bPresentationActive)
+	const ATunaSweeperTopDownCharacter* PlayerCharacter = Cast<ATunaSweeperTopDownCharacter>(GetOwner());
+	if (bDeveloperAlwaysSlowPresentationEnabled && PlayerCharacter && PlayerCharacter->IsRolling())
 	{
+		// Keep the preview alive throughout the roll, independent of near-miss and scratch gain.
 		TriggerPresentation(RealTimeSeconds);
 	}
 	else if (bPresentationActive)
@@ -99,7 +101,11 @@ void UTunaSweeperScratchComponent::SetDeveloperAlwaysSlowPresentationEnabled(boo
 	const double RealTimeSeconds = FPlatformTime::Seconds();
 	if (bEnabled)
 	{
-		TriggerPresentation(RealTimeSeconds);
+		const ATunaSweeperTopDownCharacter* PlayerCharacter = Cast<ATunaSweeperTopDownCharacter>(GetOwner());
+		if (PlayerCharacter && PlayerCharacter->IsRolling())
+		{
+			TriggerPresentation(RealTimeSeconds);
+		}
 	}
 	else if (bPresentationActive)
 	{
@@ -204,6 +210,9 @@ void UTunaSweeperScratchComponent::UpdatePresentation(double RealTimeSeconds)
 
 	const float BlendInSeconds = FMath::Max(0.001f, SlowMotionBlendInRealSeconds);
 	const float BlendOutSeconds = FMath::Max(0.001f, SlowMotionBlendOutRealSeconds);
+	const ATunaSweeperTopDownCharacter* PlayerCharacter = Cast<ATunaSweeperTopDownCharacter>(Owner);
+	const bool bHoldForDeveloperRollPreview =
+		bDeveloperAlwaysSlowPresentationEnabled && PlayerCharacter && PlayerCharacter->IsRolling();
 	float EffectAlpha = 1.0f;
 	if (RealTimeSeconds < PresentationStartRealSeconds + BlendInSeconds)
 	{
@@ -212,7 +221,7 @@ void UTunaSweeperScratchComponent::UpdatePresentation(double RealTimeSeconds)
 			0.0f,
 			1.0f);
 	}
-	else if (!bDeveloperAlwaysSlowPresentationEnabled && RealTimeSeconds >= PresentationReleaseRealSeconds)
+	else if (!bHoldForDeveloperRollPreview && RealTimeSeconds >= PresentationReleaseRealSeconds)
 	{
 		EffectAlpha = 1.0f - FMath::Clamp(
 			static_cast<float>((RealTimeSeconds - PresentationReleaseRealSeconds) / BlendOutSeconds),
