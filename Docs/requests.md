@@ -6498,3 +6498,9 @@
 
 - Git 커밋 `fdeab29`의 `steamworks/capsule-images/LibraryCapsule.png` 원본을 가져와 파일명 끝에 `_old`를 붙인 `steamworks/capsule-images/LibraryCapsule_old.png`로 저장했다.
 - 그림 내용과 채널 구성은 변경하지 않고 `1024×1536` 원본을 Steam Library Capsule 규격 `600×900`으로 Lanczos 리샘플했으며, sRGB RGBA PNG와 완전 불투명 상태를 유지하는지 확인했다.
+
+## 2026-08-20 09:34:28 (소요시간: 00:03:46)
+
+- 스크래치 연출의 잔상 생성 간격을 실시간 기준 `0.1초`, 잔상 수명을 `1초`로 조정했다.
+- 새 잔상은 플레이어가 구르는 동안에만 생성하고, 구르기가 끝나면 생성만 중단한 채 이미 만들어진 잔상은 남은 수명 동안 자연스럽게 페이드아웃하도록 변경했다.
+- UE 5.7 `TunaSweeperEditor Win64 Development` 빌드에서 C++ 컴파일과 정적 라이브러리 링크를 통과했다. 실행 중인 Unreal Editor가 모듈 DLL을 점유해 최종 DLL 링크는 수행할 수 없었으며, 저장되지 않은 편집 작업 보호를 위해 에디터를 강제 종료하지 않았다.

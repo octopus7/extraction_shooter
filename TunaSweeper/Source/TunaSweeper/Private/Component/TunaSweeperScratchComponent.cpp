@@ -369,14 +369,21 @@ void UTunaSweeperScratchComponent::UpdateAfterimages(double RealTimeSeconds)
 		}
 	}
 
-	AActor* Owner = GetOwner();
-	if (!bPresentationActive || PresentationEffectAlpha < 0.18f || !Owner)
+	ATunaSweeperTopDownCharacter* PlayerCharacter = Cast<ATunaSweeperTopDownCharacter>(GetOwner());
+	if (!PlayerCharacter || !PlayerCharacter->IsRolling())
+	{
+		// Stop emitting when the roll finishes, but leave existing ghosts alive to fade naturally.
+		bHasLastAfterimageLocation = false;
+		return;
+	}
+
+	if (!bPresentationActive || PresentationEffectAlpha < 0.18f)
 	{
 		return;
 	}
 
 	const double SafeInterval = FMath::Max(0.01f, AfterimageIntervalRealSeconds);
-	const FVector CurrentLocation = Owner->GetActorLocation();
+	const FVector CurrentLocation = PlayerCharacter->GetActorLocation();
 	const float MinimumTravelSquared = FMath::Square(FMath::Max(0.0f, AfterimageMinimumTravelCm));
 	if (RealTimeSeconds - LastAfterimageSpawnRealSeconds >= SafeInterval &&
 		(!bHasLastAfterimageLocation || FVector::DistSquared(CurrentLocation, LastAfterimageLocation) >= MinimumTravelSquared))

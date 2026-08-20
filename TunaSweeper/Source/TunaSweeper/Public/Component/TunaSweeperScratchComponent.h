@@ -127,10 +127,10 @@ protected:
 	float CharacterOverlayStrength = 0.16f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Presentation", meta = (ClampMin = "0.01", UIMin = "0.01"))
-	float AfterimageIntervalRealSeconds = 0.045f;
+	float AfterimageIntervalRealSeconds = 0.1f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Presentation", meta = (ClampMin = "0.01", UIMin = "0.01"))
-	float AfterimageLifetimeRealSeconds = 0.22f;
+	float AfterimageLifetimeRealSeconds = 1.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Presentation", meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float AfterimageMinimumTravelCm = 6.0f;
