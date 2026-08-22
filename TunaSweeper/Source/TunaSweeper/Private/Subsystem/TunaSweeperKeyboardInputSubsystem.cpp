@@ -2,9 +2,95 @@
 
 #include "Character/TunaSweeperTopDownCharacter.h"
 #include "Engine/Engine.h"
+#include "Engine/GameInstance.h"
+#include "Engine/GameViewportClient.h"
+#include "Framework/Application/IInputProcessor.h"
+#include "Framework/Application/SlateApplication.h"
 #include "Game/TunaSweeperGameInstance.h"
+#include "InputCoreTypes.h"
 #include "Math/UnrealMathUtility.h"
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
+#include "UnrealClient.h"
+
+namespace
+{
+	class FTunaSweeperScreenshotInputProcessor final : public IInputProcessor
+	{
+	public:
+		explicit FTunaSweeperScreenshotInputProcessor(UTunaSweeperKeyboardInputSubsystem* InOwner)
+			: Owner(InOwner)
+		{
+		}
+
+		virtual void Tick(const float DeltaTime, FSlateApplication& SlateApplication, TSharedRef<ICursor> Cursor) override
+		{
+		}
+
+		virtual bool HandleKeyDownEvent(FSlateApplication& SlateApplication, const FKeyEvent& InKeyEvent) override
+		{
+			if (InKeyEvent.IsRepeat() || InKeyEvent.GetKey() != EKeys::F9)
+			{
+				return false;
+			}
+
+			UTunaSweeperKeyboardInputSubsystem* KeyboardInputSubsystem = Owner.Get();
+			return KeyboardInputSubsystem && KeyboardInputSubsystem->CaptureScreenshotFromHotkey();
+		}
+
+	private:
+		TWeakObjectPtr<UTunaSweeperKeyboardInputSubsystem> Owner;
+	};
+}
+
+void UTunaSweeperKeyboardInputSubsystem::Initialize(FSubsystemCollectionBase& Collection)
+{
+	Super::Initialize(Collection);
+
+	if (FSlateApplication::IsInitialized())
+	{
+		ScreenshotInputProcessor = MakeShared<FTunaSweeperScreenshotInputProcessor>(this);
+		FSlateApplication::Get().RegisterInputPreProcessor(ScreenshotInputProcessor, 0);
+	}
+}
+
+void UTunaSweeperKeyboardInputSubsystem::Deinitialize()
+{
+	if (ScreenshotInputProcessor.IsValid() && FSlateApplication::IsInitialized())
+	{
+		FSlateApplication::Get().UnregisterInputPreProcessor(ScreenshotInputProcessor);
+	}
+	ScreenshotInputProcessor.Reset();
+
+	Super::Deinitialize();
+}
+
+bool UTunaSweeperKeyboardInputSubsystem::CaptureScreenshotFromHotkey()
+{
+	UGameInstance* GameInstance = GetGameInstance();
+	UGameViewportClient* GameViewport = GameInstance ? GameInstance->GetGameViewportClient() : nullptr;
+	if (!GameViewport || !GameViewport->GetWorld() || GameViewport->GetWorld()->GetNetMode() == NM_DedicatedServer)
+	{
+		return false;
+	}
+
+	const TSharedPtr<SWindow> GameWindow = GameViewport->GetWindow();
+	if (GameWindow.IsValid() && FSlateApplication::IsInitialized())
+	{
+		const TSharedPtr<SWindow> ActiveWindow = FSlateApplication::Get().GetActiveTopLevelWindow();
+		if (ActiveWindow.IsValid() && ActiveWindow != GameWindow)
+		{
+			return false;
+		}
+	}
+
+	if (!FScreenshotRequest::IsScreenshotRequested())
+	{
+		FScreenshotRequest::RequestScreenshot(true);
+	}
+
+	// Consume F9 so UE's development-only "shot showui" binding cannot request a duplicate capture.
+	return true;
+}
 
 void UTunaSweeperKeyboardInputSubsystem::ReceiveQuickSlotKeyInput(int32 SlotNumber, APawn* InstigatorPawn)
 {

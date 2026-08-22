@@ -6646,3 +6646,7 @@
 - 하위 메뉴에 `No Store`·`Steam`·`STOVE`의 본편/데모 조합 6개를 라디오 선택 항목으로 추가했다.
 - 선택값이 에디터 프리뷰의 채널·데모 조건과 Packaging의 `Build Target`에 일방향으로 반영되며, 에디터 시작 시에도 저장된 선택을 Packaging 설정에 동기화하도록 했다.
 - UE 5.7 `TunaSweeperNoStore Win64 Development`와 `TunaSweeperEditor Win64 Development` 빌드를 성공적으로 완료했다.
+
+## 2026-08-23 02:08:20 (소요시간: 00:00:45)
+
+- Standalone PIE 프리뷰와 패키징 빌드에서 F9로 게임 클라이언트 영역만 캡처하는 구현을 다른 작업 중 변경과 분리해 커밋했다.
