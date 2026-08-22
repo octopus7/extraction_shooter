@@ -6640,7 +6640,7 @@
 - 에디터 타이틀의 배포 채널, 버전 접미사, Steam Demo 위시리스트 버튼 표시 조건이 선택된 Build Target을 직접 사용하도록 통합했다.
 - `TunaSweeperNoStore`, `TunaSweeperNoStoreDemo`, `TunaSweeperStoveDemo` 및 `TunaSweeperEditor` Win64 Development 빌드를 성공적으로 완료했다.
 
-## 2026-08-23 01:59:30 (소요시간: 00:08:00)
+## 2026-08-23 01:59:30 (소요시간: 00:11:30)
 
 - Build Target 선택 UI를 Project Settings에서 제거하고 에디터 상단 `TunaSweeper > Build Target` 하위 메뉴로 이동했다.
 - 하위 메뉴에 `No Store`·`Steam`·`STOVE`의 본편/데모 조합 6개를 라디오 선택 항목으로 추가했다.

@@ -110,11 +110,15 @@ void FTunaSweeperBuildTargetTool::SelectBuildTarget(ETunaSweeperBuildTarget Buil
 {
 	UTunaSweeperBuildTargetSettings* BuildTargetSettings = GetMutableDefault<UTunaSweeperBuildTargetSettings>();
 	BuildTargetSettings->BuildTarget = BuildTarget;
-	BuildTargetSettings->TryUpdateDefaultConfigFile();
+	BuildTargetSettings->UpdateSinglePropertyInConfigFile(
+		BuildTargetSettings->GetClass()->FindPropertyByName(GET_MEMBER_NAME_CHECKED(UTunaSweeperBuildTargetSettings, BuildTarget)),
+		BuildTargetSettings->GetDefaultConfigFilename());
 
 	UProjectPackagingSettings* PackagingSettings = GetMutableDefault<UProjectPackagingSettings>();
 	PackagingSettings->BuildTarget = TunaSweeperBuildTargetTool::ResolveTargetName(BuildTarget);
-	PackagingSettings->TryUpdateDefaultConfigFile();
+	PackagingSettings->UpdateSinglePropertyInConfigFile(
+		PackagingSettings->GetClass()->FindPropertyByName(GET_MEMBER_NAME_CHECKED(UProjectPackagingSettings, BuildTarget)),
+		PackagingSettings->GetDefaultConfigFilename());
 }
 
 bool FTunaSweeperBuildTargetTool::IsBuildTargetSelected(ETunaSweeperBuildTarget BuildTarget) const
