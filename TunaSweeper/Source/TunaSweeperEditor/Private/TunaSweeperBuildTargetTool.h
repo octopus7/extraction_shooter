@@ -20,6 +20,9 @@ private:
 	void TogglePackaging();
 	bool IsPackagingEnabled() const;
 	bool CanTogglePackaging() const;
+	void ToggleClean();
+	bool IsCleanEnabled() const;
+	bool CanToggleClean() const;
 	void ToggleRun();
 	bool IsRunEnabled() const;
 	bool CanToggleRun() const;
@@ -27,6 +30,7 @@ private:
 	void LaunchPackagedBuild(const FString& ExecutablePath) const;
 
 	bool bPackagingEnabled = false;
+	bool bCleanEnabled = false;
 	bool bRunEnabled = false;
 	bool bPackagingInProgress = false;
 };

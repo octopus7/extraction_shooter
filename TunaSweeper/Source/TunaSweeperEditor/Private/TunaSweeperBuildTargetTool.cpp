@@ -166,6 +166,17 @@ void FTunaSweeperBuildTargetTool::PopulateBuildTargetMenu(UToolMenu* Menu)
 			FIsActionChecked::CreateRaw(this, &FTunaSweeperBuildTargetTool::IsPackagingEnabled)),
 		EUserInterfaceActionType::ToggleButton);
 	PackagingSection.AddMenuEntry(
+		TEXT("Clean"),
+		LOCTEXT("CleanToggle", "Clean"),
+		LOCTEXT("CleanToggleTooltip", "Delete the selected target's existing output and request a clean build before packaging."),
+		FSlateIcon(),
+		FUIAction(
+			FExecuteAction::CreateRaw(this, &FTunaSweeperBuildTargetTool::ToggleClean),
+			FCanExecuteAction::CreateRaw(this, &FTunaSweeperBuildTargetTool::CanToggleClean),
+			FIsActionChecked::CreateRaw(this, &FTunaSweeperBuildTargetTool::IsCleanEnabled)),
+		EUserInterfaceActionType::ToggleButton);
+
+	PackagingSection.AddMenuEntry(
 		TEXT("Run"),
 		LOCTEXT("RunToggle", "Run"),
 		LOCTEXT("RunToggleTooltip", "Run the packaged game after packaging succeeds."),
@@ -277,6 +288,7 @@ void FTunaSweeperBuildTargetTool::TogglePackaging()
 	bPackagingEnabled = !bPackagingEnabled;
 	if (!bPackagingEnabled)
 	{
+		bCleanEnabled = false;
 		bRunEnabled = false;
 	}
 }
@@ -290,6 +302,24 @@ bool FTunaSweeperBuildTargetTool::CanTogglePackaging() const
 {
 	return !bPackagingInProgress;
 }
+void FTunaSweeperBuildTargetTool::ToggleClean()
+{
+	if (CanToggleClean())
+	{
+		bCleanEnabled = !bCleanEnabled;
+	}
+}
+
+bool FTunaSweeperBuildTargetTool::IsCleanEnabled() const
+{
+	return bCleanEnabled;
+}
+
+bool FTunaSweeperBuildTargetTool::CanToggleClean() const
+{
+	return bPackagingEnabled && !bPackagingInProgress;
+}
+
 
 void FTunaSweeperBuildTargetTool::ToggleRun()
 {
@@ -346,11 +376,34 @@ void FTunaSweeperBuildTargetTool::StartPackaging(ETunaSweeperBuildTarget BuildTa
 	const FString ProjectPath = FPaths::ConvertRelativePathToFull(FPaths::GetProjectFilePath());
 	const FString CommandletExecutable = FUnrealEdMisc::Get().GetExecutableForCommandlets();
 	const FString PackagedExecutable = FPaths::Combine(OutputDirectory, TargetName + TEXT(".exe"));
+	if (bCleanEnabled)
+	{
+		FString BuildsRoot = FPaths::ConvertRelativePathToFull(FPaths::Combine(FPaths::ProjectDir(), TEXT("Builds")));
+		FPaths::NormalizeDirectoryName(BuildsRoot);
+
+		if (!FPaths::IsUnderDirectory(OutputDirectory, BuildsRoot))
+		{
+			FMessageDialog::Open(EAppMsgType::Ok, FText::Format(
+				LOCTEXT("UnsafeCleanOutputDirectoryDialog", "Clean packaging was stopped because the output directory is outside the project Builds folder:\n{0}"),
+				FText::FromString(OutputDirectory)));
+			return;
+		}
+
+		if (IFileManager::Get().DirectoryExists(*OutputDirectory) &&
+			!IFileManager::Get().DeleteDirectory(*OutputDirectory, false, true))
+		{
+			FMessageDialog::Open(EAppMsgType::Ok, FText::Format(
+				LOCTEXT("CleanOutputDirectoryFailedDialog", "Could not delete the existing package output. Close any running packaged game and try again:\n{0}"),
+				FText::FromString(OutputDirectory)));
+			return;
+		}
+	}
+
 
 	IFileManager::Get().MakeDirectory(*OutputDirectory, true);
 
 	FString PackageOptions(TEXT("-stage -archive -package -build"));
-	if (PackagingSettings->FullRebuild)
+	if (bCleanEnabled || PackagingSettings->FullRebuild)
 	{
 		PackageOptions += TEXT(" -clean");
 	}

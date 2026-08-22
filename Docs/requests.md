@@ -6711,3 +6711,11 @@
 - 6개 게임 타겟에 각 `CUSTOM_CONFIG`를 컴파일하고, 에디터 패키징과 Steam/STOVE 데모·본편 배치 스크립트에도 `-customconfig`를 명시해 채널별 설정과 Steam App ID가 실행 시 적용되도록 보강했다.
 - 데모 빌드는 실제 프로젝트 버전과 채널 표기 뒤에 `.demo`를 런타임 조합해 Steam Demo를 `v0.1.0.steam.demo` 형식으로 표시하도록 변경했다.
 - UE 5.7 `TunaSweeperEditor Win64 Development`와 `TunaSweeperDemo Win64 Development` 빌드를 성공적으로 완료하고, 생성 정의에서 `CUSTOM_CONFIG "Demo"`와 `TUNASWEEPER_DEMO 1`을 확인했다.
+
+## 2026-08-23 03:45:00 (소요시간: 00:04:30)
+
+- `TunaSweeper > Build Target`의 `Packaging` 아래에 영문 `Clean` 토글을 추가하고 `Packaging`이 켜졌을 때만 활성화되도록 구현했다.
+- `Clean`이 켜진 상태에서 타겟을 선택하면 출력 경로가 프로젝트의 `TunaSweeper/Builds` 하위인지 검증한 뒤 해당 타겟의 기존 `Windows` 출력 폴더를 삭제하도록 구현했다.
+- 기존 패키지 실행 파일이 사용 중이어서 출력 폴더를 지우지 못하거나 경로 안전 검증에 실패하면 패키징을 중단하고 안내하도록 처리했다.
+- 출력 폴더 정리와 함께 UAT `-clean` 옵션을 적용하며, `Packaging`을 끄면 `Clean`과 `Run`도 함께 꺼지도록 구성했다.
+- UE 5.7 `TunaSweeperEditor Win64 Development` 빌드를 성공적으로 완료했다.
