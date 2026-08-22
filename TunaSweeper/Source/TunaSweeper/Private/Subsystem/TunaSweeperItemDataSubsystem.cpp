@@ -13,6 +13,7 @@ DEFINE_LOG_CATEGORY_STATIC(LogTunaSweeperItemData, Log, All);
 namespace TunaSweeperItemDataFiles
 {
 	const TCHAR* ItemTableJsonRelativePath = TEXT("Data/ItemTable.json");
+	const TCHAR* WeaponActorClassMappingsJsonRelativePath = TEXT("Data/WeaponActorClassMappings.json");
 	const TCHAR* ItemStackDefinitionsJsonRelativePath = TEXT("Data/ItemStackDefinitions.json");
 	const TCHAR* ItemNameStringsCsvRelativePath = TEXT("Data/ItemNameStrings.csv");
 	const TCHAR* LootContainerTableJsonRelativePath = TEXT("Data/LootContainerTable.json");
@@ -165,6 +166,7 @@ bool UTunaSweeperItemDataSubsystem::LoadItemData(bool bForceReload)
 	ResetLoadedItemData();
 
 	const bool bLoadedItemTable = LoadItemTableJson();
+	LoadWeaponActorClassMappingsJson();
 	const bool bLoadedItemStackDefinitions = LoadItemStackDefinitionsJson();
 	const bool bLoadedNameStrings = LoadItemNameStringsCsv();
 	const bool bLoadedLootContainerTable = LoadLootContainerTableJson();
@@ -500,6 +502,26 @@ int32 UTunaSweeperItemDataSubsystem::ResolveShopItemBuyPrice(
 	}
 
 	return 0;
+}
+
+bool UTunaSweeperItemDataSubsystem::TryGetWeaponActorClassPath(
+	int32 ItemId,
+	FSoftObjectPath& OutWeaponClassPath)
+{
+	OutWeaponClassPath.Reset();
+	if (!EnsureItemDataLoaded())
+	{
+		return false;
+	}
+
+	const FSoftObjectPath* FoundClassPath = WeaponActorClassPathsByItemId.Find(ItemId);
+	if (!FoundClassPath || !FoundClassPath->IsValid())
+	{
+		return false;
+	}
+
+	OutWeaponClassPath = *FoundClassPath;
+	return true;
 }
 
 int32 UTunaSweeperItemDataSubsystem::ResolveItemMaxStackQuantity(
@@ -944,6 +966,77 @@ bool UTunaSweeperItemDataSubsystem::LoadItemTableJson()
 	if (!bHasValidRows)
 	{
 		UE_LOG(LogTunaSweeperItemData, Error, TEXT("Item table JSON has no valid rows: %s"), *ItemTableJsonPath);
+	}
+
+	return bHasValidRows;
+}
+
+bool UTunaSweeperItemDataSubsystem::LoadWeaponActorClassMappingsJson()
+{
+	FString JsonContent;
+	const FString JsonPath = GetWeaponActorClassMappingsJsonPath();
+	if (!FFileHelper::LoadFileToString(JsonContent, *JsonPath))
+	{
+		UE_LOG(LogTunaSweeperItemData, Warning, TEXT("Failed to read optional weapon actor class mappings JSON: %s"), *JsonPath);
+		return false;
+	}
+
+	TArray<TSharedPtr<FJsonValue>> JsonRows;
+	const TSharedRef<TJsonReader<>> JsonReader = TJsonReaderFactory<>::Create(JsonContent);
+	if (!FJsonSerializer::Deserialize(JsonReader, JsonRows))
+	{
+		UE_LOG(LogTunaSweeperItemData, Warning, TEXT("Failed to parse weapon actor class mappings JSON: %s"), *JsonPath);
+		return false;
+	}
+
+	bool bHasValidRows = false;
+	for (int32 RowIndex = 0; RowIndex < JsonRows.Num(); ++RowIndex)
+	{
+		const TSharedPtr<FJsonObject>* JsonObject = nullptr;
+		if (!JsonRows[RowIndex].IsValid() ||
+			!JsonRows[RowIndex]->TryGetObject(JsonObject) ||
+			!JsonObject ||
+			!JsonObject->IsValid())
+		{
+			UE_LOG(LogTunaSweeperItemData, Warning, TEXT("Skipping weapon actor class mapping row %d: row is not an object."), RowIndex);
+			continue;
+		}
+
+		double NumericItemId = 0.0;
+		FString WeaponClassPathString;
+		if (!(*JsonObject)->TryGetNumberField(TEXT("item_id"), NumericItemId) ||
+			!(*JsonObject)->TryGetStringField(TEXT("weapon_class"), WeaponClassPathString))
+		{
+			UE_LOG(LogTunaSweeperItemData, Warning, TEXT("Skipping weapon actor class mapping row %d: item_id or weapon_class is missing."), RowIndex);
+			continue;
+		}
+
+		const int32 ItemId = FMath::RoundToInt(NumericItemId);
+		const FSoftObjectPath WeaponClassPath(WeaponClassPathString.TrimStartAndEnd());
+		if (ItemId == INDEX_NONE || !WeaponClassPath.IsValid())
+		{
+			UE_LOG(LogTunaSweeperItemData, Warning, TEXT("Skipping weapon actor class mapping row %d: values are invalid."), RowIndex);
+			continue;
+		}
+
+		if (!ItemDefinitionsById.Contains(ItemId))
+		{
+			UE_LOG(LogTunaSweeperItemData, Warning, TEXT("Skipping weapon actor class mapping row %d: item %d is not defined."), RowIndex, ItemId);
+			continue;
+		}
+
+		if (WeaponActorClassPathsByItemId.Contains(ItemId))
+		{
+			UE_LOG(LogTunaSweeperItemData, Warning, TEXT("Replacing duplicate weapon actor class mapping for item %d."), ItemId);
+		}
+
+		WeaponActorClassPathsByItemId.Add(ItemId, WeaponClassPath);
+		bHasValidRows = true;
+	}
+
+	if (!bHasValidRows)
+	{
+		UE_LOG(LogTunaSweeperItemData, Warning, TEXT("Weapon actor class mappings JSON has no valid rows: %s"), *JsonPath);
 	}
 
 	return bHasValidRows;
@@ -1673,6 +1766,7 @@ bool UTunaSweeperItemDataSubsystem::LoadWorkbenchDismantleRecipesJson()
 void UTunaSweeperItemDataSubsystem::ResetLoadedItemData()
 {
 	ItemDefinitionsById.Reset();
+	WeaponActorClassPathsByItemId.Reset();
 	MaxStackQuantitiesByCategoryKey.Reset();
 	ItemNameStringsByKey.Reset();
 	LootContainerDefinitionsById.Reset();
@@ -1688,6 +1782,11 @@ void UTunaSweeperItemDataSubsystem::ResetLoadedItemData()
 FString UTunaSweeperItemDataSubsystem::GetItemTableJsonPath() const
 {
 	return FPaths::Combine(FPaths::ProjectContentDir(), TunaSweeperItemDataFiles::ItemTableJsonRelativePath);
+}
+
+FString UTunaSweeperItemDataSubsystem::GetWeaponActorClassMappingsJsonPath() const
+{
+	return FPaths::Combine(FPaths::ProjectContentDir(), TunaSweeperItemDataFiles::WeaponActorClassMappingsJsonRelativePath);
 }
 
 FString UTunaSweeperItemDataSubsystem::GetItemStackDefinitionsJsonPath() const

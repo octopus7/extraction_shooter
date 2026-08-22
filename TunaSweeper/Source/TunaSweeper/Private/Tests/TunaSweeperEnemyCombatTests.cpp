@@ -14,6 +14,7 @@
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
 #include "Subsystem/TunaSweeperNoiseSubsystem.h"
 #include "UObject/UObjectGlobals.h"
+#include "Weapon/TunaSweeperWeapon.h"
 
 namespace TunaSweeperEnemyCombatTests
 {
@@ -405,7 +406,33 @@ bool FTunaSweeperEnemyCombatDataTest::RunTest(const FString& Parameters)
 				static_cast<uint8>(ItemDefinition.FireMode),
 				static_cast<uint8>(Expected.FireMode));
 		}
+
+		FSoftObjectPath WeaponClassPath;
+		const bool bFoundWeaponClassMapping = ItemDataSubsystem->TryGetWeaponActorClassPath(
+			Expected.ItemId,
+			WeaponClassPath);
+		TestTrue(
+			*FString::Printf(TEXT("Weapon item %d has an actor class mapping"), Expected.ItemId),
+			bFoundWeaponClassMapping);
+		if (bFoundWeaponClassMapping)
+		{
+			TestEqual(
+				*FString::Printf(TEXT("Weapon item %d uses BP_SimpleSMG"), Expected.ItemId),
+				WeaponClassPath.ToString(),
+				FString(TEXT("/Game/Weapons/BP_SimpleSMG.BP_SimpleSMG_C")));
+
+			const TSoftClassPtr<ATunaSweeperWeapon> WeaponClass(WeaponClassPath);
+			const UClass* LoadedWeaponClass = WeaponClass.LoadSynchronous();
+			TestTrue(
+				*FString::Printf(TEXT("Weapon item %d mapped class loads as a TunaSweeper weapon"), Expected.ItemId),
+				LoadedWeaponClass && LoadedWeaponClass->IsChildOf(ATunaSweeperWeapon::StaticClass()));
+		}
 	}
+
+	FSoftObjectPath MissingWeaponClassPath;
+	TestFalse(
+		TEXT("An unmapped item does not resolve a weapon actor class"),
+		ItemDataSubsystem->TryGetWeaponActorClassPath(999999, MissingWeaponClassPath));
 
 	return true;
 }

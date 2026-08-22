@@ -4743,3 +4743,23 @@ App ID 끝자리가 0인 것이 뒤의 1~9 번호를 해당 앱의 Depot용으�
 ### 답변
 
 그런 보장된 규칙은 아니다. Steam 공식 문서에는 App ID 끝자리 0을 기준으로 다음 9개 ID를 해당 앱 전용으로 예약한다는 규칙이나 Depot 9개 제한이 없다. 앱 생성과 함께 기본 Depot이 생성되면 내부 발급 순서 때문에 App ID와 인접한 번호가 나올 수 있지만, 추가 Depot과 Demo, DLC 등은 각각 별도의 고유 ID를 발급받으므로 번호 관계를 로직이나 운영 규칙으로 사용하면 안 된다. App과 Depot의 연결 관계는 숫자가 아니라 Steamworks의 App Depot 설정으로 결정된다.
+
+## 2026-08-22 22:20:00 (소요시간: 00:04:11)
+
+### 질문
+
+소총 Blueprint를 플레이어 캐릭터 Blueprint에 연결하는 현재 방식과 적절한 손 장착 방식 문의.
+
+### 답변
+
+현재 플레이어는 `BP_AssaultRifle`을 캐릭터 Blueprint의 고정 컴포넌트로 넣지 않는다. 장착 슬롯 선택 시 C++가 `/Game/Weapons/BP_AssaultRifle` 액터를 런타임에 스폰하고, 캐릭터의 루트에 붙은 `WeaponAttachPoint` 씬 컴포넌트에 `SnapToTargetNotIncludingScale`로 부착한다. 따라서 현 구조의 위치 조정 지점은 `BP_TunaSweeperPlayerCharacter`의 상속 컴포넌트 `WeaponAttachPoint`이다. 다만 캐릭터 애니메이션의 손을 따라가게 만들려면 Luna Skeleton의 오른손 본에 별도 무기 소켓을 만들고, `WeaponAttachPoint` 또는 스폰된 무기를 캐릭터 Skeletal Mesh의 그 소켓에 부착하는 방식이 적합하다. 프로젝트에는 구르기 중에만 `hand_r` 소켓/본으로 임시 재부착하는 코드가 이미 있다. 양손 소총 자세까지 맞추려면 오른손 소켓을 기준으로 소총을 부착하고 왼손은 AnimBP IK로 소총의 별도 그립 소켓을 추적하도록 구성해야 한다.
+
+## 2026-08-22 22:24:40 (소요시간: 00:00:50)
+
+### 질문
+
+플레이어가 사용하는 `BP_AssaultRifle` 클래스가 무기 ID와 관계없이 모든 무기에 공통인지 문의.
+
+### 답변
+
+현재 원거리 총기에는 무기 ID 구분 없이 모두 `BP_AssaultRifle`을 사용한다. 클래스 해석 로직은 아이템의 `Id`나 `WeaponTypeTag`를 보지 않고 `CategoryTag == item.category.weapon.gun`만 확인해 `/Game/Weapons/BP_AssaultRifle`을 선택하므로 권총·소총·샷건·SMG도 같은 무기 액터와 메시를 공유한다. 다만 발사 수치, 탄약, 반동·스프레드 등 일부 동작은 장착 아이템 정의와 `WeaponTypeTag`를 별도로 읽어 달라질 수 있다. 근접 무기는 예외로 기본 C++ `ATunaSweeperWeapon` 액터를 사용한 뒤 선택한 근접 무기 메시를 덮어쓴다.

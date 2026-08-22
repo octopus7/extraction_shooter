@@ -46,7 +46,9 @@ TSubclassOf<ATunaSweeperWeapon> ATunaSweeperTopDownCharacter::ResolveEquippedWea
 		return ATunaSweeperWeapon::StaticClass();
 	}
 
-	TSoftClassPtr<ATunaSweeperWeapon> WeaponClassToLoad = DefaultWeaponClass;
+	const TSoftClassPtr<ATunaSweeperWeapon> FallbackWeaponClass(
+		TunaSweeperEquippedWeaponVisual::AssaultRifleClassPath);
+	TSoftClassPtr<ATunaSweeperWeapon> WeaponClassToLoad = FallbackWeaponClass;
 
 	FTunaSweeperItemInstance WeaponInstance;
 	FTunaSweeperItemDefinition WeaponDefinition;
@@ -56,7 +58,14 @@ TSubclassOf<ATunaSweeperWeapon> ATunaSweeperTopDownCharacter::ResolveEquippedWea
 		TunaGameInstance->TryGetEquipmentWeaponSlotItem(SelectedWeaponSlotNumber, WeaponInstance, WeaponDefinition) &&
 		WeaponDefinition.CategoryTag == TunaSweeperEquippedWeaponVisual::GunCategoryTag)
 	{
-		WeaponClassToLoad = TSoftClassPtr<ATunaSweeperWeapon>(TunaSweeperEquippedWeaponVisual::AssaultRifleClassPath);
+		if (UTunaSweeperItemDataSubsystem* ItemDataSubsystem = TunaGameInstance->GetSubsystem<UTunaSweeperItemDataSubsystem>())
+		{
+			FSoftObjectPath MappedWeaponClassPath;
+			if (ItemDataSubsystem->TryGetWeaponActorClassPath(WeaponDefinition.Id, MappedWeaponClassPath))
+			{
+				WeaponClassToLoad = TSoftClassPtr<ATunaSweeperWeapon>(MappedWeaponClassPath);
+			}
+		}
 	}
 
 	if (TSubclassOf<ATunaSweeperWeapon> LoadedWeaponClass = WeaponClassToLoad.LoadSynchronous())
@@ -64,7 +73,7 @@ TSubclassOf<ATunaSweeperWeapon> ATunaSweeperTopDownCharacter::ResolveEquippedWea
 		return LoadedWeaponClass;
 	}
 
-	return DefaultWeaponClass.LoadSynchronous();
+	return FallbackWeaponClass.LoadSynchronous();
 }
 
 void ATunaSweeperTopDownCharacter::ApplyEquippedWeaponAttachmentVisuals()

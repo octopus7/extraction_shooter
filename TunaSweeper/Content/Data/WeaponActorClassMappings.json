@@ -1,0 +1,26 @@
+[
+  {
+    "item_id": 1001,
+    "weapon_class": "/Game/Weapons/BP_SimpleSMG.BP_SimpleSMG_C"
+  },
+  {
+    "item_id": 1002,
+    "weapon_class": "/Game/Weapons/BP_SimpleSMG.BP_SimpleSMG_C"
+  },
+  {
+    "item_id": 1003,
+    "weapon_class": "/Game/Weapons/BP_SimpleSMG.BP_SimpleSMG_C"
+  },
+  {
+    "item_id": 1006,
+    "weapon_class": "/Game/Weapons/BP_SimpleSMG.BP_SimpleSMG_C"
+  },
+  {
+    "item_id": 1007,
+    "weapon_class": "/Game/Weapons/BP_SimpleSMG.BP_SimpleSMG_C"
+  },
+  {
+    "item_id": 1008,
+    "weapon_class": "/Game/Weapons/BP_SimpleSMG.BP_SimpleSMG_C"
+  }
+]

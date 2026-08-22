@@ -444,6 +444,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Item Data")
 	bool GetAllItemDefinitions(TArray<FTunaSweeperItemDefinition>& OutItemDefinitions);
 
+	bool TryGetWeaponActorClassPath(int32 ItemId, FSoftObjectPath& OutWeaponClassPath);
+
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Item Data")
 	bool TryGetLootContainerDefinition(int32 ContainerDefinitionId, FTunaSweeperLootContainerDefinition& OutDefinition);
 
@@ -504,6 +506,7 @@ public:
 private:
 	bool EnsureItemDataLoaded();
 	bool LoadItemTableJson();
+	bool LoadWeaponActorClassMappingsJson();
 	bool LoadItemStackDefinitionsJson();
 	bool LoadItemNameStringsCsv();
 	bool LoadLootContainerTableJson();
@@ -513,6 +516,7 @@ private:
 	bool LoadWorkbenchDismantleRecipesJson();
 	void ResetLoadedItemData();
 	FString GetItemTableJsonPath() const;
+	FString GetWeaponActorClassMappingsJsonPath() const;
 	FString GetItemStackDefinitionsJsonPath() const;
 	FString GetItemNameStringsCsvPath() const;
 	FString GetLootContainerTableJsonPath() const;
@@ -523,6 +527,9 @@ private:
 
 	UPROPERTY(Transient)
 	TMap<int32, FTunaSweeperItemDefinition> ItemDefinitionsById;
+
+	UPROPERTY(Transient)
+	TMap<int32, FSoftObjectPath> WeaponActorClassPathsByItemId;
 
 	UPROPERTY(Transient)
 	TMap<FName, int32> MaxStackQuantitiesByCategoryKey;

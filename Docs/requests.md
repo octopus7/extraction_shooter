@@ -6593,3 +6593,12 @@
 - `TunaSweeper/Builds/UploadSteamDemo.bat`를 추가해 `store/steamworks/steamid.txt` 첫 줄의 Steam 로그인 계정명을 읽고 Demo App VDF `app_5158070.vdf`를 SteamCMD로 실행하도록 구성했다.
 - Steam 계정 파일은 Git에 포함되지 않도록 명시적으로 제외하고, 패키징 결과물은 계속 무시하면서 업로드 BAT만 Git에서 추적할 수 있도록 ignore 예외를 추가했다.
 - 계정 파일이 없거나 비어 있는 경우 및 SteamCMD나 Demo VDF가 없는 경우 업로드 전에 오류로 종료되도록 검증 로직을 추가했다.
+
+## 2026-08-22 22:26:00 (소요시간: 00:16:00)
+
+- 아이템 ID를 무기 액터 Blueprint 클래스 경로에 연결하는 `Content/Data/WeaponActorClassMappings.json`을 추가했다.
+- 현재 총알 발사형 무기 ID 1001, 1002, 1003, 1006, 1007, 1008을 모두 `BP_SimpleSMG`에 연결했다.
+- 아이템 데이터 서브시스템이 선택적 무기 클래스 매핑 JSON을 읽고 캐시하며, 플레이어가 장착 아이템 ID에 대응하는 무기 Blueprint를 동기 로드하도록 변경했다.
+- 매핑 누락, JSON 읽기·파싱 실패, 클래스 로드 실패 시 `BP_AssaultRifle`을 명시적 fallback으로 사용하도록 구성했다.
+- 모든 현재 총기 ID의 매핑과 `BP_SimpleSMG` 클래스 상속·로드, 미등록 ID 조회 실패를 확인하는 자동화 테스트를 추가했다.
+- UE 5.7 `TunaSweeperEditor Win64 Development` 빌드와 `TunaSweeper.Combat.Data.ProfilesAndWeapons` 자동화 테스트를 성공적으로 완료했다.
