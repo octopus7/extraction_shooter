@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Engine/DeveloperSettings.h"
+#include "UObject/Object.h"
 #include "TunaSweeperBuildTargetSettings.generated.h"
 
 UENUM()
@@ -15,27 +15,15 @@ enum class ETunaSweeperBuildTarget : uint8
 	StoveDemo UMETA(DisplayName = "STOVE - Demo")
 };
 
-UCLASS(config = Game, defaultconfig, meta = (DisplayName = "Build Target"))
-class TUNASWEEPER_API UTunaSweeperBuildTargetSettings : public UDeveloperSettings
+UCLASS(config = Game, defaultconfig)
+class TUNASWEEPER_API UTunaSweeperBuildTargetSettings : public UObject
 {
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, config, Category = "Build Target", meta = (DisplayName = "Target"))
+	UPROPERTY(config)
 	ETunaSweeperBuildTarget BuildTarget = ETunaSweeperBuildTarget::NoStoreFull;
-
-	virtual FName GetCategoryName() const override { return TEXT("TunaSweeper"); }
-	virtual FName GetSectionName() const override { return TEXT("Build Target"); }
 
 	FString GetDistributionChannel() const;
 	bool IsDemoBuild() const;
-
-#if WITH_EDITOR
-	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
-#endif
-
-private:
-#if WITH_EDITOR
-	void ApplyPackagingTarget();
-#endif
 };

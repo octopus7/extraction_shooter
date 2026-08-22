@@ -6639,3 +6639,10 @@
 - 선택값이 Unreal의 `Project Settings > Packaging > Build Target`에 즉시 반영되도록 연결하고, 별도 `Distribution Preview` 설정은 제거했다.
 - 에디터 타이틀의 배포 채널, 버전 접미사, Steam Demo 위시리스트 버튼 표시 조건이 선택된 Build Target을 직접 사용하도록 통합했다.
 - `TunaSweeperNoStore`, `TunaSweeperNoStoreDemo`, `TunaSweeperStoveDemo` 및 `TunaSweeperEditor` Win64 Development 빌드를 성공적으로 완료했다.
+
+## 2026-08-23 01:59:30 (소요시간: 00:08:00)
+
+- Build Target 선택 UI를 Project Settings에서 제거하고 에디터 상단 `TunaSweeper > Build Target` 하위 메뉴로 이동했다.
+- 하위 메뉴에 `No Store`·`Steam`·`STOVE`의 본편/데모 조합 6개를 라디오 선택 항목으로 추가했다.
+- 선택값이 에디터 프리뷰의 채널·데모 조건과 Packaging의 `Build Target`에 일방향으로 반영되며, 에디터 시작 시에도 저장된 선택을 Packaging 설정에 동기화하도록 했다.
+- UE 5.7 `TunaSweeperNoStore Win64 Development`와 `TunaSweeperEditor Win64 Development` 빌드를 성공적으로 완료했다.

@@ -25,6 +25,7 @@ public class TunaSweeperEditor : ModuleRules
 			"AudioEditor",
 			"Chaos",
 			"DataflowCore",
+			"DeveloperToolSettings",
 			"FractureEngine",
 			"GeometryCollectionEngine",
 			"KismetCompiler",

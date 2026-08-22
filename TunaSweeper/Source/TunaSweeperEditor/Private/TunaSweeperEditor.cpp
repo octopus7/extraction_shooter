@@ -1,4 +1,5 @@
 #include "TunaSweeperEditorSetupShared.h"
+#include "TunaSweeperBuildTargetTool.h"
 #include "TunaSweeperEnemyAIDebugTool.h"
 #include "TunaSweeperLunaSkirtPhysicsSetup.h"
 #include "TunaSweeperQuadrupedPresetSetup.h"
@@ -113,6 +114,9 @@ public:
 			}
 		}
 
+		BuildTargetTool = MakeUnique<FTunaSweeperBuildTargetTool>();
+		BuildTargetTool->Startup();
+
 		LevelOpenTool = MakeUnique<FTunaSweeperLevelOpenTool>();
 		LevelOpenTool->Startup();
 
@@ -193,6 +197,12 @@ public:
 		if (bStandardEditorSetupStarted)
 		{
 			TunaSweeperMapCaptureActorDetails::Unregister();
+		}
+
+		if (BuildTargetTool)
+		{
+			BuildTargetTool->Shutdown();
+			BuildTargetTool.Reset();
 		}
 
 		if (LevelOpenTool)
@@ -342,6 +352,7 @@ private:
 	FTSTicker::FDelegateHandle JumpInputSetupTickerHandle;
 	FDelegateHandle QuadrupedSetupInitializedHandle;
 	FTSTicker::FDelegateHandle QuadrupedSetupTickerHandle;
+	TUniquePtr<FTunaSweeperBuildTargetTool> BuildTargetTool;
 	TUniquePtr<FTunaSweeperLevelOpenTool> LevelOpenTool;
 	TUniquePtr<FTunaSweeperEnemyAIDebugTool> EnemyAIDebugTool;
 	TUniquePtr<FTunaSweeperFMSoundTool> FMSoundTool;
