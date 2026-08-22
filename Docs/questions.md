@@ -4883,3 +4883,23 @@ Steam과 STOVE는 Windows 플랫폼 종류가 아니라 별도 Game Target이므
 ### 답변
 
 해당 입력란이 맞다. 드롭다운이 아니라 타겟 이름을 직접 입력하며, Steam 본편은 `TunaSweeper`, Steam 데모는 `TunaSweeperDemo`, STOVE 본편은 `TunaSweeperStove`를 사용한다. 빈 값이면 Unreal이 기본 Game Target을 선택하며, 값을 입력한 뒤 일반 Windows 패키징을 실행하면 지정한 타겟이 사용된다.
+
+## 2026-08-23 02:13:13 (소요시간: 00:00:36)
+
+### 질문
+
+에디터 패키징 결과 경로를 어디로 지정해야 하며 `Builds` 폴더를 선택하면 선택한 빌드 타겟별 경로를 자동으로 찾는지 문의.
+
+### 답변
+
+현재 에디터가 기억하는 패키징 경로는 `D:/github/extraction_shooter/Release`다. 패키징을 시작하면 출력 폴더 선택 창이 열리고 마지막 선택 경로를 기억한다. `Builds`를 선택하면 UAT가 Windows 플랫폼 폴더를 덧붙여 일반적으로 `Builds/Windows`에 출력하지만, Steam/STOVE 및 데모/본편별 하위 폴더는 자동 생성하지 않는다. 여러 타겟의 덮어쓰기를 피하려면 `Builds/SteamDemo`, `Builds/SteamFull`, `Builds/StoveDemo`, `Builds/StoveFull`, `Builds/NoStoreDemo`, `Builds/NoStoreFull`처럼 타겟별 폴더를 직접 선택해야 한다.
+
+## 2026-08-23 02:14:00 (소요시간: 00:00:21)
+
+### 질문
+
+Build Target 선택에 따라 패키징 출력 경로도 조정할 수 있는지 문의.
+
+### 답변
+
+가능하다. 상단 `TunaSweeper > Build Target`에서 타겟을 선택할 때 에디터의 패키징 출력 기본 경로도 함께 바꾸도록 연결할 수 있다. 표준 패키징 폴더 선택 창은 계속 표시되므로 자동 지정된 경로를 그대로 사용하거나 필요할 때 다른 폴더를 선택할 수 있다.

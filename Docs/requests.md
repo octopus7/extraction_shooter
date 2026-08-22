@@ -6654,3 +6654,10 @@
 ## 2026-08-23 02:12:08 (소요시간: 00:00:40)
 
 - 현재 작업 트리의 Steam 빌드 타겟, 전체화면 해상도 보정, 맵·플레이어 에셋, 추출 지점 위치 변경을 한 커밋으로 기록했다.
+
+## 2026-08-23 02:14:21 (소요시간: 00:06:05)
+
+- `TunaSweeper > Build Target` 선택 시 패키징 출력 기본 경로를 `Builds/{NoStore|Steam|Stove}/{Demo|Full}/Windows` 규칙으로 자동 설정하도록 구현했다.
+- 선택한 출력 폴더가 없으면 생성하고, `UPlatformsMenuSettings` 사용자 설정의 `StagingDirectory`에 저장해 표준 패키징 폴더 선택 창이 해당 위치에서 열리도록 했다.
+- 메뉴 등록 시 전체 `PlatformsMenuSettings`를 저장해 발생한 배열 범위 assertion을 제거하고 `StagingDirectory` 한 항목만 config 캐시에 기록·플러시하도록 수정했다.
+- UE 5.7 `TunaSweeperEditor Win64 Development` 빌드를 성공적으로 완료하고, Steam Demo 기준 경로 저장과 에디터 정상 실행을 확인했다.

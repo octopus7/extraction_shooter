@@ -1,5 +1,9 @@
 #include "TunaSweeperBuildTargetTool.h"
 
+#include "HAL/FileManager.h"
+#include "Misc/ConfigCacheIni.h"
+#include "Misc/Paths.h"
+#include "Settings/PlatformsMenuSettings.h"
 #include "Settings/ProjectPackagingSettings.h"
 #include "ToolMenus.h"
 
@@ -34,6 +38,36 @@ namespace TunaSweeperBuildTargetTool
 		case ETunaSweeperBuildTarget::NoStoreFull:
 		default: return TEXT("TunaSweeperNoStore");
 		}
+	}
+	FString ResolveOutputDirectory(ETunaSweeperBuildTarget BuildTarget)
+	{
+		const TCHAR* StoreDirectory = TEXT("NoStore");
+		switch (BuildTarget)
+		{
+		case ETunaSweeperBuildTarget::SteamFull:
+		case ETunaSweeperBuildTarget::SteamDemo:
+			StoreDirectory = TEXT("Steam");
+			break;
+		case ETunaSweeperBuildTarget::StoveFull:
+		case ETunaSweeperBuildTarget::StoveDemo:
+			StoreDirectory = TEXT("Stove");
+			break;
+		default:
+			break;
+		}
+
+		const bool bDemo = BuildTarget == ETunaSweeperBuildTarget::NoStoreDemo ||
+			BuildTarget == ETunaSweeperBuildTarget::SteamDemo ||
+			BuildTarget == ETunaSweeperBuildTarget::StoveDemo;
+		FString OutputDirectory = FPaths::ConvertRelativePathToFull(FPaths::Combine(
+			FPaths::ProjectDir(),
+			TEXT(".."),
+			TEXT("Builds"),
+			StoreDirectory,
+			bDemo ? TEXT("Demo") : TEXT("Full"),
+			TEXT("Windows")));
+		FPaths::NormalizeDirectoryName(OutputDirectory);
+		return OutputDirectory;
 	}
 }
 
@@ -119,6 +153,19 @@ void FTunaSweeperBuildTargetTool::SelectBuildTarget(ETunaSweeperBuildTarget Buil
 	PackagingSettings->UpdateSinglePropertyInConfigFile(
 		PackagingSettings->GetClass()->FindPropertyByName(GET_MEMBER_NAME_CHECKED(UProjectPackagingSettings, BuildTarget)),
 		PackagingSettings->GetDefaultConfigFilename());
+	UPlatformsMenuSettings* PlatformsMenuSettings = GetMutableDefault<UPlatformsMenuSettings>();
+	PlatformsMenuSettings->StagingDirectory.Path = TunaSweeperBuildTargetTool::ResolveOutputDirectory(BuildTarget);
+	IFileManager::Get().MakeDirectory(*PlatformsMenuSettings->StagingDirectory.Path, true);
+	const FString SerializedStagingDirectory = FString::Printf(
+		TEXT("(Path=\"%s\")"),
+		*PlatformsMenuSettings->StagingDirectory.Path);
+	GConfig->SetString(
+		TEXT("/Script/DeveloperToolSettings.PlatformsMenuSettings"),
+		TEXT("StagingDirectory"),
+		*SerializedStagingDirectory,
+		GGameIni);
+	GConfig->Flush(false, GGameIni);
+
 }
 
 bool FTunaSweeperBuildTargetTool::IsBuildTargetSelected(ETunaSweeperBuildTarget BuildTarget) const
