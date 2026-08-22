@@ -6626,3 +6626,9 @@
 ## 2026-08-23 01:27:15 (소요시간: 00:00:18)
 
 - `AGENTS.md`에 사용자의 전체 메시지가 `빌드` 또는 `build`뿐일 때 요청 기록을 남기지 않고 프로젝트 빌드 후 Unreal Editor를 실행하도록 지침을 추가했다.
+
+## 2026-08-23 01:30:00 (소요시간: 00:07:10)
+
+- Steam Demo 타이틀의 위시리스트 버튼이 `TunaSweeper.Distribution` 설정의 `SteamFullGameAppId`를 읽어 Steam 온라인 서브시스템의 `ShowStoreUI`로 본편 스토어 오버레이를 열도록 구현했다.
+- 장바구니 자동 추가는 비활성화해 스토어 페이지에서 사용자가 위시리스트 추가를 선택하도록 했으며, Steam 서비스·외부 UI·유효한 숫자 App ID가 없을 때는 아무 동작도 하지 않도록 방어했다.
+- UE 5.7 `TunaSweeperDemo Win64 Development` 빌드를 성공적으로 완료했다.

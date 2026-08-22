@@ -9,6 +9,7 @@ namespace TunaSweeperDistribution
 	const TCHAR* ChannelKey = TEXT("DistributionChannel");
 	const TCHAR* ProjectSettingsSectionName = TEXT("/Script/EngineSettings.GeneralProjectSettings");
 	const TCHAR* ProjectVersionKey = TEXT("ProjectVersion");
+	const TCHAR* SteamFullGameAppIdKey = TEXT("SteamFullGameAppId");
 }
 
 FString UTunaSweeperIntroMenuWidget::GetDistributionChannel() const
@@ -89,7 +90,34 @@ void UTunaSweeperIntroMenuWidget::EnsureSteamDemoWishlistButton()
 
 void UTunaSweeperIntroMenuWidget::HandleSteamDemoWishlistClicked()
 {
-	// TODO: Open the Steam overlay to this game's store page once its app ID and overlay integration are finalized.
+	if (!IsSteamDemoDistribution())
+	{
+		return;
+	}
+
+	FString FullGameAppId;
+	GConfig->GetString(TunaSweeperDistribution::SectionName, TunaSweeperDistribution::SteamFullGameAppIdKey, FullGameAppId, GGameIni);
+	if (!FullGameAppId.IsNumeric() || FullGameAppId.IsEmpty())
+	{
+		return;
+	}
+
+	IOnlineSubsystem* SteamSubsystem = IOnlineSubsystem::Get(STEAM_SUBSYSTEM);
+	if (!SteamSubsystem)
+	{
+		return;
+	}
+
+	const IOnlineExternalUIPtr ExternalUI = SteamSubsystem->GetExternalUIInterface();
+	if (!ExternalUI.IsValid())
+	{
+		return;
+	}
+
+	FShowStoreParams StoreParams;
+	StoreParams.ProductId = FullGameAppId;
+	StoreParams.bAddToCart = false;
+	ExternalUI->ShowStoreUI(0, StoreParams);
 }
 
 void UTunaSweeperIntroMenuWidget::ShowMainMenu()

@@ -35,6 +35,8 @@
 #include "Misc/ConfigCacheIni.h"
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
+#include "OnlineSubsystem.h"
+#include "Interfaces/OnlineExternalUIInterface.h"
 #include "PixelFormat.h"
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
@@ -171,4 +173,3 @@ namespace TunaSweeperSettingsUi
 		return Brush;
 	}
 }
-
