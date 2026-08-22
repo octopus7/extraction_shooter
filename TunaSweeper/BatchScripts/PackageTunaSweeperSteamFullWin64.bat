@@ -3,6 +3,7 @@ setlocal
 
 set "PROJECT_FILE=%~dp0..\TunaSweeper.uproject"
 set "TARGET_NAME=TunaSweeper"
+set "CUSTOM_CONFIG=Full"
 set "ARCHIVE_DIR=%~dp0..\Builds\Steam\Full"
 set "DISPLAY_NAME=TunaSweeper Steam Full"
 
@@ -52,6 +53,7 @@ call "%RUN_UAT%" BuildCookRun ^
     -project="%PROJECT_FILE%" ^
     -noP4 ^
     -target=%TARGET_NAME% ^
+    -customconfig=%CUSTOM_CONFIG% ^
     -platform=Win64 ^
     -clientconfig=%CONFIGURATION% ^
     -serverconfig=%CONFIGURATION% ^

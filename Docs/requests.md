@@ -6703,3 +6703,11 @@
 - 각 스크립트는 기본 Shipping이며 선택적으로 `Development` 인자를 허용하고, 기존 결과의 `Windows` 폴더를 교체한 뒤 UAT BuildCookRun을 실행하도록 구성했다.
 - 기존 통합 `PackageTunaSweeperWin64.bat`를 삭제하고 README의 사용법과 STOVE 출력 구조를 갱신했다.
 - 실제 패키징 없이 네 스크립트의 인자 및 UE 경로 사전검사와 타겟·출력 매핑을 확인했다.
+
+## 2026-08-23 03:36:00 (소요시간: 00:08:30)
+
+- 패키징 후 `Run`이 선택 타겟과 무관하게 `TunaSweeper.exe`를 찾던 문제를 수정해 `TunaSweeperDemo.exe` 등 실제 타겟 실행 파일명을 사용하도록 변경했다.
+- 패키지 실행 시 기본 설정의 `BuildType=Full` 때문에 Steam Demo가 본편으로 판정되던 문제를 수정해 컴파일된 `TUNASWEEPER_DEMO` 값을 런타임 판정 기준으로 사용하도록 변경했다.
+- 6개 게임 타겟에 각 `CUSTOM_CONFIG`를 컴파일하고, 에디터 패키징과 Steam/STOVE 데모·본편 배치 스크립트에도 `-customconfig`를 명시해 채널별 설정과 Steam App ID가 실행 시 적용되도록 보강했다.
+- 데모 빌드는 실제 프로젝트 버전과 채널 표기 뒤에 `.demo`를 런타임 조합해 Steam Demo를 `v0.1.0.steam.demo` 형식으로 표시하도록 변경했다.
+- UE 5.7 `TunaSweeperEditor Win64 Development`와 `TunaSweeperDemo Win64 Development` 빌드를 성공적으로 완료하고, 생성 정의에서 `CUSTOM_CONFIG "Demo"`와 `TUNASWEEPER_DEMO 1`을 확인했다.

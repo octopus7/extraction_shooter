@@ -10,6 +10,7 @@ public class TunaSweeperNoStoreTarget : TargetRules
 		bOverrideBuildEnvironment = true;
 		CustomConfig = "NoStore";
 		GlobalDefinitions.Add("TUNASWEEPER_DEMO=0");
+		GlobalDefinitions.Add("CUSTOM_CONFIG=\"NoStore\"");
 		ExtraModuleNames.Add("TunaSweeper");
 	}
 }

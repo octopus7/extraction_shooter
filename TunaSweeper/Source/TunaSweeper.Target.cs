@@ -13,6 +13,7 @@ public class TunaSweeperTarget : TargetRules
 		bOverrideBuildEnvironment = true;
 		CustomConfig = "Full";
 		GlobalDefinitions.Add("TUNASWEEPER_DEMO=0");
+		GlobalDefinitions.Add("CUSTOM_CONFIG=\"Full\"");
 		ExtraModuleNames.Add("TunaSweeper");
 	}
 }

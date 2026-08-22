@@ -48,6 +48,20 @@ namespace TunaSweeperBuildTargetTool
 		default: return TEXT("TunaSweeperNoStore");
 		}
 	}
+	const TCHAR* ResolveCustomConfigName(ETunaSweeperBuildTarget BuildTarget)
+	{
+		switch (BuildTarget)
+		{
+		case ETunaSweeperBuildTarget::NoStoreDemo: return TEXT("NoStoreDemo");
+		case ETunaSweeperBuildTarget::SteamFull: return TEXT("Full");
+		case ETunaSweeperBuildTarget::SteamDemo: return TEXT("Demo");
+		case ETunaSweeperBuildTarget::StoveFull: return TEXT("Stove");
+		case ETunaSweeperBuildTarget::StoveDemo: return TEXT("StoveDemo");
+		case ETunaSweeperBuildTarget::NoStoreFull:
+		default: return TEXT("NoStore");
+		}
+	}
+
 	FString ResolveOutputDirectory(ETunaSweeperBuildTarget BuildTarget)
 	{
 		const TCHAR* StoreDirectory = TEXT("NoStore");
@@ -327,10 +341,11 @@ void FTunaSweeperBuildTargetTool::StartPackaging(ETunaSweeperBuildTarget BuildTa
 		: PackagingSettings->BuildConfiguration;
 	const FString BuildConfigurationName = TunaSweeperBuildTargetTool::ResolveBuildConfigurationName(BuildConfiguration);
 	const FString TargetName = TunaSweeperBuildTargetTool::ResolveTargetName(BuildTarget);
+	const FString CustomConfigName = TunaSweeperBuildTargetTool::ResolveCustomConfigName(BuildTarget);
 	const FString OutputDirectory = TunaSweeperBuildTargetTool::ResolveOutputDirectory(BuildTarget);
 	const FString ProjectPath = FPaths::ConvertRelativePathToFull(FPaths::GetProjectFilePath());
 	const FString CommandletExecutable = FUnrealEdMisc::Get().GetExecutableForCommandlets();
-	const FString PackagedExecutable = FPaths::Combine(OutputDirectory, TEXT("TunaSweeper.exe"));
+	const FString PackagedExecutable = FPaths::Combine(OutputDirectory, TargetName + TEXT(".exe"));
 
 	IFileManager::Get().MakeDirectory(*OutputDirectory, true);
 
@@ -374,10 +389,11 @@ void FTunaSweeperBuildTargetTool::StartPackaging(ETunaSweeperBuildTarget BuildTa
 
 	const FString InstalledOption = FApp::IsEngineInstalled() ? TEXT(" -installed") : FString();
 	const FString CommandLine = FString::Printf(
-		TEXT("-ScriptsForProject=\"%s\" BuildCookRun -nop4 -utf8output -nocompileeditor -skipbuildeditor -cook -project=\"%s\" -target=%s -unrealexe=\"%s\" -platform=Win64%s -SkipCookingErrorSummary -JsonStdOut %s -archivedirectory=\"%s\" -clientconfig=%s"),
+		TEXT("-ScriptsForProject=\"%s\" BuildCookRun -nop4 -utf8output -nocompileeditor -skipbuildeditor -cook -project=\"%s\" -target=%s -customconfig=%s -unrealexe=\"%s\" -platform=Win64%s -SkipCookingErrorSummary -JsonStdOut %s -archivedirectory=\"%s\" -clientconfig=%s"),
 		*ProjectPath,
 		*ProjectPath,
 		*TargetName,
+		*CustomConfigName,
 		*CommandletExecutable,
 		*InstalledOption,
 		*PackageOptions,

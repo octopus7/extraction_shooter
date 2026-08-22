@@ -34,15 +34,8 @@ bool UTunaSweeperIntroMenuWidget::IsSteamDemoDistribution() const
 	return BuildTargetSettings && BuildTargetSettings->IsDemoBuild() &&
 		BuildTargetSettings->GetDistributionChannel().Equals(TEXT("Steam"), ESearchCase::IgnoreCase);
 #else
-	FString BuildType;
-	GConfig->GetString(TunaSweeperDistribution::SectionName, TunaSweeperDistribution::BuildTypeKey, BuildType, GGameIni);
-	BuildType.TrimStartAndEndInline();
-
-	// The custom target config is the packaged build's source of truth. Keep the
-	// compile definition as a fallback for packages made before BuildType existed.
-	const bool bIsDemoBuild = BuildType.Equals(TEXT("Demo"), ESearchCase::IgnoreCase) ||
-		(BuildType.IsEmpty() && TUNASWEEPER_DEMO != 0);
-	return bIsDemoBuild && GetDistributionChannel().Equals(TEXT("Steam"), ESearchCase::IgnoreCase);
+	return TUNASWEEPER_DEMO != 0 &&
+		GetDistributionChannel().Equals(TEXT("Steam"), ESearchCase::IgnoreCase);
 #endif
 }
 
@@ -53,9 +46,22 @@ void UTunaSweeperIntroMenuWidget::RefreshDistributionPresentation()
 	GConfig->GetString(TunaSweeperDistribution::ProjectSettingsSectionName, TunaSweeperDistribution::ProjectVersionKey, ProjectVersion, GGameIni);
 	ProjectVersion.TrimStartAndEndInline();
 	if (ProjectVersion.IsEmpty()) ProjectVersion = TEXT("0.0.0");
+	bool bIsDemoBuild = false;
+#if WITH_EDITOR
+	if (const UTunaSweeperBuildTargetSettings* BuildTargetSettings = GetDefault<UTunaSweeperBuildTargetSettings>())
+	{
+		bIsDemoBuild = BuildTargetSettings->IsDemoBuild();
+	}
+#else
+	bIsDemoBuild = TUNASWEEPER_DEMO != 0;
+#endif
 	if (UTextBlock* VersionText = Cast<UTextBlock>(WidgetTree->FindWidget(TEXT("VersionText"))))
 	{
-		VersionText->SetText(FText::FromString(FString::Printf(TEXT("v%s.%s"), *ProjectVersion, *GetDistributionChannel().ToLower())));
+		VersionText->SetText(FText::FromString(FString::Printf(
+			TEXT("v%s.%s%s"),
+			*ProjectVersion,
+			*GetDistributionChannel().ToLower(),
+			bIsDemoBuild ? TEXT(".demo") : TEXT(""))));
 	}
 	if (!IsSteamDemoDistribution() && SteamDemoWishlistButton)
 	{

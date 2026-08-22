@@ -12,6 +12,7 @@ public class TunaSweeperStoveTarget : TargetRules
 		bOverrideBuildEnvironment = true;
 		CustomConfig = "Stove";
 		GlobalDefinitions.Add("TUNASWEEPER_DEMO=0");
+		GlobalDefinitions.Add("CUSTOM_CONFIG=\"Stove\"");
 		ExtraModuleNames.Add("TunaSweeper");
 	}
 }

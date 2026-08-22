@@ -10,6 +10,7 @@ public class TunaSweeperNoStoreDemoTarget : TargetRules
 		bOverrideBuildEnvironment = true;
 		CustomConfig = "NoStoreDemo";
 		GlobalDefinitions.Add("TUNASWEEPER_DEMO=1");
+		GlobalDefinitions.Add("CUSTOM_CONFIG=\"NoStoreDemo\"");
 		ExtraModuleNames.Add("TunaSweeper");
 	}
 }
