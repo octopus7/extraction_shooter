@@ -1,4 +1,5 @@
 #include "TunaSweeperIntroMenuWidgetShared.h"
+#include "Title/TunaSweeperDisplaySettings.h"
 
 void UTunaSweeperIntroMenuWidget::LoadTitleGraphicsSettings()
 {
@@ -150,6 +151,7 @@ void UTunaSweeperIntroMenuWidget::ApplyDisplaySettings(EWindowMode::Type WindowM
 	if (UGameUserSettings* GameUserSettings = GEngine->GetGameUserSettings())
 	{
 		GameUserSettings->SetFullscreenMode(WindowMode);
+		TunaSweeperDisplaySettings::ClampUnsupportedFullscreenResolution(*GameUserSettings);
 		GameUserSettings->ApplySettings(false);
 		GameUserSettings->SaveSettings();
 	}
@@ -167,6 +169,7 @@ void UTunaSweeperIntroMenuWidget::ApplyResolutionSetting(const FIntPoint& Resolu
 	if (UGameUserSettings* GameUserSettings = GEngine->GetGameUserSettings())
 	{
 		GameUserSettings->SetScreenResolution(Resolution);
+		TunaSweeperDisplaySettings::ClampUnsupportedFullscreenResolution(*GameUserSettings);
 		GameUserSettings->ApplySettings(false);
 		GameUserSettings->SaveSettings();
 	}

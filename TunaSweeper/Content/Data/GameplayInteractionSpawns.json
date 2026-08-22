@@ -103,7 +103,7 @@
     "extraction_radius_ring_width": 2.0,
     "extraction_particle_system": "/Game/FX/NS_ExtractionSmoke.NS_ExtractionSmoke",
     "extraction_radius_visual_material": "/Game/Effects/M_LedExpression_VertexColorEmissive.M_LedExpression_VertexColorEmissive",
-    "location": [980.0, 520.0, 90.0],
+    "location": [529.091385, 2009.645971, 90.0],
     "rotation": [0.0, 0.0, 0.0],
     "scale": [1.0, 1.0, 1.0],
     "mapOverlay": {

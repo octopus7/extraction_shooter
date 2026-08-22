@@ -1,6 +1,9 @@
 #include "Game/TunaSweeperGameInstance.h"
 #include "TunaSweeperGameInstanceShared.h"
 #include "Effect/TunaSweeperOcclusionRevealSettingsDataAsset.h"
+#include "Engine/Engine.h"
+#include "GameFramework/GameUserSettings.h"
+#include "Title/TunaSweeperDisplaySettings.h"
 #include "TunaWarpTransitionProfile.h"
 
 DEFINE_LOG_CATEGORY(LogTunaSweeperGameInstance);
@@ -92,6 +95,20 @@ float FTunaSweeperPlayerHudState::GetOverweightThresholdRatio() const
 void UTunaSweeperGameInstance::Init()
 {
 	Super::Init();
+
+	if (GEngine)
+	{
+		if (UGameUserSettings* GameUserSettings = GEngine->GetGameUserSettings())
+		{
+			GameUserSettings->LoadSettings(false);
+			if (TunaSweeperDisplaySettings::ClampUnsupportedFullscreenResolution(*GameUserSettings))
+			{
+				GameUserSettings->ApplyResolutionSettings(false);
+				GameUserSettings->SaveSettings();
+			}
+		}
+	}
+
 	InitializeGlobalLanguageSetting();
 
 	int32 LoadedSaveSlotIndex = 1;

@@ -10,6 +10,9 @@ public class TunaSweeperTarget : TargetRules
 		Type = TargetType.Game;
 		DefaultBuildSettings = BuildSettingsVersion.V6;
 		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_7;
+		bOverrideBuildEnvironment = true;
+		CustomConfig = "Full";
+		GlobalDefinitions.Add("TUNASWEEPER_DEMO=0");
 		ExtraModuleNames.Add("TunaSweeper");
 	}
 }
