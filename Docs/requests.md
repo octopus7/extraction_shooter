@@ -6602,3 +6602,10 @@
 - 매핑 누락, JSON 읽기·파싱 실패, 클래스 로드 실패 시 `BP_AssaultRifle`을 명시적 fallback으로 사용하도록 구성했다.
 - 모든 현재 총기 ID의 매핑과 `BP_SimpleSMG` 클래스 상속·로드, 미등록 ID 조회 실패를 확인하는 자동화 테스트를 추가했다.
 - UE 5.7 `TunaSweeperEditor Win64 Development` 빌드와 `TunaSweeper.Combat.Data.ProfilesAndWeapons` 자동화 테스트를 성공적으로 완료했다.
+
+## 2026-08-22 22:51:45 (소요시간: 00:10:59)
+
+- 플레이어 구르기의 실제 `RollElapsedSeconds / RollDurationSeconds`를 공개하는 정규화 진행률 접근자를 추가했다.
+- 본체 무지개 오버레이와 새 잔상의 색상 위상을 전역 프로세스 실시간에서 구르기 정규화 진행률 기준으로 변경해, 모든 구르기가 청록색에서 시작해 예상 종료까지 동일한 HSV 한 바퀴 패턴을 재생하도록 했다.
+- 구르기 종료 블렌드아웃 중에는 결정된 끝 색상을 유지하고, 이미 생성된 잔상은 생성 순간의 색상을 고정한 채 기존 `1초` 수명 동안 페이드아웃하도록 유지했다.
+- UE 5.7 `TunaSweeperEditor Win64 Development` 전체 빌드의 UHT, 컴파일, 정적 라이브러리 및 DLL 링크, 메타데이터 생성을 통과한 뒤 Unreal Editor를 다시 실행했다.

@@ -178,6 +178,14 @@ public:
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Roll")
 	bool IsRolling() const { return bIsRolling; }
 
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Roll")
+	float GetRollNormalizedProgress() const
+	{
+		return bIsRolling
+			? FMath::Clamp(RollElapsedSeconds / FMath::Max(0.01f, RollDurationSeconds), 0.0f, 1.0f)
+			: 0.0f;
+	}
+
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Combat")
 	bool IsDamageInvulnerable() const { return bIsRolling; }
 

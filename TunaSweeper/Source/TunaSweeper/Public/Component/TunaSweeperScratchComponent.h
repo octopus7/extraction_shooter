@@ -4,6 +4,7 @@
 #include "CoreMinimal.h"
 #include "TunaSweeperScratchComponent.generated.h"
 
+class ATunaSweeperTopDownCharacter;
 class UMaterialInstanceDynamic;
 class UMaterialInterface;
 class UMeshComponent;
@@ -147,6 +148,8 @@ private:
 	void ApplyOverlayToCharacterMeshes();
 	void RestoreCharacterMeshOverlays();
 	void UpdateOverlayMaterial(float EffectAlpha, double RealTimeSeconds);
+	void UpdateRollRainbowProgress(const ATunaSweeperTopDownCharacter* PlayerCharacter);
+	float GetRollRainbowHueDegrees() const;
 	void UpdateAfterimages(double RealTimeSeconds);
 	void SpawnAfterimage(double RealTimeSeconds);
 	void DestroyAllAfterimages();
@@ -174,6 +177,7 @@ private:
 	float SavedWorldTimeDilation = 1.0f;
 	float SavedOwnerCustomTimeDilation = 1.0f;
 	float PresentationEffectAlpha = 0.0f;
+	float RollRainbowProgress = 0.0f;
 	double PresentationStartRealSeconds = 0.0;
 	double PresentationReleaseRealSeconds = 0.0;
 	double LastPresentationRealSeconds = -1000.0;
@@ -182,4 +186,5 @@ private:
 	bool bPresentationActive = false;
 	bool bDeveloperAlwaysSlowPresentationEnabled = false;
 	bool bHasLastAfterimageLocation = false;
+	bool bWasOwnerRolling = false;
 };

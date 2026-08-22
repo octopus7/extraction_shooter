@@ -21,7 +21,8 @@ namespace TunaSweeperScratchPresentation
 	constexpr float EmissiveIntensity = 2.2f;
 	constexpr uint8 OverlayRainbowSaturation = 112;
 	constexpr uint8 AfterimageRainbowSaturation = 220;
-	constexpr float RainbowCyclesPerSecond = 1.7f;
+	constexpr float RainbowStartHueDegrees = 180.0f;
+	constexpr float RainbowCyclesPerRoll = 1.0f;
 }
 
 UTunaSweeperScratchComponent::UTunaSweeperScratchComponent()
@@ -60,6 +61,7 @@ void UTunaSweeperScratchComponent::TickComponent(
 
 	const double RealTimeSeconds = FPlatformTime::Seconds();
 	const ATunaSweeperTopDownCharacter* PlayerCharacter = Cast<ATunaSweeperTopDownCharacter>(GetOwner());
+	UpdateRollRainbowProgress(PlayerCharacter);
 	if (bDeveloperAlwaysSlowPresentationEnabled && PlayerCharacter && PlayerCharacter->IsRolling())
 	{
 		// Keep the preview alive throughout the roll, independent of near-miss and scratch gain.
@@ -324,14 +326,13 @@ void UTunaSweeperScratchComponent::RestoreCharacterMeshOverlays()
 
 void UTunaSweeperScratchComponent::UpdateOverlayMaterial(float EffectAlpha, double RealTimeSeconds)
 {
+	(void)RealTimeSeconds;
 	if (!ScratchOverlayMaterialInstance)
 	{
 		return;
 	}
 
-	const float HueDegrees = FMath::Fmod(
-		static_cast<float>(RealTimeSeconds) * TunaSweeperScratchPresentation::RainbowCyclesPerSecond * 360.0f,
-		360.0f);
+	const float HueDegrees = GetRollRainbowHueDegrees();
 	const uint8 Hue = static_cast<uint8>(FMath::RoundToInt(HueDegrees / 360.0f * 255.0f));
 	const FLinearColor RainbowColor = FLinearColor::MakeFromHSV8(
 		Hue,
@@ -346,6 +347,32 @@ void UTunaSweeperScratchComponent::UpdateOverlayMaterial(float EffectAlpha, doub
 	ScratchOverlayMaterialInstance->SetScalarParameterValue(
 		TunaSweeperScratchPresentation::IntensityParameter,
 		TunaSweeperScratchPresentation::EmissiveIntensity);
+}
+
+void UTunaSweeperScratchComponent::UpdateRollRainbowProgress(
+	const ATunaSweeperTopDownCharacter* PlayerCharacter)
+{
+	const bool bIsRolling = PlayerCharacter && PlayerCharacter->IsRolling();
+	if (bIsRolling)
+	{
+		RollRainbowProgress = PlayerCharacter->GetRollNormalizedProgress();
+	}
+	else if (bWasOwnerRolling)
+	{
+		// Keep the deterministic end color while the presentation blends out.
+		RollRainbowProgress = 1.0f;
+	}
+
+	bWasOwnerRolling = bIsRolling;
+}
+
+float UTunaSweeperScratchComponent::GetRollRainbowHueDegrees() const
+{
+	return FMath::Fmod(
+		TunaSweeperScratchPresentation::RainbowStartHueDegrees +
+			FMath::Clamp(RollRainbowProgress, 0.0f, 1.0f) *
+			TunaSweeperScratchPresentation::RainbowCyclesPerRoll * 360.0f,
+		360.0f);
 }
 
 void UTunaSweeperScratchComponent::UpdateAfterimages(double RealTimeSeconds)
@@ -414,9 +441,7 @@ void UTunaSweeperScratchComponent::SpawnAfterimage(double RealTimeSeconds)
 		return;
 	}
 
-	const float HueDegrees = FMath::Fmod(
-		static_cast<float>(RealTimeSeconds) * TunaSweeperScratchPresentation::RainbowCyclesPerSecond * 360.0f,
-		360.0f);
+	const float HueDegrees = GetRollRainbowHueDegrees();
 	const uint8 Hue = static_cast<uint8>(FMath::RoundToInt(HueDegrees / 360.0f * 255.0f));
 	const FLinearColor GhostColor = FLinearColor::MakeFromHSV8(
 		Hue,
