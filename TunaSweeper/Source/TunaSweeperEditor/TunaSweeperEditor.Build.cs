@@ -46,6 +46,7 @@ public class TunaSweeperEditor : ModuleRules
 			"SlateCore",
 			"StaticMeshDescription",
 			"ToolMenus",
+			"UATHelper",
 			"FoldingCanopyGarageDoor",
 			"TunaSweeper",
 			"MiyakovCharacterSystem",

@@ -6687,3 +6687,11 @@
 - Steam Demo 출력 폴더로 패키징해도 AutomationTool이 본편 `TunaSweeper` 타겟을 사용해 위시리스트 버튼이 표시되지 않던 원인을 수정했다.
 - `TunaSweeper > Build Target` 선택값을 UE 5.7 패키징 메뉴가 실제로 사용하는 `PackageBuildTarget`에 동기화하고, 에디터 모듈 시작 시에도 즉시 적용하도록 보강했다.
 - Steam Demo 선택 상태에서 `PackageBuildTarget=TunaSweeperDemo` 저장을 확인하고 `TunaSweeperEditor Win64 Development` 빌드를 성공적으로 완료했다.
+
+## 2026-08-23 03:06:00 (소요시간: 00:09:30)
+
+- `TunaSweeper > Build Target` 하위 메뉴 맨 위에 영문 `Packaging`과 `Run` 토글을 추가했다.
+- `Packaging`이 켜진 상태에서 타겟을 선택하면 내장 패키징 메뉴를 거치지 않고 해당 타겟명·빌드 구성·전용 출력 경로를 명시해 UAT 패키징을 실행하도록 구현했다.
+- `Run`은 `Packaging`이 켜졌을 때만 활성화되며, 함께 켜진 경우 패키징 성공 후 결과 폴더의 `TunaSweeper.exe`를 자동 실행하도록 구현했다.
+- 패키징 진행 중 토글과 타겟 재선택을 비활성화하고 UE 패키징 진행·성공·실패 알림을 연동했다.
+- UE 5.7 `TunaSweeperEditor Win64 Development` 빌드와 에디터 재실행을 성공적으로 완료했다.

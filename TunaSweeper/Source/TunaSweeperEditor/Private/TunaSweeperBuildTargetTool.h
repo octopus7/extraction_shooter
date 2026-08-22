@@ -14,6 +14,19 @@ public:
 private:
 	void RegisterMenus();
 	void PopulateBuildTargetMenu(UToolMenu* Menu);
-	void SelectBuildTarget(ETunaSweeperBuildTarget BuildTarget) const;
+	void SelectBuildTarget(ETunaSweeperBuildTarget BuildTarget);
 	bool IsBuildTargetSelected(ETunaSweeperBuildTarget BuildTarget) const;
+	bool CanSelectBuildTarget() const;
+	void TogglePackaging();
+	bool IsPackagingEnabled() const;
+	bool CanTogglePackaging() const;
+	void ToggleRun();
+	bool IsRunEnabled() const;
+	bool CanToggleRun() const;
+	void StartPackaging(ETunaSweeperBuildTarget BuildTarget);
+	void LaunchPackagedBuild(const FString& ExecutablePath) const;
+
+	bool bPackagingEnabled = false;
+	bool bRunEnabled = false;
+	bool bPackagingInProgress = false;
 };
