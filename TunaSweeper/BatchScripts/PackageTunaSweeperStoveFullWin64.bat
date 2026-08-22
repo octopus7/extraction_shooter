@@ -2,19 +2,14 @@
 setlocal
 
 set "PROJECT_FILE=%~dp0..\TunaSweeper.uproject"
+set "TARGET_NAME=TunaSweeperStove"
+set "ARCHIVE_DIR=%~dp0..\Builds\Stove\Full"
+set "DISPLAY_NAME=TunaSweeper STOVE Full"
 
-set "BUILD_FLAVOR=%~1"
-set "CONFIGURATION=%~2"
+set "CONFIGURATION=%~1"
 if "%CONFIGURATION%"=="" set "CONFIGURATION=Shipping"
-
-if /I "%BUILD_FLAVOR%"=="Demo" (
-    set "TARGET_NAME=TunaSweeperDemo"
-    set "ARCHIVE_DIR=%~dp0..\Builds\Steam\Demo"
-) else if /I "%BUILD_FLAVOR%"=="Full" (
-    set "TARGET_NAME=TunaSweeper"
-    set "ARCHIVE_DIR=%~dp0..\Builds\Steam\Full"
-) else (
-    echo Usage: %~nx0 Demo^|Full [Development^|Shipping]
+if /I not "%CONFIGURATION%"=="Development" if /I not "%CONFIGURATION%"=="Shipping" (
+    echo Usage: %~nx0 [Development^|Shipping]
     exit /b 2
 )
 
@@ -46,7 +41,7 @@ if exist "%ARCHIVE_PLATFORM_DIR%" (
     )
 )
 
-echo Cooking and packaging TunaSweeper Steam %BUILD_FLAVOR% Win64 %CONFIGURATION%
+echo Cooking and packaging %DISPLAY_NAME% Win64 %CONFIGURATION%
 echo Target: "%TARGET_NAME%"
 echo Project: "%PROJECT_FILE%"
 echo Unreal: "%RUN_UAT%"
@@ -77,7 +72,7 @@ set "PACKAGE_EXIT_CODE=%ERRORLEVEL%"
 echo.
 if "%PACKAGE_EXIT_CODE%"=="0" (
     echo Package succeeded.
-    echo Output: "%ARCHIVE_DIR%"
+    echo Output: "%ARCHIVE_PLATFORM_DIR%"
 ) else (
     echo Package failed with exit code %PACKAGE_EXIT_CODE%.
 )

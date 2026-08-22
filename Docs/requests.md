@@ -6695,3 +6695,11 @@
 - `Run`은 `Packaging`이 켜졌을 때만 활성화되며, 함께 켜진 경우 패키징 성공 후 결과 폴더의 `TunaSweeper.exe`를 자동 실행하도록 구현했다.
 - 패키징 진행 중 토글과 타겟 재선택을 비활성화하고 UE 패키징 진행·성공·실패 알림을 연동했다.
 - UE 5.7 `TunaSweeperEditor Win64 Development` 빌드와 에디터 재실행을 성공적으로 완료했다.
+
+## 2026-08-23 03:16:00 (소요시간: 00:02:45)
+
+- Win64 패키징 배치 파일을 Steam/STOVE의 데모·본편 조합 네 개로 분리했다.
+- 각 스크립트에 `TunaSweeperDemo`, `TunaSweeper`, `TunaSweeperStoveDemo`, `TunaSweeperStove` 타겟과 `Builds/{Steam|Stove}/{Demo|Full}/Windows` 출력 경로를 각각 고정했다.
+- 각 스크립트는 기본 Shipping이며 선택적으로 `Development` 인자를 허용하고, 기존 결과의 `Windows` 폴더를 교체한 뒤 UAT BuildCookRun을 실행하도록 구성했다.
+- 기존 통합 `PackageTunaSweeperWin64.bat`를 삭제하고 README의 사용법과 STOVE 출력 구조를 갱신했다.
+- 실제 패키징 없이 네 스크립트의 인자 및 UE 경로 사전검사와 타겟·출력 매핑을 확인했다.
