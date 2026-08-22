@@ -1,0 +1,109 @@
+diff --git a/TunaSweeper/Source/TunaSweeper/Public/Character/TunaSweeperTopDownCharacter.h b/TunaSweeper/Source/TunaSweeper/Public/Character/TunaSweeperTopDownCharacter.h
+--- a/TunaSweeper/Source/TunaSweeper/Public/Character/TunaSweeperTopDownCharacter.h
++++ b/TunaSweeper/Source/TunaSweeper/Public/Character/TunaSweeperTopDownCharacter.h
+@@
+ 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Roll")
+ 	bool IsRolling() const { return bIsRolling; }
++
++	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Roll")
++	float GetRollNormalizedProgress() const
++	{
++		return bIsRolling
++			? FMath::Clamp(RollElapsedSeconds / FMath::Max(0.01f, RollDurationSeconds), 0.0f, 1.0f)
++			: 0.0f;
++	}
+ 
+ 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Combat")
+diff --git a/TunaSweeper/Source/TunaSweeper/Public/Component/TunaSweeperScratchComponent.h b/TunaSweeper/Source/TunaSweeper/Public/Component/TunaSweeperScratchComponent.h
+--- a/TunaSweeper/Source/TunaSweeper/Public/Component/TunaSweeperScratchComponent.h
++++ b/TunaSweeper/Source/TunaSweeper/Public/Component/TunaSweeperScratchComponent.h
+@@
+ #include "CoreMinimal.h"
+ #include "TunaSweeperScratchComponent.generated.h"
+ 
++class ATunaSweeperTopDownCharacter;
+ class UMaterialInstanceDynamic;
+@@
+ 	void ApplyOverlayToCharacterMeshes();
+ 	void RestoreCharacterMeshOverlays();
+ 	void UpdateOverlayMaterial(float EffectAlpha, double RealTimeSeconds);
++	void UpdateRollRainbowProgress(const ATunaSweeperTopDownCharacter* PlayerCharacter);
++	float GetRollRainbowHueDegrees() const;
+ 	void UpdateAfterimages(double RealTimeSeconds);
+@@
+ 	float SavedWorldTimeDilation = 1.0f;
+ 	float SavedOwnerCustomTimeDilation = 1.0f;
+ 	float PresentationEffectAlpha = 0.0f;
++	float RollRainbowProgress = 0.0f;
+ 	double PresentationStartRealSeconds = 0.0;
+@@
+ 	bool bPresentationActive = false;
+ 	bool bDeveloperAlwaysSlowPresentationEnabled = false;
+ 	bool bHasLastAfterimageLocation = false;
++	bool bWasOwnerRolling = false;
+ };
+diff --git a/TunaSweeper/Source/TunaSweeper/Private/Component/TunaSweeperScratchComponent.cpp b/TunaSweeper/Source/TunaSweeper/Private/Component/TunaSweeperScratchComponent.cpp
+--- a/TunaSweeper/Source/TunaSweeper/Private/Component/TunaSweeperScratchComponent.cpp
++++ b/TunaSweeper/Source/TunaSweeper/Private/Component/TunaSweeperScratchComponent.cpp
+@@
+ 	constexpr float EmissiveIntensity = 2.2f;
+ 	constexpr uint8 OverlayRainbowSaturation = 112;
+ 	constexpr uint8 AfterimageRainbowSaturation = 220;
+-	constexpr float RainbowCyclesPerSecond = 1.7f;
++	constexpr float RainbowStartHueDegrees = 180.0f;
++	constexpr float RainbowCyclesPerRoll = 1.0f;
+ }
+@@
+ 	const double RealTimeSeconds = FPlatformTime::Seconds();
+ 	const ATunaSweeperTopDownCharacter* PlayerCharacter = Cast<ATunaSweeperTopDownCharacter>(GetOwner());
++	UpdateRollRainbowProgress(PlayerCharacter);
+ 	if (bDeveloperAlwaysSlowPresentationEnabled && PlayerCharacter && PlayerCharacter->IsRolling())
+@@
+ void UTunaSweeperScratchComponent::UpdateOverlayMaterial(float EffectAlpha, double RealTimeSeconds)
+ {
++	(void)RealTimeSeconds;
+ 	if (!ScratchOverlayMaterialInstance)
+@@
+-	const float HueDegrees = FMath::Fmod(
+-		static_cast<float>(RealTimeSeconds) * TunaSweeperScratchPresentation::RainbowCyclesPerSecond * 360.0f,
+-		360.0f);
++	const float HueDegrees = GetRollRainbowHueDegrees();
+@@
+ 	ScratchOverlayMaterialInstance->SetScalarParameterValue(
+ 		TunaSweeperScratchPresentation::IntensityParameter,
+ 		TunaSweeperScratchPresentation::EmissiveIntensity);
+ }
++
++void UTunaSweeperScratchComponent::UpdateRollRainbowProgress(
++	const ATunaSweeperTopDownCharacter* PlayerCharacter)
++{
++	const bool bIsRolling = PlayerCharacter && PlayerCharacter->IsRolling();
++	if (bIsRolling)
++	{
++		RollRainbowProgress = PlayerCharacter->GetRollNormalizedProgress();
++	}
++	else if (bWasOwnerRolling)
++	{
++		// Keep the deterministic end color while the presentation blends out.
++		RollRainbowProgress = 1.0f;
++	}
++
++	bWasOwnerRolling = bIsRolling;
++}
++
++float UTunaSweeperScratchComponent::GetRollRainbowHueDegrees() const
++{
++	return FMath::Fmod(
++		TunaSweeperScratchPresentation::RainbowStartHueDegrees +
++			FMath::Clamp(RollRainbowProgress, 0.0f, 1.0f) *
++			TunaSweeperScratchPresentation::RainbowCyclesPerRoll * 360.0f,
++		360.0f);
++}
+ 
+ void UTunaSweeperScratchComponent::UpdateAfterimages(double RealTimeSeconds)
+@@
+-	const float HueDegrees = FMath::Fmod(
+-		static_cast<float>(RealTimeSeconds) * TunaSweeperScratchPresentation::RainbowCyclesPerSecond * 360.0f,
+-		360.0f);
++	const float HueDegrees = GetRollRainbowHueDegrees();
+ 	const uint8 Hue = static_cast<uint8>(FMath::RoundToInt(HueDegrees / 360.0f * 255.0f));
