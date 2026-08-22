@@ -61,7 +61,6 @@ namespace TunaSweeperBuildTargetTool
 			BuildTarget == ETunaSweeperBuildTarget::StoveDemo;
 		FString OutputDirectory = FPaths::ConvertRelativePathToFull(FPaths::Combine(
 			FPaths::ProjectDir(),
-			TEXT(".."),
 			TEXT("Builds"),
 			StoreDirectory,
 			bDemo ? TEXT("Demo") : TEXT("Full"),

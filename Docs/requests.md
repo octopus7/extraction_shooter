@@ -6668,3 +6668,9 @@
 - `Build Target` 하위 메뉴를 `Demo`와 `Full Game` 헤더로 나누고, 각 헤더 아래에 `No Store`·`Steam`·`STOVE` 세 항목을 묶어 배치했다.
 - 에디터 시작 시 이미 같은 Build Target이면 프로젝트 config를 다시 기록하지 않도록 해 불필요한 `DefaultGame.ini` 변경을 방지했다.
 - UE 5.7 `TunaSweeperEditor Win64 Development` 빌드를 성공적으로 완료했다.
+
+## 2026-08-23 02:35:00 (소요시간: 00:01:29)
+
+- 빌드 타겟별 패키징 출력 기준 경로에서 잘못된 상위 폴더 이동을 제거해 `D:/github/extraction_shooter/TunaSweeper/Builds/{Store}/{Demo|Full}/Windows` 아래를 사용하도록 수정했다.
+- UE 5.7 `TunaSweeperEditor Win64 Development` 빌드를 성공적으로 완료하고, 현재 No Store Demo 경로가 프로젝트 내부 `Builds/NoStore/Demo/Windows`로 저장·생성되는 것을 확인했다.
+- 기존 저장소 루트의 잘못된 `Builds` 경로에는 패키징 결과물이 있어 삭제하거나 이동하지 않고 보존했다.
