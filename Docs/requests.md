@@ -6661,3 +6661,10 @@
 - 선택한 출력 폴더가 없으면 생성하고, `UPlatformsMenuSettings` 사용자 설정의 `StagingDirectory`에 저장해 표준 패키징 폴더 선택 창이 해당 위치에서 열리도록 했다.
 - 메뉴 등록 시 전체 `PlatformsMenuSettings`를 저장해 발생한 배열 범위 assertion을 제거하고 `StagingDirectory` 한 항목만 config 캐시에 기록·플러시하도록 수정했다.
 - UE 5.7 `TunaSweeperEditor Win64 Development` 빌드를 성공적으로 완료하고, Steam Demo 기준 경로 저장과 에디터 정상 실행을 확인했다.
+
+## 2026-08-23 02:22:10 (소요시간: 00:02:07)
+
+- 상단 `TunaSweeper` 메뉴의 `Build` 섹션을 `Data Tools` 섹션 바로 위로 이동했다.
+- `Build Target` 하위 메뉴를 `Demo`와 `Full Game` 헤더로 나누고, 각 헤더 아래에 `No Store`·`Steam`·`STOVE` 세 항목을 묶어 배치했다.
+- 에디터 시작 시 이미 같은 Build Target이면 프로젝트 config를 다시 기록하지 않도록 해 불필요한 `DefaultGame.ini` 변경을 방지했다.
+- UE 5.7 `TunaSweeperEditor Win64 Development` 빌드를 성공적으로 완료했다.
