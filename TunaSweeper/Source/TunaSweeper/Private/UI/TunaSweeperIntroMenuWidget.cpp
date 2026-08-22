@@ -78,6 +78,8 @@ void UTunaSweeperIntroMenuWidget::NativeConstruct()
 		QuitButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleQuitClicked);
 	}
 
+	RefreshDistributionPresentation();
+
 	EnsureAlwaysNewStartButton();
 	if (AlwaysNewStartButton)
 	{
@@ -479,4 +481,3 @@ void UTunaSweeperIntroMenuWidget::NativeTick(const FGeometry& MyGeometry, float 
 		ExecuteSelectedSaveSlotDelete();
 	}
 }
-

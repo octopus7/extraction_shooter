@@ -22,6 +22,7 @@ ui.title.slot_select,슬롯 선택,Save Slots,セーブスロット
 ui.title.settings,설정,Settings,設定
 ui.title.credits,크레딧,Credits,クレジット
 ui.title.quit,종료,Quit,終了
+ui.title.wishlist,위시리스트에 추가,Add to Wishlist,ウィッシュリストに追加
 ui.title.always_new_start,항상새로시작,Always New Start,常に新規開始
 ui.title.primary_save_slot,세이브 슬롯 선택,Select Save Slot,セーブスロット選択
 ui.title.delete_hold,길게 눌러 삭제하기,Hold to Delete,長押しで削除

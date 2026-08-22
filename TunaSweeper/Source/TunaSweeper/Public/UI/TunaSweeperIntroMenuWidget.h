@@ -83,6 +83,9 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
 	TObjectPtr<UButton> QuitButton;
 
+	UPROPERTY(Transient)
+	TObjectPtr<UButton> SteamDemoWishlistButton;
+
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
 	TObjectPtr<UButton> AlwaysNewStartButton;
 
@@ -281,6 +284,9 @@ private:
 
 	UFUNCTION()
 	void HandleQuitClicked();
+
+	UFUNCTION()
+	void HandleSteamDemoWishlistClicked();
 
 	UFUNCTION()
 	void HandleAlwaysNewStartClicked();
@@ -509,6 +515,10 @@ private:
 	void ResetTitleViewportLayoutState();
 	void EnsureTitleWindParticleOverlay();
 	void ApplyTitleMenuButtonContentLayout();
+	void RefreshDistributionPresentation();
+	void EnsureSteamDemoWishlistButton();
+	FString GetDistributionChannel() const;
+	bool IsSteamDemoDistribution() const;
 	void EnsurePiggyBankToggleButton();
 	void EnsureAlwaysSlowPresentationToggleButton();
 	void EnsureDevelopmentToggleButtonContent(
