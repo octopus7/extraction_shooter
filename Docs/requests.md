@@ -6516,3 +6516,13 @@
 - 토글이 켜져 있어도 걷는 동안에는 슬로모션과 플레이어 무지개 오버레이를 시작하지 않고, 구르는 동안에만 근접 회피 판정과 스크래치 게이지 획득 여부에 관계없이 연출을 유지하도록 변경했다.
 - 구르기 종료 뒤에는 기존 `0.06초` 유지와 `0.12초` 블렌드아웃을 거쳐 월드 및 플레이어 시간 배율을 복구하며, 이미 생성된 잔상은 각자의 `1초` 수명 동안 유지된다.
 - UE 5.7 `TunaSweeperEditor Win64 Development` 빌드의 컴파일, 정적 라이브러리 및 DLL 링크, 메타데이터 생성을 통과한 뒤 Unreal Editor를 다시 실행했다.
+
+## 2026-08-22 19:37:50 (소요시간: 00:05:11)
+
+- 패키징 출력 구조를 `TunaSweeper/Builds/Steam/Demo`로 변경하고 해당 경로를 Git 추적에서 제외했다.
+- `OnlineSubsystemSteam` 플러그인과 Steam 기본 온라인 서비스를 Win64에서 활성화했으며, 실제 Demo App ID 적용 전 개발 검증용 App ID `480`을 설정했다.
+- STOVE 빌드는 구현하거나 출력 폴더를 만들지 않고 향후 경로 `Builds/Stove/Demo`만 `TunaSweeper/README.md`에 기록했다.
+- UE 5.7 `TunaSweeperEditor Win64 Development`와 `TunaSweeper Win64 Shipping` 빌드, Windows Cook, Stage, Package, Archive를 완료했다. Steam SDK 1.61 로딩을 확인했으며 Shipping 패키지는 `TunaSweeper/Builds/Steam/Demo`에 생성됐다.
+## 2026-08-22 19:43:10 (소요시간: 00:03:07)
+
+- Steam 데모 빌드 구조, Steam 활성화 설정, 프로젝트 README 및 관련 작업 기록만 선별해 기존 작업 트리 변경과 분리된 Git 커밋으로 기록했다.

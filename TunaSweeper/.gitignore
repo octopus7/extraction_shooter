@@ -26,6 +26,7 @@ Plugins/*/Binaries/
 Plugins/*/Intermediate/
 
 # Packaged builds
+Builds/
 Windows/
 WindowsNoEditor/
 Linux/

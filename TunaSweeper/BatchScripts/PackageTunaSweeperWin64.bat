@@ -2,7 +2,7 @@
 setlocal
 
 set "PROJECT_FILE=%~dp0..\TunaSweeper.uproject"
-set "ARCHIVE_DIR=%~dp0..\PackagedBuilds\Windows"
+set "ARCHIVE_DIR=%~dp0..\Builds\Steam\Demo"
 
 set "CONFIGURATION=%~1"
 if "%CONFIGURATION%"=="" set "CONFIGURATION=Development"
@@ -25,7 +25,7 @@ if not exist "%RUN_UAT%" (
     exit /b 1
 )
 
-echo Cooking and packaging TunaSweeper Win64 %CONFIGURATION%
+echo Cooking and packaging TunaSweeper Steam Demo Win64 %CONFIGURATION%
 echo Project: "%PROJECT_FILE%"
 echo Unreal: "%RUN_UAT%"
 echo Output: "%ARCHIVE_DIR%"

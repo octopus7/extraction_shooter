@@ -114,6 +114,13 @@
 		{
 			"Name": "WaveformEditor",
 			"Enabled": true
+		},
+		{
+			"Name": "OnlineSubsystemSteam",
+			"Enabled": true,
+			"TargetAllowList": [
+				"Win64"
+			]
 		}
 	]
 }
