@@ -4933,3 +4933,13 @@ Steamworks 데모 문서는 데모 메뉴에서 본편 상점 페이지를 Steam
 ### 답변
 
 그렇다. 에디터에서는 선택한 Build Target 설정의 데모 여부를, 패키지에서는 해당 실행 파일에 컴파일된 `TUNASWEEPER_DEMO` 값을 확인해 기존 `v버전.채널` 뒤에 `.demo`를 조건부로 조합한다. 따라서 Steam 데모는 `v0.1.0.steam.demo`, Steam 본편은 `v0.1.0.steam`으로 표시된다.
+
+## 2026-08-23 03:50:00 (소요시간: 00:02:45)
+
+### 질문
+
+Steam Overlay 기본 단축키가 `Shift+Tab`인지와 현재 패키지에서 Steam SDK가 초기화되지 않은 것인지 문의.
+
+### 답변
+
+Steam Overlay 기본 단축키는 `Shift+Tab`이며 사용자 설정에서 변경할 수 있다. 최신 Steam Demo 실행 로그에는 Steam SDK 1.61과 `steam_api64.dll`이 정상 로드됐지만 `SteamAPI` 초기화 조건을 충족하지 못해 App ID 0으로 실패하고 기본 Online Subsystem이 NULL로 대체된 기록이 있다. 확인 시 Steam 클라이언트 프로세스가 실행 중이지 않았으므로, Steam에 로그인한 상태로 클라이언트를 먼저 실행하고 Steam을 통해 게임을 시작해야 한다. 로컬 직접 실행 테스트에서는 실행 파일 옆에 데모 App ID만 담은 `steam_appid.txt`가 필요할 수 있으며 이 파일은 Steam depot에 포함하면 안 된다.
