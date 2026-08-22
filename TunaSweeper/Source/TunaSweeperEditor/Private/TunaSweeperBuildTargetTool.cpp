@@ -72,6 +72,11 @@ namespace TunaSweeperBuildTargetTool
 
 void FTunaSweeperBuildTargetTool::Startup()
 {
+	if (const UTunaSweeperBuildTargetSettings* BuildTargetSettings = GetDefault<UTunaSweeperBuildTargetSettings>())
+	{
+		SelectBuildTarget(BuildTargetSettings->BuildTarget);
+	}
+
 	UToolMenus::RegisterStartupCallback(
 		FSimpleMulticastDelegate::FDelegate::CreateRaw(this, &FTunaSweeperBuildTargetTool::RegisterMenus));
 }
@@ -168,11 +173,17 @@ void FTunaSweeperBuildTargetTool::SelectBuildTarget(ETunaSweeperBuildTarget Buil
 			PackagingSettings->GetDefaultConfigFilename());
 	}
 	UPlatformsMenuSettings* PlatformsMenuSettings = GetMutableDefault<UPlatformsMenuSettings>();
+	PlatformsMenuSettings->PackageBuildTarget = TargetName;
 	PlatformsMenuSettings->StagingDirectory.Path = TunaSweeperBuildTargetTool::ResolveOutputDirectory(BuildTarget);
 	IFileManager::Get().MakeDirectory(*PlatformsMenuSettings->StagingDirectory.Path, true);
 	const FString SerializedStagingDirectory = FString::Printf(
 		TEXT("(Path=\"%s\")"),
 		*PlatformsMenuSettings->StagingDirectory.Path);
+	GConfig->SetString(
+		TEXT("/Script/DeveloperToolSettings.PlatformsMenuSettings"),
+		TEXT("PackageBuildTarget"),
+		*PlatformsMenuSettings->PackageBuildTarget,
+		GGameIni);
 	GConfig->SetString(
 		TEXT("/Script/DeveloperToolSettings.PlatformsMenuSettings"),
 		TEXT("StagingDirectory"),

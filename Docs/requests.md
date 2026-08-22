@@ -6681,3 +6681,9 @@
 - 패키지 런타임의 데모 여부를 컴파일 정의에만 의존하지 않고 6개 Build Target별 `BuildType=Demo|Full` 설정을 기준으로 판별하도록 변경했다.
 - 위시리스트 버튼이 타이틀의 다른 오버레이에 가려지지 않도록 표시 순서를 상향했다.
 - UE 5.7 `TunaSweeperEditor Win64 Development`와 `TunaSweeperDemo Win64 Shipping` 빌드를 성공적으로 완료했다.
+
+## 2026-08-23 02:53:00 (소요시간: 00:07:45)
+
+- Steam Demo 출력 폴더로 패키징해도 AutomationTool이 본편 `TunaSweeper` 타겟을 사용해 위시리스트 버튼이 표시되지 않던 원인을 수정했다.
+- `TunaSweeper > Build Target` 선택값을 UE 5.7 패키징 메뉴가 실제로 사용하는 `PackageBuildTarget`에 동기화하고, 에디터 모듈 시작 시에도 즉시 적용하도록 보강했다.
+- Steam Demo 선택 상태에서 `PackageBuildTarget=TunaSweeperDemo` 저장을 확인하고 `TunaSweeperEditor Win64 Development` 빌드를 성공적으로 완료했다.
