@@ -6632,3 +6632,10 @@
 - Steam Demo 타이틀의 위시리스트 버튼이 `TunaSweeper.Distribution` 설정의 `SteamFullGameAppId`를 읽어 Steam 온라인 서브시스템의 `ShowStoreUI`로 본편 스토어 오버레이를 열도록 구현했다.
 - 장바구니 자동 추가는 비활성화해 스토어 페이지에서 사용자가 위시리스트 추가를 선택하도록 했으며, Steam 서비스·외부 UI·유효한 숫자 App ID가 없을 때는 아무 동작도 하지 않도록 방어했다.
 - UE 5.7 `TunaSweeperDemo Win64 Development` 빌드를 성공적으로 완료했다.
+
+## 2026-08-23 01:41:00 (소요시간: 00:17:20)
+
+- Project Settings에 `TunaSweeper > Build Target` 페이지를 추가하고 `No Store`·`Steam`·`STOVE`와 `Demo`·`Full Game`을 조합한 총 6개 타겟을 선택할 수 있게 했다.
+- 선택값이 Unreal의 `Project Settings > Packaging > Build Target`에 즉시 반영되도록 연결하고, 별도 `Distribution Preview` 설정은 제거했다.
+- 에디터 타이틀의 배포 채널, 버전 접미사, Steam Demo 위시리스트 버튼 표시 조건이 선택된 Build Target을 직접 사용하도록 통합했다.
+- `TunaSweeperNoStore`, `TunaSweeperNoStoreDemo`, `TunaSweeperStoveDemo` 및 `TunaSweeperEditor` Win64 Development 빌드를 성공적으로 완료했다.

@@ -4863,3 +4863,23 @@ Steam 또는 STOVE 배포 플랫폼을 런타임에 구분하여 메뉴 구성�
 ### 답변
 
 두 값을 독립된 설정으로 둔다. 빌드 구분은 `데모` 또는 `본편`, 프리뷰 채널은 `에디터`·`Steam`·`STOVE` 중 하나를 선택한다. 에디터 프리뷰에서는 두 값의 조합으로 타이틀 UI를 결정하며, 최종 Shipping 패키지에서는 해당 타겟의 실제 빌드 구분·배포 채널 설정을 사용해 프리뷰 선택이 배포물에 영향을 주지 않도록 한다.
+
+## 2026-08-23 01:38:30 (소요시간: 00:01:20)
+
+### 질문
+
+Unreal Editor에서 패키징할 때 Steam 또는 STOVE 타겟을 선택하는 방법과 메뉴에 별도 항목이 보이지 않는 이유 문의.
+
+### 답변
+
+Steam과 STOVE는 Windows 플랫폼 종류가 아니라 별도 Game Target이므로 기본 `Platforms > Windows > Package Project` 메뉴에는 채널 선택 항목이 생기지 않는다. `Project Settings > Packaging`에서 `Build Target`을 검색해 `TunaSweeper`(Steam 본편), `TunaSweeperDemo`(Steam 데모), `TunaSweeperStove`(STOVE 본편)를 선택하거나, `Tools > Project Launcher`의 Custom Launch Profile에서 동일한 Build Target을 지정해야 한다. 새 `.Target.cs`를 추가한 뒤 목록이 보이지 않으면 에디터 재시작과 프로젝트 파일 재생성이 필요할 수 있다. `TunaSweeper > Distribution Preview` 설정은 에디터 UI 미리보기 전용이며 실제 패키징 타겟을 바꾸지 않는다.
+
+## 2026-08-23 01:40:10 (소요시간: 00:00:13)
+
+### 질문
+
+첨부 화면의 `Project Settings > Packaging > Project > Build Target` 입력란이 패키징 타겟 지정 위치인지 확인 요청.
+
+### 답변
+
+해당 입력란이 맞다. 드롭다운이 아니라 타겟 이름을 직접 입력하며, Steam 본편은 `TunaSweeper`, Steam 데모는 `TunaSweeperDemo`, STOVE 본편은 `TunaSweeperStove`를 사용한다. 빈 값이면 Unreal이 기본 Game Target을 선택하며, 값을 입력한 뒤 일반 Windows 패키징을 실행하면 지정한 타겟이 사용된다.

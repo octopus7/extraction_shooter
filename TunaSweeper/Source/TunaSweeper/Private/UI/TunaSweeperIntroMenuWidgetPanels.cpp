@@ -15,9 +15,9 @@ namespace TunaSweeperDistribution
 FString UTunaSweeperIntroMenuWidget::GetDistributionChannel() const
 {
 #if WITH_EDITOR
-	if (const UTunaSweeperDistributionPreviewSettings* PreviewSettings = GetDefault<UTunaSweeperDistributionPreviewSettings>(); PreviewSettings && PreviewSettings->DistributionChannel != ETunaSweeperPreviewDistributionChannel::Editor)
+	if (const UTunaSweeperBuildTargetSettings* BuildTargetSettings = GetDefault<UTunaSweeperBuildTargetSettings>())
 	{
-		return PreviewSettings->DistributionChannel == ETunaSweeperPreviewDistributionChannel::Steam ? TEXT("Steam") : TEXT("Stove");
+		return BuildTargetSettings->GetDistributionChannel();
 	}
 #endif
 	FString DistributionChannel(TEXT("Steam"));
@@ -29,8 +29,9 @@ FString UTunaSweeperIntroMenuWidget::GetDistributionChannel() const
 bool UTunaSweeperIntroMenuWidget::IsSteamDemoDistribution() const
 {
 #if WITH_EDITOR
-	const UTunaSweeperDistributionPreviewSettings* PreviewSettings = GetDefault<UTunaSweeperDistributionPreviewSettings>();
-	return PreviewSettings && PreviewSettings->BuildType == ETunaSweeperPreviewBuildType::Demo && GetDistributionChannel().Equals(TEXT("Steam"), ESearchCase::IgnoreCase);
+	const UTunaSweeperBuildTargetSettings* BuildTargetSettings = GetDefault<UTunaSweeperBuildTargetSettings>();
+	return BuildTargetSettings && BuildTargetSettings->IsDemoBuild() &&
+		BuildTargetSettings->GetDistributionChannel().Equals(TEXT("Steam"), ESearchCase::IgnoreCase);
 #elif TUNASWEEPER_DEMO
 	return GetDistributionChannel().Equals(TEXT("Steam"), ESearchCase::IgnoreCase);
 #else
