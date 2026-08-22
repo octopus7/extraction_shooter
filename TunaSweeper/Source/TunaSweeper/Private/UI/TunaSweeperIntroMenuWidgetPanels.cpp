@@ -7,6 +7,7 @@ namespace TunaSweeperDistribution
 {
 	const TCHAR* SectionName = TEXT("TunaSweeper.Distribution");
 	const TCHAR* ChannelKey = TEXT("DistributionChannel");
+	const TCHAR* BuildTypeKey = TEXT("BuildType");
 	const TCHAR* ProjectSettingsSectionName = TEXT("/Script/EngineSettings.GeneralProjectSettings");
 	const TCHAR* ProjectVersionKey = TEXT("ProjectVersion");
 	const TCHAR* SteamFullGameAppIdKey = TEXT("SteamFullGameAppId");
@@ -32,10 +33,16 @@ bool UTunaSweeperIntroMenuWidget::IsSteamDemoDistribution() const
 	const UTunaSweeperBuildTargetSettings* BuildTargetSettings = GetDefault<UTunaSweeperBuildTargetSettings>();
 	return BuildTargetSettings && BuildTargetSettings->IsDemoBuild() &&
 		BuildTargetSettings->GetDistributionChannel().Equals(TEXT("Steam"), ESearchCase::IgnoreCase);
-#elif TUNASWEEPER_DEMO
-	return GetDistributionChannel().Equals(TEXT("Steam"), ESearchCase::IgnoreCase);
 #else
-	return false;
+	FString BuildType;
+	GConfig->GetString(TunaSweeperDistribution::SectionName, TunaSweeperDistribution::BuildTypeKey, BuildType, GGameIni);
+	BuildType.TrimStartAndEndInline();
+
+	// The custom target config is the packaged build's source of truth. Keep the
+	// compile definition as a fallback for packages made before BuildType existed.
+	const bool bIsDemoBuild = BuildType.Equals(TEXT("Demo"), ESearchCase::IgnoreCase) ||
+		(BuildType.IsEmpty() && TUNASWEEPER_DEMO != 0);
+	return bIsDemoBuild && GetDistributionChannel().Equals(TEXT("Steam"), ESearchCase::IgnoreCase);
 #endif
 }
 
@@ -84,7 +91,7 @@ void UTunaSweeperIntroMenuWidget::EnsureSteamDemoWishlistButton()
 		WishlistSlot->SetAlignment(FVector2D(0.5f, 1.0f));
 		WishlistSlot->SetPosition(FVector2D(0.0f, -42.0f));
 		WishlistSlot->SetSize(ButtonSize);
-		WishlistSlot->SetZOrder(5);
+		WishlistSlot->SetZOrder(20);
 		SteamDemoWishlistButton = WishlistButton;
 	}
 }

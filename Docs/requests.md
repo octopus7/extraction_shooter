@@ -6674,3 +6674,10 @@
 - 빌드 타겟별 패키징 출력 기준 경로에서 잘못된 상위 폴더 이동을 제거해 `D:/github/extraction_shooter/TunaSweeper/Builds/{Store}/{Demo|Full}/Windows` 아래를 사용하도록 수정했다.
 - UE 5.7 `TunaSweeperEditor Win64 Development` 빌드를 성공적으로 완료하고, 현재 No Store Demo 경로가 프로젝트 내부 `Builds/NoStore/Demo/Windows`로 저장·생성되는 것을 확인했다.
 - 기존 저장소 루트의 잘못된 `Builds` 경로에는 패키징 결과물이 있어 삭제하거나 이동하지 않고 보존했다.
+
+## 2026-08-23 02:43:00 (소요시간: 00:06:30)
+
+- Steam Demo 타이틀에서 위시리스트 버튼이 표시되지 않던 문제를 수정했다.
+- 패키지 런타임의 데모 여부를 컴파일 정의에만 의존하지 않고 6개 Build Target별 `BuildType=Demo|Full` 설정을 기준으로 판별하도록 변경했다.
+- 위시리스트 버튼이 타이틀의 다른 오버레이에 가려지지 않도록 표시 순서를 상향했다.
+- UE 5.7 `TunaSweeperEditor Win64 Development`와 `TunaSweeperDemo Win64 Shipping` 빌드를 성공적으로 완료했다.
