@@ -4422,6 +4422,126 @@ Library Capsule에서 로고가 전체 이미지의 약 1/3을 채워야 한다�
 
 현재 금빛 외곽 글로우는 밝은 하늘과 흰 구름에 섞여 로고 윤곽을 흐리므로 어두운 보조 외곽 효과를 쓰는 편이 낫다. 다만 전체 글로우를 검정으로 바꾸면 로고가 탁해질 수 있으므로, 글자 바로 옆의 얇은 금빛 발광은 유지하고 그 바깥에 짙은 청록·남색 계열의 부드러운 그림자를 추가하는 이중 구조가 적합하다. `LibraryLogo.png`의 `1479×720` 기준으로 `#17313A` 또는 `#1B2638`, 불투명도 약 `45~55%`, 블러 반경 `12~18px` 정도를 권장한다. 이렇게 하면 밝은 하늘에서는 대비가 생기고 어두운 Hero 배경에서도 검은 테두리처럼 과하게 보이지 않는다.
 
+## 2026-08-20 09:05:00 (소요시간: 00:02:05)
+
+### 질문
+
+독립 창으로 실행되는 PIE에서 게임 자체 캡처 기능을 만들 때 사용할 수 있는 F키 문의.
+
+### 답변
+
+독립 PIE 창에서도 F1~F12는 게임 입력으로 매핑할 수 있지만 엔진·에디터 및 프로젝트 단축키와 충돌할 수 있다. TunaSweeper에서는 F8이 적 전투 디버그 토글로 이미 사용 중이고, `DefaultInput.ini`에서 F11 전체화면 토글이 활성화되어 있다. F9는 Unreal의 기본 스크린샷 키로 쓰일 수 있어 자체 캡처와 동작이 중복될 가능성이 있다. 따라서 현재 프로젝트의 자체 캡처 단축키로는 충돌이 적은 F10을 우선 권장하며 F12도 대안으로 적합하다.
+
+## 2026-08-20 09:07:20 (소요시간: 00:00:28)
+
+### 질문
+
+F9를 누르면 Unreal Engine에서 원래 화면 캡처가 실행되는지 문의.
+
+### 답변
+
+UE 5.7의 `Engine/Config/BaseInput.ini`에는 `F9`가 `shot showui` 디버그 실행 바인딩으로 기본 등록되어 있다. 따라서 개발 빌드와 PIE에서 F9를 누르면 UI를 포함한 기본 스크린샷이 촬영되는 것이 맞다. 결과는 일반적으로 프로젝트의 `Saved/Screenshots/<플랫폼>` 아래에 저장된다. 자체 캡처 기능을 F9에 추가하면 기본 캡처와 동시에 실행될 수 있으므로, 기본 바인딩을 명시적으로 제거하지 않을 계획이라면 F10 또는 F12를 사용하는 것이 안전하다.
+
+## 2026-08-20 09:33:31 (소요시간: 00:00:39)
+
+### 질문
+
+스크래치 상시 연출의 잔상 생성 시간 간격을 문의.
+
+### 답변
+
+기본 잔상 생성 간격은 실시간 기준 `0.045초`다. 다만 플레이어가 마지막 잔상 위치에서 `6cm` 이상 이동해야 다음 잔상을 생성하므로, 실제 생성은 최소 `0.045초` 간격과 이동 거리 조건을 모두 충족해야 한다.
+
+## 2026-08-20 09:34:10 (소요시간: 00:00:18)
+
+### 질문
+
+스크래치 상시 연출에서 잔상 하나의 수명을 문의.
+
+### 답변
+
+잔상 하나의 기본 수명은 실시간 기준 `0.22초`다. 생성 후 이 시간 동안 서서히 사라진다.
+
+## 2026-08-20 09:36:00 (소요시간: 00:03:37)
+
+### 질문
+
+카메라 전환 시 좌우에 검은 레터박스가 생기며, 캐릭터 카메라에는 없지만 대화용 카메라에도 생기는 원인을 문의.
+
+### 답변
+
+UE 5.7의 `ACameraActor`가 기본적으로 16:9 종횡비 고정(`bConstrainAspectRatio = true`)을 사용하기 때문이다. 반면 캐릭터 카메라는 직접 생성한 `UCameraComponent`라서 기본적으로 종횡비를 고정하지 않는다. 프로젝트의 대화용 카메라는 런타임에 `ACameraActor`를 생성하고 이 설정을 해제하지 않으며, 위치 블렌드 카메라도 레벨에 배치한 `CameraActor`를 사용하므로 넓은 뷰포트에서는 좌우 필러박스가 생긴다. 또한 UE의 뷰 블렌드는 종횡비 고정 플래그를 OR 방식으로 합치므로, 대상 카메라의 블렌드 비중이 작을 때부터 검은 여백이 나타날 수 있다. 레벨 배치 카메라는 Details의 `Constrain Aspect Ratio`를 끄고, 동적 카메라는 `SetConstraintAspectRatio(false)`를 적용하면 제거할 수 있다.
+
+## 2026-08-20 09:53:10 (소요시간: 00:00:51)
+
+### 질문
+
+별도 창으로 실행된 Standalone PIE 프리뷰에서는 F9 기본 캡처가 동작하지 않는지 문의.
+
+### 답변
+
+첨부된 Standalone PIE 프리뷰의 타이틀 메뉴에서는 F9 기본 캡처가 동작하지 않는다. 앞서 `Saved/Screenshots/WindowsEditor`에서 확인한 파일들은 에디터 뷰포트에서 생성된 것이므로 Standalone 동작의 증거가 아니었다. 타이틀 메뉴는 `ATunaSweeperPlayerController::EnsureIntroMenuWidget()`에서 `FInputModeUIOnly`를 적용하고 키보드 포커스를 메뉴 위젯에 두며, 메뉴 위젯은 `NativeOnPreviewKeyDown()`에서 R과 일부 Escape 입력만 직접 처리한다. 따라서 이 화면의 F9는 `UPlayerInput`의 기본 `shot showui` 디버그 바인딩까지 전달되지 않는다. 게임플레이처럼 게임 입력이 활성화된 상태에서는 별도로 동작할 수 있지만, 타이틀 화면을 포함해 어디서든 확실히 캡처하려면 위젯·Slate보다 상위 입력 경로나 UI 위젯에서 자체 캡처키를 처리해야 한다.
+
+## 2026-08-20 10:11:32 (소요시간: 00:02:17)
+
+### 질문
+
+구르기가 끝난 뒤에도 게임 시간이 계속 느리게 흐르는 현상의 원인을 검토해 달라는 요청.
+
+### 답변
+
+현재 저장된 개발 설정에서 `bDeveloperAlwaysSlowPresentationEnabled=True`로 확인됐다. 이 토글이 켜져 있으면 `UTunaSweeperScratchComponent::UpdatePresentation()`이 구르기 종료와 무관하게 블렌드아웃 분기를 건너뛰므로 전역 시간 배율 `0.2`를 계속 유지하는 것이 기존 요구사항에 따른 정상 동작이다. 토글을 끄면 일반 근접 회피 연출은 실시간 `0.06초` 유지 후 `0.12초` 동안 블렌드아웃하고 원래 시간 배율을 복구하도록 구현되어 있다. 따라서 현재 관찰된 현상은 구르기 종료 버그가 아니라 활성화된 `상시 슬로우연출` 설정의 영향이다.
+
+## 2026-08-20 10:48:30 (소요시간: 00:03:45)
+
+### 질문
+
+새 게임 시작이 난이도 선택에서 진행되지 않는 현상이 기존 세이브 파일 때문인지, 모든 세이브를 삭제하면 해결되는지 문의.
+
+### 답변
+
+패키징 빌드 로그에서 현재 선택된 `TunaSweeperSave_Slot02`가 활성 공개 퀘스트 데이터셋과 호환되지 않아 로드와 덮어쓰기가 거부되는 것을 확인했다. 난이도 확정은 즉시 저장 성공을 진행 조건으로 사용하므로 이 저장 실패 때문에 다음 맵으로 이동하지 않는다. 세 슬롯 모두 같은 비호환 경고가 있으므로 모든 게임 슬롯을 새로 사용할 계획이면 `TunaSweeperSave_Slot01.sav`부터 `Slot03.sav`까지 삭제하면 해결된다. 현재 선택 슬롯만 시험하려면 `Slot02.sav`만 삭제해도 되며, 슬롯 선택만 저장하는 `TunaSweeperSaveSettings.sav`와 자동 로드되지 않는 `Backups` 폴더는 삭제할 필요가 없다. 다만 비호환 세이브를 빈 슬롯처럼 표시하면서 새 게임 덮어쓰기는 막는 코드 흐름도 함께 개선하는 것이 재발 방지에 적절하다.
+
+## 2026-08-20 12:34:00 (소요시간: 00:03:37)
+
+### 질문
+
+추출 포인트 연막 이펙트가 패키징 빌드에서 보이지 않는 원인이 강제 쿠킹 대상 누락인지 확인 요청.
+
+### 답변
+
+추출 포인트는 Non-UFS JSON의 문자열 경로 `/Game/FX/NS_ExtractionSmoke.NS_ExtractionSmoke`를 런타임에 소프트 로드한다. 현재 패키징 설정은 `/Game/Effects`를 강제 쿠킹하지만 별도 디렉터리인 `/Game/FX`는 포함하지 않는다. 최신 Windows Cook 산출물에도 `Content/FX/NS_ExtractionSmoke.uasset`이 없고, 패키징 빌드 로그에 `/Game/FX/NS_ExtractionSmoke` 패키지가 디스크 또는 로더에 존재하지 않는다는 경고와 오브젝트 검색 실패가 기록됐다. 따라서 강제 쿠킹 누락이 직접 원인이며, `/Game/FX`를 `DirectoriesToAlwaysCook`에 추가하면 해당 Niagara 시스템과 참조 의존성이 함께 쿠킹된다.
+
+## 2026-08-20 12:38:05 (소요시간: 00:01:25)
+
+### 질문
+
+첨부 화면의 플레이어 재장전 안내가 영어 현지화에 연결되어 있는지 문의.
+
+### 답변
+
+영어 현지화에 연결되어 있지 않다. 중앙 재장전 안내의 `CenterReloadPromptText`는 에디터 위젯 생성 코드에서 한국어 `재장전`으로 직접 설정되며, 런타임 HUD의 `RefreshLocalizedTexts()`는 이 위젯을 캐시하거나 갱신하지 않는다. 적 캐릭터의 재장전 상태에는 기존 `ui.enemy.status.reload` 키와 영어 `Reloading`이 연결되어 있지만 첨부 화면의 플레이어 입력 안내와는 별개다. 플레이어 안내용 `ui.hud.reload_prompt` 키를 `재장전, Reload, リロード`로 추가하고 HUD 현지화 갱신에서 `CenterReloadPromptText`에 적용해야 한다.
+
+## 2026-08-20 15:04:41 (소요시간: 00:00:22)
+
+### 질문
+
+Unreal Engine 5에서 화면에는 렌더링되지 않으면서 조명만 차폐하는 오브젝트를 만들 수 있는지 문의.
+
+### 답변
+
+가능하다. Static Mesh Component에서 `Cast Shadow`와 고급 옵션 `Cast Hidden Shadow`를 활성화하고 Actor 또는 Component를 `Hidden in Game`으로 숨기면, 메시 본체는 보이지 않지만 직접광의 그림자는 계속 투사할 수 있다. 블루프린트 런타임 설정은 `Set Actor Hidden In Game(true)`와 `Set Cast Hidden Shadow(true)`를 함께 사용한다. 이 설정은 주로 직접광과 섀도 패스용이며, Lumen 간접광까지 불투명 벽처럼 완전히 차단하는 용도와는 다르므로 간접광 누설까지 막아야 한다면 실제 가시 지오메트리 또는 별도의 조명·레벨 설계를 검토해야 한다.
+
+## 2026-08-20 15:07:29 (소요시간: 00:00:22)
+
+### 질문
+
+화면에서 숨긴 차폐 오브젝트가 Lumen 간접광도 차단할 수 있는지 문의.
+
+### 답변
+
+가능하다. Primitive Component에서 `Affect Dynamic Indirect Lighting`과 고급 옵션 `Affect Indirect Lighting While Hidden`을 활성화하면 메인 화면에서 숨겨진 상태에서도 오브젝트가 Lumen Scene의 GI와 반사에 영향을 줄 수 있다. 직접광 그림자까지 필요하면 `Cast Shadow`와 `Cast Hidden Shadow`도 함께 활성화한다. Software Ray Tracing Lumen에서는 `Affect Distance Field Lighting`을 켜고 유효한 Mesh Distance Field가 있어야 하며, Hardware Ray Tracing Lumen에서는 `Visible in Ray Tracing`을 유지해야 한다. Screen Trace는 화면에 보이는 정보만 사용하므로 숨은 오브젝트와 불일치가 생길 수 있어 Lumen Scene 뷰와 Screen Trace 비활성화 비교로 검증하는 것이 적절하다.
+
 ## 2026-08-22 19:34:25 (소요시간: 00:02:43)
 
 ### 질문
@@ -4441,3 +4561,185 @@ Steam App ID가 공개되어도 무관한 정보인지, 실제 인증은 업로�
 ### 답변
 
 Steam App ID는 공개 식별자이므로 저장소에 기록해도 무관하다. SteamPipe 업로드 인증은 Steam 계정, 비밀번호, Steam Guard 및 관련 API 키 같은 별도 자격 증명으로 수행되며, 이러한 비밀 정보는 저장소에 기록하면 안 된다.
+
+## 2026-08-22 19:46:45 (소요시간: 00:00:49)
+
+### 질문
+
+Steam 데모용 App ID를 어디서 발급하며, 본편 Store Presence가 리뷰 대기 중이어도 생성할 수 있는지 문의.
+
+### 답변
+
+본편 App Landing Page에서 `All associated packages, DLC, demos and tools`로 이동한 뒤 상단의 `Add Demo`를 누르면 본편과 연결된 별도 Demo App ID가 생성된다. 본편 Store Presence 리뷰 완료는 데모 App ID 생성의 선행 조건이 아니므로 리뷰 대기 중에도 생성·디포 설정·빌드 업로드·파트너 계정 테스트를 진행할 수 있다. 다만 데모를 공개하거나 출시하려면 데모 자체 체크리스트와 리뷰를 완료해야 하며, 본편 출시 전에 데모를 공개하려면 본편 스토어 페이지가 `Coming Soon`으로 게시되어 있어야 한다.
+
+## 2026-08-22 19:48:15 (소요시간: 00:00:42)
+
+### 질문
+
+하나의 Unreal Engine 프로젝트에서 Steam 본편과 데모를 패키징 타겟에 따라 분기할 수 있는지 문의.
+
+### 답변
+
+가능하다. 본편과 데모에 별도 Game Target을 두고 각 Target의 `CustomConfig`로 Steam App ID와 설정을 선택하며, 전처리 정의로 런타임 콘텐츠와 기능도 분기할 수 있다. 패키징 스크립트에서 명시적으로 타겟과 출력 경로를 선택하면 동일 프로젝트를 본편·데모 빌드로 안전하게 생성할 수 있다.
+
+## 2026-08-22 19:50:05 (소요시간: 00:00:20)
+
+### 질문
+
+Steamworks App Admin에 표시되는 `TunaSweeper (5137900)`이 본편 App ID인지 문의.
+
+### 답변
+
+맞다. 본편 App Admin 이름 뒤의 `5137900`이 TunaSweeper 본편 App ID이며, 별도로 생성된 `TunaSweeper Demo (5158070)`은 본편에 연결된 데모 App ID다.
+
+## 2026-08-22 20:05:50 (소요시간: 00:01:16)
+
+### 질문
+
+SteamPipe Build Uploader의 데모 Build Path를 `Builds/Steam/Demo`와 `Builds/Steam/Demo/Windows` 중 어디로 지정해야 하는지 문의.
+
+### 답변
+
+`Builds/Steam/Demo/Windows`를 지정하는 것이 적절하다. SteamPipe는 Build Path의 내용을 디포 루트에 매핑하므로 `Demo`를 선택하면 설치 루트에 `Windows` 하위 폴더가 추가되지만, `Demo/Windows`를 선택하면 `TunaSweeperDemo.exe`가 디포 및 설치 루트에 바로 놓인다. Steamworks의 Launch Options에는 `TunaSweeperDemo.exe`를 실행 파일로 설정하면 된다.
+
+## 2026-08-22 20:07:37 (소요시간: 00:00:20)
+
+### 질문
+
+Steam 데모의 Depot ID가 `5158071`이 맞는지 문의.
+
+### 답변
+
+첨부된 SteamPipe Build Uploader 설정 기준으로 맞다. `5158070`은 TunaSweeper Demo의 App ID이고, `5158071`은 해당 데모 애플리케이션의 Windows 빌드 파일을 담는 Depot ID다.
+
+## 2026-08-22 20:09:00 (소요시간: 00:02:30)
+
+### 질문
+
+Steam에서 TunaSweeper Demo 실행 시 `게임 실행 중 오류 발생: 잘못된 게임 구성`이 표시되는 원인과 해결 방법을 문의.
+
+### 답변
+
+직전 업로드 화면에서는 Build Path가 `Builds/Steam/Demo`여서 디포 내부 파일이 `Windows/TunaSweeperDemo.exe`로 올라갔으므로, Launch Option을 루트의 `TunaSweeperDemo.exe`로 설정했다면 실행 경로가 불일치한다. 이후 Build Path를 `Builds/Steam/Demo/Windows`로 수정한 업로드가 성공해 Depot `5158071`에 manifest ID `6063695784039611925`가 생성됐고, 업로드 경로가 `TunaSweeper/...`로 시작하므로 디포 루트 매핑도 정상이다. Steam 설치 후에는 App `5158070`의 Build ID `24878538`, Depot `5158071`, manifest `6063695784039611925`가 정상 설치됐고 루트의 `TunaSweeperDemo.exe`를 포함한 약 803MB의 파일도 확인됐다. Steam 클라이언트 `content_log.txt`에 `Failed running app 5158070 (missing launch config)`가 기록되어 최종 원인은 Demo App에 게시된 실행 옵션이 없는 것으로 확정됐다. Steamworks의 General Installation에서 Windows 기본 Launch Option의 실행 파일을 `TunaSweeperDemo.exe`로 추가하고 변경 사항을 Steam에 게시한 뒤 클라이언트를 재시작하면 된다. 빌드 재업로드나 800MB 재다운로드는 필요하지 않다.
+
+## 2026-08-22 20:13:15 (소요시간: 00:00:20)
+
+### 질문
+
+업로드한 Steam 데모 빌드의 Live 상태와 관련 설정을 Steamworks 어디에서 확인하는지 문의.
+
+### 답변
+
+Steamworks 웹에서 `TunaSweeper Demo (5158070) → SteamPipe → Builds`로 이동해 업로드한 최신 빌드를 `default` 또는 테스트 브랜치에 Live로 지정한다. 실행 파일은 `Installation → General Installation`에서 `TunaSweeperDemo.exe`, Windows로 확인하며, Depot `5158071`의 테스트 계정 권한은 `All associated packages, DLC, demos and tools`에서 Developer Comp 패키지의 포함 디포를 확인한다. 설정 변경 후에는 Publish 탭에서 게시해야 한다.
+## 2026-08-22 20:20:00 (소요시간: 00:01:30)
+
+### 질문
+
+Steamworks의 Publish 탭에서 실행 옵션 변경 사항을 게시하면 게임이 일반 사용자에게 공개되는지 문의.
+
+### 답변
+
+앱 설정 변경 사항을 `Publish to Steam`으로 게시하는 것과 제품을 출시하는 것은 별개다. 실행 옵션 게시 자체는 Demo App의 설정을 Steam 백엔드와 클라이언트에 반영하지만, 미출시 앱을 일반 사용자에게 출시하지 않는다. 실제 공개 출시는 Store Presence와 빌드 심사를 통과한 뒤 제품 랜딩 페이지의 별도 `Release App` 절차에서 이루어진다. 따라서 게시 대기 목록이 `General Installation`의 `Launch Options` 변경뿐인지 확인한 후 해당 설정은 게시해도 된다. 스토어 페이지 관련 변경이 함께 대기 중이라면 의도치 않은 변경까지 함께 반영될 수 있으므로 게시 목록을 먼저 확인한다.
+
+첨부 화면에서 Launch Option의 Executable을 `TunaSweeperDemo.exe`로 입력한 것은 올바르다. Description은 실행 옵션이 하나뿐이면 비워도 되며, 하단의 Operating System을 Windows, Launch Type을 기본 실행으로 설정해 저장한 뒤 이 앱 설정 변경을 게시하면 된다. 화면의 `customers` 문구는 필드의 일반 설명이며, 설정 게시만으로 미출시 앱이 출시된다는 뜻은 아니다.
+
+`You're about to publish changes to the public universe`와 확인 코드 입력란이 표시되는 화면은 앱 설정 게시의 정상적인 최종 확인 화면이다. 게시 대상 변경 목록이 의도한 Demo Launch Option뿐이면 확인 코드 `STEAMWORKS`를 입력하고 `Really Publish`를 눌러도 된다. 이는 설정을 운영 Steam 시스템에 반영할 뿐이며 별도의 `Release App` 절차를 실행하지 않는다.
+## 2026-08-22 20:32:00 (소요시간: 00:03:00)
+
+### 질문
+
+4K 게임 화면에서 Steam 오버레이가 좌상단 사분면만 차지하는 표시가 정상인지 문의.
+
+### 답변
+
+정상적인 전체 화면 오버레이 표시가 아니다. 오버레이가 열리므로 Steam 연동과 실행 자체는 성공했지만, 3840x2160 출력에 1920x1080 크기의 오버레이가 좌상단 정렬된 2배 스케일 불일치 상태다. 프로젝트 기본 설정도 3840x2160 전체 화면 출력과 50% 해상도 품질, 1920x1080 내부 렌더 목표를 사용하므로 관련 가능성이 있다. 먼저 3840x2160 테두리 없는 창 모드에서 재시험하고, 정상화되면 전체 화면/DPI 또는 백버퍼 크기 불일치로 좁힐 수 있다. 테두리 없는 창에서도 동일하면 DLSS 및 해상도 품질을 100%로 바꿔 비교한다.
+## 2026-08-22 20:35:00 (소요시간: 00:01:30)
+
+### 질문
+
+SteamPipe Build Uploader에서 본편 App ID `5137900` 아래에 Demo Depot `5158071`과 본편 Depot `5137902`를 함께 추가하면 두 디팟이 모두 업로드되는지 문의.
+
+### 답변
+
+Uploader는 등록된 두 Depot 행을 모두 처리하려고 시도하지만 이 구성은 사용하지 않는다. Steam 데모는 별도 App ID와 자체 빌드로 업로드해야 하므로 Demo는 App `5158070` + Depot `5158071` + `Builds/Steam/Demo/Windows`, 본편은 App `5137900` + Depot `5137902` + `Builds/Steam/Full/Windows`로 각각 별도의 업로드 설정을 사용한다. 공유 디팟을 Steamworks에서 명시적으로 구성하는 특별한 경우가 아니라면 다른 앱의 디팟을 본편 App Build에 섞지 않는다.
+## 2026-08-22 20:37:00 (소요시간: 00:01:00)
+
+### 질문
+
+SteamPipe Build Uploader에서 업로드할 앱을 어떻게 선택하며 앱마다 도구를 별도로 구성해야 하는지 문의.
+
+### 답변
+
+별도 도구 설치는 필요하지 않다. Uploader 좌상단의 App ID 입력란이 업로드 대상 앱을 선택한다. Demo 업로드 시 App ID `5158070`, Depot `5158071`, `Builds/Steam/Demo/Windows`만 구성하고, 본편 업로드 시 App ID `5137900`, Depot `5137902`, `Builds/Steam/Full/Windows`만 구성한다. 앱을 전환할 때 이전 앱의 Depot 행을 제거해야 한다. 반복 업로드 실수를 줄이려면 앱별 VDF 설정을 별도로 생성·보관할 수 있지만 Steamworks SDK와 Uploader 자체는 하나만 사용하면 된다.
+## 2026-08-22 20:38:00 (소요시간: 00:00:40)
+
+### 질문
+
+SteamPipe Build Uploader GUI가 VDF 파일을 만들어 주는 마법사인지 문의.
+
+### 답변
+
+개념적으로 맞다. GUI에 입력한 App ID, Build Description, Depot ID, Build Path, 브랜치 등의 값을 SteamPipe App Build/Depot Build VDF 설정으로 변환한다. `Generate VDFs`는 설정 파일만 생성하고, `Upload`는 생성된 설정을 이용해 SteamCMD 업로드까지 실행한다. 따라서 Demo와 Full을 반복 배포할 때는 앱별 VDF를 분리해 보관하고 SteamCMD로 실행하면 GUI에서 ID와 경로를 매번 바꾸는 실수를 줄일 수 있다.
+## 2026-08-22 20:39:00 (소요시간: 00:01:30)
+
+### 질문
+
+SteamPipeGUI 1.4.0.2에 기존 VDF 설정을 불러오는 기능이 있는지 문의.
+
+### 답변
+
+해당 버전에는 기존 VDF를 불러와 GUI 필드로 복원하는 기능이 없다. 로컬 Steamworks SDK의 SteamPipeGUI Readme에서도 이 도구를 App ID, Depot ID, 경로를 입력해 기본 설정을 구성하고 업로드하는 단순 SteamCMD 그래픽 래퍼로 설명한다. 기존 VDF는 `ContentBuilder/builder/steamcmd.exe`에 `+run_app_build`로 직접 전달해 실행한다.
+## 2026-08-22 20:41:00 (소요시간: 00:01:30)
+
+### 질문
+
+미출시 Steam 게임을 개발 계정으로 실행하는 동안 친구 목록에 어떻게 표시되는지 문의.
+
+### 답변
+
+Steam의 게임 세부 정보 공개 범위가 친구에게 허용되어 있으면 미출시 여부와 별개로 친구 목록과 채팅 상태에 `TunaSweeper Demo 플레이 중`처럼 앱 이름이 표시될 수 있다. Enhanced Rich Presence를 구현·게시하지 않았다면 기본적으로 앱 이름과 플레이 중 상태만 표시되고 맵이나 진행 상황 같은 세부 상태는 표시되지 않는다. 친구가 상태를 보더라도 해당 App/Depot이 포함된 라이선스 패키지를 소유하지 않으면 빌드를 설치하거나 실행할 수 없다. 테스트 사실을 숨기려면 Steam 라이브러리에서 해당 게임을 개별적으로 `Mark as Private` 처리하면 소유권, 게임 내 상태, 플레이 시간과 활동이 다른 사용자에게 숨겨진다.
+## 2026-08-22 20:43:00 (소요시간: 00:01:40)
+
+### 질문
+
+이미 출시된 Steam 게임에서 빌드를 default 브랜치로 지정하고 게시하면 즉시 사용자에게 배포되는지 문의.
+
+### 답변
+
+출시된 앱의 default 브랜치는 운영 브랜치다. 업로드만으로는 배포되지 않지만 Steamworks의 Builds 페이지에서 새 빌드를 default에 Live로 지정하고 모바일 인증기 또는 SMS의 추가 승인을 완료하면 게임 소유자 전원이 해당 업데이트의 대상이 되며 공식 안내상 수 분 내 다운로드 가능 상태가 된다. 빌드의 default Live 전환은 Publish 탭의 앱 설정 게시와 별개이므로 추가 Publish는 필요하지 않다. Publish 탭은 Launch Options나 앱 메타데이터 같은 설정 변경을 운영 시스템에 반영한다. 출시 후 안전한 배포는 먼저 비밀번호가 설정된 beta 브랜치에 Live로 올려 테스트한 다음 검증된 동일 빌드를 default로 승격한다.
+## 2026-08-22 20:45:00 (소요시간: 00:02:00)
+
+### 질문
+
+Steam 스토어 승인이 완료되지 않은 미출시 게임도 외부 사용자를 베타 테스트에 초대할 수 있는지 문의.
+
+### 답변
+
+가능하다. 다만 beta 브랜치 비밀번호만으로는 앱 라이선스가 부여되지 않으므로 테스터에게 먼저 접근 권한을 제공해야 한다. 소규모 비공개 테스트는 본편 App의 `Beta Testing` 패키지에서 Release State Override 키를 요청해 배포하고, 필요하면 비밀번호가 설정된 beta 브랜치의 접근 코드도 함께 전달한다. 이 키는 사전 출시 앱을 즉시 플레이할 수 있게 하며 일반적으로 총 2,500개로 제한되고 요청이 심사될 수 있다. 키를 회수하지 않으면 출시 후에도 소유권이 유지되므로 종료 시 폐기 계획이 필요하다. 규모가 크거나 본편 소유권과 분리하려면 별도 Steam Playtest App을 사용하는 것이 권장되며, Playtest 키 방식은 메인 스토어 페이지가 공개되지 않아도 운영할 수 있다. Store Presence 승인과 외부 테스트 권한은 별개다.
+## 2026-08-22 21:10:00 (소요시간: 00:01:00)
+
+### 질문
+
+Steam Depot의 개념과 바이너리 변경 사항이 Publish 절차 없이 사용자에게 반영되는지 문의.
+
+### 답변
+
+Depot은 앱이 설치할 파일 묶음이며, 업로드할 때마다 해당 Depot 파일 목록의 새 Manifest가 생성된다. App Build는 하나 이상의 Depot Manifest 조합을 가리키고, Branch는 현재 사용할 App Build를 가리킨다. 로컬 바이너리 수정이나 SteamPipe 업로드만으로 사용자의 활성 빌드는 바뀌지 않으며, 새 Build를 `default` 또는 beta 브랜치에 `Set Live`해야 해당 브랜치 사용자에게 반영된다. 바이너리 배포에는 Publish 탭이 관여하지 않는다. Publish 탭은 Launch Options, 지원 OS, 앱 메타데이터 같은 Steamworks 설정 변경을 운영 시스템에 반영한다. 현재 구성에서는 Demo App `5158070`이 Windows 파일 Depot `5158071`을, 본편 App `5137900`이 Windows 파일 Depot `5137902`를 사용한다.
+## 2026-08-22 21:12:00 (소요시간: 00:01:30)
+
+### 질문
+
+Depot ID가 App ID와 일치하지 않는 이유가 여러 브랜치를 제공하기 위한 것인지 문의.
+
+### 답변
+
+브랜치 제공 목적이 아니다. App과 Depot은 서로 다른 Steam 객체이므로 각각 전역 고유 ID를 받는다. 앱 생성 시 기본 Depot이 연이어 생성되면 숫자가 App ID와 가깝거나 `App ID + 1`처럼 보일 수 있지만 번호 일치에 의미나 보장은 없다. Depot을 여러 개 두는 주된 이유는 Windows/macOS/Linux, 언어팩, DLC, 고해상도 콘텐츠, 공유 콘텐츠처럼 서로 다른 규칙으로 설치할 파일 묶음을 분리하기 위해서다. 브랜치는 Depot ID를 새로 만들지 않고 특정 App Build를 가리키며, 각 Build는 동일한 Depot들의 서로 다른 Manifest 버전을 조합한다. 현재 TunaSweeper는 Windows 단일 패키지이므로 Demo App `5158070`의 Depot `5158071` 하나와 본편 App `5137900`의 Depot `5137902` 하나를 각각 사용하면 충분하다.
+## 2026-08-22 21:14:00 (소요시간: 00:01:30)
+
+### 질문
+
+App ID 끝자리가 0인 것이 뒤의 1~9 번호를 해당 앱의 Depot용으로 할당하기 위한 넘버링인지 문의.
+
+### 답변
+
+그런 보장된 규칙은 아니다. Steam 공식 문서에는 App ID 끝자리 0을 기준으로 다음 9개 ID를 해당 앱 전용으로 예약한다는 규칙이나 Depot 9개 제한이 없다. 앱 생성과 함께 기본 Depot이 생성되면 내부 발급 순서 때문에 App ID와 인접한 번호가 나올 수 있지만, 추가 Depot과 Demo, DLC 등은 각각 별도의 고유 ID를 발급받으므로 번호 관계를 로직이나 운영 규칙으로 사용하면 안 된다. App과 Depot의 연결 관계는 숫자가 아니라 Steamworks의 App Depot 설정으로 결정된다.

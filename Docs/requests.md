@@ -6499,16 +6499,50 @@
 - Git 커밋 `fdeab29`의 `steamworks/capsule-images/LibraryCapsule.png` 원본을 가져와 파일명 끝에 `_old`를 붙인 `steamworks/capsule-images/LibraryCapsule_old.png`로 저장했다.
 - 그림 내용과 채널 구성은 변경하지 않고 `1024×1536` 원본을 Steam Library Capsule 규격 `600×900`으로 Lanczos 리샘플했으며, sRGB RGBA PNG와 완전 불투명 상태를 유지하는지 확인했다.
 
+## 2026-08-20 09:10:55 (소요시간: 00:03:15)
+
+- 첨부 이미지에서 루나를 제거하고 두더지와 청록색 배경, 바닥 조명 및 회화적 분위기를 유지한 4:3 가로 이미지를 생성했다.
+- 생성 결과를 원본 폭 기준 `1024×768` PNG로 고품질 리샘플해 `output/imagegen/luna-removed-mole-4x3.png`에 저장하고 최종 크기와 구도를 확인했다.
+
+## 2026-08-20 09:14:31 (소요시간: 00:02:49)
+
+- `octopus7/ChatGPT-Images-2`의 `image-prompt-and-simplify` 워크플로와 `detail_level: 2` 지침을 확인해 첨부 원본에서 루나 제거 작업을 다시 수행했다.
+- 두더지의 원래 크기·정체성·질감과 청록색 배경, 황금빛 바닥 조명, 장면 밀도를 유지하면서 점 노이즈와 과도한 미세 대비를 균형 있게 정돈했다.
+- 기존 결과를 덮어쓰지 않고 최종 `1024×768` PNG를 `output/imagegen/luna-removed-mole-4x3-level2.png`에 저장해 규격과 구도를 확인했다.
+
 ## 2026-08-20 09:34:28 (소요시간: 00:03:46)
 
 - 스크래치 연출의 잔상 생성 간격을 실시간 기준 `0.1초`, 잔상 수명을 `1초`로 조정했다.
 - 새 잔상은 플레이어가 구르는 동안에만 생성하고, 구르기가 끝나면 생성만 중단한 채 이미 만들어진 잔상은 남은 수명 동안 자연스럽게 페이드아웃하도록 변경했다.
 - UE 5.7 `TunaSweeperEditor Win64 Development` 빌드에서 C++ 컴파일과 정적 라이브러리 링크를 통과했다. 실행 중인 Unreal Editor가 모듈 DLL을 점유해 최종 DLL 링크는 수행할 수 없었으며, 저장되지 않은 편집 작업 보호를 위해 에디터를 강제 종료하지 않았다.
 
+## 2026-08-20 09:39:38 (소요시간: 00:02:05)
+
+- 런타임에 생성되는 대화용 카메라만 16:8(2:1) 종횡비로 고정하고, 레벨에 직접 배치된 카메라와 위치 블렌드 카메라 설정은 변경하지 않았다.
+- UE 5.7 `TunaSweeperEditor Win64 Development` 빌드로 변경 사항의 컴파일과 링크를 검증했다.
+
+## 2026-08-20 09:56:07 (소요시간: 00:04:12)
+
+- 별도 창 Standalone PIE 프리뷰와 패키징된 빌드에서 F9를 누르면 TunaSweeper 자체 화면 캡처가 실행되도록 전역 Slate 입력 전처리기를 `UTunaSweeperKeyboardInputSubsystem`에 추가했다.
+- 타이틀 메뉴처럼 `FInputModeUIOnly`와 위젯 키보드 포커스를 사용하는 화면에서도 F9를 먼저 처리하며, UE 개발용 기본 `shot showui` 입력까지 전달하지 않아 중복 캡처를 방지하도록 했다.
+- 캡처 결과는 OS 제목 표시줄과 창 테두리를 제외한 게임 클라이언트 영역만 대상으로 하고 HUD 및 Slate UI는 포함하도록 `FScreenshotRequest::RequestScreenshot(true)`를 사용했다.
+- 활성 게임 창과 연결된 로컬 게임 뷰포트가 있을 때만 동작하고, 키 반복과 전용 서버에서는 캡처하지 않도록 제한했다.
+- UE 5.7 `TunaSweeperEditor Win64 Development` 및 `TunaSweeper Win64 Development` 빌드의 컴파일과 링크를 모두 통과했으며, 검증 후 Unreal Editor를 다시 실행했다.
+
 ## 2026-08-20 10:02:52 (소요시간: 00:01:03)
 
 - 첨부 화면에서 파스텔 톤으로 보이던 구르기 잔상의 HSV 채도를 `168/255`에서 `220/255`로 높여 무지개색이 더 선명하게 보이도록 조정했다.
 - 플레이어 본체의 무지개 오버레이 채도는 기존 값을 유지했다.
+
+## 2026-08-20 10:08:24 (소요시간: 00:00:31)
+
+- `TS_ExtractionPoint_East`의 위치를 첨부 화면 기준 `(529.091385, 2009.645971, 90.0)`으로 조정했다.
+- `GameplayInteractionSpawns.json`의 JSON 파싱을 검증했다.
+
+## 2026-08-20 10:08:55 (소요시간: 00:01:38)
+
+- UE 5.7 `TunaSweeperEditor Win64 Development` 타깃을 다시 빌드해 잔상 채도 변경이 포함된 모듈의 컴파일, 정적 라이브러리 및 DLL 링크, 메타데이터 생성을 모두 통과했다.
+- 빌드 후 `TunaSweeper.uproject`를 Unreal Editor로 다시 열고, 실행 로그에서 프로젝트 로드와 PIE `BunkerMap` 기동을 확인했다.
 
 ## 2026-08-20 10:14:38 (소요시간: 00:04:13)
 
@@ -6517,12 +6551,45 @@
 - 구르기 종료 뒤에는 기존 `0.06초` 유지와 `0.12초` 블렌드아웃을 거쳐 월드 및 플레이어 시간 배율을 복구하며, 이미 생성된 잔상은 각자의 `1초` 수명 동안 유지된다.
 - UE 5.7 `TunaSweeperEditor Win64 Development` 빌드의 컴파일, 정적 라이브러리 및 DLL 링크, 메타데이터 생성을 통과한 뒤 Unreal Editor를 다시 실행했다.
 
+## 2026-08-20 10:36:30 (소요시간: 00:10:05)
+
+- 패키징 빌드 시작 시 저장된 독점 전체화면 해상도가 현재 시스템의 지원 목록에 없으면, 지원 가능한 해상도 중 픽셀 수가 가장 큰 모드로 자동 보정하도록 추가했다.
+- 보정된 해상도를 즉시 적용하고 확인된 비디오 모드로 저장해 다음 실행에도 잘못된 4K 값이 다시 사용되지 않도록 했으며, 전체화면 모드 전환과 해상도 설정 메뉴에서도 동일한 검증을 수행하도록 연결했다.
+- UE 5.7 `TunaSweeperEditor Win64 Development` 및 `TunaSweeper Win64 Development` 빌드의 컴파일과 링크를 모두 통과한 뒤 Unreal Editor를 다시 실행했다.
+
+## 2026-08-20 12:39:25 (소요시간: 00:01:44)
+
+- JSON 문자열 경로로 런타임 로드하는 추출 포인트 연막 Niagara 시스템이 패키징에 포함되도록 `/Game/FX`를 Windows 강제 쿠킹 디렉터리에 추가했다.
+- UE 5.7 Windows Cook을 실행해 오류 없이 완료하고, Cook 산출물에 `/Game/FX/NS_ExtractionSmoke.uasset`이 생성된 것을 확인했다.
+
+## 2026-08-20 12:42:20 (소요시간: 00:01:57)
+
+- 플레이어 중앙 재장전 안내에 `ui.hud.reload_prompt` 현지화 키를 추가해 한국어 `재장전`, 영어 `Reload`, 일본어 `リロード`로 표시되도록 연결했다.
+- HUD 생성 및 런타임 언어 변경 시 `CenterReloadPromptText`를 현재 인터페이스 언어로 다시 갱신하도록 수정했다.
+- UE 5.7 `TunaSweeperEditor Win64 Development` 및 `TunaSweeper Win64 Development` 빌드의 컴파일과 링크를 모두 통과했다.
+
 ## 2026-08-22 19:37:50 (소요시간: 00:05:11)
 
 - 패키징 출력 구조를 `TunaSweeper/Builds/Steam/Demo`로 변경하고 해당 경로를 Git 추적에서 제외했다.
 - `OnlineSubsystemSteam` 플러그인과 Steam 기본 온라인 서비스를 Win64에서 활성화했으며, 실제 Demo App ID 적용 전 개발 검증용 App ID `480`을 설정했다.
 - STOVE 빌드는 구현하거나 출력 폴더를 만들지 않고 향후 경로 `Builds/Stove/Demo`만 `TunaSweeper/README.md`에 기록했다.
 - UE 5.7 `TunaSweeperEditor Win64 Development`와 `TunaSweeper Win64 Shipping` 빌드, Windows Cook, Stage, Package, Archive를 완료했다. Steam SDK 1.61 로딩을 확인했으며 Shipping 패키지는 `TunaSweeper/Builds/Steam/Demo`에 생성됐다.
+
 ## 2026-08-22 19:43:10 (소요시간: 00:03:07)
 
 - Steam 데모 빌드 구조, Steam 활성화 설정, 프로젝트 README 및 관련 작업 기록만 선별해 기존 작업 트리 변경과 분리된 Git 커밋으로 기록했다.
+
+## 2026-08-22 19:48:15 (소요시간: 00:14:10)
+
+- 동일한 UE 프로젝트에서 Steam 본편과 데모를 분리 패키징하도록 `TunaSweeper`와 `TunaSweeperDemo` Game Target을 구성했다.
+- 타겟별 `CustomConfig`와 전처리 정의를 연결해 본편은 `Full`, `TUNASWEEPER_DEMO=0`, App ID `5137900`을 사용하고 데모는 `Demo`, `TUNASWEEPER_DEMO=1`, App ID `5158070`을 사용하도록 분기했다.
+- 설치형 UE 5.7에서 타겟별 설정 차이를 허용하도록 두 Game Target에 `bOverrideBuildEnvironment=true`를 적용했다.
+- Windows 패키징 스크립트가 `Demo` 또는 `Full` 인수를 받아 대응 타겟을 각각 `Builds/Steam/Demo`와 `Builds/Steam/Full`에 출력하도록 변경했다.
+- 패키징 전 선택된 출력 경로의 생성 폴더 `Windows`만 제거해 이전 타겟 실행 파일이 SteamPipe 업로드 대상에 잔존하지 않도록 했다.
+- `TunaSweeperDemo Win64 Shipping`과 `TunaSweeper Win64 Shipping`의 Build, Cook, Stage, Package, Archive를 모두 완료했다. 데모 PAK에는 App ID `5158070`과 데모 실행 파일만, 본편 PAK에는 App ID `5137900`과 본편 실행 파일만 포함된 것을 확인했다.
+
+## 2026-08-22 21:05:00 (소요시간: 00:03:00)
+
+- `TunaSweeper/Builds/UploadSteamDemo.bat`를 추가해 `store/steamworks/steamid.txt` 첫 줄의 Steam 로그인 계정명을 읽고 Demo App VDF `app_5158070.vdf`를 SteamCMD로 실행하도록 구성했다.
+- Steam 계정 파일은 Git에 포함되지 않도록 명시적으로 제외하고, 패키징 결과물은 계속 무시하면서 업로드 BAT만 Git에서 추적할 수 있도록 ignore 예외를 추가했다.
+- 계정 파일이 없거나 비어 있는 경우 및 SteamCMD나 Demo VDF가 없는 경우 업로드 전에 오류로 종료되도록 검증 로직을 추가했다.
