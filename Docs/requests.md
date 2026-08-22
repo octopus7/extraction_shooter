@@ -6622,3 +6622,7 @@
 - Project Settings의 `TunaSweeper > Distribution Preview`에 `Build Type`(Demo/Full Game)과 `Distribution Channel`(Editor/Steam/STOVE) 선택값을 추가했다.
 - 에디터에서는 두 프리뷰 값을 타이틀 버전 표기와 Steam Demo 위시리스트 버튼 조건에 사용하고, 비에디터 빌드는 기존 타겟 config와 컴파일 정의를 계속 사용하도록 분리했다.
 - `TunaSweeperStove Win64 Development` 빌드를 성공적으로 완료했다. 열려 있는 에디터의 Live Coding 때문에 Editor 타겟 전체 빌드는 실행하지 못했다.
+
+## 2026-08-23 01:27:15 (소요시간: 00:00:18)
+
+- `AGENTS.md`에 사용자의 전체 메시지가 `빌드` 또는 `build`뿐일 때 요청 기록을 남기지 않고 프로젝트 빌드 후 Unreal Editor를 실행하도록 지침을 추가했다.
