@@ -4943,3 +4943,13 @@ Steam Overlay 기본 단축키가 `Shift+Tab`인지와 현재 패키지에서 St
 ### 답변
 
 Steam Overlay 기본 단축키는 `Shift+Tab`이며 사용자 설정에서 변경할 수 있다. 최신 Steam Demo 실행 로그에는 Steam SDK 1.61과 `steam_api64.dll`이 정상 로드됐지만 `SteamAPI` 초기화 조건을 충족하지 못해 App ID 0으로 실패하고 기본 Online Subsystem이 NULL로 대체된 기록이 있다. 확인 시 Steam 클라이언트 프로세스가 실행 중이지 않았으므로, Steam에 로그인한 상태로 클라이언트를 먼저 실행하고 Steam을 통해 게임을 시작해야 한다. 로컬 직접 실행 테스트에서는 실행 파일 옆에 데모 App ID만 담은 `steam_appid.txt`가 필요할 수 있으며 이 파일은 Steam depot에 포함하면 안 된다.
+
+## 2026-08-23 03:55:14 (소요시간: 00:00:07)
+
+### 질문
+
+Steam 타겟 게임을 직접 실행했을 때 Steam 로그인을 유도해야 하는지 문의.
+
+### 답변
+
+맞다. 다만 게임 내부에 Steam 계정 로그인 창을 구현하는 방식은 아니며, `SteamAPI_RestartAppIfNecessary`를 통해 Steam 클라이언트를 실행하고 Steam 경유로 게임을 재시작하면 로그인되지 않은 경우 Steam 클라이언트가 로그인을 처리한다. 현재 프로젝트의 Development용 Steam 설정에는 `bRelaunchInSteam=true`가 없고 Shipping 타겟에도 `UE_PROJECT_STEAMSHIPPINGID`가 정의되어 있지 않아 이 유도 경로가 동작하지 않는다. Steam 데모와 본편 타겟에 각각 올바른 App ID를 사용하도록 두 설정을 보완해야 한다.
