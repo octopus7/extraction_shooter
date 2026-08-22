@@ -1102,6 +1102,8 @@ void ATunaSweeperPlayerController::MoveDialogueCameraToFocusLocation(FVector Foc
 	if (UCameraComponent* CameraComponent = DialogueCameraActor->GetCameraComponent())
 	{
 		CameraComponent->SetFieldOfView(70.0f);
+		CameraComponent->SetAspectRatio(2.0f);
+		CameraComponent->SetConstraintAspectRatio(true);
 	}
 
 	SetViewTargetWithBlend(DialogueCameraActor, FMath::Max(0.0f, BlendSeconds), VTBlend_Cubic);
