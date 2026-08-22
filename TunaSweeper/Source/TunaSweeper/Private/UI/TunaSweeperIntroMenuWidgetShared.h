@@ -1,6 +1,7 @@
 #pragma once
 
 #include "UI/TunaSweeperIntroMenuWidget.h"
+#include "Settings/TunaSweeperDistributionPreviewSettings.h"
 
 #include "Blueprint/WidgetTree.h"
 #include "Components/Border.h"

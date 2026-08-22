@@ -6616,3 +6616,9 @@
 - 프로젝트 버전을 `0.1.0`으로 설정하고, 타이틀 우측 하단이 런타임 설정값을 읽어 `v0.1.0.steam` 또는 `v0.1.0.stove`로 표시되게 변경했다.
 - Steam Demo 타겟에서만 하단 중앙에 현지화된 위시리스트 버튼을 생성했으며, 클릭 함수에는 추후 Steam 스토어 오버레이를 연결할 위치만 TODO 주석으로 남겼다.
 - UE 5.7 `TunaSweeperStove Win64 Development`와 `TunaSweeperDemo Win64 Development` 빌드를 성공적으로 완료하고 Unreal Editor를 실행했다.
+
+## 2026-08-23 01:13:10 (소요시간: 00:06:02)
+
+- Project Settings의 `TunaSweeper > Distribution Preview`에 `Build Type`(Demo/Full Game)과 `Distribution Channel`(Editor/Steam/STOVE) 선택값을 추가했다.
+- 에디터에서는 두 프리뷰 값을 타이틀 버전 표기와 Steam Demo 위시리스트 버튼 조건에 사용하고, 비에디터 빌드는 기존 타겟 config와 컴파일 정의를 계속 사용하도록 분리했다.
+- `TunaSweeperStove Win64 Development` 빌드를 성공적으로 완료했다. 열려 있는 에디터의 Live Coding 때문에 Editor 타겟 전체 빌드는 실행하지 못했다.

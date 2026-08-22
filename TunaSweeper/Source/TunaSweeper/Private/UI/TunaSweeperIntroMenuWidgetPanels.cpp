@@ -13,6 +13,12 @@ namespace TunaSweeperDistribution
 
 FString UTunaSweeperIntroMenuWidget::GetDistributionChannel() const
 {
+#if WITH_EDITOR
+	if (const UTunaSweeperDistributionPreviewSettings* PreviewSettings = GetDefault<UTunaSweeperDistributionPreviewSettings>(); PreviewSettings && PreviewSettings->DistributionChannel != ETunaSweeperPreviewDistributionChannel::Editor)
+	{
+		return PreviewSettings->DistributionChannel == ETunaSweeperPreviewDistributionChannel::Steam ? TEXT("Steam") : TEXT("Stove");
+	}
+#endif
 	FString DistributionChannel(TEXT("Steam"));
 	GConfig->GetString(TunaSweeperDistribution::SectionName, TunaSweeperDistribution::ChannelKey, DistributionChannel, GGameIni);
 	DistributionChannel.TrimStartAndEndInline();
@@ -21,7 +27,10 @@ FString UTunaSweeperIntroMenuWidget::GetDistributionChannel() const
 
 bool UTunaSweeperIntroMenuWidget::IsSteamDemoDistribution() const
 {
-#if TUNASWEEPER_DEMO
+#if WITH_EDITOR
+	const UTunaSweeperDistributionPreviewSettings* PreviewSettings = GetDefault<UTunaSweeperDistributionPreviewSettings>();
+	return PreviewSettings && PreviewSettings->BuildType == ETunaSweeperPreviewBuildType::Demo && GetDistributionChannel().Equals(TEXT("Steam"), ESearchCase::IgnoreCase);
+#elif TUNASWEEPER_DEMO
 	return GetDistributionChannel().Equals(TEXT("Steam"), ESearchCase::IgnoreCase);
 #else
 	return false;
@@ -38,6 +47,11 @@ void UTunaSweeperIntroMenuWidget::RefreshDistributionPresentation()
 	if (UTextBlock* VersionText = Cast<UTextBlock>(WidgetTree->FindWidget(TEXT("VersionText"))))
 	{
 		VersionText->SetText(FText::FromString(FString::Printf(TEXT("v%s.%s"), *ProjectVersion, *GetDistributionChannel().ToLower())));
+	}
+	if (!IsSteamDemoDistribution() && SteamDemoWishlistButton)
+	{
+		SteamDemoWishlistButton->RemoveFromParent();
+		SteamDemoWishlistButton = nullptr;
 	}
 	EnsureSteamDemoWishlistButton();
 }
