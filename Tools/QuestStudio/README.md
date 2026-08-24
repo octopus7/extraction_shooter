@@ -1,7 +1,8 @@
-# Quest Flow Simulator
+# Quest Flow Studio
 
-퀘스트 이동 거리와 플레이 시간을 근사 계산하는 브라우저 시뮬레이션 도구입니다.
+퀘스트 제작·편집·검증·시뮬레이션·릴리스를 한곳에서 수행하는 브라우저 도구입니다.
 
+- 프로젝트 경로: `Tools/QuestStudio`
 - 서비스: https://quest.oc7.workers.dev
 - Worker: `quest`
 - D1: `quest-flow-simulator`
@@ -18,14 +19,25 @@
 두 화면은 같은 catalog 데이터를 읽지만 메인 화면에는 편집, 저장, 게시,
 시뮬레이션 기능을 노출하지 않습니다.
 
-## 로컬 실행
+## 설치 및 로컬 실행
 
 ```powershell
-npm install
+npm ci
 npm run db:migrate:local
 npm run db:seed:local
 npm run dev
 ```
+
+`npm run build`는 클린 클론에서도 필요한 Worker 타입을 먼저 생성한 뒤 시드 생성,
+TypeScript 검사와 프로덕션 번들 생성을 순서대로 수행합니다. 전체 로컬 검증은 다음
+단일 명령을 사용합니다.
+
+```powershell
+npm run verify
+```
+
+이 명령은 프로젝트 계약 테스트, Workers 통합 테스트, 테스트 타입 검사, 타입 생성,
+프로덕션 빌드와 Wrangler dry run을 모두 수행하며 원격 배포는 하지 않습니다.
 
 ## 수동 배포
 
@@ -150,8 +162,8 @@ ADMIN_PASSWORD="로컬에서만-사용할-16자-이상-비밀번호"
 
 ```powershell
 npm test
-npm run test:typecheck
 npm run build
+npm run verify
 ```
 
 Workers 런타임과 로컬 D1에 실제 마이그레이션을 적용해 로그인, 병렬 실패 제한,

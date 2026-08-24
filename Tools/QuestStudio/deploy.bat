@@ -3,7 +3,7 @@ setlocal EnableExtensions
 chcp 65001 >nul
 
 cd /d "%~dp0"
-title Quest Flow Simulator - Cloudflare Deploy
+title Quest Flow Studio - Cloudflare Deploy
 
 set "QUEST_DEPLOY_EXIT=0"
 set "QUEST_DEPLOY_PAUSE=1"
@@ -16,7 +16,7 @@ if /i "%~1"=="--help" goto :usage
 
 echo.
 echo ============================================================
-echo   Quest Flow Simulator - Cloudflare manual deployment
+echo   Quest Flow Studio - Cloudflare manual deployment
 echo ============================================================
 echo   Project : %CD%
 echo   Worker  : quest

@@ -1,4 +1,4 @@
-# Quest Flow Simulator 계획
+# Quest Flow Studio 계획
 
 ## 1. 목적
 

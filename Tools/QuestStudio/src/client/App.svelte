@@ -805,7 +805,7 @@
 />
 
 <svelte:head>
-  <title>{dataset.title} · {isSimulationPage ? "시뮬레이션" : "퀘스트 체인"}</title>
+  <title>Quest Flow Studio · {dataset.title} · {isSimulationPage ? "시뮬레이션" : "퀘스트 체인"}</title>
 </svelte:head>
 
 <main class:pro={mode === "pro"} class:viewer={!isSimulationPage} class="app-shell">
@@ -813,7 +813,7 @@
     <div class="brand">
       <span class="brand-mark">QF</span>
       <div>
-        <strong>Quest Flow</strong>
+        <strong>Quest Flow Studio</strong>
         <small>{selectedCatalog?.datasetVersion ?? "browser simulation"}</small>
       </div>
     </div>

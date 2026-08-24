@@ -1,14 +1,16 @@
 {
-  "name": "tunasweeper-quest-flow-simulator",
+  "name": "tunasweeper-quest-studio",
   "private": true,
   "version": "0.1.0",
-  "description": "Browser-side quest route and playtime simulator backed by Cloudflare Workers and D1.",
+  "description": "Browser-based quest authoring, validation, simulation, and release studio backed by Cloudflare Workers and D1.",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
-    "build": "npm run seed:generate && tsc --noEmit && vite build",
+    "build": "npm run worker:types && npm run seed:generate && tsc --noEmit && vite build",
     "preview": "vite preview --host 127.0.0.1",
-    "test": "vitest run",
-    "test:typecheck": "tsc -p test/tsconfig.json --noEmit",
+    "test": "npm run test:all",
+    "test:all": "npm run test:project && vitest run && npm run test:typecheck",
+    "test:project": "node --test test/project-baseline.node.mjs",
+    "test:typecheck": "npm run worker:types && tsc -p test/tsconfig.json --noEmit",
     "worker:types": "wrangler types worker-configuration.d.ts",
     "seed:generate": "node scripts/generate-seed.mjs",
     "db:migrate:local": "wrangler d1 migrations apply quest-flow-simulator --local",
@@ -22,12 +24,14 @@
     "quest:validate": "node scripts/quest-sync.mjs validate",
     "quest:push": "node scripts/quest-sync.mjs push",
     "quest:token:set": "node scripts/quest-sync.mjs token:set",
+    "verify": "npm run test:all && npm run build && wrangler deploy --dry-run",
     "deploy:dry": "npm run build && wrangler deploy --dry-run",
     "deploy": "npm run build && wrangler deploy"
   },
   "keywords": [
     "cloudflare-workers",
     "d1",
+    "quest-authoring",
     "quest-simulation"
   ],
   "license": "UNLICENSED",
