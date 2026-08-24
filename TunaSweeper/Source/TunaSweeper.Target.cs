@@ -14,6 +14,7 @@ public class TunaSweeperTarget : TargetRules
 		CustomConfig = "Full";
 		GlobalDefinitions.Add("TUNASWEEPER_DEMO=0");
 		GlobalDefinitions.Add("CUSTOM_CONFIG=\"Full\"");
+		GlobalDefinitions.Add("UE_PROJECT_STEAMSHIPPINGID=5137900");
 		ExtraModuleNames.Add("TunaSweeper");
 	}
 }
