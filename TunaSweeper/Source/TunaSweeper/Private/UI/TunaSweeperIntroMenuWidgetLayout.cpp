@@ -278,6 +278,101 @@ void UTunaSweeperIntroMenuWidget::EnsureAlwaysSlowPresentationToggleButton()
 	}
 }
 
+void UTunaSweeperIntroMenuWidget::EnsureSaveDataManagementSection()
+{
+	if (SaveDataManagementSection || !WidgetTree)
+	{
+		return;
+	}
+
+	UVerticalBox* DevelopmentSettingsStack = Cast<UVerticalBox>(DevelopmentSettingsPanel.Get());
+	if (!DevelopmentSettingsStack)
+	{
+		return;
+	}
+
+	UBorder* Section = WidgetTree->ConstructWidget<UBorder>(
+		UBorder::StaticClass(),
+		TEXT("SaveDataManagementSection"));
+	UVerticalBox* SectionStack = WidgetTree->ConstructWidget<UVerticalBox>(
+		UVerticalBox::StaticClass(),
+		TEXT("SaveDataManagementSectionStack"));
+	UTextBlock* TitleText = WidgetTree->ConstructWidget<UTextBlock>(
+		UTextBlock::StaticClass(),
+		TEXT("SaveDataManagementTitleText"));
+	UTextBlock* StatusText = WidgetTree->ConstructWidget<UTextBlock>(
+		UTextBlock::StaticClass(),
+		TEXT("SaveDataManagementStatusText"));
+	USizeBox* DeleteButtonBox = WidgetTree->ConstructWidget<USizeBox>(
+		USizeBox::StaticClass(),
+		TEXT("DeleteCurrentSaveDataButtonBox"));
+	UButton* DeleteButton = WidgetTree->ConstructWidget<UButton>(
+		UButton::StaticClass(),
+		TEXT("DeleteCurrentSaveDataButton"));
+	UTextBlock* DeleteButtonText = WidgetTree->ConstructWidget<UTextBlock>(
+		UTextBlock::StaticClass(),
+		TEXT("DeleteCurrentSaveDataButtonText"));
+	if (!Section || !SectionStack || !TitleText || !StatusText ||
+		!DeleteButtonBox || !DeleteButton || !DeleteButtonText)
+	{
+		return;
+	}
+
+	TitleText->SetText(ResolveUiText(
+		FName(TEXT("ui.settings.development.save_data_title")),
+		FText::FromString(TEXT("세이브 데이터 관리"))));
+	TitleText->SetColorAndOpacity(FSlateColor(FLinearColor(0.72f, 0.80f, 0.78f, 1.0f)));
+	TitleText->SetJustification(ETextJustify::Left);
+	TunaSweeperUIFont::ApplyFont(TitleText, 15, ETunaSweeperUIFontWeight::Bold);
+
+	StatusText->SetAutoWrapText(true);
+	StatusText->SetWrapTextAt(640.0f);
+	StatusText->SetColorAndOpacity(FSlateColor(FLinearColor(0.74f, 0.80f, 0.79f, 1.0f)));
+	StatusText->SetJustification(ETextJustify::Left);
+	TunaSweeperUIFont::ApplyFont(StatusText, 14);
+
+	DeleteButtonText->SetText(ResolveUiText(
+		FName(TEXT("ui.settings.development.delete_current_save")),
+		FText::FromString(TEXT("현재 슬롯 세이브 데이터 즉시 삭제"))));
+	DeleteButtonText->SetColorAndOpacity(FSlateColor(FLinearColor::White));
+	DeleteButtonText->SetJustification(ETextJustify::Center);
+	TunaSweeperUIFont::ApplyFont(DeleteButtonText, 17, ETunaSweeperUIFontWeight::Bold);
+	DeleteButton->SetContent(DeleteButtonText);
+	DeleteButtonBox->SetWidthOverride(660.0f);
+	DeleteButtonBox->SetHeightOverride(46.0f);
+	DeleteButtonBox->SetContent(DeleteButton);
+
+	Section->SetPadding(FMargin(18.0f, 14.0f, 18.0f, 16.0f));
+	Section->SetBrush(TunaSweeperSettingsUi::MakeRoundedBoxBrush(
+		FVector2D(760.0f, 166.0f),
+		FLinearColor(0.045f, 0.020f, 0.020f, 0.72f),
+		FLinearColor(0.64f, 0.24f, 0.22f, 0.62f),
+		1.0f,
+		8.0f));
+	Section->SetContent(SectionStack);
+
+	if (UVerticalBoxSlot* TitleSlot = SectionStack->AddChildToVerticalBox(TitleText))
+	{
+		TitleSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 8.0f));
+	}
+	if (UVerticalBoxSlot* StatusSlot = SectionStack->AddChildToVerticalBox(StatusText))
+	{
+		StatusSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 12.0f));
+	}
+	SectionStack->AddChildToVerticalBox(DeleteButtonBox);
+
+	if (UVerticalBoxSlot* SectionSlot = DevelopmentSettingsStack->AddChildToVerticalBox(Section))
+	{
+		SectionSlot->SetPadding(FMargin(0.0f, 12.0f, 0.0f, 0.0f));
+		SectionSlot->SetHorizontalAlignment(HAlign_Fill);
+	}
+
+	SaveDataManagementSection = Section;
+	SaveDataManagementStatusText = StatusText;
+	DeleteCurrentSaveDataButton = DeleteButton;
+	DeleteCurrentSaveDataButtonText = DeleteButtonText;
+}
+
 void UTunaSweeperIntroMenuWidget::EnsureDevelopmentToggleButtonContent(
 	UButton* ToggleButton,
 	FName LabelWidgetName,

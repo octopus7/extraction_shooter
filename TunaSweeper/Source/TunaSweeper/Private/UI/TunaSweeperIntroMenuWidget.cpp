@@ -6,7 +6,6 @@ void UTunaSweeperIntroMenuWidget::PrepareForInitialViewport()
 	ResetTitleViewportLayoutState();
 	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
 	ApplyTitleMenuButtonContentLayout();
-	EnsureAlwaysNewStartButton();
 	EnsureDifficultySelectionPanel();
 	EnsureDeleteSaveSlotHoldProgressWidget();
 	HideLegacyDeleteHoldGaugeWidgets();
@@ -47,6 +46,7 @@ void UTunaSweeperIntroMenuWidget::NativeConstruct()
 		AlwaysSlowPresentationToggleButton,
 		FName(TEXT("AlwaysSlowPresentationToggleButtonText")),
 		FName(TEXT("AlwaysSlowPresentationToggleIndicator")));
+	EnsureSaveDataManagementSection();
 
 	if (StartButton)
 	{
@@ -79,13 +79,6 @@ void UTunaSweeperIntroMenuWidget::NativeConstruct()
 	}
 
 	RefreshDistributionPresentation();
-
-	EnsureAlwaysNewStartButton();
-	if (AlwaysNewStartButton)
-	{
-		AlwaysNewStartButton->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleAlwaysNewStartClicked);
-		AlwaysNewStartButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleAlwaysNewStartClicked);
-	}
 
 	if (DifficultyFarmingButton)
 	{
@@ -222,6 +215,16 @@ void UTunaSweeperIntroMenuWidget::NativeConstruct()
 		AlwaysSlowPresentationToggleButton->OnClicked.AddDynamic(
 			this,
 			&UTunaSweeperIntroMenuWidget::HandleAlwaysSlowPresentationToggleClicked);
+	}
+
+	if (DeleteCurrentSaveDataButton)
+	{
+		DeleteCurrentSaveDataButton->OnClicked.RemoveDynamic(
+			this,
+			&UTunaSweeperIntroMenuWidget::HandleDeleteCurrentSaveDataClicked);
+		DeleteCurrentSaveDataButton->OnClicked.AddDynamic(
+			this,
+			&UTunaSweeperIntroMenuWidget::HandleDeleteCurrentSaveDataClicked);
 	}
 
 	if (WindowedModeButton)

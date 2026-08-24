@@ -93,12 +93,6 @@ protected:
 	TObjectPtr<UImage> DemoBuildImage;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
-	TObjectPtr<UButton> AlwaysNewStartButton;
-
-	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
-	TObjectPtr<UTextBlock> AlwaysNewStartButtonText;
-
-	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
 	TObjectPtr<UButton> SaveSlot1Button;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
@@ -187,6 +181,18 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
 	TObjectPtr<UButton> AlwaysSlowPresentationToggleButton;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UWidget> SaveDataManagementSection;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTextBlock> SaveDataManagementStatusText;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UButton> DeleteCurrentSaveDataButton;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTextBlock> DeleteCurrentSaveDataButtonText;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
 	TObjectPtr<UButton> WindowedModeButton;
@@ -295,9 +301,6 @@ private:
 	void HandleSteamDemoWishlistClicked();
 
 	UFUNCTION()
-	void HandleAlwaysNewStartClicked();
-
-	UFUNCTION()
 	void HandleDifficultyFarmingClicked();
 
 	UFUNCTION()
@@ -365,6 +368,9 @@ private:
 
 	UFUNCTION()
 	void HandleAlwaysSlowPresentationToggleClicked();
+
+	UFUNCTION()
+	void HandleDeleteCurrentSaveDataClicked();
 
 	UFUNCTION()
 	void HandleWindowedModeClicked();
@@ -495,8 +501,6 @@ private:
 	FText BuildDifficultyTitleText(int32 DifficultyStage) const;
 	FText BuildDifficultyDescriptionText(int32 DifficultyStage) const;
 	UTexture2D* LoadDifficultyTexture(TObjectPtr<UTexture2D>& TextureCache, const TCHAR* TexturePath);
-	void EnsureAlwaysNewStartButton();
-	void SetAlwaysNewStartButtonVisible(bool bVisible);
 	FText BuildCurrentSaveSlotText(int32 SaveSlotIndex) const;
 	FText BuildSaveSlotButtonText(int32 SaveSlotIndex) const;
 	FString BuildCreditsRollText() const;
@@ -528,6 +532,7 @@ private:
 	bool IsSteamDemoDistribution() const;
 	void EnsurePiggyBankToggleButton();
 	void EnsureAlwaysSlowPresentationToggleButton();
+	void EnsureSaveDataManagementSection();
 	void EnsureDevelopmentToggleButtonContent(
 		UButton* ToggleButton,
 		FName LabelWidgetName,
@@ -539,7 +544,7 @@ private:
 		int32 LabelFontSize,
 		int32 IconFontSize);
 	void BeginTravelToLevel(FName TargetLevelName);
-	void BeginStartTravel(bool bAlwaysNewStart);
+	void BeginStartTravel();
 	void ReloadIntroLevel();
 	void OpenPendingStartTargetLevel();
 	void SetStartTravelControlsEnabled(bool bEnabled);
@@ -569,9 +574,6 @@ private:
 	ETunaSweeperItemTextLanguage PendingInterfaceLanguage = ETunaSweeperItemTextLanguage::English;
 	FName PendingStartTargetLevelName = NAME_None;
 	FTimerHandle StartTravelTimerHandle;
-
-	UPROPERTY(Transient)
-	TObjectPtr<UWidget> AlwaysNewStartButtonContainer;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UWidget> DifficultySelectPanel;

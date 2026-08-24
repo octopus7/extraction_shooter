@@ -1,7 +1,7 @@
 #include "TunaSweeperIntroMenuWidgetShared.h"
 #include "Settings/TunaSweeperBuildFlavor.h"
 
-void UTunaSweeperIntroMenuWidget::BeginStartTravel(bool bAlwaysNewStart)
+void UTunaSweeperIntroMenuWidget::BeginStartTravel()
 {
 	if (bStartTravelPending)
 	{
@@ -15,7 +15,7 @@ void UTunaSweeperIntroMenuWidget::BeginStartTravel(bool bAlwaysNewStart)
 		if (TunaSweeperBuildFlavor::IsDemo())
 		{
 			const FTunaSweeperSaveSlotSummary DemoSummary = TunaGameInstance->GetSaveSlotSummary(1);
-			if (!DemoSummary.bHasData || !DemoSummary.bDifficultySelected || bAlwaysNewStart)
+			if (!DemoSummary.bHasData || !DemoSummary.bDifficultySelected)
 			{
 				ShowDifficultySelection();
 				return;
@@ -35,20 +35,10 @@ void UTunaSweeperIntroMenuWidget::BeginStartTravel(bool bAlwaysNewStart)
 		}
 
 		const int32 ActiveSaveSlotIndex = TunaGameInstance->GetActiveSaveSlotIndex();
-		if (bAlwaysNewStart)
+		const FTunaSweeperSaveSlotSummary Summary = TunaGameInstance->GetSaveSlotSummary(ActiveSaveSlotIndex);
+		if (!TunaGameInstance->ActivateSaveSlot(ActiveSaveSlotIndex, !Summary.bHasData))
 		{
-			if (!TunaGameInstance->DeleteSaveSlotAndStartNewGame(ActiveSaveSlotIndex))
-			{
-				return;
-			}
-		}
-		else
-		{
-			const FTunaSweeperSaveSlotSummary Summary = TunaGameInstance->GetSaveSlotSummary(ActiveSaveSlotIndex);
-			if (!TunaGameInstance->ActivateSaveSlot(ActiveSaveSlotIndex, !Summary.bHasData))
-			{
-				return;
-			}
+			return;
 		}
 		if (!TunaGameInstance->IsActiveSaveSlotDifficultySelected())
 		{
@@ -147,7 +137,6 @@ void UTunaSweeperIntroMenuWidget::SetStartTravelControlsEnabled(bool bEnabled)
 		SettingsButton.Get(),
 		CreditsButton.Get(),
 		QuitButton.Get(),
-		AlwaysNewStartButton.Get(),
 		PrimarySaveSlotButton.Get(),
 		DeleteSaveSlotButton.Get(),
 		BackToMainMenuButton.Get(),

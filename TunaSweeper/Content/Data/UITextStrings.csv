@@ -23,7 +23,6 @@ ui.title.settings,설정,Settings,設定
 ui.title.credits,크레딧,Credits,クレジット
 ui.title.quit,종료,Quit,終了
 ui.title.wishlist,위시리스트에 추가,Add to Wishlist,ウィッシュリストに追加
-ui.title.always_new_start,항상새로시작,Always New Start,常に新規開始
 ui.title.primary_save_slot,세이브 슬롯 선택,Select Save Slot,セーブスロット選択
 ui.title.delete_hold,길게 눌러 삭제하기,Hold to Delete,長押しで削除
 ui.title.delete_confirm_title,슬롯 삭제,Delete Slot,スロット削除
@@ -51,6 +50,11 @@ ui.settings.dlss.balanced,균형,Balanced,バランス
 ui.settings.dlss.performance,성능,Performance,パフォーマンス
 ui.settings.dlss.unavailable,사용 불가,Unavailable,使用不可
 ui.settings.language,언어,Language,言語
+ui.settings.development.save_data_title,세이브 데이터 관리,Save Data Management,セーブデータ管理
+ui.settings.development.save_data_exists,현재 슬롯 {0}: 저장 데이터 있음,Current Slot {0}: Save data exists,現在のスロット {0}: セーブデータあり
+ui.settings.development.no_save_data,현재 슬롯 {0}: 저장 데이터 없음,Current Slot {0}: No save data,現在のスロット {0}: セーブデータなし
+ui.settings.development.delete_current_save,현재 슬롯 세이브 데이터 즉시 삭제,Delete Current Slot Save Data Now,現在のスロットのセーブデータを即時削除
+ui.toast.save_delete_failed,저장 데이터를 삭제하지 못했습니다.,Failed to delete save data.,セーブデータを削除できませんでした。
 ui.hud.mode.inventory,인벤토리,Inventory,インベントリ
 ui.hud.mode.quest,퀘스트,Quests,クエスト
 ui.hud.mode.map,지도,Map,地図

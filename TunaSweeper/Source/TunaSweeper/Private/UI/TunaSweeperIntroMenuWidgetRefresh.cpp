@@ -262,6 +262,15 @@ void UTunaSweeperIntroMenuWidget::RefreshDevelopmentSettingsPanel()
 		ATunaSweeperPlayerController::GetDeveloperAlwaysSlowPresentationPreference();
 	const ETunaSweeperDebugDisplayLanguage DebugDisplayLanguage =
 		TunaSweeperDebugDisplaySettings::GetDebugDisplayLanguage();
+	int32 ActiveSaveSlotIndex = 1;
+	bool bHasCurrentSaveData = false;
+	if (const UTunaSweeperGameInstance* TunaGameInstance =
+		Cast<UTunaSweeperGameInstance>(GetGameInstance()))
+	{
+		ActiveSaveSlotIndex = TunaGameInstance->GetActiveSaveSlotIndex();
+		bHasCurrentSaveData =
+			TunaGameInstance->GetSaveSlotSummary(ActiveSaveSlotIndex).bHasData;
+	}
 
 	if (SettingsStatusText)
 	{
@@ -337,6 +346,44 @@ void UTunaSweeperIntroMenuWidget::RefreshDevelopmentSettingsPanel()
 	if (AlwaysSlowPresentationToggleButton)
 	{
 		AlwaysSlowPresentationToggleButton->SetIsEnabled(true);
+	}
+
+	SetNamedText(
+		FName(TEXT("SaveDataManagementTitleText")),
+		ResolveUiText(
+			FName(TEXT("ui.settings.development.save_data_title")),
+			FText::FromString(TEXT("세이브 데이터 관리"))));
+	if (SaveDataManagementStatusText)
+	{
+		SaveDataManagementStatusText->SetText(FText::Format(
+			ResolveUiText(
+				bHasCurrentSaveData
+					? FName(TEXT("ui.settings.development.save_data_exists"))
+					: FName(TEXT("ui.settings.development.no_save_data")),
+				bHasCurrentSaveData
+					? FText::FromString(TEXT("현재 슬롯 {0}: 저장 데이터 있음"))
+					: FText::FromString(TEXT("현재 슬롯 {0}: 저장 데이터 없음"))),
+			FText::AsNumber(ActiveSaveSlotIndex)));
+		SaveDataManagementStatusText->SetColorAndOpacity(FSlateColor(
+			bHasCurrentSaveData
+				? FLinearColor(0.88f, 0.82f, 0.78f, 1.0f)
+				: FLinearColor(0.52f, 0.56f, 0.56f, 1.0f)));
+	}
+	SetNamedText(
+		FName(TEXT("DeleteCurrentSaveDataButtonText")),
+		ResolveUiText(
+			FName(TEXT("ui.settings.development.delete_current_save")),
+			FText::FromString(TEXT("현재 슬롯 세이브 데이터 즉시 삭제"))));
+	if (DeleteCurrentSaveDataButton)
+	{
+		DeleteCurrentSaveDataButton->SetIsEnabled(bHasCurrentSaveData);
+	}
+	if (DeleteCurrentSaveDataButtonText)
+	{
+		DeleteCurrentSaveDataButtonText->SetColorAndOpacity(FSlateColor(
+			bHasCurrentSaveData
+				? FLinearColor::White
+				: FLinearColor(0.46f, 0.48f, 0.48f, 1.0f)));
 	}
 
 	RefreshDevelopmentSelectionStyles();
@@ -462,6 +509,53 @@ void UTunaSweeperIntroMenuWidget::RefreshDevelopmentSelectionStyles()
 		AlwaysSlowPresentationToggleButton,
 		FVector2D(660.0f, 46.0f),
 		bAlwaysSlowPresentationEnabled);
+
+	if (DeleteCurrentSaveDataButton)
+	{
+		const bool bHasCurrentSaveData = [this]()
+		{
+			if (const UTunaSweeperGameInstance* TunaGameInstance =
+				Cast<UTunaSweeperGameInstance>(GetGameInstance()))
+			{
+				return TunaGameInstance->GetSaveSlotSummary(
+					TunaGameInstance->GetActiveSaveSlotIndex()).bHasData;
+			}
+			return false;
+		}();
+
+		const FVector2D ButtonSize(660.0f, 46.0f);
+		const FLinearColor DisabledFill(0.045f, 0.045f, 0.045f, 0.56f);
+		const FLinearColor DisabledOutline(0.24f, 0.25f, 0.25f, 0.48f);
+		FButtonStyle ButtonStyle;
+		ButtonStyle.SetNormal(TunaSweeperSettingsUi::MakeRoundedBoxBrush(
+			ButtonSize,
+			bHasCurrentSaveData ? FLinearColor(0.30f, 0.035f, 0.025f, 0.88f) : DisabledFill,
+			bHasCurrentSaveData ? FLinearColor(0.90f, 0.30f, 0.24f, 0.88f) : DisabledOutline,
+			1.2f,
+			TunaSweeperSettingsUi::ButtonCornerRadius));
+		ButtonStyle.SetHovered(TunaSweeperSettingsUi::MakeRoundedBoxBrush(
+			ButtonSize,
+			FLinearColor(0.46f, 0.055f, 0.038f, 0.96f),
+			FLinearColor(1.0f, 0.44f, 0.34f, 1.0f),
+			1.6f,
+			TunaSweeperSettingsUi::ButtonCornerRadius));
+		ButtonStyle.SetPressed(TunaSweeperSettingsUi::MakeRoundedBoxBrush(
+			ButtonSize,
+			FLinearColor(0.20f, 0.025f, 0.020f, 0.96f),
+			FLinearColor(0.72f, 0.20f, 0.16f, 0.88f),
+			1.0f,
+			TunaSweeperSettingsUi::ButtonCornerRadius));
+		ButtonStyle.SetDisabled(TunaSweeperSettingsUi::MakeRoundedBoxBrush(
+			ButtonSize,
+			DisabledFill,
+			DisabledOutline,
+			1.0f,
+			TunaSweeperSettingsUi::ButtonCornerRadius));
+		ButtonStyle.SetNormalPadding(FMargin(0.0f));
+		ButtonStyle.SetPressedPadding(FMargin(0.0f, 1.0f, 0.0f, 0.0f));
+		DeleteCurrentSaveDataButton->SetStyle(ButtonStyle);
+		DeleteCurrentSaveDataButton->SetClickMethod(EButtonClickMethod::DownAndUp);
+	}
 }
 
 void UTunaSweeperIntroMenuWidget::ApplySettingsChoiceButtonStyle(
@@ -652,12 +746,6 @@ void UTunaSweeperIntroMenuWidget::RefreshLocalizedTexts()
 		FName(TEXT("BackFromCreditsButtonText")),
 		ResolveUiText(FName(TEXT("ui.common.back")), FText::FromString(TEXT("\uB3CC\uC544\uAC00\uAE30"))));
 
-	if (AlwaysNewStartButtonText)
-	{
-		AlwaysNewStartButtonText->SetText(ResolveUiText(
-			FName(TEXT("ui.title.always_new_start")),
-			FText::FromString(TEXT("\uD56D\uC0C1\uC0C8\uB85C\uC2DC\uC791"))));
-	}
 	if (DifficultyTitleText)
 	{
 		DifficultyTitleText->SetText(FText::FromString(

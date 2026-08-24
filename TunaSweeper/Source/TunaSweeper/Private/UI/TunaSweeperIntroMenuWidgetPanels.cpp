@@ -157,7 +157,6 @@ void UTunaSweeperIntroMenuWidget::ShowMainMenu()
 	}
 
 	SelectedSaveSlotIndex = INDEX_NONE;
-	SetAlwaysNewStartButtonVisible(true);
 	RefreshMainMenu();
 	RefreshSaveSlotMenu();
 }
@@ -179,7 +178,6 @@ void UTunaSweeperIntroMenuWidget::ShowDifficultySelection()
 		SaveSlotPanel->SetVisibility(ESlateVisibility::Collapsed);
 	}
 	SetTitleLogoVisible(false);
-	SetAlwaysNewStartButtonVisible(false);
 
 	SelectedDifficultyStage = INDEX_NONE;
 	if (const UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GetGameInstance()))
@@ -259,7 +257,6 @@ void UTunaSweeperIntroMenuWidget::ShowSaveSlotSelection()
 
 	SelectedSaveSlotIndex = INDEX_NONE;
 	SaveSlotSelectionRingAngle = 0.0f;
-	SetAlwaysNewStartButtonVisible(false);
 	RefreshSaveSlotMenu();
 }
 
@@ -291,7 +288,6 @@ void UTunaSweeperIntroMenuWidget::ShowSettingsPanel()
 		SettingsPanel->SetVisibility(ESlateVisibility::Visible);
 	}
 
-	SetAlwaysNewStartButtonVisible(false);
 	if (const UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GetGameInstance()))
 	{
 		PendingInterfaceLanguage = TunaGameInstance->GetCurrentTextLanguage();
@@ -441,7 +437,6 @@ void UTunaSweeperIntroMenuWidget::ShowCreditsPanel()
 	{
 		CreditsPanel->SetVisibility(ESlateVisibility::Visible);
 	}
-	SetAlwaysNewStartButtonVisible(false);
 	if (CreditsScrollBox)
 	{
 		CreditsScrollOffset = 0.0f;

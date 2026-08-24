@@ -6,7 +6,7 @@
 
 void UTunaSweeperIntroMenuWidget::HandleStartClicked()
 {
-	BeginStartTravel(false);
+	BeginStartTravel();
 }
 
 void UTunaSweeperIntroMenuWidget::HandleSlotSelectClicked()
@@ -31,11 +31,6 @@ void UTunaSweeperIntroMenuWidget::HandleCreditsClicked()
 void UTunaSweeperIntroMenuWidget::HandleQuitClicked()
 {
 	UKismetSystemLibrary::QuitGame(this, GetOwningPlayer(), EQuitPreference::Quit, false);
-}
-
-void UTunaSweeperIntroMenuWidget::HandleAlwaysNewStartClicked()
-{
-	BeginStartTravel(true);
 }
 
 void UTunaSweeperIntroMenuWidget::HandleDifficultyFarmingClicked()
@@ -260,6 +255,38 @@ void UTunaSweeperIntroMenuWidget::HandleAlwaysSlowPresentationToggleClicked()
 		}
 	}
 
+	RefreshDevelopmentSettingsPanel();
+}
+
+void UTunaSweeperIntroMenuWidget::HandleDeleteCurrentSaveDataClicked()
+{
+	UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GetGameInstance());
+	if (!TunaGameInstance)
+	{
+		return;
+	}
+
+	const int32 ActiveSaveSlotIndex = TunaGameInstance->GetActiveSaveSlotIndex();
+	if (!TunaGameInstance->GetSaveSlotSummary(ActiveSaveSlotIndex).bHasData)
+	{
+		RefreshDevelopmentSettingsPanel();
+		return;
+	}
+
+	const bool bDeleted = TunaGameInstance->DeleteSaveSlot(ActiveSaveSlotIndex);
+	if (UTunaSweeperToastSubsystem* ToastSubsystem =
+		TunaGameInstance->GetSubsystem<UTunaSweeperToastSubsystem>())
+	{
+		ToastSubsystem->ShowToast(bDeleted
+			? ResolveUiText(
+				FName(TEXT("ui.toast.save_slot_deleted")),
+				FText::FromString(TEXT("삭제 되었습니다")))
+			: ResolveUiText(
+				FName(TEXT("ui.toast.save_delete_failed")),
+				FText::FromString(TEXT("저장 데이터를 삭제하지 못했습니다."))));
+	}
+
+	RefreshMainMenu();
 	RefreshDevelopmentSettingsPanel();
 }
 
