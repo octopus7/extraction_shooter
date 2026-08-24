@@ -268,6 +268,7 @@ FTunaSweeperSaveSlotSummary UTunaSweeperGameInstance::GetSaveSlotSummary(int32 S
 	Summary.TotalPlaySeconds = FMath::Max(0.0f, SaveGame->TotalPlaySeconds);
 	Summary.DifficultyStage = TunaSweeperSave::SanitizeDifficultyStage(SaveGame->DifficultyStage);
 	Summary.bDifficultySelected =
+		TunaSweeperBuildFlavor::IsDemo() ||
 		SaveGame->bDifficultySelected ||
 		SaveGame->CompletedScenarioFlags.Contains(TunaSweeperScenario::OpeningScenarioFlag);
 	Summary.LastSavedAtTicks = SaveGame->LastSavedAtTicks;
@@ -285,11 +286,12 @@ bool UTunaSweeperGameInstance::ActivateSaveSlot(int32 SaveSlotIndex, bool bStart
 	{
 		LoadedSlotTotalPlaySeconds = 0.0f;
 		ActiveSlotStartTimeSeconds = FPlatformTime::Seconds();
-		ActiveSaveSlotDifficultyStage = TunaSweeperBuildFlavor::IsDemo()
-			? 2
-			: TunaSweeperSave::DefaultDifficultyStage;
-		bActiveSaveSlotDifficultySelected = TunaSweeperBuildFlavor::IsDemo();
 		GenerateDefaultInventoryState();
+		if (TunaSweeperBuildFlavor::IsDemo())
+		{
+			ActiveSaveSlotDifficultyStage = 2;
+			bActiveSaveSlotDifficultySelected = true;
+		}
 		bInventoryStateInitialized = true;
 		RefreshLegacyPlayerInventoryItems();
 		const bool bSaved = SaveGameStateInternal(EUsableQuickSlotSaveMode::Clear);
@@ -402,7 +404,10 @@ bool UTunaSweeperGameInstance::LoadGameState()
 	LoadedSlotTotalPlaySeconds = FMath::Max(0.0f, SaveGame->TotalPlaySeconds);
 	ActiveSlotStartTimeSeconds = FPlatformTime::Seconds();
 	ActiveSaveSlotDifficultyStage = TunaSweeperSave::SanitizeDifficultyStage(SaveGame->DifficultyStage);
-	bActiveSaveSlotDifficultySelected = SaveGame->bDifficultySelected;
+	// Demo has no difficulty selection. A compatible Demo slot can only exist after
+	// the player confirms the one-time save-data notice, so treat it as initialized.
+	bActiveSaveSlotDifficultySelected =
+		TunaSweeperBuildFlavor::IsDemo() || SaveGame->bDifficultySelected;
 	TotalExperiencePoints = FMath::Max<int64>(0, SaveGame->TotalExperiencePoints);
 	RaidStartExperiencePoints = TotalExperiencePoints;
 	PendingRaidExperiencePoints = 0;
