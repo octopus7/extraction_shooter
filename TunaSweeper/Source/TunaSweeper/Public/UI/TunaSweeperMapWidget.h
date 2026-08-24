@@ -11,6 +11,7 @@ class UBackgroundBlur;
 class UButton;
 class UCanvasPanel;
 class UImage;
+class UTunaSweeperMapDefinition;
 class UOverlay;
 class USlider;
 class UTextBlock;
@@ -54,6 +55,7 @@ private:
 	void AddOrRemoveMarkerAtLocalPosition(const FVector2D& MapViewportLocalPosition);
 	bool TryGetMapPositionFromLocal(const FVector2D& MapViewportLocalPosition, FVector2D& OutMapPosition) const;
 	FVector2D MapPositionToLocal(const FVector2D& MapPosition) const;
+	FVector2D MapPositionToTextureUV(const FVector2D& MapPosition) const;
 	FVector2D GetMapBaseDrawSize() const;
 	FVector2D GetMapScaledDrawSize() const;
 	FVector2D GetMapDrawTopLeft() const;
@@ -118,6 +120,9 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<UTexture2D> MapTexture;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTunaSweeperMapDefinition> MapDefinition;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UTexture2D> PlayerIconTexture;

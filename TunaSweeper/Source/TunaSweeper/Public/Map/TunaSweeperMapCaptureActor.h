@@ -26,6 +26,10 @@ public:
 	FString GetLastWrittenRgbPngAbsolutePathForEditor() const;
 	FString ResolveImportDestinationPathForEditor() const;
 	FString ResolveImportAssetNameForEditor() const;
+	FVector2D GetCaptureWorldSizeForEditor() const { return CaptureWorldSize; }
+	FIntPoint GetLastContentPixelMinForEditor() const { return LastContentPixelMin; }
+	FIntPoint GetLastContentPixelSizeForEditor() const { return LastContentPixelSize; }
+	void ConfigureCaptureBoundsForEditor(const FVector& Center, const FVector2D& WorldSize, float YawDegrees);
 #endif
 
 	UFUNCTION(CallInEditor, Category = "TunaSweeper|Map Capture")
@@ -83,7 +87,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map Capture|Auto Detect", meta = (EditCondition = "bRequireIncludedActorTag"))
 	TArray<FName> IncludedActorTags;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map Capture|Output", meta = (ClampMin = "256", UIMin = "256", UIMax = "4096"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Map Capture|Output")
 	int32 LongSideResolution = 2048;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Map Capture|Output")
@@ -111,6 +115,12 @@ protected:
 	FIntPoint LastCaptureResolution = FIntPoint::ZeroValue;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Map Capture|Last Result")
+	FIntPoint LastContentPixelMin = FIntPoint::ZeroValue;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Map Capture|Last Result")
+	FIntPoint LastContentPixelSize = FIntPoint::ZeroValue;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Map Capture|Last Result")
 	FString LastWrittenRgbPngAbsolutePath;
 
 private:
@@ -118,7 +128,7 @@ private:
 	bool AutoDetectCaptureBoundsInternal();
 	bool CaptureOpaqueRgbPngInternal();
 	bool IsBoundsHitUsable(const FHitResult& Hit) const;
-	FIntPoint ResolveCaptureResolution() const;
+	FIntRect ResolveContentPixelRect() const;
 	FString ResolveLevelName() const;
 	FString ResolveRgbOutputPath() const;
 	bool WritePngFile(const FString& AbsolutePath, const TArray<FColor>& Pixels, int32 Width, int32 Height) const;

@@ -11,6 +11,8 @@
 - `RaidMap` 배치 액터 라벨: `TS_Editor_MapCapture_Raid`
 - 기본 RGB 출력 경로: `Saved/MapCaptures/{level}_Map_RGB.png`
 - 기본 마스크 경로 메모: `Saved/MapCaptures/{level}_Map_Mask.png`
+- 런타임 지도 메타데이터: `/Game/UI/Map/DA_UIMap_{level}`
+- 런타임 지도 레지스트리: `/Game/UI/Map/DA_UIMapRegistry`
 
 `/Game/EditorOnly`는 `DefaultGame.ini`의 `DirectoriesToNeverCook`에 등록되어 있다. 따라서 이 폴더의 BP나 액터를 런타임 코드가 직접 참조하면 안 된다.
 
@@ -26,8 +28,8 @@
    - `Auto Detect + Capture + Import`: 자동 검출, RGB PNG 저장, UI 텍스처 임포트를 한 번에 실행한다.
 4. 기본 설정이면 다음 파일이 생성된다.
    - `TunaSweeper/Saved/MapCaptures/RaidMap_Map_RGB.png`
-5. 임포트 버튼을 사용하면 같은 이름의 기존 텍스처 에셋은 덮어쓴다.
-6. 이 PNG를 확인하고, 필요하면 바운더리나 해상도를 조정한 뒤 다시 캡처한다.
+5. 임포트 버튼을 사용하면 같은 이름의 기존 텍스처 에셋을 덮어쓰고 지도 메타데이터와 레지스트리도 갱신한다.
+6. 이 PNG를 확인하고, 필요하면 바운더리를 조정한 뒤 다시 캡처한다. 출력 크기는 항상 `2048x2048`이다.
 
 ## 주요 설정
 
@@ -49,7 +51,7 @@
 
 `Map Capture|Output`
 
-- `LongSideResolution`: 긴 변 기준 출력 해상도다. 기본값은 `2048`이다.
+- `LongSideResolution`: 호환성을 위해 노출되는 읽기 전용 값이다. 출력은 항상 `2048x2048`이다.
 - `bAutoDetectBoundsBeforeCapture`: 켜져 있으면 `CaptureOpaqueRgbPng`를 누를 때도 먼저 자동 검출을 실행한다.
 - `RgbPngOutputPath`: RGB PNG 저장 경로다. `{level}`은 현재 레벨 이름으로 치환된다.
 - `MaskPngPath`: 수동 제작할 마스크 PNG 경로를 기록하는 값이다. 현재 액터가 마스크를 자동 생성하지는 않는다.
@@ -64,7 +66,18 @@
 
 - `LastDetectedLocalMin`, `LastDetectedLocalMax`: 마지막 자동 검출 결과의 로컬 바운더리다.
 - `LastCaptureResolution`: 마지막 캡처 출력 해상도다.
+- `LastContentPixelMin`, `LastContentPixelSize`: `2048x2048` 텍스처 안에서 실제 지도가 차지하는 픽셀 사각형이다.
 - `LastWrittenRgbPngAbsolutePath`: 마지막으로 저장된 RGB PNG 절대 경로다.
+
+## 고정 해상도와 여백
+
+캡처 PNG와 임포트 텍스처는 항상 `2048x2048` RGBA로 생성한다. 월드 캡처 영역의 가로세로 비율은 유지하며, 남는 영역은 투명 픽셀로 가운데 정렬한다.
+
+- 가로로 긴 지도: 위·아래에 투명 여백을 둔다.
+- 세로로 긴 지도: 왼쪽·오른쪽에 투명 여백을 둔다.
+- 정사각형 지도: 전체 `2048x2048`을 사용한다.
+
+런타임 좌표 변환은 전체 텍스처가 아니라 메타데이터의 `ContentPixelMin`과 `ContentPixelSize`를 사용한다. 따라서 플레이어와 마커는 투명 여백을 제외한 실제 지도 영역에 맞춰 표시된다.
 
 ## 바운더리 조정 방식
 
@@ -79,7 +92,7 @@
 
 ## 마스크 제작 규칙
 
-현재 캡처 액터는 알파 없는 불투명 RGB PNG만 저장한다. 마스크는 같은 크기의 그레이스케일 PNG를 수동 제작한다.
+현재 캡처 액터는 실제 지도 영역은 불투명하고 비율 보정 여백은 투명한 RGBA PNG를 저장한다. 지형 자체를 별도 형태로 오려내는 마스크가 필요하면 같은 `2048x2048` 크기의 그레이스케일 PNG를 수동 제작한다.
 
 권장 규칙:
 
@@ -98,13 +111,14 @@
 런타임 지도에 쓰려면 다음 절차가 필요하다.
 
 1. 생성된 RGB PNG를 확인한다.
-2. 같은 크기의 마스크 PNG를 만든다.
+2. 지형 외곽 마스크가 필요하면 같은 `2048x2048` 크기의 마스크 PNG를 만든다.
 3. RGB PNG는 Details 패널의 `Capture + Import` 또는 `Auto Detect + Capture + Import` 버튼으로 패키징 대상 콘텐츠 경로에 임포트할 수 있다.
    - 기본 경로: `/Game/UI/Map/T_UIMap_{level}_RGB`
    - 기존 에셋이 있으면 덮어쓴다.
-4. 마스크 PNG는 아직 수동으로 임포트한다.
-5. 런타임 지도 위젯이나 지도 표시 머티리얼이 새 텍스처를 참조하게 바꾼다.
-6. 좌표가 실제 레벨과 맞아야 한다면 캡처 액터의 중심, yaw, `CaptureWorldSize` 값을 런타임 데이터로 별도 보존한다.
+4. `/Game/UI/Map/DA_UIMap_{level}` 메타데이터와 `/Game/UI/Map/DA_UIMapRegistry`가 자동으로 생성 또는 갱신된다.
+5. 마스크 PNG는 아직 수동으로 임포트한다.
+
+메타데이터에는 레벨, 텍스처, 캡처 중심, 월드 크기, yaw, 텍스처 크기, 실제 콘텐츠 픽셀 사각형이 저장된다. `UTunaSweeperMapWidget`은 레지스트리에서 현재 월드의 정의를 찾아 텍스처와 좌표 변환을 자동 적용한다.
 
 주의: 런타임 코드가 `/Game/EditorOnly/MapCapture/BP_Editor_MapCaptureActor`나 `TS_Editor_MapCapture_Raid`를 직접 찾거나 참조하면 안 된다. 이 액터는 제작 도구이고 cooked 빌드에서는 제외된다.
 
@@ -114,13 +128,17 @@
 
 - 소스 PNG: `TunaSweeper/Saved/MapCaptures/RaidMap_Map_RGB.png`
 - 런타임 텍스처: `/Game/UI/Map/T_UIMap_RaidMap_RGB`
+- 메타데이터: `/Game/UI/Map/DA_UIMap_RaidMap`
 - `RaidMap` 월드 바운즈: X `-12700.0` ~ `9700.0`, Y `-13950.0` ~ `10450.0`
+- 콘텐츠 픽셀 사각형: min `(0, 84)`, size `(2048, 1880)`
 
 - 소스 PNG: `TunaSweeper/Saved/MapCaptures/BunkerMap_Map_RGB.png`
 - 런타임 텍스처: `/Game/UI/Map/T_UIMap_BunkerMap_RGB`
+- 메타데이터: `/Game/UI/Map/DA_UIMap_BunkerMap`
 - `BunkerMap` 월드 바운즈: X `-1751.3` ~ `1948.7`, Y `-1787.5` ~ `1912.5`
+- 콘텐츠 픽셀 사각형: min `(0, 0)`, size `(2048, 2048)`
 
-적용 코드는 `UTunaSweeperMapWidget`이다. 신규 레벨 지도는 별도 텍스처와 월드 바운즈를 추가해야 한다.
+적용 코드는 `UTunaSweeperMapWidget`이다. 신규 레벨 지도는 캡처·임포트 시 레지스트리에 자동 등록되므로 위젯 코드를 수정할 필요가 없다.
 
 ## 좌표 매핑 기준
 
@@ -162,6 +180,5 @@
 
 - 마스크 PNG는 자동 생성하지 않는다.
 - 신규 레벨의 생성된 RGB PNG는 버튼으로 UI 텍스처 임포트까지 할 수 있지만, 마스크 임포트는 수동이다.
-- `RaidMap`, `BunkerMap` 외 레벨의 런타임 지도 텍스처 연결은 별도 구현이 필요하다.
 - 런타임 지도 위젯이 캡처 액터를 직접 읽는 구조가 아니다.
 - 마스크 텍스처를 런타임 지도 표시 알파로 적용하는 작업은 별도 구현이 필요하다.

@@ -1,5 +1,7 @@
 #include "Map/TunaSweeperMapCaptureActor.h"
 
+#include "Map/TunaSweeperMapDefinition.h"
+
 #include "Components/BoxComponent.h"
 #include "Components/SceneCaptureComponent2D.h"
 #include "Components/SceneComponent.h"
@@ -22,8 +24,6 @@ namespace TunaSweeperMapCapture
 {
 	constexpr float PreviewHeight = 40.0f;
 	constexpr float CaptureHeight = 12000.0f;
-	constexpr int32 MinLongSideResolution = 256;
-	constexpr int32 MaxLongSideResolution = 8192;
 }
 
 ATunaSweeperMapCaptureActor::ATunaSweeperMapCaptureActor()
@@ -110,6 +110,21 @@ FString ATunaSweeperMapCaptureActor::ResolveImportAssetNameForEditor() const
 	ResolvedName.ReplaceInline(TEXT("{level}"), *ResolveLevelName(), ESearchCase::IgnoreCase);
 	return FPaths::GetBaseFilename(ResolvedName);
 }
+
+void ATunaSweeperMapCaptureActor::ConfigureCaptureBoundsForEditor(
+	const FVector& Center,
+	const FVector2D& WorldSize,
+	float YawDegrees)
+{
+	Modify();
+	SetActorLocation(Center, false, nullptr, ETeleportType::TeleportPhysics);
+	SetActorRotation(FRotator(0.0f, YawDegrees, 0.0f), ETeleportType::TeleportPhysics);
+	CaptureWorldSize = FVector2D(
+		FMath::Max(100.0, WorldSize.X),
+		FMath::Max(100.0, WorldSize.Y));
+	bAutoDetectBoundsBeforeCapture = false;
+	UpdatePreviewComponents();
+}
 #endif
 
 void ATunaSweeperMapCaptureActor::AutoDetectCaptureBounds()
@@ -162,6 +177,7 @@ void ATunaSweeperMapCaptureActor::UpdatePreviewComponents()
 {
 	CaptureWorldSize.X = FMath::Max(100.0, CaptureWorldSize.X);
 	CaptureWorldSize.Y = FMath::Max(100.0, CaptureWorldSize.Y);
+	LongSideResolution = UTunaSweeperMapDefinition::FixedTextureResolution;
 	AutoDetectGridStepCm = FMath::Max(25.0f, AutoDetectGridStepCm);
 	AutoDetectSearchExtent.X = FMath::Max(static_cast<double>(AutoDetectGridStepCm), AutoDetectSearchExtent.X);
 	AutoDetectSearchExtent.Y = FMath::Max(static_cast<double>(AutoDetectGridStepCm), AutoDetectSearchExtent.Y);
@@ -275,8 +291,9 @@ bool ATunaSweeperMapCaptureActor::CaptureOpaqueRgbPngInternal()
 		return false;
 	}
 
-	const FIntPoint Resolution = ResolveCaptureResolution();
-	if (Resolution.X <= 0 || Resolution.Y <= 0)
+	const FIntRect ContentPixelRect = ResolveContentPixelRect();
+	const FIntPoint ContentResolution = ContentPixelRect.Size();
+	if (ContentResolution.X <= 0 || ContentResolution.Y <= 0)
 	{
 		UE_LOG(LogTunaSweeperMapCapture, Warning, TEXT("Map capture failed: invalid resolution."));
 		return false;
@@ -290,9 +307,9 @@ bool ATunaSweeperMapCaptureActor::CaptureOpaqueRgbPngInternal()
 	}
 
 	RenderTarget->RenderTargetFormat = RTF_RGBA8;
-	RenderTarget->ClearColor = FLinearColor::Black;
+	RenderTarget->ClearColor = FLinearColor::Transparent;
 	RenderTarget->bAutoGenerateMips = false;
-	RenderTarget->InitAutoFormat(Resolution.X, Resolution.Y);
+	RenderTarget->InitAutoFormat(ContentResolution.X, ContentResolution.Y);
 	RenderTarget->UpdateResourceImmediate(true);
 
 	UpdatePreviewComponents();
@@ -348,7 +365,7 @@ bool ATunaSweeperMapCaptureActor::CaptureOpaqueRgbPngInternal()
 	}
 
 	TArray<FColor> Pixels;
-	if (!RenderTargetResource->ReadPixels(Pixels) || Pixels.Num() != Resolution.X * Resolution.Y)
+	if (!RenderTargetResource->ReadPixels(Pixels) || Pixels.Num() != ContentResolution.X * ContentResolution.Y)
 	{
 		UE_LOG(LogTunaSweeperMapCapture, Warning, TEXT("Map capture failed: could not read pixels."));
 		CaptureComponent->TextureTarget = nullptr;
@@ -364,8 +381,26 @@ bool ATunaSweeperMapCaptureActor::CaptureOpaqueRgbPngInternal()
 		Pixel.A = 255;
 	}
 
+	constexpr int32 TextureResolution = UTunaSweeperMapDefinition::FixedTextureResolution;
+	TArray<FColor> SquarePixels;
+	SquarePixels.Init(FColor(0, 0, 0, 0), TextureResolution * TextureResolution);
+	for (int32 SourceY = 0; SourceY < ContentResolution.Y; ++SourceY)
+	{
+		const int32 SourceOffset = SourceY * ContentResolution.X;
+		const int32 DestinationOffset =
+			(ContentPixelRect.Min.Y + SourceY) * TextureResolution + ContentPixelRect.Min.X;
+		FMemory::Memcpy(
+			SquarePixels.GetData() + DestinationOffset,
+			Pixels.GetData() + SourceOffset,
+			ContentResolution.X * sizeof(FColor));
+	}
+
 	const FString OutputPath = ResolveRgbOutputPath();
-	const bool bSaved = WritePngFile(OutputPath, Pixels, Resolution.X, Resolution.Y);
+	const bool bSaved = WritePngFile(
+		OutputPath,
+		SquarePixels,
+		TextureResolution,
+		TextureResolution);
 
 	if (!bSaved)
 	{
@@ -373,7 +408,9 @@ bool ATunaSweeperMapCaptureActor::CaptureOpaqueRgbPngInternal()
 		return false;
 	}
 
-	LastCaptureResolution = Resolution;
+	LastCaptureResolution = FIntPoint(TextureResolution, TextureResolution);
+	LastContentPixelMin = ContentPixelRect.Min;
+	LastContentPixelSize = ContentResolution;
 	LastWrittenRgbPngAbsolutePath = OutputPath;
 	Modify();
 
@@ -416,25 +453,9 @@ bool ATunaSweeperMapCaptureActor::IsBoundsHitUsable(const FHitResult& Hit) const
 	return true;
 }
 
-FIntPoint ATunaSweeperMapCaptureActor::ResolveCaptureResolution() const
+FIntRect ATunaSweeperMapCaptureActor::ResolveContentPixelRect() const
 {
-	const int32 ClampedLongSide = FMath::Clamp(
-		LongSideResolution,
-		TunaSweeperMapCapture::MinLongSideResolution,
-		TunaSweeperMapCapture::MaxLongSideResolution);
-	const double SizeX = FMath::Max(1.0, CaptureWorldSize.X);
-	const double SizeY = FMath::Max(1.0, CaptureWorldSize.Y);
-
-	if (SizeX >= SizeY)
-	{
-		return FIntPoint(
-			FMath::Max(1, FMath::RoundToInt(ClampedLongSide * SizeY / SizeX)),
-			ClampedLongSide);
-	}
-
-	return FIntPoint(
-		ClampedLongSide,
-		FMath::Max(1, FMath::RoundToInt(ClampedLongSide * SizeX / SizeY)));
+	return UTunaSweeperMapDefinition::CalculateCenteredContentRect(CaptureWorldSize);
 }
 
 FString ATunaSweeperMapCaptureActor::ResolveRgbOutputPath() const

@@ -1,15 +1,20 @@
 #include "TunaSweeperMapCaptureActorDetails.h"
 
 #include "AssetToolsModule.h"
+#include "AssetRegistry/AssetRegistryModule.h"
 #include "AutomatedAssetImportData.h"
 #include "DetailCategoryBuilder.h"
 #include "DetailLayoutBuilder.h"
 #include "DetailWidgetRow.h"
 #include "Editor.h"
 #include "Engine/Texture2D.h"
+#include "Engine/World.h"
+#include "EngineUtils.h"
 #include "HAL/FileManager.h"
+#include "HAL/IConsoleManager.h"
 #include "IDetailCustomization.h"
 #include "Map/TunaSweeperMapCaptureActor.h"
+#include "Map/TunaSweeperMapDefinition.h"
 #include "Misc/PackageName.h"
 #include "Misc/Paths.h"
 #include "Modules/ModuleManager.h"
@@ -29,6 +34,7 @@ namespace
 {
 	const FName MapCaptureActorClassName(TEXT("TunaSweeperMapCaptureActor"));
 	const FString DefaultMapTextureDestinationPath = TEXT("/Game/UI/Map");
+	const FString MapRegistryAssetName = TEXT("DA_UIMapRegistry");
 
 	enum class EMapCaptureDetailAction : uint8
 	{
@@ -69,25 +75,125 @@ namespace
 		return UPackage::SavePackage(Package, Asset, *PackageFileName, SaveArgs);
 	}
 
-	void ConfigureImportedMapTexture(UTexture2D* Texture)
+	bool ConfigureImportedMapTexture(UTexture2D* Texture)
 	{
 		if (!Texture)
 		{
-			return;
+			return false;
 		}
 
 		Texture->Modify();
-		Texture->CompressionSettings = TC_EditorIcon;
-		Texture->MipGenSettings = TMGS_NoMipmaps;
+		Texture->CompressionSettings = TC_BC7;
+		Texture->MipGenSettings = TMGS_SimpleAverage;
 		Texture->LODGroup = TEXTUREGROUP_UI;
 		Texture->SRGB = true;
+		Texture->AddressX = TA_Clamp;
+		Texture->AddressY = TA_Clamp;
+		Texture->Filter = TF_Bilinear;
 		Texture->UpdateResource();
 		Texture->PostEditChange();
 		Texture->MarkPackageDirty();
-		SaveAsset(Texture);
+		return SaveAsset(Texture);
 	}
 
-	bool ImportMapTexture(const FString& InSourceFile, const FString& InDestinationPath, const FString& InAssetName)
+	template <typename AssetType>
+	AssetType* CreateOrLoadDataAsset(const FString& AssetPath, const FString& AssetName)
+	{
+		const FString ObjectPath = GetAssetObjectPath(AssetPath, AssetName);
+		if (AssetType* ExistingAsset = LoadObject<AssetType>(nullptr, *ObjectPath))
+		{
+			return ExistingAsset;
+		}
+
+		const FString PackageName = FString::Printf(TEXT("%s/%s"), *AssetPath, *AssetName);
+		UPackage* Package = CreatePackage(*PackageName);
+		if (!Package)
+		{
+			return nullptr;
+		}
+
+		AssetType* NewAsset = NewObject<AssetType>(
+			Package,
+			*AssetName,
+			RF_Public | RF_Standalone | RF_Transactional);
+		if (NewAsset)
+		{
+			FAssetRegistryModule::AssetCreated(NewAsset);
+		}
+		return NewAsset;
+	}
+
+	bool SaveMapMetadata(ATunaSweeperMapCaptureActor& Actor, UTexture2D* Texture, const FString& DestinationPath)
+	{
+		UWorld* World = Actor.GetWorld();
+		if (!World || !Texture)
+		{
+			return false;
+		}
+
+		const FString LevelName = FPackageName::GetShortName(World->GetOutermost()->GetName());
+		const FString DefinitionAssetName = FString::Printf(TEXT("DA_UIMap_%s"), *LevelName);
+		UTunaSweeperMapDefinition* Definition =
+			CreateOrLoadDataAsset<UTunaSweeperMapDefinition>(DestinationPath, DefinitionAssetName);
+		UTunaSweeperMapRegistry* Registry =
+			CreateOrLoadDataAsset<UTunaSweeperMapRegistry>(DefaultMapTextureDestinationPath, MapRegistryAssetName);
+		if (!Definition || !Registry)
+		{
+			UE_LOG(LogTunaSweeperMapCaptureDetails, Error, TEXT("Failed to create map metadata assets for %s."), *LevelName);
+			return false;
+		}
+
+		Definition->Modify();
+		Definition->DefinitionVersion = UTunaSweeperMapDefinition::CurrentDefinitionVersion;
+		Definition->MapId = FName(*LevelName);
+		Definition->World = TSoftObjectPtr<UWorld>(World);
+		Definition->Texture = TSoftObjectPtr<UTexture2D>(Texture);
+		Definition->CaptureCenter = Actor.GetActorLocation();
+		Definition->CaptureWorldSize = Actor.GetCaptureWorldSizeForEditor();
+		Definition->CaptureYawDegrees = Actor.GetActorRotation().Yaw;
+		Definition->TextureSize = FIntPoint(
+			UTunaSweeperMapDefinition::FixedTextureResolution,
+			UTunaSweeperMapDefinition::FixedTextureResolution);
+		Definition->ContentPixelMin = Actor.GetLastContentPixelMinForEditor();
+		Definition->ContentPixelSize = Actor.GetLastContentPixelSizeForEditor();
+		Definition->MarkPackageDirty();
+
+		if (!Definition->IsValidDefinition())
+		{
+			UE_LOG(LogTunaSweeperMapCaptureDetails, Error, TEXT("Generated invalid map metadata for %s."), *LevelName);
+			return false;
+		}
+
+		Registry->Modify();
+		Registry->Definitions.RemoveAll([Definition](const UTunaSweeperMapDefinition* Entry)
+		{
+			return !Entry || (Entry != Definition && Entry->MapId == Definition->MapId);
+		});
+		Registry->Definitions.AddUnique(Definition);
+		Registry->MarkPackageDirty();
+
+		if (!SaveAsset(Definition) || !SaveAsset(Registry))
+		{
+			UE_LOG(LogTunaSweeperMapCaptureDetails, Error, TEXT("Failed to save map metadata for %s."), *LevelName);
+			return false;
+		}
+
+		UE_LOG(
+			LogTunaSweeperMapCaptureDetails,
+			Display,
+			TEXT("Saved map metadata: %s/%s (content min=%s size=%s)."),
+			*DestinationPath,
+			*DefinitionAssetName,
+			*Definition->ContentPixelMin.ToString(),
+			*Definition->ContentPixelSize.ToString());
+		return true;
+	}
+
+	bool ImportMapTexture(
+		ATunaSweeperMapCaptureActor& Actor,
+		const FString& InSourceFile,
+		const FString& InDestinationPath,
+		const FString& InAssetName)
 	{
 		FString SourceFile = InSourceFile;
 		FPaths::NormalizeFilename(SourceFile);
@@ -156,15 +262,51 @@ namespace
 			return false;
 		}
 
+		UTexture2D* ImportedTexture = nullptr;
+		for (UObject* ImportedAsset : ImportedAssets)
+		{
+			if (UTexture2D* ImportedTextureCandidate = Cast<UTexture2D>(ImportedAsset))
+			{
+				ImportedTexture = ImportedTextureCandidate;
+				break;
+			}
+		}
+
 		const FString ObjectPath = GetAssetObjectPath(DestinationPath, AssetName);
-		UTexture2D* ImportedTexture = LoadObject<UTexture2D>(nullptr, *ObjectPath);
+		if (!ImportedTexture)
+		{
+			ImportedTexture = LoadObject<UTexture2D>(nullptr, *ObjectPath);
+		}
 		if (!ImportedTexture)
 		{
 			UE_LOG(LogTunaSweeperMapCaptureDetails, Error, TEXT("Failed to load captured map texture: %s"), *ObjectPath);
 			return false;
 		}
 
-		ConfigureImportedMapTexture(ImportedTexture);
+		if (ImportedTexture->GetSizeX() != UTunaSweeperMapDefinition::FixedTextureResolution ||
+			ImportedTexture->GetSizeY() != UTunaSweeperMapDefinition::FixedTextureResolution)
+		{
+			UE_LOG(
+				LogTunaSweeperMapCaptureDetails,
+				Error,
+				TEXT("Captured map texture is not 2048x2048: %s (%dx%d)"),
+				*ObjectPath,
+				ImportedTexture->GetSizeX(),
+				ImportedTexture->GetSizeY());
+			return false;
+		}
+
+		if (!ConfigureImportedMapTexture(ImportedTexture))
+		{
+			UE_LOG(LogTunaSweeperMapCaptureDetails, Error, TEXT("Failed to save captured map texture: %s"), *ObjectPath);
+			return false;
+		}
+
+		if (!SaveMapMetadata(Actor, ImportedTexture, DestinationPath))
+		{
+			return false;
+		}
+
 		UE_LOG(LogTunaSweeperMapCaptureDetails, Display, TEXT("Imported captured map texture: %s"), *ObjectPath);
 		return true;
 	}
@@ -172,10 +314,96 @@ namespace
 	bool ImportLastCapturedMapTexture(ATunaSweeperMapCaptureActor& Actor)
 	{
 		return ImportMapTexture(
+			Actor,
 			Actor.GetLastWrittenRgbPngAbsolutePathForEditor(),
 			Actor.ResolveImportDestinationPathForEditor(),
 			Actor.ResolveImportAssetNameForEditor());
 	}
+
+	void GenerateMapAssetsFromConsole(const TArray<FString>& Args, UWorld* World)
+	{
+		if (Args.Num() != 5)
+		{
+			UE_LOG(
+				LogTunaSweeperMapCaptureDetails,
+				Error,
+				TEXT("Usage: TunaSweeper.MapCapture.Generate CenterX CenterY SizeX SizeY Yaw"));
+			return;
+		}
+
+		if (!World)
+		{
+			UE_LOG(LogTunaSweeperMapCaptureDetails, Error, TEXT("Map capture console command has no editor world."));
+			return;
+		}
+
+		ATunaSweeperMapCaptureActor* CaptureActor = nullptr;
+		for (TActorIterator<ATunaSweeperMapCaptureActor> It(World); It; ++It)
+		{
+			CaptureActor = *It;
+			break;
+		}
+
+		if (!CaptureActor)
+		{
+			FActorSpawnParameters SpawnParameters;
+			SpawnParameters.ObjectFlags |= RF_Transient;
+			SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+			CaptureActor = World->SpawnActor<ATunaSweeperMapCaptureActor>(
+				FVector::ZeroVector,
+				FRotator::ZeroRotator,
+				SpawnParameters);
+		}
+
+		if (!CaptureActor)
+		{
+			UE_LOG(LogTunaSweeperMapCaptureDetails, Error, TEXT("Failed to create map capture actor."));
+			return;
+		}
+
+		const FVector Center(
+			FCString::Atod(*Args[0]),
+			FCString::Atod(*Args[1]),
+			CaptureActor->GetActorLocation().Z);
+		const FVector2D WorldSize(
+			FCString::Atod(*Args[2]),
+			FCString::Atod(*Args[3]));
+		const float YawDegrees = FCString::Atof(*Args[4]);
+		CaptureActor->ConfigureCaptureBoundsForEditor(Center, WorldSize, YawDegrees);
+
+		const bool bSucceeded =
+			CaptureActor->RunCaptureOpaqueRgbPngForEditor() &&
+			ImportLastCapturedMapTexture(*CaptureActor);
+		if (bSucceeded)
+		{
+			UE_LOG(
+				LogTunaSweeperMapCaptureDetails,
+				Display,
+				TEXT("Map capture console generation succeeded for %s."),
+				*World->GetOutermost()->GetName());
+		}
+		else
+		{
+			UE_LOG(
+				LogTunaSweeperMapCaptureDetails,
+				Error,
+				TEXT("Map capture console generation failed for %s."),
+				*World->GetOutermost()->GetName());
+		}
+
+		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperMapCaptureQuit")))
+		{
+			FPlatformMisc::RequestExitWithStatus(
+				false,
+				bSucceeded ? 0 : 1,
+				TEXT("TunaSweeperMapCaptureGenerate"));
+		}
+	}
+
+	FAutoConsoleCommandWithWorldAndArgs GenerateMapAssetsConsoleCommand(
+		TEXT("TunaSweeper.MapCapture.Generate"),
+		TEXT("Generate the current world's fixed 2048 map texture and metadata. Args: CenterX CenterY SizeX SizeY Yaw"),
+		FConsoleCommandWithWorldAndArgsDelegate::CreateStatic(&GenerateMapAssetsFromConsole));
 
 	FText GetActionTransactionText(EMapCaptureDetailAction Action)
 	{
