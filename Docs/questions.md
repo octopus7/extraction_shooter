@@ -4953,3 +4953,13 @@ Steam 타겟 게임을 직접 실행했을 때 Steam 로그인을 유도해야 �
 ### 답변
 
 맞다. 다만 게임 내부에 Steam 계정 로그인 창을 구현하는 방식은 아니며, `SteamAPI_RestartAppIfNecessary`를 통해 Steam 클라이언트를 실행하고 Steam 경유로 게임을 재시작하면 로그인되지 않은 경우 Steam 클라이언트가 로그인을 처리한다. 현재 프로젝트의 Development용 Steam 설정에는 `bRelaunchInSteam=true`가 없고 Shipping 타겟에도 `UE_PROJECT_STEAMSHIPPINGID`가 정의되어 있지 않아 이 유도 경로가 동작하지 않는다. Steam 데모와 본편 타겟에 각각 올바른 App ID를 사용하도록 두 설정을 보완해야 한다.
+
+## 2026-08-24 18:13:00 (소요시간: 00:16:43)
+
+### 질문
+
+기능이 퀘스트 흐름 시뮬레이션을 넘어 편집·저장·게시·동기화로 확장된 웹 도구에 어울리는 새 이름을 문의.
+
+### 답변
+
+기존 `Quest Flow` 정체성을 유지하면서 제작·편집·검증·시뮬레이션·릴리스 기능을 함께 포괄하는 공식 명칭으로 `Quest Flow Studio`를 추천했다. 화면 공간이 좁을 때는 `Quest Studio`, 프로젝트 경로는 `Tools/QuestStudio`로 사용하는 구성을 제안했다.
