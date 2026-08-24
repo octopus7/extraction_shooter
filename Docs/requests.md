@@ -6720,6 +6720,13 @@
 - 출력 폴더 정리와 함께 UAT `-clean` 옵션을 적용하며, `Packaging`을 끄면 `Clean`과 `Run`도 함께 꺼지도록 구성했다.
 - UE 5.7 `TunaSweeperEditor Win64 Development` 빌드를 성공적으로 완료했다.
 
+## 2026-08-23 04:00:02 (소요시간: 00:04:00)
+
+- Steam 데모와 본편의 Custom Engine 설정에 `bRelaunchInSteam=true`를 추가했다.
+- 각 Steam 게임 타깃에 해당 App ID의 `UE_PROJECT_STEAMSHIPPINGID` 전역 정의를 추가했다. 본편은 `5137900`, 데모는 `5158070`을 사용한다.
+- UE 5.7 `TunaSweeperDemo Win64 Shipping` 및 `TunaSweeper Win64 Shipping` 컴파일을 모두 성공적으로 완료했다.
+- Unreal Editor가 이미 실행 중인 것을 확인했다.
+
 ## 2026-08-24 13:58:00 (소요시간: 00:26:00)
 
 - 새 데모 구성을 위해 공개 `QuestDefinitions.json`의 기존 퀘스트 5건과 퀘스트 콘텐츠 문자열 42행을 제거하고, 공용 `quest.ui.*` 문자열 26행은 보존했다.
@@ -6729,6 +6736,12 @@
 - 공개 제거 목록 `Docs/demo_runtime_data_cleanup_2026-08-24.md`와 재사용 안내서 `Docs/quest_and_runtime_actor_data_authoring_guide.md`를 별도로 작성하고 기존 퀘스트/스폰 문서에 현재 빈 상태 안내를 추가했다.
 - JSON/CSV 정적 검사와 데모 데이터셋 `VerifyOnly`, UE 5.7 `TunaSweeperEditor Win64 Development` 빌드, `TunaSweeper.QuestDataset.ActiveData` 자동화 테스트를 통과했다.
 - 검증 후 `TunaSweeper/TunaSweeper.uproject`를 Unreal Editor로 실행했다.
+
+## 2026-08-24 14:31:00 (소요시간: 00:02:17)
+
+- 세이브 버전을 20으로 올리고 버전 19 이하 게임 세이브를 발견하면 자동 삭제한 뒤 영문 텍스트 로그에 삭제 시각과 파일을 남기는 구현 계획을 수립했다.
+- 계획상 로그 파일명은 `AutoDeletedSaveLog.txt`로 정하고, `Saved/SaveGames` 아래의 실제 게임 세이브와 백업을 검사하되 세이브 설정 파일·판독 불가 파일·미래 버전 파일은 자동 삭제 대상에서 제외했다.
+- 이번 요청에 따라 코드와 프로젝트 문서는 변경하지 않고 계획만 작성했다.
 
 ## 2026-08-24 14:36:30 (소요시간: 00:05:00)
 
@@ -6767,6 +6780,19 @@
 - Main 패키징 직전 검증·임시 staging·종료 후 정리와 Demo 패키징 전후 Main 데이터 혼입 차단을 PowerShell, Steam/STOVE 배치, 에디터 Build Target 패키징에 연결했다.
 - Main staging 구성과 Demo 안전 검사를 통과했고 UE 5.7 `TunaSweeperEditor`, `TunaSweeperDemo`, `TunaSweeper` Win64 Development 빌드 및 BuildFlavor/세이브 자동화 테스트 3개를 성공적으로 완료했다.
 
+## 2026-08-24 16:31:47 (소요시간: 00:04:20)
+
+- `Tools/QuestFlowSimulator`의 생성 카탈로그를 Demo와 Main(M01~M20) 두 종류로 한정하고, 원 프로젝트의 현재 구현 JSON/CSV를 읽어 만들던 `runtime-snapshot` 카탈로그 생성 코드와 생성 JSON을 제거했다.
+- 기존 D1의 `runtime-snapshot` 카탈로그와 연결 작업공간을 다음 마이그레이션 시 제거하는 `0003_remove_runtime_snapshot.sql`을 추가하고 README 및 계획 문서를 현재 구조에 맞게 갱신했다.
+- 생성 카탈로그 계약 테스트를 추가했으며 테스트 13개, 테스트 타입 검사, 프로덕션 빌드, 로컬 D1 migration·seed를 통과했다. 로컬 D1에는 `demo`, `main-m01-m20` 두 카탈로그만 남는 것을 조회로 확인했다.
+- 검증된 Quest Flow Simulator 변경 6개 파일만 `c8d4fbf`(`Remove runtime quest snapshot catalog`)로 커밋했으며, 원격 push와 Wrangler 배포는 수행하지 않았다.
+
+## 2026-08-24 16:38:13 (소요시간: 00:02:00)
+
+- `main`의 검증된 커밋 2개를 `origin/main`에 push한 뒤 `Tools/QuestFlowSimulator/deploy.bat --no-pause`로 Wrangler 수동 배포를 수행했다.
+- 프로덕션 빌드와 Wrangler dry run을 통과하고 원격 D1에 `0003_remove_runtime_snapshot.sql`을 적용한 뒤 Demo/Main seed를 반영했다.
+- Worker `quest` 배포가 버전 `8ff239ab-19f8-4162-92e6-765de934e149`로 성공했으며, 배포 후 읽기 전용 D1 조회에서 `demo`와 `main-m01-m20` 두 카탈로그만 확인했다.
+
 ## 2026-08-24 16:34:32 (소요시간: 00:24:48)
 
 - 타이틀 화면의 데모 전용 노란 띠를 제거하고, 원본 로고의 물고기 픽셀을 그대로 78×45 투명 PNG로 정밀 크롭해 데모 전용 두 번째 물고기 표식으로 교체했다.
@@ -6776,7 +6802,37 @@
 - 첫 빌드는 실행 중인 Unreal Editor의 DLL 점유 때문에 링크가 차단됐으나 사용자가 에디터를 닫은 뒤 UE 5.7 `TunaSweeperEditor Win64 Development` 최종 빌드와 두 DLL 링크를 성공시켰다.
 - 사용자가 실제 타이틀 화면에서 물고기 두 마리가 정상 표시되는 것을 확인했으며 요청에 따라 추가 자동 화면 테스트는 생략했다.
 
+## 2026-08-24 16:54:00 (소요시간: 00:03:40)
+
+- Quest Flow Simulator를 Demo/Main 양방향 퀘스트 에디터로 전환하고 Codex 로컬 편집과 D1 역발행을 지원하기 위한 구현 계획을 수립했다.
+- 현재 웹의 시뮬레이션 데이터 모델과 UE 런타임 퀘스트 정의 스키마가 다름을 확인해 canonical authoring pack 정의를 최우선 단계로 두고, D1 immutable release·current channel·충돌 검사, 전용 sync API·CLI, 배포/seed 분리, 기존 데이터 cutover 순서로 계획했다.
+- 이번 요청에서는 코드, D1, Worker 배포 상태를 변경하지 않았다.
+
 ## 2026-08-24 17:00:12 (소요시간: 00:02:00)
 
 - 데모 타이틀의 두 번째 물고기 표식 구현에 해당하는 소스 3개, 원본 PNG, UE 텍스처 애셋과 관련 작업 기록만 선별해 커밋했다.
 - 기존 작업공간의 다른 수정·신규 파일은 스테이징하거나 커밋하지 않았다.
+
+## 2026-08-24 17:01:57 (소요시간: 00:29:03)
+
+- Quest Flow Simulator에 런타임 퀘스트·문자열과 웹 편집 오버레이를 한 버전으로 묶는 canonical authoring pack, 불변 D1 릴리스·현재 채널·범위 제한 동기화 토큰·게시 감사 로그를 구현했다.
+- 웹 작업공간과 Codex CLI 게시 모두 기준 `datasetVersion`을 검사해 오래된 작업 사본의 덮어쓰기를 차단하고, `status/pull/validate/push` CLI와 Windows DPAPI 토큰 저장 흐름을 추가했다.
+- 초기 D1 런타임 payload가 비어 있는 동안 로컬 JSON/CSV를 첫 `pull`이 덮어쓰지 않도록 `bootstrap-required` 판정과 명시적 `quest:bootstrap` 게시 경로를 추가했다.
+- 일반 Wrangler 배포에서 콘텐츠 seed를 제거하고 초기 설치·복구용 bootstrap 명령으로 분리했으며, 기존 Demo/Main 카탈로그는 마이그레이션에서 초기 릴리스로 보존했다.
+- 테스트 18개, 테스트 타입 검사, Demo pack 검증, 프로덕션 빌드, Wrangler dry run과 Worker 시작 프로파일을 통과했다.
+- 검증된 소스를 `122b653`, `74296b0`으로 커밋해 `origin/main`에 push하고 원격 D1 `0004_quest_release_sync.sql` 적용 후 최종 Worker 버전 `934c4d62-a129-4065-8441-4f381ef8b0a0`을 배포했다.
+- 배포 후 읽기 전용 점검에서 Demo/Main 현재 채널과 릴리스 2개, 공개 catalog 1개, 익명 Main sync 요청의 404 경계를 확인했다.
+
+## 2026-08-24 17:39:39 (소요시간: 00:12:00)
+
+- Quest Flow Simulator의 메인 경로를 퀘스트 체인 그래프와 선택한 퀘스트 내용을 보여 주는 읽기 전용 뷰어로 분리하고, 편집·저장·게시·시뮬레이션 조작을 노출하지 않도록 변경했다.
+- 장소 이동, 동선·시간 설정, 반복 계산과 기존 편집 기능은 독립 경로 `/simulation`으로 이동했으며 두 화면은 같은 catalog 데이터를 사용하도록 유지했다.
+- 경로 판정 테스트를 추가하고 테스트 20개, 테스트 타입 검사, 프로덕션 빌드, Wrangler dry run과 Worker 시작 프로파일을 통과했으며 로컬·배포 화면에서 두 경로와 콘솔 오류 유무를 확인했다.
+- 검증된 변경 6개 파일만 `e859514`(`Split quest viewer from simulation`)로 커밋해 `origin/main`에 push하고, D1 변경 없이 Worker 버전 `af27f84c-e143-4873-94ba-91d48032866a`을 Wrangler로 배포했다.
+
+## 2026-08-24 18:03:52 (소요시간: 00:08:00)
+
+- 로그인 상태의 독립 `Codex 토큰`과 `로그아웃` 버튼을 제거하고 `관리자` 버튼을 누르면 두 동작이 나타나는 하위 드롭다운 메뉴로 재구성했다.
+- 메뉴는 바깥 클릭과 Escape 키로 닫히고 현재 열림 상태를 `aria-expanded`, 하위 영역을 `menu`/`menuitem`으로 노출하도록 구현했다.
+- 임시 로컬 테스트 비밀번호로 실제 로그인 상태의 메뉴 열림·닫힘과 배치를 확인했으며 해당 값은 프로세스 환경변수로만 사용하고 개발 서버 종료와 함께 폐기했다. 저장소와 `.dev.vars`에는 기록하지 않았다.
+- 프로덕션 빌드, 테스트 20개, 테스트 타입 검사와 Wrangler dry run을 통과한 UI 소스 2개만 `3430390`(`Move sync token into admin menu`)으로 커밋해 `origin/main`에 push하고, D1 변경 없이 Worker 버전 `9d26114d-521f-40c2-9772-c27b583e169e`을 배포했다.
