@@ -2,16 +2,16 @@
 
 ## 문서 상태
 
-이 문서는 초기 단일 플러그인 공개/접근제한 저장소 분리 계획을 TunaSweeper에 실제 적용한 현재 구현 문서다. 일반화된 `Private` 모드 대신 프로젝트에서 확정한 `Public`, `ProductionDemo`, `ProductionRelease` 명칭을 사용한다.
+이 문서는 초기 단일 플러그인 공개/접근제한 저장소 분리 계획을 TunaSweeper에 실제 적용한 현재 구현 문서다. 데이터셋 전환 명칭은 `Public`, `Production` 두 가지다.
 
 현재 구현 범위:
 
-- 공개 플러그인과 3종 데이터셋 선택 로직
+- 공개 플러그인과 2종 데이터셋 선택 로직
 - 별도 `ProductionPayload` Git 저장소
 - 프로덕션 데이터 검증·동기화 스크립트
 - 공개 저장소 누출 검사
 - 데이터셋별 전체 세이브 namespace 분리
-- 프로덕션 데모·정식 예시 3연퀘
+- 프로덕션 예시 3연퀘
 - `TunaSweeper` 에디터 메뉴 전환 UI
 - 플레이·Cook·Build 중 전환 차단과 재시작 안내
 - 데이터셋 자동화 테스트
@@ -21,8 +21,7 @@
 | 전환 값 | 데이터셋 ID | 세이브 namespace | 퀘스트 원본 |
 |---|---|---|---|
 | `Public` | `public` | 기존 공개 슬롯 | 공개 저장소 `Content/Data` |
-| `ProductionDemo` | `production_demo` | `ProductionDemo` | 별도 `ProductionPayload` 저장소 |
-| `ProductionRelease` | `production_release` | `ProductionRelease` | 별도 `ProductionPayload` 저장소 |
+| `Production` | `production` | `Production` | 별도 `ProductionPayload` 저장소 |
 
 저장소 접근 권한과 런타임 데이터셋 이름은 서로 다른 개념이다. 별도 저장소는 접근 제한으로 운영하지만 코드·스크립트·로그·세이브에서는 `Production` 명칭만 사용한다.
 
@@ -45,7 +44,7 @@ TunaSweeper/Plugins/QuestDatasetSwitcher/
       └─ Private/QuestDatasetSwitcherEditorModule.cpp
 ```
 
-`FQuestDatasetSwitcherModule`은 `Content/Data/QuestDatasetGenerated/active-dataset.json`을 읽는다. marker가 없으면 `Public`을 선택한다. marker가 유효하면 `ProductionDemo` 또는 `ProductionRelease`를 선택하고 해당 생성 데이터 경로를 퀘스트 서브시스템에 제공한다. 지원하지 않는 ID, 잘못된 marker, 누락된 JSON/CSV는 프로덕션 데이터로 인정하지 않고 공개 데이터로 안전하게 fallback한다.
+`FQuestDatasetSwitcherModule`은 `Content/Data/QuestDatasetGenerated/active-dataset.json`을 읽는다. marker가 없으면 `Public`을 선택한다. marker가 유효한 `production`이면 `Production`을 선택하고 해당 생성 데이터 경로를 퀘스트 서브시스템에 제공한다. 지원하지 않는 ID, 잘못된 marker, 누락된 JSON/CSV는 프로덕션 데이터로 인정하지 않고 공개 데이터로 안전하게 fallback한다.
 
 `UTunaSweeperQuestSubsystem`은 더 이상 퀘스트 파일 경로를 직접 고정하지 않는다. 플러그인의 활성 descriptor에서 다음 경로를 받는다.
 
@@ -67,17 +66,13 @@ git clone <PRODUCTION_REPOSITORY_URL> `
 ProductionPayload/
 ├─ payload-manifest.json
 └─ Datasets/
-   ├─ ProductionDemo/
-   │  ├─ dataset-manifest.json
-   │  ├─ QuestDefinitions.json
-   │  └─ QuestTextOverrides.csv
-   └─ ProductionRelease/
+   └─ Production/
       ├─ dataset-manifest.json
       ├─ QuestDefinitions.json
       └─ QuestTextOverrides.csv
 ```
 
-각 예시 데이터셋에는 기존 취수 시설 상호작용 이벤트를 사용하는 직렬 3연퀘가 들어 있다. 선행 관계는 `Q1 → Q2 → Q3`이며 프로덕션 데모와 정식은 서로 다른 퀘스트 ID와 세이브 namespace를 사용한다.
+프로덕션 예시 데이터셋에는 기존 취수 시설 상호작용 이벤트를 사용하는 직렬 3연퀘가 들어 있다. 선행 관계는 `Q1 → Q2 → Q3`이다.
 
 `QuestTextOverrides.csv`는 동기화할 때 공개 `QuestTextStrings.csv` 위에 key 기준으로 병합된다. 공통 UI 문자열은 공개 저장소에서 계속 관리하고 프로덕션 전용 퀘스트 문자열만 별도 저장소가 소유한다.
 
@@ -85,7 +80,7 @@ ProductionPayload/
 
 Unreal Editor의 최상위 `TunaSweeper` 메뉴에서 `Data Tools` 섹션의 `Quest Dataset Switcher`를 연다. 패널은 에디터가 현재 메모리에 로드한 데이터셋과 디스크에 적용된 데이터셋을 따로 표시한다.
 
-1. `공개`, `프로덕션 데모`, `프로덕션 정식` 중 하나를 선택한다.
+1. `Public`, `Production` 중 하나를 선택한다.
 2. 적용 버튼 옆의 세이브 분리 및 재시작 주의사항을 확인한다.
 3. `적용`을 누르고 확인 대화상자를 승인한다.
 4. 디스크 적용 상태에 `에디터 재시작 필요`가 표시되면 즉시 Unreal Editor를 종료하고 다시 실행한다.
@@ -111,13 +106,9 @@ UI 적용도 아래 PowerShell 스크립트를 실행하므로 manifest·퀘스�
 .\TunaSweeper\Plugins\QuestDatasetSwitcher\Scripts\SwitchQuestDataset.ps1 `
   -Dataset Public
 
-# Production demo
+# Production
 .\TunaSweeper\Plugins\QuestDatasetSwitcher\Scripts\SwitchQuestDataset.ps1 `
-  -Dataset ProductionDemo
-
-# Production release
-.\TunaSweeper\Plugins\QuestDatasetSwitcher\Scripts\SwitchQuestDataset.ps1 `
-  -Dataset ProductionRelease
+  -Dataset Production
 ```
 
 프로덕션 전환 시 스크립트는 다음을 수행한다.
@@ -134,7 +125,7 @@ UI 적용도 아래 PowerShell 스크립트를 실행하므로 manifest·퀘스�
 
 ```powershell
 .\TunaSweeper\Plugins\QuestDatasetSwitcher\Scripts\SwitchQuestDataset.ps1 `
-  -Dataset ProductionDemo -VerifyOnly
+  -Dataset Production -VerifyOnly
 ```
 
 ## 세이브 분리
@@ -152,17 +143,16 @@ TunaSweeperSave_Slot03
 프로덕션 세이브:
 
 ```text
-TunaSweeperSave_ProductionDemo_Slot01
-TunaSweeperSave_ProductionRelease_Slot01
+TunaSweeperSave_Production_Slot01
 ```
 
-최근 선택 슬롯 설정과 백업 디렉터리도 데이터셋별로 분리된다. 세이브 버전 19부터 다음 metadata를 기록한다.
+최근 선택 슬롯 설정과 백업 디렉터리도 데이터셋별로 분리된다. 세이브 버전 20은 다음 metadata를 기록한다.
 
 - `DatasetId`
 - `DatasetRevision`
 - `SaveCompatibilityId`
 
-버전 19 이전에 생성되어 `DatasetId`가 없는 기존 세이브는 `Public` 소속으로만 인정한다. 파일 내부 ID가 활성 데이터셋과 일치하지 않으면 로드와 덮어쓰기를 거부한다.
+버전 20 미만 게임 세이브는 `Saved/SaveGames`에서 발견될 때 삭제하고 `AutoDeletedSaveLog.txt`에 삭제 시각·버전·파일 경로를 기록한다. 버전 20 이상 세이브는 파일 내부 ID가 활성 데이터셋과 일치하지 않으면 로드와 덮어쓰기를 거부한다.
 
 일반적인 호환 데이터 수정은 `dataset_revision`만 올린다. 기존 진행도를 의도적으로 사용할 수 없는 변경일 때만 `save_compatibility_id`를 바꾼다.
 
@@ -216,19 +206,17 @@ git -C TunaSweeper/Plugins/QuestDatasetSwitcher/ProductionPayload push -u origin
 
 구현 과정에서 다음 스크립트 검증을 통과했다.
 
-- `ProductionDemo -VerifyOnly`
-- `ProductionRelease -VerifyOnly`
+- `Production -VerifyOnly`
 - `Public` 전환 및 public verify
-- `ProductionDemo`와 `ProductionRelease` 실제 materialization
+- `Production` 실제 materialization
 - 공개 저장소 누출 검사
 
-2026-08-04 최종 검증 결과:
+2026-08-24 현재 검증 결과:
 
-- UE 5.7 `TunaSweeperEditor Win64 Development -NoHotReload` 전체 빌드 성공
+- UE 5.7 `TunaSweeperEditor Win64 Development -NoHotReloadFromIDE` 전체 빌드 성공
 - `QuestDatasetSwitcher`, `QuestDatasetSwitcherEditor`, `TunaSweeper`, `TunaSweeperEditor` DLL 링크 성공
-- `ProductionDemo`: 자동화 테스트 2개 성공
-- `ProductionRelease`: 자동화 테스트 2개 성공
-- `Public`: 자동화 테스트 2개 성공
-- 공개 데이터셋 상태에서 Win64 Development `BuildCookRun`의 Build·Cook·Stage·Pak 성공
-- 최종 활성 상태를 `Public`로 복귀하고 `QuestDatasetGenerated/` 제거 확인
+- `Production -VerifyOnly`, `Public -VerifyOnly` 검증 성공
+- `Production` 서사팩 검증 성공
+- `TunaSweeper.Save.OutdatedCleanup`, `TunaSweeper.Save.VersionPolicy` 자동화 테스트 성공
+- `TunaSweeperNoStore Win64 Development` 전체 빌드 성공
 - `git diff --check` 통과

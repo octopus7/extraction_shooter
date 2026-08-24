@@ -30,10 +30,8 @@ FString FQuestDatasetDescriptor::GetSaveNamespace() const
 {
 	switch (Kind)
 	{
-	case EQuestDatasetKind::ProductionDemo:
-		return TEXT("ProductionDemo");
-	case EQuestDatasetKind::ProductionRelease:
-		return TEXT("ProductionRelease");
+	case EQuestDatasetKind::Production:
+		return TEXT("Production");
 	case EQuestDatasetKind::Public:
 	default:
 		return TEXT("Public");
@@ -44,10 +42,8 @@ FString FQuestDatasetDescriptor::GetDisplayName() const
 {
 	switch (Kind)
 	{
-	case EQuestDatasetKind::ProductionDemo:
-		return TEXT("Production Demo");
-	case EQuestDatasetKind::ProductionRelease:
-		return TEXT("Production Release");
+	case EQuestDatasetKind::Production:
+		return TEXT("Production");
 	case EQuestDatasetKind::Public:
 	default:
 		return TEXT("Public");
@@ -160,13 +156,9 @@ bool FQuestDatasetSwitcherModule::TryLoadProductionDataset(
 		return false;
 	}
 
-	if (DatasetId == TEXT("production_demo"))
+	if (DatasetId == TEXT("production"))
 	{
-		OutDescriptor.Kind = EQuestDatasetKind::ProductionDemo;
-	}
-	else if (DatasetId == TEXT("production_release"))
-	{
-		OutDescriptor.Kind = EQuestDatasetKind::ProductionRelease;
+		OutDescriptor.Kind = EQuestDatasetKind::Production;
 	}
 	else
 	{

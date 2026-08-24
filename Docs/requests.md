@@ -6742,3 +6742,11 @@
 - 지도 위젯이 하드코딩된 레벨별 텍스처와 바운즈 대신 레지스트리 메타데이터로 월드·콘텐츠·텍스처 좌표를 변환하고 투명 여백의 입력을 제외하도록 변경했다.
 - `RaidMap`과 `BunkerMap` 지도를 새 방식으로 다시 생성해 UI 텍스처와 메타데이터를 저장했으며, Raid는 콘텐츠 `(0,84)+(2048,1880)`, Bunker는 `(0,0)+(2048,2048)`로 등록했다.
 - UE 5.7 `TunaSweeperEditor Win64 Development` 빌드와 지도 콘텐츠 사각형·좌표 왕복 자동화 테스트를 통과했으며, 병행 작업 파일 추가 후에는 지도 테스트 소스를 단일 파일 컴파일로 재검증했다.
+
+## 2026-08-24 14:34:00 (소요시간: 00:30:00)
+
+- 퀘스트 데이터셋 전환을 `Public`과 `Production` 두 분기로 단순화하고 런타임 descriptor, 에디터 전환 UI, PowerShell 검증·동기화 스크립트, 저장 namespace를 함께 갱신했다.
+- 게임 세이브 버전을 20으로 올리고 `Saved/SaveGames` 아래에서 읽을 수 있는 버전 20 미만 게임 세이브와 백업을 발견하면 `AutoDeletedSaveLog.txt`에 삭제 시각·버전·상대 경로를 기록한 뒤 삭제하도록 구현했다.
+- 설정 세이브, 판독 불가 파일, 버전 20 이상 파일은 자동 삭제하지 않으며, 초기화 이후 유입된 구버전 슬롯도 슬롯 조회 시 다시 검사하도록 보강했다.
+- Public·Production 데이터 검증, Production 서사팩 검증, 세이브 버전 정책·삭제 로그 자동화 테스트 2개를 통과했다.
+- UE 5.7 `TunaSweeperNoStore Win64 Development`와 `TunaSweeperEditor Win64 Development` 빌드를 성공적으로 완료하고 Unreal Editor를 실행했다.

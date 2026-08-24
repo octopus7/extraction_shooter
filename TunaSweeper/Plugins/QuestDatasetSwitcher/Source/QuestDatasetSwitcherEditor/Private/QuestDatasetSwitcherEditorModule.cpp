@@ -46,10 +46,8 @@ namespace QuestDatasetSwitcherEditor
 	{
 		switch (Kind)
 		{
-		case EQuestDatasetKind::ProductionDemo:
-			return TEXT("ProductionDemo");
-		case EQuestDatasetKind::ProductionRelease:
-			return TEXT("ProductionRelease");
+		case EQuestDatasetKind::Production:
+			return TEXT("Production");
 		case EQuestDatasetKind::Public:
 		default:
 			return TEXT("Public");
@@ -60,13 +58,11 @@ namespace QuestDatasetSwitcherEditor
 	{
 		switch (Kind)
 		{
-		case EQuestDatasetKind::ProductionDemo:
-			return LOCTEXT("ProductionDemoDataset", "프로덕션 데모");
-		case EQuestDatasetKind::ProductionRelease:
-			return LOCTEXT("ProductionReleaseDataset", "프로덕션 정식");
+		case EQuestDatasetKind::Production:
+			return LOCTEXT("ProductionDataset", "Production");
 		case EQuestDatasetKind::Public:
 		default:
-			return LOCTEXT("PublicDataset", "공개");
+			return LOCTEXT("PublicDataset", "Public");
 		}
 	}
 
@@ -98,15 +94,9 @@ namespace QuestDatasetSwitcherEditor
 			return false;
 		}
 
-		if (DatasetId == TEXT("production_demo"))
+		if (DatasetId == TEXT("production"))
 		{
-			OutKind = EQuestDatasetKind::ProductionDemo;
-			return true;
-		}
-
-		if (DatasetId == TEXT("production_release"))
-		{
-			OutKind = EQuestDatasetKind::ProductionRelease;
+			OutKind = EQuestDatasetKind::Production;
 			return true;
 		}
 
@@ -168,8 +158,7 @@ public:
 	{
 		DatasetOptions = {
 			MakeShared<EQuestDatasetKind>(EQuestDatasetKind::Public),
-			MakeShared<EQuestDatasetKind>(EQuestDatasetKind::ProductionDemo),
-			MakeShared<EQuestDatasetKind>(EQuestDatasetKind::ProductionRelease)
+			MakeShared<EQuestDatasetKind>(EQuestDatasetKind::Production)
 		};
 
 		RuntimeDatasetKind = FQuestDatasetSwitcherModule::Get().GetActiveDataset().Kind;
@@ -507,7 +496,7 @@ public:
 			QuestDatasetSwitcherEditor::TabName,
 			FOnSpawnTab::CreateRaw(this, &FQuestDatasetSwitcherEditorModule::SpawnSwitcherTab))
 			.SetDisplayName(LOCTEXT("TabTitle", "Quest Dataset Switcher"))
-			.SetTooltipText(LOCTEXT("TabTooltip", "공개/프로덕션 데모/프로덕션 정식 퀘스트 데이터셋을 전환합니다."))
+			.SetTooltipText(LOCTEXT("TabTooltip", "Public/Production 퀘스트 데이터셋을 전환합니다."))
 			.SetIcon(FSlateIcon(FAppStyle::GetAppStyleSetName(), "Icons.Database"))
 			.SetMenuType(ETabSpawnerMenuType::Hidden);
 

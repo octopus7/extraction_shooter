@@ -29,7 +29,9 @@ namespace TunaSweeperSave
 {
 	inline const TCHAR* SaveSlotNamePrefix = TEXT("TunaSweeperSave_Slot");
 	inline const TCHAR* SaveSettingsSlotName = TEXT("TunaSweeperSaveSettings");
-	constexpr int32 CurrentSaveVersion = 19;
+	inline const TCHAR* AutoDeletedSaveLogFileName = TEXT("AutoDeletedSaveLog.txt");
+	constexpr int32 CurrentSaveVersion = 20;
+	constexpr int32 MinimumSupportedSaveVersion = 20;
 	constexpr int32 SaveUserIndex = 0;
 	constexpr int32 MinSaveSlotIndex = 1;
 	constexpr int32 MaxSaveSlotIndex = 3;
@@ -37,6 +39,23 @@ namespace TunaSweeperSave
 	constexpr int32 MaxDifficultyStage = 3;
 	constexpr int32 DefaultDifficultyStage = 1;
 	constexpr int32 MaxSaveGameBackupCount = 30;
+
+	enum class EOutdatedSaveCleanupResult : uint8
+	{
+		NotOutdated,
+		Deleted,
+		DeleteFailed
+	};
+
+	inline bool IsOutdatedSaveVersion(int32 SaveVersion)
+	{
+		return SaveVersion < MinimumSupportedSaveVersion;
+	}
+
+	EOutdatedSaveCleanupResult DeleteOutdatedSaveFileIfNeeded(
+		const FString& SaveFilePath,
+		const FString& SaveGameDirectory);
+	void PurgeOutdatedSaveFiles(const FString& SaveGameDirectory);
 
 	inline int32 SanitizeDifficultyStage(int32 DifficultyStage)
 	{

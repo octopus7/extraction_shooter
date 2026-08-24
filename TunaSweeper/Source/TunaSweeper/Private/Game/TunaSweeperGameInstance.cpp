@@ -110,6 +110,9 @@ void UTunaSweeperGameInstance::Init()
 	}
 
 	InitializeGlobalLanguageSetting();
+	TunaSweeperSave::PurgeOutdatedSaveFiles(FPaths::Combine(
+		FPaths::ProjectSavedDir(),
+		TEXT("SaveGames")));
 
 	int32 LoadedSaveSlotIndex = 1;
 	if (LoadActiveSaveSlotSelection(LoadedSaveSlotIndex))

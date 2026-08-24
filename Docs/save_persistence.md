@@ -6,7 +6,7 @@ Update it whenever a new state field is expected to persist across save slots, l
 ## Current Save Container
 
 - Save object: `UTunaSweeperSaveGame`
-- Current save version: `19`
+- Current save version: `20`
 - Runtime owner: `UTunaSweeperGameInstance`
 - Save entry point: `UTunaSweeperGameInstance::SaveGameStateInternal()`
 - Load entry point: `UTunaSweeperGameInstance::LoadGameState()`
@@ -31,15 +31,21 @@ Raid item changes keep their existing extraction/death/level-travel save rules a
 
 - `SaveVersion`
 - `SaveSlotIndex`
-- `DatasetId`: active quest dataset id (`public`, `production_demo`, or `production_release`). Saves older than version 19 with no dataset id belong to `public`.
+- `DatasetId`: active quest dataset id (`public` or `production`).
 - `DatasetRevision`: informational content revision written by the active dataset. Compatible content updates may change this value without changing the save namespace.
 - `SaveCompatibilityId`: stable save-lineage id. A save whose value does not match the active dataset is rejected; change this id only for intentionally incompatible progression changes.
 - `TotalPlaySeconds`
 - `DifficultyStage`: save-slot difficulty stage, clamped to `1..3`; `1` is Farming, `2` is Normal, and `3` is Hard. New slots keep the default `1` until the player confirms a difficulty.
-- `bDifficultySelected`: whether the active slot has confirmed the difficulty selection screen. New save slots start as `false`, so continuing a slot created at the difficulty screen returns to that screen until the player presses game start. Saves older than version 18 are treated as already selected for compatibility.
+- `bDifficultySelected`: whether the active slot has confirmed the difficulty selection screen. New save slots start as `false`, so continuing a slot created at the difficulty screen returns to that screen until the player presses game start.
 - `LastSavedAtTicks`
 
-Public saves retain the legacy `TunaSweeperSave_Slot01` through `03` names. `ProductionDemo` and `ProductionRelease` use separate save-slot names, last-selected-slot settings, and backup directories. Switching quest datasets therefore switches the complete save profile, not only quest progress; production quest rewards cannot leak items, currency, unlocks, or world state into another dataset.
+Public saves retain the legacy `TunaSweeperSave_Slot01` through `03` names. `Production` uses separate `TunaSweeperSave_Production_Slot01` through `03` names, last-selected-slot settings, and backup directory. Switching quest datasets therefore switches the complete save profile, not only quest progress; production quest rewards cannot leak items, currency, unlocks, or world state into the public/demo profile.
+
+### Obsolete Save Deletion
+
+Save version 20 is the minimum supported version. During `UTunaSweeperGameInstance::Init()`, every loadable `UTunaSweeperSaveGame` file below version 20 under `Saved/SaveGames/`, including backups, is deleted. Slot lookup repeats the same check so an obsolete file introduced after initialization cannot block a new save. Save settings, unreadable files, and version 20 or newer files are not auto-deleted.
+
+Every successful deletion appends a local-time timestamp, detected version, and path relative to `Saved/SaveGames` to `Saved/SaveGames/AutoDeletedSaveLog.txt`. The game prepares the audit log before deleting; if the log cannot be prepared, it leaves the save file in place and reports an error through the Unreal log.
 
 ### Scenario Progress Flags
 

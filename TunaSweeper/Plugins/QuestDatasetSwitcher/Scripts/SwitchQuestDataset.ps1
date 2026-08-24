@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true)]
-    [ValidateSet("Public", "ProductionDemo", "ProductionRelease")]
+    [ValidateSet("Public", "Production")]
     [string]$Dataset,
 
     [switch]$VerifyOnly
@@ -81,11 +81,7 @@ foreach ($requiredPath in @(
 }
 
 $datasetManifest = Get-Content -LiteralPath $datasetManifestPath -Raw -Encoding UTF8 | ConvertFrom-Json
-$expectedDatasetId = if ($Dataset -eq "ProductionDemo") {
-    "production_demo"
-} else {
-    "production_release"
-}
+$expectedDatasetId = "production"
 
 if ($datasetManifest.dataset_id -ne $expectedDatasetId) {
     throw "Dataset id mismatch. Expected '$expectedDatasetId'."
@@ -99,7 +95,7 @@ foreach ($requiredField in @("dataset_revision", "save_compatibility_id")) {
 }
 
 $questDefinitions = Get-Content -LiteralPath $questDefinitionsPath -Raw -Encoding UTF8 | ConvertFrom-Json
-if ($Dataset -ne "ProductionDemo" -and ($null -eq $questDefinitions -or @($questDefinitions).Count -eq 0)) {
+if ($null -eq $questDefinitions -or @($questDefinitions).Count -eq 0) {
     throw "QuestDefinitions.json must contain at least one quest."
 }
 

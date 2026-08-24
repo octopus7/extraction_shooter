@@ -28,17 +28,11 @@ bool FTunaSweeperQuestDatasetNamespaceTest::RunTest(const FString& Parameters)
 	Descriptor.Kind = EQuestDatasetKind::Public;
 	TestEqual(TEXT("Public namespace"), Descriptor.GetSaveNamespace(), FString(TEXT("Public")));
 
-	Descriptor.Kind = EQuestDatasetKind::ProductionDemo;
+	Descriptor.Kind = EQuestDatasetKind::Production;
 	TestEqual(
-		TEXT("Production demo namespace"),
+		TEXT("Production namespace"),
 		Descriptor.GetSaveNamespace(),
-		FString(TEXT("ProductionDemo")));
-
-	Descriptor.Kind = EQuestDatasetKind::ProductionRelease;
-	TestEqual(
-		TEXT("Production release namespace"),
-		Descriptor.GetSaveNamespace(),
-		FString(TEXT("ProductionRelease")));
+		FString(TEXT("Production")));
 	return true;
 }
 
@@ -83,13 +77,7 @@ bool FTunaSweeperActiveQuestDatasetTest::RunTest(const FString& Parameters)
 		return true;
 	}
 
-	if (Dataset.Kind == EQuestDatasetKind::ProductionDemo)
-	{
-		TestEqual(TEXT("Production demo dataset starts with no quests"), QuestValues.Num(), 0);
-		return true;
-	}
-
-	TestEqual(TEXT("Production release example contains three quests"), QuestValues.Num(), 3);
+	TestEqual(TEXT("Production example contains three quests"), QuestValues.Num(), 3);
 	TSet<FString> QuestIds;
 	int32 PrerequisiteCount = 0;
 	for (const TSharedPtr<FJsonValue>& QuestValue : QuestValues)

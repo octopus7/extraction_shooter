@@ -6,8 +6,7 @@
 enum class EQuestDatasetKind : uint8
 {
 	Public,
-	ProductionDemo,
-	ProductionRelease
+	Production
 };
 
 struct QUESTDATASETSWITCHER_API FQuestDatasetDescriptor

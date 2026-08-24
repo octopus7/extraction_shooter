@@ -2,6 +2,143 @@
 
 #include "QuestDatasetSwitcher.h"
 
+namespace TunaSweeperSave
+{
+	namespace
+	{
+		bool TryReadSaveVersion(const FString& SaveFilePath, int32& OutSaveVersion)
+		{
+			TArray<uint8> SaveData;
+			if (!FFileHelper::LoadFileToArray(SaveData, *SaveFilePath))
+			{
+				return false;
+			}
+
+			const UTunaSweeperSaveGame* SaveGame = Cast<UTunaSweeperSaveGame>(
+				UGameplayStatics::LoadGameFromMemory(SaveData));
+			if (!SaveGame)
+			{
+				return false;
+			}
+
+			OutSaveVersion = SaveGame->SaveVersion;
+			return true;
+		}
+
+		FString GetAutoDeletedSaveLogPath(const FString& SaveGameDirectory)
+		{
+			return FPaths::Combine(SaveGameDirectory, AutoDeletedSaveLogFileName);
+		}
+
+		bool AppendAutoDeletedSaveLog(const FString& SaveGameDirectory, const FString& LogLine)
+		{
+			if (!IFileManager::Get().MakeDirectory(*SaveGameDirectory, true))
+			{
+				return false;
+			}
+
+			return FFileHelper::SaveStringToFile(
+				LogLine,
+				*GetAutoDeletedSaveLogPath(SaveGameDirectory),
+				FFileHelper::EEncodingOptions::ForceUTF8WithoutBOM,
+				&IFileManager::Get(),
+				FILEWRITE_Append);
+		}
+
+		FString MakeLoggedSavePath(const FString& SaveFilePath, const FString& SaveGameDirectory)
+		{
+			FString RelativePath = SaveFilePath;
+			FString BaseDirectory = FPaths::ConvertRelativePathToFull(SaveGameDirectory);
+			FPaths::NormalizeDirectoryName(BaseDirectory);
+			BaseDirectory += TEXT("/");
+			if (!FPaths::MakePathRelativeTo(RelativePath, *BaseDirectory))
+			{
+				RelativePath = FPaths::GetCleanFilename(SaveFilePath);
+			}
+			FPaths::NormalizeFilename(RelativePath);
+			return RelativePath;
+		}
+	}
+
+	EOutdatedSaveCleanupResult DeleteOutdatedSaveFileIfNeeded(
+		const FString& SaveFilePath,
+		const FString& SaveGameDirectory)
+	{
+		int32 SaveVersion = CurrentSaveVersion;
+		if (!TryReadSaveVersion(SaveFilePath, SaveVersion) || !IsOutdatedSaveVersion(SaveVersion))
+		{
+			return EOutdatedSaveCleanupResult::NotOutdated;
+		}
+
+		if (!AppendAutoDeletedSaveLog(SaveGameDirectory, FString()))
+		{
+			UE_LOG(
+				LogTunaSweeperGameInstance,
+				Error,
+				TEXT("Could not prepare outdated save deletion log: %s"),
+				*GetAutoDeletedSaveLogPath(SaveGameDirectory));
+			return EOutdatedSaveCleanupResult::DeleteFailed;
+		}
+
+		if (!IFileManager::Get().Delete(*SaveFilePath, false, true))
+		{
+			UE_LOG(
+				LogTunaSweeperGameInstance,
+				Error,
+				TEXT("Could not delete outdated save version %d: %s"),
+				SaveVersion,
+				*SaveFilePath);
+			return EOutdatedSaveCleanupResult::DeleteFailed;
+		}
+
+		const FString LoggedPath = MakeLoggedSavePath(SaveFilePath, SaveGameDirectory);
+		const FString LogLine = FString::Printf(
+			TEXT("[%s] Deleted outdated save: version=%d, file=%s%s"),
+			*FDateTime::Now().ToString(TEXT("%Y-%m-%d %H:%M:%S")),
+			SaveVersion,
+			*LoggedPath,
+			LINE_TERMINATOR);
+		if (!AppendAutoDeletedSaveLog(SaveGameDirectory, LogLine))
+		{
+			UE_LOG(
+				LogTunaSweeperGameInstance,
+				Error,
+				TEXT("Deleted outdated save but could not append audit log: %s"),
+				*SaveFilePath);
+		}
+
+		UE_LOG(
+			LogTunaSweeperGameInstance,
+			Display,
+			TEXT("Deleted outdated save version %d: %s"),
+			SaveVersion,
+			*SaveFilePath);
+		return EOutdatedSaveCleanupResult::Deleted;
+	}
+
+	void PurgeOutdatedSaveFiles(const FString& SaveGameDirectory)
+	{
+		if (!FPaths::DirectoryExists(SaveGameDirectory))
+		{
+			return;
+		}
+
+		TArray<FString> SaveFiles;
+		IFileManager::Get().FindFilesRecursive(
+			SaveFiles,
+			*SaveGameDirectory,
+			TEXT("*.sav"),
+			true,
+			false);
+		SaveFiles.Sort();
+
+		for (const FString& SaveFilePath : SaveFiles)
+		{
+			DeleteOutdatedSaveFileIfNeeded(SaveFilePath, SaveGameDirectory);
+		}
+	}
+}
+
 namespace TunaSweeperSaveDataset
 {
 	const FQuestDatasetDescriptor& GetActiveDataset()
@@ -14,7 +151,7 @@ namespace TunaSweeperSaveDataset
 		const FQuestDatasetDescriptor& ActiveDataset = GetActiveDataset();
 		if (SaveGame.DatasetId.IsNone())
 		{
-			return SaveGame.SaveVersion < 19 && ActiveDataset.IsPublic();
+			return false;
 		}
 
 		return SaveGame.DatasetId == ActiveDataset.DatasetId &&
@@ -68,7 +205,6 @@ FTunaSweeperSaveSlotSummary UTunaSweeperGameInstance::GetSaveSlotSummary(int32 S
 	Summary.TotalPlaySeconds = FMath::Max(0.0f, SaveGame->TotalPlaySeconds);
 	Summary.DifficultyStage = TunaSweeperSave::SanitizeDifficultyStage(SaveGame->DifficultyStage);
 	Summary.bDifficultySelected =
-		SaveGame->SaveVersion < 18 ||
 		SaveGame->bDifficultySelected ||
 		SaveGame->CompletedScenarioFlags.Contains(TunaSweeperScenario::OpeningScenarioFlag);
 	Summary.LastSavedAtTicks = SaveGame->LastSavedAtTicks;
@@ -199,7 +335,7 @@ bool UTunaSweeperGameInstance::LoadGameState()
 	LoadedSlotTotalPlaySeconds = FMath::Max(0.0f, SaveGame->TotalPlaySeconds);
 	ActiveSlotStartTimeSeconds = FPlatformTime::Seconds();
 	ActiveSaveSlotDifficultyStage = TunaSweeperSave::SanitizeDifficultyStage(SaveGame->DifficultyStage);
-	bActiveSaveSlotDifficultySelected = SaveGame->SaveVersion < 18 || SaveGame->bDifficultySelected;
+	bActiveSaveSlotDifficultySelected = SaveGame->bDifficultySelected;
 	TotalExperiencePoints = FMath::Max<int64>(0, SaveGame->TotalExperiencePoints);
 	RaidStartExperiencePoints = TotalExperiencePoints;
 	PendingRaidExperiencePoints = 0;
@@ -980,6 +1116,14 @@ FString UTunaSweeperGameInstance::GetExistingSaveGameSlotName(int32 SaveSlotInde
 	const FString SlotName = GetSaveGameSlotName(SanitizedSlotIndex);
 	if (UGameplayStatics::DoesSaveGameExist(SlotName, TunaSweeperSave::SaveUserIndex))
 	{
+		const FString SaveFilePath = GetSaveGameFilePath(SlotName);
+		if (TunaSweeperSave::DeleteOutdatedSaveFileIfNeeded(
+				SaveFilePath,
+				FPaths::Combine(FPaths::ProjectSavedDir(), TEXT("SaveGames"))) ==
+			TunaSweeperSave::EOutdatedSaveCleanupResult::Deleted)
+		{
+			return FString();
+		}
 		return SlotName;
 	}
 
