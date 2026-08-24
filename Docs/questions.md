@@ -5409,3 +5409,13 @@ Quest Flow Simulator의 메인 화면을 퀘스트 편집 중심으로 바꾸고
 ### 답변
 
 맞다. 해당 디렉터리의 `package.json`에 `quest:token:set` 스크립트가 있으므로 그 위치에서 명령을 실행한다. `Codex sync token` 입력 프롬프트가 나타나면 웹에서 한 번 표시된 `qsync_...` 토큰을 붙여 넣고 Enter를 누른다. 입력 문자는 화면에 표시되지 않으며 암호화된 값은 현재 Windows 사용자의 `%APPDATA%\TunaSweeper\QuestSync\token.txt`에 DPAPI 보호 상태로 저장된다.
+
+## 2026-08-24 18:13:00 (소요시간: 00:16:43)
+
+### 질문
+
+기능이 퀘스트 흐름 시뮬레이션을 넘어 편집·저장·게시·동기화로 확장된 웹 도구에 어울리는 새 이름을 문의.
+
+### 답변
+
+기존 `Quest Flow` 정체성을 유지하면서 제작·편집·검증·시뮬레이션·릴리스 기능을 함께 포괄하는 공식 명칭으로 `Quest Flow Studio`를 추천했다. 화면 공간이 좁을 때는 `Quest Studio`, 프로젝트 경로는 `Tools/QuestStudio`로 사용하는 구성을 제안했다.

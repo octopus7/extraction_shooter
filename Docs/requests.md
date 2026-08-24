@@ -6836,3 +6836,16 @@
 - 메뉴는 바깥 클릭과 Escape 키로 닫히고 현재 열림 상태를 `aria-expanded`, 하위 영역을 `menu`/`menuitem`으로 노출하도록 구현했다.
 - 임시 로컬 테스트 비밀번호로 실제 로그인 상태의 메뉴 열림·닫힘과 배치를 확인했으며 해당 값은 프로세스 환경변수로만 사용하고 개발 서버 종료와 함께 폐기했다. 저장소와 `.dev.vars`에는 기록하지 않았다.
 - 프로덕션 빌드, 테스트 20개, 테스트 타입 검사와 Wrangler dry run을 통과한 UI 소스 2개만 `3430390`(`Move sync token into admin menu`)으로 커밋해 `origin/main`에 push하고, D1 변경 없이 Worker 버전 `9d26114d-521f-40c2-9772-c27b583e169e`을 배포했다.
+
+## 2026-08-24 18:13:00 (소요시간: 00:16:43)
+
+- 웹 퀘스트 도구의 현재 UI, 데이터 모델, 저장·게시 API와 테스트 범위를 정적 분석하고 실사용 편집 도구로 확장하기 위한 우선순위별 작업 단위를 정리했다.
+- 도구 프로젝트 경로를 `Tools/QuestFlowSimulator`에서 `Tools/QuestStudio`로 변경하고 현재 작업 규칙의 경로 참조도 함께 갱신했다.
+- 새 경로에서 전체 테스트 20개, 테스트 타입 검사, 프로덕션 빌드와 Wrangler dry run을 통과했다.
+- Unreal Engine 설정·빌드·실행은 수행하지 않았다.
+
+## 2026-08-24 18:39:00 (소요시간: 00:04:30)
+
+- `main`과 `origin/main`의 병합 중 `Docs/questions.md`, `Docs/requests.md` 끝에 양쪽이 추가한 기록 충돌을 시간순으로 모두 보존하고 충돌 표식을 제거했다.
+- `Tools/QuestFlowSimulator`에서 `Tools/QuestStudio`로 추적 파일만 이동한 뒤 남아 있던 `.wrangler` 로컬 상태, `node_modules`, `dist`, 생성 `data/seed.sql`, `worker-configuration.d.ts`를 새 경로로 이동했다.
+- 새 `Tools/QuestStudio` 경로에서 테스트 20개, 테스트 타입 검사와 프로덕션 빌드를 통과했다.
