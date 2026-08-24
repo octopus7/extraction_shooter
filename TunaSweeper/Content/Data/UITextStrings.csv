@@ -123,12 +123,10 @@ ui.memo.title,메모,Memo,メモ
 ui.memo.list_title,메모 목록,Memo List,メモ一覧
 ui.memo.none,획득한 메모가 없습니다.,No acquired memos.,取得したメモがありません。
 ui.dialogue.continue,계속,Continue,続行
+ui.dialogue.luna.speaker,루나,Luna,ルナ
 ui.dialogue.mole.speaker,두더지,Mole,モグラ
-ui.dialogue.mole.intro1,"루나, 깼구나. 어디 아픈 데는 없어? 난 두더지야.","Luna, you're awake. Are you hurt anywhere? I'm Mole.","ルナ、目が覚めたんだね。どこか痛くない？ 僕はモグラだよ。"
-ui.dialogue.mole.intro2,여긴 B-07 벙커야. 당분간 우리 둘이 지낼 곳이지.,This is the B-07 bunker. We'll be staying here together for a while.,ここはB-07バンカー。しばらくは僕たち二人で暮らす場所だよ。
-ui.dialogue.mole.intro3,저 사다리로 나가면 바깥 구역이야. 위험하니까 준비하기 전에는 나가지 마.,That ladder leads outside. It's dangerous so don't go until you're ready.,あのはしごの先は外だよ。危ないから準備ができるまでは出ないで。
-ui.dialogue.mole.intro4,몸도 장비도 괜찮아 보여. 서두르지 말고 천천히 움직여 봐.,You and your gear look all right. Take it slow while you get moving.,体も装備も大丈夫そうだね。焦らずゆっくり動いてみて。
-ui.dialogue.mole.intro5,궁금한 게 있거나 도움이 필요하면 언제든 나한테 말해.,If you need anything just ask me.,分からないことや困ったことがあったら、いつでも僕に言って。
+ui.dialogue.demo.toilet.luna,물이 안 내려가면 이건 생활 문제가 아니라 문명 멸망이야!,"If it won't flush, this isn't just a household problem—it's the end of civilization!",水が流れないなんて、これは生活の問題じゃなくて文明の滅亡だよ！
+ui.dialogue.demo.toilet.mole,"멸망은 미뤄둘게, 취수 시설부터 고치자.","We'll postpone the apocalypse. Let's fix the water intake facility first.",滅亡は後回しだ。まず取水施設から直そう。
 ui.scenario.title,재기동 기록,Reboot Log,再起動記録
 ui.scenario.status,B-07 벙커 / 비상 기상,B-07 Bunker / Emergency Wake,B-07 バンカー / 緊急起床
 ui.scenario.prompt,클릭해서 계속,Click to Continue,クリックして続行

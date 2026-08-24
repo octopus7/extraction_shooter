@@ -194,14 +194,14 @@ sequenceDiagram
     Scenario->>PC: OpenLevel(BunkerMap)
     PC->>GI: CompletePendingScenarioBunkerEntryIfNeeded()
     GI->>GI: MarkScenarioProgressFlag(scenario.opening.awakening, true)
-    PC->>Dialogue: StartMoleIntroDialogue(false)
-    Dialogue->>GI: 완료 시 dialogue.mole.bunker_intro 저장
+    PC->>Dialogue: Demo에서 StartMoleIntroDialogue(false)
+    Dialogue->>GI: 완료 시 dialogue.demo.toilet_intro 저장
     PC->>QS: 퀘스트 패널 수락/보상 시 PlayQuestPresentation()
 ```
 
 `UTunaSweeperScenarioPresentationWidget`은 `OpeningScenarioMap`에서 생성된다. 독백 라인을 표시한 뒤 `./Movies/intro.mp4`를 재생하고, 종료 또는 실패 시 `TravelToBunker()`를 호출한다. 이때 바로 완료 플래그를 저장하지 않고 `UTunaSweeperGameInstance::BeginScenarioBunkerEntry(scenario.opening.awakening)`로 pending flag만 설정한 뒤 `BunkerMap`을 연다.
 
-`BunkerMap` 로드 후 `TunaSweeperPlayerController::ShowBunkerEntryFadeIfNeeded()`가 `CompletePendingScenarioBunkerEntryIfNeeded()`를 호출한다. pending flag가 있으면 이를 `CompletedScenarioFlags`에 저장하고 검은 화면 페이드 인을 재생한다. 페이드가 끝나면 약간의 지연 후 Mole 인트로 대화가 시작된다.
+`BunkerMap` 로드 후 `TunaSweeperPlayerController::ShowBunkerEntryFadeIfNeeded()`가 `CompletePendingScenarioBunkerEntryIfNeeded()`를 호출한다. pending flag가 있으면 이를 `CompletedScenarioFlags`에 저장하고 검은 화면 페이드 인을 재생한다. Demo는 오프닝 시나리오를 거치지 않고 벙커로 직접 들어오며, 페이드가 끝난 뒤 루나와 Mole의 화장실 고장 2대사를 시작한다.
 
 `TunaSweeperDialogueWidget`은 공통 대화 표시 위젯이다. 라인 단위로 타자 효과를 진행하고, 키 입력 또는 좌클릭으로 현재 문장을 즉시 채우거나 다음 문장으로 넘어간다. 라인에 카메라 포커스가 있으면 플레이어 컨트롤러가 해당 위치로 카메라를 블렌드한다. 대화 종료 시 completion flag가 지정되어 있으면 `UTunaSweeperGameInstance::MarkScenarioProgressFlag()`로 저장한다.
 
@@ -215,9 +215,9 @@ sequenceDiagram
 2. `OpeningScenarioMap`에서 `UTunaSweeperScenarioPresentationWidget`이 독백과 영상 재생을 처리한다.
 3. 영상 완료 후 `BeginScenarioBunkerEntry(scenario.opening.awakening)`가 pending flag를 설정하고 `BunkerMap`으로 이동한다.
 4. `BunkerMap`의 플레이어 컨트롤러가 pending flag를 완료 처리하고 `scenario.opening.awakening`을 저장한다.
-5. 같은 진입 흐름에서 `StartMoleIntroDialogue(false)`가 호출된다.
-6. Mole 인트로가 처음 완료되면 `dialogue.mole.bunker_intro` 플래그가 저장된다. 이후 자동 재생은 이 플래그 때문에 생략된다.
-7. Mole의 일반 대화 상호작용은 `StartMoleIntroDialogue(true)`로 강제 재생할 수 있다. 이미 완료된 경우에는 completion flag를 다시 저장하지 않는다.
+5. Demo의 같은 진입 흐름에서 `StartMoleIntroDialogue(false)`가 호출된다. Main에서는 이 Demo 도입 대화를 시작하지 않는다.
+6. 루나와 Mole의 화장실 고장 2대사가 처음 완료되면 `dialogue.demo.toilet_intro` 플래그가 저장된다. 이후 자동 재생은 이 플래그 때문에 생략된다.
+7. Demo의 Mole 일반 대화 상호작용은 `StartMoleIntroDialogue(true)`로 강제 재생할 수 있다. 이미 완료된 경우에는 completion flag를 다시 저장하지 않는다.
 8. Mole의 퀘스트 상호작용은 `OpenQuestPanel()`로 이어지고, `quest_first_outing` 또는 같은 provider 체인의 다음 퀘스트를 표시한다.
 9. 플레이어가 첫 퀘스트를 수락하면 상태가 `Accepted`가 되고, 자동 추적이 설정되며, 수락 발표 대화가 재생된다.
 10. `BunkerMap`에서 `RaidMap`으로 이동하는 레벨 이동 상호작용이 성공하면 `quest_first_outing`의 `level_travel` 목표가 완료되고, 퀘스트 완료 토스트와 HUD 갱신이 발생한다.
@@ -227,7 +227,7 @@ sequenceDiagram
 
 | 구분 | 저장 위치 | 예시 | 용도 | 퀘스트 목표와의 관계 |
 | --- | --- | --- | --- | --- |
-| 시나리오/대화 플래그 | `UTunaSweeperSaveGame::CompletedScenarioFlags` | `scenario.opening.awakening`, `dialogue.mole.bunker_intro` | 오프닝 완료, 자동 대화 재생 여부, 초기 레벨 결정 | 현재 전용 목표 타입 없음. 퀘스트 진행을 직접 증가시키지 않음 |
+| 시나리오/대화 플래그 | `UTunaSweeperSaveGame::CompletedScenarioFlags` | `scenario.opening.awakening`, `dialogue.demo.toilet_intro` | 오프닝 완료, Demo 자동 대화 재생 여부, 초기 레벨 결정 | 현재 전용 목표 타입 없음. 퀘스트 진행을 직접 증가시키지 않음 |
 | 퀘스트 상태/진행 | `QuestProgressStates`, `TrackedQuestId`, `QuestCoinBalance` | `quest_first_outing` 상태와 목표 카운트 | 수락, 목표 진행, 보상 가능/완료, 추적, 코인 | 퀘스트 서브시스템의 목표 매칭 알림으로만 변경 |
 | 월드 진행 상태 | `WorldProgressStates` | 수리된 다리, 진행 수량 | 월드 오브젝트의 완료/진행 유지 | 전용 목표 타입 없음. 필요하면 `interaction_completed`로 연결 |
 | 인벤토리/아이템 상태 | 인벤토리 슬롯 및 아이템 상태 저장 | 획득 아이템, 제작 결과, 보상 아이템 | 플레이어 소지품과 제작/보상 처리 | 일반 획득은 `item_acquired` 목표를 진행할 수 있으나, 퀘스트 보상 지급은 연쇄 진행시키지 않음 |
@@ -247,5 +247,5 @@ sequenceDiagram
 - 워프 목표가 안 오르면 `WarpPointSpawns.json`의 현재/대상 워프 포인트 ID와 JSON의 `warp_point_id`, `target_warp_point_id`를 확인한다.
 - 월드 진행을 퀘스트로 연결하려면 월드 진행 완료 상태 저장과 별개로 `interaction_completed` 목표가 매칭될 수 있는 이벤트 ID와 타입명이 준비되어 있는지 확인한다.
 - 오프닝 이후 벙커로 바로 가지 않거나 반복 재생되면 `CompletedScenarioFlags`에 `scenario.opening.awakening`이 저장되었는지, pending flag가 `BunkerMap` 진입 후 완료 처리되었는지 확인한다.
-- Mole 인트로가 반복 자동 재생되면 `dialogue.mole.bunker_intro` 플래그가 대화 종료 시 저장되는지 확인한다.
+- Demo 화장실 도입 대화가 반복 자동 재생되면 `dialogue.demo.toilet_intro` 플래그가 대화 종료 시 저장되는지 확인한다.
 - HUD가 갱신되지 않으면 `OnQuestProgressChanged` 바인딩, `TunaSweeperGameHudWidget::HandleQuestProgressChanged()`, `TunaSweeperQuestWidget::HandleQuestProgressChanged()` 호출 여부를 확인한다.

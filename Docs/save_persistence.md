@@ -51,6 +51,7 @@ Legacy `.sav` files directly under `Saved/SaveGames/` are not migrated. They are
 
 Scenario progress is persisted per save slot through `UTunaSweeperSaveGame::CompletedScenarioFlags`.
 See [Docs/scenario_progress_flags.md](scenario_progress_flags.md) for the flag contract, routing rules, and reuse constraints.
+The Demo bunker introduction uses `dialogue.demo.toilet_intro`; the retired test-dialogue flag `dialogue.mole.bunker_intro` is intentionally left as inert legacy save data.
 
 ### Memo Unlocks
 

@@ -269,13 +269,13 @@ namespace TunaSweeperEnemyCombatDebugSettings
 
 namespace TunaSweeperMoleIntro
 {
-	const FName DialogueCompletionFlag(TEXT("dialogue.mole.bunker_intro"));
-	const FName SpeakerNameStringKey(TEXT("ui.dialogue.mole.speaker"));
+	const FName DialogueCompletionFlag(TEXT("dialogue.demo.toilet_intro"));
+	const FName LunaSpeakerNameStringKey(TEXT("ui.dialogue.luna.speaker"));
+	const FName MoleSpeakerNameStringKey(TEXT("ui.dialogue.mole.speaker"));
 	constexpr float StartDelayAfterBunkerFadeSeconds = 1.15f;
 	constexpr float CameraReturnBlendSeconds = 0.9f;
 	constexpr float DialogueCameraDistance = 1200.0f;
 	const FRotator DialogueCameraRotation(-60.0f, 0.0f, 0.0f);
-	const FVector DeployLadderFocusLocation(577.426f, 359.909f, 4.0f);
 
 	FVector CalculateCameraLocationForFocus(const FVector& FocusLocation)
 	{
@@ -857,7 +857,7 @@ void ATunaSweeperPlayerController::MaybeStartMoleIntroDialogue()
 
 bool ATunaSweeperPlayerController::StartMoleIntroDialogue(bool bForceReplay)
 {
-	if (!IsBunkerMap() || !IsLocalController() || bDialogueSequenceActive)
+	if (!TunaSweeperBuildFlavor::IsDemo() || !IsBunkerMap() || !IsLocalController() || bDialogueSequenceActive)
 	{
 		return false;
 	}
@@ -895,11 +895,14 @@ void ATunaSweeperPlayerController::BuildMoleIntroDialogueLines(TArray<FTunaSweep
 			: FallbackText;
 	};
 
-	const FText SpeakerName = ResolveDialogueText(
-		TunaSweeperMoleIntro::SpeakerNameStringKey,
+	const FText LunaSpeakerName = ResolveDialogueText(
+		TunaSweeperMoleIntro::LunaSpeakerNameStringKey,
+		FText::FromString(TEXT("\uB8E8\uB098")));
+	const FText MoleSpeakerName = ResolveDialogueText(
+		TunaSweeperMoleIntro::MoleSpeakerNameStringKey,
 		FText::FromString(TEXT("\uB450\uB354\uC9C0")));
 
-	auto AddMoleLine = [&OutDialogueLines, &SpeakerName](const FText& DialogueText)
+	auto AddLine = [&OutDialogueLines](const FText& SpeakerName, const FText& DialogueText)
 	{
 		FTunaSweeperDialogueLine Line;
 		Line.SpeakerName = SpeakerName;
@@ -907,29 +910,12 @@ void ATunaSweeperPlayerController::BuildMoleIntroDialogueLines(TArray<FTunaSweep
 		OutDialogueLines.Add(Line);
 	};
 
-	AddMoleLine(ResolveDialogueText(
-		FName(TEXT("ui.dialogue.mole.intro1")),
-		FText::FromString(TEXT("Luna, you're awake. Are you hurt anywhere? I'm Mole."))));
-	AddMoleLine(ResolveDialogueText(
-		FName(TEXT("ui.dialogue.mole.intro2")),
-		FText::FromString(TEXT("This is the B-07 bunker. We'll be staying here together for a while."))));
-
-	FTunaSweeperDialogueLine CameraLine;
-	CameraLine.SpeakerName = SpeakerName;
-	CameraLine.DialogueText = ResolveDialogueText(
-		FName(TEXT("ui.dialogue.mole.intro3")),
-		FText::FromString(TEXT("That ladder leads outside. It's dangerous, so don't go until you're ready.")));
-	CameraLine.bUseCameraFocus = true;
-	CameraLine.CameraFocusLocation = TunaSweeperMoleIntro::DeployLadderFocusLocation;
-	CameraLine.CameraBlendSeconds = 0.8f;
-	OutDialogueLines.Add(CameraLine);
-
-	AddMoleLine(ResolveDialogueText(
-		FName(TEXT("ui.dialogue.mole.intro4")),
-		FText::FromString(TEXT("You and your gear look all right. Take it slow while you get moving."))));
-	AddMoleLine(ResolveDialogueText(
-		FName(TEXT("ui.dialogue.mole.intro5")),
-		FText::FromString(TEXT("If you need anything, just ask me."))));
+	AddLine(LunaSpeakerName, ResolveDialogueText(
+		FName(TEXT("ui.dialogue.demo.toilet.luna")),
+		FText::FromString(TEXT("\uBB3C\uC774 \uC548 \uB0B4\uB824\uAC00\uBA74 \uC774\uAC74 \uC0DD\uD65C \uBB38\uC81C\uAC00 \uC544\uB2C8\uB77C \uBB38\uBA85 \uBA78\uB9DD\uC774\uC57C!"))));
+	AddLine(MoleSpeakerName, ResolveDialogueText(
+		FName(TEXT("ui.dialogue.demo.toilet.mole")),
+		FText::FromString(TEXT("\uBA78\uB9DD\uC740 \uBBF8\uB904\uB458\uAC8C, \uCDE8\uC218 \uC2DC\uC124\uBD80\uD130 \uACE0\uCE58\uC790."))));
 }
 
 bool ATunaSweeperPlayerController::StartDialogueSequence(

@@ -22,7 +22,7 @@ Scenario levels themselves are reusable presentation spaces. Do not block entry 
 | Flag | Meaning |
 | --- | --- |
 | `scenario.opening.awakening` | The first-start opening presentation has completed and the player successfully entered the bunker. |
-| `dialogue.mole.bunker_intro` | The first bunker-entry Mole dialogue tutorial has completed for the save slot. |
+| `dialogue.demo.toilet_intro` | The Demo-only two-line toilet-failure introduction has completed for the save slot. |
 
 ## Current Routing
 
@@ -43,7 +43,7 @@ The opening scenario does not mark its flag immediately when the presentation st
 
 This means the flag represents successful bunker entry after the presentation, not merely seeing part of the presentation.
 
-The Mole bunker intro dialogue flag is marked when the dialogue sequence finishes. The camera may still be blending back to the player, but the dialogue content has reached completion and the save slot should not replay it on the next bunker entry.
+The Demo toilet-introduction flag is marked when its two-line dialogue sequence finishes. The legacy test flag `dialogue.mole.bunker_intro` is not reused, so an existing Demo save that completed the old five-line test dialogue still receives the new introduction once. Main builds neither start nor manually replay this Demo dialogue.
 
 ## Reset Behavior
 

@@ -6879,3 +6879,17 @@
 
 - Steam Demo 최상위 메뉴 위시리스트 통합, Demo 안내 텍스트 전용 레이아웃과 영어 현지화 수정 사항만 선별해 커밋했다.
 - 기존 `DefaultEngine.ini`, 맵, Blender 및 Agit 작업 파일은 커밋에서 제외했다.
+
+## 2026-08-24 20:07:00 (소요시간: 00:29:52)
+
+- Demo 벙커 진입 직후 자동 재생되던 5줄짜리 Mole 테스트 대화와 사다리 안내 카메라 라인을 제거하고, 화장실 고장을 소재로 한 루나 1줄·Mole 1줄의 Demo 도입 대화로 교체했다.
+- 루나와 Mole의 정확한 한국어 2대사를 적용하고 영어·일본어 문자열을 함께 추가했으며, 사용되지 않는 기존 테스트 인트로 문자열 5개를 제거했다.
+- `StartMoleIntroDialogue()` 자체에 Demo 빌드 검사를 추가해 Main에서 일반 상호작용으로도 Demo 도입 대화를 재생할 수 없게 했다.
+- 완료 플래그를 `dialogue.demo.toilet_intro`로 변경해 기존 테스트 대화를 완료한 Demo 세이브에서도 새 도입부가 한 번 재생되게 하고, 저장·시나리오·대화 흐름 문서를 갱신했다.
+- Demo 퀘스트 동기화 상태는 읽기 전용으로 확인했으며 `bootstrap-required`였지만, 변경 대상이 퀘스트 작성 데이터가 아니므로 bootstrap·pull·push는 수행하지 않았다.
+- UE 5.7 `TunaSweeperEditor Win64 Development`와 `TunaSweeperDemo Win64 Development` 빌드를 통과했다.
+
+## 2026-08-24 20:45:20 (소요시간: 00:00:40)
+
+- Demo 화장실 도입 대화와 관련 문자열·시나리오 플래그·문서 변경만 선별해 커밋했다.
+- 별도 작업인 Demo·Full `DefaultEngine.ini`와 `BunkerMap.umap` 변경은 스테이징 및 커밋에서 제외했다.
