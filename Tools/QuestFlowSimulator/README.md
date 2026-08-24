@@ -72,6 +72,15 @@ npm run quest:validate -- --flavor Demo
 npm run quest:push -- --flavor Demo --summary "퀘스트 설명"
 ```
 
+기존 D1 카탈로그에서 처음 전환할 때 원격 런타임 payload가 비어 있고 로컬
+런타임 JSON/CSV가 비어 있지 않으면 `pull`은 덮어쓰지 않고 중단합니다. 이때만
+원격 편집 오버레이와 로컬 런타임을 합쳐 최초 릴리스를 게시합니다.
+
+```powershell
+npm run quest:bootstrap -- --flavor Demo
+npm run quest:bootstrap -- --flavor Main
+```
+
 웹에서 발급하는 Codex 토큰은 90일 뒤 만료되며 D1에는 원문이 아닌 SHA-256
 해시만 남습니다. `DELETE /api/sync-tokens/:id`로 만료 전에도 폐기할 수 있습니다.
 

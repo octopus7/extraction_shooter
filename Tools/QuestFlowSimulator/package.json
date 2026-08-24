@@ -18,6 +18,7 @@
     "quest:sync": "node scripts/quest-sync.mjs",
     "quest:status": "node scripts/quest-sync.mjs status",
     "quest:pull": "node scripts/quest-sync.mjs pull",
+    "quest:bootstrap": "node scripts/quest-sync.mjs bootstrap",
     "quest:validate": "node scripts/quest-sync.mjs validate",
     "quest:push": "node scripts/quest-sync.mjs push",
     "quest:token:set": "node scripts/quest-sync.mjs token:set",

@@ -45,6 +45,7 @@ try {
   if (command === "token:set") await setProtectedToken();
   else if (command === "status") await statusCommand();
   else if (command === "pull") await pullCommand();
+  else if (command === "bootstrap") await bootstrapCommand();
   else if (command === "validate") await validateCommand();
   else if (command === "push") await pushCommand();
   else printHelp();
@@ -56,22 +57,31 @@ try {
 }
 
 async function statusCommand() {
-  const remote = await api(`/api/sync/${config.slug}/status`, { token: await loadToken(false) });
+  const remote = await api(`/api/sync/${config.slug}/current`, { token: await loadToken(false) });
   const local = await loadLocalPack(false);
   const manifest = await readJsonIfExists(config.manifest);
   const localHash = local ? hashPack(local) : null;
+  const remotePack = normalizePack(remote.release.pack);
+  const bootstrapRequired = Boolean(
+    local &&
+    !manifest?.baseDatasetVersion &&
+    ((remotePack.runtime.questDefinitions.length === 0 && local.runtime.questDefinitions.length > 0) ||
+      (!remotePack.runtime.questTextStringsCsv.trim() && local.runtime.questTextStringsCsv.trim())),
+  );
   const state = !local
     ? "missing-local-copy"
-    : manifest?.baseDatasetVersion !== remote.status.datasetVersion
-      ? "pull-required"
-      : localHash === manifest?.localContentHash
-        ? "up-to-date"
-        : "local-changes";
+    : bootstrapRequired
+      ? "bootstrap-required"
+      : manifest?.baseDatasetVersion !== remote.release.datasetVersion
+        ? "pull-required"
+        : localHash === manifest?.localContentHash
+          ? "up-to-date"
+          : "local-changes";
   output({
     ok: true,
     flavor,
     state,
-    remoteDatasetVersion: remote.status.datasetVersion,
+    remoteDatasetVersion: remote.release.datasetVersion,
     baseDatasetVersion: manifest?.baseDatasetVersion ?? null,
     localContentHash: localHash,
   });
@@ -83,6 +93,18 @@ async function pullCommand() {
   const pack = normalizePack(value.release.pack);
   if (pack.flavor !== flavor) throw new Error(`Remote flavor is ${pack.flavor}, expected ${flavor}.`);
   validatePack(pack);
+  const [localDefinitions, localCsv] = await Promise.all([
+    readJsonIfExists(config.questDefinitions),
+    readTextIfExists(config.questTextStrings),
+  ]);
+  if (
+    (pack.runtime.questDefinitions.length === 0 && Array.isArray(localDefinitions) && localDefinitions.length > 0) ||
+    (!pack.runtime.questTextStringsCsv.trim() && localCsv?.trim())
+  ) {
+    throw new Error(
+      `Remote ${flavor} runtime payload is empty while the local copy is not. Run quest:bootstrap instead of pull.`,
+    );
+  }
   await Promise.all([
     atomicWrite(config.questDefinitions, `${JSON.stringify(pack.runtime.questDefinitions, null, 2)}\n`),
     atomicWrite(config.questTextStrings, pack.runtime.questTextStringsCsv),
@@ -103,6 +125,30 @@ async function pullCommand() {
   output({ ok: true, flavor, datasetVersion: value.release.datasetVersion, contentHash: value.release.contentHash });
 }
 
+async function bootstrapCommand() {
+  const token = await loadToken(true);
+  const manifest = await readJsonIfExists(config.manifest);
+  if (manifest?.baseDatasetVersion) {
+    throw new Error(`${flavor} already has a local sync base. Use quest:push after status/pull.`);
+  }
+  const current = await api(`/api/sync/${config.slug}/current`, { token });
+  const remotePack = normalizePack(current.release.pack);
+  if (remotePack.flavor !== flavor) {
+    throw new Error(`Remote flavor is ${remotePack.flavor}, expected ${flavor}.`);
+  }
+  const pack = await loadLocalPack(true, remotePack.editor);
+  validatePack(pack);
+  const value = await publishPack(
+    token,
+    current.release.datasetVersion,
+    pack,
+    "Initial local runtime bootstrap",
+  );
+  await atomicWrite(config.editor, `${JSON.stringify(pack.editor, null, 2)}\n`);
+  await writeManifest(value.release, pack);
+  output({ ok: true, flavor, datasetVersion: value.release.datasetVersion, contentHash: value.release.contentHash });
+}
+
 async function validateCommand() {
   const pack = await loadLocalPack(true);
   validatePack(pack);
@@ -117,35 +163,23 @@ async function pushCommand() {
   }
   const pack = await loadLocalPack(true);
   validatePack(pack);
-  const value = await api(`/api/sync/${config.slug}/publish`, {
+  const value = await publishPack(
     token,
-    method: "POST",
-    body: {
-      expectedBaseDatasetVersion: manifest.baseDatasetVersion,
-      pack,
-      summary: option("--summary") || "Published by Codex quest-sync CLI",
-    },
-  });
-  await atomicWrite(
-    config.manifest,
-    `${JSON.stringify({
-      ...manifest,
-      baseDatasetVersion: value.release.datasetVersion,
-      pulledContentHash: value.release.contentHash,
-      localContentHash: hashPack(pack),
-      pulledAt: new Date().toISOString(),
-    }, null, 2)}\n`,
+    manifest.baseDatasetVersion,
+    pack,
+    option("--summary") || "Published by Codex quest-sync CLI",
   );
+  await writeManifest(value.release, pack, manifest);
   output({ ok: true, flavor, datasetVersion: value.release.datasetVersion, contentHash: value.release.contentHash });
 }
 
-async function loadLocalPack(required) {
+async function loadLocalPack(required, remoteEditor = null) {
   const [definitions, csv, editorSource] = await Promise.all([
     readJsonIfExists(config.questDefinitions),
     readTextIfExists(config.questTextStrings),
     readJsonIfExists(config.editor),
   ]);
-  let editor = editorSource;
+  let editor = editorSource ?? remoteEditor;
   if (!editor && config.editorFallback) {
     const fallback = await readJsonIfExists(config.editorFallback);
     editor = fallback?.data ?? fallback;
@@ -160,6 +194,30 @@ async function loadLocalPack(required) {
     runtime: { questDefinitions: definitions, questTextStringsCsv: csv },
     editor,
   });
+}
+
+function publishPack(token, expectedBaseDatasetVersion, pack, summary) {
+  return api(`/api/sync/${config.slug}/publish`, {
+    token,
+    method: "POST",
+    body: { expectedBaseDatasetVersion, pack, summary },
+  });
+}
+
+async function writeManifest(release, pack, previous = {}) {
+  await atomicWrite(
+    config.manifest,
+    `${JSON.stringify({
+      ...previous,
+      schemaVersion: 1,
+      flavor,
+      slug: config.slug,
+      baseDatasetVersion: release.datasetVersion,
+      pulledContentHash: release.contentHash,
+      localContentHash: hashPack(pack),
+      pulledAt: new Date().toISOString(),
+    }, null, 2)}\n`,
+  );
 }
 
 function normalizePack(value) {
@@ -325,5 +383,5 @@ function output(value) {
 }
 
 function printHelp() {
-  console.log(`Quest authoring sync\n\nCommands:\n  status --flavor Demo|Main [--json]\n  pull --flavor Demo|Main\n  validate --flavor Demo|Main\n  push --flavor Demo|Main [--summary text]\n  token:set\n`);
+  console.log(`Quest authoring sync\n\nCommands:\n  status --flavor Demo|Main [--json]\n  pull --flavor Demo|Main\n  bootstrap --flavor Demo|Main\n  validate --flavor Demo|Main\n  push --flavor Demo|Main [--summary text]\n  token:set\n`);
 }
