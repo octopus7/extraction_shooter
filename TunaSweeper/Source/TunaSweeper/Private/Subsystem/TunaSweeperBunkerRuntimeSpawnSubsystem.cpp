@@ -273,7 +273,7 @@ bool UTunaSweeperBunkerRuntimeSpawnSubsystem::LoadBunkerCharacterSpawnData(bool 
 		bHasValidRows = true;
 	}
 
-	if (!bHasValidRows)
+	if (!bHasValidRows && JsonRows.Num() > 0)
 	{
 		UE_LOG(LogTunaSweeperBunkerRuntimeSpawn, Error, TEXT("Bunker character spawn JSON has no valid rows: %s"), *JsonPath);
 		return false;

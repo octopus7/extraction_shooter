@@ -1334,7 +1334,7 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadEnemySpawnData(bool bForceReload)
 		bHasValidRows = true;
 	}
 
-	if (!bHasValidRows)
+	if (!bHasValidRows && JsonRows.Num() > 0)
 	{
 		UE_LOG(LogTunaSweeperEnemySpawn, Error, TEXT("Enemy spawn JSON has no valid rows: %s"), *EnemySpawnJsonPath);
 		return false;
@@ -1425,7 +1425,7 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadLootContainerSpawnData(bool bForceRelo
 		bHasValidRows = true;
 	}
 
-	if (!bHasValidRows)
+	if (!bHasValidRows && JsonRows.Num() > 0)
 	{
 		UE_LOG(LogTunaSweeperEnemySpawn, Error, TEXT("Loot container spawn JSON has no valid rows: %s"), *LootContainerSpawnJsonPath);
 		return false;
@@ -1514,7 +1514,7 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadTransparentObstacleSpawnData(bool bFor
 		bHasValidRows = true;
 	}
 
-	if (!bHasValidRows)
+	if (!bHasValidRows && JsonRows.Num() > 0)
 	{
 		UE_LOG(LogTunaSweeperEnemySpawn, Error, TEXT("Transparent obstacle spawn JSON has no valid rows: %s"), *ObstacleSpawnJsonPath);
 		return false;
@@ -1651,7 +1651,7 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadWorldProgressObjectSpawnData(bool bFor
 		bHasValidRows = true;
 	}
 
-	if (!bHasValidRows)
+	if (!bHasValidRows && JsonRows.Num() > 0)
 	{
 		UE_LOG(LogTunaSweeperEnemySpawn, Error, TEXT("World progress object spawn JSON has no valid rows: %s"), *ProgressObjectSpawnJsonPath);
 		return false;
@@ -1754,7 +1754,7 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadWarpPointSpawnData(bool bForceReload)
 		bHasValidRows = true;
 	}
 
-	if (!bHasValidRows)
+	if (!bHasValidRows && JsonRows.Num() > 0)
 	{
 		UE_LOG(LogTunaSweeperEnemySpawn, Error, TEXT("Warp point spawn JSON has no valid rows: %s"), *WarpPointSpawnJsonPath);
 		return false;
@@ -2323,7 +2323,7 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadGameplayInteractionActorSpawnData(bool
 		bHasValidRows = true;
 	}
 
-	if (!bHasValidRows)
+	if (!bHasValidRows && JsonRows.Num() > 0)
 	{
 		UE_LOG(LogTunaSweeperEnemySpawn, Error, TEXT("Gameplay interaction actor spawn JSON has no valid rows: %s"), *GameplayInteractionActorSpawnJsonPath);
 		return false;

@@ -1,18 +1,1 @@
-[
-  {
-    "level_name": "RaidMap",
-    "obstacle_id": "raid_creek_blocker_01",
-    "obstacle_class": "/Game/Interaction/BP_TransparentObstacle.BP_TransparentObstacle_C",
-    "location": [1120.0, 740.0, 120.0],
-    "rotation": [0.0, 24.0, 0.0],
-    "box_extent": [360.0, 45.0, 150.0]
-  },
-  {
-    "level_name": "RaidMap",
-    "obstacle_id": "raid_creek_blocker_02",
-    "obstacle_class": "/Game/Interaction/BP_TransparentObstacle.BP_TransparentObstacle_C",
-    "location": [1620.0, 960.0, 120.0],
-    "rotation": [0.0, 24.0, 0.0],
-    "box_extent": [360.0, 45.0, 150.0]
-  }
-]
+[]

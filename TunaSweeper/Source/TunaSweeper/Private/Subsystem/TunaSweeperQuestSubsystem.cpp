@@ -301,12 +301,13 @@ bool UTunaSweeperQuestSubsystem::LoadQuestData(bool bForceReload)
 	ResetLoadedQuestData();
 	FQuestDatasetSwitcherModule::Get().ReloadActiveDataset();
 	const bool bLoadedQuestTextStrings = LoadQuestTextStringsCsv();
-	if (!bLoadedQuestTextStrings || !LoadQuestDefinitionsJson())
+	const bool bLoadedQuestDefinitions = LoadQuestDefinitionsJson();
+	if (!bLoadedQuestTextStrings || !bLoadedQuestDefinitions)
 	{
 		RegisterFallbackQuest();
 	}
 
-	bQuestDataLoaded = QuestDefinitions.Num() > 0;
+	bQuestDataLoaded = (bLoadedQuestTextStrings && bLoadedQuestDefinitions) || QuestDefinitions.Num() > 0;
 	return bQuestDataLoaded;
 }
 
@@ -902,7 +903,7 @@ void UTunaSweeperQuestSubsystem::ResetQuestProgressForNewGame()
 
 bool UTunaSweeperQuestSubsystem::EnsureQuestDataLoaded() const
 {
-	return bQuestDataLoaded && QuestDefinitions.Num() > 0;
+	return bQuestDataLoaded;
 }
 
 bool UTunaSweeperQuestSubsystem::LoadQuestDefinitionsJson()
@@ -1037,7 +1038,7 @@ bool UTunaSweeperQuestSubsystem::LoadQuestDefinitionsJson()
 		}
 	}
 
-	return QuestDefinitions.Num() > 0;
+	return QuestValues.Num() == 0 || QuestDefinitions.Num() > 0;
 }
 
 bool UTunaSweeperQuestSubsystem::LoadQuestTextStringsCsv()

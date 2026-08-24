@@ -99,7 +99,7 @@ foreach ($requiredField in @("dataset_revision", "save_compatibility_id")) {
 }
 
 $questDefinitions = Get-Content -LiteralPath $questDefinitionsPath -Raw -Encoding UTF8 | ConvertFrom-Json
-if ($null -eq $questDefinitions -or @($questDefinitions).Count -eq 0) {
+if ($Dataset -ne "ProductionDemo" -and ($null -eq $questDefinitions -or @($questDefinitions).Count -eq 0)) {
     throw "QuestDefinitions.json must contain at least one quest."
 }
 

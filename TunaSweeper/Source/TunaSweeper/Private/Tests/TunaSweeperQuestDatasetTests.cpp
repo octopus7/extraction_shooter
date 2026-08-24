@@ -79,11 +79,17 @@ bool FTunaSweeperActiveQuestDatasetTest::RunTest(const FString& Parameters)
 
 	if (Dataset.Kind == EQuestDatasetKind::Public)
 	{
-		TestTrue(TEXT("Public dataset contains quests"), QuestValues.Num() > 0);
+		TestEqual(TEXT("Public dataset starts with no quests"), QuestValues.Num(), 0);
 		return true;
 	}
 
-	TestEqual(TEXT("Production example contains three quests"), QuestValues.Num(), 3);
+	if (Dataset.Kind == EQuestDatasetKind::ProductionDemo)
+	{
+		TestEqual(TEXT("Production demo dataset starts with no quests"), QuestValues.Num(), 0);
+		return true;
+	}
+
+	TestEqual(TEXT("Production release example contains three quests"), QuestValues.Num(), 3);
 	TSet<FString> QuestIds;
 	int32 PrerequisiteCount = 0;
 	for (const TSharedPtr<FJsonValue>& QuestValue : QuestValues)

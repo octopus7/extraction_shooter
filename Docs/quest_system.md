@@ -1,5 +1,7 @@
 # 퀘스트/목표 진행 프레임워크
 
+> 현재 상태(2026-08-24): 공개 `QuestDefinitions.json`은 새 데모 구성을 위해 `[]`로 비워져 있다. 아래 기존 퀘스트 설명은 프레임워크와 과거 예시 참고용이며 현재 활성 퀘스트가 아니다. 제거 목록은 `Docs/demo_runtime_data_cleanup_2026-08-24.md`, 새 데이터 작성 절차는 `Docs/quest_and_runtime_actor_data_authoring_guide.md`를 참고한다.
+
 ## 범위
 
 이 문서는 TunaSweeper의 범용 퀘스트/목표 진행 프레임워크를 정리한다.

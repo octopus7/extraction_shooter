@@ -1,10 +1,1 @@
-[
-  {
-    "level_name": "BunkerMap",
-    "spawn_id": "TS_Bunker_Mole",
-    "actor_class": "/Game/Characters/Mole/BP_Mole.BP_Mole_C",
-    "location": [700.0, -320.0, 0.0],
-    "rotation": [0.0, 180.0, 0.0],
-    "scale": [1.0, 1.0, 1.0]
-  }
-]
+[]

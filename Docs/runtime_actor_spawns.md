@@ -1,5 +1,7 @@
 # Runtime Actor Spawns
 
+> 현재 상태(2026-08-24): 런타임 스폰 JSON 8개는 새 데모 구성을 위해 모두 `[]`로 비워져 있다. 아래의 기존 배치 설명은 재작성 참고용 기록이며 현재 활성 배치가 아니다. 제거 목록은 `Docs/demo_runtime_data_cleanup_2026-08-24.md`, 재사용 절차는 `Docs/quest_and_runtime_actor_data_authoring_guide.md`를 참고한다.
+
 이 문서는 레벨에 직접 배치하지 않고 데이터로 초기 배치하는 런타임 액터 목록과 JSON 파일을 정리한다.
 
 ## 공통 소유자

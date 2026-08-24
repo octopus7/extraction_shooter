@@ -279,7 +279,7 @@ bool UTunaSweeperMemoSubsystem::LoadMemoSpawnData(bool bForceReload)
 		bHasValidRows = true;
 	}
 
-	if (!bHasValidRows)
+	if (!bHasValidRows && JsonRows.Num() > 0)
 	{
 		UE_LOG(LogTunaSweeperMemo, Error, TEXT("Memo spawns JSON has no valid rows: %s"), *MemoSpawnsJsonPath);
 		return false;

@@ -6719,3 +6719,18 @@
 - 기존 패키지 실행 파일이 사용 중이어서 출력 폴더를 지우지 못하거나 경로 안전 검증에 실패하면 패키징을 중단하고 안내하도록 처리했다.
 - 출력 폴더 정리와 함께 UAT `-clean` 옵션을 적용하며, `Packaging`을 끄면 `Clean`과 `Run`도 함께 꺼지도록 구성했다.
 - UE 5.7 `TunaSweeperEditor Win64 Development` 빌드를 성공적으로 완료했다.
+
+## 2026-08-24 13:58:00 (소요시간: 00:26:00)
+
+- 새 데모 구성을 위해 공개 `QuestDefinitions.json`의 기존 퀘스트 5건과 퀘스트 콘텐츠 문자열 42행을 제거하고, 공용 `quest.ui.*` 문자열 26행은 보존했다.
+- 런타임 스폰 JSON 8개에서 벙커 캐릭터·적·루트 컨테이너·상호작용 액터·메모·장애물·워프·월드 진행 오브젝트 배치 53행을 제거하고 각 파일을 유효한 빈 배열 `[]`로 유지했다.
+- 퀘스트와 런타임 스폰 로더가 빈 배열을 오류나 하드코딩 폴백 콘텐츠로 해석하지 않고 정상적인 0건 데이터로 처리하도록 수정했다.
+- 데모 데이터셋만 빈 퀘스트 배열을 허용하고 정식 데이터셋의 최소 1개 퀘스트 검증은 유지하도록 전환 검증을 조정했다.
+- 공개 제거 목록 `Docs/demo_runtime_data_cleanup_2026-08-24.md`와 재사용 안내서 `Docs/quest_and_runtime_actor_data_authoring_guide.md`를 별도로 작성하고 기존 퀘스트/스폰 문서에 현재 빈 상태 안내를 추가했다.
+- JSON/CSV 정적 검사와 데모 데이터셋 `VerifyOnly`, UE 5.7 `TunaSweeperEditor Win64 Development` 빌드, `TunaSweeper.QuestDataset.ActiveData` 자동화 테스트를 통과했다.
+- 검증 후 `TunaSweeper/TunaSweeper.uproject`를 Unreal Editor로 실행했다.
+
+## 2026-08-24 14:36:30 (소요시간: 00:05:00)
+
+- 데모 퀘스트·JSON 런타임 액터 초기화 작업에 해당하는 공개 저장소 변경만 선별해 별도 커밋했다.
+- 맵 캡처, Steam 설정, 에셋, 세이브 계획 등 다른 작업 트리 변경은 스테이징과 커밋에서 제외했다.
