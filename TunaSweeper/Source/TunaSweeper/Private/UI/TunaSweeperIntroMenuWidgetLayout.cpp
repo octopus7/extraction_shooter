@@ -1,6 +1,11 @@
 #include "TunaSweeperIntroMenuWidgetShared.h"
-#include "Brushes/SlateColorBrush.h"
 #include "Settings/TunaSweeperBuildFlavor.h"
+
+namespace TunaSweeperIntroMenuLayout
+{
+	constexpr const TCHAR* DemoFishTexturePath =
+		TEXT("/Game/UI/Title/tuna_sweeper_fish_transparent.tuna_sweeper_fish_transparent");
+}
 
 void UTunaSweeperIntroMenuWidget::ResetTitleViewportLayoutState()
 {
@@ -432,13 +437,25 @@ void UTunaSweeperIntroMenuWidget::EnsureDemoBuildImage()
 			return;
 		}
 
-		const FSlateColorBrush BadgeBrush(FLinearColor(0.95f, 0.55f, 0.08f, 0.92f));
-		DemoBuildImage->SetBrush(BadgeBrush);
+		UTexture2D* DemoFishTexture = LoadObject<UTexture2D>(
+			nullptr,
+			TunaSweeperIntroMenuLayout::DemoFishTexturePath);
+		if (!DemoFishTexture)
+		{
+			DemoBuildImage->RemoveFromParent();
+			DemoBuildImage = nullptr;
+			return;
+		}
+
+		DemoBuildImage->SetBrushFromTexture(DemoFishTexture, false);
+		FSlateBrush FishBrush = DemoBuildImage->GetBrush();
+		FishBrush.SetImageSize(FVector2D(63.0f, 36.0f));
+		DemoBuildImage->SetBrush(FishBrush);
 		if (UCanvasPanelSlot* DemoSlot = RootCanvas->AddChildToCanvas(DemoBuildImage))
 		{
 			DemoSlot->SetAnchors(FAnchors(0.0f, 0.0f));
-			DemoSlot->SetPosition(FVector2D(302.0f, 282.0f));
-			DemoSlot->SetSize(FVector2D(156.0f, 10.0f));
+			DemoSlot->SetPosition(FVector2D(245.0f, 91.0f));
+			DemoSlot->SetSize(FVector2D(63.0f, 36.0f));
 			DemoSlot->SetZOrder(4);
 		}
 	}

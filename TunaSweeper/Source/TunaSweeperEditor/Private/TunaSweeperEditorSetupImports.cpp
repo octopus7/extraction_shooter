@@ -317,6 +317,7 @@ namespace TunaSweeperEditorSetup
 	bool EnsureTitleUiTextures()
 	{
 		UTexture2D* LogoTexture = nullptr;
+		UTexture2D* FishTexture = nullptr;
 
 		const bool bLogoImported = ImportUiTexture(
 			FUiTextureImportArgs{
@@ -326,8 +327,16 @@ namespace TunaSweeperEditorSetup
 				true
 			},
 			&LogoTexture);
+		const bool bFishImported = ImportUiTexture(
+			FUiTextureImportArgs{
+				GetWorkspaceFilePath(TEXT("Docs/Story/tuna_sweeper_fish_transparent.png")),
+				UITitleTextureAssetPath,
+				TitleFishTextureAssetName,
+				true
+			},
+			&FishTexture);
 
-		return bLogoImported && LogoTexture;
+		return bLogoImported && LogoTexture && bFishImported && FishTexture;
 	}
 
 	bool EnsureOpeningScenarioUiTextures()

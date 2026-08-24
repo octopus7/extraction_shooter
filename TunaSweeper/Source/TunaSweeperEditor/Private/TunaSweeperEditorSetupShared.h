@@ -365,6 +365,7 @@ namespace TunaSweeperEditorSetup
 	const FString UITitleTextureAssetPath = TEXT("/Game/UI/Title");
 	const FString UIStoryTextureAssetPath = TEXT("/Game/UI/Story");
 	const FString TitleLogoTextureAssetName = TEXT("tuna_sweeper_logo_transparent");
+	const FString TitleFishTextureAssetName = TEXT("tuna_sweeper_fish_transparent");
 	const FString TitlePresentationActorAssetName = TEXT("BP_TitlePresentationActor");
 	const FString TitlePresentationActorLabel = TEXT("TS_TitlePresentation");
 	const FString OpeningScenarioBackgroundTextureAssetName = TEXT("T_Story_OpeningLightParticles");
