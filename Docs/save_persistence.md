@@ -33,11 +33,11 @@ Raid item changes keep their existing extraction/death/level-travel save rules a
 - `SaveSlotIndex`
 - `BuildFlavor`: build target identity (`Demo` or `Main`). A save whose value does not match the running target is rejected.
 - `TotalPlaySeconds`
-- `DifficultyStage`: save-slot difficulty stage, clamped to `1..3`; `1` is Farming, `2` is Normal, and `3` is Hard. New slots keep the default `1` until the player confirms a difficulty.
-- `bDifficultySelected`: whether the active slot has confirmed the difficulty selection screen. New save slots start as `false`, so continuing a slot created at the difficulty screen returns to that screen until the player presses game start.
+- `DifficultyStage`: save-slot difficulty stage, clamped to `1..3`; `1` is Farming, `2` is Normal, and `3` is Hard. Main slots keep the default `1` until the player confirms a difficulty. Demo slots atomically initialize to fixed stage `2` when the Demo notice is confirmed.
+- `bDifficultySelected`: whether the slot completed its required start gate. For Main this is difficulty confirmation. For Demo this is the notice confirmation written together with the first slot save; no Demo save is created before confirmation.
 - `LastSavedAtTicks`
 
-Demo and Main use the same logical slot names but separate physical roots: `Saved/SaveGames/Demo/` and `Saved/SaveGames/Main/`. Each root owns slots `TunaSweeperSave_Slot01` through `03`, last-selected-slot settings, backups, and deletion logs. The directory boundary and `BuildFlavor` field together prevent progress, rewards, inventory, currency, unlocks, and world state from crossing targets.
+Demo and Main use the same logical slot-name format but separate physical roots: `Saved/SaveGames/Demo/` and `Saved/SaveGames/Main/`. Demo exposes and accepts only `TunaSweeperSave_Slot01`; Main exposes slots `TunaSweeperSave_Slot01` through `03`. Each root independently owns last-selected-slot settings, backups, and deletion logs. The directory boundary and `BuildFlavor` field together prevent progress, rewards, inventory, currency, unlocks, and world state from crossing targets.
 
 ### Obsolete Save Deletion
 

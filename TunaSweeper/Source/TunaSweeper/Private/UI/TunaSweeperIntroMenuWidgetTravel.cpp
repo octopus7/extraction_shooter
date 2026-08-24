@@ -1,4 +1,5 @@
 #include "TunaSweeperIntroMenuWidgetShared.h"
+#include "Settings/TunaSweeperBuildFlavor.h"
 
 void UTunaSweeperIntroMenuWidget::BeginStartTravel(bool bAlwaysNewStart)
 {
@@ -11,6 +12,28 @@ void UTunaSweeperIntroMenuWidget::BeginStartTravel(bool bAlwaysNewStart)
 	FName TargetLevelName = StartTargetLevelName;
 	if (TunaGameInstance)
 	{
+		if (TunaSweeperBuildFlavor::IsDemo())
+		{
+			const FTunaSweeperSaveSlotSummary DemoSummary = TunaGameInstance->GetSaveSlotSummary(1);
+			if (!DemoSummary.bHasData || !DemoSummary.bDifficultySelected || bAlwaysNewStart)
+			{
+				ShowDifficultySelection();
+				return;
+			}
+			if (!TunaGameInstance->ActivateSaveSlot(1, false))
+			{
+				if (UTunaSweeperToastSubsystem* ToastSubsystem = TunaGameInstance->GetSubsystem<UTunaSweeperToastSubsystem>())
+				{
+					ToastSubsystem->ShowToast(ResolveUiText(
+						FName(TEXT("ui.toast.load_failed")),
+						FText::FromString(TEXT("저장 데이터를 불러오지 못했습니다."))));
+				}
+				return;
+			}
+			BeginTravelToLevel(TunaSweeperBuildFlavor::GetBunkerLevelName());
+			return;
+		}
+
 		const int32 ActiveSaveSlotIndex = TunaGameInstance->GetActiveSaveSlotIndex();
 		if (bAlwaysNewStart)
 		{
@@ -22,7 +45,10 @@ void UTunaSweeperIntroMenuWidget::BeginStartTravel(bool bAlwaysNewStart)
 		else
 		{
 			const FTunaSweeperSaveSlotSummary Summary = TunaGameInstance->GetSaveSlotSummary(ActiveSaveSlotIndex);
-			TunaGameInstance->ActivateSaveSlot(ActiveSaveSlotIndex, !Summary.bHasData);
+			if (!TunaGameInstance->ActivateSaveSlot(ActiveSaveSlotIndex, !Summary.bHasData))
+			{
+				return;
+			}
 		}
 		if (!TunaGameInstance->IsActiveSaveSlotDifficultySelected())
 		{

@@ -26,6 +26,7 @@
 #include "InputActionValue.h"
 #include "InputCoreTypes.h"
 #include "Misc/ConfigCacheIni.h"
+#include "Settings/TunaSweeperBuildFlavor.h"
 #include "Subsystem/TunaSweeperKeyboardInputSubsystem.h"
 #include "Subsystem/TunaSweeperBgmSubsystem.h"
 #include "Subsystem/TunaSweeperHousingSubsystem.h"
@@ -848,7 +849,10 @@ bool ATunaSweeperPlayerController::ShowBunkerEntryFadeIfNeeded()
 
 void ATunaSweeperPlayerController::MaybeStartMoleIntroDialogue()
 {
-	StartMoleIntroDialogue(false);
+	if (TunaSweeperBuildFlavor::IsDemo())
+	{
+		StartMoleIntroDialogue(false);
+	}
 }
 
 bool ATunaSweeperPlayerController::StartMoleIntroDialogue(bool bForceReplay)
@@ -1161,7 +1165,7 @@ bool ATunaSweeperPlayerController::IsBunkerMap() const
 bool ATunaSweeperPlayerController::IsRaidMap() const
 {
 	const UWorld* World = GetWorld();
-	return World && World->GetMapName().EndsWith(TEXT("RaidMap"));
+	return World && TunaSweeperBuildFlavor::IsRaidGameplayLevelName(FName(*World->GetMapName()));
 }
 
 bool ATunaSweeperPlayerController::FindDropLocationNearPlayer(FVector& OutDropLocation) const

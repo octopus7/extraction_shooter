@@ -20,4 +20,10 @@ namespace TunaSweeperBuildFlavor
 	TUNASWEEPER_API FString GetQuestDefinitionsPath();
 	TUNASWEEPER_API void GetQuestTextStringPaths(TArray<FString>& OutPaths);
 	TUNASWEEPER_API FName ResolveInitialGameplayLevel(FName DemoLevel, FName MainFallbackLevel);
+	TUNASWEEPER_API int32 GetMaximumSaveSlotIndex();
+	TUNASWEEPER_API FName GetBunkerLevelName();
+	TUNASWEEPER_API FName GetRaidGameplayLevelName();
+	TUNASWEEPER_API bool IsRaidGameplayLevelName(FName LevelName);
+	TUNASWEEPER_API FName ResolveGameplayLevelName(FName LevelName);
+	TUNASWEEPER_API FString GetRuntimePlacementDataPath(const TCHAR* FileName);
 }

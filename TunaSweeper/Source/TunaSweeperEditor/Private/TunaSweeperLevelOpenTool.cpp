@@ -11,7 +11,7 @@
 namespace TunaSweeperLevelOpenTool
 {
 	const TCHAR* IntroMapPackagePath = TEXT("/Game/IntroMap");
-	const TCHAR* RaidMapPackagePath = TEXT("/Game/RaidMap");
+	const TCHAR* RaidMapPackagePath = TEXT("/Game/MainRaid/RaidMap");
 	const TCHAR* BunkerMapPackagePath = TEXT("/Game/BunkerMap");
 
 	void EnsureTunaSweeperTopMenu()

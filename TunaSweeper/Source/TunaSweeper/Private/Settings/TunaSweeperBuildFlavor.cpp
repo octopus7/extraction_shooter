@@ -14,10 +14,39 @@ namespace TunaSweeperBuildFlavor
 	namespace
 	{
 		constexpr const TCHAR* MainPayloadManifestName = TEXT("main-payload.json");
+		constexpr const TCHAR* MainRaidLevelPath = TEXT("/Game/MainRaid/RaidMap");
 
 		FString GetPublicDataPath(const TCHAR* FileName)
 		{
 			return FPaths::ConvertRelativePathToFull(FPaths::Combine(FPaths::ProjectContentDir(), TEXT("Data"), FileName));
+		}
+
+		FString NormalizeLevelName(FName LevelName)
+		{
+			FString Result = LevelName.ToString();
+			int32 SlashIndex = INDEX_NONE;
+			if (Result.FindLastChar(TEXT('/'), SlashIndex))
+			{
+				Result.RightChopInline(SlashIndex + 1);
+			}
+			while (Result.StartsWith(TEXT("UEDPIE_")))
+			{
+				int32 PrefixEnd = INDEX_NONE;
+				if (!Result.FindChar(TEXT('_'), PrefixEnd))
+				{
+					break;
+				}
+				Result.RightChopInline(PrefixEnd + 1);
+				if (Result.Len() > 0 && FChar::IsDigit(Result[0]))
+				{
+					int32 NextUnderscore = INDEX_NONE;
+					if (Result.FindChar(TEXT('_'), NextUnderscore))
+					{
+						Result.RightChopInline(NextUnderscore + 1);
+					}
+				}
+			}
+			return Result;
 		}
 	}
 
@@ -115,5 +144,64 @@ namespace TunaSweeperBuildFlavor
 		}
 
 		return FName(*InitialLevel);
+	}
+
+	int32 GetMaximumSaveSlotIndex()
+	{
+		return IsDemo() ? 1 : 3;
+	}
+
+	FName GetBunkerLevelName()
+	{
+		return FName(TEXT("BunkerMap"));
+	}
+
+	FName GetRaidGameplayLevelName()
+	{
+		if (IsDemo())
+		{
+			return FName(TEXT("DemoRaidMap"));
+		}
+
+		FString ManifestText;
+		const FString ManifestPath = FPaths::Combine(GetMainPayloadRoot(), MainPayloadManifestName);
+		TSharedPtr<FJsonObject> Manifest;
+		FString RaidLevel;
+		if (FFileHelper::LoadFileToString(ManifestText, *ManifestPath) &&
+			FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(ManifestText), Manifest) &&
+			Manifest.IsValid() && Manifest->TryGetStringField(TEXT("raid_level"), RaidLevel) && !RaidLevel.IsEmpty())
+		{
+			return RaidLevel == TEXT("RaidMap") ? FName(MainRaidLevelPath) : FName(*RaidLevel);
+		}
+
+		return FName(MainRaidLevelPath);
+	}
+
+	bool IsRaidGameplayLevelName(FName LevelName)
+	{
+		return NormalizeLevelName(LevelName) == NormalizeLevelName(GetRaidGameplayLevelName());
+	}
+
+	FName ResolveGameplayLevelName(FName LevelName)
+	{
+		const FString Normalized = NormalizeLevelName(LevelName);
+		if (Normalized == TEXT("RaidMap") || Normalized == TEXT("DemoRaidMap"))
+		{
+			return GetRaidGameplayLevelName();
+		}
+		return LevelName;
+	}
+
+	FString GetRuntimePlacementDataPath(const TCHAR* FileName)
+	{
+		if (IsDemo())
+		{
+			return GetPublicDataPath(FileName);
+		}
+
+		const FString ProtectedPath = FPaths::Combine(GetMainPayloadRoot(), TEXT("Data"), FileName);
+		return FPaths::FileExists(ProtectedPath)
+			? ProtectedPath
+			: GetPublicDataPath(*FPaths::Combine(TEXT("MainRuntimeDefaults"), FileName));
 	}
 }

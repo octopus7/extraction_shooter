@@ -39,7 +39,7 @@ namespace TunaSweeperEnemyAIDebug
 	const FName SightColumnName(TEXT("Sight"));
 	const FName TimeColumnName(TEXT("Time"));
 	const FName ReasonColumnName(TEXT("Reason"));
-	const FString RaidMapPackageName(TEXT("/Game/RaidMap"));
+	const FString RaidMapPackageName(TEXT("/Game/MainRaid/RaidMap"));
 	const TCHAR* SkirtPhysicsDebugConsoleVariables[] = {
 		TEXT("p.Chaos.DebugDraw.Enabled"),
 		TEXT("p.RigidBodyNode.DebugDraw"),

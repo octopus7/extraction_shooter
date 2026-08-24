@@ -30,9 +30,7 @@ FName UTunaSweeperGameInstance::ResolveInitialGameplayLevelName()
 		return FName(TEXT("IntroMap"));
 	}
 
-	const FName DemoLevel = IsScenarioProgressFlagSet(TunaSweeperScenario::OpeningScenarioFlag)
-		? TunaSweeperScenario::BunkerMapName
-		: TunaSweeperScenario::OpeningScenarioMapName;
+	const FName DemoLevel = TunaSweeperScenario::BunkerMapName;
 	return TunaSweeperBuildFlavor::ResolveInitialGameplayLevel(
 		DemoLevel,
 		TunaSweeperScenario::BunkerMapName);
@@ -41,18 +39,23 @@ FName UTunaSweeperGameInstance::ResolveInitialGameplayLevelName()
 void UTunaSweeperGameInstance::BeginScenarioBunkerEntry(FName ScenarioFlag)
 {
 	PendingScenarioCompletionFlag = ScenarioFlag;
+	bPendingScenarioBunkerEntryPresentation = true;
 }
 
 bool UTunaSweeperGameInstance::CompletePendingScenarioBunkerEntryIfNeeded()
 {
-	if (PendingScenarioCompletionFlag.IsNone())
+	if (!bPendingScenarioBunkerEntryPresentation)
 	{
 		return false;
 	}
 
 	const FName ScenarioFlag = PendingScenarioCompletionFlag;
 	PendingScenarioCompletionFlag = NAME_None;
-	MarkScenarioProgressFlag(ScenarioFlag, true);
+	bPendingScenarioBunkerEntryPresentation = false;
+	if (!ScenarioFlag.IsNone())
+	{
+		MarkScenarioProgressFlag(ScenarioFlag, true);
+	}
 	return true;
 }
 

@@ -225,6 +225,12 @@ void UTunaSweeperIntroMenuWidget::CloseDifficultyAdjustment()
 
 void UTunaSweeperIntroMenuWidget::ShowSaveSlotSelection()
 {
+	if (TunaSweeperBuildFlavor::IsDemo())
+	{
+		ShowMainMenu();
+		return;
+	}
+
 	SetTitlePresentationMainMenuActive(false);
 	HideDeleteConfirmDialog();
 	ResetDeleteHoldProgress();

@@ -22,6 +22,7 @@
 #include "Interaction/TunaSweeperPeriodicNoiseEmitterActor.h"
 #include "Interaction/TunaSweeperPiggyBankActor.h"
 #include "Player/TunaSweeperPlayerController.h"
+#include "Settings/TunaSweeperBuildFlavor.h"
 #include "Interaction/TunaSweeperPickupItemActor.h"
 #include "Interaction/TunaSweeperSandbagCoverActor.h"
 #include "Interaction/TunaSweeperSelfDestructInteractableActor.h"
@@ -2406,7 +2407,7 @@ void UTunaSweeperEnemySpawnSubsystem::ResetLoadedGameplayInteractionActorSpawnDa
 
 FString UTunaSweeperEnemySpawnSubsystem::GetEnemySpawnJsonPath() const
 {
-	return FPaths::Combine(FPaths::ProjectContentDir(), TunaSweeperEnemySpawn::EnemySpawnsJsonRelativePath);
+	return TunaSweeperBuildFlavor::GetRuntimePlacementDataPath(TEXT("EnemySpawns.json"));
 }
 
 FString UTunaSweeperEnemySpawnSubsystem::GetEnemyCombatProfileJsonPath() const
@@ -2416,27 +2417,27 @@ FString UTunaSweeperEnemySpawnSubsystem::GetEnemyCombatProfileJsonPath() const
 
 FString UTunaSweeperEnemySpawnSubsystem::GetLootContainerSpawnJsonPath() const
 {
-	return FPaths::Combine(FPaths::ProjectContentDir(), TunaSweeperEnemySpawn::LootContainerSpawnsJsonRelativePath);
+	return TunaSweeperBuildFlavor::GetRuntimePlacementDataPath(TEXT("LootContainerSpawns.json"));
 }
 
 FString UTunaSweeperEnemySpawnSubsystem::GetTransparentObstacleSpawnJsonPath() const
 {
-	return FPaths::Combine(FPaths::ProjectContentDir(), TunaSweeperEnemySpawn::TransparentObstacleSpawnsJsonRelativePath);
+	return TunaSweeperBuildFlavor::GetRuntimePlacementDataPath(TEXT("TransparentObstacleSpawns.json"));
 }
 
 FString UTunaSweeperEnemySpawnSubsystem::GetWorldProgressObjectSpawnJsonPath() const
 {
-	return FPaths::Combine(FPaths::ProjectContentDir(), TunaSweeperEnemySpawn::WorldProgressObjectSpawnsJsonRelativePath);
+	return TunaSweeperBuildFlavor::GetRuntimePlacementDataPath(TEXT("WorldProgressObjectSpawns.json"));
 }
 
 FString UTunaSweeperEnemySpawnSubsystem::GetWarpPointSpawnJsonPath() const
 {
-	return FPaths::Combine(FPaths::ProjectContentDir(), TunaSweeperEnemySpawn::WarpPointSpawnsJsonRelativePath);
+	return TunaSweeperBuildFlavor::GetRuntimePlacementDataPath(TEXT("WarpPointSpawns.json"));
 }
 
 FString UTunaSweeperEnemySpawnSubsystem::GetGameplayInteractionActorSpawnJsonPath() const
 {
-	return FPaths::Combine(FPaths::ProjectContentDir(), TunaSweeperEnemySpawn::GameplayInteractionActorSpawnsJsonRelativePath);
+	return TunaSweeperBuildFlavor::GetRuntimePlacementDataPath(TEXT("GameplayInteractionSpawns.json"));
 }
 
 bool UTunaSweeperEnemySpawnSubsystem::DoesLevelNameMatchWorld(FName LevelName, const UWorld* World) const
@@ -2446,7 +2447,8 @@ bool UTunaSweeperEnemySpawnSubsystem::DoesLevelNameMatchWorld(FName LevelName, c
 		return false;
 	}
 
-	const FString SpawnLevelName = TunaSweeperEnemySpawn::NormalizeLevelName(LevelName.ToString());
+	const FString SpawnLevelName = TunaSweeperEnemySpawn::NormalizeLevelName(
+		TunaSweeperBuildFlavor::ResolveGameplayLevelName(LevelName).ToString());
 	const FString WorldMapName = TunaSweeperEnemySpawn::NormalizeLevelName(World->GetMapName());
 	const FString WorldPackageName = TunaSweeperEnemySpawn::NormalizeLevelName(World->GetOutermost()->GetName());
 	return SpawnLevelName.Equals(WorldMapName, ESearchCase::IgnoreCase) ||
@@ -2468,7 +2470,7 @@ void UTunaSweeperEnemySpawnSubsystem::ConfigureGameplayInteractionActor(
 		if (ATunaSweeperLevelTravelInteractableActor* LevelTravelActor = Cast<ATunaSweeperLevelTravelInteractableActor>(SpawnedActor))
 		{
 			LevelTravelActor->ConfigureLevelTravelDefaults(
-				SpawnDefinition.TargetLevelName,
+				TunaSweeperBuildFlavor::ResolveGameplayLevelName(SpawnDefinition.TargetLevelName),
 				SpawnDefinition.InteractionDisplayName,
 				SpawnDefinition.MarkerWidgetClass,
 				SpawnDefinition.TransitionMediaSource,
@@ -2486,7 +2488,7 @@ void UTunaSweeperEnemySpawnSubsystem::ConfigureGameplayInteractionActor(
 		if (ATunaSweeperExtractionPointActor* ExtractionPointActor = Cast<ATunaSweeperExtractionPointActor>(SpawnedActor))
 		{
 			ExtractionPointActor->ConfigureExtractionPointDefaults(
-				SpawnDefinition.TargetLevelName,
+				TunaSweeperBuildFlavor::ResolveGameplayLevelName(SpawnDefinition.TargetLevelName),
 				SpawnDefinition.ExtractionRadius,
 				SpawnDefinition.ExtractionHoldSeconds,
 				SpawnDefinition.ExtractionRadiusRingWidth,

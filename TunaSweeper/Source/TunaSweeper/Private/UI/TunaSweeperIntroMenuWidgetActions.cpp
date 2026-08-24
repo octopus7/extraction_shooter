@@ -1,6 +1,7 @@
 #include "TunaSweeperIntroMenuWidgetShared.h"
 #include "Component/TunaSweeperScratchComponent.h"
 #include "Player/TunaSweeperPlayerController.h"
+#include "Settings/TunaSweeperBuildFlavor.h"
 #include "UI/TunaSweeperDebugDisplaySettings.h"
 
 void UTunaSweeperIntroMenuWidget::HandleStartClicked()
@@ -10,6 +11,10 @@ void UTunaSweeperIntroMenuWidget::HandleStartClicked()
 
 void UTunaSweeperIntroMenuWidget::HandleSlotSelectClicked()
 {
+	if (TunaSweeperBuildFlavor::IsDemo())
+	{
+		return;
+	}
 	ShowSaveSlotSelection();
 }
 
@@ -62,12 +67,37 @@ void UTunaSweeperIntroMenuWidget::HandleDifficultyHardClicked()
 
 void UTunaSweeperIntroMenuWidget::HandleDifficultyStartClicked()
 {
-	if (bStartTravelPending || SelectedDifficultyStage == INDEX_NONE)
+	if (bStartTravelPending)
 	{
 		return;
 	}
 
 	UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GetGameInstance());
+	if (TunaSweeperBuildFlavor::IsDemo() && !bDifficultyAdjustmentMode)
+	{
+		if (!TunaGameInstance || !TunaGameInstance->DeleteSaveSlotAndStartNewGame(1))
+		{
+			if (TunaGameInstance)
+			{
+				if (UTunaSweeperToastSubsystem* ToastSubsystem = TunaGameInstance->GetSubsystem<UTunaSweeperToastSubsystem>())
+				{
+					ToastSubsystem->ShowToast(ResolveUiText(
+						FName(TEXT("ui.toast.save_failed")),
+						FText::FromString(TEXT("저장 데이터를 만들지 못했습니다."))));
+				}
+			}
+			return;
+		}
+
+		TunaGameInstance->BeginScenarioBunkerEntry(NAME_None);
+		BeginTravelToLevel(TunaSweeperBuildFlavor::GetBunkerLevelName());
+		return;
+	}
+
+	if (SelectedDifficultyStage == INDEX_NONE)
+	{
+		return;
+	}
 	if (!TunaGameInstance ||
 		!TunaGameInstance->SetActiveSaveSlotDifficultyStage(SelectedDifficultyStage, true))
 	{

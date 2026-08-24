@@ -1,4 +1,5 @@
 #include "TunaSweeperGameInstanceShared.h"
+#include "Settings/TunaSweeperBuildFlavor.h"
 
 int32 UTunaSweeperGameInstance::GetCurrentExperienceLevel() const
 {
@@ -123,7 +124,7 @@ int32 UTunaSweeperGameInstance::AddRaidExperience(int32 ExperienceAmount)
 	if (!bRaidExperienceSessionActive)
 	{
 		const UWorld* World = GetWorld();
-		if (!World || !IsMapNameMatch(FName(*World->GetMapName()), TEXT("RaidMap")))
+		if (!World || !TunaSweeperBuildFlavor::IsRaidGameplayLevelName(FName(*World->GetMapName())))
 		{
 			return 0;
 		}

@@ -1,4 +1,5 @@
 #include "TunaSweeperIntroMenuWidgetShared.h"
+#include "Settings/TunaSweeperBuildFlavor.h"
 
 void UTunaSweeperIntroMenuWidget::EnsureAlwaysNewStartButton()
 {
@@ -86,6 +87,7 @@ void UTunaSweeperIntroMenuWidget::EnsureAlwaysNewStartButton()
 
 void UTunaSweeperIntroMenuWidget::SetAlwaysNewStartButtonVisible(bool bVisible)
 {
+	bVisible = bVisible && !TunaSweeperBuildFlavor::IsDemo();
 	EnsureAlwaysNewStartButton();
 	if (AlwaysNewStartButtonContainer)
 	{

@@ -6857,3 +6857,12 @@
 - `main`과 `origin/main`의 병합 중 `Docs/questions.md`, `Docs/requests.md` 끝에 양쪽이 추가한 기록 충돌을 시간순으로 모두 보존하고 충돌 표식을 제거했다.
 - `Tools/QuestFlowSimulator`에서 `Tools/QuestStudio`로 추적 파일만 이동한 뒤 남아 있던 `.wrangler` 로컬 상태, `node_modules`, `dist`, 생성 `data/seed.sql`, `worker-configuration.d.ts`를 새 경로로 이동했다.
 - 새 `Tools/QuestStudio` 경로에서 테스트 20개, 테스트 타입 검사와 프로덕션 빌드를 통과했다.
+
+## 2026-08-24 18:49:29 (소요시간: 00:49:27)
+
+- Demo 타이틀에서 슬롯·난이도 선택을 숨기고 슬롯 1만 허용했으며, Demo 저장 데이터가 본편과 연동되지 않는다는 다국어 안내를 확인하기 전에는 세이브를 만들지 않도록 변경했다.
+- 안내 확인 시 고정 Normal 단계와 시작 게이트 완료 상태를 슬롯 1에 저장하고, 저장 성공 후에만 프롤로그·인트로 영상 없이 공유 `BunkerMap`으로 직접 이동해 Demo 벙커 진입 페이드와 스토리 연출로 이어지도록 구현했다.
+- Demo 레이드를 `/Game/DemoRaidMap`, Main 레이드를 `/Game/MainRaid/RaidMap`으로 분리하고 논리 `RaidMap` 참조를 BuildFlavor별 실제 맵으로 해석하도록 저장 전환, 경험치, 퀘스트, 지도, 스폰과 에디터 도구 판정을 갱신했다.
+- Demo는 공개 런타임 배치 JSON, Main은 접근 제한 payload의 선택적 런타임 배치 JSON 또는 빈 Main 기본 데이터를 읽도록 분리하고 Main 패키징 스테이징에 선택적 배치 파일 복사를 추가했다.
+- Steam/STOVE Demo 패키징에 Demo 전용 맵 3개와 Cook CustomConfig를 명시하고 `OpeningScenarioMap`, Main 레이드 맵, `intro.mp4`가 Demo 결과에 포함되지 않도록 구성했다.
+- UE 5.7 Editor, Demo, Main Development 빌드와 `TunaSweeper.BuildFlavor.Paths` 자동화 테스트를 통과했으며, 최종 Demo Cook 결과에서 `IntroMap`, `BunkerMap`, `DemoRaidMap`만 생성되는 것을 확인했다. 기존 BallisticsVFX 누락 의존성과 `Shards_Mat` 셰이더 경고는 남아 있지만 Cook 오류는 없었다.

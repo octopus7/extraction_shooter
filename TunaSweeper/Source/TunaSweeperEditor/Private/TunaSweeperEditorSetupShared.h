@@ -487,7 +487,7 @@ namespace TunaSweeperEditorSetup
 	const FString IntroMapPackagePath = TEXT("/Game/IntroMap");
 	const FString OpeningScenarioMapPackagePath = TEXT("/Game/OpeningScenarioMap");
 	const FString BunkerMapPackagePath = TEXT("/Game/BunkerMap");
-	const FString RaidMapPackagePath = TEXT("/Game/RaidMap");
+	const FString RaidMapPackagePath = TEXT("/Game/MainRaid/RaidMap");
 
 	struct FUiTextureImportArgs
 	{

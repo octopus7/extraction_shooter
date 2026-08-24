@@ -31,7 +31,9 @@ Demo 패키징 직전에는 Main 임시 폴더를 제거하고, 패키징 후 �
 
 ## 새 게임과 타이틀
 
-난이도 확정 후 Demo는 기존 오프닝 흐름으로, Main은 `main-payload.json`의 `initial_level`로 진입한다. Main manifest를 읽을 수 없거나 값이 비어 있으면 `BunkerMap`을 안전한 기본값으로 쓴다.
+Demo는 저장 슬롯 선택과 난이도 선택을 노출하지 않고 슬롯 1만 사용한다. 새 게임 시작 시 먼저 "이 데모의 저장 데이터는 본편과 연동되지 않습니다." 알림을 표시하며, 확인 전에는 슬롯 파일을 만들지 않는다. 확인 시 고정 내부 난이도 Normal과 시작 게이트 완료 상태를 한 번에 저장하고, 저장이 성공한 경우에만 `BunkerMap`으로 이동한다. 프롤로그 맵과 인트로 영상은 거치지 않으며 벙커 진입 페이드 뒤 Demo 스토리 연출로 이어진다.
+
+Main은 기존 난이도 선택을 유지하고 `main-payload.json`의 `initial_level`로 진입한다. Main manifest를 읽을 수 없거나 값이 비어 있으면 `BunkerMap`을 안전한 기본값으로 쓴다.
 
 Demo 타깃의 타이틀 화면에는 `DemoBuildImage`라는 별도 이미지 위젯을 노출한다. Main 타깃에서는 같은 위젯을 접는다. 이 판정도 BuildFlavor에서 직접 가져오며 데이터 문자열 키와 관계없다.
 
@@ -41,6 +43,17 @@ Demo 타깃의 타이틀 화면에는 `DemoBuildImage`라는 별도 이미지 �
 
 - Demo: `Saved/SaveGames/Demo/`
 - Main: `Saved/SaveGames/Main/`
+
+Demo는 슬롯 1만 허용하고 Main은 슬롯 1~3을 허용한다. Demo 알림 확인 전에는 gameplay save가 존재하지 않는다.
+
+## 맵과 런타임 배치 데이터 경계
+
+- `BunkerMap`은 Demo/Main이 공유한다.
+- Main 레이드 역할의 기본 맵은 `/Game/MainRaid/RaidMap`이며 manifest의 선택적 `raid_level`로 교체할 수 있다. `MainRaid` 디렉터리는 Demo Cook에서 제외된다.
+- Demo 레이드 역할은 `DemoRaidMap`으로 고정된다. 런타임 데이터의 논리적 `RaidMap` 참조는 현재 빌드의 레이드 역할로 원자적으로 해석된다.
+- Demo 런타임 배치 JSON은 공개 `Content/Data/`에서 읽는다.
+- Main 런타임 배치 JSON은 접근 제한 payload의 `Data/` 파일을 우선 읽고, 파일이 없으면 공개 저장소의 빈 `Content/Data/MainRuntimeDefaults/`를 사용한다. 따라서 Demo 배치 데이터가 Main에 우발적으로 섞이지 않는다.
+- Demo 패키징은 `IntroMap`, `BunkerMap`, `DemoRaidMap`만 명시적으로 Cook하며 `OpeningScenarioMap`, `RaidMap`, `intro.mp4`를 포함하지 않는다.
 
 각 루트는 슬롯, 최근 선택 슬롯 설정, `Backups/`, `AutoDeletedSaveLog.txt`를 독립적으로 가진다. 세이브 객체에도 `BuildFlavor`를 기록하고 현재 타깃과 다르면 로드와 덮어쓰기를 거부한다.
 

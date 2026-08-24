@@ -1193,6 +1193,11 @@ bool UTunaSweeperQuestSubsystem::IsMapNameMatch(FName ActualMapName, const TCHAR
 	{
 		return false;
 	}
+	if (FCString::Stricmp(ExpectedMapName, TEXT("RaidMap")) == 0 &&
+		TunaSweeperBuildFlavor::IsRaidGameplayLevelName(ActualMapName))
+	{
+		return true;
+	}
 
 	const FString ActualMapString = ActualMapName.ToString();
 	return ActualMapString == ExpectedMapName || ActualMapString.EndsWith(FString::Printf(TEXT("_%s"), ExpectedMapName));

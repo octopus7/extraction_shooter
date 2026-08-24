@@ -1,5 +1,6 @@
 #include "TunaSweeperIntroMenuWidgetShared.h"
 #include "Player/TunaSweeperPlayerController.h"
+#include "Settings/TunaSweeperBuildFlavor.h"
 #include "UI/TunaSweeperDebugDisplaySettings.h"
 
 void UTunaSweeperIntroMenuWidget::RefreshMainMenu()
@@ -12,7 +13,16 @@ void UTunaSweeperIntroMenuWidget::RefreshMainMenu()
 
 	if (CurrentSaveSlotText)
 	{
+		CurrentSaveSlotText->SetVisibility(TunaSweeperBuildFlavor::IsDemo()
+			? ESlateVisibility::Collapsed
+			: ESlateVisibility::HitTestInvisible);
 		CurrentSaveSlotText->SetText(BuildCurrentSaveSlotText(Summary.SaveSlotIndex));
+	}
+	if (SlotSelectButton)
+	{
+		SlotSelectButton->SetVisibility(TunaSweeperBuildFlavor::IsDemo()
+			? ESlateVisibility::Collapsed
+			: ESlateVisibility::Visible);
 	}
 
 	if (StartButtonText)
@@ -23,7 +33,7 @@ void UTunaSweeperIntroMenuWidget::RefreshMainMenu()
 				FName(TEXT("ui.title.new_game")),
 				FText::FromString(TEXT("\uC0C8\uAC8C\uC784 \uC2DC\uC791"))));
 		}
-		else if (!Summary.bDifficultySelected)
+		else if (!Summary.bDifficultySelected && !TunaSweeperBuildFlavor::IsDemo())
 		{
 			StartButtonText->SetText(FText::FromString(TEXT("\uB09C\uC774\uB3C4 \uC120\uD0DD")));
 		}

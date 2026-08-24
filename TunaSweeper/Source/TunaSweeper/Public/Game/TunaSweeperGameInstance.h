@@ -1117,6 +1117,9 @@ private:
 	FName PendingScenarioCompletionFlag;
 
 	UPROPERTY(Transient)
+	bool bPendingScenarioBunkerEntryPresentation = false;
+
+	UPROPERTY(Transient)
 	int32 ActiveSaveSlotIndex = 1;
 
 	UPROPERTY(Transient)

@@ -2,6 +2,7 @@
 
 #include "Engine/World.h"
 #include "Misc/PackageName.h"
+#include "Settings/TunaSweeperBuildFlavor.h"
 
 namespace
 {
@@ -96,6 +97,11 @@ bool UTunaSweeperMapDefinition::MatchesWorld(const UWorld* InWorld) const
 
 	const FString DefinitionWorldPackageName = UWorld::RemovePIEPrefix(World.ToSoftObjectPath().GetLongPackageName());
 	if (!DefinitionWorldPackageName.IsEmpty() && DefinitionWorldPackageName == InWorldPackageName)
+	{
+		return true;
+	}
+	if (MapId == FName(TEXT("RaidMap")) &&
+		TunaSweeperBuildFlavor::IsRaidGameplayLevelName(FName(*InWorldPackageName)))
 	{
 		return true;
 	}

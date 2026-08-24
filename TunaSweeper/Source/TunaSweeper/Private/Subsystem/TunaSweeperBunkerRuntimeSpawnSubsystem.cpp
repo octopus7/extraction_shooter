@@ -11,6 +11,7 @@
 #include "Misc/Paths.h"
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
+#include "Settings/TunaSweeperBuildFlavor.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogTunaSweeperBunkerRuntimeSpawn, Log, All);
 
@@ -296,7 +297,7 @@ void UTunaSweeperBunkerRuntimeSpawnSubsystem::ResetLoadedBunkerCharacterSpawnDat
 
 FString UTunaSweeperBunkerRuntimeSpawnSubsystem::GetBunkerCharacterSpawnJsonPath() const
 {
-	return FPaths::Combine(FPaths::ProjectContentDir(), TunaSweeperBunkerRuntimeSpawn::BunkerCharacterSpawnsJsonRelativePath);
+	return TunaSweeperBuildFlavor::GetRuntimePlacementDataPath(TEXT("BunkerCharacterSpawns.json"));
 }
 
 bool UTunaSweeperBunkerRuntimeSpawnSubsystem::DoesLevelNameMatchWorld(FName LevelName, const UWorld* World) const
@@ -306,7 +307,8 @@ bool UTunaSweeperBunkerRuntimeSpawnSubsystem::DoesLevelNameMatchWorld(FName Leve
 		return false;
 	}
 
-	const FString SpawnLevelName = TunaSweeperBunkerRuntimeSpawn::NormalizeLevelName(LevelName.ToString());
+	const FString SpawnLevelName = TunaSweeperBunkerRuntimeSpawn::NormalizeLevelName(
+		TunaSweeperBuildFlavor::ResolveGameplayLevelName(LevelName).ToString());
 	const FString WorldMapName = TunaSweeperBunkerRuntimeSpawn::NormalizeLevelName(World->GetMapName());
 	const FString WorldPackageName = TunaSweeperBunkerRuntimeSpawn::NormalizeLevelName(World->GetOutermost()->GetName());
 	return SpawnLevelName.Equals(WorldMapName, ESearchCase::IgnoreCase) ||

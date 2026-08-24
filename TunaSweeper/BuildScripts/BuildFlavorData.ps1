@@ -12,6 +12,16 @@ $projectDirectory = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..')
 $mainSourceDirectory = [System.IO.Path]::GetFullPath((Join-Path $projectDirectory 'External\MainPayload'))
 $stagedDirectory = [System.IO.Path]::GetFullPath((Join-Path $projectDirectory 'Content\Data\MainPayloadStaged'))
 $contentDirectory = [System.IO.Path]::GetFullPath((Join-Path $projectDirectory 'Content'))
+$optionalRuntimeDataFiles = @(
+    'BunkerCharacterSpawns.json',
+    'EnemySpawns.json',
+    'GameplayInteractionSpawns.json',
+    'LootContainerSpawns.json',
+    'MemoSpawns.json',
+    'TransparentObstacleSpawns.json',
+    'WarpPointSpawns.json',
+    'WorldProgressObjectSpawns.json'
+)
 
 if (-not $stagedDirectory.StartsWith($contentDirectory, [System.StringComparison]::OrdinalIgnoreCase)) {
     throw "Unsafe staged Main payload path: $stagedDirectory"
@@ -65,6 +75,12 @@ switch ($Mode) {
         Copy-Item -LiteralPath (Join-Path $mainSourceDirectory 'main-payload.json') -Destination $stagedDirectory
         Copy-Item -LiteralPath (Join-Path $mainSourceDirectory 'Data\QuestDefinitions.json') -Destination (Join-Path $stagedDirectory 'Data')
         Copy-Item -LiteralPath (Join-Path $mainSourceDirectory 'Data\QuestTextStrings.csv') -Destination (Join-Path $stagedDirectory 'Data')
+        foreach ($fileName in $optionalRuntimeDataFiles) {
+            $sourcePath = Join-Path $mainSourceDirectory (Join-Path 'Data' $fileName)
+            if (Test-Path -LiteralPath $sourcePath -PathType Leaf) {
+                Copy-Item -LiteralPath $sourcePath -Destination (Join-Path $stagedDirectory 'Data')
+            }
+        }
         Write-Host "Validated and staged Main payload: $stagedDirectory"
     }
     'PrepareDemo' {

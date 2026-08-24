@@ -1,4 +1,5 @@
 #include "TunaSweeperIntroMenuWidgetShared.h"
+#include "Settings/TunaSweeperBuildFlavor.h"
 
 void UTunaSweeperIntroMenuWidget::EnsureDifficultySelectionPanel()
 {
@@ -425,17 +426,26 @@ void UTunaSweeperIntroMenuWidget::SelectDifficultyStage(int32 DifficultyStage)
 void UTunaSweeperIntroMenuWidget::RefreshDifficultySelectionPanel()
 {
 	LoadDifficultyDefinitions();
+	const bool bDemoNotice = TunaSweeperBuildFlavor::IsDemo() && !bDifficultyAdjustmentMode;
+	if (bDemoNotice)
+	{
+		SelectedDifficultyStage = 2;
+	}
 
 	if (DifficultyTitleText)
 	{
-		DifficultyTitleText->SetText(FText::FromString(
+		DifficultyTitleText->SetText(bDemoNotice
+			? ResolveUiText(FName(TEXT("ui.title.demo_notice_title")), FText::FromString(TEXT("데모 안내")))
+			: FText::FromString(
 			bDifficultyAdjustmentMode
 				? TEXT("\uB09C\uC774\uB3C4 \uC870\uC815")
 				: TEXT("\uB09C\uC774\uB3C4 \uC120\uD0DD")));
 	}
 	if (DifficultyStartButtonText)
 	{
-		DifficultyStartButtonText->SetText(FText::FromString(
+		DifficultyStartButtonText->SetText(bDemoNotice
+			? ResolveUiText(FName(TEXT("ui.common.confirm")), FText::FromString(TEXT("확인")))
+			: FText::FromString(
 			bDifficultyAdjustmentMode
 				? TEXT("\uC801\uC6A9")
 				: TEXT("\uAC8C\uC784 \uC2DC\uC791")));
@@ -470,9 +480,36 @@ void UTunaSweeperIntroMenuWidget::RefreshDifficultySelectionPanel()
 		DifficultyHardTitleText,
 		DifficultyHardDescriptionText);
 
+	if (DifficultyFarmingButton)
+	{
+		DifficultyFarmingButton->SetVisibility(bDemoNotice ? ESlateVisibility::Collapsed : ESlateVisibility::Visible);
+	}
+	if (DifficultyHardButton)
+	{
+		DifficultyHardButton->SetVisibility(bDemoNotice ? ESlateVisibility::Collapsed : ESlateVisibility::Visible);
+	}
+	if (DifficultyNormalButton)
+	{
+		DifficultyNormalButton->SetVisibility(bDemoNotice ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Visible);
+	}
+	if (bDemoNotice)
+	{
+		if (DifficultyNormalTitleText)
+		{
+			DifficultyNormalTitleText->SetText(ResolveUiText(
+				FName(TEXT("ui.title.demo_label")), FText::FromString(TEXT("데모"))));
+		}
+		if (DifficultyNormalDescriptionText)
+		{
+			DifficultyNormalDescriptionText->SetText(ResolveUiText(
+				FName(TEXT("ui.title.demo_notice_message")),
+				FText::FromString(TEXT("이 데모의 저장 데이터는 본편과 연동되지 않습니다."))));
+		}
+	}
+
 	if (DifficultyStartButton)
 	{
-		DifficultyStartButton->SetIsEnabled(SelectedDifficultyStage != INDEX_NONE && !bStartTravelPending);
+		DifficultyStartButton->SetIsEnabled((bDemoNotice || SelectedDifficultyStage != INDEX_NONE) && !bStartTravelPending);
 	}
 }
 

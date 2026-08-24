@@ -33,6 +33,19 @@ bool FTunaSweeperBuildFlavorPathTest::RunTest(const FString& Parameters)
 	TestTrue(
 		TEXT("Demo quest definitions are public Content data"),
 		TunaSweeperBuildFlavor::GetQuestDefinitionsPath().EndsWith(TEXT("Content/Data/QuestDefinitions.json")));
+	TestEqual(TEXT("Demo exposes one save slot"), TunaSweeperBuildFlavor::GetMaximumSaveSlotIndex(), 1);
+	TestEqual(TEXT("Demo raid role uses DemoRaidMap"), TunaSweeperBuildFlavor::GetRaidGameplayLevelName(), FName(TEXT("DemoRaidMap")));
+	TestEqual(
+		TEXT("Logical RaidMap resolves to the Demo raid role"),
+		TunaSweeperBuildFlavor::ResolveGameplayLevelName(FName(TEXT("RaidMap"))),
+		FName(TEXT("DemoRaidMap")));
+	TestTrue(
+		TEXT("Demo placement data uses public Content data"),
+		TunaSweeperBuildFlavor::GetRuntimePlacementDataPath(TEXT("EnemySpawns.json"))
+			.EndsWith(TEXT("Content/Data/EnemySpawns.json")));
+	TestTrue(
+		TEXT("DemoRaidMap asset exists"),
+		FPaths::FileExists(FPaths::Combine(FPaths::ProjectContentDir(), TEXT("DemoRaidMap.umap"))));
 
 	Settings->BuildTarget = ETunaSweeperBuildTarget::NoStoreFull;
 	TestFalse(TEXT("Full target is Main flavor"), TunaSweeperBuildFlavor::IsDemo());
@@ -44,6 +57,14 @@ bool FTunaSweeperBuildFlavorPathTest::RunTest(const FString& Parameters)
 		TEXT("Demo and Main save roots are siblings, not the same path"),
 		FPaths::GetCleanFilename(TunaSweeperBuildFlavor::GetSaveGameDirectory()),
 		FString(TEXT("Demo")));
+	TestEqual(TEXT("Main exposes three save slots"), TunaSweeperBuildFlavor::GetMaximumSaveSlotIndex(), 3);
+	TestFalse(
+		TEXT("Main raid role is not the Demo raid map"),
+		TunaSweeperBuildFlavor::GetRaidGameplayLevelName() == FName(TEXT("DemoRaidMap")));
+	TestFalse(
+		TEXT("Main placement data does not use the Demo public placement file"),
+		TunaSweeperBuildFlavor::GetRuntimePlacementDataPath(TEXT("EnemySpawns.json"))
+			.EndsWith(TEXT("Content/Data/EnemySpawns.json")));
 
 	Settings->BuildTarget = OriginalTarget;
 	return true;

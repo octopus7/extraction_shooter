@@ -192,3 +192,9 @@ ui.quest.interaction_name,퀘스트,Quest,クエスト
 ui.map_overlay.start_location,시작 위치,Start Position,開始位置
 ui.map_overlay.extraction_point,추출 포인트,Extraction Point,抽出地点
 ui.enemy.status.reload,재장전,Reloading,リロード
+ui.common.confirm,확인,Confirm,確認
+ui.title.demo_label,데모,Demo,デモ
+ui.title.demo_notice_title,데모 안내,Demo Notice,デモのお知らせ
+ui.title.demo_notice_message,이 데모의 저장 데이터는 본편과 연동되지 않습니다.,Demo save data does not carry over to the full game.,このデモのセーブデータは製品版に引き継がれません。
+ui.toast.load_failed,저장 데이터를 불러오지 못했습니다.,Failed to load save data.,セーブデータを読み込めませんでした。
+ui.toast.save_failed,저장 데이터를 만들지 못했습니다.,Failed to create save data.,セーブデータを作成できませんでした。

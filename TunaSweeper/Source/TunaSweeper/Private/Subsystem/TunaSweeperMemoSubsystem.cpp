@@ -11,6 +11,7 @@
 #include "Misc/Paths.h"
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
+#include "Settings/TunaSweeperBuildFlavor.h"
 #include "UI/TunaSweeperInteractionMarkerWidget.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogTunaSweeperMemo, Log, All);
@@ -456,7 +457,7 @@ FString UTunaSweeperMemoSubsystem::GetMemoDefinitionsJsonPath() const
 
 FString UTunaSweeperMemoSubsystem::GetMemoSpawnsJsonPath() const
 {
-	return FPaths::Combine(FPaths::ProjectContentDir(), TunaSweeperMemo::MemoSpawnsJsonRelativePath);
+	return TunaSweeperBuildFlavor::GetRuntimePlacementDataPath(TEXT("MemoSpawns.json"));
 }
 
 bool UTunaSweeperMemoSubsystem::DoesLevelNameMatchWorld(FName LevelName, const UWorld* World) const
@@ -466,7 +467,8 @@ bool UTunaSweeperMemoSubsystem::DoesLevelNameMatchWorld(FName LevelName, const U
 		return false;
 	}
 
-	const FString SpawnLevelName = TunaSweeperMemo::NormalizeLevelName(LevelName.ToString());
+	const FString SpawnLevelName = TunaSweeperMemo::NormalizeLevelName(
+		TunaSweeperBuildFlavor::ResolveGameplayLevelName(LevelName).ToString());
 	const FString WorldMapName = TunaSweeperMemo::NormalizeLevelName(World->GetMapName());
 	const FString WorldPackageName = TunaSweeperMemo::NormalizeLevelName(World->GetOutermost()->GetName());
 	return SpawnLevelName.Equals(WorldMapName, ESearchCase::IgnoreCase) ||

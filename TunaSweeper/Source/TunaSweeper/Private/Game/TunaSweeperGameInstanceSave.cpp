@@ -276,26 +276,31 @@ FTunaSweeperSaveSlotSummary UTunaSweeperGameInstance::GetSaveSlotSummary(int32 S
 
 bool UTunaSweeperGameInstance::ActivateSaveSlot(int32 SaveSlotIndex, bool bStartNewGame)
 {
-	SetActiveSaveSlotIndex(SaveSlotIndex);
+	if (!SetActiveSaveSlotIndex(SaveSlotIndex))
+	{
+		return false;
+	}
 
 	if (bStartNewGame)
 	{
 		LoadedSlotTotalPlaySeconds = 0.0f;
 		ActiveSlotStartTimeSeconds = FPlatformTime::Seconds();
-		ActiveSaveSlotDifficultyStage = TunaSweeperSave::DefaultDifficultyStage;
-		bActiveSaveSlotDifficultySelected = false;
+		ActiveSaveSlotDifficultyStage = TunaSweeperBuildFlavor::IsDemo()
+			? 2
+			: TunaSweeperSave::DefaultDifficultyStage;
+		bActiveSaveSlotDifficultySelected = TunaSweeperBuildFlavor::IsDemo();
 		GenerateDefaultInventoryState();
 		bInventoryStateInitialized = true;
 		RefreshLegacyPlayerInventoryItems();
-		if (SaveGameStateInternal(EUsableQuickSlotSaveMode::Clear))
+		const bool bSaved = SaveGameStateInternal(EUsableQuickSlotSaveMode::Clear);
+		if (bSaved)
 		{
 			bPendingBunkerItemStateSave = false;
 		}
-		return true;
+		return bSaved;
 	}
 
-	EnsureInventoryStateInitialized();
-	return true;
+	return LoadGameState();
 }
 
 bool UTunaSweeperGameInstance::SetActiveSaveSlotDifficultyStage(int32 DifficultyStage, bool bSaveImmediately)
@@ -543,6 +548,7 @@ bool UTunaSweeperGameInstance::LoadGameState()
 		}
 	}
 	PendingScenarioCompletionFlag = NAME_None;
+	bPendingScenarioBunkerEntryPresentation = false;
 
 	ItemInstancesByUid.Reset();
 	for (const FTunaSweeperItemInstance& ItemInstance : SaveGame->ItemInstances)
@@ -913,6 +919,7 @@ void UTunaSweeperGameInstance::ResetRuntimeStateForSaveSlotSelection()
 	UnlockedHousingFacilityIds.Reset();
 	UnlockedWorkbenchRecipeIds.Reset();
 	PendingScenarioCompletionFlag = NAME_None;
+	bPendingScenarioBunkerEntryPresentation = false;
 	if (UTunaSweeperQuestSubsystem* QuestSubsystem = GetSubsystem<UTunaSweeperQuestSubsystem>())
 	{
 		QuestSubsystem->ResetQuestProgressForNewGame();
@@ -946,6 +953,7 @@ void UTunaSweeperGameInstance::GenerateDefaultInventoryState()
 	UnlockedHousingFacilityIds.Reset();
 	UnlockedWorkbenchRecipeIds.Reset();
 	PendingScenarioCompletionFlag = NAME_None;
+	bPendingScenarioBunkerEntryPresentation = false;
 	if (UTunaSweeperQuestSubsystem* QuestSubsystem = GetSubsystem<UTunaSweeperQuestSubsystem>())
 	{
 		QuestSubsystem->ResetQuestProgressForNewGame();
@@ -1122,7 +1130,7 @@ bool UTunaSweeperGameInstance::SaveActiveSaveSlotSelection() const
 int32 UTunaSweeperGameInstance::FindFirstExistingSaveSlotIndex() const
 {
 	for (int32 SaveSlotIndex = TunaSweeperSave::MinSaveSlotIndex;
-		SaveSlotIndex <= TunaSweeperSave::MaxSaveSlotIndex;
+		SaveSlotIndex <= TunaSweeperBuildFlavor::GetMaximumSaveSlotIndex();
 		++SaveSlotIndex)
 	{
 		if (!GetExistingSaveGameSlotName(SaveSlotIndex).IsEmpty())
@@ -1139,7 +1147,7 @@ int32 UTunaSweeperGameInstance::SanitizeSaveSlotIndex(int32 SaveSlotIndex) const
 	return FMath::Clamp(
 		SaveSlotIndex,
 		TunaSweeperSave::MinSaveSlotIndex,
-		TunaSweeperSave::MaxSaveSlotIndex);
+		TunaSweeperBuildFlavor::GetMaximumSaveSlotIndex());
 }
 
 FString UTunaSweeperGameInstance::GetSaveGameSlotName(int32 SaveSlotIndex) const
@@ -1215,12 +1223,12 @@ bool UTunaSweeperGameInstance::IsCurrentWorldBunkerMap() const
 bool UTunaSweeperGameInstance::IsBunkerToRaidTravel(FName SourceLevelName, FName TargetLevelName) const
 {
 	return IsMapNameMatch(SourceLevelName, TEXT("BunkerMap")) &&
-		IsMapNameMatch(TargetLevelName, TEXT("RaidMap"));
+		TunaSweeperBuildFlavor::IsRaidGameplayLevelName(TargetLevelName);
 }
 
 bool UTunaSweeperGameInstance::IsRaidToBunkerTravel(FName SourceLevelName, FName TargetLevelName) const
 {
-	return IsMapNameMatch(SourceLevelName, TEXT("RaidMap")) &&
+	return TunaSweeperBuildFlavor::IsRaidGameplayLevelName(SourceLevelName) &&
 		IsMapNameMatch(TargetLevelName, TEXT("BunkerMap"));
 }
 

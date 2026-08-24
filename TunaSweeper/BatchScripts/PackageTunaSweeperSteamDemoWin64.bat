@@ -58,6 +58,8 @@ call "%RUN_UAT%" BuildCookRun ^
     -noP4 ^
     -target=%TARGET_NAME% ^
     -customconfig=%CUSTOM_CONFIG% ^
+	-map=IntroMap+BunkerMap+DemoRaidMap ^
+	-AdditionalCookerOptions="-CustomConfig=%CUSTOM_CONFIG%" ^
     -platform=Win64 ^
     -clientconfig=%CONFIGURATION% ^
     -serverconfig=%CONFIGURATION% ^
