@@ -86,6 +86,9 @@ protected:
 	UPROPERTY(Transient)
 	TObjectPtr<UButton> SteamDemoWishlistButton;
 
+	UPROPERTY(Transient)
+	TObjectPtr<UWidget> SteamDemoWishlistButtonContainer;
+
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
 	TObjectPtr<UImage> DemoBuildImage;
 
@@ -620,6 +623,9 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<UTextBlock> DifficultyTitleText;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTextBlock> DifficultyDemoNoticeText;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UTextBlock> DifficultyFarmingTitleText;

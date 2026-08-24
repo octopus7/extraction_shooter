@@ -114,6 +114,26 @@ void UTunaSweeperIntroMenuWidget::EnsureDifficultySelectionPanel()
 		}
 	}
 
+	DifficultyDemoNoticeText = WidgetTree->ConstructWidget<UTextBlock>(
+		UTextBlock::StaticClass(),
+		TEXT("DifficultyDemoNoticeText"));
+	if (DifficultyDemoNoticeText)
+	{
+		DifficultyDemoNoticeText->SetAutoWrapText(true);
+		DifficultyDemoNoticeText->SetWrapTextAt(1080.0f);
+		DifficultyDemoNoticeText->SetJustification(ETextJustify::Center);
+		DifficultyDemoNoticeText->SetColorAndOpacity(FSlateColor(FLinearColor(0.16f, 0.26f, 0.28f, 1.0f)));
+		DifficultyDemoNoticeText->SetVisibility(ESlateVisibility::Collapsed);
+		TunaSweeperUIFont::ApplyFont(DifficultyDemoNoticeText, 28.0f);
+		if (UVerticalBoxSlot* NoticeSlot = ContentStack->AddChildToVerticalBox(DifficultyDemoNoticeText))
+		{
+			NoticeSlot->SetHorizontalAlignment(HAlign_Fill);
+			NoticeSlot->SetVerticalAlignment(VAlign_Center);
+			NoticeSlot->SetPadding(FMargin(60.0f, 76.0f, 60.0f, 76.0f));
+			NoticeSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+		}
+	}
+
 	auto BuildOptionButton = [this](
 		const TCHAR* ButtonName,
 		const TCHAR* OverlayName,
@@ -432,6 +452,31 @@ void UTunaSweeperIntroMenuWidget::RefreshDifficultySelectionPanel()
 		SelectedDifficultyStage = 2;
 	}
 
+	if (USizeBox* ContentBox = Cast<USizeBox>(WidgetTree
+		? WidgetTree->FindWidget(TEXT("DifficultyContentBox"))
+		: nullptr))
+	{
+		ContentBox->SetWidthOverride(bDemoNotice ? 1440.0f : 1120.0f);
+		ContentBox->SetHeightOverride(bDemoNotice ? 520.0f : 690.0f);
+	}
+	if (UWidget* OptionRow = WidgetTree
+		? WidgetTree->FindWidget(TEXT("DifficultyOptionRow"))
+		: nullptr)
+	{
+		OptionRow->SetVisibility(bDemoNotice
+			? ESlateVisibility::Collapsed
+			: ESlateVisibility::Visible);
+	}
+	if (DifficultyDemoNoticeText)
+	{
+		DifficultyDemoNoticeText->SetVisibility(bDemoNotice
+			? ESlateVisibility::HitTestInvisible
+			: ESlateVisibility::Collapsed);
+		DifficultyDemoNoticeText->SetText(ResolveUiText(
+			FName(TEXT("ui.title.demo_notice_message")),
+			FText::FromString(TEXT("데모 저장 데이터는 본편과 연동되지 않습니다."))));
+	}
+
 	if (DifficultyTitleText)
 	{
 		DifficultyTitleText->SetText(bDemoNotice
@@ -452,10 +497,9 @@ void UTunaSweeperIntroMenuWidget::RefreshDifficultySelectionPanel()
 	}
 	if (DifficultyBackButtonText)
 	{
-		DifficultyBackButtonText->SetText(FText::FromString(
-			bDifficultyAdjustmentMode
-				? TEXT("\uCDE8\uC18C")
-				: TEXT("\uB3CC\uC544\uAC00\uAE30")));
+		DifficultyBackButtonText->SetText(bDifficultyAdjustmentMode
+			? ResolveUiText(FName(TEXT("ui.common.cancel")), FText::FromString(TEXT("\uCDE8\uC18C")))
+			: ResolveUiText(FName(TEXT("ui.common.back")), FText::FromString(TEXT("\uB3CC\uC544\uAC00\uAE30"))));
 	}
 
 	RefreshDifficultyOption(

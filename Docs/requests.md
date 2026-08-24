@@ -6866,3 +6866,16 @@
 - Demo는 공개 런타임 배치 JSON, Main은 접근 제한 payload의 선택적 런타임 배치 JSON 또는 빈 Main 기본 데이터를 읽도록 분리하고 Main 패키징 스테이징에 선택적 배치 파일 복사를 추가했다.
 - Steam/STOVE Demo 패키징에 Demo 전용 맵 3개와 Cook CustomConfig를 명시하고 `OpeningScenarioMap`, Main 레이드 맵, `intro.mp4`가 Demo 결과에 포함되지 않도록 구성했다.
 - UE 5.7 Editor, Demo, Main Development 빌드와 `TunaSweeper.BuildFlavor.Paths` 자동화 테스트를 통과했으며, 최종 Demo Cook 결과에서 `IntroMap`, `BunkerMap`, `DemoRaidMap`만 생성되는 것을 확인했다. 기존 BallisticsVFX 누락 의존성과 `Shards_Mat` 셰이더 경고는 남아 있지만 Cook 오류는 없었다.
+
+## 2026-08-24 19:53:35 (소요시간: 00:05:49)
+
+- 위시리스트 버튼을 루트 캔버스의 독립 UI에서 제거하고 최상위 `MainMenuPanel`의 설정 버튼 바로 다음 항목으로 배치해, 설정·데모 안내·크레딧·슬롯 등 하위 메뉴에서는 부모 메뉴와 함께 숨겨지도록 변경했다.
+- 위시리스트 버튼은 `SteamDemo` 타겟으로 판별되는 경우에만 생성되며 현재 UI 언어가 바뀌면 버튼 문구도 함께 갱신되도록 했다.
+- Demo 안내 화면에서는 기존 난이도 카드 행과 카드 이미지를 숨기고 1440px 폭의 중앙 텍스트 영역에 안내문만 표시하도록 변경했다.
+- Demo 안내의 돌아가기 버튼이 고정 한글을 덮어쓰던 경로를 다국어 문자열 조회로 교체해 영어에서는 `Back`으로 표시되도록 수정했다.
+- UE 5.7 `TunaSweeperEditor Win64 Development` 빌드를 통과했다.
+
+## 2026-08-24 20:05:16 (소요시간: 00:00:30)
+
+- Steam Demo 최상위 메뉴 위시리스트 통합, Demo 안내 텍스트 전용 레이아웃과 영어 현지화 수정 사항만 선별해 커밋했다.
+- 기존 `DefaultEngine.ini`, 맵, Blender 및 Agit 작업 파일은 커밋에서 제외했다.

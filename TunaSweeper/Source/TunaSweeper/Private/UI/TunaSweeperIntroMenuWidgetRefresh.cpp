@@ -577,6 +577,9 @@ void UTunaSweeperIntroMenuWidget::ApplySettingsTabButtonStyle(
 void UTunaSweeperIntroMenuWidget::RefreshLocalizedTexts()
 {
 	SetNamedText(
+		FName(TEXT("SteamDemoWishlistButtonText")),
+		ResolveUiText(FName(TEXT("ui.title.wishlist")), FText::FromString(TEXT("\uC704\uC2DC\uB9AC\uC2A4\uD2B8\uC5D0 \uCD94\uAC00"))));
+	SetNamedText(
 		FName(TEXT("SaveSlotPanelTitleText")),
 		ResolveUiText(FName(TEXT("ui.title.slot_select")), FText::FromString(TEXT("\uC2AC\uB86F \uC120\uD0DD"))));
 	SetNamedText(

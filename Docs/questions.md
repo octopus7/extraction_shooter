@@ -5429,3 +5429,13 @@ Quest Flow Simulator의 메인 화면을 퀘스트 편집 중심으로 바꾸고
 ### 답변
 
 퀘스트 자체 ID·목표 ID·선행 퀘스트 ID·코인 수량·정렬 순서는 퀘스트 데이터 내부에서 완결되지만, 제공자, 아이템, 적, 상호작용 이벤트·유형, 하우징 시설, 작업대 레시피와 워프포인트 ID는 외부 데이터 정의를 참조한다. 맵상의 레벨·위치·카메라 좌표를 제외하더라도 해당 ID는 Quest Studio에서 읽기 전용 목록으로 받아 선택과 유효성 검사를 해야 한다.
+
+## 2026-08-24 20:00:00 (소요시간: 00:02:17)
+
+### 질문
+
+영어 UI에서 Demo Notice 본문만 한글로 표시되는 이유를 문의.
+
+### 답변
+
+새 전용 본문 위젯이 CSV에 존재하지 않는 `ui.title.demo_notice_body`를 조회해 C++ 한글 fallback이 노출된 것이 원인이었다. 기존 다국어 키 `ui.title.demo_notice_message`를 사용하도록 수정했으며, 영어에서는 `Demo save data does not carry over to the full game.`으로 표시된다. UE 5.7 Editor 빌드도 통과했다.
