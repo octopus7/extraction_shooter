@@ -516,7 +516,7 @@ ExclusiveGroup: tutorial.primary
 
 Entry:
   - Map == BunkerMap
-  - Scenario flag dialogue.demo.toilet_intro is complete
+  - Active flavor's initial bunker-dialogue completion flag is complete
   - Section tutorial.bunker.inventory_open is complete
   - Inventory contains at least one movable item
 

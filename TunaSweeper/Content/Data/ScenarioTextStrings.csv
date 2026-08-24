@@ -1,0 +1,5 @@
+string_key,ko,en,ja
+scenario.demo.speaker.luna,루나,Luna,ルナ
+scenario.demo.speaker.mole,두더지,Mole,モグラ
+scenario.demo.bunker_toilet.line1,물이 안 내려가면 이건 생활 문제가 아니라 문명 멸망이야!,"If it won't flush, this isn't just a household problem—it's the end of civilization!",水が流れないなんて、これは生活の問題じゃなくて文明の滅亡だよ！
+scenario.demo.bunker_toilet.line2,"멸망은 미뤄둘게, 취수 시설부터 고치자.","We'll postpone the apocalypse. Let's fix the water intake facility first.",滅亡は後回しだ。まず取水施設から直そう。

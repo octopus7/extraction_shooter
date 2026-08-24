@@ -666,7 +666,7 @@ bool UTunaSweeperInteractionSubsystem::HandleMoleDialogueInteraction(
 	}
 
 	ATunaSweeperPlayerController* TunaPlayerController = Cast<ATunaSweeperPlayerController>(InstigatorPawn->GetController());
-	return TunaPlayerController && TunaPlayerController->StartMoleIntroDialogue(true);
+	return TunaPlayerController && TunaPlayerController->StartScenarioForTrigger(FName(TEXT("interaction.mole")), true);
 }
 
 bool UTunaSweeperInteractionSubsystem::HandleSelfDestructInteraction(

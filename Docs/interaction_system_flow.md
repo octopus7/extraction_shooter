@@ -69,7 +69,7 @@ flowchart TD
 | `LootContainerSpawn` | 맵 제한 없음 | `ATunaSweeperLootContainerSpawnInteractableActor`가 컨테이너 정의와 수용량에 맞는 contents 행을 무작위 선택해 `ATunaSweeperLootContainerActor`를 스폰하고 `SetContainerDataIds()`를 호출한다. |
 | `LevelTravel` | 맵 제한 없음 | `ATunaSweeperLevelTravelInteractableActor::TravelToTargetLevel()`이 `HandleLevelTravelPersistence()`, `NotifyLevelTravelRequested()`를 호출한다. 레이드 경험치 귀환 연출이 있으면 우선 실행하고, 아니면 레벨 전환 서브시스템 또는 `UGameplayStatics::OpenLevel()`로 이동한다. |
 | `Quest` | 맵 제한 없음, 단 해석 가능한 퀘스트 ID 필요 | `ATunaSweeperMoleCompanionActor` 또는 `ATunaSweeperFacilityNpcActor`에서 provider/fallback으로 퀘스트 ID를 해석한 뒤 `OpenQuestPanel(QuestId)`를 호출한다. 퀘스트 ID가 없으면 `CanOfferInteraction()`에서 후보 제외된다. |
-| `MoleDialogue` | BunkerMap 전용 | 소유자가 `ATunaSweeperMoleCompanionActor`이고 현재 맵이 `BunkerMap`일 때만 제공된다. `StartMoleIntroDialogue(true)`를 호출해 완료 플래그와 무관하게 두더지 대화를 재생한다. |
+| `MoleDialogue` | BunkerMap 전용 | 소유자가 `ATunaSweeperMoleCompanionActor`이고 현재 맵이 `BunkerMap`일 때만 제공된다. `StartScenarioForTrigger(interaction.mole, true)`를 호출해 활성 플레이버 JSON의 조건에 맞는 두더지 대화를 재생한다. |
 | `SelfDestruct` | 맵 제한 없음 | `ATunaSweeperSelfDestructInteractableActor::StartSelfDestruct()`가 말풍선 카운트다운을 시작한다. 종료 시 폭발 이펙트, 소음 리포트, 반경 내 `UTunaSweeperVitalsComponent` 피해를 적용하고 자기 자신을 제거한다. |
 | `WorldProgress` | 맵 제한 없음 | `ATunaSweeperWorldProgressActor::RepairUsingAvailableRequiredItems(true)`가 필요한 수량을 전부 보유한 경우 아이템을 소비하고 `WorldProgressStates`를 Completed로 저장한다. 완료 후 충돌/마커를 끄고 완료 대체 액터를 스폰한 뒤 자신을 제거한다. |
 | `PersistentDoor` | 맵 제한 없음 | `ATunaSweeperPersistentDoorActor::OpenDoor(true)`가 문 상태를 Completed로 저장하고, 충돌을 끄며 마커 타입을 `None`으로 바꾼다. 일반 토글이 아니라 영속적인 열기 전용이다. |
@@ -116,7 +116,7 @@ flowchart TD
 | 퀘스트 | `OpenQuestPanel(QuestId)` | `ShowQuestPanel(QuestId)` | HUD 모드를 Quest로 바꾸고 상호작용 퀘스트 패널을 해당 퀘스트로 초기화한다. |
 | 메모 | `OpenMemoPanel(MemoId)` | `ShowMemoPanel(MemoId)` | HUD 모드를 Memo로 바꾸고 메모 패널에서 해당 메모를 연다. |
 | 하우징 | `OpenHousingMode()` | `SetHudMode(None)` 및 하우징 패널 갱신 | 하우징 서브시스템을 열고 별도 하우징 카메라로 전환한다. 하우징 중에는 월드 상호작용 포커스/마커가 억제된다. |
-| 두더지 대화 | `StartMoleIntroDialogue(true)` | `UTunaSweeperDialogueWidget` 직접 생성 | HUD 패널 모드가 아니라 대화 위젯을 viewport 90에 올리고 UI Only 입력 모드로 바꾼다. |
+| 두더지 대화 | `StartScenarioForTrigger(interaction.mole, true)` | `UTunaSweeperScenarioSubsystem`으로 데이터 해석 후 `UTunaSweeperDialogueWidget` 생성 | HUD 패널 모드가 아니라 대화 위젯을 viewport 90에 올리고 UI Only 입력 모드로 바꾼다. |
 
 ## JSON 런타임 스폰 흐름
 

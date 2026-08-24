@@ -31,6 +31,10 @@ FName UTunaSweeperGameInstance::ResolveInitialGameplayLevelName()
 	}
 
 	const FName DemoLevel = TunaSweeperScenario::BunkerMapName;
+	if (!TunaSweeperBuildFlavor::IsDemo() && IsScenarioProgressFlagSet(TunaSweeperScenario::OpeningScenarioFlag))
+	{
+		return TunaSweeperScenario::BunkerMapName;
+	}
 	return TunaSweeperBuildFlavor::ResolveInitialGameplayLevel(
 		DemoLevel,
 		TunaSweeperScenario::BunkerMapName);

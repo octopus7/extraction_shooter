@@ -23,13 +23,15 @@ Scenario levels themselves are reusable presentation spaces. Do not block entry 
 | --- | --- |
 | `scenario.opening.awakening` | The first-start opening presentation has completed and the player successfully entered the bunker. |
 | `dialogue.demo.toilet_intro` | The Demo-only two-line toilet-failure introduction has completed for the save slot. |
+| `dialogue.main.bunker_intro` | The Main-only first bunker dialogue has completed for the save slot. |
 
 ## Current Routing
 
 The intro menu asks `UTunaSweeperGameInstance::ResolveInitialGameplayLevelName()` for the first gameplay level.
 
-- If `scenario.opening.awakening` is not completed, route to `OpeningScenarioMap`.
-- If `scenario.opening.awakening` is completed, route directly to `BunkerMap`.
+- Demo routes directly to `BunkerMap` and does not use the opening flag as an entry gate.
+- Main routes to the manifest's `OpeningScenarioMap` while `scenario.opening.awakening` is incomplete.
+- Main routes directly to `BunkerMap` after `scenario.opening.awakening` is complete.
 
 This applies to normal start and the Always New Start debug path after the selected save slot has been reset.
 
@@ -43,7 +45,9 @@ The opening scenario does not mark its flag immediately when the presentation st
 
 This means the flag represents successful bunker entry after the presentation, not merely seeing part of the presentation.
 
-The Demo toilet-introduction flag is marked when its two-line dialogue sequence finishes. The legacy test flag `dialogue.mole.bunker_intro` is not reused, so an existing Demo save that completed the old five-line test dialogue still receives the new introduction once. Main builds neither start nor manually replay this Demo dialogue.
+Dialogue completion flags are selected from the active build flavor's `ScenarioDefinitions.json` and marked when the resolved dialogue sequence finishes. Demo uses `dialogue.demo.toilet_intro`; Main uses `dialogue.main.bunker_intro` after requiring `scenario.opening.awakening`. The legacy test flag `dialogue.mole.bunker_intro` is not reused.
+
+See [scenario_data_system.md](scenario_data_system.md) for trigger, condition, localization, and flavor-pack rules.
 
 ## Reset Behavior
 

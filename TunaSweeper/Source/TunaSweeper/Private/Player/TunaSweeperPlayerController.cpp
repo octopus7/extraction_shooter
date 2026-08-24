@@ -267,12 +267,10 @@ namespace TunaSweeperEnemyCombatDebugSettings
 	const TCHAR* DeveloperAlwaysSlowPresentationEnabledKey = TEXT("bDeveloperAlwaysSlowPresentationEnabled");
 }
 
-namespace TunaSweeperMoleIntro
+namespace TunaSweeperDialoguePresentation
 {
-	const FName DialogueCompletionFlag(TEXT("dialogue.demo.toilet_intro"));
-	const FName LunaSpeakerNameStringKey(TEXT("ui.dialogue.luna.speaker"));
-	const FName MoleSpeakerNameStringKey(TEXT("ui.dialogue.mole.speaker"));
-	constexpr float StartDelayAfterBunkerFadeSeconds = 1.15f;
+	const FName LevelEnteredTrigger(TEXT("level_entered"));
+	const FName QuestStateChangedTrigger(TEXT("quest_state_changed"));
 	constexpr float CameraReturnBlendSeconds = 0.9f;
 	constexpr float DialogueCameraDistance = 1200.0f;
 	const FRotator DialogueCameraRotation(-60.0f, 0.0f, 0.0f);
@@ -462,6 +460,14 @@ void ATunaSweeperPlayerController::BeginPlay()
 
 	ApplyDefaultGameInputMode();
 	BindHousingStateChanged();
+	if (UGameInstance* GameInstance = GetGameInstance())
+	{
+		if (UTunaSweeperQuestSubsystem* QuestSubsystem = GameInstance->GetSubsystem<UTunaSweeperQuestSubsystem>())
+		{
+			QuestSubsystem->OnQuestProgressChanged.RemoveAll(this);
+			QuestSubsystem->OnQuestProgressChanged.AddUObject(this, &ATunaSweeperPlayerController::HandleQuestScenarioTrigger);
+		}
+	}
 
 	if (IsIntroMap())
 	{
@@ -485,20 +491,8 @@ void ATunaSweeperPlayerController::BeginPlay()
 		ApplyLevelBgmState();
 		EnsureGameHudWidget();
 		SetEnemyCombatDebugEnabled(GetEnemyCombatDebugPreference());
-		const bool bShowingBunkerEntryFade = ShowBunkerEntryFadeIfNeeded();
-		if (bShowingBunkerEntryFade && GetWorld())
-		{
-			GetWorldTimerManager().SetTimer(
-				MoleIntroDialogueTimerHandle,
-				this,
-				&ATunaSweeperPlayerController::MaybeStartMoleIntroDialogue,
-				TunaSweeperMoleIntro::StartDelayAfterBunkerFadeSeconds,
-				false);
-		}
-		else
-		{
-			MaybeStartMoleIntroDialogue();
-		}
+		ShowBunkerEntryFadeIfNeeded();
+		QueueScenarioTrigger(TunaSweeperDialoguePresentation::LevelEnteredTrigger);
 	}
 }
 
@@ -509,6 +503,10 @@ void ATunaSweeperPlayerController::EndPlay(const EEndPlayReason::Type EndPlayRea
 		if (UTunaSweeperHousingSubsystem* HousingSubsystem = GameInstance->GetSubsystem<UTunaSweeperHousingSubsystem>())
 		{
 			HousingSubsystem->OnHousingStateChanged.RemoveAll(this);
+		}
+		if (UTunaSweeperQuestSubsystem* QuestSubsystem = GameInstance->GetSubsystem<UTunaSweeperQuestSubsystem>())
+		{
+			QuestSubsystem->OnQuestProgressChanged.RemoveAll(this);
 		}
 	}
 
@@ -847,75 +845,93 @@ bool ATunaSweeperPlayerController::ShowBunkerEntryFadeIfNeeded()
 	return true;
 }
 
-void ATunaSweeperPlayerController::MaybeStartMoleIntroDialogue()
+void ATunaSweeperPlayerController::QueueScenarioTrigger(FName TriggerName)
 {
-	if (TunaSweeperBuildFlavor::IsDemo())
+	if (!IsLocalController() || bDialogueSequenceActive || TriggerName.IsNone() ||
+		!PendingScenarioPresentation.ScenarioId.IsNone())
 	{
-		StartMoleIntroDialogue(false);
+		return;
 	}
+
+	UGameInstance* GameInstance = GetGameInstance();
+	UTunaSweeperScenarioSubsystem* ScenarioSubsystem = GameInstance
+		? GameInstance->GetSubsystem<UTunaSweeperScenarioSubsystem>()
+		: nullptr;
+	if (!ScenarioSubsystem || !ScenarioSubsystem->TryResolveScenario(
+		TriggerName,
+		GetCurrentScenarioLevelName(),
+		false,
+		PendingScenarioPresentation))
+	{
+		return;
+	}
+
+	if (PendingScenarioPresentation.StartDelaySeconds > 0.0f && GetWorld())
+	{
+		GetWorldTimerManager().SetTimer(
+			ScenarioTriggerTimerHandle,
+			this,
+			&ATunaSweeperPlayerController::StartPendingScenarioPresentation,
+			PendingScenarioPresentation.StartDelaySeconds,
+			false);
+		return;
+	}
+	StartPendingScenarioPresentation();
 }
 
-bool ATunaSweeperPlayerController::StartMoleIntroDialogue(bool bForceReplay)
+void ATunaSweeperPlayerController::StartPendingScenarioPresentation()
 {
-	if (!TunaSweeperBuildFlavor::IsDemo() || !IsBunkerMap() || !IsLocalController() || bDialogueSequenceActive)
-	{
-		return false;
-	}
-
-	UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
-	if (!TunaGameInstance)
-	{
-		return false;
-	}
-
-	const bool bDialogueAlreadyCompleted =
-		TunaGameInstance->IsScenarioProgressFlagSet(TunaSweeperMoleIntro::DialogueCompletionFlag);
-	if (bDialogueAlreadyCompleted && !bForceReplay)
-	{
-		return false;
-	}
-
-	TArray<FTunaSweeperDialogueLine> DialogueLines;
-	BuildMoleIntroDialogueLines(DialogueLines);
-	const FName CompletionFlag = bDialogueAlreadyCompleted
-		? NAME_None
-		: TunaSweeperMoleIntro::DialogueCompletionFlag;
-	return StartDialogueSequence(DialogueLines, CompletionFlag);
+	FTunaSweeperScenarioPresentation Presentation = MoveTemp(PendingScenarioPresentation);
+	PendingScenarioPresentation = FTunaSweeperScenarioPresentation();
+	StartDialogueSequence(Presentation.DialogueLines, Presentation.CompletionFlag);
 }
 
-void ATunaSweeperPlayerController::BuildMoleIntroDialogueLines(TArray<FTunaSweeperDialogueLine>& OutDialogueLines) const
+bool ATunaSweeperPlayerController::StartScenarioForTrigger(FName TriggerName, bool bForceReplay)
 {
-	OutDialogueLines.Reset();
-
-	const UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
-	auto ResolveDialogueText = [TunaGameInstance](FName StringKey, const FText& FallbackText)
+	if (!IsLocalController() || bDialogueSequenceActive || TriggerName.IsNone())
 	{
-		return TunaGameInstance
-			? TunaGameInstance->ResolveLocalizedText(StringKey, FallbackText)
-			: FallbackText;
-	};
+		return false;
+	}
 
-	const FText LunaSpeakerName = ResolveDialogueText(
-		TunaSweeperMoleIntro::LunaSpeakerNameStringKey,
-		FText::FromString(TEXT("\uB8E8\uB098")));
-	const FText MoleSpeakerName = ResolveDialogueText(
-		TunaSweeperMoleIntro::MoleSpeakerNameStringKey,
-		FText::FromString(TEXT("\uB450\uB354\uC9C0")));
-
-	auto AddLine = [&OutDialogueLines](const FText& SpeakerName, const FText& DialogueText)
+	UGameInstance* GameInstance = GetGameInstance();
+	UTunaSweeperScenarioSubsystem* ScenarioSubsystem = GameInstance
+		? GameInstance->GetSubsystem<UTunaSweeperScenarioSubsystem>()
+		: nullptr;
+	FTunaSweeperScenarioPresentation Presentation;
+	if (!ScenarioSubsystem || !ScenarioSubsystem->TryResolveScenario(
+		TriggerName,
+		GetCurrentScenarioLevelName(),
+		bForceReplay,
+		Presentation))
 	{
-		FTunaSweeperDialogueLine Line;
-		Line.SpeakerName = SpeakerName;
-		Line.DialogueText = DialogueText;
-		OutDialogueLines.Add(Line);
-	};
+		return false;
+	}
 
-	AddLine(LunaSpeakerName, ResolveDialogueText(
-		FName(TEXT("ui.dialogue.demo.toilet.luna")),
-		FText::FromString(TEXT("\uBB3C\uC774 \uC548 \uB0B4\uB824\uAC00\uBA74 \uC774\uAC74 \uC0DD\uD65C \uBB38\uC81C\uAC00 \uC544\uB2C8\uB77C \uBB38\uBA85 \uBA78\uB9DD\uC774\uC57C!"))));
-	AddLine(MoleSpeakerName, ResolveDialogueText(
-		FName(TEXT("ui.dialogue.demo.toilet.mole")),
-		FText::FromString(TEXT("\uBA78\uB9DD\uC740 \uBBF8\uB904\uB458\uAC8C, \uCDE8\uC218 \uC2DC\uC124\uBD80\uD130 \uACE0\uCE58\uC790."))));
+	if (bForceReplay)
+	{
+		const UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+		if (TunaGameInstance && TunaGameInstance->IsScenarioProgressFlagSet(Presentation.CompletionFlag))
+		{
+			Presentation.CompletionFlag = NAME_None;
+		}
+	}
+	if (GetWorld())
+	{
+		GetWorldTimerManager().ClearTimer(ScenarioTriggerTimerHandle);
+	}
+	PendingScenarioPresentation = FTunaSweeperScenarioPresentation();
+	return StartDialogueSequence(Presentation.DialogueLines, Presentation.CompletionFlag);
+}
+
+void ATunaSweeperPlayerController::HandleQuestScenarioTrigger()
+{
+	QueueScenarioTrigger(TunaSweeperDialoguePresentation::QuestStateChangedTrigger);
+}
+
+FName ATunaSweeperPlayerController::GetCurrentScenarioLevelName() const
+{
+	const UWorld* World = GetWorld();
+	return World ? FName(*World->GetMapName()) : NAME_None;
 }
 
 bool ATunaSweeperPlayerController::StartDialogueSequence(
@@ -1043,7 +1059,7 @@ void ATunaSweeperPlayerController::HandleDialogueFinished()
 	}
 
 	const float ReturnBlendSeconds = bDialogueCameraHasFocus
-		? TunaSweeperMoleIntro::CameraReturnBlendSeconds
+		? TunaSweeperDialoguePresentation::CameraReturnBlendSeconds
 		: 0.0f;
 	ReturnDialogueCameraToPlayer(ReturnBlendSeconds);
 
@@ -1087,8 +1103,8 @@ void ATunaSweeperPlayerController::MoveDialogueCameraToFocusLocation(FVector Foc
 	}
 
 	DialogueCameraActor->SetActorLocationAndRotation(
-		TunaSweeperMoleIntro::CalculateCameraLocationForFocus(FocusLocation),
-		TunaSweeperMoleIntro::DialogueCameraRotation);
+		TunaSweeperDialoguePresentation::CalculateCameraLocationForFocus(FocusLocation),
+		TunaSweeperDialoguePresentation::DialogueCameraRotation);
 	if (UCameraComponent* CameraComponent = DialogueCameraActor->GetCameraComponent())
 	{
 		CameraComponent->SetFieldOfView(70.0f);

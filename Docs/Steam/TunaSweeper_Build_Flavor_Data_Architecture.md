@@ -15,6 +15,8 @@ Demo 퀘스트 데이터는 공개 프로젝트 파일을 직접 읽는다.
 
 - `TunaSweeper/Content/Data/QuestDefinitions.json`
 - `TunaSweeper/Content/Data/QuestTextStrings.csv`
+- `TunaSweeper/Content/Data/ScenarioDefinitions.json`
+- `TunaSweeper/Content/Data/ScenarioTextStrings.csv`
 
 Main 원본은 프로젝트 내부이지만 Unreal 자동 탐색 경로 밖에 둔 독립 Git 저장소에서 관리한다.
 
@@ -22,6 +24,8 @@ Main 원본은 프로젝트 내부이지만 Unreal 자동 탐색 경로 밖에 �
 - manifest: `main-payload.json`
 - 퀘스트 정의: `Data/QuestDefinitions.json`
 - Main 전용 문자열: `Data/QuestTextStrings.csv`
+- Main 시나리오 정의: `Data/ScenarioDefinitions.json`
+- Main 시나리오 문자열: `Data/ScenarioTextStrings.csv`
 
 Editor/PIE의 Main 타깃은 원본 일반 JSON/CSV를 직접 읽는다. Main 패키징 직전에는 `BuildScripts/BuildFlavorData.ps1`이 필수 파일과 형식을 검증하고 `Content/Data/MainPayloadStaged/`에 필요한 파일만 새로 복사한다. 패키징이 끝나면 임시 폴더를 제거한다.
 
@@ -33,7 +37,9 @@ Demo 패키징 직전에는 Main 임시 폴더를 제거하고, 패키징 후 �
 
 Demo는 저장 슬롯 선택과 난이도 선택을 노출하지 않고 슬롯 1만 사용한다. 새 게임 시작 시 먼저 "이 데모의 저장 데이터는 본편과 연동되지 않습니다." 알림을 표시하며, 확인 전에는 슬롯 파일을 만들지 않는다. 확인 시 고정 내부 난이도 Normal과 시작 게이트 완료 상태를 한 번에 저장하고, 저장이 성공한 경우에만 `BunkerMap`으로 이동한다. 프롤로그 맵과 인트로 영상은 거치지 않으며 벙커 진입 페이드 뒤 Demo 스토리 연출로 이어진다.
 
-Main은 기존 난이도 선택을 유지하고 `main-payload.json`의 `initial_level`로 진입한다. Main manifest를 읽을 수 없거나 값이 비어 있으면 `BunkerMap`을 안전한 기본값으로 쓴다.
+Main은 기존 난이도 선택을 유지한다. 새 슬롯은 `main-payload.json`의 `initial_level`인 `OpeningScenarioMap`으로 진입하고, 성공적인 벙커 진입 시 `scenario.opening.awakening`을 저장한다. 이후 시작은 이 플래그를 확인해 `BunkerMap`으로 바로 진입한다. Main manifest를 읽을 수 없거나 값이 비어 있으면 `BunkerMap`을 안전한 기본값으로 쓴다.
+
+벙커 자동 대화는 공용 `UTunaSweeperScenarioSubsystem`이 플레이버별 JSON/CSV에서 선택한다. Demo는 오프닝 요구 없이 `dialogue.demo.toilet_intro`, Main은 `scenario.opening.awakening`을 요구하고 `dialogue.main.bunker_intro`를 완료 플래그로 사용한다. 자세한 스키마는 [scenario_data_system.md](../scenario_data_system.md)를 따른다.
 
 Demo 타깃의 타이틀 화면에는 `DemoBuildImage`라는 별도 이미지 위젯을 노출한다. Main 타깃에서는 같은 위젯을 접는다. 이 판정도 BuildFlavor에서 직접 가져오며 데이터 문자열 키와 관계없다.
 

@@ -33,6 +33,12 @@ bool FTunaSweeperBuildFlavorPathTest::RunTest(const FString& Parameters)
 	TestTrue(
 		TEXT("Demo quest definitions are public Content data"),
 		TunaSweeperBuildFlavor::GetQuestDefinitionsPath().EndsWith(TEXT("Content/Data/QuestDefinitions.json")));
+	TestTrue(
+		TEXT("Demo scenarios are public Content data"),
+		TunaSweeperBuildFlavor::GetScenarioDefinitionsPath().EndsWith(TEXT("Content/Data/ScenarioDefinitions.json")));
+	TestTrue(
+		TEXT("Demo scenario strings are public Content data"),
+		TunaSweeperBuildFlavor::GetScenarioTextStringsPath().EndsWith(TEXT("Content/Data/ScenarioTextStrings.csv")));
 	TestEqual(TEXT("Demo exposes one save slot"), TunaSweeperBuildFlavor::GetMaximumSaveSlotIndex(), 1);
 	TestEqual(TEXT("Demo raid role uses DemoRaidMap"), TunaSweeperBuildFlavor::GetRaidGameplayLevelName(), FName(TEXT("DemoRaidMap")));
 	TestEqual(
@@ -65,6 +71,12 @@ bool FTunaSweeperBuildFlavorPathTest::RunTest(const FString& Parameters)
 		TEXT("Main placement data does not use the Demo public placement file"),
 		TunaSweeperBuildFlavor::GetRuntimePlacementDataPath(TEXT("EnemySpawns.json"))
 			.EndsWith(TEXT("Content/Data/EnemySpawns.json")));
+	TestFalse(
+		TEXT("Main scenarios do not use the Demo public scenario pack"),
+		TunaSweeperBuildFlavor::GetScenarioDefinitionsPath().EndsWith(TEXT("Content/Data/ScenarioDefinitions.json")));
+	TestFalse(
+		TEXT("Main scenario strings do not use the Demo public scenario strings"),
+		TunaSweeperBuildFlavor::GetScenarioTextStringsPath().EndsWith(TEXT("Content/Data/ScenarioTextStrings.csv")));
 
 	Settings->BuildTarget = OriginalTarget;
 	return true;

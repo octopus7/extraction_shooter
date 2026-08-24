@@ -37,7 +37,9 @@ function Assert-MainPayloadValid {
     $manifestPath = Join-Path $mainSourceDirectory 'main-payload.json'
     $definitionsPath = Join-Path $mainSourceDirectory 'Data\QuestDefinitions.json'
     $stringsPath = Join-Path $mainSourceDirectory 'Data\QuestTextStrings.csv'
-    foreach ($requiredPath in @($manifestPath, $definitionsPath, $stringsPath)) {
+    $scenarioDefinitionsPath = Join-Path $mainSourceDirectory 'Data\ScenarioDefinitions.json'
+    $scenarioStringsPath = Join-Path $mainSourceDirectory 'Data\ScenarioTextStrings.csv'
+    foreach ($requiredPath in @($manifestPath, $definitionsPath, $stringsPath, $scenarioDefinitionsPath, $scenarioStringsPath)) {
         if (-not (Test-Path -LiteralPath $requiredPath -PathType Leaf)) {
             throw "Required Main payload file is missing: $requiredPath"
         }
@@ -51,7 +53,9 @@ function Assert-MainPayloadValid {
         throw 'Main payload manifest initial_level must not be empty.'
     }
     if ($manifest.quest_definitions -ne 'Data/QuestDefinitions.json' -or
-        $manifest.quest_text_strings -ne 'Data/QuestTextStrings.csv') {
+        $manifest.quest_text_strings -ne 'Data/QuestTextStrings.csv' -or
+        $manifest.scenario_definitions -ne 'Data/ScenarioDefinitions.json' -or
+        $manifest.scenario_text_strings -ne 'Data/ScenarioTextStrings.csv') {
         throw 'Main payload manifest data paths do not match the supported layout.'
     }
 
@@ -65,6 +69,33 @@ function Assert-MainPayloadValid {
     if ($header.Trim() -ne 'string_key,ko,en,ja') {
         throw 'Main QuestTextStrings.csv header must be string_key,ko,en,ja.'
     }
+
+    $scenarioPack = Get-Content -LiteralPath $scenarioDefinitionsPath -Raw | ConvertFrom-Json
+    if ($scenarioPack.schema_version -ne 1 -or $scenarioPack.build_flavor -ne 'main' -or -not $scenarioPack.scenarios) {
+        throw 'Main ScenarioDefinitions.json must declare schema_version 1, build_flavor main, and at least one scenario.'
+    }
+    $scenarioHeader = Get-Content -LiteralPath $scenarioStringsPath -TotalCount 1
+    if ($scenarioHeader.Trim() -ne 'string_key,ko,en,ja') {
+        throw 'Main ScenarioTextStrings.csv header must be string_key,ko,en,ja.'
+    }
+}
+
+function Assert-DemoScenarioPackValid {
+    $scenarioDefinitionsPath = Join-Path $projectDirectory 'Content\Data\ScenarioDefinitions.json'
+    $scenarioStringsPath = Join-Path $projectDirectory 'Content\Data\ScenarioTextStrings.csv'
+    foreach ($requiredPath in @($scenarioDefinitionsPath, $scenarioStringsPath)) {
+        if (-not (Test-Path -LiteralPath $requiredPath -PathType Leaf)) {
+            throw "Required Demo scenario file is missing: $requiredPath"
+        }
+    }
+    $scenarioPack = Get-Content -LiteralPath $scenarioDefinitionsPath -Raw | ConvertFrom-Json
+    if ($scenarioPack.schema_version -ne 1 -or $scenarioPack.build_flavor -ne 'demo' -or -not $scenarioPack.scenarios) {
+        throw 'Demo ScenarioDefinitions.json must declare schema_version 1, build_flavor demo, and at least one scenario.'
+    }
+    $scenarioHeader = Get-Content -LiteralPath $scenarioStringsPath -TotalCount 1
+    if ($scenarioHeader.Trim() -ne 'string_key,ko,en,ja') {
+        throw 'Demo ScenarioTextStrings.csv header must be string_key,ko,en,ja.'
+    }
 }
 
 switch ($Mode) {
@@ -75,6 +106,8 @@ switch ($Mode) {
         Copy-Item -LiteralPath (Join-Path $mainSourceDirectory 'main-payload.json') -Destination $stagedDirectory
         Copy-Item -LiteralPath (Join-Path $mainSourceDirectory 'Data\QuestDefinitions.json') -Destination (Join-Path $stagedDirectory 'Data')
         Copy-Item -LiteralPath (Join-Path $mainSourceDirectory 'Data\QuestTextStrings.csv') -Destination (Join-Path $stagedDirectory 'Data')
+        Copy-Item -LiteralPath (Join-Path $mainSourceDirectory 'Data\ScenarioDefinitions.json') -Destination (Join-Path $stagedDirectory 'Data')
+        Copy-Item -LiteralPath (Join-Path $mainSourceDirectory 'Data\ScenarioTextStrings.csv') -Destination (Join-Path $stagedDirectory 'Data')
         foreach ($fileName in $optionalRuntimeDataFiles) {
             $sourcePath = Join-Path $mainSourceDirectory (Join-Path 'Data' $fileName)
             if (Test-Path -LiteralPath $sourcePath -PathType Leaf) {
@@ -85,6 +118,7 @@ switch ($Mode) {
     }
     'PrepareDemo' {
         Remove-StagedMainPayload
+        Assert-DemoScenarioPackValid
         if (Test-Path -LiteralPath $stagedDirectory) {
             throw "Demo preparation failed to remove Main payload staging: $stagedDirectory"
         }

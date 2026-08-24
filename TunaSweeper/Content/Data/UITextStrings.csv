@@ -123,10 +123,6 @@ ui.memo.title,메모,Memo,メモ
 ui.memo.list_title,메모 목록,Memo List,メモ一覧
 ui.memo.none,획득한 메모가 없습니다.,No acquired memos.,取得したメモがありません。
 ui.dialogue.continue,계속,Continue,続行
-ui.dialogue.luna.speaker,루나,Luna,ルナ
-ui.dialogue.mole.speaker,두더지,Mole,モグラ
-ui.dialogue.demo.toilet.luna,물이 안 내려가면 이건 생활 문제가 아니라 문명 멸망이야!,"If it won't flush, this isn't just a household problem—it's the end of civilization!",水が流れないなんて、これは生活の問題じゃなくて文明の滅亡だよ！
-ui.dialogue.demo.toilet.mole,"멸망은 미뤄둘게, 취수 시설부터 고치자.","We'll postpone the apocalypse. Let's fix the water intake facility first.",滅亡は後回しだ。まず取水施設から直そう。
 ui.scenario.title,재기동 기록,Reboot Log,再起動記録
 ui.scenario.status,B-07 벙커 / 비상 기상,B-07 Bunker / Emergency Wake,B-07 バンカー / 緊急起床
 ui.scenario.prompt,클릭해서 계속,Click to Continue,クリックして続行

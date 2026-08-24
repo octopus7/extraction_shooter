@@ -19,6 +19,8 @@ namespace TunaSweeperBuildFlavor
 	TUNASWEEPER_API FString GetMainPayloadRoot();
 	TUNASWEEPER_API FString GetQuestDefinitionsPath();
 	TUNASWEEPER_API void GetQuestTextStringPaths(TArray<FString>& OutPaths);
+	TUNASWEEPER_API FString GetScenarioDefinitionsPath();
+	TUNASWEEPER_API FString GetScenarioTextStringsPath();
 	TUNASWEEPER_API FName ResolveInitialGameplayLevel(FName DemoLevel, FName MainFallbackLevel);
 	TUNASWEEPER_API int32 GetMaximumSaveSlotIndex();
 	TUNASWEEPER_API FName GetBunkerLevelName();

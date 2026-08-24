@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "build_flavor": "demo",
+  "scenarios": [
+    {
+      "scenario_id": "scenario.demo.bunker_toilet_intro",
+      "triggers": [
+        "level_entered",
+        "interaction.mole"
+      ],
+      "level_name": "BunkerMap",
+      "required_completed_flags": [],
+      "blocked_completed_flags": [],
+      "required_quest_states": [],
+      "completion_flag": "dialogue.demo.toilet_intro",
+      "one_shot": true,
+      "priority": 100,
+      "start_delay_seconds": 0.25,
+      "lines": [
+        {
+          "speaker_name_string_key": "scenario.demo.speaker.luna",
+          "dialogue_text_string_key": "scenario.demo.bunker_toilet.line1"
+        },
+        {
+          "speaker_name_string_key": "scenario.demo.speaker.mole",
+          "dialogue_text_string_key": "scenario.demo.bunker_toilet.line2"
+        }
+      ]
+    }
+  ]
+}

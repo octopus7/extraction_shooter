@@ -6893,3 +6893,17 @@
 
 - Demo 화장실 도입 대화와 관련 문자열·시나리오 플래그·문서 변경만 선별해 커밋했다.
 - 별도 작업인 Demo·Full `DefaultEngine.ini`와 `BunkerMap.umap` 변경은 스테이징 및 커밋에서 제외했다.
+
+## 2026-08-24 20:47:00 (소요시간: 00:27:00)
+
+- PlayerController에 있던 Demo 전용 화장실 대사·화자·완료 플래그 하드코딩을 제거하고, 활성 빌드 플레이버의 JSON/CSV를 읽는 `UTunaSweeperScenarioSubsystem`을 추가했다.
+- 시나리오 정의에서 트리거, 레벨, 필수/차단 완료 플래그, 선택적 퀘스트 상태, 우선순위, 시작 지연, 1회 완료 플래그, 현지화 대사 및 카메라 포커스를 제어할 수 있게 했다.
+- Demo용 `ScenarioDefinitions.json`과 `ScenarioTextStrings.csv`에 기존 화장실 도입 대사를 옮기고, 벙커 진입 `level_entered`, 퀘스트 상태 변경 `quest_state_changed`, 두더지 상호작용 `interaction.mole` 트리거를 공용 시스템에 연결했다.
+- Main은 오프닝 완료 슬롯이면 벙커로 바로 진입하도록 초기 레벨 분기를 복구하고, 접근 제한 Main 시나리오 데이터가 Demo 패키지에 포함되지 않도록 기존 payload staging 검증·복사 절차를 확장했다.
+- Demo/Main 시나리오 팩 정적 검증, Main 임시 staging 및 정리, UE 5.7 Editor·Demo·Main Development 빌드와 `TunaSweeper.BuildFlavor.Paths` 자동화 테스트를 통과했다.
+- 사용자 작업인 `BunkerMap.umap` 변경은 수정하지 않았다.
+
+## 2026-08-24 21:15:40 (소요시간: 00:01:20)
+
+- 데이터 기반 Demo/Main 시나리오 시스템의 공개 소스·Demo 데이터·문서 변경을 선별 커밋하고 원격 저장소에 푸시했다.
+- 사용자 작업인 `BunkerMap.umap` 변경은 커밋에서 제외했다.

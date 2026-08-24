@@ -4,6 +4,7 @@
 #include "GenericTeamAgentInterface.h"
 #include "GameFramework/PlayerController.h"
 #include "Quest/TunaSweeperQuestTypes.h"
+#include "Subsystem/TunaSweeperScenarioSubsystem.h"
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
 #include "TimerManager.h"
 #include "UI/TunaSweeperDialogueWidget.h"
@@ -124,8 +125,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Dialogue")
 	bool StartDialogueSequence(const TArray<FTunaSweeperDialogueLine>& DialogueLines, FName CompletionFlag);
 
-	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Dialogue")
-	bool StartMoleIntroDialogue(bool bForceReplay = false);
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Scenario")
+	bool StartScenarioForTrigger(FName TriggerName, bool bForceReplay = false);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Quest")
 	bool PlayQuestPresentation(FName QuestId, ETunaSweeperQuestPresentationTrigger Trigger);
@@ -197,8 +198,10 @@ private:
 	void ApplyInitialTitleDisplaySettings();
 	void ApplyLevelBgmState();
 	bool ShowBunkerEntryFadeIfNeeded();
-	void MaybeStartMoleIntroDialogue();
-	void BuildMoleIntroDialogueLines(TArray<FTunaSweeperDialogueLine>& OutDialogueLines) const;
+	void QueueScenarioTrigger(FName TriggerName);
+	void StartPendingScenarioPresentation();
+	void HandleQuestScenarioTrigger();
+	FName GetCurrentScenarioLevelName() const;
 	void HandleDialogueLineActivated(const FTunaSweeperDialogueLine& DialogueLine);
 	void HandleDialogueFinished();
 	void FinishDialogueCameraReturn();
@@ -256,9 +259,10 @@ private:
 	void TryFlushPendingBunkerItemStateSave();
 	bool CanFlushPendingBunkerItemStateSave() const;
 
-	FTimerHandle MoleIntroDialogueTimerHandle;
+	FTimerHandle ScenarioTriggerTimerHandle;
 	FTimerHandle DialogueCameraReturnTimerHandle;
 	FName ActiveDialogueCompletionFlag;
+	FTunaSweeperScenarioPresentation PendingScenarioPresentation;
 	UPROPERTY(Transient)
 	TObjectPtr<ACameraActor> HousingCameraActor;
 	FVector HousingCameraFocusLocation = FVector::ZeroVector;

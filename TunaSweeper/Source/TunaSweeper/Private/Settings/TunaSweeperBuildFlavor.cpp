@@ -118,6 +118,20 @@ namespace TunaSweeperBuildFlavor
 		}
 	}
 
+	FString GetScenarioDefinitionsPath()
+	{
+		return IsDemo()
+			? GetPublicDataPath(TEXT("ScenarioDefinitions.json"))
+			: FPaths::Combine(GetMainPayloadRoot(), TEXT("Data"), TEXT("ScenarioDefinitions.json"));
+	}
+
+	FString GetScenarioTextStringsPath()
+	{
+		return IsDemo()
+			? GetPublicDataPath(TEXT("ScenarioTextStrings.csv"))
+			: FPaths::Combine(GetMainPayloadRoot(), TEXT("Data"), TEXT("ScenarioTextStrings.csv"));
+	}
+
 	FName ResolveInitialGameplayLevel(FName DemoLevel, FName MainFallbackLevel)
 	{
 		if (IsDemo())
