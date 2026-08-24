@@ -14,6 +14,7 @@
     updateWorkspace,
   } from "./api";
   import { readCatalogDraft, serializeCatalogDraft } from "./draft";
+  import { pageFromPath } from "./page";
   import { normalizeQuestDataset } from "../shared/dataset";
   import type {
     CanvasMode,
@@ -36,13 +37,15 @@
   // Generated from Docs/DemoDesign by scripts/generate-seed.mjs.
   // Keeping the public fallback on the same source prevents invented map data.
   const FALLBACK_DATASET: QuestDataset = demoCatalogSource.data;
+  const appPage = pageFromPath(globalThis.location?.pathname ?? "/");
+  const isSimulationPage = appPage === "simulation";
 
   let mode: ViewMode = "desktop";
   let session = EMPTY_SESSION;
   let catalogs: CatalogSummary[] = [];
   let selectedCatalog: CatalogSummary | null = null;
   let dataset: QuestDataset = structuredClone(FALLBACK_DATASET);
-  let canvasMode: CanvasMode = "quest-chain";
+  let canvasMode: CanvasMode = isSimulationPage ? "quest-route" : "quest-chain";
   let selectedQuestId: string | null = dataset.questNodes[0]?.questId ?? null;
   let selectedPlaceId: string | null = dataset.places[0]?.id ?? null;
   let selectedStepId: string | null = dataset.steps[0]?.id ?? null;
@@ -90,9 +93,17 @@
   $: selectedQuestSteps = dataset.steps.filter(
     (step) => step.questId === selectedQuestId && step.enabled,
   );
+  $: selectedQuestAllSteps = dataset.steps.filter(
+    (step) => step.questId === selectedQuestId,
+  );
   $: selectedRouteSteps = selectedQuestSteps.filter(
     (step) => step.fromPlaceId !== step.toPlaceId,
   );
+  $: selectedQuestNote = selectedQuestId
+    ? dataset.sourceNotes?.find((note) =>
+        note.toUpperCase().startsWith(`${selectedQuestId!.toUpperCase()} `),
+      ) ?? null
+    : null;
   $: graphEdges = dataset.questNodes.flatMap((node) =>
     node.prerequisiteQuestIds.map((prerequisiteQuestId) => ({
       id: `${prerequisiteQuestId}-${node.questId}`,
@@ -108,18 +119,20 @@
     const savedMode = localStorage.getItem("quest-flow:view-mode");
     if (savedMode === "desktop" || savedMode === "pro") mode = savedMode;
 
-    simulator = new Worker(new URL("./simulation.worker.ts", import.meta.url), {
-      type: "module",
-    });
-    simulator.onmessage = (event: MessageEvent<SimulationResult>) => {
-      result = event.data;
-      running = false;
-      activeProTab = "results";
-    };
-    simulator.onerror = () => {
-      running = false;
-      statusMessage = "시뮬레이션을 완료하지 못했습니다.";
-    };
+    if (isSimulationPage) {
+      simulator = new Worker(new URL("./simulation.worker.ts", import.meta.url), {
+        type: "module",
+      });
+      simulator.onmessage = (event: MessageEvent<SimulationResult>) => {
+        result = event.data;
+        running = false;
+        activeProTab = "results";
+      };
+      simulator.onerror = () => {
+        running = false;
+        statusMessage = "시뮬레이션을 완료하지 못했습니다.";
+      };
+    }
 
     try {
       const [sessionValue, catalogValues] = await Promise.all([
@@ -143,7 +156,7 @@
           : "서버 연결 실패 · 내장 체험 데이터를 사용합니다.";
     } finally {
       loading = false;
-      runSimulation();
+      if (isSimulationPage) runSimulation();
     }
 
     return () => simulator?.terminate();
@@ -511,7 +524,7 @@
           : draft.discarded
             ? "구버전 초안 제거 · catalog 불러옴"
             : "catalog 불러옴";
-      runSimulation();
+      if (isSimulationPage) runSimulation();
     } catch (error) {
       statusMessage =
         error instanceof Error ? error.message : "catalog를 불러오지 못했습니다.";
@@ -776,10 +789,10 @@
 </script>
 
 <svelte:head>
-  <title>{dataset.title} · Quest Flow</title>
+  <title>{dataset.title} · {isSimulationPage ? "시뮬레이션" : "퀘스트 체인"}</title>
 </svelte:head>
 
-<main class:pro={mode === "pro"} class="app-shell">
+<main class:pro={mode === "pro"} class:viewer={!isSimulationPage} class="app-shell">
   <header class="topbar">
     <div class="brand">
       <span class="brand-mark">QF</span>
@@ -795,6 +808,10 @@
     </div>
 
     <div class="top-actions">
+      <nav class="page-nav" aria-label="도구 화면">
+        <a class:active={!isSimulationPage} href="/">체인 뷰어</a>
+        <a class:active={isSimulationPage} href="/simulation">시뮬레이션</a>
+      </nav>
       <span class:online={session.authenticated} class="session">
         {session.authenticated ? session.displayName ?? "관리자" : "체험 모드"}
       </span>
@@ -810,7 +827,9 @@
           관리자 로그인
         </button>
       {/if}
-      <span class="save-state">{saveState}</span>
+      {#if isSimulationPage}
+        <span class="save-state">{saveState}</span>
+      {/if}
       <div class="mode-switch" aria-label="화면 모드">
         <button
           class:active={mode === "desktop"}
@@ -819,9 +838,11 @@
         <button class:active={mode === "pro"} onclick={() => setMode("pro")}
         >Pro</button>
       </div>
-      <button class="primary" disabled={running} onclick={runSimulation}>
-        {running ? "계산 중…" : "시뮬레이션"}
-      </button>
+      {#if isSimulationPage}
+        <button class="primary" disabled={running} onclick={runSimulation}>
+          {running ? "계산 중…" : "시뮬레이션"}
+        </button>
+      {/if}
     </div>
   </header>
 
@@ -918,7 +939,7 @@
     </div>
   {/if}
 
-  <section class="workspace">
+  <section class:viewer-workspace={!isSimulationPage} class="workspace">
     <aside class="catalog-panel">
       <div class="catalog-picker">
         <div class="panel-heading">
@@ -980,8 +1001,14 @@
             <div>
               <strong>{node.questId} {node.title}</strong>
               <small>
-                {dataset.steps.filter((step) => step.questId === node.questId).length}
-                개 동선 단계
+                {#if isSimulationPage}
+                  {dataset.steps.filter((step) => step.questId === node.questId).length}
+                  개 동선 단계
+                {:else if node.prerequisiteQuestIds.length > 0}
+                  선행 {node.prerequisiteQuestIds.join(", ")}
+                {:else}
+                  시작 퀘스트
+                {/if}
               </small>
             </div>
           </button>
@@ -993,7 +1020,9 @@
       <div class="canvas-toolbar">
         <div>
           <span class="eyebrow">
-            {canvasMode === "quest-chain"
+            {!isSimulationPage
+              ? "QUEST CHAIN · VIEWER"
+              : canvasMode === "quest-chain"
               ? "QUEST CHAIN · GRAPH"
               : canvasMode === "quest-route"
                 ? "QUEST ROUTE · READ ONLY"
@@ -1002,24 +1031,26 @@
           <h1>{dataset.title}</h1>
         </div>
         <div class="canvas-controls">
-          <div class="canvas-mode-switch" aria-label="중앙 그래프 표시 모드">
-            <button
-              class:active={canvasMode === "quest-chain"}
-              onclick={() => setCanvasMode("quest-chain")}
-            >퀘스트 체인</button>
-            <button
-              class:active={canvasMode === "quest-route"}
-              onclick={() => setCanvasMode("quest-route")}
-            >선택 퀘스트 동선</button>
-            <button
-              class:active={canvasMode === "place-edit"}
-              onclick={() => setCanvasMode("place-edit")}
-            >장소 편집</button>
-          </div>
-          {#if canvasMode === "quest-chain"}
-            <button class="secondary auto-layout" onclick={autoLayoutQuestGraph}>
-              노드 자동 배치
-            </button>
+          {#if isSimulationPage}
+            <div class="canvas-mode-switch" aria-label="중앙 그래프 표시 모드">
+              <button
+                class:active={canvasMode === "quest-chain"}
+                onclick={() => setCanvasMode("quest-chain")}
+              >퀘스트 체인</button>
+              <button
+                class:active={canvasMode === "quest-route"}
+                onclick={() => setCanvasMode("quest-route")}
+              >선택 퀘스트 동선</button>
+              <button
+                class:active={canvasMode === "place-edit"}
+                onclick={() => setCanvasMode("place-edit")}
+              >장소 편집</button>
+            </div>
+            {#if canvasMode === "quest-chain"}
+              <button class="secondary auto-layout" onclick={autoLayoutQuestGraph}>
+                노드 자동 배치
+              </button>
+            {/if}
           {/if}
           <div class="canvas-zoom">
             <span>{Math.round(zoom * 100)}%</span>
@@ -1035,7 +1066,9 @@
         <svg
           viewBox={`0 0 ${canvasWidth} ${canvasHeight}`}
           preserveAspectRatio="xMidYMid meet"
-          aria-label="퀘스트 그래프와 맵 장소 편집기"
+          aria-label={isSimulationPage
+            ? "퀘스트 그래프와 맵 장소 시뮬레이션"
+            : "퀘스트 체인 그래프 뷰어"}
           role="application"
           onwheel={handleWheel}
           onpointermove={handlePointerMove}
@@ -1088,6 +1121,12 @@
                   class="quest-node"
                   transform={`translate(${xOnCanvas(node.x)} ${yOnCanvas(node.y)})`}
                   onpointerdown={(event) => {
+                    selectedQuestId = node.questId;
+                    selectedStepId = dataset.steps.find(
+                      (step) => step.questId === node.questId,
+                    )?.id ?? null;
+                    activeProTab = "properties";
+                    if (!isSimulationPage) return;
                     const svg = (event.currentTarget as SVGGElement).ownerSVGElement;
                     if (svg) {
                       const point = canvasPointFromEvent(event, svg);
@@ -1099,11 +1138,6 @@
                       event.pointerId,
                     );
                     dragQuestNodeId = node.id;
-                    selectedQuestId = node.questId;
-                    selectedStepId = dataset.steps.find(
-                      (step) => step.questId === node.questId,
-                    )?.id ?? null;
-                    activeProTab = "properties";
                   }}
                   role="button"
                   tabindex="0"
@@ -1244,7 +1278,9 @@
         </svg>
         <div class="map-hint">
           {canvasMode === "quest-chain"
-            ? "빈 곳 드래그로 이동 · 노드 드래그 · 휠로 줌"
+            ? isSimulationPage
+              ? "빈 곳 드래그로 이동 · 노드 드래그 · 휠로 줌"
+              : "노드를 선택해 퀘스트 내용 확인 · 빈 곳 드래그로 이동 · 휠로 줌"
             : canvasMode === "quest-route"
               ? "빈 곳 드래그로 이동 · 선택 퀘스트 동선 읽기 전용 · 휠로 줌"
               : "빈 곳 드래그로 이동 · 장소 드래그·추가·형태 편집 · 휠로 줌"}
@@ -1252,6 +1288,7 @@
       </div>
     </section>
 
+    {#if isSimulationPage}
     <aside class="properties-panel">
       <div class="tabs">
         <button
@@ -1556,8 +1593,56 @@
         >{publishing ? "게시 중…" : "릴리스 게시"}</button>
       </div>
     </aside>
+    {:else}
+      <aside class="properties-panel quest-content-panel">
+        <div class="panel-heading quest-content-heading">
+          <div>
+            <span class="eyebrow">QUEST CONTENT</span>
+            <h2>퀘스트 내용</h2>
+          </div>
+        </div>
+        {#if selectedQuestNode}
+          <article class="quest-content">
+            <div class="quest-content-title">
+              <span>{selectedQuestNode.questId}</span>
+              <h2>{selectedQuestNode.title}</h2>
+            </div>
+
+            <section>
+              <span class="eyebrow">PREREQUISITES</span>
+              <p>
+                {selectedQuestNode.prerequisiteQuestIds.length > 0
+                  ? selectedQuestNode.prerequisiteQuestIds.join(", ")
+                  : "선행 퀘스트 없음"}
+              </p>
+            </section>
+
+            <section>
+              <span class="eyebrow">REGISTERED STEPS</span>
+              {#if selectedQuestAllSteps.length > 0}
+                <ol>
+                  {#each selectedQuestAllSteps as step}
+                    <li>{step.name}</li>
+                  {/each}
+                </ol>
+              {:else}
+                <p>등록된 진행 단계가 없습니다.</p>
+              {/if}
+            </section>
+
+            <section>
+              <span class="eyebrow">SOURCE NOTE</span>
+              <p>{selectedQuestNote ?? "현재 카탈로그에 추가 설명이 없습니다."}</p>
+            </section>
+          </article>
+        {:else}
+          <div class="quest-content-empty">체인에서 퀘스트를 선택하세요.</div>
+        {/if}
+      </aside>
+    {/if}
   </section>
 
+  {#if isSimulationPage}
   <section class="result-panel">
     <div class="run-settings">
       <div>
@@ -1606,4 +1691,5 @@
       </article>
     </div>
   </section>
+  {/if}
 </main>

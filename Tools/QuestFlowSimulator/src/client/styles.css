@@ -68,6 +68,11 @@ button:disabled {
   background: rgba(6, 11, 18, 0.88);
 }
 
+.app-shell.viewer,
+.app-shell.pro.viewer {
+  grid-template-rows: auto auto minmax(0, 1fr);
+}
+
 .topbar {
   z-index: 5;
   display: grid;
@@ -83,6 +88,36 @@ button:disabled {
 .top-actions {
   display: flex;
   align-items: center;
+}
+
+.page-nav {
+  display: flex;
+  overflow: hidden;
+  border: 1px solid var(--line-bright);
+  border-radius: 5px;
+  white-space: nowrap;
+}
+
+.page-nav a {
+  display: grid;
+  min-height: 36px;
+  padding: 0 11px;
+  place-items: center;
+  border-right: 1px solid var(--line);
+  color: var(--muted);
+  background: var(--raised);
+  font-size: 10px;
+  text-decoration: none;
+}
+
+.page-nav a:last-child {
+  border-right: 0;
+}
+
+.page-nav a.active {
+  color: var(--text);
+  background: var(--accent-soft);
+  box-shadow: inset 0 -2px var(--accent);
 }
 
 .brand {
@@ -960,6 +995,60 @@ h2 {
 
 .property-content.hidden {
   display: none;
+}
+
+.quest-content-panel {
+  overflow: auto;
+}
+
+.quest-content-heading {
+  flex: 0 0 auto;
+  min-height: 80px;
+}
+
+.quest-content {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 18px;
+}
+
+.quest-content-title {
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+.quest-content-title > span {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--accent);
+  font: 600 12px "IBM Plex Mono", monospace;
+}
+
+.quest-content section {
+  padding: 14px;
+  border: 1px solid var(--line);
+  background: rgba(6, 11, 18, 0.28);
+}
+
+.quest-content p,
+.quest-content li {
+  color: var(--text);
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+.quest-content ol {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding-left: 20px;
+}
+
+.quest-content-empty {
+  padding: 24px 18px;
+  color: var(--muted);
+  font-size: 12px;
 }
 
 fieldset {
