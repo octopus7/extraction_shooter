@@ -80,6 +80,7 @@
   let loginBusy = false;
   let loginError = "";
   let adminPassword = "";
+  let adminMenuOpen = false;
   let publishing = false;
   let tokenBusy = false;
   let syncTokenValue = "";
@@ -709,6 +710,11 @@
     }
   }
 
+  async function issueCodexTokenFromMenu() {
+    adminMenuOpen = false;
+    await issueCodexToken();
+  }
+
   async function copySyncToken() {
     await navigator.clipboard.writeText(syncTokenValue);
     statusMessage = "Codex 동기화 토큰을 클립보드에 복사했습니다.";
@@ -753,6 +759,7 @@
   async function signOut() {
     if (loginBusy) return;
 
+    adminMenuOpen = false;
     loginBusy = true;
     try {
       for (const catalog of catalogs) {
@@ -777,6 +784,10 @@
     }
   }
 
+  function handleAdminMenuKeydown(event: KeyboardEvent) {
+    if (event.key === "Escape") adminMenuOpen = false;
+  }
+
   function formatTime(seconds: number) {
     if (!Number.isFinite(seconds)) return "—";
     const totalSeconds = Math.max(0, Math.round(seconds));
@@ -787,6 +798,11 @@
     return minutes > 0 ? `${minutes}분 ${rest}초` : `${rest}초`;
   }
 </script>
+
+<svelte:window
+  onclick={() => (adminMenuOpen = false)}
+  onkeydown={handleAdminMenuKeydown}
+/>
 
 <svelte:head>
   <title>{dataset.title} · {isSimulationPage ? "시뮬레이션" : "퀘스트 체인"}</title>
@@ -812,17 +828,42 @@
         <a class:active={!isSimulationPage} href="/">체인 뷰어</a>
         <a class:active={isSimulationPage} href="/simulation">시뮬레이션</a>
       </nav>
-      <span class:online={session.authenticated} class="session">
-        {session.authenticated ? session.displayName ?? "관리자" : "체험 모드"}
-      </span>
       {#if session.authenticated}
-        <button class="auth-action" disabled={tokenBusy} onclick={issueCodexToken}>
-          {tokenBusy ? "발급 중…" : "Codex 토큰"}
-        </button>
-        <button class="auth-action" disabled={loginBusy} onclick={signOut}>
-          로그아웃
-        </button>
+        <div class="admin-menu">
+          <button
+            class="session online admin-menu-trigger"
+            type="button"
+            aria-haspopup="menu"
+            aria-expanded={adminMenuOpen}
+            onclick={(event) => {
+              event.stopPropagation();
+              adminMenuOpen = !adminMenuOpen;
+            }}
+          >
+            <span>{session.displayName ?? "관리자"}</span>
+            <span class="admin-menu-chevron" aria-hidden="true">▾</span>
+          </button>
+          {#if adminMenuOpen}
+            <div class="admin-dropdown" role="menu" aria-label="관리자 메뉴">
+              <button
+                type="button"
+                role="menuitem"
+                disabled={tokenBusy}
+                onclick={issueCodexTokenFromMenu}
+              >
+                {tokenBusy ? "발급 중…" : "Codex 토큰"}
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                disabled={loginBusy}
+                onclick={signOut}
+              >로그아웃</button>
+            </div>
+          {/if}
+        </div>
       {:else}
+        <span class="session">체험 모드</span>
         <button class="auth-action" disabled={loginBusy} onclick={openLogin}>
           관리자 로그인
         </button>

@@ -191,6 +191,63 @@ button:disabled {
   color: var(--accent);
 }
 
+.admin-menu {
+  position: relative;
+}
+
+.admin-menu-trigger {
+  display: flex;
+  min-height: 36px;
+  align-items: center;
+  gap: 7px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.admin-menu-trigger[aria-expanded="true"] {
+  background: var(--accent-soft);
+}
+
+.admin-menu-chevron {
+  color: var(--muted);
+  font-size: 9px;
+  transition: transform 120ms ease;
+}
+
+.admin-menu-trigger[aria-expanded="true"] .admin-menu-chevron {
+  transform: rotate(180deg);
+}
+
+.admin-dropdown {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 8px);
+  right: 0;
+  display: grid;
+  min-width: 152px;
+  padding: 6px;
+  border: 1px solid var(--line-bright);
+  background: var(--panel);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.42);
+}
+
+.admin-dropdown button {
+  min-height: 36px;
+  padding: 0 10px;
+  border: 0;
+  color: var(--text);
+  background: transparent;
+  font-size: 10px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.admin-dropdown button:hover:not(:disabled),
+.admin-dropdown button:focus-visible {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
 .save-state {
   max-width: 150px;
   overflow: hidden;
@@ -1384,7 +1441,7 @@ input:focus {
   }
 
   .project,
-  .session,
+  .session:not(.admin-menu-trigger),
   .save-state,
   .mode-switch button:first-child {
     display: none;
