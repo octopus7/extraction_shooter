@@ -163,6 +163,7 @@ void UTunaSweeperIntroMenuWidget::ShowMainMenu()
 
 void UTunaSweeperIntroMenuWidget::ShowDifficultySelection()
 {
+	const bool bDemoNotice = TunaSweeperBuildFlavor::IsDemo() && !bDifficultyAdjustmentMode;
 	SetTitlePresentationMainMenuActive(false);
 	EnsureDifficultySelectionPanel();
 	HideDeleteConfirmDialog();
@@ -188,7 +189,11 @@ void UTunaSweeperIntroMenuWidget::ShowDifficultySelection()
 		}
 	}
 
-	if (DifficultySelectPanel)
+	if (bDemoNotice && DemoNoticePanel)
+	{
+		DemoNoticePanel->SetVisibility(ESlateVisibility::Visible);
+	}
+	else if (DifficultySelectPanel)
 	{
 		DifficultySelectPanel->SetVisibility(ESlateVisibility::Visible);
 	}
@@ -277,6 +282,10 @@ void UTunaSweeperIntroMenuWidget::ShowSettingsPanel()
 	if (DifficultySelectPanel)
 	{
 		DifficultySelectPanel->SetVisibility(ESlateVisibility::Collapsed);
+	}
+	if (DemoNoticePanel)
+	{
+		DemoNoticePanel->SetVisibility(ESlateVisibility::Collapsed);
 	}
 	SetTitleLogoVisible(false);
 	if (CreditsPanel)
@@ -416,6 +425,10 @@ void UTunaSweeperIntroMenuWidget::ShowCreditsPanel()
 	{
 		DifficultySelectPanel->SetVisibility(ESlateVisibility::Collapsed);
 	}
+	if (DemoNoticePanel)
+	{
+		DemoNoticePanel->SetVisibility(ESlateVisibility::Collapsed);
+	}
 	if (SettingsPanel)
 	{
 		SettingsPanel->SetVisibility(ESlateVisibility::Collapsed);
@@ -472,6 +485,10 @@ void UTunaSweeperIntroMenuWidget::HideOverlayPanels()
 	if (DifficultySelectPanel)
 	{
 		DifficultySelectPanel->SetVisibility(ESlateVisibility::Collapsed);
+	}
+	if (DemoNoticePanel)
+	{
+		DemoNoticePanel->SetVisibility(ESlateVisibility::Collapsed);
 	}
 	if (SettingsPanel)
 	{

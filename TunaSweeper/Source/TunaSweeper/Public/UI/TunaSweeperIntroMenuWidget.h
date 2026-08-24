@@ -92,6 +92,31 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
 	TObjectPtr<UImage> DemoBuildImage;
 
+	// Demo notice layout is authored in WBP_IntroMenu so designers can reposition it without C++ changes.
+	UPROPERTY(BlueprintReadOnly, Category = "Intro|Demo Notice", meta = (BindWidgetOptional))
+	TObjectPtr<UWidget> DemoNoticePanel;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro|Demo Notice", meta = (BindWidgetOptional))
+	TObjectPtr<UTextBlock> DemoNoticeTitleText;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro|Demo Notice", meta = (BindWidgetOptional))
+	TObjectPtr<UTextBlock> DemoNoticeMessageText;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro|Demo Notice", meta = (BindWidgetOptional))
+	TObjectPtr<UImage> DemoNoticeArtworkImage;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro|Demo Notice", meta = (BindWidgetOptional))
+	TObjectPtr<UButton> DemoNoticeBackButton;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro|Demo Notice", meta = (BindWidgetOptional))
+	TObjectPtr<UTextBlock> DemoNoticeBackButtonText;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro|Demo Notice", meta = (BindWidgetOptional))
+	TObjectPtr<UButton> DemoNoticeConfirmButton;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro|Demo Notice", meta = (BindWidgetOptional))
+	TObjectPtr<UTextBlock> DemoNoticeConfirmButtonText;
+
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
 	TObjectPtr<UButton> SaveSlot1Button;
 

@@ -110,6 +110,18 @@ void UTunaSweeperIntroMenuWidget::NativeConstruct()
 		DifficultyBackButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleDifficultyBackClicked);
 	}
 
+	if (DemoNoticeConfirmButton)
+	{
+		DemoNoticeConfirmButton->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleDifficultyStartClicked);
+		DemoNoticeConfirmButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleDifficultyStartClicked);
+	}
+
+	if (DemoNoticeBackButton)
+	{
+		DemoNoticeBackButton->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleDifficultyBackClicked);
+		DemoNoticeBackButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleDifficultyBackClicked);
+	}
+
 	if (SaveSlot1Button)
 	{
 		SaveSlot1Button->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleSaveSlot1Focused);

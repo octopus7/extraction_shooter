@@ -3,6 +3,12 @@
 
 void UTunaSweeperIntroMenuWidget::EnsureDifficultySelectionPanel()
 {
+	// The Demo notice is authored in WBP_IntroMenu. Never replace it with a runtime-generated tree.
+	if (TunaSweeperBuildFlavor::IsDemo() && !bDifficultyAdjustmentMode)
+	{
+		return;
+	}
+
 	if (DifficultySelectPanel || !WidgetTree)
 	{
 		return;
@@ -450,6 +456,39 @@ void UTunaSweeperIntroMenuWidget::RefreshDifficultySelectionPanel()
 	if (bDemoNotice)
 	{
 		SelectedDifficultyStage = 2;
+	}
+
+	if (bDemoNotice && DemoNoticePanel)
+	{
+		if (DemoNoticeTitleText)
+		{
+			DemoNoticeTitleText->SetText(ResolveUiText(
+				FName(TEXT("ui.title.demo_notice_title")),
+				FText::FromString(TEXT("데모 안내"))));
+		}
+		if (DemoNoticeMessageText)
+		{
+			DemoNoticeMessageText->SetText(ResolveUiText(
+				FName(TEXT("ui.title.demo_notice_message")),
+				FText::FromString(TEXT("데모 저장 데이터는 본편과 연동되지 않습니다."))));
+		}
+		if (DemoNoticeBackButtonText)
+		{
+			DemoNoticeBackButtonText->SetText(ResolveUiText(
+				FName(TEXT("ui.common.back")),
+				FText::FromString(TEXT("돌아가기"))));
+		}
+		if (DemoNoticeConfirmButtonText)
+		{
+			DemoNoticeConfirmButtonText->SetText(ResolveUiText(
+				FName(TEXT("ui.common.confirm")),
+				FText::FromString(TEXT("확인"))));
+		}
+		if (DemoNoticeConfirmButton)
+		{
+			DemoNoticeConfirmButton->SetIsEnabled(!bStartTravelPending);
+		}
+		return;
 	}
 
 	if (USizeBox* ContentBox = Cast<USizeBox>(WidgetTree

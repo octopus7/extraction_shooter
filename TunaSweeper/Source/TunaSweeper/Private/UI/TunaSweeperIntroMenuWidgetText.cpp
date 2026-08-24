@@ -168,7 +168,8 @@ bool UTunaSweeperIntroMenuWidget::IsSaveSlotSelectionVisible() const
 
 bool UTunaSweeperIntroMenuWidget::IsDifficultySelectionVisible() const
 {
-	return DifficultySelectPanel && DifficultySelectPanel->GetVisibility() == ESlateVisibility::Visible;
+	return (DifficultySelectPanel && DifficultySelectPanel->GetVisibility() == ESlateVisibility::Visible) ||
+		(DemoNoticePanel && DemoNoticePanel->GetVisibility() == ESlateVisibility::Visible);
 }
 
 bool UTunaSweeperIntroMenuWidget::IsCreditsPanelVisible() const

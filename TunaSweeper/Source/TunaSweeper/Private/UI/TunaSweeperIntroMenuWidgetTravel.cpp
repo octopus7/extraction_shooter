@@ -133,6 +133,8 @@ void UTunaSweeperIntroMenuWidget::SetStartTravelControlsEnabled(bool bEnabled)
 		DifficultyHardButton.Get(),
 		DifficultyStartButton.Get(),
 		DifficultyBackButton.Get(),
+		DemoNoticeConfirmButton.Get(),
+		DemoNoticeBackButton.Get(),
 		SlotSelectButton.Get(),
 		SettingsButton.Get(),
 		CreditsButton.Get(),
