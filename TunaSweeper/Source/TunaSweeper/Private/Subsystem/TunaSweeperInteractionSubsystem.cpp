@@ -2,9 +2,11 @@
 
 #include "Engine/Engine.h"
 #include "Engine/World.h"
+#include "GameFramework/Pawn.h"
 #include "Character/TunaSweeperFacilityNpcActor.h"
 #include "Character/TunaSweeperMoleCompanionActor.h"
 #include "Game/TunaSweeperGameInstance.h"
+#include "Interaction/TunaSweeperBlockedIntakeScreenActor.h"
 #include "Interaction/TunaSweeperDifficultyAdjustmentActor.h"
 #include "Interaction/TunaSweeperDoorActor.h"
 #include "Interaction/TunaSweeperHousingManagementActor.h"
@@ -234,8 +236,10 @@ bool UTunaSweeperInteractionSubsystem::RequestInteraction(UTunaSweeperInteractab
 		return false;
 	}
 
+	const ETunaSweeperInteractionType RequestedInteractionType = Interactable->GetInteractionType();
+	const FName RequestedObjectiveEventId = Interactable->GetObjectiveEventId();
 	bool bHandled = false;
-	switch (Interactable->GetInteractionType())
+	switch (RequestedInteractionType)
 	{
 	case ETunaSweeperInteractionType::ItemPickup:
 		bHandled = HandlePickupItemInteraction(Interactable);
@@ -320,8 +324,8 @@ bool UTunaSweeperInteractionSubsystem::RequestInteraction(UTunaSweeperInteractab
 			if (UTunaSweeperQuestSubsystem* QuestSubsystem = GameInstance->GetSubsystem<UTunaSweeperQuestSubsystem>())
 			{
 				QuestSubsystem->NotifyInteractionCompleted(
-					Interactable->GetObjectiveEventId(),
-					TunaSweeperInteractionQuestEvents::GetInteractionTypeName(Interactable->GetInteractionType()));
+					RequestedObjectiveEventId,
+					TunaSweeperInteractionQuestEvents::GetInteractionTypeName(RequestedInteractionType));
 			}
 		}
 	}
@@ -683,15 +687,23 @@ bool UTunaSweeperInteractionSubsystem::HandleWorldProgressInteraction(
 	UTunaSweeperInteractableComponent* Interactable,
 	APawn* InstigatorPawn)
 {
-	ATunaSweeperWorldProgressActor* ProgressActor = Interactable
-		? Cast<ATunaSweeperWorldProgressActor>(Interactable->GetOwner())
-		: nullptr;
-	if (!ProgressActor || !InstigatorPawn)
+	AActor* ProgressOwner = Interactable ? Interactable->GetOwner() : nullptr;
+	if (!ProgressOwner || !InstigatorPawn)
 	{
 		return false;
 	}
 
-	return ProgressActor->RepairUsingAvailableRequiredItems(true);
+	if (ATunaSweeperWorldProgressActor* ProgressActor = Cast<ATunaSweeperWorldProgressActor>(ProgressOwner))
+	{
+		return ProgressActor->RepairUsingAvailableRequiredItems(true);
+	}
+
+	if (ATunaSweeperBlockedIntakeScreenActor* IntakeScreenActor = Cast<ATunaSweeperBlockedIntakeScreenActor>(ProgressOwner))
+	{
+		return IntakeScreenActor->ClearScreen(true);
+	}
+
+	return false;
 }
 
 bool UTunaSweeperInteractionSubsystem::HandlePersistentDoorInteraction(UTunaSweeperInteractableComponent* Interactable)

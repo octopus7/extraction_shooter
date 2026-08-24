@@ -172,7 +172,7 @@ Stored through `UTunaSweeperSaveGame::WorldProgressStates`.
 
 Each `FTunaSweeperWorldProgressSaveData` preserves:
 
-- `ObjectId`: stable per-level object identifier from runtime spawn data.
+- `ObjectId`: stable per-level object identifier from runtime spawn data or a directly placed level actor.
 - `InfoId`: reusable progress-object information id, such as a broken bridge or blocked entrance type.
 - `State`: `InProgress` or `Completed`.
 - `ProgressQuantity`: contributed material count for in-progress objects.
@@ -180,6 +180,8 @@ Each `FTunaSweeperWorldProgressSaveData` preserves:
 Raid world progress actors restore this state on spawn. Completed repair objects disable their blocking collision and spawn their configured completed replacement actor at the same transform.
 
 Persistent door actors also use `WorldProgressStates`: once opened, they write `Completed` for their stable door `ObjectId`, then later restore by applying the open transform and disabling their blocking collision in the same save slot.
+
+Directly placed `ATunaSweeperBlockedIntakeScreenActor` instances also use `WorldProgressStates`. Clearing the intake screen writes `Completed` immediately, then swaps `BlockedScreenMesh` to `ClearedScreenMesh` on the same component so the placed transform is preserved. Load restores the cleared mesh, and death saves preserve this long-term world state while clearing only carried raid possessions. Every placed instance must keep a stable, unique `ProgressObjectId`.
 
 ### Bunker Housing Facilities
 
