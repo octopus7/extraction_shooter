@@ -3,6 +3,13 @@ import demoCatalogSource from "../data/demo.json";
 import mainCatalogSource from "../data/main-m01-m20.json";
 
 describe("public demo fallback", () => {
+  it("keeps the generated catalog contract limited to Demo and Main", () => {
+    expect([demoCatalogSource.slug, mainCatalogSource.slug]).toEqual([
+      "demo",
+      "main-m01-m20",
+    ]);
+  });
+
   it("uses only map places generated from the demo design documents", () => {
     expect(
       demoCatalogSource.data.places.map((place) => place.name),

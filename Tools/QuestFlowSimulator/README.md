@@ -46,9 +46,8 @@ npm run deploy:dry
 npm run deploy
 ```
 
-퀘스트 원본이 바뀌면 `npm run seed:generate`가 데모, M01~M20, 현재 UE5
-스냅샷 카탈로그를 다시 생성합니다. 시드는 UPSERT 방식이므로 같은 버전을
-재적용할 수 있습니다.
+퀘스트 원본이 바뀌면 `npm run seed:generate`가 Demo와 Main 카탈로그를
+다시 생성합니다. 시드는 UPSERT 방식이므로 같은 버전을 재적용할 수 있습니다.
 
 ## 중앙 캔버스 모드
 
@@ -74,7 +73,7 @@ npm run deploy
 - 로그인 제한: 동일 IP에서 15분 내 5회 실패 시 15분 차단
 - 운영 쿠키: `Secure`, `HttpOnly`, `SameSite=Strict`, `__Host-` prefix
 - 비로그인: 공개 체험판만 조회
-- 로그인: M01~M20, UE5 스냅샷, D1 작업공간 사용
+- 로그인: Main(M01~M20), D1 작업공간 사용
 
 최초 운영 설정은 인증 테이블을 먼저 만든 뒤 비밀번호를 대화형으로 입력한다.
 실제 값은 명령 기록이나 문서에 적지 않는다.

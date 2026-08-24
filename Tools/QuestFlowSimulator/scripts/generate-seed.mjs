@@ -9,20 +9,6 @@ const repositoryRoot = resolve(projectRoot, "..", "..");
 const outputDirectory = resolve(projectRoot, "data");
 
 const sources = {
-  runtimeDefinitions: resolve(
-    repositoryRoot,
-    "TunaSweeper",
-    "Content",
-    "Data",
-    "QuestDefinitions.json",
-  ),
-  runtimeStrings: resolve(
-    repositoryRoot,
-    "TunaSweeper",
-    "Content",
-    "Data",
-    "QuestTextStrings.csv",
-  ),
   mainSsot: resolve(
     repositoryRoot,
     "Docs",
@@ -52,13 +38,6 @@ const sourceText = Object.fromEntries(
   ),
 );
 
-const runtimeDefinitions = JSON.parse(sourceText.runtimeDefinitions);
-if (!Array.isArray(runtimeDefinitions)) {
-  throw new Error("QuestDefinitions.json must contain a top-level array.");
-}
-
-const translations = parseCsv(sourceText.runtimeStrings);
-const runtimeCatalog = buildRuntimeCatalog(runtimeDefinitions, translations);
 const demoCatalog = buildDemoCatalog(
   sourceText.demoTree,
   sourceText.demoRoute,
@@ -83,15 +62,6 @@ const catalogs = [
     sourceKind: "ssot-markdown",
     sourceNames: ["mainSsot"],
     data: mainCatalog,
-  }),
-  makeCatalog({
-    id: "catalog-runtime-snapshot",
-    slug: "runtime-snapshot",
-    title: "UE5 현재 구현 스냅샷",
-    visibility: "authenticated",
-    sourceKind: "ue5-json-csv",
-    sourceNames: ["runtimeDefinitions", "runtimeStrings"],
-    data: runtimeCatalog,
   }),
 ];
 
@@ -140,58 +110,6 @@ function makeCatalog({
     sources: sourceNames.map((name) => relativeSourcePath(sources[name])),
     data: catalogData,
   };
-}
-
-function buildRuntimeCatalog(definitions, stringRows) {
-  const stringsByKey = new Map(
-    stringRows.map((row) => [row.string_key, row]),
-  );
-  const referencedKeys = new Set();
-
-  for (const quest of definitions) {
-    collectStringKeys(quest, referencedKeys);
-  }
-
-  const missingStringKeys = [...referencedKeys]
-    .filter((key) => !stringsByKey.has(key))
-    .sort();
-  if (missingStringKeys.length > 0) {
-    throw new Error(
-      `QuestDefinitions.json references missing string keys: ${missingStringKeys.join(", ")}`,
-    );
-  }
-
-  const quests = definitions
-    .map((quest) => ({
-      ...quest,
-      localized: {
-        title: localize(stringsByKey, quest.title_string_key),
-        description: localize(stringsByKey, quest.description_string_key),
-      },
-    }))
-    .sort(
-      (left, right) =>
-        Number(left.sort_order ?? 0) - Number(right.sort_order ?? 0) ||
-        String(left.quest_id).localeCompare(String(right.quest_id)),
-    );
-
-  const sourceNotes = quests.map((quest) => {
-    const title = quest.localized.title?.ko || quest.quest_id;
-    const objectiveIds = Array.isArray(quest.objectives)
-      ? quest.objectives.map((objective) => objective.objective_id).join(", ")
-      : "";
-    return `${quest.quest_id} ${title}: ${objectiveIds || "목표 없음"}`;
-  });
-
-  return buildApproximateSimulationCatalog(
-    "UE5 현재 구현 스냅샷",
-    quests.map((quest) => ({
-      id: String(quest.quest_id),
-      title: quest.localized.title?.ko || String(quest.quest_id),
-    })),
-    sourceNotes,
-    120,
-  );
 }
 
 function buildDemoCatalog(treeMarkdown, routeMarkdown) {
@@ -704,82 +622,6 @@ function inferredRouteForQuest(quest, index, isMainQuest) {
     fromPlaceId: index === 0 ? "inferred-base" : "inferred-outdoor",
     toPlaceId: index === 0 ? "inferred-base" : "inferred-outdoor",
   };
-}
-
-function parseCsv(text) {
-  const rows = [];
-  let row = [];
-  let field = "";
-  let quoted = false;
-
-  for (let index = 0; index < text.length; index += 1) {
-    const character = text[index];
-    if (quoted) {
-      if (character === '"' && text[index + 1] === '"') {
-        field += '"';
-        index += 1;
-      } else if (character === '"') {
-        quoted = false;
-      } else {
-        field += character;
-      }
-    } else if (character === '"') {
-      quoted = true;
-    } else if (character === ",") {
-      row.push(field);
-      field = "";
-    } else if (character === "\n") {
-      row.push(field);
-      if (row.some((value) => value.length > 0)) {
-        rows.push(row);
-      }
-      row = [];
-      field = "";
-    } else {
-      field += character;
-    }
-  }
-  row.push(field);
-  if (row.some((value) => value.length > 0)) {
-    rows.push(row);
-  }
-  if (quoted || rows.length === 0) {
-    throw new Error("QuestTextStrings.csv is malformed.");
-  }
-
-  const headers = rows[0];
-  return rows.slice(1).map((values) =>
-    Object.fromEntries(headers.map((header, index) => [header, values[index] ?? ""])),
-  );
-}
-
-function collectStringKeys(value, keys) {
-  if (Array.isArray(value)) {
-    for (const item of value) {
-      collectStringKeys(item, keys);
-    }
-    return;
-  }
-  if (!value || typeof value !== "object") {
-    return;
-  }
-  for (const [key, child] of Object.entries(value)) {
-    if (key.endsWith("_string_key") && typeof child === "string") {
-      keys.add(child);
-    } else {
-      collectStringKeys(child, keys);
-    }
-  }
-}
-
-function localize(stringsByKey, key) {
-  if (typeof key !== "string") {
-    return null;
-  }
-  const row = stringsByKey.get(key);
-  return row
-    ? { ko: row.ko ?? "", en: row.en ?? "", ja: row.ja ?? "" }
-    : null;
 }
 
 function parseHeadingSections(markdown, level) {
