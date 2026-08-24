@@ -816,6 +816,7 @@ private:
 	void MarkItemStateMutationForSave(bool bSaveImmediatelyOutsideBunker = false);
 	void ResetRuntimeStateForSaveSlotSelection();
 	void GenerateDefaultInventoryState();
+	bool InitializeDemoStartingLoadout();
 	void ResetPlayerSlotArrays();
 	void RefreshLegacyPlayerInventoryItems();
 	int32 ResolveItemExperienceValue(int32 ItemId);

@@ -291,6 +291,14 @@ bool UTunaSweeperGameInstance::ActivateSaveSlot(int32 SaveSlotIndex, bool bStart
 		{
 			ActiveSaveSlotDifficultyStage = 2;
 			bActiveSaveSlotDifficultySelected = true;
+			if (!InitializeDemoStartingLoadout())
+			{
+				UE_LOG(
+					LogTunaSweeperGameInstance,
+					Error,
+					TEXT("Could not initialize the Demo starting loadout."));
+				return false;
+			}
 		}
 		bInventoryStateInitialized = true;
 		RefreshLegacyPlayerInventoryItems();
@@ -982,6 +990,66 @@ void UTunaSweeperGameInstance::GenerateDefaultInventoryState()
 	HoveredItemSlotReference = FTunaSweeperItemSlotReference();
 	SelectedWeaponAttachmentSlotTags.Reset();
 	SelectedWeaponAttachmentSlots.Reset();
+}
+
+bool UTunaSweeperGameInstance::InitializeDemoStartingLoadout()
+{
+	constexpr int32 RifleItemId = 1002;
+	constexpr int32 RifleAmmoItemId = 2002;
+	constexpr int32 StartingAmmoCount = 60;
+	constexpr int32 PrimaryWeaponEquipmentSlotIndex = 0;
+	constexpr int32 ReserveAmmoInventorySlotIndex = 0;
+
+	if (!EquipmentSlots.IsValidIndex(PrimaryWeaponEquipmentSlotIndex) ||
+		!PlayerInventorySlots.IsValidIndex(ReserveAmmoInventorySlotIndex))
+	{
+		return false;
+	}
+
+	UTunaSweeperItemDataSubsystem* ItemDataSubsystem = GetSubsystem<UTunaSweeperItemDataSubsystem>();
+	FTunaSweeperItemDefinition RifleDefinition;
+	FTunaSweeperItemDefinition RifleAmmoDefinition;
+	if (!ItemDataSubsystem ||
+		!ItemDataSubsystem->TryGetItemDefinition(RifleItemId, RifleDefinition) ||
+		!ItemDataSubsystem->TryGetItemDefinition(RifleAmmoItemId, RifleAmmoDefinition) ||
+		!DoesItemDefinitionMatchEquipmentSlot(PrimaryWeaponEquipmentSlotIndex, RifleDefinition) ||
+		!IsAmmoDefinitionCompatibleWithWeapon(RifleDefinition, RifleAmmoDefinition))
+	{
+		return false;
+	}
+
+	const FGuid RifleUid = CreateItemInstance(RifleItemId, 1);
+	FTunaSweeperItemInstance* RifleInstance = ItemInstancesByUid.Find(RifleUid);
+	if (!RifleInstance)
+	{
+		return false;
+	}
+
+	const int32 LoadedAmmoCount = FMath::Min(
+		StartingAmmoCount,
+		CalculateWeaponMagazineCapacity(*RifleInstance, RifleDefinition));
+	RifleInstance->LoadedAmmoItemId = RifleAmmoItemId;
+	RifleInstance->SelectedAmmoItemId = RifleAmmoItemId;
+	RifleInstance->LoadedAmmoCount = LoadedAmmoCount;
+	EquipmentSlots[PrimaryWeaponEquipmentSlotIndex].ItemUid = RifleUid;
+
+	const int32 ReserveAmmoCount = StartingAmmoCount - LoadedAmmoCount;
+	if (ReserveAmmoCount > 0)
+	{
+		const FGuid AmmoUid = CreateItemInstance(RifleAmmoItemId, ReserveAmmoCount);
+		if (!AmmoUid.IsValid())
+		{
+			EquipmentSlots[PrimaryWeaponEquipmentSlotIndex].Clear();
+			ItemInstancesByUid.Remove(RifleUid);
+			return false;
+		}
+		PlayerInventorySlots[ReserveAmmoInventorySlotIndex].ItemUid = AmmoUid;
+	}
+
+	MarkItemEverAcquired(RifleItemId);
+	MarkItemEverAcquired(RifleAmmoItemId);
+	SetRuntimeSelectedWeaponSlotNumber(1);
+	return true;
 }
 
 void UTunaSweeperGameInstance::ResetPlayerSlotArrays()
