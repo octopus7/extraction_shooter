@@ -11,6 +11,20 @@ Update it whenever a new state field is expected to persist across save slots, l
 - Save entry point: `UTunaSweeperGameInstance::SaveGameStateInternal()`
 - Load entry point: `UTunaSweeperGameInstance::LoadGameState()`
 
+## Fail-Closed File Commit
+
+Gameplay slots and the last-selected-slot settings file use the same fail-closed file commit path. The existing active file is never written in place.
+
+1. Serialize the new save into a CRC-protected envelope and write it to `<active>.candidate`.
+2. Fully flush the candidate to disk, reload it, verify the envelope length/CRC, deserialize it, and validate its save class. Gameplay slots additionally validate save version, build flavor, and slot index.
+3. If candidate validation fails, delete only the candidate and report save failure. The active file remains untouched.
+4. Before promotion, copy the current valid active file into `<active>.previous` through its own flushed and verified candidate.
+5. Promote the validated candidate over the active path, then reload and validate the promoted active file. Any promotion/validation failure reports save failure and restores from the previous verified generation when possible.
+
+An uncommitted candidate left by forced termination is deleted on the next load and is never promoted. Load order is active file, previous verified generation, then newest valid timestamped backup. Recovery candidates must pass the same CRC/class/version/flavor/slot validation before they can repair the active file. If no valid generation exists, the slot remains occupied but unloadable so ordinary save calls cannot silently overwrite it; only an explicit slot deletion can discard its artifacts.
+
+Legacy raw Unreal `.sav` files remain readable. Their next successful save rewrites the active generation using the CRC envelope. Explicit slot deletion removes the active, candidate, previous, and timestamped backup files for that slot so deleted data cannot be resurrected by recovery.
+
 ## Save Timing Rules
 
 ### Bunker Item Mutation Deferral

@@ -104,13 +104,15 @@ flowchart TD
 2. 새 `UTunaSweeperSaveGame` 객체를 만든다.
 3. `CollectPlayerOwnedItemUids()`로 플레이어 소유 UID를 수집한다. 기본 수집 대상은 `InventorySlots`, `EquipmentSlots`, `AuxiliaryBagSlots`, `StorageSlots`이고, `PersistRuntime`일 때만 `UsableQuickSlots`도 포함한다. 각 아이템의 `AttachmentSlots`에 있는 UID도 재귀적으로 포함한다.
 4. 수집한 UID를 `ItemInstancesByUid`에서 찾아 `MakeItemInstanceForSave()`로 정규화한 뒤 `SaveGame->ItemInstances`에 넣는다. 이때 `LoadedAmmoItemId`, `LoadedAmmoCount`, `SelectedAmmoItemId`가 `NormalizeLoadedAmmoPersistenceFields()`로 맞춰진다.
-5. 세이브 메타데이터를 기록한다. `SaveVersion=18`, `SaveSlotIndex`, 누적 플레이 시간, 난이도, 난이도 선택 여부, `LastSavedAtTicks`, `TotalExperiencePoints`가 여기서 들어간다.
+5. 세이브 메타데이터를 기록한다. `SaveVersion=20`, `SaveSlotIndex`, `BuildFlavor`, 누적 플레이 시간, 난이도, 난이도 선택 여부, `LastSavedAtTicks`, `TotalExperiencePoints`가 여기서 들어간다.
 6. 시나리오 플래그, 메모, 획득 이력, 지도 마커, 월드 진행, 돼지저금통, 하우징, 하우징 해금, 제작대 레시피 해금을 배열로 내보내고 정렬한다.
 7. 퀘스트 서브시스템이 있으면 `ExportQuestProgressForSave()`로 `QuestProgressStates`, `TrackedQuestId`, `QuestCoinBalance`를 내보낸다.
 8. 슬롯 배열과 창고, 상점 재고 상태를 복사한다. `StorageSlotCapacity`는 정규화하고, `StorageSlots`는 그 용량까지 보장한다. `ShopStockStates`는 `ShopId`, `SlotIndex`, `ItemId` 순으로 정렬한다.
 9. 퀵슬롯 모드를 적용한다. `PreserveExisting`에서는 기존 저장 파일의 `UsableQuickSlots`를 가져오되, 기존 저장의 아이템 인스턴스에 없는 UID는 제거한다. 보존된 퀵슬롯 아이템과 부착물 UID는 새 `ItemInstances`에도 다시 추가한다.
-10. 기존 슬롯 파일이 있으면 `BackupExistingSaveGame()`으로 백업을 만든다. 백업 실패 시 저장 전체를 실패 처리한다.
-11. `UGameplayStatics::SaveGameToSlot(SaveGame, GetSaveGameSlotName(ActiveSaveSlotIndex), 0)`로 최종 저장한다.
+10. 기존 슬롯 파일이 있으면 `BackupExistingSaveGame()`으로 CRC·재로드 검증을 통과한 타임스탬프 백업을 만든다. 백업 실패 시 저장 전체를 실패 처리한다.
+11. 새 세이브를 CRC envelope로 직렬화해 액티브 슬롯의 `.candidate` 파일에 기록하고 `Flush(true)`로 디스크까지 반영한다.
+12. 후보 파일을 즉시 다시 읽어 CRC, 세이브 클래스, 버전, 빌드 플레이버, 슬롯 번호를 검증한다. 실패하면 후보만 삭제하고 기존 액티브 슬롯은 유지한다.
+13. 후보가 유효하면 기존 액티브를 `.previous` 정상 세대로 검증 복사한 뒤 후보를 액티브 경로로 승격하고, 승격된 파일을 다시 검증한다. 승격이나 최종 검증이 실패하면 저장 실패를 반환하고 가능한 경우 `.previous`에서 액티브를 복구한다.
 
 ## LoadGame 본문 로드 흐름
 
@@ -118,7 +120,7 @@ flowchart TD
 
 `LoadGameState()`의 주요 복구 순서는 다음과 같다.
 
-1. `GetExistingSaveGameSlotName(ActiveSaveSlotIndex)`가 비어 있으면 실패한다. 실제 로드는 `UGameplayStatics::LoadGameFromSlot()`이다.
+1. `GetExistingSaveGameSlotName(ActiveSaveSlotIndex)`가 비어 있으면 실패한다. 남아 있는 `.candidate`는 커밋되지 않은 저장으로 삭제하고, 액티브를 CRC·클래스·버전·플레이버·슬롯 번호로 검증한다. 액티브가 유효하지 않으면 `.previous`, 최신 타임스탬프 백업 순으로 같은 검증을 통과한 정상 세대를 찾아 액티브를 복구한다. 정상 세대가 하나도 없으면 슬롯을 자동으로 새 게임 취급하거나 덮어쓰지 않고 로드 실패로 남긴다.
 2. 플레이 시간, 난이도, `bDifficultySelected`, 경험치를 복구한다. 세이브 버전이 `18`보다 낮으면 난이도 선택을 완료한 것으로 간주한다. 오프닝 완료 플래그가 있으면 역시 난이도 선택 완료로 보정한다.
 3. 레이드 경험치 런타임 값은 저장에서 가져오지 않는다. `RaidStartExperiencePoints=TotalExperiencePoints`, pending 경험치와 pending 애니메이션은 초기화된다.
 4. `CompletedScenarioFlags`, `AcquiredMemoIds`, `EverAcquiredItemIds`, `MapMarkers`를 검증하며 복구한다. 마커는 중복/잘못된 `MarkerId`를 건너뛰고 `NextMapMarkerId`를 재계산한다.
@@ -407,5 +409,5 @@ flowchart TD
 22. 획득한 메모가 다시 보이면 `AcquiredMemoIds`에 `MemoId`가 들어갔는지, 메모 스폰 데이터의 `memo_id`가 바뀌지 않았는지 확인한다.
 23. 하우징 시설이 사라지거나 중복되면 `HousingFacilities`의 `InstanceId`, `FacilityId`, `AnchorCell`, `RotationQuarterTurns`, `bStored`를 확인한다.
 24. 로드 직후 슬롯에 빈 참조가 생기면 `ItemInstances`에 해당 UID가 저장됐는지, 부착물 UID가 `AttachmentSlots` 재귀 수집에 포함됐는지 확인한다.
-25. 저장 실패 시 기존 슬롯 백업 단계도 본다. 기존 슬롯이 있는데 `BackupExistingSaveGame()`이 실패하면 최종 `SaveGameToSlot()`까지 가지 않는다.
+25. 저장 실패 시 기존 슬롯 백업뿐 아니라 `.candidate` 기록·full flush·CRC/의미 검증, `.previous` 검증 복사, 후보 승격과 최종 재검증을 차례로 본다. 어느 단계든 실패하면 기존 정상 액티브를 유지하고 저장 실패를 반환하는 것이 정상이다.
 26. 런타임 액터 상태를 SaveGame 문제로 오해하지 않는다. 적 사망, 드롭 컨테이너 내용, 파괴 가능한 엄폐물/폭발통 상태는 현재 장기 저장 대상이 아니다.
