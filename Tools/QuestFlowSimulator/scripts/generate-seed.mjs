@@ -687,6 +687,10 @@ function hashValue(value) {
   return createHash("sha256").update(JSON.stringify(value)).digest("hex");
 }
 
+function hashText(value) {
+  return createHash("sha256").update(value, "utf8").digest("hex");
+}
+
 function relativeSourcePath(path) {
   return path
     .slice(repositoryRoot.length + 1)
@@ -708,6 +712,14 @@ function sqlString(value) {
 function renderSeedSql(catalogValues) {
   const statements = catalogValues.map((catalog) => {
     const dataJson = JSON.stringify(catalog.data);
+    const pack = {
+      schemaVersion: 3,
+      flavor: catalog.slug === "demo" ? "Demo" : "Main",
+      runtime: { questDefinitions: [], questTextStringsCsv: "" },
+      editor: catalog.data,
+    };
+    const packJson = stableStringify(pack);
+    const contentHash = hashText(packJson);
     return `INSERT INTO quest_catalogs (
   id, slug, title, visibility, schema_version, dataset_version,
   source_kind, source_hash, data_json
@@ -717,7 +729,7 @@ function renderSeedSql(catalogValues) {
   ${sqlString(catalog.title)},
   ${sqlString(catalog.visibility)},
   ${catalog.schemaVersion},
-  ${sqlString(catalog.datasetVersion)},
+  ${sqlString(contentHash)},
   ${sqlString(catalog.sourceKind)},
   ${sqlString(catalog.sourceHash)},
   ${sqlString(dataJson)}
@@ -731,6 +743,33 @@ ON CONFLICT(slug) DO UPDATE SET
   source_hash = excluded.source_hash,
   data_json = excluded.data_json,
   updated_at = CURRENT_TIMESTAMP;`;
+  }).flatMap((catalogStatement, index) => {
+    const catalog = catalogValues[index];
+    const pack = {
+      schemaVersion: 3,
+      flavor: catalog.slug === "demo" ? "Demo" : "Main",
+      runtime: { questDefinitions: [], questTextStringsCsv: "" },
+      editor: catalog.data,
+    };
+    const packJson = stableStringify(pack);
+    const contentHash = hashText(packJson);
+    const releaseId = `bootstrap-${catalog.id}-${contentHash.slice(0, 12)}`;
+    return [
+      catalogStatement,
+      `INSERT OR IGNORE INTO quest_releases (
+  id, catalog_id, parent_release_id, dataset_version, content_hash,
+  schema_version, data_json, source_kind, created_by
+) VALUES (
+  ${sqlString(releaseId)}, ${sqlString(catalog.id)}, NULL,
+  ${sqlString(contentHash)}, ${sqlString(contentHash)}, 3,
+  ${sqlString(packJson)}, 'content-bootstrap', 'bootstrap'
+);`,
+      `INSERT INTO quest_channels (catalog_id, current_release_id, updated_at)
+VALUES (${sqlString(catalog.id)}, ${sqlString(releaseId)}, CURRENT_TIMESTAMP)
+ON CONFLICT(catalog_id) DO UPDATE SET
+  current_release_id = excluded.current_release_id,
+  updated_at = CURRENT_TIMESTAMP;`,
+    ];
   });
 
   return [
@@ -739,4 +778,18 @@ ON CONFLICT(slug) DO UPDATE SET
     ...statements,
     "",
   ].join("\n\n");
+}
+
+function stableStringify(value) {
+  return JSON.stringify(sortValue(value));
+}
+
+function sortValue(value) {
+  if (Array.isArray(value)) return value.map(sortValue);
+  if (!value || typeof value !== "object") return value;
+  return Object.fromEntries(
+    Object.entries(value)
+      .sort(([left], [right]) => left.localeCompare(right))
+      .map(([key, child]) => [key, sortValue(child)]),
+  );
 }

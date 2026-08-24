@@ -29,8 +29,9 @@ Windows에서는 `deploy.bat`을 더블클릭하면 배포 로그를 콘솔에�
 .\deploy.bat
 ```
 
-기본 실행은 빌드, Wrangler dry run, 원격 D1 마이그레이션과 퀘스트 시드,
-Worker 배포까지 수행합니다. D1을 변경하지 않고 Worker만 배포하려면 다음
+기본 실행은 빌드, Wrangler dry run, 원격 D1 마이그레이션,
+Worker 배포까지 수행합니다. 배포가 D1 퀘스트 콘텐츠를 덮어쓰지는 않습니다.
+D1을 변경하지 않고 Worker만 배포하려면 다음
 옵션을 사용합니다.
 
 ```powershell
@@ -41,13 +42,47 @@ Worker 배포까지 수행합니다. D1을 변경하지 않고 Worker만 배포�
 
 ```powershell
 npm run db:migrate:remote
-npm run db:seed:remote
 npm run deploy:dry
 npm run deploy
 ```
 
-퀘스트 원본이 바뀌면 `npm run seed:generate`가 Demo와 Main 카탈로그를
-다시 생성합니다. 시드는 UPSERT 방식이므로 같은 버전을 재적용할 수 있습니다.
+초기 설치나 장애 복구에서만 다음 명령으로 기존 catalog 콘텐츠를 명시적으로
+bootstrap합니다. 일상 배포에는 사용하지 않습니다.
+
+```powershell
+npm run content:bootstrap:remote
+```
+
+## Quest authoring 동기화
+
+D1의 현재 채널이 배포 버전의 기준이고, 로컬 파일은 편집 작업 사본입니다.
+웹과 Codex 게시 모두 현재 `datasetVersion`을 기준으로 비교 후 교체하므로 다른
+클라이언트가 먼저 게시한 경우 `409`로 중단됩니다.
+
+```powershell
+# 웹 관리자 화면에서 Codex 토큰 발급 후, 원문을 출력하지 않고 Windows DPAPI에 저장
+npm run quest:token:set
+
+# 편집 전 확인 및 최신 릴리스 받기
+npm run quest:status -- --flavor Demo
+npm run quest:pull -- --flavor Demo
+
+# 편집 후 검증 및 역발행
+npm run quest:validate -- --flavor Demo
+npm run quest:push -- --flavor Demo --summary "퀘스트 설명"
+```
+
+웹에서 발급하는 Codex 토큰은 90일 뒤 만료되며 D1에는 원문이 아닌 SHA-256
+해시만 남습니다. `DELETE /api/sync-tokens/:id`로 만료 전에도 폐기할 수 있습니다.
+
+Main도 `--flavor Main`으로 같은 명령을 사용합니다. Main 런타임과 에디터 작업
+사본, 동기화 기준 파일은 모두 접근 제한 payload 경로에만 기록됩니다. CI나
+Windows 이외 환경에서는 저장소에 기록되지 않는 `QUEST_SYNC_TOKEN` 환경 변수를
+사용할 수 있습니다.
+
+Worker API는 불변 `quest_releases`, 현재 포인터 `quest_channels`, 해시로 저장한
+범위 제한 토큰, 게시 감사 로그를 사용합니다. 기존 `/api/catalogs` 응답은 현재
+릴리스의 `editor` 투영으로 계속 제공되어 기존 뷰어와 호환됩니다.
 
 ## 중앙 캔버스 모드
 

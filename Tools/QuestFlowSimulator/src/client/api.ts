@@ -1,6 +1,7 @@
 import type {
   CatalogSummary,
   QuestDataset,
+  QuestSyncRelease,
   Session,
   Workspace,
 } from "../shared/types";
@@ -157,6 +158,9 @@ export async function getWorkspaces(): Promise<Workspace[]> {
       catalogId: String(item.catalogId ?? item.catalog_id ?? ""),
       state,
       revision: Number(item.revision ?? 0),
+      baseDatasetVersion:
+        String(item.baseDatasetVersion ?? item.base_dataset_version ?? "") ||
+        undefined,
       updatedAt: String(item.updatedAt ?? item.updated_at ?? "") || undefined,
     }];
   });
@@ -197,4 +201,54 @@ export async function updateWorkspace(
     },
   );
   return "workspace" in value ? value.workspace : value;
+}
+
+export async function getCurrentQuestRelease(
+  slug: string,
+): Promise<QuestSyncRelease> {
+  const value = await request<{ release: QuestSyncRelease }>(
+    `/api/sync/${encodeURIComponent(slug)}/current`,
+  );
+  return value.release;
+}
+
+export async function publishEditorDataset(
+  slug: string,
+  expectedBaseDatasetVersion: string,
+  editor: QuestDataset,
+  workspaceId?: string,
+): Promise<QuestSyncRelease> {
+  const current = await getCurrentQuestRelease(slug);
+  const value = await request<{ release: QuestSyncRelease }>(
+    `/api/sync/${encodeURIComponent(slug)}/publish`,
+    {
+      method: "POST",
+      body: JSON.stringify({
+        expectedBaseDatasetVersion,
+        workspaceId,
+        pack: { ...current.pack, editor },
+        summary: "Published from the Quest Flow web editor",
+      }),
+    },
+  );
+  return value.release;
+}
+
+export async function createCodexSyncToken(): Promise<string> {
+  const value = await request<{ token: string }>("/api/sync-tokens", {
+    method: "POST",
+    body: JSON.stringify({
+      label: `Codex ${new Date().toISOString().slice(0, 10)}`,
+      scopes: [
+        "demo:read",
+        "demo:write",
+        "demo:publish",
+        "main:read",
+        "main:write",
+        "main:publish",
+      ],
+      expiresInDays: 90,
+    }),
+  });
+  return value.token;
 }

@@ -47,15 +47,13 @@ if errorlevel 1 goto :failed
 
 if "%QUEST_DEPLOY_WORKER_ONLY%"=="1" (
   echo.
-  echo [4/5] Skipping D1 migration and quest seed - worker-only.
+  echo [4/5] Skipping D1 migrations - worker-only.
   goto :deploy_worker
 )
 
 echo.
-echo [4/5] Applying remote D1 migrations and quest seed...
+echo [4/5] Applying remote D1 migrations...
 call npm run db:migrate:remote
-if errorlevel 1 goto :failed
-call npm run db:seed:remote
 if errorlevel 1 goto :failed
 
 :deploy_worker
@@ -85,10 +83,13 @@ goto :finish
 echo.
 echo Usage:
 echo   deploy.bat
-echo       Build, dry-run, migrate and seed D1, then deploy Worker.
+echo       Build, dry-run, migrate D1, then deploy Worker.
 echo.
 echo   deploy.bat --worker-only
 echo       Build, dry-run, and deploy Worker without changing D1.
+echo.
+echo   npm run content:bootstrap:remote
+echo       Explicitly bootstrap or recover legacy catalog content.
 echo.
 echo   Add --no-pause as the first or second argument to skip pause.
 echo.

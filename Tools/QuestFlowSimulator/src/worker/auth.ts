@@ -5,6 +5,12 @@ export interface AuthenticatedUser {
   name: "관리자";
 }
 
+export interface SyncPrincipal {
+  subject: string;
+  tokenId: string | null;
+  scopes: string[];
+}
+
 interface AdminAuthBindings {
   DB: D1Database;
   ADMIN_PASSWORD?: string;
@@ -23,6 +29,7 @@ const LOGIN_WINDOW_SECONDS = 15 * 60;
 const LOGIN_BLOCK_SECONDS = 15 * 60;
 const MAX_LOGIN_FAILURES = 5;
 const TOKEN_PATTERN = /^[A-Za-z0-9_-]{43}$/;
+const SYNC_TOKEN_PATTERN = /^qsync_[A-Za-z0-9_-]{43}$/;
 const textEncoder = new TextEncoder();
 
 export function isAdminAuthConfigured(env: AdminAuthBindings): boolean {
@@ -54,6 +61,50 @@ export async function authenticateAdminSession(
     .first<{ token_hash: string }>();
 
   return row ? { subject: "admin", name: "관리자" } : null;
+}
+
+export async function authenticateSyncToken(
+  request: Request,
+  env: AdminAuthBindings,
+): Promise<SyncPrincipal | null> {
+  const authorization = request.headers.get("authorization");
+  if (!authorization?.startsWith("Bearer ")) return null;
+  const token = authorization.slice("Bearer ".length).trim();
+  if (!SYNC_TOKEN_PATTERN.test(token)) return null;
+
+  const now = unixTime();
+  const row = await env.DB.prepare(
+    `SELECT token_id, scopes_json
+       FROM quest_sync_tokens
+      WHERE token_hash = ?
+        AND revoked_at IS NULL
+        AND (expires_at IS NULL OR expires_at > ?)
+      LIMIT 1`,
+  )
+    .bind(await sha256Hex(token), now)
+    .first<{ token_id: string; scopes_json: string }>();
+  if (!row) return null;
+
+  const scopes = parseScopes(row.scopes_json);
+  if (!scopes) return null;
+  await env.DB.prepare(
+    `UPDATE quest_sync_tokens SET last_used_at = ? WHERE token_id = ?`,
+  )
+    .bind(now, row.token_id)
+    .run();
+  return {
+    subject: `codex:${row.token_id}`,
+    tokenId: row.token_id,
+    scopes,
+  };
+}
+
+export async function createSyncTokenValue(): Promise<{
+  token: string;
+  tokenHash: string;
+}> {
+  const token = `qsync_${randomToken()}`;
+  return { token, tokenHash: await sha256Hex(token) };
 }
 
 export async function verifyAdminPassword(
@@ -259,11 +310,22 @@ async function clientKey(request: Request): Promise<string> {
   return sha256Hex(`quest-admin:${address}`);
 }
 
-async function sha256Hex(value: string): Promise<string> {
+export async function sha256Hex(value: string): Promise<string> {
   const digest = await crypto.subtle.digest("SHA-256", textEncoder.encode(value));
   return Array.from(new Uint8Array(digest), (byte) =>
     byte.toString(16).padStart(2, "0"),
   ).join("");
+}
+
+function parseScopes(value: string): string[] | null {
+  try {
+    const parsed: unknown = JSON.parse(value);
+    return Array.isArray(parsed) && parsed.every((scope) => typeof scope === "string")
+      ? parsed
+      : null;
+  } catch {
+    return null;
+  }
 }
 
 function base64Url(bytes: Uint8Array): string {

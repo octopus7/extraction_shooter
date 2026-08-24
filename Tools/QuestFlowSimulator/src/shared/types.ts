@@ -74,8 +74,53 @@ export interface Workspace {
   catalogId: string;
   state: QuestDataset;
   revision: number;
+  baseDatasetVersion?: string;
   updatedAt?: string;
 }
+
+export type QuestFlavor = "Demo" | "Main";
+
+export interface QuestRuntimePayload {
+  questDefinitions: JsonValue[];
+  questTextStringsCsv: string;
+}
+
+export interface QuestAuthoringPack {
+  schemaVersion: 3;
+  flavor: QuestFlavor;
+  runtime: QuestRuntimePayload;
+  editor: QuestDataset;
+}
+
+export interface QuestSyncStatus {
+  slug: string;
+  flavor: QuestFlavor;
+  datasetVersion: string;
+  contentHash: string;
+  updatedAt: string;
+}
+
+export interface QuestSyncRelease extends QuestSyncStatus {
+  parentDatasetVersion: string | null;
+  pack: QuestAuthoringPack;
+}
+
+export interface QuestSyncToken {
+  id: string;
+  label: string;
+  scopes: string[];
+  createdAt: string;
+  expiresAt: string | null;
+  lastUsedAt: string | null;
+}
+
+export type JsonValue =
+  | null
+  | boolean
+  | number
+  | string
+  | JsonValue[]
+  | { [key: string]: JsonValue };
 
 export interface SimulationOptions {
   iterations: number;

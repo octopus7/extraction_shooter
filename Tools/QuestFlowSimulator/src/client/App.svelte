@@ -3,12 +3,14 @@
   import demoCatalogSource from "../../data/demo.json";
   import {
     createWorkspace,
+    createCodexSyncToken,
     getCatalog,
     getCatalogs,
     getSession,
     getWorkspaces,
     loginAdmin,
     logoutAdmin,
+    publishEditorDataset,
     updateWorkspace,
   } from "./api";
   import { readCatalogDraft, serializeCatalogDraft } from "./draft";
@@ -75,6 +77,9 @@
   let loginBusy = false;
   let loginError = "";
   let adminPassword = "";
+  let publishing = false;
+  let tokenBusy = false;
+  let syncTokenValue = "";
 
   $: selectedQuestNode =
     dataset.questNodes.find((node) => node.questId === selectedQuestId) ?? null;
@@ -636,6 +641,66 @@
     }
   }
 
+  async function publishRelease() {
+    if (!session.authenticated || !selectedCatalog?.datasetVersion) {
+      statusMessage = "로그인하고 최신 catalog를 불러온 뒤 게시하세요.";
+      return;
+    }
+    if (publishing) return;
+    publishing = true;
+    saveState = "릴리스 게시 중…";
+    try {
+      const release = await publishEditorDataset(
+        selectedCatalog.slug,
+        currentWorkspace?.baseDatasetVersion ?? selectedCatalog.datasetVersion,
+        dataset,
+        currentWorkspace?.id,
+      );
+      selectedCatalog = {
+        ...selectedCatalog,
+        datasetVersion: release.datasetVersion,
+      };
+      if (currentWorkspace) {
+        currentWorkspace = {
+          ...currentWorkspace,
+          baseDatasetVersion: release.datasetVersion,
+        };
+      }
+      catalogs = catalogs.map((catalog) =>
+        catalog.slug === selectedCatalog?.slug
+          ? { ...catalog, datasetVersion: release.datasetVersion }
+          : catalog,
+      );
+      saveState = "D1 릴리스 게시 완료";
+      statusMessage = `새 릴리스를 게시했습니다. ${release.datasetVersion.slice(0, 12)}`;
+    } catch (error) {
+      saveState = "릴리스 게시 실패";
+      statusMessage =
+        error instanceof Error ? error.message : "릴리스를 게시하지 못했습니다.";
+    } finally {
+      publishing = false;
+    }
+  }
+
+  async function issueCodexToken() {
+    if (!session.authenticated || tokenBusy) return;
+    tokenBusy = true;
+    syncTokenValue = "";
+    try {
+      syncTokenValue = await createCodexSyncToken();
+    } catch (error) {
+      statusMessage =
+        error instanceof Error ? error.message : "Codex 토큰을 만들지 못했습니다.";
+    } finally {
+      tokenBusy = false;
+    }
+  }
+
+  async function copySyncToken() {
+    await navigator.clipboard.writeText(syncTokenValue);
+    statusMessage = "Codex 동기화 토큰을 클립보드에 복사했습니다.";
+  }
+
   function openLogin() {
     if (!session.authConfigured) {
       statusMessage = "관리자 비밀번호가 아직 설정되지 않았습니다.";
@@ -734,6 +799,9 @@
         {session.authenticated ? session.displayName ?? "관리자" : "체험 모드"}
       </span>
       {#if session.authenticated}
+        <button class="auth-action" disabled={tokenBusy} onclick={issueCodexToken}>
+          {tokenBusy ? "발급 중…" : "Codex 토큰"}
+        </button>
         <button class="auth-action" disabled={loginBusy} onclick={signOut}>
           로그아웃
         </button>
@@ -823,6 +891,29 @@
             >{loginBusy ? "확인 중…" : "로그인"}</button>
           </div>
         </form>
+      </div>
+    </div>
+  {/if}
+
+  {#if syncTokenValue}
+    <div class="login-backdrop" role="presentation">
+      <div class="login-dialog" role="dialog" aria-modal="true" aria-labelledby="token-title">
+        <div class="login-heading">
+          <div>
+            <span class="eyebrow">CODEX SYNC TOKEN</span>
+            <h2 id="token-title">한 번만 표시됩니다</h2>
+          </div>
+          <button class="dialog-close" type="button" aria-label="토큰 창 닫기" onclick={() => (syncTokenValue = "")}>×</button>
+        </div>
+        <label>
+          <span>Windows 보호 저장소에 등록할 토큰</span>
+          <input readonly value={syncTokenValue} />
+        </label>
+        <p>복사한 뒤 <code>npm run quest:token:set</code>에 붙여 넣으세요.</p>
+        <div class="login-actions">
+          <button class="secondary" type="button" onclick={() => (syncTokenValue = "")}>닫기</button>
+          <button class="primary" type="button" onclick={copySyncToken}>복사</button>
+        </div>
       </div>
     </div>
   {/if}
@@ -1458,6 +1549,11 @@
           disabled={!session.authenticated}
           onclick={saveWorkspace}
         >D1 저장</button>
+        <button
+          class="primary"
+          disabled={!session.authenticated || publishing}
+          onclick={publishRelease}
+        >{publishing ? "게시 중…" : "릴리스 게시"}</button>
       </div>
     </aside>
   </section>
