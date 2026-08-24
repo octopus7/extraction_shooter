@@ -1,11 +1,51 @@
 #include "TunaSweeperGameInstanceShared.h"
 
-#include "QuestDatasetSwitcher.h"
+#include "Settings/TunaSweeperBuildFlavor.h"
 
 namespace TunaSweeperSave
 {
 	namespace
 	{
+		FString GetFlavorSaveFilePath(const FString& SaveSlotName)
+		{
+			return FPaths::Combine(
+				TunaSweeperBuildFlavor::GetSaveGameDirectory(),
+				SaveSlotName + TEXT(".sav"));
+		}
+
+		bool DoesFlavorSaveExist(const FString& SaveSlotName)
+		{
+			return FPaths::FileExists(GetFlavorSaveFilePath(SaveSlotName));
+		}
+
+		USaveGame* LoadFlavorSave(const FString& SaveSlotName)
+		{
+			TArray<uint8> SaveData;
+			return FFileHelper::LoadFileToArray(SaveData, *GetFlavorSaveFilePath(SaveSlotName))
+				? UGameplayStatics::LoadGameFromMemory(SaveData)
+				: nullptr;
+		}
+
+		bool SaveFlavorSave(USaveGame* SaveGame, const FString& SaveSlotName)
+		{
+			if (!SaveGame ||
+				!IFileManager::Get().MakeDirectory(*TunaSweeperBuildFlavor::GetSaveGameDirectory(), true))
+			{
+				return false;
+			}
+
+			TArray<uint8> SaveData;
+			return UGameplayStatics::SaveGameToMemory(SaveGame, SaveData) &&
+				FFileHelper::SaveArrayToFile(SaveData, *GetFlavorSaveFilePath(SaveSlotName));
+		}
+
+		bool DeleteFlavorSave(const FString& SaveSlotName)
+		{
+			const FString SaveFilePath = GetFlavorSaveFilePath(SaveSlotName);
+			return !FPaths::FileExists(SaveFilePath) ||
+				IFileManager::Get().Delete(*SaveFilePath, false, true);
+		}
+
 		bool TryReadSaveVersion(const FString& SaveFilePath, int32& OutSaveVersion)
 		{
 			TArray<uint8> SaveData;
@@ -137,32 +177,56 @@ namespace TunaSweeperSave
 			DeleteOutdatedSaveFileIfNeeded(SaveFilePath, SaveGameDirectory);
 		}
 	}
+
+	void PurgeLegacyFlatSaveFiles()
+	{
+		const FString LegacyDirectory = FPaths::Combine(FPaths::ProjectSavedDir(), TEXT("SaveGames"));
+		TArray<FString> LegacySaveFiles;
+		IFileManager::Get().FindFiles(
+			LegacySaveFiles,
+			*FPaths::Combine(LegacyDirectory, TEXT("*.sav")),
+			true,
+			false);
+		for (FString& LegacySaveFile : LegacySaveFiles)
+		{
+			LegacySaveFile = FPaths::Combine(LegacyDirectory, LegacySaveFile);
+		}
+		TArray<FString> LegacyBackupFiles;
+		IFileManager::Get().FindFilesRecursive(
+			LegacyBackupFiles,
+			*FPaths::Combine(LegacyDirectory, TEXT("Backups")),
+			TEXT("*.sav"),
+			true,
+			false);
+		LegacySaveFiles.Append(LegacyBackupFiles);
+		LegacySaveFiles.Sort();
+
+		const FString AuditDirectory = TunaSweeperBuildFlavor::GetSaveGameDirectory();
+		for (const FString& FilePath : LegacySaveFiles)
+		{
+			if (!IFileManager::Get().Delete(*FilePath, false, true))
+			{
+				UE_LOG(LogTunaSweeperGameInstance, Warning, TEXT("Could not delete legacy flat save: %s"), *FilePath);
+				continue;
+			}
+
+			AppendAutoDeletedSaveLog(
+				AuditDirectory,
+				FString::Printf(
+					TEXT("[%s] Deleted legacy save: file=%s%s"),
+					*FDateTime::Now().ToString(TEXT("%Y-%m-%d %H:%M:%S")),
+					*MakeLoggedSavePath(FilePath, LegacyDirectory),
+					LINE_TERMINATOR));
+		}
+	}
 }
 
-namespace TunaSweeperSaveDataset
+namespace TunaSweeperSaveFlavor
 {
-	const FQuestDatasetDescriptor& GetActiveDataset()
-	{
-		return FQuestDatasetSwitcherModule::Get().GetActiveDataset();
-	}
-
 	bool IsCompatible(const UTunaSweeperSaveGame& SaveGame)
 	{
-		const FQuestDatasetDescriptor& ActiveDataset = GetActiveDataset();
-		if (SaveGame.DatasetId.IsNone())
-		{
-			return false;
-		}
-
-		return SaveGame.DatasetId == ActiveDataset.DatasetId &&
-			SaveGame.SaveCompatibilityId == ActiveDataset.SaveCompatibilityId;
-	}
-
-	FString MakeProductionSaveSlotPrefix()
-	{
-		return FString::Printf(
-			TEXT("TunaSweeperSave_%s_Slot"),
-			*GetActiveDataset().GetSaveNamespace());
+		return !SaveGame.BuildFlavor.IsNone() &&
+			SaveGame.BuildFlavor == TunaSweeperBuildFlavor::GetName();
 	}
 }
 
@@ -183,21 +247,20 @@ FTunaSweeperSaveSlotSummary UTunaSweeperGameInstance::GetSaveSlotSummary(int32 S
 		return Summary;
 	}
 
-	UTunaSweeperSaveGame* SaveGame = Cast<UTunaSweeperSaveGame>(UGameplayStatics::LoadGameFromSlot(
-		ExistingSlotName,
-		TunaSweeperSave::SaveUserIndex));
+	UTunaSweeperSaveGame* SaveGame = Cast<UTunaSweeperSaveGame>(
+		TunaSweeperSave::LoadFlavorSave(ExistingSlotName));
 	if (!SaveGame)
 	{
 		return Summary;
 	}
-	if (!TunaSweeperSaveDataset::IsCompatible(*SaveGame))
+	if (!TunaSweeperSaveFlavor::IsCompatible(*SaveGame))
 	{
 		UE_LOG(
 			LogTunaSweeperGameInstance,
 			Warning,
-			TEXT("Save slot %d does not match active quest dataset '%s'."),
+			TEXT("Save slot %d does not match active build flavor '%s'."),
 			Summary.SaveSlotIndex,
-			*TunaSweeperSaveDataset::GetActiveDataset().DatasetId.ToString());
+			*TunaSweeperBuildFlavor::GetName().ToString());
 		return Summary;
 	}
 
@@ -256,8 +319,8 @@ bool UTunaSweeperGameInstance::DeleteSaveSlot(int32 SaveSlotIndex)
 {
 	const int32 SanitizedSlotIndex = SanitizeSaveSlotIndex(SaveSlotIndex);
 	const FString SlotName = GetSaveGameSlotName(SanitizedSlotIndex);
-	const bool bDeleted = UGameplayStatics::DoesSaveGameExist(SlotName, TunaSweeperSave::SaveUserIndex) &&
-		UGameplayStatics::DeleteGameInSlot(SlotName, TunaSweeperSave::SaveUserIndex);
+	const bool bDeleted = TunaSweeperSave::DoesFlavorSaveExist(SlotName) &&
+		TunaSweeperSave::DeleteFlavorSave(SlotName);
 
 	if (ActiveSaveSlotIndex == SanitizedSlotIndex)
 	{
@@ -272,8 +335,8 @@ bool UTunaSweeperGameInstance::DeleteSaveSlotAndStartNewGame(int32 SaveSlotIndex
 {
 	const int32 SanitizedSlotIndex = SanitizeSaveSlotIndex(SaveSlotIndex);
 	const FString SlotName = GetSaveGameSlotName(SanitizedSlotIndex);
-	if (UGameplayStatics::DoesSaveGameExist(SlotName, TunaSweeperSave::SaveUserIndex) &&
-		!UGameplayStatics::DeleteGameInSlot(SlotName, TunaSweeperSave::SaveUserIndex))
+	if (TunaSweeperSave::DoesFlavorSaveExist(SlotName) &&
+		!TunaSweeperSave::DeleteFlavorSave(SlotName))
 	{
 		return false;
 	}
@@ -314,21 +377,20 @@ bool UTunaSweeperGameInstance::LoadGameState()
 		return false;
 	}
 
-	UTunaSweeperSaveGame* SaveGame = Cast<UTunaSweeperSaveGame>(UGameplayStatics::LoadGameFromSlot(
-		ExistingSlotName,
-		TunaSweeperSave::SaveUserIndex));
+	UTunaSweeperSaveGame* SaveGame = Cast<UTunaSweeperSaveGame>(
+		TunaSweeperSave::LoadFlavorSave(ExistingSlotName));
 	if (!SaveGame)
 	{
 		return false;
 	}
-	if (!TunaSweeperSaveDataset::IsCompatible(*SaveGame))
+	if (!TunaSweeperSaveFlavor::IsCompatible(*SaveGame))
 	{
 		UE_LOG(
 			LogTunaSweeperGameInstance,
 			Error,
-			TEXT("Refusing to load save '%s' for active quest dataset '%s'."),
+			TEXT("Refusing to load save '%s' for active build flavor '%s'."),
 			*ExistingSlotName,
-			*TunaSweeperSaveDataset::GetActiveDataset().DatasetId.ToString());
+			*TunaSweeperBuildFlavor::GetName().ToString());
 		return false;
 	}
 
@@ -584,15 +646,14 @@ bool UTunaSweeperGameInstance::SaveGameStateInternal(
 	UTunaSweeperSaveGame* ExistingSaveGame = nullptr;
 	if (!ExistingSlotName.IsEmpty())
 	{
-		UTunaSweeperSaveGame* LoadedExistingSaveGame = Cast<UTunaSweeperSaveGame>(UGameplayStatics::LoadGameFromSlot(
-			ExistingSlotName,
-			TunaSweeperSave::SaveUserIndex));
-		if (!LoadedExistingSaveGame || !TunaSweeperSaveDataset::IsCompatible(*LoadedExistingSaveGame))
+		UTunaSweeperSaveGame* LoadedExistingSaveGame = Cast<UTunaSweeperSaveGame>(
+			TunaSweeperSave::LoadFlavorSave(ExistingSlotName));
+		if (!LoadedExistingSaveGame || !TunaSweeperSaveFlavor::IsCompatible(*LoadedExistingSaveGame))
 		{
 			UE_LOG(
 				LogTunaSweeperGameInstance,
 				Error,
-				TEXT("Refusing to overwrite an incompatible dataset save: %s"),
+				TEXT("Refusing to overwrite an incompatible build-flavor save: %s"),
 				*ExistingSlotName);
 			return false;
 		}
@@ -624,10 +685,7 @@ bool UTunaSweeperGameInstance::SaveGameStateInternal(
 
 	SaveGame->SaveVersion = TunaSweeperSave::CurrentSaveVersion;
 	SaveGame->SaveSlotIndex = ActiveSaveSlotIndex;
-	const FQuestDatasetDescriptor& ActiveDataset = TunaSweeperSaveDataset::GetActiveDataset();
-	SaveGame->DatasetId = ActiveDataset.DatasetId;
-	SaveGame->SaveCompatibilityId = ActiveDataset.SaveCompatibilityId;
-	SaveGame->DatasetRevision = ActiveDataset.DatasetRevision;
+	SaveGame->BuildFlavor = TunaSweeperBuildFlavor::GetName();
 	SaveGame->TotalPlaySeconds = GetCurrentActiveSlotTotalPlaySeconds();
 	SaveGame->DifficultyStage = TunaSweeperSave::SanitizeDifficultyStage(ActiveSaveSlotDifficultyStage);
 	SaveGame->bDifficultySelected = bActiveSaveSlotDifficultySelected;
@@ -791,10 +849,9 @@ bool UTunaSweeperGameInstance::SaveGameStateInternal(
 		return false;
 	}
 
-	return UGameplayStatics::SaveGameToSlot(
+	return TunaSweeperSave::SaveFlavorSave(
 		SaveGame,
-		GetSaveGameSlotName(ActiveSaveSlotIndex),
-		TunaSweeperSave::SaveUserIndex);
+		GetSaveGameSlotName(ActiveSaveSlotIndex));
 }
 
 void UTunaSweeperGameInstance::ResetRuntimeStateForSaveSlotSelection()
@@ -972,7 +1029,7 @@ bool UTunaSweeperGameInstance::BackupExistingSaveGame(const FString& ExistingSlo
 	bool bBackupWritten = false;
 
 	if (UTunaSweeperSaveGame* ExistingSaveGame = Cast<UTunaSweeperSaveGame>(
-		UGameplayStatics::LoadGameFromSlot(ExistingSlotName, TunaSweeperSave::SaveUserIndex)))
+		TunaSweeperSave::LoadFlavorSave(ExistingSlotName)))
 	{
 		ExistingSaveGame->SaveSlotIndex = BackupSlotIndex;
 
@@ -1031,14 +1088,14 @@ void UTunaSweeperGameInstance::TrimSaveGameBackups() const
 
 bool UTunaSweeperGameInstance::LoadActiveSaveSlotSelection(int32& OutSaveSlotIndex) const
 {
-	if (!UGameplayStatics::DoesSaveGameExist(GetSaveSettingsSlotName(), TunaSweeperSave::SaveUserIndex))
+	if (!TunaSweeperSave::DoesFlavorSaveExist(GetSaveSettingsSlotName()))
 	{
 		OutSaveSlotIndex = 1;
 		return false;
 	}
 
 	const UTunaSweeperSaveSettings* SaveSettings = Cast<UTunaSweeperSaveSettings>(
-		UGameplayStatics::LoadGameFromSlot(GetSaveSettingsSlotName(), TunaSweeperSave::SaveUserIndex));
+		TunaSweeperSave::LoadFlavorSave(GetSaveSettingsSlotName()));
 	if (!SaveSettings)
 	{
 		OutSaveSlotIndex = 1;
@@ -1059,10 +1116,7 @@ bool UTunaSweeperGameInstance::SaveActiveSaveSlotSelection() const
 	}
 
 	SaveSettings->LastSelectedSaveSlotIndex = SanitizeSaveSlotIndex(ActiveSaveSlotIndex);
-	return UGameplayStatics::SaveGameToSlot(
-		SaveSettings,
-		GetSaveSettingsSlotName(),
-		TunaSweeperSave::SaveUserIndex);
+	return TunaSweeperSave::SaveFlavorSave(SaveSettings, GetSaveSettingsSlotName());
 }
 
 int32 UTunaSweeperGameInstance::FindFirstExistingSaveSlotIndex() const
@@ -1090,36 +1144,27 @@ int32 UTunaSweeperGameInstance::SanitizeSaveSlotIndex(int32 SaveSlotIndex) const
 
 FString UTunaSweeperGameInstance::GetSaveGameSlotName(int32 SaveSlotIndex) const
 {
-	const FString SaveSlotPrefix = TunaSweeperSaveDataset::GetActiveDataset().IsPublic()
-		? FString(TunaSweeperSave::SaveSlotNamePrefix)
-		: TunaSweeperSaveDataset::MakeProductionSaveSlotPrefix();
 	return FString::Printf(
 		TEXT("%s%02d"),
-		*SaveSlotPrefix,
+		TunaSweeperSave::SaveSlotNamePrefix,
 		SanitizeSaveSlotIndex(SaveSlotIndex));
 }
 
 FString UTunaSweeperGameInstance::GetSaveSettingsSlotName() const
 {
-	const FQuestDatasetDescriptor& ActiveDataset = TunaSweeperSaveDataset::GetActiveDataset();
-	return ActiveDataset.IsPublic()
-		? FString(TunaSweeperSave::SaveSettingsSlotName)
-		: FString::Printf(
-			TEXT("%s_%s"),
-			TunaSweeperSave::SaveSettingsSlotName,
-			*ActiveDataset.GetSaveNamespace());
+	return FString(TunaSweeperSave::SaveSettingsSlotName);
 }
 
 FString UTunaSweeperGameInstance::GetExistingSaveGameSlotName(int32 SaveSlotIndex) const
 {
 	const int32 SanitizedSlotIndex = SanitizeSaveSlotIndex(SaveSlotIndex);
 	const FString SlotName = GetSaveGameSlotName(SanitizedSlotIndex);
-	if (UGameplayStatics::DoesSaveGameExist(SlotName, TunaSweeperSave::SaveUserIndex))
+	if (TunaSweeperSave::DoesFlavorSaveExist(SlotName))
 	{
 		const FString SaveFilePath = GetSaveGameFilePath(SlotName);
 		if (TunaSweeperSave::DeleteOutdatedSaveFileIfNeeded(
 				SaveFilePath,
-				FPaths::Combine(FPaths::ProjectSavedDir(), TEXT("SaveGames"))) ==
+				TunaSweeperBuildFlavor::GetSaveGameDirectory()) ==
 			TunaSweeperSave::EOutdatedSaveCleanupResult::Deleted)
 		{
 			return FString();
@@ -1133,21 +1178,13 @@ FString UTunaSweeperGameInstance::GetExistingSaveGameSlotName(int32 SaveSlotInde
 FString UTunaSweeperGameInstance::GetSaveGameFilePath(const FString& SaveSlotName) const
 {
 	return FPaths::Combine(
-		FPaths::ProjectSavedDir(),
-		TEXT("SaveGames"),
+		TunaSweeperBuildFlavor::GetSaveGameDirectory(),
 		SaveSlotName + TEXT(".sav"));
 }
 
 FString UTunaSweeperGameInstance::GetSaveGameBackupDirectory() const
 {
-	const FQuestDatasetDescriptor& ActiveDataset = TunaSweeperSaveDataset::GetActiveDataset();
-	const FString BaseBackupDirectory = FPaths::Combine(
-		FPaths::ProjectSavedDir(),
-		TEXT("SaveGames"),
-		TEXT("Backups"));
-	return ActiveDataset.IsPublic()
-		? BaseBackupDirectory
-		: FPaths::Combine(BaseBackupDirectory, ActiveDataset.GetSaveNamespace());
+	return FPaths::Combine(TunaSweeperBuildFlavor::GetSaveGameDirectory(), TEXT("Backups"));
 }
 
 FString UTunaSweeperGameInstance::CreateSaveGameBackupFilePath(int32 SaveSlotIndex, FDateTime BackupTime) const

@@ -15,14 +15,14 @@
 
 ## 퀘스트 다시 추가하기
 
-### 1. 활성 데이터셋 확인
+### 1. 빌드 타깃별 데이터 위치 확인
 
-기본 공개 데이터셋은 다음 두 파일을 읽는다.
+Demo 타깃은 다음 두 공개 파일을 읽는다.
 
 - `TunaSweeper/Content/Data/QuestDefinitions.json`
 - `TunaSweeper/Content/Data/QuestTextStrings.csv`
 
-다른 퀘스트 데이터셋을 선택하는 작업은 `TunaSweeper/Plugins/QuestDatasetSwitcher/README.md`를 따른다. 에디터에서 데이터셋을 바꾼 뒤에는 반드시 에디터를 재시작한다.
+Main 타깃의 퀘스트 원본은 접근 제한 `TunaSweeper/External/MainPayload/Data/`에 작성한다. 수동 데이터셋 전환은 없으며 에디터 Build Target이 Demo/Main을 결정한다. 패키징 및 격리 규칙은 `Docs/Steam/TunaSweeper_Build_Flavor_Data_Architecture.md`를 따른다.
 
 ### 2. 문자열 추가
 

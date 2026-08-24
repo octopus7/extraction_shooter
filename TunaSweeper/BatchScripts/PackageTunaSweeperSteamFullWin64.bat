@@ -6,6 +6,7 @@ set "TARGET_NAME=TunaSweeper"
 set "CUSTOM_CONFIG=Full"
 set "ARCHIVE_DIR=%~dp0..\Builds\Steam\Full"
 set "DISPLAY_NAME=TunaSweeper Steam Full"
+set "BUILD_FLAVOR_DATA=%~dp0..\BuildScripts\BuildFlavorData.ps1"
 
 set "CONFIGURATION=%~1"
 if "%CONFIGURATION%"=="" set "CONFIGURATION=Shipping"
@@ -31,6 +32,9 @@ if not exist "%RUN_UAT%" (
     echo Set UE_5_7_ROOT to your Unreal Engine 5.7 install directory and run again.
     exit /b 1
 )
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%BUILD_FLAVOR_DATA%" -Mode PrepareMain
+if errorlevel 1 exit /b %ERRORLEVEL%
 
 set "ARCHIVE_PLATFORM_DIR=%ARCHIVE_DIR%\Windows"
 if exist "%ARCHIVE_PLATFORM_DIR%" (
@@ -70,6 +74,8 @@ call "%RUN_UAT%" BuildCookRun ^
     -unattended ^
     -utf8output
 set "PACKAGE_EXIT_CODE=%ERRORLEVEL%"
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%BUILD_FLAVOR_DATA%" -Mode Clean
+if not "%ERRORLEVEL%"=="0" if "%PACKAGE_EXIT_CODE%"=="0" set "PACKAGE_EXIT_CODE=%ERRORLEVEL%"
 
 echo.
 if "%PACKAGE_EXIT_CODE%"=="0" (

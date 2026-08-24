@@ -4,7 +4,7 @@
 #include "Game/TunaSweeperGameInstance.h"
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
-#include "QuestDatasetSwitcher.h"
+#include "Settings/TunaSweeperBuildFlavor.h"
 #include "Serialization/Csv/CsvParser.h"
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
@@ -299,7 +299,6 @@ bool UTunaSweeperQuestSubsystem::LoadQuestData(bool bForceReload)
 	}
 
 	ResetLoadedQuestData();
-	FQuestDatasetSwitcherModule::Get().ReloadActiveDataset();
 	const bool bLoadedQuestTextStrings = LoadQuestTextStringsCsv();
 	const bool bLoadedQuestDefinitions = LoadQuestDefinitionsJson();
 	if (!bLoadedQuestTextStrings || !bLoadedQuestDefinitions)
@@ -1043,75 +1042,82 @@ bool UTunaSweeperQuestSubsystem::LoadQuestDefinitionsJson()
 
 bool UTunaSweeperQuestSubsystem::LoadQuestTextStringsCsv()
 {
-	FString CsvContent;
-	const FString QuestTextStringsCsvPath = GetQuestTextStringsCsvPath();
-	if (!FFileHelper::LoadFileToString(CsvContent, *QuestTextStringsCsvPath))
-	{
-		UE_LOG(LogTunaSweeperQuest, Warning, TEXT("Could not load quest text strings: %s"), *QuestTextStringsCsvPath);
-		return false;
-	}
-
-	FCsvParser CsvParser(CsvContent);
-	const FCsvParser::FRows& Rows = CsvParser.GetRows();
-	if (Rows.Num() < 2)
-	{
-		UE_LOG(LogTunaSweeperQuest, Warning, TEXT("Quest text strings CSV has no data rows: %s"), *QuestTextStringsCsvPath);
-		return false;
-	}
-
-	const TArray<const TCHAR*>& HeaderRow = Rows[0];
-	const bool bHeaderIsValid =
-		TunaSweeperQuestData::GetCsvCell(HeaderRow, 0).Equals(TEXT("string_key"), ESearchCase::IgnoreCase) &&
-		TunaSweeperQuestData::GetCsvCell(HeaderRow, 1).Equals(TEXT("ko"), ESearchCase::IgnoreCase) &&
-		TunaSweeperQuestData::GetCsvCell(HeaderRow, 2).Equals(TEXT("en"), ESearchCase::IgnoreCase) &&
-		TunaSweeperQuestData::GetCsvCell(HeaderRow, 3).Equals(TEXT("ja"), ESearchCase::IgnoreCase);
-	if (!bHeaderIsValid)
-	{
-		UE_LOG(LogTunaSweeperQuest, Warning, TEXT("Quest text strings CSV header must be string_key,ko,en,ja: %s"), *QuestTextStringsCsvPath);
-		return false;
-	}
-
+	TArray<FString> CsvPaths;
+	TunaSweeperBuildFlavor::GetQuestTextStringPaths(CsvPaths);
+	bool bAllFilesValid = true;
 	bool bHasValidRows = false;
-	for (int32 RowIndex = 1; RowIndex < Rows.Num(); ++RowIndex)
+
+	for (const FString& CsvPath : CsvPaths)
 	{
-		const TArray<const TCHAR*>& Row = Rows[RowIndex];
-		if (Row.Num() < 4)
+		FString CsvContent;
+		if (!FFileHelper::LoadFileToString(CsvContent, *CsvPath))
 		{
-			UE_LOG(LogTunaSweeperQuest, Warning, TEXT("Skipping quest text row %d: expected 4 columns."), RowIndex);
+			UE_LOG(LogTunaSweeperQuest, Warning, TEXT("Could not load quest text strings: %s"), *CsvPath);
+			bAllFilesValid = false;
 			continue;
 		}
 
-		const FString StringKey = TunaSweeperQuestData::GetCsvCell(Row, 0);
-		const FString Korean = TunaSweeperQuestData::GetCsvCell(Row, 1);
-		const FString English = TunaSweeperQuestData::GetCsvCell(Row, 2);
-		const FString Japanese = TunaSweeperQuestData::GetCsvCell(Row, 3);
-		if (StringKey.IsEmpty() || Korean.IsEmpty() || English.IsEmpty() || Japanese.IsEmpty())
+		FCsvParser CsvParser(CsvContent);
+		const FCsvParser::FRows& Rows = CsvParser.GetRows();
+		if (Rows.Num() < 1)
 		{
-			UE_LOG(LogTunaSweeperQuest, Warning, TEXT("Skipping quest text row %d: required cell is empty."), RowIndex);
+			UE_LOG(LogTunaSweeperQuest, Warning, TEXT("Quest text strings CSV has no header: %s"), *CsvPath);
+			bAllFilesValid = false;
 			continue;
 		}
 
-		FTunaSweeperQuestTextString QuestTextString;
-		QuestTextString.StringKey = FName(*StringKey);
-		QuestTextString.Korean = FText::FromString(Korean);
-		QuestTextString.English = FText::FromString(English);
-		QuestTextString.Japanese = FText::FromString(Japanese);
-
-		if (QuestTextStringsByKey.Contains(QuestTextString.StringKey))
+		const TArray<const TCHAR*>& HeaderRow = Rows[0];
+		const bool bHeaderIsValid =
+			TunaSweeperQuestData::GetCsvCell(HeaderRow, 0).Equals(TEXT("string_key"), ESearchCase::IgnoreCase) &&
+			TunaSweeperQuestData::GetCsvCell(HeaderRow, 1).Equals(TEXT("ko"), ESearchCase::IgnoreCase) &&
+			TunaSweeperQuestData::GetCsvCell(HeaderRow, 2).Equals(TEXT("en"), ESearchCase::IgnoreCase) &&
+			TunaSweeperQuestData::GetCsvCell(HeaderRow, 3).Equals(TEXT("ja"), ESearchCase::IgnoreCase);
+		if (!bHeaderIsValid)
 		{
-			UE_LOG(LogTunaSweeperQuest, Warning, TEXT("Duplicate quest text string key %s found. The later row will replace the earlier row."), *StringKey);
+			UE_LOG(LogTunaSweeperQuest, Warning, TEXT("Quest text strings CSV header must be string_key,ko,en,ja: %s"), *CsvPath);
+			bAllFilesValid = false;
+			continue;
 		}
 
-		QuestTextStringsByKey.Add(QuestTextString.StringKey, QuestTextString);
-		bHasValidRows = true;
+		for (int32 RowIndex = 1; RowIndex < Rows.Num(); ++RowIndex)
+		{
+			const TArray<const TCHAR*>& Row = Rows[RowIndex];
+			if (Row.Num() < 4)
+			{
+				UE_LOG(LogTunaSweeperQuest, Warning, TEXT("Skipping quest text row %d in %s: expected 4 columns."), RowIndex, *CsvPath);
+				bAllFilesValid = false;
+				continue;
+			}
+
+			const FString StringKey = TunaSweeperQuestData::GetCsvCell(Row, 0);
+			const FString Korean = TunaSweeperQuestData::GetCsvCell(Row, 1);
+			const FString English = TunaSweeperQuestData::GetCsvCell(Row, 2);
+			const FString Japanese = TunaSweeperQuestData::GetCsvCell(Row, 3);
+			if (StringKey.IsEmpty() || Korean.IsEmpty() || English.IsEmpty() || Japanese.IsEmpty())
+			{
+				UE_LOG(LogTunaSweeperQuest, Warning, TEXT("Skipping quest text row %d in %s: required cell is empty."), RowIndex, *CsvPath);
+				bAllFilesValid = false;
+				continue;
+			}
+
+			FTunaSweeperQuestTextString QuestTextString;
+			QuestTextString.StringKey = FName(*StringKey);
+			QuestTextString.Korean = FText::FromString(Korean);
+			QuestTextString.English = FText::FromString(English);
+			QuestTextString.Japanese = FText::FromString(Japanese);
+			if (QuestTextStringsByKey.Contains(QuestTextString.StringKey))
+			{
+				UE_LOG(LogTunaSweeperQuest, Error, TEXT("Duplicate quest text string key %s across build-flavor data. Keys may not override each other."), *StringKey);
+				bAllFilesValid = false;
+				continue;
+			}
+
+			QuestTextStringsByKey.Add(QuestTextString.StringKey, QuestTextString);
+			bHasValidRows = true;
+		}
 	}
 
-	if (!bHasValidRows)
-	{
-		UE_LOG(LogTunaSweeperQuest, Warning, TEXT("Quest text strings CSV has no valid rows: %s"), *QuestTextStringsCsvPath);
-	}
-
-	return bHasValidRows;
+	return bAllFilesValid && bHasValidRows;
 }
 
 void UTunaSweeperQuestSubsystem::RegisterFallbackQuest()
@@ -1148,12 +1154,7 @@ void UTunaSweeperQuestSubsystem::ResetLoadedQuestData()
 
 FString UTunaSweeperQuestSubsystem::GetQuestDefinitionsJsonPath() const
 {
-	return FQuestDatasetSwitcherModule::Get().GetActiveDataset().QuestDefinitionsPath;
-}
-
-FString UTunaSweeperQuestSubsystem::GetQuestTextStringsCsvPath() const
-{
-	return FQuestDatasetSwitcherModule::Get().GetActiveDataset().QuestTextStringsPath;
+	return TunaSweeperBuildFlavor::GetQuestDefinitionsPath();
 }
 
 void UTunaSweeperQuestSubsystem::ResolveDefinitionText(FTunaSweeperQuestDefinition& Definition) const

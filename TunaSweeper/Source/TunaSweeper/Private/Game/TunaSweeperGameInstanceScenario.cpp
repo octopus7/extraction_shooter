@@ -1,4 +1,5 @@
 #include "TunaSweeperGameInstanceShared.h"
+#include "Settings/TunaSweeperBuildFlavor.h"
 
 bool UTunaSweeperGameInstance::IsScenarioProgressFlagSet(FName ScenarioFlag) const
 {
@@ -29,9 +30,12 @@ FName UTunaSweeperGameInstance::ResolveInitialGameplayLevelName()
 		return FName(TEXT("IntroMap"));
 	}
 
-	return IsScenarioProgressFlagSet(TunaSweeperScenario::OpeningScenarioFlag)
+	const FName DemoLevel = IsScenarioProgressFlagSet(TunaSweeperScenario::OpeningScenarioFlag)
 		? TunaSweeperScenario::BunkerMapName
 		: TunaSweeperScenario::OpeningScenarioMapName;
+	return TunaSweeperBuildFlavor::ResolveInitialGameplayLevel(
+		DemoLevel,
+		TunaSweeperScenario::BunkerMapName);
 }
 
 void UTunaSweeperGameInstance::BeginScenarioBunkerEntry(FName ScenarioFlag)

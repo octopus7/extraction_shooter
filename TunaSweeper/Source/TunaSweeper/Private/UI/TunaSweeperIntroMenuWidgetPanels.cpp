@@ -1,6 +1,7 @@
 #include "TunaSweeperIntroMenuWidgetShared.h"
 
 #include "EngineUtils.h"
+#include "Settings/TunaSweeperBuildFlavor.h"
 #include "Title/TunaSweeperTitlePresentationActor.h"
 
 namespace TunaSweeperDistribution
@@ -46,15 +47,7 @@ void UTunaSweeperIntroMenuWidget::RefreshDistributionPresentation()
 	GConfig->GetString(TunaSweeperDistribution::ProjectSettingsSectionName, TunaSweeperDistribution::ProjectVersionKey, ProjectVersion, GGameIni);
 	ProjectVersion.TrimStartAndEndInline();
 	if (ProjectVersion.IsEmpty()) ProjectVersion = TEXT("0.0.0");
-	bool bIsDemoBuild = false;
-#if WITH_EDITOR
-	if (const UTunaSweeperBuildTargetSettings* BuildTargetSettings = GetDefault<UTunaSweeperBuildTargetSettings>())
-	{
-		bIsDemoBuild = BuildTargetSettings->IsDemoBuild();
-	}
-#else
-	bIsDemoBuild = TUNASWEEPER_DEMO != 0;
-#endif
+	const bool bIsDemoBuild = TunaSweeperBuildFlavor::IsDemo();
 	if (UTextBlock* VersionText = Cast<UTextBlock>(WidgetTree->FindWidget(TEXT("VersionText"))))
 	{
 		VersionText->SetText(FText::FromString(FString::Printf(
@@ -491,6 +484,13 @@ void UTunaSweeperIntroMenuWidget::SetTitleLogoVisible(bool bVisible)
 	if (UWidget* LogoWidget = WidgetTree->FindWidget(FName(TEXT("LogoImage"))))
 	{
 		LogoWidget->SetVisibility(bVisible ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
+	}
+	if (DemoBuildImage)
+	{
+		DemoBuildImage->SetVisibility(
+			bVisible && TunaSweeperBuildFlavor::IsDemo()
+				? ESlateVisibility::HitTestInvisible
+				: ESlateVisibility::Collapsed);
 	}
 }
 

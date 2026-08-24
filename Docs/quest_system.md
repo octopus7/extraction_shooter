@@ -10,7 +10,7 @@
 
 ## 데이터 정의
 
-퀘스트 정의는 활성 퀘스트 데이터셋에서 읽는다. 기본 `Public` 데이터셋은 작업 저장소의 데모·개발 데이터인 `TunaSweeper/Content/Data/QuestDefinitions.json`을 사용하고, `Production`은 `QuestDatasetSwitcher`가 접근 제한 데이터에서 동기화한 ignored 생성 경로를 사용한다. 전환 및 별도 저장소 운영 규칙은 `Docs/Steam/TunaSweeper_Quest_Dataset_Switching_Implementation.md`를 따른다.
+퀘스트 정의 경로는 BuildFlavor가 결정한다. Demo 타깃은 작업 저장소의 `TunaSweeper/Content/Data/QuestDefinitions.json`을 사용하고, Main Editor/PIE는 접근 제한 `TunaSweeper/External/MainPayload/Data/QuestDefinitions.json` 원본을 직접 읽는다. Main 패키징에서는 검증된 임시 staging 사본을 읽는다. 수동 데이터셋 전환은 없으며 자세한 운영 규칙은 `Docs/Steam/TunaSweeper_Build_Flavor_Data_Architecture.md`를 따른다.
 
 기본 필드:
 

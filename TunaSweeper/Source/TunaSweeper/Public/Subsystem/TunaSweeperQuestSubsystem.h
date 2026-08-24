@@ -123,7 +123,6 @@ private:
 	void RegisterFallbackQuest();
 	void ResetLoadedQuestData();
 	FString GetQuestDefinitionsJsonPath() const;
-	FString GetQuestTextStringsCsvPath() const;
 	void ResolveDefinitionText(FTunaSweeperQuestDefinition& Definition) const;
 	FText ResolveQuestText(FName StringKey, const FText& FallbackText = FText::GetEmpty()) const;
 	bool IsMapNameMatch(FName ActualMapName, const TCHAR* ExpectedMapName) const;

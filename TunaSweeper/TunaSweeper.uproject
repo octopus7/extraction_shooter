@@ -69,10 +69,6 @@
 			]
 		},
 		{
-			"Name": "QuestDatasetSwitcher",
-			"Enabled": true
-		},
-		{
 			"Name": "MiyakovCharacterSystem",
 			"Enabled": true
 		},

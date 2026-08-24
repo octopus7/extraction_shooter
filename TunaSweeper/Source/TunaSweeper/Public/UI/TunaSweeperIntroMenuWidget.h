@@ -87,6 +87,9 @@ protected:
 	TObjectPtr<UButton> SteamDemoWishlistButton;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<UImage> DemoBuildImage;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
 	TObjectPtr<UButton> AlwaysNewStartButton;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
@@ -513,6 +516,7 @@ private:
 	void EnsureDeleteSaveSlotHoldProgressWidget();
 	void ConfigureDeleteSaveSlotHoldProgressFill();
 	void ResetTitleViewportLayoutState();
+	void EnsureDemoBuildImage();
 	void EnsureTitleWindParticleOverlay();
 	void ApplyTitleMenuButtonContentLayout();
 	void RefreshDistributionPresentation();

@@ -24,9 +24,9 @@ YT/thumb_dev_b_001.png
 YT/thumb_dev_c_001.png
 /Tools/IconCrop/TrimLogs
 
-# Quest dataset switcher production repository and materialized data
-/TunaSweeper/Plugins/QuestDatasetSwitcher/ProductionPayload/
-/TunaSweeper/Content/Data/QuestDatasetGenerated/
+# Access-restricted Main data repository and transient packaging data
+/TunaSweeper/External/MainPayload/
+/TunaSweeper/Content/Data/MainPayloadStaged/
 
 # Node / frontend tools
 **/node_modules/

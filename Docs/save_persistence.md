@@ -31,21 +31,21 @@ Raid item changes keep their existing extraction/death/level-travel save rules a
 
 - `SaveVersion`
 - `SaveSlotIndex`
-- `DatasetId`: active quest dataset id (`public` or `production`).
-- `DatasetRevision`: informational content revision written by the active dataset. Compatible content updates may change this value without changing the save namespace.
-- `SaveCompatibilityId`: stable save-lineage id. A save whose value does not match the active dataset is rejected; change this id only for intentionally incompatible progression changes.
+- `BuildFlavor`: build target identity (`Demo` or `Main`). A save whose value does not match the running target is rejected.
 - `TotalPlaySeconds`
 - `DifficultyStage`: save-slot difficulty stage, clamped to `1..3`; `1` is Farming, `2` is Normal, and `3` is Hard. New slots keep the default `1` until the player confirms a difficulty.
 - `bDifficultySelected`: whether the active slot has confirmed the difficulty selection screen. New save slots start as `false`, so continuing a slot created at the difficulty screen returns to that screen until the player presses game start.
 - `LastSavedAtTicks`
 
-Public saves retain the legacy `TunaSweeperSave_Slot01` through `03` names. `Production` uses separate `TunaSweeperSave_Production_Slot01` through `03` names, last-selected-slot settings, and backup directory. Switching quest datasets therefore switches the complete save profile, not only quest progress; production quest rewards cannot leak items, currency, unlocks, or world state into the public/demo profile.
+Demo and Main use the same logical slot names but separate physical roots: `Saved/SaveGames/Demo/` and `Saved/SaveGames/Main/`. Each root owns slots `TunaSweeperSave_Slot01` through `03`, last-selected-slot settings, backups, and deletion logs. The directory boundary and `BuildFlavor` field together prevent progress, rewards, inventory, currency, unlocks, and world state from crossing targets.
 
 ### Obsolete Save Deletion
 
-Save version 20 is the minimum supported version. During `UTunaSweeperGameInstance::Init()`, every loadable `UTunaSweeperSaveGame` file below version 20 under `Saved/SaveGames/`, including backups, is deleted. Slot lookup repeats the same check so an obsolete file introduced after initialization cannot block a new save. Save settings, unreadable files, and version 20 or newer files are not auto-deleted.
+Save version 20 is the minimum supported version. During `UTunaSweeperGameInstance::Init()`, every loadable `UTunaSweeperSaveGame` file below version 20 under the active `Demo` or `Main` root, including backups, is deleted. Slot lookup repeats the same check so an obsolete file introduced after initialization cannot block a new save. Save settings and unreadable files inside the active root are not auto-deleted.
 
-Every successful deletion appends a local-time timestamp, detected version, and path relative to `Saved/SaveGames` to `Saved/SaveGames/AutoDeletedSaveLog.txt`. The game prepares the audit log before deleting; if the log cannot be prepared, it leaves the save file in place and reports an error through the Unreal log.
+Every successful obsolete-version deletion appends a local-time timestamp, detected version, and path relative to the active root to that root's `AutoDeletedSaveLog.txt`. The game prepares the audit log before deleting; if the log cannot be prepared, it leaves the versioned save file in place and reports an error through the Unreal log.
+
+Legacy `.sav` files directly under `Saved/SaveGames/` are not migrated. They are deleted at startup regardless of version and their file names are appended to the active target's deletion log. The `Demo/` and `Main/` subdirectories are never included in this flat-file cleanup.
 
 ### Scenario Progress Flags
 

@@ -20,6 +20,57 @@
 
 namespace TunaSweeperBuildTargetTool
 {
+	bool IsDemoTarget(ETunaSweeperBuildTarget BuildTarget)
+	{
+		return BuildTarget == ETunaSweeperBuildTarget::NoStoreDemo ||
+			BuildTarget == ETunaSweeperBuildTarget::SteamDemo ||
+			BuildTarget == ETunaSweeperBuildTarget::StoveDemo;
+	}
+
+	bool RunBuildFlavorDataScript(
+		const TCHAR* Mode,
+		const FString& ArchiveDirectory,
+		FString& OutError)
+	{
+		const FString ScriptPath = FPaths::ConvertRelativePathToFull(FPaths::Combine(
+			FPaths::ProjectDir(), TEXT("BuildScripts"), TEXT("BuildFlavorData.ps1")));
+		if (!FPaths::FileExists(ScriptPath))
+		{
+			OutError = FString::Printf(TEXT("Build flavor data script was not found: %s"), *ScriptPath);
+			return false;
+		}
+
+		FString Arguments = FString::Printf(
+			TEXT("-NoProfile -ExecutionPolicy Bypass -File \"%s\" -Mode %s"),
+			*ScriptPath,
+			Mode);
+		if (!ArchiveDirectory.IsEmpty())
+		{
+			Arguments += FString::Printf(TEXT(" -ArchiveDirectory \"%s\""), *ArchiveDirectory);
+		}
+
+		int32 ReturnCode = INDEX_NONE;
+		FString StandardOutput;
+		FString StandardError;
+		const bool bLaunched = FPlatformProcess::ExecProcess(
+			TEXT("powershell.exe"),
+			*Arguments,
+			&ReturnCode,
+			&StandardOutput,
+			&StandardError);
+		if (!bLaunched || ReturnCode != 0)
+		{
+			OutError = !StandardError.IsEmpty() ? StandardError : StandardOutput;
+			if (OutError.IsEmpty())
+			{
+				OutError = FString::Printf(TEXT("Build flavor data script failed with exit code %d."), ReturnCode);
+			}
+			return false;
+		}
+
+		return true;
+	}
+
 	void EnsureTunaSweeperTopMenu()
 	{
 		UToolMenu* MainMenu = UToolMenus::Get()->ExtendMenu(TEXT("LevelEditor.MainMenu"));
@@ -376,6 +427,7 @@ void FTunaSweeperBuildTargetTool::StartPackaging(ETunaSweeperBuildTarget BuildTa
 	const FString ProjectPath = FPaths::ConvertRelativePathToFull(FPaths::GetProjectFilePath());
 	const FString CommandletExecutable = FUnrealEdMisc::Get().GetExecutableForCommandlets();
 	const FString PackagedExecutable = FPaths::Combine(OutputDirectory, TargetName + TEXT(".exe"));
+	const bool bDemoTarget = TunaSweeperBuildTargetTool::IsDemoTarget(BuildTarget);
 	if (bCleanEnabled)
 	{
 		FString BuildsRoot = FPaths::ConvertRelativePathToFull(FPaths::Combine(FPaths::ProjectDir(), TEXT("Builds")));
@@ -453,6 +505,20 @@ void FTunaSweeperBuildTargetTool::StartPackaging(ETunaSweeperBuildTarget BuildTa
 		*OutputDirectory,
 		*BuildConfigurationName);
 
+	FString BuildFlavorDataError;
+	if (!TunaSweeperBuildTargetTool::RunBuildFlavorDataScript(
+			bDemoTarget ? TEXT("PrepareDemo") : TEXT("PrepareMain"),
+			FString(),
+			BuildFlavorDataError))
+	{
+		FMessageDialog::Open(
+			EAppMsgType::Ok,
+			FText::Format(
+				LOCTEXT("BuildFlavorDataPreparationFailed", "Packaging was stopped by the build-flavor data safety check:\n{0}"),
+				FText::FromString(BuildFlavorDataError)));
+		return;
+	}
+
 	bPackagingInProgress = true;
 	const bool bRunAfterPackaging = bRunEnabled;
 	IUATHelperModule::Get().CreateUatTask(
@@ -462,12 +528,25 @@ void FTunaSweeperBuildTargetTool::StartPackaging(ETunaSweeperBuildTarget BuildTa
 		LOCTEXT("PackagingTask", "Packaging"),
 		FAppStyle::GetBrush(TEXT("MainFrame.PackageProject")),
 		nullptr,
-		[this, bRunAfterPackaging, PackagedExecutable](FString Result, double)
+		[this, bRunAfterPackaging, PackagedExecutable, bDemoTarget, OutputDirectory](FString Result, double)
 		{
-			AsyncTask(ENamedThreads::GameThread, [this, bRunAfterPackaging, PackagedExecutable, Result]()
+			FString BuildFlavorDataError;
+			const bool bBuildFlavorDataSafe = TunaSweeperBuildTargetTool::RunBuildFlavorDataScript(
+				bDemoTarget && Result == TEXT("Completed") ? TEXT("VerifyDemo") : TEXT("Clean"),
+				bDemoTarget ? OutputDirectory : FString(),
+				BuildFlavorDataError);
+			AsyncTask(ENamedThreads::GameThread, [this, bRunAfterPackaging, PackagedExecutable, Result, bBuildFlavorDataSafe, BuildFlavorDataError]()
 			{
 				bPackagingInProgress = false;
-				if (bRunAfterPackaging && Result == TEXT("Completed"))
+				if (!bBuildFlavorDataSafe)
+				{
+					FMessageDialog::Open(
+						EAppMsgType::Ok,
+						FText::Format(
+							LOCTEXT("BuildFlavorDataFinalizationFailed", "Packaging data cleanup or Demo safety verification failed:\n{0}"),
+							FText::FromString(BuildFlavorDataError)));
+				}
+				else if (bRunAfterPackaging && Result == TEXT("Completed"))
 				{
 					LaunchPackagedBuild(PackagedExecutable);
 				}

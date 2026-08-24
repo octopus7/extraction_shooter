@@ -6750,3 +6750,19 @@
 - 설정 세이브, 판독 불가 파일, 버전 20 이상 파일은 자동 삭제하지 않으며, 초기화 이후 유입된 구버전 슬롯도 슬롯 조회 시 다시 검사하도록 보강했다.
 - Public·Production 데이터 검증, Production 서사팩 검증, 세이브 버전 정책·삭제 로그 자동화 테스트 2개를 통과했다.
 - UE 5.7 `TunaSweeperNoStore Win64 Development`와 `TunaSweeperEditor Win64 Development` 빌드를 성공적으로 완료하고 Unreal Editor를 실행했다.
+
+## 2026-08-24 15:27:46 (소요시간: 00:00:15)
+
+- 향후 Demo/Main 타겟 기반 진입·데이터·세이브 격리 구조를 구현할 때 데이터셋 스위칭 관련 Unreal Editor 메뉴 기능을 제거하기로 한 사용자 방침을 기록했다.
+- 이번 요청에서는 코드, 에디터 메뉴, 설정을 변경하지 않았다.
+
+## 2026-08-24 15:45:00 (소요시간: 00:42:00)
+
+- 수동 `Public`/`Production` 데이터셋 전환을 제거하고 패키징 타깃을 유일한 Demo/Main 판정 기준으로 사용하는 `TunaSweeperBuildFlavor` 경로 공급자를 추가했다.
+- Demo는 공개 퀘스트 데이터를, Main Editor/PIE는 프로젝트 내부의 접근 제한 원본 JSON/CSV를 직접 읽고 Main 새 게임은 manifest의 `initial_level`로 진입하도록 분리했다.
+- Demo 타깃에서만 타이틀의 별도 `DemoBuildImage` 위젯을 노출하고 Main에서는 접도록 구현했다.
+- 세이브 슬롯·최근 슬롯 설정·백업·자동 삭제 로그를 `Saved/SaveGames/Demo/`와 `Saved/SaveGames/Main/` 형제 경로로 물리적으로 격리하고 세이브 내부 `BuildFlavor` 불일치도 거부하도록 변경했다.
+- 기존 평면 슬롯·설정·구형 백업 세이브는 이관 없이 삭제하도록 시작 정리를 추가했으며 현재 작업공간에 남아 있던 해당 파일들도 제거했다.
+- `QuestDatasetSwitcher` 런타임/에디터 플러그인, 에디터 전환 메뉴, marker·생성 사본 구조와 게임 모듈 의존성을 제거했다.
+- Main 패키징 직전 검증·임시 staging·종료 후 정리와 Demo 패키징 전후 Main 데이터 혼입 차단을 PowerShell, Steam/STOVE 배치, 에디터 Build Target 패키징에 연결했다.
+- Main staging 구성과 Demo 안전 검사를 통과했고 UE 5.7 `TunaSweeperEditor`, `TunaSweeperDemo`, `TunaSweeper` Win64 Development 빌드 및 BuildFlavor/세이브 자동화 테스트 3개를 성공적으로 완료했다.

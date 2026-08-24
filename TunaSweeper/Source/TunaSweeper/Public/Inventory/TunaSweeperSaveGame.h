@@ -93,13 +93,7 @@ public:
 	int32 SaveSlotIndex = 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Save")
-	FName DatasetId;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Save")
-	FName SaveCompatibilityId;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Save")
-	FString DatasetRevision;
+	FName BuildFlavor;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Save")
 	float TotalPlaySeconds = 0.0f;

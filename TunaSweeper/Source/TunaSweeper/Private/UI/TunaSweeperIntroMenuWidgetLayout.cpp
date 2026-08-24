@@ -1,4 +1,6 @@
 #include "TunaSweeperIntroMenuWidgetShared.h"
+#include "Brushes/SlateColorBrush.h"
+#include "Settings/TunaSweeperBuildFlavor.h"
 
 void UTunaSweeperIntroMenuWidget::ResetTitleViewportLayoutState()
 {
@@ -395,8 +397,58 @@ UWidget* UTunaSweeperIntroMenuWidget::BuildTitleMenuButtonContent(
 	return Content;
 }
 
+void UTunaSweeperIntroMenuWidget::EnsureDemoBuildImage()
+{
+	if (!WidgetTree)
+	{
+		return;
+	}
+
+	if (!DemoBuildImage)
+	{
+		DemoBuildImage = Cast<UImage>(WidgetTree->FindWidget(TEXT("DemoBuildImage")));
+	}
+
+	if (!TunaSweeperBuildFlavor::IsDemo())
+	{
+		if (DemoBuildImage)
+		{
+			DemoBuildImage->SetVisibility(ESlateVisibility::Collapsed);
+		}
+		return;
+	}
+
+	if (!DemoBuildImage)
+	{
+		UCanvasPanel* RootCanvas = Cast<UCanvasPanel>(WidgetTree->RootWidget);
+		if (!RootCanvas)
+		{
+			return;
+		}
+
+		DemoBuildImage = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("DemoBuildImage"));
+		if (!DemoBuildImage)
+		{
+			return;
+		}
+
+		const FSlateColorBrush BadgeBrush(FLinearColor(0.95f, 0.55f, 0.08f, 0.92f));
+		DemoBuildImage->SetBrush(BadgeBrush);
+		if (UCanvasPanelSlot* DemoSlot = RootCanvas->AddChildToCanvas(DemoBuildImage))
+		{
+			DemoSlot->SetAnchors(FAnchors(0.0f, 0.0f));
+			DemoSlot->SetPosition(FVector2D(302.0f, 282.0f));
+			DemoSlot->SetSize(FVector2D(156.0f, 10.0f));
+			DemoSlot->SetZOrder(4);
+		}
+	}
+
+	DemoBuildImage->SetVisibility(ESlateVisibility::HitTestInvisible);
+}
+
 void UTunaSweeperIntroMenuWidget::EnsureTitleWindParticleOverlay()
 {
+	EnsureDemoBuildImage();
 	if (TitleWindParticleOverlay || !WidgetTree)
 	{
 		return;

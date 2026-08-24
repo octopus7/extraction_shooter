@@ -56,6 +56,7 @@ namespace TunaSweeperSave
 		const FString& SaveFilePath,
 		const FString& SaveGameDirectory);
 	void PurgeOutdatedSaveFiles(const FString& SaveGameDirectory);
+	void PurgeLegacyFlatSaveFiles();
 
 	inline int32 SanitizeDifficultyStage(int32 DifficultyStage)
 	{

@@ -3,6 +3,7 @@
 #include "Effect/TunaSweeperOcclusionRevealSettingsDataAsset.h"
 #include "Engine/Engine.h"
 #include "GameFramework/GameUserSettings.h"
+#include "Settings/TunaSweeperBuildFlavor.h"
 #include "Title/TunaSweeperDisplaySettings.h"
 #include "TunaWarpTransitionProfile.h"
 
@@ -110,9 +111,8 @@ void UTunaSweeperGameInstance::Init()
 	}
 
 	InitializeGlobalLanguageSetting();
-	TunaSweeperSave::PurgeOutdatedSaveFiles(FPaths::Combine(
-		FPaths::ProjectSavedDir(),
-		TEXT("SaveGames")));
+	TunaSweeperSave::PurgeLegacyFlatSaveFiles();
+	TunaSweeperSave::PurgeOutdatedSaveFiles(TunaSweeperBuildFlavor::GetSaveGameDirectory());
 
 	int32 LoadedSaveSlotIndex = 1;
 	if (LoadActiveSaveSlotSelection(LoadedSaveSlotIndex))
