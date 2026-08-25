@@ -7047,6 +7047,11 @@
 - 현재 `WBP_IntroMenu`에 데모 안내 패널이 없더라도 기존 C++ 생성 패널이 현지화된 데모 주의사항과 확인·돌아가기 버튼을 제공하도록 fallback을 복구해 새 게임 진행 정지를 해소했다.
 - UE 5.7 `TunaSweeperEditor` 및 `TunaSweeper` Win64 Development 빌드를 통과하고 TunaSweeper 자동화 테스트 11개가 모두 성공했으며, 작업 워크트리의 `TunaSweeper.uproject`를 Unreal Editor로 열어 프로젝트 로드 완료를 확인했다.
 
+## 2026-08-25 14:27:47 (소요시간: 00:06:11)
+
+- 첨부한 아지트 인테리어 이미지를 스타일 참조로 사용해, 크림 바탕의 은은한 핑크 꽃무늬가 반복되는 512×512 sRGB 벽지 텍스처를 생성했다.
+- 2×2 반복 미리보기로 수평·수직 이음새가 자연스러운 것을 확인한 뒤 `/Game/Environment/Bunker/Agit/T_AgitWall`에 월드 텍스처로 임포트했다. 기본 압축, 월드 LOD 그룹, 텍스처 그룹 기반 미프맵, sRGB 설정과 에셋 저장을 확인했다.
+
 ## 2026-08-25 14:30:30 (소요시간: 00:00:54)
 
 - 기존 Unreal Editor 인스턴스는 유지한 채 작업 워크트리의 `TunaSweeper/TunaSweeper.uproject`를 UE 5.7 에디터로 다시 열었다.
