@@ -1,6 +1,8 @@
 using Microsoft.Win32;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Windows;
 
 namespace TunaBuildHelper;
@@ -9,11 +11,13 @@ public partial class MainWindow : Window
 {
     private const string StartupRegistryValueName = "TunaHelper";
     private const string StartupRegistryKeyPath = @"Software\Microsoft\Windows\CurrentVersion\Run";
+    private const string StartMenuShortcutFileName = "Tuna Helper.lnk";
 
     public MainWindow()
     {
         InitializeComponent();
         RunAtStartupMenuItem.IsChecked = IsRunAtStartupEnabled();
+        RegisterStartMenuMenuItem.IsChecked = IsStartMenuShortcutRegistered();
     }
 
     private void BuildAndRunButton_Click(object sender, RoutedEventArgs e)
@@ -83,6 +87,26 @@ public partial class MainWindow : Window
             RunAtStartupMenuItem.IsChecked = IsRunAtStartupEnabled();
             MessageBox.Show(
                 $"자동 실행 설정을 변경하지 못했습니다.\n\n{exception.Message}",
+                Title,
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+        }
+    }
+
+    private void RegisterStartMenuMenuItem_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            SetStartMenuShortcut(RegisterStartMenuMenuItem.IsChecked);
+            StatusTextBlock.Text = RegisterStartMenuMenuItem.IsChecked
+                ? "시작 메뉴에 Tuna Helper를 등록했습니다."
+                : "시작 메뉴에서 Tuna Helper를 제거했습니다.";
+        }
+        catch (Exception exception)
+        {
+            RegisterStartMenuMenuItem.IsChecked = IsStartMenuShortcutRegistered();
+            MessageBox.Show(
+                $"시작 메뉴 등록을 변경하지 못했습니다.\n\n{exception.Message}",
                 Title,
                 MessageBoxButton.OK,
                 MessageBoxImage.Error);
@@ -201,13 +225,84 @@ public partial class MainWindow : Window
 
         if (enabled)
         {
-            string executablePath = Environment.ProcessPath ?? Process.GetCurrentProcess().MainModule?.FileName
-                ?? throw new InvalidOperationException("실행 파일 경로를 확인할 수 없습니다.");
+            string executablePath = GetExecutablePath();
             key.SetValue(StartupRegistryValueName, $"\"{executablePath}\"");
         }
         else
         {
             key.DeleteValue(StartupRegistryValueName, throwOnMissingValue: false);
+        }
+    }
+
+    private static bool IsStartMenuShortcutRegistered()
+    {
+        return File.Exists(GetStartMenuShortcutPath());
+    }
+
+    private static void SetStartMenuShortcut(bool enabled)
+    {
+        string shortcutPath = GetStartMenuShortcutPath();
+        if (!enabled)
+        {
+            File.Delete(shortcutPath);
+            return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(shortcutPath)!);
+
+        Type shellType = Type.GetTypeFromProgID("WScript.Shell")
+            ?? throw new InvalidOperationException("Windows 바로가기 서비스를 불러올 수 없습니다.");
+        object shell = Activator.CreateInstance(shellType)
+            ?? throw new InvalidOperationException("Windows 바로가기 서비스를 시작할 수 없습니다.");
+        object? shortcut = null;
+
+        try
+        {
+            shortcut = shellType.InvokeMember(
+                "CreateShortcut",
+                BindingFlags.InvokeMethod,
+                binder: null,
+                target: shell,
+                args: [shortcutPath])
+                ?? throw new InvalidOperationException("시작 메뉴 바로가기를 만들 수 없습니다.");
+
+            Type shortcutType = shortcut.GetType();
+            string executablePath = GetExecutablePath();
+            shortcutType.InvokeMember("TargetPath", BindingFlags.SetProperty, null, shortcut, [executablePath]);
+            shortcutType.InvokeMember(
+                "WorkingDirectory",
+                BindingFlags.SetProperty,
+                null,
+                shortcut,
+                [Path.GetDirectoryName(executablePath)!]);
+            shortcutType.InvokeMember("Description", BindingFlags.SetProperty, null, shortcut, ["Launch Tuna Helper"]);
+            shortcutType.InvokeMember("Save", BindingFlags.InvokeMethod, null, shortcut, args: null);
+        }
+        finally
+        {
+            ReleaseComObject(shortcut);
+            ReleaseComObject(shell);
+        }
+    }
+
+    private static string GetStartMenuShortcutPath()
+    {
+        return Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.Programs),
+            StartMenuShortcutFileName);
+    }
+
+    private static string GetExecutablePath()
+    {
+        return Environment.ProcessPath ?? Process.GetCurrentProcess().MainModule?.FileName
+            ?? throw new InvalidOperationException("실행 파일 경로를 확인할 수 없습니다.");
+    }
+
+    private static void ReleaseComObject(object? comObject)
+    {
+        if (comObject is not null && Marshal.IsComObject(comObject))
+        {
+            Marshal.FinalReleaseComObject(comObject);
         }
     }
 

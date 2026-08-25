@@ -61,6 +61,10 @@
                           Header="Windows 시작 시 실행"
                           IsCheckable="True"
                           Click="RunAtStartupMenuItem_Click" />
+                <MenuItem x:Name="RegisterStartMenuMenuItem"
+                          Header="시작 메뉴에 등록"
+                          IsCheckable="True"
+                          Click="RegisterStartMenuMenuItem_Click" />
             </MenuItem>
         </Menu>
 
