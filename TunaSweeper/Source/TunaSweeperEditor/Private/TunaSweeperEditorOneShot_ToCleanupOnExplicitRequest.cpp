@@ -964,7 +964,7 @@ namespace TunaSweeperEditorSetup
 						});
 
 					const bool bCompleted = FTunaSweeperEditorRunOnce::HasCompleted(LevelTransitionVideoTaskId);
-					if (bCompleted && FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperSetupQuit")))
+					if (bCompleted && FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperLevelTravelPresentationSetupQuit")))
 					{
 						FPlatformMisc::RequestExit(false);
 					}

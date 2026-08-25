@@ -13,6 +13,8 @@ UTunaSweeperGameInstance::UTunaSweeperGameInstance()
 {
 	WarpTransitionProfile = TSoftObjectPtr<UTunaWarpTransitionProfile>(
 		FSoftObjectPath(TEXT("/TunaWarpTransition/Profiles/DA_WarpTransition_Default.DA_WarpTransition_Default")));
+	LevelTravelPresentationDataAsset = TSoftObjectPtr<UTunaSweeperLevelTravelPresentationDataAsset>(
+		FSoftObjectPath(TEXT("/Game/Movies/DA_LevelTravelPresentation.DA_LevelTravelPresentation")));
 }
 
 UTunaWarpTransitionProfile* UTunaSweeperGameInstance::GetWarpTransitionProfile_Implementation() const
@@ -23,6 +25,36 @@ UTunaWarpTransitionProfile* UTunaSweeperGameInstance::GetWarpTransitionProfile_I
 UTunaSweeperOcclusionRevealSettingsDataAsset* UTunaSweeperGameInstance::GetOcclusionRevealSettingsDataAsset() const
 {
 	return OcclusionRevealSettingsDataAsset.LoadSynchronous();
+}
+
+bool UTunaSweeperGameInstance::TryResolveLevelTravel(
+	ETunaSweeperLevelTravelDestination Destination,
+	FName& OutTargetLevelName,
+	FTunaSweeperLevelTravelPresentationDefinition& OutPresentation) const
+{
+	OutTargetLevelName = NAME_None;
+	OutPresentation = FTunaSweeperLevelTravelPresentationDefinition();
+	OutPresentation.Destination = Destination;
+
+	switch (Destination)
+	{
+	case ETunaSweeperLevelTravelDestination::Bunker:
+		OutTargetLevelName = TunaSweeperBuildFlavor::GetBunkerLevelName();
+		break;
+	case ETunaSweeperLevelTravelDestination::Raid:
+		OutTargetLevelName = TunaSweeperBuildFlavor::GetRaidGameplayLevelName();
+		break;
+	default:
+		return false;
+	}
+
+	if (const UTunaSweeperLevelTravelPresentationDataAsset* PresentationData =
+		LevelTravelPresentationDataAsset.LoadSynchronous())
+	{
+		PresentationData->TryGetPresentation(Destination, OutPresentation);
+	}
+
+	return !OutTargetLevelName.IsNone();
 }
 
 void FTunaSweeperExperienceLevelStatBonuses::ClampNonNegative()

@@ -77,6 +77,7 @@
 #include "Interaction/TunaSweeperInteractableComponent.h"
 #include "Interaction/TunaSweeperItemSpawnInteractableActor.h"
 #include "Interaction/TunaSweeperLevelTravelInteractableActor.h"
+#include "Interaction/TunaSweeperLevelTravelPresentationDataAsset.h"
 #include "Interaction/TunaSweeperLootContainerActor.h"
 #include "Interaction/TunaSweeperLootContainerSpawnInteractableActor.h"
 #include "Interaction/TunaSweeperPhysicsAppleActor.h"
@@ -235,7 +236,7 @@ namespace TunaSweeperEditorSetup
 	const FString IntroMenuDevelopmentSettingsTaskId = TEXT("2026-07-12_AddTitleDevelopmentSettingsV1");
 	const FString IntroMenuDebugDisplayLanguageTaskId = TEXT("2026-07-14_AddDebugDisplayLanguageSettingsV1");
 	const FString OpeningScenarioPresentationTaskId = TEXT("2026-05-19_CreateOpeningScenarioPresentationV2");
-	const FString LevelTransitionVideoTaskId = TEXT("2026-05-16_AddBidirectionalLevelTransitionVideoV3");
+	const FString LevelTransitionVideoTaskId = TEXT("2026-08-25_CentralizeLevelTravelPresentationV5");
 	const FString FirstOutingQuestTaskId = TEXT("2026-05-30_UpdateQuestPanelEmptyStateSelectionV2");
 	const FString SelfDestructInteractionTaskId = TEXT("2026-05-16_CreateSelfDestructInteractionV1");
 	const FString WorldProgressInteractionTaskId = TEXT("2026-05-19_CreateWorldProgressObstacleAssetsV1");
@@ -443,6 +444,7 @@ namespace TunaSweeperEditorSetup
 	const FString VideoAssetPath = TEXT("/Game/Movies");
 	const FString AudioBgmAssetPath = TEXT("/Game/Audio/BGM");
 	const FString BunkerToRaidMediaSourceAssetName = TEXT("MS_BunkerToRaid");
+	const FString LevelTravelPresentationDataAssetName = TEXT("DA_LevelTravelPresentation");
 	const FString TitleBgmAssetName = TEXT("Where_the_Birds_Still_Sing");
 	const FString PickupItemAssetName = TEXT("BP_PickupItem");
 	const FString ItemSpawnInteractionAssetName = TEXT("BP_Interact_ItemSpawn");
@@ -488,6 +490,7 @@ namespace TunaSweeperEditorSetup
 	const FString OpeningScenarioMapPackagePath = TEXT("/Game/Maps/OpeningScenarioMap");
 	const FString BunkerMapPackagePath = TEXT("/Game/Maps/BunkerMap");
 	const FString RaidMapPackagePath = TEXT("/Game/MainRaid/RaidMap");
+	const FString DemoRaidMapPackagePath = TEXT("/Game/Maps/DemoRaidMap");
 
 	struct FUiTextureImportArgs
 	{
@@ -927,6 +930,7 @@ bool EnsureTitlePresentationSetup();
 bool EnsureIntroMenuAndLevelTravelSetup();
 bool EnsureIntroMenuGraphicsSettingsSetup();
 bool EnsureBunkerToRaidTransitionVideoSetup();
+bool EnsureLevelTravelPresentationSetup();
 bool EnsureFirstOutingQuestSetup();
 bool EnsureWorldProgressInteractionAssets();
 bool EnsureWarpPointInteractionAssets();

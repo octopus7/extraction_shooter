@@ -157,24 +157,11 @@ flowchart TD
 
 ## BunkerMap에서 RaidMap으로 전환
 
-벙커에서 레이드로 가는 진입점은 UI 버튼이 아니라 월드에 스폰되는 `level_travel` 상호작용 액터다.
+벙커에서 레이드로 가는 진입점은 UI 버튼이나 JSON 런타임 스폰이 아니라 `BunkerMap`에 직접 배치한 `BP_Interact_LevelTravel` 상호작용 액터다.
 
-`Content/Data/GameplayInteractionSpawns.json`의 `TS_Travel_DeployToRaid`:
+직접 배치 액터는 `Level Travel > Destination` 드롭다운에서 `Raid` 또는 `Bunker`만 선택한다. 액터는 실제 맵 이름이나 영상·위젯·문구·페이드 값을 보유하지 않는다. `UTunaSweeperGameInstance::TryResolveLevelTravel()`이 목적지를 현재 빌드의 실제 맵 이름으로 해석하고, `/Game/Movies/DA_LevelTravelPresentation`에서 전환 연출을 읽는다. Demo의 `Raid`는 `DemoRaidMap`으로 해석되며, `MS_BunkerToRaid` 영상은 DA의 `Raid` 항목에 연결된다.
 
-| 필드 | 값 |
-| --- | --- |
-| `level_name` | `BunkerMap` |
-| `spawn_type` | `level_travel` |
-| `actor_class` | `/Game/Interaction/BP_Interact_LevelTravel.BP_Interact_LevelTravel_C` |
-| `target_level_name` | `RaidMap` |
-| `interaction_display_name` | `Deploy` |
-| `transition_media_source` | `/Game/Movies/MS_BunkerToRaid.MS_BunkerToRaid` |
-| `transition_widget_class` | `/Game/UI/WBP_LevelTransitionVideo.WBP_LevelTransitionVideo_C` |
-| `transition_message` | `Deploying to Raid` |
-
-이 JSON은 `UTunaSweeperEnemySpawnSubsystem::LoadGameplayInteractionActorSpawnData()`가 읽고, 맵 로드 후 `EnsureRaidRuntimeActorsSpawnedForWorld()` 경로에서 현재 월드 이름과 맞는 레코드만 스폰한다. 함수 이름은 레이드 중심이지만 `GameplayInteractionSpawns.json`의 `BunkerMap` 레코드도 함께 처리한다.
-
-스폰된 액터는 `ConfigureGameplayInteractionActor()`에서 `ATunaSweeperLevelTravelInteractableActor::ConfigureLevelTravelDefaults()`로 목적지, 표시명, 전환 영상, 전환 위젯, 메시지를 받는다.
+레벨 이동 전용 JSON 스폰 행은 더 이상 지원하지 않으며, 발견되면 런타임 스포너가 경고 후 건너뛴다. `extraction_point` 등 다른 JSON 기반 상호작용 액터에는 영향을 주지 않는다.
 
 ### 플레이어 입력에서 레이드 이동까지
 
@@ -191,7 +178,7 @@ flowchart TD
 
 | 조건 | 동작 |
 | --- | --- |
-| `TargetLevelName` 없음 | 실패 반환. |
+| GameInstance 또는 목적지 해석 실패 | 실패 반환. |
 | `GameInstance` 있음 | `HandleLevelTravelPersistence(SourceLevelName, TargetLevelName)` 호출. 벙커->레이드면 세이브 저장과 레이드 경험치 세션 시작. |
 | `QuestSubsystem` 있음 | `NotifyLevelTravelRequested(SourceLevelName, TargetLevelName)` 호출. 레벨 이동 퀘스트 목표 진행에 사용된다. |
 | 레이드 경험치 정산 pending 있음 | `UTunaSweeperRaidExperienceReturnSubsystem::StartReturnPresentation()` 시도. 주로 레이드->벙커 복귀용이다. 성공하면 여기서 종료. |
@@ -329,8 +316,8 @@ flowchart TD
 3. 타이틀에서 `bStartTravelPending`, `PendingStartTargetLevelName`, 활성 세이브 슬롯, 난이도 선택 여부를 확인한다.
 4. `CompletedScenarioFlags`에 `scenario.opening.awakening`이 있는지 확인한다.
 5. 오프닝 후 벙커 이동이라면 `PendingScenarioCompletionFlag`가 벙커 로드 뒤 저장되는지 확인한다.
-6. 벙커/레이드 이동 지점이 보이지 않으면 `GameplayInteractionSpawns.json`의 `level_name`, `spawn_type`, `actor_class`, `target_level_name`과 `UTunaSweeperEnemySpawnSubsystem::DoesLevelNameMatchWorld()` 판정을 확인한다.
+6. 벙커/레이드 이동 지점이 보이지 않으면 해당 맵의 직접 배치 `BP_Interact_LevelTravel` 액터와 `Interactable` 컴포넌트를 확인한다.
 7. 상호작용이 안 되면 `UTunaSweeperInteractionSubsystem::CanOfferInteraction()`, `IsWithinInteractionDistance()`, 현재 focused interactable을 확인한다.
-8. 전환 영상이 안 나오면 `transition_media_source`, `transition_widget_class`, `UTunaSweeperLevelTransitionSubsystem::StartTransition()` 반환값과 media open 실패 이벤트를 확인한다.
+8. 전환 영상이 안 나오면 GameInstance의 `DA_LevelTravelPresentation` 참조, 목적지 항목의 `TransitionMediaSource`·위젯 클래스, `UTunaSweeperLevelTransitionSubsystem::StartTransition()` 반환값과 media open 실패 이벤트를 확인한다.
 9. 레이드 복귀에서 경험치 UI가 안 나오면 `HandleLevelTravelPersistence(RaidMap, BunkerMap)`이 호출됐는지, pending 경험치 애니메이션 상태가 생성됐는지 확인한다.
 10. 추출 지점이 작동하지 않으면 플레이어가 살아 있는지, 2D 거리 기준으로 `ExtractionRadius` 안에 있는지, `CurrentHoldSeconds`가 증가하는지 확인한다.

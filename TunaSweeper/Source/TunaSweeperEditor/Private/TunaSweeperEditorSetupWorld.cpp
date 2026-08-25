@@ -221,19 +221,12 @@ namespace TunaSweeperEditorSetup
 
 		LevelTravelBlueprint->Modify();
 		Defaults->Modify();
-		Defaults->ConfigureLevelTravelDefaults(
-			NAME_None,
+		Defaults->ConfigureInteractionDefaults(
+			ETunaSweeperInteractionType::LevelTravel,
 			FText::FromString(TEXT("Travel")),
 			TSoftClassPtr<UTunaSweeperInteractionMarkerWidget>(
 				FSoftObjectPath(GetAssetClassPath(UIAssetPath, InteractionMarkerAssetName))),
-			TSoftObjectPtr<UMediaSource>(),
-			TSoftClassPtr<UTunaSweeperLevelTransitionWidget>(
-				FSoftObjectPath(GetAssetClassPath(UIAssetPath, LevelTransitionVideoWidgetAssetName))),
-			FText::GetEmpty());
-		Defaults->ConfigureLevelTravelVisualDefaults(
-			TSoftObjectPtr<UStaticMesh>(),
-			FVector(0.75f, 0.75f, 0.75f),
-			FVector::ZeroVector);
+			FName(TEXT("ui.interaction.travel")));
 		FBlueprintEditorUtils::MarkBlueprintAsModified(LevelTravelBlueprint);
 		FKismetEditorUtilities::CompileBlueprint(LevelTravelBlueprint);
 		LevelTravelBlueprint->MarkPackageDirty();
@@ -1202,9 +1195,119 @@ namespace TunaSweeperEditorSetup
 
 		const bool bConfigured =
 			ConfigureLevelTransitionVideoWidgetBlueprint(LevelTransitionWidgetBlueprint) &&
-			ConfigureLevelTravelBlueprint(LevelTravelBlueprint);
+			ConfigureLevelTravelBlueprint(LevelTravelBlueprint) &&
+			EnsureLevelTravelPresentationSetup();
 
 		return bConfigured;
+	}
+
+	bool EnsureLevelTravelPresentationSetup()
+	{
+		const FString DataAssetObjectPath = GetAssetObjectPath(VideoAssetPath, LevelTravelPresentationDataAssetName);
+		UTunaSweeperLevelTravelPresentationDataAsset* PresentationData =
+			LoadObject<UTunaSweeperLevelTravelPresentationDataAsset>(nullptr, *DataAssetObjectPath);
+		if (!PresentationData)
+		{
+			const FString PackageName = FString::Printf(TEXT("%s/%s"), *VideoAssetPath, *LevelTravelPresentationDataAssetName);
+			UPackage* Package = CreatePackage(*PackageName);
+			if (!Package)
+			{
+				UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to create package for %s."), *DataAssetObjectPath);
+				return false;
+			}
+
+			PresentationData = NewObject<UTunaSweeperLevelTravelPresentationDataAsset>(
+				Package,
+				*LevelTravelPresentationDataAssetName,
+				RF_Public | RF_Standalone | RF_Transactional);
+			if (!PresentationData)
+			{
+				UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to create %s."), *DataAssetObjectPath);
+				return false;
+			}
+
+			FAssetRegistryModule::AssetCreated(PresentationData);
+		}
+
+		PresentationData->Modify();
+		PresentationData->Presentations.Reset();
+
+		FTunaSweeperLevelTravelPresentationDefinition ToBunker;
+		ToBunker.Destination = ETunaSweeperLevelTravelDestination::Bunker;
+		ToBunker.TransitionWidgetClass = TSoftClassPtr<UTunaSweeperLevelTransitionWidget>(
+			FSoftObjectPath(GetAssetClassPath(UIAssetPath, LevelTransitionVideoWidgetAssetName)));
+		ToBunker.TransitionMessage = FText::FromString(TEXT("Returning to Bunker"));
+		ToBunker.TransitionMessageStringKey = FName(TEXT("ui.transition.returning_to_bunker"));
+		PresentationData->Presentations.Add(ToBunker);
+
+		FTunaSweeperLevelTravelPresentationDefinition ToRaid;
+		ToRaid.Destination = ETunaSweeperLevelTravelDestination::Raid;
+		ToRaid.TransitionMediaSource = TSoftObjectPtr<UMediaSource>(
+			FSoftObjectPath(GetAssetObjectPath(VideoAssetPath, BunkerToRaidMediaSourceAssetName)));
+		ToRaid.TransitionWidgetClass = TSoftClassPtr<UTunaSweeperLevelTransitionWidget>(
+			FSoftObjectPath(GetAssetClassPath(UIAssetPath, LevelTransitionVideoWidgetAssetName)));
+		ToRaid.TransitionMessage = FText::FromString(TEXT("Deploying to Raid"));
+		ToRaid.TransitionMessageStringKey = FName(TEXT("ui.transition.deploying_to_raid"));
+		PresentationData->Presentations.Add(ToRaid);
+		PresentationData->MarkPackageDirty();
+		if (!SaveAsset(PresentationData))
+		{
+			return false;
+		}
+
+		if (!EnsureGameInstanceBlueprint())
+		{
+			return false;
+		}
+
+		UBlueprint* GameInstanceBlueprint = LoadObject<UBlueprint>(nullptr, *GetGameInstanceObjectPath());
+		if (!GameInstanceBlueprint || !GameInstanceBlueprint->GeneratedClass)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to load %s."), *GetGameInstanceObjectPath());
+			return false;
+		}
+
+		UTunaSweeperGameInstance* GameInstanceDefaults =
+			Cast<UTunaSweeperGameInstance>(GameInstanceBlueprint->GeneratedClass->GetDefaultObject());
+		if (!GameInstanceDefaults)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to configure level travel presentation on %s."), *GetGameInstanceObjectPath());
+			return false;
+		}
+
+		GameInstanceBlueprint->Modify();
+		GameInstanceDefaults->Modify();
+		GameInstanceDefaults->LevelTravelPresentationDataAsset =
+			TSoftObjectPtr<UTunaSweeperLevelTravelPresentationDataAsset>(FSoftObjectPath(DataAssetObjectPath));
+		FBlueprintEditorUtils::MarkBlueprintAsModified(GameInstanceBlueprint);
+		FKismetEditorUtilities::CompileBlueprint(GameInstanceBlueprint);
+		GameInstanceBlueprint->MarkPackageDirty();
+		if (!SaveAsset(GameInstanceBlueprint))
+		{
+			return false;
+		}
+
+		auto ConfigurePlacedActor = [](const FString& MapPackagePath, const FString& ActorLabel, ETunaSweeperLevelTravelDestination Destination)
+		{
+			UWorld* World = LoadEditorMapForSetup(MapPackagePath);
+			ATunaSweeperLevelTravelInteractableActor* Actor =
+				World ? Cast<ATunaSweeperLevelTravelInteractableActor>(FindActorByLabel(World, ActorLabel)) : nullptr;
+			if (!Actor)
+			{
+				UE_LOG(LogTunaSweeperEditor, Warning, TEXT("Could not find directly placed level travel actor %s in %s."), *ActorLabel, *MapPackagePath);
+				return true;
+			}
+
+			Actor->Modify();
+			Actor->SetDestination(Destination);
+			Actor->MarkPackageDirty();
+			return UEditorLoadingAndSavingUtils::SaveMap(World, MapPackagePath);
+		};
+
+		return ConfigurePlacedActor(
+			BunkerMapPackagePath,
+			TEXT("BP_Interact_LevelTravel"),
+			ETunaSweeperLevelTravelDestination::Raid);
 	}
 
 	bool EnsureFirstOutingQuestSetup()

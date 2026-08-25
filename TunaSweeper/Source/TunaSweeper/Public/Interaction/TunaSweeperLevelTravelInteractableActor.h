@@ -2,13 +2,10 @@
 
 #include "CoreMinimal.h"
 #include "Interaction/TunaSweeperInteractableActor.h"
+#include "Interaction/TunaSweeperLevelTravelPresentationDataAsset.h"
 #include "TunaSweeperLevelTravelInteractableActor.generated.h"
 
 class APawn;
-class UMediaSource;
-class UStaticMesh;
-class UTunaSweeperLevelTransitionWidget;
-class UTunaSweeperInteractionMarkerWidget;
 
 UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API ATunaSweeperLevelTravelInteractableActor : public ATunaSweeperInteractableActor
@@ -19,62 +16,15 @@ public:
 	ATunaSweeperLevelTravelInteractableActor();
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Level Travel")
-	FName GetTargetLevelName() const { return TargetLevelName; }
+	ETunaSweeperLevelTravelDestination GetDestination() const { return Destination; }
 
-	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Level Travel")
-	void ConfigureLevelTravelDefaults(
-		FName InTargetLevelName,
-		const FText& InInteractionDisplayName,
-		TSoftClassPtr<UTunaSweeperInteractionMarkerWidget> InMarkerWidgetClass,
-		TSoftObjectPtr<UMediaSource> InTransitionMediaSource,
-		TSoftClassPtr<UTunaSweeperLevelTransitionWidget> InTransitionWidgetClass,
-		const FText& InTransitionMessage,
-		FName InInteractionDisplayNameStringKey = NAME_None,
-		FName InTransitionMessageStringKey = NAME_None);
+	void SetDestination(ETunaSweeperLevelTravelDestination InDestination) { Destination = InDestination; }
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Level Travel")
 	bool TravelToTargetLevel(APawn* InstigatorPawn);
 
-	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Level Travel|Visual")
-	void ConfigureLevelTravelVisualDefaults(
-		TSoftObjectPtr<UStaticMesh> InVisualMesh,
-		FVector InVisualMeshScale,
-		FVector InVisualMeshRelativeLocation);
-
 protected:
-	virtual void OnConstruction(const FTransform& Transform) override;
-	virtual void BeginPlay() override;
-
-	void RefreshLevelTravelVisual();
-	FText ResolveTransitionMessage() const;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Travel")
-	FName TargetLevelName;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Travel|Visual")
-	TSoftObjectPtr<UStaticMesh> VisualMeshOverride;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Travel|Visual")
-	FVector LevelTravelVisualScale = FVector(0.75f, 0.75f, 0.75f);
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Travel|Visual")
-	FVector LevelTravelVisualRelativeLocation = FVector::ZeroVector;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Travel|Transition Video")
-	TSoftObjectPtr<UMediaSource> TransitionMediaSource;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Travel|Transition Video")
-	TSoftClassPtr<UTunaSweeperLevelTransitionWidget> TransitionWidgetClass;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Travel|Transition Video")
-	FText TransitionMessage;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Travel|Transition Video")
-	FName TransitionMessageStringKey;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Travel|Transition Video", meta = (ClampMin = "0.01", UIMin = "0.01"))
-	float FadeToBlackDuration = 0.2f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Level Travel|Transition Video", meta = (ClampMin = "0.01", UIMin = "0.01"))
-	float FadeFromBlackDuration = 0.2f;
+	/** Per-instance selection only; maps and presentation stay centralized elsewhere. */
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "Level Travel")
+	ETunaSweeperLevelTravelDestination Destination = ETunaSweeperLevelTravelDestination::Raid;
 };

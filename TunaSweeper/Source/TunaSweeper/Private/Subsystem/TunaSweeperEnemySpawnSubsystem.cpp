@@ -1883,17 +1883,11 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadGameplayInteractionActorSpawnData(bool
 		FString TransitionWidgetClassPath;
 		FString TransitionMessage;
 		FString TransitionMessageStringKey;
-		FString LevelTravelVisualMeshPath;
-		FVector LevelTravelVisualScale(0.75f, 0.75f, 0.75f);
-		FVector LevelTravelVisualRelativeLocation = FVector::ZeroVector;
 		JsonObject->TryGetStringField(TEXT("target_level_name"), TargetLevelName);
 		JsonObject->TryGetStringField(TEXT("transition_media_source"), TransitionMediaSourcePath);
 		JsonObject->TryGetStringField(TEXT("transition_widget_class"), TransitionWidgetClassPath);
 		JsonObject->TryGetStringField(TEXT("transition_message"), TransitionMessage);
 		JsonObject->TryGetStringField(TEXT("transition_message_key"), TransitionMessageStringKey);
-		JsonObject->TryGetStringField(TEXT("level_travel_visual_mesh"), LevelTravelVisualMeshPath);
-		TunaSweeperEnemySpawn::TryReadVectorField(JsonObject, TEXT("level_travel_visual_scale"), LevelTravelVisualScale);
-		TunaSweeperEnemySpawn::TryReadVectorField(JsonObject, TEXT("level_travel_visual_relative_location"), LevelTravelVisualRelativeLocation);
 		SpawnDefinition.TargetLevelName = TargetLevelName.TrimStartAndEnd().IsEmpty()
 			? NAME_None
 			: FName(*TargetLevelName.TrimStartAndEnd());
@@ -1912,18 +1906,6 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadGameplayInteractionActorSpawnData(bool
 			? FText::GetEmpty()
 			: FText::FromString(TransitionMessage.TrimStartAndEnd());
 		SpawnDefinition.TransitionMessageStringKey = FName(*TransitionMessageStringKey.TrimStartAndEnd());
-		const FString TrimmedLevelTravelVisualMeshPath = LevelTravelVisualMeshPath.TrimStartAndEnd();
-		if (!TrimmedLevelTravelVisualMeshPath.IsEmpty())
-		{
-			SpawnDefinition.LevelTravelVisualMesh = TSoftObjectPtr<UStaticMesh>(
-				FSoftObjectPath(TrimmedLevelTravelVisualMeshPath));
-		}
-		SpawnDefinition.LevelTravelVisualScale = FVector(
-			FMath::Max(0.01f, LevelTravelVisualScale.X),
-			FMath::Max(0.01f, LevelTravelVisualScale.Y),
-			FMath::Max(0.01f, LevelTravelVisualScale.Z));
-		SpawnDefinition.LevelTravelVisualRelativeLocation = LevelTravelVisualRelativeLocation;
-
 		double NumericExtractionRadius = 300.0;
 		double NumericExtractionRadiusMeters = 0.0;
 		double NumericExtractionHoldSeconds = 4.0;
@@ -2295,10 +2277,9 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadGameplayInteractionActorSpawnData(bool
 		SpawnDefinition.NoiseEmitterSourceLocalOffset = NoiseEmitterSourceLocalOffset;
 		SpawnDefinition.bNoiseEmitterStartEnabled = bNoiseEmitterStartEnabled;
 
-		if (SpawnDefinition.SpawnType == EGameplayInteractionActorSpawnType::LevelTravel &&
-			SpawnDefinition.TargetLevelName.IsNone())
+		if (SpawnDefinition.SpawnType == EGameplayInteractionActorSpawnType::LevelTravel)
 		{
-			UE_LOG(LogTunaSweeperEnemySpawn, Warning, TEXT("Skipping gameplay interaction actor spawn row %d: level travel target is missing."), RowIndex);
+			UE_LOG(LogTunaSweeperEnemySpawn, Warning, TEXT("Skipping gameplay interaction actor spawn row %d: level travel actors are placed directly in maps."), RowIndex);
 			continue;
 		}
 		if (SpawnDefinition.SpawnType == EGameplayInteractionActorSpawnType::ExtractionPoint &&
@@ -2466,24 +2447,6 @@ void UTunaSweeperEnemySpawnSubsystem::ConfigureGameplayInteractionActor(
 
 	switch (SpawnDefinition.SpawnType)
 	{
-	case EGameplayInteractionActorSpawnType::LevelTravel:
-		if (ATunaSweeperLevelTravelInteractableActor* LevelTravelActor = Cast<ATunaSweeperLevelTravelInteractableActor>(SpawnedActor))
-		{
-			LevelTravelActor->ConfigureLevelTravelDefaults(
-				TunaSweeperBuildFlavor::ResolveGameplayLevelName(SpawnDefinition.TargetLevelName),
-				SpawnDefinition.InteractionDisplayName,
-				SpawnDefinition.MarkerWidgetClass,
-				SpawnDefinition.TransitionMediaSource,
-				SpawnDefinition.TransitionWidgetClass,
-				SpawnDefinition.TransitionMessage,
-				SpawnDefinition.InteractionDisplayNameStringKey,
-				SpawnDefinition.TransitionMessageStringKey);
-			LevelTravelActor->ConfigureLevelTravelVisualDefaults(
-				SpawnDefinition.LevelTravelVisualMesh,
-				SpawnDefinition.LevelTravelVisualScale,
-				SpawnDefinition.LevelTravelVisualRelativeLocation);
-		}
-		break;
 	case EGameplayInteractionActorSpawnType::ExtractionPoint:
 		if (ATunaSweeperExtractionPointActor* ExtractionPointActor = Cast<ATunaSweeperExtractionPointActor>(SpawnedActor))
 		{

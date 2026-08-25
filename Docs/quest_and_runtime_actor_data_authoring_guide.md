@@ -132,23 +132,24 @@ quest.demo.first.objective,레이드 구역 확인,Inspect the raid zone,レイ�
 
 ### 게임플레이/상호작용 액터 예시
 
+`level_travel`은 더 이상 JSON으로 배치하지 않는다. 맵에 `BP_Interact_LevelTravel`을 직접 배치하고 `Destination` 드롭다운에서 `Bunker` 또는 `Raid`를 선택한다. 실제 맵 이름과 전환 영상은 GameInstance와 `DA_LevelTravelPresentation`이 결정한다.
+
 ```json
 [
   {
     "level_name": "BunkerMap",
-    "spawn_id": "TS_Travel_DeployToRaid",
-    "spawn_type": "level_travel",
-    "actor_class": "/Game/Interaction/BP_Interact_LevelTravel.BP_Interact_LevelTravel_C",
+    "spawn_id": "TS_ShootingPracticeDummy_01",
+    "spawn_type": "shooting_practice_dummy",
+    "actor_class": "/Script/TunaSweeper.TunaSweeperShootingPracticeDummyActor",
     "location": [580.0, 360.0, 4.0],
-    "rotation": [0.0, 0.0, 0.0],
-    "target_level_name": "RaidMap"
+    "rotation": [0.0, 0.0, 0.0]
   }
 ]
 ```
 
 정식 `spawn_type` 값은 다음과 같다.
 
-- `level_travel`, `pickup_item`, `item_spawn`
+- `pickup_item`, `item_spawn`
 - `loot_container`, `loot_container_spawn`
 - `shop`, `workbench`, `piggy_bank`
 - `periodic_noise_emitter`, `difficulty_adjustment`, `self_destruct`

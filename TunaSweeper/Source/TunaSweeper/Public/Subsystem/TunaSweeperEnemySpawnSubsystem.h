@@ -236,10 +236,6 @@ private:
 		TSoftClassPtr<UTunaSweeperLevelTransitionWidget> TransitionWidgetClass;
 		FText TransitionMessage;
 		FName TransitionMessageStringKey;
-		TSoftObjectPtr<UStaticMesh> LevelTravelVisualMesh;
-		FVector LevelTravelVisualScale = FVector(0.75f, 0.75f, 0.75f);
-		FVector LevelTravelVisualRelativeLocation = FVector::ZeroVector;
-
 		float ExtractionRadius = 300.0f;
 		float ExtractionHoldSeconds = 4.0f;
 		float ExtractionRadiusRingWidth = 4.8f;

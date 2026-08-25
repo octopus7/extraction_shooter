@@ -7009,3 +7009,21 @@
 
 - `TunaBuildHelper`를 Release 구성으로 경고와 오류 없이 빌드했다.
 - 기존 Debug 헬퍼 창을 종료하고 `bin/Release/net10.0-windows/TunaBuildHelper.exe`를 실행했으며, 해당 Release 프로세스의 정상 응답 상태를 확인했다.
+
+## 2026-08-25 12:09:49 (소요시간: 00:04:30)
+
+- 레벨 이동 액터의 직접 레벨명과 개별 전환 연출 속성을 벙커/레이드 목적지 enum 및 GameInstance가 읽는 중앙 Data Asset 구성으로 대체하는 구현 계획을 수립했다.
+- 직접 배치한 액터의 `VisualMesh` 컴포넌트 편집값이 즉시 유지되도록 기존 레벨 이동 전용 메시 오버라이드, Construction/BeginPlay 재적용, `level_travel_visual_*` JSON 주입 경로를 제거하는 계획을 포함했다.
+- 이번 요청에서는 구현·빌드·에셋 변경을 수행하지 않았다.
+
+## 2026-08-25 12:18:57 (소요시간: 00:26:57)
+
+- 레벨 이동 목적지를 `Bunker`/`Raid` enum 드롭다운으로 바꾸고, 실제 레벨명은 GameInstance가 빌드 플레이버에 맞춰 해석하도록 구현했다.
+- 전환 미디어·위젯·문구·페이드 설정을 `DA_LevelTravelPresentation`으로 분리하고 GameInstance에서 읽어 레벨 이동 액터에 전달하도록 구성했다.
+- 기존 레벨 이동 액터의 Blueprint 노출 레벨명·전환 연출 설정과 메시 오버라이드 재적용 경로를 제거했다. 이제 맵에 직접 배치한 액터의 `VisualMesh` 편집값이 그대로 반영된다.
+- JSON `level_travel` 런타임 생성은 중단하고, `BunkerMap`에 직접 배치된 이동 액터를 Raid 목적지로 마이그레이션했다.
+- UE Editor 비Unity 빌드와 UHT를 통과했으며, 중앙 DA·GameInstance Blueprint·이동 액터 Blueprint를 저장했다.
+
+## 2026-08-25 12:58:52 (소요시간: 00:00:20)
+
+- 레벨 이동 목적지 enum, 전환 Data Asset 중앙화, JSON 메시 오버라이드 제거 변경을 하나의 Git 커밋으로 기록했다.

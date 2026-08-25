@@ -143,7 +143,7 @@ flowchart TD
 
 | `spawn_type` | 생성/설정 대상 |
 | --- | --- |
-| `level_travel` | `ATunaSweeperLevelTravelInteractableActor::ConfigureLevelTravelDefaults()`, `ConfigureLevelTravelVisualDefaults()` |
+| `level_travel` | 직접 배치 액터의 `Destination` enum과 GameInstance의 `DA_LevelTravelPresentation`을 사용한다. JSON 스폰 설정은 지원하지 않는다. |
 | `pickup_item` | `ATunaSweeperPickupItemActor::ConfigurePickupItemDefaults()` |
 | `item_spawn` | `ATunaSweeperItemSpawnInteractableActor::ConfigureItemSpawnDefaults()` 및 컴포넌트 `ItemSpawn` 설정 |
 | `loot_container` | `ATunaSweeperLootContainerActor::ConfigureLootContainerDefaults()` |
@@ -170,5 +170,5 @@ flowchart TD
 11. 월드 진행 수리가 실패하면 필요 아이템 ID/수량과 `CountInventoryItemById()` 결과를 확인한다. 현재 `RepairUsingAvailableRequiredItems()`는 부족분 일부 투입이 아니라 완료 필요 수량을 모두 보유해야 성공한다.
 12. JSON 스폰 액터가 안 생기면 `GameplayInteractionSpawns.json`의 `level_name`, `spawn_id`, `spawn_type`, `actor_class`, `location`을 확인한다. `spawn_type`이 Unknown이면 행 전체를 건너뛴다.
 13. PIE에서 맵 이름 문제가 의심되면 JSON 스폰은 `NormalizeLevelName()`으로 `UEDPIE_` 접두사를 제거하지만, 상호작용의 BunkerMap 제한은 `GetMapName().EndsWith("BunkerMap")`를 쓴다는 차이를 확인한다.
-14. 레벨 이동이 안 되면 `target_level_name`, 전환 미디어/위젯 경로, `UTunaSweeperLevelTransitionSubsystem::StartTransition()` 반환값, 최종 `UGameplayStatics::OpenLevel()` 호출 경로를 확인한다.
+14. 레벨 이동이 안 되면 직접 배치 액터의 `Destination`, GameInstance의 `DA_LevelTravelPresentation`, `UTunaSweeperLevelTransitionSubsystem::StartTransition()` 반환값, 최종 `UGameplayStatics::OpenLevel()` 호출 경로를 확인한다.
 15. 하우징 모드 중 월드 상호작용이 안 되는 것은 의도된 동작이다. `UTunaSweeperHousingSubsystem::IsHousingModeOpen()`이 true이면 서브시스템 포커스와 마커가 모두 억제된다.

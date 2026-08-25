@@ -6,6 +6,7 @@
 #include "Game/TunaSweeperDataValueTypes.h"
 #include "Inventory/TunaSweeperInventoryTypes.h"
 #include "Inventory/TunaSweeperSaveGame.h"
+#include "Interaction/TunaSweeperLevelTravelPresentationDataAsset.h"
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
 #include "TunaWarpTransitionProfileProvider.h"
 #include "Weapon/TunaSweeperWeaponSpreadRecoilDataAsset.h"
@@ -302,6 +303,16 @@ public:
 	/** Shared warp timing and presentation used by runtime-created transition components. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TunaSweeper|Warp Transition")
 	TSoftObjectPtr<UTunaWarpTransitionProfile> WarpTransitionProfile;
+
+	/** Central video/presentation mapping for the directly placed level-travel actors. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TunaSweeper|Level Travel")
+	TSoftObjectPtr<UTunaSweeperLevelTravelPresentationDataAsset> LevelTravelPresentationDataAsset;
+
+	/** Resolves a logical Bunker/Raid destination into the current build's map and transition presentation. */
+	bool TryResolveLevelTravel(
+		ETunaSweeperLevelTravelDestination Destination,
+		FName& OutTargetLevelName,
+		FTunaSweeperLevelTravelPresentationDefinition& OutPresentation) const;
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Occlusion Reveal")
 	UTunaSweeperOcclusionRevealSettingsDataAsset* GetOcclusionRevealSettingsDataAsset() const;
