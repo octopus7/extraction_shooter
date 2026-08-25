@@ -5559,3 +5559,23 @@ Blueprint 이름은 `BP_Interact_LevelTravel`이며 에셋 경로는 `/Game/Inte
 ### 답변
 
 직접 배치한 인스턴스라면 목표 레벨 설정이 원인일 가능성이 높다. 이 Blueprint의 `Target Level Name` 기본값은 의도적으로 `None`이며, 비어 있으면 상호작용 실행 시 즉시 실패한다. 현재 Demo 프로젝트에서 벙커에서 레이드로 이동하는 직접 배치 액터의 목표는 실제 월드 이름인 `DemoRaidMap`으로 지정해야 한다. 기존 JSON 런타임 스폰 경로는 논리 이름 `RaidMap`을 빌드 플레이버에 맞게 `DemoRaidMap`으로 변환하지만, 레벨에 직접 배치한 액터의 이동 함수에는 그 변환이 적용되지 않고 지정된 이름을 그대로 `OpenLevel`에 전달한다. 상호작용 표시 자체가 나타나지 않는 경우에는 목표 레벨보다 상호작용 거리·컴포넌트 인식 문제를 먼저 확인해야 한다.
+
+## 2026-08-25 11:27:56 (소요시간: 00:01:21)
+
+### 질문
+
+벙커에서 레이드로 이동할 때 기존 전환 연출 없이 즉시 이동하는 현상이 레벨 이름 또는 경로 변경의 영향인지 분석 요청.
+
+### 답변
+
+레벨 이름이나 `/Game/Maps` 경로 이동이 직접 원인은 아니다. 현재 벙커의 직접 배치 `BP_Interact_LevelTravel` 인스턴스에는 목표 `DemoRaidMap`은 저장되어 있지만 전환 미디어 `MS_BunkerToRaid` 참조가 없다. 레벨 이동 코드는 `TransitionMediaSource`와 `TransitionWidgetClass`가 모두 있을 때만 `UTunaSweeperLevelTransitionSubsystem::StartTransition()`을 호출하고, 하나라도 없으면 즉시 `UGameplayStatics::OpenLevel()`로 내려간다. 과거 JSON 런타임 스폰 행에는 `MS_BunkerToRaid`, `WBP_LevelTransitionVideo`, 전환 문구가 모두 있었으나 `ca2ea16`에서 Demo 런타임 스폰 데이터를 비우며 해당 행도 제거됐다. 이후 직접 배치 방식으로 전환하면서 목표 레벨만 옮겨지고 미디어 설정은 옮겨지지 않았다. 또한 현재 Blueprint 셋업 코드도 전환 미디어 기본값을 빈 값으로 저장하므로 셋업을 다시 실행해도 연출이 복원되지 않는다. `DemoRaidMap` 이름은 저장·레이드 역할 판정에 정상 인식되며, 전환 서브시스템 자체도 특정 레벨 이름 비교 없이 비어 있지 않은 목표와 미디어·위젯 존재 여부만 검사한다.
+
+## 2026-08-25 11:32:48 (소요시간: 00:00:20)
+
+### 질문
+
+벙커에서 레이드로 이동하는 직접 배치 BP의 전환 미디어에 `MS_BunkerToRaid`를 지정하면 되는지 확인 요청.
+
+### 답변
+
+맞다. 벙커에 배치된 `BP_Interact_LevelTravel` 인스턴스의 `Level Travel > Transition Video > Transition Media Source`에 `/Game/Movies/MS_BunkerToRaid`를 지정하면 된다. `Transition Widget Class`도 `/Game/UI/WBP_LevelTransitionVideo`인지 확인하고 목표는 `DemoRaidMap`으로 유지한다. 같은 Blueprint가 다른 방향 이동에도 재사용될 수 있으므로 Blueprint 클래스 기본값 전체를 바꾸기보다 벙커에 놓인 해당 인스턴스에만 지정하는 편이 안전하다.

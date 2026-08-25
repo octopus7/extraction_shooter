@@ -4,6 +4,7 @@
 #include "Misc/MessageDialog.h"
 #include "Misc/PackageName.h"
 #include "Misc/Paths.h"
+#include "Settings/TunaSweeperBuildFlavor.h"
 #include "ToolMenus.h"
 
 #define LOCTEXT_NAMESPACE "TunaSweeperLevelOpenTool"
@@ -11,8 +12,15 @@
 namespace TunaSweeperLevelOpenTool
 {
 	const TCHAR* IntroMapPackagePath = TEXT("/Game/Maps/IntroMap");
-	const TCHAR* RaidMapPackagePath = TEXT("/Game/MainRaid/RaidMap");
 	const TCHAR* BunkerMapPackagePath = TEXT("/Game/Maps/BunkerMap");
+
+	FString GetRaidMapPackagePath()
+	{
+		const FString RaidLevelName = TunaSweeperBuildFlavor::GetRaidGameplayLevelName().ToString();
+		return RaidLevelName.StartsWith(TEXT("/"))
+			? RaidLevelName
+			: FString::Printf(TEXT("/Game/Maps/%s"), *RaidLevelName);
+	}
 
 	void EnsureTunaSweeperTopMenu()
 	{
@@ -80,7 +88,7 @@ void FTunaSweeperLevelOpenTool::PopulateOpenLevelMenu(UToolMenu* Menu)
 		LOCTEXT("OpenRaidLevel", "Raid"),
 		LOCTEXT("OpenRaidLevelTooltip", "Open the Raid level."),
 		FSlateIcon(),
-		FUIAction(FExecuteAction::CreateRaw(this, &FTunaSweeperLevelOpenTool::OpenLevel, FString(TunaSweeperLevelOpenTool::RaidMapPackagePath))));
+		FUIAction(FExecuteAction::CreateRaw(this, &FTunaSweeperLevelOpenTool::OpenLevel, TunaSweeperLevelOpenTool::GetRaidMapPackagePath())));
 	Section.AddMenuEntry(
 		TEXT("OpenBunkerLevel"),
 		LOCTEXT("OpenBunkerLevel", "Bunker"),
