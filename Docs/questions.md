@@ -5609,6 +5609,16 @@ C++에 하드코딩된 자동 스폰은 아니다. `/Game/Maps/DemoRaidMap`과 `
 ### 답변
 
 맞다. 기존 플로팅 빌드 헬퍼의 `Kill TunaSweeper editor`와 `Build and run TunaSweeper` 버튼 및 각각의 배치 파일 실행 경로가 새 숏컷 화면으로 교체되면서 제거됐다. 현재 변경에는 Unreal 프로젝트 열기·프로젝트 폴더 열기·다운로드 폴더 열기와 Windows 시작 시 실행 설정만 남아 있다.
+
+## 2026-08-25 14:34:38 (소요시간: 00:00:20)
+
+### 질문
+
+현재 작업 경로가 Git 워크트리인지 확인 요청.
+
+### 답변
+
+맞다. 현재 작업 경로는 `C:\\Users\\blendue\\.codex\\worktrees\\76c3\\extraction_shooter`인 별도 Git 워크트리다.
 ## 2026-08-25 13:07:00 (소요시간: 00:00:30)
 
 ### 질문

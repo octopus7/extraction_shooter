@@ -1203,6 +1203,16 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadEnemySpawnData(bool bForceReload)
 		}
 
 		const TSharedPtr<FJsonObject>& JsonObject = *JsonObjectPtr;
+		// Anchor-schema rows are owned by UTunaSweeperRaidPlacementSubsystem. Never let a
+		// mixed row spawn twice through the coordinate-based legacy path.
+		if (JsonObject->HasField(TEXT("placement_id")))
+		{
+			if (JsonObject->HasField(TEXT("location")) || JsonObject->HasField(TEXT("rotation")) || JsonObject->HasField(TEXT("scale")))
+			{
+				UE_LOG(LogTunaSweeperEnemySpawn, Error, TEXT("Enemy spawn row %d mixes anchor placement_id with transform fields; skipped."), RowIndex);
+			}
+			continue;
+		}
 		FString LevelName;
 		FString EnemyId;
 		FString EnemyClassPath;
@@ -1382,6 +1392,15 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadLootContainerSpawnData(bool bForceRelo
 		}
 
 		const TSharedPtr<FJsonObject>& JsonObject = *JsonObjectPtr;
+		// Anchor-schema rows are resolved by UTunaSweeperRaidPlacementSubsystem.
+		if (JsonObject->HasField(TEXT("placement_id")))
+		{
+			if (JsonObject->HasField(TEXT("location")) || JsonObject->HasField(TEXT("rotation")) || JsonObject->HasField(TEXT("scale")))
+			{
+				UE_LOG(LogTunaSweeperEnemySpawn, Error, TEXT("Loot spawn row %d mixes anchor placement_id with transform fields; skipped."), RowIndex);
+			}
+			continue;
+		}
 		FString LevelName;
 		FString LootContainerClassPath;
 		FVector Location = FVector::ZeroVector;
