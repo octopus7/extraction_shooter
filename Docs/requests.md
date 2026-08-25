@@ -7101,3 +7101,26 @@
 ## 2026-08-25 16:25:00 (소요시간: 00:04:27)
 
 - 루팅 상자 프리뷰 카탈로그 확장 변경을 단일 Git 커밋으로 정리해 `main` 브랜치에 병합했다. 자동 테스트가 남긴 무관한 에셋 변경은 계속 제외했다.
+## 2026-08-25 15:13:05 (소요시간: 00:35:09)
+
+- 목표 기지 이미지의 따뜻한 황갈색 사암 두겁석을 참고해, 로컬 X 반복축·Y 벽 폭·Z 위쪽 규약을 사용하는 `50 x 38 x 14cm` 직선 모듈을 결정적 `FMeshDescription` 생성 파이프라인으로 제작했다. 넓은 bevel, 제한된 비대칭 손맛, 동일한 닫힌 끝 단면, UV·작성 노멀/탄젠트·단일 Box 충돌·Nanite 비활성화·바닥 중앙 피벗을 적용하고 JSON 생성 파라미터와 최종 Static Mesh/재질 에셋을 보존했다.
+- `USplineComponent`와 단일 HISM을 사용하는 전용 Wall Coping Spline 액터 및 디자이너용 Blueprint를 추가했다. 메시 X bounds 기반 반복 길이, Centered/StartAligned, 짧은 스플라인 처리, 수평 Yaw 기본/경사 추종 옵션, Y/Z 스케일·간격·시드 기반 변형을 제공하며 X 비균일 스케일과 Tick·개별 액터 증식은 사용하지 않는다.
+- 두겁석 에셋의 bounds·피벗·96 triangle 밀도·UV·노멀·재질·PerInstanceRandom·충돌·Blueprint 기본 참조를 검증하고, 짧은/긴 직선·완만한 곡선·90도·급한 곡선 배치를 확인하는 UE 자동화 테스트 2개가 warning/error 없이 성공했다. UE 5.7 `TunaSweeperEditor` Win64 Development 빌드를 통과하고 프로젝트를 Unreal Editor로 열었다.
+- Raid/Bunker/Intro 제품 레벨에는 두겁석 액터를 배치하지 않았다. 헤드리스 테스트 기동 중 기존 one-shot이 재저장한 tracked Content 변경은 복구 가능한 `codex-wall-coping-headless-autosave` stash로 격리해 현재 제품 레벨 변경 목록에서 제거했다.
+
+## 2026-08-25 16:43:19 (소요시간: 00:01:17)
+
+- UE 5.7에서 작업 워크트리의 `TunaSweeper.uproject`를 열고 Content Browser를 `/Game/Environment/Architecture/WallCoping/BP_WallCopingSpline`에 맞춘 뒤 해당 Blueprint 편집기를 열었다. 제품 레벨은 저장하거나 수정하지 않았다.
+
+## 2026-08-25 16:47:02 (소요시간: 00:00:20)
+
+- 빌드·에셋 생성·레벨 변경 없이 현재 워크트리의 `TunaSweeper/TunaSweeper.uproject`만 UE 5.7 Unreal Editor로 열었다.
+
+## 2026-08-25 16:49:45 (소요시간: 00:03:17)
+
+- 두겁석 상면이 백페이스 컬링되어 내부가 보이던 문제를 생성 메시의 반대 winding으로 진단하고, 모든 삼각형을 UE clockwise front-face 순서로 뒤집되 authored normal은 바깥쪽으로 유지하도록 수정했다.
+- 모든 면의 winding과 바깥쪽 normal 관계를 검사하는 회귀 assertion을 추가하고 두겁석 메시·재질·Blueprint를 재생성했다. Wall Coping 자동화 테스트 2개가 warning/error 없이 성공하고 UE 5.7 `TunaSweeperEditor` 빌드를 통과했으며 Unreal Editor를 다시 열었다.
+
+## 2026-08-25 16:56:24 (소요시간: 00:05:30)
+
+- 두겁석 모듈·재질·Spline HISM 액터·자동화 테스트·문서를 관련 변경만 포함하는 단일 Git 커밋으로 정리해 `main` 브랜치에 병합했다. 헤드리스 에디터가 재저장한 무관한 에셋의 복구용 stash는 커밋 및 병합 대상에서 제외했다.

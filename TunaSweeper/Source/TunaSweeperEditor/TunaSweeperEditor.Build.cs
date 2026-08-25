@@ -35,6 +35,7 @@ public class TunaSweeperEditor : ModuleRules
 			"UMG",
 			"UMGEditor",
 			"MediaAssets",
+			"MeshConversion",
 			"MeshDescription",
 			"Niagara",
 			"PropertyEditor",
@@ -48,6 +49,7 @@ public class TunaSweeperEditor : ModuleRules
 			"ToolMenus",
 			"UATHelper",
 			"FoldingCanopyGarageDoor",
+			"SplineWorldBuilder",
 			"TunaSweeper",
 			"MiyakovCharacterSystem",
 			"MiyakovCharacterSystemEditor"

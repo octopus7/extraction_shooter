@@ -5,6 +5,7 @@
 #include "TunaSweeperQuadrupedPresetSetup.h"
 #include "TunaSweeperGarageDoorSetup.h"
 #include "TunaSweeperLocationBlendCameraSetup.h"
+#include "TunaSweeperWallCopingSetup.h"
 
 #include "Containers/Ticker.h"
 #include "Editor.h"
@@ -31,6 +32,14 @@ public:
 			RaidPlacementAnchorAssetsInitializedHandle = FEditorDelegates::OnEditorInitialized.AddRaw(
 				this,
 				&FTunaSweeperEditorModule::OnEditorInitializedForRaidPlacementAnchorAssets);
+			return;
+		}
+
+		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperWallCopingSetup")))
+		{
+			WallCopingSetupInitializedHandle = FEditorDelegates::OnEditorInitialized.AddRaw(
+				this,
+				&FTunaSweeperEditorModule::OnEditorInitializedForWallCopingSetup);
 			return;
 		}
 
@@ -147,6 +156,18 @@ public:
 
 	virtual void ShutdownModule() override
 	{
+		if (WallCopingSetupInitializedHandle.IsValid())
+		{
+			FEditorDelegates::OnEditorInitialized.Remove(WallCopingSetupInitializedHandle);
+			WallCopingSetupInitializedHandle.Reset();
+		}
+
+		if (WallCopingSetupTickerHandle.IsValid())
+		{
+			FTSTicker::GetCoreTicker().RemoveTicker(WallCopingSetupTickerHandle);
+			WallCopingSetupTickerHandle.Reset();
+		}
+
 		if (LunaSkirtSetupInitializedHandle.IsValid())
 		{
 			FEditorDelegates::OnEditorInitialized.Remove(LunaSkirtSetupInitializedHandle);
@@ -256,6 +277,28 @@ public:
 	}
 
 private:
+	void OnEditorInitializedForWallCopingSetup(double)
+	{
+		FEditorDelegates::OnEditorInitialized.Remove(WallCopingSetupInitializedHandle);
+		WallCopingSetupInitializedHandle.Reset();
+		WallCopingSetupTickerHandle = FTSTicker::GetCoreTicker().AddTicker(
+			FTickerDelegate::CreateRaw(this, &FTunaSweeperEditorModule::RunWallCopingSetupAfterInitialization));
+	}
+
+	bool RunWallCopingSetupAfterInitialization(float)
+	{
+		WallCopingSetupTickerHandle.Reset();
+		const bool bSucceeded = TunaSweeperWallCopingSetup::Run();
+		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperWallCopingSetupQuit")))
+		{
+			FPlatformMisc::RequestExitWithStatus(
+				false,
+				bSucceeded ? 0 : 1,
+				TEXT("TunaSweeperWallCopingSetup"));
+		}
+		return false;
+	}
+
 	void OnEditorInitializedForLunaSkirtSetup(double)
 	{
 		FEditorDelegates::OnEditorInitialized.Remove(LunaSkirtSetupInitializedHandle);
@@ -389,6 +432,8 @@ private:
 	}
 
 	bool bStandardEditorSetupStarted = false;
+	FDelegateHandle WallCopingSetupInitializedHandle;
+	FTSTicker::FDelegateHandle WallCopingSetupTickerHandle;
 	FDelegateHandle LunaSkirtSetupInitializedHandle;
 	FTSTicker::FDelegateHandle LunaSkirtSetupTickerHandle;
 	FDelegateHandle GarageDoorSetupInitializedHandle;

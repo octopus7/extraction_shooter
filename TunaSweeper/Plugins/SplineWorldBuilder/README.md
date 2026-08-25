@@ -27,3 +27,11 @@ Use `-SplineWorldBuilderRebuildAssets` to force regeneration. Add `-SplineWorldB
 - Cross junction local arms are `+X`, `-X`, `+Y`, and `-Y`.
 
 PCG is intentionally optional. Core module allocation, junction classification, and deterministic rebuilds are implemented in C++ so the plugin does not require PCG to cook or run.
+
+## TunaSweeper wall coping specialization
+
+`AWallCopingSplineActor` is the rigid, no-X-scaling specialization used by
+`/Game/Environment/Architecture/WallCoping/BP_WallCopingSpline`. It uses one HISM,
+supports centered or start-aligned whole blocks, defaults to horizontal yaw-only
+orientation, and exposes deterministic non-length variation. See
+`Docs/wall_coping.md` for designer usage and corner limitations.

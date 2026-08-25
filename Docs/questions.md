@@ -5688,3 +5688,32 @@ C++에 하드코딩된 자동 스폰은 아니다. `/Game/Maps/DemoRaidMap`과 `
 ### 답변
 
 초기 카탈로그는 `Small`, `Medium`, `Large` 3종이다. 각각 별도 대표 메시 애셋으로 제공하며, 이후 `DA_LootAnchorPreviews` 배열에 항목을 추가하면 동일한 콤보에 자동으로 늘어난다. 이 명칭은 에디터 프리뷰 규격일 뿐 실제 상자 외형이나 전리품 정의를 제한하지 않는다.
+## 2026-08-25 16:43:19 (소요시간: 00:01:17)
+
+### 질문
+
+`BP_WallCopingSpline`을 에디터에서 열고 실제 배치·조절 방법을 안내해 달라는 요청.
+
+### 답변
+
+Content Browser의 `/Game/Environment/Architecture/WallCoping/BP_WallCopingSpline`을 레벨로 끌어놓고, 액터의 `CopingSpline`을 선택해 스플라인 점을 벽 상단 중심선에 배치한다. 기본 `Centered`는 남는 길이를 양끝에 나누고 `StartAligned`는 시작점에 첫 블록을 맞춘다. `Gap`, `WidthScale`, `HeightScale`, 수평 기본/경사 추종, `Seed`와 미세 변형 범위를 Details에서 조절할 수 있으며 X 길이 스케일은 사용하지 않는다. 급한 90도 코너는 현재 직선 블록 특성상 틈이나 겹침이 생길 수 있어 완만한 곡선을 쓰거나 두 액터로 나누는 것이 안전하다.
+
+## 2026-08-25 16:45:15 (소요시간: 00:00:15)
+
+### 질문
+
+`BP_WallCopingSpline`을 그대로 레벨에 올려 사용하면 되는지 확인 요청.
+
+### 답변
+
+맞다. 실제 벽이 있는 레벨의 뷰포트에 `BP_WallCopingSpline`을 드래그해 배치하고, `CopingSpline` 점을 벽 상단 중심선과 같은 높이·경로로 맞추면 된다. 블록은 Construction 갱신으로 즉시 반복 배치되며, 레벨에 개별 블록을 하나씩 놓을 필요가 없다.
+
+## 2026-08-25 16:46:10 (소요시간: 00:00:10)
+
+### 질문
+
+이번 두겁석 작업이 현재 Git 워크트리에서 수행됐는지 확인 요청.
+
+### 답변
+
+맞다. 작업 경로는 `C:\Users\blendue\.codex\worktrees\1ddf\extraction_shooter`이며, 두겁석 C++ 구현·생성 원본·문서·Static Mesh·재질·Blueprint 에셋은 모두 이 워크트리에 있다.
