@@ -3,8 +3,9 @@
 
 void UTunaSweeperIntroMenuWidget::EnsureDifficultySelectionPanel()
 {
-	// The Demo notice is authored in WBP_IntroMenu. Never replace it with a runtime-generated tree.
-	if (TunaSweeperBuildFlavor::IsDemo() && !bDifficultyAdjustmentMode)
+	// Prefer the authored Demo notice, but keep the generated panel as a resilient fallback
+	// when an older or locally edited WBP_IntroMenu does not contain it.
+	if (TunaSweeperBuildFlavor::IsDemo() && !bDifficultyAdjustmentMode && DemoNoticePanel)
 	{
 		return;
 	}

@@ -5,7 +5,9 @@
 #include "TunaSweeperDialogueWidget.generated.h"
 
 class UBorder;
+class UImage;
 class UTextBlock;
+class UTexture2D;
 
 USTRUCT(BlueprintType)
 struct TUNASWEEPER_API FTunaSweeperDialogueLine
@@ -17,6 +19,10 @@ struct TUNASWEEPER_API FTunaSweeperDialogueLine
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Dialogue")
 	FText DialogueText;
+
+	// Optional presentation data. Leaving this unset keeps the neutral speaker-tab icon.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Dialogue")
+	TSoftObjectPtr<UTexture2D> SpeakerIcon;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Dialogue")
 	bool bUseCameraFocus = false;
@@ -53,6 +59,8 @@ private:
 	void BuildDialogueWidget();
 	void BeginCurrentLine();
 	void UpdateVisibleDialogueText();
+	void UpdateSpeakerPresentation(const FTunaSweeperDialogueLine& CurrentLine);
+	void UpdateContinueInputHint();
 	void AdvanceOrFillLine();
 	void FinishDialogue();
 	bool IsCurrentLineFullyVisible() const;
@@ -61,10 +69,22 @@ private:
 	TObjectPtr<UBorder> DialoguePanel;
 
 	UPROPERTY(Transient)
+	TObjectPtr<UBorder> DialogueShadow;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UImage> DialogueSurfaceImage;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UBorder> DialogueAccentLine;
+
+	UPROPERTY(Transient)
 	TObjectPtr<UBorder> SpeakerNamePanel;
 
 	UPROPERTY(Transient)
-	TObjectPtr<UBorder> SpeakerAccentBar;
+	TObjectPtr<UBorder> SpeakerIconBackplate;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UImage> SpeakerIconImage;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UTextBlock> SpeakerNameText;
@@ -76,7 +96,10 @@ private:
 	TObjectPtr<UTextBlock> ContinuePromptText;
 
 	UPROPERTY(Transient)
-	TObjectPtr<UTextBlock> ContinueMarkerText;
+	TObjectPtr<UBorder> ContinueKeycap;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTextBlock> ContinueKeyText;
 
 	TArray<FTunaSweeperDialogueLine> DialogueLines;
 	FTunaSweeperDialogueLineActivatedDelegate LineActivatedDelegate;
@@ -86,5 +109,6 @@ private:
 	float TypewriterAccumulator = 0.0f;
 	int32 CurrentLineIndex = INDEX_NONE;
 	int32 VisibleCharacterCount = 0;
+	bool bLastInputWasGamepad = false;
 	bool bDialogueRunning = false;
 };

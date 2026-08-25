@@ -7,7 +7,7 @@
 
 namespace
 {
-	const TCHAR* DefaultAppleMeshPath = TEXT("/Game/Meshes/Props/Apple/SM_Apple.SM_Apple");
+	const TCHAR* PhysicsAppleMeshPath = TEXT("/Game/Meshes/Props/Apple/SM_Apple.SM_Apple");
 }
 
 ATunaSweeperPhysicsAppleActor::ATunaSweeperPhysicsAppleActor()
@@ -27,7 +27,7 @@ ATunaSweeperPhysicsAppleActor::ATunaSweeperPhysicsAppleActor()
 	AppleMeshComponent->SetCanEverAffectNavigation(false);
 	AppleMeshComponent->SetCastShadow(true);
 
-	AppleMesh = TSoftObjectPtr<UStaticMesh>(FSoftObjectPath(DefaultAppleMeshPath));
+	AppleMesh = TSoftObjectPtr<UStaticMesh>(FSoftObjectPath(PhysicsAppleMeshPath));
 }
 
 void ATunaSweeperPhysicsAppleActor::OnConstruction(const FTransform& Transform)

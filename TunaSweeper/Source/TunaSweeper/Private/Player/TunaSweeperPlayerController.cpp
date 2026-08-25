@@ -491,8 +491,11 @@ void ATunaSweeperPlayerController::BeginPlay()
 		ApplyLevelBgmState();
 		EnsureGameHudWidget();
 		SetEnemyCombatDebugEnabled(GetEnemyCombatDebugPreference());
-		ShowBunkerEntryFadeIfNeeded();
-		QueueScenarioTrigger(TunaSweeperDialoguePresentation::LevelEnteredTrigger);
+		const bool bCompletedPendingBunkerEntry = ShowBunkerEntryFadeIfNeeded();
+		if (!IsBunkerMap() || bCompletedPendingBunkerEntry)
+		{
+			QueueScenarioTrigger(TunaSweeperDialoguePresentation::LevelEnteredTrigger);
+		}
 	}
 }
 
