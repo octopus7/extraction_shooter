@@ -5579,3 +5579,13 @@ Blueprint 이름은 `BP_Interact_LevelTravel`이며 에셋 경로는 `/Game/Inte
 ### 답변
 
 맞다. 벙커에 배치된 `BP_Interact_LevelTravel` 인스턴스의 `Level Travel > Transition Video > Transition Media Source`에 `/Game/Movies/MS_BunkerToRaid`를 지정하면 된다. `Transition Widget Class`도 `/Game/UI/WBP_LevelTransitionVideo`인지 확인하고 목표는 `DemoRaidMap`으로 유지한다. 같은 Blueprint가 다른 방향 이동에도 재사용될 수 있으므로 Blueprint 클래스 기본값 전체를 바꾸기보다 벙커에 놓인 해당 인스턴스에만 지정하는 편이 안전하다.
+
+## 2026-08-25 11:38:15 (소요시간: 00:01:20)
+
+### 질문
+
+JSON 스폰 데이터를 제거했는데도 레이드에서 토마토가 나타나는 것이 하드코딩된 스폰인지 확인 요청.
+
+### 답변
+
+C++에 하드코딩된 자동 스폰은 아니다. `/Game/Maps/DemoRaidMap`과 `/Game/MainRaid/RaidMap`의 Persistent Level에 각각 `BP_BreakableTomato_C_0`부터 `_8`까지 아홉 개의 `BP_BreakableTomato` 인스턴스가 직접 배치되어 있다. 런타임 코드에는 토마토 `SpawnActor` 호출이 없으므로 JSON 스폰 행을 제거해도 레벨에 저장된 이 인스턴스들은 그대로 생성된다. 토마토를 없애려면 사용하는 레이드 맵에서 해당 직접 배치 액터들을 삭제해야 한다.

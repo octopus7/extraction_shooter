@@ -6975,3 +6975,7 @@
 - 에디터의 `TunaSweeper > Open Level` 메뉴에서 Intro와 Bunker는 이동된 `/Game/Maps` 경로를 계속 사용하도록 확인했다.
 - Raid 메뉴는 고정된 Main 레이드 경로 대신 현재 빌드 플레이버를 따르도록 변경해 Demo에서는 `/Game/Maps/DemoRaidMap`, Main에서는 `/Game/MainRaid/RaidMap`을 열도록 했다.
 - 변경한 에디터 모듈 소스의 비유니티 컴파일과 링크를 통과했다. 전체 타깃 링크는 실행 중인 Unreal Editor가 기존 플러그인 DLL을 사용 중이어서 완료되지 않았다.
+
+## 2026-08-25 11:46:12 (소요시간: 00:00:25)
+
+- 레이드 토마토 직접 배치 원인에 관한 질문 기록과 현재 `BunkerMap` 레벨 변경을 하나의 Git 커밋으로 정리했다.
