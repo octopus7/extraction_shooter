@@ -51,7 +51,7 @@ bool FTunaSweeperBuildFlavorPathTest::RunTest(const FString& Parameters)
 			.EndsWith(TEXT("Content/Data/EnemySpawns.json")));
 	TestTrue(
 		TEXT("DemoRaidMap asset exists"),
-		FPaths::FileExists(FPaths::Combine(FPaths::ProjectContentDir(), TEXT("DemoRaidMap.umap"))));
+		FPaths::FileExists(FPaths::Combine(FPaths::ProjectContentDir(), TEXT("Maps/DemoRaidMap.umap"))));
 
 	Settings->BuildTarget = ETunaSweeperBuildTarget::NoStoreFull;
 	TestFalse(TEXT("Full target is Main flavor"), TunaSweeperBuildFlavor::IsDemo());

@@ -484,9 +484,9 @@ namespace TunaSweeperEditorSetup
 	const FString TomatoGooParticleMaterialAssetName = TEXT("M_TomatoGooParticle");
 	const FString TomatoGooSplatMaterialAssetName = TEXT("M_TomatoGooSplat");
 	const FString TomatoStickySplatterSystemAssetName = TEXT("NS_Tomato_StickySplatter");
-	const FString IntroMapPackagePath = TEXT("/Game/IntroMap");
-	const FString OpeningScenarioMapPackagePath = TEXT("/Game/OpeningScenarioMap");
-	const FString BunkerMapPackagePath = TEXT("/Game/BunkerMap");
+	const FString IntroMapPackagePath = TEXT("/Game/Maps/IntroMap");
+	const FString OpeningScenarioMapPackagePath = TEXT("/Game/Maps/OpeningScenarioMap");
+	const FString BunkerMapPackagePath = TEXT("/Game/Maps/BunkerMap");
 	const FString RaidMapPackagePath = TEXT("/Game/MainRaid/RaidMap");
 
 	struct FUiTextureImportArgs

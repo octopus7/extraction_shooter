@@ -61,7 +61,7 @@ DEFINE_LOG_CATEGORY_STATIC(LogTunaSweeperProceduralTerrainTest, Log, All);
 namespace TunaSweeperProceduralTerrainTest
 {
 	const FString AssetPath = TEXT("/Game/Prototype/TerrainTest");
-	const FString MapPackagePath = TEXT("/Game/PrototypeTerrainPathCreekMap");
+	const FString MapPackagePath = TEXT("/Game/Maps/PrototypeTerrainPathCreekMap");
 	const FString LandscapeMaterialAssetName = TEXT("M_TerrainTest_Landscape");
 	const FString CreekWaterMaterialAssetName = TEXT("M_TerrainTest_CreekWater");
 	const FString CreekWaterMeshAssetName = TEXT("SM_TerrainTest_CreekWater");
