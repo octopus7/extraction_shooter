@@ -5609,3 +5609,22 @@ C++에 하드코딩된 자동 스폰은 아니다. `/Game/Maps/DemoRaidMap`과 `
 ### 답변
 
 맞다. 기존 플로팅 빌드 헬퍼의 `Kill TunaSweeper editor`와 `Build and run TunaSweeper` 버튼 및 각각의 배치 파일 실행 경로가 새 숏컷 화면으로 교체되면서 제거됐다. 현재 변경에는 Unreal 프로젝트 열기·프로젝트 폴더 열기·다운로드 폴더 열기와 Windows 시작 시 실행 설정만 남아 있다.
+## 2026-08-25 13:07:00 (소요시간: 00:00:30)
+
+### 질문
+
+`BP_RaidBunkerGarageDoor`를 상호작용 가능하게 하려면 컴포넌트만 추가하면 되는지 문의.
+
+### 답변
+
+아니다. `UTunaSweeperInteractableComponent`만 추가하면 포커스·마커는 대상이 될 수 있어도, 현재 `LevelTravel` 처리기는 소유 액터를 `ATunaSweeperLevelTravelInteractableActor`로 캐스팅하므로 차고문 Blueprint 자체에서는 이동이 실행되지 않는다. 차고문의 근접 자동 개폐는 그대로 유지하고, 실제 이동은 문 앞에 `BP_Interact_LevelTravel`을 별도 배치하거나 차고문 Blueprint의 Child Actor Component로 넣어 담당하게 하는 것이 맞다. 이 이동 액터의 `Destination`을 `Bunker` 또는 `Raid`로 선택하면 GameInstance와 `DA_LevelTravelPresentation`의 새 경로를 그대로 사용한다. 차고문 자체에 직접 상호작용을 붙이려면 `DoorOpen`/`LevelTravel` 처리기를 인터페이스 기반으로 확장하는 별도 구현이 필요하다.
+
+## 2026-08-25 13:08:00 (소요시간: 00:00:30)
+
+### 질문
+
+차고문 앞에 메시가 없는 레벨 이동 액터를 배치하는 방식과 `VisualMesh`를 비워도 되는지 문의.
+
+### 답변
+
+가능하며 현재 구조에 가장 자연스럽다. `ATunaSweeperInteractableActor`의 `VisualMesh`는 보이는 메쉬와 충돌만 담당하고, 실제 상호작용 후보 등록·거리 판정·마커 표시는 별도 `Interactable` 컴포넌트가 담당한다. 따라서 `BP_Interact_LevelTravel`의 `VisualMesh` Static Mesh를 `None`으로 비워도 `Destination`, 상호작용 마커, 입력 및 레벨 이동에는 영향이 없다. 문 앞의 플레이어가 서기 좋은 위치에 이동 액터를 두고, `Interactable`의 위치/높이와 Interaction Distance만 마커가 잘 보이도록 조절하면 된다.
