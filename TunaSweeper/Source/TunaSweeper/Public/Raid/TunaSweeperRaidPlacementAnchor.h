@@ -5,6 +5,7 @@
 #include "TunaSweeperRaidPlacementAnchor.generated.h"
 
 class USceneComponent;
+class UTunaSweeperLootAnchorPreviewDataAsset;
 
 #if WITH_EDITORONLY_DATA
 class UArrowComponent;
@@ -41,6 +42,15 @@ public:
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Raid Placement")
 	ETunaSweeperRaidPlacementAnchorKind GetAnchorKind() const { return AnchorKind; }
 
+#if WITH_EDITOR
+	/** Names used by the editor details-panel combo; sourced from the BP's preview data asset. */
+	UFUNCTION()
+	TArray<FString> GetLootPreviewOptions() const;
+
+	/** Used only while creating/updating the anchor Blueprint prefab. */
+	void SetLootPreviewDataAssetForEditor(TSoftObjectPtr<UTunaSweeperLootAnchorPreviewDataAsset> InDataAsset);
+#endif
+
 private:
 	void RefreshEditorPreview();
 
@@ -56,6 +66,14 @@ private:
 	ETunaSweeperRaidPlacementAnchorKind AnchorKind = ETunaSweeperRaidPlacementAnchorKind::Enemy;
 
 #if WITH_EDITORONLY_DATA
+	/** Set on BP_RaidPlacementAnchor, never consulted by runtime spawning. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Raid Placement|Loot Preview", meta = (AllowPrivateAccess = "true"))
+	TSoftObjectPtr<UTunaSweeperLootAnchorPreviewDataAsset> LootPreviewDataAsset;
+
+	/** Combo selection for the editor-only loot representative; data stays in the DA, not spawn JSON. */
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "Raid Placement|Loot Preview", meta = (AllowPrivateAccess = "true", GetOptions = "GetLootPreviewOptions", EditCondition = "AnchorKind == ETunaSweeperRaidPlacementAnchorKind::LootContainer", EditConditionHides))
+	FName LootPreviewId = NAME_None;
+
 	/** Editor-only visualization components: never used for runtime gameplay or serialized data resolution. */
 	UPROPERTY(Transient)
 	TObjectPtr<UArrowComponent> EditorPreviewArrow;
@@ -63,7 +81,7 @@ private:
 	UPROPERTY(Transient)
 	TObjectPtr<UBillboardComponent> EditorPreviewBillboard;
 
-	/** Neutral 100 x 70 x 60 cm editor-only crate volume for loot anchors. */
+	/** Mesh and transform are supplied by the BP-referenced loot preview data asset. */
 	UPROPERTY(Transient)
 	TObjectPtr<UStaticMeshComponent> EditorLootBoxPreview;
 

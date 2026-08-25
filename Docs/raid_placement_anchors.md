@@ -6,7 +6,7 @@
 
 Place the native actor from the Class Viewer in a raid level, set a stable positive id, and choose the kind. `PlacementId` is unique across **both** anchor kinds in a level; its stable data key is `(LevelId, PlacementId)`. Never recycle an id for another location/type once external data has shipped.
 
-The representative arrow/actor sprite and `ENEMY #id` label are editor-only enemy visualization. Loot anchors instead show a neutral `LOOT BOX #id` cube with the fixed **100 × 70 × 60 cm** editor-only volume. These components have no collision, gameplay authority, or data-driven refresh path, so a change to JSON cannot dirty a `.umap`. The fixed preview avoids terrain overlap caused by trying to visualize every final chest size; final appearance is owned by the external loot data.
+The representative arrow/actor sprite and `ENEMY #id` label are editor-only enemy visualization. Loot anchors use the BP-referenced `/Game/Raid/Placement/DA_LootAnchorPreviews` catalog. The initial `Small`, `Medium`, and `Large` choices each use a distinct representative mesh; select one from the placed `BP_RaidPlacementAnchor` instance's `Loot Preview` combo. The DA's array can be extended without changing C++ or GameInstance configuration. These preview components have no collision, gameplay authority, or runtime spawn role, so actual chest class, appearance, contents, conditions, and probability remain external runtime data.
 
 No anchors have been placed by this implementation. Designers must add the anchors to the intended raid maps.
 

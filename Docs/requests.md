@@ -7091,3 +7091,13 @@
 
 - 사용자 시각 검토에서 아지트 벽지 타일링이 요구사항을 충족하지 못한 것으로 판정되어, 이번 `M_AgitWall` 머터리얼 생성·수정은 실패로 종결했다.
 - 생성했던 `M_AgitWall.uasset`을 제거해 머터리얼 변경을 되돌렸고, 기존 `T_AgitWall` 텍스처는 유지했다.
+
+## 2026-08-25 15:23:00 (소요시간: 00:21:38)
+
+- 루팅 상자 앵커 프리뷰 카탈로그 `DA_LootAnchorPreviews`와 이를 기본값으로 참조하는 `BP_RaidPlacementAnchor`를 추가했다. 레벨에 배치한 BP 인스턴스는 `Loot Preview` 콤보에서 `Small`·`Medium`·`Large` 중 하나를 선택하며, 카탈로그 배열에 항목을 추가하면 코드·GameInstance 변경 없이 선택지가 확장된다.
+- 서로 다른 대표 상자 메시 3개를 `/Game/Raid/Placement`에 독립 애셋으로 만들었다. 프리뷰 선택은 에디터 전용이며 실제 루팅 상자 클래스·외형·내용물은 레이드 시작 시 외부 스폰 데이터가 결정한다.
+- UE 5.7 `TunaSweeperEditor` 비Unity 빌드를 성공했고, `TunaSweeper.RaidPlacement.DeterministicRoll` 및 `LootPreviewCatalog` 자동화 테스트 2개를 모두 통과했다. 에디터 애셋 생성 및 테스트 뒤 맵 파일에 Git 변경이 없음을 확인했다.
+
+## 2026-08-25 16:25:00 (소요시간: 00:04:27)
+
+- 루팅 상자 프리뷰 카탈로그 확장 변경을 단일 Git 커밋으로 정리해 `main` 브랜치에 병합했다. 자동 테스트가 남긴 무관한 에셋 변경은 계속 제외했다.

@@ -11,6 +11,11 @@
 
 DEFINE_LOG_CATEGORY(LogTunaSweeperEditor);
 
+namespace TunaSweeperRaidPlacementAnchorAssets
+{
+	bool CreateAssets();
+}
+
 class FTunaSweeperEditorModule final : public IModuleInterface
 {
 public:
@@ -18,6 +23,14 @@ public:
 	{
 		if (IsRunningCommandlet())
 		{
+			return;
+		}
+
+		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperRaidPlacementAnchorAssets")))
+		{
+			RaidPlacementAnchorAssetsInitializedHandle = FEditorDelegates::OnEditorInitialized.AddRaw(
+				this,
+				&FTunaSweeperEditorModule::OnEditorInitializedForRaidPlacementAnchorAssets);
 			return;
 		}
 
@@ -194,6 +207,18 @@ public:
 			QuadrupedSetupTickerHandle.Reset();
 		}
 
+		if (RaidPlacementAnchorAssetsInitializedHandle.IsValid())
+		{
+			FEditorDelegates::OnEditorInitialized.Remove(RaidPlacementAnchorAssetsInitializedHandle);
+			RaidPlacementAnchorAssetsInitializedHandle.Reset();
+		}
+
+		if (RaidPlacementAnchorAssetsTickerHandle.IsValid())
+		{
+			FTSTicker::GetCoreTicker().RemoveTicker(RaidPlacementAnchorAssetsTickerHandle);
+			RaidPlacementAnchorAssetsTickerHandle.Reset();
+		}
+
 		if (bStandardEditorSetupStarted)
 		{
 			TunaSweeperMapCaptureActorDetails::Unregister();
@@ -341,6 +366,28 @@ private:
 		return false;
 	}
 
+	void OnEditorInitializedForRaidPlacementAnchorAssets(double)
+	{
+		FEditorDelegates::OnEditorInitialized.Remove(RaidPlacementAnchorAssetsInitializedHandle);
+		RaidPlacementAnchorAssetsInitializedHandle.Reset();
+		RaidPlacementAnchorAssetsTickerHandle = FTSTicker::GetCoreTicker().AddTicker(
+			FTickerDelegate::CreateRaw(this, &FTunaSweeperEditorModule::RunRaidPlacementAnchorAssetsAfterInitialization));
+	}
+
+	bool RunRaidPlacementAnchorAssetsAfterInitialization(float)
+	{
+		RaidPlacementAnchorAssetsTickerHandle.Reset();
+		const bool bSucceeded = TunaSweeperRaidPlacementAnchorAssets::CreateAssets();
+		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperRaidPlacementAnchorAssetsQuit")))
+		{
+			FPlatformMisc::RequestExitWithStatus(
+				false,
+				bSucceeded ? 0 : 1,
+				TEXT("TunaSweeperRaidPlacementAnchorAssets"));
+		}
+		return false;
+	}
+
 	bool bStandardEditorSetupStarted = false;
 	FDelegateHandle LunaSkirtSetupInitializedHandle;
 	FTSTicker::FDelegateHandle LunaSkirtSetupTickerHandle;
@@ -352,6 +399,8 @@ private:
 	FTSTicker::FDelegateHandle JumpInputSetupTickerHandle;
 	FDelegateHandle QuadrupedSetupInitializedHandle;
 	FTSTicker::FDelegateHandle QuadrupedSetupTickerHandle;
+	FDelegateHandle RaidPlacementAnchorAssetsInitializedHandle;
+	FTSTicker::FDelegateHandle RaidPlacementAnchorAssetsTickerHandle;
 	TUniquePtr<FTunaSweeperBuildTargetTool> BuildTargetTool;
 	TUniquePtr<FTunaSweeperLevelOpenTool> LevelOpenTool;
 	TUniquePtr<FTunaSweeperEnemyAIDebugTool> EnemyAIDebugTool;

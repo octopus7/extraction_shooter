@@ -1,5 +1,7 @@
 #include "Raid/TunaSweeperRaidPlacementAnchor.h"
 
+#include "Raid/TunaSweeperLootAnchorPreviewDataAsset.h"
+
 #include "Components/SceneComponent.h"
 
 #if WITH_EDITORONLY_DATA
@@ -44,13 +46,6 @@ ATunaSweeperRaidPlacementAnchor::ATunaSweeperRaidPlacementAnchor()
 	EditorLootBoxPreview->SetIsVisualizationComponent(true);
 	EditorLootBoxPreview->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	EditorLootBoxPreview->SetCastShadow(false);
-	EditorLootBoxPreview->SetRelativeLocation(FVector(0.0f, 0.0f, 30.0f));
-	EditorLootBoxPreview->SetRelativeScale3D(FVector(1.0f, 0.7f, 0.6f));
-	static ConstructorHelpers::FObjectFinderOptional<UStaticMesh> CubeMesh(TEXT("/Engine/BasicShapes/Cube.Cube"));
-	if (CubeMesh.Succeeded())
-	{
-		EditorLootBoxPreview->SetStaticMesh(CubeMesh.Get());
-	}
 
 	EditorPreviewLabel = CreateEditorOnlyDefaultSubobject<UTextRenderComponent>(TEXT("EditorPreviewLabel"));
 	EditorPreviewLabel->SetupAttachment(SceneRoot);
@@ -84,12 +79,54 @@ void ATunaSweeperRaidPlacementAnchor::RefreshEditorPreview()
 	if (EditorLootBoxPreview)
 	{
 		EditorLootBoxPreview->SetVisibility(!bIsEnemy);
+		if (!bIsEnemy)
+		{
+			const UTunaSweeperLootAnchorPreviewDataAsset* PreviewData = LootPreviewDataAsset.LoadSynchronous();
+			const FTunaSweeperLootAnchorPreviewDefinition* PreviewDefinition =
+				PreviewData ? PreviewData->FindPreview(LootPreviewId) : nullptr;
+			EditorLootBoxPreview->SetStaticMesh(PreviewDefinition ? PreviewDefinition->PreviewMesh.LoadSynchronous() : nullptr);
+			EditorLootBoxPreview->SetRelativeLocation(PreviewDefinition ? PreviewDefinition->RelativeLocation : FVector::ZeroVector);
+			EditorLootBoxPreview->SetRelativeScale3D(PreviewDefinition ? PreviewDefinition->RelativeScale : FVector::OneVector);
+		}
 	}
 	if (EditorPreviewLabel)
 	{
 		const TCHAR* KindName = bIsEnemy ? TEXT("ENEMY") : TEXT("LOOT BOX");
-		EditorPreviewLabel->SetText(FText::FromString(FString::Printf(TEXT("%s #%d"), KindName, PlacementId)));
+		const FString PreviewSuffix = !bIsEnemy && !LootPreviewId.IsNone()
+			? FString::Printf(TEXT(" [%s]"), *LootPreviewId.ToString())
+			: FString();
+		EditorPreviewLabel->SetText(FText::FromString(FString::Printf(TEXT("%s #%d%s"), KindName, PlacementId, *PreviewSuffix)));
 		EditorPreviewLabel->SetTextRenderColor(PreviewColor);
 	}
 #endif
 }
+
+#if WITH_EDITOR
+TArray<FString> ATunaSweeperRaidPlacementAnchor::GetLootPreviewOptions() const
+{
+	TArray<FString> Options;
+	const UTunaSweeperLootAnchorPreviewDataAsset* PreviewData = LootPreviewDataAsset.LoadSynchronous();
+	if (!PreviewData)
+	{
+		return Options;
+	}
+
+	for (const FTunaSweeperLootAnchorPreviewDefinition& Definition : PreviewData->PreviewDefinitions)
+	{
+		if (!Definition.PreviewId.IsNone())
+		{
+			Options.Add(Definition.PreviewId.ToString());
+		}
+	}
+	return Options;
+}
+
+void ATunaSweeperRaidPlacementAnchor::SetLootPreviewDataAssetForEditor(
+	TSoftObjectPtr<UTunaSweeperLootAnchorPreviewDataAsset> InDataAsset)
+{
+#if WITH_EDITORONLY_DATA
+	LootPreviewDataAsset = MoveTemp(InDataAsset);
+	RefreshEditorPreview();
+#endif
+}
+#endif
