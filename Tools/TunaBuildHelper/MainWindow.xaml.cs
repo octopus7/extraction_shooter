@@ -1,227 +1,163 @@
+using Microsoft.Win32;
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Threading;
 
 namespace TunaBuildHelper;
 
 public partial class MainWindow : Window
 {
-    private const double DragBandThickness = 8.0;
-    private static readonly TimeSpan CloseHoverDelay = TimeSpan.FromMilliseconds(650);
-    private static readonly TimeSpan CloseHideDelay = TimeSpan.FromSeconds(1);
-
-    private readonly DispatcherTimer closeHoverTimer;
-    private readonly DispatcherTimer closeHideTimer;
-    private readonly Brush normalBorderBrush;
-    private readonly Brush hoverBorderBrush;
-    private bool closeButtonHovered;
+    private const string StartupRegistryValueName = "TunaHelper";
+    private const string StartupRegistryKeyPath = @"Software\Microsoft\Windows\CurrentVersion\Run";
 
     public MainWindow()
     {
         InitializeComponent();
+        RunAtStartupMenuItem.IsChecked = IsRunAtStartupEnabled();
+    }
 
-        normalBorderBrush = (Brush)FindResource("BorderBrush");
-        hoverBorderBrush = (Brush)FindResource("BorderHoverBrush");
+    private void BuildAndRunButton_Click(object sender, RoutedEventArgs e)
+    {
+        RunBatchScript("BuildAndRunTunaSweeper.bat", closeOnSuccess: true);
+    }
 
-        closeHoverTimer = new DispatcherTimer
+    private void KillEditorButton_Click(object sender, RoutedEventArgs e)
+    {
+        RunBatchScript("KillTunaSweeperEditor.bat", closeAlways: true);
+    }
+
+    private void OpenUnrealProjectButton_Click(object sender, RoutedEventArgs e)
+    {
+        string? projectFilePath = FindUnrealProjectFile();
+        if (projectFilePath is null)
         {
-            Interval = CloseHoverDelay
-        };
-        closeHoverTimer.Tick += CloseHoverTimer_Tick;
-
-        closeHideTimer = new DispatcherTimer
-        {
-            Interval = CloseHideDelay
-        };
-        closeHideTimer.Tick += CloseHideTimer_Tick;
-    }
-
-    private void Window_Loaded(object sender, RoutedEventArgs e)
-    {
-        var area = SystemParameters.WorkArea;
-        Left = area.Right - ActualWidth - 18;
-        Top = area.Top + 86;
-    }
-
-    private void KillButton_Click(object sender, RoutedEventArgs e)
-    {
-        RunBatch("KillTunaSweeperEditor.bat", closeAlways: true);
-    }
-
-    private void BuildButton_Click(object sender, RoutedEventArgs e)
-    {
-        RunBatch("BuildAndRunTunaSweeper.bat", closeOnSuccess: true);
-    }
-
-    private void CloseButton_Click(object sender, RoutedEventArgs e)
-    {
-        Close();
-    }
-
-    private void ChromeBorder_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-    {
-        if (e.ButtonState != MouseButtonState.Pressed || !IsMouseOnDragBand())
-        {
+            ShowProjectNotFoundMessage();
             return;
         }
 
-        try
-        {
-            DragMove();
-        }
-        catch (InvalidOperationException)
-        {
-            // DragMove can throw if the mouse state changes between the hit test and call.
-        }
+        OpenPath(projectFilePath, "Unreal 프로젝트를 여는 중입니다.");
     }
 
-    private void Window_MouseMove(object sender, MouseEventArgs e)
+    private void OpenProjectFolderButton_Click(object sender, RoutedEventArgs e)
     {
-        if (IsMouseOnDragBand() || closeButtonHovered)
+        string? projectFilePath = FindUnrealProjectFile();
+        if (projectFilePath is null)
         {
-            closeHideTimer.Stop();
-            ChromeBorder.BorderBrush = hoverBorderBrush;
-            if (!closeHoverTimer.IsEnabled && CloseButton.Visibility != Visibility.Visible)
-            {
-                closeHoverTimer.Start();
-            }
-
+            ShowProjectNotFoundMessage();
             return;
         }
 
-        ScheduleHideCloseButton();
+        OpenPath(Path.GetDirectoryName(projectFilePath)!, "Unreal 프로젝트 폴더를 여는 중입니다.");
     }
 
-    private void Window_MouseLeave(object sender, MouseEventArgs e)
+    private void OpenDownloadsFolderButton_Click(object sender, RoutedEventArgs e)
     {
-        if (!closeButtonHovered)
-        {
-            ScheduleHideCloseButton();
-        }
-    }
+        string downloadsPath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+            "Downloads");
 
-    private void CloseButton_MouseEnter(object sender, MouseEventArgs e)
-    {
-        closeButtonHovered = true;
-        closeHoverTimer.Stop();
-        closeHideTimer.Stop();
-        CloseButton.Visibility = Visibility.Visible;
-        ChromeBorder.BorderBrush = hoverBorderBrush;
-    }
-
-    private void CloseButton_MouseLeave(object sender, MouseEventArgs e)
-    {
-        closeButtonHovered = false;
-        if (!IsMouseOnDragBand())
-        {
-            ScheduleHideCloseButton();
-        }
-    }
-
-    private void CloseHoverTimer_Tick(object? sender, EventArgs e)
-    {
-        closeHoverTimer.Stop();
-        if (IsMouseOnDragBand() || closeButtonHovered)
-        {
-            closeHideTimer.Stop();
-            CloseButton.Visibility = Visibility.Visible;
-        }
-    }
-
-    private void CloseHideTimer_Tick(object? sender, EventArgs e)
-    {
-        closeHideTimer.Stop();
-        if (IsMouseOnDragBand() || closeButtonHovered)
-        {
-            ChromeBorder.BorderBrush = hoverBorderBrush;
-            return;
-        }
-
-        HideCloseButton();
-    }
-
-    private void ScheduleHideCloseButton()
-    {
-        closeHoverTimer.Stop();
-        if (!closeHideTimer.IsEnabled)
-        {
-            closeHideTimer.Start();
-        }
-    }
-
-    private void HideCloseButton()
-    {
-        closeHoverTimer.Stop();
-        closeHideTimer.Stop();
-        CloseButton.Visibility = Visibility.Collapsed;
-        ChromeBorder.BorderBrush = normalBorderBrush;
-    }
-
-    private bool IsMouseOnDragBand()
-    {
-        Point position = Mouse.GetPosition(ChromeBorder);
-        double width = ChromeBorder.ActualWidth;
-        double height = ChromeBorder.ActualHeight;
-
-        if (position.X < 0 || position.Y < 0 || position.X > width || position.Y > height)
-        {
-            return false;
-        }
-
-        return position.X <= DragBandThickness ||
-               position.Y <= DragBandThickness ||
-               position.X >= width - DragBandThickness ||
-               position.Y >= height - DragBandThickness;
-    }
-
-    private static void RunBatch(string scriptName, bool closeOnSuccess = false, bool closeAlways = false)
-    {
-        string? scriptPath = FindScript(scriptName);
-        if (scriptPath is null)
+        if (!Directory.Exists(downloadsPath))
         {
             MessageBox.Show(
-                $"Cannot find {scriptName}.",
-                "Tuna Build Helper",
+                "다운로드 폴더를 찾을 수 없습니다.",
+                Title,
                 MessageBoxButton.OK,
                 MessageBoxImage.Error);
             return;
         }
 
-        var startInfo = new ProcessStartInfo
-        {
-            FileName = "cmd.exe",
-            Arguments = GetCmdArguments(scriptPath, closeOnSuccess, closeAlways),
-            WorkingDirectory = Path.GetDirectoryName(scriptPath) ?? AppContext.BaseDirectory,
-            UseShellExecute = true
-        };
-
-        Process.Start(startInfo);
+        OpenPath(downloadsPath, "다운로드 폴더를 여는 중입니다.");
     }
 
-    private static string GetCmdArguments(string scriptPath, bool closeOnSuccess, bool closeAlways)
+    private void RunAtStartupMenuItem_Click(object sender, RoutedEventArgs e)
     {
-        if (closeAlways)
+        try
         {
-            return $"/c \"call \"\"{scriptPath}\"\"\"";
+            SetRunAtStartup(RunAtStartupMenuItem.IsChecked);
+            StatusTextBlock.Text = RunAtStartupMenuItem.IsChecked
+                ? "Windows 시작 시 자동 실행을 등록했습니다."
+                : "Windows 시작 시 자동 실행을 해제했습니다.";
         }
-
-        if (closeOnSuccess)
+        catch (Exception exception)
         {
-            return $"/c \"call \"\"{scriptPath}\"\" & if errorlevel 1 pause\"";
+            RunAtStartupMenuItem.IsChecked = IsRunAtStartupEnabled();
+            MessageBox.Show(
+                $"자동 실행 설정을 변경하지 못했습니다.\n\n{exception.Message}",
+                Title,
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
         }
-
-        return $"/k \"\"{scriptPath}\"\"";
     }
 
-    private static string? FindScript(string scriptName)
+    private void OpenPath(string path, string statusMessage)
+    {
+        try
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = path,
+                UseShellExecute = true
+            });
+            StatusTextBlock.Text = statusMessage;
+        }
+        catch (Exception exception)
+        {
+            MessageBox.Show(
+                $"경로를 열지 못했습니다.\n\n{exception.Message}",
+                Title,
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+        }
+    }
+
+    private void RunBatchScript(string scriptName, bool closeOnSuccess = false, bool closeAlways = false)
+    {
+        string? scriptPath = FindBatchScript(scriptName);
+        if (scriptPath is null)
+        {
+            MessageBox.Show(
+                $"{scriptName}을(를) 찾을 수 없습니다.",
+                Title,
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+            return;
+        }
+
+        string arguments = closeAlways
+            ? $"/c \"call \"\"{scriptPath}\"\"\""
+            : closeOnSuccess
+                ? $"/c \"call \"\"{scriptPath}\"\" & if errorlevel 1 pause\""
+                : $"/k \"\"{scriptPath}\"\"";
+
+        try
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = "cmd.exe",
+                Arguments = arguments,
+                WorkingDirectory = Path.GetDirectoryName(scriptPath) ?? AppContext.BaseDirectory,
+                UseShellExecute = true
+            });
+            StatusTextBlock.Text = closeAlways
+                ? "Unreal Editor 종료를 요청했습니다."
+                : "프로젝트 빌드 및 실행을 시작했습니다.";
+        }
+        catch (Exception exception)
+        {
+            MessageBox.Show(
+                $"작업을 시작하지 못했습니다.\n\n{exception.Message}",
+                Title,
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+        }
+    }
+
+    private static string? FindUnrealProjectFile()
     {
         DirectoryInfo? directory = new(AppContext.BaseDirectory);
         while (directory is not null)
         {
-            string candidate = Path.Combine(directory.FullName, scriptName);
+            string candidate = Path.Combine(directory.FullName, "TunaSweeper", "TunaSweeper.uproject");
             if (File.Exists(candidate))
             {
                 return candidate;
@@ -231,5 +167,56 @@ public partial class MainWindow : Window
         }
 
         return null;
+    }
+
+    private static string? FindBatchScript(string scriptName)
+    {
+        string? projectFilePath = FindUnrealProjectFile();
+        if (projectFilePath is null)
+        {
+            return null;
+        }
+
+        string scriptPath = Path.Combine(
+            Path.GetDirectoryName(projectFilePath)!,
+            "BatchScripts",
+            scriptName);
+        return File.Exists(scriptPath) ? scriptPath : null;
+    }
+
+    private static bool IsRunAtStartupEnabled()
+    {
+        using RegistryKey? key = Registry.CurrentUser.OpenSubKey(StartupRegistryKeyPath, writable: false);
+        return key?.GetValue(StartupRegistryValueName) is string value &&
+               !string.IsNullOrWhiteSpace(value);
+    }
+
+    private static void SetRunAtStartup(bool enabled)
+    {
+        using RegistryKey? key = Registry.CurrentUser.OpenSubKey(StartupRegistryKeyPath, writable: true);
+        if (key is null)
+        {
+            throw new InvalidOperationException("Windows 자동 실행 레지스트리 키에 접근할 수 없습니다.");
+        }
+
+        if (enabled)
+        {
+            string executablePath = Environment.ProcessPath ?? Process.GetCurrentProcess().MainModule?.FileName
+                ?? throw new InvalidOperationException("실행 파일 경로를 확인할 수 없습니다.");
+            key.SetValue(StartupRegistryValueName, $"\"{executablePath}\"");
+        }
+        else
+        {
+            key.DeleteValue(StartupRegistryValueName, throwOnMissingValue: false);
+        }
+    }
+
+    private void ShowProjectNotFoundMessage()
+    {
+        MessageBox.Show(
+            "TunaSweeper.uproject를 찾을 수 없습니다.\n앱을 프로젝트 저장소 내부에서 실행해 주세요.",
+            Title,
+            MessageBoxButton.OK,
+            MessageBoxImage.Error);
     }
 }

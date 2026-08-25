@@ -5589,3 +5589,23 @@ JSON 스폰 데이터를 제거했는데도 레이드에서 토마토가 나타�
 ### 답변
 
 C++에 하드코딩된 자동 스폰은 아니다. `/Game/Maps/DemoRaidMap`과 `/Game/MainRaid/RaidMap`의 Persistent Level에 각각 `BP_BreakableTomato_C_0`부터 `_8`까지 아홉 개의 `BP_BreakableTomato` 인스턴스가 직접 배치되어 있다. 런타임 코드에는 토마토 `SpawnActor` 호출이 없으므로 JSON 스폰 행을 제거해도 레벨에 저장된 이 인스턴스들은 그대로 생성된다. 토마토를 없애려면 사용하는 레이드 맵에서 해당 직접 배치 액터들을 삭제해야 한다.
+
+## 2026-08-25 11:52:00 (소요시간: 00:03:00)
+
+### 질문
+
+빌드 헬퍼가 기존에 있었는지와 실행 요청.
+
+### 답변
+
+기존 `Tools/TunaBuildHelper` .NET 10 WPF 프로젝트가 있었으며, 최신 Debug 빌드를 경고와 오류 없이 완료한 뒤 `TunaBuildHelper.exe`를 실행했다.
+
+## 2026-08-25 11:56:00 (소요시간: 00:01:00)
+
+### 질문
+
+기존 빌드 헬퍼 기능이 새 숏컷 도구 변경으로 제거됐는지 확인 요청.
+
+### 답변
+
+맞다. 기존 플로팅 빌드 헬퍼의 `Kill TunaSweeper editor`와 `Build and run TunaSweeper` 버튼 및 각각의 배치 파일 실행 경로가 새 숏컷 화면으로 교체되면서 제거됐다. 현재 변경에는 Unreal 프로젝트 열기·프로젝트 폴더 열기·다운로드 폴더 열기와 Windows 시작 시 실행 설정만 남아 있다.

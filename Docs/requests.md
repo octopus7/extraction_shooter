@@ -6979,3 +6979,21 @@
 ## 2026-08-25 11:46:12 (소요시간: 00:00:25)
 
 - 레이드 토마토 직접 배치 원인에 관한 질문 기록과 현재 `BunkerMap` 레벨 변경을 하나의 Git 커밋으로 정리했다.
+
+## 2026-08-25 11:47:00 (소요시간: 00:06:00)
+
+- 기존 .NET 10 WPF `TunaBuildHelper`를 작업용 `Tuna Helper` 화면으로 개편하고, 직사각형 버튼으로 Unreal 프로젝트 열기·프로젝트 폴더 열기·다운로드 폴더 열기 숏컷을 추가했다.
+- 실행 위치에서 상위 폴더를 탐색해 `TunaSweeper/TunaSweeper.uproject`를 찾도록 해, 소스 빌드 출력 위치에서도 프로젝트 열기 기능이 작동하도록 했다.
+- 설정 메뉴에 `Windows 시작 시 실행` 토글을 추가하고, 현재 사용자 Run 레지스트리 항목을 등록·해제하며 현재 설정을 메뉴에 표시하도록 했다.
+- `dotnet build Tools/TunaBuildHelper/TunaBuildHelper.csproj --no-restore`를 경고와 오류 없이 통과했다.
+
+## 2026-08-25 11:52:00 (소요시간: 00:03:00)
+
+- 최신 `TunaBuildHelper` Debug 빌드를 경고와 오류 없이 완료하고 `bin/Debug/net10.0-windows/TunaBuildHelper.exe`를 실행했다.
+
+## 2026-08-25 11:57:00 (소요시간: 00:03:00)
+
+- 새 숏컷 UI 교체로 제거된 기존 `BuildAndRunTunaSweeper.bat` 실행과 `KillTunaSweeperEditor.bat` 실행 기능을 각각 `프로젝트 빌드 및 실행`, `Unreal Editor 종료` 직사각형 버튼으로 복원했다.
+- 배치 파일을 실제 프로젝트 경로인 `TunaSweeper/BatchScripts`에서 찾도록 변경해 Debug 출력 위치에서도 두 기능이 올바른 스크립트를 실행하도록 했다.
+- 버튼 내부 콘텐츠에 세로 여백을 중첩 적용하던 템플릿을 수정하고, 각 버튼의 최소 높이를 46px로 고정하며 `UniformGrid`를 `StackPanel`로 바꿔 상단 버튼 글자가 잘리던 레이아웃 문제를 해결했다.
+- 최신 Debug 빌드를 경고와 오류 없이 통과하고, 수정된 `Tuna Helper` 창의 정상 기동과 응답 상태를 확인했다.
