@@ -5,6 +5,7 @@ void UTunaSweeperIntroMenuWidget::EnsureDifficultySelectionPanel()
 {
 	// Prefer the authored Demo notice, but keep the generated panel as a resilient fallback
 	// when an older or locally edited WBP_IntroMenu does not contain it.
+		ApplyDemoNoticeVisualStyle();
 	if (TunaSweeperBuildFlavor::IsDemo() && !bDifficultyAdjustmentMode && DemoNoticePanel)
 	{
 		return;
@@ -649,6 +650,135 @@ void UTunaSweeperIntroMenuWidget::ApplyDifficultyButtonStyle(UButton* Button) co
 	Button->SetStyle(ButtonStyle);
 	Button->SetClickMethod(EButtonClickMethod::DownAndUp);
 }
+void UTunaSweeperIntroMenuWidget::ApplyDemoNoticeVisualStyle()
+{
+	if (!WidgetTree || !DemoNoticePanel)
+	{
+		return;
+	}
+
+	// Keep the watercolor background recognizable, but push it behind the notice content.
+	if (UImage* BackgroundImage = Cast<UImage>(WidgetTree->FindWidget(TEXT("DemoNoticeBackgroundImage"))))
+	{
+		BackgroundImage->SetColorAndOpacity(FLinearColor(0.90f, 0.94f, 0.93f, 1.0f));
+	}
+	if (UImage* ReadabilityWash = Cast<UImage>(WidgetTree->FindWidget(TEXT("DemoNoticeReadabilityWash"))))
+	{
+		FSlateBrush WashBrush = ReadabilityWash->GetBrush();
+		WashBrush.DrawAs = ESlateBrushDrawType::Box;
+		WashBrush.SetResourceObject(nullptr);
+		WashBrush.TintColor = FSlateColor(FLinearColor(0.055f, 0.17f, 0.19f, 0.10f));
+		ReadabilityWash->SetBrush(WashBrush);
+		ReadabilityWash->SetColorAndOpacity(FLinearColor::White);
+		ReadabilityWash->SetVisibility(ESlateVisibility::HitTestInvisible);
+	}
+
+	// The illustration is a JPG with a white paper background. A restrained cream-teal tint
+	// blends that rectangle into the dimmed watercolor instead of making it look pasted on.
+	if (DemoNoticeArtworkImage)
+	{
+		DemoNoticeArtworkImage->SetColorAndOpacity(FLinearColor(0.90f, 0.93f, 0.89f, 1.0f));
+		DemoNoticeArtworkImage->SetRenderOpacity(0.96f);
+	}
+
+	const FLinearColor HeadingColor(0.10f, 0.25f, 0.28f, 1.0f);
+	const FLinearColor BodyColor(0.18f, 0.34f, 0.36f, 1.0f);
+	if (DemoNoticeTitleText)
+	{
+		DemoNoticeTitleText->SetColorAndOpacity(FSlateColor(HeadingColor));
+	}
+	if (DemoNoticeMessageText)
+	{
+		DemoNoticeMessageText->SetColorAndOpacity(FSlateColor(BodyColor));
+	}
+
+	auto MakeRoundedBrush = [](
+		const FLinearColor& FillColor,
+		const FLinearColor& OutlineColor,
+		float OutlineWidth)
+	{
+		FSlateBrush Brush;
+		Brush.DrawAs = ESlateBrushDrawType::RoundedBox;
+		Brush.TintColor = FSlateColor(FillColor);
+		Brush.OutlineSettings = FSlateBrushOutlineSettings(
+			22.0f,
+			FSlateColor(OutlineColor),
+			OutlineWidth);
+		Brush.OutlineSettings.bUseBrushTransparency = false;
+		return Brush;
+	};
+
+	auto ApplyButtonPalette = [&MakeRoundedBrush](
+		UButton* Button,
+		bool bPrimary)
+	{
+		if (!Button)
+		{
+			return;
+		}
+
+		const FLinearColor OutlineColor = bPrimary
+			? FLinearColor(0.12f, 0.31f, 0.34f, 1.0f)
+			: FLinearColor(0.24f, 0.43f, 0.45f, 0.92f);
+		const FSlateBrush NormalBrush = MakeRoundedBrush(
+			bPrimary
+				? FLinearColor(0.28f, 0.50f, 0.53f, 0.98f)
+				: FLinearColor(0.91f, 0.94f, 0.90f, 0.96f),
+			OutlineColor,
+			2.0f);
+		const FSlateBrush HoveredBrush = MakeRoundedBrush(
+			bPrimary
+				? FLinearColor(0.34f, 0.58f, 0.60f, 1.0f)
+				: FLinearColor(0.84f, 0.91f, 0.87f, 1.0f),
+			OutlineColor,
+			3.0f);
+		const FSlateBrush PressedBrush = MakeRoundedBrush(
+			bPrimary
+				? FLinearColor(0.22f, 0.42f, 0.45f, 1.0f)
+				: FLinearColor(0.77f, 0.86f, 0.82f, 1.0f),
+			OutlineColor,
+			3.0f);
+		const FSlateBrush DisabledBrush = MakeRoundedBrush(
+			bPrimary
+				? FLinearColor(0.38f, 0.49f, 0.49f, 0.55f)
+				: FLinearColor(0.78f, 0.80f, 0.77f, 0.55f),
+			FLinearColor(0.31f, 0.39f, 0.40f, 0.45f),
+			2.0f);
+
+		FButtonStyle ButtonStyle;
+		ButtonStyle.SetNormal(NormalBrush);
+		ButtonStyle.SetHovered(HoveredBrush);
+		ButtonStyle.SetPressed(PressedBrush);
+		ButtonStyle.SetDisabled(DisabledBrush);
+		ButtonStyle.SetNormalPadding(FMargin(0.0f));
+		ButtonStyle.SetPressedPadding(FMargin(0.0f, 2.0f, 0.0f, 0.0f));
+		Button->SetStyle(ButtonStyle);
+		Button->SetClickMethod(EButtonClickMethod::DownAndUp);
+	};
+
+	// The old child images contain coral/cyan double outlines. The button styles now provide
+	// the full background and interaction states, so those decorative images stay hidden.
+	if (UImage* BackBackground = Cast<UImage>(WidgetTree->FindWidget(TEXT("DemoNoticeBackButtonBackground"))))
+	{
+		BackBackground->SetVisibility(ESlateVisibility::Collapsed);
+	}
+	if (UImage* ConfirmBackground = Cast<UImage>(WidgetTree->FindWidget(TEXT("DemoNoticeConfirmButtonBackground"))))
+	{
+		ConfirmBackground->SetVisibility(ESlateVisibility::Collapsed);
+	}
+
+	ApplyButtonPalette(DemoNoticeBackButton, false);
+	ApplyButtonPalette(DemoNoticeConfirmButton, true);
+	if (DemoNoticeBackButtonText)
+	{
+		DemoNoticeBackButtonText->SetColorAndOpacity(FSlateColor(HeadingColor));
+	}
+	if (DemoNoticeConfirmButtonText)
+	{
+		DemoNoticeConfirmButtonText->SetColorAndOpacity(FSlateColor(FLinearColor(0.97f, 0.98f, 0.93f, 1.0f)));
+	}
+}
+
 
 void UTunaSweeperIntroMenuWidget::ConfigureDifficultyCardBackground(UImage* BackgroundImage, bool bSelected)
 {

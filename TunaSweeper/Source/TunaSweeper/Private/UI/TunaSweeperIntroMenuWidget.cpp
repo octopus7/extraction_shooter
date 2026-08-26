@@ -5,6 +5,7 @@ void UTunaSweeperIntroMenuWidget::PrepareForInitialViewport()
 {
 	ResetTitleViewportLayoutState();
 	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
+	ApplyDemoNoticeVisualStyle();
 	ApplyTitleMenuButtonContentLayout();
 	EnsureDifficultySelectionPanel();
 	EnsureDeleteSaveSlotHoldProgressWidget();
@@ -18,6 +19,7 @@ void UTunaSweeperIntroMenuWidget::NativePreConstruct()
 {
 	Super::NativePreConstruct();
 	ResetTitleViewportLayoutState();
+	ApplyDemoNoticeVisualStyle();
 	HideLegacyDeleteHoldGaugeWidgets();
 }
 
@@ -27,6 +29,7 @@ void UTunaSweeperIntroMenuWidget::NativeConstruct()
 	ResetTitleViewportLayoutState();
 	SetIsFocusable(true);
 	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
+	ApplyDemoNoticeVisualStyle();
 	EnsureTitleWindParticleOverlay();
 	EnsureDeleteSaveSlotHoldProgressWidget();
 	EnsureSaveSlotSelectionRingWidgets();

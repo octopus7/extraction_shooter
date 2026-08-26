@@ -518,6 +518,7 @@ private:
 		UTextBlock* TitleText,
 		UTextBlock* DescriptionText);
 	void ApplyDifficultyButtonStyle(UButton* Button) const;
+	void ApplyDemoNoticeVisualStyle();
 	void ConfigureDifficultyCardBackground(UImage* BackgroundImage, bool bSelected);
 	void ConfigureDifficultyActionButtonBackground(UImage* BackgroundImage, bool bSelected);
 	void ConfigureDifficultySelectionBorder(UBorder* SelectionBorder, bool bSelected);
