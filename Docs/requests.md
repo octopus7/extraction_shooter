@@ -7142,3 +7142,15 @@
 - 슬라이딩 도어를 프로젝트의 기본 문으로 사용할 수 있도록 C++ 클래스와 파일명에서 `SciFi`를 제거해 `ATunaSweeperSlidingDoorActor`와 `TunaSweeperSlidingDoorActor.h/.cpp`로 정리했다.
 - `/Game/Environment/Bunker/Agit/Door/BP_SlidingDoor` Blueprint를 생성하고 부모를 `ATunaSweeperSlidingDoorActor`로 지정했다. 생성 클래스 기본값에서 좌·우 문짝과 고정 프레임 메시 3종이 모두 상속되는 것을 확인했으며, 임시 `BP_SciFiSlidingDoor`는 남기지 않았다.
 - 열린 Unreal Editor의 기존 DLL 잠금이 해제된 뒤 UE 5.7 `TunaSweeperEditor` Win64 Development 빌드를 성공했다.
+
+## 2026-08-26 14:40:00 (소요시간: 00:02:00)
+
+- `D:\github\ffmpeg` 경로의 존재를 확인하고, Tuna Helper에 해당 폴더를 탐색기로 여는 `FFmpeg 폴더 열기` 버튼을 추가했다.
+- 대상 폴더가 없을 때는 전체 경로를 포함한 오류 알림을 표시하도록 했다.
+- Release 구성을 경고와 오류 없이 빌드하고, 새 버튼이 포함된 Release `TunaBuildHelper.exe`의 정상 실행과 응답 상태를 확인했다.
+
+## 2026-08-26 16:45:30 (소요시간: 00:36:30)
+
+- 기존 `/Game/UI/WBP_IntroMenu`의 `DemoNoticePanel`과 적용 텍스처 참조를 유지하면서, 수채화 배경에 저채도 청록 감광을 추가해 장식 대비를 낮췄다. JPG 낚시 삽화는 크림·청록 틴트와 약한 투명도를 적용해 흰 사각 배경이 화면에서 덜 분리되어 보이도록 했다.
+- 데모 안내 전용 `돌아가기`와 `확인` 버튼에서 기존 산호색·청록색 이중 테두리 이미지를 숨기고, `돌아가기`는 밝은 저채도 외곽선형, `확인`은 청록 채움형으로 구분했다. Normal·Hovered·Pressed·Disabled 상태와 제목·본문·버튼 글자색을 같은 청록 팔레트로 통일했다.
+- UE 5.7 `TunaSweeperEditor` 빌드에서 변경 소스의 UHT와 C++ 컴파일을 통과했으나 실행 중인 Unreal Editor가 모듈 DLL을 점유해 최종 에디터 DLL 링크는 수행되지 않았다. 에디터를 강제 종료하지 않고 `TunaSweeperDemo Win64 Development` 타깃의 전체 컴파일·실행 파일 링크와 메타데이터 생성을 성공했다.

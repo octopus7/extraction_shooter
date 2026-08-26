@@ -12,6 +12,7 @@ public partial class MainWindow : Window
     private const string StartupRegistryValueName = "TunaHelper";
     private const string StartupRegistryKeyPath = @"Software\Microsoft\Windows\CurrentVersion\Run";
     private const string StartMenuShortcutFileName = "Tuna Helper.lnk";
+    private const string FfmpegFolderPath = @"D:\github\ffmpeg";
 
     public MainWindow()
     {
@@ -71,6 +72,21 @@ public partial class MainWindow : Window
         }
 
         OpenPath(downloadsPath, "다운로드 폴더를 여는 중입니다.");
+    }
+
+    private void OpenFfmpegFolderButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (!Directory.Exists(FfmpegFolderPath))
+        {
+            MessageBox.Show(
+                $"FFmpeg 폴더를 찾을 수 없습니다.\n\n{FfmpegFolderPath}",
+                Title,
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+            return;
+        }
+
+        OpenPath(FfmpegFolderPath, "FFmpeg 폴더를 여는 중입니다.");
     }
 
     private void RunAtStartupMenuItem_Click(object sender, RoutedEventArgs e)
