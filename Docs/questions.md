@@ -5717,3 +5717,23 @@ Content Browser의 `/Game/Environment/Architecture/WallCoping/BP_WallCopingSplin
 ### 답변
 
 맞다. 작업 경로는 `C:\Users\blendue\.codex\worktrees\1ddf\extraction_shooter`이며, 두겁석 C++ 구현·생성 원본·문서·Static Mesh·재질·Blueprint 에셋은 모두 이 워크트리에 있다.
+
+## 2026-08-26 13:42:05 (소요시간: 00:16:58)
+
+### 질문
+
+새 슬라이딩 도어가 양쪽으로 열리는 구조인지, 양개식 도어와 프레임에 총 3파츠가 필요한지, 합쳐진 도어 메시를 실제로 쪼갠다는 의미인지 확인 요청.
+
+### 답변
+
+슬라이딩 도어는 중앙에서 좌·우 문짝이 각각 바깥쪽으로 이동하는 양개식 구조다. 고정 프레임 1개와 움직이는 왼쪽·오른쪽 문짝 각 1개로 총 3파츠가 필요하다. 원본 Blender 파일은 보존하고, UE용 출력에서만 합쳐진 도어 지오메트리를 중앙 이음선 기준 `SM_SlidingDoor_Left`와 `SM_SlidingDoor_Right`로 분리해 UV·재질 슬롯과 바닥 피봇을 유지한다.
+
+## 2026-08-26 14:03:33 (소요시간: 00:00:06)
+
+### 질문
+
+슬라이딩 도어용 Blueprint가 이미 있는지 확인 요청.
+
+### 답변
+
+확인 시점에는 `ATunaSweeperSciFiSlidingDoorActor` C++ 클래스와 스태틱 메시만 있고 별도 Blueprint 애셋은 없었다. 이후 후속 요청에 따라 일반 기본 문 명칭의 `/Game/Environment/Bunker/Agit/Door/BP_SlidingDoor`를 생성했다.

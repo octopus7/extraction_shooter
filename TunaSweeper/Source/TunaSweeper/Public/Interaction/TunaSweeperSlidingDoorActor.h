@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "TunaSweeperSciFiSlidingDoorActor.generated.h"
+#include "TunaSweeperSlidingDoorActor.generated.h"
 
 class APawn;
 class UBoxComponent;
@@ -25,12 +25,12 @@ enum class ETunaSweeperSlidingDoorState : uint8
  * The actor faces local -Y; both panels slide outward along local X.
  */
 UCLASS(BlueprintType, Blueprintable)
-class TUNASWEEPER_API ATunaSweeperSciFiSlidingDoorActor : public AActor
+class TUNASWEEPER_API ATunaSweeperSlidingDoorActor : public AActor
 {
 	GENERATED_BODY()
 
 public:
-	ATunaSweeperSciFiSlidingDoorActor();
+	ATunaSweeperSlidingDoorActor();
 
 	virtual void OnConstruction(const FTransform& Transform) override;
 	virtual void BeginPlay() override;
@@ -88,6 +88,9 @@ protected:
 	TObjectPtr<UStaticMeshComponent> RightDoorMeshComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Sliding Door|Components")
+	TObjectPtr<UStaticMeshComponent> DoorFrameMeshComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Sliding Door|Components")
 	TObjectPtr<UBoxComponent> LeftPanelCollision;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Sliding Door|Components")
@@ -103,23 +106,26 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sliding Door|Meshes")
 	TObjectPtr<UStaticMesh> RightDoorMesh;
 
-	/** Fits replacement meshes to one half of the configured doorway and centers their source bounds. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sliding Door|Meshes")
+	TObjectPtr<UStaticMesh> DoorFrameMesh;
+
+	/** Fits replacement meshes to the configured doorway while keeping their geometry floor-aligned. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sliding Door|Meshes")
 	bool bAutoFitPanelMeshes = true;
 
 	/** Total clear width of the closed doorway, in centimeters. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sliding Door|Geometry", meta = (ClampMin = "10.0", UIMin = "10.0", Units = "cm"))
-	float DoorWidth = 240.0f;
+	float DoorWidth = 132.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sliding Door|Geometry", meta = (ClampMin = "10.0", UIMin = "10.0", Units = "cm"))
-	float DoorHeight = 220.0f;
+	float DoorHeight = 195.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sliding Door|Geometry", meta = (ClampMin = "1.0", UIMin = "1.0", Units = "cm"))
-	float DoorThickness = 12.0f;
+	float DoorThickness = 15.0f;
 
 	/** Distance each panel travels outward from its closed location. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sliding Door|Motion", meta = (ClampMin = "0.0", UIMin = "0.0", Units = "cm"))
-	float PanelTravelDistance = 140.0f;
+	float PanelTravelDistance = 72.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sliding Door|Motion", meta = (ClampMin = "0.01", UIMin = "0.01", Units = "s"))
 	float OpenDuration = 0.6f;
@@ -163,6 +169,7 @@ private:
 	void ApplyConfiguration();
 	void ApplyDoorPose();
 	void ApplyMeshDimensions(UStaticMeshComponent* MeshComponent, const FVector& TargetDimensions) const;
+	void ApplyFrameMeshScale(const FVector& TargetDoorDimensions) const;
 	bool IsEligiblePlayer(const AActor* Actor) const;
 	bool HasNearbyPlayers();
 	void HandleDelayedAutoClose();

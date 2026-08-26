@@ -1,4 +1,4 @@
-#include "Interaction/TunaSweeperSciFiSlidingDoorActor.h"
+#include "Interaction/TunaSweeperSlidingDoorActor.h"
 
 #include "Components/BoxComponent.h"
 #include "Components/SceneComponent.h"
@@ -8,13 +8,17 @@
 #include "TimerManager.h"
 #include "UObject/ConstructorHelpers.h"
 
-ATunaSweeperSciFiSlidingDoorActor::ATunaSweeperSciFiSlidingDoorActor()
+ATunaSweeperSlidingDoorActor::ATunaSweeperSlidingDoorActor()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = false;
 
 	SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("SceneRoot"));
 	RootComponent = SceneRoot;
+
+	DoorFrameMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("DoorFrameMesh"));
+	DoorFrameMeshComponent->SetupAttachment(SceneRoot);
+	DoorFrameMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	LeftPanelRoot = CreateDefaultSubobject<USceneComponent>(TEXT("LeftPanelRoot"));
 	LeftPanelRoot->SetupAttachment(SceneRoot);
@@ -47,21 +51,33 @@ ATunaSweeperSciFiSlidingDoorActor::ATunaSweeperSciFiSlidingDoorActor()
 	ProximityTrigger->SetHiddenInGame(true);
 	ProximityTrigger->SetVisibility(false);
 	ProximityTrigger->SetCanEverAffectNavigation(false);
-	ProximityTrigger->OnComponentBeginOverlap.AddDynamic(this, &ATunaSweeperSciFiSlidingDoorActor::HandleProximityBeginOverlap);
-	ProximityTrigger->OnComponentEndOverlap.AddDynamic(this, &ATunaSweeperSciFiSlidingDoorActor::HandleProximityEndOverlap);
+	ProximityTrigger->OnComponentBeginOverlap.AddDynamic(this, &ATunaSweeperSlidingDoorActor::HandleProximityBeginOverlap);
+	ProximityTrigger->OnComponentEndOverlap.AddDynamic(this, &ATunaSweeperSlidingDoorActor::HandleProximityEndOverlap);
 
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> PlaceholderMesh(TEXT("/Engine/BasicShapes/Cube.Cube"));
-	if (PlaceholderMesh.Succeeded())
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> LeftDoorMeshFinder(
+		TEXT("/Game/Environment/Bunker/Agit/Door/SM_SlidingDoor_Left.SM_SlidingDoor_Left"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> RightDoorMeshFinder(
+		TEXT("/Game/Environment/Bunker/Agit/Door/SM_SlidingDoor_Right.SM_SlidingDoor_Right"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> DoorFrameMeshFinder(
+		TEXT("/Game/Environment/Bunker/Agit/Door/SM_SlidingDoorFrame.SM_SlidingDoorFrame"));
+	if (LeftDoorMeshFinder.Succeeded())
 	{
-		LeftDoorMesh = PlaceholderMesh.Object;
-		RightDoorMesh = PlaceholderMesh.Object;
+		LeftDoorMesh = LeftDoorMeshFinder.Object;
+	}
+	if (RightDoorMeshFinder.Succeeded())
+	{
+		RightDoorMesh = RightDoorMeshFinder.Object;
+	}
+	if (DoorFrameMeshFinder.Succeeded())
+	{
+		DoorFrameMesh = DoorFrameMeshFinder.Object;
 	}
 
 	ApplyConfiguration();
 	ApplyDoorPose();
 }
 
-void ATunaSweeperSciFiSlidingDoorActor::OnConstruction(const FTransform& Transform)
+void ATunaSweeperSlidingDoorActor::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
@@ -73,7 +89,7 @@ void ATunaSweeperSciFiSlidingDoorActor::OnConstruction(const FTransform& Transfo
 	ApplyDoorPose();
 }
 
-void ATunaSweeperSciFiSlidingDoorActor::BeginPlay()
+void ATunaSweeperSlidingDoorActor::BeginPlay()
 {
 	Super::BeginPlay();
 
@@ -87,7 +103,7 @@ void ATunaSweeperSciFiSlidingDoorActor::BeginPlay()
 	AddInitiallyOverlappingPlayers();
 }
 
-void ATunaSweeperSciFiSlidingDoorActor::Tick(float DeltaSeconds)
+void ATunaSweeperSlidingDoorActor::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
@@ -117,31 +133,31 @@ void ATunaSweeperSciFiSlidingDoorActor::Tick(float DeltaSeconds)
 	ApplyDoorPose();
 }
 
-void ATunaSweeperSciFiSlidingDoorActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
+void ATunaSweeperSlidingDoorActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	GetWorldTimerManager().ClearTimer(AutoCloseTimerHandle);
 	NearbyPlayers.Reset();
 	Super::EndPlay(EndPlayReason);
 }
 
-void ATunaSweeperSciFiSlidingDoorActor::OpenDoor()
+void ATunaSweeperSlidingDoorActor::OpenDoor()
 {
 	SetDoorOpen(true, false);
 }
 
-void ATunaSweeperSciFiSlidingDoorActor::CloseDoor()
+void ATunaSweeperSlidingDoorActor::CloseDoor()
 {
 	SetDoorOpen(false, false);
 }
 
-void ATunaSweeperSciFiSlidingDoorActor::ToggleDoor()
+void ATunaSweeperSlidingDoorActor::ToggleDoor()
 {
 	const bool bIsOpenOrOpening = DoorState == ETunaSweeperSlidingDoorState::Open
 		|| DoorState == ETunaSweeperSlidingDoorState::Opening;
 	SetDoorOpen(!bIsOpenOrOpening, false);
 }
 
-void ATunaSweeperSciFiSlidingDoorActor::SetDoorOpen(bool bInOpen, bool bInstant)
+void ATunaSweeperSlidingDoorActor::SetDoorOpen(bool bInOpen, bool bInstant)
 {
 	if (bInOpen)
 	{
@@ -183,7 +199,7 @@ void ATunaSweeperSciFiSlidingDoorActor::SetDoorOpen(bool bInOpen, bool bInstant)
 	SetActorTickEnabled(true);
 }
 
-void ATunaSweeperSciFiSlidingDoorActor::HandleProximityBeginOverlap(
+void ATunaSweeperSlidingDoorActor::HandleProximityBeginOverlap(
 	UPrimitiveComponent* OverlappedComponent,
 	AActor* OtherActor,
 	UPrimitiveComponent* OtherComponent,
@@ -201,7 +217,7 @@ void ATunaSweeperSciFiSlidingDoorActor::HandleProximityBeginOverlap(
 	OpenDoor();
 }
 
-void ATunaSweeperSciFiSlidingDoorActor::HandleProximityEndOverlap(
+void ATunaSweeperSlidingDoorActor::HandleProximityEndOverlap(
 	UPrimitiveComponent* OverlappedComponent,
 	AActor* OtherActor,
 	UPrimitiveComponent* OtherComponent,
@@ -227,12 +243,12 @@ void ATunaSweeperSciFiSlidingDoorActor::HandleProximityEndOverlap(
 	GetWorldTimerManager().SetTimer(
 		AutoCloseTimerHandle,
 		this,
-		&ATunaSweeperSciFiSlidingDoorActor::HandleDelayedAutoClose,
+		&ATunaSweeperSlidingDoorActor::HandleDelayedAutoClose,
 		AutoCloseDelay,
 		false);
 }
 
-void ATunaSweeperSciFiSlidingDoorActor::ApplyConfiguration()
+void ATunaSweeperSlidingDoorActor::ApplyConfiguration()
 {
 	const float SafeWidth = FMath::Max(DoorWidth, 10.0f);
 	const float SafeHeight = FMath::Max(DoorHeight, 10.0f);
@@ -241,14 +257,18 @@ void ATunaSweeperSciFiSlidingDoorActor::ApplyConfiguration()
 
 	LeftDoorMeshComponent->SetStaticMesh(LeftDoorMesh);
 	RightDoorMeshComponent->SetStaticMesh(RightDoorMesh);
+	DoorFrameMeshComponent->SetStaticMesh(DoorFrameMesh);
 	LeftDoorMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	RightDoorMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	DoorFrameMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	ApplyMeshDimensions(LeftDoorMeshComponent, PanelDimensions);
 	ApplyMeshDimensions(RightDoorMeshComponent, PanelDimensions);
+	ApplyFrameMeshScale(FVector(SafeWidth, SafeThickness, SafeHeight));
 
 	for (UBoxComponent* PanelCollision : { LeftPanelCollision.Get(), RightPanelCollision.Get() })
 	{
 		PanelCollision->SetBoxExtent(PanelDimensions * 0.5f);
+		PanelCollision->SetRelativeLocation(FVector(0.0f, 0.0f, SafeHeight * 0.5f));
 		PanelCollision->SetCollisionObjectType(ECC_WorldStatic);
 		PanelCollision->SetCollisionResponseToAllChannels(ECR_Block);
 		PanelCollision->SetGenerateOverlapEvents(false);
@@ -269,23 +289,21 @@ void ATunaSweeperSciFiSlidingDoorActor::ApplyConfiguration()
 		bAutoOpenOnPlayerProximity ? ECollisionEnabled::QueryOnly : ECollisionEnabled::NoCollision);
 }
 
-void ATunaSweeperSciFiSlidingDoorActor::ApplyDoorPose()
+void ATunaSweeperSlidingDoorActor::ApplyDoorPose()
 {
 	const float SafeWidth = FMath::Max(DoorWidth, 10.0f);
-	const float SafeHeight = FMath::Max(DoorHeight, 10.0f);
 	const float ClampedAlpha = FMath::Clamp(OpenAlpha, 0.0f, 1.0f);
 	const float MotionAlpha = bUseSmoothStepMotion
 		? FMath::SmoothStep(0.0f, 1.0f, ClampedAlpha)
 		: ClampedAlpha;
 	const float PanelCenterOffset = SafeWidth * 0.25f
 		+ FMath::Max(0.0f, PanelTravelDistance) * MotionAlpha;
-	const float PanelCenterZ = SafeHeight * 0.5f;
 
-	LeftPanelRoot->SetRelativeLocation(FVector(-PanelCenterOffset, 0.0f, PanelCenterZ));
-	RightPanelRoot->SetRelativeLocation(FVector(PanelCenterOffset, 0.0f, PanelCenterZ));
+	LeftPanelRoot->SetRelativeLocation(FVector(-PanelCenterOffset, 0.0f, 0.0f));
+	RightPanelRoot->SetRelativeLocation(FVector(PanelCenterOffset, 0.0f, 0.0f));
 }
 
-void ATunaSweeperSciFiSlidingDoorActor::ApplyMeshDimensions(
+void ATunaSweeperSlidingDoorActor::ApplyMeshDimensions(
 	UStaticMeshComponent* MeshComponent,
 	const FVector& TargetDimensions) const
 {
@@ -308,16 +326,58 @@ void ATunaSweeperSciFiSlidingDoorActor::ApplyMeshDimensions(
 		TargetDimensions.Y / SourceSize.Y,
 		TargetDimensions.Z / SourceSize.Z);
 	MeshComponent->SetRelativeScale3D(MeshScale);
-	MeshComponent->SetRelativeLocation(-FVector(SourceBounds.Origin) * MeshScale);
+	MeshComponent->SetRelativeLocation(FVector(
+		-SourceBounds.Origin.X * MeshScale.X,
+		-SourceBounds.Origin.Y * MeshScale.Y,
+		-(SourceBounds.Origin.Z - SourceBounds.BoxExtent.Z) * MeshScale.Z));
 }
 
-bool ATunaSweeperSciFiSlidingDoorActor::IsEligiblePlayer(const AActor* Actor) const
+void ATunaSweeperSlidingDoorActor::ApplyFrameMeshScale(const FVector& TargetDoorDimensions) const
+{
+	if (!bAutoFitPanelMeshes || !DoorFrameMeshComponent || !DoorFrameMeshComponent->GetStaticMesh())
+	{
+		return;
+	}
+
+	const UStaticMesh* LeftMesh = LeftDoorMeshComponent ? LeftDoorMeshComponent->GetStaticMesh() : nullptr;
+	const UStaticMesh* RightMesh = RightDoorMeshComponent ? RightDoorMeshComponent->GetStaticMesh() : nullptr;
+	if (!LeftMesh || !RightMesh)
+	{
+		return;
+	}
+
+	const FVector LeftSize = FVector(LeftMesh->GetBounds().BoxExtent) * 2.0f;
+	const FVector RightSize = FVector(RightMesh->GetBounds().BoxExtent) * 2.0f;
+	const FVector SourceDoorDimensions(
+		LeftSize.X + RightSize.X,
+		FMath::Max(LeftSize.Y, RightSize.Y),
+		FMath::Max(LeftSize.Z, RightSize.Z));
+	if (SourceDoorDimensions.X <= KINDA_SMALL_NUMBER
+		|| SourceDoorDimensions.Y <= KINDA_SMALL_NUMBER
+		|| SourceDoorDimensions.Z <= KINDA_SMALL_NUMBER)
+	{
+		return;
+	}
+
+	const FVector FrameScale(
+		TargetDoorDimensions.X / SourceDoorDimensions.X,
+		TargetDoorDimensions.Y / SourceDoorDimensions.Y,
+		TargetDoorDimensions.Z / SourceDoorDimensions.Z);
+	const FBoxSphereBounds FrameBounds = DoorFrameMeshComponent->GetStaticMesh()->GetBounds();
+	DoorFrameMeshComponent->SetRelativeScale3D(FrameScale);
+	DoorFrameMeshComponent->SetRelativeLocation(FVector(
+		-FrameBounds.Origin.X * FrameScale.X,
+		-FrameBounds.Origin.Y * FrameScale.Y,
+		-(FrameBounds.Origin.Z - FrameBounds.BoxExtent.Z) * FrameScale.Z));
+}
+
+bool ATunaSweeperSlidingDoorActor::IsEligiblePlayer(const AActor* Actor) const
 {
 	const APawn* Pawn = Cast<APawn>(Actor);
 	return Pawn && Pawn->IsPlayerControlled();
 }
 
-bool ATunaSweeperSciFiSlidingDoorActor::HasNearbyPlayers()
+bool ATunaSweeperSlidingDoorActor::HasNearbyPlayers()
 {
 	for (auto PlayerIt = NearbyPlayers.CreateIterator(); PlayerIt; ++PlayerIt)
 	{
@@ -330,7 +390,7 @@ bool ATunaSweeperSciFiSlidingDoorActor::HasNearbyPlayers()
 	return !NearbyPlayers.IsEmpty();
 }
 
-void ATunaSweeperSciFiSlidingDoorActor::HandleDelayedAutoClose()
+void ATunaSweeperSlidingDoorActor::HandleDelayedAutoClose()
 {
 	if (bAutoOpenOnPlayerProximity && !HasNearbyPlayers())
 	{
@@ -338,7 +398,7 @@ void ATunaSweeperSciFiSlidingDoorActor::HandleDelayedAutoClose()
 	}
 }
 
-void ATunaSweeperSciFiSlidingDoorActor::AddInitiallyOverlappingPlayers()
+void ATunaSweeperSlidingDoorActor::AddInitiallyOverlappingPlayers()
 {
 	if (!bAutoOpenOnPlayerProximity || !ProximityTrigger)
 	{

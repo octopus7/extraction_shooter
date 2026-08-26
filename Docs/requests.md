@@ -7130,3 +7130,15 @@
 - 좌·우 스태틱 메시 2장으로 구성되고 플레이어가 근접하면 자동으로 열리는 `ATunaSweeperSciFiSlidingDoorActor` C++ 액터를 추가했다. 엔진 기본 Cube를 임시 메시로 지정했으며 Blueprint 자식에서 좌·우 메시를 독립적으로 교체하고 자동 크기 맞춤을 선택할 수 있다.
 - 문 폭·높이·두께, 패널 가동 거리, 열림/닫힘 시간, 자동 닫힘 대기 시간, 플레이어 감지 범위와 패널 충돌을 Blueprint에 노출했다. 좌우 패널은 로컬 X축으로 부드럽게 이동하며 근접 영역 내 플레이어가 남아 있는 동안 열린 상태를 유지한다.
 - UE 5.7 `TunaSweeperEditor` Win64 Development 빌드에서 UHT와 C++ 컴파일을 성공했다.
+
+## 2026-08-26 13:42:05 (소요시간: 00:16:58)
+
+- `Blender/SM_AgitDoor.blend`의 합쳐진 `SM_SlidingDoor`를 중앙 이음선 기준 좌·우 문짝으로 분리하고 원본 Blender 파일은 보존했다. 각 문짝과 `SM_SlidingDoorFrame`은 바닥 중앙 피봇, UE 로컬 X 폭·Y 두께·Z 높이, 센티미터 단위로 정리해 `/Game/Environment/Bunker/Agit/Door`에 스태틱 메시 3종으로 임포트했다.
+- `ATunaSweeperSciFiSlidingDoorActor`에 고정 프레임 컴포넌트와 Blueprint 교체 가능한 프레임 메시 속성을 추가하고, 좌·우 문짝과 프레임을 새 애셋으로 기본 지정했다. 기본 치수는 원본 비율에 맞춘 폭 132cm·높이 195cm·두께 15cm이며 각 문짝은 반대 방향으로 72cm 이동한다.
+- UE에서 좌·우 문짝 약 `65.82 x 15 x 195.26cm`, 프레임 약 `163.92 x 34.74 x 209.65cm`, 바닥 Z=0과 기존 `M_SM_SlidingDoorSimple` 재질 슬롯을 확인했다. UE 5.7 `TunaSweeperEditor` Win64 Development 빌드 및 C++ 기본 애셋 참조 검증을 성공했다.
+
+## 2026-08-26 14:03:33 (소요시간: 00:09:03)
+
+- 슬라이딩 도어를 프로젝트의 기본 문으로 사용할 수 있도록 C++ 클래스와 파일명에서 `SciFi`를 제거해 `ATunaSweeperSlidingDoorActor`와 `TunaSweeperSlidingDoorActor.h/.cpp`로 정리했다.
+- `/Game/Environment/Bunker/Agit/Door/BP_SlidingDoor` Blueprint를 생성하고 부모를 `ATunaSweeperSlidingDoorActor`로 지정했다. 생성 클래스 기본값에서 좌·우 문짝과 고정 프레임 메시 3종이 모두 상속되는 것을 확인했으며, 임시 `BP_SciFiSlidingDoor`는 남기지 않았다.
+- 열린 Unreal Editor의 기존 DLL 잠금이 해제된 뒤 UE 5.7 `TunaSweeperEditor` Win64 Development 빌드를 성공했다.
