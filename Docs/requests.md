@@ -7235,7 +7235,7 @@
 - 전용 `UTunaSweeperGameUserSettings`, 기존 설정 마이그레이션, 첫 실행 안전 기본값, 프로젝트 `DefaultScalability.ini`, 텍스처 풀 정책, 개별 품질 프리셋 매핑, 스크롤 가능한 별도 그래픽 위젯, 적용·취소·해상도 복구 흐름을 파일별로 계획했다.
 - 4GiB 경계 자동화 테스트, 비Shipping VRAM 테스트 인자, WBP 원샷 저장 검증, 다국어·해상도 UI 검증, 패키지 `stat streaming`·`stat RHI`·`memreport -full` 계측과 완료 기준을 정의했으며 이번 작업에서는 구현·빌드를 수행하지 않았다.
 
-## 2026-08-28 17:25:44 (소요시간: 00:46:39)
+## 2026-08-28 17:25:44 (소요시간: 00:55:04)
 
 - 전용 `UTunaSweeperGameUserSettings`를 구현해 실제 렌더 어댑터의 전용 VRAM이 `4GiB` 미만이거나 감지되지 않으면 자동 낮음, `4GiB` 이상이면 자동 최고를 적용하도록 했다. 중간·높음과 개별 혼합값은 사용자 선택으로 저장되며 기존 Scalability·DLSS 설정은 새 스키마로 마이그레이션한다.
 - 저사양 첫 로딩부터 텍스처 VRAM을 줄이도록 안전한 낮음 기본값과 `DefaultScalability.ini`의 400/600/800/1000MB 스트리밍 풀, Mip Bias, VRAM 제한을 추가하고 per-texture bias는 UE 5.7이 허용하는 GameSetting 적용 경로로 분리했다.
