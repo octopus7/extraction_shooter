@@ -1192,6 +1192,7 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadEnemySpawnData(bool bForceReload)
 	}
 
 	bool bHasValidRows = false;
+	bool bHasAnchorRows = false;
 	for (int32 RowIndex = 0; RowIndex < JsonRows.Num(); ++RowIndex)
 	{
 		const TSharedPtr<FJsonObject>* JsonObjectPtr = nullptr;
@@ -1210,6 +1211,10 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadEnemySpawnData(bool bForceReload)
 			if (JsonObject->HasField(TEXT("location")) || JsonObject->HasField(TEXT("rotation")) || JsonObject->HasField(TEXT("scale")))
 			{
 				UE_LOG(LogTunaSweeperEnemySpawn, Error, TEXT("Enemy spawn row %d mixes anchor placement_id with transform fields; skipped."), RowIndex);
+			}
+			else
+			{
+				bHasAnchorRows = true;
 			}
 			continue;
 		}
@@ -1345,7 +1350,7 @@ bool UTunaSweeperEnemySpawnSubsystem::LoadEnemySpawnData(bool bForceReload)
 		bHasValidRows = true;
 	}
 
-	if (!bHasValidRows && JsonRows.Num() > 0)
+	if (!bHasValidRows && !bHasAnchorRows && JsonRows.Num() > 0)
 	{
 		UE_LOG(LogTunaSweeperEnemySpawn, Error, TEXT("Enemy spawn JSON has no valid rows: %s"), *EnemySpawnJsonPath);
 		return false;

@@ -1,1 +1,19 @@
-[]
+[
+  {
+    "profile_id": "enemy.quadruped_gun_test",
+    "enemy_class": "/Game/Blueprints/BP_QuadrupedGunEnemy.BP_QuadrupedGunEnemy_C",
+    "combat_profile_id": "enemy.rifle_anchor",
+    "faction_id": 10,
+    "squad_id": "squad.demo_quadruped",
+    "squad_slot": 0,
+    "drop_container_definition_id": 7001,
+    "drop_contents_id": 8009,
+    "weapon_item_id": 1002,
+    "ammo_item_id": 2002,
+    "reserve_ammo_count": 60,
+    "loot_loaded_ammo_deduction_ratio": 0.4,
+    "loot_loaded_ammo_flat_deduction": 2,
+    "experience_value": 65,
+    "max_health": 60.0
+  }
+]

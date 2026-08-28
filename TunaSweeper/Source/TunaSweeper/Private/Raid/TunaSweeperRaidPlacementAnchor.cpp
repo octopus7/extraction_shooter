@@ -24,36 +24,48 @@ ATunaSweeperRaidPlacementAnchor::ATunaSweeperRaidPlacementAnchor()
 
 #if WITH_EDITORONLY_DATA
 	EditorPreviewArrow = CreateEditorOnlyDefaultSubobject<UArrowComponent>(TEXT("EditorPreviewArrow"));
-	EditorPreviewArrow->SetupAttachment(SceneRoot);
-	EditorPreviewArrow->SetIsVisualizationComponent(true);
-	EditorPreviewArrow->ArrowSize = 1.25f;
-	EditorPreviewArrow->ArrowLength = 120.0f;
-	EditorPreviewArrow->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	if (EditorPreviewArrow)
+	{
+		EditorPreviewArrow->SetupAttachment(SceneRoot);
+		EditorPreviewArrow->SetIsVisualizationComponent(true);
+		EditorPreviewArrow->ArrowSize = 1.25f;
+		EditorPreviewArrow->ArrowLength = 120.0f;
+		EditorPreviewArrow->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
 
 	EditorPreviewBillboard = CreateEditorOnlyDefaultSubobject<UBillboardComponent>(TEXT("EditorPreviewBillboard"));
-	EditorPreviewBillboard->SetupAttachment(SceneRoot);
-	EditorPreviewBillboard->SetIsVisualizationComponent(true);
-	EditorPreviewBillboard->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	EditorPreviewBillboard->SetRelativeLocation(FVector(0.0f, 0.0f, 85.0f));
-	static ConstructorHelpers::FObjectFinderOptional<UTexture2D> ActorSprite(TEXT("/Engine/EditorResources/S_Actor.S_Actor"));
-	if (ActorSprite.Succeeded())
+	if (EditorPreviewBillboard)
 	{
-		EditorPreviewBillboard->SetSprite(ActorSprite.Get());
+		EditorPreviewBillboard->SetupAttachment(SceneRoot);
+		EditorPreviewBillboard->SetIsVisualizationComponent(true);
+		EditorPreviewBillboard->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		EditorPreviewBillboard->SetRelativeLocation(FVector(0.0f, 0.0f, 85.0f));
+		static ConstructorHelpers::FObjectFinderOptional<UTexture2D> ActorSprite(TEXT("/Engine/EditorResources/S_Actor.S_Actor"));
+		if (ActorSprite.Succeeded())
+		{
+			EditorPreviewBillboard->SetSprite(ActorSprite.Get());
+		}
 	}
 
 	EditorLootBoxPreview = CreateEditorOnlyDefaultSubobject<UStaticMeshComponent>(TEXT("EditorLootBoxPreview"));
-	EditorLootBoxPreview->SetupAttachment(SceneRoot);
-	EditorLootBoxPreview->SetIsVisualizationComponent(true);
-	EditorLootBoxPreview->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	EditorLootBoxPreview->SetCastShadow(false);
+	if (EditorLootBoxPreview)
+	{
+		EditorLootBoxPreview->SetupAttachment(SceneRoot);
+		EditorLootBoxPreview->SetIsVisualizationComponent(true);
+		EditorLootBoxPreview->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		EditorLootBoxPreview->SetCastShadow(false);
+	}
 
 	EditorPreviewLabel = CreateEditorOnlyDefaultSubobject<UTextRenderComponent>(TEXT("EditorPreviewLabel"));
-	EditorPreviewLabel->SetupAttachment(SceneRoot);
-	EditorPreviewLabel->SetIsVisualizationComponent(true);
-	EditorPreviewLabel->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	EditorPreviewLabel->SetHorizontalAlignment(EHTA_Center);
-	EditorPreviewLabel->SetWorldSize(24.0f);
-	EditorPreviewLabel->SetRelativeLocation(FVector(0.0f, 0.0f, 145.0f));
+	if (EditorPreviewLabel)
+	{
+		EditorPreviewLabel->SetupAttachment(SceneRoot);
+		EditorPreviewLabel->SetIsVisualizationComponent(true);
+		EditorPreviewLabel->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		EditorPreviewLabel->SetHorizontalAlignment(EHTA_Center);
+		EditorPreviewLabel->SetWorldSize(24.0f);
+		EditorPreviewLabel->SetRelativeLocation(FVector(0.0f, 0.0f, 145.0f));
+	}
 #endif
 }
 

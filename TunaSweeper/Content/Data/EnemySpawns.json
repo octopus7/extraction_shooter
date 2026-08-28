@@ -1,1 +1,9 @@
-[]
+[
+  {
+    "level_name": "DemoRaidMap",
+    "placement_id": 1,
+    "profile_id": "enemy.quadruped_gun_test",
+    "spawn_chance": 1.0,
+    "condition_id": "always"
+  }
+]

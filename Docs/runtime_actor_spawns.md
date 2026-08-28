@@ -1,6 +1,6 @@
 # Runtime Actor Spawns
 
-> 현재 상태(2026-08-24): 런타임 스폰 JSON 8개는 새 데모 구성을 위해 모두 `[]`로 비워져 있다. 아래의 기존 배치 설명은 재작성 참고용 기록이며 현재 활성 배치가 아니다. 제거 목록은 `Docs/demo_runtime_data_cleanup_2026-08-24.md`, 재사용 절차는 `Docs/quest_and_runtime_actor_data_authoring_guide.md`를 참고한다.
+> 현재 상태(2026-08-28): 새 데모 구성을 위해 비웠던 런타임 스폰 데이터 중 `EnemySpawnProfiles.json`과 `EnemySpawns.json`에는 사족 총기 적 검증용 항목 1개가 다시 활성화되어 있다. 나머지 기존 배치 설명은 재작성 참고용 기록이며 현재 활성 배치가 아니다. 제거 목록은 `Docs/demo_runtime_data_cleanup_2026-08-24.md`, 재사용 절차는 `Docs/quest_and_runtime_actor_data_authoring_guide.md`를 참고한다.
 
 이 문서는 레벨에 직접 배치하지 않고 데이터로 초기 배치하는 런타임 액터 목록과 JSON 파일을 정리한다.
 
@@ -52,6 +52,15 @@ File: `TunaSweeper/Content/Data/BunkerCharacterSpawns.json`
 - `WarpPointSpawns.json`: 워프 포인트 초기 배치.
 
 `LootContainerSpawns.json`의 `BunkerMap` 개발자 상자는 `container_definition_id=7008`, `contents_id=8007`이며 현재 위치는 `[441.322, 548.9291, 40.0]`이다.
+
+## Demo Quadruped Gun Enemy
+
+- `/Game/Maps/DemoRaidMap`에는 실제 적 Blueprint가 아니라 `BP_RaidPlacementAnchor` 인스턴스 `TS_EnemySpawn_QuadrupedGun_01`만 배치한다.
+- 앵커는 `PlacementId=1`, 종류 `Enemy`, 위치 `[5200, 1040, 90]`, 회전 `[0, 180, 0]`을 사용한다.
+- `EnemySpawns.json`의 `DemoRaidMap`/`placement_id=1` 행이 `enemy.quadruped_gun_test` 프로필을 선택한다. 좌표·회전·스케일은 JSON에 두지 않고 레벨 앵커 Transform이 소유한다.
+- `EnemySpawnProfiles.json`의 `enemy.quadruped_gun_test`는 `/Game/Blueprints/BP_QuadrupedGunEnemy`와 `enemy.rifle_anchor` 전투 프로필, 라이플·탄약 및 임시 체력·전리품 값을 연결한다.
+- 게임 월드가 시작되면 `UTunaSweeperRaidPlacementSubsystem`이 앵커와 두 JSON 행을 결합해 `BP_QuadrupedGunEnemy`를 런타임 생성한다. 따라서 적 BP 인스턴스 자체는 레이드 맵에 저장하지 않는다.
+
 ## MemoSpawns.json
 
 File: `TunaSweeper/Content/Data/MemoSpawns.json`

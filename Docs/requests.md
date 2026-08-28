@@ -7241,3 +7241,14 @@
 - 저사양 첫 로딩부터 텍스처 VRAM을 줄이도록 안전한 낮음 기본값과 `DefaultScalability.ini`의 400/600/800/1000MB 스트리밍 풀, Mip Bias, VRAM 제한을 추가하고 per-texture bias는 UE 5.7이 허용하는 GameSetting 적용 경로로 분리했다.
 - 타이틀 그래픽 탭에 스크롤 가능한 전용 런타임 UMG 패널을 추가했다. 자동·낮음·중간·높음·최고 프리셋, 화면 모드, 해상도, DLSS, 11개 개별 품질, VSync, FPS 제한, 모션 블러, 동적 해상도, 하드웨어 RT와 적용·취소를 지원하며 화면 변경은 15초 유지 확인 후 미확정 시 복구한다.
 - 한국어·영어·일본어 UI 문자열과 상세 구현 문서를 추가했다. `TunaSweeper` 게임 타깃과 `TunaSweeperEditor` 전체 빌드를 성공했고 `TunaSweeper.Graphics.AutoVramBoundary`, `TunaSweeper.Graphics.PresetMapping` 자동화 테스트가 모두 성공했다. 마지막 증분 에디터 빌드는 컴파일 후 다른 실행 중 에디터가 DLL 링크를 점유해 재링크만 생략되었고 동일 최종 런타임 소스의 게임 타깃 링크는 성공했다.
+
+## 2026-08-28 17:20:00 (소요시간: 01:00:40)
+
+- `/Game/Maps/DemoRaidMap`에 실제 `BP_QuadrupedGunEnemy`가 아니라 범용 `BP_RaidPlacementAnchor` 인스턴스 `TS_EnemySpawn_QuadrupedGun_01`만 배치하고, `PlacementId=1`, 위치 `(5200, 1040, 90)`, Yaw `180°`를 저장했다.
+- `EnemySpawns.json`의 레이드 앵커 행을 `EnemySpawnProfiles.json`의 임시 `enemy.quadruped_gun_test` 적 데이터와 연결해 런타임에서 `BP_QuadrupedGunEnemy`를 생성하도록 했다. 적 클래스, 전투 프로필, 팩션·분대, 라이플·탄약, 체력·경험치·드롭 값을 데이터에서 편집할 수 있다.
+- 에디터 전용 앵커 프리뷰 컴포넌트가 게임 월드에서 생성되지 않을 때의 null 접근을 방지하고, 구형 좌표 스포너가 앵커 전용 `EnemySpawns.json`을 정상 입력으로 허용하도록 호환 처리를 추가했다.
+- 멱등 UE Python 배치·검증 도구로 앵커 1개와 직접 배치된 적 BP 0개를 확인했다. 실제 게임 월드 로그에서 `DemoRaidMap`의 적 앵커 1개가 해석되는 것을 확인했고 UE 5.7 `TunaSweeperDemo` Win64 Development 전체 빌드를 성공했다. 이미 실행 중인 Unreal Editor는 종료하지 않고 유지했다.
+
+## 2026-08-28 18:20:45 (소요시간: 00:03:15)
+
+- 레이드 레벨의 데이터 기반 사족 총기 적 스폰 구현, 배치 검증 도구, 호환 코드와 관련 문서만 선별해 Git 커밋으로 정리했다. 동시에 진행 중인 시선 추적·벙커 메시 변경과 해당 요청·질문 기록은 커밋에서 제외했다.
