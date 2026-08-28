@@ -13,6 +13,8 @@
 3. PIE를 시작하고 캐릭터를 이동시킨다.
 4. 초록 구는 고정된 발, 노란 구는 이동 중인 발 타깃이다.
 
+총기 사용 적으로 시험하려면 `/Game/Blueprints/BP_QuadrupedGunEnemy`를 배치한다. 이 Blueprint는 기존 `ATunaSweeperEnemyCharacter`의 AI, 총기, 팩션, 피해, 드롭 기능을 유지하면서 RobotDog 스켈레탈 표현과 `UQuadrupedComponent`를 사용한다.
+
 현재 연결된 자산은 다음과 같다.
 
 - AnimBP: `/Game/Characters/Robot/ABP_RobotDog`
@@ -30,6 +32,12 @@
 - `StepHeight`: 이동 중 발이 올라가는 높이다.
 - `StepDuration`: 한 스텝의 시간이다.
 - `GroundCheckStartOffset`, `GroundCheckDistance`: 발 위치 위에서 아래로 수행하는 지면 트레이스 범위다.
+- `LookAheadSeconds`: 현재 수평 속도와 관측된 yaw 속도로 몸체 위치를 미리 예측하는 시간이다.
+- `MaxStepDistance`: 한 번에 선택할 수 있는 착지점의 최대 수평 이동 거리다.
+- `GroundProbeRadius`, `MinGroundNormalZ`, `MaxLegReach`: 착지 후보의 접지 면적, 경사, 다리 도달 가능성을 제한한다.
+- `bMoveGaitGroupTogether`: 켜면 대각선 다리를 함께 움직이고, 끄면 총기 적에 적합한 한 발씩의 안정 보행을 사용한다.
+
+`GetFootPosition()`은 현재 IK 발 위치를, `GetNextFootPosition()`은 계속 평가되는 다음 착지 후보를 반환한다. 발을 드는 순간 후보 위치와 지지 컴포넌트 상대 좌표를 래치하므로 스윙 중 목표가 불안정하게 바뀌지 않는다. 움직이는 지지 컴포넌트에 심은 발은 해당 컴포넌트의 상대 좌표를 따라간다.
 
 프로젝트 좌표 규칙에 따라 `+X`는 전방, `+Y`는 오른쪽, `+Z`는 위쪽이다. 따라서 왼발 오프셋의 Y는 음수이고 오른발은 양수다.
 
@@ -47,4 +55,4 @@
 
 ## 현재 범위
 
-이 버전은 네 다리의 분석적 Two Bone IK만 적용한다. 몸통 높이·기울기 보정, 발바닥의 지면 법선 정렬, 이동 발판 추적은 아직 포함하지 않는다. 이 항목들이 필요해질 때 현재 발 타깃 생성기는 유지하고 몸통 보정 또는 Full Body IK 계층을 추가한다.
+이 버전은 네 다리의 분석적 Two Bone IK, 이동·yaw 예측 착지점, 구형 지면 스윕, 경사·도달 범위 판정, 이동 지지 컴포넌트 추적을 적용한다. 지면 법선은 발 상태에 저장하지만 현재 AnimGraph 노드는 위치만 소비하므로 발바닥 회전 정렬은 아직 적용하지 않는다. 몸통 높이·기울기 보정이나 Full Body IK가 필요해질 때 현재 발 타깃 생성기는 유지하고 별도 몸통/고품질 솔브 계층을 추가한다.

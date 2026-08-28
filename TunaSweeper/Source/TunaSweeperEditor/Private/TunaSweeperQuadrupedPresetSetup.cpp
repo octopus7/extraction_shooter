@@ -1,5 +1,8 @@
 #include "TunaSweeperQuadrupedPresetSetup.h"
 
+#include "AI/TunaSweeperQuadrupedEnemyCharacter.h"
+#include "TunaSweeperEditorSetupShared.h"
+
 #include "AnimGraphNode_ComponentToLocalSpace.h"
 #include "AnimGraphNode_LocalToComponentSpace.h"
 #include "AnimGraphNode_QuadrupedRobotIK.h"
@@ -10,6 +13,8 @@
 #include "AnimationGraphSchema.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "AssetToolsModule.h"
+#include "Components/CapsuleComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "EdGraph/EdGraph.h"
 #include "EdGraph/EdGraphNode.h"
 #include "EdGraph/EdGraphPin.h"
@@ -18,6 +23,8 @@
 #include "Kismet2/BlueprintEditorUtils.h"
 #include "Kismet2/KismetEditorUtilities.h"
 #include "PackageTools.h"
+#include "QuadrupedCharacter.h"
+#include "QuadrupedComponent.h"
 #include "QuadrupedRigProfile.h"
 #include "Subsystems/EditorAssetSubsystem.h"
 
@@ -29,6 +36,9 @@ namespace
 	const TCHAR* ProfileObjectPath = TEXT("/Game/Characters/Robot/QRP_RobotDog_2Joint.QRP_RobotDog_2Joint");
 	const TCHAR* SkeletonObjectPath = TEXT("/Game/Characters/Robot/SKM_Robot_Skeleton.SKM_Robot_Skeleton");
 	const TCHAR* SkeletalMeshObjectPath = TEXT("/Game/Characters/Robot/SKM_Robot.SKM_Robot");
+	const TCHAR* SourceQuadrupedBlueprintObjectPath = TEXT("/Game/Blueprints/BP_QuadrupedDog.BP_QuadrupedDog");
+	const TCHAR* QuadrupedEnemyAssetPath = TEXT("/Game/Blueprints");
+	const TCHAR* QuadrupedEnemyAssetName = TEXT("BP_QuadrupedGunEnemy");
 
 	UEdGraphPin* FindPosePin(UEdGraphNode* Node, EEdGraphPinDirection Direction)
 	{
@@ -160,6 +170,15 @@ namespace
 			return nullptr;
 		}
 
+		const bool bNeedsSave =
+			bCreated ||
+			Profile->TargetSkeleton != Skeleton ||
+			Profile->PreviewMesh != SkeletalMesh;
+		if (!bNeedsSave)
+		{
+			return Profile;
+		}
+
 		Profile->Modify();
 		if (bCreated)
 		{
@@ -267,6 +286,13 @@ namespace
 		bool bModifiedInMemory = false;
 		if (QuadrupedNodes.Num() == 1 && TwoBoneNodes.Num() == 0)
 		{
+			if (QuadrupedNodes[0]->Node.RigProfile == Profile &&
+				AnimBlueprint->Status != BS_Error &&
+				AnimBlueprint->GeneratedClass)
+			{
+				return true;
+			}
+
 			QuadrupedNodes[0]->Modify();
 			QuadrupedNodes[0]->Node.RigProfile = Profile;
 			bModifiedInMemory = true;
@@ -353,6 +379,88 @@ namespace
 
 		return true;
 	}
+
+	bool EnsureQuadrupedEnemyBlueprint()
+	{
+		UBlueprint* EnemyBlueprint = TunaSweeperEditorSetup::EnsureBlueprint(
+			QuadrupedEnemyAssetPath,
+			QuadrupedEnemyAssetName,
+			ATunaSweeperQuadrupedEnemyCharacter::StaticClass());
+		if (!EnemyBlueprint || !EnemyBlueprint->GeneratedClass)
+		{
+			UE_LOG(LogTemp, Error, TEXT("Quadruped enemy setup could not create BP_QuadrupedGunEnemy."));
+			return false;
+		}
+
+		ATunaSweeperQuadrupedEnemyCharacter* EnemyDefaults =
+			Cast<ATunaSweeperQuadrupedEnemyCharacter>(EnemyBlueprint->GeneratedClass->GetDefaultObject());
+		if (!EnemyDefaults || !EnemyDefaults->GetMesh() || !EnemyDefaults->GetQuadrupedComponent())
+		{
+			UE_LOG(LogTemp, Error, TEXT("BP_QuadrupedGunEnemy has incomplete native defaults."));
+			return false;
+		}
+
+		EnemyDefaults->Modify();
+		USkeletalMeshComponent* EnemyMesh = EnemyDefaults->GetMesh();
+		UQuadrupedComponent* EnemyQuadruped = EnemyDefaults->GetQuadrupedComponent();
+
+		UBlueprint* SourceBlueprint = LoadObject<UBlueprint>(nullptr, SourceQuadrupedBlueprintObjectPath);
+		const AQuadrupedCharacter* SourceDefaults = SourceBlueprint && SourceBlueprint->GeneratedClass
+			? Cast<AQuadrupedCharacter>(SourceBlueprint->GeneratedClass->GetDefaultObject())
+			: nullptr;
+		if (SourceDefaults && SourceDefaults->GetMesh())
+		{
+			USkeletalMeshComponent* SourceMesh = SourceDefaults->GetMesh();
+			EnemyMesh->SetSkeletalMeshAsset(SourceMesh->GetSkeletalMeshAsset());
+			EnemyMesh->SetAnimationMode(EAnimationMode::AnimationBlueprint);
+			EnemyMesh->SetAnimInstanceClass(SourceMesh->GetAnimClass());
+			EnemyMesh->SetRelativeTransform(SourceMesh->GetRelativeTransform());
+
+			if (const UCapsuleComponent* SourceCapsule = SourceDefaults->GetCapsuleComponent())
+			{
+				EnemyDefaults->GetCapsuleComponent()->InitCapsuleSize(
+					SourceCapsule->GetUnscaledCapsuleRadius(),
+					SourceCapsule->GetUnscaledCapsuleHalfHeight());
+			}
+
+			if (const UQuadrupedComponent* SourceQuadruped = SourceDefaults->QuadrupedComponent)
+			{
+				EnemyQuadruped->Legs.SetNum(SourceQuadruped->Legs.Num());
+				for (int32 LegIndex = 0; LegIndex < SourceQuadruped->Legs.Num(); ++LegIndex)
+				{
+					EnemyQuadruped->Legs[LegIndex].DefaultOffset = SourceQuadruped->Legs[LegIndex].DefaultOffset;
+					EnemyQuadruped->Legs[LegIndex].GaitGroup = SourceQuadruped->Legs[LegIndex].GaitGroup;
+				}
+				EnemyQuadruped->GroundCheckDistance = SourceQuadruped->GroundCheckDistance;
+				EnemyQuadruped->GroundCheckStartOffset = SourceQuadruped->GroundCheckStartOffset;
+			}
+		}
+
+		EnemyMesh->SetVisibility(true);
+		EnemyMesh->SetHiddenInGame(false);
+		EnemyMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		EnemyQuadruped->LookAheadSeconds = 0.18f;
+		EnemyQuadruped->StepThreshold = 42.0f;
+		EnemyQuadruped->StepHeight = 26.0f;
+		EnemyQuadruped->StepDuration = 0.18f;
+		EnemyQuadruped->MaxStepDistance = 100.0f;
+		EnemyQuadruped->MaxLegReach = 150.0f;
+		EnemyQuadruped->GroundProbeRadius = 6.0f;
+		EnemyQuadruped->MinGroundNormalZ = 0.65f;
+		EnemyQuadruped->bMoveGaitGroupTogether = false;
+		EnemyQuadruped->bDrawDebug = false;
+
+		EnemyDefaults->MarkPackageDirty();
+		EnemyBlueprint->MarkPackageDirty();
+		if (!SaveAsset(EnemyBlueprint))
+		{
+			UE_LOG(LogTemp, Error, TEXT("Quadruped enemy setup failed to save BP_QuadrupedGunEnemy."));
+			return false;
+		}
+
+		UE_LOG(LogTemp, Display, TEXT("Created /Game/Blueprints/BP_QuadrupedGunEnemy."));
+		return true;
+	}
 }
 
 namespace TunaSweeperQuadrupedPresetSetup
@@ -368,7 +476,9 @@ namespace TunaSweeperQuadrupedPresetSetup
 			return false;
 		}
 
-		const bool bSucceeded = InstallQuadrupedNode(AnimBlueprint, Profile);
+		const bool bSucceeded =
+			InstallQuadrupedNode(AnimBlueprint, Profile) &&
+			EnsureQuadrupedEnemyBlueprint();
 		if (bSucceeded)
 		{
 			UE_LOG(LogTemp, Display, TEXT("RobotDog quadruped IK preset setup completed."));

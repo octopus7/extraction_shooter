@@ -2,6 +2,7 @@
 
 #include "QuadrupedComponent.h"
 
+#include "Components/PrimitiveComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "DrawDebugHelpers.h"
 #include "Engine/World.h"
@@ -111,6 +112,8 @@ void UQuadrupedComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	UpdateMotionPrediction(DeltaTime);
+	UpdatePlantedSupportPositions();
 	UpdateLegTargets();
 	ProcessGaitCycle(DeltaTime);
 	InterpolateLegPositions(DeltaTime);
@@ -121,7 +124,19 @@ void UQuadrupedComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 		{
 			const FColor Color = Legs[i].bIsMoving ? FColor::Yellow : FColor::Green;
 			DrawDebugSphere(GetWorld(), GetFootPosition(i), 5.0f, 8, Color, false, -1.0f, 0, 1.0f);
-			DrawDebugLine(GetWorld(), GetOwner()->GetActorLocation(), GetFootPosition(i), FColor::White, false, -1.0f, 0, 0.5f);
+			const FColor TargetColor = Legs[i].bHasValidGroundTarget ? FColor::Cyan : FColor::Red;
+			DrawDebugSphere(GetWorld(), Legs[i].TargetPosition, 4.0f, 8, TargetColor, false, -1.0f, 0, 1.0f);
+			DrawDebugLine(GetWorld(), GetFootPosition(i), Legs[i].TargetPosition, TargetColor, false, -1.0f, 0, 0.5f);
+			DrawDebugDirectionalArrow(
+				GetWorld(),
+				Legs[i].TargetPosition,
+				Legs[i].TargetPosition + Legs[i].TargetSurfaceNormal * 20.0f,
+				5.0f,
+				TargetColor,
+				false,
+				-1.0f,
+				0,
+				1.0f);
 		}
 	}
 }
@@ -151,14 +166,20 @@ void UQuadrupedComponent::InitializeDefaultLegs(float BodyLength, float BodyWidt
 
 void UQuadrupedComponent::ResetLegPositionsToTargets()
 {
+	UpdateMotionPrediction(0.0f);
 	UpdateLegTargets();
 	for (FQuadrupedLegData& Leg : Legs)
 	{
 		Leg.CurrentPosition = Leg.TargetPosition;
+		Leg.CurrentSurfaceNormal = Leg.TargetSurfaceNormal;
 		Leg.StepStartPosition = Leg.CurrentPosition;
 		Leg.StepEndPosition = Leg.CurrentPosition;
+		Leg.StepEndSurfaceNormal = Leg.CurrentSurfaceNormal;
 		Leg.StepProgress = 0.0f;
 		Leg.bIsMoving = false;
+		Leg.Phase = EQuadrupedFootPhase::Planted;
+		Leg.SupportComponent = Leg.TargetSupportComponent;
+		Leg.SupportRelativePosition = Leg.TargetSupportRelativePosition;
 	}
 }
 
@@ -182,59 +203,140 @@ FVector UQuadrupedComponent::GetFootPosition(int32 LegIndex) const
 	return Leg.CurrentPosition;
 }
 
+FVector UQuadrupedComponent::GetNextFootPosition(int32 LegIndex) const
+{
+	return Legs.IsValidIndex(LegIndex) ? Legs[LegIndex].TargetPosition : FVector::ZeroVector;
+}
+
+bool UQuadrupedComponent::HasValidNextFootPosition(int32 LegIndex) const
+{
+	return Legs.IsValidIndex(LegIndex) && Legs[LegIndex].bHasValidGroundTarget;
+}
+
+void UQuadrupedComponent::UpdateMotionPrediction(float DeltaTime)
+{
+	AActor* Owner = GetOwner();
+	if (!Owner)
+	{
+		PredictedOwnerTransform = FTransform::Identity;
+		return;
+	}
+
+	const FTransform OwnerTransform = Owner->GetActorTransform();
+	const float CurrentYaw = OwnerTransform.Rotator().Yaw;
+	float ObservedYawSpeed = 0.0f;
+	if (bHasPreviousOwnerYaw && DeltaTime > UE_SMALL_NUMBER)
+	{
+		ObservedYawSpeed = FMath::FindDeltaAngleDegrees(PreviousOwnerYaw, CurrentYaw) / DeltaTime;
+		ObservedYawSpeed = FMath::Clamp(ObservedYawSpeed, -MaxPredictedYawSpeed, MaxPredictedYawSpeed);
+	}
+
+	FVector HorizontalVelocity = Owner->GetVelocity();
+	HorizontalVelocity.Z = 0.0f;
+	const FVector PredictedLocation = OwnerTransform.GetLocation() + HorizontalVelocity * LookAheadSeconds;
+	const FRotator PredictedRotation(0.0f, CurrentYaw + ObservedYawSpeed * LookAheadSeconds, 0.0f);
+	PredictedOwnerTransform = FTransform(PredictedRotation, PredictedLocation, OwnerTransform.GetScale3D());
+
+	PreviousOwnerYaw = CurrentYaw;
+	bHasPreviousOwnerYaw = true;
+}
+
+void UQuadrupedComponent::UpdatePlantedSupportPositions()
+{
+	for (FQuadrupedLegData& Leg : Legs)
+	{
+		if (!Leg.bIsMoving && Leg.SupportComponent.IsValid())
+		{
+			Leg.CurrentPosition = Leg.SupportComponent->GetComponentTransform().TransformPosition(Leg.SupportRelativePosition);
+		}
+	}
+}
+
 void UQuadrupedComponent::UpdateLegTargets()
 {
 	for (int32 i = 0; i < Legs.Num(); i++)
 	{
-		const FVector IdealPosition = CalculateIdealFootPosition(i);
-		FVector GroundPosition;
-
-		if (TraceGround(IdealPosition, GroundPosition))
+		FQuadrupedLegData& Leg = Legs[i];
+		FVector ProbePosition = CalculateIdealFootPosition(i);
+		FVector PlanarStep = ProbePosition - Leg.CurrentPosition;
+		PlanarStep.Z = 0.0f;
+		if (!Leg.CurrentPosition.IsNearlyZero() && PlanarStep.SizeSquared() > FMath::Square(MaxStepDistance))
 		{
-			Legs[i].TargetPosition = GroundPosition;
+			ProbePosition = Leg.CurrentPosition + PlanarStep.GetSafeNormal() * MaxStepDistance;
+			ProbePosition.Z = CalculateIdealFootPosition(i).Z;
+		}
+
+		FHitResult GroundHit;
+		Leg.bHasValidGroundTarget =
+			TraceGround(ProbePosition, GroundHit) &&
+			GroundHit.ImpactNormal.Z >= MinGroundNormalZ &&
+			IsCandidateReachable(Leg, GroundHit.ImpactPoint);
+
+		if (Leg.bHasValidGroundTarget)
+		{
+			Leg.TargetPosition = GroundHit.ImpactPoint;
+			Leg.TargetSurfaceNormal = GroundHit.ImpactNormal.GetSafeNormal(UE_SMALL_NUMBER, FVector::UpVector);
+			Leg.TargetSupportComponent = GroundHit.GetComponent();
+			Leg.TargetSupportRelativePosition = Leg.TargetSupportComponent.IsValid()
+				? Leg.TargetSupportComponent->GetComponentTransform().InverseTransformPosition(Leg.TargetPosition)
+				: FVector::ZeroVector;
 		}
 		else
 		{
-			Legs[i].TargetPosition = IdealPosition;
+			Leg.TargetPosition = ProbePosition;
+			Leg.TargetSurfaceNormal = FVector::UpVector;
+			Leg.TargetSupportComponent.Reset();
+			Leg.TargetSupportRelativePosition = FVector::ZeroVector;
 		}
+
+		Leg.PlacementScore = CalculatePlacementError(Leg) / FMath::Max(StepThreshold, 1.0f);
 	}
 }
 
 void UQuadrupedComponent::ProcessGaitCycle(float DeltaTime)
 {
-	for (int32 i = 0; i < Legs.Num(); i++)
+	if (Legs.ContainsByPredicate([](const FQuadrupedLegData& Leg) { return Leg.bIsMoving; }))
 	{
-		FQuadrupedLegData& Leg = Legs[i];
+		return;
+	}
 
-		if (Leg.bIsMoving)
+	int32 BestLegIndex = INDEX_NONE;
+	float BestScore = 1.0f;
+	for (int32 LegIndex = 0; LegIndex < Legs.Num(); ++LegIndex)
+	{
+		const FQuadrupedLegData& Leg = Legs[LegIndex];
+		if (Leg.bHasValidGroundTarget && Leg.PlacementScore > BestScore)
+		{
+			BestScore = Leg.PlacementScore;
+			BestLegIndex = LegIndex;
+		}
+	}
+
+	if (BestLegIndex == INDEX_NONE)
+	{
+		return;
+	}
+
+	const int32 SelectedGroup = Legs[BestLegIndex].GaitGroup;
+	StartStep(Legs[BestLegIndex]);
+	if (!bMoveGaitGroupTogether)
+	{
+		return;
+	}
+
+	for (int32 LegIndex = 0; LegIndex < Legs.Num(); ++LegIndex)
+	{
+		if (LegIndex == BestLegIndex)
 		{
 			continue;
 		}
 
-		const float Distance = FVector::Dist(Leg.CurrentPosition, Leg.TargetPosition);
-
-		if (Distance > StepThreshold)
+		FQuadrupedLegData& GroupLeg = Legs[LegIndex];
+		if (GroupLeg.GaitGroup == SelectedGroup &&
+			GroupLeg.bHasValidGroundTarget &&
+			GroupLeg.PlacementScore > GroupStepThresholdScale)
 		{
-			const int32 OtherGroup = (Leg.GaitGroup == 0) ? 1 : 0;
-
-			if (!IsGaitGroupStepping(OtherGroup))
-			{
-				for (FQuadrupedLegData& GroupLeg : Legs)
-				{
-					if (GroupLeg.GaitGroup == Leg.GaitGroup)
-					{
-						const float GroupDistance = FVector::Dist(GroupLeg.CurrentPosition, GroupLeg.TargetPosition);
-						if (GroupDistance > StepThreshold * 0.5f)
-						{
-							GroupLeg.StepStartPosition = GroupLeg.CurrentPosition;
-							GroupLeg.StepEndPosition = GroupLeg.TargetPosition;
-							GroupLeg.bIsMoving = true;
-							GroupLeg.StepProgress = 0.0f;
-						}
-					}
-				}
-				break;
-			}
+			StartStep(GroupLeg);
 		}
 	}
 }
@@ -247,21 +349,50 @@ void UQuadrupedComponent::InterpolateLegPositions(float DeltaTime)
 	{
 		if (Leg.bIsMoving)
 		{
+			if (Leg.StepEndSupportComponent.IsValid())
+			{
+				Leg.StepEndPosition = Leg.StepEndSupportComponent->GetComponentTransform().TransformPosition(
+					Leg.StepEndSupportRelativePosition);
+			}
+
 			Leg.StepProgress += DeltaTime * StepSpeed;
 
 			if (Leg.StepProgress >= 1.0f)
 			{
-				Leg.CurrentPosition = Leg.StepEndPosition;
-				Leg.StepProgress = 0.0f;
-				Leg.bIsMoving = false;
+				FinishStep(Leg);
 			}
 			else
 			{
 				const float Alpha = FMath::Clamp(Leg.StepProgress, 0.0f, 1.0f);
-				Leg.CurrentPosition = FMath::Lerp(Leg.StepStartPosition, Leg.StepEndPosition, Alpha);
+				const float SmoothedAlpha = Alpha * Alpha * (3.0f - 2.0f * Alpha);
+				Leg.CurrentPosition = FMath::Lerp(Leg.StepStartPosition, Leg.StepEndPosition, SmoothedAlpha);
 			}
 		}
 	}
+}
+
+void UQuadrupedComponent::StartStep(FQuadrupedLegData& Leg)
+{
+	Leg.StepStartPosition = Leg.CurrentPosition;
+	Leg.StepEndPosition = Leg.TargetPosition;
+	Leg.StepEndSurfaceNormal = Leg.TargetSurfaceNormal;
+	Leg.StepEndSupportComponent = Leg.TargetSupportComponent;
+	Leg.StepEndSupportRelativePosition = Leg.TargetSupportRelativePosition;
+	Leg.SupportComponent.Reset();
+	Leg.bIsMoving = true;
+	Leg.Phase = EQuadrupedFootPhase::Swinging;
+	Leg.StepProgress = 0.0f;
+}
+
+void UQuadrupedComponent::FinishStep(FQuadrupedLegData& Leg)
+{
+	Leg.CurrentPosition = Leg.StepEndPosition;
+	Leg.CurrentSurfaceNormal = Leg.StepEndSurfaceNormal;
+	Leg.SupportComponent = Leg.StepEndSupportComponent;
+	Leg.SupportRelativePosition = Leg.StepEndSupportRelativePosition;
+	Leg.StepProgress = 0.0f;
+	Leg.bIsMoving = false;
+	Leg.Phase = EQuadrupedFootPhase::Planted;
 }
 
 bool UQuadrupedComponent::IsGaitGroupStepping(int32 GroupIndex) const
@@ -276,7 +407,7 @@ bool UQuadrupedComponent::IsGaitGroupStepping(int32 GroupIndex) const
 	return false;
 }
 
-bool UQuadrupedComponent::TraceGround(const FVector& WorldLocation, FVector& OutGroundPosition) const
+bool UQuadrupedComponent::TraceGround(const FVector& WorldLocation, FHitResult& OutHit) const
 {
 	if (!GetWorld() || !GetOwner())
 	{
@@ -286,17 +417,40 @@ bool UQuadrupedComponent::TraceGround(const FVector& WorldLocation, FVector& Out
 	const FVector Start = WorldLocation + FVector(0.0f, 0.0f, GroundCheckStartOffset);
 	const FVector End = WorldLocation - FVector(0.0f, 0.0f, GroundCheckDistance);
 
-	FHitResult HitResult;
 	FCollisionQueryParams QueryParams;
 	QueryParams.AddIgnoredActor(GetOwner());
+	QueryParams.bTraceComplex = false;
 
-	if (GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_Visibility, QueryParams))
+	if (GroundProbeRadius > UE_SMALL_NUMBER)
 	{
-		OutGroundPosition = HitResult.Location;
-		return true;
+		return GetWorld()->SweepSingleByChannel(
+			OutHit,
+			Start,
+			End,
+			FQuat::Identity,
+			GroundTraceChannel,
+			FCollisionShape::MakeSphere(GroundProbeRadius),
+			QueryParams);
 	}
 
-	return false;
+	return GetWorld()->LineTraceSingleByChannel(OutHit, Start, End, GroundTraceChannel, QueryParams);
+}
+
+bool UQuadrupedComponent::IsCandidateReachable(
+	const FQuadrupedLegData& Leg,
+	const FVector& CandidatePosition) const
+{
+	const FVector PredictedHipPosition = PredictedOwnerTransform.TransformPosition(
+		FVector(Leg.DefaultOffset.X, Leg.DefaultOffset.Y, 0.0f));
+	return FVector::DistSquared(PredictedHipPosition, CandidatePosition) <= FMath::Square(MaxLegReach);
+}
+
+float UQuadrupedComponent::CalculatePlacementError(const FQuadrupedLegData& Leg) const
+{
+	const FVector Delta = Leg.TargetPosition - Leg.CurrentPosition;
+	const float PlanarErrorSquared = FMath::Square(Delta.X) + FMath::Square(Delta.Y);
+	const float WeightedVerticalErrorSquared = FMath::Square(Delta.Z * 0.35f);
+	return FMath::Sqrt(PlanarErrorSquared + WeightedVerticalErrorSquared);
 }
 
 FVector UQuadrupedComponent::CalculateIdealFootPosition(int32 LegIndex) const
@@ -307,7 +461,5 @@ FVector UQuadrupedComponent::CalculateIdealFootPosition(int32 LegIndex) const
 	}
 
 	const FQuadrupedLegData& Leg = Legs[LegIndex];
-	const FTransform OwnerTransform = GetOwner()->GetActorTransform();
-	const FVector WorldOffset = OwnerTransform.TransformVector(Leg.DefaultOffset);
-	return GetOwner()->GetActorLocation() + WorldOffset;
+	return PredictedOwnerTransform.TransformPosition(Leg.DefaultOffset);
 }

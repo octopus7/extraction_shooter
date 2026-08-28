@@ -7183,3 +7183,15 @@
 
 - 테스트용 박스 로봇 시선 추적 구현, Blender·FBX 원본, UE Skeletal Mesh·Skeleton·재질·Blueprint, `IntroMap` 배치, 자동화 테스트와 관련 문서만 하나의 Git 커밋으로 정리했다.
 - 동시에 진행된 사족보행 구현, 능력치 연구 트리 설계 문서, 벙커 벽 스태틱 메시 변경은 커밋 대상에서 제외했다.
+
+## 2026-08-28 16:45:43 (소요시간: 00:29:22)
+
+- 기존 `ATunaSweeperEnemyCharacter`의 AI, 총기, 팩션, 피해, 드롭 기능을 그대로 상속하는 `ATunaSweeperQuadrupedEnemyCharacter`를 추가했다. 기존 스태틱 적 외형은 숨기고 RobotDog 스켈레탈 메시와 `ABP_RobotDog`, `UQuadrupedComponent`를 사용하도록 구성했다.
+- `UQuadrupedComponent`에 실제 수평 속도와 관측 yaw 속도를 이용한 다음 몸체 위치 예측, 구형 지면 스윕, 경사·도달 범위 판정, 현재 접지점과 다음 착지 후보의 분리, 스윙 착지점 래치, 이동 지지 컴포넌트 상대 좌표 추적, Blueprint 조회 함수와 확장 디버그 표시를 추가했다. 총기 적은 한 번에 한 발만 움직이는 안정 보행 기본값을 사용한다.
+- `/Game/Blueprints/BP_QuadrupedGunEnemy`를 생성하고 기존 `BP_QuadrupedDog`의 메시 상대 트랜스폼·캡슐·다리 기본 오프셋을 복사했다. UE 로드 검증에서 사족형 총기 적 생성 클래스, 다리 4개, 예측 시간 `0.18초`, 스텝 임계 `42cm`, 단일발 보행 기본값을 확인했다.
+- UE 5.7 `TunaSweeperEditor` 빌드를 성공한 뒤 애셋을 생성했다. 이후 멱등 에디터 생성 코드의 컴파일은 통과했으나 동시에 열린 Unreal Editor가 에디터 DLL 최종 재링크를 점유해 강제 종료하지 않았고, 별도 `TunaSweeper Win64 Development` 게임 타깃의 전체 UHT·C++ 컴파일·실행 파일 링크를 성공했다. 기존 Unreal Editor는 열린 상태로 유지했다.
+
+## 2026-08-28 17:16:41 (소요시간: 00:01:31)
+
+- 사족보행 총기 적 클래스, 보행 컴포넌트 확장, `BP_QuadrupedGunEnemy`, 에디터 생성 코드와 관련 문서만 하나의 Git 커밋으로 정리했다.
+- 동시에 진행된 능력치 연구 트리 문서, 그래픽 설정 질문 기록, 벙커 벽 스태틱 메시 변경과 검사 스크립트는 커밋 대상에서 제외했다.
