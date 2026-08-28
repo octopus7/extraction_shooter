@@ -197,3 +197,29 @@ ui.title.demo_notice_message,이 데모의 저장 데이터는 본편과 연동�
 ui.toast.load_failed,저장 데이터를 불러오지 못했습니다.,Failed to load save data.,セーブデータを読み込めませんでした。
 ui.toast.save_failed,저장 데이터를 만들지 못했습니다.,Failed to create save data.,セーブデータを作成できませんでした。
 ui.interaction.clear_debris,이물질 제거,Clear Debris,異物を除去
+ui.common.apply,적용,Apply,適用
+ui.common.keep,유지,Keep,維持
+ui.common.revert,되돌리기,Revert,元に戻す
+ui.settings.preset.auto,자동,Auto,自動
+ui.settings.preset.low,낮음,Low,低
+ui.settings.preset.medium,중간,Medium,中
+ui.settings.preset.high,높음,High,高
+ui.settings.preset.epic,최고,Epic,最高
+ui.settings.preset.custom,사용자 지정,Custom,カスタム
+ui.settings.texture,텍스처,Texture,テクスチャ
+ui.settings.shadow,그림자,Shadow,シャドウ
+ui.settings.global_illumination,전역 조명,Global Illumination,グローバルイルミネーション
+ui.settings.reflection,반사,Reflection,反射
+ui.settings.view_distance,가시 거리,View Distance,描画距離
+ui.settings.effects,효과,Effects,エフェクト
+ui.settings.post_process,후처리,Post Process,ポストプロセス
+ui.settings.foliage,식생,Foliage,植生
+ui.settings.shading,셰이딩,Shading,シェーディング
+ui.settings.landscape,지형,Landscape,地形
+ui.settings.anti_aliasing,안티앨리어싱,Anti-Aliasing,アンチエイリアス
+ui.settings.vsync,수직 동기화,VSync,垂直同期
+ui.settings.motion_blur,모션 블러,Motion Blur,モーションブラー
+ui.settings.dynamic_resolution,동적 해상도,Dynamic Resolution,動的解像度
+ui.settings.hardware_ray_tracing,하드웨어 레이 트레이싱,Hardware Ray Tracing,ハードウェアレイトレーシング
+ui.settings.fps_unlimited,제한 없음,Unlimited,無制限
+ui.settings.resolution_confirm_countdown,이 화면 설정을 유지할까요? {0}초 후 복구됩니다.,Keep these display settings? Reverting in {0} seconds.,この画面設定を維持しますか？ {0}秒後に元に戻します。

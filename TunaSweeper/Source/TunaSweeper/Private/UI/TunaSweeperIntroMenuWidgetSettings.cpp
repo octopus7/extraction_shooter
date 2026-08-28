@@ -1,34 +1,25 @@
 #include "TunaSweeperIntroMenuWidgetShared.h"
+#include "Settings/TunaSweeperGameUserSettings.h"
 #include "Title/TunaSweeperDisplaySettings.h"
 
 void UTunaSweeperIntroMenuWidget::LoadTitleGraphicsSettings()
 {
-	int32 DLSSModeValue = TunaSweeperTitleGraphicsSettings::ToConfigValue(PreferredDLSSMode);
-	if (GConfig)
+	if (const UTunaSweeperGameUserSettings* Settings = UTunaSweeperGameUserSettings::Get())
 	{
-		GConfig->GetInt(
-			TunaSweeperTitleGraphicsSettings::SectionName,
-			TunaSweeperTitleGraphicsSettings::DLSSModeKey,
-			DLSSModeValue,
-			GGameUserSettingsIni);
+		PreferredDLSSMode = Settings->GetPreferredDLSSMode();
 	}
-
-	PreferredDLSSMode = TunaSweeperTitleGraphicsSettings::ToTitleDLSSMode(DLSSModeValue);
 }
 
 void UTunaSweeperIntroMenuWidget::SaveTitleGraphicsSettings() const
 {
-	if (!GConfig)
+	UTunaSweeperGameUserSettings* Settings = UTunaSweeperGameUserSettings::Get();
+	if (!Settings)
 	{
 		return;
 	}
 
-	GConfig->SetInt(
-		TunaSweeperTitleGraphicsSettings::SectionName,
-		TunaSweeperTitleGraphicsSettings::DLSSModeKey,
-		TunaSweeperTitleGraphicsSettings::ToConfigValue(PreferredDLSSMode),
-		GGameUserSettingsIni);
-	GConfig->Flush(false, GGameUserSettingsIni);
+	Settings->SetPreferredDLSSMode(PreferredDLSSMode);
+	Settings->SaveSettings();
 }
 
 void UTunaSweeperIntroMenuWidget::ApplyDLSSSetting(ETunaSweeperTitleDLSSMode DLSSMode)

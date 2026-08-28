@@ -4,6 +4,7 @@
 #include "Engine/Engine.h"
 #include "GameFramework/GameUserSettings.h"
 #include "Settings/TunaSweeperBuildFlavor.h"
+#include "Settings/TunaSweeperGameUserSettings.h"
 #include "Title/TunaSweeperDisplaySettings.h"
 #include "TunaWarpTransitionProfile.h"
 
@@ -134,6 +135,10 @@ void UTunaSweeperGameInstance::Init()
 		if (UGameUserSettings* GameUserSettings = GEngine->GetGameUserSettings())
 		{
 			GameUserSettings->LoadSettings(false);
+			if (UTunaSweeperGameUserSettings* TunaSettings = Cast<UTunaSweeperGameUserSettings>(GameUserSettings))
+			{
+				TunaSettings->InitializeForCurrentHardware();
+			}
 			if (TunaSweeperDisplaySettings::ClampUnsupportedFullscreenResolution(*GameUserSettings))
 			{
 				GameUserSettings->ApplyResolutionSettings(false);

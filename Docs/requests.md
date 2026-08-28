@@ -7227,3 +7227,17 @@
 - 욕실 세면대에 직접 배치할 수 있는 `/Game/Interaction/BP_ResearchSinkInteraction` 더미 액터 Blueprint를 생성했다. 에디터에서는 위치를 확인할 수 있는 작은 배치 표식이 보이지만 게임 중에는 숨겨지고 충돌하지 않는다.
 - 전용 연구 상호작용 유형과 벙커 전용 제공 조건을 추가했으며, 상호작용하면 기존 능력치 연구 HUD를 열도록 연결했다. Blueprint는 상호작용 컴포넌트를 포함한 전용 C++ 액터를 부모로 사용한다.
 - 격리된 UE 5.7 `TunaSweeperEditor` 전체 빌드를 성공하고 `TunaSweeper.Research.InteractionDefaults`, `TunaSweeper.Research.JsonContract` 자동화 테스트를 모두 통과했다. 기존에 열린 프로젝트 에디터는 종료하지 않고 유지했다.
+
+## 2026-08-28 17:13:45 (소요시간: 00:08:10)
+
+- 타이틀 메뉴 그래픽 설정의 상세 구현 계획을 `Docs/title_graphics_settings_plan.md`에 작성했다.
+- 자동 모드는 UE 5.7 `RHIGetTextureMemoryStats`로 현재 렌더 어댑터의 전용 VRAM을 읽어 `4GiB` 미만 또는 감지 실패는 낮음, `4GiB` 이상은 최고로만 판정하며 중간·높음은 수동 선택 전용으로 설계했다.
+- 전용 `UTunaSweeperGameUserSettings`, 기존 설정 마이그레이션, 첫 실행 안전 기본값, 프로젝트 `DefaultScalability.ini`, 텍스처 풀 정책, 개별 품질 프리셋 매핑, 스크롤 가능한 별도 그래픽 위젯, 적용·취소·해상도 복구 흐름을 파일별로 계획했다.
+- 4GiB 경계 자동화 테스트, 비Shipping VRAM 테스트 인자, WBP 원샷 저장 검증, 다국어·해상도 UI 검증, 패키지 `stat streaming`·`stat RHI`·`memreport -full` 계측과 완료 기준을 정의했으며 이번 작업에서는 구현·빌드를 수행하지 않았다.
+
+## 2026-08-28 17:25:44 (소요시간: 00:46:39)
+
+- 전용 `UTunaSweeperGameUserSettings`를 구현해 실제 렌더 어댑터의 전용 VRAM이 `4GiB` 미만이거나 감지되지 않으면 자동 낮음, `4GiB` 이상이면 자동 최고를 적용하도록 했다. 중간·높음과 개별 혼합값은 사용자 선택으로 저장되며 기존 Scalability·DLSS 설정은 새 스키마로 마이그레이션한다.
+- 저사양 첫 로딩부터 텍스처 VRAM을 줄이도록 안전한 낮음 기본값과 `DefaultScalability.ini`의 400/600/800/1000MB 스트리밍 풀, Mip Bias, VRAM 제한을 추가하고 per-texture bias는 UE 5.7이 허용하는 GameSetting 적용 경로로 분리했다.
+- 타이틀 그래픽 탭에 스크롤 가능한 전용 런타임 UMG 패널을 추가했다. 자동·낮음·중간·높음·최고 프리셋, 화면 모드, 해상도, DLSS, 11개 개별 품질, VSync, FPS 제한, 모션 블러, 동적 해상도, 하드웨어 RT와 적용·취소를 지원하며 화면 변경은 15초 유지 확인 후 미확정 시 복구한다.
+- 한국어·영어·일본어 UI 문자열과 상세 구현 문서를 추가했다. `TunaSweeper` 게임 타깃과 `TunaSweeperEditor` 전체 빌드를 성공했고 `TunaSweeper.Graphics.AutoVramBoundary`, `TunaSweeper.Graphics.PresetMapping` 자동화 테스트가 모두 성공했다. 마지막 증분 에디터 빌드는 컴파일 후 다른 실행 중 에디터가 DLL 링크를 점유해 재링크만 생략되었고 동일 최종 런타임 소스의 게임 타깃 링크는 성공했다.

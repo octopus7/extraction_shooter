@@ -1,8 +1,11 @@
 #include "TunaSweeperIntroMenuWidgetShared.h"
 
 #include "EngineUtils.h"
+#include "Blueprint/WidgetTree.h"
+#include "Components/PanelWidget.h"
 #include "Settings/TunaSweeperBuildFlavor.h"
 #include "Title/TunaSweeperTitlePresentationActor.h"
+#include "UI/TunaSweeperGraphicsSettingsWidget.h"
 
 namespace TunaSweeperDistribution
 {
@@ -308,10 +311,19 @@ void UTunaSweeperIntroMenuWidget::ShowGraphicsSettingsTab()
 {
 	bShowingInterfaceSettingsTab = false;
 	bShowingDevelopmentSettingsTab = false;
+	EnsureGraphicsSettingsWidget();
+	if (SettingsStatusText)
+	{
+		SettingsStatusText->SetVisibility(ESlateVisibility::Collapsed);
+	}
 
 	if (GraphicsSettingsPanel)
 	{
 		GraphicsSettingsPanel->SetVisibility(ESlateVisibility::Visible);
+	}
+	if (TitleGraphicsSettingsWidget)
+	{
+		TitleGraphicsSettingsWidget->RefreshFromSettings();
 	}
 	if (InterfaceSettingsPanel)
 	{
@@ -337,10 +349,49 @@ void UTunaSweeperIntroMenuWidget::ShowGraphicsSettingsTab()
 	RefreshSettingsPanel();
 }
 
+void UTunaSweeperIntroMenuWidget::EnsureGraphicsSettingsWidget()
+{
+	if (!TitleGraphicsSettingsWidget)
+	{
+		if (UPanelWidget* GraphicsPanel = Cast<UPanelWidget>(GraphicsSettingsPanel))
+		{
+			TitleGraphicsSettingsWidget = CreateWidget<UTunaSweeperGraphicsSettingsWidget>(
+				GetOwningPlayer(),
+				UTunaSweeperGraphicsSettingsWidget::StaticClass());
+			if (TitleGraphicsSettingsWidget)
+			{
+				GraphicsPanel->AddChild(TitleGraphicsSettingsWidget);
+			}
+		}
+	}
+
+	if (WidgetTree)
+	{
+		for (const FName LegacySectionName : {
+			FName(TEXT("SettingsWindowModeSection")),
+			FName(TEXT("SettingsResolutionSection")),
+			FName(TEXT("SettingsDLSSSection")) })
+		{
+			if (UWidget* LegacySection = WidgetTree->FindWidget(LegacySectionName))
+			{
+				LegacySection->SetVisibility(ESlateVisibility::Collapsed);
+			}
+		}
+	}
+}
+
 void UTunaSweeperIntroMenuWidget::ShowInterfaceSettingsTab()
 {
+	if (TitleGraphicsSettingsWidget)
+	{
+		TitleGraphicsSettingsWidget->DiscardPendingChanges();
+	}
 	bShowingInterfaceSettingsTab = true;
 	bShowingDevelopmentSettingsTab = false;
+	if (SettingsStatusText)
+	{
+		SettingsStatusText->SetVisibility(ESlateVisibility::Visible);
+	}
 
 	if (const UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GetGameInstance()))
 	{
@@ -376,8 +427,16 @@ void UTunaSweeperIntroMenuWidget::ShowInterfaceSettingsTab()
 
 void UTunaSweeperIntroMenuWidget::ShowDevelopmentSettingsTab()
 {
+	if (TitleGraphicsSettingsWidget)
+	{
+		TitleGraphicsSettingsWidget->DiscardPendingChanges();
+	}
 	bShowingInterfaceSettingsTab = false;
 	bShowingDevelopmentSettingsTab = true;
+	if (SettingsStatusText)
+	{
+		SettingsStatusText->SetVisibility(ESlateVisibility::Visible);
+	}
 
 	if (GraphicsSettingsPanel)
 	{

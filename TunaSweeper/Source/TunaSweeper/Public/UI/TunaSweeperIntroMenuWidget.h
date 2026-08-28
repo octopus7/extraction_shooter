@@ -3,6 +3,7 @@
 #include "Blueprint/UserWidget.h"
 #include "CoreMinimal.h"
 #include "GenericPlatform/GenericWindow.h"
+#include "Settings/TunaSweeperGraphicsSettingsTypes.h"
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
 #include "TimerManager.h"
 #include "TunaSweeperIntroMenuWidget.generated.h"
@@ -19,14 +20,7 @@ class UVerticalBox;
 class UWidget;
 class UTunaSweeperScreenFadeWidget;
 class UTunaSweeperTitleWindParticleWidget;
-
-enum class ETunaSweeperTitleDLSSMode : uint8
-{
-	Off = 0,
-	Quality,
-	Balanced,
-	Performance
-};
+class UTunaSweeperGraphicsSettingsWidget;
 
 UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API UTunaSweeperIntroMenuWidget : public UUserWidget
@@ -185,6 +179,9 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
 	TObjectPtr<UWidget> GraphicsSettingsPanel;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTunaSweeperGraphicsSettingsWidget> TitleGraphicsSettingsWidget;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
 	TObjectPtr<UWidget> InterfaceSettingsPanel;
@@ -462,6 +459,7 @@ private:
 	void ShowSaveSlotSelection();
 	void ShowSettingsPanel();
 	void ShowGraphicsSettingsTab();
+	void EnsureGraphicsSettingsWidget();
 	void ShowInterfaceSettingsTab();
 	void ShowDevelopmentSettingsTab();
 	void ShowCreditsPanel();

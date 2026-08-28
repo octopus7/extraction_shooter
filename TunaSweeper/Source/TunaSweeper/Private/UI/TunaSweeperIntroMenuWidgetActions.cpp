@@ -3,6 +3,7 @@
 #include "Player/TunaSweeperPlayerController.h"
 #include "Settings/TunaSweeperBuildFlavor.h"
 #include "UI/TunaSweeperDebugDisplaySettings.h"
+#include "UI/TunaSweeperGraphicsSettingsWidget.h"
 
 void UTunaSweeperIntroMenuWidget::HandleStartClicked()
 {
@@ -352,6 +353,10 @@ void UTunaSweeperIntroMenuWidget::HandleDLSSPerformanceClicked()
 
 void UTunaSweeperIntroMenuWidget::HandleBackFromSettingsClicked()
 {
+	if (TitleGraphicsSettingsWidget)
+	{
+		TitleGraphicsSettingsWidget->DiscardPendingChanges();
+	}
 	ShowMainMenu();
 }
 

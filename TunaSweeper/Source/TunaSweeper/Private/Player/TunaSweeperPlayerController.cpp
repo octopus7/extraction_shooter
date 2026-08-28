@@ -552,7 +552,6 @@ void ATunaSweeperPlayerController::ApplyInitialTitleDisplaySettings()
 		return;
 	}
 
-	GameUserSettings->LoadSettings(false);
 	GameUserSettings->ApplySettings(false);
 }
 
