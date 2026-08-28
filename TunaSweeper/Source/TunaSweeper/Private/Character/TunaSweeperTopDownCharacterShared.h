@@ -38,6 +38,7 @@
 #include "Subsystem/TunaSweeperInteractionSubsystem.h"
 #include "Subsystem/TunaSweeperLevelTransitionSubsystem.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
+#include "Subsystem/TunaSweeperResearchSubsystem.h"
 #include "TimerManager.h"
 #include "TunaSweeperCollisionChannels.h"
 #include "UI/TunaSweeperLevelTransitionWidget.h"

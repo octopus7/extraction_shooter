@@ -152,7 +152,7 @@ void ATunaSweeperTopDownCharacter::BeginPlay()
 	DefaultSkeletalMeshRelativeRotation = GetMesh() ? GetMesh()->GetRelativeRotation() : FRotator::ZeroRotator;
 	DefaultVisualMeshRelativeRotation = VisualMesh ? VisualMesh->GetRelativeRotation() : FRotator::ZeroRotator;
 	CacheBaseSurvivalStats();
-	ApplyExperienceLevelStatBonuses();
+	ApplyProgressionStatBonuses();
 	ApplyBunkerPeaceZoneVitalsRules();
 	CurrentStamina = FMath::Max(0.0f, MaxStamina);
 	StaminaGaugeOpacity = 0.0f;
@@ -162,7 +162,12 @@ void ATunaSweeperTopDownCharacter::BeginPlay()
 		TunaGameInstance->OnInventoryStateChanged.RemoveAll(this);
 		TunaGameInstance->OnInventoryStateChanged.AddUObject(this, &ATunaSweeperTopDownCharacter::HandleInventoryStateChanged);
 		TunaGameInstance->OnExperienceChanged.RemoveAll(this);
-		TunaGameInstance->OnExperienceChanged.AddUObject(this, &ATunaSweeperTopDownCharacter::ApplyExperienceLevelStatBonuses);
+		TunaGameInstance->OnExperienceChanged.AddUObject(this, &ATunaSweeperTopDownCharacter::ApplyProgressionStatBonuses);
+		if (UTunaSweeperResearchSubsystem* ResearchSubsystem = TunaGameInstance->GetSubsystem<UTunaSweeperResearchSubsystem>())
+		{
+			ResearchSubsystem->OnResearchEffectsChanged.RemoveAll(this);
+			ResearchSubsystem->OnResearchEffectsChanged.AddUObject(this, &ATunaSweeperTopDownCharacter::ApplyProgressionStatBonuses);
+		}
 	}
 
 	if (VitalsComponent)
@@ -254,6 +259,10 @@ void ATunaSweeperTopDownCharacter::EndPlay(const EEndPlayReason::Type EndPlayRea
 	{
 		TunaGameInstance->OnInventoryStateChanged.RemoveAll(this);
 		TunaGameInstance->OnExperienceChanged.RemoveAll(this);
+		if (UTunaSweeperResearchSubsystem* ResearchSubsystem = TunaGameInstance->GetSubsystem<UTunaSweeperResearchSubsystem>())
+		{
+			ResearchSubsystem->OnResearchEffectsChanged.RemoveAll(this);
+		}
 	}
 
 	Super::EndPlay(EndPlayReason);

@@ -669,6 +669,13 @@ bool UTunaSweeperGameInstance::LoadGameState()
 			}
 		}
 	}
+	if (UTunaSweeperResearchSubsystem* ResearchSubsystem = GetSubsystem<UTunaSweeperResearchSubsystem>())
+	{
+		ResearchSubsystem->LoadResearchProgressFromSave(
+			SaveGame->AppliedResearchNodeIds,
+			SaveGame->ActiveResearchStates,
+			SaveGame->ResearchLastObservedUtcTicks);
+	}
 	PendingScenarioCompletionFlag = NAME_None;
 	bPendingScenarioBunkerEntryPresentation = false;
 
@@ -870,6 +877,13 @@ bool UTunaSweeperGameInstance::SaveGameStateInternal(
 			SaveGame->TrackedQuestId,
 			SaveGame->QuestCoinBalance);
 	}
+	if (const UTunaSweeperResearchSubsystem* ResearchSubsystem = GetSubsystem<UTunaSweeperResearchSubsystem>())
+	{
+		ResearchSubsystem->ExportResearchProgressForSave(
+			SaveGame->AppliedResearchNodeIds,
+			SaveGame->ActiveResearchStates,
+			SaveGame->ResearchLastObservedUtcTicks);
+	}
 	SaveGame->InventorySlots = PlayerInventorySlots;
 	SaveGame->EquipmentSlots = EquipmentSlots;
 	SaveGame->AuxiliaryBagSlots = AuxiliaryBagSlots;
@@ -1046,6 +1060,10 @@ void UTunaSweeperGameInstance::ResetRuntimeStateForSaveSlotSelection()
 	{
 		QuestSubsystem->ResetQuestProgressForNewGame();
 	}
+	if (UTunaSweeperResearchSubsystem* ResearchSubsystem = GetSubsystem<UTunaSweeperResearchSubsystem>())
+	{
+		ResearchSubsystem->ResetResearchProgressForNewGame();
+	}
 }
 
 void UTunaSweeperGameInstance::GenerateDefaultInventoryState()
@@ -1079,6 +1097,10 @@ void UTunaSweeperGameInstance::GenerateDefaultInventoryState()
 	if (UTunaSweeperQuestSubsystem* QuestSubsystem = GetSubsystem<UTunaSweeperQuestSubsystem>())
 	{
 		QuestSubsystem->ResetQuestProgressForNewGame();
+	}
+	if (UTunaSweeperResearchSubsystem* ResearchSubsystem = GetSubsystem<UTunaSweeperResearchSubsystem>())
+	{
+		ResearchSubsystem->ResetResearchProgressForNewGame();
 	}
 	ResetPlayerSlotArrays();
 	StorageSlotCapacity = GetDefaultStorageSlotCapacity();

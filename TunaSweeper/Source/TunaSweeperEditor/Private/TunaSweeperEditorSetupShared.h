@@ -176,6 +176,7 @@
 #include "UI/TunaSweeperPickupItemIconWidget.h"
 #include "UI/TunaSweeperQuestWidget.h"
 #include "UI/TunaSweeperReloadRingWidget.h"
+#include "UI/TunaSweeperResearchWidgets.h"
 #include "UI/TunaSweeperSpeechBubbleWidget.h"
 #include "UI/TunaSweeperWorkbenchPanelWidget.h"
 #include "UI/TunaSweeperWorkbenchRecipeListEntryWidget.h"
@@ -390,6 +391,8 @@ namespace TunaSweeperEditorSetup
 	const FString LevelTransitionVideoWidgetAssetName = TEXT("WBP_LevelTransitionVideo");
 	const FString QuestMenuWidgetAssetName = TEXT("WBP_QuestMenu");
 	const FString QuestInteractionWidgetAssetName = TEXT("WBP_QuestInteraction");
+	const FString ResearchNodeWidgetAssetName = TEXT("WBP_ResearchNode");
+	const FString ResearchTreeWidgetAssetName = TEXT("WBP_ResearchTree");
 	const FString SpeechBubbleWidgetAssetName = TEXT("WBP_SpeechBubble");
 	constexpr float HudTopModeTabButtonWidth = 52.0f;
 	constexpr float HudTopModeTabButtonHeight = 46.0f;
@@ -397,7 +400,7 @@ namespace TunaSweeperEditorSetup
 	constexpr float HudTopModeTabPaddingX = 12.0f;
 	constexpr float HudTopModeTabPaddingY = 10.0f;
 	constexpr float HudTopModeTabPanelWidth =
-		4.0f * HudTopModeTabButtonWidth + 3.0f * HudTopModeTabGap + 2.0f * HudTopModeTabPaddingX;
+		5.0f * HudTopModeTabButtonWidth + 4.0f * HudTopModeTabGap + 2.0f * HudTopModeTabPaddingX;
 	constexpr float HudTopModeTabPanelHeight = HudTopModeTabButtonHeight + 2.0f * HudTopModeTabPaddingY;
 	constexpr float HudUtilityPanelLeftInset = 34.0f;
 	constexpr float HudUtilityPanelRightInset = 34.0f;
@@ -841,6 +844,8 @@ void SetListViewEntryWidgetClass(UListViewBase* ListViewBase, TSubclassOf<UUserW
 UWidgetBlueprint* EnsureWidgetBlueprint(const FString& AssetPath, const FString& AssetName, UClass* ParentClass);
 bool BuildItemThumbnailSlotWidgetTree(UWidgetBlueprint* WidgetBlueprint);
 bool BuildHudTopReserveWidgetTree(UWidgetBlueprint* WidgetBlueprint);
+bool BuildResearchNodeWidgetTree(UWidgetBlueprint* WidgetBlueprint);
+bool BuildResearchTreeWidgetTree(UWidgetBlueprint* WidgetBlueprint, TSubclassOf<UUserWidget> ResearchNodeWidgetClass);
 bool BuildHudBottomStatusWidgetTree(UWidgetBlueprint* WidgetBlueprint);
 bool BuildHudDebuffBarWidgetTree(UWidgetBlueprint* WidgetBlueprint);
 bool BuildHudQuickSlotBarWidgetTree(UWidgetBlueprint* WidgetBlueprint);
@@ -872,7 +877,8 @@ bool BuildGameHudWidgetTree(
 		TSubclassOf<UUserWidget> QuickSlotBarWidgetClass,
 		TSubclassOf<UUserWidget> InventoryAreaWidgetClass,
 		TSubclassOf<UUserWidget> ItemInfoPanelWidgetClass,
-		TSubclassOf<UUserWidget> ExternalPanelWidgetClass);
+		TSubclassOf<UUserWidget> ExternalPanelWidgetClass,
+		TSubclassOf<UUserWidget> ResearchTreeWidgetClass);
 bool BuildPickupItemIconWidgetTree(UWidgetBlueprint* WidgetBlueprint);
 bool EnsureCommonGameHudAssets();
 bool EnsureScratchPresentationAssets();

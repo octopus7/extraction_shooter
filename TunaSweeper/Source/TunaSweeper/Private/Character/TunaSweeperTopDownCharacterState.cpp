@@ -101,7 +101,7 @@ void ATunaSweeperTopDownCharacter::CacheBaseSurvivalStats()
 	bBaseSurvivalStatsCached = true;
 }
 
-void ATunaSweeperTopDownCharacter::ApplyExperienceLevelStatBonuses()
+void ATunaSweeperTopDownCharacter::ApplyProgressionStatBonuses()
 {
 	CacheBaseSurvivalStats();
 
@@ -109,19 +109,22 @@ void ATunaSweeperTopDownCharacter::ApplyExperienceLevelStatBonuses()
 	const FTunaSweeperExperienceLevelStatBonuses Bonuses = TunaGameInstance
 		? TunaGameInstance->GetCurrentExperienceLevelStatBonuses()
 		: FTunaSweeperExperienceLevelStatBonuses();
+	const FTunaSweeperResearchStatBonuses ResearchBonuses = TunaGameInstance && TunaGameInstance->GetSubsystem<UTunaSweeperResearchSubsystem>()
+		? TunaGameInstance->GetSubsystem<UTunaSweeperResearchSubsystem>()->GetAppliedStatBonuses()
+		: FTunaSweeperResearchStatBonuses();
 
 	if (VitalsComponent)
 	{
 		VitalsComponent->SetMaxVitals(
-			BaseMaxHealth + Bonuses.MaxHealthBonus,
-			BaseMaxFood + Bonuses.MaxFoodBonus,
-			BaseMaxHydration + Bonuses.MaxHydrationBonus,
+			BaseMaxHealth + Bonuses.MaxHealthBonus + ResearchBonuses.MaxHealth,
+			BaseMaxFood + Bonuses.MaxFoodBonus + ResearchBonuses.MaxFood,
+			BaseMaxHydration + Bonuses.MaxHydrationBonus + ResearchBonuses.MaxHydration,
 			true);
 	}
 
 	const float OldMaxStamina = FMath::Max(1.0f, MaxStamina);
 	const float StaminaRatio = FMath::Clamp(CurrentStamina / OldMaxStamina, 0.0f, 1.0f);
-	MaxStamina = FMath::Max(1.0f, BaseMaxStamina + Bonuses.MaxStaminaBonus);
+	MaxStamina = FMath::Max(1.0f, BaseMaxStamina + Bonuses.MaxStaminaBonus + ResearchBonuses.MaxStamina);
 	CurrentStamina = FMath::Clamp(MaxStamina * StaminaRatio, 0.0f, MaxStamina);
 	RefreshCarryWeightConditionDebuffs();
 }

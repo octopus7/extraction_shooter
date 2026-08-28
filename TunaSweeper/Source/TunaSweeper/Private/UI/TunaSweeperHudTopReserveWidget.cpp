@@ -13,6 +13,7 @@ namespace TunaSweeperHudTopReserve
 	const TCHAR* QuestModeIconPath = TEXT("/Game/UI/Icons/T_UI_Mode_Quest.T_UI_Mode_Quest");
 	const TCHAR* MapModeIconPath = TEXT("/Game/UI/Icons/T_UI_Mode_Map.T_UI_Mode_Map");
 	const TCHAR* MemoModeIconPath = TEXT("/Game/UI/Icons/T_UI_Mode_Memo.T_UI_Mode_Memo");
+	const TCHAR* ResearchModeIconPath = TEXT("/Game/UI/Icons/T_UI_Mode_Memo.T_UI_Mode_Memo");
 	constexpr float ModeIconSize = 28.0f;
 
 	const TCHAR* ResolveIconPath(ETunaSweeperHudMode Mode)
@@ -27,6 +28,8 @@ namespace TunaSweeperHudTopReserve
 			return MapModeIconPath;
 		case ETunaSweeperHudMode::Memo:
 			return MemoModeIconPath;
+		case ETunaSweeperHudMode::Research:
+			return ResearchModeIconPath;
 		default:
 			return nullptr;
 		}
@@ -62,6 +65,11 @@ void UTunaSweeperHudTopReserveWidget::NativeConstruct()
 		MemoModeButton->OnClicked.RemoveDynamic(this, &UTunaSweeperHudTopReserveWidget::HandleMemoModeClicked);
 		MemoModeButton->OnClicked.AddDynamic(this, &UTunaSweeperHudTopReserveWidget::HandleMemoModeClicked);
 	}
+	if (ResearchModeButton)
+	{
+		ResearchModeButton->OnClicked.RemoveDynamic(this, &UTunaSweeperHudTopReserveWidget::HandleResearchModeClicked);
+		ResearchModeButton->OnClicked.AddDynamic(this, &UTunaSweeperHudTopReserveWidget::HandleResearchModeClicked);
+	}
 
 	RefreshTabVisuals();
 }
@@ -87,6 +95,10 @@ void UTunaSweeperHudTopReserveWidget::NativeDestruct()
 	{
 		MemoModeButton->OnClicked.RemoveDynamic(this, &UTunaSweeperHudTopReserveWidget::HandleMemoModeClicked);
 	}
+	if (ResearchModeButton)
+	{
+		ResearchModeButton->OnClicked.RemoveDynamic(this, &UTunaSweeperHudTopReserveWidget::HandleResearchModeClicked);
+	}
 
 	Super::NativeDestruct();
 }
@@ -104,6 +116,7 @@ void UTunaSweeperHudTopReserveWidget::RefreshTabVisuals()
 	SetTabVisual(ETunaSweeperHudMode::Quest, QuestModeButton, QuestModeIcon, TEXT("QuestModeIcon"));
 	SetTabVisual(ETunaSweeperHudMode::Map, MapModeButton, MapModeIcon, TEXT("MapModeIcon"));
 	SetTabVisual(ETunaSweeperHudMode::Memo, MemoModeButton, MemoModeIcon, TEXT("MemoModeIcon"));
+	SetTabVisual(ETunaSweeperHudMode::Research, ResearchModeButton, ResearchModeIcon, TEXT("ResearchModeIcon"));
 }
 
 void UTunaSweeperHudTopReserveWidget::CacheNamedWidgets()
@@ -129,6 +142,10 @@ void UTunaSweeperHudTopReserveWidget::CacheNamedWidgets()
 	{
 		MemoModeButton = Cast<UButton>(WidgetTree->FindWidget(FName(TEXT("MemoModeButton"))));
 	}
+	if (!ResearchModeButton)
+	{
+		ResearchModeButton = Cast<UButton>(WidgetTree->FindWidget(FName(TEXT("ResearchModeButton"))));
+	}
 
 	if (!InventoryModeIcon)
 	{
@@ -145,6 +162,10 @@ void UTunaSweeperHudTopReserveWidget::CacheNamedWidgets()
 	if (!MemoModeIcon)
 	{
 		MemoModeIcon = Cast<UImage>(WidgetTree->FindWidget(FName(TEXT("MemoModeIcon"))));
+	}
+	if (!ResearchModeIcon)
+	{
+		ResearchModeIcon = Cast<UImage>(WidgetTree->FindWidget(FName(TEXT("ResearchModeIcon"))));
 	}
 }
 
@@ -243,4 +264,9 @@ void UTunaSweeperHudTopReserveWidget::HandleMapModeClicked()
 void UTunaSweeperHudTopReserveWidget::HandleMemoModeClicked()
 {
 	OnHudModeSelected.Broadcast(ETunaSweeperHudMode::Memo);
+}
+
+void UTunaSweeperHudTopReserveWidget::HandleResearchModeClicked()
+{
+	OnHudModeSelected.Broadcast(ETunaSweeperHudMode::Research);
 }

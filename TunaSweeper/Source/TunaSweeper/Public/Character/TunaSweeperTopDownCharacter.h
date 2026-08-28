@@ -558,7 +558,7 @@ private:
 	void ConfigureSkirtExternalPhysicsCollision();
 	void RefreshCharacterVisualVisibility();
 	void CacheBaseSurvivalStats();
-	void ApplyExperienceLevelStatBonuses();
+	void ApplyProgressionStatBonuses();
 	void ApplyBunkerPeaceZoneVitalsRules();
 	float ResolveCameraCursorLeadRatio() const;
 	void UpdateAimingVisuals(float DeltaSeconds);

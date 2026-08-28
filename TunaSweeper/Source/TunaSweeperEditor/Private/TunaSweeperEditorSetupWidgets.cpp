@@ -2284,18 +2284,21 @@ namespace TunaSweeperEditorSetup
 		UButton* QuestModeButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("QuestModeButton"));
 		UButton* MapModeButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("MapModeButton"));
 		UButton* MemoModeButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("MemoModeButton"));
+		UButton* ResearchModeButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("ResearchModeButton"));
 		USizeBox* InventoryModeButtonFrame = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("InventoryModeButtonFrame"));
 		USizeBox* QuestModeButtonFrame = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("QuestModeButtonFrame"));
 		USizeBox* MapModeButtonFrame = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("MapModeButtonFrame"));
 		USizeBox* MemoModeButtonFrame = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("MemoModeButtonFrame"));
+		USizeBox* ResearchModeButtonFrame = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("ResearchModeButtonFrame"));
 		UImage* InventoryModeIcon = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("InventoryModeIcon"));
 		UImage* QuestModeIcon = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("QuestModeIcon"));
 		UImage* MapModeIcon = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("MapModeIcon"));
 		UImage* MemoModeIcon = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("MemoModeIcon"));
+		UImage* ResearchModeIcon = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("ResearchModeIcon"));
 		if (!RootSizeBox || !ReservedBackground || !ModeTabRow ||
-			!InventoryModeButton || !QuestModeButton || !MapModeButton || !MemoModeButton ||
-			!InventoryModeButtonFrame || !QuestModeButtonFrame || !MapModeButtonFrame || !MemoModeButtonFrame ||
-			!InventoryModeIcon || !QuestModeIcon || !MapModeIcon || !MemoModeIcon)
+			!InventoryModeButton || !QuestModeButton || !MapModeButton || !MemoModeButton || !ResearchModeButton ||
+			!InventoryModeButtonFrame || !QuestModeButtonFrame || !MapModeButtonFrame || !MemoModeButtonFrame || !ResearchModeButtonFrame ||
+			!InventoryModeIcon || !QuestModeIcon || !MapModeIcon || !MemoModeIcon || !ResearchModeIcon)
 		{
 			return false;
 		}
@@ -2312,6 +2315,7 @@ namespace TunaSweeperEditorSetup
 		UTexture2D* MemoModeTexture = LoadObject<UTexture2D>(
 			nullptr,
 			*GetAssetObjectPath(UIIconAssetPath, HudModeMemoIconAssetName));
+		UTexture2D* ResearchModeTexture = MemoModeTexture;
 
 		WidgetTree->RootWidget = RootSizeBox;
 		RootSizeBox->SetWidthOverride(HudTopModeTabPanelWidth);
@@ -2392,6 +2396,7 @@ namespace TunaSweeperEditorSetup
 		AddModeTab(QuestModeButtonFrame, QuestModeButton, QuestModeIcon, QuestModeTexture, false);
 		AddModeTab(MapModeButtonFrame, MapModeButton, MapModeIcon, MapModeTexture, false);
 		AddModeTab(MemoModeButtonFrame, MemoModeButton, MemoModeIcon, MemoModeTexture, false);
+		AddModeTab(ResearchModeButtonFrame, ResearchModeButton, ResearchModeIcon, ResearchModeTexture, false);
 
 		RegisterWidgetVariable(WidgetBlueprint, RootSizeBox);
 		RegisterWidgetVariable(WidgetBlueprint, ReservedBackground);
@@ -2400,14 +2405,17 @@ namespace TunaSweeperEditorSetup
 		RegisterWidgetVariable(WidgetBlueprint, QuestModeButton);
 		RegisterWidgetVariable(WidgetBlueprint, MapModeButton);
 		RegisterWidgetVariable(WidgetBlueprint, MemoModeButton);
+		RegisterWidgetVariable(WidgetBlueprint, ResearchModeButton);
 		RegisterWidgetVariable(WidgetBlueprint, InventoryModeButtonFrame);
 		RegisterWidgetVariable(WidgetBlueprint, QuestModeButtonFrame);
 		RegisterWidgetVariable(WidgetBlueprint, MapModeButtonFrame);
 		RegisterWidgetVariable(WidgetBlueprint, MemoModeButtonFrame);
+		RegisterWidgetVariable(WidgetBlueprint, ResearchModeButtonFrame);
 		RegisterWidgetVariable(WidgetBlueprint, InventoryModeIcon);
 		RegisterWidgetVariable(WidgetBlueprint, QuestModeIcon);
 		RegisterWidgetVariable(WidgetBlueprint, MapModeIcon);
 		RegisterWidgetVariable(WidgetBlueprint, MemoModeIcon);
+		RegisterWidgetVariable(WidgetBlueprint, ResearchModeIcon);
 		WidgetBlueprint->MarkPackageDirty();
 		return true;
 	}
@@ -4413,6 +4421,117 @@ namespace TunaSweeperEditorSetup
 		return true;
 	}
 
+	bool BuildResearchNodeWidgetTree(UWidgetBlueprint* WidgetBlueprint)
+	{
+		if (!WidgetBlueprint || !WidgetBlueprint->WidgetTree) return false;
+		WidgetBlueprint->Modify();
+		WidgetBlueprint->WidgetTree->Modify();
+		ClearWidgetTreeForRebuild(WidgetBlueprint);
+		UWidgetTree* Tree = WidgetBlueprint->WidgetTree;
+		USizeBox* RootSizeBox = Tree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("RootSizeBox"));
+		UBorder* NodeBorder = Tree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("NodeBorder"));
+		UButton* NodeButton = Tree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("NodeButton"));
+		UVerticalBox* Content = Tree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("NodeContent"));
+		UTextBlock* NameText = Tree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("NameText"));
+		UTextBlock* RequirementText = Tree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("RequirementText"));
+		UTextBlock* RemainingTimeText = Tree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("RemainingTimeText"));
+		UProgressBar* ResearchProgressBar = Tree->ConstructWidget<UProgressBar>(UProgressBar::StaticClass(), TEXT("ResearchProgressBar"));
+		UTextBlock* ActionText = Tree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("ActionText"));
+		if (!RootSizeBox || !NodeBorder || !NodeButton || !Content || !NameText || !RequirementText || !RemainingTimeText || !ResearchProgressBar || !ActionText) return false;
+		Tree->RootWidget = RootSizeBox;
+		RootSizeBox->SetWidthOverride(240.0f);
+		RootSizeBox->SetHeightOverride(154.0f);
+		RootSizeBox->SetContent(NodeBorder);
+		NodeBorder->SetPadding(FMargin(2.0f));
+		NodeBorder->SetBrush(MakeRoundedBoxBrush(FVector2D(240.0f, 154.0f), FLinearColor(0.02f, 0.035f, 0.04f, 0.96f), FLinearColor(0.28f, 0.62f, 0.52f, 0.9f), 2.0f, 8.0f));
+		NodeBorder->SetContent(NodeButton);
+		NodeButton->SetContent(Content);
+		ConfigureTextBlock(NameText, FText::FromString(TEXT("연구 노드")), FLinearColor::White, 19);
+		ConfigureTextBlock(RequirementText, FText::FromString(TEXT("개방 0")), FLinearColor(0.72f, 0.78f, 0.80f), 13);
+		ConfigureTextBlock(RemainingTimeText, FText::GetEmpty(), FLinearColor(0.55f, 0.92f, 0.78f), 17);
+		ConfigureTextBlock(ActionText, FText::FromString(TEXT("연구 시작")), FLinearColor(0.82f, 0.96f, 0.88f), 15);
+		for (UWidget* Child : TArray<UWidget*>{ NameText, RequirementText, RemainingTimeText, ResearchProgressBar, ActionText })
+		{
+			if (UVerticalBoxSlot* Slot = Content->AddChildToVerticalBox(Child))
+			{
+				Slot->SetHorizontalAlignment(HAlign_Fill);
+				Slot->SetPadding(FMargin(9.0f, 3.0f));
+			}
+		}
+		ResearchProgressBar->SetPercent(0.0f);
+		ResearchProgressBar->SetFillColorAndOpacity(FLinearColor(0.25f, 0.85f, 0.62f));
+		for (UWidget* Widget : TArray<UWidget*>{ RootSizeBox, NodeBorder, NodeButton, Content, NameText, RequirementText, RemainingTimeText, ResearchProgressBar, ActionText }) RegisterWidgetVariable(WidgetBlueprint, Widget);
+		WidgetBlueprint->MarkPackageDirty();
+		return true;
+	}
+
+	bool BuildResearchTreeWidgetTree(UWidgetBlueprint* WidgetBlueprint, TSubclassOf<UUserWidget> ResearchNodeWidgetClass)
+	{
+		if (!WidgetBlueprint || !WidgetBlueprint->WidgetTree || !ResearchNodeWidgetClass) return false;
+		WidgetBlueprint->Modify();
+		WidgetBlueprint->WidgetTree->Modify();
+		ClearWidgetTreeForRebuild(WidgetBlueprint);
+		UWidgetTree* Tree = WidgetBlueprint->WidgetTree;
+		USizeBox* RootSizeBox = Tree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("RootSizeBox"));
+		UBorder* Background = Tree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("ResearchBackground"));
+		UVerticalBox* RootColumn = Tree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("RootColumn"));
+		UTextBlock* ResearchStatusText = Tree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("ResearchStatusText"));
+		UScrollBox* ResearchScrollBox = Tree->ConstructWidget<UScrollBox>(UScrollBox::StaticClass(), TEXT("ResearchScrollBox"));
+		UVerticalBox* TreeRows = Tree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("TreeRows"));
+		if (!RootSizeBox || !Background || !RootColumn || !ResearchStatusText || !ResearchScrollBox || !TreeRows) return false;
+		Tree->RootWidget = RootSizeBox;
+		RootSizeBox->SetWidthOverride(920.0f);
+		RootSizeBox->SetHeightOverride(700.0f);
+		RootSizeBox->SetContent(Background);
+		Background->SetPadding(FMargin(22.0f));
+		Background->SetBrush(MakeRoundedBoxBrush(FVector2D(920.0f, 700.0f), FLinearColor(0.008f, 0.014f, 0.017f, 0.96f), FLinearColor(0.20f, 0.36f, 0.34f, 0.9f), 2.0f, 10.0f));
+		Background->SetContent(RootColumn);
+		ConfigureTextBlockLeft(ResearchStatusText, FText::FromString(TEXT("적용 0 / 13")), FLinearColor(0.82f, 0.96f, 0.88f), 22);
+		if (UVerticalBoxSlot* HeaderSlot = RootColumn->AddChildToVerticalBox(ResearchStatusText)) HeaderSlot->SetPadding(FMargin(8.0f, 4.0f, 8.0f, 12.0f));
+		if (UVerticalBoxSlot* ScrollSlot = RootColumn->AddChildToVerticalBox(ResearchScrollBox)) ScrollSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+		ResearchScrollBox->SetOrientation(Orient_Vertical);
+		ResearchScrollBox->AddChild(TreeRows);
+		const TArray<TArray<FName>> Rows = {
+			{ NAME_None, TEXT("vitality_1"), NAME_None },
+			{ TEXT("nutrition_1"), NAME_None, TEXT("hydration_1") },
+			{ TEXT("vitality_2"), TEXT("stamina_1"), TEXT("carry_1") },
+			{ TEXT("nutrition_2"), NAME_None, TEXT("hydration_2") },
+			{ TEXT("vitality_3"), TEXT("stamina_2"), TEXT("carry_2") },
+			{ NAME_None, TEXT("survival_mastery"), NAME_None },
+			{ NAME_None, TEXT("ultimate_conditioning"), NAME_None }
+		};
+		for (int32 RowIndex = 0; RowIndex < Rows.Num(); ++RowIndex)
+		{
+			UHorizontalBox* Row = Tree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), *FString::Printf(TEXT("ResearchRow_%d"), RowIndex));
+			if (!Row) return false;
+			for (int32 Column = 0; Column < 3; ++Column)
+			{
+				UWidget* Cell = nullptr;
+				if (!Rows[RowIndex][Column].IsNone())
+				{
+					UTunaSweeperResearchNodeWidget* Node = Cast<UTunaSweeperResearchNodeWidget>(Tree->ConstructWidget<UUserWidget>(ResearchNodeWidgetClass, *FString::Printf(TEXT("ResearchNode_%s"), *Rows[RowIndex][Column].ToString())));
+					if (!Node) return false;
+					Node->NodeId = Rows[RowIndex][Column];
+					Cell = Node;
+				}
+				else
+				{
+					Cell = Tree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), *FString::Printf(TEXT("Empty_%d_%d"), RowIndex, Column));
+				}
+				if (UHorizontalBoxSlot* CellSlot = Row->AddChildToHorizontalBox(Cell))
+				{
+					CellSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+					CellSlot->SetHorizontalAlignment(HAlign_Center);
+					CellSlot->SetPadding(FMargin(10.0f, 12.0f));
+				}
+			}
+			if (UVerticalBoxSlot* RowSlot = TreeRows->AddChildToVerticalBox(Row)) RowSlot->SetHorizontalAlignment(HAlign_Fill);
+		}
+		RegisterAllWidgetsInTree(WidgetBlueprint);
+		WidgetBlueprint->MarkPackageDirty();
+		return true;
+	}
+
 	bool BuildGameHudWidgetTree(
 		UWidgetBlueprint* WidgetBlueprint,
 		TSubclassOf<UUserWidget> TopReserveWidgetClass,
@@ -4421,11 +4540,12 @@ namespace TunaSweeperEditorSetup
 		TSubclassOf<UUserWidget> QuickSlotBarWidgetClass,
 		TSubclassOf<UUserWidget> InventoryAreaWidgetClass,
 		TSubclassOf<UUserWidget> ItemInfoPanelWidgetClass,
-		TSubclassOf<UUserWidget> ExternalPanelWidgetClass)
+		TSubclassOf<UUserWidget> ExternalPanelWidgetClass,
+		TSubclassOf<UUserWidget> ResearchTreeWidgetClass)
 	{
 		if (!WidgetBlueprint || !WidgetBlueprint->WidgetTree || !TopReserveWidgetClass || !BottomStatusWidgetClass ||
 			!DebuffBarWidgetClass ||
-			!QuickSlotBarWidgetClass || !InventoryAreaWidgetClass || !ItemInfoPanelWidgetClass || !ExternalPanelWidgetClass)
+			!QuickSlotBarWidgetClass || !InventoryAreaWidgetClass || !ItemInfoPanelWidgetClass || !ExternalPanelWidgetClass || !ResearchTreeWidgetClass)
 		{
 			return false;
 		}
@@ -4441,6 +4561,7 @@ namespace TunaSweeperEditorSetup
 		UUserWidget* InventoryAreaWidget = WidgetTree->ConstructWidget<UUserWidget>(InventoryAreaWidgetClass, TEXT("InventoryAreaWidget"));
 		UUserWidget* ItemInfoPanelWidget = WidgetTree->ConstructWidget<UUserWidget>(ItemInfoPanelWidgetClass, TEXT("ItemInfoPanelWidget"));
 		UUserWidget* ExternalPanelWidget = WidgetTree->ConstructWidget<UUserWidget>(ExternalPanelWidgetClass, TEXT("ExternalPanelWidget"));
+		UUserWidget* ResearchPanelWidget = WidgetTree->ConstructWidget<UUserWidget>(ResearchTreeWidgetClass, TEXT("ResearchPanelWidget"));
 		UBorder* UnsupportedModePanel = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("UnsupportedModePanel"));
 		UTextBlock* UnsupportedModeText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("UnsupportedModeText"));
 		UTextBlock* ModeTitleText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("ModeTitleText"));
@@ -4461,7 +4582,7 @@ namespace TunaSweeperEditorSetup
 		UTextBlock* CenterReloadPromptKeyText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("CenterReloadPromptKeyText"));
 
 		if (!RootCanvas || !TopStatusReserveWidget || !CenterContentPanel || !InventoryAreaWidget || !ItemInfoPanelWidget ||
-			!ExternalPanelWidget || !UnsupportedModePanel || !UnsupportedModeText || !ModeTitleText ||
+			!ExternalPanelWidget || !ResearchPanelWidget || !UnsupportedModePanel || !UnsupportedModeText || !ModeTitleText ||
 			!BottomRow || !BottomStatusWidget || !DebuffBarWidget || !QuickSlotBarWidget ||
 			!CenterCancelableActionGaugeRoot || !CenterCancelableActionGaugeCanvas || !CenterCancelableActionGaugeBackdrop || !CenterCancelableActionRingWidget || !CenterCancelableActionPercentText ||
 			!CenterReloadPromptRoot || !CenterReloadPromptText || !CenterReloadPromptKeyBackground || !CenterReloadPromptKeyText)
@@ -4532,6 +4653,15 @@ namespace TunaSweeperEditorSetup
 			ExternalSlot->SetAnchors(FAnchors(1.0f, 0.0f, 1.0f, 1.0f));
 			ExternalSlot->SetAlignment(FVector2D(1.0f, 0.0f));
 			ExternalSlot->SetOffsets(FMargin(0.0f, 0.0f, WorkbenchPanelWidth, 0.0f));
+		}
+
+		ResearchPanelWidget->SetVisibility(ESlateVisibility::Collapsed);
+		UCanvasPanelSlot* ResearchSlot = CenterContentPanel->AddChildToCanvas(ResearchPanelWidget);
+		if (ResearchSlot)
+		{
+			ResearchSlot->SetAnchors(FAnchors(0.5f, 0.5f, 0.5f, 0.5f));
+			ResearchSlot->SetAlignment(FVector2D(0.5f, 0.5f));
+			ResearchSlot->SetAutoSize(true);
 		}
 
 		UnsupportedModePanel->SetVisibility(ESlateVisibility::Collapsed);
@@ -4682,6 +4812,7 @@ namespace TunaSweeperEditorSetup
 		RegisterWidgetVariable(WidgetBlueprint, InventoryAreaWidget);
 		RegisterWidgetVariable(WidgetBlueprint, ItemInfoPanelWidget);
 		RegisterWidgetVariable(WidgetBlueprint, ExternalPanelWidget);
+		RegisterWidgetVariable(WidgetBlueprint, ResearchPanelWidget);
 		RegisterWidgetVariable(WidgetBlueprint, UnsupportedModePanel);
 		RegisterWidgetVariable(WidgetBlueprint, UnsupportedModeText);
 		RegisterWidgetVariable(WidgetBlueprint, ModeTitleText);
@@ -4742,6 +4873,14 @@ namespace TunaSweeperEditorSetup
 			UIAssetPath,
 			HudTopReserveWidgetAssetName,
 			UTunaSweeperHudTopReserveWidget::StaticClass());
+		UWidgetBlueprint* ResearchNodeWidgetBlueprint = EnsureWidgetBlueprint(
+			UIAssetPath,
+			ResearchNodeWidgetAssetName,
+			UTunaSweeperResearchNodeWidget::StaticClass());
+		UWidgetBlueprint* ResearchTreeWidgetBlueprint = EnsureWidgetBlueprint(
+			UIAssetPath,
+			ResearchTreeWidgetAssetName,
+			UTunaSweeperResearchTreeWidget::StaticClass());
 		UWidgetBlueprint* BottomStatusWidgetBlueprint = EnsureWidgetBlueprint(
 			UIAssetPath,
 			HudBottomStatusWidgetAssetName,
@@ -4787,7 +4926,7 @@ namespace TunaSweeperEditorSetup
 			WorkbenchRecipeListEntryWidgetAssetName,
 			UTunaSweeperWorkbenchRecipeListEntryWidget::StaticClass());
 
-		if (!ItemThumbnailWidgetBlueprint || !TopReserveWidgetBlueprint || !BottomStatusWidgetBlueprint ||
+		if (!ItemThumbnailWidgetBlueprint || !TopReserveWidgetBlueprint || !ResearchNodeWidgetBlueprint || !ResearchTreeWidgetBlueprint || !BottomStatusWidgetBlueprint ||
 			!DebuffBarWidgetBlueprint || !QuickSlotWidgetBlueprint || !InventoryAreaWidgetBlueprint ||
 			!ItemInfoPanelWidgetBlueprint || !ExternalPanelWidgetBlueprint ||
 			!LootContainerWidgetBlueprint || !StorageContainerWidgetBlueprint || !ShopContainerWidgetBlueprint ||
@@ -4813,6 +4952,17 @@ namespace TunaSweeperEditorSetup
 		{
 			return false;
 		}
+
+		if (!BuildResearchNodeWidgetTree(ResearchNodeWidgetBlueprint)) return false;
+		RegisterAllWidgetsInTree(ResearchNodeWidgetBlueprint);
+		FKismetEditorUtilities::CompileBlueprint(ResearchNodeWidgetBlueprint);
+		ResearchNodeWidgetBlueprint->MarkPackageDirty();
+		if (!SaveAsset(ResearchNodeWidgetBlueprint) || !ResearchNodeWidgetBlueprint->GeneratedClass) return false;
+		if (!BuildResearchTreeWidgetTree(ResearchTreeWidgetBlueprint, ResearchNodeWidgetBlueprint->GeneratedClass.Get())) return false;
+		RegisterAllWidgetsInTree(ResearchTreeWidgetBlueprint);
+		FKismetEditorUtilities::CompileBlueprint(ResearchTreeWidgetBlueprint);
+		ResearchTreeWidgetBlueprint->MarkPackageDirty();
+		if (!SaveAsset(ResearchTreeWidgetBlueprint) || !ResearchTreeWidgetBlueprint->GeneratedClass) return false;
 
 		if (!BuildWorkbenchRecipeListEntryWidgetTree(WorkbenchRecipeListEntryWidgetBlueprint))
 		{
@@ -4909,7 +5059,8 @@ namespace TunaSweeperEditorSetup
 			QuickSlotWidgetBlueprint->GeneratedClass.Get(),
 			InventoryAreaWidgetBlueprint->GeneratedClass.Get(),
 			ItemInfoPanelWidgetBlueprint->GeneratedClass.Get(),
-			ExternalPanelWidgetBlueprint->GeneratedClass.Get()))
+			ExternalPanelWidgetBlueprint->GeneratedClass.Get(),
+			ResearchTreeWidgetBlueprint->GeneratedClass.Get()))
 		{
 			return false;
 		}

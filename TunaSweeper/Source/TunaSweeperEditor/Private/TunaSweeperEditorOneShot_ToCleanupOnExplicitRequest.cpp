@@ -6,6 +6,17 @@ namespace TunaSweeperEditorSetup
 	// One-shot editor bootstrap. Remove only after an explicit cleanup request; see Docs/editor_one_shot_cleanup.md.
 	void RunEditorOneShotSetup_ToCleanupOnExplicitRequest()
 	{
+		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperResearchSetupQuit")))
+		{
+			const bool bSucceeded = TunaSweeperEditorSetup::EnsureCommonGameHudAssets();
+			FTSTicker::GetCoreTicker().AddTicker(FTickerDelegate::CreateLambda([bSucceeded](float)
+			{
+				FPlatformMisc::RequestExitWithStatus(false, bSucceeded ? 0 : 1, TEXT("TunaSweeperResearchSetup"));
+				return false;
+			}));
+			return;
+		}
+
 		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperScratchSetup")))
 		{
 			const bool bSucceeded = TunaSweeperEditorSetup::EnsureScratchPresentationAssets();

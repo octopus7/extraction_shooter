@@ -39,6 +39,9 @@ protected:
 	TObjectPtr<UButton> MemoModeButton;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
+	TObjectPtr<UButton> ResearchModeButton;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
 	TObjectPtr<UImage> InventoryModeIcon;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
@@ -49,6 +52,9 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
 	TObjectPtr<UImage> MemoModeIcon;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
+	TObjectPtr<UImage> ResearchModeIcon;
 
 private:
 	void RefreshTabVisuals();
@@ -75,6 +81,9 @@ private:
 
 	UFUNCTION()
 	void HandleMemoModeClicked();
+
+	UFUNCTION()
+	void HandleResearchModeClicked();
 
 	UPROPERTY(Transient)
 	ETunaSweeperHudMode ActiveMode = ETunaSweeperHudMode::None;

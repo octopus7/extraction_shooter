@@ -747,9 +747,14 @@ float UTunaSweeperGameInstance::CalculateMaxCarryWeight() const
 	CarrySettings.Normalize();
 
 	const FTunaSweeperExperienceLevelStatBonuses LevelBonuses = GetCurrentExperienceLevelStatBonuses();
+	const UTunaSweeperResearchSubsystem* ResearchSubsystem = GetSubsystem<UTunaSweeperResearchSubsystem>();
+	const FTunaSweeperResearchStatBonuses ResearchBonuses = ResearchSubsystem
+		? ResearchSubsystem->GetAppliedStatBonuses()
+		: FTunaSweeperResearchStatBonuses();
 	const float CarryStrength =
 		CarrySettings.BaseStrength +
 		FMath::Max(0.0f, LevelBonuses.CarryStrengthBonus) +
+		FMath::Max(0.0f, ResearchBonuses.CarryStrength) +
 		GetEquippedBackpackCarryStrengthBonus();
 	return FMath::Max(1.0f, CarryStrength * CarrySettings.KgPerStrength);
 }

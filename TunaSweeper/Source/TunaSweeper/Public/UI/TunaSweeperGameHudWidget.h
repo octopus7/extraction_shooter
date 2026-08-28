@@ -25,6 +25,7 @@ class UTunaSweeperItemThumbnailSlotWidget;
 class UTunaSweeperMapWidget;
 class UTunaSweeperMemoWidget;
 class UTunaSweeperQuestWidget;
+class UTunaSweeperResearchTreeWidget;
 class UTunaSweeperReloadRingWidget;
 class UBorder;
 class UButton;
@@ -213,6 +214,9 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
 	TObjectPtr<UTextBlock> ModeTitleText;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|HUD", meta = (BindWidgetOptional))
+	TObjectPtr<UTunaSweeperResearchTreeWidget> ResearchPanelWidget;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|HUD|Transitions", meta = (DisplayName = "Top Status Direction Override"))
 	ETunaSweeperHudTransitionEdge TopStatusReserveTransitionEdge = ETunaSweeperHudTransitionEdge::Auto;

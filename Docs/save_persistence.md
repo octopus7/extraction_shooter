@@ -225,6 +225,17 @@ Level reward stat bonuses are derived from the current level and `Content/Data/E
 
 Raid-to-bunker travel keeps the entering vitals ratios in runtime memory only so the bunker character can preserve health and restore food/fullness or hydration up to at least 50% if they entered below that threshold. This bunker-entry adjustment is not a save-owned field.
 
+## Ability Stat Research
+
+Ability-stat research is persisted per save slot through `AppliedResearchNodeIds`, `ActiveResearchStates`, and `ResearchLastObservedUtcTicks`.
+
+- `AppliedResearchNodeIds` contains only nodes whose timer finished and whose `Complete` button was pressed. Only these nodes contribute stat effects.
+- Each `FTunaSweeperActiveResearchSaveData` stores an independent `NodeId`, UTC start/finish ticks, and whether timer completion was detected. Multiple entries may run concurrently without a slot limit.
+- `ResearchLastObservedUtcTicks` prevents a local wall-clock rollback from reducing already-observed progress. Offline progress uses UTC finish times.
+- Starting research, first detecting timer completion, and claiming completion each request an immediate save.
+- New games clear applied and active research. Save version 21 adds these fields while version 20 remains load-compatible and initializes them empty.
+- Node layout, unlock counts, durations, localized labels, and stat effects are static editable data in `Content/Data/StatResearchNodes.json`; they are not duplicated in save data.
+
 ## Loaded Ammo Rules
 
 - `LoadedAmmoItemId` is the source of truth for a weapon's selected/loaded ammo type.

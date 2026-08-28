@@ -5,6 +5,7 @@
 #include "Housing/TunaSweeperHousingTypes.h"
 #include "Inventory/TunaSweeperInventoryTypes.h"
 #include "Quest/TunaSweeperQuestTypes.h"
+#include "Research/TunaSweeperResearchTypes.h"
 #include "TunaSweeperSaveGame.generated.h"
 
 UENUM(BlueprintType)
@@ -87,7 +88,7 @@ class TUNASWEEPER_API UTunaSweeperSaveGame : public USaveGame
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Save")
-	int32 SaveVersion = 20;
+	int32 SaveVersion = 21;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Save")
 	int32 SaveSlotIndex = 1;
@@ -169,6 +170,15 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Quest", meta = (ClampMin = "0", UIMin = "0"))
 	int32 QuestCoinBalance = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Research")
+	TArray<FName> AppliedResearchNodeIds;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Research")
+	TArray<FTunaSweeperActiveResearchSaveData> ActiveResearchStates;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Research")
+	int64 ResearchLastObservedUtcTicks = 0;
 };
 
 UCLASS()

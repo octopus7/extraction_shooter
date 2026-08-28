@@ -7,6 +7,7 @@ void UTunaSweeperGameHudWidget::ApplyHudModeVisibility()
 	const bool bMapMode = ActiveHudMode == ETunaSweeperHudMode::Map;
 	const bool bMemoMode = ActiveHudMode == ETunaSweeperHudMode::Memo;
 	const bool bQuestMode = ActiveHudMode == ETunaSweeperHudMode::Quest;
+	const bool bResearchMode = ActiveHudMode == ETunaSweeperHudMode::Research;
 	const UTunaSweeperGameInstance* WorkbenchGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
 	const bool bWorkbenchPanelOpen =
 		bInventoryMode &&
@@ -158,6 +159,13 @@ void UTunaSweeperGameHudWidget::ApplyHudModeVisibility()
 			InteractionQuestPanelWidget->RefreshQuestView();
 		}
 	}
+	if (ResearchPanelWidget)
+	{
+		SetTransitionedWidgetVisibility(
+			ResearchPanelWidget,
+			bUtilityModeOpen && bResearchMode ? ESlateVisibility::SelfHitTestInvisible : ESlateVisibility::Collapsed,
+			ETunaSweeperHudTransitionEdge::Right);
+	}
 
 	if (ExternalPanelWidget)
 	{
@@ -183,7 +191,7 @@ void UTunaSweeperGameHudWidget::ApplyHudModeVisibility()
 	{
 		SetTransitionedWidgetVisibility(
 			UnsupportedModePanel,
-			bUtilityModeOpen && !bInventoryMode && !bMapMode && !bMemoMode && !bQuestMode
+			bUtilityModeOpen && !bInventoryMode && !bMapMode && !bMemoMode && !bQuestMode && !bResearchMode
 				? ESlateVisibility::HitTestInvisible
 				: ESlateVisibility::Collapsed,
 			UnsupportedModePanelTransitionEdge);
@@ -199,7 +207,7 @@ void UTunaSweeperGameHudWidget::ApplyHudModeVisibility()
 
 	if (ModeTitleText)
 	{
-		const bool bShowModeTitle = bUtilityModeOpen && (bQuestMode || bMemoMode);
+		const bool bShowModeTitle = bUtilityModeOpen && (bQuestMode || bMemoMode || bResearchMode);
 		const UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
 		SetTransitionedWidgetVisibility(
 			ModeTitleText,
@@ -210,7 +218,9 @@ void UTunaSweeperGameHudWidget::ApplyHudModeVisibility()
 				? ResolveUiText(TunaGameInstance, TEXT("ui.hud.mode.quest"), TEXT("\uD018\uC2A4\uD2B8"))
 				: bMemoMode
 					? ResolveUiText(TunaGameInstance, TEXT("ui.hud.mode.memo"), TEXT("\uBA54\uBAA8"))
-					: FText::GetEmpty());
+					: bResearchMode
+						? FText::FromString(TEXT("연구"))
+						: FText::GetEmpty());
 	}
 
 	RefreshExtractionProgressWidget();
