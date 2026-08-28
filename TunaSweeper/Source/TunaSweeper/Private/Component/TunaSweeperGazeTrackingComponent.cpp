@@ -98,6 +98,26 @@ void UTunaSweeperGazeTrackingComponent::SetEyeTargetComponents(
 	RightEyeTargetReference.OverrideComponent = InRightEyeTarget;
 }
 
+void UTunaSweeperGazeTrackingComponent::SetEyeBoneNames(
+	FName InLeftEyeBoneName,
+	FName InRightEyeBoneName)
+{
+	LeftEyeBoneName = InLeftEyeBoneName;
+	RightEyeBoneName = InRightEyeBoneName;
+}
+
+void UTunaSweeperGazeTrackingComponent::SetEyeAxes(FVector InEyeAimAxis, FVector InEyeUpAxis)
+{
+	if (!InEyeAimAxis.IsNearlyZero())
+	{
+		EyeAimAxis = InEyeAimAxis.GetSafeNormal();
+	}
+	if (!InEyeUpAxis.IsNearlyZero())
+	{
+		EyeUpAxis = InEyeUpAxis.GetSafeNormal();
+	}
+}
+
 void UTunaSweeperGazeTrackingComponent::ReturnToNeutral()
 {
 	bGazeEnabled = false;

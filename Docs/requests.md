@@ -7171,3 +7171,15 @@
 
 - 머리 계층과 독립된 안구 시선 추적 컴포넌트 구현, 자동화 테스트, 타이틀 프레젠테이션 연동 및 관련 문서를 하나의 Git 커밋으로 정리했다. 기존에 변경되어 있던 벙커 벽 스태틱 메시 에셋 2개는 커밋 대상에서 제외했다.
 - 실제 안구 리깅 캐릭터가 준비된 이후 캐릭터별 본 축·회전 한계·시선 간격과 움직임 미감을 추가 조정하기로 했다.
+
+## 2026-08-28 16:20:00 (소요시간: 00:44:16)
+
+- Blender에서 박스형 몸통·목·머리와 일부 매립된 구형 안구·동공을 가진 `SKM_GazeTestRobot` 원본 및 FBX를 생성했다. 스켈레톤은 정확히 `root → body → neck → head → left_eye/right_eye` 6본이며 각 메시 파트는 해당 본에 리짓 웨이트했다.
+- 타이틀 전용 안구 포즈 적용 코드를 재사용 가능한 `UTunaSweeperGazeSkeletalMeshComponent`로 분리하고, 이를 기본 메시로 사용하는 `ATunaSweeperGazeTestRobotCharacter`를 추가했다. 테스트 로봇은 머리 회전 없이 별도 중앙 시선 컴포넌트와 40cm 간격의 좌·우 자식 타겟으로 마우스 커서를 추적하며, 임포트 검증으로 확인한 안구 로컬 `-X` 전방축을 사용한다.
+- `/Game/Characters/Test/GazeRobot`에 Skeletal Mesh, Skeleton, 대비가 구분되는 재질 5종과 별도 `BP_GazeTestRobot`을 생성했다. `IntroMap`의 기존 타이틀 캐릭터 옆 `(120, 100, 0)`, Yaw `105°`, 스케일 `0.72`에 Blueprint 인스턴스 하나를 배치했다.
+- UE 5.7 `TunaSweeperEditor` Win64 Development 빌드와 시선 수학·Luna 안구축·테스트 로봇 6본 계층·로컬 `-X` 축·재질·컴포넌트 계층·Blueprint·IntroMap 배치를 포함한 자동화 테스트 6개를 모두 성공했다. `IntroMap` Map Check 0 오류·0 경고를 확인하고 에디터를 열린 상태로 유지했다.
+
+## 2026-08-28 17:05:48 (소요시간: 00:01:22)
+
+- 테스트용 박스 로봇 시선 추적 구현, Blender·FBX 원본, UE Skeletal Mesh·Skeleton·재질·Blueprint, `IntroMap` 배치, 자동화 테스트와 관련 문서만 하나의 Git 커밋으로 정리했다.
+- 동시에 진행된 사족보행 구현, 능력치 연구 트리 설계 문서, 벙커 벽 스태틱 메시 변경은 커밋 대상에서 제외했다.

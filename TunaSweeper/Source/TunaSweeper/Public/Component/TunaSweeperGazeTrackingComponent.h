@@ -42,6 +42,12 @@ public:
 	void SetEyeTargetComponents(USceneComponent* InLeftEyeTarget, USceneComponent* InRightEyeTarget);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Gaze")
+	void SetEyeBoneNames(FName InLeftEyeBoneName, FName InRightEyeBoneName);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Gaze")
+	void SetEyeAxes(FVector InEyeAimAxis, FVector InEyeUpAxis);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Gaze")
 	void ReturnToNeutral();
 
 	UFUNCTION(BlueprintCallable, CallInEditor, Category = "TunaSweeper|Gaze")

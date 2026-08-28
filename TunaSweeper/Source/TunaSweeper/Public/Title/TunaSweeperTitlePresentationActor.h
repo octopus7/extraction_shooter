@@ -1,8 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Component/TunaSweeperGazePoseSink.h"
-#include "Components/SkeletalMeshComponent.h"
+#include "Component/TunaSweeperGazeSkeletalMeshComponent.h"
 #include "GameFramework/Actor.h"
 #include "TunaSweeperTitlePresentationActor.generated.h"
 
@@ -16,7 +15,7 @@ class UTunaSweeperGazeTrackingComponent;
 struct FReferenceSkeleton;
 
 UCLASS(ClassGroup = (TunaSweeper), meta = (BlueprintSpawnableComponent))
-class TUNASWEEPER_API UTunaSweeperTitleSkeletalMeshComponent : public USkeletalMeshComponent, public ITunaSweeperGazePoseSink
+class TUNASWEEPER_API UTunaSweeperTitleSkeletalMeshComponent : public UTunaSweeperGazeSkeletalMeshComponent
 {
 	GENERATED_BODY()
 
@@ -25,7 +24,6 @@ public:
 	void SetDirectHeadLookRotation(float YawDegrees, float PitchDegrees);
 
 	void SetTemporaryRelaxedArmPose(float BlendAlpha, float MotionPhaseSeconds);
-	virtual void SetGazePoseRequest(const FTunaSweeperGazePoseRequest& Request) override;
 
 	virtual void FinalizeBoneTransform() override;
 
@@ -35,9 +33,6 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Title|Look")
 	bool bApplyDirectHeadLook = true;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Title|Look")
-	bool bApplyDirectEyeGaze = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Title|Pose")
 	bool bApplyTemporaryRelaxedArms = true;
@@ -52,24 +47,11 @@ private:
 		FName LowerArmBoneName,
 		float SidePhaseOffset) const;
 	void ApplyDirectHeadLookToEditablePose();
-	void ApplyEyeGazeToEditablePose();
-	void ApplyEyeGazeBranch(
-		TArray<FTransform>& ComponentSpaceTransforms,
-		FName EyeBoneName,
-		const FVector& TargetWorldLocation,
-		bool bHasTarget,
-		float& InOutCurrentYawDegrees,
-		float& InOutCurrentPitchDegrees);
 
 	float DirectHeadLookYaw = 0.0f;
 	float DirectHeadLookPitch = 0.0f;
 	float TemporaryRelaxedArmBlendAlpha = 1.0f;
 	float TemporaryRelaxedArmMotionPhase = 0.0f;
-	FTunaSweeperGazePoseRequest CurrentGazePoseRequest;
-	float CurrentLeftEyeYawDegrees = 0.0f;
-	float CurrentLeftEyePitchDegrees = 0.0f;
-	float CurrentRightEyeYawDegrees = 0.0f;
-	float CurrentRightEyePitchDegrees = 0.0f;
 };
 
 UCLASS(BlueprintType, Blueprintable)
