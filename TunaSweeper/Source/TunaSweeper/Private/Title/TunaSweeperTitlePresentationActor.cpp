@@ -1,6 +1,7 @@
 #include "Title/TunaSweeperTitlePresentationActor.h"
 
 #include "Animation/AnimInstance.h"
+#include "Component/TunaSweeperGazeTrackingComponent.h"
 #include "ReferenceSkeleton.h"
 #include "Camera/CameraComponent.h"
 #include "Components/PointLightComponent.h"
@@ -50,10 +51,16 @@ void UTunaSweeperTitleSkeletalMeshComponent::SetTemporaryRelaxedArmPose(
 	TemporaryRelaxedArmMotionPhase = MotionPhaseSeconds;
 }
 
+void UTunaSweeperTitleSkeletalMeshComponent::SetGazePoseRequest(const FTunaSweeperGazePoseRequest& Request)
+{
+	CurrentGazePoseRequest = Request;
+}
+
 void UTunaSweeperTitleSkeletalMeshComponent::FinalizeBoneTransform()
 {
 	ApplyTemporaryRelaxedArmPoseToEditablePose();
 	ApplyDirectHeadLookToEditablePose();
+	ApplyEyeGazeToEditablePose();
 	Super::FinalizeBoneTransform();
 }
 
@@ -231,6 +238,128 @@ void UTunaSweeperTitleSkeletalMeshComponent::ApplyDirectHeadLookToEditablePose()
 	}
 }
 
+void UTunaSweeperTitleSkeletalMeshComponent::ApplyEyeGazeToEditablePose()
+{
+	if (!bApplyDirectEyeGaze)
+	{
+		CurrentLeftEyeYawDegrees = 0.0f;
+		CurrentLeftEyePitchDegrees = 0.0f;
+		CurrentRightEyeYawDegrees = 0.0f;
+		CurrentRightEyePitchDegrees = 0.0f;
+		return;
+	}
+
+	TArray<FTransform>& ComponentSpaceTransforms = GetEditableComponentSpaceTransforms();
+	if (ComponentSpaceTransforms.IsEmpty())
+	{
+		return;
+	}
+
+	ApplyEyeGazeBranch(
+		ComponentSpaceTransforms,
+		CurrentGazePoseRequest.LeftEyeBoneName,
+		CurrentGazePoseRequest.LeftTargetWorldLocation,
+		CurrentGazePoseRequest.bEnabled && CurrentGazePoseRequest.bHasLeftTarget,
+		CurrentLeftEyeYawDegrees,
+		CurrentLeftEyePitchDegrees);
+	ApplyEyeGazeBranch(
+		ComponentSpaceTransforms,
+		CurrentGazePoseRequest.RightEyeBoneName,
+		CurrentGazePoseRequest.RightTargetWorldLocation,
+		CurrentGazePoseRequest.bEnabled && CurrentGazePoseRequest.bHasRightTarget,
+		CurrentRightEyeYawDegrees,
+		CurrentRightEyePitchDegrees);
+}
+
+void UTunaSweeperTitleSkeletalMeshComponent::ApplyEyeGazeBranch(
+	TArray<FTransform>& ComponentSpaceTransforms,
+	FName EyeBoneName,
+	const FVector& TargetWorldLocation,
+	bool bHasTarget,
+	float& InOutCurrentYawDegrees,
+	float& InOutCurrentPitchDegrees)
+{
+	const int32 EyeBoneIndex = GetBoneIndex(EyeBoneName);
+	if (!ComponentSpaceTransforms.IsValidIndex(EyeBoneIndex))
+	{
+		InOutCurrentYawDegrees = 0.0f;
+		InOutCurrentPitchDegrees = 0.0f;
+		return;
+	}
+
+	const FTransform BaseEyeTransform = ComponentSpaceTransforms[EyeBoneIndex];
+	const FTransform MeshWorldTransform = GetComponentTransform();
+	const FVector EyeWorldLocation = MeshWorldTransform.TransformPosition(BaseEyeTransform.GetLocation());
+	const FVector TargetOffsetWorld = TargetWorldLocation - EyeWorldLocation;
+	const float MinimumDistance = FMath::Max(0.0f, CurrentGazePoseRequest.MinimumTargetDistance);
+	bool bHasValidDirection = bHasTarget && TargetOffsetWorld.SizeSquared() >= FMath::Square(MinimumDistance);
+
+	float TargetYawDegrees = 0.0f;
+	float TargetPitchDegrees = 0.0f;
+	if (bHasValidDirection)
+	{
+		const FVector DesiredComponentDirection =
+			MeshWorldTransform.InverseTransformVectorNoScale(TargetOffsetWorld).GetSafeNormal();
+		bHasValidDirection = TunaSweeperGaze::SolveClampedLookAngles(
+			BaseEyeTransform.GetRotation(),
+			CurrentGazePoseRequest.EyeAimAxis,
+			CurrentGazePoseRequest.EyeUpAxis,
+			DesiredComponentDirection,
+			CurrentGazePoseRequest.MaxYawDegrees,
+			CurrentGazePoseRequest.MaxPitchUpDegrees,
+			CurrentGazePoseRequest.MaxPitchDownDegrees,
+			TargetYawDegrees,
+			TargetPitchDegrees);
+	}
+
+	if (bHasValidDirection)
+	{
+		const float Weight = FMath::Clamp(CurrentGazePoseRequest.Weight, 0.0f, 1.0f);
+		TargetYawDegrees *= Weight;
+		TargetPitchDegrees *= Weight;
+	}
+	else
+	{
+		TargetYawDegrees = 0.0f;
+		TargetPitchDegrees = 0.0f;
+	}
+
+	const float InterpolationSpeed = bHasValidDirection
+		? CurrentGazePoseRequest.TrackingInterpolationSpeed
+		: CurrentGazePoseRequest.NeutralReturnInterpolationSpeed;
+	const float InterpolationAlpha = TunaSweeperGaze::CalculateExponentialInterpolationAlpha(
+		InterpolationSpeed,
+		CurrentGazePoseRequest.DeltaSeconds);
+	InOutCurrentYawDegrees = FMath::Lerp(InOutCurrentYawDegrees, TargetYawDegrees, InterpolationAlpha);
+	InOutCurrentPitchDegrees = FMath::Lerp(InOutCurrentPitchDegrees, TargetPitchDegrees, InterpolationAlpha);
+
+	if (FMath::IsNearlyZero(InOutCurrentYawDegrees, 0.01f) &&
+		FMath::IsNearlyZero(InOutCurrentPitchDegrees, 0.01f))
+	{
+		return;
+	}
+
+	const FQuat LookDelta = TunaSweeperGaze::BuildLookDelta(
+		BaseEyeTransform.GetRotation(),
+		CurrentGazePoseRequest.EyeAimAxis,
+		CurrentGazePoseRequest.EyeUpAxis,
+		InOutCurrentYawDegrees,
+		InOutCurrentPitchDegrees);
+	const FVector EyeLocation = BaseEyeTransform.GetLocation();
+	for (int32 BoneIndex = 0; BoneIndex < ComponentSpaceTransforms.Num(); ++BoneIndex)
+	{
+		if (!IsBoneDescendantOf(BoneIndex, EyeBoneIndex))
+		{
+			continue;
+		}
+
+		FTransform& BoneTransform = ComponentSpaceTransforms[BoneIndex];
+		BoneTransform.SetLocation(
+			EyeLocation + LookDelta.RotateVector(BoneTransform.GetLocation() - EyeLocation));
+		BoneTransform.SetRotation((LookDelta * BoneTransform.GetRotation()).GetNormalized());
+	}
+}
+
 ATunaSweeperTitlePresentationActor::ATunaSweeperTitlePresentationActor()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -268,6 +397,18 @@ ATunaSweeperTitlePresentationActor::ATunaSweeperTitlePresentationActor()
 
 	HeadLookTarget = CreateDefaultSubobject<USceneComponent>(TEXT("HeadLookTarget"));
 	HeadLookTarget->SetupAttachment(SceneRoot);
+
+	GazeTracking = CreateDefaultSubobject<UTunaSweeperGazeTrackingComponent>(TEXT("GazeTracking"));
+	GazeTracking->SetupAttachment(SceneRoot);
+	GazeTracking->AddTickPrerequisiteActor(this);
+
+	LeftEyeTarget = CreateDefaultSubobject<USceneComponent>(TEXT("LeftEyeTarget"));
+	LeftEyeTarget->SetupAttachment(GazeTracking);
+	LeftEyeTarget->SetRelativeLocation(FVector(0.0f, -3.2f, 0.0f));
+
+	RightEyeTarget = CreateDefaultSubobject<USceneComponent>(TEXT("RightEyeTarget"));
+	RightEyeTarget->SetupAttachment(GazeTracking);
+	RightEyeTarget->SetRelativeLocation(FVector(0.0f, 3.2f, 0.0f));
 
 	BackWall = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BackWall"));
 	BackWall->SetupAttachment(SceneRoot);
@@ -355,11 +496,22 @@ void ATunaSweeperTitlePresentationActor::OnConstruction(const FTransform& Transf
 			FAttachmentTransformRules::SnapToTargetNotIncludingScale,
 			FaceAttachmentSocketName);
 	}
+	if (GazeTracking)
+	{
+		GazeTracking->SetTrackedMesh(BodyMesh);
+		GazeTracking->SetEyeTargetComponents(LeftEyeTarget, RightEyeTarget);
+	}
 }
 
 void ATunaSweeperTitlePresentationActor::BeginPlay()
 {
 	Super::BeginPlay();
+	if (GazeTracking)
+	{
+		GazeTracking->SetTrackedMesh(BodyMesh);
+		GazeTracking->SetEyeTargetComponents(LeftEyeTarget, RightEyeTarget);
+		GazeTracking->SetGazeEnabled(bEnableEyeCursorTracking);
+	}
 	ConfigureSkirtExternalPhysicsCollision();
 	SetMainMenuPresentationActive(true);
 }
@@ -388,6 +540,10 @@ void ATunaSweeperTitlePresentationActor::Tick(float DeltaSeconds)
 void ATunaSweeperTitlePresentationActor::SetMainMenuPresentationActive(bool bActive)
 {
 	bMainMenuPresentationActive = bActive;
+	if (GazeTracking)
+	{
+		GazeTracking->SetGazeEnabled(bActive && bEnableEyeCursorTracking);
+	}
 	if (bActive)
 	{
 		SetCharacterPresentationEnabled(true);
@@ -528,10 +684,12 @@ void ATunaSweeperTitlePresentationActor::UpdateCursorLook(float DeltaSeconds)
 	const float NormalizedY = FMath::Clamp((MouseY / static_cast<float>(ViewportHeight) - 0.5f) * 2.0f, -1.0f, 1.0f);
 	const float TargetYaw = NormalizedX * MaxHeadLookYaw;
 	const float TargetPitch = -NormalizedY * MaxHeadLookPitch;
+	const float DesiredHeadYaw = bEnableHeadCursorTracking ? TargetYaw : 0.0f;
+	const float DesiredHeadPitch = bEnableHeadCursorTracking ? TargetPitch : 0.0f;
 	CurrentHeadLookYaw = FMath::FInterpTo(
-		CurrentHeadLookYaw, TargetYaw, DeltaSeconds, HeadLookInterpolationSpeed);
+		CurrentHeadLookYaw, DesiredHeadYaw, DeltaSeconds, HeadLookInterpolationSpeed);
 	CurrentHeadLookPitch = FMath::FInterpTo(
-		CurrentHeadLookPitch, TargetPitch, DeltaSeconds, HeadLookInterpolationSpeed);
+		CurrentHeadLookPitch, DesiredHeadPitch, DeltaSeconds, HeadLookInterpolationSpeed);
 	if (BodyMesh)
 	{
 		BodyMesh->SetDirectHeadLookRotation(CurrentHeadLookYaw, CurrentHeadLookPitch);
@@ -545,6 +703,19 @@ void ATunaSweeperTitlePresentationActor::UpdateCursorLook(float DeltaSeconds)
 	if (HeadLookTarget)
 	{
 		HeadLookTarget->SetWorldLocation(WorldTarget);
+	}
+
+	if (GazeTracking)
+	{
+		const float EyeHorizontalOffset =
+			FMath::Tan(FMath::DegreesToRadians(TargetYaw)) * HeadLookTargetDistance;
+		const float EyeVerticalOffset =
+			FMath::Tan(FMath::DegreesToRadians(TargetPitch)) * HeadLookTargetDistance;
+		const FVector EyeWorldTarget = CameraLocation + TitleCamera->GetForwardVector() * HeadLookTargetDistance +
+			TitleCamera->GetRightVector() * EyeHorizontalOffset +
+			TitleCamera->GetUpVector() * EyeVerticalOffset;
+		GazeTracking->SetGazeEnabled(bEnableEyeCursorTracking);
+		GazeTracking->SetGazeTargetWorldTransform(FTransform(TitleCamera->GetComponentQuat(), EyeWorldTarget));
 	}
 	ReceiveHeadLookUpdated(CurrentHeadLookYaw, CurrentHeadLookPitch, WorldTarget);
 }

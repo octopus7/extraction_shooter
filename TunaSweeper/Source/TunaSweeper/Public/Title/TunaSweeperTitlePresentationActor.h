@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Component/TunaSweeperGazePoseSink.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/Actor.h"
 #include "TunaSweeperTitlePresentationActor.generated.h"
@@ -11,10 +12,11 @@ class UPhysicsAsset;
 class USceneComponent;
 class USkyLightComponent;
 class UStaticMeshComponent;
+class UTunaSweeperGazeTrackingComponent;
 struct FReferenceSkeleton;
 
 UCLASS(ClassGroup = (TunaSweeper), meta = (BlueprintSpawnableComponent))
-class TUNASWEEPER_API UTunaSweeperTitleSkeletalMeshComponent : public USkeletalMeshComponent
+class TUNASWEEPER_API UTunaSweeperTitleSkeletalMeshComponent : public USkeletalMeshComponent, public ITunaSweeperGazePoseSink
 {
 	GENERATED_BODY()
 
@@ -23,6 +25,7 @@ public:
 	void SetDirectHeadLookRotation(float YawDegrees, float PitchDegrees);
 
 	void SetTemporaryRelaxedArmPose(float BlendAlpha, float MotionPhaseSeconds);
+	virtual void SetGazePoseRequest(const FTunaSweeperGazePoseRequest& Request) override;
 
 	virtual void FinalizeBoneTransform() override;
 
@@ -32,6 +35,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Title|Look")
 	bool bApplyDirectHeadLook = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Title|Look")
+	bool bApplyDirectEyeGaze = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Title|Pose")
 	bool bApplyTemporaryRelaxedArms = true;
@@ -46,11 +52,24 @@ private:
 		FName LowerArmBoneName,
 		float SidePhaseOffset) const;
 	void ApplyDirectHeadLookToEditablePose();
+	void ApplyEyeGazeToEditablePose();
+	void ApplyEyeGazeBranch(
+		TArray<FTransform>& ComponentSpaceTransforms,
+		FName EyeBoneName,
+		const FVector& TargetWorldLocation,
+		bool bHasTarget,
+		float& InOutCurrentYawDegrees,
+		float& InOutCurrentPitchDegrees);
 
 	float DirectHeadLookYaw = 0.0f;
 	float DirectHeadLookPitch = 0.0f;
 	float TemporaryRelaxedArmBlendAlpha = 1.0f;
 	float TemporaryRelaxedArmMotionPhase = 0.0f;
+	FTunaSweeperGazePoseRequest CurrentGazePoseRequest;
+	float CurrentLeftEyeYawDegrees = 0.0f;
+	float CurrentLeftEyePitchDegrees = 0.0f;
+	float CurrentRightEyeYawDegrees = 0.0f;
+	float CurrentRightEyePitchDegrees = 0.0f;
 };
 
 UCLASS(BlueprintType, Blueprintable)
@@ -115,6 +134,15 @@ protected:
 	TObjectPtr<USceneComponent> HeadLookTarget;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "TunaSweeper|Title|Components")
+	TObjectPtr<UTunaSweeperGazeTrackingComponent> GazeTracking;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "TunaSweeper|Title|Components")
+	TObjectPtr<USceneComponent> LeftEyeTarget;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "TunaSweeper|Title|Components")
+	TObjectPtr<USceneComponent> RightEyeTarget;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "TunaSweeper|Title|Components")
 	TObjectPtr<UStaticMeshComponent> BackWall;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "TunaSweeper|Title|Components")
@@ -176,6 +204,12 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Title|Look", meta = (ClampMin = "100.0", UIMin = "100.0"))
 	float HeadLookTargetDistance = 1000.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Title|Look")
+	bool bEnableHeadCursorTracking = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Title|Look")
+	bool bEnableEyeCursorTracking = true;
 
 private:
 	void ApplyDesignTransforms();
