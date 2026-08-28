@@ -8,6 +8,7 @@
 #include "Engine/Level.h"
 #include "Engine/SkeletalMesh.h"
 #include "Engine/World.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Misc/AutomationTest.h"
 #include "ReferenceSkeleton.h"
 #include "Title/TunaSweeperTitlePresentationActor.h"
@@ -330,6 +331,10 @@ bool FTunaSweeperGazeTestRobotRigTest::RunTest(const FString& Parameters)
 	{
 		return false;
 	}
+	const float RawMeshHalfHeight = RobotMesh->GetImportedBounds().BoxExtent.Z;
+	TestTrue(
+		TEXT("Robot raw mesh preserves the stable metre-authored FBX scale"),
+		RawMeshHalfHeight >= 0.8f && RawMeshHalfHeight <= 1.0f);
 
 	const FReferenceSkeleton& ReferenceSkeleton = RobotMesh->GetRefSkeleton();
 	TestEqual(TEXT("Robot rig contains exactly the requested six bones"), ReferenceSkeleton.GetNum(), 6);
@@ -394,6 +399,32 @@ bool FTunaSweeperGazeTestRobotRigTest::RunTest(const FString& Parameters)
 			RobotDefaults->FindComponentByClass<UTunaSweeperGazeTrackingComponent>();
 		TestNotNull(TEXT("Robot Character uses the reusable gaze skeletal mesh component"), GazeMesh);
 		TestNotNull(TEXT("Robot Character owns an independent gaze tracking component"), GazeTracking);
+		const UCharacterMovementComponent* Movement = RobotDefaults->GetCharacterMovement();
+		TestNotNull(TEXT("Robot Character retains a movement component"), Movement);
+		if (Movement)
+		{
+			TestEqual(TEXT("Robot test actor has no gravity"), Movement->GravityScale, 0.0f);
+			TestTrue(
+				TEXT("Robot test actor defaults to no land movement"),
+				Movement->DefaultLandMovementMode == MOVE_None);
+			TestTrue(
+				TEXT("Robot test actor movement starts disabled"),
+				Movement->MovementMode == MOVE_None);
+		}
+		if (GazeMesh)
+		{
+			TestTrue(
+				TEXT("Robot Character defaults assign the generated skeletal mesh"),
+				GazeMesh->GetSkeletalMeshAsset() == RobotMesh);
+			TestTrue(
+				TEXT("Robot mesh component converts the metre-authored rig to Unreal centimetres"),
+				GazeMesh->GetRelativeScale3D().Equals(FVector(100.0f), 0.01f));
+			const float EffectiveMeshHeight =
+				RawMeshHalfHeight * 2.0f * GazeMesh->GetRelativeScale3D().Z;
+			TestTrue(
+				TEXT("Robot effective height remains visible inside the Character capsule"),
+				EffectiveMeshHeight >= 170.0f && EffectiveMeshHeight <= 190.0f);
+		}
 		if (GazeTracking)
 		{
 			const USceneComponent* LeftTarget = nullptr;

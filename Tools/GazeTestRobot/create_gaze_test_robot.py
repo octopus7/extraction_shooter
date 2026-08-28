@@ -216,7 +216,10 @@ def create_robot():
         Vector((0.0, 0.0, 1.3)) - fill_light.location
     ).to_track_quat("-Z", "Y").to_euler()
 
-    scene.render.engine = "BLENDER_EEVEE_NEXT"
+    try:
+        scene.render.engine = "BLENDER_EEVEE_NEXT"
+    except TypeError:
+        scene.render.engine = "BLENDER_EEVEE"
     scene.render.resolution_x = 640
     scene.render.resolution_y = 640
     scene.render.resolution_percentage = 100

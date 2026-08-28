@@ -5,6 +5,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/SceneComponent.h"
 #include "Engine/SkeletalMesh.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/PlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "UObject/ConstructorHelpers.h"
@@ -21,8 +22,20 @@ ATunaSweeperGazeTestRobotCharacter::ATunaSweeperGazeTestRobotCharacter(
 
 	GetCapsuleComponent()->InitCapsuleSize(46.0f, 105.0f);
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	if (UCharacterMovementComponent* Movement = GetCharacterMovement())
+	{
+		Movement->GravityScale = 0.0f;
+		Movement->DefaultLandMovementMode = MOVE_None;
+		Movement->DefaultWaterMovementMode = MOVE_None;
+		Movement->DisableMovement();
+	}
 	GetMesh()->SetRelativeLocation(FVector(0.0f, 0.0f, -105.0f));
 	GetMesh()->SetRelativeRotation(FRotator::ZeroRotator);
+	// The Blender source is authored in metres, but this minimal FBX imports its
+	// raw geometry in centimetre-sized units. Scale the complete skeletal mesh
+	// component so the 1.78-unit rig appears as a 178 cm test character while
+	// preserving its stable six-bone import and skin binding.
+	GetMesh()->SetRelativeScale3D(FVector(100.0f));
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetGenerateOverlapEvents(false);
 	GetMesh()->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
@@ -58,6 +71,11 @@ void ATunaSweeperGazeTestRobotCharacter::OnConstruction(const FTransform& Transf
 void ATunaSweeperGazeTestRobotCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	if (UCharacterMovementComponent* Movement = GetCharacterMovement())
+	{
+		Movement->StopMovementImmediately();
+		Movement->DisableMovement();
+	}
 	ConfigureGazeComponents();
 }
 

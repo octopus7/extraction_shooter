@@ -10,7 +10,6 @@ MESH_PATH = f"{DESTINATION_PATH}/SKM_GazeTestRobot"
 BLUEPRINT_PATH = f"{DESTINATION_PATH}/BP_GazeTestRobot"
 INTRO_MAP_PATH = "/Game/Maps/IntroMap"
 ACTOR_LABEL = "BP_GazeTestRobot_GazeComponentTest"
-SKELETON_PATH = f"{DESTINATION_PATH}/SKM_GazeTestRobot_Skeleton"
 
 MATERIAL_SETTINGS = {
     "M_GazeRobot_Body": (unreal.LinearColor(0.12, 0.30, 0.38, 1.0), 0.65, 0.32),
@@ -93,7 +92,6 @@ def import_skeletal_mesh():
     options.set_editor_property("create_physics_asset", False)
     options.set_editor_property("automated_import_should_detect_type", False)
     options.set_editor_property("mesh_type_to_import", unreal.FBXImportType.FBXIT_SKELETAL_MESH)
-
     task = unreal.AssetImportTask()
     task.set_editor_property("filename", str(FBX_PATH))
     task.set_editor_property("destination_path", DESTINATION_PATH)
@@ -112,6 +110,11 @@ def import_skeletal_mesh():
     mesh = unreal.load_asset(MESH_PATH)
     if not mesh:
         raise RuntimeError(f"Failed to import skeletal mesh: {MESH_PATH}")
+    bounds = mesh.get_bounds()
+    if not 0.8 <= bounds.box_extent.z <= 1.0:
+        raise RuntimeError(
+            f"Unexpected raw gaze robot half-height after import: {bounds.box_extent.z} cm"
+        )
     assign_materials(mesh)
     unreal.EditorAssetLibrary.save_asset(MESH_PATH, only_if_is_dirty=False)
     return mesh
@@ -145,7 +148,7 @@ def get_component(actor, component_name):
     return None
 
 
-def reset_generated_rig_assets():
+def clear_existing_placement():
     world = unreal.EditorLoadingAndSavingUtils.load_map(INTRO_MAP_PATH)
     if not world:
         raise RuntimeError(f"Failed to load map for reset: {INTRO_MAP_PATH}")
@@ -156,11 +159,7 @@ def reset_generated_rig_assets():
             actor_subsystem.destroy_actor(actor)
     unreal.EditorLoadingAndSavingUtils.save_dirty_packages(True, True)
 
-    for asset_path in (BLUEPRINT_PATH, MESH_PATH, SKELETON_PATH):
-        if unreal.EditorAssetLibrary.does_asset_exist(asset_path):
-            if not unreal.EditorAssetLibrary.delete_asset(asset_path):
-                raise RuntimeError(f"Failed to reset generated asset: {asset_path}")
-    unreal.log("Reset prior gaze robot rig assets and map instance.")
+    unreal.log("Cleared prior gaze robot map instance.")
 
 
 def place_blueprint(blueprint, mesh):
@@ -194,16 +193,22 @@ def place_blueprint(blueprint, mesh):
     robot_rotation.roll = 0.0
 
     generated_class = blueprint.generated_class()
+    unreal.log("Gaze robot placement: spawning Blueprint actor")
     robot = actor_subsystem.spawn_actor_from_class(generated_class, robot_location, robot_rotation)
     if not robot:
         raise RuntimeError("Failed to place BP_GazeTestRobot in IntroMap")
+    unreal.log("Gaze robot placement: actor spawned")
     robot.set_actor_label(ACTOR_LABEL)
+    unreal.log("Gaze robot placement: actor label assigned")
     robot.set_actor_scale3d(unreal.Vector(0.72, 0.72, 0.72))
+    unreal.log("Gaze robot placement: actor scale assigned")
 
     mesh_component = get_component(robot, "CharacterMesh0")
     if not mesh_component:
         raise RuntimeError("Placed gaze robot has no CharacterMesh0 component")
+    unreal.log("Gaze robot placement: assigning skeletal mesh")
     mesh_component.set_skeletal_mesh(mesh)
+    unreal.log("Gaze robot placement: skeletal mesh assigned")
 
     unreal.EditorAssetLibrary.save_asset(BLUEPRINT_PATH, only_if_is_dirty=False)
     unreal.EditorLoadingAndSavingUtils.save_dirty_packages(True, True)
@@ -213,7 +218,7 @@ def place_blueprint(blueprint, mesh):
 
 
 def main():
-    reset_generated_rig_assets()
+    clear_existing_placement()
     mesh = import_skeletal_mesh()
     blueprint = ensure_blueprint()
     place_blueprint(blueprint, mesh)
