@@ -2226,6 +2226,26 @@ void ATunaSweeperPlayerController::HandleDifficultyAdjustmentWidgetClosed()
 	ApplyDefaultGameInputMode();
 }
 
+bool ATunaSweeperPlayerController::OpenResearchPanel()
+{
+	if (!IsLocalController() || !IsBunkerMap())
+	{
+		return false;
+	}
+
+	EnsureGameHudWidget();
+	if (!GameHudWidget)
+	{
+		return false;
+	}
+
+	GameHudWidget->SetHudMode(ETunaSweeperHudMode::Research);
+	CancelPawnGameplayActions();
+	ApplyDefaultGameInputMode();
+	bShowMouseCursor = true;
+	return GameHudWidget->GetHudMode() == ETunaSweeperHudMode::Research;
+}
+
 void ATunaSweeperPlayerController::DropWorkbenchOverflowItems(const TArray<FTunaSweeperItemStack>& OverflowItems)
 {
 	for (const FTunaSweeperItemStack& OverflowItem : OverflowItems)

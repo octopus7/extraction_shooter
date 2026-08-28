@@ -2,6 +2,39 @@
 
 namespace TunaSweeperEditorSetup
 {
+	bool EnsureResearchSinkInteractionBlueprint()
+	{
+		UBlueprint* Blueprint = EnsureBlueprint(
+			InteractionAssetPath,
+			ResearchSinkInteractionAssetName,
+			ATunaSweeperResearchStationActor::StaticClass());
+		if (!Blueprint)
+		{
+			return false;
+		}
+
+		FKismetEditorUtilities::CompileBlueprint(Blueprint);
+		ATunaSweeperResearchStationActor* Defaults = Blueprint->GeneratedClass
+			? Cast<ATunaSweeperResearchStationActor>(Blueprint->GeneratedClass->GetDefaultObject())
+			: nullptr;
+		if (!Defaults)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to configure %s defaults."), *GetNameSafe(Blueprint));
+			return false;
+		}
+
+		Blueprint->Modify();
+		Defaults->Modify();
+		Defaults->ConfigureResearchStationDefaults(
+			FText::FromString(TEXT("능력치 연구")),
+			TSoftClassPtr<UTunaSweeperInteractionMarkerWidget>(
+				FSoftObjectPath(GetAssetClassPath(UIAssetPath, InteractionMarkerAssetName))));
+		FBlueprintEditorUtils::MarkBlueprintAsModified(Blueprint);
+		FKismetEditorUtilities::CompileBlueprint(Blueprint);
+		Blueprint->MarkPackageDirty();
+		return SaveAsset(Blueprint);
+	}
+
 	UTexture2D* EnsureWarpPointNoiseTexture()
 	{
 		const FString ObjectPath = GetAssetObjectPath(InteractionAssetPath, WarpPointNoiseTextureAssetName);

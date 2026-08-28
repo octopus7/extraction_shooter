@@ -7221,3 +7221,9 @@
 - 세이브 버전을 21로 올리고 버전 20 호환을 유지했다. 완료 확정 노드, 복수 진행 연구, 마지막 관측 UTC를 저장·로드하고 새 게임에서 초기화하며, 완료 효과를 최대 체력·포만감·수분·스태미나와 운반 힘 계산에 합산했다.
 - 실제 편집 가능한 `WBP_ResearchNode`와 세로 ScrollBox를 가진 `WBP_ResearchTree` 에셋을 생성하고, 한 행 최대 3개로 아래 방향 7행을 구성했다. `WBP_HudTopReserve` 연구 탭과 `WBP_GameHud` 연구 패널을 연결했으며 런타임 C++은 연구 위젯 트리를 생성하지 않고 실물 WBP의 바인딩 상태만 갱신한다.
 - UE 5.7 `TunaSweeperEditor` 전체 빌드 성공, `TunaSweeper.Research.JsonContract` 및 `TunaSweeper.Save.VersionPolicy` 자동화 테스트 성공을 확인했다. 이후 동시 그래픽 설정 작업이 새 소스를 추가한 상태의 최종 증분 빌드는 열린 Live Coding 에디터 때문에 재링크하지 않았고, 에디터는 열린 상태로 유지했다.
+
+## 2026-08-28 17:50:00 (소요시간: 00:20:42)
+
+- 욕실 세면대에 직접 배치할 수 있는 `/Game/Interaction/BP_ResearchSinkInteraction` 더미 액터 Blueprint를 생성했다. 에디터에서는 위치를 확인할 수 있는 작은 배치 표식이 보이지만 게임 중에는 숨겨지고 충돌하지 않는다.
+- 전용 연구 상호작용 유형과 벙커 전용 제공 조건을 추가했으며, 상호작용하면 기존 능력치 연구 HUD를 열도록 연결했다. Blueprint는 상호작용 컴포넌트를 포함한 전용 C++ 액터를 부모로 사용한다.
+- 격리된 UE 5.7 `TunaSweeperEditor` 전체 빌드를 성공하고 `TunaSweeper.Research.InteractionDefaults`, `TunaSweeper.Research.JsonContract` 자동화 테스트를 모두 통과했다. 기존에 열린 프로젝트 에디터는 종료하지 않고 유지했다.

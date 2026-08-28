@@ -83,6 +83,7 @@
 #include "Interaction/TunaSweeperPhysicsAppleActor.h"
 #include "Interaction/TunaSweeperPhysicsCrateFragmentActor.h"
 #include "Interaction/TunaSweeperPickupItemActor.h"
+#include "Interaction/TunaSweeperResearchStationActor.h"
 #include "Interaction/TunaSweeperSandbagCoverActor.h"
 #include "Interaction/TunaSweeperSelfDestructInteractableActor.h"
 #include "Interaction/TunaSweeperTransparentObstacleActor.h"
@@ -441,6 +442,7 @@ namespace TunaSweeperEditorSetup
 	constexpr float WorkbenchTileWidth = 96.0f;
 	constexpr float WorkbenchTileHeight = 96.0f;
 	const FString InteractionAssetPath = TEXT("/Game/Interaction");
+	const FString ResearchSinkInteractionAssetName = TEXT("BP_ResearchSinkInteraction");
 	const FString EditorMapCaptureAssetPath = TEXT("/Game/EditorOnly/MapCapture");
 	const FString EditorMapCaptureBlueprintAssetName = TEXT("BP_Editor_MapCaptureActor");
 	const FString EditorMapCaptureActorLabel = TEXT("TS_Editor_MapCapture_Raid");
@@ -912,6 +914,7 @@ bool IsEditorWorldReadyForMapSetup();
 bool ConfigureEditorMapCaptureActorInstance(AActor* Actor, bool bAutoDetectBounds);
 bool PlaceEditorMapCaptureActorInRaidMap(UBlueprint* MapCaptureBlueprint);
 bool EnsureEditorMapCaptureBlueprintAndRaidPlacement();
+bool EnsureResearchSinkInteractionBlueprint();
 bool EnsureOpeningScenarioMap();
 bool EnsureOpeningScenarioPresentationSetup();
 bool PlacePickupItemActor(UWorld* World, UBlueprint* ActorBlueprint, const FString& ActorLabel, const FVector& Location, int32 ItemId);

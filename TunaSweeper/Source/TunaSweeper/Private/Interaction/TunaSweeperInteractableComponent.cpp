@@ -75,6 +75,8 @@ namespace TunaSweeperInteractionMarkerLayout
 			return FName(TEXT("ui.interaction.mole_dialogue"));
 		case ETunaSweeperInteractionType::DifficultyAdjustment:
 			return FName(TEXT("ui.interaction.difficulty_adjustment"));
+		case ETunaSweeperInteractionType::Research:
+			return FName(TEXT("ui.interaction.research"));
 		default:
 			return NAME_None;
 		}

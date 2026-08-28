@@ -87,6 +87,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
 	bool OpenDifficultyAdjustmentPanel();
 
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|HUD")
+	bool OpenResearchPanel();
+
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Workbench")
 	void DropWorkbenchOverflowItems(const TArray<FTunaSweeperItemStack>& OverflowItems);
 

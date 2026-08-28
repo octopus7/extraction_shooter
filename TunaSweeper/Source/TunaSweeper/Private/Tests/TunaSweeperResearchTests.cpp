@@ -3,6 +3,7 @@
 #include "Dom/JsonObject.h"
 #include "Dom/JsonValue.h"
 #include "Misc/AutomationTest.h"
+#include "Interaction/TunaSweeperResearchStationActor.h"
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
 #include "Serialization/JsonReader.h"
@@ -46,6 +47,31 @@ bool FTunaSweeperResearchJsonContractTest::RunTest(const FString& Parameters)
 	}
 	TestTrue(TEXT("At least one node is initially available"), InitialNodeCount > 0);
 	TestEqual(TEXT("Final research duration reaches one hour"), MaximumDurationSeconds, 3600);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(
+	FTunaSweeperResearchInteractionDefaultsTest,
+	"TunaSweeper.Research.InteractionDefaults",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool FTunaSweeperResearchInteractionDefaultsTest::RunTest(const FString& Parameters)
+{
+	(void)Parameters;
+	const ATunaSweeperResearchStationActor* Defaults = GetDefault<ATunaSweeperResearchStationActor>();
+	TestNotNull(TEXT("Research station CDO"), Defaults);
+	if (!Defaults)
+	{
+		return false;
+	}
+
+	TestNotNull(TEXT("Research station has an interactable component"), Defaults->GetInteractableComponent());
+	TestEqual(TEXT("Research station interaction type"), Defaults->GetInteractionType(), ETunaSweeperInteractionType::Research);
+	TestFalse(TEXT("Research station has a visible interaction label"), Defaults->GetInteractionDisplayName().IsEmpty());
+	UClass* BlueprintClass = LoadClass<ATunaSweeperResearchStationActor>(
+		nullptr,
+		TEXT("/Game/Interaction/BP_ResearchSinkInteraction.BP_ResearchSinkInteraction_C"));
+	TestNotNull(TEXT("Placeable research sink Blueprint loads"), BlueprintClass);
 	return true;
 }
 

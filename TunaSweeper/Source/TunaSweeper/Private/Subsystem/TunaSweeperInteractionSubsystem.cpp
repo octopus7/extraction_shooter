@@ -19,6 +19,7 @@
 #include "Interaction/TunaSweeperPersistentDoorActor.h"
 #include "Interaction/TunaSweeperPiggyBankActor.h"
 #include "Interaction/TunaSweeperPickupItemActor.h"
+#include "Interaction/TunaSweeperResearchStationActor.h"
 #include "Interaction/TunaSweeperSelfDestructInteractableActor.h"
 #include "Interaction/TunaSweeperShopActor.h"
 #include "Interaction/TunaSweeperStorageActor.h"
@@ -116,6 +117,8 @@ namespace TunaSweeperInteractionQuestEvents
 			return FName(TEXT("mole_dialogue"));
 		case ETunaSweeperInteractionType::DifficultyAdjustment:
 			return FName(TEXT("difficulty_adjustment"));
+		case ETunaSweeperInteractionType::Research:
+			return FName(TEXT("research"));
 		default:
 			return NAME_None;
 		}
@@ -313,6 +316,9 @@ bool UTunaSweeperInteractionSubsystem::RequestInteraction(UTunaSweeperInteractab
 	case ETunaSweeperInteractionType::DifficultyAdjustment:
 		bHandled = HandleDifficultyAdjustmentInteraction(Interactable, InstigatorPawn);
 		break;
+	case ETunaSweeperInteractionType::Research:
+		bHandled = HandleResearchInteraction(Interactable, InstigatorPawn);
+		break;
 	default:
 		return false;
 	}
@@ -399,6 +405,12 @@ bool UTunaSweeperInteractionSubsystem::CanOfferInteraction(const UTunaSweeperInt
 	{
 		return TunaSweeperInteractionQuestEvents::IsBunkerMap(GetWorld()) &&
 			Cast<ATunaSweeperDifficultyAdjustmentActor>(Interactable->GetOwner());
+	}
+
+	if (Interactable->GetInteractionType() == ETunaSweeperInteractionType::Research)
+	{
+		return TunaSweeperInteractionQuestEvents::IsBunkerMap(GetWorld()) &&
+			Cast<ATunaSweeperResearchStationActor>(Interactable->GetOwner());
 	}
 
 	if (Interactable->GetInteractionType() != ETunaSweeperInteractionType::Quest)
@@ -948,6 +960,22 @@ bool UTunaSweeperInteractionSubsystem::HandleDifficultyAdjustmentInteraction(
 
 	ATunaSweeperPlayerController* TunaPlayerController = Cast<ATunaSweeperPlayerController>(InstigatorPawn->GetController());
 	return TunaPlayerController && TunaPlayerController->OpenDifficultyAdjustmentPanel();
+}
+
+bool UTunaSweeperInteractionSubsystem::HandleResearchInteraction(
+	UTunaSweeperInteractableComponent* Interactable,
+	APawn* InstigatorPawn)
+{
+	const ATunaSweeperResearchStationActor* ResearchStationActor = Interactable
+		? Cast<ATunaSweeperResearchStationActor>(Interactable->GetOwner())
+		: nullptr;
+	if (!ResearchStationActor || !InstigatorPawn || !TunaSweeperInteractionQuestEvents::IsBunkerMap(GetWorld()))
+	{
+		return false;
+	}
+
+	ATunaSweeperPlayerController* TunaPlayerController = Cast<ATunaSweeperPlayerController>(InstigatorPawn->GetController());
+	return TunaPlayerController && TunaPlayerController->OpenResearchPanel();
 }
 
 void UTunaSweeperInteractionSubsystem::RefreshFocusedInteractable()
