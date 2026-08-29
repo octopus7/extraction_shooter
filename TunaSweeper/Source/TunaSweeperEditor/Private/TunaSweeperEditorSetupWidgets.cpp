@@ -1411,6 +1411,7 @@ namespace TunaSweeperEditorSetup
 		if (GraphicsSettingsSlot)
 		{
 			GraphicsSettingsSlot->SetPadding(FMargin(0.0f));
+			GraphicsSettingsSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
 		}
 
 		ConfigureTextBlockLeft(WindowModeLabelText, FText::FromString(TEXT("\uD654\uBA74 \uBAA8\uB4DC")), FLinearColor(0.72f, 0.80f, 0.78f, 1.0f), 15);

@@ -351,6 +351,15 @@ void UTunaSweeperIntroMenuWidget::ShowGraphicsSettingsTab()
 
 void UTunaSweeperIntroMenuWidget::EnsureGraphicsSettingsWidget()
 {
+	if (GraphicsSettingsPanel)
+	{
+		GraphicsSettingsPanel->SetClipping(EWidgetClipping::ClipToBoundsAlways);
+		if (UVerticalBoxSlot* GraphicsPanelSlot = Cast<UVerticalBoxSlot>(GraphicsSettingsPanel->Slot))
+		{
+			GraphicsPanelSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+		}
+	}
+
 	if (!TitleGraphicsSettingsWidget)
 	{
 		if (UPanelWidget* GraphicsPanel = Cast<UPanelWidget>(GraphicsSettingsPanel))
@@ -360,9 +369,19 @@ void UTunaSweeperIntroMenuWidget::EnsureGraphicsSettingsWidget()
 				UTunaSweeperGraphicsSettingsWidget::StaticClass());
 			if (TitleGraphicsSettingsWidget)
 			{
-				GraphicsPanel->AddChild(TitleGraphicsSettingsWidget);
+				TitleGraphicsSettingsWidget->SetClipping(EWidgetClipping::ClipToBoundsAlways);
+				if (UVerticalBoxSlot* GraphicsWidgetSlot =
+					Cast<UVerticalBoxSlot>(GraphicsPanel->AddChild(TitleGraphicsSettingsWidget)))
+				{
+					GraphicsWidgetSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+				}
 			}
 		}
+	}
+	else if (UVerticalBoxSlot* GraphicsWidgetSlot =
+		Cast<UVerticalBoxSlot>(TitleGraphicsSettingsWidget->Slot))
+	{
+		GraphicsWidgetSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
 	}
 
 	if (WidgetTree)
