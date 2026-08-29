@@ -2,12 +2,14 @@
 
 #include "Dom/JsonObject.h"
 #include "Dom/JsonValue.h"
+#include "Engine/GameInstance.h"
 #include "Misc/AutomationTest.h"
 #include "Interaction/TunaSweeperResearchStationActor.h"
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
+#include "Subsystem/TunaSweeperResearchSubsystem.h"
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(
 	FTunaSweeperResearchJsonContractTest,
@@ -72,6 +74,57 @@ bool FTunaSweeperResearchInteractionDefaultsTest::RunTest(const FString& Paramet
 		nullptr,
 		TEXT("/Game/Interaction/BP_ResearchSinkInteraction.BP_ResearchSinkInteraction_C"));
 	TestNotNull(TEXT("Placeable research sink Blueprint loads"), BlueprintClass);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(
+	FTunaSweeperResearchDeferredInitializationNotificationsTest,
+	"TunaSweeper.Research.DeferredInitializationNotifications",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool FTunaSweeperResearchDeferredInitializationNotificationsTest::RunTest(const FString& Parameters)
+{
+	(void)Parameters;
+	UGameInstance* GameInstance = NewObject<UGameInstance>();
+	TestNotNull(TEXT("Game instance outer"), GameInstance);
+	UTunaSweeperResearchSubsystem* ResearchSubsystem =
+		NewObject<UTunaSweeperResearchSubsystem>(GameInstance);
+	TestNotNull(TEXT("Research subsystem instance"), ResearchSubsystem);
+	if (!ResearchSubsystem)
+	{
+		return false;
+	}
+
+	int32 EffectsNotificationCount = 0;
+	int32 StateNotificationCount = 0;
+	ResearchSubsystem->OnResearchEffectsChanged.AddLambda([&EffectsNotificationCount]()
+	{
+		++EffectsNotificationCount;
+	});
+	ResearchSubsystem->OnResearchStateChanged.AddLambda([&StateNotificationCount]()
+	{
+		++StateNotificationCount;
+	});
+
+	ResearchSubsystem->ResetResearchProgressForNewGame(
+		ETunaSweeperResearchNotificationMode::Deferred);
+	ResearchSubsystem->ResetResearchProgressForNewGame(
+		ETunaSweeperResearchNotificationMode::Deferred);
+	TestEqual(TEXT("Deferred effects notification is suppressed"), EffectsNotificationCount, 0);
+	TestEqual(TEXT("Deferred state notification is suppressed"), StateNotificationCount, 0);
+
+	ResearchSubsystem->FlushDeferredResearchNotifications();
+	TestEqual(TEXT("Deferred effects notifications are coalesced"), EffectsNotificationCount, 1);
+	TestEqual(TEXT("Deferred state notifications are coalesced"), StateNotificationCount, 1);
+
+	ResearchSubsystem->FlushDeferredResearchNotifications();
+	TestEqual(TEXT("Second flush has no effects notification"), EffectsNotificationCount, 1);
+	TestEqual(TEXT("Second flush has no state notification"), StateNotificationCount, 1);
+
+	ResearchSubsystem->ResetResearchProgressForNewGame(
+		ETunaSweeperResearchNotificationMode::Immediate);
+	TestEqual(TEXT("Immediate effects notification remains immediate"), EffectsNotificationCount, 2);
+	TestEqual(TEXT("Immediate state notification remains immediate"), StateNotificationCount, 2);
 	return true;
 }
 

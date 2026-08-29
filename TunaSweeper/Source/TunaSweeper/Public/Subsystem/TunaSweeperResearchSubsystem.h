@@ -5,6 +5,12 @@
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "TunaSweeperResearchSubsystem.generated.h"
 
+enum class ETunaSweeperResearchNotificationMode : uint8
+{
+	Immediate,
+	Deferred
+};
+
 UCLASS()
 class TUNASWEEPER_API UTunaSweeperResearchSubsystem : public UGameInstanceSubsystem
 {
@@ -22,9 +28,16 @@ public:
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Research") int32 GetAppliedNodeCount() const { return AppliedNodeIds.Num(); }
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Research") FTunaSweeperResearchStatBonuses GetAppliedStatBonuses() const;
 	void ExportResearchProgressForSave(TArray<FName>& OutAppliedNodeIds, TArray<FTunaSweeperActiveResearchSaveData>& OutActiveResearch, int64& OutLastObservedUtcTicks) const;
-	void LoadResearchProgressFromSave(const TArray<FName>& SavedAppliedNodeIds, const TArray<FTunaSweeperActiveResearchSaveData>& SavedActiveResearch, int64 SavedLastObservedUtcTicks);
-	void ResetResearchProgressForNewGame();
+	void LoadResearchProgressFromSave(
+		const TArray<FName>& SavedAppliedNodeIds,
+		const TArray<FTunaSweeperActiveResearchSaveData>& SavedActiveResearch,
+		int64 SavedLastObservedUtcTicks,
+		ETunaSweeperResearchNotificationMode NotificationMode = ETunaSweeperResearchNotificationMode::Immediate);
+	void ResetResearchProgressForNewGame(
+		ETunaSweeperResearchNotificationMode NotificationMode = ETunaSweeperResearchNotificationMode::Immediate);
+	void FlushDeferredResearchNotifications();
 private:
+	void NotifyResearchProgressChanged(ETunaSweeperResearchNotificationMode NotificationMode);
 	bool TickResearch(float DeltaSeconds);
 	void RefreshTemporalState(bool bSaveIfChanged);
 	bool EnsureResearchDataLoaded() const;
@@ -41,5 +54,7 @@ private:
 	int64 SessionStartUtcTicks = 0;
 	bool bResearchDataLoaded = false;
 	bool bProgressLoaded = false;
+	bool bResearchEffectsNotificationPending = false;
+	bool bResearchStateNotificationPending = false;
 	FTSTicker::FDelegateHandle TickerHandle;
 };

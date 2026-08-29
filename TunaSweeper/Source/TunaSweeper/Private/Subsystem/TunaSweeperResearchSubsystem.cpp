@@ -42,6 +42,8 @@ void UTunaSweeperResearchSubsystem::Deinitialize()
 		FTSTicker::GetCoreTicker().RemoveTicker(TickerHandle);
 		TickerHandle.Reset();
 	}
+	bResearchEffectsNotificationPending = false;
+	bResearchStateNotificationPending = false;
 	Super::Deinitialize();
 }
 
@@ -243,7 +245,11 @@ void UTunaSweeperResearchSubsystem::ExportResearchProgressForSave(TArray<FName>&
 	OutLastObservedUtcTicks = FMath::Max(LastObservedUtcTicks, GetEffectiveUtcTicks());
 }
 
-void UTunaSweeperResearchSubsystem::LoadResearchProgressFromSave(const TArray<FName>& SavedAppliedNodeIds, const TArray<FTunaSweeperActiveResearchSaveData>& SavedActiveResearch, int64 SavedLastObservedUtcTicks)
+void UTunaSweeperResearchSubsystem::LoadResearchProgressFromSave(
+	const TArray<FName>& SavedAppliedNodeIds,
+	const TArray<FTunaSweeperActiveResearchSaveData>& SavedActiveResearch,
+	int64 SavedLastObservedUtcTicks,
+	ETunaSweeperResearchNotificationMode NotificationMode)
 {
 	LoadResearchData(false);
 	AppliedNodeIds.Reset();
@@ -263,18 +269,45 @@ void UTunaSweeperResearchSubsystem::LoadResearchProgressFromSave(const TArray<FN
 	SessionStartPlatformSeconds = FPlatformTime::Seconds();
 	SessionStartUtcTicks = LastObservedUtcTicks;
 	bProgressLoaded = true;
-	OnResearchEffectsChanged.Broadcast();
-	OnResearchStateChanged.Broadcast();
+	NotifyResearchProgressChanged(NotificationMode);
 }
 
-void UTunaSweeperResearchSubsystem::ResetResearchProgressForNewGame()
+void UTunaSweeperResearchSubsystem::ResetResearchProgressForNewGame(
+	ETunaSweeperResearchNotificationMode NotificationMode)
 {
 	AppliedNodeIds.Reset();
 	ActiveResearch.Reset();
 	LastObservedUtcTicks = FDateTime::UtcNow().GetTicks();
 	bProgressLoaded = true;
-	OnResearchEffectsChanged.Broadcast();
-	OnResearchStateChanged.Broadcast();
+	NotifyResearchProgressChanged(NotificationMode);
+}
+
+void UTunaSweeperResearchSubsystem::NotifyResearchProgressChanged(
+	ETunaSweeperResearchNotificationMode NotificationMode)
+{
+	bResearchEffectsNotificationPending = true;
+	bResearchStateNotificationPending = true;
+	if (NotificationMode == ETunaSweeperResearchNotificationMode::Immediate)
+	{
+		FlushDeferredResearchNotifications();
+	}
+}
+
+void UTunaSweeperResearchSubsystem::FlushDeferredResearchNotifications()
+{
+	const bool bBroadcastEffectsChanged = bResearchEffectsNotificationPending;
+	const bool bBroadcastStateChanged = bResearchStateNotificationPending;
+	bResearchEffectsNotificationPending = false;
+	bResearchStateNotificationPending = false;
+
+	if (bBroadcastEffectsChanged)
+	{
+		OnResearchEffectsChanged.Broadcast();
+	}
+	if (bBroadcastStateChanged)
+	{
+		OnResearchStateChanged.Broadcast();
+	}
 }
 
 bool UTunaSweeperResearchSubsystem::TickResearch(float DeltaSeconds)

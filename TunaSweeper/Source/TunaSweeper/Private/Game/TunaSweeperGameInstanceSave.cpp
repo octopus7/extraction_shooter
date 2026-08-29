@@ -391,6 +391,7 @@ bool UTunaSweeperGameInstance::ActivateSaveSlot(int32 SaveSlotIndex, bool bStart
 		return false;
 	}
 
+	bInventoryStateInitializing = true;
 	if (bStartNewGame)
 	{
 		LoadedSlotTotalPlaySeconds = 0.0f;
@@ -406,11 +407,11 @@ bool UTunaSweeperGameInstance::ActivateSaveSlot(int32 SaveSlotIndex, bool bStart
 					LogTunaSweeperGameInstance,
 					Error,
 					TEXT("Could not initialize the Demo starting loadout."));
+				bInventoryStateInitializing = false;
 				return false;
 			}
 		}
-		bInventoryStateInitialized = true;
-		RefreshLegacyPlayerInventoryItems();
+		CompleteInventoryStateInitialization();
 		const bool bSaved = SaveGameStateInternal(EUsableQuickSlotSaveMode::Clear);
 		if (bSaved)
 		{
@@ -419,7 +420,14 @@ bool UTunaSweeperGameInstance::ActivateSaveSlot(int32 SaveSlotIndex, bool bStart
 		return bSaved;
 	}
 
-	return LoadGameState();
+	if (!LoadGameState())
+	{
+		bInventoryStateInitializing = false;
+		return false;
+	}
+
+	CompleteInventoryStateInitialization();
+	return true;
 }
 
 bool UTunaSweeperGameInstance::SetActiveSaveSlotDifficultyStage(int32 DifficultyStage, bool bSaveImmediately)
@@ -477,11 +485,12 @@ void UTunaSweeperGameInstance::GeneratePlayerInventoryItems()
 
 void UTunaSweeperGameInstance::EnsureInventoryStateInitialized()
 {
-	if (bInventoryStateInitialized)
+	if (bInventoryStateInitialized || bInventoryStateInitializing)
 	{
 		return;
 	}
 
+	bInventoryStateInitializing = true;
 	if (!LoadGameState())
 	{
 		LoadedSlotTotalPlaySeconds = 0.0f;
@@ -489,8 +498,18 @@ void UTunaSweeperGameInstance::EnsureInventoryStateInitialized()
 		GenerateDefaultInventoryState();
 	}
 
+	CompleteInventoryStateInitialization();
+}
+
+void UTunaSweeperGameInstance::CompleteInventoryStateInitialization()
+{
 	bInventoryStateInitialized = true;
+	bInventoryStateInitializing = false;
 	RefreshLegacyPlayerInventoryItems();
+	if (UTunaSweeperResearchSubsystem* ResearchSubsystem = GetSubsystem<UTunaSweeperResearchSubsystem>())
+	{
+		ResearchSubsystem->FlushDeferredResearchNotifications();
+	}
 }
 
 bool UTunaSweeperGameInstance::LoadGameState()
@@ -674,7 +693,8 @@ bool UTunaSweeperGameInstance::LoadGameState()
 		ResearchSubsystem->LoadResearchProgressFromSave(
 			SaveGame->AppliedResearchNodeIds,
 			SaveGame->ActiveResearchStates,
-			SaveGame->ResearchLastObservedUtcTicks);
+			SaveGame->ResearchLastObservedUtcTicks,
+			ETunaSweeperResearchNotificationMode::Deferred);
 	}
 	PendingScenarioCompletionFlag = NAME_None;
 	bPendingScenarioBunkerEntryPresentation = false;
@@ -998,6 +1018,7 @@ bool UTunaSweeperGameInstance::SaveGameStateInternal(
 
 void UTunaSweeperGameInstance::ResetRuntimeStateForSaveSlotSelection()
 {
+	TGuardValue<bool> InitializationGuard(bInventoryStateInitializing, true);
 	DespawnPetCompanion();
 
 	GameplayInfo.Reset();
@@ -1062,7 +1083,8 @@ void UTunaSweeperGameInstance::ResetRuntimeStateForSaveSlotSelection()
 	}
 	if (UTunaSweeperResearchSubsystem* ResearchSubsystem = GetSubsystem<UTunaSweeperResearchSubsystem>())
 	{
-		ResearchSubsystem->ResetResearchProgressForNewGame();
+		ResearchSubsystem->ResetResearchProgressForNewGame(
+			ETunaSweeperResearchNotificationMode::Deferred);
 	}
 }
 
@@ -1100,7 +1122,8 @@ void UTunaSweeperGameInstance::GenerateDefaultInventoryState()
 	}
 	if (UTunaSweeperResearchSubsystem* ResearchSubsystem = GetSubsystem<UTunaSweeperResearchSubsystem>())
 	{
-		ResearchSubsystem->ResetResearchProgressForNewGame();
+		ResearchSubsystem->ResetResearchProgressForNewGame(
+			ETunaSweeperResearchNotificationMode::Deferred);
 	}
 	ResetPlayerSlotArrays();
 	StorageSlotCapacity = GetDefaultStorageSlotCapacity();

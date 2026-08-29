@@ -822,6 +822,7 @@ private:
 
 	void GeneratePlayerInventoryItems();
 	void EnsureInventoryStateInitialized();
+	void CompleteInventoryStateInitialization();
 	bool LoadGameState();
 	bool SaveGameStateInternal(EUsableQuickSlotSaveMode UsableQuickSlotSaveMode = EUsableQuickSlotSaveMode::PreserveExisting) const;
 	void MarkItemStateMutationForSave(bool bSaveImmediatelyOutsideBunker = false);
@@ -1062,6 +1063,9 @@ private:
 
 	UPROPERTY(Transient)
 	bool bInventoryStateInitialized = false;
+
+	UPROPERTY(Transient)
+	bool bInventoryStateInitializing = false;
 
 	UPROPERTY(Transient)
 	bool bPendingBunkerItemStateSave = false;
