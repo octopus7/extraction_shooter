@@ -373,15 +373,29 @@ bool FTunaSweeperGazeTestRobotRigTest::RunTest(const FString& Parameters)
 		}
 		const FQuat EyeRotation = ComponentPose[EyeBoneIndex].GetRotation();
 		const float XDot = FVector::DotProduct(EyeRotation.RotateVector(FVector::ForwardVector), FVector::ForwardVector);
-		const float YDot = FVector::DotProduct(EyeRotation.RotateVector(FVector::RightVector), FVector::ForwardVector);
-		const float ZDot = FVector::DotProduct(EyeRotation.RotateVector(FVector::UpVector), FVector::ForwardVector);
+		const float YRightDot =
+			FVector::DotProduct(EyeRotation.RotateVector(FVector::RightVector), FVector::RightVector);
 		const float ZUpDot = FVector::DotProduct(EyeRotation.RotateVector(FVector::UpVector), FVector::UpVector);
 		AddInfo(FString::Printf(
-			TEXT("%s actor-forward axis dots: X=%.4f Y=%.4f Z=%.4f; local-Z up dot=%.4f"),
-			*EyeBoneName.ToString(), XDot, YDot, ZDot, ZUpDot));
-		TestTrue(TEXT("Robot eye local negative X axis points toward actor forward"), XDot < -0.98f);
+			TEXT("%s basis dots: local-X/forward=%.4f local-Y/right=%.4f local-Z/up=%.4f"),
+			*EyeBoneName.ToString(), XDot, YRightDot, ZUpDot));
+		TestTrue(TEXT("Robot eye local negative Y axis points toward the pupils"), YRightDot < -0.98f);
 		TestTrue(TEXT("Robot eye local Z axis points toward actor up"), ZUpDot > 0.98f);
 	}
+
+	const FVector CursorRayOrigin = FVector::ZeroVector;
+	const FVector EyeCenter(600.0f, 0.0f, 0.0f);
+	const FVector CenterCursorTarget = ATunaSweeperGazeTestRobotCharacter::CalculateCursorTargetWorldLocation(
+		CursorRayOrigin, FVector::ForwardVector, EyeCenter, 250.0f, 50.0f);
+	TestTrue(
+		TEXT("Center cursor target stays on the cursor ray in front of the eyes"),
+		CenterCursorTarget.Equals(FVector(350.0f, 0.0f, 0.0f), 0.01f));
+	const FVector LeftCursorTarget = ATunaSweeperGazeTestRobotCharacter::CalculateCursorTargetWorldLocation(
+		CursorRayOrigin, FVector(1.0f, -0.1f, 0.0f), EyeCenter, 250.0f, 50.0f);
+	const FVector RightCursorTarget = ATunaSweeperGazeTestRobotCharacter::CalculateCursorTargetWorldLocation(
+		CursorRayOrigin, FVector(1.0f, 0.1f, 0.0f), EyeCenter, 250.0f, 50.0f);
+	TestTrue(TEXT("Left cursor ray produces a left-side target"), LeftCursorTarget.Y < 0.0f);
+	TestTrue(TEXT("Right cursor ray produces a right-side target"), RightCursorTarget.Y > 0.0f);
 
 	TestEqual(TEXT("Robot mesh preserves five contrasting material slots"), RobotMesh->GetMaterials().Num(), 5);
 	for (const FSkeletalMaterial& MaterialSlot : RobotMesh->GetMaterials())

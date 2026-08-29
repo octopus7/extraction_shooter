@@ -15,6 +15,12 @@ class TUNASWEEPER_API ATunaSweeperGazeTestRobotCharacter : public ACharacter
 
 public:
 	ATunaSweeperGazeTestRobotCharacter(const FObjectInitializer& ObjectInitializer);
+	static FVector CalculateCursorTargetWorldLocation(
+		const FVector& CursorRayOrigin,
+		const FVector& CursorRayDirection,
+		const FVector& EyeCenterWorldLocation,
+		float TargetFrontOffset,
+		float MinimumRayDistance);
 
 	virtual void OnConstruction(const FTransform& Transform) override;
 	virtual void BeginPlay() override;
@@ -33,8 +39,11 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Gaze Test")
 	bool bTrackMouseCursor = true;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Gaze Test", meta = (ClampMin = "100.0"))
-	float CursorTargetDistance = 1000.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Gaze Test", meta = (ClampMin = "0.0"))
+	float CursorTargetFrontOffset = 250.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Gaze Test", meta = (ClampMin = "1.0"))
+	float CursorTargetMinimumRayDistance = 50.0f;
 
 private:
 	void ConfigureGazeComponents();

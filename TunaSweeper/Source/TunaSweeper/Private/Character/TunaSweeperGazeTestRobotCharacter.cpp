@@ -98,8 +98,32 @@ void ATunaSweeperGazeTestRobotCharacter::ConfigureGazeComponents()
 	GazeTracking->SetTrackedMesh(GetMesh());
 	GazeTracking->SetEyeTargetComponents(LeftEyeTarget, RightEyeTarget);
 	GazeTracking->SetEyeBoneNames(TEXT("left_eye"), TEXT("right_eye"));
-	GazeTracking->SetEyeAxes(-FVector::ForwardVector, FVector::UpVector);
+	// The imported pupils face the mesh component's local +Y direction. The
+	// eye-bone basis maps local -Y to that visual forward direction.
+	GazeTracking->SetEyeAxes(-FVector::RightVector, FVector::UpVector);
 	GazeTracking->SetGazeEnabled(true);
+}
+
+FVector ATunaSweeperGazeTestRobotCharacter::CalculateCursorTargetWorldLocation(
+	const FVector& CursorRayOrigin,
+	const FVector& CursorRayDirection,
+	const FVector& EyeCenterWorldLocation,
+	float TargetFrontOffset,
+	float MinimumRayDistance)
+{
+	const FVector NormalizedDirection = CursorRayDirection.GetSafeNormal();
+	if (NormalizedDirection.IsNearlyZero())
+	{
+		return CursorRayOrigin;
+	}
+
+	const float EyeRayDistance = FVector::DotProduct(
+		EyeCenterWorldLocation - CursorRayOrigin,
+		NormalizedDirection);
+	const float TargetRayDistance = FMath::Max(
+		FMath::Max(1.0f, MinimumRayDistance),
+		EyeRayDistance - FMath::Max(0.0f, TargetFrontOffset));
+	return CursorRayOrigin + NormalizedDirection * TargetRayDistance;
 }
 
 void ATunaSweeperGazeTestRobotCharacter::UpdateMouseGaze()
@@ -118,6 +142,19 @@ void ATunaSweeperGazeTestRobotCharacter::UpdateMouseGaze()
 	}
 
 	const FVector NormalizedDirection = MouseWorldDirection.GetSafeNormal();
-	const FVector TargetLocation = MouseWorldOrigin + NormalizedDirection * CursorTargetDistance;
+	FVector EyeCenterWorldLocation = GetMesh()->GetComponentLocation();
+	const int32 LeftEyeBoneIndex = GetMesh()->GetBoneIndex(TEXT("left_eye"));
+	const int32 RightEyeBoneIndex = GetMesh()->GetBoneIndex(TEXT("right_eye"));
+	if (LeftEyeBoneIndex != INDEX_NONE && RightEyeBoneIndex != INDEX_NONE)
+	{
+		EyeCenterWorldLocation =
+			(GetMesh()->GetBoneLocation(TEXT("left_eye")) + GetMesh()->GetBoneLocation(TEXT("right_eye"))) * 0.5f;
+	}
+	const FVector TargetLocation = CalculateCursorTargetWorldLocation(
+		MouseWorldOrigin,
+		NormalizedDirection,
+		EyeCenterWorldLocation,
+		CursorTargetFrontOffset,
+		CursorTargetMinimumRayDistance);
 	GazeTracking->SetGazeTargetWorldTransform(FTransform(NormalizedDirection.Rotation(), TargetLocation));
 }
