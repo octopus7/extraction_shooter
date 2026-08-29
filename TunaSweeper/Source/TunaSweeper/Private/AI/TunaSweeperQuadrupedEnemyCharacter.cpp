@@ -8,6 +8,34 @@
 #include "QuadrupedComponent.h"
 #include "UObject/ConstructorHelpers.h"
 
+namespace
+{
+bool HasValidQuadrupedLegLayout(const UQuadrupedComponent* Component)
+{
+	if (!Component || Component->Legs.Num() != 4)
+	{
+		return false;
+	}
+
+	FVector2D MinOffset(TNumericLimits<double>::Max(), TNumericLimits<double>::Max());
+	FVector2D MaxOffset(TNumericLimits<double>::Lowest(), TNumericLimits<double>::Lowest());
+	for (const FQuadrupedLegData& Leg : Component->Legs)
+	{
+		if (Leg.DefaultOffset.ContainsNaN())
+		{
+			return false;
+		}
+
+		MinOffset.X = FMath::Min(MinOffset.X, Leg.DefaultOffset.X);
+		MinOffset.Y = FMath::Min(MinOffset.Y, Leg.DefaultOffset.Y);
+		MaxOffset.X = FMath::Max(MaxOffset.X, Leg.DefaultOffset.X);
+		MaxOffset.Y = FMath::Max(MaxOffset.Y, Leg.DefaultOffset.Y);
+	}
+
+	return MaxOffset.X - MinOffset.X > 1.0 && MaxOffset.Y - MinOffset.Y > 1.0;
+}
+}
+
 ATunaSweeperQuadrupedEnemyCharacter::ATunaSweeperQuadrupedEnemyCharacter()
 {
 	GetCapsuleComponent()->InitCapsuleSize(30.0f, 40.0f);
@@ -57,3 +85,35 @@ ATunaSweeperQuadrupedEnemyCharacter::ATunaSweeperQuadrupedEnemyCharacter()
 	QuadrupedComponent->MinGroundNormalZ = 0.65f;
 	QuadrupedComponent->bMoveGaitGroupTogether = false;
 }
+
+void ATunaSweeperQuadrupedEnemyCharacter::OnConstruction(const FTransform& Transform)
+{
+	Super::OnConstruction(Transform);
+	EnsureValidQuadrupedLegLayout();
+}
+
+void ATunaSweeperQuadrupedEnemyCharacter::BeginPlay()
+{
+	EnsureValidQuadrupedLegLayout();
+	Super::BeginPlay();
+}
+
+void ATunaSweeperQuadrupedEnemyCharacter::EnsureValidQuadrupedLegLayout()
+{
+	if (QuadrupedComponent && !HasValidQuadrupedLegLayout(QuadrupedComponent))
+	{
+		QuadrupedComponent->InitializeDefaultLegs(60.0f, 30.0f);
+	}
+}
+
+#if WITH_EDITOR
+void ATunaSweeperQuadrupedEnemyCharacter::PostEditMove(bool bFinished)
+{
+	Super::PostEditMove(bFinished);
+
+	if (QuadrupedComponent)
+	{
+		QuadrupedComponent->RefreshLegsInEditor();
+	}
+}
+#endif

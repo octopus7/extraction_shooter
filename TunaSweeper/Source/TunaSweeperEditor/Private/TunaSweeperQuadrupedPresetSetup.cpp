@@ -403,6 +403,9 @@ namespace
 		EnemyDefaults->Modify();
 		USkeletalMeshComponent* EnemyMesh = EnemyDefaults->GetMesh();
 		UQuadrupedComponent* EnemyQuadruped = EnemyDefaults->GetQuadrupedComponent();
+		// BP_QuadrupedDog stores legacy shared effector placeholders (0, 0, -50) in every
+		// leg slot. Those are not usable as world-space footfall offsets for this component.
+		EnemyQuadruped->InitializeDefaultLegs(60.0f, 30.0f);
 
 		UBlueprint* SourceBlueprint = LoadObject<UBlueprint>(nullptr, SourceQuadrupedBlueprintObjectPath);
 		const AQuadrupedCharacter* SourceDefaults = SourceBlueprint && SourceBlueprint->GeneratedClass
@@ -425,12 +428,6 @@ namespace
 
 			if (const UQuadrupedComponent* SourceQuadruped = SourceDefaults->QuadrupedComponent)
 			{
-				EnemyQuadruped->Legs.SetNum(SourceQuadruped->Legs.Num());
-				for (int32 LegIndex = 0; LegIndex < SourceQuadruped->Legs.Num(); ++LegIndex)
-				{
-					EnemyQuadruped->Legs[LegIndex].DefaultOffset = SourceQuadruped->Legs[LegIndex].DefaultOffset;
-					EnemyQuadruped->Legs[LegIndex].GaitGroup = SourceQuadruped->Legs[LegIndex].GaitGroup;
-				}
 				EnemyQuadruped->GroundCheckDistance = SourceQuadruped->GroundCheckDistance;
 				EnemyQuadruped->GroundCheckStartOffset = SourceQuadruped->GroundCheckStartOffset;
 			}

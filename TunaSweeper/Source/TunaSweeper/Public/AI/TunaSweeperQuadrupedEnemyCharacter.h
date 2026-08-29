@@ -17,10 +17,20 @@ class TUNASWEEPER_API ATunaSweeperQuadrupedEnemyCharacter : public ATunaSweeperE
 public:
 	ATunaSweeperQuadrupedEnemyCharacter();
 
+#if WITH_EDITOR
+	virtual void PostEditMove(bool bFinished) override;
+#endif
+
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Quadruped")
 	UQuadrupedComponent* GetQuadrupedComponent() const { return QuadrupedComponent; }
 
 protected:
+	virtual void OnConstruction(const FTransform& Transform) override;
+	virtual void BeginPlay() override;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UQuadrupedComponent> QuadrupedComponent;
+
+private:
+	void EnsureValidQuadrupedLegLayout();
 };
