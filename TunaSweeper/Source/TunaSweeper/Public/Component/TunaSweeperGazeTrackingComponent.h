@@ -47,6 +47,18 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Gaze")
 	void SetEyeAxes(FVector InEyeAimAxis, FVector InEyeUpAxis);
 
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Gaze")
+	FName GetLeftEyeBoneName() const { return LeftEyeBoneName; }
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Gaze")
+	FName GetRightEyeBoneName() const { return RightEyeBoneName; }
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Gaze")
+	FVector GetEyeAimAxis() const { return EyeAimAxis; }
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Gaze")
+	FVector GetEyeUpAxis() const { return EyeUpAxis; }
+
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Gaze")
 	void ReturnToNeutral();
 

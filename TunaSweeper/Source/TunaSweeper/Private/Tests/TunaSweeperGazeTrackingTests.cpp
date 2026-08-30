@@ -234,6 +234,63 @@ bool FTunaSweeperGazeLunaEyeAxisTest::RunTest(const FString& Parameters)
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(
+	FTunaSweeperGazeLunaMk2EyeRigTest,
+	"TunaSweeper.Gaze.LunaMk2EyeRig",
+	TunaSweeperGazeTrackingTests::TestFlags)
+
+bool FTunaSweeperGazeLunaMk2EyeRigTest::RunTest(const FString& Parameters)
+{
+	(void)Parameters;
+	const USkeletalMesh* LunaMk2Mesh = LoadObject<USkeletalMesh>(
+		nullptr,
+		TEXT("/Game/Characters/Player/LunaMk2/SKM_LunaMk2.SKM_LunaMk2"));
+	TestNotNull(TEXT("Luna Mk2 skeletal mesh loads"), LunaMk2Mesh);
+	if (!LunaMk2Mesh)
+	{
+		return false;
+	}
+
+	const FReferenceSkeleton& ReferenceSkeleton = LunaMk2Mesh->GetRefSkeleton();
+	const int32 LeftEyeIndex = ReferenceSkeleton.FindBoneIndex(TEXT("eye_l"));
+	const int32 RightEyeIndex = ReferenceSkeleton.FindBoneIndex(TEXT("eye_r"));
+	TestTrue(TEXT("Luna Mk2 left eye bone exists"), LeftEyeIndex != INDEX_NONE);
+	TestTrue(TEXT("Luna Mk2 right eye bone exists"), RightEyeIndex != INDEX_NONE);
+	TestTrue(TEXT("Luna Mk2 head bone exists"), ReferenceSkeleton.FindBoneIndex(TEXT("Head")) != INDEX_NONE);
+	if (LeftEyeIndex == INDEX_NONE || RightEyeIndex == INDEX_NONE)
+	{
+		return false;
+	}
+
+	const TArray<FTransform>& LocalPose = ReferenceSkeleton.GetRefBonePose();
+	TArray<FTransform> ComponentPose;
+	ComponentPose.SetNum(LocalPose.Num());
+	for (int32 BoneIndex = 0; BoneIndex < LocalPose.Num(); ++BoneIndex)
+	{
+		const int32 ParentIndex = ReferenceSkeleton.GetParentIndex(BoneIndex);
+		ComponentPose[BoneIndex] = ParentIndex == INDEX_NONE
+			? LocalPose[BoneIndex]
+			: LocalPose[BoneIndex] * ComponentPose[ParentIndex];
+	}
+
+	const FVector EyeLateralDirection = FVector(
+		ComponentPose[LeftEyeIndex].GetLocation() - ComponentPose[RightEyeIndex].GetLocation()).GetSafeNormal2D();
+	const FVector FaceForwardDirection = FVector::CrossProduct(FVector::UpVector, EyeLateralDirection).GetSafeNormal();
+	for (const int32 EyeIndex : {LeftEyeIndex, RightEyeIndex})
+	{
+		const FQuat EyeRotation = ComponentPose[EyeIndex].GetRotation();
+		const FVector EyeAimDirection = EyeRotation.RotateVector(FVector::RightVector).GetSafeNormal();
+		const FVector EyeUpDirection = EyeRotation.RotateVector(FVector::UpVector).GetSafeNormal();
+		TestTrue(
+			TEXT("Luna Mk2 eye local positive Y axis points toward the face forward direction"),
+			FVector::DotProduct(EyeAimDirection, FaceForwardDirection) > 0.9f);
+		TestTrue(
+			TEXT("Luna Mk2 eye local Z axis remains upright"),
+			FVector::DotProduct(EyeUpDirection, FVector::UpVector) > 0.9f);
+	}
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(
 	FTunaSweeperGazeTitleHierarchyTest,
 	"TunaSweeper.Gaze.TitleHierarchy",
 	TunaSweeperGazeTrackingTests::TestFlags)
@@ -241,16 +298,16 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(
 bool FTunaSweeperGazeTitleHierarchyTest::RunTest(const FString& Parameters)
 {
 	(void)Parameters;
-	const ATunaSweeperTitlePresentationActor* TitleActor = GetDefault<ATunaSweeperTitlePresentationActor>();
+	ATunaSweeperTitlePresentationActor* TitleActor = GetMutableDefault<ATunaSweeperTitlePresentationActor>();
 	TestNotNull(TEXT("Title presentation actor default object exists"), TitleActor);
 	if (!TitleActor)
 	{
 		return false;
 	}
 
-	const UTunaSweeperGazeTrackingComponent* GazeTracking =
+	UTunaSweeperGazeTrackingComponent* GazeTracking =
 		TitleActor->FindComponentByClass<UTunaSweeperGazeTrackingComponent>();
-	const UTunaSweeperTitleSkeletalMeshComponent* BodyMesh =
+	UTunaSweeperTitleSkeletalMeshComponent* BodyMesh =
 		TitleActor->FindComponentByClass<UTunaSweeperTitleSkeletalMeshComponent>();
 	TestNotNull(TEXT("Title actor owns the gaze tracking component"), GazeTracking);
 	TestNotNull(TEXT("Title body mesh exists"), BodyMesh);
@@ -259,12 +316,33 @@ bool FTunaSweeperGazeTitleHierarchyTest::RunTest(const FString& Parameters)
 		return false;
 	}
 
-	const USceneComponent* LeftEyeTarget = nullptr;
-	const USceneComponent* RightEyeTarget = nullptr;
-	const USceneComponent* HeadLookTarget = nullptr;
+	const USkeletalMesh* LunaMk2Mesh = LoadObject<USkeletalMesh>(
+		nullptr,
+		TEXT("/Game/Characters/Player/LunaMk2/SKM_LunaMk2.SKM_LunaMk2"));
+	TestNotNull(TEXT("Luna Mk2 skeletal mesh loads"), LunaMk2Mesh);
+	TestTrue(TEXT("Title body uses Luna Mk2"), BodyMesh->GetSkeletalMeshAsset() == LunaMk2Mesh);
+	TestTrue(
+		TEXT("Title body uses the Luna Mk2 animation Blueprint"),
+		BodyMesh->GetAnimClass() && BodyMesh->GetAnimClass()->GetPathName().Contains(TEXT("ABP_LunaMk2")));
+	TestFalse(
+		TEXT("Title body preserves the Luna Mk2 animation pose instead of forcing the old relaxed-arm override"),
+		BodyMesh->IsTemporaryRelaxedArmPoseEnabled());
+	TestEqual(TEXT("Title gaze uses the Luna Mk2 left eye bone"), GazeTracking->GetLeftEyeBoneName(), FName(TEXT("eye_l")));
+	TestEqual(TEXT("Title gaze uses the Luna Mk2 right eye bone"), GazeTracking->GetRightEyeBoneName(), FName(TEXT("eye_r")));
+	TestTrue(
+		TEXT("Title gaze uses the Luna Mk2 positive-Y eye aim axis"),
+		GazeTracking->GetEyeAimAxis().Equals(FVector::RightVector, 0.001f));
+	TestTrue(
+		TEXT("Title gaze preserves the eye local Z up axis"),
+		GazeTracking->GetEyeUpAxis().Equals(FVector::UpVector, 0.001f));
+
+	USceneComponent* LeftEyeTarget = nullptr;
+	USceneComponent* RightEyeTarget = nullptr;
+	USceneComponent* HeadLookTarget = nullptr;
+	USkeletalMeshComponent* SkirtMesh = nullptr;
 	TArray<USceneComponent*> SceneComponents;
 	TitleActor->GetComponents(SceneComponents);
-	for (const USceneComponent* SceneComponent : SceneComponents)
+	for (USceneComponent* SceneComponent : SceneComponents)
 	{
 		if (!SceneComponent)
 		{
@@ -283,11 +361,16 @@ bool FTunaSweeperGazeTitleHierarchyTest::RunTest(const FString& Parameters)
 		{
 			HeadLookTarget = SceneComponent;
 		}
+		else if (SceneComponent->GetFName() == TEXT("Skirt"))
+		{
+			SkirtMesh = Cast<USkeletalMeshComponent>(SceneComponent);
+		}
 	}
 
 	TestNotNull(TEXT("Left eye target exists"), LeftEyeTarget);
 	TestNotNull(TEXT("Right eye target exists"), RightEyeTarget);
 	TestNotNull(TEXT("Head look target remains separate"), HeadLookTarget);
+	TestNotNull(TEXT("Title Luna Mk2 has the player skirt component"), SkirtMesh);
 	if (LeftEyeTarget && RightEyeTarget && HeadLookTarget)
 	{
 		TestEqual(
@@ -298,10 +381,9 @@ bool FTunaSweeperGazeTitleHierarchyTest::RunTest(const FString& Parameters)
 			TEXT("Right eye target is a gaze child"),
 			static_cast<const USceneComponent*>(RightEyeTarget->GetAttachParent()),
 			static_cast<const USceneComponent*>(GazeTracking));
-		TestNotEqual(
+		TestTrue(
 			TEXT("Gaze target is not parented to the head target"),
-			static_cast<const USceneComponent*>(GazeTracking->GetAttachParent()),
-			HeadLookTarget);
+			GazeTracking->GetAttachParent() != HeadLookTarget);
 		TestTrue(
 			TEXT("Eye targets have mirrored lateral offsets"),
 			FMath::IsNearlyEqual(
@@ -312,6 +394,39 @@ bool FTunaSweeperGazeTitleHierarchyTest::RunTest(const FString& Parameters)
 	TestTrue(
 		TEXT("Title body mesh implements the gaze pose sink"),
 		BodyMesh->GetClass()->ImplementsInterface(UTunaSweeperGazePoseSink::StaticClass()));
+	if (SkirtMesh)
+	{
+		const USkeletalMesh* PlayerSkirtMesh = LoadObject<USkeletalMesh>(
+			nullptr,
+			TEXT("/Game/Characters/Player/Luna/Skirt/Luna__Skirt_front.Luna__Skirt_front"));
+		TestTrue(TEXT("Title skirt uses the player skirt mesh"), SkirtMesh->GetSkeletalMeshAsset() == PlayerSkirtMesh);
+		TestTrue(
+			TEXT("Title skirt is attached to the Mk2 body like the player Blueprint"),
+			SkirtMesh->GetAttachParent() == BodyMesh);
+		TestEqual(
+			TEXT("Title skirt uses the player Blueprint pelvis socket"),
+			SkirtMesh->GetAttachSocketName(),
+			FName(TEXT("pelvis")));
+		TestTrue(
+			TEXT("Title skirt copies the player Blueprint position correction"),
+			SkirtMesh->GetRelativeLocation().Equals(FVector(6.012824f, 5.358606f, -1.723956f), 0.001f));
+		TestTrue(
+			TEXT("Title skirt copies the player Blueprint rotation correction"),
+			SkirtMesh->GetRelativeRotation().Equals(FRotator(-90.0f, 34.0f, 0.0f), 0.01f));
+		TestTrue(
+			TEXT("Title skirt uses the same animation Blueprint as the player skirt"),
+			SkirtMesh->GetAnimClass() && SkirtMesh->GetAnimClass()->GetPathName().Contains(TEXT("ABP_Luna_Skirt")));
+	}
+
+	const FVector CursorTarget = ATunaSweeperTitlePresentationActor::CalculateCursorTargetWorldLocation(
+		FVector::ZeroVector,
+		FVector::ForwardVector,
+		FVector(650.0f, 0.0f, 0.0f),
+		250.0f,
+		50.0f);
+	TestTrue(
+		TEXT("Title cursor target stays on the cursor ray in front of Luna Mk2"),
+		CursorTarget.Equals(FVector(400.0f, 0.0f, 0.0f), 0.01f));
 	return true;
 }
 

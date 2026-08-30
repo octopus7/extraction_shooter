@@ -1136,11 +1136,6 @@ namespace TunaSweeperEditorSetup
 		TitlePresentationActor->Modify();
 		TitlePresentationActor->SetActorLabel(TitlePresentationActorLabel);
 		TitlePresentationActor->SetActorLocationAndRotation(FVector::ZeroVector, FRotator::ZeroRotator);
-		if (ATunaSweeperTitlePresentationActor* TypedTitlePresentationActor =
-			Cast<ATunaSweeperTitlePresentationActor>(TitlePresentationActor))
-		{
-			TypedTitlePresentationActor->ApplyRecommendedPresentationLayout();
-		}
 		TitlePresentationActor->MarkPackageDirty();
 		return UEditorLoadingAndSavingUtils::SaveMap(IntroWorld, IntroMapPackagePath);
 	}
@@ -1159,12 +1154,6 @@ namespace TunaSweeperEditorSetup
 
 		TitlePresentationBlueprint->Modify();
 		FKismetEditorUtilities::CompileBlueprint(TitlePresentationBlueprint);
-		if (ATunaSweeperTitlePresentationActor* BlueprintDefaults =
-			Cast<ATunaSweeperTitlePresentationActor>(TitlePresentationBlueprint->GeneratedClass->GetDefaultObject()))
-		{
-			BlueprintDefaults->Modify();
-			BlueprintDefaults->ApplyRecommendedPresentationLayout();
-		}
 		TitlePresentationBlueprint->MarkPackageDirty();
 		return SaveAsset(TitlePresentationBlueprint) &&
 			PlaceTitlePresentationActorInIntroMap(TitlePresentationBlueprint);

@@ -7290,3 +7290,29 @@
 
 - 사족 총기 적의 편집기 발 목표 갱신, 잘못된 공통 다리 오프셋 복구, 교정된 `BP_QuadrupedGunEnemy` 에셋과 관련 작업·질문 기록만 선별해 Git 커밋으로 정리했다.
 - 사용자가 직접 저장한 `DemoRaidMap`과 동시에 진행 중인 타이틀 그래픽 UI 변경은 커밋에서 제외했다.
+
+## 2026-08-30 00:43:30 (소요시간: 00:18:30)
+
+- 타이틀 프레젠테이션 캐릭터의 본체와 애니메이션 Blueprint를 구형 Luna에서 `SKM_LunaMk2`와 `ABP_LunaMk2`로 교체했다. Mk2 메시가 참조하던 누락 `M_Luna_001` 머티리얼도 기존 Mk2 머티리얼 복제본으로 복구해 두 메시 슬롯이 모두 정상 로드되도록 했다.
+- 플레이어 BP의 런타임 치마 구성을 확인해 타이틀 치마를 Mk2 본체 자식으로 옮기고 동일한 메시, 애니메이션 Blueprint, 상대 위치 `(6.012824, 5.358606, -1.723956)`, 상대 회전 `(-90, 34, 0)`과 외부 물리 충돌 프록시를 적용했다.
+- 머리와 시선 중심은 실제 마우스 커서 월드 광선을 추적하도록 변경했다. Mk2의 `Head`, `eye_l`, `eye_r` 본과 로컬 `+Y` 안구 조준축을 사용하며, 안구 두 개가 중심점을 직접 보지 않고 로봇과 동일하게 독립된 `GazeTracking` 중심의 자식 `LeftEyeTarget`·`RightEyeTarget`을 각각 바라보는 계층과 좌우 간격을 유지했다.
+- UE 5.7 `TunaSweeperEditor` 빌드를 성공했고 `TunaSweeper.Gaze.LunaMk2EyeRig`, `TunaSweeper.Gaze.TitleHierarchy` 자동화 테스트를 통과했다. 전체 `TunaSweeper.Gaze` 묶음에서는 이번 변경과 무관하게 현재 `IntroMap`에 테스트 로봇이 0개라 기존 배치 검사 1개만 실패했으며 나머지 검사는 성공했다.
+
+## 2026-08-30 01:10:30 (소요시간: 00:06:30)
+
+- 타이틀 Luna Mk2의 목이 움츠러들고 플레이어 BP와 포즈가 달라 보이는 현상을 조사했다. 플레이어와 타이틀의 `spine_01`~`Head` 본 변환은 동일했으며, 타이틀 전용 팔 이완 후처리만 최종 포즈를 다르게 만들고 있어 이를 비활성화했다.
+- 머리 커서 추적 회전의 기준 본을 `Head` 단독에서 `neck_01`로 옮겨 목부터 머리까지 한 분기로 회전하도록 변경해 목 접합부가 눌려 보이지 않도록 했다.
+- 플레이어 치마가 `CharacterMesh0`의 `pelvis` 소켓에 붙는 것과 달리 타이틀 치마에는 소켓이 누락된 것을 확인했다. 타이틀에서도 `BodyMesh/pelvis`에 동일한 상대 Transform으로 강제 부착하고 Construction·BeginPlay에서 복구하도록 수정했다. 수정 후 치마 월드 회전은 플레이어와 동일한 수준의 `Pitch -0.44°`, `Roll -1.03°`로 확인했다.
+- UE 5.7 `TunaSweeperEditor` 빌드와 `TunaSweeper.Gaze.TitleHierarchy` 자동화 테스트를 성공했다.
+
+## 2026-08-30 10:40:00 (소요시간: 00:04:20)
+
+- 타이틀 프레젠테이션의 모든 네이티브 자식 컴포넌트를 `BP_TitlePresentationActor`에서 상속 편집 가능하도록 명시하고, BP 뷰포트에서 수정한 상대 위치·회전·스케일을 Construction Script가 기본 레이아웃으로 다시 덮어쓰지 않도록 변경했다.
+- 카메라와 캐릭터 앵커는 BP에 보이는 컴포넌트 Transform을 런타임 기준값으로 사용하며, 얼굴과 `pelvis` 치마 부착도 BP에서 조정한 상대 Transform을 유지하도록 했다. 명시적으로 `ApplyRecommendedPresentationLayout`을 호출할 때만 추천 배치로 초기화된다.
+- 에디터 자동 설정 경로가 기존 BP CDO와 레벨 인스턴스에 추천 배치를 반복 적용하지 않도록 수정했다. `/Game/UI/Title/BP_TitlePresentationActor`를 다시 컴파일·저장하고 `/Game/Maps/IntroMap`의 `TS_TitlePresentation`을 해당 BP 클래스의 새 인스턴스로 교체·저장했다.
+- UE 5.7 `TunaSweeperEditor` 빌드를 성공했으며, 사용자 요청에 따라 별도 자동화 테스트는 실행하지 않았다.
+
+## 2026-08-30 10:47:30 (소요시간: 00:02:30)
+
+- 타이틀 Luna Mk2 본체, 커서 기반 머리·안구 추적, `pelvis` 치마 부착, BP 하위 컴포넌트 편집 가능 구조와 `IntroMap`의 BP 인스턴스 교체 변경을 관련 에셋 및 기록과 함께 선별해 Git 커밋으로 정리했다.
+- 사용자가 직접 저장한 `DemoRaidMap`과 별도 질문·요청 기록은 커밋에서 제외했으며, 사용자 요청에 따라 추가 빌드나 자동화 테스트는 실행하지 않았다.

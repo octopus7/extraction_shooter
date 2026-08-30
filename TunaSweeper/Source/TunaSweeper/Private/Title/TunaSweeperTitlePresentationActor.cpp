@@ -18,6 +18,9 @@
 
 namespace TunaSweeperTitlePresentation
 {
+	const FName LunaMk2LeftEyeBoneName(TEXT("eye_l"));
+	const FName LunaMk2RightEyeBoneName(TEXT("eye_r"));
+
 	void ConfigureWallComponent(
 		UStaticMeshComponent* Component,
 		UStaticMesh* CubeMesh,
@@ -49,6 +52,11 @@ void UTunaSweeperTitleSkeletalMeshComponent::SetTemporaryRelaxedArmPose(
 {
 	TemporaryRelaxedArmBlendAlpha = FMath::Clamp(BlendAlpha, 0.0f, 1.0f);
 	TemporaryRelaxedArmMotionPhase = MotionPhaseSeconds;
+}
+
+void UTunaSweeperTitleSkeletalMeshComponent::SetTemporaryRelaxedArmPoseEnabled(bool bEnabled)
+{
+	bApplyTemporaryRelaxedArms = bEnabled;
 }
 
 void UTunaSweeperTitleSkeletalMeshComponent::FinalizeBoneTransform()
@@ -197,37 +205,41 @@ void UTunaSweeperTitleSkeletalMeshComponent::ApplyDirectHeadLookToEditablePose()
 		return;
 	}
 
-	int32 HeadBoneIndex = GetBoneIndex(HeadBoneName);
-	if (HeadBoneIndex == INDEX_NONE)
+	int32 LookRootBoneIndex = GetBoneIndex(HeadLookRootBoneName);
+	if (LookRootBoneIndex == INDEX_NONE)
 	{
-		HeadBoneIndex = GetBoneIndex(TEXT("head"));
+		LookRootBoneIndex = GetBoneIndex(HeadBoneName);
 	}
-	if (HeadBoneIndex == INDEX_NONE)
+	if (LookRootBoneIndex == INDEX_NONE)
+	{
+		LookRootBoneIndex = GetBoneIndex(TEXT("head"));
+	}
+	if (LookRootBoneIndex == INDEX_NONE)
 	{
 		return;
 	}
 
 	TArray<FTransform>& ComponentSpaceTransforms = GetEditableComponentSpaceTransforms();
-	if (!ComponentSpaceTransforms.IsValidIndex(HeadBoneIndex))
+	if (!ComponentSpaceTransforms.IsValidIndex(LookRootBoneIndex))
 	{
 		return;
 	}
 
-	const FTransform OriginalHeadTransform = ComponentSpaceTransforms[HeadBoneIndex];
-	const FVector HeadLocation = OriginalHeadTransform.GetLocation();
+	const FVector LookRootLocation = ComponentSpaceTransforms[LookRootBoneIndex].GetLocation();
 	const FQuat YawDelta(FVector::UpVector, FMath::DegreesToRadians(-DirectHeadLookYaw));
 	const FQuat PitchDelta(FVector::ForwardVector, FMath::DegreesToRadians(DirectHeadLookPitch));
 	const FQuat LookDelta = (PitchDelta * YawDelta).GetNormalized();
 
 	for (int32 BoneIndex = 0; BoneIndex < ComponentSpaceTransforms.Num(); ++BoneIndex)
 	{
-		if (!IsBoneDescendantOf(BoneIndex, HeadBoneIndex))
+		if (!IsBoneDescendantOf(BoneIndex, LookRootBoneIndex))
 		{
 			continue;
 		}
 
 		FTransform& BoneTransform = ComponentSpaceTransforms[BoneIndex];
-		BoneTransform.SetLocation(HeadLocation + LookDelta.RotateVector(BoneTransform.GetLocation() - HeadLocation));
+		BoneTransform.SetLocation(
+			LookRootLocation + LookDelta.RotateVector(BoneTransform.GetLocation() - LookRootLocation));
 		BoneTransform.SetRotation((LookDelta * BoneTransform.GetRotation()).GetNormalized());
 	}
 }
@@ -254,6 +266,7 @@ ATunaSweeperTitlePresentationActor::ATunaSweeperTitlePresentationActor()
 	BodyMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	BodyMesh->SetGenerateOverlapEvents(false);
 	BodyMesh->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::OnlyTickPoseWhenRendered;
+	BodyMesh->SetTemporaryRelaxedArmPoseEnabled(false);
 
 	FaceMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("FaceMesh"));
 	FaceMesh->SetupAttachment(BodyMesh, FaceAttachmentSocketName);
@@ -262,7 +275,9 @@ ATunaSweeperTitlePresentationActor::ATunaSweeperTitlePresentationActor()
 	FaceMesh->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::OnlyTickPoseWhenRendered;
 
 	SkirtMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Skirt"));
-	SkirtMesh->SetupAttachment(CharacterAnchor);
+	SkirtMesh->SetupAttachment(BodyMesh, TEXT("pelvis"));
+	SkirtMesh->SetRelativeLocation(FVector(6.012824f, 5.358606f, -1.723956f));
+	SkirtMesh->SetRelativeRotation(FRotator(-90.0f, 34.0f, 0.0f));
 	SkirtMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	SkirtMesh->SetGenerateOverlapEvents(false);
 	SkirtMesh->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::OnlyTickPoseWhenRendered;
@@ -273,6 +288,10 @@ ATunaSweeperTitlePresentationActor::ATunaSweeperTitlePresentationActor()
 	GazeTracking = CreateDefaultSubobject<UTunaSweeperGazeTrackingComponent>(TEXT("GazeTracking"));
 	GazeTracking->SetupAttachment(SceneRoot);
 	GazeTracking->AddTickPrerequisiteActor(this);
+	GazeTracking->SetEyeBoneNames(
+		TunaSweeperTitlePresentation::LunaMk2LeftEyeBoneName,
+		TunaSweeperTitlePresentation::LunaMk2RightEyeBoneName);
+	GazeTracking->SetEyeAxes(FVector::RightVector, FVector::UpVector);
 
 	LeftEyeTarget = CreateDefaultSubobject<USceneComponent>(TEXT("LeftEyeTarget"));
 	LeftEyeTarget->SetupAttachment(GazeTracking);
@@ -302,14 +321,14 @@ ATunaSweeperTitlePresentationActor::ATunaSweeperTitlePresentationActor()
 	TunaSweeperTitlePresentation::ConfigureWallComponent(Floor, CubeMesh, WallMaterial);
 
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> BodyMeshFinder(
-		TEXT("/Game/Characters/Player/Luna/SKM_Luna.SKM_Luna"));
+		TEXT("/Game/Characters/Player/LunaMk2/SKM_LunaMk2.SKM_LunaMk2"));
 	if (BodyMeshFinder.Succeeded())
 	{
 		BodyMesh->SetSkeletalMeshAsset(BodyMeshFinder.Object);
 	}
 
 	static ConstructorHelpers::FClassFinder<UAnimInstance> BodyAnimClassFinder(
-		TEXT("/Game/Characters/Player/Luna/Animations/ABP_Luna"));
+		TEXT("/Game/Characters/Player/LunaMk2/Animations/ABP_LunaMk2"));
 	if (BodyAnimClassFinder.Succeeded())
 	{
 		BodyMesh->SetAnimationMode(EAnimationMode::AnimationBlueprint);
@@ -353,35 +372,88 @@ ATunaSweeperTitlePresentationActor::ATunaSweeperTitlePresentationActor()
 	EmptyWallLight->SetAttenuationRadius(1050.0f);
 	EmptyWallLight->SetLightColor(FLinearColor(0.48f, 0.68f, 1.0f));
 
+	UActorComponent* BlueprintEditableComponents[] = {
+		TitleCamera,
+		CharacterAnchor,
+		BodyMesh,
+		FaceMesh,
+		SkirtMesh,
+		HeadLookTarget,
+		GazeTracking,
+		LeftEyeTarget,
+		RightEyeTarget,
+		BackWall,
+		LeftWall,
+		RightWall,
+		Floor,
+		AmbientLight,
+		CharacterKeyLight,
+		EmptyWallLight};
+	for (UActorComponent* Component : BlueprintEditableComponents)
+	{
+		if (Component)
+		{
+			Component->bEditableWhenInherited = true;
+		}
+	}
+
 	ApplyDesignTransforms();
 }
 
 void ATunaSweeperTitlePresentationActor::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
-	ApplyDesignTransforms();
+	ConfigureSkirtAttachment();
+	if (BodyMesh)
+	{
+		BodyMesh->SetTemporaryRelaxedArmPoseEnabled(false);
+	}
 
 	if (FaceMesh && BodyMesh)
 	{
 		FaceMesh->AttachToComponent(
 			BodyMesh,
-			FAttachmentTransformRules::SnapToTargetNotIncludingScale,
+			FAttachmentTransformRules::KeepRelativeTransform,
 			FaceAttachmentSocketName);
 	}
 	if (GazeTracking)
 	{
 		GazeTracking->SetTrackedMesh(BodyMesh);
 		GazeTracking->SetEyeTargetComponents(LeftEyeTarget, RightEyeTarget);
+		GazeTracking->SetEyeBoneNames(
+			TunaSweeperTitlePresentation::LunaMk2LeftEyeBoneName,
+			TunaSweeperTitlePresentation::LunaMk2RightEyeBoneName);
+		GazeTracking->SetEyeAxes(FVector::RightVector, FVector::UpVector);
 	}
 }
 
 void ATunaSweeperTitlePresentationActor::BeginPlay()
 {
 	Super::BeginPlay();
+	if (TitleCamera)
+	{
+		MainMenuCameraLocation = TitleCamera->GetRelativeLocation();
+		MainMenuCameraRotation = TitleCamera->GetRelativeRotation();
+		CameraFieldOfView = TitleCamera->FieldOfView;
+	}
+	if (CharacterAnchor)
+	{
+		CharacterRelativeLocation = CharacterAnchor->GetRelativeLocation();
+		CharacterRelativeRotation = CharacterAnchor->GetRelativeRotation();
+	}
+	ConfigureSkirtAttachment();
+	if (BodyMesh)
+	{
+		BodyMesh->SetTemporaryRelaxedArmPoseEnabled(false);
+	}
 	if (GazeTracking)
 	{
 		GazeTracking->SetTrackedMesh(BodyMesh);
 		GazeTracking->SetEyeTargetComponents(LeftEyeTarget, RightEyeTarget);
+		GazeTracking->SetEyeBoneNames(
+			TunaSweeperTitlePresentation::LunaMk2LeftEyeBoneName,
+			TunaSweeperTitlePresentation::LunaMk2RightEyeBoneName);
+		GazeTracking->SetEyeAxes(FVector::RightVector, FVector::UpVector);
 		GazeTracking->SetGazeEnabled(bEnableEyeCursorTracking);
 	}
 	ConfigureSkirtExternalPhysicsCollision();
@@ -437,14 +509,28 @@ void ATunaSweeperTitlePresentationActor::ApplyRecommendedPresentationLayout()
 
 void ATunaSweeperTitlePresentationActor::SetFacialWeight(FName MorphTargetName, float Weight)
 {
-	if (FaceMesh && !MorphTargetName.IsNone())
+	if (MorphTargetName.IsNone())
 	{
-		FaceMesh->SetMorphTarget(MorphTargetName, FMath::Clamp(Weight, 0.0f, 1.0f));
+		return;
+	}
+
+	const float ClampedWeight = FMath::Clamp(Weight, 0.0f, 1.0f);
+	if (BodyMesh)
+	{
+		BodyMesh->SetMorphTarget(MorphTargetName, ClampedWeight);
+	}
+	if (FaceMesh && FaceMesh->GetSkeletalMeshAsset())
+	{
+		FaceMesh->SetMorphTarget(MorphTargetName, ClampedWeight);
 	}
 }
 
 void ATunaSweeperTitlePresentationActor::ClearFacialWeights()
 {
+	if (BodyMesh)
+	{
+		BodyMesh->ClearMorphTargets();
+	}
 	if (FaceMesh)
 	{
 		FaceMesh->ClearMorphTargets();
@@ -454,6 +540,24 @@ void ATunaSweeperTitlePresentationActor::ClearFacialWeights()
 FVector ATunaSweeperTitlePresentationActor::GetHeadLookTargetLocation() const
 {
 	return HeadLookTarget ? HeadLookTarget->GetComponentLocation() : GetActorLocation();
+}
+
+FVector ATunaSweeperTitlePresentationActor::CalculateCursorTargetWorldLocation(
+	const FVector& CursorRayOrigin,
+	const FVector& CursorRayDirection,
+	const FVector& EyeCenterWorldLocation,
+	float FrontOffset,
+	float MinimumDistance)
+{
+	const FVector NormalizedDirection = CursorRayDirection.GetSafeNormal();
+	if (NormalizedDirection.IsNearlyZero())
+	{
+		return CursorRayOrigin;
+	}
+
+	const float EyeDepth = FVector::DotProduct(EyeCenterWorldLocation - CursorRayOrigin, NormalizedDirection);
+	const float TargetDistance = FMath::Max(MinimumDistance, EyeDepth - FMath::Max(0.0f, FrontOffset));
+	return CursorRayOrigin + NormalizedDirection * TargetDistance;
 }
 
 void ATunaSweeperTitlePresentationActor::ApplyDesignTransforms()
@@ -519,6 +623,19 @@ void ATunaSweeperTitlePresentationActor::ConfigureSkirtExternalPhysicsCollision(
 		*ProxyPhysicsAsset->GetName());
 }
 
+void ATunaSweeperTitlePresentationActor::ConfigureSkirtAttachment()
+{
+	if (!BodyMesh || !SkirtMesh)
+	{
+		return;
+	}
+
+	SkirtMesh->AttachToComponent(
+		BodyMesh,
+		FAttachmentTransformRules::KeepRelativeTransform,
+		TEXT("pelvis"));
+}
+
 void ATunaSweeperTitlePresentationActor::UpdateCamera(float DeltaSeconds)
 {
 	if (!TitleCamera)
@@ -537,25 +654,45 @@ void ATunaSweeperTitlePresentationActor::UpdateCamera(float DeltaSeconds)
 void ATunaSweeperTitlePresentationActor::UpdateCursorLook(float DeltaSeconds)
 {
 	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(this, 0);
-	if (!PlayerController || !TitleCamera)
+	if (!PlayerController || !TitleCamera || !BodyMesh)
 	{
 		return;
 	}
 
-	int32 ViewportWidth = 0;
-	int32 ViewportHeight = 0;
-	PlayerController->GetViewportSize(ViewportWidth, ViewportHeight);
-	float MouseX = 0.0f;
-	float MouseY = 0.0f;
-	if (ViewportWidth <= 0 || ViewportHeight <= 0 || !PlayerController->GetMousePosition(MouseX, MouseY))
+	FVector CursorRayOrigin = FVector::ZeroVector;
+	FVector CursorRayDirection = FVector::ForwardVector;
+	if (!PlayerController->DeprojectMousePositionToWorld(CursorRayOrigin, CursorRayDirection))
 	{
 		return;
 	}
 
-	const float NormalizedX = FMath::Clamp((MouseX / static_cast<float>(ViewportWidth) - 0.5f) * 2.0f, -1.0f, 1.0f);
-	const float NormalizedY = FMath::Clamp((MouseY / static_cast<float>(ViewportHeight) - 0.5f) * 2.0f, -1.0f, 1.0f);
-	const float TargetYaw = NormalizedX * MaxHeadLookYaw;
-	const float TargetPitch = -NormalizedY * MaxHeadLookPitch;
+	const FVector LeftEyeLocation = BodyMesh->GetBoneLocation(TunaSweeperTitlePresentation::LunaMk2LeftEyeBoneName);
+	const FVector RightEyeLocation = BodyMesh->GetBoneLocation(TunaSweeperTitlePresentation::LunaMk2RightEyeBoneName);
+	const FVector EyeCenter = (LeftEyeLocation + RightEyeLocation) * 0.5f;
+	const FVector WorldTarget = CalculateCursorTargetWorldLocation(
+		CursorRayOrigin,
+		CursorRayDirection,
+		EyeCenter,
+		CursorTargetFrontOffset,
+		MinimumCursorTargetDistance);
+
+	const FVector HeadLocation = BodyMesh->GetBoneLocation(TEXT("Head"));
+	const FVector LocalLookDirection = BodyMesh->GetComponentTransform()
+		.InverseTransformVectorNoScale(WorldTarget - HeadLocation)
+		.GetSafeNormal();
+	if (LocalLookDirection.IsNearlyZero())
+	{
+		return;
+	}
+	const float TargetYaw = FMath::Clamp(
+		FMath::RadiansToDegrees(FMath::Atan2(LocalLookDirection.X, LocalLookDirection.Y)),
+		-MaxHeadLookYaw,
+		MaxHeadLookYaw);
+	const float HorizontalMagnitude = FVector2D(LocalLookDirection.X, LocalLookDirection.Y).Size();
+	const float TargetPitch = FMath::Clamp(
+		FMath::RadiansToDegrees(FMath::Atan2(LocalLookDirection.Z, HorizontalMagnitude)),
+		-MaxHeadLookPitch,
+		MaxHeadLookPitch);
 	const float DesiredHeadYaw = bEnableHeadCursorTracking ? TargetYaw : 0.0f;
 	const float DesiredHeadPitch = bEnableHeadCursorTracking ? TargetPitch : 0.0f;
 	CurrentHeadLookYaw = FMath::FInterpTo(
@@ -567,11 +704,6 @@ void ATunaSweeperTitlePresentationActor::UpdateCursorLook(float DeltaSeconds)
 		BodyMesh->SetDirectHeadLookRotation(CurrentHeadLookYaw, CurrentHeadLookPitch);
 	}
 
-	const FVector CameraLocation = TitleCamera->GetComponentLocation();
-	const float HorizontalOffset = FMath::Tan(FMath::DegreesToRadians(CurrentHeadLookYaw)) * HeadLookTargetDistance;
-	const float VerticalOffset = FMath::Tan(FMath::DegreesToRadians(CurrentHeadLookPitch)) * HeadLookTargetDistance;
-	const FVector WorldTarget = CameraLocation + TitleCamera->GetForwardVector() * HeadLookTargetDistance +
-		TitleCamera->GetRightVector() * HorizontalOffset + TitleCamera->GetUpVector() * VerticalOffset;
 	if (HeadLookTarget)
 	{
 		HeadLookTarget->SetWorldLocation(WorldTarget);
@@ -579,15 +711,8 @@ void ATunaSweeperTitlePresentationActor::UpdateCursorLook(float DeltaSeconds)
 
 	if (GazeTracking)
 	{
-		const float EyeHorizontalOffset =
-			FMath::Tan(FMath::DegreesToRadians(TargetYaw)) * HeadLookTargetDistance;
-		const float EyeVerticalOffset =
-			FMath::Tan(FMath::DegreesToRadians(TargetPitch)) * HeadLookTargetDistance;
-		const FVector EyeWorldTarget = CameraLocation + TitleCamera->GetForwardVector() * HeadLookTargetDistance +
-			TitleCamera->GetRightVector() * EyeHorizontalOffset +
-			TitleCamera->GetUpVector() * EyeVerticalOffset;
 		GazeTracking->SetGazeEnabled(bEnableEyeCursorTracking);
-		GazeTracking->SetGazeTargetWorldTransform(FTransform(TitleCamera->GetComponentQuat(), EyeWorldTarget));
+		GazeTracking->SetGazeTargetWorldTransform(FTransform(CursorRayDirection.Rotation(), WorldTarget));
 	}
 	ReceiveHeadLookUpdated(CurrentHeadLookYaw, CurrentHeadLookPitch, WorldTarget);
 }

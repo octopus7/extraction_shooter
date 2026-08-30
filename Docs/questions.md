@@ -5937,3 +5937,13 @@ PIE로 실행하면 배치된 테스트 로봇이 보이지 않는데 런타임�
 ### 답변
 
 새로 배치할 필요가 없다. 문제는 배치 인스턴스가 아니라 적 BP에 직렬화된 네 다리의 `DefaultOffset`이 모두 원본 `BP_QuadrupedDog`의 레거시 값 `(0, 0, -50)`으로 같았던 것이다. 적 BP를 앞·뒤 `±60`, 좌·우 `±30`으로 교정하고 이전 인스턴스도 Construction 및 BeginPlay에서 자동 복구하게 했다. 기존 직접 배치 인스턴스에서 네 발과 지면 타깃이 서로 다른 좌표로 계산되고 모두 유효함을 확인했다.
+
+## 2026-08-30 10:46:30 (소요시간: 00:00:40)
+
+### 질문
+
+`IntroMap` 아웃라이너에 여전히 `TS_TitlePresentation`으로 표시되어 BP 인스턴스로 교체되지 않은 것인지 문의.
+
+### 답변
+
+스크린샷의 `TS_TitlePresentation`은 레벨 액터의 Item Label이며 클래스명이 아니다. 같은 행 Type 열에 `Edit BP_TitlePresentation...`이 표시되므로 실제 배치 클래스는 `/Game/UI/Title/BP_TitlePresentationActor`가 맞다. `TS_` 라벨은 레벨에서 액터를 식별하기 위해 유지한 이름이며, BP 편집은 Type 열 링크를 누르면 된다.

@@ -24,6 +24,8 @@ public:
 	void SetDirectHeadLookRotation(float YawDegrees, float PitchDegrees);
 
 	void SetTemporaryRelaxedArmPose(float BlendAlpha, float MotionPhaseSeconds);
+	void SetTemporaryRelaxedArmPoseEnabled(bool bEnabled);
+	bool IsTemporaryRelaxedArmPoseEnabled() const { return bApplyTemporaryRelaxedArms; }
 
 	virtual void FinalizeBoneTransform() override;
 
@@ -32,10 +34,13 @@ protected:
 	FName HeadBoneName = TEXT("Head");
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Title|Look")
+	FName HeadLookRootBoneName = TEXT("neck_01");
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Title|Look")
 	bool bApplyDirectHeadLook = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Title|Pose")
-	bool bApplyTemporaryRelaxedArms = true;
+	bool bApplyTemporaryRelaxedArms = false;
 
 private:
 	bool IsBoneDescendantOf(int32 BoneIndex, int32 ParentBoneIndex) const;
@@ -89,6 +94,13 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Title|Look")
 	FVector GetHeadLookTargetLocation() const;
+
+	static FVector CalculateCursorTargetWorldLocation(
+		const FVector& CursorRayOrigin,
+		const FVector& CursorRayDirection,
+		const FVector& EyeCenterWorldLocation,
+		float FrontOffset,
+		float MinimumDistance);
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "TunaSweeper|Title|Look", meta = (DisplayName = "On Title Head Look Updated"))
 	void ReceiveHeadLookUpdated(float YawDegrees, float PitchDegrees, FVector WorldTargetLocation);
@@ -184,8 +196,11 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Title|Look", meta = (ClampMin = "0.1", UIMin = "0.1"))
 	float HeadLookInterpolationSpeed = 7.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Title|Look", meta = (ClampMin = "100.0", UIMin = "100.0"))
-	float HeadLookTargetDistance = 1000.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Title|Look", meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float CursorTargetFrontOffset = 250.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Title|Look", meta = (ClampMin = "1.0", UIMin = "1.0"))
+	float MinimumCursorTargetDistance = 50.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Title|Look")
 	bool bEnableHeadCursorTracking = true;
@@ -195,6 +210,7 @@ protected:
 
 private:
 	void ApplyDesignTransforms();
+	void ConfigureSkirtAttachment();
 	void ConfigureSkirtExternalPhysicsCollision();
 	void UpdateCamera(float DeltaSeconds);
 	void UpdateCursorLook(float DeltaSeconds);
