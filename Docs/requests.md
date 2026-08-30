@@ -7367,3 +7367,11 @@
 
 - 로봇 컬러 마스크, 커스터마이즈 머터리얼, 4개 MI와 자식 적 BP, 재실행·검증 도구 및 관련 작업·질문 기록만 선별해 Git 커밋으로 정리했다.
 - 동시에 진행 중인 `DemoRaidMap`, `ChainPhysicsEditor`, 체인 물리 관련 질문 기록은 커밋에서 제외했다.
+
+## 2026-08-30 11:57:40 (소요시간: 00:34:20)
+
+- 프로젝트 게임·에디터 모듈에 내장하지 않고 재사용 가능한 독립 UE 5.7 에디터 플러그인 `ChainPhysicsEditor`를 추가했다. 기존 `TunaSweeper` 상위 메뉴의 `Animation Tools > Chain Physics Setup`에서 별도 Nomad 툴 창을 연다.
+- 창에서 SKM을 선택하면 이름과 스켈레톤 계층으로 여러 선형 물리 체인 후보를 감지하고 시작·끝 본, 본 수, 길이, 기존 설정 상태를 표시한다. 후보 체인과 호환 AnimBP를 각각 선택할 수 있으며 비표준 체인은 시작 본을 수동으로 추가할 수 있다.
+- 선택 체인을 하나의 전용 PA에 구성하고, 본 길이에 따른 캡슐·구 크기 계산과 전체 반경 배율, Hair·Accessory·Cloth 프리셋, 부모 키네마틱 앵커 및 근접 충돌 프록시, 시뮬레이션 바디·제약·충돌 제외를 자동 설정하도록 구현했다. 원본 PA가 없는 SKM도 전용 PA를 새로 생성할 수 있다.
+- 호환 AnimBP의 최종 포즈 앞에 `Local To Component -> Rigid Body -> Component To Local` 체인을 중복 없이 연결하고 전용 PA를 오버라이드한다. 기존 PA와 연결된 Rigid Body를 함께 조사해 미설정·부분 설정·완료·충돌을 분류하며, 완료 상태는 무변경 종료하고 충돌 구성은 Repair가 자동 덮어쓰지 않도록 차단했다.
+- UE 5.7 독립 `BuildPlugin` 패키징과 실제 `TunaSweeperEditor Win64 Development` 빌드를 성공했다. `TunaSweeper.ChainPhysicsEditor.LunaMk2ExistingSetup` 자동화 테스트에서 Luna Mk2 좌우 6본 체인, 기존 `PA_LunaMk2_SideTail`, 연결된 `ABP_LunaMk2`를 완료 상태로 감지하고 Repair 재실행이 에셋을 변경하지 않음을 확인했다.

@@ -1,0 +1,18 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0.0",
+	"FriendlyName": "Chain Physics Setup",
+	"Description": "Detect secondary-motion bone chains and configure dedicated Physics Assets and Anim Blueprint Rigid Body nodes.",
+	"Category": "Editor",
+	"CreatedBy": "TunaSweeper",
+	"EnabledByDefault": true,
+	"CanContainContent": false,
+	"Modules": [
+		{
+			"Name": "ChainPhysicsEditor",
+			"Type": "Editor",
+			"LoadingPhase": "PostEngineInit"
+		}
+	]
+}
