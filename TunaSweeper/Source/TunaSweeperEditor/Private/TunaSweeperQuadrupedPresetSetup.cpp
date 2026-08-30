@@ -436,16 +436,18 @@ namespace
 		EnemyMesh->SetVisibility(true);
 		EnemyMesh->SetHiddenInGame(false);
 		EnemyMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		EnemyQuadruped->LookAheadSeconds = 0.18f;
-		EnemyQuadruped->StepThreshold = 42.0f;
+		EnemyQuadruped->LookAheadSeconds = 0.10f;
+		EnemyQuadruped->StepThreshold = 30.0f;
 		EnemyQuadruped->StepHeight = 26.0f;
-		EnemyQuadruped->StepDuration = 0.18f;
-		EnemyQuadruped->MaxStepDistance = 100.0f;
+		EnemyQuadruped->StepDuration = 0.12f;
+		EnemyQuadruped->MaxStepDistance = 80.0f;
+		EnemyQuadruped->GroupStepThresholdScale = 0.35f;
 		EnemyQuadruped->MaxLegReach = 150.0f;
 		EnemyQuadruped->GroundProbeRadius = 6.0f;
 		EnemyQuadruped->MinGroundNormalZ = 0.65f;
-		EnemyQuadruped->bMoveGaitGroupTogether = false;
+		EnemyQuadruped->bMoveGaitGroupTogether = true;
 		EnemyQuadruped->bDrawDebug = false;
+		EnemyQuadruped->bLogDiagnostics = true;
 
 		EnemyDefaults->MarkPackageDirty();
 		EnemyBlueprint->MarkPackageDirty();

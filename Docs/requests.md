@@ -7375,3 +7375,26 @@
 - 선택 체인을 하나의 전용 PA에 구성하고, 본 길이에 따른 캡슐·구 크기 계산과 전체 반경 배율, Hair·Accessory·Cloth 프리셋, 부모 키네마틱 앵커 및 근접 충돌 프록시, 시뮬레이션 바디·제약·충돌 제외를 자동 설정하도록 구현했다. 원본 PA가 없는 SKM도 전용 PA를 새로 생성할 수 있다.
 - 호환 AnimBP의 최종 포즈 앞에 `Local To Component -> Rigid Body -> Component To Local` 체인을 중복 없이 연결하고 전용 PA를 오버라이드한다. 기존 PA와 연결된 Rigid Body를 함께 조사해 미설정·부분 설정·완료·충돌을 분류하며, 완료 상태는 무변경 종료하고 충돌 구성은 Repair가 자동 덮어쓰지 않도록 차단했다.
 - UE 5.7 독립 `BuildPlugin` 패키징과 실제 `TunaSweeperEditor Win64 Development` 빌드를 성공했다. `TunaSweeper.ChainPhysicsEditor.LunaMk2ExistingSetup` 자동화 테스트에서 Luna Mk2 좌우 6본 체인, 기존 `PA_LunaMk2_SideTail`, 연결된 `ABP_LunaMk2`를 완료 상태로 감지하고 Repair 재실행이 에셋을 변경하지 않음을 확인했다.
+
+## 2026-08-30 12:49:30 (소요시간: 00:03:30)
+
+- 사족 총기 적이 초당 260cm 이동 중 한 발씩 순차 보행해 다리가 몸체 뒤로 과도하게 늘어나는 현상을 완화하도록 보행 프리셋을 조정했다.
+- 대각선 보행 그룹 동시 이동을 활성화하고 `StepDuration`을 0.12초, `StepThreshold`를 30cm, `LookAheadSeconds`를 0.10초, `MaxStepDistance`를 80cm, 그룹 동반 임계 배율을 0.35로 설정했다. `MaxLegReach`는 목표 무효화를 피하도록 150cm로 유지했다.
+- C++ 기본값, 에디터 BP 재생성 경로와 현재 `BP_QuadrupedGunEnemy` 에셋에 동일한 값을 반영했다. 명령let으로 저장된 BP CDO 값을 다시 읽어 확인하고 UE 5.7 `TunaSweeperEditor` 빌드를 성공했다.
+
+## 2026-08-30 12:54:00 (소요시간: 00:13:00)
+
+- 사족 총기 적의 실행 중 상태를 BP별로 식별할 수 있도록 `LogQuadrupedDiagnostics` 진단 로그를 추가했다. 액터 이름과 클래스 경로, 다리 인덱스, 액터 위치·속도, 현재·이상적·검사 위치, 스윕 결과·충돌점·법선, 도달 거리와 최대 도달 거리를 기록한다.
+- 실패 원인을 `NoGroundHit`, `GroundTooSteep`, `OutOfReach`로 분리하고 상태가 바뀔 때만 출력해 프레임별 로그 폭증을 막았다. 비 Shipping 게임 월드에서만 동작하며 사족 총기 적 부모 클래스와 에디터 프리셋에서 진단을 기본 활성화했다.
+- UE 5.7 게임 및 에디터 `Win64 Development` 빌드를 성공하고 `DemoRaidMap`을 게임 모드 명령let으로 실행해 로그를 검증했다. 지면 스윕과 법선은 정상이었지만 색상 자식 BP 4종과 데이터 스폰 기본 BP가 저장된 옛 월드 좌표 때문에 `OutOfReach`가 되는 것을 확인했다. 이번 작업은 원인 진단과 식별 로그 구현 범위이며 런타임 상태 초기화의 근본 동작 수정은 아직 적용하지 않았다.
+
+## 2026-08-30 13:11:20 (소요시간: 00:06:35)
+
+- `FQuadrupedLegData`에서 현재·다음 발 월드 위치, 표면 법선, 목표 유효성, 배치 점수, 보행 단계와 스텝 시작·종료 위치·진행도·이동 여부를 `Transient` 런타임 상태로 변경해 CDO와 레벨 패키지에 저장된 옛 좌표가 새 인스턴스에 유입되지 않도록 했다.
+- BeginPlay와 에디터 갱신의 발 초기화에서 모든 런타임 접촉·스텝 상태를 먼저 비우고, 현재 액터 Transform 기준의 이상적 네 발 위치를 `MaxStepDistance` 제한 없이 직접 지면 투영하도록 수정했다. 최초 접촉을 얻은 뒤 현재 위치와 목표 위치를 같은 충돌점으로 확정하며, 80cm 보폭 제한은 정상 보행 갱신에만 적용한다.
+- UE 5.7 `TunaSweeper`와 `TunaSweeperEditor` Win64 Development 빌드를 성공했다. `DemoRaidMap` 독립 게임 실행에서 기본·파랑·밝은 회색·금색·빨강 직접 배치 BP와 `(5200, 1040)` 데이터 스폰 기본 BP의 총 24개 다리가 모두 첫 프레임 `Valid`로 초기화되고 `NoGroundHit`, `GroundTooSteep`, `OutOfReach`가 0건임을 진단 로그로 확인했다.
+
+## 2026-08-30 13:35:30 (소요시간: 00:01:00)
+
+- 사족 총기 적의 보행 프리셋 조정, BP별 런타임 진단 로그, 런타임 발 상태 직렬화 차단과 최초 지면 획득 초기화 수정, 현재 `BP_QuadrupedGunEnemy` 에셋 및 관련 기록만 선별해 Git 커밋으로 정리했다.
+- 사용자가 편집 중인 `DemoRaidMap`, `MI_Robot_Blue`, `M_Robot_Customizable` 변경은 커밋에서 제외했다.

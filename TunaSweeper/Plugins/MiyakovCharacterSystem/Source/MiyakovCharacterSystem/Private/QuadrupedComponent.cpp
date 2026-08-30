@@ -10,6 +10,36 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "QuadrupedCharacter.h"
 
+DEFINE_LOG_CATEGORY_STATIC(LogQuadrupedDiagnostics, Log, All);
+
+namespace
+{
+enum class EQuadrupedTargetDiagnosticState : uint8
+{
+	Valid,
+	NoGroundHit,
+	GroundTooSteep,
+	OutOfReach
+};
+
+const TCHAR* LexToString(EQuadrupedTargetDiagnosticState State)
+{
+	switch (State)
+	{
+	case EQuadrupedTargetDiagnosticState::Valid:
+		return TEXT("Valid");
+	case EQuadrupedTargetDiagnosticState::NoGroundHit:
+		return TEXT("NoGroundHit");
+	case EQuadrupedTargetDiagnosticState::GroundTooSteep:
+		return TEXT("GroundTooSteep");
+	case EQuadrupedTargetDiagnosticState::OutOfReach:
+		return TEXT("OutOfReach");
+	default:
+		return TEXT("Unknown");
+	}
+}
+}
+
 UQuadrupedComponent::UQuadrupedComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
@@ -19,6 +49,7 @@ UQuadrupedComponent::UQuadrupedComponent()
 void UQuadrupedComponent::BeginPlay()
 {
 	Super::BeginPlay();
+	LogDiagnosticConfiguration();
 
 	if (Legs.Num() == 0)
 	{
@@ -166,8 +197,49 @@ void UQuadrupedComponent::InitializeDefaultLegs(float BodyLength, float BodyWidt
 
 void UQuadrupedComponent::ResetLegPositionsToTargets()
 {
-	UpdateMotionPrediction(0.0f);
-	UpdateLegTargets();
+	AActor* Owner = GetOwner();
+	if (!Owner)
+	{
+		return;
+	}
+
+	// Runtime foot positions are world-space values. Never use values inherited from a CDO,
+	// duplicated PIE actor, saved map instance, or an earlier placement to bootstrap a new owner.
+	for (FQuadrupedLegData& Leg : Legs)
+	{
+		Leg.CurrentPosition = FVector::ZeroVector;
+		Leg.TargetPosition = FVector::ZeroVector;
+		Leg.CurrentSurfaceNormal = FVector::UpVector;
+		Leg.TargetSurfaceNormal = FVector::UpVector;
+		Leg.bHasValidGroundTarget = false;
+		Leg.PlacementScore = 0.0f;
+		Leg.Phase = EQuadrupedFootPhase::Planted;
+		Leg.StepStartPosition = FVector::ZeroVector;
+		Leg.StepEndPosition = FVector::ZeroVector;
+		Leg.StepEndSurfaceNormal = FVector::UpVector;
+		Leg.StepProgress = 0.0f;
+		Leg.bIsMoving = false;
+		Leg.SupportComponent.Reset();
+		Leg.SupportRelativePosition = FVector::ZeroVector;
+		Leg.TargetSupportComponent.Reset();
+		Leg.TargetSupportRelativePosition = FVector::ZeroVector;
+		Leg.StepEndSupportComponent.Reset();
+		Leg.StepEndSupportRelativePosition = FVector::ZeroVector;
+	}
+
+	const FTransform OwnerTransform = Owner->GetActorTransform();
+	const float OwnerYaw = OwnerTransform.Rotator().Yaw;
+	PredictedOwnerTransform = FTransform(
+		FRotator(0.0f, OwnerYaw, 0.0f),
+		OwnerTransform.GetLocation(),
+		OwnerTransform.GetScale3D());
+	PreviousOwnerYaw = OwnerYaw;
+	bHasPreviousOwnerYaw = true;
+	LastDiagnosticTargetStates.Reset();
+
+	// Initial acquisition must probe the ideal locations directly. MaxStepDistance is a gait
+	// constraint and must only apply after a world-space planted position has been established.
+	UpdateLegTargets(false);
 	for (FQuadrupedLegData& Leg : Legs)
 	{
 		Leg.CurrentPosition = Leg.TargetPosition;
@@ -178,6 +250,7 @@ void UQuadrupedComponent::ResetLegPositionsToTargets()
 		Leg.StepProgress = 0.0f;
 		Leg.bIsMoving = false;
 		Leg.Phase = EQuadrupedFootPhase::Planted;
+		Leg.PlacementScore = 0.0f;
 		Leg.SupportComponent = Leg.TargetSupportComponent;
 		Leg.SupportRelativePosition = Leg.TargetSupportRelativePosition;
 	}
@@ -252,25 +325,55 @@ void UQuadrupedComponent::UpdatePlantedSupportPositions()
 	}
 }
 
-void UQuadrupedComponent::UpdateLegTargets()
+void UQuadrupedComponent::UpdateLegTargets(bool bLimitStepDistance)
 {
 	for (int32 i = 0; i < Legs.Num(); i++)
 	{
 		FQuadrupedLegData& Leg = Legs[i];
-		FVector ProbePosition = CalculateIdealFootPosition(i);
+		const FVector IdealPosition = CalculateIdealFootPosition(i);
+		FVector ProbePosition = IdealPosition;
 		FVector PlanarStep = ProbePosition - Leg.CurrentPosition;
 		PlanarStep.Z = 0.0f;
-		if (!Leg.CurrentPosition.IsNearlyZero() && PlanarStep.SizeSquared() > FMath::Square(MaxStepDistance))
+		if (bLimitStepDistance &&
+			!Leg.CurrentPosition.IsNearlyZero() &&
+			PlanarStep.SizeSquared() > FMath::Square(MaxStepDistance))
 		{
 			ProbePosition = Leg.CurrentPosition + PlanarStep.GetSafeNormal() * MaxStepDistance;
-			ProbePosition.Z = CalculateIdealFootPosition(i).Z;
+			ProbePosition.Z = IdealPosition.Z;
 		}
 
 		FHitResult GroundHit;
-		Leg.bHasValidGroundTarget =
-			TraceGround(ProbePosition, GroundHit) &&
-			GroundHit.ImpactNormal.Z >= MinGroundNormalZ &&
-			IsCandidateReachable(Leg, GroundHit.ImpactPoint);
+		const bool bHasGroundHit = TraceGround(ProbePosition, GroundHit);
+		const bool bHasWalkableNormal = bHasGroundHit && GroundHit.ImpactNormal.Z >= MinGroundNormalZ;
+		const bool bIsReachable = bHasWalkableNormal && IsCandidateReachable(Leg, GroundHit.ImpactPoint);
+		Leg.bHasValidGroundTarget = bHasGroundHit && bHasWalkableNormal && bIsReachable;
+
+		EQuadrupedTargetDiagnosticState DiagnosticState = EQuadrupedTargetDiagnosticState::Valid;
+		if (!bHasGroundHit)
+		{
+			DiagnosticState = EQuadrupedTargetDiagnosticState::NoGroundHit;
+		}
+		else if (!bHasWalkableNormal)
+		{
+			DiagnosticState = EQuadrupedTargetDiagnosticState::GroundTooSteep;
+		}
+		else if (!bIsReachable)
+		{
+			DiagnosticState = EQuadrupedTargetDiagnosticState::OutOfReach;
+		}
+
+		const FVector PredictedHipPosition = PredictedOwnerTransform.TransformPosition(
+			FVector(Leg.DefaultOffset.X, Leg.DefaultOffset.Y, 0.0f));
+		const float ReachDistance = bHasGroundHit
+			? FVector::Distance(PredictedHipPosition, GroundHit.ImpactPoint)
+			: -1.0f;
+		LogTargetDiagnostic(
+			i,
+			static_cast<uint8>(DiagnosticState),
+			IdealPosition,
+			ProbePosition,
+			GroundHit,
+			ReachDistance);
 
 		if (Leg.bHasValidGroundTarget)
 		{
@@ -291,6 +394,97 @@ void UQuadrupedComponent::UpdateLegTargets()
 
 		Leg.PlacementScore = CalculatePlacementError(Leg) / FMath::Max(StepThreshold, 1.0f);
 	}
+}
+
+void UQuadrupedComponent::LogDiagnosticConfiguration() const
+{
+#if !UE_BUILD_SHIPPING
+	if (!bLogDiagnostics || !GetOwner() || !GetWorld() || !GetWorld()->IsGameWorld())
+	{
+		return;
+	}
+
+	UE_LOG(
+		LogQuadrupedDiagnostics,
+		Display,
+		TEXT("QuadrupedConfig Actor=%s Class=%s WorldType=%d Location=%s Velocity=%s Legs=%d LookAhead=%.3f StepThreshold=%.1f StepDuration=%.3f MaxStep=%.1f MaxReach=%.1f GroundStart=%.1f GroundDistance=%.1f ProbeRadius=%.1f MinNormalZ=%.2f TraceChannel=%d PairedGait=%s"),
+		*GetOwner()->GetName(),
+		*GetOwner()->GetClass()->GetPathName(),
+		static_cast<int32>(GetWorld()->WorldType),
+		*GetOwner()->GetActorLocation().ToCompactString(),
+		*GetOwner()->GetVelocity().ToCompactString(),
+		Legs.Num(),
+		LookAheadSeconds,
+		StepThreshold,
+		StepDuration,
+		MaxStepDistance,
+		MaxLegReach,
+		GroundCheckStartOffset,
+		GroundCheckDistance,
+		GroundProbeRadius,
+		MinGroundNormalZ,
+		static_cast<int32>(GroundTraceChannel.GetValue()),
+		bMoveGaitGroupTogether ? TEXT("true") : TEXT("false"));
+#endif
+}
+
+void UQuadrupedComponent::LogTargetDiagnostic(
+	int32 LegIndex,
+	uint8 TargetState,
+	const FVector& IdealPosition,
+	const FVector& ProbePosition,
+	const FHitResult& GroundHit,
+	float ReachDistance)
+{
+#if !UE_BUILD_SHIPPING
+	if (!bLogDiagnostics || !GetOwner() || !GetWorld() || !GetWorld()->IsGameWorld() ||
+		!Legs.IsValidIndex(LegIndex))
+	{
+		return;
+	}
+
+	if (LastDiagnosticTargetStates.Num() != Legs.Num())
+	{
+		LastDiagnosticTargetStates.Init(MAX_uint8, Legs.Num());
+	}
+
+	if (LastDiagnosticTargetStates[LegIndex] == TargetState)
+	{
+		return;
+	}
+	LastDiagnosticTargetStates[LegIndex] = TargetState;
+
+	const FQuadrupedLegData& Leg = Legs[LegIndex];
+	const EQuadrupedTargetDiagnosticState State =
+		static_cast<EQuadrupedTargetDiagnosticState>(TargetState);
+	const FString Message = FString::Printf(
+		TEXT("QuadrupedTarget Actor=%s Class=%s WorldType=%d Leg=%d State=%s ActorLocation=%s Velocity=%s Offset=%s Current=%s Ideal=%s Probe=%s Hit=%s HitPoint=%s HitNormal=%s ReachDistance=%.1f MaxReach=%.1f Valid=%s"),
+		*GetOwner()->GetName(),
+		*GetOwner()->GetClass()->GetPathName(),
+		static_cast<int32>(GetWorld()->WorldType),
+		LegIndex,
+		LexToString(State),
+		*GetOwner()->GetActorLocation().ToCompactString(),
+		*GetOwner()->GetVelocity().ToCompactString(),
+		*Leg.DefaultOffset.ToCompactString(),
+		*Leg.CurrentPosition.ToCompactString(),
+		*IdealPosition.ToCompactString(),
+		*ProbePosition.ToCompactString(),
+		GroundHit.bBlockingHit ? TEXT("true") : TEXT("false"),
+		*GroundHit.ImpactPoint.ToCompactString(),
+		*GroundHit.ImpactNormal.ToCompactString(),
+		ReachDistance,
+		MaxLegReach,
+		Leg.bHasValidGroundTarget ? TEXT("true") : TEXT("false"));
+	if (State == EQuadrupedTargetDiagnosticState::Valid)
+	{
+		UE_LOG(LogQuadrupedDiagnostics, Display, TEXT("%s"), *Message);
+	}
+	else
+	{
+		UE_LOG(LogQuadrupedDiagnostics, Warning, TEXT("%s"), *Message);
+	}
+#endif
 }
 
 void UQuadrupedComponent::ProcessGaitCycle(float DeltaTime)

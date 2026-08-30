@@ -75,15 +75,17 @@ ATunaSweeperQuadrupedEnemyCharacter::ATunaSweeperQuadrupedEnemyCharacter()
 
 	QuadrupedComponent = CreateDefaultSubobject<UQuadrupedComponent>(TEXT("QuadrupedComponent"));
 	QuadrupedComponent->InitializeDefaultLegs(60.0f, 30.0f);
-	QuadrupedComponent->LookAheadSeconds = 0.18f;
-	QuadrupedComponent->StepThreshold = 42.0f;
+	QuadrupedComponent->LookAheadSeconds = 0.10f;
+	QuadrupedComponent->StepThreshold = 30.0f;
 	QuadrupedComponent->StepHeight = 26.0f;
-	QuadrupedComponent->StepDuration = 0.18f;
-	QuadrupedComponent->MaxStepDistance = 100.0f;
+	QuadrupedComponent->StepDuration = 0.12f;
+	QuadrupedComponent->MaxStepDistance = 80.0f;
+	QuadrupedComponent->GroupStepThresholdScale = 0.35f;
 	QuadrupedComponent->MaxLegReach = 150.0f;
 	QuadrupedComponent->GroundProbeRadius = 6.0f;
 	QuadrupedComponent->MinGroundNormalZ = 0.65f;
-	QuadrupedComponent->bMoveGaitGroupTogether = false;
+	QuadrupedComponent->bMoveGaitGroupTogether = true;
+	QuadrupedComponent->bLogDiagnostics = true;
 }
 
 void ATunaSweeperQuadrupedEnemyCharacter::OnConstruction(const FTransform& Transform)

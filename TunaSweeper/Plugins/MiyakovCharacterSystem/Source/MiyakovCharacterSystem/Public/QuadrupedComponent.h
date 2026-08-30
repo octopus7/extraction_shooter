@@ -28,43 +28,43 @@ struct FQuadrupedLegData
 	FVector DefaultOffset = FVector::ZeroVector;
 
 	// Current foot world position
-	UPROPERTY(BlueprintReadOnly, Category = "Leg")
+	UPROPERTY(Transient, BlueprintReadOnly, Category = "Leg")
 	FVector CurrentPosition = FVector::ZeroVector;
 
 	// Continuously evaluated preview for the next valid footfall.
-	UPROPERTY(BlueprintReadOnly, Category = "Leg")
+	UPROPERTY(Transient, BlueprintReadOnly, Category = "Leg")
 	FVector TargetPosition = FVector::ZeroVector;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Leg")
+	UPROPERTY(Transient, BlueprintReadOnly, Category = "Leg")
 	FVector CurrentSurfaceNormal = FVector::UpVector;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Leg")
+	UPROPERTY(Transient, BlueprintReadOnly, Category = "Leg")
 	FVector TargetSurfaceNormal = FVector::UpVector;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Leg")
+	UPROPERTY(Transient, BlueprintReadOnly, Category = "Leg")
 	bool bHasValidGroundTarget = false;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Leg")
+	UPROPERTY(Transient, BlueprintReadOnly, Category = "Leg")
 	float PlacementScore = 0.0f;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Leg")
+	UPROPERTY(Transient, BlueprintReadOnly, Category = "Leg")
 	EQuadrupedFootPhase Phase = EQuadrupedFootPhase::Planted;
 
 	// Latched positions for a stable swing trajectory.
-	UPROPERTY(BlueprintReadOnly, Category = "Leg")
+	UPROPERTY(Transient, BlueprintReadOnly, Category = "Leg")
 	FVector StepStartPosition = FVector::ZeroVector;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Leg")
+	UPROPERTY(Transient, BlueprintReadOnly, Category = "Leg")
 	FVector StepEndPosition = FVector::ZeroVector;
 
 	FVector StepEndSurfaceNormal = FVector::UpVector;
 
 	// Step interpolation progress (0 to 1)
-	UPROPERTY(BlueprintReadOnly, Category = "Leg")
+	UPROPERTY(Transient, BlueprintReadOnly, Category = "Leg")
 	float StepProgress = 0.0f;
 
 	// Is this leg currently stepping?
-	UPROPERTY(BlueprintReadOnly, Category = "Leg")
+	UPROPERTY(Transient, BlueprintReadOnly, Category = "Leg")
 	bool bIsMoving = false;
 
 	// Gait group (0 or 1) - diagonal pairs step together
@@ -161,6 +161,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Quadruped|Debug")
 	bool bDrawDebug = false;
 
+	/** Log the owning BP class and target failure transitions without per-frame spam. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Quadruped|Debug")
+	bool bLogDiagnostics = false;
+
 	UFUNCTION(BlueprintPure, Category = "Quadruped")
 	FVector GetFootPosition(int32 LegIndex) const;
 
@@ -176,7 +180,7 @@ public:
 private:
 	void UpdateMotionPrediction(float DeltaTime);
 	void UpdatePlantedSupportPositions();
-	void UpdateLegTargets();
+	void UpdateLegTargets(bool bLimitStepDistance = true);
 	void ResetLegPositionsToTargets();
 	void ProcessGaitCycle(float DeltaTime);
 	void InterpolateLegPositions(float DeltaTime);
@@ -187,8 +191,17 @@ private:
 	bool IsCandidateReachable(const FQuadrupedLegData& Leg, const FVector& CandidatePosition) const;
 	float CalculatePlacementError(const FQuadrupedLegData& Leg) const;
 	FVector CalculateIdealFootPosition(int32 LegIndex) const;
+	void LogDiagnosticConfiguration() const;
+	void LogTargetDiagnostic(
+		int32 LegIndex,
+		uint8 TargetState,
+		const FVector& IdealPosition,
+		const FVector& ProbePosition,
+		const FHitResult& GroundHit,
+		float ReachDistance);
 
 	FTransform PredictedOwnerTransform = FTransform::Identity;
 	float PreviousOwnerYaw = 0.0f;
 	bool bHasPreviousOwnerYaw = false;
+	TArray<uint8> LastDiagnosticTargetStates;
 };
