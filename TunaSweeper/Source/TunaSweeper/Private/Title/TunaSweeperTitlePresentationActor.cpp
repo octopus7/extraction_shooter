@@ -454,7 +454,14 @@ void ATunaSweeperTitlePresentationActor::BeginPlay()
 			TunaSweeperTitlePresentation::LunaMk2LeftEyeBoneName,
 			TunaSweeperTitlePresentation::LunaMk2RightEyeBoneName);
 		GazeTracking->SetEyeAxes(FVector::RightVector, FVector::UpVector);
-		GazeTracking->SetGazeEnabled(bEnableEyeCursorTracking);
+		GazeTracking->SetGazeEnabled(
+			!bTemporarilyDisableHeadAndEyeCorrection && bEnableEyeCursorTracking);
+	}
+	if (bTemporarilyDisableHeadAndEyeCorrection && BodyMesh)
+	{
+		CurrentHeadLookYaw = 0.0f;
+		CurrentHeadLookPitch = 0.0f;
+		BodyMesh->SetDirectHeadLookRotation(0.0f, 0.0f);
 	}
 	ConfigureSkirtExternalPhysicsCollision();
 	SetMainMenuPresentationActive(true);
@@ -475,7 +482,20 @@ void ATunaSweeperTitlePresentationActor::Tick(float DeltaSeconds)
 
 	UpdateCamera(DeltaSeconds);
 	UpdateCharacterPresentationState();
-	if (bCharacterPresentationEnabled && bMainMenuPresentationActive)
+	if (bTemporarilyDisableHeadAndEyeCorrection)
+	{
+		CurrentHeadLookYaw = 0.0f;
+		CurrentHeadLookPitch = 0.0f;
+		if (BodyMesh)
+		{
+			BodyMesh->SetDirectHeadLookRotation(0.0f, 0.0f);
+		}
+		if (GazeTracking)
+		{
+			GazeTracking->SetGazeEnabled(false);
+		}
+	}
+	else if (bCharacterPresentationEnabled && bMainMenuPresentationActive)
 	{
 		UpdateCursorLook(DeltaSeconds);
 	}
@@ -486,7 +506,8 @@ void ATunaSweeperTitlePresentationActor::SetMainMenuPresentationActive(bool bAct
 	bMainMenuPresentationActive = bActive;
 	if (GazeTracking)
 	{
-		GazeTracking->SetGazeEnabled(bActive && bEnableEyeCursorTracking);
+		GazeTracking->SetGazeEnabled(
+			bActive && !bTemporarilyDisableHeadAndEyeCorrection && bEnableEyeCursorTracking);
 	}
 	if (bActive)
 	{

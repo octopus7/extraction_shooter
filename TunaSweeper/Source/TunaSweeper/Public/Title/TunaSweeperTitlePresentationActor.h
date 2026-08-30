@@ -203,6 +203,9 @@ protected:
 	float MinimumCursorTargetDistance = 50.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Title|Look")
+	bool bTemporarilyDisableHeadAndEyeCorrection = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Title|Look")
 	bool bEnableHeadCursorTracking = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Title|Look")
