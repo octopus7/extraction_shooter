@@ -7398,3 +7398,9 @@
 
 - 사족 총기 적의 보행 프리셋 조정, BP별 런타임 진단 로그, 런타임 발 상태 직렬화 차단과 최초 지면 획득 초기화 수정, 현재 `BP_QuadrupedGunEnemy` 에셋 및 관련 기록만 선별해 Git 커밋으로 정리했다.
 - 사용자가 편집 중인 `DemoRaidMap`, `MI_Robot_Blue`, `M_Robot_Customizable` 변경은 커밋에서 제외했다.
+
+## 2026-08-30 13:45:30 (소요시간: 00:04:45)
+
+- 커스텀 `Quadruped Robot IK` 애니메이션 노드가 레벨 편집·BP 프리뷰 같은 비 게임 월드에서는 본 변환을 적용하지 않고 `ABP_RobotDog`의 입력 스켈레탈 기본 포즈를 그대로 통과시키도록 변경했다. PIE와 standalone 게임 월드에서는 기존 지면 IK를 그대로 평가한다.
+- UE 5.7 `TunaSweeper`와 `TunaSweeperEditor` Win64 Development 빌드를 성공했다. `DemoRaidMap` 독립 게임 실행에서 총 24개 다리가 모두 `Valid`이고 지면 목표 실패가 0건임을 확인해 런타임 IK 초기화가 유지되는 것을 검증했다.
+- 에디터 기본 포즈 분기 코드와 관련 질문·작업 기록만 선별해 Git 커밋으로 정리하고, 사용자가 편집 중인 `DemoRaidMap`, `MI_Robot_Blue`, `M_Robot_Customizable` 변경은 제외했다.

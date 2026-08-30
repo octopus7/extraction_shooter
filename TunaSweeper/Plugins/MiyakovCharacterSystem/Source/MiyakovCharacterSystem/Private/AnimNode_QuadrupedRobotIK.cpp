@@ -3,6 +3,7 @@
 #include "Animation/AnimInstance.h"
 #include "BonePose.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Engine/World.h"
 #include "GameFramework/Actor.h"
 #include "QuadrupedComponent.h"
 #include "TwoBoneIK.h"
@@ -25,6 +26,14 @@ void FAnimNode_QuadrupedRobotIK::PreUpdate(const UAnimInstance* InAnimInstance)
 	}
 
 	USkeletalMeshComponent* SkeletalMeshComponent = InAnimInstance->GetSkelMeshComponent();
+	const UWorld* World = SkeletalMeshComponent ? SkeletalMeshComponent->GetWorld() : nullptr;
+	// Keep placed actors and Blueprint previews in the AnimBP input pose. For ABP_RobotDog this
+	// is the skeletal reference pose; PIE and standalone game worlds still evaluate ground IK.
+	if (!World || !World->IsGameWorld())
+	{
+		return;
+	}
+
 	AActor* Owner = SkeletalMeshComponent ? SkeletalMeshComponent->GetOwner() : nullptr;
 	const UQuadrupedComponent* QuadrupedComponent = Owner ? Owner->FindComponentByClass<UQuadrupedComponent>() : nullptr;
 	if (!SkeletalMeshComponent || !QuadrupedComponent || QuadrupedComponent->Legs.Num() != 4)
