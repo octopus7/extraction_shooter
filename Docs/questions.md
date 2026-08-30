@@ -5947,3 +5947,13 @@ PIE로 실행하면 배치된 테스트 로봇이 보이지 않는데 런타임�
 ### 답변
 
 스크린샷의 `TS_TitlePresentation`은 레벨 액터의 Item Label이며 클래스명이 아니다. 같은 행 Type 열에 `Edit BP_TitlePresentation...`이 표시되므로 실제 배치 클래스는 `/Game/UI/Title/BP_TitlePresentationActor`가 맞다. `TS_` 라벨은 레벨에서 액터를 식별하기 위해 유지한 이름이며, BP 편집은 Type 열 링크를 누르면 된다.
+
+## 2026-08-30 11:30:30 (소요시간: 00:00:17)
+
+### 질문
+
+루나 MK2의 좌우 사이드 테일 본이 식별되는지 문의.
+
+### 답변
+
+루나 MK2 스켈레톤과 스켈레탈 메시에서 좌우 사이드 테일 본 체인이 확인된다. 언리얼 본 이름은 왼쪽 `sidetail_L_01`부터 `sidetail_L_006`까지, 오른쪽 `sidetail_R_01`부터 `sidetail_R_006`까지로 좌우 각각 6개, 총 12개다.

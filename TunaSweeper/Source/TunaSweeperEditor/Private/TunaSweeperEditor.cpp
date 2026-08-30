@@ -1,6 +1,7 @@
 #include "TunaSweeperEditorSetupShared.h"
 #include "TunaSweeperBuildTargetTool.h"
 #include "TunaSweeperEnemyAIDebugTool.h"
+#include "TunaSweeperLunaMk2SideTailPhysicsSetup.h"
 #include "TunaSweeperLunaSkirtPhysicsSetup.h"
 #include "TunaSweeperQuadrupedPresetSetup.h"
 #include "TunaSweeperGarageDoorSetup.h"
@@ -48,6 +49,14 @@ public:
 			LunaSkirtSetupInitializedHandle = FEditorDelegates::OnEditorInitialized.AddRaw(
 				this,
 				&FTunaSweeperEditorModule::OnEditorInitializedForLunaSkirtSetup);
+			return;
+		}
+
+		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperLunaMk2SideTailPhysicsSetup")))
+		{
+			LunaMk2SideTailSetupInitializedHandle = FEditorDelegates::OnEditorInitialized.AddRaw(
+				this,
+				&FTunaSweeperEditorModule::OnEditorInitializedForLunaMk2SideTailSetup);
 			return;
 		}
 
@@ -178,6 +187,18 @@ public:
 		{
 			FTSTicker::GetCoreTicker().RemoveTicker(LunaSkirtSetupTickerHandle);
 			LunaSkirtSetupTickerHandle.Reset();
+		}
+
+		if (LunaMk2SideTailSetupInitializedHandle.IsValid())
+		{
+			FEditorDelegates::OnEditorInitialized.Remove(LunaMk2SideTailSetupInitializedHandle);
+			LunaMk2SideTailSetupInitializedHandle.Reset();
+		}
+
+		if (LunaMk2SideTailSetupTickerHandle.IsValid())
+		{
+			FTSTicker::GetCoreTicker().RemoveTicker(LunaMk2SideTailSetupTickerHandle);
+			LunaMk2SideTailSetupTickerHandle.Reset();
 		}
 
 		if (GarageDoorSetupInitializedHandle.IsValid())
@@ -321,6 +342,28 @@ private:
 		return false;
 	}
 
+	void OnEditorInitializedForLunaMk2SideTailSetup(double)
+	{
+		FEditorDelegates::OnEditorInitialized.Remove(LunaMk2SideTailSetupInitializedHandle);
+		LunaMk2SideTailSetupInitializedHandle.Reset();
+		LunaMk2SideTailSetupTickerHandle = FTSTicker::GetCoreTicker().AddTicker(
+			FTickerDelegate::CreateRaw(this, &FTunaSweeperEditorModule::RunLunaMk2SideTailSetupAfterInitialization));
+	}
+
+	bool RunLunaMk2SideTailSetupAfterInitialization(float)
+	{
+		LunaMk2SideTailSetupTickerHandle.Reset();
+		const bool bSucceeded = TunaSweeperLunaMk2SideTailPhysicsSetup::Run();
+		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperLunaMk2SideTailPhysicsSetupQuit")))
+		{
+			FPlatformMisc::RequestExitWithStatus(
+				false,
+				bSucceeded ? 0 : 1,
+				TEXT("TunaSweeperLunaMk2SideTailPhysicsSetup"));
+		}
+		return false;
+	}
+
 	void OnEditorInitializedForGarageDoorSetup(double)
 	{
 		FEditorDelegates::OnEditorInitialized.Remove(GarageDoorSetupInitializedHandle);
@@ -436,6 +479,8 @@ private:
 	FTSTicker::FDelegateHandle WallCopingSetupTickerHandle;
 	FDelegateHandle LunaSkirtSetupInitializedHandle;
 	FTSTicker::FDelegateHandle LunaSkirtSetupTickerHandle;
+	FDelegateHandle LunaMk2SideTailSetupInitializedHandle;
+	FTSTicker::FDelegateHandle LunaMk2SideTailSetupTickerHandle;
 	FDelegateHandle GarageDoorSetupInitializedHandle;
 	FTSTicker::FDelegateHandle GarageDoorSetupTickerHandle;
 	FDelegateHandle LocationBlendCameraSetupInitializedHandle;
