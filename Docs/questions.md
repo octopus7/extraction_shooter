@@ -6097,3 +6097,53 @@ UE 5.7 에디터 모듈의 Nomad 탭과 Tools 메뉴 항목으로 구현할 수 
 ### 답변
 
 가능하며 에디터 배치 미리보기에는 더 단순하고 안정적인 방식이다. 비 게임 월드에서는 사족 IK 노드의 Alpha를 0으로 만들어 기본 애니메이션 포즈를 통과시키거나, 정확히 임포트된 기준 포즈가 필요하면 AnimGraph의 `Local Space Ref Pose`와 런타임 포즈를 Bool 또는 Alpha로 블렌드한다. 게임 월드에서는 Alpha 1로 전환해 BeginPlay에서 초기화한 지면 IK를 적용한다. 메시의 AnimationMode나 AnimClass를 Construction에서 바꾸면 에셋 기본값이 오염될 수 있으므로 유지하고, 컴포넌트가 `GetWorld()->IsGameWorld()`에 따라 제공하는 런타임 전용 `IKAlpha` 또는 `ShouldEvaluateIK` 값을 AnimBP가 읽는 구성이 안전하다. 일반 애니메이션을 유지한 중립 자세면 IK 노드만 우회하고, 완전한 스켈레탈 기준 자세가 목적이면 최종 출력 직전에 Ref Pose로 전환하면 된다.
+
+## 2026-08-30 14:16:45 (소요시간: 00:01:00)
+
+### 질문
+
+얼굴 클로즈업, 소규모 몸 동작, 얼굴 표정 모프 타깃 조정 정도의 시퀀서 연출에서 플레이어 캐릭터 BP 대신 별도 메시 또는 연출 전용 액터를 사용하는 것이 적절한지와 권장 구성을 문의.
+
+### 답변
+
+현재 플레이어 캐릭터는 입력, 이동, 카메라, 전투, 인벤토리 등 연출에 불필요한 런타임 상태가 많으므로 이 용도에는 별도 `Actor` 기반 연출용 BP를 시퀀서 `Spawnable`로 사용하는 구성이 적합하다. 연출용 BP에는 Scene Root와 Body/Face/Skirt Skeletal Mesh만 두고 동일 외형 데이터와 재질을 공유하며, Level Sequence에는 별도 CineCamera와 Camera Cuts, Body Animation, 필요 시 소규모 FK 또는 Control Rig 보정, 얼굴 Morph Target용 Animation Curve나 소형 Face Control Rig 트랙을 둔다. 기존 타이틀 연출 액터에는 이미 Body/Face/Skirt 구성과 `SetFacialWeight()` 로직이 있으므로 전체 액터를 상속하기보다는 외형·표정 적용 부분만 공용 컴포넌트나 연출용 BP로 재사용하는 편이 낫다. 실제 플레이어의 현재 장비, 피격 상태, 위치를 그대로 이어야 할 때만 기존 Pawn을 Possessable 또는 동적 바인딩으로 연결하고, 이번처럼 독립적인 얼굴 쇼트에는 전용 Spawnable이 더 단순하고 안정적이다.
+
+## 2026-08-30 14:20:56 (소요시간: 00:00:30)
+
+### 질문
+
+Send to Unreal에서 동일 아마추어를 사용한 몸과 얼굴을 분리 익스포트할 때 각각 별도 Skeleton 에셋이 생기는 경우, 임포트 후 얼굴 Skeletal Mesh에 몸의 Skeleton 에셋을 지정해도 되는지 문의.
+
+### 답변
+
+본 이름, 부모 계층, 계층 순서와 기준 포즈가 일치한다면 얼굴 Skeletal Mesh가 몸의 Skeleton 에셋을 공유하도록 지정해도 되며, 같은 캐릭터의 분리 파츠에는 오히려 권장되는 구성이다. 가장 안전한 순서는 몸을 먼저 임포트해 기준 Skeleton을 만든 뒤 얼굴 임포트 시 해당 Skeleton을 직접 선택하는 것이고, Send to Unreal이 별도 Skeleton을 이미 만들었다면 사후에 얼굴 메시의 Skeleton을 몸 쪽으로 재지정해도 된다. Morph Target은 Skeletal Mesh에 속하므로 Skeleton 통합만으로 사라지지 않는다. 단, 얼굴 전용 본이 몸 Skeleton 또는 몸 메시의 참조 본 목록에 없거나 계층·기준 포즈가 다르면 강제로 통합하지 말아야 한다. 공통 본과 모프만 쓰는 얼굴은 BodyMesh를 Leader Pose로 지정하면 되고, 얼굴 전용 본을 독립적으로 애니메이션해야 하면 Copy Pose From Mesh 뒤에 얼굴 AnimBP나 Control Rig를 평가하는 구성이 적합하다.
+
+## 2026-08-30 14:21:10 (소요시간: 00:01:10)
+
+### 질문
+
+사용 중인 Send to Unreal이 Blender 4.5용으로 설치된 애드온이라는 조건을 추가로 전달하고, 그 설치본에 맞는 Skeleton 공유 방법을 확인.
+
+### 답변
+
+설치본은 Blender 4.x FBX 경로가 포함된 Send to Unreal 2.6.6 커뮤니티 포크이며 `Paths > Skeleton Asset (Unreal)` 설정을 제공한다. 따라서 몸을 먼저 보내 기준 Skeleton 에셋을 만든 뒤 UE에서 그 Skeleton을 우클릭해 Copy Reference하고, Blender의 해당 필드에 붙여 넣은 다음 얼굴만 별도로 Push Assets하는 것이 가장 안전하다. 얼굴 임포트에서는 `Import Morph Targets`를 켜고 `Update Skeleton Reference Pose`는 꺼서 얼굴 익스포트가 몸 Skeleton의 기준 포즈를 덮어쓰지 않게 한다. Skeleton 경로가 비어 있으면 애드온이 각 Skeletal Mesh 이름을 기준으로 별도 `_Skeleton` 경로를 자동 생성하므로 현재 현상은 예상된 동작이다.
+
+## 2026-08-30 14:57:36 (소요시간: 00:00:20)
+
+### 질문
+
+Send to Unreal에 이미 UE 자산으로 존재하는 Skeleton을 선택해 새 Skeletal Mesh 임포트에 재사용하는 기능이 있는지 확인.
+
+### 답변
+
+기능은 있다. 다만 Blender에서 UE Content Browser 목록을 여는 에셋 피커 방식은 아니며, `Paths > Skeleton Asset (Unreal)` 문자열 필드에 기존 UE Skeleton의 참조 경로를 지정하는 방식이다. UE에서 대상 Skeleton을 우클릭해 `Copy Reference`한 값을 붙여 넣으면 애드온이 해당 자산의 존재 여부와 타입을 확인하고 Skeletal Mesh 임포트 옵션의 Skeleton으로 전달한다.
+
+## 2026-08-30 15:20:35 (소요시간: 00:00:30)
+
+### 질문
+
+커밋 이후 블루 로봇 변형에만 변경사항이 보이고 커스터마이저블 부모 머터리얼에도 변경이 생긴 것이 사용자가 한 작업인지 확인.
+
+### 답변
+
+Git 기준으로 블루 적 BP는 변경되지 않았고 `MI_Robot_Blue`와 부모 `M_Robot_Customizable`만 커밋 이후 수정되었다. 두 파일의 마지막 기록 시각은 2026-08-30 12:50:24로 0.02초 차이이며, 각각 7,720바이트에서 20,065바이트, 17,905바이트에서 30,055바이트로 함께 재저장되었다. 로봇 변형 생성·검증 결과는 12:24 커밋에 포함되었고 그 뒤 Codex가 UE 에셋을 쓰는 작업은 하지 않았으므로, 현재 변경은 이후 열려 있던 Unreal Editor에서 블루 MI와 부모 머터리얼이 한 번의 저장 작업으로 재직렬화된 것으로 판단된다. 다만 Git만으로 사용자가 파라미터를 직접 바꾼 것인지, 에디터가 로드·컴파일 뒤 저장한 것인지는 구분할 수 없다.
