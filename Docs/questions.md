@@ -5988,6 +5988,26 @@ UE5 프로젝트 안에서 쿼드봇이 사용하는 메시 이름을 문의.
 
 쿼드봇 블루프린트 `/Game/Blueprints/BP_QuadrupedDog`가 참조하는 스켈레탈 메시 이름은 `SKM_Robot`이며, 에셋 경로는 `/Game/Characters/Robot/SKM_Robot`이다.
 
+## 2026-08-30 11:55:30 (소요시간: 00:01:15)
+
+### 질문
+
+쿼드봇이 사용하는 `SKM_Robot` 메시의 머터리얼 사용 개수를 문의.
+
+### 답변
+
+`SKM_Robot` 스켈레탈 메시의 머터리얼 슬롯은 1개이며, 슬롯 이름과 할당 머터리얼은 `M_Robot`이다. 에셋 경로는 `/Game/Characters/Robot/Materials/M_Robot`이다.
+
+## 2026-08-30 11:57:00 (소요시간: 00:01:16)
+
+### 질문
+
+쿼드봇 메시의 흰색 부분에 색상을 적용할 때 폴리곤 단위로 머터리얼을 분리하는 방식보다 마스크 텍스처와 RGB 색상 파라미터를 사용하는 방식이 적합한지 문의.
+
+### 답변
+
+현재 `SKM_Robot`은 단일 머터리얼 슬롯과 `M_Robot` 하나를 사용하므로, 색상 변경만을 위해 슬롯과 드로 콜을 늘리는 폴리곤 머터리얼 분리보다 마스크 기반 틴트가 적합하다. `T_Robot` 원본 Base Color와 `T_Robot * BodyTint`를 흰색 영역 마스크의 R 채널로 Lerp하면 원본 명암과 디테일을 유지하면서 색을 바꿀 수 있다. 마스크는 sRGB를 끄고 Masks 압축을 사용하며, 고정 색상 변형은 Material Instance Constant, 개체별 동적 색상은 Dynamic Material Instance 또는 대량 개체에서는 Custom Primitive Data를 사용하는 구성이 적합하다.
+
 ## 2026-08-30 11:45:49 (소요시간: 00:01:30)
 
 ### 질문

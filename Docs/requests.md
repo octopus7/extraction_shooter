@@ -7348,3 +7348,22 @@
 
 - Luna Mk2 사이드 테일 전용 Physics Asset, AnimBP 연결, 재실행 가능한 에디터 설정 코드와 해당 작업·질문 기록만 선별해 Git 커밋으로 정리했다.
 - 동시에 진행 중인 타이틀 프레젠테이션 소스·BP·맵 변경, `DemoRaidMap`, 다른 질문·요청 기록은 커밋에서 제외했다.
+
+## 2026-08-30 11:59:40 (소요시간: 00:07:54)
+
+- `T_Robot` 원본 텍스처를 PNG로 추출하고 밝기와 채도를 이용해 흰 외장판을 대략 검출하는 재실행 가능한 로봇 바디 컬러 마스크 생성 도구를 추가했다.
+- 자동 검출 마스크 `T_Robot_BodyColorMask.png`와 선택 영역을 자홍색으로 표시한 확인용 프리뷰를 생성했다. 큰 흰 외장판을 포함하고 검은 기계부와 청색 LED는 대부분 제외하며, 밝은 은색 링과 가장자리 하이라이트는 일부 포함되는 초안이다.
+- 생성한 마스크를 `/Game/Characters/Robot/Materials/T_Robot_BodyColorMask` UE 텍스처 에셋으로 가져오고 `sRGB=False`, `TC_Masks`, Character LOD Group 설정으로 저장했다.
+
+## 2026-08-30 12:08:00 (소요시간: 00:12:21)
+
+- 기존 `BP_QuadrupedGunEnemy`와 기존 `M_Robot`을 수정하지 않고, `T_Robot`과 `T_Robot_BodyColorMask`를 사용하는 `M_Robot_Customizable` 마스터 머터리얼을 추가했다.
+- 마스크 외부와 도색 외장판 내부의 `Metallic`, `Roughness`, `Specular` 값을 각각 조절할 수 있도록 `BaseMetallic`, `BaseRoughness`, `BaseSpecular`, `BodyMetallic`, `BodyRoughness`, `BodySpecular`를 노출하고, `BodyColor`, `TintStrength`, 원본·마스크 텍스처 파라미터도 MI에서 조절 가능하게 구성했다.
+- 밝은 회색, 붉은색, 푸른색, 금색 프리셋용 `MI_Robot_BrightGray`, `MI_Robot_Red`, `MI_Robot_Blue`, `MI_Robot_Gold`를 생성했다. 금색은 금속성 1.0과 거칠기 0.22, 나머지는 비금속 도장 계열의 초기 PBR 값을 적용했다.
+- 기존 `BP_QuadrupedGunEnemy`를 직접 상속하는 색상별 자식 BP 4개를 `/Game/Blueprints/Enemies/QuadrupedVariants`에 생성하고 각 BP의 `CharacterMesh0` 머터리얼 슬롯 0에 대응 MI를 오버라이드했다.
+- 별도 UE 5.7 프로세스에서 마스터 파라미터, MI 부모·색상·PBR 값, 각 BP 컴파일과 저장된 메시 머터리얼 오버라이드를 다시 로드해 모두 검증했다. 기존 `BP_QuadrupedGunEnemy` 파일은 변경되지 않았다.
+
+## 2026-08-30 12:20:30 (소요시간: 00:03:30)
+
+- 로봇 컬러 마스크, 커스터마이즈 머터리얼, 4개 MI와 자식 적 BP, 재실행·검증 도구 및 관련 작업·질문 기록만 선별해 Git 커밋으로 정리했다.
+- 동시에 진행 중인 `DemoRaidMap`, `ChainPhysicsEditor`, 체인 물리 관련 질문 기록은 커밋에서 제외했다.
