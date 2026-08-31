@@ -65,6 +65,7 @@ namespace
 	constexpr float TemporaryVideoBulletStormSpreadHalfAngleDegrees = 44.0f;
 	constexpr float TemporaryVideoBulletStormFireCooldownSeconds = 0.05f;
 	const FLinearColor LumberjackMeleeImpactColor(0.0f, 0.92f, 1.0f, 1.0f);
+	const FName DeathDissolveParameterName(TEXT("DeathDissolve"));
 	const FName PistolWeaponTypeTag(TEXT("weapon.type.pistol"));
 	const FName RifleWeaponTypeTag(TEXT("weapon.type.rifle"));
 	const FName ShotgunWeaponTypeTag(TEXT("weapon.type.shotgun"));
@@ -240,6 +241,7 @@ void ATunaSweeperEnemyCharacter::Tick(float DeltaSeconds)
 
 	if (bIsDead)
 	{
+		TickDeathDissolve(DeltaSeconds);
 		return;
 	}
 
@@ -1328,6 +1330,8 @@ void ATunaSweeperEnemyCharacter::HandleDeath(AController* KillerController, AAct
 	}
 
 	PendingDeathDamageCauser = DamageCauser;
+	// Start the death Niagara in the same frame as the ragdoll/dissolve presentation.
+	SpawnDeathNiagaraEffect();
 	if (!TryStartDeathRagdoll())
 	{
 		FinalizeDeath();
@@ -1348,6 +1352,7 @@ bool ATunaSweeperEnemyCharacter::TryStartDeathRagdoll()
 		return false;
 	}
 
+	InitializeDeathDissolveMaterials();
 	CharacterMesh->SetCollisionProfileName(TEXT("Ragdoll"));
 	CharacterMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	CharacterMesh->SetAllBodiesSimulatePhysics(true);
@@ -1369,9 +1374,45 @@ bool ATunaSweeperEnemyCharacter::TryStartDeathRagdoll()
 	return true;
 }
 
+void ATunaSweeperEnemyCharacter::InitializeDeathDissolveMaterials()
+{
+	DeathDissolveElapsedSeconds = 0.0f;
+	DeathDissolveMaterials.Reset();
+	USkeletalMeshComponent* CharacterMesh = GetMesh();
+	if (!CharacterMesh)
+	{
+		return;
+	}
+
+	for (int32 MaterialIndex = 0; MaterialIndex < CharacterMesh->GetNumMaterials(); ++MaterialIndex)
+	{
+		if (UMaterialInstanceDynamic* DynamicMaterial =
+			CharacterMesh->CreateAndSetMaterialInstanceDynamic(MaterialIndex))
+		{
+			DynamicMaterial->SetScalarParameterValue(DeathDissolveParameterName, 0.0f);
+			DeathDissolveMaterials.Add(DynamicMaterial);
+		}
+	}
+}
+
+void ATunaSweeperEnemyCharacter::TickDeathDissolve(float DeltaSeconds)
+{
+	const float Duration = FMath::Max(KINDA_SMALL_NUMBER, DeathRagdollDurationSeconds);
+	DeathDissolveElapsedSeconds += FMath::Max(0.0f, DeltaSeconds);
+	const float LinearAlpha = FMath::Clamp(DeathDissolveElapsedSeconds / Duration, 0.0f, 1.0f);
+	const float SmoothAlpha = LinearAlpha * LinearAlpha * (3.0f - 2.0f * LinearAlpha);
+	for (UMaterialInstanceDynamic* DynamicMaterial : DeathDissolveMaterials)
+	{
+		if (DynamicMaterial)
+		{
+			DynamicMaterial->SetScalarParameterValue(DeathDissolveParameterName, SmoothAlpha);
+		}
+	}
+}
+
 void ATunaSweeperEnemyCharacter::FinalizeDeath()
 {
-	SpawnDeathNiagaraEffect();
+	TickDeathDissolve(DeathRagdollDurationSeconds);
 	SpawnDeathStrawberryBurst();
 	SpawnDeathLootContainer(PendingDeathDamageCauser.Get());
 	PendingDeathDamageCauser.Reset();

@@ -538,6 +538,7 @@ FString GetGameInstanceClassPath();
 FString GetAssetObjectPath(const FString& AssetPath, const FString& AssetName);
 FString GetAssetClassPath(const FString& AssetPath, const FString& AssetName);
 bool SaveAsset(UObject* Asset);
+bool EnsureRobotDeathDissolveMaterial();
 UMaterial* EnsureLedExpressionMaterial();
 UMaterial* EnsureEnemySensorDebugMaterial();
 void AddBoxQuad(

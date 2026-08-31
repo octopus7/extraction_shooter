@@ -14,6 +14,7 @@ class UTunaSweeperFactionComponent;
 class UTunaSweeperSpeechBubbleWidget;
 class UWidgetComponent;
 class UMaterialInterface;
+class UMaterialInstanceDynamic;
 class UNiagaraSystem;
 class ATunaSweeperProjectile;
 class ATunaSweeperWeapon;
@@ -316,6 +317,8 @@ private:
 	void HandleDeath(AController* KillerController, AActor* DamageCauser);
 	bool TryStartDeathRagdoll();
 	void FinalizeDeath();
+	void InitializeDeathDissolveMaterials();
+	void TickDeathDissolve(float DeltaSeconds);
 	void SpawnDeathNiagaraEffect();
 	FVector ResolveDeathVisualLocation() const;
 	bool ApplyMeleeDamageTo(AActor* TargetActor);
@@ -329,6 +332,9 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<ATunaSweeperWeapon> EnemyWeapon;
+
+	UPROPERTY(Transient)
+	TArray<TObjectPtr<UMaterialInstanceDynamic>> DeathDissolveMaterials;
 
 	FTunaSweeperEnemyCombatProfile CombatProfile;
 
@@ -347,6 +353,7 @@ private:
 	TWeakObjectPtr<AActor> PendingDeathDamageCauser;
 	FTimerHandle DeathFinalizeTimerHandle;
 	bool bIsDead = false;
+	float DeathDissolveElapsedSeconds = 0.0f;
 	bool bEnemyWeaponRuntimeInitialized = false;
 	float FootstepNoiseElapsedSeconds = 0.0f;
 	ETunaSweeperEnemyStatusBubble EnemyStatusBubble = ETunaSweeperEnemyStatusBubble::None;
