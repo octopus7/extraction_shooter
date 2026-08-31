@@ -8,6 +8,7 @@
 #include "Game/TunaSweeperGameInstance.h"
 #include "Interaction/TunaSweeperBlockedIntakeScreenActor.h"
 #include "Interaction/TunaSweeperDifficultyAdjustmentActor.h"
+#include "../../TunaSweeperDebugRifleSupplyActor.h"
 #include "Interaction/TunaSweeperDoorActor.h"
 #include "Interaction/TunaSweeperHousingManagementActor.h"
 #include "Interaction/TunaSweeperItemSpawnInteractableActor.h"
@@ -587,6 +588,14 @@ bool UTunaSweeperInteractionSubsystem::HandleItemSpawnInteraction(
 	UTunaSweeperInteractableComponent* Interactable,
 	APawn* InstigatorPawn)
 {
+	ATunaSweeperDebugRifleSupplyActor* DebugSupplyActor = Interactable
+		? Cast<ATunaSweeperDebugRifleSupplyActor>(Interactable->GetOwner())
+		: nullptr;
+	if (DebugSupplyActor)
+	{
+		return DebugSupplyActor->SupplyRifleAndAmmo(InstigatorPawn);
+	}
+
 	ATunaSweeperItemSpawnInteractableActor* ItemSpawnActor = Interactable
 		? Cast<ATunaSweeperItemSpawnInteractableActor>(Interactable->GetOwner())
 		: nullptr;

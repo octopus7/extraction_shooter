@@ -259,6 +259,7 @@ Ability-stat research is persisted per save slot through `AppliedResearchNodeIds
 - Loading an older save that only has `SelectedAmmoItemId` migrates that value into `LoadedAmmoItemId`.
 - If an item has no ammo item id, its loaded ammo count is normalized to `0`.
 - `LootLoadedAmmoSourceCount`, `LootLoadedAmmoDeductedCount`, `LootLoadedAmmoDeductionRatio`, and `LootLoadedAmmoFlatDeduction` record enemy-loot conversion metadata when a dropped weapon keeps only part of the enemy's loaded magazine. These fields are informational rule traces; `LoadedAmmoCount` remains the playable loaded-ammo value.
+- `BP_DebugRifleSupply` changes the same save-owned equipment item, loaded-ammo fields, and carried ammo item stacks used by normal inventory actions. It adds no debug-only save field: a supplied rifle, full magazine, and reserve ammunition therefore follow the existing bunker/raid save and death-persistence rules.
 
 ## Maintenance Rule
 
