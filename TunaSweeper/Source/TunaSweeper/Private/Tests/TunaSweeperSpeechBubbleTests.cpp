@@ -8,6 +8,7 @@
 #include "Subsystem/TunaSweeperSpeechBubbleSubsystem.h"
 #include "Subsystem/TunaSweeperSpeechBubbleSubsystemInternal.h"
 #include "UI/TunaSweeperScreenSpaceSpeechBubbleWidget.h"
+#include "UI/TunaSweeperSpeechBubbleWidget.h"
 
 #include <limits>
 
@@ -50,6 +51,25 @@ namespace TunaSweeperSpeechBubbleTests
 		Target.WorldLocation = Position;
 		return Target;
 	}
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(
+	FTunaSweeperSpeechBubbleAlertPresentationTest,
+	"TunaSweeper.UI.SpeechBubble.AlertPresentation",
+	TunaSweeperSpeechBubbleTests::Flags)
+
+bool FTunaSweeperSpeechBubbleAlertPresentationTest::RunTest(const FString& Parameters)
+{
+	(void)Parameters;
+	TestTrue(TEXT("A bare exclamation mark uses the alert cloud"),
+		UTunaSweeperSpeechBubbleWidget::IsAlertBubbleText(FText::FromString(TEXT("!"))));
+	TestTrue(TEXT("Whitespace around the exclamation mark is ignored"),
+		UTunaSweeperSpeechBubbleWidget::IsAlertBubbleText(FText::FromString(TEXT("  !  "))));
+	TestFalse(TEXT("Reload text keeps the standard speech bubble"),
+		UTunaSweeperSpeechBubbleWidget::IsAlertBubbleText(FText::FromString(TEXT("재장전"))));
+	TestFalse(TEXT("Other punctuation keeps the standard speech bubble"),
+		UTunaSweeperSpeechBubbleWidget::IsAlertBubbleText(FText::FromString(TEXT("!!"))));
+	return true;
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(
@@ -227,6 +247,7 @@ bool FTunaSweeperSpeechBubbleTextureAssetsTest::RunTest(const FString& Parameter
 	{
 		{TEXT("/Game/UI/SpeechBubble/T_SpeechBubble_Body.T_SpeechBubble_Body"), 512, 256},
 		{TEXT("/Game/UI/SpeechBubble/T_SpeechBubble_Tail.T_SpeechBubble_Tail"), 128, 128},
+		{TEXT("/Game/UI/SpeechBubble/T_EnemyAlertCloud.T_EnemyAlertCloud"), 1024, 1024},
 	};
 
 	for (const FTextureCase& TestCase : Cases)
