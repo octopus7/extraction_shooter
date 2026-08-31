@@ -1,15 +1,30 @@
 # Save/Load Persistence Contract
 
-This file tracks gameplay/runtime state that must survive `UTunaSweeperSaveGame` save/load.
+This file tracks gameplay/runtime state that must survive gameplay-slot or account-global save/load.
 Update it whenever a new state field is expected to persist across save slots, level travel saves, death saves, or intro-menu reloads.
 
 ## Current Save Container
 
 - Save object: `UTunaSweeperSaveGame`
-- Current save version: `20`
+- Current save version: `21`
 - Runtime owner: `UTunaSweeperGameInstance`
 - Save entry point: `UTunaSweeperGameInstance::SaveGameStateInternal()`
 - Load entry point: `UTunaSweeperGameInstance::LoadGameState()`
+
+## Account-Global Achievement Container
+
+Achievements use `UTunaSweeperAchievementSaveGame` version `1` instead of `UTunaSweeperSaveGame`. The file is stored as `Saved/SaveGames/<Demo|Main>/Achievements_<DistributionNamespace>.sav`, so Demo/Main and Steam/Stove/NoStore progress do not cross. It uses the same CRC envelope and fail-closed active/candidate/previous commit path as gameplay saves. If both active and previous generations are invalid, they are retained with a timestamped `.corrupt-*` suffix before a fresh state is allowed.
+
+The achievement container persists independently of gameplay slots:
+
+- total player-attributed enemy kills;
+- enemy ids killed at least once;
+- reached achievement location ids;
+- quest ids whose rewards were claimed;
+- internally unlocked achievement ids;
+- platform unlock confirmations used to avoid duplicate writes.
+
+Facts are saved immediately when first observed, regardless of whether a current JSON definition consumes them. Loading a new definition can therefore unlock an achievement retroactively. New game, save-slot selection, and slot deletion must not reset this container. The platform publisher may merge remote unlocks into it, while failed or unavailable platform writes remain derivable as pending from locally unlocked ids without a matching platform confirmation.
 
 ## Fail-Closed File Commit
 

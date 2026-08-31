@@ -8,6 +8,7 @@
 #include "Serialization/Csv/CsvParser.h"
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
+#include "Subsystem/TunaSweeperAchievementSubsystem.h"
 #include "Subsystem/TunaSweeperToastSubsystem.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogTunaSweeperQuest, Log, All);
@@ -528,6 +529,14 @@ bool UTunaSweeperQuestSubsystem::ClaimQuestReward(FName QuestId)
 
 	CoinBalance += FMath::Max(0, Definition->Rewards.Coins);
 	SetQuestState(QuestId, ETunaSweeperQuestState::RewardCompleted);
+	if (UGameInstance* GameInstance = GetGameInstance())
+	{
+		if (UTunaSweeperAchievementSubsystem* AchievementSubsystem =
+			GameInstance->GetSubsystem<UTunaSweeperAchievementSubsystem>())
+		{
+			AchievementSubsystem->ReportQuestRewardClaimed(QuestId);
+		}
+	}
 	if (TrackedQuestId == QuestId)
 	{
 		TrackedQuestId = NAME_None;
@@ -882,6 +891,17 @@ void UTunaSweeperQuestSubsystem::LoadQuestProgressFromSave(
 		}
 
 		QuestProgressById.Add(LoadedProgress.QuestId, LoadedProgress);
+		if (LoadedProgress.State == ETunaSweeperQuestState::RewardCompleted)
+		{
+			if (UGameInstance* GameInstance = GetGameInstance())
+			{
+				if (UTunaSweeperAchievementSubsystem* AchievementSubsystem =
+					GameInstance->GetSubsystem<UTunaSweeperAchievementSubsystem>())
+				{
+					AchievementSubsystem->ReportQuestRewardClaimed(LoadedProgress.QuestId);
+				}
+			}
+		}
 	}
 
 	if (IsQuestTrackable(SavedTrackedQuestId))

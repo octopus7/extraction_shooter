@@ -29,6 +29,7 @@
 #include "NiagaraSystem.h"
 #include "Debuff/TunaSweeperDebuffTypes.h"
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
+#include "Subsystem/TunaSweeperAchievementSubsystem.h"
 #include "Subsystem/TunaSweeperFactionSubsystem.h"
 #include "Subsystem/TunaSweeperNoiseSubsystem.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
@@ -1274,6 +1275,11 @@ void ATunaSweeperEnemyCharacter::HandleDeath(AController* KillerController, AAct
 	{
 		if (UGameInstance* GameInstance = GetGameInstance())
 		{
+			if (UTunaSweeperAchievementSubsystem* AchievementSubsystem =
+				GameInstance->GetSubsystem<UTunaSweeperAchievementSubsystem>())
+			{
+				AchievementSubsystem->ReportEnemyKilled(EnemyId);
+			}
 			if (UTunaSweeperQuestSubsystem* QuestSubsystem = GameInstance->GetSubsystem<UTunaSweeperQuestSubsystem>())
 			{
 				QuestSubsystem->NotifyEnemyKilled(EnemyId);
