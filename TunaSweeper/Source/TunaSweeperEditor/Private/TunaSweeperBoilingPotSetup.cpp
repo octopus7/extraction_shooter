@@ -716,6 +716,37 @@ namespace TunaSweeperBoilingPotSetup
 	{
 		TArray<UObject*> NestedObjects;
 		GetObjectsWithOuter(System, NestedObjects, true);
+		for (FNiagaraEmitterHandle& EmitterHandle : System->GetEmitterHandles())
+		{
+			UObject* StatelessEmitter = reinterpret_cast<UObject*>(EmitterHandle.GetStatelessEmitter());
+			if (!StatelessEmitter)
+			{
+				continue;
+			}
+			StatelessEmitter->Modify();
+			if (FStructProperty* FixedBoundsProperty =
+				FindFProperty<FStructProperty>(StatelessEmitter->GetClass(), TEXT("FixedBounds")))
+			{
+				FBox* FixedBounds = FixedBoundsProperty->ContainerPtrToValuePtr<FBox>(StatelessEmitter);
+				*FixedBounds = FBox(FVector(-180.0f, -180.0f, -40.0f), FVector(180.0f, 180.0f, 240.0f));
+			}
+			StatelessEmitter->PostEditChange();
+
+			FArrayProperty* ModulesProperty =
+				FindFProperty<FArrayProperty>(StatelessEmitter->GetClass(), TEXT("Modules"));
+			FObjectPropertyBase* ModuleObjectProperty =
+				ModulesProperty ? CastField<FObjectPropertyBase>(ModulesProperty->Inner) : nullptr;
+			if (!ModulesProperty || !ModuleObjectProperty)
+			{
+				continue;
+			}
+
+			FScriptArrayHelper Modules(ModulesProperty, ModulesProperty->ContainerPtrToValuePtr<void>(StatelessEmitter));
+			for (int32 ModuleIndex = 0; ModuleIndex < Modules.Num(); ++ModuleIndex)
+			{
+				NestedObjects.AddUnique(ModuleObjectProperty->GetObjectPropertyValue(Modules.GetRawPtr(ModuleIndex)));
+			}
+		}
 		int32 UpdatedModuleCount = 0;
 
 		for (UObject* Object : NestedObjects)
@@ -748,6 +779,48 @@ namespace TunaSweeperBoilingPotSetup
 					FNiagaraDistributionColor* Distribution =
 						Property->ContainerPtrToValuePtr<FNiagaraDistributionColor>(Object);
 					Distribution->InitConstant(FLinearColor(0.88f, 0.95f, 1.0f, 0.65f));
+				}
+				Object->PostEditChange();
+				++UpdatedModuleCount;
+			}
+			else if (ClassName == TEXT("NiagaraStatelessModule_ShapeLocation"))
+			{
+				Object->Modify();
+				if (FEnumProperty* Property = FindFProperty<FEnumProperty>(Object->GetClass(), TEXT("ShapePrimitive")))
+				{
+					void* ValueAddress = Property->ContainerPtrToValuePtr<void>(Object);
+					Property->GetUnderlyingProperty()->SetIntPropertyValue(ValueAddress, int64(3)); // ENSM_ShapePrimitive::Ring
+				}
+				if (FStructProperty* Property = FindFProperty<FStructProperty>(Object->GetClass(), TEXT("RingRadius")))
+				{
+					FNiagaraDistributionRangeFloat* Distribution =
+						Property->ContainerPtrToValuePtr<FNiagaraDistributionRangeFloat>(Object);
+					// The Niagara component is scaled to 25%, so 152 cm becomes a 38 cm world-space ring.
+					Distribution->InitConstant(152.0f);
+				}
+				if (FStructProperty* Property = FindFProperty<FStructProperty>(Object->GetClass(), TEXT("DiscCoverage")))
+				{
+					FNiagaraDistributionRangeFloat* Distribution =
+						Property->ContainerPtrToValuePtr<FNiagaraDistributionRangeFloat>(Object);
+					Distribution->InitConstant(0.28f);
+				}
+				if (FStructProperty* Property = FindFProperty<FStructProperty>(Object->GetClass(), TEXT("RingUDistribution")))
+				{
+					FNiagaraDistributionRangeFloat* Distribution =
+						Property->ContainerPtrToValuePtr<FNiagaraDistributionRangeFloat>(Object);
+					Distribution->InitConstant(0.0f);
+				}
+				if (FStructProperty* Property = FindFProperty<FStructProperty>(Object->GetClass(), TEXT("ShapeRotation")))
+				{
+					FNiagaraDistributionRangeRotator* Distribution =
+						Property->ContainerPtrToValuePtr<FNiagaraDistributionRangeRotator>(Object);
+					Distribution->InitConstant(FRotator3f::ZeroRotator);
+				}
+				if (FStructProperty* Property = FindFProperty<FStructProperty>(Object->GetClass(), TEXT("ShapeScale")))
+				{
+					FNiagaraDistributionRangeVector3* Distribution =
+						Property->ContainerPtrToValuePtr<FNiagaraDistributionRangeVector3>(Object);
+					Distribution->InitConstant(FVector3f::OneVector);
 				}
 				Object->PostEditChange();
 				++UpdatedModuleCount;
@@ -824,7 +897,7 @@ namespace TunaSweeperBoilingPotSetup
 		UE_LOG(
 			LogTunaSweeperEditor,
 			Display,
-			TEXT("Configured boiling-pot steam: %d stateless modules, textured white sprites."),
+			TEXT("Configured boiling-pot steam: %d stateless modules, 38 cm world-space annular emission at 25%% component scale, textured white sprites."),
 			UpdatedStatelessModuleCount);
 		return bConfiguredSpriteRenderer && TunaSweeperEditorSetup::SaveAsset(System);
 	}
