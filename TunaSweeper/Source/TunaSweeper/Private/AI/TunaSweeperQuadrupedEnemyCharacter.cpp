@@ -45,6 +45,8 @@ ATunaSweeperQuadrupedEnemyCharacter::ATunaSweeperQuadrupedEnemyCharacter()
 	constexpr float QuadrupedCapsuleHalfHeight = 60.0f;
 	GetCapsuleComponent()->InitCapsuleSize(QuadrupedCapsuleRadius, QuadrupedCapsuleHalfHeight);
 
+	DeathRagdollDurationSeconds = 0.5f;
+	DeathRagdollAngularSpeedDegrees = 60.0f;
 	static ConstructorHelpers::FObjectFinder<UNiagaraSystem> RobotDeathEffect(
 		TEXT("/Game/Effects/ExplosionTuna/NS_Explosion_SmokeRobot.NS_Explosion_SmokeRobot"));
 	if (RobotDeathEffect.Succeeded())
@@ -111,6 +113,16 @@ void ATunaSweeperQuadrupedEnemyCharacter::BeginPlay()
 {
 	EnsureValidQuadrupedLegLayout();
 	Super::BeginPlay();
+}
+
+void ATunaSweeperQuadrupedEnemyCharacter::OnDeathPresentationStarted()
+{
+	Super::OnDeathPresentationStarted();
+	if (QuadrupedComponent)
+	{
+		QuadrupedComponent->SetActive(false);
+		QuadrupedComponent->SetComponentTickEnabled(false);
+	}
 }
 
 void ATunaSweeperQuadrupedEnemyCharacter::EnsureValidQuadrupedLegLayout()

@@ -9,6 +9,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/PrimitiveComponent.h"
 #include "Components/SceneComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Game/TunaSweeperDataValueTypes.h"
@@ -251,6 +252,7 @@ void ATunaSweeperEnemyCharacter::Tick(float DeltaSeconds)
 void ATunaSweeperEnemyCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	GetWorldTimerManager().ClearTimer(EnemyStatusBubbleTimerHandle);
+	GetWorldTimerManager().ClearTimer(DeathFinalizeTimerHandle);
 	if (EnemyWeapon)
 	{
 		EnemyWeapon->Destroy();
@@ -1303,7 +1305,7 @@ void ATunaSweeperEnemyCharacter::HandleDeath(AController* KillerController, AAct
 		Capsule->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 
-	SetActorEnableCollision(false);
+	OnDeathPresentationStarted();
 	DetachFromControllerPendingDestroy();
 	if (KillerController && KillerController->IsPlayerController())
 	{
@@ -1324,9 +1326,56 @@ void ATunaSweeperEnemyCharacter::HandleDeath(AController* KillerController, AAct
 			}
 		}
 	}
+
+	PendingDeathDamageCauser = DamageCauser;
+	if (!TryStartDeathRagdoll())
+	{
+		FinalizeDeath();
+	}
+}
+
+void ATunaSweeperEnemyCharacter::OnDeathPresentationStarted()
+{
+}
+
+bool ATunaSweeperEnemyCharacter::TryStartDeathRagdoll()
+{
+	UWorld* World = GetWorld();
+	USkeletalMeshComponent* CharacterMesh = GetMesh();
+	const float RagdollDuration = FMath::Max(0.0f, DeathRagdollDurationSeconds);
+	if (!World || !CharacterMesh || !CharacterMesh->GetPhysicsAsset() || RagdollDuration <= 0.0f)
+	{
+		return false;
+	}
+
+	CharacterMesh->SetCollisionProfileName(TEXT("Ragdoll"));
+	CharacterMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	CharacterMesh->SetAllBodiesSimulatePhysics(true);
+	CharacterMesh->SetSimulatePhysics(true);
+	CharacterMesh->WakeAllRigidBodies();
+
+	const float AngularSpeed = FMath::Max(0.0f, DeathRagdollAngularSpeedDegrees);
+	if (AngularSpeed > 0.0f)
+	{
+		CharacterMesh->SetAllPhysicsAngularVelocityInDegrees(FMath::VRand() * AngularSpeed, false);
+	}
+
+	World->GetTimerManager().SetTimer(
+		DeathFinalizeTimerHandle,
+		this,
+		&ATunaSweeperEnemyCharacter::FinalizeDeath,
+		RagdollDuration,
+		false);
+	return true;
+}
+
+void ATunaSweeperEnemyCharacter::FinalizeDeath()
+{
 	SpawnDeathNiagaraEffect();
 	SpawnDeathStrawberryBurst();
-	SpawnDeathLootContainer(DamageCauser);
+	SpawnDeathLootContainer(PendingDeathDamageCauser.Get());
+	PendingDeathDamageCauser.Reset();
+	SetActorEnableCollision(false);
 	Destroy();
 }
 
@@ -1342,13 +1391,23 @@ void ATunaSweeperEnemyCharacter::SpawnDeathNiagaraEffect()
 	UNiagaraFunctionLibrary::SpawnSystemAtLocation(
 		World,
 		LoadedDeathEffect,
-		GetActorLocation(),
+		ResolveDeathVisualLocation(),
 		GetActorRotation(),
 		FVector(FMath::Max(0.01f, DeathNiagaraScale)),
 		true,
 		true,
 		ENCPoolMethod::AutoRelease,
 		true);
+}
+
+FVector ATunaSweeperEnemyCharacter::ResolveDeathVisualLocation() const
+{
+	const USkeletalMeshComponent* CharacterMesh = GetMesh();
+	if (CharacterMesh && CharacterMesh->IsSimulatingPhysics())
+	{
+		return CharacterMesh->Bounds.Origin;
+	}
+	return GetActorLocation();
 }
 
 void ATunaSweeperEnemyCharacter::SpawnDeathStrawberryBurst()
@@ -1363,7 +1422,7 @@ void ATunaSweeperEnemyCharacter::SpawnDeathStrawberryBurst()
 	SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	World->SpawnActor<ATunaSweeperEnemyDeathStrawberryBurstActor>(
 		ATunaSweeperEnemyDeathStrawberryBurstActor::StaticClass(),
-		GetActorLocation() + FVector(0.0f, 0.0f, 88.0f),
+		ResolveDeathVisualLocation() + FVector(0.0f, 0.0f, 88.0f),
 		FRotator::ZeroRotator,
 		SpawnParameters);
 }

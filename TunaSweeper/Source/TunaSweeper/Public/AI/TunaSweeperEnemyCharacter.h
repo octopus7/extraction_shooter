@@ -141,6 +141,7 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	virtual void OnDeathPresentationStarted();
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UStaticMeshComponent> VisualMesh;
@@ -210,6 +211,14 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Effects|Death",
 		meta = (ClampMin = "0.01", UIMin = "0.01"))
 	float DeathNiagaraScale = 1.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Effects|Death",
+		meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float DeathRagdollDurationSeconds = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Effects|Death",
+		meta = (ClampMin = "0.0", UIMin = "0.0"))
+	float DeathRagdollAngularSpeedDegrees = 0.0f;
 
 	// TEMP_VIDEO_BULLET_STORM: BEGIN
 	// One-off capture switch. Search for TEMP_VIDEO_BULLET_STORM to remove every related branch.
@@ -305,7 +314,10 @@ private:
 		TArray<FGuid>& OutRuntimeItemUids) const;
 	int32 ResolveLootLoadedAmmoCount(int32& OutSourceLoadedAmmoCount, int32& OutDeductedLoadedAmmoCount) const;
 	void HandleDeath(AController* KillerController, AActor* DamageCauser);
+	bool TryStartDeathRagdoll();
+	void FinalizeDeath();
 	void SpawnDeathNiagaraEffect();
+	FVector ResolveDeathVisualLocation() const;
 	bool ApplyMeleeDamageTo(AActor* TargetActor);
 	void ApplyMeleeKnockbackTo(AActor* TargetActor, const FVector& AttackDirection) const;
 	void SpawnMeleeSwingEffect(const FVector& AttackDirection);
@@ -332,6 +344,8 @@ private:
 	int32 EnemyMagazineCapacity = 0;
 	int32 EnemyLoadedAmmoCount = 0;
 	int32 PendingEnemyReloadAmmoCount = 0;
+	TWeakObjectPtr<AActor> PendingDeathDamageCauser;
+	FTimerHandle DeathFinalizeTimerHandle;
 	bool bIsDead = false;
 	bool bEnemyWeaponRuntimeInitialized = false;
 	float FootstepNoiseElapsedSeconds = 0.0f;
