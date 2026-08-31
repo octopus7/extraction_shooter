@@ -1353,11 +1353,14 @@ bool ATunaSweeperEnemyCharacter::TryStartDeathRagdoll()
 	}
 
 	InitializeDeathDissolveMaterials();
+	CharacterMesh->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 	CharacterMesh->SetCollisionProfileName(TEXT("Ragdoll"));
 	CharacterMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	CharacterMesh->SetEnableGravity(true);
 	CharacterMesh->SetAllBodiesSimulatePhysics(true);
 	CharacterMesh->SetSimulatePhysics(true);
 	CharacterMesh->WakeAllRigidBodies();
+	CharacterMesh->bBlendPhysics = true;
 
 	const float AngularSpeed = FMath::Max(0.0f, DeathRagdollAngularSpeedDegrees);
 	if (AngularSpeed > 0.0f)
