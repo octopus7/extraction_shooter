@@ -7431,3 +7431,16 @@
 ## 2026-08-31 10:38:49 (소요시간: 00:00:29)
 
 - 스크린 스페이스 말풍선 시스템의 C++ 구현, 자동화 테스트, ImageGen 최종 PNG, 임포트된 UI 텍스처 에셋과 관련 작업 기록만 선별해 Git 커밋으로 정리했다.
+
+## 2026-08-31 15:11:51 (소요시간: 00:15:29)
+
+- ImageGen으로 청회색 법랑 금속의 큰 벗겨짐과 브러시 결이 있는 단일 정사각형 베이스컬러 텍스처를 생성하고 `Content/SourceArt/BoilingPot/T_BoilingPot_Enamel_Source.png`에 보관했다.
+- 속이 빈 저폴리 냄비 본체와 양쪽 손잡이를 한 Static Mesh로, 돔과 상단 손잡이를 가진 뚜껑을 별도 Static Mesh로 모델링하는 재현 가능한 Editor setup을 추가했다. 두 메시가 같은 임포트 텍스처와 금속 머터리얼 한 장을 공유하도록 구성했다.
+- `ATunaSweeperBoilingPotActor`에 고정 본체, 별도 뚜껑 피벗, 짧은 무작위 달그락 묶음과 정지 구간, 높이·기울기 변화, 금속 충돌음 피치/볼륨 변화, 흰 증기 Niagara 활성화와 `SetBoiling()` 제어를 구현했다.
+- `/Game/Environment/Props/BoilingPot`에 `T_BoilingPot_Enamel`, `M_BoilingPot_Enamel`, `SM_BoilingPot_Body`, `SM_BoilingPot_Lid`, `NS_BoilingPot_Steam`, `BP_BoilingPot` 자산을 생성하고 Blueprint 컴파일과 저장을 확인했다.
+- UE 5.7 `TunaSweeperEditor Win64 Development` 빌드가 성공했으며 전용 Editor one-shot도 성공 종료했다. 생성 후 프로젝트를 일반 Unreal Editor로 다시 열었다.
+
+## 2026-08-31 15:31:16 (소요시간: 00:01:30)
+
+- 냄비 C++ 클래스, Editor 자산 생성기, ImageGen 원본, 생성된 UE 자산 6개와 관련 질문·요청 기록만 선별해 `feat: add rattling boiling pot prop` 커밋으로 정리했다.
+- 함께 변경되어 있던 `DemoRaidMap`, 참치 생각풍선 원본과 다른 작업의 질문·요청 기록은 커밋에서 제외해 작업 트리에 그대로 보존했다.

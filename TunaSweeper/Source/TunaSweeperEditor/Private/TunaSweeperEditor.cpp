@@ -6,6 +6,7 @@
 #include "TunaSweeperQuadrupedPresetSetup.h"
 #include "TunaSweeperGarageDoorSetup.h"
 #include "TunaSweeperLocationBlendCameraSetup.h"
+#include "TunaSweeperBoilingPotSetup.h"
 #include "TunaSweeperWallCopingSetup.h"
 
 #include "Containers/Ticker.h"
@@ -41,6 +42,14 @@ public:
 			WallCopingSetupInitializedHandle = FEditorDelegates::OnEditorInitialized.AddRaw(
 				this,
 				&FTunaSweeperEditorModule::OnEditorInitializedForWallCopingSetup);
+			return;
+		}
+
+		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperBoilingPotSetup")))
+		{
+			BoilingPotSetupInitializedHandle = FEditorDelegates::OnEditorInitialized.AddRaw(
+				this,
+				&FTunaSweeperEditorModule::OnEditorInitializedForBoilingPotSetup);
 			return;
 		}
 
@@ -177,6 +186,18 @@ public:
 			WallCopingSetupTickerHandle.Reset();
 		}
 
+		if (BoilingPotSetupInitializedHandle.IsValid())
+		{
+			FEditorDelegates::OnEditorInitialized.Remove(BoilingPotSetupInitializedHandle);
+			BoilingPotSetupInitializedHandle.Reset();
+		}
+
+		if (BoilingPotSetupTickerHandle.IsValid())
+		{
+			FTSTicker::GetCoreTicker().RemoveTicker(BoilingPotSetupTickerHandle);
+			BoilingPotSetupTickerHandle.Reset();
+		}
+
 		if (LunaSkirtSetupInitializedHandle.IsValid())
 		{
 			FEditorDelegates::OnEditorInitialized.Remove(LunaSkirtSetupInitializedHandle);
@@ -298,6 +319,28 @@ public:
 	}
 
 private:
+	void OnEditorInitializedForBoilingPotSetup(double)
+	{
+		FEditorDelegates::OnEditorInitialized.Remove(BoilingPotSetupInitializedHandle);
+		BoilingPotSetupInitializedHandle.Reset();
+		BoilingPotSetupTickerHandle = FTSTicker::GetCoreTicker().AddTicker(
+			FTickerDelegate::CreateRaw(this, &FTunaSweeperEditorModule::RunBoilingPotSetupAfterInitialization));
+	}
+
+	bool RunBoilingPotSetupAfterInitialization(float)
+	{
+		BoilingPotSetupTickerHandle.Reset();
+		const bool bSucceeded = TunaSweeperBoilingPotSetup::Run();
+		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperBoilingPotSetupQuit")))
+		{
+			FPlatformMisc::RequestExitWithStatus(
+				false,
+				bSucceeded ? 0 : 1,
+				TEXT("TunaSweeperBoilingPotSetup"));
+		}
+		return false;
+	}
+
 	void OnEditorInitializedForWallCopingSetup(double)
 	{
 		FEditorDelegates::OnEditorInitialized.Remove(WallCopingSetupInitializedHandle);
@@ -475,6 +518,8 @@ private:
 	}
 
 	bool bStandardEditorSetupStarted = false;
+	FDelegateHandle BoilingPotSetupInitializedHandle;
+	FTSTicker::FDelegateHandle BoilingPotSetupTickerHandle;
 	FDelegateHandle WallCopingSetupInitializedHandle;
 	FTSTicker::FDelegateHandle WallCopingSetupTickerHandle;
 	FDelegateHandle LunaSkirtSetupInitializedHandle;
