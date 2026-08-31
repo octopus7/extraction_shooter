@@ -7,6 +7,7 @@
 #include "TunaSweeperGarageDoorSetup.h"
 #include "TunaSweeperLocationBlendCameraSetup.h"
 #include "TunaSweeperBoilingPotSetup.h"
+#include "TunaThoughtIndicatorSetup.h"
 #include "TunaSweeperWallCopingSetup.h"
 
 #include "Containers/Ticker.h"
@@ -50,6 +51,14 @@ public:
 			BoilingPotSetupInitializedHandle = FEditorDelegates::OnEditorInitialized.AddRaw(
 				this,
 				&FTunaSweeperEditorModule::OnEditorInitializedForBoilingPotSetup);
+			return;
+		}
+
+		if (FParse::Param(FCommandLine::Get(), TEXT("TunaThoughtIndicatorSetup")))
+		{
+			TunaThoughtIndicatorSetupInitializedHandle = FEditorDelegates::OnEditorInitialized.AddRaw(
+				this,
+				&FTunaSweeperEditorModule::OnEditorInitializedForTunaThoughtIndicatorSetup);
 			return;
 		}
 
@@ -198,6 +207,18 @@ public:
 			BoilingPotSetupTickerHandle.Reset();
 		}
 
+		if (TunaThoughtIndicatorSetupInitializedHandle.IsValid())
+		{
+			FEditorDelegates::OnEditorInitialized.Remove(TunaThoughtIndicatorSetupInitializedHandle);
+			TunaThoughtIndicatorSetupInitializedHandle.Reset();
+		}
+
+		if (TunaThoughtIndicatorSetupTickerHandle.IsValid())
+		{
+			FTSTicker::GetCoreTicker().RemoveTicker(TunaThoughtIndicatorSetupTickerHandle);
+			TunaThoughtIndicatorSetupTickerHandle.Reset();
+		}
+
 		if (LunaSkirtSetupInitializedHandle.IsValid())
 		{
 			FEditorDelegates::OnEditorInitialized.Remove(LunaSkirtSetupInitializedHandle);
@@ -319,6 +340,28 @@ public:
 	}
 
 private:
+	void OnEditorInitializedForTunaThoughtIndicatorSetup(double)
+	{
+		FEditorDelegates::OnEditorInitialized.Remove(TunaThoughtIndicatorSetupInitializedHandle);
+		TunaThoughtIndicatorSetupInitializedHandle.Reset();
+		TunaThoughtIndicatorSetupTickerHandle = FTSTicker::GetCoreTicker().AddTicker(
+			FTickerDelegate::CreateRaw(this, &FTunaSweeperEditorModule::RunTunaThoughtIndicatorSetupAfterInitialization));
+	}
+
+	bool RunTunaThoughtIndicatorSetupAfterInitialization(float)
+	{
+		TunaThoughtIndicatorSetupTickerHandle.Reset();
+		const bool bSucceeded = TunaThoughtIndicatorSetup::Run();
+		if (FParse::Param(FCommandLine::Get(), TEXT("TunaThoughtIndicatorSetupQuit")))
+		{
+			FPlatformMisc::RequestExitWithStatus(
+				false,
+				bSucceeded ? 0 : 1,
+				TEXT("TunaThoughtIndicatorSetup"));
+		}
+		return false;
+	}
+
 	void OnEditorInitializedForBoilingPotSetup(double)
 	{
 		FEditorDelegates::OnEditorInitialized.Remove(BoilingPotSetupInitializedHandle);
@@ -518,6 +561,8 @@ private:
 	}
 
 	bool bStandardEditorSetupStarted = false;
+	FDelegateHandle TunaThoughtIndicatorSetupInitializedHandle;
+	FTSTicker::FDelegateHandle TunaThoughtIndicatorSetupTickerHandle;
 	FDelegateHandle BoilingPotSetupInitializedHandle;
 	FTSTicker::FDelegateHandle BoilingPotSetupTickerHandle;
 	FDelegateHandle WallCopingSetupInitializedHandle;
