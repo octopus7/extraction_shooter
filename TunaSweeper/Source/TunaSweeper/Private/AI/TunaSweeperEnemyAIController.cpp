@@ -19,6 +19,10 @@
 
 namespace
 {
+	// TEMP_VIDEO_BULLET_STORM: Remove these capture-only pattern values after recording.
+	constexpr float TemporaryVideoBulletStormWarningSeconds = 1.0f;
+	constexpr float TemporaryVideoBulletStormShotIntervalSeconds = 0.05f;
+	constexpr int32 TemporaryVideoBulletStormShotCount = 24;
 	float GetRandomizedValue(float BaseValue, const FVector2D& OffsetRange, float MinValue)
 	{
 		return FMath::Max(
@@ -577,7 +581,13 @@ void ATunaSweeperEnemyAIController::StartAlerted(AActor* TargetActor, const TCHA
 
 	AwarenessState = ETunaSweeperEnemyAwarenessState::Alerted;
 	AwarenessStateStartTimeSeconds = World->GetTimeSeconds();
-	AwarenessStateEndTimeSeconds = AwarenessStateStartTimeSeconds + FMath::Max(0.0f, CombatProfile.AlertSeconds);
+	// TEMP_VIDEO_BULLET_STORM: The capture pattern always fires exactly one second after the ! bubble.
+	const ATunaSweeperEnemyCharacter* EnemyCharacter = Cast<ATunaSweeperEnemyCharacter>(ControlledPawn);
+	const bool bTemporaryVideoBulletStorm = EnemyCharacter && EnemyCharacter->IsTemporaryVideoBulletStormEnabled();
+	const float AlertSeconds = bTemporaryVideoBulletStorm
+		? TemporaryVideoBulletStormWarningSeconds
+		: FMath::Max(0.0f, CombatProfile.AlertSeconds);
+	AwarenessStateEndTimeSeconds = AwarenessStateStartTimeSeconds + AlertSeconds;
 	CurrentTargetActor = TargetActor;
 	bHasDirectTargetSight = true;
 	LastKnownTargetLocation = TargetActor->GetActorLocation();
@@ -596,8 +606,12 @@ void ATunaSweeperEnemyAIController::StartAlerted(AActor* TargetActor, const TCHA
 		}
 		bAlertBubbleShownThisCycle = true;
 	}
-	RegisterWithSquad();
-	ReportSquadContact(TargetActor, TargetActor->GetActorLocation());
+	// TEMP_VIDEO_BULLET_STORM: Keep the disposable capture pattern out of squad leases and cadence.
+	if (!bTemporaryVideoBulletStorm)
+	{
+		RegisterWithSquad();
+		ReportSquadContact(TargetActor, TargetActor->GetActorLocation());
+	}
 }
 
 void ATunaSweeperEnemyAIController::EnterCombat()
@@ -613,10 +627,22 @@ void ATunaSweeperEnemyAIController::EnterCombat()
 	AwarenessState = ETunaSweeperEnemyAwarenessState::Combat;
 	bIsCombatEngaged = true;
 	SetFocus(TargetActor, EAIFocusPriority::Gameplay);
-	RegisterWithSquad();
-	RefreshSquadState();
-	ReportSquadContact(TargetActor, TargetActor->GetActorLocation());
+	// TEMP_VIDEO_BULLET_STORM: Capture actors bypass squad choreography entirely.
+	const bool bTemporaryVideoBulletStorm = EnemyCharacter->IsTemporaryVideoBulletStormEnabled();
+	if (!bTemporaryVideoBulletStorm)
+	{
+		RegisterWithSquad();
+		RefreshSquadState();
+		ReportSquadContact(TargetActor, TargetActor->GetActorLocation());
+	}
 	RecordCombatDebugEntryReason(TEXT("Combat: target acquired"));
+
+	// TEMP_VIDEO_BULLET_STORM: The alerted state already supplied the one-second warning; skip normal aim timing.
+	if (bTemporaryVideoBulletStorm)
+	{
+		StartFiring(EnemyCharacter);
+		return;
+	}
 
 	if (EnemyCharacter->UsesMeleeAttack())
 	{
@@ -1089,7 +1115,9 @@ void ATunaSweeperEnemyAIController::StartAim(bool bFromReposition)
 
 void ATunaSweeperEnemyAIController::StartFiring(ATunaSweeperEnemyCharacter* EnemyCharacter)
 {
-	if (!EnemyCharacter || !CanSquadMemberStartFiring())
+	const bool bTemporaryVideoBulletStorm =
+		EnemyCharacter && EnemyCharacter->IsTemporaryVideoBulletStormEnabled();
+	if (!EnemyCharacter || (!bTemporaryVideoBulletStorm && !CanSquadMemberStartFiring()))
 	{
 		StartObserve(0.15f);
 		return;
@@ -1100,7 +1128,7 @@ void ATunaSweeperEnemyAIController::StartFiring(ATunaSweeperEnemyCharacter* Enem
 		return;
 	}
 	const FTunaSweeperEnemyWeaponRuntimeStatus WeaponStatus = EnemyCharacter->GetEnemyWeaponRuntimeStatus();
-	if (WeaponStatus.LoadedAmmo <= 0)
+	if (!bTemporaryVideoBulletStorm && WeaponStatus.LoadedAmmo <= 0)
 	{
 		if (WeaponStatus.ReserveAmmo > 0)
 		{
@@ -1119,7 +1147,10 @@ void ATunaSweeperEnemyAIController::StartFiring(ATunaSweeperEnemyCharacter* Enem
 		: bOpeningFiring
 			? FMath::Max(1, CombatProfile.OpeningFiringShotCount)
 			: FMath::Max(1, CombatProfile.FiringShotCount);
-	ShotsPlannedThisFiring = FMath::Min(DesiredShots, WeaponStatus.LoadedAmmo);
+	// TEMP_VIDEO_BULLET_STORM: Fixed long burst with virtual ammo for disposable capture footage.
+	ShotsPlannedThisFiring = bTemporaryVideoBulletStorm
+		? TemporaryVideoBulletStormShotCount
+		: FMath::Min(DesiredShots, WeaponStatus.LoadedAmmo);
 	ShotsFiredThisFiring = 0;
 	bSquadLastShotReported = false;
 	NextShotTimeSeconds = GetWorldTimeSeconds(this);
@@ -1140,12 +1171,15 @@ void ATunaSweeperEnemyAIController::TickFiring(
 		FinishFiring(EnemyCharacter, LastShotTimeSeconds);
 		return;
 	}
-	if (!bHasDirectTargetSight || !CanSquadMemberStartFiring())
+	// TEMP_VIDEO_BULLET_STORM: Ignore normal squad cadence/facing gates only for the disposable capture burst.
+	const bool bTemporaryVideoBulletStorm = EnemyCharacter->IsTemporaryVideoBulletStormEnabled();
+	if (!bHasDirectTargetSight ||
+		(!bTemporaryVideoBulletStorm && !CanSquadMemberStartFiring()))
 	{
 		FinishFiring(EnemyCharacter, LastShotTimeSeconds);
 		return;
 	}
-	if (!IsFacingCurrentTarget())
+	if (!bTemporaryVideoBulletStorm && !IsFacingCurrentTarget())
 	{
 		NextShotTimeSeconds = CurrentTimeSeconds + 0.02;
 		return;
@@ -1188,7 +1222,9 @@ void ATunaSweeperEnemyAIController::TickFiring(
 		++ShotsFiredThisFiring;
 		LastShotTimeSeconds = CurrentTimeSeconds;
 		const FTunaSweeperEnemyWeaponRuntimeStatus StatusAfterShot = EnemyCharacter->GetEnemyWeaponRuntimeStatus();
-		const bool bLastShot = ShotsFiredThisFiring >= ShotsPlannedThisFiring || StatusAfterShot.LoadedAmmo <= 0;
+		const bool bLastShot =
+			ShotsFiredThisFiring >= ShotsPlannedThisFiring ||
+			(!bTemporaryVideoBulletStorm && StatusAfterShot.LoadedAmmo <= 0);
 		ReportSquadShot(bFirstShot, bLastShot);
 		bSquadLastShotReported = bLastShot;
 		if (bLastShot)
@@ -1196,9 +1232,12 @@ void ATunaSweeperEnemyAIController::TickFiring(
 			FinishFiring(EnemyCharacter, CurrentTimeSeconds);
 			return;
 		}
-		NextShotTimeSeconds = CurrentTimeSeconds + GetRandomRangeValue(
-			FVector2D(CombatProfile.ShotIntervalSecondsMin, CombatProfile.ShotIntervalSecondsMax),
-			0.01f);
+		// TEMP_VIDEO_BULLET_STORM: Fixed 0.05-second capture cadence; normal cadence remains profile-driven.
+		NextShotTimeSeconds = CurrentTimeSeconds + (bTemporaryVideoBulletStorm
+			? TemporaryVideoBulletStormShotIntervalSeconds
+			: GetRandomRangeValue(
+				FVector2D(CombatProfile.ShotIntervalSecondsMin, CombatProfile.ShotIntervalSecondsMax),
+				0.01f));
 		break;
 	}
 	case ETunaSweeperEnemyFireResult::MagazineEmpty:

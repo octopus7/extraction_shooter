@@ -99,6 +99,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Combat")
 	bool IsDead() const { return bIsDead; }
 
+	// TEMP_VIDEO_BULLET_STORM: Remove this accessor with the matching debug checkbox after capture.
+	bool IsTemporaryVideoBulletStormEnabled() const;
+
 	bool AttackTarget(AActor* TargetActor);
 	bool UsesMeleeAttack() const;
 	float GetMeleeAttackRange() const;
@@ -201,6 +204,20 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat", meta = (ClampMin = "1.0", UIMin = "1.0"))
 	float MaxHealth = 30.0f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Effects|Death")
+	TSoftObjectPtr<UNiagaraSystem> DeathNiagaraEffect;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Effects|Death",
+		meta = (ClampMin = "0.01", UIMin = "0.01"))
+	float DeathNiagaraScale = 1.0f;
+
+	// TEMP_VIDEO_BULLET_STORM: BEGIN
+	// One-off capture switch. Search for TEMP_VIDEO_BULLET_STORM to remove every related branch.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Debug|Temporary Video Capture",
+		meta = (DisplayName = "Enable No-Damage Bullet Storm (Temporary)"))
+	bool bEnableTemporaryVideoBulletStorm = false;
+	// TEMP_VIDEO_BULLET_STORM: END
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Combat|Debuffs", meta = (ClampMin = "0", ClampMax = "10000"))
 	int32 BleedingChanceBonus = 0;
 
@@ -288,6 +305,7 @@ private:
 		TArray<FGuid>& OutRuntimeItemUids) const;
 	int32 ResolveLootLoadedAmmoCount(int32& OutSourceLoadedAmmoCount, int32& OutDeductedLoadedAmmoCount) const;
 	void HandleDeath(AController* KillerController, AActor* DamageCauser);
+	void SpawnDeathNiagaraEffect();
 	bool ApplyMeleeDamageTo(AActor* TargetActor);
 	void ApplyMeleeKnockbackTo(AActor* TargetActor, const FVector& AttackDirection) const;
 	void SpawnMeleeSwingEffect(const FVector& AttackDirection);

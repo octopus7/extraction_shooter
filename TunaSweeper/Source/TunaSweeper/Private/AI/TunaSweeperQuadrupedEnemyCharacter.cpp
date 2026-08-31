@@ -7,6 +7,7 @@
 #include "Engine/SkeletalMesh.h"
 #include "QuadrupedComponent.h"
 #include "UObject/ConstructorHelpers.h"
+#include "NiagaraSystem.h"
 
 namespace
 {
@@ -38,7 +39,19 @@ bool HasValidQuadrupedLegLayout(const UQuadrupedComponent* Component)
 
 ATunaSweeperQuadrupedEnemyCharacter::ATunaSweeperQuadrupedEnemyCharacter()
 {
-	GetCapsuleComponent()->InitCapsuleSize(30.0f, 40.0f);
+	// The robot mesh is query-disabled, so this movement capsule is also its projectile hit target.
+	// Keep it large enough to cover the low, wide torso instead of relying on the small biped default.
+	constexpr float QuadrupedCapsuleRadius = 50.0f;
+	constexpr float QuadrupedCapsuleHalfHeight = 60.0f;
+	GetCapsuleComponent()->InitCapsuleSize(QuadrupedCapsuleRadius, QuadrupedCapsuleHalfHeight);
+
+	static ConstructorHelpers::FObjectFinder<UNiagaraSystem> RobotDeathEffect(
+		TEXT("/Game/Effects/ExplosionTuna/NS_Explosion_SmokeRobot.NS_Explosion_SmokeRobot"));
+	if (RobotDeathEffect.Succeeded())
+	{
+		DeathNiagaraEffect = RobotDeathEffect.Object;
+		DeathNiagaraScale = 1.0f;
+	}
 
 	if (VisualMesh)
 	{

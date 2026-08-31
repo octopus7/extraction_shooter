@@ -662,7 +662,9 @@ bool ATunaSweeperWeapon::FireWithAimIntent(
 	AActor* AimIntentActor,
 	UPrimitiveComponent* AimIntentComponent,
 	FVector AimIntentWorldPoint,
-	bool bHasAimIntentWorldPoint)
+	bool bHasAimIntentWorldPoint,
+	float FireCooldownOverrideSeconds,
+	bool bSuppressFireSound)
 {
 	UWorld* World = GetWorld();
 	if (!World)
@@ -671,7 +673,11 @@ bool ATunaSweeperWeapon::FireWithAimIntent(
 	}
 
 	const float CurrentTime = World->GetTimeSeconds();
-	if (CurrentTime - LastFireTimeSeconds < FireCooldown)
+	// TEMP_VIDEO_BULLET_STORM: The optional override is only supplied by the temporary enemy capture mode.
+	const float ResolvedFireCooldown = FireCooldownOverrideSeconds >= 0.0f
+		? FMath::Max(0.0f, FireCooldownOverrideSeconds)
+		: FireCooldown;
+	if (CurrentTime - LastFireTimeSeconds < ResolvedFireCooldown)
 	{
 		return false;
 	}
@@ -754,7 +760,7 @@ bool ATunaSweeperWeapon::FireWithAimIntent(
 
 	LastFireTimeSeconds = CurrentTime;
 	EjectShellCasing(*World, InstigatorPawn);
-	PlayFirePresentation();
+	PlayFirePresentation(bSuppressFireSound);
 	return true;
 }
 
@@ -822,7 +828,7 @@ void ATunaSweeperWeapon::EjectShellCasing(UWorld& World, APawn* InstigatorPawn)
 	Casing->LaunchCasing(EjectionVelocity, AngularVelocity);
 }
 
-void ATunaSweeperWeapon::PlayFirePresentation()
+void ATunaSweeperWeapon::PlayFirePresentation(bool bSuppressFireSound)
 {
 	TriggerMuzzleFlashLight();
 
@@ -858,9 +864,13 @@ void ATunaSweeperWeapon::PlayFirePresentation()
 		}
 	}
 
-	if (USoundBase* FireSound = PresentationData->FireSound.LoadSynchronous())
+	// TEMP_VIDEO_BULLET_STORM: Keep muzzle visuals, but skip only the gunshot audio for capture actors.
+	if (!bSuppressFireSound)
 	{
-		UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetMuzzleWorldLocation());
+		if (USoundBase* FireSound = PresentationData->FireSound.LoadSynchronous())
+		{
+			UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetMuzzleWorldLocation());
+		}
 	}
 }
 

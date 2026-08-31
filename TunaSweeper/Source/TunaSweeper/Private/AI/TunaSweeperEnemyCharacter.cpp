@@ -60,6 +60,9 @@ namespace
 	constexpr int32 DefaultEnemyReserveMagazineCount = 2;
 	constexpr float DefaultEnemyReloadSeconds = 1.8f;
 	constexpr float DefaultProjectileDamageAmount = 10.0f;
+	// TEMP_VIDEO_BULLET_STORM: Remove these capture-only tuning values after recording.
+	constexpr float TemporaryVideoBulletStormSpreadHalfAngleDegrees = 44.0f;
+	constexpr float TemporaryVideoBulletStormFireCooldownSeconds = 0.05f;
 	const FLinearColor LumberjackMeleeImpactColor(0.0f, 0.92f, 1.0f, 1.0f);
 	const FName PistolWeaponTypeTag(TEXT("weapon.type.pistol"));
 	const FName RifleWeaponTypeTag(TEXT("weapon.type.rifle"));
@@ -537,7 +540,8 @@ void ATunaSweeperEnemyCharacter::ShowAlertSpeechBubble()
 	SetEnemyStatusSpeechBubble(
 		ETunaSweeperEnemyStatusBubble::Alert,
 		FText::FromString(TEXT("!")),
-		0.9f);
+		// TEMP_VIDEO_BULLET_STORM: Keep the warning visible for the full forced one-second delay.
+		IsTemporaryVideoBulletStormEnabled() ? 1.0f : 0.9f);
 }
 
 void ATunaSweeperEnemyCharacter::HideAlertSpeechBubble()
@@ -947,6 +951,14 @@ bool ATunaSweeperEnemyCharacter::UsesMeleeAttack() const
 	return CombatProfile.AttackMode == ETunaSweeperEnemyAttackMode::Melee;
 }
 
+// TEMP_VIDEO_BULLET_STORM: BEGIN
+// Isolated query used by the enemy AI and projectile firing path. Remove after video capture.
+bool ATunaSweeperEnemyCharacter::IsTemporaryVideoBulletStormEnabled() const
+{
+	return bEnableTemporaryVideoBulletStorm && !UsesMeleeAttack();
+}
+// TEMP_VIDEO_BULLET_STORM: END
+
 float ATunaSweeperEnemyCharacter::GetMeleeAttackRange() const
 {
 	return TunaSweeperEnemyCombatConstants::MeleeAttackRange;
@@ -1028,11 +1040,13 @@ ETunaSweeperEnemyFireResult ATunaSweeperEnemyCharacter::TryFireProjectileAt(AAct
 	{
 		return ETunaSweeperEnemyFireResult::OutOfAmmo;
 	}
-	if (EnemyWeapon->IsReloadRuntimeActive())
+	// TEMP_VIDEO_BULLET_STORM: Capture mode ignores reload/ammo state so the long burst is uninterrupted.
+	const bool bTemporaryVideoBulletStorm = IsTemporaryVideoBulletStormEnabled();
+	if (!bTemporaryVideoBulletStorm && EnemyWeapon->IsReloadRuntimeActive())
 	{
 		return ETunaSweeperEnemyFireResult::Reloading;
 	}
-	if (EnemyLoadedAmmoCount <= 0)
+	if (!bTemporaryVideoBulletStorm && EnemyLoadedAmmoCount <= 0)
 	{
 		return EnemyReserveAmmoCount > 0
 			? ETunaSweeperEnemyFireResult::MagazineEmpty
@@ -1051,27 +1065,47 @@ ETunaSweeperEnemyFireResult ATunaSweeperEnemyCharacter::TryFireProjectileAt(AAct
 	const float ProjectileDamageScale = ProjectileDamage > 0.0f
 		? ProjectileDamage / DefaultProjectileDamageAmount
 		: 0.0f;
+	// TEMP_VIDEO_BULLET_STORM: BEGIN
+	// Force zero damage and the wide 44-degree full cone only while the capture checkbox is enabled.
+	const float ResolvedProjectileDamageMultiplier = bTemporaryVideoBulletStorm
+		? 0.0f
+		: ProjectileDamageScale * EnemyProjectileDamageMultiplier;
+	const int32 ResolvedProjectileDamageBonus = bTemporaryVideoBulletStorm ? 0 : EnemyProjectileDamageBonus;
+	const float ResolvedSpreadHalfAngleDegrees = bTemporaryVideoBulletStorm
+		? TemporaryVideoBulletStormSpreadHalfAngleDegrees
+		: EnemyWeapon->GetRuntimeSpreadHalfAngleDegrees() * FMath::Max(0.01f, CombatProfile.WeaponSpreadMultiplier);
+	const float FireCooldownOverrideSeconds = bTemporaryVideoBulletStorm
+		? TemporaryVideoBulletStormFireCooldownSeconds
+		: -1.0f;
+	// TEMP_VIDEO_BULLET_STORM: END
 	const bool bFired = EnemyWeapon->FireWithAimIntent(
 		FireDirection,
 		this,
 		EnemyImpactProfileId,
 		EnemyProjectileHitEffectId,
 		EnemyWeaponTypeTag,
-		ProjectileDamageScale * EnemyProjectileDamageMultiplier,
-		EnemyProjectileDamageBonus,
-		EnemyWeapon->GetRuntimeSpreadHalfAngleDegrees() * FMath::Max(0.01f, CombatProfile.WeaponSpreadMultiplier),
+		ResolvedProjectileDamageMultiplier,
+		ResolvedProjectileDamageBonus,
+		ResolvedSpreadHalfAngleDegrees,
 		TargetLocation,
 		true,
 		TargetActor,
 		nullptr,
 		TargetLocation,
-		true);
+		true,
+		FireCooldownOverrideSeconds,
+		// TEMP_VIDEO_BULLET_STORM: Capture footage uses replacement audio in editing.
+		bTemporaryVideoBulletStorm);
 	if (!bFired)
 	{
 		return ETunaSweeperEnemyFireResult::Cooldown;
 	}
 
-	EnemyLoadedAmmoCount = FMath::Max(0, EnemyLoadedAmmoCount - 1);
+	// TEMP_VIDEO_BULLET_STORM: Capture mode uses unlimited virtual ammo; normal gameplay still consumes one round.
+	if (!bTemporaryVideoBulletStorm)
+	{
+		EnemyLoadedAmmoCount = FMath::Max(0, EnemyLoadedAmmoCount - 1);
+	}
 	EnemyWeapon->AddRuntimeSpreadRecoilShot();
 	return ETunaSweeperEnemyFireResult::Fired;
 }
@@ -1290,9 +1324,31 @@ void ATunaSweeperEnemyCharacter::HandleDeath(AController* KillerController, AAct
 			}
 		}
 	}
+	SpawnDeathNiagaraEffect();
 	SpawnDeathStrawberryBurst();
 	SpawnDeathLootContainer(DamageCauser);
 	Destroy();
+}
+
+void ATunaSweeperEnemyCharacter::SpawnDeathNiagaraEffect()
+{
+	UWorld* World = GetWorld();
+	UNiagaraSystem* LoadedDeathEffect = DeathNiagaraEffect.LoadSynchronous();
+	if (!World || !LoadedDeathEffect)
+	{
+		return;
+	}
+
+	UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+		World,
+		LoadedDeathEffect,
+		GetActorLocation(),
+		GetActorRotation(),
+		FVector(FMath::Max(0.01f, DeathNiagaraScale)),
+		true,
+		true,
+		ENCPoolMethod::AutoRelease,
+		true);
 }
 
 void ATunaSweeperEnemyCharacter::SpawnDeathStrawberryBurst()

@@ -47,7 +47,11 @@ public:
 		AActor* AimIntentActor = nullptr,
 		UPrimitiveComponent* AimIntentComponent = nullptr,
 		FVector AimIntentWorldPoint = FVector::ZeroVector,
-		bool bHasAimIntentWorldPoint = false);
+		bool bHasAimIntentWorldPoint = false,
+		// TEMP_VIDEO_BULLET_STORM: Negative keeps the normal weapon cooldown; remove this argument after capture.
+		float FireCooldownOverrideSeconds = -1.0f,
+		// TEMP_VIDEO_BULLET_STORM: Only the temporary capture mode passes true; normal fire remains audible.
+		bool bSuppressFireSound = false);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Weapon")
 	void ConfigureGunVisual();
@@ -171,7 +175,7 @@ protected:
 		const FVector& AimIntentWorldPoint,
 		bool bHasAimIntentWorldPoint);
 
-	void PlayFirePresentation();
+	void PlayFirePresentation(bool bSuppressFireSound = false);
 	void PlayReloadPresentation(TSoftObjectPtr<class USoundBase> ReloadSound);
 	void EjectShellCasing(UWorld& World, APawn* InstigatorPawn);
 	void TriggerMuzzleFlashLight();
