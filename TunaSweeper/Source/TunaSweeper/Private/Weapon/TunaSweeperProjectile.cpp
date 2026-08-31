@@ -72,9 +72,16 @@ namespace
 			return false;
 		}
 
+		// TEMP_VIDEO_BULLET_STORM: BEGIN
+		// Keep capture footage clean when the player hits an enemy using the disposable bullet-storm mode.
+		if (const ATunaSweeperEnemyCharacter* EnemyCharacter = Cast<ATunaSweeperEnemyCharacter>(OtherActor))
+		{
+			return !EnemyCharacter->IsTemporaryVideoBulletStormEnabled();
+		}
+		// TEMP_VIDEO_BULLET_STORM: END
+
 		return
 			OtherActor->FindComponentByClass<UTunaSweeperVitalsComponent>() ||
-			Cast<ATunaSweeperEnemyCharacter>(OtherActor) ||
 			Cast<ATunaSweeperRollingBomberSpawner>(OtherActor) ||
 			Cast<ATunaSweeperBreakableAppleCrateActor>(OtherActor) ||
 			Cast<ATunaSweeperExplosiveBarrelActor>(OtherActor) ||
