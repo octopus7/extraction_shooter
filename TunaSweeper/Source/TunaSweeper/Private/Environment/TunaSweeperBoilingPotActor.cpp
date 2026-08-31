@@ -1,13 +1,11 @@
 #include "Environment/TunaSweeperBoilingPotActor.h"
 
-#include "Components/AudioComponent.h"
 #include "Components/BoxComponent.h"
 #include "Components/SceneComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMesh.h"
 #include "NiagaraComponent.h"
 #include "NiagaraSystem.h"
-#include "Sound/SoundBase.h"
 
 ATunaSweeperBoilingPotActor::ATunaSweeperBoilingPotActor()
 {
@@ -53,9 +51,6 @@ ATunaSweeperBoilingPotActor::ATunaSweeperBoilingPotActor()
 	SteamEffectComponent->SetAutoActivate(false);
 	SteamEffectComponent->SetRelativeScale3D(FVector(SteamVisualScale));
 
-	LidClatterAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("LidClatterAudio"));
-	LidClatterAudioComponent->SetupAttachment(LidPivot);
-	LidClatterAudioComponent->bAutoActivate = false;
 }
 
 void ATunaSweeperBoilingPotActor::OnConstruction(const FTransform& Transform)
@@ -114,13 +109,6 @@ void ATunaSweeperBoilingPotActor::Tick(float DeltaSeconds)
 		BurstTiltAxis.Y * BurstTiltDegrees * TiltWave * Envelope);
 	LidPivot->SetRelativeLocationAndRotation(AnimatedLocation, AnimatedRotation);
 
-	const int32 HitIndex = FMath::Min(FMath::FloorToInt(HitPhase), BurstHitCount - 1);
-	if (HitIndex != LastPlayedHitIndex && LiftWave < 0.22f)
-	{
-		LastPlayedHitIndex = HitIndex;
-		PlayLidClatter();
-	}
-
 	if (Alpha >= 1.0f)
 	{
 		FinishRattleBurst();
@@ -158,13 +146,12 @@ void ATunaSweeperBoilingPotActor::SetBoiling(bool bEnabled)
 void ATunaSweeperBoilingPotActor::ConfigurePresentationDefaults(
 	TSoftObjectPtr<UStaticMesh> InPotBodyMesh,
 	TSoftObjectPtr<UStaticMesh> InLidMesh,
-	TSoftObjectPtr<UNiagaraSystem> InSteamSystem,
-	TSoftObjectPtr<USoundBase> InLidClatterSound)
+	TSoftObjectPtr<UNiagaraSystem> InSteamSystem)
 {
 	PotBodyMesh = MoveTemp(InPotBodyMesh);
 	LidMesh = MoveTemp(InLidMesh);
 	SteamSystem = MoveTemp(InSteamSystem);
-	LidClatterSound = MoveTemp(InLidClatterSound);
+	SteamVisualScale = 0.25f;
 	ApplyPresentation();
 }
 
@@ -201,10 +188,6 @@ void ATunaSweeperBoilingPotActor::ApplyPresentation()
 			FName(TEXT("User.SmokeColor")),
 			FLinearColor(0.86f, 0.93f, 1.0f, 1.0f));
 	}
-	if (LidClatterAudioComponent)
-	{
-		LidClatterAudioComponent->SetSound(LidClatterSound.LoadSynchronous());
-	}
 }
 
 void ATunaSweeperBoilingPotActor::StartRattleBurst()
@@ -215,11 +198,9 @@ void ATunaSweeperBoilingPotActor::StartRattleBurst()
 	BurstLiftCm = GetRandomRange(MinLidLiftCm, MaxLidLiftCm);
 	BurstTiltDegrees = GetRandomRange(MinTiltDegrees, MaxTiltDegrees);
 	BurstHitCount = RattleRandom.RandRange(MinHitsPerBurst, MaxHitsPerBurst);
-	LastPlayedHitIndex = 0;
 
 	const float AxisAngle = GetRandomRange(0.0f, UE_TWO_PI);
 	BurstTiltAxis = FVector2D(FMath::Cos(AxisAngle), FMath::Sin(AxisAngle));
-	PlayLidClatter();
 }
 
 void ATunaSweeperBoilingPotActor::FinishRattleBurst()
@@ -238,16 +219,6 @@ void ATunaSweeperBoilingPotActor::ResetLidTransform()
 
 	LidRestTransform = FTransform(FRotator::ZeroRotator, FVector(0.0f, 0.0f, LidRestHeightCm));
 	LidPivot->SetRelativeTransform(LidRestTransform);
-}
-
-void ATunaSweeperBoilingPotActor::PlayLidClatter()
-{
-	if (LidClatterAudioComponent && LidClatterAudioComponent->Sound)
-	{
-		LidClatterAudioComponent->SetPitchMultiplier(GetRandomRange(0.92f, 1.08f));
-		LidClatterAudioComponent->SetVolumeMultiplier(GetRandomRange(0.72f, 1.0f));
-		LidClatterAudioComponent->Play(0.0f);
-	}
 }
 
 float ATunaSweeperBoilingPotActor::GetRandomRange(float Minimum, float Maximum)

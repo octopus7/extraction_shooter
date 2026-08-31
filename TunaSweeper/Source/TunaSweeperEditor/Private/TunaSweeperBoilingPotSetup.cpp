@@ -5,24 +5,30 @@
 #include "Environment/TunaSweeperBoilingPotActor.h"
 #include "Kismet2/BlueprintEditorUtils.h"
 #include "Kismet2/KismetEditorUtilities.h"
+#include "Materials/MaterialExpressionParticleColor.h"
+#include "Materials/MaterialExpressionParticleRelativeTime.h"
 #include "Materials/MaterialExpressionScalarParameter.h"
 #include "Materials/MaterialExpressionTextureCoordinate.h"
 #include "Materials/MaterialExpressionTextureSampleParameter2D.h"
 #include "MeshDescriptionBuilder.h"
 #include "NiagaraSystem.h"
-#include "Sound/SoundBase.h"
+#include "Stateless/NiagaraStatelessDistribution.h"
+#include "UObject/UObjectHash.h"
+#include "UObject/UnrealType.h"
 
 namespace TunaSweeperBoilingPotSetup
 {
 	const FString AssetPath = TEXT("/Game/Environment/Props/BoilingPot");
 	const FString TextureName = TEXT("T_BoilingPot_Enamel");
 	const FString MaterialName = TEXT("M_BoilingPot_Enamel");
+	const FString SteamOpacityTextureName = TEXT("T_BoilingPot_SteamOpacity");
+	const FString SteamMaterialName = TEXT("M_BoilingPot_SteamWhite");
 	const FString BodyMeshName = TEXT("SM_BoilingPot_Body");
 	const FString LidMeshName = TEXT("SM_BoilingPot_Lid");
 	const FString SteamSystemName = TEXT("NS_BoilingPot_Steam");
 	const FString BlueprintName = TEXT("BP_BoilingPot");
 	const FName MaterialSlotName(TEXT("EnamelMetal"));
-	constexpr int32 RadialSegments = 24;
+	constexpr int32 RadialSegments = 64;
 
 	FString GetTextureSourcePath()
 	{
@@ -31,6 +37,17 @@ namespace TunaSweeperBoilingPotSetup
 			TEXT("SourceArt"),
 			TEXT("BoilingPot"),
 			TEXT("T_BoilingPot_Enamel_Source.png")));
+		FPaths::CollapseRelativeDirectories(SourcePath);
+		return SourcePath;
+	}
+
+	FString GetSteamOpacityTextureSourcePath()
+	{
+		FString SourcePath = FPaths::ConvertRelativePathToFull(FPaths::Combine(
+			FPaths::ProjectContentDir(),
+			TEXT("SourceArt"),
+			TEXT("BoilingPot"),
+			TEXT("T_BoilingPot_SteamOpacity_Source.png")));
 		FPaths::CollapseRelativeDirectories(SourcePath);
 		return SourcePath;
 	}
@@ -156,6 +173,48 @@ namespace TunaSweeperBoilingPotSetup
 		Builder.AppendTriangle(Instances[0], Instances[2], Instances[1], Group);
 	}
 
+	void AddSmoothTriangle(
+		FMeshDescriptionBuilder& Builder,
+		FPolygonGroupID Group,
+		const FVector& A,
+		const FVector& B,
+		const FVector& C,
+		const FVector& NormalA,
+		const FVector& NormalB,
+		const FVector& NormalC,
+		const FVector2D& UVA,
+		const FVector2D& UVB,
+		const FVector2D& UVC)
+	{
+		const FVector Positions[3] = { A, B, C };
+		const FVector Normals[3] = {
+			NormalA.GetSafeNormal(),
+			NormalB.GetSafeNormal(),
+			NormalC.GetSafeNormal()
+		};
+		const FVector2D UVs[3] = { UVA, UVB, UVC };
+		FVertexInstanceID Instances[3];
+		for (int32 Index = 0; Index < 3; ++Index)
+		{
+			const FVertexID Vertex = Builder.AppendVertex(Positions[Index]);
+			Instances[Index] = Builder.AppendInstance(Vertex);
+			FVector Tangent = B - A;
+			Tangent -= Normals[Index] * FVector::DotProduct(Tangent, Normals[Index]);
+			if (!Tangent.Normalize())
+			{
+				Tangent = FVector::CrossProduct(FVector::UpVector, Normals[Index]).GetSafeNormal();
+			}
+			if (Tangent.IsNearlyZero())
+			{
+				Tangent = FVector::ForwardVector;
+			}
+			Builder.SetInstanceTangentSpace(Instances[Index], Normals[Index], Tangent, 1.0f);
+			Builder.SetInstanceUV(Instances[Index], UVs[Index], 0);
+			Builder.SetInstanceColor(Instances[Index], FVector4f(1.0f, 1.0f, 1.0f, 1.0f));
+		}
+		Builder.AppendTriangle(Instances[0], Instances[2], Instances[1], Group);
+	}
+
 	void AddQuad(
 		FMeshDescriptionBuilder& Builder,
 		FPolygonGroupID Group,
@@ -170,6 +229,26 @@ namespace TunaSweeperBoilingPotSetup
 	{
 		AddTriangle(Builder, Group, A, B, C, UVA, UVB, UVC);
 		AddTriangle(Builder, Group, A, C, D, UVA, UVC, UVD);
+	}
+
+	void AddSmoothQuad(
+		FMeshDescriptionBuilder& Builder,
+		FPolygonGroupID Group,
+		const FVector& A,
+		const FVector& B,
+		const FVector& C,
+		const FVector& D,
+		const FVector& NormalA,
+		const FVector& NormalB,
+		const FVector& NormalC,
+		const FVector& NormalD,
+		const FVector2D& UVA,
+		const FVector2D& UVB,
+		const FVector2D& UVC,
+		const FVector2D& UVD)
+	{
+		AddSmoothTriangle(Builder, Group, A, B, C, NormalA, NormalB, NormalC, UVA, UVB, UVC);
+		AddSmoothTriangle(Builder, Group, A, C, D, NormalA, NormalC, NormalD, UVA, UVC, UVD);
 	}
 
 	void AddBox(FMeshDescriptionBuilder& Builder, FPolygonGroupID Group, const FVector& Minimum, const FVector& Maximum)
@@ -208,13 +287,21 @@ namespace TunaSweeperBoilingPotSetup
 			const float Angle1 = UE_TWO_PI * static_cast<float>(Next) / static_cast<float>(RadialSegments);
 			const float U0 = static_cast<float>(Segment) / static_cast<float>(RadialSegments);
 			const float U1 = static_cast<float>(Segment + 1) / static_cast<float>(RadialSegments);
-			AddQuad(
+			const float DeltaRadius = TopRadius - BottomRadius;
+			const float DeltaZ = TopZ - BottomZ;
+			const FVector Normal0 = FVector(FMath::Cos(Angle0) * DeltaZ, FMath::Sin(Angle0) * DeltaZ, -DeltaRadius).GetSafeNormal();
+			const FVector Normal1 = FVector(FMath::Cos(Angle1) * DeltaZ, FMath::Sin(Angle1) * DeltaZ, -DeltaRadius).GetSafeNormal();
+			AddSmoothQuad(
 				Builder,
 				Group,
 				MakeRadialPoint(BottomRadius, Angle0, BottomZ),
 				MakeRadialPoint(BottomRadius, Angle1, BottomZ),
 				MakeRadialPoint(TopRadius, Angle1, TopZ),
 				MakeRadialPoint(TopRadius, Angle0, TopZ),
+				Normal0,
+				Normal1,
+				Normal1,
+				Normal0,
 				FVector2D(U0, V0),
 				FVector2D(U1, V0),
 				FVector2D(U1, V1),
@@ -236,13 +323,19 @@ namespace TunaSweeperBoilingPotSetup
 			const float Angle1 = UE_TWO_PI * static_cast<float>(Next) / static_cast<float>(RadialSegments);
 			const float U0 = static_cast<float>(Segment) / static_cast<float>(RadialSegments);
 			const float U1 = static_cast<float>(Segment + 1) / static_cast<float>(RadialSegments);
-			AddQuad(
+			const FVector Normal0(-FMath::Cos(Angle0), -FMath::Sin(Angle0), 0.0f);
+			const FVector Normal1(-FMath::Cos(Angle1), -FMath::Sin(Angle1), 0.0f);
+			AddSmoothQuad(
 				Builder,
 				Group,
 				MakeRadialPoint(Radius, Angle0, BottomZ),
 				MakeRadialPoint(Radius, Angle0, TopZ),
 				MakeRadialPoint(Radius, Angle1, TopZ),
 				MakeRadialPoint(Radius, Angle1, BottomZ),
+				Normal0,
+				Normal0,
+				Normal1,
+				Normal1,
 				FVector2D(U0, 0.0),
 				FVector2D(U0, 1.0),
 				FVector2D(U1, 1.0),
@@ -341,6 +434,18 @@ namespace TunaSweeperBoilingPotSetup
 		const TArray<FLidRing>& Rings)
 	{
 		const FVector Center(0.0f, 0.0f, 9.5f);
+		auto GetRingNormal = [&Rings, &Center](int32 RingIndex, float Angle)
+		{
+			const float PreviousRadius = RingIndex > 0 ? Rings[RingIndex - 1].Radius : 0.0f;
+			const float PreviousZ = RingIndex > 0 ? Rings[RingIndex - 1].Z : Center.Z;
+			const int32 NextRingIndex = FMath::Min(RingIndex + 1, Rings.Num() - 1);
+			const float DeltaRadius = Rings[NextRingIndex].Radius - PreviousRadius;
+			const float DeltaZ = Rings[NextRingIndex].Z - PreviousZ;
+			return FVector(
+				FMath::Cos(Angle) * -DeltaZ,
+				FMath::Sin(Angle) * -DeltaZ,
+				DeltaRadius).GetSafeNormal();
+		};
 		for (int32 Segment = 0; Segment < RadialSegments; ++Segment)
 		{
 			const int32 Next = (Segment + 1) % RadialSegments;
@@ -348,12 +453,15 @@ namespace TunaSweeperBoilingPotSetup
 			const float Angle1 = UE_TWO_PI * static_cast<float>(Next) / static_cast<float>(RadialSegments);
 			const FVector Point0 = MakeRadialPoint(Rings[0].Radius, Angle0, Rings[0].Z);
 			const FVector Point1 = MakeRadialPoint(Rings[0].Radius, Angle1, Rings[0].Z);
-			AddTriangle(
+			AddSmoothTriangle(
 				Builder,
 				Group,
 				Center,
 				Point0,
 				Point1,
+				FVector::UpVector,
+				GetRingNormal(0, Angle0),
+				GetRingNormal(0, Angle1),
 				FVector2D(0.5, 0.5),
 				FVector2D(0.5 + Point0.X / 88.0, 0.5 + Point0.Y / 88.0),
 				FVector2D(0.5 + Point1.X / 88.0, 0.5 + Point1.Y / 88.0));
@@ -374,7 +482,21 @@ namespace TunaSweeperBoilingPotSetup
 				{
 					return FVector2D(0.5 + Position.X / 88.0, 0.5 + Position.Y / 88.0);
 				};
-				AddQuad(Builder, Group, Inner0, Outer0, Outer1, Inner1, UV(Inner0), UV(Outer0), UV(Outer1), UV(Inner1));
+				AddSmoothQuad(
+					Builder,
+					Group,
+					Inner0,
+					Outer0,
+					Outer1,
+					Inner1,
+					GetRingNormal(RingIndex, Angle0),
+					GetRingNormal(RingIndex + 1, Angle0),
+					GetRingNormal(RingIndex + 1, Angle1),
+					GetRingNormal(RingIndex, Angle1),
+					UV(Inner0),
+					UV(Outer0),
+					UV(Outer1),
+					UV(Inner1));
 			}
 		}
 	}
@@ -485,7 +607,229 @@ namespace TunaSweeperBoilingPotSetup
 		return TunaSweeperEditorSetup::SaveAsset(Mesh) ? Mesh : nullptr;
 	}
 
-	UNiagaraSystem* EnsureSteamSystem()
+	UTexture2D* EnsureSteamOpacityTexture()
+	{
+		UTexture2D* Texture = nullptr;
+		const FString SourcePath = GetSteamOpacityTextureSourcePath();
+		if (!TunaSweeperEditorSetup::ImportWorldTexture(
+				SourcePath,
+				AssetPath,
+				SteamOpacityTextureName,
+				&Texture) || !Texture)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("Failed to import boiling-pot steam opacity texture %s."), *SourcePath);
+			return nullptr;
+		}
+
+		Texture->Modify();
+		Texture->SRGB = false;
+		Texture->CompressionSettings = TC_Masks;
+		Texture->MipGenSettings = TMGS_FromTextureGroup;
+		Texture->LODGroup = TEXTUREGROUP_Effects;
+		Texture->AddressX = TA_Clamp;
+		Texture->AddressY = TA_Clamp;
+		Texture->PostEditChange();
+		Texture->UpdateResource();
+		Texture->MarkPackageDirty();
+		return TunaSweeperEditorSetup::SaveAsset(Texture) ? Texture : nullptr;
+	}
+
+	UMaterial* EnsureSteamWhiteMaterial(UTexture2D* SmokeTexture)
+	{
+		if (!SmokeTexture)
+		{
+			return nullptr;
+		}
+
+		const FString ObjectPath = TunaSweeperEditorSetup::GetAssetObjectPath(AssetPath, SteamMaterialName);
+		UMaterial* Material = LoadObject<UMaterial>(nullptr, *ObjectPath);
+		if (!Material)
+		{
+			UPackage* Package = CreatePackage(*(AssetPath / SteamMaterialName));
+			Material = Package
+				? NewObject<UMaterial>(Package, *SteamMaterialName, RF_Public | RF_Standalone | RF_Transactional)
+				: nullptr;
+			if (Material)
+			{
+				FAssetRegistryModule::AssetCreated(Material);
+			}
+		}
+		if (!Material)
+		{
+			return nullptr;
+		}
+
+		Material->Modify();
+		Material->GetExpressionCollection().Empty();
+		Material->MaterialDomain = MD_Surface;
+		Material->BlendMode = BLEND_Translucent;
+		Material->SetShadingModel(MSM_Unlit);
+		Material->TwoSided = true;
+		Material->bUsedWithNiagaraSprites = true;
+
+		UMaterialEditorOnlyData* Data = Material->GetEditorOnlyData();
+		if (!Data)
+		{
+			return nullptr;
+		}
+
+		UMaterialExpressionTextureSampleParameter2D* TextureSample =
+			AddMaterialExpression<UMaterialExpressionTextureSampleParameter2D>(Material, -620, 0);
+		TextureSample->ParameterName = TEXT("SteamOpacityTexture");
+		TextureSample->Texture = SmokeTexture;
+		TextureSample->AutoSetSampleType();
+		UMaterialExpressionScalarParameter* Opacity =
+			AddMaterialExpression<UMaterialExpressionScalarParameter>(Material, -380, 260);
+		Opacity->ParameterName = TEXT("SteamOpacity");
+		Opacity->DefaultValue = 0.72f;
+		UMaterialExpressionParticleColor* ParticleColor =
+			AddMaterialExpression<UMaterialExpressionParticleColor>(Material, -620, 150);
+		UMaterialExpressionMultiply* TextureAndParticleOpacity =
+			AddMaterialExpression<UMaterialExpressionMultiply>(Material, -350, 20);
+		TextureAndParticleOpacity->A.Connect(1, TextureSample);
+		TextureAndParticleOpacity->B.Connect(4, ParticleColor);
+		UMaterialExpressionParticleRelativeTime* RelativeTime =
+			AddMaterialExpression<UMaterialExpressionParticleRelativeTime>(Material, -620, 370);
+		UMaterialExpressionOneMinus* LifetimeFade =
+			AddMaterialExpression<UMaterialExpressionOneMinus>(Material, -380, 370);
+		LifetimeFade->Input.Connect(0, RelativeTime);
+		UMaterialExpressionMultiply* FadedTextureOpacity =
+			AddMaterialExpression<UMaterialExpressionMultiply>(Material, -100, 50);
+		FadedTextureOpacity->A.Connect(0, TextureAndParticleOpacity);
+		FadedTextureOpacity->B.Connect(0, LifetimeFade);
+		UMaterialExpressionMultiply* FinalOpacity =
+			AddMaterialExpression<UMaterialExpressionMultiply>(Material, 140, 50);
+		FinalOpacity->A.Connect(0, FadedTextureOpacity);
+		FinalOpacity->B.Connect(0, Opacity);
+		UMaterialExpressionConstant3Vector* WhiteColor =
+			AddMaterialExpression<UMaterialExpressionConstant3Vector>(Material, -100, -130);
+		WhiteColor->Constant = FLinearColor(0.88f, 0.95f, 1.0f, 1.0f);
+
+		Data->EmissiveColor.Connect(0, WhiteColor);
+		Data->Opacity.Connect(0, FinalOpacity);
+		Material->PostEditChange();
+		Material->MarkPackageDirty();
+		return TunaSweeperEditorSetup::SaveAsset(Material) ? Material : nullptr;
+	}
+
+	int32 ConfigureStatelessSteamModules(UNiagaraSystem* System)
+	{
+		TArray<UObject*> NestedObjects;
+		GetObjectsWithOuter(System, NestedObjects, true);
+		int32 UpdatedModuleCount = 0;
+
+		for (UObject* Object : NestedObjects)
+		{
+			if (!Object)
+			{
+				continue;
+			}
+
+			const FName ClassName = Object->GetClass()->GetFName();
+			if (ClassName == TEXT("NiagaraStatelessModule_InitializeParticle"))
+			{
+				Object->Modify();
+				if (FStructProperty* Property = FindFProperty<FStructProperty>(Object->GetClass(), TEXT("LifetimeDistribution")))
+				{
+					FNiagaraDistributionRangeFloat* Distribution =
+						Property->ContainerPtrToValuePtr<FNiagaraDistributionRangeFloat>(Object);
+					Distribution->InitRange(0.65f, 1.15f);
+				}
+				if (FStructProperty* Property = FindFProperty<FStructProperty>(Object->GetClass(), TEXT("SpriteSizeDistribution")))
+				{
+					FNiagaraDistributionRangeVector2* Distribution =
+						Property->ContainerPtrToValuePtr<FNiagaraDistributionRangeVector2>(Object);
+					Distribution->Mode = ENiagaraDistributionMode::NonUniformRange;
+					Distribution->Min = FVector2f(7.0f, 10.0f);
+					Distribution->Max = FVector2f(13.0f, 18.0f);
+				}
+				if (FStructProperty* Property = FindFProperty<FStructProperty>(Object->GetClass(), TEXT("ColorDistribution")))
+				{
+					FNiagaraDistributionColor* Distribution =
+						Property->ContainerPtrToValuePtr<FNiagaraDistributionColor>(Object);
+					Distribution->InitConstant(FLinearColor(0.88f, 0.95f, 1.0f, 0.65f));
+				}
+				Object->PostEditChange();
+				++UpdatedModuleCount;
+			}
+			else if (ClassName == TEXT("NiagaraStatelessModule_ScaleSpriteSize"))
+			{
+				Object->Modify();
+				if (FStructProperty* Property = FindFProperty<FStructProperty>(Object->GetClass(), TEXT("ScaleDistribution")))
+				{
+					FNiagaraDistributionVector2* Distribution =
+						Property->ContainerPtrToValuePtr<FNiagaraDistributionVector2>(Object);
+					Distribution->InitConstant(FVector2f(1.0f, 1.0f));
+				}
+				Object->PostEditChange();
+				++UpdatedModuleCount;
+			}
+			else if (ClassName == TEXT("NiagaraStatelessModule_SubUVAnimation"))
+			{
+				Object->Modify();
+				if (FIntProperty* Property = FindFProperty<FIntProperty>(Object->GetClass(), TEXT("NumFrames")))
+				{
+					Property->SetPropertyValue_InContainer(Object, 1);
+				}
+				Object->PostEditChange();
+				++UpdatedModuleCount;
+			}
+		}
+
+		return UpdatedModuleCount;
+	}
+
+	bool ConfigureSteamSystem(UNiagaraSystem* System, UMaterialInterface* SteamMaterial)
+	{
+		if (!System || !SteamMaterial)
+		{
+			return false;
+		}
+
+		bool bConfiguredSpriteRenderer = false;
+		System->Modify();
+		const int32 UpdatedStatelessModuleCount = ConfigureStatelessSteamModules(System);
+		for (FNiagaraEmitterHandle& EmitterHandle : System->GetEmitterHandles())
+		{
+			EmitterHandle.SetDebugShowBounds(false);
+			EmitterHandle.ForEachEnabledRendererWithIndex(
+				[SteamMaterial, &bConfiguredSpriteRenderer](const UNiagaraRendererProperties* Renderer, int32)
+				{
+					UNiagaraSpriteRendererProperties* SpriteRenderer =
+						Cast<UNiagaraSpriteRendererProperties>(const_cast<UNiagaraRendererProperties*>(Renderer));
+					if (SpriteRenderer)
+					{
+						SpriteRenderer->Modify();
+						SpriteRenderer->Material = SteamMaterial;
+						SpriteRenderer->SubImageSize = FVector2D(1.0, 1.0);
+						SpriteRenderer->bSubImageBlend = false;
+						bConfiguredSpriteRenderer = true;
+					}
+				});
+			if (FVersionedNiagaraEmitterData* EmitterData = EmitterHandle.GetEmitterData())
+			{
+				EmitterData->bLocalSpace = true;
+				EmitterData->CalculateBoundsMode = ENiagaraEmitterCalculateBoundMode::Fixed;
+				EmitterData->FixedBounds = FBox(FVector(-80.0f, -80.0f, -10.0f), FVector(80.0f, 80.0f, 220.0f));
+			}
+		}
+
+		System->SetWarmupTime(0.35f);
+		System->SetWarmupTickDelta(1.0f / 30.0f);
+		System->InvalidateCachedData();
+		System->RequestCompile(true);
+		System->PollForCompilationComplete(true);
+		System->PostEditChange();
+		System->MarkPackageDirty();
+		UE_LOG(
+			LogTunaSweeperEditor,
+			Display,
+			TEXT("Configured boiling-pot steam: %d stateless modules, textured white sprites."),
+			UpdatedStatelessModuleCount);
+		return bConfiguredSpriteRenderer && TunaSweeperEditorSetup::SaveAsset(System);
+	}
+
+	UNiagaraSystem* EnsureSteamSystem(UMaterialInterface* SteamMaterial)
 	{
 		const FString ObjectPath = TunaSweeperEditorSetup::GetAssetObjectPath(AssetPath, SteamSystemName);
 		UNiagaraSystem* System = LoadObject<UNiagaraSystem>(nullptr, *ObjectPath);
@@ -507,12 +851,7 @@ namespace TunaSweeperBoilingPotSetup
 			return nullptr;
 		}
 
-		System->Modify();
-		System->SetWarmupTime(0.35f);
-		System->SetWarmupTickDelta(1.0f / 30.0f);
-		System->PostEditChange();
-		System->MarkPackageDirty();
-		return TunaSweeperEditorSetup::SaveAsset(System) ? System : nullptr;
+		return ConfigureSteamSystem(System, SteamMaterial) ? System : nullptr;
 	}
 
 	UBlueprint* EnsurePotBlueprint(UStaticMesh* BodyMesh, UStaticMesh* LidMesh, UNiagaraSystem* SteamSystem)
@@ -540,14 +879,12 @@ namespace TunaSweeperBoilingPotSetup
 			return nullptr;
 		}
 
-		const FString ClatterSoundPath = TEXT("/Game/Audio/Imported/SW_BarrelHit.SW_BarrelHit");
 		Blueprint->Modify();
 		Defaults->Modify();
 		Defaults->ConfigurePresentationDefaults(
 			TSoftObjectPtr<UStaticMesh>(FSoftObjectPath(TunaSweeperEditorSetup::GetAssetObjectPath(AssetPath, BodyMeshName))),
 			TSoftObjectPtr<UStaticMesh>(FSoftObjectPath(TunaSweeperEditorSetup::GetAssetObjectPath(AssetPath, LidMeshName))),
-			TSoftObjectPtr<UNiagaraSystem>(FSoftObjectPath(TunaSweeperEditorSetup::GetAssetObjectPath(AssetPath, SteamSystemName))),
-			TSoftObjectPtr<USoundBase>(FSoftObjectPath(ClatterSoundPath)));
+			TSoftObjectPtr<UNiagaraSystem>(FSoftObjectPath(TunaSweeperEditorSetup::GetAssetObjectPath(AssetPath, SteamSystemName))));
 		FBlueprintEditorUtils::MarkBlueprintAsModified(Blueprint);
 		FKismetEditorUtilities::CompileBlueprint(Blueprint);
 		Blueprint->MarkPackageDirty();
@@ -556,6 +893,34 @@ namespace TunaSweeperBoilingPotSetup
 
 	bool Run()
 	{
+		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperBoilingPotMeshesOnly")))
+		{
+			UMaterial* Material = LoadObject<UMaterial>(
+				nullptr,
+				*TunaSweeperEditorSetup::GetAssetObjectPath(AssetPath, MaterialName));
+			UNiagaraSystem* ExistingSteamSystem = LoadObject<UNiagaraSystem>(
+				nullptr,
+				*TunaSweeperEditorSetup::GetAssetObjectPath(AssetPath, SteamSystemName));
+			UStaticMesh* BodyMesh = EnsureStaticMesh(BodyMeshName, Material, BuildBodyMeshDescription);
+			UStaticMesh* LidMesh = EnsureStaticMesh(LidMeshName, Material, BuildLidMeshDescription);
+			return Material && ExistingSteamSystem && BodyMesh && LidMesh &&
+				EnsurePotBlueprint(BodyMesh, LidMesh, ExistingSteamSystem);
+		}
+
+		UTexture2D* SteamOpacityTexture = EnsureSteamOpacityTexture();
+		UMaterial* SteamMaterial = EnsureSteamWhiteMaterial(SteamOpacityTexture);
+		UNiagaraSystem* SteamSystem = EnsureSteamSystem(SteamMaterial);
+		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperBoilingPotSteamOnly")))
+		{
+			UStaticMesh* BodyMesh = LoadObject<UStaticMesh>(
+				nullptr,
+				*TunaSweeperEditorSetup::GetAssetObjectPath(AssetPath, BodyMeshName));
+			UStaticMesh* LidMesh = LoadObject<UStaticMesh>(
+				nullptr,
+				*TunaSweeperEditorSetup::GetAssetObjectPath(AssetPath, LidMeshName));
+			return SteamMaterial && SteamSystem && EnsurePotBlueprint(BodyMesh, LidMesh, SteamSystem);
+		}
+
 		UTexture2D* Texture = nullptr;
 		const FString SourcePath = GetTextureSourcePath();
 		if (!TunaSweeperEditorSetup::ImportWorldTexture(SourcePath, AssetPath, TextureName, &Texture) || !Texture)
@@ -573,9 +938,8 @@ namespace TunaSweeperBoilingPotSetup
 		UMaterial* Material = EnsurePotMaterial(Texture);
 		UStaticMesh* BodyMesh = EnsureStaticMesh(BodyMeshName, Material, BuildBodyMeshDescription);
 		UStaticMesh* LidMesh = EnsureStaticMesh(LidMeshName, Material, BuildLidMeshDescription);
-		UNiagaraSystem* SteamSystem = EnsureSteamSystem();
 		UBlueprint* Blueprint = EnsurePotBlueprint(BodyMesh, LidMesh, SteamSystem);
-		const bool bSucceeded = Material && BodyMesh && LidMesh && SteamSystem && Blueprint;
+		const bool bSucceeded = Material && SteamOpacityTexture && SteamMaterial && BodyMesh && LidMesh && SteamSystem && Blueprint;
 
 		if (bSucceeded)
 		{

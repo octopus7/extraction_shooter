@@ -4,12 +4,10 @@
 #include "GameFramework/Actor.h"
 #include "TunaSweeperBoilingPotActor.generated.h"
 
-class UAudioComponent;
 class UBoxComponent;
 class UNiagaraComponent;
 class UNiagaraSystem;
 class USceneComponent;
-class USoundBase;
 class UStaticMesh;
 class UStaticMeshComponent;
 
@@ -36,8 +34,7 @@ public:
 	void ConfigurePresentationDefaults(
 		TSoftObjectPtr<UStaticMesh> InPotBodyMesh,
 		TSoftObjectPtr<UStaticMesh> InLidMesh,
-		TSoftObjectPtr<UNiagaraSystem> InSteamSystem,
-		TSoftObjectPtr<USoundBase> InLidClatterSound);
+		TSoftObjectPtr<UNiagaraSystem> InSteamSystem);
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
@@ -61,9 +58,6 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UNiagaraComponent> SteamEffectComponent;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	TObjectPtr<UAudioComponent> LidClatterAudioComponent;
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Boiling Pot|Presentation")
 	TSoftObjectPtr<UStaticMesh> PotBodyMesh;
 
@@ -72,9 +66,6 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Boiling Pot|Presentation")
 	TSoftObjectPtr<UNiagaraSystem> SteamSystem;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Boiling Pot|Presentation")
-	TSoftObjectPtr<USoundBase> LidClatterSound;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boiling Pot|State")
 	bool bStartBoiling = true;
@@ -119,14 +110,13 @@ protected:
 	float SteamHeightCm = 59.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Boiling Pot|Layout", meta = (ClampMin = "0.01", UIMin = "0.01"))
-	float SteamVisualScale = 0.18f;
+	float SteamVisualScale = 0.25f;
 
 private:
 	void ApplyPresentation();
 	void StartRattleBurst();
 	void FinishRattleBurst();
 	void ResetLidTransform();
-	void PlayLidClatter();
 	float GetRandomRange(float Minimum, float Maximum);
 
 	FTransform LidRestTransform = FTransform::Identity;
@@ -138,7 +128,6 @@ private:
 	float BurstLiftCm = 1.0f;
 	float BurstTiltDegrees = 3.0f;
 	int32 BurstHitCount = 3;
-	int32 LastPlayedHitIndex = INDEX_NONE;
 	bool bRattleBurstActive = false;
 	bool bBoiling = false;
 };
