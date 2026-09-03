@@ -1,1 +1,34 @@
-[]
+[
+  {
+    "quest_id": "demo_q1_water_intake_check",
+    "provider_id": "provider.mole",
+    "sort_order": 10,
+    "title_string_key": "quest.demo_q1.title",
+    "description_string_key": "quest.demo_q1.description",
+    "auto_track_on_accept": true,
+    "accept_presentation": [
+      {
+        "speaker_name_string_key": "quest.speaker.mole",
+        "dialogue_text_string_key": "quest.demo_q1.accept.line1"
+      },
+      {
+        "speaker_name_string_key": "quest.speaker.mole",
+        "dialogue_text_string_key": "quest.demo_q1.accept.line2"
+      }
+    ],
+    "objectives": [
+      {
+        "objective_id": "inspect_water_intake",
+        "type": "interaction_completed",
+        "text_string_key": "quest.demo_q1.objective.inspect",
+        "required_count": 1,
+        "interaction_event_id": "demo.water_intake.inspect",
+        "interaction_type": "world_progress"
+      }
+    ],
+    "rewards": {
+      "coins": 50,
+      "items": []
+    }
+  }
+]

@@ -25,3 +25,9 @@ quest.ui.button.locked,잠김,Locked,ロック中
 quest.ui.button.in_progress,진행 중,In Progress,進行中
 quest.ui.button.claim_reward,보상 받기,Claim Reward,報酬を受け取る
 quest.ui.button.completed,완료,Complete,完了
+quest.speaker.mole,두더지,Mole,モグラ
+quest.demo_q1.title,취수 시설 확인,Check the Water Intake Facility,取水施設を確認
+quest.demo_q1.description,외부 취수 시설을 확인하고 막힌 스크린의 원인을 조사하세요.,Check the external water intake facility and investigate the blocked screen.,外部の取水施設を確認し、詰まったスクリーンの原因を調べましょう
+quest.demo_q1.accept.line1,벙커에 물이 거의 안 나와. 취수 시설부터 살펴봐야겠어.,There's almost no water in the bunker. We should check the intake facility first.,バンカーの水がほとんど出ない。まず取水施設を見てこないと。
+quest.demo_q1.accept.line2,밖은 위험하니까 조심해. 이상한 게 보이면 바로 돌아와서 알려줘.,Be careful out there. If you find anything strange come right back and tell me.,外は危ないから気をつけて。変なものを見つけたら、すぐ戻って教えて。
+quest.demo_q1.objective.inspect,취수 시설 조사,Inspect the water intake facility,取水施設を調査
