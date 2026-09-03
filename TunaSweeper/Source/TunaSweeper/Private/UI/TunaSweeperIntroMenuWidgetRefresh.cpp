@@ -5,22 +5,29 @@
 
 void UTunaSweeperIntroMenuWidget::RefreshMainMenu()
 {
+	const bool bIsDemo = TunaSweeperBuildFlavor::IsDemo();
 	FTunaSweeperSaveSlotSummary Summary;
 	if (const UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GetGameInstance()))
 	{
 		Summary = TunaGameInstance->GetSaveSlotSummary(TunaGameInstance->GetActiveSaveSlotIndex());
 	}
 
+	if (CurrentSaveSlotBox)
+	{
+		CurrentSaveSlotBox->SetVisibility(bIsDemo
+			? ESlateVisibility::Collapsed
+			: ESlateVisibility::Visible);
+	}
 	if (CurrentSaveSlotText)
 	{
-		CurrentSaveSlotText->SetVisibility(TunaSweeperBuildFlavor::IsDemo()
+		CurrentSaveSlotText->SetVisibility(bIsDemo
 			? ESlateVisibility::Collapsed
 			: ESlateVisibility::HitTestInvisible);
 		CurrentSaveSlotText->SetText(BuildCurrentSaveSlotText(Summary.SaveSlotIndex));
 	}
 	if (SlotSelectButton)
 	{
-		SlotSelectButton->SetVisibility(TunaSweeperBuildFlavor::IsDemo()
+		SlotSelectButton->SetVisibility(bIsDemo
 			? ESlateVisibility::Collapsed
 			: ESlateVisibility::Visible);
 	}
@@ -33,7 +40,7 @@ void UTunaSweeperIntroMenuWidget::RefreshMainMenu()
 				FName(TEXT("ui.title.new_game")),
 				FText::FromString(TEXT("\uC0C8\uAC8C\uC784 \uC2DC\uC791"))));
 		}
-		else if (!Summary.bDifficultySelected && !TunaSweeperBuildFlavor::IsDemo())
+		else if (!Summary.bDifficultySelected && !bIsDemo)
 		{
 			StartButtonText->SetText(FText::FromString(TEXT("\uB09C\uC774\uB3C4 \uC120\uD0DD")));
 		}

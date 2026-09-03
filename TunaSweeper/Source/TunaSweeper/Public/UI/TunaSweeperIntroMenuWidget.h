@@ -63,6 +63,9 @@ protected:
 	TObjectPtr<UTextBlock> StartButtonText;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<USizeBox> CurrentSaveSlotBox;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
 	TObjectPtr<UTextBlock> CurrentSaveSlotText;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))

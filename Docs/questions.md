@@ -6477,3 +6477,23 @@ Unreal Engine 콘텐츠 리네임 후 남은 리다이렉터를 삭제하는 안
 ### 답변
 
 맞다. 이물질 제거는 `ProgressObjectId=demo.water_intake.blocked_screen`, 밸브 수리는 `ValveProgressObjectId=demo.water_intake.valve`라는 서로 다른 키로 해당 슬롯의 `WorldProgressStates`에 `Completed` 상태를 저장한다. 맵 재진입, 게임 재실행과 사망 후 복귀에서도 두 상태를 다시 읽어 복원하며, 새 게임이나 해당 세이브 슬롯 삭제 전까지 유지된다. Q1 조사는 월드 상태가 아니라 퀘스트 objective 진행으로만 저장된다.
+
+## 2026-09-03 16:35:30 (소요시간: 00:02:40)
+
+### 질문
+
+타이틀 메뉴의 계속하기 버튼 아래에 보이는 빈 칸이 데모의 단일 세이브 슬롯 정책 때문에 생기는지 문의.
+
+### 답변
+
+데모가 슬롯 1만 노출하는 정책과 관련은 있지만 의도된 표시 요소는 아니다. 현재 데모 분기에서 `CurrentSaveSlotText`와 `SlotSelectButton`은 `Collapsed`로 숨기지만, `CurrentSaveSlotText`를 감싸는 `CurrentSaveSlotBorder`와 `CurrentSaveSlotBox`는 그대로 남는다. 따라서 화면의 빈 테두리는 숨겨진 현재 슬롯 문구의 바깥 컨테이너가 남은 UI 잔여 공간이다.
+
+## 2026-09-03 16:38:20 (소요시간: 00:00:25)
+
+### 질문
+
+데모 타이틀 메뉴에서는 현재 세이브 슬롯 표시 영역 자체를 없애는 것이 맞는지 확인.
+
+### 답변
+
+맞다. 데모는 세이브 슬롯을 하나만 노출하고 선택 기능도 제공하지 않으므로 현재 슬롯 문구와 그 바깥 박스·테두리를 함께 `Collapsed` 처리하는 것이 맞다. 메인 빌드의 슬롯 표시 영역은 그대로 유지한다.
