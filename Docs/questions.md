@@ -6357,3 +6357,23 @@ Git 기준으로 블루 적 BP는 변경되지 않았고 `MI_Robot_Blue`와 부�
 ### 답변
 
 무방하다. 검정·흰색 배경 파생본과 체크무늬 미리보기는 단색 배경 원본에서 재생성할 수 있고 게임 런타임도 참조하지 않는다. 따라서 `Debug`만 무시하고 재생성 기준인 `Source`, 최종 투명 PNG인 `Split`, UE 런타임 에셋은 계속 추적하는 구성이 적절하다.
+
+## 2026-09-03 14:14:50 (소요시간: 00:01:45)
+
+### 질문
+
+인게임 콘솔 입력이 패키징된 빌드에서도 유효한지 문의.
+
+### 답변
+
+패키징 자체가 콘솔을 막는 것은 아니며 Development와 Debug 구성에서는 인게임 콘솔과 콘솔 명령을 사용할 수 있다. Test 구성도 일부 콘솔 명령을 지원하지만, 최종 배포용 Shipping 구성은 일반적으로 콘솔 명령과 통계·프로파일링 도구를 제거하므로 첨부 화면 같은 콘솔 입력창을 사용할 수 없다. 프로젝트의 `DefaultInput.ini`에는 `Tilde`가 콘솔 키로 등록되어 있지만 이는 키 매핑일 뿐 Shipping 제한을 해제하지 않는다.
+
+## 2026-09-03 14:17:15 (소요시간: 00:02:35)
+
+### 질문
+
+Development 빌드에서 월드 장면은 유지한 채 UI 렌더링만 끄는 콘솔 명령이 있는지 문의.
+
+### 답변
+
+UE 5.7 Development 빌드에서는 `Slate.GameLayer.ViewportSlotVisible 0`으로 `AddToViewport()`를 통해 등록된 UMG/Slate UI 레이어만 숨길 수 있고, `Slate.GameLayer.ViewportSlotVisible 1`로 복원할 수 있다. TunaSweeper UI는 주로 `AddToViewport()`를 사용하므로 이 명령이 적합하며 3D 장면과 별도 디버그 캔버스에 그려지는 콘솔은 유지된다. `showhud`는 `AHUD::bShowHUD`만 토글하므로 TunaSweeper의 UMG 전체를 숨기지는 못한다. 해당 Slate 명령은 Shipping과 Test 구성에서는 컴파일되지 않는다.
