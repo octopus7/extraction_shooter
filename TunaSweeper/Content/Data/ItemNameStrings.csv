@@ -105,4 +105,5 @@ item.replacement_valve_handle.desc,취수 시설의 부러진 밸브에 맞는 �
 item.waterproof_tape,방수 테이프,Waterproof Tape,防水テープ
 item.waterproof_tape.desc,벙커의 새는 배관을 임시로 막을 수 있는 두꺼운 방수 테이프다,Heavy waterproof tape that can temporarily seal a leaking bunker pipe,バンカーの水漏れする配管を一時的に塞げる厚手の防水テープだ
 container.lumber_crate,목재 상자,Lumber Crate,木材箱
-container.developer_crate,개발자의 상자,Developer Crate,Developer Crate
+container.developer_crate,개발상자,Developer Crate,開発箱
+container.north_crate,북쪽 상자,North Crate,北側の箱

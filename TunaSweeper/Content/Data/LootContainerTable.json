@@ -62,5 +62,13 @@
     "static_mesh_path": "/Engine/BasicShapes/Cube.Cube",
     "material_path": "/Game/Interaction/M_Container_Supply.M_Container_Supply",
     "mesh_scale": [1.0, 0.75, 0.5]
+  },
+  {
+    "id": 7009,
+    "name_string_key": "container.north_crate",
+    "capacity": 5,
+    "static_mesh_path": "/Engine/BasicShapes/Cube.Cube",
+    "material_path": "/Game/Interaction/M_Container_Wood.M_Container_Wood",
+    "mesh_scale": [0.95, 0.7, 0.48]
   }
 ]

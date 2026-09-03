@@ -61,7 +61,7 @@
   },
   {
     "id": 8007,
-    "memo_ko": "개발 확인용 풀세트: 주요 총기와 탄약, 근접무기, 전술장비, 설계도, 화폐",
+    "memo_ko": "개발상자: 주요 장비와 방수 테이프를 포함한 테스트용 풀세트",
     "items": [
       { "item_id": 1001, "quantity": 1 },
       { "item_id": 2001, "quantity": 100 },
@@ -79,7 +79,8 @@
       { "item_id": 2006, "quantity": 1 },
       { "item_id": 7001, "quantity": 1 },
       { "item_id": 7002, "quantity": 20 },
-      { "item_id": 7003, "quantity": 3 }
+      { "item_id": 7003, "quantity": 3 },
+      { "item_id": 6005, "quantity": 1 }
     ]
   },
   {
@@ -101,7 +102,9 @@
       { "item_id": 2021, "quantity": 30 },
       { "item_id": 2004, "quantity": 1, "drop_chance": 0.65 },
       { "item_id": 2006, "quantity": 1, "drop_chance": 0.45 },
-      { "item_id": 3003, "quantity": 1 }
+      { "item_id": 3003, "quantity": 1 },
+      { "item_id": 6004, "quantity": 1, "drop_chance": 0.2 },
+      { "item_id": 6005, "quantity": 1, "drop_chance": 0.2 }
     ]
   },
   {
@@ -125,6 +128,13 @@
       { "item_id": 2001, "quantity": 64 },
       { "item_id": 2011, "quantity": 32 },
       { "item_id": 4003, "quantity": 1 }
+    ]
+  },
+  {
+    "id": 8012,
+    "memo_ko": "북쪽 상자 확정 획득: 교체용 밸브 손잡이",
+    "items": [
+      { "item_id": 6004, "quantity": 1 }
     ]
   }
 ]

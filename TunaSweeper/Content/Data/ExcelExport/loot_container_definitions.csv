@@ -7,3 +7,4 @@
 5,7006,container.rifle_ammo_box,5,/Engine/BasicShapes/Cube.Cube,/Game/Interaction/M_Container_Metal.M_Container_Metal,1.15,0.72,0.45
 6,7007,container.lumber_crate,5,/Engine/BasicShapes/Cube.Cube,/Game/Interaction/M_Container_Wood.M_Container_Wood,0.95,0.7,0.48
 7,7008,container.developer_crate,24,/Engine/BasicShapes/Cube.Cube,/Game/Interaction/M_Container_Supply.M_Container_Supply,1,0.75,0.5
+8,7009,container.north_crate,5,/Engine/BasicShapes/Cube.Cube,/Game/Interaction/M_Container_Wood.M_Container_Wood,0.95,0.7,0.48
