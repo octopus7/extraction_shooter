@@ -916,6 +916,7 @@ bool ConfigureEditorMapCaptureActorInstance(AActor* Actor, bool bAutoDetectBound
 bool PlaceEditorMapCaptureActorInRaidMap(UBlueprint* MapCaptureBlueprint);
 bool EnsureEditorMapCaptureBlueprintAndRaidPlacement();
 bool EnsureResearchSinkInteractionBlueprint();
+bool EnsureCrowbarWallRackBlueprint();
 bool EnsureOpeningScenarioMap();
 bool EnsureOpeningScenarioPresentationSetup();
 bool PlacePickupItemActor(UWorld* World, UBlueprint* ActorBlueprint, const FString& ActorLabel, const FVector& Location, int32 ItemId);

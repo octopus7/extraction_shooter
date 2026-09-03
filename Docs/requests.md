@@ -7698,3 +7698,9 @@
 ## 2026-09-03 17:38:30 (소요시간: 00:01:00)
 
 - 두더지 임시 시각 구조를 단일 `DummyMesh`와 향후 `SkeletalMesh` 자리로 정리한 구현·BP 재저장·문서·자동화 테스트를 하나의 Git 커밋으로 정리했다.
+
+## 2026-09-03 17:49:59 (소요시간: 00:07:45)
+
+- 벙커에 배치할 `BP_CrowbarWallRack`을 추가하고, 비어 있는 `PedestalMesh`·`CrowbarMesh` 두 스태틱 메시 컴포넌트와 상호작용 컴포넌트로 구성했다.
+- 크로우바(ID 6003)를 보유하지 않았고 취수시설 이물질 제거 진행 키 `demo.water_intake.blocked_screen`이 완료되지 않았을 때만 획득할 수 있게 했다. 획득 후에는 크로우바 메시와 상호작용만 즉시 숨기며 액터 자체의 획득 상태는 저장하지 않는다.
+- UE 5.7 에디터 전체 빌드·링크와 `TunaSweeper.Interaction.CrowbarWallRack.Defaults` 자동화 테스트가 성공했다.

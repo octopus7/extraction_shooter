@@ -7,6 +7,7 @@
 #include "Character/TunaSweeperMoleCompanionActor.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "Interaction/TunaSweeperBlockedIntakeScreenActor.h"
+#include "Interaction/TunaSweeperCrowbarWallRackActor.h"
 #include "Interaction/TunaSweeperDifficultyAdjustmentActor.h"
 #include "../../TunaSweeperDebugRifleSupplyActor.h"
 #include "Interaction/TunaSweeperDoorActor.h"
@@ -588,6 +589,14 @@ bool UTunaSweeperInteractionSubsystem::HandleItemSpawnInteraction(
 	UTunaSweeperInteractableComponent* Interactable,
 	APawn* InstigatorPawn)
 {
+	ATunaSweeperCrowbarWallRackActor* CrowbarWallRackActor = Interactable
+		? Cast<ATunaSweeperCrowbarWallRackActor>(Interactable->GetOwner())
+		: nullptr;
+	if (CrowbarWallRackActor)
+	{
+		return CrowbarWallRackActor->SupplyCrowbar(InstigatorPawn);
+	}
+
 	ATunaSweeperDebugRifleSupplyActor* DebugSupplyActor = Interactable
 		? Cast<ATunaSweeperDebugRifleSupplyActor>(Interactable->GetOwner())
 		: nullptr;
