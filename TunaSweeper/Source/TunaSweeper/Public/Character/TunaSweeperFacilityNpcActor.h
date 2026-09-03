@@ -10,7 +10,7 @@ class UStaticMesh;
 class UStaticMeshComponent;
 class UTunaSweeperInteractableComponent;
 class UTunaSweeperInteractionMarkerWidget;
-class UWidgetComponent;
+class UTunaSweeperQuestMarkerComponent;
 
 UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API ATunaSweeperFacilityNpcActor : public AActor
@@ -57,8 +57,8 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Interaction")
 	TObjectPtr<UTunaSweeperInteractableComponent> QuestInteractableComponent;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Interaction")
-	TObjectPtr<UWidgetComponent> QuestNoticeWidgetComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Quest Marker")
+	TObjectPtr<UTunaSweeperQuestMarkerComponent> QuestMarkerComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Facility NPC")
 	FName NpcId = TEXT("npc.facility");

@@ -4,7 +4,7 @@
 #include "Components/SceneComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
-#include "Components/WidgetComponent.h"
+#include "Component/TunaSweeperQuestMarkerComponent.h"
 #include "Engine/GameInstance.h"
 #include "Engine/StaticMesh.h"
 #include "Engine/World.h"
@@ -12,7 +12,6 @@
 #include "Kismet/GameplayStatics.h"
 #include "Materials/MaterialInterface.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
-#include "UI/TunaSweeperQuestNoticeWidget.h"
 #include "UObject/ConstructorHelpers.h"
 
 ATunaSweeperMoleCompanionActor::ATunaSweeperMoleCompanionActor()
@@ -79,17 +78,11 @@ ATunaSweeperMoleCompanionActor::ATunaSweeperMoleCompanionActor()
 	QuestInteractableComponent->SetInteractionOrder(1);
 	QuestInteractableComponent->bEditableWhenInherited = true;
 
-	QuestNoticeWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("QuestNoticeWidget"));
-	QuestNoticeWidgetComponent->SetupAttachment(SceneRoot);
-	QuestNoticeWidgetComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 190.0f));
-	QuestNoticeWidgetComponent->SetWidgetSpace(EWidgetSpace::Screen);
-	QuestNoticeWidgetComponent->SetWidgetClass(UTunaSweeperQuestNoticeWidget::StaticClass());
-	QuestNoticeWidgetComponent->SetDrawSize(FVector2D(56.0f, 56.0f));
-	QuestNoticeWidgetComponent->SetPivot(FVector2D(0.5f, 0.5f));
-	QuestNoticeWidgetComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	QuestNoticeWidgetComponent->SetVisibility(false);
-	QuestNoticeWidgetComponent->SetHiddenInGame(false);
-	QuestNoticeWidgetComponent->bEditableWhenInherited = true;
+	QuestMarkerComponent = CreateDefaultSubobject<UTunaSweeperQuestMarkerComponent>(TEXT("QuestMarker"));
+	QuestMarkerComponent->SetupAttachment(SceneRoot);
+	QuestMarkerComponent->SetMarkerHeight(190.0f);
+	QuestMarkerComponent->SetVisibility(false, true);
+	QuestMarkerComponent->bEditableWhenInherited = true;
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> MoleDummyMesh(
 		TEXT("/Game/Characters/NPC/Mole/SM_MoleDummy.SM_MoleDummy"));
@@ -238,9 +231,9 @@ void ATunaSweeperMoleCompanionActor::RefreshCompanionVisuals()
 
 void ATunaSweeperMoleCompanionActor::RefreshQuestNoticeVisibility()
 {
-	if (QuestNoticeWidgetComponent)
+	if (QuestMarkerComponent)
 	{
-		QuestNoticeWidgetComponent->SetVisibility(ShouldShowQuestNotice());
+		QuestMarkerComponent->SetVisibility(ShouldShowQuestNotice(), true);
 	}
 }
 

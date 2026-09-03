@@ -3,13 +3,12 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/SceneComponent.h"
 #include "Components/StaticMeshComponent.h"
-#include "Components/WidgetComponent.h"
+#include "Component/TunaSweeperQuestMarkerComponent.h"
 #include "Engine/GameInstance.h"
 #include "Engine/StaticMesh.h"
 #include "Engine/World.h"
 #include "Interaction/TunaSweeperInteractableComponent.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
-#include "UI/TunaSweeperQuestNoticeWidget.h"
 #include "UObject/ConstructorHelpers.h"
 
 ATunaSweeperFacilityNpcActor::ATunaSweeperFacilityNpcActor()
@@ -58,16 +57,10 @@ ATunaSweeperFacilityNpcActor::ATunaSweeperFacilityNpcActor()
 		InteractionMarkerWidgetClass,
 		FName(TEXT("ui.quest.interaction_name")));
 
-	QuestNoticeWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("QuestNoticeWidget"));
-	QuestNoticeWidgetComponent->SetupAttachment(SceneRoot);
-	QuestNoticeWidgetComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 214.0f));
-	QuestNoticeWidgetComponent->SetWidgetSpace(EWidgetSpace::Screen);
-	QuestNoticeWidgetComponent->SetWidgetClass(UTunaSweeperQuestNoticeWidget::StaticClass());
-	QuestNoticeWidgetComponent->SetDrawSize(FVector2D(56.0f, 56.0f));
-	QuestNoticeWidgetComponent->SetPivot(FVector2D(0.5f, 0.5f));
-	QuestNoticeWidgetComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	QuestNoticeWidgetComponent->SetVisibility(false);
-	QuestNoticeWidgetComponent->SetHiddenInGame(false);
+	QuestMarkerComponent = CreateDefaultSubobject<UTunaSweeperQuestMarkerComponent>(TEXT("QuestMarker"));
+	QuestMarkerComponent->SetupAttachment(SceneRoot);
+	QuestMarkerComponent->SetMarkerHeight(214.0f);
+	QuestMarkerComponent->SetVisibility(false, true);
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> CylinderMeshFinder(TEXT("/Engine/BasicShapes/Cylinder.Cylinder"));
 	if (CylinderMeshFinder.Succeeded())
@@ -178,9 +171,9 @@ FName ATunaSweeperFacilityNpcActor::ResolveQuestId() const
 
 void ATunaSweeperFacilityNpcActor::RefreshQuestNoticeVisibility()
 {
-	if (QuestNoticeWidgetComponent)
+	if (QuestMarkerComponent)
 	{
-		QuestNoticeWidgetComponent->SetVisibility(ShouldShowQuestNotice());
+		QuestMarkerComponent->SetVisibility(ShouldShowQuestNotice(), true);
 	}
 }
 

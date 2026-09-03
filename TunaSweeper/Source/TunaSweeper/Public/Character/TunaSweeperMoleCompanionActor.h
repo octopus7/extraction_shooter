@@ -12,7 +12,7 @@ class UStaticMesh;
 class UStaticMeshComponent;
 class UTunaSweeperInteractableComponent;
 class UTunaSweeperInteractionMarkerWidget;
-class UWidgetComponent;
+class UTunaSweeperQuestMarkerComponent;
 
 UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API ATunaSweeperMoleCompanionActor : public AActor
@@ -67,8 +67,8 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mole Companion|Interaction", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UTunaSweeperInteractableComponent> QuestInteractableComponent;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mole Companion|Interaction", meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UWidgetComponent> QuestNoticeWidgetComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mole Companion|Quest Marker", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UTunaSweeperQuestMarkerComponent> QuestMarkerComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mole Companion", meta = (AllowPrivateAccess = "true"))
 	FName CompanionId = TEXT("BunkerMole");
