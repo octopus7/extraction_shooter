@@ -5,6 +5,7 @@
 #include "Misc/PackageName.h"
 #include "Misc/Paths.h"
 #include "Settings/TunaSweeperBuildFlavor.h"
+#include "Settings/TunaSweeperBuildTargetSettings.h"
 #include "ToolMenus.h"
 
 #define LOCTEXT_NAMESPACE "TunaSweeperLevelOpenTool"
@@ -72,6 +73,19 @@ void FTunaSweeperLevelOpenTool::RegisterMenus()
 		LOCTEXT("OpenLevelSubMenu", "Open Level"),
 		LOCTEXT("OpenLevelSubMenuTooltip", "Open a TunaSweeper level in the editor."),
 		FNewToolMenuChoice(FNewToolMenuDelegate::CreateRaw(this, &FTunaSweeperLevelOpenTool::PopulateOpenLevelMenu)));
+	FToolMenuEntry& UseBoxRaidLevelEntry = Section.AddMenuEntry(
+		TEXT("UseBoxRaidLevel"),
+		LOCTEXT("UseBoxRaidLevel", "Use Box Raid Level"),
+		LOCTEXT("UseBoxRaidLevelTooltip", "Use DemoBoxRaidMap instead of DemoRaidMap for demo targets."),
+		FSlateIcon(),
+		FUIAction(
+			FExecuteAction::CreateRaw(this, &FTunaSweeperLevelOpenTool::ToggleUseBoxRaidLevel),
+			FCanExecuteAction::CreateRaw(this, &FTunaSweeperLevelOpenTool::CanToggleUseBoxRaidLevel),
+			FIsActionChecked::CreateRaw(this, &FTunaSweeperLevelOpenTool::IsUsingBoxRaidLevel)),
+		EUserInterfaceActionType::ToggleButton);
+	UseBoxRaidLevelEntry.InsertPosition = FToolMenuInsert(
+		TEXT("OpenLevel"),
+		EToolMenuInsertType::After);
 }
 
 void FTunaSweeperLevelOpenTool::PopulateOpenLevelMenu(UToolMenu* Menu)
@@ -113,6 +127,32 @@ void FTunaSweeperLevelOpenTool::OpenLevel(FString MapPackagePath) const
 	}
 
 	UEditorLoadingAndSavingUtils::LoadMap(MapFilename);
+}
+
+void FTunaSweeperLevelOpenTool::ToggleUseBoxRaidLevel()
+{
+	if (!CanToggleUseBoxRaidLevel())
+	{
+		return;
+	}
+
+	UTunaSweeperBuildTargetSettings* Settings = GetMutableDefault<UTunaSweeperBuildTargetSettings>();
+	Settings->bUseBoxRaidLevel = !Settings->bUseBoxRaidLevel;
+	Settings->UpdateSinglePropertyInConfigFile(
+		Settings->GetClass()->FindPropertyByName(
+			GET_MEMBER_NAME_CHECKED(UTunaSweeperBuildTargetSettings, bUseBoxRaidLevel)),
+		Settings->GetDefaultConfigFilename());
+}
+
+bool FTunaSweeperLevelOpenTool::CanToggleUseBoxRaidLevel() const
+{
+	return TunaSweeperBuildFlavor::IsDemo();
+}
+
+bool FTunaSweeperLevelOpenTool::IsUsingBoxRaidLevel() const
+{
+	const UTunaSweeperBuildTargetSettings* Settings = GetDefault<UTunaSweeperBuildTargetSettings>();
+	return TunaSweeperBuildFlavor::IsDemo() && Settings && Settings->bUseBoxRaidLevel;
 }
 
 #undef LOCTEXT_NAMESPACE

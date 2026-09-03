@@ -24,6 +24,10 @@ public:
 	UPROPERTY(config)
 	ETunaSweeperBuildTarget BuildTarget = ETunaSweeperBuildTarget::NoStoreFull;
 
+	/** Selects the lightweight box raid map for demo targets only. */
+	UPROPERTY(config)
+	bool bUseBoxRaidLevel = false;
+
 	FString GetDistributionChannel() const;
 	bool IsDemoBuild() const;
 };

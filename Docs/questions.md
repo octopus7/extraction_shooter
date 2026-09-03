@@ -6377,3 +6377,23 @@ Development 빌드에서 월드 장면은 유지한 채 UI 렌더링만 끄는 �
 ### 답변
 
 UE 5.7 Development 빌드에서는 `Slate.GameLayer.ViewportSlotVisible 0`으로 `AddToViewport()`를 통해 등록된 UMG/Slate UI 레이어만 숨길 수 있고, `Slate.GameLayer.ViewportSlotVisible 1`로 복원할 수 있다. TunaSweeper UI는 주로 `AddToViewport()`를 사용하므로 이 명령이 적합하며 3D 장면과 별도 디버그 캔버스에 그려지는 콘솔은 유지된다. `showhud`는 `AHUD::bShowHUD`만 토글하므로 TunaSweeper의 UMG 전체를 숨기지는 못한다. 해당 Slate 명령은 Shipping과 Test 구성에서는 컴파일되지 않는다.
+
+## 2026-09-03 14:21:20 (소요시간: 00:00:50)
+
+### 질문
+
+현재 레이드 레벨 이름이 `RaidDemo`인지 문의.
+
+### 답변
+
+아니다. 데모 레이드의 실제 레벨 에셋 이름은 `DemoRaidMap`이며 경로는 `/Game/Maps/DemoRaidMap`이다. 정식·메인 레이드 에셋은 `RaidMap`이며 경로는 `/Game/MainRaid/RaidMap`이다. 런타임에서는 논리 이름 `RaidMap`이나 `DemoRaidMap`이 빌드 flavor에 맞는 실제 레이드 레벨로 해석되므로 데모 빌드에서는 `DemoRaidMap`으로 이동한다. `RaidDemo`라는 이름은 현재 설정과 소스에서 사용되지 않는다.
+
+## 2026-09-03 14:22:30 (소요시간: 00:03:30)
+
+### 질문
+
+빠른 테스트용 박스 레이드 맵 `DemoBoxRaidMap`을 기본 레벨 템플릿으로 만들고 기존 `DemoRaidMap` 대신 연결할 때 레벨 자체에 필요한 조건이 있는지 문의.
+
+### 답변
+
+기본 템플릿으로 시작할 수 있다. 현재 생성된 `DemoBoxRaidMap.umap`에는 바닥과 조명·하늘, `PlayerStart`가 있어 캐릭터 스폰과 기본 이동 테스트에는 충분하다. 다만 새 맵을 실제 데모 레이드 역할로 쓰려면 빌드 flavor의 레이드 레벨 이름과 별칭, Demo·NoStoreDemo·StoveDemo의 `MapsToCook`, 관련 자동화 테스트를 `DemoBoxRaidMap` 기준으로 갱신해야 한다. 적 AI가 필요하면 `NavMeshBoundsVolume`을 추가하고, 현재 `EnemySpawns.json`의 `DemoRaidMap`/`placement_id: 1` 행을 새 맵 이름으로 옮긴 뒤 동일 ID와 Enemy 종류의 `BP_RaidPlacementAnchor`를 배치해야 한다. 레이드 종료가 필요하면 벙커로 돌아가는 레벨 이동 또는 탈출 액터도 별도로 배치해야 한다. 미니맵은 기존 레이드 정의가 논리적으로 매칭될 수 있지만 캡처 범위와 텍스처가 새 박스 맵과 맞지 않으므로 미니맵까지 시험할 때만 새로 캡처·정의하면 된다.

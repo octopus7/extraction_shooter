@@ -5,9 +5,7 @@
 #include "Misc/Paths.h"
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
-#if WITH_EDITOR
 #include "Settings/TunaSweeperBuildTargetSettings.h"
-#endif
 
 namespace TunaSweeperBuildFlavor
 {
@@ -15,6 +13,8 @@ namespace TunaSweeperBuildFlavor
 	{
 		constexpr const TCHAR* MainPayloadManifestName = TEXT("main-payload.json");
 		constexpr const TCHAR* MainRaidLevelPath = TEXT("/Game/MainRaid/RaidMap");
+		constexpr const TCHAR* DemoRaidLevelName = TEXT("DemoRaidMap");
+		constexpr const TCHAR* DemoBoxRaidLevelName = TEXT("DemoBoxRaidMap");
 
 		FString GetPublicDataPath(const TCHAR* FileName)
 		{
@@ -174,7 +174,10 @@ namespace TunaSweeperBuildFlavor
 	{
 		if (IsDemo())
 		{
-			return FName(TEXT("DemoRaidMap"));
+			const UTunaSweeperBuildTargetSettings* Settings = GetDefault<UTunaSweeperBuildTargetSettings>();
+			return FName(Settings && Settings->bUseBoxRaidLevel
+				? DemoBoxRaidLevelName
+				: DemoRaidLevelName);
 		}
 
 		FString ManifestText;
@@ -199,7 +202,9 @@ namespace TunaSweeperBuildFlavor
 	FName ResolveGameplayLevelName(FName LevelName)
 	{
 		const FString Normalized = NormalizeLevelName(LevelName);
-		if (Normalized == TEXT("RaidMap") || Normalized == TEXT("DemoRaidMap"))
+		if (Normalized == TEXT("RaidMap") ||
+			Normalized == DemoRaidLevelName ||
+			Normalized == DemoBoxRaidLevelName)
 		{
 			return GetRaidGameplayLevelName();
 		}

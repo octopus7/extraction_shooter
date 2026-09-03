@@ -7647,3 +7647,14 @@
 ## 2026-09-03 14:20:30 (소요시간: 00:01:00)
 
 - 패키징 빌드의 콘솔 지원 여부와 Development 빌드에서 UI 레이어만 숨기는 명령에 관한 질의응답 기록을 Git 커밋으로 정리했다.
+
+## 2026-09-03 14:26:00 (소요시간: 00:35:44)
+
+- 최상위 `TunaSweeper` 메뉴의 `Open Level` 바로 아래에 `Use Box Raid Level` 체크 항목을 추가했다. 현재 편집기 빌드 타깃이 Demo일 때만 조작·체크 표시가 유효하며 선택 상태는 Game 기본 설정에 저장된다.
+- Demo에서 체크하면 논리적 레이드 레벨과 `Open Level > Raid`가 `DemoBoxRaidMap`, 해제하면 `DemoRaidMap`을 사용하도록 연결했다. Full 빌드는 체크 상태와 무관하게 `/Game/MainRaid/RaidMap`을 유지한다.
+- Demo·NoStoreDemo·StoveDemo cook 목록에 두 데모 레이드 맵을 모두 포함하고, 레이드 배치 데이터의 논리적 레벨 별칭도 현재 선택된 데모 레이드로 해석되도록 맞췄다.
+- 체크 해제·체크·Full 비영향 경로와 두 맵 에셋 존재 여부를 자동화 테스트에 추가했다. UE 5.7 `TunaSweeperEditor Win64 Development` 전체 빌드와 DLL 링크가 성공했고 `TunaSweeper.BuildFlavor.Paths` 테스트도 통과한 뒤 프로젝트를 에디터로 다시 열었다. 별도 Demo 실행 타깃 빌드 시도는 기존 `TunaSweeperSpeechBubbleTests.cpp`의 에디터 전용 텍스처 소스 접근 오류로 중단됐지만 이번 변경 소스의 Editor 타깃 컴파일과 테스트에는 영향이 없었다.
+
+## 2026-09-03 15:26:40 (소요시간: 00:02:10)
+
+- `Use Box Raid Level` 전환 기능과 `DemoBoxRaidMap`, 해당 맵이 사용하는 프로토타입 텍스처·머티리얼 및 관련 문서 변경을 하나의 Git 커밋으로 정리했다.

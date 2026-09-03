@@ -23,8 +23,10 @@ bool FTunaSweeperBuildFlavorPathTest::RunTest(const FString& Parameters)
 
 	UTunaSweeperBuildTargetSettings* Settings = GetMutableDefault<UTunaSweeperBuildTargetSettings>();
 	const ETunaSweeperBuildTarget OriginalTarget = Settings->BuildTarget;
+	const bool bOriginalUseBoxRaidLevel = Settings->bUseBoxRaidLevel;
 
 	Settings->BuildTarget = ETunaSweeperBuildTarget::NoStoreDemo;
+	Settings->bUseBoxRaidLevel = false;
 	TestTrue(TEXT("Demo target is Demo flavor"), TunaSweeperBuildFlavor::IsDemo());
 	TestEqual(TEXT("Demo flavor name"), TunaSweeperBuildFlavor::GetName(), FName(TEXT("Demo")));
 	TestTrue(
@@ -53,6 +55,19 @@ bool FTunaSweeperBuildFlavorPathTest::RunTest(const FString& Parameters)
 		TEXT("DemoRaidMap asset exists"),
 		FPaths::FileExists(FPaths::Combine(FPaths::ProjectContentDir(), TEXT("Maps/DemoRaidMap.umap"))));
 
+	Settings->bUseBoxRaidLevel = true;
+	TestEqual(
+		TEXT("Demo box raid option uses DemoBoxRaidMap"),
+		TunaSweeperBuildFlavor::GetRaidGameplayLevelName(),
+		FName(TEXT("DemoBoxRaidMap")));
+	TestEqual(
+		TEXT("Logical RaidMap resolves to the selected demo box raid role"),
+		TunaSweeperBuildFlavor::ResolveGameplayLevelName(FName(TEXT("RaidMap"))),
+		FName(TEXT("DemoBoxRaidMap")));
+	TestTrue(
+		TEXT("DemoBoxRaidMap asset exists"),
+		FPaths::FileExists(FPaths::Combine(FPaths::ProjectContentDir(), TEXT("Maps/DemoBoxRaidMap.umap"))));
+
 	Settings->BuildTarget = ETunaSweeperBuildTarget::NoStoreFull;
 	TestFalse(TEXT("Full target is Main flavor"), TunaSweeperBuildFlavor::IsDemo());
 	TestEqual(TEXT("Main flavor name"), TunaSweeperBuildFlavor::GetName(), FName(TEXT("Main")));
@@ -67,6 +82,10 @@ bool FTunaSweeperBuildFlavorPathTest::RunTest(const FString& Parameters)
 	TestFalse(
 		TEXT("Main raid role is not the Demo raid map"),
 		TunaSweeperBuildFlavor::GetRaidGameplayLevelName() == FName(TEXT("DemoRaidMap")));
+	TestEqual(
+		TEXT("Full target ignores the demo box raid option"),
+		TunaSweeperBuildFlavor::GetRaidGameplayLevelName(),
+		FName(TEXT("/Game/MainRaid/RaidMap")));
 	TestFalse(
 		TEXT("Main placement data does not use the Demo public placement file"),
 		TunaSweeperBuildFlavor::GetRuntimePlacementDataPath(TEXT("EnemySpawns.json"))
@@ -79,6 +98,7 @@ bool FTunaSweeperBuildFlavorPathTest::RunTest(const FString& Parameters)
 		TunaSweeperBuildFlavor::GetScenarioTextStringsPath().EndsWith(TEXT("Content/Data/ScenarioTextStrings.csv")));
 
 	Settings->BuildTarget = OriginalTarget;
+	Settings->bUseBoxRaidLevel = bOriginalUseBoxRaidLevel;
 	return true;
 }
 

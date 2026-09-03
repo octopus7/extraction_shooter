@@ -14,4 +14,7 @@ private:
 	void RegisterMenus();
 	void PopulateOpenLevelMenu(UToolMenu* Menu);
 	void OpenLevel(FString MapPackagePath) const;
+	void ToggleUseBoxRaidLevel();
+	bool CanToggleUseBoxRaidLevel() const;
+	bool IsUsingBoxRaidLevel() const;
 };

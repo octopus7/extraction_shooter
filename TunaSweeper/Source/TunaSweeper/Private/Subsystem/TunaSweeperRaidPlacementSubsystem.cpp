@@ -470,7 +470,10 @@ FString UTunaSweeperRaidPlacementSubsystem::GetLootPlacementsJsonPath() const { 
 
 bool UTunaSweeperRaidPlacementSubsystem::DoesLevelIdMatchWorld(FName LevelId, const UWorld* World) const
 {
-	return World && !LevelId.IsNone() && TunaSweeperRaidPlacement::NormalizeLevelId(LevelId) == TunaSweeperRaidPlacement::NormalizeLevelId(FName(*World->GetMapName()));
+	return World &&
+		!LevelId.IsNone() &&
+		TunaSweeperRaidPlacement::NormalizeLevelId(TunaSweeperBuildFlavor::ResolveGameplayLevelName(LevelId)) ==
+			TunaSweeperRaidPlacement::NormalizeLevelId(FName(*World->GetMapName()));
 }
 
 bool UTunaSweeperRaidPlacementSubsystem::DoesSpawnConditionPass(FName ConditionId, const FString& DebugId) const
