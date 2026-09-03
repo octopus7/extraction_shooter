@@ -6397,3 +6397,43 @@ UE 5.7 Development 빌드에서는 `Slate.GameLayer.ViewportSlotVisible 0`으로
 ### 답변
 
 기본 템플릿으로 시작할 수 있다. 현재 생성된 `DemoBoxRaidMap.umap`에는 바닥과 조명·하늘, `PlayerStart`가 있어 캐릭터 스폰과 기본 이동 테스트에는 충분하다. 다만 새 맵을 실제 데모 레이드 역할로 쓰려면 빌드 flavor의 레이드 레벨 이름과 별칭, Demo·NoStoreDemo·StoveDemo의 `MapsToCook`, 관련 자동화 테스트를 `DemoBoxRaidMap` 기준으로 갱신해야 한다. 적 AI가 필요하면 `NavMeshBoundsVolume`을 추가하고, 현재 `EnemySpawns.json`의 `DemoRaidMap`/`placement_id: 1` 행을 새 맵 이름으로 옮긴 뒤 동일 ID와 Enemy 종류의 `BP_RaidPlacementAnchor`를 배치해야 한다. 레이드 종료가 필요하면 벙커로 돌아가는 레벨 이동 또는 탈출 액터도 별도로 배치해야 한다. 미니맵은 기존 레이드 정의가 논리적으로 매칭될 수 있지만 캡처 범위와 텍스처가 새 박스 맵과 맞지 않으므로 미니맵까지 시험할 때만 새로 캡처·정의하면 된다.
+
+## 2026-09-03 15:29:10 (소요시간: 00:01:10)
+
+### 질문
+
+`DemoBoxRaidMap`에 배치할 취수시설 Blueprint가 기존에 만들어져 있는지 문의.
+
+### 답변
+
+기존 배치용 Blueprint는 `/Game/Interaction/BP_WorldProgress_BlockedIntakeScreen`이다. 이 BP는 `ATunaSweeperBlockedIntakeScreenActor`를 부모로 사용하며 기본 외형으로 `/Game/Meshes/Props/WaterIntake/SM_SKM_WaterIntake`를 연결한다. 단순 장식물이 아니라 이물질 제거 상호작용, 퀘스트 objective event, `WorldProgressStates` 저장·복원 기능이 포함되어 있다. 현재 막힘 전·후 메시가 같은 취수시설 메시로 설정되어 있으므로 외형 변화가 필요하면 `BlockedScreenMesh`와 `ClearedScreenMesh`를 별도로 지정해야 한다.
+
+## 2026-09-03 15:30:30 (소요시간: 00:03:11)
+
+### 질문
+
+현재 데모 퀘스트 상호작용을 위해 레벨과 런타임 데이터에 반드시 존재해야 하는 항목의 목록을 요청.
+
+### 답변
+
+Q1~Q4 설계 흐름을 실제 플레이로 완주하려면 벙커의 퀘스트 제공자 `BP_Mole`, 레이드 왕복용 레벨 이동 또는 탈출 액터, 취수시설 조사·막힌 스크린 청소·밸브 수리·벙커 배관 수리·참치캔 전달 상호작용, 그리고 크로우바(6003)·교체용 밸브 손잡이(6004)·방수 테이프(6005)·참치캔(3004)의 획득원이 필요하다. 현재 `BP_WorldProgress_BlockedIntakeScreen`과 공용 `BP_PickupItem`, 레벨 이동 BP, 아이템 정의는 존재하지만 조사·밸브 수리·배관 수리·참치캔 전달용 전용 상호작용은 없으며 `DemoBoxRaidMap`에는 이들 퀘스트 액터가 하나도 배치되지 않았다. 벙커에는 Raid 방향 레벨 이동 BP만 직접 배치되어 있고 `BP_Mole`은 직접 배치되지 않았으며 `BunkerCharacterSpawns.json`도 비어 있다. 또한 공개 `QuestDefinitions.json`과 데모 전용 퀘스트 문자열이 비어 있어 월드 배치만으로는 퀘스트가 활성화되지 않는다. 기존 취수 스크린 액터의 이벤트 ID `demo.water_intake.screen_clear`도 과거 제거된 퀘스트 정의의 `interaction.demo.water_screen.clear`와 달라 새 퀘스트 데이터를 작성할 때 하나로 통일해야 한다.
+
+## 2026-09-03 15:38:30 (소요시간: 00:01:03)
+
+### 질문
+
+취수시설을 상시 유지되는 펌프·조작 패널과 상태에 따라 보이거나 사라지는 스크린 이물질의 두 부분으로 구성하고, 전체 메시 교체 대신 이물질만 토글하는 구조가 적절한지 문의.
+
+### 답변
+
+그 구조가 더 적절하다. 하나의 취수시설 BP 안에 펌프·패널·스크린 프레임을 담당하는 상시 `FacilityMesh`와 별도 `DebrisMesh` 컴포넌트를 두고, 제거 완료 시 `DebrisMesh`의 표시와 충돌만 비활성화하면 시설 transform과 상호작용 위치가 유지되고 상태 표현도 명확해진다. 기존 `BlockedScreenMesh`/`ClearedScreenMesh` 전체 교체 방식은 제거하고, 저장된 `bScreenCleared` 상태와 에디터 미리보기 값으로 이물질 표시를 제어하는 편이 좋다. 향후 조사·청소·밸브 수리의 논리 단계는 시설 액터의 별도 진행 상태로 관리하되, 외형 변화는 필요한 컴포넌트에만 적용하는 구조가 확장성도 높다.
+
+## 2026-09-03 15:41:10 (소요시간: 00:01:00)
+
+### 질문
+
+취수시설의 Q1 조사 및 Q3 밸브 수리 상호작용 마커가 퀘스트 진행 상황에 따라 활성화되는지 문의.
+
+### 답변
+
+현재 일반 상호작용 마커는 퀘스트 진행 상황에 따라 자동 활성화되지 않는다. `UTunaSweeperInteractableComponent`는 상호작용 타입이 `None`이 아닌지, 소유 액터가 표시 중인지, 상호작용 서브시스템이 허용하는지와 플레이어가 표시 거리 안에 있는지만 검사한다. 퀘스트 서브시스템은 완료 이벤트를 받은 뒤 현재 `Accepted` 상태인 목표만 진행시킬 뿐 마커를 선제적으로 차단하지 않는다. 따라서 Q1과 Q3 시설 상호작용은 해당 퀘스트가 `Accepted`이고 대상 목표가 미완료일 때만 컴포넌트의 타입·이벤트·위치를 활성화하고, 그 외에는 `InteractionType=None`으로 두도록 시설 액터가 `OnQuestProgressChanged`를 구독해 갱신해야 한다. 퀘스트 제공자 두더지의 알림 표시는 이미 퀘스트 상태를 기준으로 동작한다.
