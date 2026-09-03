@@ -7658,3 +7658,14 @@
 ## 2026-09-03 15:26:40 (소요시간: 00:02:10)
 
 - `Use Box Raid Level` 전환 기능과 `DemoBoxRaidMap`, 해당 맵이 사용하는 프로토타입 텍스처·머티리얼 및 관련 문서 변경을 하나의 Git 커밋으로 정리했다.
+
+## 2026-09-03 15:45:45 (소요시간: 00:48:33)
+
+- 리네임된 `/Game/Interaction/BP_WaterIntake`, `/Game/Meshes/Props/WaterIntake/SM_WaterIntake`, `/Game/Environment/Water/SM_WaterIntakeScreen`을 기준으로 취수시설 부모 액터를 상시 시설 메시, 상시 스크린 메시와 별도 토글형 `DebrisMesh` 컴포넌트 구조로 변경하고 BP에서 `SM_ScreenDebris`를 연결했다.
+- Q1 조사, Q2 크로우바를 이용한 이물질 제거, Q3-1 교체용 밸브 손잡이 설치가 각각 해당 퀘스트의 `Accepted`·미완료 목표일 때만 하나의 상호작용 마커로 활성화되도록 하고, 퀘스트 진행 변경 시 단계·이벤트·문구·위치를 즉시 갱신하도록 연결했다.
+- 이물질 제거와 밸브 수리를 별도 `WorldProgressStates` 항목으로 저장·복원하고, 제거 완료 시 시설 본체와 스크린은 유지하면서 별도 데브리 메시의 표시와 충돌만 비활성화하도록 했다.
+- `BP_WaterIntake` 부모·상시 시설/스크린 컴포넌트·`SM_ScreenDebris` 연결·리네임 메시 및 크로우바(6003)·밸브 손잡이(6004) 기본값을 검증하는 자동화 테스트를 추가했다. UE 5.7 `TunaSweeperEditor Win64 Development` 전체 빌드·링크와 초기 에셋 테스트가 성공했고, 최종 데브리 연결 기준으로 갱신한 테스트 소스도 에디터 실행 중 `-NoLink` 컴파일에 성공했다.
+
+## 2026-09-03 16:30:00 (소요시간: 00:04:30)
+
+- 사용자가 제작해 `BP_WaterIntake`의 `DebrisMesh`에 연결한 `SM_ScreenDebris`와 머티리얼·텍스처·원본 이미지·Blender 원본, 취수시설 BP·배치 맵·리다이렉터 참조 갱신 맵 및 퀘스트 단계별 취수시설 구현을 하나의 Git 커밋으로 정리했다.

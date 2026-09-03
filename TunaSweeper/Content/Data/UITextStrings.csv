@@ -137,6 +137,7 @@ ui.scenario.monologue4,전력 부족. 내부 시스템 불안정.,Power shortage
 ui.scenario.monologue5,그래도 움직일 수 있다.,Still able to move.,それでも動ける。
 ui.scenario.monologue6,먼저 이 장소를 확인해야 한다.,First I need to check this place.,まずこの場所を確認しなければならない。
 ui.interaction.default,상호작용,Interact,インタラクト
+ui.interaction.inspect,조사하기,Inspect,調べる
 ui.interaction.open,열기,Open,開く
 ui.interaction.repair,수리하기,Repair,修理する
 ui.interaction.door,문,Door,扉

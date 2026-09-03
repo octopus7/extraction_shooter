@@ -39,7 +39,7 @@ flowchart TD
 | --- | --- | --- |
 | `ATunaSweeperTopDownCharacter` | `TunaSweeper/Source/TunaSweeper/Private/Character/TunaSweeperTopDownCharacter.cpp` | `IA_Interact`, `IA_InteractionFocus` 입력을 받아 상호작용 서브시스템으로 위임한다. |
 | `ATunaSweeperPlayerController` | `TunaSweeper/Source/TunaSweeper/Private/Player/TunaSweeperPlayerController.cpp` | HUD 패널, 퀘스트/메모 패널, 하우징 모드, 두더지 대화 시퀀스를 연다. |
-| `UTunaSweeperInteractionSubsystem` | `TunaSweeper/Source/TunaSweeper/Private/Subsystem/TunaSweeperInteractionSubsystem.cpp` | 상호작용 컴포넌트 등록, 포커스 선정, BunkerMap 제한, 타입별 분기를 담당한다. |
+| `UTunaSweeperInteractionSubsystem` | `TunaSweeper/Source/TunaSweeper/Private/Subsystem/TunaSweeperInteractionSubsystem.cpp` | 상호작용 컴포넌트 등록, 포커스 선정, BunkerMap 제한, 타입별 분기를 담당한다. `BP_WaterIntake`는 현재 퀘스트 단계에 맞는 조사·이물질 제거·밸브 수리를 하나의 월드 진행 분기로 전달한다. |
 | `UTunaSweeperInteractableComponent` | `TunaSweeper/Source/TunaSweeper/Private/Interaction/TunaSweeperInteractableComponent.cpp` | 상호작용 타입/이름/거리/목표 이벤트를 보관하고 마커 위젯을 생성/갱신한다. |
 | `ATunaSweeperInteractableActor` | `TunaSweeper/Source/TunaSweeper/Private/Interaction/TunaSweeperInteractableActor.cpp` | 기본 `SceneRoot`, `VisualMesh`, `InteractableComponent`를 가진 상호작용 액터 베이스다. |
 | 아이템/컨테이너 액터 | `TunaSweeper/Source/TunaSweeper/Private/Interaction/TunaSweeperPickupItemActor.cpp`, `TunaSweeperItemSpawnInteractableActor.cpp`, `TunaSweeperLootContainerActor.cpp`, `TunaSweeperLootContainerSpawnInteractableActor.cpp` | 픽업, 아이템 스폰, 루팅 컨테이너 열기/스폰을 처리한다. |
@@ -71,7 +71,7 @@ flowchart TD
 | `Quest` | 맵 제한 없음, 단 해석 가능한 퀘스트 ID 필요 | `ATunaSweeperMoleCompanionActor` 또는 `ATunaSweeperFacilityNpcActor`에서 provider/fallback으로 퀘스트 ID를 해석한 뒤 `OpenQuestPanel(QuestId)`를 호출한다. 퀘스트 ID가 없으면 `CanOfferInteraction()`에서 후보 제외된다. |
 | `MoleDialogue` | BunkerMap 전용 | 소유자가 `ATunaSweeperMoleCompanionActor`이고 현재 맵이 `BunkerMap`일 때만 제공된다. `StartScenarioForTrigger(interaction.mole, true)`를 호출해 활성 플레이버 JSON의 조건에 맞는 두더지 대화를 재생한다. |
 | `SelfDestruct` | 맵 제한 없음 | `ATunaSweeperSelfDestructInteractableActor::StartSelfDestruct()`가 말풍선 카운트다운을 시작한다. 종료 시 폭발 이펙트, 소음 리포트, 반경 내 `UTunaSweeperVitalsComponent` 피해를 적용하고 자기 자신을 제거한다. |
-| `WorldProgress` | 맵 제한 없음 | `ATunaSweeperWorldProgressActor::RepairUsingAvailableRequiredItems(true)`가 필요한 수량을 전부 보유한 경우 아이템을 소비하고 `WorldProgressStates`를 Completed로 저장한다. 완료 후 충돌/마커를 끄고 완료 대체 액터를 스폰한 뒤 자신을 제거한다. |
+| `WorldProgress` | 맵 제한 없음 | 일반 `ATunaSweeperWorldProgressActor`는 필요한 수량을 전부 보유한 경우 아이템을 소비하고 완료 상태를 저장한 뒤 대체 액터를 스폰한다. `BP_WaterIntake`의 부모 액터는 퀘스트가 `Accepted`이고 해당 목표가 미완료일 때만 마커를 제공하며 Q1 조사, Q2 크로우바 기반 이물질 제거, Q3-1 밸브 손잡이 설치로 동작을 전환한다. 시설 본체와 스크린 메시를 항상 유지하고, BP의 `DebrisMesh`에 연결된 `SM_ScreenDebris`만 숨기며 이물질 제거와 밸브 완료 상태를 별도 `WorldProgressStates` 항목에 저장한다. |
 | `PersistentDoor` | 맵 제한 없음 | `ATunaSweeperPersistentDoorActor::OpenDoor(true)`가 문 상태를 Completed로 저장하고, 충돌을 끄며 마커 타입을 `None`으로 바꾼다. 일반 토글이 아니라 영속적인 열기 전용이다. |
 | `DoorOpen` | 맵 제한 없음 | `ATunaSweeperDoorActor::ToggleDoor()`가 `bOpen`을 뒤집고 힌지 회전을 보간한다. 저장은 하지 않는다. |
 | `WarpPoint` | 맵 제한 없음 | `ATunaSweeperWarpPointActor`가 같은 월드의 `TargetWarpPointId`를 찾아 이동을 정지시키고, 대상 위치 + `ExitOffset`으로 텔레포트한다. 성공하면 `QuestSubsystem::NotifyWarpPointUsed()`를 보낸다. |

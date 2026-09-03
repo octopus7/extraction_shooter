@@ -6437,3 +6437,43 @@ Q1~Q4 설계 흐름을 실제 플레이로 완주하려면 벙커의 퀘스트 �
 ### 답변
 
 현재 일반 상호작용 마커는 퀘스트 진행 상황에 따라 자동 활성화되지 않는다. `UTunaSweeperInteractableComponent`는 상호작용 타입이 `None`이 아닌지, 소유 액터가 표시 중인지, 상호작용 서브시스템이 허용하는지와 플레이어가 표시 거리 안에 있는지만 검사한다. 퀘스트 서브시스템은 완료 이벤트를 받은 뒤 현재 `Accepted` 상태인 목표만 진행시킬 뿐 마커를 선제적으로 차단하지 않는다. 따라서 Q1과 Q3 시설 상호작용은 해당 퀘스트가 `Accepted`이고 대상 목표가 미완료일 때만 컴포넌트의 타입·이벤트·위치를 활성화하고, 그 외에는 `InteractionType=None`으로 두도록 시설 액터가 `OnQuestProgressChanged`를 구독해 갱신해야 한다. 퀘스트 제공자 두더지의 알림 표시는 이미 퀘스트 상태를 기준으로 동작한다.
+
+## 2026-09-03 15:57:20 (소요시간: 00:00:41)
+
+### 질문
+
+Unreal Engine 콘텐츠 리네임 후 남은 리다이렉터를 삭제하는 안전한 절차를 문의.
+
+### 답변
+
+현재 남아 있는 리다이렉터는 `/Game/Interaction/BP_WorldProgress_BlockedIntakeScreen`, `/Game/Environment/Water/SM_SM_WaterIntake`, `/Game/Meshes/Props/WaterIntake/SM_SKM_WaterIntake` 세 개다. 에디터에서 먼저 모든 변경 에셋을 저장하고 PIE와 관련 에셋 편집기를 닫은 뒤, Content Browser에서 각 상위 폴더를 우클릭하여 `Fix Up Redirectors in Folder`를 실행한다. 이 작업이 참조를 새 경로로 갱신하고 안전한 리다이렉터를 자동 삭제하므로 리다이렉터 파일부터 수동 삭제하면 안 된다. 이후 `Save All`을 실행하고 Git 변경 목록에서 세 구 경로가 삭제로 표시되는지 확인한다. 실패하면 참조 에셋의 읽기 전용·미저장 상태와 열린 레벨을 확인한 뒤 `/Game` 루트에서 한 번 더 실행한다.
+
+## 2026-09-03 16:14:20 (소요시간: 00:01:00)
+
+### 질문
+
+현재 구현된 취수시설 BP가 데모 퀘스트 진행에 따라 몇 가지 상태를 가지는지 문의.
+
+### 답변
+
+코드의 상호작용 단계는 `None`, `Inspect`, `ClearDebris`, `RepairValve` 네 가지다. 저장되는 시설 진행은 `bScreenCleared`와 `bValveRepaired` 두 값이지만, 밸브 수리는 스크린 제거 후에만 허용하므로 정상 진행에서 의미 있는 저장 상태는 둘 다 미완료, 스크린만 제거, 스크린 제거와 밸브 수리 완료의 세 가지다. 퀘스트 수락 전·보상 대기처럼 상호작용할 수 없는 모든 구간은 별도 단계로 늘리지 않고 `None`으로 통합한다.
+
+## 2026-09-03 16:15:50 (소요시간: 00:00:26)
+
+### 질문
+
+취수시설 BP가 퀘스트 상태를 읽어 네 상호작용 단계 중 하나를 표시하는 구조인지 확인.
+
+### 답변
+
+맞다. `ActiveInteractionPhase` 자체를 저장하지는 않고, 퀘스트의 `Accepted` 상태와 해당 objective의 미완료 여부, 그리고 저장된 이물질 제거·밸브 수리 상태를 읽어 `None`, `Inspect`, `ClearDebris`, `RepairValve` 중 하나를 매번 계산한다. 계산된 단계에 따라 마커의 문구, 이벤트 ID, 요구 아이템과 상대 위치를 전환한다.
+
+## 2026-09-03 16:16:50 (소요시간: 00:00:26)
+
+### 질문
+
+이물질 제거와 밸브 수리가 해당 세이브 슬롯의 월드 영구 상태로 보존되는지 확인.
+
+### 답변
+
+맞다. 이물질 제거는 `ProgressObjectId=demo.water_intake.blocked_screen`, 밸브 수리는 `ValveProgressObjectId=demo.water_intake.valve`라는 서로 다른 키로 해당 슬롯의 `WorldProgressStates`에 `Completed` 상태를 저장한다. 맵 재진입, 게임 재실행과 사망 후 복귀에서도 두 상태를 다시 읽어 복원하며, 새 게임이나 해당 세이브 슬롯 삭제 전까지 유지된다. Q1 조사는 월드 상태가 아니라 퀘스트 objective 진행으로만 저장된다.

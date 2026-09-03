@@ -196,7 +196,7 @@ Raid world progress actors restore this state on spawn. Completed repair objects
 
 Persistent door actors also use `WorldProgressStates`: once opened, they write `Completed` for their stable door `ObjectId`, then later restore by applying the open transform and disabling their blocking collision in the same save slot.
 
-Directly placed `ATunaSweeperBlockedIntakeScreenActor` instances also use `WorldProgressStates`. Clearing the intake screen writes `Completed` immediately, then swaps `BlockedScreenMesh` to `ClearedScreenMesh` on the same component so the placed transform is preserved. Load restores the cleared mesh, and death saves preserve this long-term world state while clearing only carried raid possessions. Every placed instance must keep a stable, unique `ProgressObjectId`.
+Directly placed `ATunaSweeperBlockedIntakeScreenActor` instances also use `WorldProgressStates`. The `BP_WaterIntake` facility keeps both its pump/control-panel mesh and screen mesh visible, while the separate `DebrisMesh` using `/Game/Meshes/Props/WaterIntake/SM_ScreenDebris` is the only visual toggled by clearing. The native component has no hard-coded debris asset so the BP owns that presentation assignment. Clearing debris writes `Completed` under `ProgressObjectId`; repairing the valve writes a second `Completed` entry under `ValveProgressObjectId`. Load restores both states, and death saves preserve this long-term world progress while clearing only carried raid possessions. Every placed facility must keep stable, unique screen and valve object ids.
 
 ### Bunker Housing Facilities
 

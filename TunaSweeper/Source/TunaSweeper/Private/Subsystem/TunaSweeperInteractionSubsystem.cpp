@@ -721,7 +721,7 @@ bool UTunaSweeperInteractionSubsystem::HandleWorldProgressInteraction(
 
 	if (ATunaSweeperBlockedIntakeScreenActor* IntakeScreenActor = Cast<ATunaSweeperBlockedIntakeScreenActor>(ProgressOwner))
 	{
-		return IntakeScreenActor->ClearScreen(true);
+		return IntakeScreenActor->Interact(true);
 	}
 
 	return false;
