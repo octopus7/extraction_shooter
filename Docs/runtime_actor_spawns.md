@@ -41,7 +41,9 @@
 
 File: `TunaSweeper/Content/Data/BunkerCharacterSpawns.json`
 
-`TS_Bunker_LED_Robot` spawns `BP_Mole` through `UTunaSweeperBunkerRuntimeSpawnSubsystem`. `ATunaSweeperMoleCompanionActor` owns the Mole dialogue and quest interactables directly. Its quest provider is `provider.mole`, with `quest_first_outing` as the fallback quest.
+`BP_Mole` can be placed directly in `BunkerMap`; when `BunkerCharacterSpawns.json` contains a row, `UTunaSweeperBunkerRuntimeSpawnSubsystem` can also spawn it from data. `ATunaSweeperMoleCompanionActor` owns the Mole dialogue and quest interactables directly. Its quest provider is `provider.mole`, with `quest_first_outing` as the fallback quest.
+
+The Mole visual uses one `DummyMesh` static-mesh component with `/Game/Characters/NPC/Mole/SM_MoleDummy` as its default asset. `BunkerCharacterSpawns.json` may override that single mesh with `dummy_mesh`; legacy `body_mesh` is accepted only as a compatibility alias. An empty `SkeletalMesh` component is reserved for the final character asset. Assigning a skeletal mesh hides the dummy automatically, while the dialogue, quest, collision, and notice components remain unchanged.
 
 ## 기존 데이터 파일
 

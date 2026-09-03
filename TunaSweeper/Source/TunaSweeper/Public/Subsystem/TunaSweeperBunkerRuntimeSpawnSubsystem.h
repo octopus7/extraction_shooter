@@ -36,9 +36,7 @@ private:
 		FVector Location = FVector::ZeroVector;
 		FRotator Rotation = FRotator::ZeroRotator;
 		FVector Scale = FVector::OneVector;
-		TSoftObjectPtr<UStaticMesh> BodyMesh;
-		TSoftObjectPtr<UStaticMesh> HeadMesh;
-		TSoftObjectPtr<UStaticMesh> SnoutMesh;
+		TSoftObjectPtr<UStaticMesh> DummyMesh;
 		TSoftObjectPtr<UMaterialInterface> VisualMaterial;
 	};
 

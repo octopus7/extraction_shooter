@@ -2,6 +2,7 @@
 
 #include "Components/CapsuleComponent.h"
 #include "Components/SceneComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Engine/GameInstance.h"
@@ -21,24 +22,26 @@ ATunaSweeperMoleCompanionActor::ATunaSweeperMoleCompanionActor()
 	SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("SceneRoot"));
 	SetRootComponent(SceneRoot);
 
-	auto ConfigureVisualComponent = [this](const TCHAR* Name)
-	{
-		UStaticMeshComponent* MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(Name);
-		MeshComponent->SetupAttachment(SceneRoot);
-		MeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		MeshComponent->SetGenerateOverlapEvents(false);
-		MeshComponent->SetCastShadow(true);
-		return MeshComponent;
-	};
+	DummyMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("DummyMesh"));
+	DummyMesh->SetupAttachment(SceneRoot);
+	DummyMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	DummyMesh->SetGenerateOverlapEvents(false);
+	DummyMesh->SetCastShadow(true);
+	DummyMesh->bEditableWhenInherited = true;
 
-	BodyMesh = ConfigureVisualComponent(TEXT("BodyMesh"));
-	HeadMesh = ConfigureVisualComponent(TEXT("HeadMesh"));
-	SnoutMesh = ConfigureVisualComponent(TEXT("SnoutMesh"));
+	SkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMesh"));
+	SkeletalMesh->SetupAttachment(SceneRoot);
+	SkeletalMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	SkeletalMesh->SetGenerateOverlapEvents(false);
+	SkeletalMesh->SetCastShadow(true);
+	SkeletalMesh->SetVisibility(false, true);
+	SkeletalMesh->SetHiddenInGame(true, true);
+	SkeletalMesh->bEditableWhenInherited = true;
 
 	BodyCollision = CreateDefaultSubobject<UCapsuleComponent>(TEXT("BodyCollision"));
 	BodyCollision->SetupAttachment(SceneRoot);
 	BodyCollision->SetMobility(EComponentMobility::Movable);
-	BodyCollision->SetRelativeLocation(BodyRelativeLocation);
+	BodyCollision->SetRelativeLocation(BodyCollisionRelativeLocation);
 	BodyCollision->SetCapsuleSize(BodyCollisionRadius, BodyCollisionHalfHeight);
 	BodyCollision->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	BodyCollision->SetCollisionObjectType(ECC_WorldDynamic);
@@ -88,12 +91,11 @@ ATunaSweeperMoleCompanionActor::ATunaSweeperMoleCompanionActor()
 	QuestNoticeWidgetComponent->SetHiddenInGame(false);
 	QuestNoticeWidgetComponent->bEditableWhenInherited = true;
 
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereMesh(TEXT("/Engine/BasicShapes/Sphere.Sphere"));
-	if (SphereMesh.Succeeded())
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> MoleDummyMesh(
+		TEXT("/Game/Characters/NPC/Mole/SM_MoleDummy.SM_MoleDummy"));
+	if (MoleDummyMesh.Succeeded())
 	{
-		BodyMesh->SetStaticMesh(SphereMesh.Object);
-		HeadMesh->SetStaticMesh(SphereMesh.Object);
-		SnoutMesh->SetStaticMesh(SphereMesh.Object);
+		DummyMesh->SetStaticMesh(MoleDummyMesh.Object);
 	}
 }
 
@@ -105,23 +107,13 @@ void ATunaSweeperMoleCompanionActor::Tick(float DeltaSeconds)
 
 void ATunaSweeperMoleCompanionActor::ConfigureCompanionDefaults(
 	FName InCompanionId,
-	TSoftObjectPtr<UStaticMesh> InBodyMesh,
-	TSoftObjectPtr<UStaticMesh> InHeadMesh,
-	TSoftObjectPtr<UStaticMesh> InSnoutMesh,
+	TSoftObjectPtr<UStaticMesh> InDummyMesh,
 	TSoftObjectPtr<UMaterialInterface> InVisualMaterial)
 {
 	CompanionId = InCompanionId.IsNone() ? CompanionId : InCompanionId;
-	if (!InBodyMesh.IsNull())
+	if (!InDummyMesh.IsNull())
 	{
-		BodyMeshOverride = InBodyMesh;
-	}
-	if (!InHeadMesh.IsNull())
-	{
-		HeadMeshOverride = InHeadMesh;
-	}
-	if (!InSnoutMesh.IsNull())
-	{
-		SnoutMeshOverride = InSnoutMesh;
+		DummyMeshOverride = InDummyMesh;
 	}
 	if (!InVisualMaterial.IsNull())
 	{
@@ -205,41 +197,41 @@ FName ATunaSweeperMoleCompanionActor::ResolveQuestId() const
 
 void ATunaSweeperMoleCompanionActor::RefreshCompanionVisuals()
 {
-	UStaticMesh* DefaultSphere = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Sphere.Sphere"));
-	auto ApplyVisual = [DefaultSphere, this](
-		UStaticMeshComponent* MeshComponent,
-		const TSoftObjectPtr<UStaticMesh>& MeshOverride,
-		const FVector& RelativeLocation,
-		const FVector& RelativeScale)
+	if (DummyMesh)
 	{
-		if (!MeshComponent)
-		{
-			return;
-		}
-
-		UStaticMesh* MeshToUse = MeshOverride.IsNull() ? DefaultSphere : MeshOverride.LoadSynchronous();
+		UStaticMesh* MeshToUse = DummyMeshOverride.IsNull()
+			? LoadObject<UStaticMesh>(nullptr, TEXT("/Game/Characters/NPC/Mole/SM_MoleDummy.SM_MoleDummy"))
+			: DummyMeshOverride.LoadSynchronous();
 		if (MeshToUse)
 		{
-			MeshComponent->SetStaticMesh(MeshToUse);
+			DummyMesh->SetStaticMesh(MeshToUse);
 		}
 		if (!VisualMaterial.IsNull())
 		{
 			if (UMaterialInterface* LoadedMaterial = VisualMaterial.LoadSynchronous())
 			{
-				MeshComponent->SetMaterial(0, LoadedMaterial);
+				DummyMesh->SetMaterial(0, LoadedMaterial);
 			}
 		}
-		MeshComponent->SetRelativeLocation(RelativeLocation);
-		MeshComponent->SetRelativeScale3D(RelativeScale);
-	};
+		DummyMesh->SetRelativeLocation(DummyMeshRelativeLocation);
+		DummyMesh->SetRelativeScale3D(DummyMeshScale);
+	}
 
-	ApplyVisual(BodyMesh, BodyMeshOverride, BodyRelativeLocation, BodyScale);
-	ApplyVisual(HeadMesh, HeadMeshOverride, HeadRelativeLocation, HeadScale);
-	ApplyVisual(SnoutMesh, SnoutMeshOverride, SnoutRelativeLocation, SnoutScale);
+	const bool bUseSkeletalMesh = SkeletalMesh && SkeletalMesh->GetSkeletalMeshAsset() != nullptr;
+	if (DummyMesh)
+	{
+		DummyMesh->SetVisibility(!bUseSkeletalMesh, true);
+		DummyMesh->SetHiddenInGame(bUseSkeletalMesh, true);
+	}
+	if (SkeletalMesh)
+	{
+		SkeletalMesh->SetVisibility(bUseSkeletalMesh, true);
+		SkeletalMesh->SetHiddenInGame(!bUseSkeletalMesh, true);
+	}
 
 	if (BodyCollision)
 	{
-		BodyCollision->SetRelativeLocation(BodyRelativeLocation);
+		BodyCollision->SetRelativeLocation(BodyCollisionRelativeLocation);
 		BodyCollision->SetCapsuleSize(BodyCollisionRadius, BodyCollisionHalfHeight);
 	}
 }

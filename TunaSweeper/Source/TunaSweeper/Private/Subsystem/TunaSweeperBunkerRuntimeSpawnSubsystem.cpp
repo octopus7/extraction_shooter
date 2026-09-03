@@ -141,9 +141,7 @@ bool UTunaSweeperBunkerRuntimeSpawnSubsystem::EnsureBunkerRuntimeActorsSpawnedFo
 
 		SpawnedCompanion->ConfigureCompanionDefaults(
 			SpawnDefinition.SpawnId,
-			SpawnDefinition.BodyMesh,
-			SpawnDefinition.HeadMesh,
-			SpawnDefinition.SnoutMesh,
+			SpawnDefinition.DummyMesh,
 			SpawnDefinition.VisualMaterial);
 
 		if (!SpawnDefinition.SpawnId.IsNone())
@@ -224,17 +222,17 @@ bool UTunaSweeperBunkerRuntimeSpawnSubsystem::LoadBunkerCharacterSpawnData(bool 
 		}
 
 		FString ActorClassPath;
-		FString BodyMeshPath;
-		FString HeadMeshPath;
-		FString SnoutMeshPath;
+		FString DummyMeshPath;
 		FString VisualMaterialPath;
 		FVector Scale = FVector::OneVector;
 		FRotator Rotation = FRotator::ZeroRotator;
 
 		JsonObject->TryGetStringField(TEXT("actor_class"), ActorClassPath);
-		JsonObject->TryGetStringField(TEXT("body_mesh"), BodyMeshPath);
-		JsonObject->TryGetStringField(TEXT("head_mesh"), HeadMeshPath);
-		JsonObject->TryGetStringField(TEXT("snout_mesh"), SnoutMeshPath);
+		JsonObject->TryGetStringField(TEXT("dummy_mesh"), DummyMeshPath);
+		if (DummyMeshPath.IsEmpty())
+		{
+			JsonObject->TryGetStringField(TEXT("body_mesh"), DummyMeshPath);
+		}
 		JsonObject->TryGetStringField(TEXT("visual_material"), VisualMaterialPath);
 		TunaSweeperBunkerRuntimeSpawn::TryReadRotatorField(JsonObject, TEXT("rotation"), Rotation);
 		TunaSweeperBunkerRuntimeSpawn::TryReadVectorField(JsonObject, TEXT("scale"), Scale);
@@ -259,9 +257,7 @@ bool UTunaSweeperBunkerRuntimeSpawnSubsystem::LoadBunkerCharacterSpawnData(bool 
 				? TSoftObjectPtr<UStaticMesh>()
 				: TSoftObjectPtr<UStaticMesh>(FSoftObjectPath(TrimmedPath));
 		};
-		SpawnDefinition.BodyMesh = ResolveStaticMesh(BodyMeshPath);
-		SpawnDefinition.HeadMesh = ResolveStaticMesh(HeadMeshPath);
-		SpawnDefinition.SnoutMesh = ResolveStaticMesh(SnoutMeshPath);
+		SpawnDefinition.DummyMesh = ResolveStaticMesh(DummyMeshPath);
 
 		const FString TrimmedVisualMaterialPath = VisualMaterialPath.TrimStartAndEnd();
 		if (!TrimmedVisualMaterialPath.IsEmpty())

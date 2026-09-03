@@ -7,6 +7,7 @@
 class UMaterialInterface;
 class UCapsuleComponent;
 class USceneComponent;
+class USkeletalMeshComponent;
 class UStaticMesh;
 class UStaticMeshComponent;
 class UTunaSweeperInteractableComponent;
@@ -26,9 +27,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Mole Companion")
 	void ConfigureCompanionDefaults(
 		FName InCompanionId,
-		TSoftObjectPtr<UStaticMesh> InBodyMesh,
-		TSoftObjectPtr<UStaticMesh> InHeadMesh,
-		TSoftObjectPtr<UStaticMesh> InSnoutMesh,
+		TSoftObjectPtr<UStaticMesh> InDummyMesh,
 		TSoftObjectPtr<UMaterialInterface> InVisualMaterial);
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Mole Companion")
@@ -54,13 +53,10 @@ private:
 	TObjectPtr<USceneComponent> SceneRoot;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mole Companion|Visual", meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UStaticMeshComponent> BodyMesh;
+	TObjectPtr<UStaticMeshComponent> DummyMesh;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mole Companion|Visual", meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UStaticMeshComponent> HeadMesh;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mole Companion|Visual", meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UStaticMeshComponent> SnoutMesh;
+	TObjectPtr<USkeletalMeshComponent> SkeletalMesh;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mole Companion|Collision", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UCapsuleComponent> BodyCollision;
@@ -78,34 +74,19 @@ private:
 	FName CompanionId = TEXT("BunkerMole");
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mole Companion|Visual", meta = (AllowPrivateAccess = "true"))
-	TSoftObjectPtr<UStaticMesh> BodyMeshOverride;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mole Companion|Visual", meta = (AllowPrivateAccess = "true"))
-	TSoftObjectPtr<UStaticMesh> HeadMeshOverride;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mole Companion|Visual", meta = (AllowPrivateAccess = "true"))
-	TSoftObjectPtr<UStaticMesh> SnoutMeshOverride;
+	TSoftObjectPtr<UStaticMesh> DummyMeshOverride;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mole Companion|Visual", meta = (AllowPrivateAccess = "true"))
 	TSoftObjectPtr<UMaterialInterface> VisualMaterial;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mole Companion|Visual", meta = (AllowPrivateAccess = "true"))
-	FVector BodyRelativeLocation = FVector(0.0f, 0.0f, 72.0f);
+	FVector DummyMeshRelativeLocation = FVector::ZeroVector;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mole Companion|Visual", meta = (AllowPrivateAccess = "true"))
-	FVector BodyScale = FVector(0.72f, 0.92f, 0.58f);
+	FVector DummyMeshScale = FVector::OneVector;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mole Companion|Visual", meta = (AllowPrivateAccess = "true"))
-	FVector HeadRelativeLocation = FVector(54.0f, 0.0f, 86.0f);
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mole Companion|Visual", meta = (AllowPrivateAccess = "true"))
-	FVector HeadScale = FVector(0.48f, 0.52f, 0.43f);
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mole Companion|Visual", meta = (AllowPrivateAccess = "true"))
-	FVector SnoutRelativeLocation = FVector(91.0f, 0.0f, 78.0f);
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mole Companion|Visual", meta = (AllowPrivateAccess = "true"))
-	FVector SnoutScale = FVector(0.17f, 0.21f, 0.15f);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mole Companion|Collision", meta = (AllowPrivateAccess = "true"))
+	FVector BodyCollisionRelativeLocation = FVector(0.0f, 0.0f, 72.0f);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mole Companion|Collision", meta = (AllowPrivateAccess = "true", ClampMin = "1.0"))
 	float BodyCollisionRadius = 66.0f;
