@@ -612,6 +612,39 @@
     "weight_kg": 0.8
   },
   {
+    "id": 6003,
+    "name_string_key": "item.crowbar",
+    "description_string_key": "item.crowbar.desc",
+    "shop_sell_price": 0,
+    "experience_value": 0,
+    "item_grade": "uncommon",
+    "icon_file_name": "T_UIIcon_Crowbar.uasset",
+    "category_tag": "item.category.material",
+    "weight_kg": 2.5
+  },
+  {
+    "id": 6004,
+    "name_string_key": "item.replacement_valve_handle",
+    "description_string_key": "item.replacement_valve_handle.desc",
+    "shop_sell_price": 0,
+    "experience_value": 0,
+    "item_grade": "uncommon",
+    "icon_file_name": "T_UIIcon_ReplacementValveHandle.uasset",
+    "category_tag": "item.category.material",
+    "weight_kg": 1.2
+  },
+  {
+    "id": 6005,
+    "name_string_key": "item.waterproof_tape",
+    "description_string_key": "item.waterproof_tape.desc",
+    "shop_sell_price": 0,
+    "experience_value": 0,
+    "item_grade": "common",
+    "icon_file_name": "T_UIIcon_WaterproofTape.uasset",
+    "category_tag": "item.category.material",
+    "weight_kg": 0.4
+  },
+  {
     "id": 7001,
     "name_string_key": "item.blueprint_king_water_bottle",
     "description_string_key": "item.blueprint_king_water_bottle.desc",
