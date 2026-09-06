@@ -2,10 +2,13 @@
 import bpy
 import bmesh
 import json
+import sys
 from pathlib import Path
 from mathutils import Vector
 ROOT=Path(__file__).resolve().parents[2]
 OUT=ROOT/'TunaSweeper/SourceArt/Memo/StorageDevice'
+if '--low-poly' in sys.argv:
+    OUT=OUT/'LowPoly'
 spec=json.loads((OUT/'model_manifest.json').read_text())
 bpy.ops.wm.read_factory_settings(use_empty=True)
 bpy.ops.import_scene.fbx(filepath=str(OUT/'Models'/f"{spec['name']}.fbx"))
@@ -15,6 +18,10 @@ assert len(models)==1 and len(cols)==1
 obj=models[0]
 obj.data.calc_loop_triangles()
 assert len(obj.data.loop_triangles)==spec['triangles']
+if 'triangle_budget' in spec:
+    for col in cols:
+        col.data.calc_loop_triangles()
+    assert len(obj.data.loop_triangles)+sum(len(c.data.loop_triangles) for c in cols)<=spec['triangle_budget']
 assert [m.name for m in obj.data.materials]==list(spec['materials'])
 assert len(obj.data.uv_layers)==1
 assert all(-.0001<=c<=1.0001 for uv in obj.data.uv_layers.active.data for c in uv.uv)

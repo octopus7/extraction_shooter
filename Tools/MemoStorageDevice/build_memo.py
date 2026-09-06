@@ -7,18 +7,22 @@ import bpy
 import bmesh
 import json
 import math
+import sys
 from pathlib import Path
 from mathutils import Vector
 
 ROOT = Path(__file__).resolve().parents[2]
+LOW_POLY = '--low-poly' in sys.argv
 OUT = ROOT / 'TunaSweeper/SourceArt/Memo/StorageDevice'
+if LOW_POLY:
+    OUT = OUT / 'LowPoly'
 for folder in ['Models', 'Previews']:
     (OUT/folder).mkdir(parents=True, exist_ok=True)
 bpy.ops.wm.read_factory_settings(use_empty=True)
 scene = bpy.context.scene
 scene.unit_settings.system = 'METRIC'
 scene.unit_settings.scale_length = 1.0
-NAME = 'SM_MemoStorageDevice'
+NAME = 'SM_MemoStorageDevice_LowPoly' if LOW_POLY else 'SM_MemoStorageDevice'
 SPECS = {
     'M_MemoDevice_Shell': {'color': [.045, .13, .28, 1], 'metallic': .35, 'roughness': .5, 'emission': 0},
     'M_MemoDevice_Guard': {'color': [.025, .035, .045, 1], 'metallic': .05, 'roughness': .78, 'emission': 0},
@@ -46,7 +50,7 @@ def finish(obj, name, material, bevel):
     if bevel:
         mod = obj.modifiers.new('Readable edge bevel', 'BEVEL')
         mod.width = bevel/100
-        mod.segments = 2
+        mod.segments = 1 if LOW_POLY else 2
         bpy.ops.object.modifier_apply(modifier=mod.name)
     bm = bmesh.new()
     bm.from_mesh(obj.data)
@@ -55,7 +59,7 @@ def finish(obj, name, material, bevel):
     bm.to_mesh(obj.data)
     bm.free()
     for face in obj.data.polygons:
-        face.use_smooth = True
+        face.use_smooth = not (LOW_POLY and bevel == 0)
     mod = obj.modifiers.new('Weighted surface normals', 'WEIGHTED_NORMAL')
     mod.keep_sharp = True
     mod.weight = 50
@@ -87,41 +91,46 @@ def plate(name, loc, size, cut, material, bevel=.06):
     obj.select_set(True)
     return finish(obj, name, material, bevel)
 
-# Bottom rests at Z=0; body length X=11 cm, connector projects towards +X.
-plate('Impact guard lower', (0,0,.44), (10.9,6.9,.64), .75, 'Guard', .12)
-plate('Blue chassis', (0,0,1.0), (10.6,6.6,1.18), .65, 'Shell', .11)
-plate('Lid seam', (0,0,1.47), (10.25,6.25,.16), .58, 'Guard', .035)
-plate('Blue lid', (-.1,0,1.66), (9.85,5.95,.32), .64, 'Shell', .1)
-plate('Top inset border', (-.55,0,1.827), (7.2,4.65,.07), .6, 'Guard', .018)
-plate('Top inset metal rim', (-.55,0,1.863), (6.95,4.4,.07), .55, 'Metal', .015)
-plate('Recessed data panel', (-.55,0,1.902), (6.73,4.18,.08), .51, 'Shell', .026)
-# Broad corner armor wraps the height and remains legible from the gameplay view.
-for x in [-4.65, 4.65]:
-    for y in [-2.65, 2.65]:
-        plate('Corner bumper', (x,y,1.06), (1.7,1.7,1.96), .43, 'Guard', .1)
-        box('Armor inlay', (x,y,2.038), (.72,.76,.065), 'Metal', .06)
-for y in [-3.29,3.29]:
-    for x in [-1.7,0,1.7]:
-        box('Grip rib', (x,y,.99), (.55,.27,.94), 'Guard', .07)
-# A substantial socket shroud, black tongue and 5 broad silver contacts.
-plate('Connector root', (5.18,0,1.0), (1.0,3.85,1.16), .2, 'Guard', .06)
-box('Connector top', (5.72,0,1.46), (1.56,3.25,.2), 'Metal', .055)
-box('Connector bottom', (5.72,0,.61), (1.56,3.25,.2), 'Metal', .055)
-for y in [-1.51,1.51]:
-    box('Connector side', (5.72,y,1.035), (1.56,.23,.75), 'Metal', .045)
-box('Connector cavity', (5.26,0,1.035), (.12,2.83,.72), 'Guard', .015)
-box('Contact tongue', (5.82,0,.89), (1.14,2.6,.21), 'Guard', .045)
-for y in [-.96,-.48,0,.48,.96]:
-    box('Contact', (5.99,y,1.007), (.85,.24,.04), 'Metal', .009)
-# One small status indicator and an embossed data-stack pictogram; no narrative.
-plate('Indicator bezel', (3.49,0,1.839), (.85,2.63,.11), .2, 'Guard', .025)
-plate('Status lens', (3.49,0,1.913), (.4,1.92,.065), .13, 'Status', .025)
-for i in range(3):
-    box('Data stack glyph', (-.76+i*.44,0,1.965), (.18,1.2,.05), 'Metal', .016)
-# Underside service plate, kept above the bottom seating plane.
-plate('Underside plate', (0,0,.09), (7.7,4.7,.11), .45, 'Shell', .018)
-for y in [-1.52,1.52]:
-    box('Underside skid', (0,y,.025), (5.7,.39,.05), 'Guard', .012)
+if LOW_POLY:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from low_poly_geometry import build
+    build(box, plate)
+else:
+    # Bottom rests at Z=0; body length X=11 cm, connector projects towards +X.
+    plate('Impact guard lower', (0,0,.44), (10.9,6.9,.64), .75, 'Guard', .12)
+    plate('Blue chassis', (0,0,1.0), (10.6,6.6,1.18), .65, 'Shell', .11)
+    plate('Lid seam', (0,0,1.47), (10.25,6.25,.16), .58, 'Guard', .035)
+    plate('Blue lid', (-.1,0,1.66), (9.85,5.95,.32), .64, 'Shell', .1)
+    plate('Top inset border', (-.55,0,1.827), (7.2,4.65,.07), .6, 'Guard', .018)
+    plate('Top inset metal rim', (-.55,0,1.863), (6.95,4.4,.07), .55, 'Metal', .015)
+    plate('Recessed data panel', (-.55,0,1.902), (6.73,4.18,.08), .51, 'Shell', .026)
+    # Broad corner armor wraps the height and remains legible from the gameplay view.
+    for x in [-4.65, 4.65]:
+        for y in [-2.65, 2.65]:
+            plate('Corner bumper', (x,y,1.06), (1.7,1.7,1.96), .43, 'Guard', .1)
+            box('Armor inlay', (x,y,2.038), (.72,.76,.065), 'Metal', .06)
+    for y in [-3.29,3.29]:
+        for x in [-1.7,0,1.7]:
+            box('Grip rib', (x,y,.99), (.55,.27,.94), 'Guard', .07)
+    # A substantial socket shroud, black tongue and 5 broad silver contacts.
+    plate('Connector root', (5.18,0,1.0), (1.0,3.85,1.16), .2, 'Guard', .06)
+    box('Connector top', (5.72,0,1.46), (1.56,3.25,.2), 'Metal', .055)
+    box('Connector bottom', (5.72,0,.61), (1.56,3.25,.2), 'Metal', .055)
+    for y in [-1.51,1.51]:
+        box('Connector side', (5.72,y,1.035), (1.56,.23,.75), 'Metal', .045)
+    box('Connector cavity', (5.26,0,1.035), (.12,2.83,.72), 'Guard', .015)
+    box('Contact tongue', (5.82,0,.89), (1.14,2.6,.21), 'Guard', .045)
+    for y in [-.96,-.48,0,.48,.96]:
+        box('Contact', (5.99,y,1.007), (.85,.24,.04), 'Metal', .009)
+    # One small status indicator and an embossed data-stack pictogram; no narrative.
+    plate('Indicator bezel', (3.49,0,1.839), (.85,2.63,.11), .2, 'Guard', .025)
+    plate('Status lens', (3.49,0,1.913), (.4,1.92,.065), .13, 'Status', .025)
+    for i in range(3):
+        box('Data stack glyph', (-.76+i*.44,0,1.965), (.18,1.2,.05), 'Metal', .016)
+    # Underside service plate, kept above the bottom seating plane.
+    plate('Underside plate', (0,0,.09), (7.7,4.7,.11), .45, 'Shell', .018)
+    for y in [-1.52,1.52]:
+        box('Underside skid', (0,y,.025), (5.7,.39,.05), 'Guard', .012)
 
 bpy.ops.object.select_all(action='DESELECT')
 for obj in parts:
@@ -167,6 +176,10 @@ manifest = {'name':NAME, 'blender':bpy.app.version_string, 'bounds_cm':bounds,
     'axis_contract':'X length, connector +X, Z up; Y symmetric',
     'pivot':'Origin at body bottom center; connector makes bounds center asymmetric in X',
     'collision_boxes':1, 'texture_dependencies':[], 'checks_passed':True}
+if LOW_POLY:
+    assert manifest['triangles'] + 12 < 1000, manifest['triangles']
+    manifest['triangle_budget'] = 999
+    manifest['triangles_including_collision'] = manifest['triangles'] + 12
 # One lightweight conservative body collision box, including protruding connector.
 bpy.ops.mesh.primitive_cube_add(size=1, location=Vector(((bounds[0]+bounds[3])/200,0,bounds[5]/200)))
 collision = bpy.context.object

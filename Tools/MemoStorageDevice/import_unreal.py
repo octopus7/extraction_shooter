@@ -11,6 +11,9 @@ import unreal
 ROOT=Path(__file__).resolve().parents[2]
 SOURCE=ROOT/'TunaSweeper/SourceArt/Memo/StorageDevice'
 DEST='/Game/Meshes/Props/MemoStorageDevice'
+LOW_POLY=os.environ.get('MEMO_LOW_POLY')=='1'
+if LOW_POLY:
+    SOURCE=SOURCE/'LowPoly'
 SPEC=json.loads((SOURCE/'model_manifest.json').read_text())
 VERIFY=os.environ.get('MEMO_VERIFY_ONLY')=='1'
 assets=unreal.AssetToolsHelpers.get_asset_tools()
@@ -23,12 +26,14 @@ def protected_hashes():
     for p in (ROOT/'TunaSweeper/Content').rglob('*'):
         if not p.is_file():
             continue
-        if p.suffix=='.umap' or p.name.startswith('BP_') or (p.parent.name in ('Interaction','Data') and 'Memo' in p.name):
+        if p.suffix=='.umap' or p.name.startswith('BP_') or (p.parent.name in ('Interaction','Data') and 'Memo' in p.name) or (LOW_POLY and 'MemoStorageDevice' in p.parts and 'LowPoly' not in p.name):
             result[str(p.relative_to(ROOT))]=hashlib.sha256(p.read_bytes()).hexdigest()
     return result
 
 def save(asset):
     assert asset.get_path_name().startswith(DEST+'/')
+    if LOW_POLY:
+        assert asset.get_name()=='SM_MemoStorageDevice_LowPoly'
     assert unreal.EditorAssetLibrary.save_loaded_asset(asset,only_if_is_dirty=False)
 
 before=protected_hashes()
@@ -36,7 +41,7 @@ mats={}
 for name,spec in SPEC['materials'].items():
     path=f'{DEST}/Materials/{name}'
     mat=unreal.load_asset(path) if unreal.EditorAssetLibrary.does_asset_exist(path) else None
-    if not VERIFY:
+    if not VERIFY and not LOW_POLY:
         if not mat:
             mat=assets.create_asset(name,DEST+'/Materials',unreal.Material,unreal.MaterialFactoryNew())
         assert isinstance(mat,unreal.Material)
@@ -114,6 +119,9 @@ if not VERIFY:
 
 mesh=unreal.load_asset(mesh_path)
 assert isinstance(mesh,unreal.StaticMesh)
+if LOW_POLY:
+    assert SPEC['triangles']+12<1000
+    assert mesh.get_num_triangles(0)==SPEC['triangles'], 'Imported triangle budget mismatch'
 bounds=mesh.get_bounds()
 center=[bounds.origin.x,bounds.origin.y,bounds.origin.z]
 extent=[bounds.box_extent.x,bounds.box_extent.y,bounds.box_extent.z]
@@ -141,5 +149,8 @@ report={'passed':True,'mode':'fresh-process reload' if VERIFY else 'import',
         'collision_boxes':collision_count,'materials':[m.get_path_name() for m in mats.values()],
         'texture_dependencies':[],'protected_asset_count':len(after),
         'protected_assets_unchanged':True}
+if LOW_POLY:
+    report['triangles_lod0']=mesh.get_num_triangles(0)
+    report['triangles_including_collision']=SPEC['triangles']+12
 (SOURCE/('unreal_reload_validation.json' if VERIFY else 'unreal_import_validation.json')).write_text(json.dumps(report,indent=2),encoding='utf-8')
 unreal.log('MEMO_UE_VALIDATION_PASSED')
