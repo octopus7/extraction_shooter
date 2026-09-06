@@ -7,6 +7,9 @@ OUT=ROOT/'TunaSweeper/SourceArt/Environment/ModularInteriorPreview'
 m=json.loads((OUT/'model_manifest.json').read_text())
 bpy.ops.wm.open_mainfile(filepath=str(OUT/'ModularInteriorPreview.blend'))
 report={'assets':[],'assembly':{},'passed':False}
+assert len(m['assets'])==6 and m['roofless']
+assert all('Ceiling' not in o.name and 'Beam' not in o.name for o in bpy.data.objects)
+assert {p.stem for p in (OUT/'Models').glob('*.fbx')}=={e['name'] for e in m['assets']}
 parts=[]
 for p in m['placements']:
     e=next(e for e in m['assets'] if e['key']==p['key'])
@@ -82,11 +85,9 @@ for e in m['assets']:
        'zero_area_uv_triangles':0,'collision_hulls':len(collisions),'material_slots':len(render.data.materials)})
     for o in imported:bpy.data.objects.remove(o,do_unlink=True)
     source.name=original_name
-scene=bpy.context.scene;scene.camera=bpy.data.objects['Eye_160cm']
-for o in bpy.data.objects:
-    if o.name.startswith('Ceiling_'):o.hide_render=False
-bpy.data.objects['PreviewOnly_OverviewSoftbox'].hide_render=True
-scene.render.filepath=str(OUT/'Previews/FBX_Reload_Eye.png')
+scene=bpy.context.scene;scene.camera=bpy.data.objects['PlayCamera_NativeTopDown']
+bpy.data.objects['PreviewOnly_OverviewSoftbox'].hide_render=False
+scene.render.filepath=str(OUT/'Previews/FBX_Reload_PlayCamera.png')
 bpy.ops.render.render(write_still=True)
 report['passed']=True
 (OUT/'source_validation.json').write_text(json.dumps(report,indent=2))

@@ -61,34 +61,10 @@
       "material_slots": 1
     },
     {
-      "name": "SM_MI_Ceiling",
-      "triangles": 12,
-      "bounds_error_m": 2.384185791015625e-07,
-      "signed_volume_m3": 0.8000000357627934,
-      "manifold": true,
-      "degenerate_triangles": 0,
-      "uv_channels": 2,
-      "zero_area_uv_triangles": 0,
-      "collision_hulls": 1,
-      "material_slots": 1
-    },
-    {
-      "name": "SM_MI_Beam",
-      "triangles": 12,
-      "bounds_error_m": 1.7136335372924805e-07,
-      "signed_volume_m3": 0.0800000023841861,
-      "manifold": true,
-      "degenerate_triangles": 0,
-      "uv_channels": 2,
-      "zero_area_uv_triangles": 0,
-      "collision_hulls": 1,
-      "material_slots": 1
-    },
-    {
       "name": "SM_MI_LightBar",
       "triangles": 12,
-      "bounds_error_m": 1.30385160446167e-07,
-      "signed_volume_m3": 0.014399999356269897,
+      "bounds_error_m": 1.341104507446289e-07,
+      "signed_volume_m3": 0.014399999657706605,
       "manifold": true,
       "degenerate_triangles": 0,
       "uv_channels": 2,
@@ -99,7 +75,7 @@
   ],
   "assembly": {
     "positive_volume_overlap_pairs": [],
-    "tested_collision_boxes": 95,
+    "tested_collision_boxes": 60,
     "wall_edge_gaps_m": [
       0.0,
       0.0,

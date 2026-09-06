@@ -1,4 +1,4 @@
-"""Blender 4.5, meters in source / cm in UE. Rebuild all eight assets and review views."""
+"""Blender 4.5, meters in source / cm in UE. Six roofless top-down modules."""
 import bpy, bmesh, json, math, os
 from pathlib import Path
 from mathutils import Vector, Matrix
@@ -92,7 +92,7 @@ for key,spec in specs.items():
             links.new(strength.outputs[0],mixprop.inputs[0]);links.new(mixprop.outputs[0],b.inputs[field])
     mats[key]=m
 
-templates=bpy.data.collections.new('Eight source modules - hidden from sample')
+templates=bpy.data.collections.new('Six source modules - hidden from sample')
 scene.collection.children.link(templates)
 sample=bpy.data.collections.new('Sample assembly')
 scene.collection.children.link(sample)
@@ -150,13 +150,11 @@ for (i,j),material in cells.items():
 mesh('Doorway',verts,faces,('Concrete','Steel'),indices)
 collision['Doorway']=[((0,0,0),(1,.2,2.4)),((3,0,0),(4,.2,2.4)),((0,0,2.4),(4,.2,3))]
 box('DoorLeaf',(0,0,0),(1.96,.08,2.36),'Door')
-box('Ceiling',(0,0,0),(2,2,.2),'Concrete')
-box('Beam',(0,-.10,-.20),(2,.10,0),'Steel')
-o=box('LightBar',(0,-.06,-.08),(1.5,.06,0),'Steel')
+o=box('LightBar',(0,-.08,0),(1.5,0,.12),'Steel')
 o.data.materials.append(mats['LED'])
-# The bottom face is the diffuser. No second coplanar plane or transparent material.
+# Wall-mounted back face Y=0, diffuser on front and top for top-down readability.
 for p in o.data.polygons:
-    if p.normal.z<-.9:p.material_index=1
+    if p.normal.y<-.9 or p.normal.z>.9:p.material_index=1
 collision['LightBar']=[]
 
 regions={'Concrete':(.012,.512,.488,.988),'Floor':(.008,.008,.492,.492),
@@ -226,7 +224,7 @@ for name,o in assets.items():
     for c in copies:bpy.data.objects.remove(c,do_unlink=True)
     o.name=saved_name;o.hide_render=True;o.hide_set(True)
 
-placements=[];ceilings=[]
+placements=[]
 def place(key,loc,angle=0,scale=(1,1,1),label=None):
     src=assets[key];o=src.copy();o.data=src.data;sample.objects.link(o)
     o.name=label or f'{key}_{len(placements):03d}';o.location=loc;o.rotation_euler.z=angle
@@ -234,18 +232,17 @@ def place(key,loc,angle=0,scale=(1,1,1),label=None):
     offset=[round((len(placements)*.371)%1,4),round((len(placements)*.619)%1,4)]
     o.color=(*offset,.65,1)
     placements.append({'name':o.name,'key':key,'location_m':list(loc),'yaw_deg':math.degrees(angle),'scale':list(scale),'dirt_offset':offset})
-    if key=='Ceiling':ceilings.append(o)
     return o
 
 # 6x6 clear room, threshold through 20cm wall, 4m-wide L corridor.
 for x in (0,2,4):
     for y in (0,2,4):
-        place('Floor',(x,y,0));place('Ceiling',(x,y,3))
-for x in (1,3):place('Floor',(x,6,0),scale=(1,.1,1));place('Ceiling',(x,6,3),scale=(1,.1,1))
+        place('Floor',(x,y,0))
+for x in (1,3):place('Floor',(x,6,0),scale=(1,.1,1))
 for x in (1,3,5,7):
     for y in (6.2,8.2,10.2,12.2):
         if x>=5 and y<10:continue
-        place('Floor',(x,y,0));place('Ceiling',(x,y,3))
+        place('Floor',(x,y,0))
 
 edge_checks=[]
 def perimeter(poly,open_edges=(),open_vertices=(),door_edge=None):
@@ -282,12 +279,17 @@ perimeter([(0,0),(6,0),(6,6),(0,6)],door_edge=2)
 perimeter([(1,6.2),(5,6.2),(5,10.2),(9,10.2),(9,14.2),(1,14.2)],open_edges=(0,),open_vertices=(0,1))
 # Side-hinged leaf opened into room. 2cm clearances on all four edges when closed.
 place('DoorLeaf',(2.02,6.06,.02),math.radians(-68),label='DoorLeaf_open_68deg')
-for x,y in [(0,2),(2,2),(4,2),(0,4),(2,4),(4,4),(1,8.2),(3,8.2),(1,12.2),(3,12.2),(5,12.2),(7,12.2)]:
-    place('Beam',(x,y,3))
-for x,y in [(1.25,2),(3.25,4),(2.25,8.2),(2.25,12.2),(6.25,12.2)]:
-    place('LightBar',(x,y,2.79))
+fixtures=[]
+for x,y,yaw in [(4.75,0,180),(6,3.75,-90),(4.25,6,0),(1,10.95,90),(6.25,14.2,0)]:
+    angle=math.radians(yaw)
+    place('LightBar',(x,y,2.4),angle)
+    along=Vector((math.cos(angle),math.sin(angle),0))
+    inward=Vector((math.sin(angle),-math.cos(angle),0))
+    center=Vector((x,y,2.46))+.75*along+.10*inward
+    target=center+2*inward;target.z=.8
+    fixtures.append({'location_m':list(center),'target_m':list(target)})
 
-# Temporary project capsule-sized scale mannequin, excluded from eight exported models.
+# Temporary project capsule-sized scale mannequin, excluded from six exported models.
 def plainmat(name,color):
     m=bpy.data.materials.new(name);m.diffuse_color=(*color,1);return m
 refmat=plainmat('Preview_ScaleMarker',(.67,.28,.09))
@@ -307,7 +309,7 @@ def area(name,loc,energy,size,color=(.83,.90,1),target=None):
     if target:o.rotation_euler=(Vector(target)-o.location).to_track_quat('-Z','Y').to_euler()
     return o
 # Five actual fixtures. Preview illumination is explicitly separate from emissive mesh cost.
-for i,(x,y) in enumerate([(2,2),(4,4),(3,8.2),(3,12.2),(7,12.2)]):area('FixtureLight_'+str(i),(x,y,2.70),110,1.1)
+for i,f in enumerate(fixtures):area('FixtureLight_'+str(i),f['location_m'],110,1.1,target=f['target_m'])
 studio=area('PreviewOnly_OverviewSoftbox',(-1,3,10),1800,9,target=(3,6,0))
 def camera(name,loc,target,lens=35,ortho=None):
     d=bpy.data.cameras.new(name);o=bpy.data.objects.new(name,d);scene.collection.objects.link(o)
@@ -321,6 +323,8 @@ pitch=math.radians(88);target=Vector((3,3.3,.88))
 play=camera('PlayCamera_NativeTopDown',target+Vector((-15*math.cos(pitch),0,15*math.sin(pitch))),target)
 play.data.lens=36/(2*math.tan(math.radians(70)/2));play.data.sensor_width=36
 play.rotation_euler=Matrix(((0,-1,0),(math.sin(pitch),0,math.cos(pitch)),(-math.cos(pitch),0,math.sin(pitch)))).transposed().to_euler()
+corridor_play=play.copy();corridor_play.data=play.data.copy();scene.collection.objects.link(corridor_play)
+corridor_play.name='PlayCamera_Corridor';corridor_play.location+=Vector((2,6.9,0))
 # Blender is right-handed, UE is left-handed. Horizontal film flip makes +Y screen-right.
 scene.use_nodes=True
 nodes=scene.node_tree.nodes;nodes.clear()
@@ -334,7 +338,7 @@ manifest={'assets':entries,'materials':{'M_MI_'+k:v for k,v in specs.items()},'t
  'imagegen_original_size':original_size,'runtime_count':2,'dirt_size':[1024,1024],'normal_map':None,'roughness':'artist-selected scalar, not measured PBR'},
  'placements':placements,'counts':dict(counts),'unique_triangles':sum(e['triangles'] for e in entries),
  'sample_triangles':sum(counts[e['key']]*e['triangles'] for e in entries),'sample_instances':len(placements),
- 'real_lights':5,'preview_only_softboxes':1,'room_clear_m':[6,6,3],'corridor_clear_width_m':4,
+ 'real_lights':5,'fixtures':fixtures,'roofless':True,'preview_only_softboxes':1,'room_clear_m':[6,6,3],'corridor_clear_width_m':4,
  'door_clear_m':[2,2.4],'edge_checks':edge_checks,'axis_contract':'Blender source X=UE X north, Y=UE Y east, Z=up; export copies mirror Y',
  'play_camera':{'arm_cm':1500,'pitch_deg':-88,'yaw_deg':0,'horizontal_fov_deg':70,'target_m':list(target)}}
 assert all(abs(e['length']-e['filled'])<1e-5 for e in edge_checks)
@@ -345,32 +349,30 @@ def variant(kind):
     mats['Concrete'].node_tree.nodes['Tint'].inputs[2].default_value=tint
     mats['Concrete'].node_tree.nodes['Band'].inputs[2].default_value=(.17,.48,.50,1) if kind=='Managed' else (1,1,1,1)
 
-def render(name,cam,roof=False):
+def render(name,cam):
     scene.camera=cam
-    flip.mute=cam!=play
-    for o in ceilings:o.hide_render=not roof
-    studio.hide_render=roof
+    flip.mute=cam not in (play,corridor_play)
+    studio.hide_render=False
     scene.render.filepath=str(OUT/'Previews'/f'{name}.png');bpy.ops.render.render(write_still=True)
 
 variant('Light')
-scene.camera=overview
-for o in ceilings:o.hide_render=True
+scene.camera=play;flip.mute=False
 bpy.ops.wm.save_as_mainfile(filepath=str(OUT/'ModularInteriorPreview.blend'))
 if not os.environ.get('MI_SKIP_RENDER'):
     for kind in ('Light','Dark','Managed'):
         variant(kind);render(f'{kind}_Overview',overview)
-        render(f'{kind}_Eye',eye,True)
-    variant('Light');render('Light_PlayCamera',play)
+        render(f'{kind}_Eye',eye)
+        render(f'{kind}_PlayCamera',play)
+    variant('Light');render('Light_CorridorPlayCamera',corridor_play)
     for label,strength in [('Clean',0),('Weak',.65),('Strong',1.8)]:
         for key,m in mats.items():
             if key!='LED':m.node_tree.nodes['DirtStrength'].inputs[1].default_value=strength
-        render('Dirt_'+label+'_Eye',eye,True)
+        render('Dirt_'+label+'_PlayCamera',play)
         render('Dirt_'+label+'_Overview',overview)
     for key,m in mats.items():
         if key!='LED':m.node_tree.nodes['DirtStrength'].inputs[1].default_value=.65
 variant('Light')
-for o in ceilings:o.hide_render=True
-studio.hide_render=False;scene.camera=overview
-flip.mute=True
+studio.hide_render=False;scene.camera=play
+flip.mute=False
 bpy.ops.wm.save_as_mainfile(filepath=str(OUT/'ModularInteriorPreview.blend'))
 print('MI_BUILD_PASSED',manifest['unique_triangles'],manifest['sample_triangles'])

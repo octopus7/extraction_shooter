@@ -48,26 +48,8 @@
       "uv_channels": 2
     },
     {
-      "name": "SM_MI_Ceiling",
-      "bounds_error_cm": 1.748455542838201e-05,
-      "triangles": 12,
-      "material_slots": 1,
-      "collision_boxes": 1,
-      "collision_shape_bounds_verified": true,
-      "uv_channels": 2
-    },
-    {
-      "name": "SM_MI_Beam",
-      "bounds_error_cm": 1.7017126083374023e-05,
-      "triangles": 12,
-      "material_slots": 1,
-      "collision_boxes": 1,
-      "collision_shape_bounds_verified": true,
-      "uv_channels": 2
-    },
-    {
       "name": "SM_MI_LightBar",
-      "bounds_error_cm": 1.3008713722229004e-05,
+      "bounds_error_cm": 1.3530254364013672e-05,
       "triangles": 12,
       "material_slots": 2,
       "collision_boxes": 0,

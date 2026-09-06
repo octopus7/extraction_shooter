@@ -2,12 +2,15 @@
   "passed": true,
   "mode": "reload",
   "map": "/Game/Environment/ModularInteriorPreview/Maps/L_ModularInteriorPreview",
-  "kit_instances": 90,
-  "kit_triangles": 1224,
+  "kit_instances": 55,
+  "kit_triangles": 804,
   "rect_lights": 5,
   "reference_objects": 1,
   "placement_transforms_and_dirt_cpd_verified": true,
-  "ceiling_present": true,
+  "roofless": true,
+  "ceiling_present": false,
+  "beam_present": false,
+  "wall_mounted_lights": 5,
   "simple_collision_traces": [
     {
       "name": "south_wall",

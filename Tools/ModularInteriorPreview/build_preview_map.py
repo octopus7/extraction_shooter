@@ -29,14 +29,15 @@ else:
         c.set_mobility(unreal.ComponentMobility.STATIC)
         c.set_collision_profile_name('NoCollision' if p['key']=='LightBar' else 'BlockAll')
         for index,value in enumerate([.65,1,*p['dirt_offset']]):c.set_default_custom_primitive_data_float(index,value)
-        a.set_folder_path('MI/Ceiling' if p['key']=='Ceiling' else 'MI/Modules')
-    # Engine capsule-sized reference, no ninth kit mesh is exported.
+        a.set_folder_path('MI/Modules')
+    # Engine capsule-sized reference, excluded from the six kit meshes.
     a=spawn(unreal.StaticMeshActor,'PreviewOnly_176cm_ScaleReference',[300,330,88])
     a.static_mesh_component.set_static_mesh(unreal.load_asset('/Engine/BasicShapes/Cylinder'))
     a.set_actor_scale3d(unreal.Vector(.68,.68,1.76));a.static_mesh_component.set_collision_profile_name('NoCollision')
     a.set_folder_path('MI/Reference')
-    for i,(x,y) in enumerate([(2,2),(4,4),(3,8.2),(3,12.2),(7,12.2)]):
-        a=spawn(unreal.RectLight,f'MI_FixtureLight_{i}',[x*100,y*100,270],unreal.Rotator(pitch=-90,yaw=0,roll=0))
+    for i,f in enumerate(m['fixtures']):
+        loc=unreal.Vector(*[v*100 for v in f['location_m']]);target=unreal.Vector(*[v*100 for v in f['target_m']])
+        a=spawn(unreal.RectLight,f'MI_FixtureLight_{i}',[loc.x,loc.y,loc.z],unreal.MathLibrary.find_look_at_rotation(loc,target))
         c=a.get_component_by_class(unreal.RectLightComponent);c.set_mobility(unreal.ComponentMobility.MOVABLE)
         c.set_intensity(450);c.set_attenuation_radius(550)
         c.set_source_width(110);c.set_source_height(8);a.set_folder_path('MI/Lights')
@@ -44,15 +45,40 @@ else:
     a=spawn(unreal.CameraActor,'MI_PlayCamera',[300-1500*math.cos(pitch),330,88+1500*math.sin(pitch)],unreal.Rotator(pitch=-88,yaw=0,roll=0))
     a.camera_component.set_field_of_view(70)
     a.camera_component.set_aspect_ratio(1.4)
+    a=spawn(unreal.CameraActor,'MI_CorridorPlayCamera',[500-1500*math.cos(pitch),1020,88+1500*math.sin(pitch)],unreal.Rotator(pitch=-88,yaw=0,roll=0))
+    a.camera_component.set_field_of_view(70);a.camera_component.set_aspect_ratio(1.4)
     a=spawn(unreal.CameraActor,'MI_Eye160cm',[100,90,160],unreal.MathLibrary.find_look_at_rotation(unreal.Vector(100,90,160),unreal.Vector(340,640,150)))
     a.camera_component.set_field_of_view(84);a.camera_component.set_aspect_ratio(1.4)
     a=spawn(unreal.CameraActor,'MI_Overview',[-1400,-1600,2000],unreal.MathLibrary.find_look_at_rotation(unreal.Vector(-1400,-1600,2000),unreal.Vector(400,700,40)))
     a.camera_component.set_projection_mode(unreal.CameraProjectionMode.ORTHOGRAPHIC)
     a.camera_component.set_ortho_width(2300);a.camera_component.set_aspect_ratio(1.4)
+    # Preview-only exposure prevents emissive wall fixtures washing out the shared atlas.
+    for camera_actor in actors.get_all_level_actors():
+        if isinstance(camera_actor,unreal.CameraActor):
+            camera=camera_actor.camera_component
+            settings=camera.get_editor_property('post_process_settings')
+            settings.set_editor_property('override_auto_exposure_bias',True)
+            settings.set_editor_property('auto_exposure_bias',-1.5)
+            camera.set_editor_property('post_process_settings',settings)
+            camera.set_editor_property('post_process_blend_weight',1.0)
     assert levels.save_current_level()
+    for retired in ('Ceiling','Beam'):
+        path=f'{DEST}/Meshes/SM_MI_{retired}'
+        if unreal.EditorAssetLibrary.does_asset_exist(path):assert unreal.EditorAssetLibrary.delete_asset(path)
 
 all_actors=actors.get_all_level_actors()
+assert not any(unreal.EditorAssetLibrary.does_asset_exist(f'{DEST}/Meshes/SM_MI_{key}') for key in ('Ceiling','Beam'))
+assert not any('Ceiling' in a.get_actor_label() or 'Beam' in a.get_actor_label() for a in all_actors)
+assert len([a for a in all_actors if isinstance(a,unreal.StaticMeshActor) and a.static_mesh_component.static_mesh and a.static_mesh_component.static_mesh.get_path_name().startswith(DEST+'/Meshes/')])==55
 by_label={a.get_actor_label():a for a in all_actors}
+assert len([a for a in all_actors if isinstance(a,unreal.RectLight)])==len(m['fixtures'])==5
+for i,f in enumerate(m['fixtures']):
+    light=by_label[f'MI_FixtureLight_{i}'];loc=light.get_actor_location()
+    assert max(abs(v-w*100) for v,w in zip([loc.x,loc.y,loc.z],f['location_m']))<.1
+for name in ('MI_PlayCamera','MI_CorridorPlayCamera'):
+    camera=by_label[name];rotation=camera.get_actor_rotation()
+    assert abs(rotation.pitch+88)<.01 and abs(rotation.yaw)<.01
+    assert abs(camera.camera_component.field_of_view-70)<.01
 for p in m['placements']:
     a=by_label[p['name']];c=a.static_mesh_component
     expected=f"{DEST}/Meshes/SM_MI_{p['key']}"
@@ -66,7 +92,7 @@ for p in m['placements']:
     assert len(cpd)>=4
 report={'passed':True,'mode':'reload' if verify else 'create','map':MAP,'kit_instances':len(m['placements']),
         'kit_triangles':m['sample_triangles'],'rect_lights':5,'reference_objects':1,
-        'placement_transforms_and_dirt_cpd_verified':True,'ceiling_present':True}
+        'placement_transforms_and_dirt_cpd_verified':True,'roofless':True,'ceiling_present':False,'beam_present':False,'wall_mounted_lights':5}
 def finish_verification():
     world=unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem).get_editor_world()
     report['simple_collision_traces']=[]
@@ -98,16 +124,38 @@ def finish_verification():
 # Loading a map queues Chaos registration. Let the editor tick before querying its broadphase.
 # No PIE/game instance is started, and no gameplay save can be touched by this audit.
 _ticks=0
+_screens=[]
+_capture=None
+_busy=False
+
+def _finish():
+    unreal.unregister_slate_post_tick_callback(_tick_handle)
+    report['editor_ticks_before_physics_query']=30
+    (OUT/('unreal_map_reload_validation.json' if verify else 'unreal_map_validation.json')).write_text(json.dumps(report,indent=2))
+    unreal.SystemLibrary.quit_editor()
 def _after_map_tick(delta):
-    global _ticks
+    global _ticks,_capture,_busy
+    if _busy:return
     _ticks+=1
     if _ticks<30:return
-    unreal.unregister_slate_post_tick_callback(_tick_handle)
-    try:finish_verification()
+    _busy=True
+    try:
+        if _ticks==30:
+            finish_verification()
+            if verify:_finish();return
+            _screens.extend([('UE_PlayCamera','MI_PlayCamera'),('UE_CorridorPlayCamera','MI_CorridorPlayCamera')])
+        if _capture and not _capture.is_task_done():
+            assert _ticks<1200,'Screenshot timeout'
+            return
+        if _screens:
+            name,camera=_screens.pop(0)
+            _capture=unreal.AutomationLibrary.take_high_res_screenshot(1400,1000,str(OUT/'Previews'/f'{name}.png'),camera=by_label[camera],delay=5.0)
+        else:
+            assert all((OUT/'Previews'/f'{n}.png').is_file() for n in ('UE_PlayCamera','UE_CorridorPlayCamera'))
+            _finish()
     except Exception:
         import traceback
         report['passed']=False;report['error']=traceback.format_exc();unreal.log_error(report['error'])
-    report['editor_ticks_before_physics_query']=_ticks
-    (OUT/('unreal_map_reload_validation.json' if verify else 'unreal_map_validation.json')).write_text(json.dumps(report,indent=2))
-    unreal.SystemLibrary.quit_editor()
+        _finish()
+    finally:_busy=False
 _tick_handle=unreal.register_slate_post_tick_callback(_after_map_tick)
