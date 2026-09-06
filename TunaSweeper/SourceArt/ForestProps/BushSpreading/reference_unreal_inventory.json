@@ -1,0 +1,299 @@
+[
+  {
+    "path": "/Game/Nature/Bush/Bush_Combined.Bush_Combined",
+    "size_cm": [
+      102.13286209106445,
+      99.76132583618164,
+      87.98967933654785
+    ],
+    "materials": [
+      "/Game/Nature/Bush/M_Bush.M_Bush"
+    ]
+  },
+  {
+    "path": "/Game/Nature/Flower/SM_Flower.SM_Flower",
+    "size_cm": [
+      53.00008010864258,
+      58.719547271728516,
+      28.035074144601822
+    ],
+    "materials": [
+      "/Game/Nature/Flower/M_Flower.M_Flower"
+    ]
+  },
+  {
+    "path": "/Game/Nature/Flower/SM_FlowerY.SM_FlowerY",
+    "size_cm": [
+      53.00008010864258,
+      58.719547271728516,
+      28.035074144601822
+    ],
+    "materials": [
+      "/Game/Nature/Flower/M_FlowerY.M_FlowerY"
+    ]
+  },
+  {
+    "path": "/Game/Nature/GrassLow/SM_GrassLow.SM_GrassLow",
+    "size_cm": [
+      16.483139038085938,
+      14.405555725097656,
+      41.752188086509705
+    ],
+    "materials": [
+      "/Game/Nature/GrassLow/M_GrassBlade.M_GrassBlade"
+    ]
+  },
+  {
+    "path": "/Game/Nature/GrassLow/SM_GrassLowB.SM_GrassLowB",
+    "size_cm": [
+      46.11924171447754,
+      40.30623817443848,
+      116.82115316390991
+    ],
+    "materials": [
+      "/Game/Nature/GrassLow/M_GrassBlade.M_GrassBlade"
+    ]
+  },
+  {
+    "path": "/Game/Nature/RockBasic/RockL_1.RockL_1",
+    "size_cm": [
+      75.1211929321289,
+      98.67240905761719,
+      53.743221282958984
+    ],
+    "materials": [
+      "/Game/Nature/RockBasic/M_RockBasic.M_RockBasic"
+    ]
+  },
+  {
+    "path": "/Game/Nature/RockBasic/RockL_A.RockL_A",
+    "size_cm": [
+      75.1211929321289,
+      98.67240905761719,
+      53.743221282958984
+    ],
+    "materials": [
+      "/Game/Nature/RockBasic/M_RockBasic.M_RockBasic"
+    ]
+  },
+  {
+    "path": "/Game/Nature/RockBasic/RockL_B.RockL_B",
+    "size_cm": [
+      73.44479370117188,
+      107.134521484375,
+      68.04571533203125
+    ],
+    "materials": [
+      "/Game/Nature/RockBasic/M_RockBasic.M_RockBasic"
+    ]
+  },
+  {
+    "path": "/Game/Nature/RockBasic/RockL_C.RockL_C",
+    "size_cm": [
+      83.1836929321289,
+      93.6378173828125,
+      55.155906677246094
+    ],
+    "materials": [
+      "/Game/Nature/RockBasic/M_RockBasic.M_RockBasic"
+    ]
+  },
+  {
+    "path": "/Game/Nature/RockBasic/RockM_1.RockM_1",
+    "size_cm": [
+      18.006702423095703,
+      15.585502624511719,
+      8.66710017528385
+    ],
+    "materials": [
+      "/Game/Nature/RockBasic/M_RockBasic.M_RockBasic"
+    ]
+  },
+  {
+    "path": "/Game/Nature/RockBasic/RockM_2.RockM_2",
+    "size_cm": [
+      48.530099868774414,
+      48.657310485839844,
+      14.04900336265564
+    ],
+    "materials": [
+      "/Game/Nature/RockBasic/M_RockBasic.M_RockBasic"
+    ]
+  },
+  {
+    "path": "/Game/Nature/RockBasic/RockM_3.RockM_3",
+    "size_cm": [
+      13.940999031066895,
+      16.299901962280273,
+      7.667600819841027
+    ],
+    "materials": [
+      "/Game/Nature/RockBasic/M_RockBasic.M_RockBasic"
+    ]
+  },
+  {
+    "path": "/Game/Nature/RockBasic/RockS_1.RockS_1",
+    "size_cm": [
+      7.512998580932617,
+      7.747806549072266,
+      4.369300290942192
+    ],
+    "materials": [
+      "/Game/Nature/RockBasic/M_RockBasic.M_RockBasic"
+    ]
+  },
+  {
+    "path": "/Game/Nature/RockBasic/RockS_2.RockS_2",
+    "size_cm": [
+      5.979799270629883,
+      6.8050994873046875,
+      3.690601199865341
+    ],
+    "materials": [
+      "/Game/Nature/RockBasic/M_RockBasic.M_RockBasic"
+    ]
+  },
+  {
+    "path": "/Game/Nature/RockBasic/RockS_3.RockS_3",
+    "size_cm": [
+      7.126399040222168,
+      7.464897155761719,
+      4.658000327646732
+    ],
+    "materials": [
+      "/Game/Nature/RockBasic/M_RockBasic.M_RockBasic"
+    ]
+  },
+  {
+    "path": "/Game/Nature/RockBasic/RockS_4.RockS_4",
+    "size_cm": [
+      7.204099893569946,
+      8.18280029296875,
+      5.163001134991646
+    ],
+    "materials": [
+      "/Game/Nature/RockBasic/M_RockBasic.M_RockBasic"
+    ]
+  },
+  {
+    "path": "/Game/Nature/RockBasic/RockS_5.RockS_5",
+    "size_cm": [
+      5.5346999168396,
+      6.595699310302734,
+      4.017400838434696
+    ],
+    "materials": [
+      "/Game/Nature/RockBasic/M_RockBasic.M_RockBasic"
+    ]
+  },
+  {
+    "path": "/Game/Nature/RockBasic/RockS_6.RockS_6",
+    "size_cm": [
+      5.87769889831543,
+      6.85870361328125,
+      3.9405013006180525
+    ],
+    "materials": [
+      "/Game/Nature/RockBasic/M_RockBasic.M_RockBasic"
+    ]
+  },
+  {
+    "path": "/Game/Nature/RockBasic/RockS_7.RockS_7",
+    "size_cm": [
+      6.174901962280273,
+      7.060703277587891,
+      4.312400966882706
+    ],
+    "materials": [
+      "/Game/Nature/RockBasic/M_RockBasic.M_RockBasic"
+    ]
+  },
+  {
+    "path": "/Game/Nature/SimpleTree/SM_SimplePineTree.SM_SimplePineTree",
+    "size_cm": [
+      253.24805450439453,
+      247.0498275756836,
+      453.3673240490316
+    ],
+    "materials": [
+      "/Game/Nature/SimpleTree/M_SimplePineTree.M_SimplePineTree"
+    ]
+  },
+  {
+    "path": "/Game/Nature/SimpleTree/SM_SimpleTree.SM_SimpleTree",
+    "size_cm": [
+      356.8192138671875,
+      355.0352478027344,
+      457.86289827525616
+    ],
+    "materials": [
+      "/Game/Nature/SimpleTree/M_SimpleTree.M_SimpleTree"
+    ]
+  },
+  {
+    "path": "/Game/Nature/Wood/SM_CrateA.SM_CrateA",
+    "size_cm": [
+      61.73413848876953,
+      74.67919158935547,
+      70.43730926513672
+    ],
+    "materials": [
+      "/Game/Nature/Wood/M_WoodCommon.M_WoodCommon"
+    ]
+  },
+  {
+    "path": "/Game/Nature/Wood/SM_CrateB.SM_CrateB",
+    "size_cm": [
+      77.32247924804688,
+      73.89291381835938,
+      70.49140930175781
+    ],
+    "materials": [
+      "/Game/Nature/Wood/M_WoodCommon.M_WoodCommon"
+    ]
+  },
+  {
+    "path": "/Game/Nature/Wood/SM_LogA.SM_LogA",
+    "size_cm": [
+      116.48522186279297,
+      94.21091842651367,
+      65.32597541809082
+    ],
+    "materials": [
+      "/Game/Nature/Wood/M_WoodCommon.M_WoodCommon"
+    ]
+  },
+  {
+    "path": "/Game/Nature/Wood/SM_LogB.SM_LogB",
+    "size_cm": [
+      128.3581428527832,
+      91.79080963134766,
+      66.36454772949219
+    ],
+    "materials": [
+      "/Game/Nature/Wood/M_WoodCommon.M_WoodCommon"
+    ]
+  },
+  {
+    "path": "/Game/Nature/Wood/SM_StumpA.SM_StumpA",
+    "size_cm": [
+      103.39057540893555,
+      97.90304946899414,
+      58.251516342163086
+    ],
+    "materials": [
+      "/Game/Nature/Wood/M_WoodCommon.M_WoodCommon"
+    ]
+  },
+  {
+    "path": "/Game/Nature/Wood/SM_StumpB.SM_StumpB",
+    "size_cm": [
+      94.85684585571289,
+      100.19342422485352,
+      49.82253456115723
+    ],
+    "materials": [
+      "/Game/Nature/Wood/M_WoodCommon.M_WoodCommon"
+    ]
+  }
+]

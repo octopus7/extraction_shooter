@@ -1,0 +1,28 @@
+{
+  "SM_SimpleTree.blend": [
+    {
+      "name": "SM_SimpleTree",
+      "dimensions": [
+        0.8920480012893677,
+        1.1446571350097656,
+        0.8875881433486938
+      ],
+      "polygons": 3845,
+      "materials": [
+        "Material.001"
+      ]
+    },
+    {
+      "name": "SM_SimplePineTree",
+      "dimensions": [
+        1.9480619430541992,
+        3.487440586090088,
+        1.9003832340240479
+      ],
+      "polygons": 3822,
+      "materials": [
+        "M_SimplePineTree"
+      ]
+    }
+  ]
+}

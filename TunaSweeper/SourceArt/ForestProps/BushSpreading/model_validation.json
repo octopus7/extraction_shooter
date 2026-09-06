@@ -1,0 +1,79 @@
+{
+  "asset": "SM_BushSpreading",
+  "blender": "4.5.12 LTS",
+  "seed": 90637,
+  "leaves": 157,
+  "branches": 27,
+  "palette_srgb": [
+    "48613D",
+    "587447",
+    "6A8052",
+    "506C40",
+    "627449",
+    "405536",
+    "806344",
+    "927450"
+  ],
+  "source": {
+    "vertices": 1741,
+    "triangles": 2746,
+    "bounds_m": [
+      -1.1014907360076904,
+      -0.6268888711929321,
+      0.0,
+      0.988030195236206,
+      0.7141273021697998,
+      0.6613427400588989
+    ],
+    "dimensions_m": [
+      2.0895209312438965,
+      1.341016173362732,
+      0.6613427400588989
+    ],
+    "material_slots": 1,
+    "uv_channels": 2,
+    "nonmanifold_edges": 0,
+    "degenerate_faces": 0,
+    "invalid_normals": 0,
+    "uv_nonfinite": 0
+  },
+  "pivot": [
+    0,
+    0,
+    0
+  ],
+  "units": "meters; UE centimeters x100",
+  "opaque_closed_leaves": true,
+  "collision": false,
+  "fbx_export": {
+    "axis_forward": "-Y",
+    "axis_up": "Z",
+    "apply_unit_scale": true,
+    "apply_scale_options": "FBX_SCALE_UNITS",
+    "global_scale": 1
+  },
+  "fbx_reload": {
+    "vertices": 1741,
+    "triangles": 2746,
+    "bounds_m": [
+      -1.1014907360076904,
+      -0.6268889307975769,
+      0.0,
+      0.988030195236206,
+      0.7141273021697998,
+      0.6613427400588989
+    ],
+    "dimensions_m": [
+      2.0895209312438965,
+      1.3410162329673767,
+      0.6613427400588989
+    ],
+    "material_slots": 1,
+    "uv_channels": 2,
+    "nonmanifold_edges": 0,
+    "degenerate_faces": 0,
+    "invalid_normals": 0,
+    "uv_nonfinite": 0
+  },
+  "passed": true
+}
