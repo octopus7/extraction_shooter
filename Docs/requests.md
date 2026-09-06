@@ -7854,3 +7854,11 @@
 - 경로: Tools/ModularInteriorPreview, TunaSweeper/SourceArt/Environment/ModularInteriorPreview, /Game/Environment/ModularInteriorPreview. UE 빌드 성공 후 에디터 실행. 기존 게임 맵·BP·애셋 변경 없음.
 - 실행 결과: 원본 및 FBX 검사 종료 0, UE 에셋 검증 통과. 기존 NE_PostProcess Niagara 초기화 ensure로 임포트/재로드 커맨드렛 종료 1이며, 전용 맵 생성/재로드는 종료 0. FPS 향상은 측정하거나 주장하지 않음.
 - 커밋: 원본 단계 7f0a7f80. UE 애셋/맵·검증 도구·완료 기록은 별도 후속 로컬 커밋으로 저장하며 push하지 않음.
+
+## 2026-09-07 00:29:02 (소요시간: 00:17:24)
+
+- 요청: 탑다운용 실내 프리뷰에서 천장과 천장 지지 구조물을 제거하고 6종 구성으로 수정. 벽 부착 조명, 탑다운 검토, 검증·커밋을 유지하며 일회성 UE 생성 코드는 에셋 커밋 직후 제거.
+- 완료: Floor, Wall, InsideCorner, Doorway, DoorLeaf, LightBar만 유지. Ceiling/Beam FBX·UE 메시·샘플 배치·Blender 원본과 남은 백업에서 제거. LightBar 5개를 벽 부착형으로 변경. 고유 160삼각형, 55개 배치·804삼각형. 기존 ImageGen 아틀라스·오염 마스크 유지.
+- 방·복도 탑다운 Blender 프리뷰와 같은 프로젝트 카메라 설정의 UE 에디터 캡처 추가. 비교 페이지는 탑다운을 기본으로 변경. UE 캡처는 PIE 플레이가 아니며 프리뷰 카메라 노출 -1.5 EV 적용.
+- 검증: Blender 생성 및 FBX 재로드 종료 0. UE 6종 메시·UV·재질·충돌 검사 통과. 생성 코드 제거 후 읽기 전용 재검증도 통과. UE 에셋 커맨드렛은 기존 Niagara NE_PostProcess ensure로 종료 1, 전체 에디터 맵 재로드·벽/문틀/바닥 충돌 및 문 통과 검사 종료 0. 새 에셋 폴더 밖의 UE 콘텐츠 변경 없음.
+- 수정 커밋 473c3fae에 검증된 생성물과 UE 생성 코드를 함께 기록. 바로 다음 정리 커밋에서 임포터·맵 생성기·생성 진입점과 전용 임포트 옵션을 제거하고 읽기 전용 검증 도구로 교체. 재사용 Blender 도구와 저장하지 않는 재질 검토 도구는 유지. 푸시하지 않음.
