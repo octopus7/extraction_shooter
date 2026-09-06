@@ -70,3 +70,13 @@ JSON 스폰에서는 `visual_mesh`, `visual_material`, `visual_scale`, `visual_r
 UE 실행에는 빌드된 TunaSweeperEditor 모듈과 UE 5.7이 필요하다. 명령행에서만 Python/EditorScripting 플러그인을 켜며 `.uproject`는 바꾸지 않는다. FBX는 legacy importer를 명시하고 크기 보정 없이 1.0으로 임포트한다. DDC는 작업트리 내 폴더와 엔진의 `InstalledNoZenLocalFallback`을 사용한다.
 
 UE 시작 시 기존 Niagara `NE_PostProcess`의 Typed Element Registry ensure가 관찰되었다. 이 오류는 모델 생성 전 읽기 전용 조사에서도 발생했으며 명령행 종료 코드를 1로 만든다. 래퍼는 이를 성공으로 숨기지 않는다. Python 완료 표시·새 검증 JSON과 프로세스 종료 코드는 구분해서 확인한다. 실행 로그는 `TunaSweeper/Saved/MemoDevice_*.log`에 있다.
+
+## 완료 검증
+
+- 원본 커밋: `e602d949`. Blender 4.5.12 LTS로 생성·렌더·독립 FBX 재로드 완료. Hero/Rear/Top/Bottom/Connector와 카메라 거리 비교를 실제 시각 확인했다. 면 겹침과 과다 노출을 수정한 최종 렌더다.
+- UE 5.7.4 `TunaSweeperEditor Win64 Development` 빌드: 성공, 종료 코드 0.
+- Static Mesh 1개, 새 재질 4개 임포트 완료. 별도 UE 프로세스에서 저장 애셋 재로드 검증 통과. `unreal_import_validation.json`, `unreal_reload_validation.json` 참고.
+- UE 바운드 최대 오차 **0.000000462cm**, 슬롯 4개 및 PBR 값·발광값, UCX 충돌 1개, UV0와 lightmap UV1 생성 설정 확인. UE 정점 4,897개는 노멀/UV 경계에서 분리된 값이다.
+- 임포트·재로드 과정에서 보호한 기존 맵·BP·메모 파일 72개 해시가 동일했다. 게임 내 연결과 최종 플레이 화면 검증은 수행하지 않았다.
+- 두 UE 명령은 Python 오류 없이 완료됐지만, 기존 Niagara 시작 ensure로 프로세스 종료 코드가 **1**이었다. `unreal_execution_Import.json`, `unreal_execution_Verify.json`에서 구분해 기록했다.
+- `open_in_editor.py`는 이미 임포트된 메시를 Content Browser와 Static Mesh Editor에서 열기만 한다. 에디터 Python 콘솔에서 `exec(open(r'전체경로/Tools/MemoStorageDevice/open_in_editor.py', encoding='utf-8').read())`로 재사용할 수 있다.
