@@ -43,9 +43,8 @@ public:
 
 private:
 	bool EnsureTextDataLoaded() const;
-	bool LoadTextStringsCsv() const;
+	bool LoadTextStringsCsv(const TCHAR* RelativePath, const TCHAR* DatasetLabel) const;
 	void ResetLoadedTextData() const;
-	FString GetTextStringsCsvPath() const;
 
 	mutable TMap<FName, FTunaSweeperLocalizedTextString> TextStringsByKey;
 

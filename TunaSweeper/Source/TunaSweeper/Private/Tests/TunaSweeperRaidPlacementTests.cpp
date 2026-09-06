@@ -2,6 +2,7 @@
 
 #include "Subsystem/TunaSweeperRaidPlacementSubsystem.h"
 #include "Raid/TunaSweeperLootAnchorPreviewDataAsset.h"
+#include "Game/TunaSweeperDataValueTypes.h"
 
 #include "Dom/JsonObject.h"
 #include "Misc/AutomationTest.h"
@@ -89,6 +90,21 @@ bool FTunaSweeperRaidPlacementDeterministicRollTest::RunTest(const FString& Para
 	TestEqual(TEXT("Same RaidSeed and PlacementId reproduce exactly"), First, Second);
 	TestNotEqual(TEXT("PlacementId contributes to the roll"), First, Interleaved);
 	TestNotEqual(TEXT("RaidSeed contributes to the roll"), First, UTunaSweeperRaidPlacementSubsystem::GetDeterministicPlacementRoll(48272, 101));
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(
+	FTunaSweeperProbabilityBasisTest,
+	"TunaSweeper.RaidPlacement.IntegerProbabilityBasis",
+	TunaSweeperRaidPlacementTests::TestFlags)
+
+bool FTunaSweeperProbabilityBasisTest::RunTest(const FString& Parameters)
+{
+	(void)Parameters;
+	TestEqual(TEXT("Raw 0 is 0 percent"), TunaSweeperDataValues::NormalizeProbabilityValue(0), 0.0f);
+	TestEqual(TEXT("Raw 1 is 0.01 percent"), TunaSweeperDataValues::NormalizeProbabilityValue(1), 0.0001f);
+	TestEqual(TEXT("Raw 10000 is 100 percent"), TunaSweeperDataValues::NormalizeProbabilityValue(10000), 1.0f);
+	TestEqual(TEXT("Probabilities clamp above 100 percent"), TunaSweeperDataValues::NormalizeProbabilityValue(20000), 1.0f);
 	return true;
 }
 

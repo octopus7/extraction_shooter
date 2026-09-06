@@ -22,4 +22,9 @@ namespace TunaSweeperDataValues
 	{
 		return static_cast<float>(Value) / static_cast<float>(FixedPointBasis);
 	}
+
+	FORCEINLINE float NormalizeProbabilityValue(int32 Value)
+	{
+		return ToRatioFloat(ClampProbabilityValue(Value));
+	}
 }

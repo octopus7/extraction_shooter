@@ -598,8 +598,8 @@ private:
 	struct FDifficultyOptionText
 	{
 		int32 DifficultyStage = 1;
-		FText Title;
-		FText Description;
+		FName TitleStringKey;
+		FName DescriptionStringKey;
 	};
 
 	int32 SelectedSaveSlotIndex = INDEX_NONE;

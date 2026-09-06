@@ -50,9 +50,9 @@ namespace TunaSweeperRaidPlacement
 
 	float ReadSpawnChance(const TSharedPtr<FJsonObject>& JsonObject)
 	{
-		double NumericChance = 1.0;
+		double NumericChance = TunaSweeperDataValues::ProbabilityMax;
 		JsonObject->TryGetNumberField(TEXT("spawn_chance"), NumericChance);
-		return FMath::Clamp(static_cast<float>(NumericChance), 0.0f, 1.0f);
+		return TunaSweeperDataValues::NormalizeProbabilityValue(FMath::RoundToInt(NumericChance));
 	}
 
 	FName ReadOptionalName(const TSharedPtr<FJsonObject>& JsonObject, const TCHAR* FieldName)

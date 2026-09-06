@@ -130,11 +130,11 @@ bool UTunaSweeperMemoSubsystem::LoadMemoDefinitions(bool bForceReload)
 
 		const TSharedPtr<FJsonObject>& JsonObject = *JsonObjectPtr;
 		double NumericMemoId = INDEX_NONE;
-		FString Title;
-		FString Body;
+		FString TitleStringKey;
+		FString BodyStringKey;
 		if (!JsonObject->TryGetNumberField(TEXT("memo_id"), NumericMemoId) ||
-			!JsonObject->TryGetStringField(TEXT("title"), Title) ||
-			!JsonObject->TryGetStringField(TEXT("body"), Body))
+			!JsonObject->TryGetStringField(TEXT("title_string_key"), TitleStringKey) ||
+			!JsonObject->TryGetStringField(TEXT("body_string_key"), BodyStringKey))
 		{
 			UE_LOG(LogTunaSweeperMemo, Warning, TEXT("Skipping memo definition row %d: required field is missing."), RowIndex);
 			continue;
@@ -142,11 +142,11 @@ bool UTunaSweeperMemoSubsystem::LoadMemoDefinitions(bool bForceReload)
 
 		FTunaSweeperMemoDefinition Definition;
 		Definition.MemoId = static_cast<int32>(NumericMemoId);
-		Definition.Title = FText::FromString(Title.TrimStartAndEnd());
-		Definition.Body = FText::FromString(Body.TrimStartAndEnd());
-		if (Definition.MemoId <= 0 || Definition.Title.IsEmpty())
+		Definition.TitleStringKey = FName(*TitleStringKey.TrimStartAndEnd());
+		Definition.BodyStringKey = FName(*BodyStringKey.TrimStartAndEnd());
+		if (Definition.MemoId <= 0 || Definition.TitleStringKey.IsNone() || Definition.BodyStringKey.IsNone())
 		{
-			UE_LOG(LogTunaSweeperMemo, Warning, TEXT("Skipping memo definition row %d: invalid memo id or title."), RowIndex);
+			UE_LOG(LogTunaSweeperMemo, Warning, TEXT("Skipping memo definition row %d: invalid memo id or text string key."), RowIndex);
 			continue;
 		}
 
@@ -434,6 +434,11 @@ bool UTunaSweeperMemoSubsystem::TryGetMemoDefinition(int32 MemoId, FTunaSweeperM
 	if (const FTunaSweeperMemoDefinition* FoundDefinition = MemoDefinitionsById.Find(MemoId))
 	{
 		OutDefinition = *FoundDefinition;
+		if (const UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GetGameInstance()))
+		{
+			OutDefinition.Title = TunaGameInstance->ResolveLocalizedText(OutDefinition.TitleStringKey, FText::GetEmpty());
+			OutDefinition.Body = TunaGameInstance->ResolveLocalizedText(OutDefinition.BodyStringKey, FText::GetEmpty());
+		}
 		return true;
 	}
 
@@ -464,8 +469,12 @@ void UTunaSweeperMemoSubsystem::GetMemoListEntries(TArray<FTunaSweeperMemoListEn
 
 		FTunaSweeperMemoListEntry Entry;
 		Entry.MemoId = MemoId;
-		Entry.Title = Definition->Title;
-		Entry.Body = Definition->Body;
+		Entry.Title = TunaGameInstance
+			? TunaGameInstance->ResolveLocalizedText(Definition->TitleStringKey, FText::GetEmpty())
+			: FText::FromName(Definition->TitleStringKey);
+		Entry.Body = TunaGameInstance
+			? TunaGameInstance->ResolveLocalizedText(Definition->BodyStringKey, FText::GetEmpty())
+			: FText::FromName(Definition->BodyStringKey);
 		Entry.bAcquired = TunaGameInstance && TunaGameInstance->IsMemoAcquired(MemoId);
 		OutEntries.Add(Entry);
 	}

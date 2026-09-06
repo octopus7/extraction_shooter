@@ -23,7 +23,7 @@ Enemy placement:
   "level_name": "DemoRaidMap",
   "placement_id": 101,
   "profile_id": "enemy.rifle.standard",
-  "spawn_chance": 0.65,
+  "spawn_chance": 6500,
   "condition_id": "always"
 }
 ```
@@ -37,10 +37,12 @@ Loot-container anchor placement:
   "loot_container_class": "/Game/Interaction/BP_LootContainer.BP_LootContainer_C",
   "container_definition_id": 7001,
   "contents_id": 8001,
-  "spawn_chance": 1.0,
+  "spawn_chance": 10000,
   "condition_id": "always"
 }
 ```
+
+`spawn_chance`는 `0..10000` 정수 확률이다. `0`은 0%, `1`은 0.01%, `10000`은 100%이며 생략 시 `10000`이다. `0.65` 같은 `0..1` 비율 표기는 지원하지 않는다.
 
 Memo placement:
 

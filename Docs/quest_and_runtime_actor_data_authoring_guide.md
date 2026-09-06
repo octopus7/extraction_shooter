@@ -92,7 +92,10 @@ quest.demo.first.objective,레이드 구역 확인,Inspect the raid zone,レイ�
 | `EnemySpawnProfiles.json` | 적 클래스/로드아웃 | `profile_id`, `enemy_class`, `combat_profile_id` |
 | `LootContainerSpawns.json` | 앵커 또는 기존 좌표 기반 루트 컨테이너 | 앵커: `level_name`, `placement_id`, 정의/내용 ID |
 | `MemoSpawns.json` | 앵커 기반 수집 메모 | `level_name`, `placement_id`, `memo_id` |
-| `MemoDefinitions.json` | 메모 본문과 제목 | `memo_id` 및 표시 데이터 |
+| `MemoDefinitions.json` | 메모 본문과 제목 키 | `memo_id`, `title_string_key`, `body_string_key` |
+| `MemoTextStrings.csv` | 메모 다국어 원문 | `string_key,ko,en,ja` |
+| `DifficultyDefinitions.json` | 난이도 키와 적→플레이어 피해 배율 | `difficulty_stage`, 텍스트 키, `enemy_incoming_damage_multiplier` |
+| `DifficultyTextStrings.csv` | 난이도 다국어 원문 | `string_key,ko,en,ja` |
 
 모든 파일은 `TunaSweeper/Content/Data` 아래에 있다. `EnemySpawns.json`과 `MemoSpawns.json`에는 `location`, `rotation`, `scale`을 쓰지 않는다. 같은 `placement_id`와 종류를 가진 `BP_RaidPlacementAnchor`의 Transform이 위치를 소유한다. 일반 상호작용, Mole, 워프, 월드 진행, 투명 장애물, 레벨 이동, 추출은 레벨에 직접 배치한다.
 
@@ -104,7 +107,7 @@ quest.demo.first.objective,레이드 구역 확인,Inspect the raid zone,レイ�
     "level_name": "DemoRaidMap",
     "placement_id": 101,
     "profile_id": "enemy.demo_guard",
-    "spawn_chance": 1.0,
+    "spawn_chance": 10000,
     "condition_id": "always"
   }
 ]
@@ -130,6 +133,12 @@ quest.demo.first.objective,레이드 구역 확인,Inspect the raid zone,レイ�
 ```
 
 같은 `memo_id`가 `MemoDefinitions.json`에 있어야 하고, 레벨에는 종류 `Memo`, ID `301`인 앵커가 있어야 한다. 이미 획득한 메모 ID는 `AcquiredMemoIds` 때문에 다시 나타나지 않을 수 있으므로 새 저장 슬롯으로 확인한다. 직접 배치한 `ATunaSweeperMemoActor`도 별도로 계속 지원한다.
+
+`MemoDefinitions.json`에는 표시 문장을 직접 쓰지 않는다. 제목과 본문은 각각 `title_string_key`, `body_string_key`로 `MemoTextStrings.csv`를 참조한다. CSV 헤더는 정확히 `string_key,ko,en,ja`이며 키 중복이나 번역 누락은 데이터 오류로 취급한다. 언어 변경 시 메모 목록과 현재 본문은 같은 키를 현재 언어로 다시 해석한다.
+
+`DifficultyDefinitions.json`의 `enemy_incoming_damage_multiplier`도 `10000 = 1.0배`인 정수 비율이다. 이 값은 확률이 아니므로 `10000` 위로 제한하지 않는다. 현재 1/2/3단계 값은 `5000`, `10000`, `20000`이다. 적 진영으로 귀속된 원시 피해에 배율을 적용하고 정수 체력 단위로 한 번 반올림한 뒤 플레이어 방어력을 뺀다. 플레이어·아군·환경 피해에는 적용하지 않는다.
+
+`LootContainerContents.json`의 `drop_chance`는 수량 필드와 별개인 `0..10000` 정수 확률이다. 생략 시 `10000`이며 `1`은 100%가 아니라 0.01%다. `0..1` 소수 비율과 `drop_chance_ratio` 별칭은 지원하지 않는다.
 
 ### 연결 데이터 주의사항
 
