@@ -27,10 +27,8 @@ struct TUNASWEEPER_API FTunaSweeperResearchNodeDefinition
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TunaSweeper|Research") int32 RequiredAppliedNodeCount = 0;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TunaSweeper|Research") int32 DurationSeconds = 10;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TunaSweeper|Research") TArray<FName> ParentNodeIds;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TunaSweeper|Research") FString DisplayNameKo;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TunaSweeper|Research") FString DisplayNameEn;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TunaSweeper|Research") FString DescriptionKo;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TunaSweeper|Research") FString DescriptionEn;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TunaSweeper|Research") FName DisplayNameStringKey;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TunaSweeper|Research") FName DescriptionStringKey;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TunaSweeper|Research") FSoftObjectPath Icon;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TunaSweeper|Research") TArray<FTunaSweeperResearchEffect> Effects;
 };

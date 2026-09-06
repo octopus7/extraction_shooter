@@ -225,3 +225,29 @@ ui.settings.dynamic_resolution,동적 해상도,Dynamic Resolution,動的解像�
 ui.settings.hardware_ray_tracing,하드웨어 레이 트레이싱,Hardware Ray Tracing,ハードウェアレイトレーシング
 ui.settings.fps_unlimited,제한 없음,Unlimited,無制限
 ui.settings.resolution_confirm_countdown,이 화면 설정을 유지할까요? {0}초 후 복구됩니다.,Keep these display settings? Reverting in {0} seconds.,この画面設定を維持しますか？ {0}秒後に元に戻します。
+research.node.vitality_1.name,기초 체력 연구,Basic Vitality,基礎体力研究
+research.node.vitality_1.description,최대 체력이 5 증가합니다.,Maximum health +5.,最大体力が5増加します。
+research.node.nutrition_1.name,영양 저장 I,Nutrition Storage I,栄養貯蔵 I
+research.node.nutrition_1.description,최대 포만감이 5 증가합니다.,Maximum food +5.,最大満腹度が5増加します。
+research.node.hydration_1.name,수분 저장 I,Hydration Storage I,水分貯蔵 I
+research.node.hydration_1.description,최대 수분이 5 증가합니다.,Maximum hydration +5.,最大水分が5増加します。
+research.node.vitality_2.name,체력 강화 I,Vitality Boost I,体力強化 I
+research.node.vitality_2.description,최대 체력이 10 증가합니다.,Maximum health +10.,最大体力が10増加します。
+research.node.stamina_1.name,지구력 I,Endurance I,持久力 I
+research.node.stamina_1.description,최대 스태미나가 5 증가합니다.,Maximum stamina +5.,最大スタミナが5増加します。
+research.node.carry_1.name,운반 기술 I,Carrying Technique I,運搬技術 I
+research.node.carry_1.description,운반 힘이 1 증가합니다.,Carry strength +1.,運搬力が1増加します。
+research.node.nutrition_2.name,영양 저장 II,Nutrition Storage II,栄養貯蔵 II
+research.node.nutrition_2.description,최대 포만감이 10 증가합니다.,Maximum food +10.,最大満腹度が10増加します。
+research.node.hydration_2.name,수분 저장 II,Hydration Storage II,水分貯蔵 II
+research.node.hydration_2.description,최대 수분이 10 증가합니다.,Maximum hydration +10.,最大水分が10増加します。
+research.node.vitality_3.name,체력 강화 II,Vitality Boost II,体力強化 II
+research.node.vitality_3.description,최대 체력이 15 증가합니다.,Maximum health +15.,最大体力が15増加します。
+research.node.stamina_2.name,지구력 II,Endurance II,持久力 II
+research.node.stamina_2.description,최대 스태미나가 10 증가합니다.,Maximum stamina +10.,最大スタミナが10増加します。
+research.node.carry_2.name,운반 기술 II,Carrying Technique II,運搬技術 II
+research.node.carry_2.description,운반 힘이 2 증가합니다.,Carry strength +2.,運搬力が2増加します。
+research.node.survival_mastery.name,생존 숙련,Survival Mastery,サバイバル熟練
+research.node.survival_mastery.description,모든 생존 최대치가 10 증가합니다.,All survival maximums +10.,すべての生存最大値が10増加します。
+research.node.ultimate_conditioning.name,궁극의 신체 단련,Ultimate Conditioning,究極の身体鍛錬
+research.node.ultimate_conditioning.description,"최대 체력과 스태미나가 20, 운반 힘이 2 증가합니다.","Maximum health and stamina +20, carry strength +2.","最大体力とスタミナが20、運搬力が2増加します。"

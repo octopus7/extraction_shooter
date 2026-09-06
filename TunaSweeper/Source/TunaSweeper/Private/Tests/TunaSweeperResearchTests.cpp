@@ -9,7 +9,9 @@
 #include "Misc/Paths.h"
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
+#include "Serialization/Csv/CsvParser.h"
 #include "Subsystem/TunaSweeperResearchSubsystem.h"
+#include "Subsystem/TunaSweeperTextSubsystem.h"
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(
 	FTunaSweeperResearchJsonContractTest,
@@ -25,6 +27,36 @@ bool FTunaSweeperResearchJsonContractTest::RunTest(const FString& Parameters)
 	const TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Json);
 	TestTrue(TEXT("Research JSON parses as an array"), FJsonSerializer::Deserialize(Reader, Values));
 	TSet<FString> NodeIds;
+	TSet<FString> UiTextKeys;
+	FString UiTextCsv;
+	const FString UiTextCsvPath = FPaths::Combine(FPaths::ProjectContentDir(), TEXT("Data/UITextStrings.csv"));
+	if (TestTrue(TEXT("UI text CSV exists"), FFileHelper::LoadFileToString(UiTextCsv, *UiTextCsvPath)))
+	{
+		const FCsvParser CsvParser(UiTextCsv);
+		const FCsvParser::FRows& CsvRows = CsvParser.GetRows();
+		if (TestTrue(TEXT("UI text CSV includes its header"), CsvRows.Num() > 0))
+		{
+			const TArray<const TCHAR*>& Header = CsvRows[0];
+			TestTrue(TEXT("UI text CSV uses string_key,ko,en,ja"),
+				Header.Num() >= 4 &&
+				FString(Header[0]).Equals(TEXT("string_key"), ESearchCase::IgnoreCase) &&
+				FString(Header[1]).Equals(TEXT("ko"), ESearchCase::IgnoreCase) &&
+				FString(Header[2]).Equals(TEXT("en"), ESearchCase::IgnoreCase) &&
+				FString(Header[3]).Equals(TEXT("ja"), ESearchCase::IgnoreCase));
+		}
+		for (int32 RowIndex = 1; RowIndex < CsvRows.Num(); ++RowIndex)
+		{
+			const TArray<const TCHAR*>& Row = CsvRows[RowIndex];
+			if (Row.Num() >= 4 && !FString(Row[0]).TrimStartAndEnd().IsEmpty() &&
+				!FString(Row[1]).TrimStartAndEnd().IsEmpty() &&
+				!FString(Row[2]).TrimStartAndEnd().IsEmpty() &&
+				!FString(Row[3]).TrimStartAndEnd().IsEmpty())
+			{
+				UiTextKeys.Add(FString(Row[0]).TrimStartAndEnd());
+			}
+		}
+	}
+	TSet<FString> ResearchTextKeys;
 	TMap<int32, int32> RowCounts;
 	int32 InitialNodeCount = 0;
 	int32 MaximumDurationSeconds = 0;
@@ -42,6 +74,25 @@ bool FTunaSweeperResearchJsonContractTest::RunTest(const FString& Parameters)
 		if (Required == 0) ++InitialNodeCount;
 		MaximumDurationSeconds = FMath::Max(MaximumDurationSeconds, Duration);
 		TestTrue(FString::Printf(TEXT("Duration is within 1..3600: %s"), *NodeId), Duration >= 1 && Duration <= 3600);
+
+		FString DisplayNameStringKey;
+		FString DescriptionStringKey;
+		TestTrue(FString::Printf(TEXT("Display-name string key exists: %s"), *NodeId),
+			Object->TryGetStringField(TEXT("display_name_string_key"), DisplayNameStringKey) && !DisplayNameStringKey.TrimStartAndEnd().IsEmpty());
+		TestTrue(FString::Printf(TEXT("Description string key exists: %s"), *NodeId),
+			Object->TryGetStringField(TEXT("description_string_key"), DescriptionStringKey) && !DescriptionStringKey.TrimStartAndEnd().IsEmpty());
+		DisplayNameStringKey.TrimStartAndEndInline();
+		DescriptionStringKey.TrimStartAndEndInline();
+		TestTrue(FString::Printf(TEXT("Display-name key resolves through UI text CSV: %s"), *NodeId), UiTextKeys.Contains(DisplayNameStringKey));
+		TestTrue(FString::Printf(TEXT("Description key resolves through UI text CSV: %s"), *NodeId), UiTextKeys.Contains(DescriptionStringKey));
+		TestFalse(FString::Printf(TEXT("Display-name key is unique: %s"), *DisplayNameStringKey), ResearchTextKeys.Contains(DisplayNameStringKey));
+		ResearchTextKeys.Add(DisplayNameStringKey);
+		TestFalse(FString::Printf(TEXT("Description key is unique: %s"), *DescriptionStringKey), ResearchTextKeys.Contains(DescriptionStringKey));
+		ResearchTextKeys.Add(DescriptionStringKey);
+		TestFalse(FString::Printf(TEXT("Legacy Korean display-name text was removed: %s"), *NodeId), Object->HasField(TEXT("display_name_ko")));
+		TestFalse(FString::Printf(TEXT("Legacy English display-name text was removed: %s"), *NodeId), Object->HasField(TEXT("display_name_en")));
+		TestFalse(FString::Printf(TEXT("Legacy Korean description text was removed: %s"), *NodeId), Object->HasField(TEXT("description_ko")));
+		TestFalse(FString::Printf(TEXT("Legacy English description text was removed: %s"), *NodeId), Object->HasField(TEXT("description_en")));
 	}
 	for (const TPair<int32, int32>& Pair : RowCounts)
 	{
@@ -49,6 +100,27 @@ bool FTunaSweeperResearchJsonContractTest::RunTest(const FString& Parameters)
 	}
 	TestTrue(TEXT("At least one node is initially available"), InitialNodeCount > 0);
 	TestEqual(TEXT("Final research duration reaches one hour"), MaximumDurationSeconds, 3600);
+	TestEqual(TEXT("Every research node owns one display-name and one description key"), ResearchTextKeys.Num(), Values.Num() * 2);
+
+	UGameInstance* GameInstance = NewObject<UGameInstance>();
+	UTunaSweeperTextSubsystem* TextSubsystem = NewObject<UTunaSweeperTextSubsystem>(GameInstance);
+	if (TestNotNull(TEXT("Common UI text subsystem instance"), TextSubsystem) &&
+		TestTrue(TEXT("Common UI text subsystem loads research strings"), TextSubsystem->LoadTextData(true)))
+	{
+		for (const FString& ResearchTextKey : ResearchTextKeys)
+		{
+			for (const ETunaSweeperItemTextLanguage Language : {
+				ETunaSweeperItemTextLanguage::Korean,
+				ETunaSweeperItemTextLanguage::English,
+				ETunaSweeperItemTextLanguage::Japanese })
+			{
+				FText ResolvedText;
+				TestTrue(
+					FString::Printf(TEXT("Common UI text subsystem resolves research key %s for language %d"), *ResearchTextKey, static_cast<int32>(Language)),
+					TextSubsystem->TryGetTextByKey(FName(*ResearchTextKey), Language, ResolvedText) && !ResolvedText.IsEmpty());
+			}
+		}
+	}
 	return true;
 }
 
