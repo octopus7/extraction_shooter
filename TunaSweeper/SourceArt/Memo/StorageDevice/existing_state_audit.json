@@ -1,0 +1,41 @@
+{
+  "engine": "5.7.4-51494982+++UE5+Release-5.7",
+  "native_defaults": {
+    "visual_mesh_asset": "None",
+    "visual_material_asset": "None",
+    "visual_scale": [
+      0.8500000238418579,
+      0.550000011920929,
+      0.07999999821186066
+    ],
+    "visual_relative_location": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "component_mesh": "/Engine/BasicShapes/Cube.Cube",
+    "component_materials": [
+      "/Game/Interaction/M_MemoStorageDevice.M_MemoStorageDevice"
+    ]
+  },
+  "derived_classes": [],
+  "blueprints": [],
+  "references": {
+    "/Game/Interaction/M_MemoStorageDevice": [],
+    "/Game/Interaction/T_MemoStorageDevice": [
+      "/Game/Interaction/M_MemoStorageDevice"
+    ]
+  },
+  "existing_material": {
+    "path": "/Game/Interaction/M_MemoStorageDevice.M_MemoStorageDevice",
+    "two_sided": false,
+    "base_color_node": "/Game/Interaction/M_MemoStorageDevice.M_MemoStorageDevice:MaterialExpressionTextureSampleParameter2D_0"
+  },
+  "existing_texture": {
+    "path": "/Game/Interaction/T_MemoStorageDevice.T_MemoStorageDevice",
+    "width": 1254,
+    "height": 1254
+  },
+  "serialized_memo_references": [],
+  "demo_memo_spawn_count": 0
+}

@@ -1,0 +1,24 @@
+{
+  "type": "Blender camera approximation; no UI marker, not an in-game capture",
+  "camera_source": "TunaSweeperTopDownCharacter.cpp / .h native default: arm 1200 cm, pitch -60, horizontal FOV 70",
+  "resolution": [
+    1920,
+    1080
+  ],
+  "results": [
+    {
+      "uniform_scale": 1,
+      "projected_pixel_size": [
+        8.0255126953125,
+        12.649072408676147
+      ]
+    },
+    {
+      "uniform_scale": 3,
+      "projected_pixel_size": [
+        24.245338439941406,
+        37.954652309417725
+      ]
+    }
+  ]
+}

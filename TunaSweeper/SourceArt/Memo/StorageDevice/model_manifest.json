@@ -1,0 +1,72 @@
+{
+  "name": "SM_MemoStorageDevice",
+  "blender": "4.5.12 LTS",
+  "bounds_cm": [
+    -5.499999970197678,
+    -3.500000014901161,
+    0.0,
+    6.499999761581421,
+    3.500000014901161,
+    2.0705001428723335
+  ],
+  "size_cm": [
+    11.999999731779099,
+    7.000000029802322,
+    2.0705001428723335
+  ],
+  "triangles": 6012,
+  "vertices": 3088,
+  "closed_solids": 41,
+  "uv_channels": 1,
+  "materials": {
+    "M_MemoDevice_Shell": {
+      "color": [
+        0.045,
+        0.13,
+        0.28,
+        1
+      ],
+      "metallic": 0.35,
+      "roughness": 0.5,
+      "emission": 0
+    },
+    "M_MemoDevice_Guard": {
+      "color": [
+        0.025,
+        0.035,
+        0.045,
+        1
+      ],
+      "metallic": 0.05,
+      "roughness": 0.78,
+      "emission": 0
+    },
+    "M_MemoDevice_Metal": {
+      "color": [
+        0.34,
+        0.4,
+        0.44,
+        1
+      ],
+      "metallic": 0.8,
+      "roughness": 0.34,
+      "emission": 0
+    },
+    "M_MemoDevice_Status": {
+      "color": [
+        0.025,
+        0.75,
+        0.9,
+        1
+      ],
+      "metallic": 0.1,
+      "roughness": 0.28,
+      "emission": 2.0
+    }
+  },
+  "axis_contract": "X length, connector +X, Z up; Y symmetric",
+  "pivot": "Origin at body bottom center; connector makes bounds center asymmetric in X",
+  "collision_boxes": 1,
+  "texture_dependencies": [],
+  "checks_passed": true
+}
