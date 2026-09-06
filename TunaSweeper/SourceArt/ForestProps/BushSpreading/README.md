@@ -16,12 +16,15 @@
 | 잎 뒷면 | 두께가 있는 닫힌 메시, 불투명 단면 재질 |
 | 충돌 | 없음. UE NoCollision, 내비게이션 데이터 없음 |
 
+UE 5.7.4 실제 재로드 결과: X/Y/Z = 208.9521 / 134.1016 / 66.1343cm, Blender→UE 축은 `(X, -Y, Z)`, 최대 bounds 오차 0.000006cm 미만이다. 프로젝트 기준 UE +X는 북쪽, +Y는 동쪽이다. UV와 flat normal 경계에서 분리된 UE LOD0 정점 수는 8,036개다.
+
 ## 산출물 및 재현
 
 - `SM_BushSpreading.blend`: 텍스처 내장, 미터 단위, 원본 메시 및 PREVIEW_ONLY 스튜디오 컬렉션.
 - `SM_BushSpreading.fbx`: 원본 메시만 포함, `-Y` forward / `Z` up, FBX 단위 정보로 UE에서 ×100 cm 변환. Import Uniform Scale=1. UE 변환 축은 실제 로드한 bounds를 비교해 `unreal_*_validation.json`에 기록한다.
 - `Textures/T_BushSpreading_Palette.png`: sRGB 팔레트, RGB만 사용. 모든 UV는 색상 셀 안쪽을 사용한다. UE에서는 128px의 작은 팔레트 색이 먼 거리에서 섞이지 않게 mip을 생성하지 않는다.
 - `Previews/`: 다방향, 반복 배치, 기존 자연물 비교 렌더.
+- `Previews/gameplay_distance.png`: C++ 기본 카메라 거리 12m, 하향 60°, 수평 FOV 70°, 1920×1080에서의 9개 반복 배치. 실제 게임 스크린샷은 아니며 BP override, 조준/대체 카메라 모드는 포함하지 않는다.
 - `model_validation.json`: 원본 및 FBX 재로드의 치수·위상·노멀·UV·재질 검사.
 - `blend_reload_validation.json`: 새 프로세스에서 저장된 blend의 UV 면적, UV 범위, 내장 PNG 일치 검사.
 
@@ -30,6 +33,7 @@
 ```powershell
 & 'C:/Program Files/Blender Foundation/Blender 4.5/blender.exe' -b --factory-startup -t 3 --python-exit-code 1 --python Tools/ForestProps/BushSpreading/build_bush.py
 & 'C:/Program Files/Blender Foundation/Blender 4.5/blender.exe' -b --factory-startup -t 2 --python-exit-code 1 --python Tools/ForestProps/BushSpreading/validate_source.py
+& 'C:/Program Files/Blender Foundation/Blender 4.5/blender.exe' -b --factory-startup -t 2 --python-exit-code 1 --python Tools/ForestProps/BushSpreading/render_gameplay_readability.py
 & Tools/ForestProps/BushSpreading/run_unreal.ps1 -InspectReferences
 & 'C:/Program Files/Blender Foundation/Blender 4.5/blender.exe' -b --factory-startup -t 2 --python-exit-code 1 --python Tools/ForestProps/BushSpreading/inspect_references.py
 ```
@@ -50,6 +54,9 @@ Blender 4.5.12 LTS, 고정 seed 90637. FBX 재로드에서 원본과 삼각형 �
 & Tools/ForestProps/BushSpreading/run_unreal.ps1
 & Tools/ForestProps/BushSpreading/run_unreal.ps1 -VerifyOnly
 & Tools/ForestProps/BushSpreading/run_unreal.ps1 -Render
+& Tools/ForestProps/BushSpreading/copy_verified_assets.ps1
 ```
 
 `unreal_import_validation.json`, `unreal_reload_validation.json`, `Previews/unreal_hero.png`은 임포트 단계의 별도 커밋에 포함된다. 실제 게임 레벨에서의 최종 조명·배치 성능 확인은 이 독립 에셋 검증 범위에 포함되지 않는다.
+
+최종 UE 임포트·새 프로세스 재로드·DirectX 12 에디터 렌더 모두 종료 코드 0을 확인했다. `unreal_render_validation.json`은 새 이미지 생성과 정상 종료를 기록하며 최종 이미지를 직접 시각 확인했다. 전경의 잎·목질 색, 닫힌 잎의 뒷면, 비대칭 외곽과 지면 기준을 확인했다. 검증 장면의 조명은 게임 조명과 별개다. `project_copy_validation.json`의 SHA-256으로 본 프로젝트의 3개 uasset이 재로드한 파일과 동일함을 확인했다. 전체 게임 빌드·PIE·레벨 배치는 수행하지 않았다.

@@ -15,6 +15,7 @@ for file in ['SM_GrassLow.blend','SM_Flower.blend','SM_SimpleTree.blend','Wood.b
         if o.name.startswith(('UCX_','UBX_')):bpy.data.objects.remove(o,do_unlink=True)
     meshes=[o for o in bpy.context.scene.objects if o.type=='MESH' and not o.hide_render]
     report[file]=[{'name':o.name,'dimensions':list(o.dimensions),'polygons':len(o.data.polygons),'materials':[m.name for m in o.data.materials if m]} for o in meshes]
+    if os.environ.get('BUSH_REFERENCE_INVENTORY_ONLY'):continue
     # Reconstruct base-color-only preview graphs from repository textures because
     # the legacy source materials reference unavailable external paint resources.
     texture={'SM_GrassLow.blend':'textures/M_GrassLowBlade.png','SM_Flower.blend':'tex/T_Flower.png','SM_SimpleTree.blend':'tex/T_SimpleTree.png','Wood.blend':'textures/T_WoodCommon.png','RockBasic.blend':'tex/T_Rock_Basic.png'}

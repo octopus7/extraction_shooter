@@ -2,7 +2,7 @@
 BUSH_SPREADING_VERIFY_ONLY=1 performs a read-only audit.
 """
 from pathlib import Path
-import unreal,json,os,itertools
+import unreal,json,os,itertools,hashlib
 ROOT=Path(__file__).resolve().parents[3]
 OUT=ROOT/'TunaSweeper/SourceArt/ForestProps/BushSpreading'
 DEST='/Game/Nature/ForestProps/BushSpreading'
@@ -83,7 +83,12 @@ assert isinstance(node,unreal.MaterialExpressionTextureSample) and node.texture=
 body=mesh.get_editor_property('body_setup')
 assert body.get_editor_property('collision_trace_flag')==unreal.CollisionTraceFlag.CTF_USE_SIMPLE_AS_COMPLEX
 assert str(body.get_editor_property('default_instance').get_editor_property('collision_profile_name'))=='NoCollision'
+assert body.get_editor_property('default_instance').get_editor_property('collision_enabled')==unreal.CollisionEnabled.NO_COLLISION
 assert not mesh.get_editor_property('has_navigation_data')
 report={'passed':True,'verification':'fresh process reload' if VERIFY else 'import','engine':unreal.SystemLibrary.get_engine_version(),'mesh':mesh.get_path_name(),'material':mat.get_path_name(),'texture':texture.get_path_name(),'dimensions_cm':[x*2 for x in extent],'bounds_cm':bounds,'source_uv_channels':uv,'material_slots':len(slots),'collision_primitives':collisions,'opaque':True,'two_sided':False,'source_triangles':source['source']['triangles'],'lod0_vertices':editor.get_number_verts(mesh,0),'axis_mapping':{'blender_axis_indices_for_ue_xyz':permutation,'signs':signs,'max_bounds_error_cm':error}}
+report['collision_profile']='NoCollision';report['navigation_data']=False
+report['lod0_triangles']=mesh.get_num_triangles(0)
+assert report['lod0_triangles']==source['source']['triangles']
+report['source_sha256']={name:hashlib.sha256((OUT/name).read_bytes()).hexdigest() for name in ['SM_BushSpreading.fbx','Textures/T_BushSpreading_Palette.png']}
 (OUT/('unreal_reload_validation.json' if VERIFY else 'unreal_import_validation.json')).write_text(json.dumps(report,indent=2))
 unreal.log('BUSH_SPREADING_UE_VALIDATION_PASSED')
