@@ -783,6 +783,10 @@ namespace TunaSweeperEditorSetup
 				return TunaSweeperEditorSetup::EnsureIntroMenuGraphicsSettingsSetup();
 			});
 
+		FTunaSweeperEditorRunOnce::Run(
+			TEXT("2026-09-06_SplitTitleScreensAndFullscreenSettingsV2"),
+			[]() { return TunaSweeperEditorSetup::EnsureTitleScreenAssetsSetup(); });
+
 		TunaSweeperEditorSetup::SchedulePickupItemAndSpawnerAssetsAndMapPlacement();
 		TunaSweeperEditorSetup::ScheduleLootContainerAndSpawnerAssetsAndMapPlacement();
 		TunaSweeperEditorSetup::ScheduleEditorMapCaptureSetup();

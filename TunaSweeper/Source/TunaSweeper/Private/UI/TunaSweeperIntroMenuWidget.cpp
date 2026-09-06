@@ -3,6 +3,7 @@
 
 void UTunaSweeperIntroMenuWidget::PrepareForInitialViewport()
 {
+	BindScreenWidgets();
 	ResetTitleViewportLayoutState();
 	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
 	ApplyDemoNoticeVisualStyle();
@@ -17,6 +18,7 @@ void UTunaSweeperIntroMenuWidget::PrepareForInitialViewport()
 void UTunaSweeperIntroMenuWidget::NativePreConstruct()
 {
 	Super::NativePreConstruct();
+	BindScreenWidgets();
 	ResetTitleViewportLayoutState();
 	ApplyDemoNoticeVisualStyle();
 	HideLegacyDeleteHoldGaugeWidgets();
@@ -25,6 +27,7 @@ void UTunaSweeperIntroMenuWidget::NativePreConstruct()
 void UTunaSweeperIntroMenuWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
+	BindScreenWidgets();
 	ResetTitleViewportLayoutState();
 	SetIsFocusable(true);
 	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
@@ -425,6 +428,7 @@ FReply UTunaSweeperIntroMenuWidget::NativeOnPreviewKeyDown(
 void UTunaSweeperIntroMenuWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
 	Super::NativeTick(MyGeometry, InDeltaTime);
+	TickMenuTransitions(InDeltaTime);
 
 	if (IsCreditsPanelVisible() && CreditsScrollBox)
 	{

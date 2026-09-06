@@ -310,6 +310,29 @@ protected:
 	TObjectPtr<UButton> BackFromCreditsButton;
 
 private:
+	friend class FTitleScreenAssetTest;
+	UWidget* FindIntroWidget(FName Name) const;
+	void BindScreenWidgets();
+	void BeginSettingsEntry();
+	void BeginSettingsExit();
+	void RequestSettingsTab(int32 TabIndex);
+	void TickMenuTransitions(float DeltaSeconds);
+	void FadeInScreen(UWidget* Screen);
+	UPROPERTY(EditDefaultsOnly, Category="Intro|Transitions", meta=(ClampMin="0.1"))
+	float SettingsFadeDuration = 0.42f;
+	UPROPERTY(EditDefaultsOnly, Category="Intro|Transitions", meta=(ClampMin="0.0"))
+	float SettingsTabStagger = 0.09f;
+	UPROPERTY(EditDefaultsOnly, Category="Intro|Transitions", meta=(ClampMin="0.05"))
+	float SettingsTabFadeDuration = 0.18f;
+	float SettingsTransitionTime = -1.0f;
+	bool bSettingsExiting = false;
+	bool bFinishingSettingsExit = false;
+	float TabTransitionTime = -1.0f;
+	int32 PendingSettingsTab = 0;
+	bool bTabContentSwitched = false;
+	UPROPERTY(Transient)
+	TObjectPtr<UWidget> FadingScreen;
+	float ScreenFadeTime = 0.0f;
 	UFUNCTION()
 	void HandleStartClicked();
 

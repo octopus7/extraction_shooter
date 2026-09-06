@@ -16,6 +16,9 @@ class TUNASWEEPER_API UTunaSweeperGraphicsSettingsWidget : public UUserWidget
 	GENERATED_BODY()
 
 public:
+#if WITH_EDITOR
+	void BuildEditorTemplate() { BuildRuntimeWidgetTree(); }
+#endif
 	void RefreshFromSettings();
 	void DiscardPendingChanges();
 	bool HasPendingChanges() const;
@@ -26,49 +29,155 @@ protected:
 	virtual void NativeDestruct() override;
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
-#define TUNA_GRAPHICS_BUTTON(Name) \
-	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional)) TObjectPtr<UButton> Name; \
-	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional)) TObjectPtr<UTextBlock> Name##Text
 
 	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
 	TObjectPtr<UTextBlock> GraphicsStatusText;
 
-	TUNA_GRAPHICS_BUTTON(PresetAutoButton);
-	TUNA_GRAPHICS_BUTTON(PresetLowButton);
-	TUNA_GRAPHICS_BUTTON(PresetMediumButton);
-	TUNA_GRAPHICS_BUTTON(PresetHighButton);
-	TUNA_GRAPHICS_BUTTON(PresetEpicButton);
+	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
+	TObjectPtr<UButton> PresetAutoButton;
+	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
+	TObjectPtr<UTextBlock> PresetAutoButtonText;
 
-	TUNA_GRAPHICS_BUTTON(WindowedModeButton);
-	TUNA_GRAPHICS_BUTTON(BorderlessWindowModeButton);
-	TUNA_GRAPHICS_BUTTON(FullscreenModeButton);
+	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
+	TObjectPtr<UButton> PresetLowButton;
+	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
+	TObjectPtr<UTextBlock> PresetLowButtonText;
 
-	TUNA_GRAPHICS_BUTTON(Resolution1280Button);
-	TUNA_GRAPHICS_BUTTON(Resolution1600Button);
-	TUNA_GRAPHICS_BUTTON(Resolution1920Button);
-	TUNA_GRAPHICS_BUTTON(Resolution2560Button);
-	TUNA_GRAPHICS_BUTTON(Resolution3840Button);
+	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
+	TObjectPtr<UButton> PresetMediumButton;
+	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
+	TObjectPtr<UTextBlock> PresetMediumButtonText;
 
-	TUNA_GRAPHICS_BUTTON(DLSSOffButton);
-	TUNA_GRAPHICS_BUTTON(DLSSQualityButton);
-	TUNA_GRAPHICS_BUTTON(DLSSBalancedButton);
-	TUNA_GRAPHICS_BUTTON(DLSSPerformanceButton);
+	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
+	TObjectPtr<UButton> PresetHighButton;
+	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
+	TObjectPtr<UTextBlock> PresetHighButtonText;
 
-	TUNA_GRAPHICS_BUTTON(VSyncToggleButton);
-	TUNA_GRAPHICS_BUTTON(FrameRateUnlimitedButton);
-	TUNA_GRAPHICS_BUTTON(FrameRate60Button);
-	TUNA_GRAPHICS_BUTTON(FrameRate120Button);
-	TUNA_GRAPHICS_BUTTON(FrameRate144Button);
-	TUNA_GRAPHICS_BUTTON(MotionBlurToggleButton);
-	TUNA_GRAPHICS_BUTTON(DynamicResolutionToggleButton);
-	TUNA_GRAPHICS_BUTTON(HardwareRayTracingToggleButton);
+	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
+	TObjectPtr<UButton> PresetEpicButton;
+	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
+	TObjectPtr<UTextBlock> PresetEpicButtonText;
 
-	TUNA_GRAPHICS_BUTTON(ApplyGraphicsSettingsButton);
-	TUNA_GRAPHICS_BUTTON(CancelGraphicsSettingsButton);
-	TUNA_GRAPHICS_BUTTON(ConfirmResolutionButton);
-	TUNA_GRAPHICS_BUTTON(RevertResolutionButton);
+	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
+	TObjectPtr<UButton> WindowedModeButton;
+	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
+	TObjectPtr<UTextBlock> WindowedModeButtonText;
 
-#undef TUNA_GRAPHICS_BUTTON
+	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
+	TObjectPtr<UButton> BorderlessWindowModeButton;
+	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
+	TObjectPtr<UTextBlock> BorderlessWindowModeButtonText;
+
+	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
+	TObjectPtr<UButton> FullscreenModeButton;
+	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
+	TObjectPtr<UTextBlock> FullscreenModeButtonText;
+
+	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
+	TObjectPtr<UButton> Resolution1280Button;
+	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
+	TObjectPtr<UTextBlock> Resolution1280ButtonText;
+
+	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
+	TObjectPtr<UButton> Resolution1600Button;
+	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
+	TObjectPtr<UTextBlock> Resolution1600ButtonText;
+
+	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
+	TObjectPtr<UButton> Resolution1920Button;
+	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
+	TObjectPtr<UTextBlock> Resolution1920ButtonText;
+
+	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
+	TObjectPtr<UButton> Resolution2560Button;
+	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
+	TObjectPtr<UTextBlock> Resolution2560ButtonText;
+
+	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
+	TObjectPtr<UButton> Resolution3840Button;
+	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
+	TObjectPtr<UTextBlock> Resolution3840ButtonText;
+
+	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
+	TObjectPtr<UButton> DLSSOffButton;
+	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
+	TObjectPtr<UTextBlock> DLSSOffButtonText;
+
+	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
+	TObjectPtr<UButton> DLSSQualityButton;
+	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
+	TObjectPtr<UTextBlock> DLSSQualityButtonText;
+
+	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
+	TObjectPtr<UButton> DLSSBalancedButton;
+	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
+	TObjectPtr<UTextBlock> DLSSBalancedButtonText;
+
+	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
+	TObjectPtr<UButton> DLSSPerformanceButton;
+	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
+	TObjectPtr<UTextBlock> DLSSPerformanceButtonText;
+
+	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
+	TObjectPtr<UButton> VSyncToggleButton;
+	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
+	TObjectPtr<UTextBlock> VSyncToggleButtonText;
+
+	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
+	TObjectPtr<UButton> FrameRateUnlimitedButton;
+	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
+	TObjectPtr<UTextBlock> FrameRateUnlimitedButtonText;
+
+	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
+	TObjectPtr<UButton> FrameRate60Button;
+	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
+	TObjectPtr<UTextBlock> FrameRate60ButtonText;
+
+	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
+	TObjectPtr<UButton> FrameRate120Button;
+	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
+	TObjectPtr<UTextBlock> FrameRate120ButtonText;
+
+	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
+	TObjectPtr<UButton> FrameRate144Button;
+	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
+	TObjectPtr<UTextBlock> FrameRate144ButtonText;
+
+	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
+	TObjectPtr<UButton> MotionBlurToggleButton;
+	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
+	TObjectPtr<UTextBlock> MotionBlurToggleButtonText;
+
+	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
+	TObjectPtr<UButton> DynamicResolutionToggleButton;
+	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
+	TObjectPtr<UTextBlock> DynamicResolutionToggleButtonText;
+
+	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
+	TObjectPtr<UButton> HardwareRayTracingToggleButton;
+	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
+	TObjectPtr<UTextBlock> HardwareRayTracingToggleButtonText;
+
+	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
+	TObjectPtr<UButton> ApplyGraphicsSettingsButton;
+	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
+	TObjectPtr<UTextBlock> ApplyGraphicsSettingsButtonText;
+
+	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
+	TObjectPtr<UButton> CancelGraphicsSettingsButton;
+	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
+	TObjectPtr<UTextBlock> CancelGraphicsSettingsButtonText;
+
+	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
+	TObjectPtr<UButton> ConfirmResolutionButton;
+	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
+	TObjectPtr<UTextBlock> ConfirmResolutionButtonText;
+
+	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
+	TObjectPtr<UButton> RevertResolutionButton;
+	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
+	TObjectPtr<UTextBlock> RevertResolutionButtonText;
+
 
 	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
 	TObjectPtr<UWidget> ResolutionConfirmationPanel;
@@ -124,37 +233,93 @@ private:
 
 	void HandleQualityStepRequested(ETunaSweeperScalabilityOption Option, int32 Delta);
 
-#define TUNA_GRAPHICS_HANDLER(Name) UFUNCTION() void Name()
-	TUNA_GRAPHICS_HANDLER(HandlePresetAutoClicked);
-	TUNA_GRAPHICS_HANDLER(HandlePresetLowClicked);
-	TUNA_GRAPHICS_HANDLER(HandlePresetMediumClicked);
-	TUNA_GRAPHICS_HANDLER(HandlePresetHighClicked);
-	TUNA_GRAPHICS_HANDLER(HandlePresetEpicClicked);
-	TUNA_GRAPHICS_HANDLER(HandleWindowedModeClicked);
-	TUNA_GRAPHICS_HANDLER(HandleBorderlessWindowModeClicked);
-	TUNA_GRAPHICS_HANDLER(HandleFullscreenModeClicked);
-	TUNA_GRAPHICS_HANDLER(HandleResolution1280Clicked);
-	TUNA_GRAPHICS_HANDLER(HandleResolution1600Clicked);
-	TUNA_GRAPHICS_HANDLER(HandleResolution1920Clicked);
-	TUNA_GRAPHICS_HANDLER(HandleResolution2560Clicked);
-	TUNA_GRAPHICS_HANDLER(HandleResolution3840Clicked);
-	TUNA_GRAPHICS_HANDLER(HandleDLSSOffClicked);
-	TUNA_GRAPHICS_HANDLER(HandleDLSSQualityClicked);
-	TUNA_GRAPHICS_HANDLER(HandleDLSSBalancedClicked);
-	TUNA_GRAPHICS_HANDLER(HandleDLSSPerformanceClicked);
-	TUNA_GRAPHICS_HANDLER(HandleVSyncToggleClicked);
-	TUNA_GRAPHICS_HANDLER(HandleFrameRateUnlimitedClicked);
-	TUNA_GRAPHICS_HANDLER(HandleFrameRate60Clicked);
-	TUNA_GRAPHICS_HANDLER(HandleFrameRate120Clicked);
-	TUNA_GRAPHICS_HANDLER(HandleFrameRate144Clicked);
-	TUNA_GRAPHICS_HANDLER(HandleMotionBlurToggleClicked);
-	TUNA_GRAPHICS_HANDLER(HandleDynamicResolutionToggleClicked);
-	TUNA_GRAPHICS_HANDLER(HandleHardwareRayTracingToggleClicked);
-	TUNA_GRAPHICS_HANDLER(HandleApplyClicked);
-	TUNA_GRAPHICS_HANDLER(HandleCancelClicked);
-	TUNA_GRAPHICS_HANDLER(HandleConfirmResolutionClicked);
-	TUNA_GRAPHICS_HANDLER(HandleRevertResolutionClicked);
-#undef TUNA_GRAPHICS_HANDLER
+
+	UFUNCTION()
+	void HandlePresetAutoClicked();
+
+	UFUNCTION()
+	void HandlePresetLowClicked();
+
+	UFUNCTION()
+	void HandlePresetMediumClicked();
+
+	UFUNCTION()
+	void HandlePresetHighClicked();
+
+	UFUNCTION()
+	void HandlePresetEpicClicked();
+
+	UFUNCTION()
+	void HandleWindowedModeClicked();
+
+	UFUNCTION()
+	void HandleBorderlessWindowModeClicked();
+
+	UFUNCTION()
+	void HandleFullscreenModeClicked();
+
+	UFUNCTION()
+	void HandleResolution1280Clicked();
+
+	UFUNCTION()
+	void HandleResolution1600Clicked();
+
+	UFUNCTION()
+	void HandleResolution1920Clicked();
+
+	UFUNCTION()
+	void HandleResolution2560Clicked();
+
+	UFUNCTION()
+	void HandleResolution3840Clicked();
+
+	UFUNCTION()
+	void HandleDLSSOffClicked();
+
+	UFUNCTION()
+	void HandleDLSSQualityClicked();
+
+	UFUNCTION()
+	void HandleDLSSBalancedClicked();
+
+	UFUNCTION()
+	void HandleDLSSPerformanceClicked();
+
+	UFUNCTION()
+	void HandleVSyncToggleClicked();
+
+	UFUNCTION()
+	void HandleFrameRateUnlimitedClicked();
+
+	UFUNCTION()
+	void HandleFrameRate60Clicked();
+
+	UFUNCTION()
+	void HandleFrameRate120Clicked();
+
+	UFUNCTION()
+	void HandleFrameRate144Clicked();
+
+	UFUNCTION()
+	void HandleMotionBlurToggleClicked();
+
+	UFUNCTION()
+	void HandleDynamicResolutionToggleClicked();
+
+	UFUNCTION()
+	void HandleHardwareRayTracingToggleClicked();
+
+	UFUNCTION()
+	void HandleApplyClicked();
+
+	UFUNCTION()
+	void HandleCancelClicked();
+
+	UFUNCTION()
+	void HandleConfirmResolutionClicked();
+
+	UFUNCTION()
+	void HandleRevertResolutionClicked();
 
 	FTunaSweeperGraphicsSettingsState AppliedState;
 	FTunaSweeperGraphicsSettingsState PendingState;

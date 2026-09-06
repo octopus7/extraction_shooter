@@ -943,6 +943,7 @@ bool EnsureTitlePresentationSetup();
 bool EnsureIntroMenuAndLevelTravelSetup();
 bool EnsureIntroMenuGraphicsSettingsSetup();
 bool EnsureIntroMenuVisualRestyleSetup();
+bool EnsureTitleScreenAssetsSetup();
 bool EnsureBunkerToRaidTransitionVideoSetup();
 bool EnsureLevelTravelPresentationSetup();
 bool EnsureFirstOutingQuestSetup();

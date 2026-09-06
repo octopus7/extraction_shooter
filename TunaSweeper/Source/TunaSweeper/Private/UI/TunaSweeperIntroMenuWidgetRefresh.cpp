@@ -308,7 +308,7 @@ void UTunaSweeperIntroMenuWidget::RefreshDevelopmentSettingsPanel()
 	{
 		if (WidgetTree)
 		{
-			if (UCheckBox* Indicator = Cast<UCheckBox>(WidgetTree->FindWidget(IndicatorWidgetName)))
+			if (UCheckBox* Indicator = Cast<UCheckBox>(FindIntroWidget(IndicatorWidgetName)))
 			{
 				Indicator->SetIsChecked(bChecked);
 			}
@@ -629,57 +629,10 @@ void UTunaSweeperIntroMenuWidget::ApplySettingsChoiceButtonStyle(
 }
 
 void UTunaSweeperIntroMenuWidget::ApplySettingsTabButtonStyle(
-	UButton* Button,
-	const FVector2D& ButtonSize,
-	bool bSelected) const
+	UButton* Button, const FVector2D& ButtonSize, bool bSelected) const
 {
-	if (!Button)
-	{
-		return;
-	}
-
-	using namespace TunaSweeperSettingsUi;
-
-	const FLinearColor Fill = bSelected
-		? FLinearColor(0.035f, 0.19f, 0.21f, 0.92f)
-		: FLinearColor(0.018f, 0.030f, 0.036f, 0.78f);
-	const FLinearColor HoveredFill = bSelected
-		? FLinearColor(0.05f, 0.28f, 0.31f, 0.98f)
-		: FLinearColor(0.035f, 0.070f, 0.080f, 0.94f);
-	const FLinearColor Outline = bSelected
-		? Accent
-		: FLinearColor(0.46f, 0.56f, 0.56f, 0.68f);
-
-	FButtonStyle ButtonStyle;
-	ButtonStyle.SetNormal(TunaSweeperSettingsUi::MakeRoundedBoxBrush(
-		ButtonSize,
-		Fill,
-		Outline,
-		bSelected ? 1.8f : 1.0f,
-		TunaSweeperSettingsUi::ButtonCornerRadius));
-	ButtonStyle.SetHovered(TunaSweeperSettingsUi::MakeRoundedBoxBrush(
-		ButtonSize,
-		HoveredFill,
-		FLinearColor(0.78f, 0.98f, 1.0f, 1.0f),
-		2.0f,
-		TunaSweeperSettingsUi::ButtonCornerRadius));
-	ButtonStyle.SetPressed(TunaSweeperSettingsUi::MakeRoundedBoxBrush(
-		ButtonSize,
-		Fill * 0.78f,
-		Outline,
-		1.0f,
-		TunaSweeperSettingsUi::ButtonCornerRadius));
-	ButtonStyle.SetDisabled(TunaSweeperSettingsUi::MakeRoundedBoxBrush(
-		ButtonSize,
-		Fill,
-		Outline,
-		bSelected ? 1.8f : 1.0f,
-		TunaSweeperSettingsUi::ButtonCornerRadius));
-	ButtonStyle.SetNormalPadding(FMargin(0.0f));
-	ButtonStyle.SetPressedPadding(FMargin(0.0f, 1.0f, 0.0f, 0.0f));
-
-	Button->SetStyle(ButtonStyle);
-	Button->SetClickMethod(EButtonClickMethod::DownAndUp);
+	if (!Button) return;
+	Button->SetBackgroundColor(bSelected ? FLinearColor(1.0f, 1.0f, 0.90f, 1.0f) : FLinearColor(0.62f, 0.72f, 0.67f, 0.75f));
 }
 
 void UTunaSweeperIntroMenuWidget::RefreshLocalizedTexts()

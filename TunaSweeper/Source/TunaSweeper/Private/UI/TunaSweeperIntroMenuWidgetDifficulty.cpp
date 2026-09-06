@@ -494,14 +494,14 @@ void UTunaSweeperIntroMenuWidget::RefreshDifficultySelectionPanel()
 	}
 
 	if (USizeBox* ContentBox = Cast<USizeBox>(WidgetTree
-		? WidgetTree->FindWidget(TEXT("DifficultyContentBox"))
+		? FindIntroWidget(TEXT("DifficultyContentBox"))
 		: nullptr))
 	{
 		ContentBox->SetWidthOverride(bDemoNotice ? 1440.0f : 1120.0f);
 		ContentBox->SetHeightOverride(bDemoNotice ? 520.0f : 690.0f);
 	}
 	if (UWidget* OptionRow = WidgetTree
-		? WidgetTree->FindWidget(TEXT("DifficultyOptionRow"))
+		? FindIntroWidget(TEXT("DifficultyOptionRow"))
 		: nullptr)
 	{
 		OptionRow->SetVisibility(bDemoNotice
@@ -658,11 +658,11 @@ void UTunaSweeperIntroMenuWidget::ApplyDemoNoticeVisualStyle()
 	}
 
 	// Keep the watercolor background recognizable, but push it behind the notice content.
-	if (UImage* BackgroundImage = Cast<UImage>(WidgetTree->FindWidget(TEXT("DemoNoticeBackgroundImage"))))
+	if (UImage* BackgroundImage = Cast<UImage>(FindIntroWidget(TEXT("DemoNoticeBackgroundImage"))))
 	{
 		BackgroundImage->SetColorAndOpacity(FLinearColor(0.90f, 0.94f, 0.93f, 1.0f));
 	}
-	if (UImage* ReadabilityWash = Cast<UImage>(WidgetTree->FindWidget(TEXT("DemoNoticeReadabilityWash"))))
+	if (UImage* ReadabilityWash = Cast<UImage>(FindIntroWidget(TEXT("DemoNoticeReadabilityWash"))))
 	{
 		FSlateBrush WashBrush = ReadabilityWash->GetBrush();
 		WashBrush.DrawAs = ESlateBrushDrawType::Box;
@@ -758,11 +758,11 @@ void UTunaSweeperIntroMenuWidget::ApplyDemoNoticeVisualStyle()
 
 	// The old child images contain coral/cyan double outlines. The button styles now provide
 	// the full background and interaction states, so those decorative images stay hidden.
-	if (UImage* BackBackground = Cast<UImage>(WidgetTree->FindWidget(TEXT("DemoNoticeBackButtonBackground"))))
+	if (UImage* BackBackground = Cast<UImage>(FindIntroWidget(TEXT("DemoNoticeBackButtonBackground"))))
 	{
 		BackBackground->SetVisibility(ESlateVisibility::Collapsed);
 	}
-	if (UImage* ConfirmBackground = Cast<UImage>(WidgetTree->FindWidget(TEXT("DemoNoticeConfirmButtonBackground"))))
+	if (UImage* ConfirmBackground = Cast<UImage>(FindIntroWidget(TEXT("DemoNoticeConfirmButtonBackground"))))
 	{
 		ConfirmBackground->SetVisibility(ESlateVisibility::Collapsed);
 	}

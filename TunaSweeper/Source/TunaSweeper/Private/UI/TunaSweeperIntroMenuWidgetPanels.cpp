@@ -51,7 +51,7 @@ void UTunaSweeperIntroMenuWidget::RefreshDistributionPresentation()
 	ProjectVersion.TrimStartAndEndInline();
 	if (ProjectVersion.IsEmpty()) ProjectVersion = TEXT("0.0.0");
 	const bool bIsDemoBuild = TunaSweeperBuildFlavor::IsDemo();
-	if (UTextBlock* VersionText = Cast<UTextBlock>(WidgetTree->FindWidget(TEXT("VersionText"))))
+	if (UTextBlock* VersionText = Cast<UTextBlock>(FindIntroWidget(TEXT("VersionText"))))
 	{
 		VersionText->SetText(FText::FromString(FString::Printf(
 			TEXT("v%s.%s%s"),
@@ -71,8 +71,8 @@ void UTunaSweeperIntroMenuWidget::RefreshDistributionPresentation()
 void UTunaSweeperIntroMenuWidget::EnsureSteamDemoWishlistButton()
 {
 	if (SteamDemoWishlistButton || !IsSteamDemoDistribution() || !WidgetTree) return;
-	UVerticalBox* MainMenuStack = Cast<UVerticalBox>(WidgetTree->FindWidget(TEXT("MainMenuPanel")));
-	UWidget* SettingsButtonContainer = WidgetTree->FindWidget(TEXT("SettingsButtonBox"));
+	UVerticalBox* MainMenuStack = Cast<UVerticalBox>(FindIntroWidget(TEXT("MainMenuPanel")));
+	UWidget* SettingsButtonContainer = FindIntroWidget(TEXT("SettingsButtonBox"));
 	if (!MainMenuStack || !SettingsButtonContainer) return;
 
 	USizeBox* WishlistButtonBox = WidgetTree->ConstructWidget<USizeBox>(
@@ -143,6 +143,13 @@ void UTunaSweeperIntroMenuWidget::HandleSteamDemoWishlistClicked()
 
 void UTunaSweeperIntroMenuWidget::ShowMainMenu()
 {
+	if (!bFinishingSettingsExit && SettingsPanel && SettingsPanel->GetVisibility() == ESlateVisibility::Visible)
+	{
+		BeginSettingsExit();
+		return;
+	}
+	if (MainMenuPanel) MainMenuPanel->SetRenderOpacity(1.0f);
+	if (UWidget* Logo = FindIntroWidget(TEXT("LogoImage"))) Logo->SetRenderOpacity(1.0f);
 	SetTitlePresentationMainMenuActive(true);
 	bDifficultyAdjustmentMode = false;
 	HideOverlayPanels();
@@ -195,6 +202,7 @@ void UTunaSweeperIntroMenuWidget::ShowDifficultySelection()
 	if (bDemoNotice && DemoNoticePanel)
 	{
 		DemoNoticePanel->SetVisibility(ESlateVisibility::Visible);
+		FadeInScreen(DemoNoticePanel);
 	}
 	else if (DifficultySelectPanel)
 	{
@@ -261,6 +269,7 @@ void UTunaSweeperIntroMenuWidget::ShowSaveSlotSelection()
 	if (SaveSlotPanel)
 	{
 		SaveSlotPanel->SetVisibility(ESlateVisibility::Visible);
+		FadeInScreen(SaveSlotPanel);
 	}
 
 	SelectedSaveSlotIndex = INDEX_NONE;
@@ -305,6 +314,7 @@ void UTunaSweeperIntroMenuWidget::ShowSettingsPanel()
 		PendingInterfaceLanguage = TunaGameInstance->GetCurrentTextLanguage();
 	}
 	ShowGraphicsSettingsTab();
+	BeginSettingsEntry();
 }
 
 void UTunaSweeperIntroMenuWidget::ShowGraphicsSettingsTab()
@@ -351,51 +361,9 @@ void UTunaSweeperIntroMenuWidget::ShowGraphicsSettingsTab()
 
 void UTunaSweeperIntroMenuWidget::EnsureGraphicsSettingsWidget()
 {
-	if (GraphicsSettingsPanel)
-	{
-		GraphicsSettingsPanel->SetClipping(EWidgetClipping::ClipToBoundsAlways);
-		if (UVerticalBoxSlot* GraphicsPanelSlot = Cast<UVerticalBoxSlot>(GraphicsSettingsPanel->Slot))
-		{
-			GraphicsPanelSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
-		}
-	}
-
 	if (!TitleGraphicsSettingsWidget)
 	{
-		if (UPanelWidget* GraphicsPanel = Cast<UPanelWidget>(GraphicsSettingsPanel))
-		{
-			TitleGraphicsSettingsWidget = CreateWidget<UTunaSweeperGraphicsSettingsWidget>(
-				GetOwningPlayer(),
-				UTunaSweeperGraphicsSettingsWidget::StaticClass());
-			if (TitleGraphicsSettingsWidget)
-			{
-				TitleGraphicsSettingsWidget->SetClipping(EWidgetClipping::ClipToBoundsAlways);
-				if (UVerticalBoxSlot* GraphicsWidgetSlot =
-					Cast<UVerticalBoxSlot>(GraphicsPanel->AddChild(TitleGraphicsSettingsWidget)))
-				{
-					GraphicsWidgetSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
-				}
-			}
-		}
-	}
-	else if (UVerticalBoxSlot* GraphicsWidgetSlot =
-		Cast<UVerticalBoxSlot>(TitleGraphicsSettingsWidget->Slot))
-	{
-		GraphicsWidgetSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
-	}
-
-	if (WidgetTree)
-	{
-		for (const FName LegacySectionName : {
-			FName(TEXT("SettingsWindowModeSection")),
-			FName(TEXT("SettingsResolutionSection")),
-			FName(TEXT("SettingsDLSSSection")) })
-		{
-			if (UWidget* LegacySection = WidgetTree->FindWidget(LegacySectionName))
-			{
-				LegacySection->SetVisibility(ESlateVisibility::Collapsed);
-			}
-		}
+		TitleGraphicsSettingsWidget = Cast<UTunaSweeperGraphicsSettingsWidget>(FindIntroWidget(TEXT("TitleGraphicsSettingsWidget")));
 	}
 }
 
@@ -527,6 +495,7 @@ void UTunaSweeperIntroMenuWidget::ShowCreditsPanel()
 	if (CreditsPanel)
 	{
 		CreditsPanel->SetVisibility(ESlateVisibility::Visible);
+		FadeInScreen(CreditsPanel);
 	}
 	if (CreditsScrollBox)
 	{
@@ -588,7 +557,7 @@ void UTunaSweeperIntroMenuWidget::SetTitleLogoVisible(bool bVisible)
 		return;
 	}
 
-	if (UWidget* LogoWidget = WidgetTree->FindWidget(FName(TEXT("LogoImage"))))
+	if (UWidget* LogoWidget = FindIntroWidget(FName(TEXT("LogoImage"))))
 	{
 		LogoWidget->SetVisibility(bVisible ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
 	}

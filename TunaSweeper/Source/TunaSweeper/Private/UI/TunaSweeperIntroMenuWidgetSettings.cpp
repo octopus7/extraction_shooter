@@ -126,7 +126,7 @@ void UTunaSweeperIntroMenuWidget::SetNamedText(FName WidgetName, const FText& Te
 		return;
 	}
 
-	if (UTextBlock* TextBlock = Cast<UTextBlock>(WidgetTree->FindWidget(WidgetName)))
+	if (UTextBlock* TextBlock = Cast<UTextBlock>(FindIntroWidget(WidgetName)))
 	{
 		TextBlock->SetText(Text);
 	}

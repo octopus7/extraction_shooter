@@ -5,6 +5,8 @@ public class TunaSweeperEditor : ModuleRules
 	public TunaSweeperEditor(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+		// Setup files contain file-local helper names; compile independently.
+		bUseUnity = false;
 
 		PrivateDependencyModuleNames.AddRange(new string[]
 		{

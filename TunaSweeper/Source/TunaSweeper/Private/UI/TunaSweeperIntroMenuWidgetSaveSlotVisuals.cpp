@@ -36,7 +36,7 @@ void UTunaSweeperIntroMenuWidget::EnsureSaveSlotSelectionRingContent(
 
 	const FName ContentName(ContentWidgetName);
 	const FName RingName(RingWidgetName);
-	UOverlay* ContentOverlay = Cast<UOverlay>(WidgetTree->FindWidget(ContentName));
+	UOverlay* ContentOverlay = Cast<UOverlay>(FindIntroWidget(ContentName));
 	if (!ContentOverlay)
 	{
 		ContentOverlay = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), ContentName);
@@ -51,7 +51,7 @@ void UTunaSweeperIntroMenuWidget::EnsureSaveSlotSelectionRingContent(
 
 	if (!RingImage)
 	{
-		RingImage = Cast<UImage>(WidgetTree->FindWidget(RingName));
+		RingImage = Cast<UImage>(FindIntroWidget(RingName));
 	}
 	if (!RingImage)
 	{

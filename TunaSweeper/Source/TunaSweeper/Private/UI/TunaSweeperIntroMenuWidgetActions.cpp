@@ -193,17 +193,17 @@ void UTunaSweeperIntroMenuWidget::HandleCancelDeleteClicked()
 
 void UTunaSweeperIntroMenuWidget::HandleSettingsGraphicsTabClicked()
 {
-	ShowGraphicsSettingsTab();
+	RequestSettingsTab(0);
 }
 
 void UTunaSweeperIntroMenuWidget::HandleSettingsInterfaceTabClicked()
 {
-	ShowInterfaceSettingsTab();
+	RequestSettingsTab(1);
 }
 
 void UTunaSweeperIntroMenuWidget::HandleSettingsDevelopmentTabClicked()
 {
-	ShowDevelopmentSettingsTab();
+	RequestSettingsTab(2);
 }
 
 void UTunaSweeperIntroMenuWidget::HandleEnemyCombatDebugToggleClicked()

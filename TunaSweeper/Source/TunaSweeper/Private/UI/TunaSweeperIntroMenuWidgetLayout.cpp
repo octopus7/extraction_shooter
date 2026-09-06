@@ -307,12 +307,12 @@ void UTunaSweeperIntroMenuWidget::EnsureDevelopmentToggleButtonContent(
 	FName LabelWidgetName,
 	FName IndicatorWidgetName)
 {
-	if (!WidgetTree || !ToggleButton || WidgetTree->FindWidget(IndicatorWidgetName))
+	if (!WidgetTree || !ToggleButton || FindIntroWidget(IndicatorWidgetName))
 	{
 		return;
 	}
 
-	UTextBlock* LabelText = Cast<UTextBlock>(WidgetTree->FindWidget(LabelWidgetName));
+	UTextBlock* LabelText = Cast<UTextBlock>(FindIntroWidget(LabelWidgetName));
 	constexpr float CheckBoxLaneWidth = 76.0f;
 	constexpr float CheckBoxLeftPadding = 26.0f;
 
@@ -371,7 +371,7 @@ void UTunaSweeperIntroMenuWidget::EnsureDemoBuildImage()
 
 	if (!DemoBuildImage)
 	{
-		DemoBuildImage = Cast<UImage>(WidgetTree->FindWidget(TEXT("DemoBuildImage")));
+		DemoBuildImage = Cast<UImage>(FindIntroWidget(TEXT("DemoBuildImage")));
 	}
 
 	if (!TunaSweeperBuildFlavor::IsDemo())
@@ -445,10 +445,10 @@ void UTunaSweeperIntroMenuWidget::EnsureTitleWindParticleOverlay()
 		}
 	};
 
-	SetCanvasZOrder(WidgetTree->FindWidget(TEXT("LeftScrim")), 2);
-	SetCanvasZOrder(WidgetTree->FindWidget(TEXT("LogoImage")), 3);
+	SetCanvasZOrder(FindIntroWidget(TEXT("LeftScrim")), 2);
+	SetCanvasZOrder(FindIntroWidget(TEXT("LogoImage")), 3);
 	SetCanvasZOrder(MainMenuPanel, 4);
-	SetCanvasZOrder(WidgetTree->FindWidget(TEXT("VersionText")), 4);
+	SetCanvasZOrder(FindIntroWidget(TEXT("VersionText")), 4);
 	SetCanvasZOrder(SaveSlotPanel, 10);
 	SetCanvasZOrder(SettingsPanel, 10);
 	SetCanvasZOrder(CreditsPanel, 10);

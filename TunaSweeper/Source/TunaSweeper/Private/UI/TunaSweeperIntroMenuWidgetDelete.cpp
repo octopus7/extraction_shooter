@@ -103,7 +103,7 @@ void UTunaSweeperIntroMenuWidget::HideLegacyDeleteHoldGaugeWidgets()
 
 	for (const FName& WidgetName : LegacyGaugeWidgetNames)
 	{
-		if (UWidget* GaugeWidget = WidgetTree->FindWidget(WidgetName))
+		if (UWidget* GaugeWidget = FindIntroWidget(WidgetName))
 		{
 			GaugeWidget->SetVisibility(ESlateVisibility::Collapsed);
 			GaugeWidget->SetRenderOpacity(0.0f);
@@ -120,7 +120,7 @@ void UTunaSweeperIntroMenuWidget::EnsureDeleteSaveSlotHoldProgressWidget()
 
 	if (!DeleteSaveSlotHoldProgressFill)
 	{
-		DeleteSaveSlotHoldProgressFill = Cast<UImage>(WidgetTree->FindWidget(TEXT("DeleteSaveSlotHoldProgressFill")));
+		DeleteSaveSlotHoldProgressFill = Cast<UImage>(FindIntroWidget(TEXT("DeleteSaveSlotHoldProgressFill")));
 	}
 
 	if (DeleteSaveSlotHoldProgressFill)
