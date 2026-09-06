@@ -1,0 +1,19 @@
+{
+  "source_commit": "d567b32f",
+  "blender_build_exit_code": 0,
+  "blender_fbx_reload_exit_code": 0,
+  "source_and_fbx_validation_passed": true,
+  "actual_project_import_validation_passed": true,
+  "actual_project_reload_validation_passed": true,
+  "actual_project_import_process_exit_code": 1,
+  "actual_project_reload_process_exit_code": 1,
+  "nonzero_exit_reason": "Existing NE_PostProcess Niagara asset requests a typed element before the registry is available during game module startup. See Saved/Logs/GrassLongCurved_Import.log and GrassLongCurved_Reload.log.",
+  "identical_package_preview_project_render_exit_code": 0,
+  "render_pixel_validation_passed": true,
+  "ue_hero_and_back_visually_reviewed": true,
+  "blender_multidirection_and_repeated_previews_visually_reviewed": true,
+  "existing_nature_packages_unchanged": true,
+  "gameplay_or_map_changes": false,
+  "full_project_build_performed": false,
+  "push_performed": false
+}

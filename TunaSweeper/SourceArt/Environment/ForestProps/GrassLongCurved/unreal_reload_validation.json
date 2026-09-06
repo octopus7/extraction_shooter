@@ -1,0 +1,63 @@
+{
+  "engine": "5.7.4-51494982+++UE5+Release-5.7",
+  "mode": "fresh-process reload",
+  "mesh": "/Game/Nature/ForestProps/GrassLongCurved/SM_GrassLongCurved.SM_GrassLongCurved",
+  "material_slots": 1,
+  "two_sided": true,
+  "blend_mode": "Opaque",
+  "collision": "NoCollision; no shapes; disabled per section",
+  "lods": [
+    {
+      "lod": 0,
+      "triangles": 988,
+      "vertices": 806,
+      "source_uv_channels": 1,
+      "generated_lightmap_uv": 1,
+      "screen_size": 1.0
+    },
+    {
+      "lod": 1,
+      "triangles": 374,
+      "vertices": 323,
+      "source_uv_channels": 1,
+      "generated_lightmap_uv": 1,
+      "screen_size": 0.20000000298023224
+    },
+    {
+      "lod": 2,
+      "triangles": 140,
+      "vertices": 130,
+      "source_uv_channels": 1,
+      "generated_lightmap_uv": 1,
+      "screen_size": 0.07500000298023224
+    }
+  ],
+  "bounds_cm": [
+    -58.5112190246582,
+    -69.77217102050781,
+    0.0,
+    59.08441162109375,
+    57.23650360107422,
+    83.43970489501953
+  ],
+  "dimensions_cm": [
+    117.59563064575195,
+    127.00867462158203,
+    83.43970489501953
+  ],
+  "axis_mapping": {
+    "blender_axes_for_ue_xyz": [
+      0,
+      1,
+      2
+    ],
+    "signs": [
+      1,
+      -1,
+      1
+    ],
+    "max_error_cm": 5.0067901611328125e-06
+  },
+  "existing_nature_unchanged": true,
+  "passed": true
+}
