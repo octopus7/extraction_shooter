@@ -1,0 +1,64 @@
+{
+  "passed": true,
+  "map": "/Game/Environment/ModularInteriorExpansion/Maps/L_ModularInteriorExpansion",
+  "kit_instances": 96,
+  "kit_triangles": 1556,
+  "placements_and_cpd_verified": true,
+  "roofless": true,
+  "camera_verified_against_player_bp": true,
+  "fixture_lights": 6,
+  "preview_softboxes": 2,
+  "simple_collision_traces": [
+    {
+      "name": "base_wall",
+      "hit": true,
+      "expected": true
+    },
+    {
+      "name": "base_door",
+      "hit": false,
+      "expected": false
+    },
+    {
+      "name": "floor",
+      "hit": true,
+      "expected": true
+    },
+    {
+      "name": "grating_solid",
+      "hit": true,
+      "expected": true
+    },
+    {
+      "name": "new_door",
+      "hit": false,
+      "expected": false
+    },
+    {
+      "name": "frame_jamb",
+      "hit": true,
+      "expected": true
+    },
+    {
+      "name": "window_pane",
+      "hit": true,
+      "expected": true
+    },
+    {
+      "name": "window_sill",
+      "hit": true,
+      "expected": true
+    },
+    {
+      "name": "low_partition",
+      "hit": true,
+      "expected": true
+    },
+    {
+      "name": "above_partition",
+      "hit": false,
+      "expected": false
+    }
+  ],
+  "editor_ticks_before_physics_query": 30
+}
