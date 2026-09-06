@@ -1,0 +1,9 @@
+Use case: stylized-concept
+Asset type: a single production base-color texture atlas for a low-poly industrial concrete interior game kit, 2048x2048 square. Flat orthographic unlit surface artwork filling the entire image, not a render of a room or object.
+Composition: exact 2 by 2 equal square quadrants, no margins, no text labels.
+TOP LEFT: calm light neutral gray poured concrete, broad subtle cloud variations, very restrained surface texture, flat seamless tile on all four edges, no cracks, no holes, no baked shadows.
+TOP RIGHT: medium gray painted steel panel square, thin straight inset rectangular panel border close to edges, 4 small flush screws in corners painted into the texture, no protruding shapes, calm flat center. Broad low-contrast wear only.
+BOTTOM LEFT: medium gray concrete floor slab, thin straight dark joint border at perimeter, broad calm mottling, no cracks, no grit.
+BOTTOM RIGHT: industrial gray door panel, thin dark rectangular perimeter gasket, two wide horizontal inset panel divisions, a narrow muted teal horizontal stripe at 60 percent of panel height, small painted fasteners, no handle, no text.
+Style: clean stylized industrial facility, readable broad material shapes, compatible with restrained gray concrete and painted-metal bunker automatic door. Very low micro detail. Neutral uniform diffuse illumination across all quadrants.
+Constraints: exact straight quadrant boundaries at image midlines. No perspective, no 3D view, no drop shadows, no vignette, no logos, no labels, no metallic specular reflections, no grain or speckled highlights. Surface lines and screws are solely painted texture information.

@@ -1,0 +1,85 @@
+{
+  "engine": "5.7.4-51494982+++UE5+Release-5.7",
+  "mode": "import",
+  "assets": [
+    {
+      "name": "SM_MI_Floor",
+      "bounds_error_cm": 1.748455542838201e-05,
+      "triangles": 12,
+      "material_slots": 1,
+      "collision_boxes": 1,
+      "collision_shape_bounds_verified": true,
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_MI_Wall",
+      "bounds_error_cm": 1.748455542838201e-05,
+      "triangles": 12,
+      "material_slots": 1,
+      "collision_boxes": 1,
+      "collision_shape_bounds_verified": true,
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_MI_InsideCorner",
+      "bounds_error_cm": 9.238719940185547e-06,
+      "triangles": 20,
+      "material_slots": 1,
+      "collision_boxes": 2,
+      "collision_shape_bounds_verified": true,
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_MI_Doorway",
+      "bounds_error_cm": 3.496911085676402e-05,
+      "triangles": 92,
+      "material_slots": 2,
+      "collision_boxes": 3,
+      "collision_shape_bounds_verified": true,
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_MI_DoorLeaf",
+      "bounds_error_cm": 1.713486562948674e-05,
+      "triangles": 12,
+      "material_slots": 1,
+      "collision_boxes": 1,
+      "collision_shape_bounds_verified": true,
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_MI_LightBar",
+      "bounds_error_cm": 1.3530254364013672e-05,
+      "triangles": 12,
+      "material_slots": 2,
+      "collision_boxes": 0,
+      "collision_shape_bounds_verified": true,
+      "uv_channels": 2
+    }
+  ],
+  "opaque": true,
+  "textures": [
+    {
+      "name": "T_MI_Atlas",
+      "size": [
+        2048,
+        2048
+      ],
+      "srgb": true
+    },
+    {
+      "name": "T_MI_DirtMask",
+      "size": [
+        1024,
+        1024
+      ],
+      "srgb": false,
+      "compression": "grayscale"
+    }
+  ],
+  "shader_texture_samples_per_surface": 2,
+  "decal_count": 0,
+  "normal_maps": 0,
+  "nanite": false,
+  "passed": true
+}

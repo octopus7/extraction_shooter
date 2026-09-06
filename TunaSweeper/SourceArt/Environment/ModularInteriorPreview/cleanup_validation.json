@@ -1,0 +1,29 @@
+{
+  "passed": true,
+  "checked_at": "2026-09-07 00:46:26",
+  "asset_commit": "473c3fae",
+  "removed_generators": [
+    "import_unreal.py",
+    "build_preview_map.py",
+    "map_driver.py",
+    "run_unreal.ps1"
+  ],
+  "retained_read_only_checks": [
+    "verify_unreal_assets.py",
+    "verify_unreal_map.py",
+    "verify_map_driver.py",
+    "verify_unreal.ps1"
+  ],
+  "fbx_mesh_count": 6,
+  "ue_mesh_count": 6,
+  "kit_instances": 55,
+  "kit_triangles": 804,
+  "ue_asset_assertions_passed": true,
+  "ue_asset_command_exit": 1,
+  "ue_asset_engine_error": "Existing NE_PostProcess typed-element registry ensure",
+  "ue_map_assertions_passed": true,
+  "ue_map_command_exit": 0,
+  "ue_assets_unchanged_after_generator_removal": true,
+  "gallery_links_passed": true,
+  "startup_generation_path_present": false
+}

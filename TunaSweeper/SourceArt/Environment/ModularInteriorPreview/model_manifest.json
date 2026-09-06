@@ -1,0 +1,1502 @@
+{
+  "assets": [
+    {
+      "name": "SM_MI_Floor",
+      "key": "Floor",
+      "triangles": 12,
+      "material_slots": 1,
+      "materials": [
+        "M_MI_Floor"
+      ],
+      "bounds_m": [
+        0.0,
+        0.0,
+        -0.20000000298023224,
+        2.0,
+        2.0,
+        0.0
+      ],
+      "collision_boxes": [
+        [
+          [
+            0,
+            0,
+            -0.2
+          ],
+          [
+            2,
+            2,
+            0
+          ]
+        ]
+      ],
+      "pivot_m": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "SM_MI_Wall",
+      "key": "Wall",
+      "triangles": 12,
+      "material_slots": 1,
+      "materials": [
+        "M_MI_Concrete"
+      ],
+      "bounds_m": [
+        0.0,
+        0.0,
+        0.0,
+        2.0,
+        0.20000000298023224,
+        3.0
+      ],
+      "collision_boxes": [
+        [
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            2,
+            0.2,
+            3
+          ]
+        ]
+      ],
+      "pivot_m": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "SM_MI_InsideCorner",
+      "key": "InsideCorner",
+      "triangles": 20,
+      "material_slots": 1,
+      "materials": [
+        "M_MI_Concrete"
+      ],
+      "bounds_m": [
+        -0.20000000298023224,
+        -0.20000000298023224,
+        0.0,
+        1.0,
+        1.0,
+        3.0
+      ],
+      "collision_boxes": [
+        [
+          [
+            -0.2,
+            -0.2,
+            0
+          ],
+          [
+            1,
+            0,
+            3
+          ]
+        ],
+        [
+          [
+            -0.2,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            3
+          ]
+        ]
+      ],
+      "pivot_m": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "SM_MI_Doorway",
+      "key": "Doorway",
+      "triangles": 92,
+      "material_slots": 2,
+      "materials": [
+        "M_MI_Concrete",
+        "M_MI_Steel"
+      ],
+      "bounds_m": [
+        0.0,
+        0.0,
+        0.0,
+        4.0,
+        0.20000000298023224,
+        3.0
+      ],
+      "collision_boxes": [
+        [
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            1,
+            0.2,
+            2.4
+          ]
+        ],
+        [
+          [
+            3,
+            0,
+            0
+          ],
+          [
+            4,
+            0.2,
+            2.4
+          ]
+        ],
+        [
+          [
+            0,
+            0,
+            2.4
+          ],
+          [
+            4,
+            0.2,
+            3
+          ]
+        ]
+      ],
+      "pivot_m": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "SM_MI_DoorLeaf",
+      "key": "DoorLeaf",
+      "triangles": 12,
+      "material_slots": 1,
+      "materials": [
+        "M_MI_Door"
+      ],
+      "bounds_m": [
+        0.0,
+        0.0,
+        0.0,
+        1.9600000381469727,
+        0.07999999821186066,
+        2.359999895095825
+      ],
+      "collision_boxes": [
+        [
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            1.96,
+            0.08,
+            2.36
+          ]
+        ]
+      ],
+      "pivot_m": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "SM_MI_LightBar",
+      "key": "LightBar",
+      "triangles": 12,
+      "material_slots": 2,
+      "materials": [
+        "M_MI_Steel",
+        "M_MI_LED"
+      ],
+      "bounds_m": [
+        0.0,
+        -0.07999999821186066,
+        0.0,
+        1.5,
+        0.0,
+        0.11999999731779099
+      ],
+      "collision_boxes": [],
+      "pivot_m": [
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  "materials": {
+    "M_MI_Concrete": {
+      "metallic": 0.0,
+      "roughness": 0.85,
+      "tint": [
+        1,
+        1,
+        1
+      ]
+    },
+    "M_MI_Floor": {
+      "metallic": 0.0,
+      "roughness": 0.78,
+      "tint": [
+        0.72,
+        0.76,
+        0.79
+      ]
+    },
+    "M_MI_Steel": {
+      "metallic": 0.25,
+      "roughness": 0.52,
+      "tint": [
+        0.62,
+        0.7,
+        0.73
+      ]
+    },
+    "M_MI_Door": {
+      "metallic": 0.2,
+      "roughness": 0.58,
+      "tint": [
+        0.83,
+        0.89,
+        0.91
+      ]
+    },
+    "M_MI_LED": {
+      "metallic": 0.0,
+      "roughness": 0.35,
+      "tint": [
+        0.68,
+        0.86,
+        1.0
+      ],
+      "emission": 5.0
+    }
+  },
+  "texture": {
+    "runtime_size": [
+      2048,
+      2048
+    ],
+    "imagegen_original_size": [
+      1254,
+      1254
+    ],
+    "runtime_count": 2,
+    "dirt_size": [
+      1024,
+      1024
+    ],
+    "normal_map": null,
+    "roughness": "artist-selected scalar, not measured PBR"
+  },
+  "placements": [
+    {
+      "name": "Floor_000",
+      "key": "Floor",
+      "location_m": [
+        0,
+        0,
+        0
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "Floor_001",
+      "key": "Floor",
+      "location_m": [
+        0,
+        2,
+        0
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.371,
+        0.619
+      ]
+    },
+    {
+      "name": "Floor_002",
+      "key": "Floor",
+      "location_m": [
+        0,
+        4,
+        0
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.742,
+        0.238
+      ]
+    },
+    {
+      "name": "Floor_003",
+      "key": "Floor",
+      "location_m": [
+        2,
+        0,
+        0
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.113,
+        0.857
+      ]
+    },
+    {
+      "name": "Floor_004",
+      "key": "Floor",
+      "location_m": [
+        2,
+        2,
+        0
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.484,
+        0.476
+      ]
+    },
+    {
+      "name": "Floor_005",
+      "key": "Floor",
+      "location_m": [
+        2,
+        4,
+        0
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.855,
+        0.095
+      ]
+    },
+    {
+      "name": "Floor_006",
+      "key": "Floor",
+      "location_m": [
+        4,
+        0,
+        0
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.226,
+        0.714
+      ]
+    },
+    {
+      "name": "Floor_007",
+      "key": "Floor",
+      "location_m": [
+        4,
+        2,
+        0
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.597,
+        0.333
+      ]
+    },
+    {
+      "name": "Floor_008",
+      "key": "Floor",
+      "location_m": [
+        4,
+        4,
+        0
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.968,
+        0.952
+      ]
+    },
+    {
+      "name": "Floor_009",
+      "key": "Floor",
+      "location_m": [
+        1,
+        6,
+        0
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        0.1,
+        1
+      ],
+      "dirt_offset": [
+        0.339,
+        0.571
+      ]
+    },
+    {
+      "name": "Floor_010",
+      "key": "Floor",
+      "location_m": [
+        3,
+        6,
+        0
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        0.1,
+        1
+      ],
+      "dirt_offset": [
+        0.71,
+        0.19
+      ]
+    },
+    {
+      "name": "Floor_011",
+      "key": "Floor",
+      "location_m": [
+        1,
+        6.2,
+        0
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.081,
+        0.809
+      ]
+    },
+    {
+      "name": "Floor_012",
+      "key": "Floor",
+      "location_m": [
+        1,
+        8.2,
+        0
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.452,
+        0.428
+      ]
+    },
+    {
+      "name": "Floor_013",
+      "key": "Floor",
+      "location_m": [
+        1,
+        10.2,
+        0
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.823,
+        0.047
+      ]
+    },
+    {
+      "name": "Floor_014",
+      "key": "Floor",
+      "location_m": [
+        1,
+        12.2,
+        0
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.194,
+        0.666
+      ]
+    },
+    {
+      "name": "Floor_015",
+      "key": "Floor",
+      "location_m": [
+        3,
+        6.2,
+        0
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.565,
+        0.285
+      ]
+    },
+    {
+      "name": "Floor_016",
+      "key": "Floor",
+      "location_m": [
+        3,
+        8.2,
+        0
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.936,
+        0.904
+      ]
+    },
+    {
+      "name": "Floor_017",
+      "key": "Floor",
+      "location_m": [
+        3,
+        10.2,
+        0
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.307,
+        0.523
+      ]
+    },
+    {
+      "name": "Floor_018",
+      "key": "Floor",
+      "location_m": [
+        3,
+        12.2,
+        0
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.678,
+        0.142
+      ]
+    },
+    {
+      "name": "Floor_019",
+      "key": "Floor",
+      "location_m": [
+        5,
+        10.2,
+        0
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.049,
+        0.761
+      ]
+    },
+    {
+      "name": "Floor_020",
+      "key": "Floor",
+      "location_m": [
+        5,
+        12.2,
+        0
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.42,
+        0.38
+      ]
+    },
+    {
+      "name": "Floor_021",
+      "key": "Floor",
+      "location_m": [
+        7,
+        10.2,
+        0
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.791,
+        0.999
+      ]
+    },
+    {
+      "name": "Floor_022",
+      "key": "Floor",
+      "location_m": [
+        7,
+        12.2,
+        0
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.162,
+        0.618
+      ]
+    },
+    {
+      "name": "InsideCorner_023",
+      "key": "InsideCorner",
+      "location_m": [
+        0.0,
+        0.0,
+        0
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.533,
+        0.237
+      ]
+    },
+    {
+      "name": "InsideCorner_024",
+      "key": "InsideCorner",
+      "location_m": [
+        6.0,
+        0.0,
+        0
+      ],
+      "yaw_deg": 90.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.904,
+        0.856
+      ]
+    },
+    {
+      "name": "InsideCorner_025",
+      "key": "InsideCorner",
+      "location_m": [
+        6.0,
+        6.0,
+        0
+      ],
+      "yaw_deg": 180.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.275,
+        0.475
+      ]
+    },
+    {
+      "name": "InsideCorner_026",
+      "key": "InsideCorner",
+      "location_m": [
+        0.0,
+        6.0,
+        0
+      ],
+      "yaw_deg": -90.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.646,
+        0.094
+      ]
+    },
+    {
+      "name": "Wall_027",
+      "key": "Wall",
+      "location_m": [
+        3.0,
+        0.0,
+        0
+      ],
+      "yaw_deg": -180.0,
+      "scale": [
+        1.0,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.017,
+        0.713
+      ]
+    },
+    {
+      "name": "Wall_028",
+      "key": "Wall",
+      "location_m": [
+        5.0,
+        0.0,
+        0
+      ],
+      "yaw_deg": -180.0,
+      "scale": [
+        1.0,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.388,
+        0.332
+      ]
+    },
+    {
+      "name": "Wall_029",
+      "key": "Wall",
+      "location_m": [
+        6.0,
+        3.0,
+        0
+      ],
+      "yaw_deg": -90.0,
+      "scale": [
+        1.0,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.759,
+        0.951
+      ]
+    },
+    {
+      "name": "Wall_030",
+      "key": "Wall",
+      "location_m": [
+        6.0,
+        5.0,
+        0
+      ],
+      "yaw_deg": -90.0,
+      "scale": [
+        1.0,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.13,
+        0.57
+      ]
+    },
+    {
+      "name": "Doorway_031",
+      "key": "Doorway",
+      "location_m": [
+        1.0,
+        6.0,
+        0
+      ],
+      "yaw_deg": -0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.501,
+        0.189
+      ]
+    },
+    {
+      "name": "Wall_032",
+      "key": "Wall",
+      "location_m": [
+        0.0,
+        3.0,
+        0
+      ],
+      "yaw_deg": 90.0,
+      "scale": [
+        1.0,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.872,
+        0.808
+      ]
+    },
+    {
+      "name": "Wall_033",
+      "key": "Wall",
+      "location_m": [
+        0.0,
+        1.0,
+        0
+      ],
+      "yaw_deg": 90.0,
+      "scale": [
+        1.0,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.243,
+        0.427
+      ]
+    },
+    {
+      "name": "InsideCorner_034",
+      "key": "InsideCorner",
+      "location_m": [
+        5.199999809265137,
+        10.0,
+        0
+      ],
+      "yaw_deg": -90.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.614,
+        0.046
+      ]
+    },
+    {
+      "name": "InsideCorner_035",
+      "key": "InsideCorner",
+      "location_m": [
+        9.0,
+        10.199999809265137,
+        0
+      ],
+      "yaw_deg": 90.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.985,
+        0.665
+      ]
+    },
+    {
+      "name": "InsideCorner_036",
+      "key": "InsideCorner",
+      "location_m": [
+        9.0,
+        14.199999809265137,
+        0
+      ],
+      "yaw_deg": 180.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.356,
+        0.284
+      ]
+    },
+    {
+      "name": "InsideCorner_037",
+      "key": "InsideCorner",
+      "location_m": [
+        1.0,
+        14.199999809265137,
+        0
+      ],
+      "yaw_deg": -90.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.727,
+        0.903
+      ]
+    },
+    {
+      "name": "Wall_038",
+      "key": "Wall",
+      "location_m": [
+        5.0,
+        8.199999809265137,
+        0
+      ],
+      "yaw_deg": -90.0,
+      "scale": [
+        1.0,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.098,
+        0.522
+      ]
+    },
+    {
+      "name": "Wall_039",
+      "key": "Wall",
+      "location_m": [
+        5.0,
+        9.0,
+        0
+      ],
+      "yaw_deg": -90.0,
+      "scale": [
+        0.40000009536743164,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.469,
+        0.141
+      ]
+    },
+    {
+      "name": "Wall_040",
+      "key": "Wall",
+      "location_m": [
+        8.0,
+        10.199999809265137,
+        0
+      ],
+      "yaw_deg": -180.0,
+      "scale": [
+        0.9000000953674316,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.84,
+        0.76
+      ]
+    },
+    {
+      "name": "Wall_041",
+      "key": "Wall",
+      "location_m": [
+        9.0,
+        13.199999809265137,
+        0
+      ],
+      "yaw_deg": -90.0,
+      "scale": [
+        1.0,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.211,
+        0.379
+      ]
+    },
+    {
+      "name": "Wall_042",
+      "key": "Wall",
+      "location_m": [
+        6.0,
+        14.199999809265137,
+        0
+      ],
+      "yaw_deg": -0.0,
+      "scale": [
+        1.0,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.582,
+        0.998
+      ]
+    },
+    {
+      "name": "Wall_043",
+      "key": "Wall",
+      "location_m": [
+        4.0,
+        14.199999809265137,
+        0
+      ],
+      "yaw_deg": -0.0,
+      "scale": [
+        1.0,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.953,
+        0.617
+      ]
+    },
+    {
+      "name": "Wall_044",
+      "key": "Wall",
+      "location_m": [
+        2.0,
+        14.199999809265137,
+        0
+      ],
+      "yaw_deg": -0.0,
+      "scale": [
+        1.0,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.324,
+        0.236
+      ]
+    },
+    {
+      "name": "Wall_045",
+      "key": "Wall",
+      "location_m": [
+        1.0,
+        11.199999809265137,
+        0
+      ],
+      "yaw_deg": 90.0,
+      "scale": [
+        1.0,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.695,
+        0.855
+      ]
+    },
+    {
+      "name": "Wall_046",
+      "key": "Wall",
+      "location_m": [
+        1.0,
+        9.199999809265137,
+        0
+      ],
+      "yaw_deg": 90.0,
+      "scale": [
+        1.0,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.066,
+        0.474
+      ]
+    },
+    {
+      "name": "Wall_047",
+      "key": "Wall",
+      "location_m": [
+        1.0,
+        7.199999809265137,
+        0
+      ],
+      "yaw_deg": 90.0,
+      "scale": [
+        1.0,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.437,
+        0.093
+      ]
+    },
+    {
+      "name": "Wall_048",
+      "key": "Wall",
+      "location_m": [
+        1.0,
+        6.199999809265137,
+        0
+      ],
+      "yaw_deg": 90.0,
+      "scale": [
+        0.5,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.808,
+        0.712
+      ]
+    },
+    {
+      "name": "DoorLeaf_open_68deg",
+      "key": "DoorLeaf",
+      "location_m": [
+        2.02,
+        6.06,
+        0.02
+      ],
+      "yaw_deg": -68.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.179,
+        0.331
+      ]
+    },
+    {
+      "name": "LightBar_050",
+      "key": "LightBar",
+      "location_m": [
+        4.75,
+        0,
+        2.4
+      ],
+      "yaw_deg": 180.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.55,
+        0.95
+      ]
+    },
+    {
+      "name": "LightBar_051",
+      "key": "LightBar",
+      "location_m": [
+        6,
+        3.75,
+        2.4
+      ],
+      "yaw_deg": -90.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.921,
+        0.569
+      ]
+    },
+    {
+      "name": "LightBar_052",
+      "key": "LightBar",
+      "location_m": [
+        4.25,
+        6,
+        2.4
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.292,
+        0.188
+      ]
+    },
+    {
+      "name": "LightBar_053",
+      "key": "LightBar",
+      "location_m": [
+        1,
+        10.95,
+        2.4
+      ],
+      "yaw_deg": 90.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.663,
+        0.807
+      ]
+    },
+    {
+      "name": "LightBar_054",
+      "key": "LightBar",
+      "location_m": [
+        6.25,
+        14.2,
+        2.4
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.034,
+        0.426
+      ]
+    }
+  ],
+  "counts": {
+    "Floor": 23,
+    "InsideCorner": 8,
+    "Wall": 17,
+    "Doorway": 1,
+    "DoorLeaf": 1,
+    "LightBar": 5
+  },
+  "unique_triangles": 160,
+  "sample_triangles": 804,
+  "sample_instances": 55,
+  "real_lights": 5,
+  "fixtures": [
+    {
+      "location_m": [
+        4.0,
+        0.10000000149011612,
+        2.4600000381469727
+      ],
+      "target_m": [
+        4.0,
+        2.0999999046325684,
+        0.800000011920929
+      ]
+    },
+    {
+      "location_m": [
+        5.900000095367432,
+        3.0,
+        2.4600000381469727
+      ],
+      "target_m": [
+        3.9000000953674316,
+        3.0,
+        0.800000011920929
+      ]
+    },
+    {
+      "location_m": [
+        5.0,
+        5.900000095367432,
+        2.4600000381469727
+      ],
+      "target_m": [
+        5.0,
+        3.9000000953674316,
+        0.800000011920929
+      ]
+    },
+    {
+      "location_m": [
+        1.100000023841858,
+        11.699999809265137,
+        2.4600000381469727
+      ],
+      "target_m": [
+        3.0999999046325684,
+        11.699999809265137,
+        0.800000011920929
+      ]
+    },
+    {
+      "location_m": [
+        7.0,
+        14.09999942779541,
+        2.4600000381469727
+      ],
+      "target_m": [
+        7.0,
+        12.09999942779541,
+        0.800000011920929
+      ]
+    }
+  ],
+  "roofless": true,
+  "preview_only_softboxes": 1,
+  "room_clear_m": [
+    6,
+    6,
+    3
+  ],
+  "corridor_clear_width_m": 4,
+  "door_clear_m": [
+    2,
+    2.4
+  ],
+  "edge_checks": [
+    {
+      "length": 4.0,
+      "filled": 4,
+      "kind": "wall"
+    },
+    {
+      "length": 4.0,
+      "filled": 4,
+      "kind": "wall"
+    },
+    {
+      "length": 4.0,
+      "filled": 4,
+      "kind": "doorway"
+    },
+    {
+      "length": 4.0,
+      "filled": 4,
+      "kind": "wall"
+    },
+    {
+      "length": 2.8000001907348633,
+      "filled": 2.8000001907348633,
+      "kind": "wall"
+    },
+    {
+      "length": 1.8000001907348633,
+      "filled": 1.8000001907348633,
+      "kind": "wall"
+    },
+    {
+      "length": 2.0,
+      "filled": 2,
+      "kind": "wall"
+    },
+    {
+      "length": 6.0,
+      "filled": 6,
+      "kind": "wall"
+    },
+    {
+      "length": 7.0,
+      "filled": 7.0,
+      "kind": "wall"
+    }
+  ],
+  "axis_contract": "Blender source X=UE X north, Y=UE Y east, Z=up; export copies mirror Y",
+  "play_camera": {
+    "arm_cm": 1500,
+    "pitch_deg": -88,
+    "yaw_deg": 0,
+    "horizontal_fov_deg": 70,
+    "target_m": [
+      3.0,
+      3.299999952316284,
+      0.8799999952316284
+    ]
+  }
+}
