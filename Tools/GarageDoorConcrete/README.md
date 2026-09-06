@@ -12,6 +12,8 @@ The moving upper slabs remain gray metal with inset plates, while the jambs, lin
 
 After the user's follow-up authorization, `/Game/Environment/Bunker/GarageDoor/BP_RaidBunkerGarageDoor` now uses this kit, including both motion indicators and authored mesh materials. The door's dimensions and motion settings are preserved. Level assets are unchanged. Imported assets live under `/Game/Environment/Bunker/GarageDoorConcrete`.
 
+The connection was compiled, saved, reloaded in a fresh process and verified by constructing the BP: all 16 mesh components resolve to this kit's meshes and materials. See `blueprint_connection_validation.json` and `blueprint_reload_validation.json` in the SourceArt folder. The one-off connection script was removed after its asset commit, per project policy. Reload the BP or restart an already-open editor to see the saved defaults.
+
 1. In the existing door's mesh fields, assign the corresponding `SM_GarageConcrete_FrameTop`, `FrameLeft`, `FrameRight`, `CanopyRailLeft`, `CanopyRailRight`, `LEDBar` and `LowerEmbeddedPanel` meshes.
 2. Assign `SM_GarageConcrete_UpperPanel` to all four Upper Panel Meshes entries. Optional TemporaryWallLeft/Right and TemporaryRoof meshes are also supplied.
 3. Enable **Use Authored Mesh Materials** to preserve the new concrete, metal, rubber, LED and lens material slots instead of applying the legacy single metal override.
