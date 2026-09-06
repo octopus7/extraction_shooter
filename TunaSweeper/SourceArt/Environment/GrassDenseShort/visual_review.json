@@ -1,0 +1,18 @@
+{
+  "reviewer": "Codex visual inspection",
+  "source_views_reviewed": ["01_hero.png", "02_reverse.png", "03_top.png", "04_profile.png", "05_repeat_25.png", "06_game_distance.png"],
+  "reference": "Reference/existing_nature_style.png",
+  "ue_views_reviewed": ["07_ue_reload_hero.png", "08_ue_reload_reverse.png", "09_ue_camera_12m.png"],
+  "ue_findings": {"front_and_reverse_geometry_visible": true, "green_palette_visible": true, "game_camera_scale_view_reviewed": true, "note": "UE diagnostic lighting differs from the softer Blender presentation; no gameplay map was saved."},
+  "source_findings": {
+    "irregular_low_outline": true,
+    "compact_tufts_with_height_variation": true,
+    "no_flowers": true,
+    "no_microtexture_noise": true,
+    "repeat_rotations_and_scale_break_grid": true,
+    "spacing_note": "25-instance review uses 54-59cm nominal spacing with jitter and natural openings; choose 45-50cm for more continuous cover.",
+    "underside_note": "Open ribbon geometry is intentional. UE opaque two-sided material renders leaf backs without alpha cards."
+  },
+  "blend_fresh_process_reload": {"passed": true, "packed_texture_pixels": [64, 64], "triangles": 1290, "ground_pivot": true},
+  "limitations": ["No gameplay map placement or PIE test", "Single LOD; no target-hardware density/FPS benchmark", "UV palette islands intentionally overlap; dynamic lighting only"]
+}

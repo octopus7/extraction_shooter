@@ -16,6 +16,7 @@
 & 'C:/Program Files/Blender Foundation/Blender 4.5/blender.exe' -b --factory-startup -t 4 --python-exit-code 1 --python Tools/ForestProps/GrassDenseShort/verify_fbx.py
 & Tools/ForestProps/GrassDenseShort/run_unreal.ps1 -Mode import
 & Tools/ForestProps/GrassDenseShort/run_unreal.ps1 -Mode reload
+& Tools/ForestProps/GrassDenseShort/run_unreal.ps1 -Mode render
 ```
 
 `SM_GrassDenseShort.blend`는 텍스처를 pack하고 메시·조명·카메라·바닥·숨긴 25개 반복 배치 프리뷰를 포함한다. FBX에는 원점의 실제 메시 하나만 export한다. 재현 seed는 906413.
@@ -40,3 +41,7 @@ Blender 1 단위 = 1m, FBX unit scale 보존, Unreal 임포트 배율 1. `-Y for
 `Previews/01_hero`부터 `06_game_distance`까지 정면 사선·반대 사선·상면·측면·25개 반복·거리 축소 뷰를 제공한다. 팔레트는 잔점 없이 낮은 채도의 녹색 덩어리로 구성했다.
 
 `model_manifest.json`, `fbx_reload_validation.json`은 치수·UV·법선·퇴화 면·재질·포장 텍스처·지면 피벗 검증 결과다. UE 결과는 `unreal_import_validation.json`, 별도 실행 재로드 결과는 `unreal_reload_validation.json`에 저장된다.
+
+UE 재로드에서 바운드 최대 오차는 0.00000191cm였다. UE LOD0 정점은 평면 법선의 모서리 분할 후 3,870개이며 Blender의 공유 정점 1,505개와 표현 방식이 다르다. 삼각형 수는 1,290개다. `.blend` 별도 실행 재로드에서도 텍스처 pack·원점 피벗·삼각형 수를 확인했다.
+
+UE 캡처는 실제 프레임이 진행되는 offscreen editor의 SceneCapture2D로 생성한다. 07/08은 재로드한 에셋의 앞·뒤 보기이며 09는 기본 C++ 카메라 기준(12m, 하향 60°, FOV 70°)이다. 검토용 조명과 배경이며 실제 게임 레벨 캡처는 아니다. BP나 사용자 카메라 조정에 따라 실제 화면 크기는 달라질 수 있다. 캡처 API는 [Epic UE 5.7 RenderingLibrary](https://dev.epicgames.com/documentation/en-us/unreal-engine/python-api/class/RenderingLibrary?application_version=5.7)를 따른다.

@@ -83,18 +83,21 @@ expected=[s[0]*100,-s[4]*100,s[2]*100,s[3]*100,-s[1]*100,s[5]*100]
 error=max(abs(a-b) for a,b in zip(bounds,expected))
 assert error<.01,('bounds/axis mismatch',bounds,expected)
 assert sub.get_num_uv_channels(mesh,0)==1
+assert mesh.get_num_triangles(0)==manifest['triangles']
+assert mesh.get_num_lods()==1 and mesh.get_num_sections(0)==1
 assert sub.get_simple_collision_count(mesh)==0 and sub.get_convex_collision_count(mesh)==0
 assert len(mesh.static_materials)==1 and mesh.static_materials[0].material_interface==mat
 assert mat.get_editor_property('two_sided') and mat.get_editor_property('blend_mode')==unreal.BlendMode.BLEND_OPAQUE
 assert mat.get_editor_property('used_with_instanced_static_meshes')
 assert tex.get_editor_property('srgb')
 assert unreal.MaterialEditingLibrary.get_material_property_input_node(mat,unreal.MaterialProperty.MP_BASE_COLOR).texture==tex
-assert str(mesh.body_setup.default_instance.get_editor_property('collision_profile_name'))=='NoCollision'
+assert str(mesh.get_editor_property('body_setup').get_editor_property('default_instance').get_editor_property('collision_profile_name'))=='NoCollision'
 assert protected()==before
 report={'passed':True,'mode':'fresh-process reload' if VERIFY else 'import','engine':unreal.SystemLibrary.get_engine_version(),
         'host':'Content-only UE 5.7 validation project; Content junction targets actual TunaSweeper Content',
         'asset':mesh.get_path_name(),'bounds_cm':bounds,'max_axis_bounds_error_cm':error,
-        'vertices_lod0':sub.get_number_verts(mesh,0),'uv_channels':sub.get_num_uv_channels(mesh,0),
+        'vertices_lod0':sub.get_number_verts(mesh,0),'triangles_lod0':mesh.get_num_triangles(0),
+        'lod_count':mesh.get_num_lods(),'sections_lod0':mesh.get_num_sections(0),'uv_channels':sub.get_num_uv_channels(mesh,0),
         'material_slots':1,'two_sided':True,'blend_mode':'Opaque','collision_primitives':0,
         'collision_profile':'NoCollision','instanced_static_mesh_usage':True,'texture_srgb':True,
         'existing_nature_assets_unchanged':True,'protected_assets_sha256':before}

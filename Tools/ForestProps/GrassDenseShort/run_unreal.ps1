@@ -13,7 +13,19 @@ $env:GRASS_DENSE_MODE=$Mode
 ${env:UE-LocalDataCachePath}=Join-Path $taskHost 'DerivedDataCache'
 $taskScript=if ($Mode -eq 'reference') {'reference_unreal.py'} elseif ($Mode -eq 'render') {'render_unreal.py'} else {'import_unreal.py'}
 $taskArgs=@($taskProject,'-run=pythonscript',"-script=$PSScriptRoot/$taskScript",'-ddc=InstalledNoZenLocalFallback','-unattended','-nosplash','-nosound','-stdout','-FullStdOutLogOutput','-ini:Engine:[ConsoleVariables]:Interchange.FeatureFlags.Import.FBX=0',"-abslog=$taskHost/$Mode.log")
-if ($Mode -eq 'render') { $taskArgs+=@('-AllowCommandletRendering','-d3d12') } else { $taskArgs+='-nullrhi' }
+$taskArgs+='-ini:Engine:[ConsoleVariables]:Interchange.FeatureFlags.Import.SyncToBrowser=0'
+if ($Mode -eq 'render') {
+    $taskArgs=@($taskArgs | Where-Object { $_ -ne '-run=pythonscript' -and $_ -notlike '-script=*' })
+    $taskArgs+=@('-d3d12','-RenderOffscreen',"-ExecCmds=py $PSScriptRoot/$taskScript")
+} else { $taskArgs+='-nullrhi' }
+$taskStarted=Get-Date
 & 'C:/Program Files/Epic Games/UE_5.7/Engine/Binaries/Win64/UnrealEditor-Cmd.exe' @taskArgs *> (Join-Path $taskHost "$Mode.stdout.log")
 if ($LASTEXITCODE -ne 0) { Get-Content (Join-Path $taskHost "$Mode.stdout.log") -Tail 45; throw "UE $Mode failed: $LASTEXITCODE" }
+if ($Mode -ne 'reference') {
+    $taskReport=Join-Path $taskRoot "TunaSweeper/SourceArt/Environment/GrassDenseShort/unreal_${Mode}_validation.json"
+    if (!(Test-Path -LiteralPath $taskReport) -or (Get-Item -LiteralPath $taskReport).LastWriteTime -lt $taskStarted) { throw "Missing or stale $Mode validation report" }
+    $taskResult=Get-Content -LiteralPath $taskReport -Raw | ConvertFrom-Json
+    if ($Mode -eq 'render') { if (!$taskResult.nonblank_pixel_checks) { throw 'Render pixel checks failed' } }
+    elseif (!$taskResult.passed) { throw "$Mode validation failed" }
+}
 Get-Content (Join-Path $taskHost "$Mode.stdout.log") -Tail 8
