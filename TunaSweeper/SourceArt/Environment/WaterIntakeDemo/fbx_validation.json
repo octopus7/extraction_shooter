@@ -1,0 +1,51 @@
+[
+  {
+    "name": "SM_IntakeDemo_GateFrame",
+    "triangles": 16908,
+    "collision_meshes": 12,
+    "max_bounds_error_m": 2.384185791015625e-07,
+    "passed": true
+  },
+  {
+    "name": "SM_IntakeDemo_Screen",
+    "triangles": 3780,
+    "collision_meshes": 21,
+    "max_bounds_error_m": 1.1920928955078125e-07,
+    "passed": true
+  },
+  {
+    "name": "SM_IntakeDemo_Pump",
+    "triangles": 17696,
+    "collision_meshes": 3,
+    "max_bounds_error_m": 3.5762786865234375e-07,
+    "passed": true
+  },
+  {
+    "name": "SM_IntakeDemo_PumpFoundation",
+    "triangles": 216,
+    "collision_meshes": 2,
+    "max_bounds_error_m": 4.172325134277344e-07,
+    "passed": true
+  },
+  {
+    "name": "SM_IntakeDemo_ValveHandle_Repaired",
+    "triangles": 1424,
+    "collision_meshes": 0,
+    "max_bounds_error_m": 5.960464477539063e-08,
+    "passed": true
+  },
+  {
+    "name": "SM_IntakeDemo_ValveHandle_Broken",
+    "triangles": 696,
+    "collision_meshes": 0,
+    "max_bounds_error_m": 7.450580596923828e-08,
+    "passed": true
+  },
+  {
+    "name": "SM_IntakeDemo_ScreenDebris",
+    "triangles": 7548,
+    "collision_meshes": 0,
+    "max_bounds_error_m": 1.1920928955078125e-07,
+    "passed": true
+  }
+]

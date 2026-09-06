@@ -1,0 +1,190 @@
+{
+  "units": "meters in Blender; centimeters in UE",
+  "atlas": "TunaSweeper\\SourceArt\\Environment\\WaterIntakeDemo\\Textures\\T_WaterIntakeDemo_Atlas_BaseColor.png",
+  "materials": {
+    "M_IntakeDemo_PaintedMetal": {
+      "metallic": 0.2,
+      "roughness": 0.68
+    },
+    "M_IntakeDemo_Steel": {
+      "metallic": 0.65,
+      "roughness": 0.48
+    },
+    "M_IntakeDemo_Concrete": {
+      "metallic": 0.0,
+      "roughness": 0.92
+    },
+    "M_IntakeDemo_Organic": {
+      "metallic": 0.0,
+      "roughness": 0.88
+    },
+    "M_IntakeDemo_Rubber": {
+      "metallic": 0.0,
+      "roughness": 0.85
+    }
+  },
+  "assets": [
+    {
+      "name": "SM_IntakeDemo_GateFrame",
+      "vertices": 8600,
+      "triangles": 16908,
+      "bounds_world_m": [
+        -1.9900000095367432,
+        -1.5099999904632568,
+        0.0,
+        2.6050000190734863,
+        1.1049998998641968,
+        3.6100001335144043
+      ],
+      "placement_blender_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": [
+        "M_IntakeDemo_Concrete",
+        "M_IntakeDemo_Steel"
+      ],
+      "collision_boxes": 12
+    },
+    {
+      "name": "SM_IntakeDemo_Screen",
+      "vertices": 1944,
+      "triangles": 3780,
+      "bounds_world_m": [
+        -1.3324999809265137,
+        -0.15199999511241913,
+        0.08500003814697266,
+        1.3324999809265137,
+        0.055000003427267075,
+        2.2070000171661377
+      ],
+      "placement_blender_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": [
+        "M_IntakeDemo_Steel"
+      ],
+      "collision_boxes": 21
+    },
+    {
+      "name": "SM_IntakeDemo_Pump",
+      "vertices": 9028,
+      "triangles": 17696,
+      "bounds_world_m": [
+        -4.505000114440918,
+        -1.0550000667572021,
+        0.07500000298023224,
+        -0.937999963760376,
+        2.194999933242798,
+        1.8799999952316284
+      ],
+      "placement_blender_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": [
+        "M_IntakeDemo_Steel",
+        "M_IntakeDemo_PaintedMetal",
+        "M_IntakeDemo_Rubber",
+        "M_IntakeDemo_Organic"
+      ],
+      "collision_boxes": 3
+    },
+    {
+      "name": "SM_IntakeDemo_PumpFoundation",
+      "vertices": 112,
+      "triangles": 216,
+      "bounds_world_m": [
+        -4.724999904632568,
+        -0.6399999856948853,
+        0.0,
+        -2.4149999618530273,
+        2.3350000381469727,
+        0.2199999988079071
+      ],
+      "placement_blender_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": [
+        "M_IntakeDemo_Concrete"
+      ],
+      "collision_boxes": 2
+    },
+    {
+      "name": "SM_IntakeDemo_ValveHandle_Repaired",
+      "vertices": 724,
+      "triangles": 1424,
+      "bounds_world_m": [
+        -3.4120001792907715,
+        1.2979999780654907,
+        1.847499966621399,
+        -2.888000011444092,
+        1.8219999074935913,
+        1.9470000267028809
+      ],
+      "placement_blender_m": [
+        -3.1500000953674316,
+        1.559999942779541,
+        1.8799999952316284
+      ],
+      "materials": [
+        "M_IntakeDemo_PaintedMetal",
+        "M_IntakeDemo_Steel"
+      ],
+      "collision_boxes": 0
+    },
+    {
+      "name": "SM_IntakeDemo_ValveHandle_Broken",
+      "vertices": 356,
+      "triangles": 696,
+      "bounds_world_m": [
+        -3.2138309478759766,
+        1.4989999532699585,
+        1.847499966621399,
+        -3.031418800354004,
+        1.6209999322891235,
+        1.9470000267028809
+      ],
+      "placement_blender_m": [
+        -3.1500000953674316,
+        1.559999942779541,
+        1.8799999952316284
+      ],
+      "materials": [
+        "M_IntakeDemo_PaintedMetal",
+        "M_IntakeDemo_Steel"
+      ],
+      "collision_boxes": 0
+    },
+    {
+      "name": "SM_IntakeDemo_ScreenDebris",
+      "vertices": 3978,
+      "triangles": 7548,
+      "bounds_world_m": [
+        -1.284363031387329,
+        -0.45706886053085327,
+        0.07693678140640259,
+        1.251273274421692,
+        -0.22900977730751038,
+        0.9461270570755005
+      ],
+      "placement_blender_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "materials": [
+        "M_IntakeDemo_Organic"
+      ],
+      "collision_boxes": 0
+    }
+  ],
+  "notes": "The supplied sluice reference supersedes the old cylindrical screen concept. No Blueprint is modified.",
+  "total_triangles": 48268
+}
