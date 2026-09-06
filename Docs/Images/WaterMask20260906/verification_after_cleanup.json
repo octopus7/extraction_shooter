@@ -1,0 +1,375 @@
+{
+  "phase": "after_generator_removal",
+  "reportCreatedOn": "2026.09.06-14.30.45",
+  "renderer": "UE 5.7 WindowsEditor D3D12 SM6",
+  "buildResult": "Succeeded",
+  "buildSeconds": 14.28,
+  "generatorClassAbsent": true,
+  "succeeded": 2,
+  "succeededWithWarnings": 1,
+  "failed": 0,
+  "tests": [
+    {
+      "fullTestPath": "StylizedWater.MaskWater.AssetsAndTopology",
+      "state": "Success",
+      "warnings": 0,
+      "errors": 0,
+      "entries": []
+    },
+    {
+      "fullTestPath": "StylizedWater.MaskWater.RenderMatrix",
+      "state": "Success",
+      "warnings": 0,
+      "errors": 0,
+      "entries": [
+        {
+          "event": {
+            "type": "Info",
+            "message": "Rendered Lake_Near_Off",
+            "context": "",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.09.06-14.30.15"
+        },
+        {
+          "event": {
+            "type": "Info",
+            "message": "Rendered Lake_Far_Off",
+            "context": "",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.09.06-14.30.16"
+        },
+        {
+          "event": {
+            "type": "Info",
+            "message": "Rendered Lake_Far_On",
+            "context": "",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.09.06-14.30.17"
+        },
+        {
+          "event": {
+            "type": "Info",
+            "message": "Rendered Lake_Far_Moved",
+            "context": "",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.09.06-14.30.18"
+        },
+        {
+          "event": {
+            "type": "Info",
+            "message": "Rendered Beach_Near_Off",
+            "context": "",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.09.06-14.30.20"
+        },
+        {
+          "event": {
+            "type": "Info",
+            "message": "Rendered Beach_Far_Off",
+            "context": "",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.09.06-14.30.21"
+        },
+        {
+          "event": {
+            "type": "Info",
+            "message": "Rendered Beach_Far_On",
+            "context": "",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.09.06-14.30.22"
+        },
+        {
+          "event": {
+            "type": "Info",
+            "message": "Rendered Beach_Far_Moved",
+            "context": "",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.09.06-14.30.23"
+        },
+        {
+          "event": {
+            "type": "Info",
+            "message": "Rendered River_Near_Off",
+            "context": "",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.09.06-14.30.25"
+        },
+        {
+          "event": {
+            "type": "Info",
+            "message": "Rendered River_Far_Off",
+            "context": "",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.09.06-14.30.26"
+        },
+        {
+          "event": {
+            "type": "Info",
+            "message": "Rendered River_Far_On",
+            "context": "",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.09.06-14.30.27"
+        },
+        {
+          "event": {
+            "type": "Info",
+            "message": "Rendered River_Far_Moved",
+            "context": "",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.09.06-14.30.29"
+        },
+        {
+          "event": {
+            "type": "Info",
+            "message": "Rendered Lake_2x2_Shore",
+            "context": "",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.09.06-14.30.30"
+        },
+        {
+          "event": {
+            "type": "Info",
+            "message": "Rendered Lake_64x64_Shore",
+            "context": "",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.09.06-14.30.31"
+        },
+        {
+          "event": {
+            "type": "Info",
+            "message": "Rendered Sky_Fixed_T0",
+            "context": "",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.09.06-14.30.32"
+        },
+        {
+          "event": {
+            "type": "Info",
+            "message": "Rendered Sky_Fixed_T3",
+            "context": "",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.09.06-14.30.34"
+        },
+        {
+          "event": {
+            "type": "Info",
+            "message": "Rendered River_Flow_T0",
+            "context": "",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.09.06-14.30.35"
+        },
+        {
+          "event": {
+            "type": "Info",
+            "message": "Rendered River_Flow_T2",
+            "context": "",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.09.06-14.30.36"
+        },
+        {
+          "event": {
+            "type": "Info",
+            "message": "Rendered Beach_TerrainFilm_Close",
+            "context": "",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.09.06-14.30.37"
+        },
+        {
+          "event": {
+            "type": "Info",
+            "message": "Rendered Beach_TerrainFilm_Grazing",
+            "context": "",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.09.06-14.30.39"
+        },
+        {
+          "event": {
+            "type": "Info",
+            "message": "Image mean byte deltas: fixed sky 0.000000; river 0.283704; grid 0.000886",
+            "context": "",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.09.06-14.30.39"
+        },
+        {
+          "event": {
+            "type": "Info",
+            "message": "4225 / 4225 terrain hits; complete surface retained",
+            "context": "",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.09.06-14.30.39"
+        }
+      ]
+    },
+    {
+      "fullTestPath": "StylizedWater.MaskWater.SavedMapRenders",
+      "state": "Success",
+      "warnings": 3,
+      "errors": 0,
+      "entries": [
+        {
+          "event": {
+            "type": "Warning",
+            "message": "MapCheck: M_GarageDoorLED Material /Game/Environment/Bunker/GarageDoor/Materials/M_GarageDoorLED.M_GarageDoorLED was missing the usage flag bUsedWithNanite. If the material asset is not re-saved, it may not render correctly when run outside the editor. Fix",
+            "context": "log",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.09.06-14.30.39"
+        },
+        {
+          "event": {
+            "type": "Warning",
+            "message": "MapCheck: M_GarageDoorMetal Material /Game/Environment/Bunker/GarageDoor/Materials/M_GarageDoorMetal.M_GarageDoorMetal was missing the usage flag bUsedWithNanite. If the material asset is not re-saved, it may not render correctly when run outside the editor. Fix",
+            "context": "log",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.09.06-14.30.39"
+        },
+        {
+          "event": {
+            "type": "Info",
+            "message": "Rendered DemoRaid_Migrated",
+            "context": "",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.09.06-14.30.42"
+        },
+        {
+          "event": {
+            "type": "Warning",
+            "message": "LogCrowdFollowing: Unable to find RecastNavMesh instance while trying to create UCrowdManager instance",
+            "context": "log",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.09.06-14.30.42"
+        },
+        {
+          "event": {
+            "type": "Info",
+            "message": "Rendered Raid_Migrated",
+            "context": "",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.09.06-14.30.45"
+        }
+      ]
+    }
+  ],
+  "saved": {
+    "loaded_assets": [
+      "/StylizedWater/MaskWater/M_WaterMask",
+      "/StylizedWater/MaskWater/Masks/T_MaskBeach",
+      "/StylizedWater/MaskWater/Masks/T_MaskDemo0",
+      "/StylizedWater/MaskWater/Masks/T_MaskLake",
+      "/StylizedWater/MaskWater/Masks/T_MaskRaid0",
+      "/StylizedWater/MaskWater/Masks/T_MaskRiver",
+      "/StylizedWater/Review/M_ReviewGround",
+      "/StylizedWater/Review/WaterMaskReview",
+      "/StylizedWater/SkyParallax/M_WaterMaskSky",
+      "/StylizedWater/SkyParallax/T_AnimeSky"
+    ],
+    "base_dependencies": [
+      "/StylizedWater/MaskWater/Masks/T_MaskLake"
+    ],
+    "maps": [
+      {
+        "level": "/Game/Maps/DemoRaidMap",
+        "actor": "SW_GentleBeach",
+        "mask": "/StylizedWater/MaskWater/Masks/T_MaskDemo0.T_MaskDemo0",
+        "surface_sections": 1,
+        "terrain_fit": "4225 / 4225 terrain hits; complete surface retained",
+        "components": [
+          "SceneRoot",
+          "WaterSurface"
+        ]
+      },
+      {
+        "level": "/Game/MainRaid/RaidMap",
+        "actor": "SW_GentleBeach",
+        "mask": "/StylizedWater/MaskWater/Masks/T_MaskRaid0.T_MaskRaid0",
+        "surface_sections": 1,
+        "terrain_fit": "4225 / 4225 terrain hits; complete surface retained",
+        "components": [
+          "SceneRoot",
+          "WaterSurface"
+        ]
+      }
+    ],
+    "legacy_assets_absent": true
+  }
+}

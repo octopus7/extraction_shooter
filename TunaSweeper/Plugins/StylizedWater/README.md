@@ -13,6 +13,8 @@ This experimental UE 5.7 plugin replaces the failed masked Single Layer Water su
 
 The plugin reads saved materials; startup, placement and reconstruction never create or overwrite content packages. Missing base assets hide the water rather than generating replacement content.
 
+The one-shot asset commandlet and migration script were committed with the verified assets in `4c58b165`, then removed in the immediately following commit. Only the read-only `Tools/verify_saved_water.py` remains. Open `/StylizedWater/Review/WaterMaskReview` for the saved lake/beach/river gallery.
+
 ## Mask contract
 
 Use a linear texture: **sRGB off**, HDR/uncompressed data, trilinear filtering, mipmaps, clamp addressing. The supplied masks use RGBA16F source and HDR storage.

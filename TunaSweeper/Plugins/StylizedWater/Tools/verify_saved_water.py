@@ -1,5 +1,6 @@
 """Read-only saved-water verification. Run via UE Python; writes only Saved/WaterRebuild."""
 import unreal, json, os
+assert not hasattr(unreal,"GenerateMaskWaterAssetsCommandlet"),"One-shot generator is still registered"
 reg=unreal.AssetRegistryHelpers.get_asset_registry()
 reg.search_all_assets(True)
 opts=unreal.AssetRegistryDependencyOptions(True,True,True,True,True)
@@ -10,6 +11,7 @@ base="/StylizedWater/MaskWater/M_WaterMask"
 base_deps=[str(p) for p in reg.get_dependencies(base,opts)]
 assert not any("/SkyParallax/" in p for p in base_deps),base_deps
 saved=reg.get_assets_by_path("/StylizedWater",recursive=True)
+assert len(saved)==10,len(saved)
 loaded=[]
 for item in saved:
     path=str(item.package_name)

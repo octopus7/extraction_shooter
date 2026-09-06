@@ -68,7 +68,7 @@ RenderMatrix는 호수·해변·강의 근거리/원거리, 하늘 off/on, 카�
 
 확인한 이미지에서 청록색 얕은 물에서 짙은 수심색까지 이어지고, 해안 경계와 지형 위 막에 과거 삼각형 조각·불투명 흰 파편이 보이지 않았다. 하늘을 켜면 구름 무늬가 나타나고 카메라 이동 시 바뀐다. 시간만 흐를 때 하늘 무늬는 고정된다. 가는 물결 선은 별도로 흐른다.
 
-검사는 1600 × 1000 SceneCapture, 고정 수동 노출이며 AA/모션 블러를 껐다. 화면 위 검정은 검토 장면의 빈 배경이다. 해변·강의 사각 도메인 끝이 보이므로 실제 배치에서 메시/마스크 범위를 충분히 확장하거나 연결해야 한다. 지형 맞춤은 수동 동작이며, 낮은 격자는 굴곡을 충분히 따라가지 못한다. 원본 하늘은 완벽한 반복 타일이 아니므로 mirror 주소 모드를 쓴다. 실제 맵 이미지는 기존 조명 아래 어둡게 보이며 게임플레이 전체 조명, 패키징, 다른 GPU와 플랫폼까지 검증했다는 의미가 아니다. 최종 미술 품질은 사용자가 아래 이미지와 에디터에서 판단할 수 있다.
+검사는 1600 × 1000 SceneCapture, 고정 수동 노출이며 제어된 RenderMatrix 장면에서는 AA/모션 블러를 껐다. 화면 위 검정은 검토 장면의 빈 배경이다. 해변·강의 사각 도메인 끝이 보이므로 실제 배치에서 메시/마스크 범위를 충분히 확장하거나 연결해야 한다. 지형 맞춤은 수동 동작이며, 낮은 격자는 굴곡을 충분히 따라가지 못한다. 원본 하늘은 완벽한 반복 타일이 아니므로 mirror 주소 모드를 쓴다. 실제 맵 이미지는 기존 조명 아래 어둡게 보이며 게임플레이 전체 조명, 패키징, 다른 GPU와 플랫폼까지 검증했다는 의미가 아니다. 최종 미술 품질은 사용자가 아래 이미지와 에디터에서 판단할 수 있다.
 
 | 비교 | 렌더 증거 |
 |---|---|
@@ -84,4 +84,8 @@ RenderMatrix는 호수·해변·강의 근거리/원거리, 하늘 off/on, 카�
 
 ### 두 연속 로컬 커밋
 
-첫 커밋은 위 검증을 거친 저장 애셋·구현과 GenerateMaskWaterAssetsCommandlet.cpp/.h, Tools/one_shot_migrate_and_gallery.py를 함께 기록한다. 생성은 명시적 commandlet/스크립트 호출만으로 수행했으며 시작 자동 생성 연결은 없다. 바로 다음 커밋에서 이 세 파일과 전용 빌드 의존성을 제거한 뒤 저장 애셋만으로 빌드·로드·실제 렌더 검사를 반복한다. 푸시는 하지 않는다.
+첫 커밋 **4c58b165**는 위 검증을 거친 저장 애셋·구현과 GenerateMaskWaterAssetsCommandlet.cpp/.h, Tools/one_shot_migrate_and_gallery.py를 함께 기록했다. 생성은 명시적 commandlet/스크립트 호출만으로 수행했으며 시작 자동 생성 연결은 없다. 바로 다음 커밋에서 이 세 파일과 전용 AssetRegistry/AssetTools/BlueprintGraph/Kismet/MaterialEditor/Projects 에디터 의존성을 제거했다. 런타임의 Projects/RenderCore는 shader 경로 연결에, 에디터의 ImageCore/RenderCore 등은 유지하는 실제 렌더 검사에 필요하다. 푸시는 하지 않았다.
+
+생성기 제거 후 빌드 성공(14.28초), 2026-09-06 23:30:45 렌더 자동화 3개 Success(경고 동반 1개, 실패 0), 프로세스 종료 상태 0. 저장 애셋 10개와 맵 2개를 다시 로드했고 제거한 생성기 클래스가 더 이상 등록되지 않았음을 검사했다. 첫 커밋 이후 콘텐츠 변경은 없으며 917개 관련 없는 기존 패키지의 해시도 그대로다. [제거 후 검사 결과](Images/WaterMask20260906/verification_after_cleanup.json)를 별도로 보관한다. Python commandlet의 기존 ensure/종료 코드 1은 제거 전과 동일하다.
+
+읽기 전용 재검사: UE Python commandlet로 Plugins/StylizedWater/Tools/verify_saved_water.py를 실행한다. 렌더 재검사: 일반 에디터에 `-dx12 -sm6 -SkipLegacyEditorAssetSetup -ExecCmds="Automation RunTests StylizedWater.MaskWater" -TestExit="Automation Test Queue Empty"`를 전달한다. 자동화 탭에서도 같은 접두사의 세 검사를 실행할 수 있다. 마지막에는 현재 워크트리의 일반 에디터에서 /StylizedWater/Review/WaterMaskReview를 열고 호수 검토 카메라로 이동했다(23:31:40 WATER_REVIEW_VIEW_READY 로그). 시작 후에도 저장 콘텐츠 해시는 동일했다.
