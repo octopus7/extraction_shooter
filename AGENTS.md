@@ -1,5 +1,6 @@
 # Agent Instructions
 
+- Permanent user preference: when the user asks to proceed in a new conversation/task, create the new task with Sol (`model: "gpt-5.6-sol"`) and high reasoning (`thinking: "high"`) by default. An explicitly specified model or reasoning effort overrides its respective default. Apply this preference across future conversations in this project.
 - The Unreal Engine project is `TunaSweeper/TunaSweeper.uproject`.
 - Treat TunaSweeper as an Unreal Engine 5.7 project.
 - Version check: `TunaSweeper.uproject` has `"EngineAssociation": "5.7"`, and both `TunaSweeper.Target.cs` and `TunaSweeperEditor.Target.cs` use `EngineIncludeOrderVersion.Unreal5_7`.
