@@ -1,0 +1,78 @@
+{
+  "Bush": {
+    "asset": "/Game/Nature/Bush/Bush_Combined",
+    "size_cm": [
+      102.13286209106445,
+      99.76132583618164,
+      87.98967933654785
+    ],
+    "materials": [
+      "/Game/Nature/Bush/M_Bush.M_Bush"
+    ],
+    "base_node": "MaterialExpressionMultiply"
+  },
+  "GrassLow": {
+    "asset": "/Game/Nature/GrassLow/SM_GrassLow",
+    "size_cm": [
+      16.483139038085938,
+      14.405555725097656,
+      41.752188086509705
+    ],
+    "materials": [
+      "/Game/Nature/GrassLow/M_GrassBlade.M_GrassBlade"
+    ],
+    "base_node": "MaterialExpressionLinearInterpolate"
+  },
+  "Flower": {
+    "asset": "/Game/Nature/Flower/SM_Flower",
+    "size_cm": [
+      53.00008010864258,
+      58.719547271728516,
+      28.035074144601822
+    ],
+    "materials": [
+      "/Game/Nature/Flower/M_Flower.M_Flower"
+    ],
+    "base_node": "MaterialExpressionTextureSample",
+    "base_texture": "/Game/Nature/Flower/T_Flower.T_Flower"
+  },
+  "SimpleTree": {
+    "asset": "/Game/Nature/SimpleTree/SM_SimpleTree",
+    "size_cm": [
+      356.8192138671875,
+      355.0352478027344,
+      457.86289827525616
+    ],
+    "materials": [
+      "/Game/Nature/SimpleTree/M_SimpleTree.M_SimpleTree"
+    ],
+    "base_node": "MaterialExpressionTextureSample",
+    "base_texture": "/Game/Nature/SimpleTree/T_SimpleTree.T_SimpleTree"
+  },
+  "Wood": {
+    "asset": "/Game/Nature/Wood/SM_LogA",
+    "size_cm": [
+      116.48522186279297,
+      94.21091842651367,
+      65.32597541809082
+    ],
+    "materials": [
+      "/Game/Nature/Wood/M_WoodCommon.M_WoodCommon"
+    ],
+    "base_node": "MaterialExpressionTextureSample",
+    "base_texture": "/Game/Nature/Wood/T_WoodCommon.T_WoodCommon"
+  },
+  "RockBasic": {
+    "asset": "/Game/Nature/RockBasic/RockM_1",
+    "size_cm": [
+      18.006702423095703,
+      15.585502624511719,
+      8.66710017528385
+    ],
+    "materials": [
+      "/Game/Nature/RockBasic/M_RockBasic.M_RockBasic"
+    ],
+    "base_node": "MaterialExpressionTextureSample",
+    "base_texture": "/Game/Nature/RockBasic/T_Rock_Basic.T_Rock_Basic"
+  }
+}
