@@ -42,6 +42,7 @@ UE에서 읽고 메시/텍스처를 추출해 `ExistingNature_Reference.png`로 
 & 'C:/Program Files/Blender Foundation/Blender 4.5/blender.exe' -b --factory-startup --python-exit-code 1 --python Tools/ForestProps/BushSparse/verify_fbx.py
 powershell -ExecutionPolicy Bypass -File Tools/ForestProps/BushSparse/run_unreal.ps1
 powershell -ExecutionPolicy Bypass -File Tools/ForestProps/BushSparse/run_unreal.ps1 -VerifyOnly
+powershell -ExecutionPolicy Bypass -File Tools/ForestProps/BushSparse/run_render.ps1
 ```
 
 Blender 검증: 유한 좌표/단위 노멀, 퇴화 면 0, 닫힌 기하, 0~1 UV 및 삼각형 UV 면적,
@@ -57,3 +58,13 @@ TunaSweeper Content에 복사하고 SHA256 동일성을 확인한다. 재로드�
 UE 실행은 AppData 엔진 캐시 쓰기가 허용되는 환경이 필요하다.
 
 원본을 먼저 커밋하고 UE 애셋/UE 검증 산출물은 별도 커밋한다. Push하지 않는다.
+
+## UE 측정 결과
+
+UE 5.7.4에서 크기 123.273216 × 128.170807 × 72.259918 cm, 원본과 최대 오차
+0.000002623 cm. 실제 축 대응은 UE (X,Y,Z) = Blender (X,-Y,Z) × 100.
+렌더 정점은 3,477개이며 UV 2개, 재질 슬롯 1개다. 저장된 3개 .uasset의 SHA256을
+실제 Content 폴더와 대조했다. 임포트 프로세스는 신규 재질 생성 전 조회 경고 2개,
+오류 0개/종료 0이었다. 새 프로세스 재로드는 경고 0개, 오류 0개/종료 0이었다.
+GPU 프리뷰는 `render_unreal.py`의 임시 월드에서 저장된 애셋을 읽어 생성한다.
+실제 게임 맵/광원에서 촬영한 화면은 아니며 작업을 위해 게임 맵을 저장하지 않는다.

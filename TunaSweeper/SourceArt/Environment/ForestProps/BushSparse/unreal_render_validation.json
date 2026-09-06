@@ -1,0 +1,11 @@
+{
+  "engine": "5.7.4-51494982+++UE5+Release-5.7",
+  "render": "UE GPU lit perspective viewport, reloaded uassets, unsaved transient level",
+  "screenshots": [
+    "BushSparse_UE_Hero.png",
+    "BushSparse_UE_Back.png",
+    "BushSparse_UE_Repeated.png"
+  ],
+  "mesh": "/Game/Nature/ForestProps/BushSparse/SM_BushSparse.SM_BushSparse",
+  "passed": true
+}
