@@ -784,7 +784,7 @@ namespace TunaSweeperEditorSetup
 			});
 
 		FTunaSweeperEditorRunOnce::Run(
-			TEXT("2026-09-06_SplitTitleScreensAndFullscreenSettingsV5"),
+			TEXT("2026-09-06_SplitTitleScreensAndFullscreenSettingsV7"),
 			[]() { return TunaSweeperEditorSetup::EnsureTitleScreenAssetsSetup(); });
 
 		TunaSweeperEditorSetup::SchedulePickupItemAndSpawnerAssetsAndMapPlacement();

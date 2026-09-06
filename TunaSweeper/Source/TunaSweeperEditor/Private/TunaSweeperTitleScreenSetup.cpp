@@ -8,6 +8,81 @@ namespace TunaSweeperEditorSetup
 namespace TitleScreens
 {
 	bool SaveWidget(UWidgetBlueprint* BP);
+	bool RefineSettingsAlignment()
+	{
+		UWidgetBlueprint* Settings = LoadObject<UWidgetBlueprint>(nullptr, TEXT("/Game/UI/Title/Screens/WBP_TitleSettings.WBP_TitleSettings"));
+		UWidgetBlueprint* Graphics = LoadObject<UWidgetBlueprint>(nullptr, TEXT("/Game/UI/Title/Screens/WBP_TitleGraphics.WBP_TitleGraphics"));
+		if (!Settings || !Graphics) return false;
+		UWidgetTree* Tree = Settings->WidgetTree;
+		if (Tree->FindWidget(TEXT("SettingsSidebarShade")))
+		{
+			if (UWidget* Root=Graphics->WidgetTree->FindWidget(TEXT("GraphicsSettingsRoot")))
+				if (UCanvasPanelSlot* Slot=Cast<UCanvasPanelSlot>(Root->Slot)) Slot->SetOffsets(FMargin(480,80,40,40));
+			for (const TCHAR* Name : { TEXT("ApplyGraphicsSettingsButton"), TEXT("CancelGraphicsSettingsButton") })
+				if (UButton* Button=Cast<UButton>(Graphics->WidgetTree->FindWidget(Name))) { FButtonStyle Style=Button->GetStyle(); Style.NormalPadding=FMargin(0); Style.PressedPadding=FMargin(0); Button->SetStyle(Style); }
+			return SaveWidget(Graphics);
+		}
+		auto LeftAlign = [](UButton* Button) {
+			if (!Button) return;
+			if (UWidget* Content = Button->GetContent()) {
+				if (UButtonSlot* Slot = Cast<UButtonSlot>(Content->Slot)) { Slot->SetHorizontalAlignment(HAlign_Left); Slot->SetPadding(FMargin(0)); }
+				if (UTextBlock* Text = Cast<UTextBlock>(Content)) Text->SetJustification(ETextJustify::Left);
+			}
+		};
+		for (const TCHAR* Name : { TEXT("SettingsGraphicsTabButton"), TEXT("SettingsInterfaceTabButton"), TEXT("SettingsDevelopmentTabButton") })
+			LeftAlign(Cast<UButton>(Tree->FindWidget(Name)));
+		if (UWidget* Tabs = Tree->FindWidget(TEXT("SettingsNavigationStack")))
+			if (UCanvasPanelSlot* Slot = Cast<UCanvasPanelSlot>(Tabs->Slot)) Slot->SetOffsets(FMargin(110, 225, 280, 220));
+		if (UImage* Leaves = Cast<UImage>(Tree->FindWidget(TEXT("SettingsBotanicalImage"))))
+		{
+			Leaves->SetRenderOpacity(.22f);
+			if (UCanvasPanelSlot* Slot = Cast<UCanvasPanelSlot>(Leaves->Slot)) { Slot->SetAnchors(FAnchors(1,1)); Slot->SetOffsets(FMargin(-560,-380,560,380)); }
+		}
+		UCanvasPanel* Canvas = Cast<UCanvasPanel>(Tree->RootWidget);
+		if (!Canvas) return false;
+		UPackage* Package = CreatePackage(TEXT("/Game/UI/Title/T_SettingsSidebarFade"));
+		UTexture2D* Fade = NewObject<UTexture2D>(Package, TEXT("T_SettingsSidebarFade"), RF_Public | RF_Standalone);
+		TArray<FColor> Pixels; Pixels.SetNum(128);
+		for (int32 X=0; X<128; ++X) { float T=FMath::Clamp((X/127.f-.65f)/.35f,0.f,1.f); Pixels[X]=FColor(0,0,0,FMath::RoundToInt(255*.18f*(1-T*T*(3-2*T)))); }
+		Fade->Source.Init(128,1,1,1,TSF_BGRA8,reinterpret_cast<const uint8*>(Pixels.GetData()));
+		Fade->CompressionSettings=TC_EditorIcon; Fade->MipGenSettings=TMGS_NoMipmaps; Fade->LODGroup=TEXTUREGROUP_UI;
+		Fade->PostEditChange(); FAssetRegistryModule::AssetCreated(Fade); Fade->MarkPackageDirty(); if (!SaveAsset(Fade)) return false;
+		UImage* Shade = Tree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("SettingsSidebarShade"));
+		Shade->SetBrushFromTexture(Fade); Shade->SetVisibility(ESlateVisibility::HitTestInvisible);
+		UCanvasPanelSlot* ShadeSlot=Canvas->AddChildToCanvas(Shade); ShadeSlot->SetAnchors(FAnchors(0,0,0,1)); ShadeSlot->SetOffsets(FMargin(0,0,440,0)); ShadeSlot->SetZOrder(1);
+		UWidgetTree* GTree=Graphics->WidgetTree;
+		UVerticalBox* Root=Cast<UVerticalBox>(GTree->FindWidget(TEXT("GraphicsSettingsRoot")));
+		if (!Root) return false;
+		if (UCanvasPanelSlot* Slot=Cast<UCanvasPanelSlot>(Root->Slot)) Slot->SetOffsets(FMargin(480,80,40,40));
+		UTextBlock* Header=GTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(),TEXT("GraphicsSectionTitleText"));
+		Header->SetText(FText::FromString(TEXT("그래픽"))); FSlateFontInfo HeaderFont=Header->GetFont(); HeaderFont.Size=30; Header->SetFont(HeaderFont);
+		Root->InsertChildAt(0,Header);
+		if (UVerticalBoxSlot* Slot=Cast<UVerticalBoxSlot>(Header->Slot)) Slot->SetPadding(FMargin(0,0,0,12));
+		if (UWidget* Status=GTree->FindWidget(TEXT("GraphicsStatusText")))
+			if (UVerticalBoxSlot* Slot=Cast<UVerticalBoxSlot>(Status->Slot)) Slot->SetPadding(FMargin(0,0,0,28));
+		GTree->ForEachWidget([](UWidget* Widget) {
+			const FString Name=Widget->GetName();
+			if (UTextBlock* Text=Cast<UTextBlock>(Widget)) {
+				FSlateFontInfo Font=Text->GetFont(); Font.Size=Name==TEXT("GraphicsSectionTitleText") ? 30 : (Name==TEXT("GraphicsStatusText") ? 16 : (Name.EndsWith(TEXT("Heading")) ? 22 : 18)); Text->SetFont(Font);
+				if (Name.EndsWith(TEXT("Heading"))) if (UVerticalBoxSlot* Slot=Cast<UVerticalBoxSlot>(Text->Slot)) Slot->SetPadding(FMargin(0,24,0,10));
+			}
+			if (USizeBox* Box=Cast<USizeBox>(Widget)) {
+				Box->SetHeightOverride(44);
+				if (Box->GetWidthOverride()>0) Box->SetWidthOverride(Box->GetWidthOverride()*1.20f);
+			}
+		});
+		for (const TCHAR* Name : { TEXT("ApplyGraphicsSettingsButton"), TEXT("CancelGraphicsSettingsButton") }) {
+			UButton* Button=Cast<UButton>(GTree->FindWidget(Name)); if (!Button) return false; LeftAlign(Button);
+			FSlateBrush Clear; Clear.DrawAs=ESlateBrushDrawType::NoDrawType;
+			FButtonStyle Style=Button->GetStyle(); Style.SetNormal(Clear); Style.SetHovered(Clear); Style.SetPressed(Clear); Style.SetDisabled(Clear);
+			Style.SetNormalForeground(FLinearColor(.8f,.88f,.85f,.9f)); Style.SetHoveredForeground(FLinearColor::White); Style.SetPressedForeground(FLinearColor(.65f,.85f,.75f));
+			Style.NormalPadding=FMargin(0); Style.PressedPadding=FMargin(0);
+			Button->SetStyle(Style); if (UTextBlock* Text=Cast<UTextBlock>(Button->GetContent())) { Text->SetColorAndOpacity(FSlateColor::UseForeground()); FSlateFontInfo Font=Text->GetFont(); Font.Size=24; Text->SetFont(Font); }
+		}
+		for (const TCHAR* Name : { TEXT("InterfaceSettingsPanel"), TEXT("DevelopmentSettingsPanel") })
+			if (UWidget* Panel=Tree->FindWidget(Name)) if (UVerticalBoxSlot* Slot=Cast<UVerticalBoxSlot>(Panel->Slot)) Slot->SetPadding(FMargin(480,72,40,40));
+		return SaveWidget(Graphics) && SaveWidget(Settings);
+	}
 	bool SetupSettingsBackHeader()
 	{
 		UWidgetBlueprint* BP = LoadObject<UWidgetBlueprint>(nullptr, TEXT("/Game/UI/Title/Screens/WBP_TitleSettings.WBP_TitleSettings"));
@@ -295,7 +370,7 @@ bool EnsureTitleScreenAssetsSetup()
 	UWidgetTree* Tree = Intro->WidgetTree;
 	if (Tree->FindWidget(TEXT("SettingsPanelView")))
 	{
-		return SetupSettingsBackHeader();
+		return RefineSettingsAlignment();
 	}
 	Intro->Modify(); Tree->Modify();
 	UCanvasPanel* Settings = Cast<UCanvasPanel>(Tree->FindWidget(TEXT("SettingsPanel")));

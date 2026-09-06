@@ -34,10 +34,10 @@ void UTunaSweeperGraphicsQualityRowWidget::BuildRuntimeWidgetTree()
 	NextButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("NextButton"));
 	NextButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("NextButtonText"));
 
-	TunaSweeperUIFont::ApplyFont(OptionLabelText, 14);
-	TunaSweeperUIFont::ApplyFont(PreviousButtonText, 14);
-	TunaSweeperUIFont::ApplyFont(QualityValueText, 14);
-	TunaSweeperUIFont::ApplyFont(NextButtonText, 14);
+	TunaSweeperUIFont::ApplyFont(OptionLabelText, 18);
+	TunaSweeperUIFont::ApplyFont(PreviousButtonText, 18);
+	TunaSweeperUIFont::ApplyFont(QualityValueText, 18);
+	TunaSweeperUIFont::ApplyFont(NextButtonText, 18);
 	OptionLabelText->SetColorAndOpacity(FSlateColor(FLinearColor(0.86f, 0.91f, 0.92f, 1.0f)));
 	QualityValueText->SetColorAndOpacity(FSlateColor(FLinearColor::White));
 	QualityValueText->SetJustification(ETextJustify::Center);
@@ -63,9 +63,11 @@ void UTunaSweeperGraphicsQualityRowWidget::BuildRuntimeWidgetTree()
 		Button->SetBackgroundColor(FLinearColor::White);
 	}
 
-	if (UHorizontalBoxSlot* RowSlot = Root->AddChildToHorizontalBox(OptionLabelText))
+	USizeBox* LabelColumn = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("QualityLabelColumn"));
+	LabelColumn->SetWidthOverride(300); LabelColumn->SetContent(OptionLabelText);
+	if (UHorizontalBoxSlot* RowSlot = Root->AddChildToHorizontalBox(LabelColumn))
 	{
-		RowSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+		RowSlot->SetPadding(FMargin(0,8));
 		RowSlot->SetVerticalAlignment(VAlign_Center);
 	}
 	Root->AddChildToHorizontalBox(PreviousButton)->SetPadding(FMargin(8.0f, 2.0f));

@@ -29,6 +29,12 @@ bool FTitleScreenAssetTest::RunTest(const FString& Parameters)
 	TestNotNull(TEXT("Bound graphics widget"), Menu->TitleGraphicsSettingsWidget.Get());
 	if (!Menu->SettingsDevelopmentTabButton || !Menu->TitleGraphicsSettingsWidget) { Menu->RemoveFromRoot(); return false; }
 	TestTrue(TEXT("Development click is bound"), Menu->SettingsDevelopmentTabButton->OnClicked.IsBound());
+	TestNotNull(TEXT("Settings sidebar fade exists"), Menu->FindIntroWidget(TEXT("SettingsSidebarShade")));
+	TestNotNull(TEXT("Graphics section heading exists"), Menu->TitleGraphicsSettingsWidget->WidgetTree->FindWidget(TEXT("GraphicsSectionTitleText")));
+	for (const TCHAR* Name : { TEXT("ApplyGraphicsSettingsButton"), TEXT("CancelGraphicsSettingsButton") }) {
+		UButton* Action=Cast<UButton>(Menu->TitleGraphicsSettingsWidget->WidgetTree->FindWidget(Name));
+		TestTrue(FString::Printf(TEXT("Unframed and bound action %s"),Name),Action && Action->GetStyle().Normal.DrawAs==ESlateBrushDrawType::NoDrawType && Action->OnClicked.IsBound());
+	}
 	UWidget* BackTitle = Menu->FindIntroWidget(TEXT("SettingsTitleText"));
 	TestTrue(TEXT("Settings title is inside back button hit area"), BackTitle && BackTitle->GetParent() && BackTitle->GetParent()->GetParent() == Menu->BackFromSettingsButton);
 	TestNotNull(TEXT("Curved back arrow image exists"), Menu->FindIntroWidget(TEXT("SettingsBackArrowImage")));

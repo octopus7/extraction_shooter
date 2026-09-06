@@ -410,6 +410,8 @@ void UTunaSweeperGraphicsSettingsWidget::ConfigureQualityRows()
 
 void UTunaSweeperGraphicsSettingsWidget::RefreshVisualState()
 {
+	if (WidgetTree) if (UTextBlock* Header = Cast<UTextBlock>(WidgetTree->FindWidget(TEXT("GraphicsSectionTitleText"))))
+		Header->SetText(ResolveUiText(FName(TEXT("ui.settings.graphics")), FText::FromString(TEXT("그래픽"))));
 	if (!bHasSettingsSnapshot)
 	{
 		return;
