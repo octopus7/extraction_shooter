@@ -1,0 +1,85 @@
+{
+  "seed": 6072026,
+  "blender_version": "4.5.12 LTS",
+  "units": "Blender meters; UE centimeters",
+  "pivot": "root center on ground z=0",
+  "material": "M_GrassLongCurved",
+  "opaque": true,
+  "two_sided": true,
+  "alpha_used": false,
+  "collision": "none",
+  "lods": [
+    {
+      "name": "SM_GrassLongCurved",
+      "vertices": 806,
+      "triangles": 988,
+      "bounds_m": [
+        -0.5851122140884399,
+        -0.5723649859428406,
+        0.0,
+        0.5908441543579102,
+        0.6977217197418213,
+        0.8343970775604248
+      ],
+      "dimensions_cm": [
+        117.59563684463501,
+        127.00867056846619,
+        83.43970775604248
+      ],
+      "material_slots": 1,
+      "uv_channels": 1,
+      "intentional_open_boundary_edges": 572,
+      "nonmanifold_junction_edges": 0,
+      "degenerate_triangles": 0,
+      "passed": true
+    },
+    {
+      "name": "SM_GrassLongCurved_LOD1",
+      "vertices": 323,
+      "triangles": 374,
+      "bounds_m": [
+        -0.5851122140884399,
+        -0.5723649859428406,
+        0.0,
+        0.5908441543579102,
+        0.6977217197418213,
+        0.8323926329612732
+      ],
+      "dimensions_cm": [
+        117.59563684463501,
+        127.00867056846619,
+        83.23926329612732
+      ],
+      "material_slots": 1,
+      "uv_channels": 1,
+      "intentional_open_boundary_edges": 238,
+      "nonmanifold_junction_edges": 0,
+      "degenerate_triangles": 0,
+      "passed": true
+    },
+    {
+      "name": "SM_GrassLongCurved_LOD2",
+      "vertices": 130,
+      "triangles": 140,
+      "bounds_m": [
+        -0.5851122140884399,
+        -0.5723649859428406,
+        0.0,
+        0.5908441543579102,
+        0.6977217197418213,
+        0.8328724503517151
+      ],
+      "dimensions_cm": [
+        117.59563684463501,
+        127.00867056846619,
+        83.28724503517151
+      ],
+      "material_slots": 1,
+      "uv_channels": 1,
+      "intentional_open_boundary_edges": 100,
+      "nonmanifold_junction_edges": 0,
+      "degenerate_triangles": 0,
+      "passed": true
+    }
+  ]
+}
