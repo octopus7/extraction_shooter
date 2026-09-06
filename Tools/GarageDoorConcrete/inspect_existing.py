@@ -10,5 +10,5 @@ for n in names:
  except Exception as e:r[n]=str(e)
 for n in ['frame_top_mesh','frame_left_mesh','frame_right_mesh','led_bar_mesh','metal_material','led_material']:
  v=a.get_editor_property(n);r[n]=v.get_path_name() if v else None
-Path('D:/github/extraction_shooter/TunaSweeper/SourceArt/Environment/GarageDoorConcrete/existing_blueprint_layout.json').write_text(json.dumps(r,indent=2),encoding='utf-8')
+(Path(__file__).resolve().parents[2]/'TunaSweeper/SourceArt/Environment/GarageDoorConcrete/existing_blueprint_layout.json').write_text(json.dumps(r,indent=2),encoding='utf-8')
 unreal.log('GARAGE_STRUCTURE_READ_COMPLETE')

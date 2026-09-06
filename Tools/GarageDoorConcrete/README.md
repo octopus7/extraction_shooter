@@ -28,3 +28,7 @@ Run Blender in background with `--python-exit-code 1 --python Tools/GarageDoorCo
 Build `TunaSweeperEditor Win64 Development`. Run automation test `TunaSweeper.GarageDoor.MotionIndicators` to check start, reversal, pause/resume, endpoints and manual endpoint changes in a real transient UE world. The test does not modify project assets.
 
 Import with `run_unreal_import.ps1`; reload/audit with `run_unreal_import.ps1 -VerifyOnly`. These scripts save only the new kit folder and compare hashes of the existing garage assets. Existing editor/BP instances need an editor restart to load the rebuilt native class.
+
+Verified results: 12 meshes, 6 materials and 1 ImageGen atlas imported and reloaded in UE 5.7.4; centered bounds match the native contract within 0.1 cm. Material graph checks confirm LED emission and lens CPD indices with zero default lens emission. The existing garage asset hashes, including the BP, remain unchanged. Static meshes include simple collision; the actor disables collision on the moving/visual components as before, and always disables it on the indicators. Frame recesses are visual details within each jamb's simple collision hull.
+
+The project currently raises a pre-existing Niagara `NE_PostProcess` typed-element registry ensure at engine startup. Asset validation passes, but import/reload commandlets exit with code 1 because of that engine error. The runner deliberately reports this separately instead of hiding the nonzero exit. Native motion automation passes.
