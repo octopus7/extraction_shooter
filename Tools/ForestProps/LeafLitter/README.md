@@ -6,7 +6,9 @@ UE 경로는 `/Game/Nature/ForestProps/LeafLitter/`이다.
 
 - 크기: Blender XYZ 175.92 × 126.06 × 5.19cm. 1 Blender unit = 1m = 100 UE cm.
 - 지면 피벗 `(0,0,0)`, 최저점 Z=0. UE 축 변환의 실제 결과는 `unreal_reload_validation.json` 참조.
+- 검증된 UE 축: Blender `(X,Y,Z)` → UE `(X,-Y,Z)`, 각 좌표 ×100. 최대 경계 오차 0.000004cm 미만.
 - 60장, 960 원본 정점, 1,680 삼각형, 재질 1슬롯, 128×32 RGB 팔레트 1장.
+- UE LOD0은 면 노멀/UV 분리 후 5,040 정점을 보고한다. 원본 정점 수와 혼동하지 않는다.
 - 접힌 넓은 잎을 네 덩어리로 겹치고 가장자리 8장은 성기게 배치한다. 미세 잎맥·꽃·노이즈 없음.
 - 잎마다 1.5mm 닫힌 두께. Opaque / 단면 재질, 알파 오버드로 없음. 겹치는 불투명 면의 비용은 남는다.
 - 충돌 없음, 내비게이션 없음, Nanite 없음. UV0은 팔레트 안에 의도적으로 겹친 비퇴화 삼각형.
@@ -31,6 +33,7 @@ LOD 자동 축소로 1.5mm 면을 무작정 합치면 잎이 사라질 수 있�
 & 'C:/Program Files/Blender Foundation/Blender 4.5/blender.exe' -b --factory-startup --python Tools/ForestProps/LeafLitter/verify_fbx.py
 ./Tools/ForestProps/LeafLitter/run_unreal.ps1
 ./Tools/ForestProps/LeafLitter/run_unreal.ps1 -VerifyOnly
+./Tools/ForestProps/LeafLitter/run_unreal.ps1 -Script render_unreal.py -Render
 ```
 
 Blender 원본에 팔레트가 packed 되어 있다. FBX에도 텍스처를 내장하며 UE 스크립트는
@@ -41,6 +44,11 @@ Blender 원본에 팔레트가 packed 되어 있다. FBX에도 텍스처를 내�
 새 워크트리의 프로젝트 C++ 바이너리 대신 `Saved/LeafLitterHost`의 콘텐츠 전용 UE 5.7
 호스트가 실제 `TunaSweeper/Content`를 /Game으로 마운트한다. DDC도 이 임시 폴더에 둔다.
 기존 BP·맵·공용 자연물을 저장하지 않는다. 전체 게임 빌드/PIE 검증과 구분한다.
+UE 표시 검증은 숨겨진 실제 에디터에서 임시 월드와 SceneCapture2D를 만들고
+180프레임을 진행한 뒤 저장된 메시/재질을 캡처한다. 검토 이미지는
+`Previews/LeafLitter_UE.png`이며 임시 월드는 저장하지 않고 에디터를 종료한다.
+처음 NullRHI 임포트의 Content Browser 동기화 충돌은 SyncToBrowser=0으로 해결했다.
+단순 렌더 commandlet의 검은 이미지는 폐기했고 실제 에디터 캡처로 대체했다.
 
 ## 기존 아트 확인
 

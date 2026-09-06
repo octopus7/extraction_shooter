@@ -1,0 +1,8 @@
+{
+  "engine": "5.7.4-51494982+++UE5+Release-5.7",
+  "mesh": "/Game/Nature/ForestProps/LeafLitter/SM_LeafLitter.SM_LeafLitter",
+  "saved_map": false,
+  "warmup_frames": 180,
+  "image": "Previews/LeafLitter_UE.png",
+  "render_source": "UE editor SceneCapture2D; actual reloaded material and texture"
+}

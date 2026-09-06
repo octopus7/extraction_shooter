@@ -47,7 +47,9 @@ if not verify:
     sms.set_lod_build_settings(mesh,0,build)
     mesh.set_editor_property('light_map_coordinate_index',1)
     body=mesh.get_editor_property('body_setup')
-    body.set_editor_property('default_instance',unreal.BodyInstance(collision_profile_name='NoCollision'))
+    instance=body.get_editor_property('default_instance')
+    instance.set_editor_property('collision_profile_name','NoCollision')
+    body.set_editor_property('default_instance',instance)
     mesh.set_editor_property('has_navigation_data',False)
     save(mesh)
 bound=mesh.get_bounds();lo=[bound.origin.x-bound.box_extent.x,bound.origin.y-bound.box_extent.y,bound.origin.z-bound.box_extent.z];hi=[bound.origin.x+bound.box_extent.x,bound.origin.y+bound.box_extent.y,bound.origin.z+bound.box_extent.z]
@@ -67,6 +69,10 @@ assert len(mesh.static_materials)==1 and mesh.get_material(0)==mat
 assert not mat.get_editor_property('two_sided') and mat.get_editor_property('blend_mode')==unreal.BlendMode.BLEND_OPAQUE
 assert unreal.MaterialEditingLibrary.get_material_property_input_node(mat,unreal.MaterialProperty.MP_BASE_COLOR).texture==tex
 assert str(mesh.get_editor_property('body_setup').get_editor_property('default_instance').get_editor_property('collision_profile_name'))=='NoCollision'
+assert not mesh.get_editor_property('has_navigation_data')
+assert not mesh.get_editor_property('nanite_settings').get_editor_property('enabled')
+assert sms.get_lod_build_settings(mesh,0).get_editor_property('generate_lightmap_u_vs')
+assert mesh.get_editor_property('light_map_coordinate_index')==1
 report={'passed':True,'engine':unreal.SystemLibrary.get_engine_version(),'verification':'fresh-process reload' if verify else 'import','host':'content-only UE 5.7 with actual TunaSweeper Content mount','mesh':mesh.get_path_name(),'bounds_cm':actual,'max_bounds_error_cm':error,'axis_mapping':{'indices':perm,'signs':signs},'vertices_lod0':sms.get_number_verts(mesh,0),'source_uv_channels':sms.get_num_uv_channels(mesh,0),'material_slots':1,'opaque':True,'two_sided':False,'collisions':0,'collision_profile':'NoCollision','navigation':False,'texture_srgb':tex.srgb}
 (OUT/('unreal_reload_validation.json' if verify else 'unreal_import_validation.json')).write_text(json.dumps(report,indent=2))
 unreal.log('LEAFLITTER_UE_PASSED '+json.dumps(report))

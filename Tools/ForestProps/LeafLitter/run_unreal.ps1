@@ -15,8 +15,18 @@ try {
  $env:LEAFLITTER_VERIFY_ONLY=if($VerifyOnly){'1'}else{'0'}
  $taskArgs=@($taskProject,'-run=pythonscript',"-script=$PSScriptRoot/$Script",'-unattended','-nosplash','-nosound','-stdout','-FullStdOutLogOutput','-ini:Engine:[ConsoleVariables]:Interchange.FeatureFlags.Import.FBX=0')
  $taskArgs+='-ddc=InstalledNoZenLocalFallback'
- if(-not $Render){$taskArgs+='-nullrhi'}else{$taskArgs+='-AllowCommandletRendering'}
+ $taskArgs+='-ini:Engine:[ConsoleVariables]:Interchange.FeatureFlags.Import.SyncToBrowser=0'
+ if(-not $Render){$taskArgs+='-nullrhi'}
  $taskLog="$taskHost/$Script.$(Get-Date -Format 'HHmmss').log"
- & 'C:/Program Files/Epic Games/UE_5.7/Engine/Binaries/Win64/UnrealEditor-Cmd.exe' @taskArgs *> $taskLog
- if($LASTEXITCODE -ne 0){throw "UE exited $LASTEXITCODE; see $taskHost/$Script.log"}
+ if($Render){
+   $taskArgs=$taskArgs | Where-Object {$_ -ne '-run=pythonscript' -and $_ -notlike '-script=*'}
+   $taskArgs+=@('-RenderOffscreen',"-ExecCmds=py $PSScriptRoot/$Script",'-windowed','-ResX=1200','-ResY=900')
+   $taskQuoted=$taskArgs | ForEach-Object {'"'+$_+'"'}
+   $taskProcess=Start-Process -FilePath 'C:/Program Files/Epic Games/UE_5.7/Engine/Binaries/Win64/UnrealEditor.exe' -ArgumentList $taskQuoted -WindowStyle Hidden -PassThru -Wait -RedirectStandardOutput $taskLog
+   $taskExit=$taskProcess.ExitCode
+ }else{
+   & 'C:/Program Files/Epic Games/UE_5.7/Engine/Binaries/Win64/UnrealEditor-Cmd.exe' @taskArgs *> $taskLog
+   $taskExit=$LASTEXITCODE
+ }
+ if($taskExit -ne 0){throw "UE exited $taskExit; see $taskLog"}
 } finally { $env:LEAFLITTER_VERIFY_ONLY=$taskPrevious; [Environment]::SetEnvironmentVariable('UE-LocalDataCachePath',$taskPreviousDDC) }
