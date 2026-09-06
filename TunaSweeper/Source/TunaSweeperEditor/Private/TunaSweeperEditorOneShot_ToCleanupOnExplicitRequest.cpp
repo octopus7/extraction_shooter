@@ -763,6 +763,13 @@ namespace TunaSweeperEditorSetup
 			});
 
 		FTunaSweeperEditorRunOnce::Run(
+			TunaSweeperEditorSetup::IntroMenuVisualRestyleTaskId,
+			[]()
+			{
+				return TunaSweeperEditorSetup::EnsureIntroMenuVisualRestyleSetup();
+			});
+
+		FTunaSweeperEditorRunOnce::Run(
 			TunaSweeperEditorSetup::IntroMenuDevelopmentSettingsTaskId,
 			[]()
 			{

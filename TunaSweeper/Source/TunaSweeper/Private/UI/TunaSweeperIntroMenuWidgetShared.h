@@ -151,7 +151,7 @@ namespace TunaSweeperDifficultySelect
 
 namespace TunaSweeperSettingsUi
 {
-	constexpr float ButtonCornerRadius = 7.0f;
+	constexpr float ButtonCornerRadius = 2.0f;
 	const FLinearColor Accent(0.32f, 0.90f, 0.96f, 1.0f);
 
 	inline FSlateBrush MakeRoundedBoxBrush(

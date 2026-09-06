@@ -235,6 +235,7 @@ namespace TunaSweeperEditorSetup
 	const FString BackpackInventoryTaskId = TEXT("2026-05-16_CreateEquipmentInventoryAssetsV3");
 	const FString IntroMenuAndLevelTravelTaskId = TEXT("2026-08-06_CreateTitlePresentationActorAndRoomV9");
 	const FString IntroMenuGraphicsSettingsTaskId = TEXT("2026-07-08_BuildCompleteTitleSettingsWbpV1");
+	const FString IntroMenuVisualRestyleTaskId = TEXT("2026-09-06_RestyleTitleMenuAndSettingsV2_RestoreTabs");
 	const FString IntroMenuDevelopmentSettingsTaskId = TEXT("2026-07-12_AddTitleDevelopmentSettingsV1");
 	const FString IntroMenuDebugDisplayLanguageTaskId = TEXT("2026-07-14_AddDebugDisplayLanguageSettingsV1");
 	const FString OpeningScenarioPresentationTaskId = TEXT("2026-05-19_CreateOpeningScenarioPresentationV2");
@@ -891,6 +892,7 @@ bool BuildInteractionMarkerWidgetTree(UWidgetBlueprint* WidgetBlueprint);
 UWidgetBlueprint* EnsureInteractionMarkerWidgetBlueprint();
 bool RebuildInteractionMarkerWidgetAlignment();
 bool ConfigureIntroMenuWidgetBlueprint(UWidgetBlueprint* WidgetBlueprint);
+bool RestyleIntroMenuWidgetBlueprint(UWidgetBlueprint* WidgetBlueprint);
 bool ConfigureLevelTransitionVideoWidgetBlueprint(UWidgetBlueprint* WidgetBlueprint);
 bool ConfigureSpeechBubbleWidgetBlueprint(UWidgetBlueprint* WidgetBlueprint);
 bool ConfigureQuestWidgetBlueprint(UWidgetBlueprint* WidgetBlueprint);
@@ -940,6 +942,7 @@ bool PlaceTitlePresentationActorInIntroMap(UBlueprint* TitlePresentationBlueprin
 bool EnsureTitlePresentationSetup();
 bool EnsureIntroMenuAndLevelTravelSetup();
 bool EnsureIntroMenuGraphicsSettingsSetup();
+bool EnsureIntroMenuVisualRestyleSetup();
 bool EnsureBunkerToRaidTransitionVideoSetup();
 bool EnsureLevelTravelPresentationSetup();
 bool EnsureFirstOutingQuestSetup();

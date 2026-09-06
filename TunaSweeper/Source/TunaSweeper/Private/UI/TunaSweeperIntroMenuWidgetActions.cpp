@@ -400,8 +400,6 @@ void UTunaSweeperIntroMenuWidget::HandleBackFromCreditsClicked()
 
 void UTunaSweeperIntroMenuWidget::HandleLanguageChanged()
 {
-	bTitleMenuButtonContentLayoutApplied = false;
-	ApplyTitleMenuButtonContentLayout();
 	RefreshLocalizedTexts();
 	RefreshMainMenu();
 	if (IsSaveSlotSelectionVisible())

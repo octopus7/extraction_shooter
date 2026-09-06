@@ -5402,6 +5402,239 @@ namespace TunaSweeperEditorSetup
 		return CreatedBlueprint;
 	}
 
+	bool RestyleIntroMenuWidgetBlueprint(UWidgetBlueprint* WidgetBlueprint)
+	{
+		if (!WidgetBlueprint || !WidgetBlueprint->WidgetTree)
+		{
+			return false;
+		}
+
+		UWidgetTree* WidgetTree = WidgetBlueprint->WidgetTree;
+		auto Find = [WidgetTree](const TCHAR* Name) -> UWidget*
+		{
+			if (UWidget* Connected = WidgetTree->FindWidget(FName(Name)))
+			{
+				return Connected;
+			}
+			return FindObject<UWidget>(WidgetTree, Name);
+		};
+		auto* SettingsPanel = Cast<UCanvasPanel>(Find(TEXT("SettingsPanel")));
+		auto* SettingsBackground = Cast<UBorder>(Find(TEXT("SettingsContentBackground")));
+		auto* SettingsStack = Cast<UVerticalBox>(Find(TEXT("SettingsContentStack")));
+		auto* SettingsTitle = Cast<UTextBlock>(Find(TEXT("SettingsTitleText")));
+		auto* SettingsStatus = Cast<UTextBlock>(Find(TEXT("SettingsStatusText")));
+		auto* GraphicsPanel = Cast<UVerticalBox>(Find(TEXT("GraphicsSettingsPanel")));
+		auto* InterfacePanel = Cast<UVerticalBox>(Find(TEXT("InterfaceSettingsPanel")));
+		auto* DevelopmentPanel = Cast<UVerticalBox>(Find(TEXT("DevelopmentSettingsPanel")));
+		if (!SettingsPanel || !SettingsBackground || !SettingsStack || !SettingsTitle || !SettingsStatus ||
+			!GraphicsPanel || !InterfacePanel || !DevelopmentPanel)
+		{
+			UE_LOG(LogTunaSweeperEditor, Error, TEXT("The intro menu WBP is missing settings widgets required by the visual restyle."));
+			return false;
+		}
+
+		WidgetBlueprint->Modify();
+		WidgetTree->Modify();
+
+		auto MakeButtonStyle = [](const FVector2D& Size, bool bPrimary)
+		{
+			const FLinearColor NormalFill = bPrimary
+				? FLinearColor(0.018f, 0.17f, 0.19f, 0.94f)
+				: FLinearColor(0.012f, 0.030f, 0.035f, 0.78f);
+			const FLinearColor NormalOutline = bPrimary
+				? FLinearColor(0.79f, 0.91f, 0.82f, 0.98f)
+				: FLinearColor(0.33f, 0.55f, 0.55f, 0.72f);
+			FButtonStyle Style;
+			Style.SetNormal(MakeRoundedBoxBrush(Size, NormalFill, NormalOutline, bPrimary ? 2.0f : 1.0f, 2.0f));
+			Style.SetHovered(MakeRoundedBoxBrush(Size, FLinearColor(0.035f, 0.25f, 0.27f, 0.97f), FLinearColor(0.90f, 0.98f, 0.91f, 1.0f), 2.0f, 2.0f));
+			Style.SetPressed(MakeRoundedBoxBrush(Size, FLinearColor(0.012f, 0.10f, 0.12f, 0.98f), NormalOutline, 1.0f, 2.0f));
+			Style.SetNormalPadding(FMargin(0.0f));
+			Style.SetPressedPadding(FMargin(3.0f, 1.0f, 0.0f, 0.0f));
+			return Style;
+		};
+
+		struct FMenuButtonRestyle
+		{
+			const TCHAR* Prefix;
+			const TCHAR* Code;
+			FVector2D Size;
+			bool bPrimary;
+		};
+		for (const FMenuButtonRestyle& Entry : {
+			FMenuButtonRestyle{ TEXT("StartButton"), TEXT("01"), FVector2D(388.0f, 70.0f), true },
+			FMenuButtonRestyle{ TEXT("SlotSelectButton"), TEXT("02"), FVector2D(350.0f, 52.0f), false },
+			FMenuButtonRestyle{ TEXT("SettingsButton"), TEXT("03"), FVector2D(350.0f, 52.0f), false },
+			FMenuButtonRestyle{ TEXT("CreditsButton"), TEXT("04"), FVector2D(350.0f, 52.0f), false },
+			FMenuButtonRestyle{ TEXT("QuitButton"), TEXT("05"), FVector2D(350.0f, 52.0f), false } })
+		{
+			if (UButton* Button = Cast<UButton>(Find(Entry.Prefix)))
+			{
+				Button->SetStyle(MakeButtonStyle(Entry.Size, Entry.bPrimary));
+			}
+			if (USizeBox* Box = Cast<USizeBox>(Find(*FString::Printf(TEXT("%sBox"), Entry.Prefix))))
+			{
+				Box->SetWidthOverride(Entry.Size.X);
+				Box->SetHeightOverride(Entry.Size.Y);
+			}
+			if (UTextBlock* Icon = Cast<UTextBlock>(Find(*FString::Printf(TEXT("%sIconText"), Entry.Prefix))))
+			{
+				Icon->SetText(FText::FromString(Entry.Code));
+				Icon->SetColorAndOpacity(FSlateColor(FLinearColor(0.42f, 0.90f, 0.88f, 1.0f)));
+				TunaSweeperUIFont::ApplyFont(Icon, Entry.bPrimary ? 17 : 14);
+			}
+			if (UTextBlock* Label = Cast<UTextBlock>(Find(*FString::Printf(TEXT("%sText"), Entry.Prefix))))
+			{
+				Label->SetJustification(ETextJustify::Left);
+				if (UHorizontalBoxSlot* LabelSlot = Cast<UHorizontalBoxSlot>(Label->Slot))
+				{
+					LabelSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+					LabelSlot->SetHorizontalAlignment(HAlign_Left);
+				}
+			}
+			if (USizeBox* EndBox = Cast<USizeBox>(Find(*FString::Printf(TEXT("%sBalanceBox"), Entry.Prefix))))
+			{
+				EndBox->SetWidthOverride(38.0f);
+				if (!EndBox->GetContent())
+				{
+					UTextBlock* EndMark = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass());
+					ConfigureTextBlock(EndMark, FText::FromString(TEXT("//")), FLinearColor(0.42f, 0.90f, 0.88f, 0.72f), 12);
+					EndBox->SetContent(EndMark);
+				}
+			}
+		}
+
+		SettingsBackground->SetPadding(FMargin(34.0f, 26.0f, 34.0f, 30.0f));
+		SettingsBackground->SetBrush(MakeRoundedBoxBrush(
+			FVector2D(1380.0f, 824.0f),
+			FLinearColor(0.008f, 0.019f, 0.023f, 0.95f),
+			FLinearColor(0.29f, 0.58f, 0.57f, 0.84f),
+			1.2f,
+			2.0f));
+		if (UCanvasPanelSlot* ContentSlot = Cast<UCanvasPanelSlot>(SettingsBackground->Slot))
+		{
+			ContentSlot->SetAnchors(FAnchors(0.5f, 0.5f));
+			ContentSlot->SetAlignment(FVector2D(0.5f, 0.5f));
+			ContentSlot->SetPosition(FVector2D(65.0f, 0.0f));
+			ContentSlot->SetSize(FVector2D(1380.0f, 824.0f));
+		}
+		ConfigureTextBlockLeft(SettingsTitle, FText::FromString(TEXT("SYSTEM CONFIGURATION")), FLinearColor(0.90f, 0.94f, 0.87f, 1.0f), 29);
+
+		SettingsStatus->SetColorAndOpacity(FSlateColor(FLinearColor(0.42f, 0.69f, 0.68f, 1.0f)));
+
+		auto* Body = Cast<UHorizontalBox>(Find(TEXT("SettingsBodyRow")));
+		if (!Body)
+		{
+			Body = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("SettingsBodyRow"));
+			USizeBox* NavigationBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("SettingsNavigationBox"));
+			UBorder* NavigationSurface = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("SettingsNavigationSurface"));
+			UVerticalBox* NavigationStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("SettingsNavigationStack"));
+			UTextBlock* NavigationLabel = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("SettingsNavigationLabelText"));
+			UBorder* PageSurface = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("SettingsPageSurface"));
+			UVerticalBox* PageStack = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("SettingsPageStack"));
+			if (!NavigationBox || !NavigationSurface || !NavigationStack || !NavigationLabel || !PageSurface || !PageStack)
+			{
+				return false;
+			}
+
+			if (UWidget* LegacyTabRow = Find(TEXT("SettingsTabRow")))
+			{
+				LegacyTabRow->RemoveFromParent();
+			}
+
+			for (const TCHAR* WidgetName : { TEXT("GraphicsTabButtonBox"), TEXT("InterfaceTabButtonBox"), TEXT("DevelopmentTabButtonBox") })
+			{
+				if (UWidget* Tab = Find(WidgetName))
+				{
+					Tab->RemoveFromParent();
+				}
+			}
+			GraphicsPanel->RemoveFromParent();
+			InterfacePanel->RemoveFromParent();
+			DevelopmentPanel->RemoveFromParent();
+
+			NavigationBox->SetWidthOverride(250.0f);
+			NavigationBox->SetContent(NavigationSurface);
+			NavigationSurface->SetPadding(FMargin(18.0f, 22.0f, 18.0f, 18.0f));
+			NavigationSurface->SetBrush(MakeRoundedBoxBrush(FVector2D(250.0f, 680.0f), FLinearColor(0.012f, 0.050f, 0.057f, 0.90f), FLinearColor(0.20f, 0.46f, 0.47f, 0.85f), 1.0f, 1.0f));
+			NavigationSurface->SetContent(NavigationStack);
+			ConfigureTextBlockLeft(NavigationLabel, FText::FromString(TEXT("CONFIG / 03")), FLinearColor(0.40f, 0.72f, 0.70f, 1.0f), 12);
+
+			NavigationStack->AddChildToVerticalBox(NavigationLabel)->SetPadding(FMargin(8.0f, 0.0f, 0.0f, 22.0f));
+			for (const TCHAR* WidgetName : { TEXT("GraphicsTabButtonBox"), TEXT("InterfaceTabButtonBox"), TEXT("DevelopmentTabButtonBox") })
+			{
+				if (USizeBox* TabBox = Cast<USizeBox>(Find(WidgetName)))
+				{
+					TabBox->SetWidthOverride(214.0f);
+					TabBox->SetHeightOverride(50.0f);
+					NavigationStack->AddChildToVerticalBox(TabBox)->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 8.0f));
+				}
+			}
+
+			PageSurface->SetPadding(FMargin(30.0f, 24.0f, 26.0f, 24.0f));
+			PageSurface->SetBrush(MakeRoundedBoxBrush(FVector2D(1030.0f, 680.0f), FLinearColor(0.006f, 0.018f, 0.022f, 0.82f), FLinearColor(0.17f, 0.35f, 0.36f, 0.76f), 1.0f, 1.0f));
+			PageSurface->SetContent(PageStack);
+			PageStack->AddChildToVerticalBox(GraphicsPanel)->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+			PageStack->AddChildToVerticalBox(InterfacePanel)->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+			PageStack->AddChildToVerticalBox(DevelopmentPanel)->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+			Body->AddChildToHorizontalBox(NavigationBox)->SetPadding(FMargin(0.0f, 0.0f, 18.0f, 0.0f));
+			Body->AddChildToHorizontalBox(PageSurface)->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+			if (UVerticalBoxSlot* BodySlot = SettingsStack->AddChildToVerticalBox(Body))
+			{
+				BodySlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+				BodySlot->SetPadding(FMargin(0.0f, 10.0f, 0.0f, 0.0f));
+			}
+		}
+
+		// Repair already-migrated assets as well as a freshly moved navigation rail.
+		UVerticalBox* NavigationStack = Cast<UVerticalBox>(Find(TEXT("SettingsNavigationStack")));
+		if (!NavigationStack)
+		{
+			return false;
+		}
+		const TCHAR* TabBoxes[] = { TEXT("GraphicsTabButtonBox"), TEXT("InterfaceTabButtonBox"), TEXT("DevelopmentTabButtonBox") };
+		const TCHAR* TabButtons[] = { TEXT("SettingsGraphicsTabButton"), TEXT("SettingsInterfaceTabButton"), TEXT("SettingsDevelopmentTabButton") };
+		const TCHAR* TabLabels[] = { TEXT("SettingsGraphicsTabButtonText"), TEXT("SettingsInterfaceTabButtonText"), TEXT("SettingsDevelopmentTabButtonText") };
+		const TCHAR* TabTexts[] = { TEXT("그래픽"), TEXT("인터페이스"), TEXT("개발") };
+		for (int32 Index = 0; Index < 3; ++Index)
+		{
+			USizeBox* Box = Cast<USizeBox>(Find(TabBoxes[Index]));
+			UButton* Button = Cast<UButton>(Find(TabButtons[Index]));
+			UTextBlock* Label = Cast<UTextBlock>(Find(TabLabels[Index]));
+			if (!Box) Box = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TabBoxes[Index]);
+			if (!Button) Button = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TabButtons[Index]);
+			if (!Label) Label = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TabLabels[Index]);
+			Box->RemoveFromParent();
+			Button->RemoveFromParent();
+			Label->RemoveFromParent();
+			ConfigureTextBlock(Label, FText::FromString(TabTexts[Index]), FLinearColor(0.90f, 0.94f, 0.87f, 1.0f), 17);
+			Button->SetContent(Label);
+			Button->SetStyle(MakeButtonStyle(FVector2D(214.0f, 50.0f), Index == 0));
+			Box->SetContent(Button);
+			Box->SetWidthOverride(214.0f);
+			Box->SetHeightOverride(50.0f);
+			NavigationStack->AddChildToVerticalBox(Box)->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 8.0f));
+			if (WidgetTree->FindWidget(TabButtons[Index]) != Button || Box->GetParent() != NavigationStack)
+			{
+				UE_LOG(LogTunaSweeperEditor, Error, TEXT("Settings tab hierarchy validation failed: %s"), TabButtons[Index]);
+				return false;
+			}
+			UE_LOG(LogTunaSweeperEditor, Display, TEXT("Settings tab hierarchy verified: %s -> %s"), TabBoxes[Index], TabButtons[Index]);
+		}
+
+		for (const TCHAR* SectionName : { TEXT("SettingsWindowModeSection"), TEXT("SettingsResolutionSection"), TEXT("SettingsDLSSSection"), TEXT("SettingsLanguageSection"), TEXT("EnemyCombatDebugSection"), TEXT("DebugDisplayLanguageSection") })
+		{
+			if (UBorder* Section = Cast<UBorder>(Find(SectionName)))
+			{
+				Section->SetBrush(MakeRoundedBoxBrush(FVector2D(940.0f, 120.0f), FLinearColor(0.01f, 0.026f, 0.030f, 0.42f), FLinearColor(0.20f, 0.42f, 0.42f, 0.62f), 1.0f, 1.0f));
+			}
+		}
+
+		RegisterAllWidgetsInTree(WidgetBlueprint);
+		FKismetEditorUtilities::CompileBlueprint(WidgetBlueprint);
+		WidgetBlueprint->MarkPackageDirty();
+		return SaveAsset(WidgetBlueprint);
+	}
+
 	bool ConfigureIntroMenuWidgetBlueprint(UWidgetBlueprint* WidgetBlueprint)
 	{
 		if (!WidgetBlueprint || !BuildTitleIntroMenuWidgetTree(WidgetBlueprint))

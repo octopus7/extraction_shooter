@@ -72,6 +72,9 @@ protected:
 	TObjectPtr<UButton> SlotSelectButton;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
+	TObjectPtr<USizeBox> SlotSelectButtonBox;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
 	TObjectPtr<UButton> SettingsButton;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
@@ -552,7 +555,6 @@ private:
 	void ResetTitleViewportLayoutState();
 	void EnsureDemoBuildImage();
 	void EnsureTitleWindParticleOverlay();
-	void ApplyTitleMenuButtonContentLayout();
 	void RefreshDistributionPresentation();
 	void EnsureSteamDemoWishlistButton();
 	FString GetDistributionChannel() const;
@@ -564,12 +566,6 @@ private:
 		UButton* ToggleButton,
 		FName LabelWidgetName,
 		FName IndicatorWidgetName);
-	UWidget* BuildTitleMenuButtonContent(
-		const FText& Icon,
-		UTextBlock* LabelText,
-		const FText& Label,
-		int32 LabelFontSize,
-		int32 IconFontSize);
 	void BeginTravelToLevel(FName TargetLevelName);
 	void BeginStartTravel();
 	void ReloadIntroLevel();
@@ -591,7 +587,6 @@ private:
 	bool bDeleteHoldActive = false;
 	bool bDeleteConfirmVisible = false;
 	bool bStartTravelPending = false;
-	bool bTitleMenuButtonContentLayoutApplied = false;
 	bool bShowingInterfaceSettingsTab = false;
 	bool bShowingDevelopmentSettingsTab = false;
 	bool bDifficultyDefinitionsLoaded = false;

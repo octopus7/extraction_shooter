@@ -6,7 +6,6 @@ void UTunaSweeperIntroMenuWidget::PrepareForInitialViewport()
 	ResetTitleViewportLayoutState();
 	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
 	ApplyDemoNoticeVisualStyle();
-	ApplyTitleMenuButtonContentLayout();
 	EnsureDifficultySelectionPanel();
 	EnsureDeleteSaveSlotHoldProgressWidget();
 	HideLegacyDeleteHoldGaugeWidgets();
@@ -362,7 +361,6 @@ void UTunaSweeperIntroMenuWidget::NativeConstruct()
 		TunaGameInstance->OnLanguageChanged.AddUObject(this, &UTunaSweeperIntroMenuWidget::HandleLanguageChanged);
 	}
 
-	ApplyTitleMenuButtonContentLayout();
 	RefreshLocalizedTexts();
 	LoadTitleGraphicsSettings();
 	ApplyDLSSModeToRuntime(PreferredDLSSMode);

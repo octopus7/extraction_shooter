@@ -1195,6 +1195,16 @@ namespace TunaSweeperEditorSetup
 		return ConfigureIntroMenuWidgetBlueprint(IntroMenuWidgetBlueprint);
 	}
 
+	bool EnsureIntroMenuVisualRestyleSetup()
+	{
+		UWidgetBlueprint* IntroMenuWidgetBlueprint = EnsureWidgetBlueprint(
+			UIAssetPath,
+			IntroMenuWidgetAssetName,
+			UTunaSweeperIntroMenuWidget::StaticClass());
+
+		return RestyleIntroMenuWidgetBlueprint(IntroMenuWidgetBlueprint);
+	}
+
 	bool EnsureBunkerToRaidTransitionVideoSetup()
 	{
 		UWidgetBlueprint* LevelTransitionWidgetBlueprint = EnsureWidgetBlueprint(

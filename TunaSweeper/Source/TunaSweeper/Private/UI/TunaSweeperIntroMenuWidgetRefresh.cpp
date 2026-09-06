@@ -32,6 +32,13 @@ void UTunaSweeperIntroMenuWidget::RefreshMainMenu()
 			: ESlateVisibility::Visible);
 	}
 
+	if (SlotSelectButtonBox)
+	{
+		SlotSelectButtonBox->SetVisibility(bIsDemo
+			? ESlateVisibility::Collapsed
+			: ESlateVisibility::Visible);
+	}
+
 	if (StartButtonText)
 	{
 		if (!Summary.bHasData)
@@ -400,9 +407,9 @@ void UTunaSweeperIntroMenuWidget::RefreshSettingsSelectionStyles(
 	const FIntPoint& CurrentResolution,
 	EWindowMode::Type CurrentWindowMode)
 {
-	ApplySettingsTabButtonStyle(SettingsGraphicsTabButton, FVector2D(142.0f, 38.0f), true);
-	ApplySettingsTabButtonStyle(SettingsInterfaceTabButton, FVector2D(158.0f, 38.0f), false);
-	ApplySettingsTabButtonStyle(SettingsDevelopmentTabButton, FVector2D(102.0f, 38.0f), false);
+	ApplySettingsTabButtonStyle(SettingsGraphicsTabButton, FVector2D(214.0f, 50.0f), true);
+	ApplySettingsTabButtonStyle(SettingsInterfaceTabButton, FVector2D(214.0f, 50.0f), false);
+	ApplySettingsTabButtonStyle(SettingsDevelopmentTabButton, FVector2D(214.0f, 50.0f), false);
 
 	ApplySettingsChoiceButtonStyle(
 		WindowedModeButton,
@@ -458,9 +465,9 @@ void UTunaSweeperIntroMenuWidget::RefreshSettingsSelectionStyles(
 
 void UTunaSweeperIntroMenuWidget::RefreshInterfaceSelectionStyles()
 {
-	ApplySettingsTabButtonStyle(SettingsGraphicsTabButton, FVector2D(142.0f, 38.0f), false);
-	ApplySettingsTabButtonStyle(SettingsInterfaceTabButton, FVector2D(158.0f, 38.0f), true);
-	ApplySettingsTabButtonStyle(SettingsDevelopmentTabButton, FVector2D(102.0f, 38.0f), false);
+	ApplySettingsTabButtonStyle(SettingsGraphicsTabButton, FVector2D(214.0f, 50.0f), false);
+	ApplySettingsTabButtonStyle(SettingsInterfaceTabButton, FVector2D(214.0f, 50.0f), true);
+	ApplySettingsTabButtonStyle(SettingsDevelopmentTabButton, FVector2D(214.0f, 50.0f), false);
 
 	ApplySettingsChoiceButtonStyle(
 		LanguageEnglishButton,
@@ -493,9 +500,9 @@ void UTunaSweeperIntroMenuWidget::RefreshDevelopmentSelectionStyles()
 		ATunaSweeperPlayerController::GetDeveloperAlwaysSlowPresentationPreference();
 	const ETunaSweeperDebugDisplayLanguage DebugDisplayLanguage =
 		TunaSweeperDebugDisplaySettings::GetDebugDisplayLanguage();
-	ApplySettingsTabButtonStyle(SettingsGraphicsTabButton, FVector2D(142.0f, 38.0f), false);
-	ApplySettingsTabButtonStyle(SettingsInterfaceTabButton, FVector2D(158.0f, 38.0f), false);
-	ApplySettingsTabButtonStyle(SettingsDevelopmentTabButton, FVector2D(102.0f, 38.0f), true);
+	ApplySettingsTabButtonStyle(SettingsGraphicsTabButton, FVector2D(214.0f, 50.0f), false);
+	ApplySettingsTabButtonStyle(SettingsInterfaceTabButton, FVector2D(214.0f, 50.0f), false);
+	ApplySettingsTabButtonStyle(SettingsDevelopmentTabButton, FVector2D(214.0f, 50.0f), true);
 	ApplySettingsChoiceButtonStyle(
 		EnemyCombatDebugToggleButton,
 		FVector2D(660.0f, 46.0f),
