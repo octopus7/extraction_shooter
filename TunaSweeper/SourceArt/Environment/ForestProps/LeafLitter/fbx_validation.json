@@ -1,0 +1,17 @@
+{
+  "passed": true,
+  "triangles": 1680,
+  "material_slots": 1,
+  "uv_channels": 1,
+  "degenerate_uv_triangles": 0,
+  "degenerate_faces": 0,
+  "nonmanifold_edges": 0,
+  "unit_normals": true,
+  "packed_blend_texture": true,
+  "max_bounds_error_m": 0.0,
+  "pivot_m": [
+    0.0,
+    0.0,
+    0.0
+  ]
+}
