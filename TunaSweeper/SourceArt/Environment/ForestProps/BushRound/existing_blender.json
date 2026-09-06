@@ -1,0 +1,62 @@
+{
+  "GrassLow": {
+    "source": "SM_GrassLow.blend",
+    "object": "SM_GrassLowB",
+    "source_dimensions": [
+      0.46119242906570435,
+      1.1682114601135254,
+      0.40306246280670166
+    ],
+    "faces": 34
+  },
+  "Flower": {
+    "source": "SM_Flower.blend",
+    "object": "SM_Flower",
+    "source_dimensions": [
+      0.9734399318695068,
+      0.519167959690094,
+      0.914268970489502
+    ],
+    "faces": 8477
+  },
+  "SimpleTree": {
+    "source": "SM_SimpleTree.blend",
+    "object": "SM_SimpleTree",
+    "source_dimensions": [
+      0.8920480012893677,
+      1.144657015800476,
+      0.8875880241394043
+    ],
+    "faces": 3845
+  },
+  "Wood": {
+    "source": "Wood.blend",
+    "object": "SM_CrateB",
+    "source_dimensions": [
+      0.22588598728179932,
+      0.20593002438545227,
+      0.21586701273918152
+    ],
+    "faces": 14296
+  },
+  "RockBasic": {
+    "source": "RockBasic.blend",
+    "object": "RockL_2",
+    "source_dimensions": [
+      0.24481600522994995,
+      0.2268190085887909,
+      0.3571150302886963
+    ],
+    "faces": 12528
+  },
+  "Bush": {
+    "source": "/Game/Nature/Bush",
+    "object": "Bush_Combined",
+    "source_dimensions": [
+      1.0213285684585571,
+      0.997613251209259,
+      0.8798967599868774
+    ],
+    "faces": 12797
+  }
+}
