@@ -1,0 +1,50 @@
+{
+  "imagegen_source_sha256": "ceb2b1e091cca807073d35f347e224d02bf217f6e0f685f744b88f8340db08c3",
+  "applied_texture_sha256": "ceb2b1e091cca807073d35f347e224d02bf217f6e0f685f744b88f8340db08c3",
+  "models": {
+    "Q1_Scout": {
+      "closed_rigid_islands": 50,
+      "minimum_signed_volume_cm3": 50.19656737645465,
+      "max_rigid_edge_length_error_cm": 2.5739289412685107e-05,
+      "minimum_vertex_z_during_pose_cm": -6.3147267610474955e-06,
+      "pose_frames_checked": 36,
+      "texture_size": [
+        1254,
+        1254
+      ]
+    },
+    "Q2_Bulwark": {
+      "closed_rigid_islands": 51,
+      "minimum_signed_volume_cm3": 95.62829645474754,
+      "max_rigid_edge_length_error_cm": 2.2042260798937896e-05,
+      "minimum_vertex_z_during_pose_cm": -3.3676624298095703e-06,
+      "pose_frames_checked": 36,
+      "texture_size": [
+        1254,
+        1254
+      ]
+    },
+    "H1_Carrier": {
+      "closed_rigid_islands": 75,
+      "minimum_signed_volume_cm3": 52.42240142822265,
+      "max_rigid_edge_length_error_cm": 2.085017599640082e-05,
+      "minimum_vertex_z_during_pose_cm": -3.814697265625e-06,
+      "pose_frames_checked": 36,
+      "texture_size": [
+        1254,
+        1254
+      ]
+    },
+    "B1_Sentry": {
+      "closed_rigid_islands": 28,
+      "minimum_signed_volume_cm3": 126.50352199872337,
+      "max_rigid_edge_length_error_cm": 1.4283013499039043e-05,
+      "minimum_vertex_z_during_pose_cm": -1.9036236835745513e-06,
+      "pose_frames_checked": 36,
+      "texture_size": [
+        1254,
+        1254
+      ]
+    }
+  }
+}
