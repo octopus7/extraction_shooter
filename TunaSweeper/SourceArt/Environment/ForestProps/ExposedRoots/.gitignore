@@ -1,0 +1,4 @@
+# Reproducible read-only exports of existing assets, retained locally for reference renders.
+Reference_*.fbx
+Reference_*.tga
+Reference_*.fbm/

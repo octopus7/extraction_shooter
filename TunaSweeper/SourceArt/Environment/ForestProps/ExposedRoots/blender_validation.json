@@ -1,0 +1,63 @@
+{
+  "vertices": 304,
+  "triangles": 580,
+  "material_slots": 1,
+  "uv_channels": 2,
+  "degenerate_triangles": 0,
+  "nonmanifold_edges": 0,
+  "bad_normals": 0,
+  "bounds_m": [
+    -0.9218022227287292,
+    -1.4803653955459595,
+    -0.08699999749660492,
+    1.463578462600708,
+    1.4824047088623047,
+    0.42500001192092896
+  ],
+  "origin": [
+    0.0,
+    0.0,
+    0.0
+  ],
+  "scale": [
+    1.0,
+    1.0,
+    1.0
+  ],
+  "uv_degenerate_triangles": [
+    0,
+    0
+  ],
+  "fbx_reload": {
+    "vertices": 304,
+    "triangles": 580,
+    "material_slots": 1,
+    "uv_channels": 2,
+    "degenerate_triangles": 0,
+    "nonmanifold_edges": 0,
+    "bad_normals": 0,
+    "bounds_m": [
+      -0.9218022227287292,
+      -1.4803653955459595,
+      -0.08699999749660492,
+      1.463578462600708,
+      1.4824047088623047,
+      0.42500001192092896
+    ],
+    "origin": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "uv_degenerate_triangles": [
+      0,
+      0
+    ]
+  },
+  "passed": true
+}
