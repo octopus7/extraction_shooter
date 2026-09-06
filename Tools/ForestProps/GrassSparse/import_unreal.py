@@ -38,24 +38,29 @@ if not verify:
 mesh=unreal.load_asset(DEST+'/'+m['name']);assert isinstance(mesh,unreal.StaticMesh)
 if not verify:
     mesh.set_material(0,mat)
-    body=mesh.get_editor_property('body_setup');body.set_editor_property('default_instance',unreal.BodyInstance(collision_profile_name='NoCollision'))
+    body=mesh.get_editor_property('body_setup');instance=body.get_editor_property('default_instance')
+    instance.set_editor_property('collision_profile_name','NoCollision');instance.set_editor_property('collision_enabled',unreal.CollisionEnabled.NO_COLLISION)
+    body.set_editor_property('default_instance',instance)
     mesh.set_editor_property('light_map_coordinate_index',1)
     # Decorative blades never participate in navigation or distance-field occlusion.
     mesh.set_editor_property('has_navigation_data',False)
     save(mesh)
-assert mat.two_sided and mat.blend_mode==unreal.BlendMode.BLEND_OPAQUE
+assert mat.get_editor_property('two_sided') and mat.get_editor_property('blend_mode')==unreal.BlendMode.BLEND_OPAQUE
 color=unreal.MaterialEditingLibrary.get_material_property_input_node(mat,unreal.MaterialProperty.MP_BASE_COLOR);assert color.texture==texture
-assert len(mesh.static_materials)==1 and mesh.static_materials[0].material_interface==mat
+assert len(mesh.get_editor_property('static_materials'))==1 and mesh.get_editor_property('static_materials')[0].material_interface==mat
 assert ed.get_num_uv_channels(mesh,0)>=1
 assert ed.get_simple_collision_count(mesh)==0 and ed.get_convex_collision_count(mesh)==0
-assert str(mesh.body_setup.default_instance.collision_profile_name)=='NoCollision'
-assert not mesh.has_navigation_data
+body=mesh.get_editor_property('body_setup');instance=body.get_editor_property('default_instance')
+assert str(instance.get_editor_property('collision_profile_name'))=='NoCollision'
+assert instance.get_editor_property('collision_enabled')==unreal.CollisionEnabled.NO_COLLISION
+assert mesh.get_num_triangles(0)==m['triangles']
+assert not mesh.get_editor_property('has_navigation_data')
 b=mesh.get_bounds();actual=[b.origin.x-b.box_extent.x,b.origin.y-b.box_extent.y,b.origin.z-b.box_extent.z,b.origin.x+b.box_extent.x,b.origin.y+b.box_extent.y,b.origin.z+b.box_extent.z]
 # Standard Blender FBX -Y/Z maps (x,y,z) metres to UE (x,-y,z) centimetres.
 s=m['bounds_m'];expected=[s[0]*100,-s[4]*100,s[2]*100,s[3]*100,-s[1]*100,s[5]*100]
 error=max(abs(a-b) for a,b in zip(actual,expected));assert error<.1,(actual,expected)
 assert abs(actual[2])<.001
 after=hashes();assert before==after
-report={'passed':True,'engine':unreal.SystemLibrary.get_engine_version(),'mode':'fresh-process reload' if verify else 'import','asset':mesh.get_path_name(),'bounds_cm':actual,'max_bounds_error_cm':error,'axis_mapping':'UE cm = (Blender X, -Blender Y, Blender Z) * 100','source_uv_channels':ed.get_num_uv_channels(mesh,0),'vertices_lod0':ed.get_number_verts(mesh,0),'material_slots':len(mesh.static_materials),'opaque':True,'two_sided':True,'collision_profile':'NoCollision','collision_shapes':0,'navigation':False,'existing_assets_unchanged':before==after,'protected_asset_hashes':after}
+report={'passed':True,'engine':unreal.SystemLibrary.get_engine_version(),'mode':'fresh-process reload' if verify else 'import','asset':mesh.get_path_name(),'bounds_cm':actual,'max_bounds_error_cm':error,'axis_mapping':'UE cm = (Blender X, -Blender Y, Blender Z) * 100','source_uv_channels':ed.get_num_uv_channels(mesh,0),'vertices_lod0':ed.get_number_verts(mesh,0),'triangles_lod0':mesh.get_num_triangles(0),'material_slots':len(mesh.get_editor_property('static_materials')),'opaque':True,'two_sided':True,'collision_profile':'NoCollision','collision_shapes':0,'navigation':False,'existing_assets_unchanged':before==after,'protected_asset_hashes':after}
 (OUT/('unreal_reload_validation.json' if verify else 'unreal_import_validation.json')).write_text(json.dumps(report,indent=2),encoding='utf-8')
 unreal.log('GRASS_SPARSE_UE_PASS')
