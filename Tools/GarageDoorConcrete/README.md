@@ -8,9 +8,9 @@ Read the existing BP_RaidBunkerGarageDoor class defaults and the native actor eq
 
 The moving upper slabs remain gray metal with inset plates, while the jambs, lintel and optional shell are gray concrete. Separate rail recesses follow the real inward rail offset. The original four hinge pivots, moving lower slab and canopy equations are preserved. A white emissive bar follows the first hinge. Two 12 cm circular lamps sit on the solid outer strip of the right jamb: red above green.
 
-## Manual setup after inspection
+## Connected Blueprint and manual setup reference
 
-No existing Blueprint or level asset is changed. Imported assets live under `/Game/Environment/Bunker/GarageDoorConcrete`.
+After the user's follow-up authorization, `/Game/Environment/Bunker/GarageDoor/BP_RaidBunkerGarageDoor` now uses this kit, including both motion indicators and authored mesh materials. The door's dimensions and motion settings are preserved. Level assets are unchanged. Imported assets live under `/Game/Environment/Bunker/GarageDoorConcrete`.
 
 1. In the existing door's mesh fields, assign the corresponding `SM_GarageConcrete_FrameTop`, `FrameLeft`, `FrameRight`, `CanopyRailLeft`, `CanopyRailRight`, `LEDBar` and `LowerEmbeddedPanel` meshes.
 2. Assign `SM_GarageConcrete_UpperPanel` to all four Upper Panel Meshes entries. Optional TemporaryWallLeft/Right and TemporaryRoof meshes are also supplied.
@@ -29,6 +29,6 @@ Build `TunaSweeperEditor Win64 Development`. Run automation test `TunaSweeper.Ga
 
 Import with `run_unreal_import.ps1`; reload/audit with `run_unreal_import.ps1 -VerifyOnly`. These scripts save only the new kit folder and compare hashes of the existing garage assets. Existing editor/BP instances need an editor restart to load the rebuilt native class.
 
-Verified results: 12 meshes, 6 materials and 1 ImageGen atlas imported and reloaded in UE 5.7.4; centered bounds match the native contract within 0.1 cm. Material graph checks confirm LED emission and lens CPD indices with zero default lens emission. The existing garage asset hashes, including the BP, remain unchanged. Static meshes include simple collision; the actor disables collision on the moving/visual components as before, and always disables it on the indicators. Frame recesses are visual details within each jamb's simple collision hull.
+Verified import results: 12 meshes, 6 materials and 1 ImageGen atlas imported and reloaded in UE 5.7.4; centered bounds match the native contract within 0.1 cm. Material graph checks confirm LED emission and lens CPD indices with zero default lens emission. The initial import preserved all existing garage assets; the subsequent authorized connection changes only the door BP. Static meshes include simple collision; the actor disables collision on the moving/visual components as before, and always disables it on the indicators. Frame recesses are visual details within each jamb's simple collision hull.
 
 The project currently raises a pre-existing Niagara `NE_PostProcess` typed-element registry ensure at engine startup. Asset validation passes, but import/reload commandlets exit with code 1 because of that engine error. The runner deliberately reports this separately instead of hiding the nonzero exit. Native motion automation passes.
