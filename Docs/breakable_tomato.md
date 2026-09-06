@@ -21,9 +21,8 @@
 | `M_TomatoGooParticle` | `T_TomatoFlesh`와 원형 알파 마스크를 쓰는 반투명 Niagara 스프라이트 머티리얼. 연기 대신 붉은 과육 방울을 그린다. |
 | `M_TomatoGooSplat` | 지면에 투사되는 반투명 데칼 머티리얼. 파괴 후 바닥에 남는 끈적한 과즙 자국을 그린다. |
 | `TunaSweeperBreakableAppleCrateActor.h/.cpp` | 토마토가 재사용하는 기반 파괴 액터. 외부에서 파편 방향을 넘겨 파괴할 수 있도록 `BreakCrateInDirection` 진입점을 제공한다. |
-| `TunaSweeperEditorSetupCore.cpp` | 과육 재질, 물리 재질, Niagara 복제, Geometry Collection, Blueprint 기본값을 생성·저장하는 Editor one-shot 로직이다. |
-| `TunaSweeperEditorSetupShared.h` | 토마토용 에셋 이름, one-shot 작업 ID, 생성 함수 선언을 보관한다. |
-| `TunaSweeperEditorOneShot_ToCleanupOnExplicitRequest.cpp` | `-TunaSweeperRebuildBreakableTomato` 명령행 옵션과 최초 실행 one-shot을 연결한다. |
+
+초기 생성·RunOnce·재생성 명령행은 2026-09-06 제거했다. 현재는 저장된 BP/재질/Niagara/Geometry Collection을 직접 편집한다. 정리 근거는 `Docs/asset_generation_cleanup_2026-09-06.md`를 참조한다.
 
 ## 런타임 동작
 

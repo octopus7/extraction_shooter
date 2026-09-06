@@ -1,7 +1,12 @@
 #if WITH_DEV_AUTOMATION_TESTS
 #include "Components/ScrollBox.h"
 #include "Misc/AutomationTest.h"
-#include "TunaSweeperEditorSetupShared.h"
+#include "Blueprint/WidgetTree.h"
+#include "Components/Button.h"
+#include "Components/CanvasPanel.h"
+#include "Components/PanelWidget.h"
+#include "Editor.h"
+#include "UI/TunaSweeperIntroMenuWidget.h"
 #include "UI/TunaSweeperGraphicsSettingsWidget.h"
 #include "Slate/WidgetRenderer.h"
 #include "Engine/TextureRenderTarget2D.h"

@@ -8,20 +8,15 @@ public class SplineWorldBuilderEditor : ModuleRules
 
 		PrivateDependencyModuleNames.AddRange(new string[]
 		{
-			"AssetRegistry",
+			"MeshDescription",
+			"StaticMeshDescription",
 			"Core",
 			"CoreUObject",
 			"Engine",
-			"ImageCore",
 			"LevelEditor",
-			"MaterialEditor",
-			"MeshConversion",
-			"MeshDescription",
-			"Projects",
 			"Slate",
 			"SlateCore",
 			"SplineWorldBuilder",
-			"StaticMeshDescription",
 			"ToolMenus",
 			"UnrealEd"
 		});

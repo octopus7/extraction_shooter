@@ -13,9 +13,9 @@ UE 5.7 plugin for non-destructive spline-authored modular environment geometry.
 
 ## Generated test assets
 
-The editor module imports `Resources/SourceArt/T_SplineWorldBuilder_StoneBlocks_ImageGen.png`, then creates versioned internal texture, material, and test meshes under `/SplineWorldBuilder/Generated/Internal`. The editable test profile is stored at `/SplineWorldBuilder/Profiles/DA_SWB_TestStoneWall`.
+Test meshes, texture and material are committed under `/SplineWorldBuilder/Generated/Internal`. The editable profile is `/SplineWorldBuilder/Profiles/DA_SWB_TestStoneWall`. The placement menu loads that saved profile.
 
-Use `-SplineWorldBuilderRebuildAssets` to force regeneration. Add `-SplineWorldBuilderAssetGenerationQuit` for a headless generate-and-exit run.
+Startup generation, the rebuild menu and generation flags were retired on 2026-09-06. Edit the saved assets directly or restore missing files from Git/LFS. Source art remains available for future authoring.
 
 ## Mesh contract
 

@@ -24,9 +24,9 @@ The editable material instances are:
 - `/TunaWarpTransition/Materials/MI_PP_TunaWarpRadial_Default`
 - `/TunaWarpTransition/Materials/MI_PP_TunaWarpArrivalRim_Default`
 
-Duplicate these instances for a different visual style and assign the copies on the component. The parent materials under `/TunaWarpTransition/Generated/Internal` are generated and versioned by the editor module; do not hand-edit those parents.
+Duplicate these instances for a different visual style and assign the copies on the component. The parent materials under `/TunaWarpTransition/Generated/Internal` are committed assets and can be edited directly.
 
-The editor module creates the missing default profile and missing/versioned material assets when the editor starts. The public profile is created only once, so later designer edits are preserved. Generated `.uasset` files live in the plugin Content directory and are cooked with the plugin.
+Startup generation was retired on 2026-09-06. The default profile and materials remain in plugin Content and are cooked with the plugin. Edit these saved assets directly; restore missing files from Git/LFS. The editor module identity remains available without startup mutations.
 
 ## Rendering limits
 

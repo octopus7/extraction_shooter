@@ -15,9 +15,9 @@ Do not place or subclass the generated internal `BP_` asset and do not assign th
 
 `Enable Terrain-Following Runup` builds a second non-colliding procedural mesh on the sampled terrain. It lets the animated waterline and foam render above dry shoreline terrain instead of being hidden below it. That overlay uses a separate generated translucent material: `Shore Water Opacity` controls the pale, terrain-visible water film and `Shore Foam Opacity` controls the stronger white foam. Its signed-depth alpha fades continuously, so grid-cell edges remain invisible. `Terrain Overlay Offset` keeps the mesh slightly above the ground to avoid z-fighting. Rebuild and bake after sculpting the shoreline.
 
-The default depth palette comes from the preserved ImageGen study at `Resources/SourceArt/WaterDepthPalette_ImageGen.png`. Its vertical average is stored as the deterministic `256x1` LUT `WaterDepthGradient_1D.png`, with an enlarged review image at `WaterDepthGradient_Preview.png`. The editor module turns that LUT into the internal `T_WaterDepthGradient` asset automatically. `ImageGen Depth Gradient Influence` blends from the legacy three-color controls at `0` to the generated LUT at `1`.
+The default depth palette comes from the preserved ImageGen study at `Resources/SourceArt/WaterDepthPalette_ImageGen.png`. Its vertical average is stored as the deterministic `256x1` LUT `WaterDepthGradient_1D.png`, with an enlarged review image at `WaterDepthGradient_Preview.png`. The corresponding `T_WaterDepthGradient` asset is committed in plugin Content. `ImageGen Depth Gradient Influence` blends from the legacy three-color controls at `0` to the generated LUT at `1`.
 
-The plugin creates its internal surface/shore materials, material instances, and Blueprint template under `/StylizedWater/Generated/Internal`. The menu uses that template and connects both materials automatically.
+The internal surface/shore materials, material instances, and Blueprint template are committed under `/StylizedWater/Generated/Internal`. The menu loads those saved assets and connects both materials. Startup generation and rebuild flags were retired on 2026-09-06; edit saved assets directly and restore missing files from Git/LFS.
 
 ## Rendering model
 

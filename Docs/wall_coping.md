@@ -5,11 +5,10 @@
 - Designer actor: `/Game/Environment/Architecture/WallCoping/BP_WallCopingSpline`
 - Static mesh: `/Game/Environment/Architecture/WallCoping/SM_WallCoping_Straight`
 - Material: `/Game/Environment/Architecture/WallCoping/M_WallCoping_WarmSandstone`
-- Editable generator parameters: `TunaSweeper/SourceArt/Environment/WallCoping/wall_coping_parameters.json`
-- Deterministic generator: `TunaSweeperWallCopingSetup.cpp`
-
-Regenerate the assets with UE 5.7 using
-`-TunaSweeperWallCopingSetup -TunaSweeperWallCopingSetupQuit`.
+- Preserved source parameters: `TunaSweeper/SourceArt/Environment/WallCoping/wall_coping_parameters.json`
+The one-shot generator and its flags were retired on 2026-09-06. Edit the saved
+assets directly. Source parameters remain as historical input, without automatic
+regeneration. See `Docs/asset_generation_cleanup_2026-09-06.md`.
 
 ## Mesh contract
 
@@ -54,3 +53,12 @@ similar to the generic `SplineWorldBuilder` profile/junction system. Until those
 meshes are authored, designers should use a small corner radius, terminate two
 coping actors at the corner, or accept/cover the local overlap. Product Raid and
 Bunker levels are not modified by asset generation or tests.
+
+## Saved asset audit (2026-09-06)
+
+The committed mesh and its single box collision currently measure approximately
+48.920246 × 46.041420 × 14 cm. The nominal 50 × 38 × 14 cm parameters above and
+the fixed-dimension automation assertions are historical and differ from this
+saved asset. Generation cleanup preserved the asset byte-for-byte; the placement
+test passed, while the four fixed length/width assertions failed. See
+`Docs/asset_generation_cleanup_2026-09-06.md` for the full validation results.

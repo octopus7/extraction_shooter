@@ -1,86 +1,20 @@
-# Editor One-Shot Cleanup List
+# Editor asset generation cleanup
 
-이 문서는 에디터 시작 시 한 번 실행하고 끝나는 자동 생성/보정 코드를 추적한다.
+2026-09-06 사용자의 생성 코드 정리 요청에 따라 기존 one-shot/RunOnce 생성기를 제거했다.
+조사·검증은 [애셋 생성 코드 정리 보고서](asset_generation_cleanup_2026-09-06.md)를 참조한다.
 
-정리 규칙:
+## 현재 규칙
 
-- 아래 코드는 사용자가 명시적으로 "에디터 one-shot 정리", "RunOnce 정리", "cleanup" 등을 요청할 때만 제거한다.
-- RunOnce 키 문자열은 완료 상태 판정에 쓰이므로, 정리 전에는 이름이나 값을 바꾸지 않는다.
-- 코드 마커는 `TunaSweeperEditorOneShot_ToCleanupOnExplicitRequest.cpp` 파일명과 `RunEditorOneShotSetup_ToCleanupOnExplicitRequest` 함수명이다.
-- 정리 시에는 호출부, 관련 `TaskId` 상수, 더 이상 참조되지 않는 `Ensure*` 생성 함수까지 함께 확인한다.
+- Git에 저장된 `.uasset`/`.umap`이 애셋 편집의 기준이다. 에디터 시작이나 로컬 설정 초기화로 재생성하지 않는다.
+- 기존 BP/WBP/ABP, DataAsset, 메시, 머티리얼, Niagara, 입력 애셋과 맵 및 런타임 C++ 부모 클래스는 유지한다.
+- `TunaSweeperEditorOneShot_ToCleanupOnExplicitRequest.cpp`, `FTunaSweeperEditorRunOnce`, TaskId/Ensure/Setup 함수와 전용 명령행·콘솔 연결은 제거되었다. 과거 `SetupQuit`/`RebuildAssets` 실행 예제를 사용하지 않는다.
+- `Saved/Config`의 `TunaSweeperEditor.RunOnce` 완료 목록은 더 이상 읽지 않는다. 삭제할 필요는 없다.
+- 새 애셋에 에디터용 일회성 생성 코드를 작성했다면 생성 결과와 코드를 검증해 먼저 커밋한다. 그 커밋 직후 생성 코드·호출부·전용 의존성을 제거하고 재검증한 결과를 바로 다음 커밋으로 남긴다. 완성된 애셋에 과거 생성기를 일괄 재실행하지 않는다.
+- 과거 생성 로직은 Git 이력을 참고한다. 애셋 누락 시 우선 Git/LFS의 원본을 복구한다.
 
-## 코드 마커
+## 유지하는 도구
 
-- `TunaSweeper/Source/TunaSweeperEditor/Private/TunaSweeperEditorOneShot_ToCleanupOnExplicitRequest.cpp`
-- `TunaSweeperEditorSetup::RunEditorOneShotSetup_ToCleanupOnExplicitRequest()`
-- `TunaSweeperEditorSetup::SchedulePickupItemAndSpawnerAssetsAndMapPlacement()`
-- `TunaSweeperEditorSetup::ScheduleLootContainerAndSpawnerAssetsAndMapPlacement()`
-- `TunaSweeperEditorSetup::ScheduleEditorMapCaptureSetup()`
-- `TunaSweeperEditorSetup::ScheduleLookdevFluidExplosionSetup()`
-- `TunaSweeperEditorSetup::ScheduleIntroMenuAndLevelTravelSetup()`
-- `TunaSweeperEditorSetup::ScheduleOpeningScenarioPresentationSetup()`
-- `TunaSweeperEditorSetup::ScheduleBunkerToRaidTransitionVideoSetup()`
-- `TunaSweeperEditorSetup::ScheduleFirstOutingQuestSetup()`
-- `TunaSweeperEditorSetup::ScheduleSelfDestructInteractionSetup()`
-
-## RunOnce TaskId 목록
-
-- `GameInstanceTaskId`: `2026-05-10_CreateGameInstanceBlueprint`
-- `TopDownShooterTaskId`: `2026-05-10_CreateTopDownShooterAssets`
-- `InteractionInputTaskId`: `2026-05-29_SetInteractInputAndFocusWheelV1`
-- `InteractionMarkerAlignmentTaskId`: `2026-05-25_RebuildInteractionMarkerRequirementPreviewV1`
-- `PickupItemAndSpawnerTaskId`: `2026-05-11_CreatePickupItemAndSpawnerAssetsV3`
-- `CommonGameHudTaskId`: `2026-06-02_BottomActionProgressCuteLayoutV1`
-- `ScratchPresentationTaskId`: `2026-08-20_CreateScratchNearMissPresentationV1`
-- `WorkbenchPanelWidgetTaskId`: `2026-05-29_CreateWorkbenchPanelWidgetV6`
-- `ShopRefreshStockButtonTaskId`: `2026-05-29_AddShopRefreshStockButtonV1`
-- `SplitExternalContainerPanelTaskId`: `2026-05-30_SplitExternalContainerPanelsV1`
-- `CurrencyCoinUiTaskId`: `2026-05-30_AddCurrencyCoinUiV1`
-- `HudDebuffBarWidgetTaskId`: `2026-05-30_HudDebuffBarWidgetV2`
-- `ItemThumbnailSlotLayoutTaskId`: `2026-05-30_RebuildItemThumbnailSlotLayoutV1`
-- `ItemContainerScrollbarStyleTaskId`: `2026-05-30_ItemContainerScrollbarStyleV1`
-- `InventoryInputTaskId`: `2026-05-11_AddInventoryInput`
-- `QuickSlotInputTaskId`: `2026-05-28_AddMeleeQuickSlotInputV1`
-- `DropInputTaskId`: `2026-05-18_AddDropInputAction`
-- `AmmoReloadInputTaskId`: `2026-05-19_AddAmmoReloadInputActionsV1`
-- `CameraModeInputTaskId`: `2026-05-26_AddCameraModeInputV1`
-- `SprintInputTaskId`: `2026-05-28_AddSprintInputV1`
-- `RollInputTaskId`: `2026-05-28_AddRollInputV1`
-- `MapInputTaskId`: `2026-05-28_AddMapInputV1`
-- `EditorMapCaptureTaskId`: `2026-05-28_CreateEditorMapCaptureBlueprintAndRaidPlacementV1`
-- `LootContainerAndSpawnerTaskId`: `2026-05-11_CreateLootContainerAndSpawnerAssetsV1`
-- `LootContainerOccupancyHeaderTaskId`: `2026-05-30_StorageFilterHeaderAboveGridV1`
-- `CannedTunaIconImportTaskId`: `2026-05-11_ImportCannedTunaIconV1`
-- `BackpackInventoryTaskId`: `2026-05-16_CreateEquipmentInventoryAssetsV3`
-- `IntroMenuAndLevelTravelTaskId`: `2026-05-24_CreateTitleIntroMenuPersistentSaveSlotSelectionLevelTravelLadderInitialScaleV1`
-- `IntroMenuGraphicsSettingsTaskId`: `2026-07-08_CompactTitleSettingsUiV1`
-- `OpeningScenarioPresentationTaskId`: `2026-05-19_CreateOpeningScenarioPresentationV2`
-- `LevelTransitionVideoTaskId`: `2026-05-16_AddBidirectionalLevelTransitionVideoV3`
-- `FirstOutingQuestTaskId`: `2026-05-30_UpdateQuestPanelEmptyStateSelectionV2`
-- `SelfDestructInteractionTaskId`: `2026-05-16_CreateSelfDestructInteractionV1`
-- `WorldProgressInteractionTaskId`: `2026-05-19_CreateWorldProgressObstacleAssetsV1`
-- `WarpPointInteractionTaskId`: `2026-05-25_CreateWarpPointInteractionAssetsV1`
-- `EnemyVisualMaterialTaskId`: `2026-05-19_CreateEnemyAndContainerVisualMaterialsV3`
-- `ExplosiveBarrelTaskId`: `2026-05-29_CreateExplosiveBarrelAssetsV8`
-- `BreakableAppleCrateTaskId`: `2026-07-07_CreateBreakableAppleCrateAssetsV5`
-- `RollingBomberBodyMaterialTaskId`: `2026-05-28_CreateRollingBomberBodyGrayMaterialV1`
-- `RollingBomberLegMaterialTaskId`: `2026-05-28_CreateRollingBomberLegMetalMaterialV1`
-- `RollingBomberChargeCylinderEffectTaskId`: `2026-05-28_CreateRollingBomberChargeCylinderEffectV1`
-- `LocalExplosionEffectTaskId`: `2026-05-29_CreateLocalExplosionFlipbookEffectV3`
-- `ExtractionSmokeSignalNiagaraSystemTaskId`: `2026-05-29_CreateExtractionSmokeSignalNiagaraSystemV4`
-- `LookdevFluidExplosionTaskId`: `2026-06-14_CreateLookdevFluidExplosionNiagaraLevelV1`
-- `ProjectileHitEffectAssetTaskId`: `2026-05-28_CreateProjectileHitEffectAssetsV1`
-- `WeaponSpreadRecoilAssetTaskId`: `2026-05-28_CreateWeaponSpreadRecoilAssetsV1`
-- `BaseballBatAssetTaskId`: `2026-05-28_CreateBaseballBatStaticMeshAssetsV1`
-- `SandbagCoverAssetTaskId`: `2026-06-02_SandbagFourLayerCoverV1`
-- `VoxelMeshAssetTaskId`: `2026-05-19_CreateSharedVoxelMeshAssetsV1`
-- `LumberjackMeleeSwingArcAssetTaskId`: `2026-05-20_CreateLumberjackMeleeSwingArcAssetsV2`
-- `LedExpressionMaterialTaskId`: `2026-05-26_CreateLedExpressionMaterialV1`
-- `ExperimentalVegetationAssetTaskId`: `2026-05-24_CreateExperimentalVegetationStaticMeshV4`
-- `TurbulentConiferOcclusionRevealTaskId`: `2026-06-08_UpdateTurbulentConiferOcclusionRevealV1`
-- `CoverPointAssetTaskId`: `2026-05-16_CreateCoverPointBlueprintV1`
-- `MoleBlueprintTaskId`: `2026-05-25_CreateMoleBlueprintV1`
-
-## Inline literal RunOnce keys
-
-- `2026-07-06_PuddleSkyReflectionMaterialNoRippleV2`
+- `TunaSweeperEditorAssetImport`: 명시적 UI 텍스처·오디오 임포트. 기존 `TunaSweeperImportUiTexture*`/`TunaSweeperImportAudio*` 옵션 유지.
+- 맵 캡처·이미지 임포트, FM 사운드 제작, 빌드 대상·레벨 열기·AI 디버그·GLB 도구.
+- 물·스플라인 배치, 벽 코핑, 물 깊이 베이크, 안개 시각화 등 현재 레벨 편집 기능.
+- 반복 제작용 메시 생성·재임포트·원본 이미지 처리, 검증 전용 Python 도구. 자동 시작과 연결된 완성 애셋 생성기와 구분한다.

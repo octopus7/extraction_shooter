@@ -8,13 +8,7 @@ public class TunaWarpTransitionEditor : ModuleRules
 
 		PrivateDependencyModuleNames.AddRange(new string[]
 		{
-			"AssetRegistry",
 			"Core",
-			"CoreUObject",
-			"Engine",
-			"MaterialEditor",
-			"TunaWarpTransition",
-			"UnrealEd"
 		});
 	}
 }
