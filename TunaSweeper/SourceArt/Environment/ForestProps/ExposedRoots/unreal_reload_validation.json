@@ -1,0 +1,39 @@
+{
+  "passed": true,
+  "mode": "fresh-process reload",
+  "engine": "5.7.4-51494982+++UE5+Release-5.7",
+  "path": "/Game/Nature/ForestProps/ExposedRoots/SM_ExposedRoots.SM_ExposedRoots",
+  "bounds_cm": [
+    -92.18021392822266,
+    -148.24046325683594,
+    -8.699999809265137,
+    146.35784912109375,
+    148.03652954101562,
+    42.5
+  ],
+  "dimensions_cm": [
+    238.5380630493164,
+    296.27699279785156,
+    51.19999980926514
+  ],
+  "axis_mapping": {
+    "blender_indices": [
+      0,
+      1,
+      2
+    ],
+    "signs": [
+      1,
+      -1,
+      1
+    ],
+    "max_error_cm": 1.0013580322265625e-05
+  },
+  "uv_channels": 2,
+  "simple_collisions": 0,
+  "collision_profile": "NoCollision",
+  "material_slots": 1,
+  "opaque": true,
+  "two_sided": false,
+  "vertices": 1740
+}

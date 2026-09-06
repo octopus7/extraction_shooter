@@ -38,7 +38,7 @@ if not VERIFY:
     for key,value in {'recompute_normals':False,'recompute_tangents':True,'generate_lightmap_u_vs':False,'use_full_precision_u_vs':True}.items():build.set_editor_property(key,value)
     sub.set_lod_build_settings(mesh,0,build)
     mesh.set_editor_property('light_map_coordinate_index',1);mesh.set_editor_property('light_map_resolution',64)
-    body=mesh.get_editor_property('body_setup');body.set_editor_property('default_instance',unreal.BodyInstance(collision_profile_name='NoCollision'))
+    body=mesh.get_editor_property('body_setup');instance=body.get_editor_property('default_instance');instance.set_editor_property('collision_profile_name','NoCollision');body.set_editor_property('default_instance',instance)
     save(mesh)
 mesh=unreal.load_asset(DEST+'/SM_ExposedRoots');assert mesh and material and texture
 b=mesh.get_bounds();center=[b.origin.x,b.origin.y,b.origin.z];ext=[b.box_extent.x,b.box_extent.y,b.box_extent.z]

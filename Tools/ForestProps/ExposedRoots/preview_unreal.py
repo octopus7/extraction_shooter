@@ -9,9 +9,9 @@ mesh=unreal.load_asset('/Game/Nature/ForestProps/ExposedRoots/SM_ExposedRoots');
 actor=actors.spawn_actor_from_class(unreal.StaticMeshActor,unreal.Vector(0,0,0));actor.static_mesh_component.set_static_mesh(mesh)
 ground=actors.spawn_actor_from_class(unreal.StaticMeshActor,unreal.Vector(0,0,-5))
 ground.static_mesh_component.set_static_mesh(unreal.load_asset('/Engine/BasicShapes/Cube'));ground.set_actor_scale3d(unreal.Vector(20,20,.1))
-light=actors.spawn_actor_from_class(unreal.DirectionalLight,unreal.Vector(0,0,500),unreal.Rotator(-45,-35,0));light.light_component.set_intensity(3)
+light=actors.spawn_actor_from_class(unreal.DirectionalLight,unreal.Vector(0,0,500),unreal.Rotator(pitch=-45,yaw=-35,roll=0));light.light_component.set_intensity(3)
 sky=actors.spawn_actor_from_class(unreal.SkyLight,unreal.Vector(0,0,300));sky.light_component.set_intensity(1)
-capture=actors.spawn_actor_from_class(unreal.SceneCapture2D,unreal.Vector(330,-420,330),unreal.Rotator(-31,128,0))
+capture=actors.spawn_actor_from_class(unreal.SceneCapture2D,unreal.Vector(330,-420,330),unreal.Rotator(pitch=-31,yaw=128,roll=0))
 component=capture.get_component_by_class(unreal.SceneCaptureComponent2D)
 target=unreal.RenderingLibrary.create_render_target2d(world,1400,1000,unreal.TextureRenderTargetFormat.RTF_RGBA8)
 component.set_editor_property('texture_target',target)
@@ -20,8 +20,17 @@ component.set_editor_property('capture_source',unreal.SceneCaptureSource.SCS_FIN
 settings=component.get_editor_property('post_process_settings')
 settings.set_editor_property('override_auto_exposure_method',True);settings.set_editor_property('auto_exposure_method',unreal.AutoExposureMethod.AEM_MANUAL)
 settings.set_editor_property('override_auto_exposure_bias',True);settings.set_editor_property('auto_exposure_bias',1)
+settings.set_editor_property('auto_exposure_apply_physical_camera_exposure',False)
 component.set_editor_property('post_process_settings',settings)
-component.set_editor_property('capture_every_frame',True)
+settings.set_editor_property('override_auto_exposure_apply_physical_camera_exposure',True)
+component.set_editor_property('post_process_settings',settings)
+component.set_editor_property('capture_every_frame',False)
+component.set_editor_property('always_persist_rendering_state',True)
+capture.set_actor_location(unreal.Vector(330,-420,330),False,False)
+capture.set_actor_rotation(unreal.Rotator(pitch=-31,yaw=128,roll=0),False)
+actor.set_actor_location(unreal.Vector(0,0,0),False,False)
+ground.set_actor_location(unreal.Vector(0,0,-5),False,False)
+component.set_editor_property('capture_source',unreal.SceneCaptureSource.SCS_BASE_COLOR)
 start=time.time();phase=0
 def tick(delta):
     global phase
@@ -29,10 +38,14 @@ def tick(delta):
         elapsed=time.time()-start
         if elapsed>20 and phase==0:
             component.capture_scene();phase=1
-        if elapsed>25:
+        if elapsed>25 and phase==1:
+            unreal.RenderingLibrary.export_render_target(world,target,str(OUT/'Previews'),'ExposedRoots_UE_BaseColor.png')
+            component.set_editor_property('capture_source',unreal.SceneCaptureSource.SCS_FINAL_COLOR_LDR);component.capture_scene();phase=2
+        if elapsed>35:
             unreal.RenderingLibrary.export_render_target(world,target,str(OUT/'Previews'),'ExposedRoots_UE.png')
-            (OUT/'unreal_render_validation.json').write_text(json.dumps({'rendered_asset':mesh.get_path_name(),'material':mesh.get_material(0).get_path_name(),'transient_world':True,'saved_levels':0},indent=2))
+            (OUT/'unreal_render_validation.json').write_text(json.dumps({'rendered_asset':mesh.get_path_name(),'material':mesh.get_material(0).get_path_name(),'transient_world':True,'saved_levels':0,'capture_location':str(capture.get_actor_location()),'capture_rotation':str(capture.get_actor_rotation()),'mesh_location':str(actor.get_actor_location())},indent=2))
             unreal.unregister_slate_post_tick_callback(handle);unreal.SystemLibrary.quit_editor()
     except Exception:
         unreal.log_error(traceback.format_exc());unreal.unregister_slate_post_tick_callback(handle);unreal.SystemLibrary.quit_editor()
 handle=unreal.register_slate_post_tick_callback(tick)
+unreal.EditorPythonScripting.set_keep_python_script_alive(True)

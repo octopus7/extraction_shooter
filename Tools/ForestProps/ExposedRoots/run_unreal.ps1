@@ -14,13 +14,22 @@ if ($Mode -eq 'Reload' -or $Mode -eq 'Preview') {
 }
 $taskScript=if ($Mode -eq 'References') {'export_ue_reference.py'} elseif ($Mode -eq 'Preview') {'preview_unreal.py'} else {'import_unreal.py'}
 $taskPrevious=$env:EXPOSED_ROOTS_VERIFY
+$taskCachePrevious=[Environment]::GetEnvironmentVariable('UE-LocalDataCachePath','Process')
 try {
+    $taskStarted=Get-Date
+    New-Item -ItemType Directory -Force "$taskHost/DerivedDataCache" | Out-Null
+    [Environment]::SetEnvironmentVariable('UE-LocalDataCachePath',"$taskHost/DerivedDataCache",'Process')
     $env:EXPOSED_ROOTS_VERIFY=if ($Mode -eq 'Reload') {'1'} else {'0'}
-    $taskArgs=@("$taskHost/ExposedRootsUE.uproject",'-ddc=InstalledNoZenLocalFallback','-DDC-ForceMemoryCache','-unattended','-nosplash','-nosound','-stdout','-FullStdOutLogOutput','-ini:Engine:[ConsoleVariables]:Interchange.FeatureFlags.Import.FBX=0')
+    $taskArgs=@("$taskHost/ExposedRootsUE.uproject",'-ddc=InstalledNoZenLocalFallback','-DDC-ForceMemoryCache','-unattended','-nosplash','-nosound','-stdout','-FullStdOutLogOutput','-ini:Engine:[Zen]:AutoLaunch=false','-ini:Engine:[ConsoleVariables]:Interchange.FeatureFlags.Import.SyncToBrowser=0,Interchange.FeatureFlags.Import.FBX=0')
     if ($Mode -eq 'Preview') {$taskArgs+=@('-RenderOffscreen',"-ExecutePythonScript=$PSScriptRoot/$taskScript")}
     else {$taskArgs+=@('-nullrhi','-run=pythonscript',"-script=$PSScriptRoot/$taskScript")}
-    & 'C:/Program Files/Epic Games/UE_5.7/Engine/Binaries/Win64/UnrealEditor-Cmd.exe' @taskArgs *> "$taskHost/$Mode.stdout.log"
-    if ($LASTEXITCODE -ne 0) {throw "UE $Mode exited $LASTEXITCODE. See $taskHost/$Mode.stdout.log"}
+    $taskLog=Join-Path $taskHost "$Mode.$(Get-Date -Format 'HHmmss').stdout.log"
+    Write-Output "UE log: $taskLog"
+    & 'C:/Program Files/Epic Games/UE_5.7/Engine/Binaries/Win64/UnrealEditor-Cmd.exe' @taskArgs *> $taskLog
+    if ($LASTEXITCODE -ne 0) {throw "UE $Mode exited $LASTEXITCODE. See $taskLog"}
+    $taskReportName=switch ($Mode) {'Import' {'unreal_import_validation.json'} 'Reload' {'unreal_reload_validation.json'} 'Preview' {'unreal_render_validation.json'} 'References' {'ue_reference_inventory.json'}}
+    $taskReportFile=Join-Path $taskOut $taskReportName
+    if (-not (Test-Path -LiteralPath $taskReportFile) -or (Get-Item -LiteralPath $taskReportFile).LastWriteTime -lt $taskStarted) {throw "Missing or stale report: $taskReportFile"}
     if ($Mode -eq 'Import') {
         $taskReport=Get-Content "$taskOut/unreal_import_validation.json" -Raw | ConvertFrom-Json
         if (-not $taskReport.passed) {throw 'Import validation failed'}
@@ -28,4 +37,4 @@ try {
         Copy-Item -LiteralPath "$taskHost/Content/Nature/ForestProps/ExposedRoots" -Destination "$taskRoot/TunaSweeper/Content/Nature/ForestProps" -Recurse -Force
     }
     Write-Output "UE $Mode completed successfully."
-} finally {$env:EXPOSED_ROOTS_VERIFY=$taskPrevious}
+} finally {$env:EXPOSED_ROOTS_VERIFY=$taskPrevious;[Environment]::SetEnvironmentVariable('UE-LocalDataCachePath',$taskCachePrevious,'Process')}

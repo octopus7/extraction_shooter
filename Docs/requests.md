@@ -7837,3 +7837,11 @@
 
 - 사용자 요청에 따라 SSOT 구현·애셋 검토 보고서, NFT 관련 SSOT 정정 문서 4개와 이 작업의 기록을 로컬 커밋 대상으로 묶었다. 공용 요청·질문 기록에서는 이번 작업의 항목만 선택했다.
 - 다른 작업의 코드·애셋·문서 변경은 커밋 범위에서 제외했다. 문서 변경의 공백 오류와 폐기 퀘스트 잔여 참조를 확인했으며 원격 push는 수행하지 않는다.
+
+## 2026-09-06 22:22:11 (소요시간: 00:37:20)
+
+- 기존 Content/Nature의 Bush·GrassLow·Flower·SimpleTree·Wood·RockBasic과 Blender 원본/텍스처를 조사하고, 열린 중앙과 굵은 5갈래·보조 2갈래로 구성한 노출 뿌리 소품 1종을 제작했다. 기능·퀘스트·기존 레벨과 공용 애셋은 변경하지 않았다.
+- Tools/ForestProps/ExposedRoots에 재현 가능한 Blender·UE 도구와 치수/배치 안내를, TunaSweeper/SourceArt/Environment/ForestProps/ExposedRoots에 텍스처 포함 blend·FBX·64x64 팔레트·다방향/그루터기 조합/6회 반복 프리뷰를 저장했다. 검증된 원본을 d2566286으로 먼저 로컬 커밋했다.
+- 580삼각형·304 위치 정점, UV 2채널, 재질 1개를 확인했다. 퇴화 면·비정상 노멀·nonmanifold edge·퇴화 UV 삼각형 0개이며 FBX 재로드 및 저장 blend의 packed texture 픽셀 검사도 통과했다.
+- UE 5.7.4 임시 검사 프로젝트에서 /Game/Nature/ForestProps/ExposedRoots로 임포트하고 새 Static Mesh·Material·Texture 3개를 본 프로젝트에 복사한 뒤 새 프로세스로 다시 읽었다. 약 238.54x296.28x51.20cm, 지면 피벗 Z=0/지상 높이 42.5cm, 축 변환 (X,-Y,Z)x100, 치수 오차 0.000011cm 미만, NoCollision, 불투명 단면 재질, 렌더 정점 1740개를 확인했다.
+- UE 실제 base-color/조명 캡처와 Blender 렌더를 직접 시각 확인했다. 최종 UE Import/Reload 명령은 정상 종료했다. Preview는 이미지/보고서 저장 후 종료 단계에서 -1073741819(0xC0000005)를 반환했으므로 명령 전체가 정상 종료한 것으로 처리하지 않았다. 공용 캐시 및 초기 캡처 문제는 전용 DDC·브라우저 동기화 차단·명시적 회전/캡처 갱신으로 수정했다. 이 worktree에 게임 모듈 바이너리가 없어 엔진 기본 검사 호스트를 사용했으며 게임 전체 빌드/PIE·실제 데모 배치는 수행하지 않았다. UE 애셋은 원본과 분리해 로컬 커밋하고 push는 하지 않는다.
