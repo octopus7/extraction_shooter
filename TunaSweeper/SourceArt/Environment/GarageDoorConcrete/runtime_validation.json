@@ -1,0 +1,15 @@
+{
+  "build": "UE 5.7 TunaSweeperEditor Win64 Development: Succeeded",
+  "startup_note": "Existing Niagara NE_PostProcess typed element registry ensure occurs before tests.",
+  "checks": [
+    "opening green only",
+    "closing red only",
+    "direction reversal",
+    "pause and resume",
+    "fully open and closed off",
+    "explicit endpoints",
+    "disabled command ignored"
+  ],
+  "result": "Success",
+  "test": "TunaSweeper.GarageDoor.MotionIndicators"
+}

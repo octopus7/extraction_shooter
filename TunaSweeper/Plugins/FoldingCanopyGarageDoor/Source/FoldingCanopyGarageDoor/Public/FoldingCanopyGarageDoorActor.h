@@ -120,6 +120,12 @@ protected:
 	TObjectPtr<UStaticMeshComponent> LedBarComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Garage Door|Components")
+	TObjectPtr<UStaticMeshComponent> OpeningIndicatorComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Garage Door|Components")
+	TObjectPtr<UStaticMeshComponent> ClosingIndicatorComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Garage Door|Components")
 	TObjectPtr<UStaticMeshComponent> CanopyRailLeftComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Garage Door|Components")
@@ -211,6 +217,29 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Garage Door|Materials")
 	TObjectPtr<UMaterialInterface> LedMaterial;
+
+	/** Keep concrete, metal and lens slots authored on a replacement art kit. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Garage Door|Materials")
+	bool bUseAuthoredMeshMaterials = false;
+
+	/** Round lamp: its lens reads CPD 0=strength, 1..3=linear RGB. Unassigned by default. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Garage Door|Indicators")
+	TObjectPtr<UStaticMesh> MotionIndicatorMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Garage Door|Indicators", meta = (ClampMin = "1.0", Units = "cm"))
+	float IndicatorDiameter = 12.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Garage Door|Indicators", meta = (ClampMin = "0.1", Units = "cm"))
+	float IndicatorDepth = 4.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Garage Door|Indicators", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+	float IndicatorHeightRatio = 0.65f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Garage Door|Indicators", meta = (ClampMin = "1.0", Units = "cm"))
+	float IndicatorVerticalSpacing = 18.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Garage Door|Indicators", meta = (ClampMin = "0.0"))
+	float IndicatorEmissiveStrength = 8.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Garage Door|Geometry", meta = (ClampMin = "1.0"))
 	float DoorWidth = 200.0f;
@@ -333,6 +362,7 @@ private:
 	bool HasAutoOpenPawns();
 	void HandleDelayedAutoClose();
 	void SetDoorState(EFoldingCanopyGarageDoorState NewState);
+	void UpdateMotionIndicators();
 
 	float OpenAlpha = 0.0f;
 	EFoldingCanopyGarageDoorState DoorState = EFoldingCanopyGarageDoorState::Closed;

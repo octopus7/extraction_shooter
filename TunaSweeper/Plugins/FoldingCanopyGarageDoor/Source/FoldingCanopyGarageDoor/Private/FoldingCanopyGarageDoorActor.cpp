@@ -58,6 +58,16 @@ AFoldingCanopyGarageDoor::AFoldingCanopyGarageDoor()
 	FrameLeftComponent->SetupAttachment(SceneRoot);
 	FrameRightComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("FrameRight"));
 	FrameRightComponent->SetupAttachment(SceneRoot);
+	OpeningIndicatorComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("OpeningIndicator"));
+	OpeningIndicatorComponent->SetupAttachment(SceneRoot);
+	ClosingIndicatorComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ClosingIndicator"));
+	ClosingIndicatorComponent->SetupAttachment(SceneRoot);
+	for (UStaticMeshComponent* Indicator : { OpeningIndicatorComponent.Get(), ClosingIndicatorComponent.Get() })
+	{
+		Indicator->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		Indicator->SetGenerateOverlapEvents(false);
+		Indicator->SetCastShadow(false);
+	}
 	CanopyRailLeftComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CanopyRailLeft"));
 	CanopyRailLeftComponent->SetupAttachment(SceneRoot);
 	CanopyRailRightComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CanopyRailRight"));
@@ -131,6 +141,7 @@ void AFoldingCanopyGarageDoor::OnConstruction(const FTransform& Transform)
 	}
 #endif
 	ApplyDoorPose(PoseAlpha);
+	UpdateMotionIndicators();
 }
 
 void AFoldingCanopyGarageDoor::BeginPlay()
@@ -145,12 +156,15 @@ void AFoldingCanopyGarageDoor::BeginPlay()
 	DoorState = bStartsOpen ? EFoldingCanopyGarageDoorState::Open : EFoldingCanopyGarageDoorState::Closed;
 	ApplyDoorPose(OpenAlpha);
 	SetActorTickEnabled(false);
+	UpdateMotionIndicators();
 }
 
 void AFoldingCanopyGarageDoor::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	GetWorldTimerManager().ClearTimer(AutoCloseTimerHandle);
 	AutoOpenPawns.Reset();
+	SetActorTickEnabled(false);
+	UpdateMotionIndicators();
 
 	Super::EndPlay(EndPlayReason);
 }
@@ -159,9 +173,10 @@ void AFoldingCanopyGarageDoor::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	if (DoorState != EFoldingCanopyGarageDoorState::Opening && DoorState != EFoldingCanopyGarageDoorState::Closing)
+	if (!bDoorEnabled || (DoorState != EFoldingCanopyGarageDoorState::Opening && DoorState != EFoldingCanopyGarageDoorState::Closing))
 	{
 		SetActorTickEnabled(false);
+		UpdateMotionIndicators();
 		return;
 	}
 
@@ -175,6 +190,7 @@ void AFoldingCanopyGarageDoor::Tick(float DeltaSeconds)
 		ApplyDoorPose(OpenAlpha);
 		DoorState = EFoldingCanopyGarageDoorState::Open;
 		SetActorTickEnabled(false);
+		UpdateMotionIndicators();
 		OnDoorFullyOpened.Broadcast();
 	}
 	else if (Direction < 0.0f && IsFullyClosed())
@@ -183,6 +199,7 @@ void AFoldingCanopyGarageDoor::Tick(float DeltaSeconds)
 		ApplyDoorPose(OpenAlpha);
 		DoorState = EFoldingCanopyGarageDoorState::Closed;
 		SetActorTickEnabled(false);
+		UpdateMotionIndicators();
 		OnDoorFullyClosed.Broadcast();
 	}
 }
@@ -194,8 +211,8 @@ void AFoldingCanopyGarageDoor::OpenDoor()
 		return;
 	}
 
-	SetDoorState(EFoldingCanopyGarageDoorState::Opening);
 	SetActorTickEnabled(true);
+	SetDoorState(EFoldingCanopyGarageDoorState::Opening);
 }
 
 void AFoldingCanopyGarageDoor::CloseDoor()
@@ -205,8 +222,8 @@ void AFoldingCanopyGarageDoor::CloseDoor()
 		return;
 	}
 
-	SetDoorState(EFoldingCanopyGarageDoorState::Closing);
 	SetActorTickEnabled(true);
+	SetDoorState(EFoldingCanopyGarageDoorState::Closing);
 }
 
 void AFoldingCanopyGarageDoor::ToggleDoor()
@@ -236,6 +253,7 @@ void AFoldingCanopyGarageDoor::SetOpenAlpha(float NewOpenAlpha)
 		DoorState = EFoldingCanopyGarageDoorState::Closed;
 		SetActorTickEnabled(false);
 	}
+	UpdateMotionIndicators();
 }
 
 bool AFoldingCanopyGarageDoor::IsFullyOpen() const
@@ -250,11 +268,17 @@ bool AFoldingCanopyGarageDoor::IsFullyClosed() const
 
 void AFoldingCanopyGarageDoor::SetDoorEnabled(bool bNewDoorEnabled)
 {
+	const bool bWasEnabled = bDoorEnabled;
 	bDoorEnabled = bNewDoorEnabled;
 	if (!bDoorEnabled)
 	{
 		SetActorTickEnabled(false);
 	}
+	else if (!bWasEnabled && (DoorState == EFoldingCanopyGarageDoorState::Opening || DoorState == EFoldingCanopyGarageDoorState::Closing))
+	{
+		SetActorTickEnabled(true);
+	}
+	UpdateMotionIndicators();
 }
 
 void AFoldingCanopyGarageDoor::ConfigureVisualDefaults(
@@ -425,12 +449,28 @@ void AFoldingCanopyGarageDoor::ApplyMeshes()
 	UpperPanel03->SetStaticMesh(UpperPanelMeshes[2]);
 	UpperPanel04->SetStaticMesh(UpperPanelMeshes[3]);
 	LowerPanelComponent->SetStaticMesh(LowerPanelMesh);
+	OpeningIndicatorComponent->SetStaticMesh(MotionIndicatorMesh);
+	ClosingIndicatorComponent->SetStaticMesh(MotionIndicatorMesh);
 
 	for (UStaticMeshComponent* MetalComponent : { FrameTopComponent.Get(), FrameLeftComponent.Get(), FrameRightComponent.Get(), CanopyRailLeftComponent.Get(), CanopyRailRightComponent.Get(), TemporaryWallLeftComponent.Get(), TemporaryWallRightComponent.Get(), TemporaryRoofComponent.Get(), UpperPanel01.Get(), UpperPanel02.Get(), UpperPanel03.Get(), UpperPanel04.Get(), LowerPanelComponent.Get() })
 	{
-		MetalComponent->SetMaterial(0, MetalMaterial);
+		if (bUseAuthoredMeshMaterials)
+		{
+			MetalComponent->EmptyOverrideMaterials();
+		}
+		else
+		{
+			MetalComponent->SetMaterial(0, MetalMaterial);
+		}
 	}
-	LedBarComponent->SetMaterial(0, LedMaterial);
+	if (bUseAuthoredMeshMaterials)
+	{
+		LedBarComponent->EmptyOverrideMaterials();
+	}
+	else
+	{
+		LedBarComponent->SetMaterial(0, LedMaterial);
+	}
 
 	const FVector FrameTopDimensions(DoorWidth + FrameSideWidth * 2.0f, FrameDepth, FrameTopHeight);
 	const FVector FrameSideDimensions(FrameSideWidth, FrameDepth, GetUpperTotalHeight() + LowerPanelHeight - LowerPanelEmbedDepth);
@@ -440,6 +480,8 @@ void AFoldingCanopyGarageDoor::ApplyMeshes()
 	ApplyMeshDimensions(FrameLeftComponent, FrameSideDimensions);
 	ApplyMeshDimensions(FrameRightComponent, FrameSideDimensions);
 	ApplyMeshDimensions(LedBarComponent, FVector(LedBarWidth, LedBarThickness, LedBarHeight));
+	ApplyMeshDimensions(OpeningIndicatorComponent, FVector(IndicatorDiameter, IndicatorDepth, IndicatorDiameter));
+	ApplyMeshDimensions(ClosingIndicatorComponent, FVector(IndicatorDiameter, IndicatorDepth, IndicatorDiameter));
 	ApplyMeshDimensions(CanopyRailLeftComponent, FVector(FrameSideWidth * 0.55f, GetCanopyRailLength(), GetCanopyRailHeight()));
 	ApplyMeshDimensions(CanopyRailRightComponent, FVector(FrameSideWidth * 0.55f, GetCanopyRailLength(), GetCanopyRailHeight()));
 	ApplyMeshDimensions(TemporaryWallLeftComponent, FVector(DoorWidth, FrameDepth, TemporaryShellHeight));
@@ -481,6 +523,13 @@ void AFoldingCanopyGarageDoor::ApplyClosedLayout()
 		-DoorThickness * 0.5f - LedBarThickness * 0.5f,
 		-GetEffectiveUpperPanelHeight(0)));
 	LedBarComponent->SetRelativeRotation(FRotator::ZeroRotator);
+	// Leave the inward rail pocket clear and mount lamps on the solid outer jamb.
+	const FVector IndicatorCenter(DoorWidth * 0.5f + FrameSideWidth - IndicatorDiameter * 0.5f - 1.0f,
+		-FrameDepth * 0.5f - IndicatorDepth * 0.5f, UpperTopZ * IndicatorHeightRatio);
+	ClosingIndicatorComponent->SetRelativeLocation(IndicatorCenter + FVector(0.0f, 0.0f, IndicatorVerticalSpacing * 0.5f));
+	OpeningIndicatorComponent->SetRelativeLocation(IndicatorCenter - FVector(0.0f, 0.0f, IndicatorVerticalSpacing * 0.5f));
+	ClosingIndicatorComponent->SetRelativeRotation(FRotator::ZeroRotator);
+	OpeningIndicatorComponent->SetRelativeRotation(FRotator::ZeroRotator);
 	const float TemporaryShellHeight = UpperTopZ + FrameTopHeight;
 	const float TemporaryWallCenterX = DoorWidth + FrameSideWidth;
 	TemporaryWallLeftComponent->SetRelativeLocation(FVector(-TemporaryWallCenterX, 0.0f, TemporaryShellHeight * 0.5f));
@@ -748,10 +797,12 @@ void AFoldingCanopyGarageDoor::SetDoorState(EFoldingCanopyGarageDoorState NewSta
 {
 	if (DoorState == NewState)
 	{
+		UpdateMotionIndicators();
 		return;
 	}
 
 	DoorState = NewState;
+	UpdateMotionIndicators();
 	if (DoorState == EFoldingCanopyGarageDoorState::Opening)
 	{
 		OnDoorOpeningStarted.Broadcast();
@@ -760,4 +811,16 @@ void AFoldingCanopyGarageDoor::SetDoorState(EFoldingCanopyGarageDoorState NewSta
 	{
 		OnDoorClosingStarted.Broadcast();
 	}
+}
+
+void AFoldingCanopyGarageDoor::UpdateMotionIndicators()
+{
+	// Derived presentation only: no new save state or material-instance allocation.
+	const bool bMoving = bDoorEnabled && IsActorTickEnabled();
+	OpeningIndicatorComponent->SetCustomPrimitiveDataVector3(1, FVector(0.015f, 1.0f, 0.06f));
+	ClosingIndicatorComponent->SetCustomPrimitiveDataVector3(1, FVector(1.0f, 0.015f, 0.01f));
+	OpeningIndicatorComponent->SetCustomPrimitiveDataFloat(0,
+		bMoving && DoorState == EFoldingCanopyGarageDoorState::Opening ? IndicatorEmissiveStrength : 0.0f);
+	ClosingIndicatorComponent->SetCustomPrimitiveDataFloat(0,
+		bMoving && DoorState == EFoldingCanopyGarageDoorState::Closing ? IndicatorEmissiveStrength : 0.0f);
 }

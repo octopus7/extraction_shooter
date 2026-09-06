@@ -1,0 +1,248 @@
+{
+  "assets": [
+    {
+      "name": "SM_GarageConcrete_FrameLeft",
+      "size_cm": [
+        34.99999940395355,
+        44.999998807907104,
+        194.99999284744263
+      ],
+      "triangles": 720,
+      "materials": [
+        "M_GarageConcrete_Concrete",
+        "M_GarageConcrete_Steel"
+      ],
+      "closed_location_cm": [
+        -117.5,
+        0,
+        97.5
+      ]
+    },
+    {
+      "name": "SM_GarageConcrete_FrameRight",
+      "size_cm": [
+        34.99999940395355,
+        44.999998807907104,
+        194.99999284744263
+      ],
+      "triangles": 720,
+      "materials": [
+        "M_GarageConcrete_Concrete",
+        "M_GarageConcrete_Steel"
+      ],
+      "closed_location_cm": [
+        117.5,
+        0,
+        97.5
+      ]
+    },
+    {
+      "name": "SM_GarageConcrete_FrameTop",
+      "size_cm": [
+        270.0000047683716,
+        44.999998807907104,
+        34.99999940395355
+      ],
+      "triangles": 520,
+      "materials": [
+        "M_GarageConcrete_Concrete",
+        "M_GarageConcrete_Steel"
+      ],
+      "closed_location_cm": [
+        0,
+        0,
+        212.5
+      ]
+    },
+    {
+      "name": "SM_GarageConcrete_CanopyRailLeft",
+      "size_cm": [
+        19.249999523162842,
+        74.00000095367432,
+        12.312499433755875
+      ],
+      "triangles": 432,
+      "materials": [
+        "M_GarageConcrete_Steel",
+        "M_GarageConcrete_Rubber"
+      ],
+      "closed_location_cm": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "SM_GarageConcrete_CanopyRailRight",
+      "size_cm": [
+        19.249999523162842,
+        74.00000095367432,
+        12.312499433755875
+      ],
+      "triangles": 432,
+      "materials": [
+        "M_GarageConcrete_Steel",
+        "M_GarageConcrete_Rubber"
+      ],
+      "closed_location_cm": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "SM_GarageConcrete_UpperPanel",
+      "size_cm": [
+        199.99998807907104,
+        15.999999642372131,
+        44.999998807907104
+      ],
+      "triangles": 2064,
+      "materials": [
+        "M_GarageConcrete_Steel",
+        "M_GarageConcrete_Panel",
+        "M_GarageConcrete_Rubber"
+      ],
+      "closed_location_cm": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "SM_GarageConcrete_LowerEmbeddedPanel",
+      "size_cm": [
+        200.0,
+        15.999999642372131,
+        25.0
+      ],
+      "triangles": 520,
+      "materials": [
+        "M_GarageConcrete_Steel",
+        "M_GarageConcrete_Panel"
+      ],
+      "closed_location_cm": [
+        0,
+        0,
+        2.5
+      ]
+    },
+    {
+      "name": "SM_GarageConcrete_LEDBar",
+      "size_cm": [
+        110.00000238418579,
+        6.000000238418579,
+        9.999999403953552
+      ],
+      "triangles": 300,
+      "materials": [
+        "M_GarageConcrete_Steel",
+        "M_GarageConcrete_Rubber",
+        "M_GarageConcrete_LED"
+      ],
+      "closed_location_cm": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "SM_GarageConcrete_MotionIndicator",
+      "size_cm": [
+        11.999999731779099,
+        4.000000283122063,
+        11.999999731779099
+      ],
+      "triangles": 1404,
+      "materials": [
+        "M_GarageConcrete_Steel",
+        "M_GarageConcrete_Rubber",
+        "M_GarageConcrete_Signal"
+      ],
+      "closed_location_cm": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "SM_GarageConcrete_TemporaryWallLeft",
+      "size_cm": [
+        200.0,
+        44.999998807907104,
+        229.99999523162842
+      ],
+      "triangles": 108,
+      "materials": [
+        "M_GarageConcrete_Concrete"
+      ],
+      "closed_location_cm": [
+        -235,
+        0,
+        115
+      ]
+    },
+    {
+      "name": "SM_GarageConcrete_TemporaryWallRight",
+      "size_cm": [
+        200.0,
+        44.999998807907104,
+        229.99999523162842
+      ],
+      "triangles": 108,
+      "materials": [
+        "M_GarageConcrete_Concrete"
+      ],
+      "closed_location_cm": [
+        235,
+        0,
+        115
+      ]
+    },
+    {
+      "name": "SM_GarageConcrete_TemporaryRoof",
+      "size_cm": [
+        669.9999809265137,
+        200.0,
+        44.999998807907104
+      ],
+      "triangles": 108,
+      "materials": [
+        "M_GarageConcrete_Concrete"
+      ],
+      "closed_location_cm": [
+        0,
+        100,
+        252.5
+      ]
+    }
+  ],
+  "materials": {
+    "Concrete": {
+      "name": "M_GarageConcrete_Concrete",
+      "metallic": 0,
+      "roughness": 0.9
+    },
+    "Steel": {
+      "name": "M_GarageConcrete_Steel",
+      "metallic": 0.6,
+      "roughness": 0.5
+    },
+    "Panel": {
+      "name": "M_GarageConcrete_Panel",
+      "metallic": 0.3,
+      "roughness": 0.65
+    },
+    "Rubber": {
+      "name": "M_GarageConcrete_Rubber",
+      "metallic": 0,
+      "roughness": 0.85
+    }
+  },
+  "axis_contract": "X width, -Y exterior, Z up; meshes centered. FBX pre-mirrors Y to compensate Unreal conversion.",
+  "indicator_cpd": {
+    "0": "emissive strength",
+    "1..3": "linear RGB"
+  },
+  "total_triangles": 7436
+}
