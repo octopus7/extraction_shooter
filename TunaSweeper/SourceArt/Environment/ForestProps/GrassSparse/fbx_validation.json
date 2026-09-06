@@ -1,0 +1,16 @@
+{
+  "passed": true,
+  "fresh_process": true,
+  "triangles": 300,
+  "bounds_error_m": 2.9802322387695312e-08,
+  "pivot": [
+    0.0,
+    0.0,
+    0.0
+  ],
+  "uv_channels": 1,
+  "material_slots": 1,
+  "degenerate_faces": 0,
+  "normals_finite_unit_length": true,
+  "blend_texture_packed": true
+}

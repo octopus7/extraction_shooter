@@ -1,0 +1,45 @@
+{
+  "name": "SM_GrassSparse",
+  "blender_version": "4.5.12 LTS",
+  "seed": 6019,
+  "units": "metres",
+  "pivot": [
+    0,
+    0,
+    0
+  ],
+  "bounds_m": [
+    -0.69252610206604,
+    -0.42984849214553833,
+    0.0,
+    0.6161834597587585,
+    0.5335753560066223,
+    0.3431454300880432
+  ],
+  "size_cm": [
+    130.87095618247986,
+    96.34238481521606,
+    34.31454300880432
+  ],
+  "vertices": 300,
+  "triangles": 300,
+  "tufts": 5,
+  "blades": 30,
+  "materials": [
+    "M_GrassSparse"
+  ],
+  "texture": "T_GrassSparse_BaseColor",
+  "texture_resolution": [
+    128,
+    128
+  ],
+  "uv_channels": 1,
+  "two_sided": true,
+  "alpha": false,
+  "collision": false,
+  "degenerate_faces": 0,
+  "finite_unit_normals": true,
+  "fbx_forward": "-Y",
+  "fbx_up": "Z",
+  "passed": true
+}
