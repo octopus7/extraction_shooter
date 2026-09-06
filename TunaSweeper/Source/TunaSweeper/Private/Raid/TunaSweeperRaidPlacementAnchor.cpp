@@ -79,19 +79,22 @@ void ATunaSweeperRaidPlacementAnchor::RefreshEditorPreview()
 {
 #if WITH_EDITORONLY_DATA
 	const bool bIsEnemy = AnchorKind == ETunaSweeperRaidPlacementAnchorKind::Enemy;
-	const FColor PreviewColor = bIsEnemy ? FColor(215, 78, 66) : FColor(224, 175, 62);
+	const bool bIsLootContainer = AnchorKind == ETunaSweeperRaidPlacementAnchorKind::LootContainer;
+	const FColor PreviewColor = bIsEnemy
+		? FColor(215, 78, 66)
+		: bIsLootContainer ? FColor(224, 175, 62) : FColor(82, 180, 232);
 	if (EditorPreviewArrow)
 	{
 		EditorPreviewArrow->ArrowColor = PreviewColor;
 	}
 	if (EditorPreviewBillboard)
 	{
-		EditorPreviewBillboard->SetVisibility(bIsEnemy);
+		EditorPreviewBillboard->SetVisibility(!bIsLootContainer);
 	}
 	if (EditorLootBoxPreview)
 	{
-		EditorLootBoxPreview->SetVisibility(!bIsEnemy);
-		if (!bIsEnemy)
+		EditorLootBoxPreview->SetVisibility(bIsLootContainer);
+		if (bIsLootContainer)
 		{
 			const UTunaSweeperLootAnchorPreviewDataAsset* PreviewData = LootPreviewDataAsset.LoadSynchronous();
 			const FTunaSweeperLootAnchorPreviewDefinition* PreviewDefinition =
@@ -103,8 +106,8 @@ void ATunaSweeperRaidPlacementAnchor::RefreshEditorPreview()
 	}
 	if (EditorPreviewLabel)
 	{
-		const TCHAR* KindName = bIsEnemy ? TEXT("ENEMY") : TEXT("LOOT BOX");
-		const FString PreviewSuffix = !bIsEnemy && !LootPreviewId.IsNone()
+		const TCHAR* KindName = bIsEnemy ? TEXT("ENEMY") : bIsLootContainer ? TEXT("LOOT BOX") : TEXT("MEMO");
+		const FString PreviewSuffix = bIsLootContainer && !LootPreviewId.IsNone()
 			? FString::Printf(TEXT(" [%s]"), *LootPreviewId.ToString())
 			: FString();
 		EditorPreviewLabel->SetText(FText::FromString(FString::Printf(TEXT("%s #%d%s"), KindName, PlacementId, *PreviewSuffix)));

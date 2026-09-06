@@ -18,10 +18,13 @@
 #include "Components/VerticalBoxSlot.h"
 #include "Engine/Texture2D.h"
 #include "Engine/World.h"
+#include "EngineUtils.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
 #include "InputCoreTypes.h"
+#include "Interaction/TunaSweeperExtractionPointActor.h"
+#include "Interaction/TunaSweeperLevelTravelInteractableActor.h"
 #include "Map/TunaSweeperMapDefinition.h"
 #include "Player/TunaSweeperPlayerController.h"
 #include "Styling/SlateBrush.h"
@@ -708,17 +711,32 @@ void UTunaSweeperMapWidget::RefreshMapCanvas()
 void UTunaSweeperMapWidget::RefreshMapOverlayData()
 {
 	CachedMapOverlays.Reset();
-
-	UGameInstance* GameInstance = GetGameInstance();
-	UTunaSweeperEnemySpawnSubsystem* SpawnSubsystem = GameInstance
-		? GameInstance->GetSubsystem<UTunaSweeperEnemySpawnSubsystem>()
-		: nullptr;
-	if (!SpawnSubsystem)
+	UWorld* World = GetWorld();
+	if (!World)
 	{
 		return;
 	}
 
-	SpawnSubsystem->GetMapOverlaysForWorld(GetWorld(), CachedMapOverlays);
+	for (TActorIterator<ATunaSweeperLevelTravelInteractableActor> It(World); It; ++It)
+	{
+		if (It->GetDestination() != ETunaSweeperLevelTravelDestination::Bunker)
+		{
+			continue;
+		}
+
+		FTunaSweeperMapOverlayDefinition& Overlay = CachedMapOverlays.AddDefaulted_GetRef();
+		Overlay.WorldLocation = It->GetActorLocation();
+		Overlay.TextStringKey = FName(TEXT("ui.map_overlay.start_location"));
+	}
+
+	for (TActorIterator<ATunaSweeperExtractionPointActor> It(World); It; ++It)
+	{
+		FTunaSweeperMapOverlayDefinition& Overlay = CachedMapOverlays.AddDefaulted_GetRef();
+		Overlay.WorldLocation = It->GetActorLocation();
+		Overlay.TextStringKey = FName(TEXT("ui.map_overlay.extraction_point"));
+		Overlay.IconId = FName(TEXT("green_inverted_triangle"));
+		Overlay.TextOffset = FVector2D(0.0f, -34.0f);
+	}
 }
 
 void UTunaSweeperMapWidget::AddMapOverlayToCanvas(const FTunaSweeperMapOverlayDefinition& MapOverlay)

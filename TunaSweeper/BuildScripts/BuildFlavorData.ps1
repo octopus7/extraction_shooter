@@ -13,14 +13,9 @@ $mainSourceDirectory = [System.IO.Path]::GetFullPath((Join-Path $projectDirector
 $stagedDirectory = [System.IO.Path]::GetFullPath((Join-Path $projectDirectory 'Content\Data\MainPayloadStaged'))
 $contentDirectory = [System.IO.Path]::GetFullPath((Join-Path $projectDirectory 'Content'))
 $optionalRuntimeDataFiles = @(
-    'BunkerCharacterSpawns.json',
     'EnemySpawns.json',
-    'GameplayInteractionSpawns.json',
     'LootContainerSpawns.json',
-    'MemoSpawns.json',
-    'TransparentObstacleSpawns.json',
-    'WarpPointSpawns.json',
-    'WorldProgressObjectSpawns.json'
+    'MemoSpawns.json'
 )
 
 if (-not $stagedDirectory.StartsWith($contentDirectory, [System.StringComparison]::OrdinalIgnoreCase)) {

@@ -1,33 +1,22 @@
 # Raid placement anchors
 
-## Purpose and level ownership
+## Level contract
 
-`ATunaSweeperRaidPlacementAnchor` is the spatial source of truth for raid enemy and loot-container placements. A placed instance serializes only its actor Transform, a positive integer `PlacementId`, and `AnchorKind` (`Enemy` or `LootContainer`). Do not place a real enemy or loot-container actor to reserve one of these locations.
+`ATunaSweeperRaidPlacementAnchor` is the spatial source of truth for data-owned enemy, loot-container, and memo placement. The reusable Blueprint is `/Game/Raid/Placement/BP_RaidPlacementAnchor`.
 
-Place the native actor from the Class Viewer in a raid level, set a stable positive id, and choose the kind. `PlacementId` is unique across **both** anchor kinds in a level; its stable data key is `(LevelId, PlacementId)`. Never recycle an id for another location/type once external data has shipped.
+A placed instance serializes its actor transform, a positive `PlacementId`, and `AnchorKind`:
 
-The representative arrow/actor sprite and `ENEMY #id` label are editor-only enemy visualization. Loot anchors use the BP-referenced `/Game/Raid/Placement/DA_LootAnchorPreviews` catalog. The initial `Small`, `Medium`, and `Large` choices each use a distinct representative mesh; select one from the placed `BP_RaidPlacementAnchor` instance's `Loot Preview` combo. The DA's array can be extended without changing C++ or GameInstance configuration. These preview components have no collision, gameplay authority, or runtime spawn role, so actual chest class, appearance, contents, conditions, and probability remain external runtime data.
+- `Enemy`
+- `Loot Container`
+- `Memo`
 
-No anchors have been placed by this implementation. Designers must add the anchors to the intended raid maps.
+`PlacementId` must be unique across every anchor kind in one level. Its stable key is `(LevelId, PlacementId)`. Do not recycle a shipped id for another location or kind.
 
-## External data schemas
+The Details panel exposes the kind and id. Editor-only arrows, billboards, labels, and loot preview meshes make anchors visible without owning runtime behavior. Loot preview choices come from `/Game/Raid/Placement/DA_LootAnchorPreviews`; memo anchors use the blue `MEMO` preview. Preview components have no collision or gameplay authority.
 
-New anchor rows share the existing build-flavor-aware runtime placement files. They must not contain `location`, `rotation`, or `scale`; legacy coordinate rows remain supported by `UTunaSweeperEnemySpawnSubsystem` and are skipped by the anchor subsystem.
+## Data schemas
 
-`Content/Data/EnemySpawnProfiles.json` owns enemy class and combat/loadout properties. Required fields are `profile_id`, `enemy_class`, and `combat_profile_id`. Optional fields mirror the existing enemy spawn values: `body_material`, loot ids, weapon/ammo ids, health/experience, bleed values, faction, and squad values.
-
-```json
-[
-  {
-    "profile_id": "enemy.rifle.standard",
-    "enemy_class": "/Game/Characters/Enemy/BP_TunaSweeperEnemy.BP_TunaSweeperEnemy_C",
-    "combat_profile_id": "enemy.rifle_anchor",
-    "max_health": 40
-  }
-]
-```
-
-`Content/Data/EnemySpawns.json` anchor row:
+Enemy placement:
 
 ```json
 {
@@ -39,7 +28,7 @@ New anchor rows share the existing build-flavor-aware runtime placement files. T
 }
 ```
 
-`Content/Data/LootContainerSpawns.json` anchor row (all actual container class, definition, and contents remain external):
+Loot-container anchor placement:
 
 ```json
 {
@@ -53,14 +42,25 @@ New anchor rows share the existing build-flavor-aware runtime placement files. T
 }
 ```
 
-For Main, put the same files into the access-restricted runtime payload. The public `MainRuntimeDefaults` copies are empty fallbacks and must not receive Main authoring data.
+Memo placement:
 
-## Runtime contract and validation
+```json
+{
+  "level_name": "DemoRaidMap",
+  "placement_id": 301,
+  "memo_id": 1,
+  "visual_scale": [0.85, 0.55, 0.08]
+}
+```
 
-`UTunaSweeperRaidPlacementSubsystem` loads after a raid map is loaded. It validates invalid/nonpositive ids, duplicate anchor ids, duplicate data ids, absent anchors, unconnected anchors, missing enemy profiles/combat profiles, and anchor-kind mismatches with explicit `LogTunaSweeperRaidPlacement` errors/warnings. A bad individual row is skipped without spawning at a guessed transform.
+Anchor-owned rows must not contain `location`, `rotation`, or `scale`. `EnemySpawns.json` and `MemoSpawns.json` accept only anchor-owned placement. `LootContainerSpawns.json` alone retains its existing coordinate-row form for backward compatibility.
 
-`RaidSeed` is runtime-only and must be set with `SetRaidSeed` before the raid map loads. Each chance decision hashes only `(RaidSeed, PlacementId)`, so adding/reordering another placement cannot change its outcome. Until the raid-session owner supplies a seed, the subsystem warns and uses deterministic fallback `0` rather than hidden global randomness.
+Enemy class/loadout data stays in `EnemySpawnProfiles.json`, combat behavior stays in `EnemyCombatProfiles.json`, memo content stays in `MemoDefinitions.json`, and loot class/definition/contents stay in the loot placement row. Main-only authoring belongs in the access-restricted runtime payload; public Main defaults are empty fallbacks.
 
-Initialization order is: load/validate data and anchors, evaluate condition and deterministic chance, resolve the external profile/class, spawn at the anchor Transform, apply combat/spawn state, then finish the enemy spawn. Loot containers are spawned at the anchor Transform and receive external definition/contents immediately before they can be interacted with. `PlacementId` identifies a level location, `ProfileId` / container `DefinitionId` identify external definitions, and the generated `raid_runtime_<level>_<placement>_<seed>` actor tag identifies only that runtime instance. None of these new placement decisions or runtime ids are persisted, so the save schema is unchanged.
+## Runtime validation
 
-Only empty `condition_id` and `always` are currently evaluable. Other condition ids are logged and fail closed until a condition evaluator is registered.
+`UTunaSweeperRaidPlacementSubsystem` validates enemy and loot anchors. `UTunaSweeperMemoSubsystem` validates memo anchors. Invalid/nonpositive ids, duplicate level ids, duplicate data ids, missing anchors, unconnected anchors, kind mismatches, missing definitions/profiles, and transform fields in anchor rows are logged explicitly. Invalid data never spawns at a guessed transform.
+
+Enemy chance uses a deterministic hash of `(RaidSeed, PlacementId)`. Placement ordering therefore cannot change another placement's result. Only empty `condition_id` and `always` currently evaluate true; unknown conditions fail closed.
+
+Memo collection persistence remains keyed by `memo_id` through `AcquiredMemoIds`; the anchor id and runtime actor tag are not persisted. Enemy and loot placement decisions are also not persisted.

@@ -46,8 +46,8 @@ flowchart TD
 | 세이브 슬롯, 난이도, 오프닝 완료 플래그 | `Source/TunaSweeper/Private/Game/TunaSweeperGameInstance.cpp` |
 | 오프닝 독백/영상 후 벙커 이동 | `Source/TunaSweeper/Private/UI/TunaSweeperScenarioPresentationWidget.cpp` |
 | 공통 전환 영상/페이드/원형 리빌 | `Source/TunaSweeper/Private/Subsystem/TunaSweeperLevelTransitionSubsystem.cpp` |
-| 벙커 런타임 캐릭터 스폰 | `Source/TunaSweeper/Private/Subsystem/TunaSweeperBunkerRuntimeSpawnSubsystem.cpp`, `Content/Data/BunkerCharacterSpawns.json` |
-| 레이드/벙커 상호작용 액터 스폰 | `Source/TunaSweeper/Private/Subsystem/TunaSweeperEnemySpawnSubsystem.cpp`, `Content/Data/GameplayInteractionSpawns.json` |
+| 벙커 캐릭터·상호작용 배치 | `Content/Maps/BunkerMap.umap`의 직접 배치 Blueprint |
+| 레이드 데이터 배치 | `Source/TunaSweeper/Private/Subsystem/TunaSweeperRaidPlacementSubsystem.cpp`, `TunaSweeperMemoSubsystem.cpp` |
 | 벙커/레이드 즉시 레벨 이동 액터 | `Source/TunaSweeper/Private/Interaction/TunaSweeperLevelTravelInteractableActor.cpp` |
 | 레이드 추출 지점 | `Source/TunaSweeper/Private/Interaction/TunaSweeperExtractionPointActor.cpp` |
 | 레이드 복귀 경험치 정산 UI | `Source/TunaSweeper/Private/Subsystem/TunaSweeperRaidExperienceReturnSubsystem.cpp` |
@@ -153,7 +153,7 @@ flowchart TD
 5. 오프닝 직후 진입이면 Mole 인트로 대화를 약간 지연해서 시작한다.
 6. 일반 벙커 진입이면 Mole 인트로 대화 조건만 바로 확인한다.
 
-벙커 런타임 캐릭터는 `UTunaSweeperBunkerRuntimeSpawnSubsystem`이 `FCoreUObjectDelegates::PostLoadMapWithWorld`를 통해 맵 로드 후 스폰한다. `Content/Data/BunkerCharacterSpawns.json`의 `TS_Bunker_LED_Robot`이 대표 예시다.
+Mole 등 벙커 캐릭터는 `BunkerMap`에 직접 배치한다. 맵 로드 후 별도 벙커 캐릭터 JSON을 읽거나 기존 레벨 액터를 교체하는 경로는 없다.
 
 ## BunkerMap에서 RaidMap으로 전환
 
@@ -161,7 +161,7 @@ flowchart TD
 
 직접 배치 액터는 `Level Travel > Destination` 드롭다운에서 `Raid` 또는 `Bunker`만 선택한다. 액터는 실제 맵 이름이나 영상·위젯·문구·페이드 값을 보유하지 않는다. `UTunaSweeperGameInstance::TryResolveLevelTravel()`이 목적지를 현재 빌드의 실제 맵 이름으로 해석하고, `/Game/Movies/DA_LevelTravelPresentation`에서 전환 연출을 읽는다. Demo의 `Raid`는 `DemoRaidMap`으로 해석되며, `MS_BunkerToRaid` 영상은 DA의 `Raid` 항목에 연결된다.
 
-레벨 이동 전용 JSON 스폰 행은 더 이상 지원하지 않으며, 발견되면 런타임 스포너가 경고 후 건너뛴다. `extraction_point` 등 다른 JSON 기반 상호작용 액터에는 영향을 주지 않는다.
+레벨 이동과 추출은 JSON 스폰 타입이 아니다. 두 액터 모두 레벨에 직접 배치하며, 전환 목적지와 연출 해석은 기존 GameInstance/데이터 에셋 흐름을 유지한다.
 
 ### 플레이어 입력에서 레이드 이동까지
 
@@ -218,20 +218,11 @@ flowchart TD
 
 미디어 열기 실패 이벤트(`HandleMediaOpenFailed`)가 오면 곧바로 `OpenTargetLevel()`을 호출한다. 미디어 종료 이벤트는 루프 재생으로 처리한다. 전환 중에는 입력 모드를 `UIOnly`로 바꾸고 이동/시점 입력을 막으며, 플레이어의 진행 중 행동을 취소한다. 완료 시 `ApplyDefaultGameInputMode()`로 입력을 복구한다.
 
-## RaidMap 로드 후 런타임 스폰
+## RaidMap 로드 후 배치
 
-`RaidMap` 로드 후에도 `UTunaSweeperEnemySpawnSubsystem::EnsureRaidRuntimeActorsSpawnedForWorld()`가 실행된다. 이 함수는 현재 월드와 `level_name`이 맞는 데이터만 스폰한다.
+적·앵커형 루트 컨테이너는 `UTunaSweeperRaidPlacementSubsystem`, 메모는 `UTunaSweeperMemoSubsystem`이 현재 월드의 `BP_RaidPlacementAnchor`와 `level_name + placement_id` 데이터를 연결해 생성한다. `EnemySpawns.json`과 `MemoSpawns.json`에는 좌표가 없으며 앵커 Transform이 유일한 공간 소스다. `LootContainerSpawns.json`의 기존 좌표 행만 호환 경로로 남는다.
 
-주요 데이터:
-
-- `Content/Data/EnemySpawns.json`: 적
-- `Content/Data/LootContainerSpawns.json`: 루팅 컨테이너
-- `Content/Data/TransparentObstacleSpawns.json`: 투명화 장애물
-- `Content/Data/WorldProgressObjectSpawns.json`: 월드 진행 오브젝트
-- `Content/Data/WarpPointSpawns.json`: 워프 지점
-- `Content/Data/GameplayInteractionSpawns.json`: 레벨 이동, 추출 지점, 아이템/루팅 상호작용, 테스트 프랍 등
-
-`LastSpawnedWorld`가 같은 월드를 가리키면 중복 스폰을 막고 바로 성공 처리한다.
+레벨 이동, 추출, 월드 진행, 워프, 투명 장애물과 일반 상호작용 액터는 맵의 직접 배치 인스턴스를 그대로 사용한다.
 
 ## RaidMap에서 BunkerMap으로 복귀
 
@@ -239,21 +230,11 @@ flowchart TD
 
 ### 1. 즉시 레벨 이동 상호작용
 
-`GameplayInteractionSpawns.json`의 `TS_Travel_ToBunker`:
-
-| 필드 | 값 |
-| --- | --- |
-| `level_name` | `RaidMap` |
-| `spawn_type` | `level_travel` |
-| `target_level_name` | `BunkerMap` |
-| `interaction_display_name` | `To Bunker` |
-| `transition_message_key` | `ui.transition.returning_to_bunker` |
-
-플레이어 입력 흐름은 벙커의 `Deploy`와 같다. `ATunaSweeperLevelTravelInteractableActor::TravelToTargetLevel()`이 호출되고, 이번에는 `HandleLevelTravelPersistence(RaidMap, BunkerMap)`이 레이드 복귀 저장/정산을 수행한다.
+레이드 맵에 직접 배치한 `BP_Interact_LevelTravel`에서 `Destination=Bunker`를 선택한다. 플레이어 입력 흐름은 벙커의 `Deploy`와 같고, `ATunaSweeperLevelTravelInteractableActor::TravelToTargetLevel()`과 `HandleLevelTravelPersistence(RaidMap, BunkerMap)`이 레이드 복귀 저장/정산을 수행한다.
 
 ### 2. 추출 지점
 
-`GameplayInteractionSpawns.json`의 `TS_ExtractionPoint_East`는 `spawn_type = extraction_point`이며 `target_level_name = BunkerMap`이다. 이 액터는 상호작용 키가 아니라 틱에서 플레이어 위치를 검사한다.
+레이드 맵에 직접 배치한 `BP_ExtractionPoint`는 상호작용 키가 아니라 틱에서 플레이어 위치를 검사한다. 기본 목적지는 `BunkerMap`이며 인스턴스 설정으로 반경·유지 시간·시각 효과를 조정할 수 있다.
 
 `ATunaSweeperExtractionPointActor::UpdateExtractionProgress()` 분기:
 

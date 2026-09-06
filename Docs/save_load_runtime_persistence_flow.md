@@ -16,7 +16,7 @@
 | 퀘스트 저장 연동 | `TunaSweeper/Source/TunaSweeper/Private/Subsystem/TunaSweeperQuestSubsystem.cpp` |
 | 메모/문/월드 진행 | `TunaSweeper/Source/TunaSweeper/Private/Interaction/TunaSweeperMemoActor.cpp`, `TunaSweeper/Source/TunaSweeper/Private/Interaction/TunaSweeperPersistentDoorActor.cpp`, `TunaSweeper/Source/TunaSweeper/Private/Interaction/TunaSweeperWorldProgressActor.cpp`, `TunaSweeper/Source/TunaSweeper/Private/Interaction/TunaSweeperBlockedIntakeScreenActor.cpp` |
 | 하우징 | `TunaSweeper/Source/TunaSweeper/Private/Subsystem/TunaSweeperHousingSubsystem.cpp` |
-| 런타임 스폰 | `TunaSweeper/Source/TunaSweeper/Private/Subsystem/TunaSweeperEnemySpawnSubsystem.cpp`, `TunaSweeper/Source/TunaSweeper/Private/Subsystem/TunaSweeperBunkerRuntimeSpawnSubsystem.cpp`, `TunaSweeper/Source/TunaSweeper/Private/Subsystem/TunaSweeperMemoSubsystem.cpp` |
+| 런타임 배치 | `TunaSweeper/Source/TunaSweeper/Private/Subsystem/TunaSweeperRaidPlacementSubsystem.cpp`, `TunaSweeper/Source/TunaSweeper/Private/Subsystem/TunaSweeperEnemySpawnSubsystem.cpp`, `TunaSweeper/Source/TunaSweeper/Private/Subsystem/TunaSweeperMemoSubsystem.cpp` |
 
 ## 슬롯과 저장 파일 구조
 
@@ -356,13 +356,13 @@ flowchart TD
 
 레벨이 열린 뒤에는 저장 데이터와 런타임 JSON 스폰이 결합된다.
 
-1. `UTunaSweeperEnemySpawnSubsystem::EnsureRaidRuntimeActorsSpawnedForWorld()`가 현재 월드 이름과 JSON의 `level_name`을 비교해 적, 루트 컨테이너, 월드 진행 오브젝트, 워프 포인트, 상호작용 액터를 스폰한다.
+1. `UTunaSweeperRaidPlacementSubsystem`이 적/앵커형 루트 컨테이너 데이터를 레벨 앵커와 연결하고, `UTunaSweeperEnemySpawnSubsystem`은 남아 있는 좌표형 루트 컨테이너만 생성한다. 월드 진행, 워프와 일반 상호작용 액터는 레벨 직접 배치를 사용한다.
 2. `ATunaSweeperWorldProgressActor::BeginPlay()`는 `ApplySavedState()`로 `WorldProgressStates`를 읽는다. 완료 상태면 blocking collision을 끄고 완료 replacement actor를 스폰한다.
 3. `ATunaSweeperPersistentDoorActor::BeginPlay()`는 `ApplySavedState()`로 같은 `WorldProgressStates`를 읽어 문 열림 상태를 적용한다.
 4. 레벨에 직접 배치된 `ATunaSweeperBlockedIntakeScreenActor::BeginPlay()`는 같은 `WorldProgressStates`를 읽어 막힘/제거 메시를 적용한다.
-5. `UTunaSweeperMemoSubsystem`이 메모 스폰 데이터를 읽고, `AcquiredMemoIds`에 이미 있는 `memo_id`는 스폰하지 않는다. 액터 자체도 `BeginPlay()`에서 `IsMemoAcquired()`를 검사해 이미 획득된 메모를 제거한다.
+5. `UTunaSweeperMemoSubsystem`이 메모 스폰 데이터와 직접 배치된 `Memo` 앵커를 연결하고, `AcquiredMemoIds`에 이미 있는 `memo_id`는 스폰하지 않는다. 직접 배치 메모 액터도 `BeginPlay()`에서 `IsMemoAcquired()`를 검사해 이미 획득된 메모를 제거한다.
 6. `UTunaSweeperHousingSubsystem::EnsureHousingForWorld()`는 저장된 `HousingFacilities`를 불러오고 `RefreshSpawnedFacilities()`로 배치 액터를 다시 만든다. 저장된 시설이 보관 상태면 스폰하지 않는다.
-7. `UTunaSweeperBunkerRuntimeSpawnSubsystem`은 `BunkerCharacterSpawns.json`을 기준으로 Mole 등 벙커 캐릭터를 스폰한다. 이 캐릭터의 대화 완료 여부는 `CompletedScenarioFlags`로 제어된다.
+7. `BunkerMap`에 직접 배치된 Mole 등 벙커 캐릭터가 시작된다. 이 캐릭터의 대화 완료 여부는 `CompletedScenarioFlags`로 제어된다.
 8. 상점 UI는 열릴 때 `GetShopStockQuantity()`로 `ShopStockStatesByKey`를 조회한다. 저장 상태가 없으면 정적 `ShopDefinitions.json`의 기본 재고를 사용한다.
 9. 퀘스트 UI는 `UTunaSweeperQuestSubsystem`의 로드된 `QuestProgressById`, `TrackedQuestId`, `CoinBalance`를 본다.
 

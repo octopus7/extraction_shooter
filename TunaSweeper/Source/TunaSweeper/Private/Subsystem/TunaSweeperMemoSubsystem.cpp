@@ -2,6 +2,7 @@
 
 #include "Dom/JsonObject.h"
 #include "Engine/World.h"
+#include "EngineUtils.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "Interaction/TunaSweeperMemoActor.h"
 #include "Kismet/GameplayStatics.h"
@@ -11,6 +12,7 @@
 #include "Misc/Paths.h"
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
+#include "Raid/TunaSweeperRaidPlacementAnchor.h"
 #include "Settings/TunaSweeperBuildFlavor.h"
 #include "UI/TunaSweeperInteractionMarkerWidget.h"
 
@@ -187,59 +189,76 @@ bool UTunaSweeperMemoSubsystem::LoadMemoSpawnData(bool bForceReload)
 		return false;
 	}
 
-	bool bHasValidRows = false;
+	if (!LoadMemoDefinitions(false))
+	{
+		return false;
+	}
+
+	bool bAllRowsValid = true;
+	TSet<FString> SeenPlacementKeys;
+	TSet<FString> SeenMemoKeys;
 	for (int32 RowIndex = 0; RowIndex < JsonRows.Num(); ++RowIndex)
 	{
 		const TSharedPtr<FJsonObject>* JsonObjectPtr = nullptr;
 		if (!JsonRows[RowIndex].IsValid() || !JsonRows[RowIndex]->TryGetObject(JsonObjectPtr) ||
 			!JsonObjectPtr || !JsonObjectPtr->IsValid())
 		{
-			UE_LOG(LogTunaSweeperMemo, Warning, TEXT("Skipping memo spawn row %d: row is not an object."), RowIndex);
+			UE_LOG(LogTunaSweeperMemo, Error, TEXT("Memo spawn row %d is not an object."), RowIndex);
+			bAllRowsValid = false;
 			continue;
 		}
 
 		const TSharedPtr<FJsonObject>& JsonObject = *JsonObjectPtr;
 		FString LevelName;
-		FString SpawnId;
 		FString ActorClassPath;
 		FString InteractionDisplayName;
 		FString MarkerWidgetClassPath;
 		FString VisualMeshPath;
 		FString VisualMaterialPath;
+		double NumericPlacementId = INDEX_NONE;
 		double NumericMemoId = INDEX_NONE;
-		FVector Location = FVector::ZeroVector;
-		FRotator Rotation = FRotator::ZeroRotator;
-		FVector ActorScale = FVector::OneVector;
 		FVector VisualScale(0.85f, 0.55f, 0.08f);
 		FVector VisualRelativeLocation = FVector::ZeroVector;
 		if (!JsonObject->TryGetStringField(TEXT("level_name"), LevelName) ||
-			!JsonObject->TryGetNumberField(TEXT("memo_id"), NumericMemoId) ||
-			!TunaSweeperMemo::TryReadVectorField(JsonObject, TEXT("location"), Location))
+			!JsonObject->TryGetNumberField(TEXT("placement_id"), NumericPlacementId) ||
+			!JsonObject->TryGetNumberField(TEXT("memo_id"), NumericMemoId))
 		{
-			UE_LOG(LogTunaSweeperMemo, Warning, TEXT("Skipping memo spawn row %d: required field is missing."), RowIndex);
+			UE_LOG(LogTunaSweeperMemo, Error, TEXT("Memo spawn row %d is missing level_name, placement_id, or memo_id."), RowIndex);
+			bAllRowsValid = false;
+			continue;
+		}
+		if (JsonObject->HasField(TEXT("location")) || JsonObject->HasField(TEXT("rotation")) || JsonObject->HasField(TEXT("scale")))
+		{
+			UE_LOG(LogTunaSweeperMemo, Error, TEXT("Memo spawn row %d must not contain transform fields; the level anchor owns its transform."), RowIndex);
+			bAllRowsValid = false;
 			continue;
 		}
 
-		JsonObject->TryGetStringField(TEXT("spawn_id"), SpawnId);
 		JsonObject->TryGetStringField(TEXT("actor_class"), ActorClassPath);
 		JsonObject->TryGetStringField(TEXT("interaction_display_name"), InteractionDisplayName);
 		JsonObject->TryGetStringField(TEXT("marker_widget_class"), MarkerWidgetClassPath);
 		JsonObject->TryGetStringField(TEXT("visual_mesh"), VisualMeshPath);
 		JsonObject->TryGetStringField(TEXT("visual_material"), VisualMaterialPath);
-		TunaSweeperMemo::TryReadRotatorField(JsonObject, TEXT("rotation"), Rotation);
-		TunaSweeperMemo::TryReadVectorField(JsonObject, TEXT("scale"), ActorScale);
 		TunaSweeperMemo::TryReadVectorField(JsonObject, TEXT("visual_scale"), VisualScale);
 		TunaSweeperMemo::TryReadVectorField(JsonObject, TEXT("visual_relative_location"), VisualRelativeLocation);
 
 		FMemoSpawnDefinition SpawnDefinition;
 		SpawnDefinition.LevelName = FName(*LevelName.TrimStartAndEnd());
-		SpawnDefinition.MemoId = static_cast<int32>(NumericMemoId);
-		SpawnDefinition.SpawnId = SpawnId.TrimStartAndEnd().IsEmpty()
-			? FName(*FString::Printf(TEXT("memo_%03d"), SpawnDefinition.MemoId))
-			: FName(*SpawnId.TrimStartAndEnd());
-		if (SpawnDefinition.LevelName.IsNone() || SpawnDefinition.MemoId <= 0)
+		SpawnDefinition.PlacementId = FMath::RoundToInt(NumericPlacementId);
+		SpawnDefinition.MemoId = FMath::RoundToInt(NumericMemoId);
+		const FString PlacementKey = FString::Printf(TEXT("%s:%d"), *SpawnDefinition.LevelName.ToString(), SpawnDefinition.PlacementId);
+		const FString MemoKey = FString::Printf(TEXT("%s:%d"), *SpawnDefinition.LevelName.ToString(), SpawnDefinition.MemoId);
+		if (SpawnDefinition.LevelName.IsNone() || SpawnDefinition.PlacementId <= 0 || SpawnDefinition.MemoId <= 0 ||
+			SeenPlacementKeys.Contains(PlacementKey) || SeenMemoKeys.Contains(MemoKey))
 		{
-			UE_LOG(LogTunaSweeperMemo, Warning, TEXT("Skipping memo spawn row %d: invalid level or memo id."), RowIndex);
+			UE_LOG(LogTunaSweeperMemo, Error, TEXT("Memo spawn row %d has invalid or duplicate level/placement/memo identifiers."), RowIndex);
+			bAllRowsValid = false;
+			continue;
+		}
+		if (!MemoDefinitionsById.Contains(SpawnDefinition.MemoId))
+		{
+			UE_LOG(LogTunaSweeperMemo, Error, TEXT("Memo spawn row %d references missing memo definition %d."), RowIndex, SpawnDefinition.MemoId);
+			bAllRowsValid = false;
 			continue;
 		}
 
@@ -264,25 +283,20 @@ bool UTunaSweeperMemoSubsystem::LoadMemoSpawnData(bool bForceReload)
 		SpawnDefinition.InteractionDisplayName = InteractionDisplayName.TrimStartAndEnd().IsEmpty()
 			? FText::FromString(TEXT("\uBA54\uBAA8"))
 			: FText::FromString(InteractionDisplayName.TrimStartAndEnd());
-		SpawnDefinition.Location = Location;
-		SpawnDefinition.Rotation = Rotation;
-		SpawnDefinition.ActorScale = FVector(
-			FMath::Max(0.01f, ActorScale.X),
-			FMath::Max(0.01f, ActorScale.Y),
-			FMath::Max(0.01f, ActorScale.Z));
 		SpawnDefinition.VisualScale = FVector(
 			FMath::Max(0.01f, VisualScale.X),
 			FMath::Max(0.01f, VisualScale.Y),
 			FMath::Max(0.01f, VisualScale.Z));
 		SpawnDefinition.VisualRelativeLocation = VisualRelativeLocation;
 
+		SeenPlacementKeys.Add(PlacementKey);
+		SeenMemoKeys.Add(MemoKey);
 		MemoSpawnDefinitions.Add(SpawnDefinition);
-		bHasValidRows = true;
 	}
 
-	if (!bHasValidRows && JsonRows.Num() > 0)
+	if (!bAllRowsValid)
 	{
-		UE_LOG(LogTunaSweeperMemo, Error, TEXT("Memo spawns JSON has no valid rows: %s"), *MemoSpawnsJsonPath);
+		MemoSpawnDefinitions.Reset();
 		return false;
 	}
 
@@ -306,10 +320,34 @@ bool UTunaSweeperMemoSubsystem::EnsureMemosSpawnedForWorld(UWorld* World)
 	{
 		return false;
 	}
-	LoadMemoDefinitions(false);
 
 	LastSpawnedWorld = World;
+	TMap<int32, ATunaSweeperRaidPlacementAnchor*> MemoAnchorsByPlacementId;
+	TSet<int32> AllPlacementIds;
+	TSet<int32> InvalidPlacementIds;
+	for (TActorIterator<ATunaSweeperRaidPlacementAnchor> It(World); It; ++It)
+	{
+		ATunaSweeperRaidPlacementAnchor* Anchor = *It;
+		const int32 PlacementId = Anchor->GetPlacementId();
+		if (PlacementId <= 0 || AllPlacementIds.Contains(PlacementId))
+		{
+			UE_LOG(LogTunaSweeperMemo, Error, TEXT("Level %s has an invalid or duplicate placement id %d at '%s'."), *World->GetMapName(), PlacementId, *Anchor->GetPathName());
+			InvalidPlacementIds.Add(PlacementId);
+			continue;
+		}
+		AllPlacementIds.Add(PlacementId);
+		if (Anchor->GetAnchorKind() == ETunaSweeperRaidPlacementAnchorKind::Memo)
+		{
+			MemoAnchorsByPlacementId.Add(PlacementId, Anchor);
+		}
+	}
+	for (int32 InvalidPlacementId : InvalidPlacementIds)
+	{
+		MemoAnchorsByPlacementId.Remove(InvalidPlacementId);
+	}
+
 	int32 SpawnedMemoCount = 0;
+	TSet<int32> ConnectedMemoPlacementIds;
 	UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GetGameInstance());
 	for (const FMemoSpawnDefinition& SpawnDefinition : MemoSpawnDefinitions)
 	{
@@ -317,6 +355,13 @@ bool UTunaSweeperMemoSubsystem::EnsureMemosSpawnedForWorld(UWorld* World)
 		{
 			continue;
 		}
+		ATunaSweeperRaidPlacementAnchor* const* Anchor = MemoAnchorsByPlacementId.Find(SpawnDefinition.PlacementId);
+		if (!Anchor)
+		{
+			UE_LOG(LogTunaSweeperMemo, Error, TEXT("Memo placement %s/%d has no matching Memo anchor."), *SpawnDefinition.LevelName.ToString(), SpawnDefinition.PlacementId);
+			continue;
+		}
+		ConnectedMemoPlacementIds.Add(SpawnDefinition.PlacementId);
 		if (TunaGameInstance && TunaGameInstance->IsMemoAcquired(SpawnDefinition.MemoId))
 		{
 			continue;
@@ -325,7 +370,7 @@ bool UTunaSweeperMemoSubsystem::EnsureMemosSpawnedForWorld(UWorld* World)
 		FTunaSweeperMemoDefinition MemoDefinition;
 		if (!TryGetMemoDefinition(SpawnDefinition.MemoId, MemoDefinition))
 		{
-			UE_LOG(LogTunaSweeperMemo, Warning, TEXT("Skipping memo spawn %s: memo definition %d is missing."), *SpawnDefinition.SpawnId.ToString(), SpawnDefinition.MemoId);
+			UE_LOG(LogTunaSweeperMemo, Error, TEXT("Memo placement %s/%d references missing memo definition %d."), *SpawnDefinition.LevelName.ToString(), SpawnDefinition.PlacementId, SpawnDefinition.MemoId);
 			continue;
 		}
 
@@ -335,7 +380,7 @@ bool UTunaSweeperMemoSubsystem::EnsureMemosSpawnedForWorld(UWorld* World)
 			LoadedMemoActorClass = ATunaSweeperMemoActor::StaticClass();
 		}
 
-		const FTransform SpawnTransform(SpawnDefinition.Rotation, SpawnDefinition.Location, SpawnDefinition.ActorScale);
+		const FTransform SpawnTransform = (*Anchor)->GetActorTransform();
 		ATunaSweeperMemoActor* SpawnedMemo = World->SpawnActorDeferred<ATunaSweeperMemoActor>(
 			LoadedMemoActorClass,
 			SpawnTransform,
@@ -355,15 +400,23 @@ bool UTunaSweeperMemoSubsystem::EnsureMemosSpawnedForWorld(UWorld* World)
 			SpawnDefinition.VisualMaterial,
 			SpawnDefinition.VisualScale,
 			SpawnDefinition.VisualRelativeLocation);
-		if (!SpawnDefinition.SpawnId.IsNone())
-		{
-			SpawnedMemo->Tags.AddUnique(SpawnDefinition.SpawnId);
+		const FName RuntimePlacementId(*FString::Printf(
+			TEXT("memo_runtime_%s_%d"),
+			*TunaSweeperMemo::NormalizeLevelName(SpawnDefinition.LevelName.ToString()),
+			SpawnDefinition.PlacementId));
+		SpawnedMemo->Tags.AddUnique(RuntimePlacementId);
 #if WITH_EDITOR
-			SpawnedMemo->SetActorLabel(SpawnDefinition.SpawnId.ToString());
+		SpawnedMemo->SetActorLabel(RuntimePlacementId.ToString());
 #endif
-		}
 		UGameplayStatics::FinishSpawningActor(SpawnedMemo, SpawnTransform);
 		++SpawnedMemoCount;
+	}
+	for (const TPair<int32, ATunaSweeperRaidPlacementAnchor*>& Pair : MemoAnchorsByPlacementId)
+	{
+		if (!ConnectedMemoPlacementIds.Contains(Pair.Key))
+		{
+			UE_LOG(LogTunaSweeperMemo, Warning, TEXT("Memo anchor %s/%d has no MemoSpawns.json row."), *World->GetMapName(), Pair.Key);
+		}
 	}
 
 	UE_LOG(LogTunaSweeperMemo, Log, TEXT("Spawned %d memo actors for level %s."), SpawnedMemoCount, *World->GetMapName());

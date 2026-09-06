@@ -4,7 +4,6 @@
 #include "CoreMinimal.h"
 #include "InputCoreTypes.h"
 #include "Inventory/TunaSweeperSaveGame.h"
-#include "Subsystem/TunaSweeperEnemySpawnSubsystem.h"
 #include "TunaSweeperMapWidget.generated.h"
 
 class UBackgroundBlur;
@@ -16,6 +15,15 @@ class UOverlay;
 class USlider;
 class UTextBlock;
 class UTexture2D;
+
+struct FTunaSweeperMapOverlayDefinition
+{
+	FVector WorldLocation = FVector::ZeroVector;
+	FName TextStringKey = NAME_None;
+	FName IconId = NAME_None;
+	FVector2D TextOffset = FVector2D::ZeroVector;
+	FVector2D IconOffset = FVector2D::ZeroVector;
+};
 
 UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API UTunaSweeperMapWidget : public UUserWidget

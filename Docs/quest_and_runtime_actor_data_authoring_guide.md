@@ -80,99 +80,56 @@ quest.demo.first.objective,레이드 구역 확인,Inspect the raid zone,レイ�
 
 ### 4. 제공자 액터 연결 확인
 
-`provider.mole` 퀘스트를 쓰려면 두더지 제공자 액터가 월드에 있어야 한다. 현재 `BunkerCharacterSpawns.json`도 비어 있으므로 아래 런타임 액터 절차로 제공자 액터를 먼저 복구하거나 다른 제공자 연결을 구현한다.
+`provider.mole` 퀘스트를 쓰려면 `BunkerMap`에 직접 배치된 `BP_Mole` 제공자 액터가 있어야 한다. Mole의 대화·퀘스트 컴포넌트와 `provider.mole` 연결은 액터가 소유한다.
 
-## 런타임 액터 다시 추가하기
+## 데이터 소유 배치 다시 추가하기
 
 ### 파일별 역할과 필수 필드
 
 | 파일 | 역할 | 최소 필드 |
 | --- | --- | --- |
-| `BunkerCharacterSpawns.json` | 벙커 동료 캐릭터 | `level_name`, `spawn_id`, `location` |
-| `EnemySpawns.json` | 적 | `level_name`, `location` |
-| `LootContainerSpawns.json` | 고정 루트 컨테이너 | `level_name`, `location`, `container_definition_id`, `contents_id` |
-| `GameplayInteractionSpawns.json` | 상호작용/게임플레이 액터 | `level_name`, `spawn_id`, `spawn_type`, `location` |
-| `MemoSpawns.json` | 수집 메모 액터 | `level_name`, `memo_id`, `location` |
-| `TransparentObstacleSpawns.json` | 투명 장애물 | `level_name`, `obstacle_id`, `location` |
-| `WarpPointSpawns.json` | 양방향/단방향 워프 | `level_name`, `warp_point_id`, `target_warp_point_id`, `location` |
-| `WorldProgressObjectSpawns.json` | 재료 투입형 월드 진행 오브젝트 | `level_name`, `object_id`, `info_id`, `location` |
+| `EnemySpawns.json` | 앵커 기반 적 선택 | `level_name`, `placement_id`, `profile_id` |
+| `EnemySpawnProfiles.json` | 적 클래스/로드아웃 | `profile_id`, `enemy_class`, `combat_profile_id` |
+| `LootContainerSpawns.json` | 앵커 또는 기존 좌표 기반 루트 컨테이너 | 앵커: `level_name`, `placement_id`, 정의/내용 ID |
+| `MemoSpawns.json` | 앵커 기반 수집 메모 | `level_name`, `placement_id`, `memo_id` |
+| `MemoDefinitions.json` | 메모 본문과 제목 | `memo_id` 및 표시 데이터 |
 
-모든 파일은 `TunaSweeper/Content/Data` 아래에 있다. `rotation`, `scale`, 클래스 경로와 타입별 세부 필드는 선택 또는 타입별 추가 필드다.
-
-### 벙커 캐릭터 예시
-
-```json
-[
-  {
-    "level_name": "BunkerMap",
-    "spawn_id": "TS_Bunker_Mole",
-    "actor_class": "/Game/Characters/Mole/BP_Mole.BP_Mole_C",
-    "location": [700.0, -320.0, 0.0],
-    "rotation": [0.0, 180.0, 0.0],
-    "scale": [1.0, 1.0, 1.0]
-  }
-]
-```
+모든 파일은 `TunaSweeper/Content/Data` 아래에 있다. `EnemySpawns.json`과 `MemoSpawns.json`에는 `location`, `rotation`, `scale`을 쓰지 않는다. 같은 `placement_id`와 종류를 가진 `BP_RaidPlacementAnchor`의 Transform이 위치를 소유한다. 일반 상호작용, Mole, 워프, 월드 진행, 투명 장애물, 레벨 이동, 추출은 레벨에 직접 배치한다.
 
 ### 적 예시
 
 ```json
 [
   {
-    "level_name": "RaidMap",
-    "enemy_id": "enemy.demo_guard",
-    "combat_profile_id": "enemy.rifle_anchor",
-    "location": [1200.0, 300.0, 90.0],
-    "rotation": [0.0, 180.0, 0.0]
+    "level_name": "DemoRaidMap",
+    "placement_id": 101,
+    "profile_id": "enemy.demo_guard",
+    "spawn_chance": 1.0,
+    "condition_id": "always"
   }
 ]
 ```
 
-`combat_profile_id`는 `EnemyCombatProfiles.json`에 존재해야 한다. 특정 처치 퀘스트가 이 적을 구분해야 할 때 `enemy_id`를 반드시 지정한다.
+`profile_id`는 `EnemySpawnProfiles.json`에 존재해야 하고, 그 프로필의 `combat_profile_id`는 `EnemyCombatProfiles.json`에 존재해야 한다. 레벨에는 종류 `Enemy`, ID `101`인 앵커를 직접 배치한다.
 
-### 게임플레이/상호작용 액터 예시
+### 직접 배치 상호작용
 
-`level_travel`은 더 이상 JSON으로 배치하지 않는다. 맵에 `BP_Interact_LevelTravel`을 직접 배치하고 `Destination` 드롭다운에서 `Bunker` 또는 `Raid`를 선택한다. 실제 맵 이름과 전환 영상은 GameInstance와 `DA_LevelTravelPresentation`이 결정한다.
-
-```json
-[
-  {
-    "level_name": "BunkerMap",
-    "spawn_id": "TS_ShootingPracticeDummy_01",
-    "spawn_type": "shooting_practice_dummy",
-    "actor_class": "/Script/TunaSweeper.TunaSweeperShootingPracticeDummyActor",
-    "location": [580.0, 360.0, 4.0],
-    "rotation": [0.0, 0.0, 0.0]
-  }
-]
-```
-
-정식 `spawn_type` 값은 다음과 같다.
-
-- `pickup_item`, `item_spawn`
-- `loot_container`, `loot_container_spawn`
-- `shop`, `workbench`, `piggy_bank`
-- `periodic_noise_emitter`, `difficulty_adjustment`, `self_destruct`
-- `rolling_bomber_spawner`, `extraction_point`
-- `sandbag_cover`, `explosive_barrel`, `static_mesh_prop`
-- `shooting_practice_dummy`
-
-타입별 상세 필드와 지도 오버레이 설정은 `Docs/runtime_actor_spawns.md`를 참고한다.
+맵에 필요한 BP를 직접 배치하고 인스턴스 Details에서 설정한다. `BP_Interact_LevelTravel`은 `Destination`을 `Bunker` 또는 `Raid`로 고르고, `BP_ExtractionPoint`는 반경·유지 시간·대상 레벨을 설정한다. 상점, 작업대, 픽업, 워프, 월드 진행, 투명 장애물과 테스트 프랍도 같은 원칙을 따른다.
 
 ### 메모 예시
 
 ```json
 [
   {
-    "level_name": "RaidMap",
+    "level_name": "DemoRaidMap",
+    "placement_id": 301,
     "memo_id": 1,
-    "spawn_id": "memo_demo_001",
-    "location": [520.0, -360.0, 36.0]
+    "visual_scale": [0.85, 0.55, 0.08]
   }
 ]
 ```
 
-같은 `memo_id`가 `MemoDefinitions.json`에 있어야 한다. 이미 획득한 메모 ID는 저장 상태 때문에 다시 나타나지 않을 수 있으므로 새 저장 슬롯으로 확인한다.
+같은 `memo_id`가 `MemoDefinitions.json`에 있어야 하고, 레벨에는 종류 `Memo`, ID `301`인 앵커가 있어야 한다. 이미 획득한 메모 ID는 `AcquiredMemoIds` 때문에 다시 나타나지 않을 수 있으므로 새 저장 슬롯으로 확인한다. 직접 배치한 `ATunaSweeperMemoActor`도 별도로 계속 지원한다.
 
 ### 연결 데이터 주의사항
 
