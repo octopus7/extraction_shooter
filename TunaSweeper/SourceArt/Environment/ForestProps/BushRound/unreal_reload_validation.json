@@ -1,0 +1,41 @@
+{
+  "engine": "5.7.4-51494982+++UE5+Release-5.7",
+  "mode": "fresh-process reload",
+  "mesh": "/Game/Nature/ForestProps/BushRound/SM_BushRound.SM_BushRound",
+  "bounds_cm": [
+    -74.5280532836914,
+    -68.36972045898438,
+    0.0,
+    78.28857421875,
+    60.66559982299805,
+    72.72541809082031
+  ],
+  "dimensions_cm": [
+    152.8166275024414,
+    129.03532028198242,
+    72.72541809082031
+  ],
+  "axis_mapping": {
+    "blender_axis_for_ue_xyz": [
+      0,
+      1,
+      2
+    ],
+    "signs": [
+      1,
+      -1,
+      1
+    ],
+    "max_error_cm": 4.291534423828125e-06
+  },
+  "source_uv_channels": 2,
+  "vertices": 7124,
+  "material_slots": 1,
+  "simple_collisions": 0,
+  "convex_collisions": 0,
+  "collision_profile": "NoCollision",
+  "opaque": true,
+  "two_sided": false,
+  "texture_srgb": true,
+  "passed": true
+}

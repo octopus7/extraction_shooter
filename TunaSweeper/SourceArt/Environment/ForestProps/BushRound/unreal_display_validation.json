@@ -1,0 +1,11 @@
+{
+  "engine": "5.7.4-51494982+++UE5+Release-5.7",
+  "mesh": "/Game/Nature/ForestProps/BushRound/SM_BushRound.SM_BushRound",
+  "material": "/Game/Nature/ForestProps/BushRound/M_BushRound.M_BushRound",
+  "used_textures": [
+    "/Game/Nature/ForestProps/BushRound/T_BushRound_Palette.T_BushRound_Palette"
+  ],
+  "preview": "Previews/BushRound_UE_Reload.png",
+  "world_saved": false,
+  "real_rhi_capture": true
+}
