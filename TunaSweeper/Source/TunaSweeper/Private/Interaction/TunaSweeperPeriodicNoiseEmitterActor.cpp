@@ -2,6 +2,8 @@
 
 #include "Dom/JsonObject.h"
 #include "Dom/JsonValue.h"
+#include "Engine/StaticMesh.h"
+#include "KismetProceduralMeshLibrary.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Materials/MaterialInterface.h"
 #include "Misc/FileHelper.h"
@@ -11,6 +13,7 @@
 #include "Serialization/JsonSerializer.h"
 #include "Subsystem/TunaSweeperNoiseSubsystem.h"
 #include "TimerManager.h"
+#include "UObject/ConstructorHelpers.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogTunaSweeperNoiseEmitter, Log, All);
 
@@ -350,6 +353,69 @@ ATunaSweeperPeriodicNoiseEmitterActor::ATunaSweeperPeriodicNoiseEmitterActor()
 	ProceduralMesh->SetupAttachment(SceneRoot);
 	ProceduralMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	ProceduralMesh->SetCastShadow(false);
+
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> BodyAsset(TEXT("/Game/Meshes/Props/NoiseEmitter/SM_NoiseEmitter_Body.SM_NoiseEmitter_Body"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> HornAsset(TEXT("/Game/Meshes/Props/NoiseEmitter/SM_NoiseEmitter_Horn.SM_NoiseEmitter_Horn"));
+	BodySourceMesh = BodyAsset.Object;
+	HornSourceMesh = HornAsset.Object;
+}
+
+void ATunaSweeperPeriodicNoiseEmitterActor::OnConstruction(const FTransform& Transform)
+{
+	Super::OnConstruction(Transform);
+	RebuildProceduralMesh();
+}
+
+bool ATunaSweeperPeriodicNoiseEmitterActor::BuildAuthoredMesh()
+{
+	// Custom JSON definitions continue to use their own geometry.
+	if (MeshDefinitionId != FName(TEXT("mesh.test_noise_quad_horn")) ||
+		MeshDefinitionJsonRelativePath != TEXT("Data/PeriodicNoiseEmitterMeshes.json") ||
+		!BodySourceMesh || !HornSourceMesh || !BodySourceMesh->bAllowCPUAccess || !HornSourceMesh->bAllowCPUAccess ||
+		BodySourceMesh->GetNumSections(0) == 0 || HornSourceMesh->GetNumSections(0) == 0)
+	{
+		return false;
+	}
+
+	for (int32 PartIndex = 0; PartIndex < 5; ++PartIndex)
+	{
+		const bool bHorn = PartIndex > 0;
+		UStaticMesh* Source = bHorn ? HornSourceMesh.Get() : BodySourceMesh.Get();
+		const FRotator Rotation(0.0f, bHorn ? (PartIndex - 1) * 90.0f : 0.0f, 0.0f);
+		const FVector Axis = Rotation.RotateVector(FVector::ForwardVector);
+		const FVector Origin = bHorn ? Axis * 34.0f + FVector(0.0f, 0.0f, 154.0f) : FVector::ZeroVector;
+		for (int32 SourceSection = 0; SourceSection < Source->GetNumSections(0); ++SourceSection)
+		{
+			FRuntimeMeshSection Section;
+			TArray<int32> Triangles;
+			UKismetProceduralMeshLibrary::GetSectionFromStaticMesh(Source, 0, SourceSection,
+				Section.BaseVertices, Triangles, Section.Normals, Section.UVs, Section.Tangents);
+			if (Section.BaseVertices.IsEmpty() || Triangles.IsEmpty())
+			{
+				continue;
+			}
+			for (FVector& Vertex : Section.BaseVertices) { Vertex = Rotation.RotateVector(Vertex) + Origin; }
+			for (FVector& Normal : Section.Normals) { Normal = Rotation.RotateVector(Normal); }
+			for (FProcMeshTangent& Tangent : Section.Tangents) { Tangent.TangentX = Rotation.RotateVector(Tangent.TangentX); }
+			Section.VertexColors.Init(FLinearColor::White, Section.BaseVertices.Num());
+			Section.SectionIndex = RuntimeMeshSections.Num();
+			Section.bIsHorn = bHorn;
+			Section.HornBaseCenter = Origin;
+			Section.HornAxis = Axis;
+			Section.HornLength = 118.0f;
+			ProceduralMesh->CreateMeshSection_LinearColor(Section.SectionIndex, Section.BaseVertices, Triangles,
+				Section.Normals, Section.UVs, Section.VertexColors, Section.Tangents, false);
+			const int32 MaterialIndex = Source->GetSectionInfoMap().Get(0, SourceSection).MaterialIndex;
+			if (UMaterialInterface* Material = Source->GetMaterial(MaterialIndex))
+			{
+				UMaterialInstanceDynamic* DynamicMaterial = UMaterialInstanceDynamic::Create(Material, this);
+				Section.DynamicMaterialIndex = DynamicMaterials.Add(DynamicMaterial);
+				ProceduralMesh->SetMaterial(Section.SectionIndex, DynamicMaterial);
+			}
+			RuntimeMeshSections.Add(MoveTemp(Section));
+		}
+	}
+	return !RuntimeMeshSections.IsEmpty();
 }
 
 void ATunaSweeperPeriodicNoiseEmitterActor::Tick(float DeltaSeconds)
@@ -488,6 +554,11 @@ void ATunaSweeperPeriodicNoiseEmitterActor::RebuildProceduralMesh()
 	bHornPulseActive = false;
 	HornPulseElapsedSeconds = 0.0f;
 	SetActorTickEnabled(false);
+
+	if (BuildAuthoredMesh())
+	{
+		return;
+	}
 
 	FString JsonContent;
 	const FString JsonPath = ResolveMeshDefinitionJsonPath();
@@ -751,6 +822,7 @@ void ATunaSweeperPeriodicNoiseEmitterActor::ApplyHornPulse(float PulseAmount)
 				DynamicMaterial->SetVectorParameterValue(TEXT("Color"), PulseColor);
 				DynamicMaterial->SetVectorParameterValue(TEXT("BaseColor"), PulseColor);
 				DynamicMaterial->SetVectorParameterValue(TEXT("EmissiveColor"), PulseColor);
+				DynamicMaterial->SetScalarParameterValue(TEXT("PulseColorScale"), ColorScale);
 			}
 		}
 	}

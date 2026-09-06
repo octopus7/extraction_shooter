@@ -1,0 +1,35 @@
+{
+  "engine": "5.7.4-51494982+++UE5+Release-5.7",
+  "mode": "reload",
+  "meshes": [
+    {
+      "name": "SM_NoiseEmitter_Body",
+      "bounds_cm": [
+        -34.000003814697266,
+        -34.000003814697266,
+        0.0,
+        34.000003814697266,
+        34.000003814697266,
+        172.0
+      ],
+      "cpu_access": true,
+      "vertices": 384
+    },
+    {
+      "name": "SM_NoiseEmitter_Horn",
+      "bounds_cm": [
+        -1.5736100067442749e-06,
+        -52.0000114440918,
+        -52.0,
+        118.00000762939453,
+        51.9999885559082,
+        52.0
+      ],
+      "cpu_access": true,
+      "vertices": 288
+    }
+  ],
+  "blueprint": "/Game/Interaction/BP_PeriodicNoiseEmitter",
+  "constructed_sections": 14,
+  "passed": true
+}
