@@ -1,0 +1,124 @@
+{
+  "assets": [
+    {
+      "name": "SM_MI_Floor",
+      "triangles": 12,
+      "bounds_error_m": 2.384185791015625e-07,
+      "signed_volume_m3": 0.8000000357627934,
+      "manifold": true,
+      "degenerate_triangles": 0,
+      "uv_channels": 2,
+      "zero_area_uv_triangles": 0,
+      "collision_hulls": 1,
+      "material_slots": 1
+    },
+    {
+      "name": "SM_MI_Wall",
+      "triangles": 12,
+      "bounds_error_m": 1.7484555314695172e-07,
+      "signed_volume_m3": 1.2000000007308878,
+      "manifold": true,
+      "degenerate_triangles": 0,
+      "uv_channels": 2,
+      "zero_area_uv_triangles": 0,
+      "collision_hulls": 1,
+      "material_slots": 1
+    },
+    {
+      "name": "SM_MI_InsideCorner",
+      "triangles": 20,
+      "bounds_error_m": 8.940696716308594e-08,
+      "signed_volume_m3": 1.3200000214576761,
+      "manifold": true,
+      "degenerate_triangles": 0,
+      "uv_channels": 2,
+      "zero_area_uv_triangles": 0,
+      "collision_hulls": 2,
+      "material_slots": 1
+    },
+    {
+      "name": "SM_MI_Doorway",
+      "triangles": 92,
+      "bounds_error_m": 3.4969110629390343e-07,
+      "signed_volume_m3": 1.4399999919612902,
+      "manifold": true,
+      "degenerate_triangles": 0,
+      "uv_channels": 2,
+      "zero_area_uv_triangles": 0,
+      "collision_hulls": 3,
+      "material_slots": 2
+    },
+    {
+      "name": "SM_MI_DoorLeaf",
+      "triangles": 12,
+      "bounds_error_m": 1.713486454946178e-07,
+      "signed_volume_m3": 0.3700479817877238,
+      "manifold": true,
+      "degenerate_triangles": 0,
+      "uv_channels": 2,
+      "zero_area_uv_triangles": 0,
+      "collision_hulls": 1,
+      "material_slots": 1
+    },
+    {
+      "name": "SM_MI_Ceiling",
+      "triangles": 12,
+      "bounds_error_m": 2.384185791015625e-07,
+      "signed_volume_m3": 0.8000000357627934,
+      "manifold": true,
+      "degenerate_triangles": 0,
+      "uv_channels": 2,
+      "zero_area_uv_triangles": 0,
+      "collision_hulls": 1,
+      "material_slots": 1
+    },
+    {
+      "name": "SM_MI_Beam",
+      "triangles": 12,
+      "bounds_error_m": 1.7136335372924805e-07,
+      "signed_volume_m3": 0.0800000023841861,
+      "manifold": true,
+      "degenerate_triangles": 0,
+      "uv_channels": 2,
+      "zero_area_uv_triangles": 0,
+      "collision_hulls": 1,
+      "material_slots": 1
+    },
+    {
+      "name": "SM_MI_LightBar",
+      "triangles": 12,
+      "bounds_error_m": 1.30385160446167e-07,
+      "signed_volume_m3": 0.014399999356269897,
+      "manifold": true,
+      "degenerate_triangles": 0,
+      "uv_channels": 2,
+      "zero_area_uv_triangles": 0,
+      "collision_hulls": 0,
+      "material_slots": 2
+    }
+  ],
+  "assembly": {
+    "positive_volume_overlap_pairs": [],
+    "tested_collision_boxes": 95,
+    "wall_edge_gaps_m": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "door_closed_clearance_cm": [
+      2,
+      2,
+      2,
+      2
+    ],
+    "door_open_angle_deg": -68,
+    "door_sweep_0_to_68deg_minimum_jamb_clearance_cm": 1.836802636172341
+  },
+  "passed": true
+}

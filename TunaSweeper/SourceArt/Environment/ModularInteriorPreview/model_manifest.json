@@ -1,0 +1,2178 @@
+{
+  "assets": [
+    {
+      "name": "SM_MI_Floor",
+      "key": "Floor",
+      "triangles": 12,
+      "material_slots": 1,
+      "materials": [
+        "M_MI_Floor"
+      ],
+      "bounds_m": [
+        0.0,
+        0.0,
+        -0.20000000298023224,
+        2.0,
+        2.0,
+        0.0
+      ],
+      "collision_boxes": [
+        [
+          [
+            0,
+            0,
+            -0.2
+          ],
+          [
+            2,
+            2,
+            0
+          ]
+        ]
+      ],
+      "pivot_m": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "SM_MI_Wall",
+      "key": "Wall",
+      "triangles": 12,
+      "material_slots": 1,
+      "materials": [
+        "M_MI_Concrete"
+      ],
+      "bounds_m": [
+        0.0,
+        0.0,
+        0.0,
+        2.0,
+        0.20000000298023224,
+        3.0
+      ],
+      "collision_boxes": [
+        [
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            2,
+            0.2,
+            3
+          ]
+        ]
+      ],
+      "pivot_m": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "SM_MI_InsideCorner",
+      "key": "InsideCorner",
+      "triangles": 20,
+      "material_slots": 1,
+      "materials": [
+        "M_MI_Concrete"
+      ],
+      "bounds_m": [
+        -0.20000000298023224,
+        -0.20000000298023224,
+        0.0,
+        1.0,
+        1.0,
+        3.0
+      ],
+      "collision_boxes": [
+        [
+          [
+            -0.2,
+            -0.2,
+            0
+          ],
+          [
+            1,
+            0,
+            3
+          ]
+        ],
+        [
+          [
+            -0.2,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            3
+          ]
+        ]
+      ],
+      "pivot_m": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "SM_MI_Doorway",
+      "key": "Doorway",
+      "triangles": 92,
+      "material_slots": 2,
+      "materials": [
+        "M_MI_Concrete",
+        "M_MI_Steel"
+      ],
+      "bounds_m": [
+        0.0,
+        0.0,
+        0.0,
+        4.0,
+        0.20000000298023224,
+        3.0
+      ],
+      "collision_boxes": [
+        [
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            1,
+            0.2,
+            2.4
+          ]
+        ],
+        [
+          [
+            3,
+            0,
+            0
+          ],
+          [
+            4,
+            0.2,
+            2.4
+          ]
+        ],
+        [
+          [
+            0,
+            0,
+            2.4
+          ],
+          [
+            4,
+            0.2,
+            3
+          ]
+        ]
+      ],
+      "pivot_m": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "SM_MI_DoorLeaf",
+      "key": "DoorLeaf",
+      "triangles": 12,
+      "material_slots": 1,
+      "materials": [
+        "M_MI_Door"
+      ],
+      "bounds_m": [
+        0.0,
+        0.0,
+        0.0,
+        1.9600000381469727,
+        0.07999999821186066,
+        2.359999895095825
+      ],
+      "collision_boxes": [
+        [
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            1.96,
+            0.08,
+            2.36
+          ]
+        ]
+      ],
+      "pivot_m": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "SM_MI_Ceiling",
+      "key": "Ceiling",
+      "triangles": 12,
+      "material_slots": 1,
+      "materials": [
+        "M_MI_Concrete"
+      ],
+      "bounds_m": [
+        0.0,
+        0.0,
+        0.0,
+        2.0,
+        2.0,
+        0.20000000298023224
+      ],
+      "collision_boxes": [
+        [
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            2,
+            2,
+            0.2
+          ]
+        ]
+      ],
+      "pivot_m": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "SM_MI_Beam",
+      "key": "Beam",
+      "triangles": 12,
+      "material_slots": 1,
+      "materials": [
+        "M_MI_Steel"
+      ],
+      "bounds_m": [
+        0.0,
+        -0.10000000149011612,
+        -0.20000000298023224,
+        2.0,
+        0.10000000149011612,
+        0.0
+      ],
+      "collision_boxes": [
+        [
+          [
+            0,
+            -0.1,
+            -0.2
+          ],
+          [
+            2,
+            0.1,
+            0
+          ]
+        ]
+      ],
+      "pivot_m": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "name": "SM_MI_LightBar",
+      "key": "LightBar",
+      "triangles": 12,
+      "material_slots": 2,
+      "materials": [
+        "M_MI_Steel",
+        "M_MI_LED"
+      ],
+      "bounds_m": [
+        0.0,
+        -0.05999999865889549,
+        -0.07999999821186066,
+        1.5,
+        0.05999999865889549,
+        0.0
+      ],
+      "collision_boxes": [],
+      "pivot_m": [
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  "materials": {
+    "M_MI_Concrete": {
+      "metallic": 0.0,
+      "roughness": 0.85,
+      "tint": [
+        1,
+        1,
+        1
+      ]
+    },
+    "M_MI_Floor": {
+      "metallic": 0.0,
+      "roughness": 0.78,
+      "tint": [
+        0.72,
+        0.76,
+        0.79
+      ]
+    },
+    "M_MI_Steel": {
+      "metallic": 0.25,
+      "roughness": 0.52,
+      "tint": [
+        0.62,
+        0.7,
+        0.73
+      ]
+    },
+    "M_MI_Door": {
+      "metallic": 0.2,
+      "roughness": 0.58,
+      "tint": [
+        0.83,
+        0.89,
+        0.91
+      ]
+    },
+    "M_MI_LED": {
+      "metallic": 0.0,
+      "roughness": 0.35,
+      "tint": [
+        0.68,
+        0.86,
+        1.0
+      ],
+      "emission": 5.0
+    }
+  },
+  "texture": {
+    "runtime_size": [
+      2048,
+      2048
+    ],
+    "imagegen_original_size": [
+      1254,
+      1254
+    ],
+    "runtime_count": 2,
+    "dirt_size": [
+      1024,
+      1024
+    ],
+    "normal_map": null,
+    "roughness": "artist-selected scalar, not measured PBR"
+  },
+  "placements": [
+    {
+      "name": "Floor_000",
+      "key": "Floor",
+      "location_m": [
+        0,
+        0,
+        0
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "Ceiling_001",
+      "key": "Ceiling",
+      "location_m": [
+        0,
+        0,
+        3
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.371,
+        0.619
+      ]
+    },
+    {
+      "name": "Floor_002",
+      "key": "Floor",
+      "location_m": [
+        0,
+        2,
+        0
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.742,
+        0.238
+      ]
+    },
+    {
+      "name": "Ceiling_003",
+      "key": "Ceiling",
+      "location_m": [
+        0,
+        2,
+        3
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.113,
+        0.857
+      ]
+    },
+    {
+      "name": "Floor_004",
+      "key": "Floor",
+      "location_m": [
+        0,
+        4,
+        0
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.484,
+        0.476
+      ]
+    },
+    {
+      "name": "Ceiling_005",
+      "key": "Ceiling",
+      "location_m": [
+        0,
+        4,
+        3
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.855,
+        0.095
+      ]
+    },
+    {
+      "name": "Floor_006",
+      "key": "Floor",
+      "location_m": [
+        2,
+        0,
+        0
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.226,
+        0.714
+      ]
+    },
+    {
+      "name": "Ceiling_007",
+      "key": "Ceiling",
+      "location_m": [
+        2,
+        0,
+        3
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.597,
+        0.333
+      ]
+    },
+    {
+      "name": "Floor_008",
+      "key": "Floor",
+      "location_m": [
+        2,
+        2,
+        0
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.968,
+        0.952
+      ]
+    },
+    {
+      "name": "Ceiling_009",
+      "key": "Ceiling",
+      "location_m": [
+        2,
+        2,
+        3
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.339,
+        0.571
+      ]
+    },
+    {
+      "name": "Floor_010",
+      "key": "Floor",
+      "location_m": [
+        2,
+        4,
+        0
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.71,
+        0.19
+      ]
+    },
+    {
+      "name": "Ceiling_011",
+      "key": "Ceiling",
+      "location_m": [
+        2,
+        4,
+        3
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.081,
+        0.809
+      ]
+    },
+    {
+      "name": "Floor_012",
+      "key": "Floor",
+      "location_m": [
+        4,
+        0,
+        0
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.452,
+        0.428
+      ]
+    },
+    {
+      "name": "Ceiling_013",
+      "key": "Ceiling",
+      "location_m": [
+        4,
+        0,
+        3
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.823,
+        0.047
+      ]
+    },
+    {
+      "name": "Floor_014",
+      "key": "Floor",
+      "location_m": [
+        4,
+        2,
+        0
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.194,
+        0.666
+      ]
+    },
+    {
+      "name": "Ceiling_015",
+      "key": "Ceiling",
+      "location_m": [
+        4,
+        2,
+        3
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.565,
+        0.285
+      ]
+    },
+    {
+      "name": "Floor_016",
+      "key": "Floor",
+      "location_m": [
+        4,
+        4,
+        0
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.936,
+        0.904
+      ]
+    },
+    {
+      "name": "Ceiling_017",
+      "key": "Ceiling",
+      "location_m": [
+        4,
+        4,
+        3
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.307,
+        0.523
+      ]
+    },
+    {
+      "name": "Floor_018",
+      "key": "Floor",
+      "location_m": [
+        1,
+        6,
+        0
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        0.1,
+        1
+      ],
+      "dirt_offset": [
+        0.678,
+        0.142
+      ]
+    },
+    {
+      "name": "Ceiling_019",
+      "key": "Ceiling",
+      "location_m": [
+        1,
+        6,
+        3
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        0.1,
+        1
+      ],
+      "dirt_offset": [
+        0.049,
+        0.761
+      ]
+    },
+    {
+      "name": "Floor_020",
+      "key": "Floor",
+      "location_m": [
+        3,
+        6,
+        0
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        0.1,
+        1
+      ],
+      "dirt_offset": [
+        0.42,
+        0.38
+      ]
+    },
+    {
+      "name": "Ceiling_021",
+      "key": "Ceiling",
+      "location_m": [
+        3,
+        6,
+        3
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        0.1,
+        1
+      ],
+      "dirt_offset": [
+        0.791,
+        0.999
+      ]
+    },
+    {
+      "name": "Floor_022",
+      "key": "Floor",
+      "location_m": [
+        1,
+        6.2,
+        0
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.162,
+        0.618
+      ]
+    },
+    {
+      "name": "Ceiling_023",
+      "key": "Ceiling",
+      "location_m": [
+        1,
+        6.2,
+        3
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.533,
+        0.237
+      ]
+    },
+    {
+      "name": "Floor_024",
+      "key": "Floor",
+      "location_m": [
+        1,
+        8.2,
+        0
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.904,
+        0.856
+      ]
+    },
+    {
+      "name": "Ceiling_025",
+      "key": "Ceiling",
+      "location_m": [
+        1,
+        8.2,
+        3
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.275,
+        0.475
+      ]
+    },
+    {
+      "name": "Floor_026",
+      "key": "Floor",
+      "location_m": [
+        1,
+        10.2,
+        0
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.646,
+        0.094
+      ]
+    },
+    {
+      "name": "Ceiling_027",
+      "key": "Ceiling",
+      "location_m": [
+        1,
+        10.2,
+        3
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.017,
+        0.713
+      ]
+    },
+    {
+      "name": "Floor_028",
+      "key": "Floor",
+      "location_m": [
+        1,
+        12.2,
+        0
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.388,
+        0.332
+      ]
+    },
+    {
+      "name": "Ceiling_029",
+      "key": "Ceiling",
+      "location_m": [
+        1,
+        12.2,
+        3
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.759,
+        0.951
+      ]
+    },
+    {
+      "name": "Floor_030",
+      "key": "Floor",
+      "location_m": [
+        3,
+        6.2,
+        0
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.13,
+        0.57
+      ]
+    },
+    {
+      "name": "Ceiling_031",
+      "key": "Ceiling",
+      "location_m": [
+        3,
+        6.2,
+        3
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.501,
+        0.189
+      ]
+    },
+    {
+      "name": "Floor_032",
+      "key": "Floor",
+      "location_m": [
+        3,
+        8.2,
+        0
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.872,
+        0.808
+      ]
+    },
+    {
+      "name": "Ceiling_033",
+      "key": "Ceiling",
+      "location_m": [
+        3,
+        8.2,
+        3
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.243,
+        0.427
+      ]
+    },
+    {
+      "name": "Floor_034",
+      "key": "Floor",
+      "location_m": [
+        3,
+        10.2,
+        0
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.614,
+        0.046
+      ]
+    },
+    {
+      "name": "Ceiling_035",
+      "key": "Ceiling",
+      "location_m": [
+        3,
+        10.2,
+        3
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.985,
+        0.665
+      ]
+    },
+    {
+      "name": "Floor_036",
+      "key": "Floor",
+      "location_m": [
+        3,
+        12.2,
+        0
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.356,
+        0.284
+      ]
+    },
+    {
+      "name": "Ceiling_037",
+      "key": "Ceiling",
+      "location_m": [
+        3,
+        12.2,
+        3
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.727,
+        0.903
+      ]
+    },
+    {
+      "name": "Floor_038",
+      "key": "Floor",
+      "location_m": [
+        5,
+        10.2,
+        0
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.098,
+        0.522
+      ]
+    },
+    {
+      "name": "Ceiling_039",
+      "key": "Ceiling",
+      "location_m": [
+        5,
+        10.2,
+        3
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.469,
+        0.141
+      ]
+    },
+    {
+      "name": "Floor_040",
+      "key": "Floor",
+      "location_m": [
+        5,
+        12.2,
+        0
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.84,
+        0.76
+      ]
+    },
+    {
+      "name": "Ceiling_041",
+      "key": "Ceiling",
+      "location_m": [
+        5,
+        12.2,
+        3
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.211,
+        0.379
+      ]
+    },
+    {
+      "name": "Floor_042",
+      "key": "Floor",
+      "location_m": [
+        7,
+        10.2,
+        0
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.582,
+        0.998
+      ]
+    },
+    {
+      "name": "Ceiling_043",
+      "key": "Ceiling",
+      "location_m": [
+        7,
+        10.2,
+        3
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.953,
+        0.617
+      ]
+    },
+    {
+      "name": "Floor_044",
+      "key": "Floor",
+      "location_m": [
+        7,
+        12.2,
+        0
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.324,
+        0.236
+      ]
+    },
+    {
+      "name": "Ceiling_045",
+      "key": "Ceiling",
+      "location_m": [
+        7,
+        12.2,
+        3
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.695,
+        0.855
+      ]
+    },
+    {
+      "name": "InsideCorner_046",
+      "key": "InsideCorner",
+      "location_m": [
+        0.0,
+        0.0,
+        0
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.066,
+        0.474
+      ]
+    },
+    {
+      "name": "InsideCorner_047",
+      "key": "InsideCorner",
+      "location_m": [
+        6.0,
+        0.0,
+        0
+      ],
+      "yaw_deg": 90.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.437,
+        0.093
+      ]
+    },
+    {
+      "name": "InsideCorner_048",
+      "key": "InsideCorner",
+      "location_m": [
+        6.0,
+        6.0,
+        0
+      ],
+      "yaw_deg": 180.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.808,
+        0.712
+      ]
+    },
+    {
+      "name": "InsideCorner_049",
+      "key": "InsideCorner",
+      "location_m": [
+        0.0,
+        6.0,
+        0
+      ],
+      "yaw_deg": -90.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.179,
+        0.331
+      ]
+    },
+    {
+      "name": "Wall_050",
+      "key": "Wall",
+      "location_m": [
+        3.0,
+        0.0,
+        0
+      ],
+      "yaw_deg": -180.0,
+      "scale": [
+        1.0,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.55,
+        0.95
+      ]
+    },
+    {
+      "name": "Wall_051",
+      "key": "Wall",
+      "location_m": [
+        5.0,
+        0.0,
+        0
+      ],
+      "yaw_deg": -180.0,
+      "scale": [
+        1.0,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.921,
+        0.569
+      ]
+    },
+    {
+      "name": "Wall_052",
+      "key": "Wall",
+      "location_m": [
+        6.0,
+        3.0,
+        0
+      ],
+      "yaw_deg": -90.0,
+      "scale": [
+        1.0,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.292,
+        0.188
+      ]
+    },
+    {
+      "name": "Wall_053",
+      "key": "Wall",
+      "location_m": [
+        6.0,
+        5.0,
+        0
+      ],
+      "yaw_deg": -90.0,
+      "scale": [
+        1.0,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.663,
+        0.807
+      ]
+    },
+    {
+      "name": "Doorway_054",
+      "key": "Doorway",
+      "location_m": [
+        1.0,
+        6.0,
+        0
+      ],
+      "yaw_deg": -0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.034,
+        0.426
+      ]
+    },
+    {
+      "name": "Wall_055",
+      "key": "Wall",
+      "location_m": [
+        0.0,
+        3.0,
+        0
+      ],
+      "yaw_deg": 90.0,
+      "scale": [
+        1.0,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.405,
+        0.045
+      ]
+    },
+    {
+      "name": "Wall_056",
+      "key": "Wall",
+      "location_m": [
+        0.0,
+        1.0,
+        0
+      ],
+      "yaw_deg": 90.0,
+      "scale": [
+        1.0,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.776,
+        0.664
+      ]
+    },
+    {
+      "name": "InsideCorner_057",
+      "key": "InsideCorner",
+      "location_m": [
+        5.199999809265137,
+        10.0,
+        0
+      ],
+      "yaw_deg": -90.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.147,
+        0.283
+      ]
+    },
+    {
+      "name": "InsideCorner_058",
+      "key": "InsideCorner",
+      "location_m": [
+        9.0,
+        10.199999809265137,
+        0
+      ],
+      "yaw_deg": 90.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.518,
+        0.902
+      ]
+    },
+    {
+      "name": "InsideCorner_059",
+      "key": "InsideCorner",
+      "location_m": [
+        9.0,
+        14.199999809265137,
+        0
+      ],
+      "yaw_deg": 180.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.889,
+        0.521
+      ]
+    },
+    {
+      "name": "InsideCorner_060",
+      "key": "InsideCorner",
+      "location_m": [
+        1.0,
+        14.199999809265137,
+        0
+      ],
+      "yaw_deg": -90.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.26,
+        0.14
+      ]
+    },
+    {
+      "name": "Wall_061",
+      "key": "Wall",
+      "location_m": [
+        5.0,
+        8.199999809265137,
+        0
+      ],
+      "yaw_deg": -90.0,
+      "scale": [
+        1.0,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.631,
+        0.759
+      ]
+    },
+    {
+      "name": "Wall_062",
+      "key": "Wall",
+      "location_m": [
+        5.0,
+        9.0,
+        0
+      ],
+      "yaw_deg": -90.0,
+      "scale": [
+        0.40000009536743164,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.002,
+        0.378
+      ]
+    },
+    {
+      "name": "Wall_063",
+      "key": "Wall",
+      "location_m": [
+        8.0,
+        10.199999809265137,
+        0
+      ],
+      "yaw_deg": -180.0,
+      "scale": [
+        0.9000000953674316,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.373,
+        0.997
+      ]
+    },
+    {
+      "name": "Wall_064",
+      "key": "Wall",
+      "location_m": [
+        9.0,
+        13.199999809265137,
+        0
+      ],
+      "yaw_deg": -90.0,
+      "scale": [
+        1.0,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.744,
+        0.616
+      ]
+    },
+    {
+      "name": "Wall_065",
+      "key": "Wall",
+      "location_m": [
+        6.0,
+        14.199999809265137,
+        0
+      ],
+      "yaw_deg": -0.0,
+      "scale": [
+        1.0,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.115,
+        0.235
+      ]
+    },
+    {
+      "name": "Wall_066",
+      "key": "Wall",
+      "location_m": [
+        4.0,
+        14.199999809265137,
+        0
+      ],
+      "yaw_deg": -0.0,
+      "scale": [
+        1.0,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.486,
+        0.854
+      ]
+    },
+    {
+      "name": "Wall_067",
+      "key": "Wall",
+      "location_m": [
+        2.0,
+        14.199999809265137,
+        0
+      ],
+      "yaw_deg": -0.0,
+      "scale": [
+        1.0,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.857,
+        0.473
+      ]
+    },
+    {
+      "name": "Wall_068",
+      "key": "Wall",
+      "location_m": [
+        1.0,
+        11.199999809265137,
+        0
+      ],
+      "yaw_deg": 90.0,
+      "scale": [
+        1.0,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.228,
+        0.092
+      ]
+    },
+    {
+      "name": "Wall_069",
+      "key": "Wall",
+      "location_m": [
+        1.0,
+        9.199999809265137,
+        0
+      ],
+      "yaw_deg": 90.0,
+      "scale": [
+        1.0,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.599,
+        0.711
+      ]
+    },
+    {
+      "name": "Wall_070",
+      "key": "Wall",
+      "location_m": [
+        1.0,
+        7.199999809265137,
+        0
+      ],
+      "yaw_deg": 90.0,
+      "scale": [
+        1.0,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.97,
+        0.33
+      ]
+    },
+    {
+      "name": "Wall_071",
+      "key": "Wall",
+      "location_m": [
+        1.0,
+        6.199999809265137,
+        0
+      ],
+      "yaw_deg": 90.0,
+      "scale": [
+        0.5,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.341,
+        0.949
+      ]
+    },
+    {
+      "name": "DoorLeaf_open_68deg",
+      "key": "DoorLeaf",
+      "location_m": [
+        2.02,
+        6.06,
+        0.02
+      ],
+      "yaw_deg": -68.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.712,
+        0.568
+      ]
+    },
+    {
+      "name": "Beam_073",
+      "key": "Beam",
+      "location_m": [
+        0,
+        2,
+        3
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.083,
+        0.187
+      ]
+    },
+    {
+      "name": "Beam_074",
+      "key": "Beam",
+      "location_m": [
+        2,
+        2,
+        3
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.454,
+        0.806
+      ]
+    },
+    {
+      "name": "Beam_075",
+      "key": "Beam",
+      "location_m": [
+        4,
+        2,
+        3
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.825,
+        0.425
+      ]
+    },
+    {
+      "name": "Beam_076",
+      "key": "Beam",
+      "location_m": [
+        0,
+        4,
+        3
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.196,
+        0.044
+      ]
+    },
+    {
+      "name": "Beam_077",
+      "key": "Beam",
+      "location_m": [
+        2,
+        4,
+        3
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.567,
+        0.663
+      ]
+    },
+    {
+      "name": "Beam_078",
+      "key": "Beam",
+      "location_m": [
+        4,
+        4,
+        3
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.938,
+        0.282
+      ]
+    },
+    {
+      "name": "Beam_079",
+      "key": "Beam",
+      "location_m": [
+        1,
+        8.2,
+        3
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.309,
+        0.901
+      ]
+    },
+    {
+      "name": "Beam_080",
+      "key": "Beam",
+      "location_m": [
+        3,
+        8.2,
+        3
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.68,
+        0.52
+      ]
+    },
+    {
+      "name": "Beam_081",
+      "key": "Beam",
+      "location_m": [
+        1,
+        12.2,
+        3
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.051,
+        0.139
+      ]
+    },
+    {
+      "name": "Beam_082",
+      "key": "Beam",
+      "location_m": [
+        3,
+        12.2,
+        3
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.422,
+        0.758
+      ]
+    },
+    {
+      "name": "Beam_083",
+      "key": "Beam",
+      "location_m": [
+        5,
+        12.2,
+        3
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.793,
+        0.377
+      ]
+    },
+    {
+      "name": "Beam_084",
+      "key": "Beam",
+      "location_m": [
+        7,
+        12.2,
+        3
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.164,
+        0.996
+      ]
+    },
+    {
+      "name": "LightBar_085",
+      "key": "LightBar",
+      "location_m": [
+        1.25,
+        2,
+        2.79
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.535,
+        0.615
+      ]
+    },
+    {
+      "name": "LightBar_086",
+      "key": "LightBar",
+      "location_m": [
+        3.25,
+        4,
+        2.79
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.906,
+        0.234
+      ]
+    },
+    {
+      "name": "LightBar_087",
+      "key": "LightBar",
+      "location_m": [
+        2.25,
+        8.2,
+        2.79
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.277,
+        0.853
+      ]
+    },
+    {
+      "name": "LightBar_088",
+      "key": "LightBar",
+      "location_m": [
+        2.25,
+        12.2,
+        2.79
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.648,
+        0.472
+      ]
+    },
+    {
+      "name": "LightBar_089",
+      "key": "LightBar",
+      "location_m": [
+        6.25,
+        12.2,
+        2.79
+      ],
+      "yaw_deg": 0.0,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "dirt_offset": [
+        0.019,
+        0.091
+      ]
+    }
+  ],
+  "counts": {
+    "Floor": 23,
+    "Ceiling": 23,
+    "InsideCorner": 8,
+    "Wall": 17,
+    "Doorway": 1,
+    "DoorLeaf": 1,
+    "Beam": 12,
+    "LightBar": 5
+  },
+  "unique_triangles": 184,
+  "sample_triangles": 1224,
+  "sample_instances": 90,
+  "real_lights": 5,
+  "preview_only_softboxes": 1,
+  "room_clear_m": [
+    6,
+    6,
+    3
+  ],
+  "corridor_clear_width_m": 4,
+  "door_clear_m": [
+    2,
+    2.4
+  ],
+  "edge_checks": [
+    {
+      "length": 4.0,
+      "filled": 4,
+      "kind": "wall"
+    },
+    {
+      "length": 4.0,
+      "filled": 4,
+      "kind": "wall"
+    },
+    {
+      "length": 4.0,
+      "filled": 4,
+      "kind": "doorway"
+    },
+    {
+      "length": 4.0,
+      "filled": 4,
+      "kind": "wall"
+    },
+    {
+      "length": 2.8000001907348633,
+      "filled": 2.8000001907348633,
+      "kind": "wall"
+    },
+    {
+      "length": 1.8000001907348633,
+      "filled": 1.8000001907348633,
+      "kind": "wall"
+    },
+    {
+      "length": 2.0,
+      "filled": 2,
+      "kind": "wall"
+    },
+    {
+      "length": 6.0,
+      "filled": 6,
+      "kind": "wall"
+    },
+    {
+      "length": 7.0,
+      "filled": 7.0,
+      "kind": "wall"
+    }
+  ],
+  "axis_contract": "Blender source X=UE X north, Y=UE Y east, Z=up; export copies mirror Y",
+  "play_camera": {
+    "arm_cm": 1500,
+    "pitch_deg": -88,
+    "yaw_deg": 0,
+    "horizontal_fov_deg": 70,
+    "target_m": [
+      3.0,
+      3.299999952316284,
+      0.8799999952316284
+    ]
+  }
+}
