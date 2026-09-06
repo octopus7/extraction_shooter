@@ -1,0 +1,17 @@
+{
+  "passed": true,
+  "mode": "create",
+  "map": "/Game/Environment/ModularInteriorPreview/Maps/L_ModularInteriorPreview",
+  "kit_instances": 90,
+  "kit_triangles": 1224,
+  "rect_lights": 5,
+  "reference_objects": 1,
+  "placement_transforms_and_dirt_cpd_verified": true,
+  "ceiling_present": true,
+  "project_camera": {
+    "arm_cm": 1500.0,
+    "pitch_deg": -88.0,
+    "yaw_deg": 0.0,
+    "fov_deg": 70.0
+  }
+}
