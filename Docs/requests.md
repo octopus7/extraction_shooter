@@ -7846,3 +7846,11 @@
 - /Game/Meshes/Props/MemoStorageDevice에 Static Mesh 1개와 재질 4개를 임포트했다. 별도 UE 프로세스에서 재로드 후 치수·PBR 재질·충돌·UV 설정 검사 통과, 기존 맵·BP·메모 파일 72개 해시 동일. 기존 비균일 Visual Scale과 슬롯 0 재질 오버라이드를 교체하는 연결 방법을 문서화했다. BP·레벨·퀘스트/메모 작성 데이터는 수정하지 않았다.
 - UE 5.7.4 Editor 빌드는 성공(종료 코드 0)했고 에디터를 실행했다. 임포트/재로드 Python은 오류 없이 완료됐으나 기존 Niagara NE_PostProcess의 Typed Element Registry 시작 ensure로 commandlet 종료 코드는 1이었다. 에셋 검사 성공과 엔진 오류를 별도 JSON으로 기록했다. 실제 게임 연결/플레이 화면 검증은 수행하지 않았다.
 - 원본과 임포트 결과를 별도 로컬 커밋으로 정리하며 다른 작업 변경과 원격 push는 포함하지 않는다.
+
+## 2026-09-07 00:29:29 (소요시간: 00:08:21)
+
+- 요청: 기존 메모 저장장치가 과도하므로 1,000폴리곤 미만 버전을 하나 더 제작한다.
+- 기존 원본은 유지하고 SM_MemoStorageDevice_LowPoly를 추가했다. 렌더 메시 936삼각형, UCX 포함 948삼각형으로 기존 6,012삼각형보다 84.4% 감소했다. 본체·뚜껑을 통합하고 미세 베벨·측면 그립·겹친 테두리를 줄였으며 보호 모서리·커넥터·상태등은 유지했다.
+- 동일한 12×7×2.0705cm 크기, 바닥 피벗, 재질 슬롯 4개를 유지했다. Blender 원본·FBX·5방향 프리뷰·검증 JSON을 TunaSweeper/SourceArt/Memo/StorageDevice/LowPoly에 저장하고 시각 확인했다. 제작 스크립트에 --low-poly 선택 옵션을 추가했다. 원본 커밋 c57edc0d.
+- /Game/Meshes/Props/MemoStorageDevice/SM_MemoStorageDevice_LowPoly로 임포트하고 기존 재질을 공유했다. 별도 UE 5.7.4 프로세스의 저장 애셋 재로드에서도 936삼각형과 치수·피벗·UV·슬롯·충돌 검증을 통과했다. 기존 모델·재질·BP·맵 등 77개 파일 해시가 동일했다.
+- 기존 Niagara 시작 ensure로 임포트/재로드 commandlet 종료 코드는 1이었지만 두 Python 스크립트는 오류 없이 완료하고 애셋 검증은 통과했다. 모델 원본과 임포트 결과를 분리해 로컬 커밋하며 원격 push와 기존 BP/레벨 연결 변경은 수행하지 않는다.
