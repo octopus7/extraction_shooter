@@ -60,5 +60,6 @@
       "expected": false
     }
   ],
-  "editor_ticks_before_physics_query": 30
+  "editor_ticks_before_physics_query": 30,
+  "process_exit": 0
 }

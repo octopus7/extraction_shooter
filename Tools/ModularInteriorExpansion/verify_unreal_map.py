@@ -43,7 +43,7 @@ def physics():
 _ticks=0;_busy=False
 def finish():
     unreal.unregister_slate_post_tick_callback(_handle)
-    (OUT/('unreal_map_validation.json' if globals().get('CAPTURE_ONCE') else 'unreal_map_reload_validation.json')).write_text(json.dumps(report,indent=2))
+    (OUT/'unreal_map_reload_validation.json').write_text(json.dumps(report,indent=2))
     unreal.SystemLibrary.quit_editor()
 def tick(dt):
     global _ticks,_busy
@@ -53,11 +53,7 @@ def tick(dt):
     _busy=True
     try:
         physics();report['passed']=True;report['editor_ticks_before_physics_query']=_ticks
-        if globals().get('CAPTURE_ONCE'):
-            unreal.unregister_slate_post_tick_callback(_handle)
-            script=Path(__file__).with_name('capture_once.py')
-            exec(compile(script.read_text(),str(script),'exec'),globals())
-        else:finish()
+        finish()
     except Exception:
         import traceback
         report['error']=traceback.format_exc();unreal.log_error(report['error']);finish()

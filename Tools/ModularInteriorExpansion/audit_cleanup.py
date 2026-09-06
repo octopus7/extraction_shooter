@@ -29,6 +29,8 @@ page=(OUT/'Review.html').read_text(encoding='utf-8')
 links=set(re.findall(r'(?:href|src)="([^"]+)"',page))
 assert all((OUT/link).is_file() for link in links)
 report={'passed':True,'asset_commit':asset_commit,'removed_generators':removed,'runtime_packages':23,'expansion_meshes':18,'base_meshes':6,'expansion_triangles':476,'combined_unique_triangles':636,'sample_instances':96,'sample_triangles':1556,'base_three_paths_unchanged_from':'c2b70edf','runtime_content_unchanged_after_generator_removal':True,'gallery_links_verified':len(links),'reports_passed':list(reports),'post_cleanup_asset_process_exit':1,'post_cleanup_map_process_exit':0,'engine_exit_note':'Asset assertions pass separately; existing NE_PostProcess Niagara ensure remains.'}
+report['post_cleanup_asset_process_exit']=reports['unreal_reload_validation.json']['process_exit']
+report['post_cleanup_map_process_exit']=reports['unreal_map_reload_validation.json']['process_exit']
 report['runtime_sha256']={str(p.relative_to(content)):hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(content.rglob('*')) if p.is_file()}
 (OUT/'cleanup_validation.json').write_text(json.dumps(report,indent=2))
 print('EXPANSION_CLEANUP_VALIDATION_PASSED',report['runtime_packages'])
