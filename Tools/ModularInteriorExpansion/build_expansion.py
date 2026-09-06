@@ -98,6 +98,7 @@ for name,o in assets.items():o.name='SM_MIE_'+name
 export=source[source.index('for name,o in assets.items():'):source.index('\nplacements=[]')]
 # Service UV regions are module/face specific but remain one material and one atlas.
 export=export.replace('u0,v0,u1,v1=regions[key]',"u0,v0,u1,v1=regions[key]\n        if key=='ExpansionSurface':\n            if name=='DrainFloor' and p.normal.z>.9:u0,v0,u1,v1=(.012,.512,.488,.988)\n            elif name=='Vent' and abs(p.normal.y)>.9:u0,v0,u1,v1=(.512,.512,.988,.988)\n            elif name=='ZoneSign' and abs(p.normal.y)>.9:u0,v0,u1,v1=(.012,.012,.488,.488)")
+export=export.replace('cp=export_copy(o,saved_name)',"cp=export_copy(o,saved_name)\n    if name=='ZoneSign':\n        for face in cp.data.polygons:\n            if abs(face.normal.y)>.9:\n                for li in face.loop_indices:cp.data.uv_layers[0].data[li].uv.x=.5-cp.data.uv_layers[0].data[li].uv.x")
 exec(compile(export,__file__,'exec'))
 assert len(assets)==18
 assets.update(base_assets)
@@ -174,12 +175,13 @@ if not os.environ.get('MIE_SKIP_RENDER'):
         o=assets[e['key']];o.hide_render=False;o.hide_set(False)
         center=Vector([(e['bounds_m'][i]+e['bounds_m'][i+3])/2 for i in range(3)])
         span=max(e['bounds_m'][i+3]-e['bounds_m'][i] for i in range(3))
-        cam=camera('Sheet_'+e['key'],center+Vector((span*.7,-span*1.4,span*.9)),center,ortho=max(.6,span*1.45))
+        cam=camera('Sheet_'+e['key'],center+Vector((span*.7,-span*1.4,span*.9)),center,ortho=max(.6,span*1.8))
         lamp=area('SheetSoftbox',center+Vector((-2,-4,6)),600,5,target=center)
         render('Module_'+e['key'],cam);o.hide_render=True;o.hide_set(True);bpy.data.objects.remove(lamp,do_unlink=True)
     for o in visible:o.hide_render=False
 scene.camera=play;flip.mute=False
 bpy.ops.wm.save_as_mainfile(filepath=str(OUT/'ModularInteriorExpansion.blend'))
 print('EXPANSION_BUILD_PASSED',manifest['unique_triangles'],manifest['sample_triangles'])
+
 
 

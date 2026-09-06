@@ -18,6 +18,7 @@ exec(compile(assembly,__file__,'exec'))
 # Audit all 24 source meshes/FBXs and preserve per-file paths.
 audit=basecode[basecode.index('for e in m[\'assets\']:\n    source='):basecode.index('\nscene=bpy.context.scene;')]
 audit=audit.replace("str(OUT/'Models'/f'{original_name}.fbx')","str((BASE if original_name.startswith('SM_MI_') else OUT)/'Models'/f'{original_name}.fbx')")
+audit=audit.replace('oldmesh=source.data',"if original_name=='SM_MIE_ZoneSign':\n        for face in render.data.polygons:\n            if abs(face.normal.y)>.9:\n                for li in face.loop_indices:render.data.uv_layers[0].data[li].uv.x=.5-render.data.uv_layers[0].data[li].uv.x\n    oldmesh=source.data")
 exec(compile(audit,__file__,'exec'))
 # Numeric socket checks use saved actor transforms, not rounded screenshot positions.
 bykey={e['key']:e for e in m['assets']}
@@ -45,6 +46,7 @@ service=bpy.data.materials['M_MI_ExpansionSurface']
 textures=[n.image for n in service.node_tree.nodes if n.type=='TEX_IMAGE']
 assert len(textures)==2 and any('Expansion' in t.name for t in textures)
 report['shared_surface_texture_reads']=len(textures)
+report['sign_fbx_front_back_u_compensated_for_ue_handedness']=True
 report['expansion_triangles']=sum(e['triangles'] for e in original_assets)
 report['combined_unique_triangles']=sum(e['triangles'] for e in m['assets'])
 scene=bpy.context.scene;scene.camera=bpy.data.objects['ExpansionPlayCamera']

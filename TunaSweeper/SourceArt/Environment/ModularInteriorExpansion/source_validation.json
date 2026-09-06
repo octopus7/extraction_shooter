@@ -323,6 +323,7 @@
     "grating_and_vent_are_opaque_texture_recesses": true
   },
   "shared_surface_texture_reads": 2,
+  "sign_fbx_front_back_u_compensated_for_ue_handedness": true,
   "expansion_triangles": 476,
   "combined_unique_triangles": 636
 }
