@@ -1,0 +1,31 @@
+{
+  "fbx_meshes": 1,
+  "triangles": 1190,
+  "bounds_m": [
+    -0.582611083984375,
+    -0.6719169616699219,
+    0.0,
+    0.6501210927963257,
+    0.609791100025177,
+    0.72259920835495
+  ],
+  "max_bounds_error_m": 0.0,
+  "material_slots": 1,
+  "uv_checks": [
+    {
+      "name": "PaletteUV",
+      "minimum_triangle_uv_area": 0.006308765613255218
+    },
+    {
+      "name": "LightmapUV",
+      "minimum_triangle_uv_area": 3.4304237672699855e-08
+    }
+  ],
+  "closed_after_weld": true,
+  "signed_volume_m3": 0.0074606189161999315,
+  "unit_normals": true,
+  "degenerate_faces": 0,
+  "packed_blend_texture": true,
+  "blend_mesh_reloaded": true,
+  "passed": true
+}
