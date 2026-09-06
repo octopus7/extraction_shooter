@@ -1,0 +1,197 @@
+{
+  "destination": "/Game/Meshes/Props/WaterIntakeDemo",
+  "engine": "5.7.4-51494982+++UE5+Release-5.7",
+  "verification": "import process",
+  "texture": "/Game/Meshes/Props/WaterIntakeDemo/Textures/T_WaterIntakeDemo_Atlas_BaseColor.T_WaterIntakeDemo_Atlas_BaseColor",
+  "texture_srgb": true,
+  "materials": [
+    "/Game/Meshes/Props/WaterIntakeDemo/Materials/M_IntakeDemo_PaintedMetal.M_IntakeDemo_PaintedMetal",
+    "/Game/Meshes/Props/WaterIntakeDemo/Materials/M_IntakeDemo_Steel.M_IntakeDemo_Steel",
+    "/Game/Meshes/Props/WaterIntakeDemo/Materials/M_IntakeDemo_Concrete.M_IntakeDemo_Concrete",
+    "/Game/Meshes/Props/WaterIntakeDemo/Materials/M_IntakeDemo_Organic.M_IntakeDemo_Organic",
+    "/Game/Meshes/Props/WaterIntakeDemo/Materials/M_IntakeDemo_Rubber.M_IntakeDemo_Rubber"
+  ],
+  "assets": [
+    {
+      "name": "SM_IntakeDemo_GateFrame",
+      "path": "/Game/Meshes/Props/WaterIntakeDemo/Meshes/SM_IntakeDemo_GateFrame.SM_IntakeDemo_GateFrame",
+      "vertices_lod0": 19556,
+      "source_uv_channels": 1,
+      "generated_lightmap_uv_channel": 1,
+      "simple_collisions": 12,
+      "material_slots": 2,
+      "bounds_cm": [
+        -199.00001525878906,
+        -110.50000762939453,
+        0.0,
+        260.5,
+        150.99998474121094,
+        361.0
+      ],
+      "assembly_relative_location_cm": [
+        0.0,
+        -0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "SM_IntakeDemo_Screen",
+      "path": "/Game/Meshes/Props/WaterIntakeDemo/Meshes/SM_IntakeDemo_Screen.SM_IntakeDemo_Screen",
+      "vertices_lod0": 7488,
+      "source_uv_channels": 1,
+      "generated_lightmap_uv_channel": 1,
+      "simple_collisions": 21,
+      "material_slots": 1,
+      "bounds_cm": [
+        -133.25,
+        -5.500011920928955,
+        8.500003814697266,
+        133.25,
+        15.200010299682617,
+        220.6999969482422
+      ],
+      "assembly_relative_location_cm": [
+        0.0,
+        -0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "SM_IntakeDemo_Pump",
+      "path": "/Game/Meshes/Props/WaterIntakeDemo/Meshes/SM_IntakeDemo_Pump.SM_IntakeDemo_Pump",
+      "vertices_lod0": 19309,
+      "source_uv_channels": 1,
+      "generated_lightmap_uv_channel": 1,
+      "simple_collisions": 3,
+      "material_slots": 4,
+      "bounds_cm": [
+        -450.5000305175781,
+        -219.49996948242188,
+        7.500000476837158,
+        -93.80000305175781,
+        105.50003051757812,
+        188.0
+      ],
+      "assembly_relative_location_cm": [
+        0.0,
+        -0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "SM_IntakeDemo_PumpFoundation",
+      "path": "/Game/Meshes/Props/WaterIntakeDemo/Meshes/SM_IntakeDemo_PumpFoundation.SM_IntakeDemo_PumpFoundation",
+      "vertices_lod0": 528,
+      "source_uv_channels": 1,
+      "generated_lightmap_uv_channel": 1,
+      "simple_collisions": 2,
+      "material_slots": 1,
+      "bounds_cm": [
+        -472.5,
+        -233.49998474121094,
+        0.0,
+        -241.49998474121094,
+        64.00003814697266,
+        22.0
+      ],
+      "assembly_relative_location_cm": [
+        0.0,
+        -0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "SM_IntakeDemo_ValveHandle_Repaired",
+      "path": "/Game/Meshes/Props/WaterIntakeDemo/Meshes/SM_IntakeDemo_ValveHandle_Repaired.SM_IntakeDemo_ValveHandle_Repaired",
+      "vertices_lod0": 1132,
+      "source_uv_channels": 1,
+      "generated_lightmap_uv_channel": 1,
+      "simple_collisions": 0,
+      "material_slots": 2,
+      "bounds_cm": [
+        -26.19999885559082,
+        -26.19999885559082,
+        -3.25,
+        26.19999885559082,
+        26.19999885559082,
+        6.700004577636719
+      ],
+      "assembly_relative_location_cm": [
+        -315.0,
+        -156.0,
+        188.0
+      ]
+    },
+    {
+      "name": "SM_IntakeDemo_ValveHandle_Broken",
+      "path": "/Game/Meshes/Props/WaterIntakeDemo/Meshes/SM_IntakeDemo_ValveHandle_Broken.SM_IntakeDemo_ValveHandle_Broken",
+      "vertices_lod0": 550,
+      "source_uv_channels": 1,
+      "generated_lightmap_uv_channel": 1,
+      "simple_collisions": 0,
+      "material_slots": 2,
+      "bounds_cm": [
+        -6.383080005645752,
+        -6.099999904632568,
+        -3.25,
+        11.858120918273926,
+        6.099999904632568,
+        6.700004577636719
+      ],
+      "assembly_relative_location_cm": [
+        -315.0,
+        -156.0,
+        188.0
+      ]
+    },
+    {
+      "name": "SM_IntakeDemo_ScreenDebris",
+      "path": "/Game/Meshes/Props/WaterIntakeDemo/Meshes/SM_IntakeDemo_ScreenDebris.SM_IntakeDemo_ScreenDebris",
+      "vertices_lod0": 7326,
+      "source_uv_channels": 1,
+      "generated_lightmap_uv_channel": 1,
+      "simple_collisions": 0,
+      "material_slots": 1,
+      "bounds_cm": [
+        -128.43629455566406,
+        22.900983810424805,
+        7.69367790222168,
+        125.12733459472656,
+        45.70689392089844,
+        94.61270904541016
+      ],
+      "assembly_relative_location_cm": [
+        0.0,
+        -0.0,
+        0.0
+      ]
+    }
+  ],
+  "axis_mapping": {
+    "blender_axis_indices_for_ue_xyz": [
+      0,
+      1,
+      2
+    ],
+    "signs": [
+      1,
+      -1,
+      1
+    ],
+    "max_bounds_error_cm": 3.9577484130859375e-05
+  },
+  "existing_intake_assets_unchanged": true,
+  "protected_assets_sha256": {
+    "TunaSweeper\\Content\\Interaction\\BP_WaterIntake.uasset": "b66921318f960ac74bc942f93436c81ee9c72b38d9791285d430564c699a81a9",
+    "TunaSweeper\\Content\\Meshes\\Props\\WaterIntake\\M_ScreenDebris.uasset": "041a82142b7c7446755e24734b880b8c1bb23f2f38d8878c11f856f670e9d82f",
+    "TunaSweeper\\Content\\Meshes\\Props\\WaterIntake\\M_WaterIntake.uasset": "1b9f18a5ceb038cf27218b5264b72b8f4022a34e79a39700b52ef86e4a0d1c3d",
+    "TunaSweeper\\Content\\Meshes\\Props\\WaterIntake\\SM_ScreenDebris.uasset": "0e5ad71f63bf1dce74d7a8855e87c022327f3b7a0e4f33ef24aeec4cdc7ff3ac",
+    "TunaSweeper\\Content\\Meshes\\Props\\WaterIntake\\SM_WaterIntake.uasset": "bd2a5edee62bc8fc6242ca23e847dbad5715ac6be6c4c93c3754e39149e8a13c",
+    "TunaSweeper\\Content\\Meshes\\Props\\WaterIntake\\T_ScreenDebris.uasset": "f8e1e4a30a30b9690600801295675dd2fa623529787f32a32692102f088c7ff5",
+    "TunaSweeper\\Content\\Meshes\\Props\\WaterIntake\\T_ScreenDebrisRM.uasset": "fb3d8426cdb411808de68641cda85125b94955ec0b104feb658a3091d7c3a4ec",
+    "TunaSweeper\\Content\\Meshes\\Props\\WaterIntake\\T_ScreenDebris_Normal.uasset": "7ee712ab079be278e605f2fc25c7a2f3254e9920363ddc1e66f62b183a6d5f66",
+    "TunaSweeper\\Content\\Meshes\\Props\\WaterIntake\\T_WaterIntake_BaseColor.uasset": "3579326a23b4700d91fc5923bb917544295a3bb03cd67fb8342ffb010dd518f4",
+    "TunaSweeper\\Content\\Meshes\\Props\\WaterIntake\\T_WaterIntake_Normal.uasset": "314d06db5e1d8856b901d90deb2e0047d3b50de79f1501ddb2f4846f345b5399"
+  },
+  "passed": true
+}

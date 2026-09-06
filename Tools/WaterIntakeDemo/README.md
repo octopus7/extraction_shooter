@@ -65,3 +65,50 @@ Debris and interchangeable handles have no simple collision. Four Cycles renders
 cover assembly, front, back and clean-screen/broken-valve states.
 
 No Blueprint, level, quest authoring data or existing intake asset is changed.
+
+## Unreal import and manual assembly
+
+```powershell
+& .\Tools\WaterIntakeDemo\run_unreal_import.ps1
+& .\Tools\WaterIntakeDemo\run_unreal_import.ps1 -VerifyOnly
+```
+
+UE assets are under `/Game/Meshes/Props/WaterIntakeDemo/` in `Meshes`, `Materials`
+and `Textures` subfolders. There are seven Static Meshes, five materials and one
+base-color atlas. The original ImageGen PNG stays unchanged; the UE texture uses
+Stretch to Power of Two during its build (2048 x 1024), with mipmaps and world
+texture streaming. UV positions still map to the same eight regions.
+
+Verified UE component transforms for this assembly (cm):
+
+| Mesh | Relative location | Rotation | Scale |
+| --- | --- | --- | --- |
+| GateFrame, Screen, ScreenDebris, Pump, PumpFoundation | `(0, 0, 0)` | `(0, 0, 0)` | `(1, 1, 1)` |
+| ValveHandle_Broken OR ValveHandle_Repaired | `(-315, -156, 188)` | `(0, 0, 0)` | `(1, 1, 1)` |
+
+These locations are relative to a shared assembly root. Rotate/move that root to
+fit the level. Display one of the two valve handles, and toggle ScreenDebris for
+cleaning. The gate screen itself can move independently if desired; the static
+hoist is visual only. No placement or Blueprint connection has been made.
+
+The importer checks geometry bounds, material graph links to the atlas, original
+UVs, generated lightmap UV settings, 38 explicit collision hulls, and hashes of
+the pre-existing intake assets/BP. Import and fresh-process reload reports are
+stored next to the .blend. The UE asset build recomputes tangents with full
+precision UVs and a high precision tangent basis. FBX import logs report a few
+near-zero pump tangents before this build step; the asset uses the rebuilt basis.
+FBX texture-name duplicate notices are harmless here: texture/material auto-import
+is disabled and material slots are explicitly assigned to the single atlas.
+
+The import wrapper disables Interchange browser synchronization for that process
+because a headless commandlet has no Slate application. Project configuration is
+not changed. Existing startup Niagara/ChaosNiagara warnings are outside this asset
+task. Rendered previews are Blender Cycles images; final in-level appearance is
+left for manual review in Unreal.
+
+On the recorded import and reload runs the Python commandlet returned 0 and both
+asset-validation reports passed. The engine process nevertheless returned 1 due
+to the pre-existing Niagara typed-element-registry startup ensure. The wrapper
+keeps that nonzero outcome visible instead of treating the entire engine run as
+clean. Logs: `TunaSweeper/Saved/WaterIntakeDemo_Import.stdout.log` and
+`TunaSweeper/Saved/WaterIntakeDemo_Reload.stdout.log` (local, untracked).
