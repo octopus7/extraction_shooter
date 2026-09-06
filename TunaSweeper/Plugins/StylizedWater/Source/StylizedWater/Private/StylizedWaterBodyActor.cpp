@@ -1,555 +1,151 @@
 #include "StylizedWaterBodyActor.h"
-
+#include "Engine/Texture2D.h"
 #include "Materials/MaterialInstanceDynamic.h"
-#include "Materials/MaterialInterface.h"
 #include "ProceduralMeshComponent.h"
-
-DEFINE_LOG_CATEGORY_STATIC(LogStylizedWater, Log, All);
-
-namespace StylizedWater
-{
-	const TCHAR* GeneratedMaterialInstancePath = TEXT("/StylizedWater/Generated/Internal/MI_StylizedWater_CalmAnime.MI_StylizedWater_CalmAnime");
-	const TCHAR* GeneratedShoreMaterialInstancePath = TEXT("/StylizedWater/Generated/Internal/MI_StylizedWater_ShoreOverlay.MI_StylizedWater_ShoreOverlay");
-
-	FName ShallowColorName(TEXT("ShallowColor"));
-	FName MidColorName(TEXT("MidColor"));
-	FName DeepColorName(TEXT("DeepColor"));
-	FName FoamColorName(TEXT("FoamColor"));
-	FName DepthColorRangeName(TEXT("DepthColorRangeCm"));
-	FName MidColorPositionName(TEXT("MidColorPosition"));
-	FName DepthGradientInfluenceName(TEXT("DepthGradientInfluence"));
-	FName OpacityName(TEXT("Opacity"));
-	FName RoughnessName(TEXT("Roughness"));
-	FName DistortionStrengthName(TEXT("DistortionStrength"));
-	FName EmissiveStrengthName(TEXT("EmissiveStrength"));
-	FName WaterLevelOffsetName(TEXT("WaterLevelOffsetCm"));
-	FName WaterlineSoftnessName(TEXT("WaterlineSoftnessCm"));
-	FName ShoreRunupName(TEXT("ShoreRunupCm"));
-	FName ShoreWavelengthName(TEXT("ShoreWavelengthCm"));
-	FName ShoreWaveSpeedName(TEXT("ShoreWaveSpeed"));
-	FName ShoreFoamDepthName(TEXT("ShoreFoamDepthCm"));
-	FName ShoreFoamWidthName(TEXT("ShoreFoamWidth"));
-	FName FoamIntensityName(TEXT("FoamIntensity"));
-	FName ShoreWaterOpacityName(TEXT("ShoreWaterOpacity"));
-	FName ShoreFoamOpacityName(TEXT("ShoreFoamOpacity"));
-	FName FlowDirectionName(TEXT("FlowDirection"));
-	FName FlowSpeedName(TEXT("FlowSpeed"));
-	FName WaveWorldScaleName(TEXT("WaveWorldScale"));
-	FName GeometryWaveAmplitudeName(TEXT("GeometryWaveAmplitudeCm"));
-	FName DryRangeName(TEXT("DryRangeCm"));
-	FName DepthRangeName(TEXT("DepthRangeCm"));
-}
 
 AStylizedWaterBodyActor::AStylizedWaterBodyActor()
 {
-	PrimaryActorTick.bCanEverTick = false;
-
-	SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("SceneRoot"));
-	SetRootComponent(SceneRoot);
-
-	WaterSurface = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("WaterSurface"));
-	WaterSurface->SetupAttachment(SceneRoot);
-	WaterSurface->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	WaterSurface->SetGenerateOverlapEvents(false);
-	WaterSurface->bUseAsyncCooking = true;
-	WaterSurface->SetCastShadow(false);
-	WaterSurface->SetCanEverAffectNavigation(false);
-
-	ShoreOverlay = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("ShoreOverlay"));
-	ShoreOverlay->SetupAttachment(SceneRoot);
-	ShoreOverlay->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	ShoreOverlay->SetGenerateOverlapEvents(false);
-	ShoreOverlay->bUseAsyncCooking = true;
-	ShoreOverlay->SetCastShadow(false);
-	ShoreOverlay->SetCanEverAffectNavigation(false);
-	ShoreOverlay->TranslucencySortPriority = 1;
-
-	TemplateMaterialInstance = TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath(StylizedWater::GeneratedMaterialInstancePath));
-	TemplateShoreMaterialInstance = TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath(StylizedWater::GeneratedShoreMaterialInstancePath));
+    PrimaryActorTick.bCanEverTick = false;
+    SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("SceneRoot"));
+    SetRootComponent(SceneRoot);
+    WaterSurface = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("WaterSurface"));
+    WaterSurface->SetupAttachment(SceneRoot);
+    WaterSurface->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    WaterSurface->SetGenerateOverlapEvents(false);
+    WaterSurface->SetCastShadow(false);
+    WaterSurface->SetCanEverAffectNavigation(false);
+    BaseMaterial = TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath(TEXT("/StylizedWater/MaskWater/M_WaterMask.M_WaterMask")));
+    // WATER_SKY_PARALLAX_EXPERIMENT: soft default is loaded only when enabled.
+    SkyTexture = TSoftObjectPtr<UTexture2D>(FSoftObjectPath(TEXT("/StylizedWater/SkyParallax/T_AnimeSky.T_AnimeSky")));
+    SkyMaterial = TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath(TEXT("/StylizedWater/SkyParallax/M_WaterMaskSky.M_WaterMaskSky")));
 }
-
 void AStylizedWaterBodyActor::OnConstruction(const FTransform& Transform)
 {
-	Super::OnConstruction(Transform);
-	if (HasAnyFlags(RF_ClassDefaultObject) || !WaterSurface || !ShoreOverlay)
-	{
-		return;
-	}
-
-	if (WaterSurface->GetNumSections() == 0 || !bShoreOverlayBakeInitialized)
-	{
-		BuildWaterMesh(bSampleTerrainOnRebuild);
-	}
-	else
-	{
-		EnsureDynamicMaterial();
-		UpdateMaterialParameters();
-	}
+    Super::OnConstruction(Transform);
+    if (!HasAnyFlags(RF_ClassDefaultObject)) BuildSurface(false);
 }
-
-void AStylizedWaterBodyActor::BeginPlay()
+void AStylizedWaterBodyActor::BeginPlay() { Super::BeginPlay(); BuildSurface(false); }
+void AStylizedWaterBodyActor::RebuildSurface() { BuildSurface(false); }
+void AStylizedWaterBodyActor::FitSurfaceToTerrain() { Modify(); BuildSurface(true); }
+void AStylizedWaterBodyActor::ApplyCalmLakePreset() { ApplyPreset(EStylizedWaterPreset::CalmLake); }
+void AStylizedWaterBodyActor::ApplyGentleBeachPreset() { ApplyPreset(EStylizedWaterPreset::GentleBeach); }
+void AStylizedWaterBodyActor::ApplyFlowingRiverPreset() { ApplyPreset(EStylizedWaterPreset::FlowingRiver); }
+void AStylizedWaterBodyActor::ApplyPreset(EStylizedWaterPreset Preset, bool bRebuild)
 {
-	Super::BeginPlay();
-	EnsureDynamicMaterial();
-	UpdateMaterialParameters();
+    const bool Beach = Preset == EStylizedWaterPreset::GentleBeach;
+    const bool River = Preset == EStylizedWaterPreset::FlowingRiver;
+    SurfaceSize = River ? FVector2D(7000,2400) : (Beach ? FVector2D(6000,5000) : FVector2D(5000,5000));
+    const TCHAR* MaskName = River ? TEXT("River") : (Beach ? TEXT("Beach") : TEXT("Lake"));
+    const FString Path = FString::Printf(TEXT("/StylizedWater/MaskWater/Masks/T_Mask%s.T_Mask%s"), MaskName, MaskName);
+    BoundaryMask = LoadObject<UTexture2D>(nullptr, *Path);
+    ShoreRunup = Beach ? 45 : (River ? 8 : 14);
+    ShoreWaveSpeed = Beach ? 0.13 : 0.09;
+    FoamIntensity = Beach ? 0.78 : 0.5;
+    FlowSpeed = River ? 90 : 8;
+    RippleStrength = River ? 0.22 : 0.12;
+    FittedHeights.Reset(); FittedDepths.Reset(); TerrainDepthInfluence = 0;
+    if (bRebuild) BuildSurface(false);
 }
-
-void AStylizedWaterBodyActor::RebuildAndBakeDepth()
+void AStylizedWaterBodyActor::BuildSurface(bool bTrace)
 {
-	BuildWaterMesh(true);
+    if (!WaterSurface || HasAnyFlags(RF_ClassDefaultObject)) return;
+    const int32 NX = FMath::Clamp(GridResolution.X,2,192), NY = FMath::Clamp(GridResolution.Y,2,192);
+    const int32 Count = (NX+1)*(NY+1);
+    SurfaceSize.X = FMath::Max(SurfaceSize.X,100.0); SurfaceSize.Y = FMath::Max(SurfaceSize.Y,100.0);
+    if (FittedHeights.Num()!=Count || FittedDepths.Num()!=Count) { FittedHeights.Init(0,Count); FittedDepths.Init(0,Count); }
+    TArray<FVector> Vertices, Normals;
+    TArray<FVector2D> UVs;
+    TArray<FLinearColor> Colors;
+    TArray<FProcMeshTangent> Tangents;
+    TArray<int32> Indices;
+    int32 Hits=0;
+    for (int32 Y=0;Y<=NY;++Y) for (int32 X=0;X<=NX;++X)
+    {
+        const int32 I=Y*(NX+1)+X;
+        FVector Local((double(X)/NX-0.5)*SurfaceSize.X,(double(Y)/NY-0.5)*SurfaceSize.Y,WaterLevelOffset);
+        if (bTrace && GetWorld())
+        {
+            const FVector P=GetActorTransform().TransformPosition(Local);
+            FHitResult Hit;
+            FCollisionQueryParams Query(SCENE_QUERY_STAT(WaterMaskTerrainFit),true,this);
+            if (GetWorld()->LineTraceSingleByChannel(Hit,P+FVector(0,0,TraceHeight),P-FVector(0,0,MaximumDepth),TerrainTraceChannel,Query))
+            {
+                ++Hits;
+                const FVector Ground=GetActorTransform().InverseTransformPosition(Hit.ImpactPoint);
+                FittedHeights[I]=FMath::Max(0.0,Ground.Z+TerrainFilmLift-Local.Z);
+                FittedDepths[I]=FMath::Max(0.0,P.Z-Hit.ImpactPoint.Z);
+            }
+            else { FittedHeights[I]=0; FittedDepths[I]=MaximumDepth; }
+        }
+        Local.Z+=FittedHeights[I];
+        Vertices.Add(Local); Normals.Add(FVector::UpVector); UVs.Add(FVector2D(double(X)/NX,double(Y)/NY));
+        Colors.Add(FLinearColor(FittedDepths[I]/FMath::Max(DepthColorRange,1.f),0,0,1));
+        Tangents.Add(FProcMeshTangent(FVector::ForwardVector,false));
+    }
+    // Always retain every triangle. Shore coverage is sampled per pixel from the texture.
+    for(int32 Y=0;Y<NY;++Y) for(int32 X=0;X<NX;++X)
+    {
+        int32 I=Y*(NX+1)+X;
+        Indices.Append({I,I+NX+2,I+1,I,I+NX+1,I+NX+2});
+    }
+    WaterSurface->CreateMeshSection_LinearColor(0,Vertices,Indices,Normals,UVs,Colors,Tangents,false);
+    if(bTrace) { LastTerrainFit=FString::Printf(TEXT("%d / %d terrain hits; complete surface retained"),Hits,Count); TerrainDepthInfluence=Hits>0?1.f:0.f; }
+    UpdateMaterial();
 }
-
-void AStylizedWaterBodyActor::RebuildWithoutTerrainTrace()
+void AStylizedWaterBodyActor::UpdateMaterial()
 {
-	BuildWaterMesh(false);
-}
-
-void AStylizedWaterBodyActor::ApplyCalmLakePreset()
-{
-	ApplyPreset(EStylizedWaterPreset::CalmLake, true);
-}
-
-void AStylizedWaterBodyActor::ApplyGentleBeachPreset()
-{
-	ApplyPreset(EStylizedWaterPreset::GentleBeach, true);
-}
-
-void AStylizedWaterBodyActor::ApplyFlowingRiverPreset()
-{
-	ApplyPreset(EStylizedWaterPreset::FlowingRiver, true);
-}
-
-void AStylizedWaterBodyActor::ApplyPreset(const EStylizedWaterPreset InPreset, const bool bRebuild)
-{
-	DepthGradientInfluence = 1.0f;
-	switch (InPreset)
-	{
-	case EStylizedWaterPreset::CalmLake:
-		SurfaceSize = FVector2D(5000.0, 5000.0);
-		GridResolution = FIntPoint(48, 48);
-		ShallowColor = FLinearColor(0.17f, 0.72f, 0.77f, 1.0f);
-		MidColor = FLinearColor(0.035f, 0.43f, 0.63f, 1.0f);
-		DeepColor = FLinearColor(0.014f, 0.16f, 0.34f, 1.0f);
-		Opacity = 0.84f;
-		Roughness = 0.13f;
-		DistortionStrength = 0.12f;
-		ShoreRunup = 12.0f;
-		ShoreWavelength = 360.0f;
-		ShoreWaveSpeed = 0.09f;
-		ShoreFoamDepth = 90.0f;
-		ShoreFoamWidth = 0.09f;
-		FoamIntensity = 0.42f;
-		ShoreWaterOpacity = 0.12f;
-		ShoreFoamOpacity = 0.66f;
-		FlowSpeed = 0.06f;
-		GeometryWaveAmplitude = 1.5f;
-		break;
-
-	case EStylizedWaterPreset::GentleBeach:
-		SurfaceSize = FVector2D(6000.0, 4200.0);
-		GridResolution = FIntPoint(72, 52);
-		ShallowColor = FLinearColor(0.24f, 0.78f, 0.76f, 1.0f);
-		MidColor = FLinearColor(0.045f, 0.49f, 0.68f, 1.0f);
-		DeepColor = FLinearColor(0.012f, 0.18f, 0.38f, 1.0f);
-		Opacity = 0.80f;
-		Roughness = 0.16f;
-		DistortionStrength = 0.13f;
-		ShoreRunup = 38.0f;
-		ShoreWavelength = 260.0f;
-		ShoreWaveSpeed = 0.16f;
-		ShoreFoamDepth = 150.0f;
-		ShoreFoamWidth = 0.14f;
-		FoamIntensity = 0.95f;
-		ShoreWaterOpacity = 0.18f;
-		ShoreFoamOpacity = 0.86f;
-		FlowSpeed = 0.08f;
-		GeometryWaveAmplitude = 4.0f;
-		break;
-
-	case EStylizedWaterPreset::FlowingRiver:
-		SurfaceSize = FVector2D(7000.0, 1800.0);
-		GridResolution = FIntPoint(96, 28);
-		ShallowColor = FLinearColor(0.13f, 0.67f, 0.70f, 1.0f);
-		MidColor = FLinearColor(0.025f, 0.38f, 0.52f, 1.0f);
-		DeepColor = FLinearColor(0.012f, 0.16f, 0.28f, 1.0f);
-		Opacity = 0.86f;
-		Roughness = 0.11f;
-		DistortionStrength = 0.18f;
-		ShoreRunup = 10.0f;
-		ShoreWavelength = 220.0f;
-		ShoreWaveSpeed = 0.12f;
-		ShoreFoamDepth = 75.0f;
-		ShoreFoamWidth = 0.08f;
-		FoamIntensity = 0.46f;
-		ShoreWaterOpacity = 0.10f;
-		ShoreFoamOpacity = 0.68f;
-		FlowSpeed = 0.32f;
-		WaveWorldScale = 0.0048f;
-		GeometryWaveAmplitude = 2.0f;
-		FlowDirection = FVector2D(1.0, 0.0);
-		break;
-	}
-
-	if (bRebuild)
-	{
-		BuildWaterMesh(bSampleTerrainOnRebuild);
-	}
-	else
-	{
-		UpdateMaterialParameters();
-	}
-}
-
-void AStylizedWaterBodyActor::SetTemplateMaterialInstance(UMaterialInterface* InMaterial)
-{
-	TemplateMaterialInstance = InMaterial;
-	DynamicMaterial = nullptr;
-	EnsureDynamicMaterial();
-	UpdateMaterialParameters();
-}
-
-void AStylizedWaterBodyActor::SetTemplateShoreMaterialInstance(UMaterialInterface* InMaterial)
-{
-	TemplateShoreMaterialInstance = InMaterial;
-	ShoreDynamicMaterial = nullptr;
-	EnsureDynamicMaterial();
-	UpdateMaterialParameters();
-}
-
-float AStylizedWaterBodyActor::SampleSignedDepthAtWorldPosition(const FVector& SurfaceWorldPosition, FHitResult& OutHit) const
-{
-	OutHit = FHitResult();
-	const UWorld* World = GetWorld();
-	if (!World)
-	{
-		return MaximumDepth;
-	}
-
-	FCollisionQueryParams QueryParams(SCENE_QUERY_STAT(StylizedWaterDepthBake), true, this);
-	QueryParams.AddIgnoredActor(this);
-
-	FVector TraceStart = SurfaceWorldPosition;
-	TraceStart.Z += FMath::Max(TraceHeight, MaximumDryHeight + 10.0f);
-	FVector TraceEnd = SurfaceWorldPosition;
-	TraceEnd.Z -= MaximumDepth;
-
-	if (!World->LineTraceSingleByChannel(OutHit, TraceStart, TraceEnd, TerrainTraceChannel, QueryParams))
-	{
-		return MaximumDepth;
-	}
-
-	return FMath::Clamp(SurfaceWorldPosition.Z - OutHit.ImpactPoint.Z, -MaximumDryHeight, MaximumDepth);
-}
-
-void AStylizedWaterBodyActor::BuildWaterMesh(const bool bTraceTerrain)
-{
-	if (!WaterSurface || !ShoreOverlay || HasAnyFlags(RF_ClassDefaultObject))
-	{
-		return;
-	}
-
-	const int32 ResolutionX = FMath::Clamp(GridResolution.X, 2, 256);
-	const int32 ResolutionY = FMath::Clamp(GridResolution.Y, 2, 256);
-	GridResolution = FIntPoint(ResolutionX, ResolutionY);
-	SurfaceSize.X = FMath::Max(SurfaceSize.X, 100.0);
-	SurfaceSize.Y = FMath::Max(SurfaceSize.Y, 100.0);
-	MaximumDryHeight = FMath::Max(MaximumDryHeight, 10.0f);
-	MaximumDepth = FMath::Max(MaximumDepth, 10.0f);
-
-	const int32 VertexCount = (ResolutionX + 1) * (ResolutionY + 1);
-	TArray<FVector> Vertices;
-	TArray<int32> Triangles;
-	TArray<FVector> ShoreVertices;
-	TArray<int32> ShoreTriangles;
-	TArray<FVector> Normals;
-	TArray<FVector> ShoreNormals;
-	TArray<FVector2D> UVs;
-	TArray<FLinearColor> VertexColors;
-	TArray<FProcMeshTangent> Tangents;
-	TArray<FProcMeshTangent> ShoreTangents;
-	TArray<bool> TerrainHitMask;
-	TArray<float> SignedDepths;
-	Vertices.Reserve(VertexCount);
-	ShoreVertices.Reserve(VertexCount);
-	Normals.Reserve(VertexCount);
-	ShoreNormals.Reserve(VertexCount);
-	UVs.Reserve(VertexCount);
-	VertexColors.Reserve(VertexCount);
-	Tangents.Reserve(VertexCount);
-	ShoreTangents.Reserve(VertexCount);
-	TerrainHitMask.Reserve(VertexCount);
-	SignedDepths.Reserve(VertexCount);
-	Triangles.Reserve(ResolutionX * ResolutionY * 6);
-	ShoreTriangles.Reserve(ResolutionX * ResolutionY * 6);
-
-	const FTransform ActorTransform = GetActorTransform();
-	const float TotalDepthRange = MaximumDryHeight + MaximumDepth;
-	int32 HitSampleCount = 0;
-	float MinimumHitDepth = MaximumDepth;
-	float MaximumHitDepth = -MaximumDryHeight;
-	for (int32 Y = 0; Y <= ResolutionY; ++Y)
-	{
-		const float V = static_cast<float>(Y) / static_cast<float>(ResolutionY);
-		for (int32 X = 0; X <= ResolutionX; ++X)
-		{
-			const float U = static_cast<float>(X) / static_cast<float>(ResolutionX);
-			const FVector LocalPosition(
-				FMath::Lerp(-0.5 * SurfaceSize.X, 0.5 * SurfaceSize.X, U),
-				FMath::Lerp(-0.5 * SurfaceSize.Y, 0.5 * SurfaceSize.Y, V),
-				0.0);
-			const FVector WorldPosition = ActorTransform.TransformPosition(LocalPosition);
-			FHitResult TerrainHit;
-			const float SignedDepth = bTraceTerrain ? SampleSignedDepthAtWorldPosition(WorldPosition, TerrainHit) : MaximumDepth;
-			const bool bHitTerrain = TerrainHit.bBlockingHit;
-			if (bHitTerrain)
-			{
-				++HitSampleCount;
-				MinimumHitDepth = FMath::Min(MinimumHitDepth, SignedDepth);
-				MaximumHitDepth = FMath::Max(MaximumHitDepth, SignedDepth);
-			}
-			const float EncodedDepth = FMath::Clamp((SignedDepth + MaximumDryHeight) / TotalDepthRange, 0.0f, 1.0f);
-			const float BorderDistance = FMath::Clamp(2.0f * FMath::Min(FMath::Min(U, 1.0f - U), FMath::Min(V, 1.0f - V)), 0.0f, 1.0f);
-
-			Vertices.Add(LocalPosition);
-			if (bHitTerrain)
-			{
-				const FVector SafeImpactNormal = TerrainHit.ImpactNormal.GetSafeNormal(SMALL_NUMBER, FVector::UpVector);
-				const FVector OverlayWorldPosition = TerrainHit.ImpactPoint + SafeImpactNormal * ShoreOverlayOffset;
-				ShoreVertices.Add(ActorTransform.InverseTransformPosition(OverlayWorldPosition));
-				ShoreNormals.Add(ActorTransform.InverseTransformVectorNoScale(SafeImpactNormal).GetSafeNormal(SMALL_NUMBER, FVector::UpVector));
-			}
-			else
-			{
-				ShoreVertices.Add(LocalPosition - FVector(0.0, 0.0, MaximumDepth));
-				ShoreNormals.Add(FVector::UpVector);
-			}
-			Normals.Add(FVector::UpVector);
-			UVs.Add(FVector2D(U, V));
-			VertexColors.Add(FLinearColor(EncodedDepth, BorderDistance, U, V));
-			Tangents.Add(FProcMeshTangent(FVector::ForwardVector, false));
-			ShoreTangents.Add(FProcMeshTangent(FVector::ForwardVector, false));
-			TerrainHitMask.Add(bHitTerrain);
-			SignedDepths.Add(SignedDepth);
-		}
-	}
-	if (!bTraceTerrain)
-	{
-		LastDepthBakeResult = FString::Printf(TEXT("Terrain trace skipped; uniform %.1f cm depth"), MaximumDepth);
-	}
-	else if (HitSampleCount == 0)
-	{
-		LastDepthBakeResult = FString::Printf(TEXT("0 / %d samples hit the selected trace channel"), VertexCount);
-		UE_LOG(LogStylizedWater, Warning, TEXT("StylizedWater: %s has no terrain depth hits. Check its Z position and Terrain Trace Channel."), *GetName());
-	}
-	else
-	{
-		LastDepthBakeResult = FString::Printf(
-			TEXT("%d / %d hits; %.1f to %.1f cm (range %.1f cm)"),
-			HitSampleCount,
-			VertexCount,
-			MinimumHitDepth,
-			MaximumHitDepth,
-			MaximumHitDepth - MinimumHitDepth);
-	}
-
-	for (int32 Y = 0; Y < ResolutionY; ++Y)
-	{
-		for (int32 X = 0; X < ResolutionX; ++X)
-		{
-			const int32 I00 = Y * (ResolutionX + 1) + X;
-			const int32 I10 = I00 + 1;
-			const int32 I01 = I00 + ResolutionX + 1;
-			const int32 I11 = I01 + 1;
-
-			Triangles.Add(I00);
-			Triangles.Add(I11);
-			Triangles.Add(I10);
-			Triangles.Add(I00);
-			Triangles.Add(I01);
-			Triangles.Add(I11);
-
-			const bool bCellHasTerrain =
-				TerrainHitMask[I00] && TerrainHitMask[I10] && TerrainHitMask[I01] && TerrainHitMask[I11];
-			const float ShoreGeometryDepth = ShoreFoamDepth + FMath::Max(WaterlineSoftness, 0.1f);
-			const bool bCellTouchesShore =
-				SignedDepths[I00] <= ShoreGeometryDepth || SignedDepths[I10] <= ShoreGeometryDepth ||
-				SignedDepths[I01] <= ShoreGeometryDepth || SignedDepths[I11] <= ShoreGeometryDepth;
-			if (bEnableTerrainShoreOverlay && bTraceTerrain && bCellHasTerrain && bCellTouchesShore)
-			{
-				ShoreTriangles.Add(I00);
-				ShoreTriangles.Add(I11);
-				ShoreTriangles.Add(I10);
-				ShoreTriangles.Add(I00);
-				ShoreTriangles.Add(I01);
-				ShoreTriangles.Add(I11);
-			}
-		}
-	}
-	if (bTraceTerrain)
-	{
-		LastDepthBakeResult += bEnableTerrainShoreOverlay
-			? FString::Printf(TEXT("; shore overlay %d triangles"), ShoreTriangles.Num() / 3)
-			: TEXT("; shore overlay disabled");
-	}
-
-	WaterSurface->ClearAllMeshSections();
-	WaterSurface->CreateMeshSection_LinearColor(0, Vertices, Triangles, Normals, UVs, VertexColors, Tangents, false);
-	WaterSurface->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	ShoreOverlay->ClearAllMeshSections();
-	if (!ShoreTriangles.IsEmpty())
-	{
-		ShoreOverlay->CreateMeshSection_LinearColor(0, ShoreVertices, ShoreTriangles, ShoreNormals, UVs, VertexColors, ShoreTangents, false);
-		ShoreOverlay->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	}
-	bShoreOverlayBakeInitialized = true;
-	DynamicMaterial = nullptr;
-	ShoreDynamicMaterial = nullptr;
-	EnsureDynamicMaterial();
-	UpdateMaterialParameters();
-
+    if(!BoundaryMask) BoundaryMask=LoadObject<UTexture2D>(nullptr,TEXT("/StylizedWater/MaskWater/Masks/T_MaskLake.T_MaskLake"));
+    UMaterialInterface* Parent=nullptr;
+    // WATER_SKY_PARALLAX_EXPERIMENT: missing experiment falls back to base.
+    if(bEnableSkyParallax) Parent=SkyMaterial.LoadSynchronous();
+    if(!Parent) Parent=BaseMaterial.LoadSynchronous();
+    if(!Parent || !BoundaryMask) { WaterSurface->SetVisibility(false); return; }
+    WaterSurface->SetVisibility(true);
+    if(!DynamicMaterial || DynamicMaterial->Parent!=Parent) DynamicMaterial=UMaterialInstanceDynamic::Create(Parent,this);
+    WaterSurface->SetMaterial(0,DynamicMaterial);
+    auto V=[this](const TCHAR* N,FLinearColor C){DynamicMaterial->SetVectorParameterValue(N,C);};
+    auto S=[this](const TCHAR* N,float Value){DynamicMaterial->SetScalarParameterValue(N,Value);};
+    const FVector P=GetActorLocation(), Scale=GetActorScale3D();
+    const FVector2D Center=bWorldLockedMask?WorldMaskCenter:FVector2D(P.X,P.Y);
+    const float Angle=FMath::DegreesToRadians(bWorldLockedMask?WorldMaskYaw:GetActorRotation().Yaw);
+    const FVector2D Extent(MaskWorldSize.X>0?MaskWorldSize.X:SurfaceSize.X*FMath::Abs(Scale.X),MaskWorldSize.Y>0?MaskWorldSize.Y:SurfaceSize.Y*FMath::Abs(Scale.Y));
+    V(TEXT("MaskCenter"),FLinearColor(Center.X,Center.Y,FMath::Cos(Angle),FMath::Sin(Angle)));
+    V(TEXT("MaskExtent"),FLinearColor(FMath::Max(Extent.X,1.0),FMath::Max(Extent.Y,1.0),FMath::Max(MaskUVScale.X,0.01),FMath::Max(MaskUVScale.Y,0.01)));
+    V(TEXT("MaskOffset"),FLinearColor(MaskUVOffset.X,MaskUVOffset.Y,0,0));
+    V(TEXT("Boundary"),FLinearColor(MaskDistanceRange,EdgeFeather,ShoreOffset,ShoreRunup));
+    V(TEXT("Shore"),FLinearColor(ShoreWaveSpeed,FoamWidth,ShoreWavelength,FoamIntensity));
+    V(TEXT("Surface"),FLinearColor(Opacity,ShoreFilmOpacity,TerrainDepthInfluence,MaskDepthRange/FMath::Max(DepthColorRange,1.f)));
+    FVector2D Flow=FlowDirection.GetSafeNormal();
+    V(TEXT("Flow"),FLinearColor(Flow.X,Flow.Y,FlowSpeed,RippleScale));
+    V(TEXT("ShallowColor"),ShallowColor); V(TEXT("MidColor"),MidColor); V(TEXT("DeepColor"),DeepColor); V(TEXT("FoamColor"),FoamColor);
+    S(TEXT("RippleStrength"),RippleStrength); S(TEXT("AnimationSpeed"),AnimationSpeed); S(TEXT("IntersectionFade"),IntersectionFade); S(TEXT("RefractionStrength"),RefractionStrength);
+    DynamicMaterial->SetTextureParameterValue(TEXT("BoundaryMask"),BoundaryMask);
+    int32 MaskWidth=BoundaryMask->GetSizeX(),MaskHeight=BoundaryMask->GetSizeY();
 #if WITH_EDITOR
-	WaterSurface->MarkRenderStateDirty();
-	ShoreOverlay->MarkRenderStateDirty();
-	MarkPackageDirty();
+    // Source dimensions remain correct while the asynchronous texture build has a temporary resource.
+    MaskWidth=BoundaryMask->Source.GetSizeX(); MaskHeight=BoundaryMask->Source.GetSizeY();
 #endif
+    MaskResolution=FString::Printf(TEXT("%d x %d; %.2f x %.2f cm/texel"),MaskWidth,MaskHeight,Extent.X/FMath::Max(MaskWidth,1)/FMath::Max(MaskUVScale.X,0.01),Extent.Y/FMath::Max(MaskHeight,1)/FMath::Max(MaskUVScale.Y,0.01));
+    // WATER_SKY_PARALLAX_EXPERIMENT_BEGIN
+    if(bEnableSkyParallax)
+    {
+        if(UTexture2D* Sky=SkyTexture.LoadSynchronous()) DynamicMaterial->SetTextureParameterValue(TEXT("SkyTexture"),Sky);
+        V(TEXT("Sky"),FLinearColor(SkyHeight,SkyWorldSize,SkyReflectionStrength,P.Z+WaterLevelOffset*Scale.Z));
+        V(TEXT("SkyAnchor"),FLinearColor(SkyWorldAnchor.X,SkyWorldAnchor.Y,0,0));
+    }
+    // WATER_SKY_PARALLAX_EXPERIMENT_END
 }
-
-void AStylizedWaterBodyActor::EnsureDynamicMaterial()
-{
-	if (!WaterSurface || !ShoreOverlay || HasAnyFlags(RF_ClassDefaultObject))
-	{
-		return;
-	}
-
-	if (!DynamicMaterial)
-	{
-		UMaterialInterface* ParentMaterial = TemplateMaterialInstance.LoadSynchronous();
-		if (!ParentMaterial)
-		{
-			ParentMaterial = LoadObject<UMaterialInterface>(nullptr, StylizedWater::GeneratedMaterialInstancePath);
-		}
-		if (ParentMaterial)
-		{
-			DynamicMaterial = UMaterialInstanceDynamic::Create(ParentMaterial, this);
-			WaterSurface->SetMaterial(0, DynamicMaterial);
-		}
-	}
-
-	if (!ShoreDynamicMaterial)
-	{
-		UMaterialInterface* ShoreParentMaterial = TemplateShoreMaterialInstance.LoadSynchronous();
-		if (!ShoreParentMaterial)
-		{
-			ShoreParentMaterial = LoadObject<UMaterialInterface>(nullptr, StylizedWater::GeneratedShoreMaterialInstancePath);
-		}
-		if (ShoreParentMaterial)
-		{
-			ShoreDynamicMaterial = UMaterialInstanceDynamic::Create(ShoreParentMaterial, this);
-			ShoreOverlay->SetMaterial(0, ShoreDynamicMaterial);
-		}
-	}
-}
-
-void AStylizedWaterBodyActor::UpdateMaterialParameters()
-{
-	EnsureDynamicMaterial();
-	if (!DynamicMaterial || !ShoreDynamicMaterial)
-	{
-		return;
-	}
-
-	FVector2D SafeFlowDirection = FlowDirection.GetSafeNormal();
-	if (SafeFlowDirection.IsNearlyZero())
-	{
-		SafeFlowDirection = FVector2D::UnitX();
-	}
-
-	DynamicMaterial->SetVectorParameterValue(StylizedWater::ShallowColorName, ShallowColor);
-	DynamicMaterial->SetVectorParameterValue(StylizedWater::MidColorName, MidColor);
-	DynamicMaterial->SetVectorParameterValue(StylizedWater::DeepColorName, DeepColor);
-	DynamicMaterial->SetVectorParameterValue(StylizedWater::FoamColorName, FoamColor);
-	DynamicMaterial->SetVectorParameterValue(StylizedWater::FlowDirectionName, FLinearColor(SafeFlowDirection.X, SafeFlowDirection.Y, 0.0f, 0.0f));
-	DynamicMaterial->SetScalarParameterValue(StylizedWater::DepthColorRangeName, FMath::Max(DepthColorRange, 10.0f));
-	DynamicMaterial->SetScalarParameterValue(StylizedWater::MidColorPositionName, FMath::Clamp(MidColorPosition, 0.05f, 0.95f));
-	DynamicMaterial->SetScalarParameterValue(StylizedWater::DepthGradientInfluenceName, FMath::Clamp(DepthGradientInfluence, 0.0f, 1.0f));
-	DynamicMaterial->SetScalarParameterValue(StylizedWater::OpacityName, FMath::Clamp(Opacity, 0.0f, 1.0f));
-	DynamicMaterial->SetScalarParameterValue(StylizedWater::RoughnessName, FMath::Clamp(Roughness, 0.0f, 1.0f));
-	DynamicMaterial->SetScalarParameterValue(StylizedWater::DistortionStrengthName, FMath::Max(DistortionStrength, 0.0f));
-	DynamicMaterial->SetScalarParameterValue(StylizedWater::EmissiveStrengthName, FMath::Max(EmissiveStrength, 0.0f));
-	DynamicMaterial->SetScalarParameterValue(StylizedWater::WaterLevelOffsetName, WaterLevelOffset);
-	DynamicMaterial->SetScalarParameterValue(StylizedWater::WaterlineSoftnessName, FMath::Max(WaterlineSoftness, 0.1f));
-	DynamicMaterial->SetScalarParameterValue(StylizedWater::ShoreRunupName, FMath::Max(ShoreRunup, 0.0f));
-	DynamicMaterial->SetScalarParameterValue(StylizedWater::ShoreWavelengthName, FMath::Max(ShoreWavelength, 20.0f));
-	DynamicMaterial->SetScalarParameterValue(StylizedWater::ShoreWaveSpeedName, FMath::Max(ShoreWaveSpeed, 0.0f));
-	DynamicMaterial->SetScalarParameterValue(StylizedWater::ShoreFoamDepthName, FMath::Max(ShoreFoamDepth, 10.0f));
-	DynamicMaterial->SetScalarParameterValue(StylizedWater::ShoreFoamWidthName, FMath::Clamp(ShoreFoamWidth, 0.01f, 0.49f));
-	DynamicMaterial->SetScalarParameterValue(StylizedWater::FoamIntensityName, FMath::Max(FoamIntensity, 0.0f));
-	DynamicMaterial->SetScalarParameterValue(StylizedWater::FlowSpeedName, FMath::Max(FlowSpeed, 0.0f));
-	DynamicMaterial->SetScalarParameterValue(StylizedWater::WaveWorldScaleName, FMath::Max(WaveWorldScale, 0.00001f));
-	DynamicMaterial->SetScalarParameterValue(StylizedWater::GeometryWaveAmplitudeName, FMath::Max(GeometryWaveAmplitude, 0.0f));
-	DynamicMaterial->SetScalarParameterValue(StylizedWater::DryRangeName, FMath::Max(MaximumDryHeight, 10.0f));
-	DynamicMaterial->SetScalarParameterValue(StylizedWater::DepthRangeName, FMath::Max(MaximumDepth, 10.0f));
-
-	ShoreDynamicMaterial->SetVectorParameterValue(StylizedWater::ShallowColorName, ShallowColor);
-	ShoreDynamicMaterial->SetVectorParameterValue(StylizedWater::FoamColorName, FoamColor);
-	ShoreDynamicMaterial->SetVectorParameterValue(StylizedWater::FlowDirectionName, FLinearColor(SafeFlowDirection.X, SafeFlowDirection.Y, 0.0f, 0.0f));
-	ShoreDynamicMaterial->SetScalarParameterValue(StylizedWater::RoughnessName, FMath::Clamp(Roughness, 0.0f, 1.0f));
-	ShoreDynamicMaterial->SetScalarParameterValue(StylizedWater::WaterLevelOffsetName, WaterLevelOffset);
-	ShoreDynamicMaterial->SetScalarParameterValue(StylizedWater::WaterlineSoftnessName, FMath::Max(WaterlineSoftness, 0.1f));
-	ShoreDynamicMaterial->SetScalarParameterValue(StylizedWater::ShoreRunupName, FMath::Max(ShoreRunup, 0.0f));
-	ShoreDynamicMaterial->SetScalarParameterValue(StylizedWater::ShoreWavelengthName, FMath::Max(ShoreWavelength, 20.0f));
-	ShoreDynamicMaterial->SetScalarParameterValue(StylizedWater::ShoreWaveSpeedName, FMath::Max(ShoreWaveSpeed, 0.0f));
-	ShoreDynamicMaterial->SetScalarParameterValue(StylizedWater::ShoreFoamDepthName, FMath::Max(ShoreFoamDepth, 10.0f));
-	ShoreDynamicMaterial->SetScalarParameterValue(StylizedWater::ShoreFoamWidthName, FMath::Clamp(ShoreFoamWidth, 0.01f, 0.49f));
-	ShoreDynamicMaterial->SetScalarParameterValue(StylizedWater::FoamIntensityName, FMath::Max(FoamIntensity, 0.0f));
-	ShoreDynamicMaterial->SetScalarParameterValue(StylizedWater::ShoreWaterOpacityName, FMath::Clamp(ShoreWaterOpacity, 0.0f, 1.0f));
-	ShoreDynamicMaterial->SetScalarParameterValue(StylizedWater::ShoreFoamOpacityName, FMath::Clamp(ShoreFoamOpacity, 0.0f, 1.0f));
-	ShoreDynamicMaterial->SetScalarParameterValue(StylizedWater::FlowSpeedName, FMath::Max(FlowSpeed, 0.0f));
-	ShoreDynamicMaterial->SetScalarParameterValue(StylizedWater::WaveWorldScaleName, FMath::Max(WaveWorldScale, 0.00001f));
-	ShoreDynamicMaterial->SetScalarParameterValue(StylizedWater::DryRangeName, FMath::Max(MaximumDryHeight, 10.0f));
-	ShoreDynamicMaterial->SetScalarParameterValue(StylizedWater::DepthRangeName, FMath::Max(MaximumDepth, 10.0f));
-}
-
 #if WITH_EDITOR
-void AStylizedWaterBodyActor::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+void AStylizedWaterBodyActor::PostEditChangeProperty(FPropertyChangedEvent& Event)
 {
-	Super::PostEditChangeProperty(PropertyChangedEvent);
-	if (HasAnyFlags(RF_ClassDefaultObject))
-	{
-		return;
-	}
-
-	const FName PropertyName = PropertyChangedEvent.GetPropertyName();
-	const FName MemberPropertyName = PropertyChangedEvent.GetMemberPropertyName();
-	const FName ChangedPropertyName = MemberPropertyName.IsNone() ? PropertyName : MemberPropertyName;
-	const bool bGeometryChanged =
-		ChangedPropertyName == GET_MEMBER_NAME_CHECKED(AStylizedWaterBodyActor, SurfaceSize) ||
-		ChangedPropertyName == GET_MEMBER_NAME_CHECKED(AStylizedWaterBodyActor, GridResolution) ||
-		ChangedPropertyName == GET_MEMBER_NAME_CHECKED(AStylizedWaterBodyActor, MaximumDryHeight) ||
-		ChangedPropertyName == GET_MEMBER_NAME_CHECKED(AStylizedWaterBodyActor, MaximumDepth) ||
-		ChangedPropertyName == GET_MEMBER_NAME_CHECKED(AStylizedWaterBodyActor, TraceHeight) ||
-		ChangedPropertyName == GET_MEMBER_NAME_CHECKED(AStylizedWaterBodyActor, TerrainTraceChannel) ||
-		ChangedPropertyName == GET_MEMBER_NAME_CHECKED(AStylizedWaterBodyActor, bEnableTerrainShoreOverlay) ||
-		ChangedPropertyName == GET_MEMBER_NAME_CHECKED(AStylizedWaterBodyActor, ShoreOverlayOffset) ||
-		ChangedPropertyName == GET_MEMBER_NAME_CHECKED(AStylizedWaterBodyActor, ShoreFoamDepth) ||
-		ChangedPropertyName == GET_MEMBER_NAME_CHECKED(AStylizedWaterBodyActor, bSampleTerrainOnRebuild);
-
-	if (bGeometryChanged)
-	{
-		BuildWaterMesh(bSampleTerrainOnRebuild);
-	}
-	else
-	{
-		UpdateMaterialParameters();
-	}
+    const FName N=Event.GetMemberPropertyName();
+    if(N==GET_MEMBER_NAME_CHECKED(AStylizedWaterBodyActor,SurfaceSize) || N==GET_MEMBER_NAME_CHECKED(AStylizedWaterBodyActor,GridResolution) || N==GET_MEMBER_NAME_CHECKED(AStylizedWaterBodyActor,WaterLevelOffset)) { FittedHeights.Reset(); FittedDepths.Reset(); TerrainDepthInfluence=0; }
+    Super::PostEditChangeProperty(Event);
+    BuildSurface(false);
 }
-
-void AStylizedWaterBodyActor::PostEditMove(const bool bFinished)
+void AStylizedWaterBodyActor::PostEditMove(bool bFinished)
 {
-	Super::PostEditMove(bFinished);
-	if (bFinished && !HasAnyFlags(RF_ClassDefaultObject))
-	{
-		BuildWaterMesh(bSampleTerrainOnRebuild);
-	}
+    Super::PostEditMove(bFinished);
+    if(bFinished) { FittedHeights.Reset(); FittedDepths.Reset(); TerrainDepthInfluence=0; BuildSurface(false); }
 }
 #endif

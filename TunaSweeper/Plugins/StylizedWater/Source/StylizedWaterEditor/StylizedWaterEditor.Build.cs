@@ -21,6 +21,7 @@ public class StylizedWaterEditor : ModuleRules
 			"Projects",
 			"ProceduralMeshComponent",
 			"RHI",
+			"RenderCore",
 			"Slate",
 			"SlateCore",
 			"StylizedWater",

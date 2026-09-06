@@ -25,7 +25,8 @@ class FTunaSweeperEditorModule final : public IModuleInterface
 public:
 	virtual void StartupModule() override
 	{
-		if (IsRunningCommandlet())
+		// WATER_MASK_REBUILD: isolate verification in worktrees predating the one-shot cleanup.
+		if (IsRunningCommandlet() || FParse::Param(FCommandLine::Get(), TEXT("SkipLegacyEditorAssetSetup")))
 		{
 			return;
 		}

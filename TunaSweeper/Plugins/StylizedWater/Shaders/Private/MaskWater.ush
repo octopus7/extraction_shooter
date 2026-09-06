@@ -1,0 +1,43 @@
+// WATER_MASK_REBUILD. R: signed shore distance; G: normalized depth. No sky dependencies.
+#pragma once
+float2 WaterMaskUV(float3 P, float4 Center, float4 Extent, float2 Offset)
+{
+    float2 D=P.xy-Center.xy;
+    float2 Local=float2(dot(D,Center.zw),dot(D,float2(-Center.w,Center.z)));
+    return Local/max(Extent.xy,1)*Extent.zw+0.5+Offset;
+}
+float4 EvaluateMaskWater(float3 P,float2 UV,float4 Mask,float TerrainDepth,float Time,
+    float4 Boundary,float4 Shore,float4 Surface,float4 Flow,float RippleStrength,
+    float3 Shallow,float3 Mid,float3 Deep,float3 FoamColor)
+{
+    float Distance=(Mask.r-0.5)*2*max(Boundary.x,1)+Boundary.z;
+    float Phase=Time*Shore.x*6.283185+P.x*0.0011+sin(P.y*0.0016)*0.6;
+    float Runup=sin(Phase)*Boundary.w;
+    float D=Distance+Runup;
+    float AA=max(fwidth(D)*1.2,1.0);
+    float Feather=max(Boundary.y,AA);
+    float Coverage=smoothstep(-Feather,Feather,D);
+    float2 UVEdge=min(UV,1-UV);
+    float Edge=min(UVEdge.x,UVEdge.y);
+    Coverage*=smoothstep(0,max(fwidth(Edge)*2,0.018),Edge);
+    float Depth=saturate(lerp(Mask.g*Surface.w,TerrainDepth,saturate(Surface.z)));
+    float3 Color=lerp(Shallow,Mid,smoothstep(0,0.45,Depth));
+    Color=lerp(Color,Deep,smoothstep(0.4,1,Depth));
+    float2 Q=(P.xy-Flow.xy*Time*Flow.z)/max(Flow.w,30);
+    // Sparse, thin broken strokes instead of a regular field of oval highlights.
+    float Waves=sin(Q.y*6+sin(Q.x*0.65)*0.9+Q.x*0.22);
+    float Gaps=smoothstep(0.0,0.8,sin(Q.x*1.7+sin(Q.y*0.4)*2));
+    float Ripple=smoothstep(0.975,0.998,Waves)*Gaps*RippleStrength*smoothstep(Feather,Feather*4,Distance);
+    Color+=float3(0.19,0.29,0.31)*Ripple;
+    float Breakup=smoothstep(-0.75,0.5,sin(P.x*0.009+sin(P.y*0.004))+sin(P.y*0.012)*0.4);
+    float Width=max(Shore.y,AA);
+    float Front=1-smoothstep(Width,Width+max(AA,Width*0.8),abs(D-Width*0.4));
+    float InnerWave=sin(D/max(Shore.z,20)*6.283185-Time*Shore.x*4);
+    float Inner=smoothstep(0.92,0.99,InnerWave)*smoothstep(Width*3,Width*5,D)*(1-smoothstep(Shore.z,Shore.z*2.5,D));
+    float Foam=saturate((Front*0.75+Inner*0.3)*Breakup*Shore.w);
+    float Wet=smoothstep(0,Feather*3,Distance);
+    float Alpha=Coverage*lerp(Surface.y,Surface.x,Wet);
+    Alpha=lerp(Alpha,max(Alpha,Coverage*0.65),Foam);
+    Color=lerp(Color,FoamColor,Foam);
+    return float4(Color,saturate(Alpha));
+}

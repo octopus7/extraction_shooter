@@ -329,24 +329,6 @@ namespace TunaSweeperEditorSetup
 				1.0f);
 		}
 
-		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperRebuildPuddleSkyReflectionMaterial")))
-		{
-			TunaSweeperPuddleSkyReflectionMaterial::EnsureAssets();
-
-			if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperPuddleSkyReflectionMaterialQuit")))
-			{
-				FPlatformMisc::RequestExit(false);
-				return;
-			}
-		}
-
-		FTunaSweeperEditorRunOnce::Run(
-			TEXT("2026-07-06_PuddleSkyReflectionMaterialNoRippleV2"),
-			[]()
-			{
-				return TunaSweeperPuddleSkyReflectionMaterial::EnsureAssets();
-			});
-
 		FTunaSweeperEditorRunOnce::Run(
 			TunaSweeperEditorSetup::GameInstanceTaskId,
 			[]()
