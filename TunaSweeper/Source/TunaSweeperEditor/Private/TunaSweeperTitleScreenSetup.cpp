@@ -7,6 +7,126 @@ namespace TunaSweeperEditorSetup
 {
 namespace TitleScreens
 {
+	bool SaveWidget(UWidgetBlueprint* BP);
+	bool SetupSettingsBackHeader()
+	{
+		UWidgetBlueprint* BP = LoadObject<UWidgetBlueprint>(nullptr, TEXT("/Game/UI/Title/Screens/WBP_TitleSettings.WBP_TitleSettings"));
+		if (!BP) return false;
+		UWidgetTree* Tree = BP->WidgetTree;
+		UButton* Button = Cast<UButton>(Tree->FindWidget(TEXT("BackFromSettingsButton")));
+		USizeBox* Box = Cast<USizeBox>(Tree->FindWidget(TEXT("BackFromSettingsButtonBox")));
+		UTextBlock* Title = Cast<UTextBlock>(Tree->FindWidget(TEXT("SettingsTitleText")));
+		if (!Button || !Box || !Title) return false;
+		UCanvasPanelSlot* Placement = Cast<UCanvasPanelSlot>(Box->Slot);
+		if (!Placement) return false;
+		UPackage* Package = CreatePackage(TEXT("/Game/UI/Title/M_SettingsBackArrow"));
+		UMaterial* Material = FindObject<UMaterial>(Package, TEXT("M_SettingsBackArrow"));
+		if (!Material)
+		{
+			Material = NewObject<UMaterial>(Package, TEXT("M_SettingsBackArrow"), RF_Public | RF_Standalone);
+			FAssetRegistryModule::AssetCreated(Material);
+		}
+		Material->MaterialDomain = MD_UI;
+		Material->BlendMode = BLEND_Translucent;
+		Material->GetExpressionCollection().Empty();
+		auto* UV = NewObject<UMaterialExpressionTextureCoordinate>(Material);
+		Material->GetExpressionCollection().AddExpression(UV);
+		auto* Shape = NewObject<UMaterialExpressionCustom>(Material);
+		Shape->OutputType = CMOT_Float1;
+		Shape->Description = TEXT("Antialiased curved return arrow, resolution independent");
+		Shape->Code = TEXT("float d=10; float2 a=float2(.78,.78); for(int i=1;i<=24;i++){float t=i/24.0; float2 b=(1-t)*(1-t)*float2(.78,.78)+2*(1-t)*t*float2(.88,.26)+t*t*float2(.23,.30); float2 e=b-a; d=min(d,length(UV-a-e*saturate(dot(UV-a,e)/dot(e,e)))); a=b;} float2 p=float2(.23,.30); float2 e=float2(.17,-.17); d=min(d,length(UV-p-e*saturate(dot(UV-p,e)/dot(e,e)))); e=float2(.17,.17); d=min(d,length(UV-p-e*saturate(dot(UV-p,e)/dot(e,e)))); float aa=max(fwidth(d),.001); return 1-smoothstep(.026-aa,.026+aa,d);");
+		FCustomInput Input; Input.InputName = TEXT("UV"); Input.Input.Connect(0, UV); Shape->Inputs.Add(Input);
+		Material->GetExpressionCollection().AddExpression(Shape);
+		auto* Color = NewObject<UMaterialExpressionConstant3Vector>(Material);
+		Color->Constant = FLinearColor::White;
+		Material->GetExpressionCollection().AddExpression(Color);
+		Material->GetEditorOnlyData()->EmissiveColor.Connect(0, Color);
+		Material->GetEditorOnlyData()->Opacity.Connect(0, Shape);
+		Material->PostEditChange(); Material->MarkPackageDirty();
+		if (!SaveAsset(Material)) return false;
+		// Store the simple vector shape as a UI texture so it also renders during shader warm-up.
+		UPackage* IconPackage = CreatePackage(TEXT("/Game/UI/Title/T_SettingsBackArrow"));
+		UTexture2D* Icon = NewObject<UTexture2D>(IconPackage, TEXT("T_SettingsBackArrow"), RF_Public | RF_Standalone);
+		TArray<FColor> Pixels; Pixels.SetNum(128 * 128);
+		for (int32 Y = 0; Y < 128; ++Y) for (int32 X = 0; X < 128; ++X)
+		{
+			const FVector2D P((X + 0.5f) / 128, (Y + 0.5f) / 128);
+			float Distance = 10;
+			auto Segment = [&](FVector2D A, FVector2D B) {
+				FVector2D E = B - A;
+				Distance = FMath::Min(Distance, static_cast<float>((P - A - E * FMath::Clamp(FVector2D::DotProduct(P - A, E) / E.SizeSquared(), 0.0, 1.0)).Size()));
+			};
+			FVector2D A(.78, .78);
+			for (int32 I = 1; I <= 64; ++I) { double T = I / 64.0; FVector2D B = (1-T)*(1-T)*FVector2D(.78,.78) + 2*(1-T)*T*FVector2D(.88,.26) + T*T*FVector2D(.23,.30); Segment(A, B); A = B; }
+			Segment(FVector2D(.23,.30), FVector2D(.40,.13)); Segment(FVector2D(.23,.30), FVector2D(.40,.47));
+			Pixels[Y*128+X] = FColor(255,255,255, FMath::RoundToInt(255 * FMath::Clamp((.030f-Distance)/.008f, 0.0f, 1.0f)));
+		}
+		Icon->Source.Init(128,128,1,1,TSF_BGRA8,reinterpret_cast<const uint8*>(Pixels.GetData()));
+		Icon->CompressionSettings = TC_EditorIcon; Icon->MipGenSettings = TMGS_NoMipmaps; Icon->LODGroup = TEXTUREGROUP_UI;
+		Icon->PostEditChange(); FAssetRegistryModule::AssetCreated(Icon); Icon->MarkPackageDirty();
+		if (!SaveAsset(Icon)) return false;
+		Title->RemoveFromParent();
+		UHorizontalBox* Row = Cast<UHorizontalBox>(Tree->FindWidget(TEXT("SettingsBackHeaderRow")));
+		UImage* Arrow = Cast<UImage>(Tree->FindWidget(TEXT("SettingsBackArrowImage")));
+		if (!Row) Row = Tree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("SettingsBackHeaderRow"));
+		if (!Arrow) Arrow = Tree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("SettingsBackArrowImage"));
+		Row->ClearChildren();
+		FSlateBrush Brush; Brush.SetResourceObject(Icon); Brush.DrawAs = ESlateBrushDrawType::Image;
+		Brush.ImageSize = FVector2D(48, 48); Brush.TintColor = FSlateColor::UseForeground(); Arrow->SetBrush(Brush);
+		Arrow->SetVisibility(ESlateVisibility::HitTestInvisible);
+		Row->AddChildToHorizontalBox(Arrow)->SetVerticalAlignment(VAlign_Center);
+		UHorizontalBoxSlot* LabelSlot = Row->AddChildToHorizontalBox(Title);
+		LabelSlot->SetPadding(FMargin(12, 0, 0, 0)); LabelSlot->SetVerticalAlignment(VAlign_Center);
+		Title->SetColorAndOpacity(FSlateColor::UseForeground()); Title->SetRenderOpacity(1);
+		Title->SetVisibility(ESlateVisibility::HitTestInvisible);
+		Button->SetContent(Row);
+		if (UButtonSlot* Slot = Cast<UButtonSlot>(Row->Slot)) { Slot->SetPadding(FMargin(0)); Slot->SetHorizontalAlignment(HAlign_Left); Slot->SetVerticalAlignment(VAlign_Center); }
+		FSlateBrush Clear; Clear.DrawAs = ESlateBrushDrawType::NoDrawType;
+		FButtonStyle Style = Button->GetStyle();
+		Style.SetNormal(Clear); Style.SetHovered(Clear); Style.SetPressed(Clear); Style.SetDisabled(Clear);
+		Style.SetNormalForeground(FLinearColor(0.90f, 0.95f, 0.93f, 0.90f));
+		Style.SetHoveredForeground(FLinearColor(1.0f, 1.0f, 0.94f, 1.0f));
+		Style.SetPressedForeground(FLinearColor(0.70f, 0.88f, 0.79f, 1.0f));
+		Style.NormalPadding = FMargin(0); Style.PressedPadding = FMargin(0);
+		Button->SetStyle(Style); Button->SetBackgroundColor(FLinearColor::White);
+		Box->SetWidthOverride(260); Box->SetHeightOverride(65);
+		Placement->SetAnchors(FAnchors(0, 0)); Placement->SetAlignment(FVector2D::ZeroVector);
+		Placement->SetOffsets(FMargin(50, 72, 260, 65));
+		UWidgetBlueprint* Graphics = LoadObject<UWidgetBlueprint>(nullptr, TEXT("/Game/UI/Title/Screens/WBP_TitleGraphics.WBP_TitleGraphics"));
+		if (!Graphics) return false;
+		UWidget* Page = Tree->FindWidget(TEXT("SettingsPageStack"));
+		UCanvasPanelSlot* PageSlot = Page ? Cast<UCanvasPanelSlot>(Page->Slot) : nullptr;
+		if (!PageSlot) return false;
+		Page->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+		PageSlot->SetAnchors(FAnchors(0, 0, 1, 1)); PageSlot->SetOffsets(FMargin(0)); PageSlot->SetZOrder(1);
+		for (const TCHAR* Name : { TEXT("InterfaceSettingsPanel"), TEXT("DevelopmentSettingsPanel") })
+			if (UWidget* Panel = Tree->FindWidget(Name))
+				if (UVerticalBoxSlot* Slot = Cast<UVerticalBoxSlot>(Panel->Slot)) Slot->SetPadding(FMargin(440, 72, 32, 32));
+		UWidgetTree* GTree = Graphics->WidgetTree;
+		if (!GTree->FindWidget(TEXT("GraphicsFullscreenCanvas")))
+		{
+			UWidget* OldRoot = GTree->RootWidget;
+			UWidget* Apply = GTree->FindWidget(TEXT("ApplyGraphicsSettingsButtonBox"));
+			UWidget* Cancel = GTree->FindWidget(TEXT("CancelGraphicsSettingsButtonBox"));
+			UWidget* OldActions = GTree->FindWidget(TEXT("GraphicsActionRow"));
+			if (!Apply || !Cancel || !OldActions) return false;
+			Apply->RemoveFromParent(); Cancel->RemoveFromParent(); OldActions->RemoveFromParent();
+			UCanvasPanel* Canvas = GTree->ConstructWidget<UCanvasPanel>(UCanvasPanel::StaticClass(), TEXT("GraphicsFullscreenCanvas"));
+			Canvas->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+			GTree->RootWidget = Canvas;
+			UCanvasPanelSlot* ContentSlot = Canvas->AddChildToCanvas(OldRoot);
+			ContentSlot->SetAnchors(FAnchors(0, 0, 1, 1)); ContentSlot->SetOffsets(FMargin(440, 72, 32, 32));
+			UVerticalBox* Actions = GTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("GraphicsActionColumn"));
+			for (UWidget* Action : { Apply, Cancel })
+			{
+				if (USizeBox* Size = Cast<USizeBox>(Action)) { Size->SetWidthOverride(280); Size->SetHeightOverride(58); }
+				Actions->AddChildToVerticalBox(Action)->SetPadding(FMargin(0, 0, 0, 12));
+			}
+			UCanvasPanelSlot* ActionsSlot = Canvas->AddChildToCanvas(Actions);
+			ActionsSlot->SetAnchors(FAnchors(0, 1)); ActionsSlot->SetOffsets(FMargin(110, -190, 280, 140));
+		}
+		return SaveWidget(Graphics) && SaveWidget(BP);
+	}
 	bool SimplifySettingsTabs()
 	{
 		UWidgetBlueprint* Settings = LoadObject<UWidgetBlueprint>(nullptr, TEXT("/Game/UI/Title/Screens/WBP_TitleSettings.WBP_TitleSettings"));
@@ -126,6 +246,9 @@ namespace TitleScreens
 			if (!ConnectedNames.Contains(It.Key())) It.RemoveCurrent();
 		FKismetEditorUtilities::CompileBlueprint(BP);
 		if (BP->Status == BS_Error) return false;
+		// Compilation can repopulate detached source-object entries; keep only authored tree names.
+		for (auto It = BP->WidgetVariableNameToGuidMap.CreateIterator(); It; ++It)
+			if (!ConnectedNames.Contains(It.Key())) It.RemoveCurrent();
 		BP->MarkPackageDirty();
 		return SaveAsset(BP);
 	}
@@ -172,7 +295,7 @@ bool EnsureTitleScreenAssetsSetup()
 	UWidgetTree* Tree = Intro->WidgetTree;
 	if (Tree->FindWidget(TEXT("SettingsPanelView")))
 	{
-		return SimplifySettingsTabs();
+		return SetupSettingsBackHeader();
 	}
 	Intro->Modify(); Tree->Modify();
 	UCanvasPanel* Settings = Cast<UCanvasPanel>(Tree->FindWidget(TEXT("SettingsPanel")));

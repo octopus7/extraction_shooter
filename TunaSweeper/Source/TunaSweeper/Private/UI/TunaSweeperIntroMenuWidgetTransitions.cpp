@@ -98,7 +98,6 @@ void UTunaSweeperIntroMenuWidget::TickMenuTransitions(float DeltaSeconds)
 		const float SettingsAlpha = bSettingsExiting ? 1.0f - Alpha : Alpha;
 		Opacity(TEXT("SettingsDimImage"), SettingsAlpha);
 		Opacity(TEXT("SettingsBotanicalImage"), SettingsAlpha * 0.48f);
-		Opacity(TEXT("SettingsTitleText"), SettingsAlpha);
 		Opacity(TEXT("BackFromSettingsButtonBox"), SettingsAlpha);
 		if (MainMenuPanel) MainMenuPanel->SetRenderOpacity(1.0f - SettingsAlpha);
 		Opacity(TEXT("LogoImage"), 1.0f - SettingsAlpha);

@@ -29,6 +29,14 @@ bool FTitleScreenAssetTest::RunTest(const FString& Parameters)
 	TestNotNull(TEXT("Bound graphics widget"), Menu->TitleGraphicsSettingsWidget.Get());
 	if (!Menu->SettingsDevelopmentTabButton || !Menu->TitleGraphicsSettingsWidget) { Menu->RemoveFromRoot(); return false; }
 	TestTrue(TEXT("Development click is bound"), Menu->SettingsDevelopmentTabButton->OnClicked.IsBound());
+	UWidget* BackTitle = Menu->FindIntroWidget(TEXT("SettingsTitleText"));
+	TestTrue(TEXT("Settings title is inside back button hit area"), BackTitle && BackTitle->GetParent() && BackTitle->GetParent()->GetParent() == Menu->BackFromSettingsButton);
+	TestNotNull(TEXT("Curved back arrow image exists"), Menu->FindIntroWidget(TEXT("SettingsBackArrowImage")));
+	TestTrue(TEXT("Back header is borderless"), Menu->BackFromSettingsButton && Menu->BackFromSettingsButton->GetStyle().Normal.DrawAs == ESlateBrushDrawType::NoDrawType);
+	if (Menu->BackFromSettingsButton) {
+		TestEqual(TEXT("Back header idle alpha"), Menu->BackFromSettingsButton->GetStyle().NormalForeground.GetSpecifiedColor().A, 0.9f);
+		TestEqual(TEXT("Back header hovered alpha"), Menu->BackFromSettingsButton->GetStyle().HoveredForeground.GetSpecifiedColor().A, 1.0f);
+	}
 	TestEqual(TEXT("Idle settings tab has no frame"), Menu->SettingsDevelopmentTabButton->GetStyle().Normal.DrawAs, ESlateBrushDrawType::NoDrawType);
 	TestNotNull(TEXT("Tab hover uses mist material"), Menu->SettingsDevelopmentTabButton->GetStyle().Hovered.GetResourceObject());
 	for (const TCHAR* Name : { TEXT("VSyncToggleButton"), TEXT("MotionBlurToggleButton"), TEXT("DynamicResolutionToggleButton"), TEXT("HardwareRayTracingToggleButton") })
@@ -80,7 +88,7 @@ bool FTitleScreenAssetTest::RunTest(const FString& Parameters)
 		if (FImageUtils::GetRenderTargetImage(Target, Pixels))
 			FImageUtils::SaveImageByExtension(*(FPaths::ProjectSavedDir() / TEXT("Screenshots/TitleSettingsEffects.png")), Pixels);
 	}
-	Menu->ShowMainMenu();
+	Menu->BackFromSettingsButton->OnClicked.Broadcast();
 	TestTrue(TEXT("Back starts reverse fade"), Menu->bSettingsExiting);
 	Menu->TickMenuTransitions(1.0f);
 	TestEqual(TEXT("Settings closes after exit fade"), Menu->SettingsPanel->GetVisibility(), ESlateVisibility::Collapsed);
