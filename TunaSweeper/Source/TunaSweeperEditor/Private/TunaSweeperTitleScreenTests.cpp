@@ -1,4 +1,5 @@
 #if WITH_DEV_AUTOMATION_TESTS
+#include "Components/ScrollBox.h"
 #include "Misc/AutomationTest.h"
 #include "TunaSweeperEditorSetupShared.h"
 #include "UI/TunaSweeperGraphicsSettingsWidget.h"
@@ -28,6 +29,13 @@ bool FTitleScreenAssetTest::RunTest(const FString& Parameters)
 	TestNotNull(TEXT("Bound graphics widget"), Menu->TitleGraphicsSettingsWidget.Get());
 	if (!Menu->SettingsDevelopmentTabButton || !Menu->TitleGraphicsSettingsWidget) { Menu->RemoveFromRoot(); return false; }
 	TestTrue(TEXT("Development click is bound"), Menu->SettingsDevelopmentTabButton->OnClicked.IsBound());
+	TestEqual(TEXT("Idle settings tab has no frame"), Menu->SettingsDevelopmentTabButton->GetStyle().Normal.DrawAs, ESlateBrushDrawType::NoDrawType);
+	TestNotNull(TEXT("Tab hover uses mist material"), Menu->SettingsDevelopmentTabButton->GetStyle().Hovered.GetResourceObject());
+	for (const TCHAR* Name : { TEXT("VSyncToggleButton"), TEXT("MotionBlurToggleButton"), TEXT("DynamicResolutionToggleButton"), TEXT("HardwareRayTracingToggleButton") })
+	{
+		UButton* Toggle = Cast<UButton>(Menu->TitleGraphicsSettingsWidget->WidgetTree->FindWidget(Name));
+		TestTrue(FString::Printf(TEXT("Unframed toggle %s"), Name), Toggle && Toggle->GetStyle().Normal.DrawAs == ESlateBrushDrawType::NoDrawType);
+	}
 	UButton* Preset = Cast<UButton>(Menu->TitleGraphicsSettingsWidget->WidgetTree->FindWidget(TEXT("PresetHighButton")));
 	TestTrue(TEXT("Baked graphics preset is bound"), Preset && Preset->OnClicked.IsBound());
 	Menu->ShowSettingsPanel();
@@ -62,6 +70,15 @@ bool FTitleScreenAssetTest::RunTest(const FString& Parameters)
 		FImage Pixels;
 		if (FImageUtils::GetRenderTargetImage(Target, Pixels))
 			FImageUtils::SaveImageByExtension(*(FPaths::ProjectSavedDir() / TEXT("Screenshots/TitleSettings.png")), Pixels);
+	}
+	if (UScrollBox* Scroll = Cast<UScrollBox>(Menu->TitleGraphicsSettingsWidget->WidgetTree->FindWidget(TEXT("GraphicsSettingsScroll"))))
+	{
+		Scroll->SetScrollOffset(10000.0f);
+		Renderer.DrawWidget(Target, Slate, FVector2D(1920, 1080), 0.0f);
+		FlushRenderingCommands();
+		FImage Pixels;
+		if (FImageUtils::GetRenderTargetImage(Target, Pixels))
+			FImageUtils::SaveImageByExtension(*(FPaths::ProjectSavedDir() / TEXT("Screenshots/TitleSettingsEffects.png")), Pixels);
 	}
 	Menu->ShowMainMenu();
 	TestTrue(TEXT("Back starts reverse fade"), Menu->bSettingsExiting);

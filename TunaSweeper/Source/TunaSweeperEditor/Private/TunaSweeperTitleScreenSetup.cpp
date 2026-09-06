@@ -7,6 +7,70 @@ namespace TunaSweeperEditorSetup
 {
 namespace TitleScreens
 {
+	bool SimplifySettingsTabs()
+	{
+		UWidgetBlueprint* Settings = LoadObject<UWidgetBlueprint>(nullptr, TEXT("/Game/UI/Title/Screens/WBP_TitleSettings.WBP_TitleSettings"));
+		UWidgetBlueprint* Graphics = LoadObject<UWidgetBlueprint>(nullptr, TEXT("/Game/UI/Title/Screens/WBP_TitleGraphics.WBP_TitleGraphics"));
+		if (!Settings || !Graphics) return false;
+		UPackage* Package = CreatePackage(TEXT("/Game/UI/Title/M_SettingsTabMist"));
+		UMaterial* Material = LoadObject<UMaterial>(nullptr, TEXT("/Game/UI/Title/M_SettingsTabMist.M_SettingsTabMist"));
+		if (!Material)
+		{
+			Material = NewObject<UMaterial>(Package, TEXT("M_SettingsTabMist"), RF_Public | RF_Standalone);
+			FAssetRegistryModule::AssetCreated(Material);
+		}
+		if (!Material) return false;
+		Material->Modify();
+		Material->GetExpressionCollection().Empty();
+		Material->MaterialDomain = MD_UI;
+		Material->BlendMode = BLEND_Translucent;
+		auto* UV = NewObject<UMaterialExpressionTextureCoordinate>(Material);
+		Material->GetExpressionCollection().AddExpression(UV);
+		auto* Mask = NewObject<UMaterialExpressionCustom>(Material);
+		Mask->OutputType = CMOT_Float1;
+		Mask->Description = TEXT("Soft horizontal fade with broad rising wisps; no hard frame");
+		Mask->Code = TEXT("float x=saturate(UV.x), y=saturate(UV.y); float edge=pow(saturate(sin(x*3.14159265)),1.6); float vertical=pow(saturate(sin(y*3.14159265)),1.1); float wisp=0.78+0.12*sin(x*19+y*7+sin(y*8)*1.3)+0.10*sin(x*31-y*5); return saturate(edge*vertical*wisp)*0.26;");
+		FCustomInput Input; Input.InputName = TEXT("UV"); Input.Input.Connect(0, UV); Mask->Inputs.Add(Input);
+		Material->GetExpressionCollection().AddExpression(Mask);
+		auto* Color = NewObject<UMaterialExpressionConstant3Vector>(Material);
+		Color->Constant = FLinearColor(0.40f, 0.62f, 0.53f);
+		Material->GetExpressionCollection().AddExpression(Color);
+		Material->GetEditorOnlyData()->EmissiveColor.Connect(0, Color);
+		Material->GetEditorOnlyData()->Opacity.Connect(0, Mask);
+		Material->PostEditChange(); Material->MarkPackageDirty();
+		if (!SaveAsset(Material)) return false;
+		FSlateBrush Clear; Clear.DrawAs = ESlateBrushDrawType::NoDrawType;
+		FSlateBrush Mist; Mist.SetResourceObject(Material); Mist.DrawAs = ESlateBrushDrawType::Image;
+		Mist.ImageSize = FVector2D(300, 64);
+		for (const TCHAR* Name : { TEXT("SettingsGraphicsTabButton"), TEXT("SettingsInterfaceTabButton"), TEXT("SettingsDevelopmentTabButton") })
+		{
+			UButton* Button = Cast<UButton>(Settings->WidgetTree->FindWidget(Name));
+			if (!Button) return false;
+			FButtonStyle Style = Button->GetStyle();
+			Style.SetNormal(Clear); Style.SetHovered(Mist); Style.SetPressed(Mist); Style.SetDisabled(Mist);
+			Button->SetStyle(Style); Button->SetBackgroundColor(FLinearColor::White);
+			if (UTextBlock* Text = Cast<UTextBlock>(Button->GetContent()))
+			{
+				FSlateFontInfo Font = Text->GetFont(); Font.Size = 30; Text->SetFont(Font);
+				Text->SetColorAndOpacity(FLinearColor(0.88f, 0.92f, 0.88f));
+			}
+		}
+		for (const TCHAR* Name : { TEXT("VSyncToggleButton"), TEXT("MotionBlurToggleButton"), TEXT("DynamicResolutionToggleButton"), TEXT("HardwareRayTracingToggleButton") })
+		{
+			UButton* Button = Cast<UButton>(Graphics->WidgetTree->FindWidget(Name));
+			if (!Button) return false;
+			FButtonStyle Style = Button->GetStyle();
+			Style.SetNormal(Clear); Style.SetHovered(Clear); Style.SetPressed(Clear); Style.SetDisabled(Clear);
+			Button->SetStyle(Style);
+		}
+		for (UWidgetBlueprint* BP : { Settings, Graphics })
+		{
+			FKismetEditorUtilities::CompileBlueprint(BP);
+			if (BP->Status == BS_Error) return false;
+			BP->MarkPackageDirty(); if (!SaveAsset(BP)) return false;
+		}
+		return true;
+	}
 	FSlateBrush TextureBrush(UTexture2D* Texture, FLinearColor Tint = FLinearColor::White)
 	{
 		FSlateBrush Brush;
@@ -108,12 +172,7 @@ bool EnsureTitleScreenAssetsSetup()
 	UWidgetTree* Tree = Intro->WidgetTree;
 	if (Tree->FindWidget(TEXT("SettingsPanelView")))
 	{
-		for (const TCHAR* Asset : { TEXT("WBP_TitleGraphics"), TEXT("WBP_TitleMain"), TEXT("WBP_TitleSaveSlots"), TEXT("WBP_TitleSettings"), TEXT("WBP_TitleCredits"), TEXT("WBP_TitleDemoNotice") })
-		{
-			UWidgetBlueprint* Child = LoadObject<UWidgetBlueprint>(nullptr, *FString::Printf(TEXT("/Game/UI/Title/Screens/%s.%s"), Asset, Asset));
-			if (!Child || !SaveWidget(Child)) return false;
-		}
-		return SaveWidget(Intro);
+		return SimplifySettingsTabs();
 	}
 	Intro->Modify(); Tree->Modify();
 	UCanvasPanel* Settings = Cast<UCanvasPanel>(Tree->FindWidget(TEXT("SettingsPanel")));

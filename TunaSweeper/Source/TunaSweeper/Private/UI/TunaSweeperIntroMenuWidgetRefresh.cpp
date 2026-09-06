@@ -632,7 +632,15 @@ void UTunaSweeperIntroMenuWidget::ApplySettingsTabButtonStyle(
 	UButton* Button, const FVector2D& ButtonSize, bool bSelected) const
 {
 	if (!Button) return;
-	Button->SetBackgroundColor(bSelected ? FLinearColor(1.0f, 1.0f, 0.90f, 1.0f) : FLinearColor(0.62f, 0.72f, 0.67f, 0.75f));
+	Button->SetBackgroundColor(FLinearColor::White);
+	FButtonStyle Style = Button->GetStyle();
+	FSlateBrush Clear; Clear.DrawAs = ESlateBrushDrawType::NoDrawType;
+	Style.SetNormal(bSelected ? Style.Disabled : Clear);
+	Button->SetStyle(Style);
+	// Selection is visual state, not disabled input (which greys out the label).
+	Button->SetIsEnabled(true);
+	if (UTextBlock* Text = Cast<UTextBlock>(Button->GetContent()))
+		Text->SetColorAndOpacity(bSelected ? FLinearColor(1.0f, 0.98f, 0.88f) : FLinearColor(0.70f, 0.79f, 0.76f));
 }
 
 void UTunaSweeperIntroMenuWidget::RefreshLocalizedTexts()

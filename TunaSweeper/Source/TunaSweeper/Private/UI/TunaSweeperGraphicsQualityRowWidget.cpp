@@ -45,6 +45,23 @@ void UTunaSweeperGraphicsQualityRowWidget::BuildRuntimeWidgetTree()
 	NextButtonText->SetText(FText::FromString(TEXT(">")));
 	PreviousButton->SetContent(PreviousButtonText);
 	NextButton->SetContent(NextButtonText);
+	// Quiet hit areas: the arrow is primary; fill only becomes apparent on interaction.
+	for (UButton* Button : { PreviousButton.Get(), NextButton.Get() })
+	{
+		auto Fill = [](FLinearColor Color) {
+			FSlateBrush Brush;
+			Brush.DrawAs = ESlateBrushDrawType::Box;
+			Brush.TintColor = Color;
+			return Brush;
+		};
+		FButtonStyle Style = Button->GetStyle();
+		Style.SetNormal(Fill(FLinearColor(0.005f, 0.015f, 0.017f, 0.16f)));
+		Style.SetHovered(Fill(FLinearColor(0.24f, 0.40f, 0.34f, 0.38f)));
+		Style.SetPressed(Fill(FLinearColor(0.36f, 0.52f, 0.42f, 0.50f)));
+		Style.SetDisabled(Fill(FLinearColor::Transparent));
+		Button->SetStyle(Style);
+		Button->SetBackgroundColor(FLinearColor::White);
+	}
 
 	if (UHorizontalBoxSlot* RowSlot = Root->AddChildToHorizontalBox(OptionLabelText))
 	{
