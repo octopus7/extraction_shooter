@@ -1,0 +1,17 @@
+{
+  "passed": true,
+  "base_commit": "c1b408f8",
+  "protected_paths": [
+    "TunaSweeper/Source",
+    "TunaSweeper/Config",
+    "TunaSweeper/Content/Data",
+    "TunaSweeper/Content/Interaction/BP_LootContainer.uasset"
+  ],
+  "changed_existing_content": [],
+  "sha256": {
+    "TunaSweeper/Content/Data/LootContainerTable.json": "6d587e5a353b05efd3c762e8bf0e9fb3abd7ef6d7714f5450f39c31d1a8d2ee9",
+    "TunaSweeper/Content/Interaction/BP_LootContainer.uasset": "7b86d373136b674ce933f5ebebc2dbb1576c31d9bad33fd01c56f6b9a90d0cd7",
+    "TunaSweeper/Source/TunaSweeper/Private/Interaction/TunaSweeperLootContainerActor.cpp": "dd6328daf76bc38cc1ada47cc4c59b0fcc63211338d1d47bc385aa9c874f38ba",
+    "TunaSweeper/Source/TunaSweeper/Public/Interaction/TunaSweeperLootContainerActor.h": "a8084ebe9ffdc272e0eaec79d52d78c3f07884672abd0204d2dd5dce21e92222"
+  }
+}
