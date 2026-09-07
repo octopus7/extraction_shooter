@@ -1,0 +1,41 @@
+{
+  "passed": true,
+  "assets": [
+    {
+      "name": "SM_MoleControlV2_GrandMapConsole",
+      "size_cm": [
+        359.99999046325684,
+        115.0000274181366,
+        210.00001430511475
+      ],
+      "triangles": 38220,
+      "collision_boxes": 7,
+      "uv_channels": 2,
+      "passed": true
+    },
+    {
+      "name": "SM_MoleControlV2_VintageRadioStack",
+      "size_cm": [
+        85.00000238418579,
+        55.00000715255737,
+        125.0
+      ],
+      "triangles": 20568,
+      "collision_boxes": 4,
+      "uv_channels": 2,
+      "passed": true
+    },
+    {
+      "name": "SM_MoleControlV2_ShelfReceiver",
+      "size_cm": [
+        84.99999642372131,
+        35.00000387430191,
+        37.99999952316284
+      ],
+      "triangles": 6248,
+      "collision_boxes": 1,
+      "uv_channels": 2,
+      "passed": true
+    }
+  ]
+}

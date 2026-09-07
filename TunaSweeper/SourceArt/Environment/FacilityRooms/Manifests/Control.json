@@ -1,0 +1,726 @@
+{
+  "category": "Control",
+  "axis_contract": "Blender X width/-Y front/Z up -> UE X width/+Y front/Z up; floor-centred pivots, cm",
+  "materials": {
+    "Concrete": {
+      "name": "M_FacilityRooms_Concrete",
+      "metallic": 0,
+      "roughness": 0.85,
+      "emission": 0.0
+    },
+    "Floor": {
+      "name": "M_FacilityRooms_Floor",
+      "metallic": 0.05,
+      "roughness": 0.72,
+      "emission": 0.0
+    },
+    "Steel": {
+      "name": "M_FacilityRooms_Steel",
+      "metallic": 0.8,
+      "roughness": 0.3,
+      "emission": 0.0
+    },
+    "Iron": {
+      "name": "M_FacilityRooms_Iron",
+      "metallic": 0.65,
+      "roughness": 0.48,
+      "emission": 0.0
+    },
+    "Teal": {
+      "name": "M_FacilityRooms_Teal",
+      "metallic": 0.2,
+      "roughness": 0.48,
+      "emission": 0.0
+    },
+    "Ivory": {
+      "name": "M_FacilityRooms_Ivory",
+      "metallic": 0.1,
+      "roughness": 0.45,
+      "emission": 0.0
+    },
+    "Rust": {
+      "name": "M_FacilityRooms_Rust",
+      "metallic": 0.3,
+      "roughness": 0.82,
+      "emission": 0.0
+    },
+    "Rubber": {
+      "name": "M_FacilityRooms_Rubber",
+      "metallic": 0,
+      "roughness": 0.9,
+      "emission": 0.0
+    },
+    "Hazard": {
+      "name": "M_FacilityRooms_Hazard",
+      "metallic": 0.1,
+      "roughness": 0.55,
+      "emission": 0.0
+    },
+    "Wood": {
+      "name": "M_FacilityRooms_Wood",
+      "metallic": 0,
+      "roughness": 0.8,
+      "emission": 0.0
+    },
+    "Screen": {
+      "name": "M_FacilityRooms_Screen",
+      "metallic": 0.05,
+      "roughness": 0.3,
+      "emission": 1.5
+    },
+    "Amber": {
+      "name": "M_FacilityRooms_Amber",
+      "metallic": 0.0,
+      "roughness": 0.4,
+      "emission": 2.0
+    },
+    "Blue": {
+      "name": "M_FacilityRooms_Blue",
+      "metallic": 0.25,
+      "roughness": 0.4,
+      "emission": 0.0
+    },
+    "Red": {
+      "name": "M_FacilityRooms_Red",
+      "metallic": 0.2,
+      "roughness": 0.4,
+      "emission": 0.0
+    },
+    "Panel": {
+      "name": "M_FacilityRooms_Panel",
+      "metallic": 0.3,
+      "roughness": 0.5,
+      "emission": 0.0
+    },
+    "Paper": {
+      "name": "M_FacilityRooms_Paper",
+      "metallic": 0,
+      "roughness": 0.9,
+      "emission": 0.0
+    }
+  },
+  "assets": [
+    {
+      "name": "SM_FacilityRooms_OperatorDesk",
+      "target_size_cm": [
+        180,
+        80,
+        78
+      ],
+      "category": "Control",
+      "reference": "References/ControlRoom_Attic_Reference.png",
+      "size_cm": [
+        180,
+        80,
+        78
+      ],
+      "bounds_cm": [
+        -90.0,
+        -40.0,
+        0,
+        90.0,
+        40.0,
+        78
+      ],
+      "triangles": 2760,
+      "materials": [
+        "M_FacilityRooms_Wood",
+        "M_FacilityRooms_Steel",
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Rubber"
+      ],
+      "collision_boxes": 5,
+      "collision_specs_cm": [
+        {
+          "center": [
+            0.0,
+            0.0,
+            74.07265961170197
+          ],
+          "size": [
+            180.0,
+            80.00000953674316,
+            6.9598472118377686
+          ]
+        },
+        {
+          "center": [
+            -62.0,
+            3.0000003576278687,
+            34.79923605918884
+          ],
+          "size": [
+            44.0,
+            64.00000762939453,
+            69.59847211837769
+          ]
+        },
+        {
+          "center": [
+            72.0,
+            -28.000003337860107,
+            34.79923605918884
+          ],
+          "size": [
+            8.0,
+            8.000000953674316,
+            69.59847211837769
+          ]
+        },
+        {
+          "center": [
+            72.0,
+            28.000003337860107,
+            34.79923605918884
+          ],
+          "size": [
+            8.0,
+            8.000000953674316,
+            69.59847211837769
+          ]
+        },
+        {
+          "center": [
+            14.000000000000002,
+            26.00000309944153,
+            44.7418749332428
+          ],
+          "size": [
+            104.0,
+            5.000000596046448,
+            32.81070828437805
+          ]
+        }
+      ],
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_FacilityRooms_MonitorWall",
+      "target_size_cm": [
+        240,
+        35,
+        170
+      ],
+      "category": "Control",
+      "reference": "References/ControlRoom_Attic_Reference.png",
+      "size_cm": [
+        240,
+        35,
+        170
+      ],
+      "bounds_cm": [
+        -120.0,
+        -17.5,
+        0,
+        120.0,
+        17.5,
+        170
+      ],
+      "triangles": 3720,
+      "materials": [
+        "M_FacilityRooms_Wood",
+        "M_FacilityRooms_Rubber",
+        "M_FacilityRooms_Steel",
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Screen",
+        "M_FacilityRooms_Teal",
+        "M_FacilityRooms_Amber",
+        "M_FacilityRooms_Blue"
+      ],
+      "collision_boxes": 5,
+      "collision_specs_cm": [
+        {
+          "center": [
+            0.0,
+            -1.0,
+            115.17751842737198
+          ],
+          "size": [
+            241.0041904449463,
+            15.0,
+            111.65680825710297
+          ]
+        },
+        {
+          "center": [
+            -78.32636189460754,
+            0.0,
+            3.017751574516296
+          ],
+          "size": [
+            55.23012697696686,
+            35.0,
+            6.035503149032593
+          ]
+        },
+        {
+          "center": [
+            -78.32636189460754,
+            10.0,
+            31.1834329366684
+          ],
+          "size": [
+            10.041841268539429,
+            10.0,
+            62.36686587333679
+          ]
+        },
+        {
+          "center": [
+            78.32636189460754,
+            0.0,
+            3.017751574516296
+          ],
+          "size": [
+            55.23012697696686,
+            35.0,
+            6.035503149032593
+          ]
+        },
+        {
+          "center": [
+            78.32636189460754,
+            10.0,
+            31.1834329366684
+          ],
+          "size": [
+            10.041841268539429,
+            10.0,
+            62.36686587333679
+          ]
+        }
+      ],
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_FacilityRooms_DeskMonitor",
+      "target_size_cm": [
+        65,
+        25,
+        50
+      ],
+      "category": "Control",
+      "reference": "References/ControlRoom_Attic_Reference.png",
+      "size_cm": [
+        65,
+        25,
+        50
+      ],
+      "bounds_cm": [
+        -32.5,
+        -12.5,
+        0,
+        32.5,
+        12.5,
+        50
+      ],
+      "triangles": 1868,
+      "materials": [
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Wood",
+        "M_FacilityRooms_Steel",
+        "M_FacilityRooms_Screen",
+        "M_FacilityRooms_Teal",
+        "M_FacilityRooms_Amber",
+        "M_FacilityRooms_Blue",
+        "M_FacilityRooms_Rubber"
+      ],
+      "collision_boxes": 3,
+      "collision_specs_cm": [
+        {
+          "center": [
+            0.0,
+            0.0,
+            31.5
+          ],
+          "size": [
+            65.0,
+            10.0,
+            37.0
+          ]
+        },
+        {
+          "center": [
+            0.0,
+            0.0,
+            2.0
+          ],
+          "size": [
+            39.0,
+            25.0,
+            4.0
+          ]
+        },
+        {
+          "center": [
+            0.0,
+            6.0,
+            10.0
+          ],
+          "size": [
+            10.0,
+            10.0,
+            20.0
+          ]
+        }
+      ],
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_FacilityRooms_RadioRack",
+      "target_size_cm": [
+        90,
+        65,
+        185
+      ],
+      "category": "Control",
+      "reference": "References/ControlRoom_Attic_Reference.png",
+      "size_cm": [
+        90,
+        65,
+        185
+      ],
+      "bounds_cm": [
+        -45.0,
+        -32.5,
+        0,
+        45.0,
+        32.5,
+        185
+      ],
+      "triangles": 12008,
+      "materials": [
+        "M_FacilityRooms_Wood",
+        "M_FacilityRooms_Rubber",
+        "M_FacilityRooms_Steel",
+        "M_FacilityRooms_Panel",
+        "M_FacilityRooms_Screen",
+        "M_FacilityRooms_Blue",
+        "M_FacilityRooms_Amber",
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Ivory"
+      ],
+      "collision_boxes": 1,
+      "collision_specs_cm": [
+        {
+          "center": [
+            0.0,
+            3.645799242275416,
+            93.0
+          ],
+          "size": [
+            90.0,
+            61.49255573749542,
+            184.0
+          ]
+        }
+      ],
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_FacilityRooms_RadioConsole",
+      "target_size_cm": [
+        70,
+        45,
+        25
+      ],
+      "category": "Control",
+      "reference": "References/ControlRoom_Attic_Reference.png",
+      "size_cm": [
+        70,
+        45,
+        25
+      ],
+      "bounds_cm": [
+        -35.0,
+        -22.5,
+        0,
+        35.0,
+        22.5,
+        25
+      ],
+      "triangles": 3244,
+      "materials": [
+        "M_FacilityRooms_Wood",
+        "M_FacilityRooms_Ivory",
+        "M_FacilityRooms_Screen",
+        "M_FacilityRooms_Blue",
+        "M_FacilityRooms_Amber",
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Rubber",
+        "M_FacilityRooms_Panel"
+      ],
+      "collision_boxes": 1,
+      "collision_specs_cm": [
+        {
+          "center": [
+            0.07372730392862792,
+            1.0487295104285366,
+            9.762309142152807
+          ],
+          "size": [
+            69.8525458574295,
+            42.90254205465317,
+            21.22241109609604
+          ]
+        }
+      ],
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_FacilityRooms_OperatorChair",
+      "target_size_cm": [
+        65,
+        65,
+        115
+      ],
+      "category": "Control",
+      "reference": "References/ControlRoom_Attic_Reference.png",
+      "size_cm": [
+        65,
+        65,
+        115
+      ],
+      "bounds_cm": [
+        -32.5,
+        -32.5,
+        0,
+        32.5,
+        32.5,
+        115
+      ],
+      "triangles": 3980,
+      "materials": [
+        "M_FacilityRooms_Steel",
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Rubber",
+        "M_FacilityRooms_Ivory",
+        "M_FacilityRooms_Wood"
+      ],
+      "collision_boxes": 3,
+      "collision_specs_cm": [
+        {
+          "center": [
+            -0.7330834839801348,
+            0.0,
+            10.00000149011612
+          ],
+          "size": [
+            55.71428722143173,
+            55.95245969295502,
+            18.0
+          ]
+        },
+        {
+          "center": [
+            -0.7330834839801348,
+            -0.9816220998764039,
+            49.00000149011612
+          ],
+          "size": [
+            51.804512679576874,
+            50.062727093696594,
+            14.0
+          ]
+        },
+        {
+          "center": [
+            -0.7330834839801348,
+            21.595686197280884,
+            86.00000149011612
+          ],
+          "size": [
+            47.894738137722015,
+            12.76108729839325,
+            58.0
+          ]
+        }
+      ],
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_FacilityRooms_KeyboardConsole",
+      "target_size_cm": [
+        75,
+        35,
+        9
+      ],
+      "category": "Control",
+      "reference": "References/ControlRoom_Attic_Reference.png",
+      "size_cm": [
+        75,
+        35,
+        9
+      ],
+      "bounds_cm": [
+        -37.5,
+        -17.5,
+        0,
+        37.5,
+        17.5,
+        9
+      ],
+      "triangles": 6012,
+      "materials": [
+        "M_FacilityRooms_Wood",
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Ivory",
+        "M_FacilityRooms_Panel"
+      ],
+      "collision_boxes": 1,
+      "collision_specs_cm": [
+        {
+          "center": [
+            0.0,
+            0.0,
+            3.2400001287460323
+          ],
+          "size": [
+            75.0,
+            35.0,
+            6.480000257492065
+          ]
+        }
+      ],
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_FacilityRooms_FileCabinet",
+      "target_size_cm": [
+        90,
+        45,
+        130
+      ],
+      "category": "Control",
+      "reference": "References/ControlRoom_Attic_Reference.png",
+      "size_cm": [
+        90,
+        45,
+        130
+      ],
+      "bounds_cm": [
+        -45.0,
+        -22.5,
+        0,
+        45.0,
+        22.5,
+        130
+      ],
+      "triangles": 2184,
+      "materials": [
+        "M_FacilityRooms_Wood",
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Paper",
+        "M_FacilityRooms_Steel"
+      ],
+      "collision_boxes": 1,
+      "collision_specs_cm": [
+        {
+          "center": [
+            0.0,
+            1.836734388555783,
+            65.0
+          ],
+          "size": [
+            90.0,
+            41.3265323638916,
+            130.0
+          ]
+        }
+      ],
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_FacilityRooms_BookStack",
+      "target_size_cm": [
+        45,
+        30,
+        22
+      ],
+      "category": "Control",
+      "reference": "References/ControlRoom_Attic_Reference.png",
+      "size_cm": [
+        45,
+        30,
+        22
+      ],
+      "bounds_cm": [
+        -22.5,
+        -15.0,
+        0,
+        22.5,
+        15.0,
+        22
+      ],
+      "triangles": 1404,
+      "materials": [
+        "M_FacilityRooms_Paper",
+        "M_FacilityRooms_Red",
+        "M_FacilityRooms_Ivory",
+        "M_FacilityRooms_Wood",
+        "M_FacilityRooms_Teal"
+      ],
+      "collision_boxes": 1,
+      "collision_specs_cm": [
+        {
+          "center": [
+            0.0,
+            0.16550139442923495,
+            11.733332668315795
+          ],
+          "size": [
+            45.0,
+            28.576430082321167,
+            23.0476176738739
+          ]
+        }
+      ],
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_FacilityRooms_DeskMug",
+      "target_size_cm": [
+        16,
+        13,
+        18
+      ],
+      "category": "Control",
+      "reference": "References/ControlRoom_Attic_Reference.png",
+      "size_cm": [
+        16,
+        13,
+        18
+      ],
+      "bounds_cm": [
+        -8.0,
+        -6.5,
+        0,
+        8.0,
+        6.5,
+        18
+      ],
+      "triangles": 2872,
+      "materials": [
+        "M_FacilityRooms_Ivory",
+        "M_FacilityRooms_Wood"
+      ],
+      "collision_boxes": 1,
+      "collision_specs_cm": [
+        {
+          "center": [
+            3.014824190513251e-07,
+            0.0,
+            9.000000607967378
+          ],
+          "size": [
+            15.999999847412111,
+            12.999999842643737,
+            18.000001215934756
+          ]
+        }
+      ],
+      "uv_channels": 2
+    }
+  ],
+  "total_triangles": 40052
+}

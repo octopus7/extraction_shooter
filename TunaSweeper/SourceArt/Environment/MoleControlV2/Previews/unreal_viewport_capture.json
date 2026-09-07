@@ -1,0 +1,56 @@
+{
+  "passed": true,
+  "started_at_utc": "2026-09-07T08:07:00.047461+00:00",
+  "engine_version": "5.7.4-51494982+++UE5+Release-5.7",
+  "level": "/Game/Environment/MoleControlV2/Maps/L_MoleControlV2_StoneVault",
+  "requested_cameras": [
+    "MoleV2_InteriorCamera"
+  ],
+  "resolution": [
+    1600,
+    900
+  ],
+  "warmup_seconds": 15.0,
+  "warmup_frames": 90,
+  "captures": [
+    {
+      "path": "C:\\Users\\blendue\\.codex\\worktrees\\5bb8\\extraction_shooter\\TunaSweeper\\SourceArt\\Environment\\MoleControlV2\\Previews\\UE_MoleControlV2_StoneVault_Interior.png",
+      "width": 1600,
+      "height": 900,
+      "bytes": 2235934,
+      "sha256": "afd0707798daad5733cb2c6dba63e3cecec4246a66698d7757bdd6389b0d0228",
+      "camera_label": "MoleV2_InteriorCamera"
+    }
+  ],
+  "validation": "rendered editor viewport PNG; visual acceptance is separate",
+  "camera_transforms": [
+    {
+      "label": "MoleV2_InteriorCamera",
+      "actor_location": [
+        240.0,
+        -245.0,
+        475.0
+      ],
+      "actor_rotation": [
+        -0.6268419732098776,
+        126.99527114270715,
+        1.0762480431904656e-08
+      ],
+      "component_location": [
+        240.0,
+        -245.0,
+        475.0
+      ],
+      "component_rotation": [
+        -0.6268419732098776,
+        126.99527114270715,
+        1.0762480431904656e-08
+      ],
+      "fov": 86.0
+    }
+  ],
+  "asset_packages_checked": 42,
+  "asset_packages_unchanged": true,
+  "changed_asset_packages": [],
+  "elapsed_seconds": 19.875
+}

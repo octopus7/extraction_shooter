@@ -1,0 +1,361 @@
+{
+  "category": "Console",
+  "axis_contract": "Blender X width/-Y front/Z up -> UE X width/+Y front/Z up; floor-centred pivots, cm",
+  "materials": {
+    "Stone": {
+      "name": "M_MoleControlV2_Stone",
+      "metallic": 0,
+      "roughness": 0.88,
+      "emission": 0.0
+    },
+    "Oak": {
+      "name": "M_MoleControlV2_Oak",
+      "metallic": 0,
+      "roughness": 0.64,
+      "emission": 0.0
+    },
+    "Brass": {
+      "name": "M_MoleControlV2_Brass",
+      "metallic": 0.72,
+      "roughness": 0.38,
+      "emission": 0.0
+    },
+    "Iron": {
+      "name": "M_MoleControlV2_Iron",
+      "metallic": 0.65,
+      "roughness": 0.52,
+      "emission": 0.0
+    },
+    "Rose": {
+      "name": "M_MoleControlV2_Rose",
+      "metallic": 0,
+      "roughness": 0.86,
+      "emission": 0.0
+    },
+    "Cream": {
+      "name": "M_MoleControlV2_Cream",
+      "metallic": 0,
+      "roughness": 0.82,
+      "emission": 0.0
+    },
+    "Leather": {
+      "name": "M_MoleControlV2_Leather",
+      "metallic": 0,
+      "roughness": 0.65,
+      "emission": 0.0
+    },
+    "Paper": {
+      "name": "M_MoleControlV2_Paper",
+      "metallic": 0,
+      "roughness": 0.92,
+      "emission": 0.0
+    },
+    "Map": {
+      "name": "M_MoleControlV2_Map",
+      "metallic": 0,
+      "roughness": 0.72,
+      "emission": 0.35
+    },
+    "Dial": {
+      "name": "M_MoleControlV2_Dial",
+      "metallic": 0.15,
+      "roughness": 0.4,
+      "emission": 0.0
+    },
+    "Amber": {
+      "name": "M_MoleControlV2_Amber",
+      "metallic": 0,
+      "roughness": 0.35,
+      "emission": 2.0
+    },
+    "Green": {
+      "name": "M_MoleControlV2_Green",
+      "metallic": 0,
+      "roughness": 0.35,
+      "emission": 1.5
+    },
+    "BookRed": {
+      "name": "M_MoleControlV2_BookRed",
+      "metallic": 0,
+      "roughness": 0.75,
+      "emission": 0.0
+    },
+    "BookGreen": {
+      "name": "M_MoleControlV2_BookGreen",
+      "metallic": 0,
+      "roughness": 0.75,
+      "emission": 0.0
+    },
+    "Ceramic": {
+      "name": "M_MoleControlV2_Ceramic",
+      "metallic": 0,
+      "roughness": 0.3,
+      "emission": 0.0
+    },
+    "Leaf": {
+      "name": "M_MoleControlV2_Leaf",
+      "metallic": 0,
+      "roughness": 0.7,
+      "emission": 0.0
+    }
+  },
+  "assets": [
+    {
+      "name": "SM_MoleControlV2_GrandMapConsole",
+      "target_size_cm": [
+        360,
+        115,
+        210
+      ],
+      "category": "Console",
+      "reference": "References/User_Reference.png: curved oak console, parchment map and brass analog controls",
+      "size_cm": [
+        360,
+        115,
+        210
+      ],
+      "bounds_cm": [
+        -180.0,
+        -57.5,
+        0,
+        180.0,
+        57.5,
+        210
+      ],
+      "triangles": 38220,
+      "materials": [
+        "M_MoleControlV2_Oak",
+        "M_MoleControlV2_Iron",
+        "M_MoleControlV2_Brass",
+        "M_MoleControlV2_Map",
+        "M_MoleControlV2_Dial",
+        "M_MoleControlV2_Amber",
+        "M_MoleControlV2_Green",
+        "M_MoleControlV2_Cream"
+      ],
+      "collision_boxes": 7,
+      "collision_specs_cm": [
+        {
+          "center": [
+            -137.00000596046448,
+            5.0,
+            42.88393199443817
+          ],
+          "size": [
+            65.0,
+            91.0,
+            85.76786398887634
+          ]
+        },
+        {
+          "center": [
+            136.99999403953552,
+            5.0,
+            42.88393199443817
+          ],
+          "size": [
+            65.0,
+            91.0,
+            85.76786398887634
+          ]
+        },
+        {
+          "center": [
+            -5.9604644775390625e-06,
+            0.0,
+            90.75436770915985
+          ],
+          "size": [
+            360.0,
+            112.0,
+            14.959511160850525
+          ]
+        },
+        {
+          "center": [
+            -5.9604644775390625e-06,
+            45.0,
+            139.62210416793823
+          ],
+          "size": [
+            333.0,
+            18.0,
+            99.73007440567017
+          ]
+        },
+        {
+          "center": [
+            -173.00000596046448,
+            28.999999999999996,
+            151.58971309661865
+          ],
+          "size": [
+            14.0,
+            57.0,
+            115.68688631057739
+          ]
+        },
+        {
+          "center": [
+            172.99999403953552,
+            28.999999999999996,
+            151.58971309661865
+          ],
+          "size": [
+            14.0,
+            57.0,
+            115.68688631057739
+          ]
+        },
+        {
+          "center": [
+            -5.9604644775390625e-06,
+            -27.0,
+            106.71117961406709
+          ],
+          "size": [
+            331.0,
+            51.0,
+            22.937917113304138
+          ]
+        }
+      ],
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_MoleControlV2_VintageRadioStack",
+      "target_size_cm": [
+        85,
+        55,
+        125
+      ],
+      "category": "Console",
+      "reference": "References/User_Reference.png: curved oak console, parchment map and brass analog controls",
+      "size_cm": [
+        85,
+        55,
+        125
+      ],
+      "bounds_cm": [
+        -42.5,
+        -27.5,
+        0,
+        42.5,
+        27.5,
+        125
+      ],
+      "triangles": 20568,
+      "materials": [
+        "M_MoleControlV2_Oak",
+        "M_MoleControlV2_Iron",
+        "M_MoleControlV2_Brass",
+        "M_MoleControlV2_Dial",
+        "M_MoleControlV2_Cream",
+        "M_MoleControlV2_BookRed",
+        "M_MoleControlV2_Green",
+        "M_MoleControlV2_Amber"
+      ],
+      "collision_boxes": 4,
+      "collision_specs_cm": [
+        {
+          "center": [
+            0.0,
+            1.0576916208633769,
+            29.713117361068726
+          ],
+          "size": [
+            81.0,
+            47.11538618803024,
+            34.836068630218506
+          ]
+        },
+        {
+          "center": [
+            0.0,
+            1.0576916208633769,
+            68.64754700660706
+          ],
+          "size": [
+            81.0,
+            47.11538618803024,
+            34.836068630218506
+          ]
+        },
+        {
+          "center": [
+            0.0,
+            1.0576916208633769,
+            107.5819766521454
+          ],
+          "size": [
+            81.0,
+            47.11538618803024,
+            34.836068630218506
+          ]
+        },
+        {
+          "center": [
+            0.0,
+            1.0576916208633769,
+            5.122951269149781
+          ],
+          "size": [
+            85.0,
+            52.884617149829865,
+            10.24590253829956
+          ]
+        }
+      ],
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_MoleControlV2_ShelfReceiver",
+      "target_size_cm": [
+        85,
+        35,
+        38
+      ],
+      "category": "Console",
+      "reference": "References/User_Reference.png: curved oak console, parchment map and brass analog controls",
+      "size_cm": [
+        85,
+        35,
+        38
+      ],
+      "bounds_cm": [
+        -42.5,
+        -17.5,
+        0,
+        42.5,
+        17.5,
+        38
+      ],
+      "triangles": 6248,
+      "materials": [
+        "M_MoleControlV2_Oak",
+        "M_MoleControlV2_Iron",
+        "M_MoleControlV2_Brass",
+        "M_MoleControlV2_Dial",
+        "M_MoleControlV2_Amber",
+        "M_MoleControlV2_Green"
+      ],
+      "collision_boxes": 1,
+      "collision_specs_cm": [
+        {
+          "center": [
+            0.0,
+            2.7941181996873787,
+            19.0
+          ],
+          "size": [
+            85.0,
+            34.31372553110123,
+            38.0
+          ]
+        }
+      ],
+      "uv_channels": 2
+    }
+  ],
+  "total_triangles": 65036
+}

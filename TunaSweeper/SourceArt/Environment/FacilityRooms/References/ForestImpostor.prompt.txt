@@ -1,0 +1,5 @@
+Use case: stylized-concept
+Asset type: opaque forest-background impostor texture for an Unreal game; seen outside a small wooden attic window.
+Primary request: a tranquil sunlit temperate forest viewed from a second-floor treetop height. Fill the entire square image with layered broadleaf trees, tall trunks and distant soft woodland; mostly leafy canopy at eye level with a little woodland floor low in frame. Gentle warm late-afternoon light, muted greens and golden highlights, soft haze between tree layers. Stylized realistic 3D game-environment art with broad readable forms, not noisy microdetail.
+Composition: square standalone outdoor landscape background, natural perspective, no close foreground object occluding the center. Woodland extends beyond all image edges; no obvious frame or border.
+Constraints: forest only; no window, no interior, no buildings, no people, no animals, no text, no watermark, no visible sun disk. Opaque image; image will be used as an unlit plane outside a real modeled window.

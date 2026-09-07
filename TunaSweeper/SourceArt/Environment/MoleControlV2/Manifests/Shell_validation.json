@@ -1,0 +1,241 @@
+{
+  "category": "Shell",
+  "blender": "4.5.12 LTS",
+  "verification": "fresh-process blend and FBX reload, exact bounds and aperture ray probes",
+  "assets": [
+    {
+      "name": "SM_MoleControlV2_StoneWall200",
+      "triangles": 7884,
+      "vertices": 4088,
+      "collision_boxes": 1,
+      "uv_channels": 2,
+      "bounds_cm": [
+        -100.0,
+        -12.000008672475815,
+        0.0,
+        100.0,
+        12.000008672475815,
+        240.00000953674316
+      ],
+      "max_bounds_error_cm": 9.5367431640625e-06,
+      "open_space_probes": [],
+      "sha256": "4b6bd54e56f1f1f6c86ed4cc8b2fe40d8ed7da5dd60d014d41eb667c2229b44f",
+      "passed": true
+    },
+    {
+      "name": "SM_MoleControlV2_StoneWindowWall200",
+      "triangles": 10260,
+      "vertices": 5320,
+      "collision_boxes": 4,
+      "uv_channels": 2,
+      "bounds_cm": [
+        -100.0,
+        -12.000008672475815,
+        0.0,
+        100.0,
+        12.000008672475815,
+        239.99998569488525
+      ],
+      "max_bounds_error_cm": 1.430511474609375e-05,
+      "open_space_probes": [
+        [
+          -25,
+          0,
+          127
+        ],
+        [
+          25,
+          0,
+          127
+        ],
+        [
+          -25,
+          0,
+          182
+        ],
+        [
+          25,
+          0,
+          182
+        ]
+      ],
+      "sha256": "792a27646bcea06e6f7b82011ed53c8787ff71da0a3f01a96c36b59ca43c72bb",
+      "passed": true
+    },
+    {
+      "name": "SM_MoleControlV2_ArchedDoorway200",
+      "triangles": 10132,
+      "vertices": 5252,
+      "collision_boxes": 24,
+      "uv_channels": 2,
+      "bounds_cm": [
+        -100.0,
+        -12.000008672475815,
+        0.0,
+        100.0,
+        12.000008672475815,
+        240.00000953674316
+      ],
+      "max_bounds_error_cm": 9.5367431640625e-06,
+      "open_space_probes": [
+        [
+          -53,
+          0,
+          80
+        ],
+        [
+          53,
+          0,
+          80
+        ],
+        [
+          0,
+          0,
+          218
+        ],
+        [
+          -30,
+          0,
+          208
+        ],
+        [
+          30,
+          0,
+          208
+        ]
+      ],
+      "sha256": "e08e3be1ea1ce673c2225c04a87980ba179839b20ad687e50944bc6545e186c8",
+      "passed": true
+    },
+    {
+      "name": "SM_MoleControlV2_ArchedWoodDoor",
+      "triangles": 4652,
+      "vertices": 2384,
+      "collision_boxes": 15,
+      "uv_channels": 2,
+      "bounds_cm": [
+        -52.99999713897705,
+        -5.000004544854164,
+        0.0,
+        52.99999713897705,
+        5.000004544854164,
+        218.00000667572021
+      ],
+      "max_bounds_error_cm": 6.67572021484375e-06,
+      "open_space_probes": [],
+      "sha256": "57c5c9d75532fb6cf1716516fafb43dcbfbbd22f56205bfe2413485a84e609dc",
+      "passed": true
+    },
+    {
+      "name": "SM_MoleControlV2_OakFloor200",
+      "triangles": 10668,
+      "vertices": 5432,
+      "collision_boxes": 1,
+      "uv_channels": 2,
+      "bounds_cm": [
+        -100.00001192092896,
+        -100.00001192092896,
+        0.0,
+        100.00001192092896,
+        100.00001192092896,
+        20.000001788139343
+      ],
+      "max_bounds_error_cm": 1.1920928955078125e-05,
+      "open_space_probes": [],
+      "sha256": "83aa928041604db90bdb480706493ba650f460342ee271d420a3ccacb68fb6ad",
+      "passed": true
+    },
+    {
+      "name": "SM_MoleControlV2_OakHatch200",
+      "triangles": 3024,
+      "vertices": 1568,
+      "collision_boxes": 4,
+      "uv_channels": 2,
+      "bounds_cm": [
+        -100.00001192092896,
+        -100.00001192092896,
+        0.0,
+        100.00001192092896,
+        100.00001192092896,
+        20.000001788139343
+      ],
+      "max_bounds_error_cm": 1.1920928955078125e-05,
+      "open_space_probes": [
+        [
+          -44,
+          -44,
+          10
+        ],
+        [
+          0,
+          0,
+          10
+        ],
+        [
+          44,
+          44,
+          10
+        ]
+      ],
+      "sha256": "b9234cafc5109756dcf63c3e884c3a4650418d325b92e19e617753c63d3b9835",
+      "passed": true
+    },
+    {
+      "name": "SM_MoleControlV2_StoneVault600",
+      "triangles": 39960,
+      "vertices": 20600,
+      "collision_boxes": 30,
+      "uv_channels": 2,
+      "bounds_cm": [
+        -300.0000238418579,
+        -300.0000238418579,
+        0.0,
+        300.0000238418579,
+        300.0000238418579,
+        120.00000476837158
+      ],
+      "max_bounds_error_cm": 2.384185791015625e-05,
+      "open_space_probes": [
+        [
+          0,
+          0,
+          80
+        ],
+        [
+          -150,
+          0,
+          60
+        ],
+        [
+          150,
+          0,
+          60
+        ]
+      ],
+      "sha256": "bd333cce75378a80c2d885d714a7f9f325c1289a2e298b9f612bc09c62db3f1a",
+      "passed": true
+    },
+    {
+      "name": "SM_MoleControlV2_VaultEnd600",
+      "triangles": 11072,
+      "vertices": 5714,
+      "collision_boxes": 30,
+      "uv_channels": 2,
+      "bounds_cm": [
+        -300.0,
+        -12.000025808811188,
+        0.0,
+        300.0,
+        12.000025808811188,
+        120.00000476837158
+      ],
+      "max_bounds_error_cm": 2.580881118774414e-05,
+      "open_space_probes": [],
+      "sha256": "9a26332fcf9021758b56d3467c5ac1fc58fc0012ad22a49ff393a71a9a0b8b9f",
+      "passed": true
+    }
+  ],
+  "passed": true,
+  "source_blend_reload_passed": true,
+  "total_triangles": 97652
+}

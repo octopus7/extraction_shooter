@@ -1,0 +1,227 @@
+{
+  "verification": "fresh Blender process FBX round trip",
+  "blender": "4.5.12 LTS",
+  "axis_contract": "+X muzzle/forward, +Y right, +Z up",
+  "assets": [
+    {
+      "name": "SM_TunaWeapon_SMG_Standard",
+      "sha256": "db7fdddb36df4523e53161a1179a39bd20d5231a81d4c902945a6c626a0f3861",
+      "triangles": 19768,
+      "vertices_round_trip": 10100,
+      "vertices_source": 10100,
+      "uv_channels": 2,
+      "materials": [
+        "M_TunaWeapon_Charcoal",
+        "M_TunaWeapon_Gunmetal",
+        "M_TunaWeapon_Rubber",
+        "M_TunaWeapon_Steel",
+        "M_TunaWeapon_Titanium",
+        "M_TunaWeapon_OlivePolymer",
+        "M_TunaWeapon_BlackGrip",
+        "M_TunaWeapon_TanGrip",
+        "M_TunaWeapon_WarmGrayPolymer",
+        "M_TunaWeapon_Magazine"
+      ],
+      "collision_meshes": 3,
+      "bounds_cm": [
+        -24.0,
+        -3.000001907348633,
+        -12.984122276306152,
+        24.0,
+        2.992501974105835,
+        9.0
+      ],
+      "max_bounds_error_cm": 1.9073486328125e-06,
+      "sockets_from_manifest": [
+        "MuzzleSocket",
+        "LaserSightSocket",
+        "ShellEjectionSocket"
+      ],
+      "passed": true
+    },
+    {
+      "name": "SM_TunaWeapon_SMG_Premium",
+      "sha256": "3eb0bdf017067516c36e2f6d1a24de3652afb88f935314e688c28ba55465d3f9",
+      "triangles": 28924,
+      "vertices_round_trip": 14814,
+      "vertices_source": 14814,
+      "uv_channels": 2,
+      "materials": [
+        "M_TunaWeapon_Gunmetal",
+        "M_TunaWeapon_Charcoal",
+        "M_TunaWeapon_GraphiteCeramic",
+        "M_TunaWeapon_Rubber",
+        "M_TunaWeapon_Titanium",
+        "M_TunaWeapon_CyanAccent",
+        "M_TunaWeapon_Steel",
+        "M_TunaWeapon_BlackGrip",
+        "M_TunaWeapon_IvoryCeramic",
+        "M_TunaWeapon_Magazine",
+        "M_TunaWeapon_SmokedPolymer",
+        "M_TunaWeapon_VioletLens"
+      ],
+      "collision_meshes": 3,
+      "bounds_cm": [
+        -24.020000457763672,
+        -3.0210022926330566,
+        -13.0,
+        24.0,
+        2.8875021934509277,
+        9.0
+      ],
+      "max_bounds_error_cm": 2.1457672119140625e-06,
+      "sockets_from_manifest": [
+        "MuzzleSocket",
+        "LaserSightSocket",
+        "ShellEjectionSocket"
+      ],
+      "passed": true
+    },
+    {
+      "name": "SM_TunaWeapon_AR_Standard",
+      "sha256": "f5a344be9717feee7ce78fed7c45e8076f23494779c8c6bb6b8d579fc24c1afb",
+      "triangles": 24132,
+      "vertices_round_trip": 12348,
+      "vertices_source": 12348,
+      "uv_channels": 2,
+      "materials": [
+        "M_TunaWeapon_OlivePolymer",
+        "M_TunaWeapon_Rubber",
+        "M_TunaWeapon_Charcoal",
+        "M_TunaWeapon_Gunmetal",
+        "M_TunaWeapon_BlackGrip",
+        "M_TunaWeapon_Steel",
+        "M_TunaWeapon_IvoryCeramic",
+        "M_TunaWeapon_Titanium",
+        "M_TunaWeapon_Magazine"
+      ],
+      "collision_meshes": 3,
+      "bounds_cm": [
+        -30.000001907348633,
+        -3.5000030994415283,
+        -16.979711532592773,
+        36.0,
+        3.50000262260437,
+        9.0
+      ],
+      "max_bounds_error_cm": 3.0994415283203125e-06,
+      "sockets_from_manifest": [
+        "MuzzleSocket",
+        "LaserSightSocket",
+        "ShellEjectionSocket"
+      ],
+      "passed": true
+    },
+    {
+      "name": "SM_TunaWeapon_AR_Premium",
+      "sha256": "a8b20fa1bfd98fa502eb4b26180010e8d53c6ce4b044f3c5d00482a28345c35c",
+      "triangles": 44726,
+      "vertices_round_trip": 22979,
+      "vertices_source": 22979,
+      "uv_channels": 2,
+      "materials": [
+        "M_TunaWeapon_Gunmetal",
+        "M_TunaWeapon_Steel",
+        "M_TunaWeapon_GraphiteCeramic",
+        "M_TunaWeapon_Rubber",
+        "M_TunaWeapon_Charcoal",
+        "M_TunaWeapon_IvoryCeramic",
+        "M_TunaWeapon_Titanium",
+        "M_TunaWeapon_BlackGrip",
+        "M_TunaWeapon_Magazine",
+        "M_TunaWeapon_CyanAccent",
+        "M_TunaWeapon_VioletLens",
+        "M_TunaWeapon_SmokedPolymer"
+      ],
+      "collision_meshes": 3,
+      "bounds_cm": [
+        -30.000001907348633,
+        -3.5000030994415283,
+        -16.969478607177734,
+        36.0,
+        3.50000262260437,
+        8.997963905334473
+      ],
+      "max_bounds_error_cm": 3.0994415283203125e-06,
+      "sockets_from_manifest": [
+        "MuzzleSocket",
+        "LaserSightSocket",
+        "ShellEjectionSocket"
+      ],
+      "passed": true
+    },
+    {
+      "name": "SM_TunaWeapon_Pistol_Standard",
+      "sha256": "95f6b7978429305e2206df290b456b1f13292fb537707c7d85fcad1d0c680b49",
+      "triangles": 12662,
+      "vertices_round_trip": 6479,
+      "vertices_source": 6479,
+      "uv_channels": 2,
+      "materials": [
+        "M_TunaWeapon_Charcoal",
+        "M_TunaWeapon_Steel",
+        "M_TunaWeapon_Rubber",
+        "M_TunaWeapon_Gunmetal",
+        "M_TunaWeapon_WarmGrayPolymer",
+        "M_TunaWeapon_BlackGrip",
+        "M_TunaWeapon_Magazine",
+        "M_TunaWeapon_IvoryCeramic"
+      ],
+      "collision_meshes": 3,
+      "bounds_cm": [
+        -11.0,
+        -2.2500016689300537,
+        -12.0,
+        17.0,
+        2.2500009536743164,
+        6.0
+      ],
+      "max_bounds_error_cm": 1.6689300537109375e-06,
+      "sockets_from_manifest": [
+        "MuzzleSocket",
+        "LaserSightSocket",
+        "ShellEjectionSocket"
+      ],
+      "passed": true
+    },
+    {
+      "name": "SM_TunaWeapon_Pistol_Premium",
+      "sha256": "373518b958bbd89b9df1f3dd3f7c01e9c3e9a6e7c2ccaf1c237c0b246957f23e",
+      "triangles": 15555,
+      "vertices_round_trip": 7971,
+      "vertices_source": 7971,
+      "uv_channels": 2,
+      "materials": [
+        "M_TunaWeapon_Charcoal",
+        "M_TunaWeapon_Steel",
+        "M_TunaWeapon_Rubber",
+        "M_TunaWeapon_Gunmetal",
+        "M_TunaWeapon_CyanAccent",
+        "M_TunaWeapon_GraphiteCeramic",
+        "M_TunaWeapon_IvoryCeramic",
+        "M_TunaWeapon_BlackGrip",
+        "M_TunaWeapon_Titanium",
+        "M_TunaWeapon_Magazine"
+      ],
+      "collision_meshes": 3,
+      "bounds_cm": [
+        -10.987194061279297,
+        -2.2550415992736816,
+        -12.0,
+        17.0,
+        2.2550408840179443,
+        6.0
+      ],
+      "max_bounds_error_cm": 1.6689300537109375e-06,
+      "sockets_from_manifest": [
+        "MuzzleSocket",
+        "LaserSightSocket",
+        "ShellEjectionSocket"
+      ],
+      "passed": true
+    }
+  ],
+  "passed": true,
+  "total_triangles": 145767,
+  "texture_sha256": "6d3bf2f1d52db009d5f92a1ed4341add826dc81454b03ae7aff877ba4c0941df"
+}

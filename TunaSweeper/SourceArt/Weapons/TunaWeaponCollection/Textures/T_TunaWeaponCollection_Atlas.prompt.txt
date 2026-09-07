@@ -1,0 +1,12 @@
+Use case: stylized-concept
+Asset type: source texture atlas for six stylized Unreal Engine weapon models
+Primary request: create one perfectly aligned 4 by 4 grid of sixteen square seamless material swatches, edge-to-edge, exactly equal tile sizes, no gaps, no borders
+Scene/backdrop: the full image is the atlas, orthographic flat material capture, no perspective, no lighting direction or cast shadows
+Subject: row 1 left to right: charcoal coated metal, olive molded polymer, warm gray molded polymer, near-black rubber; row 2: dark gunmetal, brushed steel, muted titanium, smoked translucent polymer; row 3: pearl warm ivory ceramic composite, graphite ceramic composite, cyan luminous panel texture, violet optical lens texture; row 4: tan ribbed grip rubber, black coarse grip stipple, curved dark magazine ribs, subtle maintained edge-wear metal
+Style/medium: clean hand-painted PBR base-color source for a polished stylized top-down game, broad low-frequency variation and readable material identity
+Composition/framing: exact 4x4 atlas filling the square canvas; every cell independently tileable; hard mathematical boundaries at 25%, 50%, and 75%
+Lighting/mood: diffuse neutral albedo capture, no highlights baked into the surface
+Color palette: charcoal, olive, warm gray, black, ivory, titanium, cyan, violet, tan
+Materials/textures: modest wear, no tiny speckles, no dirt noise, no photographic scenery
+Constraints: no objects, no weapons, no text, no numbers, no labels, no icons, no logos, no watermark; uniform scale; each tile must remain visually consistent from edge to edge
+Avoid: gradients spanning multiple cells, diagonal composition, bevelled sample spheres, material balls, seams, gutters, frames, shadows, high-frequency glitter, scratches dense enough to create noise

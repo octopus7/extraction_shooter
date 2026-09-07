@@ -1,0 +1,176 @@
+{
+  "passed": true,
+  "file_count": 42,
+  "verified_source": "compiled project Content/Environment/MoleControlV2",
+  "destination": "TunaSweeper/Content/Environment/MoleControlV2",
+  "files": [
+    {
+      "path": "Maps/L_MoleControlV2_StoneVault.umap",
+      "sha256": "d6cbeff98888d1ebe3c26ff0f7a201fb23c387e39b996ce17bebcb10b36891fb"
+    },
+    {
+      "path": "Materials/M_MoleControlV2_Amber.uasset",
+      "sha256": "6b20eb7b38a485bfabb4f17073e46b5f502388f212d37e4802e43ac01db8136c"
+    },
+    {
+      "path": "Materials/M_MoleControlV2_BookGreen.uasset",
+      "sha256": "7ae2e7d9ec5231250764cbb6c3371fa4a6812892b312e10c6dee36b4ec8b85b1"
+    },
+    {
+      "path": "Materials/M_MoleControlV2_BookRed.uasset",
+      "sha256": "2459d9365316ede47185c22a5430099a3f78116df88977ddaa9b8e5c462263b3"
+    },
+    {
+      "path": "Materials/M_MoleControlV2_Brass.uasset",
+      "sha256": "fa6fe42e11aec7980313c4a54cdc1b4cad03becd029731cf6ab9736ec6c4fa71"
+    },
+    {
+      "path": "Materials/M_MoleControlV2_Ceramic.uasset",
+      "sha256": "161a668cc52c1815fe60e83685a62432e194eba3f12418ca0c55d06efeb7daae"
+    },
+    {
+      "path": "Materials/M_MoleControlV2_Cream.uasset",
+      "sha256": "86020df043d723b3b63df6bc6d00e5ab78ea01d3a0389903d0deaba748eea3fb"
+    },
+    {
+      "path": "Materials/M_MoleControlV2_Dial.uasset",
+      "sha256": "cb1cda097548f5aa7af459df0a56d100b33496c52e176d3938f10e87da4399b0"
+    },
+    {
+      "path": "Materials/M_MoleControlV2_ForestImpostor.uasset",
+      "sha256": "6500a8b4d81a52076e3dc8892fc8ce5fa13944ccb489df9f0b4c385a0aaf30b1"
+    },
+    {
+      "path": "Materials/M_MoleControlV2_Green.uasset",
+      "sha256": "016cf2e65bfca585ffef7a3d72508ab788b954378e7e04cbaea9a84197aeeac4"
+    },
+    {
+      "path": "Materials/M_MoleControlV2_Iron.uasset",
+      "sha256": "c326dcff7faaf19ff79cd9dc9f40c712cc01b24778d6ab86cc024644dd40baab"
+    },
+    {
+      "path": "Materials/M_MoleControlV2_Leaf.uasset",
+      "sha256": "d0bdebd8f346ac2d0caef0272ac1b3b5794f8748d11681fb7a54aaec0eea4327"
+    },
+    {
+      "path": "Materials/M_MoleControlV2_Leather.uasset",
+      "sha256": "18f9ebe70f211b6ce5fdf23f02f044e60fae3e6dd74abf47ed72ea97be4885cf"
+    },
+    {
+      "path": "Materials/M_MoleControlV2_Map.uasset",
+      "sha256": "2286e54f1c756f3713b5cbc2ef4d0c19b17e53b44ec63f6a0ff65e09ddf81605"
+    },
+    {
+      "path": "Materials/M_MoleControlV2_Master.uasset",
+      "sha256": "54d55c8af39ea7ec4c3115fb7da96b25d4faa105392bf02a21bc23e33adacff7"
+    },
+    {
+      "path": "Materials/M_MoleControlV2_Oak.uasset",
+      "sha256": "b96e8e7072947db0edcea9e5d55b88796880ebe6bb2cc01ff6f0e76e913e7a23"
+    },
+    {
+      "path": "Materials/M_MoleControlV2_Paper.uasset",
+      "sha256": "e65b8cf993b823c38356b343da1674053978564915c7b8f5822cb12fe3bea235"
+    },
+    {
+      "path": "Materials/M_MoleControlV2_Rose.uasset",
+      "sha256": "372043e3d97abfeee1a26b8e7519639c614dec2a5ea1fd0773bf5afdfcfa60e7"
+    },
+    {
+      "path": "Materials/M_MoleControlV2_Rug.uasset",
+      "sha256": "4bf642a42d7d511dce9981c58a71771553b52ffeeec86ca3bb4138096586223f"
+    },
+    {
+      "path": "Materials/M_MoleControlV2_Stone.uasset",
+      "sha256": "49c980bb6a3c098da995a0a24ff7e273c4b9b408870de5b631e9bb6804679a44"
+    },
+    {
+      "path": "Meshes/SM_MoleControlV2_ArchedDoorway200.uasset",
+      "sha256": "fb763330a1f68b56924b8f47cc57fc22f5a29342b4ef6d68ff8b9d8f5d041e48"
+    },
+    {
+      "path": "Meshes/SM_MoleControlV2_ArchedWoodDoor.uasset",
+      "sha256": "8d087a9112b0b0609308a5d9081c97910f014d0a118ca110f9cea94128aaefed"
+    },
+    {
+      "path": "Meshes/SM_MoleControlV2_BookSet.uasset",
+      "sha256": "85e0ebdd70fcce72df037115d4262ccbc27ee079f1adbfd5ccaf8346e779c0a0"
+    },
+    {
+      "path": "Meshes/SM_MoleControlV2_CeramicMug.uasset",
+      "sha256": "1b2285c3404fab5a1d59ee76485332e2af84d577ccb562a1c55bf3631f972306"
+    },
+    {
+      "path": "Meshes/SM_MoleControlV2_CurtainFrame.uasset",
+      "sha256": "46a13159231efd187d19d624065ed44cfdfba70f3b118ad79b0f97cc128d22d1"
+    },
+    {
+      "path": "Meshes/SM_MoleControlV2_FloralRug240.uasset",
+      "sha256": "09388443abb5697a25b7a4c2ad9def3d824601d472b1bbbfe86817e9fc4f1f08"
+    },
+    {
+      "path": "Meshes/SM_MoleControlV2_FlowerPot.uasset",
+      "sha256": "0b463768f049aa00ed074b8ae15e22afacf4a0493b7dffc59537557242bc77ea"
+    },
+    {
+      "path": "Meshes/SM_MoleControlV2_GrandMapConsole.uasset",
+      "sha256": "efef13e19aab024cbf31816aa4005c43c51b53dd52db7730fd3ebe8953a567b1"
+    },
+    {
+      "path": "Meshes/SM_MoleControlV2_OakFloor200.uasset",
+      "sha256": "0ab521792efc03a1c3e18b9eacaf9d9dda08e9221f6fc9ef60c03d4aa7cbae8d"
+    },
+    {
+      "path": "Meshes/SM_MoleControlV2_OakHatch200.uasset",
+      "sha256": "3074d20e6b752e35dafae69231f25fa23e35f2f4d1b86ee759d619f5d83806c7"
+    },
+    {
+      "path": "Meshes/SM_MoleControlV2_RoseTableLamp.uasset",
+      "sha256": "2c209f5e174ec246fcf9a9f576d547fc1b077172bb627806c9f515f876bbec56"
+    },
+    {
+      "path": "Meshes/SM_MoleControlV2_ShelfReceiver.uasset",
+      "sha256": "d3aaae83922a4eff22c7512ff06b619dcd4c603851de2b178ce24c7f53fe9136"
+    },
+    {
+      "path": "Meshes/SM_MoleControlV2_SideCabinet.uasset",
+      "sha256": "97175e2b78f78fdf95dc42fb9c4eb61f4de911e1fbcafaebdae49ba04844ecfc"
+    },
+    {
+      "path": "Meshes/SM_MoleControlV2_StoneVault600.uasset",
+      "sha256": "afce4a190c4678270bbbe4c416224e8980cd22a142a69928a736c6c070b39c85"
+    },
+    {
+      "path": "Meshes/SM_MoleControlV2_StoneWall200.uasset",
+      "sha256": "10dea416532169555e4b37e617440a7a1d6b841ba514a58fff8be78f25ed3928"
+    },
+    {
+      "path": "Meshes/SM_MoleControlV2_StoneWindowWall200.uasset",
+      "sha256": "ed0ccb0d2bc0a41bd70c14737d7e7ea2a8c0cee8c8fa0fdcc422c2f735563caa"
+    },
+    {
+      "path": "Meshes/SM_MoleControlV2_SwivelStool.uasset",
+      "sha256": "abda5c1ce07aaad2c45ecc9f7853adc75e2519a74781f726225fdf5d826750b6"
+    },
+    {
+      "path": "Meshes/SM_MoleControlV2_VaultEnd600.uasset",
+      "sha256": "add1814a9d60b43a4e01259ea248e15b4e804386daa18bafb135258154bcdfb9"
+    },
+    {
+      "path": "Meshes/SM_MoleControlV2_VintageRadioStack.uasset",
+      "sha256": "f38192fee799950427e65653575260d93bd689aec8b0d74541419e344eac2214"
+    },
+    {
+      "path": "Textures/T_MoleControlV2_Atlas.uasset",
+      "sha256": "20b423666d6b130c5aa533b6cb7fc18c6756c7e055c2dc6573d6baf9260700a4"
+    },
+    {
+      "path": "Textures/T_MoleControlV2_Forest.uasset",
+      "sha256": "6b4ef9dd17f5a3f7aa9579b92685c8e3cd4d91a0bc7171fa6bb9227d97b71ab8"
+    },
+    {
+      "path": "Textures/T_MoleControlV2_Rug.uasset",
+      "sha256": "842d1a75e174ef812f8835c6b923e04e880f080cbef97250f57b0a5525a0d894"
+    }
+  ]
+}
