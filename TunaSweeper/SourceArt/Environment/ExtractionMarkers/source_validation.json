@@ -1,0 +1,193 @@
+{
+  "passed": true,
+  "blender_version": "4.5.12 LTS",
+  "assets": [
+    {
+      "label": "source:SM_MIE_EmergencyLight",
+      "triangles": 12,
+      "material_slots": 2,
+      "bounds_m": [
+        -1.0490732726964325e-08,
+        -0.12000003457069397,
+        0.0,
+        0.4000000059604645,
+        0.0,
+        0.20000000298023224
+      ],
+      "bounds_error_m": 0.0,
+      "uv_channels": 2,
+      "minimum_triangle_area_m2": 0.012000000104308128,
+      "minimum_uv_triangle_areas": [
+        0.11712798430633597,
+        0.0007499999944120643
+      ],
+      "closed_shell_count": 1,
+      "positive_shell_volumes_m3": [
+        0.009600000507670205
+      ],
+      "normals_and_winding_valid": true,
+      "arrow_faces_pointing_plus_x": 0
+    },
+    {
+      "label": "source:SM_EM_DirectionSign",
+      "triangles": 60,
+      "material_slots": 1,
+      "bounds_m": [
+        -0.3400000035762787,
+        -0.44999998807907104,
+        0.0,
+        0.3400000035762787,
+        0.44999998807907104,
+        0.28995048999786377
+      ],
+      "bounds_error_m": 0.0,
+      "uv_channels": 2,
+      "minimum_triangle_area_m2": 0.0016250003827735782,
+      "minimum_uv_triangle_areas": [
+        0.008937783901609708,
+        0.00010156252048909575
+      ],
+      "closed_shell_count": 5,
+      "positive_shell_volumes_m3": [
+        0.0005967006630574664,
+        0.0005967005951485289,
+        0.0024309997485640147,
+        0.011700000782244906,
+        0.002430999748564016
+      ],
+      "normals_and_winding_valid": true,
+      "arrow_faces_pointing_plus_x": 2
+    },
+    {
+      "label": "source:SM_EM_Beacon",
+      "triangles": 132,
+      "material_slots": 2,
+      "bounds_m": [
+        -0.30000001192092896,
+        -0.3850000202655792,
+        0.0,
+        0.30000001192092896,
+        0.30000001192092896,
+        0.550000011920929
+      ],
+      "bounds_error_m": 0.0,
+      "uv_channels": 2,
+      "minimum_triangle_area_m2": 0.0007000004407018423,
+      "minimum_uv_triangle_areas": [
+        0.01048478254816354,
+        4.375002773012587e-05
+      ],
+      "closed_shell_count": 7,
+      "positive_shell_volumes_m3": [
+        0.028589742491021756,
+        0.0071474395226687176,
+        0.00016800017207666928,
+        0.00016799993924602558,
+        0.00036399987584445647,
+        0.05040000565350056,
+        0.007844643706145384
+      ],
+      "normals_and_winding_valid": true,
+      "arrow_faces_pointing_plus_x": 0
+    },
+    {
+      "label": "fbx:SM_MIE_EmergencyLight",
+      "triangles": 12,
+      "material_slots": 2,
+      "bounds_m": [
+        -1.0490732726964325e-08,
+        -0.12000003457069397,
+        0.0,
+        0.4000000059604645,
+        0.0,
+        0.20000000298023224
+      ],
+      "bounds_error_m": 0.0,
+      "uv_channels": 2,
+      "minimum_triangle_area_m2": 0.012000000104308128,
+      "minimum_uv_triangle_areas": [
+        0.11712798430633597,
+        0.0007499999944120643
+      ],
+      "closed_shell_count": 1,
+      "positive_shell_volumes_m3": [
+        0.009600000507670204
+      ],
+      "normals_and_winding_valid": true,
+      "arrow_faces_pointing_plus_x": 0,
+      "triangle_position_signature_matches_source": true,
+      "triangle_uv_and_material_signature_matches_source": true
+    },
+    {
+      "label": "fbx:SM_EM_DirectionSign",
+      "triangles": 60,
+      "material_slots": 1,
+      "bounds_m": [
+        -0.3400000333786011,
+        -0.45000001788139343,
+        0.0,
+        0.3400000333786011,
+        0.45000001788139343,
+        0.28995048999786377
+      ],
+      "bounds_error_m": 2.9802322387695312e-08,
+      "uv_channels": 2,
+      "minimum_triangle_area_m2": 0.0016250003827735782,
+      "minimum_uv_triangle_areas": [
+        0.008937783901609708,
+        0.00010156252048909575
+      ],
+      "closed_shell_count": 5,
+      "positive_shell_volumes_m3": [
+        0.0024309997508923384,
+        0.0005966997899425526,
+        0.0005966994795016945,
+        0.002430999944917837,
+        0.011700000675531232
+      ],
+      "normals_and_winding_valid": true,
+      "arrow_faces_pointing_plus_x": 2,
+      "triangle_position_signature_matches_source": true,
+      "triangle_uv_and_material_signature_matches_source": true
+    },
+    {
+      "label": "fbx:SM_EM_Beacon",
+      "triangles": 132,
+      "material_slots": 2,
+      "bounds_m": [
+        -0.30000004172325134,
+        -0.3850000202655792,
+        0.0,
+        0.30000004172325134,
+        0.30000004172325134,
+        0.550000011920929
+      ],
+      "bounds_error_m": 2.9802322387695312e-08,
+      "uv_channels": 2,
+      "minimum_triangle_area_m2": 0.0007000004407018423,
+      "minimum_uv_triangle_areas": [
+        0.01048478254816354,
+        4.375002773012587e-05
+      ],
+      "closed_shell_count": 7,
+      "positive_shell_volumes_m3": [
+        0.028589743635448656,
+        0.007147439087273975,
+        0.00016800016649843696,
+        0.0001680001428758284,
+        0.000364000123227015,
+        0.05040000472217805,
+        0.00784464374595949
+      ],
+      "normals_and_winding_valid": true,
+      "arrow_faces_pointing_plus_x": 0,
+      "triangle_position_signature_matches_source": true,
+      "triangle_uv_and_material_signature_matches_source": true
+    }
+  ],
+  "errors": [],
+  "original_emergency_light_sha256": "e402a7a01e68c4e16bc6149187e16be4964743dce8339a5ed9a16e2007105642",
+  "proof_render": "Previews/FBX_Reload.png",
+  "proof_render_uses_reloaded_fbx_geometry_uvs_material_indices": true,
+  "unique_triangles": 204
+}

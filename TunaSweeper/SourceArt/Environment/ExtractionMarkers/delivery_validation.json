@@ -1,0 +1,41 @@
+{
+  "passed": true,
+  "reused_files_byte_identical_to": "8bb53750",
+  "reused_paths": [
+    "TunaSweeper/Content/Environment/ModularInteriorExpansion/Materials/M_MI_ExpansionAmber.uasset",
+    "TunaSweeper/Content/Environment/ModularInteriorExpansion/Meshes/SM_MIE_EmergencyLight.uasset",
+    "TunaSweeper/Content/Environment/ModularInteriorPreview/Materials/M_MI_Steel.uasset",
+    "TunaSweeper/Content/Environment/ModularInteriorPreview/Textures/T_MI_Atlas.uasset",
+    "TunaSweeper/Content/Environment/ModularInteriorPreview/Textures/T_MI_DirtMask.uasset",
+    "TunaSweeper/SourceArt/Environment/ModularInteriorExpansion/Models/SM_MIE_EmergencyLight.fbx",
+    "TunaSweeper/SourceArt/Environment/ModularInteriorExpansion/Models/SM_MIE_ZoneSign.fbx",
+    "TunaSweeper/SourceArt/Environment/ModularInteriorPreview/Textures/T_MI_Atlas.png",
+    "TunaSweeper/SourceArt/Environment/ModularInteriorPreview/Textures/T_MI_DirtMask.png"
+  ],
+  "existing_game_maps_blueprints_source_preserved": true,
+  "runtime_packages": 13,
+  "runtime_sha256": {
+    "TunaSweeper/Content/Interaction/ExtractionMarkers/Maps/L_ExtractionMarkers.umap": "20923746e4556ba56120e481e6506d87e66a05c8669c30eae7e14dcbabea74c8",
+    "TunaSweeper/Content/Interaction/ExtractionMarkers/Materials/MI_EM_AmberOff.uasset": "7540dbbaa04f9f32f9f3484b1ac9fcb0089c3b14c773078153afc07241b05d42",
+    "TunaSweeper/Content/Interaction/ExtractionMarkers/Materials/MI_EM_GreenOff.uasset": "69c3b7716dd3400a9f1d370a6888777e5584710fb102b876ab8a7c5e6e089c31",
+    "TunaSweeper/Content/Interaction/ExtractionMarkers/Materials/M_EM_Green.uasset": "a84aecdf812d5b93f71213ff80f90f67ada837dcbbc9092cd0ccbcc576a3fabd",
+    "TunaSweeper/Content/Interaction/ExtractionMarkers/Materials/M_EM_Surface.uasset": "be0f2c4ea60d97e1074bc4bb5187918f46c7d39e0f9008e883c69c1f8e17d8ff",
+    "TunaSweeper/Content/Interaction/ExtractionMarkers/Meshes/SM_EM_Beacon.uasset": "ff7bdda6e7ab5728f5b55076a2a0ffe205c58eb23449dbe7b773c99278d0d484",
+    "TunaSweeper/Content/Interaction/ExtractionMarkers/Meshes/SM_EM_DirectionSign.uasset": "99540653bfe2749ed5954c9e33b2809d556990e7dca4184629484656518c993b",
+    "TunaSweeper/Content/Interaction/ExtractionMarkers/Textures/T_EM_Atlas.uasset": "f2db8bb04030d3fa05d78ae98393e7ce990e9b5bf2953d3fc6a97d606f6209f5",
+    "TunaSweeper/Content/Environment/ModularInteriorExpansion/Materials/M_MI_ExpansionAmber.uasset": "aa74bc816cec1da7d6aac4407bee723349494f053628c3f122683a9e4447f5bc",
+    "TunaSweeper/Content/Environment/ModularInteriorExpansion/Meshes/SM_MIE_EmergencyLight.uasset": "806e01041843387d3ef8c32013b9dee9af9008551bc68f75e64d5bb057581adb",
+    "TunaSweeper/Content/Environment/ModularInteriorPreview/Materials/M_MI_Steel.uasset": "c33614bf6663318b98cf0f8dce009ca67357343985811f5f68efe76a1c6b3e3f",
+    "TunaSweeper/Content/Environment/ModularInteriorPreview/Textures/T_MI_Atlas.uasset": "4f112a9db7fd6dcc200f22454fc33e204c3dc32063a1acf182c0c64d9e6f4bb8",
+    "TunaSweeper/Content/Environment/ModularInteriorPreview/Textures/T_MI_DirtMask.uasset": "d31c706c5dda07423e4fe2eff9e867d39263408d51b6750e81ffc6b57d48201b"
+  },
+  "reports_passed": [
+    "source_validation.json",
+    "unreal_import_validation.json",
+    "unreal_reload_validation.json",
+    "unreal_scene_validation.json",
+    "unreal_scene_reload_validation.json",
+    "unreal_smoke_preview.json"
+  ],
+  "cleanup_verified": true
+}

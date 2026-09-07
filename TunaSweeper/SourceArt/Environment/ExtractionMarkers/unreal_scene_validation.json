@@ -1,0 +1,20 @@
+{
+  "passed": true,
+  "map": "/Game/Interaction/ExtractionMarkers/Maps/L_ExtractionMarkers",
+  "sample_radius_cm": 300,
+  "prop_instances": 3,
+  "prop_triangles": 204,
+  "new_prop_light_actors": 0,
+  "existing_extraction_bp": "/Game/Interaction/BP_ExtractionPoint.BP_ExtractionPoint_C",
+  "smoke_system": "/Game/FX/NS_ExtractionSmoke",
+  "capture_kind": "editor preview, no PIE",
+  "screenshots": [
+    "UE_Day_Assembly",
+    "UE_TrueTopDown",
+    "UE_Extraction_PlayCamera",
+    "UE_Extraction_Overview",
+    "UE_Day_Off",
+    "UE_Dark_Off",
+    "UE_Dark_On"
+  ]
+}

@@ -1,0 +1,208 @@
+{
+  "passed": true,
+  "engine": "5.7.4-51494982+++UE5+Release-5.7",
+  "map": "/Game/Interaction/ExtractionMarkers/Maps/L_ExtractionMarkers",
+  "mode": "fresh editor reload, read-only, no PIE",
+  "prop_instances": [
+    {
+      "name": "Beacon",
+      "mesh": "/Game/Interaction/ExtractionMarkers/Meshes/SM_EM_Beacon",
+      "location_cm": [
+        -390.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_degrees": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "collision": "NoCollision",
+      "generate_overlap_events": false,
+      "can_ever_affect_navigation": false,
+      "horizontal_bounds_clearance_from_extraction_disk_cm": 59.999998807907104
+    },
+    {
+      "name": "DirectionSign",
+      "mesh": "/Game/Interaction/ExtractionMarkers/Meshes/SM_EM_DirectionSign",
+      "location_cm": [
+        -500.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_degrees": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "collision": "NoCollision",
+      "generate_overlap_events": false,
+      "can_ever_affect_navigation": false,
+      "horizontal_bounds_clearance_from_extraction_disk_cm": 165.99999964237213
+    },
+    {
+      "name": "EmergencyLight",
+      "mesh": "/Game/Environment/ModularInteriorExpansion/Meshes/SM_MIE_EmergencyLight",
+      "location_cm": [
+        -435.0,
+        45.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_degrees": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "collision": "NoCollision",
+      "generate_overlap_events": false,
+      "can_ever_affect_navigation": false,
+      "horizontal_bounds_clearance_from_extraction_disk_cm": 96.37608315961336
+    }
+  ],
+  "physics_traces": [
+    {
+      "name": "center_north_south",
+      "start_cm": [
+        -450,
+        0,
+        90
+      ],
+      "end_cm": [
+        450,
+        0,
+        90
+      ],
+      "sphere_radius_cm": 34,
+      "hit": false,
+      "expected_hit": false
+    },
+    {
+      "name": "center_east_west",
+      "start_cm": [
+        0,
+        -450,
+        90
+      ],
+      "end_cm": [
+        0,
+        450,
+        90
+      ],
+      "sphere_radius_cm": 34,
+      "hit": false,
+      "expected_hit": false
+    },
+    {
+      "name": "center_floor",
+      "start_cm": [
+        0,
+        0,
+        100
+      ],
+      "end_cm": [
+        0,
+        0,
+        -50
+      ],
+      "sphere_radius_cm": 0,
+      "hit": true,
+      "expected_hit": true
+    },
+    {
+      "name": "disabled_prop_Beacon",
+      "start_cm": [
+        -490.0,
+        0,
+        20
+      ],
+      "end_cm": [
+        -290.0,
+        0,
+        20
+      ],
+      "sphere_radius_cm": 5,
+      "hit": false,
+      "expected_hit": false
+    },
+    {
+      "name": "disabled_prop_DirectionSign",
+      "start_cm": [
+        -600,
+        0,
+        20
+      ],
+      "end_cm": [
+        -400,
+        0,
+        20
+      ],
+      "sphere_radius_cm": 5,
+      "hit": false,
+      "expected_hit": false
+    },
+    {
+      "name": "disabled_prop_EmergencyLight",
+      "start_cm": [
+        -535.0,
+        45.0,
+        20
+      ],
+      "end_cm": [
+        -334.99999999999994,
+        45.0,
+        20
+      ],
+      "sphere_radius_cm": 5,
+      "hit": false,
+      "expected_hit": false
+    }
+  ],
+  "extraction": {
+    "actor_class": "/Game/Interaction/BP_ExtractionPoint.BP_ExtractionPoint_C",
+    "radius_cm": 300,
+    "ring_vertices": 194,
+    "ring_triangles": 192,
+    "ring_collision": "NoCollision",
+    "smoke_system": "/Game/FX/NS_ExtractionSmoke.NS_ExtractionSmoke",
+    "actor_origin_cm": [
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "camera": {
+    "verified_against_player_bp": true,
+    "arm_cm": 1500.0,
+    "pitch": -88.0,
+    "yaw": 0.0,
+    "fov": 70.0
+  },
+  "light_actor_counts": {
+    "DirectionalLight": 1,
+    "SkyLight": 1,
+    "PointLight": 0,
+    "SpotLight": 0,
+    "RectLight": 0
+  },
+  "sample_travel_prevention": {
+    "target_level_name": "None",
+    "default_game_mode": "/Script/Engine.GameModeBase"
+  },
+  "combined_fresh_editor_audit": true,
+  "editor_ticks_before_audit": 45
+}

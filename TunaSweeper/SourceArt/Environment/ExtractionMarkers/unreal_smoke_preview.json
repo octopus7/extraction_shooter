@@ -1,0 +1,8 @@
+{
+  "passed": true,
+  "mode": "Simulate in Editor; dedicated GameModeBase; extraction target None",
+  "screenshots": [
+    "UE_SimulatedSmoke_Overview",
+    "UE_SimulatedSmoke_PlayCamera"
+  ]
+}

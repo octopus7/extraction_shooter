@@ -1,0 +1,93 @@
+{
+  "passed": true,
+  "engine": "5.7.4-51494982+++UE5+Release-5.7",
+  "assets": [
+    {
+      "name": "SM_MIE_EmergencyLight",
+      "triangles": 12,
+      "slots": 2,
+      "bounds_error_cm": 5.960464477539062e-07,
+      "uv_channels": 2,
+      "simple_boxes": 0,
+      "nanite": false
+    },
+    {
+      "name": "SM_EM_DirectionSign",
+      "triangles": 60,
+      "slots": 1,
+      "bounds_error_cm": 3.4570693969726562e-06,
+      "uv_channels": 2,
+      "simple_boxes": 0,
+      "nanite": false
+    },
+    {
+      "name": "SM_EM_Beacon",
+      "triangles": 132,
+      "slots": 2,
+      "bounds_error_cm": 2.6226043701171875e-06,
+      "uv_channels": 2,
+      "simple_boxes": 1,
+      "nanite": false
+    }
+  ],
+  "materials": [
+    {
+      "path": "/Game/Interaction/ExtractionMarkers/Materials/M_EM_Surface",
+      "reachable_texture_samples": 2,
+      "textures": [
+        "/Game/Interaction/ExtractionMarkers/Textures/T_EM_Atlas.T_EM_Atlas",
+        "/Game/Environment/ModularInteriorPreview/Textures/T_MI_DirtMask.T_MI_DirtMask"
+      ]
+    },
+    {
+      "path": "/Game/Interaction/ExtractionMarkers/Materials/M_EM_Green",
+      "reachable_texture_samples": 0,
+      "textures": []
+    },
+    {
+      "path": "/Game/Environment/ModularInteriorPreview/Materials/M_MI_Steel",
+      "reachable_texture_samples": 2,
+      "textures": [
+        "/Game/Environment/ModularInteriorPreview/Textures/T_MI_DirtMask.T_MI_DirtMask",
+        "/Game/Environment/ModularInteriorPreview/Textures/T_MI_Atlas.T_MI_Atlas"
+      ]
+    },
+    {
+      "path": "/Game/Environment/ModularInteriorExpansion/Materials/M_MI_ExpansionAmber",
+      "reachable_texture_samples": 0,
+      "textures": []
+    }
+  ],
+  "textures": [
+    {
+      "path": "/Game/Interaction/ExtractionMarkers/Textures/T_EM_Atlas",
+      "size": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "path": "/Game/Environment/ModularInteriorPreview/Textures/T_MI_DirtMask",
+      "size": [
+        1024,
+        1024
+      ]
+    },
+    {
+      "path": "/Game/Environment/ModularInteriorPreview/Textures/T_MI_Atlas",
+      "size": [
+        2048,
+        2048
+      ]
+    }
+  ],
+  "extraction_bp_defaults": {
+    "extraction_radius": "300.0",
+    "radius_ring_width": "4.800000190734863",
+    "radius_visual_z_offset": "3.0",
+    "extraction_hold_seconds": "4.0",
+    "extraction_particle_system": "None"
+  },
+  "combined_fresh_editor_audit": true,
+  "editor_ticks_before_audit": 45
+}
