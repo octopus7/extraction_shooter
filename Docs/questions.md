@@ -6607,3 +6607,8 @@ Codex에서 컴퓨터 사용 기능을 시작하는 방법과 작동 중 사용�
 
 - 질문: 검토 보고서는 파일로 저장되어 있고 커밋 가능한가?
 - 답변: Docs/ssot_implementation_asset_audit_2026-09-06.md로 저장되어 있다. 해당 보고서와 이번 SSOT 정정 문서 및 관련 기록을 함께 로컬 커밋할 수 있다.
+
+## 2026-09-07 15:30:41 (소요시간: 00:07:35)
+
+- 질문: 모델링한 무기들의 쇼케이스 레벨이 있는가?
+- 답변: 무기6종을 모은 `/Game/Weapons/TunaWeaponCollection/Maps/L_TunaWeaponCollection_Showcase`가 있다. 실제 `.umap`과 기존 재로드 검증 보고서를 확인했다. 콘텐츠 브라우저의 `Content → Weapons → TunaWeaponCollection → Maps`에서 열 수 있다. 질문에 따라 레벨을 임의로 열거나 변경하지 않았다.

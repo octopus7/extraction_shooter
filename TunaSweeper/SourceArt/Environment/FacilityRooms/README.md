@@ -36,4 +36,4 @@
 - `../../../..` 위 프로젝트 루트의 `Tools/FacilityRooms/`: 반복 사용 Blender 제작/배치 스크립트와 읽기 전용 검증기. 실행 시 Blender `--background --factory-startup`을 사용해 개인 애드온과 분리합니다.
 - `fbx_validation.json`, `layout_validation.json`, `unreal_import_validation.json`, `unreal_reload_validation.json`: 검증 결과. UE 명령렛 종료 코드와 자산 검증 결과는 구별합니다. 기존 프로젝트 Niagara typed-element Registry ensure가 발생할 수 있습니다.
 
-완료된 일회성 UE 임포터는 생성 에셋과 함께 첫 커밋 후 바로 다음 커밋에서 제거합니다. 최종 트리는 시작 시 자동 재생성하지 않습니다.
+완료된 일회성 UE 임포터는 생성 에셋과 함께 첫 커밋한 후 제거했습니다. 최종 트리는 시작 시 자동 재생성하지 않습니다. 반복 사용 Blender 제작·배치 스크립트와 읽기 전용 검증·캡처 도구는 유지합니다.
