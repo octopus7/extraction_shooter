@@ -1,0 +1,15 @@
+{
+  "saved_blend_reopened": true,
+  "mesh_objects": 1,
+  "packed_textures": 1,
+  "texture_alpha_all_one": true,
+  "closed_components": 147,
+  "all_component_normals_outward": true,
+  "minimum_component_volume_m3": 0.00015690919584206617,
+  "sha256": {
+    "BushRound.blend": "49faecd084d8291df1b71cef085d349db8149ed7a93c1750ef48931406716cbc",
+    "Models\\SM_BushRound.fbx": "7f4035e6fd31f8cf97f466bc32b93d08bff201ea9a08795e6e4da0f2c6b6e0f5",
+    "Textures\\T_BushRound_Palette.png": "e7982a2ce8873e342e066dd6fee448446497f32fe2350c772aa1117d62c69360"
+  },
+  "passed": true
+}

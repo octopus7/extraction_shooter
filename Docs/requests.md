@@ -8103,3 +8103,12 @@
 - 580삼각형·304 위치 정점, UV 2채널, 재질 1개를 확인했다. 퇴화 면·비정상 노멀·nonmanifold edge·퇴화 UV 삼각형 0개이며 FBX 재로드 및 저장 blend의 packed texture 픽셀 검사도 통과했다.
 - UE 5.7.4 임시 검사 프로젝트에서 /Game/Nature/ForestProps/ExposedRoots로 임포트하고 새 Static Mesh·Material·Texture 3개를 본 프로젝트에 복사한 뒤 새 프로세스로 다시 읽었다. 약 238.54x296.28x51.20cm, 지면 피벗 Z=0/지상 높이 42.5cm, 축 변환 (X,-Y,Z)x100, 치수 오차 0.000011cm 미만, NoCollision, 불투명 단면 재질, 렌더 정점 1740개를 확인했다.
 - UE 실제 base-color/조명 캡처와 Blender 렌더를 직접 시각 확인했다. 최종 UE Import/Reload 명령은 정상 종료했다. Preview는 이미지/보고서 저장 후 종료 단계에서 -1073741819(0xC0000005)를 반환했으므로 명령 전체가 정상 종료한 것으로 처리하지 않았다. 공용 캐시 및 초기 캡처 문제는 전용 DDC·브라우저 동기화 차단·명시적 회전/캡처 갱신으로 수정했다. 이 worktree에 게임 모듈 바이너리가 없어 엔진 기본 검사 호스트를 사용했으며 게임 전체 빌드/PIE·실제 데모 배치는 수행하지 않았다. UE 애셋은 원본과 분리해 로컬 커밋하고 push는 하지 않는다.
+
+## 2026-09-06 22:21:30 (소요시간: 00:31:43)
+
+- 요청: 공용 환경 프랍 중 낮고 둥근 비대칭 덤불 1종을 Blender 스크립트로 모델링하고 원본·FBX·프리뷰 검증, UE 5.7 임포트·재로드·로컬 커밋 완료.
+- 기존 Nature의 Bush, GrassLow, Flower, SimpleTree, Wood, RockBasic 및 Blender 원본을 조사하고 비교 렌더로 스타일을 확인했다.
+- Tools/ForestProps/BushRound와 기존 원본 관례의 TunaSweeper/SourceArt/Environment/ForestProps/BushRound에 재현 스크립트, 텍스처 내장 .blend, FBX, 128px 팔레트, 다방향 및 16개 반복 배치 프리뷰, 배치 안내를 추가했다. 원본 커밋: 0fbd30cc.
+- 133장 둥근 잎, 2,408삼각형, 약 153×129×73cm. UV 2채널, 재질 1슬롯, 지면 피벗, 닫힌 잎 뒷면, 불투명·NoCollision 구성. 퇴화 면·UV·비정상 노멀·비다양체 엣지 0, 개별 입체 147개의 바깥쪽 노멀 및 .blend 텍스처 내장, FBX 재로드 통과.
+- /Game/Nature/ForestProps/BushRound에 Static Mesh·Material·Texture 3개를 UE 5.7.4로 임포트했다. 임시 콘텐츠 검수 프로젝트에서 새 프로세스 재로드와 GPU 렌더를 확인했다. 실제 크기 152.8166×129.0353×72.7254cm, 경계 오차 0.0000043cm, UV 2채널·단일 재질·충돌 없음 검증 통과. 최종 UE 렌더에서 실제 팔레트 표시를 직접 확인했다.
+- 기존 공용 애셋·BP·맵·게임 기능·퀘스트를 변경하지 않았다. 별도 LOD와 실제 레벨 밀도 성능 측정은 포함하지 않았으며 배치 시 Foliage/HISM·거리 컬링 안내를 제공했다. push하지 않았다.

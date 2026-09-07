@@ -1,0 +1,65 @@
+{
+  "triangles": 2408,
+  "vertices": 1498,
+  "bounds_m": [
+    -0.7452805042266846,
+    -0.6066559553146362,
+    0.0,
+    0.782885730266571,
+    0.6836972236633301,
+    0.7272541522979736
+  ],
+  "dimensions_m": [
+    1.5281662344932556,
+    1.2903531789779663,
+    0.7272541522979736
+  ],
+  "nonmanifold_edges": 0,
+  "degenerate_faces": 0,
+  "uv_layers": 2,
+  "material_slots": 1,
+  "normal_errors": 0,
+  "uv_out_of_range": 0,
+  "degenerate_uv_triangles": 0,
+  "seed": 90631,
+  "pivot_m": [
+    0.0,
+    0.0,
+    0.0
+  ],
+  "unit": "metres",
+  "fbx_axes": {
+    "forward": "-Y",
+    "up": "Z"
+  },
+  "material": "M_BushRound",
+  "texture": "T_BushRound_Palette",
+  "collision": "none",
+  "alpha": "opaque",
+  "leaf_geometry": "closed oval octagonal lamina, 16 triangles per leaf",
+  "leaf_count": 133,
+  "fbx_reload": {
+    "triangles": 2408,
+    "vertices": 1498,
+    "bounds_m": [
+      -0.7452805042266846,
+      -0.6066559553146362,
+      0.0,
+      0.782885730266571,
+      0.6836972236633301,
+      0.7272541522979736
+    ],
+    "dimensions_m": [
+      1.5281662344932556,
+      1.2903531789779663,
+      0.7272541522979736
+    ],
+    "nonmanifold_edges": 0,
+    "degenerate_faces": 0,
+    "uv_layers": 2,
+    "material_slots": 1,
+    "normal_errors": 0,
+    "uv_out_of_range": 0,
+    "degenerate_uv_triangles": 0
+  }
+}
