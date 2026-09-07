@@ -10,6 +10,8 @@ Native fallback settings are radius 300cm, hold time 4s, ring width 4.8cm, ring 
 
 `/Game/Interaction/BP_ExtractionPoint` and both `/Game/FX/NS_ExtractionSmoke` and `/Game/Effects/NS_ExtractionSmokeSignal` exist. The latest implementation logs identify `/Game/FX/NS_ExtractionSmoke` as the gameplay smoke asset; the native particle-system property itself is unset until configured. An active Niagara system suppresses the actor's 18 fallback smoke sprites. The ten green spark meshes have their own enable setting. No original smoke asset, source parameter, ring, map marker or extraction logic is edited by this prop set. The dedicated UE sample uses the existing BP and smoke; visual proof and persisted properties are recorded by the validation outputs.
 
+The dedicated review map uses `GameModeBase` and sets only its sample extraction instance's target level to `None`, preventing review simulation from travelling to a game map. These sample-only settings do not change the original BP or extraction implementation. Actual Simulate-in-Editor (SIE) captures demonstrate the existing smoke and ring together with the props; capture reports identify the simulated views separately from static editor previews.
+
 The map overlay already supports a green inverted triangle, `green_inverted_triangle`, in linear color `(0.22, 0.96, 0.34, 1)`. Green symbol blocks on these props follow that established extraction palette. No game text or translation key is added. The existing top-down camera mode is arm 1500cm, pitch -88 degrees, yaw 0 and FOV 70; the source constructor's older -60-degree camera pose is not the active top-down-mode contract. Review this set from the actual steep top-down angle as well as from oblique views.
 
 ## Geometry and assembly contract
@@ -32,15 +34,19 @@ Place separate static-mesh components or actors relative to the existing extract
 
 | Prop | Relative location | Placement intent |
 | --- | --- | --- |
-| Beacon | `(0, R+90, 0)` | One side of the circle; leave the smoke origin and center accessible. |
-| Direction sign | `(-110, R+90, 0)` | Broad upward face and arrow pointing local +X. |
-| Emergency light | `(-45, R+135, 0)` | Independent position beside the pair; its rear-origin bounds must be considered if attached instead. |
+| Beacon | `(-R-90, 0, 0)` | South of the circle, on the upwind side; leave the smoke origin and center accessible. |
+| Direction sign | `(-R-200, 0, 0)` | Further south; its broad upward face carries a +X arrow toward both the beacon and the extraction center. |
+| Emergency light | `(-R-135, 45, 0)` | Independent position beside the pair; its rear-origin bounds must be considered if attached instead. |
+
+At the review radius of 300cm, these locations are beacon `(-390,0,0)`, sign `(-500,0,0)` and light `(-435,45,0)` cm. Actual SIE inspection showed the original east-side arrangement being obscured by smoke drifting toward +X/+Y. The revised arrangement moves the three props together to the south/upwind side, preserving their relative assembly while keeping the arrow directed toward the center. For a different wind or approach direction, check the simulated plume before placing the group and retain a readable upwind approach.
 
 For another approach direction, rotate the whole decorative group about the extraction origin, preserving clearances, and rotate the sign arrow with it. Do not move or scale the extraction actor just to reposition props. The props do not drive Niagara, radius color, map markers, hold progress or level transitions. They contain no dynamic light actors; emission provides the visible signal. Daylight and dark-environment previews compare emission on/off before any additional illumination is considered.
 
 ## Reuse and surface provenance
 
 Only relevant asset dependencies are selectively restored from the completed modular-interior expansion at commit `8bb53750`. The source lineage is original `4f8caf5d`, visual/UV correction `7c7c9b8c`, imported UE assets `481528e5`, then generator cleanup `8bb53750`. No unrelated module, map or source change from that task is integrated.
+
+This extraction set's initial validated source commit is `4a1b45f8`. A subsequent visual source correction updates the south/upwind arrangement and its regenerated previews; its commit hash is pending final validation and commit. The unchanged mesh counts and dimensions are verified again with the final placement manifest.
 
 The reused emergency light has **12 triangles and 2 material slots**: `/Game/Environment/ModularInteriorPreview/Materials/M_MI_Steel` and `/Game/Environment/ModularInteriorExpansion/Materials/M_MI_ExpansionAmber`. Its source is `TunaSweeper/SourceArt/Environment/ModularInteriorExpansion/Models/SM_MIE_EmergencyLight.fbx`. The prior `SM_MIE_ZoneSign` is the thin closed sign-body reference, with 12 triangles, dimensions 100x2x50cm and one service material. Its exact `ZONE 01` typography is not used as an extraction message.
 

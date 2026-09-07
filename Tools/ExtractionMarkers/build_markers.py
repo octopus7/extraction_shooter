@@ -86,7 +86,7 @@ for name,o in assets.items():
   o.name=name+'_source';cp=o.copy();cp.data=o.data.copy();s.collection.objects.link(cp);cp.name=name;reflect(cp);bpy.ops.object.select_all(action='DESELECT');cp.select_set(True);bpy.context.view_layer.objects.active=cp
   bpy.ops.export_scene.fbx(filepath=str(OUT/'Models'/(name+'.fbx')),use_selection=True,object_types={'MESH'},apply_unit_scale=True,apply_scale_options='FBX_SCALE_NONE',axis_forward='-Y',axis_up='Z',mesh_smooth_type='FACE',bake_anim=False,path_mode='STRIP');bpy.data.objects.remove(cp,do_unlink=True);o.name=name
  o.hide_render=True;o.hide_set(True)
-placements=[{'name':'Beacon','mesh':'SM_EM_Beacon','location_m':[0,3.9,0]}, {'name':'DirectionSign','mesh':'SM_EM_DirectionSign','location_m':[-1.1,3.9,0]}, {'name':'EmergencyLight','mesh':'SM_MIE_EmergencyLight','location_m':[-.45,4.35,0]}]
+placements=[{'name':'Beacon','mesh':'SM_EM_Beacon','location_m':[-3.9,0,0]}, {'name':'DirectionSign','mesh':'SM_EM_DirectionSign','location_m':[-5,0,0]}, {'name':'EmergencyLight','mesh':'SM_MIE_EmergencyLight','location_m':[-4.35,.45,0]}]
 instances=[]
 for p in placements:
  src=assets[p['mesh']];o=src.copy();o.data=src.data;s.collection.objects.link(o);o.name=p['name'];o.location=p['location_m'];o.hide_render=False;o.hide_set(False);instances.append(o)
@@ -95,7 +95,7 @@ def camera(name,loc,target,ortho=0):
  d=bpy.data.cameras.new(name);o=bpy.data.objects.new(name,d);s.collection.objects.link(o);o.location=loc;o.rotation_euler=(Vector(target)-o.location).to_track_quat('-Z','Y').to_euler();d.lens=38
  if ortho:d.type='ORTHO';d.ortho_scale=ortho
  return o
-ld=bpy.data.lights.new('DaySoftbox','AREA');ld.energy=1800;ld.shape='DISK';ld.size=8;lo=bpy.data.objects.new('DaySoftbox',ld);s.collection.objects.link(lo);lo.location=(-3,1,8)
+ld=bpy.data.lights.new('DaySoftbox','AREA');ld.energy=1800;ld.shape='DISK';ld.size=8;lo=bpy.data.objects.new('DaySoftbox',ld);s.collection.objects.link(lo);lo.location=(-6.9,-2.9,8)
 def render(name,cam):
  if os.environ.get('EM_SKIP_RENDER'):return
  if os.environ.get('EM_RENDER_FILTER') and name not in os.environ['EM_RENDER_FILTER'].split(','):return
@@ -104,9 +104,9 @@ def render(name,cam):
   nodes.clear();rl=nodes.new('CompositorNodeRLayers');fl=nodes.new('CompositorNodeFlip');fl.name='ProjectAxisFlip';fl.axis='X';co=nodes.new('CompositorNodeComposite');s.node_tree.links.new(rl.outputs['Image'],fl.inputs[0]);s.node_tree.links.new(fl.outputs[0],co.inputs[0])
  nodes['ProjectAxisFlip'].mute=cam.name!='TrueTopDown'
  s.camera=cam;s.render.filepath=str(OUT/'Previews'/(name+'.png'));bpy.ops.render.render(write_still=True)
-overview=camera('Overview',(-2,1.3,2.4),(-.4,3.95,.2),3.2);render('Blender_Day_Assembly',overview)
-top=camera('TrueTopDown',(-.4,3.95,8),(-.4,3.95,0),3.1);top.rotation_euler=(0,0,-math.pi/2);render('Blender_TrueTopDown',top)
-render('Blender_Reverse',camera('Reverse',(2,6.5,2.2),(-.4,3.95,.2),3.2))
+overview=camera('Overview',(-5.9,-2.6,2.4),(-4.3,.05,.2),3.2);render('Blender_Day_Assembly',overview)
+top=camera('TrueTopDown',(-4.3,.05,8),(-4.3,.05,0),3.1);top.rotation_euler=(0,0,-math.pi/2);render('Blender_TrueTopDown',top)
+render('Blender_Reverse',camera('Reverse',(-1.9,2.6,2.2),(-4.3,.05,.2),3.2))
 for emission,label in [(0,'Off'),(2,'On')]:
  green.node_tree.nodes['Principled BSDF'].inputs['Emission Strength'].default_value=emission;amber.node_tree.nodes['Principled BSDF'].inputs['Emission Strength'].default_value=emission*1.5;render('Blender_Day_'+label,overview)
  ld.energy=90;s.world.node_tree.nodes['Background'].inputs[1].default_value=.03;render('Blender_Dark_'+label,overview);ld.energy=1800;s.world.node_tree.nodes['Background'].inputs[1].default_value=.6
@@ -115,6 +115,6 @@ for name,o in assets.items():
  o.hide_render=False;o.hide_set(False);entry=next(e for e in entries if e['name']==name);b=entry['bounds_m'];center=Vector([(b[i]+b[i+3])/2 for i in range(3)]);span=max(b[i+3]-b[i] for i in range(3));lo.location=(-2,-3,5)
  render('Blender_Sheet_'+name,camera('Sheet_'+name,center+Vector((-1,-1.5,1.2))*span,center,span*1.7));o.hide_render=True;o.hide_set(True)
 for o in instances:o.hide_render=False
-lo.location=(-3,1,8);s.camera=overview
+lo.location=(-6.9,-2.9,8);s.camera=overview
 manifest={'assets':entries,'placements':placements,'sample_radius_cm':300,'source_units':'meters','axes':'+X north +Y east +Z up','unique_triangles':sum(e['triangles'] for e in entries),'total_material_slots':sum(e['material_slots'] for e in entries),'new_atlas_size':[1024,1024],'prop_light_actors':0}
 (OUT/'model_manifest.json').write_text(json.dumps(manifest,indent=2));bpy.ops.wm.save_as_mainfile(filepath=str(OUT/'ExtractionMarkers.blend'));print('EM_BUILD_PASSED',manifest['unique_triangles'])
