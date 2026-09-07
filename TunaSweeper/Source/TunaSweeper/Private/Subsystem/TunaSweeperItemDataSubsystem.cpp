@@ -1,4 +1,5 @@
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
+#include "Combat/TunaSweeperBurnTypes.h"
 
 #include "Dom/JsonObject.h"
 #include "Game/TunaSweeperDataValueTypes.h"
@@ -713,6 +714,8 @@ bool UTunaSweeperItemDataSubsystem::LoadItemTableJson()
 		double NumericReloadSeconds = 0.0;
 		double NumericProjectileDamageMultiplier = TunaSweeperDataValues::RatioIdentity;
 		double NumericProjectileDamageBonus = 0.0;
+		double NumericBurnDamagePerTick = 0.0;
+		double NumericBurnTickCount = 5.0;
 		double NumericDefenseValue = 0.0;
 		double NumericUseHealthDelta = 0.0;
 		double NumericUseFoodDelta = 0.0;
@@ -829,6 +832,14 @@ bool UTunaSweeperItemDataSubsystem::LoadItemTableJson()
 			(*JsonObject)->TryGetNumberField(TEXT("damage_bonus"), NumericProjectileDamageBonus))
 		{
 			ItemDefinition.ProjectileDamageBonus = FMath::RoundToInt(NumericProjectileDamageBonus);
+		}
+		if ((*JsonObject)->TryGetNumberField(TEXT("burn_damage_per_tick"), NumericBurnDamagePerTick) && FMath::IsFinite(NumericBurnDamagePerTick))
+		{
+			ItemDefinition.BurnDamagePerTick = static_cast<float>(FMath::Clamp(NumericBurnDamagePerTick, 0.0, static_cast<double>(FTunaSweeperBurnSpec::MaxDamagePerTick)));
+		}
+		if ((*JsonObject)->TryGetNumberField(TEXT("burn_tick_count"), NumericBurnTickCount) && FMath::IsFinite(NumericBurnTickCount))
+		{
+			ItemDefinition.BurnTickCount = FMath::RoundToInt(FMath::Clamp(NumericBurnTickCount, 1.0, static_cast<double>(FTunaSweeperBurnSpec::MaxTickCount)));
 		}
 		const TArray<TSharedPtr<FJsonValue>>* AttachmentSlotTagsArray = nullptr;
 		if ((*JsonObject)->TryGetArrayField(TEXT("attachment_slot_tags"), AttachmentSlotTagsArray) && AttachmentSlotTagsArray)

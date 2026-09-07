@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Combat/TunaSweeperBurnTypes.h"
 #include "GameFramework/Actor.h"
 #include "TunaSweeperProjectile.generated.h"
 
@@ -24,6 +25,9 @@ public:
 
 	void SetDamageAmount(float InDamageAmount) { DamageAmount = FMath::Max(0.0f, InDamageAmount); }
 	float GetDamageAmount() const { return DamageAmount; }
+	UFUNCTION(BlueprintCallable, Category = "Projectile|Burn")
+	void SetBurnSpec(const FTunaSweeperBurnSpec& InBurnSpec) { BurnSpec = InBurnSpec; BurnSpec.Normalize(); }
+	const FTunaSweeperBurnSpec& GetBurnSpec() const { return BurnSpec; }
 	void SetImpactProfileId(FName InImpactProfileId) { ImpactProfileId = InImpactProfileId; }
 	FName GetImpactProfileId() const { return ImpactProfileId; }
 	void SetHitEffectId(FName InHitEffectId) { HitEffectId = InHitEffectId; }
@@ -107,6 +111,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Projectile", meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float DamageAmount = 10.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Projectile|Burn")
+	FTunaSweeperBurnSpec BurnSpec;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Projectile|Camera", meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float CameraHitReactionScale = 1.0f;

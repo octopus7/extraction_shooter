@@ -7,6 +7,7 @@
 #include "TunaSweeperEnemyCharacter.generated.h"
 
 class UTunaSweeperCombatPatternComponent;
+class UTunaSweeperBurnComponent;
 class UStaticMeshComponent;
 class USceneComponent;
 class UTunaSweeperVisionSubjectComponent;
@@ -101,6 +102,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Combat")
 	bool IsDead() const { return bIsDead; }
 
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Combat|Burn")
+	UTunaSweeperBurnComponent* GetBurnComponent() const { return BurnComponent; }
+
 	// TEMP_VIDEO_BULLET_STORM: Remove this accessor with the matching debug checkbox after capture.
 	bool IsTemporaryVideoBulletStormEnabled() const;
 
@@ -180,6 +184,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UTunaSweeperCombatPatternComponent> CombatPatternComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UTunaSweeperBurnComponent> BurnComponent;
 
 public:
 	UTunaSweeperEnemySensorDebugComponent* GetSensorDebugComponent() const { return SensorDebugComponent; }

@@ -10,6 +10,7 @@
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
 #include "Subsystem/TunaSweeperResearchSubsystem.h"
+#include "Subsystem/TunaSweeperItemDataSubsystem.h"
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(
 	FTunaSweeperResearchJsonContractTest,
@@ -125,6 +126,88 @@ bool FTunaSweeperResearchDeferredInitializationNotificationsTest::RunTest(const 
 		ETunaSweeperResearchNotificationMode::Immediate);
 	TestEqual(TEXT("Immediate effects notification remains immediate"), EffectsNotificationCount, 2);
 	TestEqual(TEXT("Immediate state notification remains immediate"), StateNotificationCount, 2);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(
+	FTunaSweeperResearchBurnProgressionTest,
+	"TunaSweeper.Research.BurnProgression",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool FTunaSweeperResearchBurnProgressionTest::RunTest(const FString& Parameters)
+{
+	(void)Parameters;
+	UGameInstance* GameInstance = NewObject<UGameInstance>();
+	UTunaSweeperResearchSubsystem* Research = NewObject<UTunaSweeperResearchSubsystem>(GameInstance);
+	if (!TestTrue(TEXT("Burn research data loads"), Research->LoadResearchData())) return false;
+	const FName RifleType(TEXT("weapon.type.rifle"));
+	const FName RifleAmmoType(TEXT("ammo.type.rifle"));
+	const FTunaSweeperResearchBurnBonuses Base = Research->GetAppliedBurnBonuses(RifleType, RifleAmmoType);
+	TestEqual(TEXT("No research adds no burn ticks"), Base.AdditionalTickCount, 0);
+	TestEqual(TEXT("No research preserves base burn damage"), Base.DamageMultiplier, 1.0f);
+
+	FTunaSweeperActiveResearchSaveData ReadyResearch;
+	ReadyResearch.NodeId = FName(TEXT("ammo_burn_1"));
+	ReadyResearch.bTimerCompleted = true;
+	Research->LoadResearchProgressFromSave(
+		{FName(TEXT("weapon_burn_1"))}, {ReadyResearch}, FDateTime::UtcNow().GetTicks());
+	const FTunaSweeperResearchBurnBonuses WeaponOnly = Research->GetAppliedBurnBonuses(RifleType, RifleAmmoType);
+	TestEqual(TEXT("Only claimed research extends burn"), WeaponOnly.AdditionalTickCount, 1);
+	TestEqual(TEXT("Completed but unclaimed ammunition research adds no damage"), WeaponOnly.DamageMultiplier, 1.25f);
+	TestTrue(TEXT("Completed ammunition research can be claimed"), Research->TryClaimResearch(ReadyResearch.NodeId));
+	const FTunaSweeperResearchBurnBonuses Combined = Research->GetAppliedBurnBonuses(RifleType, RifleAmmoType);
+	TestEqual(TEXT("Weapon and ammunition tick bonuses combine"), Combined.AdditionalTickCount, 2);
+	TestEqual(TEXT("Weapon and ammunition damage bonuses combine"), Combined.DamageMultiplier, 1.5f);
+
+	Research->LoadResearchProgressFromSave(
+		{FName(TEXT("weapon_burn_1")), FName(TEXT("weapon_burn_2")), FName(TEXT("ammo_burn_1")), FName(TEXT("ammo_burn_2"))},
+		{}, FDateTime::UtcNow().GetTicks());
+	const FTunaSweeperResearchBurnBonuses Maximum = Research->GetAppliedBurnBonuses(RifleType, RifleAmmoType);
+	TestEqual(TEXT("Two levels of weapon and ammunition research add four ticks"), Maximum.AdditionalTickCount, 4);
+	TestEqual(TEXT("Two levels of each research double burn damage"), Maximum.DamageMultiplier, 2.0f);
+	TestEqual(TEXT("Burn research does not increase maximum health"), Research->GetAppliedStatBonuses().MaxHealth, 0.0f);
+	const FTunaSweeperResearchBurnBonuses Pistol = Research->GetAppliedBurnBonuses(
+		FName(TEXT("weapon.type.pistol")), FName(TEXT("ammo.type.pistol")));
+	TestEqual(TEXT("Rifle research does not extend pistol burn"), Pistol.AdditionalTickCount, 0);
+	TestEqual(TEXT("Rifle research does not amplify pistol burn"), Pistol.DamageMultiplier, 1.0f);
+	const FTunaSweeperResearchBurnBonuses MissingAmmo = Research->GetAppliedBurnBonuses(RifleType, NAME_None);
+	TestEqual(TEXT("Missing ammunition receives only weapon research"), MissingAmmo.AdditionalTickCount, 2);
+	TestEqual(TEXT("Missing ammunition receives only weapon damage bonuses"), MissingAmmo.DamageMultiplier, 1.5f);
+
+	TArray<FName> SavedApplied;
+	TArray<FTunaSweeperActiveResearchSaveData> SavedActive;
+	int64 SavedClock = 0;
+	Research->ExportResearchProgressForSave(SavedApplied, SavedActive, SavedClock);
+	UTunaSweeperResearchSubsystem* Restored = NewObject<UTunaSweeperResearchSubsystem>(GameInstance);
+	Restored->LoadResearchProgressFromSave(SavedApplied, SavedActive, SavedClock);
+	const FTunaSweeperResearchBurnBonuses RestoredBonuses = Restored->GetAppliedBurnBonuses(RifleType, RifleAmmoType);
+	TestEqual(TEXT("Save/load restores burn duration research"), RestoredBonuses.AdditionalTickCount, Maximum.AdditionalTickCount);
+	TestEqual(TEXT("Save/load restores burn damage research"), RestoredBonuses.DamageMultiplier, Maximum.DamageMultiplier);
+	Restored->ResetResearchProgressForNewGame();
+	TestEqual(TEXT("New game clears burn research"), Restored->GetAppliedBurnBonuses(RifleType, RifleAmmoType).AdditionalTickCount, 0);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(
+	FTunaSweeperIncendiaryAmmoDataTest,
+	"TunaSweeper.Research.IncendiaryAmmoData",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool FTunaSweeperIncendiaryAmmoDataTest::RunTest(const FString& Parameters)
+{
+	(void)Parameters;
+	UGameInstance* GameInstance = NewObject<UGameInstance>();
+	UTunaSweeperItemDataSubsystem* Items = NewObject<UTunaSweeperItemDataSubsystem>(GameInstance);
+	FTunaSweeperItemDefinition Incendiary;
+	FTunaSweeperItemDefinition Standard;
+	if (!TestTrue(TEXT("Incendiary rifle ammunition is authored"), Items->TryGetItemDefinition(2023, Incendiary)) ||
+		!TestTrue(TEXT("Standard rifle ammunition remains authored"), Items->TryGetItemDefinition(2002, Standard))) return false;
+	TestEqual(TEXT("Incendiary ammunition enables burn damage"), Incendiary.BurnDamagePerTick, 2.0f);
+	TestEqual(TEXT("Incendiary ammunition defaults to five burn ticks"), Incendiary.BurnTickCount, 5);
+	TestEqual(TEXT("Incendiary and standard ammunition fit the same rifles"), Incendiary.AmmoTypeTag, Standard.AmmoTypeTag);
+	TestEqual(TEXT("Ordinary ammunition does not ignite enemies"), Standard.BurnDamagePerTick, 0.0f);
+	TestEqual(TEXT("Incendiary ammunition retains standard direct damage multiplier"), Incendiary.ProjectileDamageMultiplier, Standard.ProjectileDamageMultiplier);
+	TestEqual(TEXT("Incendiary ammunition retains standard direct damage bonus"), Incendiary.ProjectileDamageBonus, Standard.ProjectileDamageBonus);
 	return true;
 }
 

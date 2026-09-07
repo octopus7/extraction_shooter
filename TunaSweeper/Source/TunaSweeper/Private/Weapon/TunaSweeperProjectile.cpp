@@ -1,4 +1,5 @@
 #include "Weapon/TunaSweeperProjectile.h"
+#include "Component/TunaSweeperBurnComponent.h"
 
 #include "AI/TunaSweeperEnemyCharacter.h"
 #include "Character/TunaSweeperTopDownCharacter.h"
@@ -564,6 +565,18 @@ void ATunaSweeperProjectile::HandleHit(
 		if (ATunaSweeperEnemyCharacter* EnemyOwner = Cast<ATunaSweeperEnemyCharacter>(GetOwner()))
 		{
 			EnemyOwner->TryApplyBleedTo(OtherActor);
+		}
+	}
+
+	if (HasAuthority() && AppliedDamage > 0.0f && BurnSpec.bEnabled)
+	{
+		if (ATunaSweeperEnemyCharacter* Enemy = Cast<ATunaSweeperEnemyCharacter>(OtherActor))
+		{
+			if (UTunaSweeperBurnComponent* BurnComponent = Enemy->GetBurnComponent())
+			{
+				// Retain the firing pawn for damage and kill credit after this projectile is destroyed.
+				BurnComponent->TryApplyBurn(BurnSpec, GetInstigatorController(), GetInstigator());
+			}
 		}
 	}
 

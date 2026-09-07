@@ -21,6 +21,7 @@ void UTunaSweeperResearchNodeWidget::RefreshFromSubsystem()
 	FTunaSweeperResearchNodeView View;
 	if (!Research || !Research->GetNodeView(NodeId, View)) return;
 	NameText->SetText(View.DisplayName);
+	SetToolTipText(View.Description);
 	RequirementText->SetText(FText::Format(NSLOCTEXT("TunaSweeperResearch", "Requirement", "Unlocked: {0}"), View.RequiredAppliedNodeCount));
 	ResearchProgressBar->SetPercent(View.Progress);
 	RemainingTimeText->SetText(View.State == ETunaSweeperResearchNodeState::Researching

@@ -676,5 +676,22 @@
     "icon_file_name": "T_UIIcon_AncientBanknoteBundle.uasset",
     "category_tag": "item.category.currency",
     "weight_kg": 0.01
+  },
+  {
+    "id": 2023,
+    "name_string_key": "item.rifle_incendiary_ammo",
+    "description_string_key": "item.rifle_incendiary_ammo.desc",
+    "shop_sell_price": 30,
+    "experience_value": 6,
+    "item_grade": "rare",
+    "icon_file_name": "T_UIIcon_RifleAmmo.uasset",
+    "category_tag": "item.category.ammo",
+    "ammo_type_tag": "ammo.type.rifle",
+    "impact_profile_id": "DA_Impact_Ballistic",
+    "projectile_hit_effect_id": "hit.red_burst",
+    "projectile_damage_multiplier": 10000,
+    "projectile_damage_bonus": 2,
+    "burn_damage_per_tick": 2,
+    "burn_tick_count": 5
   }
 ]

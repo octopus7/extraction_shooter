@@ -1,8 +1,10 @@
 #include "Subsystem/TunaSweeperResearchSubsystem.h"
+#include "Combat/TunaSweeperBurnTypes.h"
 
 #include "Dom/JsonObject.h"
 #include "Dom/JsonValue.h"
 #include "Game/TunaSweeperGameInstance.h"
+#include "Game/TunaSweeperDataValueTypes.h"
 #include "Internationalization/Internationalization.h"
 #include "Internationalization/Culture.h"
 #include "Misc/FileHelper.h"
@@ -20,6 +22,10 @@ namespace
 		if (Value.Equals(TEXT("max_hydration"), ESearchCase::IgnoreCase)) return ETunaSweeperResearchEffectType::MaxHydration;
 		if (Value.Equals(TEXT("max_stamina"), ESearchCase::IgnoreCase)) return ETunaSweeperResearchEffectType::MaxStamina;
 		if (Value.Equals(TEXT("carry_strength"), ESearchCase::IgnoreCase)) return ETunaSweeperResearchEffectType::CarryStrength;
+		if (Value.Equals(TEXT("weapon_burn_ticks"), ESearchCase::IgnoreCase)) return ETunaSweeperResearchEffectType::WeaponBurnTicks;
+		if (Value.Equals(TEXT("ammo_burn_ticks"), ESearchCase::IgnoreCase)) return ETunaSweeperResearchEffectType::AmmoBurnTicks;
+		if (Value.Equals(TEXT("weapon_burn_damage"), ESearchCase::IgnoreCase)) return ETunaSweeperResearchEffectType::WeaponBurnDamage;
+		if (Value.Equals(TEXT("ammo_burn_damage"), ESearchCase::IgnoreCase)) return ETunaSweeperResearchEffectType::AmmoBurnDamage;
 		return ETunaSweeperResearchEffectType::MaxHealth;
 	}
 }
@@ -102,6 +108,11 @@ bool UTunaSweeperResearchSubsystem::LoadResearchData(bool bForceReload)
 				double EffectValueNumber = 0.0;
 				EffectObject->TryGetNumberField(TEXT("value"), EffectValueNumber);
 				Effect.Value = static_cast<float>(EffectValueNumber);
+				FString TargetTypeTag;
+				if (EffectObject->TryGetStringField(TEXT("target_type_tag"), TargetTypeTag))
+				{
+					Effect.TargetTypeTag = FName(*TargetTypeTag.TrimStartAndEnd());
+				}
 				Definition.Effects.Add(Effect);
 			}
 		}
@@ -230,6 +241,40 @@ FTunaSweeperResearchStatBonuses UTunaSweeperResearchSubsystem::GetAppliedStatBon
 			case ETunaSweeperResearchEffectType::MaxHydration: Result.MaxHydration += Effect.Value; break;
 			case ETunaSweeperResearchEffectType::MaxStamina: Result.MaxStamina += Effect.Value; break;
 			case ETunaSweeperResearchEffectType::CarryStrength: Result.CarryStrength += Effect.Value; break;
+			default: break;
+			}
+		}
+	}
+	return Result;
+}
+
+FTunaSweeperResearchBurnBonuses UTunaSweeperResearchSubsystem::GetAppliedBurnBonuses(FName WeaponTypeTag, FName AmmoTypeTag) const
+{
+	EnsureSaveStateLoaded();
+	FTunaSweeperResearchBurnBonuses Result;
+	if (!EnsureResearchDataLoaded()) return Result;
+	for (const FName& NodeId : AppliedNodeIds)
+	{
+		const FTunaSweeperResearchNodeDefinition* Definition = Definitions.Find(NodeId);
+		if (!Definition) continue;
+		for (const FTunaSweeperResearchEffect& Effect : Definition->Effects)
+		{
+			const bool bWeaponEffect = Effect.Type == ETunaSweeperResearchEffectType::WeaponBurnTicks ||
+				Effect.Type == ETunaSweeperResearchEffectType::WeaponBurnDamage;
+			const bool bAmmoEffect = Effect.Type == ETunaSweeperResearchEffectType::AmmoBurnTicks ||
+				Effect.Type == ETunaSweeperResearchEffectType::AmmoBurnDamage;
+			if ((!bWeaponEffect && !bAmmoEffect) || !FMath::IsFinite(Effect.Value)) continue;
+			const FName SourceTypeTag = bWeaponEffect ? WeaponTypeTag : AmmoTypeTag;
+			if (SourceTypeTag.IsNone() || (!Effect.TargetTypeTag.IsNone() && Effect.TargetTypeTag != SourceTypeTag)) continue;
+			if (Effect.Type == ETunaSweeperResearchEffectType::WeaponBurnTicks || Effect.Type == ETunaSweeperResearchEffectType::AmmoBurnTicks)
+			{
+				Result.AdditionalTickCount = FMath::Min(FTunaSweeperBurnSpec::MaxTickCount, Result.AdditionalTickCount + FMath::RoundToInt(FMath::Clamp(Effect.Value, 0.0f, static_cast<float>(FTunaSweeperBurnSpec::MaxTickCount))));
+			}
+			else
+			{
+				// Authored damage bonuses use the shared integer ratio convention: 2500 adds 0.25x.
+				const int32 RatioBonus = FMath::RoundToInt(FMath::Clamp(Effect.Value, 0.0f, 1000000.0f));
+				Result.DamageMultiplier = FMath::Min(100.0f, Result.DamageMultiplier + TunaSweeperDataValues::ToRatioFloat(RatioBonus));
 			}
 		}
 	}

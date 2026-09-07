@@ -25,6 +25,7 @@ public class TunaSweeperEditor : ModuleRules
 			"DeveloperToolSettings",
 			"LevelEditor",
 			"UMG",
+			"UMGEditor", // Temporary burn research asset generator; remove with the generator.
 			"PropertyEditor",
 			"RenderCore",
 			"Slate",

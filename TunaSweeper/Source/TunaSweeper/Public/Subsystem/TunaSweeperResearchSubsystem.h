@@ -27,6 +27,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Research") bool TryClaimResearch(FName NodeId);
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Research") int32 GetAppliedNodeCount() const { return AppliedNodeIds.Num(); }
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Research") FTunaSweeperResearchStatBonuses GetAppliedStatBonuses() const;
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Research") FTunaSweeperResearchBurnBonuses GetAppliedBurnBonuses(FName WeaponTypeTag, FName AmmoTypeTag) const;
 	void ExportResearchProgressForSave(TArray<FName>& OutAppliedNodeIds, TArray<FTunaSweeperActiveResearchSaveData>& OutActiveResearch, int64& OutLastObservedUtcTicks) const;
 	void LoadResearchProgressFromSave(
 		const TArray<FName>& SavedAppliedNodeIds,

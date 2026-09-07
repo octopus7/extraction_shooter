@@ -75,6 +75,8 @@ internal static class ItemDataCsvExporter
 		"projectile_hit_effect_id",
 		"projectile_damage_multiplier",
 		"projectile_damage_bonus",
+		"burn_damage_per_tick",
+		"burn_tick_count",
 		"magazine_capacity",
 		"magazine_capacity_bonus",
 		"reload_seconds",

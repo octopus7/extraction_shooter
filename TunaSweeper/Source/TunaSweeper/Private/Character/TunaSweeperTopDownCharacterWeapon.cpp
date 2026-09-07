@@ -1,4 +1,5 @@
 #include "TunaSweeperTopDownCharacterShared.h"
+#include "Combat/TunaSweeperWeaponBurnResolver.h"
 
 void ATunaSweeperTopDownCharacter::EnsureEquippedWeaponActor()
 {
@@ -197,6 +198,7 @@ void ATunaSweeperTopDownCharacter::FireWeapon()
 	FName WeaponTypeTag = NAME_None;
 	float ProjectileDamageMultiplier = 1.0f;
 	int32 ProjectileDamageBonus = 0;
+	FTunaSweeperItemDefinition AmmoDefinition;
 	FTunaSweeperItemInstance WeaponInstance;
 	FTunaSweeperItemDefinition WeaponDefinition;
 	if (TunaGameInstance->TryGetEquipmentWeaponSlotItem(SelectedWeaponSlotNumber, WeaponInstance, WeaponDefinition))
@@ -209,7 +211,6 @@ void ATunaSweeperTopDownCharacter::FireWeapon()
 		{
 			if (UTunaSweeperItemDataSubsystem* ItemDataSubsystem = TunaGameInstance->GetSubsystem<UTunaSweeperItemDataSubsystem>())
 			{
-				FTunaSweeperItemDefinition AmmoDefinition;
 				if (ItemDataSubsystem->TryGetItemDefinition(LoadedAmmoItemId, AmmoDefinition))
 				{
 					ImpactProfileId = AmmoDefinition.ImpactProfileId;
@@ -231,6 +232,12 @@ void ATunaSweeperTopDownCharacter::FireWeapon()
 		return;
 	}
 
+	const UTunaSweeperResearchSubsystem* Research = TunaGameInstance->GetSubsystem<UTunaSweeperResearchSubsystem>();
+	const FTunaSweeperResearchBurnBonuses BurnBonuses = Research
+		? Research->GetAppliedBurnBonuses(WeaponTypeTag, AmmoDefinition.AmmoTypeTag)
+		: FTunaSweeperResearchBurnBonuses();
+	const FTunaSweeperBurnSpec BurnSpec = TunaSweeperBurn::ResolveWeaponBurnSpec(WeaponDefinition, AmmoDefinition, BurnBonuses);
+
 	const float SpreadHalfAngleDegrees = ResolveWeaponSpreadHalfAngleDegrees(WeaponTypeTag);
 	const bool bFired = EquippedWeapon->FireWithAimIntent(
 		AimDirection,
@@ -246,7 +253,10 @@ void ATunaSweeperTopDownCharacter::FireWeapon()
 		bHasAimIntent ? AimIntentActor.Get() : nullptr,
 		bHasAimIntent ? AimIntentComponent.Get() : nullptr,
 		AimIntentWorldPoint,
-		bHasAimIntent);
+		bHasAimIntent,
+		-1.0f,
+		false,
+		BurnSpec);
 	if (!bFired)
 	{
 		return;

@@ -664,7 +664,8 @@ bool ATunaSweeperWeapon::FireWithAimIntent(
 	FVector AimIntentWorldPoint,
 	bool bHasAimIntentWorldPoint,
 	float FireCooldownOverrideSeconds,
-	bool bSuppressFireSound)
+	bool bSuppressFireSound,
+	const FTunaSweeperBurnSpec& BurnSpec)
 {
 	UWorld* World = GetWorld();
 	if (!World)
@@ -717,7 +718,8 @@ bool ATunaSweeperWeapon::FireWithAimIntent(
 				AimIntentActor,
 				AimIntentComponent,
 				AimIntentWorldPoint,
-				bHasAimIntentWorldPoint) != nullptr;
+				bHasAimIntentWorldPoint,
+				BurnSpec) != nullptr;
 		}
 		if (!bSpawnedAnyProjectile)
 		{
@@ -739,7 +741,8 @@ bool ATunaSweeperWeapon::FireWithAimIntent(
 			AimIntentActor,
 			AimIntentComponent,
 			AimIntentWorldPoint,
-			bHasAimIntentWorldPoint))
+			bHasAimIntentWorldPoint,
+			BurnSpec))
 		{
 			return false;
 		}
@@ -924,17 +927,13 @@ ATunaSweeperProjectile* ATunaSweeperWeapon::SpawnProjectile(
 	AActor* AimIntentActor,
 	UPrimitiveComponent* AimIntentComponent,
 	const FVector& AimIntentWorldPoint,
-	bool bHasAimIntentWorldPoint)
+	bool bHasAimIntentWorldPoint,
+	const FTunaSweeperBurnSpec& BurnSpec)
 {
-	FActorSpawnParameters SpawnParameters;
-	SpawnParameters.Owner = this;
-	SpawnParameters.Instigator = InstigatorPawn;
-	SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-
 	const FVector SpawnLocation = MuzzlePoint ? MuzzlePoint->GetComponentLocation() : GetActorLocation();
-	const FRotator SpawnRotation = ShotDirection.Rotation();
-	ATunaSweeperProjectile* SpawnedProjectile =
-		World.SpawnActor<ATunaSweeperProjectile>(ProjectileClassToSpawn, SpawnLocation, SpawnRotation, SpawnParameters);
+	const FTransform SpawnTransform(ShotDirection.Rotation(), SpawnLocation);
+	ATunaSweeperProjectile* SpawnedProjectile = World.SpawnActorDeferred<ATunaSweeperProjectile>(
+		ProjectileClassToSpawn, SpawnTransform, this, InstigatorPawn, ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
 	if (SpawnedProjectile)
 	{
 		const float BaseDamageAmount = SpawnedProjectile->GetDamageAmount();
@@ -942,6 +941,7 @@ ATunaSweeperProjectile* ATunaSweeperWeapon::SpawnProjectile(
 			0,
 			FMath::RoundToInt(BaseDamageAmount * FMath::Max(0.0f, ProjectileDamageMultiplier)) + ProjectileDamageBonus);
 		SpawnedProjectile->SetDamageAmount(static_cast<float>(ModifiedDamageAmount));
+		SpawnedProjectile->SetBurnSpec(BurnSpec);
 		SpawnedProjectile->SetImpactProfileId(ImpactProfileId);
 		SpawnedProjectile->SetHitEffectId(ProjectileHitEffectId);
 		SpawnedProjectile->SetAimIntent(
@@ -949,6 +949,7 @@ ATunaSweeperProjectile* ATunaSweeperWeapon::SpawnProjectile(
 			AimIntentComponent,
 			AimIntentWorldPoint,
 			bHasAimIntentWorldPoint);
+		SpawnedProjectile->FinishSpawning(SpawnTransform);
 		IgnoreNearbyPlayerPassthroughCovers(SpawnedProjectile, InstigatorPawn);
 	}
 

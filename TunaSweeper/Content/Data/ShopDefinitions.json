@@ -34,6 +34,10 @@
         "stock_quantity": 10
       },
       {
+        "item_id": 2023,
+        "stock_quantity": 60
+      },
+      {
         "item_id": 7002,
         "stock_quantity": 10,
         "price": 1

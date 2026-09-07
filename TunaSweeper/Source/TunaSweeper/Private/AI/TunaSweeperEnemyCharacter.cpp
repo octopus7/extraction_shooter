@@ -1,6 +1,7 @@
 #include "AI/TunaSweeperEnemyCharacter.h"
 
 #include "AI/TunaSweeperEnemyAIController.h"
+#include "Component/TunaSweeperBurnComponent.h"
 #include "Component/TunaSweeperCombatPatternComponent.h"
 #include "Component/TunaSweeperDebuffComponent.h"
 #include "Component/TunaSweeperEnemySensorDebugComponent.h"
@@ -118,6 +119,7 @@ namespace
 ATunaSweeperEnemyCharacter::ATunaSweeperEnemyCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	BurnComponent = CreateDefaultSubobject<UTunaSweeperBurnComponent>(TEXT("BurnComponent"));
 
 	AIControllerClass = ATunaSweeperEnemyAIController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
@@ -1303,6 +1305,7 @@ void ATunaSweeperEnemyCharacter::HandleDeath(AController* KillerController, AAct
 
 	bIsDead = true;
 	CurrentHealth = 0.0f;
+	if (BurnComponent) BurnComponent->ClearBurn();
 	if (FactionComponent) FactionComponent->SetCanBeCombatTarget(false);
 	if (CombatPatternComponent) CombatPatternComponent->CancelPatterns();
 

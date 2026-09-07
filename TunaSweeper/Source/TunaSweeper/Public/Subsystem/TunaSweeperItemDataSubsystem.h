@@ -106,6 +106,13 @@ struct TUNASWEEPER_API FTunaSweeperItemDefinition
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
 	int32 ProjectileDamageBonus = 0;
 
+	// Zero keeps ordinary weapons and ammunition non-incendiary.
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item", meta = (ClampMin = "0.0", ClampMax = "100000", UIMin = "0.0"))
+	float BurnDamagePerTick = 0.0f;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item", meta = (ClampMin = "1", ClampMax = "300", UIMin = "1"))
+	int32 BurnTickCount = 5;
+
 	UPROPERTY(BlueprintReadOnly, Category = "TunaSweeper|Item")
 	TArray<FName> AttachmentSlotTags;
 

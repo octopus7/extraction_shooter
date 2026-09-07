@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Combat/TunaSweeperBurnTypes.h"
 #include "GameFramework/Actor.h"
 #include "Weapon/TunaSweeperWeaponSpreadRecoilDataAsset.h"
 #include "TunaSweeperWeapon.generated.h"
@@ -51,7 +52,8 @@ public:
 		// TEMP_VIDEO_BULLET_STORM: Negative keeps the normal weapon cooldown; remove this argument after capture.
 		float FireCooldownOverrideSeconds = -1.0f,
 		// TEMP_VIDEO_BULLET_STORM: Only the temporary capture mode passes true; normal fire remains audible.
-		bool bSuppressFireSound = false);
+		bool bSuppressFireSound = false,
+		const FTunaSweeperBurnSpec& BurnSpec = FTunaSweeperBurnSpec());
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Weapon")
 	void ConfigureGunVisual();
@@ -173,7 +175,8 @@ protected:
 		AActor* AimIntentActor,
 		UPrimitiveComponent* AimIntentComponent,
 		const FVector& AimIntentWorldPoint,
-		bool bHasAimIntentWorldPoint);
+		bool bHasAimIntentWorldPoint,
+		const FTunaSweeperBurnSpec& BurnSpec);
 
 	void PlayFirePresentation(bool bSuppressFireSound = false);
 	void PlayReloadPresentation(TSoftObjectPtr<class USoundBase> ReloadSound);

@@ -107,3 +107,5 @@ item.waterproof_tape.desc,벙커의 새는 배관을 임시로 막을 수 있는
 container.lumber_crate,목재 상자,Lumber Crate,木材箱
 container.developer_crate,개발상자,Developer Crate,開発箱
 container.north_crate,북쪽 상자,North Crate,北側の箱
+item.rifle_incendiary_ammo,소총 소이탄,Rifle Incendiary Ammo,ライフル焼夷弾
+item.rifle_incendiary_ammo.desc,적을 발화시켜 1초마다 2의 피해를 5회 줍니다. 무기와 탄약 연구로 지속시간과 피해가 증가합니다.,Ignites enemies for 2 damage every second for 5 ticks. Weapon and ammunition research improve duration and damage.,敵を発火させて1秒ごとに2ダメージを5回与えます。武器と弾薬の研究で持続時間とダメージが増加します。
