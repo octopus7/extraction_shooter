@@ -41,4 +41,4 @@
 
 반복 제작용 Blender 스크립트와 읽기 전용 검증기는 `Tools/MoleControlV2`에 있다. `build_shell.py`, `build_console.py`, `build_decor.py` → `merge_manifest.py`, `build_layout.py` → `build_scenes.py` 순서로 소스를 재생성한다. `verify_fbx.py`는 Blender background에서, `verify_layout.py`는 일반 Python에서 실행한다. `verify_unreal.py`는 UE Python 명령렛으로 실행한다. `capture_unreal.py`는 주석의 전용 unattended 렌더 에디터 프로세스에서만 실행하며 해당 프로세스만 종료한다.
 
-일회성 UE 임포터는 생성 에셋과 함께 첫 커밋한 뒤 다음 커밋에서 즉시 제거한다. 자동 시작·재생성 경로는 추가하지 않았다. 원격 푸시는 하지 않는다.
+일회성 UE 임포터는 생성 에셋과 함께 `5a53ada3`에 커밋한 직후 제거했다. 필요한 경우 해당 커밋에서 복구할 수 있다. 다음 커밋은 임포터 제거와 재검증 기록이며, 반복 제작용 Blender 스크립트와 읽기 전용 검증기는 유지한다. 자동 시작·재생성 경로는 추가하지 않았다. 원격 푸시는 하지 않는다.
