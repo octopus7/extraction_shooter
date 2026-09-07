@@ -6,6 +6,7 @@
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
 #include "TunaSweeperEnemyCharacter.generated.h"
 
+class UTunaSweeperCombatPatternComponent;
 class UStaticMeshComponent;
 class USceneComponent;
 class UTunaSweeperVisionSubjectComponent;
@@ -103,6 +104,12 @@ public:
 	// TEMP_VIDEO_BULLET_STORM: Remove this accessor with the matching debug checkbox after capture.
 	bool IsTemporaryVideoBulletStormEnabled() const;
 
+	/** Pattern execution and minion deployment can temporarily own movement/attacks. */
+	virtual bool IsStandardCombatSuppressed() const;
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Patterns")
+	UTunaSweeperCombatPatternComponent* GetCombatPatternComponent() const { return CombatPatternComponent; }
+
 	bool AttackTarget(AActor* TargetActor);
 	bool UsesMeleeAttack() const;
 	float GetMeleeAttackRange() const;
@@ -170,6 +177,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UTunaSweeperEnemySensorDebugComponent> SensorDebugComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UTunaSweeperCombatPatternComponent> CombatPatternComponent;
 
 public:
 	UTunaSweeperEnemySensorDebugComponent* GetSensorDebugComponent() const { return SensorDebugComponent; }

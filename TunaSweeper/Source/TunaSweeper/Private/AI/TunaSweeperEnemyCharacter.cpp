@@ -1,6 +1,7 @@
 #include "AI/TunaSweeperEnemyCharacter.h"
 
 #include "AI/TunaSweeperEnemyAIController.h"
+#include "Component/TunaSweeperCombatPatternComponent.h"
 #include "Component/TunaSweeperDebuffComponent.h"
 #include "Component/TunaSweeperEnemySensorDebugComponent.h"
 #include "Component/TunaSweeperFactionComponent.h"
@@ -191,6 +192,7 @@ ATunaSweeperEnemyCharacter::ATunaSweeperEnemyCharacter()
 
 	VisionSubjectComponent = CreateDefaultSubobject<UTunaSweeperVisionSubjectComponent>(TEXT("VisionSubject"));
 	SensorDebugComponent = CreateDefaultSubobject<UTunaSweeperEnemySensorDebugComponent>(TEXT("SensorDebug"));
+	CombatPatternComponent = CreateDefaultSubobject<UTunaSweeperCombatPatternComponent>(TEXT("CombatPatterns"));
 
 	ApplyVoxelVisualMeshes();
 
@@ -940,8 +942,14 @@ bool ATunaSweeperEnemyCharacter::TryBuildDeathLootRuntimeItemUids(
 	return OutRuntimeItemUids.Num() > 0;
 }
 
+bool ATunaSweeperEnemyCharacter::IsStandardCombatSuppressed() const
+{
+	return bIsDead || (CombatPatternComponent && CombatPatternComponent->IsPatternActive());
+}
+
 bool ATunaSweeperEnemyCharacter::AttackTarget(AActor* TargetActor)
 {
+	if (IsStandardCombatSuppressed()) return false;
 	if (UsesMeleeAttack())
 	{
 		return ApplyMeleeDamageTo(TargetActor);
@@ -1021,7 +1029,7 @@ bool ATunaSweeperEnemyCharacter::FireProjectileAt(AActor* TargetActor)
 ETunaSweeperEnemyFireResult ATunaSweeperEnemyCharacter::TryFireProjectileAt(AActor* TargetActor)
 {
 	UWorld* World = GetWorld();
-	if (!World || !TargetActor || bIsDead || UsesMeleeAttack())
+	if (!World || !TargetActor || IsStandardCombatSuppressed() || UsesMeleeAttack())
 	{
 		return ETunaSweeperEnemyFireResult::Blocked;
 	}
@@ -1295,6 +1303,8 @@ void ATunaSweeperEnemyCharacter::HandleDeath(AController* KillerController, AAct
 
 	bIsDead = true;
 	CurrentHealth = 0.0f;
+	if (FactionComponent) FactionComponent->SetCanBeCombatTarget(false);
+	if (CombatPatternComponent) CombatPatternComponent->CancelPatterns();
 
 	if (UCharacterMovementComponent* MovementComponent = GetCharacterMovement())
 	{

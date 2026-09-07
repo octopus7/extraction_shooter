@@ -84,6 +84,11 @@ public:
 	void NotifySuspicionAtLocation(const FVector& SuspicionLocation);
 	void NotifyDamageTaken(AActor* SuspectedActor);
 
+	/** Patterns may interrupt a ranged enemy only between complete attacks/reloads. */
+	bool CanStartCombatPattern() const;
+	/** Call once after the component enters an active phase and before stopping its movement. */
+	void NotifyCombatPatternStarted();
+
 	virtual void SetGenericTeamId(const FGenericTeamId& InTeamId) override;
 	virtual FGenericTeamId GetGenericTeamId() const override;
 	virtual ETeamAttitude::Type GetTeamAttitudeTowards(const AActor& Other) const override;
@@ -166,8 +171,10 @@ protected:
 	float CombatDebugEntryReasonDisplaySeconds = 4.0f;
 
 private:
+	bool bWasStandardCombatSuppressed = false;
 #if WITH_DEV_AUTOMATION_TESTS
 	friend class FTunaSweeperEnemyRepositionFallbackTest;
+	friend class FTunaSweeperCombatPatternRangedBoundaryTest;
 #endif
 
 	void InitializeFromControlledCharacter();

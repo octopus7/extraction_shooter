@@ -1,6 +1,7 @@
 #include "AI/TunaSweeperEnemyAIController.h"
 
 #include "AI/TunaSweeperEnemyCharacter.h"
+#include "Component/TunaSweeperCombatPatternComponent.h"
 #include "Character/TunaSweeperTopDownCharacter.h"
 #include "Component/TunaSweeperFactionComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -233,6 +234,7 @@ void ATunaSweeperEnemyAIController::EndPlay(const EEndPlayReason::Type EndPlayRe
 void ATunaSweeperEnemyAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
+	bWasStandardCombatSuppressed = false;
 	InitializeFromControlledCharacter();
 	StartNonCombatIdle();
 	UpdateAttackTarget();
@@ -241,6 +243,7 @@ void ATunaSweeperEnemyAIController::OnPossess(APawn* InPawn)
 void ATunaSweeperEnemyAIController::OnUnPossess()
 {
 	UnregisterFromSquad();
+	bWasStandardCombatSuppressed = false;
 	Super::OnUnPossess();
 }
 
@@ -266,9 +269,68 @@ void ATunaSweeperEnemyAIController::InitializeFromControlledCharacter()
 		FMath::Max(1, FMath::Max(CombatProfile.PositionFiringBudgetMin, CombatProfile.PositionFiringBudgetMax)));
 }
 
+bool ATunaSweeperEnemyAIController::CanStartCombatPattern() const
+{
+	ATunaSweeperEnemyCharacter* Enemy = Cast<ATunaSweeperEnemyCharacter>(GetPawn());
+	if (!Enemy || Enemy->IsStandardCombatSuppressed())
+	{
+		return false;
+	}
+	if (Enemy->UsesMeleeAttack())
+	{
+		return true;
+	}
+	return (RangedCombatState == ETunaSweeperRangedCombatState::Idle ||
+		RangedCombatState == ETunaSweeperRangedCombatState::Observe) &&
+		!bReloadMovementSpeedReduced && !Enemy->GetEnemyWeaponRuntimeStatus().bIsReloading;
+}
+
+void ATunaSweeperEnemyAIController::NotifyCombatPatternStarted()
+{
+	bWasStandardCombatSuppressed = true;
+	// A summoned attack has its own rhythm. Free the partner immediately instead of holding a lease.
+	UnregisterFromSquad();
+	bMoveRequestActive = false;
+	ActiveMoveRequestId = FAIRequestID::InvalidRequest;
+	ActiveMoveCycleId = 0;
+	bSquadMoverSettling = false;
+	SettleCycleId = 0;
+	bPendingReloadSafeMove = false;
+	CrossRepositionWaypoints.Reset();
+	CrossWaypointIndex = INDEX_NONE;
+	RangedMoveKind = ETunaSweeperRangedMoveKind::None;
+	StopMovement();
+	ClearFocus(EAIFocusPriority::Gameplay);
+}
 void ATunaSweeperEnemyAIController::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
+	if (const ATunaSweeperEnemyCharacter* Enemy = Cast<ATunaSweeperEnemyCharacter>(GetPawn());
+		Enemy && Enemy->IsStandardCombatSuppressed())
+	{
+		bWasStandardCombatSuppressed = true;
+		return;
+	}
+	if (bWasStandardCombatSuppressed)
+	{
+		bWasStandardCombatSuppressed = false;
+		// Refresh sight and target validity before returning the actor to its normal combat rhythm.
+		UpdateAttackTarget();
+		if (bIsCombatEngaged)
+		{
+			StartObserve(0.15f);
+			if (AActor* Target = CurrentTargetActor.Get())
+			{
+				SetFocus(Target, EAIFocusPriority::Gameplay);
+				RegisterWithSquad();
+				if (bHasDirectTargetSight) ReportSquadContact(Target, Target->GetActorLocation());
+			}
+		}
+		else if (AwarenessState == ETunaSweeperEnemyAwarenessState::Unaware)
+		{
+			StartNonCombatIdle();
+		}
+	}
 	UpdateAwarenessState(DeltaSeconds);
 	UpdateNonCombatState(DeltaSeconds);
 
@@ -276,6 +338,8 @@ void ATunaSweeperEnemyAIController::Tick(float DeltaSeconds)
 	AActor* TargetActor = CurrentTargetActor.Get();
 	if (bIsCombatEngaged && EnemyCharacter && TargetActor)
 	{
+		if (bHasDirectTargetSight && EnemyCharacter->GetCombatPatternComponent()
+			&& EnemyCharacter->GetCombatPatternComponent()->TryStartAutomaticPattern(TargetActor)) return;
 		const float DistanceToTarget = FVector::Dist2D(
 			EnemyCharacter->GetActorLocation(),
 			TargetActor->GetActorLocation());
@@ -297,6 +361,8 @@ void ATunaSweeperEnemyAIController::Tick(float DeltaSeconds)
 
 void ATunaSweeperEnemyAIController::UpdateAttackTarget()
 {
+	if (const ATunaSweeperEnemyCharacter* Enemy = Cast<ATunaSweeperEnemyCharacter>(GetPawn());
+		Enemy && Enemy->IsStandardCombatSuppressed()) return;
 	APawn* ControlledPawn = GetPawn();
 	UWorld* World = GetWorld();
 	if (!ControlledPawn || !World)
@@ -442,6 +508,8 @@ AActor* ATunaSweeperEnemyAIController::FindBestHostileTarget() const
 
 void ATunaSweeperEnemyAIController::NotifySuspicionAtLocation(const FVector& InSuspicionLocation)
 {
+	if (const ATunaSweeperEnemyCharacter* Enemy = Cast<ATunaSweeperEnemyCharacter>(GetPawn());
+		Enemy && Enemy->IsStandardCombatSuppressed()) return;
 	if (InSuspicionLocation.ContainsNaN() || bIsCombatEngaged ||
 		AwarenessState == ETunaSweeperEnemyAwarenessState::Alerted)
 	{
@@ -452,6 +520,8 @@ void ATunaSweeperEnemyAIController::NotifySuspicionAtLocation(const FVector& InS
 
 void ATunaSweeperEnemyAIController::NotifyDamageTaken(AActor* SuspectedActor)
 {
+	if (const ATunaSweeperEnemyCharacter* Enemy = Cast<ATunaSweeperEnemyCharacter>(GetPawn());
+		Enemy && Enemy->IsStandardCombatSuppressed()) return;
 	APawn* ControlledPawn = GetPawn();
 	UWorld* World = GetWorld();
 	if (!ControlledPawn || !World)
@@ -1990,6 +2060,13 @@ void ATunaSweeperEnemyAIController::OnMoveCompleted(
 	const FPathFollowingResult& Result)
 {
 	Super::OnMoveCompleted(RequestId, Result);
+	if (const ATunaSweeperEnemyCharacter* Enemy = Cast<ATunaSweeperEnemyCharacter>(GetPawn());
+		Enemy && Enemy->IsStandardCombatSuppressed())
+	{
+		bMoveRequestActive = false;
+		ActiveMoveRequestId = FAIRequestID::InvalidRequest;
+		return;
+	}
 	if (!bMoveRequestActive || !RequestId.IsEquivalent(ActiveMoveRequestId))
 	{
 		return;
@@ -2353,6 +2430,11 @@ void ATunaSweeperEnemyAIController::HandleSquadStateChanged(
 	const ETunaSweeperEnemySquadRole PreviousRole = SquadState.Role;
 	SquadState = NewState;
 	bSquadRegistered = NewState.bRegistered;
+	if (const ATunaSweeperEnemyCharacter* Enemy = Cast<ATunaSweeperEnemyCharacter>(GetPawn());
+		Enemy && Enemy->IsStandardCombatSuppressed())
+	{
+		return;
+	}
 	const bool bPairJustFormed =
 		Reason == ETunaSweeperEnemySquadUpdateReason::PairFormed &&
 		PreviousRole == ETunaSweeperEnemySquadRole::Solo &&
@@ -2522,6 +2604,8 @@ void ATunaSweeperEnemyAIController::CompleteSquadMoverRole(int32 ExpectedCycleId
 
 void ATunaSweeperEnemyAIController::HandleNoiseReported(const FTunaSweeperNoiseEvent& NoiseEvent)
 {
+	if (const ATunaSweeperEnemyCharacter* Enemy = Cast<ATunaSweeperEnemyCharacter>(GetPawn());
+		Enemy && Enemy->IsStandardCombatSuppressed()) return;
 	if (bHasDirectTargetSight || bIsCombatEngaged || AwarenessState == ETunaSweeperEnemyAwarenessState::Alerted ||
 		NoiseEvent.Loudness <= 0.0f || NoiseEvent.MaxRange <= 0.0f)
 	{
