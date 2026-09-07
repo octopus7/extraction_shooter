@@ -46,7 +46,7 @@ For another approach direction, rotate the whole decorative group about the extr
 
 Only relevant asset dependencies are selectively restored from the completed modular-interior expansion at commit `8bb53750`. The source lineage is original `4f8caf5d`, visual/UV correction `7c7c9b8c`, imported UE assets `481528e5`, then generator cleanup `8bb53750`. No unrelated module, map or source change from that task is integrated.
 
-This extraction set's initial validated source commit is `4a1b45f8`. A subsequent visual source correction updates the south/upwind arrangement and its regenerated previews; its commit hash is pending final validation and commit. The unchanged mesh counts and dimensions are verified again with the final placement manifest.
+This extraction set's initial validated source commit is `4a1b45f8`. Visual source correction `f98cf3f7` updates the south/upwind arrangement and its regenerated previews. The unchanged mesh counts and dimensions pass again with the final placement manifest.
 
 The reused emergency light has **12 triangles and 2 material slots**: `/Game/Environment/ModularInteriorPreview/Materials/M_MI_Steel` and `/Game/Environment/ModularInteriorExpansion/Materials/M_MI_ExpansionAmber`. Its source is `TunaSweeper/SourceArt/Environment/ModularInteriorExpansion/Models/SM_MIE_EmergencyLight.fbx`. The prior `SM_MIE_ZoneSign` is the thin closed sign-body reference, with 12 triangles, dimensions 100x2x50cm and one service material. Its exact `ZONE 01` typography is not used as an extraction message.
 
@@ -62,4 +62,3 @@ The reproducible Blender script, `.blend`, per-model FBXs, original images, text
 
 
 Run Blender 4.5 with --factory-startup -b --python-exit-code 1 --python Tools/ExtractionMarkers/build_markers.py, then validate_source.py in a fresh process. EM_SKIP_RENDER=1 skips rendering; EM_RENDER_FILTER selects comma-separated preview names. Run build_gallery.py with Python. Read-only UE audits use run_unreal.ps1 -Script verify_unreal.py and -Script verify_scene_driver.py -FullEditor. The dedicated scene is /Game/Interaction/ExtractionMarkers/Maps/L_ExtractionMarkers. Reports live beside ExtractionMarkers.blend. Source and UE-import commits are separate. If a one-off editor generator is used, its generated assets and generator are first validated and committed together; the next commit removes the generator, its entry points and generator-only dependencies, followed by revalidation. No startup regeneration path remains. Remote push is not part of this task.
-
