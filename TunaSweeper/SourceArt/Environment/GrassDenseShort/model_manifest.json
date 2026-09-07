@@ -1,0 +1,41 @@
+{
+  "name": "SM_GrassDenseShort",
+  "seed": 906413,
+  "blades": 215,
+  "tufts": 43,
+  "vertices": 1505,
+  "triangles": 1290,
+  "bounds_m": [
+    -0.34754419326782227,
+    -0.33386874198913574,
+    0.0,
+    0.42450881004333496,
+    0.3540772497653961,
+    0.18229983747005463
+  ],
+  "dimensions_cm": [
+    77.20530033111572,
+    68.79459917545319,
+    18.229983747005463
+  ],
+  "pivot_m": [
+    0,
+    0,
+    0
+  ],
+  "unit_scale_m": 1,
+  "fbx_axis_forward": "-Y",
+  "fbx_axis_up": "Z",
+  "ue_axis_mapping": "Blender X -> UE X, Blender Y -> UE -Y, Blender Z -> UE Z (validated against signed bounds)",
+  "materials": [
+    "M_GrassDenseShort"
+  ],
+  "uv_channels": 1,
+  "min_uv_triangle_area": 0.015971996220827123,
+  "degenerate_triangles": 0,
+  "invalid_normals": 0,
+  "two_sided": true,
+  "alpha_mode": "OPAQUE",
+  "collision": false,
+  "note": "Open leaf ribbons intentional: opaque two-sided material; overlapping UVs intentional for palette reuse. Dynamic lighting; no baked lightmap UV."
+}

@@ -8112,3 +8112,11 @@
 - 133장 둥근 잎, 2,408삼각형, 약 153×129×73cm. UV 2채널, 재질 1슬롯, 지면 피벗, 닫힌 잎 뒷면, 불투명·NoCollision 구성. 퇴화 면·UV·비정상 노멀·비다양체 엣지 0, 개별 입체 147개의 바깥쪽 노멀 및 .blend 텍스처 내장, FBX 재로드 통과.
 - /Game/Nature/ForestProps/BushRound에 Static Mesh·Material·Texture 3개를 UE 5.7.4로 임포트했다. 임시 콘텐츠 검수 프로젝트에서 새 프로세스 재로드와 GPU 렌더를 확인했다. 실제 크기 152.8166×129.0353×72.7254cm, 경계 오차 0.0000043cm, UV 2채널·단일 재질·충돌 없음 검증 통과. 최종 UE 렌더에서 실제 팔레트 표시를 직접 확인했다.
 - 기존 공용 애셋·BP·맵·게임 기능·퀘스트를 변경하지 않았다. 별도 LOD와 실제 레벨 밀도 성능 측정은 포함하지 않았으며 배치 시 Foliage/HISM·거리 컬링 안내를 제공했다. push하지 않았다.
+
+## 2026-09-06 22:21:46 (소요시간: 00:42:10)
+
+- 담당 모델인 짧고 촘촘한 풀 군락 GrassDenseShort 1종을 Blender 스크립트로 제작했다. 기존 Nature의 Bush·GrassLow·Flower·SimpleTree·Wood·RockBasic 실제 메시·재질과 Blender 원본을 조사하고 비교 렌더를 시각 확인했다.
+- 기존 원본 관리 규칙에 따라 TunaSweeper/SourceArt/Environment/GrassDenseShort에 텍스처를 포함한 blend, UE용 FBX, 64×64 색상 텍스처, 다방향·25개 반복·거리 프리뷰와 검증 JSON을 저장했다. 제작 도구·치수·배치 안내는 Tools/ForestProps/GrassDenseShort에 기록했다.
+- 크기 77.21×68.79×18.23cm, 잎 215장, 삼각형 1,290개, 재질 슬롯 1개. 꽃·알파 카드·미세 노이즈·충돌 없이 양면 불투명 재질을 사용했다. Blender의 미터→UE cm 및 축, 지면 피벗, UV·법선·퇴화 면·FBX/블렌드 재로드 검증을 통과했다.
+- 검증된 원본을 먼저 850a59c6으로 로컬 커밋한 뒤 /Game/Nature/ForestProps/GrassDenseShort에 Static Mesh·재질·텍스처를 임포트했다. 실제 Content 폴더를 연결한 독립 UE 5.7.4 검증 프로젝트에서 임포트·별도 프로세스 재로드·오프스크린 에디터 캡처가 종료 코드 0으로 완료됐다. UE 바운드 최대 오차 약 0.000002cm, UV 1개·삼각형 1,290개·NoCollision·양면 불투명 재질을 확인했다.
+- UE 앞·뒤 렌더와 기본 12m/하향 60도/FOV 70도 카메라 거리의 화면을 직접 시각 확인했다. 기존 Nature 6개 폴더 해시는 동일하며 BP·맵·게임 기능·퀘스트·저장 데이터는 변경하지 않았다. 단일 LOD이며 실제 게임 레벨 배치·PIE·목표 하드웨어 FPS 검증은 수행하지 않았다. UE 산출물과 최종 검증 기록은 별도 로컬 커밋하며 push는 수행하지 않는다.

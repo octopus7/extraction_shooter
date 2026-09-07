@@ -1,0 +1,20 @@
+{
+  "passed": true,
+  "mesh_count": 1,
+  "triangles": 1290,
+  "bounds_m": [
+    -0.34754419326782227,
+    -0.33386874198913574,
+    0.0,
+    0.42450881004333496,
+    0.3540772497653961,
+    0.18229983747005463
+  ],
+  "bounds_max_error_m": 0.0,
+  "uv_channels": 1,
+  "materials": 1,
+  "normals_unit_length": true,
+  "degenerate_faces": 0,
+  "embedded_texture_loaded": true,
+  "ground_pivot": true
+}

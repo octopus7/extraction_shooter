@@ -1,0 +1,36 @@
+{
+  "engine": "5.7.4-51494982+++UE5+Release-5.7",
+  "asset": "/Game/Nature/ForestProps/GrassDenseShort/SM_GrassDenseShort.SM_GrassDenseShort",
+  "render_backend": "D3D12 offscreen editor SceneCapture2D",
+  "world_saved": false,
+  "views": [
+    {
+      "file": "07_ue_reload_hero.png",
+      "distinct_sample_colors": 33,
+      "camera_location_cm": [
+        110.0,
+        -150.0,
+        120.0
+      ]
+    },
+    {
+      "file": "08_ue_reload_reverse.png",
+      "distinct_sample_colors": 32,
+      "camera_location_cm": [
+        -110.0,
+        150.0,
+        100.0
+      ]
+    },
+    {
+      "file": "09_ue_camera_12m.png",
+      "distinct_sample_colors": 19,
+      "camera_location_cm": [
+        -600.0,
+        0.0,
+        1046.2305
+      ]
+    }
+  ],
+  "nonblank_pixel_checks": true
+}

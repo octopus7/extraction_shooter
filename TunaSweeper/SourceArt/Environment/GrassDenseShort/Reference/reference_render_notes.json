@@ -1,0 +1,26 @@
+{
+  "Bush": {
+    "source_texture": "TunaSweeper\\SourceArt\\Environment\\GrassDenseShort\\Reference\\Bush.tga",
+    "display_normalized": true
+  },
+  "GrassLow": {
+    "source_texture": "Blender\\textures\\M_GrassLowBlade.png",
+    "display_normalized": true
+  },
+  "Flower": {
+    "source_texture": "TunaSweeper\\SourceArt\\Environment\\GrassDenseShort\\Reference\\Flower_BaseColor.tga",
+    "display_normalized": true
+  },
+  "SimpleTree": {
+    "source_texture": "TunaSweeper\\SourceArt\\Environment\\GrassDenseShort\\Reference\\SimpleTree_BaseColor.tga",
+    "display_normalized": true
+  },
+  "Wood": {
+    "source_texture": "TunaSweeper\\SourceArt\\Environment\\GrassDenseShort\\Reference\\Wood_BaseColor.tga",
+    "display_normalized": true
+  },
+  "RockBasic": {
+    "source_texture": "TunaSweeper\\SourceArt\\Environment\\GrassDenseShort\\Reference\\RockBasic_BaseColor.tga",
+    "display_normalized": true
+  }
+}
