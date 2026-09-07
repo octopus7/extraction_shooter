@@ -1,7 +1,7 @@
 {
 	"FileVersion": 3,
-	"Version": 1,
-	"VersionName": "1.0.0",
+	"Version": 2,
+	"VersionName": "2.0.0-experimental",
 	"FriendlyName": "Stylized Water",
 	"Description": "Artist-directed anime background water with baked depth color, gentle shore waves, foam, flow, and restrained distortion.",
 	"Category": "Rendering",
@@ -9,18 +9,18 @@
 	"CanContainContent": true,
 	"EnabledByDefault": false,
 	"IsBetaVersion": false,
-	"IsExperimentalVersion": false,
+	"IsExperimentalVersion": true,
 	"Installed": false,
 	"Modules": [
 		{
 			"Name": "StylizedWater",
 			"Type": "Runtime",
-			"LoadingPhase": "Default"
+			"LoadingPhase": "PostConfigInit"
 		},
 		{
 			"Name": "StylizedWaterEditor",
 			"Type": "UncookedOnly",
-			"LoadingPhase": "PostEngineInit"
+			"LoadingPhase": "Default"
 		}
 	],
 	"Plugins": [

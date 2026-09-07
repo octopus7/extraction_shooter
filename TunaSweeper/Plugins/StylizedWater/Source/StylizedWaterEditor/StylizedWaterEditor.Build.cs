@@ -8,12 +8,14 @@ public class StylizedWaterEditor : ModuleRules
 
 		PrivateDependencyModuleNames.AddRange(new string[]
 		{
-			"ProceduralMeshComponent",
-			"RHI",
 			"Core",
 			"CoreUObject",
 			"Engine",
+			"ImageCore",
 			"LevelEditor",
+			"ProceduralMeshComponent",
+			"RHI",
+			"RenderCore",
 			"Slate",
 			"SlateCore",
 			"StylizedWater",

@@ -1,0 +1,18 @@
+// WATER_SKY_PARALLAX_EXPERIMENT. No Time input: fixed camera means fixed cloud UVs.
+#pragma once
+float2 PaintedSkyUV(float3 Position,float3 Camera,float4 Sky,float2 Anchor)
+{
+    float3 Ray=normalize(Position-Camera);
+    float3 Reflected=reflect(Ray,float3(0,0,1));
+    // Smooth finite-horizon regularization avoids a hard clamp seam at low angles.
+    float Height=max(Sky.w+Sky.x-Position.z,100);
+    float Denominator=sqrt(Reflected.z*Reflected.z+0.0225);
+    float2 Hit=Position.xy+Reflected.xy*Height/Denominator;
+    return (Hit-Anchor)/max(Sky.y,100)+0.5;
+}
+float3 BlendPaintedSky(float4 Water,float3 Cloud,float3 Position,float3 Camera,float Strength)
+{
+    float Facing=abs(normalize(Camera-Position).z);
+    float Fresnel=0.18+0.82*pow(1-Facing,2);
+    return lerp(Water.rgb,Cloud,saturate(Strength)*Fresnel*smoothstep(0.15,0.75,Water.a));
+}
