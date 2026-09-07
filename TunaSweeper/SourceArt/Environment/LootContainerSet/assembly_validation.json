@@ -1,0 +1,48 @@
+{
+  "passed": true,
+  "assemblies": [
+    {
+      "kind": "Wood",
+      "closed_dimensions_m": [
+        1.100000023841858,
+        0.8000000178813934,
+        0.5500000035762787
+      ],
+      "body_to_lid_vertical_gap_mm": 1.9999957084655962,
+      "continuous_clearance_roll_degrees": [
+        0,
+        -105
+      ],
+      "passed": true
+    },
+    {
+      "kind": "Metal",
+      "closed_dimensions_m": [
+        1.350000023841858,
+        0.9499999940395355,
+        0.6000000238418579
+      ],
+      "body_to_lid_vertical_gap_mm": 2.0000040531158447,
+      "continuous_clearance_roll_degrees": [
+        0,
+        -105
+      ],
+      "passed": true
+    },
+    {
+      "kind": "Supply",
+      "closed_dimensions_m": [
+        1.649999976158142,
+        1.1000000357627868,
+        0.6999999761581421
+      ],
+      "body_to_lid_vertical_gap_mm": 0.9999752044678178,
+      "continuous_clearance_roll_degrees": [
+        0,
+        -105
+      ],
+      "passed": true
+    }
+  ],
+  "proof": "In hinge coordinates every lid vertex has y>=0 and z>=0; every body vertex has y>=0 and z<0. For physical +X angle 0..90 degrees lid z stays >=0. For 90..105 degrees, any lid point with z<0 has y<0, behind the body. Thus their interiors cannot intersect anywhere in the continuous requested arc."
+}

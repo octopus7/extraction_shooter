@@ -83,4 +83,6 @@ Blender는 m, UE는 cm다. +Z 위쪽, 전면 +Y, 후면 힌지 -Y, 힌지 회전
 
 최종 판정 자료는 원본 폴더의 `source_validation.json`, `unreal_import_validation.json`, `unreal_reload_validation.json`, `unreal_review_validation.json`이다. 각 보고서의 `passed`와 상세 검사 결과를 확인한다. 소스 검증은 새로운 Blender 프로세스에서 .blend와 FBX를 재로드하여 치수·피벗·매니폴드·면 방향·퇴화 면·삼각형별 UV/색상 보존을 검사한다. UE 검증은 새 프로세스의 저장 메시에서 GeometryScript로 실제 삼각형·UV·노멀·색상과 충돌 경계를 확인하고 공유 재질·CPD·텍스처 크기도 검사한다.
 
+UE 캡처는 PIE 종료 후 검수 프로세스에서만 TextureQuality=3과 전체 텍스처 로드를 적용하며, 실제 로드 해상도 2048²/1024²를 확인한다. 프로젝트의 기본 품질 설정은 변경하지 않는다. 캡처용 수직 카메라는 열린 뚜껑까지 담도록 높이 1300cm를 사용한다. 원본 해상도는 실제 플레이 설정에서 보장되는 해상도나 FPS를 뜻하지 않는다.
+
 재현용 Blender 빌더와 읽기 전용 검증기는 유지한다. 일회성 UE importer는 생성 자산과 함께 검증·커밋한 직후 제거하는 다음 커밋으로 정리한다. 재임포트가 필요한 경우 해당 자산 생성 커밋의 `Tools/LootContainerSet/import_once.py`를 git 이력에서 확인한다. 최종 소스 트리와 에디터 시작 경로에 자동 재생성 기능을 남기지 않는다. 검증된 원본, UE 임포트, 생성기 제거를 구분하여 로컬 커밋하며 원격 push는 수행하지 않는다.
