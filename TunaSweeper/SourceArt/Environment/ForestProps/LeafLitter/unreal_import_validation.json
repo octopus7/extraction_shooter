@@ -1,0 +1,37 @@
+{
+  "passed": true,
+  "engine": "5.7.4-51494982+++UE5+Release-5.7",
+  "verification": "import",
+  "host": "content-only UE 5.7 with actual TunaSweeper Content mount",
+  "mesh": "/Game/Nature/ForestProps/LeafLitter/SM_LeafLitter.SM_LeafLitter",
+  "bounds_cm": [
+    -87.83460998535156,
+    -69.57044982910156,
+    0.0,
+    88.08172607421875,
+    56.488460540771484,
+    5.1907854080200195
+  ],
+  "max_bounds_error_cm": 3.814697265625e-06,
+  "axis_mapping": {
+    "indices": [
+      0,
+      1,
+      2
+    ],
+    "signs": [
+      1,
+      -1,
+      1
+    ]
+  },
+  "vertices_lod0": 5040,
+  "source_uv_channels": 1,
+  "material_slots": 1,
+  "opaque": true,
+  "two_sided": false,
+  "collisions": 0,
+  "collision_profile": "NoCollision",
+  "navigation": false,
+  "texture_srgb": true
+}

@@ -8144,3 +8144,11 @@
 - 검증 원본을 a9e78b84로 먼저 로컬 커밋했다. UE 5.7.4 콘텐츠 전용 독립 검증 프로젝트에서 /Game/Nature/ForestProps/BushSpreading/ 메시·재질·텍스처 3개를 임포트하고 새 프로세스로 재로드했다. 실제 UE 크기 오차 0.000006cm 미만, UV 2개, 삼각형 2,746개, 충돌 0개를 확인했다.
 - DirectX 12 에디터의 transient 장면을 실제 갱신한 뒤 최종 렌더를 저장·시각 확인했다. 최종 임포트·재로드·렌더 종료 코드는 모두 0이다. 본 프로젝트의 독립 Content 폴더에 3개 uasset을 반영하고 검증 파일과 SHA-256 일치를 확인했으며 UE 산출물은 별도 로컬 커밋한다.
 - 기존 공용 애셋·BP·맵·기능·퀘스트는 변경하지 않았다. 전체 게임 빌드·PIE·실제 레벨 배치/성능 검증과 원격 push는 수행하지 않았다.
+
+## 2026-09-06 22:22:16 (소요시간: 00:23:36)
+
+- 숲 바닥 낙엽 더미 1종을 Tools/ForestProps/LeafLitter 및 기존 원본 규칙의 TunaSweeper/SourceArt/Environment/ForestProps/LeafLitter에 독립 제작했다. Bush, GrassLow, Flower, SimpleTree, Wood, RockBasic의 기존 형상·색을 시각 확인했다.
+- 접힌 낙엽 60장, 1,680삼각형, 약 176×126×5.2cm, 지면 피벗의 단일 메시와 1슬롯 불투명 재질/128×32 팔레트를 만들었다. 재현 Blender 스크립트, 텍스처 내장 blend·FBX, 다방향 4장 및 9개 반복 배치 렌더, 치수·배치 안내를 제공했다.
+- Blender/FBX 재로드에서 경계·UV·노멀·퇴화 면·닫힌 표면·재질·packed 텍스처를 검증했다. 원본을 먼저 e703e45c에 로컬 커밋했다.
+- UE 5.7.4 콘텐츠 검증 호스트로 실제 /Game/Nature/ForestProps/LeafLitter에 Static Mesh·Material·Texture를 임포트하고 새 프로세스에서 크기·축·UV·재질·NoCollision·내비게이션 제외·Nanite 비활성 설정을 검증했다. 최대 경계 오차 0.000004cm 미만. UE 저장 메시의 면/UV 분리 정점은 5,040개다.
+- 실제 UE 에디터의 저장하지 않는 임시 월드에서 180프레임 뒤 렌더를 캡처해 직접 표시를 확인했다. 초기 commandlet 검은 캡처는 실제 에디터 캡처로 대체했다. 전체 게임 빌드·PIE·성능 측정은 수행하지 않았으며 기존 공용 애셋·BP·맵·기능·퀘스트는 변경하지 않았다. UE 애셋과 후속 검증 자료는 원본과 별도 로컬 커밋하며 push하지 않는다.

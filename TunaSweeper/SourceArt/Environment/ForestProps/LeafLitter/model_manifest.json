@@ -1,0 +1,44 @@
+{
+  "name": "SM_LeafLitter",
+  "seed": 90682,
+  "leaf_count": 60,
+  "triangles": 1680,
+  "vertices": 960,
+  "bounds_m": [
+    -0.8783460855484009,
+    -0.564884603023529,
+    0.0,
+    0.8808172941207886,
+    0.695704460144043,
+    0.05190785229206085
+  ],
+  "dimensions_cm": [
+    175.91633796691895,
+    126.0589063167572,
+    5.190785229206085
+  ],
+  "pivot_m": [
+    0,
+    0,
+    0
+  ],
+  "material_slots": 1,
+  "uv_channels": 1,
+  "degenerate_faces": 0,
+  "nonmanifold_edges": 0,
+  "closed_leaf_shells": true,
+  "texture": "Textures/T_LeafLitter_Palette.png",
+  "palette_srgb_hex": [
+    "66543C",
+    "786347",
+    "82724E",
+    "636344",
+    "74734D",
+    "90805B",
+    "534A36",
+    "80704F"
+  ],
+  "alpha": false,
+  "collision": false,
+  "passed": true
+}
