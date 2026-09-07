@@ -48,8 +48,8 @@
       "path": "/Game/Environment/ModularInteriorPreview/Materials/M_MI_Steel",
       "reachable_texture_samples": 2,
       "textures": [
-        "/Game/Environment/ModularInteriorPreview/Textures/T_MI_Atlas.T_MI_Atlas",
-        "/Game/Environment/ModularInteriorPreview/Textures/T_MI_DirtMask.T_MI_DirtMask"
+        "/Game/Environment/ModularInteriorPreview/Textures/T_MI_DirtMask.T_MI_DirtMask",
+        "/Game/Environment/ModularInteriorPreview/Textures/T_MI_Atlas.T_MI_Atlas"
       ]
     },
     {

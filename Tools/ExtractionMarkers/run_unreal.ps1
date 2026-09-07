@@ -1,4 +1,4 @@
-param([string]$Script='verify_unreal.py',[switch]$FullEditor)
+param([ValidateSet('verify_unreal.py','verify_scene_driver.py')][string]$Script='verify_unreal.py',[switch]$FullEditor)
 $ErrorActionPreference='Stop'
 $taskRoot=(Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
 $taskEngine='C:/Program Files/Epic Games/UE_5.7/Engine/Binaries/Win64'

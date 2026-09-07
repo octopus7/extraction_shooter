@@ -34,7 +34,8 @@
     "unreal_import_validation.json",
     "unreal_reload_validation.json",
     "unreal_scene_validation.json",
-    "unreal_scene_reload_validation.json"
+    "unreal_scene_reload_validation.json",
+    "unreal_smoke_preview.json"
   ],
-  "cleanup_verified": false
+  "cleanup_verified": true
 }

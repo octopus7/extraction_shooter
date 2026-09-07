@@ -17,7 +17,7 @@ for p in reuse:assert (ROOT/p).read_bytes()==git('show','8bb53750:'+p),p
 changed=git('diff','--name-only','4a1b45f8^').decode().splitlines()
 allowed=('Tools/ExtractionMarkers/','TunaSweeper/SourceArt/Environment/ExtractionMarkers/','TunaSweeper/Content/Interaction/ExtractionMarkers/')
 assert all(p in reuse or p=='Docs/requests.md' or p.startswith(allowed) for p in changed),changed
-reports=['source_validation.json','unreal_import_validation.json','unreal_reload_validation.json','unreal_scene_validation.json','unreal_scene_reload_validation.json']
+reports=['source_validation.json','unreal_import_validation.json','unreal_reload_validation.json','unreal_scene_validation.json','unreal_scene_reload_validation.json','unreal_smoke_preview.json']
 for n in reports:assert json.loads((OUT/n).read_text())['passed'],n
 runtime=[p for folder in ['TunaSweeper/Content/Interaction/ExtractionMarkers','TunaSweeper/Content/Environment/ModularInteriorExpansion','TunaSweeper/Content/Environment/ModularInteriorPreview'] for p in (ROOT/folder).rglob('*') if p.is_file()]
 hashes={p.relative_to(ROOT).as_posix():hashlib.sha256(p.read_bytes()).hexdigest() for p in runtime}
