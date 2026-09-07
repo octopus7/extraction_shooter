@@ -11,4 +11,9 @@ class TUNASWEEPER_API ATunaSweeperPatternEnemyCharacter : public ATunaSweeperEne
 	GENERATED_BODY()
 public:
 	ATunaSweeperPatternEnemyCharacter();
+protected:
+	virtual void BeginPlay() override;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UStaticMeshComponent> ChargeChassis;
 };

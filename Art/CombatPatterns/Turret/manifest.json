@@ -1,0 +1,301 @@
+{
+  "coordinate_system": "Source meters; +X front; +Z up. FBX axis_forward=-Y, axis_up=Z; unit conversion to UE centimeters.",
+  "material_slot_order": [
+    "CP_Armor",
+    "CP_Dark",
+    "CP_Teal",
+    "CP_Amber",
+    "CP_Rubber"
+  ],
+  "assembly_ue_cm": {
+    "base": {
+      "mesh": "SM_CP_TurretBase",
+      "location": [
+        0,
+        0,
+        0
+      ],
+      "rotation_pitch_yaw_roll": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    "head": {
+      "mesh": "SM_CP_TurretHead",
+      "location": [
+        0,
+        0,
+        69
+      ],
+      "rotation_pitch_yaw_roll": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    "left_tube_relative_head": {
+      "mesh": "SM_CP_TurretTube",
+      "location": [
+        0,
+        -28,
+        -4
+      ],
+      "rotation_pitch_yaw_roll": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    "right_tube_relative_head": {
+      "mesh": "SM_CP_TurretTube",
+      "location": [
+        0,
+        28,
+        -4
+      ],
+      "rotation_pitch_yaw_roll": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    },
+    "missile": {
+      "mesh": "SM_CP_Missile",
+      "pivot": "exhaust bottom center",
+      "local_nose_axis": "+Z",
+      "falling_rotation_pitch_yaw_roll": [
+        180,
+        0,
+        0
+      ],
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    }
+  },
+  "assets": [
+    {
+      "name": "SM_CP_TurretBase",
+      "file": "SM_CP_TurretBase.fbx",
+      "triangles": 2780,
+      "vertices": 1504,
+      "dimensions_cm": [
+        98.0,
+        94.0,
+        45.8
+      ],
+      "bounds_min_cm": [
+        -49.0,
+        -47.0,
+        0.0
+      ],
+      "bounds_max_cm": [
+        49.0,
+        47.0,
+        45.8
+      ],
+      "pivot_cm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "uv_maps": [
+        "UVMap"
+      ],
+      "material_slots": [
+        "CP_Armor",
+        "CP_Dark",
+        "CP_Teal",
+        "CP_Amber",
+        "CP_Rubber"
+      ]
+    },
+    {
+      "name": "SM_CP_TurretHead",
+      "file": "SM_CP_TurretHead.fbx",
+      "triangles": 1588,
+      "vertices": 864,
+      "dimensions_cm": [
+        60.8,
+        65.8,
+        51.65
+      ],
+      "bounds_min_cm": [
+        -29.5,
+        -32.9,
+        -23.55
+      ],
+      "bounds_max_cm": [
+        31.3,
+        32.9,
+        28.1
+      ],
+      "pivot_cm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "uv_maps": [
+        "UVMap"
+      ],
+      "material_slots": [
+        "CP_Armor",
+        "CP_Dark",
+        "CP_Teal",
+        "CP_Amber",
+        "CP_Rubber"
+      ]
+    },
+    {
+      "name": "SM_CP_TurretTube",
+      "file": "SM_CP_TurretTube.fbx",
+      "triangles": 1224,
+      "vertices": 648,
+      "dimensions_cm": [
+        31.75,
+        30.1,
+        51.85
+      ],
+      "bounds_min_cm": [
+        -14.9,
+        -15.05,
+        0.0
+      ],
+      "bounds_max_cm": [
+        16.85,
+        15.05,
+        51.85
+      ],
+      "pivot_cm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "uv_maps": [
+        "UVMap"
+      ],
+      "material_slots": [
+        "CP_Armor",
+        "CP_Dark",
+        "CP_Teal",
+        "CP_Amber",
+        "CP_Rubber"
+      ]
+    },
+    {
+      "name": "SM_CP_Missile",
+      "file": "SM_CP_Missile.fbx",
+      "triangles": 1008,
+      "vertices": 528,
+      "dimensions_cm": [
+        23.0,
+        23.0,
+        95.0
+      ],
+      "bounds_min_cm": [
+        -11.5,
+        -11.5,
+        0.0
+      ],
+      "bounds_max_cm": [
+        11.5,
+        11.5,
+        95.0
+      ],
+      "pivot_cm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "uv_maps": [
+        "UVMap"
+      ],
+      "material_slots": [
+        "CP_Armor",
+        "CP_Dark",
+        "CP_Teal",
+        "CP_Amber",
+        "CP_Rubber"
+      ]
+    }
+  ],
+  "fbx_validation": [
+    {
+      "name": "SM_CP_TurretBase",
+      "fbx_reimport_dimensions_cm": [
+        98.0,
+        94.0,
+        45.8
+      ],
+      "fbx_reimport_triangles": 2780,
+      "max_dimension_delta_m": 0.0,
+      "pivot_origin_valid": true,
+      "uv_valid": true,
+      "finite_normals": true
+    },
+    {
+      "name": "SM_CP_TurretHead",
+      "fbx_reimport_dimensions_cm": [
+        60.8,
+        65.8,
+        51.65
+      ],
+      "fbx_reimport_triangles": 1588,
+      "max_dimension_delta_m": 0.0,
+      "pivot_origin_valid": true,
+      "uv_valid": true,
+      "finite_normals": true
+    },
+    {
+      "name": "SM_CP_TurretTube",
+      "fbx_reimport_dimensions_cm": [
+        31.75,
+        30.1,
+        51.85
+      ],
+      "fbx_reimport_triangles": 1224,
+      "max_dimension_delta_m": 0.0,
+      "pivot_origin_valid": true,
+      "uv_valid": true,
+      "finite_normals": true
+    },
+    {
+      "name": "SM_CP_Missile",
+      "fbx_reimport_dimensions_cm": [
+        23.0,
+        23.0,
+        95.0
+      ],
+      "fbx_reimport_triangles": 1008,
+      "max_dimension_delta_m": 0.0,
+      "pivot_origin_valid": true,
+      "uv_valid": true,
+      "finite_normals": true
+    }
+  ],
+  "preview": "turret_preview.png",
+  "blend": "CP_MissileTurret.blend"
+}

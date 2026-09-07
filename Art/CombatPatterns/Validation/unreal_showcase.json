@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "meshes": 9,
+  "effect_samples": [
+    "<TunaSweeperCombatPatternEffect.IMPACT: 3>",
+    "<TunaSweeperCombatPatternEffect.ROBOT_UNFOLD: 5>",
+    "<TunaSweeperCombatPatternEffect.CHARGE_TRAIL: 4>",
+    "<TunaSweeperCombatPatternEffect.MISSILE_TRAIL: 2>"
+  ]
+}

@@ -12,6 +12,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/BoxComponent.h"
 #include "Engine/World.h"
+#include "Effect/TunaSweeperCombatPatternEffectActor.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Subsystem/TunaSweeperFactionSubsystem.h"
@@ -91,6 +92,7 @@ bool UTunaSweeperCombatPatternComponent::TryStartPattern(ETunaSweeperCombatPatte
 		Phase = ETunaSweeperCombatPatternPhase::Warning;
 		ChargeVictims.Reset();
 		++ChargeSerial;
+		ChargeTrailCountdown = 0.0f;
 		break;
 	case ETunaSweeperCombatPattern::MissileTurret:
 		if (Turrets.Num() >= FMath::Clamp(MaxActiveTurrets, 1, 8) || !SpawnTurret(TargetActor)) return false;
@@ -286,6 +288,14 @@ void UTunaSweeperCombatPatternComponent::TickCharge(float DeltaTime)
 {
 	ACharacter* Character = CastChecked<ACharacter>(GetOwner());
 	const UCapsuleComponent* Capsule = Character->GetCapsuleComponent();
+	ChargeTrailCountdown -= DeltaTime;
+	if (ChargeTrailCountdown <= 0.0f)
+	{
+		ATunaSweeperCombatPatternEffectActor::Spawn(GetWorld(), ETunaSweeperCombatPatternEffect::ChargeTrail,
+			Character->GetActorLocation() - FVector(0, 0, Capsule->GetScaledCapsuleHalfHeight()),
+			Capsule->GetScaledCapsuleRadius() * 1.3f, -LockedDirection, GetOwner());
+		ChargeTrailCountdown = 0.08f;
+	}
 	float Travel = FMath::Min(FMath::Max(100.0f, ChargeSpeed) * FMath::Max(0.0f, DeltaTime), FVector::Dist2D(Character->GetActorLocation(), ChargeEnd));
 	while (Travel > 0.01f)
 	{
@@ -374,6 +384,8 @@ bool UTunaSweeperCombatPatternComponent::SpawnTurret(AActor* TargetActor)
 		Turret->InitializeTurret(GetOwner(), TargetActor);
 		Turret->FinishSpawning(Transform);
 		if (!IsValid(Turret) || Turret->IsActorBeingDestroyed()) continue;
+		ATunaSweeperCombatPatternEffectActor::Spawn(GetWorld(), ETunaSweeperCombatPatternEffect::Summon,
+			Ground, 75.0f, FVector::UpVector, Turret);
 		Turrets.Add(Turret);
 		return true;
 	}
@@ -405,7 +417,12 @@ void UTunaSweeperCombatPatternComponent::SpawnNextMinion()
 	}
 	Minion->InitializeRoll(Direction, Target.Get());
 	Minion->FinishSpawning(Transform);
-	if (IsValid(Minion) && !Minion->IsActorBeingDestroyed()) Minions.Add(Minion);
+	if (IsValid(Minion) && !Minion->IsActorBeingDestroyed())
+	{
+		Minions.Add(Minion);
+		ATunaSweeperCombatPatternEffectActor::Spawn(GetWorld(), ETunaSweeperCombatPatternEffect::Summon,
+			Ground, Radius, Direction, Minion);
+	}
 }
 
 void UTunaSweeperCombatPatternComponent::EnterRecovery()

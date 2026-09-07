@@ -10,6 +10,11 @@ namespace TunaSweeperAttackTelegraph
 {
 	constexpr int32 CircleSegments = 64;
 
+	FLinearColor WithAlpha(const FLinearColor& Color, float Alpha)
+	{
+		return FLinearColor(Color.R, Color.G, Color.B, FMath::Clamp(Alpha, 0.0f, 1.0f));
+	}
+
 	struct FWarningGeometry
 	{
 		TArray<FVector> Vertices;
@@ -23,8 +28,8 @@ namespace TunaSweeperAttackTelegraph
 		{
 			const int32 First = Vertices.Num();
 			Vertices.Append({A, B, C});
-			// Both windings keep the warning readable from either side without a new material asset.
-			Triangles.Append({First, First + 1, First + 2, First + 2, First + 1, First});
+			// The authored warning materials are two sided, avoiding doubled translucent overdraw.
+			Triangles.Append({First, First + 1, First + 2});
 			for (int32 Index = 0; Index < 3; ++Index)
 			{
 				Normals.Add(FVector::UpVector);
@@ -38,6 +43,21 @@ namespace TunaSweeperAttackTelegraph
 		{
 			Triangle(A, B, C, Color);
 			Triangle(A, C, D, Color);
+		}
+
+		void Line(const FVector& Start, const FVector& End, float Width, const FLinearColor& Color)
+		{
+			const FVector Direction = (End - Start).GetSafeNormal2D();
+			const FVector Side(-Direction.Y * Width * 0.5f, Direction.X * Width * 0.5f, 0.0f);
+			Quad(Start - Side, End - Side, End + Side, Start + Side, Color);
+		}
+
+		void Arc(float OuterRadius, float Width, float AngleA, float AngleB, const FLinearColor& Color)
+		{
+			const FVector A(FMath::Cos(AngleA), FMath::Sin(AngleA), 0.0f);
+			const FVector B(FMath::Cos(AngleB), FMath::Sin(AngleB), 0.0f);
+			const float InnerRadius = FMath::Max(0.0f, OuterRadius - Width);
+			Quad(A * OuterRadius, B * OuterRadius, B * InnerRadius, A * InnerRadius, Color);
 		}
 
 		void Commit(UProceduralMeshComponent* Mesh, int32 Section) const
@@ -73,12 +93,14 @@ ATunaSweeperAttackTelegraph::ATunaSweeperAttackTelegraph()
 	WarningMesh->SetCanEverAffectNavigation(false);
 	WarningMesh->SetTranslucentSortPriority(80);
 
-	static ConstructorHelpers::FObjectFinder<UMaterialInterface> MaterialAsset(
+	static ConstructorHelpers::FObjectFinderOptional<UMaterialInterface> MaterialAsset(
+		TEXT("/Game/Characters/CombatPatterns/Materials/M_CP_Effect.M_CP_Effect"));
+	static ConstructorHelpers::FObjectFinderOptional<UMaterialInterface> AccentAsset(
+		TEXT("/Game/Characters/CombatPatterns/Materials/M_CP_Glow.M_CP_Glow"));
+	static ConstructorHelpers::FObjectFinder<UMaterialInterface> FallbackAsset(
 		TEXT("/Game/Effects/M_LedExpression_VertexColorEmissive.M_LedExpression_VertexColorEmissive"));
-	if (MaterialAsset.Succeeded())
-	{
-		WarningMaterial = MaterialAsset.Object;
-	}
+	WarningMaterial = MaterialAsset.Get() ? MaterialAsset.Get() : FallbackAsset.Object.Get();
+	AccentMaterial = AccentAsset.Get() ? AccentAsset.Get() : FallbackAsset.Object.Get();
 }
 
 void ATunaSweeperAttackTelegraph::InitCircle(const FVector& Center, float Radius, float Duration)
@@ -124,57 +146,74 @@ void ATunaSweeperAttackTelegraph::ApplyMaterial()
 	if (!DynamicMaterial && WarningMaterial)
 	{
 		DynamicMaterial = UMaterialInstanceDynamic::Create(WarningMaterial, this);
-		DynamicMaterial->SetScalarParameterValue(TEXT("Intensity"), 1.6f);
+		DynamicMaterial->SetScalarParameterValue(TEXT("Intensity"), 1.25f);
 	}
-	if (DynamicMaterial)
+	if (!DynamicAccentMaterial && AccentMaterial)
 	{
-		WarningMesh->SetMaterial(0, DynamicMaterial);
-		WarningMesh->SetMaterial(1, DynamicMaterial);
+		DynamicAccentMaterial = UMaterialInstanceDynamic::Create(AccentMaterial, this);
+		DynamicAccentMaterial->SetScalarParameterValue(TEXT("Intensity"), 1.8f);
 	}
+	WarningMesh->SetMaterial(0, DynamicAccentMaterial);
+	WarningMesh->SetMaterial(1, DynamicMaterial);
+	WarningMesh->SetMaterial(2, DynamicAccentMaterial);
 }
 
 void ATunaSweeperAttackTelegraph::BuildBoundary()
 {
 	using namespace TunaSweeperAttackTelegraph;
 	FWarningGeometry Geometry;
-	const FVector Up(0.0f, 0.0f, GroundClearance);
 	const float Width = FMath::Clamp(OutlineWidth, 0.1f, Extent);
+	const FLinearColor QuietColor = WithAlpha(BoundaryColor, BoundaryColor.A * 0.42f);
 	if (bCircle)
 	{
 		for (int32 Index = 0; Index < CircleSegments; ++Index)
 		{
 			const float AngleA = Index * 2.0f * UE_PI / CircleSegments;
 			const float AngleB = (Index + 1) * 2.0f * UE_PI / CircleSegments;
-			const FVector A(FMath::Cos(AngleA), FMath::Sin(AngleA), 0.0f);
-			const FVector B(FMath::Cos(AngleB), FMath::Sin(AngleB), 0.0f);
-			Geometry.Quad(A * Extent + Up, B * Extent + Up,
-				B * (Extent - Width) + Up, A * (Extent - Width) + Up, BoundaryColor);
+			// The continuous hairline is the exact damage radius; every decoration stays inside it.
+			Geometry.Arc(Extent, Width * 0.35f, AngleA, AngleB, QuietColor);
+			Geometry.Arc(Extent - Width * 0.50f, Width * 0.65f,
+				AngleA + (AngleB - AngleA) * 0.12f, AngleB - (AngleB - AngleA) * 0.12f, BoundaryColor);
 		}
+		for (int32 Index = 0; Index < 12; ++Index)
+		{
+			const float Angle = Index * 2.0f * UE_PI / 12.0f;
+			const FVector Direction(FMath::Cos(Angle), FMath::Sin(Angle), 0.0f);
+			Geometry.Line(Direction * Extent * 0.86f, Direction * (Extent - Width * 2.0f),
+				FMath::Min(Width * 0.45f, Extent * 0.012f), QuietColor);
+		}
+		const float Reticle = Extent * 0.035f;
+		Geometry.Line(FVector(-Reticle, 0.0f, 0.0f), FVector(Reticle, 0.0f, 0.0f), Width * 0.35f, QuietColor);
+		Geometry.Line(FVector(0.0f, -Reticle, 0.0f), FVector(0.0f, Reticle, 0.0f), Width * 0.35f, QuietColor);
 	}
 	else
 	{
-		const FVector Direction = LaneEndLocal.GetSafeNormal2D();
-		const FVector Side(-Direction.Y, Direction.X, 0.0f);
-		const FVector A = Up - Side * Extent;
-		const FVector B = Up + Side * Extent;
-		const FVector C = B + LaneEndLocal;
-		const FVector D = A + LaneEndLocal;
-		const int32 Segments = FMath::Clamp(FMath::CeilToInt(LaneEndLocal.X / 50.0f), 1, 128);
+		const float Length = LaneEndLocal.X;
+		const int32 Segments = FMath::Clamp(FMath::CeilToInt(Length / 50.0f), 1, 128);
 		for (int32 Segment = 0; Segment < Segments; ++Segment)
 		{
-			const FVector SegmentStart = LaneEndLocal * Segment / Segments;
-			const FVector SegmentEnd = LaneEndLocal * (Segment + 1) / Segments;
-			Geometry.Quad(A + SegmentStart, A + SegmentEnd, A + SegmentEnd + Side * Width,
-				A + SegmentStart + Side * Width, BoundaryColor);
-			Geometry.Quad(B + SegmentStart, B + SegmentStart - Side * Width, B + SegmentEnd - Side * Width,
-				B + SegmentEnd, BoundaryColor);
+			const float StartX = Length * Segment / Segments;
+			const float EndX = Length * (Segment + 1) / Segments;
+			Geometry.Quad(FVector(StartX, -Extent, 0.0f), FVector(EndX, -Extent, 0.0f),
+				FVector(EndX, -Extent + Width * 0.65f, 0.0f), FVector(StartX, -Extent + Width * 0.65f, 0.0f), BoundaryColor);
+			Geometry.Quad(FVector(StartX, Extent - Width * 0.65f, 0.0f), FVector(EndX, Extent - Width * 0.65f, 0.0f),
+				FVector(EndX, Extent, 0.0f), FVector(StartX, Extent, 0.0f), BoundaryColor);
 		}
-		Geometry.Quad(A, A + Direction * Width, B + Direction * Width, B, BoundaryColor);
-		Geometry.Quad(D, C, C - Direction * Width, D - Direction * Width, BoundaryColor);
-		// A direction chevron at the destination makes the impending movement unambiguous.
-		const FVector Tip = LaneEndLocal + Up;
-		Geometry.Triangle(Tip, Tip - Direction * Extent + Side * Extent * 0.5f,
-			Tip - Direction * Extent - Side * Extent * 0.5f, BoundaryColor);
+		const float CapWidth = FMath::Min(Width * 0.65f, Length * 0.5f);
+		Geometry.Quad(FVector(0.0f, -Extent, 0.0f), FVector(CapWidth, -Extent, 0.0f),
+			FVector(CapWidth, Extent, 0.0f), FVector(0.0f, Extent, 0.0f), BoundaryColor);
+		Geometry.Quad(FVector(Length - CapWidth, -Extent, 0.0f), FVector(Length, -Extent, 0.0f),
+			FVector(Length, Extent, 0.0f), FVector(Length - CapWidth, Extent, 0.0f), BoundaryColor);
+		// Repeated hollow chevrons communicate travel direction without covering the target's feet.
+		const int32 Arrows = FMath::Clamp(FMath::FloorToInt(Length / FMath::Max(70.0f, Extent * 1.8f)), 1, 12);
+		const float ArrowLength = FMath::Min(Extent * 0.65f, Length / (Arrows + 1) * 0.55f);
+		for (int32 Index = 0; Index < Arrows; ++Index)
+		{
+			const float X = Length * (Index + 1) / (Arrows + 1);
+			const FVector Tip(X + ArrowLength * 0.5f, 0.0f, 0.0f);
+			Geometry.Line(FVector(X - ArrowLength * 0.5f, -Extent * 0.36f, 0.0f), Tip, Width * 0.55f, QuietColor);
+			Geometry.Line(Tip, FVector(X - ArrowLength * 0.5f, Extent * 0.36f, 0.0f), Width * 0.55f, QuietColor);
+		}
 	}
 	ConformToGround(Geometry.Vertices, GroundClearance);
 	Geometry.Commit(WarningMesh, 0);
@@ -184,10 +223,13 @@ void ATunaSweeperAttackTelegraph::UpdateFill()
 {
 	using namespace TunaSweeperAttackTelegraph;
 	FWarningGeometry Geometry;
-	const FVector Up(0.0f, 0.0f, GroundClearance + 0.15f);
+	FWarningGeometry Accent;
+	const float Width = FMath::Clamp(OutlineWidth, 0.1f, Extent);
+	const FLinearColor CurrentFill = WithAlpha(FillColor, FillColor.A * FMath::Lerp(0.70f, 1.20f, Progress));
+	const FLinearColor FrontierColor(1.0f, FMath::Lerp(0.49f, 0.25f, Progress), 0.055f, 0.70f);
 	if (Progress > 0.0f && bCircle)
 	{
-		// Fixed radial subdivisions follow ramps while retaining a stable section topology.
+		// Filled area is proportional to elapsed warning time; the final radius never changes.
 		constexpr int32 Rings = 8;
 		const float FilledRadius = Extent * FMath::Sqrt(Progress);
 		for (int32 Ring = 0; Ring < Rings; ++Ring)
@@ -198,33 +240,54 @@ void ATunaSweeperAttackTelegraph::UpdateFill()
 			{
 				const float AngleA = Index * 2.0f * UE_PI / CircleSegments;
 				const float AngleB = (Index + 1) * 2.0f * UE_PI / CircleSegments;
-				const FVector A(FMath::Cos(AngleA), FMath::Sin(AngleA), 0.0f);
-				const FVector B(FMath::Cos(AngleB), FMath::Sin(AngleB), 0.0f);
-				Geometry.Quad(Up + A * InnerRadius, Up + A * OuterRadius,
-					Up + B * OuterRadius, Up + B * InnerRadius, FillColor);
+				Geometry.Arc(OuterRadius, OuterRadius - InnerRadius, AngleA, AngleB, CurrentFill);
 			}
+		}
+		for (int32 Index = 0; Index < CircleSegments; ++Index)
+		{
+			const float AngleA = Index * 2.0f * UE_PI / CircleSegments;
+			const float AngleB = (Index + 1) * 2.0f * UE_PI / CircleSegments;
+			Accent.Arc(FilledRadius, FMath::Min(Width * 0.45f, FilledRadius), AngleA, AngleB, FrontierColor);
+		}
+		// Four short moving ticks follow the expanding front, kept inside the advertised area.
+		for (int32 Index = 0; Index < 4; ++Index)
+		{
+			const float Angle = Index * UE_PI * 0.5f + Progress * UE_PI * 0.15f;
+			const FVector Direction(FMath::Cos(Angle), FMath::Sin(Angle), 0.0f);
+			Accent.Line(Direction * FMath::Max(0.0f, FilledRadius - Width * 3.0f),
+				Direction * FMath::Max(0.0f, FilledRadius - Width), Width * 0.38f, FrontierColor);
 		}
 	}
 	else if (Progress > 0.0f)
 	{
+		const float FilledLength = LaneEndLocal.X * Progress;
 		const int32 Segments = FMath::Clamp(FMath::CeilToInt(LaneEndLocal.X / 50.0f), 1, 128);
 		for (int32 Segment = 0; Segment < Segments; ++Segment)
 		{
-			const float StartX = FMath::Min(LaneEndLocal.X * Segment / Segments, LaneEndLocal.X * Progress);
-			const float EndX = FMath::Min(LaneEndLocal.X * (Segment + 1) / Segments, LaneEndLocal.X * Progress);
+			const float StartX = FMath::Min(LaneEndLocal.X * Segment / Segments, FilledLength);
+			const float EndX = FMath::Min(LaneEndLocal.X * (Segment + 1) / Segments, FilledLength);
 			for (int32 Strip = 0; Strip < 4; ++Strip)
 			{
 				const float StartY = -Extent + 2.0f * Extent * Strip / 4;
 				const float EndY = -Extent + 2.0f * Extent * (Strip + 1) / 4;
 				Geometry.Quad(FVector(StartX, StartY, 0.0f), FVector(EndX, StartY, 0.0f),
-					FVector(EndX, EndY, 0.0f), FVector(StartX, EndY, 0.0f), FillColor);
+					FVector(EndX, EndY, 0.0f), FVector(StartX, EndY, 0.0f), CurrentFill);
 			}
+		}
+		const float FrontierStart = FMath::Max(0.0f, FilledLength - Width * 0.55f);
+		for (int32 Strip = 0; Strip < 4; ++Strip)
+		{
+			const float StartY = -Extent + 2.0f * Extent * Strip / 4;
+			const float EndY = -Extent + 2.0f * Extent * (Strip + 1) / 4;
+			Accent.Quad(FVector(FrontierStart, StartY, 0.0f), FVector(FilledLength, StartY, 0.0f),
+				FVector(FilledLength, EndY, 0.0f), FVector(FrontierStart, EndY, 0.0f), FrontierColor);
 		}
 	}
 	ConformToGround(Geometry.Vertices, GroundClearance + 0.15f);
 	Geometry.Commit(WarningMesh, 1);
+	ConformToGround(Accent.Vertices, GroundClearance + 0.35f);
+	Accent.Commit(WarningMesh, 2);
 }
-
 void ATunaSweeperAttackTelegraph::SampleGround()
 {
 	const float Length = bCircle ? Extent * 2.0f : FMath::Max(1.0f, LaneEndLocal.X);

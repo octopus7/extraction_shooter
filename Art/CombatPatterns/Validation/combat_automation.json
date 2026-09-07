@@ -1,0 +1,113 @@
+{
+  "passed": true,
+  "suite": "TunaSweeper.Combat",
+  "succeeded": 26,
+  "warnings": 0,
+  "failed": 0,
+  "tests": [
+    {
+      "name": "TunaSweeper.Combat.AI.RepositionFailureResumesFiring",
+      "state": "Success"
+    },
+    {
+      "name": "TunaSweeper.Combat.Burn.EnemiesOnlyAndCleanup",
+      "state": "Success"
+    },
+    {
+      "name": "TunaSweeper.Combat.Burn.FiniteSpecification",
+      "state": "Success"
+    },
+    {
+      "name": "TunaSweeper.Combat.Burn.FiveTicksAndLongFrames",
+      "state": "Success"
+    },
+    {
+      "name": "TunaSweeper.Combat.Burn.ProjectileAndPelletSnapshots",
+      "state": "Success"
+    },
+    {
+      "name": "TunaSweeper.Combat.Burn.ProjectileImpactRouting",
+      "state": "Success"
+    },
+    {
+      "name": "TunaSweeper.Combat.Burn.RefreshAndResearchStrength",
+      "state": "Success"
+    },
+    {
+      "name": "TunaSweeper.Combat.Burn.SourceSurvivesProjectile",
+      "state": "Success"
+    },
+    {
+      "name": "TunaSweeper.Combat.Burn.WeaponAndAmmoResolution",
+      "state": "Success"
+    },
+    {
+      "name": "TunaSweeper.Combat.Data.ProfilesAndWeapons",
+      "state": "Success"
+    },
+    {
+      "name": "TunaSweeper.Combat.Faction.Relationships",
+      "state": "Success"
+    },
+    {
+      "name": "TunaSweeper.Combat.Noise.PlayerFootsteps",
+      "state": "Success"
+    },
+    {
+      "name": "TunaSweeper.Combat.Patterns.Art.EffectPresentation",
+      "state": "Success"
+    },
+    {
+      "name": "TunaSweeper.Combat.Patterns.Art.NativeBindings",
+      "state": "Success"
+    },
+    {
+      "name": "TunaSweeper.Combat.Patterns.Art.TelegraphPresentation",
+      "state": "Success"
+    },
+    {
+      "name": "TunaSweeper.Combat.Patterns.ChargeAppliesOneBodyHit",
+      "state": "Success"
+    },
+    {
+      "name": "TunaSweeper.Combat.Patterns.ChargeStopsAtObstacle",
+      "state": "Success"
+    },
+    {
+      "name": "TunaSweeper.Combat.Patterns.DestroyedTurretCancelsPendingMissile",
+      "state": "Success"
+    },
+    {
+      "name": "TunaSweeper.Combat.Patterns.MinionWaveStaggerAndCleanup",
+      "state": "Success"
+    },
+    {
+      "name": "TunaSweeper.Combat.Patterns.MissileWarningTimingLockedTargetAndFaction",
+      "state": "Success"
+    },
+    {
+      "name": "TunaSweeper.Combat.Patterns.OptInAndLockedCharge",
+      "state": "Success"
+    },
+    {
+      "name": "TunaSweeper.Combat.Patterns.OwnerDeathCancelsWarning",
+      "state": "Success"
+    },
+    {
+      "name": "TunaSweeper.Combat.Patterns.RangedAttackAndReloadBoundaries",
+      "state": "Success"
+    },
+    {
+      "name": "TunaSweeper.Combat.Patterns.RollingMinionDamageableBeforeDeployment",
+      "state": "Success"
+    },
+    {
+      "name": "TunaSweeper.Combat.Patterns.RollingMinionUnfoldsOnlyInClearSpace",
+      "state": "Success"
+    },
+    {
+      "name": "TunaSweeper.Combat.Squad.RoleLeases",
+      "state": "Success"
+    }
+  ]
+}

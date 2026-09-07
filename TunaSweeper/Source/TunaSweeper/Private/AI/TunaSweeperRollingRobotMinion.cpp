@@ -7,6 +7,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMesh.h"
 #include "Engine/World.h"
+#include "Effect/TunaSweeperCombatPatternEffectActor.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Materials/MaterialInterface.h"
 #include "Subsystem/TunaSweeperFactionSubsystem.h"
@@ -37,8 +38,10 @@ ATunaSweeperRollingRobotMinion::ATunaSweeperRollingRobotMinion()
 
 	RobotBodyPivot = CreateDefaultSubobject<USceneComponent>(TEXT("RobotBodyPivot"));
 	RobotBodyPivot->SetupAttachment(RootComponent);
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereMesh(TEXT("/Engine/BasicShapes/Sphere.Sphere"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> CubeMesh(TEXT("/Engine/BasicShapes/Cube.Cube"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> ShellMesh(TEXT("/Game/Characters/CombatPatterns/Meshes/SM_CP_RobotShell.SM_CP_RobotShell"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> EyeMesh(TEXT("/Game/Characters/CombatPatterns/Meshes/SM_CP_RobotEye.SM_CP_RobotEye"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> LegMesh(TEXT("/Game/Characters/CombatPatterns/Meshes/SM_CP_RobotLeg.SM_CP_RobotLeg"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> FootMesh(TEXT("/Game/Characters/CombatPatterns/Meshes/SM_CP_RobotFoot.SM_CP_RobotFoot"));
 	auto ConfigureMesh = [](UStaticMeshComponent* VisualPart, USceneComponent* Parent, UStaticMesh* Asset)
 	{
 		VisualPart->SetupAttachment(Parent);
@@ -48,22 +51,19 @@ ATunaSweeperRollingRobotMinion::ATunaSweeperRollingRobotMinion()
 		VisualPart->SetCanEverAffectNavigation(false);
 	};
 	RobotShell = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("RobotShell"));
-	ConfigureMesh(RobotShell, RobotBodyPivot, SphereMesh.Object);
+	ConfigureMesh(RobotShell, RobotBodyPivot, ShellMesh.Object);
 	RobotEye = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("RobotEye"));
-	ConfigureMesh(RobotEye, RobotBodyPivot, CubeMesh.Object);
+	ConfigureMesh(RobotEye, RobotBodyPivot, EyeMesh.Object);
 	LeftLeg = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("LeftLeg"));
-	ConfigureMesh(LeftLeg, RootComponent, CubeMesh.Object);
+	ConfigureMesh(LeftLeg, RootComponent, LegMesh.Object);
 	RightLeg = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("RightLeg"));
-	ConfigureMesh(RightLeg, RootComponent, CubeMesh.Object);
+	ConfigureMesh(RightLeg, RootComponent, LegMesh.Object);
 	LeftFoot = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("LeftFoot"));
-	ConfigureMesh(LeftFoot, RootComponent, CubeMesh.Object);
+	ConfigureMesh(LeftFoot, RootComponent, FootMesh.Object);
 	RightFoot = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("RightFoot"));
-	ConfigureMesh(RightFoot, RootComponent, CubeMesh.Object);
+	ConfigureMesh(RightFoot, RootComponent, FootMesh.Object);
 
-	ShellMaterial = TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath(
-		TEXT("/Game/Characters/Enemy/M_RollingBomberBodyGray.M_RollingBomberBodyGray")));
-	LegMaterial = TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath(
-		TEXT("/Game/Characters/Enemy/M_RollingBomberLegMetal.M_RollingBomberLegMetal")));
+	// Imported meshes carry their own armor, mechanism and emissive material slots.
 	VisualMesh->SetHiddenInGame(true);
 	VisualMesh->SetVisibility(false);
 	ForwardMarkerMesh->SetHiddenInGame(true);
@@ -233,6 +233,8 @@ bool ATunaSweeperRollingRobotMinion::TryBeginUnfolding()
 	Capsule->SetCapsuleSize(Radius, HalfHeight, true);
 	GetCharacterMovement()->StopMovementImmediately();
 	DeploymentPhase = ETunaSweeperRollingRobotPhase::Unfolding;
+	ATunaSweeperCombatPatternEffectActor::Spawn(GetWorld(), ETunaSweeperCombatPatternEffect::RobotUnfold,
+		GetActorLocation() - FVector(0, 0, GetCapsuleComponent()->GetScaledCapsuleHalfHeight()), GetRollRadius(), GetActorForwardVector(), this);
 	DeploymentElapsedSeconds = 0.0f;
 	LastPresentationLocation = GetActorLocation();
 	UpdateRobotPresentation(0.0f, 0.0f);
@@ -303,13 +305,13 @@ void ATunaSweeperRollingRobotMinion::UpdateRobotPresentation(float UnfoldAlpha, 
 	const FVector LocalRollAxis = GetActorQuat().UnrotateVector(FVector::CrossProduct(FVector::UpVector, RollDirection));
 	const FQuat RollRotation(LocalRollAxis.GetSafeNormal(), FMath::DegreesToRadians(BodyRollDegrees));
 	RobotBodyPivot->SetRelativeRotation(bRolling ? RollRotation : FQuat::Slerp(RollRotation, FQuat::Identity, SmoothAlpha));
-	RobotShell->SetRelativeScale3D(FVector(Radius / 50.0f));
-	RobotEye->SetRelativeLocation(FVector(Radius * 0.94f, 0.0f, 2.0f));
-	RobotEye->SetRelativeScale3D(FVector(0.07f, Radius / 110.0f, 0.12f));
+	RobotShell->SetRelativeScale3D(FVector(Radius / 36.0f));
+	RobotEye->SetRelativeLocation(FVector::ZeroVector);
+	RobotEye->SetRelativeScale3D(FVector(Radius / 36.0f));
 	const bool bWalking = DeploymentPhase == ETunaSweeperRollingRobotPhase::Walking;
 	const float Gait = bWalking && GetVelocity().SizeSquared2D() > FMath::Square(10.0f)
 		? FMath::Sin(WalkCycleRadians) : 0.0f;
-	const float LegLength = FMath::Max(4.0f, HeightDifference * 2.0f - 8.0f);
+	const float LegLength = FMath::Max(4.0f, HeightDifference * 2.0f - 10.0f);
 	const float HalfHeight = FMath::Max(Radius, StandingHalfHeight);
 	auto PositionLeg = [&](UStaticMeshComponent* Leg, UStaticMeshComponent* Foot, float Side)
 	{
@@ -318,12 +320,12 @@ void ATunaSweeperRollingRobotMinion::UpdateRobotPresentation(float UnfoldAlpha, 
 		Leg->SetVisibility(!bRolling && UnfoldAlpha > 0.01f);
 		Foot->SetVisibility(!bRolling && UnfoldAlpha > 0.01f);
 		Leg->SetRelativeLocation(FVector(Step * 5.0f, Side * Radius * 0.46f,
-			-HalfHeight + 8.0f + LegLength * 0.5f + Lift * 0.5f));
+			-HalfHeight + 10.0f + LegLength * 0.5f + Lift * 0.5f));
 		Leg->SetRelativeRotation(FRotator(Step * 22.0f, 0.0f, 0.0f));
-		Leg->SetRelativeScale3D(FVector(0.12f, 0.12f, LegLength * SmoothAlpha / 100.0f));
+		Leg->SetRelativeScale3D(FVector(Radius / 36.0f, Radius / 36.0f, LegLength * SmoothAlpha / 42.0f));
 		Foot->SetRelativeLocation(FVector(8.0f + Step * 13.0f, Side * Radius * 0.46f,
-			FMath::Lerp(-HeightDifference, -HalfHeight + 4.0f + Lift, SmoothAlpha)));
-		Foot->SetRelativeScale3D(FVector(0.30f, 0.22f, 0.08f) * SmoothAlpha);
+			FMath::Lerp(-HeightDifference, -HalfHeight + 5.0f + Lift, SmoothAlpha)));
+		Foot->SetRelativeScale3D(FVector(Radius / 36.0f) * SmoothAlpha);
 	};
 	PositionLeg(LeftLeg, LeftFoot, -1.0f);
 	PositionLeg(RightLeg, RightFoot, 1.0f);
@@ -351,6 +353,8 @@ void ATunaSweeperRollingRobotMinion::ApplyRobotMaterials()
 
 void ATunaSweeperRollingRobotMinion::OnDeathPresentationStarted()
 {
+	ATunaSweeperCombatPatternEffectActor::Spawn(GetWorld(), ETunaSweeperCombatPatternEffect::RobotDeath,
+		GetActorLocation(), GetRollRadius(), GetActorForwardVector(), this);
 	DeploymentPhase = ETunaSweeperRollingRobotPhase::Dead;
 	DeploymentTarget.Reset();
 	Super::OnDeathPresentationStarted();

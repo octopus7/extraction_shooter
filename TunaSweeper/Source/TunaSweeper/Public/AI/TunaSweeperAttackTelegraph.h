@@ -42,10 +42,13 @@ protected:
 	TObjectPtr<UMaterialInterface> WarningMaterial;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TunaSweeper|Combat Pattern|Warning")
-	FLinearColor BoundaryColor = FLinearColor(1.0f, 0.12f, 0.015f, 1.0f);
+	TObjectPtr<UMaterialInterface> AccentMaterial;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TunaSweeper|Combat Pattern|Warning")
-	FLinearColor FillColor = FLinearColor(1.0f, 0.30f, 0.02f, 1.0f);
+	FLinearColor BoundaryColor = FLinearColor(1.0f, 0.20f, 0.025f, 0.90f);
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TunaSweeper|Combat Pattern|Warning")
+	FLinearColor FillColor = FLinearColor(1.0f, 0.25f, 0.035f, 0.17f);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TunaSweeper|Combat Pattern|Warning", meta = (ClampMin = "0.1"))
 	float OutlineWidth = 5.0f;
@@ -62,6 +65,9 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<UMaterialInstanceDynamic> DynamicMaterial;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UMaterialInstanceDynamic> DynamicAccentMaterial;
 
 	bool bCircle = true;
 	float Extent = 1.0f;

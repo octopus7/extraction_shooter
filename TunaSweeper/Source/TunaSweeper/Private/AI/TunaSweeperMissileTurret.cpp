@@ -10,7 +10,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/SceneComponent.h"
 #include "Components/StaticMeshComponent.h"
-#include "Effect/TunaSweeperLocalExplosionEffectActor.h"
+#include "Effect/TunaSweeperCombatPatternEffectActor.h"
 #include "Engine/OverlapResult.h"
 #include "Engine/StaticMesh.h"
 #include "Engine/World.h"
@@ -45,51 +45,25 @@ ATunaSweeperMissileTurret::ATunaSweeperMissileTurret()
 	LeftLaunchTube = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("LeftLaunchTube"));
 	RightLaunchTube = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("RightLaunchTube"));
 
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> Cube(TEXT("/Engine/BasicShapes/Cube.Cube"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> Cylinder(TEXT("/Engine/BasicShapes/Cylinder.Cylinder"));
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> Cone(TEXT("/Engine/BasicShapes/Cone.Cone"));
-	static ConstructorHelpers::FObjectFinder<UMaterialInterface> Metal(
-		TEXT("/Game/Characters/Enemy/M_RollingBomberBodyGray.M_RollingBomberBodyGray"));
-
-	for (UStaticMeshComponent* Mesh : {BaseMesh.Get(), LauncherMesh.Get(), LeftLaunchTube.Get(), RightLaunchTube.Get()})
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> BaseAsset(TEXT("/Game/Characters/CombatPatterns/Meshes/SM_CP_TurretBase.SM_CP_TurretBase"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> HeadAsset(TEXT("/Game/Characters/CombatPatterns/Meshes/SM_CP_TurretHead.SM_CP_TurretHead"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> TubeAsset(TEXT("/Game/Characters/CombatPatterns/Meshes/SM_CP_TurretTube.SM_CP_TurretTube"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> MissileAsset(TEXT("/Game/Characters/CombatPatterns/Meshes/SM_CP_Missile.SM_CP_Missile"));
+	for (UStaticMeshComponent* Part : {BaseMesh.Get(), LauncherMesh.Get(), LeftLaunchTube.Get(), RightLaunchTube.Get()})
 	{
-		Mesh->SetupAttachment(SceneRoot);
-		Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		Mesh->SetGenerateOverlapEvents(false);
-		Mesh->SetCanEverAffectNavigation(false);
-		if (Metal.Succeeded())
-		{
-			Mesh->SetMaterial(0, Metal.Object);
-		}
+		Part->SetupAttachment(SceneRoot);
+		Part->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		Part->SetGenerateOverlapEvents(false);
+		Part->SetCanEverAffectNavigation(false);
 	}
-	if (Cylinder.Succeeded())
-	{
-		BaseMesh->SetStaticMesh(Cylinder.Object);
-		LeftLaunchTube->SetStaticMesh(Cylinder.Object);
-		RightLaunchTube->SetStaticMesh(Cylinder.Object);
-	}
-	if (Cube.Succeeded())
-	{
-		LauncherMesh->SetStaticMesh(Cube.Object);
-	}
-	if (Cone.Succeeded())
-	{
-		MissileVisualAsset = Cone.Object;
-	}
-	BaseMesh->SetRelativeLocation(FVector(0.0f, 0.0f, 12.0f));
-	BaseMesh->SetRelativeScale3D(FVector(0.95f, 0.95f, 0.24f));
-	LauncherMesh->SetRelativeLocation(FVector(0.0f, 0.0f, 49.0f));
-	LauncherMesh->SetRelativeScale3D(FVector(0.5f, 0.72f, 0.52f));
-	LeftLaunchTube->SetRelativeLocation(FVector(0.0f, -22.0f, 86.0f));
-	RightLaunchTube->SetRelativeLocation(FVector(0.0f, 22.0f, 86.0f));
-	LeftLaunchTube->SetRelativeScale3D(FVector(0.3f, 0.3f, 0.68f));
-	RightLaunchTube->SetRelativeScale3D(FVector(0.3f, 0.3f, 0.68f));
-	static ConstructorHelpers::FObjectFinder<UMaterialInterface> MissileMaterialAsset(
-		TEXT("/Game/Effects/M_LedExpression_VertexColorEmissive.M_LedExpression_VertexColorEmissive"));
-	if (MissileMaterialAsset.Succeeded())
-	{
-		MissileMaterial = MissileMaterialAsset.Object;
-	}
+	BaseMesh->SetStaticMesh(BaseAsset.Object);
+	LauncherMesh->SetStaticMesh(HeadAsset.Object);
+	LeftLaunchTube->SetStaticMesh(TubeAsset.Object);
+	RightLaunchTube->SetStaticMesh(TubeAsset.Object);
+	LauncherMesh->SetRelativeLocation(FVector(0, 0, 69));
+	LeftLaunchTube->SetRelativeLocation(FVector(0, -28, 65));
+	RightLaunchTube->SetRelativeLocation(FVector(0, 28, 65));
+	MissileVisualAsset = MissileAsset.Object;
 	TelegraphClass = ATunaSweeperAttackTelegraph::StaticClass();
 }
 
@@ -226,7 +200,7 @@ bool ATunaSweeperMissileTurret::BeginWarning()
 	MissileMesh->SetGenerateOverlapEvents(false);
 	MissileMesh->SetCanEverAffectNavigation(false);
 	MissileMesh->SetCastShadow(false);
-	MissileMesh->SetRelativeScale3D(FVector(0.23f, 0.23f, 0.95f));
+	MissileMesh->SetRelativeScale3D(FVector::OneVector);
 	MissileMesh->SetRelativeRotation(FRotator(180.0f, 0.0f, 0.0f));
 	MissileMesh->SetVisibility(false);
 	if (MissileMaterial)
@@ -236,6 +210,9 @@ bool ATunaSweeperMissileTurret::BeginWarning()
 		MissileMesh->SetMaterial(0, Material);
 	}
 	MissileMesh->RegisterComponent();
+	ATunaSweeperCombatPatternEffectActor::Spawn(GetWorld(), ETunaSweeperCombatPatternEffect::MissileLaunch,
+		GetActorLocation() + FVector(0, 0, 120), 45.0f, FVector::UpVector, this);
+	MissileTrailCountdown = 0.0f;
 	WarningElapsed = 0.0f;
 	bWarningActive = true;
 	TargetActor = Target;
@@ -282,7 +259,17 @@ void ATunaSweeperMissileTurret::Tick(float DeltaSeconds)
 	const float DescentDuration = FMath::Clamp(MissileDescentDuration, 0.01f, ActiveWarningDuration);
 	const float DescentProgress = FMath::Clamp((WarningElapsed - (ActiveWarningDuration - DescentDuration)) / DescentDuration, 0.0f, 1.0f);
 	MissileMesh->SetVisibility(DescentProgress > 0.0f);
-	MissileMesh->SetWorldLocation(LockedImpactLocation + FVector(0.0f, 0.0f, 47.5f + FMath::Max(1.0f, MissileDropHeight) * (1.0f - DescentProgress)));
+	MissileMesh->SetWorldLocation(LockedImpactLocation + FVector(0.0f, 0.0f, 95.0f + FMath::Max(1.0f, MissileDropHeight) * (1.0f - DescentProgress)));
+	if (DescentProgress > 0.0f)
+	{
+		MissileTrailCountdown -= DeltaSeconds;
+		if (MissileTrailCountdown <= 0.0f)
+		{
+			ATunaSweeperCombatPatternEffectActor::Spawn(GetWorld(), ETunaSweeperCombatPatternEffect::MissileTrail,
+				MissileMesh->GetComponentLocation(), 24.0f, FVector::UpVector, ActiveWarning);
+			MissileTrailCountdown = 0.07f;
+		}
+	}
 	if (WarningElapsed >= ActiveWarningDuration)
 	{
 		Impact();
@@ -379,20 +366,9 @@ void ATunaSweeperMissileTurret::Impact()
 
 void ATunaSweeperMissileTurret::SpawnExplosion(const FVector& Location, float Radius) const
 {
-	if (UWorld* World = GetWorld())
-	{
-		FActorSpawnParameters Parameters;
-		Parameters.Owner = const_cast<ATunaSweeperMissileTurret*>(this);
-		Parameters.Instigator = GetInstigator();
-		Parameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-		if (ATunaSweeperLocalExplosionEffectActor* Effect = World->SpawnActor<ATunaSweeperLocalExplosionEffectActor>(
-			Location, FRotator::ZeroRotator, Parameters))
-		{
-			Effect->ConfigureExplosion(Radius, 0.6f);
-		}
-	}
+	ATunaSweeperCombatPatternEffectActor::Spawn(GetWorld(), ETunaSweeperCombatPatternEffect::Impact,
+		Location, Radius, FVector::UpVector, const_cast<ATunaSweeperMissileTurret*>(this));
 }
-
 float ATunaSweeperMissileTurret::TakeDamage(float DamageAmount, const FDamageEvent& DamageEvent,
 	AController* EventInstigator, AActor* DamageCauser)
 {

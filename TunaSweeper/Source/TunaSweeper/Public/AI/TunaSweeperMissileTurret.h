@@ -141,6 +141,7 @@ private:
 	float Age = 0.0f;
 	float TimeToNextWarning = 0.0f;
 	float WarningElapsed = 0.0f;
+	float MissileTrailCountdown = 0.0f;
 	float ActiveWarningDuration = 1.8f;
 	float ActiveImpactRadius = 180.0f;
 	bool bInitialized = false;

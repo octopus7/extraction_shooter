@@ -1,0 +1,198 @@
+{
+  "passed": true,
+  "import_yaw": 0.0,
+  "engine": "5.7.4-51494982+++UE5+Release-5.7",
+  "meshes": [
+    {
+      "name": "SM_CP_Missile",
+      "bounds_origin_cm": [
+        0.0,
+        0.0,
+        47.5
+      ],
+      "size_cm": [
+        23.0,
+        23.0,
+        95.0
+      ],
+      "vertices": 1921,
+      "uv_channels": 1,
+      "materials": [
+        "/Game/Characters/CombatPatterns/Materials/M_CP_Armor.M_CP_Armor",
+        "/Game/Characters/CombatPatterns/Materials/M_CP_Dark.M_CP_Dark",
+        "/Game/Characters/CombatPatterns/Materials/M_CP_Teal.M_CP_Teal",
+        "/Game/Characters/CombatPatterns/Materials/M_CP_Amber.M_CP_Amber"
+      ]
+    },
+    {
+      "name": "SM_CP_TurretBase",
+      "bounds_origin_cm": [
+        1.9073486328125e-06,
+        1.9073486328125e-06,
+        22.899999618530273
+      ],
+      "size_cm": [
+        98.0000114440918,
+        94.0000114440918,
+        45.79999923706055
+      ],
+      "vertices": 5632,
+      "uv_channels": 1,
+      "materials": [
+        "/Game/Characters/CombatPatterns/Materials/M_CP_Armor.M_CP_Armor",
+        "/Game/Characters/CombatPatterns/Materials/M_CP_Dark.M_CP_Dark",
+        "/Game/Characters/CombatPatterns/Materials/M_CP_Teal.M_CP_Teal",
+        "/Game/Characters/CombatPatterns/Materials/M_CP_Amber.M_CP_Amber",
+        "/Game/Characters/CombatPatterns/Materials/M_CP_Rubber.M_CP_Rubber"
+      ]
+    },
+    {
+      "name": "SM_CP_TurretHead",
+      "bounds_origin_cm": [
+        0.9000005722045898,
+        0.0,
+        2.2749996185302734
+      ],
+      "size_cm": [
+        60.800004959106445,
+        65.80000305175781,
+        51.64999771118164
+      ],
+      "vertices": 3232,
+      "uv_channels": 1,
+      "materials": [
+        "/Game/Characters/CombatPatterns/Materials/M_CP_Armor.M_CP_Armor",
+        "/Game/Characters/CombatPatterns/Materials/M_CP_Dark.M_CP_Dark",
+        "/Game/Characters/CombatPatterns/Materials/M_CP_Teal.M_CP_Teal",
+        "/Game/Characters/CombatPatterns/Materials/M_CP_Amber.M_CP_Amber"
+      ]
+    },
+    {
+      "name": "SM_CP_TurretTube",
+      "bounds_origin_cm": [
+        0.9749999046325684,
+        4.76837158203125e-07,
+        25.924999237060547
+      ],
+      "size_cm": [
+        31.750000953674316,
+        30.09999942779541,
+        51.849998474121094
+      ],
+      "vertices": 2207,
+      "uv_channels": 1,
+      "materials": [
+        "/Game/Characters/CombatPatterns/Materials/M_CP_Armor.M_CP_Armor",
+        "/Game/Characters/CombatPatterns/Materials/M_CP_Dark.M_CP_Dark",
+        "/Game/Characters/CombatPatterns/Materials/M_CP_Teal.M_CP_Teal",
+        "/Game/Characters/CombatPatterns/Materials/M_CP_Amber.M_CP_Amber",
+        "/Game/Characters/CombatPatterns/Materials/M_CP_Rubber.M_CP_Rubber"
+      ]
+    },
+    {
+      "name": "SM_CP_ChargeChassis",
+      "bounds_origin_cm": [
+        1.273550033569336,
+        0.0,
+        75.3499984741211
+      ],
+      "size_cm": [
+        108.85290908813477,
+        95.40000915527344,
+        149.3000030517578
+      ],
+      "vertices": 7987,
+      "uv_channels": 1,
+      "materials": [
+        "/Game/Characters/CombatPatterns/Materials/M_CP_Armor.M_CP_Armor",
+        "/Game/Characters/CombatPatterns/Materials/M_CP_Dark.M_CP_Dark",
+        "/Game/Characters/CombatPatterns/Materials/M_CP_Teal.M_CP_Teal",
+        "/Game/Characters/CombatPatterns/Materials/M_CP_Amber.M_CP_Amber",
+        "/Game/Characters/CombatPatterns/Materials/M_CP_Rubber.M_CP_Rubber"
+      ]
+    },
+    {
+      "name": "SM_CP_RobotEye",
+      "bounds_origin_cm": [
+        33.57499694824219,
+        -2.86102294921875e-06,
+        2.5
+      ],
+      "size_cm": [
+        6.5500030517578125,
+        32.99999809265137,
+        13.0
+      ],
+      "vertices": 200,
+      "uv_channels": 1,
+      "materials": [
+        "/Game/Characters/CombatPatterns/Materials/M_CP_Dark.M_CP_Dark",
+        "/Game/Characters/CombatPatterns/Materials/M_CP_Amber.M_CP_Amber",
+        "/Game/Characters/CombatPatterns/Materials/M_CP_Rubber.M_CP_Rubber"
+      ]
+    },
+    {
+      "name": "SM_CP_RobotFoot",
+      "bounds_origin_cm": [
+        0.0,
+        0.0,
+        2.384185791015625e-07
+      ],
+      "size_cm": [
+        32.0,
+        21.000001907348633,
+        10.000000476837158
+      ],
+      "vertices": 305,
+      "uv_channels": 1,
+      "materials": [
+        "/Game/Characters/CombatPatterns/Materials/M_CP_Armor.M_CP_Armor",
+        "/Game/Characters/CombatPatterns/Materials/M_CP_Dark.M_CP_Dark",
+        "/Game/Characters/CombatPatterns/Materials/M_CP_Teal.M_CP_Teal",
+        "/Game/Characters/CombatPatterns/Materials/M_CP_Rubber.M_CP_Rubber"
+      ]
+    },
+    {
+      "name": "SM_CP_RobotLeg",
+      "bounds_origin_cm": [
+        0.5400652885437012,
+        0.0,
+        5.25
+      ],
+      "size_cm": [
+        20.261487007141113,
+        18.400001525878906,
+        55.5
+      ],
+      "vertices": 864,
+      "uv_channels": 1,
+      "materials": [
+        "/Game/Characters/CombatPatterns/Materials/M_CP_Armor.M_CP_Armor",
+        "/Game/Characters/CombatPatterns/Materials/M_CP_Dark.M_CP_Dark",
+        "/Game/Characters/CombatPatterns/Materials/M_CP_Teal.M_CP_Teal"
+      ]
+    },
+    {
+      "name": "SM_CP_RobotShell",
+      "bounds_origin_cm": [
+        -0.30519866943359375,
+        0.0,
+        0.7124996185302734
+      ],
+      "size_cm": [
+        70.25454711914062,
+        73.25,
+        71.42499923706055
+      ],
+      "vertices": 3682,
+      "uv_channels": 1,
+      "materials": [
+        "/Game/Characters/CombatPatterns/Materials/M_CP_Armor.M_CP_Armor",
+        "/Game/Characters/CombatPatterns/Materials/M_CP_Dark.M_CP_Dark",
+        "/Game/Characters/CombatPatterns/Materials/M_CP_Teal.M_CP_Teal",
+        "/Game/Characters/CombatPatterns/Materials/M_CP_Amber.M_CP_Amber",
+        "/Game/Characters/CombatPatterns/Materials/M_CP_Rubber.M_CP_Rubber"
+      ]
+    }
+  ]
+}

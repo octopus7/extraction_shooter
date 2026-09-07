@@ -137,6 +137,7 @@ private:
 	FVector ChargeEnd = FVector::ZeroVector;
 	FVector LockedDirection = FVector::ForwardVector;
 	float PhaseSeconds = 0.0f;
+	float ChargeTrailCountdown = 0.0f;
 	float NextMinionSeconds = 0.0f;
 	double NextPatternTime = 0.0;
 	int32 SequenceIndex = 0;
