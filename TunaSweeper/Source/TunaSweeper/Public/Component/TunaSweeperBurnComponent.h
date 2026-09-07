@@ -9,17 +9,21 @@ class AController;
 class UNiagaraComponent;
 class UNiagaraSystem;
 
-/** Enemy-only, authoritative damage over time. Only the presentation flag is replicated. */
+/** Enemy-only, authoritative damage over time. Burn and stack presentation state is replicated. */
 UCLASS(ClassGroup = (TunaSweeper), meta = (BlueprintSpawnableComponent))
 class TUNASWEEPER_API UTunaSweeperBurnComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:
+	static constexpr int32 MaxStackCount = 3;
+
 	UTunaSweeperBurnComponent();
 
+	/** A valid ID groups all pellets from one shot. Invalid IDs are independent applications. */
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "TunaSweeper|Burn")
-	bool TryApplyBurn(const FTunaSweeperBurnSpec& BurnSpec, AController* EventInstigator, AActor* DamageCauser);
+	bool TryApplyBurn(const FTunaSweeperBurnSpec& BurnSpec, AController* EventInstigator, AActor* DamageCauser,
+		FGuid ApplicationId = FGuid());
 
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "TunaSweeper|Burn")
 	void ClearBurn();
@@ -27,9 +31,15 @@ public:
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Burn")
 	bool IsBurning() const { return bIsBurning; }
 
-	/** Remaining time is authoritative local state, not replicated to clients. */
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Burn")
+	int32 GetStackCount() const { return StackCount; }
+
+	/** Remaining time and effective damage are authoritative local state, not replicated to clients. */
 	float GetRemainingSeconds() const { return static_cast<float>(RemainingSeconds); }
-	float GetDamagePerTick() const { return ActiveDamagePerTick; }
+	float GetDamagePerTick() const
+	{
+		return StackCount > 0 ? ActiveBaseDamagePerTick * (1.0f + 0.5f * (StackCount - 1)) : 0.0f;
+	}
 	static bool CanBurnActor(const AActor* Actor);
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
@@ -61,12 +71,17 @@ private:
 	UPROPERTY(ReplicatedUsing = OnRep_IsBurning)
 	bool bIsBurning = false;
 
+	UPROPERTY(Replicated)
+	int32 StackCount = 0;
+
 	UPROPERTY(Transient)
 	TObjectPtr<UNiagaraComponent> BurningEffectComponent;
 
 	TWeakObjectPtr<AController> BurnInstigator;
 	TWeakObjectPtr<AActor> BurnDamageSource;
+	// Only contributing IDs matter: at the cap no hit adds a stack. Bounded to MaxStackCount entries.
+	TArray<FGuid, TInlineAllocator<MaxStackCount>> StackApplicationIds;
 	double RemainingSeconds = 0.0;
 	double TickAccumulator = 0.0;
-	float ActiveDamagePerTick = 0.0f;
+	float ActiveBaseDamagePerTick = 0.0f;
 };

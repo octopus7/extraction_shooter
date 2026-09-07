@@ -697,6 +697,8 @@ bool ATunaSweeperWeapon::FireWithAimIntent(
 		LoadedProjectileClass = ATunaSweeperProjectile::StaticClass();
 	}
 
+	// All pellets from this trigger pull can grant at most one burn stack per target.
+	const FGuid BurnApplicationId = FGuid::NewGuid();
 	if (WeaponTypeTag == TunaSweeperWeaponTags::ShotgunWeaponTypeTag)
 	{
 		const FVector CenterDirection = ApplyRandomConeSpread(ShotDirection, SpreadHalfAngleDegrees);
@@ -719,7 +721,8 @@ bool ATunaSweeperWeapon::FireWithAimIntent(
 				AimIntentComponent,
 				AimIntentWorldPoint,
 				bHasAimIntentWorldPoint,
-				BurnSpec) != nullptr;
+				BurnSpec,
+				BurnApplicationId) != nullptr;
 		}
 		if (!bSpawnedAnyProjectile)
 		{
@@ -742,7 +745,8 @@ bool ATunaSweeperWeapon::FireWithAimIntent(
 			AimIntentComponent,
 			AimIntentWorldPoint,
 			bHasAimIntentWorldPoint,
-			BurnSpec))
+			BurnSpec,
+			BurnApplicationId))
 		{
 			return false;
 		}
@@ -928,7 +932,8 @@ ATunaSweeperProjectile* ATunaSweeperWeapon::SpawnProjectile(
 	UPrimitiveComponent* AimIntentComponent,
 	const FVector& AimIntentWorldPoint,
 	bool bHasAimIntentWorldPoint,
-	const FTunaSweeperBurnSpec& BurnSpec)
+	const FTunaSweeperBurnSpec& BurnSpec,
+	const FGuid& BurnApplicationId)
 {
 	const FVector SpawnLocation = MuzzlePoint ? MuzzlePoint->GetComponentLocation() : GetActorLocation();
 	const FTransform SpawnTransform(ShotDirection.Rotation(), SpawnLocation);
@@ -942,6 +947,7 @@ ATunaSweeperProjectile* ATunaSweeperWeapon::SpawnProjectile(
 			FMath::RoundToInt(BaseDamageAmount * FMath::Max(0.0f, ProjectileDamageMultiplier)) + ProjectileDamageBonus);
 		SpawnedProjectile->SetDamageAmount(static_cast<float>(ModifiedDamageAmount));
 		SpawnedProjectile->SetBurnSpec(BurnSpec);
+		SpawnedProjectile->SetBurnApplicationId(BurnApplicationId);
 		SpawnedProjectile->SetImpactProfileId(ImpactProfileId);
 		SpawnedProjectile->SetHitEffectId(ProjectileHitEffectId);
 		SpawnedProjectile->SetAimIntent(

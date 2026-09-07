@@ -39,6 +39,7 @@ void UTunaSweeperBurnComponent::GetLifetimeReplicatedProps(TArray<FLifetimePrope
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(UTunaSweeperBurnComponent, bIsBurning);
+	DOREPLIFETIME(UTunaSweeperBurnComponent, StackCount);
 }
 
 bool UTunaSweeperBurnComponent::CanBurnActor(const AActor* Actor)
@@ -66,7 +67,7 @@ bool UTunaSweeperBurnComponent::CanApplyFromSource(const AActor* SourceActor) co
 }
 
 bool UTunaSweeperBurnComponent::TryApplyBurn(
-	const FTunaSweeperBurnSpec& BurnSpec, AController* EventInstigator, AActor* DamageCauser)
+	const FTunaSweeperBurnSpec& BurnSpec, AController* EventInstigator, AActor* DamageCauser, FGuid ApplicationId)
 {
 	AActor* Owner = GetOwner();
 	if (!Owner || !Owner->HasAuthority() || !CanBurnActor(Owner))
@@ -96,15 +97,25 @@ bool UTunaSweeperBurnComponent::TryApplyBurn(
 	}
 
 	const float IncomingDamage = SafeSpec.GetDamagePerTick();
-	if (!bIsBurning || IncomingDamage >= ActiveDamagePerTick)
+	// Compare researched per-stack strength, never the multiplied total of the current stacks.
+	if (!bIsBurning || IncomingDamage >= ActiveBaseDamagePerTick)
 	{
-		ActiveDamagePerTick = IncomingDamage;
+		ActiveBaseDamagePerTick = IncomingDamage;
 		BurnInstigator = SourceController;
 		BurnDamageSource = SourceActor;
 	}
 	if (!bIsBurning)
 	{
 		TickAccumulator = 0.0;
+	}
+	// A valid ID groups pellets from one shot; invalid IDs preserve independent Blueprint applications.
+	if (StackCount < MaxStackCount && (!ApplicationId.IsValid() || !StackApplicationIds.Contains(ApplicationId)))
+	{
+		++StackCount;
+		if (ApplicationId.IsValid())
+		{
+			StackApplicationIds.Add(ApplicationId);
+		}
 	}
 	// Refresh the finite duration without delaying the next scheduled tick or weakening an existing burn.
 	RemainingSeconds = FMath::Max(RemainingSeconds, static_cast<double>(SafeSpec.GetDurationSeconds()));
@@ -121,7 +132,9 @@ void UTunaSweeperBurnComponent::ClearBurn()
 	bIsBurning = false;
 	RemainingSeconds = 0.0;
 	TickAccumulator = 0.0;
-	ActiveDamagePerTick = 0.0f;
+	ActiveBaseDamagePerTick = 0.0f;
+	StackCount = 0;
+	StackApplicationIds.Reset();
 	BurnInstigator.Reset();
 	BurnDamageSource.Reset();
 	SetComponentTickEnabled(false);
@@ -195,7 +208,7 @@ void UTunaSweeperBurnComponent::ApplyBurnTick()
 	Enemy->GetActorBounds(false, BoundsOrigin, BoundsExtent);
 	const FVector DamageNumberLocation = BoundsOrigin + FVector(0.0f, 0.0f, BoundsExtent.Z + 34.0f);
 	const float AppliedDamage = UGameplayStatics::ApplyDamage(
-		Enemy, ActiveDamagePerTick, Instigator, ResolveDamageSource(), UDamageType::StaticClass());
+		Enemy, GetDamagePerTick(), Instigator, ResolveDamageSource(), UDamageType::StaticClass());
 	if (AppliedDamage > 0.0f && bShowDamageNumber)
 	{
 		if (ATunaSweeperPlayerController* PlayerController = Cast<ATunaSweeperPlayerController>(Instigator);

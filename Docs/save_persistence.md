@@ -272,6 +272,6 @@ When adding a field that should survive save/load:
 
 ## Enemy Burn
 
-- Active enemy burn timers, tick phase, damage snapshots, damage-source references, and flame effects are transient combat state. They end with enemy death, EndPlay, or level travel and are not restored by save/load.
+- Active enemy burn timers, tick phase, stack count, shot/application IDs, damage snapshots, damage-source references, and flame effects are transient combat state. They end with enemy death, EndPlay, or level travel and are not restored by save/load.
 - Weapon/ammunition burn research uses the existing AppliedResearchNodeIds and ActiveResearchStates fields. Only claimed nodes contribute; no new save field or version is required.
 - Incendiary ammunition (item 2023) and loaded incendiary rounds use existing inventory item instances and LoadedAmmoItemId/LoadedAmmoCount. Burn strength is derived from static item definitions and applied research at fire time, not serialized into each item.

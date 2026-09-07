@@ -575,7 +575,7 @@ void ATunaSweeperProjectile::HandleHit(
 			if (UTunaSweeperBurnComponent* BurnComponent = Enemy->GetBurnComponent())
 			{
 				// Retain the firing pawn for damage and kill credit after this projectile is destroyed.
-				BurnComponent->TryApplyBurn(BurnSpec, GetInstigatorController(), GetInstigator());
+				BurnComponent->TryApplyBurn(BurnSpec, GetInstigatorController(), GetInstigator(), BurnApplicationId);
 			}
 		}
 	}

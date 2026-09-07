@@ -176,7 +176,8 @@ protected:
 		UPrimitiveComponent* AimIntentComponent,
 		const FVector& AimIntentWorldPoint,
 		bool bHasAimIntentWorldPoint,
-		const FTunaSweeperBurnSpec& BurnSpec);
+		const FTunaSweeperBurnSpec& BurnSpec,
+		const FGuid& BurnApplicationId);
 
 	void PlayFirePresentation(bool bSuppressFireSound = false);
 	void PlayReloadPresentation(TSoftObjectPtr<class USoundBase> ReloadSound);

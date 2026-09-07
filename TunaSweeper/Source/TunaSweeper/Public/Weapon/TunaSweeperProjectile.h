@@ -28,6 +28,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Projectile|Burn")
 	void SetBurnSpec(const FTunaSweeperBurnSpec& InBurnSpec) { BurnSpec = InBurnSpec; BurnSpec.Normalize(); }
 	const FTunaSweeperBurnSpec& GetBurnSpec() const { return BurnSpec; }
+	void SetBurnApplicationId(const FGuid& InApplicationId)
+	{
+		BurnApplicationId = InApplicationId.IsValid() ? InApplicationId : FGuid::NewGuid();
+	}
+	const FGuid& GetBurnApplicationId() const { return BurnApplicationId; }
 	void SetImpactProfileId(FName InImpactProfileId) { ImpactProfileId = InImpactProfileId; }
 	FName GetImpactProfileId() const { return ImpactProfileId; }
 	void SetHitEffectId(FName InHitEffectId) { HitEffectId = InHitEffectId; }
@@ -114,6 +119,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Projectile|Burn")
 	FTunaSweeperBurnSpec BurnSpec;
+
+	// Native per-instance default also gives projectiles spawned outside a weapon distinct applications.
+	FGuid BurnApplicationId = FGuid::NewGuid();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Projectile|Camera", meta = (ClampMin = "0.0", UIMin = "0.0"))
 	float CameraHitReactionScale = 1.0f;

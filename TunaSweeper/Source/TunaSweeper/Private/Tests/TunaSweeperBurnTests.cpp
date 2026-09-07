@@ -136,14 +136,14 @@ bool FTunaSweeperBurnRefreshTest::RunTest(const FString& Parameters)
 	TestTrue(TEXT("Strong burn starts"), Burn->TryApplyBurn(Strong, nullptr, nullptr));
 	Advance(Burn, 0.75f);
 	TestTrue(TEXT("Weak reapplication refreshes burn"), Burn->TryApplyBurn(DefaultBurn(), nullptr, nullptr));
-	TestEqual(TEXT("Weak reapplication retains strongest tick damage"), Burn->GetDamagePerTick(), 6.0f);
+	TestEqual(TEXT("Weak reapplication stacks the strongest researched damage"), Burn->GetDamagePerTick(), 9.0f);
 	TestEqual(TEXT("Reapplication grants a full five-second duration"), Burn->GetRemainingSeconds(), 5.0f);
 	Advance(Burn, 0.25f);
 	Advance(Burn, 4.0f);
 	TestTrue(TEXT("Flames remain for the refreshed fractional duration"), Burn->IsBurning());
 	Advance(Burn, 0.75f);
 	TestFalse(TEXT("Refreshed burn still expires"), Burn->IsBurning());
-	TestEqual(TEXT("Refreshing does not stack duplicate damage streams"), ConsumeRemainingHealth(Enemy), 70.0f);
+	TestEqual(TEXT("Two stacks share one damage stream at one-and-a-half strength"), ConsumeRemainingHealth(Enemy), 55.0f);
 
 	ATunaSweeperEnemyCharacter* PhaseEnemy = TestWorld.SpawnEnemy(1.0f);
 	if (!TestNotNull(TEXT("Phase enemy exists"), PhaseEnemy)) return false;
@@ -154,6 +154,8 @@ bool FTunaSweeperBurnRefreshTest::RunTest(const FString& Parameters)
 	Advance(PhaseBurn, 0.25f);
 	TestTrue(TEXT("Rapid reapplication preserves progress to the first tick"), PhaseEnemy->IsDead());
 	TestFalse(TEXT("Lethal tick clears burn during the damage callback"), PhaseBurn->IsBurning());
+	TestEqual(TEXT("Lethal tick clears every stack"), PhaseBurn->GetStackCount(), 0);
+	TestEqual(TEXT("Lethal tick clears effective damage"), PhaseBurn->GetDamagePerTick(), 0.0f);
 
 	ATunaSweeperEnemyCharacter* ResearchEnemy = TestWorld.SpawnEnemy();
 	if (!TestNotNull(TEXT("Research enemy exists"), ResearchEnemy)) return false;
@@ -167,7 +169,123 @@ bool FTunaSweeperBurnRefreshTest::RunTest(const FString& Parameters)
 	TestEqual(TEXT("Short weak hit cannot shorten remaining research duration"), ResearchBurn->GetRemainingSeconds(), 7.0f);
 	Advance(ResearchBurn, 20.0f);
 	TestFalse(TEXT("Research extension remains finite"), ResearchBurn->IsBurning());
-	TestEqual(TEXT("Research yields eight ticks at twice base damage"), ConsumeRemainingHealth(ResearchEnemy), 68.0f);
+	TestEqual(TEXT("Research applies one four-damage tick and seven six-damage stacked ticks"), ConsumeRemainingHealth(ResearchEnemy), 54.0f);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FTunaSweeperBurnStackingTest,
+	"TunaSweeper.Combat.Burn.ThreeStacksAndShotGrouping", TunaSweeperBurnTests::TestFlags)
+
+bool FTunaSweeperBurnStackingTest::RunTest(const FString& Parameters)
+{
+	(void)Parameters;
+	using namespace TunaSweeperBurnTests;
+	FTestWorld TestWorld;
+	if (!TestNotNull(TEXT("Stack test world exists"), TestWorld.World)) return false;
+	ATunaSweeperEnemyCharacter* Enemy = TestWorld.SpawnEnemy();
+	if (!TestNotNull(TEXT("Stack enemy exists"), Enemy)) return false;
+	UTunaSweeperBurnComponent* Burn = Enemy->FindComponentByClass<UTunaSweeperBurnComponent>();
+	if (!TestNotNull(TEXT("Stack burn component exists"), Burn)) return false;
+	const FGuid ShotA = FGuid::NewGuid();
+	const FGuid ShotB = FGuid::NewGuid();
+	const FGuid ShotC = FGuid::NewGuid();
+
+	TestTrue(TEXT("First shot ignites"), Burn->TryApplyBurn(DefaultBurn(), nullptr, nullptr, ShotA));
+	TestEqual(TEXT("First shot grants one stack"), Burn->GetStackCount(), 1);
+	TestEqual(TEXT("One stack deals base damage"), Burn->GetDamagePerTick(), 2.0f);
+	Advance(Burn, 1.0f);
+	TestTrue(TEXT("Another pellet from the same shot is accepted"), Burn->TryApplyBurn(DefaultBurn(), nullptr, nullptr, ShotA));
+	TestEqual(TEXT("Repeated pellet cannot add a stack"), Burn->GetStackCount(), 1);
+	TestEqual(TEXT("Repeated pellet refreshes the finite duration"), Burn->GetRemainingSeconds(), 5.0f);
+	Burn->TryApplyBurn(DefaultBurn(), nullptr, nullptr, ShotB);
+	TestEqual(TEXT("Second shot grants a second stack"), Burn->GetStackCount(), 2);
+	TestEqual(TEXT("Two stacks deal one-and-a-half base damage"), Burn->GetDamagePerTick(), 3.0f);
+	Advance(Burn, 1.0f);
+	Burn->TryApplyBurn(DefaultBurn(), nullptr, nullptr, ShotA);
+	Burn->TryApplyBurn(DefaultBurn(), nullptr, nullptr, ShotB);
+	TestEqual(TEXT("Interleaved pellets from A and B cannot grant a third stack"), Burn->GetStackCount(), 2);
+	Burn->TryApplyBurn(DefaultBurn(), nullptr, nullptr, ShotC);
+	TestEqual(TEXT("Third distinct shot reaches the cap"), Burn->GetStackCount(), 3);
+	TestEqual(TEXT("Three stacks deal twice base damage"), Burn->GetDamagePerTick(), 4.0f);
+	Advance(Burn, 0.5f);
+	for (int32 Shot = 0; Shot < 32; ++Shot)
+	{
+		Burn->TryApplyBurn(DefaultBurn(), nullptr, nullptr, FGuid::NewGuid());
+	}
+	TestEqual(TEXT("Further shots cannot exceed three stacks"), Burn->GetStackCount(), 3);
+	TestEqual(TEXT("Capped damage remains twice base damage"), Burn->GetDamagePerTick(), 4.0f);
+	TestEqual(TEXT("Repeated capped hits refresh to five seconds without adding duration"), Burn->GetRemainingSeconds(), 5.0f);
+	Advance(Burn, 0.5f);
+	Advance(Burn, 4.5f);
+	TestFalse(TEXT("The entire stack expires five seconds after the final hit"), Burn->IsBurning());
+	TestEqual(TEXT("Expiry clears all stacks"), Burn->GetStackCount(), 0);
+	TestEqual(TEXT("Expiry clears effective damage"), Burn->GetDamagePerTick(), 0.0f);
+	TestEqual(TEXT("Expiry clears remaining time"), Burn->GetRemainingSeconds(), 0.0f);
+	Burn->TryApplyBurn(DefaultBurn(), nullptr, nullptr, ShotA);
+	TestEqual(TEXT("A fresh ignition can reuse an expired application ID"), Burn->GetStackCount(), 1);
+	TestEqual(TEXT("Fresh ignition starts at base damage"), Burn->GetDamagePerTick(), 2.0f);
+	Burn->ClearBurn();
+	TestEqual(TEXT("Explicit clearing removes the new stack"), Burn->GetStackCount(), 0);
+	TestEqual(TEXT("Stack changes retain the one-second phase and deal exactly two plus three plus five four-damage ticks"),
+		ConsumeRemainingHealth(Enemy), 75.0f);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FTunaSweeperBurnStackStrengthTest,
+	"TunaSweeper.Combat.Burn.StackStrengthAndSourceAttribution", TunaSweeperBurnTests::TestFlags)
+
+bool FTunaSweeperBurnStackStrengthTest::RunTest(const FString& Parameters)
+{
+	(void)Parameters;
+	using namespace TunaSweeperBurnTests;
+	FTestWorld TestWorld;
+	if (!TestNotNull(TEXT("Stack attribution test world exists"), TestWorld.World)) return false;
+
+	// Equal and stronger researched hits transfer attribution even below the existing stacked total;
+	// weaker hits preserve the strongest source. Faction changes make source selection observable.
+	const float IncomingBaseDamages[] = { 2.0f, 3.0f, 1.0f };
+	for (float IncomingBaseDamage : IncomingBaseDamages)
+	{
+		ATunaSweeperEnemyCharacter* Enemy = TestWorld.SpawnEnemy();
+		APawn* FirstSource = TestWorld.World->SpawnActor<APawn>();
+		APawn* IncomingSource = TestWorld.World->SpawnActor<APawn>();
+		if (!Enemy || !FirstSource || !IncomingSource) { AddError(TEXT("Stack attribution actors failed to spawn")); return false; }
+		auto AddPlayerFaction = [](APawn* Source)
+		{
+			UTunaSweeperFactionComponent* Faction = NewObject<UTunaSweeperFactionComponent>(Source);
+			Source->AddInstanceComponent(Faction);
+			Faction->SetFactionId(TunaSweeperFactionIds::Player);
+			Faction->RegisterComponent();
+			return Faction;
+		};
+		UTunaSweeperFactionComponent* FirstFaction = AddPlayerFaction(FirstSource);
+		UTunaSweeperFactionComponent* IncomingFaction = AddPlayerFaction(IncomingSource);
+		UTunaSweeperBurnComponent* Burn = Enemy->FindComponentByClass<UTunaSweeperBurnComponent>();
+		if (!TestNotNull(TEXT("Stack attribution burn exists"), Burn)) return false;
+		for (int32 Stack = 0; Stack < 3; ++Stack)
+		{
+			Burn->TryApplyBurn(DefaultBurn(), nullptr, FirstSource);
+		}
+		TestEqual(TEXT("Independent applications without IDs reach three stacks"), Burn->GetStackCount(), 3);
+		FTunaSweeperBurnSpec Incoming = DefaultBurn();
+		Incoming.BaseDamagePerTick = IncomingBaseDamage;
+		Burn->TryApplyBurn(Incoming, nullptr, IncomingSource);
+		const float ExpectedBaseDamage = FMath::Max(2.0f, IncomingBaseDamage);
+		TestEqual(TEXT("Pre-stack strength is retained and the multiplier is applied once"),
+			Burn->GetDamagePerTick(), ExpectedBaseDamage * 2.0f);
+		const bool bIncomingSourceRetained = IncomingBaseDamage >= 2.0f;
+		UTunaSweeperFactionComponent* RetainedFaction = bIncomingSourceRetained ? IncomingFaction : FirstFaction;
+		UTunaSweeperFactionComponent* DiscardedFaction = bIncomingSourceRetained ? FirstFaction : IncomingFaction;
+		DiscardedFaction->SetFactionId(TunaSweeperFactionIds::Enemy);
+		Advance(Burn, 1.0f);
+		TestTrue(TEXT("A discarded source becoming friendly does not cancel burn"), Burn->IsBurning());
+		RetainedFaction->SetFactionId(TunaSweeperFactionIds::Enemy);
+		Advance(Burn, 1.0f);
+		TestFalse(TEXT("The retained source becoming friendly cancels burn"), Burn->IsBurning());
+		TestEqual(TEXT("Source rejection clears all stacks"), Burn->GetStackCount(), 0);
+		TestEqual(TEXT("Exactly one tick uses the strongest base with the stack multiplier"),
+			ConsumeRemainingHealth(Enemy), 100.0f - ExpectedBaseDamage * 2.0f);
+	}
 	return true;
 }
 
@@ -206,6 +324,7 @@ bool FTunaSweeperBurnEligibilityTest::RunTest(const FString& Parameters)
 	FriendlyBurn->TryApplyBurn(DefaultBurn(), nullptr, PlayerFaction);
 	ConsumeRemainingHealth(Friendly);
 	TestFalse(TEXT("External lethal damage clears burn immediately without another component tick"), FriendlyBurn->IsBurning());
+	TestEqual(TEXT("External lethal damage clears the stack count"), FriendlyBurn->GetStackCount(), 0);
 	return true;
 }
 

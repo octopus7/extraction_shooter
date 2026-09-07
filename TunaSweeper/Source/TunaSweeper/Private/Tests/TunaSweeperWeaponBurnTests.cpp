@@ -83,6 +83,18 @@ namespace TunaSweeperWeaponBurnTests
 			return Result;
 		}
 
+		bool HitProjectile(ATunaSweeperProjectile* Projectile, ATunaSweeperEnemyCharacter* Enemy)
+		{
+			USphereComponent* Collision = Cast<USphereComponent>(Projectile->GetRootComponent());
+			if (!Collision) return false;
+			const FHitResult Hit(Enemy, Enemy->GetCapsuleComponent(), Enemy->GetActorLocation(), FVector::UpVector);
+			// The transient world has no actor initialization phase; allow its native dynamic delegate to dispatch.
+			FEditorScriptExecutionGuard ScriptExecutionGuard;
+			// Exercise the same bound hit handler as a physics collision without depending on a world frame.
+			Collision->OnComponentHit.Broadcast(Collision, Enemy, Enemy->GetCapsuleComponent(), FVector::ZeroVector, Hit);
+			return true;
+		}
+
 		ATunaSweeperProjectile* HitEnemy(APawn* Source, ATunaSweeperEnemyCharacter* Enemy,
 			const FTunaSweeperBurnSpec& Spec)
 		{
@@ -93,14 +105,7 @@ namespace TunaSweeperWeaponBurnTests
 			Projectile->SetDamageAmount(10.0f);
 			Projectile->SetBurnSpec(Spec);
 			Projectile->FinishSpawning(FTransform::Identity);
-			USphereComponent* Collision = Cast<USphereComponent>(Projectile->GetRootComponent());
-			if (!Collision) return nullptr;
-			const FHitResult Hit(Enemy, Enemy->GetCapsuleComponent(), Enemy->GetActorLocation(), FVector::UpVector);
-			// The transient world has no actor initialization phase; allow its native dynamic delegate to dispatch.
-			FEditorScriptExecutionGuard ScriptExecutionGuard;
-			// Exercise the same bound hit handler as a physics collision without depending on a world frame.
-			Collision->OnComponentHit.Broadcast(Collision, Enemy, Enemy->GetCapsuleComponent(), FVector::ZeroVector, Hit);
-			return Projectile;
+			return HitProjectile(Projectile, Enemy) ? Projectile : nullptr;
 		}
 	};
 
@@ -190,13 +195,17 @@ bool FTunaSweeperWeaponBurnProjectileSnapshotTest::RunTest(const FString& Parame
 	TArray<ATunaSweeperProjectile*> Shots = TestWorld.ProjectilesFrom(Weapon);
 	if (!TestEqual(TEXT("Single-shot firing creates one projectile"), Shots.Num(), 1)) return false;
 	ATunaSweeperProjectile* FirstShot = Shots[0];
+	TestTrue(TEXT("A fired projectile has a valid burn application ID"), FirstShot->GetBurnApplicationId().IsValid());
 	TestEqual(TEXT("Projectile retains firing pawn"), FirstShot->GetInstigator(), Source);
 	TestEqual(TEXT("Projectile receives the resolved tick count"), FirstShot->GetBurnSpec().TickCount, 8);
 	TestEqual(TEXT("Projectile receives the resolved damage"), FirstShot->GetBurnSpec().GetDamagePerTick(), 3.0f);
 
 	if (!TestTrue(TEXT("A burning shotgun shot fires"), Fire(Shotgun, Source, FName(TEXT("weapon.type.shotgun")), Spec))) return false;
 	const TArray<ATunaSweeperProjectile*> Pellets = TestWorld.ProjectilesFrom(Shotgun);
-	TestTrue(TEXT("Shotgun creates multiple pellets"), Pellets.Num() > 1);
+	if (!TestTrue(TEXT("Shotgun creates multiple pellets"), Pellets.Num() > 1)) return false;
+	const FGuid PelletApplicationId = Pellets[0]->GetBurnApplicationId();
+	TestTrue(TEXT("A shotgun trigger pull has a valid burn application ID"), PelletApplicationId.IsValid());
+	TestTrue(TEXT("Different weapons' trigger pulls have distinct IDs"), PelletApplicationId != FirstShot->GetBurnApplicationId());
 	Spec.bEnabled = false;
 	Spec.TickCount = 1;
 	Spec.BaseDamagePerTick = 90.0f;
@@ -207,6 +216,8 @@ bool FTunaSweeperWeaponBurnProjectileSnapshotTest::RunTest(const FString& Parame
 	{
 		if (Shot == FirstShot) continue;
 		TestFalse(TEXT("Subsequent ordinary round does not inherit previous burn"), Shot->GetBurnSpec().bEnabled);
+		TestTrue(TEXT("Successive trigger pulls have distinct application IDs"),
+			Shot->GetBurnApplicationId().IsValid() && Shot->GetBurnApplicationId() != FirstShot->GetBurnApplicationId());
 	}
 	TestEqual(TEXT("Changing ammunition does not alter an in-flight shot's duration"), FirstShot->GetBurnSpec().TickCount, 8);
 	TestEqual(TEXT("Changing ammunition does not alter an in-flight shot's damage"), FirstShot->GetBurnSpec().GetDamagePerTick(), 3.0f);
@@ -215,6 +226,8 @@ bool FTunaSweeperWeaponBurnProjectileSnapshotTest::RunTest(const FString& Parame
 		TestEqual(TEXT("Each pellet keeps the original duration snapshot"), Pellet->GetBurnSpec().TickCount, 8);
 		TestEqual(TEXT("Each pellet keeps the original damage snapshot"), Pellet->GetBurnSpec().GetDamagePerTick(), 3.0f);
 		TestEqual(TEXT("Each pellet keeps its firing pawn"), Pellet->GetInstigator(), Source);
+		TestTrue(TEXT("All pellets from one trigger pull share one burn application ID"),
+			Pellet->GetBurnApplicationId() == PelletApplicationId);
 	}
 	return true;
 }
@@ -251,7 +264,11 @@ bool FTunaSweeperBurnProjectileImpactRoutingTest::RunTest(const FString& Paramet
 		UGameplayStatics::ApplyDamage(Hostile, 100000.0f, nullptr, nullptr, nullptr), 87.0f);
 	TestFalse(TEXT("A lethal follow-up clears the active burn"), Hostile->GetBurnComponent()->IsBurning());
 
-	TestNotNull(TEXT("Friendly impact projectile exists"), TestWorld.HitEnemy(Source, Friendly, Spec));
+	ATunaSweeperProjectile* FriendlyShot = TestWorld.HitEnemy(Source, Friendly, Spec);
+	if (!TestNotNull(TEXT("Friendly impact projectile exists"), FriendlyShot)) return false;
+	TestTrue(TEXT("Directly spawned projectiles receive distinct valid fallback IDs"),
+		HostileShot->GetBurnApplicationId().IsValid() && FriendlyShot->GetBurnApplicationId().IsValid() &&
+		HostileShot->GetBurnApplicationId() != FriendlyShot->GetBurnApplicationId());
 	TestFalse(TEXT("Friendly actor cannot acquire burn on impact"), Friendly->GetBurnComponent()->IsBurning());
 	TestEqual(TEXT("Friendly impact also remains blocked by faction damage rules"),
 		UGameplayStatics::ApplyDamage(Friendly, 100000.0f, nullptr, nullptr, nullptr), 100.0f);
@@ -261,6 +278,87 @@ bool FTunaSweeperBurnProjectileImpactRoutingTest::RunTest(const FString& Paramet
 	ProtectedEnemy->GetFactionComponent()->SetCanBeCombatTarget(false);
 	TestNotNull(TEXT("Non-combat impact projectile exists"), TestWorld.HitEnemy(Source, ProtectedEnemy, Spec));
 	TestFalse(TEXT("Non-combat enemy cannot acquire burn"), ProtectedEnemy->GetBurnComponent()->IsBurning());
+	return true;
+}
+
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FTunaSweeperBurnShotgunStackingTest,
+	"TunaSweeper.Combat.Burn.ShotgunStacking", TunaSweeperWeaponBurnTests::TestFlags)
+
+bool FTunaSweeperBurnShotgunStackingTest::RunTest(const FString& Parameters)
+{
+	(void)Parameters;
+	using namespace TunaSweeperWeaponBurnTests;
+	FTestWorld TestWorld;
+	if (!TestNotNull(TEXT("Shotgun stacking test world exists"), TestWorld.World)) return false;
+	APawn* Source = TestWorld.SpawnSource();
+	ATunaSweeperWeapon* Shotgun = TestWorld.World->SpawnActor<ATunaSweeperWeapon>();
+	ATunaSweeperEnemyCharacter* Enemy = TestWorld.SpawnEnemy();
+	if (!TestNotNull(TEXT("Shotgun source exists"), Source) ||
+		!TestNotNull(TEXT("Shotgun exists"), Shotgun) || !TestNotNull(TEXT("Enemy exists"), Enemy)) return false;
+
+	FTunaSweeperBurnSpec Spec;
+	Spec.bEnabled = true;
+	Spec.BaseDamagePerTick = 2.0f;
+	const FName ShotgunType(TEXT("weapon.type.shotgun"));
+	if (!TestTrue(TEXT("First shotgun trigger pull fires"), Fire(Shotgun, Source, ShotgunType, Spec))) return false;
+	const TArray<ATunaSweeperProjectile*> FirstPellets = TestWorld.ProjectilesFrom(Shotgun);
+	if (!TestTrue(TEXT("First shot produces multiple pellets"), FirstPellets.Num() > 1)) return false;
+	const FGuid FirstApplicationId = FirstPellets[0]->GetBurnApplicationId();
+
+	if (!TestTrue(TEXT("Second shotgun trigger pull fires"), Fire(Shotgun, Source, ShotgunType, Spec))) return false;
+	TArray<ATunaSweeperProjectile*> SecondPellets = TestWorld.ProjectilesFrom(Shotgun);
+	SecondPellets.RemoveAll([&FirstPellets](ATunaSweeperProjectile* Pellet) { return FirstPellets.Contains(Pellet); });
+	if (!TestTrue(TEXT("Second shot produces multiple pellets"), SecondPellets.Num() > 1)) return false;
+	TestTrue(TEXT("Successive shotgun shots use different valid IDs"),
+		FirstApplicationId.IsValid() && SecondPellets[0]->GetBurnApplicationId().IsValid() &&
+		FirstApplicationId != SecondPellets[0]->GetBurnApplicationId());
+
+	int32 DirectHitCount = 0;
+	auto HitPellet = [this, &TestWorld, Enemy, &DirectHitCount](ATunaSweeperProjectile* Pellet, int32 ExpectedStacks)
+	{
+		// Keep every direct hit observable without killing the enemy before all four shots land.
+		Pellet->SetDamageAmount(1.0f);
+		if (!TestTrue(TEXT("Actual fire-generated pellet dispatches its hit"), TestWorld.HitProjectile(Pellet, Enemy))) return false;
+		++DirectHitCount;
+		TestTrue(TEXT("Hit consumes the pellet"), Pellet->IsActorBeingDestroyed());
+		TestEqual(TEXT("Only a new trigger pull can add a burn stack"), Enemy->GetBurnComponent()->GetStackCount(), ExpectedStacks);
+		return true;
+	};
+
+	if (!HitPellet(FirstPellets[0], 1) || !HitPellet(SecondPellets[0], 2)) return false;
+	// A later pellet from the first shot must remain deduplicated after another shot has landed.
+	for (int32 Index = 1; Index < FirstPellets.Num(); ++Index)
+	{
+		if (!HitPellet(FirstPellets[Index], 2)) return false;
+	}
+	for (int32 Index = 1; Index < SecondPellets.Num(); ++Index)
+	{
+		if (!HitPellet(SecondPellets[Index], 2)) return false;
+	}
+	TestEqual(TEXT("Two distinct shots produce the 1.5x damage multiplier"), Enemy->GetBurnComponent()->GetDamagePerTick(), 3.0f);
+
+	FGuid PreviousApplicationId = SecondPellets[0]->GetBurnApplicationId();
+	for (int32 ShotIndex = 3; ShotIndex <= 4; ++ShotIndex)
+	{
+		if (!TestTrue(TEXT("A further shotgun trigger pull fires"), Fire(Shotgun, Source, ShotgunType, Spec))) return false;
+		const TArray<ATunaSweeperProjectile*> Pellets = TestWorld.ProjectilesFrom(Shotgun);
+		if (!TestTrue(TEXT("A further shotgun shot produces multiple pellets"), Pellets.Num() > 1)) return false;
+		const FGuid ApplicationId = Pellets[0]->GetBurnApplicationId();
+		TestTrue(TEXT("Each later trigger pull receives a fresh valid ID"),
+			ApplicationId.IsValid() && ApplicationId != PreviousApplicationId && ApplicationId != FirstApplicationId);
+		for (ATunaSweeperProjectile* Pellet : Pellets)
+		{
+			TestTrue(TEXT("Every pellet in the new shot shares its application ID"), Pellet->GetBurnApplicationId() == ApplicationId);
+			if (!HitPellet(Pellet, 3)) return false;
+		}
+		PreviousApplicationId = ApplicationId;
+	}
+	TestEqual(TEXT("Further trigger pulls remain capped at three stacks"), Enemy->GetBurnComponent()->GetStackCount(), 3);
+	TestEqual(TEXT("Three stacks cap tick damage at twice the unstacked damage"), Enemy->GetBurnComponent()->GetDamagePerTick(), 4.0f);
+	static_cast<UActorComponent*>(Enemy->GetBurnComponent())->TickComponent(1.0f, LEVELTICK_All, nullptr);
+	TestEqual(TEXT("All direct pellet impacts and one capped burn tick deal the expected damage"),
+		UGameplayStatics::ApplyDamage(Enemy, 100000.0f, nullptr, nullptr, nullptr), 100.0f - static_cast<float>(DirectHitCount) - 4.0f);
 	return true;
 }
 
