@@ -1,0 +1,303 @@
+{
+  "engine": "5.7.4-51494982+++UE5+Release-5.7",
+  "mode": "reload",
+  "passed": true,
+  "assets": [
+    {
+      "name": "SM_MI_Floor",
+      "triangles": 12,
+      "slots": 1,
+      "bounds_error_cm": 1.748455542838201E-05,
+      "collision_boxes": 1,
+      "collision_bounds_verified": true,
+      "source_uv_channels": 2,
+      "generated_lightmap_uv_index": 2,
+      "nanite": false
+    },
+    {
+      "name": "SM_MI_Wall",
+      "triangles": 12,
+      "slots": 1,
+      "bounds_error_cm": 1.748455542838201E-05,
+      "collision_boxes": 1,
+      "collision_bounds_verified": true,
+      "source_uv_channels": 2,
+      "generated_lightmap_uv_index": 2,
+      "nanite": false
+    },
+    {
+      "name": "SM_MI_InsideCorner",
+      "triangles": 20,
+      "slots": 1,
+      "bounds_error_cm": 9.238719940185547E-06,
+      "collision_boxes": 2,
+      "collision_bounds_verified": true,
+      "source_uv_channels": 2,
+      "generated_lightmap_uv_index": 2,
+      "nanite": false
+    },
+    {
+      "name": "SM_MI_Doorway",
+      "triangles": 92,
+      "slots": 2,
+      "bounds_error_cm": 3.496911085676402E-05,
+      "collision_boxes": 3,
+      "collision_bounds_verified": true,
+      "source_uv_channels": 2,
+      "generated_lightmap_uv_index": 2,
+      "nanite": false
+    },
+    {
+      "name": "SM_MI_DoorLeaf",
+      "triangles": 12,
+      "slots": 1,
+      "bounds_error_cm": 1.713486562948674E-05,
+      "collision_boxes": 1,
+      "collision_bounds_verified": true,
+      "source_uv_channels": 2,
+      "generated_lightmap_uv_index": 2,
+      "nanite": false
+    },
+    {
+      "name": "SM_MI_LightBar",
+      "triangles": 12,
+      "slots": 2,
+      "bounds_error_cm": 1.3530254364013672E-05,
+      "collision_boxes": 0,
+      "collision_bounds_verified": true,
+      "source_uv_channels": 2,
+      "generated_lightmap_uv_index": 2,
+      "nanite": false
+    },
+    {
+      "name": "SM_MIE_FloorHalf",
+      "triangles": 12,
+      "slots": 1,
+      "bounds_error_cm": 1.52587890625E-05,
+      "collision_boxes": 1,
+      "collision_bounds_verified": true,
+      "source_uv_channels": 2,
+      "generated_lightmap_uv_index": 2,
+      "nanite": false
+    },
+    {
+      "name": "SM_MIE_DrainFloor",
+      "triangles": 12,
+      "slots": 1,
+      "bounds_error_cm": 1.748455542838201E-05,
+      "collision_boxes": 1,
+      "collision_bounds_verified": true,
+      "source_uv_channels": 2,
+      "generated_lightmap_uv_index": 2,
+      "nanite": false
+    },
+    {
+      "name": "SM_MIE_FloorEdge",
+      "triangles": 12,
+      "slots": 1,
+      "bounds_error_cm": 1.7568469047546387E-05,
+      "collision_boxes": 1,
+      "collision_bounds_verified": true,
+      "source_uv_channels": 2,
+      "generated_lightmap_uv_index": 2,
+      "nanite": false
+    },
+    {
+      "name": "SM_MIE_WallHalf",
+      "triangles": 12,
+      "slots": 1,
+      "bounds_error_cm": 8.742277714191005E-06,
+      "collision_boxes": 1,
+      "collision_bounds_verified": true,
+      "source_uv_channels": 2,
+      "generated_lightmap_uv_index": 2,
+      "nanite": false
+    },
+    {
+      "name": "SM_MIE_WindowWall",
+      "triangles": 64,
+      "slots": 1,
+      "bounds_error_cm": 1.748455542838201E-05,
+      "collision_boxes": 4,
+      "collision_bounds_verified": true,
+      "source_uv_channels": 2,
+      "generated_lightmap_uv_index": 2,
+      "nanite": false
+    },
+    {
+      "name": "SM_MIE_LowPartition",
+      "triangles": 12,
+      "slots": 1,
+      "bounds_error_cm": 1.748455542838201E-05,
+      "collision_boxes": 1,
+      "collision_bounds_verified": true,
+      "source_uv_channels": 2,
+      "generated_lightmap_uv_index": 2,
+      "nanite": false
+    },
+    {
+      "name": "SM_MIE_OutsideCorner",
+      "triangles": 20,
+      "slots": 1,
+      "bounds_error_cm": 1.0490733984624967E-05,
+      "collision_boxes": 2,
+      "collision_bounds_verified": true,
+      "source_uv_channels": 2,
+      "generated_lightmap_uv_index": 2,
+      "nanite": false
+    },
+    {
+      "name": "SM_MIE_WallEnd",
+      "triangles": 12,
+      "slots": 1,
+      "bounds_error_cm": 1.8328428268432617E-06,
+      "collision_boxes": 1,
+      "collision_bounds_verified": true,
+      "source_uv_channels": 2,
+      "generated_lightmap_uv_index": 2,
+      "nanite": false
+    },
+    {
+      "name": "SM_MIE_DoorFrame",
+      "triangles": 44,
+      "slots": 1,
+      "bounds_error_cm": 2.7101061277789995E-05,
+      "collision_boxes": 3,
+      "collision_bounds_verified": true,
+      "source_uv_channels": 2,
+      "generated_lightmap_uv_index": 2,
+      "nanite": false
+    },
+    {
+      "name": "SM_MIE_ObservationWindow",
+      "triangles": 76,
+      "slots": 2,
+      "bounds_error_cm": 1.3068318367004395E-05,
+      "collision_boxes": 1,
+      "collision_bounds_verified": true,
+      "source_uv_channels": 2,
+      "generated_lightmap_uv_index": 2,
+      "nanite": false
+    },
+    {
+      "name": "SM_MIE_PipeStraight",
+      "triangles": 28,
+      "slots": 1,
+      "bounds_error_cm": 1.6868114471435547E-05,
+      "collision_boxes": 0,
+      "collision_bounds_verified": true,
+      "source_uv_channels": 2,
+      "generated_lightmap_uv_index": 2,
+      "nanite": false
+    },
+    {
+      "name": "SM_MIE_PipeElbow",
+      "triangles": 76,
+      "slots": 1,
+      "bounds_error_cm": 3.516674041748047E-06,
+      "collision_boxes": 0,
+      "collision_bounds_verified": true,
+      "source_uv_channels": 2,
+      "generated_lightmap_uv_index": 2,
+      "nanite": false
+    },
+    {
+      "name": "SM_MIE_PipeEnd",
+      "triangles": 28,
+      "slots": 1,
+      "bounds_error_cm": 1.748455588312936E-06,
+      "collision_boxes": 0,
+      "collision_bounds_verified": true,
+      "source_uv_channels": 2,
+      "generated_lightmap_uv_index": 2,
+      "nanite": false
+    },
+    {
+      "name": "SM_MIE_DuctStraight",
+      "triangles": 12,
+      "slots": 1,
+      "bounds_error_cm": 1.8477439880371094E-05,
+      "collision_boxes": 0,
+      "collision_bounds_verified": true,
+      "source_uv_channels": 2,
+      "generated_lightmap_uv_index": 2,
+      "nanite": false
+    },
+    {
+      "name": "SM_MIE_DuctCorner",
+      "triangles": 20,
+      "slots": 1,
+      "bounds_error_cm": 3.496911176625872E-06,
+      "collision_boxes": 0,
+      "collision_bounds_verified": true,
+      "source_uv_channels": 2,
+      "generated_lightmap_uv_index": 2,
+      "nanite": false
+    },
+    {
+      "name": "SM_MIE_Vent",
+      "triangles": 12,
+      "slots": 1,
+      "bounds_error_cm": 8.761882781982422E-06,
+      "collision_boxes": 0,
+      "collision_bounds_verified": true,
+      "source_uv_channels": 2,
+      "generated_lightmap_uv_index": 2,
+      "nanite": false
+    },
+    {
+      "name": "SM_MIE_EmergencyLight",
+      "triangles": 12,
+      "slots": 2,
+      "bounds_error_cm": 3.129243850708008E-06,
+      "collision_boxes": 0,
+      "collision_bounds_verified": true,
+      "source_uv_channels": 2,
+      "generated_lightmap_uv_index": 2,
+      "nanite": false
+    },
+    {
+      "name": "SM_MIE_ZoneSign",
+      "triangles": 12,
+      "slots": 1,
+      "bounds_error_cm": 8.627772331237793E-06,
+      "collision_boxes": 0,
+      "collision_bounds_verified": true,
+      "source_uv_channels": 2,
+      "generated_lightmap_uv_index": 2,
+      "nanite": false
+    }
+  ],
+  "material_graphs": [
+    {
+      "name": "M_MI_ExpansionSurface",
+      "reachable_texture_sample_nodes": 2,
+      "used_textures": [
+        "/Game/Environment/ModularInteriorExpansion/Textures/T_MIE_ServiceAtlas.T_MIE_ServiceAtlas",
+        "/Game/Environment/ModularInteriorPreview/Textures/T_MI_DirtMask.T_MI_DirtMask"
+      ]
+    },
+    {
+      "name": "M_MI_ExpansionAmber",
+      "reachable_texture_sample_nodes": 0,
+      "used_textures": []
+    },
+    {
+      "name": "M_MI_ExpansionGlass",
+      "reachable_texture_sample_nodes": 0,
+      "used_textures": []
+    }
+  ],
+  "materials": {
+    "opaque_structure": true,
+    "glass_translucent_slots": 1,
+    "glass_refraction": false,
+    "service_texture_reads": 2,
+    "constant_glass_and_amber_texture_reads": 0,
+    "new_texture_size": [
+      2048,
+      2048
+    ]
+  },
+  "process_exit": 1
+}
