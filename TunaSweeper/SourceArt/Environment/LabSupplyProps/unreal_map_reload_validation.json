@@ -647,5 +647,6 @@
     "fov_deg": 70.0
   },
   "camera_route_samples": 48,
-  "editor_ticks_before_physics_query": 30
+  "editor_ticks_before_physics_query": 30,
+  "process_exit": 0
 }
