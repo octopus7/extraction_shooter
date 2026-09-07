@@ -1,0 +1,16 @@
+{
+  "rendered_asset": "/Game/Nature/ForestProps/ExposedRoots/SM_ExposedRoots.SM_ExposedRoots",
+  "material": "/Game/Nature/ForestProps/ExposedRoots/M_ExposedRoots.M_ExposedRoots",
+  "transient_world": true,
+  "saved_levels": 0,
+  "capture_location": "<Struct 'Vector' (0x0000024304544A10) {x: 330.000000, y: -420.000000, z: 330.000000}>",
+  "capture_rotation": "<Struct 'Rotator' (0x0000024304544A10) {pitch: -31.000000, yaw: 128.000000, roll: 0.000000}>",
+  "mesh_location": "<Struct 'Vector' (0x0000024304544A10) {x: 0.000000, y: 0.000000, z: 0.000000}>",
+  "visually_checked": true,
+  "checked_views": [
+    "BaseColor: brown palette, complete silhouette",
+    "Lit: facet normals and ground contact under direct light"
+  ],
+  "process_exit_code": "-1073741819",
+  "process_note": "Images and report saved and visually checked; final render process returned 0xC0000005 after shutdown. Import and fresh-process reload commands returned 0."
+}

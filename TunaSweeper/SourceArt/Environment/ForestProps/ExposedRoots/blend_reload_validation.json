@@ -1,0 +1,28 @@
+{
+  "passed": true,
+  "images": [
+    {
+      "object": "SM_ExposedRoots",
+      "image": "T_ExposedRoots_Palette",
+      "size": [
+        64,
+        64
+      ],
+      "packed": true
+    },
+    {
+      "object": "PREVIEW_ONLY_ExistingWoodStump",
+      "image": "T_WoodCommon.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "packed": true
+    }
+  ],
+  "origin": [
+    0.0,
+    0.0,
+    0.0
+  ]
+}

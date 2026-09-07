@@ -1,0 +1,74 @@
+[
+  {
+    "asset": "/Game/Nature/Bush/Bush_Combined.Bush_Combined",
+    "extent_cm": [
+      51.06643104553223,
+      49.88066291809082,
+      43.994839668273926
+    ],
+    "vertices": 38307,
+    "materials": [
+      "/Game/Nature/Bush/M_Bush.M_Bush"
+    ]
+  },
+  {
+    "asset": "/Game/Nature/GrassLow/SM_GrassLow.SM_GrassLow",
+    "extent_cm": [
+      8.241569519042969,
+      7.202777862548828,
+      20.876094043254852
+    ],
+    "vertices": 110,
+    "materials": [
+      "/Game/Nature/GrassLow/M_GrassBlade.M_GrassBlade"
+    ]
+  },
+  {
+    "asset": "/Game/Nature/Flower/SM_Flower.SM_Flower",
+    "extent_cm": [
+      26.50004005432129,
+      29.359773635864258,
+      14.017537072300911
+    ],
+    "vertices": 9896,
+    "materials": [
+      "/Game/Nature/Flower/M_Flower.M_Flower"
+    ]
+  },
+  {
+    "asset": "/Game/Nature/SimpleTree/SM_SimpleTree.SM_SimpleTree",
+    "extent_cm": [
+      178.40960693359375,
+      177.5176239013672,
+      228.93144913762808
+    ],
+    "vertices": 4209,
+    "materials": [
+      "/Game/Nature/SimpleTree/M_SimpleTree.M_SimpleTree"
+    ]
+  },
+  {
+    "asset": "/Game/Nature/Wood/SM_StumpA.SM_StumpA",
+    "extent_cm": [
+      51.69528770446777,
+      48.95152473449707,
+      29.125758171081543
+    ],
+    "vertices": 7199,
+    "materials": [
+      "/Game/Nature/Wood/M_WoodCommon.M_WoodCommon"
+    ]
+  },
+  {
+    "asset": "/Game/Nature/RockBasic/RockM_1.RockM_1",
+    "extent_cm": [
+      9.003351211547852,
+      7.792751312255859,
+      4.333550087641925
+    ],
+    "vertices": 2182,
+    "materials": [
+      "/Game/Nature/RockBasic/M_RockBasic.M_RockBasic"
+    ]
+  }
+]
