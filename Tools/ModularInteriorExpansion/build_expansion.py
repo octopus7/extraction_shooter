@@ -182,6 +182,3 @@ if not os.environ.get('MIE_SKIP_RENDER'):
 scene.camera=play;flip.mute=False
 bpy.ops.wm.save_as_mainfile(filepath=str(OUT/'ModularInteriorExpansion.blend'))
 print('EXPANSION_BUILD_PASSED',manifest['unique_triangles'],manifest['sample_triangles'])
-
-
-

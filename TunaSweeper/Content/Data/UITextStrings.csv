@@ -251,11 +251,11 @@ research.node.survival_mastery.name,생존 숙련,Survival Mastery,サバイバ�
 research.node.survival_mastery.description,모든 생존 최대치가 10 증가합니다.,All survival maximums +10.,すべての生存最大値が10増加します。
 research.node.ultimate_conditioning.name,궁극의 신체 단련,Ultimate Conditioning,究極の身体鍛錬
 research.node.ultimate_conditioning.description,"최대 체력과 스태미나가 20, 운반 힘이 2 증가합니다.","Maximum health and stamina +20, carry strength +2.",最大体力とスタミナが20、運搬力が2増加します。
-research.node.weapon_burn_1.name,소총 발화 연구 I,Rifle Ignition I,
-research.node.weapon_burn_1.description,소총의 발화가 1초 더 지속되고 틱 피해가 기본 피해의 25%만큼 증가합니다.,Rifle burns last 1 second longer and gain 25% of base tick damage.,
-research.node.ammo_burn_1.name,소이탄 연소 연구 I,Incendiary Ammunition I,
-research.node.ammo_burn_1.description,소총 탄약의 발화가 1초 더 지속되고 틱 피해가 기본 피해의 25%만큼 증가합니다.,Rifle ammunition burns last 1 second longer and gain 25% of base tick damage.,
-research.node.weapon_burn_2.name,소총 발화 연구 II,Rifle Ignition II,
-research.node.weapon_burn_2.description,소총의 발화가 추가로 1초 더 지속되고 틱 피해가 기본 피해의 25%만큼 증가합니다.,Rifle burns last another 1 second and gain another 25% of base tick damage.,
-research.node.ammo_burn_2.name,소이탄 연소 연구 II,Incendiary Ammunition II,
-research.node.ammo_burn_2.description,소총 탄약의 발화가 추가로 1초 더 지속되고 틱 피해가 기본 피해의 25%만큼 증가합니다.,Rifle ammunition burns last another 1 second and gain another 25% of base tick damage.,
+research.node.weapon_burn_1.name,소총 발화 연구 I,Rifle Ignition I,ライフル発火研究 I
+research.node.weapon_burn_1.description,소총의 발화가 1초 더 지속되고 틱 피해가 기본 피해의 25%만큼 증가합니다.,Rifle burns last 1 second longer and gain 25% of base tick damage.,ライフルによる燃焼が1秒長く続き、毎秒のダメージが基本ダメージの25%分増加します。
+research.node.ammo_burn_1.name,소이탄 연소 연구 I,Incendiary Ammunition I,焼夷弾燃焼研究 I
+research.node.ammo_burn_1.description,소총 탄약의 발화가 1초 더 지속되고 틱 피해가 기본 피해의 25%만큼 증가합니다.,Rifle ammunition burns last 1 second longer and gain 25% of base tick damage.,ライフル弾薬による燃焼が1秒長く続き、毎秒のダメージが基本ダメージの25%分増加します。
+research.node.weapon_burn_2.name,소총 발화 연구 II,Rifle Ignition II,ライフル発火研究 II
+research.node.weapon_burn_2.description,소총의 발화가 추가로 1초 더 지속되고 틱 피해가 기본 피해의 25%만큼 증가합니다.,Rifle burns last another 1 second and gain another 25% of base tick damage.,ライフルによる燃焼がさらに1秒長く続き、毎秒のダメージが基本ダメージの25%分増加します。
+research.node.ammo_burn_2.name,소이탄 연소 연구 II,Incendiary Ammunition II,焼夷弾燃焼研究 II
+research.node.ammo_burn_2.description,소총 탄약의 발화가 추가로 1초 더 지속되고 틱 피해가 기본 피해의 25%만큼 증가합니다.,Rifle ammunition burns last another 1 second and gain another 25% of base tick damage.,ライフル弾薬による燃焼がさらに1秒長く続き、毎秒のダメージが基本ダメージの25%分増加します。
