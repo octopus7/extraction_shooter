@@ -1,0 +1,429 @@
+{
+  "category": "Furniture",
+  "axis_contract": "X width, -Y front, Z up; floor-centred pivots; authoring cm, Blender m, FBX unit scale",
+  "materials": {
+    "Pink": {
+      "name": "M_InteriorAdditions_Pink",
+      "metallic": 0.12,
+      "roughness": 0.38
+    },
+    "Ivory": {
+      "name": "M_InteriorAdditions_Ivory",
+      "metallic": 0.08,
+      "roughness": 0.32
+    },
+    "Oak": {
+      "name": "M_InteriorAdditions_Oak",
+      "metallic": 0,
+      "roughness": 0.65
+    },
+    "Walnut": {
+      "name": "M_InteriorAdditions_Walnut",
+      "metallic": 0,
+      "roughness": 0.68
+    },
+    "Steel": {
+      "name": "M_InteriorAdditions_Steel",
+      "metallic": 0.72,
+      "roughness": 0.32
+    },
+    "Iron": {
+      "name": "M_InteriorAdditions_Iron",
+      "metallic": 0.55,
+      "roughness": 0.58
+    },
+    "Brass": {
+      "name": "M_InteriorAdditions_Brass",
+      "metallic": 0.72,
+      "roughness": 0.32
+    },
+    "Glass": {
+      "name": "M_InteriorAdditions_Glass",
+      "metallic": 0.15,
+      "roughness": 0.19
+    },
+    "Gingham": {
+      "name": "M_InteriorAdditions_Gingham",
+      "metallic": 0,
+      "roughness": 0.9
+    },
+    "Rug": {
+      "name": "M_InteriorAdditions_Rug",
+      "metallic": 0,
+      "roughness": 0.98
+    },
+    "Lace": {
+      "name": "M_InteriorAdditions_Lace",
+      "metallic": 0,
+      "roughness": 0.95
+    },
+    "Floral": {
+      "name": "M_InteriorAdditions_Floral",
+      "metallic": 0,
+      "roughness": 0.52
+    },
+    "Sage": {
+      "name": "M_InteriorAdditions_Sage",
+      "metallic": 0.1,
+      "roughness": 0.42
+    },
+    "Terracotta": {
+      "name": "M_InteriorAdditions_Terracotta",
+      "metallic": 0,
+      "roughness": 0.83
+    },
+    "Turquoise": {
+      "name": "M_InteriorAdditions_Turquoise",
+      "metallic": 0.05,
+      "roughness": 0.32
+    },
+    "Linen": {
+      "name": "M_InteriorAdditions_Linen",
+      "metallic": 0,
+      "roughness": 0.92
+    }
+  },
+  "assets": [
+    {
+      "name": "SM_InteriorAdditions_DiningTable",
+      "target_size_cm": [
+        148.605,
+        131.477,
+        63.221
+      ],
+      "category": "Furniture",
+      "reference": "SM_KitchenTable; BunkerMap component scale 1; cozy pink gingham dining table",
+      "size_cm": [
+        148.605,
+        131.477,
+        63.221
+      ],
+      "bounds_cm": [
+        -74.3025,
+        -65.7385,
+        0,
+        74.3025,
+        65.7385,
+        63.221
+      ],
+      "triangles": 11480,
+      "materials": [
+        "M_InteriorAdditions_Pink",
+        "M_InteriorAdditions_Oak",
+        "M_InteriorAdditions_Gingham"
+      ],
+      "collision_boxes": 1
+    },
+    {
+      "name": "SM_InteriorAdditions_Stool",
+      "target_size_cm": [
+        61.344,
+        55.71,
+        65.725
+      ],
+      "category": "Furniture",
+      "reference": "SM_Stool; BunkerMap component scale 1; round pink padded kitchen stool",
+      "size_cm": [
+        61.344,
+        55.71,
+        65.725
+      ],
+      "bounds_cm": [
+        -30.672,
+        -27.855,
+        0,
+        30.672,
+        27.855,
+        65.725
+      ],
+      "triangles": 15932,
+      "materials": [
+        "M_InteriorAdditions_Oak",
+        "M_InteriorAdditions_Walnut",
+        "M_InteriorAdditions_Pink",
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Brass"
+      ],
+      "collision_boxes": 1
+    },
+    {
+      "name": "SM_InteriorAdditions_Sofa",
+      "target_size_cm": [
+        257.818,
+        115.852,
+        127.141
+      ],
+      "category": "Furniture",
+      "reference": "SM_Couch native 211.978/95.252/104.535cm times BunkerMap component scale 1.21625516",
+      "size_cm": [
+        257.818,
+        115.852,
+        127.141
+      ],
+      "bounds_cm": [
+        -128.909,
+        -57.926,
+        0,
+        128.909,
+        57.926,
+        127.141
+      ],
+      "triangles": 50044,
+      "materials": [
+        "M_InteriorAdditions_Walnut",
+        "M_InteriorAdditions_Gingham",
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Brass",
+        "M_InteriorAdditions_Pink",
+        "M_InteriorAdditions_Floral"
+      ],
+      "collision_boxes": 1
+    },
+    {
+      "name": "SM_InteriorAdditions_CoffeeTable",
+      "target_size_cm": [
+        164.899,
+        104.887,
+        44.877
+      ],
+      "category": "Furniture",
+      "reference": "SM_TeaTable native 52.810/33.591/14.372cm times BunkerMap component scale 3.12249993",
+      "size_cm": [
+        164.899,
+        104.887,
+        44.877
+      ],
+      "bounds_cm": [
+        -82.4495,
+        -52.4435,
+        0,
+        82.4495,
+        52.4435,
+        44.877
+      ],
+      "triangles": 11820,
+      "materials": [
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Oak",
+        "M_InteriorAdditions_Brass",
+        "M_InteriorAdditions_Lace"
+      ],
+      "collision_boxes": 1
+    },
+    {
+      "name": "SM_InteriorAdditions_Bed",
+      "target_size_cm": [
+        188.124,
+        205.026,
+        114.638
+      ],
+      "category": "Furniture",
+      "reference": "SM_Agit_F_000; actual BunkerMap bedroom component scale 1; related SM_LunaBed reference",
+      "size_cm": [
+        188.124,
+        205.026,
+        114.638
+      ],
+      "bounds_cm": [
+        -94.062,
+        -102.513,
+        0,
+        94.062,
+        102.513,
+        114.638
+      ],
+      "triangles": 33940,
+      "materials": [
+        "M_InteriorAdditions_Oak",
+        "M_InteriorAdditions_Linen",
+        "M_InteriorAdditions_Floral",
+        "M_InteriorAdditions_Brass",
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Gingham"
+      ],
+      "collision_boxes": 2
+    },
+    {
+      "name": "SM_InteriorAdditions_Nightstand",
+      "target_size_cm": [
+        55.115,
+        58.789,
+        71
+      ],
+      "category": "Furniture",
+      "reference": "SM_Agit_F_002; separate bedside cabinet from original lamp combination",
+      "size_cm": [
+        55.115,
+        58.789,
+        71
+      ],
+      "bounds_cm": [
+        -27.5575,
+        -29.3945,
+        0,
+        27.5575,
+        29.3945,
+        71
+      ],
+      "triangles": 15488,
+      "materials": [
+        "M_InteriorAdditions_Oak",
+        "M_InteriorAdditions_Pink",
+        "M_InteriorAdditions_Brass"
+      ],
+      "collision_boxes": 1
+    },
+    {
+      "name": "SM_InteriorAdditions_BedsideLamp",
+      "target_size_cm": [
+        36,
+        36,
+        56.866
+      ],
+      "category": "Furniture",
+      "reference": "SM_Agit_F_002; separate pleated ivory bedside lamp from original 127.866cm combination",
+      "size_cm": [
+        36,
+        36,
+        56.866
+      ],
+      "bounds_cm": [
+        -18.0,
+        -18.0,
+        0,
+        18.0,
+        18.0,
+        56.866
+      ],
+      "triangles": 4712,
+      "materials": [
+        "M_InteriorAdditions_Brass",
+        "M_InteriorAdditions_Floral",
+        "M_InteriorAdditions_Linen",
+        "M_InteriorAdditions_Ivory"
+      ],
+      "collision_boxes": 1
+    },
+    {
+      "name": "SM_InteriorAdditions_BedroomCabinet",
+      "target_size_cm": [
+        66.9,
+        58.8,
+        90
+      ],
+      "category": "Furniture",
+      "reference": "Low two-door cabinet from Home_Reference.png; bedside-sized addition",
+      "size_cm": [
+        66.9,
+        58.8,
+        90
+      ],
+      "bounds_cm": [
+        -33.45,
+        -29.4,
+        0,
+        33.45,
+        29.4,
+        90
+      ],
+      "triangles": 15120,
+      "materials": [
+        "M_InteriorAdditions_Oak",
+        "M_InteriorAdditions_Pink",
+        "M_InteriorAdditions_Brass"
+      ],
+      "collision_boxes": 1
+    },
+    {
+      "name": "SM_InteriorAdditions_RoundRug",
+      "target_size_cm": [
+        185,
+        185,
+        1.5
+      ],
+      "category": "Furniture",
+      "reference": "Scalloped coral rug with cream lace border",
+      "size_cm": [
+        185,
+        185,
+        1.5
+      ],
+      "bounds_cm": [
+        -92.5,
+        -92.5,
+        0,
+        92.5,
+        92.5,
+        1.5
+      ],
+      "triangles": 24768,
+      "materials": [
+        "M_InteriorAdditions_Rug",
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Lace"
+      ],
+      "collision_boxes": 1
+    },
+    {
+      "name": "SM_InteriorAdditions_OvalRug",
+      "target_size_cm": [
+        235,
+        150,
+        1.5
+      ],
+      "category": "Furniture",
+      "reference": "Scalloped coral rug with cream lace border",
+      "size_cm": [
+        235,
+        150,
+        1.5
+      ],
+      "bounds_cm": [
+        -117.5,
+        -75.0,
+        0,
+        117.5,
+        75.0,
+        1.5
+      ],
+      "triangles": 24768,
+      "materials": [
+        "M_InteriorAdditions_Rug",
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Lace"
+      ],
+      "collision_boxes": 1
+    },
+    {
+      "name": "SM_InteriorAdditions_FloorCushion",
+      "target_size_cm": [
+        56.984,
+        61.425,
+        21.462
+      ],
+      "category": "Furniture",
+      "reference": "SM_Agit_E_005; BunkerMap component scale 1; pink gingham square floor cushion",
+      "size_cm": [
+        56.984,
+        61.425,
+        21.462
+      ],
+      "bounds_cm": [
+        -28.492,
+        -30.7125,
+        0,
+        28.492,
+        30.7125,
+        21.462
+      ],
+      "triangles": 7204,
+      "materials": [
+        "M_InteriorAdditions_Gingham",
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Linen"
+      ],
+      "collision_boxes": 1
+    }
+  ],
+  "total_triangles": 215276
+}

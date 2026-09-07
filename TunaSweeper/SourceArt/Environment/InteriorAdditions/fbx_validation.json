@@ -1,0 +1,722 @@
+{
+  "verification": "fresh Blender process FBX round trip",
+  "blender": "4.5.12 LTS",
+  "assets": [
+    {
+      "name": "SM_InteriorAdditions_Refrigerator",
+      "sha256": "07e419f8a5e063407fd14b580ae3e8c530501fe04b7f3e698c26f745372b57cc",
+      "triangles": 22960,
+      "vertices": 11608,
+      "uv_channels": 1,
+      "materials": [
+        "M_InteriorAdditions_Pink",
+        "M_InteriorAdditions_Iron",
+        "M_InteriorAdditions_Walnut",
+        "M_InteriorAdditions_Brass",
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Linen",
+        "M_InteriorAdditions_Oak"
+      ],
+      "collision_meshes": 1,
+      "bounds_cm": [
+        -51.0640025138855,
+        -47.73400127887726,
+        0.0,
+        51.0640025138855,
+        47.73400127887726,
+        173.173987865448
+      ],
+      "max_bounds_error_cm": 1.2134552008546962e-05,
+      "passed": true
+    },
+    {
+      "name": "SM_InteriorAdditions_SinkCabinet",
+      "sha256": "f9094585b3bf4a6543c53258aa9b8c238bd090a53e92c32d882ad71e1c32cf0c",
+      "triangles": 13576,
+      "vertices": 6926,
+      "uv_channels": 1,
+      "materials": [
+        "M_InteriorAdditions_Oak",
+        "M_InteriorAdditions_Walnut",
+        "M_InteriorAdditions_Steel",
+        "M_InteriorAdditions_Iron",
+        "M_InteriorAdditions_Pink",
+        "M_InteriorAdditions_Brass",
+        "M_InteriorAdditions_Floral"
+      ],
+      "collision_meshes": 1,
+      "bounds_cm": [
+        -102.12849378585815,
+        -50.324004888534546,
+        0.0,
+        102.12849378585815,
+        50.324004888534546,
+        137.65100240707397
+      ],
+      "max_bounds_error_cm": 6.2141418482042354e-06,
+      "passed": true
+    },
+    {
+      "name": "SM_InteriorAdditions_StoveOven",
+      "sha256": "5758ba21bbdcaf51f9d80d28b3cf8561737a41c53b5c7457472b9c5974858b48",
+      "triangles": 23976,
+      "vertices": 12056,
+      "uv_channels": 1,
+      "materials": [
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Iron",
+        "M_InteriorAdditions_Brass",
+        "M_InteriorAdditions_Walnut",
+        "M_InteriorAdditions_Glass",
+        "M_InteriorAdditions_Steel"
+      ],
+      "collision_meshes": 1,
+      "bounds_cm": [
+        -48.844003677368164,
+        -39.59300220012665,
+        0.0,
+        48.844003677368164,
+        39.59300220012665,
+        120.63000202178955
+      ],
+      "max_bounds_error_cm": 3.677368162868788e-06,
+      "passed": true
+    },
+    {
+      "name": "SM_InteriorAdditions_PantryShelf",
+      "sha256": "f60c76e74f400524078fe16a76b891f6ef0fc696ac06afa57eff5d9e20472176",
+      "triangles": 9588,
+      "vertices": 4830,
+      "uv_channels": 1,
+      "materials": [
+        "M_InteriorAdditions_Oak",
+        "M_InteriorAdditions_Pink",
+        "M_InteriorAdditions_Walnut",
+        "M_InteriorAdditions_Brass",
+        "M_InteriorAdditions_Sage",
+        "M_InteriorAdditions_Floral",
+        "M_InteriorAdditions_Gingham",
+        "M_InteriorAdditions_Linen"
+      ],
+      "collision_meshes": 6,
+      "bounds_cm": [
+        -60.68500876426697,
+        -39.96300399303436,
+        0.0,
+        60.68500876426697,
+        39.96300399303436,
+        89.54700231552124
+      ],
+      "max_bounds_error_cm": 8.7642669654997e-06,
+      "passed": true
+    },
+    {
+      "name": "SM_InteriorAdditions_CanisterSet",
+      "sha256": "13ff1014ce603123aeee9419a037a7570cceda60cea040f8fab5ef7cdd133a9d",
+      "triangles": 7332,
+      "vertices": 3678,
+      "uv_channels": 1,
+      "materials": [
+        "M_InteriorAdditions_Pink",
+        "M_InteriorAdditions_Walnut",
+        "M_InteriorAdditions_Brass",
+        "M_InteriorAdditions_Sage",
+        "M_InteriorAdditions_Floral"
+      ],
+      "collision_meshes": 1,
+      "bounds_cm": [
+        -28.999999165534973,
+        -11.000002175569534,
+        0.0,
+        28.999999165534973,
+        11.000002175569534,
+        28.999999165534973
+      ],
+      "max_bounds_error_cm": 2.175569534301758e-06,
+      "passed": true
+    },
+    {
+      "name": "SM_InteriorAdditions_ElectricKettle",
+      "sha256": "ddce67bb5baf9d1e44d5bdd0b3c8975d85118b48aca0da806ceeaf0e5fe670bf",
+      "triangles": 3968,
+      "vertices": 1994,
+      "uv_channels": 1,
+      "materials": [
+        "M_InteriorAdditions_Floral",
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Brass",
+        "M_InteriorAdditions_Pink",
+        "M_InteriorAdditions_Glass"
+      ],
+      "collision_meshes": 1,
+      "bounds_cm": [
+        -14.000001549720764,
+        -12.000001966953278,
+        0.0,
+        14.000001549720764,
+        12.000001966953278,
+        37.00000047683716
+      ],
+      "max_bounds_error_cm": 1.9669532775878906e-06,
+      "passed": true
+    },
+    {
+      "name": "SM_InteriorAdditions_CookingPot",
+      "sha256": "9c3c6190fc63181ee9b5ca0bce449c0975e5eb1e04e566e8697a809b10162884",
+      "triangles": 3972,
+      "vertices": 1994,
+      "uv_channels": 1,
+      "materials": [
+        "M_InteriorAdditions_Iron",
+        "M_InteriorAdditions_Steel"
+      ],
+      "collision_meshes": 1,
+      "bounds_cm": [
+        -19.5000022649765,
+        -15.000000596046448,
+        0.0,
+        19.5000022649765,
+        15.000000596046448,
+        27.000001072883606
+      ],
+      "max_bounds_error_cm": 2.2649765014648438e-06,
+      "passed": true
+    },
+    {
+      "name": "SM_InteriorAdditions_FoldedNapkin",
+      "sha256": "599c9ee8fd210158217ed7611f137060c9581e918bfcefd54272427713689419",
+      "triangles": 580,
+      "vertices": 296,
+      "uv_channels": 1,
+      "materials": [
+        "M_InteriorAdditions_Pink",
+        "M_InteriorAdditions_Gingham",
+        "M_InteriorAdditions_Ivory"
+      ],
+      "collision_meshes": 1,
+      "bounds_cm": [
+        -16.00000113248825,
+        -13.000001013278961,
+        0.0,
+        16.00000113248825,
+        13.000001013278961,
+        3.0000001192092896
+      ],
+      "max_bounds_error_cm": 1.1324882507324219e-06,
+      "passed": true
+    },
+    {
+      "name": "SM_InteriorAdditions_WindowCurtains",
+      "sha256": "301edb6b4050a01ecf3d60cf42b99b576c6ffe24add9de1048d5f48de6020f02",
+      "triangles": 4840,
+      "vertices": 2444,
+      "uv_channels": 1,
+      "materials": [
+        "M_InteriorAdditions_Turquoise",
+        "M_InteriorAdditions_Oak",
+        "M_InteriorAdditions_Brass",
+        "M_InteriorAdditions_Pink",
+        "M_InteriorAdditions_Linen"
+      ],
+      "collision_meshes": 1,
+      "bounds_cm": [
+        -68.99999976158142,
+        -11.500006169080734,
+        0.0,
+        68.99999976158142,
+        11.500006169080734,
+        98.00000190734863
+      ],
+      "max_bounds_error_cm": 6.16908073425293e-06,
+      "passed": true
+    },
+    {
+      "name": "SM_InteriorAdditions_MilkCan",
+      "sha256": "830f1d311862db438e73da3b72a233d5ab88788b5e6e395cd0275c68d14beee8",
+      "triangles": 4864,
+      "vertices": 2440,
+      "uv_channels": 1,
+      "materials": [
+        "M_InteriorAdditions_Steel"
+      ],
+      "collision_meshes": 1,
+      "bounds_cm": [
+        -18.131501972675323,
+        -14.061002433300018,
+        0.0,
+        18.131501972675323,
+        14.061002433300018,
+        59.20500159263611
+      ],
+      "max_bounds_error_cm": 2.4333000183673903e-06,
+      "passed": true
+    },
+    {
+      "name": "SM_InteriorAdditions_WashingMachine",
+      "sha256": "fc8fc6b21a284fdb50d24ce3c48e984915bc9711456d62cba7d316f119368b33",
+      "triangles": 11040,
+      "vertices": 5592,
+      "uv_channels": 1,
+      "materials": [
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Pink",
+        "M_InteriorAdditions_Iron",
+        "M_InteriorAdditions_Brass",
+        "M_InteriorAdditions_Glass",
+        "M_InteriorAdditions_Steel"
+      ],
+      "collision_meshes": 1,
+      "bounds_cm": [
+        -45.36350071430206,
+        -39.75500166416168,
+        0.0,
+        45.36350071430206,
+        39.75500166416168,
+        110.52199602127075
+      ],
+      "max_bounds_error_cm": 3.97872925361753e-06,
+      "passed": true
+    },
+    {
+      "name": "SM_InteriorAdditions_LaundryShelf",
+      "sha256": "f854af9c0a35f11301b99d3d2f2814a110361b68248772f86a79a25b7d02ebeb",
+      "triangles": 9468,
+      "vertices": 4800,
+      "uv_channels": 1,
+      "materials": [
+        "M_InteriorAdditions_Oak",
+        "M_InteriorAdditions_Walnut",
+        "M_InteriorAdditions_Gingham",
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Linen",
+        "M_InteriorAdditions_Pink",
+        "M_InteriorAdditions_Floral",
+        "M_InteriorAdditions_Sage"
+      ],
+      "collision_meshes": 4,
+      "bounds_cm": [
+        -70.00001072883606,
+        -46.000006794929504,
+        0.0,
+        70.00001072883606,
+        46.000006794929504,
+        184.0000033378601
+      ],
+      "max_bounds_error_cm": 1.0728836059570312e-05,
+      "passed": true
+    },
+    {
+      "name": "SM_InteriorAdditions_LaundryHamper",
+      "sha256": "27c45f5a1f52f26a7576c8fc56287dd2589e87c9e184aaf4a7ca2e4a078f4cdc",
+      "triangles": 14640,
+      "vertices": 7376,
+      "uv_channels": 1,
+      "materials": [
+        "M_InteriorAdditions_Oak",
+        "M_InteriorAdditions_Walnut",
+        "M_InteriorAdditions_Gingham",
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Linen"
+      ],
+      "collision_meshes": 1,
+      "bounds_cm": [
+        -24.000002443790436,
+        -23.000001907348633,
+        0.0,
+        24.000002443790436,
+        23.000001907348633,
+        62.99999952316284
+      ],
+      "max_bounds_error_cm": 2.4437904357910156e-06,
+      "passed": true
+    },
+    {
+      "name": "SM_InteriorAdditions_Toilet",
+      "sha256": "1904637571ac3728cf0d953006591153934d28c5b82fd5e7a10c0f043f1571d0",
+      "triangles": 4960,
+      "vertices": 2496,
+      "uv_channels": 1,
+      "materials": [
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Turquoise",
+        "M_InteriorAdditions_Pink",
+        "M_InteriorAdditions_Brass"
+      ],
+      "collision_meshes": 2,
+      "bounds_cm": [
+        -26.31300389766693,
+        -35.607001185417175,
+        0.0,
+        26.31300389766693,
+        35.607001185417175,
+        77.24899649620056
+      ],
+      "max_bounds_error_cm": 3.897666932317634e-06,
+      "passed": true
+    },
+    {
+      "name": "SM_InteriorAdditions_Bathtub",
+      "sha256": "354a31733e4eaf617e7724b0f21928eff69254953a48fa7e7a413d6cb921681a",
+      "triangles": 10956,
+      "vertices": 5516,
+      "uv_channels": 1,
+      "materials": [
+        "M_InteriorAdditions_Pink",
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Turquoise",
+        "M_InteriorAdditions_Brass"
+      ],
+      "collision_meshes": 1,
+      "bounds_cm": [
+        -77.86301374435425,
+        -113.14001083374023,
+        0.0,
+        77.86301374435425,
+        113.14001083374023,
+        116.87600612640381
+      ],
+      "max_bounds_error_cm": 1.3744354248501622e-05,
+      "passed": true
+    },
+    {
+      "name": "SM_InteriorAdditions_Washbasin",
+      "sha256": "e1c96fcf719dcfe74711264cf537f4cc99892f2bc03865d467fe0ef0e9accd67",
+      "triangles": 6832,
+      "vertices": 3452,
+      "uv_channels": 1,
+      "materials": [
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Steel",
+        "M_InteriorAdditions_Iron",
+        "M_InteriorAdditions_Pink",
+        "M_InteriorAdditions_Brass"
+      ],
+      "collision_meshes": 1,
+      "bounds_cm": [
+        -26.353001594543457,
+        -28.063002228736877,
+        0.0,
+        26.353001594543457,
+        28.063002228736877,
+        27.559998631477356
+      ],
+      "max_bounds_error_cm": 2.2287368786066963e-06,
+      "passed": true
+    },
+    {
+      "name": "SM_InteriorAdditions_TowelStack",
+      "sha256": "48ed4e8adefa7c4eb57e7f7af1d94a6eff7b23e58722365f8ed49ba8f77efec4",
+      "triangles": 2012,
+      "vertices": 1024,
+      "uv_channels": 1,
+      "materials": [
+        "M_InteriorAdditions_Linen",
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Gingham",
+        "M_InteriorAdditions_Lace"
+      ],
+      "collision_meshes": 1,
+      "bounds_cm": [
+        -21.99999988079071,
+        -17.000001668930054,
+        0.0,
+        21.99999988079071,
+        17.000001668930054,
+        25.0
+      ],
+      "max_bounds_error_cm": 1.6689300537109375e-06,
+      "passed": true
+    },
+    {
+      "name": "SM_InteriorAdditions_DetergentSet",
+      "sha256": "0da223a23c06a0be90f0deb056554d3c23ddaae168fa3411503b938460165c79",
+      "triangles": 4924,
+      "vertices": 2480,
+      "uv_channels": 1,
+      "materials": [
+        "M_InteriorAdditions_Oak",
+        "M_InteriorAdditions_Walnut",
+        "M_InteriorAdditions_Pink",
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Floral",
+        "M_InteriorAdditions_Sage"
+      ],
+      "collision_meshes": 1,
+      "bounds_cm": [
+        -26.499998569488525,
+        -15.500003099441528,
+        0.0,
+        26.499998569488525,
+        15.500003099441528,
+        38.999998569488525
+      ],
+      "max_bounds_error_cm": 3.0994415283203125e-06,
+      "passed": true
+    },
+    {
+      "name": "SM_InteriorAdditions_DiningTable",
+      "sha256": "3d08d9a311bbaf243c0979076aab4511ccf1eabf469c5baf3e63754aab522a8d",
+      "triangles": 11480,
+      "vertices": 5811,
+      "uv_channels": 1,
+      "materials": [
+        "M_InteriorAdditions_Pink",
+        "M_InteriorAdditions_Oak",
+        "M_InteriorAdditions_Gingham"
+      ],
+      "collision_meshes": 1,
+      "bounds_cm": [
+        -74.30250644683838,
+        -65.73850512504578,
+        0.0,
+        74.30250644683838,
+        65.73850512504578,
+        63.221001625061035
+      ],
+      "max_bounds_error_cm": 6.446838384022158e-06,
+      "passed": true
+    },
+    {
+      "name": "SM_InteriorAdditions_Stool",
+      "sha256": "294edec4d33ba1c1f33a57165867d053674836de2ef000f958be1e4451aa27df",
+      "triangles": 15932,
+      "vertices": 8028,
+      "uv_channels": 1,
+      "materials": [
+        "M_InteriorAdditions_Oak",
+        "M_InteriorAdditions_Walnut",
+        "M_InteriorAdditions_Pink",
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Brass"
+      ],
+      "collision_meshes": 1,
+      "bounds_cm": [
+        -30.67200481891632,
+        -27.855002880096436,
+        0.0,
+        30.67200481891632,
+        27.855002880096436,
+        65.72499871253967
+      ],
+      "max_bounds_error_cm": 4.818916320203925e-06,
+      "passed": true
+    },
+    {
+      "name": "SM_InteriorAdditions_Sofa",
+      "sha256": "dc28a4d3d74665713d4e9b5dada5b9babdb8231a53e314c6776325e19292a253",
+      "triangles": 50044,
+      "vertices": 25322,
+      "uv_channels": 1,
+      "materials": [
+        "M_InteriorAdditions_Walnut",
+        "M_InteriorAdditions_Gingham",
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Brass",
+        "M_InteriorAdditions_Pink",
+        "M_InteriorAdditions_Floral"
+      ],
+      "collision_meshes": 1,
+      "bounds_cm": [
+        -128.90900373458862,
+        -57.926011085510254,
+        0.0,
+        128.90900373458862,
+        57.926011085510254,
+        127.14099884033203
+      ],
+      "max_bounds_error_cm": 1.1085510251973574e-05,
+      "passed": true
+    },
+    {
+      "name": "SM_InteriorAdditions_CoffeeTable",
+      "sha256": "0207720ec72a5b4d971185b6834a5dc7b6c885a2e375c36ad90a8da90594540a",
+      "triangles": 11820,
+      "vertices": 5968,
+      "uv_channels": 1,
+      "materials": [
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Oak",
+        "M_InteriorAdditions_Brass",
+        "M_InteriorAdditions_Lace"
+      ],
+      "collision_meshes": 1,
+      "bounds_cm": [
+        -82.44950771331787,
+        -52.44351029396057,
+        0.0,
+        82.44950771331787,
+        52.44351029396057,
+        44.87700164318085
+      ],
+      "max_bounds_error_cm": 1.0293960571061689e-05,
+      "passed": true
+    },
+    {
+      "name": "SM_InteriorAdditions_Bed",
+      "sha256": "6140437d44f56903d67829c94879cc5a10f8d2a347e5aee2d53670494583a758",
+      "triangles": 33940,
+      "vertices": 17213,
+      "uv_channels": 1,
+      "materials": [
+        "M_InteriorAdditions_Oak",
+        "M_InteriorAdditions_Linen",
+        "M_InteriorAdditions_Floral",
+        "M_InteriorAdditions_Brass",
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Gingham"
+      ],
+      "collision_meshes": 2,
+      "bounds_cm": [
+        -94.06201243400574,
+        -102.51301527023315,
+        0.0,
+        94.06201243400574,
+        102.51301527023315,
+        114.6380066871643
+      ],
+      "max_bounds_error_cm": 1.527023314906728e-05,
+      "passed": true
+    },
+    {
+      "name": "SM_InteriorAdditions_Nightstand",
+      "sha256": "35c67ae0f288cf454a8d2cd51929326b6f24ba940a406a6c2b690624aa64862e",
+      "triangles": 15488,
+      "vertices": 7816,
+      "uv_channels": 1,
+      "materials": [
+        "M_InteriorAdditions_Oak",
+        "M_InteriorAdditions_Pink",
+        "M_InteriorAdditions_Brass"
+      ],
+      "collision_meshes": 1,
+      "bounds_cm": [
+        -27.557504177093506,
+        -29.39450442790985,
+        0.0,
+        27.557504177093506,
+        29.39450442790985,
+        70.99999785423279
+      ],
+      "max_bounds_error_cm": 4.427909850335254e-06,
+      "passed": true
+    },
+    {
+      "name": "SM_InteriorAdditions_BedsideLamp",
+      "sha256": "534c611589244fb39cc37bc4b2c8ba9d8feff97fede9bd112786702c20409480",
+      "triangles": 4712,
+      "vertices": 2462,
+      "uv_channels": 1,
+      "materials": [
+        "M_InteriorAdditions_Brass",
+        "M_InteriorAdditions_Floral",
+        "M_InteriorAdditions_Linen",
+        "M_InteriorAdditions_Ivory"
+      ],
+      "collision_meshes": 1,
+      "bounds_cm": [
+        -18.000000715255737,
+        -18.000000715255737,
+        0.0,
+        18.000000715255737,
+        18.000000715255737,
+        56.86600208282471
+      ],
+      "max_bounds_error_cm": 2.0828247073723105e-06,
+      "passed": true
+    },
+    {
+      "name": "SM_InteriorAdditions_BedroomCabinet",
+      "sha256": "e7c4da2e8cf0199f460d85df02505c344ea6af4a8ee27748b82113b14efd2020",
+      "triangles": 15120,
+      "vertices": 7644,
+      "uv_channels": 1,
+      "materials": [
+        "M_InteriorAdditions_Oak",
+        "M_InteriorAdditions_Pink",
+        "M_InteriorAdditions_Brass"
+      ],
+      "collision_meshes": 1,
+      "bounds_cm": [
+        -33.45000147819519,
+        -29.40000295639038,
+        0.0,
+        33.45000147819519,
+        29.40000295639038,
+        89.99999761581421
+      ],
+      "max_bounds_error_cm": 2.9563903822804605e-06,
+      "passed": true
+    },
+    {
+      "name": "SM_InteriorAdditions_RoundRug",
+      "sha256": "1d719e64209f1477c230dca0c4cb97aa5cac50ee46ffb01b7752ff32e201cdbb",
+      "triangles": 24768,
+      "vertices": 13249,
+      "uv_channels": 1,
+      "materials": [
+        "M_InteriorAdditions_Rug",
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Lace"
+      ],
+      "collision_meshes": 1,
+      "bounds_cm": [
+        -92.50000715255737,
+        -92.50000715255737,
+        0.0,
+        92.50000715255737,
+        92.50000715255737,
+        1.4999999664723873
+      ],
+      "max_bounds_error_cm": 7.152557373046875e-06,
+      "passed": true
+    },
+    {
+      "name": "SM_InteriorAdditions_OvalRug",
+      "sha256": "4b338f19596eda909207b154a9d3e5cb7a1519fa19318bde418400ce7c33721e",
+      "triangles": 24768,
+      "vertices": 13249,
+      "uv_channels": 1,
+      "materials": [
+        "M_InteriorAdditions_Rug",
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Lace"
+      ],
+      "collision_meshes": 1,
+      "bounds_cm": [
+        -117.50001907348633,
+        -75.00001192092896,
+        0.0,
+        117.50001907348633,
+        75.00001192092896,
+        1.4999999664723873
+      ],
+      "max_bounds_error_cm": 1.9073486328125e-05,
+      "passed": true
+    },
+    {
+      "name": "SM_InteriorAdditions_FloorCushion",
+      "sha256": "a77ae8866c39acb33505e0d24b8446fbdc73d01939f4d1c33074758724415b32",
+      "triangles": 7204,
+      "vertices": 3654,
+      "uv_channels": 1,
+      "materials": [
+        "M_InteriorAdditions_Gingham",
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Linen"
+      ],
+      "collision_meshes": 1,
+      "bounds_cm": [
+        -28.492000699043274,
+        -30.71250319480896,
+        0.0,
+        28.492000699043274,
+        30.71250319480896,
+        21.46199941635132
+      ],
+      "max_bounds_error_cm": 3.194808961382023e-06,
+      "passed": true
+    }
+  ],
+  "passed": true,
+  "total_triangles": 375764
+}

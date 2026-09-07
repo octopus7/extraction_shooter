@@ -1,0 +1,1582 @@
+[
+  {
+    "actor": "SM_Agit_Bath",
+    "component": "StaticMeshComponent0",
+    "mesh": "/Game/Environment/Bunker/Agit/SM_Agit_Bath.SM_Agit_Bath",
+    "world_scale": [
+      1.3449262955691665,
+      1.3449262955691665,
+      1.3449262955691665
+    ],
+    "relative_scale": [
+      1.3449262955691665,
+      1.3449262955691665,
+      1.3449262955691665
+    ],
+    "world_location_cm": [
+      356.3397036713427,
+      635.5447342316331,
+      41.526695176056904
+    ]
+  },
+  {
+    "actor": "SM_Agit_Toilet",
+    "component": "StaticMeshComponent0",
+    "mesh": "/Game/Environment/Bunker/Agit/SM_Agit_Toilet.SM_Agit_Toilet",
+    "world_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "relative_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "world_location_cm": [
+      707.9582170980987,
+      394.58013809033366,
+      37.42797807786849
+    ]
+  },
+  {
+    "actor": "SM_Agit_Washstand",
+    "component": "StaticMeshComponent0",
+    "mesh": "/Game/Environment/Bunker/Agit/SM_Agit_Washstand.SM_Agit_Washstand",
+    "world_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "relative_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "world_location_cm": [
+      595.6293954844825,
+      610.2388253733076,
+      96.89078762611902
+    ]
+  },
+  {
+    "actor": "SM_Agit_WashingMachineA",
+    "component": "StaticMeshComponent0",
+    "mesh": "/Game/Environment/Bunker/Agit/SM_Agit_WashingMachineA.SM_Agit_WashingMachineA",
+    "world_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "relative_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "world_location_cm": [
+      763.7430328173059,
+      56.415056845927424,
+      54.63863417748661
+    ]
+  },
+  {
+    "actor": "SM_Agit_Workroom_000",
+    "component": "StaticMeshComponent0",
+    "mesh": "/Game/Environment/Bunker/Agit/SM_Agit_Workroom_000.SM_Agit_Workroom_000",
+    "world_scale": [
+      2.198970934841781,
+      2.198970934841781,
+      2.198970934841781
+    ],
+    "relative_scale": [
+      2.198970934841781,
+      2.198970934841781,
+      2.198970934841781
+    ],
+    "world_location_cm": [
+      -280.08841247416075,
+      -644.3638996685877,
+      136.93948178170461
+    ]
+  },
+  {
+    "actor": "SM_Agit_Workroom_001",
+    "component": "StaticMeshComponent0",
+    "mesh": "/Game/Environment/Bunker/Agit/SM_Agit_Workroom_001.SM_Agit_Workroom_001",
+    "world_scale": [
+      2.8696333977859485,
+      2.8696333977859485,
+      2.8696333977859485
+    ],
+    "relative_scale": [
+      2.8696333977859485,
+      2.8696333977859485,
+      2.8696333977859485
+    ],
+    "world_location_cm": [
+      -25.817267046581662,
+      -712.7655378358095,
+      130.9337700836987
+    ]
+  },
+  {
+    "actor": "SM_Agit_Workroom_002",
+    "component": "StaticMeshComponent0",
+    "mesh": "/Game/Environment/Bunker/Agit/SM_Agit_Workroom_002.SM_Agit_Workroom_002",
+    "world_scale": [
+      1.668978686677292,
+      1.668978686677292,
+      1.668978686677292
+    ],
+    "relative_scale": [
+      1.668978686677292,
+      1.668978686677292,
+      1.668978686677292
+    ],
+    "world_location_cm": [
+      -47.18039659103877,
+      -697.7469840894013,
+      96.25360886921285
+    ]
+  },
+  {
+    "actor": "SM_Agit_Workroom_003",
+    "component": "StaticMeshComponent0",
+    "mesh": "/Game/Environment/Bunker/Agit/SM_Agit_Workroom_003.SM_Agit_Workroom_003",
+    "world_scale": [
+      2.369212932186201,
+      2.369212932186201,
+      2.369212932186201
+    ],
+    "relative_scale": [
+      2.369212932186201,
+      2.369212932186201,
+      2.369212932186201
+    ],
+    "world_location_cm": [
+      -27.19152091054336,
+      -705.0362506628404,
+      166.09640867955014
+    ]
+  },
+  {
+    "actor": "SM_Agit_Workroom_004",
+    "component": "StaticMeshComponent0",
+    "mesh": "/Game/Environment/Bunker/Agit/SM_Agit_Workroom_004.SM_Agit_Workroom_004",
+    "world_scale": [
+      1.668978686677292,
+      1.668978686677292,
+      1.668978686677292
+    ],
+    "relative_scale": [
+      1.668978686677292,
+      1.668978686677292,
+      1.668978686677292
+    ],
+    "world_location_cm": [
+      -37.64899894091114,
+      -702.9982833785016,
+      232.10839150883203
+    ]
+  },
+  {
+    "actor": "SM_Agit_Workroom_005",
+    "component": "StaticMeshComponent0",
+    "mesh": "/Game/Environment/Bunker/Agit/SM_Agit_Workroom_005.SM_Agit_Workroom_005",
+    "world_scale": [
+      1.7793378503993145,
+      1.7793378503993145,
+      1.7793378503993145
+    ],
+    "relative_scale": [
+      1.7793378503993145,
+      1.7793378503993145,
+      1.7793378503993145
+    ],
+    "world_location_cm": [
+      -223.87546251225683,
+      -684.3774071471437,
+      148.5813599602493
+    ]
+  },
+  {
+    "actor": "SM_Agit_Workroom_006",
+    "component": "StaticMeshComponent0",
+    "mesh": "/Game/Environment/Bunker/Agit/SM_Agit_Workroom_006.SM_Agit_Workroom_006",
+    "world_scale": [
+      3.0586761860176943,
+      3.0586761860176943,
+      3.0586761860176943
+    ],
+    "relative_scale": [
+      3.0586761860176943,
+      3.0586761860176943,
+      3.0586761860176943
+    ],
+    "world_location_cm": [
+      -223.60607676144866,
+      -655.0695730177745,
+      93.77597668370147
+    ]
+  },
+  {
+    "actor": "SM_Agit_Workroom_007",
+    "component": "StaticMeshComponent0",
+    "mesh": "/Game/Environment/Bunker/Agit/SM_Agit_Workroom_007.SM_Agit_Workroom_007",
+    "world_scale": [
+      1.7811489277519286,
+      1.7811489277519286,
+      1.7811489277519286
+    ],
+    "relative_scale": [
+      1.7811489277519286,
+      1.7811489277519286,
+      1.7811489277519286
+    ],
+    "world_location_cm": [
+      90.492807046135,
+      -590.580844046369,
+      158.21124441871257
+    ]
+  },
+  {
+    "actor": "SM_Agit_Workroom_009",
+    "component": "StaticMeshComponent0",
+    "mesh": "/Game/Environment/Bunker/Agit/SM_Agit_Workroom_009.SM_Agit_Workroom_009",
+    "world_scale": [
+      2.1597835132852197,
+      2.1597835132852197,
+      2.1597835132852197
+    ],
+    "relative_scale": [
+      2.1597835132852197,
+      2.1597835132852197,
+      2.1597835132852197
+    ],
+    "world_location_cm": [
+      -196.88527636528767,
+      -581.442870323904,
+      133.97023749270733
+    ]
+  },
+  {
+    "actor": "SM_Agit_Workroom_010",
+    "component": "StaticMeshComponent0",
+    "mesh": "/Game/Environment/Bunker/Agit/SM_Agit_Workroom_010.SM_Agit_Workroom_010",
+    "world_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "relative_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "world_location_cm": [
+      -273.74526662372307,
+      -739.965839034346,
+      23.85719787744472
+    ]
+  },
+  {
+    "actor": "SM_Agit_Workroom_011",
+    "component": "StaticMeshComponent0",
+    "mesh": "/Game/Environment/Bunker/Agit/SM_Agit_Workroom_011.SM_Agit_Workroom_011",
+    "world_scale": [
+      2.021682704798881,
+      2.021682704798881,
+      2.021682704798881
+    ],
+    "relative_scale": [
+      2.021682704798881,
+      2.021682704798881,
+      2.021682704798881
+    ],
+    "world_location_cm": [
+      -264.58437025328465,
+      -729.6162482979831,
+      193.2911348247103
+    ]
+  },
+  {
+    "actor": "SM_Agit_Workroom_012",
+    "component": "StaticMeshComponent0",
+    "mesh": "/Game/Environment/Bunker/Agit/SM_Agit_Workroom_012.SM_Agit_Workroom_012",
+    "world_scale": [
+      1.835114498157055,
+      1.835114498157055,
+      1.835114498157055
+    ],
+    "relative_scale": [
+      1.835114498157055,
+      1.835114498157055,
+      1.835114498157055
+    ],
+    "world_location_cm": [
+      -133.1877675551504,
+      -617.4542047969625,
+      166.99326128807604
+    ]
+  },
+  {
+    "actor": "SM_Agit_Workroom_013",
+    "component": "StaticMeshComponent0",
+    "mesh": "/Game/Environment/Bunker/Agit/SM_Agit_Workroom_013.SM_Agit_Workroom_013",
+    "world_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "relative_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "world_location_cm": [
+      -254.9636466369422,
+      -685.9014284048751,
+      102.32449675169323
+    ]
+  },
+  {
+    "actor": "SM_Agit_Workroom_014",
+    "component": "StaticMeshComponent0",
+    "mesh": "/Game/Environment/Bunker/Agit/SM_Agit_Workroom_014.SM_Agit_Workroom_014",
+    "world_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "relative_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "world_location_cm": [
+      -165.54890106275593,
+      -668.7334025992033,
+      23.857197877444605
+    ]
+  },
+  {
+    "actor": "SM_Agit_D_000",
+    "component": "StaticMeshComponent0",
+    "mesh": "/Game/Environment/Bunker/Agit/SM_Agit_D_000.SM_Agit_D_000",
+    "world_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "relative_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "world_location_cm": [
+      715.4212608716412,
+      40.875706889513054,
+      64.07243738426382
+    ]
+  },
+  {
+    "actor": "SM_Agit_D_002",
+    "component": "StaticMeshComponent0",
+    "mesh": "/Game/Environment/Bunker/Agit/SM_Agit_D_002.SM_Agit_D_002",
+    "world_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "relative_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "world_location_cm": [
+      698.2063169701728,
+      191.93913529112393,
+      10.002136090194142
+    ]
+  },
+  {
+    "actor": "SM_Agit_D_004",
+    "component": "StaticMeshComponent0",
+    "mesh": "/Game/Environment/Bunker/Agit/SM_Agit_D_004.SM_Agit_D_004",
+    "world_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "relative_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "world_location_cm": [
+      725.453161812573,
+      161.6766431453418,
+      50.946660119363855
+    ]
+  },
+  {
+    "actor": "BP_SlidingDoor",
+    "component": "DoorFrameMesh",
+    "mesh": "/Game/Environment/Bunker/Agit/Door/SM_SlidingDoorFrame.SM_SlidingDoorFrame",
+    "world_scale": [
+      1.002770652092015,
+      0.9772782119817088,
+      0.9986713409475743
+    ],
+    "relative_scale": [
+      1.002770652092015,
+      0.9772782119817088,
+      0.9986713409475743
+    ],
+    "world_location_cm": [
+      -71.31009176748131,
+      -307.5542169751618,
+      -8.863882684818343e-05
+    ]
+  },
+  {
+    "actor": "BP_SlidingDoor",
+    "component": "LeftDoorMesh",
+    "mesh": "/Game/Environment/Bunker/Agit/Door/SM_SlidingDoor_Left.SM_SlidingDoor_Left",
+    "world_scale": [
+      1.002770652092015,
+      0.9772782119817088,
+      0.9986713779369667
+    ],
+    "relative_scale": [
+      1.002770652092015,
+      0.9772782119817088,
+      0.9986713779369667
+    ],
+    "world_location_cm": [
+      -103.65316728673024,
+      -301.00242554897295,
+      -9.220489670111584e-05
+    ]
+  },
+  {
+    "actor": "BP_SlidingDoor",
+    "component": "RightDoorMesh",
+    "mesh": "/Game/Environment/Bunker/Agit/Door/SM_SlidingDoor_Right.SM_SlidingDoor_Right",
+    "world_scale": [
+      1.002770652092015,
+      1.0376322654351662,
+      0.9986713409475743
+    ],
+    "relative_scale": [
+      1.002770652092015,
+      1.0376322654351662,
+      0.9986713409475743
+    ],
+    "world_location_cm": [
+      -38.96704340384006,
+      -314.10606538710135,
+      -8.498236903088084e-05
+    ]
+  },
+  {
+    "actor": "BP_SlidingDoor2",
+    "component": "DoorFrameMesh",
+    "mesh": "/Game/Environment/Bunker/Agit/Door/SM_SlidingDoorFrame.SM_SlidingDoorFrame",
+    "world_scale": [
+      1.002770652092015,
+      0.9772782119817088,
+      0.9986713409475743
+    ],
+    "relative_scale": [
+      1.002770652092015,
+      0.9772782119817088,
+      0.9986713409475743
+    ],
+    "world_location_cm": [
+      258.4104493502246,
+      -191.68378610511817,
+      -8.837894828684618e-05
+    ]
+  },
+  {
+    "actor": "BP_SlidingDoor2",
+    "component": "LeftDoorMesh",
+    "mesh": "/Game/Environment/Bunker/Agit/Door/SM_SlidingDoor_Left.SM_SlidingDoor_Left",
+    "world_scale": [
+      1.002770652092015,
+      0.9772782119817088,
+      0.9986713779369667
+    ],
+    "relative_scale": [
+      1.002770652092015,
+      0.9772782119817088,
+      0.9986713779369667
+    ],
+    "world_location_cm": [
+      238.51415496579486,
+      -218.01129974967316,
+      -9.19450181397786e-05
+    ]
+  },
+  {
+    "actor": "BP_SlidingDoor2",
+    "component": "RightDoorMesh",
+    "mesh": "/Game/Environment/Bunker/Agit/Door/SM_SlidingDoor_Right.SM_SlidingDoor_Right",
+    "world_scale": [
+      1.002770652092015,
+      1.0376322654351662,
+      0.9986713409475743
+    ],
+    "relative_scale": [
+      1.002770652092015,
+      1.0376322654351662,
+      0.9986713409475743
+    ],
+    "world_location_cm": [
+      278.306783369027,
+      -165.3563215922161,
+      -8.47224904695436e-05
+    ]
+  },
+  {
+    "actor": "BP_SlidingDoor3",
+    "component": "DoorFrameMesh",
+    "mesh": "/Game/Environment/Bunker/Agit/Door/SM_SlidingDoorFrame.SM_SlidingDoorFrame",
+    "world_scale": [
+      1.002770652092015,
+      0.9772782119817088,
+      0.9986713409475743
+    ],
+    "relative_scale": [
+      1.002770652092015,
+      0.9772782119817088,
+      0.9986713409475743
+    ],
+    "world_location_cm": [
+      354.4385776448189,
+      132.75796119569495,
+      -8.837894828684618e-05
+    ]
+  },
+  {
+    "actor": "BP_SlidingDoor3",
+    "component": "LeftDoorMesh",
+    "mesh": "/Game/Environment/Bunker/Agit/Door/SM_SlidingDoor_Left.SM_SlidingDoor_Left",
+    "world_scale": [
+      1.002770652092015,
+      0.9772782119817088,
+      0.9986713779369667
+    ],
+    "relative_scale": [
+      1.002770652092015,
+      0.9772782119817088,
+      0.9986713779369667
+    ],
+    "world_location_cm": [
+      365.7252730167494,
+      101.74810772107554,
+      -9.19450181397786e-05
+    ]
+  },
+  {
+    "actor": "BP_SlidingDoor3",
+    "component": "RightDoorMesh",
+    "mesh": "/Game/Environment/Bunker/Agit/Door/SM_SlidingDoor_Right.SM_SlidingDoor_Right",
+    "world_scale": [
+      1.002770652092015,
+      1.0376322654351662,
+      0.9986713409475743
+    ],
+    "relative_scale": [
+      1.002770652092015,
+      1.0376322654351662,
+      0.9986713409475743
+    ],
+    "world_location_cm": [
+      343.1519450555657,
+      163.76782123828593,
+      -8.47224904695436e-05
+    ]
+  },
+  {
+    "actor": "BP_SlidingDoor4",
+    "component": "DoorFrameMesh",
+    "mesh": "/Game/Environment/Bunker/Agit/Door/SM_SlidingDoorFrame.SM_SlidingDoorFrame",
+    "world_scale": [
+      1.002770652092015,
+      0.9772782119817088,
+      0.9986713409475743
+    ],
+    "relative_scale": [
+      1.002770652092015,
+      0.9772782119817088,
+      0.9986713409475743
+    ],
+    "world_location_cm": [
+      50.48113676751737,
+      573.5046155143547,
+      -8.837894555836208e-05
+    ]
+  },
+  {
+    "actor": "BP_SlidingDoor4",
+    "component": "LeftDoorMesh",
+    "mesh": "/Game/Environment/Bunker/Agit/Door/SM_SlidingDoor_Left.SM_SlidingDoor_Left",
+    "world_scale": [
+      1.002770652092015,
+      0.9772782119817088,
+      0.9986713779369667
+    ],
+    "relative_scale": [
+      1.002770652092015,
+      0.9772782119817088,
+      0.9986713779369667
+    ],
+    "world_location_cm": [
+      52.20825350722369,
+      540.5498347882817,
+      -9.194501541129449e-05
+    ]
+  },
+  {
+    "actor": "BP_SlidingDoor4",
+    "component": "RightDoorMesh",
+    "mesh": "/Game/Environment/Bunker/Agit/Door/SM_SlidingDoor_Right.SM_SlidingDoor_Right",
+    "world_scale": [
+      1.002770652092015,
+      1.0376322654351662,
+      0.9986713409475743
+    ],
+    "relative_scale": [
+      1.002770652092015,
+      1.0376322654351662,
+      0.9986713409475743
+    ],
+    "world_location_cm": [
+      48.754081987472944,
+      606.4593841655317,
+      -8.472248774105949e-05
+    ]
+  },
+  {
+    "actor": "BP_SlidingDoor5",
+    "component": "DoorFrameMesh",
+    "mesh": "/Game/Environment/Bunker/Agit/Door/SM_SlidingDoorFrame.SM_SlidingDoorFrame",
+    "world_scale": [
+      1.002770652092015,
+      0.9772782119817088,
+      0.9986713409475743
+    ],
+    "relative_scale": [
+      1.002770652092015,
+      0.9772782119817088,
+      0.9986713409475743
+    ],
+    "world_location_cm": [
+      439.8478225653343,
+      344.10852520602555,
+      -8.837894760472516e-05
+    ]
+  },
+  {
+    "actor": "BP_SlidingDoor5",
+    "component": "LeftDoorMesh",
+    "mesh": "/Game/Environment/Bunker/Agit/Door/SM_SlidingDoor_Left.SM_SlidingDoor_Left",
+    "world_scale": [
+      1.002770652092015,
+      0.9772782119817088,
+      0.9986713779369667
+    ],
+    "relative_scale": [
+      1.002770652092015,
+      0.9772782119817088,
+      0.9986713779369667
+    ],
+    "world_location_cm": [
+      412.8158159432857,
+      325.1804739877506,
+      -9.194501745765757e-05
+    ]
+  },
+  {
+    "actor": "BP_SlidingDoor5",
+    "component": "RightDoorMesh",
+    "mesh": "/Game/Environment/Bunker/Agit/Door/SM_SlidingDoor_Right.SM_SlidingDoor_Right",
+    "world_scale": [
+      1.002770652092015,
+      1.0376322654351662,
+      0.9986713409475743
+    ],
+    "relative_scale": [
+      1.002770652092015,
+      1.0376322654351662,
+      0.9986713409475743
+    ],
+    "world_location_cm": [
+      466.87985178090884,
+      363.0365174808073,
+      -8.472248978742257e-05
+    ]
+  },
+  {
+    "actor": "BP_SlidingDoor6",
+    "component": "DoorFrameMesh",
+    "mesh": "/Game/Environment/Bunker/Agit/Door/SM_SlidingDoorFrame.SM_SlidingDoorFrame",
+    "world_scale": [
+      1.002770652092015,
+      0.9772782119817088,
+      0.9986713409475743
+    ],
+    "relative_scale": [
+      1.002770652092015,
+      0.9772782119817088,
+      0.9986713409475743
+    ],
+    "world_location_cm": [
+      590.4512229998091,
+      299.9795163284616,
+      -8.837894828165115e-05
+    ]
+  },
+  {
+    "actor": "BP_SlidingDoor6",
+    "component": "LeftDoorMesh",
+    "mesh": "/Game/Environment/Bunker/Agit/Door/SM_SlidingDoor_Left.SM_SlidingDoor_Left",
+    "world_scale": [
+      1.002770652092015,
+      0.9772782119817088,
+      0.9986713779369667
+    ],
+    "relative_scale": [
+      1.002770652092015,
+      0.9772782119817088,
+      0.9986713779369667
+    ],
+    "world_location_cm": [
+      606.4061426552574,
+      271.09282313376883,
+      -9.194501813458356e-05
+    ]
+  },
+  {
+    "actor": "BP_SlidingDoor6",
+    "component": "RightDoorMesh",
+    "mesh": "/Game/Environment/Bunker/Agit/Door/SM_SlidingDoor_Right.SM_SlidingDoor_Right",
+    "world_scale": [
+      1.002770652092015,
+      1.0376322654351662,
+      0.9986713409475743
+    ],
+    "relative_scale": [
+      1.002770652092015,
+      1.0376322654351662,
+      0.9986713409475743
+    ],
+    "world_location_cm": [
+      574.4963643513058,
+      328.86622573905646,
+      -8.472249046434856e-05
+    ]
+  },
+  {
+    "actor": "BP_SlidingDoor7",
+    "component": "DoorFrameMesh",
+    "mesh": "/Game/Environment/Bunker/Agit/Door/SM_SlidingDoorFrame.SM_SlidingDoorFrame",
+    "world_scale": [
+      1.002770652092015,
+      0.9772782119817088,
+      0.9986713409475743
+    ],
+    "relative_scale": [
+      1.002770652092015,
+      0.9772782119817088,
+      0.9986713409475743
+    ],
+    "world_location_cm": [
+      -293.07633370368586,
+      168.12064915802176,
+      -8.837894737215642e-05
+    ]
+  },
+  {
+    "actor": "BP_SlidingDoor7",
+    "component": "LeftDoorMesh",
+    "mesh": "/Game/Environment/Bunker/Agit/Door/SM_SlidingDoor_Left.SM_SlidingDoor_Left",
+    "world_scale": [
+      1.002770652092015,
+      0.9772782119817088,
+      0.9986713779369667
+    ],
+    "relative_scale": [
+      1.002770652092015,
+      0.9772782119817088,
+      0.9986713779369667
+    ],
+    "world_location_cm": [
+      -271.81343347831074,
+      193.35732047065457,
+      -9.194501722508883e-05
+    ]
+  },
+  {
+    "actor": "BP_SlidingDoor7",
+    "component": "RightDoorMesh",
+    "mesh": "/Game/Environment/Bunker/Agit/Door/SM_SlidingDoor_Right.SM_SlidingDoor_Right",
+    "world_scale": [
+      1.002770652092015,
+      1.0376322654351662,
+      0.9986713409475743
+    ],
+    "relative_scale": [
+      1.002770652092015,
+      1.0376322654351662,
+      0.9986713409475743
+    ],
+    "world_location_cm": [
+      -314.3392709053487,
+      142.8840290074546,
+      -8.472248955485383e-05
+    ]
+  },
+  {
+    "actor": "SM_AgitFloorVaultRoom",
+    "component": "StaticMeshComponent0",
+    "mesh": "/Game/Environment/Bunker/Agit/SM_AgitFloorVaultRoom.SM_AgitFloorVaultRoom",
+    "world_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "relative_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "world_location_cm": [
+      0.0,
+      -8.11132849776186e-08,
+      6.245182531777232
+    ]
+  },
+  {
+    "actor": "SM_AgitFloorRest",
+    "component": "StaticMeshComponent0",
+    "mesh": "/Game/Environment/Bunker/Agit/SM_AgitFloorRest.SM_AgitFloorRest",
+    "world_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "relative_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "world_location_cm": [
+      0.0,
+      -1.782871095201699e-08,
+      10.670021158293366
+    ]
+  },
+  {
+    "actor": "SM_AgitFloorVaultRoom_Shaft",
+    "component": "StaticMeshComponent0",
+    "mesh": "/Game/Environment/Bunker/Agit/SM_AgitFloorVaultRoom_Shaft.SM_AgitFloorVaultRoom_Shaft",
+    "world_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "relative_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "world_location_cm": [
+      0.0,
+      -2.1515120351978112e-08,
+      4.771975381384209
+    ]
+  },
+  {
+    "actor": "SM_AgitFloorHall",
+    "component": "StaticMeshComponent0",
+    "mesh": "/Game/Environment/Bunker/Agit/SM_AgitFloorHall.SM_AgitFloorHall",
+    "world_scale": [
+      0.5903043842292488,
+      0.5903043842292488,
+      1.2691649009939283
+    ],
+    "relative_scale": [
+      0.5903043842292488,
+      0.5903043842292488,
+      1.2691649009939283
+    ],
+    "world_location_cm": [
+      -567.6084746960215,
+      -327.1077430043032,
+      10.67
+    ]
+  },
+  {
+    "actor": "SM_AgitFloorHall2",
+    "component": "StaticMeshComponent0",
+    "mesh": "/Game/Environment/Bunker/Agit/SM_AgitFloorHall.SM_AgitFloorHall",
+    "world_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "relative_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "world_location_cm": [
+      -7.520912974642215,
+      46.83010389922754,
+      11.999999999997726
+    ]
+  },
+  {
+    "actor": "SM_Agit_E",
+    "component": "StaticMeshComponent0",
+    "mesh": "/Game/Environment/Bunker/Agit/GroupE/SM_Agit_E.SM_Agit_E",
+    "world_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "relative_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "world_location_cm": [
+      -379.4936335376974,
+      450.57802811319397,
+      127.16711292313062
+    ]
+  },
+  {
+    "actor": "SM_Agit_E_001",
+    "component": "StaticMeshComponent0",
+    "mesh": "/Game/Environment/Bunker/Agit/GroupE/SM_Agit_E_001.SM_Agit_E_001",
+    "world_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "relative_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "world_location_cm": [
+      -469.1381662603626,
+      567.9296098704455,
+      105.31111990835518
+    ]
+  },
+  {
+    "actor": "SM_Agit_E_002",
+    "component": "StaticMeshComponent0",
+    "mesh": "/Game/Environment/Bunker/Agit/GroupE/SM_Agit_E_002.SM_Agit_E_002",
+    "world_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "relative_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "world_location_cm": [
+      -503.4327693830455,
+      -18.733568053389632,
+      70.53910527873825
+    ]
+  },
+  {
+    "actor": "SM_Agit_E_003",
+    "component": "StaticMeshComponent0",
+    "mesh": "/Game/Environment/Bunker/Agit/GroupE/SM_Agit_E_003.SM_Agit_E_003",
+    "world_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "relative_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "world_location_cm": [
+      521.8215164526093,
+      703.2357521579331,
+      138.9482548719741
+    ]
+  },
+  {
+    "actor": "SM_Agit_E_004",
+    "component": "StaticMeshComponent0",
+    "mesh": "/Game/Environment/Bunker/Agit/GroupE/SM_Agit_E_004.SM_Agit_E_004",
+    "world_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "relative_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "world_location_cm": [
+      -414.84692201966845,
+      523.7739564512807,
+      195.8775018373949
+    ]
+  },
+  {
+    "actor": "SM_Agit_E_005",
+    "component": "StaticMeshComponent0",
+    "mesh": "/Game/Environment/Bunker/Agit/GroupE/SM_Agit_E_005.SM_Agit_E_005",
+    "world_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "relative_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "world_location_cm": [
+      -600.7105565714411,
+      -2.9994666432047694,
+      42.95748032500248
+    ]
+  },
+  {
+    "actor": "SM_Agit_E_006",
+    "component": "StaticMeshComponent0",
+    "mesh": "/Game/Environment/Bunker/Agit/GroupE/SM_Agit_E_006.SM_Agit_E_006",
+    "world_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "relative_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "world_location_cm": [
+      -268.34737945410257,
+      344.3073891411164,
+      115.87038030304325
+    ]
+  },
+  {
+    "actor": "SM_Agit_F_008",
+    "component": "StaticMeshComponent0",
+    "mesh": "/Game/Environment/Bunker/Agit/GroupF/SM_Agit_F_008.SM_Agit_F_008",
+    "world_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "relative_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "world_location_cm": [
+      575.4207133548783,
+      -457.5066233610467,
+      99.63419791691001
+    ]
+  },
+  {
+    "actor": "SM_Agit_F_005",
+    "component": "StaticMeshComponent0",
+    "mesh": "/Game/Environment/Bunker/Agit/GroupF/SM_Agit_F_005.SM_Agit_F_005",
+    "world_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "relative_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "world_location_cm": [
+      744.9277290749177,
+      -432.93019654343334,
+      116.90774608943843
+    ]
+  },
+  {
+    "actor": "SM_Agit_F_004",
+    "component": "StaticMeshComponent0",
+    "mesh": "/Game/Environment/Bunker/Agit/GroupF/SM_Agit_F_004.SM_Agit_F_004",
+    "world_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "relative_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "world_location_cm": [
+      796.0398963005534,
+      -322.06329050945607,
+      131.68450320189285
+    ]
+  },
+  {
+    "actor": "SM_Agit_F_003",
+    "component": "StaticMeshComponent0",
+    "mesh": "/Game/Environment/Bunker/Agit/GroupF/SM_Agit_F_003.SM_Agit_F_003",
+    "world_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "relative_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "world_location_cm": [
+      740.1072323688647,
+      -186.06454273709886,
+      65.78919887322604
+    ]
+  },
+  {
+    "actor": "SM_Agit_F_002",
+    "component": "StaticMeshComponent0",
+    "mesh": "/Game/Environment/Bunker/Agit/GroupF/SM_Agit_F_002.SM_Agit_F_002",
+    "world_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "relative_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "world_location_cm": [
+      584.449155634583,
+      -567.9111840966481,
+      49.79506891252538
+    ]
+  },
+  {
+    "actor": "SM_Agit_F_001",
+    "component": "StaticMeshComponent0",
+    "mesh": "/Game/Environment/Bunker/Agit/GroupF/SM_Agit_F_001.SM_Agit_F_001",
+    "world_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "relative_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "world_location_cm": [
+      138.6515622330964,
+      -472.04972891156837,
+      28.115010801947335
+    ]
+  },
+  {
+    "actor": "SM_Agit_F_000",
+    "component": "StaticMeshComponent0",
+    "mesh": "/Game/Environment/Bunker/Agit/GroupF/SM_Agit_F_000.SM_Agit_F_000",
+    "world_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "relative_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "world_location_cm": [
+      566.5810395684041,
+      -403.97646341050694,
+      49.79506891252072
+    ]
+  },
+  {
+    "actor": "SM_SM_LadderGrayFrame",
+    "component": "StaticMeshComponent0",
+    "mesh": "/Game/Environment/Bunker/Agit/Props/SM_SM_LadderGrayFrame.SM_SM_LadderGrayFrame",
+    "world_scale": [
+      1.6442221086472273,
+      1.444177180994302,
+      1.444177180994302
+    ],
+    "relative_scale": [
+      1.6442221086472273,
+      1.444177180994302,
+      1.444177180994302
+    ],
+    "world_location_cm": [
+      -117.73858373262773,
+      675.3123452710164,
+      22.188506950240992
+    ]
+  },
+  {
+    "actor": "SM_SM_LadderGrayHatch",
+    "component": "StaticMeshComponent0",
+    "mesh": "/Game/Environment/Bunker/Agit/Props/SM_SM_LadderGrayHatch.SM_SM_LadderGrayHatch",
+    "world_scale": [
+      1.5456647572573274,
+      1.5456647572573274,
+      1.5456647572573274
+    ],
+    "relative_scale": [
+      1.5456647572573274,
+      1.5456647572573274,
+      1.5456647572573274
+    ],
+    "world_location_cm": [
+      -143.26820374702547,
+      735.7063330112555,
+      106.83998465000127
+    ]
+  },
+  {
+    "actor": "SM_SM_LadderGray",
+    "component": "StaticMeshComponent0",
+    "mesh": "/Game/Environment/Bunker/Agit/Props/SM_SM_LadderGray.SM_SM_LadderGray",
+    "world_scale": [
+      1.6349999634549022,
+      1.6349999634549022,
+      1.6349999634549022
+    ],
+    "relative_scale": [
+      1.6349999634549022,
+      1.6349999634549022,
+      1.6349999634549022
+    ],
+    "world_location_cm": [
+      -59.98399823922893,
+      682.1846958773137,
+      -15.465587913718878
+    ]
+  },
+  {
+    "actor": "SM_Couch",
+    "component": "StaticMeshComponent0",
+    "mesh": "/Game/Environment/Bunker/Agit/Furnitures/SM_Couch.SM_Couch",
+    "world_scale": [
+      1.2162551598157734,
+      1.2162551598157734,
+      1.2162551598157734
+    ],
+    "relative_scale": [
+      1.2162551598157734,
+      1.2162551598157734,
+      1.2162551598157734
+    ],
+    "world_location_cm": [
+      120.09760881518037,
+      200.29114012286473,
+      59.24420515013958
+    ]
+  },
+  {
+    "actor": "SM_Stool",
+    "component": "StaticMeshComponent0",
+    "mesh": "/Game/Environment/Bunker/Agit/Furnitures/SM_Stool.SM_Stool",
+    "world_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "relative_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "world_location_cm": [
+      -296.68043654971984,
+      -528.2144198804589,
+      41.047212798812325
+    ]
+  },
+  {
+    "actor": "SM_Stool2",
+    "component": "StaticMeshComponent0",
+    "mesh": "/Game/Environment/Bunker/Agit/Furnitures/SM_Stool.SM_Stool",
+    "world_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "relative_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "world_location_cm": [
+      -624.5094322017818,
+      319.55612096278753,
+      41.047212999999545
+    ]
+  },
+  {
+    "actor": "SM_Stool3",
+    "component": "StaticMeshComponent0",
+    "mesh": "/Game/Environment/Bunker/Agit/Furnitures/SM_Stool.SM_Stool",
+    "world_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "relative_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "world_location_cm": [
+      -639.5833041718784,
+      152.2142587913704,
+      41.047212999999545
+    ]
+  },
+  {
+    "actor": "SM_KitchenTable",
+    "component": "StaticMeshComponent0",
+    "mesh": "/Game/Environment/Bunker/Agit/Furnitures/SM_KitchenTable.SM_KitchenTable",
+    "world_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "relative_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "world_location_cm": [
+      -628.7553368128057,
+      235.7287192787245,
+      71.6761155549716
+    ]
+  },
+  {
+    "actor": "SM_TeaTable",
+    "component": "StaticMeshComponent0",
+    "mesh": "/Game/Environment/Bunker/Agit/TeaProps/SM_TeaTable.SM_TeaTable",
+    "world_scale": [
+      3.1224999302066863,
+      3.1224999302066863,
+      3.1224999302066863
+    ],
+    "relative_scale": [
+      3.1224999302066863,
+      3.1224999302066863,
+      3.1224999302066863
+    ],
+    "world_location_cm": [
+      11.856562105895819,
+      60.546406281131055,
+      8.412999092091013
+    ]
+  },
+  {
+    "actor": "SM_CakePlate",
+    "component": "StaticMeshComponent0",
+    "mesh": "/Game/Environment/Bunker/Agit/TeaProps/SM_CakePlate.SM_CakePlate",
+    "world_scale": [
+      2.604268764654989,
+      2.604268764654989,
+      2.604268764654989
+    ],
+    "relative_scale": [
+      2.604268764654989,
+      2.604268764654989,
+      2.604268764654989
+    ],
+    "world_location_cm": [
+      7.459001524026689,
+      73.22248883414117,
+      55.49083837005668
+    ]
+  },
+  {
+    "actor": "SM_Coaster",
+    "component": "StaticMeshComponent0",
+    "mesh": "/Game/Environment/Bunker/Agit/TeaProps/SM_Coaster.SM_Coaster",
+    "world_scale": [
+      1.6460754750296474,
+      1.6460754750296474,
+      1.6460754750296474
+    ],
+    "relative_scale": [
+      1.6460754750296474,
+      1.6460754750296474,
+      1.6460754750296474
+    ],
+    "world_location_cm": [
+      36.84991238826257,
+      42.73954056311032,
+      54.37525916692857
+    ]
+  },
+  {
+    "actor": "SM_Dessert_Rollcake",
+    "component": "StaticMeshComponent0",
+    "mesh": "/Game/Environment/Bunker/Agit/Desserts/SM_Dessert_Rollcake.SM_Dessert_Rollcake",
+    "world_scale": [
+      0.8282586084096693,
+      0.8282586084096693,
+      0.8282586084096693
+    ],
+    "relative_scale": [
+      0.8282586084096693,
+      0.8282586084096693,
+      0.8282586084096693
+    ],
+    "world_location_cm": [
+      11.06009430945008,
+      73.36542641090091,
+      58.17357534885355
+    ]
+  },
+  {
+    "actor": "SM_Dessert_Tart",
+    "component": "StaticMeshComponent0",
+    "mesh": "/Game/Environment/Bunker/Agit/Desserts/SM_Dessert_Tart.SM_Dessert_Tart",
+    "world_scale": [
+      0.7281629674835131,
+      0.7281629674835131,
+      0.7281629674835131
+    ],
+    "relative_scale": [
+      0.7281629674835131,
+      0.7281629674835131,
+      0.7281629674835131
+    ],
+    "world_location_cm": [
+      8.43326889003447,
+      29.2642805164935,
+      54.37527631130618
+    ]
+  },
+  {
+    "actor": "SM_CakePlate2",
+    "component": "StaticMeshComponent0",
+    "mesh": "/Game/Environment/Bunker/Agit/TeaProps/SM_CakePlate.SM_CakePlate",
+    "world_scale": [
+      2.2913579311086534,
+      2.2913579311086534,
+      2.2913579311086534
+    ],
+    "relative_scale": [
+      2.2913579311086534,
+      2.2913579311086534,
+      2.2913579311086534
+    ],
+    "world_location_cm": [
+      5.342553209404812,
+      26.635763111248735,
+      55.49083799999963
+    ]
+  },
+  {
+    "actor": "SM_CoffeeCup",
+    "component": "StaticMeshComponent0",
+    "mesh": "/Game/Environment/Bunker/Agit/Props/SM_CoffeeCup.SM_CoffeeCup",
+    "world_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "relative_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "world_location_cm": [
+      39.55315631459831,
+      42.86687771145438,
+      68.56095826860383
+    ]
+  },
+  {
+    "actor": "SM_NoteBook",
+    "component": "StaticMeshComponent0",
+    "mesh": "/Game/Environment/Bunker/Agit/Props/SM_NoteBook.SM_NoteBook",
+    "world_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "relative_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "world_location_cm": [
+      -22.58396216145114,
+      113.34933147280414,
+      67.11641595586426
+    ]
+  },
+  {
+    "actor": "SM_AgitCircle",
+    "component": "StaticMeshComponent0",
+    "mesh": "/Game/Environment/Bunker/Agit/Wall/SM_AgitCircle.SM_AgitCircle",
+    "world_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "relative_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "world_location_cm": [
+      34.63530221199869,
+      -39.69146298688105,
+      -38.922380431066586
+    ]
+  },
+  {
+    "actor": "SM_AgitWall",
+    "component": "StaticMeshComponent0",
+    "mesh": "/Game/Environment/Bunker/Agit/Wall/SM_AgitWall.SM_AgitWall",
+    "world_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "relative_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "world_location_cm": [
+      34.63530221199869,
+      -39.69146298688105,
+      -38.922380431066586
+    ]
+  }
+]

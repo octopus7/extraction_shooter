@@ -1,0 +1,453 @@
+{
+  "note": "Evaluated original Blender world-space geometry bounds; these do not include Unreal import scale or level actor scale. Object facing can swap X/Y dimensions for new front convention.",
+  "meshes": [
+    {
+      "source": "Blender/SM_Agit_A.blend",
+      "name": "SM_Agit_Bath",
+      "world_xyz_cm": [
+        37.345,
+        54.264,
+        28.028
+      ],
+      "delta_rotation_xyz": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "source": "Blender/SM_Agit_A.blend",
+      "name": "SM_Agit_Toilet",
+      "world_xyz_cm": [
+        30.433,
+        22.49,
+        33.012
+      ],
+      "delta_rotation_xyz": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "source": "Blender/SM_Agit_A.blend",
+      "name": "SM_Agit_WashingMachineA",
+      "world_xyz_cm": [
+        28.37,
+        24.862,
+        34.56
+      ],
+      "delta_rotation_xyz": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "source": "Blender/SM_Agit_A.blend",
+      "name": "SM_Agit_Washstand",
+      "world_xyz_cm": [
+        27.029,
+        28.783,
+        14.133
+      ],
+      "delta_rotation_xyz": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "source": "Blender/SM_Agit_E.blend",
+      "name": "SM_Agit_E",
+      "world_xyz_cm": [
+        100.648,
+        204.257,
+        137.651
+      ],
+      "delta_rotation_xyz": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "source": "Blender/SM_Agit_E.blend",
+      "name": "SM_Agit_E.001",
+      "world_xyz_cm": [
+        79.186,
+        97.688,
+        120.63
+      ],
+      "delta_rotation_xyz": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "source": "Blender/SM_Agit_E.blend",
+      "name": "SM_Agit_E.002",
+      "world_xyz_cm": [
+        79.926,
+        121.37,
+        89.547
+      ],
+      "delta_rotation_xyz": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "source": "Blender/SM_Agit_E.blend",
+      "name": "SM_Agit_E.003",
+      "world_xyz_cm": [
+        64.385,
+        137.651,
+        98.428
+      ],
+      "delta_rotation_xyz": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "source": "Blender/SM_Agit_E.blend",
+      "name": "SM_Agit_E.004",
+      "world_xyz_cm": [
+        36.263,
+        28.122,
+        59.205
+      ],
+      "delta_rotation_xyz": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "source": "Blender/SM_Agit_E.blend",
+      "name": "SM_Agit_E.005",
+      "world_xyz_cm": [
+        56.984,
+        61.425,
+        21.462
+      ],
+      "delta_rotation_xyz": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "source": "Blender/SM_Agit_E.blend",
+      "name": "SM_Agit_E.006",
+      "world_xyz_cm": [
+        95.468,
+        102.128,
+        173.174
+      ],
+      "delta_rotation_xyz": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "source": "Blender/SM_Agit_E.blend",
+      "name": "SM_Agit_E.007",
+      "world_xyz_cm": [
+        133.951,
+        141.352,
+        31.083
+      ],
+      "delta_rotation_xyz": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "source": "Blender/SM_Agit_F.blend",
+      "name": "SM_Agit_F.000",
+      "world_xyz_cm": [
+        188.124,
+        205.026,
+        114.638
+      ],
+      "delta_rotation_xyz": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "source": "Blender/SM_Agit_F.blend",
+      "name": "SM_Agit_F.001",
+      "world_xyz_cm": [
+        35.273,
+        36.009,
+        56.584
+      ],
+      "delta_rotation_xyz": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "source": "Blender/SM_Agit_F.blend",
+      "name": "SM_Agit_F.002",
+      "world_xyz_cm": [
+        55.115,
+        58.789,
+        127.866
+      ],
+      "delta_rotation_xyz": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "source": "Blender/SM_Agit_F.blend",
+      "name": "SM_Agit_F.003",
+      "world_xyz_cm": [
+        66.872,
+        87.449,
+        131.54
+      ],
+      "delta_rotation_xyz": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "source": "Blender/SM_Agit_F.blend",
+      "name": "SM_Agit_F.004",
+      "world_xyz_cm": [
+        59.524,
+        45.561,
+        93.327
+      ],
+      "delta_rotation_xyz": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "source": "Blender/SM_Agit_F.blend",
+      "name": "SM_Agit_F.005",
+      "world_xyz_cm": [
+        38.213,
+        44.827,
+        60.994
+      ],
+      "delta_rotation_xyz": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "source": "Blender/SM_Agit_F.blend",
+      "name": "SM_Agit_F.006",
+      "world_xyz_cm": [
+        39.683,
+        45.561,
+        60.994
+      ],
+      "delta_rotation_xyz": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "source": "Blender/SM_Agit_F.blend",
+      "name": "SM_Agit_F.007",
+      "world_xyz_cm": [
+        39.683,
+        45.562,
+        60.994
+      ],
+      "delta_rotation_xyz": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "source": "Blender/SM_Agit_F.blend",
+      "name": "SM_Agit_F.008",
+      "world_xyz_cm": [
+        59.524,
+        52.91,
+        71.282
+      ],
+      "delta_rotation_xyz": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "source": "Blender/SM_Agit_F.blend",
+      "name": "SM_Agit_F.009",
+      "world_xyz_cm": [
+        49.235,
+        53.645,
+        24.251
+      ],
+      "delta_rotation_xyz": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "source": "Blender/SM_Agit_F.blend",
+      "name": "SM_Agit_F.010",
+      "world_xyz_cm": [
+        33.803,
+        35.273,
+        24.251
+      ],
+      "delta_rotation_xyz": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "source": "Blender/SM_Agit_F.blend",
+      "name": "SM_Agit_F.011",
+      "world_xyz_cm": [
+        34.539,
+        36.008,
+        24.251
+      ],
+      "delta_rotation_xyz": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "source": "Blender/SM_Agit_F.blend",
+      "name": "SM_Agit_F.012",
+      "world_xyz_cm": [
+        39.682,
+        38.947,
+        24.251
+      ],
+      "delta_rotation_xyz": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "source": "Blender/SM_Furnitures.blend",
+      "name": "SM_Couch",
+      "world_xyz_cm": [
+        211.978,
+        95.252,
+        104.535
+      ],
+      "delta_rotation_xyz": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "source": "Blender/SM_Furnitures.blend",
+      "name": "SM_KitchenTable",
+      "world_xyz_cm": [
+        148.605,
+        131.477,
+        63.221
+      ],
+      "delta_rotation_xyz": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "source": "Blender/SM_Furnitures.blend",
+      "name": "SM_LunaBed",
+      "world_xyz_cm": [
+        185.622,
+        199.728,
+        105.16
+      ],
+      "delta_rotation_xyz": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "source": "Blender/SM_Furnitures.blend",
+      "name": "SM_Stool",
+      "world_xyz_cm": [
+        61.344,
+        55.71,
+        65.725
+      ],
+      "delta_rotation_xyz": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "source": "Blender/SM_TeaTable.blend",
+      "name": "SM_CakePlate",
+      "world_xyz_cm": [
+        15.375,
+        15.542,
+        1.671
+      ],
+      "delta_rotation_xyz": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "source": "Blender/SM_TeaTable.blend",
+      "name": "SM_Coaster",
+      "world_xyz_cm": [
+        12.701,
+        12.701,
+        1.671
+      ],
+      "delta_rotation_xyz": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "source": "Blender/SM_TeaTable.blend",
+      "name": "SM_TeaTable",
+      "world_xyz_cm": [
+        52.81,
+        33.591,
+        14.372
+      ],
+      "delta_rotation_xyz": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1011 @@
+{
+  "materials": {
+    "Pink": {
+      "name": "M_InteriorAdditions_Pink",
+      "metallic": 0.12,
+      "roughness": 0.38
+    },
+    "Ivory": {
+      "name": "M_InteriorAdditions_Ivory",
+      "metallic": 0.08,
+      "roughness": 0.32
+    },
+    "Oak": {
+      "name": "M_InteriorAdditions_Oak",
+      "metallic": 0,
+      "roughness": 0.65
+    },
+    "Walnut": {
+      "name": "M_InteriorAdditions_Walnut",
+      "metallic": 0,
+      "roughness": 0.68
+    },
+    "Steel": {
+      "name": "M_InteriorAdditions_Steel",
+      "metallic": 0.72,
+      "roughness": 0.32
+    },
+    "Iron": {
+      "name": "M_InteriorAdditions_Iron",
+      "metallic": 0.55,
+      "roughness": 0.58
+    },
+    "Brass": {
+      "name": "M_InteriorAdditions_Brass",
+      "metallic": 0.72,
+      "roughness": 0.32
+    },
+    "Glass": {
+      "name": "M_InteriorAdditions_Glass",
+      "metallic": 0.15,
+      "roughness": 0.19
+    },
+    "Gingham": {
+      "name": "M_InteriorAdditions_Gingham",
+      "metallic": 0,
+      "roughness": 0.9
+    },
+    "Rug": {
+      "name": "M_InteriorAdditions_Rug",
+      "metallic": 0,
+      "roughness": 0.98
+    },
+    "Lace": {
+      "name": "M_InteriorAdditions_Lace",
+      "metallic": 0,
+      "roughness": 0.95
+    },
+    "Floral": {
+      "name": "M_InteriorAdditions_Floral",
+      "metallic": 0,
+      "roughness": 0.52
+    },
+    "Sage": {
+      "name": "M_InteriorAdditions_Sage",
+      "metallic": 0.1,
+      "roughness": 0.42
+    },
+    "Terracotta": {
+      "name": "M_InteriorAdditions_Terracotta",
+      "metallic": 0,
+      "roughness": 0.83
+    },
+    "Turquoise": {
+      "name": "M_InteriorAdditions_Turquoise",
+      "metallic": 0.05,
+      "roughness": 0.32
+    },
+    "Linen": {
+      "name": "M_InteriorAdditions_Linen",
+      "metallic": 0,
+      "roughness": 0.92
+    }
+  },
+  "assets": [
+    {
+      "name": "SM_InteriorAdditions_Refrigerator",
+      "target_size_cm": [
+        102.128,
+        95.468,
+        173.174
+      ],
+      "category": "Kitchen",
+      "reference": "/Game/Environment/Bunker/Agit/GroupE/SM_Agit_E_006",
+      "size_cm": [
+        102.128,
+        95.468,
+        173.174
+      ],
+      "bounds_cm": [
+        -51.064,
+        -47.734,
+        0,
+        51.064,
+        47.734,
+        173.174
+      ],
+      "triangles": 22960,
+      "materials": [
+        "M_InteriorAdditions_Pink",
+        "M_InteriorAdditions_Iron",
+        "M_InteriorAdditions_Walnut",
+        "M_InteriorAdditions_Brass",
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Linen",
+        "M_InteriorAdditions_Oak"
+      ],
+      "collision_boxes": 1
+    },
+    {
+      "name": "SM_InteriorAdditions_SinkCabinet",
+      "target_size_cm": [
+        204.257,
+        100.648,
+        137.651
+      ],
+      "category": "Kitchen",
+      "reference": "/Game/Environment/Bunker/Agit/GroupE/SM_Agit_E",
+      "size_cm": [
+        204.257,
+        100.648,
+        137.651
+      ],
+      "bounds_cm": [
+        -102.1285,
+        -50.324,
+        0,
+        102.1285,
+        50.324,
+        137.651
+      ],
+      "triangles": 13576,
+      "materials": [
+        "M_InteriorAdditions_Oak",
+        "M_InteriorAdditions_Walnut",
+        "M_InteriorAdditions_Steel",
+        "M_InteriorAdditions_Iron",
+        "M_InteriorAdditions_Pink",
+        "M_InteriorAdditions_Brass",
+        "M_InteriorAdditions_Floral"
+      ],
+      "collision_boxes": 1
+    },
+    {
+      "name": "SM_InteriorAdditions_StoveOven",
+      "target_size_cm": [
+        97.688,
+        79.186,
+        120.63
+      ],
+      "category": "Kitchen",
+      "reference": "/Game/Environment/Bunker/Agit/GroupE/SM_Agit_E_001",
+      "size_cm": [
+        97.688,
+        79.186,
+        120.63
+      ],
+      "bounds_cm": [
+        -48.844,
+        -39.593,
+        0,
+        48.844,
+        39.593,
+        120.63
+      ],
+      "triangles": 23976,
+      "materials": [
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Iron",
+        "M_InteriorAdditions_Brass",
+        "M_InteriorAdditions_Walnut",
+        "M_InteriorAdditions_Glass",
+        "M_InteriorAdditions_Steel"
+      ],
+      "collision_boxes": 1
+    },
+    {
+      "name": "SM_InteriorAdditions_PantryShelf",
+      "target_size_cm": [
+        121.37,
+        79.926,
+        89.547
+      ],
+      "category": "Kitchen",
+      "reference": "/Game/Environment/Bunker/Agit/GroupE/SM_Agit_E_002",
+      "size_cm": [
+        121.37,
+        79.926,
+        89.547
+      ],
+      "bounds_cm": [
+        -60.685,
+        -39.963,
+        0,
+        60.685,
+        39.963,
+        89.547
+      ],
+      "triangles": 9588,
+      "materials": [
+        "M_InteriorAdditions_Oak",
+        "M_InteriorAdditions_Pink",
+        "M_InteriorAdditions_Walnut",
+        "M_InteriorAdditions_Brass",
+        "M_InteriorAdditions_Sage",
+        "M_InteriorAdditions_Floral",
+        "M_InteriorAdditions_Gingham",
+        "M_InteriorAdditions_Linen"
+      ],
+      "collision_boxes": 6
+    },
+    {
+      "name": "SM_InteriorAdditions_CanisterSet",
+      "target_size_cm": [
+        58,
+        22,
+        29
+      ],
+      "category": "Kitchen",
+      "reference": "Kitchen pantry shelf decorative ceramics",
+      "size_cm": [
+        58,
+        22,
+        29
+      ],
+      "bounds_cm": [
+        -29.0,
+        -11.0,
+        0,
+        29.0,
+        11.0,
+        29
+      ],
+      "triangles": 7332,
+      "materials": [
+        "M_InteriorAdditions_Pink",
+        "M_InteriorAdditions_Walnut",
+        "M_InteriorAdditions_Brass",
+        "M_InteriorAdditions_Sage",
+        "M_InteriorAdditions_Floral"
+      ],
+      "collision_boxes": 1
+    },
+    {
+      "name": "SM_InteriorAdditions_ElectricKettle",
+      "target_size_cm": [
+        28,
+        24,
+        37
+      ],
+      "category": "Kitchen",
+      "reference": "Existing sink countertop ivory kettle",
+      "size_cm": [
+        28,
+        24,
+        37
+      ],
+      "bounds_cm": [
+        -14.0,
+        -12.0,
+        0,
+        14.0,
+        12.0,
+        37
+      ],
+      "triangles": 3968,
+      "materials": [
+        "M_InteriorAdditions_Floral",
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Brass",
+        "M_InteriorAdditions_Pink",
+        "M_InteriorAdditions_Glass"
+      ],
+      "collision_boxes": 1
+    },
+    {
+      "name": "SM_InteriorAdditions_CookingPot",
+      "target_size_cm": [
+        39,
+        30,
+        27
+      ],
+      "category": "Kitchen",
+      "reference": "Existing stovetop pot with lid",
+      "size_cm": [
+        39,
+        30,
+        27
+      ],
+      "bounds_cm": [
+        -19.5,
+        -15.0,
+        0,
+        19.5,
+        15.0,
+        27
+      ],
+      "triangles": 3972,
+      "materials": [
+        "M_InteriorAdditions_Iron",
+        "M_InteriorAdditions_Steel"
+      ],
+      "collision_boxes": 1
+    },
+    {
+      "name": "SM_InteriorAdditions_FoldedNapkin",
+      "target_size_cm": [
+        32,
+        26,
+        3
+      ],
+      "category": "Kitchen",
+      "reference": "Existing kitchen countertop pink cloth",
+      "size_cm": [
+        32,
+        26,
+        3
+      ],
+      "bounds_cm": [
+        -16.0,
+        -13.0,
+        0,
+        16.0,
+        13.0,
+        3
+      ],
+      "triangles": 580,
+      "materials": [
+        "M_InteriorAdditions_Pink",
+        "M_InteriorAdditions_Gingham",
+        "M_InteriorAdditions_Ivory"
+      ],
+      "collision_boxes": 1
+    },
+    {
+      "name": "SM_InteriorAdditions_WindowCurtains",
+      "target_size_cm": [
+        138,
+        23,
+        98
+      ],
+      "category": "Kitchen",
+      "reference": "/Game/Environment/Bunker/Agit/GroupE/SM_Agit_E_003",
+      "size_cm": [
+        138,
+        23,
+        98
+      ],
+      "bounds_cm": [
+        -69.0,
+        -11.5,
+        0,
+        69.0,
+        11.5,
+        98
+      ],
+      "triangles": 4840,
+      "materials": [
+        "M_InteriorAdditions_Turquoise",
+        "M_InteriorAdditions_Oak",
+        "M_InteriorAdditions_Brass",
+        "M_InteriorAdditions_Pink",
+        "M_InteriorAdditions_Linen"
+      ],
+      "collision_boxes": 1
+    },
+    {
+      "name": "SM_InteriorAdditions_MilkCan",
+      "target_size_cm": [
+        36.263,
+        28.122,
+        59.205
+      ],
+      "category": "Kitchen",
+      "reference": "/Game/Environment/Bunker/Agit/GroupE/SM_Agit_E_004",
+      "size_cm": [
+        36.263,
+        28.122,
+        59.205
+      ],
+      "bounds_cm": [
+        -18.1315,
+        -14.061,
+        0,
+        18.1315,
+        14.061,
+        59.205
+      ],
+      "triangles": 4864,
+      "materials": [
+        "M_InteriorAdditions_Steel"
+      ],
+      "collision_boxes": 1
+    },
+    {
+      "name": "SM_InteriorAdditions_WashingMachine",
+      "target_size_cm": [
+        90.727,
+        79.51,
+        110.522
+      ],
+      "category": "BathroomLaundry",
+      "reference": "/Game/Environment/Bunker/Agit/SM_Agit_WashingMachineA",
+      "size_cm": [
+        90.727,
+        79.51,
+        110.522
+      ],
+      "bounds_cm": [
+        -45.3635,
+        -39.755,
+        0,
+        45.3635,
+        39.755,
+        110.522
+      ],
+      "triangles": 11040,
+      "materials": [
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Pink",
+        "M_InteriorAdditions_Iron",
+        "M_InteriorAdditions_Brass",
+        "M_InteriorAdditions_Glass",
+        "M_InteriorAdditions_Steel"
+      ],
+      "collision_boxes": 1
+    },
+    {
+      "name": "SM_InteriorAdditions_LaundryShelf",
+      "target_size_cm": [
+        140,
+        92,
+        184
+      ],
+      "category": "BathroomLaundry",
+      "reference": "Screenshot laundry alcove; wooden surround sized to the existing washer",
+      "size_cm": [
+        140,
+        92,
+        184
+      ],
+      "bounds_cm": [
+        -70.0,
+        -46.0,
+        0,
+        70.0,
+        46.0,
+        184
+      ],
+      "triangles": 9468,
+      "materials": [
+        "M_InteriorAdditions_Oak",
+        "M_InteriorAdditions_Walnut",
+        "M_InteriorAdditions_Gingham",
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Linen",
+        "M_InteriorAdditions_Pink",
+        "M_InteriorAdditions_Floral",
+        "M_InteriorAdditions_Sage"
+      ],
+      "collision_boxes": 4
+    },
+    {
+      "name": "SM_InteriorAdditions_LaundryHamper",
+      "target_size_cm": [
+        48,
+        46,
+        63
+      ],
+      "category": "BathroomLaundry",
+      "reference": "Screenshot woven laundry basket beside washer",
+      "size_cm": [
+        48,
+        46,
+        63
+      ],
+      "bounds_cm": [
+        -24.0,
+        -23.0,
+        0,
+        24.0,
+        23.0,
+        63
+      ],
+      "triangles": 14640,
+      "materials": [
+        "M_InteriorAdditions_Oak",
+        "M_InteriorAdditions_Walnut",
+        "M_InteriorAdditions_Gingham",
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Linen"
+      ],
+      "collision_boxes": 1
+    },
+    {
+      "name": "SM_InteriorAdditions_Toilet",
+      "target_size_cm": [
+        52.626,
+        71.214,
+        77.249
+      ],
+      "category": "BathroomLaundry",
+      "reference": "/Game/Environment/Bunker/Agit/SM_Agit_Toilet; original X-facing mesh rotated to new -Y front",
+      "size_cm": [
+        52.626,
+        71.214,
+        77.249
+      ],
+      "bounds_cm": [
+        -26.313,
+        -35.607,
+        0,
+        26.313,
+        35.607,
+        77.249
+      ],
+      "triangles": 4960,
+      "materials": [
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Turquoise",
+        "M_InteriorAdditions_Pink",
+        "M_InteriorAdditions_Brass"
+      ],
+      "collision_boxes": 2
+    },
+    {
+      "name": "SM_InteriorAdditions_Bathtub",
+      "target_size_cm": [
+        155.726,
+        226.28,
+        116.876
+      ],
+      "category": "BathroomLaundry",
+      "reference": "/Game/Environment/Bunker/Agit/SM_Agit_Bath; native bounds multiplied by existing BunkerMap actor scale 1.3449263",
+      "size_cm": [
+        155.726,
+        226.28,
+        116.876
+      ],
+      "bounds_cm": [
+        -77.863,
+        -113.14,
+        0,
+        77.863,
+        113.14,
+        116.876
+      ],
+      "triangles": 10956,
+      "materials": [
+        "M_InteriorAdditions_Pink",
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Turquoise",
+        "M_InteriorAdditions_Brass"
+      ],
+      "collision_boxes": 1
+    },
+    {
+      "name": "SM_InteriorAdditions_Washbasin",
+      "target_size_cm": [
+        52.706,
+        56.126,
+        27.56
+      ],
+      "category": "BathroomLaundry",
+      "reference": "/Game/Environment/Bunker/Agit/SM_Agit_Washstand",
+      "size_cm": [
+        52.706,
+        56.126,
+        27.56
+      ],
+      "bounds_cm": [
+        -26.353,
+        -28.063,
+        0,
+        26.353,
+        28.063,
+        27.56
+      ],
+      "triangles": 6832,
+      "materials": [
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Steel",
+        "M_InteriorAdditions_Iron",
+        "M_InteriorAdditions_Pink",
+        "M_InteriorAdditions_Brass"
+      ],
+      "collision_boxes": 1
+    },
+    {
+      "name": "SM_InteriorAdditions_TowelStack",
+      "target_size_cm": [
+        44,
+        34,
+        25
+      ],
+      "category": "BathroomLaundry",
+      "reference": "Screenshot folded gingham towels on laundry/bedroom cabinet",
+      "size_cm": [
+        44,
+        34,
+        25
+      ],
+      "bounds_cm": [
+        -22.0,
+        -17.0,
+        0,
+        22.0,
+        17.0,
+        25
+      ],
+      "triangles": 2012,
+      "materials": [
+        "M_InteriorAdditions_Linen",
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Gingham",
+        "M_InteriorAdditions_Lace"
+      ],
+      "collision_boxes": 1
+    },
+    {
+      "name": "SM_InteriorAdditions_DetergentSet",
+      "target_size_cm": [
+        53,
+        31,
+        39
+      ],
+      "category": "BathroomLaundry",
+      "reference": "Screenshot pink detergent bottles above laundry washer",
+      "size_cm": [
+        53,
+        31,
+        39
+      ],
+      "bounds_cm": [
+        -26.5,
+        -15.5,
+        0,
+        26.5,
+        15.5,
+        39
+      ],
+      "triangles": 4924,
+      "materials": [
+        "M_InteriorAdditions_Oak",
+        "M_InteriorAdditions_Walnut",
+        "M_InteriorAdditions_Pink",
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Floral",
+        "M_InteriorAdditions_Sage"
+      ],
+      "collision_boxes": 1
+    },
+    {
+      "name": "SM_InteriorAdditions_DiningTable",
+      "target_size_cm": [
+        148.605,
+        131.477,
+        63.221
+      ],
+      "category": "Furniture",
+      "reference": "SM_KitchenTable; BunkerMap component scale 1; cozy pink gingham dining table",
+      "size_cm": [
+        148.605,
+        131.477,
+        63.221
+      ],
+      "bounds_cm": [
+        -74.3025,
+        -65.7385,
+        0,
+        74.3025,
+        65.7385,
+        63.221
+      ],
+      "triangles": 11480,
+      "materials": [
+        "M_InteriorAdditions_Pink",
+        "M_InteriorAdditions_Oak",
+        "M_InteriorAdditions_Gingham"
+      ],
+      "collision_boxes": 1
+    },
+    {
+      "name": "SM_InteriorAdditions_Stool",
+      "target_size_cm": [
+        61.344,
+        55.71,
+        65.725
+      ],
+      "category": "Furniture",
+      "reference": "SM_Stool; BunkerMap component scale 1; round pink padded kitchen stool",
+      "size_cm": [
+        61.344,
+        55.71,
+        65.725
+      ],
+      "bounds_cm": [
+        -30.672,
+        -27.855,
+        0,
+        30.672,
+        27.855,
+        65.725
+      ],
+      "triangles": 15932,
+      "materials": [
+        "M_InteriorAdditions_Oak",
+        "M_InteriorAdditions_Walnut",
+        "M_InteriorAdditions_Pink",
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Brass"
+      ],
+      "collision_boxes": 1
+    },
+    {
+      "name": "SM_InteriorAdditions_Sofa",
+      "target_size_cm": [
+        257.818,
+        115.852,
+        127.141
+      ],
+      "category": "Furniture",
+      "reference": "SM_Couch native 211.978/95.252/104.535cm times BunkerMap component scale 1.21625516",
+      "size_cm": [
+        257.818,
+        115.852,
+        127.141
+      ],
+      "bounds_cm": [
+        -128.909,
+        -57.926,
+        0,
+        128.909,
+        57.926,
+        127.141
+      ],
+      "triangles": 50044,
+      "materials": [
+        "M_InteriorAdditions_Walnut",
+        "M_InteriorAdditions_Gingham",
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Brass",
+        "M_InteriorAdditions_Pink",
+        "M_InteriorAdditions_Floral"
+      ],
+      "collision_boxes": 1
+    },
+    {
+      "name": "SM_InteriorAdditions_CoffeeTable",
+      "target_size_cm": [
+        164.899,
+        104.887,
+        44.877
+      ],
+      "category": "Furniture",
+      "reference": "SM_TeaTable native 52.810/33.591/14.372cm times BunkerMap component scale 3.12249993",
+      "size_cm": [
+        164.899,
+        104.887,
+        44.877
+      ],
+      "bounds_cm": [
+        -82.4495,
+        -52.4435,
+        0,
+        82.4495,
+        52.4435,
+        44.877
+      ],
+      "triangles": 11820,
+      "materials": [
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Oak",
+        "M_InteriorAdditions_Brass",
+        "M_InteriorAdditions_Lace"
+      ],
+      "collision_boxes": 1
+    },
+    {
+      "name": "SM_InteriorAdditions_Bed",
+      "target_size_cm": [
+        188.124,
+        205.026,
+        114.638
+      ],
+      "category": "Furniture",
+      "reference": "SM_Agit_F_000; actual BunkerMap bedroom component scale 1; related SM_LunaBed reference",
+      "size_cm": [
+        188.124,
+        205.026,
+        114.638
+      ],
+      "bounds_cm": [
+        -94.062,
+        -102.513,
+        0,
+        94.062,
+        102.513,
+        114.638
+      ],
+      "triangles": 33940,
+      "materials": [
+        "M_InteriorAdditions_Oak",
+        "M_InteriorAdditions_Linen",
+        "M_InteriorAdditions_Floral",
+        "M_InteriorAdditions_Brass",
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Gingham"
+      ],
+      "collision_boxes": 2
+    },
+    {
+      "name": "SM_InteriorAdditions_Nightstand",
+      "target_size_cm": [
+        55.115,
+        58.789,
+        71
+      ],
+      "category": "Furniture",
+      "reference": "SM_Agit_F_002; separate bedside cabinet from original lamp combination",
+      "size_cm": [
+        55.115,
+        58.789,
+        71
+      ],
+      "bounds_cm": [
+        -27.5575,
+        -29.3945,
+        0,
+        27.5575,
+        29.3945,
+        71
+      ],
+      "triangles": 15488,
+      "materials": [
+        "M_InteriorAdditions_Oak",
+        "M_InteriorAdditions_Pink",
+        "M_InteriorAdditions_Brass"
+      ],
+      "collision_boxes": 1
+    },
+    {
+      "name": "SM_InteriorAdditions_BedsideLamp",
+      "target_size_cm": [
+        36,
+        36,
+        56.866
+      ],
+      "category": "Furniture",
+      "reference": "SM_Agit_F_002; separate pleated ivory bedside lamp from original 127.866cm combination",
+      "size_cm": [
+        36,
+        36,
+        56.866
+      ],
+      "bounds_cm": [
+        -18.0,
+        -18.0,
+        0,
+        18.0,
+        18.0,
+        56.866
+      ],
+      "triangles": 4712,
+      "materials": [
+        "M_InteriorAdditions_Brass",
+        "M_InteriorAdditions_Floral",
+        "M_InteriorAdditions_Linen",
+        "M_InteriorAdditions_Ivory"
+      ],
+      "collision_boxes": 1
+    },
+    {
+      "name": "SM_InteriorAdditions_BedroomCabinet",
+      "target_size_cm": [
+        66.9,
+        58.8,
+        90
+      ],
+      "category": "Furniture",
+      "reference": "Low two-door cabinet from Home_Reference.png; bedside-sized addition",
+      "size_cm": [
+        66.9,
+        58.8,
+        90
+      ],
+      "bounds_cm": [
+        -33.45,
+        -29.4,
+        0,
+        33.45,
+        29.4,
+        90
+      ],
+      "triangles": 15120,
+      "materials": [
+        "M_InteriorAdditions_Oak",
+        "M_InteriorAdditions_Pink",
+        "M_InteriorAdditions_Brass"
+      ],
+      "collision_boxes": 1
+    },
+    {
+      "name": "SM_InteriorAdditions_RoundRug",
+      "target_size_cm": [
+        185,
+        185,
+        1.5
+      ],
+      "category": "Furniture",
+      "reference": "Scalloped coral rug with cream lace border",
+      "size_cm": [
+        185,
+        185,
+        1.5
+      ],
+      "bounds_cm": [
+        -92.5,
+        -92.5,
+        0,
+        92.5,
+        92.5,
+        1.5
+      ],
+      "triangles": 24768,
+      "materials": [
+        "M_InteriorAdditions_Rug",
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Lace"
+      ],
+      "collision_boxes": 1
+    },
+    {
+      "name": "SM_InteriorAdditions_OvalRug",
+      "target_size_cm": [
+        235,
+        150,
+        1.5
+      ],
+      "category": "Furniture",
+      "reference": "Scalloped coral rug with cream lace border",
+      "size_cm": [
+        235,
+        150,
+        1.5
+      ],
+      "bounds_cm": [
+        -117.5,
+        -75.0,
+        0,
+        117.5,
+        75.0,
+        1.5
+      ],
+      "triangles": 24768,
+      "materials": [
+        "M_InteriorAdditions_Rug",
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Lace"
+      ],
+      "collision_boxes": 1
+    },
+    {
+      "name": "SM_InteriorAdditions_FloorCushion",
+      "target_size_cm": [
+        56.984,
+        61.425,
+        21.462
+      ],
+      "category": "Furniture",
+      "reference": "SM_Agit_E_005; BunkerMap component scale 1; pink gingham square floor cushion",
+      "size_cm": [
+        56.984,
+        61.425,
+        21.462
+      ],
+      "bounds_cm": [
+        -28.492,
+        -30.7125,
+        0,
+        28.492,
+        30.7125,
+        21.462
+      ],
+      "triangles": 7204,
+      "materials": [
+        "M_InteriorAdditions_Gingham",
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Linen"
+      ],
+      "collision_boxes": 1
+    }
+  ],
+  "axis_contract": "X width, -Y front, Z up; floor-center pivot, dimensions centimetres. Existing X-facing assets are reoriented to match this contract.",
+  "total_triangles": 375764,
+  "provenance": {
+    "modeling": "Original Blender script geometry; no existing geometry reused",
+    "reference_images": "Built-in image_gen using the user screenshots and inspected existing appearance",
+    "base_color": "Built-in image_gen 4x4 atlas, native image retained",
+    "scale_audits": "References/existing_unreal_mesh_bounds.json and existing_bunker_component_scales.json"
+  }
+}

@@ -1,0 +1,126 @@
+{
+  "units": "centimetres",
+  "contract": "New X width, Y depth, Z height. New mesh bounds include the scale of the corresponding existing BunkerMap object; actor placement remains unchanged.",
+  "source": "existing_unreal_mesh_bounds.json and existing_bunker_component_scales.json",
+  "assets": [
+    {
+      "new": "SM_InteriorAdditions_WashingMachine",
+      "old": "/Game/Environment/Bunker/Agit/SM_Agit_WashingMachineA",
+      "native_xyz_cm": [
+        90.727,
+        79.51,
+        110.522
+      ],
+      "existing_actor_scale": [
+        1,
+        1,
+        1
+      ],
+      "new_width_depth_height_cm": [
+        90.727,
+        79.51,
+        110.522
+      ]
+    },
+    {
+      "new": "SM_InteriorAdditions_Toilet",
+      "old": "/Game/Environment/Bunker/Agit/SM_Agit_Toilet",
+      "native_xyz_cm": [
+        71.214,
+        52.626,
+        77.249
+      ],
+      "existing_actor_scale": [
+        1,
+        1,
+        1
+      ],
+      "new_width_depth_height_cm": [
+        52.626,
+        71.214,
+        77.249
+      ],
+      "orientation_note": "Original toilet faces along X. Width/depth are swapped to the new -Y-front authoring convention."
+    },
+    {
+      "new": "SM_InteriorAdditions_Bathtub",
+      "old": "/Game/Environment/Bunker/Agit/SM_Agit_Bath",
+      "native_xyz_cm": [
+        115.788,
+        168.245,
+        86.901
+      ],
+      "existing_actor_scale": [
+        1.3449262955691665,
+        1.3449262955691665,
+        1.3449262955691665
+      ],
+      "effective_existing_xyz_cm": [
+        155.726326,
+        226.277125,
+        116.87544
+      ],
+      "new_width_depth_height_cm": [
+        155.726,
+        226.28,
+        116.876
+      ],
+      "note": "Rounded centimetre target matches the larger existing level bathtub."
+    },
+    {
+      "new": "SM_InteriorAdditions_Washbasin",
+      "old": "/Game/Environment/Bunker/Agit/SM_Agit_Washstand",
+      "native_xyz_cm": [
+        52.706,
+        56.126,
+        27.56
+      ],
+      "existing_actor_scale": [
+        1,
+        1,
+        1
+      ],
+      "new_width_depth_height_cm": [
+        52.706,
+        56.126,
+        27.56
+      ]
+    },
+    {
+      "new": "SM_InteriorAdditions_LaundryShelf",
+      "new_width_depth_height_cm": [
+        140,
+        92,
+        184
+      ],
+      "note": "Additional wooden surround derived from screenshot, with space for the verified 90.727 cm-wide washer."
+    },
+    {
+      "new": "SM_InteriorAdditions_LaundryHamper",
+      "new_width_depth_height_cm": [
+        48,
+        46,
+        63
+      ],
+      "note": "Additional basket derived from screenshot proportions."
+    },
+    {
+      "new": "SM_InteriorAdditions_TowelStack",
+      "new_width_depth_height_cm": [
+        44,
+        34,
+        25
+      ],
+      "note": "Additional reusable stack derived from screenshot proportions."
+    },
+    {
+      "new": "SM_InteriorAdditions_DetergentSet",
+      "new_width_depth_height_cm": [
+        53,
+        31,
+        39
+      ],
+      "note": "Additional reusable bottle group derived from screenshot proportions."
+    }
+  ]
+}

@@ -1,0 +1,1532 @@
+[
+  {
+    "path": "/Game/Environment/Bunker/Agit/Desserts/SM_Dessert_Cake.SM_Dessert_Cake",
+    "size_cm": [
+      52.076,
+      46.034,
+      39.704
+    ],
+    "min_cm": [
+      -29.247,
+      -22.252,
+      1.626
+    ],
+    "max_cm": [
+      22.829,
+      23.781,
+      41.33
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/Desserts/SM_Dessert_Donut.SM_Dessert_Donut",
+    "size_cm": [
+      42.006,
+      41.718,
+      14.419
+    ],
+    "min_cm": [
+      -21.519,
+      -20.816,
+      8.531
+    ],
+    "max_cm": [
+      20.487,
+      20.902,
+      22.95
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/Desserts/SM_Dessert_Farpe.SM_Dessert_Farpe",
+    "size_cm": [
+      25.031,
+      25.319,
+      44.137
+    ],
+    "min_cm": [
+      -13.104,
+      -12.567,
+      -11.847
+    ],
+    "max_cm": [
+      11.926,
+      12.752,
+      32.29
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/Desserts/SM_Dessert_Macaron.SM_Dessert_Macaron",
+    "size_cm": [
+      35.676,
+      36.539,
+      31.361
+    ],
+    "min_cm": [
+      -19.05,
+      -16.182,
+      1.459
+    ],
+    "max_cm": [
+      16.626,
+      20.358,
+      32.82
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/Desserts/SM_Dessert_Muffin.SM_Dessert_Muffin",
+    "size_cm": [
+      35.389,
+      35.101,
+      44.02
+    ],
+    "min_cm": [
+      -18.282,
+      -17.648,
+      -0.423
+    ],
+    "max_cm": [
+      17.107,
+      17.452,
+      43.596
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/Desserts/SM_Dessert_Puding.SM_Dessert_Puding",
+    "size_cm": [
+      44.595,
+      44.883,
+      28.483
+    ],
+    "min_cm": [
+      -23.356,
+      -21.998,
+      8.06
+    ],
+    "max_cm": [
+      21.239,
+      22.885,
+      36.543
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/Desserts/SM_Dessert_Rollcake.SM_Dessert_Rollcake",
+    "size_cm": [
+      29.059,
+      39.129,
+      36.539
+    ],
+    "min_cm": [
+      -14.726,
+      -19.501,
+      2.518
+    ],
+    "max_cm": [
+      14.332,
+      19.628,
+      39.057
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/Desserts/SM_Dessert_Tart.SM_Dessert_Tart",
+    "size_cm": [
+      44.02,
+      43.157,
+      23.305
+    ],
+    "min_cm": [
+      -22.836,
+      -21.374,
+      7.451
+    ],
+    "max_cm": [
+      21.184,
+      21.782,
+      30.755
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/Desserts/SM_StrawberryCreamScone.SM_StrawberryCreamScone",
+    "size_cm": [
+      34.525,
+      34.525,
+      30.497
+    ],
+    "min_cm": [
+      -17.696,
+      -17.134,
+      3.012
+    ],
+    "max_cm": [
+      16.829,
+      17.391,
+      33.509
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/Door/SM_SlidingDoor.SM_SlidingDoor",
+    "size_cm": [
+      15.359,
+      131.635,
+      195.259
+    ],
+    "min_cm": [
+      -6.504,
+      -60.345,
+      -4.551
+    ],
+    "max_cm": [
+      8.854,
+      71.29,
+      190.709
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/Door/SM_SlidingDoor_Left.SM_SlidingDoor_Left",
+    "size_cm": [
+      65.818,
+      15.349,
+      195.259
+    ],
+    "min_cm": [
+      -32.909,
+      -7.674,
+      0.0
+    ],
+    "max_cm": [
+      32.909,
+      7.674,
+      195.259
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/Door/SM_SlidingDoor_Right.SM_SlidingDoor_Right",
+    "size_cm": [
+      65.818,
+      14.456,
+      195.259
+    ],
+    "min_cm": [
+      -32.909,
+      -7.228,
+      -0.0
+    ],
+    "max_cm": [
+      32.909,
+      7.228,
+      195.259
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/Door/SM_SlidingDoorFrame.SM_SlidingDoorFrame",
+    "size_cm": [
+      163.919,
+      34.736,
+      209.649
+    ],
+    "min_cm": [
+      -81.96,
+      -17.368,
+      0.0
+    ],
+    "max_cm": [
+      81.96,
+      17.368,
+      209.649
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/Furnitures/SM_Couch.SM_Couch",
+    "size_cm": [
+      211.978,
+      95.252,
+      104.535
+    ],
+    "min_cm": [
+      -98.918,
+      -49.78,
+      -35.677
+    ],
+    "max_cm": [
+      113.06,
+      45.472,
+      68.858
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/Furnitures/SM_KitchenTable.SM_KitchenTable",
+    "size_cm": [
+      148.605,
+      131.477,
+      63.221
+    ],
+    "min_cm": [
+      -68.855,
+      -54.829,
+      -37.226
+    ],
+    "max_cm": [
+      79.75,
+      76.648,
+      25.995
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/Furnitures/SM_LunaBed.SM_LunaBed",
+    "size_cm": [
+      185.622,
+      199.728,
+      105.161
+    ],
+    "min_cm": [
+      -85.669,
+      -94.304,
+      -36.111
+    ],
+    "max_cm": [
+      99.953,
+      105.424,
+      69.049
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/Furnitures/SM_Stool.SM_Stool",
+    "size_cm": [
+      61.344,
+      55.71,
+      65.725
+    ],
+    "min_cm": [
+      -29.866,
+      -13.278,
+      -35.051
+    ],
+    "max_cm": [
+      31.478,
+      42.432,
+      30.674
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/GroupE/SM_Agit_E.SM_Agit_E",
+    "size_cm": [
+      100.648,
+      204.257,
+      137.651
+    ],
+    "min_cm": [
+      -43.558,
+      -106.017,
+      -60.115
+    ],
+    "max_cm": [
+      57.09,
+      98.24,
+      77.536
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/GroupE/SM_Agit_E_001.SM_Agit_E_001",
+    "size_cm": [
+      79.186,
+      97.688,
+      120.63
+    ],
+    "min_cm": [
+      -32.766,
+      -45.455,
+      -74.711
+    ],
+    "max_cm": [
+      46.42,
+      52.233,
+      45.919
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/GroupE/SM_Agit_E_002.SM_Agit_E_002",
+    "size_cm": [
+      79.926,
+      121.37,
+      89.547
+    ],
+    "min_cm": [
+      -33.076,
+      -61.367,
+      -56.099
+    ],
+    "max_cm": [
+      46.85,
+      60.003,
+      33.448
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/GroupE/SM_Agit_E_003.SM_Agit_E_003",
+    "size_cm": [
+      64.385,
+      137.651,
+      98.428
+    ],
+    "min_cm": [
+      -23.963,
+      -68.862,
+      -64.668
+    ],
+    "max_cm": [
+      40.422,
+      68.789,
+      33.76
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/GroupE/SM_Agit_E_004.SM_Agit_E_004",
+    "size_cm": [
+      36.263,
+      28.122,
+      59.205
+    ],
+    "min_cm": [
+      -15.201,
+      -15.819,
+      -34.277
+    ],
+    "max_cm": [
+      21.062,
+      12.303,
+      24.927
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/GroupE/SM_Agit_E_005.SM_Agit_E_005",
+    "size_cm": [
+      56.984,
+      61.425,
+      21.462
+    ],
+    "min_cm": [
+      -21.754,
+      -32.402,
+      -23.09
+    ],
+    "max_cm": [
+      35.231,
+      29.023,
+      -1.629
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/GroupE/SM_Agit_E_006.SM_Agit_E_006",
+    "size_cm": [
+      95.468,
+      102.128,
+      173.174
+    ],
+    "min_cm": [
+      -45.057,
+      -53.547,
+      -101.94
+    ],
+    "max_cm": [
+      50.41,
+      48.581,
+      71.234
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/GroupE/SM_Agit_E_007.SM_Agit_E_007",
+    "size_cm": [
+      133.951,
+      141.352,
+      31.083
+    ],
+    "min_cm": [
+      -69.954,
+      -73.39,
+      -25.311
+    ],
+    "max_cm": [
+      63.996,
+      67.961,
+      5.772
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/GroupF/SM_Agit_F_000.SM_Agit_F_000",
+    "size_cm": [
+      188.124,
+      205.026,
+      114.638
+    ],
+    "min_cm": [
+      -95.253,
+      -89.034,
+      -48.43
+    ],
+    "max_cm": [
+      92.871,
+      115.992,
+      66.208
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/GroupF/SM_Agit_F_001.SM_Agit_F_001",
+    "size_cm": [
+      35.273,
+      36.009,
+      56.584
+    ],
+    "min_cm": [
+      -17.55,
+      -17.957,
+      -23.832
+    ],
+    "max_cm": [
+      17.723,
+      18.051,
+      32.752
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/GroupF/SM_Agit_F_002.SM_Agit_F_002",
+    "size_cm": [
+      55.115,
+      58.789,
+      127.866
+    ],
+    "min_cm": [
+      -28.159,
+      -29.474,
+      -45.515
+    ],
+    "max_cm": [
+      26.956,
+      29.314,
+      82.351
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/GroupF/SM_Agit_F_003.SM_Agit_F_003",
+    "size_cm": [
+      66.872,
+      87.449,
+      131.54
+    ],
+    "min_cm": [
+      -34.272,
+      -44.419,
+      -61.129
+    ],
+    "max_cm": [
+      32.6,
+      43.03,
+      70.411
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/GroupF/SM_Agit_F_004.SM_Agit_F_004",
+    "size_cm": [
+      59.524,
+      45.561,
+      93.327
+    ],
+    "min_cm": [
+      -26.416,
+      -23.507,
+      -45.098
+    ],
+    "max_cm": [
+      33.107,
+      22.054,
+      48.229
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/GroupF/SM_Agit_F_005.SM_Agit_F_005",
+    "size_cm": [
+      38.213,
+      44.826,
+      60.994
+    ],
+    "min_cm": [
+      -19.32,
+      -22.419,
+      -29.29
+    ],
+    "max_cm": [
+      18.893,
+      22.407,
+      31.704
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/GroupF/SM_Agit_F_006.SM_Agit_F_006",
+    "size_cm": [
+      39.683,
+      45.561,
+      60.994
+    ],
+    "min_cm": [
+      -19.92,
+      -22.454,
+      -29.195
+    ],
+    "max_cm": [
+      19.763,
+      23.107,
+      31.798
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/GroupF/SM_Agit_F_007.SM_Agit_F_007",
+    "size_cm": [
+      39.683,
+      45.561,
+      60.994
+    ],
+    "min_cm": [
+      -20.081,
+      -22.42,
+      -29.543
+    ],
+    "max_cm": [
+      19.601,
+      23.141,
+      31.45
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/GroupF/SM_Agit_F_008.SM_Agit_F_008",
+    "size_cm": [
+      59.524,
+      52.91,
+      71.282
+    ],
+    "min_cm": [
+      -27.819,
+      -25.835,
+      -30.073
+    ],
+    "max_cm": [
+      31.704,
+      27.075,
+      41.208
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/GroupF/SM_Agit_F_009.SM_Agit_F_009",
+    "size_cm": [
+      49.235,
+      53.645,
+      24.251
+    ],
+    "min_cm": [
+      -24.627,
+      -26.971,
+      -12.329
+    ],
+    "max_cm": [
+      24.608,
+      26.674,
+      11.921
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/GroupF/SM_Agit_F_010.SM_Agit_F_010",
+    "size_cm": [
+      33.803,
+      35.273,
+      24.251
+    ],
+    "min_cm": [
+      -16.802,
+      -17.468,
+      -12.227
+    ],
+    "max_cm": [
+      17.001,
+      17.805,
+      12.024
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/GroupF/SM_Agit_F_011.SM_Agit_F_011",
+    "size_cm": [
+      34.539,
+      36.008,
+      24.251
+    ],
+    "min_cm": [
+      -17.025,
+      -18.26,
+      -12.146
+    ],
+    "max_cm": [
+      17.513,
+      17.748,
+      12.105
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/GroupF/SM_Agit_F_012.SM_Agit_F_012",
+    "size_cm": [
+      39.682,
+      38.947,
+      24.251
+    ],
+    "min_cm": [
+      -20.016,
+      -20.119,
+      -12.147
+    ],
+    "max_cm": [
+      19.666,
+      18.828,
+      12.104
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/Props/SM_CakePiece.SM_CakePiece",
+    "size_cm": [
+      43.994,
+      41.043,
+      25.753
+    ],
+    "min_cm": [
+      -22.976,
+      -20.746,
+      -8.77
+    ],
+    "max_cm": [
+      21.018,
+      20.298,
+      16.983
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/Props/SM_CoffeeCup.SM_CoffeeCup",
+    "size_cm": [
+      28.972,
+      26.826,
+      21.461
+    ],
+    "min_cm": [
+      -14.19,
+      -13.935,
+      -12.299
+    ],
+    "max_cm": [
+      14.782,
+      12.891,
+      9.161
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/Props/SM_NoteBook.SM_NoteBook",
+    "size_cm": [
+      37.824,
+      39.702,
+      39.166
+    ],
+    "min_cm": [
+      -17.884,
+      -20.313,
+      -11.802
+    ],
+    "max_cm": [
+      19.94,
+      19.389,
+      27.364
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/Props/SM_SM_LadderGray.SM_SM_LadderGray",
+    "size_cm": [
+      40.067,
+      16.802,
+      80.134
+    ],
+    "min_cm": [
+      -21.058,
+      -5.227,
+      -49.153
+    ],
+    "max_cm": [
+      19.009,
+      11.576,
+      30.981
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/Props/SM_SM_LadderGrayFrame.SM_SM_LadderGrayFrame",
+    "size_cm": [
+      106.16,
+      107.619,
+      7.755
+    ],
+    "min_cm": [
+      -55.536,
+      -56.476,
+      -13.28
+    ],
+    "max_cm": [
+      50.624,
+      51.143,
+      -5.525
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/Props/SM_SM_LadderGrayHatch.SM_SM_LadderGrayHatch",
+    "size_cm": [
+      99.114,
+      100.896,
+      31.806
+    ],
+    "min_cm": [
+      -52.39,
+      -53.032,
+      -14.041
+    ],
+    "max_cm": [
+      46.724,
+      47.864,
+      17.765
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/SM_Agit_Bath.SM_Agit_Bath",
+    "size_cm": [
+      115.788,
+      168.245,
+      86.901
+    ],
+    "min_cm": [
+      -57.894,
+      -84.123,
+      -43.45
+    ],
+    "max_cm": [
+      57.894,
+      84.123,
+      43.45
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/SM_Agit_D_000.SM_Agit_D_000",
+    "size_cm": [
+      149.51,
+      87.147,
+      175.894
+    ],
+    "min_cm": [
+      -72.743,
+      -87.309,
+      -52.55
+    ],
+    "max_cm": [
+      76.767,
+      -0.161,
+      123.345
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/SM_Agit_D_001.SM_Agit_D_001",
+    "size_cm": [
+      45.572,
+      85.549,
+      154.307
+    ],
+    "min_cm": [
+      -17.338,
+      -80.742,
+      -58.98
+    ],
+    "max_cm": [
+      28.234,
+      4.807,
+      95.328
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/SM_Agit_D_002.SM_Agit_D_002",
+    "size_cm": [
+      57.566,
+      59.164,
+      64.761
+    ],
+    "min_cm": [
+      -24.078,
+      -66.912,
+      -9.34
+    ],
+    "max_cm": [
+      33.488,
+      -7.748,
+      55.421
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/SM_Agit_D_003.SM_Agit_D_003",
+    "size_cm": [
+      68.758,
+      71.157,
+      87.947
+    ],
+    "min_cm": [
+      -28.946,
+      -73.71,
+      -34.968
+    ],
+    "max_cm": [
+      39.813,
+      -2.553,
+      52.979
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/SM_Agit_D_004.SM_Agit_D_004",
+    "size_cm": [
+      83.15,
+      80.752,
+      131.921
+    ],
+    "min_cm": [
+      -35.232,
+      -79.602,
+      -45.334
+    ],
+    "max_cm": [
+      47.918,
+      1.15,
+      86.586
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/SM_Agit_D_005.SM_Agit_D_005",
+    "size_cm": [
+      58.365,
+      62.363,
+      60.763
+    ],
+    "min_cm": [
+      -24.117,
+      -69.731,
+      -9.893
+    ],
+    "max_cm": [
+      34.248,
+      -7.369,
+      50.87
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/SM_Agit_D_006.SM_Agit_D_006",
+    "size_cm": [
+      220.667,
+      163.102,
+      125.524
+    ],
+    "min_cm": [
+      -94.103,
+      -109.267,
+      -59.905
+    ],
+    "max_cm": [
+      126.564,
+      53.835,
+      65.619
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/SM_Agit_Toilet.SM_Agit_Toilet",
+    "size_cm": [
+      71.214,
+      52.626,
+      77.249
+    ],
+    "min_cm": [
+      -35.607,
+      -26.313,
+      -38.624
+    ],
+    "max_cm": [
+      35.607,
+      26.313,
+      38.624
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/SM_Agit_WashingMachineA.SM_Agit_WashingMachineA",
+    "size_cm": [
+      90.727,
+      79.51,
+      110.522
+    ],
+    "min_cm": [
+      -45.363,
+      -39.755,
+      -55.261
+    ],
+    "max_cm": [
+      45.363,
+      39.755,
+      55.261
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/SM_Agit_Washstand.SM_Agit_Washstand",
+    "size_cm": [
+      52.706,
+      56.126,
+      27.56
+    ],
+    "min_cm": [
+      -26.353,
+      -28.063,
+      -13.78
+    ],
+    "max_cm": [
+      26.353,
+      28.063,
+      13.78
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/SM_Agit_Workroom_000.SM_Agit_Workroom_000",
+    "size_cm": [
+      38.543,
+      20.61,
+      2.944
+    ],
+    "min_cm": [
+      -19.337,
+      -10.244,
+      -1.464
+    ],
+    "max_cm": [
+      19.205,
+      10.365,
+      1.48
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/SM_Agit_Workroom_001.SM_Agit_Workroom_001",
+    "size_cm": [
+      47.375,
+      25.16,
+      59.152
+    ],
+    "min_cm": [
+      -24.358,
+      -12.413,
+      -31.573
+    ],
+    "max_cm": [
+      23.017,
+      12.747,
+      27.579
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/SM_Agit_Workroom_002.SM_Agit_Workroom_002",
+    "size_cm": [
+      45.234,
+      25.16,
+      25.695
+    ],
+    "min_cm": [
+      -23.929,
+      -12.198,
+      -13.093
+    ],
+    "max_cm": [
+      21.305,
+      12.962,
+      12.602
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/SM_Agit_Workroom_003.SM_Agit_Workroom_003",
+    "size_cm": [
+      41.219,
+      23.286,
+      16.327
+    ],
+    "min_cm": [
+      -20.74,
+      -11.542,
+      -8.326
+    ],
+    "max_cm": [
+      20.479,
+      11.744,
+      8.001
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/SM_Agit_Workroom_004.SM_Agit_Workroom_004",
+    "size_cm": [
+      24.625,
+      22.751,
+      25.695
+    ],
+    "min_cm": [
+      -12.624,
+      -11.567,
+      -12.848
+    ],
+    "max_cm": [
+      12.0,
+      11.184,
+      12.848
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/SM_Agit_Workroom_005.SM_Agit_Workroom_005",
+    "size_cm": [
+      55.137,
+      35.063,
+      26.498
+    ],
+    "min_cm": [
+      -26.507,
+      -16.391,
+      -11.009
+    ],
+    "max_cm": [
+      28.63,
+      18.672,
+      15.49
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/SM_Agit_Workroom_006.SM_Agit_Workroom_006",
+    "size_cm": [
+      76.55,
+      45.769,
+      38.275
+    ],
+    "min_cm": [
+      -36.85,
+      -22.563,
+      -25.667
+    ],
+    "max_cm": [
+      39.7,
+      23.206,
+      12.608
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/SM_Agit_Workroom_007.SM_Agit_Workroom_007",
+    "size_cm": [
+      18.201,
+      17.665,
+      38.81
+    ],
+    "min_cm": [
+      -9.637,
+      -8.988,
+      -19.448
+    ],
+    "max_cm": [
+      8.564,
+      8.678,
+      19.362
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/SM_Agit_Workroom_008.SM_Agit_Workroom_008",
+    "size_cm": [
+      16.862,
+      30.78,
+      27.033
+    ],
+    "min_cm": [
+      -8.695,
+      -14.887,
+      -14.137
+    ],
+    "max_cm": [
+      8.167,
+      15.894,
+      12.896
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/SM_Agit_Workroom_009.SM_Agit_Workroom_009",
+    "size_cm": [
+      8.833,
+      13.65,
+      7.227
+    ],
+    "min_cm": [
+      -4.374,
+      -6.833,
+      -3.501
+    ],
+    "max_cm": [
+      4.459,
+      6.818,
+      3.726
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/SM_Agit_Workroom_010.SM_Agit_Workroom_010",
+    "size_cm": [
+      14.721,
+      14.453,
+      27.301
+    ],
+    "min_cm": [
+      -7.413,
+      -7.24,
+      -11.121
+    ],
+    "max_cm": [
+      7.308,
+      7.213,
+      16.18
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/SM_Agit_Workroom_011.SM_Agit_Workroom_011",
+    "size_cm": [
+      16.327,
+      20.877,
+      46.305
+    ],
+    "min_cm": [
+      -6.803,
+      -8.57,
+      -30.523
+    ],
+    "max_cm": [
+      9.524,
+      12.307,
+      15.782
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/SM_Agit_Workroom_012.SM_Agit_Workroom_012",
+    "size_cm": [
+      18.201,
+      17.665,
+      31.851
+    ],
+    "min_cm": [
+      -8.639,
+      -8.238,
+      -18.333
+    ],
+    "max_cm": [
+      9.562,
+      9.427,
+      13.519
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/SM_Agit_Workroom_013.SM_Agit_Workroom_013",
+    "size_cm": [
+      28.639,
+      32.119,
+      6.692
+    ],
+    "min_cm": [
+      -14.581,
+      -16.042,
+      -3.401
+    ],
+    "max_cm": [
+      14.059,
+      16.077,
+      3.29
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/SM_Agit_Workroom_014.SM_Agit_Workroom_014",
+    "size_cm": [
+      14.989,
+      17.933,
+      23.286
+    ],
+    "min_cm": [
+      -7.697,
+      -9.042,
+      -10.839
+    ],
+    "max_cm": [
+      7.292,
+      8.891,
+      12.447
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/SM_Agit_Workroom_015.SM_Agit_Workroom_015",
+    "size_cm": [
+      20.074,
+      19.539,
+      3.747
+    ],
+    "min_cm": [
+      -10.103,
+      -9.67,
+      -1.807
+    ],
+    "max_cm": [
+      9.971,
+      9.869,
+      1.94
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/SM_Agit_Workroom_016.SM_Agit_Workroom_016",
+    "size_cm": [
+      20.074,
+      20.342,
+      5.085
+    ],
+    "min_cm": [
+      -9.983,
+      -10.023,
+      -2.655
+    ],
+    "max_cm": [
+      10.091,
+      10.319,
+      2.43
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/SM_Agit_Workroom_017.SM_Agit_Workroom_017",
+    "size_cm": [
+      23.554,
+      23.286,
+      5.353
+    ],
+    "min_cm": [
+      -11.702,
+      -11.714,
+      -2.847
+    ],
+    "max_cm": [
+      11.852,
+      11.572,
+      2.506
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/SM_Agit_Workroom_018.SM_Agit_Workroom_018",
+    "size_cm": [
+      23.286,
+      23.019,
+      5.353
+    ],
+    "min_cm": [
+      -11.724,
+      -11.529,
+      -2.772
+    ],
+    "max_cm": [
+      11.562,
+      11.489,
+      2.581
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/SM_AgitCircle.SM_AgitCircle",
+    "size_cm": [
+      1812.14,
+      1812.14,
+      216.494
+    ],
+    "min_cm": [
+      -963.957,
+      -915.953,
+      0.0
+    ],
+    "max_cm": [
+      848.183,
+      896.187,
+      216.494
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/SM_AgitFloorHall.SM_AgitFloorHall",
+    "size_cm": [
+      775.154,
+      795.038,
+      1.009
+    ],
+    "min_cm": [
+      -427.473,
+      -369.419,
+      -4.596
+    ],
+    "max_cm": [
+      347.681,
+      425.618,
+      -3.587
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/SM_AgitFloorRest.SM_AgitFloorRest",
+    "size_cm": [
+      1800.0,
+      1800.0,
+      0.0
+    ],
+    "min_cm": [
+      -908.272,
+      -903.706,
+      -4.596
+    ],
+    "max_cm": [
+      891.728,
+      896.294,
+      -4.596
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/SM_AgitFloorVaultRoom.SM_AgitFloorVaultRoom",
+    "size_cm": [
+      497.137,
+      552.12,
+      7.094
+    ],
+    "min_cm": [
+      337.371,
+      -266.417,
+      -4.596
+    ],
+    "max_cm": [
+      834.509,
+      285.703,
+      2.498
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/SM_AgitFloorVaultRoom_Shaft.SM_AgitFloorVaultRoom_Shaft",
+    "size_cm": [
+      169.866,
+      184.137,
+      289.441
+    ],
+    "min_cm": [
+      590.16,
+      -158.949,
+      -294.037
+    ],
+    "max_cm": [
+      760.026,
+      25.188,
+      -4.596
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/SM_AgitWall.SM_AgitWall",
+    "size_cm": [
+      1729.962,
+      1729.785,
+      224.927
+    ],
+    "min_cm": [
+      -925.369,
+      -870.428,
+      0.0
+    ],
+    "max_cm": [
+      804.593,
+      859.356,
+      224.927
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/TeaProps/SM_CakePlate.SM_CakePlate",
+    "size_cm": [
+      15.375,
+      15.542,
+      1.671
+    ],
+    "min_cm": [
+      -7.299,
+      -7.501,
+      1.016
+    ],
+    "max_cm": [
+      8.076,
+      8.041,
+      2.687
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/TeaProps/SM_Coaster.SM_Coaster",
+    "size_cm": [
+      12.701,
+      12.701,
+      1.671
+    ],
+    "min_cm": [
+      -5.97,
+      -6.378,
+      1.016
+    ],
+    "max_cm": [
+      6.731,
+      6.323,
+      2.687
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/TeaProps/SM_TeaTable.SM_TeaTable",
+    "size_cm": [
+      52.81,
+      33.591,
+      14.372
+    ],
+    "min_cm": [
+      -25.118,
+      -16.39,
+      0.347
+    ],
+    "max_cm": [
+      27.692,
+      17.201,
+      14.72
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/Wall/SM_AgitCircle.SM_AgitCircle",
+    "size_cm": [
+      1812.14,
+      1812.14,
+      216.494
+    ],
+    "min_cm": [
+      -963.957,
+      -915.953,
+      0.0
+    ],
+    "max_cm": [
+      848.183,
+      896.187,
+      216.494
+    ]
+  },
+  {
+    "path": "/Game/Environment/Bunker/Agit/Wall/SM_AgitWall.SM_AgitWall",
+    "size_cm": [
+      1729.962,
+      1729.785,
+      224.927
+    ],
+    "min_cm": [
+      -925.369,
+      -870.428,
+      0.0
+    ],
+    "max_cm": [
+      804.593,
+      859.356,
+      224.927
+    ]
+  }
+]

@@ -1,0 +1,1134 @@
+{
+  "destination": "/Game/Environment/Bunker/InteriorAdditions",
+  "engine": "5.7.4-51494982+++UE5+Release-5.7",
+  "verification": "fresh-process reload",
+  "texture": "/Game/Environment/Bunker/InteriorAdditions/Textures/T_InteriorAdditions_Atlas.T_InteriorAdditions_Atlas",
+  "texture_srgb": true,
+  "materials": [
+    {
+      "path": "/Game/Environment/Bunker/InteriorAdditions/Materials/M_InteriorAdditions_Pink.M_InteriorAdditions_Pink",
+      "metallic": 0.11999999731779099,
+      "roughness": 0.3799999952316284
+    },
+    {
+      "path": "/Game/Environment/Bunker/InteriorAdditions/Materials/M_InteriorAdditions_Ivory.M_InteriorAdditions_Ivory",
+      "metallic": 0.07999999821186066,
+      "roughness": 0.3199999928474426
+    },
+    {
+      "path": "/Game/Environment/Bunker/InteriorAdditions/Materials/M_InteriorAdditions_Oak.M_InteriorAdditions_Oak",
+      "metallic": 0.0,
+      "roughness": 0.6499999761581421
+    },
+    {
+      "path": "/Game/Environment/Bunker/InteriorAdditions/Materials/M_InteriorAdditions_Walnut.M_InteriorAdditions_Walnut",
+      "metallic": 0.0,
+      "roughness": 0.6800000071525574
+    },
+    {
+      "path": "/Game/Environment/Bunker/InteriorAdditions/Materials/M_InteriorAdditions_Steel.M_InteriorAdditions_Steel",
+      "metallic": 0.7200000286102295,
+      "roughness": 0.3199999928474426
+    },
+    {
+      "path": "/Game/Environment/Bunker/InteriorAdditions/Materials/M_InteriorAdditions_Iron.M_InteriorAdditions_Iron",
+      "metallic": 0.550000011920929,
+      "roughness": 0.5799999833106995
+    },
+    {
+      "path": "/Game/Environment/Bunker/InteriorAdditions/Materials/M_InteriorAdditions_Brass.M_InteriorAdditions_Brass",
+      "metallic": 0.7200000286102295,
+      "roughness": 0.3199999928474426
+    },
+    {
+      "path": "/Game/Environment/Bunker/InteriorAdditions/Materials/M_InteriorAdditions_Glass.M_InteriorAdditions_Glass",
+      "metallic": 0.15000000596046448,
+      "roughness": 0.1899999976158142
+    },
+    {
+      "path": "/Game/Environment/Bunker/InteriorAdditions/Materials/M_InteriorAdditions_Gingham.M_InteriorAdditions_Gingham",
+      "metallic": 0.0,
+      "roughness": 0.8999999761581421
+    },
+    {
+      "path": "/Game/Environment/Bunker/InteriorAdditions/Materials/M_InteriorAdditions_Rug.M_InteriorAdditions_Rug",
+      "metallic": 0.0,
+      "roughness": 0.9800000190734863
+    },
+    {
+      "path": "/Game/Environment/Bunker/InteriorAdditions/Materials/M_InteriorAdditions_Lace.M_InteriorAdditions_Lace",
+      "metallic": 0.0,
+      "roughness": 0.949999988079071
+    },
+    {
+      "path": "/Game/Environment/Bunker/InteriorAdditions/Materials/M_InteriorAdditions_Floral.M_InteriorAdditions_Floral",
+      "metallic": 0.0,
+      "roughness": 0.5199999809265137
+    },
+    {
+      "path": "/Game/Environment/Bunker/InteriorAdditions/Materials/M_InteriorAdditions_Sage.M_InteriorAdditions_Sage",
+      "metallic": 0.10000000149011612,
+      "roughness": 0.41999998688697815
+    },
+    {
+      "path": "/Game/Environment/Bunker/InteriorAdditions/Materials/M_InteriorAdditions_Terracotta.M_InteriorAdditions_Terracotta",
+      "metallic": 0.0,
+      "roughness": 0.8299999833106995
+    },
+    {
+      "path": "/Game/Environment/Bunker/InteriorAdditions/Materials/M_InteriorAdditions_Turquoise.M_InteriorAdditions_Turquoise",
+      "metallic": 0.05000000074505806,
+      "roughness": 0.3199999928474426
+    },
+    {
+      "path": "/Game/Environment/Bunker/InteriorAdditions/Materials/M_InteriorAdditions_Linen.M_InteriorAdditions_Linen",
+      "metallic": 0.0,
+      "roughness": 0.9200000166893005
+    }
+  ],
+  "assets": [
+    {
+      "name": "SM_InteriorAdditions_Refrigerator",
+      "path": "/Game/Environment/Bunker/InteriorAdditions/Meshes/SM_InteriorAdditions_Refrigerator.SM_InteriorAdditions_Refrigerator",
+      "category": "Kitchen",
+      "vertices_lod0": 16565,
+      "triangles_lod0": 22960,
+      "source_uv_channels": 1,
+      "lightmap_uv_channel": 1,
+      "simple_collisions": 1,
+      "materials": [
+        "M_InteriorAdditions_Pink",
+        "M_InteriorAdditions_Iron",
+        "M_InteriorAdditions_Walnut",
+        "M_InteriorAdditions_Brass",
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Linen",
+        "M_InteriorAdditions_Oak"
+      ],
+      "bounds_cm": [
+        -51.06399917602539,
+        -47.73400115966797,
+        0.0,
+        51.06399917602539,
+        47.73400115966797,
+        173.17398071289062
+      ],
+      "max_bounds_error_cm": 1.9287109381593837e-05
+    },
+    {
+      "name": "SM_InteriorAdditions_SinkCabinet",
+      "path": "/Game/Environment/Bunker/InteriorAdditions/Meshes/SM_InteriorAdditions_SinkCabinet.SM_InteriorAdditions_SinkCabinet",
+      "category": "Kitchen",
+      "vertices_lod0": 10094,
+      "triangles_lod0": 13576,
+      "source_uv_channels": 1,
+      "lightmap_uv_channel": 1,
+      "simple_collisions": 1,
+      "materials": [
+        "M_InteriorAdditions_Oak",
+        "M_InteriorAdditions_Walnut",
+        "M_InteriorAdditions_Steel",
+        "M_InteriorAdditions_Iron",
+        "M_InteriorAdditions_Pink",
+        "M_InteriorAdditions_Brass",
+        "M_InteriorAdditions_Floral"
+      ],
+      "bounds_cm": [
+        -102.12849426269531,
+        -50.32400894165039,
+        0.0,
+        102.12849426269531,
+        50.32400131225586,
+        137.6510009765625
+      ],
+      "max_bounds_error_cm": 8.941650392557676e-06
+    },
+    {
+      "name": "SM_InteriorAdditions_StoveOven",
+      "path": "/Game/Environment/Bunker/InteriorAdditions/Meshes/SM_InteriorAdditions_StoveOven.SM_InteriorAdditions_StoveOven",
+      "category": "Kitchen",
+      "vertices_lod0": 17543,
+      "triangles_lod0": 23976,
+      "source_uv_channels": 1,
+      "lightmap_uv_channel": 1,
+      "simple_collisions": 1,
+      "materials": [
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Iron",
+        "M_InteriorAdditions_Brass",
+        "M_InteriorAdditions_Walnut",
+        "M_InteriorAdditions_Glass",
+        "M_InteriorAdditions_Steel"
+      ],
+      "bounds_cm": [
+        -48.8440055847168,
+        -39.59300231933594,
+        0.0,
+        48.84400177001953,
+        39.59299850463867,
+        120.6300048828125
+      ],
+      "max_bounds_error_cm": 5.584716795681288e-06
+    },
+    {
+      "name": "SM_InteriorAdditions_PantryShelf",
+      "path": "/Game/Environment/Bunker/InteriorAdditions/Meshes/SM_InteriorAdditions_PantryShelf.SM_InteriorAdditions_PantryShelf",
+      "category": "Kitchen",
+      "vertices_lod0": 7471,
+      "triangles_lod0": 9588,
+      "source_uv_channels": 1,
+      "lightmap_uv_channel": 1,
+      "simple_collisions": 6,
+      "materials": [
+        "M_InteriorAdditions_Oak",
+        "M_InteriorAdditions_Pink",
+        "M_InteriorAdditions_Walnut",
+        "M_InteriorAdditions_Brass",
+        "M_InteriorAdditions_Sage",
+        "M_InteriorAdditions_Floral",
+        "M_InteriorAdditions_Gingham",
+        "M_InteriorAdditions_Linen"
+      ],
+      "bounds_cm": [
+        -60.68500518798828,
+        -39.9630012512207,
+        0.0,
+        60.68500518798828,
+        39.9630012512207,
+        89.54700469970703
+      ],
+      "max_bounds_error_cm": 5.187988278976263e-06
+    },
+    {
+      "name": "SM_InteriorAdditions_CanisterSet",
+      "path": "/Game/Environment/Bunker/InteriorAdditions/Meshes/SM_InteriorAdditions_CanisterSet.SM_InteriorAdditions_CanisterSet",
+      "category": "Kitchen",
+      "vertices_lod0": 5658,
+      "triangles_lod0": 7332,
+      "source_uv_channels": 1,
+      "lightmap_uv_channel": 1,
+      "simple_collisions": 1,
+      "materials": [
+        "M_InteriorAdditions_Pink",
+        "M_InteriorAdditions_Walnut",
+        "M_InteriorAdditions_Brass",
+        "M_InteriorAdditions_Sage",
+        "M_InteriorAdditions_Floral"
+      ],
+      "bounds_cm": [
+        -29.0,
+        -11.000001907348633,
+        0.0,
+        29.0,
+        11.000001907348633,
+        29.0
+      ],
+      "max_bounds_error_cm": 1.9073486328125e-06
+    },
+    {
+      "name": "SM_InteriorAdditions_ElectricKettle",
+      "path": "/Game/Environment/Bunker/InteriorAdditions/Meshes/SM_InteriorAdditions_ElectricKettle.SM_InteriorAdditions_ElectricKettle",
+      "category": "Kitchen",
+      "vertices_lod0": 3135,
+      "triangles_lod0": 3968,
+      "source_uv_channels": 1,
+      "lightmap_uv_channel": 1,
+      "simple_collisions": 1,
+      "materials": [
+        "M_InteriorAdditions_Floral",
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Brass",
+        "M_InteriorAdditions_Pink",
+        "M_InteriorAdditions_Glass"
+      ],
+      "bounds_cm": [
+        -14.0,
+        -12.0,
+        0.0,
+        14.0,
+        12.000000953674316,
+        37.0
+      ],
+      "max_bounds_error_cm": 9.5367431640625e-07
+    },
+    {
+      "name": "SM_InteriorAdditions_CookingPot",
+      "path": "/Game/Environment/Bunker/InteriorAdditions/Meshes/SM_InteriorAdditions_CookingPot.SM_InteriorAdditions_CookingPot",
+      "category": "Kitchen",
+      "vertices_lod0": 3174,
+      "triangles_lod0": 3972,
+      "source_uv_channels": 1,
+      "lightmap_uv_channel": 1,
+      "simple_collisions": 1,
+      "materials": [
+        "M_InteriorAdditions_Iron",
+        "M_InteriorAdditions_Steel"
+      ],
+      "bounds_cm": [
+        -19.5,
+        -14.999999046325684,
+        0.0,
+        19.500001907348633,
+        14.999999046325684,
+        27.000001907348633
+      ],
+      "max_bounds_error_cm": 1.9073486328125e-06
+    },
+    {
+      "name": "SM_InteriorAdditions_FoldedNapkin",
+      "path": "/Game/Environment/Bunker/InteriorAdditions/Meshes/SM_InteriorAdditions_FoldedNapkin.SM_InteriorAdditions_FoldedNapkin",
+      "category": "Kitchen",
+      "vertices_lod0": 508,
+      "triangles_lod0": 580,
+      "source_uv_channels": 1,
+      "lightmap_uv_channel": 1,
+      "simple_collisions": 1,
+      "materials": [
+        "M_InteriorAdditions_Pink",
+        "M_InteriorAdditions_Gingham",
+        "M_InteriorAdditions_Ivory"
+      ],
+      "bounds_cm": [
+        -16.0,
+        -13.000000953674316,
+        0.0,
+        16.0,
+        12.999999046325684,
+        3.0
+      ],
+      "max_bounds_error_cm": 9.5367431640625e-07
+    },
+    {
+      "name": "SM_InteriorAdditions_WindowCurtains",
+      "path": "/Game/Environment/Bunker/InteriorAdditions/Meshes/SM_InteriorAdditions_WindowCurtains.SM_InteriorAdditions_WindowCurtains",
+      "category": "Kitchen",
+      "vertices_lod0": 4060,
+      "triangles_lod0": 4840,
+      "source_uv_channels": 1,
+      "lightmap_uv_channel": 1,
+      "simple_collisions": 1,
+      "materials": [
+        "M_InteriorAdditions_Turquoise",
+        "M_InteriorAdditions_Oak",
+        "M_InteriorAdditions_Brass",
+        "M_InteriorAdditions_Pink",
+        "M_InteriorAdditions_Linen"
+      ],
+      "bounds_cm": [
+        -69.0,
+        -11.500005722045898,
+        0.0,
+        69.0,
+        11.500004768371582,
+        98.0
+      ],
+      "max_bounds_error_cm": 5.7220458984375e-06
+    },
+    {
+      "name": "SM_InteriorAdditions_MilkCan",
+      "path": "/Game/Environment/Bunker/InteriorAdditions/Meshes/SM_InteriorAdditions_MilkCan.SM_InteriorAdditions_MilkCan",
+      "category": "Kitchen",
+      "vertices_lod0": 3932,
+      "triangles_lod0": 4864,
+      "source_uv_channels": 1,
+      "lightmap_uv_channel": 1,
+      "simple_collisions": 1,
+      "materials": [
+        "M_InteriorAdditions_Steel"
+      ],
+      "bounds_cm": [
+        -18.131500244140625,
+        -14.06100082397461,
+        0.0,
+        18.131500244140625,
+        14.06100082397461,
+        59.20500183105469
+      ],
+      "max_bounds_error_cm": 1.8310546892053026e-06
+    },
+    {
+      "name": "SM_InteriorAdditions_WashingMachine",
+      "path": "/Game/Environment/Bunker/InteriorAdditions/Meshes/SM_InteriorAdditions_WashingMachine.SM_InteriorAdditions_WashingMachine",
+      "category": "BathroomLaundry",
+      "vertices_lod0": 8215,
+      "triangles_lod0": 11040,
+      "source_uv_channels": 1,
+      "lightmap_uv_channel": 1,
+      "simple_collisions": 1,
+      "materials": [
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Pink",
+        "M_InteriorAdditions_Iron",
+        "M_InteriorAdditions_Brass",
+        "M_InteriorAdditions_Glass",
+        "M_InteriorAdditions_Steel"
+      ],
+      "bounds_cm": [
+        -45.363502502441406,
+        -39.755001068115234,
+        0.0,
+        45.36349868774414,
+        39.75499725341797,
+        110.5219955444336
+      ],
+      "max_bounds_error_cm": 4.455566411820655e-06
+    },
+    {
+      "name": "SM_InteriorAdditions_LaundryShelf",
+      "path": "/Game/Environment/Bunker/InteriorAdditions/Meshes/SM_InteriorAdditions_LaundryShelf.SM_InteriorAdditions_LaundryShelf",
+      "category": "BathroomLaundry",
+      "vertices_lod0": 7646,
+      "triangles_lod0": 9468,
+      "source_uv_channels": 1,
+      "lightmap_uv_channel": 1,
+      "simple_collisions": 4,
+      "materials": [
+        "M_InteriorAdditions_Oak",
+        "M_InteriorAdditions_Walnut",
+        "M_InteriorAdditions_Gingham",
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Linen",
+        "M_InteriorAdditions_Pink",
+        "M_InteriorAdditions_Floral",
+        "M_InteriorAdditions_Sage"
+      ],
+      "bounds_cm": [
+        -70.00000762939453,
+        -46.00000762939453,
+        0.0,
+        70.00000762939453,
+        46.00000762939453,
+        184.0
+      ],
+      "max_bounds_error_cm": 7.62939453125e-06
+    },
+    {
+      "name": "SM_InteriorAdditions_LaundryHamper",
+      "path": "/Game/Environment/Bunker/InteriorAdditions/Meshes/SM_InteriorAdditions_LaundryHamper.SM_InteriorAdditions_LaundryHamper",
+      "category": "BathroomLaundry",
+      "vertices_lod0": 11872,
+      "triangles_lod0": 14640,
+      "source_uv_channels": 1,
+      "lightmap_uv_channel": 1,
+      "simple_collisions": 1,
+      "materials": [
+        "M_InteriorAdditions_Oak",
+        "M_InteriorAdditions_Walnut",
+        "M_InteriorAdditions_Gingham",
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Linen"
+      ],
+      "bounds_cm": [
+        -24.0,
+        -23.0,
+        0.0,
+        24.0,
+        23.0,
+        63.0
+      ],
+      "max_bounds_error_cm": 0.0
+    },
+    {
+      "name": "SM_InteriorAdditions_Toilet",
+      "path": "/Game/Environment/Bunker/InteriorAdditions/Meshes/SM_InteriorAdditions_Toilet.SM_InteriorAdditions_Toilet",
+      "category": "BathroomLaundry",
+      "vertices_lod0": 3796,
+      "triangles_lod0": 4960,
+      "source_uv_channels": 1,
+      "lightmap_uv_channel": 1,
+      "simple_collisions": 2,
+      "materials": [
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Turquoise",
+        "M_InteriorAdditions_Pink",
+        "M_InteriorAdditions_Brass"
+      ],
+      "bounds_cm": [
+        -26.312999725341797,
+        -35.606998443603516,
+        0.0,
+        26.31300163269043,
+        35.606998443603516,
+        77.24899291992188
+      ],
+      "max_bounds_error_cm": 7.080078120225153e-06
+    },
+    {
+      "name": "SM_InteriorAdditions_Bathtub",
+      "path": "/Game/Environment/Bunker/InteriorAdditions/Meshes/SM_InteriorAdditions_Bathtub.SM_InteriorAdditions_Bathtub",
+      "category": "BathroomLaundry",
+      "vertices_lod0": 7820,
+      "triangles_lod0": 10956,
+      "source_uv_channels": 1,
+      "lightmap_uv_channel": 1,
+      "simple_collisions": 1,
+      "materials": [
+        "M_InteriorAdditions_Pink",
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Turquoise",
+        "M_InteriorAdditions_Brass"
+      ],
+      "bounds_cm": [
+        -77.86299896240234,
+        -113.13999938964844,
+        0.0,
+        77.86299896240234,
+        113.13999938964844,
+        116.87600708007812
+      ],
+      "max_bounds_error_cm": 7.080078120225153e-06
+    },
+    {
+      "name": "SM_InteriorAdditions_Washbasin",
+      "path": "/Game/Environment/Bunker/InteriorAdditions/Meshes/SM_InteriorAdditions_Washbasin.SM_InteriorAdditions_Washbasin",
+      "category": "BathroomLaundry",
+      "vertices_lod0": 5094,
+      "triangles_lod0": 6832,
+      "source_uv_channels": 1,
+      "lightmap_uv_channel": 1,
+      "simple_collisions": 1,
+      "materials": [
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Steel",
+        "M_InteriorAdditions_Iron",
+        "M_InteriorAdditions_Pink",
+        "M_InteriorAdditions_Brass"
+      ],
+      "bounds_cm": [
+        -26.352998733520508,
+        -28.06300163269043,
+        0.0,
+        26.352998733520508,
+        28.062999725341797,
+        27.559999465942383
+      ],
+      "max_bounds_error_cm": 1.63269043085279e-06
+    },
+    {
+      "name": "SM_InteriorAdditions_TowelStack",
+      "path": "/Game/Environment/Bunker/InteriorAdditions/Meshes/SM_InteriorAdditions_TowelStack.SM_InteriorAdditions_TowelStack",
+      "category": "BathroomLaundry",
+      "vertices_lod0": 1603,
+      "triangles_lod0": 2012,
+      "source_uv_channels": 1,
+      "lightmap_uv_channel": 1,
+      "simple_collisions": 1,
+      "materials": [
+        "M_InteriorAdditions_Linen",
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Gingham",
+        "M_InteriorAdditions_Lace"
+      ],
+      "bounds_cm": [
+        -22.0,
+        -17.000001907348633,
+        0.0,
+        22.0,
+        17.000001907348633,
+        25.0
+      ],
+      "max_bounds_error_cm": 1.9073486328125e-06
+    },
+    {
+      "name": "SM_InteriorAdditions_DetergentSet",
+      "path": "/Game/Environment/Bunker/InteriorAdditions/Meshes/SM_InteriorAdditions_DetergentSet.SM_InteriorAdditions_DetergentSet",
+      "category": "BathroomLaundry",
+      "vertices_lod0": 4015,
+      "triangles_lod0": 4924,
+      "source_uv_channels": 1,
+      "lightmap_uv_channel": 1,
+      "simple_collisions": 1,
+      "materials": [
+        "M_InteriorAdditions_Oak",
+        "M_InteriorAdditions_Walnut",
+        "M_InteriorAdditions_Pink",
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Floral",
+        "M_InteriorAdditions_Sage"
+      ],
+      "bounds_cm": [
+        -26.5,
+        -15.500001907348633,
+        0.0,
+        26.499998092651367,
+        15.500001907348633,
+        39.0
+      ],
+      "max_bounds_error_cm": 1.9073486328125e-06
+    },
+    {
+      "name": "SM_InteriorAdditions_DiningTable",
+      "path": "/Game/Environment/Bunker/InteriorAdditions/Meshes/SM_InteriorAdditions_DiningTable.SM_InteriorAdditions_DiningTable",
+      "category": "Furniture",
+      "vertices_lod0": 7735,
+      "triangles_lod0": 11480,
+      "source_uv_channels": 1,
+      "lightmap_uv_channel": 1,
+      "simple_collisions": 1,
+      "materials": [
+        "M_InteriorAdditions_Pink",
+        "M_InteriorAdditions_Oak",
+        "M_InteriorAdditions_Gingham"
+      ],
+      "bounds_cm": [
+        -74.30250549316406,
+        -65.7385025024414,
+        0.0,
+        74.30249786376953,
+        65.7385025024414,
+        63.22100067138672
+      ],
+      "max_bounds_error_cm": 5.493164067615908e-06
+    },
+    {
+      "name": "SM_InteriorAdditions_Stool",
+      "path": "/Game/Environment/Bunker/InteriorAdditions/Meshes/SM_InteriorAdditions_Stool.SM_InteriorAdditions_Stool",
+      "category": "Furniture",
+      "vertices_lod0": 10668,
+      "triangles_lod0": 15932,
+      "source_uv_channels": 1,
+      "lightmap_uv_channel": 1,
+      "simple_collisions": 1,
+      "materials": [
+        "M_InteriorAdditions_Oak",
+        "M_InteriorAdditions_Walnut",
+        "M_InteriorAdditions_Pink",
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Brass"
+      ],
+      "bounds_cm": [
+        -30.672000885009766,
+        -27.854999542236328,
+        0.0,
+        30.6720027923584,
+        27.854999542236328,
+        65.7249984741211
+      ],
+      "max_bounds_error_cm": 2.792358397840644e-06
+    },
+    {
+      "name": "SM_InteriorAdditions_Sofa",
+      "path": "/Game/Environment/Bunker/InteriorAdditions/Meshes/SM_InteriorAdditions_Sofa.SM_InteriorAdditions_Sofa",
+      "category": "Furniture",
+      "vertices_lod0": 36745,
+      "triangles_lod0": 50044,
+      "source_uv_channels": 1,
+      "lightmap_uv_channel": 1,
+      "simple_collisions": 1,
+      "materials": [
+        "M_InteriorAdditions_Walnut",
+        "M_InteriorAdditions_Gingham",
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Brass",
+        "M_InteriorAdditions_Pink",
+        "M_InteriorAdditions_Floral"
+      ],
+      "bounds_cm": [
+        -128.9090118408203,
+        -57.92601013183594,
+        0.0,
+        128.9090118408203,
+        57.92601013183594,
+        127.14099884033203
+      ],
+      "max_bounds_error_cm": 1.1840820320685452e-05
+    },
+    {
+      "name": "SM_InteriorAdditions_CoffeeTable",
+      "path": "/Game/Environment/Bunker/InteriorAdditions/Meshes/SM_InteriorAdditions_CoffeeTable.SM_InteriorAdditions_CoffeeTable",
+      "category": "Furniture",
+      "vertices_lod0": 7949,
+      "triangles_lod0": 11820,
+      "source_uv_channels": 1,
+      "lightmap_uv_channel": 1,
+      "simple_collisions": 1,
+      "materials": [
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Oak",
+        "M_InteriorAdditions_Brass",
+        "M_InteriorAdditions_Lace"
+      ],
+      "bounds_cm": [
+        -82.44950866699219,
+        -52.443511962890625,
+        0.0,
+        82.44950103759766,
+        52.443511962890625,
+        44.87700271606445
+      ],
+      "max_bounds_error_cm": 1.1962890624772626e-05
+    },
+    {
+      "name": "SM_InteriorAdditions_Bed",
+      "path": "/Game/Environment/Bunker/InteriorAdditions/Meshes/SM_InteriorAdditions_Bed.SM_InteriorAdditions_Bed",
+      "category": "Furniture",
+      "vertices_lod0": 24458,
+      "triangles_lod0": 33940,
+      "source_uv_channels": 1,
+      "lightmap_uv_channel": 1,
+      "simple_collisions": 2,
+      "materials": [
+        "M_InteriorAdditions_Oak",
+        "M_InteriorAdditions_Linen",
+        "M_InteriorAdditions_Floral",
+        "M_InteriorAdditions_Brass",
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Gingham"
+      ],
+      "bounds_cm": [
+        -94.0619888305664,
+        -102.51300811767578,
+        0.0,
+        94.06200408935547,
+        102.51300811767578,
+        114.63800811767578
+      ],
+      "max_bounds_error_cm": 1.1169433591362576e-05
+    },
+    {
+      "name": "SM_InteriorAdditions_Nightstand",
+      "path": "/Game/Environment/Bunker/InteriorAdditions/Meshes/SM_InteriorAdditions_Nightstand.SM_InteriorAdditions_Nightstand",
+      "category": "Furniture",
+      "vertices_lod0": 10314,
+      "triangles_lod0": 15488,
+      "source_uv_channels": 1,
+      "lightmap_uv_channel": 1,
+      "simple_collisions": 1,
+      "materials": [
+        "M_InteriorAdditions_Oak",
+        "M_InteriorAdditions_Pink",
+        "M_InteriorAdditions_Brass"
+      ],
+      "bounds_cm": [
+        -27.55750274658203,
+        -29.39450454711914,
+        0.0,
+        27.55750274658203,
+        29.394500732421875,
+        71.0
+      ],
+      "max_bounds_error_cm": 4.5471191398860356e-06
+    },
+    {
+      "name": "SM_InteriorAdditions_BedsideLamp",
+      "path": "/Game/Environment/Bunker/InteriorAdditions/Meshes/SM_InteriorAdditions_BedsideLamp.SM_InteriorAdditions_BedsideLamp",
+      "category": "Furniture",
+      "vertices_lod0": 3802,
+      "triangles_lod0": 4712,
+      "source_uv_channels": 1,
+      "lightmap_uv_channel": 1,
+      "simple_collisions": 1,
+      "materials": [
+        "M_InteriorAdditions_Brass",
+        "M_InteriorAdditions_Floral",
+        "M_InteriorAdditions_Linen",
+        "M_InteriorAdditions_Ivory"
+      ],
+      "bounds_cm": [
+        -18.0,
+        -18.0,
+        0.0,
+        18.0,
+        18.0,
+        56.86600112915039
+      ],
+      "max_bounds_error_cm": 1.1291503909660605e-06
+    },
+    {
+      "name": "SM_InteriorAdditions_BedroomCabinet",
+      "path": "/Game/Environment/Bunker/InteriorAdditions/Meshes/SM_InteriorAdditions_BedroomCabinet.SM_InteriorAdditions_BedroomCabinet",
+      "category": "Furniture",
+      "vertices_lod0": 10143,
+      "triangles_lod0": 15120,
+      "source_uv_channels": 1,
+      "lightmap_uv_channel": 1,
+      "simple_collisions": 1,
+      "materials": [
+        "M_InteriorAdditions_Oak",
+        "M_InteriorAdditions_Pink",
+        "M_InteriorAdditions_Brass"
+      ],
+      "bounds_cm": [
+        -33.45000076293945,
+        -29.399999618530273,
+        0.0,
+        33.45000076293945,
+        29.399999618530273,
+        90.0
+      ],
+      "max_bounds_error_cm": 7.629394502828291e-07
+    },
+    {
+      "name": "SM_InteriorAdditions_RoundRug",
+      "path": "/Game/Environment/Bunker/InteriorAdditions/Meshes/SM_InteriorAdditions_RoundRug.SM_InteriorAdditions_RoundRug",
+      "category": "Furniture",
+      "vertices_lod0": 19873,
+      "triangles_lod0": 24768,
+      "source_uv_channels": 1,
+      "lightmap_uv_channel": 1,
+      "simple_collisions": 1,
+      "materials": [
+        "M_InteriorAdditions_Rug",
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Lace"
+      ],
+      "bounds_cm": [
+        -92.5,
+        -92.5,
+        0.0,
+        92.5,
+        92.5,
+        1.5
+      ],
+      "max_bounds_error_cm": 0.0
+    },
+    {
+      "name": "SM_InteriorAdditions_OvalRug",
+      "path": "/Game/Environment/Bunker/InteriorAdditions/Meshes/SM_InteriorAdditions_OvalRug.SM_InteriorAdditions_OvalRug",
+      "category": "Furniture",
+      "vertices_lod0": 19873,
+      "triangles_lod0": 24768,
+      "source_uv_channels": 1,
+      "lightmap_uv_channel": 1,
+      "simple_collisions": 1,
+      "materials": [
+        "M_InteriorAdditions_Rug",
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Lace"
+      ],
+      "bounds_cm": [
+        -117.50000762939453,
+        -75.0,
+        0.0,
+        117.50000762939453,
+        75.0,
+        1.5
+      ],
+      "max_bounds_error_cm": 7.62939453125e-06
+    },
+    {
+      "name": "SM_InteriorAdditions_FloorCushion",
+      "path": "/Game/Environment/Bunker/InteriorAdditions/Meshes/SM_InteriorAdditions_FloorCushion.SM_InteriorAdditions_FloorCushion",
+      "category": "Furniture",
+      "vertices_lod0": 5128,
+      "triangles_lod0": 7204,
+      "source_uv_channels": 1,
+      "lightmap_uv_channel": 1,
+      "simple_collisions": 1,
+      "materials": [
+        "M_InteriorAdditions_Gingham",
+        "M_InteriorAdditions_Ivory",
+        "M_InteriorAdditions_Linen"
+      ],
+      "bounds_cm": [
+        -28.492000579833984,
+        -30.712501525878906,
+        0.0,
+        28.491994857788086,
+        30.712499618530273,
+        21.461999893188477
+      ],
+      "max_bounds_error_cm": 5.142211914943573e-06
+    }
+  ],
+  "showcase": {
+    "created": true,
+    "path": "/Game/Environment/Bunker/InteriorAdditions/Maps/L_InteriorAdditions_Showcase",
+    "displayed_assets": {
+      "SM_InteriorAdditions_Bathtub": [
+        -795.636,
+        -940.6999999999999,
+        0.0
+      ],
+      "SM_InteriorAdditions_DetergentSet": [
+        -397.818,
+        -940.6999999999999,
+        0.0
+      ],
+      "SM_InteriorAdditions_LaundryHamper": [
+        0.0,
+        -940.6999999999999,
+        0.0
+      ],
+      "SM_InteriorAdditions_LaundryShelf": [
+        397.818,
+        -940.6999999999999,
+        0.0
+      ],
+      "SM_InteriorAdditions_Toilet": [
+        795.636,
+        -940.6999999999999,
+        0.0
+      ],
+      "SM_InteriorAdditions_TowelStack": [
+        -795.636,
+        -564.42,
+        0.0
+      ],
+      "SM_InteriorAdditions_Washbasin": [
+        -397.818,
+        -564.42,
+        0.0
+      ],
+      "SM_InteriorAdditions_WashingMachine": [
+        0.0,
+        -564.42,
+        0.0
+      ],
+      "SM_InteriorAdditions_Bed": [
+        397.818,
+        -564.42,
+        0.0
+      ],
+      "SM_InteriorAdditions_BedroomCabinet": [
+        795.636,
+        -564.42,
+        0.0
+      ],
+      "SM_InteriorAdditions_BedsideLamp": [
+        -795.636,
+        -188.14,
+        0.0
+      ],
+      "SM_InteriorAdditions_CoffeeTable": [
+        -397.818,
+        -188.14,
+        0.0
+      ],
+      "SM_InteriorAdditions_DiningTable": [
+        0.0,
+        -188.14,
+        0.0
+      ],
+      "SM_InteriorAdditions_FloorCushion": [
+        397.818,
+        -188.14,
+        0.0
+      ],
+      "SM_InteriorAdditions_Nightstand": [
+        795.636,
+        -188.14,
+        0.0
+      ],
+      "SM_InteriorAdditions_OvalRug": [
+        -795.636,
+        188.14,
+        0.0
+      ],
+      "SM_InteriorAdditions_RoundRug": [
+        -397.818,
+        188.14,
+        0.0
+      ],
+      "SM_InteriorAdditions_Sofa": [
+        0.0,
+        188.14,
+        0.0
+      ],
+      "SM_InteriorAdditions_Stool": [
+        397.818,
+        188.14,
+        0.0
+      ],
+      "SM_InteriorAdditions_CanisterSet": [
+        795.636,
+        188.14,
+        0.0
+      ],
+      "SM_InteriorAdditions_CookingPot": [
+        -795.636,
+        564.42,
+        0.0
+      ],
+      "SM_InteriorAdditions_ElectricKettle": [
+        -397.818,
+        564.42,
+        0.0
+      ],
+      "SM_InteriorAdditions_FoldedNapkin": [
+        0.0,
+        564.42,
+        0.0
+      ],
+      "SM_InteriorAdditions_MilkCan": [
+        397.818,
+        564.42,
+        0.0
+      ],
+      "SM_InteriorAdditions_PantryShelf": [
+        795.636,
+        564.42,
+        0.0
+      ],
+      "SM_InteriorAdditions_Refrigerator": [
+        -795.636,
+        940.6999999999999,
+        0.0
+      ],
+      "SM_InteriorAdditions_SinkCabinet": [
+        -397.818,
+        940.6999999999999,
+        0.0
+      ],
+      "SM_InteriorAdditions_StoveOven": [
+        0.0,
+        940.6999999999999,
+        0.0
+      ],
+      "SM_InteriorAdditions_WindowCurtains": [
+        397.818,
+        940.6999999999999,
+        0.0
+      ]
+    },
+    "label_count": 29,
+    "directional_light_count": 2
+  },
+  "protected_assets_sha256": {
+    "TunaSweeper/Content/EditorOnly/Lookdev/Lookdev_NiagaraExplosion.umap": "36846db7a6d0fa538b9f2222d0218f5b677280f303893df1f73048c4df587673",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Desserts/M_SM_Dessert.uasset": "24a1b57367fa9fe2a92ab78dad1ef958c11ada7b4d6d06d494042517f81db8e5",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Desserts/SM_Dessert_Cake.uasset": "27e43bff64ed3f5331c2b7575f4ddcf0c9e714aa6ce78cae819f15603073a0b6",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Desserts/SM_Dessert_Donut.uasset": "f6a7c0021bc0d57634d1d8e37afe7ad2a537ef1039cdb3f019948c9675192e04",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Desserts/SM_Dessert_Farpe.uasset": "3bd74ad98c8e7db8bfc244c45d9e326ecf323164d8bac2246cbf1dbc99fbf1a6",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Desserts/SM_Dessert_Macaron.uasset": "f4292c55af1e23a6558498976226e73ca7ac23690e5721c7a6fab74bc930f84f",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Desserts/SM_Dessert_Muffin.uasset": "7620a9cd3cb99fd524967a99542521ee02a31a72a940df33bc26319fd0eb3254",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Desserts/SM_Dessert_Puding.uasset": "8fbeebfaf32efde03e04d529a5b0d72957eb9f9a888185db4b3145b982f51983",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Desserts/SM_Dessert_Rollcake.uasset": "584d80c74e448806b51f6b98d9f578e2200760d02fe094de83424ef72b17f556",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Desserts/SM_Dessert_Tart.uasset": "422772d5d836157fd62863b8a7eb92b17cc5e0b1088ee418fd16065a27107028",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Desserts/SM_StrawberryCreamScone.uasset": "c017515f23dc9f911f30dcb2bb5dd3db901f68066646d49478d92d166b366dcf",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Desserts/T_SM_Dessert_BaseColor_01.uasset": "68c560479f7fd4285f631b00997e07ba187375c9c014f3905c0210db05f34ddc",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Desserts/T_SM_Dessert_Normal_01.uasset": "057b0d93cd968e8fe166a5e55b4985dc733ab8abb14aad006a545e03b8037cd0",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Door/BP_SlidingDoor.uasset": "d554d7a02de47913cd54ae75f919ddf2c85505f8f17717fe285a5f6dee73b5d6",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Door/M_SM_SlidingDoorSimple.uasset": "ef943ddfc5c82989d86c0aa209494cb2fa022629418a408ed8ca3ad1fc07e894",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Door/SM_SlidingDoor.uasset": "46f1beeec5251e671618fbce8f12db0a83777c672acf5583be80beb7b498ada8",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Door/SM_SlidingDoor_Left.uasset": "b77bfab4b2af005b13716d9cb382fd055b1bc6c55ecf37098cf4365d9dc3e257",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Door/SM_SlidingDoor_Right.uasset": "167785a0b570ccc45426dab2be85e5afbf1847cff1bd061547b02b27ad05bb89",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Door/SM_SlidingDoorFrame.uasset": "3a16f9c3143a3227cc2fd4c7bb3fac38bc2b4a2b2aa0867ffcfdaa081cd5ec2d",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Door/T_SM_SlidingDoorSimple_BaseColor.uasset": "56c632701a36756635196edacb913ac5dae34c16d3f7ce565d0a4e8bb3ad552a",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Door/T_SM_SlidingDoorSimple_Normal.uasset": "467c896cd2692a07a14c61d3651b5d2e3d2c0cdfecc8a343ecbd3765aecc74ad",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Furnitures/M_SM_Furniture.uasset": "870a20f595915db2f3df38cb99d66e036d9ed1e2a5e124d2d100bf618e74e809",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Furnitures/SM_Couch.uasset": "5ba67c69a7e6d08c11bc30ee503c9d6a078b52c31fc0956ec3f115d992e69adc",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Furnitures/SM_KitchenTable.uasset": "47a0027d8318198dbeb14800a0778aa3559bdd8e121de496fb88bcbb16de3b97",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Furnitures/SM_LunaBed.uasset": "7f2fd16124e4388cc18510005f0fd4f23e48ccbfb317d09ae38e3adbf3e3aa1b",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Furnitures/SM_Stool.uasset": "d431514bbc4d72119fd13024a62850066713975670a5213387a3ebb2da8f623c",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Furnitures/T_SM_Furniture_BaseColor_01.uasset": "c96a1493315217cb0ba0356d787a22d30a9fc7d76b2a9ca60b345ceb9b4576ab",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Furnitures/T_SM_Furniture_Normal_01.uasset": "31b425b58926d58522224557f835f3882d55de3173a37a6507f539dcdac46e83",
+    "TunaSweeper/Content/Environment/Bunker/Agit/GroupE/M_Agit_E.uasset": "d7aefbdef7216580695fbe2d22acd7ce6b1ec1bc8728f88ed6f8bf311fe358fe",
+    "TunaSweeper/Content/Environment/Bunker/Agit/GroupE/SM_Agit_E.uasset": "b9e6ba4e155f885bbc196aee581ff440545e49d72bf632fd9145e148a2c91ca0",
+    "TunaSweeper/Content/Environment/Bunker/Agit/GroupE/SM_Agit_E_001.uasset": "d6e1f3afb8df0442ffdad0b9c13dfbc1d6ff04557e5c53184998f8ec3d3309fb",
+    "TunaSweeper/Content/Environment/Bunker/Agit/GroupE/SM_Agit_E_002.uasset": "aa81b9123ac077b06e646234d9ea133499980f0bed10d2024765e5819a28cc2a",
+    "TunaSweeper/Content/Environment/Bunker/Agit/GroupE/SM_Agit_E_003.uasset": "b55794b042e9df86c01e87ea596727977fdf5ea2cb66faef25b727470ea53bea",
+    "TunaSweeper/Content/Environment/Bunker/Agit/GroupE/SM_Agit_E_004.uasset": "0899c4c91fbd253ed4064dd3de57198f7fd9eeab760a4c11cb211d5b32aead8c",
+    "TunaSweeper/Content/Environment/Bunker/Agit/GroupE/SM_Agit_E_005.uasset": "6291c4cfa5e05a851c8b165ed3360f99883b66d90e5634b10ad3bcc5d8bf5277",
+    "TunaSweeper/Content/Environment/Bunker/Agit/GroupE/SM_Agit_E_006.uasset": "09c71ecf4f6fe7908f0ccf045c0c95bddfe97864b59060830eeb4589a84d0cda",
+    "TunaSweeper/Content/Environment/Bunker/Agit/GroupE/SM_Agit_E_007.uasset": "4736c3be599f31a3b4efc04d836f94d90d96fce474da5f9d54e35fdd8c6409a1",
+    "TunaSweeper/Content/Environment/Bunker/Agit/GroupE/T_Agit_E_BaseColor_01.uasset": "0e43c9e3b58278e8f46dbc3252d95607a3e60a73213bf017a9271f5c8080124c",
+    "TunaSweeper/Content/Environment/Bunker/Agit/GroupE/T_Agit_E_Normal_01.uasset": "f2688445f9079d7bc24e9337e318f237500db9a149fd8026d45b613e2fb47be7",
+    "TunaSweeper/Content/Environment/Bunker/Agit/GroupF/M_Agit_F.uasset": "1c447dbcb2d0b3e3b065f074d1b98d42554ba9d9c5c6f2b3216cca3434d7d0c7",
+    "TunaSweeper/Content/Environment/Bunker/Agit/GroupF/SM_Agit_F_000.uasset": "e456e871522a0d72fed522d36b9eabbd307c51d9918d340a214914a9af63db80",
+    "TunaSweeper/Content/Environment/Bunker/Agit/GroupF/SM_Agit_F_001.uasset": "34a7914855103643dcda0a54fac6b46f194751296015b1e29febdf9ca7f19bb5",
+    "TunaSweeper/Content/Environment/Bunker/Agit/GroupF/SM_Agit_F_002.uasset": "e1dc92fc9416e103324a70cf5140569fa3d41df74c0a36dd9abee12b0507a9d1",
+    "TunaSweeper/Content/Environment/Bunker/Agit/GroupF/SM_Agit_F_003.uasset": "5b94ded29ece87dbdb952d8c6ef026073652cacf1cce527474decbbf2950c0c9",
+    "TunaSweeper/Content/Environment/Bunker/Agit/GroupF/SM_Agit_F_004.uasset": "69b76ff9e9e6f95f20d73dec947c5a63581b442aa9d8319e6f405715e63f345f",
+    "TunaSweeper/Content/Environment/Bunker/Agit/GroupF/SM_Agit_F_005.uasset": "b0d95cc7a02ebe4937e7d4c6ccc7cf39d5f4a1e8265f785bc54f220fce9d6acd",
+    "TunaSweeper/Content/Environment/Bunker/Agit/GroupF/SM_Agit_F_006.uasset": "ab4da54bdb386c3ea5b161e8cace380efa77ce0fb1848117d0fee0b795b2c4e0",
+    "TunaSweeper/Content/Environment/Bunker/Agit/GroupF/SM_Agit_F_007.uasset": "564708b04dc273cf513582d709e092bf3fd04a10608cc0f14cb03d669c577c9e",
+    "TunaSweeper/Content/Environment/Bunker/Agit/GroupF/SM_Agit_F_008.uasset": "29d3c333519cc615e13e45a17c4c9ab2449e2013123c7032e313bfa7006afc19",
+    "TunaSweeper/Content/Environment/Bunker/Agit/GroupF/SM_Agit_F_009.uasset": "ec9537444651b689d9ad3e8c25473e4b09e28fde07d33b9cf8394a8547e4e35a",
+    "TunaSweeper/Content/Environment/Bunker/Agit/GroupF/SM_Agit_F_010.uasset": "d8dffde571fa736ed4adecfed9a6e52a6cacdf10e42fa143f9f6893d30a2810c",
+    "TunaSweeper/Content/Environment/Bunker/Agit/GroupF/SM_Agit_F_011.uasset": "97574937148aa128e4199b3867e19be0f950cfe43015ddeaf326fcf6b994d5cc",
+    "TunaSweeper/Content/Environment/Bunker/Agit/GroupF/SM_Agit_F_012.uasset": "b50b5effa0d590e7ef9080f2cb00f8d44536ae54bacd5888007bbb434d4d4e80",
+    "TunaSweeper/Content/Environment/Bunker/Agit/GroupF/T_Agit_F_BaseColor_01.uasset": "53c28c69aeb32106839d288d0021cbd3974d369af6e548489b71a120cde0324d",
+    "TunaSweeper/Content/Environment/Bunker/Agit/GroupF/T_Agit_F_Normal_01.uasset": "f27c4487c86178361c41ae929f5b62e69b7d86c9c40805613e09249a44043061",
+    "TunaSweeper/Content/Environment/Bunker/Agit/M_Agit_A.uasset": "57848a29deac9abf156d917809842fd3cb922b1d91cf2f9d6f4409b17381e267",
+    "TunaSweeper/Content/Environment/Bunker/Agit/M_Agit_C.uasset": "d67470cabb9eba21a3d7cd70d49abce38c239108eb8a9cf960b11fdc67a82c25",
+    "TunaSweeper/Content/Environment/Bunker/Agit/M_Agit_D.uasset": "7eea0f8cca9191271eab7c164f426b24e7f4b1b491f108ee08a3a7b4ba00dbae",
+    "TunaSweeper/Content/Environment/Bunker/Agit/M_AgitFloor.uasset": "b56b56db17321b0ac5f7005557903b2d8a6f06fb0b61166a5fa6038fb0a33e75",
+    "TunaSweeper/Content/Environment/Bunker/Agit/M_AgitFloorHall.uasset": "7c7713442c0f10613ae0ac73b5ee3a0792cc0ee8e15b5d496b5c8322f5c28070",
+    "TunaSweeper/Content/Environment/Bunker/Agit/M_AgitWall.uasset": "1d28b26660be4e81f123d32ca78ea292f78fc3e699b923638254e14f9ce4297d",
+    "TunaSweeper/Content/Environment/Bunker/Agit/M_WallGray.uasset": "ae1a88c2df69720e89ddd05eb6ac591e1429331c1bbdae69aecffe0b7cb50372",
+    "TunaSweeper/Content/Environment/Bunker/Agit/M_Wallpaper01.uasset": "e196b49770b7c1bce37c4b227bb33ddee6fb6a8c76b85dbe54d159ea653daf4e",
+    "TunaSweeper/Content/Environment/Bunker/Agit/M_Wallpaper02.uasset": "f14be3b811c3ef2db97857efa96755e7d5c83cca2923963c36f331ba7906f363",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Props/M_Agit_G.uasset": "363a4cf4a76f799d5bef0d06c6538e322ca86ab446cf689d3d582bd04069bc1e",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Props/M_SM_LadderGray.uasset": "5e60657a0c5babb17aeca30cc60eb8fd8fbf82f29c34cee6b741e0a80f54c1bb",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Props/SM_CakePiece.uasset": "1543cd9c2d8a8be5b52417e9b201898091b235d2651c27a202c46fffe14edf97",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Props/SM_CoffeeCup.uasset": "fc0077c847a14e629e45b408999e07fa3ac9cdf9f57f982b8ad20dbf4ac44e9b",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Props/SM_NoteBook.uasset": "d7318027ef5b99dfc858c7a29f7a7a8642d9fe548c69160b7dca602f65ce4f39",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Props/SM_SM_LadderGray.uasset": "6cf5b0496a9812a7fd6a4e253c8ae5e0e7c4bb62d06b701132630c9b49790b3e",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Props/SM_SM_LadderGrayFrame.uasset": "db7791e759e45732d516c886cc40fa7e8fea34eb8055015ebc0fb109958b79ae",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Props/SM_SM_LadderGrayHatch.uasset": "4ab6af4a2d61be5191aadb096f7abae89f71d33ca7a7d216ffa687150c4e7188",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Props/T_Agit_G_BaseColor_01.uasset": "0bfebd02a07572762d2703015a857471e72dc997f68e1c9ab5c7f3b6f3e92fbb",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Props/T_Agit_G_Normal_01.uasset": "f0c3cdc271db23ea9b52c4acc08601b0a5163b04240700f1760494a495176fff",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Props/T_SM_LadderGray_BaseColor_01.uasset": "f2c5bef38a34f5f0971573e9b71f7ede46f7aa00c76d01c1a951ec27beaf4f9a",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Props/T_SM_LadderGray_Normal_01.uasset": "b820c0e2bae4d69646f3017ace6872f2bd6ed6da277667a51b3fda0e15b31e8d",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_Bath.uasset": "dd5291e3bd06af03f1c35097198918bdd0ce1fb079eb94b865ed667e50c573c2",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_D_000.uasset": "911589879bb06ed784a6a7436833f3781379baa18db9790752b9cb3b11f0f28e",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_D_001.uasset": "a9a9816f8729924f4bff7f2e50102118e36264f28a0cba4eba69502d079f6a56",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_D_002.uasset": "106edd2a13f32d9f6b49513c605393e7d31d86d5624a08a87c7f25c3753e1f88",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_D_003.uasset": "6f0528cde49d0ffda23377d93a615bedd6ee2347b55fcf3c1001437f8eac9de8",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_D_004.uasset": "458b0eb80875f7b08342953e66ea7fbc3674e4ce6dc74f5b04879d0c11c0937c",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_D_005.uasset": "e50e1d55b42567cd5183260b17b4b54b3f051b921829fa2870a7756a1ad9d4c4",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_D_006.uasset": "78d4f9fc84d826dd83e2b88edd5868e133f6d5423fb9e63145eff61837d05a17",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_Toilet.uasset": "f731b3c2c340829bf74f10e87ffa39d63d9ddf5aa163f40fabe7259deef04ecb",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_WashingMachineA.uasset": "92767139e88e63b265f855e40438916ea9fc0b0c9d1408089144fda824eb8692",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_Washstand.uasset": "d7be19a426f5cc0c9012ab1c6ad3420486e568b63f55930873c78458c4ecec94",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_Workroom_000.uasset": "383d88dac085472b9a1a8422ac11e26003017613f80df935e6e93cfc3fa8e5ef",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_Workroom_001.uasset": "dbbf908fa31550ad97c4cc49c0540aedccc44ca89de2c86e9647c3fef9b27b38",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_Workroom_002.uasset": "a5a2d552916f5bf9eaf8af9c85f097259e76874df486a3bf76bc0f476045d3c8",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_Workroom_003.uasset": "97fffd5132bfd7f43955b8b77da15fe6817b3f365a3ff972a2afdcd6a4329a96",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_Workroom_004.uasset": "3da49712c90b158eeecf7f6fc77ed343a952d3f0ec858592c1eff70c2426d7b3",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_Workroom_005.uasset": "718388feb2be7ed5157ba8d93f006d8ad203e38003f1ddfbc4b5c6f918449b03",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_Workroom_006.uasset": "983e2fb9083197c59c338903efbaaa5e6dc8a7de207a6385e43ca31351a90518",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_Workroom_007.uasset": "114bae664a5379dd3c8facd2e3200d108df1920de6b4fae33dff38ce4361619e",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_Workroom_008.uasset": "b288a4f9a8d2bfa633e35907b34e47577301b2026805c9d1db6887a7c2133f3f",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_Workroom_009.uasset": "6cb947b7f3d580485ae9304b95d0b7c53d8ce195fb553752e7b8877bf0381a30",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_Workroom_010.uasset": "cffe0796c3a1b789352653ad8d0b9ce5b22f39eea3ec5985b5a5e4ea7a888a92",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_Workroom_011.uasset": "3b3a5bc449cc696e57719a9961a8d49befcd52114f5489d5c6ff69fde413a927",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_Workroom_012.uasset": "19ebe595fb55f326382b80747f2359acb61e02949d7b10221fb743210c2bdcc2",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_Workroom_013.uasset": "37286b3e50c045b9c5a9372260861ee2afb1d21152961dec04612771c4abf8a7",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_Workroom_014.uasset": "812265ec57653221524fecc010b8eca40ca7ec6ecf41010bfdfcd3e4d6c70920",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_Workroom_015.uasset": "6c904e9f178ed10c47b78963d981bc0fc9ec190d3fe41be7a036a22e3eb39a5f",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_Workroom_016.uasset": "f1d802ea8b6584665ff5c46365fc22eba5221100cdb5024ffc8f043c3fe9df20",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_Workroom_017.uasset": "175095cd2169fa3acc8187194b0b646b97c7657a5bc4ef436890257f8fe624d8",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_Workroom_018.uasset": "840a1296f73037e4056b2e985ee642c436f547c47258e149b001095a570bb17b",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_AgitCircle.uasset": "b2648970bc9672290591758df36c6085df5e94045974948a0f6375cf237b9c2e",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_AgitFloorHall.uasset": "1e253e0e1c0ff48bfbebbc005dc7a6785eff09a2b7390ff5d000225899bc128f",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_AgitFloorRest.uasset": "bdca8df606406f90d1faf1fa8e5e15c0011cef95d20465bd63070d99041fd607",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_AgitFloorVaultRoom.uasset": "c4d756eb249c6c56b35454b85f7e0e5564d1afcf88fbaf52f61de3ca8b147a77",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_AgitFloorVaultRoom_Shaft.uasset": "f14eb6bdcd4fcc1d8ced80835fad322e865795242a20ec493ec1cb48dfa56691",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_AgitWall.uasset": "66368223910c3c3447971f4e0a70b9d40101d7f279c5ed9519eb830197a75a81",
+    "TunaSweeper/Content/Environment/Bunker/Agit/T_Agit_A_BaseColor_01.uasset": "293ed75e03641e2c94abb91b9b173abdfb669ff6d4c24bc29b3795e1624b0aaf",
+    "TunaSweeper/Content/Environment/Bunker/Agit/T_Agit_A_Normal_01.uasset": "0bdb53ac6c8eeb9cbf09672df82a2d6d0cf12e8f8b172fac8cb28b50c5b6e392",
+    "TunaSweeper/Content/Environment/Bunker/Agit/T_Agit_C_BaseColor_01.uasset": "56a4b3fe6a2760385c373afa65d71da0e3ba1baa58495aa23ae0c6639ed8f250",
+    "TunaSweeper/Content/Environment/Bunker/Agit/T_Agit_C_Normal_01.uasset": "4245a5868d36efd6acd19b940fd902fb332afc61e4db9befa786e11f6795ec5c",
+    "TunaSweeper/Content/Environment/Bunker/Agit/T_Agit_D_BaseColor_01.uasset": "7ee74c34541445f7eff0ee69c7015de99402a1b45a46ec204a21fe78237fc1f2",
+    "TunaSweeper/Content/Environment/Bunker/Agit/T_Agit_D_Normal_01.uasset": "42696e9b6ac3317df891c194fb3b43f41abd962c50bfaac7fa0a8c0b45cb027a",
+    "TunaSweeper/Content/Environment/Bunker/Agit/T_AgitFloor.uasset": "0fb8c3ee61efe073deb2c7f398d02993237d2769a83ee0a56c5d0000ead0db61",
+    "TunaSweeper/Content/Environment/Bunker/Agit/T_AgitWall.uasset": "42fa002d4f50b8734d406a208f74d6fc5227d1d3004e6b15e44c11de5f2fc70a",
+    "TunaSweeper/Content/Environment/Bunker/Agit/TealGoldMarbleMedallion_albedo.uasset": "b85405af721fb1aab8ad2668efdf3e368323667f83e30a96be86c2611aa50870",
+    "TunaSweeper/Content/Environment/Bunker/Agit/TeaProps/M_SM_TeaTable.uasset": "3afab0d39291cd28dd1cdedf99f3dc405f00cc9bcccc2949507ecfef8f30b79e",
+    "TunaSweeper/Content/Environment/Bunker/Agit/TeaProps/SM_CakePlate.uasset": "7b01ef448597f4daf8fee66318f5e042c5369f16a8cf88f7ee82b26f9683e168",
+    "TunaSweeper/Content/Environment/Bunker/Agit/TeaProps/SM_Coaster.uasset": "583222aa8adbcf09ed977f8d498a1c172b22b1a7a5d5e144db82e25a7c449d9a",
+    "TunaSweeper/Content/Environment/Bunker/Agit/TeaProps/SM_TeaTable.uasset": "7a8cef8996c579d15cbf66587cf0281c7f1f93a1e4f58f315581bd9631f069f1",
+    "TunaSweeper/Content/Environment/Bunker/Agit/TeaProps/T_SM_TeaTable_BaseColor_01.uasset": "aeeef8cd3e271fb41f1bdaad344a6d91d82e3c668855abbf1a2cf3754e4cedb0",
+    "TunaSweeper/Content/Environment/Bunker/Agit/TeaProps/T_SM_TeaTable_Normal_01.uasset": "4e6e307a26bc1a10f279e2c8be5ce8b6312137cc6a97a0eb7ae766257dc6a7ac",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Wall/M_WallGray.uasset": "277e9c5fd05027ee5dce16e4f3697e0c968236616b32411b288ca0176da4a41c",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Wall/M_Wallpaper01.uasset": "c995caef70d62e01c74104644d0d345a528f8301e8b17919ce723171879f4290",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Wall/M_Wallpaper02.uasset": "7fd9002812b55386485a51f1c7a3da4213f8bd429819912ae346bfcecdefe8a6",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Wall/SM_AgitCircle.uasset": "2ae516851370bac791948d1f38150f7061925269fb675009888884a6fc3cabbf",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Wall/SM_AgitWall.uasset": "458643e49273eb1d8d081158ecc264f6ea401ef31936f4c60972189d95153879",
+    "TunaSweeper/Content/MainRaid/RaidMap.umap": "4b5151d642a2e3d447d4171389373fb5007705844554fd05f967924148e4f4e4",
+    "TunaSweeper/Content/Maps/BunkerMap.umap": "3a3e918678ce8a92b5d7af33c113ec1bcc663f81baf4700b0c99314be2b5d616",
+    "TunaSweeper/Content/Maps/DemoBoxRaidMap.umap": "a6c76b4728424722cc5c73f21b0985f0178fc5faafa118a8229c13528c76916b",
+    "TunaSweeper/Content/Maps/DemoRaidMap.umap": "13017a262fe76319003395f276de4faa16138f949130952f2872d08f03c34b95",
+    "TunaSweeper/Content/Maps/IntroMap.umap": "95ae73de76b9ea3e80bcfeedd7102a3eb19e8d0e86f7bd9b9256c7243b6be837",
+    "TunaSweeper/Content/Maps/LiftSeqMap.umap": "315cf8e2ca2eea82b02320f52226bff783facfd7cd041bfe52ca6d3e5590c5db",
+    "TunaSweeper/Content/Maps/OpeningScenarioMap.umap": "8b82d906432ca8a3ffd64576f9e58c3bb5f8546de00a9b59c5e2d112826f1153",
+    "TunaSweeper/Content/Maps/PrototypeTerrainPathCreekMap.umap": "6465905818ca2f779240116a2498cfedf3ecc8efd1047ba6d2d2af3877e12fe0",
+    "TunaSweeper/Content/Maps/SkySeqMap.umap": "2f402e10af5eb547a15ba568b51f00d7f43f1c0ab01409cd1e1269ea0b24daff",
+    "TunaSweeper/Content/Maps/TempMap.umap": "158673ba1e5b3e7a975145b180239b090c7f256299e8566b54f33c52f6e2cc9a"
+  },
+  "existing_agit_and_maps_unchanged": true,
+  "total_triangles": 375764,
+  "passed": true
+}

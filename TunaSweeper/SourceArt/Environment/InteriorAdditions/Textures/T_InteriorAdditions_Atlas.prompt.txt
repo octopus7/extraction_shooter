@@ -1,0 +1,14 @@
+Use case: stylized-concept
+Asset type: production base color material texture atlas for Blender modeled cozy game kitchen props to import into Unreal Engine.
+Primary request: Generate one square 2048x2048 texture image containing EXACTLY a 4 by 4 grid of 16 equally sized perfectly square texture tiles. Every tile is a flat orthographic straight-on surface swatch, NOT an object, NOT a render of a panel. Each tile fills its quadrant cell edge to edge, touching its neighbors without borders, dividers, outlines, labels, text, gutters, or padding. Precise boundaries are at 25%, 50%, 75% both horizontal and vertical. All 16 materials must be visually distinct and in the specified order.
+Color palette: warm cozy hand-painted kitchen, dusty strawberry pink, vanilla cream, honey oak, gently aged metal and coral cloth. Subtle smooth broad painterly surface variation, clean readable color regions, no tiny speckle.
+EXACT tile order reading left to right:
+Top row (row 1): (1) muted dusty rose pink enamel base color, subtly hand-painted and almost solid, (2) warm ivory cream enamel base color, subtly hand-painted and almost solid, (3) honey golden oak wood with flowing HORIZONTAL grain, (4) rich dark walnut wood with broad HORIZONTAL grain.
+Row 2: (1) neutral warm brushed stainless steel medium-light gray with extremely subtle HORIZONTAL brushing, (2) matte charcoal black cast iron with minimal subtle surface texture, (3) soft antique brass warm muted golden ochre base color with subtle brushing, (4) dark brown-black oven glass almost solid dark smoky brown.
+Row 3: (1) pink and cream gingham woven textile with regular repeating checks, (2) coral salmon woven rug fabric with subtle woven structure, (3) cream lace textile with a small repeating delicate lace pattern filling whole tile over slightly darker cream ground, (4) warm cream glazed ceramic with small scattered stylized pink flowers and sage leaves.
+Bottom row (row 4): (1) soft desaturated sage green enamel, (2) warm salmon terracotta clay with minimal clean broad variation, (3) muted turquoise teal enamel, (4) plain warm cream linen with subtle weave.
+Lighting: unlit diffuse albedo map only, perfectly even illumination, no specular highlights, no shading gradients, no cast shadows, no ambient occlusion.
+Constraints: EXACTLY 4 equally tall rows and 4 equally wide columns. All tiles have identical dimensions. NO text, numbers, labels, borders, gaps, perspective, geometry, knobs, handles, props, utensils, compositional illustration, glossy reflections, dark vignette, distressing scratches, grainy noise, glitter, point highlights, speckling, logos or watermark. Tile patterns fill their entire assigned square.
+
+Generated using the built-in image_gen tool. Native output preserved without image processing.
+Grid mapping: row 0 starts at image top; column 0 starts at image left. Blender UV v increases from image bottom.
