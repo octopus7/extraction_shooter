@@ -7963,3 +7963,12 @@
 - 주방 10종, 세탁실·욕실 8종, 가구 11종의 총 29개 메시와 16개 재질·텍스처를 /Game/Environment/Bunker/InteriorAdditions에 추가했다. 별도 L_InteriorAdditions_Showcase 맵에 전시했다.
 - FBX 및 독립 UE 재로드 검증: 375,764삼각형, 충돌체 39개, UV·재질 연결·피벗·치수 검사 통과, 최대 치수 오차 0.00002cm 미만. 기존 Agit·맵 파일 142개의 해시 불변을 확인했다. Python 결과는 성공이며 UE 종료 코드 1은 기존 Niagara typed-element Registry ensure로 별도 기록했다.
 - 생성 에셋과 일회성 임포터를 먼저 로컬 커밋한 뒤 임포터·실행 래퍼를 제거하고 재검증했다. 반복 제작용 Blender 스크립트와 읽기 전용 검증기는 유지한다. 최종 정리는 바로 다음 로컬 커밋으로 기록하며 원격 푸시는 수행하지 않는다.
+
+## 2026-09-07 11:48:00 (소요시간: 01:00:30)
+
+- 병렬 Astra xhigh 모델링 작업으로 SMG·AR·권총을 각각 기본형과 고급형으로 제작해 총 6종을 추가했다. 기본형은 현대 전술 총기, 고급형은 사용자 피드백에 맞춰 우주 SF 느낌을 제거하고 총기 본체와 모딩 장비 모두 현대 기반의 절제된 근미래 디자인으로 정리했다.
+- 내장 ImageGen으로 모델별 최종 레퍼런스 6장과 16칸 공유 텍스처 아틀라스를 생성했다. 선택 레퍼런스·방향 수정 이터레이션·정확한 프롬프트·Blender 소스·FBX·다방향 프리뷰·매니페스트를 `SourceArt/Weapons/TunaWeaponCollection`에 보존했다.
+- 색상 영역을 16개 의미별 머터리얼 슬롯으로 분리하고 UE 머터리얼 인스턴스마다 `Tint`를 노출했다. `Metallic`, `Roughness`, `EmissionStrength`도 개별 조정 가능하며 아틀라스 색상과 Tint가 곱해지도록 구성했다.
+- `/Game/Weapons/TunaWeaponCollection`에 메시 6개, 머터리얼 인스턴스 16개와 마스터 머터리얼, 텍스처, 별도 쇼케이스 맵을 추가했다. 각 메시는 +X 전방/+Y 우측/+Z 상단, UV 2채널, 단순 충돌 3개, `MuzzleSocket`·`LaserSightSocket`·`ShellEjectionSocket`을 갖는다.
+- Blender 신규 프로세스 FBX 라운드트립과 UE 5.7 신규 프로세스 재로딩 검증을 통과했다. UE LOD0 합계는 132,396삼각형이며 기존 무기 에셋과 기존 맵 해시 불변을 확인했다. UE 종료 코드 1은 기존 Niagara typed-element Registry ensure이고 자산 검증 보고서는 통과 상태다.
+- 생성 에셋과 일회성 UE 임포터를 첫 로컬 커밋으로 저장한 뒤 임포터와 실행 래퍼를 제거하고 남겨둔 읽기 전용 검증기로 재검증했다. Blender 편집·재생성 스크립트와 검증기는 유지하며 원격 푸시는 수행하지 않는다.
