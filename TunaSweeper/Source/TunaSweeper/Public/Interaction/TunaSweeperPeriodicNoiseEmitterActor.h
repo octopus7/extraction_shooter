@@ -7,6 +7,7 @@
 
 class UMaterialInstanceDynamic;
 class USceneComponent;
+class UStaticMesh;
 
 UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API ATunaSweeperPeriodicNoiseEmitterActor : public AActor
@@ -31,6 +32,7 @@ public:
 	void EmitNoise();
 
 protected:
+	virtual void OnConstruction(const FTransform& Transform) override;
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
@@ -40,6 +42,13 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UProceduralMeshComponent> ProceduralMesh;
+
+	/** Authored source meshes retain the existing per-vertex horn pulse at runtime. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TunaSweeper|Noise|Appearance")
+	TObjectPtr<UStaticMesh> BodySourceMesh;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TunaSweeper|Noise|Appearance")
+	TObjectPtr<UStaticMesh> HornSourceMesh;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TunaSweeper|Noise")
 	FName MeshDefinitionId = FName(TEXT("mesh.test_noise_quad_horn"));
@@ -78,6 +87,7 @@ protected:
 	float HornPulseColorBoost = 0.35f;
 
 private:
+	friend class FTunaSweeperNoiseEmitterMeshTest;
 	struct FRuntimeMeshSection
 	{
 		int32 SectionIndex = INDEX_NONE;
@@ -95,6 +105,7 @@ private:
 	};
 
 	void RebuildProceduralMesh();
+	bool BuildAuthoredMesh();
 	FString ResolveMeshDefinitionJsonPath() const;
 	void StartNoiseTimer();
 	void StopNoiseTimer();

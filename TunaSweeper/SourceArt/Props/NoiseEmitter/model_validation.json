@@ -1,0 +1,49 @@
+{
+  "SM_NoiseEmitter_Body": {
+    "vertices": 96,
+    "faces": 104,
+    "triangles": 176,
+    "nonmanifold_edges": 0,
+    "degenerate_faces": 0
+  },
+  "SM_NoiseEmitter_Horn": {
+    "vertices": 80,
+    "faces": 74,
+    "triangles": 156,
+    "nonmanifold_edges": 0,
+    "degenerate_faces": 0
+  },
+  "assembly_triangles": 800,
+  "bounds_cm": [
+    304,
+    304,
+    206
+  ],
+  "pivot": "Ground center; +Z up; reusable horn +X, pivot at narrow end",
+  "materials": {
+    "M_Noise_Ivory": [
+      0.7200000286102295,
+      0.6899999976158142,
+      0.5699999928474426,
+      1.0
+    ],
+    "M_Noise_Red": [
+      0.5799999833106995,
+      0.03200000151991844,
+      0.02500000037252903,
+      1.0
+    ],
+    "M_Noise_Interior": [
+      0.18000000715255737,
+      0.012000000104308128,
+      0.008999999612569809,
+      1.0
+    ],
+    "M_Noise_Charcoal": [
+      0.03200000151991844,
+      0.03999999910593033,
+      0.04399999976158142,
+      1.0
+    ]
+  }
+}
