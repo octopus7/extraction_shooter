@@ -1,0 +1,100 @@
+{
+  "verification": "source UCX AABB transformed into UE; conservative sampled capsule clearance",
+  "capsule_radius_cm": 35.0,
+  "sample_interval_cm": 10.0,
+  "body_height_above_floor_cm": [
+    35.0,
+    180.0
+  ],
+  "axis_contract": "Blender X/-Y/Z -> UE X/+Y/Z, then yaw/location",
+  "closed_arched_door_note": "No traversal through the intentionally closed door is asserted",
+  "opening_checks": [
+    {
+      "name": "SM_MoleControlV2_OakHatch200",
+      "expected_width_depth_cm": [
+        90,
+        90
+      ],
+      "collision_width_depth_cm": [
+        90.0,
+        90.0
+      ],
+      "passed": true
+    },
+    {
+      "name": "SM_MoleControlV2_StoneWindowWall200",
+      "expected_width_height_cm": [
+        100,
+        110
+      ],
+      "expected_z_range_cm": [
+        100,
+        210
+      ],
+      "collision_width_height_cm": [
+        100.0,
+        109.99999344348907
+      ],
+      "collision_z_range_cm": [
+        99.99999403953552,
+        209.9999874830246
+      ],
+      "allowed_muntins": [],
+      "interior_blocking_boxes": [],
+      "passed": true
+    }
+  ],
+  "levels": [
+    {
+      "name": "L_MoleControlV2_StoneVault",
+      "placement_count": 41,
+      "collision_box_count": 204,
+      "body_z_range_cm": [
+        355.0,
+        500.0
+      ],
+      "walkway_checks": [
+        {
+          "index": 0,
+          "segment_cm": [
+            0,
+            -210,
+            0,
+            85
+          ],
+          "samples": 31,
+          "minimum_clearance_cm": 8.999999999999972,
+          "blocked_colliders": [],
+          "passed": true
+        },
+        {
+          "index": 1,
+          "segment_cm": [
+            -160,
+            -180,
+            120,
+            -180
+          ],
+          "samples": 29,
+          "minimum_clearance_cm": 73.0,
+          "blocked_colliders": [],
+          "passed": true
+        }
+      ],
+      "passed": true
+    }
+  ],
+  "errors": [],
+  "passed": true,
+  "source_hashes_before": {
+    "TunaSweeper/SourceArt/Environment/FacilityRooms/model_manifest.json": "ce97815af3951aa2abe427d215f6c6a3c1cd5efb293999639d03cd156cb8a7a5",
+    "TunaSweeper/SourceArt/Environment/MoleControlV2/level_layout.json": "48668d47ba7d2fa08f772aa959f14a3a19c6b9842d7e9498e35e87e9553f296c",
+    "TunaSweeper/SourceArt/Environment/MoleControlV2/model_manifest.json": "22fcc469155f70c41e589c4b856f963f40dd67d5218f1364c2f79a1758adb508"
+  },
+  "source_hashes_after": {
+    "TunaSweeper/SourceArt/Environment/FacilityRooms/model_manifest.json": "ce97815af3951aa2abe427d215f6c6a3c1cd5efb293999639d03cd156cb8a7a5",
+    "TunaSweeper/SourceArt/Environment/MoleControlV2/level_layout.json": "48668d47ba7d2fa08f772aa959f14a3a19c6b9842d7e9498e35e87e9553f296c",
+    "TunaSweeper/SourceArt/Environment/MoleControlV2/model_manifest.json": "22fcc469155f70c41e589c4b856f963f40dd67d5218f1364c2f79a1758adb508"
+  },
+  "source_files_unchanged": true
+}

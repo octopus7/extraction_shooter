@@ -1,0 +1,549 @@
+{
+  "levels": [
+    {
+      "name": "L_MoleControlV2_StoneVault",
+      "size_cm": [
+        600,
+        600
+      ],
+      "floor_z_cm": 320,
+      "no_ceiling": false,
+      "placements": [
+        {
+          "label": "Architecture_OakFloor200_000",
+          "mesh": "SM_MoleControlV2_OakFloor200",
+          "location_cm": [
+            -200,
+            -200,
+            300
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_OakFloor200_001",
+          "mesh": "SM_MoleControlV2_OakFloor200",
+          "location_cm": [
+            -200,
+            0,
+            300
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_OakFloor200_002",
+          "mesh": "SM_MoleControlV2_OakFloor200",
+          "location_cm": [
+            -200,
+            200,
+            300
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_OakFloor200_003",
+          "mesh": "SM_MoleControlV2_OakFloor200",
+          "location_cm": [
+            0,
+            -200,
+            300
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_OakFloor200_004",
+          "mesh": "SM_MoleControlV2_OakFloor200",
+          "location_cm": [
+            0,
+            0,
+            300
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_OakFloor200_005",
+          "mesh": "SM_MoleControlV2_OakFloor200",
+          "location_cm": [
+            0,
+            200,
+            300
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_OakHatch200_006",
+          "mesh": "SM_MoleControlV2_OakHatch200",
+          "location_cm": [
+            200,
+            -200,
+            300
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_OakFloor200_007",
+          "mesh": "SM_MoleControlV2_OakFloor200",
+          "location_cm": [
+            200,
+            0,
+            300
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_OakFloor200_008",
+          "mesh": "SM_MoleControlV2_OakFloor200",
+          "location_cm": [
+            200,
+            200,
+            300
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_StoneWall200_009",
+          "mesh": "SM_MoleControlV2_StoneWall200",
+          "location_cm": [
+            -200,
+            -300,
+            320
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_StoneWall200_010",
+          "mesh": "SM_MoleControlV2_StoneWall200",
+          "location_cm": [
+            -200,
+            300,
+            320
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_StoneWall200_011",
+          "mesh": "SM_MoleControlV2_StoneWall200",
+          "location_cm": [
+            0,
+            -300,
+            320
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_StoneWall200_012",
+          "mesh": "SM_MoleControlV2_StoneWall200",
+          "location_cm": [
+            0,
+            300,
+            320
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_StoneWall200_013",
+          "mesh": "SM_MoleControlV2_StoneWall200",
+          "location_cm": [
+            200,
+            -300,
+            320
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_StoneWall200_014",
+          "mesh": "SM_MoleControlV2_StoneWall200",
+          "location_cm": [
+            200,
+            300,
+            320
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_ArchedDoorway200_015",
+          "mesh": "SM_MoleControlV2_ArchedDoorway200",
+          "location_cm": [
+            -300,
+            -200,
+            320
+          ],
+          "yaw_deg": 90,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_StoneWall200_016",
+          "mesh": "SM_MoleControlV2_StoneWall200",
+          "location_cm": [
+            300,
+            -200,
+            320
+          ],
+          "yaw_deg": 90,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_StoneWindowWall200_017",
+          "mesh": "SM_MoleControlV2_StoneWindowWall200",
+          "location_cm": [
+            -300,
+            0,
+            320
+          ],
+          "yaw_deg": 90,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_StoneWall200_018",
+          "mesh": "SM_MoleControlV2_StoneWall200",
+          "location_cm": [
+            300,
+            0,
+            320
+          ],
+          "yaw_deg": 90,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_StoneWall200_019",
+          "mesh": "SM_MoleControlV2_StoneWall200",
+          "location_cm": [
+            -300,
+            200,
+            320
+          ],
+          "yaw_deg": 90,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_StoneWall200_020",
+          "mesh": "SM_MoleControlV2_StoneWall200",
+          "location_cm": [
+            300,
+            200,
+            320
+          ],
+          "yaw_deg": 90,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Entry_ArchedWoodDoor_021",
+          "mesh": "SM_MoleControlV2_ArchedWoodDoor",
+          "location_cm": [
+            -300,
+            -200,
+            320
+          ],
+          "yaw_deg": -90,
+          "zone": "Entry"
+        },
+        {
+          "label": "Window_CurtainFrame_022",
+          "mesh": "SM_MoleControlV2_CurtainFrame",
+          "location_cm": [
+            -280,
+            0,
+            420
+          ],
+          "yaw_deg": -90,
+          "zone": "Window"
+        },
+        {
+          "label": "VaultRoof_StoneVault600_023",
+          "mesh": "SM_MoleControlV2_StoneVault600",
+          "location_cm": [
+            0,
+            0,
+            560
+          ],
+          "yaw_deg": 0,
+          "zone": "VaultRoof",
+          "review_hidden": true
+        },
+        {
+          "label": "VaultEnd_VaultEnd600_024",
+          "mesh": "SM_MoleControlV2_VaultEnd600",
+          "location_cm": [
+            0,
+            -300,
+            560
+          ],
+          "yaw_deg": 0,
+          "zone": "VaultEnd"
+        },
+        {
+          "label": "VaultEnd_VaultEnd600_025",
+          "mesh": "SM_MoleControlV2_VaultEnd600",
+          "location_cm": [
+            0,
+            300,
+            560
+          ],
+          "yaw_deg": 0,
+          "zone": "VaultEnd"
+        },
+        {
+          "label": "Operations_GrandMapConsole_026",
+          "mesh": "SM_MoleControlV2_GrandMapConsole",
+          "location_cm": [
+            0,
+            185,
+            320
+          ],
+          "yaw_deg": 180,
+          "zone": "Operations"
+        },
+        {
+          "label": "Communications_VintageRadioStack_027",
+          "mesh": "SM_MoleControlV2_VintageRadioStack",
+          "location_cm": [
+            -215,
+            30,
+            320
+          ],
+          "yaw_deg": 180,
+          "zone": "Communications"
+        },
+        {
+          "label": "Communications_ShelfReceiver_028",
+          "mesh": "SM_MoleControlV2_ShelfReceiver",
+          "location_cm": [
+            85,
+            224,
+            529.44
+          ],
+          "yaw_deg": 180,
+          "zone": "Communications"
+        },
+        {
+          "label": "Living_SideCabinet_029",
+          "mesh": "SM_MoleControlV2_SideCabinet",
+          "location_cm": [
+            -235,
+            185,
+            320
+          ],
+          "yaw_deg": 180,
+          "zone": "Living"
+        },
+        {
+          "label": "Living_SideCabinet_030",
+          "mesh": "SM_MoleControlV2_SideCabinet",
+          "location_cm": [
+            235,
+            185,
+            320
+          ],
+          "yaw_deg": 180,
+          "zone": "Living"
+        },
+        {
+          "label": "Practical_RoseTableLamp_031",
+          "mesh": "SM_MoleControlV2_RoseTableLamp",
+          "location_cm": [
+            245,
+            190,
+            405
+          ],
+          "yaw_deg": 0,
+          "zone": "Practical"
+        },
+        {
+          "label": "Practical_RoseTableLamp_032",
+          "mesh": "SM_MoleControlV2_RoseTableLamp",
+          "location_cm": [
+            -120,
+            224,
+            529.44
+          ],
+          "yaw_deg": 0,
+          "zone": "Practical"
+        },
+        {
+          "label": "Living_BookSet_033",
+          "mesh": "SM_MoleControlV2_BookSet",
+          "location_cm": [
+            -235,
+            183,
+            405
+          ],
+          "yaw_deg": 0,
+          "zone": "Living"
+        },
+        {
+          "label": "Living_FlowerPot_034",
+          "mesh": "SM_MoleControlV2_FlowerPot",
+          "location_cm": [
+            -235,
+            183,
+            437
+          ],
+          "yaw_deg": 0,
+          "zone": "Living"
+        },
+        {
+          "label": "Living_BookSet_035",
+          "mesh": "SM_MoleControlV2_BookSet",
+          "location_cm": [
+            -40,
+            225,
+            529.44
+          ],
+          "yaw_deg": 0,
+          "zone": "Living"
+        },
+        {
+          "label": "Living_CeramicMug_036",
+          "mesh": "SM_MoleControlV2_CeramicMug",
+          "location_cm": [
+            215,
+            164,
+            405
+          ],
+          "yaw_deg": 0,
+          "zone": "Living"
+        },
+        {
+          "label": "Living_FloralRug240_037",
+          "mesh": "SM_MoleControlV2_FloralRug240",
+          "location_cm": [
+            0,
+            -40,
+            320.05
+          ],
+          "yaw_deg": 0,
+          "zone": "Living"
+        },
+        {
+          "label": "Operations_SwivelStool_038",
+          "mesh": "SM_MoleControlV2_SwivelStool",
+          "location_cm": [
+            -95,
+            70,
+            320
+          ],
+          "yaw_deg": 0,
+          "zone": "Operations"
+        },
+        {
+          "label": "Operations_SwivelStool_039",
+          "mesh": "SM_MoleControlV2_SwivelStool",
+          "location_cm": [
+            110,
+            70,
+            320
+          ],
+          "yaw_deg": 0,
+          "zone": "Operations"
+        },
+        {
+          "label": "Entry_Ladder300_040",
+          "mesh": "SM_FacilityRooms_Ladder300",
+          "location_cm": [
+            200,
+            -225,
+            0
+          ],
+          "yaw_deg": 0,
+          "zone": "Entry",
+          "asset_path": "/Game/Environment/FacilityRooms/Meshes/SM_FacilityRooms_Ladder300"
+        }
+      ],
+      "player_start": [
+        0,
+        -210,
+        420
+      ],
+      "walkway_checks": [
+        [
+          0,
+          -210,
+          0,
+          85
+        ],
+        [
+          -160,
+          -180,
+          120,
+          -180
+        ]
+      ],
+      "camera": {
+        "location_cm": [
+          1150,
+          -1400,
+          1750
+        ],
+        "target_cm": [
+          0,
+          0,
+          405
+        ]
+      },
+      "interior_camera": {
+        "location_cm": [
+          240,
+          -245,
+          475
+        ],
+        "target_cm": [
+          -35,
+          120,
+          470
+        ],
+        "fov": 86
+      },
+      "forest": {
+        "label": "Exterior_ForestImpostor",
+        "location_cm": [
+          -550,
+          0,
+          480
+        ],
+        "rotation_deg": [
+          0,
+          90,
+          -90
+        ],
+        "scale": [
+          8,
+          6,
+          1
+        ]
+      },
+      "window_light": {
+        "location_cm": [
+          -470,
+          -50,
+          565
+        ],
+        "target_cm": [
+          100,
+          160,
+          370
+        ],
+        "intensity_candela": 350,
+        "inner_cone_deg": 15,
+        "outer_cone_deg": 22,
+        "volumetric_scattering_intensity": 8,
+        "fog_density": 0.03,
+        "fog_extinction_scale": 1,
+        "fog_view_distance_cm": 2000
+      }
+    }
+  ]
+}

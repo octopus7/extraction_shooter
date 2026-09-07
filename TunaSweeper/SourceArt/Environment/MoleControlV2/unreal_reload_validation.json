@@ -1,0 +1,745 @@
+{
+  "passed": true,
+  "verification": "fresh-process reload",
+  "engine": "5.7.4-51494982+++UE5+Release-5.7",
+  "destination": "/Game/Environment/MoleControlV2",
+  "assets": [
+    {
+      "name": "SM_MoleControlV2_StoneWall200",
+      "triangles_lod0": 7884,
+      "uv_channels": 2,
+      "collision_boxes": 1,
+      "materials": [
+        "M_MoleControlV2_Stone"
+      ],
+      "bounds_cm": [
+        -100.0,
+        -12.000008583068848,
+        0.0,
+        100.0,
+        12.000008583068848,
+        240.00001525878906
+      ],
+      "bounds_error_cm": 1.52587890625e-05
+    },
+    {
+      "name": "SM_MoleControlV2_StoneWindowWall200",
+      "triangles_lod0": 10260,
+      "uv_channels": 2,
+      "collision_boxes": 4,
+      "materials": [
+        "M_MoleControlV2_Stone",
+        "M_MoleControlV2_Oak"
+      ],
+      "bounds_cm": [
+        -100.0,
+        -12.000008583068848,
+        0.0,
+        100.0,
+        12.000008583068848,
+        239.99998474121094
+      ],
+      "bounds_error_cm": 1.52587890625e-05
+    },
+    {
+      "name": "SM_MoleControlV2_ArchedDoorway200",
+      "triangles_lod0": 10132,
+      "uv_channels": 2,
+      "collision_boxes": 24,
+      "materials": [
+        "M_MoleControlV2_Stone"
+      ],
+      "bounds_cm": [
+        -100.0,
+        -12.000008583068848,
+        0.0,
+        100.0,
+        12.000008583068848,
+        240.00001525878906
+      ],
+      "bounds_error_cm": 1.52587890625e-05
+    },
+    {
+      "name": "SM_MoleControlV2_ArchedWoodDoor",
+      "triangles_lod0": 4652,
+      "uv_channels": 2,
+      "collision_boxes": 15,
+      "materials": [
+        "M_MoleControlV2_Oak",
+        "M_MoleControlV2_Iron",
+        "M_MoleControlV2_Brass"
+      ],
+      "bounds_cm": [
+        -52.999996185302734,
+        -5.000004291534424,
+        0.0,
+        52.999996185302734,
+        5.000004291534424,
+        218.0
+      ],
+      "bounds_error_cm": 4.291534423828125e-06
+    },
+    {
+      "name": "SM_MoleControlV2_OakFloor200",
+      "triangles_lod0": 9900,
+      "uv_channels": 2,
+      "collision_boxes": 1,
+      "materials": [
+        "M_MoleControlV2_Oak",
+        "M_MoleControlV2_Iron"
+      ],
+      "bounds_cm": [
+        -100.00000762939453,
+        -100.00000762939453,
+        0.0,
+        100.00000762939453,
+        100.00000762939453,
+        20.000001907348633
+      ],
+      "bounds_error_cm": 7.62939453125e-06
+    },
+    {
+      "name": "SM_MoleControlV2_OakHatch200",
+      "triangles_lod0": 3024,
+      "uv_channels": 2,
+      "collision_boxes": 4,
+      "materials": [
+        "M_MoleControlV2_Oak"
+      ],
+      "bounds_cm": [
+        -100.00000762939453,
+        -100.00000762939453,
+        0.0,
+        100.00000762939453,
+        100.00000762939453,
+        20.000001907348633
+      ],
+      "bounds_error_cm": 7.62939453125e-06
+    },
+    {
+      "name": "SM_MoleControlV2_StoneVault600",
+      "triangles_lod0": 39960,
+      "uv_channels": 2,
+      "collision_boxes": 30,
+      "materials": [
+        "M_MoleControlV2_Stone",
+        "M_MoleControlV2_Oak",
+        "M_MoleControlV2_Iron"
+      ],
+      "bounds_cm": [
+        -300.0000305175781,
+        -300.0000305175781,
+        0.0,
+        300.0000305175781,
+        300.0000305175781,
+        120.00000762939453
+      ],
+      "bounds_error_cm": 3.0517578125e-05
+    },
+    {
+      "name": "SM_MoleControlV2_VaultEnd600",
+      "triangles_lod0": 11072,
+      "uv_channels": 2,
+      "collision_boxes": 30,
+      "materials": [
+        "M_MoleControlV2_Stone"
+      ],
+      "bounds_cm": [
+        -300.0,
+        -12.000025749206543,
+        0.0,
+        300.0,
+        12.000025749206543,
+        120.00000762939453
+      ],
+      "bounds_error_cm": 2.574920654296875e-05
+    },
+    {
+      "name": "SM_MoleControlV2_GrandMapConsole",
+      "triangles_lod0": 38220,
+      "uv_channels": 2,
+      "collision_boxes": 7,
+      "materials": [
+        "M_MoleControlV2_Oak",
+        "M_MoleControlV2_Iron",
+        "M_MoleControlV2_Brass",
+        "M_MoleControlV2_Map",
+        "M_MoleControlV2_Dial",
+        "M_MoleControlV2_Amber",
+        "M_MoleControlV2_Green",
+        "M_MoleControlV2_Cream"
+      ],
+      "bounds_cm": [
+        -180.0,
+        -57.50001525878906,
+        0.0,
+        180.0,
+        57.5000114440918,
+        210.00001525878906
+      ],
+      "bounds_error_cm": 1.52587890625e-05
+    },
+    {
+      "name": "SM_MoleControlV2_VintageRadioStack",
+      "triangles_lod0": 20568,
+      "uv_channels": 2,
+      "collision_boxes": 4,
+      "materials": [
+        "M_MoleControlV2_Oak",
+        "M_MoleControlV2_Iron",
+        "M_MoleControlV2_Brass",
+        "M_MoleControlV2_Dial",
+        "M_MoleControlV2_Cream",
+        "M_MoleControlV2_BookRed",
+        "M_MoleControlV2_Green",
+        "M_MoleControlV2_Amber"
+      ],
+      "bounds_cm": [
+        -42.5,
+        -27.500003814697266,
+        0.0,
+        42.5,
+        27.500003814697266,
+        125.0
+      ],
+      "bounds_error_cm": 3.814697265625e-06
+    },
+    {
+      "name": "SM_MoleControlV2_ShelfReceiver",
+      "triangles_lod0": 6248,
+      "uv_channels": 2,
+      "collision_boxes": 1,
+      "materials": [
+        "M_MoleControlV2_Oak",
+        "M_MoleControlV2_Iron",
+        "M_MoleControlV2_Brass",
+        "M_MoleControlV2_Dial",
+        "M_MoleControlV2_Amber",
+        "M_MoleControlV2_Green"
+      ],
+      "bounds_cm": [
+        -42.5,
+        -17.500003814697266,
+        0.0,
+        42.5,
+        17.500001907348633,
+        38.0
+      ],
+      "bounds_error_cm": 3.814697265625e-06
+    },
+    {
+      "name": "SM_MoleControlV2_SideCabinet",
+      "triangles_lod0": 2404,
+      "uv_channels": 2,
+      "collision_boxes": 1,
+      "materials": [
+        "M_MoleControlV2_Oak",
+        "M_MoleControlV2_Brass"
+      ],
+      "bounds_cm": [
+        -40.00000762939453,
+        -30.000001907348633,
+        0.0,
+        40.000003814697266,
+        29.999998092651367,
+        85.0
+      ],
+      "bounds_error_cm": 7.62939453125e-06
+    },
+    {
+      "name": "SM_MoleControlV2_RoseTableLamp",
+      "triangles_lod0": 3692,
+      "uv_channels": 2,
+      "collision_boxes": 2,
+      "materials": [
+        "M_MoleControlV2_Brass",
+        "M_MoleControlV2_Amber",
+        "M_MoleControlV2_Cream",
+        "M_MoleControlV2_Rose"
+      ],
+      "bounds_cm": [
+        -19.0,
+        -19.0,
+        0.0,
+        19.0,
+        19.0,
+        65.0
+      ],
+      "bounds_error_cm": 0.0
+    },
+    {
+      "name": "SM_MoleControlV2_SwivelStool",
+      "triangles_lod0": 4960,
+      "uv_channels": 2,
+      "collision_boxes": 3,
+      "materials": [
+        "M_MoleControlV2_Oak",
+        "M_MoleControlV2_Rose",
+        "M_MoleControlV2_Cream",
+        "M_MoleControlV2_Brass",
+        "M_MoleControlV2_Iron"
+      ],
+      "bounds_cm": [
+        -27.499998092651367,
+        -27.499998092651367,
+        0.0,
+        27.499998092651367,
+        27.499998092651367,
+        65.0
+      ],
+      "bounds_error_cm": 1.9073486328125e-06
+    },
+    {
+      "name": "SM_MoleControlV2_FlowerPot",
+      "triangles_lod0": 23688,
+      "uv_channels": 2,
+      "collision_boxes": 2,
+      "materials": [
+        "M_MoleControlV2_Ceramic",
+        "M_MoleControlV2_Oak",
+        "M_MoleControlV2_Leaf",
+        "M_MoleControlV2_Amber",
+        "M_MoleControlV2_Rose"
+      ],
+      "bounds_cm": [
+        -22.5,
+        -22.5,
+        0.0,
+        22.5,
+        22.5,
+        65.0
+      ],
+      "bounds_error_cm": 0.0
+    },
+    {
+      "name": "SM_MoleControlV2_BookSet",
+      "triangles_lod0": 1368,
+      "uv_channels": 2,
+      "collision_boxes": 1,
+      "materials": [
+        "M_MoleControlV2_Paper",
+        "M_MoleControlV2_BookRed",
+        "M_MoleControlV2_Brass",
+        "M_MoleControlV2_BookGreen"
+      ],
+      "bounds_cm": [
+        -27.500001907348633,
+        -15.00000286102295,
+        0.0,
+        27.500001907348633,
+        15.00000286102295,
+        32.000003814697266
+      ],
+      "bounds_error_cm": 3.814697265625e-06
+    },
+    {
+      "name": "SM_MoleControlV2_CeramicMug",
+      "triangles_lod0": 1244,
+      "uv_channels": 2,
+      "collision_boxes": 1,
+      "materials": [
+        "M_MoleControlV2_Ceramic",
+        "M_MoleControlV2_Oak"
+      ],
+      "bounds_cm": [
+        -9.0,
+        -7.0,
+        0.0,
+        9.0,
+        7.000000476837158,
+        20.000001907348633
+      ],
+      "bounds_error_cm": 1.9073486328125e-06
+    },
+    {
+      "name": "SM_MoleControlV2_CurtainFrame",
+      "triangles_lod0": 7188,
+      "uv_channels": 2,
+      "collision_boxes": 2,
+      "materials": [
+        "M_MoleControlV2_Brass",
+        "M_MoleControlV2_Rose",
+        "M_MoleControlV2_Cream"
+      ],
+      "bounds_cm": [
+        -62.5,
+        -12.500004768371582,
+        0.0,
+        62.5,
+        12.500005722045898,
+        135.0
+      ],
+      "bounds_error_cm": 5.7220458984375e-06
+    },
+    {
+      "name": "SM_MoleControlV2_FloralRug240",
+      "triangles_lod0": 1532,
+      "uv_channels": 2,
+      "collision_boxes": 1,
+      "materials": [
+        "M_MoleControlV2_Rug"
+      ],
+      "bounds_cm": [
+        -119.99999237060547,
+        -119.99999237060547,
+        0.0,
+        119.99999237060547,
+        119.99999237060547,
+        1.5999999046325684
+      ],
+      "bounds_error_cm": 7.62939453125e-06
+    }
+  ],
+  "materials": [
+    {
+      "name": "M_MoleControlV2_Stone",
+      "editable_color": "Tint",
+      "parent": "/Game/Environment/MoleControlV2/Materials/M_MoleControlV2_Master",
+      "texture": "/Game/Environment/MoleControlV2/Textures/T_MoleControlV2_Atlas.T_MoleControlV2_Atlas"
+    },
+    {
+      "name": "M_MoleControlV2_Oak",
+      "editable_color": "Tint",
+      "parent": "/Game/Environment/MoleControlV2/Materials/M_MoleControlV2_Master",
+      "texture": "/Game/Environment/MoleControlV2/Textures/T_MoleControlV2_Atlas.T_MoleControlV2_Atlas"
+    },
+    {
+      "name": "M_MoleControlV2_Brass",
+      "editable_color": "Tint",
+      "parent": "/Game/Environment/MoleControlV2/Materials/M_MoleControlV2_Master",
+      "texture": "/Game/Environment/MoleControlV2/Textures/T_MoleControlV2_Atlas.T_MoleControlV2_Atlas"
+    },
+    {
+      "name": "M_MoleControlV2_Iron",
+      "editable_color": "Tint",
+      "parent": "/Game/Environment/MoleControlV2/Materials/M_MoleControlV2_Master",
+      "texture": "/Game/Environment/MoleControlV2/Textures/T_MoleControlV2_Atlas.T_MoleControlV2_Atlas"
+    },
+    {
+      "name": "M_MoleControlV2_Rose",
+      "editable_color": "Tint",
+      "parent": "/Game/Environment/MoleControlV2/Materials/M_MoleControlV2_Master",
+      "texture": "/Game/Environment/MoleControlV2/Textures/T_MoleControlV2_Atlas.T_MoleControlV2_Atlas"
+    },
+    {
+      "name": "M_MoleControlV2_Cream",
+      "editable_color": "Tint",
+      "parent": "/Game/Environment/MoleControlV2/Materials/M_MoleControlV2_Master",
+      "texture": "/Game/Environment/MoleControlV2/Textures/T_MoleControlV2_Atlas.T_MoleControlV2_Atlas"
+    },
+    {
+      "name": "M_MoleControlV2_Leather",
+      "editable_color": "Tint",
+      "parent": "/Game/Environment/MoleControlV2/Materials/M_MoleControlV2_Master",
+      "texture": "/Game/Environment/MoleControlV2/Textures/T_MoleControlV2_Atlas.T_MoleControlV2_Atlas"
+    },
+    {
+      "name": "M_MoleControlV2_Paper",
+      "editable_color": "Tint",
+      "parent": "/Game/Environment/MoleControlV2/Materials/M_MoleControlV2_Master",
+      "texture": "/Game/Environment/MoleControlV2/Textures/T_MoleControlV2_Atlas.T_MoleControlV2_Atlas"
+    },
+    {
+      "name": "M_MoleControlV2_Map",
+      "editable_color": "Tint",
+      "parent": "/Game/Environment/MoleControlV2/Materials/M_MoleControlV2_Master",
+      "texture": "/Game/Environment/MoleControlV2/Textures/T_MoleControlV2_Atlas.T_MoleControlV2_Atlas"
+    },
+    {
+      "name": "M_MoleControlV2_Dial",
+      "editable_color": "Tint",
+      "parent": "/Game/Environment/MoleControlV2/Materials/M_MoleControlV2_Master",
+      "texture": "/Game/Environment/MoleControlV2/Textures/T_MoleControlV2_Atlas.T_MoleControlV2_Atlas"
+    },
+    {
+      "name": "M_MoleControlV2_Amber",
+      "editable_color": "Tint",
+      "parent": "/Game/Environment/MoleControlV2/Materials/M_MoleControlV2_Master",
+      "texture": "/Game/Environment/MoleControlV2/Textures/T_MoleControlV2_Atlas.T_MoleControlV2_Atlas"
+    },
+    {
+      "name": "M_MoleControlV2_Green",
+      "editable_color": "Tint",
+      "parent": "/Game/Environment/MoleControlV2/Materials/M_MoleControlV2_Master",
+      "texture": "/Game/Environment/MoleControlV2/Textures/T_MoleControlV2_Atlas.T_MoleControlV2_Atlas"
+    },
+    {
+      "name": "M_MoleControlV2_BookRed",
+      "editable_color": "Tint",
+      "parent": "/Game/Environment/MoleControlV2/Materials/M_MoleControlV2_Master",
+      "texture": "/Game/Environment/MoleControlV2/Textures/T_MoleControlV2_Atlas.T_MoleControlV2_Atlas"
+    },
+    {
+      "name": "M_MoleControlV2_BookGreen",
+      "editable_color": "Tint",
+      "parent": "/Game/Environment/MoleControlV2/Materials/M_MoleControlV2_Master",
+      "texture": "/Game/Environment/MoleControlV2/Textures/T_MoleControlV2_Atlas.T_MoleControlV2_Atlas"
+    },
+    {
+      "name": "M_MoleControlV2_Ceramic",
+      "editable_color": "Tint",
+      "parent": "/Game/Environment/MoleControlV2/Materials/M_MoleControlV2_Master",
+      "texture": "/Game/Environment/MoleControlV2/Textures/T_MoleControlV2_Atlas.T_MoleControlV2_Atlas"
+    },
+    {
+      "name": "M_MoleControlV2_Leaf",
+      "editable_color": "Tint",
+      "parent": "/Game/Environment/MoleControlV2/Materials/M_MoleControlV2_Master",
+      "texture": "/Game/Environment/MoleControlV2/Textures/T_MoleControlV2_Atlas.T_MoleControlV2_Atlas"
+    },
+    {
+      "name": "M_MoleControlV2_Rug",
+      "editable_color": "Tint",
+      "parent": "/Game/Environment/MoleControlV2/Materials/M_MoleControlV2_Master",
+      "texture": "/Game/Environment/MoleControlV2/Textures/T_MoleControlV2_Rug.T_MoleControlV2_Rug"
+    }
+  ],
+  "levels": [
+    {
+      "name": "L_MoleControlV2_StoneVault",
+      "path": "/Game/Environment/MoleControlV2/Maps/L_MoleControlV2_StoneVault",
+      "mesh_actors": 42,
+      "floor_z_cm": 320,
+      "player_start": true,
+      "collision_profile": "BlockAll (forest: NoCollision)",
+      "window_forest_volumetric_setup": true,
+      "cameras": [
+        {
+          "label": "MoleV2_ReviewCamera",
+          "location": [
+            1150,
+            -1400,
+            1750
+          ],
+          "rotation": [
+            -36.58905335010494,
+            129.40066066347944,
+            5.974930919607727e-07
+          ]
+        },
+        {
+          "label": "MoleV2_InteriorCamera",
+          "location": [
+            240,
+            -245,
+            475
+          ],
+          "rotation": [
+            -0.6268419732098776,
+            126.99527114270715,
+            1.0762480431904656e-08
+          ]
+        }
+      ],
+      "verified_placements": true
+    }
+  ],
+  "total_triangles": 207996,
+  "total_collision_boxes": 134,
+  "protected_assets_sha256": {
+    "TunaSweeper/Content/EditorOnly/Lookdev/Lookdev_NiagaraExplosion.umap": "36846db7a6d0fa538b9f2222d0218f5b677280f303893df1f73048c4df587673",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Desserts/M_SM_Dessert.uasset": "24a1b57367fa9fe2a92ab78dad1ef958c11ada7b4d6d06d494042517f81db8e5",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Desserts/SM_Dessert_Cake.uasset": "27e43bff64ed3f5331c2b7575f4ddcf0c9e714aa6ce78cae819f15603073a0b6",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Desserts/SM_Dessert_Donut.uasset": "f6a7c0021bc0d57634d1d8e37afe7ad2a537ef1039cdb3f019948c9675192e04",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Desserts/SM_Dessert_Farpe.uasset": "3bd74ad98c8e7db8bfc244c45d9e326ecf323164d8bac2246cbf1dbc99fbf1a6",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Desserts/SM_Dessert_Macaron.uasset": "f4292c55af1e23a6558498976226e73ca7ac23690e5721c7a6fab74bc930f84f",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Desserts/SM_Dessert_Muffin.uasset": "7620a9cd3cb99fd524967a99542521ee02a31a72a940df33bc26319fd0eb3254",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Desserts/SM_Dessert_Puding.uasset": "8fbeebfaf32efde03e04d529a5b0d72957eb9f9a888185db4b3145b982f51983",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Desserts/SM_Dessert_Rollcake.uasset": "584d80c74e448806b51f6b98d9f578e2200760d02fe094de83424ef72b17f556",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Desserts/SM_Dessert_Tart.uasset": "422772d5d836157fd62863b8a7eb92b17cc5e0b1088ee418fd16065a27107028",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Desserts/SM_StrawberryCreamScone.uasset": "c017515f23dc9f911f30dcb2bb5dd3db901f68066646d49478d92d166b366dcf",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Desserts/T_SM_Dessert_BaseColor_01.uasset": "68c560479f7fd4285f631b00997e07ba187375c9c014f3905c0210db05f34ddc",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Desserts/T_SM_Dessert_Normal_01.uasset": "057b0d93cd968e8fe166a5e55b4985dc733ab8abb14aad006a545e03b8037cd0",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Door/BP_SlidingDoor.uasset": "d554d7a02de47913cd54ae75f919ddf2c85505f8f17717fe285a5f6dee73b5d6",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Door/M_SM_SlidingDoorSimple.uasset": "ef943ddfc5c82989d86c0aa209494cb2fa022629418a408ed8ca3ad1fc07e894",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Door/SM_SlidingDoor.uasset": "46f1beeec5251e671618fbce8f12db0a83777c672acf5583be80beb7b498ada8",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Door/SM_SlidingDoor_Left.uasset": "b77bfab4b2af005b13716d9cb382fd055b1bc6c55ecf37098cf4365d9dc3e257",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Door/SM_SlidingDoor_Right.uasset": "167785a0b570ccc45426dab2be85e5afbf1847cff1bd061547b02b27ad05bb89",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Door/SM_SlidingDoorFrame.uasset": "3a16f9c3143a3227cc2fd4c7bb3fac38bc2b4a2b2aa0867ffcfdaa081cd5ec2d",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Door/T_SM_SlidingDoorSimple_BaseColor.uasset": "56c632701a36756635196edacb913ac5dae34c16d3f7ce565d0a4e8bb3ad552a",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Door/T_SM_SlidingDoorSimple_Normal.uasset": "467c896cd2692a07a14c61d3651b5d2e3d2c0cdfecc8a343ecbd3765aecc74ad",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Furnitures/M_SM_Furniture.uasset": "870a20f595915db2f3df38cb99d66e036d9ed1e2a5e124d2d100bf618e74e809",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Furnitures/SM_Couch.uasset": "5ba67c69a7e6d08c11bc30ee503c9d6a078b52c31fc0956ec3f115d992e69adc",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Furnitures/SM_KitchenTable.uasset": "47a0027d8318198dbeb14800a0778aa3559bdd8e121de496fb88bcbb16de3b97",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Furnitures/SM_LunaBed.uasset": "7f2fd16124e4388cc18510005f0fd4f23e48ccbfb317d09ae38e3adbf3e3aa1b",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Furnitures/SM_Stool.uasset": "d431514bbc4d72119fd13024a62850066713975670a5213387a3ebb2da8f623c",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Furnitures/T_SM_Furniture_BaseColor_01.uasset": "c96a1493315217cb0ba0356d787a22d30a9fc7d76b2a9ca60b345ceb9b4576ab",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Furnitures/T_SM_Furniture_Normal_01.uasset": "31b425b58926d58522224557f835f3882d55de3173a37a6507f539dcdac46e83",
+    "TunaSweeper/Content/Environment/Bunker/Agit/GroupE/M_Agit_E.uasset": "d7aefbdef7216580695fbe2d22acd7ce6b1ec1bc8728f88ed6f8bf311fe358fe",
+    "TunaSweeper/Content/Environment/Bunker/Agit/GroupE/SM_Agit_E.uasset": "b9e6ba4e155f885bbc196aee581ff440545e49d72bf632fd9145e148a2c91ca0",
+    "TunaSweeper/Content/Environment/Bunker/Agit/GroupE/SM_Agit_E_001.uasset": "d6e1f3afb8df0442ffdad0b9c13dfbc1d6ff04557e5c53184998f8ec3d3309fb",
+    "TunaSweeper/Content/Environment/Bunker/Agit/GroupE/SM_Agit_E_002.uasset": "aa81b9123ac077b06e646234d9ea133499980f0bed10d2024765e5819a28cc2a",
+    "TunaSweeper/Content/Environment/Bunker/Agit/GroupE/SM_Agit_E_003.uasset": "b55794b042e9df86c01e87ea596727977fdf5ea2cb66faef25b727470ea53bea",
+    "TunaSweeper/Content/Environment/Bunker/Agit/GroupE/SM_Agit_E_004.uasset": "0899c4c91fbd253ed4064dd3de57198f7fd9eeab760a4c11cb211d5b32aead8c",
+    "TunaSweeper/Content/Environment/Bunker/Agit/GroupE/SM_Agit_E_005.uasset": "6291c4cfa5e05a851c8b165ed3360f99883b66d90e5634b10ad3bcc5d8bf5277",
+    "TunaSweeper/Content/Environment/Bunker/Agit/GroupE/SM_Agit_E_006.uasset": "09c71ecf4f6fe7908f0ccf045c0c95bddfe97864b59060830eeb4589a84d0cda",
+    "TunaSweeper/Content/Environment/Bunker/Agit/GroupE/SM_Agit_E_007.uasset": "4736c3be599f31a3b4efc04d836f94d90d96fce474da5f9d54e35fdd8c6409a1",
+    "TunaSweeper/Content/Environment/Bunker/Agit/GroupE/T_Agit_E_BaseColor_01.uasset": "0e43c9e3b58278e8f46dbc3252d95607a3e60a73213bf017a9271f5c8080124c",
+    "TunaSweeper/Content/Environment/Bunker/Agit/GroupE/T_Agit_E_Normal_01.uasset": "f2688445f9079d7bc24e9337e318f237500db9a149fd8026d45b613e2fb47be7",
+    "TunaSweeper/Content/Environment/Bunker/Agit/GroupF/M_Agit_F.uasset": "1c447dbcb2d0b3e3b065f074d1b98d42554ba9d9c5c6f2b3216cca3434d7d0c7",
+    "TunaSweeper/Content/Environment/Bunker/Agit/GroupF/SM_Agit_F_000.uasset": "e456e871522a0d72fed522d36b9eabbd307c51d9918d340a214914a9af63db80",
+    "TunaSweeper/Content/Environment/Bunker/Agit/GroupF/SM_Agit_F_001.uasset": "34a7914855103643dcda0a54fac6b46f194751296015b1e29febdf9ca7f19bb5",
+    "TunaSweeper/Content/Environment/Bunker/Agit/GroupF/SM_Agit_F_002.uasset": "e1dc92fc9416e103324a70cf5140569fa3d41df74c0a36dd9abee12b0507a9d1",
+    "TunaSweeper/Content/Environment/Bunker/Agit/GroupF/SM_Agit_F_003.uasset": "5b94ded29ece87dbdb952d8c6ef026073652cacf1cce527474decbbf2950c0c9",
+    "TunaSweeper/Content/Environment/Bunker/Agit/GroupF/SM_Agit_F_004.uasset": "69b76ff9e9e6f95f20d73dec947c5a63581b442aa9d8319e6f405715e63f345f",
+    "TunaSweeper/Content/Environment/Bunker/Agit/GroupF/SM_Agit_F_005.uasset": "b0d95cc7a02ebe4937e7d4c6ccc7cf39d5f4a1e8265f785bc54f220fce9d6acd",
+    "TunaSweeper/Content/Environment/Bunker/Agit/GroupF/SM_Agit_F_006.uasset": "ab4da54bdb386c3ea5b161e8cace380efa77ce0fb1848117d0fee0b795b2c4e0",
+    "TunaSweeper/Content/Environment/Bunker/Agit/GroupF/SM_Agit_F_007.uasset": "564708b04dc273cf513582d709e092bf3fd04a10608cc0f14cb03d669c577c9e",
+    "TunaSweeper/Content/Environment/Bunker/Agit/GroupF/SM_Agit_F_008.uasset": "29d3c333519cc615e13e45a17c4c9ab2449e2013123c7032e313bfa7006afc19",
+    "TunaSweeper/Content/Environment/Bunker/Agit/GroupF/SM_Agit_F_009.uasset": "ec9537444651b689d9ad3e8c25473e4b09e28fde07d33b9cf8394a8547e4e35a",
+    "TunaSweeper/Content/Environment/Bunker/Agit/GroupF/SM_Agit_F_010.uasset": "d8dffde571fa736ed4adecfed9a6e52a6cacdf10e42fa143f9f6893d30a2810c",
+    "TunaSweeper/Content/Environment/Bunker/Agit/GroupF/SM_Agit_F_011.uasset": "97574937148aa128e4199b3867e19be0f950cfe43015ddeaf326fcf6b994d5cc",
+    "TunaSweeper/Content/Environment/Bunker/Agit/GroupF/SM_Agit_F_012.uasset": "b50b5effa0d590e7ef9080f2cb00f8d44536ae54bacd5888007bbb434d4d4e80",
+    "TunaSweeper/Content/Environment/Bunker/Agit/GroupF/T_Agit_F_BaseColor_01.uasset": "53c28c69aeb32106839d288d0021cbd3974d369af6e548489b71a120cde0324d",
+    "TunaSweeper/Content/Environment/Bunker/Agit/GroupF/T_Agit_F_Normal_01.uasset": "f27c4487c86178361c41ae929f5b62e69b7d86c9c40805613e09249a44043061",
+    "TunaSweeper/Content/Environment/Bunker/Agit/M_Agit_A.uasset": "57848a29deac9abf156d917809842fd3cb922b1d91cf2f9d6f4409b17381e267",
+    "TunaSweeper/Content/Environment/Bunker/Agit/M_Agit_C.uasset": "d67470cabb9eba21a3d7cd70d49abce38c239108eb8a9cf960b11fdc67a82c25",
+    "TunaSweeper/Content/Environment/Bunker/Agit/M_Agit_D.uasset": "7eea0f8cca9191271eab7c164f426b24e7f4b1b491f108ee08a3a7b4ba00dbae",
+    "TunaSweeper/Content/Environment/Bunker/Agit/M_AgitFloor.uasset": "b56b56db17321b0ac5f7005557903b2d8a6f06fb0b61166a5fa6038fb0a33e75",
+    "TunaSweeper/Content/Environment/Bunker/Agit/M_AgitFloorHall.uasset": "7c7713442c0f10613ae0ac73b5ee3a0792cc0ee8e15b5d496b5c8322f5c28070",
+    "TunaSweeper/Content/Environment/Bunker/Agit/M_AgitWall.uasset": "1d28b26660be4e81f123d32ca78ea292f78fc3e699b923638254e14f9ce4297d",
+    "TunaSweeper/Content/Environment/Bunker/Agit/M_WallGray.uasset": "ae1a88c2df69720e89ddd05eb6ac591e1429331c1bbdae69aecffe0b7cb50372",
+    "TunaSweeper/Content/Environment/Bunker/Agit/M_Wallpaper01.uasset": "e196b49770b7c1bce37c4b227bb33ddee6fb6a8c76b85dbe54d159ea653daf4e",
+    "TunaSweeper/Content/Environment/Bunker/Agit/M_Wallpaper02.uasset": "f14be3b811c3ef2db97857efa96755e7d5c83cca2923963c36f331ba7906f363",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Props/M_Agit_G.uasset": "363a4cf4a76f799d5bef0d06c6538e322ca86ab446cf689d3d582bd04069bc1e",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Props/M_SM_LadderGray.uasset": "5e60657a0c5babb17aeca30cc60eb8fd8fbf82f29c34cee6b741e0a80f54c1bb",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Props/SM_CakePiece.uasset": "1543cd9c2d8a8be5b52417e9b201898091b235d2651c27a202c46fffe14edf97",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Props/SM_CoffeeCup.uasset": "fc0077c847a14e629e45b408999e07fa3ac9cdf9f57f982b8ad20dbf4ac44e9b",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Props/SM_NoteBook.uasset": "d7318027ef5b99dfc858c7a29f7a7a8642d9fe548c69160b7dca602f65ce4f39",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Props/SM_SM_LadderGray.uasset": "6cf5b0496a9812a7fd6a4e253c8ae5e0e7c4bb62d06b701132630c9b49790b3e",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Props/SM_SM_LadderGrayFrame.uasset": "db7791e759e45732d516c886cc40fa7e8fea34eb8055015ebc0fb109958b79ae",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Props/SM_SM_LadderGrayHatch.uasset": "4ab6af4a2d61be5191aadb096f7abae89f71d33ca7a7d216ffa687150c4e7188",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Props/T_Agit_G_BaseColor_01.uasset": "0bfebd02a07572762d2703015a857471e72dc997f68e1c9ab5c7f3b6f3e92fbb",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Props/T_Agit_G_Normal_01.uasset": "f0c3cdc271db23ea9b52c4acc08601b0a5163b04240700f1760494a495176fff",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Props/T_SM_LadderGray_BaseColor_01.uasset": "f2c5bef38a34f5f0971573e9b71f7ede46f7aa00c76d01c1a951ec27beaf4f9a",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Props/T_SM_LadderGray_Normal_01.uasset": "b820c0e2bae4d69646f3017ace6872f2bd6ed6da277667a51b3fda0e15b31e8d",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_Bath.uasset": "dd5291e3bd06af03f1c35097198918bdd0ce1fb079eb94b865ed667e50c573c2",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_D_000.uasset": "911589879bb06ed784a6a7436833f3781379baa18db9790752b9cb3b11f0f28e",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_D_001.uasset": "a9a9816f8729924f4bff7f2e50102118e36264f28a0cba4eba69502d079f6a56",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_D_002.uasset": "106edd2a13f32d9f6b49513c605393e7d31d86d5624a08a87c7f25c3753e1f88",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_D_003.uasset": "6f0528cde49d0ffda23377d93a615bedd6ee2347b55fcf3c1001437f8eac9de8",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_D_004.uasset": "458b0eb80875f7b08342953e66ea7fbc3674e4ce6dc74f5b04879d0c11c0937c",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_D_005.uasset": "e50e1d55b42567cd5183260b17b4b54b3f051b921829fa2870a7756a1ad9d4c4",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_D_006.uasset": "78d4f9fc84d826dd83e2b88edd5868e133f6d5423fb9e63145eff61837d05a17",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_Toilet.uasset": "f731b3c2c340829bf74f10e87ffa39d63d9ddf5aa163f40fabe7259deef04ecb",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_WashingMachineA.uasset": "92767139e88e63b265f855e40438916ea9fc0b0c9d1408089144fda824eb8692",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_Washstand.uasset": "d7be19a426f5cc0c9012ab1c6ad3420486e568b63f55930873c78458c4ecec94",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_Workroom_000.uasset": "383d88dac085472b9a1a8422ac11e26003017613f80df935e6e93cfc3fa8e5ef",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_Workroom_001.uasset": "dbbf908fa31550ad97c4cc49c0540aedccc44ca89de2c86e9647c3fef9b27b38",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_Workroom_002.uasset": "a5a2d552916f5bf9eaf8af9c85f097259e76874df486a3bf76bc0f476045d3c8",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_Workroom_003.uasset": "97fffd5132bfd7f43955b8b77da15fe6817b3f365a3ff972a2afdcd6a4329a96",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_Workroom_004.uasset": "3da49712c90b158eeecf7f6fc77ed343a952d3f0ec858592c1eff70c2426d7b3",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_Workroom_005.uasset": "718388feb2be7ed5157ba8d93f006d8ad203e38003f1ddfbc4b5c6f918449b03",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_Workroom_006.uasset": "983e2fb9083197c59c338903efbaaa5e6dc8a7de207a6385e43ca31351a90518",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_Workroom_007.uasset": "114bae664a5379dd3c8facd2e3200d108df1920de6b4fae33dff38ce4361619e",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_Workroom_008.uasset": "b288a4f9a8d2bfa633e35907b34e47577301b2026805c9d1db6887a7c2133f3f",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_Workroom_009.uasset": "6cb947b7f3d580485ae9304b95d0b7c53d8ce195fb553752e7b8877bf0381a30",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_Workroom_010.uasset": "cffe0796c3a1b789352653ad8d0b9ce5b22f39eea3ec5985b5a5e4ea7a888a92",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_Workroom_011.uasset": "3b3a5bc449cc696e57719a9961a8d49befcd52114f5489d5c6ff69fde413a927",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_Workroom_012.uasset": "19ebe595fb55f326382b80747f2359acb61e02949d7b10221fb743210c2bdcc2",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_Workroom_013.uasset": "37286b3e50c045b9c5a9372260861ee2afb1d21152961dec04612771c4abf8a7",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_Workroom_014.uasset": "812265ec57653221524fecc010b8eca40ca7ec6ecf41010bfdfcd3e4d6c70920",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_Workroom_015.uasset": "6c904e9f178ed10c47b78963d981bc0fc9ec190d3fe41be7a036a22e3eb39a5f",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_Workroom_016.uasset": "f1d802ea8b6584665ff5c46365fc22eba5221100cdb5024ffc8f043c3fe9df20",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_Workroom_017.uasset": "175095cd2169fa3acc8187194b0b646b97c7657a5bc4ef436890257f8fe624d8",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_Agit_Workroom_018.uasset": "840a1296f73037e4056b2e985ee642c436f547c47258e149b001095a570bb17b",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_AgitCircle.uasset": "b2648970bc9672290591758df36c6085df5e94045974948a0f6375cf237b9c2e",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_AgitFloorHall.uasset": "1e253e0e1c0ff48bfbebbc005dc7a6785eff09a2b7390ff5d000225899bc128f",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_AgitFloorRest.uasset": "bdca8df606406f90d1faf1fa8e5e15c0011cef95d20465bd63070d99041fd607",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_AgitFloorVaultRoom.uasset": "c4d756eb249c6c56b35454b85f7e0e5564d1afcf88fbaf52f61de3ca8b147a77",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_AgitFloorVaultRoom_Shaft.uasset": "f14eb6bdcd4fcc1d8ced80835fad322e865795242a20ec493ec1cb48dfa56691",
+    "TunaSweeper/Content/Environment/Bunker/Agit/SM_AgitWall.uasset": "66368223910c3c3447971f4e0a70b9d40101d7f279c5ed9519eb830197a75a81",
+    "TunaSweeper/Content/Environment/Bunker/Agit/T_Agit_A_BaseColor_01.uasset": "293ed75e03641e2c94abb91b9b173abdfb669ff6d4c24bc29b3795e1624b0aaf",
+    "TunaSweeper/Content/Environment/Bunker/Agit/T_Agit_A_Normal_01.uasset": "0bdb53ac6c8eeb9cbf09672df82a2d6d0cf12e8f8b172fac8cb28b50c5b6e392",
+    "TunaSweeper/Content/Environment/Bunker/Agit/T_Agit_C_BaseColor_01.uasset": "56a4b3fe6a2760385c373afa65d71da0e3ba1baa58495aa23ae0c6639ed8f250",
+    "TunaSweeper/Content/Environment/Bunker/Agit/T_Agit_C_Normal_01.uasset": "4245a5868d36efd6acd19b940fd902fb332afc61e4db9befa786e11f6795ec5c",
+    "TunaSweeper/Content/Environment/Bunker/Agit/T_Agit_D_BaseColor_01.uasset": "7ee74c34541445f7eff0ee69c7015de99402a1b45a46ec204a21fe78237fc1f2",
+    "TunaSweeper/Content/Environment/Bunker/Agit/T_Agit_D_Normal_01.uasset": "42696e9b6ac3317df891c194fb3b43f41abd962c50bfaac7fa0a8c0b45cb027a",
+    "TunaSweeper/Content/Environment/Bunker/Agit/T_AgitFloor.uasset": "0fb8c3ee61efe073deb2c7f398d02993237d2769a83ee0a56c5d0000ead0db61",
+    "TunaSweeper/Content/Environment/Bunker/Agit/T_AgitWall.uasset": "42fa002d4f50b8734d406a208f74d6fc5227d1d3004e6b15e44c11de5f2fc70a",
+    "TunaSweeper/Content/Environment/Bunker/Agit/TealGoldMarbleMedallion_albedo.uasset": "b85405af721fb1aab8ad2668efdf3e368323667f83e30a96be86c2611aa50870",
+    "TunaSweeper/Content/Environment/Bunker/Agit/TeaProps/M_SM_TeaTable.uasset": "3afab0d39291cd28dd1cdedf99f3dc405f00cc9bcccc2949507ecfef8f30b79e",
+    "TunaSweeper/Content/Environment/Bunker/Agit/TeaProps/SM_CakePlate.uasset": "7b01ef448597f4daf8fee66318f5e042c5369f16a8cf88f7ee82b26f9683e168",
+    "TunaSweeper/Content/Environment/Bunker/Agit/TeaProps/SM_Coaster.uasset": "583222aa8adbcf09ed977f8d498a1c172b22b1a7a5d5e144db82e25a7c449d9a",
+    "TunaSweeper/Content/Environment/Bunker/Agit/TeaProps/SM_TeaTable.uasset": "7a8cef8996c579d15cbf66587cf0281c7f1f93a1e4f58f315581bd9631f069f1",
+    "TunaSweeper/Content/Environment/Bunker/Agit/TeaProps/T_SM_TeaTable_BaseColor_01.uasset": "aeeef8cd3e271fb41f1bdaad344a6d91d82e3c668855abbf1a2cf3754e4cedb0",
+    "TunaSweeper/Content/Environment/Bunker/Agit/TeaProps/T_SM_TeaTable_Normal_01.uasset": "4e6e307a26bc1a10f279e2c8be5ce8b6312137cc6a97a0eb7ae766257dc6a7ac",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Wall/M_WallGray.uasset": "277e9c5fd05027ee5dce16e4f3697e0c968236616b32411b288ca0176da4a41c",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Wall/M_Wallpaper01.uasset": "c995caef70d62e01c74104644d0d345a528f8301e8b17919ce723171879f4290",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Wall/M_Wallpaper02.uasset": "7fd9002812b55386485a51f1c7a3da4213f8bd429819912ae346bfcecdefe8a6",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Wall/SM_AgitCircle.uasset": "2ae516851370bac791948d1f38150f7061925269fb675009888884a6fc3cabbf",
+    "TunaSweeper/Content/Environment/Bunker/Agit/Wall/SM_AgitWall.uasset": "458643e49273eb1d8d081158ecc264f6ea401ef31936f4c60972189d95153879",
+    "TunaSweeper/Content/Environment/Bunker/InteriorAdditions/Maps/L_InteriorAdditions_Showcase.umap": "c96ac27cc170eadab8155f078058d198177757969dba0e51fb62fb7de63c7e16",
+    "TunaSweeper/Content/Environment/FacilityRooms/Maps/L_Facility_Basement.umap": "afad4e1b69a477a82e40d17dd140d04794e0384c06334525f5d332e798713a54",
+    "TunaSweeper/Content/Environment/FacilityRooms/Maps/L_Facility_ControlFloor02.umap": "5314f287bdba64cd3092be18fcd4ece91ab9fd5b8ec942a1351128fed8a25bb7",
+    "TunaSweeper/Content/Environment/FacilityRooms/Materials/M_FacilityRooms_Amber.uasset": "38f9515036397a3ca19248305face670c8205f46f4c60c74bb002d177a577229",
+    "TunaSweeper/Content/Environment/FacilityRooms/Materials/M_FacilityRooms_Blue.uasset": "4b65312502499cc632766965fe4ba3e70437cadee7bca263c59abbec7b778ccd",
+    "TunaSweeper/Content/Environment/FacilityRooms/Materials/M_FacilityRooms_Concrete.uasset": "b8f47079b56f7e82877af58b7211bc98cb99b2a270ba0bc692200b4e72fe3f93",
+    "TunaSweeper/Content/Environment/FacilityRooms/Materials/M_FacilityRooms_Floor.uasset": "d1451f1cfa5941d3ded2925c7262050391e152aaea38cbd40d030ea9336044fd",
+    "TunaSweeper/Content/Environment/FacilityRooms/Materials/M_FacilityRooms_ForestImpostor.uasset": "20fa84320f6f1f158a588ddd12732684d5646d300233f66c6fa6059fb315c967",
+    "TunaSweeper/Content/Environment/FacilityRooms/Materials/M_FacilityRooms_Hazard.uasset": "0d595735f9408f1cc9c2582de53ef488ed4b874f9cefa440e3caebb69c7ac008",
+    "TunaSweeper/Content/Environment/FacilityRooms/Materials/M_FacilityRooms_Iron.uasset": "e824b281762fc342ef1c84156de3bec81b3dd99f4a4df3732c87bdf7fe49b9c4",
+    "TunaSweeper/Content/Environment/FacilityRooms/Materials/M_FacilityRooms_Ivory.uasset": "510c2a11beb5914c12670a4fb8076abf17a0dac234fe2306a1e1025fbd85ff88",
+    "TunaSweeper/Content/Environment/FacilityRooms/Materials/M_FacilityRooms_Master.uasset": "92460ea64b3959bb8e4eeafa856e1453ba2603e67de9b0bfe0202d3cf4f928fd",
+    "TunaSweeper/Content/Environment/FacilityRooms/Materials/M_FacilityRooms_Panel.uasset": "c660044fa23ab73f4c393b1aa6d44e5272153c7cdc4bdfe82e7f2f4b2a04a442",
+    "TunaSweeper/Content/Environment/FacilityRooms/Materials/M_FacilityRooms_Paper.uasset": "fe75004018b7afd6f606568d73e4693f0b2369536e3a99271aca872a20ae32a5",
+    "TunaSweeper/Content/Environment/FacilityRooms/Materials/M_FacilityRooms_Red.uasset": "bbb8629a15ad292ded377e19575e2ad431f88b316cd3ad6211993efb3e3f4bba",
+    "TunaSweeper/Content/Environment/FacilityRooms/Materials/M_FacilityRooms_Rubber.uasset": "a0c2b4a4967ae3e7b18246edea3a41234442feb082907e8c1772d5bbfb6dbd03",
+    "TunaSweeper/Content/Environment/FacilityRooms/Materials/M_FacilityRooms_Rust.uasset": "ef91eb1cd4f364145e9f69a7fc7f2dff6bdbfa4938f459cfc7650f6af2cd0bf1",
+    "TunaSweeper/Content/Environment/FacilityRooms/Materials/M_FacilityRooms_Screen.uasset": "ba3500dc2735e0a99d057ad85f3ab384c39020f973f00a2bfdb3785c545dcab7",
+    "TunaSweeper/Content/Environment/FacilityRooms/Materials/M_FacilityRooms_Steel.uasset": "a704c465fc94817f8050d5aa55bfe6f2641b16d68491368d1db4e5b2217e9b10",
+    "TunaSweeper/Content/Environment/FacilityRooms/Materials/M_FacilityRooms_Teal.uasset": "f9540982461cb0c1da41b81b7f860cfe09c3a05a87e5c2389e72cce1c873201b",
+    "TunaSweeper/Content/Environment/FacilityRooms/Materials/M_FacilityRooms_Wood.uasset": "5b8cce23a78eeb16f5a33eb1e3756881fb3472d2c8e83c81b58c92e1a0bd6d69",
+    "TunaSweeper/Content/Environment/FacilityRooms/Meshes/SM_FacilityRooms_AtticLamp.uasset": "4a61e6f6e1cd032b7ecc478b9cb3784ea97b6060a956b051bbe1c08e663e52a8",
+    "TunaSweeper/Content/Environment/FacilityRooms/Meshes/SM_FacilityRooms_Boiler.uasset": "45908624349f2910ded58c944c135e3d490aa71b88f8f6ea98e01b5be046bc63",
+    "TunaSweeper/Content/Environment/FacilityRooms/Meshes/SM_FacilityRooms_BookStack.uasset": "1108cbc247a8a2b6c8ffdf112e9b26e6ac70b64ea273ac741e11f22071358ab3",
+    "TunaSweeper/Content/Environment/FacilityRooms/Meshes/SM_FacilityRooms_DeskMonitor.uasset": "7c9d7c68b927bdee6f326df5af68d4ba871837b5097005f218b34d0d1a60af43",
+    "TunaSweeper/Content/Environment/FacilityRooms/Meshes/SM_FacilityRooms_DeskMug.uasset": "dfad3ba83319ca0d1ed550ab2ce53c668a26149cb5f3b04fc7de98d2ec3ce11a",
+    "TunaSweeper/Content/Environment/FacilityRooms/Meshes/SM_FacilityRooms_Doorway200.uasset": "83470aa11823c0e7301c57a4d9c86aaa7c42ff04cbd3ffa9abb05be2e3345281",
+    "TunaSweeper/Content/Environment/FacilityRooms/Meshes/SM_FacilityRooms_ElectricalCabinet.uasset": "47938d1f7f82f99221e39bebd5e905edd8e3a16ba12d456bc26e1305fe56ab94",
+    "TunaSweeper/Content/Environment/FacilityRooms/Meshes/SM_FacilityRooms_FileCabinet.uasset": "0d0aaaefe29b03640588a843b41ca13b102f2f540b3c02f1e21f84a429b054d9",
+    "TunaSweeper/Content/Environment/FacilityRooms/Meshes/SM_FacilityRooms_Floor200.uasset": "e3f72c322c1edee995140745f849e9913524b1640d28c88ea13310e19ecc7929",
+    "TunaSweeper/Content/Environment/FacilityRooms/Meshes/SM_FacilityRooms_Generator.uasset": "247780f12d32d53c6041afd498c33ea5e1603219a1644834e69829a3f6658206",
+    "TunaSweeper/Content/Environment/FacilityRooms/Meshes/SM_FacilityRooms_Guardrail200.uasset": "0e2385da2a25c9c7d2529406f46f42471f43bcdc1572ecdcdf7f41b0dfe0f050",
+    "TunaSweeper/Content/Environment/FacilityRooms/Meshes/SM_FacilityRooms_HatchLanding200.uasset": "1cde22e77b0879dc46848e0b2a23390c5bd5ed812b9de8449db0a89d65ece526",
+    "TunaSweeper/Content/Environment/FacilityRooms/Meshes/SM_FacilityRooms_KeyboardConsole.uasset": "c5c7f377531b8cba5ac294d83110de3cbaa6fcf7302a31f1d0dae5423bfab939",
+    "TunaSweeper/Content/Environment/FacilityRooms/Meshes/SM_FacilityRooms_Ladder300.uasset": "c50ac1a83eb1f9f02538e2ca7b935906aeca5984fca1f174392b255a4837d75e",
+    "TunaSweeper/Content/Environment/FacilityRooms/Meshes/SM_FacilityRooms_MonitorWall.uasset": "679ddd425f95f5ed10a75f52780ffe8134b9e91913139edcbe52de7334e98829",
+    "TunaSweeper/Content/Environment/FacilityRooms/Meshes/SM_FacilityRooms_OperatorChair.uasset": "212f2b198aee7639c6d11bbc89976c9520ea4ba04e3f6e061375d77630346fa9",
+    "TunaSweeper/Content/Environment/FacilityRooms/Meshes/SM_FacilityRooms_OperatorDesk.uasset": "7e7eefd055941ad5f44021d54290ccae1e694a407305ef300c08e679a0a272eb",
+    "TunaSweeper/Content/Environment/FacilityRooms/Meshes/SM_FacilityRooms_PalletCrates.uasset": "8c1ebbf2a30107d20ace8ab12299df3c16eed16363ea4ea4f83d6d9cd72115fe",
+    "TunaSweeper/Content/Environment/FacilityRooms/Meshes/SM_FacilityRooms_PipeBundle.uasset": "27a8a03a571185700adf5280a1611fb238501c4a7060fef86a109d59d2530603",
+    "TunaSweeper/Content/Environment/FacilityRooms/Meshes/SM_FacilityRooms_PipeRun.uasset": "11138e8dffde5801e25c8e8969f45929067045e8d922157c729bf1fabe10c8c1",
+    "TunaSweeper/Content/Environment/FacilityRooms/Meshes/SM_FacilityRooms_PressureTank.uasset": "e01eb8a87ec94b06dc0cee7c487f3c352de1169cabb2eb71d862f532e8b03691",
+    "TunaSweeper/Content/Environment/FacilityRooms/Meshes/SM_FacilityRooms_PumpSkid.uasset": "30d324673c31eb77757071ae5f53eba7dd0fec1de57ff7f8c7c1defe00daa1d8",
+    "TunaSweeper/Content/Environment/FacilityRooms/Meshes/SM_FacilityRooms_RadioConsole.uasset": "402eb282e9eb97850549da505534e83ef11dbe03f8fa0b983a539eb39a99182b",
+    "TunaSweeper/Content/Environment/FacilityRooms/Meshes/SM_FacilityRooms_RadioRack.uasset": "5115849212663bf29d1d464ae220099fe76b9f413188f11f95e48922cf40cf71",
+    "TunaSweeper/Content/Environment/FacilityRooms/Meshes/SM_FacilityRooms_SupplyRack.uasset": "00bac71ce7f9240d267dfe223328a96b57fa7dd0e4d7c6d534c3492a0abf1bd5",
+    "TunaSweeper/Content/Environment/FacilityRooms/Meshes/SM_FacilityRooms_Threshold120.uasset": "6a73d398529bfc24e92430741026c375a0c0b48281d0e3309cda3bd348d689b3",
+    "TunaSweeper/Content/Environment/FacilityRooms/Meshes/SM_FacilityRooms_Wall100.uasset": "aaaca6f0d00e2f26453b36c0e2effe1e41e6f829e2bb16cdc8a841d2ea9c7a4c",
+    "TunaSweeper/Content/Environment/FacilityRooms/Meshes/SM_FacilityRooms_Wall200.uasset": "57191f7be4fd2d4819601bcf33a6538e5a0f3b6f9f04cf3451453476c5818e75",
+    "TunaSweeper/Content/Environment/FacilityRooms/Meshes/SM_FacilityRooms_WallCorner.uasset": "ec01176b209f6b8f5629346290c253103126eb0462aaeedc89dc7b2a7c45ed81",
+    "TunaSweeper/Content/Environment/FacilityRooms/Meshes/SM_FacilityRooms_WallLamp.uasset": "c0305234d2447e58b7cae5dd2ec8acff03419e99fba8063639142a45a07a6e11",
+    "TunaSweeper/Content/Environment/FacilityRooms/Meshes/SM_FacilityRooms_WallVent.uasset": "87ed7e56bdea5ac231df7ae276c79d923e9a57df9659283a9eab1b7828183a61",
+    "TunaSweeper/Content/Environment/FacilityRooms/Meshes/SM_FacilityRooms_WoodFloor200.uasset": "4ef97bdba8788bbad7c4c19e8b0dfd25a69d9ddce6e4464b82388183822596af",
+    "TunaSweeper/Content/Environment/FacilityRooms/Meshes/SM_FacilityRooms_WoodGable600.uasset": "40ee26e9978b4517956dbfb6cc0142e3526d1e7b6d6dd5a7774da895e0b3884e",
+    "TunaSweeper/Content/Environment/FacilityRooms/Meshes/SM_FacilityRooms_WoodHatchLanding200.uasset": "c7939bc78596470baa985f5bf2fb1c90672117bc12667bcbb16f4b0df5b3cceb",
+    "TunaSweeper/Content/Environment/FacilityRooms/Meshes/SM_FacilityRooms_WoodRoof600.uasset": "8549a8ec10c134f8287115f8959a4317e0ede22db758c7e1eb3ef6b089c490d5",
+    "TunaSweeper/Content/Environment/FacilityRooms/Meshes/SM_FacilityRooms_WoodWall200.uasset": "cf7dd5ebcaf47684c149d95f44e9d6c365874e384bf62e1fb858a7fc50a67c65",
+    "TunaSweeper/Content/Environment/FacilityRooms/Meshes/SM_FacilityRooms_WoodWindowWall200.uasset": "f549b3fcd8396f2eda058892b19ac73f5bc3b727230a24e281c4e8d2da216843",
+    "TunaSweeper/Content/Environment/FacilityRooms/Textures/T_FacilityRooms_Atlas.uasset": "d9c63a4ca09f97296c304ebd28c2782b8e6735cf4ae66b9c3e64adad8e74b03b",
+    "TunaSweeper/Content/Environment/FacilityRooms/Textures/T_FacilityRooms_Forest.uasset": "a84d4f9fd1c8d0cd278aa178271729a41da9003ad6849c6308e28055ff9e213e",
+    "TunaSweeper/Content/MainRaid/RaidMap.umap": "4b5151d642a2e3d447d4171389373fb5007705844554fd05f967924148e4f4e4",
+    "TunaSweeper/Content/Maps/BunkerMap.umap": "3a3e918678ce8a92b5d7af33c113ec1bcc663f81baf4700b0c99314be2b5d616",
+    "TunaSweeper/Content/Maps/DemoBoxRaidMap.umap": "a6c76b4728424722cc5c73f21b0985f0178fc5faafa118a8229c13528c76916b",
+    "TunaSweeper/Content/Maps/DemoRaidMap.umap": "13017a262fe76319003395f276de4faa16138f949130952f2872d08f03c34b95",
+    "TunaSweeper/Content/Maps/IntroMap.umap": "95ae73de76b9ea3e80bcfeedd7102a3eb19e8d0e86f7bd9b9256c7243b6be837",
+    "TunaSweeper/Content/Maps/LiftSeqMap.umap": "315cf8e2ca2eea82b02320f52226bff783facfd7cd041bfe52ca6d3e5590c5db",
+    "TunaSweeper/Content/Maps/OpeningScenarioMap.umap": "8b82d906432ca8a3ffd64576f9e58c3bb5f8546de00a9b59c5e2d112826f1153",
+    "TunaSweeper/Content/Maps/PrototypeTerrainPathCreekMap.umap": "6465905818ca2f779240116a2498cfedf3ecc8efd1047ba6d2d2af3877e12fe0",
+    "TunaSweeper/Content/Maps/SkySeqMap.umap": "2f402e10af5eb547a15ba568b51f00d7f43f1c0ab01409cd1e1269ea0b24daff",
+    "TunaSweeper/Content/Maps/TempMap.umap": "158673ba1e5b3e7a975145b180239b090c7f256299e8566b54f33c52f6e2cc9a",
+    "TunaSweeper/Content/Weapons/TunaWeaponCollection/Maps/L_TunaWeaponCollection_Showcase.umap": "1bb31b8f9e7fc7dace5c5e84fc375671473c18cf368ef0f0cf34671dccb42e22"
+  },
+  "preexisting_assets_unchanged": true
+}
