@@ -27,4 +27,3 @@ parts.append('<h2 id="reference">ImageGen 컨셉 레퍼런스 · 실제 모델 �
 parts.append('<details><summary>ImageGen 공유 아틀라스 / 원본과 프롬프트</summary><div class="pair">'+img('Textures/ImageGen_Atlas_Final.png','ImageGen atlas final')+img('Textures/ImageGen_Atlas_v1.png','ImageGen atlas before two-tile edit')+'</div><p><a href="References/concept.prompt.txt">컨셉 프롬프트</a> · <a href="Textures/atlas.prompt.txt">아틀라스 프롬프트</a> · <a href="Textures/atlas-edit.prompt.txt">두 칸 수정 프롬프트</a></p></details></main></html>')
 (OUT/'Review.html').write_text(''.join(parts),encoding='utf-8')
 print('LSP_REVIEW_WRITTEN')
-

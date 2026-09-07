@@ -1,0 +1,20 @@
+{
+  "passed": true,
+  "map": "/Game/Environment/LabSupplyProps/Maps/L_LabSupplyProps",
+  "manifest_instances": 106,
+  "rooms": 2,
+  "room_footprint_m": [
+    8,
+    8
+  ],
+  "warehouse_shift_m": [
+    12,
+    0,
+    0
+  ],
+  "rect_lights": 4,
+  "cameras": 4,
+  "scale_proxies": 2,
+  "roofless": true,
+  "note": "Map saved only; validation requires an independent full-editor process."
+}

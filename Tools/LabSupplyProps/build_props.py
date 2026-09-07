@@ -173,4 +173,3 @@ if not os.getenv('LSP_SKIP_RENDER'):
     strength.inputs[1].default_value=.35
 visibility('Lab');bpy.ops.wm.save_as_mainfile(filepath=str(OUT/'LabSupplyProps.blend'))
 print('LSP_BUILD_PASSED',manifest['unique_triangles'],manifest['sample_totals'])
-
