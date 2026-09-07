@@ -1,0 +1,809 @@
+{
+  "destination": "/Game/Weapons/TunaWeaponCollection",
+  "engine": "5.7.4-51494982+++UE5+Release-5.7",
+  "verification": "fresh-process reload",
+  "texture": "/Game/Weapons/TunaWeaponCollection/Textures/T_TunaWeaponCollection_Atlas.T_TunaWeaponCollection_Atlas",
+  "texture_srgb": true,
+  "editable_color_parameter": "Tint",
+  "materials": [
+    {
+      "path": "/Game/Weapons/TunaWeaponCollection/Materials/M_TunaWeapon_Charcoal.M_TunaWeapon_Charcoal",
+      "tint_parameter": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "metallic": 0.7200000286102295,
+      "roughness": 0.3799999952316284,
+      "emission": 0.0
+    },
+    {
+      "path": "/Game/Weapons/TunaWeaponCollection/Materials/M_TunaWeapon_OlivePolymer.M_TunaWeapon_OlivePolymer",
+      "tint_parameter": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "metallic": 0.03999999910593033,
+      "roughness": 0.5799999833106995,
+      "emission": 0.0
+    },
+    {
+      "path": "/Game/Weapons/TunaWeaponCollection/Materials/M_TunaWeapon_WarmGrayPolymer.M_TunaWeapon_WarmGrayPolymer",
+      "tint_parameter": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "metallic": 0.019999999552965164,
+      "roughness": 0.550000011920929,
+      "emission": 0.0
+    },
+    {
+      "path": "/Game/Weapons/TunaWeaponCollection/Materials/M_TunaWeapon_Rubber.M_TunaWeapon_Rubber",
+      "tint_parameter": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.8600000143051147,
+      "emission": 0.0
+    },
+    {
+      "path": "/Game/Weapons/TunaWeaponCollection/Materials/M_TunaWeapon_Gunmetal.M_TunaWeapon_Gunmetal",
+      "tint_parameter": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "metallic": 0.8199999928474426,
+      "roughness": 0.3199999928474426,
+      "emission": 0.0
+    },
+    {
+      "path": "/Game/Weapons/TunaWeaponCollection/Materials/M_TunaWeapon_Steel.M_TunaWeapon_Steel",
+      "tint_parameter": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "metallic": 0.9200000166893005,
+      "roughness": 0.23999999463558197,
+      "emission": 0.0
+    },
+    {
+      "path": "/Game/Weapons/TunaWeaponCollection/Materials/M_TunaWeapon_Titanium.M_TunaWeapon_Titanium",
+      "tint_parameter": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "metallic": 0.7799999713897705,
+      "roughness": 0.2800000011920929,
+      "emission": 0.0
+    },
+    {
+      "path": "/Game/Weapons/TunaWeaponCollection/Materials/M_TunaWeapon_SmokedPolymer.M_TunaWeapon_SmokedPolymer",
+      "tint_parameter": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "metallic": 0.05000000074505806,
+      "roughness": 0.2800000011920929,
+      "emission": 0.0
+    },
+    {
+      "path": "/Game/Weapons/TunaWeaponCollection/Materials/M_TunaWeapon_IvoryCeramic.M_TunaWeapon_IvoryCeramic",
+      "tint_parameter": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "metallic": 0.029999999329447746,
+      "roughness": 0.3400000035762787,
+      "emission": 0.0
+    },
+    {
+      "path": "/Game/Weapons/TunaWeaponCollection/Materials/M_TunaWeapon_GraphiteCeramic.M_TunaWeapon_GraphiteCeramic",
+      "tint_parameter": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "metallic": 0.07999999821186066,
+      "roughness": 0.30000001192092896,
+      "emission": 0.0
+    },
+    {
+      "path": "/Game/Weapons/TunaWeaponCollection/Materials/M_TunaWeapon_CyanAccent.M_TunaWeapon_CyanAccent",
+      "tint_parameter": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "metallic": 0.11999999731779099,
+      "roughness": 0.2199999988079071,
+      "emission": 2.5
+    },
+    {
+      "path": "/Game/Weapons/TunaWeaponCollection/Materials/M_TunaWeapon_VioletLens.M_TunaWeapon_VioletLens",
+      "tint_parameter": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "metallic": 0.18000000715255737,
+      "roughness": 0.18000000715255737,
+      "emission": 1.399999976158142
+    },
+    {
+      "path": "/Game/Weapons/TunaWeaponCollection/Materials/M_TunaWeapon_TanGrip.M_TunaWeapon_TanGrip",
+      "tint_parameter": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.7799999713897705,
+      "emission": 0.0
+    },
+    {
+      "path": "/Game/Weapons/TunaWeaponCollection/Materials/M_TunaWeapon_BlackGrip.M_TunaWeapon_BlackGrip",
+      "tint_parameter": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.8600000143051147,
+      "emission": 0.0
+    },
+    {
+      "path": "/Game/Weapons/TunaWeaponCollection/Materials/M_TunaWeapon_Magazine.M_TunaWeapon_Magazine",
+      "tint_parameter": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "metallic": 0.41999998688697815,
+      "roughness": 0.47999998927116394,
+      "emission": 0.0
+    },
+    {
+      "path": "/Game/Weapons/TunaWeaponCollection/Materials/M_TunaWeapon_EdgeWear.M_TunaWeapon_EdgeWear",
+      "tint_parameter": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "metallic": 0.7400000095367432,
+      "roughness": 0.36000001430511475,
+      "emission": 0.0
+    }
+  ],
+  "assets": [
+    {
+      "name": "SM_TunaWeapon_SMG_Standard",
+      "path": "/Game/Weapons/TunaWeaponCollection/Meshes/SM_TunaWeapon_SMG_Standard.SM_TunaWeapon_SMG_Standard",
+      "category": "SMG",
+      "style": "Standard",
+      "vertices_lod0": 15721,
+      "triangles_lod0": 18221,
+      "uv_channels": 2,
+      "lightmap_uv_channel": 1,
+      "simple_collisions": 3,
+      "materials": [
+        "M_TunaWeapon_Charcoal",
+        "M_TunaWeapon_Gunmetal",
+        "M_TunaWeapon_Rubber",
+        "M_TunaWeapon_Steel",
+        "M_TunaWeapon_Titanium",
+        "M_TunaWeapon_OlivePolymer",
+        "M_TunaWeapon_BlackGrip",
+        "M_TunaWeapon_TanGrip",
+        "M_TunaWeapon_WarmGrayPolymer",
+        "M_TunaWeapon_Magazine"
+      ],
+      "bounds_cm": [
+        -24.0,
+        -3.0,
+        -12.984122276306152,
+        24.0,
+        2.992499351501465,
+        9.0
+      ],
+      "max_bounds_error_cm": 7.152557373046875e-07,
+      "sockets": {
+        "MuzzleSocket": {
+          "location_cm": [
+            24.0,
+            0.0,
+            3.15
+          ],
+          "rotation_deg": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "LaserSightSocket": {
+          "location_cm": [
+            16.8,
+            -2.88,
+            3.15
+          ],
+          "rotation_deg": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "ShellEjectionSocket": {
+          "location_cm": [
+            3.5,
+            2.34,
+            3.3
+          ],
+          "rotation_deg": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      }
+    },
+    {
+      "name": "SM_TunaWeapon_SMG_Premium",
+      "path": "/Game/Weapons/TunaWeaponCollection/Meshes/SM_TunaWeapon_SMG_Premium.SM_TunaWeapon_SMG_Premium",
+      "category": "SMG",
+      "style": "Premium",
+      "vertices_lod0": 23092,
+      "triangles_lod0": 26941,
+      "uv_channels": 2,
+      "lightmap_uv_channel": 1,
+      "simple_collisions": 3,
+      "materials": [
+        "M_TunaWeapon_Gunmetal",
+        "M_TunaWeapon_Charcoal",
+        "M_TunaWeapon_GraphiteCeramic",
+        "M_TunaWeapon_Rubber",
+        "M_TunaWeapon_Titanium",
+        "M_TunaWeapon_CyanAccent",
+        "M_TunaWeapon_Steel",
+        "M_TunaWeapon_BlackGrip",
+        "M_TunaWeapon_IvoryCeramic",
+        "M_TunaWeapon_Magazine",
+        "M_TunaWeapon_SmokedPolymer",
+        "M_TunaWeapon_VioletLens"
+      ],
+      "bounds_cm": [
+        -24.020000457763672,
+        -3.021000862121582,
+        -13.0,
+        24.0,
+        2.8874993324279785,
+        9.0
+      ],
+      "max_bounds_error_cm": 7.152557373046875e-07,
+      "sockets": {
+        "MuzzleSocket": {
+          "location_cm": [
+            24.0,
+            0.0,
+            3.08
+          ],
+          "rotation_deg": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "LaserSightSocket": {
+          "location_cm": [
+            7.95,
+            -2.97,
+            3.58
+          ],
+          "rotation_deg": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "ShellEjectionSocket": {
+          "location_cm": [
+            1.0,
+            2.5,
+            3.76
+          ],
+          "rotation_deg": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      }
+    },
+    {
+      "name": "SM_TunaWeapon_AR_Standard",
+      "path": "/Game/Weapons/TunaWeaponCollection/Meshes/SM_TunaWeapon_AR_Standard.SM_TunaWeapon_AR_Standard",
+      "category": "AR",
+      "style": "Standard",
+      "vertices_lod0": 21099,
+      "triangles_lod0": 22588,
+      "uv_channels": 2,
+      "lightmap_uv_channel": 1,
+      "simple_collisions": 3,
+      "materials": [
+        "M_TunaWeapon_OlivePolymer",
+        "M_TunaWeapon_Rubber",
+        "M_TunaWeapon_Charcoal",
+        "M_TunaWeapon_Gunmetal",
+        "M_TunaWeapon_BlackGrip",
+        "M_TunaWeapon_Steel",
+        "M_TunaWeapon_IvoryCeramic",
+        "M_TunaWeapon_Titanium",
+        "M_TunaWeapon_Magazine"
+      ],
+      "bounds_cm": [
+        -30.000001907348633,
+        -3.499999761581421,
+        -16.979711532592773,
+        36.0,
+        3.500000476837158,
+        9.0
+      ],
+      "max_bounds_error_cm": 4.76837158203125e-07,
+      "sockets": {
+        "MuzzleSocket": {
+          "location_cm": [
+            36.0,
+            0.0,
+            2.0
+          ],
+          "rotation_deg": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "LaserSightSocket": {
+          "location_cm": [
+            22.0,
+            3.35,
+            1.7
+          ],
+          "rotation_deg": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "ShellEjectionSocket": {
+          "location_cm": [
+            2.5,
+            3.3,
+            2.1
+          ],
+          "rotation_deg": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      }
+    },
+    {
+      "name": "SM_TunaWeapon_AR_Premium",
+      "path": "/Game/Weapons/TunaWeaponCollection/Meshes/SM_TunaWeapon_AR_Premium.SM_TunaWeapon_AR_Premium",
+      "category": "AR",
+      "style": "Premium",
+      "vertices_lod0": 41223,
+      "triangles_lod0": 39479,
+      "uv_channels": 2,
+      "lightmap_uv_channel": 1,
+      "simple_collisions": 3,
+      "materials": [
+        "M_TunaWeapon_Gunmetal",
+        "M_TunaWeapon_Steel",
+        "M_TunaWeapon_GraphiteCeramic",
+        "M_TunaWeapon_Rubber",
+        "M_TunaWeapon_Charcoal",
+        "M_TunaWeapon_IvoryCeramic",
+        "M_TunaWeapon_Titanium",
+        "M_TunaWeapon_BlackGrip",
+        "M_TunaWeapon_Magazine",
+        "M_TunaWeapon_CyanAccent",
+        "M_TunaWeapon_VioletLens",
+        "M_TunaWeapon_SmokedPolymer"
+      ],
+      "bounds_cm": [
+        -30.000001907348633,
+        -3.5000009536743164,
+        -16.969478607177734,
+        36.0,
+        3.500000476837158,
+        8.997963905334473
+      ],
+      "max_bounds_error_cm": 9.5367431640625e-07,
+      "sockets": {
+        "MuzzleSocket": {
+          "location_cm": [
+            36.0,
+            0.0,
+            2.3
+          ],
+          "rotation_deg": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "LaserSightSocket": {
+          "location_cm": [
+            12.0,
+            -3.03,
+            1.02
+          ],
+          "rotation_deg": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "ShellEjectionSocket": {
+          "location_cm": [
+            2.5,
+            3.3,
+            2.1
+          ],
+          "rotation_deg": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      }
+    },
+    {
+      "name": "SM_TunaWeapon_Pistol_Standard",
+      "path": "/Game/Weapons/TunaWeaponCollection/Meshes/SM_TunaWeapon_Pistol_Standard.SM_TunaWeapon_Pistol_Standard",
+      "category": "Pistol",
+      "style": "Standard",
+      "vertices_lod0": 10130,
+      "triangles_lod0": 11359,
+      "uv_channels": 2,
+      "lightmap_uv_channel": 1,
+      "simple_collisions": 3,
+      "materials": [
+        "M_TunaWeapon_Charcoal",
+        "M_TunaWeapon_Steel",
+        "M_TunaWeapon_Rubber",
+        "M_TunaWeapon_Gunmetal",
+        "M_TunaWeapon_WarmGrayPolymer",
+        "M_TunaWeapon_BlackGrip",
+        "M_TunaWeapon_Magazine",
+        "M_TunaWeapon_IvoryCeramic"
+      ],
+      "bounds_cm": [
+        -11.0,
+        -2.249999761581421,
+        -12.0,
+        17.0,
+        2.2500009536743164,
+        6.0
+      ],
+      "max_bounds_error_cm": 9.5367431640625e-07,
+      "sockets": {
+        "MuzzleSocket": {
+          "location_cm": [
+            17.0,
+            0.0,
+            3.76
+          ],
+          "rotation_deg": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "LaserSightSocket": {
+          "location_cm": [
+            12.15,
+            0.0,
+            -0.72
+          ],
+          "rotation_deg": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "ShellEjectionSocket": {
+          "location_cm": [
+            2.65,
+            2.03,
+            4.36
+          ],
+          "rotation_deg": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      }
+    },
+    {
+      "name": "SM_TunaWeapon_Pistol_Premium",
+      "path": "/Game/Weapons/TunaWeaponCollection/Meshes/SM_TunaWeapon_Pistol_Premium.SM_TunaWeapon_Pistol_Premium",
+      "category": "Pistol",
+      "style": "Premium",
+      "vertices_lod0": 12280,
+      "triangles_lod0": 13808,
+      "uv_channels": 2,
+      "lightmap_uv_channel": 1,
+      "simple_collisions": 3,
+      "materials": [
+        "M_TunaWeapon_Charcoal",
+        "M_TunaWeapon_Steel",
+        "M_TunaWeapon_Rubber",
+        "M_TunaWeapon_Gunmetal",
+        "M_TunaWeapon_CyanAccent",
+        "M_TunaWeapon_GraphiteCeramic",
+        "M_TunaWeapon_IvoryCeramic",
+        "M_TunaWeapon_BlackGrip",
+        "M_TunaWeapon_Titanium",
+        "M_TunaWeapon_Magazine"
+      ],
+      "bounds_cm": [
+        -10.987194061279297,
+        -2.255039930343628,
+        -12.0,
+        17.0,
+        2.255040407180786,
+        6.0
+      ],
+      "max_bounds_error_cm": 4.76837158203125e-07,
+      "sockets": {
+        "MuzzleSocket": {
+          "location_cm": [
+            17.0,
+            0.0,
+            3.76
+          ],
+          "rotation_deg": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "LaserSightSocket": {
+          "location_cm": [
+            12.85,
+            0.0,
+            -1.03
+          ],
+          "rotation_deg": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "ShellEjectionSocket": {
+          "location_cm": [
+            2.65,
+            1.97,
+            4.36
+          ],
+          "rotation_deg": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      }
+    }
+  ],
+  "showcase": {
+    "created": true,
+    "path": "/Game/Weapons/TunaWeaponCollection/Maps/L_TunaWeaponCollection_Showcase",
+    "displayed_assets": {
+      "SM_TunaWeapon_SMG_Standard": [
+        -52.5,
+        -125.0,
+        22.984122276306152
+      ],
+      "SM_TunaWeapon_SMG_Premium": [
+        52.5,
+        -125.0,
+        23.0
+      ],
+      "SM_TunaWeapon_AR_Standard": [
+        -52.5,
+        0.0,
+        26.979711532592773
+      ],
+      "SM_TunaWeapon_AR_Premium": [
+        52.5,
+        0.0,
+        26.969478607177734
+      ],
+      "SM_TunaWeapon_Pistol_Standard": [
+        -52.5,
+        125.0,
+        22.0
+      ],
+      "SM_TunaWeapon_Pistol_Premium": [
+        52.5,
+        125.0,
+        22.0
+      ]
+    },
+    "label_count": 6,
+    "directional_light_count": 2,
+    "camera_count": 1
+  },
+  "protected_assets_sha256": {
+    "TunaSweeper/Content/EditorOnly/Lookdev/Lookdev_NiagaraExplosion.umap": "36846db7a6d0fa538b9f2222d0218f5b677280f303893df1f73048c4df587673",
+    "TunaSweeper/Content/Environment/Bunker/InteriorAdditions/Maps/L_InteriorAdditions_Showcase.umap": "ebb89a304b2d2416a5ae6f3696dc36fea3b507aa3e3a5232de8a8351bd24913c",
+    "TunaSweeper/Content/MainRaid/RaidMap.umap": "4b5151d642a2e3d447d4171389373fb5007705844554fd05f967924148e4f4e4",
+    "TunaSweeper/Content/Maps/BunkerMap.umap": "3a3e918678ce8a92b5d7af33c113ec1bcc663f81baf4700b0c99314be2b5d616",
+    "TunaSweeper/Content/Maps/DemoBoxRaidMap.umap": "a6c76b4728424722cc5c73f21b0985f0178fc5faafa118a8229c13528c76916b",
+    "TunaSweeper/Content/Maps/DemoRaidMap.umap": "13017a262fe76319003395f276de4faa16138f949130952f2872d08f03c34b95",
+    "TunaSweeper/Content/Maps/IntroMap.umap": "95ae73de76b9ea3e80bcfeedd7102a3eb19e8d0e86f7bd9b9256c7243b6be837",
+    "TunaSweeper/Content/Maps/LiftSeqMap.umap": "315cf8e2ca2eea82b02320f52226bff783facfd7cd041bfe52ca6d3e5590c5db",
+    "TunaSweeper/Content/Maps/OpeningScenarioMap.umap": "8b82d906432ca8a3ffd64576f9e58c3bb5f8546de00a9b59c5e2d112826f1153",
+    "TunaSweeper/Content/Maps/PrototypeTerrainPathCreekMap.umap": "6465905818ca2f779240116a2498cfedf3ecc8efd1047ba6d2d2af3877e12fe0",
+    "TunaSweeper/Content/Maps/SkySeqMap.umap": "2f402e10af5eb547a15ba568b51f00d7f43f1c0ab01409cd1e1269ea0b24daff",
+    "TunaSweeper/Content/Maps/TempMap.umap": "158673ba1e5b3e7a975145b180239b090c7f256299e8566b54f33c52f6e2cc9a",
+    "TunaSweeper/Content/Materials/M_AssaultRifle.uasset": "e7c6b04d420bba803fff7624f77e179f850c1706d8e97db588feae36054b51bb",
+    "TunaSweeper/Content/Materials/M_OldGun.uasset": "dfa04ddefe4dcef397c4a1acddd4a67905d803363e445883ef3cc000cba123bf",
+    "TunaSweeper/Content/Materials/M_SimpleSMG.uasset": "1c3e3870ce3ff01594d6b418f4676224058e4463d20d595d7ed38c3d0b702269",
+    "TunaSweeper/Content/Materials/Textures/T_AssaultRifle.uasset": "49600a4ee4310a4e0154c351af2cc3b7829bad434041f57821da13d8267f5c4b",
+    "TunaSweeper/Content/Materials/Textures/T_AssaultRifle_normal.uasset": "eff72250338d5b713d719cdf1027b2698e5733ac25da03e78e6b64105f3340b3",
+    "TunaSweeper/Content/Materials/Textures/T_AssaultRifle_roughness.uasset": "7a8406a1ecb009d7f05752299fb9cbb0cfbdf111a4bd1a8c9f5c58708afb58a6",
+    "TunaSweeper/Content/Materials/Textures/T_OldGun.uasset": "ebc785ced0de9ce4377abeebf931304ee5c074c685642d7105fda31284e0b8a1",
+    "TunaSweeper/Content/Materials/Textures/T_OldGun__roughness.uasset": "401fbc672c36f10ec31cef2b198f83bf5a0df7ef721ea6b2a00a703b89ff8d3e",
+    "TunaSweeper/Content/Materials/Textures/T_OldGun_normal.uasset": "ca163959aa9b399ace41a39b624363fbad13b268b956f94dc7281e11ac32b7f5",
+    "TunaSweeper/Content/Materials/Textures/T_SimpleSMG.uasset": "d15bc15cf7f898bbfc8f7ed136cd8acbb2501778a663abf8198f4343655936a1",
+    "TunaSweeper/Content/Materials/Textures/T_SimpleSMG_normal.uasset": "4a26e4f3a361b490e6185f6ea4c7365e44c0d2f106c3b8a7b48789785a32aef6",
+    "TunaSweeper/Content/Meshes/Weapons/SM_AssaultRifle.uasset": "bae455895006ee878efcc247c23aae24d10b4228a1e9608b65d171d0f9ed17f6",
+    "TunaSweeper/Content/Meshes/Weapons/SM_OldGun.uasset": "b5b4125820d6f3b38807c102a3f67c669ad39fe915966ad8386ecfd0e9a9275c",
+    "TunaSweeper/Content/Meshes/Weapons/SM_SimpleSMG.uasset": "b8867cce6e85e36bd01266524df2d037e2f8e02c3c0fa214713be78b216020e5",
+    "TunaSweeper/Content/UI/Icons/T_UIIcon_AdvancedRifle.uasset": "93b03385dca0d8c356d3e8afd4a1fd3963ab09ef078678949d4f75be27556e34",
+    "TunaSweeper/Content/UI/Icons/T_UIIcon_AdvancedSMG.uasset": "1b93f85a9c7ec4405280feab5830bc14034ffa3b41aa2e75d8711669f787a28d",
+    "TunaSweeper/Content/UI/Icons/T_UIIcon_Pistol.uasset": "32438b4f2269963b1af95bd85554eff8e30a6b46671f142d1906a7e702a8c000",
+    "TunaSweeper/Content/UI/Icons/T_UIIcon_PistolAmmo.uasset": "054b24d445372b8a8cc3335ce2b47f20c6cd0eb3dada68e9ec780546a173ad3e",
+    "TunaSweeper/Content/UI/Icons/T_UIIcon_PistolAPAmmo.uasset": "730e0842eefa5145709b6609f7dd1841b678aa9cee94f13b0f4ea564f6afbb7a",
+    "TunaSweeper/Content/UI/Icons/T_UIIcon_Rifle.uasset": "b124034492a299978dade191610ed085d035f9a41633263239973b1c94362487",
+    "TunaSweeper/Content/UI/Icons/T_UIIcon_RifleAmmo.uasset": "bc094f686054864978598526b2cd9e86f30870ea611534cea3cb2452eaa36a47",
+    "TunaSweeper/Content/UI/Icons/T_UIIcon_RifleAPAmmo.uasset": "ece5cd472862f9a1ca81649ccc502c91d0dc500937d260f9e5be58f0f27d28cd",
+    "TunaSweeper/Content/UI/Icons/T_UIIcon_RifleExtendedMagazine.uasset": "bc6d618028733501adfc0e9129802b6090d710ec331cd4189bd020e126f53afb",
+    "TunaSweeper/Content/UI/Icons/T_UIIcon_RustyPistolAmmo.uasset": "bfa93b010a8f27b6d412ff53c2cf298a92c96f9cc6dd58e6b7ea636a193ef549",
+    "TunaSweeper/Content/UI/Icons/T_UIIcon_RustyRifleAmmo.uasset": "acf90b73c7040dba4a993a7e87fc8f0e41605894368dffd1c98bd61a4ffc4c70",
+    "TunaSweeper/Content/UI/Icons/T_UIIcon_SMG.uasset": "50c2a40b7d44ade7811a8296a0acbac4aaa8543fc3db7c5af78bfa87d41cc02c",
+    "TunaSweeper/Content/Weapons/AudioVisual/DA_EnemyWeaponPresentation_Fallback.uasset": "8759e80c530b6c4e04ae70dfbcbfdff657dfb12ff44684edb9068a00179504d1",
+    "TunaSweeper/Content/Weapons/AudioVisual/DA_WeaponPresentation_Rifle.uasset": "647e5d21225ff2d917ab26284d794a03c6680b98fe52e8a5bbd9459cb6ed707c",
+    "TunaSweeper/Content/Weapons/BP_AssaultRifle.uasset": "03b17052bb88a492ce52692850a2e6f2d9ded37fc23488b48be2b6c55911a1aa",
+    "TunaSweeper/Content/Weapons/BP_SimpleSMG.uasset": "2290e546f48b30d18fa18a1cc2e299448f2b0642bcf4d690acc4f5cd9a9dc1a1",
+    "TunaSweeper/Content/Weapons/BP_TunaSweeperProjectile.uasset": "c2a1fe66c630eeb8cd494fc3ea1bb16ba46a95d7b112a980b455fc213fe702cf",
+    "TunaSweeper/Content/Weapons/BP_TunaSweeperWeapon.uasset": "488e3457f4fa09bd76fe87f59fe434aa68b93f672f008c02913f2a6653828606",
+    "TunaSweeper/Content/Weapons/DA_WeaponSpreadRecoil.uasset": "34278b126fed4e1de7286f1d6951a57c5b5020bd381f0a36c45e7333bf8ddce8",
+    "TunaSweeper/Content/Weapons/Effects/M_WeaponShellCasing_Brass.uasset": "54f15885de99e7ad97d653aac1a69d06fbcafc035301d146f16778e5f68e6445",
+    "TunaSweeper/Content/Weapons/Effects/SM_WeaponShellCasing.uasset": "3e068fc08ad9c90855a707af82da76e30bf5f7895c049a4424e83a7d529c15be",
+    "TunaSweeper/Content/Weapons/M_BaseballBat_Wood.uasset": "e6ac87bf6d457fde16fb7018ce7560c12d3e63d8c784b4216ef34913a36e2f98",
+    "TunaSweeper/Content/Weapons/SM_BaseballBat.uasset": "82c8d44f895d38fc72888bd909233227cbc56ac462a71a4101848282db907b17",
+    "TunaSweeper/Content/Weapons/T_BaseballBat_WoodGrain.uasset": "54a1a907c4a41bb7dd552731b26d4a58e3c956c2c8058f1eeb1c972c7466cf87"
+  },
+  "existing_weapons_and_maps_unchanged": true,
+  "total_triangles": 132396,
+  "passed": true
+}

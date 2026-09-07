@@ -1,0 +1,370 @@
+{
+  "family": "SMG",
+  "engine": "Unreal Engine 5.7",
+  "axis_contract": "+X muzzle/forward, +Y right, +Z up",
+  "unit_contract": "authoring cm, Blender m, FBX unit metadata, UE identity import",
+  "pivot_contract": "receiver attachment reference at origin; centered laterally",
+  "texture": "Textures/T_TunaWeaponCollection_Atlas.png",
+  "ue_material_authoring": {
+    "color_segmentation": "semantic material slots remain separate on every mesh",
+    "editable_color_parameter": "Tint",
+    "texture_usage": "ImageGen atlas multiplied by per-material Tint"
+  },
+  "materials": {
+    "Charcoal": {
+      "name": "M_TunaWeapon_Charcoal",
+      "atlas_cell": [
+        0,
+        0
+      ],
+      "metallic": 0.72,
+      "roughness": 0.38,
+      "emission": 0.0
+    },
+    "OlivePolymer": {
+      "name": "M_TunaWeapon_OlivePolymer",
+      "atlas_cell": [
+        1,
+        0
+      ],
+      "metallic": 0.04,
+      "roughness": 0.58,
+      "emission": 0.0
+    },
+    "WarmGrayPolymer": {
+      "name": "M_TunaWeapon_WarmGrayPolymer",
+      "atlas_cell": [
+        2,
+        0
+      ],
+      "metallic": 0.02,
+      "roughness": 0.55,
+      "emission": 0.0
+    },
+    "Rubber": {
+      "name": "M_TunaWeapon_Rubber",
+      "atlas_cell": [
+        3,
+        0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.86,
+      "emission": 0.0
+    },
+    "Gunmetal": {
+      "name": "M_TunaWeapon_Gunmetal",
+      "atlas_cell": [
+        0,
+        1
+      ],
+      "metallic": 0.82,
+      "roughness": 0.32,
+      "emission": 0.0
+    },
+    "Steel": {
+      "name": "M_TunaWeapon_Steel",
+      "atlas_cell": [
+        1,
+        1
+      ],
+      "metallic": 0.92,
+      "roughness": 0.24,
+      "emission": 0.0
+    },
+    "Titanium": {
+      "name": "M_TunaWeapon_Titanium",
+      "atlas_cell": [
+        2,
+        1
+      ],
+      "metallic": 0.78,
+      "roughness": 0.28,
+      "emission": 0.0
+    },
+    "SmokedPolymer": {
+      "name": "M_TunaWeapon_SmokedPolymer",
+      "atlas_cell": [
+        3,
+        1
+      ],
+      "metallic": 0.05,
+      "roughness": 0.28,
+      "emission": 0.0
+    },
+    "IvoryCeramic": {
+      "name": "M_TunaWeapon_IvoryCeramic",
+      "atlas_cell": [
+        0,
+        2
+      ],
+      "metallic": 0.03,
+      "roughness": 0.34,
+      "emission": 0.0
+    },
+    "GraphiteCeramic": {
+      "name": "M_TunaWeapon_GraphiteCeramic",
+      "atlas_cell": [
+        1,
+        2
+      ],
+      "metallic": 0.08,
+      "roughness": 0.3,
+      "emission": 0.0
+    },
+    "CyanAccent": {
+      "name": "M_TunaWeapon_CyanAccent",
+      "atlas_cell": [
+        2,
+        2
+      ],
+      "metallic": 0.12,
+      "roughness": 0.22,
+      "emission": 2.5
+    },
+    "VioletLens": {
+      "name": "M_TunaWeapon_VioletLens",
+      "atlas_cell": [
+        3,
+        2
+      ],
+      "metallic": 0.18,
+      "roughness": 0.18,
+      "emission": 1.4
+    },
+    "TanGrip": {
+      "name": "M_TunaWeapon_TanGrip",
+      "atlas_cell": [
+        0,
+        3
+      ],
+      "metallic": 0.0,
+      "roughness": 0.78,
+      "emission": 0.0
+    },
+    "BlackGrip": {
+      "name": "M_TunaWeapon_BlackGrip",
+      "atlas_cell": [
+        1,
+        3
+      ],
+      "metallic": 0.0,
+      "roughness": 0.86,
+      "emission": 0.0
+    },
+    "Magazine": {
+      "name": "M_TunaWeapon_Magazine",
+      "atlas_cell": [
+        2,
+        3
+      ],
+      "metallic": 0.42,
+      "roughness": 0.48,
+      "emission": 0.0
+    },
+    "EdgeWear": {
+      "name": "M_TunaWeapon_EdgeWear",
+      "atlas_cell": [
+        3,
+        3
+      ],
+      "metallic": 0.74,
+      "roughness": 0.36,
+      "emission": 0.0
+    }
+  },
+  "assets": [
+    {
+      "name": "SM_TunaWeapon_SMG_Standard",
+      "category": "SMG",
+      "style": "Standard",
+      "reference": "References/SMG_Standard_Reference.png",
+      "design_notes": "Compact industrial blowback silhouette: sculpted fixed olive stock, stamped slab receiver, twin-row perforated handguard, curved fluted steel magazine, tan ribbed grip and protected aperture sights. Hollow muzzle and full trigger/stock construction.",
+      "pivot": "receiver attachment reference at UE (0,0,0)",
+      "axis": "+X muzzle/forward, +Y right, +Z up",
+      "sockets": [
+        {
+          "name": "MuzzleSocket",
+          "location_cm": [
+            24,
+            0,
+            3.15
+          ],
+          "rotation_deg": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "name": "LaserSightSocket",
+          "location_cm": [
+            16.8,
+            -2.88,
+            3.15
+          ],
+          "rotation_deg": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "name": "ShellEjectionSocket",
+          "location_cm": [
+            3.5,
+            2.34,
+            3.3
+          ],
+          "rotation_deg": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "bounds_cm": [
+        -24.0,
+        -3.0,
+        -12.984122276306152,
+        24.0,
+        2.992500066757202,
+        9.0
+      ],
+      "size_cm": [
+        48.0,
+        5.992500066757202,
+        21.984122276306152
+      ],
+      "triangles": 19768,
+      "vertices": 10100,
+      "materials": [
+        "M_TunaWeapon_Charcoal",
+        "M_TunaWeapon_Gunmetal",
+        "M_TunaWeapon_Rubber",
+        "M_TunaWeapon_Steel",
+        "M_TunaWeapon_Titanium",
+        "M_TunaWeapon_OlivePolymer",
+        "M_TunaWeapon_BlackGrip",
+        "M_TunaWeapon_TanGrip",
+        "M_TunaWeapon_WarmGrayPolymer",
+        "M_TunaWeapon_Magazine"
+      ],
+      "texture": "T_TunaWeaponCollection_Atlas",
+      "uv_channels_source": 2,
+      "collision_boxes": 3
+    },
+    {
+      "name": "SM_TunaWeapon_SMG_Premium",
+      "category": "SMG",
+      "style": "Premium",
+      "reference": "References/SMG_Premium_Reference.png",
+      "design_notes": "Approximately 70 percent modern / 30 percent near-future: angular forged receiver, skeletal adjustable stock, straight compact magazine, sculpted grip, ivory heatshield plates, compact enclosed reflex optic and twin-channel side sensor. Functional modern silhouette retained with restrained cyan accents.",
+      "pivot": "receiver attachment reference at UE (0,0,0)",
+      "axis": "+X muzzle/forward, +Y right, +Z up",
+      "sockets": [
+        {
+          "name": "MuzzleSocket",
+          "location_cm": [
+            24,
+            0,
+            3.08
+          ],
+          "rotation_deg": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "name": "LaserSightSocket",
+          "location_cm": [
+            7.95,
+            -2.97,
+            3.58
+          ],
+          "rotation_deg": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "name": "ShellEjectionSocket",
+          "location_cm": [
+            1.0,
+            2.5,
+            3.76
+          ],
+          "rotation_deg": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "bounds_cm": [
+        -24.020000457763672,
+        -3.0210001468658447,
+        -13.0,
+        24.0,
+        2.887500047683716,
+        9.0
+      ],
+      "size_cm": [
+        48.02000045776367,
+        5.9085001945495605,
+        22.0
+      ],
+      "triangles": 28924,
+      "vertices": 14814,
+      "materials": [
+        "M_TunaWeapon_Gunmetal",
+        "M_TunaWeapon_Charcoal",
+        "M_TunaWeapon_GraphiteCeramic",
+        "M_TunaWeapon_Rubber",
+        "M_TunaWeapon_Titanium",
+        "M_TunaWeapon_CyanAccent",
+        "M_TunaWeapon_Steel",
+        "M_TunaWeapon_BlackGrip",
+        "M_TunaWeapon_IvoryCeramic",
+        "M_TunaWeapon_Magazine",
+        "M_TunaWeapon_SmokedPolymer",
+        "M_TunaWeapon_VioletLens"
+      ],
+      "texture": "T_TunaWeaponCollection_Atlas",
+      "uv_channels_source": 2,
+      "collision_boxes": 3
+    }
+  ],
+  "total_triangles": 48692
+}

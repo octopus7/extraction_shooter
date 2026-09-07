@@ -1,0 +1,369 @@
+{
+  "family": "AR",
+  "engine": "Unreal Engine 5.7",
+  "axis_contract": "+X muzzle/forward, +Y right, +Z up",
+  "unit_contract": "authoring cm, Blender m, FBX unit metadata, UE identity import",
+  "pivot_contract": "receiver attachment reference at origin; centered laterally",
+  "texture": "Textures/T_TunaWeaponCollection_Atlas.png",
+  "ue_material_authoring": {
+    "color_segmentation": "semantic material slots remain separate on every mesh",
+    "editable_color_parameter": "Tint",
+    "texture_usage": "ImageGen atlas multiplied by per-material Tint"
+  },
+  "materials": {
+    "Charcoal": {
+      "name": "M_TunaWeapon_Charcoal",
+      "atlas_cell": [
+        0,
+        0
+      ],
+      "metallic": 0.72,
+      "roughness": 0.38,
+      "emission": 0.0
+    },
+    "OlivePolymer": {
+      "name": "M_TunaWeapon_OlivePolymer",
+      "atlas_cell": [
+        1,
+        0
+      ],
+      "metallic": 0.04,
+      "roughness": 0.58,
+      "emission": 0.0
+    },
+    "WarmGrayPolymer": {
+      "name": "M_TunaWeapon_WarmGrayPolymer",
+      "atlas_cell": [
+        2,
+        0
+      ],
+      "metallic": 0.02,
+      "roughness": 0.55,
+      "emission": 0.0
+    },
+    "Rubber": {
+      "name": "M_TunaWeapon_Rubber",
+      "atlas_cell": [
+        3,
+        0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.86,
+      "emission": 0.0
+    },
+    "Gunmetal": {
+      "name": "M_TunaWeapon_Gunmetal",
+      "atlas_cell": [
+        0,
+        1
+      ],
+      "metallic": 0.82,
+      "roughness": 0.32,
+      "emission": 0.0
+    },
+    "Steel": {
+      "name": "M_TunaWeapon_Steel",
+      "atlas_cell": [
+        1,
+        1
+      ],
+      "metallic": 0.92,
+      "roughness": 0.24,
+      "emission": 0.0
+    },
+    "Titanium": {
+      "name": "M_TunaWeapon_Titanium",
+      "atlas_cell": [
+        2,
+        1
+      ],
+      "metallic": 0.78,
+      "roughness": 0.28,
+      "emission": 0.0
+    },
+    "SmokedPolymer": {
+      "name": "M_TunaWeapon_SmokedPolymer",
+      "atlas_cell": [
+        3,
+        1
+      ],
+      "metallic": 0.05,
+      "roughness": 0.28,
+      "emission": 0.0
+    },
+    "IvoryCeramic": {
+      "name": "M_TunaWeapon_IvoryCeramic",
+      "atlas_cell": [
+        0,
+        2
+      ],
+      "metallic": 0.03,
+      "roughness": 0.34,
+      "emission": 0.0
+    },
+    "GraphiteCeramic": {
+      "name": "M_TunaWeapon_GraphiteCeramic",
+      "atlas_cell": [
+        1,
+        2
+      ],
+      "metallic": 0.08,
+      "roughness": 0.3,
+      "emission": 0.0
+    },
+    "CyanAccent": {
+      "name": "M_TunaWeapon_CyanAccent",
+      "atlas_cell": [
+        2,
+        2
+      ],
+      "metallic": 0.12,
+      "roughness": 0.22,
+      "emission": 2.5
+    },
+    "VioletLens": {
+      "name": "M_TunaWeapon_VioletLens",
+      "atlas_cell": [
+        3,
+        2
+      ],
+      "metallic": 0.18,
+      "roughness": 0.18,
+      "emission": 1.4
+    },
+    "TanGrip": {
+      "name": "M_TunaWeapon_TanGrip",
+      "atlas_cell": [
+        0,
+        3
+      ],
+      "metallic": 0.0,
+      "roughness": 0.78,
+      "emission": 0.0
+    },
+    "BlackGrip": {
+      "name": "M_TunaWeapon_BlackGrip",
+      "atlas_cell": [
+        1,
+        3
+      ],
+      "metallic": 0.0,
+      "roughness": 0.86,
+      "emission": 0.0
+    },
+    "Magazine": {
+      "name": "M_TunaWeapon_Magazine",
+      "atlas_cell": [
+        2,
+        3
+      ],
+      "metallic": 0.42,
+      "roughness": 0.48,
+      "emission": 0.0
+    },
+    "EdgeWear": {
+      "name": "M_TunaWeapon_EdgeWear",
+      "atlas_cell": [
+        3,
+        3
+      ],
+      "metallic": 0.74,
+      "roughness": 0.36,
+      "emission": 0.0
+    }
+  },
+  "assets": [
+    {
+      "name": "SM_TunaWeapon_AR_Standard",
+      "category": "AR",
+      "style": "Standard",
+      "reference": "References/AR_Standard_Reference.png",
+      "design_notes": "Practical industrial rifle: solid fixed stock, broad perforated olive handguard, forged receiver, stamped curved steel magazine, iron sights; six structural families differ from Premium.",
+      "pivot": "receiver attachment reference at UE (0,0,0)",
+      "axis": "+X muzzle/forward, +Y right, +Z up",
+      "sockets": [
+        {
+          "name": "MuzzleSocket",
+          "location_cm": [
+            36,
+            0,
+            2
+          ],
+          "rotation_deg": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "name": "LaserSightSocket",
+          "location_cm": [
+            22,
+            3.35,
+            1.7
+          ],
+          "rotation_deg": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "name": "ShellEjectionSocket",
+          "location_cm": [
+            2.5,
+            3.3,
+            2.1
+          ],
+          "rotation_deg": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "bounds_cm": [
+        -30.000001907348633,
+        -3.5,
+        -16.979711532592773,
+        36.0,
+        3.5,
+        9.0
+      ],
+      "size_cm": [
+        66.00000190734863,
+        7.0,
+        25.979711532592773
+      ],
+      "triangles": 24132,
+      "vertices": 12348,
+      "materials": [
+        "M_TunaWeapon_OlivePolymer",
+        "M_TunaWeapon_Rubber",
+        "M_TunaWeapon_Charcoal",
+        "M_TunaWeapon_Gunmetal",
+        "M_TunaWeapon_BlackGrip",
+        "M_TunaWeapon_Steel",
+        "M_TunaWeapon_IvoryCeramic",
+        "M_TunaWeapon_Titanium",
+        "M_TunaWeapon_Magazine"
+      ],
+      "texture": "T_TunaWeaponCollection_Atlas",
+      "uv_channels_source": 2,
+      "collision_boxes": 3
+    },
+    {
+      "name": "SM_TunaWeapon_AR_Premium",
+      "category": "AR",
+      "style": "Premium",
+      "reference": "References/AR_Premium_Reference.png",
+      "design_notes": "70% modern rifle / 30% restrained near-future: subtly tapered faceted receiver, slim cut-through handguard, ivory ceramic side armour, compact optic and sensor, adjustable open stock, modular curved magazine, refined grip.",
+      "pivot": "receiver attachment reference at UE (0,0,0)",
+      "axis": "+X muzzle/forward, +Y right, +Z up",
+      "sockets": [
+        {
+          "name": "MuzzleSocket",
+          "location_cm": [
+            36,
+            0,
+            2.3
+          ],
+          "rotation_deg": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "name": "LaserSightSocket",
+          "location_cm": [
+            12,
+            -3.03,
+            1.02
+          ],
+          "rotation_deg": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        {
+          "name": "ShellEjectionSocket",
+          "location_cm": [
+            2.5,
+            3.3,
+            2.1
+          ],
+          "rotation_deg": [
+            0,
+            0,
+            0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        }
+      ],
+      "bounds_cm": [
+        -30.000001907348633,
+        -3.5,
+        -16.969478607177734,
+        36.0,
+        3.5,
+        8.997963905334473
+      ],
+      "size_cm": [
+        66.00000190734863,
+        7.0,
+        25.967442512512207
+      ],
+      "triangles": 44726,
+      "vertices": 22979,
+      "materials": [
+        "M_TunaWeapon_Gunmetal",
+        "M_TunaWeapon_Steel",
+        "M_TunaWeapon_GraphiteCeramic",
+        "M_TunaWeapon_Rubber",
+        "M_TunaWeapon_Charcoal",
+        "M_TunaWeapon_IvoryCeramic",
+        "M_TunaWeapon_Titanium",
+        "M_TunaWeapon_BlackGrip",
+        "M_TunaWeapon_Magazine",
+        "M_TunaWeapon_CyanAccent",
+        "M_TunaWeapon_VioletLens",
+        "M_TunaWeapon_SmokedPolymer"
+      ],
+      "texture": "T_TunaWeaponCollection_Atlas",
+      "uv_channels_source": 2,
+      "collision_boxes": 3
+    }
+  ],
+  "total_triangles": 68858
+}
