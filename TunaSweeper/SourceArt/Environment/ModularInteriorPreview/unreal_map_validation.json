@@ -1,0 +1,43 @@
+{
+  "passed": true,
+  "mode": "create",
+  "map": "/Game/Environment/ModularInteriorPreview/Maps/L_ModularInteriorPreview",
+  "kit_instances": 55,
+  "kit_triangles": 804,
+  "rect_lights": 5,
+  "reference_objects": 1,
+  "placement_transforms_and_dirt_cpd_verified": true,
+  "roofless": true,
+  "ceiling_present": false,
+  "beam_present": false,
+  "wall_mounted_lights": 5,
+  "simple_collision_traces": [
+    {
+      "name": "south_wall",
+      "blocking_hit": true,
+      "expected": true
+    },
+    {
+      "name": "door_opening",
+      "blocking_hit": false,
+      "expected": false
+    },
+    {
+      "name": "door_jamb",
+      "blocking_hit": true,
+      "expected": true
+    },
+    {
+      "name": "floor",
+      "blocking_hit": true,
+      "expected": true
+    }
+  ],
+  "project_camera": {
+    "arm_cm": 1500.0,
+    "pitch_deg": -88.0,
+    "yaw_deg": 0.0,
+    "fov_deg": 70.0
+  },
+  "editor_ticks_before_physics_query": 30
+}

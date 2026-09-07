@@ -1,0 +1,5 @@
+Use case: stylized-concept
+Asset type: single grayscale dirt coverage MASK texture for reusable opaque industrial interior materials, square 1024x1024.
+Primary request: seamless tileable flat black-to-white mask depicting broad soft irregular dust patches, diffuse grime clouds, and a few elongated soft stains. Black means clean, gray partial dust, white full dust. Mostly dark charcoal with broad uneven medium gray patches and a few soft light gray cores, well-separated large shapes. No color. Low spatial frequency, no tiny particles.
+Composition: full frame mask only, evenly distributed, seamless edges, no border. Top down flat 2D grayscale data artwork, not a shaded material photograph.
+Constraints: no lighting, no bevels, no normals, no shadows, no perspective, no text, no small speckle noise, no scratches or screws, no recognizable objects. Suitable for tiling over large concrete walls and floors, with scale/offset and coverage strength controlled in shader.
