@@ -1,0 +1,414 @@
+{
+  "Q1_Scout": {
+    "blend": {
+      "vertices": 5728,
+      "polygons": 5104,
+      "triangles": 11256,
+      "bones": 14,
+      "material_slots": 3,
+      "uv_layers": 1,
+      "invalid_uv_loops": 0,
+      "invalid_weight_vertices": 0,
+      "missing_bone_vertices": 0,
+      "degenerate_faces": 0,
+      "nonmanifold_component_edges": 0,
+      "dimensions_cm": [
+        156.72002410888672,
+        168.92291259765625,
+        107.25000631472676
+      ],
+      "mesh_scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rig_scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "pose_collision_nonadjacent": {
+      "1": [],
+      "2": [],
+      "3": [],
+      "4": [],
+      "5": [],
+      "6": [],
+      "7": [],
+      "8": [],
+      "9": [],
+      "10": [],
+      "11": [],
+      "12": [],
+      "13": [],
+      "14": [],
+      "15": [],
+      "16": [],
+      "17": [],
+      "18": [],
+      "19": [],
+      "20": [],
+      "21": [],
+      "22": [],
+      "23": [],
+      "24": [],
+      "25": [],
+      "26": [],
+      "27": [],
+      "28": [],
+      "29": [],
+      "30": [],
+      "31": [],
+      "32": [],
+      "33": [],
+      "34": [],
+      "35": [],
+      "36": []
+    },
+    "missing_textures": [],
+    "fbx_reload": {
+      "vertices": 5728,
+      "polygons": 5104,
+      "triangles": 11256,
+      "bones": 14,
+      "material_slots": 3,
+      "uv_layers": 1,
+      "invalid_uv_loops": 0,
+      "invalid_weight_vertices": 0,
+      "missing_bone_vertices": 0,
+      "degenerate_faces": 0,
+      "nonmanifold_component_edges": 0,
+      "dimensions_cm": [
+        156.72005462646484,
+        168.92294311523438,
+        107.25001734335638
+      ],
+      "mesh_scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rig_scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "fbx_texture_nodes": 3,
+    "fbx_dimensions_delta_cm": [
+      3.0517578125e-05,
+      3.0517578125e-05,
+      1.1028629614884267e-05
+    ]
+  },
+  "Q2_Bulwark": {
+    "blend": {
+      "vertices": 4880,
+      "polygons": 4318,
+      "triangles": 9556,
+      "bones": 14,
+      "material_slots": 3,
+      "uv_layers": 1,
+      "invalid_uv_loops": 0,
+      "invalid_weight_vertices": 0,
+      "missing_bone_vertices": 0,
+      "degenerate_faces": 0,
+      "nonmanifold_component_edges": 0,
+      "dimensions_cm": [
+        161.66500854492188,
+        230.0,
+        107.25000336766243
+      ],
+      "mesh_scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rig_scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "pose_collision_nonadjacent": {
+      "1": [],
+      "2": [],
+      "3": [],
+      "4": [],
+      "5": [],
+      "6": [],
+      "7": [],
+      "8": [],
+      "9": [],
+      "10": [],
+      "11": [],
+      "12": [],
+      "13": [],
+      "14": [],
+      "15": [],
+      "16": [],
+      "17": [],
+      "18": [],
+      "19": [],
+      "20": [],
+      "21": [],
+      "22": [],
+      "23": [],
+      "24": [],
+      "25": [],
+      "26": [],
+      "27": [],
+      "28": [],
+      "29": [],
+      "30": [],
+      "31": [],
+      "32": [],
+      "33": [],
+      "34": [],
+      "35": [],
+      "36": []
+    },
+    "missing_textures": [],
+    "fbx_reload": {
+      "vertices": 4880,
+      "polygons": 4318,
+      "triangles": 9556,
+      "bones": 14,
+      "material_slots": 3,
+      "uv_layers": 1,
+      "invalid_uv_loops": 0,
+      "invalid_weight_vertices": 0,
+      "missing_bone_vertices": 0,
+      "degenerate_faces": 0,
+      "nonmanifold_component_edges": 0,
+      "dimensions_cm": [
+        161.66504669189453,
+        230.0000228881836,
+        107.25001243158295
+      ],
+      "mesh_scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rig_scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "fbx_texture_nodes": 3,
+    "fbx_dimensions_delta_cm": [
+      3.814697265625e-05,
+      2.288818359375e-05,
+      9.063920515473e-06
+    ]
+  },
+  "H1_Carrier": {
+    "blend": {
+      "vertices": 8344,
+      "polygons": 7446,
+      "triangles": 16388,
+      "bones": 20,
+      "material_slots": 3,
+      "uv_layers": 1,
+      "invalid_uv_loops": 0,
+      "invalid_weight_vertices": 0,
+      "missing_bone_vertices": 0,
+      "degenerate_faces": 0,
+      "nonmanifold_component_edges": 0,
+      "dimensions_cm": [
+        226.9000015258789,
+        184.92291259765625,
+        123.60000228881836
+      ],
+      "mesh_scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rig_scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "pose_collision_nonadjacent": {
+      "1": [],
+      "2": [],
+      "3": [],
+      "4": [],
+      "5": [],
+      "6": [],
+      "7": [],
+      "8": [],
+      "9": [],
+      "10": [],
+      "11": [],
+      "12": [],
+      "13": [],
+      "14": [],
+      "15": [],
+      "16": [],
+      "17": [],
+      "18": [],
+      "19": [],
+      "20": [],
+      "21": [],
+      "22": [],
+      "23": [],
+      "24": [],
+      "25": [],
+      "26": [],
+      "27": [],
+      "28": [],
+      "29": [],
+      "30": [],
+      "31": [],
+      "32": [],
+      "33": [],
+      "34": [],
+      "35": [],
+      "36": []
+    },
+    "missing_textures": [],
+    "fbx_reload": {
+      "vertices": 8344,
+      "polygons": 7446,
+      "triangles": 16388,
+      "bones": 20,
+      "material_slots": 3,
+      "uv_layers": 1,
+      "invalid_uv_loops": 0,
+      "invalid_weight_vertices": 0,
+      "missing_bone_vertices": 0,
+      "degenerate_faces": 0,
+      "nonmanifold_component_edges": 0,
+      "dimensions_cm": [
+        226.90006256103516,
+        184.9229507446289,
+        123.60002366342451
+      ],
+      "mesh_scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rig_scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "fbx_texture_nodes": 3,
+    "fbx_dimensions_delta_cm": [
+      6.103515625e-05,
+      3.814697265625e-05,
+      2.13746061490383e-05
+    ]
+  },
+  "B1_Sentry": {
+    "blend": {
+      "vertices": 2872,
+      "polygons": 2548,
+      "triangles": 5632,
+      "bones": 8,
+      "material_slots": 3,
+      "uv_layers": 1,
+      "invalid_uv_loops": 0,
+      "invalid_weight_vertices": 0,
+      "missing_bone_vertices": 0,
+      "degenerate_faces": 0,
+      "nonmanifold_component_edges": 0,
+      "dimensions_cm": [
+        71.9000015258789,
+        130.99998474121094,
+        194.00000190362368
+      ],
+      "mesh_scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rig_scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "pose_collision_nonadjacent": {
+      "1": [],
+      "2": [],
+      "3": [],
+      "4": [],
+      "5": [],
+      "6": [],
+      "7": [],
+      "8": [],
+      "9": [],
+      "10": [],
+      "11": [],
+      "12": [],
+      "13": [],
+      "14": [],
+      "15": [],
+      "16": [],
+      "17": [],
+      "18": [],
+      "19": [],
+      "20": [],
+      "21": [],
+      "22": [],
+      "23": [],
+      "24": [],
+      "25": [],
+      "26": [],
+      "27": [],
+      "28": [],
+      "29": [],
+      "30": [],
+      "31": [],
+      "32": [],
+      "33": [],
+      "34": [],
+      "35": [],
+      "36": []
+    },
+    "missing_textures": [],
+    "fbx_reload": {
+      "vertices": 2872,
+      "polygons": 2548,
+      "triangles": 5632,
+      "bones": 8,
+      "material_slots": 3,
+      "uv_layers": 1,
+      "invalid_uv_loops": 0,
+      "invalid_weight_vertices": 0,
+      "missing_bone_vertices": 0,
+      "degenerate_faces": 0,
+      "nonmanifold_component_edges": 0,
+      "dimensions_cm": [
+        71.9000244140625,
+        131.0000228881836,
+        194.00001581478136
+      ],
+      "mesh_scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rig_scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "fbx_texture_nodes": 3,
+    "fbx_dimensions_delta_cm": [
+      2.288818359375e-05,
+      3.814697265625e-05,
+      1.3911157680013275e-05
+    ]
+  }
+}
