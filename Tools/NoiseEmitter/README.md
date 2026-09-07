@@ -42,10 +42,10 @@ side, top and oblique renders were inspected.
 
 ## Verification
 
-Run Blender 4.5 with `--python Tools/NoiseEmitter/build_model.py`, generate and
-inspect the ImageGen reference, then run `author_model.py`. Build UE 5.7 editor,
-run `Tools/NoiseEmitter/run_import.ps1`, then `-VerifyOnly` in a fresh process.
-Memory DDC avoids dependence on the local Zen service.
+The editable Blender sources and source-model scripts remain available. The
+completed one-off Unreal importer and its PowerShell entry point were removed
+after integration validation. Use the committed Unreal assets directly.
+Revalidate runtime behavior with `TunaSweeper.NoiseEmitter.AuthoredMeshAndPulse`.
 
 Import and reload asset reports passed (bounds, UVs, CPU access, no collision,
 BP noise defaults, source references and 14 constructed sections). Both engine
