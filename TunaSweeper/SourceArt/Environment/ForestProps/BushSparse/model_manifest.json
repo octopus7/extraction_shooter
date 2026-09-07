@@ -1,0 +1,78 @@
+{
+  "name": "SM_BushSparse",
+  "blender_version": "4.5.12 LTS",
+  "seed": 91063,
+  "units": "meters",
+  "bounds_m": [
+    -0.582611083984375,
+    -0.6719169616699219,
+    0.0,
+    0.6501210927963257,
+    0.609791100025177,
+    0.72259920835495
+  ],
+  "dimensions_m": [
+    1.2327321767807007,
+    1.2817080616950989,
+    0.72259920835495
+  ],
+  "pivot_m": [
+    0,
+    0,
+    0
+  ],
+  "vertices": 749,
+  "triangles": 1190,
+  "uv_channels": [
+    "PaletteUV",
+    "LightmapUV"
+  ],
+  "material_slots": 1,
+  "leaf_count": 63,
+  "branch_components": 14,
+  "closed_manifold_components": true,
+  "degenerate_faces": 0,
+  "finite_unit_normals": true,
+  "alpha": false,
+  "two_sided_required": false,
+  "collision_meshes": 0,
+  "palette_srgb_8bit": [
+    [
+      65,
+      96,
+      40
+    ],
+    [
+      78,
+      110,
+      47
+    ],
+    [
+      90,
+      120,
+      54
+    ],
+    [
+      70,
+      102,
+      43
+    ],
+    [
+      104,
+      77,
+      45
+    ],
+    [
+      126,
+      94,
+      55
+    ]
+  ],
+  "fbx_export": {
+    "axis_forward": "-Y",
+    "axis_up": "Z",
+    "apply_unit_scale": true,
+    "apply_scale_options": "FBX_SCALE_UNITS"
+  },
+  "passed": true
+}

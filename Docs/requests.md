@@ -8152,3 +8152,11 @@
 - Blender/FBX 재로드에서 경계·UV·노멀·퇴화 면·닫힌 표면·재질·packed 텍스처를 검증했다. 원본을 먼저 e703e45c에 로컬 커밋했다.
 - UE 5.7.4 콘텐츠 검증 호스트로 실제 /Game/Nature/ForestProps/LeafLitter에 Static Mesh·Material·Texture를 임포트하고 새 프로세스에서 크기·축·UV·재질·NoCollision·내비게이션 제외·Nanite 비활성 설정을 검증했다. 최대 경계 오차 0.000004cm 미만. UE 저장 메시의 면/UV 분리 정점은 5,040개다.
 - 실제 UE 에디터의 저장하지 않는 임시 월드에서 180프레임 뒤 렌더를 캡처해 직접 표시를 확인했다. 초기 commandlet 검은 캡처는 실제 에디터 캡처로 대체했다. 전체 게임 빌드·PIE·성능 측정은 수행하지 않았으며 기존 공용 애셋·BP·맵·기능·퀘스트는 변경하지 않았다. UE 애셋과 후속 검증 자료는 원본과 별도 로컬 커밋하며 push하지 않는다.
+
+## 2026-09-06 22:21:39 (소요시간: 00:22:00)
+- 요청: 공용 환경 프랍 8종 중 낮은 덤불 성긴형 1종을 독립 경로에서 Blender 스크립트로 제작하고 원본과 UE 임포트 애셋을 별도로 로컬 커밋.
+- 조사: 기존 Nature의 Bush, GrassLow, Flower, SimpleTree, Wood, RockBasic 메시와 텍스처를 UE 5.7에서 읽기 전용 추출해 비교 렌더를 확인. 기존 풀 단색과 WoodCommon/나무 텍스처 확인.
+- 제작: Tools/ForestProps/BushSparse 및 기존 원본 관리 경로인 TunaSweeper/SourceArt/Environment/ForestProps/BushSparse 사용. 7개 줄기, 63개 입체 잎, 1,190삼각형, 약 123 × 128 × 72 cm의 성긴 덤불 제작. 꽃 없음. 내장 팔레트 텍스처가 포함된 .blend, UE FBX, 재현 스크립트, 다방향/12개 반복 배치 프리뷰와 배치 안내 제공.
+- 원본 검증: 지면 피벗 Z=0, 미터 단위, 유한 좌표/단위 노멀, UV 2개 및 양의 UV 삼각형 면적, 닫힌 기하, 퇴화 면 0, 단일 재질 확인. FBX 새 프로세스 재로드 치수 오차 0, .blend 내장 텍스처 재로드 성공. 원본 커밋 898498e0.
+- UE: /Game/Nature/ForestProps/BushSparse에 Static Mesh·재질·텍스처 3개 저장. UE 5.7.4 콘텐츠 전용 임시 검증 프로젝트에서 임포트 후 실제 Content 폴더로 동일 경로 복사, SHA256 대조 및 실제 목적지 파일의 새 프로세스 재로드 검증. 치수 오차 0.000003 cm 미만, 축 대응 (X,-Y,Z) × 100, UV 2개, 재질 1개, Opaque, 단면 렌더링, 충돌 형상 0/NoCollision, navigation data 비활성 확인.
+- 표시 검증: UE GPU Lit 카메라의 앞/뒤/12개 반복 배치 렌더를 직접 확인. UE 임포트 종료 0(신규 재질 생성 전 조회 경고 2개), 재로드 종료 0/경고 0/오류 0. 게임 플레이 검증은 아님. UE 애셋·검증 기록은 원본 이후 별도 커밋. 기존 공용 애셋, BP, 맵, 게임 기능, 퀘스트 변경 및 push 없음.

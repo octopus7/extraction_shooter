@@ -1,0 +1,42 @@
+{
+  "engine": "5.7.4-51494982+++UE5+Release-5.7",
+  "project": "C:/Users/blendue/.codex/worktrees/7a0e/extraction_shooter/TunaSweeper/Saved/BushSparseAudit/BushSparseAudit.uproject",
+  "mode": "import",
+  "mesh": "/Game/Nature/ForestProps/BushSparse/SM_BushSparse.SM_BushSparse",
+  "bounds_cm": [
+    -58.2611083984375,
+    -60.97911071777344,
+    0.0,
+    65.0121078491211,
+    67.19169616699219,
+    72.25991821289062
+  ],
+  "dimensions_cm": [
+    123.2732162475586,
+    128.17080688476562,
+    72.25991821289062
+  ],
+  "axis_mapping": {
+    "blender_indices_for_ue_xyz": [
+      0,
+      1,
+      2
+    ],
+    "signs": [
+      1,
+      -1,
+      1
+    ],
+    "error_cm": 2.6226043701171875e-06
+  },
+  "vertices": 3477,
+  "source_uv_channels": 2,
+  "material_slots": 1,
+  "texture_srgb": true,
+  "opaque": true,
+  "two_sided": false,
+  "collision_shapes": 0,
+  "collision_profile": "NoCollision",
+  "navigation_data": false,
+  "passed": true
+}

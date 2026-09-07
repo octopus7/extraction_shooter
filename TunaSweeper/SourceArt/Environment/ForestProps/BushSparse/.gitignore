@@ -1,0 +1,5 @@
+# Disposable exports of already tracked references and FBX unpack caches.
+References/*.fbx
+References/*.tga
+References/*.fbm/
+Models/*.fbm/
