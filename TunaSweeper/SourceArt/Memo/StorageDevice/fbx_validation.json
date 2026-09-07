@@ -1,0 +1,28 @@
+{
+  "passed": true,
+  "bounds_cm": [
+    -5.5000003427267075,
+    -3.500000387430191,
+    0.0,
+    6.499999761581421,
+    3.500000759959221,
+    2.0705001428723335
+  ],
+  "max_bounds_error_cm": 7.450580596923828e-07,
+  "triangles": 6012,
+  "vertices": 3088,
+  "uv_channels": 1,
+  "slots": [
+    "M_MemoDevice_Shell",
+    "M_MemoDevice_Guard",
+    "M_MemoDevice_Metal",
+    "M_MemoDevice_Status"
+  ],
+  "outward_closed_solids": 41,
+  "collision_boxes": 1,
+  "pivot": [
+    0.0,
+    0.0,
+    0.0
+  ]
+}

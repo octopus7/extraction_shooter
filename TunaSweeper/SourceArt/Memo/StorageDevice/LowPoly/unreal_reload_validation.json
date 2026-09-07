@@ -1,0 +1,30 @@
+{
+  "passed": true,
+  "mode": "fresh-process reload",
+  "engine": "5.7.4-51494982+++UE5+Release-5.7",
+  "mesh": "/Game/Meshes/Props/MemoStorageDevice/SM_MemoStorageDevice_LowPoly.SM_MemoStorageDevice_LowPoly",
+  "bounds_cm": [
+    -5.5,
+    -3.500000476837158,
+    0.0,
+    6.5,
+    3.500000476837158,
+    2.070499897003174
+  ],
+  "max_bounds_error_cm": 4.6193599700927734e-07,
+  "vertices_lod0": 1296,
+  "source_uv_channels": 1,
+  "lightmap_uv_channel": 1,
+  "collision_boxes": 1,
+  "materials": [
+    "/Game/Meshes/Props/MemoStorageDevice/Materials/M_MemoDevice_Shell.M_MemoDevice_Shell",
+    "/Game/Meshes/Props/MemoStorageDevice/Materials/M_MemoDevice_Guard.M_MemoDevice_Guard",
+    "/Game/Meshes/Props/MemoStorageDevice/Materials/M_MemoDevice_Metal.M_MemoDevice_Metal",
+    "/Game/Meshes/Props/MemoStorageDevice/Materials/M_MemoDevice_Status.M_MemoDevice_Status"
+  ],
+  "texture_dependencies": [],
+  "protected_asset_count": 77,
+  "protected_assets_unchanged": true,
+  "triangles_lod0": 936,
+  "triangles_including_collision": 948
+}
