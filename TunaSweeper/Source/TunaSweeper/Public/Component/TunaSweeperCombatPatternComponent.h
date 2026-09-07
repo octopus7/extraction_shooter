@@ -5,6 +5,7 @@
 #include "TunaSweeperCombatPatternComponent.generated.h"
 
 class ATunaSweeperAttackTelegraph;
+class ATunaSweeperCombatPatternEffectActor;
 class ATunaSweeperMissileTurret;
 class ATunaSweeperRollingRobotMinion;
 
@@ -55,6 +56,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Patterns")
 	bool bAutomaticPatterns = false;
 
+	/** Use patterns as the only attacks while allowing normal target acquisition between patterns. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Patterns")
+	bool bPatternAttacksOnly = false;
+
+	/** Allowed for automatic and explicitly requested attacks. Empty disables every pattern. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Patterns")
+	TArray<ETunaSweeperCombatPattern> EnabledPatterns;
+
 	/** Select one pattern for a teaching enemy, or combine patterns for a boss. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Patterns")
 	TArray<ETunaSweeperCombatPattern> PatternSequence;
@@ -101,6 +110,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Patterns|Minions", meta = (ClampMin = "0.05", Units = "s"))
 	float MinionSpawnInterval = 0.18f;
 
+	/** Optional harmless deployment cue before the first robot rolls out. Zero preserves immediate waves. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Patterns|Minions", meta = (ClampMin = "0.0", Units = "s"))
+	float MinionWarningSeconds = 0.0f;
+
+	/** Teaching encounters can require the previous wave to be defeated before starting another. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Patterns|Minions")
+	bool bWaitForMinionsDefeated = false;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Patterns|Minions", meta = (ClampMin = "0.0", ClampMax = "160.0", Units = "deg"))
 	float MinionFanAngle = 75.0f;
 
@@ -118,6 +135,8 @@ private:
 	void ApplyChargeDamage(const FVector& Start, const FVector& End);
 	bool SpawnTurret(AActor* TargetActor);
 	void SpawnNextMinion();
+	void PulseMinionWarning();
+	void ClearMinionWarning();
 	void HoldOwnerMovement();
 	void RestoreOwnerMovement();
 	void EnterRecovery();
@@ -126,6 +145,9 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<ATunaSweeperAttackTelegraph> Warning;
+
+	UPROPERTY(Transient)
+	TObjectPtr<ATunaSweeperCombatPatternEffectActor> MinionWarningEffect;
 
 	TWeakObjectPtr<AActor> Target;
 	TArray<TWeakObjectPtr<ATunaSweeperMissileTurret>> Turrets;
@@ -139,6 +161,8 @@ private:
 	float PhaseSeconds = 0.0f;
 	float ChargeTrailCountdown = 0.0f;
 	float NextMinionSeconds = 0.0f;
+	float MinionWarningDuration = 0.0f;
+	float MinionWarningPulseSeconds = 0.0f;
 	double NextPatternTime = 0.0;
 	int32 SequenceIndex = 0;
 	int32 WaveSpawnIndex = 0;

@@ -26,6 +26,7 @@ UTunaSweeperCombatPatternComponent::UTunaSweeperCombatPatternComponent()
 	RollingMinionClass = ATunaSweeperRollingRobotMinion::StaticClass();
 	PatternSequence = { ETunaSweeperCombatPattern::MissileTurret, ETunaSweeperCombatPattern::Charge,
 		ETunaSweeperCombatPattern::RollingMinions };
+	EnabledPatterns = PatternSequence;
 }
 
 void UTunaSweeperCombatPatternComponent::BeginPlay()
@@ -67,7 +68,7 @@ bool UTunaSweeperCombatPatternComponent::TryStartAutomaticPattern(AActor* Target
 
 bool UTunaSweeperCombatPatternComponent::TryStartPattern(ETunaSweeperCombatPattern Pattern, AActor* TargetActor)
 {
-	if (!GetWorld() || !IsOwnerAvailable() || IsPatternActive() || !IsValidTarget(TargetActor)
+	if (!EnabledPatterns.Contains(Pattern) || !GetWorld() || !IsOwnerAvailable() || IsPatternActive() || !IsValidTarget(TargetActor)
 		|| GetWorld()->GetTimeSeconds() < NextPatternTime
 		|| FVector::DistSquared2D(GetOwner()->GetActorLocation(), TargetActor->GetActorLocation()) > FMath::Square(FMath::Max(100.0f, ActivationRange)))
 	{
@@ -99,11 +100,15 @@ bool UTunaSweeperCombatPatternComponent::TryStartPattern(ETunaSweeperCombatPatte
 		Phase = ETunaSweeperCombatPatternPhase::Recovery;
 		break;
 	case ETunaSweeperCombatPattern::RollingMinions:
+		if (bWaitForMinionsDefeated && !Minions.IsEmpty()) return false;
 		WaveSize = FMath::Min(FMath::Clamp(MinionsPerWave, 1, 24), FMath::Clamp(MaxActiveMinions, 1, 64) - Minions.Num());
 		if (!RollingMinionClass || WaveSize <= 0) return false;
 		WaveSpawnIndex = 0;
 		NextMinionSeconds = 0.0f;
-		Phase = ETunaSweeperCombatPatternPhase::Executing;
+		// Lock the preparation duration so changing settings cannot shorten an active cue.
+		MinionWarningDuration = FMath::Max(0.0f, MinionWarningSeconds);
+		Phase = MinionWarningDuration > 0.0f ? ETunaSweeperCombatPatternPhase::Warning : ETunaSweeperCombatPatternPhase::Executing;
+		if (Phase == ETunaSweeperCombatPatternPhase::Warning) PulseMinionWarning();
 		break;
 	default:
 		return false;
@@ -273,7 +278,19 @@ void UTunaSweeperCombatPatternComponent::TickComponent(float DeltaTime, ELevelTi
 	}
 	else if (ActivePattern == ETunaSweeperCombatPattern::RollingMinions)
 	{
-		NextMinionSeconds -= DeltaTime;
+		if (Phase == ETunaSweeperCombatPatternPhase::Warning)
+		{
+			if (PhaseSeconds < MinionWarningDuration)
+			{
+				MinionWarningPulseSeconds -= FMath::Max(0.0f, DeltaTime);
+				if (MinionWarningPulseSeconds <= 0.0f) PulseMinionWarning();
+				return;
+			}
+			ClearMinionWarning();
+			Phase = ETunaSweeperCombatPatternPhase::Executing;
+			PhaseSeconds = 0.0f;
+		}
+		NextMinionSeconds -= FMath::Max(0.0f, DeltaTime);
 		// A hitch must not emit the whole wave in one frame.
 		if (NextMinionSeconds <= 0.0f)
 		{
@@ -392,6 +409,31 @@ bool UTunaSweeperCombatPatternComponent::SpawnTurret(AActor* TargetActor)
 	return false;
 }
 
+void UTunaSweeperCombatPatternComponent::PulseMinionWarning()
+{
+	// One harmless cyan scanner cue at a time, even after a hitch or in a long teaching windup.
+	if (IsValid(MinionWarningEffect)) MinionWarningEffect->Destroy();
+	FVector Ground = GetOwner()->GetActorLocation();
+	if (!FindGround(Ground, Ground))
+	{
+		float Radius = 0.0f, HalfHeight = 0.0f;
+		GetOwner()->GetSimpleCollisionCylinder(Radius, HalfHeight);
+		Ground.Z -= HalfHeight;
+	}
+	MinionWarningEffect = ATunaSweeperCombatPatternEffectActor::Spawn(GetWorld(),
+		ETunaSweeperCombatPatternEffect::Summon, Ground,
+		FMath::Max(60.0f, GetOwner()->GetSimpleCollisionRadius() * 1.6f), FVector::UpVector, GetOwner());
+	MinionWarningPulseSeconds = 0.8f;
+}
+
+void UTunaSweeperCombatPatternComponent::ClearMinionWarning()
+{
+	if (IsValid(MinionWarningEffect)) MinionWarningEffect->Destroy();
+	MinionWarningEffect = nullptr;
+	MinionWarningDuration = 0.0f;
+	MinionWarningPulseSeconds = 0.0f;
+}
+
 void UTunaSweeperCombatPatternComponent::SpawnNextMinion()
 {
 	const float Fraction = WaveSize <= 1 ? 0.5f : static_cast<float>(WaveSpawnIndex) / (WaveSize - 1);
@@ -429,6 +471,7 @@ void UTunaSweeperCombatPatternComponent::EnterRecovery()
 {
 	if (IsValid(Warning)) Warning->Destroy();
 	Warning = nullptr;
+	ClearMinionWarning();
 	Phase = ETunaSweeperCombatPatternPhase::Recovery;
 	PhaseSeconds = 0.0f;
 }
@@ -437,6 +480,7 @@ void UTunaSweeperCombatPatternComponent::FinishPattern()
 {
 	if (IsValid(Warning)) Warning->Destroy();
 	Warning = nullptr;
+	ClearMinionWarning();
 	RestoreOwnerMovement();
 	Phase = ETunaSweeperCombatPatternPhase::Idle;
 	Target.Reset();
@@ -455,6 +499,7 @@ void UTunaSweeperCombatPatternComponent::CancelPatterns(bool bDestroySummons)
 {
 	if (IsValid(Warning)) Warning->Destroy();
 	Warning = nullptr;
+	ClearMinionWarning();
 	RestoreOwnerMovement();
 	Phase = ETunaSweeperCombatPatternPhase::Idle;
 	Target.Reset();

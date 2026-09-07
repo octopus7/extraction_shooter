@@ -951,7 +951,7 @@ bool ATunaSweeperEnemyCharacter::IsStandardCombatSuppressed() const
 
 bool ATunaSweeperEnemyCharacter::AttackTarget(AActor* TargetActor)
 {
-	if (IsStandardCombatSuppressed()) return false;
+	if (IsStandardCombatSuppressed() || (CombatPatternComponent && CombatPatternComponent->bPatternAttacksOnly)) return false;
 	if (UsesMeleeAttack())
 	{
 		return ApplyMeleeDamageTo(TargetActor);
@@ -1031,7 +1031,8 @@ bool ATunaSweeperEnemyCharacter::FireProjectileAt(AActor* TargetActor)
 ETunaSweeperEnemyFireResult ATunaSweeperEnemyCharacter::TryFireProjectileAt(AActor* TargetActor)
 {
 	UWorld* World = GetWorld();
-	if (!World || !TargetActor || IsStandardCombatSuppressed() || UsesMeleeAttack())
+	if (!World || !TargetActor || IsStandardCombatSuppressed() || UsesMeleeAttack()
+		|| (CombatPatternComponent && CombatPatternComponent->bPatternAttacksOnly))
 	{
 		return ETunaSweeperEnemyFireResult::Blocked;
 	}
@@ -1127,7 +1128,8 @@ ETunaSweeperEnemyFireResult ATunaSweeperEnemyCharacter::TryFireProjectileAt(AAct
 bool ATunaSweeperEnemyCharacter::ApplyMeleeDamageTo(AActor* TargetActor)
 {
 	const float MeleeDamage = FMath::Max(0.0f, CombatProfile.MeleeAttackDamage);
-	if (!TargetActor || TargetActor == this || bIsDead || MeleeDamage <= 0.0f)
+	if (!TargetActor || TargetActor == this || IsStandardCombatSuppressed() || MeleeDamage <= 0.0f
+		|| (CombatPatternComponent && CombatPatternComponent->bPatternAttacksOnly))
 	{
 		return false;
 	}

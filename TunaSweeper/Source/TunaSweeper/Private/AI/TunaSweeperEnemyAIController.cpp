@@ -343,6 +343,18 @@ void ATunaSweeperEnemyAIController::Tick(float DeltaSeconds)
 		const float DistanceToTarget = FVector::Dist2D(
 			EnemyCharacter->GetActorLocation(),
 			TargetActor->GetActorLocation());
+		if (const UTunaSweeperCombatPatternComponent* Patterns = EnemyCharacter->GetCombatPatternComponent();
+			Patterns && Patterns->bPatternAttacksOnly)
+		{
+			// Let the lesson breathe between telegraphed attacks; only approach if out of pattern range.
+			bIsClosingDistance = bHasDirectTargetSight && CombatProfile.MovementSpeed > 0.0f &&
+				DistanceToTarget > FMath::Max(100.0f, Patterns->ActivationRange) * 0.85f;
+			if (bHasDirectTargetSight) RotateTowardLocation(TargetActor->GetActorLocation(), DeltaSeconds);
+			if (bIsClosingDistance) MoveTowardCurrentTarget(DeltaSeconds);
+			else StopMovement();
+			DrawCombatDebug();
+			return;
+		}
 		if (EnemyCharacter->UsesMeleeAttack())
 		{
 			if (bHasDirectTargetSight)

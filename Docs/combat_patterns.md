@@ -6,9 +6,25 @@
 
 - 바로 배치하는 예제는 `TunaSweeperPatternEnemyCharacter`다. 세 패턴의 자동 실행이 켜져 있으며, 적대 대상을 인지하면 미사일 터렛 → 돌진 → 부하 로봇 순서로 사용한다. 실행 조건이 맞지 않는 패턴은 건너뛸 수 있다.
 - 기존 `TunaSweeperEnemyCharacter`에도 `CombatPatterns` 컴포넌트가 있다. 기본 `bAutomaticPatterns`는 꺼져 있으므로 원하는 적에서만 켠다.
-- 학습용 중간보스는 `PatternSequence`에 하나만 넣고, 보스는 같은 패턴을 조합한다. 터렛과 이미 나온 부하는 독립적으로 동작하므로 다음 패턴과 겹칠 수 있다.
+- 학습용 중간보스는 아래의 돌진형·로봇 소환형 두 네이티브 캐릭터를 사용한다. 미사일은 메인보스 고유 기술로 남긴다. `EnabledPatterns`는 수동·자동 호출 모두의 허용 목록이고, `PatternSequence`는 그중 자동 실행 순서다. 기존 조합 보스의 터렛과 부하는 독립적으로 동작하므로 다음 패턴과 겹칠 수 있다.
 - 수동 제어는 컴포넌트의 `TryStartPattern(Pattern, TargetActor)`를 호출한다. 유효한 적대 대상, `ActivationRange`, 재사용 대기시간을 만족해야 하며 다른 패턴이나 로봇 전개가 진행 중이면 시작하지 않는다. 총기 적은 사격·재장전·전술 이동 중에는 시작을 거절하고, 일반 AI의 Idle/Observe 시점에 실행한다. 패턴 실행 중에는 분대 역할을 반납하고 종료 후 다시 합류한다. 반환값으로 시작 성공을 확인한다.
 - 네이티브 예제 적과 부하 로봇에는 기본 근접 전투 프로필이 있다. 기존 스폰 경로의 `ConfigureCombatProfile`로 프로필과 팩션·분대 배정을 전달할 수 있고, `ConfigureSpawnData`로 체력·보상 등을 설정할 수 있다. 패턴 밖에서는 기존 적 AI가 이동과 공격을 담당한다.
+
+## 사전 학습용 중간보스
+
+에디터 Place Actors 또는 C++ Classes에서 각각 독립적으로 배치한다. 두 클래스 모두 Blueprint 파생·세부 수치 조정이 가능하다. 배치할 전투 맵은 지정되지 않았으므로 기존 맵에는 추가하지 않는다.
+
+| 캐릭터 | 역할 | 학습용 기본값 |
+| --- | --- | --- |
+| `TunaSweeperChargeTeachingMiniboss` / Teaching Miniboss - Charge | 돌진 몸통 공격 전용. 앞쪽 충각이 있는 무한궤도 로봇. | 체력 260, 3초 고정 경로 예고 → 850cm/s로 최대 8m 돌진, 피해 12. 후딜 2.2초 후 다음 패턴까지 7초 대기. |
+| `TunaSweeperRobotTeachingMiniboss` / Teaching Miniboss - Robot Carrier | 부하 로봇 소환 전용. 등에 구체 포드를 실은 고정형 운반 로봇. | 체력 240, 청록색 2.5초 준비 표시 → 0.85초 간격으로 3기 소환. 후딜 2.5초와 재사용 대기 9초를 거치며 기존 부하가 모두 처치되어야 다음 웨이브 허용. |
+| `TunaSweeperTeachingRollingRobotMinion` | 소환형이 사용하는 학습 전용 부하. | 체력 14, 구르기 350cm/s·3초, 기립 1.2초. 보행 180cm/s, 근접 피해 4, 공격 간격 1.8초. 소환된 순간부터 피격 가능. 벽에 막히면 기존 규칙대로 일찍 기립을 시작할 수 있다. |
+
+두 중간보스는 각자의 패턴만 허용한다. 미사일과 반대쪽 중간보스 패턴은 수동 호출도 거절한다. `bPatternAttacksOnly`가 켜져 있어 패턴 사이에 예고 없는 일반 근접·총기 공격을 섞지 않는다. 돌진형은 패턴 거리 밖에서만 천천히 접근하고, 소환형은 제자리에서 부하 처리에 집중할 시간을 준다. 예고 도중 대상 상실·취소·사망 시 준비 효과를 정리한다.
+
+메인보스용 `TunaSweeperPatternEnemyCharacter`와 기본 부하의 타이밍은 유지한다. 기본 돌진 예고는 1.5초·1500cm/s, 기본 소환은 즉시 준비 후 0.18초 간격 5기, 기본 부하는 800cm/s·1.4초 구르기와 0.45초 기립이다. 학습 캐릭터는 같은 회피·피격 규칙을 더 여유로운 별도 설정으로 사용한다.
+
+재사용 설정 `MinionWarningSeconds`는 소환 준비 시간(기본 0초), `bWaitForMinionsDefeated`는 기존 부하 처치 대기(기본 false)다. 새 실행 제한과 예고·웨이브 상태는 런타임 전투 설정이며 저장 필드나 세이브 버전 변경은 없다.
 
 ## 패턴과 조정값
 
@@ -37,8 +53,10 @@
 ## 검증
 
 - UE 5.7 `TunaSweeperEditor Win64 Development` 빌드 성공.
-- 명령줄 자동화 `TunaSweeper.Combat` 26개 모두 성공. 패턴 회귀 10개, 이번 아트·효과 회귀 3개와 기존 전투·화상 테스트를 포함하며 경고·실패는 0개.
+- 공통 변경 후 기존 `TunaSweeper.Combat` 회귀 29개와 새 `TunaSweeper.Combat.TeachingMinibosses` 5개, 총 34개 성공. 경고·실패는 0개.
 - 새 테스트는 예고 시간·고정 위치, 돌진 실제 접촉점과 단일 피해, 벽 차단, 즉시 피격 가능한 구르기, 기립 공간, 시간차 소환·상한, 사망 정리, 재장전·사격과의 전환을 검사한다.
-- 검증 보고서: `TunaSweeper/Saved/Automation/CombatPatternArt/index.json` (로컬 실행 결과). 전투 밸런스는 실제 플레이에서 조정할 수 있다.
+- 검증 보고서: `TunaSweeper/Saved/Automation/TeachingMinibossRegression/index.json`, `TunaSweeper/Saved/Automation/TeachingMinibosses/index.json` (로컬 실행 결과). 전투 밸런스는 실제 플레이에서 조정할 수 있다.
 
 - 아트 검증은 네이티브 액터의 메시 9개 연결, 효과 7종의 유한 기하·수명·충돌 없음, 진행도별 원형·돌진 경고 범위를 검사한다. 저장된 에셋의 독립 읽기 검증은 크기·피벗·UV·재질 8개·충돌 없음과 패키지 무변경을 확인한다. 재검증 스크립트는 `Tools/CombatPatternArt/verify_unreal.py`, 검증 결과는 `Art/CombatPatterns/Validation`에 있다.
+
+- 학습 중간보스 검증은 자동·수동 패턴 격리와 메인보스 미사일 유지, 3초 돌진 예고·고정 경로·후딜, 2.5초 소환 예고·0.85초 배출 간격·전원 처치 대기, 구르기 중 피격과 3초/1.2초 전개, 예고 중 사망 정리를 검사한다.
