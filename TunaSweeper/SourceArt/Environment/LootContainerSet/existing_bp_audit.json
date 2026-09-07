@@ -1,0 +1,142 @@
+{
+  "body_mesh_override": null,
+  "lid_mesh_override": null,
+  "lid_pivot_relative_location": [
+    0.0,
+    -40.0,
+    55.0
+  ],
+  "closed_lid_relative_rotation": [
+    0.0,
+    0.0,
+    0.0
+  ],
+  "open_lid_relative_rotation": [
+    0.0,
+    0.0,
+    -105.0
+  ],
+  "open_animation_duration": 0.3499999940395355,
+  "close_animation_duration": 0.25,
+  "container_definition_id": 7001,
+  "components": [
+    {
+      "name": "SceneRoot",
+      "location": [
+        0.0,
+        0.0,
+        -10000.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "VisualMesh",
+      "location": [
+        0.0,
+        0.0,
+        25.0
+      ],
+      "scale": [
+        1.100000023841858,
+        0.800000011920929,
+        0.5
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "mesh": "/Engine/BasicShapes/Cube.Cube",
+      "materials": [
+        "/Engine/EngineMaterials/WorldGridMaterial.WorldGridMaterial"
+      ],
+      "collision": "<CollisionEnabled.QUERY_AND_PHYSICS: 3>"
+    },
+    {
+      "name": "LidPivot",
+      "location": [
+        0.0,
+        -40.0,
+        55.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "LidMesh",
+      "location": [
+        0.0,
+        40.0,
+        0.0
+      ],
+      "scale": [
+        1.100000023841858,
+        0.800000011920929,
+        0.07999999821186066
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "mesh": "/Engine/BasicShapes/Cube.Cube",
+      "materials": [
+        "/Engine/EngineMaterials/WorldGridMaterial.WorldGridMaterial"
+      ],
+      "collision": "<CollisionEnabled.QUERY_AND_PHYSICS: 3>"
+    },
+    {
+      "name": "Interactable",
+      "location": [
+        0.0,
+        0.0,
+        90.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "InteractionMarkerWidget_0",
+      "location": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  ]
+}

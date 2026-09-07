@@ -1,0 +1,768 @@
+{
+  "passed": true,
+  "assertions": 6398,
+  "assets": [
+    {
+      "name": "SM_LC_Wood_Body",
+      "source": {
+        "triangles": 156,
+        "bounds_m": [
+          -0.550000011920929,
+          -0.4000000059604645,
+          0.0,
+          0.550000011920929,
+          0.4000000059604645,
+          0.4580000042915344
+        ],
+        "connected_solids": 13,
+        "minimum_solid_volume_m3": 8.08499620082633e-05,
+        "summed_signed_volume_m3": 0.06762302276183621,
+        "manifold": true,
+        "consistent_winding": true,
+        "loose_geometry": 0,
+        "degenerate_triangles": 0,
+        "valid_normals": true,
+        "bounds_error_m": 0.0,
+        "material_slots": 1,
+        "material": "M_LSP_Surface",
+        "uv_channels": [
+          "UVMap",
+          "DirtUV"
+        ],
+        "zero_area_uv_triangles": 0,
+        "uv0_range_valid": true,
+        "surface_attribute": "SurfaceParams",
+        "surface_domain": "CORNER",
+        "metallic_range": [
+          0.0,
+          0.11999999731779099
+        ],
+        "roughness_range": [
+          0.6399999856948853,
+          0.8199999928474426
+        ]
+      },
+      "fbx_reload": {
+        "triangles": 156,
+        "bounds_m": [
+          -0.5500000715255737,
+          -0.40000003576278687,
+          0.0,
+          0.5500000715255737,
+          0.40000003576278687,
+          0.4580000042915344
+        ],
+        "connected_solids": 13,
+        "minimum_solid_volume_m3": 8.08499620082633e-05,
+        "summed_signed_volume_m3": 0.06762302306646324,
+        "manifold": true,
+        "consistent_winding": true,
+        "loose_geometry": 0,
+        "degenerate_triangles": 0,
+        "valid_normals": true,
+        "bounds_error_m": 5.960464477539063e-08,
+        "material_slots": 1,
+        "material": "M_LSP_Surface.001",
+        "uv_channels": [
+          "UVMap",
+          "DirtUV"
+        ],
+        "zero_area_uv_triangles": 0,
+        "uv0_range_valid": true,
+        "surface_attribute": "SurfaceParams",
+        "surface_domain": "CORNER",
+        "metallic_range": [
+          0.0,
+          0.11999999731779099
+        ],
+        "roughness_range": [
+          0.6399999856948853,
+          0.8199999928474426
+        ]
+      },
+      "fbx_raw_world_matrix": [
+        [
+          1.0,
+          -8.742277657347586e-08,
+          0.0,
+          0.0
+        ],
+        [
+          8.742277657347586e-08,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "triangle_corner_parity_max_errors": {
+        "position_m": 5.960464477539063e-08,
+        "normal_component": 1.1037917602152447e-06,
+        "uv0": 0.0,
+        "uv1": 0.0,
+        "color": 0.0
+      },
+      "collision_boxes": 5,
+      "collision_names": [
+        "UCX_SM_LC_Wood_Body_00",
+        "UCX_SM_LC_Wood_Body_01",
+        "UCX_SM_LC_Wood_Body_02",
+        "UCX_SM_LC_Wood_Body_03",
+        "UCX_SM_LC_Wood_Body_04"
+      ],
+      "collision_max_bounds_error_m": 7.86781311212792e-08,
+      "identity_source_transform": true,
+      "pivot_valid": true,
+      "dimensions_m": [
+        1.100000023841858,
+        0.800000011920929,
+        0.4580000042915344
+      ]
+    },
+    {
+      "name": "SM_LC_Wood_Lid",
+      "source": {
+        "triangles": 36,
+        "bounds_m": [
+          -0.550000011920929,
+          0.0,
+          0.0,
+          0.550000011920929,
+          0.800000011920929,
+          0.09000000357627869
+        ],
+        "connected_solids": 3,
+        "minimum_solid_volume_m3": 0.0022400012239813805,
+        "summed_signed_volume_m3": 0.052879984180132546,
+        "manifold": true,
+        "consistent_winding": true,
+        "loose_geometry": 0,
+        "degenerate_triangles": 0,
+        "valid_normals": true,
+        "bounds_error_m": 0.0,
+        "material_slots": 1,
+        "material": "M_LSP_Surface",
+        "uv_channels": [
+          "UVMap",
+          "DirtUV"
+        ],
+        "zero_area_uv_triangles": 0,
+        "uv0_range_valid": true,
+        "surface_attribute": "SurfaceParams",
+        "surface_domain": "CORNER",
+        "metallic_range": [
+          0.0,
+          0.0
+        ],
+        "roughness_range": [
+          0.8199999928474426,
+          0.8199999928474426
+        ]
+      },
+      "fbx_reload": {
+        "triangles": 36,
+        "bounds_m": [
+          -0.550000011920929,
+          -4.8082526404868986e-08,
+          0.0,
+          0.5500000715255737,
+          0.8000000715255737,
+          0.09000000357627869
+        ],
+        "connected_solids": 3,
+        "minimum_solid_volume_m3": 0.00224000121094244,
+        "summed_signed_volume_m3": 0.05287998572364397,
+        "manifold": true,
+        "consistent_winding": true,
+        "loose_geometry": 0,
+        "degenerate_triangles": 0,
+        "valid_normals": true,
+        "bounds_error_m": 5.960464477539063e-08,
+        "material_slots": 1,
+        "material": "M_LSP_Surface.002",
+        "uv_channels": [
+          "UVMap",
+          "DirtUV"
+        ],
+        "zero_area_uv_triangles": 0,
+        "uv0_range_valid": true,
+        "surface_attribute": "SurfaceParams",
+        "surface_domain": "CORNER",
+        "metallic_range": [
+          0.0,
+          0.0
+        ],
+        "roughness_range": [
+          0.8199999928474426,
+          0.8199999928474426
+        ]
+      },
+      "fbx_raw_world_matrix": [
+        [
+          1.0,
+          -8.742277657347586e-08,
+          0.0,
+          0.0
+        ],
+        [
+          8.742277657347586e-08,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "triangle_corner_parity_max_errors": {
+        "position_m": 5.960464477539063e-08,
+        "normal_component": 1.0837208463954084e-07,
+        "uv0": 0.0,
+        "uv1": 0.0,
+        "color": 0.0
+      },
+      "collision_boxes": 1,
+      "collision_names": [
+        "UCX_SM_LC_Wood_Lid_00"
+      ],
+      "collision_max_bounds_error_m": 5.960464477539063e-08,
+      "identity_source_transform": true,
+      "pivot_valid": true,
+      "dimensions_m": [
+        1.100000023841858,
+        0.800000011920929,
+        0.09000000357627869
+      ]
+    },
+    {
+      "name": "SM_LC_Metal_Body",
+      "source": {
+        "triangles": 160,
+        "bounds_m": [
+          -0.675000011920929,
+          -0.4749999940395355,
+          0.0,
+          0.675000011920929,
+          0.4749999940395355,
+          0.49799999594688416
+        ],
+        "connected_solids": 12,
+        "minimum_solid_volume_m3": 7.349997031269595e-05,
+        "summed_signed_volume_m3": 0.10569139057042774,
+        "manifold": true,
+        "consistent_winding": true,
+        "loose_geometry": 0,
+        "degenerate_triangles": 0,
+        "valid_normals": true,
+        "bounds_error_m": 0.0,
+        "material_slots": 1,
+        "material": "M_LSP_Surface",
+        "uv_channels": [
+          "UVMap",
+          "DirtUV"
+        ],
+        "zero_area_uv_triangles": 0,
+        "uv0_range_valid": true,
+        "surface_attribute": "SurfaceParams",
+        "surface_domain": "CORNER",
+        "metallic_range": [
+          0.11999999731779099,
+          0.11999999731779099
+        ],
+        "roughness_range": [
+          0.6399999856948853,
+          0.6399999856948853
+        ]
+      },
+      "fbx_reload": {
+        "triangles": 160,
+        "bounds_m": [
+          -0.6750000715255737,
+          -0.4750000536441803,
+          0.0,
+          0.6750000715255737,
+          0.4750000536441803,
+          0.49799999594688416
+        ],
+        "connected_solids": 12,
+        "minimum_solid_volume_m3": 7.349996180273702e-05,
+        "summed_signed_volume_m3": 0.10569139097764674,
+        "manifold": true,
+        "consistent_winding": true,
+        "loose_geometry": 0,
+        "degenerate_triangles": 0,
+        "valid_normals": true,
+        "bounds_error_m": 5.960464477539063e-08,
+        "material_slots": 1,
+        "material": "M_LSP_Surface.003",
+        "uv_channels": [
+          "UVMap",
+          "DirtUV"
+        ],
+        "zero_area_uv_triangles": 0,
+        "uv0_range_valid": true,
+        "surface_attribute": "SurfaceParams",
+        "surface_domain": "CORNER",
+        "metallic_range": [
+          0.11999999731779099,
+          0.11999999731779099
+        ],
+        "roughness_range": [
+          0.6399999856948853,
+          0.6399999856948853
+        ]
+      },
+      "fbx_raw_world_matrix": [
+        [
+          1.0,
+          -8.742277657347586e-08,
+          0.0,
+          0.0
+        ],
+        [
+          8.742277657347586e-08,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "triangle_corner_parity_max_errors": {
+        "position_m": 5.960464477539063e-08,
+        "normal_component": 2.1287374352141342e-07,
+        "uv0": 0.0,
+        "uv1": 0.0,
+        "color": 0.0
+      },
+      "collision_boxes": 5,
+      "collision_names": [
+        "UCX_SM_LC_Metal_Body_00",
+        "UCX_SM_LC_Metal_Body_01",
+        "UCX_SM_LC_Metal_Body_02",
+        "UCX_SM_LC_Metal_Body_03",
+        "UCX_SM_LC_Metal_Body_04"
+      ],
+      "collision_max_bounds_error_m": 7.86781311212792e-08,
+      "identity_source_transform": true,
+      "pivot_valid": true,
+      "dimensions_m": [
+        1.350000023841858,
+        0.949999988079071,
+        0.49799999594688416
+      ]
+    },
+    {
+      "name": "SM_LC_Metal_Lid",
+      "source": {
+        "triangles": 52,
+        "bounds_m": [
+          -0.675000011920929,
+          0.0,
+          0.0,
+          0.675000011920929,
+          0.949999988079071,
+          0.10000002384185791
+        ],
+        "connected_solids": 3,
+        "minimum_solid_volume_m3": 0.001530900422949344,
+        "summed_signed_volume_m3": 0.09596891978677982,
+        "manifold": true,
+        "consistent_winding": true,
+        "loose_geometry": 0,
+        "degenerate_triangles": 0,
+        "valid_normals": true,
+        "bounds_error_m": 0.0,
+        "material_slots": 1,
+        "material": "M_LSP_Surface",
+        "uv_channels": [
+          "UVMap",
+          "DirtUV"
+        ],
+        "zero_area_uv_triangles": 0,
+        "uv0_range_valid": true,
+        "surface_attribute": "SurfaceParams",
+        "surface_domain": "CORNER",
+        "metallic_range": [
+          0.11999999731779099,
+          0.6800000071525574
+        ],
+        "roughness_range": [
+          0.4300000071525574,
+          0.6399999856948853
+        ]
+      },
+      "fbx_reload": {
+        "triangles": 52,
+        "bounds_m": [
+          -0.675000011920929,
+          -5.289077975589862e-08,
+          0.0,
+          0.6750000715255737,
+          0.9500000476837158,
+          0.10000002384185791
+        ],
+        "connected_solids": 3,
+        "minimum_solid_volume_m3": 0.0015309003726515689,
+        "summed_signed_volume_m3": 0.09596891993758601,
+        "manifold": true,
+        "consistent_winding": true,
+        "loose_geometry": 0,
+        "degenerate_triangles": 0,
+        "valid_normals": true,
+        "bounds_error_m": 5.960464477539063e-08,
+        "material_slots": 1,
+        "material": "M_LSP_Surface.004",
+        "uv_channels": [
+          "UVMap",
+          "DirtUV"
+        ],
+        "zero_area_uv_triangles": 0,
+        "uv0_range_valid": true,
+        "surface_attribute": "SurfaceParams",
+        "surface_domain": "CORNER",
+        "metallic_range": [
+          0.11999999731779099,
+          0.6800000071525574
+        ],
+        "roughness_range": [
+          0.4300000071525574,
+          0.6399999856948853
+        ]
+      },
+      "fbx_raw_world_matrix": [
+        [
+          1.0,
+          -8.742277657347586e-08,
+          0.0,
+          0.0
+        ],
+        [
+          8.742277657347586e-08,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "triangle_corner_parity_max_errors": {
+        "position_m": 8.940696716308594e-08,
+        "normal_component": 1.1920928955078125e-07,
+        "uv0": 0.0,
+        "uv1": 0.0,
+        "color": 0.0
+      },
+      "collision_boxes": 1,
+      "collision_names": [
+        "UCX_SM_LC_Metal_Lid_00"
+      ],
+      "collision_max_bounds_error_m": 5.960464477539063e-08,
+      "identity_source_transform": true,
+      "pivot_valid": true,
+      "dimensions_m": [
+        1.350000023841858,
+        0.949999988079071,
+        0.10000002384185791
+      ]
+    },
+    {
+      "name": "SM_LC_Supply_Body",
+      "source": {
+        "triangles": 168,
+        "bounds_m": [
+          -0.824999988079071,
+          -0.550000011920929,
+          0.0,
+          0.824999988079071,
+          0.550000011920929,
+          0.6115000247955322
+        ],
+        "connected_solids": 14,
+        "minimum_solid_volume_m3": 0.0022931399289518595,
+        "summed_signed_volume_m3": 0.22975051527221996,
+        "manifold": true,
+        "consistent_winding": true,
+        "loose_geometry": 0,
+        "degenerate_triangles": 0,
+        "valid_normals": true,
+        "bounds_error_m": 0.0,
+        "material_slots": 1,
+        "material": "M_LSP_Surface",
+        "uv_channels": [
+          "UVMap",
+          "DirtUV"
+        ],
+        "zero_area_uv_triangles": 0,
+        "uv0_range_valid": true,
+        "surface_attribute": "SurfaceParams",
+        "surface_domain": "CORNER",
+        "metallic_range": [
+          0.11999999731779099,
+          0.11999999731779099
+        ],
+        "roughness_range": [
+          0.6399999856948853,
+          0.6399999856948853
+        ]
+      },
+      "fbx_reload": {
+        "triangles": 168,
+        "bounds_m": [
+          -0.8250000476837158,
+          -0.5500000715255737,
+          0.0,
+          0.8250000476837158,
+          0.5500000715255737,
+          0.6115000247955322
+        ],
+        "connected_solids": 14,
+        "minimum_solid_volume_m3": 0.0022931399289518595,
+        "summed_signed_volume_m3": 0.22975051758683485,
+        "manifold": true,
+        "consistent_winding": true,
+        "loose_geometry": 0,
+        "degenerate_triangles": 0,
+        "valid_normals": true,
+        "bounds_error_m": 5.960464477539063e-08,
+        "material_slots": 1,
+        "material": "M_LSP_Surface.005",
+        "uv_channels": [
+          "UVMap",
+          "DirtUV"
+        ],
+        "zero_area_uv_triangles": 0,
+        "uv0_range_valid": true,
+        "surface_attribute": "SurfaceParams",
+        "surface_domain": "CORNER",
+        "metallic_range": [
+          0.11999999731779099,
+          0.11999999731779099
+        ],
+        "roughness_range": [
+          0.6399999856948853,
+          0.6399999856948853
+        ]
+      },
+      "fbx_raw_world_matrix": [
+        [
+          1.0,
+          -8.742277657347586e-08,
+          0.0,
+          0.0
+        ],
+        [
+          8.742277657347586e-08,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "triangle_corner_parity_max_errors": {
+        "position_m": 5.960464477539063e-08,
+        "normal_component": 1.1407588829115411e-07,
+        "uv0": 0.0,
+        "uv1": 0.0,
+        "color": 0.0
+      },
+      "collision_boxes": 5,
+      "collision_names": [
+        "UCX_SM_LC_Supply_Body_00",
+        "UCX_SM_LC_Supply_Body_01",
+        "UCX_SM_LC_Supply_Body_02",
+        "UCX_SM_LC_Supply_Body_03",
+        "UCX_SM_LC_Supply_Body_04"
+      ],
+      "collision_max_bounds_error_m": 7.629394538355427e-08,
+      "identity_source_transform": true,
+      "pivot_valid": true,
+      "dimensions_m": [
+        1.649999976158142,
+        1.100000023841858,
+        0.6115000247955322
+      ]
+    },
+    {
+      "name": "SM_LC_Supply_Lid",
+      "source": {
+        "triangles": 60,
+        "bounds_m": [
+          -0.824999988079071,
+          0.0,
+          0.0,
+          0.824999988079071,
+          1.100000023841858,
+          0.08749997615814209
+        ],
+        "connected_solids": 5,
+        "minimum_solid_volume_m3": 0.002580702304840088,
+        "summed_signed_volume_m3": 0.14126762759406117,
+        "manifold": true,
+        "consistent_winding": true,
+        "loose_geometry": 0,
+        "degenerate_triangles": 0,
+        "valid_normals": true,
+        "bounds_error_m": 0.0,
+        "material_slots": 1,
+        "material": "M_LSP_Surface",
+        "uv_channels": [
+          "UVMap",
+          "DirtUV"
+        ],
+        "zero_area_uv_triangles": 0,
+        "uv0_range_valid": true,
+        "surface_attribute": "SurfaceParams",
+        "surface_domain": "CORNER",
+        "metallic_range": [
+          0.11999999731779099,
+          0.11999999731779099
+        ],
+        "roughness_range": [
+          0.6399999856948853,
+          0.6399999856948853
+        ]
+      },
+      "fbx_reload": {
+        "triangles": 60,
+        "bounds_m": [
+          -0.824999988079071,
+          -7.212378960730348e-08,
+          0.0,
+          0.8250001072883606,
+          1.1000001430511475,
+          0.08749997615814209
+        ],
+        "connected_solids": 5,
+        "minimum_solid_volume_m3": 0.0025807023048788763,
+        "summed_signed_volume_m3": 0.14126763419798477,
+        "manifold": true,
+        "consistent_winding": true,
+        "loose_geometry": 0,
+        "degenerate_triangles": 0,
+        "valid_normals": true,
+        "bounds_error_m": 1.1920928955078125e-07,
+        "material_slots": 1,
+        "material": "M_LSP_Surface.006",
+        "uv_channels": [
+          "UVMap",
+          "DirtUV"
+        ],
+        "zero_area_uv_triangles": 0,
+        "uv0_range_valid": true,
+        "surface_attribute": "SurfaceParams",
+        "surface_domain": "CORNER",
+        "metallic_range": [
+          0.11999999731779099,
+          0.11999999731779099
+        ],
+        "roughness_range": [
+          0.6399999856948853,
+          0.6399999856948853
+        ]
+      },
+      "fbx_raw_world_matrix": [
+        [
+          1.0,
+          -8.742277657347586e-08,
+          0.0,
+          0.0
+        ],
+        [
+          8.742277657347586e-08,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "triangle_corner_parity_max_errors": {
+        "position_m": 1.1920928955078125e-07,
+        "normal_component": 6.66905236812454e-07,
+        "uv0": 0.0,
+        "uv1": 0.0,
+        "color": 0.0
+      },
+      "collision_boxes": 1,
+      "collision_names": [
+        "UCX_SM_LC_Supply_Lid_00"
+      ],
+      "collision_max_bounds_error_m": 1.1920928955078125e-07,
+      "identity_source_transform": true,
+      "pivot_valid": true,
+      "dimensions_m": [
+        1.649999976158142,
+        1.100000023841858,
+        0.08749997615814209
+      ]
+    }
+  ],
+  "failures": [],
+  "blender_version": "4.5.12 LTS",
+  "bounds_tolerance_m": 0.0001,
+  "validation": "Fresh-process .blend reload, independent FBX reload, triangle geometry/winding/UV/color parity; source files unchanged",
+  "total_unique_asset_triangles": 632,
+  "total_collision_boxes": 18
+}
