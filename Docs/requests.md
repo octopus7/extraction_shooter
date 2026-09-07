@@ -8128,3 +8128,11 @@
 - 검증: 크기 117.6×127.0×83.4cm, LOD 988/374/140삼각형, 지면 피벗, 미터/cm·축 변환, 유효 UV·노멀·퇴화 면 0, FBX 재로드를 확인했다. UE의 단일 양면 불투명 재질, LOD, UV, NoCollision과 별도 프로세스 재로드 검사도 통과했다.
 - UE 표시: 동일 .uasset 3개의 SHA-256을 확인한 임시 UE 5.7 검증 프로젝트에서 D3D11/SM5 앞·뒤 렌더를 생성하고 직접 확인했다. 렌더 종료 코드는 0. 실제 프로젝트 임포트·재로드 검사 자체는 통과했으나 기존 Niagara 초기화 ensure 때문에 두 커맨드릿 종료 코드는 1이며 보고서에 구분해 기록했다.
 - 원본 선행 커밋: d567b32f. UE 폴더: /Game/Nature/ForestProps/GrassLongCurved/. 기존 공용 Nature 애셋·BP·맵·기능·퀘스트는 변경하지 않았고 push는 하지 않았다.
+
+## 2026-09-06 22:22:19 (소요시간: 00:30:04)
+
+- 공용 환경 프랍 중 성긴 풀 군락 GrassSparse 1종을 독립 경로에 제작했다. 기존 Bush, GrassLow, Flower, SimpleTree, Wood, RockBasic과 Blender 원본·UE 애셋을 조사하고 참조 렌더를 확인했다.
+- 재현 가능한 Blender 스크립트, 텍스처 내장 blend, UE용 FBX, 128×128 색상 텍스처, 다방향·16개 반복 배치 프리뷰와 치수·배치 안내를 제공했다. 원본은 기존 관리 규칙에 따라 TunaSweeper/SourceArt/Environment/ForestProps/GrassSparse에 저장했다.
+- 풀 5묶음·잎 30장·300삼각형, 약 130.87×96.34×34.31cm이며 지면 피벗·UV·노멀·퇴화 면 0개·재질 슬롯·FBX 별도 프로세스 재로드·텍스처 내장을 검증했다. 원본은 eb1adc7f로 먼저 로컬 커밋했다.
+- UE 5.7.4에서 /Game/Nature/ForestProps/GrassSparse에 메시·불투명 양면 재질·텍스처 3개를 임포트하고 별도 프로세스로 재로드했다. bounds 오차 0.000004cm 미만, 300삼각형, NoCollision·충돌 도형 0개·내비게이션 없음과 기존 자연물 해시 불변을 확인했다.
+- 게임 DLL이 없는 작업트리이므로 실제 Content를 마운트한 독립 UE 검사 프로젝트를 사용했다. 저장하지 않은 검사 맵의 Scene Capture 이미지도 직접 확인했고 임포트·재로드·렌더 명령 모두 종료 코드 0이었다. 게임 코드·퀘스트·BP·레벨 배치는 변경하지 않았고 push는 수행하지 않았다.

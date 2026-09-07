@@ -1,0 +1,2 @@
+# FBX SDK extracts embedded textures on import; source PNG is tracked in Textures/.
+Models/*.fbm/
