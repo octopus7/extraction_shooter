@@ -1,0 +1,652 @@
+{
+  "passed": true,
+  "mode": "fresh_editor_saved_map_reload",
+  "map": "/Game/Environment/LabSupplyProps/Maps/L_LabSupplyProps",
+  "manifest_instances": 106,
+  "sample_totals": {
+    "Lab": {
+      "instances": 44,
+      "triangles": 3876,
+      "prop_instances": 13,
+      "prop_triangles": 3424
+    },
+    "Warehouse": {
+      "instances": 62,
+      "triangles": 5188,
+      "prop_instances": 31,
+      "prop_triangles": 4736
+    },
+    "Sheet": {
+      "instances": 12,
+      "triangles": 2368,
+      "prop_instances": 12,
+      "prop_triangles": 2368
+    }
+  },
+  "rect_lights": 4,
+  "cameras": 4,
+  "scale_proxies": 2,
+  "proxy_dimensions_cm": [
+    68,
+    68,
+    176
+  ],
+  "transforms_mesh_paths_and_dirt_cpd_verified": true,
+  "roofless": true,
+  "warehouse_shift_m": [
+    12,
+    0,
+    0
+  ],
+  "pie_started": false,
+  "simple_collision_traces": [
+    {
+      "name": "Lab_floor",
+      "start_cm": [
+        20,
+        20,
+        50
+      ],
+      "end_cm": [
+        20,
+        20,
+        -30
+      ],
+      "blocking_hit": true,
+      "expected": true
+    },
+    {
+      "name": "Lab_central_hall",
+      "start_cm": [
+        0,
+        -320,
+        88
+      ],
+      "end_cm": [
+        0,
+        280,
+        88
+      ],
+      "blocking_hit": false,
+      "expected": false
+    },
+    {
+      "name": "Warehouse_floor",
+      "start_cm": [
+        1220,
+        20,
+        50
+      ],
+      "end_cm": [
+        1220,
+        20,
+        -30
+      ],
+      "blocking_hit": true,
+      "expected": true
+    },
+    {
+      "name": "Warehouse_central_hall",
+      "start_cm": [
+        1200,
+        -320,
+        88
+      ],
+      "end_cm": [
+        1200,
+        280,
+        88
+      ],
+      "blocking_hit": false,
+      "expected": false
+    },
+    {
+      "name": "shelf_open_tier",
+      "start_cm": [
+        392.0,
+        120.0,
+        45.0
+      ],
+      "end_cm": [
+        328.0,
+        120.0,
+        45.0
+      ],
+      "blocking_hit": false,
+      "expected": false
+    },
+    {
+      "name": "shelf_board",
+      "start_cm": [
+        360.0,
+        165.0,
+        80.0
+      ],
+      "end_cm": [
+        360.0,
+        165.0,
+        65.0
+      ],
+      "blocking_hit": true,
+      "expected": true
+    },
+    {
+      "name": "pallet_fork_gap_Y",
+      "start_cm": [
+        914.0,
+        -221.99999999999997,
+        6.0
+      ],
+      "end_cm": [
+        914.0,
+        -118.0,
+        6.0
+      ],
+      "blocking_hit": false,
+      "expected": false
+    },
+    {
+      "name": "pallet_fork_gap_X",
+      "start_cm": [
+        878.0,
+        -191.0,
+        6.0
+      ],
+      "end_cm": [
+        1002.0,
+        -191.0,
+        6.0
+      ],
+      "blocking_hit": false,
+      "expected": false
+    },
+    {
+      "name": "pallet_deck",
+      "start_cm": [
+        891.0,
+        -125.0,
+        20.0
+      ],
+      "end_cm": [
+        891.0,
+        -125.0,
+        10.0
+      ],
+      "blocking_hit": true,
+      "expected": true
+    },
+    {
+      "name": "sink_basin_open_above",
+      "start_cm": [
+        -154.99999999999997,
+        350.0,
+        105.0
+      ],
+      "end_cm": [
+        -154.99999999999997,
+        350.0,
+        70.0
+      ],
+      "blocking_hit": false,
+      "expected": false
+    },
+    {
+      "name": "sink_basin_bottom",
+      "start_cm": [
+        -154.99999999999997,
+        350.0,
+        105.0
+      ],
+      "end_cm": [
+        -154.99999999999997,
+        350.0,
+        60.0
+      ],
+      "blocking_hit": true,
+      "expected": true
+    }
+  ],
+  "camera_route_visibility": [
+    {
+      "group": "Lab",
+      "target_cm": [
+        -34.0,
+        -250.0,
+        88.0
+      ],
+      "occluded": false
+    },
+    {
+      "group": "Lab",
+      "target_cm": [
+        -34.0,
+        -250.0,
+        165.0
+      ],
+      "occluded": false
+    },
+    {
+      "group": "Lab",
+      "target_cm": [
+        -34.0,
+        -50.0,
+        88.0
+      ],
+      "occluded": false
+    },
+    {
+      "group": "Lab",
+      "target_cm": [
+        -34.0,
+        -50.0,
+        165.0
+      ],
+      "occluded": false
+    },
+    {
+      "group": "Lab",
+      "target_cm": [
+        -34.0,
+        150.0,
+        88.0
+      ],
+      "occluded": false
+    },
+    {
+      "group": "Lab",
+      "target_cm": [
+        -34.0,
+        150.0,
+        165.0
+      ],
+      "occluded": false
+    },
+    {
+      "group": "Lab",
+      "target_cm": [
+        -34.0,
+        265.0,
+        88.0
+      ],
+      "occluded": false
+    },
+    {
+      "group": "Lab",
+      "target_cm": [
+        -34.0,
+        265.0,
+        165.0
+      ],
+      "occluded": false
+    },
+    {
+      "group": "Lab",
+      "target_cm": [
+        0,
+        -250.0,
+        88.0
+      ],
+      "occluded": false
+    },
+    {
+      "group": "Lab",
+      "target_cm": [
+        0,
+        -250.0,
+        165.0
+      ],
+      "occluded": false
+    },
+    {
+      "group": "Lab",
+      "target_cm": [
+        0,
+        -50.0,
+        88.0
+      ],
+      "occluded": false
+    },
+    {
+      "group": "Lab",
+      "target_cm": [
+        0,
+        -50.0,
+        165.0
+      ],
+      "occluded": false
+    },
+    {
+      "group": "Lab",
+      "target_cm": [
+        0,
+        150.0,
+        88.0
+      ],
+      "occluded": false
+    },
+    {
+      "group": "Lab",
+      "target_cm": [
+        0,
+        150.0,
+        165.0
+      ],
+      "occluded": false
+    },
+    {
+      "group": "Lab",
+      "target_cm": [
+        0,
+        265.0,
+        88.0
+      ],
+      "occluded": false
+    },
+    {
+      "group": "Lab",
+      "target_cm": [
+        0,
+        265.0,
+        165.0
+      ],
+      "occluded": false
+    },
+    {
+      "group": "Lab",
+      "target_cm": [
+        34.0,
+        -250.0,
+        88.0
+      ],
+      "occluded": false
+    },
+    {
+      "group": "Lab",
+      "target_cm": [
+        34.0,
+        -250.0,
+        165.0
+      ],
+      "occluded": false
+    },
+    {
+      "group": "Lab",
+      "target_cm": [
+        34.0,
+        -50.0,
+        88.0
+      ],
+      "occluded": false
+    },
+    {
+      "group": "Lab",
+      "target_cm": [
+        34.0,
+        -50.0,
+        165.0
+      ],
+      "occluded": false
+    },
+    {
+      "group": "Lab",
+      "target_cm": [
+        34.0,
+        150.0,
+        88.0
+      ],
+      "occluded": false
+    },
+    {
+      "group": "Lab",
+      "target_cm": [
+        34.0,
+        150.0,
+        165.0
+      ],
+      "occluded": false
+    },
+    {
+      "group": "Lab",
+      "target_cm": [
+        34.0,
+        265.0,
+        88.0
+      ],
+      "occluded": false
+    },
+    {
+      "group": "Lab",
+      "target_cm": [
+        34.0,
+        265.0,
+        165.0
+      ],
+      "occluded": false
+    },
+    {
+      "group": "Warehouse",
+      "target_cm": [
+        1166.0,
+        -250.0,
+        88.0
+      ],
+      "occluded": false
+    },
+    {
+      "group": "Warehouse",
+      "target_cm": [
+        1166.0,
+        -250.0,
+        165.0
+      ],
+      "occluded": false
+    },
+    {
+      "group": "Warehouse",
+      "target_cm": [
+        1166.0,
+        -50.0,
+        88.0
+      ],
+      "occluded": false
+    },
+    {
+      "group": "Warehouse",
+      "target_cm": [
+        1166.0,
+        -50.0,
+        165.0
+      ],
+      "occluded": false
+    },
+    {
+      "group": "Warehouse",
+      "target_cm": [
+        1166.0,
+        150.0,
+        88.0
+      ],
+      "occluded": false
+    },
+    {
+      "group": "Warehouse",
+      "target_cm": [
+        1166.0,
+        150.0,
+        165.0
+      ],
+      "occluded": false
+    },
+    {
+      "group": "Warehouse",
+      "target_cm": [
+        1166.0,
+        265.0,
+        88.0
+      ],
+      "occluded": false
+    },
+    {
+      "group": "Warehouse",
+      "target_cm": [
+        1166.0,
+        265.0,
+        165.0
+      ],
+      "occluded": false
+    },
+    {
+      "group": "Warehouse",
+      "target_cm": [
+        1200,
+        -250.0,
+        88.0
+      ],
+      "occluded": false
+    },
+    {
+      "group": "Warehouse",
+      "target_cm": [
+        1200,
+        -250.0,
+        165.0
+      ],
+      "occluded": false
+    },
+    {
+      "group": "Warehouse",
+      "target_cm": [
+        1200,
+        -50.0,
+        88.0
+      ],
+      "occluded": false
+    },
+    {
+      "group": "Warehouse",
+      "target_cm": [
+        1200,
+        -50.0,
+        165.0
+      ],
+      "occluded": false
+    },
+    {
+      "group": "Warehouse",
+      "target_cm": [
+        1200,
+        150.0,
+        88.0
+      ],
+      "occluded": false
+    },
+    {
+      "group": "Warehouse",
+      "target_cm": [
+        1200,
+        150.0,
+        165.0
+      ],
+      "occluded": false
+    },
+    {
+      "group": "Warehouse",
+      "target_cm": [
+        1200,
+        265.0,
+        88.0
+      ],
+      "occluded": false
+    },
+    {
+      "group": "Warehouse",
+      "target_cm": [
+        1200,
+        265.0,
+        165.0
+      ],
+      "occluded": false
+    },
+    {
+      "group": "Warehouse",
+      "target_cm": [
+        1234.0,
+        -250.0,
+        88.0
+      ],
+      "occluded": false
+    },
+    {
+      "group": "Warehouse",
+      "target_cm": [
+        1234.0,
+        -250.0,
+        165.0
+      ],
+      "occluded": false
+    },
+    {
+      "group": "Warehouse",
+      "target_cm": [
+        1234.0,
+        -50.0,
+        88.0
+      ],
+      "occluded": false
+    },
+    {
+      "group": "Warehouse",
+      "target_cm": [
+        1234.0,
+        -50.0,
+        165.0
+      ],
+      "occluded": false
+    },
+    {
+      "group": "Warehouse",
+      "target_cm": [
+        1234.0,
+        150.0,
+        88.0
+      ],
+      "occluded": false
+    },
+    {
+      "group": "Warehouse",
+      "target_cm": [
+        1234.0,
+        150.0,
+        165.0
+      ],
+      "occluded": false
+    },
+    {
+      "group": "Warehouse",
+      "target_cm": [
+        1234.0,
+        265.0,
+        88.0
+      ],
+      "occluded": false
+    },
+    {
+      "group": "Warehouse",
+      "target_cm": [
+        1234.0,
+        265.0,
+        165.0
+      ],
+      "occluded": false
+    }
+  ],
+  "project_camera": {
+    "arm_cm": 1500.0,
+    "pitch_deg": -88.0,
+    "yaw_deg": 0.0,
+    "fov_deg": 70.0
+  },
+  "camera_route_samples": 48,
+  "editor_ticks_before_physics_query": 30,
+  "process_exit": 0
+}

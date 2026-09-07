@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "captures": [
+    "LSP_Lab_GameCamera",
+    "LSP_Warehouse_GameCamera",
+    "LSP_Lab_ObliqueCamera",
+    "LSP_Warehouse_ObliqueCamera"
+  ],
+  "process_exit": 0
+}

@@ -1,0 +1,227 @@
+{
+  "engine": "5.7.4-51494982+++UE5+Release-5.7",
+  "mode": "import",
+  "passed": true,
+  "assets": [
+    {
+      "name": "SM_LSP_Workbench",
+      "triangles": 204,
+      "material_slots": 1,
+      "bounds_error_cm": 8.225440979003906e-06,
+      "collision_boxes": 17,
+      "collision_shape_bounds_verified": true,
+      "collision_rotation_verified": true,
+      "source_uv_channels": 2,
+      "generated_lightmap_uv_index": 2,
+      "vertex_color_import": "REPLACE",
+      "nanite": false
+    },
+    {
+      "name": "SM_LSP_Shelf",
+      "triangles": 288,
+      "material_slots": 1,
+      "bounds_error_cm": 6.4373016357421875e-06,
+      "collision_boxes": 24,
+      "collision_shape_bounds_verified": true,
+      "collision_rotation_verified": true,
+      "source_uv_channels": 2,
+      "generated_lightmap_uv_index": 2,
+      "vertex_color_import": "REPLACE",
+      "nanite": false
+    },
+    {
+      "name": "SM_LSP_Cabinet",
+      "triangles": 36,
+      "material_slots": 1,
+      "bounds_error_cm": 4.5299530029296875e-06,
+      "collision_boxes": 3,
+      "collision_shape_bounds_verified": true,
+      "collision_rotation_verified": true,
+      "source_uv_channels": 2,
+      "generated_lightmap_uv_index": 2,
+      "vertex_color_import": "REPLACE",
+      "nanite": false
+    },
+    {
+      "name": "SM_LSP_Cart",
+      "triangles": 272,
+      "material_slots": 1,
+      "bounds_error_cm": 3.814697265625e-06,
+      "collision_boxes": 16,
+      "collision_shape_bounds_verified": true,
+      "collision_rotation_verified": true,
+      "source_uv_channels": 2,
+      "generated_lightmap_uv_index": 2,
+      "vertex_color_import": "REPLACE",
+      "nanite": false
+    },
+    {
+      "name": "SM_LSP_Chair",
+      "triangles": 156,
+      "material_slots": 1,
+      "bounds_error_cm": 2.86102294921875e-06,
+      "collision_boxes": 16,
+      "collision_shape_bounds_verified": true,
+      "collision_rotation_verified": true,
+      "source_uv_channels": 2,
+      "generated_lightmap_uv_index": 2,
+      "vertex_color_import": "REPLACE",
+      "nanite": false
+    },
+    {
+      "name": "SM_LSP_ControlBox",
+      "triangles": 24,
+      "material_slots": 1,
+      "bounds_error_cm": 2.6226834961562417e-06,
+      "collision_boxes": 2,
+      "collision_shape_bounds_verified": true,
+      "collision_rotation_verified": true,
+      "source_uv_channels": 2,
+      "generated_lightmap_uv_index": 2,
+      "vertex_color_import": "REPLACE",
+      "nanite": false
+    },
+    {
+      "name": "SM_LSP_Analyzer",
+      "triangles": 144,
+      "material_slots": 1,
+      "bounds_error_cm": 7.033348083496094e-06,
+      "collision_boxes": 13,
+      "collision_shape_bounds_verified": true,
+      "collision_rotation_verified": true,
+      "source_uv_channels": 2,
+      "generated_lightmap_uv_index": 2,
+      "vertex_color_import": "REPLACE",
+      "nanite": false
+    },
+    {
+      "name": "SM_LSP_Sink",
+      "triangles": 272,
+      "material_slots": 1,
+      "bounds_error_cm": 8.225440979003906e-06,
+      "collision_boxes": 18,
+      "collision_shape_bounds_verified": true,
+      "collision_rotation_verified": true,
+      "source_uv_channels": 2,
+      "generated_lightmap_uv_index": 2,
+      "vertex_color_import": "REPLACE",
+      "nanite": false
+    },
+    {
+      "name": "SM_LSP_SampleTray",
+      "triangles": 564,
+      "material_slots": 1,
+      "bounds_error_cm": 2.2649765014648438e-06,
+      "collision_boxes": 7,
+      "collision_shape_bounds_verified": true,
+      "collision_rotation_verified": true,
+      "source_uv_channels": 2,
+      "generated_lightmap_uv_index": 2,
+      "vertex_color_import": "REPLACE",
+      "nanite": false
+    },
+    {
+      "name": "SM_LSP_Pallet",
+      "triangles": 240,
+      "material_slots": 1,
+      "bounds_error_cm": 5.245208740234375e-06,
+      "collision_boxes": 20,
+      "collision_shape_bounds_verified": true,
+      "collision_rotation_verified": true,
+      "source_uv_channels": 2,
+      "generated_lightmap_uv_index": 2,
+      "vertex_color_import": "REPLACE",
+      "nanite": false
+    },
+    {
+      "name": "SM_LSP_SupplyCrate",
+      "triangles": 132,
+      "material_slots": 1,
+      "bounds_error_cm": 3.516674041748047e-06,
+      "collision_boxes": 1,
+      "collision_shape_bounds_verified": true,
+      "collision_rotation_verified": true,
+      "source_uv_channels": 2,
+      "generated_lightmap_uv_index": 2,
+      "vertex_color_import": "REPLACE",
+      "nanite": false
+    },
+    {
+      "name": "SM_LSP_BoxBundle",
+      "triangles": 36,
+      "material_slots": 1,
+      "bounds_error_cm": 4.410743713378906e-06,
+      "collision_boxes": 3,
+      "collision_shape_bounds_verified": true,
+      "collision_rotation_verified": true,
+      "source_uv_channels": 2,
+      "generated_lightmap_uv_index": 2,
+      "vertex_color_import": "REPLACE",
+      "nanite": false
+    }
+  ],
+  "texture_dimensions": [
+    {
+      "texture": "/Game/Environment/LabSupplyProps/Textures/T_LSP_Atlas.T_LSP_Atlas",
+      "source_png": [
+        2048,
+        2048
+      ],
+      "imported": [
+        2048,
+        2048
+      ],
+      "method": "computed_built_size",
+      "resident_at_check": [
+        2048,
+        2048
+      ]
+    },
+    {
+      "texture": "/Game/Environment/ModularInteriorPreview/Textures/T_MI_DirtMask.T_MI_DirtMask",
+      "source_png": [
+        1024,
+        1024
+      ],
+      "imported": [
+        1024,
+        1024
+      ],
+      "method": "computed_built_size",
+      "resident_at_check": [
+        1024,
+        1024
+      ]
+    }
+  ],
+  "materials": {
+    "name": "M_LSP_Surface",
+    "opaque": true,
+    "two_sided": false,
+    "reachable_texture_sample_nodes": 2,
+    "used_textures": [
+      "/Game/Environment/LabSupplyProps/Textures/T_LSP_Atlas.T_LSP_Atlas",
+      "/Game/Environment/ModularInteriorPreview/Textures/T_MI_DirtMask.T_MI_DirtMask"
+    ],
+    "reachable_vertex_color_nodes": 1,
+    "surface_channels": {
+      "R": "metallic",
+      "G": "roughness"
+    },
+    "custom_primitive_data": {
+      "0": "DirtStrength=.35",
+      "1": "DirtScale=1",
+      "2": "DirtOffsetU=0",
+      "3": "DirtOffsetV=0"
+    },
+    "atlas_size": [
+      2048,
+      2048
+    ],
+    "shared_dirt_mask_size": [
+      1024,
+      1024
+    ]
+  },
+  "total_unique_mesh_triangles": 2368
+}

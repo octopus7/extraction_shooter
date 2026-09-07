@@ -1,0 +1,1119 @@
+{
+  "passed": true,
+  "assets": [
+    {
+      "name": "SM_LSP_Workbench",
+      "key": "Workbench",
+      "dimensions_m": [
+        1.600000023841858,
+        0.699999988079071,
+        0.8999999761581421
+      ],
+      "source": {
+        "triangles": 204,
+        "bounds_m": [
+          -0.800000011920929,
+          -0.3499999940395355,
+          0.0,
+          0.800000011920929,
+          0.3499999940395355,
+          0.8999999761581421
+        ],
+        "connected_solids": 17,
+        "minimum_solid_volume_m3": 8.750004053581506e-05,
+        "summed_signed_volume_m3": 0.07683895390558367,
+        "manifold": true,
+        "degenerate_triangles": 0,
+        "finite_normals": true,
+        "bounds_error_m": 0.0,
+        "material_slots": 1,
+        "uv_channels": 2,
+        "zero_area_atlas_uv_triangles": 0,
+        "surface_attribute": "SurfaceParams",
+        "atlas_uv_range_and_gutter_valid": true,
+        "atlas_tile_triangle_counts": {
+          "0": 58,
+          "3": 2,
+          "1": 96,
+          "14": 48
+        },
+        "dirt_uv_planar_max_error": 0.0,
+        "surface_rgba_matches_tile": true,
+        "surface_domain": "CORNER",
+        "metallic_range": [
+          0.0,
+          0.6800000071525574
+        ],
+        "roughness_range": [
+          0.4300000071525574,
+          0.8199999928474426
+        ]
+      },
+      "fbx_reload": {
+        "triangles": 204,
+        "bounds_m": [
+          -0.8000000715255737,
+          -0.3500000536441803,
+          0.0,
+          0.8000000715255737,
+          0.3500000536441803,
+          0.8999999761581421
+        ],
+        "connected_solids": 17,
+        "minimum_solid_volume_m3": 8.750004053581506e-05,
+        "summed_signed_volume_m3": 0.0768389540224971,
+        "manifold": true,
+        "degenerate_triangles": 0,
+        "finite_normals": true,
+        "bounds_error_m": 5.960464477539063e-08,
+        "material_slots": 1,
+        "uv_channels": 2,
+        "zero_area_atlas_uv_triangles": 0,
+        "surface_attribute": "SurfaceParams",
+        "atlas_uv_range_and_gutter_valid": true,
+        "atlas_tile_triangle_counts": {
+          "0": 58,
+          "3": 2,
+          "1": 96,
+          "14": 48
+        },
+        "dirt_uv_planar_max_error": 2.9802322387695312e-08,
+        "surface_rgba_matches_tile": true,
+        "surface_domain": "CORNER",
+        "metallic_range": [
+          0.0,
+          0.6800000071525574
+        ],
+        "roughness_range": [
+          0.4300000071525574,
+          0.8199999928474426
+        ]
+      },
+      "collision_boxes": 17,
+      "collision_max_bounds_error_m": 7.390975953480705e-08,
+      "source_unit_transform": true,
+      "pivot_valid": true
+    },
+    {
+      "name": "SM_LSP_Shelf",
+      "key": "Shelf",
+      "dimensions_m": [
+        1.399999976158142,
+        0.6000000238418579,
+        2.0
+      ],
+      "source": {
+        "triangles": 288,
+        "bounds_m": [
+          -0.699999988079071,
+          -0.30000001192092896,
+          0.0,
+          0.699999988079071,
+          0.30000001192092896,
+          2.0
+        ],
+        "connected_solids": 24,
+        "minimum_solid_volume_m3": 0.0013749990612268448,
+        "summed_signed_volume_m3": 0.1506000671070069,
+        "manifold": true,
+        "degenerate_triangles": 0,
+        "finite_normals": true,
+        "bounds_error_m": 0.0,
+        "material_slots": 1,
+        "uv_channels": 2,
+        "zero_area_atlas_uv_triangles": 0,
+        "surface_attribute": "SurfaceParams",
+        "atlas_uv_range_and_gutter_valid": true,
+        "atlas_tile_triangle_counts": {
+          "1": 184,
+          "3": 8,
+          "2": 96
+        },
+        "dirt_uv_planar_max_error": 0.0,
+        "surface_rgba_matches_tile": true,
+        "surface_domain": "CORNER",
+        "metallic_range": [
+          0.11999999731779099,
+          0.6800000071525574
+        ],
+        "roughness_range": [
+          0.4300000071525574,
+          0.6399999856948853
+        ]
+      },
+      "fbx_reload": {
+        "triangles": 288,
+        "bounds_m": [
+          -0.699999988079071,
+          -0.30000007152557373,
+          0.0,
+          0.699999988079071,
+          0.30000007152557373,
+          2.0
+        ],
+        "connected_solids": 24,
+        "minimum_solid_volume_m3": 0.0013749990612268448,
+        "summed_signed_volume_m3": 0.15060006695365147,
+        "manifold": true,
+        "degenerate_triangles": 0,
+        "finite_normals": true,
+        "bounds_error_m": 5.960464477539063e-08,
+        "material_slots": 1,
+        "uv_channels": 2,
+        "zero_area_atlas_uv_triangles": 0,
+        "surface_attribute": "SurfaceParams",
+        "atlas_uv_range_and_gutter_valid": true,
+        "atlas_tile_triangle_counts": {
+          "1": 184,
+          "3": 8,
+          "2": 96
+        },
+        "dirt_uv_planar_max_error": 2.9802322387695312e-08,
+        "surface_rgba_matches_tile": true,
+        "surface_domain": "CORNER",
+        "metallic_range": [
+          0.11999999731779099,
+          0.6800000071525574
+        ],
+        "roughness_range": [
+          0.4300000071525574,
+          0.6399999856948853
+        ]
+      },
+      "collision_boxes": 24,
+      "collision_max_bounds_error_m": 7.629394538355427e-08,
+      "source_unit_transform": true,
+      "pivot_valid": true
+    },
+    {
+      "name": "SM_LSP_Cabinet",
+      "key": "Cabinet",
+      "dimensions_m": [
+        1.2000000476837158,
+        0.6000000238418579,
+        0.8999999761581421
+      ],
+      "source": {
+        "triangles": 36,
+        "bounds_m": [
+          -0.6000000238418579,
+          -0.30000001192092896,
+          0.0,
+          0.6000000238418579,
+          0.30000001192092896,
+          0.8999999761581421
+        ],
+        "connected_solids": 3,
+        "minimum_solid_volume_m3": 0.03599996864795685,
+        "summed_signed_volume_m3": 0.6118919774889946,
+        "manifold": true,
+        "degenerate_triangles": 0,
+        "finite_normals": true,
+        "bounds_error_m": 0.0,
+        "material_slots": 1,
+        "uv_channels": 2,
+        "zero_area_atlas_uv_triangles": 0,
+        "surface_attribute": "SurfaceParams",
+        "atlas_uv_range_and_gutter_valid": true,
+        "atlas_tile_triangle_counts": {
+          "1": 12,
+          "0": 20,
+          "4": 2,
+          "3": 2
+        },
+        "dirt_uv_planar_max_error": 0.0,
+        "surface_rgba_matches_tile": true,
+        "surface_domain": "CORNER",
+        "metallic_range": [
+          0.11999999731779099,
+          0.6800000071525574
+        ],
+        "roughness_range": [
+          0.4300000071525574,
+          0.6399999856948853
+        ]
+      },
+      "fbx_reload": {
+        "triangles": 36,
+        "bounds_m": [
+          -0.6000000238418579,
+          -0.30000007152557373,
+          0.0,
+          0.6000000238418579,
+          0.30000007152557373,
+          0.8999999761581421
+        ],
+        "connected_solids": 3,
+        "minimum_solid_volume_m3": 0.03599996859828525,
+        "summed_signed_volume_m3": 0.6118919658069799,
+        "manifold": true,
+        "degenerate_triangles": 0,
+        "finite_normals": true,
+        "bounds_error_m": 5.960464477539063e-08,
+        "material_slots": 1,
+        "uv_channels": 2,
+        "zero_area_atlas_uv_triangles": 0,
+        "surface_attribute": "SurfaceParams",
+        "atlas_uv_range_and_gutter_valid": true,
+        "atlas_tile_triangle_counts": {
+          "1": 12,
+          "0": 20,
+          "4": 2,
+          "3": 2
+        },
+        "dirt_uv_planar_max_error": 2.9802322387695312e-08,
+        "surface_rgba_matches_tile": true,
+        "surface_domain": "CORNER",
+        "metallic_range": [
+          0.11999999731779099,
+          0.6800000071525574
+        ],
+        "roughness_range": [
+          0.4300000071525574,
+          0.6399999856948853
+        ]
+      },
+      "collision_boxes": 3,
+      "collision_max_bounds_error_m": 7.152557374157098e-08,
+      "source_unit_transform": true,
+      "pivot_valid": true
+    },
+    {
+      "name": "SM_LSP_Cart",
+      "key": "Cart",
+      "dimensions_m": [
+        0.800000011920929,
+        0.5,
+        0.8500000238418579
+      ],
+      "source": {
+        "triangles": 272,
+        "bounds_m": [
+          -0.4000000059604645,
+          -0.25,
+          0.0,
+          0.4000000059604645,
+          0.25,
+          0.8500000238418579
+        ],
+        "connected_solids": 16,
+        "minimum_solid_volume_m3": 4.0000002627493814e-05,
+        "summed_signed_volume_m3": 0.03401431004234231,
+        "manifold": true,
+        "degenerate_triangles": 0,
+        "finite_normals": true,
+        "bounds_error_m": 0.0,
+        "material_slots": 1,
+        "uv_channels": 2,
+        "zero_area_atlas_uv_triangles": 0,
+        "surface_attribute": "SurfaceParams",
+        "atlas_uv_range_and_gutter_valid": true,
+        "atlas_tile_triangle_counts": {
+          "1": 34,
+          "3": 4,
+          "0": 94,
+          "2": 28,
+          "14": 112
+        },
+        "dirt_uv_planar_max_error": 0.0,
+        "surface_rgba_matches_tile": true,
+        "surface_domain": "CORNER",
+        "metallic_range": [
+          0.0,
+          0.6800000071525574
+        ],
+        "roughness_range": [
+          0.4300000071525574,
+          0.8199999928474426
+        ]
+      },
+      "fbx_reload": {
+        "triangles": 272,
+        "bounds_m": [
+          -0.40000003576278687,
+          -0.2500000298023224,
+          0.0,
+          0.40000003576278687,
+          0.2500000298023224,
+          0.8500000238418579
+        ],
+        "connected_solids": 16,
+        "minimum_solid_volume_m3": 4.0000002627493814e-05,
+        "summed_signed_volume_m3": 0.03401430993454897,
+        "manifold": true,
+        "degenerate_triangles": 0,
+        "finite_normals": true,
+        "bounds_error_m": 2.9802322387695312e-08,
+        "material_slots": 1,
+        "uv_channels": 2,
+        "zero_area_atlas_uv_triangles": 0,
+        "surface_attribute": "SurfaceParams",
+        "atlas_uv_range_and_gutter_valid": true,
+        "atlas_tile_triangle_counts": {
+          "1": 34,
+          "3": 4,
+          "0": 94,
+          "2": 28,
+          "14": 112
+        },
+        "dirt_uv_planar_max_error": 1.4901161193847656e-08,
+        "surface_rgba_matches_tile": true,
+        "surface_domain": "CORNER",
+        "metallic_range": [
+          0.0,
+          0.6800000071525574
+        ],
+        "roughness_range": [
+          0.4300000071525574,
+          0.8199999928474426
+        ]
+      },
+      "collision_boxes": 16,
+      "collision_max_bounds_error_m": 4.887580873358388e-08,
+      "source_unit_transform": true,
+      "pivot_valid": true
+    },
+    {
+      "name": "SM_LSP_Chair",
+      "key": "Chair",
+      "dimensions_m": [
+        0.47999998927116394,
+        0.5199999809265137,
+        0.800000011920929
+      ],
+      "source": {
+        "triangles": 156,
+        "bounds_m": [
+          -0.23999999463558197,
+          -0.25999999046325684,
+          0.0,
+          0.23999999463558197,
+          0.25999999046325684,
+          0.800000011920929
+        ],
+        "connected_solids": 9,
+        "minimum_solid_volume_m3": 9.687506705328512e-05,
+        "summed_signed_volume_m3": 0.019801750093392908,
+        "manifold": true,
+        "degenerate_triangles": 0,
+        "finite_normals": true,
+        "bounds_error_m": 0.0,
+        "material_slots": 1,
+        "uv_channels": 2,
+        "zero_area_atlas_uv_triangles": 0,
+        "surface_attribute": "SurfaceParams",
+        "atlas_uv_range_and_gutter_valid": true,
+        "atlas_tile_triangle_counts": {
+          "1": 100,
+          "2": 56
+        },
+        "dirt_uv_planar_max_error": 0.0,
+        "surface_rgba_matches_tile": true,
+        "surface_domain": "CORNER",
+        "metallic_range": [
+          0.11999999731779099,
+          0.11999999731779099
+        ],
+        "roughness_range": [
+          0.6399999856948853,
+          0.6399999856948853
+        ]
+      },
+      "fbx_reload": {
+        "triangles": 156,
+        "bounds_m": [
+          -0.24000000953674316,
+          -0.2600000202655792,
+          0.0,
+          0.24000000953674316,
+          0.2600000202655792,
+          0.800000011920929
+        ],
+        "connected_solids": 9,
+        "minimum_solid_volume_m3": 9.687506705328512e-05,
+        "summed_signed_volume_m3": 0.01980174952813732,
+        "manifold": true,
+        "degenerate_triangles": 0,
+        "finite_normals": true,
+        "bounds_error_m": 2.9802322387695312e-08,
+        "material_slots": 1,
+        "uv_channels": 2,
+        "zero_area_atlas_uv_triangles": 0,
+        "surface_attribute": "SurfaceParams",
+        "atlas_uv_range_and_gutter_valid": true,
+        "atlas_tile_triangle_counts": {
+          "1": 100,
+          "2": 56
+        },
+        "dirt_uv_planar_max_error": 1.4901161193847656e-08,
+        "surface_rgba_matches_tile": true,
+        "surface_domain": "CORNER",
+        "metallic_range": [
+          0.11999999731779099,
+          0.11999999731779099
+        ],
+        "roughness_range": [
+          0.6399999856948853,
+          0.6399999856948853
+        ]
+      },
+      "collision_boxes": 16,
+      "collision_max_bounds_error_m": 4.0531158429502057e-08,
+      "source_unit_transform": true,
+      "pivot_valid": true
+    },
+    {
+      "name": "SM_LSP_ControlBox",
+      "key": "ControlBox",
+      "dimensions_m": [
+        0.6000000238418579,
+        0.20000000298023224,
+        0.800000011920929
+      ],
+      "source": {
+        "triangles": 24,
+        "bounds_m": [
+          -0.30000001192092896,
+          -0.20000000298023224,
+          0.0,
+          0.30000001192092896,
+          0.0,
+          0.800000011920929
+        ],
+        "connected_solids": 2,
+        "minimum_solid_volume_m3": 0.008663997985422611,
+        "summed_signed_volume_m3": 0.09506400767713785,
+        "manifold": true,
+        "degenerate_triangles": 0,
+        "finite_normals": true,
+        "bounds_error_m": 0.0,
+        "material_slots": 1,
+        "uv_channels": 2,
+        "zero_area_atlas_uv_triangles": 0,
+        "surface_attribute": "SurfaceParams",
+        "atlas_uv_range_and_gutter_valid": true,
+        "atlas_tile_triangle_counts": {
+          "0": 22,
+          "5": 2
+        },
+        "dirt_uv_planar_max_error": 0.0,
+        "surface_rgba_matches_tile": true,
+        "surface_domain": "CORNER",
+        "metallic_range": [
+          0.11999999731779099,
+          0.11999999731779099
+        ],
+        "roughness_range": [
+          0.6399999856948853,
+          0.6399999856948853
+        ]
+      },
+      "fbx_reload": {
+        "triangles": 24,
+        "bounds_m": [
+          -0.30000004172325134,
+          -0.20000003278255463,
+          0.0,
+          0.30000001192092896,
+          2.622683403785686e-08,
+          0.800000011920929
+        ],
+        "connected_solids": 2,
+        "minimum_solid_volume_m3": 0.008663998097926395,
+        "summed_signed_volume_m3": 0.09506400310484381,
+        "manifold": true,
+        "degenerate_triangles": 0,
+        "finite_normals": true,
+        "bounds_error_m": 2.9802322387695312e-08,
+        "material_slots": 1,
+        "uv_channels": 2,
+        "zero_area_atlas_uv_triangles": 0,
+        "surface_attribute": "SurfaceParams",
+        "atlas_uv_range_and_gutter_valid": true,
+        "atlas_tile_triangle_counts": {
+          "0": 22,
+          "5": 2
+        },
+        "dirt_uv_planar_max_error": 1.4901161193847656e-08,
+        "surface_rgba_matches_tile": true,
+        "surface_domain": "CORNER",
+        "metallic_range": [
+          0.11999999731779099,
+          0.11999999731779099
+        ],
+        "roughness_range": [
+          0.6399999856948853,
+          0.6399999856948853
+        ]
+      },
+      "collision_boxes": 2,
+      "collision_max_bounds_error_m": 4.172325135387567e-08,
+      "source_unit_transform": true,
+      "pivot_valid": true
+    },
+    {
+      "name": "SM_LSP_Analyzer",
+      "key": "Analyzer",
+      "dimensions_m": [
+        1.2000000476837158,
+        0.800000011920929,
+        1.5
+      ],
+      "source": {
+        "triangles": 144,
+        "bounds_m": [
+          -0.6000000238418579,
+          -0.4000000059604645,
+          0.0,
+          0.6000000238418579,
+          0.4000000059604645,
+          1.5
+        ],
+        "connected_solids": 12,
+        "minimum_solid_volume_m3": 0.00023850000191790363,
+        "summed_signed_volume_m3": 1.1072664495926197,
+        "manifold": true,
+        "degenerate_triangles": 0,
+        "finite_normals": true,
+        "bounds_error_m": 0.0,
+        "material_slots": 1,
+        "uv_channels": 2,
+        "zero_area_atlas_uv_triangles": 0,
+        "surface_attribute": "SurfaceParams",
+        "atlas_uv_range_and_gutter_valid": true,
+        "atlas_tile_triangle_counts": {
+          "1": 60,
+          "0": 42,
+          "2": 10,
+          "3": 2,
+          "7": 4,
+          "15": 24,
+          "6": 2
+        },
+        "dirt_uv_planar_max_error": 0.0,
+        "surface_rgba_matches_tile": true,
+        "surface_domain": "CORNER",
+        "metallic_range": [
+          0.11999999731779099,
+          0.6800000071525574
+        ],
+        "roughness_range": [
+          0.4300000071525574,
+          0.6399999856948853
+        ]
+      },
+      "fbx_reload": {
+        "triangles": 144,
+        "bounds_m": [
+          -0.6000000834465027,
+          -0.40000006556510925,
+          0.0,
+          0.6000000834465027,
+          0.40000006556510925,
+          1.5
+        ],
+        "connected_solids": 12,
+        "minimum_solid_volume_m3": 0.0002385000061551068,
+        "summed_signed_volume_m3": 1.1072664501123095,
+        "manifold": true,
+        "degenerate_triangles": 0,
+        "finite_normals": true,
+        "bounds_error_m": 5.960464477539063e-08,
+        "material_slots": 1,
+        "uv_channels": 2,
+        "zero_area_atlas_uv_triangles": 0,
+        "surface_attribute": "SurfaceParams",
+        "atlas_uv_range_and_gutter_valid": true,
+        "atlas_tile_triangle_counts": {
+          "1": 60,
+          "0": 42,
+          "2": 10,
+          "3": 2,
+          "7": 4,
+          "15": 24,
+          "6": 2
+        },
+        "dirt_uv_planar_max_error": 2.9802322387695312e-08,
+        "surface_rgba_matches_tile": true,
+        "surface_domain": "CORNER",
+        "metallic_range": [
+          0.11999999731779099,
+          0.6800000071525574
+        ],
+        "roughness_range": [
+          0.4300000071525574,
+          0.6399999856948853
+        ]
+      },
+      "collision_boxes": 13,
+      "collision_max_bounds_error_m": 1.1444091807533141e-07,
+      "source_unit_transform": true,
+      "pivot_valid": true
+    },
+    {
+      "name": "SM_LSP_Sink",
+      "key": "Sink",
+      "dimensions_m": [
+        1.600000023841858,
+        0.699999988079071,
+        1.2000000476837158
+      ],
+      "source": {
+        "triangles": 272,
+        "bounds_m": [
+          -0.800000011920929,
+          -0.3499999940395355,
+          0.0,
+          0.800000011920929,
+          0.3499999940395355,
+          1.2000000476837158
+        ],
+        "connected_solids": 20,
+        "minimum_solid_volume_m3": 8.145874054813854e-05,
+        "summed_signed_volume_m3": 0.7020699226146311,
+        "manifold": true,
+        "degenerate_triangles": 0,
+        "finite_normals": true,
+        "bounds_error_m": 0.0,
+        "material_slots": 1,
+        "uv_channels": 2,
+        "zero_area_atlas_uv_triangles": 0,
+        "surface_attribute": "SurfaceParams",
+        "atlas_uv_range_and_gutter_valid": true,
+        "atlas_tile_triangle_counts": {
+          "1": 12,
+          "0": 56,
+          "4": 4,
+          "3": 132,
+          "15": 12,
+          "2": 56
+        },
+        "dirt_uv_planar_max_error": 0.0,
+        "surface_rgba_matches_tile": true,
+        "surface_domain": "CORNER",
+        "metallic_range": [
+          0.11999999731779099,
+          0.6800000071525574
+        ],
+        "roughness_range": [
+          0.4300000071525574,
+          0.6399999856948853
+        ]
+      },
+      "fbx_reload": {
+        "triangles": 272,
+        "bounds_m": [
+          -0.8000000715255737,
+          -0.3500000536441803,
+          0.0,
+          0.8000000715255737,
+          0.3500000536441803,
+          1.2000000476837158
+        ],
+        "connected_solids": 20,
+        "minimum_solid_volume_m3": 8.145870917057133e-05,
+        "summed_signed_volume_m3": 0.7020699298417996,
+        "manifold": true,
+        "degenerate_triangles": 0,
+        "finite_normals": true,
+        "bounds_error_m": 5.960464477539063e-08,
+        "material_slots": 1,
+        "uv_channels": 2,
+        "zero_area_atlas_uv_triangles": 0,
+        "surface_attribute": "SurfaceParams",
+        "atlas_uv_range_and_gutter_valid": true,
+        "atlas_tile_triangle_counts": {
+          "1": 12,
+          "0": 56,
+          "4": 4,
+          "3": 132,
+          "15": 12,
+          "2": 56
+        },
+        "dirt_uv_planar_max_error": 2.9802322387695312e-08,
+        "surface_rgba_matches_tile": true,
+        "surface_domain": "CORNER",
+        "metallic_range": [
+          0.11999999731779099,
+          0.6800000071525574
+        ],
+        "roughness_range": [
+          0.4300000071525574,
+          0.6399999856948853
+        ]
+      },
+      "collision_boxes": 18,
+      "collision_max_bounds_error_m": 8.583068855649856e-08,
+      "source_unit_transform": true,
+      "pivot_valid": true
+    },
+    {
+      "name": "SM_LSP_SampleTray",
+      "key": "SampleTray",
+      "dimensions_m": [
+        0.44999998807907104,
+        0.30000001192092896,
+        0.21899999678134918
+      ],
+      "source": {
+        "triangles": 564,
+        "bounds_m": [
+          -0.22499999403953552,
+          -0.15000000596046448,
+          0.0,
+          0.22499999403953552,
+          0.15000000596046448,
+          0.21899999678134918
+        ],
+        "connected_solids": 23,
+        "minimum_solid_volume_m3": 1.6576171816495844e-05,
+        "summed_signed_volume_m3": 0.0058504688663182005,
+        "manifold": true,
+        "degenerate_triangles": 0,
+        "finite_normals": true,
+        "bounds_error_m": 0.0,
+        "material_slots": 1,
+        "uv_channels": 2,
+        "zero_area_atlas_uv_triangles": 0,
+        "surface_attribute": "SurfaceParams",
+        "atlas_uv_range_and_gutter_valid": true,
+        "atlas_tile_triangle_counts": {
+          "3": 60,
+          "0": 312,
+          "13": 24,
+          "2": 168
+        },
+        "dirt_uv_planar_max_error": 0.0,
+        "surface_rgba_matches_tile": true,
+        "surface_domain": "CORNER",
+        "metallic_range": [
+          0.0,
+          0.6800000071525574
+        ],
+        "roughness_range": [
+          0.4300000071525574,
+          0.8199999928474426
+        ]
+      },
+      "fbx_reload": {
+        "triangles": 564,
+        "bounds_m": [
+          -0.22500000894069672,
+          -0.15000002086162567,
+          0.0,
+          0.22500000894069672,
+          0.15000002086162567,
+          0.21899999678134918
+        ],
+        "connected_solids": 23,
+        "minimum_solid_volume_m3": 1.657617177860023e-05,
+        "summed_signed_volume_m3": 0.0058504688337078,
+        "manifold": true,
+        "degenerate_triangles": 0,
+        "finite_normals": true,
+        "bounds_error_m": 1.4901161193847656e-08,
+        "material_slots": 1,
+        "uv_channels": 2,
+        "zero_area_atlas_uv_triangles": 0,
+        "surface_attribute": "SurfaceParams",
+        "atlas_uv_range_and_gutter_valid": true,
+        "atlas_tile_triangle_counts": {
+          "3": 60,
+          "0": 312,
+          "13": 24,
+          "2": 168
+        },
+        "dirt_uv_planar_max_error": 7.450580596923828e-09,
+        "surface_rgba_matches_tile": true,
+        "surface_domain": "CORNER",
+        "metallic_range": [
+          0.0,
+          0.6800000071525574
+        ],
+        "roughness_range": [
+          0.4300000071525574,
+          0.8199999928474426
+        ]
+      },
+      "collision_boxes": 7,
+      "collision_max_bounds_error_m": 2.0861625676937834e-08,
+      "source_unit_transform": true,
+      "pivot_valid": true
+    },
+    {
+      "name": "SM_LSP_Pallet",
+      "key": "Pallet",
+      "dimensions_m": [
+        1.2000000476837158,
+        1.0,
+        0.15000000596046448
+      ],
+      "source": {
+        "triangles": 240,
+        "bounds_m": [
+          -0.6000000238418579,
+          -0.5,
+          0.0,
+          0.6000000238418579,
+          0.5,
+          0.15000000596046448
+        ],
+        "connected_solids": 20,
+        "minimum_solid_volume_m3": 0.0018000000854954123,
+        "summed_signed_volume_m3": 0.06575001504582664,
+        "manifold": true,
+        "degenerate_triangles": 0,
+        "finite_normals": true,
+        "bounds_error_m": 0.0,
+        "material_slots": 1,
+        "uv_channels": 2,
+        "zero_area_atlas_uv_triangles": 0,
+        "surface_attribute": "SurfaceParams",
+        "atlas_uv_range_and_gutter_valid": true,
+        "atlas_tile_triangle_counts": {
+          "8": 240
+        },
+        "dirt_uv_planar_max_error": 0.0,
+        "surface_rgba_matches_tile": true,
+        "surface_domain": "CORNER",
+        "metallic_range": [
+          0.0,
+          0.0
+        ],
+        "roughness_range": [
+          0.8199999928474426,
+          0.8199999928474426
+        ]
+      },
+      "fbx_reload": {
+        "triangles": 240,
+        "bounds_m": [
+          -0.6000000834465027,
+          -0.5000000596046448,
+          0.0,
+          0.6000000834465027,
+          0.5000000596046448,
+          0.15000000596046448
+        ],
+        "connected_solids": 20,
+        "minimum_solid_volume_m3": 0.0018000000750956558,
+        "summed_signed_volume_m3": 0.06575001589736532,
+        "manifold": true,
+        "degenerate_triangles": 0,
+        "finite_normals": true,
+        "bounds_error_m": 5.960464477539063e-08,
+        "material_slots": 1,
+        "uv_channels": 2,
+        "zero_area_atlas_uv_triangles": 0,
+        "surface_attribute": "SurfaceParams",
+        "atlas_uv_range_and_gutter_valid": true,
+        "atlas_tile_triangle_counts": {
+          "8": 240
+        },
+        "dirt_uv_planar_max_error": 2.9802322387695312e-08,
+        "surface_rgba_matches_tile": true,
+        "surface_domain": "CORNER",
+        "metallic_range": [
+          0.0,
+          0.0
+        ],
+        "roughness_range": [
+          0.8199999928474426,
+          0.8199999928474426
+        ]
+      },
+      "collision_boxes": 20,
+      "collision_max_bounds_error_m": 9.536743161842054e-08,
+      "source_unit_transform": true,
+      "pivot_valid": true
+    },
+    {
+      "name": "SM_LSP_SupplyCrate",
+      "key": "SupplyCrate",
+      "dimensions_m": [
+        0.6000000238418579,
+        0.4000000059604645,
+        0.4000000059604645
+      ],
+      "source": {
+        "triangles": 132,
+        "bounds_m": [
+          -0.30000001192092896,
+          -0.20000000298023224,
+          0.0,
+          0.30000001192092896,
+          0.20000000298023224,
+          0.4000000059604645
+        ],
+        "connected_solids": 11,
+        "minimum_solid_volume_m3": 0.0002145000495753872,
+        "summed_signed_volume_m3": 0.08961679610850601,
+        "manifold": true,
+        "degenerate_triangles": 0,
+        "finite_normals": true,
+        "bounds_error_m": 0.0,
+        "material_slots": 1,
+        "uv_channels": 2,
+        "zero_area_atlas_uv_triangles": 0,
+        "surface_attribute": "SurfaceParams",
+        "atlas_uv_range_and_gutter_valid": true,
+        "atlas_tile_triangle_counts": {
+          "0": 10,
+          "11": 2,
+          "1": 106,
+          "12": 2,
+          "2": 12
+        },
+        "dirt_uv_planar_max_error": 0.0,
+        "surface_rgba_matches_tile": true,
+        "surface_domain": "CORNER",
+        "metallic_range": [
+          0.11999999731779099,
+          0.11999999731779099
+        ],
+        "roughness_range": [
+          0.6399999856948853,
+          0.6399999856948853
+        ]
+      },
+      "fbx_reload": {
+        "triangles": 132,
+        "bounds_m": [
+          -0.30000004172325134,
+          -0.20000003278255463,
+          0.0,
+          0.30000004172325134,
+          0.20000003278255463,
+          0.4000000059604645
+        ],
+        "connected_solids": 11,
+        "minimum_solid_volume_m3": 0.00021450004264869017,
+        "summed_signed_volume_m3": 0.08961679639247833,
+        "manifold": true,
+        "degenerate_triangles": 0,
+        "finite_normals": true,
+        "bounds_error_m": 2.9802322387695312e-08,
+        "material_slots": 1,
+        "uv_channels": 2,
+        "zero_area_atlas_uv_triangles": 0,
+        "surface_attribute": "SurfaceParams",
+        "atlas_uv_range_and_gutter_valid": true,
+        "atlas_tile_triangle_counts": {
+          "0": 10,
+          "11": 2,
+          "1": 106,
+          "12": 2,
+          "2": 12
+        },
+        "dirt_uv_planar_max_error": 1.4901161193847656e-08,
+        "surface_rgba_matches_tile": true,
+        "surface_domain": "CORNER",
+        "metallic_range": [
+          0.11999999731779099,
+          0.11999999731779099
+        ],
+        "roughness_range": [
+          0.6399999856948853,
+          0.6399999856948853
+        ]
+      },
+      "collision_boxes": 1,
+      "collision_max_bounds_error_m": 4.172325135387567e-08,
+      "source_unit_transform": true,
+      "pivot_valid": true
+    },
+    {
+      "name": "SM_LSP_BoxBundle",
+      "key": "BoxBundle",
+      "dimensions_m": [
+        1.0,
+        0.699999988079071,
+        0.699999988079071
+      ],
+      "source": {
+        "triangles": 36,
+        "bounds_m": [
+          -0.5,
+          -0.3499999940395355,
+          0.0,
+          0.5,
+          0.3499999940395355,
+          0.699999988079071
+        ],
+        "connected_solids": 3,
+        "minimum_solid_volume_m3": 0.046299003064632416,
+        "summed_signed_volume_m3": 0.3041189995904764,
+        "manifold": true,
+        "degenerate_triangles": 0,
+        "finite_normals": true,
+        "bounds_error_m": 0.0,
+        "material_slots": 1,
+        "uv_channels": 2,
+        "zero_area_atlas_uv_triangles": 0,
+        "surface_attribute": "SurfaceParams",
+        "atlas_uv_range_and_gutter_valid": true,
+        "atlas_tile_triangle_counts": {
+          "9": 30,
+          "10": 6
+        },
+        "dirt_uv_planar_max_error": 0.0,
+        "surface_rgba_matches_tile": true,
+        "surface_domain": "CORNER",
+        "metallic_range": [
+          0.0,
+          0.0
+        ],
+        "roughness_range": [
+          0.8199999928474426,
+          0.8199999928474426
+        ]
+      },
+      "fbx_reload": {
+        "triangles": 36,
+        "bounds_m": [
+          -0.5000000596046448,
+          -0.3500000238418579,
+          0.0,
+          0.5000000596046448,
+          0.3499999940395355,
+          0.699999988079071
+        ],
+        "connected_solids": 3,
+        "minimum_solid_volume_m3": 0.04629900052373643,
+        "summed_signed_volume_m3": 0.3041189983430041,
+        "manifold": true,
+        "degenerate_triangles": 0,
+        "finite_normals": true,
+        "bounds_error_m": 5.960464477539063e-08,
+        "material_slots": 1,
+        "uv_channels": 2,
+        "zero_area_atlas_uv_triangles": 0,
+        "surface_attribute": "SurfaceParams",
+        "atlas_uv_range_and_gutter_valid": true,
+        "atlas_tile_triangle_counts": {
+          "9": 30,
+          "10": 6
+        },
+        "dirt_uv_planar_max_error": 2.9802322387695312e-08,
+        "surface_rgba_matches_tile": true,
+        "surface_domain": "CORNER",
+        "metallic_range": [
+          0.0,
+          0.0
+        ],
+        "roughness_range": [
+          0.8199999928474426,
+          0.8199999928474426
+        ]
+      },
+      "collision_boxes": 3,
+      "collision_max_bounds_error_m": 5.960464477539063e-08,
+      "source_unit_transform": true,
+      "pivot_valid": true
+    }
+  ],
+  "failures": [],
+  "validation": "fresh .blend load and independent FBX reload; no source writes",
+  "total_unique_asset_triangles": 2368,
+  "total_collision_boxes": 140
+}
