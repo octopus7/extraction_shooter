@@ -1,0 +1,19 @@
+[
+  {
+    "source": "/Game/Nature/Bush/Bush_Combined",
+    "objects": [
+      {
+        "name": "Bush_Combined",
+        "dimensions": [
+          1.0213285684585571,
+          0.9976131916046143,
+          0.8798967599868774
+        ],
+        "polygons": 12797,
+        "materials": [
+          "M_Bush"
+        ]
+      }
+    ]
+  }
+]

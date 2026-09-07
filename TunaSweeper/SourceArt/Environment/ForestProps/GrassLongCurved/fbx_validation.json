@@ -1,0 +1,37 @@
+{
+  "packed_texture": true,
+  "opaque_pixels": true,
+  "lods": [
+    {
+      "name": "SM_GrassLongCurved",
+      "triangles": 988,
+      "bounds_error_m": 5.960464477539063e-08,
+      "uv_valid": true,
+      "normals_valid": true,
+      "degenerate_faces": 0,
+      "pivot_ground_zero": true,
+      "passed": true
+    },
+    {
+      "name": "SM_GrassLongCurved_LOD1",
+      "triangles": 374,
+      "bounds_error_m": 5.960464477539063e-08,
+      "uv_valid": true,
+      "normals_valid": true,
+      "degenerate_faces": 0,
+      "pivot_ground_zero": true,
+      "passed": true
+    },
+    {
+      "name": "SM_GrassLongCurved_LOD2",
+      "triangles": 140,
+      "bounds_error_m": 5.960464477539063e-08,
+      "uv_valid": true,
+      "normals_valid": true,
+      "degenerate_faces": 0,
+      "pivot_ground_zero": true,
+      "passed": true
+    }
+  ],
+  "passed": true
+}

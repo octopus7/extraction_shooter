@@ -1,0 +1,146 @@
+{
+  "mesh": "/Game/Nature/ForestProps/GrassLongCurved/SM_GrassLongCurved.SM_GrassLongCurved",
+  "engine": "5.7.4-51494982+++UE5+Release-5.7",
+  "views": [
+    {
+      "name": "UE_Hero",
+      "non_black_samples": 25
+    },
+    {
+      "name": "UE_Back",
+      "non_black_samples": 25
+    }
+  ],
+  "world": "transient unsaved blank map",
+  "saved_existing_map": false,
+  "rhi": "D3D11 SM5; hardware rendering; exported SceneCapture2D after editor ticks",
+  "project": "temporary content-only UE 5.7 project; byte-identical packages verified by runner",
+  "passed": true,
+  "sample_rgb": [
+    [
+      232,
+      232,
+      232
+    ],
+    [
+      232,
+      232,
+      232
+    ],
+    [
+      234,
+      234,
+      235
+    ],
+    [
+      233,
+      233,
+      233
+    ],
+    [
+      234,
+      234,
+      234
+    ],
+    [
+      86,
+      112,
+      37
+    ],
+    [
+      200,
+      204,
+      192
+    ],
+    [
+      55,
+      88,
+      32
+    ],
+    [
+      234,
+      235,
+      235
+    ],
+    [
+      235,
+      235,
+      235
+    ],
+    [
+      112,
+      149,
+      52
+    ],
+    [
+      235,
+      235,
+      235
+    ],
+    [
+      110,
+      149,
+      45
+    ],
+    [
+      234,
+      234,
+      234
+    ],
+    [
+      235,
+      235,
+      235
+    ],
+    [
+      234,
+      234,
+      234
+    ],
+    [
+      235,
+      235,
+      235
+    ],
+    [
+      231,
+      231,
+      231
+    ],
+    [
+      188,
+      188,
+      188
+    ],
+    [
+      235,
+      235,
+      235
+    ],
+    [
+      233,
+      233,
+      233
+    ],
+    [
+      233,
+      233,
+      233
+    ],
+    [
+      234,
+      235,
+      235
+    ],
+    [
+      186,
+      186,
+      186
+    ],
+    [
+      232,
+      232,
+      232
+    ]
+  ]
+}
