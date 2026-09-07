@@ -1,0 +1,12 @@
+{
+  "camera_distance_m": 12,
+  "pitch_degrees": -60,
+  "horizontal_fov_degrees": 70,
+  "resolution": [
+    1920,
+    1080
+  ],
+  "target_height_m": 0.8,
+  "note": "C++ default camera approximation, not an in-game screenshot; excludes BP overrides, aiming and alternate camera modes.",
+  "source": "TunaSweeper/Source/TunaSweeper/Private/Character/TunaSweeperTopDownCharacter.cpp:44"
+}

@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "fresh_blend_reload": true,
+  "packed_palette_matches_png": true,
+  "mesh_count_exported": 1,
+  "uvs": {
+    "PaletteUV": {
+      "zero_area_triangles": 0,
+      "in_0_1": true
+    },
+    "LightmapUV": {
+      "zero_area_triangles": 0,
+      "in_0_1": true
+    }
+  },
+  "object_origin_ground": true,
+  "preview_collection_excluded_from_fbx": true
+}

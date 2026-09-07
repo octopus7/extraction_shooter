@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "sha256": {
+    "SM_BushSpreading.uasset": "0ADB6E2549560246760907BCB5E5A10A693BDE892A514A33697B89E5427E7934",
+    "T_BushSpreading_Palette.uasset": "8E47176EB895030361F922C1B69CB9784996B0319999FF9B250F8802CF505212",
+    "M_BushSpreading.uasset": "DAFB46F791053F86D977D2E6DF29B6BAA4DC8467250261E51FCEAFC9C17EC146"
+  },
+  "identical_to_freshly_reloaded_assets": true,
+  "destination": "TunaSweeper/Content/Nature/ForestProps/BushSpreading"
+}

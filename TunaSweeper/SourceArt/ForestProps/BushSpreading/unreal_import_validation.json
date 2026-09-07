@@ -1,0 +1,41 @@
+{
+  "passed": true,
+  "verification": "import",
+  "engine": "5.7.4-51494982+++UE5+Release-5.7",
+  "mesh": "/Game/Nature/ForestProps/BushSpreading/SM_BushSpreading.SM_BushSpreading",
+  "material": "/Game/Nature/ForestProps/BushSpreading/M_BushSpreading.M_BushSpreading",
+  "texture": "/Game/Nature/ForestProps/BushSpreading/T_BushSpreading_Palette.T_BushSpreading_Palette",
+  "dimensions_cm": [
+    208.95208740234375,
+    134.10162734985352,
+    66.13427734375
+  ],
+  "bounds_cm": [
+    -110.1490707397461,
+    -71.41273498535156,
+    0.0,
+    98.80301666259766,
+    62.68889236450195,
+    66.13427734375
+  ],
+  "source_uv_channels": 2,
+  "material_slots": 1,
+  "collision_primitives": 0,
+  "opaque": true,
+  "two_sided": false,
+  "source_triangles": 2746,
+  "lod0_vertices": 8036,
+  "axis_mapping": {
+    "blender_axis_indices_for_ue_xyz": [
+      0,
+      1,
+      2
+    ],
+    "signs": [
+      1,
+      -1,
+      1
+    ],
+    "max_bounds_error_cm": 5.245208740234375e-06
+  }
+}
