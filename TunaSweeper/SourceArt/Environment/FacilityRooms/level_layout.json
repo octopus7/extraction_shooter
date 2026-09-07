@@ -1,0 +1,1443 @@
+{
+  "levels": [
+    {
+      "name": "L_Facility_Basement",
+      "size_cm": [
+        1200,
+        1000
+      ],
+      "floor_z_cm": 0,
+      "placements": [
+        {
+          "label": "Architecture_Floor200_000",
+          "mesh": "SM_FacilityRooms_Floor200",
+          "location_cm": [
+            -500,
+            -400,
+            -20
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_Floor200_001",
+          "mesh": "SM_FacilityRooms_Floor200",
+          "location_cm": [
+            -500,
+            -200,
+            -20
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_Floor200_002",
+          "mesh": "SM_FacilityRooms_Floor200",
+          "location_cm": [
+            -500,
+            0,
+            -20
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_Floor200_003",
+          "mesh": "SM_FacilityRooms_Floor200",
+          "location_cm": [
+            -500,
+            200,
+            -20
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_Floor200_004",
+          "mesh": "SM_FacilityRooms_Floor200",
+          "location_cm": [
+            -500,
+            400,
+            -20
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_Floor200_005",
+          "mesh": "SM_FacilityRooms_Floor200",
+          "location_cm": [
+            -300,
+            -400,
+            -20
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_Floor200_006",
+          "mesh": "SM_FacilityRooms_Floor200",
+          "location_cm": [
+            -300,
+            -200,
+            -20
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_Floor200_007",
+          "mesh": "SM_FacilityRooms_Floor200",
+          "location_cm": [
+            -300,
+            0,
+            -20
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_Floor200_008",
+          "mesh": "SM_FacilityRooms_Floor200",
+          "location_cm": [
+            -300,
+            200,
+            -20
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_Floor200_009",
+          "mesh": "SM_FacilityRooms_Floor200",
+          "location_cm": [
+            -300,
+            400,
+            -20
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_Floor200_010",
+          "mesh": "SM_FacilityRooms_Floor200",
+          "location_cm": [
+            -100,
+            -400,
+            -20
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_Floor200_011",
+          "mesh": "SM_FacilityRooms_Floor200",
+          "location_cm": [
+            -100,
+            -200,
+            -20
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_Floor200_012",
+          "mesh": "SM_FacilityRooms_Floor200",
+          "location_cm": [
+            -100,
+            0,
+            -20
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_Floor200_013",
+          "mesh": "SM_FacilityRooms_Floor200",
+          "location_cm": [
+            -100,
+            200,
+            -20
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_Floor200_014",
+          "mesh": "SM_FacilityRooms_Floor200",
+          "location_cm": [
+            -100,
+            400,
+            -20
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_Floor200_015",
+          "mesh": "SM_FacilityRooms_Floor200",
+          "location_cm": [
+            100,
+            -400,
+            -20
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_Floor200_016",
+          "mesh": "SM_FacilityRooms_Floor200",
+          "location_cm": [
+            100,
+            -200,
+            -20
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_Floor200_017",
+          "mesh": "SM_FacilityRooms_Floor200",
+          "location_cm": [
+            100,
+            0,
+            -20
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_Floor200_018",
+          "mesh": "SM_FacilityRooms_Floor200",
+          "location_cm": [
+            100,
+            200,
+            -20
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_Floor200_019",
+          "mesh": "SM_FacilityRooms_Floor200",
+          "location_cm": [
+            100,
+            400,
+            -20
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_Floor200_020",
+          "mesh": "SM_FacilityRooms_Floor200",
+          "location_cm": [
+            300,
+            -400,
+            -20
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_Floor200_021",
+          "mesh": "SM_FacilityRooms_Floor200",
+          "location_cm": [
+            300,
+            -200,
+            -20
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_Floor200_022",
+          "mesh": "SM_FacilityRooms_Floor200",
+          "location_cm": [
+            300,
+            0,
+            -20
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_Floor200_023",
+          "mesh": "SM_FacilityRooms_Floor200",
+          "location_cm": [
+            300,
+            200,
+            -20
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_Floor200_024",
+          "mesh": "SM_FacilityRooms_Floor200",
+          "location_cm": [
+            300,
+            400,
+            -20
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_Floor200_025",
+          "mesh": "SM_FacilityRooms_Floor200",
+          "location_cm": [
+            500,
+            -400,
+            -20
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_Floor200_026",
+          "mesh": "SM_FacilityRooms_Floor200",
+          "location_cm": [
+            500,
+            -200,
+            -20
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_Floor200_027",
+          "mesh": "SM_FacilityRooms_Floor200",
+          "location_cm": [
+            500,
+            0,
+            -20
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_Floor200_028",
+          "mesh": "SM_FacilityRooms_Floor200",
+          "location_cm": [
+            500,
+            200,
+            -20
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_Floor200_029",
+          "mesh": "SM_FacilityRooms_Floor200",
+          "location_cm": [
+            500,
+            400,
+            -20
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_Wall200_030",
+          "mesh": "SM_FacilityRooms_Wall200",
+          "location_cm": [
+            -500,
+            -500.0,
+            0
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_Wall200_031",
+          "mesh": "SM_FacilityRooms_Wall200",
+          "location_cm": [
+            -500,
+            500.0,
+            0
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_Wall200_032",
+          "mesh": "SM_FacilityRooms_Wall200",
+          "location_cm": [
+            -300,
+            -500.0,
+            0
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_Wall200_033",
+          "mesh": "SM_FacilityRooms_Wall200",
+          "location_cm": [
+            -300,
+            500.0,
+            0
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_Wall200_034",
+          "mesh": "SM_FacilityRooms_Wall200",
+          "location_cm": [
+            -100,
+            -500.0,
+            0
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_Wall200_035",
+          "mesh": "SM_FacilityRooms_Wall200",
+          "location_cm": [
+            -100,
+            500.0,
+            0
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_Wall200_036",
+          "mesh": "SM_FacilityRooms_Wall200",
+          "location_cm": [
+            100,
+            -500.0,
+            0
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_Wall200_037",
+          "mesh": "SM_FacilityRooms_Wall200",
+          "location_cm": [
+            100,
+            500.0,
+            0
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_Wall200_038",
+          "mesh": "SM_FacilityRooms_Wall200",
+          "location_cm": [
+            300,
+            -500.0,
+            0
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_Wall200_039",
+          "mesh": "SM_FacilityRooms_Wall200",
+          "location_cm": [
+            300,
+            500.0,
+            0
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_Wall200_040",
+          "mesh": "SM_FacilityRooms_Wall200",
+          "location_cm": [
+            500,
+            -500.0,
+            0
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_Wall200_041",
+          "mesh": "SM_FacilityRooms_Wall200",
+          "location_cm": [
+            500,
+            500.0,
+            0
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_Wall200_042",
+          "mesh": "SM_FacilityRooms_Wall200",
+          "location_cm": [
+            -600.0,
+            -400,
+            0
+          ],
+          "yaw_deg": 90,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_Wall200_043",
+          "mesh": "SM_FacilityRooms_Wall200",
+          "location_cm": [
+            600.0,
+            -400,
+            0
+          ],
+          "yaw_deg": 90,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_Wall200_044",
+          "mesh": "SM_FacilityRooms_Wall200",
+          "location_cm": [
+            -600.0,
+            -200,
+            0
+          ],
+          "yaw_deg": 90,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_Wall200_045",
+          "mesh": "SM_FacilityRooms_Wall200",
+          "location_cm": [
+            600.0,
+            -200,
+            0
+          ],
+          "yaw_deg": 90,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_Wall200_046",
+          "mesh": "SM_FacilityRooms_Wall200",
+          "location_cm": [
+            -600.0,
+            0,
+            0
+          ],
+          "yaw_deg": 90,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_Wall200_047",
+          "mesh": "SM_FacilityRooms_Wall200",
+          "location_cm": [
+            600.0,
+            0,
+            0
+          ],
+          "yaw_deg": 90,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_Wall200_048",
+          "mesh": "SM_FacilityRooms_Wall200",
+          "location_cm": [
+            -600.0,
+            200,
+            0
+          ],
+          "yaw_deg": 90,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_Wall200_049",
+          "mesh": "SM_FacilityRooms_Wall200",
+          "location_cm": [
+            600.0,
+            200,
+            0
+          ],
+          "yaw_deg": 90,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_Wall200_050",
+          "mesh": "SM_FacilityRooms_Wall200",
+          "location_cm": [
+            -600.0,
+            400,
+            0
+          ],
+          "yaw_deg": 90,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_Wall200_051",
+          "mesh": "SM_FacilityRooms_Wall200",
+          "location_cm": [
+            600.0,
+            400,
+            0
+          ],
+          "yaw_deg": 90,
+          "zone": "Architecture"
+        },
+        {
+          "label": "LadderRoom_Doorway200_052",
+          "mesh": "SM_FacilityRooms_Doorway200",
+          "location_cm": [
+            -300,
+            -100,
+            0
+          ],
+          "yaw_deg": 0,
+          "zone": "LadderRoom"
+        },
+        {
+          "label": "LadderRoom_Wall200_053",
+          "mesh": "SM_FacilityRooms_Wall200",
+          "location_cm": [
+            -500,
+            -100,
+            0
+          ],
+          "yaw_deg": 0,
+          "zone": "LadderRoom"
+        },
+        {
+          "label": "LadderRoom_Wall200_054",
+          "mesh": "SM_FacilityRooms_Wall200",
+          "location_cm": [
+            -200,
+            -400,
+            0
+          ],
+          "yaw_deg": 90,
+          "zone": "LadderRoom"
+        },
+        {
+          "label": "LadderRoom_Wall200_055",
+          "mesh": "SM_FacilityRooms_Wall200",
+          "location_cm": [
+            -200,
+            -200,
+            0
+          ],
+          "yaw_deg": 90,
+          "zone": "LadderRoom"
+        },
+        {
+          "label": "LadderRoom_Threshold120_056",
+          "mesh": "SM_FacilityRooms_Threshold120",
+          "location_cm": [
+            -300,
+            -100,
+            0
+          ],
+          "yaw_deg": 0,
+          "zone": "LadderRoom"
+        },
+        {
+          "label": "LadderRoom_Ladder300_057",
+          "mesh": "SM_FacilityRooms_Ladder300",
+          "location_cm": [
+            -470,
+            -355,
+            0
+          ],
+          "yaw_deg": 0,
+          "zone": "LadderRoom"
+        },
+        {
+          "label": "LadderRoom_HatchLanding200_058",
+          "mesh": "SM_FacilityRooms_HatchLanding200",
+          "location_cm": [
+            -470,
+            -330,
+            300
+          ],
+          "yaw_deg": 0,
+          "zone": "LadderRoom"
+        },
+        {
+          "label": "LadderRoom_Guardrail200_059",
+          "mesh": "SM_FacilityRooms_Guardrail200",
+          "location_cm": [
+            -470,
+            -425,
+            320
+          ],
+          "yaw_deg": 0,
+          "zone": "LadderRoom"
+        },
+        {
+          "label": "BoilerBay_Boiler_060",
+          "mesh": "SM_FacilityRooms_Boiler",
+          "location_cm": [
+            -385,
+            290,
+            0
+          ],
+          "yaw_deg": 0,
+          "zone": "BoilerBay"
+        },
+        {
+          "label": "GeneratorBay_Generator_061",
+          "mesh": "SM_FacilityRooms_Generator",
+          "location_cm": [
+            -375,
+            130,
+            0
+          ],
+          "yaw_deg": 0,
+          "zone": "GeneratorBay"
+        },
+        {
+          "label": "GeneratorBay_ElectricalCabinet_062",
+          "mesh": "SM_FacilityRooms_ElectricalCabinet",
+          "location_cm": [
+            -525,
+            105,
+            0
+          ],
+          "yaw_deg": 90,
+          "zone": "GeneratorBay"
+        },
+        {
+          "label": "PumpBay_PumpSkid_063",
+          "mesh": "SM_FacilityRooms_PumpSkid",
+          "location_cm": [
+            380,
+            300,
+            0
+          ],
+          "yaw_deg": 0,
+          "zone": "PumpBay"
+        },
+        {
+          "label": "PumpBay_PressureTank_064",
+          "mesh": "SM_FacilityRooms_PressureTank",
+          "location_cm": [
+            500,
+            110,
+            0
+          ],
+          "yaw_deg": 0,
+          "zone": "PumpBay"
+        },
+        {
+          "label": "PumpBay_PipeRun_065",
+          "mesh": "SM_FacilityRooms_PipeRun",
+          "location_cm": [
+            360,
+            460,
+            30
+          ],
+          "yaw_deg": 0,
+          "zone": "PumpBay"
+        },
+        {
+          "label": "MaterialsStorage_SupplyRack_066",
+          "mesh": "SM_FacilityRooms_SupplyRack",
+          "location_cm": [
+            390,
+            -425,
+            0
+          ],
+          "yaw_deg": 0,
+          "zone": "MaterialsStorage"
+        },
+        {
+          "label": "MaterialsStorage_SupplyRack_067",
+          "mesh": "SM_FacilityRooms_SupplyRack",
+          "location_cm": [
+            545,
+            -160,
+            0
+          ],
+          "yaw_deg": -90,
+          "zone": "MaterialsStorage"
+        },
+        {
+          "label": "MaterialsStorage_PalletCrates_068",
+          "mesh": "SM_FacilityRooms_PalletCrates",
+          "location_cm": [
+            285,
+            -220,
+            0
+          ],
+          "yaw_deg": 0,
+          "zone": "MaterialsStorage"
+        },
+        {
+          "label": "MaterialsStorage_PipeBundle_069",
+          "mesh": "SM_FacilityRooms_PipeBundle",
+          "location_cm": [
+            390,
+            -70,
+            0
+          ],
+          "yaw_deg": 0,
+          "zone": "MaterialsStorage"
+        },
+        {
+          "label": "Lighting_WallLamp_070",
+          "mesh": "SM_FacilityRooms_WallLamp",
+          "location_cm": [
+            -590,
+            300,
+            240
+          ],
+          "yaw_deg": 90,
+          "zone": "Lighting"
+        },
+        {
+          "label": "Lighting_WallLamp_071",
+          "mesh": "SM_FacilityRooms_WallLamp",
+          "location_cm": [
+            590,
+            300,
+            240
+          ],
+          "yaw_deg": -90,
+          "zone": "Lighting"
+        },
+        {
+          "label": "Lighting_WallLamp_072",
+          "mesh": "SM_FacilityRooms_WallLamp",
+          "location_cm": [
+            0,
+            490,
+            240
+          ],
+          "yaw_deg": 0,
+          "zone": "Lighting"
+        },
+        {
+          "label": "Lighting_WallLamp_073",
+          "mesh": "SM_FacilityRooms_WallLamp",
+          "location_cm": [
+            -470,
+            -490,
+            240
+          ],
+          "yaw_deg": 180,
+          "zone": "Lighting"
+        },
+        {
+          "label": "BoilerBay_WallVent_074",
+          "mesh": "SM_FacilityRooms_WallVent",
+          "location_cm": [
+            -380,
+            484,
+            170
+          ],
+          "yaw_deg": 0,
+          "zone": "BoilerBay"
+        }
+      ],
+      "player_start": [
+        0,
+        0,
+        100
+      ],
+      "walkway_checks": [
+        [
+          -300,
+          -180,
+          -300,
+          -20
+        ],
+        [
+          0,
+          -350,
+          0,
+          350
+        ],
+        [
+          -100,
+          170,
+          100,
+          170
+        ]
+      ],
+      "no_ceiling": true,
+      "camera": {
+        "location_cm": [
+          1700,
+          -2200,
+          2000
+        ],
+        "target_cm": [
+          0,
+          20,
+          40
+        ]
+      }
+    },
+    {
+      "name": "L_Facility_ControlFloor02",
+      "size_cm": [
+        600,
+        600
+      ],
+      "floor_z_cm": 320,
+      "placements": [
+        {
+          "label": "Architecture_WoodHatchLanding200_000",
+          "mesh": "SM_FacilityRooms_WoodHatchLanding200",
+          "location_cm": [
+            -200,
+            -200,
+            300
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_WoodFloor200_001",
+          "mesh": "SM_FacilityRooms_WoodFloor200",
+          "location_cm": [
+            -200,
+            0,
+            300
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_WoodFloor200_002",
+          "mesh": "SM_FacilityRooms_WoodFloor200",
+          "location_cm": [
+            -200,
+            200,
+            300
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_WoodFloor200_003",
+          "mesh": "SM_FacilityRooms_WoodFloor200",
+          "location_cm": [
+            0,
+            -200,
+            300
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_WoodFloor200_004",
+          "mesh": "SM_FacilityRooms_WoodFloor200",
+          "location_cm": [
+            0,
+            0,
+            300
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_WoodFloor200_005",
+          "mesh": "SM_FacilityRooms_WoodFloor200",
+          "location_cm": [
+            0,
+            200,
+            300
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_WoodFloor200_006",
+          "mesh": "SM_FacilityRooms_WoodFloor200",
+          "location_cm": [
+            200,
+            -200,
+            300
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_WoodFloor200_007",
+          "mesh": "SM_FacilityRooms_WoodFloor200",
+          "location_cm": [
+            200,
+            0,
+            300
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_WoodFloor200_008",
+          "mesh": "SM_FacilityRooms_WoodFloor200",
+          "location_cm": [
+            200,
+            200,
+            300
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_WoodWall200_009",
+          "mesh": "SM_FacilityRooms_WoodWall200",
+          "location_cm": [
+            -200,
+            -300.0,
+            320
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_WoodWall200_010",
+          "mesh": "SM_FacilityRooms_WoodWall200",
+          "location_cm": [
+            -200,
+            300.0,
+            320
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_WoodWall200_011",
+          "mesh": "SM_FacilityRooms_WoodWall200",
+          "location_cm": [
+            0,
+            -300.0,
+            320
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_WoodWall200_012",
+          "mesh": "SM_FacilityRooms_WoodWall200",
+          "location_cm": [
+            0,
+            300.0,
+            320
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_WoodWall200_013",
+          "mesh": "SM_FacilityRooms_WoodWall200",
+          "location_cm": [
+            200,
+            -300.0,
+            320
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_WoodWall200_014",
+          "mesh": "SM_FacilityRooms_WoodWall200",
+          "location_cm": [
+            200,
+            300.0,
+            320
+          ],
+          "yaw_deg": 0,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_WoodWall200_015",
+          "mesh": "SM_FacilityRooms_WoodWall200",
+          "location_cm": [
+            -300.0,
+            -200,
+            320
+          ],
+          "yaw_deg": 90,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_WoodWall200_016",
+          "mesh": "SM_FacilityRooms_WoodWall200",
+          "location_cm": [
+            300.0,
+            -200,
+            320
+          ],
+          "yaw_deg": 90,
+          "zone": "Architecture"
+        },
+        {
+          "label": "AtticTimber_WoodWindowWall200",
+          "mesh": "SM_FacilityRooms_WoodWindowWall200",
+          "location_cm": [
+            -300.0,
+            0,
+            320
+          ],
+          "yaw_deg": 90,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_WoodWall200_018",
+          "mesh": "SM_FacilityRooms_WoodWall200",
+          "location_cm": [
+            300.0,
+            0,
+            320
+          ],
+          "yaw_deg": 90,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_WoodWall200_019",
+          "mesh": "SM_FacilityRooms_WoodWall200",
+          "location_cm": [
+            -300.0,
+            200,
+            320
+          ],
+          "yaw_deg": 90,
+          "zone": "Architecture"
+        },
+        {
+          "label": "Architecture_WoodWall200_020",
+          "mesh": "SM_FacilityRooms_WoodWall200",
+          "location_cm": [
+            300.0,
+            200,
+            320
+          ],
+          "yaw_deg": 90,
+          "zone": "Architecture"
+        },
+        {
+          "label": "AtticTimber_WoodGable600_021",
+          "mesh": "SM_FacilityRooms_WoodGable600",
+          "location_cm": [
+            0,
+            -300,
+            540
+          ],
+          "yaw_deg": 0,
+          "zone": "AtticTimber"
+        },
+        {
+          "label": "AtticTimber_WoodGable600_022",
+          "mesh": "SM_FacilityRooms_WoodGable600",
+          "location_cm": [
+            0,
+            300,
+            540
+          ],
+          "yaw_deg": 0,
+          "zone": "AtticTimber"
+        },
+        {
+          "label": "AtticRoof_WoodRoof600_023",
+          "mesh": "SM_FacilityRooms_WoodRoof600",
+          "location_cm": [
+            0,
+            0,
+            540
+          ],
+          "yaw_deg": 0,
+          "zone": "AtticRoof",
+          "review_hidden": true
+        },
+        {
+          "label": "LadderLanding_Ladder300_024",
+          "mesh": "SM_FacilityRooms_Ladder300",
+          "location_cm": [
+            -200,
+            -225,
+            0
+          ],
+          "yaw_deg": 0,
+          "zone": "LadderLanding"
+        },
+        {
+          "label": "LadderLanding_Guardrail200_025",
+          "mesh": "SM_FacilityRooms_Guardrail200",
+          "location_cm": [
+            -295,
+            -200,
+            320
+          ],
+          "yaw_deg": 90,
+          "zone": "LadderLanding"
+        },
+        {
+          "label": "LadderLanding_Guardrail200_026",
+          "mesh": "SM_FacilityRooms_Guardrail200",
+          "location_cm": [
+            -200,
+            -295,
+            320
+          ],
+          "yaw_deg": 0,
+          "zone": "LadderLanding"
+        },
+        {
+          "label": "Operations_OperatorDesk_027",
+          "mesh": "SM_FacilityRooms_OperatorDesk",
+          "location_cm": [
+            -120,
+            110,
+            320
+          ],
+          "yaw_deg": 180,
+          "zone": "Operations"
+        },
+        {
+          "label": "Operations_OperatorDesk_028",
+          "mesh": "SM_FacilityRooms_OperatorDesk",
+          "location_cm": [
+            100,
+            110,
+            320
+          ],
+          "yaw_deg": 180,
+          "zone": "Operations"
+        },
+        {
+          "label": "Operations_DeskMonitor_029",
+          "mesh": "SM_FacilityRooms_DeskMonitor",
+          "location_cm": [
+            -120,
+            125,
+            398
+          ],
+          "yaw_deg": 180,
+          "zone": "Operations"
+        },
+        {
+          "label": "Operations_DeskMonitor_030",
+          "mesh": "SM_FacilityRooms_DeskMonitor",
+          "location_cm": [
+            65,
+            135,
+            398
+          ],
+          "yaw_deg": 180,
+          "zone": "Operations"
+        },
+        {
+          "label": "Operations_KeyboardConsole_031",
+          "mesh": "SM_FacilityRooms_KeyboardConsole",
+          "location_cm": [
+            -120,
+            80,
+            399
+          ],
+          "yaw_deg": 180,
+          "zone": "Operations"
+        },
+        {
+          "label": "Operations_KeyboardConsole_032",
+          "mesh": "SM_FacilityRooms_KeyboardConsole",
+          "location_cm": [
+            65,
+            80,
+            399
+          ],
+          "yaw_deg": 180,
+          "zone": "Operations"
+        },
+        {
+          "label": "Operations_OperatorChair_033",
+          "mesh": "SM_FacilityRooms_OperatorChair",
+          "location_cm": [
+            -120,
+            10,
+            320
+          ],
+          "yaw_deg": 180,
+          "zone": "Operations"
+        },
+        {
+          "label": "Operations_OperatorChair_034",
+          "mesh": "SM_FacilityRooms_OperatorChair",
+          "location_cm": [
+            100,
+            10,
+            320
+          ],
+          "yaw_deg": 180,
+          "zone": "Operations"
+        },
+        {
+          "label": "SituationDisplays_MonitorWall_035",
+          "mesh": "SM_FacilityRooms_MonitorWall",
+          "location_cm": [
+            0,
+            265,
+            420
+          ],
+          "yaw_deg": 180,
+          "zone": "SituationDisplays"
+        },
+        {
+          "label": "Communications_RadioRack_036",
+          "mesh": "SM_FacilityRooms_RadioRack",
+          "location_cm": [
+            250,
+            -160,
+            320
+          ],
+          "yaw_deg": -90,
+          "zone": "Communications"
+        },
+        {
+          "label": "Communications_RadioConsole_037",
+          "mesh": "SM_FacilityRooms_RadioConsole",
+          "location_cm": [
+            150,
+            115,
+            398
+          ],
+          "yaw_deg": 180,
+          "zone": "Communications"
+        },
+        {
+          "label": "Operations_FileCabinet_038",
+          "mesh": "SM_FacilityRooms_FileCabinet",
+          "location_cm": [
+            -265,
+            130,
+            320
+          ],
+          "yaw_deg": 90,
+          "zone": "Operations"
+        },
+        {
+          "label": "WarmLighting_AtticLamp_039",
+          "mesh": "SM_FacilityRooms_AtticLamp",
+          "location_cm": [
+            -185,
+            130,
+            398
+          ],
+          "yaw_deg": 0,
+          "zone": "WarmLighting"
+        },
+        {
+          "label": "WarmLighting_AtticLamp_040",
+          "mesh": "SM_FacilityRooms_AtticLamp",
+          "location_cm": [
+            235,
+            185,
+            450
+          ],
+          "yaw_deg": 0,
+          "zone": "WarmLighting"
+        },
+        {
+          "label": "MoleLiving_BookStack_041",
+          "mesh": "SM_FacilityRooms_BookStack",
+          "location_cm": [
+            -170,
+            85,
+            398
+          ],
+          "yaw_deg": 0,
+          "zone": "MoleLiving"
+        },
+        {
+          "label": "MoleLiving_DeskMug_042",
+          "mesh": "SM_FacilityRooms_DeskMug",
+          "location_cm": [
+            -65,
+            85,
+            398
+          ],
+          "yaw_deg": 0,
+          "zone": "MoleLiving"
+        }
+      ],
+      "player_start": [
+        0,
+        -140,
+        420
+      ],
+      "walkway_checks": [
+        [
+          -100,
+          -200,
+          100,
+          -200
+        ],
+        [
+          0,
+          -220,
+          0,
+          30
+        ]
+      ],
+      "no_ceiling": false,
+      "camera": {
+        "location_cm": [
+          1050,
+          -1350,
+          2350
+        ],
+        "target_cm": [
+          0,
+          0,
+          370
+        ]
+      },
+      "interior_camera": {
+        "location_cm": [
+          210,
+          -215,
+          465
+        ],
+        "target_cm": [
+          -190,
+          100,
+          475
+        ],
+        "fov": 82
+      },
+      "forest": {
+        "label": "Exterior_ForestImpostor",
+        "location_cm": [
+          -550,
+          0,
+          490
+        ],
+        "rotation_deg": [
+          0,
+          90,
+          -90
+        ],
+        "scale": [
+          8,
+          6,
+          1
+        ]
+      },
+      "window_light": {
+        "location_cm": [
+          -470,
+          -70,
+          540
+        ],
+        "target_cm": [
+          170,
+          190,
+          340
+        ],
+        "intensity_candela": 1800,
+        "inner_cone_deg": 15,
+        "outer_cone_deg": 21,
+        "volumetric_scattering_intensity": 4,
+        "fog_density": 0.02,
+        "fog_extinction_scale": 1.5,
+        "fog_view_distance_cm": 2000
+      }
+    }
+  ]
+}

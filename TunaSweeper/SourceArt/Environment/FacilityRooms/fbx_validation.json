@@ -1,0 +1,3615 @@
+{
+  "verification": "fresh Blender scenes: render mesh and individual UCX bounds",
+  "blender": "4.5.12 LTS",
+  "axis_contract": "Blender X width/-Y front/Z up, cm",
+  "bounds_tolerance_cm": 0.1,
+  "assets": [
+    {
+      "name": "SM_FacilityRooms_Wall200",
+      "passed": true,
+      "triangles": 3084,
+      "vertices": 1592,
+      "uv_channels": 2,
+      "materials": [
+        "M_FacilityRooms_Concrete",
+        "M_FacilityRooms_Iron"
+      ],
+      "bounds_cm": [
+        -100.0,
+        -10.000009834766388,
+        0.0,
+        100.0,
+        10.000009834766388,
+        300.0
+      ],
+      "max_bounds_error_cm": 9.834766387939453e-06,
+      "collision_boxes": 1,
+      "collision_validation": [
+        {
+          "name": "UCX_SM_FacilityRooms_Wall200_00",
+          "bounds_cm": [
+            -100.0,
+            -10.000009834766388,
+            0.0,
+            100.0,
+            10.000009834766388,
+            300.0
+          ],
+          "max_bounds_error_cm": 8.64267349243164e-06
+        }
+      ],
+      "opening_ray_probes": [],
+      "sha256_before": "b9492a4739157e874a5f0c6203d806538501d19feb4621387755015cf4d78546",
+      "sha256_after": "b9492a4739157e874a5f0c6203d806538501d19feb4621387755015cf4d78546"
+    },
+    {
+      "name": "SM_FacilityRooms_Wall100",
+      "passed": true,
+      "triangles": 3084,
+      "vertices": 1592,
+      "uv_channels": 2,
+      "materials": [
+        "M_FacilityRooms_Concrete",
+        "M_FacilityRooms_Iron"
+      ],
+      "bounds_cm": [
+        -50.0,
+        -10.00000536441803,
+        0.0,
+        50.0,
+        10.00000536441803,
+        300.0
+      ],
+      "max_bounds_error_cm": 5.364418029785156e-06,
+      "collision_boxes": 1,
+      "collision_validation": [
+        {
+          "name": "UCX_SM_FacilityRooms_Wall100_00",
+          "bounds_cm": [
+            -50.0,
+            -10.00000536441803,
+            0.0,
+            50.0,
+            10.00000536441803,
+            300.0
+          ],
+          "max_bounds_error_cm": 4.172325134277344e-06
+        }
+      ],
+      "opening_ray_probes": [],
+      "sha256_before": "2b9c925f19a8bc12ca92f15595bee888bb83c65446bddc62e3b091c6cd54d3bb",
+      "sha256_after": "2b9c925f19a8bc12ca92f15595bee888bb83c65446bddc62e3b091c6cd54d3bb"
+    },
+    {
+      "name": "SM_FacilityRooms_WallCorner",
+      "passed": true,
+      "triangles": 756,
+      "vertices": 392,
+      "uv_channels": 2,
+      "materials": [
+        "M_FacilityRooms_Concrete",
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Steel"
+      ],
+      "bounds_cm": [
+        -10.000001639127731,
+        -10.000001639127731,
+        0.0,
+        10.000001639127731,
+        10.000001639127731,
+        300.0
+      ],
+      "max_bounds_error_cm": 1.6391277313232422e-06,
+      "collision_boxes": 1,
+      "collision_validation": [
+        {
+          "name": "UCX_SM_FacilityRooms_WallCorner_00",
+          "bounds_cm": [
+            -10.000001639127731,
+            -10.000001639127731,
+            0.0,
+            10.000001639127731,
+            10.000001639127731,
+            300.0
+          ],
+          "max_bounds_error_cm": 4.470348358154297e-07
+        }
+      ],
+      "opening_ray_probes": [],
+      "sha256_before": "34599307e005373f31cdb2702575ad8404aa69af498380cc543164b211293d31",
+      "sha256_after": "34599307e005373f31cdb2702575ad8404aa69af498380cc543164b211293d31"
+    },
+    {
+      "name": "SM_FacilityRooms_Doorway200",
+      "passed": true,
+      "triangles": 2396,
+      "vertices": 1240,
+      "uv_channels": 2,
+      "materials": [
+        "M_FacilityRooms_Concrete",
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Hazard"
+      ],
+      "bounds_cm": [
+        -100.0,
+        -10.000009834766388,
+        0.0,
+        100.0,
+        10.000009834766388,
+        300.0
+      ],
+      "max_bounds_error_cm": 9.834766387939453e-06,
+      "collision_boxes": 3,
+      "collision_validation": [
+        {
+          "name": "UCX_SM_FacilityRooms_Doorway200_00",
+          "bounds_cm": [
+            -99.99999403953552,
+            -10.000002384185791,
+            0.0,
+            -59.99999642372131,
+            10.000002384185791,
+            229.99999523162842
+          ],
+          "max_bounds_error_cm": 5.9604644775390625e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_Doorway200_01",
+          "bounds_cm": [
+            59.99999642372131,
+            -10.000002384185791,
+            0.0,
+            99.99999403953552,
+            10.000002384185791,
+            229.99999523162842
+          ],
+          "max_bounds_error_cm": 5.9604644775390625e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_Doorway200_02",
+          "bounds_cm": [
+            -100.0,
+            -10.000009834766388,
+            229.99999523162842,
+            100.0,
+            10.000009834766388,
+            299.9999761581421
+          ],
+          "max_bounds_error_cm": 2.384185791015625e-05
+        }
+      ],
+      "opening_ray_probes": [
+        {
+          "start_cm": [
+            -55,
+            -40,
+            10
+          ],
+          "end_cm": [
+            -55,
+            40,
+            10
+          ]
+        },
+        {
+          "start_cm": [
+            -55,
+            -40,
+            115
+          ],
+          "end_cm": [
+            -55,
+            40,
+            115
+          ]
+        },
+        {
+          "start_cm": [
+            -55,
+            -40,
+            225
+          ],
+          "end_cm": [
+            -55,
+            40,
+            225
+          ]
+        },
+        {
+          "start_cm": [
+            0,
+            -40,
+            10
+          ],
+          "end_cm": [
+            0,
+            40,
+            10
+          ]
+        },
+        {
+          "start_cm": [
+            0,
+            -40,
+            115
+          ],
+          "end_cm": [
+            0,
+            40,
+            115
+          ]
+        },
+        {
+          "start_cm": [
+            0,
+            -40,
+            225
+          ],
+          "end_cm": [
+            0,
+            40,
+            225
+          ]
+        },
+        {
+          "start_cm": [
+            55,
+            -40,
+            10
+          ],
+          "end_cm": [
+            55,
+            40,
+            10
+          ]
+        },
+        {
+          "start_cm": [
+            55,
+            -40,
+            115
+          ],
+          "end_cm": [
+            55,
+            40,
+            115
+          ]
+        },
+        {
+          "start_cm": [
+            55,
+            -40,
+            225
+          ],
+          "end_cm": [
+            55,
+            40,
+            225
+          ]
+        }
+      ],
+      "sha256_before": "75c26bb28d14511934470fc8e35af6fe40ad05861db7624d67ecef268be60601",
+      "sha256_after": "75c26bb28d14511934470fc8e35af6fe40ad05861db7624d67ecef268be60601"
+    },
+    {
+      "name": "SM_FacilityRooms_Floor200",
+      "passed": true,
+      "triangles": 648,
+      "vertices": 336,
+      "uv_channels": 2,
+      "materials": [
+        "M_FacilityRooms_Concrete",
+        "M_FacilityRooms_Iron"
+      ],
+      "bounds_cm": [
+        -100.00001192092896,
+        -100.00001192092896,
+        0.0,
+        100.00001192092896,
+        100.00001192092896,
+        20.000000298023224
+      ],
+      "max_bounds_error_cm": 1.1920928955078125e-05,
+      "collision_boxes": 1,
+      "collision_validation": [
+        {
+          "name": "UCX_SM_FacilityRooms_Floor200_00",
+          "bounds_cm": [
+            -100.00001192092896,
+            -100.00001192092896,
+            -7.450580596923828e-07,
+            100.00001192092896,
+            100.00001192092896,
+            19.999998807907104
+          ],
+          "max_bounds_error_cm": 1.1920928955078125e-05
+        }
+      ],
+      "opening_ray_probes": [],
+      "sha256_before": "3542227e2e934b02e606fe56cb794c3297539be4caf08b87882b43d0e2616d7c",
+      "sha256_after": "3542227e2e934b02e606fe56cb794c3297539be4caf08b87882b43d0e2616d7c"
+    },
+    {
+      "name": "SM_FacilityRooms_Threshold120",
+      "passed": true,
+      "triangles": 1100,
+      "vertices": 568,
+      "uv_channels": 2,
+      "materials": [
+        "M_FacilityRooms_Steel",
+        "M_FacilityRooms_Iron"
+      ],
+      "bounds_cm": [
+        -60.00000238418579,
+        -12.000004947185516,
+        0.0,
+        60.00000238418579,
+        12.000004947185516,
+        3.999999910593033
+      ],
+      "max_bounds_error_cm": 4.947185516357422e-06,
+      "collision_boxes": 1,
+      "collision_validation": [
+        {
+          "name": "UCX_SM_FacilityRooms_Threshold120_00",
+          "bounds_cm": [
+            -60.00000834465027,
+            -12.000004947185516,
+            0.0,
+            60.00000834465027,
+            12.000004947185516,
+            3.999999910593033
+          ],
+          "max_bounds_error_cm": 4.947185516357422e-06
+        }
+      ],
+      "opening_ray_probes": [],
+      "sha256_before": "a813531f4b9f2226e1b7fca66570691d883a5cd04d59bed4052b2e629263335b",
+      "sha256_after": "a813531f4b9f2226e1b7fca66570691d883a5cd04d59bed4052b2e629263335b"
+    },
+    {
+      "name": "SM_FacilityRooms_Ladder300",
+      "passed": true,
+      "triangles": 8512,
+      "vertices": 4366,
+      "uv_channels": 2,
+      "materials": [
+        "M_FacilityRooms_Steel",
+        "M_FacilityRooms_Hazard",
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Rubber"
+      ],
+      "bounds_cm": [
+        -37.5,
+        -15.000002086162567,
+        0.0,
+        37.5,
+        15.000002086162567,
+        330.0000190734863
+      ],
+      "max_bounds_error_cm": 1.9073486328125e-05,
+      "collision_boxes": 17,
+      "collision_validation": [
+        {
+          "name": "UCX_SM_FacilityRooms_Ladder300_00",
+          "bounds_cm": [
+            -37.480008602142334,
+            -12.999998033046722,
+            0.0,
+            -31.483209133148193,
+            -6.999998539686203,
+            299.84703063964844
+          ],
+          "max_bounds_error_cm": 5.9604644775390625e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_Ladder300_01",
+          "bounds_cm": [
+            -37.480008602142334,
+            -12.999999523162842,
+            297.8480339050293,
+            -31.483209133148193,
+            -4.999999329447746,
+            327.8327465057373
+          ],
+          "max_bounds_error_cm": 1.0609626770019531e-05
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_Ladder300_02",
+          "bounds_cm": [
+            -37.48001158237457,
+            -6.999999284744263,
+            323.83477687835693,
+            -31.483206152915955,
+            14.999999105930328,
+            329.83171939849854
+          ],
+          "max_bounds_error_cm": 9.775161743164062e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_Ladder300_03",
+          "bounds_cm": [
+            31.483209133148193,
+            -12.999998033046722,
+            0.0,
+            37.480008602142334,
+            -6.999998539686203,
+            299.84703063964844
+          ],
+          "max_bounds_error_cm": 5.9604644775390625e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_Ladder300_04",
+          "bounds_cm": [
+            31.483209133148193,
+            -12.999999523162842,
+            297.8480339050293,
+            37.480008602142334,
+            -4.999999329447746,
+            327.8327465057373
+          ],
+          "max_bounds_error_cm": 1.0609626770019531e-05
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_Ladder300_05",
+          "bounds_cm": [
+            31.483206152915955,
+            -6.999999284744263,
+            323.83477687835693,
+            37.48001158237457,
+            14.999999105930328,
+            329.83171939849854
+          ],
+          "max_bounds_error_cm": 9.775161743164062e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_Ladder300_06",
+          "bounds_cm": [
+            -31.982943415641785,
+            -15.000002086162567,
+            12.493626773357391,
+            31.982943415641785,
+            -8.99999663233757,
+            17.4910768866539
+          ],
+          "max_bounds_error_cm": 2.980232240545888e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_Ladder300_07",
+          "bounds_cm": [
+            -31.982943415641785,
+            -15.000002086162567,
+            39.47985768318176,
+            31.982943415641785,
+            -8.99999663233757,
+            44.47730779647827
+          ],
+          "max_bounds_error_cm": 2.980232240545888e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_Ladder300_08",
+          "bounds_cm": [
+            -31.982943415641785,
+            -15.000002086162567,
+            66.46608114242554,
+            31.982943415641785,
+            -8.99999663233757,
+            71.46353721618652
+          ],
+          "max_bounds_error_cm": 9.328126907348633e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_Ladder300_09",
+          "bounds_cm": [
+            -31.982943415641785,
+            -15.000002086162567,
+            93.45232248306274,
+            31.982943415641785,
+            -8.99999663233757,
+            98.44977855682373
+          ],
+          "max_bounds_error_cm": 5.453825011159097e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_Ladder300_10",
+          "bounds_cm": [
+            -31.982943415641785,
+            -15.000002086162567,
+            120.43856382369995,
+            31.982943415641785,
+            -8.99999663233757,
+            125.43600797653198
+          ],
+          "max_bounds_error_cm": 8.910894393920898e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_Ladder300_11",
+          "bounds_cm": [
+            -31.982943415641785,
+            -15.000002086162567,
+            147.4247932434082,
+            31.982943415641785,
+            -8.99999663233757,
+            152.42223739624023
+          ],
+          "max_bounds_error_cm": 6.109476089477539e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_Ladder300_12",
+          "bounds_cm": [
+            -31.982943415641785,
+            -15.000002086162567,
+            174.41102266311646,
+            31.982943415641785,
+            -8.99999663233757,
+            179.4084668159485
+          ],
+          "max_bounds_error_cm": 3.3080577850341797e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_Ladder300_13",
+          "bounds_cm": [
+            -31.982943415641785,
+            -15.000002086162567,
+            201.3972520828247,
+            31.982943415641785,
+            -8.99999663233757,
+            206.39469623565674
+          ],
+          "max_bounds_error_cm": 5.751848220825195e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_Ladder300_14",
+          "bounds_cm": [
+            -31.982943415641785,
+            -15.000002086162567,
+            228.3834934234619,
+            31.982943415641785,
+            -8.99999663233757,
+            233.38093757629395
+          ],
+          "max_bounds_error_cm": 9.626150102803877e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_Ladder300_15",
+          "bounds_cm": [
+            -31.982943415641785,
+            -15.000002086162567,
+            255.3697109222412,
+            31.982943415641785,
+            -8.99999663233757,
+            260.36715507507324
+          ],
+          "max_bounds_error_cm": 1.1354684829711914e-05
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_Ladder300_16",
+          "bounds_cm": [
+            -31.982943415641785,
+            -15.000002086162567,
+            282.3559522628784,
+            31.982943415641785,
+            -8.99999663233757,
+            287.35339641571045
+          ],
+          "max_bounds_error_cm": 4.023313522338867e-06
+        }
+      ],
+      "opening_ray_probes": [],
+      "sha256_before": "6a19e162b3c701941b48831a296af092030e6a069b743c3c4e5262b4428e259b",
+      "sha256_after": "6a19e162b3c701941b48831a296af092030e6a069b743c3c4e5262b4428e259b"
+    },
+    {
+      "name": "SM_FacilityRooms_HatchLanding200",
+      "passed": true,
+      "triangles": 1952,
+      "vertices": 1008,
+      "uv_channels": 2,
+      "materials": [
+        "M_FacilityRooms_Concrete",
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Hazard",
+        "M_FacilityRooms_Steel"
+      ],
+      "bounds_cm": [
+        -100.00001192092896,
+        -100.00001192092896,
+        0.0,
+        100.00001192092896,
+        100.00001192092896,
+        20.000000298023224
+      ],
+      "max_bounds_error_cm": 1.1920928955078125e-05,
+      "collision_boxes": 4,
+      "collision_validation": [
+        {
+          "name": "UCX_SM_FacilityRooms_HatchLanding200_00",
+          "bounds_cm": [
+            -100.0,
+            -100.0,
+            -7.450580596923828e-07,
+            -44.99998688697815,
+            100.0,
+            19.999998807907104
+          ],
+          "max_bounds_error_cm": 1.0132789611816406e-05
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_HatchLanding200_01",
+          "bounds_cm": [
+            44.99998688697815,
+            -100.0,
+            -7.450580596923828e-07,
+            100.0,
+            100.0,
+            19.999998807907104
+          ],
+          "max_bounds_error_cm": 1.609325408935547e-05
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_HatchLanding200_02",
+          "bounds_cm": [
+            -44.999998807907104,
+            -100.0,
+            -7.450580596923828e-07,
+            45.00000476837158,
+            -44.99999284744263,
+            19.999998807907104
+          ],
+          "max_bounds_error_cm": 7.152557373046875e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_HatchLanding200_03",
+          "bounds_cm": [
+            -44.999998807907104,
+            44.99999284744263,
+            -7.450580596923828e-07,
+            45.00000476837158,
+            100.0,
+            19.999998807907104
+          ],
+          "max_bounds_error_cm": 7.152557373046875e-06
+        }
+      ],
+      "opening_ray_probes": [
+        {
+          "start_cm": [
+            -40,
+            -40,
+            -15
+          ],
+          "end_cm": [
+            -40,
+            -40,
+            35
+          ]
+        },
+        {
+          "start_cm": [
+            -40,
+            0,
+            -15
+          ],
+          "end_cm": [
+            -40,
+            0,
+            35
+          ]
+        },
+        {
+          "start_cm": [
+            -40,
+            40,
+            -15
+          ],
+          "end_cm": [
+            -40,
+            40,
+            35
+          ]
+        },
+        {
+          "start_cm": [
+            0,
+            -40,
+            -15
+          ],
+          "end_cm": [
+            0,
+            -40,
+            35
+          ]
+        },
+        {
+          "start_cm": [
+            0,
+            0,
+            -15
+          ],
+          "end_cm": [
+            0,
+            0,
+            35
+          ]
+        },
+        {
+          "start_cm": [
+            0,
+            40,
+            -15
+          ],
+          "end_cm": [
+            0,
+            40,
+            35
+          ]
+        },
+        {
+          "start_cm": [
+            40,
+            -40,
+            -15
+          ],
+          "end_cm": [
+            40,
+            -40,
+            35
+          ]
+        },
+        {
+          "start_cm": [
+            40,
+            0,
+            -15
+          ],
+          "end_cm": [
+            40,
+            0,
+            35
+          ]
+        },
+        {
+          "start_cm": [
+            40,
+            40,
+            -15
+          ],
+          "end_cm": [
+            40,
+            40,
+            35
+          ]
+        }
+      ],
+      "sha256_before": "e6a381dc7a07dba80719fd140fa841e170469ab61d0d3736fdaf28aab683b602",
+      "sha256_after": "e6a381dc7a07dba80719fd140fa841e170469ab61d0d3736fdaf28aab683b602"
+    },
+    {
+      "name": "SM_FacilityRooms_Guardrail200",
+      "passed": true,
+      "triangles": 1412,
+      "vertices": 728,
+      "uv_channels": 2,
+      "materials": [
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Steel",
+        "M_FacilityRooms_Hazard"
+      ],
+      "bounds_cm": [
+        -100.0,
+        -6.000008434057236,
+        0.0,
+        100.0,
+        6.000008434057236,
+        110.00000238418579
+      ],
+      "max_bounds_error_cm": 8.434057235717773e-06,
+      "collision_boxes": 5,
+      "collision_validation": [
+        {
+          "name": "UCX_SM_FacilityRooms_Guardrail200_00",
+          "bounds_cm": [
+            -100.0,
+            -6.000000238418579,
+            0.0,
+            -89.99999761581421,
+            6.000000238418579,
+            110.00001430511475
+          ],
+          "max_bounds_error_cm": 2.384185791015625e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_Guardrail200_01",
+          "bounds_cm": [
+            89.99999761581421,
+            -6.000000238418579,
+            0.0,
+            100.0,
+            6.000000238418579,
+            110.00001430511475
+          ],
+          "max_bounds_error_cm": 2.384185791015625e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_Guardrail200_02",
+          "bounds_cm": [
+            -100.0,
+            -4.000008478760719,
+            104.00002002716064,
+            100.0,
+            4.000008478760719,
+            110.00001430511475
+          ],
+          "max_bounds_error_cm": 8.478760719299316e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_Guardrail200_03",
+          "bounds_cm": [
+            -93.99999976158142,
+            -2.5000082328915596,
+            56.00000619888306,
+            93.99999976158142,
+            2.5000082328915596,
+            60.00000238418579
+          ],
+          "max_bounds_error_cm": 8.23289155960083e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_Guardrail200_04",
+          "bounds_cm": [
+            -93.99999976158142,
+            -1.500008162111044,
+            3.999999165534973,
+            93.99999976158142,
+            1.500008162111044,
+            20.000001788139343
+          ],
+          "max_bounds_error_cm": 8.162111043930054e-06
+        }
+      ],
+      "opening_ray_probes": [],
+      "sha256_before": "0df2e21bef6180804a37985d3764bece4c1d3fb8fc4e906a887e91f744b0c7ff",
+      "sha256_after": "0df2e21bef6180804a37985d3764bece4c1d3fb8fc4e906a887e91f744b0c7ff"
+    },
+    {
+      "name": "SM_FacilityRooms_WallLamp",
+      "passed": true,
+      "triangles": 1032,
+      "vertices": 536,
+      "uv_channels": 2,
+      "materials": [
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Steel",
+        "M_FacilityRooms_Rubber",
+        "M_FacilityRooms_Amber"
+      ],
+      "bounds_cm": [
+        -40.00000357627869,
+        -9.000002592802048,
+        0.0,
+        40.00000357627869,
+        9.000003337860107,
+        21.99999988079071
+      ],
+      "max_bounds_error_cm": 3.5762786865234375e-06,
+      "collision_boxes": 1,
+      "collision_validation": [
+        {
+          "name": "UCX_SM_FacilityRooms_WallLamp_00",
+          "bounds_cm": [
+            -40.00000357627869,
+            -9.000004082918167,
+            0.0,
+            40.00000357627869,
+            9.000004082918167,
+            21.99999988079071
+          ],
+          "max_bounds_error_cm": 4.082918167114258e-06
+        }
+      ],
+      "opening_ray_probes": [],
+      "sha256_before": "fbc835b5237fe24e491a5c6ee4ec8dfde0f5fc58cdbff8b8af3a65d8a1874e50",
+      "sha256_after": "fbc835b5237fe24e491a5c6ee4ec8dfde0f5fc58cdbff8b8af3a65d8a1874e50"
+    },
+    {
+      "name": "SM_FacilityRooms_WallVent",
+      "passed": true,
+      "triangles": 2840,
+      "vertices": 1456,
+      "uv_channels": 2,
+      "materials": [
+        "M_FacilityRooms_Steel",
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Rubber"
+      ],
+      "bounds_cm": [
+        -50.0,
+        -7.000003755092621,
+        0.0,
+        50.0,
+        7.000003755092621,
+        60.00000238418579
+      ],
+      "max_bounds_error_cm": 3.7550926208496094e-06,
+      "collision_boxes": 1,
+      "collision_validation": [
+        {
+          "name": "UCX_SM_FacilityRooms_WallVent_00",
+          "bounds_cm": [
+            -50.0,
+            -7.0000045001506805,
+            0.0,
+            50.0,
+            7.000003755092621,
+            60.00000834465027
+          ],
+          "max_bounds_error_cm": 4.127621650695801e-06
+        }
+      ],
+      "opening_ray_probes": [],
+      "sha256_before": "e06b54d76d75e0a370acfe9b938377f360cb241495af6fa26ad52cf00bca1c95",
+      "sha256_after": "e06b54d76d75e0a370acfe9b938377f360cb241495af6fa26ad52cf00bca1c95"
+    },
+    {
+      "name": "SM_FacilityRooms_WoodWall200",
+      "passed": true,
+      "triangles": 4360,
+      "vertices": 2256,
+      "uv_channels": 2,
+      "materials": [
+        "M_FacilityRooms_Wood",
+        "M_FacilityRooms_Iron"
+      ],
+      "bounds_cm": [
+        -100.0,
+        -10.000009834766388,
+        0.0,
+        100.0,
+        10.000009834766388,
+        220.00000476837158
+      ],
+      "max_bounds_error_cm": 9.834766387939453e-06,
+      "collision_boxes": 1,
+      "collision_validation": [
+        {
+          "name": "UCX_SM_FacilityRooms_WoodWall200_00",
+          "bounds_cm": [
+            -100.0,
+            -10.000009834766388,
+            0.0,
+            100.0,
+            10.000009834766388,
+            220.00000476837158
+          ],
+          "max_bounds_error_cm": 8.64267349243164e-06
+        }
+      ],
+      "opening_ray_probes": [],
+      "sha256_before": "907efebfea90474ed21de66d55d62b2239440615b10b6d2b2f26eb353691c150",
+      "sha256_after": "907efebfea90474ed21de66d55d62b2239440615b10b6d2b2f26eb353691c150"
+    },
+    {
+      "name": "SM_FacilityRooms_WoodGable600",
+      "passed": true,
+      "triangles": 3196,
+      "vertices": 1658,
+      "uv_channels": 2,
+      "materials": [
+        "M_FacilityRooms_Wood"
+      ],
+      "bounds_cm": [
+        -300.0,
+        -10.00002697110176,
+        0.0,
+        300.0,
+        10.00002697110176,
+        139.9999976158142
+      ],
+      "max_bounds_error_cm": 2.6971101760864258e-05,
+      "collision_boxes": 24,
+      "collision_validation": [
+        {
+          "name": "UCX_SM_FacilityRooms_WoodGable600_00",
+          "bounds_cm": [
+            -300.06701946258545,
+            -10.000001639127731,
+            -3.725290298461914e-07,
+            -275.0614404678345,
+            10.000001639127731,
+            11.670529842376709
+          ],
+          "max_bounds_error_cm": 5.9604644775390625e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_WoodGable600_01",
+          "bounds_cm": [
+            -275.0614404678345,
+            -10.000001639127731,
+            -7.450580596923828e-07,
+            -250.0558614730835,
+            10.000001639127731,
+            23.341059684753418
+          ],
+          "max_bounds_error_cm": 1.1920928955078125e-05
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_WoodGable600_02",
+          "bounds_cm": [
+            -250.0558376312256,
+            -10.000001639127731,
+            0.0,
+            -225.0502586364746,
+            10.000001639127731,
+            35.01158952713013
+          ],
+          "max_bounds_error_cm": 1.1920928955078125e-05
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_WoodGable600_03",
+          "bounds_cm": [
+            -225.0502586364746,
+            -10.000001639127731,
+            -1.4901161193847656e-06,
+            -200.04467964172363,
+            10.000001639127731,
+            46.682119369506836
+          ],
+          "max_bounds_error_cm": 5.9604644775390625e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_WoodGable600_04",
+          "bounds_cm": [
+            -200.04467964172363,
+            -10.000001639127731,
+            0.0,
+            -175.0390887260437,
+            10.000001639127731,
+            58.352649211883545
+          ],
+          "max_bounds_error_cm": 5.9604644775390625e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_WoodGable600_05",
+          "bounds_cm": [
+            -175.0390887260437,
+            -10.000001639127731,
+            0.0,
+            -150.03350973129272,
+            10.000001639127731,
+            70.02317905426025
+          ],
+          "max_bounds_error_cm": 5.9604644775390625e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_WoodGable600_06",
+          "bounds_cm": [
+            -150.03349781036377,
+            -10.000001639127731,
+            0.0,
+            -125.0279188156128,
+            10.000001639127731,
+            81.69370889663696
+          ],
+          "max_bounds_error_cm": 1.1920928955078125e-05
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_WoodGable600_07",
+          "bounds_cm": [
+            -125.0279188156128,
+            -10.000001639127731,
+            -2.9802322387695312e-06,
+            -100.02233982086182,
+            10.000001639127731,
+            93.36423873901367
+          ],
+          "max_bounds_error_cm": 5.9604644775390625e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_WoodGable600_08",
+          "bounds_cm": [
+            -100.02233982086182,
+            -10.000001639127731,
+            0.0,
+            -75.01674890518188,
+            10.000001639127731,
+            105.03476858139038
+          ],
+          "max_bounds_error_cm": 5.9604644775390625e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_WoodGable600_09",
+          "bounds_cm": [
+            -75.01675486564636,
+            -10.000001639127731,
+            0.0,
+            -50.01116394996643,
+            10.000001639127731,
+            116.70529842376709
+          ],
+          "max_bounds_error_cm": 5.9604644775390625e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_WoodGable600_10",
+          "bounds_cm": [
+            -50.01116991043091,
+            -10.000001639127731,
+            -5.9604644775390625e-06,
+            -25.005584955215454,
+            10.000001639127731,
+            128.37581634521484
+          ],
+          "max_bounds_error_cm": 1.6291936219658965e-05
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_WoodGable600_11",
+          "bounds_cm": [
+            -25.005584955215454,
+            -10.000001639127731,
+            0.0,
+            8.742278012618954e-07,
+            10.000001639127731,
+            140.0463581085205
+          ],
+          "max_bounds_error_cm": 4.76837158203125e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_WoodGable600_12",
+          "bounds_cm": [
+            -8.742278012618954e-07,
+            -10.000001639127731,
+            0.0,
+            25.005584955215454,
+            10.000001639127731,
+            140.0463581085205
+          ],
+          "max_bounds_error_cm": 4.76837158203125e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_WoodGable600_13",
+          "bounds_cm": [
+            25.005584955215454,
+            -10.000001639127731,
+            -5.9604644775390625e-06,
+            50.01116991043091,
+            10.000001639127731,
+            128.37581634521484
+          ],
+          "max_bounds_error_cm": 1.6291936219658965e-05
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_WoodGable600_14",
+          "bounds_cm": [
+            50.01116394996643,
+            -10.000001639127731,
+            0.0,
+            75.01675486564636,
+            10.000001639127731,
+            116.70529842376709
+          ],
+          "max_bounds_error_cm": 5.9604644775390625e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_WoodGable600_15",
+          "bounds_cm": [
+            75.01674890518188,
+            -10.000001639127731,
+            0.0,
+            100.02233982086182,
+            10.000001639127731,
+            105.03476858139038
+          ],
+          "max_bounds_error_cm": 5.9604644775390625e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_WoodGable600_16",
+          "bounds_cm": [
+            100.02233982086182,
+            -10.000001639127731,
+            -2.9802322387695312e-06,
+            125.0279188156128,
+            10.000001639127731,
+            93.36423873901367
+          ],
+          "max_bounds_error_cm": 5.9604644775390625e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_WoodGable600_17",
+          "bounds_cm": [
+            125.0279188156128,
+            -10.000001639127731,
+            0.0,
+            150.03349781036377,
+            10.000001639127731,
+            81.69370889663696
+          ],
+          "max_bounds_error_cm": 1.1920928955078125e-05
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_WoodGable600_18",
+          "bounds_cm": [
+            150.03350973129272,
+            -10.000001639127731,
+            0.0,
+            175.0390887260437,
+            10.000001639127731,
+            70.02317905426025
+          ],
+          "max_bounds_error_cm": 5.9604644775390625e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_WoodGable600_19",
+          "bounds_cm": [
+            175.0390887260437,
+            -10.000001639127731,
+            0.0,
+            200.04467964172363,
+            10.000001639127731,
+            58.352649211883545
+          ],
+          "max_bounds_error_cm": 5.9604644775390625e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_WoodGable600_20",
+          "bounds_cm": [
+            200.04467964172363,
+            -10.000001639127731,
+            -1.4901161193847656e-06,
+            225.0502586364746,
+            10.000001639127731,
+            46.682119369506836
+          ],
+          "max_bounds_error_cm": 5.9604644775390625e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_WoodGable600_21",
+          "bounds_cm": [
+            225.0502586364746,
+            -10.000001639127731,
+            0.0,
+            250.0558376312256,
+            10.000001639127731,
+            35.01158952713013
+          ],
+          "max_bounds_error_cm": 1.1920928955078125e-05
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_WoodGable600_22",
+          "bounds_cm": [
+            250.0558614730835,
+            -10.000001639127731,
+            -7.450580596923828e-07,
+            275.0614404678345,
+            10.000001639127731,
+            23.341059684753418
+          ],
+          "max_bounds_error_cm": 1.1920928955078125e-05
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_WoodGable600_23",
+          "bounds_cm": [
+            275.0614404678345,
+            -10.000001639127731,
+            -3.725290298461914e-07,
+            300.06701946258545,
+            10.000001639127731,
+            11.670529842376709
+          ],
+          "max_bounds_error_cm": 5.9604644775390625e-06
+        }
+      ],
+      "opening_ray_probes": [],
+      "sha256_before": "771381d7fc5caa1b36785ce9a9550392189d76c1331ea172a1419dfbed14759e",
+      "sha256_after": "771381d7fc5caa1b36785ce9a9550392189d76c1331ea172a1419dfbed14759e"
+    },
+    {
+      "name": "SM_FacilityRooms_WoodFloor200",
+      "passed": true,
+      "triangles": 7356,
+      "vertices": 3752,
+      "uv_channels": 2,
+      "materials": [
+        "M_FacilityRooms_Wood",
+        "M_FacilityRooms_Iron"
+      ],
+      "bounds_cm": [
+        -100.00001192092896,
+        -100.00001192092896,
+        0.0,
+        100.00001192092896,
+        100.00001192092896,
+        20.000000298023224
+      ],
+      "max_bounds_error_cm": 1.1920928955078125e-05,
+      "collision_boxes": 1,
+      "collision_validation": [
+        {
+          "name": "UCX_SM_FacilityRooms_WoodFloor200_00",
+          "bounds_cm": [
+            -100.00001192092896,
+            -100.00001192092896,
+            -7.450580596923828e-07,
+            100.00001192092896,
+            100.00001192092896,
+            19.999998807907104
+          ],
+          "max_bounds_error_cm": 1.1920928955078125e-05
+        }
+      ],
+      "opening_ray_probes": [],
+      "sha256_before": "10cee42b3e6fdd39b20e8ce02d3663d9dc254cc39456b45cade00b9bb708c2d2",
+      "sha256_after": "10cee42b3e6fdd39b20e8ce02d3663d9dc254cc39456b45cade00b9bb708c2d2"
+    },
+    {
+      "name": "SM_FacilityRooms_WoodHatchLanding200",
+      "passed": true,
+      "triangles": 4664,
+      "vertices": 2416,
+      "uv_channels": 2,
+      "materials": [
+        "M_FacilityRooms_Wood",
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Steel"
+      ],
+      "bounds_cm": [
+        -100.00001192092896,
+        -100.00001192092896,
+        0.0,
+        100.00001192092896,
+        100.00001192092896,
+        20.000001788139343
+      ],
+      "max_bounds_error_cm": 1.1920928955078125e-05,
+      "collision_boxes": 4,
+      "collision_validation": [
+        {
+          "name": "UCX_SM_FacilityRooms_WoodHatchLanding200_00",
+          "bounds_cm": [
+            -100.0,
+            -100.0,
+            0.0,
+            -44.99998688697815,
+            100.0,
+            20.000001788139343
+          ],
+          "max_bounds_error_cm": 1.3113021850585938e-05
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_WoodHatchLanding200_01",
+          "bounds_cm": [
+            44.99998688697815,
+            -100.0,
+            0.0,
+            100.0,
+            100.0,
+            20.000001788139343
+          ],
+          "max_bounds_error_cm": 1.3113021850585938e-05
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_WoodHatchLanding200_02",
+          "bounds_cm": [
+            -45.00000178813934,
+            -100.0,
+            0.0,
+            45.00000178813934,
+            -44.99999284744263,
+            20.000001788139343
+          ],
+          "max_bounds_error_cm": 7.152557373046875e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_WoodHatchLanding200_03",
+          "bounds_cm": [
+            -45.00000178813934,
+            44.99999284744263,
+            0.0,
+            45.00000178813934,
+            100.0,
+            20.000001788139343
+          ],
+          "max_bounds_error_cm": 7.152557373046875e-06
+        }
+      ],
+      "opening_ray_probes": [
+        {
+          "start_cm": [
+            -40,
+            -40,
+            -15
+          ],
+          "end_cm": [
+            -40,
+            -40,
+            35
+          ]
+        },
+        {
+          "start_cm": [
+            -40,
+            0,
+            -15
+          ],
+          "end_cm": [
+            -40,
+            0,
+            35
+          ]
+        },
+        {
+          "start_cm": [
+            -40,
+            40,
+            -15
+          ],
+          "end_cm": [
+            -40,
+            40,
+            35
+          ]
+        },
+        {
+          "start_cm": [
+            0,
+            -40,
+            -15
+          ],
+          "end_cm": [
+            0,
+            -40,
+            35
+          ]
+        },
+        {
+          "start_cm": [
+            0,
+            0,
+            -15
+          ],
+          "end_cm": [
+            0,
+            0,
+            35
+          ]
+        },
+        {
+          "start_cm": [
+            0,
+            40,
+            -15
+          ],
+          "end_cm": [
+            0,
+            40,
+            35
+          ]
+        },
+        {
+          "start_cm": [
+            40,
+            -40,
+            -15
+          ],
+          "end_cm": [
+            40,
+            -40,
+            35
+          ]
+        },
+        {
+          "start_cm": [
+            40,
+            0,
+            -15
+          ],
+          "end_cm": [
+            40,
+            0,
+            35
+          ]
+        },
+        {
+          "start_cm": [
+            40,
+            40,
+            -15
+          ],
+          "end_cm": [
+            40,
+            40,
+            35
+          ]
+        }
+      ],
+      "sha256_before": "0c17a3788b4e911f831c78042f40091df998b9e17a90ed6f9b16efa72f9b9791",
+      "sha256_after": "0c17a3788b4e911f831c78042f40091df998b9e17a90ed6f9b16efa72f9b9791"
+    },
+    {
+      "name": "SM_FacilityRooms_AtticLamp",
+      "passed": true,
+      "triangles": 1580,
+      "vertices": 808,
+      "uv_channels": 2,
+      "materials": [
+        "M_FacilityRooms_Wood",
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Amber"
+      ],
+      "bounds_cm": [
+        -17.500001192092896,
+        -17.500001192092896,
+        0.0,
+        17.500001192092896,
+        17.500001192092896,
+        50.0
+      ],
+      "max_bounds_error_cm": 1.1920928955078125e-06,
+      "collision_boxes": 2,
+      "collision_validation": [
+        {
+          "name": "UCX_SM_FacilityRooms_AtticLamp_00",
+          "bounds_cm": [
+            -17.500001192092896,
+            -17.500001192092896,
+            0.0,
+            17.500001192092896,
+            17.500001192092896,
+            43.99999976158142
+          ],
+          "max_bounds_error_cm": 1.1920928955078125e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_AtticLamp_01",
+          "bounds_cm": [
+            -5.000000074505806,
+            -1.5000004321336746,
+            43.99999976158142,
+            5.000000074505806,
+            1.5000004321336746,
+            50.0
+          ],
+          "max_bounds_error_cm": 4.3213367462158203e-07
+        }
+      ],
+      "opening_ray_probes": [],
+      "sha256_before": "dd643f1bb3963bd459800190d88e484c8cd8fccce8f744ceb27ba33d108b8de8",
+      "sha256_after": "dd643f1bb3963bd459800190d88e484c8cd8fccce8f744ceb27ba33d108b8de8"
+    },
+    {
+      "name": "SM_FacilityRooms_WoodWindowWall200",
+      "passed": true,
+      "triangles": 5076,
+      "vertices": 2632,
+      "uv_channels": 2,
+      "materials": [
+        "M_FacilityRooms_Wood"
+      ],
+      "bounds_cm": [
+        -100.0,
+        -10.000009834766388,
+        0.0,
+        100.0,
+        10.000009834766388,
+        220.00000476837158
+      ],
+      "max_bounds_error_cm": 9.834766387939453e-06,
+      "collision_boxes": 6,
+      "collision_validation": [
+        {
+          "name": "UCX_SM_FacilityRooms_WoodWindowWall200_00",
+          "bounds_cm": [
+            -99.99998807907104,
+            -10.00000312924385,
+            0.0,
+            -47.499990463256836,
+            10.00000312924385,
+            220.00000476837158
+          ],
+          "max_bounds_error_cm": 8.940696716308594e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_WoodWindowWall200_01",
+          "bounds_cm": [
+            47.50000238418579,
+            -10.00000312924385,
+            0.0,
+            100.0,
+            10.00000312924385,
+            220.00000476837158
+          ],
+          "max_bounds_error_cm": 4.76837158203125e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_WoodWindowWall200_02",
+          "bounds_cm": [
+            -47.49999642372131,
+            -10.00000536441803,
+            -2.9802322387695312e-06,
+            47.50000238418579,
+            10.00000536441803,
+            85.00000238418579
+          ],
+          "max_bounds_error_cm": 4.172325134277344e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_WoodWindowWall200_03",
+          "bounds_cm": [
+            -47.49999642372131,
+            -10.00000536441803,
+            179.99999523162842,
+            47.50000238418579,
+            10.00000536441803,
+            220.00000476837158
+          ],
+          "max_bounds_error_cm": 4.76837158203125e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_WoodWindowWall200_04",
+          "bounds_cm": [
+            -1.4999975450336933,
+            -6.000000610947609,
+            84.99999046325684,
+            1.5000035054981709,
+            6.000000610947609,
+            179.99999523162842
+          ],
+          "max_bounds_error_cm": 9.5367431640625e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_WoodWindowWall200_05",
+          "bounds_cm": [
+            -47.49999642372131,
+            -6.000004708766937,
+            130.9999942779541,
+            47.50000238418579,
+            6.000004708766937,
+            133.99999141693115
+          ],
+          "max_bounds_error_cm": 8.58306884765625e-06
+        }
+      ],
+      "opening_ray_probes": [
+        {
+          "start_cm": [
+            -40,
+            -45,
+            92
+          ],
+          "end_cm": [
+            -40,
+            45,
+            92
+          ]
+        },
+        {
+          "start_cm": [
+            -40,
+            -45,
+            105
+          ],
+          "end_cm": [
+            -40,
+            45,
+            105
+          ]
+        },
+        {
+          "start_cm": [
+            -40,
+            -45,
+            160
+          ],
+          "end_cm": [
+            -40,
+            45,
+            160
+          ]
+        },
+        {
+          "start_cm": [
+            -40,
+            -45,
+            173
+          ],
+          "end_cm": [
+            -40,
+            45,
+            173
+          ]
+        },
+        {
+          "start_cm": [
+            -20,
+            -45,
+            92
+          ],
+          "end_cm": [
+            -20,
+            45,
+            92
+          ]
+        },
+        {
+          "start_cm": [
+            -20,
+            -45,
+            105
+          ],
+          "end_cm": [
+            -20,
+            45,
+            105
+          ]
+        },
+        {
+          "start_cm": [
+            -20,
+            -45,
+            160
+          ],
+          "end_cm": [
+            -20,
+            45,
+            160
+          ]
+        },
+        {
+          "start_cm": [
+            -20,
+            -45,
+            173
+          ],
+          "end_cm": [
+            -20,
+            45,
+            173
+          ]
+        },
+        {
+          "start_cm": [
+            20,
+            -45,
+            92
+          ],
+          "end_cm": [
+            20,
+            45,
+            92
+          ]
+        },
+        {
+          "start_cm": [
+            20,
+            -45,
+            105
+          ],
+          "end_cm": [
+            20,
+            45,
+            105
+          ]
+        },
+        {
+          "start_cm": [
+            20,
+            -45,
+            160
+          ],
+          "end_cm": [
+            20,
+            45,
+            160
+          ]
+        },
+        {
+          "start_cm": [
+            20,
+            -45,
+            173
+          ],
+          "end_cm": [
+            20,
+            45,
+            173
+          ]
+        },
+        {
+          "start_cm": [
+            40,
+            -45,
+            92
+          ],
+          "end_cm": [
+            40,
+            45,
+            92
+          ]
+        },
+        {
+          "start_cm": [
+            40,
+            -45,
+            105
+          ],
+          "end_cm": [
+            40,
+            45,
+            105
+          ]
+        },
+        {
+          "start_cm": [
+            40,
+            -45,
+            160
+          ],
+          "end_cm": [
+            40,
+            45,
+            160
+          ]
+        },
+        {
+          "start_cm": [
+            40,
+            -45,
+            173
+          ],
+          "end_cm": [
+            40,
+            45,
+            173
+          ]
+        }
+      ],
+      "sha256_before": "8451f60de2146895f5a6f10da850b0c972ff7a7575d09612f24ee992f7a4733f",
+      "sha256_after": "8451f60de2146895f5a6f10da850b0c972ff7a7575d09612f24ee992f7a4733f"
+    },
+    {
+      "name": "SM_FacilityRooms_WoodRoof600",
+      "passed": true,
+      "triangles": 4372,
+      "vertices": 2268,
+      "uv_channels": 2,
+      "materials": [
+        "M_FacilityRooms_Wood"
+      ],
+      "bounds_cm": [
+        -300.0000238418579,
+        -300.0000238418579,
+        0.0,
+        300.0000238418579,
+        300.0000238418579,
+        139.9999976158142
+      ],
+      "max_bounds_error_cm": 2.384185791015625e-05,
+      "collision_boxes": 24,
+      "collision_validation": [
+        {
+          "name": "UCX_SM_FacilityRooms_WoodRoof600_00",
+          "bounds_cm": [
+            -300.0650882720947,
+            -300.0,
+            -3.725290298461914e-07,
+            -275.0596046447754,
+            300.0,
+            11.670529842376709
+          ],
+          "max_bounds_error_cm": 3.5762786865234375e-05
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_WoodRoof600_01",
+          "bounds_cm": [
+            -275.0596523284912,
+            -300.0,
+            8.66953656077385,
+            -250.05416870117188,
+            300.0,
+            23.341059684753418
+          ],
+          "max_bounds_error_cm": 4.172325134277344e-05
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_WoodRoof600_02",
+          "bounds_cm": [
+            -250.0542402267456,
+            -300.0,
+            20.340067148208618,
+            -225.04875659942627,
+            300.0,
+            35.01158952713013
+          ],
+          "max_bounds_error_cm": 3.2782554626464844e-05
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_WoodRoof600_03",
+          "bounds_cm": [
+            -225.048828125,
+            -300.0,
+            32.01059699058533,
+            -200.04334449768066,
+            300.0,
+            46.682119369506836
+          ],
+          "max_bounds_error_cm": 3.8743019104003906e-05
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_WoodRoof600_04",
+          "bounds_cm": [
+            -200.04339218139648,
+            -300.0,
+            43.681129813194275,
+            -175.0379204750061,
+            300.0,
+            58.35265517234802
+          ],
+          "max_bounds_error_cm": 2.682209014892578e-05
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_WoodRoof600_05",
+          "bounds_cm": [
+            -175.03796815872192,
+            -300.0,
+            55.351656675338745,
+            -150.0324845314026,
+            300.0,
+            70.02318501472473
+          ],
+          "max_bounds_error_cm": 4.172325134277344e-05
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_WoodRoof600_06",
+          "bounds_cm": [
+            -150.03255605697632,
+            -300.0,
+            67.02218055725098,
+            -125.02707242965698,
+            300.0,
+            81.69370889663696
+          ],
+          "max_bounds_error_cm": 3.2782554626464844e-05
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_WoodRoof600_07",
+          "bounds_cm": [
+            -125.02713203430176,
+            -300.0,
+            78.69271636009216,
+            -100.02164840698242,
+            300.0,
+            93.36424469947815
+          ],
+          "max_bounds_error_cm": 3.5762786865234375e-05
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_WoodRoof600_08",
+          "bounds_cm": [
+            -100.0217080116272,
+            -300.0,
+            90.36324620246887,
+            -75.01623630523682,
+            300.0,
+            105.03476858139038
+          ],
+          "max_bounds_error_cm": 2.682209014892578e-05
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_WoodRoof600_09",
+          "bounds_cm": [
+            -75.01628994941711,
+            -300.0,
+            102.03378200531006,
+            -50.01081824302673,
+            300.0,
+            116.70529842376709
+          ],
+          "max_bounds_error_cm": 2.682209014892578e-05
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_WoodRoof600_10",
+          "bounds_cm": [
+            -50.010865926742554,
+            -300.0,
+            113.70431184768677,
+            -25.005391240119934,
+            300.0,
+            128.3758282661438
+          ],
+          "max_bounds_error_cm": 2.9802322387695312e-05
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_WoodRoof600_11",
+          "bounds_cm": [
+            -25.00544786453247,
+            -300.0,
+            125.37484169006348,
+            2.6226831550957286e-05,
+            300.0,
+            140.0463581085205
+          ],
+          "max_bounds_error_cm": 2.682209014892578e-05
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_WoodRoof600_12",
+          "bounds_cm": [
+            -2.6226831550957286e-05,
+            -300.0,
+            125.37484169006348,
+            25.00544786453247,
+            300.0,
+            140.0463581085205
+          ],
+          "max_bounds_error_cm": 2.682209014892578e-05
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_WoodRoof600_13",
+          "bounds_cm": [
+            25.005391240119934,
+            -300.0,
+            113.70431184768677,
+            50.010865926742554,
+            300.0,
+            128.3758282661438
+          ],
+          "max_bounds_error_cm": 2.9802322387695312e-05
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_WoodRoof600_14",
+          "bounds_cm": [
+            50.01081824302673,
+            -300.0,
+            102.03378200531006,
+            75.01628994941711,
+            300.0,
+            116.70529842376709
+          ],
+          "max_bounds_error_cm": 2.682209014892578e-05
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_WoodRoof600_15",
+          "bounds_cm": [
+            75.01623630523682,
+            -300.0,
+            90.36324620246887,
+            100.0217080116272,
+            300.0,
+            105.03476858139038
+          ],
+          "max_bounds_error_cm": 2.682209014892578e-05
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_WoodRoof600_16",
+          "bounds_cm": [
+            100.02164840698242,
+            -300.0,
+            78.69271636009216,
+            125.02713203430176,
+            300.0,
+            93.36424469947815
+          ],
+          "max_bounds_error_cm": 3.5762786865234375e-05
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_WoodRoof600_17",
+          "bounds_cm": [
+            125.02707242965698,
+            -300.0,
+            67.02218055725098,
+            150.03255605697632,
+            300.0,
+            81.69370889663696
+          ],
+          "max_bounds_error_cm": 3.2782554626464844e-05
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_WoodRoof600_18",
+          "bounds_cm": [
+            150.0324845314026,
+            -300.0,
+            55.351656675338745,
+            175.03796815872192,
+            300.0,
+            70.02318501472473
+          ],
+          "max_bounds_error_cm": 4.172325134277344e-05
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_WoodRoof600_19",
+          "bounds_cm": [
+            175.0379204750061,
+            -300.0,
+            43.681129813194275,
+            200.04339218139648,
+            300.0,
+            58.35265517234802
+          ],
+          "max_bounds_error_cm": 2.682209014892578e-05
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_WoodRoof600_20",
+          "bounds_cm": [
+            200.04334449768066,
+            -300.0,
+            32.01059699058533,
+            225.048828125,
+            300.0,
+            46.682119369506836
+          ],
+          "max_bounds_error_cm": 3.8743019104003906e-05
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_WoodRoof600_21",
+          "bounds_cm": [
+            225.04875659942627,
+            -300.0,
+            20.340067148208618,
+            250.0542402267456,
+            300.0,
+            35.01158952713013
+          ],
+          "max_bounds_error_cm": 3.2782554626464844e-05
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_WoodRoof600_22",
+          "bounds_cm": [
+            250.05416870117188,
+            -300.0,
+            8.66953656077385,
+            275.0596523284912,
+            300.0,
+            23.341059684753418
+          ],
+          "max_bounds_error_cm": 4.172325134277344e-05
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_WoodRoof600_23",
+          "bounds_cm": [
+            275.0596046447754,
+            -300.0,
+            -3.725290298461914e-07,
+            300.0650882720947,
+            300.0,
+            11.670529842376709
+          ],
+          "max_bounds_error_cm": 3.5762786865234375e-05
+        }
+      ],
+      "opening_ray_probes": [],
+      "sha256_before": "ef8aeb7131525c81fab041c681d199c4b4f5652aa48b0c6bd2a58fcbf0d59b3b",
+      "sha256_after": "ef8aeb7131525c81fab041c681d199c4b4f5652aa48b0c6bd2a58fcbf0d59b3b"
+    },
+    {
+      "name": "SM_FacilityRooms_Boiler",
+      "passed": true,
+      "triangles": 12892,
+      "vertices": 6544,
+      "uv_channels": 2,
+      "materials": [
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Steel",
+        "M_FacilityRooms_Teal",
+        "M_FacilityRooms_Red",
+        "M_FacilityRooms_Ivory",
+        "M_FacilityRooms_Screen",
+        "M_FacilityRooms_Amber",
+        "M_FacilityRooms_Hazard"
+      ],
+      "bounds_cm": [
+        -110.00000238418579,
+        -65.00000357627869,
+        0.0,
+        110.00000238418579,
+        65.00000357627869,
+        230.00001907348633
+      ],
+      "max_bounds_error_cm": 1.9073486328125e-05,
+      "collision_boxes": 5,
+      "collision_validation": [
+        {
+          "name": "UCX_SM_FacilityRooms_Boiler_00",
+          "bounds_cm": [
+            -90.12576341629028,
+            -42.899516224861145,
+            58.266669511795044,
+            93.4411346912384,
+            64.1650915145874,
+            174.8000144958496
+          ],
+          "max_bounds_error_cm": 5.883521225769073e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_Boiler_01",
+          "bounds_cm": [
+            -98.1686532497406,
+            -48.79298210144043,
+            0.0,
+            101.48402452468872,
+            64.16509747505188,
+            57.244449853897095
+          ],
+          "max_bounds_error_cm": 1.2579004760482349e-05
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_Boiler_02",
+          "bounds_cm": [
+            -78.29800248146057,
+            -65.00000357627869,
+            48.0444461107254,
+            -14.901183545589447,
+            -21.781259775161743,
+            105.28889894485474
+          ],
+          "max_bounds_error_cm": 4.2492683860473335e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_Boiler_03",
+          "bounds_cm": [
+            -77.82489061355591,
+            -9.99433770775795,
+            175.82223415374756,
+            -38.083600997924805,
+            31.259915232658386,
+            228.97779941558838
+          ],
+          "max_bounds_error_cm": 8.58306887607796e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_Boiler_04",
+          "bounds_cm": [
+            89.18313384056091,
+            -42.899513244628906,
+            157.42223262786865,
+            105.26889562606812,
+            28.80430519580841,
+            192.17779636383057
+          ],
+          "max_bounds_error_cm": 7.62939453125e-06
+        }
+      ],
+      "opening_ray_probes": [],
+      "sha256_before": "656302f0b03e3ef8528aa2d401fede33aac42f01b99a123d43e4adfbcb745cb7",
+      "sha256_after": "656302f0b03e3ef8528aa2d401fede33aac42f01b99a123d43e4adfbcb745cb7"
+    },
+    {
+      "name": "SM_FacilityRooms_Generator",
+      "passed": true,
+      "triangles": 9620,
+      "vertices": 4900,
+      "uv_channels": 2,
+      "materials": [
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Steel",
+        "M_FacilityRooms_Teal",
+        "M_FacilityRooms_Panel",
+        "M_FacilityRooms_Screen",
+        "M_FacilityRooms_Blue",
+        "M_FacilityRooms_Amber",
+        "M_FacilityRooms_Red",
+        "M_FacilityRooms_Ivory",
+        "M_FacilityRooms_Hazard",
+        "M_FacilityRooms_Rubber"
+      ],
+      "bounds_cm": [
+        -125.0,
+        -59.99999642372131,
+        0.0,
+        125.0,
+        60.00000834465027,
+        160.0000023841858
+      ],
+      "max_bounds_error_cm": 8.344650268554688e-06,
+      "collision_boxes": 4,
+      "collision_validation": [
+        {
+          "name": "UCX_SM_FacilityRooms_Generator_00",
+          "bounds_cm": [
+            -125.0,
+            -53.37070822715759,
+            -1.4901161193847656e-06,
+            125.0,
+            58.078473806381226,
+            44.86848711967468
+          ],
+          "max_bounds_error_cm": 1.1463999015859372e-05
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_Generator_01",
+          "bounds_cm": [
+            -119.50000524520874,
+            -52.409934997558594,
+            39.76979851722717,
+            61.500000953674316,
+            57.117706537246704,
+            153.98049354553223
+          ],
+          "max_bounds_error_cm": 1.0251998901367188e-05
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_Generator_02",
+          "bounds_cm": [
+            47.499993443489075,
+            -48.56685698032379,
+            36.71058118343353,
+            120.50000429153442,
+            53.27462553977966,
+            136.6449475288391
+          ],
+          "max_bounds_error_cm": 6.556510925292969e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_Generator_03",
+          "bounds_cm": [
+            20.99999636411667,
+            12.441954016685486,
+            128.48703861236572,
+            94.9999988079071,
+            38.38271200656891,
+            163.15815448760986
+          ],
+          "max_bounds_error_cm": 4.7683716104529594e-06
+        }
+      ],
+      "opening_ray_probes": [],
+      "sha256_before": "6f987423cc6d15a14da85bd65fa748a703364f1c12b718b8e915539e58f46915",
+      "sha256_after": "6f987423cc6d15a14da85bd65fa748a703364f1c12b718b8e915539e58f46915"
+    },
+    {
+      "name": "SM_FacilityRooms_PumpSkid",
+      "passed": true,
+      "triangles": 14452,
+      "vertices": 7360,
+      "uv_channels": 2,
+      "materials": [
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Steel",
+        "M_FacilityRooms_Teal",
+        "M_FacilityRooms_Blue",
+        "M_FacilityRooms_Ivory",
+        "M_FacilityRooms_Red"
+      ],
+      "bounds_cm": [
+        -100.0,
+        -55.00000715255737,
+        0.0,
+        100.0,
+        55.00000715255737,
+        129.99999523162842
+      ],
+      "max_bounds_error_cm": 7.152557373046875e-06,
+      "collision_boxes": 7,
+      "collision_validation": [
+        {
+          "name": "UCX_SM_FacilityRooms_PumpSkid_00",
+          "bounds_cm": [
+            -76.26263499259949,
+            -16.42857939004898,
+            16.75781011581421,
+            -20.707067847251892,
+            53.09523940086365,
+            80.7421863079071
+          ],
+          "max_bounds_error_cm": 5.868928770524917e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_PumpSkid_01",
+          "bounds_cm": [
+            -76.26262903213501,
+            -48.33333492279053,
+            21.83593511581421,
+            -20.70706933736801,
+            -2.619045041501522,
+            75.6640613079071
+          ],
+          "max_bounds_error_cm": 4.62893929409347e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_PumpSkid_02",
+          "bounds_cm": [
+            20.707067847251892,
+            -16.42857939004898,
+            16.75781011581421,
+            76.26263499259949,
+            53.09523940086365,
+            80.7421863079071
+          ],
+          "max_bounds_error_cm": 5.868928770524917e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_PumpSkid_03",
+          "bounds_cm": [
+            20.70706933736801,
+            -48.33333492279053,
+            21.83593511581421,
+            76.26262903213501,
+            -2.619045041501522,
+            75.6640613079071
+          ],
+          "max_bounds_error_cm": 4.62893929409347e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_PumpSkid_04",
+          "bounds_cm": [
+            -100.00001192092896,
+            -47.38096296787262,
+            0.0,
+            100.00001192092896,
+            51.66667103767395,
+            14.218750596046448
+          ],
+          "max_bounds_error_cm": 8.402126169926305e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_PumpSkid_05",
+          "bounds_cm": [
+            -101.01010799407959,
+            -55.00001311302185,
+            81.75780773162842,
+            101.01010799407959,
+            -32.1428507566452,
+            107.14843273162842
+          ],
+          "max_bounds_error_cm": 1.0905521250492711e-05
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_PumpSkid_06",
+          "bounds_cm": [
+            -101.01010799407959,
+            -9.28572490811348,
+            104.60938215255737,
+            101.01010799407959,
+            13.57143521308899,
+            131.0156226158142
+          ],
+          "max_bounds_error_cm": 8.644802235835414e-06
+        }
+      ],
+      "opening_ray_probes": [],
+      "sha256_before": "51c7157a89f3d9566ce507af8454da8b6fddec28c5e19dec2150e1ca10cc6b8c",
+      "sha256_after": "51c7157a89f3d9566ce507af8454da8b6fddec28c5e19dec2150e1ca10cc6b8c"
+    },
+    {
+      "name": "SM_FacilityRooms_PressureTank",
+      "passed": true,
+      "triangles": 6240,
+      "vertices": 3178,
+      "uv_channels": 2,
+      "materials": [
+        "M_FacilityRooms_Steel",
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Ivory",
+        "M_FacilityRooms_Blue",
+        "M_FacilityRooms_Red",
+        "M_FacilityRooms_Teal",
+        "M_FacilityRooms_Panel"
+      ],
+      "bounds_cm": [
+        -40.00000059604645,
+        -40.00000059604645,
+        0.0,
+        40.00000059604645,
+        40.00000059604645,
+        189.9999976158142
+      ],
+      "max_bounds_error_cm": 2.384185791015625e-06,
+      "collision_boxes": 3,
+      "collision_validation": [
+        {
+          "name": "UCX_SM_FacilityRooms_PressureTank_00",
+          "bounds_cm": [
+            -38.40000331401825,
+            -31.359225511550903,
+            21.499991416931152,
+            38.39999735355377,
+            38.543689250946045,
+            176.49998664855957
+          ],
+          "max_bounds_error_cm": 7.3015689849853516e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_PressureTank_01",
+          "bounds_cm": [
+            -34.13333296775818,
+            -27.475732564926147,
+            0.0,
+            34.13332998752594,
+            34.66019630432129,
+            25.999999046325684
+          ],
+          "max_bounds_error_cm": 4.00514277032471e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_PressureTank_02",
+          "bounds_cm": [
+            -13.866668939590454,
+            -9.029129147529602,
+            173.99998903274536,
+            13.866665959358215,
+            16.213592886924744,
+            189.9999976158142
+          ],
+          "max_bounds_error_cm": 8.940696716308594e-06
+        }
+      ],
+      "opening_ray_probes": [],
+      "sha256_before": "9fa56ec2b80ae2a8c5742492302ee2726cfb6704c0e423fd709db12c30143bec",
+      "sha256_after": "9fa56ec2b80ae2a8c5742492302ee2726cfb6704c0e423fd709db12c30143bec"
+    },
+    {
+      "name": "SM_FacilityRooms_ElectricalCabinet",
+      "passed": true,
+      "triangles": 4124,
+      "vertices": 2132,
+      "uv_channels": 2,
+      "materials": [
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Ivory",
+        "M_FacilityRooms_Steel",
+        "M_FacilityRooms_Panel",
+        "M_FacilityRooms_Screen",
+        "M_FacilityRooms_Blue",
+        "M_FacilityRooms_Amber",
+        "M_FacilityRooms_Teal",
+        "M_FacilityRooms_Red",
+        "M_FacilityRooms_Hazard"
+      ],
+      "bounds_cm": [
+        -55.000001192092896,
+        -22.499997913837433,
+        0.0,
+        55.000001192092896,
+        22.50000387430191,
+        200.0
+      ],
+      "max_bounds_error_cm": 3.874301910400391e-06,
+      "collision_boxes": 1,
+      "collision_validation": [
+        {
+          "name": "UCX_SM_FacilityRooms_ElectricalCabinet_00",
+          "bounds_cm": [
+            -55.000001192092896,
+            -13.73894214630127,
+            0.0,
+            55.000001192092896,
+            22.10177481174469,
+            200.0000238418579
+          ],
+          "max_bounds_error_cm": 5.436682073423071e-06
+        }
+      ],
+      "opening_ray_probes": [],
+      "sha256_before": "6bc02b2b7ba41f22a5ab987bee4441a1dbab27ff29b52436a4f792ae052f7ad7",
+      "sha256_after": "6bc02b2b7ba41f22a5ab987bee4441a1dbab27ff29b52436a4f792ae052f7ad7"
+    },
+    {
+      "name": "SM_FacilityRooms_SupplyRack",
+      "passed": true,
+      "triangles": 6460,
+      "vertices": 3344,
+      "uv_channels": 2,
+      "materials": [
+        "M_FacilityRooms_Teal",
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Steel",
+        "M_FacilityRooms_Paper",
+        "M_FacilityRooms_Ivory",
+        "M_FacilityRooms_Wood",
+        "M_FacilityRooms_Rubber"
+      ],
+      "bounds_cm": [
+        -90.00000357627869,
+        -35.00000238418579,
+        0.0,
+        89.99999761581421,
+        35.00000834465027,
+        210.00001430511475
+      ],
+      "max_bounds_error_cm": 1.430511474609375e-05,
+      "collision_boxes": 11,
+      "collision_validation": [
+        {
+          "name": "UCX_SM_FacilityRooms_SupplyRack_00",
+          "bounds_cm": [
+            -87.04918026924133,
+            -31.111112236976624,
+            0.0,
+            -80.16393780708313,
+            -24.30555522441864,
+            209.49640274047852
+          ],
+          "max_bounds_error_cm": 7.62939453125e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_SupplyRack_01",
+          "bounds_cm": [
+            -87.04918026924133,
+            25.27777850627899,
+            0.0,
+            -80.16393780708313,
+            32.083335518836975,
+            209.49640274047852
+          ],
+          "max_bounds_error_cm": 7.62939453125e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_SupplyRack_02",
+          "bounds_cm": [
+            80.16394376754761,
+            -31.111112236976624,
+            0.0,
+            87.04918622970581,
+            -24.30555522441864,
+            209.49640274047852
+          ],
+          "max_bounds_error_cm": 7.62939453125e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_SupplyRack_03",
+          "bounds_cm": [
+            80.16394376754761,
+            25.27777850627899,
+            0.0,
+            87.04918622970581,
+            32.083335518836975,
+            209.49640274047852
+          ],
+          "max_bounds_error_cm": 7.62939453125e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_SupplyRack_04",
+          "bounds_cm": [
+            -88.52459788322449,
+            -33.54167640209198,
+            5.539567768573761,
+            88.52460384368896,
+            34.51389670372009,
+            16.618704795837402
+          ],
+          "max_bounds_error_cm": 7.672442308148675e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_SupplyRack_05",
+          "bounds_cm": [
+            -88.52459788322449,
+            -33.54167640209198,
+            68.99281144142151,
+            88.52460384368896,
+            34.51389670372009,
+            80.07194399833679
+          ],
+          "max_bounds_error_cm": 7.672442308148675e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_SupplyRack_06",
+          "bounds_cm": [
+            -88.52459788322449,
+            -33.54167640209198,
+            132.44603872299194,
+            88.52460384368896,
+            34.51389670372009,
+            143.52518320083618
+          ],
+          "max_bounds_error_cm": 9.179115295410156e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_SupplyRack_07",
+          "bounds_cm": [
+            -88.52459788322449,
+            -33.54167640209198,
+            199.9280571937561,
+            88.52460384368896,
+            34.51389670372009,
+            211.0071897506714
+          ],
+          "max_bounds_error_cm": 1.2040138244628906e-05
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_SupplyRack_08",
+          "bounds_cm": [
+            -77.70492434501648,
+            -25.763899087905884,
+            17.12230294942856,
+            77.70493030548096,
+            26.736119389533997,
+            59.42445993423462
+          ],
+          "max_bounds_error_cm": 8.506907335004144e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_SupplyRack_09",
+          "bounds_cm": [
+            -85.08197665214539,
+            -21.875008940696716,
+            80.57554364204407,
+            75.2459168434143,
+            30.625009536743164,
+            120.86331844329834
+          ],
+          "max_bounds_error_cm": 8.540021070757575e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_SupplyRack_10",
+          "bounds_cm": [
+            -80.16394376754761,
+            -21.875008940696716,
+            143.52517127990723,
+            80.16394972801208,
+            30.625009536743164,
+            190.863299369812
+          ],
+          "max_bounds_error_cm": 1.6808509826660156e-05
+        }
+      ],
+      "opening_ray_probes": [],
+      "sha256_before": "475f808a6733f8bb4fc2122e433778692512b8067419ce7b270e2a22dc41ce7a",
+      "sha256_after": "475f808a6733f8bb4fc2122e433778692512b8067419ce7b270e2a22dc41ce7a"
+    },
+    {
+      "name": "SM_FacilityRooms_PalletCrates",
+      "passed": true,
+      "triangles": 2808,
+      "vertices": 1456,
+      "uv_channels": 2,
+      "materials": [
+        "M_FacilityRooms_Wood",
+        "M_FacilityRooms_Teal",
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Steel",
+        "M_FacilityRooms_Paper",
+        "M_FacilityRooms_Ivory"
+      ],
+      "bounds_cm": [
+        -60.00000834465027,
+        -50.00000596046448,
+        0.0,
+        60.00000834465027,
+        50.00000596046448,
+        105.00000715255737
+      ],
+      "max_bounds_error_cm": 8.344650268554688e-06,
+      "collision_boxes": 3,
+      "collision_validation": [
+        {
+          "name": "UCX_SM_FacilityRooms_PalletCrates_00",
+          "bounds_cm": [
+            -60.000014305114746,
+            -52.083343267440796,
+            0.0,
+            60.000014305114746,
+            52.083343267440796,
+            16.31067991256714
+          ],
+          "max_bounds_error_cm": 7.152557373046875e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_PalletCrates_01",
+          "bounds_cm": [
+            -52.500009536743164,
+            -37.500008940696716,
+            17.330098152160645,
+            52.500009536743164,
+            47.91667461395264,
+            76.45631432533264
+          ],
+          "max_bounds_error_cm": 6.079673767089844e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_PalletCrates_02",
+          "bounds_cm": [
+            -53.000009059906006,
+            -26.562505960464478,
+            72.88835048675537,
+            53.000009059906006,
+            41.14584028720856,
+            106.52912855148315
+          ],
+          "max_bounds_error_cm": 3.933906555175781e-06
+        }
+      ],
+      "opening_ray_probes": [],
+      "sha256_before": "ab26694bfc1689b7d67d9e56ad7741fd10a21ca958a81f1131f3744fb3ab8a66",
+      "sha256_after": "ab26694bfc1689b7d67d9e56ad7741fd10a21ca958a81f1131f3744fb3ab8a66"
+    },
+    {
+      "name": "SM_FacilityRooms_PipeBundle",
+      "passed": true,
+      "triangles": 9636,
+      "vertices": 4872,
+      "uv_channels": 2,
+      "materials": [
+        "M_FacilityRooms_Wood",
+        "M_FacilityRooms_Steel",
+        "M_FacilityRooms_Iron"
+      ],
+      "bounds_cm": [
+        -89.99999761581421,
+        -32.50000774860382,
+        0.0,
+        89.99999761581421,
+        32.50000774860382,
+        59.99999642372131
+      ],
+      "max_bounds_error_cm": 7.748603820800781e-06,
+      "collision_boxes": 2,
+      "collision_validation": [
+        {
+          "name": "UCX_SM_FacilityRooms_PipeBundle_00",
+          "bounds_cm": [
+            -88.91328573226929,
+            -29.053041338920593,
+            12.897196412086487,
+            88.91328573226929,
+            29.053041338920593,
+            61.12149953842163
+          ],
+          "max_bounds_error_cm": 8.851289749145508e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_PipeBundle_01",
+          "bounds_cm": [
+            -69.15478110313416,
+            -32.00758397579193,
+            0.0,
+            69.15478110313416,
+            32.00758397579193,
+            17.94392615556717
+          ],
+          "max_bounds_error_cm": 5.811452865600586e-06
+        }
+      ],
+      "opening_ray_probes": [],
+      "sha256_before": "4b681e479e9ed84afda7ba61ba53c57e6c192fc0317047f0f06a76552b75ecc5",
+      "sha256_after": "4b681e479e9ed84afda7ba61ba53c57e6c192fc0317047f0f06a76552b75ecc5"
+    },
+    {
+      "name": "SM_FacilityRooms_PipeRun",
+      "passed": true,
+      "triangles": 8244,
+      "vertices": 4184,
+      "uv_channels": 2,
+      "materials": [
+        "M_FacilityRooms_Blue",
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Steel",
+        "M_FacilityRooms_Red",
+        "M_FacilityRooms_Hazard",
+        "M_FacilityRooms_Ivory"
+      ],
+      "bounds_cm": [
+        -100.0,
+        -12.5,
+        0.0,
+        100.0,
+        12.500007450580597,
+        89.99999761581421
+      ],
+      "max_bounds_error_cm": 7.450580596923828e-06,
+      "collision_boxes": 4,
+      "collision_validation": [
+        {
+          "name": "UCX_SM_FacilityRooms_PipeRun_00",
+          "bounds_cm": [
+            -101.52283906936646,
+            -10.372348129749298,
+            5.389222502708435,
+            101.52283906936646,
+            14.09575492143631,
+            25.868263840675354
+          ],
+          "max_bounds_error_cm": 9.517086319021928e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_PipeRun_01",
+          "bounds_cm": [
+            -101.52283906936646,
+            -10.372348129749298,
+            61.43711805343628,
+            101.52283906936646,
+            14.09575492143631,
+            81.91616535186768
+          ],
+          "max_bounds_error_cm": 9.517086319021928e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_PipeRun_02",
+          "bounds_cm": [
+            -18.274112045764923,
+            -17.28723496198654,
+            -1.0778427124023438,
+            18.274112045764923,
+            1.8617043271660805,
+            36.646705865859985
+          ],
+          "max_bounds_error_cm": 1.8674008330776815e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_PipeRun_03",
+          "bounds_cm": [
+            37.5634491443634,
+            -15.159574151039124,
+            69.52095627784729,
+            57.868021726608276,
+            6.117023527622223,
+            91.07784628868103
+          ],
+          "max_bounds_error_cm": 5.304099587988276e-06
+        }
+      ],
+      "opening_ray_probes": [],
+      "sha256_before": "7230ae45ac52fc8c2cfd9d4e447ad9e4a7f1b5d7e9f8b3ff6778e6298bc1b5e3",
+      "sha256_after": "7230ae45ac52fc8c2cfd9d4e447ad9e4a7f1b5d7e9f8b3ff6778e6298bc1b5e3"
+    },
+    {
+      "name": "SM_FacilityRooms_OperatorDesk",
+      "passed": true,
+      "triangles": 2760,
+      "vertices": 1416,
+      "uv_channels": 2,
+      "materials": [
+        "M_FacilityRooms_Wood",
+        "M_FacilityRooms_Steel",
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Rubber"
+      ],
+      "bounds_cm": [
+        -90.00000357627869,
+        -40.0000125169754,
+        0.0,
+        90.00000357627869,
+        40.0000125169754,
+        78.00000309944153
+      ],
+      "max_bounds_error_cm": 1.2516975402832031e-05,
+      "collision_boxes": 5,
+      "collision_validation": [
+        {
+          "name": "UCX_SM_FacilityRooms_OperatorDesk_00",
+          "bounds_cm": [
+            -90.00000357627869,
+            -40.0000125169754,
+            70.59273719787598,
+            90.00000357627869,
+            40.0000125169754,
+            77.55258083343506
+          ],
+          "max_bounds_error_cm": 7.748603820800781e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_OperatorDesk_01",
+          "bounds_cm": [
+            -84.00000333786011,
+            -29.00000810623169,
+            0.0,
+            -39.99999761581421,
+            35.00000834465027,
+            69.59847211837769
+          ],
+          "max_bounds_error_cm": 4.649162292480469e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_OperatorDesk_02",
+          "bounds_cm": [
+            67.99999475479126,
+            -32.00000524520874,
+            0.0,
+            75.99999904632568,
+            -24.000002443790436,
+            69.59847211837769
+          ],
+          "max_bounds_error_cm": 5.245208740234375e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_OperatorDesk_03",
+          "bounds_cm": [
+            67.99999475479126,
+            24.000002443790436,
+            0.0,
+            75.99999904632568,
+            32.00000524520874,
+            69.59847211837769
+          ],
+          "max_bounds_error_cm": 5.245208740234375e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_OperatorDesk_04",
+          "bounds_cm": [
+            -37.99999952316284,
+            23.499996960163116,
+            28.33651900291443,
+            65.99999666213989,
+            28.50000560283661,
+            61.14723086357117
+          ],
+          "max_bounds_error_cm": 5.841255187988281e-06
+        }
+      ],
+      "opening_ray_probes": [],
+      "sha256_before": "18f8c19e3420f7cf1df4be4249ad9cccb21aa98d11a2ba7e7eb6f9a18e91fc23",
+      "sha256_after": "18f8c19e3420f7cf1df4be4249ad9cccb21aa98d11a2ba7e7eb6f9a18e91fc23"
+    },
+    {
+      "name": "SM_FacilityRooms_MonitorWall",
+      "passed": true,
+      "triangles": 3720,
+      "vertices": 2088,
+      "uv_channels": 2,
+      "materials": [
+        "M_FacilityRooms_Wood",
+        "M_FacilityRooms_Rubber",
+        "M_FacilityRooms_Steel",
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Screen",
+        "M_FacilityRooms_Teal",
+        "M_FacilityRooms_Amber",
+        "M_FacilityRooms_Blue"
+      ],
+      "bounds_cm": [
+        -119.99999284744263,
+        -17.500008642673492,
+        0.0,
+        119.99999284744263,
+        17.500008642673492,
+        170.00000476837158
+      ],
+      "max_bounds_error_cm": 8.64267349243164e-06,
+      "collision_boxes": 5,
+      "collision_validation": [
+        {
+          "name": "UCX_SM_FacilityRooms_MonitorWall_00",
+          "bounds_cm": [
+            -120.50209045410156,
+            -8.500010520219803,
+            59.349119663238525,
+            120.50209045410156,
+            6.500010937452316,
+            171.00592851638794
+          ],
+          "max_bounds_error_cm": 1.093745231628418e-05
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_MonitorWall_01",
+          "bounds_cm": [
+            -105.9414267539978,
+            -17.500002682209015,
+            -1.862645149230957e-07,
+            -50.7112979888916,
+            17.500002682209015,
+            6.035503000020981
+          ],
+          "max_bounds_error_cm": 2.682209014892578e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_MonitorWall_02",
+          "bounds_cm": [
+            -83.34728479385376,
+            4.999998956918716,
+            0.0,
+            -73.30543994903564,
+            15.000000596046448,
+            62.36686706542969
+          ],
+          "max_bounds_error_cm": 2.2649765014648438e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_MonitorWall_03",
+          "bounds_cm": [
+            50.7112979888916,
+            -17.500002682209015,
+            -1.862645149230957e-07,
+            105.9414267539978,
+            17.500002682209015,
+            6.035503000020981
+          ],
+          "max_bounds_error_cm": 2.682209014892578e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_MonitorWall_04",
+          "bounds_cm": [
+            73.30543994903564,
+            4.999998956918716,
+            0.0,
+            83.34728479385376,
+            15.000000596046448,
+            62.36686706542969
+          ],
+          "max_bounds_error_cm": 2.2649765014648438e-06
+        }
+      ],
+      "opening_ray_probes": [],
+      "sha256_before": "4d52ac3224b1eea8d213efe4c1961b256f5d22ae9ad7a80cd2001c0b50e36935",
+      "sha256_after": "4d52ac3224b1eea8d213efe4c1961b256f5d22ae9ad7a80cd2001c0b50e36935"
+    },
+    {
+      "name": "SM_FacilityRooms_DeskMonitor",
+      "passed": true,
+      "triangles": 1868,
+      "vertices": 992,
+      "uv_channels": 2,
+      "materials": [
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Wood",
+        "M_FacilityRooms_Steel",
+        "M_FacilityRooms_Screen",
+        "M_FacilityRooms_Teal",
+        "M_FacilityRooms_Amber",
+        "M_FacilityRooms_Blue",
+        "M_FacilityRooms_Rubber"
+      ],
+      "bounds_cm": [
+        -32.499998807907104,
+        -12.50000149011612,
+        0.0,
+        32.499998807907104,
+        12.50000149011612,
+        50.0
+      ],
+      "max_bounds_error_cm": 1.4901161193847656e-06,
+      "collision_boxes": 3,
+      "collision_validation": [
+        {
+          "name": "UCX_SM_FacilityRooms_DeskMonitor_00",
+          "bounds_cm": [
+            -32.499998807907104,
+            -5.000003054738045,
+            12.999999523162842,
+            32.499998807907104,
+            5.000003054738045,
+            50.0
+          ],
+          "max_bounds_error_cm": 3.0547380447387695e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_DeskMonitor_01",
+          "bounds_cm": [
+            -19.500000774860382,
+            -12.50000149011612,
+            0.0,
+            19.500000774860382,
+            12.50000149011612,
+            3.999999910593033
+          ],
+          "max_bounds_error_cm": 1.4901161193847656e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_DeskMonitor_02",
+          "bounds_cm": [
+            -5.000000447034836,
+            0.999999325722456,
+            -7.450580596923828e-07,
+            5.000000447034836,
+            11.000000685453415,
+            19.999998807907104
+          ],
+          "max_bounds_error_cm": 1.1920928955078125e-06
+        }
+      ],
+      "opening_ray_probes": [],
+      "sha256_before": "21da7cac1ee940fe7463957e2dd332a3cb89740902f5722d3b2f0f7cb9694d36",
+      "sha256_after": "21da7cac1ee940fe7463957e2dd332a3cb89740902f5722d3b2f0f7cb9694d36"
+    },
+    {
+      "name": "SM_FacilityRooms_RadioRack",
+      "passed": true,
+      "triangles": 12008,
+      "vertices": 6200,
+      "uv_channels": 2,
+      "materials": [
+        "M_FacilityRooms_Wood",
+        "M_FacilityRooms_Rubber",
+        "M_FacilityRooms_Steel",
+        "M_FacilityRooms_Panel",
+        "M_FacilityRooms_Screen",
+        "M_FacilityRooms_Blue",
+        "M_FacilityRooms_Amber",
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Ivory"
+      ],
+      "bounds_cm": [
+        -45.00000178813934,
+        -32.499998807907104,
+        0.0,
+        45.00000178813934,
+        32.50000178813934,
+        184.99999046325684
+      ],
+      "max_bounds_error_cm": 9.5367431640625e-06,
+      "collision_boxes": 1,
+      "collision_validation": [
+        {
+          "name": "UCX_SM_FacilityRooms_RadioRack_00",
+          "bounds_cm": [
+            -45.00000178813934,
+            -27.10048258304596,
+            0.9999990463256836,
+            45.00000178813934,
+            34.39208269119263,
+            185.0000023841858
+          ],
+          "max_bounds_error_cm": 5.5801694998081075e-06
+        }
+      ],
+      "opening_ray_probes": [],
+      "sha256_before": "026aa70bc5871ae569cc92b672d53de1f05040034b5a1f819947c3bdbf88cc45",
+      "sha256_after": "026aa70bc5871ae569cc92b672d53de1f05040034b5a1f819947c3bdbf88cc45"
+    },
+    {
+      "name": "SM_FacilityRooms_RadioConsole",
+      "passed": true,
+      "triangles": 3244,
+      "vertices": 1676,
+      "uv_channels": 2,
+      "materials": [
+        "M_FacilityRooms_Wood",
+        "M_FacilityRooms_Ivory",
+        "M_FacilityRooms_Screen",
+        "M_FacilityRooms_Blue",
+        "M_FacilityRooms_Amber",
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Rubber",
+        "M_FacilityRooms_Panel"
+      ],
+      "bounds_cm": [
+        -34.99999940395355,
+        -22.499997913837433,
+        0.0,
+        35.00000238418579,
+        22.50000238418579,
+        25.0
+      ],
+      "max_bounds_error_cm": 2.384185791015625e-06,
+      "collision_boxes": 1,
+      "collision_validation": [
+        {
+          "name": "UCX_SM_FacilityRooms_RadioConsole_00",
+          "bounds_cm": [
+            -34.85254645347595,
+            -20.402544736862183,
+            -0.8488968014717102,
+            34.99999940395355,
+            22.50000238418579,
+            20.37351429462433
+          ],
+          "max_bounds_error_cm": 3.2199641353258812e-06
+        }
+      ],
+      "opening_ray_probes": [],
+      "sha256_before": "8f4a5568b43451cb4b7bcc601c530a4e5b5e82723eb17d195d05388e1fcf9596",
+      "sha256_after": "8f4a5568b43451cb4b7bcc601c530a4e5b5e82723eb17d195d05388e1fcf9596"
+    },
+    {
+      "name": "SM_FacilityRooms_OperatorChair",
+      "passed": true,
+      "triangles": 3980,
+      "vertices": 2040,
+      "uv_channels": 2,
+      "materials": [
+        "M_FacilityRooms_Steel",
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Rubber",
+        "M_FacilityRooms_Ivory",
+        "M_FacilityRooms_Wood"
+      ],
+      "bounds_cm": [
+        -32.50000178813934,
+        -32.499998807907104,
+        0.0,
+        32.50000178813934,
+        32.499998807907104,
+        114.99999761581421
+      ],
+      "max_bounds_error_cm": 2.384185791015625e-06,
+      "collision_boxes": 3,
+      "collision_validation": [
+        {
+          "name": "UCX_SM_FacilityRooms_OperatorChair_00",
+          "bounds_cm": [
+            -28.590229153633118,
+            -27.976232767105103,
+            1.0000012814998627,
+            27.124062180519104,
+            27.976232767105103,
+            19.00000274181366
+          ],
+          "max_bounds_error_cm": 2.9206275939941406e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_OperatorChair_01",
+          "bounds_cm": [
+            -26.635342836380005,
+            -26.01298689842224,
+            41.999998688697815,
+            25.16917586326599,
+            24.04974400997162,
+            56.00000023841858
+          ],
+          "max_bounds_error_cm": 3.0126114332063025e-06
+        },
+        {
+          "name": "UCX_SM_FacilityRooms_OperatorChair_02",
+          "bounds_cm": [
+            -24.680452048778534,
+            15.215139091014862,
+            56.999993324279785,
+            23.21428507566452,
+            27.976229786872864,
+            114.99999761581421
+          ],
+          "max_bounds_error_cm": 8.165836334228516e-06
+        }
+      ],
+      "opening_ray_probes": [],
+      "sha256_before": "bf13d3a2c26ddb9b9ee54bff3502b3b26974c4a28ed5cc643fd7349905017b20",
+      "sha256_after": "bf13d3a2c26ddb9b9ee54bff3502b3b26974c4a28ed5cc643fd7349905017b20"
+    },
+    {
+      "name": "SM_FacilityRooms_KeyboardConsole",
+      "passed": true,
+      "triangles": 6012,
+      "vertices": 3110,
+      "uv_channels": 2,
+      "materials": [
+        "M_FacilityRooms_Wood",
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Ivory",
+        "M_FacilityRooms_Panel"
+      ],
+      "bounds_cm": [
+        -37.5,
+        -17.500002682209015,
+        0.0,
+        37.5,
+        17.500002682209015,
+        9.000000357627869
+      ],
+      "max_bounds_error_cm": 2.682209014892578e-06,
+      "collision_boxes": 1,
+      "collision_validation": [
+        {
+          "name": "UCX_SM_FacilityRooms_KeyboardConsole_00",
+          "bounds_cm": [
+            -37.50000298023224,
+            -17.500002682209015,
+            0.0,
+            37.50000298023224,
+            17.500002682209015,
+            6.480000168085098
+          ],
+          "max_bounds_error_cm": 2.9802322387695312e-06
+        }
+      ],
+      "opening_ray_probes": [],
+      "sha256_before": "81d35c1f7e149369b10dcf101a9520416d84df00154dd8babd07924f58474d88",
+      "sha256_after": "81d35c1f7e149369b10dcf101a9520416d84df00154dd8babd07924f58474d88"
+    },
+    {
+      "name": "SM_FacilityRooms_FileCabinet",
+      "passed": true,
+      "triangles": 2184,
+      "vertices": 1128,
+      "uv_channels": 2,
+      "materials": [
+        "M_FacilityRooms_Wood",
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Paper",
+        "M_FacilityRooms_Steel"
+      ],
+      "bounds_cm": [
+        -45.00000178813934,
+        -22.50000089406967,
+        0.0,
+        45.00000178813934,
+        22.50000387430191,
+        129.99999523162842
+      ],
+      "max_bounds_error_cm": 4.76837158203125e-06,
+      "collision_boxes": 1,
+      "collision_validation": [
+        {
+          "name": "UCX_SM_FacilityRooms_FileCabinet_00",
+          "bounds_cm": [
+            -45.00000178813934,
+            -18.82653534412384,
+            0.0,
+            45.00000178813934,
+            22.50000387430191,
+            129.99999523162842
+          ],
+          "max_bounds_error_cm": 4.76837158203125e-06
+        }
+      ],
+      "opening_ray_probes": [],
+      "sha256_before": "265049306975887a5a6e0c2c21341b71645b6b0f97b2d544f400905294965b23",
+      "sha256_after": "265049306975887a5a6e0c2c21341b71645b6b0f97b2d544f400905294965b23"
+    },
+    {
+      "name": "SM_FacilityRooms_BookStack",
+      "passed": true,
+      "triangles": 1404,
+      "vertices": 744,
+      "uv_channels": 2,
+      "materials": [
+        "M_FacilityRooms_Paper",
+        "M_FacilityRooms_Red",
+        "M_FacilityRooms_Ivory",
+        "M_FacilityRooms_Wood",
+        "M_FacilityRooms_Teal"
+      ],
+      "bounds_cm": [
+        -22.50000089406967,
+        -14.999997615814209,
+        0.0,
+        22.50000089406967,
+        14.999997615814209,
+        21.99999988079071
+      ],
+      "max_bounds_error_cm": 2.384185791015625e-06,
+      "collision_boxes": 1,
+      "collision_validation": [
+        {
+          "name": "UCX_SM_FacilityRooms_BookStack_00",
+          "bounds_cm": [
+            -22.50000089406967,
+            -14.122715592384338,
+            0.2095237374305725,
+            22.50000089406967,
+            14.453718066215515,
+            23.257140815258026
+          ],
+          "max_bounds_error_cm": 1.9456529898320696e-06
+        }
+      ],
+      "opening_ray_probes": [],
+      "sha256_before": "fd00173562f6d12f1a563688e6fc04683a4401b39270d5e4f102d437904c22f6",
+      "sha256_after": "fd00173562f6d12f1a563688e6fc04683a4401b39270d5e4f102d437904c22f6"
+    },
+    {
+      "name": "SM_FacilityRooms_DeskMug",
+      "passed": true,
+      "triangles": 2872,
+      "vertices": 1440,
+      "uv_channels": 2,
+      "materials": [
+        "M_FacilityRooms_Ivory",
+        "M_FacilityRooms_Wood"
+      ],
+      "bounds_cm": [
+        -7.999999821186066,
+        -6.500000506639481,
+        0.0,
+        7.999999821186066,
+        6.500000506639481,
+        18.000000715255737
+      ],
+      "max_bounds_error_cm": 7.152557373046875e-07,
+      "collision_boxes": 1,
+      "collision_validation": [
+        {
+          "name": "UCX_SM_FacilityRooms_DeskMug_00",
+          "bounds_cm": [
+            -7.999999821186066,
+            -6.500000506639481,
+            -7.450580596923828e-07,
+            8.000000566244125,
+            6.500000506639481,
+            18.000000715255737
+          ],
+          "max_bounds_error_cm": 7.450580596923828e-07
+        }
+      ],
+      "opening_ray_probes": [],
+      "sha256_before": "6d73738bf4012654c5217696156ea4fb7a09e4d4ba8f6c7516424d9bfc1dd446",
+      "sha256_after": "6d73738bf4012654c5217696156ea4fb7a09e4d4ba8f6c7516424d9bfc1dd446"
+    }
+  ],
+  "errors": [],
+  "passed": true,
+  "source_hashes_before": {
+    "FacilityRooms_Architecture.blend": "4cb299b73b4d0ea2802b2a27b8acbf39459f8b45b2af52b8d5018843cf9163c0",
+    "FacilityRooms_Control.blend": "1bfd694271ece8b2821443dce370627776f60be30138e123b1192520e9a4a6eb",
+    "FacilityRooms_Utilities.blend": "03810c75cb1bc8345dd3b45676479ce5e0f8025540473f025fe99dbd69613798",
+    "L_Facility_Basement.blend": "292708e85e08ae4c00daad1261033fe3b97ea0ae4920c0f28ff8889643ef6d57",
+    "L_Facility_ControlFloor02.blend": "49c2f42b4af5e9d8ac28a3d159acef1df53bc5ee3597916e83d2663a3bdbc41d",
+    "model_manifest.json": "ce97815af3951aa2abe427d215f6c6a3c1cd5efb293999639d03cd156cb8a7a5",
+    "Models/SM_FacilityRooms_AtticLamp.fbx": "dd643f1bb3963bd459800190d88e484c8cd8fccce8f744ceb27ba33d108b8de8",
+    "Models/SM_FacilityRooms_Boiler.fbx": "656302f0b03e3ef8528aa2d401fede33aac42f01b99a123d43e4adfbcb745cb7",
+    "Models/SM_FacilityRooms_BookStack.fbx": "fd00173562f6d12f1a563688e6fc04683a4401b39270d5e4f102d437904c22f6",
+    "Models/SM_FacilityRooms_DeskMonitor.fbx": "21da7cac1ee940fe7463957e2dd332a3cb89740902f5722d3b2f0f7cb9694d36",
+    "Models/SM_FacilityRooms_DeskMug.fbx": "6d73738bf4012654c5217696156ea4fb7a09e4d4ba8f6c7516424d9bfc1dd446",
+    "Models/SM_FacilityRooms_Doorway200.fbx": "75c26bb28d14511934470fc8e35af6fe40ad05861db7624d67ecef268be60601",
+    "Models/SM_FacilityRooms_ElectricalCabinet.fbx": "6bc02b2b7ba41f22a5ab987bee4441a1dbab27ff29b52436a4f792ae052f7ad7",
+    "Models/SM_FacilityRooms_FileCabinet.fbx": "265049306975887a5a6e0c2c21341b71645b6b0f97b2d544f400905294965b23",
+    "Models/SM_FacilityRooms_Floor200.fbx": "3542227e2e934b02e606fe56cb794c3297539be4caf08b87882b43d0e2616d7c",
+    "Models/SM_FacilityRooms_Generator.fbx": "6f987423cc6d15a14da85bd65fa748a703364f1c12b718b8e915539e58f46915",
+    "Models/SM_FacilityRooms_Guardrail200.fbx": "0df2e21bef6180804a37985d3764bece4c1d3fb8fc4e906a887e91f744b0c7ff",
+    "Models/SM_FacilityRooms_HatchLanding200.fbx": "e6a381dc7a07dba80719fd140fa841e170469ab61d0d3736fdaf28aab683b602",
+    "Models/SM_FacilityRooms_KeyboardConsole.fbx": "81d35c1f7e149369b10dcf101a9520416d84df00154dd8babd07924f58474d88",
+    "Models/SM_FacilityRooms_Ladder300.fbx": "6a19e162b3c701941b48831a296af092030e6a069b743c3c4e5262b4428e259b",
+    "Models/SM_FacilityRooms_MonitorWall.fbx": "4d52ac3224b1eea8d213efe4c1961b256f5d22ae9ad7a80cd2001c0b50e36935",
+    "Models/SM_FacilityRooms_OperatorChair.fbx": "bf13d3a2c26ddb9b9ee54bff3502b3b26974c4a28ed5cc643fd7349905017b20",
+    "Models/SM_FacilityRooms_OperatorDesk.fbx": "18f8c19e3420f7cf1df4be4249ad9cccb21aa98d11a2ba7e7eb6f9a18e91fc23",
+    "Models/SM_FacilityRooms_PalletCrates.fbx": "ab26694bfc1689b7d67d9e56ad7741fd10a21ca958a81f1131f3744fb3ab8a66",
+    "Models/SM_FacilityRooms_PipeBundle.fbx": "4b681e479e9ed84afda7ba61ba53c57e6c192fc0317047f0f06a76552b75ecc5",
+    "Models/SM_FacilityRooms_PipeRun.fbx": "7230ae45ac52fc8c2cfd9d4e447ad9e4a7f1b5d7e9f8b3ff6778e6298bc1b5e3",
+    "Models/SM_FacilityRooms_PressureTank.fbx": "9fa56ec2b80ae2a8c5742492302ee2726cfb6704c0e423fd709db12c30143bec",
+    "Models/SM_FacilityRooms_PumpSkid.fbx": "51c7157a89f3d9566ce507af8454da8b6fddec28c5e19dec2150e1ca10cc6b8c",
+    "Models/SM_FacilityRooms_RadioConsole.fbx": "8f4a5568b43451cb4b7bcc601c530a4e5b5e82723eb17d195d05388e1fcf9596",
+    "Models/SM_FacilityRooms_RadioRack.fbx": "026aa70bc5871ae569cc92b672d53de1f05040034b5a1f819947c3bdbf88cc45",
+    "Models/SM_FacilityRooms_SupplyRack.fbx": "475f808a6733f8bb4fc2122e433778692512b8067419ce7b270e2a22dc41ce7a",
+    "Models/SM_FacilityRooms_Threshold120.fbx": "a813531f4b9f2226e1b7fca66570691d883a5cd04d59bed4052b2e629263335b",
+    "Models/SM_FacilityRooms_Wall100.fbx": "2b9c925f19a8bc12ca92f15595bee888bb83c65446bddc62e3b091c6cd54d3bb",
+    "Models/SM_FacilityRooms_Wall200.fbx": "b9492a4739157e874a5f0c6203d806538501d19feb4621387755015cf4d78546",
+    "Models/SM_FacilityRooms_WallCorner.fbx": "34599307e005373f31cdb2702575ad8404aa69af498380cc543164b211293d31",
+    "Models/SM_FacilityRooms_WallLamp.fbx": "fbc835b5237fe24e491a5c6ee4ec8dfde0f5fc58cdbff8b8af3a65d8a1874e50",
+    "Models/SM_FacilityRooms_WallVent.fbx": "e06b54d76d75e0a370acfe9b938377f360cb241495af6fa26ad52cf00bca1c95",
+    "Models/SM_FacilityRooms_WoodFloor200.fbx": "10cee42b3e6fdd39b20e8ce02d3663d9dc254cc39456b45cade00b9bb708c2d2",
+    "Models/SM_FacilityRooms_WoodGable600.fbx": "771381d7fc5caa1b36785ce9a9550392189d76c1331ea172a1419dfbed14759e",
+    "Models/SM_FacilityRooms_WoodHatchLanding200.fbx": "0c17a3788b4e911f831c78042f40091df998b9e17a90ed6f9b16efa72f9b9791",
+    "Models/SM_FacilityRooms_WoodRoof600.fbx": "ef8aeb7131525c81fab041c681d199c4b4f5652aa48b0c6bd2a58fcbf0d59b3b",
+    "Models/SM_FacilityRooms_WoodWall200.fbx": "907efebfea90474ed21de66d55d62b2239440615b10b6d2b2f26eb353691c150",
+    "Models/SM_FacilityRooms_WoodWindowWall200.fbx": "8451f60de2146895f5a6f10da850b0c972ff7a7575d09612f24ee992f7a4733f",
+    "References/Basement_Reference.png": "a84bcc2c4159af1be23394bdec3cb192fd039bf268367adacd44c5f49967e582",
+    "References/ControlRoom_Attic.prompt.txt": "e08e982df9df8f1fb9a3ab9710add8172eeadec5a25b8459d78cadfd36f8c656",
+    "References/ControlRoom_Attic_Reference.png": "073b6040a0d6c7c5ef7e2fb9907da9723d0e8a6724151b7cc9ab1a65743833f0",
+    "References/ControlRoom_Reference.png": "3faa9373f285a67c6c09993171efd4e680a8b1df3638b53bf1e646b9a5b37882",
+    "References/ForestImpostor.prompt.txt": "196a6c90e9788b26005d002096bd3b2a2f29960d39c11e95e9fc65a8f1bd8e07",
+    "References/prompts.md": "feb2a6d09fdbed865f39fe338a4bb408e6df7a34596a153b6ac58ee803fe767f",
+    "Textures/T_FacilityRooms_Atlas.png": "75eeac263c788a05630ee3951803073316b43f80cc0ce3175da755d7ba1b7912",
+    "Textures/T_FacilityRooms_Forest.png": "c652de0021e492e82bd587d27d9470cc0df026acebcb1756982ec75e21d59541"
+  },
+  "source_hashes_after": {
+    "FacilityRooms_Architecture.blend": "4cb299b73b4d0ea2802b2a27b8acbf39459f8b45b2af52b8d5018843cf9163c0",
+    "FacilityRooms_Control.blend": "1bfd694271ece8b2821443dce370627776f60be30138e123b1192520e9a4a6eb",
+    "FacilityRooms_Utilities.blend": "03810c75cb1bc8345dd3b45676479ce5e0f8025540473f025fe99dbd69613798",
+    "L_Facility_Basement.blend": "292708e85e08ae4c00daad1261033fe3b97ea0ae4920c0f28ff8889643ef6d57",
+    "L_Facility_ControlFloor02.blend": "49c2f42b4af5e9d8ac28a3d159acef1df53bc5ee3597916e83d2663a3bdbc41d",
+    "model_manifest.json": "ce97815af3951aa2abe427d215f6c6a3c1cd5efb293999639d03cd156cb8a7a5",
+    "Models/SM_FacilityRooms_AtticLamp.fbx": "dd643f1bb3963bd459800190d88e484c8cd8fccce8f744ceb27ba33d108b8de8",
+    "Models/SM_FacilityRooms_Boiler.fbx": "656302f0b03e3ef8528aa2d401fede33aac42f01b99a123d43e4adfbcb745cb7",
+    "Models/SM_FacilityRooms_BookStack.fbx": "fd00173562f6d12f1a563688e6fc04683a4401b39270d5e4f102d437904c22f6",
+    "Models/SM_FacilityRooms_DeskMonitor.fbx": "21da7cac1ee940fe7463957e2dd332a3cb89740902f5722d3b2f0f7cb9694d36",
+    "Models/SM_FacilityRooms_DeskMug.fbx": "6d73738bf4012654c5217696156ea4fb7a09e4d4ba8f6c7516424d9bfc1dd446",
+    "Models/SM_FacilityRooms_Doorway200.fbx": "75c26bb28d14511934470fc8e35af6fe40ad05861db7624d67ecef268be60601",
+    "Models/SM_FacilityRooms_ElectricalCabinet.fbx": "6bc02b2b7ba41f22a5ab987bee4441a1dbab27ff29b52436a4f792ae052f7ad7",
+    "Models/SM_FacilityRooms_FileCabinet.fbx": "265049306975887a5a6e0c2c21341b71645b6b0f97b2d544f400905294965b23",
+    "Models/SM_FacilityRooms_Floor200.fbx": "3542227e2e934b02e606fe56cb794c3297539be4caf08b87882b43d0e2616d7c",
+    "Models/SM_FacilityRooms_Generator.fbx": "6f987423cc6d15a14da85bd65fa748a703364f1c12b718b8e915539e58f46915",
+    "Models/SM_FacilityRooms_Guardrail200.fbx": "0df2e21bef6180804a37985d3764bece4c1d3fb8fc4e906a887e91f744b0c7ff",
+    "Models/SM_FacilityRooms_HatchLanding200.fbx": "e6a381dc7a07dba80719fd140fa841e170469ab61d0d3736fdaf28aab683b602",
+    "Models/SM_FacilityRooms_KeyboardConsole.fbx": "81d35c1f7e149369b10dcf101a9520416d84df00154dd8babd07924f58474d88",
+    "Models/SM_FacilityRooms_Ladder300.fbx": "6a19e162b3c701941b48831a296af092030e6a069b743c3c4e5262b4428e259b",
+    "Models/SM_FacilityRooms_MonitorWall.fbx": "4d52ac3224b1eea8d213efe4c1961b256f5d22ae9ad7a80cd2001c0b50e36935",
+    "Models/SM_FacilityRooms_OperatorChair.fbx": "bf13d3a2c26ddb9b9ee54bff3502b3b26974c4a28ed5cc643fd7349905017b20",
+    "Models/SM_FacilityRooms_OperatorDesk.fbx": "18f8c19e3420f7cf1df4be4249ad9cccb21aa98d11a2ba7e7eb6f9a18e91fc23",
+    "Models/SM_FacilityRooms_PalletCrates.fbx": "ab26694bfc1689b7d67d9e56ad7741fd10a21ca958a81f1131f3744fb3ab8a66",
+    "Models/SM_FacilityRooms_PipeBundle.fbx": "4b681e479e9ed84afda7ba61ba53c57e6c192fc0317047f0f06a76552b75ecc5",
+    "Models/SM_FacilityRooms_PipeRun.fbx": "7230ae45ac52fc8c2cfd9d4e447ad9e4a7f1b5d7e9f8b3ff6778e6298bc1b5e3",
+    "Models/SM_FacilityRooms_PressureTank.fbx": "9fa56ec2b80ae2a8c5742492302ee2726cfb6704c0e423fd709db12c30143bec",
+    "Models/SM_FacilityRooms_PumpSkid.fbx": "51c7157a89f3d9566ce507af8454da8b6fddec28c5e19dec2150e1ca10cc6b8c",
+    "Models/SM_FacilityRooms_RadioConsole.fbx": "8f4a5568b43451cb4b7bcc601c530a4e5b5e82723eb17d195d05388e1fcf9596",
+    "Models/SM_FacilityRooms_RadioRack.fbx": "026aa70bc5871ae569cc92b672d53de1f05040034b5a1f819947c3bdbf88cc45",
+    "Models/SM_FacilityRooms_SupplyRack.fbx": "475f808a6733f8bb4fc2122e433778692512b8067419ce7b270e2a22dc41ce7a",
+    "Models/SM_FacilityRooms_Threshold120.fbx": "a813531f4b9f2226e1b7fca66570691d883a5cd04d59bed4052b2e629263335b",
+    "Models/SM_FacilityRooms_Wall100.fbx": "2b9c925f19a8bc12ca92f15595bee888bb83c65446bddc62e3b091c6cd54d3bb",
+    "Models/SM_FacilityRooms_Wall200.fbx": "b9492a4739157e874a5f0c6203d806538501d19feb4621387755015cf4d78546",
+    "Models/SM_FacilityRooms_WallCorner.fbx": "34599307e005373f31cdb2702575ad8404aa69af498380cc543164b211293d31",
+    "Models/SM_FacilityRooms_WallLamp.fbx": "fbc835b5237fe24e491a5c6ee4ec8dfde0f5fc58cdbff8b8af3a65d8a1874e50",
+    "Models/SM_FacilityRooms_WallVent.fbx": "e06b54d76d75e0a370acfe9b938377f360cb241495af6fa26ad52cf00bca1c95",
+    "Models/SM_FacilityRooms_WoodFloor200.fbx": "10cee42b3e6fdd39b20e8ce02d3663d9dc254cc39456b45cade00b9bb708c2d2",
+    "Models/SM_FacilityRooms_WoodGable600.fbx": "771381d7fc5caa1b36785ce9a9550392189d76c1331ea172a1419dfbed14759e",
+    "Models/SM_FacilityRooms_WoodHatchLanding200.fbx": "0c17a3788b4e911f831c78042f40091df998b9e17a90ed6f9b16efa72f9b9791",
+    "Models/SM_FacilityRooms_WoodRoof600.fbx": "ef8aeb7131525c81fab041c681d199c4b4f5652aa48b0c6bd2a58fcbf0d59b3b",
+    "Models/SM_FacilityRooms_WoodWall200.fbx": "907efebfea90474ed21de66d55d62b2239440615b10b6d2b2f26eb353691c150",
+    "Models/SM_FacilityRooms_WoodWindowWall200.fbx": "8451f60de2146895f5a6f10da850b0c972ff7a7575d09612f24ee992f7a4733f",
+    "References/Basement_Reference.png": "a84bcc2c4159af1be23394bdec3cb192fd039bf268367adacd44c5f49967e582",
+    "References/ControlRoom_Attic.prompt.txt": "e08e982df9df8f1fb9a3ab9710add8172eeadec5a25b8459d78cadfd36f8c656",
+    "References/ControlRoom_Attic_Reference.png": "073b6040a0d6c7c5ef7e2fb9907da9723d0e8a6724151b7cc9ab1a65743833f0",
+    "References/ControlRoom_Reference.png": "3faa9373f285a67c6c09993171efd4e680a8b1df3638b53bf1e646b9a5b37882",
+    "References/ForestImpostor.prompt.txt": "196a6c90e9788b26005d002096bd3b2a2f29960d39c11e95e9fc65a8f1bd8e07",
+    "References/prompts.md": "feb2a6d09fdbed865f39fe338a4bb408e6df7a34596a153b6ac58ee803fe767f",
+    "Textures/T_FacilityRooms_Atlas.png": "75eeac263c788a05630ee3951803073316b43f80cc0ce3175da755d7ba1b7912",
+    "Textures/T_FacilityRooms_Forest.png": "c652de0021e492e82bd587d27d9470cc0df026acebcb1756982ec75e21d59541"
+  },
+  "source_files_unchanged": true,
+  "expected_asset_count": 37,
+  "validated_asset_count": 37,
+  "total_triangles": 171948,
+  "total_collision_boxes": 160
+}

@@ -1,0 +1,469 @@
+{
+  "category": "Architecture",
+  "blender": "4.5.12 LTS",
+  "verification": "fresh-process FBX reload and open-space probes",
+  "assets": [
+    {
+      "name": "SM_FacilityRooms_Wall200",
+      "triangles": 3084,
+      "vertices": 1592,
+      "uv_channels": 2,
+      "collision_boxes": 1,
+      "bounds_cm": [
+        -100.0,
+        -10.000009834766388,
+        0.0,
+        100.0,
+        10.000009834766388,
+        300.0
+      ],
+      "max_bounds_error_cm": 9.834766387939453e-06,
+      "open_space_probes": [],
+      "sha256": "b9492a4739157e874a5f0c6203d806538501d19feb4621387755015cf4d78546",
+      "passed": true
+    },
+    {
+      "name": "SM_FacilityRooms_Wall100",
+      "triangles": 3084,
+      "vertices": 1592,
+      "uv_channels": 2,
+      "collision_boxes": 1,
+      "bounds_cm": [
+        -50.0,
+        -10.00000536441803,
+        0.0,
+        50.0,
+        10.00000536441803,
+        300.0
+      ],
+      "max_bounds_error_cm": 5.364418029785156e-06,
+      "open_space_probes": [],
+      "sha256": "2b9c925f19a8bc12ca92f15595bee888bb83c65446bddc62e3b091c6cd54d3bb",
+      "passed": true
+    },
+    {
+      "name": "SM_FacilityRooms_WallCorner",
+      "triangles": 756,
+      "vertices": 392,
+      "uv_channels": 2,
+      "collision_boxes": 1,
+      "bounds_cm": [
+        -10.000001639127731,
+        -10.000001639127731,
+        0.0,
+        10.000001639127731,
+        10.000001639127731,
+        300.0
+      ],
+      "max_bounds_error_cm": 1.6391277313232422e-06,
+      "open_space_probes": [],
+      "sha256": "34599307e005373f31cdb2702575ad8404aa69af498380cc543164b211293d31",
+      "passed": true
+    },
+    {
+      "name": "SM_FacilityRooms_Doorway200",
+      "triangles": 2396,
+      "vertices": 1240,
+      "uv_channels": 2,
+      "collision_boxes": 3,
+      "bounds_cm": [
+        -100.0,
+        -10.000009834766388,
+        0.0,
+        100.0,
+        10.000009834766388,
+        300.0
+      ],
+      "max_bounds_error_cm": 9.834766387939453e-06,
+      "open_space_probes": [
+        [
+          -59,
+          0,
+          100
+        ],
+        [
+          0,
+          0,
+          229
+        ],
+        [
+          59,
+          0,
+          100
+        ]
+      ],
+      "sha256": "75c26bb28d14511934470fc8e35af6fe40ad05861db7624d67ecef268be60601",
+      "passed": true
+    },
+    {
+      "name": "SM_FacilityRooms_Floor200",
+      "triangles": 648,
+      "vertices": 336,
+      "uv_channels": 2,
+      "collision_boxes": 1,
+      "bounds_cm": [
+        -100.00001192092896,
+        -100.00001192092896,
+        0.0,
+        100.00001192092896,
+        100.00001192092896,
+        20.000000298023224
+      ],
+      "max_bounds_error_cm": 1.1920928955078125e-05,
+      "open_space_probes": [],
+      "sha256": "3542227e2e934b02e606fe56cb794c3297539be4caf08b87882b43d0e2616d7c",
+      "passed": true
+    },
+    {
+      "name": "SM_FacilityRooms_Threshold120",
+      "triangles": 1100,
+      "vertices": 568,
+      "uv_channels": 2,
+      "collision_boxes": 1,
+      "bounds_cm": [
+        -60.00000238418579,
+        -12.000004947185516,
+        0.0,
+        60.00000238418579,
+        12.000004947185516,
+        3.999999910593033
+      ],
+      "max_bounds_error_cm": 4.947185516357422e-06,
+      "open_space_probes": [],
+      "sha256": "a813531f4b9f2226e1b7fca66570691d883a5cd04d59bed4052b2e629263335b",
+      "passed": true
+    },
+    {
+      "name": "SM_FacilityRooms_Ladder300",
+      "triangles": 8512,
+      "vertices": 4366,
+      "uv_channels": 2,
+      "collision_boxes": 17,
+      "bounds_cm": [
+        -37.5,
+        -15.000002086162567,
+        0.0,
+        37.5,
+        15.000002086162567,
+        330.0000190734863
+      ],
+      "max_bounds_error_cm": 1.9073486328125e-05,
+      "open_space_probes": [
+        [
+          0,
+          -11,
+          28
+        ],
+        [
+          0,
+          -11,
+          163
+        ]
+      ],
+      "sha256": "6a19e162b3c701941b48831a296af092030e6a069b743c3c4e5262b4428e259b",
+      "passed": true
+    },
+    {
+      "name": "SM_FacilityRooms_HatchLanding200",
+      "triangles": 1952,
+      "vertices": 1008,
+      "uv_channels": 2,
+      "collision_boxes": 4,
+      "bounds_cm": [
+        -100.00001192092896,
+        -100.00001192092896,
+        0.0,
+        100.00001192092896,
+        100.00001192092896,
+        20.000000298023224
+      ],
+      "max_bounds_error_cm": 1.1920928955078125e-05,
+      "open_space_probes": [
+        [
+          -44,
+          -44,
+          10
+        ],
+        [
+          0,
+          0,
+          10
+        ],
+        [
+          44,
+          44,
+          10
+        ]
+      ],
+      "sha256": "e6a381dc7a07dba80719fd140fa841e170469ab61d0d3736fdaf28aab683b602",
+      "passed": true
+    },
+    {
+      "name": "SM_FacilityRooms_Guardrail200",
+      "triangles": 1412,
+      "vertices": 728,
+      "uv_channels": 2,
+      "collision_boxes": 5,
+      "bounds_cm": [
+        -100.0,
+        -6.000008434057236,
+        0.0,
+        100.0,
+        6.000008434057236,
+        110.00000238418579
+      ],
+      "max_bounds_error_cm": 8.434057235717773e-06,
+      "open_space_probes": [
+        [
+          0,
+          0,
+          36
+        ],
+        [
+          0,
+          0,
+          82
+        ]
+      ],
+      "sha256": "0df2e21bef6180804a37985d3764bece4c1d3fb8fc4e906a887e91f744b0c7ff",
+      "passed": true
+    },
+    {
+      "name": "SM_FacilityRooms_WallLamp",
+      "triangles": 1032,
+      "vertices": 536,
+      "uv_channels": 2,
+      "collision_boxes": 1,
+      "bounds_cm": [
+        -40.00000357627869,
+        -9.000003337860107,
+        0.0,
+        40.00000357627869,
+        9.000003337860107,
+        21.99999988079071
+      ],
+      "max_bounds_error_cm": 3.5762786865234375e-06,
+      "open_space_probes": [],
+      "sha256": "fbc835b5237fe24e491a5c6ee4ec8dfde0f5fc58cdbff8b8af3a65d8a1874e50",
+      "passed": true
+    },
+    {
+      "name": "SM_FacilityRooms_WallVent",
+      "triangles": 2840,
+      "vertices": 1456,
+      "uv_channels": 2,
+      "collision_boxes": 1,
+      "bounds_cm": [
+        -50.0,
+        -7.000003755092621,
+        0.0,
+        50.0,
+        7.000003755092621,
+        60.00000238418579
+      ],
+      "max_bounds_error_cm": 3.7550926208496094e-06,
+      "open_space_probes": [],
+      "sha256": "e06b54d76d75e0a370acfe9b938377f360cb241495af6fa26ad52cf00bca1c95",
+      "passed": true
+    },
+    {
+      "name": "SM_FacilityRooms_WoodWall200",
+      "triangles": 4360,
+      "vertices": 2256,
+      "uv_channels": 2,
+      "collision_boxes": 1,
+      "bounds_cm": [
+        -100.0,
+        -10.000009834766388,
+        0.0,
+        100.0,
+        10.000009834766388,
+        220.00000476837158
+      ],
+      "max_bounds_error_cm": 9.834766387939453e-06,
+      "open_space_probes": [],
+      "sha256": "907efebfea90474ed21de66d55d62b2239440615b10b6d2b2f26eb353691c150",
+      "passed": true
+    },
+    {
+      "name": "SM_FacilityRooms_WoodGable600",
+      "triangles": 3196,
+      "vertices": 1658,
+      "uv_channels": 2,
+      "collision_boxes": 24,
+      "bounds_cm": [
+        -300.0,
+        -10.00002697110176,
+        0.0,
+        300.0,
+        10.00002697110176,
+        139.9999976158142
+      ],
+      "max_bounds_error_cm": 2.6971101760864258e-05,
+      "open_space_probes": [],
+      "sha256": "771381d7fc5caa1b36785ce9a9550392189d76c1331ea172a1419dfbed14759e",
+      "passed": true
+    },
+    {
+      "name": "SM_FacilityRooms_WoodFloor200",
+      "triangles": 7356,
+      "vertices": 3752,
+      "uv_channels": 2,
+      "collision_boxes": 1,
+      "bounds_cm": [
+        -100.00001192092896,
+        -100.00001192092896,
+        0.0,
+        100.00001192092896,
+        100.00001192092896,
+        20.000000298023224
+      ],
+      "max_bounds_error_cm": 1.1920928955078125e-05,
+      "open_space_probes": [],
+      "sha256": "10cee42b3e6fdd39b20e8ce02d3663d9dc254cc39456b45cade00b9bb708c2d2",
+      "passed": true
+    },
+    {
+      "name": "SM_FacilityRooms_WoodHatchLanding200",
+      "triangles": 4664,
+      "vertices": 2416,
+      "uv_channels": 2,
+      "collision_boxes": 4,
+      "bounds_cm": [
+        -100.00001192092896,
+        -100.00001192092896,
+        0.0,
+        100.00001192092896,
+        100.00001192092896,
+        20.000001788139343
+      ],
+      "max_bounds_error_cm": 1.1920928955078125e-05,
+      "open_space_probes": [
+        [
+          -44,
+          -44,
+          10
+        ],
+        [
+          0,
+          0,
+          10
+        ],
+        [
+          44,
+          44,
+          10
+        ]
+      ],
+      "sha256": "0c17a3788b4e911f831c78042f40091df998b9e17a90ed6f9b16efa72f9b9791",
+      "passed": true
+    },
+    {
+      "name": "SM_FacilityRooms_AtticLamp",
+      "triangles": 1580,
+      "vertices": 808,
+      "uv_channels": 2,
+      "collision_boxes": 2,
+      "bounds_cm": [
+        -17.500001192092896,
+        -17.500001192092896,
+        0.0,
+        17.500001192092896,
+        17.500001192092896,
+        50.0
+      ],
+      "max_bounds_error_cm": 1.1920928955078125e-06,
+      "open_space_probes": [],
+      "sha256": "dd643f1bb3963bd459800190d88e484c8cd8fccce8f744ceb27ba33d108b8de8",
+      "passed": true
+    },
+    {
+      "name": "SM_FacilityRooms_WoodWindowWall200",
+      "triangles": 5076,
+      "vertices": 2632,
+      "uv_channels": 2,
+      "collision_boxes": 6,
+      "bounds_cm": [
+        -100.0,
+        -10.000009834766388,
+        0.0,
+        100.0,
+        10.000009834766388,
+        220.00000476837158
+      ],
+      "max_bounds_error_cm": 9.834766387939453e-06,
+      "open_space_probes": [
+        [
+          -22.5,
+          0,
+          107.5
+        ],
+        [
+          22.5,
+          0,
+          107.5
+        ],
+        [
+          -22.5,
+          0,
+          157.5
+        ],
+        [
+          22.5,
+          0,
+          157.5
+        ],
+        [
+          -46,
+          0,
+          86
+        ],
+        [
+          46,
+          0,
+          179
+        ]
+      ],
+      "sha256": "8451f60de2146895f5a6f10da850b0c972ff7a7575d09612f24ee992f7a4733f",
+      "passed": true
+    },
+    {
+      "name": "SM_FacilityRooms_WoodRoof600",
+      "triangles": 4372,
+      "vertices": 2268,
+      "uv_channels": 2,
+      "collision_boxes": 24,
+      "bounds_cm": [
+        -300.0000238418579,
+        -300.0000238418579,
+        0.0,
+        300.0000238418579,
+        300.0000238418579,
+        139.9999976158142
+      ],
+      "max_bounds_error_cm": 2.384185791015625e-05,
+      "open_space_probes": [
+        [
+          0,
+          0,
+          100
+        ],
+        [
+          -150,
+          0,
+          40
+        ],
+        [
+          150,
+          0,
+          40
+        ]
+      ],
+      "sha256": "ef8aeb7131525c81fab041c681d199c4b4f5652aa48b0c6bd2a58fcbf0d59b3b",
+      "passed": true
+    }
+  ],
+  "passed": true,
+  "source_blend_reload_passed": true,
+  "total_triangles": 57420
+}

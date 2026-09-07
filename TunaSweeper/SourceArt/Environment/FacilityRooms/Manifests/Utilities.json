@@ -1,0 +1,919 @@
+{
+  "category": "Utilities",
+  "axis_contract": "Blender X width/-Y front/Z up -> UE X width/+Y front/Z up; floor-centred pivots, cm",
+  "materials": {
+    "Concrete": {
+      "name": "M_FacilityRooms_Concrete",
+      "metallic": 0,
+      "roughness": 0.85,
+      "emission": 0.0
+    },
+    "Floor": {
+      "name": "M_FacilityRooms_Floor",
+      "metallic": 0.05,
+      "roughness": 0.72,
+      "emission": 0.0
+    },
+    "Steel": {
+      "name": "M_FacilityRooms_Steel",
+      "metallic": 0.8,
+      "roughness": 0.3,
+      "emission": 0.0
+    },
+    "Iron": {
+      "name": "M_FacilityRooms_Iron",
+      "metallic": 0.65,
+      "roughness": 0.48,
+      "emission": 0.0
+    },
+    "Teal": {
+      "name": "M_FacilityRooms_Teal",
+      "metallic": 0.2,
+      "roughness": 0.48,
+      "emission": 0.0
+    },
+    "Ivory": {
+      "name": "M_FacilityRooms_Ivory",
+      "metallic": 0.1,
+      "roughness": 0.45,
+      "emission": 0.0
+    },
+    "Rust": {
+      "name": "M_FacilityRooms_Rust",
+      "metallic": 0.3,
+      "roughness": 0.82,
+      "emission": 0.0
+    },
+    "Rubber": {
+      "name": "M_FacilityRooms_Rubber",
+      "metallic": 0,
+      "roughness": 0.9,
+      "emission": 0.0
+    },
+    "Hazard": {
+      "name": "M_FacilityRooms_Hazard",
+      "metallic": 0.1,
+      "roughness": 0.55,
+      "emission": 0.0
+    },
+    "Wood": {
+      "name": "M_FacilityRooms_Wood",
+      "metallic": 0,
+      "roughness": 0.8,
+      "emission": 0.0
+    },
+    "Screen": {
+      "name": "M_FacilityRooms_Screen",
+      "metallic": 0.05,
+      "roughness": 0.3,
+      "emission": 1.5
+    },
+    "Amber": {
+      "name": "M_FacilityRooms_Amber",
+      "metallic": 0.0,
+      "roughness": 0.4,
+      "emission": 2.0
+    },
+    "Blue": {
+      "name": "M_FacilityRooms_Blue",
+      "metallic": 0.25,
+      "roughness": 0.4,
+      "emission": 0.0
+    },
+    "Red": {
+      "name": "M_FacilityRooms_Red",
+      "metallic": 0.2,
+      "roughness": 0.4,
+      "emission": 0.0
+    },
+    "Panel": {
+      "name": "M_FacilityRooms_Panel",
+      "metallic": 0.3,
+      "roughness": 0.5,
+      "emission": 0.0
+    },
+    "Paper": {
+      "name": "M_FacilityRooms_Paper",
+      "metallic": 0,
+      "roughness": 0.9,
+      "emission": 0.0
+    }
+  },
+  "assets": [
+    {
+      "name": "SM_FacilityRooms_Boiler",
+      "target_size_cm": [
+        220,
+        130,
+        230
+      ],
+      "category": "Utilities",
+      "reference": "References/Basement_Reference.png",
+      "size_cm": [
+        220,
+        130,
+        230
+      ],
+      "bounds_cm": [
+        -110.0,
+        -65.0,
+        0,
+        110.0,
+        65.0,
+        230
+      ],
+      "triangles": 12892,
+      "materials": [
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Steel",
+        "M_FacilityRooms_Teal",
+        "M_FacilityRooms_Red",
+        "M_FacilityRooms_Ivory",
+        "M_FacilityRooms_Screen",
+        "M_FacilityRooms_Amber",
+        "M_FacilityRooms_Hazard"
+      ],
+      "collision_boxes": 5,
+      "collision_specs_cm": [
+        {
+          "center": [
+            1.6576845025610965,
+            10.632788461989549,
+            116.5333399772644
+          ],
+          "size": [
+            183.56689596176147,
+            107.06459760665894,
+            116.5333399772644
+          ]
+        },
+        {
+          "center": [
+            1.6576845025610965,
+            7.686056417769578,
+            28.62222385406494
+          ],
+          "size": [
+            199.65265488624573,
+            112.95806169509888,
+            57.24444770812988
+          ]
+        },
+        {
+          "center": [
+            -46.59959227089166,
+            -43.390632348709914,
+            76.66667103767395
+          ],
+          "size": [
+            63.396814584732056,
+            43.21873664855957,
+            57.24444770812988
+          ]
+        },
+        {
+          "center": [
+            -57.95424562935113,
+            10.632788461989549,
+            202.4000115394592
+          ],
+          "size": [
+            39.741286754608154,
+            41.25424861907959,
+            53.155558586120605
+          ]
+        },
+        {
+          "center": [
+            97.22601693626166,
+            -7.047603803330276,
+            174.8000099658966
+          ],
+          "size": [
+            16.085758924484253,
+            71.70381307601929,
+            34.75555753707886
+          ]
+        }
+      ],
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_FacilityRooms_Generator",
+      "target_size_cm": [
+        250,
+        120,
+        160
+      ],
+      "category": "Utilities",
+      "reference": "References/Basement_Reference.png",
+      "size_cm": [
+        250,
+        120,
+        160
+      ],
+      "bounds_cm": [
+        -125.0,
+        -60.0,
+        0,
+        125.0,
+        60.0,
+        160
+      ],
+      "triangles": 9620,
+      "materials": [
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Steel",
+        "M_FacilityRooms_Teal",
+        "M_FacilityRooms_Panel",
+        "M_FacilityRooms_Screen",
+        "M_FacilityRooms_Blue",
+        "M_FacilityRooms_Amber",
+        "M_FacilityRooms_Red",
+        "M_FacilityRooms_Ivory",
+        "M_FacilityRooms_Hazard",
+        "M_FacilityRooms_Rubber"
+      ],
+      "collision_boxes": 4,
+      "collision_specs_cm": [
+        {
+          "center": [
+            0.0,
+            2.3538843592397996,
+            22.434245586395264
+          ],
+          "size": [
+            250.0,
+            111.44916224479675,
+            44.86849117279053
+          ]
+        },
+        {
+          "center": [
+            -28.999999999999996,
+            2.3538843592397996,
+            96.87515139579772
+          ],
+          "size": [
+            181.0,
+            109.52762496471405,
+            114.2107048034668
+          ]
+        },
+        {
+          "center": [
+            84.0,
+            2.3538843592397996,
+            86.67776703834534
+          ],
+          "size": [
+            73.0,
+            101.84147584438324,
+            99.93436670303345
+          ]
+        },
+        {
+          "center": [
+            57.99999999999999,
+            25.412331720232228,
+            145.82259631156919
+          ],
+          "size": [
+            74.0,
+            25.940753281116486,
+            34.671106815338135
+          ]
+        }
+      ],
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_FacilityRooms_PumpSkid",
+      "target_size_cm": [
+        200,
+        110,
+        130
+      ],
+      "category": "Utilities",
+      "reference": "References/Basement_Reference.png",
+      "size_cm": [
+        200,
+        110,
+        130
+      ],
+      "bounds_cm": [
+        -100.0,
+        -55.0,
+        0,
+        100.0,
+        55.0,
+        130
+      ],
+      "triangles": 14452,
+      "materials": [
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Steel",
+        "M_FacilityRooms_Teal",
+        "M_FacilityRooms_Blue",
+        "M_FacilityRooms_Ivory",
+        "M_FacilityRooms_Red"
+      ],
+      "collision_boxes": 7,
+      "collision_specs_cm": [
+        {
+          "center": [
+            -48.484851837158196,
+            18.3333313443831,
+            48.75
+          ],
+          "size": [
+            55.555559396743774,
+            69.52380973100662,
+            63.984375
+          ]
+        },
+        {
+          "center": [
+            -48.484851837158196,
+            -25.476192595703267,
+            48.75
+          ],
+          "size": [
+            55.555559396743774,
+            45.7142858505249,
+            53.828125
+          ]
+        },
+        {
+          "center": [
+            48.484851837158196,
+            18.3333313443831,
+            48.75
+          ],
+          "size": [
+            55.555559396743774,
+            69.52380973100662,
+            63.984375
+          ]
+        },
+        {
+          "center": [
+            48.484851837158196,
+            -25.476192595703267,
+            48.75
+          ],
+          "size": [
+            55.555559396743774,
+            45.7142858505249,
+            53.828125
+          ]
+        },
+        {
+          "center": [
+            0.0,
+            2.142855105655528,
+            7.109375000000001
+          ],
+          "size": [
+            200.0000138282776,
+            99.04761934280396,
+            14.21875
+          ]
+        },
+        {
+          "center": [
+            0.0,
+            -43.571430744869375,
+            94.453125
+          ],
+          "size": [
+            202.02021598815918,
+            22.85714292526245,
+            25.390625
+          ]
+        },
+        {
+          "center": [
+            0.0,
+            2.142855105655528,
+            117.81249999999999
+          ],
+          "size": [
+            202.02021598815918,
+            22.85714292526245,
+            26.40625
+          ]
+        }
+      ],
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_FacilityRooms_PressureTank",
+      "target_size_cm": [
+        80,
+        80,
+        190
+      ],
+      "category": "Utilities",
+      "reference": "References/Basement_Reference.png",
+      "size_cm": [
+        80,
+        80,
+        190
+      ],
+      "bounds_cm": [
+        -40.0,
+        -40.0,
+        0,
+        40.0,
+        40.0,
+        190
+      ],
+      "triangles": 6240,
+      "materials": [
+        "M_FacilityRooms_Steel",
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Ivory",
+        "M_FacilityRooms_Blue",
+        "M_FacilityRooms_Red",
+        "M_FacilityRooms_Teal",
+        "M_FacilityRooms_Panel"
+      ],
+      "collision_boxes": 3,
+      "collision_specs_cm": [
+        {
+          "center": [
+            -1.5894570992713852e-06,
+            3.59223156004278,
+            98.99999409914017
+          ],
+          "size": [
+            76.79999542236328,
+            69.90291166305542,
+            154.99999076128006
+          ]
+        },
+        {
+          "center": [
+            -1.5894570992713852e-06,
+            3.59223156004278,
+            12.99999922513962
+          ],
+          "size": [
+            68.26666259765625,
+            62.135921478271484,
+            25.999998450279236
+          ]
+        },
+        {
+          "center": [
+            -1.5894570992713852e-06,
+            3.59223156004278,
+            181.99998915195465
+          ],
+          "size": [
+            27.73333168029785,
+            25.24271810054779,
+            15.999999046325684
+          ]
+        }
+      ],
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_FacilityRooms_ElectricalCabinet",
+      "target_size_cm": [
+        110,
+        45,
+        200
+      ],
+      "category": "Utilities",
+      "reference": "References/Basement_Reference.png",
+      "size_cm": [
+        110,
+        45,
+        200
+      ],
+      "bounds_cm": [
+        -55.0,
+        -22.5,
+        0,
+        55.0,
+        22.5,
+        200
+      ],
+      "triangles": 4124,
+      "materials": [
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Ivory",
+        "M_FacilityRooms_Steel",
+        "M_FacilityRooms_Panel",
+        "M_FacilityRooms_Screen",
+        "M_FacilityRooms_Blue",
+        "M_FacilityRooms_Amber",
+        "M_FacilityRooms_Teal",
+        "M_FacilityRooms_Red",
+        "M_FacilityRooms_Hazard"
+      ],
+      "collision_boxes": 1,
+      "collision_specs_cm": [
+        {
+          "center": [
+            0.0,
+            4.181415962434443,
+            100.00001192092896
+          ],
+          "size": [
+            110.0,
+            35.84070682525635,
+            200.0000238418579
+          ]
+        }
+      ],
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_FacilityRooms_SupplyRack",
+      "target_size_cm": [
+        180,
+        70,
+        210
+      ],
+      "category": "Utilities",
+      "reference": "References/Basement_Reference.png",
+      "size_cm": [
+        180,
+        70,
+        210
+      ],
+      "bounds_cm": [
+        -90.0,
+        -35.0,
+        0,
+        90.0,
+        35.0,
+        210
+      ],
+      "triangles": 6460,
+      "materials": [
+        "M_FacilityRooms_Teal",
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Steel",
+        "M_FacilityRooms_Paper",
+        "M_FacilityRooms_Ivory",
+        "M_FacilityRooms_Wood",
+        "M_FacilityRooms_Rubber"
+      ],
+      "collision_boxes": 11,
+      "collision_specs_cm": [
+        {
+          "center": [
+            -83.60656117318082,
+            -27.708335118161326,
+            104.74820518493652
+          ],
+          "size": [
+            6.885246455669403,
+            6.805555880069733,
+            209.49641036987305
+          ]
+        },
+        {
+          "center": [
+            -83.60656117318082,
+            28.68055645955931,
+            104.74820518493652
+          ],
+          "size": [
+            6.885246455669403,
+            6.805555880069733,
+            209.49641036987305
+          ]
+        },
+        {
+          "center": [
+            83.60656703593324,
+            -27.708335118161326,
+            104.74820518493652
+          ],
+          "size": [
+            6.885246455669403,
+            6.805555880069733,
+            209.49641036987305
+          ]
+        },
+        {
+          "center": [
+            83.60656703593324,
+            28.68055645955931,
+            104.74820518493652
+          ],
+          "size": [
+            6.885246455669403,
+            6.805555880069733,
+            209.49641036987305
+          ]
+        },
+        {
+          "center": [
+            2.9313762084370865e-06,
+            0.4861106706989915,
+            11.079137086868286
+          ],
+          "size": [
+            177.04919457435608,
+            68.05555880069733,
+            11.079137086868286
+          ]
+        },
+        {
+          "center": [
+            2.9313762084370865e-06,
+            0.4861106706989915,
+            74.53237676620483
+          ],
+          "size": [
+            177.04919457435608,
+            68.05555880069733,
+            11.079137086868286
+          ]
+        },
+        {
+          "center": [
+            2.9313762084370865e-06,
+            0.4861106706989915,
+            137.98561644554138
+          ],
+          "size": [
+            177.04919457435608,
+            68.05555880069733,
+            11.079137086868286
+          ]
+        },
+        {
+          "center": [
+            2.9313762084370865e-06,
+            0.4861106706989915,
+            205.4676332473755
+          ],
+          "size": [
+            177.04919457435608,
+            68.05555880069733,
+            11.079137086868286
+          ]
+        },
+        {
+          "center": [
+            2.9313762084370865e-06,
+            0.4861106706989915,
+            38.27338266372681
+          ],
+          "size": [
+            155.40984857082367,
+            52.50000250339508,
+            42.302159786224365
+          ]
+        },
+        {
+          "center": [
+            -4.918030251244794,
+            4.374999745024553,
+            100.71942806243896
+          ],
+          "size": [
+            160.32788175344467,
+            52.50000250339508,
+            40.287771224975586
+          ]
+        },
+        {
+          "center": [
+            2.9313762084370865e-06,
+            4.374999745024553,
+            167.19425058364868
+          ],
+          "size": [
+            160.32788175344467,
+            52.50000250339508,
+            47.33813118934631
+          ]
+        }
+      ],
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_FacilityRooms_PalletCrates",
+      "target_size_cm": [
+        120,
+        100,
+        105
+      ],
+      "category": "Utilities",
+      "reference": "References/Basement_Reference.png",
+      "size_cm": [
+        120,
+        100,
+        105
+      ],
+      "bounds_cm": [
+        -60.0,
+        -50.0,
+        0,
+        60.0,
+        50.0,
+        105
+      ],
+      "triangles": 2808,
+      "materials": [
+        "M_FacilityRooms_Wood",
+        "M_FacilityRooms_Teal",
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Steel",
+        "M_FacilityRooms_Paper",
+        "M_FacilityRooms_Ivory"
+      ],
+      "collision_boxes": 3,
+      "collision_specs_cm": [
+        {
+          "center": [
+            0.0,
+            0.0,
+            8.155340194702148
+          ],
+          "size": [
+            120.00001430511475,
+            104.16667461395264,
+            16.310680389404297
+          ]
+        },
+        {
+          "center": [
+            0.0,
+            5.208333730697632,
+            46.89320611953735
+          ],
+          "size": [
+            105.0000125169754,
+            85.41667318344116,
+            59.126216411590576
+          ]
+        },
+        {
+          "center": [
+            0.0,
+            7.291667222976685,
+            89.70874214172363
+          ],
+          "size": [
+            106.00001263618469,
+            67.70833849906921,
+            33.64077830314636
+          ]
+        }
+      ],
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_FacilityRooms_PipeBundle",
+      "target_size_cm": [
+        180,
+        65,
+        60
+      ],
+      "category": "Utilities",
+      "reference": "References/Basement_Reference.png",
+      "size_cm": [
+        180,
+        65,
+        60
+      ],
+      "bounds_cm": [
+        -90.0,
+        -32.5,
+        0,
+        90.0,
+        32.5,
+        60
+      ],
+      "triangles": 9636,
+      "materials": [
+        "M_FacilityRooms_Wood",
+        "M_FacilityRooms_Steel",
+        "M_FacilityRooms_Iron"
+      ],
+      "collision_boxes": 2,
+      "collision_specs_cm": [
+        {
+          "center": [
+            0.0,
+            0.0,
+            37.00934708118439
+          ],
+          "size": [
+            177.82657384872437,
+            58.10606497526169,
+            48.22430074214935
+          ]
+        },
+        {
+          "center": [
+            0.0,
+            0.0,
+            8.971962928771973
+          ],
+          "size": [
+            138.30955743789673,
+            64.01515632867813,
+            17.943925857543945
+          ]
+        }
+      ],
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_FacilityRooms_PipeRun",
+      "target_size_cm": [
+        200,
+        25,
+        90
+      ],
+      "category": "Utilities",
+      "reference": "References/Basement_Reference.png",
+      "size_cm": [
+        200,
+        25,
+        90
+      ],
+      "bounds_cm": [
+        -100.0,
+        -12.5,
+        0,
+        100.0,
+        12.5,
+        90
+      ],
+      "triangles": 8244,
+      "materials": [
+        "M_FacilityRooms_Blue",
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Steel",
+        "M_FacilityRooms_Red",
+        "M_FacilityRooms_Hazard",
+        "M_FacilityRooms_Ivory"
+      ],
+      "collision_boxes": 4,
+      "collision_specs_cm": [
+        {
+          "center": [
+            0.0,
+            1.8617029386631927,
+            15.628742635963883
+          ],
+          "size": [
+            203.0456781387329,
+            24.468084931373596,
+            20.47904098033905
+          ]
+        },
+        {
+          "center": [
+            0.0,
+            1.8617029386631927,
+            71.67664426636549
+          ],
+          "size": [
+            203.0456781387329,
+            24.468084931373596,
+            20.47904098033905
+          ]
+        },
+        {
+          "center": [
+            0.0,
+            -7.712765077961257,
+            17.784431160210097
+          ],
+          "size": [
+            36.548222064971924,
+            19.1489360332489,
+            37.72454917430878
+          ]
+        },
+        {
+          "center": [
+            47.71573436260223,
+            -4.521275739086442,
+            80.29939836335036
+          ],
+          "size": [
+            20.30456781387329,
+            21.27659559249878,
+            21.556885242462158
+          ]
+        }
+      ],
+      "uv_channels": 2
+    }
+  ],
+  "total_triangles": 74476
+}

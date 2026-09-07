@@ -1,0 +1,3409 @@
+{
+  "axis_contract": "Blender X width/-Y front/Z up -> UE X width/+Y front/Z up; floor-centred pivots, cm",
+  "materials": {
+    "Concrete": {
+      "name": "M_FacilityRooms_Concrete",
+      "metallic": 0,
+      "roughness": 0.85,
+      "emission": 0.0
+    },
+    "Floor": {
+      "name": "M_FacilityRooms_Floor",
+      "metallic": 0.05,
+      "roughness": 0.72,
+      "emission": 0.0
+    },
+    "Steel": {
+      "name": "M_FacilityRooms_Steel",
+      "metallic": 0.8,
+      "roughness": 0.3,
+      "emission": 0.0
+    },
+    "Iron": {
+      "name": "M_FacilityRooms_Iron",
+      "metallic": 0.65,
+      "roughness": 0.48,
+      "emission": 0.0
+    },
+    "Teal": {
+      "name": "M_FacilityRooms_Teal",
+      "metallic": 0.2,
+      "roughness": 0.48,
+      "emission": 0.0
+    },
+    "Ivory": {
+      "name": "M_FacilityRooms_Ivory",
+      "metallic": 0.1,
+      "roughness": 0.45,
+      "emission": 0.0
+    },
+    "Rust": {
+      "name": "M_FacilityRooms_Rust",
+      "metallic": 0.3,
+      "roughness": 0.82,
+      "emission": 0.0
+    },
+    "Rubber": {
+      "name": "M_FacilityRooms_Rubber",
+      "metallic": 0,
+      "roughness": 0.9,
+      "emission": 0.0
+    },
+    "Hazard": {
+      "name": "M_FacilityRooms_Hazard",
+      "metallic": 0.1,
+      "roughness": 0.55,
+      "emission": 0.0
+    },
+    "Wood": {
+      "name": "M_FacilityRooms_Wood",
+      "metallic": 0,
+      "roughness": 0.8,
+      "emission": 0.0
+    },
+    "Screen": {
+      "name": "M_FacilityRooms_Screen",
+      "metallic": 0.05,
+      "roughness": 0.3,
+      "emission": 1.5
+    },
+    "Amber": {
+      "name": "M_FacilityRooms_Amber",
+      "metallic": 0.0,
+      "roughness": 0.4,
+      "emission": 2.0
+    },
+    "Blue": {
+      "name": "M_FacilityRooms_Blue",
+      "metallic": 0.25,
+      "roughness": 0.4,
+      "emission": 0.0
+    },
+    "Red": {
+      "name": "M_FacilityRooms_Red",
+      "metallic": 0.2,
+      "roughness": 0.4,
+      "emission": 0.0
+    },
+    "Panel": {
+      "name": "M_FacilityRooms_Panel",
+      "metallic": 0.3,
+      "roughness": 0.5,
+      "emission": 0.0
+    },
+    "Paper": {
+      "name": "M_FacilityRooms_Paper",
+      "metallic": 0,
+      "roughness": 0.9,
+      "emission": 0.0
+    }
+  },
+  "texture": "Textures/T_FacilityRooms_Atlas.png",
+  "assets": [
+    {
+      "name": "SM_FacilityRooms_Wall200",
+      "target_size_cm": [
+        200,
+        20,
+        300
+      ],
+      "category": "Architecture",
+      "reference": "References/Basement_Reference.png; References/ControlRoom_Reference.png",
+      "module_grid_cm": 200,
+      "size_cm": [
+        200,
+        20,
+        300
+      ],
+      "bounds_cm": [
+        -100.0,
+        -10.0,
+        0,
+        100.0,
+        10.0,
+        300
+      ],
+      "triangles": 3084,
+      "materials": [
+        "M_FacilityRooms_Concrete",
+        "M_FacilityRooms_Iron"
+      ],
+      "collision_boxes": 1,
+      "collision_specs_cm": [
+        {
+          "center": [
+            0.0,
+            0.0,
+            150.0
+          ],
+          "size": [
+            200.0,
+            20.00000238418579,
+            300.0
+          ]
+        }
+      ],
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_FacilityRooms_Wall100",
+      "target_size_cm": [
+        100,
+        20,
+        300
+      ],
+      "category": "Architecture",
+      "reference": "References/Basement_Reference.png; References/ControlRoom_Reference.png",
+      "module_grid_cm": 100,
+      "size_cm": [
+        100,
+        20,
+        300
+      ],
+      "bounds_cm": [
+        -50.0,
+        -10.0,
+        0,
+        50.0,
+        10.0,
+        300
+      ],
+      "triangles": 3084,
+      "materials": [
+        "M_FacilityRooms_Concrete",
+        "M_FacilityRooms_Iron"
+      ],
+      "collision_boxes": 1,
+      "collision_specs_cm": [
+        {
+          "center": [
+            0.0,
+            0.0,
+            150.0
+          ],
+          "size": [
+            100.0,
+            20.00000238418579,
+            300.0
+          ]
+        }
+      ],
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_FacilityRooms_WallCorner",
+      "target_size_cm": [
+        20,
+        20,
+        300
+      ],
+      "category": "Architecture",
+      "reference": "References/Basement_Reference.png; References/ControlRoom_Reference.png",
+      "module_grid_cm": 20,
+      "size_cm": [
+        20,
+        20,
+        300
+      ],
+      "bounds_cm": [
+        -10.0,
+        -10.0,
+        0,
+        10.0,
+        10.0,
+        300
+      ],
+      "triangles": 756,
+      "materials": [
+        "M_FacilityRooms_Concrete",
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Steel"
+      ],
+      "collision_boxes": 1,
+      "collision_specs_cm": [
+        {
+          "center": [
+            0.0,
+            0.0,
+            150.0
+          ],
+          "size": [
+            20.00000238418579,
+            20.00000238418579,
+            300.0
+          ]
+        }
+      ],
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_FacilityRooms_Doorway200",
+      "target_size_cm": [
+        200,
+        20,
+        300
+      ],
+      "category": "Architecture",
+      "reference": "References/Basement_Reference.png; References/ControlRoom_Reference.png",
+      "opening_cm": {
+        "width": 120,
+        "height": 230,
+        "center_x": 0,
+        "bounds": [
+          -60,
+          -10,
+          0,
+          60,
+          10,
+          230
+        ]
+      },
+      "size_cm": [
+        200,
+        20,
+        300
+      ],
+      "bounds_cm": [
+        -100.0,
+        -10.0,
+        0,
+        100.0,
+        10.0,
+        300
+      ],
+      "triangles": 2396,
+      "materials": [
+        "M_FacilityRooms_Concrete",
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Hazard"
+      ],
+      "collision_boxes": 3,
+      "collision_specs_cm": [
+        {
+          "center": [
+            -80.0,
+            0.0,
+            114.99999999999999
+          ],
+          "size": [
+            40.0,
+            20.00000238418579,
+            230.0
+          ]
+        },
+        {
+          "center": [
+            80.0,
+            0.0,
+            114.99999999999999
+          ],
+          "size": [
+            40.0,
+            20.00000238418579,
+            230.0
+          ]
+        },
+        {
+          "center": [
+            0.0,
+            0.0,
+            265.0
+          ],
+          "size": [
+            200.0,
+            20.00000238418579,
+            70.0
+          ]
+        }
+      ],
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_FacilityRooms_Floor200",
+      "target_size_cm": [
+        200,
+        200,
+        20
+      ],
+      "category": "Architecture",
+      "reference": "References/Basement_Reference.png; References/ControlRoom_Reference.png",
+      "module_grid_cm": 200,
+      "walkable_top_z_cm": 20,
+      "size_cm": [
+        200,
+        200,
+        20
+      ],
+      "bounds_cm": [
+        -100.0,
+        -100.0,
+        0,
+        100.0,
+        100.0,
+        20
+      ],
+      "triangles": 648,
+      "materials": [
+        "M_FacilityRooms_Concrete",
+        "M_FacilityRooms_Iron"
+      ],
+      "collision_boxes": 1,
+      "collision_specs_cm": [
+        {
+          "center": [
+            0.0,
+            0.0,
+            9.999999403953552
+          ],
+          "size": [
+            200.0,
+            200.0,
+            19.999998807907104
+          ]
+        }
+      ],
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_FacilityRooms_Threshold120",
+      "target_size_cm": [
+        120,
+        24,
+        4
+      ],
+      "category": "Architecture",
+      "reference": "References/Basement_Reference.png; References/ControlRoom_Reference.png",
+      "size_cm": [
+        120,
+        24,
+        4
+      ],
+      "bounds_cm": [
+        -60.0,
+        -12.0,
+        0,
+        60.0,
+        12.0,
+        4
+      ],
+      "triangles": 1100,
+      "materials": [
+        "M_FacilityRooms_Steel",
+        "M_FacilityRooms_Iron"
+      ],
+      "collision_boxes": 1,
+      "collision_specs_cm": [
+        {
+          "center": [
+            0.0,
+            0.0,
+            2.0
+          ],
+          "size": [
+            120.00001430511475,
+            24.0,
+            4.0
+          ]
+        }
+      ],
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_FacilityRooms_Ladder300",
+      "target_size_cm": [
+        75,
+        30,
+        330
+      ],
+      "category": "Architecture",
+      "reference": "References/Basement_Reference.png; References/ControlRoom_Reference.png",
+      "climb_height_cm": 300,
+      "rung_count": 11,
+      "rung_spacing_cm": 27,
+      "use_note": "Visual ladder with segmented collision; climb interaction is authored separately.",
+      "size_cm": [
+        75,
+        30,
+        330
+      ],
+      "bounds_cm": [
+        -37.5,
+        -15.0,
+        0,
+        37.5,
+        15.0,
+        330
+      ],
+      "triangles": 8512,
+      "materials": [
+        "M_FacilityRooms_Steel",
+        "M_FacilityRooms_Hazard",
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Rubber"
+      ],
+      "collision_boxes": 17,
+      "collision_specs_cm": [
+        {
+          "center": [
+            -34.48160997033119,
+            -9.999999403953552,
+            149.92351233959198
+          ],
+          "size": [
+            5.996801733970642,
+            5.999999642372131,
+            299.84702467918396
+          ]
+        },
+        {
+          "center": [
+            -34.48160997033119,
+            -8.999999463558197,
+            312.84039574861526
+          ],
+          "size": [
+            5.996801733970642,
+            7.999999523162842,
+            29.984702467918396
+          ]
+        },
+        {
+          "center": [
+            -34.48160997033119,
+            3.999999761581421,
+            326.8332569003105
+          ],
+          "size": [
+            5.996801733970642,
+            21.999998688697815,
+            5.996940493583679
+          ]
+        },
+        {
+          "center": [
+            34.48160997033119,
+            -9.999999403953552,
+            149.92351233959198
+          ],
+          "size": [
+            5.996801733970642,
+            5.999999642372131,
+            299.84702467918396
+          ]
+        },
+        {
+          "center": [
+            34.48160997033119,
+            -8.999999463558197,
+            312.84039574861526
+          ],
+          "size": [
+            5.996801733970642,
+            7.999999523162842,
+            29.984702467918396
+          ]
+        },
+        {
+          "center": [
+            34.48160997033119,
+            3.999999761581421,
+            326.8332569003105
+          ],
+          "size": [
+            5.996801733970642,
+            21.999998688697815,
+            5.996940493583679
+          ]
+        },
+        {
+          "center": [
+            0.0,
+            -11.999999284744261,
+            14.992351233959198
+          ],
+          "size": [
+            63.965885162353516,
+            5.999999642372131,
+            4.997450411319733
+          ]
+        },
+        {
+          "center": [
+            0.0,
+            -11.999999284744261,
+            41.978583455085754
+          ],
+          "size": [
+            63.965885162353516,
+            5.999999642372131,
+            4.997450411319733
+          ]
+        },
+        {
+          "center": [
+            0.0,
+            -11.999999284744261,
+            68.96481567621231
+          ],
+          "size": [
+            63.965885162353516,
+            5.999999642372131,
+            4.997450411319733
+          ]
+        },
+        {
+          "center": [
+            0.0,
+            -11.999999284744261,
+            95.95104789733885
+          ],
+          "size": [
+            63.965885162353516,
+            5.999999642372131,
+            4.997450411319733
+          ]
+        },
+        {
+          "center": [
+            0.0,
+            -11.999999284744261,
+            122.93728011846542
+          ],
+          "size": [
+            63.965885162353516,
+            5.999999642372131,
+            4.997450411319733
+          ]
+        },
+        {
+          "center": [
+            0.0,
+            -11.999999284744261,
+            149.92351233959198
+          ],
+          "size": [
+            63.965885162353516,
+            5.999999642372131,
+            4.997450411319733
+          ]
+        },
+        {
+          "center": [
+            0.0,
+            -11.999999284744261,
+            176.90974456071854
+          ],
+          "size": [
+            63.965885162353516,
+            5.999999642372131,
+            4.997450411319733
+          ]
+        },
+        {
+          "center": [
+            0.0,
+            -11.999999284744261,
+            203.8959767818451
+          ],
+          "size": [
+            63.965885162353516,
+            5.999999642372131,
+            4.997450411319733
+          ]
+        },
+        {
+          "center": [
+            0.0,
+            -11.999999284744261,
+            230.88220900297168
+          ],
+          "size": [
+            63.965885162353516,
+            5.999999642372131,
+            4.997450411319733
+          ]
+        },
+        {
+          "center": [
+            0.0,
+            -11.999999284744261,
+            257.8684412240982
+          ],
+          "size": [
+            63.965885162353516,
+            5.999999642372131,
+            4.997450411319733
+          ]
+        },
+        {
+          "center": [
+            0.0,
+            -11.999999284744261,
+            284.85467344522476
+          ],
+          "size": [
+            63.965885162353516,
+            5.999999642372131,
+            4.997450411319733
+          ]
+        }
+      ],
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_FacilityRooms_HatchLanding200",
+      "target_size_cm": [
+        200,
+        200,
+        20
+      ],
+      "category": "Architecture",
+      "reference": "References/Basement_Reference.png; References/ControlRoom_Reference.png",
+      "opening_cm": {
+        "width": 90,
+        "depth": 90,
+        "center": [
+          0,
+          0
+        ],
+        "bounds": [
+          -45,
+          -45,
+          0,
+          45,
+          45,
+          20
+        ]
+      },
+      "walkable_top_z_cm": 20,
+      "size_cm": [
+        200,
+        200,
+        20
+      ],
+      "bounds_cm": [
+        -100.0,
+        -100.0,
+        0,
+        100.0,
+        100.0,
+        20
+      ],
+      "triangles": 1952,
+      "materials": [
+        "M_FacilityRooms_Concrete",
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Hazard",
+        "M_FacilityRooms_Steel"
+      ],
+      "collision_boxes": 4,
+      "collision_specs_cm": [
+        {
+          "center": [
+            -72.49999701976776,
+            0.0,
+            10.0
+          ],
+          "size": [
+            55.0,
+            200.0,
+            20.0
+          ]
+        },
+        {
+          "center": [
+            72.50000298023224,
+            0.0,
+            10.0
+          ],
+          "size": [
+            55.0,
+            200.0,
+            20.0
+          ]
+        },
+        {
+          "center": [
+            2.9802322387695312e-06,
+            -72.5,
+            10.0
+          ],
+          "size": [
+            90.0,
+            55.0,
+            20.0
+          ]
+        },
+        {
+          "center": [
+            2.9802322387695312e-06,
+            72.5,
+            10.0
+          ],
+          "size": [
+            90.0,
+            55.0,
+            20.0
+          ]
+        }
+      ],
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_FacilityRooms_Guardrail200",
+      "target_size_cm": [
+        200,
+        12,
+        110
+      ],
+      "category": "Architecture",
+      "reference": "References/Basement_Reference.png; References/ControlRoom_Reference.png",
+      "size_cm": [
+        200,
+        12,
+        110
+      ],
+      "bounds_cm": [
+        -100.0,
+        -6.0,
+        0,
+        100.0,
+        6.0,
+        110
+      ],
+      "triangles": 1412,
+      "materials": [
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Steel",
+        "M_FacilityRooms_Hazard"
+      ],
+      "collision_boxes": 5,
+      "collision_specs_cm": [
+        {
+          "center": [
+            -95.0,
+            0.0,
+            55.000006556510925
+          ],
+          "size": [
+            10.0,
+            12.0,
+            110.00001311302185
+          ]
+        },
+        {
+          "center": [
+            95.0,
+            0.0,
+            55.000006556510925
+          ],
+          "size": [
+            10.0,
+            12.0,
+            110.00001311302185
+          ]
+        },
+        {
+          "center": [
+            0.0,
+            0.0,
+            107.000012755394
+          ],
+          "size": [
+            200.0,
+            8.0,
+            6.000000715255737
+          ]
+        },
+        {
+          "center": [
+            0.0,
+            0.0,
+            58.000006914138794
+          ],
+          "size": [
+            188.0,
+            5.0,
+            4.000000476837158
+          ]
+        },
+        {
+          "center": [
+            0.0,
+            0.0,
+            12.000001430511475
+          ],
+          "size": [
+            188.0,
+            3.0,
+            16.000001907348633
+          ]
+        }
+      ],
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_FacilityRooms_WallLamp",
+      "target_size_cm": [
+        80,
+        18,
+        22
+      ],
+      "category": "Architecture",
+      "reference": "References/Basement_Reference.png; References/ControlRoom_Reference.png",
+      "size_cm": [
+        80,
+        18,
+        22
+      ],
+      "bounds_cm": [
+        -40.0,
+        -9.0,
+        0,
+        40.0,
+        9.0,
+        22
+      ],
+      "triangles": 1032,
+      "materials": [
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Steel",
+        "M_FacilityRooms_Rubber",
+        "M_FacilityRooms_Amber"
+      ],
+      "collision_boxes": 1,
+      "collision_specs_cm": [
+        {
+          "center": [
+            0.0,
+            0.0,
+            11.0
+          ],
+          "size": [
+            80.00000953674316,
+            18.0,
+            22.0
+          ]
+        }
+      ],
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_FacilityRooms_WallVent",
+      "target_size_cm": [
+        100,
+        14,
+        60
+      ],
+      "category": "Architecture",
+      "reference": "References/Basement_Reference.png; References/ControlRoom_Reference.png",
+      "size_cm": [
+        100,
+        14,
+        60
+      ],
+      "bounds_cm": [
+        -50.0,
+        -7.0,
+        0,
+        50.0,
+        7.0,
+        60
+      ],
+      "triangles": 2840,
+      "materials": [
+        "M_FacilityRooms_Steel",
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Rubber"
+      ],
+      "collision_boxes": 1,
+      "collision_specs_cm": [
+        {
+          "center": [
+            0.0,
+            -3.725290298461914e-07,
+            30.000003576278683
+          ],
+          "size": [
+            100.0,
+            14.0,
+            60.00000715255737
+          ]
+        }
+      ],
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_FacilityRooms_WoodWall200",
+      "target_size_cm": [
+        200,
+        20,
+        220
+      ],
+      "category": "Architecture",
+      "reference": "References/ControlRoom_Attic_Reference.png",
+      "module_grid_cm": 200,
+      "size_cm": [
+        200,
+        20,
+        220
+      ],
+      "bounds_cm": [
+        -100.0,
+        -10.0,
+        0,
+        100.0,
+        10.0,
+        220
+      ],
+      "triangles": 4360,
+      "materials": [
+        "M_FacilityRooms_Wood",
+        "M_FacilityRooms_Iron"
+      ],
+      "collision_boxes": 1,
+      "collision_specs_cm": [
+        {
+          "center": [
+            0.0,
+            0.0,
+            110.00000000000001
+          ],
+          "size": [
+            200.0,
+            20.00000238418579,
+            220.0
+          ]
+        }
+      ],
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_FacilityRooms_WoodGable600",
+      "target_size_cm": [
+        600,
+        20,
+        140
+      ],
+      "category": "Architecture",
+      "reference": "References/ControlRoom_Attic_Reference.png",
+      "profile_cm": [
+        [
+          -300,
+          0
+        ],
+        [
+          0,
+          140
+        ],
+        [
+          300,
+          0
+        ]
+      ],
+      "collision_profile": "Twenty-four 25 cm wide stepped box envelopes; at most 11.667 cm above the timber slope.",
+      "size_cm": [
+        600,
+        20,
+        140
+      ],
+      "bounds_cm": [
+        -300.0,
+        -10.0,
+        0,
+        300.0,
+        10.0,
+        140
+      ],
+      "triangles": 3196,
+      "materials": [
+        "M_FacilityRooms_Wood"
+      ],
+      "collision_boxes": 24,
+      "collision_specs_cm": [
+        {
+          "center": [
+            -287.5642269849777,
+            0.0,
+            5.835265119870506
+          ],
+          "size": [
+            25.005584955215454,
+            20.00000238418579,
+            11.670530239741012
+          ]
+        },
+        {
+          "center": [
+            -262.55864202976227,
+            0.0,
+            11.670530239741005
+          ],
+          "size": [
+            25.005584955215454,
+            20.00000238418579,
+            23.34106047948201
+          ]
+        },
+        {
+          "center": [
+            -237.5530570745468,
+            0.0,
+            17.505795359611508
+          ],
+          "size": [
+            25.005584955215454,
+            20.00000238418579,
+            35.01159071922302
+          ]
+        },
+        {
+          "center": [
+            -212.54747211933136,
+            0.0,
+            23.341060479482017
+          ],
+          "size": [
+            25.005584955215454,
+            20.00000238418579,
+            46.682120958964035
+          ]
+        },
+        {
+          "center": [
+            -187.5418871641159,
+            0.0,
+            29.176325599352516
+          ],
+          "size": [
+            25.005584955215454,
+            20.00000238418579,
+            58.35265119870503
+          ]
+        },
+        {
+          "center": [
+            -162.53630220890045,
+            0.0,
+            35.011590719223015
+          ],
+          "size": [
+            25.005584955215454,
+            20.00000238418579,
+            70.02318143844604
+          ]
+        },
+        {
+          "center": [
+            -137.530717253685,
+            0.0,
+            40.84685583909352
+          ],
+          "size": [
+            25.005584955215454,
+            20.00000238418579,
+            81.69371167818704
+          ]
+        },
+        {
+          "center": [
+            -112.52513229846954,
+            0.0,
+            46.682120958964035
+          ],
+          "size": [
+            25.005584955215454,
+            20.00000238418579,
+            93.36424191792807
+          ]
+        },
+        {
+          "center": [
+            -87.51954734325409,
+            0.0,
+            52.51738607883454
+          ],
+          "size": [
+            25.005584955215454,
+            20.00000238418579,
+            105.03477215766907
+          ]
+        },
+        {
+          "center": [
+            -62.513962388038635,
+            0.0,
+            58.35265119870504
+          ],
+          "size": [
+            25.005584955215454,
+            20.00000238418579,
+            116.70530239741008
+          ]
+        },
+        {
+          "center": [
+            -37.50837743282318,
+            0.0,
+            64.18791631857553
+          ],
+          "size": [
+            25.005584955215454,
+            20.00000238418579,
+            128.37583263715106
+          ]
+        },
+        {
+          "center": [
+            -12.502792477607727,
+            0.0,
+            70.02318143844603
+          ],
+          "size": [
+            25.005584955215454,
+            20.00000238418579,
+            140.0463628768921
+          ]
+        },
+        {
+          "center": [
+            12.502792477607727,
+            0.0,
+            70.02318143844603
+          ],
+          "size": [
+            25.005584955215454,
+            20.00000238418579,
+            140.0463628768921
+          ]
+        },
+        {
+          "center": [
+            37.50837743282318,
+            0.0,
+            64.18791631857553
+          ],
+          "size": [
+            25.005584955215454,
+            20.00000238418579,
+            128.37583263715106
+          ]
+        },
+        {
+          "center": [
+            62.513962388038635,
+            0.0,
+            58.35265119870504
+          ],
+          "size": [
+            25.005584955215454,
+            20.00000238418579,
+            116.70530239741008
+          ]
+        },
+        {
+          "center": [
+            87.51954734325409,
+            0.0,
+            52.51738607883454
+          ],
+          "size": [
+            25.005584955215454,
+            20.00000238418579,
+            105.03477215766907
+          ]
+        },
+        {
+          "center": [
+            112.52513229846954,
+            0.0,
+            46.682120958964035
+          ],
+          "size": [
+            25.005584955215454,
+            20.00000238418579,
+            93.36424191792807
+          ]
+        },
+        {
+          "center": [
+            137.530717253685,
+            0.0,
+            40.84685583909352
+          ],
+          "size": [
+            25.005584955215454,
+            20.00000238418579,
+            81.69371167818704
+          ]
+        },
+        {
+          "center": [
+            162.53630220890045,
+            0.0,
+            35.011590719223015
+          ],
+          "size": [
+            25.005584955215454,
+            20.00000238418579,
+            70.02318143844604
+          ]
+        },
+        {
+          "center": [
+            187.5418871641159,
+            0.0,
+            29.176325599352516
+          ],
+          "size": [
+            25.005584955215454,
+            20.00000238418579,
+            58.35265119870503
+          ]
+        },
+        {
+          "center": [
+            212.54747211933136,
+            0.0,
+            23.341060479482017
+          ],
+          "size": [
+            25.005584955215454,
+            20.00000238418579,
+            46.682120958964035
+          ]
+        },
+        {
+          "center": [
+            237.5530570745468,
+            0.0,
+            17.505795359611508
+          ],
+          "size": [
+            25.005584955215454,
+            20.00000238418579,
+            35.01159071922302
+          ]
+        },
+        {
+          "center": [
+            262.55864202976227,
+            0.0,
+            11.670530239741005
+          ],
+          "size": [
+            25.005584955215454,
+            20.00000238418579,
+            23.34106047948201
+          ]
+        },
+        {
+          "center": [
+            287.5642269849777,
+            0.0,
+            5.835265119870506
+          ],
+          "size": [
+            25.005584955215454,
+            20.00000238418579,
+            11.670530239741012
+          ]
+        }
+      ],
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_FacilityRooms_WoodFloor200",
+      "target_size_cm": [
+        200,
+        200,
+        20
+      ],
+      "category": "Architecture",
+      "reference": "References/ControlRoom_Attic_Reference.png",
+      "module_grid_cm": 200,
+      "walkable_top_z_cm": 20,
+      "size_cm": [
+        200,
+        200,
+        20
+      ],
+      "bounds_cm": [
+        -100.0,
+        -100.0,
+        0,
+        100.0,
+        100.0,
+        20
+      ],
+      "triangles": 7356,
+      "materials": [
+        "M_FacilityRooms_Wood",
+        "M_FacilityRooms_Iron"
+      ],
+      "collision_boxes": 1,
+      "collision_specs_cm": [
+        {
+          "center": [
+            0.0,
+            0.0,
+            9.999999403953552
+          ],
+          "size": [
+            200.0,
+            200.0,
+            19.999998807907104
+          ]
+        }
+      ],
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_FacilityRooms_WoodHatchLanding200",
+      "target_size_cm": [
+        200,
+        200,
+        20
+      ],
+      "category": "Architecture",
+      "reference": "References/ControlRoom_Attic_Reference.png",
+      "opening_cm": {
+        "width": 90,
+        "depth": 90,
+        "center": [
+          0,
+          0
+        ],
+        "bounds": [
+          -45,
+          -45,
+          0,
+          45,
+          45,
+          20
+        ]
+      },
+      "walkable_top_z_cm": 20,
+      "size_cm": [
+        200,
+        200,
+        20
+      ],
+      "bounds_cm": [
+        -100.0,
+        -100.0,
+        0,
+        100.0,
+        100.0,
+        20
+      ],
+      "triangles": 4664,
+      "materials": [
+        "M_FacilityRooms_Wood",
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Steel"
+      ],
+      "collision_boxes": 4,
+      "collision_specs_cm": [
+        {
+          "center": [
+            -72.5,
+            0.0,
+            10.000001192092896
+          ],
+          "size": [
+            55.0,
+            200.0,
+            20.00000238418579
+          ]
+        },
+        {
+          "center": [
+            72.5,
+            0.0,
+            10.000001192092896
+          ],
+          "size": [
+            55.0,
+            200.0,
+            20.00000238418579
+          ]
+        },
+        {
+          "center": [
+            0.0,
+            -72.5,
+            10.000001192092896
+          ],
+          "size": [
+            90.0,
+            55.0,
+            20.00000238418579
+          ]
+        },
+        {
+          "center": [
+            0.0,
+            72.5,
+            10.000001192092896
+          ],
+          "size": [
+            90.0,
+            55.0,
+            20.00000238418579
+          ]
+        }
+      ],
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_FacilityRooms_AtticLamp",
+      "target_size_cm": [
+        35,
+        35,
+        50
+      ],
+      "category": "Architecture",
+      "reference": "References/ControlRoom_Attic_Reference.png",
+      "use_note": "Warm timber-framed lantern, floor-centred origin; place on shelves or attach to a wall support.",
+      "size_cm": [
+        35,
+        35,
+        50
+      ],
+      "bounds_cm": [
+        -17.5,
+        -17.5,
+        0,
+        17.5,
+        17.5,
+        50
+      ],
+      "triangles": 1580,
+      "materials": [
+        "M_FacilityRooms_Wood",
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Amber"
+      ],
+      "collision_boxes": 2,
+      "collision_specs_cm": [
+        {
+          "center": [
+            0.0,
+            0.0,
+            22.0
+          ],
+          "size": [
+            35.0,
+            35.0,
+            44.0
+          ]
+        },
+        {
+          "center": [
+            0.0,
+            0.0,
+            47.0
+          ],
+          "size": [
+            10.0,
+            3.0,
+            6.0
+          ]
+        }
+      ],
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_FacilityRooms_WoodWindowWall200",
+      "target_size_cm": [
+        200,
+        20,
+        220
+      ],
+      "category": "Architecture",
+      "reference": "References/ControlRoom_Attic_Reference.png",
+      "module_grid_cm": 200,
+      "opening_cm": {
+        "width": 95,
+        "height": 95,
+        "sill_z": 85,
+        "bounds": [
+          -47.5,
+          -10,
+          85,
+          47.5,
+          10,
+          180
+        ],
+        "mullion_width": 3,
+        "mullion_center_z": 132.5
+      },
+      "use_note": "Open timber window with a thin cross mullion. No glazing or opaque surface spans the opening.",
+      "size_cm": [
+        200,
+        20,
+        220
+      ],
+      "bounds_cm": [
+        -100.0,
+        -10.0,
+        0,
+        100.0,
+        10.0,
+        220
+      ],
+      "triangles": 5076,
+      "materials": [
+        "M_FacilityRooms_Wood"
+      ],
+      "collision_boxes": 6,
+      "collision_specs_cm": [
+        {
+          "center": [
+            -73.74999701976776,
+            0.0,
+            110.00000000000001
+          ],
+          "size": [
+            52.5,
+            20.00000238418579,
+            220.0
+          ]
+        },
+        {
+          "center": [
+            73.75000298023224,
+            0.0,
+            110.00000000000001
+          ],
+          "size": [
+            52.5,
+            20.00000238418579,
+            220.0
+          ]
+        },
+        {
+          "center": [
+            2.9802322387695312e-06,
+            0.0,
+            42.5
+          ],
+          "size": [
+            95.0,
+            20.00000238418579,
+            85.0
+          ]
+        },
+        {
+          "center": [
+            2.9802322387695312e-06,
+            0.0,
+            200.0
+          ],
+          "size": [
+            95.0,
+            20.00000238418579,
+            40.0
+          ]
+        },
+        {
+          "center": [
+            2.9802322387695312e-06,
+            0.0,
+            132.5
+          ],
+          "size": [
+            3.0,
+            12.000001430511475,
+            95.0
+          ]
+        },
+        {
+          "center": [
+            2.9802322387695312e-06,
+            0.0,
+            132.5
+          ],
+          "size": [
+            95.0,
+            12.000001430511475,
+            3.0
+          ]
+        }
+      ],
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_FacilityRooms_WoodRoof600",
+      "target_size_cm": [
+        600,
+        600,
+        140
+      ],
+      "category": "Architecture",
+      "reference": "References/ControlRoom_Attic_Reference.png",
+      "profile_cm": [
+        [
+          -300,
+          0
+        ],
+        [
+          0,
+          140
+        ],
+        [
+          300,
+          0
+        ]
+      ],
+      "matching_gable": "SM_FacilityRooms_WoodGable600",
+      "collision_profile": "Twenty-four 25 cm wide box bands follow the 3 cm roof skin; maximum envelope thickness 14.667 cm. Exposed decorative rafters are not separately blocked.",
+      "size_cm": [
+        600,
+        600,
+        140
+      ],
+      "bounds_cm": [
+        -300.0,
+        -300.0,
+        0,
+        300.0,
+        300.0,
+        140
+      ],
+      "triangles": 4372,
+      "materials": [
+        "M_FacilityRooms_Wood"
+      ],
+      "collision_boxes": 24,
+      "collision_specs_cm": [
+        {
+          "center": [
+            -287.5623419880867,
+            0.0,
+            5.835265119870506
+          ],
+          "size": [
+            25.005421042442322,
+            600.0,
+            11.670530239741012
+          ]
+        },
+        {
+          "center": [
+            -262.5569209456444,
+            0.0,
+            16.005298614501953
+          ],
+          "size": [
+            25.005421042442322,
+            600.0,
+            14.671523729960114
+          ]
+        },
+        {
+          "center": [
+            -237.55149990320206,
+            0.0,
+            27.67582885424296
+          ],
+          "size": [
+            25.005421042442322,
+            600.0,
+            14.671523729960128
+          ]
+        },
+        {
+          "center": [
+            -212.54607886075974,
+            0.0,
+            39.34635909398397
+          ],
+          "size": [
+            25.005421042442322,
+            600.0,
+            14.671523729960128
+          ]
+        },
+        {
+          "center": [
+            -187.5406578183174,
+            0.0,
+            51.01688933372498
+          ],
+          "size": [
+            25.005421042442322,
+            600.0,
+            14.671523729960114
+          ]
+        },
+        {
+          "center": [
+            -162.5352367758751,
+            0.0,
+            62.687419573465974
+          ],
+          "size": [
+            25.005421042442322,
+            600.0,
+            14.671523729960128
+          ]
+        },
+        {
+          "center": [
+            -137.52981573343277,
+            0.0,
+            74.35794981320699
+          ],
+          "size": [
+            25.005421042442322,
+            600.0,
+            14.671523729960114
+          ]
+        },
+        {
+          "center": [
+            -112.52439469099045,
+            0.0,
+            86.028480052948
+          ],
+          "size": [
+            25.005421042442322,
+            600.0,
+            14.671523729960143
+          ]
+        },
+        {
+          "center": [
+            -87.51897364854813,
+            0.0,
+            97.69901029268901
+          ],
+          "size": [
+            25.005421042442322,
+            600.0,
+            14.671523729960114
+          ]
+        },
+        {
+          "center": [
+            -62.513552606105804,
+            0.0,
+            109.36954053243002
+          ],
+          "size": [
+            25.005421042442322,
+            600.0,
+            14.671523729960128
+          ]
+        },
+        {
+          "center": [
+            -37.50813156366348,
+            0.0,
+            121.04007077217102
+          ],
+          "size": [
+            25.005421042442322,
+            600.0,
+            14.6715237299601
+          ]
+        },
+        {
+          "center": [
+            -12.502710521221161,
+            0.0,
+            132.71060101191205
+          ],
+          "size": [
+            25.005421042442322,
+            600.0,
+            14.671523729960143
+          ]
+        },
+        {
+          "center": [
+            12.502710521221161,
+            0.0,
+            132.71060101191205
+          ],
+          "size": [
+            25.005421042442322,
+            600.0,
+            14.671523729960143
+          ]
+        },
+        {
+          "center": [
+            37.50813156366348,
+            0.0,
+            121.04007077217102
+          ],
+          "size": [
+            25.005421042442322,
+            600.0,
+            14.6715237299601
+          ]
+        },
+        {
+          "center": [
+            62.513552606105804,
+            0.0,
+            109.36954053243002
+          ],
+          "size": [
+            25.005421042442322,
+            600.0,
+            14.671523729960128
+          ]
+        },
+        {
+          "center": [
+            87.51897364854813,
+            0.0,
+            97.69901029268901
+          ],
+          "size": [
+            25.005421042442322,
+            600.0,
+            14.671523729960114
+          ]
+        },
+        {
+          "center": [
+            112.52439469099045,
+            0.0,
+            86.028480052948
+          ],
+          "size": [
+            25.005421042442322,
+            600.0,
+            14.671523729960143
+          ]
+        },
+        {
+          "center": [
+            137.52981573343277,
+            0.0,
+            74.35794981320699
+          ],
+          "size": [
+            25.005421042442322,
+            600.0,
+            14.671523729960114
+          ]
+        },
+        {
+          "center": [
+            162.5352367758751,
+            0.0,
+            62.687419573465974
+          ],
+          "size": [
+            25.005421042442322,
+            600.0,
+            14.671523729960128
+          ]
+        },
+        {
+          "center": [
+            187.5406578183174,
+            0.0,
+            51.01688933372498
+          ],
+          "size": [
+            25.005421042442322,
+            600.0,
+            14.671523729960114
+          ]
+        },
+        {
+          "center": [
+            212.54607886075974,
+            0.0,
+            39.34635909398397
+          ],
+          "size": [
+            25.005421042442322,
+            600.0,
+            14.671523729960128
+          ]
+        },
+        {
+          "center": [
+            237.55149990320206,
+            0.0,
+            27.67582885424296
+          ],
+          "size": [
+            25.005421042442322,
+            600.0,
+            14.671523729960128
+          ]
+        },
+        {
+          "center": [
+            262.5569209456444,
+            0.0,
+            16.005298614501953
+          ],
+          "size": [
+            25.005421042442322,
+            600.0,
+            14.671523729960114
+          ]
+        },
+        {
+          "center": [
+            287.5623419880867,
+            0.0,
+            5.835265119870506
+          ],
+          "size": [
+            25.005421042442322,
+            600.0,
+            11.670530239741012
+          ]
+        }
+      ],
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_FacilityRooms_Boiler",
+      "target_size_cm": [
+        220,
+        130,
+        230
+      ],
+      "category": "Utilities",
+      "reference": "References/Basement_Reference.png",
+      "size_cm": [
+        220,
+        130,
+        230
+      ],
+      "bounds_cm": [
+        -110.0,
+        -65.0,
+        0,
+        110.0,
+        65.0,
+        230
+      ],
+      "triangles": 12892,
+      "materials": [
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Steel",
+        "M_FacilityRooms_Teal",
+        "M_FacilityRooms_Red",
+        "M_FacilityRooms_Ivory",
+        "M_FacilityRooms_Screen",
+        "M_FacilityRooms_Amber",
+        "M_FacilityRooms_Hazard"
+      ],
+      "collision_boxes": 5,
+      "collision_specs_cm": [
+        {
+          "center": [
+            1.6576845025610965,
+            10.632788461989549,
+            116.5333399772644
+          ],
+          "size": [
+            183.56689596176147,
+            107.06459760665894,
+            116.5333399772644
+          ]
+        },
+        {
+          "center": [
+            1.6576845025610965,
+            7.686056417769578,
+            28.62222385406494
+          ],
+          "size": [
+            199.65265488624573,
+            112.95806169509888,
+            57.24444770812988
+          ]
+        },
+        {
+          "center": [
+            -46.59959227089166,
+            -43.390632348709914,
+            76.66667103767395
+          ],
+          "size": [
+            63.396814584732056,
+            43.21873664855957,
+            57.24444770812988
+          ]
+        },
+        {
+          "center": [
+            -57.95424562935113,
+            10.632788461989549,
+            202.4000115394592
+          ],
+          "size": [
+            39.741286754608154,
+            41.25424861907959,
+            53.155558586120605
+          ]
+        },
+        {
+          "center": [
+            97.22601693626166,
+            -7.047603803330276,
+            174.8000099658966
+          ],
+          "size": [
+            16.085758924484253,
+            71.70381307601929,
+            34.75555753707886
+          ]
+        }
+      ],
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_FacilityRooms_Generator",
+      "target_size_cm": [
+        250,
+        120,
+        160
+      ],
+      "category": "Utilities",
+      "reference": "References/Basement_Reference.png",
+      "size_cm": [
+        250,
+        120,
+        160
+      ],
+      "bounds_cm": [
+        -125.0,
+        -60.0,
+        0,
+        125.0,
+        60.0,
+        160
+      ],
+      "triangles": 9620,
+      "materials": [
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Steel",
+        "M_FacilityRooms_Teal",
+        "M_FacilityRooms_Panel",
+        "M_FacilityRooms_Screen",
+        "M_FacilityRooms_Blue",
+        "M_FacilityRooms_Amber",
+        "M_FacilityRooms_Red",
+        "M_FacilityRooms_Ivory",
+        "M_FacilityRooms_Hazard",
+        "M_FacilityRooms_Rubber"
+      ],
+      "collision_boxes": 4,
+      "collision_specs_cm": [
+        {
+          "center": [
+            0.0,
+            2.3538843592397996,
+            22.434245586395264
+          ],
+          "size": [
+            250.0,
+            111.44916224479675,
+            44.86849117279053
+          ]
+        },
+        {
+          "center": [
+            -28.999999999999996,
+            2.3538843592397996,
+            96.87515139579772
+          ],
+          "size": [
+            181.0,
+            109.52762496471405,
+            114.2107048034668
+          ]
+        },
+        {
+          "center": [
+            84.0,
+            2.3538843592397996,
+            86.67776703834534
+          ],
+          "size": [
+            73.0,
+            101.84147584438324,
+            99.93436670303345
+          ]
+        },
+        {
+          "center": [
+            57.99999999999999,
+            25.412331720232228,
+            145.82259631156919
+          ],
+          "size": [
+            74.0,
+            25.940753281116486,
+            34.671106815338135
+          ]
+        }
+      ],
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_FacilityRooms_PumpSkid",
+      "target_size_cm": [
+        200,
+        110,
+        130
+      ],
+      "category": "Utilities",
+      "reference": "References/Basement_Reference.png",
+      "size_cm": [
+        200,
+        110,
+        130
+      ],
+      "bounds_cm": [
+        -100.0,
+        -55.0,
+        0,
+        100.0,
+        55.0,
+        130
+      ],
+      "triangles": 14452,
+      "materials": [
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Steel",
+        "M_FacilityRooms_Teal",
+        "M_FacilityRooms_Blue",
+        "M_FacilityRooms_Ivory",
+        "M_FacilityRooms_Red"
+      ],
+      "collision_boxes": 7,
+      "collision_specs_cm": [
+        {
+          "center": [
+            -48.484851837158196,
+            18.3333313443831,
+            48.75
+          ],
+          "size": [
+            55.555559396743774,
+            69.52380973100662,
+            63.984375
+          ]
+        },
+        {
+          "center": [
+            -48.484851837158196,
+            -25.476192595703267,
+            48.75
+          ],
+          "size": [
+            55.555559396743774,
+            45.7142858505249,
+            53.828125
+          ]
+        },
+        {
+          "center": [
+            48.484851837158196,
+            18.3333313443831,
+            48.75
+          ],
+          "size": [
+            55.555559396743774,
+            69.52380973100662,
+            63.984375
+          ]
+        },
+        {
+          "center": [
+            48.484851837158196,
+            -25.476192595703267,
+            48.75
+          ],
+          "size": [
+            55.555559396743774,
+            45.7142858505249,
+            53.828125
+          ]
+        },
+        {
+          "center": [
+            0.0,
+            2.142855105655528,
+            7.109375000000001
+          ],
+          "size": [
+            200.0000138282776,
+            99.04761934280396,
+            14.21875
+          ]
+        },
+        {
+          "center": [
+            0.0,
+            -43.571430744869375,
+            94.453125
+          ],
+          "size": [
+            202.02021598815918,
+            22.85714292526245,
+            25.390625
+          ]
+        },
+        {
+          "center": [
+            0.0,
+            2.142855105655528,
+            117.81249999999999
+          ],
+          "size": [
+            202.02021598815918,
+            22.85714292526245,
+            26.40625
+          ]
+        }
+      ],
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_FacilityRooms_PressureTank",
+      "target_size_cm": [
+        80,
+        80,
+        190
+      ],
+      "category": "Utilities",
+      "reference": "References/Basement_Reference.png",
+      "size_cm": [
+        80,
+        80,
+        190
+      ],
+      "bounds_cm": [
+        -40.0,
+        -40.0,
+        0,
+        40.0,
+        40.0,
+        190
+      ],
+      "triangles": 6240,
+      "materials": [
+        "M_FacilityRooms_Steel",
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Ivory",
+        "M_FacilityRooms_Blue",
+        "M_FacilityRooms_Red",
+        "M_FacilityRooms_Teal",
+        "M_FacilityRooms_Panel"
+      ],
+      "collision_boxes": 3,
+      "collision_specs_cm": [
+        {
+          "center": [
+            -1.5894570992713852e-06,
+            3.59223156004278,
+            98.99999409914017
+          ],
+          "size": [
+            76.79999542236328,
+            69.90291166305542,
+            154.99999076128006
+          ]
+        },
+        {
+          "center": [
+            -1.5894570992713852e-06,
+            3.59223156004278,
+            12.99999922513962
+          ],
+          "size": [
+            68.26666259765625,
+            62.135921478271484,
+            25.999998450279236
+          ]
+        },
+        {
+          "center": [
+            -1.5894570992713852e-06,
+            3.59223156004278,
+            181.99998915195465
+          ],
+          "size": [
+            27.73333168029785,
+            25.24271810054779,
+            15.999999046325684
+          ]
+        }
+      ],
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_FacilityRooms_ElectricalCabinet",
+      "target_size_cm": [
+        110,
+        45,
+        200
+      ],
+      "category": "Utilities",
+      "reference": "References/Basement_Reference.png",
+      "size_cm": [
+        110,
+        45,
+        200
+      ],
+      "bounds_cm": [
+        -55.0,
+        -22.5,
+        0,
+        55.0,
+        22.5,
+        200
+      ],
+      "triangles": 4124,
+      "materials": [
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Ivory",
+        "M_FacilityRooms_Steel",
+        "M_FacilityRooms_Panel",
+        "M_FacilityRooms_Screen",
+        "M_FacilityRooms_Blue",
+        "M_FacilityRooms_Amber",
+        "M_FacilityRooms_Teal",
+        "M_FacilityRooms_Red",
+        "M_FacilityRooms_Hazard"
+      ],
+      "collision_boxes": 1,
+      "collision_specs_cm": [
+        {
+          "center": [
+            0.0,
+            4.181415962434443,
+            100.00001192092896
+          ],
+          "size": [
+            110.0,
+            35.84070682525635,
+            200.0000238418579
+          ]
+        }
+      ],
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_FacilityRooms_SupplyRack",
+      "target_size_cm": [
+        180,
+        70,
+        210
+      ],
+      "category": "Utilities",
+      "reference": "References/Basement_Reference.png",
+      "size_cm": [
+        180,
+        70,
+        210
+      ],
+      "bounds_cm": [
+        -90.0,
+        -35.0,
+        0,
+        90.0,
+        35.0,
+        210
+      ],
+      "triangles": 6460,
+      "materials": [
+        "M_FacilityRooms_Teal",
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Steel",
+        "M_FacilityRooms_Paper",
+        "M_FacilityRooms_Ivory",
+        "M_FacilityRooms_Wood",
+        "M_FacilityRooms_Rubber"
+      ],
+      "collision_boxes": 11,
+      "collision_specs_cm": [
+        {
+          "center": [
+            -83.60656117318082,
+            -27.708335118161326,
+            104.74820518493652
+          ],
+          "size": [
+            6.885246455669403,
+            6.805555880069733,
+            209.49641036987305
+          ]
+        },
+        {
+          "center": [
+            -83.60656117318082,
+            28.68055645955931,
+            104.74820518493652
+          ],
+          "size": [
+            6.885246455669403,
+            6.805555880069733,
+            209.49641036987305
+          ]
+        },
+        {
+          "center": [
+            83.60656703593324,
+            -27.708335118161326,
+            104.74820518493652
+          ],
+          "size": [
+            6.885246455669403,
+            6.805555880069733,
+            209.49641036987305
+          ]
+        },
+        {
+          "center": [
+            83.60656703593324,
+            28.68055645955931,
+            104.74820518493652
+          ],
+          "size": [
+            6.885246455669403,
+            6.805555880069733,
+            209.49641036987305
+          ]
+        },
+        {
+          "center": [
+            2.9313762084370865e-06,
+            0.4861106706989915,
+            11.079137086868286
+          ],
+          "size": [
+            177.04919457435608,
+            68.05555880069733,
+            11.079137086868286
+          ]
+        },
+        {
+          "center": [
+            2.9313762084370865e-06,
+            0.4861106706989915,
+            74.53237676620483
+          ],
+          "size": [
+            177.04919457435608,
+            68.05555880069733,
+            11.079137086868286
+          ]
+        },
+        {
+          "center": [
+            2.9313762084370865e-06,
+            0.4861106706989915,
+            137.98561644554138
+          ],
+          "size": [
+            177.04919457435608,
+            68.05555880069733,
+            11.079137086868286
+          ]
+        },
+        {
+          "center": [
+            2.9313762084370865e-06,
+            0.4861106706989915,
+            205.4676332473755
+          ],
+          "size": [
+            177.04919457435608,
+            68.05555880069733,
+            11.079137086868286
+          ]
+        },
+        {
+          "center": [
+            2.9313762084370865e-06,
+            0.4861106706989915,
+            38.27338266372681
+          ],
+          "size": [
+            155.40984857082367,
+            52.50000250339508,
+            42.302159786224365
+          ]
+        },
+        {
+          "center": [
+            -4.918030251244794,
+            4.374999745024553,
+            100.71942806243896
+          ],
+          "size": [
+            160.32788175344467,
+            52.50000250339508,
+            40.287771224975586
+          ]
+        },
+        {
+          "center": [
+            2.9313762084370865e-06,
+            4.374999745024553,
+            167.19425058364868
+          ],
+          "size": [
+            160.32788175344467,
+            52.50000250339508,
+            47.33813118934631
+          ]
+        }
+      ],
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_FacilityRooms_PalletCrates",
+      "target_size_cm": [
+        120,
+        100,
+        105
+      ],
+      "category": "Utilities",
+      "reference": "References/Basement_Reference.png",
+      "size_cm": [
+        120,
+        100,
+        105
+      ],
+      "bounds_cm": [
+        -60.0,
+        -50.0,
+        0,
+        60.0,
+        50.0,
+        105
+      ],
+      "triangles": 2808,
+      "materials": [
+        "M_FacilityRooms_Wood",
+        "M_FacilityRooms_Teal",
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Steel",
+        "M_FacilityRooms_Paper",
+        "M_FacilityRooms_Ivory"
+      ],
+      "collision_boxes": 3,
+      "collision_specs_cm": [
+        {
+          "center": [
+            0.0,
+            0.0,
+            8.155340194702148
+          ],
+          "size": [
+            120.00001430511475,
+            104.16667461395264,
+            16.310680389404297
+          ]
+        },
+        {
+          "center": [
+            0.0,
+            5.208333730697632,
+            46.89320611953735
+          ],
+          "size": [
+            105.0000125169754,
+            85.41667318344116,
+            59.126216411590576
+          ]
+        },
+        {
+          "center": [
+            0.0,
+            7.291667222976685,
+            89.70874214172363
+          ],
+          "size": [
+            106.00001263618469,
+            67.70833849906921,
+            33.64077830314636
+          ]
+        }
+      ],
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_FacilityRooms_PipeBundle",
+      "target_size_cm": [
+        180,
+        65,
+        60
+      ],
+      "category": "Utilities",
+      "reference": "References/Basement_Reference.png",
+      "size_cm": [
+        180,
+        65,
+        60
+      ],
+      "bounds_cm": [
+        -90.0,
+        -32.5,
+        0,
+        90.0,
+        32.5,
+        60
+      ],
+      "triangles": 9636,
+      "materials": [
+        "M_FacilityRooms_Wood",
+        "M_FacilityRooms_Steel",
+        "M_FacilityRooms_Iron"
+      ],
+      "collision_boxes": 2,
+      "collision_specs_cm": [
+        {
+          "center": [
+            0.0,
+            0.0,
+            37.00934708118439
+          ],
+          "size": [
+            177.82657384872437,
+            58.10606497526169,
+            48.22430074214935
+          ]
+        },
+        {
+          "center": [
+            0.0,
+            0.0,
+            8.971962928771973
+          ],
+          "size": [
+            138.30955743789673,
+            64.01515632867813,
+            17.943925857543945
+          ]
+        }
+      ],
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_FacilityRooms_PipeRun",
+      "target_size_cm": [
+        200,
+        25,
+        90
+      ],
+      "category": "Utilities",
+      "reference": "References/Basement_Reference.png",
+      "size_cm": [
+        200,
+        25,
+        90
+      ],
+      "bounds_cm": [
+        -100.0,
+        -12.5,
+        0,
+        100.0,
+        12.5,
+        90
+      ],
+      "triangles": 8244,
+      "materials": [
+        "M_FacilityRooms_Blue",
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Steel",
+        "M_FacilityRooms_Red",
+        "M_FacilityRooms_Hazard",
+        "M_FacilityRooms_Ivory"
+      ],
+      "collision_boxes": 4,
+      "collision_specs_cm": [
+        {
+          "center": [
+            0.0,
+            1.8617029386631927,
+            15.628742635963883
+          ],
+          "size": [
+            203.0456781387329,
+            24.468084931373596,
+            20.47904098033905
+          ]
+        },
+        {
+          "center": [
+            0.0,
+            1.8617029386631927,
+            71.67664426636549
+          ],
+          "size": [
+            203.0456781387329,
+            24.468084931373596,
+            20.47904098033905
+          ]
+        },
+        {
+          "center": [
+            0.0,
+            -7.712765077961257,
+            17.784431160210097
+          ],
+          "size": [
+            36.548222064971924,
+            19.1489360332489,
+            37.72454917430878
+          ]
+        },
+        {
+          "center": [
+            47.71573436260223,
+            -4.521275739086442,
+            80.29939836335036
+          ],
+          "size": [
+            20.30456781387329,
+            21.27659559249878,
+            21.556885242462158
+          ]
+        }
+      ],
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_FacilityRooms_OperatorDesk",
+      "target_size_cm": [
+        180,
+        80,
+        78
+      ],
+      "category": "Control",
+      "reference": "References/ControlRoom_Attic_Reference.png",
+      "size_cm": [
+        180,
+        80,
+        78
+      ],
+      "bounds_cm": [
+        -90.0,
+        -40.0,
+        0,
+        90.0,
+        40.0,
+        78
+      ],
+      "triangles": 2760,
+      "materials": [
+        "M_FacilityRooms_Wood",
+        "M_FacilityRooms_Steel",
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Rubber"
+      ],
+      "collision_boxes": 5,
+      "collision_specs_cm": [
+        {
+          "center": [
+            0.0,
+            0.0,
+            74.07265961170197
+          ],
+          "size": [
+            180.0,
+            80.00000953674316,
+            6.9598472118377686
+          ]
+        },
+        {
+          "center": [
+            -62.0,
+            3.0000003576278687,
+            34.79923605918884
+          ],
+          "size": [
+            44.0,
+            64.00000762939453,
+            69.59847211837769
+          ]
+        },
+        {
+          "center": [
+            72.0,
+            -28.000003337860107,
+            34.79923605918884
+          ],
+          "size": [
+            8.0,
+            8.000000953674316,
+            69.59847211837769
+          ]
+        },
+        {
+          "center": [
+            72.0,
+            28.000003337860107,
+            34.79923605918884
+          ],
+          "size": [
+            8.0,
+            8.000000953674316,
+            69.59847211837769
+          ]
+        },
+        {
+          "center": [
+            14.000000000000002,
+            26.00000309944153,
+            44.7418749332428
+          ],
+          "size": [
+            104.0,
+            5.000000596046448,
+            32.81070828437805
+          ]
+        }
+      ],
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_FacilityRooms_MonitorWall",
+      "target_size_cm": [
+        240,
+        35,
+        170
+      ],
+      "category": "Control",
+      "reference": "References/ControlRoom_Attic_Reference.png",
+      "size_cm": [
+        240,
+        35,
+        170
+      ],
+      "bounds_cm": [
+        -120.0,
+        -17.5,
+        0,
+        120.0,
+        17.5,
+        170
+      ],
+      "triangles": 3720,
+      "materials": [
+        "M_FacilityRooms_Wood",
+        "M_FacilityRooms_Rubber",
+        "M_FacilityRooms_Steel",
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Screen",
+        "M_FacilityRooms_Teal",
+        "M_FacilityRooms_Amber",
+        "M_FacilityRooms_Blue"
+      ],
+      "collision_boxes": 5,
+      "collision_specs_cm": [
+        {
+          "center": [
+            0.0,
+            -1.0,
+            115.17751842737198
+          ],
+          "size": [
+            241.0041904449463,
+            15.0,
+            111.65680825710297
+          ]
+        },
+        {
+          "center": [
+            -78.32636189460754,
+            0.0,
+            3.017751574516296
+          ],
+          "size": [
+            55.23012697696686,
+            35.0,
+            6.035503149032593
+          ]
+        },
+        {
+          "center": [
+            -78.32636189460754,
+            10.0,
+            31.1834329366684
+          ],
+          "size": [
+            10.041841268539429,
+            10.0,
+            62.36686587333679
+          ]
+        },
+        {
+          "center": [
+            78.32636189460754,
+            0.0,
+            3.017751574516296
+          ],
+          "size": [
+            55.23012697696686,
+            35.0,
+            6.035503149032593
+          ]
+        },
+        {
+          "center": [
+            78.32636189460754,
+            10.0,
+            31.1834329366684
+          ],
+          "size": [
+            10.041841268539429,
+            10.0,
+            62.36686587333679
+          ]
+        }
+      ],
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_FacilityRooms_DeskMonitor",
+      "target_size_cm": [
+        65,
+        25,
+        50
+      ],
+      "category": "Control",
+      "reference": "References/ControlRoom_Attic_Reference.png",
+      "size_cm": [
+        65,
+        25,
+        50
+      ],
+      "bounds_cm": [
+        -32.5,
+        -12.5,
+        0,
+        32.5,
+        12.5,
+        50
+      ],
+      "triangles": 1868,
+      "materials": [
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Wood",
+        "M_FacilityRooms_Steel",
+        "M_FacilityRooms_Screen",
+        "M_FacilityRooms_Teal",
+        "M_FacilityRooms_Amber",
+        "M_FacilityRooms_Blue",
+        "M_FacilityRooms_Rubber"
+      ],
+      "collision_boxes": 3,
+      "collision_specs_cm": [
+        {
+          "center": [
+            0.0,
+            0.0,
+            31.5
+          ],
+          "size": [
+            65.0,
+            10.0,
+            37.0
+          ]
+        },
+        {
+          "center": [
+            0.0,
+            0.0,
+            2.0
+          ],
+          "size": [
+            39.0,
+            25.0,
+            4.0
+          ]
+        },
+        {
+          "center": [
+            0.0,
+            6.0,
+            10.0
+          ],
+          "size": [
+            10.0,
+            10.0,
+            20.0
+          ]
+        }
+      ],
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_FacilityRooms_RadioRack",
+      "target_size_cm": [
+        90,
+        65,
+        185
+      ],
+      "category": "Control",
+      "reference": "References/ControlRoom_Attic_Reference.png",
+      "size_cm": [
+        90,
+        65,
+        185
+      ],
+      "bounds_cm": [
+        -45.0,
+        -32.5,
+        0,
+        45.0,
+        32.5,
+        185
+      ],
+      "triangles": 12008,
+      "materials": [
+        "M_FacilityRooms_Wood",
+        "M_FacilityRooms_Rubber",
+        "M_FacilityRooms_Steel",
+        "M_FacilityRooms_Panel",
+        "M_FacilityRooms_Screen",
+        "M_FacilityRooms_Blue",
+        "M_FacilityRooms_Amber",
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Ivory"
+      ],
+      "collision_boxes": 1,
+      "collision_specs_cm": [
+        {
+          "center": [
+            0.0,
+            3.645799242275416,
+            93.0
+          ],
+          "size": [
+            90.0,
+            61.49255573749542,
+            184.0
+          ]
+        }
+      ],
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_FacilityRooms_RadioConsole",
+      "target_size_cm": [
+        70,
+        45,
+        25
+      ],
+      "category": "Control",
+      "reference": "References/ControlRoom_Attic_Reference.png",
+      "size_cm": [
+        70,
+        45,
+        25
+      ],
+      "bounds_cm": [
+        -35.0,
+        -22.5,
+        0,
+        35.0,
+        22.5,
+        25
+      ],
+      "triangles": 3244,
+      "materials": [
+        "M_FacilityRooms_Wood",
+        "M_FacilityRooms_Ivory",
+        "M_FacilityRooms_Screen",
+        "M_FacilityRooms_Blue",
+        "M_FacilityRooms_Amber",
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Rubber",
+        "M_FacilityRooms_Panel"
+      ],
+      "collision_boxes": 1,
+      "collision_specs_cm": [
+        {
+          "center": [
+            0.07372730392862792,
+            1.0487295104285366,
+            9.762309142152807
+          ],
+          "size": [
+            69.8525458574295,
+            42.90254205465317,
+            21.22241109609604
+          ]
+        }
+      ],
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_FacilityRooms_OperatorChair",
+      "target_size_cm": [
+        65,
+        65,
+        115
+      ],
+      "category": "Control",
+      "reference": "References/ControlRoom_Attic_Reference.png",
+      "size_cm": [
+        65,
+        65,
+        115
+      ],
+      "bounds_cm": [
+        -32.5,
+        -32.5,
+        0,
+        32.5,
+        32.5,
+        115
+      ],
+      "triangles": 3980,
+      "materials": [
+        "M_FacilityRooms_Steel",
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Rubber",
+        "M_FacilityRooms_Ivory",
+        "M_FacilityRooms_Wood"
+      ],
+      "collision_boxes": 3,
+      "collision_specs_cm": [
+        {
+          "center": [
+            -0.7330834839801348,
+            0.0,
+            10.00000149011612
+          ],
+          "size": [
+            55.71428722143173,
+            55.95245969295502,
+            18.0
+          ]
+        },
+        {
+          "center": [
+            -0.7330834839801348,
+            -0.9816220998764039,
+            49.00000149011612
+          ],
+          "size": [
+            51.804512679576874,
+            50.062727093696594,
+            14.0
+          ]
+        },
+        {
+          "center": [
+            -0.7330834839801348,
+            21.595686197280884,
+            86.00000149011612
+          ],
+          "size": [
+            47.894738137722015,
+            12.76108729839325,
+            58.0
+          ]
+        }
+      ],
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_FacilityRooms_KeyboardConsole",
+      "target_size_cm": [
+        75,
+        35,
+        9
+      ],
+      "category": "Control",
+      "reference": "References/ControlRoom_Attic_Reference.png",
+      "size_cm": [
+        75,
+        35,
+        9
+      ],
+      "bounds_cm": [
+        -37.5,
+        -17.5,
+        0,
+        37.5,
+        17.5,
+        9
+      ],
+      "triangles": 6012,
+      "materials": [
+        "M_FacilityRooms_Wood",
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Ivory",
+        "M_FacilityRooms_Panel"
+      ],
+      "collision_boxes": 1,
+      "collision_specs_cm": [
+        {
+          "center": [
+            0.0,
+            0.0,
+            3.2400001287460323
+          ],
+          "size": [
+            75.0,
+            35.0,
+            6.480000257492065
+          ]
+        }
+      ],
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_FacilityRooms_FileCabinet",
+      "target_size_cm": [
+        90,
+        45,
+        130
+      ],
+      "category": "Control",
+      "reference": "References/ControlRoom_Attic_Reference.png",
+      "size_cm": [
+        90,
+        45,
+        130
+      ],
+      "bounds_cm": [
+        -45.0,
+        -22.5,
+        0,
+        45.0,
+        22.5,
+        130
+      ],
+      "triangles": 2184,
+      "materials": [
+        "M_FacilityRooms_Wood",
+        "M_FacilityRooms_Iron",
+        "M_FacilityRooms_Paper",
+        "M_FacilityRooms_Steel"
+      ],
+      "collision_boxes": 1,
+      "collision_specs_cm": [
+        {
+          "center": [
+            0.0,
+            1.836734388555783,
+            65.0
+          ],
+          "size": [
+            90.0,
+            41.3265323638916,
+            130.0
+          ]
+        }
+      ],
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_FacilityRooms_BookStack",
+      "target_size_cm": [
+        45,
+        30,
+        22
+      ],
+      "category": "Control",
+      "reference": "References/ControlRoom_Attic_Reference.png",
+      "size_cm": [
+        45,
+        30,
+        22
+      ],
+      "bounds_cm": [
+        -22.5,
+        -15.0,
+        0,
+        22.5,
+        15.0,
+        22
+      ],
+      "triangles": 1404,
+      "materials": [
+        "M_FacilityRooms_Paper",
+        "M_FacilityRooms_Red",
+        "M_FacilityRooms_Ivory",
+        "M_FacilityRooms_Wood",
+        "M_FacilityRooms_Teal"
+      ],
+      "collision_boxes": 1,
+      "collision_specs_cm": [
+        {
+          "center": [
+            0.0,
+            0.16550139442923495,
+            11.733332668315795
+          ],
+          "size": [
+            45.0,
+            28.576430082321167,
+            23.0476176738739
+          ]
+        }
+      ],
+      "uv_channels": 2
+    },
+    {
+      "name": "SM_FacilityRooms_DeskMug",
+      "target_size_cm": [
+        16,
+        13,
+        18
+      ],
+      "category": "Control",
+      "reference": "References/ControlRoom_Attic_Reference.png",
+      "size_cm": [
+        16,
+        13,
+        18
+      ],
+      "bounds_cm": [
+        -8.0,
+        -6.5,
+        0,
+        8.0,
+        6.5,
+        18
+      ],
+      "triangles": 2872,
+      "materials": [
+        "M_FacilityRooms_Ivory",
+        "M_FacilityRooms_Wood"
+      ],
+      "collision_boxes": 1,
+      "collision_specs_cm": [
+        {
+          "center": [
+            3.014824190513251e-07,
+            0.0,
+            9.000000607967378
+          ],
+          "size": [
+            15.999999847412111,
+            12.999999842643737,
+            18.000001215934756
+          ]
+        }
+      ],
+      "uv_channels": 2
+    }
+  ],
+  "total_triangles": 171948
+}
