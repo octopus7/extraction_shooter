@@ -62,7 +62,7 @@ Raid item changes keep their existing extraction/death/level-travel save rules a
 - `SaveSlotIndex`
 - `BuildFlavor`: build target identity (`Demo` or `Main`). A save whose value does not match the running target is rejected.
 - `TotalPlaySeconds`
-- `DifficultyStage`: save-slot difficulty stage, clamped to `1..3`; `1` is Farming, `2` is Normal, and `3` is Hard. Main slots keep the default `1` until the player confirms a difficulty. Demo slots atomically initialize to fixed stage `2` when the Demo notice is confirmed.
+- `DifficultyStage`: save-slot difficulty stage, clamped to `1..3`; `1` is Farming, `2` is Normal, and `3` is Hard. Main slots keep the default `1` until the player confirms a difficulty. Demo slots atomically initialize to fixed stage `2` when the Demo notice is confirmed. Runtime resolves the stage through `DifficultyDefinitions.json`; its `enemy_incoming_damage_multiplier` scales only enemy-attributed damage received by the player (`5000/10000/20000` for stages `1/2/3`) before integer defense is subtracted.
 - `bDifficultySelected`: whether the slot completed its required start gate. For Main this is difficulty confirmation. For Demo this is the notice confirmation written together with the first slot save; no Demo save is created before confirmation.
 - `LastSavedAtTicks`
 

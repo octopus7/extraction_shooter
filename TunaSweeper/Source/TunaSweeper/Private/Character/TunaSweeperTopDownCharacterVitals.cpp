@@ -1,6 +1,7 @@
 #include "TunaSweeperTopDownCharacterShared.h"
 
 #include "Subsystem/TunaSweeperFactionSubsystem.h"
+#include "Subsystem/TunaSweeperDifficultySubsystem.h"
 
 float ATunaSweeperTopDownCharacter::TakeDamage(
 	float DamageAmount,
@@ -13,18 +14,18 @@ float ATunaSweeperTopDownCharacter::TakeDamage(
 		return 0.0f;
 	}
 
+	const AActor* FactionSource = DamageCauser;
+	if (!FactionSource && EventInstigator)
+	{
+		FactionSource = EventInstigator->GetPawn()
+			? static_cast<AActor*>(EventInstigator->GetPawn())
+			: static_cast<AActor*>(EventInstigator);
+	}
+	const UTunaSweeperFactionSubsystem* FactionSubsystem = nullptr;
 	if (const UWorld* World = GetWorld())
 	{
-		const AActor* FactionSource = DamageCauser;
-		if (!FactionSource && EventInstigator)
-		{
-			FactionSource = EventInstigator->GetPawn()
-				? static_cast<AActor*>(EventInstigator->GetPawn())
-				: static_cast<AActor*>(EventInstigator);
-		}
-		if (const UTunaSweeperFactionSubsystem* FactionSubsystem =
-			World->GetSubsystem<UTunaSweeperFactionSubsystem>();
-			FactionSubsystem && !FactionSubsystem->CanApplyCombatEffect(FactionSource, this))
+		FactionSubsystem = World->GetSubsystem<UTunaSweeperFactionSubsystem>();
+		if (FactionSubsystem && !FactionSubsystem->CanApplyCombatEffect(FactionSource, this))
 		{
 			return 0.0f;
 		}
@@ -38,8 +39,26 @@ float ATunaSweeperTopDownCharacter::TakeDamage(
 	LastDamageImpulseDirection = ResolveDamageCameraReactionDirection(DamageCauser);
 
 	UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+	const bool bEnemyAttributed = TunaGameInstance && FactionSubsystem &&
+		FactionSubsystem->GetFactionIdForActor(FactionSource) == TunaSweeperFactionIds::Enemy;
+	int32 EnemyIncomingDamageMultiplier = TunaSweeperDataValues::RatioIdentity;
+	if (bEnemyAttributed)
+	{
+		if (UTunaSweeperDifficultySubsystem* DifficultySubsystem =
+			TunaGameInstance->GetSubsystem<UTunaSweeperDifficultySubsystem>())
+		{
+			EnemyIncomingDamageMultiplier = DifficultySubsystem->GetEnemyIncomingDamageMultiplier(
+				TunaGameInstance->GetActiveSaveSlotDifficultyStage());
+		}
+	}
 	const int32 DefenseValue = TunaGameInstance ? TunaGameInstance->GetEquippedDefenseValue() : 0;
-	const float AppliedDamage = FMath::Max(0.0f, DamageAmount - static_cast<float>(DefenseValue));
+	// Enemy difficulty is applied exactly once, rounded to a whole health point, and then
+	// integer defense is subtracted. Non-enemy sources retain their original raw damage.
+	const float AppliedDamage = UTunaSweeperDifficultySubsystem::ResolveAppliedPlayerDamage(
+		DamageAmount,
+		DefenseValue,
+		bEnemyAttributed,
+		EnemyIncomingDamageMultiplier);
 	if (AppliedDamage <= 0.0f)
 	{
 		return 0.0f;

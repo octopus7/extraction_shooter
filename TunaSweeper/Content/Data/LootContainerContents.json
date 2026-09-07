@@ -100,11 +100,11 @@
       { "item_id": 1002, "quantity": 1 },
       { "item_id": 2002, "quantity": 45 },
       { "item_id": 2021, "quantity": 30 },
-      { "item_id": 2004, "quantity": 1, "drop_chance": 0.65 },
-      { "item_id": 2006, "quantity": 1, "drop_chance": 0.45 },
+      { "item_id": 2004, "quantity": 1, "drop_chance": 6500 },
+      { "item_id": 2006, "quantity": 1, "drop_chance": 4500 },
       { "item_id": 3003, "quantity": 1 },
-      { "item_id": 6004, "quantity": 1, "drop_chance": 0.2 },
-      { "item_id": 6005, "quantity": 1, "drop_chance": 0.2 }
+      { "item_id": 6004, "quantity": 1, "drop_chance": 2000 },
+      { "item_id": 6005, "quantity": 1, "drop_chance": 2000 }
     ]
   },
   {
@@ -114,9 +114,9 @@
       { "item_id": 1007, "quantity": 1 },
       { "item_id": 2022, "quantity": 36 },
       { "item_id": 2002, "quantity": 36 },
-      { "item_id": 2004, "quantity": 1, "drop_chance": 0.75 },
-      { "item_id": 2005, "quantity": 1, "drop_chance": 0.55 },
-      { "item_id": 2006, "quantity": 1, "drop_chance": 0.55 },
+      { "item_id": 2004, "quantity": 1, "drop_chance": 7500 },
+      { "item_id": 2005, "quantity": 1, "drop_chance": 5500 },
+      { "item_id": 2006, "quantity": 1, "drop_chance": 5500 },
       { "item_id": 4002, "quantity": 1 }
     ]
   },

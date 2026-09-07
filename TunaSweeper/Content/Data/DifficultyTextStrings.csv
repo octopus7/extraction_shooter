@@ -1,0 +1,7 @@
+string_key,ko,en,ja
+difficulty.stage.1.title,파밍,Farming,ファーミング
+difficulty.stage.1.description,파밍과 탐색에 여유가 있는 시작 난이도입니다.,A starting difficulty with more room for looting and exploration.,物資収集と探索に余裕のある入門難易度です。
+difficulty.stage.2.title,일반,Normal,ノーマル
+difficulty.stage.2.description,생존과 전투가 균형 있게 진행되는 기본 난이도입니다.,The standard difficulty with balanced survival and combat.,生存と戦闘のバランスが取れた標準難易度です。
+difficulty.stage.3.title,어려움,Hard,ハード
+difficulty.stage.3.description,자원과 전투 압박이 커지는 도전 난이도입니다.,A challenging difficulty with greater resource and combat pressure.,物資と戦闘の圧力が増す挑戦的な難易度です。

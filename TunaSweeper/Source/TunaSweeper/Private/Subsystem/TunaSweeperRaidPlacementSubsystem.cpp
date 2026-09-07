@@ -50,9 +50,9 @@ namespace TunaSweeperRaidPlacement
 
 	float ReadSpawnChance(const TSharedPtr<FJsonObject>& JsonObject)
 	{
-		double NumericChance = 1.0;
+		double NumericChance = TunaSweeperDataValues::ProbabilityMax;
 		JsonObject->TryGetNumberField(TEXT("spawn_chance"), NumericChance);
-		return FMath::Clamp(static_cast<float>(NumericChance), 0.0f, 1.0f);
+		return TunaSweeperDataValues::NormalizeProbabilityValue(FMath::RoundToInt(NumericChance));
 	}
 
 	FName ReadOptionalName(const TSharedPtr<FJsonObject>& JsonObject, const TCHAR* FieldName)
@@ -156,6 +156,18 @@ bool UTunaSweeperRaidPlacementSubsystem::EnsureRaidPlacementActorsSpawnedForWorl
 	for (int32 InvalidId : InvalidPlacementIds)
 	{
 		AnchorsByPlacementId.Remove(InvalidId);
+	}
+	TArray<int32> MemoPlacementIds;
+	for (const TPair<int32, ATunaSweeperRaidPlacementAnchor*>& Pair : AnchorsByPlacementId)
+	{
+		if (Pair.Value->GetAnchorKind() == ETunaSweeperRaidPlacementAnchorKind::Memo)
+		{
+			MemoPlacementIds.Add(Pair.Key);
+		}
+	}
+	for (int32 MemoPlacementId : MemoPlacementIds)
+	{
+		AnchorsByPlacementId.Remove(MemoPlacementId);
 	}
 
 	TSet<int32> ConnectedPlacementIds;
@@ -374,16 +386,28 @@ bool UTunaSweeperRaidPlacementSubsystem::LoadEnemyPlacements(const FString& Json
 	TArray<TSharedPtr<FJsonValue>> Rows;
 	if (!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(JsonContent), Rows)) { UE_LOG(LogTunaSweeperRaidPlacement, Error, TEXT("Failed to parse enemy placements: %s"), *JsonPath); return false; }
 	TSet<FString> SeenKeys;
+	bool bAllRowsValid = true;
 	for (int32 RowIndex = 0; RowIndex < Rows.Num(); ++RowIndex)
 	{
 		const TSharedPtr<FJsonObject>* JsonObjectPtr = nullptr;
-		if (!Rows[RowIndex].IsValid() || !Rows[RowIndex]->TryGetObject(JsonObjectPtr) || !JsonObjectPtr || !JsonObjectPtr->IsValid()) { continue; }
+		if (!Rows[RowIndex].IsValid() || !Rows[RowIndex]->TryGetObject(JsonObjectPtr) || !JsonObjectPtr || !JsonObjectPtr->IsValid())
+		{
+			UE_LOG(LogTunaSweeperRaidPlacement, Error, TEXT("Enemy placement row %d is not an object."), RowIndex);
+			bAllRowsValid = false;
+			continue;
+		}
 		const TSharedPtr<FJsonObject>& JsonObject = *JsonObjectPtr;
 		int32 PlacementId = INDEX_NONE;
-		if (!TunaSweeperRaidPlacement::TryGetPlacementId(JsonObject, PlacementId)) { continue; } // Legacy coordinate row.
+		if (!TunaSweeperRaidPlacement::TryGetPlacementId(JsonObject, PlacementId))
+		{
+			UE_LOG(LogTunaSweeperRaidPlacement, Error, TEXT("Enemy placement row %d is missing placement_id; coordinate-authored enemy rows are not supported."), RowIndex);
+			bAllRowsValid = false;
+			continue;
+		}
 		if (JsonObject->HasField(TEXT("location")) || JsonObject->HasField(TEXT("rotation")) || JsonObject->HasField(TEXT("scale")))
 		{
 			UE_LOG(LogTunaSweeperRaidPlacement, Error, TEXT("Enemy anchor placement row %d must not contain transform fields."), RowIndex);
+			bAllRowsValid = false;
 			continue;
 		}
 		FString LevelIdString;
@@ -391,6 +415,7 @@ bool UTunaSweeperRaidPlacementSubsystem::LoadEnemyPlacements(const FString& Json
 		if (!JsonObject->TryGetStringField(TEXT("level_name"), LevelIdString) || !JsonObject->TryGetStringField(TEXT("profile_id"), ProfileIdString) || PlacementId <= 0)
 		{
 			UE_LOG(LogTunaSweeperRaidPlacement, Error, TEXT("Enemy placement row %d is missing a valid level_name, placement_id, or profile_id."), RowIndex);
+			bAllRowsValid = false;
 			continue;
 		}
 		FEnemyPlacementDefinition Placement;
@@ -400,11 +425,16 @@ bool UTunaSweeperRaidPlacementSubsystem::LoadEnemyPlacements(const FString& Json
 		Placement.SpawnChance = TunaSweeperRaidPlacement::ReadSpawnChance(JsonObject);
 		Placement.ConditionId = TunaSweeperRaidPlacement::ReadOptionalName(JsonObject, TEXT("condition_id"));
 		const FString Key = Placement.LevelId.ToString() + TEXT(":") + FString::FromInt(Placement.PlacementId);
-		if (Placement.LevelId.IsNone() || Placement.ProfileId.IsNone() || SeenKeys.Contains(Key)) { UE_LOG(LogTunaSweeperRaidPlacement, Error, TEXT("Enemy placement row %d has an invalid or duplicate level/PlacementId."), RowIndex); continue; }
+		if (Placement.LevelId.IsNone() || Placement.ProfileId.IsNone() || SeenKeys.Contains(Key))
+		{
+			UE_LOG(LogTunaSweeperRaidPlacement, Error, TEXT("Enemy placement row %d has an invalid or duplicate level/PlacementId."), RowIndex);
+			bAllRowsValid = false;
+			continue;
+		}
 		SeenKeys.Add(Key);
 		EnemyPlacementDefinitions.Add(Placement);
 	}
-	return true;
+	return bAllRowsValid;
 }
 
 bool UTunaSweeperRaidPlacementSubsystem::LoadLootPlacements(const FString& JsonPath)

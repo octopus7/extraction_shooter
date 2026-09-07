@@ -25,11 +25,8 @@
 
 - `TunaSweeper/Content/Data/QuestDefinitions.json`
 - `TunaSweeper/Content/Data/QuestTextStrings.csv`
-- `TunaSweeper/Content/Data/BunkerCharacterSpawns.json`
-- `TunaSweeper/Content/Data/GameplayInteractionSpawns.json`
 - `TunaSweeper/Content/Data/EnemySpawns.json`
-- `TunaSweeper/Content/Data/WarpPointSpawns.json`
-- `TunaSweeper/Content/Data/WorldProgressObjectSpawns.json`
+- `TunaSweeper/Content/Data/MemoSpawns.json`
 - `TunaSweeper/Content/Data/ItemTable.json`
 - `TunaSweeper/Content/Data/ItemStackDefinitions.json`
 
@@ -135,7 +132,7 @@ Mole의 퀘스트 상호작용은 현재 생성자에서 별도 `ObjectiveEventI
 
 ### 월드 진행
 
-월드 진행 오브젝트는 `WorldProgressObjectSpawns.json`으로 배치되고, 성공 상태는 `UTunaSweeperGameInstance`의 `WorldProgressStatesById` 및 저장 게임의 `WorldProgressStates`로 관리된다. 예를 들어 부서진 다리 수리 데이터는 필요한 아이템과 수량을 요구하고, 완료 여부는 월드 상태로 남는다.
+월드 진행 오브젝트는 레벨에 Blueprint로 직접 배치하고 안정적인 진행 ID를 설정한다. 성공 상태는 `UTunaSweeperGameInstance`의 `WorldProgressStatesById` 및 저장 게임의 `WorldProgressStates`로 관리된다. 예를 들어 부서진 다리 수리 설정은 필요한 아이템과 수량을 요구하고, 완료 여부는 월드 상태로 남는다.
 
 현재 코드 기준으로 월드 진행 전용 퀘스트 목표 타입은 없다. 월드 진행을 퀘스트와 연결하려면 `WorldProgress` 상호작용 성공 후 발생하는 `interaction_completed` 목표를 사용해야 한다. 이때 목표 JSON에는 `interaction_type`을 `world_progress`로 지정할 수 있고, 컴포넌트에 의미 있는 `ObjectiveEventId`가 설정되어 있어야 특정 오브젝트만 좁혀 매칭할 수 있다.
 
@@ -152,7 +149,7 @@ Mole의 퀘스트 상호작용은 현재 생성자에서 별도 `ObjectiveEventI
 
 ## 퀘스트 제공자, NPC, notice
 
-Mole은 `ATunaSweeperMoleCompanionActor`에서 기본 제공자 `provider.mole`와 fallback 퀘스트 `quest_first_outing`을 가진다. `BunkerCharacterSpawns.json`의 Mole 스폰 데이터는 `BunkerMap`에 Mole 블루프린트를 배치한다.
+Mole은 `ATunaSweeperMoleCompanionActor`에서 기본 제공자 `provider.mole`와 fallback 퀘스트 `quest_first_outing`을 가진다. `BunkerMap`에 직접 배치된 `BP_Mole`이 대화와 퀘스트 상호작용을 제공한다.
 
 퀘스트 대상 NPC는 `ResolveQuestId()`에서 `UTunaSweeperQuestSubsystem::TryResolveQuestForProvider()`를 호출한다. 이 함수는 같은 제공자 안에서 다음 우선순위로 노출할 퀘스트를 고른다.
 
@@ -245,7 +242,7 @@ sequenceDiagram
 - 레벨 이동 목표가 안 오르면 실제 현재 맵 이름과 `source_level`, 대상 맵과 `target_level`이 일치하는지 확인한다. 코드 매칭은 정확한 이름 또는 접미 형태를 허용한다.
 - 아이템 획득 목표가 안 오르면 해당 획득 경로가 일반 획득인지 확인한다. 퀘스트 보상 지급은 `NotifyItemAcquired()`를 호출하지 않는다.
 - 적 처치 목표가 안 오르면 적 스폰 데이터의 `enemy_id`와 JSON의 `enemy_id`가 일치하는지, 처치자가 플레이어 컨트롤러로 판정되는지 확인한다.
-- 워프 목표가 안 오르면 `WarpPointSpawns.json`의 현재/대상 워프 포인트 ID와 JSON의 `warp_point_id`, `target_warp_point_id`를 확인한다.
+- 워프 목표가 안 오르면 직접 배치한 워프 액터의 현재/대상 워프 포인트 ID와 퀘스트 JSON의 `warp_point_id`, `target_warp_point_id`를 확인한다.
 - 월드 진행을 퀘스트로 연결하려면 월드 진행 완료 상태 저장과 별개로 `interaction_completed` 목표가 매칭될 수 있는 이벤트 ID와 타입명이 준비되어 있는지 확인한다.
 - 오프닝 이후 벙커로 바로 가지 않거나 반복 재생되면 `CompletedScenarioFlags`에 `scenario.opening.awakening`이 저장되었는지, pending flag가 `BunkerMap` 진입 후 완료 처리되었는지 확인한다.
 - Demo 화장실 도입 대화가 반복 자동 재생되면 `dialogue.demo.toilet_intro` 플래그가 대화 종료 시 저장되는지 확인한다.

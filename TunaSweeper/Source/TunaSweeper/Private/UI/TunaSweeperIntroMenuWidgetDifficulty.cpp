@@ -1,5 +1,6 @@
 #include "TunaSweeperIntroMenuWidgetShared.h"
 #include "Settings/TunaSweeperBuildFlavor.h"
+#include "Subsystem/TunaSweeperDifficultySubsystem.h"
 
 void UTunaSweeperIntroMenuWidget::EnsureDifficultySelectionPanel()
 {
@@ -897,96 +898,19 @@ void UTunaSweeperIntroMenuWidget::LoadDifficultyDefinitions()
 	}
 
 	DifficultyOptionTexts.Reset();
-	for (int32 DifficultyStage = 1; DifficultyStage <= 3; ++DifficultyStage)
+	if (UGameInstance* GameInstance = GetGameInstance())
 	{
-		FDifficultyOptionText OptionText;
-		OptionText.DifficultyStage = DifficultyStage;
-		OptionText.Title = TunaSweeperDifficultySelect::MakeFallbackTitle(DifficultyStage);
-		OptionText.Description = TunaSweeperDifficultySelect::MakeFallbackDescription(DifficultyStage);
-		DifficultyOptionTexts.Add(OptionText);
-	}
-
-	FString JsonContent;
-	const FString JsonPath = TunaSweeperDifficultySelect::GetDefinitionsJsonPath();
-	if (!FFileHelper::LoadFileToString(JsonContent, *JsonPath))
-	{
-		bDifficultyDefinitionsLoaded = true;
-		return;
-	}
-
-	TSharedPtr<FJsonValue> RootValue;
-	const TSharedRef<TJsonReader<>> JsonReader = TJsonReaderFactory<>::Create(JsonContent);
-	if (!FJsonSerializer::Deserialize(JsonReader, RootValue) || !RootValue.IsValid())
-	{
-		bDifficultyDefinitionsLoaded = true;
-		return;
-	}
-
-	TArray<TSharedPtr<FJsonValue>> RootArrayValues;
-	const TArray<TSharedPtr<FJsonValue>>* DifficultyValues = nullptr;
-	if (RootValue->Type == EJson::Array)
-	{
-		RootArrayValues = RootValue->AsArray();
-		DifficultyValues = &RootArrayValues;
-	}
-	else if (RootValue->Type == EJson::Object)
-	{
-		const TSharedPtr<FJsonObject> RootObject = RootValue->AsObject();
-		if (RootObject.IsValid())
+		if (UTunaSweeperDifficultySubsystem* DifficultySubsystem =
+			GameInstance->GetSubsystem<UTunaSweeperDifficultySubsystem>())
 		{
-			RootObject->TryGetArrayField(TEXT("difficulties"), DifficultyValues) ||
-				RootObject->TryGetArrayField(TEXT("difficulty_options"), DifficultyValues);
-		}
-	}
-
-	if (!DifficultyValues)
-	{
-		bDifficultyDefinitionsLoaded = true;
-		return;
-	}
-
-	for (const TSharedPtr<FJsonValue>& DifficultyValue : *DifficultyValues)
-	{
-		const TSharedPtr<FJsonObject>* DifficultyObjectPtr = nullptr;
-		if (!DifficultyValue.IsValid() ||
-			!DifficultyValue->TryGetObject(DifficultyObjectPtr) ||
-			!DifficultyObjectPtr ||
-			!DifficultyObjectPtr->IsValid())
-		{
-			continue;
-		}
-
-		const TSharedPtr<FJsonObject>& DifficultyObject = *DifficultyObjectPtr;
-		double NumericStage = 0.0;
-		if (!DifficultyObject->TryGetNumberField(TEXT("difficulty_stage"), NumericStage) &&
-			!DifficultyObject->TryGetNumberField(TEXT("stage"), NumericStage) &&
-			!DifficultyObject->TryGetNumberField(TEXT("id"), NumericStage))
-		{
-			continue;
-		}
-
-		const int32 DifficultyStage = FMath::Clamp(FMath::RoundToInt(NumericStage), 1, 3);
-		FDifficultyOptionText* OptionText = DifficultyOptionTexts.FindByPredicate(
-			[DifficultyStage](const FDifficultyOptionText& Candidate)
+			for (int32 DifficultyStage = 1; DifficultyStage <= 3; ++DifficultyStage)
 			{
-				return Candidate.DifficultyStage == DifficultyStage;
-			});
-		if (!OptionText)
-		{
-			continue;
-		}
-
-		FString StringValue;
-		if (DifficultyObject->TryGetStringField(TEXT("title"), StringValue) ||
-			DifficultyObject->TryGetStringField(TEXT("name"), StringValue) ||
-			DifficultyObject->TryGetStringField(TEXT("label"), StringValue))
-		{
-			OptionText->Title = FText::FromString(StringValue);
-		}
-		if (DifficultyObject->TryGetStringField(TEXT("description"), StringValue) ||
-			DifficultyObject->TryGetStringField(TEXT("desc"), StringValue))
-		{
-			OptionText->Description = FText::FromString(StringValue);
+				FTunaSweeperDifficultyDefinition Definition;
+				if (DifficultySubsystem->TryGetDifficultyDefinition(DifficultyStage, Definition))
+				{
+					DifficultyOptionTexts.Add({DifficultyStage, Definition.TitleStringKey, Definition.DescriptionStringKey});
+				}
+			}
 		}
 	}
 
@@ -1001,7 +925,7 @@ FText UTunaSweeperIntroMenuWidget::BuildDifficultyTitleText(int32 DifficultyStag
 			return Candidate.DifficultyStage == DifficultyStage;
 		}))
 	{
-		return OptionText->Title;
+		return ResolveUiText(OptionText->TitleStringKey, TunaSweeperDifficultySelect::MakeFallbackTitle(DifficultyStage));
 	}
 
 	return TunaSweeperDifficultySelect::MakeFallbackTitle(DifficultyStage);
@@ -1015,7 +939,7 @@ FText UTunaSweeperIntroMenuWidget::BuildDifficultyDescriptionText(int32 Difficul
 			return Candidate.DifficultyStage == DifficultyStage;
 		}))
 	{
-		return OptionText->Description;
+		return ResolveUiText(OptionText->DescriptionStringKey, TunaSweeperDifficultySelect::MakeFallbackDescription(DifficultyStage));
 	}
 
 	return TunaSweeperDifficultySelect::MakeFallbackDescription(DifficultyStage);

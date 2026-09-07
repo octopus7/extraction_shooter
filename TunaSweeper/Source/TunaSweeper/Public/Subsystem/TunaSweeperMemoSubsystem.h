@@ -47,19 +47,14 @@ public:
 private:
 	struct FMemoSpawnDefinition
 	{
-		// Future extension: map-placed marker actors can be matched by MemoId and used as the source
-		// for the runtime spawn transform and visual mesh/material fields below.
 		FName LevelName;
-		FName SpawnId;
+		int32 PlacementId = INDEX_NONE;
 		int32 MemoId = INDEX_NONE;
 		TSoftClassPtr<ATunaSweeperMemoActor> MemoActorClass;
 		TSoftClassPtr<UTunaSweeperInteractionMarkerWidget> MarkerWidgetClass;
 		TSoftObjectPtr<UStaticMesh> VisualMesh;
 		TSoftObjectPtr<UMaterialInterface> VisualMaterial;
 		FText InteractionDisplayName;
-		FVector Location = FVector::ZeroVector;
-		FRotator Rotation = FRotator::ZeroRotator;
-		FVector ActorScale = FVector::OneVector;
 		FVector VisualScale = FVector(0.85f, 0.55f, 0.08f);
 		FVector VisualRelativeLocation = FVector::ZeroVector;
 	};

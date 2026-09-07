@@ -49,7 +49,7 @@
 
 | NPC | 스폰/배치 | provider | 역할 |
 | --- | --- | --- | --- |
-| 두더지 | `BunkerCharacterSpawns.json`의 `TS_Bunker_LED_Robot` | `provider.mole` | 벙커 기본 안내, 참치 선반 연출, 메인 퀘스트 접점 |
+| 두더지 | `BunkerMap`에 직접 배치한 `BP_Mole` | `provider.mole` | 벙커 기본 안내, 참치 선반 연출, 메인 퀘스트 접점 |
 
 ## 해금 규칙
 

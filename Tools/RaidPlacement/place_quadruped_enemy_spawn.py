@@ -4,14 +4,21 @@ import os
 import unreal
 
 
-MAP_PACKAGE_PATH = "/Game/Maps/DemoRaidMap"
 ANCHOR_BLUEPRINT_PATH = "/Game/Raid/Placement/BP_RaidPlacementAnchor"
 ENEMY_BLUEPRINT_PATH = "/Game/Blueprints/BP_QuadrupedGunEnemy"
 ANCHOR_LABEL = "TS_EnemySpawn_QuadrupedGun_01"
 PLACEMENT_ID = 1
 PROFILE_ID = "enemy.quadruped_gun_test"
-LOCATION = unreal.Vector(5200.0, 1040.0, 90.0)
-ROTATION = unreal.Rotator(0.0, 180.0, 0.0)
+MAP_PLACEMENTS = {
+    "/Game/Maps/DemoRaidMap": (
+        unreal.Vector(5200.0, 1040.0, 90.0),
+        unreal.Rotator(0.0, 180.0, 0.0),
+    ),
+    "/Game/Maps/DemoBoxRaidMap": (
+        unreal.Vector(1300.0, 1200.0, 90.0),
+        unreal.Rotator(0.0, 180.0, 0.0),
+    ),
+}
 
 
 def _read_placement_id(actor):
@@ -21,10 +28,10 @@ def _read_placement_id(actor):
         return None
 
 
-def place_anchor():
-    world = unreal.EditorLoadingAndSavingUtils.load_map(MAP_PACKAGE_PATH)
+def place_anchor(map_package_path, location, rotation):
+    world = unreal.EditorLoadingAndSavingUtils.load_map(map_package_path)
     if not world:
-        raise RuntimeError(f"Could not load {MAP_PACKAGE_PATH}")
+        raise RuntimeError(f"Could not load {map_package_path}")
 
     anchor_class = unreal.EditorAssetLibrary.load_blueprint_class(ANCHOR_BLUEPRINT_PATH)
     if not anchor_class:
@@ -37,10 +44,6 @@ def place_anchor():
     actor_subsystem = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
     existing = None
     for actor in actor_subsystem.get_all_level_actors():
-        if actor.get_class() == enemy_class:
-            raise RuntimeError(
-                f"{ENEMY_BLUEPRINT_PATH} is directly placed as {actor.get_actor_label()}"
-            )
         if actor.get_actor_label() == ANCHOR_LABEL:
             existing = actor
             continue
@@ -51,8 +54,8 @@ def place_anchor():
 
     anchor = existing or actor_subsystem.spawn_actor_from_class(
         anchor_class,
-        LOCATION,
-        ROTATION,
+        location,
+        rotation,
         transient=False,
     )
     if not anchor:
@@ -67,12 +70,12 @@ def place_anchor():
         )
 
     anchor.set_actor_label(ANCHOR_LABEL)
-    anchor.set_actor_location(LOCATION, sweep=False, teleport=True)
-    anchor.set_actor_rotation(ROTATION, teleport_physics=True)
+    anchor.set_actor_location(location, sweep=False, teleport=True)
+    anchor.set_actor_rotation(rotation, teleport_physics=True)
     anchor.set_folder_path("RaidPlacement/Enemy")
 
-    if not unreal.EditorLoadingAndSavingUtils.save_map(world, MAP_PACKAGE_PATH):
-        raise RuntimeError(f"Could not save {MAP_PACKAGE_PATH}")
+    if not unreal.EditorLoadingAndSavingUtils.save_map(world, map_package_path):
+        raise RuntimeError(f"Could not save {map_package_path}")
 
     data_directory = os.path.join(unreal.Paths.project_content_dir(), "Data")
     with open(os.path.join(data_directory, "EnemySpawnProfiles.json"), encoding="utf-8") as source:
@@ -98,9 +101,10 @@ def place_anchor():
         raise RuntimeError("Anchor-owned enemy placement data must not contain transform fields")
 
     unreal.log(
-        f"Placed {ANCHOR_LABEL} (PlacementId={PLACEMENT_ID}) in {MAP_PACKAGE_PATH}; "
-        f"profile {PROFILE_ID} resolves {ENEMY_BLUEPRINT_PATH}, which is not directly placed."
+        f"Placed {ANCHOR_LABEL} (PlacementId={PLACEMENT_ID}) in {map_package_path}; "
+        f"profile {PROFILE_ID} resolves {ENEMY_BLUEPRINT_PATH}."
     )
 
 
-place_anchor()
+for map_package_path, (location, rotation) in MAP_PLACEMENTS.items():
+    place_anchor(map_package_path, location, rotation)

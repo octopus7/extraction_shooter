@@ -9,6 +9,8 @@ DEFINE_LOG_CATEGORY_STATIC(LogTunaSweeperText, Log, All);
 namespace TunaSweeperText
 {
 	const TCHAR* TextStringsCsvRelativePath = TEXT("Data/UITextStrings.csv");
+	const TCHAR* MemoTextStringsCsvRelativePath = TEXT("Data/MemoTextStrings.csv");
+	const TCHAR* DifficultyTextStringsCsvRelativePath = TEXT("Data/DifficultyTextStrings.csv");
 
 	FString GetCsvCell(const TArray<const TCHAR*>& Row, int32 CellIndex)
 	{
@@ -26,7 +28,10 @@ bool UTunaSweeperTextSubsystem::LoadTextData(bool bForceReload) const
 	}
 
 	ResetLoadedTextData();
-	bTextDataLoaded = LoadTextStringsCsv();
+	bTextDataLoaded =
+		LoadTextStringsCsv(TunaSweeperText::TextStringsCsvRelativePath, TEXT("UI")) &&
+		LoadTextStringsCsv(TunaSweeperText::MemoTextStringsCsvRelativePath, TEXT("memo")) &&
+		LoadTextStringsCsv(TunaSweeperText::DifficultyTextStringsCsvRelativePath, TEXT("difficulty"));
 	if (!bTextDataLoaded)
 	{
 		ResetLoadedTextData();
@@ -90,13 +95,13 @@ bool UTunaSweeperTextSubsystem::EnsureTextDataLoaded() const
 	return bTextDataLoaded || LoadTextData(false);
 }
 
-bool UTunaSweeperTextSubsystem::LoadTextStringsCsv() const
+bool UTunaSweeperTextSubsystem::LoadTextStringsCsv(const TCHAR* RelativePath, const TCHAR* DatasetLabel) const
 {
 	FString CsvContent;
-	const FString TextStringsCsvPath = GetTextStringsCsvPath();
+	const FString TextStringsCsvPath = FPaths::Combine(FPaths::ProjectContentDir(), RelativePath);
 	if (!FFileHelper::LoadFileToString(CsvContent, *TextStringsCsvPath))
 	{
-		UE_LOG(LogTunaSweeperText, Error, TEXT("Failed to read UI text strings CSV: %s"), *TextStringsCsvPath);
+		UE_LOG(LogTunaSweeperText, Error, TEXT("Failed to read %s text strings CSV: %s"), DatasetLabel, *TextStringsCsvPath);
 		return false;
 	}
 
@@ -104,7 +109,7 @@ bool UTunaSweeperTextSubsystem::LoadTextStringsCsv() const
 	const FCsvParser::FRows& Rows = CsvParser.GetRows();
 	if (Rows.Num() < 2)
 	{
-		UE_LOG(LogTunaSweeperText, Error, TEXT("UI text strings CSV has no data rows: %s"), *TextStringsCsvPath);
+		UE_LOG(LogTunaSweeperText, Error, TEXT("%s text strings CSV has no data rows: %s"), DatasetLabel, *TextStringsCsvPath);
 		return false;
 	}
 
@@ -116,7 +121,7 @@ bool UTunaSweeperTextSubsystem::LoadTextStringsCsv() const
 		TunaSweeperText::GetCsvCell(HeaderRow, 3).Equals(TEXT("ja"), ESearchCase::IgnoreCase);
 	if (!bHeaderIsValid)
 	{
-		UE_LOG(LogTunaSweeperText, Error, TEXT("UI text strings CSV header must be string_key,ko,en,ja: %s"), *TextStringsCsvPath);
+		UE_LOG(LogTunaSweeperText, Error, TEXT("%s text strings CSV header must be string_key,ko,en,ja: %s"), DatasetLabel, *TextStringsCsvPath);
 		return false;
 	}
 
@@ -126,7 +131,7 @@ bool UTunaSweeperTextSubsystem::LoadTextStringsCsv() const
 		const TArray<const TCHAR*>& Row = Rows[RowIndex];
 		if (Row.Num() < 4)
 		{
-			UE_LOG(LogTunaSweeperText, Warning, TEXT("Skipping UI text row %d: expected 4 columns."), RowIndex);
+			UE_LOG(LogTunaSweeperText, Warning, TEXT("Skipping %s text row %d: expected 4 columns."), DatasetLabel, RowIndex);
 			continue;
 		}
 
@@ -136,7 +141,7 @@ bool UTunaSweeperTextSubsystem::LoadTextStringsCsv() const
 		const FString Japanese = TunaSweeperText::GetCsvCell(Row, 3);
 		if (StringKey.IsEmpty() || Korean.IsEmpty() || English.IsEmpty() || Japanese.IsEmpty())
 		{
-			UE_LOG(LogTunaSweeperText, Warning, TEXT("Skipping UI text row %d: required cell is empty."), RowIndex);
+			UE_LOG(LogTunaSweeperText, Warning, TEXT("Skipping %s text row %d: required cell is empty."), DatasetLabel, RowIndex);
 			continue;
 		}
 
@@ -148,7 +153,7 @@ bool UTunaSweeperTextSubsystem::LoadTextStringsCsv() const
 
 		if (TextStringsByKey.Contains(TextString.StringKey))
 		{
-			UE_LOG(LogTunaSweeperText, Warning, TEXT("Duplicate UI text string key %s found. The later row will replace the earlier row."), *StringKey);
+			UE_LOG(LogTunaSweeperText, Warning, TEXT("Duplicate text string key %s found while loading %s data. The later row will replace the earlier row."), *StringKey, DatasetLabel);
 		}
 
 		TextStringsByKey.Add(TextString.StringKey, TextString);
@@ -157,7 +162,7 @@ bool UTunaSweeperTextSubsystem::LoadTextStringsCsv() const
 
 	if (!bHasValidRows)
 	{
-		UE_LOG(LogTunaSweeperText, Error, TEXT("UI text strings CSV has no valid rows: %s"), *TextStringsCsvPath);
+		UE_LOG(LogTunaSweeperText, Error, TEXT("%s text strings CSV has no valid rows: %s"), DatasetLabel, *TextStringsCsvPath);
 	}
 
 	return bHasValidRows;
@@ -167,9 +172,4 @@ void UTunaSweeperTextSubsystem::ResetLoadedTextData() const
 {
 	TextStringsByKey.Reset();
 	bTextDataLoaded = false;
-}
-
-FString UTunaSweeperTextSubsystem::GetTextStringsCsvPath() const
-{
-	return FPaths::Combine(FPaths::ProjectContentDir(), TunaSweeperText::TextStringsCsvRelativePath);
 }

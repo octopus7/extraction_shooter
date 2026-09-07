@@ -19,12 +19,13 @@ UENUM(BlueprintType)
 enum class ETunaSweeperRaidPlacementAnchorKind : uint8
 {
 	Enemy UMETA(DisplayName = "Enemy"),
-	LootContainer UMETA(DisplayName = "Loot Container")
+	LootContainer UMETA(DisplayName = "Loot Container"),
+	Memo UMETA(DisplayName = "Memo")
 };
 
 /**
- * Lightweight level-authored location for a data-owned raid spawn. This actor has no gameplay
- * collision or authority; runtime actors are created by UTunaSweeperRaidPlacementSubsystem.
+ * Lightweight level-authored location for a data-owned spawn. This actor has no gameplay
+ * collision or authority; runtime actors are created by the matching placement subsystem.
  */
 UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API ATunaSweeperRaidPlacementAnchor : public AActor
@@ -57,7 +58,7 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	TObjectPtr<USceneComponent> SceneRoot;
 
-	/** Stable positive number, unique with the level id across both anchor kinds. */
+	/** Stable positive number, unique with the level id across every anchor kind. */
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "Raid Placement", meta = (AllowPrivateAccess = "true", ClampMin = "1"))
 	int32 PlacementId = 1;
 

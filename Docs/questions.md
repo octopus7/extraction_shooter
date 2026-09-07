@@ -6652,3 +6652,13 @@ Codex에서 컴퓨터 사용 기능을 시작하는 방법과 작동 중 사용�
 
 - 질문: 모델링한 무기들의 쇼케이스 레벨이 있는가?
 - 답변: 무기6종을 모은 `/Game/Weapons/TunaWeaponCollection/Maps/L_TunaWeaponCollection_Showcase`가 있다. 실제 `.umap`과 기존 재로드 검증 보고서를 확인했다. 콘텐츠 브라우저의 `Content → Weapons → TunaWeaponCollection → Maps`에서 열 수 있다. 질문에 따라 레벨을 임의로 열거나 변경하지 않았다.
+
+## 2026-09-06 21:48:45 (소요시간: 00:00:51)
+
+### 질문
+
+Unreal Editor commandlet 검사 후 작업 트리에 나타난 무관한 139개 자산 변경이 무엇인지 문의.
+
+### 답변
+
+의도한 `DemoBoxRaidMap` 앵커 변경을 제외하고, commandlet가 여러 맵과 그 의존성을 로드하는 동안 현재 UE 직렬화 형식으로 자동 재저장한 `.uasset`/`.umap` 변경이다. UI 59개, Effects 18개, Interaction 18개, Prototype 11개, Characters 9개, Weapons 7개, Audio 3개, EditorOnly 3개, Maps 3개, Meshes 3개, Core 2개와 Input/MainRaid/Movies 각 1개로 총 139개다. 로그상 직접 원인은 일반 자동 저장이 아니라 `TunaSweeperEditor` 시작 시 예약되는 다수의 one-shot `Ensure...Assets` 작업이다. 현재 완료 마커가 유지되는 동안은 즉시 반복되지 않을 수 있지만 새 작업 트리나 마커 초기화 뒤에는 재발할 수 있으므로, commandlet/자동화 실행에서는 명시적 setup 인수가 없으면 one-shot 생성기를 실행하지 않는 시작 조건을 추가한 뒤 원본을 복구하는 것이 안전하다.

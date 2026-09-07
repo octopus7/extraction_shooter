@@ -47,7 +47,7 @@ flowchart TD
 | 벙커 시설 액터 | `TunaSweeper/Source/TunaSweeper/Private/Interaction/TunaSweeperHousingManagementActor.cpp`, `TunaSweeperStorageActor.cpp`, `TunaSweeperShopActor.cpp`, `TunaSweeperWorkbenchActor.cpp`, `TunaSweeperPiggyBankActor.cpp` | 하우징, 창고, 상점, 작업대, 돼지저금통 상호작용을 처리한다. |
 | 퀘스트/두더지 액터 | `TunaSweeper/Source/TunaSweeper/Private/Character/TunaSweeperMoleCompanionActor.cpp`, `TunaSweeperFacilityNpcActor.cpp` | 퀘스트 제공자/폴백 ID를 해석하고 퀘스트 알림 및 두더지 대화 옵션을 제공한다. |
 | HUD 패널 | `TunaSweeper/Source/TunaSweeper/Private/UI/TunaSweeperGameHudWidget.cpp` | 루팅/창고/상점/작업대 외부 패널, 퀘스트 패널, 메모 패널, 하우징 패널 표시를 담당한다. |
-| 런타임 스폰 | `TunaSweeper/Source/TunaSweeper/Private/Subsystem/TunaSweeperEnemySpawnSubsystem.cpp`, `TunaSweeper/Content/Data/GameplayInteractionSpawns.json` | 맵 로드 후 JSON 기반 상호작용/런타임 액터를 생성하고 타입별 초기값을 주입한다. |
+| 월드 배치 | 각 레벨의 직접 배치 BP, `BP_RaidPlacementAnchor` | 일반 상호작용은 레벨이 Transform과 설정을 소유하고, 적·루트·메모 데이터 배치만 앵커와 JSON을 결합한다. |
 
 ## 마커와 포커스
 
@@ -118,42 +118,20 @@ flowchart TD
 | 하우징 | `OpenHousingMode()` | `SetHudMode(None)` 및 하우징 패널 갱신 | 하우징 서브시스템을 열고 별도 하우징 카메라로 전환한다. 하우징 중에는 월드 상호작용 포커스/마커가 억제된다. |
 | 두더지 대화 | `StartScenarioForTrigger(interaction.mole, true)` | `UTunaSweeperScenarioSubsystem`으로 데이터 해석 후 `UTunaSweeperDialogueWidget` 생성 | HUD 패널 모드가 아니라 대화 위젯을 viewport 90에 올리고 UI Only 입력 모드로 바꾼다. |
 
-## JSON 런타임 스폰 흐름
+## 월드 배치 흐름
 
 ```mermaid
 flowchart TD
-    A["PostLoadMapWithWorld"] --> B["UTunaSweeperEnemySpawnSubsystem::EnsureRaidRuntimeActorsSpawnedForWorld"]
-    B --> C["LoadGameplayInteractionActorSpawnData"]
-    C --> D["Content/Data/GameplayInteractionSpawns.json 파싱"]
-    D --> E{"level_name 이 현재 월드와 일치?"}
-    E -- "아니오" --> X["건너뜀"]
-    E -- "예" --> F["actor_class 또는 spawn_type 기본 클래스 로드"]
-    F --> G["spawn_id 태그/이름/위치가 겹치는 기존 액터 제거"]
-    G --> H["SpawnActorDeferred"]
-    H --> I["ConfigureGameplayInteractionActor"]
-    I --> J["spawn_type 별 Configure...Defaults 호출"]
-    J --> K["spawn_id 태그 추가 후 FinishSpawningActor"]
+    A["레벨에 직접 배치한 BP"] --> B["BeginPlay / InteractableComponent 등록"]
+    B --> C["InteractionSubsystem 포커스·실행"]
+    D["Enemy/Loot/Memo JSON"] --> E["level_name + placement_id 검증"]
+    E --> F["같은 종류의 BP_RaidPlacementAnchor 연결"]
+    F --> G["앵커 Transform에서 런타임 액터 생성"]
 ```
 
-`UTunaSweeperEnemySpawnSubsystem`은 GameInstance 서브시스템이며 `FCoreUObjectDelegates::PostLoadMapWithWorld`에 등록된다. 레벨 전환 중에는 `UTunaSweeperLevelTransitionSubsystem::HandlePostLoadMapWithWorld()`도 같은 스폰 보장을 한 번 더 호출한다. 같은 월드에 대해 `LastSpawnedWorld`가 같으면 중복 스폰하지 않는다.
+범용 상호작용 스폰 JSON과 parser/switch는 제거되었다. 픽업, 상점, 작업대, 돼지저금통, 자폭, 난이도 조정, 테스트 프랍, 레벨 이동, 추출, 워프, 월드 진행, 투명 장애물, Mole은 필요한 레벨에 직접 배치한다. 로딩 경로는 같은 이름·태그·클래스·좌표를 가진 기존 BP를 검색하거나 삭제하지 않는다.
 
-`GameplayInteractionSpawns.json`의 기본 필수 필드는 `level_name`, `spawn_id`, `spawn_type`, `location`이다. `actor_class`가 없으면 `spawn_type`별 기본 클래스를 쓴다. 공통 필드로 `rotation`, `scale`, `interaction_display_name`, `interaction_display_name_key`, `marker_widget_class`, `mapOverlay`를 읽는다.
-
-상호작용 액터와 직접 연결되는 주요 `spawn_type`은 다음과 같다.
-
-| `spawn_type` | 생성/설정 대상 |
-| --- | --- |
-| `level_travel` | 직접 배치 액터의 `Destination` enum과 GameInstance의 `DA_LevelTravelPresentation`을 사용한다. JSON 스폰 설정은 지원하지 않는다. |
-| `pickup_item` | `ATunaSweeperPickupItemActor::ConfigurePickupItemDefaults()` |
-| `item_spawn` | `ATunaSweeperItemSpawnInteractableActor::ConfigureItemSpawnDefaults()` 및 컴포넌트 `ItemSpawn` 설정 |
-| `loot_container` | `ATunaSweeperLootContainerActor::ConfigureLootContainerDefaults()` |
-| `loot_container_spawn` | `ATunaSweeperLootContainerSpawnInteractableActor::ConfigureLootContainerSpawnDefaults()` 및 컴포넌트 `LootContainerSpawn` 설정 |
-| `self_destruct` | `ATunaSweeperSelfDestructInteractableActor::ConfigureSelfDestructDefaults()` 및 컴포넌트 `SelfDestruct` 설정 |
-| `vending_machine`/`shop_open`/`shop` | `ATunaSweeperShopActor::ConfigureShopDefaults()` 및 컴포넌트 `ShopOpen` 설정 |
-| `workbench`/`workbench_open` | `ATunaSweeperWorkbenchActor::ConfigureWorkbenchDefaults()` 및 제조/분해/설계도 등록 컴포넌트 설정 |
-| `piggy_bank` 계열 | `ATunaSweeperPiggyBankActor::ConfigurePiggyBankDefaults()` |
-
-같은 JSON에는 `extraction_point`, `shooting_practice_dummy`, `rolling_bomber_spawner`, `sandbag_cover`, `explosive_barrel`, `static_mesh_prop`, `periodic_noise_emitter`도 함께 들어간다. 이들은 동일 스폰 파이프라인을 쓰지만 `UTunaSweeperInteractionSubsystem::RequestInteraction()`의 월드 상호작용 switch와 직접 연결되지 않는 타입도 있다.
+데이터 소유 배치가 필요한 적, 루트 컨테이너, 메모는 `level_name + placement_id`로 `BP_RaidPlacementAnchor`에 연결한다. 적과 메모 JSON에는 Transform을 둘 수 없다. `LootContainerSpawns.json`만 기존 좌표 행을 호환 목적으로 유지한다.
 
 ## 디버깅 체크리스트
 
@@ -168,7 +146,7 @@ flowchart TD
 9. 루팅 컨테이너가 비거나 열리지 않으면 `ContainerDefinitionId`, `ContentsId`, `UTunaSweeperItemDataSubsystem::TryBuildLootContainerInstance()`를 확인한다.
 10. 메모가 안 보이면 `MemoId > 0`, `TryGetMemoDefinition()`, `UTunaSweeperGameInstance::IsMemoAcquired()` 상태를 확인한다. 획득한 메모 액터는 `BeginPlay()` 또는 상호작용 후 제거된다.
 11. 월드 진행 수리가 실패하면 필요 아이템 ID/수량과 `CountInventoryItemById()` 결과를 확인한다. 현재 `RepairUsingAvailableRequiredItems()`는 부족분 일부 투입이 아니라 완료 필요 수량을 모두 보유해야 성공한다.
-12. JSON 스폰 액터가 안 생기면 `GameplayInteractionSpawns.json`의 `level_name`, `spawn_id`, `spawn_type`, `actor_class`, `location`을 확인한다. `spawn_type`이 Unknown이면 행 전체를 건너뛴다.
-13. PIE에서 맵 이름 문제가 의심되면 JSON 스폰은 `NormalizeLevelName()`으로 `UEDPIE_` 접두사를 제거하지만, 상호작용의 BunkerMap 제한은 `GetMapName().EndsWith("BunkerMap")`를 쓴다는 차이를 확인한다.
+12. 앵커 기반 액터가 안 생기면 JSON의 `level_name`, `placement_id`, 프로필/정의 ID와 레벨 앵커의 `PlacementId`, `AnchorKind`를 확인한다.
+13. PIE에서 맵 이름 문제가 의심되면 배치 서브시스템은 `UEDPIE_` 접두사와 빌드 flavor 레이드 별칭을 정규화하지만, 상호작용의 BunkerMap 제한은 `GetMapName().EndsWith("BunkerMap")`를 쓴다는 차이를 확인한다.
 14. 레벨 이동이 안 되면 직접 배치 액터의 `Destination`, GameInstance의 `DA_LevelTravelPresentation`, `UTunaSweeperLevelTransitionSubsystem::StartTransition()` 반환값, 최종 `UGameplayStatics::OpenLevel()` 호출 경로를 확인한다.
 15. 하우징 모드 중 월드 상호작용이 안 되는 것은 의도된 동작이다. `UTunaSweeperHousingSubsystem::IsHousingModeOpen()`이 true이면 서브시스템 포커스와 마커가 모두 억제된다.

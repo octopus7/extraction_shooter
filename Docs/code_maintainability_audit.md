@@ -15,7 +15,7 @@
 | --- | --- | --- | --- |
 | P0 | 데이터 파일 | `LootContainerContents.json` 파싱 실패로 `LoadItemData()` 전체 실패 가능 | JSON 복구, `Content/Data` 파싱 검증 자동화 |
 | P1 | 저장/런타임 상태 | `UTunaSweeperGameInstance`가 저장, 인벤토리, 상점, 작업대, 하우징, 경험치를 모두 소유 | 도메인별 save snapshot/export/import 분리 |
-| P1 | 런타임 스폰 | `UTunaSweeperEnemySpawnSubsystem`과 `GameplayInteractionSpawns.json`이 다수 타입을 단일 union/parser로 처리 | spawn type별 parser/handler와 공통 row reader 분리 |
+| 완료 | 런타임 스폰 | 범용 gameplay-interaction union/parser와 좌표 기반 적 배치가 제거됨 | 직접 BP 배치와 엄격한 anchor schema 유지 |
 | P1 | 데이터 로더 | JSON/CSV 파서, alias, vector/rotator reader가 여러 파일에 중복 | 공용 data reader/schema validator 추가 |
 | P1 | UI | HUD/Intro/ItemContainer/Workbench 위젯이 화면 생성, 상태 전환, 도메인 조회를 동시에 처리 | shell/presenter/view-model/하위 위젯 분리 |
 | P1 | AI/전투 | RollingBomber, EnemyAIController, EnemyCharacter가 상태 머신, 비주얼, 전투 수치를 직접 소유 | combat profile/data asset, 행동/비주얼/피해 컴포넌트 분리 |
@@ -86,32 +86,29 @@ Get-ChildItem .\TunaSweeper\Content\Data -File -Filter *.json |
 - RaidMap 사망 저장, RaidMap to BunkerMap 추출 저장, Bunker UI 거래 저장 지연 flush.
 - 인벤토리/장비/퀵슬롯/창고/상점/작업대/하우징/퀘스트/메모/월드 진행 저장-로드 회귀.
 
-## P1. 런타임 스폰 시스템의 union parser
+## 해결됨. 런타임 스폰 시스템의 union parser
 
 ### 문제
 
-`UTunaSweeperEnemySpawnSubsystem`이 적, 루팅 컨테이너, 투명 장애물, 월드 진행 오브젝트, 워프 포인트, gameplay interaction actor까지 한 클래스에서 로드하고 스폰한다. 특히 `GameplayInteractionSpawns.json`은 레벨 이동, 추출 지점, 픽업, 상점, 작업대, 자폭, rolling bomber spawner, sandbag, barrel, static mesh prop, practice dummy, noise emitter 같은 타입을 단일 struct와 거대 parser/switch로 처리한다.
+범용 gameplay-interaction union/parser는 제거되었다. 월드 진행, 워프, 투명 장애물, Mole, 레벨 이동, 추출과 일반 상호작용은 레벨의 직접 배치 BP를 사용한다. 적과 메모는 엄격한 `level_name + placement_id` 앵커 schema를 사용하고, 루트 컨테이너만 기존 좌표 행을 호환한다. `UTunaSweeperEnemySpawnSubsystem`에는 전투 프로필 조회와 좌표형 루트 컨테이너 호환 경로만 남아 있다.
 
 근거:
 
-- `TunaSweeper/Source/TunaSweeper/Public/Subsystem/TunaSweeperEnemySpawnSubsystem.h:66`: 스폰 데이터 로더가 한 subsystem에 집중
-- `TunaSweeper/Source/TunaSweeper/Private/Subsystem/TunaSweeperEnemySpawnSubsystem.cpp:469`: 여러 스폰 데이터를 한 흐름에서 로드/스폰
-- `TunaSweeper/Source/TunaSweeper/Private/Subsystem/TunaSweeperEnemySpawnSubsystem.cpp:1418`: gameplay interaction row 파싱
-- `TunaSweeper/Source/TunaSweeper/Private/Subsystem/TunaSweeperEnemySpawnSubsystem.cpp:2119`: gameplay interaction actor 구성
+- `TunaSweeper/Source/TunaSweeper/Private/Subsystem/TunaSweeperRaidPlacementSubsystem.cpp`: enemy/loot anchor 연결
+- `TunaSweeper/Source/TunaSweeper/Private/Subsystem/TunaSweeperMemoSubsystem.cpp`: memo anchor 연결
+- `TunaSweeper/Source/TunaSweeper/Private/UI/TunaSweeperMapWidget.cpp`: 직접 배치 level travel/extraction 오버레이
 
 ### 해결
 
-1. 공통 필드(`level_name`, `spawn_id`, transform, editor-only, map overlay)는 shared row reader로 분리한다.
-2. `spawn_type`별 `ISpawnRowParser`와 `ISpawnActorConfigurator`를 등록형으로 둔다.
-3. legacy alias와 default asset path는 타입별 config에 가두고, 새 타입 추가 시 기존 타입 parser를 건드리지 않게 한다.
-4. 에디터 배치 cleanup은 runtime spawn과 분리해 editor migration command로 옮긴다.
+1. 일반 월드 액터는 레벨 배치를 유지한다.
+2. 데이터 소유 배치는 anchor kind별 subsystem과 schema를 유지한다.
+3. 새 anchor kind가 필요할 때 기존 종류와 ID 충돌 검증을 함께 확장한다.
 
 ### 검증
 
-- `GameplayInteractionSpawns.json` 전체 row schema validation.
-- BunkerMap/RaidMap runtime spawn 수와 stable spawn id 중복 방지.
-- 맵 오버레이, level travel, extraction, loot, shop, workbench, static mesh prop, noise emitter 동작.
-- 정리된 맵과 구버전 맵에서 중복 스폰/오삭제가 없는지 확인.
+- `EnemySpawns.json`/`MemoSpawns.json`의 placement id, 중복, transform 금지 검증.
+- anchor kind 불일치·누락·미연결 로그 검증.
+- 직접 배치 level travel/extraction 오버레이와 기존 BP 비삭제 확인.
 
 ## P1. 공용 데이터 로더와 schema validator 부재
 
@@ -123,7 +120,7 @@ JSON/CSV 파일 로드, 필드 alias, vector/rotator/color 파싱, level name �
 
 - `TunaSweeper/Source/TunaSweeper/Private/Subsystem/TunaSweeperEnemySpawnSubsystem.cpp:105`: vector/rotator reader
 - `TunaSweeper/Source/TunaSweeper/Private/Subsystem/TunaSweeperMemoSubsystem.cpp:41`: 유사 vector/rotator reader
-- `TunaSweeper/Source/TunaSweeper/Private/Subsystem/TunaSweeperBunkerRuntimeSpawnSubsystem.cpp:36`: 유사 vector/rotator/color reader
+- `TunaSweeper/Source/TunaSweeper/Private/Subsystem/TunaSweeperRaidPlacementSubsystem.cpp`: placement JSON reader
 - `TunaSweeper/Source/TunaSweeper/Private/Subsystem/TunaSweeperItemDataSubsystem.cpp:634`: item table JSON parser
 - `TunaSweeper/Source/TunaSweeper/Private/Subsystem/TunaSweeperQuestSubsystem.cpp:303`: quest data loader
 
@@ -232,9 +229,8 @@ HUD, Intro, ItemContainer, Workbench 위젯이 화면 생성, 상태 전환, 입
 
 근거:
 
-- `TunaSweeper/Content/Data/GameplayInteractionSpawns.json`
 - `TunaSweeper/Content/Data/QuestDefinitions.json`
-- `TunaSweeper/Source/TunaSweeper/Private/Subsystem/TunaSweeperEnemySpawnSubsystem.cpp:294`
+- 직접 배치된 개발용 BP/레벨 테스트 프랍
 
 ### 해결
 
