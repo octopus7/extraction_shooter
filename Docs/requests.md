@@ -8225,3 +8225,10 @@
 - 검증: UE 5.7.4 빌드 성공. 새 프로세스 임포트/재로드 에셋 검증 통과(치수·축·피벗·UV·CPU 접근·14개 섹션). 기존 Niagara 시작 ensure로 임포트/재로드 프로세스 종료 코드는 1. AuthoredMeshAndPulse 자동 테스트 성공(종료 0). 에디터 실행 및 시작 완료 확인.
 - 범위: 배치 JSON·하우징·카메라·CSV·난이도 작업은 수정하지 않음. 에디터 기존 자동 초기화가 다시 저장한 별도 Content 138개는 커밋에서 제외. 자동 승인 검토가 원복을 두 차례 거부하여 사용자 원복 승인 대기 상태로 남김.
 - 산출물: TunaSweeper/SourceArt/Props/NoiseEmitter, Tools/NoiseEmitter. 푸시하지 않음.
+
+## 2026-09-06 20:29:05 (소요시간: 00:15:11)
+
+- 연구 노드 13개의 이름과 설명 원문 필드를 `display_name_string_key`·`description_string_key` 참조로 전환하고, 한국어·영어·일본어 문구 26개를 공통 `Content/Data/UITextStrings.csv`에 통합했다.
+- 연구 정의와 JSON 로더가 문자열 키를 보관하도록 변경하고, 노드 뷰는 `UTunaSweeperGameInstance::ResolveLocalizedText`를 통해 현재 선택 언어 문구를 얻도록 공통 현지화 경로를 사용한다. 열린 연구 화면은 `OnLanguageChanged`를 구독해 언어 변경 시 즉시 갱신한다.
+- 노드 ID, 배치, 해금 수량, 연구 시간, 부모 관계, 효과와 세이브 진행도 구조는 변경하지 않았다. 연구 설계 문서와 저장 지속성 문서를 실제 JSON·CSV 구조에 맞췄다.
+- 정적 데이터 검증에서 노드 13개, 연구 문자열 26개, 누락된 언어 셀 0개, 기존 규칙 필드 변경 0개를 확인했다. UE 5.7 `TunaSweeperEditor Win64 Development` 빌드와 `TunaSweeper.Research.JsonContract` 자동화 검사가 성공했으며, 자동화 실행이 재저장한 비관련 Unreal 에셋은 복구 가능한 별도 stash로 분리해 커밋에서 제외했다. 빌드 후 일반 Unreal Editor 실행도 확인했다.

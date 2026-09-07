@@ -4,6 +4,7 @@
 #include "Components/Button.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
+#include "Game/TunaSweeperGameInstance.h"
 #include "Subsystem/TunaSweeperResearchSubsystem.h"
 
 void UTunaSweeperResearchNodeWidget::NativeConstruct()
@@ -76,6 +77,11 @@ void UTunaSweeperResearchTreeWidget::NativeConstruct()
 			Research->OnResearchStateChanged.AddUObject(this, &UTunaSweeperResearchTreeWidget::RefreshAllNodes);
 		}
 	}
+	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
+	{
+		TunaGameInstance->OnLanguageChanged.RemoveAll(this);
+		TunaGameInstance->OnLanguageChanged.AddUObject(this, &UTunaSweeperResearchTreeWidget::RefreshAllNodes);
+	}
 	RefreshAllNodes();
 }
 
@@ -84,6 +90,10 @@ void UTunaSweeperResearchTreeWidget::NativeDestruct()
 	if (UGameInstance* GameInstance = GetGameInstance())
 	{
 		if (UTunaSweeperResearchSubsystem* Research = GameInstance->GetSubsystem<UTunaSweeperResearchSubsystem>()) Research->OnResearchStateChanged.RemoveAll(this);
+	}
+	if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
+	{
+		TunaGameInstance->OnLanguageChanged.RemoveAll(this);
 	}
 	Super::NativeDestruct();
 }

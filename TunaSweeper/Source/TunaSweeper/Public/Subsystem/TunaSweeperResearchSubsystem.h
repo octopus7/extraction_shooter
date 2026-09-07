@@ -46,7 +46,7 @@ private:
 	int64 GetEffectiveUtcTicks() const;
 	void EnsureSaveStateLoaded() const;
 	void RequestSaveGameState() const;
-	FText ResolveLocalizedText(const FString& Korean, const FString& English) const;
+	FText ResolveLocalizedText(FName StringKey) const;
 	TMap<FName, FTunaSweeperResearchNodeDefinition> Definitions;
 	TSet<FName> AppliedNodeIds;
 	TArray<FTunaSweeperActiveResearchSaveData> ActiveResearch;

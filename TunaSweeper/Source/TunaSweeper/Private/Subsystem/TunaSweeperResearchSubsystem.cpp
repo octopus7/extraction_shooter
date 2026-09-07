@@ -85,10 +85,12 @@ bool UTunaSweeperResearchSubsystem::LoadResearchData(bool bForceReload)
 		if (Object->TryGetNumberField(TEXT("column"), Number)) Definition.Column = FMath::RoundToInt(Number);
 		if (Object->TryGetNumberField(TEXT("required_applied_node_count"), Number)) Definition.RequiredAppliedNodeCount = FMath::Max(0, FMath::RoundToInt(Number));
 		if (Object->TryGetNumberField(TEXT("duration_seconds"), Number)) Definition.DurationSeconds = FMath::Clamp(FMath::RoundToInt(Number), 1, 3600);
-		Object->TryGetStringField(TEXT("display_name_ko"), Definition.DisplayNameKo);
-		Object->TryGetStringField(TEXT("display_name_en"), Definition.DisplayNameEn);
-		Object->TryGetStringField(TEXT("description_ko"), Definition.DescriptionKo);
-		Object->TryGetStringField(TEXT("description_en"), Definition.DescriptionEn);
+		FString DisplayNameStringKey;
+		FString DescriptionStringKey;
+		Object->TryGetStringField(TEXT("display_name_string_key"), DisplayNameStringKey);
+		Object->TryGetStringField(TEXT("description_string_key"), DescriptionStringKey);
+		Definition.DisplayNameStringKey = FName(*DisplayNameStringKey.TrimStartAndEnd());
+		Definition.DescriptionStringKey = FName(*DescriptionStringKey.TrimStartAndEnd());
 		FString IconPath;
 		if (Object->TryGetStringField(TEXT("icon"), IconPath)) Definition.Icon = FSoftObjectPath(IconPath);
 		const TArray<TSharedPtr<FJsonValue>>* ParentValues = nullptr;
@@ -117,6 +119,13 @@ bool UTunaSweeperResearchSubsystem::LoadResearchData(bool bForceReload)
 			}
 		}
 		if (Definition.NodeId.IsNone() || Definitions.Contains(Definition.NodeId)) continue;
+		if (Definition.DisplayNameStringKey.IsNone() || Definition.DescriptionStringKey.IsNone())
+		{
+			UE_LOG(LogTunaSweeperResearch, Error, TEXT("Research node %s is missing a display-name or description string key."), *Definition.NodeId.ToString());
+			Definitions.Reset();
+			bResearchDataLoaded = false;
+			return false;
+		}
 		int32& RowCount = NodesPerRow.FindOrAdd(Definition.Row);
 		if (++RowCount > 3)
 		{
@@ -160,8 +169,8 @@ bool UTunaSweeperResearchSubsystem::GetNodeView(FName NodeId, FTunaSweeperResear
 	const FTunaSweeperActiveResearchSaveData* Active = nullptr;
 	OutView = FTunaSweeperResearchNodeView();
 	OutView.NodeId = NodeId;
-	OutView.DisplayName = ResolveLocalizedText(Definition->DisplayNameKo, Definition->DisplayNameEn);
-	OutView.Description = ResolveLocalizedText(Definition->DescriptionKo, Definition->DescriptionEn);
+	OutView.DisplayName = ResolveLocalizedText(Definition->DisplayNameStringKey);
+	OutView.Description = ResolveLocalizedText(Definition->DescriptionStringKey);
 	OutView.Row = Definition->Row;
 	OutView.Column = Definition->Column;
 	OutView.RequiredAppliedNodeCount = Definition->RequiredAppliedNodeCount;
@@ -398,8 +407,10 @@ void UTunaSweeperResearchSubsystem::RequestSaveGameState() const
 	if (UTunaSweeperGameInstance* GameInstance = Cast<UTunaSweeperGameInstance>(GetGameInstance())) GameInstance->SaveGameState();
 }
 
-FText UTunaSweeperResearchSubsystem::ResolveLocalizedText(const FString& Korean, const FString& English) const
+FText UTunaSweeperResearchSubsystem::ResolveLocalizedText(FName StringKey) const
 {
-	const FString Language = FInternationalization::Get().GetCurrentLanguage()->GetTwoLetterISOLanguageName();
-	return FText::FromString(Language.Equals(TEXT("ko"), ESearchCase::IgnoreCase) || English.IsEmpty() ? Korean : English);
+	const UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GetGameInstance());
+	return TunaGameInstance
+		? TunaGameInstance->ResolveLocalizedText(StringKey, FText::GetEmpty())
+		: FText::FromName(StringKey);
 }

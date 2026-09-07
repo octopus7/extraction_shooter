@@ -100,27 +100,25 @@ Locked -> Available -> Researching -> ReadyToClaim -> Applied
 
 ### 정의 파일
 
-`Content/Data/StatResearchNodes.json` 한 파일을 사용한다. 노드 배치와 게임 규칙을 여러 파일로 나누지 않는다. 연구 시간, 개방 수량, 표시 행·열, 시각 부모, 아이콘, 현지화 키와 능력치 효과는 모두 이 JSON에서 수정할 수 있어야 하며 C++에는 개별 노드 값이나 시간표를 하드코딩하지 않는다.
+`Content/Data/StatResearchNodes.json`은 노드 배치와 게임 규칙 및 현지화 문자열 키를 정의한다. 실제 한국어·영어·일본어 문구는 공통 `Content/Data/UITextStrings.csv`에 둔다. 연구 시간, 개방 수량, 표시 행·열, 시각 부모, 아이콘, 현지화 키와 능력치 효과는 JSON에서 수정할 수 있어야 하며 C++에는 개별 노드 값이나 시간표를 하드코딩하지 않는다.
 
 ```json
-{
-  "nodes": [
-    {
-      "node_id": "research_vitals_01",
-      "row": 0,
-      "column": 1,
-      "visual_parent_ids": [],
-      "required_applied_node_count": 0,
-      "research_duration_seconds": 10,
-      "name_key": "research.vitals_01.name",
-      "description_key": "research.vitals_01.desc",
-      "icon_path": "/Game/UI/Research/T_UI_Research_Vitals_01",
-      "effects": [
-        { "type": "max_health", "value": 5000 }
-      ]
-    }
-  ]
-}
+[
+  {
+    "node_id": "vitality_1",
+    "row": 0,
+    "column": 1,
+    "required_applied_node_count": 0,
+    "duration_seconds": 10,
+    "parent_node_ids": [],
+    "display_name_string_key": "research.node.vitality_1.name",
+    "description_string_key": "research.node.vitality_1.description",
+    "icon": "",
+    "effects": [
+      { "type": "max_health", "value": 5 }
+    ]
+  }
+]
 ```
 
 ### 필드 규칙
@@ -128,11 +126,11 @@ Locked -> Available -> Researching -> ReadyToClaim -> Applied
 - `node_id`: 세이브에 기록되는 영구 식별자다. 출시 후 이름을 바꾸지 않는다.
 - `row`: 위에서 아래로 증가한다.
 - `column`: `0=왼쪽`, `1=중앙`, `2=오른쪽`만 허용한다.
-- `visual_parent_ids`: 연결선 검증과 디자이너 참고용이며 연구 가능 판정에는 사용하지 않는다.
+- `parent_node_ids`: 연결선 검증과 디자이너 참고용이며 연구 가능 판정에는 사용하지 않는다.
 - `required_applied_node_count`: 이미 완료 확정된 노드 수 조건이다.
-- `research_duration_seconds`: 실제 연구 시간이다. 1초 이상 정수로 두며 최종 노드의 초기값은 `3600`이다. 런타임은 이 값을 그대로 사용하고 별도의 시간 증가 공식을 적용하지 않는다.
-- `name_key`, `description_key`: 기존 텍스트 서브시스템을 통해 현지화한다.
-- `icon_path`: 노드 WBP에 표시할 소프트 텍스처 경로다.
+- `duration_seconds`: 실제 연구 시간이다. 1초 이상 정수로 두며 최종 노드의 초기값은 `3600`이다. 런타임은 이 값을 그대로 사용하고 별도의 시간 증가 공식을 적용하지 않는다.
+- `display_name_string_key`, `description_string_key`: `UTunaSweeperGameInstance::ResolveLocalizedText`와 공통 텍스트 서브시스템을 통해 `UITextStrings.csv`의 현재 선택 언어 문구로 해석한다.
+- `icon`: 노드 WBP에 표시할 소프트 텍스처 경로다. 빈 문자열이면 아이콘을 지정하지 않은 상태다.
 - `effects`: 완료 확정 후 합산할 능력치 효과 목록이다.
 
 초기 효과 타입은 현재 플레이어 성장 코드와 충돌 없이 합칠 수 있는 아래 5개만 지원한다.
@@ -289,6 +287,7 @@ RootOverlay
 - 각 행은 3개의 같은 폭 열 기준으로 맞춘다. 사용하지 않는 열은 Spacer로 남긴다.
 - 연결선은 상태 판정용이 아니므로 WBP의 장식 Image로 둔다.
 - 루트 C++ 위젯은 이미 배치된 `UTunaSweeperResearchNodeWidget`을 수집해 `NodeId`와 데이터 정의를 연결할 뿐 트리를 재구성하지 않는다.
+- 노드 뷰의 이름과 설명은 JSON의 문자열 키를 공통 UI 텍스트 서브시스템으로 해석한 값이며, 연구 트리는 `OnLanguageChanged`를 구독해 열린 화면도 즉시 다시 해석한다.
 - WBP에 중복 NodeId가 있거나 JSON 정의가 WBP에 없으면 에디터/개발 빌드에서 오류를 낸다.
 
 #### `WBP_GameHud`
@@ -310,7 +309,7 @@ Private/Subsystem/TunaSweeperResearchSubsystem.cpp
 Public/UI/TunaSweeperResearchWidgets.h
 Private/UI/TunaSweeperResearchWidgets.cpp
 Content/Data/StatResearchNodes.json
-Content/Data/ResearchTextStrings.csv
+Content/Data/UITextStrings.csv
 Content/UI/WBP_ResearchNode.uasset
 Content/UI/WBP_ResearchTree.uasset
 ```
