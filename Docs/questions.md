@@ -6662,3 +6662,24 @@ Unreal Editor commandlet 검사 후 작업 트리에 나타난 무관한 139개 
 ### 답변
 
 의도한 `DemoBoxRaidMap` 앵커 변경을 제외하고, commandlet가 여러 맵과 그 의존성을 로드하는 동안 현재 UE 직렬화 형식으로 자동 재저장한 `.uasset`/`.umap` 변경이다. UI 59개, Effects 18개, Interaction 18개, Prototype 11개, Characters 9개, Weapons 7개, Audio 3개, EditorOnly 3개, Maps 3개, Meshes 3개, Core 2개와 Input/MainRaid/Movies 각 1개로 총 139개다. 로그상 직접 원인은 일반 자동 저장이 아니라 `TunaSweeperEditor` 시작 시 예약되는 다수의 one-shot `Ensure...Assets` 작업이다. 현재 완료 마커가 유지되는 동안은 즉시 반복되지 않을 수 있지만 새 작업 트리나 마커 초기화 뒤에는 재발할 수 있으므로, commandlet/자동화 실행에서는 명시적 setup 인수가 없으면 one-shot 생성기를 실행하지 않는 시작 조건을 추가한 뒤 원본을 복구하는 것이 안전하다.
+
+## 2026-09-07 16:51:35 (소요시간: 00:02:02)
+
+### 질문
+
+보스전 테스트용 레벨이 있는지 문의.
+
+### 답변
+
+현재 보스전 전용 테스트 레벨은 없다. 프로젝트의 레벨 파일과 전투 패턴 문서를 확인했으며, 메인보스·돌진형 중간보스·로봇 소환형 중간보스 캐릭터와 자동 테스트는 구현되어 있지만 기존 맵에는 배치하지 않았다. 이전 시각 검증 화면은 렌더 확인용 임시 장면이며 저장된 전투 테스트 레벨이 아니다. 게임 코드·에셋은 수정하지 않았다.
+
+## 2026-09-07 17:35:39 (소요시간: 00:01:11)
+
+### 질문
+
+최근 24시간 작업 중 브랜치에만 커밋된 작업이 남아 있는지 병합 상황 점검 요청.
+
+### 답변
+
+원격 fetch 후 확인한 결과 최근 24시간 커밋 중 main 미병합 작업이 있다. codex/loot-container-set(3개), codex/memo-storage-device(4개), codex/modular-interior-preview(4개), codex/robot-family-assets-20260906(1개), codex/water-mask-rebuild(2개)의 총 14개 커밋은 main에 포함되지 않았으며 git cherry에서도 동일 패치가 확인되지 않았다. 별도 detached HEAD 워크트리에도 두더지 제어실, 탈출 표식, 실험실 소품, 실내 확장 모듈, 식생 등의 미병합 커밋이 남아 있다. 로컬 main은 origin/main보다 5개 커밋 앞서고 뒤처진 커밋은 없다. 현재 작업 폴더에는 미커밋 변경과 미추적 에셋도 있다. 점검만 수행하고 병합이나 푸시는 하지 않았다.
+

@@ -797,6 +797,9 @@ bool UTunaSweeperGameInstance::LoadGameState()
 bool UTunaSweeperGameInstance::SaveGameStateInternal(
 	UTunaSweeperGameInstance::EUsableQuickSlotSaveMode UsableQuickSlotSaveMode) const
 {
+	// Lab supplies, damage and rewards belong only to the current test session.
+	if (IsCombatTestSession()) return false;
+
 	const FString ExistingSlotName = GetExistingSaveGameSlotName(ActiveSaveSlotIndex);
 	UTunaSweeperSaveGame* ExistingSaveGame = nullptr;
 	if (!ExistingSlotName.IsEmpty())

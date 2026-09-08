@@ -189,6 +189,11 @@ void UTunaSweeperGameInstance::MarkItemStateMutationForSave(bool bSaveImmediatel
 
 void UTunaSweeperGameInstance::ClearInventoryAndSave()
 {
+	if (IsCombatTestSession())
+	{
+		ResetCombatTestLoadout();
+		return;
+	}
 	EnsureInventoryStateInitialized();
 	ClearSelectedItemSelection();
 	ClearHoveredItemSlot();

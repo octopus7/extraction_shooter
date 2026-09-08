@@ -796,6 +796,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Inventory")
 	void NotifyActiveLootContainerUiClosed();
 	void SaveGameState();
+	/** Temporary equipment for the local boss lab; restored when its game mode ends. */
+	void BeginCombatTestSession();
+	void ResetCombatTestLoadout();
+	void EndCombatTestSession();
+	bool IsCombatTestSession() const { return CombatTestInventoryBackup.IsValid(); }
 	void MarkBunkerItemStateSavePending();
 	bool FlushPendingBunkerItemStateSave();
 	bool HasPendingBunkerItemStateSave() const { return bPendingBunkerItemStateSave; }
@@ -813,6 +818,9 @@ public:
 	FSimpleMulticastDelegate OnExperienceChanged;
 
 private:
+	struct FCombatTestInventoryBackup;
+	TSharedPtr<FCombatTestInventoryBackup> CombatTestInventoryBackup;
+
 	enum class EUsableQuickSlotSaveMode : uint8
 	{
 		PreserveExisting,

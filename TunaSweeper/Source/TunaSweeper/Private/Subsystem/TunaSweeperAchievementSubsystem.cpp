@@ -5,6 +5,7 @@
 #include "Achievement/TunaSweeperOnlineAchievementPublisher.h"
 #include "Dom/JsonObject.h"
 #include "Engine/World.h"
+#include "Game/TunaSweeperGameInstance.h"
 #include "Game/TunaSweeperSafeSave.h"
 #include "HAL/FileManager.h"
 #include "Misc/ConfigCacheIni.h"
@@ -214,16 +215,22 @@ bool UTunaSweeperAchievementSubsystem::LoadAchievementDefinitions(bool bForceRel
 
 void UTunaSweeperAchievementSubsystem::ReportEnemyKilled(FName EnemyId)
 {
+	// Practice events must never reach the separate achievement save or platform publisher.
+	if (const auto* Instance = Cast<UTunaSweeperGameInstance>(GetGameInstance()); Instance && Instance->IsCombatTestSession()) { return; }
 	ProcessProgressChanged(TunaSweeperAchievementModel::RecordEnemyKilled(ProgressState, EnemyId));
 }
 
 void UTunaSweeperAchievementSubsystem::ReportLocationReached(FName LocationId)
 {
+	// Practice events must never reach the separate achievement save or platform publisher.
+	if (const auto* Instance = Cast<UTunaSweeperGameInstance>(GetGameInstance()); Instance && Instance->IsCombatTestSession()) { return; }
 	ProcessProgressChanged(TunaSweeperAchievementModel::RecordLocationReached(ProgressState, LocationId));
 }
 
 void UTunaSweeperAchievementSubsystem::ReportQuestRewardClaimed(FName QuestId)
 {
+	// Practice events must never reach the separate achievement save or platform publisher.
+	if (const auto* Instance = Cast<UTunaSweeperGameInstance>(GetGameInstance()); Instance && Instance->IsCombatTestSession()) { return; }
 	ProcessProgressChanged(TunaSweeperAchievementModel::RecordQuestRewardClaimed(ProgressState, QuestId));
 }
 

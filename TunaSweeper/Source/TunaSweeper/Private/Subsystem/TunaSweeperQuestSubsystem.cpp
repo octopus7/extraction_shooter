@@ -453,6 +453,7 @@ bool UTunaSweeperQuestSubsystem::AreQuestPrerequisitesMet(FName QuestId) const
 
 bool UTunaSweeperQuestSubsystem::AcceptQuest(FName QuestId)
 {
+	if (const auto* Instance = Cast<UTunaSweeperGameInstance>(GetGameInstance()); Instance && Instance->IsCombatTestSession()) { return false; }
 	EnsureSaveStateLoaded();
 	if (!CanAcceptQuest(QuestId))
 	{
@@ -480,6 +481,7 @@ bool UTunaSweeperQuestSubsystem::CanClaimQuestReward(FName QuestId) const
 
 bool UTunaSweeperQuestSubsystem::ClaimQuestReward(FName QuestId)
 {
+	if (const auto* Instance = Cast<UTunaSweeperGameInstance>(GetGameInstance()); Instance && Instance->IsCombatTestSession()) { return false; }
 	EnsureSaveStateLoaded();
 	if (!CanClaimQuestReward(QuestId))
 	{
@@ -548,6 +550,7 @@ bool UTunaSweeperQuestSubsystem::ClaimQuestReward(FName QuestId)
 
 bool UTunaSweeperQuestSubsystem::SetTrackedQuest(FName QuestId)
 {
+	if (const auto* Instance = Cast<UTunaSweeperGameInstance>(GetGameInstance()); Instance && Instance->IsCombatTestSession()) { return false; }
 	EnsureSaveStateLoaded();
 	if (!IsQuestTrackable(QuestId))
 	{
@@ -566,6 +569,7 @@ bool UTunaSweeperQuestSubsystem::SetTrackedQuest(FName QuestId)
 
 void UTunaSweeperQuestSubsystem::ClearTrackedQuest()
 {
+	if (const auto* Instance = Cast<UTunaSweeperGameInstance>(GetGameInstance()); Instance && Instance->IsCombatTestSession()) { return; }
 	if (!TrackedQuestId.IsNone())
 	{
 		EnsureSaveStateLoaded();
@@ -801,6 +805,7 @@ void UTunaSweeperQuestSubsystem::NotifyInteractionCompleted(FName InteractionEve
 
 void UTunaSweeperQuestSubsystem::AddCoins(int32 Amount, bool bSaveImmediately)
 {
+	if (const auto* Instance = Cast<UTunaSweeperGameInstance>(GetGameInstance()); Instance && Instance->IsCombatTestSession()) { return; }
 	EnsureSaveStateLoaded();
 
 	const int32 PositiveAmount = FMath::Max(0, Amount);
@@ -815,6 +820,7 @@ void UTunaSweeperQuestSubsystem::AddCoins(int32 Amount, bool bSaveImmediately)
 
 bool UTunaSweeperQuestSubsystem::TrySpendCoins(int32 Amount, bool bSaveImmediately)
 {
+	if (const auto* Instance = Cast<UTunaSweeperGameInstance>(GetGameInstance()); Instance && Instance->IsCombatTestSession()) { return false; }
 	EnsureSaveStateLoaded();
 
 	const int32 PositiveAmount = FMath::Max(0, Amount);
@@ -1323,6 +1329,7 @@ void UTunaSweeperQuestSubsystem::AdvanceMatchingObjectives(
 	int32 Amount,
 	bool bSaveImmediately)
 {
+	if (const auto* Instance = Cast<UTunaSweeperGameInstance>(GetGameInstance()); Instance && Instance->IsCombatTestSession()) { return; }
 	if (!EnsureQuestDataLoaded() || Amount <= 0)
 	{
 		return;

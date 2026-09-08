@@ -1,6 +1,6 @@
 # 재사용 전투 패턴
 
-보스와 중간보스가 같은 예고·회피 규칙을 공유하도록 `UTunaSweeperCombatPatternComponent`에 세 패턴을 구성한다. 특정 보스 맵이 정해지지 않아 기존 맵에는 적을 추가 배치하지 않는다.
+보스와 중간보스가 같은 예고·회피 규칙을 공유하도록 `UTunaSweeperCombatPatternComponent`에 세 패턴을 구성한다. `/Game/Maps/BossCombatTestMap`에서 포탈로 각 보스의 안전 대기 공간에 이동하고 전투 구역에 진입해 시험한다. 사용법은 [보스 전투 테스트 맵](boss_combat_test.md)을 참조한다.
 
 ## 사용
 
@@ -12,7 +12,7 @@
 
 ## 사전 학습용 중간보스
 
-에디터 Place Actors 또는 C++ Classes에서 각각 독립적으로 배치한다. 두 클래스 모두 Blueprint 파생·세부 수치 조정이 가능하다. 배치할 전투 맵은 지정되지 않았으므로 기존 맵에는 추가하지 않는다.
+에디터 Place Actors 또는 C++ Classes에서 각각 독립적으로 배치한다. 두 클래스 모두 Blueprint 파생·세부 수치 조정이 가능하다. 보스 전투 테스트 맵에서는 독립된 `TunaSweeperBossEncounter` 구역이 각 중간보스를 진입 시 생성한다.
 
 | 캐릭터 | 역할 | 학습용 기본값 |
 | --- | --- | --- |

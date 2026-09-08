@@ -275,3 +275,9 @@ When adding a field that should survive save/load:
 - Active enemy burn timers, tick phase, stack count, shot/application IDs, damage snapshots, damage-source references, and flame effects are transient combat state. They end with enemy death, EndPlay, or level travel and are not restored by save/load.
 - Weapon/ammunition burn research uses the existing AppliedResearchNodeIds and ActiveResearchStates fields. Only claimed nodes contribute; no new save field or version is required.
 - Incendiary ammunition (item 2023) and loaded incendiary rounds use existing inventory item instances and LoadedAmmoItemId/LoadedAmmoCount. Burn strength is derived from static item definitions and applied research at fire time, not serialized into each item.
+
+## Boss Combat Lab
+
+- Encounter occupancy, boss ownership, ready/active/cleared state, and reset latches are transient; no save fields or migration are added.
+- `TunaSweeperBossTestGameMode` temporarily backs up the player's inventory/equipment/ammunition, acquired-item set, weapon selection, and experience state in memory. The original state is restored when the test game mode ends. Test supplies and repeated deaths never write gameplay saves.
+- Combat-test sessions suppress quest objective/reward progression and achievement event reporting so lab kills and portal use do not become persistent progression.
