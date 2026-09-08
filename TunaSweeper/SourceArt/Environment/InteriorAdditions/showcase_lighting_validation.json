@@ -1,0 +1,156 @@
+{
+  "created": true,
+  "path": "/Game/Environment/Bunker/InteriorAdditions/Maps/L_InteriorAdditions_Showcase",
+  "displayed_assets": {
+    "SM_InteriorAdditions_Bathtub": [
+      -795.636,
+      -940.6999999999999,
+      0.0
+    ],
+    "SM_InteriorAdditions_DetergentSet": [
+      -397.818,
+      -940.6999999999999,
+      0.0
+    ],
+    "SM_InteriorAdditions_LaundryHamper": [
+      0.0,
+      -940.6999999999999,
+      0.0
+    ],
+    "SM_InteriorAdditions_LaundryShelf": [
+      397.818,
+      -940.6999999999999,
+      0.0
+    ],
+    "SM_InteriorAdditions_Toilet": [
+      795.636,
+      -940.6999999999999,
+      0.0
+    ],
+    "SM_InteriorAdditions_TowelStack": [
+      -795.636,
+      -564.42,
+      0.0
+    ],
+    "SM_InteriorAdditions_Washbasin": [
+      -397.818,
+      -564.42,
+      0.0
+    ],
+    "SM_InteriorAdditions_WashingMachine": [
+      0.0,
+      -564.42,
+      0.0
+    ],
+    "SM_InteriorAdditions_Bed": [
+      397.818,
+      -564.42,
+      0.0
+    ],
+    "SM_InteriorAdditions_BedroomCabinet": [
+      795.636,
+      -564.42,
+      0.0
+    ],
+    "SM_InteriorAdditions_BedsideLamp": [
+      -795.636,
+      -188.14,
+      0.0
+    ],
+    "SM_InteriorAdditions_CoffeeTable": [
+      -397.818,
+      -188.14,
+      0.0
+    ],
+    "SM_InteriorAdditions_DiningTable": [
+      0.0,
+      -188.14,
+      0.0
+    ],
+    "SM_InteriorAdditions_FloorCushion": [
+      397.818,
+      -188.14,
+      0.0
+    ],
+    "SM_InteriorAdditions_Nightstand": [
+      795.636,
+      -188.14,
+      0.0
+    ],
+    "SM_InteriorAdditions_OvalRug": [
+      -795.636,
+      188.14,
+      0.0
+    ],
+    "SM_InteriorAdditions_RoundRug": [
+      -397.818,
+      188.14,
+      0.0
+    ],
+    "SM_InteriorAdditions_Sofa": [
+      0.0,
+      188.14,
+      0.0
+    ],
+    "SM_InteriorAdditions_Stool": [
+      397.818,
+      188.14,
+      0.0
+    ],
+    "SM_InteriorAdditions_CanisterSet": [
+      795.636,
+      188.14,
+      0.0
+    ],
+    "SM_InteriorAdditions_CookingPot": [
+      -795.636,
+      564.42,
+      0.0
+    ],
+    "SM_InteriorAdditions_ElectricKettle": [
+      -397.818,
+      564.42,
+      0.0
+    ],
+    "SM_InteriorAdditions_FoldedNapkin": [
+      0.0,
+      564.42,
+      0.0
+    ],
+    "SM_InteriorAdditions_MilkCan": [
+      397.818,
+      564.42,
+      0.0
+    ],
+    "SM_InteriorAdditions_PantryShelf": [
+      795.636,
+      564.42,
+      0.0
+    ],
+    "SM_InteriorAdditions_Refrigerator": [
+      -795.636,
+      940.6999999999999,
+      0.0
+    ],
+    "SM_InteriorAdditions_SinkCabinet": [
+      -397.818,
+      940.6999999999999,
+      0.0
+    ],
+    "SM_InteriorAdditions_StoveOven": [
+      0.0,
+      940.6999999999999,
+      0.0
+    ],
+    "SM_InteriorAdditions_WindowCurtains": [
+      397.818,
+      940.6999999999999,
+      0.0
+    ]
+  },
+  "label_count": 29,
+  "directional_light_count": 1,
+  "key_light_source_angle_degrees": 45.0,
+  "verification": "fresh-process saved-map reload",
+  "passed": true
+}

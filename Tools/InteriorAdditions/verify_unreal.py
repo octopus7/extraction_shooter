@@ -86,9 +86,14 @@ def validate_showcase(manifest, expected_showcase):
     labels = unreal.GameplayStatics.get_all_actors_of_class(world, unreal.TextRenderActor)
     assert len(labels) >= len(manifest["assets"]), "Missing showcase labels"
     lights = unreal.GameplayStatics.get_all_actors_of_class(world, unreal.DirectionalLight)
-    assert len(lights) >= 2, "Missing showcase key/fill lights"
+    assert len(lights) == 1, "Showcase must contain only one directional key light"
+    key = lights[0]
+    assert key.get_actor_label() == "Showcase_Key", "Unexpected showcase directional light"
+    source_angle = key.get_component_by_class(unreal.DirectionalLightComponent).get_editor_property("light_source_angle")
+    assert abs(source_angle - 45.0) < 1e-4, ("Key source angle must be 45 degrees", source_angle)
     return {"created": True, "path": SHOWCASE_PATH, "displayed_assets": displayed,
-            "label_count": len(labels), "directional_light_count": len(lights)}
+            "label_count": len(labels), "directional_light_count": len(lights),
+            "key_light_source_angle_degrees": source_angle}
 
 
 def validate(manifest=None, baseline=None, verification="fresh-process reload", showcase=None):
