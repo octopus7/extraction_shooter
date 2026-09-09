@@ -16,10 +16,6 @@ public:
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Version")
 	int32 InternalBuildNumber;
 
-	/** 유저에게 노출되는 표시용 버전 문자열 (예: "v1.0.0") */
-	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Version")
-	FString PublicVersionString;
-
 	/** 버전 체크 JSON을 요청할 스태틱 웹페이지 URL */
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Version")
 	FString VersionCheckUrl;

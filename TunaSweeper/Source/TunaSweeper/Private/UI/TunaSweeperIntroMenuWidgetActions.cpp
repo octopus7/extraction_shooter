@@ -416,3 +416,18 @@ void UTunaSweeperIntroMenuWidget::HandleLanguageChanged()
 	}
 }
 
+void UTunaSweeperIntroMenuWidget::HandleVersionCheckCompleted(bool bIsAllowed, const FString& Message, const FString& UpdateUrl)
+{
+	if (!bIsAllowed)
+	{
+		FPlatformMisc::MessageBoxExt(EAppMsgType::Ok, *Message, TEXT("버전 알림"));
+		
+		if (!UpdateUrl.IsEmpty())
+		{
+			FPlatformProcess::LaunchURL(*UpdateUrl, nullptr, nullptr);
+		}
+		
+		FGenericPlatformMisc::RequestExit(false);
+	}
+}
+

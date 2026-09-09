@@ -1,5 +1,6 @@
 #include "UI/TunaSweeperIntroMenuWidget.h"
 #include "TunaSweeperIntroMenuWidgetShared.h"
+#include "Subsystem/TunaSweeperVersionCheckSubsystem.h"
 
 void UTunaSweeperIntroMenuWidget::PrepareForInitialViewport()
 {
@@ -379,6 +380,16 @@ void UTunaSweeperIntroMenuWidget::NativeConstruct()
 	if (CreditsText3)
 	{
 		CreditsText3->SetText(FText::FromString(BuildCreditsColumnText(2)));
+	}
+
+	if (UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GetGameInstance()))
+	{
+		if (UTunaSweeperVersionCheckSubsystem* VersionCheckSubsystem = TunaGameInstance->GetSubsystem<UTunaSweeperVersionCheckSubsystem>())
+		{
+			VersionCheckSubsystem->OnVersionCheckCompleted.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleVersionCheckCompleted);
+			VersionCheckSubsystem->OnVersionCheckCompleted.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleVersionCheckCompleted);
+			VersionCheckSubsystem->RequestVersionCheck();
+		}
 	}
 
 	SelectedSaveSlotIndex = INDEX_NONE;

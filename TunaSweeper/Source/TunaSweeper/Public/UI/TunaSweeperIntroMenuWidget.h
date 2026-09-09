@@ -480,6 +480,9 @@ private:
 	UFUNCTION()
 	void HandleBackFromCreditsClicked();
 
+	UFUNCTION()
+	void HandleVersionCheckCompleted(bool bIsAllowed, const FString& Message, const FString& UpdateUrl);
+
 	void HandleLanguageChanged();
 
 	void ShowMainMenu();
