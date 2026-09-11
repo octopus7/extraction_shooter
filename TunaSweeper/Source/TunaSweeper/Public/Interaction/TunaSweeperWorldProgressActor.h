@@ -127,6 +127,9 @@ protected:
 	FName RequiredItemDisplayNameStringKey;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "World Progress")
+	FName ObjectiveEventId;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "World Progress")
 	FVector BlockingBoxExtent = FVector(260.0f, 55.0f, 140.0f);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "World Progress")

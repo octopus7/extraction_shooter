@@ -287,6 +287,7 @@ void ATunaSweeperWorldProgressActor::RefreshPresentation()
 			bCompleted ? ETunaSweeperInteractionType::None : ETunaSweeperInteractionType::WorldProgress,
 			bCompleted ? FText::GetEmpty() : ResolveInteractionDisplayName(),
 			bCompleted ? NAME_None : InteractionDisplayNameStringKey);
+		InteractableComponent->SetObjectiveEventId(bCompleted ? NAME_None : ObjectiveEventId);
 		InteractableComponent->SetInteractionRequirementPreview(
 			LoadRequiredItemIconTexture(),
 			GetRemainingRequiredQuantity(),
