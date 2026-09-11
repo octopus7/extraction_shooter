@@ -11,7 +11,7 @@
       { "speaker_name_string_key": "quest.speaker.mole", "dialogue_text_string_key": "quest.demo_q1.accept.line2" }
     ],
     "objectives": [
-      { "objective_id": "inspect_water_intake", "type": "interaction_completed", "text_string_key": "quest.demo_q1.objective.inspect", "required_count": 1, "interaction_event_id": "interaction.demo.water_intake.inspect", "interaction_type": "quest" }
+      { "objective_id": "inspect_water_intake", "type": "interaction_completed", "text_string_key": "quest.demo_q1.objective.inspect", "required_count": 1, "interaction_event_id": "demo.water_intake.inspect", "interaction_type": "world_progress" }
     ],
     "rewards": { "coins": 50, "items": [] }
   },
@@ -28,7 +28,7 @@
       { "speaker_name_string_key": "quest.speaker.mole", "dialogue_text_string_key": "quest.demo_q2.accept.line2" }
     ],
     "objectives": [
-      { "objective_id": "clear_water_screen", "type": "interaction_completed", "text_string_key": "quest.demo_q2.objective.clear", "required_count": 1, "interaction_event_id": "interaction.demo.water_screen.clear", "interaction_type": "quest" }
+      { "objective_id": "clear_water_screen", "type": "interaction_completed", "text_string_key": "quest.demo_q2.objective.clear", "required_count": 1, "interaction_event_id": "demo.water_intake.screen_clear", "interaction_type": "world_progress" }
     ],
     "rewards": { "coins": 75, "items": [] }
   },
@@ -41,7 +41,7 @@
     "description_string_key": "quest.demo_q3a.description",
     "auto_track_on_accept": true,
     "objectives": [
-      { "objective_id": "repair_valve", "type": "interaction_completed", "text_string_key": "quest.demo_q3a.objective.repair", "required_count": 1, "interaction_event_id": "interaction.demo.water_valve.repair", "interaction_type": "quest" }
+      { "objective_id": "repair_valve", "type": "interaction_completed", "text_string_key": "quest.demo_q3a.objective.repair", "required_count": 1, "interaction_event_id": "demo.water_intake.valve_repair", "interaction_type": "world_progress" }
     ],
     "rewards": { "coins": 100, "items": [] }
   },
@@ -54,7 +54,7 @@
     "description_string_key": "quest.demo_q3b.description",
     "auto_track_on_accept": true,
     "objectives": [
-      { "objective_id": "repair_bunker_pipe", "type": "interaction_completed", "text_string_key": "quest.demo_q3b.objective.repair", "required_count": 1, "interaction_event_id": "interaction.demo.bunker_pipe.repair", "interaction_type": "quest" }
+      { "objective_id": "repair_bunker_pipe", "type": "interaction_completed", "text_string_key": "quest.demo_q3b.objective.repair", "required_count": 1, "interaction_event_id": "demo.bunker_pipe.repair", "interaction_type": "world_progress" }
     ],
     "rewards": { "coins": 100, "items": [] }
   },
@@ -71,7 +71,7 @@
       { "speaker_name_string_key": "quest.speaker.mole", "dialogue_text_string_key": "quest.demo_q4.accept.line2" }
     ],
     "objectives": [
-      { "objective_id": "deliver_canned_tuna", "type": "interaction_completed", "text_string_key": "quest.demo_q4.objective.deliver", "required_count": 1, "interaction_event_id": "interaction.demo.canned_tuna.deliver", "interaction_type": "quest" }
+      { "objective_id": "deliver_canned_tuna", "type": "interaction_completed", "text_string_key": "quest.demo_q4.objective.deliver", "required_count": 1, "interaction_event_id": "demo.canned_tuna.deliver", "interaction_type": "world_progress" }
     ],
     "rewards": { "coins": 250, "items": [{ "item_id": 3004, "quantity": 1 }] }
   }
