@@ -6728,3 +6728,33 @@ Unreal Editor commandlet 검사 후 작업 트리에 나타난 무관한 139개 
 
 - 질문: 투사체·폭발 이펙트가 처음 화면에 렌더될 때 프리징되는 문제를 어떻게 해결하는가? 웜업이 가능한가?
 - 답변: 가능하다. 소스에서 총구 효과, 피격 효과·사운드·데칼·효과 클래스, 폭발 Niagara·왜곡 머티리얼의 사용 시점 LoadSynchronous 호출을 확인했으며 최초 사용 시 동기 로딩이 원인 후보다. 실제 프리징 원인은 프로파일링 전에는 확정할 수 없다. 로딩 화면에서 필요한 효과와 의존 에셋을 비동기 로드하고 강한 참조/로드 핸들을 유지하며, PSO 사전 준비 완료를 기다리고 필요한 Niagara 풀을 미리 준비하는 방식을 권장했다. UE 5.7 공식 문서상 PSO precaching은 기본 활성화되므로 실제 실행 설정과 누락/지연을 확인해야 한다. Niagara Warmup Time은 시뮬레이션 선진행으로 자체 히치를 유발할 수 있어 첫 렌더 프리징 해결과 구별해야 한다. 패키지 첫 실행에서 Insights와 PSO validation으로 검증할 것을 안내했다. 게임 코드·에셋은 수정하지 않았다.
+
+## 2026-09-14 00:43:20 (소요시간: 00:00:36)
+
+- 질문: 마지막 퀘스트를 진행하려면 외부 식량 창고 BP가 필요한가?
+- 답변: 외부 창고에서 참치캔을 얻는 배치/상호작용은 필요하지만 전용 C++ 클래스는 필수가 아니다. 기존 BP_LootContainer 또는 BP_PickupItem을 재사용하는 창고 BP로 충분하다. 현재 Q4는 밸브·배관 퀘스트 완료 후 수락하며 최종 조건은 참치캔 획득이 아니라 demo.canned_tuna.deliver(world_progress) 상호작용이다. 따라서 두더지에게 캔을 전달/소모하고 해당 이벤트를 알리는 연결도 필요하다. 확인한 Interaction 애셋 목록에는 외부 식량 창고 전용 BP가 없고, C++에는 해당 전달 이벤트의 전용 처리도 검색되지 않았다. 이번 응답은 확인 및 설계 답변이며 구현은 수행하지 않았다.
+
+## 2026-09-14 01:42:37 (소요시간: 00:00:20)
+
+- 질문: 엔딩 대화 진입 시 바로 무언가를 기록하는가?
+- 답변: 엔딩 진입 자체에서는 영구 저장하지 않고 bEndingActive 같은 임시 상태만 설정한다. 진입 직전에 최종 퀘스트 보상 수령이 RewardCompleted와 보상을 저장한다. 엔딩 감상 완료 플래그 demo.ending.farewell_seen은 대화가 끝나고 본편에서 만나요 화면을 표시할 때 기록한다. 따라서 대화 도중 종료하면 다음 벙커 진입에서 엔딩을 재개(처음부터 재생)하고, 작별 화면이 표시된 후에는 키를 누르기 전이라도 자동 재생하지 않는다.
+
+## 2026-09-14 01:50:04 (소요시간: 00:00:14)
+
+- 질문: 크로우바를 주는 공구 보관소 BP 이름은?
+- 답변: BP_CrowbarWallRack. 콘텐츠 경로는 /Game/Interaction/BP_CrowbarWallRack이며, 기반 클래스는 ATunaSweeperCrowbarWallRackActor이다.
+
+## 2026-09-14 02:06:40 (소요시간: 00:00:52)
+
+- 질문: 화면 상단에 표시되는 퀘스트 진행 알림 위젯의 클래스 이름은?
+- 답변: UTunaSweeperToastWidget이다. 퀘스트 완료 알림은 UTunaSweeperQuestSubsystem이 UTunaSweeperToastSubsystem을 통해 표시하며, 이 서브시스템이 UTunaSweeperToastWidget을 생성한다.
+
+## 2026-09-14 02:34:56 (소요시간: 00:02:26)
+
+- 질문: 데모 작별 화면에서 아무 키나 눌러 타이틀로 넘어가는 동작이 먹통처럼 보이는데 문제가 있는가?
+- 답변: 최근 PIE 로그에서 작별 화면이 표시된 BunkerMap 세션이 IntroMap 로드 없이 종료되어 실제 입력 콜백이 실행되지 않은 정황을 확인했다. 현재 구현은 포커스를 가진 UTunaSweeperDemoFarewellWidget만 키·마우스 입력을 처리하며, 포커스가 사라졌을 때 복구하거나 PlayerController에서 입력을 받는 보조 경로가 없다. 또한 기존 자동화 검사는 NativeOnKeyDown을 직접 호출해 실제 Slate 포커스 전달을 검증하지 않는다. 페이드 위젯은 HitTestInvisible이며 페이드 완료 후 제거되므로 직접적인 입력 차단 원인은 아니다. 진입 직후 0.5초 입력 유예는 즉시 누른 키와 그 반복 입력을 무시해 먹통처럼 느끼게 할 수 있다. 다음 수정에서는 화면 표시와 페이드/세이브 처리가 끝난 다음 틱에 사용자 포커스를 다시 지정하고, 포커스가 없어도 동작하는 입력 보조 경로와 실제 포커스 기반 회귀 검사를 추가하는 것이 적절하다. 이번 응답에서는 원인 검토만 수행하고 코드는 수정하지 않았다.
+
+## 2026-09-14 02:52:49 (소요시간: 00:01:41)
+
+- 질문: 레이드 북쪽에 방수 테이프를 확정 지급하는 상자를 BP_RaidPlacementAnchor 방식으로 배치하려면 어떻게 해야 하는가?
+- 답변: DemoBoxRaidMap 북쪽(+X)에 `/Game/Raid/Placement/BP_RaidPlacementAnchor`를 배치하고 Anchor Kind를 Loot Container, PlacementId를 레벨 내 모든 앵커 종류를 통틀어 미사용 양수로 설정한다. 방수 테이프는 아이템 6005이며, 기존 북쪽 상자 정의 7009를 재사용할 수 있다. 기존 내용물 8012는 밸브 손잡이 전용이므로 덮어쓰지 말고 LootContainerContents.json에 테이프 1개·확률 생략 또는 10000인 새 내용물 ID를 만든다. LootContainerSpawns.json에는 같은 level_name/placement_id, BP_LootContainer 클래스, definition 7009, 새 contents ID, spawn_chance 10000, condition always인 앵커 행을 추가한다. 앵커 Transform이 위치를 소유하므로 JSON에는 location/rotation/scale을 넣지 않는다. 현재 데모는 DemoBoxRaidMap을 사용하지만 논리 레이드 별칭 행은 선택된 데모 레이드 맵에 적용되므로 다른 데모 레이드 맵도 계속 지원하려면 같은 PlacementId 앵커를 양쪽 맵에 둔다. 이번 응답에서는 방법만 안내하고 데이터와 맵은 수정하지 않았다.
