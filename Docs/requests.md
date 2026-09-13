@@ -8347,9 +8347,9 @@
 - 검증: 선별 패치 적용 검사 및 스테이징 diff 확인. 빌드/플레이 검증은 수행하지 않음.
 
 
-## 2026-09-13 23:45:27 (소요시간: 00:22:38)
+## 2026-09-13 23:45:27 (소요시간: 00:24:26)
 
 - 요청: 스켈레탈 두더지를 SKM_ 이름으로 정리하고 실제 BP의 스태틱 두더지를 제거·교체. 회전 중 제자리 걸음, 미세한 호흡 idle 사용. 걷기 애니메이션은 에셋으로만 보관.
 - 완료: Blender/SKM_MoleDummy.blend와 메시 오브젝트 SKM_MoleDummy로 정리. 4초 호흡 Idle_Breathe 및 루트 고정 Turn_InPlace 제작, 6개 클립과 스켈레탈 FBX 내보내기/UE 5.7 임포트. BP_Mole 및 BunkerMap 배치 액터를 스켈레탈로 연결하고 DummyMesh 컴포넌트 제거. BS_Mole_IdleTurn에는 idle/회전용 발걸음만 연결, 실제 yaw 속도로 블렌딩. 걷기와 90도 회전 클립은 보관만 함.
-- 검증: Blender 4.5 전체 idle/제자리 걸음 프레임과 루트 고정·이음 오차 0 확인. UE 5.7 에디터 빌드 성공. 새 프로세스의 TunaSweeper.Character.Mole.RuntimeTurn / TurnAnimation / VisualComponents 3개 테스트 통과. 스켈레톤 참조 재저장과 BP 회전축 보정 후 재검증. 일회성 제작 도구는 에셋과 함께 커밋한 다음 제거하고 재빌드·검증한다.
+- 검증: Blender 4.5 전체 idle/제자리 걸음 프레임과 루트 고정·이음 오차 0 확인. UE 5.7 에디터 빌드 성공. 새 프로세스의 TunaSweeper.Character.Mole.RuntimeTurn / TurnAnimation / VisualComponents 3개 테스트 통과. 스켈레톤 참조 재저장과 BP 회전축 보정 후 재검증. 일회성 제작 도구를 에셋과 함께 커밋한 다음 제거했고, 최종 재빌드와 동일 3개 테스트가 모두 통과했다.
 
