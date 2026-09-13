@@ -3,6 +3,7 @@
 `SM_MoleDummy_Rigged.blend`는 Blender 4.5.12 LTS에서 제작/검증했다. 원본 `SM_MoleDummy.blend`는 보존한다.
 
 - 리그: `RIG_MoleDummy`, 19개 뼈. 발 IK 컨트롤 `CTRL_foot.L/R`.
+- 배 앞면 중심은 다리 영향을 제거하고 하복부의 pelvis에서 윗배의 spine으로 부드럽게 연결했다. 가장자리와 다리 접합부는 기존 가중치로 점진적으로 전환해 걷기 중 배 중앙이 갈라져 접히는 현상을 보정했다.
 - 30 fps, Blender 전방 -Y, 위쪽 +Z. 원본 크기 약 1.04 m 유지.
 - Action Editor에서 리그의 액션을 선택한다. 모든 액션은 Fake User와 Asset 표시로 보존된다.
 

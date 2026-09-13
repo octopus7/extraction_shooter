@@ -8325,3 +8325,10 @@
 - 완료: 원본 보존, Blender/SM_MoleDummy_Rigged.blend에 19본 리그와 발 IK, Walk_InPlace/Walk_Forward/Turn_Left_90/Turn_Right_90 액션 제작. 사용법은 Blender/SM_MoleDummy_Rigged.md에 기록.
 - 검증: Blender 4.5.12 재열기, 전체 프레임 좌표/가중치 정규화/걷기 이음/루트 이동 및 회전각 검사 통과. 주요 포즈 및 미리보기 영상 렌더. 원본 발목 표면 틈은 유지.
 
+
+## 2026-09-13 21:24:54 (소요시간: 00:01:55)
+
+- 요청: 두더지 배 중심의 다리 영향을 줄이고 척추·골반으로 연결하는 가중치 보정 진행.
+- 완료: SM_MoleDummy_Rigged.blend의 1,340개 버텍스 가중치를 부드러운 마스크로 보정. 배 중심 104개 버텍스는 pelvis/spine만 사용. 원본 메시와 기존 4개 액션 유지.
+- 검증: Blender 4.5.12 재열기, 전체 액션 프레임/가중치 정규화/걷기 이음/루트 이동·회전각 검사 통과. 동일 걷기 포즈 전후 렌더에서 중앙 접힘 개선 확인, 좌우 회전 포즈 확인. Saved/MoleRig/BellyFix에 비교 이미지와 갱신된 영상 생성.
+
