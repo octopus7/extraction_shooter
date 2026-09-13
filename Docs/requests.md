@@ -8508,3 +8508,9 @@
 - 요청: 사용자가 DemoBoxRaidMap 북쪽에 배치한 `Loot Container` 종류의 `BP_RaidPlacementAnchor`, `PlacementId=2`에 방수 테이프를 확정 지급하는 상자 데이터 연결.
 - 완료: 기존 북쪽 상자 정의 7009를 재사용하고 방수 테이프 6005 한 개를 100% 지급하는 내용물 8013을 추가. `LootContainerSpawns.json`에서 논리 데모 레이드와 앵커 2를 해당 상자·내용물에 100% 생성 조건으로 연결하고 Excel 내보내기 CSV를 동기화.
 - 검증: JSON 파싱, ID 고유성, 아이템·상자 정의 참조, 수량·확률, transform 필드 부재 및 CSV 일치를 검사. UE 런타임 로그에서 `DemoBoxRaidMap`의 `loot_containers=1` 생성 확인. 사용자 맵 변경은 수정하거나 커밋하지 않음.
+
+## 2026-09-14 03:08:35 (소요시간: 00:08:49)
+
+- 요청: 식량 창고가 최종 퀘스트 진행 중이 아닌데도 활성화되고 상호작용 명칭이 `수리하기`로 표시되는 문제 수정.
+- 완료: 식량 창고가 최종 퀘스트 `demo_q4_todays_reward`의 `Accepted` 상태에서만 활성화되도록 퀘스트 변경 이벤트와 연결하고, 직접 함수 호출로도 제한을 우회할 수 없게 처리. 전용 다국어 키 `ui.interaction.take_tuna_can`을 추가해 한국어 표시를 `참치캔 획득`으로 변경.
+- 검증: UE 5.7 `TunaSweeperEditor Win64 Development` 빌드 성공. `TunaSweeper.DemoEnding.AssetsAndInput` 자동화 테스트에서 퀘스트 전 비활성·지급 차단, 전용 문구, 1회 획득 및 중복 차단 통과.
