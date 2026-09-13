@@ -13,7 +13,7 @@
 
 namespace TunaSweeperToastWidget
 {
-	constexpr TCHAR FrameTexturePath[] = TEXT("/Game/UI/Toast/T_UI_QuestToastInnerFrame.T_UI_QuestToastInnerFrame");
+	constexpr TCHAR FrameTexturePath[] = TEXT("/Game/UI/Toast/T_UI_QuestToastInnerFrameWide.T_UI_QuestToastInnerFrameWide");
 }
 
 TSharedRef<SWidget> UTunaSweeperToastWidget::RebuildWidget()
@@ -115,8 +115,7 @@ void UTunaSweeperToastWidget::EnsureToastLayout()
 	{
 		ToastFrameImage->SetBrushFromTexture(FrameTexture, false);
 		FSlateBrush FrameBrush = ToastFrameImage->GetBrush();
-		FrameBrush.DrawAs = ESlateBrushDrawType::Box;
-		FrameBrush.Margin = FMargin(0.06f, 0.18f);
+		FrameBrush.DrawAs = ESlateBrushDrawType::Image;
 		ToastFrameImage->SetBrush(FrameBrush);
 	}
 	ToastFrameImage->SetColorAndOpacity(FLinearColor(1.0f, 1.0f, 1.0f, 0.72f));
