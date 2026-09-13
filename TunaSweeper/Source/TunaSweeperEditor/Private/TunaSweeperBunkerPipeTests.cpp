@@ -3,6 +3,7 @@
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMesh.h"
+#include "StaticMeshResources.h"
 #include "Engine/StaticMeshActor.h"
 #include "Engine/World.h"
 #include "EngineUtils.h"
@@ -25,6 +26,20 @@ bool FTunaSweeperBunkerPipeTest::RunTest(const FString& Parameters)
         TEXT("/Game/Interaction/BunkerPipe/BP_BunkerPipe_Repaired.BP_BunkerPipe_Repaired_C"));
     if (!TestNotNull(TEXT("Broken BP loads"), BrokenClass) ||
         !TestNotNull(TEXT("Repaired BP loads"), RepairedClass)) return false;
+    for (const TCHAR* Name : { TEXT("SM_BunkerPipe_Broken"), TEXT("SM_BunkerPipe_Repaired") })
+    {
+        auto* Mesh = LoadObject<UStaticMesh>(nullptr, *(FString(TEXT("/Game/Interaction/BunkerPipe/")) + Name));
+        if (!TestNotNull(TEXT("Cylinder loads"), Mesh)) return false;
+        const auto& LOD = Mesh->GetRenderData()->LODResources[0];
+        int32 InwardNormals = 0;
+        for (uint32 I = 0; I < LOD.VertexBuffers.PositionVertexBuffer.GetNumVertices(); ++I)
+        {
+            const FVector3f P = LOD.VertexBuffers.PositionVertexBuffer.VertexPosition(I) - FVector3f(0, 0, 120);
+            const FVector3f N = LOD.VertexBuffers.StaticMeshVertexBuffer.VertexTangentZ(I);
+            if (FVector3f::DotProduct(P, N) <= 0.f) ++InwardNormals;
+        }
+        TestEqual(FString(Name) + TEXT(" side and cap normals face outward"), InwardNormals, 0);
+    }
     UWorld* World = UWorld::CreateWorld(EWorldType::Game, false);
     UTunaSweeperGameInstance* GI = NewObject<UTunaSweeperGameInstance>(World);
     World->SetGameInstance(GI);
