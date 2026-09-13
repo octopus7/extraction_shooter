@@ -9,6 +9,7 @@ class ATunaSweeperWorldProgressCompletedActor;
 class UBoxComponent;
 class USceneComponent;
 class UStaticMeshComponent;
+class UStaticMesh;
 class UTexture2D;
 class UTunaSweeperGameInstance;
 class UTunaSweeperInteractableComponent;
@@ -81,6 +82,13 @@ public:
 	bool RepairUsingAvailableRequiredItems(bool bSaveImmediately = true);
 
 protected:
+	// An authored mesh bypasses the legacy bridge presentation entirely.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "World Progress|Presentation")
+	TObjectPtr<UStaticMesh> ProgressVisualMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "World Progress|Presentation")
+	FVector BlockingBoxOffset = FVector::ZeroVector;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<USceneComponent> SceneRoot;
 

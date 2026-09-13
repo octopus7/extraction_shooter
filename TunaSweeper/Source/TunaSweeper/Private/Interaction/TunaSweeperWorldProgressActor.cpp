@@ -135,6 +135,14 @@ void ATunaSweeperWorldProgressActor::ApplyBridgeVisualMesh()
 	{
 		return;
 	}
+	if (ProgressVisualMesh)
+	{
+		VisualMesh->SetStaticMesh(ProgressVisualMesh);
+		VisualMesh->EmptyOverrideMaterials();
+		VisualMesh->SetRelativeLocation(FVector::ZeroVector);
+		VisualMesh->SetRelativeScale3D(FVector::OneVector);
+		return;
+	}
 
 	if (UStaticMesh* BridgeMesh = LoadObject<UStaticMesh>(nullptr, BrokenBridgeVoxelMeshPath))
 	{
@@ -268,6 +276,7 @@ void ATunaSweeperWorldProgressActor::ApplyCollisionDefaults()
 	}
 
 	BlockingCollision->SetBoxExtent(BlockingBoxExtent);
+	BlockingCollision->SetRelativeLocation(BlockingBoxOffset);
 	BlockingCollision->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	BlockingCollision->SetCollisionObjectType(ECC_WorldStatic);
 	BlockingCollision->SetCollisionResponseToAllChannels(ECR_Ignore);
@@ -358,8 +367,7 @@ void ATunaSweeperWorldProgressActor::CompleteAndReplace(bool bSaveImmediately)
 		SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 		World->SpawnActor<AActor>(
 			ReplacementClass,
-			GetActorLocation(),
-			GetActorRotation(),
+			GetActorTransform(),
 			SpawnParameters);
 	}
 

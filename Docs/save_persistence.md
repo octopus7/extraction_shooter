@@ -185,6 +185,8 @@ Each entry is a stable recipe id from `Content/Data/WorkbenchRecipes.json`. Reci
 
 Stored through `UTunaSweeperSaveGame::WorldProgressStates`.
 
+The bunker pipe BP (`/Game/Interaction/BunkerPipe/BP_BunkerPipe_Broken`) reuses this state: waterproof tape item 6005, quantity 1, completed replacement `BP_BunkerPipe_Repaired`. Assign a stable unique `ProgressObjectId` to each placed pipe; the BP leaves it unset rather than sharing one ID across all placements. Completion is restored through the existing replacement flow, including the placed actor's scale. No save schema change is required.
+
 Each `FTunaSweeperWorldProgressSaveData` preserves:
 
 - `ObjectId`: stable per-level object identifier from runtime spawn data or a directly placed level actor.
