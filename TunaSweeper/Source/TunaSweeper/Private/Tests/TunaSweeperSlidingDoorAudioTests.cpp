@@ -35,7 +35,7 @@ bool FTunaSweeperSlidingDoorAudioTest::RunTest(const FString& Parameters)
 	if (!TestNotNull(TEXT("Owned audio component"), Audio)) { return false; }
 	TestFalse(TEXT("No automatic playback on spawn"), Audio->bAutoActivate);
 	TestTrue(TEXT("Spatial attenuation enabled"), Audio->bOverrideAttenuation && Audio->AttenuationOverrides.bAttenuate);
-	TestEqual(TEXT("Unity default volume"), Door->GetDoorSoundVolume(), 1.0f);
+	TestEqual(TEXT("35 percent default volume"), Door->GetDoorSoundVolume(), 0.35f);
 	TestTrue(TEXT("Top-down camera height does not suppress nearby door"),
 		Audio->AttenuationOverrides.Evaluate(FTransform::Identity, FVector(0.0f, 0.0f, 1500.0f)) > 0.99f);
 	TestTrue(TEXT("Distant doors still fade out horizontally"),
@@ -75,7 +75,7 @@ bool FTunaSweeperSlidingDoorAudioTest::RunTest(const FString& Parameters)
 	if (!TestNotNull(TEXT("Existing Blueprint spawns"), BlueprintDoor)) { return false; }
 	UAudioComponent* BlueprintAudio = BlueprintDoor->FindComponentByClass<UAudioComponent>();
 	if (!TestNotNull(TEXT("Existing Blueprint inherits audio component"), BlueprintAudio)) { return false; }
-	TestEqual(TEXT("Existing Blueprint inherits unity volume"), BlueprintDoor->GetDoorSoundVolume(), 1.0f);
+	TestEqual(TEXT("Existing Blueprint inherits 35 percent volume"), BlueprintDoor->GetDoorSoundVolume(), 0.35f);
 	TestTrue(TEXT("Existing Blueprint preserves top-down audibility"),
 		BlueprintAudio->AttenuationOverrides.Evaluate(FTransform::Identity, FVector(0.0f, 0.0f, 1500.0f)) > 0.99f);
 	BlueprintDoor->SetDoorOpen(false, true);

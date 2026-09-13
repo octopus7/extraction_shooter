@@ -21,6 +21,6 @@ UE 임포트나 프로젝트 애셋 설정은 하지 않았습니다.
 - `SlidingDoor_Close.wav`: 0.75초, 조금 낮은 서보 모터음과 부드러운 정지음.
 - 48 kHz / 16-bit PCM / 모노, 피크 -9 dBFS. 초기 버전의 저주파 배음 버징을 제거하고 원본 레벨을 높임.
 - 재생성: `generate_sliding_door.ps1`. 원본은 이 폴더에 보관하며 UE SoundWave는 `/Game/Audio/Doors`에 임포트.
-- `ATunaSweeperSlidingDoorActor`의 `DoorSoundVolume` 기본값은 `1.0f`. 실행 중 C++/Blueprint에서 `SetDoorSoundVolume(0.2f)`로 더 작게, `SetDoorSoundVolume(0.0f)`로 음소거 가능.
+- `ATunaSweeperSlidingDoorActor`의 `DoorSoundVolume` 기본값은 `0.35f`(35%). 실행 중 C++/Blueprint에서 `SetDoorSoundVolume(0.2f)`로 더 작게, `SetDoorSoundVolume(0.0f)`로 음소거 가능.
 - 높이 방향으로 긴 캡슐형 거리 감쇠를 사용해 12~15m 높이의 탑다운 카메라 때문에 가까운 문까지 작아지지 않도록 보정. 수평 거리 감쇠와 방향감은 유지.
 - 문마다 오디오 컴포넌트 하나를 사용하며 반복 요청은 재시작하지 않음. 방향 전환 시 사운드 교체, 이동 완료 시 페이드아웃, 즉시 배치·종료 시 정지. 기본 이동 시간에 맞춰 녹음했고 변경된 이동 시간에는 재생 속도를 맞춤.

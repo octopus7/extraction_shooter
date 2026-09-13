@@ -74,9 +74,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sliding Door|Audio")
 	TObjectPtr<USoundBase> CloseSound;
 
-	/** Unity gain by default; use SetDoorSoundVolume for changes while playing. */
+	/** 35% volume by default; use SetDoorSoundVolume for changes while playing. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sliding Door|Audio", meta = (ClampMin = "0.0", UIMax = "1.0"))
-	float DoorSoundVolume = 1.0f;
+	float DoorSoundVolume = 0.35f;
 
 	UFUNCTION()
 	void HandleProximityBeginOverlap(
