@@ -107,10 +107,10 @@ private:
 	bool bLookAtNearbyPlayer = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mole Companion|Look At", meta = (AllowPrivateAccess = "true", ClampMin = "0.0"))
-	float LookAtStartDistance = 650.0f;
+	float LookAtStartDistance = 400.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mole Companion|Look At", meta = (AllowPrivateAccess = "true", ClampMin = "0.0"))
-	float LookAtStopDistance = 850.0f;
+	float LookAtStopDistance = 500.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mole Companion|Look At", meta = (AllowPrivateAccess = "true", ClampMin = "0.0"))
 	float LookAtInterpolationSpeed = 2.8f;

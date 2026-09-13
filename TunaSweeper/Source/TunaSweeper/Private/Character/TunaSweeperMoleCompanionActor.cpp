@@ -299,7 +299,7 @@ void ATunaSweeperMoleCompanionActor::UpdatePlayerLookAt(float DeltaSeconds)
 			LookAtReactionElapsed = 0.0f;
 		}
 	}
-	else if (!bHasPlayer || PlayerDistance2D >= StopDistance)
+	else if (!bHasPlayer || PlayerDistance2D > StopDistance)
 	{
 		bIsLookingAtPlayer = false;
 		bLookAtReactionPending = false;
