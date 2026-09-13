@@ -26,7 +26,10 @@ ATunaSweeperSlidingDoorActor::ATunaSweeperSlidingDoorActor()
 	DoorAudioComponent->bOverrideAttenuation = true;
 	DoorAudioComponent->AttenuationOverrides.bAttenuate = true;
 	DoorAudioComponent->AttenuationOverrides.bSpatialize = true;
-	DoorAudioComponent->AttenuationOverrides.AttenuationShapeExtents = FVector(150.0f);
+	// The top-down camera sits 12-15 m above/behind the pawn. A vertical capsule
+	// preserves horizontal falloff without treating camera height as player distance.
+	DoorAudioComponent->AttenuationOverrides.AttenuationShape = EAttenuationShape::Capsule;
+	DoorAudioComponent->AttenuationOverrides.AttenuationShapeExtents = FVector(2000.0f, 250.0f, 0.0f);
 	DoorAudioComponent->AttenuationOverrides.FalloffDistance = 1800.0f;
 	DoorAudioComponent->SetVolumeMultiplier(DoorSoundVolume);
 
