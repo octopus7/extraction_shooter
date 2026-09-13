@@ -129,6 +129,9 @@ void ATunaSweeperMoleCompanionActor::BeginPlay()
 {
 	Super::BeginPlay();
 	IdleActorRotation = GetActorRotation();
+	// Rest facing opposite the placed actor's heading, both initially and after looking away.
+	IdleActorRotation.Yaw = FRotator::NormalizeAxis(IdleActorRotation.Yaw + 180.0f);
+	SetActorRotation(IdleActorRotation);
 	PendingLookAtYaw = IdleActorRotation.Yaw;
 	LookAtReactionDelay = FMath::FRandRange(LookAtMinReactionDelay, FMath::Max(LookAtMinReactionDelay, LookAtMaxReactionDelay));
 	RefreshCompanionVisuals();
@@ -304,6 +307,7 @@ void ATunaSweeperMoleCompanionActor::UpdatePlayerLookAt(float DeltaSeconds)
 			if (LookAtReactionElapsed >= LookAtReactionDelay)
 			{
 				bIsLookingAtPlayer = true;
+				LookAtReturnDelayRemaining = 0.0f;
 				bLookAtReactionPending = false;
 				LookAtRefreshElapsed = LookAtTargetRefreshInterval;
 			}
@@ -319,6 +323,14 @@ void ATunaSweeperMoleCompanionActor::UpdatePlayerLookAt(float DeltaSeconds)
 		bIsLookingAtPlayer = false;
 		bLookAtReactionPending = false;
 		LookAtReactionElapsed = 0.0f;
+		LookAtReturnDelayRemaining = FMath::Max(0.0f, LookAtReturnDelay);
+	}
+
+	if (!bIsLookingAtPlayer && LookAtReturnDelayRemaining > 0.0f)
+	{
+		LookAtReturnDelayRemaining = FMath::Max(0.0f, LookAtReturnDelayRemaining - DeltaSeconds);
+		// Hold the last heading so the animation settles into idle before returning.
+		return;
 	}
 
 	float DesiredYaw = IdleActorRotation.Yaw;

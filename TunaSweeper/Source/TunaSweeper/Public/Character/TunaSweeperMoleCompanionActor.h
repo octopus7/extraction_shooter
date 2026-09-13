@@ -117,6 +117,9 @@ private:
 	float LookAtReturnInterpolationSpeed = 1.8f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mole Companion|Look At", meta = (AllowPrivateAccess = "true", ClampMin = "0.0"))
+	float LookAtReturnDelay = 2.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mole Companion|Look At", meta = (AllowPrivateAccess = "true", ClampMin = "0.0"))
 	float LookAtMinReactionDelay = 0.18f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mole Companion|Look At", meta = (AllowPrivateAccess = "true", ClampMin = "0.0"))
@@ -133,6 +136,7 @@ private:
 	float LookAtReactionElapsed = 0.0f;
 	float LookAtReactionDelay = 0.0f;
 	float LookAtRefreshElapsed = 0.0f;
+	float LookAtReturnDelayRemaining = 0.0f;
 	float LookAtYawOffset = 0.0f;
 	float LookAtYawOffsetTarget = 0.0f;
 	float LookAtYawOffsetRefreshElapsed = 0.0f;
