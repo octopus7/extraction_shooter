@@ -163,11 +163,12 @@ public partial class MainWindow : Window
             return;
         }
 
+        // cmd /s removes the outer quotes; CALL needs one remaining pair around the path.
         string arguments = closeAlways
-            ? $"/c \"call \"\"{scriptPath}\"\"\""
+            ? $"/d /s /c \"call \"{scriptPath}\"\""
             : closeOnSuccess
-                ? $"/c \"call \"\"{scriptPath}\"\" & if errorlevel 1 pause\""
-                : $"/k \"\"{scriptPath}\"\"";
+                ? $"/d /s /c \"call \"{scriptPath}\" & if errorlevel 1 pause\""
+                : $"/d /s /k \"\"{scriptPath}\"\"";
 
         try
         {

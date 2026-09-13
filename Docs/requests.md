@@ -8416,3 +8416,9 @@
 - 완료: WorldProgressActor에 메시 지정과 충돌 중심 설정을 추가하여 기존 수리/저장 기능 재사용. /Game/Interaction/BunkerPipe에 BP 2개, 240cm 높이·40cm 지름 메시 2개, 머터리얼 2개 저장. 테이프 6005 한 개와 demo.bunker_pipe.repair 이벤트 연결. 교체 스케일 보존. 배치 및 저장 ID 안내 문서 작성.
 - 검증: UE 5.7 Editor Development 최종 빌드 성공. TunaSweeper.WorldProgress.BunkerPipe 자동 검사 성공(애셋 재로드, 색상·충돌·크기, 재료 없음, 완료 전환, 배치 변환 유지, 완료 저장 상태 복원). 생성 과정의 NullRHI 종료 충돌 후 일반 에디터의 독립 재검증 성공. 레벨 배치 및 수동 플레이 평가는 수행하지 않음.
 - 정리: 생성기와 애셋을 c2643734에 커밋한 뒤 생성기·진입점·RawMesh 전용 의존성 제거, 재빌드 및 동일 검사 재통과. 후속 정리 커밋 및 프로젝트 에디터 재실행.
+
+## 2026-09-14 00:36:46 (소요시간: 00:00:29)
+
+- 요청: 이번 Tuna Helper 수정 커밋.
+- 처리: 배치 호출 인용 수정 소스, Release 배포 실행 파일, 관련 질문 답변 및 커밋 요청 기록만 선별. 기존 검토 기록은 앞선 커밋에 이미 포함됨을 확인.
+- 검증: 앞서 통과한 Helper Release 빌드와 UE Development Editor 빌드·실행 결과 확인, 커밋 대상 diff 검사.
