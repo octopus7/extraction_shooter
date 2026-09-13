@@ -1,6 +1,8 @@
 #include "Interaction/TunaSweeperSlidingDoorActor.h"
 
 #include "Components/BoxComponent.h"
+#include "Components/AudioComponent.h"
+#include "Sound/SoundWave.h"
 #include "Components/SceneComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMesh.h"
@@ -15,6 +17,25 @@ ATunaSweeperSlidingDoorActor::ATunaSweeperSlidingDoorActor()
 
 	SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("SceneRoot"));
 	RootComponent = SceneRoot;
+
+	DoorAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("DoorAudio"));
+	DoorAudioComponent->SetupAttachment(SceneRoot);
+	DoorAudioComponent->bAutoActivate = false;
+	DoorAudioComponent->bAutoDestroy = false;
+	DoorAudioComponent->bStopWhenOwnerDestroyed = true;
+	DoorAudioComponent->bOverrideAttenuation = true;
+	DoorAudioComponent->AttenuationOverrides.bAttenuate = true;
+	DoorAudioComponent->AttenuationOverrides.bSpatialize = true;
+	DoorAudioComponent->AttenuationOverrides.AttenuationShapeExtents = FVector(150.0f);
+	DoorAudioComponent->AttenuationOverrides.FalloffDistance = 1800.0f;
+	DoorAudioComponent->SetVolumeMultiplier(DoorSoundVolume);
+
+	static ConstructorHelpers::FObjectFinder<USoundWave> OpenSoundFinder(
+		TEXT("/Game/Audio/Doors/SlidingDoor_Open.SlidingDoor_Open"));
+	static ConstructorHelpers::FObjectFinder<USoundWave> CloseSoundFinder(
+		TEXT("/Game/Audio/Doors/SlidingDoor_Close.SlidingDoor_Close"));
+	OpenSound = OpenSoundFinder.Object;
+	CloseSound = CloseSoundFinder.Object;
 
 	DoorFrameMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("DoorFrameMesh"));
 	DoorFrameMeshComponent->SetupAttachment(SceneRoot);
@@ -114,6 +135,7 @@ void ATunaSweeperSlidingDoorActor::Tick(float DeltaSeconds)
 		{
 			DoorState = ETunaSweeperSlidingDoorState::Open;
 			SetActorTickEnabled(false);
+			StopDoorMovementSound();
 		}
 	}
 	else if (DoorState == ETunaSweeperSlidingDoorState::Closing)
@@ -123,6 +145,7 @@ void ATunaSweeperSlidingDoorActor::Tick(float DeltaSeconds)
 		{
 			DoorState = ETunaSweeperSlidingDoorState::Closed;
 			SetActorTickEnabled(false);
+			StopDoorMovementSound();
 		}
 	}
 	else
@@ -135,6 +158,7 @@ void ATunaSweeperSlidingDoorActor::Tick(float DeltaSeconds)
 
 void ATunaSweeperSlidingDoorActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
+	DoorAudioComponent->Stop();
 	GetWorldTimerManager().ClearTimer(AutoCloseTimerHandle);
 	NearbyPlayers.Reset();
 	Super::EndPlay(EndPlayReason);
@@ -166,6 +190,7 @@ void ATunaSweeperSlidingDoorActor::SetDoorOpen(bool bInOpen, bool bInstant)
 
 	if (bInstant)
 	{
+		DoorAudioComponent->Stop();
 		OpenAlpha = bInOpen ? 1.0f : 0.0f;
 		DoorState = bInOpen
 			? ETunaSweeperSlidingDoorState::Open
@@ -175,11 +200,14 @@ void ATunaSweeperSlidingDoorActor::SetDoorOpen(bool bInOpen, bool bInstant)
 		return;
 	}
 
+	const ETunaSweeperSlidingDoorState PreviousState = DoorState;
 	if (bInOpen)
 	{
 		if (OpenAlpha >= 1.0f)
 		{
 			DoorState = ETunaSweeperSlidingDoorState::Open;
+			StopDoorMovementSound();
+			SetActorTickEnabled(false);
 			return;
 		}
 
@@ -190,6 +218,8 @@ void ATunaSweeperSlidingDoorActor::SetDoorOpen(bool bInOpen, bool bInstant)
 		if (OpenAlpha <= 0.0f)
 		{
 			DoorState = ETunaSweeperSlidingDoorState::Closed;
+			StopDoorMovementSound();
+			SetActorTickEnabled(false);
 			return;
 		}
 
@@ -197,6 +227,43 @@ void ATunaSweeperSlidingDoorActor::SetDoorOpen(bool bInOpen, bool bInstant)
 	}
 
 	SetActorTickEnabled(true);
+	if (DoorState != PreviousState)
+	{
+		PlayDoorMovementSound(bInOpen);
+	}
+}
+
+void ATunaSweeperSlidingDoorActor::SetDoorSoundVolume(float Volume)
+{
+	DoorSoundVolume = FMath::IsFinite(Volume) ? FMath::Max(0.0f, Volume) : 0.0f;
+	DoorAudioComponent->SetVolumeMultiplier(DoorSoundVolume);
+}
+
+void ATunaSweeperSlidingDoorActor::PlayDoorMovementSound(bool bOpening)
+{
+	DoorAudioComponent->Stop();
+	USoundBase* Sound = bOpening ? OpenSound.Get() : CloseSound.Get();
+	if (!Sound || !GetWorld() || !GetWorld()->IsGameWorld() || GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
+	const float Duration = FMath::Max(bOpening ? OpenDuration : CloseDuration, 0.01f);
+	const float SoundDuration = Sound->GetDuration();
+	const float Progress = bOpening ? OpenAlpha : 1.0f - OpenAlpha;
+	DoorAudioComponent->SetRelativeLocation(FVector(0.0f, 0.0f, DoorHeight * 0.5f));
+	DoorAudioComponent->SetSound(Sound);
+	DoorAudioComponent->SetVolumeMultiplier(FMath::Max(0.0f, DoorSoundVolume));
+	DoorAudioComponent->SetPitchMultiplier(SoundDuration / Duration);
+	DoorAudioComponent->FadeIn(0.025f, 1.0f, Progress * SoundDuration);
+}
+
+void ATunaSweeperSlidingDoorActor::StopDoorMovementSound()
+{
+	if (DoorAudioComponent->IsPlaying())
+	{
+		DoorAudioComponent->FadeOut(0.04f, 0.0f);
+	}
 }
 
 void ATunaSweeperSlidingDoorActor::HandleProximityBeginOverlap(

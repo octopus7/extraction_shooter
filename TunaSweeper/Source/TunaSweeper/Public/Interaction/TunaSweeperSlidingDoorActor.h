@@ -5,6 +5,8 @@
 #include "TunaSweeperSlidingDoorActor.generated.h"
 
 class APawn;
+class UAudioComponent;
+class USoundBase;
 class UBoxComponent;
 class UPrimitiveComponent;
 class USceneComponent;
@@ -49,6 +51,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Sliding Door")
 	void SetDoorOpen(bool bInOpen, bool bInstant = false);
 
+	/** Changes this door's sound level immediately, including during movement. Zero mutes it. */
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Sliding Door|Audio")
+	void SetDoorSoundVolume(float Volume);
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Sliding Door|Audio")
+	float GetDoorSoundVolume() const { return DoorSoundVolume; }
+
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Sliding Door")
 	float GetOpenAlpha() const { return OpenAlpha; }
 
@@ -56,6 +65,19 @@ public:
 	ETunaSweeperSlidingDoorState GetDoorState() const { return DoorState; }
 
 protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Sliding Door|Components")
+	TObjectPtr<UAudioComponent> DoorAudioComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sliding Door|Audio")
+	TObjectPtr<USoundBase> OpenSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sliding Door|Audio")
+	TObjectPtr<USoundBase> CloseSound;
+
+	/** Quiet default; use SetDoorSoundVolume for changes while playing. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sliding Door|Audio", meta = (ClampMin = "0.0", UIMax = "1.0"))
+	float DoorSoundVolume = 0.35f;
+
 	UFUNCTION()
 	void HandleProximityBeginOverlap(
 		UPrimitiveComponent* OverlappedComponent,
@@ -166,6 +188,8 @@ protected:
 	ETunaSweeperSlidingDoorState DoorState = ETunaSweeperSlidingDoorState::Closed;
 
 private:
+	void PlayDoorMovementSound(bool bOpening);
+	void StopDoorMovementSound();
 	void ApplyConfiguration();
 	void ApplyDoorPose();
 	void ApplyMeshDimensions(UStaticMeshComponent* MeshComponent, const FVector& TargetDimensions) const;
