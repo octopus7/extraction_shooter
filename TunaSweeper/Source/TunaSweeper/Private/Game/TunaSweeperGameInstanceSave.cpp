@@ -390,6 +390,7 @@ bool UTunaSweeperGameInstance::ActivateSaveSlot(int32 SaveSlotIndex, bool bStart
 	{
 		return false;
 	}
+	RetiredDemoSaveSlotIndex = INDEX_NONE;
 
 	bInventoryStateInitializing = true;
 	if (bStartNewGame)
@@ -475,6 +476,27 @@ bool UTunaSweeperGameInstance::DeleteSaveSlotAndStartNewGame(int32 SaveSlotIndex
 
 	ResetRuntimeStateForSaveSlotSelection();
 	return ActivateSaveSlot(SanitizedSlotIndex, true);
+}
+
+bool UTunaSweeperGameInstance::DeleteCompletedDemoSave()
+{
+	// DEMO ENDING ONLY: Main keeps its save and supports unlimited continued play.
+	// Never apply this deletion policy to the full game's ending or progression.
+	if (!TunaSweeperBuildFlavor::IsDemo() || IsCombatTestSession() ||
+		!IsScenarioProgressFlagSet(FName(TEXT("demo.ending.farewell_seen"))))
+	{
+		return false;
+	}
+	const FString SlotName = GetSaveGameSlotName(ActiveSaveSlotIndex);
+	RetiredDemoSaveSlotIndex = ActiveSaveSlotIndex;
+	// Includes the slot's recovery artifacts and backups, without touching other slots.
+	if (!TunaSweeperSave::DeleteFlavorSave(SlotName))
+	{
+		UE_LOG(LogTunaSweeperGameInstance, Warning, TEXT("Could not fully remove the completed demo save slot."));
+		return false;
+	}
+	ResetRuntimeStateForSaveSlotSelection();
+	return true;
 }
 
 void UTunaSweeperGameInstance::GeneratePlayerInventoryItems()
@@ -798,7 +820,7 @@ bool UTunaSweeperGameInstance::SaveGameStateInternal(
 	UTunaSweeperGameInstance::EUsableQuickSlotSaveMode UsableQuickSlotSaveMode) const
 {
 	// Lab supplies, damage and rewards belong only to the current test session.
-	if (IsCombatTestSession()) return false;
+	if (IsCombatTestSession() || ActiveSaveSlotIndex == RetiredDemoSaveSlotIndex) return false;
 
 	const FString ExistingSlotName = GetExistingSaveGameSlotName(ActiveSaveSlotIndex);
 	UTunaSweeperSaveGame* ExistingSaveGame = nullptr;

@@ -12,6 +12,7 @@
 #include "UI/TunaSweeperDemoFarewellWidget.h"
 #include "UI/TunaSweeperScreenFadeWidget.h"
 #include "TimerManager.h"
+#include "Settings/TunaSweeperBuildFlavor.h"
 namespace
 {
 const FName FinalQuest(TEXT("demo_q4_todays_reward"));
@@ -46,6 +47,8 @@ void ATunaSweeperDemoEndingActor::BeginPlay()
 }
 void ATunaSweeperDemoEndingActor::ResumePendingEnding()
 {
+    // Main is unlimited play: the demo's ending/title-return flow must never run there.
+    if (!TunaSweeperBuildFlavor::IsDemo()) return;
     auto* GI = GetGameInstance<UTunaSweeperGameInstance>();
     auto* Quests = GI ? GI->GetSubsystem<UTunaSweeperQuestSubsystem>() : nullptr;
     if (Quests && Quests->GetQuestState(FinalQuest) == ETunaSweeperQuestState::RewardCompleted && !GI->IsScenarioProgressFlagSet(EndingSeen))
@@ -53,6 +56,7 @@ void ATunaSweeperDemoEndingActor::ResumePendingEnding()
 }
 bool ATunaSweeperDemoEndingActor::TryDeliverToMole(APawn* Pawn)
 {
+    if (!TunaSweeperBuildFlavor::IsDemo()) return false;
     auto* Scene = Pawn ? Find(Pawn->GetWorld()) : nullptr;
     auto* GI = Pawn ? Pawn->GetGameInstance<UTunaSweeperGameInstance>() : nullptr;
     auto* Quests = GI ? GI->GetSubsystem<UTunaSweeperQuestSubsystem>() : nullptr;
@@ -75,6 +79,7 @@ void ATunaSweeperDemoEndingActor::QueueEnding()
 }
 bool ATunaSweeperDemoEndingActor::StartEnding()
 {
+    if (!TunaSweeperBuildFlavor::IsDemo()) return false;
     Player = Cast<ATunaSweeperPlayerController>(UGameplayStatics::GetPlayerController(this,0));
     if (bEndingActive || !Player || !Player->GetPawn() || DinnerDialogue.IsEmpty() || !FarewellIllustration.LoadSynchronous()) return false;
     if (Player->IsDialogueSequenceActive())
@@ -138,7 +143,11 @@ void ATunaSweeperDemoEndingActor::ShowFarewell()
     Farewell->AddToViewport(600);
     FInputModeUIOnly Input; Input.SetWidgetToFocus(Farewell->TakeWidget());
     Player->SetInputMode(Input); Farewell->SetKeyboardFocus();
-    if (auto* GI = GetGameInstance<UTunaSweeperGameInstance>()) GI->MarkScenarioProgressFlag(EndingSeen,true);
+    if (auto* GI = GetGameInstance<UTunaSweeperGameInstance>())
+    {
+        GI->MarkScenarioProgressFlag(EndingSeen,true);
+        GI->DeleteCompletedDemoSave();
+    }
     Fade->StartFadeFromBlack(FadeSeconds);
 }
 void ATunaSweeperDemoEndingActor::ReturnToTitle()
@@ -146,7 +155,15 @@ void ATunaSweeperDemoEndingActor::ReturnToTitle()
     Fade->AddToViewport(1000);
     Fade->StartFadeToBlack(FadeSeconds,FSimpleDelegate::CreateUObject(this,&ThisClass::OpenTitle));
 }
-void ATunaSweeperDemoEndingActor::OpenTitle() { UGameplayStatics::OpenLevel(this,TEXT("/Game/Maps/IntroMap")); }
+void ATunaSweeperDemoEndingActor::OpenTitle()
+{
+    if (auto* GI = GetGameInstance<UTunaSweeperGameInstance>())
+    {
+        // Retry only if the earlier deletion failed and the completion flag remains.
+        if (GI->IsScenarioProgressFlagSet(EndingSeen)) GI->DeleteCompletedDemoSave();
+    }
+    UGameplayStatics::OpenLevel(this,TEXT("/Game/Maps/IntroMap"));
+}
 void ATunaSweeperDemoEndingActor::RestoreActors()
 {
     if (!bActorsMoved) return;
