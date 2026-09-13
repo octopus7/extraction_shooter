@@ -5,6 +5,7 @@
 #include "TunaSweeperToastWidget.generated.h"
 
 class UBorder;
+class UImage;
 class UTextBlock;
 
 UCLASS()
@@ -25,6 +26,9 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<UBorder> ToastPanel;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UImage> ToastFrameImage;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UTextBlock> ToastText;
