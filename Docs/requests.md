@@ -8353,3 +8353,18 @@
 - 완료: Blender/SKM_MoleDummy.blend와 메시 오브젝트 SKM_MoleDummy로 정리. 4초 호흡 Idle_Breathe 및 루트 고정 Turn_InPlace 제작, 6개 클립과 스켈레탈 FBX 내보내기/UE 5.7 임포트. BP_Mole 및 BunkerMap 배치 액터를 스켈레탈로 연결하고 DummyMesh 컴포넌트 제거. BS_Mole_IdleTurn에는 idle/회전용 발걸음만 연결, 실제 yaw 속도로 블렌딩. 걷기와 90도 회전 클립은 보관만 함.
 - 검증: Blender 4.5 전체 idle/제자리 걸음 프레임과 루트 고정·이음 오차 0 확인. UE 5.7 에디터 빌드 성공. 새 프로세스의 TunaSweeper.Character.Mole.RuntimeTurn / TurnAnimation / VisualComponents 3개 테스트 통과. 스켈레톤 참조 재저장과 BP 회전축 보정 후 재검증. 일회성 제작 도구를 에셋과 함께 커밋한 다음 제거했고, 최종 재빌드와 동일 3개 테스트가 모두 통과했다.
 
+
+
+## 2026-09-14 00:08:39 (소요시간: 00:01:34)
+
+- 요청: UE 프로젝트 애셋 설정 없이 Sounds 경로에 권총·소총·SMG·샷건 총소리 4종 테스트 제작.
+- 완료: 전용 AI 오디오 생성 도구가 없어 절차적 합성 방식으로 4종 WAV 제작. 권총·소총·샷건은 단발, SMG는 800 RPM 6발 버스트. 재생성 스크립트와 설명 포함. UE 파일 변경 없음.
+- 검증: FFmpeg로 4개 파일 모두 48 kHz / 24-bit PCM / 모노 디코딩 성공, 최대 피크 -3.0 dBFS 확인. git diff --check 통과. 청감 평가는 수행하지 않음.
+
+
+## 2026-09-14 00:11:32 (소요시간: 00:00:16)
+
+- 요청: 총소리 테스트 작업 커밋.
+- 처리: Sounds의 권총·소총·SMG·샷건 WAV, 재생성 스크립트, 설명 및 관련 요청 기록을 커밋 대상으로 확인.
+- 검증: 변경 범위 확인 및 커밋 전 diff 검사.
+
