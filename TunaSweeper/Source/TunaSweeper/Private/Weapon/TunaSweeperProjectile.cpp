@@ -23,6 +23,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Materials/MaterialInterface.h"
+#include "Subsystem/TunaSweeperEffectCandidateSubsystem.h"
 #include "Player/TunaSweeperPlayerController.h"
 #include "ProceduralMeshComponent.h"
 #include "Subsystem/TunaSweeperImpactEffectSubsystem.h"
@@ -262,6 +263,7 @@ void ATunaSweeperProjectile::ApplyVisualMaterial(
 		return;
 	}
 
+	UTunaSweeperEffectCandidateSubsystem::RecordObject(this, Material, TEXT("Projectile.Material"));
 	DynamicVisualMaterial = VisualMesh->CreateDynamicMaterialInstance(0, Material);
 	if (!DynamicVisualMaterial)
 	{
@@ -386,6 +388,7 @@ void ATunaSweeperProjectile::ApplyTrailVisual(
 	TrailMesh->SetHiddenInGame(false);
 	TrailMesh->SetVisibility(true);
 
+	UTunaSweeperEffectCandidateSubsystem::RecordObject(this, Material, TEXT("Projectile.TrailMaterial"));
 	DynamicTrailMaterial = TrailMesh->CreateDynamicMaterialInstance(0, Material);
 	if (!DynamicTrailMaterial)
 	{

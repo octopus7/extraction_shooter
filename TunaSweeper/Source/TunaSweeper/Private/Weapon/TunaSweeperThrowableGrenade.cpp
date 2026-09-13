@@ -7,6 +7,10 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "NiagaraFunctionLibrary.h"
+#include "NiagaraSystem.h"
+#include "Particles/ParticleSystem.h"
+#include "Sound/SoundBase.h"
+#include "Subsystem/TunaSweeperEffectCandidateSubsystem.h"
 #include "Subsystem/TunaSweeperFactionSubsystem.h"
 #include "TimerManager.h"
 #include "Weapon/TunaSweeperThrowableDamageType.h"
@@ -147,6 +151,7 @@ void ATunaSweeperThrowableGrenade::Explode()
 
 	if (ExplosionNiagara)
 	{
+		UTunaSweeperEffectCandidateSubsystem::RecordObject(this, ExplosionNiagara, TEXT("Grenade.Niagara"));
 		UNiagaraFunctionLibrary::SpawnSystemAtLocation(
 			GetWorld(),
 			ExplosionNiagara,
@@ -155,6 +160,7 @@ void ATunaSweeperThrowableGrenade::Explode()
 	}
 	else if (ExplosionParticle)
 	{
+		UTunaSweeperEffectCandidateSubsystem::RecordObject(this, ExplosionParticle, TEXT("Grenade.Cascade"));
 		UGameplayStatics::SpawnEmitterAtLocation(
 			GetWorld(),
 			ExplosionParticle,
@@ -164,6 +170,7 @@ void ATunaSweeperThrowableGrenade::Explode()
 
 	if (ExplosionSound)
 	{
+		UTunaSweeperEffectCandidateSubsystem::RecordObject(this, ExplosionSound, TEXT("Grenade.Sound"));
 		UGameplayStatics::PlaySoundAtLocation(this, ExplosionSound, ExplosionLocation);
 	}
 

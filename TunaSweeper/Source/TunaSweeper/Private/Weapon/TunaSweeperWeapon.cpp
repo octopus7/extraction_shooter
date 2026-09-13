@@ -15,6 +15,7 @@
 #include "Materials/MaterialInterface.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraSystem.h"
+#include "Subsystem/TunaSweeperEffectCandidateSubsystem.h"
 #include "Sound/SoundBase.h"
 #include "Subsystem/TunaSweeperNoiseSubsystem.h"
 #include "TunaSweeperCollisionChannels.h"
@@ -839,12 +840,14 @@ void ATunaSweeperWeapon::PlayFirePresentation(bool bSuppressFireSound)
 {
 	TriggerMuzzleFlashLight();
 
+	UTunaSweeperEffectCandidateSubsystem::Record(this, WeaponPresentationDataAsset.ToSoftObjectPath(), TEXT("Weapon.Presentation"));
 	UTunaSweeperWeaponPresentationDataAsset* PresentationData = WeaponPresentationDataAsset.LoadSynchronous();
 	if (!PresentationData)
 	{
 		return;
 	}
 
+	UTunaSweeperEffectCandidateSubsystem::Record(this, PresentationData->MuzzleFlashEffect.ToSoftObjectPath(), TEXT("Weapon.MuzzleFlash"));
 	if (UNiagaraSystem* MuzzleFlashEffect = PresentationData->MuzzleFlashEffect.LoadSynchronous())
 	{
 		if (WeaponMesh && WeaponMesh->DoesSocketExist(TunaSweeperWeaponTags::MuzzleSocketName))
@@ -874,6 +877,7 @@ void ATunaSweeperWeapon::PlayFirePresentation(bool bSuppressFireSound)
 	// TEMP_VIDEO_BULLET_STORM: Keep muzzle visuals, but skip only the gunshot audio for capture actors.
 	if (!bSuppressFireSound)
 	{
+		UTunaSweeperEffectCandidateSubsystem::Record(this, PresentationData->FireSound.ToSoftObjectPath(), TEXT("Weapon.FireSound"));
 		if (USoundBase* FireSound = PresentationData->FireSound.LoadSynchronous())
 		{
 			UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetMuzzleWorldLocation());

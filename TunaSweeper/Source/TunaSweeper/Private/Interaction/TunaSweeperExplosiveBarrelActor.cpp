@@ -16,6 +16,7 @@
 #include "Materials/MaterialInterface.h"
 #include "NiagaraComponent.h"
 #include "NiagaraSystem.h"
+#include "Subsystem/TunaSweeperEffectCandidateSubsystem.h"
 #include "Subsystem/TunaSweeperNoiseSubsystem.h"
 #include "TunaSweeperCollisionChannels.h"
 #include "TimerManager.h"
@@ -705,6 +706,8 @@ void ATunaSweeperExplosiveBarrelActor::SpawnExplosionEffect()
 {
 	UWorld* World = GetWorld();
 	if (!World) return;
+	UTunaSweeperEffectCandidateSubsystem::Record(this, ExplosionEffectActorClass.ToSoftObjectPath(), TEXT("Barrel.ExplosionClass"));
+	UTunaSweeperEffectCandidateSubsystem::Record(this, ExplosionSound.ToSoftObjectPath(), TEXT("Barrel.ExplosionSound"));
 	TSubclassOf<ATunaSweeperLocalExplosionEffectActor> Class = ExplosionEffectActorClass.LoadSynchronous();
 	if (!Class) Class = ATunaSweeperLocalExplosionEffectActor::StaticClass();
 	FActorSpawnParameters Params;

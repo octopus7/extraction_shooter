@@ -9,6 +9,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraSystem.h"
+#include "Subsystem/TunaSweeperEffectCandidateSubsystem.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
 #include "Sound/SoundBase.h"
 
@@ -132,6 +133,7 @@ const UTunaSweeperImpactEffectProfile* UTunaSweeperImpactEffectSubsystem::FindPr
 
 	const FString AssetName = ImpactProfileId.ToString();
 	const FString AssetPath = FString::Printf(TEXT("/Game/Effects/Impact/%s.%s"), *AssetName, *AssetName);
+	UTunaSweeperEffectCandidateSubsystem::Record(this, FSoftObjectPath(AssetPath), TEXT("Impact.Profile"));
 	return LoadObject<UTunaSweeperImpactEffectProfile>(nullptr, *AssetPath);
 }
 
@@ -151,6 +153,8 @@ void UTunaSweeperImpactEffectSubsystem::SpawnResolvedEffect(
 	const FRotator SpawnRotation = ImpactNormal.Rotation();
 	const float Scale = FMath::Max(0.0f, Effect.EffectScale * Context.EffectScaleMultiplier);
 
+	UTunaSweeperEffectCandidateSubsystem::Record(this, Effect.NiagaraSystem.ToSoftObjectPath(), TEXT("Impact.Niagara"));
+	UTunaSweeperEffectCandidateSubsystem::Record(this, Effect.Sound.ToSoftObjectPath(), TEXT("Impact.Sound"));
 	if (UNiagaraSystem* NiagaraSystem = Effect.NiagaraSystem.LoadSynchronous())
 	{
 		UNiagaraFunctionLibrary::SpawnSystemAtLocation(World, NiagaraSystem, SpawnLocation, SpawnRotation, FVector(Scale));
@@ -170,6 +174,7 @@ void UTunaSweeperImpactEffectSubsystem::SpawnResolvedEffect(
 	}
 	if (!Context.bSuppressDecal && Effect.bSpawnDecal)
 	{
+		UTunaSweeperEffectCandidateSubsystem::Record(this, Effect.DecalMaterial.ToSoftObjectPath(), TEXT("Impact.Decal"));
 		if (UMaterialInterface* DecalMaterial = Effect.DecalMaterial.LoadSynchronous())
 		{
 			UGameplayStatics::SpawnDecalAtLocation(
@@ -206,6 +211,7 @@ bool UTunaSweeperImpactEffectSubsystem::SpawnLegacyEffect(
 		GameInstance->TryGetProjectileHitEffectDefinition(LegacyEffectId, Definition);
 	}
 
+	UTunaSweeperEffectCandidateSubsystem::Record(this, Definition.EffectActorClass.ToSoftObjectPath(), TEXT("Impact.LegacyClass"));
 	TSubclassOf<ATunaSweeperProjectileHitBurstActor> EffectClass = Definition.EffectActorClass.LoadSynchronous();
 	if (!EffectClass && LegacyEffectId == FName(TEXT("hit.red_burst")))
 	{

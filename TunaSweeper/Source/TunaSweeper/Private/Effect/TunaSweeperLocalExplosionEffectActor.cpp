@@ -9,6 +9,7 @@
 #include "Materials/MaterialInterface.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraSystem.h"
+#include "Subsystem/TunaSweeperEffectCandidateSubsystem.h"
 #include "UObject/ConstructorHelpers.h"
 
 namespace
@@ -106,6 +107,7 @@ void ATunaSweeperLocalExplosionEffectActor::ConfigureDistortionComponent()
 
 void ATunaSweeperLocalExplosionEffectActor::ApplyDynamicMaterials()
 {
+	UTunaSweeperEffectCandidateSubsystem::Record(this, ExplosionDistortionMaterial.ToSoftObjectPath(), TEXT("Explosion.Distortion"));
 	if (UMaterialInterface* LoadedDistortionMaterial = ExplosionDistortionMaterial.LoadSynchronous())
 	{
 		if (DistortionSprite)
@@ -151,6 +153,7 @@ void ATunaSweeperLocalExplosionEffectActor::SpawnNiagaraBurstEffect()
 		return;
 	}
 
+	UTunaSweeperEffectCandidateSubsystem::Record(this, FireBurstNiagaraSystem.ToSoftObjectPath(), TEXT("Explosion.Niagara"));
 	if (UNiagaraSystem* FireSystem = FireBurstNiagaraSystem.LoadSynchronous())
 	{
 		UNiagaraFunctionLibrary::SpawnSystemAttached(

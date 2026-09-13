@@ -6,6 +6,7 @@
 #include "Engine/StaticMesh.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Materials/MaterialInterface.h"
+#include "Subsystem/TunaSweeperEffectCandidateSubsystem.h"
 #include "UObject/ConstructorHelpers.h"
 
 namespace
@@ -89,6 +90,7 @@ void ATunaSweeperProjectileHitBurstActor::BeginPlay()
 
 	BurstDynamicMaterials.Reset();
 
+	UTunaSweeperEffectCandidateSubsystem::Record(this, FSoftObjectPath(ProjectileHitBurstMaterialPath), TEXT("Impact.LegacyMaterial"));
 	UMaterialInterface* BurstMaterial = LoadObject<UMaterialInterface>(nullptr, ProjectileHitBurstMaterialPath);
 	for (UStaticMeshComponent* Particle : BurstParticles)
 	{
