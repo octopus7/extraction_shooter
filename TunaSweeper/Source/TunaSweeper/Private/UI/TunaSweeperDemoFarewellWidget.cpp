@@ -44,7 +44,7 @@ TSharedRef<SWidget> UTunaSweeperDemoFarewellWidget::RebuildWidget()
             Place(Label, Anchors);
         };
         Text(NSLOCTEXT("DemoEnding","Farewell","본편에서 만나요"), 44, FAnchors(.05f,.75f,.95f,.85f));
-        Text(NSLOCTEXT("DemoEnding","Continue","아무 키나 누르면 타이틀로 돌아갑니다 · 마우스 클릭 가능"), 20, FAnchors(.05f,.89f,.95f,.98f));
+        Text(NSLOCTEXT("DemoEnding","Continue","아무 키나 누르면 타이틀로 돌아갑니다"), 20, FAnchors(.05f,.89f,.95f,.98f));
     }
     return Super::RebuildWidget();
 }
