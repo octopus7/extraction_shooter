@@ -8422,3 +8422,10 @@
 - 요청: 이번 Tuna Helper 수정 커밋.
 - 처리: 배치 호출 인용 수정 소스, Release 배포 실행 파일, 관련 질문 답변 및 커밋 요청 기록만 선별. 기존 검토 기록은 앞선 커밋에 이미 포함됨을 확인.
 - 검증: 앞서 통과한 Helper Release 빌드와 UE Development Editor 빌드·실행 결과 확인, 커밋 대상 diff 검사.
+
+## 2026-09-14 00:38:13 (소요시간: 00:04:53)
+
+- 요청: 배관 메시의 뒤집힌 면 수정 및 커밋.
+- 완료: SM_BunkerPipe_Broken과 SM_BunkerPipe_Repaired의 삼각형 순서를 반전하고 노멀·탄젠트를 재계산하여 애셋 저장. 옆면 및 위·아래 뚜껑 모든 렌더 버텍스의 외향 노멀 검사를 기존 배관 자동 검사에 추가.
+- 검증: 별도 에디터 프로세스 재로드 후 TunaSweeper.WorldProgress.BunkerPipe 성공. 일회성 수정 코드와 애셋을 ef37b488에 커밋한 뒤 수정 코드·RawMesh 의존성 제거. 최종 UE 5.7 Editor 빌드 및 동일 자동 검사 재통과. 에디터 재실행.
+- 범위: 기존 BunkerMap.umap 및 Docs/questions.md 변경은 커밋에서 제외.
