@@ -3,10 +3,11 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/SceneComponent.h"
 #include "Components/SkeletalMeshComponent.h"
-#include "Components/StaticMeshComponent.h"
+#include "Animation/AnimSingleNodeInstance.h"
+#include "Animation/BlendSpace.h"
 #include "Component/TunaSweeperQuestMarkerComponent.h"
 #include "Engine/GameInstance.h"
-#include "Engine/StaticMesh.h"
+#include "Engine/SkeletalMesh.h"
 #include "Engine/World.h"
 #include "Interaction/TunaSweeperInteractableComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -21,20 +22,13 @@ ATunaSweeperMoleCompanionActor::ATunaSweeperMoleCompanionActor()
 	SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("SceneRoot"));
 	SetRootComponent(SceneRoot);
 
-	DummyMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("DummyMesh"));
-	DummyMesh->SetupAttachment(SceneRoot);
-	DummyMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	DummyMesh->SetGenerateOverlapEvents(false);
-	DummyMesh->SetCastShadow(true);
-	DummyMesh->bEditableWhenInherited = true;
-
 	SkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMesh"));
 	SkeletalMesh->SetupAttachment(SceneRoot);
 	SkeletalMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	SkeletalMesh->SetGenerateOverlapEvents(false);
 	SkeletalMesh->SetCastShadow(true);
-	SkeletalMesh->SetVisibility(false, true);
-	SkeletalMesh->SetHiddenInGame(true, true);
+	SkeletalMesh->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
+	SkeletalMesh->SetAnimationMode(EAnimationMode::AnimationSingleNode);
 	SkeletalMesh->bEditableWhenInherited = true;
 
 	BodyCollision = CreateDefaultSubobject<UCapsuleComponent>(TEXT("BodyCollision"));
@@ -84,29 +78,38 @@ ATunaSweeperMoleCompanionActor::ATunaSweeperMoleCompanionActor()
 	QuestMarkerComponent->SetVisibility(false, true);
 	QuestMarkerComponent->bEditableWhenInherited = true;
 
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> MoleDummyMesh(
-		TEXT("/Game/Characters/NPC/Mole/SM_MoleDummy.SM_MoleDummy"));
-	if (MoleDummyMesh.Succeeded())
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> MoleMesh(
+		TEXT("/Game/Characters/NPC/Mole/SKM_MoleDummy.SKM_MoleDummy"));
+	if (MoleMesh.Succeeded())
 	{
-		DummyMesh->SetStaticMesh(MoleDummyMesh.Object);
+		SkeletalMesh->SetSkeletalMesh(MoleMesh.Object);
+	}
+	static ConstructorHelpers::FObjectFinder<UBlendSpace> MoleIdleTurn(
+		TEXT("/Game/Characters/NPC/Mole/BS_Mole_IdleTurn.BS_Mole_IdleTurn"));
+	if (MoleIdleTurn.Succeeded())
+	{
+		IdleTurnBlendSpace = MoleIdleTurn.Object;
+		SkeletalMesh->OverrideAnimationData(IdleTurnBlendSpace, true, true);
 	}
 }
 
 void ATunaSweeperMoleCompanionActor::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
+	const float PreviousYaw = GetActorRotation().Yaw;
 	UpdatePlayerLookAt(DeltaSeconds);
+	UpdateCompanionAnimation(PreviousYaw, DeltaSeconds);
 }
 
 void ATunaSweeperMoleCompanionActor::ConfigureCompanionDefaults(
 	FName InCompanionId,
-	TSoftObjectPtr<UStaticMesh> InDummyMesh,
+	TSoftObjectPtr<USkeletalMesh> InSkeletalMesh,
 	TSoftObjectPtr<UMaterialInterface> InVisualMaterial)
 {
 	CompanionId = InCompanionId.IsNone() ? CompanionId : InCompanionId;
-	if (!InDummyMesh.IsNull())
+	if (!InSkeletalMesh.IsNull())
 	{
-		DummyMeshOverride = InDummyMesh;
+		SkeletalMeshOverride = InSkeletalMesh;
 	}
 	if (!InVisualMaterial.IsNull())
 	{
@@ -190,42 +193,54 @@ FName ATunaSweeperMoleCompanionActor::ResolveQuestId() const
 
 void ATunaSweeperMoleCompanionActor::RefreshCompanionVisuals()
 {
-	if (DummyMesh)
+	if (SkeletalMesh)
 	{
-		UStaticMesh* MeshToUse = DummyMeshOverride.IsNull()
-			? LoadObject<UStaticMesh>(nullptr, TEXT("/Game/Characters/NPC/Mole/SM_MoleDummy.SM_MoleDummy"))
-			: DummyMeshOverride.LoadSynchronous();
-		if (MeshToUse)
+		USkeletalMesh* MeshToUse = SkeletalMeshOverride.IsNull()
+			? LoadObject<USkeletalMesh>(nullptr, TEXT("/Game/Characters/NPC/Mole/SKM_MoleDummy.SKM_MoleDummy"))
+			: SkeletalMeshOverride.LoadSynchronous();
+		if (MeshToUse && SkeletalMesh->GetSkeletalMeshAsset() != MeshToUse)
 		{
-			DummyMesh->SetStaticMesh(MeshToUse);
+			SkeletalMesh->SetSkeletalMesh(MeshToUse);
 		}
 		if (!VisualMaterial.IsNull())
 		{
 			if (UMaterialInterface* LoadedMaterial = VisualMaterial.LoadSynchronous())
 			{
-				DummyMesh->SetMaterial(0, LoadedMaterial);
+				SkeletalMesh->SetMaterial(0, LoadedMaterial);
 			}
 		}
-		DummyMesh->SetRelativeLocation(DummyMeshRelativeLocation);
-		DummyMesh->SetRelativeScale3D(DummyMeshScale);
-	}
-
-	const bool bUseSkeletalMesh = SkeletalMesh && SkeletalMesh->GetSkeletalMeshAsset() != nullptr;
-	if (DummyMesh)
-	{
-		DummyMesh->SetVisibility(!bUseSkeletalMesh, true);
-		DummyMesh->SetHiddenInGame(bUseSkeletalMesh, true);
-	}
-	if (SkeletalMesh)
-	{
-		SkeletalMesh->SetVisibility(bUseSkeletalMesh, true);
-		SkeletalMesh->SetHiddenInGame(!bUseSkeletalMesh, true);
+		SkeletalMesh->SetVisibility(true, true);
+		SkeletalMesh->SetHiddenInGame(false, true);
+		if (IdleTurnBlendSpace && SkeletalMesh->AnimationData.AnimToPlay != IdleTurnBlendSpace)
+		{
+			SkeletalMesh->OverrideAnimationData(IdleTurnBlendSpace, true, true);
+		}
 	}
 
 	if (BodyCollision)
 	{
 		BodyCollision->SetRelativeLocation(BodyCollisionRelativeLocation);
 		BodyCollision->SetCapsuleSize(BodyCollisionRadius, BodyCollisionHalfHeight);
+	}
+}
+
+float ATunaSweeperMoleCompanionActor::ResolveTurnAnimationAmount(float PreviousYaw, float CurrentYaw, float DeltaSeconds)
+{
+	if (DeltaSeconds <= SMALL_NUMBER)
+	{
+		return 0.0f;
+	}
+	const float TurnSpeed = FMath::Abs(FMath::FindDeltaAngleDegrees(PreviousYaw, CurrentYaw)) / DeltaSeconds;
+	// Ignore tiny gaze drift and settle into breathing as the look-at rotation finishes.
+	return FMath::GetMappedRangeValueClamped(FVector2D(2.0f, 25.0f), FVector2D(0.0f, 1.0f), TurnSpeed);
+}
+
+void ATunaSweeperMoleCompanionActor::UpdateCompanionAnimation(float PreviousYaw, float DeltaSeconds)
+{
+	if (UAnimSingleNodeInstance* Animation = SkeletalMesh ? SkeletalMesh->GetSingleNodeInstance() : nullptr)
+	{
+		// The blend space contains only breathing and stationary steps. Actor rotation owns yaw.
+		Animation->SetBlendSpacePosition(FVector(ResolveTurnAnimationAmount(PreviousYaw, GetActorRotation().Yaw, DeltaSeconds), 0.0f, 0.0f));
 	}
 }
 

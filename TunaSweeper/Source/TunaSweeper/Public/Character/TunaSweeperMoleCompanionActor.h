@@ -8,8 +8,8 @@ class UMaterialInterface;
 class UCapsuleComponent;
 class USceneComponent;
 class USkeletalMeshComponent;
-class UStaticMesh;
-class UStaticMeshComponent;
+class USkeletalMesh;
+class UBlendSpace;
 class UTunaSweeperInteractableComponent;
 class UTunaSweeperInteractionMarkerWidget;
 class UTunaSweeperQuestMarkerComponent;
@@ -27,11 +27,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Mole Companion")
 	void ConfigureCompanionDefaults(
 		FName InCompanionId,
-		TSoftObjectPtr<UStaticMesh> InDummyMesh,
+		TSoftObjectPtr<USkeletalMesh> InSkeletalMesh,
 		TSoftObjectPtr<UMaterialInterface> InVisualMaterial);
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Mole Companion")
 	FName GetCompanionId() const { return CompanionId; }
+
+	/** Zero means breathing idle; positive values blend stationary turning steps. */
+	static float ResolveTurnAnimationAmount(float PreviousYaw, float CurrentYaw, float DeltaSeconds);
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Quest")
 	FName ResolveQuestId() const;
@@ -46,14 +49,12 @@ private:
 	void RefreshQuestNoticeVisibility();
 	bool ShouldShowQuestNotice() const;
 	void UpdatePlayerLookAt(float DeltaSeconds);
+	void UpdateCompanionAnimation(float PreviousYaw, float DeltaSeconds);
 	bool TryGetPlayerLookYaw(float& OutYaw, float& OutDistance2D) const;
 	float ResolveOrganicYawOffset(float DeltaSeconds);
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mole Companion", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<USceneComponent> SceneRoot;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mole Companion|Visual", meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UStaticMeshComponent> DummyMesh;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mole Companion|Visual", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<USkeletalMeshComponent> SkeletalMesh;
@@ -74,16 +75,13 @@ private:
 	FName CompanionId = TEXT("BunkerMole");
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mole Companion|Visual", meta = (AllowPrivateAccess = "true"))
-	TSoftObjectPtr<UStaticMesh> DummyMeshOverride;
+	TSoftObjectPtr<USkeletalMesh> SkeletalMeshOverride;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mole Companion|Visual", meta = (AllowPrivateAccess = "true"))
 	TSoftObjectPtr<UMaterialInterface> VisualMaterial;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mole Companion|Visual", meta = (AllowPrivateAccess = "true"))
-	FVector DummyMeshRelativeLocation = FVector::ZeroVector;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mole Companion|Visual", meta = (AllowPrivateAccess = "true"))
-	FVector DummyMeshScale = FVector::OneVector;
+	TObjectPtr<UBlendSpace> IdleTurnBlendSpace;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mole Companion|Collision", meta = (AllowPrivateAccess = "true"))
 	FVector BodyCollisionRelativeLocation = FVector(0.0f, 0.0f, 72.0f);

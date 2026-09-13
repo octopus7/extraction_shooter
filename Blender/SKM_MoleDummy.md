@@ -1,0 +1,27 @@
+# MoleDummy 리그
+
+`SKM_MoleDummy.blend`는 Blender 4.5.12 LTS에서 제작/검증했다. 스켈레탈 메시 오브젝트 이름도 `SKM_MoleDummy`다. 리깅 전 원본 `SM_MoleDummy.blend`는 보존한다.
+
+- 리그: `Armature`, 편집용 19개 뼈. 발 IK 컨트롤 `CTRL_foot.L/R`. FBX는 IK 평가 결과를 베이크하고 비변형 발 컨트롤을 제외한다.
+- 배 앞면 중심은 다리 영향을 제거하고 하복부의 pelvis에서 윗배의 spine으로 부드럽게 연결했다. 가장자리와 다리 접합부는 기존 가중치로 점진적으로 전환해 걷기 중 배 중앙이 갈라져 접히는 현상을 보정했다.
+- 30 fps, Blender 전방 -Y, 위쪽 +Z. 원본 크기 약 1.04 m 유지.
+- Action Editor에서 리그의 액션을 선택한다. 모든 액션은 Fake User와 Asset 표시로 보존된다.
+
+| 액션 | 프레임 | 동작 |
+|---|---|---|
+| Idle_Breathe | 1–120 반복 | 4초 주기의 미세한 호흡. 121은 이음 프레임. 런타임 기본 동작. |
+| Turn_InPlace | 1–32 반복 | 루트 이동·회전 없이 발만 번갈아 드는 회전용 제자리 걸음. 33은 이음 프레임. |
+| Walk_InPlace | 1–32 반복 | 보관용 제자리 걷기. 런타임에서는 사용하지 않는다. 33은 이음 프레임. |
+| Walk_Forward | 1–33 | 한 주기 동안 root가 전방으로 0.32 m 이동. |
+| Turn_Left_90 | 1–65 | 발을 번갈아 옮기며 왼쪽 90도 회전 후 정리. |
+| Turn_Right_90 | 1–65 | 발을 번갈아 옮기며 오른쪽 90도 회전 후 정리. |
+
+파일을 열면 Idle_Breathe가 선택되어 있으며 타임라인은 1–120이다. 다른 액션은 위 프레임 범위로 바꿔 재생한다. 원본에서 존재하던 발목 주변 표면 불연속은 모델 수정 범위에 포함하지 않았다.
+
+Unreal FBX는 `TunaSweeper/SourceArt/Characters/Mole/`에 있다. Unreal 에셋은 `/Game/Characters/NPC/Mole/`에 있으며 기존 `M_Mole` 재질을 사용한다.
+
+`/Game/Characters/Mole/BP_Mole` 및 `BunkerMap` 배치 액터는 `SKM_MoleDummy`를 사용한다. 기존 `DummyMesh` 스태틱 컴포넌트는 제거했다. `BS_Mole_IdleTurn`에는 `A_Mole_Idle_Breathe`와 `A_Mole_Turn_InPlace`만 연결한다. 액터의 실제 yaw 변화 속도를 입력으로 사용하므로 플레이어 쪽 회전과 원래 방향 복귀 모두 제자리 걸음을 섞고, 회전이 멈추면 호흡 idle로 전환한다. 애니메이션은 액터 위치나 yaw를 추가로 변경하지 않는다.
+
+`A_Mole_Walk_InPlace`, `A_Mole_Walk_Forward` 및 별도 90도 회전 클립은 에셋으로만 보관한다. 런타임 블렌드에는 연결하지 않는다.
+
+검증: 저장 후 Blender 4.5에서 재열기, 모든 버텍스 가중치 합계, 전체 액션 프레임의 유한 좌표, 걷기 이음 포즈, 루트 전진 거리 및 좌우 회전각 확인. 주요 포즈 렌더 및 걷기/왼쪽 회전 미리보기 영상 생성.
