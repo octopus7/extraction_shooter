@@ -13,6 +13,7 @@
 #include "UI/TunaSweeperScreenFadeWidget.h"
 #include "TimerManager.h"
 #include "Settings/TunaSweeperBuildFlavor.h"
+#include "Subsystem/TunaSweeperBgmSubsystem.h"
 namespace
 {
 const FName FinalQuest(TEXT("demo_q4_todays_reward"));
@@ -136,6 +137,13 @@ void ATunaSweeperDemoEndingActor::DinnerFinished()
 }
 void ATunaSweeperDemoEndingActor::ShowFarewell()
 {
+    if (auto* GI = GetGameInstance<UTunaSweeperGameInstance>())
+    {
+        if (auto* BgmSubsystem = GI->GetSubsystem<UTunaSweeperBgmSubsystem>())
+        {
+            BgmSubsystem->FadeOutAndStop(FarewellBgmFadeOutSeconds);
+        }
+    }
     Dialogue->RemoveFromParent();
     RestoreActors();
     Farewell->Illustration = FarewellIllustration.LoadSynchronous();

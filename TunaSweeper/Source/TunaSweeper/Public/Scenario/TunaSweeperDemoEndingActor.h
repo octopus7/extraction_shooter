@@ -35,6 +35,8 @@ public:
     TSoftObjectPtr<UTexture2D> FarewellIllustration;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Demo Ending", meta=(ClampMin="0.05"))
     float FadeSeconds = .2f;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Demo Ending", meta=(ClampMin="0.0"))
+    float FarewellBgmFadeOutSeconds = 1.5f;
     UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Transient, Category="Demo Ending")
     bool bEndingActive = false;
 private:

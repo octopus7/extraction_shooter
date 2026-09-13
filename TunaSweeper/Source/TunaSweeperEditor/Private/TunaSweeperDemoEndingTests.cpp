@@ -34,6 +34,7 @@ bool FTunaDemoEndingAssetsTest::RunTest(const FString&)
     const auto* SceneCDO=SceneClass->GetDefaultObject<ATunaSweeperDemoEndingActor>();
     TestTrue(TEXT("Dinner dialogue authored"),SceneCDO->DinnerDialogue.Num()>=6);
     TestTrue(TEXT("Illustration serialized on BP"),SceneCDO->FarewellIllustration.LoadSynchronous()==Texture);
+    TestTrue(TEXT("Farewell BGM fades out over time"),SceneCDO->FarewellBgmFadeOutSeconds>0.f);
     UWorld* World=UWorld::CreateWorld(EWorldType::Game,false);
     auto* GI=NewObject<UTunaSweeperGameInstance>(World); World->SetGameInstance(GI);
     // No item-data subsystem is initialized in this isolated fixture; lab weapon setup is irrelevant.

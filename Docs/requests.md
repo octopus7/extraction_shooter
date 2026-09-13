@@ -8484,3 +8484,9 @@
 - 요청: 승인한 상단 퀘스트 진행 알림 내부 프레임 디자인을 게임에 적용하고 커밋.
 - 완료: 투명 9-slice용 황동·아이보리 장식 프레임을 생성해 `/Game/UI/Toast/T_UI_QuestToastInnerFrame` UI 텍스처로 임포트하고, `UTunaSweeperToastWidget`의 어두운 패널 안쪽에 프레임 이미지와 텍스트가 겹쳐 표시되도록 연결했다.
 - 검증: 원본 PNG의 RGBA/투명 알파와 생성된 `.uasset`을 확인하고, UE 5.7 `TunaSweeperEditor Win64 Development` 빌드가 성공했다.
+
+## 2026-09-14 02:17:18 (소요시간: 00:03:51)
+
+- 요청: 데모 엔딩의 “본편에서 만나요” 화면에 진입하면 재생 중인 BGM을 페이드 아웃하고, 완료 후 별도 확인 없이 이번 변경을 커밋.
+- 완료: 작별 화면 표시 진입점에서 중앙 BGM 서브시스템에 기본 1.5초 페이드 아웃·정지를 요청하도록 연결. 페이드 시간은 엔딩 BP/배치 인스턴스에서 조절할 수 있도록 노출.
+- 검증: UE 5.7 `TunaSweeperEditor Win64 Development` 빌드 성공. `TunaSweeper.DemoEnding.AssetsAndInput` 자동화 테스트 통과.
