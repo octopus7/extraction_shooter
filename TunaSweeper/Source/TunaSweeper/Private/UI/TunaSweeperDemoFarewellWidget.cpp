@@ -10,6 +10,12 @@
 #include "Styling/CoreStyle.h"
 #include "UI/TunaSweeperUIFont.h"
 
+UTunaSweeperDemoFarewellWidget::UTunaSweeperDemoFarewellWidget(const FObjectInitializer& ObjectInitializer)
+    : Super(ObjectInitializer)
+{
+    SetIsFocusable(true);
+}
+
 TSharedRef<SWidget> UTunaSweeperDemoFarewellWidget::RebuildWidget()
 {
     if (!WidgetTree) WidgetTree = NewObject<UWidgetTree>(this, TEXT("WidgetTree"));
@@ -51,8 +57,23 @@ TSharedRef<SWidget> UTunaSweeperDemoFarewellWidget::RebuildWidget()
 void UTunaSweeperDemoFarewellWidget::NativeConstruct()
 {
     Super::NativeConstruct();
-    SetIsFocusable(true);
     AcceptInputAfter = FPlatformTime::Seconds() + .5;
+}
+void UTunaSweeperDemoFarewellWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
+{
+    Super::NativeTick(MyGeometry, InDeltaTime);
+    if (!bLeaving && FPlatformTime::Seconds() >= AcceptInputAfter)
+    {
+        EnsureInputFocus();
+    }
+}
+void UTunaSweeperDemoFarewellWidget::EnsureInputFocus()
+{
+    if (APlayerController* OwningPlayer = GetOwningPlayer(); OwningPlayer && !HasUserFocus(OwningPlayer))
+    {
+        SetUserFocus(OwningPlayer);
+        SetKeyboardFocus();
+    }
 }
 FReply UTunaSweeperDemoFarewellWidget::Continue()
 {

@@ -149,14 +149,18 @@ void ATunaSweeperDemoEndingActor::ShowFarewell()
     Farewell->Illustration = FarewellIllustration.LoadSynchronous();
     Farewell->OnContinue = FSimpleDelegate::CreateUObject(this,&ThisClass::ReturnToTitle);
     Farewell->AddToViewport(600);
-    FInputModeUIOnly Input; Input.SetWidgetToFocus(Farewell->TakeWidget());
-    Player->SetInputMode(Input); Farewell->SetKeyboardFocus();
     if (auto* GI = GetGameInstance<UTunaSweeperGameInstance>())
     {
         GI->MarkScenarioProgressFlag(EndingSeen,true);
         GI->DeleteCompletedDemoSave();
     }
     Fade->StartFadeFromBlack(FadeSeconds);
+    FInputModeUIOnly Input;
+    Input.SetWidgetToFocus(Farewell->TakeWidget());
+    Input.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+    Player->SetInputMode(Input);
+    Farewell->SetUserFocus(Player);
+    Farewell->SetKeyboardFocus();
 }
 void ATunaSweeperDemoEndingActor::ReturnToTitle()
 {

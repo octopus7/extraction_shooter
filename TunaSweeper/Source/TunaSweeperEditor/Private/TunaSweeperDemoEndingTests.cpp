@@ -57,6 +57,7 @@ bool FTunaDemoEndingAssetsTest::RunTest(const FString&)
     Widget->Illustration=Texture;
     Widget->Initialize();
     auto SlateWidget=Widget->TakeWidget();
+    TestTrue(TEXT("Farewell widget accepts keyboard focus"),Widget->IsFocusable());
     auto* Frame=Cast<UScaleBox>(Widget->WidgetTree->FindWidget(TEXT("IllustrationFrame")));
     if (!TestNotNull(TEXT("Illustration frame"),Frame)) return false;
     auto* Slot=CastChecked<UCanvasPanelSlot>(Frame->Slot);
