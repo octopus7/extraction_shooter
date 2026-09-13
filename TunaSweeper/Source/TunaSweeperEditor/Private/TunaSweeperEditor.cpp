@@ -1,5 +1,4 @@
 #include "TunaSweeperEditorAssetImport.h"
-#include "TunaSweeperPipeGenerateCommandlet.h"
 #include "TunaSweeperBuildTargetTool.h"
 #include "TunaSweeperEnemyAIDebugTool.h"
 #include "TunaSweeperFMSoundTool.h"
@@ -17,12 +16,6 @@ class FTunaSweeperEditorModule final : public IModuleInterface
 public:
 	virtual void StartupModule() override
 	{
-		if (FParse::Param(FCommandLine::Get(), TEXT("GenerateBunkerPipe")))
-		{
-			const int32 Result = NewObject<UTunaSweeperPipeGenerateCommandlet>()->Main(TEXT(""));
-			FPlatformMisc::RequestExitWithStatus(false, Result);
-			return;
-		}
 		if (IsRunningCommandlet())
 		{
 			return;
