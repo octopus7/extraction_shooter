@@ -79,6 +79,10 @@ Legacy `.sav` files directly under `Saved/SaveGames/` are not migrated. They are
 ### Scenario Progress Flags
 
 Scenario progress is persisted per save slot through `UTunaSweeperSaveGame::CompletedScenarioFlags`.
+
+Demo dinner ending uses `demo.ending.farewell_seen` in this existing set. It is written when the farewell card is shown, after restoring the actors' original transforms. A final quest in RewardCompleted with this flag absent resumes the ending on bunker entry. Temporary camera/input state and dinner actor transforms are not persisted.
+
+The food warehouse grants canned tuna (3004) through the existing inventory save path. Its collected state is transient per world visit, deliberately replenishing on a later raid visit so death or consuming the food cannot permanently block delivery. Final delivery consumes one can and advances the existing `demo.canned_tuna.deliver` objective; reward retries use RewardAvailable without consuming another can.
 See [Docs/scenario_progress_flags.md](scenario_progress_flags.md) for the flag contract, routing rules, and reuse constraints.
 The active scenario data pack supplies dialogue completion flags. Demo uses `dialogue.demo.toilet_intro`, while Main uses `dialogue.main.bunker_intro` after `scenario.opening.awakening`; the retired test-dialogue flag `dialogue.mole.bunker_intro` is intentionally left as inert legacy save data.
 

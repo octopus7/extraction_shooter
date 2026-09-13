@@ -1,4 +1,5 @@
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
+#include "Scenario/TunaSweeperDemoEndingActor.h"
 
 #include "Dom/JsonObject.h"
 #include "Game/TunaSweeperGameInstance.h"
@@ -545,6 +546,10 @@ bool UTunaSweeperQuestSubsystem::ClaimQuestReward(FName QuestId)
 	}
 
 	BroadcastQuestProgressChanged(true);
+	if (QuestId == FName(TEXT("demo_q4_todays_reward")))
+	{
+		if (auto* Ending = ATunaSweeperDemoEndingActor::Find(GetWorld())) Ending->QueueEnding();
+	}
 	return true;
 }
 

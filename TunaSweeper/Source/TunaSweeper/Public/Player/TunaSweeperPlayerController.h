@@ -122,6 +122,7 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Dialogue")
 	bool IsDialogueSequenceActive() const { return bDialogueSequenceActive; }
+	void SetDemoEndingInputLock(bool bLocked);
 
 	bool TryGetCursorWorldPointOnPlane(float PlaneZ, FVector& OutWorldPoint) const;
 

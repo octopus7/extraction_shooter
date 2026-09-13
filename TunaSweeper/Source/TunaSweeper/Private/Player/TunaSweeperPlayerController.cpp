@@ -2225,6 +2225,15 @@ void ATunaSweeperPlayerController::HandleDifficultyAdjustmentWidgetClosed()
 	ApplyDefaultGameInputMode();
 }
 
+void ATunaSweeperPlayerController::SetDemoEndingInputLock(bool bLocked)
+{
+	bDialogueSequenceActive = bLocked;
+	if (bLocked) CancelPawnGameplayActions();
+	if (GameHudWidget) GameHudWidget->SetVisibility(bLocked ? ESlateVisibility::Collapsed : ESlateVisibility::Visible);
+	if (bLocked && QuestWidget) QuestWidget->RemoveFromParent();
+	SetCinematicMode(bLocked, false, true, true, true);
+}
+
 bool ATunaSweeperPlayerController::OpenResearchPanel()
 {
 	if (!IsLocalController() || !IsBunkerMap())

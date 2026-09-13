@@ -28,6 +28,8 @@
 #include "Interaction/TunaSweeperWarpPointActor.h"
 #include "Interaction/TunaSweeperWorkbenchActor.h"
 #include "Interaction/TunaSweeperWorldProgressActor.h"
+#include "Interaction/TunaSweeperFoodWarehouseActor.h"
+#include "Scenario/TunaSweeperDemoEndingActor.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/TunaSweeperPlayerController.h"
 #include "GameFramework/Actor.h"
@@ -683,6 +685,7 @@ bool UTunaSweeperInteractionSubsystem::HandleQuestInteraction(
 		return false;
 	}
 
+	if (Cast<ATunaSweeperMoleCompanionActor>(QuestOwner) && ATunaSweeperDemoEndingActor::TryDeliverToMole(InstigatorPawn)) return true;
 	TunaPlayerController->OpenQuestPanel(ResolvedQuestId);
 	return true;
 }
@@ -700,6 +703,7 @@ bool UTunaSweeperInteractionSubsystem::HandleMoleDialogueInteraction(
 	}
 
 	ATunaSweeperPlayerController* TunaPlayerController = Cast<ATunaSweeperPlayerController>(InstigatorPawn->GetController());
+	if (ATunaSweeperDemoEndingActor::TryDeliverToMole(InstigatorPawn)) return true;
 	return TunaPlayerController && TunaPlayerController->StartScenarioForTrigger(FName(TEXT("interaction.mole")), true);
 }
 
@@ -727,6 +731,7 @@ bool UTunaSweeperInteractionSubsystem::HandleWorldProgressInteraction(
 	{
 		return ProgressActor->RepairUsingAvailableRequiredItems(true);
 	}
+	if (auto* Warehouse = Cast<ATunaSweeperFoodWarehouseActor>(ProgressOwner)) return Warehouse->TakeFood();
 
 	if (ATunaSweeperBlockedIntakeScreenActor* IntakeScreenActor = Cast<ATunaSweeperBlockedIntakeScreenActor>(ProgressOwner))
 	{
