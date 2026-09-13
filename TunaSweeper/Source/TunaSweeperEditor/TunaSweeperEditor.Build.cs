@@ -27,7 +27,6 @@ public class TunaSweeperEditor : ModuleRules
 			"UMG",
 			"PropertyEditor",
 			"RenderCore",
-			"RawMesh",
 			"Slate",
 			"SlateCore",
 			"ToolMenus",
