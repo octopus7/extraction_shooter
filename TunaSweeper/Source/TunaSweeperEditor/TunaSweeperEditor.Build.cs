@@ -7,8 +7,6 @@ public class TunaSweeperEditor : ModuleRules
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 		// Keep editor tools independent of accidental unity-build includes.
 		bUseUnity = false;
-		PrivateIncludePaths.Add(System.IO.Path.Combine(EngineDirectory, "Plugins/FX/Niagara/Source/Niagara/Internal"));
-		PrivateIncludePaths.Add(System.IO.Path.Combine(EngineDirectory, "Plugins/FX/Niagara/Source/NiagaraShader/Internal"));
 
 		PrivateDependencyModuleNames.AddRange(new string[]
 		{
@@ -34,11 +32,6 @@ public class TunaSweeperEditor : ModuleRules
 			"ToolMenus",
 			"UATHelper",
 			"TunaSweeper",
-			"Niagara",
-			"NiagaraEditor",
-			"NiagaraShader",
-			"MeshDescription",
-			"StaticMeshDescription",
 		});
 	}
 }
