@@ -8514,3 +8514,10 @@
 - 요청: 식량 창고가 최종 퀘스트 진행 중이 아닌데도 활성화되고 상호작용 명칭이 `수리하기`로 표시되는 문제 수정.
 - 완료: 식량 창고가 최종 퀘스트 `demo_q4_todays_reward`의 `Accepted` 상태에서만 활성화되도록 퀘스트 변경 이벤트와 연결하고, 직접 함수 호출로도 제한을 우회할 수 없게 처리. 전용 다국어 키 `ui.interaction.take_tuna_can`을 추가해 한국어 표시를 `참치캔 획득`으로 변경.
 - 검증: UE 5.7 `TunaSweeperEditor Win64 Development` 빌드 성공. `TunaSweeper.DemoEnding.AssetsAndInput` 자동화 테스트에서 퀘스트 전 비활성·지급 차단, 전용 문구, 1회 획득 및 중복 차단 통과.
+
+## 2026-09-15 01:52:44 (소요시간: 00:27:29)
+
+- 요청: 본체 메시·공기를 가르는 화염 꼬리 메시·파티클을 조합한 스타일라이즈드 Niagara 투사체를 서로 다른 방식으로 3종 이상 제작. 중단 후 이어서 진행하고, Computer Use로 UE 에디터를 열 때 TunaSweeper/TunaSweeper.uproject를 명시하도록 AGENTS.md에 반영.
+- 완료: /Game/Effects/FlameProjectiles에 ScrollLance, FlipbookComet, Helix NS 3종, 메시 6개, 머티리얼 5개, 4x4 플립북 텍스처와 비교 맵 생성. 본체·꼬리 메시와 불티 이미터를 조합하고 재생 확인 후 빈 렌더러 슬롯, 본체 무늬와 꼬리 연결부를 보정. 비교 문서와 실제 에디터 렌더 이미지 저장.
+- 검증: 생성 자동화 테스트 통과, 최종 생성 소스 빌드와 생성 소스 제거 후 빌드 성공. 최종 에디터에서 16개 저장 자산과 비교 맵의 Niagara 액터 3개 재로딩 확인. 패키징·전투 투사체 연결은 수행하지 않음.
+- 정리: 생성 자산과 일회성 생성 소스를 6829a9ac에 커밋한 뒤 즉시 생성 소스·엔트리·전용 의존성을 제거. 비교 맵을 TunaSweeper 프로젝트에서 열어 둠. AGENTS.md에 Computer Use 프로젝트 지정·기존 에디터 재사용 규칙 반영.
