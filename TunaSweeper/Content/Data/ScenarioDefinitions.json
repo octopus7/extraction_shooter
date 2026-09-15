@@ -26,6 +26,59 @@
           "dialogue_text_string_key": "scenario.demo.bunker_toilet.line2"
         }
       ]
+    },
+    {
+      "scenario_id": "scenario.demo.ending.dinner",
+      "triggers": [
+        "demo.ending.dinner"
+      ],
+      "level_name": "BunkerMap",
+      "required_completed_flags": [],
+      "blocked_completed_flags": [],
+      "required_quest_states": [
+        {
+          "quest_id": "demo_q4_todays_reward",
+          "state": "reward_completed"
+        }
+      ],
+      "completion_flag": "dialogue.demo.ending.dinner",
+      "one_shot": true,
+      "priority": 100,
+      "start_delay_seconds": 0.0,
+      "lines": [
+        {
+          "speaker_name_string_key": "scenario.demo.speaker.luna",
+          "dialogue_text_string_key": "scenario.demo.ending.dinner.line1"
+        },
+        {
+          "speaker_name_string_key": "scenario.demo.speaker.mole",
+          "dialogue_text_string_key": "scenario.demo.ending.dinner.line2"
+        },
+        {
+          "speaker_name_string_key": "scenario.demo.speaker.luna",
+          "dialogue_text_string_key": "scenario.demo.ending.dinner.line3"
+        },
+        {
+          "speaker_name_string_key": "scenario.demo.speaker.mole",
+          "dialogue_text_string_key": "scenario.demo.ending.dinner.line4"
+        },
+        {
+          "speaker_name_string_key": "scenario.demo.speaker.luna",
+          "dialogue_text_string_key": "scenario.demo.ending.dinner.line5"
+        },
+        {
+          "speaker_name_string_key": "scenario.demo.speaker.mole",
+          "dialogue_text_string_key": "scenario.demo.ending.dinner.line6"
+        },
+        {
+          "speaker_name_string_key": "scenario.demo.speaker.luna",
+          "dialogue_text_string_key": "scenario.demo.ending.dinner.line7"
+        },
+        {
+          "speaker_name_string_key": "scenario.demo.speaker.mole",
+          "dialogue_text_string_key": "scenario.demo.ending.dinner.line8"
+        }
+      ]
     }
   ]
 }

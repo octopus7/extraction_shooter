@@ -30,8 +30,6 @@ public:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
     TObjectPtr<USceneComponent> MolePosition;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Demo Ending")
-    TArray<FTunaSweeperDialogueLine> DinnerDialogue;
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Demo Ending")
     TSoftObjectPtr<UTexture2D> FarewellIllustration;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Demo Ending", meta=(ClampMin="0.05"))
     float FadeSeconds = .2f;
@@ -54,6 +52,8 @@ private:
     UPROPERTY(Transient) TObjectPtr<UTunaSweeperDialogueWidget> Dialogue;
     UPROPERTY(Transient) TObjectPtr<UTunaSweeperDemoFarewellWidget> Farewell;
     FTransform PreviousLuna, PreviousMole;
+    TArray<FTunaSweeperDialogueLine> DinnerDialogueLines;
+    FName DinnerDialogueCompletionFlag;
     bool bActorsMoved = false;
     bool bMoleTickEnabled = true;
     FTimerHandle StageTimer;

@@ -3,3 +3,11 @@ scenario.demo.speaker.luna,루나,Luna,ルナ
 scenario.demo.speaker.mole,두더지,Mole,モグラ
 scenario.demo.bunker_toilet.line1,물이 안 내려가면 이건 생활 문제가 아니라 문명 멸망이야!,"If it won't flush, this isn't just a household problem—it's the end of civilization!",水が流れないなんて、これは生活の問題じゃなくて文明の滅亡だよ！
 scenario.demo.bunker_toilet.line2,"멸망은 미뤄둘게, 취수 시설부터 고치자.","We'll postpone the apocalypse. Let's fix the water intake facility first.",滅亡は後回しだ。まず取水施設から直そう。
+scenario.demo.ending.dinner.line1,찾았다. 마지막 한 캔.,Found it. The last can.,見つけた。最後の一缶だ。
+scenario.demo.ending.dinner.line2,수고했어. 오늘은 여기 앉아서 같이 먹자.,Good work. Sit here and eat with me today.,お疲れさま。今日はここに座って一緒に食べよう。
+scenario.demo.ending.dinner.line3,수리 부품보다 이게 더 귀하게 느껴지네.,This feels more precious than the repair parts.,修理部品より、こっちのほうが貴重に感じる。
+scenario.demo.ending.dinner.line4,"물도 나오고 배관도 고쳤으니, 이제 마음 놓고 먹어도 돼.","The water is running and the pipes are fixed, so we can eat without worrying now.",水も出るようになって配管も直ったから、もう安心して食べられるね。
+scenario.demo.ending.dinner.line5,오늘은 네가 진짜 영웅이다.,You are the real hero today.,今日の本当の英雄はあなたよ。
+scenario.demo.ending.dinner.line6,취수 시설을 수리한 건 너야.,You are the one who repaired the water intake facility.,取水施設を修理したのは君だよ。
+scenario.demo.ending.dinner.line7,아니. 참치캔을 챙긴 쪽이 영웅이야.,No. The one who brought the tuna can is the hero.,違う。ツナ缶を持ってきたほうが英雄だよ。
+scenario.demo.ending.dinner.line8,그럼 영웅이랑 반씩 나눠 먹자.,Then let's split it with the hero.,じゃあ英雄と半分ずつ分けて食べよう。

@@ -9,6 +9,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Player/TunaSweeperPlayerController.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
+#include "Subsystem/TunaSweeperScenarioSubsystem.h"
 #include "UI/TunaSweeperDemoFarewellWidget.h"
 #include "UI/TunaSweeperScreenFadeWidget.h"
 #include "TimerManager.h"
@@ -82,7 +83,15 @@ bool ATunaSweeperDemoEndingActor::StartEnding()
 {
     if (!TunaSweeperBuildFlavor::IsDemo()) return false;
     Player = Cast<ATunaSweeperPlayerController>(UGameplayStatics::GetPlayerController(this,0));
-    if (bEndingActive || !Player || !Player->GetPawn() || DinnerDialogue.IsEmpty() || !FarewellIllustration.LoadSynchronous()) return false;
+    auto* GI = GetGameInstance<UTunaSweeperGameInstance>();
+    auto* ScenarioSubsystem = GI ? GI->GetSubsystem<UTunaSweeperScenarioSubsystem>() : nullptr;
+    FTunaSweeperScenarioPresentation Presentation;
+    if (bEndingActive || !Player || !Player->GetPawn() || !FarewellIllustration.LoadSynchronous() ||
+        !ScenarioSubsystem || !ScenarioSubsystem->TryResolveScenario(
+            FName(TEXT("demo.ending.dinner")), FName(*GetWorld()->GetMapName()), false, Presentation) ||
+        Presentation.DialogueLines.IsEmpty()) return false;
+    DinnerDialogueLines = MoveTemp(Presentation.DialogueLines);
+    DinnerDialogueCompletionFlag = Presentation.CompletionFlag;
     if (Player->IsDialogueSequenceActive())
     {
         GetWorldTimerManager().SetTimer(StageTimer,this,&ThisClass::ResumePendingEnding,.25f,false);
@@ -125,13 +134,20 @@ void ATunaSweeperDemoEndingActor::StartDinnerDialogue()
     Dialogue->SetFinishedDelegate(FTunaSweeperDialogueFinishedDelegate::CreateUObject(this,&ThisClass::DinnerFinished));
     Dialogue->AddToViewport(500);
     auto* GI = GetGameInstance<UTunaSweeperGameInstance>();
-    Dialogue->StartDialogue(DinnerDialogue,GI ? GI->GetDialogueCharactersPerSecond() : 25.f);
+    Dialogue->StartDialogue(DinnerDialogueLines,GI ? GI->GetDialogueCharactersPerSecond() : 25.f);
     FInputModeUIOnly Input; Input.SetWidgetToFocus(Dialogue->TakeWidget());
     Player->SetInputMode(Input); Dialogue->SetKeyboardFocus();
 }
 void ATunaSweeperDemoEndingActor::DinnerFinished()
 {
     Player->SetInputMode(FInputModeUIOnly());
+    if (DinnerDialogueCompletionFlag != NAME_None)
+    {
+        if (auto* GI = GetGameInstance<UTunaSweeperGameInstance>())
+        {
+            GI->MarkScenarioProgressFlag(DinnerDialogueCompletionFlag, true);
+        }
+    }
     Fade->AddToViewport(1000);
     Fade->StartFadeToBlack(FadeSeconds,FSimpleDelegate::CreateUObject(this,&ThisClass::ShowFarewell));
 }

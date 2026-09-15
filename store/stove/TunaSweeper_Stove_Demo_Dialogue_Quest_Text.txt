@@ -4,7 +4,9 @@ STOVE 심사용
 기준
 실제 데모 런타임 데이터 기준
 원본 데이터: TunaSweeper/Content/Data
-대상 데이터: ScenarioDefinitions.json, ScenarioTextStrings.csv, QuestDefinitions.json, QuestTextStrings.csv
+대상 데이터: ScenarioDefinitions.json, ScenarioTextStrings.csv, UITextStrings.csv, QuestDefinitions.json, QuestTextStrings.csv
+엔딩 대화 원본: ScenarioDefinitions.json + ScenarioTextStrings.csv
+엔딩 안내 원본: UITextStrings.csv
 언어: 한국어
 
 ============================================================

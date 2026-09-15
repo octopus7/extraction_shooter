@@ -200,6 +200,8 @@ ui.toast.save_failed,저장 데이터를 만들지 못했습니다.,Failed to cr
 ui.interaction.clear_debris,이물질 제거,Clear Debris,異物を除去
 ui.interaction.take_crowbar,크로우바 획득,Take Crowbar,バールを取る
 ui.interaction.take_tuna_can,참치캔 획득,Take Tuna Can,ツナ缶を入手
+ui.demo_ending.farewell_title,본편에서 만나요,See you in the full game,本編でまた会いましょう
+ui.demo_ending.return_to_title,아무 키나 누르면 타이틀로 돌아갑니다,Press any key to return to the title,任意のキーを押すとタイトルに戻ります
 ui.common.apply,적용,Apply,適用
 ui.common.keep,유지,Keep,維持
 ui.common.revert,되돌리기,Revert,元に戻す

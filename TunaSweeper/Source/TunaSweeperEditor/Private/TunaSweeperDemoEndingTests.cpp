@@ -1,4 +1,5 @@
 #if WITH_DEV_AUTOMATION_TESTS
+#include "Dom/JsonObject.h"
 #include "Misc/AutomationTest.h"
 #include "AssetCompilingManager.h"
 #include "Blueprint/WidgetTree.h"
@@ -18,21 +19,121 @@
 #include "ImageUtils.h"
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
+#include "Serialization/JsonReader.h"
+#include "Serialization/JsonSerializer.h"
+#include "Serialization/Csv/CsvParser.h"
+
+namespace TunaSweeperDemoEndingTests
+{
+    bool LoadCsvKeys(const FString& Path, TSet<FString>& OutKeys)
+    {
+        FString Content;
+        if (!FFileHelper::LoadFileToString(Content, *Path)) return false;
+        const FCsvParser Parser(Content);
+        const FCsvParser::FRows& Rows = Parser.GetRows();
+        if (Rows.Num() < 2) return false;
+        for (int32 RowIndex = 1; RowIndex < Rows.Num(); ++RowIndex)
+        {
+            if (Rows[RowIndex].Num() > 0) OutKeys.Add(FString(Rows[RowIndex][0]).TrimStartAndEnd());
+        }
+        return !OutKeys.IsEmpty();
+    }
+}
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FTunaDemoEndingAssetsTest,"TunaSweeper.DemoEnding.AssetsAndInput",
     EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 bool FTunaDemoEndingAssetsTest::RunTest(const FString&)
 {
+    const FString ScenarioDefinitionsPath = FPaths::Combine(FPaths::ProjectContentDir(), TEXT("Data/ScenarioDefinitions.json"));
+    FString ScenarioDefinitionsJson;
+    TestTrue(TEXT("Demo scenario definitions load"), FFileHelper::LoadFileToString(ScenarioDefinitionsJson, *ScenarioDefinitionsPath));
+    TSharedPtr<FJsonObject> ScenarioRoot;
+    TestTrue(TEXT("Demo scenario definitions parse"), FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(ScenarioDefinitionsJson), ScenarioRoot));
+    TSharedPtr<FJsonObject> EndingScenario;
+    const TArray<TSharedPtr<FJsonValue>>* ScenarioValues = nullptr;
+    if (ScenarioRoot.IsValid() && ScenarioRoot->TryGetArrayField(TEXT("scenarios"), ScenarioValues) && ScenarioValues)
+    {
+        for (const TSharedPtr<FJsonValue>& Value : *ScenarioValues)
+        {
+            const TSharedPtr<FJsonObject> Scenario = Value.IsValid() ? Value->AsObject() : nullptr;
+            FString ScenarioId;
+            if (Scenario.IsValid() && Scenario->TryGetStringField(TEXT("scenario_id"), ScenarioId) &&
+                ScenarioId == TEXT("scenario.demo.ending.dinner"))
+            {
+                EndingScenario = Scenario;
+                break;
+            }
+        }
+    }
+    TestNotNull(TEXT("Dinner ending scenario is authored in ScenarioDefinitions"), EndingScenario.Get());
+    if (EndingScenario.IsValid())
+    {
+        const TArray<TSharedPtr<FJsonValue>>* Triggers = nullptr;
+        const TArray<TSharedPtr<FJsonValue>>* QuestConditions = nullptr;
+        const TArray<TSharedPtr<FJsonValue>>* Lines = nullptr;
+        FString CompletionFlag;
+        bool bOneShot = false;
+        TestTrue(TEXT("Dinner ending has the direct trigger"), EndingScenario->TryGetArrayField(TEXT("triggers"), Triggers) &&
+            Triggers && Triggers->ContainsByPredicate([](const TSharedPtr<FJsonValue>& Value)
+            {
+                return Value.IsValid() && Value->AsString() == TEXT("demo.ending.dinner");
+            }));
+        TestTrue(TEXT("Dinner ending requires the final quest reward"), EndingScenario->TryGetArrayField(TEXT("required_quest_states"), QuestConditions));
+        TestTrue(TEXT("Dinner ending has eight scenario lines"), EndingScenario->TryGetArrayField(TEXT("lines"), Lines) && Lines && Lines->Num() == 8);
+        TestTrue(TEXT("Dinner ending has a completion flag"), EndingScenario->TryGetStringField(TEXT("completion_flag"), CompletionFlag));
+        TestEqual(TEXT("Dinner ending completion flag"), CompletionFlag, FString(TEXT("dialogue.demo.ending.dinner")));
+        TestTrue(TEXT("Dinner ending is one-shot"), EndingScenario->TryGetBoolField(TEXT("one_shot"), bOneShot) && bOneShot);
+        if (QuestConditions)
+        {
+            bool bFoundFinalQuestCondition = false;
+            for (const TSharedPtr<FJsonValue>& ConditionValue : *QuestConditions)
+            {
+                const TSharedPtr<FJsonObject> Condition = ConditionValue.IsValid() ? ConditionValue->AsObject() : nullptr;
+                FString QuestId;
+                FString State;
+                if (Condition.IsValid() && Condition->TryGetStringField(TEXT("quest_id"), QuestId) &&
+                    Condition->TryGetStringField(TEXT("state"), State) &&
+                    QuestId == TEXT("demo_q4_todays_reward") && State == TEXT("reward_completed"))
+                {
+                    bFoundFinalQuestCondition = true;
+                    break;
+                }
+            }
+            TestTrue(TEXT("Dinner ending quest condition is reward_completed"), bFoundFinalQuestCondition);
+        }
+    }
+
+    TSet<FString> ScenarioTextKeys;
+    TSet<FString> UiTextKeys;
+    TestTrue(TEXT("Scenario text CSV loads"), TunaSweeperDemoEndingTests::LoadCsvKeys(
+        FPaths::Combine(FPaths::ProjectContentDir(), TEXT("Data/ScenarioTextStrings.csv")), ScenarioTextKeys));
+    TestTrue(TEXT("UI text CSV loads"), TunaSweeperDemoEndingTests::LoadCsvKeys(
+        FPaths::Combine(FPaths::ProjectContentDir(), TEXT("Data/UITextStrings.csv")), UiTextKeys));
+    for (int32 LineIndex = 1; LineIndex <= 8; ++LineIndex)
+    {
+        TestTrue(
+            FString::Printf(TEXT("Dinner ending line %d has a ScenarioTextStrings key"), LineIndex),
+            ScenarioTextKeys.Contains(FString::Printf(TEXT("scenario.demo.ending.dinner.line%d"), LineIndex)));
+    }
+    TestTrue(TEXT("Farewell title uses a UI text key"), UiTextKeys.Contains(TEXT("ui.demo_ending.farewell_title")));
+    TestTrue(TEXT("Return-to-title instruction uses a UI text key"), UiTextKeys.Contains(TEXT("ui.demo_ending.return_to_title")));
+    FString FarewellSource;
+    const FString FarewellSourcePath = FPaths::Combine(FPaths::ProjectDir(), TEXT("Source/TunaSweeper/Private/UI/TunaSweeperDemoFarewellWidget.cpp"));
+    TestTrue(TEXT("Farewell widget source loads"), FFileHelper::LoadFileToString(FarewellSource, *FarewellSourcePath));
+    TestFalse(TEXT("Farewell title is not hardcoded in C++"), FarewellSource.Contains(TEXT("본편에서 만나요")));
+    TestFalse(TEXT("Return-to-title instruction is not hardcoded in C++"), FarewellSource.Contains(TEXT("아무 키나 누르면 타이틀로 돌아갑니다")));
+
     auto* WarehouseClass=LoadClass<ATunaSweeperFoodWarehouseActor>(nullptr,TEXT("/Game/Interaction/DemoEnding/BP_FoodWarehouse.BP_FoodWarehouse_C"));
     auto* SceneClass=LoadClass<ATunaSweeperDemoEndingActor>(nullptr,TEXT("/Game/Interaction/DemoEnding/BP_DemoDinnerEnding.BP_DemoDinnerEnding_C"));
     auto* Texture=LoadObject<UTexture2D>(nullptr,TEXT("/Game/UI/DemoEnding/T_DemoFarewell.T_DemoFarewell"));
     if (!TestNotNull(TEXT("Warehouse BP"),WarehouseClass)||!TestNotNull(TEXT("Dinner BP"),SceneClass)||!TestNotNull(TEXT("Farewell texture"),Texture)) return false;
+    auto* SceneCDO=SceneClass->GetDefaultObject<ATunaSweeperDemoEndingActor>();
+    if (!TestNotNull(TEXT("Dinner BP defaults"),SceneCDO)) return false;
     FAssetCompilingManager::Get().FinishAllCompilation();
     TestEqual(TEXT("Source width"),Texture->GetSizeX(),1350);
     TestEqual(TEXT("Source height"),Texture->GetSizeY(),900);
     TestTrue(TEXT("UI texture group"),Texture->LODGroup==TEXTUREGROUP_UI);
-    const auto* SceneCDO=SceneClass->GetDefaultObject<ATunaSweeperDemoEndingActor>();
-    TestTrue(TEXT("Dinner dialogue authored"),SceneCDO->DinnerDialogue.Num()>=6);
+    TestNull(TEXT("Ending BP has no serialized DinnerDialogue property"),SceneClass->FindPropertyByName(TEXT("DinnerDialogue")));
     TestTrue(TEXT("Illustration serialized on BP"),SceneCDO->FarewellIllustration.LoadSynchronous()==Texture);
     TestTrue(TEXT("Farewell BGM fades out over time"),SceneCDO->FarewellBgmFadeOutSeconds>0.f);
     UWorld* World=UWorld::CreateWorld(EWorldType::Game,false);

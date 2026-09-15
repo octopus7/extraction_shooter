@@ -7,7 +7,9 @@
 #include "Components/ScaleBox.h"
 #include "Components/TextBlock.h"
 #include "Engine/Texture2D.h"
+#include "Game/TunaSweeperGameInstance.h"
 #include "Styling/CoreStyle.h"
+#include "UI/TunaSweeperUiText.h"
 #include "UI/TunaSweeperUIFont.h"
 
 UTunaSweeperDemoFarewellWidget::UTunaSweeperDemoFarewellWidget(const FObjectInitializer& ObjectInitializer)
@@ -49,8 +51,9 @@ TSharedRef<SWidget> UTunaSweeperDemoFarewellWidget::RebuildWidget()
             Label->SetVisibility(ESlateVisibility::HitTestInvisible);
             Place(Label, Anchors);
         };
-        Text(NSLOCTEXT("DemoEnding","Farewell","본편에서 만나요"), 44, FAnchors(.05f,.75f,.95f,.85f));
-        Text(NSLOCTEXT("DemoEnding","Continue","아무 키나 누르면 타이틀로 돌아갑니다"), 20, FAnchors(.05f,.89f,.95f,.98f));
+        const UTunaSweeperGameInstance* GameInstance = GetGameInstance<UTunaSweeperGameInstance>();
+        Text(TunaSweeperUiText::ResolveUiText(GameInstance, TEXT("ui.demo_ending.farewell_title"), TEXT("")), 44, FAnchors(.05f,.75f,.95f,.85f));
+        Text(TunaSweeperUiText::ResolveUiText(GameInstance, TEXT("ui.demo_ending.return_to_title"), TEXT("")), 20, FAnchors(.05f,.89f,.95f,.98f));
     }
     return Super::RebuildWidget();
 }
