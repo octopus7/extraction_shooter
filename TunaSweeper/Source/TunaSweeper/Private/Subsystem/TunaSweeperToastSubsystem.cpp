@@ -95,6 +95,18 @@ bool UTunaSweeperToastSubsystem::ShowQuestCompletedToast(const FText& QuestTitle
 	return ShowToast(FText::Format(Pattern, Arguments), 2.5f);
 }
 
+bool UTunaSweeperToastSubsystem::ShowQuestAcceptedToast(const FText& QuestTitle)
+{
+	if (QuestTitle.IsEmpty())
+	{
+		return ShowLocalizedToast(TEXT("ui.toast.quest_accepted_generic"),
+			FText::FromString(TEXT("\uD018\uC2A4\uD2B8 \uC218\uB77D")), 2.5f);
+	}
+	const FText Pattern = ResolveToastText(TEXT("ui.toast.quest_accepted"),
+		FText::FromString(TEXT("\uD018\uC2A4\uD2B8 \uC218\uB77D: {0}")));
+	return ShowToast(FText::Format(Pattern, QuestTitle), 2.5f);
+}
+
 void UTunaSweeperToastSubsystem::ClearToasts()
 {
 	ToastQueue.Reset();

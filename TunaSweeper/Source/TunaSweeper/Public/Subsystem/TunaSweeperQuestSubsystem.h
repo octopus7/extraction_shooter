@@ -56,6 +56,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Quest")
 	bool AcceptQuest(FName QuestId);
 
+	/** Called after scenario dialogue completes; returns true only for a newly accepted quest. */
+	bool AutoAcceptQuestForScenario(FName CompletionFlag);
+
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Quest")
 	bool CanClaimQuestReward(FName QuestId) const;
 

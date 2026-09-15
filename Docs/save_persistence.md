@@ -224,6 +224,8 @@ Each entry is a stable facility definition id from `Content/Data/HousingFacility
 
 ### Quest Progress
 
+Completing `dialogue.demo.toilet_intro` automatically accepts `demo_q1_water_intake_check` through the normal quest acceptance path. The dialogue completion flag is set before acceptance saves, so the same save includes the flag, accepted quest state, and tracked quest. Existing accepted/completed quest states prevent duplicate acceptance and notifications; no new save field or version is required. The acceptance toast is transient and is not replayed on load.
+
 Stored through `UTunaSweeperSaveGame::QuestProgressStates`, `TrackedQuestId`, and `QuestCoinBalance`.
 
 Each `FTunaSweeperQuestProgressSaveData` preserves:

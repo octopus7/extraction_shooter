@@ -475,6 +475,31 @@ bool UTunaSweeperQuestSubsystem::AcceptQuest(FName QuestId)
 	return true;
 }
 
+bool UTunaSweeperQuestSubsystem::AutoAcceptQuestForScenario(FName CompletionFlag)
+{
+	if (!TunaSweeperBuildFlavor::IsDemo() || CompletionFlag != TEXT("dialogue.demo.toilet_intro"))
+	{
+		return false;
+	}
+
+	// Resolve a fixed quest, not the provider's next quest, so a replay cannot advance the chain.
+	const FName QuestId(TEXT("demo_q1_water_intake_check"));
+	if (!AcceptQuest(QuestId))
+	{
+		return false;
+	}
+
+	FTunaSweeperQuestDefinition Definition;
+	if (TryGetQuestDefinition(QuestId, Definition))
+	{
+		if (auto* Toasts = GetGameInstance()->GetSubsystem<UTunaSweeperToastSubsystem>())
+		{
+			Toasts->ShowQuestAcceptedToast(Definition.Title);
+		}
+	}
+	return true;
+}
+
 bool UTunaSweeperQuestSubsystem::CanClaimQuestReward(FName QuestId) const
 {
 	return FindQuestDefinition(QuestId) && GetQuestState(QuestId) == ETunaSweeperQuestState::RewardAvailable;

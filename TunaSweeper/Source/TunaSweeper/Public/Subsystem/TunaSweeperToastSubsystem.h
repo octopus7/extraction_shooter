@@ -37,6 +37,9 @@ public:
 	bool ShowQuestCompletedToast(const FText& QuestTitle);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|UI|Toast")
+	bool ShowQuestAcceptedToast(const FText& QuestTitle);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|UI|Toast")
 	void ClearToasts();
 
 private:

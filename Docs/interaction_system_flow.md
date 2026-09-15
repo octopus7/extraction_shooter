@@ -117,6 +117,8 @@ flowchart TD
 | 하우징 | `OpenHousingMode()` | `SetHudMode(None)` 및 하우징 패널 갱신 | 하우징 서브시스템을 열고 별도 하우징 카메라로 전환한다. 하우징 중에는 월드 상호작용 포커스/마커가 억제된다. |
 | 두더지 퀘스트에서 미완료 대화 | `StartScenarioForTrigger(interaction.mole, false)` | `UTunaSweeperScenarioSubsystem`으로 데이터 해석 후 `UTunaSweeperDialogueWidget` 생성 | HUD 패널 모드가 아니라 대화 위젯을 viewport 90에 올리고 UI Only 입력 모드로 바꾼다. |
 
+두더지 최초 시나리오(`dialogue.demo.toilet_intro`) 대화 완료 시 첫 퀘스트 `demo_q1_water_intake_check`를 자동 수락·추적한다. 대화 완료 플래그와 수락 상태를 함께 저장하고, 새 수락에 성공했을 때 기존 상단 중앙 토스트에 현지화된 ‘퀘스트 수락: {제목}’을 2.5초 표시한다. 이미 수락·완료한 퀘스트는 다시 수락하거나 알리지 않는다.
+
 ## 월드 배치 흐름
 
 ```mermaid
