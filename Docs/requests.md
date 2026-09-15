@@ -8624,3 +8624,17 @@
 - 요청: 스토어 패키징 점검 사항을 별도 MD로 작성하고 AGENTS.md에서는 패키징 때만 읽도록 연결.
 - 완료: Docs/store_packaging_checklist.md에 타겟·버전·CustomConfig, Steam/STOVE 기능 분리, 바이너리 설정, 쿡 재사용 조건, 데이터 및 SDK 검사, 런처 실행 확인, 업로드 기준 경로를 정리했다. AGENTS.md에 스토어 패키징·재패키징 작업 시에만 읽도록 조건부 지침을 추가했다.
 - 검증: 실제 패키징 스크립트와 설정 경로를 대조하고 문서 변경의 공백 오류를 확인했다. 문서 변경만 수행했다.
+
+
+## 2026-09-16 02:58:06 (소요시간: 00:09:30)
+
+- 요청: STOVE 심사용 데모 기준 대화집과 퀘스트 설명문을 Markdown이 아닌 TXT 파일로 작성. SSOT가 현재 기준이 아니므로 실제 프로젝트 내부 데이터를 기준으로 추출.
+- 완료: `TunaSweeper/Content/Data`의 데모 런타임 데이터(`ScenarioDefinitions.json`, `ScenarioTextStrings.csv`, `QuestDefinitions.json`, `QuestTextStrings.csv`)만 사용해 시나리오·퀘스트 수락 대사와 Q1~Q4 제목·설명·목표 문장을 `Docs/Stove/TunaSweeper_Stove_Demo_Dialogue_Quest_Text.txt`에 작성했다. Q3-1/Q3-2에 등록되지 않은 수락 대사는 임의로 추가하지 않았다.
+- 검증: JSON/CSV 파싱과 키 참조를 확인하고 데모 시나리오 1개, 데모 퀘스트 정의 5개(Q3 분기 포함), 런타임 대사 8줄의 출력 반영을 확인했다. 생성된 TXT에는 SSOT·기획 문서 내용이 포함되지 않았다.
+
+
+## 2026-09-16 03:02:39 (소요시간: 00:04:33)
+
+- 요청: 실제 프로젝트 내부에 존재하는 데모 엔딩 대화도 STOVE 심사용 TXT에 포함.
+- 완료: `TunaSweeper/Content/Interaction/DemoEnding/BP_DemoDinnerEnding.uasset`의 `DinnerDialogue`에 직렬화된 엔딩 대화 8줄을 순서대로 추출해 TXT에 추가했다. 엔딩 안내 위젯의 실제 문구 `본편에서 만나요`, `아무 키나 누르면 타이틀로 돌아갑니다`도 함께 추가했다.
+- 검증: 블루프린트 에셋의 문자열 존재·순서와 TXT 반영을 확인하고, 엔딩 대화 8줄 및 안내 문구 2개의 일치를 검증했다.
