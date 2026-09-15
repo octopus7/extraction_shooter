@@ -86,7 +86,7 @@ void UTunaSweeperPauseMenuWidget::BuildWidgetTree()
 	BlurSlot->SetHorizontalAlignment(HAlign_Fill);
 	BlurSlot->SetVerticalAlignment(VAlign_Fill);
 	UBorder* Dim = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("PauseBackgroundTint"));
-	Dim->SetBrushColor(FLinearColor(0.008f, 0.035f, 0.05f, 0.16f));
+	Dim->SetBrushColor(FLinearColor(0.008f, 0.018f, 0.05f, 0.25f));
 	UOverlaySlot* DimSlot = Layers->AddChildToOverlay(Dim);
 	DimSlot->SetHorizontalAlignment(HAlign_Fill);
 	DimSlot->SetVerticalAlignment(VAlign_Fill);
