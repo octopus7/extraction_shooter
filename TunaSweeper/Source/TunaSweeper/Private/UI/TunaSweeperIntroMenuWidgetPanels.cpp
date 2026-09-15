@@ -2,6 +2,7 @@
 
 #include "EngineUtils.h"
 #include "Blueprint/WidgetTree.h"
+#include "Components/CanvasPanelSlot.h"
 #include "Components/PanelWidget.h"
 #include "Settings/TunaSweeperBuildFlavor.h"
 #include "Title/TunaSweeperTitlePresentationActor.h"
@@ -58,6 +59,15 @@ void UTunaSweeperIntroMenuWidget::RefreshDistributionPresentation()
 			*ProjectVersion,
 			*GetDistributionChannel().ToLower(),
 			bIsDemoBuild ? TEXT(".demo") : TEXT(""))));
+		VersionText->SetJustification(ETextJustify::Right);
+		VersionText->SetAutoWrapText(false);
+		if (UCanvasPanelSlot* VersionSlot = Cast<UCanvasPanelSlot>(VersionText->Slot))
+		{
+			VersionSlot->SetAnchors(FAnchors(1.0f, 1.0f));
+			VersionSlot->SetAlignment(FVector2D(1.0f, 1.0f));
+			VersionSlot->SetPosition(FVector2D(-40.0f, -24.0f));
+			VersionSlot->SetAutoSize(true);
+		}
 	}
 	if (!IsSteamDemoDistribution() && SteamDemoWishlistButtonContainer)
 	{

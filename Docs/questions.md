@@ -6774,3 +6774,15 @@ Unreal Editor commandlet 검사 후 작업 트리에 나타난 무관한 139개 
 - 질문: 스토브용 빌드를 만들기 위해 SDK와 앱 정보를 발급받아 준비하면 연동 작업을 맡길 수 있는가?
 - 답변: 가능하다. Windows용 STOVE PC SDK와 해당 버전의 연동 문서, 발급된 게임 식별자 및 SDK에서 요구하는 설정값, STOVE 런처와 테스트 권한이 있는 계정을 준비하면 UE 5.7 호환성 확인, SDK 연동, 필요한 인증·소유권 확인 및 오류 처리, Windows 패키징과 런처 실행 검증을 진행할 수 있다. 실제 요구 설정은 전달받는 SDK 버전에 맞춰 확인하며 계정 발급·계약·스토어 심사는 사용자 측에서 진행해야 한다. 이번 응답은 준비물 안내이며 SDK 연동이나 빌드는 실행하지 않았다.
 
+
+## 2026-09-16 01:10:10 (소요시간: 00:00:12)
+
+- 질문: 스토브 빌드가 Builds 내부에 있는지, 스튜디오 업로드 기준 경로는 어디인지 확인.
+- 답변: 실제 출력 폴더를 확인했다. 업로드 기준 경로는 D:\github\extraction_shooter\TunaSweeper\Builds\Stove\Demo\Windows이며, 기준 경로에 대한 실행 파일 상대 경로는 TunaSweeperStoveDemo.exe이다. Windows 폴더 안의 실행 파일과 Engine 및 TunaSweeper 하위 폴더를 함께 업로드하는 구조다.
+
+
+## 2026-09-16 01:43:50 (소요시간: 00:10:31)
+
+- 질문: 설치된 50251 경로와 로컬 패키징 경로 모두 같은 오류인데 다음 빌드는 후자로 실행해야 하는가?
+- 답변: 그렇다. 이번에 갱신한 빌드는 D:\github\extraction_shooter\TunaSweeper\Builds\Stove\Demo\Windows\TunaSweeperStoveDemo.exe로 실행한다. C:\ProgramData\Smilegate\Games\TunaSweeper\50251의 설치본은 재업로드·업데이트 전까지 이전 버전이다.
+

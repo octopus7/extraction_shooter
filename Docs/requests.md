@@ -8579,3 +8579,41 @@
 - 검증: 소유권 정책 11개 검사 통과, 기존 TunaSweeper.NoiseEmitter.AuthoredMeshAndPulse 자동화 검사 통과, 독립 SDK 코드 리뷰에서 추가 문제 없음. 최종 UAT BuildCookRun은 ExitCode=0/BUILD SUCCESSFUL이며 최종 쿠킹은 오류 0개·경고 16개. 데모 데이터 검사 통과, 패키징된 SDK DLL 3개의 원본 해시 일치, credentials.env/생성 헤더 미포함, 최종 실행 파일의 필수 설정 반영 및 Application Secret 미포함을 확인했다.
 - 결과: TunaSweeper/Builds/Stove/Demo/Windows/TunaSweeperStoveDemo.exe, 출력 폴더 전체 약 1.09GB. 운영 안내는 Docs/Stove/SDKIntegration.md에 기록했다. STOVE 계정으로 실제 런처 인증·소유권 성공 응답을 확인하거나 스토어에 업로드하지는 않았다.
 
+
+## 2026-09-16 01:26:16 (소요시간: 00:00:37)
+
+- 요청: STOVE 스튜디오 테스트 설치 후 실행 파일이 없다는 오류 화면 제시 및 원인 확인.
+- 완료: 실제 설치 경로 C:\ProgramData\Smilegate\Games\TunaSweeper\50250를 원본 패키지와 비교했다. 설치 루트에 Binaries/Content가 직접 있으며 원본 Windows/TunaSweeper 하위 구조에 대응한다. Shipping 실행 파일은 원본과 해시가 같지만 루트 부트스트랩 TunaSweeperStoveDemo.exe와 Engine 폴더가 없다. 한 단계 안쪽 폴더가 업로드 기준으로 선택됐거나 업로드 구성이 그에 준하게 설정된 것으로 판단했다. 기준 경로를 TunaSweeper/Builds/Stove/Demo/Windows로, 실행 상대 경로를 TunaSweeperStoveDemo.exe로 설정하여 전체 구조를 다시 업로드하도록 안내했다. 스튜디오 설정 변경·업로드·설치 파일 수정은 수행하지 않았다.
+
+
+## 2026-09-16 01:36:17 (소요시간: 00:01:27)
+
+- 요청: STOVE PolicyConfig 게임 ID 등록 이후 GameCode 3/4 판정이 의심되어 코드 확인.
+- 완료: 현재 IsOwnedGame은 Game ID 정확 일치, OwnershipCode=1, 데모 GameCode=4/정식판=3을 요구한다. SDK 3.4.2 헤더에서 BASIC=3/DEMO=4/DLC=5를 확인했고 11개 기존 정책 검사가 통과했다. 실제 콜백 GameCode는 수집하지 않았으므로 타입 조건을 실패 원인으로 확정하거나 완화하지 않았다. 로컬 PolicyConfig.json 첫 줄에 파일명 PolicyConfig.json이 본문으로 들어 있어 JSON 파싱이 실패함을 확인했다. 첫 줄을 제외해 메모리에서 파싱하면 dev_game_list와 dev_game_exhibit_list의 게임 ID가 로컬 빌드 설정과 일치하지만 is_studio는 생략되어 있다. 현재 게임 초기화 환경은 LIVE이며 공식 PC 클라이언트 문서는 개발자 모드를 Sandbox 전용으로 안내한다. 코드와 사용자 설정 파일은 변경하지 않았고 실제 ID/키는 출력 또는 기록하지 않았다.
+
+
+## 2026-09-16 01:42:56 (소요시간: 00:00:01)
+
+- 요청: PolicyConfig.json 수정 후 상태 확인.
+- 완료: JSON 파싱 성공, dev_game_list의 빌드 게임 ID 일치 여부 True, 일치하는 전시 항목 1개를 확인했다. 실제 식별자와 인증값은 출력하거나 기록하지 않았다. 런처 재시작이나 게임 실행 검증은 수행하지 않았다.
+
+
+## 2026-09-16 01:43:50 (소요시간: 00:10:31)
+
+- 요청: STOVE game ownership: 0 오류 원인 확인 및 해결.
+- 완료: 과거 SDK 로그에서 소유권 조회 HTTP 200/size=0을 확인했고 PolicyConfig의 해당 전시 항목에 누락된 is_studio=true를 추가했다. 변경 전 원본은 같은 로컬 설정 폴더에 백업했다. 사용자 재시작 후에도 같은 오류가 지속되어 게임과 동일한 런처 확인·Base 초기화·소유권 조회를 사용하는 로컬 진단 프로그램으로 직접 검증했다. 실제 응답은 조회 성공, 항목 1개, 게임 ID 일치, GameCode=3, OwnershipCode=1이었다. 데모에 GameCode=4만 허용하던 과도한 조건을 BASIC(3)/DEMO(4) 허용으로 수정하고 ID 정확 일치·보유 상태 확인·DLC/미지 타입 거부는 유지했다. 빈 목록과 항목 불일치의 오류 진단도 구분하며 실제 ID/키는 진단에 포함하지 않는다.
+- 검증: 변경 전 회귀 검사 2건 실패를 확인하고 수정 후 13건 모두 통과했다. 실제 SDK 응답에 수정된 운영 판정 함수를 적용한 진단은 ProductionPolicyAccepted=1이었다. 최종 UAT 빌드/재패키징 ExitCode=0, 데모 데이터 검사 및 최신 실행 파일 해시 일치 확인. 같은 Windows 출력 폴더를 갱신했다. 설치된 50251 빌드는 변경하지 않았고 스토어 업로드도 하지 않았다. 실제 게임 화면 진입 확인은 사용자 테스트를 기다린다.
+
+
+## 2026-09-16 01:55:04 (소요시간: 00:06:51)
+
+- 요청: 스토브 빌드 타이틀 하단이 .steam으로 표시되고 Steam 전용 위시리스트 버튼이 나타나는 분기/타겟 오류 확인 및 수정.
+- 완료: 두 UI 동작이 GGameIni의 DistributionChannel을 함께 사용함을 확인했다. 스토브 타겟과 전용 INI는 올바르지만 설치형 UE의 사전 컴파일된 Core 런타임 CustomConfig 값은 게임 타겟 매크로로 재컴파일되지 않아 기본 Steam 설정을 선택하는 문제가 있었다. DefaultGame.ini 패키징 설정에 bMakeBinaryConfig=True를 추가하여 선택한 타겟의 설정 계층을 패키징 때 확정하도록 변경했다. 이 경로는 GGameIni/GEngineIni에 함께 적용되므로 타이틀/위시리스트/Steam 활성화/업적 네임스페이스를 같은 타겟 설정으로 읽는다.
+- 검증: 최종 UAT BuildCookRun ExitCode=0/BUILD SUCCESSFUL. MakeBinaryConfig -CustomConfig=StoveDemo 호출 확인, PAK에서 BinaryConfig.ini를 직접 추출하여 생성 원본과 해시 일치 확인, 데모 데이터 검사 통과. 독립 리뷰에서 UE 5.7의 바이너리 설정 로딩과 정적 계층 유지 경로를 확인했고 추가 문제는 발견되지 않았다. 출력 경로는 기존 TunaSweeper/Builds/Stove/Demo/Windows이며 실제 타이틀 화면의 최종 확인은 사용자 실행을 기다린다. 스토어 설치본은 갱신하지 않았다.
+
+
+## 2026-09-16 02:03:22 (소요시간: 00:03:53)
+
+- 요청: 타이틀 하단 버전 정보 잘림 수정 및 최종 버전 0.2.9160 적용.
+- 완료: ProjectVersion을 0.2.9160으로 변경했다. 버전 텍스트를 오른쪽 아래 기준 자동 크기와 오른쪽 정렬로 배치하고 오른쪽 40, 아래쪽 24의 여백을 두어 긴 문구가 왼쪽으로 확장되도록 했다.
+- 검증: STOVE Demo Shipping 컴파일 및 재패키징 성공(ExitCode=0), 데모 데이터 검사 통과, 패키지와 빌드 실행 파일 해시 일치 확인. 기존 Builds/Stove/Demo/Windows를 갱신했다. 실제 화면 배치 확인은 사용자 실행이 필요하다.

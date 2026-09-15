@@ -51,13 +51,31 @@ namespace TunaSweeperStove
                 Fail(TEXT("ownership query"), ResultValue.GetResultCode());
                 return;
             }
+            if (Count == 0 || !Items)
+            {
+                // A successful request can still return no entitlements. There is no
+                // GameCode to compare in this case; distinguish it from a type mismatch.
+                Fail(TEXT("empty ownership list"), 0);
+                return;
+            }
+            FString OwnershipSummary;
             if (Items)
             {
                 for (uint32_t Index = 0; Index < Count; ++Index)
                 {
+                    if (Index < 8)
+                    {
+                        const wchar_t* ItemGameId = Items[Index].GetGameId();
+                        const bool bSameGame = ItemGameId && FCString::Strcmp(
+                            ItemGameId, TunaSweeperStoveCredentials::GameId) == 0;
+                        OwnershipSummary += FString::Printf(TEXT(" [id=%s type=%u owned=%u]"),
+                            bSameGame ? TEXT("match") : TEXT("other"),
+                            static_cast<uint32>(Items[Index].GetGameCode()),
+                            static_cast<uint32>(Items[Index].GetOwnershipCode()));
+                    }
                     if (IsOwnedGame(TunaSweeperStoveCredentials::GameId, Items[Index].GetGameId(),
                         static_cast<uint32>(Items[Index].GetGameCode()),
-                        static_cast<uint32>(Items[Index].GetOwnershipCode()), TUNASWEEPER_DEMO != 0))
+                        static_cast<uint32>(Items[Index].GetOwnershipCode())))
                     {
                         State = EStartupState::Ready;
                         UE_LOG(LogTunaStove, Display, TEXT("STOVE initialization and ownership verified."));
@@ -65,7 +83,8 @@ namespace TunaSweeperStove
                     }
                 }
             }
-            Fail(TEXT("game ownership"), 0);
+            // Keep account identifiers out of diagnostics while making rejected entries actionable.
+            Fail(*FString::Printf(TEXT("game ownership entries=%u%s"), Count, *OwnershipSummary), 0);
         }
 
         void __cdecl OnInitialized(CallbackResult Callback)
