@@ -22,6 +22,7 @@ protected:
 	virtual TSharedRef<SWidget> RebuildWidget() override;
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
+	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 	virtual FReply NativeOnPreviewKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent) override;
 
 private:
@@ -52,6 +53,7 @@ private:
 	UPROPERTY(Transient) TObjectPtr<UTextBlock> CancelText;
 	UPROPERTY(Transient) TObjectPtr<UButton> ResumeButton;
 	UPROPERTY(Transient) TObjectPtr<UButton> CancelButton;
+	UPROPERTY(Transient) TArray<TObjectPtr<UButton>> MenuButtons;
 	UPROPERTY(Transient) TObjectPtr<UTunaSweeperIntroMenuWidget> SettingsWidget;
 	bool bRaidContext = false;
 	bool bQuitRequested = false;

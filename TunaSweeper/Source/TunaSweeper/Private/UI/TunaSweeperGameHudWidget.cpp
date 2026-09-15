@@ -180,7 +180,10 @@ void UTunaSweeperGameHudWidget::NativeTick(const FGeometry& MyGeometry, float In
 	RefreshCursorDistanceWidget();
 	TickHudTransitions(InDeltaTime);
 	UpdateCrosshairState(InDeltaTime);
-	TickHeadphoneNoiseRipples(InDeltaTime);
+	if (!IsPauseMenuOpen())
+	{
+		TickHeadphoneNoiseRipples(InDeltaTime);
+	}
 	TickDamageNumberPopups(InDeltaTime);
 	Invalidate(EInvalidateWidgetReason::Paint);
 }
@@ -230,7 +233,7 @@ int32 UTunaSweeperGameHudWidget::NativePaint(
 		bParentEnabled);
 	int32 CurrentLayerId = PaintedLayerId;
 
-	if (!FSlateApplication::IsInitialized())
+	if (!FSlateApplication::IsInitialized() || IsPauseMenuOpen())
 	{
 		return CurrentLayerId;
 	}

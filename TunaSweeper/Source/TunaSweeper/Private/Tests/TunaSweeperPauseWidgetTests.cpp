@@ -2,6 +2,7 @@
 
 #include "Blueprint/WidgetTree.h"
 #include "Components/Border.h"
+#include "Components/BackgroundBlur.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
 #include "Engine/Engine.h"
@@ -83,12 +84,27 @@ bool FTunaSweeperPauseWidgetTest::RunTest(const FString& Parameters)
 		if (!TestNotNull(TEXT("Menu exists"), Menu) || !TestNotNull(TEXT("Confirmation exists"), Confirmation)
 			|| !TestNotNull(TEXT("Cancel exists"), Cancel) || !TestNotNull(TEXT("Warning exists"), Warning)) return false;
 		TestEqual(TEXT("Confirmation starts hidden"), Confirmation->GetVisibility(), ESlateVisibility::Collapsed);
+		UBackgroundBlur* Blur = Cast<UBackgroundBlur>(Widget->WidgetTree->FindWidget(TEXT("PauseBackgroundBlur")));
+		if (!TestNotNull(TEXT("Pause uses a real UMG background blur"), Blur)) return false;
+		TestTrue(TEXT("Background blur is active"), Blur->GetBlurStrength() > 0.0f);
+		TestEqual(TEXT("Main panel has no visible backing"), Menu->GetBrushColor().A, 0.0f);
+		TestEqual(TEXT("Confirmation has no visible backing"), Confirmation->GetBrushColor().A, 0.0f);
+		Widget->WidgetTree->ForEachWidget([&](UWidget* Child)
+		{
+			if (UTextBlock* Label = Cast<UTextBlock>(Child))
+			{
+				TestTrue(TEXT("Every pause label has a bottom-right directional shadow"),
+					Label->GetShadowOffset().X > 0.0f && Label->GetShadowOffset().Y > 0.0f);
+			}
+		});
 		const TCHAR* ButtonNames[] = {TEXT("ResumeButton"), TEXT("SettingsButton"), TEXT("ReturnToTitleButton"), TEXT("QuitButton")};
 		const TCHAR* StringKeys[] = {TEXT("ui.pause.resume"), TEXT("ui.title.settings"), TEXT("ui.pause.return_to_title"), TEXT("ui.title.quit")};
 		for (int32 Index = 0; Index < UE_ARRAY_COUNT(ButtonNames); ++Index)
 		{
 			UButton* Control = Button(ButtonNames[Index]);
 			if (!TestNotNull(ButtonNames[Index], Control)) return false;
+			TestEqual(TEXT("Buttons have rounded backgrounds"), Control->GetStyle().Normal.DrawAs, ESlateBrushDrawType::RoundedBox);
+			TestEqual(TEXT("Buttons have no outline"), Control->GetStyle().Normal.OutlineSettings.Width, 0.0f);
 			UTextBlock* Label = Cast<UTextBlock>(Control->GetContent());
 			if (!TestNotNull(TEXT("Button has a text label"), Label)) return false;
 			TestFalse(TEXT("Localized label is nonempty"), Label->GetText().IsEmpty());

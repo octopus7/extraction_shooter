@@ -345,13 +345,14 @@ void UTunaSweeperGameHudWidget::RefreshCancelableActionWidgets(const FGeometry* 
 
 	const bool bDialogueActive = IsDialogueSequenceActive();
 	const bool bHousingModeActive = IsHousingModeActive();
+	const bool bPauseMenuOpen = IsPauseMenuOpen();
 	ATunaSweeperTopDownCharacter* TunaCharacter = nullptr;
 	if (const APlayerController* PlayerController = GetOwningPlayer())
 	{
 		TunaCharacter = Cast<ATunaSweeperTopDownCharacter>(PlayerController->GetPawn());
 	}
 
-	const bool bShowCancelableAction = !bDialogueActive && !bHousingModeActive && TunaCharacter && TunaCharacter->IsCancelableActionActive();
+	const bool bShowCancelableAction = !bDialogueActive && !bHousingModeActive && !bPauseMenuOpen && TunaCharacter && TunaCharacter->IsCancelableActionActive();
 	const float CancelableActionProgress = bShowCancelableAction ? TunaCharacter->GetCancelableActionProgress() : 0.0f;
 	const bool bUseCrosshairReloadGauge = bShowCancelableAction && IsReloadGaugeReplacingCrosshair(TunaCharacter);
 	if (GeometryForPlacement)
@@ -361,7 +362,7 @@ void UTunaSweeperGameHudWidget::RefreshCancelableActionWidgets(const FGeometry* 
 	UpdateMouseCursorForReloadGauge(bUseCrosshairReloadGauge);
 
 	bool bShowReloadPrompt = false;
-	if (!bDialogueActive && !bHousingModeActive && !bShowCancelableAction && TunaCharacter && !TunaCharacter->IsAmmoSelectionOpen() && !IsInventoryUiOpen())
+	if (!bDialogueActive && !bHousingModeActive && !bPauseMenuOpen && !bShowCancelableAction && TunaCharacter && !TunaCharacter->IsAmmoSelectionOpen() && !IsInventoryUiOpen())
 	{
 		if (UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>())
 		{

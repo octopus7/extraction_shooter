@@ -1,6 +1,8 @@
 #include "UI/TunaSweeperPauseMenuWidget.h"
 
 #include "Blueprint/WidgetTree.h"
+#include "Brushes/SlateRoundedBoxBrush.h"
+#include "Components/BackgroundBlur.h"
 #include "Components/Border.h"
 #include "Components/Button.h"
 #include "Components/Overlay.h"
@@ -36,37 +38,58 @@ UTextBlock* UTunaSweeperPauseMenuWidget::AddText(UVerticalBox* Parent, FName Nam
 {
 	UTextBlock* Label = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), Name);
 	TunaSweeperUIFont::ApplyFont(Label, Size);
-	Label->SetColorAndOpacity(FSlateColor(FLinearColor(0.94f, 0.91f, 0.82f)));
+	Label->SetColorAndOpacity(FSlateColor(FLinearColor(0.93f, 0.99f, 1.0f)));
+	Label->SetShadowOffset(Size >= 28 ? FVector2D(3.0f, 3.0f) : FVector2D(2.0f, 2.0f));
+	Label->SetShadowColorAndOpacity(FLinearColor(0.005f, 0.025f, 0.04f, Size >= 28 ? 0.80f : 0.65f));
 	Label->SetJustification(ETextJustify::Center);
 	Label->SetAutoWrapText(true);
-	Parent->AddChildToVerticalBox(Label)->SetPadding(FMargin(0.0f, 8.0f));
+	Parent->AddChildToVerticalBox(Label)->SetPadding(FMargin(0.0f, 8.0f, 0.0f, Size >= 28 ? 26.0f : 18.0f));
 	return Label;
 }
 
 UButton* UTunaSweeperPauseMenuWidget::AddButton(UVerticalBox* Parent, FName Name, UTextBlock*& Label)
 {
 	UButton* Button = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), Name);
-	Button->SetBackgroundColor(FLinearColor(0.19f, 0.23f, 0.20f));
+	FButtonStyle Style = Button->GetStyle();
+	Style.SetNormal(FSlateRoundedBoxBrush(FLinearColor(0.012f, 0.35f, 0.43f), 15.0f));
+	Style.SetHovered(FSlateRoundedBoxBrush(FLinearColor(0.025f, 0.49f, 0.58f), 15.0f));
+	Style.SetPressed(FSlateRoundedBoxBrush(FLinearColor(0.008f, 0.23f, 0.29f), 15.0f));
+	Style.SetDisabled(FSlateRoundedBoxBrush(FLinearColor(0.08f, 0.18f, 0.20f), 15.0f));
+	Style.SetNormalPadding(FMargin(22.0f, 12.0f));
+	Style.SetPressedPadding(FMargin(22.0f, 13.0f, 22.0f, 11.0f));
+	Button->SetStyle(Style);
+	Button->SetBackgroundColor(FLinearColor::White);
+	Button->SetRenderTransformPivot(FVector2D(0.5f, 0.5f));
+	MenuButtons.Add(Button);
 	Label = WidgetTree->ConstructWidget<UTextBlock>();
-	TunaSweeperUIFont::ApplyFont(Label, 22);
-	Label->SetColorAndOpacity(FSlateColor(FLinearColor(0.94f, 0.91f, 0.82f)));
+	TunaSweeperUIFont::ApplyFont(Label, 23, ETunaSweeperUIFontWeight::Bold);
+	Label->SetColorAndOpacity(FSlateColor(FLinearColor(0.97f, 1.0f, 1.0f)));
+	Label->SetShadowOffset(FVector2D(1.0f, 1.0f));
+	Label->SetShadowColorAndOpacity(FLinearColor(0.005f, 0.035f, 0.05f, 0.55f));
 	Label->SetJustification(ETextJustify::Center);
 	Button->SetContent(Label);
 	USizeBox* Size = WidgetTree->ConstructWidget<USizeBox>();
-	Size->SetHeightOverride(56.0f);
+	Size->SetHeightOverride(64.0f);
 	Size->SetContent(Button);
-	Parent->AddChildToVerticalBox(Size)->SetPadding(FMargin(0.0f, 7.0f));
+	Parent->AddChildToVerticalBox(Size)->SetPadding(FMargin(0.0f, 8.0f));
 	return Button;
 }
 
 void UTunaSweeperPauseMenuWidget::BuildWidgetTree()
 {
-	UBorder* Background = WidgetTree->ConstructWidget<UBorder>();
-	Background->SetBrushColor(FLinearColor(0.015f, 0.025f, 0.02f, 0.83f));
-	Background->SetPadding(FMargin(24.0f));
-	WidgetTree->RootWidget = Background;
 	UOverlay* Layers = WidgetTree->ConstructWidget<UOverlay>();
-	Background->SetContent(Layers);
+	WidgetTree->RootWidget = Layers;
+	UBackgroundBlur* Blur = WidgetTree->ConstructWidget<UBackgroundBlur>(UBackgroundBlur::StaticClass(), TEXT("PauseBackgroundBlur"));
+	Blur->SetBlurStrength(8.0f);
+	Blur->SetApplyAlphaToBlur(true);
+	UOverlaySlot* BlurSlot = Layers->AddChildToOverlay(Blur);
+	BlurSlot->SetHorizontalAlignment(HAlign_Fill);
+	BlurSlot->SetVerticalAlignment(VAlign_Fill);
+	UBorder* Dim = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("PauseBackgroundTint"));
+	Dim->SetBrushColor(FLinearColor(0.008f, 0.035f, 0.05f, 0.16f));
+	UOverlaySlot* DimSlot = Layers->AddChildToOverlay(Dim);
+	DimSlot->SetHorizontalAlignment(HAlign_Fill);
+	DimSlot->SetVerticalAlignment(VAlign_Fill);
 	auto MakePanel = [&](FName Name, float Width, TObjectPtr<UBorder>& Panel)
 	{
 		USizeBox* Size = WidgetTree->ConstructWidget<USizeBox>();
@@ -75,15 +98,15 @@ void UTunaSweeperPauseMenuWidget::BuildWidgetTree()
 		Slot->SetHorizontalAlignment(HAlign_Center);
 		Slot->SetVerticalAlignment(VAlign_Center);
 		Panel = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), Name);
-		Panel->SetBrushColor(FLinearColor(0.045f, 0.065f, 0.055f, 0.98f));
-		Panel->SetPadding(FMargin(36.0f, 24.0f));
+		Panel->SetBrushColor(FLinearColor::Transparent);
+		Panel->SetPadding(FMargin(24.0f));
 		Size->SetContent(Panel);
 		UVerticalBox* Column = WidgetTree->ConstructWidget<UVerticalBox>();
 		Panel->SetContent(Column);
 		return Column;
 	};
 	UVerticalBox* Menu = MakePanel(TEXT("PauseMenuPanel"), 440.0f, MenuPanel);
-	HeadingText = AddText(Menu, TEXT("PauseHeading"), 32);
+	HeadingText = AddText(Menu, TEXT("PauseHeading"), 38);
 	UTextBlock* Label = nullptr;
 	ResumeButton = AddButton(Menu, TEXT("ResumeButton"), Label); ResumeText = Label;
 	ResumeButton->OnClicked.AddDynamic(this, &ThisClass::HandleResume);
@@ -122,6 +145,19 @@ void UTunaSweeperPauseMenuWidget::NativeDestruct()
 		SettingsWidget = nullptr;
 	}
 	Super::NativeDestruct();
+}
+
+void UTunaSweeperPauseMenuWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
+{
+	Super::NativeTick(MyGeometry, InDeltaTime);
+	for (UButton* Button : MenuButtons)
+	{
+		if (!Button) continue;
+		const bool bHighlighted = Button->IsHovered() || Button->HasKeyboardFocus();
+		const float TargetScale = Button->IsPressed() ? 0.985f : (bHighlighted ? 1.025f : 1.0f);
+		const float Scale = FMath::FInterpTo(Button->GetRenderTransform().Scale.X, TargetScale, InDeltaTime, 18.0f);
+		Button->SetRenderScale(FVector2D(Scale));
+	}
 }
 
 void UTunaSweeperPauseMenuWidget::RefreshTexts()

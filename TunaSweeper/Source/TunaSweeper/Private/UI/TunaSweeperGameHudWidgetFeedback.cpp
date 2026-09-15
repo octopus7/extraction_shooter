@@ -459,6 +459,11 @@ void UTunaSweeperGameHudWidget::TickDamageNumberPopups(float InDeltaTime)
 			continue;
 		}
 
+		if (IsPauseMenuOpen())
+		{
+			TextWidget->SetRenderOpacity(0.0f);
+			continue;
+		}
 		Popup.ElapsedSeconds += FMath::Max(0.0f, InDeltaTime);
 		const float DurationSeconds = FMath::Max(0.01f, Popup.DurationSeconds);
 		const float Alpha = FMath::Clamp(Popup.ElapsedSeconds / DurationSeconds, 0.0f, 1.0f);

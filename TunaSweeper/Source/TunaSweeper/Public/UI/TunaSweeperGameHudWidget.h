@@ -360,6 +360,7 @@ protected:
 	FVector2D ExtractionProgressWidgetSize = FVector2D(180.0f, 36.0f);
 
 private:
+	friend class FTunaSweeperPauseHudTransitionTest;
 	struct FDamageNumberPopup
 	{
 		TWeakObjectPtr<UTextBlock> TextWidget;
@@ -438,6 +439,7 @@ private:
 	void HandleHousingStateChanged();
 	void HandleLanguageChanged();
 	bool IsDialogueSequenceActive() const;
+	bool IsPauseMenuOpen() const;
 	bool IsHousingModeActive() const;
 	bool IsGameplayBottomHudSuppressed() const;
 	bool IsBunkerMap() const;

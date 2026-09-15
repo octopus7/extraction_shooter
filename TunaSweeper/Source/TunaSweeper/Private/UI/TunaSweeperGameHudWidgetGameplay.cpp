@@ -6,6 +6,12 @@ bool UTunaSweeperGameHudWidget::IsDialogueSequenceActive() const
 	return TunaPlayerController && TunaPlayerController->IsDialogueSequenceActive();
 }
 
+bool UTunaSweeperGameHudWidget::IsPauseMenuOpen() const
+{
+	const ATunaSweeperPlayerController* TunaPlayerController = Cast<ATunaSweeperPlayerController>(GetOwningPlayer());
+	return TunaPlayerController && TunaPlayerController->IsPauseMenuOpen();
+}
+
 bool UTunaSweeperGameHudWidget::IsHousingModeActive() const
 {
 	const UTunaSweeperHousingSubsystem* HousingSubsystem = GetGameInstance()
@@ -16,7 +22,7 @@ bool UTunaSweeperGameHudWidget::IsHousingModeActive() const
 
 bool UTunaSweeperGameHudWidget::IsGameplayBottomHudSuppressed() const
 {
-	return IsDialogueSequenceActive() || IsInventoryUiOpen() || IsHousingModeActive();
+	return IsDialogueSequenceActive() || IsInventoryUiOpen() || IsHousingModeActive() || IsPauseMenuOpen();
 }
 
 bool UTunaSweeperGameHudWidget::IsBunkerMap() const
@@ -60,7 +66,7 @@ FName UTunaSweeperGameHudWidget::GetSelectedWeaponTypeTag() const
 
 bool UTunaSweeperGameHudWidget::IsWeaponCrosshairSuppressed() const
 {
-	if (IsInventoryUiOpen() || IsDialogueSequenceActive() || IsHousingModeActive())
+	if (IsGameplayBottomHudSuppressed())
 	{
 		return true;
 	}
@@ -70,7 +76,7 @@ bool UTunaSweeperGameHudWidget::IsWeaponCrosshairSuppressed() const
 
 bool UTunaSweeperGameHudWidget::IsReloadGaugeReplacingCrosshair(const ATunaSweeperTopDownCharacter* TunaCharacter) const
 {
-	if (IsInventoryUiOpen() || IsDialogueSequenceActive() || IsHousingModeActive())
+	if (IsGameplayBottomHudSuppressed())
 	{
 		return false;
 	}
