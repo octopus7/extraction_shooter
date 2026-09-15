@@ -449,6 +449,11 @@ void UTunaSweeperQuestWidget::HandlePrimaryButtonClicked()
 			QuestId = ActingQuestId;
 			ActiveFilter = EQuestListFilter::RewardCompleted;
 			SetSavedSelectedQuestId(ActiveFilter, QuestId);
+			if (bShowAvailableTab && CountVisibleQuestsForFilter(EQuestListFilter::Available) > 0)
+			{
+				ActiveFilter = EQuestListFilter::Available;
+				QuestId = GetSavedSelectedQuestId(ActiveFilter);
+			}
 			if (TunaPlayerController)
 			{
 				TunaPlayerController->PlayQuestPresentation(ActingQuestId, ETunaSweeperQuestPresentationTrigger::OnRewardClaim);
