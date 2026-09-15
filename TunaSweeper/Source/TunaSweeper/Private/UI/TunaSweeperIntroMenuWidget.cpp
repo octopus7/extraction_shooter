@@ -1,6 +1,9 @@
 #include "UI/TunaSweeperIntroMenuWidget.h"
 #include "TunaSweeperIntroMenuWidgetShared.h"
 #include "Subsystem/TunaSweeperVersionCheckSubsystem.h"
+#include "Player/TunaSweeperPlayerController.h"
+#include "UI/TunaSweeperGraphicsSettingsWidget.h"
+#include "Framework/Application/SlateApplication.h"
 
 void UTunaSweeperIntroMenuWidget::PrepareForInitialViewport()
 {
@@ -388,7 +391,7 @@ void UTunaSweeperIntroMenuWidget::NativeConstruct()
 		{
 			VersionCheckSubsystem->OnVersionCheckCompleted.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleVersionCheckCompleted);
 			VersionCheckSubsystem->OnVersionCheckCompleted.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleVersionCheckCompleted);
-			VersionCheckSubsystem->RequestVersionCheck();
+			if (!bPauseSettingsMode) VersionCheckSubsystem->RequestVersionCheck();
 		}
 	}
 
@@ -396,7 +399,18 @@ void UTunaSweeperIntroMenuWidget::NativeConstruct()
 	ResetDeleteHoldProgress();
 	HideDeleteConfirmDialog();
 	HideOverlayPanels();
-	ShowMainMenu();
+	if (bPauseSettingsMode)
+	{
+		ShowSettingsPanel();
+		TickMenuTransitions(10.0f);
+		// Save deletion and debug controls are title-only operations.
+		if (UWidget* DevelopmentTab = FindIntroWidget(TEXT("DevelopmentTabButtonBox")))
+			DevelopmentTab->SetVisibility(ESlateVisibility::Collapsed);
+	}
+	else
+	{
+		ShowMainMenu();
+	}
 	InvalidateLayoutAndVolatility();
 	ForceLayoutPrepass();
 }
@@ -421,6 +435,22 @@ FReply UTunaSweeperIntroMenuWidget::NativeOnPreviewKeyDown(
 	const FGeometry& InGeometry,
 	const FKeyEvent& InKeyEvent)
 {
+	if (bPauseSettingsMode)
+	{
+		const TSharedPtr<SWidget> Focused = FSlateApplication::Get().GetKeyboardFocusedWidget();
+		const bool bTyping = Focused.IsValid() && Focused->GetTypeAsString().Contains(TEXT("EditableText"));
+		if (ATunaSweeperPlayerController::IsPauseMenuKey(InKeyEvent.GetKey(), GetWorld())
+			&& (InKeyEvent.GetKey() == EKeys::Escape || !bTyping))
+		{
+			if (!InKeyEvent.IsRepeat())
+			{
+				if (!TitleGraphicsSettingsWidget || !TitleGraphicsSettingsWidget->CancelResolutionConfirmation())
+					ClosePauseSettings();
+			}
+			return FReply::Handled();
+		}
+		return Super::NativeOnPreviewKeyDown(InGeometry, InKeyEvent);
+	}
 	if (!InKeyEvent.IsRepeat() && bDifficultyAdjustmentMode && InKeyEvent.GetKey() == EKeys::Escape)
 	{
 		CloseDifficultyAdjustment();
@@ -434,6 +464,14 @@ FReply UTunaSweeperIntroMenuWidget::NativeOnPreviewKeyDown(
 	}
 
 	return Super::NativeOnPreviewKeyDown(InGeometry, InKeyEvent);
+}
+
+void UTunaSweeperIntroMenuWidget::ClosePauseSettings()
+{
+	if (!bPauseSettingsMode) return;
+	if (TitleGraphicsSettingsWidget) TitleGraphicsSettingsWidget->DiscardPendingChanges();
+	RemoveFromParent();
+	OnPauseSettingsClosed.Broadcast();
 }
 
 void UTunaSweeperIntroMenuWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)

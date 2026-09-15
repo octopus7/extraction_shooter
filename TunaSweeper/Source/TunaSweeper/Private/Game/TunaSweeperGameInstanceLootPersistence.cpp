@@ -1,4 +1,5 @@
 #include "TunaSweeperGameInstanceShared.h"
+#include <tuple>
 
 void UTunaSweeperGameInstance::SelectItemSlot(const FTunaSweeperItemSlotReference& SlotReference)
 {
@@ -189,13 +190,52 @@ void UTunaSweeperGameInstance::MarkItemStateMutationForSave(bool bSaveImmediatel
 
 void UTunaSweeperGameInstance::ClearInventoryAndSave()
 {
+	ClearInventoryAndSaveInternal();
+}
+
+bool UTunaSweeperGameInstance::SaveForGameplayExit(bool bAbandonRaid)
+{
+	// The editor combat lab owns a temporary loadout and must not write gameplay saves.
+	if (IsCombatTestSession()) return true;
+	EnsureInventoryStateInitialized();
+	if (bAbandonRaid)
+	{
+		// Do not leave the live raid emptied if the player cancels after a save failure.
+		auto State = std::tie(ItemInstancesByUid, EquipmentSlots, AuxiliaryBagSlots, UsableQuickSlots,
+			PlayerInventorySlots, StorageSlots, ActiveLootContainerSlots, ActiveLootContainerOwner,
+			ActiveLootContainerDisplayName, ActiveLootContainerCapacity, bHasActiveLootContainer,
+			SelectedItemSlotReference, HoveredItemSlotReference, SelectedWeaponAttachmentSlotTags,
+			SelectedWeaponAttachmentSlots, PendingRaidExperiencePoints, RaidStartExperiencePoints,
+			bRaidExperienceSessionActive, bHasPendingRaidExperienceAnimationState,
+			PendingRaidExperienceAnimationState, bHasPendingBunkerEntryVitals, bPendingBunkerItemStateSave);
+		const auto Backup = std::apply([](const auto&... Values) { return std::make_tuple(Values...); }, State);
+		if (ClearInventoryAndSaveInternal(false)) return true;
+		State = Backup;
+		return false;
+	}
+	const bool bSaved = SaveGameStateInternal(EUsableQuickSlotSaveMode::PersistRuntime);
+	if (bSaved) bPendingBunkerItemStateSave = false;
+	return bSaved;
+}
+
+bool UTunaSweeperGameInstance::ClearInventoryAndSaveInternal(bool bNotifyChanges)
+{
 	if (IsCombatTestSession())
 	{
 		ResetCombatTestLoadout();
-		return;
+		return true;
 	}
 	EnsureInventoryStateInitialized();
-	ClearSelectedItemSelection();
+	if (bNotifyChanges)
+	{
+		ClearSelectedItemSelection();
+	}
+	else
+	{
+		SelectedItemSlotReference = FTunaSweeperItemSlotReference();
+		SelectedWeaponAttachmentSlotTags.Reset();
+		SelectedWeaponAttachmentSlots.Reset();
+	}
 	ClearHoveredItemSlot();
 
 	TSet<FGuid> StorageItemUids;
@@ -222,11 +262,13 @@ void UTunaSweeperGameInstance::ClearInventoryAndSave()
 	bHasActiveLootContainer = false;
 	ClearRaidExperienceGain();
 	bHasPendingBunkerEntryVitals = false;
-	if (SaveGameStateInternal(EUsableQuickSlotSaveMode::Clear))
+	const bool bSaved = SaveGameStateInternal(EUsableQuickSlotSaveMode::Clear);
+	if (bSaved)
 	{
 		bPendingBunkerItemStateSave = false;
 	}
-	BroadcastInventoryStateChanged();
+	if (bNotifyChanges) BroadcastInventoryStateChanged();
+	return bSaved;
 }
 
 void UTunaSweeperGameInstance::HandleLevelTravelPersistence(FName SourceLevelName, FName TargetLevelName)

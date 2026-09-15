@@ -1,4 +1,12 @@
 string_key,ko,en,ja
+ui.pause.title,일시 정지,Paused,一時停止
+ui.pause.resume,계속하기,Resume,ゲームに戻る
+ui.pause.return_to_title,타이틀로 돌아가기,Return to Title,タイトルに戻る
+ui.pause.confirm_title,타이틀로 돌아가시겠습니까?,Return to the title screen?,タイトルに戻りますか？
+ui.pause.confirm_quit,게임을 종료하시겠습니까?,Quit the game?,ゲームを終了しますか？
+ui.pause.raid_warning,레이드를 떠나면 소지품·장비·퀵슬롯 아이템과 이번 레이드의 미정산 경험치를 잃습니다. 보관함과 퀘스트·월드 진행 상황은 저장됩니다.,Leaving the raid forfeits carried items and equipment including quick slots and unbanked raid experience. Storage and quest/world progress are saved.,レイドを離れると所持品・装備・クイックスロットのアイテムと未精算のレイド経験値を失います。保管庫とクエスト・ワールドの進行状況は保存されます。
+ui.pause.bunker_warning,벙커의 현재 진행 상황을 저장하고 나갑니다. 아이템은 잃지 않습니다.,Your current bunker progress will be saved before leaving. No items will be lost.,バンカーの現在の進行状況を保存して退出します。アイテムは失われません。
+ui.pause.save_failed,저장하지 못했습니다. 게임을 떠나지 않았습니다. 다시 시도하거나 취소해 주세요.,Saving failed. You have not left the game. Please retry or cancel.,保存できませんでした。ゲームは終了していません。再試行するかキャンセルしてください。
 ui.debuff.overweight,중량 과다,Overweight,重量過多
 ui.debuff.movement_blocked,이동불가,Movement Blocked,移動不可
 ui.debuff.bleeding,출혈,Bleeding,出血

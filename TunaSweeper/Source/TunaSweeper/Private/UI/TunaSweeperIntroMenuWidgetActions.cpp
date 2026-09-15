@@ -353,6 +353,11 @@ void UTunaSweeperIntroMenuWidget::HandleDLSSPerformanceClicked()
 
 void UTunaSweeperIntroMenuWidget::HandleBackFromSettingsClicked()
 {
+	if (bPauseSettingsMode)
+	{
+		ClosePauseSettings();
+		return;
+	}
 	if (TitleGraphicsSettingsWidget)
 	{
 		TitleGraphicsSettingsWidget->DiscardPendingChanges();
@@ -418,6 +423,7 @@ void UTunaSweeperIntroMenuWidget::HandleLanguageChanged()
 
 void UTunaSweeperIntroMenuWidget::HandleVersionCheckCompleted(bool bIsAllowed, const FString& Message, const FString& UpdateUrl)
 {
+	if (bPauseSettingsMode) return;
 	if (!bIsAllowed)
 	{
 		FPlatformMisc::MessageBoxExt(EAppMsgType::Ok, *Message, TEXT("버전 알림"));
@@ -430,4 +436,3 @@ void UTunaSweeperIntroMenuWidget::HandleVersionCheckCompleted(bool bIsAllowed, c
 		FGenericPlatformMisc::RequestExit(false);
 	}
 }
-

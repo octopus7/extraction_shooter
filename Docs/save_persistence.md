@@ -44,6 +44,8 @@ Legacy raw Unreal `.sav` files remain readable. Their next successful save rewri
 
 ### Bunker Item Mutation Deferral
 
+The pause menu's confirmed **Return to title** and **Quit game** actions share `SaveForGameplayExit`. In the bunker this persists current item/quick-slot state before leaving. In a raid it uses the existing death-loss rule: carried inventory, equipment, auxiliary bags, quick slots, and pending raid experience are forfeited; storage and long-term quest/world progress remain. This path never calls successful extraction persistence. Both actions first show a localized confirmation explaining the applicable outcome. If saving fails, the game stays paused and raid item/experience state is restored without broadcasting the temporary loss, allowing safe cancellation or retry. Pausing itself is transient and adds no save field.
+
 Bunker item ownership/layout mutations must be saved after the player leaves the blocking UI and returns to a gameplay-capable mode. This includes purchases, sales, storage moves, inventory/equipment/quick-slot layout edits, weapon attachment changes, and future bunker-only item transactions that modify persisted item instances or slot arrays.
 
 While the responsible UI is alive, the mutation should only mark a pending bunker item save in runtime memory. Multiple mutations during the same UI session coalesce into one pending save. The pending save must be flushed immediately when the HUD/input state becomes gameplay-capable again: no inventory-only panel, external storage/shop/workbench panel, attachment edit UI, modal confirmation, or other blocking item UI remains open, and the player can resume normal bunker gameplay controls.

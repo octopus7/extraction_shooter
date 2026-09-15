@@ -153,6 +153,11 @@ void UTunaSweeperIntroMenuWidget::HandleSteamDemoWishlistClicked()
 
 void UTunaSweeperIntroMenuWidget::ShowMainMenu()
 {
+	if (bPauseSettingsMode)
+	{
+		ClosePauseSettings();
+		return;
+	}
 	if (!bFinishingSettingsExit && SettingsPanel && SettingsPanel->GetVisibility() == ESlateVisibility::Visible)
 	{
 		BeginSettingsExit();
@@ -375,6 +380,8 @@ void UTunaSweeperIntroMenuWidget::EnsureGraphicsSettingsWidget()
 	{
 		TitleGraphicsSettingsWidget = Cast<UTunaSweeperGraphicsSettingsWidget>(FindIntroWidget(TEXT("TitleGraphicsSettingsWidget")));
 	}
+	if (bPauseSettingsMode && TitleGraphicsSettingsWidget)
+		TitleGraphicsSettingsWidget->UseLocalizedStringKeysOnly();
 }
 
 void UTunaSweeperIntroMenuWidget::ShowInterfaceSettingsTab()

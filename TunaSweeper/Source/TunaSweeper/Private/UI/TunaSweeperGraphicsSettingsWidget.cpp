@@ -331,6 +331,13 @@ void UTunaSweeperGraphicsSettingsWidget::DiscardPendingChanges()
 	}
 }
 
+bool UTunaSweeperGraphicsSettingsWidget::CancelResolutionConfirmation()
+{
+	if (!bResolutionConfirmationActive) return false;
+	RevertResolution();
+	return true;
+}
+
 bool UTunaSweeperGraphicsSettingsWidget::HasPendingChanges() const
 {
 	return bHasSettingsSnapshot &&
@@ -576,9 +583,9 @@ FText UTunaSweeperGraphicsSettingsWidget::ResolveUiText(FName StringKey, const F
 {
 	if (const UTunaSweeperGameInstance* GameInstance = Cast<UTunaSweeperGameInstance>(GetGameInstance()))
 	{
-		return GameInstance->ResolveLocalizedText(StringKey, FallbackText);
+		return GameInstance->ResolveLocalizedText(StringKey, bLocalizedStringKeysOnly ? FText::GetEmpty() : FallbackText);
 	}
-	return FallbackText;
+	return bLocalizedStringKeysOnly ? FText::GetEmpty() : FallbackText;
 }
 
 FText UTunaSweeperGraphicsSettingsWidget::BuildPresetText(ETunaSweeperGraphicsPreset Preset) const

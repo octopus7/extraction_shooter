@@ -8675,3 +8675,9 @@
 - 요청: 현재 Stove 데모 레이드 테스트 축약 맵에 실제로 배치된 액터 정보를 Markdown으로 정리하고, 카메라가 바라보는 방향 기준 Mermaid 위치 그래프와 별도 PNG 지도를 추가.
 - 완료: `StoveDemo`의 `bUseBoxRaidLevel=True` 설정을 확인하고 실제 `/Game/Maps/DemoBoxRaidMap`을 UE 5.7 에디터에서 읽기 전용 추출했다. 저장된 레벨 액터 15개, 로컬 배치 액터 9개, PlayerStart 반경 5m 내 액터 5개를 `Docs/demo_box_raid_actor_layout.md`에 기록했다. 플레이어 탑다운 카메라 `Pitch -88° / Yaw 0°`를 기준으로 월드 `+X`를 화면 위쪽, `+Y`를 화면 오른쪽으로 정렬한 Mermaid 그래프와 500cm 격자 PNG(`Docs/demo_box_raid_actor_layout.png`)를 함께 작성했다. `PlacementId=1` 적 앵커와 `PlacementId=2` Loot Container 앵커의 `EnemySpawns.json`·`LootContainerSpawns.json` 연결도 문서에 포함했다.
 - 검증: UE Python 추출 스크립트 실행 성공, PNG 1600×1050 식별 및 시각 검토, Markdown Mermaid/PNG 링크·A01~A15 ID 일치·런타임 데이터 링크 검사를 통과했다. 읽기 전용 추출 중 맵/콘텐츠 에셋은 저장하지 않았고 일회성 스크립트와 임시 덤프는 제거했다. UE commandlet 최종 종료 코드의 1은 샌드박스에서 기본 DDC/Zen 쓰기가 불가능해 발생한 경고이며 Python 출력과 산출물 검증은 성공했다.
+
+## 2026-09-16 04:10:41 (소요시간: 00:18:28)
+
+- 요청: 일시정지 메뉴의 타이틀 복귀·종료 선택 후 손실 경고 팝업 표시, 관련 UI 문자열 키 사용, 미할당 K를 에디터 테스트 입력으로 사용, UI 문자열 비하드코딩 규칙을 영구 지침에 기록.
+- 처리: ESC 일시정지 메뉴(계속하기/기존 설정/타이틀/종료)와 단계별 취소 구현. 실제 IMC_Player에서 K 미할당 확인 후 PIE에만 K 별칭 추가. 월드 정지와 플레이어 행동 차단, 하우징·HUD 닫기 우선 처리. 타이틀/종료 모두 확인 후 동일 저장 경로 사용: 벙커 현재 상태 저장, 레이드는 소지품·장비·퀵슬롯·미정산 경험치 손실 및 보관함·퀘스트/월드 진행 보존. 저장 실패 시 임시 손실을 방송하지 않고 메모리 상태를 복원해 종료를 막는다. 기존 설정 UI를 재사용하고 타이틀 전용 재시작·개발 조작은 차단. ui.pause 키 8개를 한국어·영어·일본어로 추가. 저장 계약과 메뉴 문서 갱신. AGENTS.md에는 UI 문구·경고·표시용 대체 문구를 하드코딩하지 않고 기존 문자열 키 규칙을 따른다는 영구 지침을 별도 커밋으로 기록.
+- 검증: UE 5.7 Development Editor 빌드 성공. 입력 및 저장 실패 회귀 테스트에서 수정 전 실패·수정 후 성공 확인. TunaSweeper.UI.PauseMenu 테스트 3개(Keys, SaveFailurePreservesRaid, WidgetConfirmation) 모두 성공. 실제 위젯의 다국어 키·타이틀/종료 경고·취소·저장 실패 표시 확인. 코드 검토와 diff 검사 통과.

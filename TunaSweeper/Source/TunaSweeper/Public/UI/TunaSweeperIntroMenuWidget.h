@@ -29,6 +29,9 @@ class TUNASWEEPER_API UTunaSweeperIntroMenuWidget : public UUserWidget
 
 public:
 	void PrepareForInitialViewport();
+	void PrepareForPauseSettings() { bPauseSettingsMode = true; }
+	void ClosePauseSettings();
+	FSimpleMulticastDelegate OnPauseSettingsClosed;
 	void OpenForDifficultyAdjustment();
 	void CloseDifficultyAdjustment();
 
@@ -617,6 +620,7 @@ private:
 	bool bShowingDevelopmentSettingsTab = false;
 	bool bDifficultyDefinitionsLoaded = false;
 	bool bDifficultyAdjustmentMode = false;
+	bool bPauseSettingsMode = false;
 	bool bClosingDifficultyAdjustment = false;
 	ETunaSweeperTitleDLSSMode PreferredDLSSMode = ETunaSweeperTitleDLSSMode::Performance;
 	ETunaSweeperItemTextLanguage PendingInterfaceLanguage = ETunaSweeperItemTextLanguage::English;

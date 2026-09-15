@@ -343,6 +343,7 @@ bool ATunaSweeperTopDownCharacter::IsGameplayActionInputLocked() const
 	const ATunaSweeperPlayerController* TunaPlayerController = Cast<ATunaSweeperPlayerController>(GetController());
 	return TunaPlayerController &&
 		(TunaPlayerController->IsInventoryUiOpen() ||
+			TunaPlayerController->IsPauseMenuOpen() ||
 			TunaPlayerController->IsDialogueSequenceActive() ||
 			TunaPlayerController->IsHousingModeOpen());
 }

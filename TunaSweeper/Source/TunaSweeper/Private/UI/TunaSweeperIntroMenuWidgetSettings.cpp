@@ -115,8 +115,8 @@ FText UTunaSweeperIntroMenuWidget::ResolveUiText(FName StringKey, const FText& F
 {
 	const UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GetGameInstance());
 	return TunaGameInstance
-		? TunaGameInstance->ResolveLocalizedText(StringKey, FallbackText)
-		: FallbackText;
+		? TunaGameInstance->ResolveLocalizedText(StringKey, bPauseSettingsMode ? FText::GetEmpty() : FallbackText)
+		: (bPauseSettingsMode ? FText::GetEmpty() : FallbackText);
 }
 
 void UTunaSweeperIntroMenuWidget::SetNamedText(FName WidgetName, const FText& Text) const

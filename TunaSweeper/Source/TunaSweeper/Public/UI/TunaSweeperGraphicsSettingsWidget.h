@@ -20,10 +20,13 @@ public:
 	void BuildEditorTemplate() { BuildRuntimeWidgetTree(); }
 #endif
 	void RefreshFromSettings();
+	void UseLocalizedStringKeysOnly() { bLocalizedStringKeysOnly = true; RefreshVisualState(); }
+	bool CancelResolutionConfirmation();
 	void DiscardPendingChanges();
 	bool HasPendingChanges() const;
 
 protected:
+	bool bLocalizedStringKeysOnly = false;
 	virtual TSharedRef<SWidget> RebuildWidget() override;
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;

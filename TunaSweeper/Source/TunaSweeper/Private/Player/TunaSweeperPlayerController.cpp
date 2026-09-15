@@ -34,6 +34,7 @@
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
 #include "UI/TunaSweeperGameHudWidget.h"
 #include "UI/TunaSweeperIntroMenuWidget.h"
+#include "UI/TunaSweeperPauseMenuWidget.h"
 #include "UI/TunaSweeperQuestWidget.h"
 #include "UI/TunaSweeperScenarioPresentationWidget.h"
 #include "UI/TunaSweeperScreenFadeWidget.h"
@@ -501,6 +502,12 @@ void ATunaSweeperPlayerController::BeginPlay()
 
 void ATunaSweeperPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
+	if (PauseMenuWidget)
+	{
+		PauseMenuWidget->RemoveFromParent();
+		PauseMenuWidget = nullptr;
+		SetPause(false);
+	}
 	if (UGameInstance* GameInstance = GetGameInstance())
 	{
 		if (UTunaSweeperHousingSubsystem* HousingSubsystem = GameInstance->GetSubsystem<UTunaSweeperHousingSubsystem>())
@@ -592,7 +599,11 @@ void ATunaSweeperPlayerController::SetupInputComponent()
 		InputComponent->BindKey(EKeys::V, IE_Pressed, this, &ATunaSweeperPlayerController::HandleMeleeQuickSlotPressed);
 		InputComponent->BindKey(EKeys::Q, IE_Pressed, this, &ATunaSweeperPlayerController::HandleHousingRotateLeft);
 		InputComponent->BindKey(EKeys::E, IE_Pressed, this, &ATunaSweeperPlayerController::HandleHousingRotateRight);
-		InputComponent->BindKey(EKeys::Escape, IE_Pressed, this, &ATunaSweeperPlayerController::HandleHousingCancel);
+		InputComponent->BindKey(EKeys::Escape, IE_Pressed, this, &ATunaSweeperPlayerController::TogglePauseMenu).bExecuteWhenPaused = true;
+		if (IsPauseMenuKey(EKeys::K, GetWorld()))
+		{
+			InputComponent->BindKey(EKeys::K, IE_Pressed, this, &ATunaSweeperPlayerController::TogglePauseMenu).bExecuteWhenPaused = true;
+		}
 		InputComponent->BindKey(EKeys::RightMouseButton, IE_Pressed, this, &ATunaSweeperPlayerController::HandleHousingFacilityContextMenuPressed);
 		InputComponent->BindKey(EKeys::W, IE_Pressed, this, &ATunaSweeperPlayerController::HandleHousingMoveForwardPressed);
 		InputComponent->BindKey(EKeys::W, IE_Released, this, &ATunaSweeperPlayerController::HandleHousingMoveForwardReleased);
@@ -2390,6 +2401,15 @@ bool ATunaSweeperPlayerController::StartHousingFacilityPlacement(FName FacilityI
 
 void ATunaSweeperPlayerController::ApplyDefaultGameInputMode()
 {
+	if (PauseMenuWidget)
+	{
+		FInputModeUIOnly PauseInputMode;
+		PauseInputMode.SetWidgetToFocus(PauseMenuWidget->TakeWidget());
+		PauseInputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+		SetInputMode(PauseInputMode);
+		bShowMouseCursor = true;
+		return;
+	}
 	FInputModeGameAndUI InputMode;
 	InputMode.SetHideCursorDuringCapture(false);
 	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);

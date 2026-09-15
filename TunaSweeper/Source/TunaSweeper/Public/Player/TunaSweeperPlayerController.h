@@ -13,6 +13,7 @@
 class ACameraActor;
 class UTunaSweeperGameHudWidget;
 class UTunaSweeperIntroMenuWidget;
+class UTunaSweeperPauseMenuWidget;
 class UTunaSweeperQuestWidget;
 class UTunaSweeperScenarioPresentationWidget;
 class UTunaSweeperScreenFadeWidget;
@@ -38,6 +39,12 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|HUD")
 	UTunaSweeperGameHudWidget* GetGameHudWidget() const { return GameHudWidget; }
+
+	void TogglePauseMenu();
+	void ResumeFromPauseMenu();
+	void ExitFromPauseMenu(bool bQuitGame);
+	bool IsPauseMenuOpen() const { return PauseMenuWidget != nullptr; }
+	static bool IsPauseMenuKey(const FKey& Key, const UWorld* World);
 
 	/** Device-local development preference; it is deliberately separate from save-slot data. */
 	static bool GetEnemyCombatDebugPreference();
@@ -144,6 +151,9 @@ public:
 	bool TryHandleHoveredItemInteract();
 
 protected:
+	UPROPERTY(Transient)
+	TObjectPtr<UTunaSweeperPauseMenuWidget> PauseMenuWidget;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "HUD")
 	TSoftClassPtr<UTunaSweeperGameHudWidget> GameHudWidgetClass;
 

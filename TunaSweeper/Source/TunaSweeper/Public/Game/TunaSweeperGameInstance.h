@@ -263,6 +263,7 @@ class TUNASWEEPER_API UTunaSweeperGameInstance : public UGameInstance, public IT
 {
 	GENERATED_BODY()
 	friend class FTunaDemoSaveRetirementTest;
+	friend class FTunaSweeperPauseExitSaveFailureTest;
 
 public:
 	UTunaSweeperGameInstance();
@@ -808,6 +809,8 @@ public:
 	bool FlushPendingBunkerItemStateSave();
 	bool HasPendingBunkerItemStateSave() const { return bPendingBunkerItemStateSave; }
 	void ClearInventoryAndSave();
+	/** Explicit, confirmed menu exit: raid loss or a full bunker save. */
+	bool SaveForGameplayExit(bool bAbandonRaid);
 	void HandleLevelTravelPersistence(FName SourceLevelName, FName TargetLevelName);
 	void CaptureBunkerEntryVitalsFromPawn(APawn* Pawn);
 	bool ConsumePendingBunkerEntryVitals(UTunaSweeperVitalsComponent* VitalsComponent);
@@ -838,6 +841,7 @@ private:
 	bool SaveGameStateInternal(EUsableQuickSlotSaveMode UsableQuickSlotSaveMode = EUsableQuickSlotSaveMode::PreserveExisting) const;
 	void MarkItemStateMutationForSave(bool bSaveImmediatelyOutsideBunker = false);
 	void ResetRuntimeStateForSaveSlotSelection();
+	bool ClearInventoryAndSaveInternal(bool bNotifyChanges = true);
 	void GenerateDefaultInventoryState();
 	bool InitializeDemoStartingLoadout();
 	void ResetPlayerSlotArrays();
