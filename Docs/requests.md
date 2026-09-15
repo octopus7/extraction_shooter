@@ -8668,3 +8668,10 @@
 - 요청: 퀘스트 완료 직후 수락 가능한 퀘스트가 있으면 완료 탭 대신 수락 가능 탭으로 전환.
 - 처리: 보상 수령 성공 후 CanAcceptQuest 조건을 만족하는 퀘스트가 있고 수락 가능 탭을 표시하는 화면이면 해당 탭으로 전환. 기존 선택 복원 또는 첫 항목 선택은 기존 목록 갱신 경로를 사용. 수락 가능 퀘스트가 없거나 해당 탭을 숨기는 메뉴에서는 완료 탭 유지. 완료 연출에는 원래 완료한 퀘스트 ID 전달.
 - 검증: UE 5.7 Development Editor 빌드 성공. 변경 diff 공백 검사와 수락 조건·선택 복원 흐름 코드 확인.
+
+
+## 2026-09-16 03:58:20 (소요시간: 00:14:50)
+
+- 요청: 현재 Stove 데모 레이드 테스트 축약 맵에 실제로 배치된 액터 정보를 Markdown으로 정리하고, 카메라가 바라보는 방향 기준 Mermaid 위치 그래프와 별도 PNG 지도를 추가.
+- 완료: `StoveDemo`의 `bUseBoxRaidLevel=True` 설정을 확인하고 실제 `/Game/Maps/DemoBoxRaidMap`을 UE 5.7 에디터에서 읽기 전용 추출했다. 저장된 레벨 액터 15개, 로컬 배치 액터 9개, PlayerStart 반경 5m 내 액터 5개를 `Docs/demo_box_raid_actor_layout.md`에 기록했다. 플레이어 탑다운 카메라 `Pitch -88° / Yaw 0°`를 기준으로 월드 `+X`를 화면 위쪽, `+Y`를 화면 오른쪽으로 정렬한 Mermaid 그래프와 500cm 격자 PNG(`Docs/demo_box_raid_actor_layout.png`)를 함께 작성했다. `PlacementId=1` 적 앵커와 `PlacementId=2` Loot Container 앵커의 `EnemySpawns.json`·`LootContainerSpawns.json` 연결도 문서에 포함했다.
+- 검증: UE Python 추출 스크립트 실행 성공, PNG 1600×1050 식별 및 시각 검토, Markdown Mermaid/PNG 링크·A01~A15 ID 일치·런타임 데이터 링크 검사를 통과했다. 읽기 전용 추출 중 맵/콘텐츠 에셋은 저장하지 않았고 일회성 스크립트와 임시 덤프는 제거했다. UE commandlet 최종 종료 코드의 1은 샌드박스에서 기본 DDC/Zen 쓰기가 불가능해 발생한 경고이며 Python 출력과 산출물 검증은 성공했다.
