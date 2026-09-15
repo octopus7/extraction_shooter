@@ -45,7 +45,7 @@ flowchart TD
 | 아이템/컨테이너 액터 | `TunaSweeper/Source/TunaSweeper/Private/Interaction/TunaSweeperPickupItemActor.cpp`, `TunaSweeperItemSpawnInteractableActor.cpp`, `TunaSweeperLootContainerActor.cpp`, `TunaSweeperLootContainerSpawnInteractableActor.cpp` | 픽업, 아이템 스폰, 루팅 컨테이너 열기/스폰을 처리한다. |
 | 이동/월드 액터 | `TunaSweeper/Source/TunaSweeper/Private/Interaction/TunaSweeperLevelTravelInteractableActor.cpp`, `TunaSweeperWorldProgressActor.cpp`, `TunaSweeperPersistentDoorActor.cpp`, `TunaSweeperDoorActor.cpp`, `TunaSweeperWarpPointActor.cpp`, `TunaSweeperMemoActor.cpp` | 레벨 이동, 월드 진행 수리, 영속 문, 일반 문, 워프, 메모 획득을 처리한다. |
 | 벙커 시설 액터 | `TunaSweeper/Source/TunaSweeper/Private/Interaction/TunaSweeperHousingManagementActor.cpp`, `TunaSweeperStorageActor.cpp`, `TunaSweeperShopActor.cpp`, `TunaSweeperWorkbenchActor.cpp`, `TunaSweeperPiggyBankActor.cpp` | 하우징, 창고, 상점, 작업대, 돼지저금통 상호작용을 처리한다. |
-| 퀘스트/두더지 액터 | `TunaSweeper/Source/TunaSweeper/Private/Character/TunaSweeperMoleCompanionActor.cpp`, `TunaSweeperFacilityNpcActor.cpp` | 퀘스트 제공자/폴백 ID를 해석하고 퀘스트 알림 및 두더지 대화 옵션을 제공한다. |
+| 퀘스트/두더지 액터 | `TunaSweeper/Source/TunaSweeper/Private/Character/TunaSweeperMoleCompanionActor.cpp`, `TunaSweeperFacilityNpcActor.cpp` | 퀘스트 제공자/폴백 ID를 해석하고 퀘스트 알림과 통합 퀘스트 옵션을 제공한다. |
 | HUD 패널 | `TunaSweeper/Source/TunaSweeper/Private/UI/TunaSweeperGameHudWidget.cpp` | 루팅/창고/상점/작업대 외부 패널, 퀘스트 패널, 메모 패널, 하우징 패널 표시를 담당한다. |
 | 월드 배치 | 각 레벨의 직접 배치 BP, `BP_RaidPlacementAnchor` | 일반 상호작용은 레벨이 Transform과 설정을 소유하고, 적·루트·메모 데이터 배치만 앵커와 JSON을 결합한다. |
 
@@ -68,8 +68,8 @@ flowchart TD
 | `LootContainerOpen` | 맵 제한 없음 | `ATunaSweeperLootContainerActor::OpenRuntimeContainer()`가 새 컨테이너 인스턴스를 만들거나 기존 런타임 슬롯을 재사용한다. 그 뒤 뚜껑 열기 애니메이션을 재생하고 `ATunaSweeperPlayerController::OpenLootContainerPanel()`로 HUD를 연다. UI 닫힘/인벤토리 변경 시 런타임 슬롯을 다시 캡처한다. |
 | `LootContainerSpawn` | 맵 제한 없음 | `ATunaSweeperLootContainerSpawnInteractableActor`가 컨테이너 정의와 수용량에 맞는 contents 행을 무작위 선택해 `ATunaSweeperLootContainerActor`를 스폰하고 `SetContainerDataIds()`를 호출한다. |
 | `LevelTravel` | 맵 제한 없음 | `ATunaSweeperLevelTravelInteractableActor::TravelToTargetLevel()`이 `HandleLevelTravelPersistence()`, `NotifyLevelTravelRequested()`를 호출한다. 레이드 경험치 귀환 연출이 있으면 우선 실행하고, 아니면 레벨 전환 서브시스템 또는 `UGameplayStatics::OpenLevel()`로 이동한다. |
-| `Quest` | 맵 제한 없음, 단 해석 가능한 퀘스트 ID 필요 | `ATunaSweeperMoleCompanionActor` 또는 `ATunaSweeperFacilityNpcActor`에서 provider/fallback으로 퀘스트 ID를 해석한 뒤 `OpenQuestPanel(QuestId)`를 호출한다. 퀘스트 ID가 없으면 `CanOfferInteraction()`에서 후보 제외된다. |
-| `MoleDialogue` | BunkerMap 전용 | 소유자가 `ATunaSweeperMoleCompanionActor`이고 현재 맵이 `BunkerMap`일 때만 제공된다. `StartScenarioForTrigger(interaction.mole, true)`를 호출해 활성 플레이버 JSON의 조건에 맞는 두더지 대화를 재생한다. |
+| `Quest` | 해석 가능한 퀘스트 ID 또는 벙커 두더지의 미완료 시나리오 필요 | 두더지는 참치 전달을 먼저 처리하고, 벙커에서 `StartScenarioForTrigger(interaction.mole, false)`로 아직 보지 않은 시나리오를 재생한다. 재생할 시나리오가 없으면 provider/fallback으로 해석한 퀘스트 패널을 연다. 다른 시설 NPC는 기존 퀘스트 패널 흐름을 유지한다. |
+| `MoleDialogue` | 제공하지 않음 | 기존 BP 컴포넌트 호환을 위해 타입은 유지하지만 후보에서 제외한다. 두더지는 `Quest` 하나로 필요한 대화와 퀘스트를 처리한다. |
 | `SelfDestruct` | 맵 제한 없음 | `ATunaSweeperSelfDestructInteractableActor::StartSelfDestruct()`가 말풍선 카운트다운을 시작한다. 종료 시 폭발 이펙트, 소음 리포트, 반경 내 `UTunaSweeperVitalsComponent` 피해를 적용하고 자기 자신을 제거한다. |
 | `WorldProgress` | 맵 제한 없음 | 일반 `ATunaSweeperWorldProgressActor`는 필요한 수량을 전부 보유한 경우 아이템을 소비하고 완료 상태를 저장한 뒤 대체 액터를 스폰한다. `BP_WaterIntake`의 부모 액터는 퀘스트가 `Accepted`이고 해당 목표가 미완료일 때만 마커를 제공하며 Q1 조사, Q2 크로우바 기반 이물질 제거, Q3-1 밸브 손잡이 설치로 동작을 전환한다. 시설 본체와 스크린 메시를 항상 유지하고, BP의 `DebrisMesh`에 연결된 `SM_ScreenDebris`만 숨기며 이물질 제거와 밸브 완료 상태를 별도 `WorldProgressStates` 항목에 저장한다. |
 | `PersistentDoor` | 맵 제한 없음 | `ATunaSweeperPersistentDoorActor::OpenDoor(true)`가 문 상태를 Completed로 저장하고, 충돌을 끄며 마커 타입을 `None`으로 바꾼다. 일반 토글이 아니라 영속적인 열기 전용이다. |
@@ -99,7 +99,6 @@ flowchart TD
 - `PiggyBank`
 - `PiggyBankDeposit`
 - `PiggyBankWithdraw`
-- `MoleDialogue`
 
 추가로 `ATunaSweeperPlayerController::OpenStoragePanel()`, `OpenShopPanel()`, `OpenWorkbenchCraftPanel()`, `OpenWorkbenchDismantlePanel()`, `OpenWorkbenchBlueprintRegisterPanel()`도 `IsBunkerMap()`을 다시 검사한다. 반대로 pickup, item spawn, loot container open/spawn, level travel, quest, self destruct, world progress, persistent door, door open, warp point, memo, housing management에는 현재 상호작용 코드상 BunkerMap 제한이 없다.
 
@@ -116,7 +115,7 @@ flowchart TD
 | 퀘스트 | `OpenQuestPanel(QuestId)` | `ShowQuestPanel(QuestId)` | HUD 모드를 Quest로 바꾸고 상호작용 퀘스트 패널을 해당 퀘스트로 초기화한다. |
 | 메모 | `OpenMemoPanel(MemoId)` | `ShowMemoPanel(MemoId)` | HUD 모드를 Memo로 바꾸고 메모 패널에서 해당 메모를 연다. |
 | 하우징 | `OpenHousingMode()` | `SetHudMode(None)` 및 하우징 패널 갱신 | 하우징 서브시스템을 열고 별도 하우징 카메라로 전환한다. 하우징 중에는 월드 상호작용 포커스/마커가 억제된다. |
-| 두더지 대화 | `StartScenarioForTrigger(interaction.mole, true)` | `UTunaSweeperScenarioSubsystem`으로 데이터 해석 후 `UTunaSweeperDialogueWidget` 생성 | HUD 패널 모드가 아니라 대화 위젯을 viewport 90에 올리고 UI Only 입력 모드로 바꾼다. |
+| 두더지 퀘스트에서 미완료 대화 | `StartScenarioForTrigger(interaction.mole, false)` | `UTunaSweeperScenarioSubsystem`으로 데이터 해석 후 `UTunaSweeperDialogueWidget` 생성 | HUD 패널 모드가 아니라 대화 위젯을 viewport 90에 올리고 UI Only 입력 모드로 바꾼다. |
 
 ## 월드 배치 흐름
 

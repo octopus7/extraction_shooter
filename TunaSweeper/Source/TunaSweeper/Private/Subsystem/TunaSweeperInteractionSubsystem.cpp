@@ -37,6 +37,7 @@
 #include "Subsystem/TunaSweeperHousingSubsystem.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
 #include "Subsystem/TunaSweeperMemoSubsystem.h"
+#include "Subsystem/TunaSweeperScenarioSubsystem.h"
 
 namespace TunaSweeperInteractionQuestEvents
 {
@@ -314,9 +315,6 @@ bool UTunaSweeperInteractionSubsystem::RequestInteraction(UTunaSweeperInteractab
 	case ETunaSweeperInteractionType::PiggyBankWithdraw:
 		bHandled = HandlePiggyBankWithdrawInteraction(Interactable, InstigatorPawn);
 		break;
-	case ETunaSweeperInteractionType::MoleDialogue:
-		bHandled = HandleMoleDialogueInteraction(Interactable, InstigatorPawn);
-		break;
 	case ETunaSweeperInteractionType::DifficultyAdjustment:
 		bHandled = HandleDifficultyAdjustmentInteraction(Interactable, InstigatorPawn);
 		break;
@@ -401,8 +399,8 @@ bool UTunaSweeperInteractionSubsystem::CanOfferInteraction(const UTunaSweeperInt
 
 	if (Interactable->GetInteractionType() == ETunaSweeperInteractionType::MoleDialogue)
 	{
-		return TunaSweeperInteractionQuestEvents::IsBunkerMap(GetWorld()) &&
-			Cast<ATunaSweeperMoleCompanionActor>(Interactable->GetOwner());
+		// Existing Blueprints still contain this component. Quest is the single entry point.
+		return false;
 	}
 
 	if (Interactable->GetInteractionType() == ETunaSweeperInteractionType::DifficultyAdjustment)
@@ -422,7 +420,19 @@ bool UTunaSweeperInteractionSubsystem::CanOfferInteraction(const UTunaSweeperInt
 		return true;
 	}
 
-	return !TunaSweeperInteractionQuestEvents::ResolveQuestIdForActor(Interactable->GetOwner()).IsNone();
+	if (!TunaSweeperInteractionQuestEvents::ResolveQuestIdForActor(Interactable->GetOwner()).IsNone())
+	{
+		return true;
+	}
+
+	// Keep an unfinished introduction reachable even before a quest becomes available.
+	const UWorld* World = GetWorld();
+	const UGameInstance* GameInstance = World ? World->GetGameInstance() : nullptr;
+	const auto* Scenarios = GameInstance ? GameInstance->GetSubsystem<UTunaSweeperScenarioSubsystem>() : nullptr;
+	FTunaSweeperScenarioPresentation Presentation;
+	return Cast<ATunaSweeperMoleCompanionActor>(Interactable->GetOwner()) &&
+		TunaSweeperInteractionQuestEvents::IsBunkerMap(World) && Scenarios &&
+		Scenarios->TryResolveScenario(TEXT("interaction.mole"), FName(*World->GetMapName()), false, Presentation);
 }
 
 bool UTunaSweeperInteractionSubsystem::ShouldDisplayMarkerForInteractable(
@@ -679,32 +689,21 @@ bool UTunaSweeperInteractionSubsystem::HandleQuestInteraction(
 		return false;
 	}
 
+	if (Cast<ATunaSweeperMoleCompanionActor>(QuestOwner))
+	{
+		if (ATunaSweeperDemoEndingActor::TryDeliverToMole(InstigatorPawn)) return true;
+		if (TunaSweeperInteractionQuestEvents::IsBunkerMap(GetWorld()) &&
+			TunaPlayerController->StartScenarioForTrigger(TEXT("interaction.mole"), false)) return true;
+	}
+
 	const FName ResolvedQuestId = TunaSweeperInteractionQuestEvents::ResolveQuestIdForActor(QuestOwner);
 	if (ResolvedQuestId.IsNone())
 	{
 		return false;
 	}
 
-	if (Cast<ATunaSweeperMoleCompanionActor>(QuestOwner) && ATunaSweeperDemoEndingActor::TryDeliverToMole(InstigatorPawn)) return true;
 	TunaPlayerController->OpenQuestPanel(ResolvedQuestId);
 	return true;
-}
-
-bool UTunaSweeperInteractionSubsystem::HandleMoleDialogueInteraction(
-	UTunaSweeperInteractableComponent* Interactable,
-	APawn* InstigatorPawn)
-{
-	ATunaSweeperMoleCompanionActor* MoleActor = Interactable
-		? Cast<ATunaSweeperMoleCompanionActor>(Interactable->GetOwner())
-		: nullptr;
-	if (!MoleActor || !InstigatorPawn)
-	{
-		return false;
-	}
-
-	ATunaSweeperPlayerController* TunaPlayerController = Cast<ATunaSweeperPlayerController>(InstigatorPawn->GetController());
-	if (ATunaSweeperDemoEndingActor::TryDeliverToMole(InstigatorPawn)) return true;
-	return TunaPlayerController && TunaPlayerController->StartScenarioForTrigger(FName(TEXT("interaction.mole")), true);
 }
 
 bool UTunaSweeperInteractionSubsystem::HandleSelfDestructInteraction(
