@@ -1,5 +1,7 @@
 # Agent Instructions
 
+- Permanent user preference: when a distinct task is completed and verified, commit its changes without asking for confirmation. Keep work of different kinds in separate commits and include only the changes belonging to that task.
+
 - Permanent user preference: when the user asks to proceed in a new conversation/task, create the new task with Sol (`model: "gpt-5.6-sol"`) and high reasoning (`thinking: "high"`) by default. An explicitly specified model or reasoning effort overrides its respective default. Apply this preference across future conversations in this project.
 - Blender modeling host workflow: when a modeling instruction arrives in the Blender script modeling host conversation, create a new task using Astra (`model: "gpt-6-astra"`) with high reasoning (`thinking: "high"`), and have that task perform the modeling work, validate the results, and commit the completed changes. This overrides the general Sol default for those modeling tasks. Answer ordinary questions directly in the host conversation without saving question or request logs for them.
 - The Unreal Engine project is `TunaSweeper/TunaSweeper.uproject`.
