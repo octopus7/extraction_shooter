@@ -47,13 +47,11 @@ ATunaSweeperQuadrupedEnemyCharacter::ATunaSweeperQuadrupedEnemyCharacter()
 
 	DeathRagdollDurationSeconds = 0.5f;
 	DeathRagdollAngularSpeedDegrees = 60.0f;
-	static ConstructorHelpers::FObjectFinder<UNiagaraSystem> RobotDeathEffect(
-		TEXT("/Game/Effects/ExplosionTuna/NS_Explosion_SmokeRobot.NS_Explosion_SmokeRobot"));
-	if (RobotDeathEffect.Succeeded())
-	{
-		DeathNiagaraEffect = RobotDeathEffect.Object;
-		DeathNiagaraScale = 1.0f;
-	}
+	// Keep the existing soft reference lazy: loading Niagara component templates while
+	// constructing the CDO precedes the editor typed-element registry during cook startup.
+	DeathNiagaraEffect = TSoftObjectPtr<UNiagaraSystem>(FSoftObjectPath(
+		TEXT("/Game/Effects/ExplosionTuna/NS_Explosion_SmokeRobot.NS_Explosion_SmokeRobot")));
+	DeathNiagaraScale = 1.0f;
 
 	if (VisualMesh)
 	{

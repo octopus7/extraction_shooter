@@ -8558,3 +8558,24 @@
 - 요청: store/stove 하위에 Product No, Game ID, Application Key, Application Secret 입력용 Git 제외 파일 생성.
 - 완료: store/stove/credentials.env에 네 항목의 빈 환경변수 템플릿을 만들고 루트 .gitignore에 해당 파일의 정확한 경로를 추가했다. git check-ignore로 제외 규칙 적용을 확인하고 git ls-files로 추적되지 않음을 확인했다. 실제 인증값은 입력하거나 로그에 기록하지 않았다.
 
+
+## 2026-09-16 00:34:47 (소요시간: 00:00:01)
+
+- 요청: 로컬 STOVE 인증정보 입력 상태 확인.
+- 완료: 실제 값을 출력하지 않고 네 필수 항목의 단일 정의와 비어 있지 않음을 검사했다(전체 통과: True). Git 제외 적용: True, Git 추적 여부: False. SDK 또는 서버를 통한 인증 유효성 검증은 수행하지 않았다. 인증값은 로그에 기록하지 않았다.
+
+
+## 2026-09-16 00:48:58 (소요시간: 00:00:20)
+
+- 요청: store/stove에 넣은 SDK ZIP과 압축 해제될 파일을 Git에서 제외.
+- 완료: StovePCSDK_Studio_Cpp_3.4.2.zip 내부의 최상위 경로 dll, Include, lib를 확인했다. .gitignore에 StovePCSDK_*.zip, StovePCSDK_* 폴더, store/stove 바로 아래의 dll/Include/lib 폴더를 추가하여 파일명 폴더에 풀거나 현재 폴더에 풀 때 모두 제외되도록 했다. git check-ignore로 ZIP과 각 해제 경로의 제외를 확인했고 git ls-files로 해당 경로에 추적 파일이 없음을 확인했다. 압축 해제는 실행하지 않았다.
+
+
+## 2026-09-16 00:50:27 (소요시간: 00:19:22)
+
+- 요청: 준비된 SDK와 로컬 앱 정보를 사용해 스토브 연동 후 패키징.
+- 완료: 현재 선택된 데모를 기준으로 STOVE PC SDK C++ 3.4.2를 기존 Stove/StoveDemo Win64 게임 타겟에 연결했다. 런처 검사, Base/Ownership 초기화, 정확한 게임 ID·데모/정식판 타입·획득 소유권 확인, 90초 타임아웃과 실패 시 월드 로딩 전 종료, 콜백 처리 및 SDK 역순 종료를 구현했다. Game ID/Application Key만 Git 제외 Intermediate 헤더를 통해 공급하며 Application Secret/Product No는 클라이언트에 공급하지 않는다. SDK와 인증정보의 실제 값은 기록하지 않았다.
+- 패키징 수정: 스토브 데모 배치의 맵 목록에 DemoBoxRaidMap을 포함했다. 기존 소음 발생기에서 에디터 전용 GetSectionInfoMap 대신 런타임 렌더 섹션의 MaterialIndex를 사용하도록 수정했고, 로봇 사망 Niagara의 생성자 동기 로딩을 기존 TSoftObjectPtr 경로 지정으로 바꿔 초기 레지스트리 오류를 해결했다.
+- 검증: 소유권 정책 11개 검사 통과, 기존 TunaSweeper.NoiseEmitter.AuthoredMeshAndPulse 자동화 검사 통과, 독립 SDK 코드 리뷰에서 추가 문제 없음. 최종 UAT BuildCookRun은 ExitCode=0/BUILD SUCCESSFUL이며 최종 쿠킹은 오류 0개·경고 16개. 데모 데이터 검사 통과, 패키징된 SDK DLL 3개의 원본 해시 일치, credentials.env/생성 헤더 미포함, 최종 실행 파일의 필수 설정 반영 및 Application Secret 미포함을 확인했다.
+- 결과: TunaSweeper/Builds/Stove/Demo/Windows/TunaSweeperStoveDemo.exe, 출력 폴더 전체 약 1.09GB. 운영 안내는 Docs/Stove/SDKIntegration.md에 기록했다. STOVE 계정으로 실제 런처 인증·소유권 성공 응답을 확인하거나 스토어에 업로드하지는 않았다.
+

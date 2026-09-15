@@ -2,5 +2,19 @@
 
 #include "TunaSweeper.h"
 #include "Modules/ModuleManager.h"
+#include "Platform/TunaSweeperStove.h"
 
-IMPLEMENT_PRIMARY_GAME_MODULE( FDefaultGameModuleImpl, TunaSweeper, "TunaSweeper" );
+class FTunaSweeperGameModule : public FDefaultGameModuleImpl
+{
+public:
+	virtual void StartupModule() override
+	{
+		TunaSweeperStove::Startup();
+	}
+	virtual void ShutdownModule() override
+	{
+		TunaSweeperStove::Shutdown();
+	}
+};
+
+IMPLEMENT_PRIMARY_GAME_MODULE( FTunaSweeperGameModule, TunaSweeper, "TunaSweeper" );

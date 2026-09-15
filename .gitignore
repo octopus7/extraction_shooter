@@ -43,6 +43,12 @@ Blender/SKM_Luna_Procreate.obj
 /store/steamworks/steamworks_sdk_165.zip
 /store/steamworks/steamid.txt
 /store/stove/credentials.env
+# STOVE SDK archives and extracted SDK files
+/store/stove/StovePCSDK_*/
+/store/stove/StovePCSDK_*.zip
+/store/stove/dll/
+/store/stove/Include/
+/store/stove/lib/
 /HYTemp
 /TunaSweeper/Content/Environment/Bunker/AgitTemp
 /Saved

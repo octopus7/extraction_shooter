@@ -3,6 +3,7 @@
 #include "Dom/JsonObject.h"
 #include "Dom/JsonValue.h"
 #include "Engine/StaticMesh.h"
+#include "StaticMeshResources.h"
 #include "KismetProceduralMeshLibrary.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Materials/MaterialInterface.h"
@@ -405,7 +406,7 @@ bool ATunaSweeperPeriodicNoiseEmitterActor::BuildAuthoredMesh()
 			Section.HornLength = 118.0f;
 			ProceduralMesh->CreateMeshSection_LinearColor(Section.SectionIndex, Section.BaseVertices, Triangles,
 				Section.Normals, Section.UVs, Section.VertexColors, Section.Tangents, false);
-			const int32 MaterialIndex = Source->GetSectionInfoMap().Get(0, SourceSection).MaterialIndex;
+			const int32 MaterialIndex = Source->GetRenderData()->LODResources[0].Sections[SourceSection].MaterialIndex;
 			if (UMaterialInterface* Material = Source->GetMaterial(MaterialIndex))
 			{
 				UMaterialInstanceDynamic* DynamicMaterial = UMaterialInstanceDynamic::Create(Material, this);
