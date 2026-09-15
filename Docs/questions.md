@@ -6786,3 +6786,21 @@ Unreal Editor commandlet 검사 후 작업 트리에 나타난 무관한 139개 
 - 질문: 설치된 50251 경로와 로컬 패키징 경로 모두 같은 오류인데 다음 빌드는 후자로 실행해야 하는가?
 - 답변: 그렇다. 이번에 갱신한 빌드는 D:\github\extraction_shooter\TunaSweeper\Builds\Stove\Demo\Windows\TunaSweeperStoveDemo.exe로 실행한다. C:\ProgramData\Smilegate\Games\TunaSweeper\50251의 설치본은 재업로드·업데이트 전까지 이전 버전이다.
 
+
+
+## 2026-09-16 02:10:20 (소요시간: 00:00:12)
+
+- 질문: Steam 설정 혼입이 에디터 수동 환경 선택 때문인지, 수정 후 STOVE 데모 타겟에서 Steam이 배타적으로 제외되는지.
+- 답변: 확인된 원인은 설치형 엔진 런타임에서 타겟 CustomConfig가 반영되지 않아 기본 Steam 설정을 읽던 문제다. bMakeBinaryConfig=True로 패키징 시 StoveDemo 설정 계층을 확정했다. 현재 표준 패키징 경로에서 Steam OnlineSubsystem 비활성, 기본 서비스 NULL, 배포 채널 및 업적 네임스페이스 Stove, Steam 전용 위시리스트 숨김으로 적용된다. 에디터 미리보기 환경과 배포 타겟은 구분되며 모든 Steam 파일의 물리적 제거를 의미하지는 않는다.
+
+
+
+## 2026-09-16 02:13:39 (소요시간: 00:00:18)
+
+- 질문: 스토어별 차이가 위시리스트와 버전 표기뿐인지, 두 UI가 같은 값을 참조하는지.
+- 답변: 타이틀 UI의 채널 표기와 위시리스트는 같은 GetDistributionChannel 값을 사용한다. 위시리스트는 Steam 채널이면서 Demo인 경우에만 표시한다. 전체 동작에는 SDK 초기화·STOVE 소유권 인증, 온라인 서비스 설정, 업적 저장 네임스페이스 차이도 있다.
+
+## 2026-09-16 02:14:37 (소요시간: 00:00:20)
+
+- 질문: 체크리스트에도 버전 표기와 위시리스트가 채널을 참조한다고 명시되어 있는지.
+- 답변: 기존에는 채널 설정과 표시 결과만 기재되어 있었다. 같은 GetDistributionChannel 값을 사용한다는 점, 패키지 INI 출처, Steam+Demo 조건, 버전 문자열을 파싱하지 않는다는 점과 에디터 미리보기 출처를 추가했다.
