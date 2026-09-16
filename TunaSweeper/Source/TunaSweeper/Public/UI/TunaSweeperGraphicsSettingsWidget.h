@@ -9,6 +9,13 @@ class UButton;
 class UTextBlock;
 class UWidget;
 class UTunaSweeperGraphicsQualityRowWidget;
+class UTunaSweeperOptionRowWidget;
+
+namespace TunaSweeperGraphicsSettingsOptions
+{
+	TUNASWEEPER_API TArray<FIntPoint> BuildResolutionCandidates(const FIntPoint& Pending, const FIntPoint& Applied);
+	TUNASWEEPER_API TArray<float> BuildFrameRateCandidates(float Pending, float Applied);
+}
 
 UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API UTunaSweeperGraphicsSettingsWidget : public UUserWidget
@@ -188,6 +195,21 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
 	TObjectPtr<UTextBlock> ResolutionConfirmationText;
 
+	UPROPERTY(Transient, BlueprintReadOnly, Category="Graphics")
+	TObjectPtr<UTunaSweeperOptionRowWidget> PresetOptionRow;
+
+	UPROPERTY(Transient, BlueprintReadOnly, Category="Graphics")
+	TObjectPtr<UTunaSweeperOptionRowWidget> WindowModeOptionRow;
+
+	UPROPERTY(Transient, BlueprintReadOnly, Category="Graphics")
+	TObjectPtr<UTunaSweeperOptionRowWidget> ResolutionOptionRow;
+
+	UPROPERTY(Transient, BlueprintReadOnly, Category="Graphics")
+	TObjectPtr<UTunaSweeperOptionRowWidget> DLSSOptionRow;
+
+	UPROPERTY(Transient, BlueprintReadOnly, Category="Graphics")
+	TObjectPtr<UTunaSweeperOptionRowWidget> FrameRateOptionRow;
+
 	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
 	TObjectPtr<UTunaSweeperGraphicsQualityRowWidget> TextureQualityRow;
 	UPROPERTY(BlueprintReadOnly, Category="Graphics", meta=(BindWidgetOptional))
@@ -213,9 +235,12 @@ protected:
 
 private:
 	void BuildRuntimeWidgetTree();
+	void AdaptAuthoredWidgetTree();
 	void BindButtons();
+	void ConfigureOptionRows();
 	void ConfigureQualityRows();
 	void RefreshVisualState();
+	void RefreshOptionRows();
 	void RefreshQualityRows();
 	void SelectPreset(ETunaSweeperGraphicsPreset Preset);
 	void SetWindowMode(EWindowMode::Type WindowMode);
@@ -224,17 +249,23 @@ private:
 	void SetFrameRateLimit(float FrameRateLimit);
 	void ApplyDLSSModeToRuntime(ETunaSweeperTitleDLSSMode Mode) const;
 	bool IsDLSSModeAvailable(ETunaSweeperTitleDLSSMode Mode) const;
-	FText ResolveUiText(FName StringKey, const FText& FallbackText) const;
+	FText ResolveUiText(FName StringKey) const;
 	FText BuildPresetText(ETunaSweeperGraphicsPreset Preset) const;
 	FText BuildQualityText(int32 Quality) const;
+	FText BuildWindowModeText(EWindowMode::Type WindowMode) const;
 	FText BuildDLSSModeText(ETunaSweeperTitleDLSSMode Mode) const;
-	FText BuildToggleText(const FText& Label, bool bEnabled) const;
-	void SetChoiceButtonText(UTextBlock* TextBlock, const FText& Label, bool bSelected) const;
+	FText BuildResolutionText(const FIntPoint& Resolution) const;
+	FText BuildFrameRateText(float FrameRateLimit) const;
 	void BeginResolutionConfirmation();
 	void ConfirmResolution();
 	void RevertResolution();
 
 	void HandleQualityStepRequested(ETunaSweeperScalabilityOption Option, int32 Delta);
+	void HandlePresetStepRequested(int32 Delta);
+	void HandleWindowModeStepRequested(int32 Delta);
+	void HandleResolutionStepRequested(int32 Delta);
+	void HandleDLSSStepRequested(int32 Delta);
+	void HandleFrameRateStepRequested(int32 Delta);
 
 
 	UFUNCTION()

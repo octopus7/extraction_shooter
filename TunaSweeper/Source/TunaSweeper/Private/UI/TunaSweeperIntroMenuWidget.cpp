@@ -15,6 +15,8 @@ void UTunaSweeperIntroMenuWidget::PrepareForInitialViewport()
 	EnsureDeleteSaveSlotHoldProgressWidget();
 	HideLegacyDeleteHoldGaugeWidgets();
 	EnsureTitleWindParticleOverlay();
+	EnsureLanguageOptionRows();
+	ApplyUnifiedControlStyles();
 	InvalidateLayoutAndVolatility();
 	ForceLayoutPrepass();
 }
@@ -26,6 +28,7 @@ void UTunaSweeperIntroMenuWidget::NativePreConstruct()
 	ResetTitleViewportLayoutState();
 	ApplyDemoNoticeVisualStyle();
 	HideLegacyDeleteHoldGaugeWidgets();
+	ApplyUnifiedControlStyles();
 }
 
 void UTunaSweeperIntroMenuWidget::NativeConstruct()
@@ -56,6 +59,8 @@ void UTunaSweeperIntroMenuWidget::NativeConstruct()
 		FName(TEXT("AlwaysSlowPresentationToggleButtonText")),
 		FName(TEXT("AlwaysSlowPresentationToggleIndicator")));
 	EnsureSaveDataManagementSection();
+	EnsureLanguageOptionRows();
+	ApplyUnifiedControlStyles();
 
 	if (StartButton)
 	{
@@ -88,6 +93,7 @@ void UTunaSweeperIntroMenuWidget::NativeConstruct()
 	}
 
 	RefreshDistributionPresentation();
+	ApplyUnifiedControlStyles();
 
 	if (DifficultyFarmingButton)
 	{

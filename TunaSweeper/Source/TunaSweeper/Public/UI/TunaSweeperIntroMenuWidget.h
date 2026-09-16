@@ -21,6 +21,7 @@ class UWidget;
 class UTunaSweeperScreenFadeWidget;
 class UTunaSweeperTitleWindParticleWidget;
 class UTunaSweeperGraphicsSettingsWidget;
+class UTunaSweeperOptionRowWidget;
 
 UCLASS(BlueprintType, Blueprintable)
 class TUNASWEEPER_API UTunaSweeperIntroMenuWidget : public UUserWidget
@@ -225,6 +226,12 @@ protected:
 	UPROPERTY(Transient)
 	TObjectPtr<UTextBlock> DeleteCurrentSaveDataButtonText;
 
+	UPROPERTY(Transient)
+	TObjectPtr<UTunaSweeperOptionRowWidget> InterfaceLanguageOptionRow;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTunaSweeperOptionRowWidget> DebugDisplayLanguageOptionRow;
+
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
 	TObjectPtr<UButton> WindowedModeButton;
 
@@ -417,6 +424,9 @@ private:
 	UFUNCTION()
 	void HandleDebugDisplayLanguageEnglishClicked();
 
+	void HandleInterfaceLanguageStepRequested(int32 Delta);
+	void HandleDebugDisplayLanguageStepRequested(int32 Delta);
+
 	UFUNCTION()
 	void HandlePiggyBankToggleClicked();
 
@@ -538,7 +548,6 @@ private:
 	FText BuildWindowModeText(EWindowMode::Type WindowMode) const;
 	FText BuildDLSSModeText(ETunaSweeperTitleDLSSMode DLSSMode) const;
 	FText BuildLanguageNameText(ETunaSweeperItemTextLanguage Language) const;
-	FText BuildLanguageOptionText(ETunaSweeperItemTextLanguage Language, bool bSelected) const;
 	FText ResolveUiText(FName StringKey, const FText& FallbackText) const;
 	void SetNamedText(FName WidgetName, const FText& Text) const;
 	void EnsureDifficultySelectionPanel();
@@ -553,7 +562,6 @@ private:
 	void ApplyDifficultyButtonStyle(UButton* Button) const;
 	void ApplyDemoNoticeVisualStyle();
 	void ConfigureDifficultyCardBackground(UImage* BackgroundImage, bool bSelected);
-	void ConfigureDifficultyActionButtonBackground(UImage* BackgroundImage, bool bSelected);
 	void ConfigureDifficultySelectionBorder(UBorder* SelectionBorder, bool bSelected);
 	void ConfigureDifficultyIcon(UImage* IconImage, int32 DifficultyStage);
 	void LoadDifficultyDefinitions();
@@ -591,6 +599,8 @@ private:
 	void EnsurePiggyBankToggleButton();
 	void EnsureAlwaysSlowPresentationToggleButton();
 	void EnsureSaveDataManagementSection();
+	void EnsureLanguageOptionRows();
+	void ApplyUnifiedControlStyles();
 	void EnsureDevelopmentToggleButtonContent(
 		UButton* ToggleButton,
 		FName LabelWidgetName,
@@ -728,9 +738,6 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<UTexture2D> DifficultyCardFrameTexture;
-
-	UPROPERTY(Transient)
-	TObjectPtr<UTexture2D> DifficultyActionButtonTexture;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UTexture2D> DifficultyFarmingIconTexture;

@@ -2,6 +2,7 @@
 
 #include "Misc/AutomationTest.h"
 #include "Settings/TunaSweeperGameUserSettings.h"
+#include "UI/TunaSweeperGraphicsSettingsWidget.h"
 
 namespace TunaSweeperGraphicsSettingsTests
 {
@@ -53,6 +54,46 @@ bool FTunaSweeperGraphicsPresetMappingTest::RunTest(const FString& Parameters)
 	Scalability::FQualityLevels Custom = UTunaSweeperGameUserSettings::BuildQualityLevelsForPreset(ETunaSweeperGraphicsPreset::High, 100.0f);
 	Custom.TextureQuality = 1;
 	TestEqual(TEXT("Mixed profile is custom"), UTunaSweeperGameUserSettings::MatchNamedPreset(Custom), ETunaSweeperGraphicsPreset::Custom);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(
+	FTunaSweeperGraphicsCustomSelectorRoundTripTest,
+	"TunaSweeper.Graphics.CustomSelectorRoundTrip",
+	TunaSweeperGraphicsSettingsTests::TestFlags)
+
+bool FTunaSweeperGraphicsCustomSelectorRoundTripTest::RunTest(const FString& Parameters)
+{
+	(void)Parameters;
+	const TArray<float> InitialFrameRates = TunaSweeperGraphicsSettingsOptions::BuildFrameRateCandidates(75.0f, 75.0f);
+	const int32 InitialFrameRateIndex = InitialFrameRates.IndexOfByKey(75.0f);
+	TestTrue(TEXT("Custom frame rate is a selectable candidate"), InitialFrameRateIndex != INDEX_NONE);
+	const bool bHasNextFrameRate = InitialFrameRateIndex != INDEX_NONE && InitialFrameRateIndex + 1 < InitialFrameRates.Num();
+	TestTrue(TEXT("Custom frame rate has a next candidate"), bHasNextFrameRate);
+	if (bHasNextFrameRate)
+	{
+		const float NextFrameRate = InitialFrameRates[InitialFrameRateIndex + 1];
+		TestEqual(TEXT("Next candidate after custom 75 FPS is 120 FPS"), NextFrameRate, 120.0f);
+		const TArray<float> SteppedFrameRates = TunaSweeperGraphicsSettingsOptions::BuildFrameRateCandidates(NextFrameRate, 75.0f);
+		const int32 SteppedIndex = SteppedFrameRates.IndexOfByKey(NextFrameRate);
+		TestTrue(TEXT("Previous step returns to applied custom frame rate"), SteppedIndex > 0 && FMath::IsNearlyEqual(SteppedFrameRates[SteppedIndex - 1], 75.0f));
+	}
+
+	const FIntPoint CustomResolution(1920, 1200);
+	const TArray<FIntPoint> InitialResolutions = TunaSweeperGraphicsSettingsOptions::BuildResolutionCandidates(CustomResolution, CustomResolution);
+	const int32 InitialResolutionIndex = InitialResolutions.IndexOfByKey(CustomResolution);
+	TestTrue(TEXT("Custom resolution is a selectable candidate"), InitialResolutionIndex != INDEX_NONE);
+	const bool bHasNextResolution = InitialResolutionIndex != INDEX_NONE && InitialResolutionIndex + 1 < InitialResolutions.Num();
+	TestTrue(TEXT("Custom resolution has a next candidate"), bHasNextResolution);
+	if (bHasNextResolution)
+	{
+		const FIntPoint NextResolution = InitialResolutions[InitialResolutionIndex + 1];
+		TestEqual(TEXT("Next resolution width after 1920x1200"), NextResolution.X, 2560);
+		TestEqual(TEXT("Next resolution height after 1920x1200"), NextResolution.Y, 1440);
+		const TArray<FIntPoint> SteppedResolutions = TunaSweeperGraphicsSettingsOptions::BuildResolutionCandidates(NextResolution, CustomResolution);
+		const int32 SteppedIndex = SteppedResolutions.IndexOfByKey(NextResolution);
+		TestTrue(TEXT("Previous step returns to applied custom resolution"), SteppedIndex > 0 && SteppedResolutions[SteppedIndex - 1] == CustomResolution);
+	}
 	return true;
 }
 

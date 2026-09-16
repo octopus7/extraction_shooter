@@ -5,6 +5,7 @@
 #include "Components/Button.h"
 #include "Components/HorizontalBox.h"
 #include "Components/HorizontalBoxSlot.h"
+#include "Components/PanelWidget.h"
 #include "Components/ScrollBox.h"
 #include "Components/SizeBox.h"
 #include "Components/TextBlock.h"
@@ -17,7 +18,8 @@
 #include "HAL/IConsoleManager.h"
 #include "RHIGlobals.h"
 #include "UI/TunaSweeperGraphicsQualityRowWidget.h"
-#include "UI/TunaSweeperUIFont.h"
+#include "UI/TunaSweeperOptionRowWidget.h"
+#include "UI/TunaSweeperUIStyle.h"
 
 namespace TunaSweeperGraphicsSettingsWidget
 {
@@ -89,9 +91,48 @@ namespace TunaSweeperGraphicsSettingsWidget
 	}
 }
 
+TArray<FIntPoint> TunaSweeperGraphicsSettingsOptions::BuildResolutionCandidates(
+	const FIntPoint& Pending,
+	const FIntPoint& Applied)
+{
+	TArray<FIntPoint> Resolutions = {
+		FIntPoint(1280, 720),
+		FIntPoint(1600, 900),
+		FIntPoint(1920, 1080),
+		FIntPoint(2560, 1440),
+		FIntPoint(3840, 2160)
+	};
+	Resolutions.AddUnique(Applied);
+	Resolutions.AddUnique(Pending);
+	Resolutions.Sort([](const FIntPoint& Left, const FIntPoint& Right)
+	{
+		const int64 LeftPixels = static_cast<int64>(Left.X) * Left.Y;
+		const int64 RightPixels = static_cast<int64>(Right.X) * Right.Y;
+		return LeftPixels == RightPixels ? Left.X < Right.X : LeftPixels < RightPixels;
+	});
+	return Resolutions;
+}
+
+TArray<float> TunaSweeperGraphicsSettingsOptions::BuildFrameRateCandidates(float Pending, float Applied)
+{
+	TArray<float> FrameRates = { 0.0f, 60.0f, 120.0f, 144.0f };
+	auto AddUniqueNearlyEqual = [&FrameRates](float Value)
+	{
+		if (!FrameRates.ContainsByPredicate([Value](float Candidate) { return FMath::IsNearlyEqual(Candidate, Value); }))
+		{
+			FrameRates.Add(Value);
+		}
+	};
+	AddUniqueNearlyEqual(Applied);
+	AddUniqueNearlyEqual(Pending);
+	FrameRates.Sort();
+	return FrameRates;
+}
+
 TSharedRef<SWidget> UTunaSweeperGraphicsSettingsWidget::RebuildWidget()
 {
 	BuildRuntimeWidgetTree();
+	AdaptAuthoredWidgetTree();
 	return Super::RebuildWidget();
 }
 
@@ -109,8 +150,7 @@ void UTunaSweeperGraphicsSettingsWidget::BuildRuntimeWidgetTree()
 	UVerticalBox* Root = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("GraphicsSettingsRoot"));
 	WidgetTree->RootWidget = Root;
 	GraphicsStatusText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("GraphicsStatusText"));
-	TunaSweeperUIFont::ApplyFont(GraphicsStatusText, 14);
-	GraphicsStatusText->SetColorAndOpacity(FSlateColor(FLinearColor(0.72f, 0.84f, 0.84f, 1.0f)));
+	TunaSweeperUIStyle::ApplyLabel(GraphicsStatusText, 14);
 	Root->AddChildToVerticalBox(GraphicsStatusText)->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 5.0f));
 
 	UScrollBox* Scroll = WidgetTree->ConstructWidget<UScrollBox>(UScrollBox::StaticClass(), TEXT("GraphicsSettingsScroll"));
@@ -123,15 +163,21 @@ void UTunaSweeperGraphicsSettingsWidget::BuildRuntimeWidgetTree()
 		GraphicsScrollSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
 	}
 
-	auto AddHeading = [this, Content](const TCHAR* Name, const TCHAR* Text)
+	auto AddHeading = [this, Content](const TCHAR* Name)
 	{
 		UTextBlock* Heading = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), Name);
-		Heading->SetText(FText::FromString(Text));
-		Heading->SetColorAndOpacity(FSlateColor(FLinearColor(0.63f, 0.78f, 0.78f, 1.0f)));
-		TunaSweeperUIFont::ApplyFont(Heading, 15);
+		TunaSweeperUIStyle::ApplyLabel(Heading, 15);
 		if (UVerticalBoxSlot* HeadingSlot = Content->AddChildToVerticalBox(Heading))
 		{
 			HeadingSlot->SetPadding(FMargin(0.0f, 8.0f, 0.0f, 2.0f));
+		}
+	};
+	auto AddOptionRow = [this, Content](const TCHAR* Name, TObjectPtr<UTunaSweeperOptionRowWidget>& OutRow)
+	{
+		OutRow = WidgetTree->ConstructWidget<UTunaSweeperOptionRowWidget>(UTunaSweeperOptionRowWidget::StaticClass(), Name);
+		if (UVerticalBoxSlot* RowSlot = Content->AddChildToVerticalBox(OutRow))
+		{
+			RowSlot->SetPadding(FMargin(0.0f, 2.0f));
 		}
 	};
 	auto AddButtonRow = [this, Content](const TArray<UWidget*>& Buttons)
@@ -150,50 +196,23 @@ void UTunaSweeperGraphicsSettingsWidget::BuildRuntimeWidgetTree()
 		}
 	};
 
-#define MAKE_GRAPHICS_BUTTON(Name, Label, Width) \
+#define MAKE_GRAPHICS_BUTTON(Name, Width) \
 	Name = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT(#Name)); \
 	Name##Text = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT(#Name "Text")); \
-	Name##Text->SetText(FText::FromString(Label)); \
-	Name##Text->SetColorAndOpacity(FSlateColor(FLinearColor(0.90f, 0.95f, 0.96f, 1.0f))); \
 	Name##Text->SetJustification(ETextJustify::Center); \
-	TunaSweeperUIFont::ApplyFont(Name##Text, 13); \
+	TunaSweeperUIStyle::ApplyLabel(Name##Text, 13); \
 	Name->SetContent(Name##Text); \
-	Name->SetBackgroundColor(FLinearColor(0.12f, 0.16f, 0.18f, 1.0f)); \
 	USizeBox* Name##Box = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT(#Name "Box")); \
 	Name##Box->SetWidthOverride(Width); \
-	Name##Box->SetHeightOverride(36.0f); \
+	Name##Box->SetHeightOverride(44.0f); \
 	Name##Box->SetContent(Name)
 
-	AddHeading(TEXT("PresetHeading"), TEXT("전체 품질 프리셋"));
-	MAKE_GRAPHICS_BUTTON(PresetAutoButton, TEXT("자동"), 110.0f);
-	MAKE_GRAPHICS_BUTTON(PresetLowButton, TEXT("낮음"), 100.0f);
-	MAKE_GRAPHICS_BUTTON(PresetMediumButton, TEXT("중간"), 100.0f);
-	MAKE_GRAPHICS_BUTTON(PresetHighButton, TEXT("높음"), 100.0f);
-	MAKE_GRAPHICS_BUTTON(PresetEpicButton, TEXT("최고"), 100.0f);
-	AddButtonRow({ PresetAutoButtonBox, PresetLowButtonBox, PresetMediumButtonBox, PresetHighButtonBox, PresetEpicButtonBox });
+	AddOptionRow(TEXT("PresetOptionRow"), PresetOptionRow);
+	AddOptionRow(TEXT("WindowModeOptionRow"), WindowModeOptionRow);
+	AddOptionRow(TEXT("ResolutionOptionRow"), ResolutionOptionRow);
+	AddOptionRow(TEXT("DLSSOptionRow"), DLSSOptionRow);
 
-	AddHeading(TEXT("WindowHeading"), TEXT("화면 모드"));
-	MAKE_GRAPHICS_BUTTON(WindowedModeButton, TEXT("창모드"), 145.0f);
-	MAKE_GRAPHICS_BUTTON(BorderlessWindowModeButton, TEXT("테두리 없는 창"), 190.0f);
-	MAKE_GRAPHICS_BUTTON(FullscreenModeButton, TEXT("전체화면"), 145.0f);
-	AddButtonRow({ WindowedModeButtonBox, BorderlessWindowModeButtonBox, FullscreenModeButtonBox });
-
-	AddHeading(TEXT("ResolutionHeading"), TEXT("해상도"));
-	MAKE_GRAPHICS_BUTTON(Resolution1280Button, TEXT("1280 x 720"), 130.0f);
-	MAKE_GRAPHICS_BUTTON(Resolution1600Button, TEXT("1600 x 900"), 130.0f);
-	MAKE_GRAPHICS_BUTTON(Resolution1920Button, TEXT("1920 x 1080"), 138.0f);
-	MAKE_GRAPHICS_BUTTON(Resolution2560Button, TEXT("2560 x 1440"), 138.0f);
-	MAKE_GRAPHICS_BUTTON(Resolution3840Button, TEXT("3840 x 2160"), 138.0f);
-	AddButtonRow({ Resolution1280ButtonBox, Resolution1600ButtonBox, Resolution1920ButtonBox, Resolution2560ButtonBox, Resolution3840ButtonBox });
-
-	AddHeading(TEXT("DLSSHeading"), TEXT("DLSS"));
-	MAKE_GRAPHICS_BUTTON(DLSSOffButton, TEXT("끄기"), 120.0f);
-	MAKE_GRAPHICS_BUTTON(DLSSQualityButton, TEXT("품질"), 120.0f);
-	MAKE_GRAPHICS_BUTTON(DLSSBalancedButton, TEXT("균형"), 120.0f);
-	MAKE_GRAPHICS_BUTTON(DLSSPerformanceButton, TEXT("성능"), 120.0f);
-	AddButtonRow({ DLSSOffButtonBox, DLSSQualityButtonBox, DLSSBalancedButtonBox, DLSSPerformanceButtonBox });
-
-	AddHeading(TEXT("QualityHeading"), TEXT("개별 품질"));
+	AddHeading(TEXT("QualityHeading"));
 #define MAKE_QUALITY_ROW(Name) \
 	Name = WidgetTree->ConstructWidget<UTunaSweeperGraphicsQualityRowWidget>(UTunaSweeperGraphicsQualityRowWidget::StaticClass(), TEXT(#Name)); \
 	Content->AddChildToVerticalBox(Name)->SetPadding(FMargin(0.0f, 2.0f))
@@ -210,27 +229,24 @@ void UTunaSweeperGraphicsSettingsWidget::BuildRuntimeWidgetTree()
 	MAKE_QUALITY_ROW(AntiAliasingQualityRow);
 #undef MAKE_QUALITY_ROW
 
-	AddHeading(TEXT("PerformanceHeading"), TEXT("성능 및 효과"));
-	MAKE_GRAPHICS_BUTTON(VSyncToggleButton, TEXT("[ ] 수직 동기화"), 165.0f);
-	MAKE_GRAPHICS_BUTTON(MotionBlurToggleButton, TEXT("[x] 모션 블러"), 165.0f);
-	MAKE_GRAPHICS_BUTTON(DynamicResolutionToggleButton, TEXT("[ ] 동적 해상도"), 175.0f);
-	MAKE_GRAPHICS_BUTTON(HardwareRayTracingToggleButton, TEXT("[x] 하드웨어 RT"), 190.0f);
-	AddButtonRow({ VSyncToggleButtonBox, MotionBlurToggleButtonBox, DynamicResolutionToggleButtonBox, HardwareRayTracingToggleButtonBox });
-	MAKE_GRAPHICS_BUTTON(FrameRateUnlimitedButton, TEXT("제한 없음"), 145.0f);
-	MAKE_GRAPHICS_BUTTON(FrameRate60Button, TEXT("60 FPS"), 110.0f);
-	MAKE_GRAPHICS_BUTTON(FrameRate120Button, TEXT("120 FPS"), 110.0f);
-	MAKE_GRAPHICS_BUTTON(FrameRate144Button, TEXT("144 FPS"), 110.0f);
-	AddButtonRow({ FrameRateUnlimitedButtonBox, FrameRate60ButtonBox, FrameRate120ButtonBox, FrameRate144ButtonBox });
+	AddHeading(TEXT("PerformanceHeading"));
+	MAKE_GRAPHICS_BUTTON(VSyncToggleButton, 260.0f);
+	MAKE_GRAPHICS_BUTTON(MotionBlurToggleButton, 260.0f);
+	MAKE_GRAPHICS_BUTTON(DynamicResolutionToggleButton, 260.0f);
+	MAKE_GRAPHICS_BUTTON(HardwareRayTracingToggleButton, 300.0f);
+	AddButtonRow({ VSyncToggleButtonBox, MotionBlurToggleButtonBox });
+	AddButtonRow({ DynamicResolutionToggleButtonBox, HardwareRayTracingToggleButtonBox });
+	AddOptionRow(TEXT("FrameRateOptionRow"), FrameRateOptionRow);
 
-	MAKE_GRAPHICS_BUTTON(ApplyGraphicsSettingsButton, TEXT("적용"), 145.0f);
-	MAKE_GRAPHICS_BUTTON(CancelGraphicsSettingsButton, TEXT("취소"), 145.0f);
+	MAKE_GRAPHICS_BUTTON(ApplyGraphicsSettingsButton, 145.0f);
+	MAKE_GRAPHICS_BUTTON(CancelGraphicsSettingsButton, 145.0f);
 	UHorizontalBox* ActionRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("GraphicsActionRow"));
 	ActionRow->AddChildToHorizontalBox(ApplyGraphicsSettingsButtonBox)->SetPadding(FMargin(0.0f, 8.0f, 10.0f, 0.0f));
 	ActionRow->AddChildToHorizontalBox(CancelGraphicsSettingsButtonBox)->SetPadding(FMargin(0.0f, 8.0f, 0.0f, 0.0f));
 	Root->AddChildToVerticalBox(ActionRow);
 
-	MAKE_GRAPHICS_BUTTON(ConfirmResolutionButton, TEXT("유지"), 90.0f);
-	MAKE_GRAPHICS_BUTTON(RevertResolutionButton, TEXT("되돌리기"), 110.0f);
+	MAKE_GRAPHICS_BUTTON(ConfirmResolutionButton, 90.0f);
+	MAKE_GRAPHICS_BUTTON(RevertResolutionButton, 110.0f);
 #undef MAKE_GRAPHICS_BUTTON
 	UBorder* ConfirmationBorder = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("ResolutionConfirmationPanel"));
 	ResolutionConfirmationPanel = ConfirmationBorder;
@@ -238,9 +254,7 @@ void UTunaSweeperGraphicsSettingsWidget::BuildRuntimeWidgetTree()
 	ConfirmationBorder->SetBrushColor(FLinearColor(0.12f, 0.075f, 0.035f, 0.98f));
 	UHorizontalBox* ConfirmationRow = WidgetTree->ConstructWidget<UHorizontalBox>();
 	ResolutionConfirmationText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("ResolutionConfirmationText"));
-	ResolutionConfirmationText->SetText(FText::FromString(TEXT("이 화면 설정을 유지할까요? 15초 후 복구됩니다.")));
-	ResolutionConfirmationText->SetColorAndOpacity(FSlateColor(FLinearColor::White));
-	TunaSweeperUIFont::ApplyFont(ResolutionConfirmationText, 13);
+	TunaSweeperUIStyle::ApplyLabel(ResolutionConfirmationText, 13);
 	ConfirmationRow->AddChildToHorizontalBox(ResolutionConfirmationText)->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
 	ConfirmationRow->AddChildToHorizontalBox(ConfirmResolutionButtonBox)->SetPadding(FMargin(8.0f, 0.0f));
 	ConfirmationRow->AddChildToHorizontalBox(RevertResolutionButtonBox);
@@ -249,10 +263,95 @@ void UTunaSweeperGraphicsSettingsWidget::BuildRuntimeWidgetTree()
 	Root->AddChildToVerticalBox(ConfirmationBorder)->SetPadding(FMargin(0.0f, 8.0f, 0.0f, 0.0f));
 }
 
+void UTunaSweeperGraphicsSettingsWidget::AdaptAuthoredWidgetTree()
+{
+	if (!WidgetTree)
+	{
+		return;
+	}
+
+	auto ReplaceChoiceRow = [this](TObjectPtr<UTunaSweeperOptionRowWidget>& OutRow, const TCHAR* RowName, const TCHAR* AnchorBoxName, const TCHAR* HeadingName)
+	{
+		if (OutRow)
+		{
+			return;
+		}
+		UWidget* AnchorBox = WidgetTree->FindWidget(FName(AnchorBoxName));
+		UPanelWidget* OldRow = AnchorBox ? Cast<UPanelWidget>(AnchorBox->GetParent()) : nullptr;
+		UPanelWidget* Container = OldRow ? Cast<UPanelWidget>(OldRow->GetParent()) : nullptr;
+		if (!Container)
+		{
+			return;
+		}
+
+		const int32 InsertIndex = Container->GetChildIndex(OldRow);
+		Container->RemoveChild(OldRow);
+		OutRow = WidgetTree->ConstructWidget<UTunaSweeperOptionRowWidget>(UTunaSweeperOptionRowWidget::StaticClass(), RowName);
+		UPanelSlot* NewSlot = Container->InsertChildAt(InsertIndex, OutRow);
+		if (UVerticalBoxSlot* VerticalSlot = Cast<UVerticalBoxSlot>(NewSlot))
+		{
+			VerticalSlot->SetPadding(FMargin(0.0f, 2.0f));
+		}
+		if (HeadingName && HeadingName[0] != TCHAR('\0'))
+		{
+			if (UWidget* Heading = WidgetTree->FindWidget(FName(HeadingName)))
+			{
+				Heading->SetVisibility(ESlateVisibility::Collapsed);
+			}
+		}
+	};
+
+	ReplaceChoiceRow(PresetOptionRow, TEXT("PresetOptionRow"), TEXT("PresetAutoButtonBox"), TEXT("PresetHeading"));
+	ReplaceChoiceRow(WindowModeOptionRow, TEXT("WindowModeOptionRow"), TEXT("WindowedModeButtonBox"), TEXT("WindowHeading"));
+	ReplaceChoiceRow(ResolutionOptionRow, TEXT("ResolutionOptionRow"), TEXT("Resolution1280ButtonBox"), TEXT("ResolutionHeading"));
+	ReplaceChoiceRow(DLSSOptionRow, TEXT("DLSSOptionRow"), TEXT("DLSSOffButtonBox"), TEXT("DLSSHeading"));
+	ReplaceChoiceRow(FrameRateOptionRow, TEXT("FrameRateOptionRow"), TEXT("FrameRateUnlimitedButtonBox"), nullptr);
+
+	USizeBox* VSyncBox = Cast<USizeBox>(WidgetTree->FindWidget(TEXT("VSyncToggleButtonBox")));
+	UHorizontalBox* OldToggleRow = VSyncBox ? Cast<UHorizontalBox>(VSyncBox->GetParent()) : nullptr;
+	UPanelWidget* ToggleContainer = OldToggleRow ? Cast<UPanelWidget>(OldToggleRow->GetParent()) : nullptr;
+	if (VSyncBox && OldToggleRow && ToggleContainer && OldToggleRow->GetFName() != FName(TEXT("GraphicsToggleRow1")))
+	{
+		USizeBox* MotionBlurBox = Cast<USizeBox>(WidgetTree->FindWidget(TEXT("MotionBlurToggleButtonBox")));
+		USizeBox* DynamicResolutionBox = Cast<USizeBox>(WidgetTree->FindWidget(TEXT("DynamicResolutionToggleButtonBox")));
+		USizeBox* RayTracingBox = Cast<USizeBox>(WidgetTree->FindWidget(TEXT("HardwareRayTracingToggleButtonBox")));
+		if (MotionBlurBox && DynamicResolutionBox && RayTracingBox &&
+			MotionBlurBox->GetParent() == OldToggleRow &&
+			DynamicResolutionBox->GetParent() == OldToggleRow &&
+			RayTracingBox->GetParent() == OldToggleRow)
+		{
+			const int32 InsertIndex = ToggleContainer->GetChildIndex(OldToggleRow);
+			for (USizeBox* Box : { VSyncBox, MotionBlurBox, DynamicResolutionBox, RayTracingBox })
+			{
+				OldToggleRow->RemoveChild(Box);
+				Box->SetWidthOverride(300.0f);
+				Box->SetHeightOverride(44.0f);
+			}
+			ToggleContainer->RemoveChild(OldToggleRow);
+
+			UVerticalBox* ToggleRows = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("GraphicsToggleRows"));
+			UHorizontalBox* FirstRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("GraphicsToggleRow1"));
+			UHorizontalBox* SecondRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("GraphicsToggleRow2"));
+			FirstRow->AddChildToHorizontalBox(VSyncBox)->SetPadding(FMargin(0.0f, 0.0f, 8.0f, 4.0f));
+			FirstRow->AddChildToHorizontalBox(MotionBlurBox)->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 4.0f));
+			SecondRow->AddChildToHorizontalBox(DynamicResolutionBox)->SetPadding(FMargin(0.0f, 0.0f, 8.0f, 0.0f));
+			SecondRow->AddChildToHorizontalBox(RayTracingBox);
+			ToggleRows->AddChildToVerticalBox(FirstRow);
+			ToggleRows->AddChildToVerticalBox(SecondRow);
+			if (UVerticalBoxSlot* AddedSlot = Cast<UVerticalBoxSlot>(ToggleContainer->InsertChildAt(InsertIndex, ToggleRows)))
+			{
+				AddedSlot->SetPadding(FMargin(0.0f, 3.0f, 0.0f, 8.0f));
+			}
+		}
+	}
+}
+
 void UTunaSweeperGraphicsSettingsWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
+	AdaptAuthoredWidgetTree();
 	BindButtons();
+	ConfigureOptionRows();
 	ConfigureQualityRows();
 	if (ResolutionConfirmationPanel)
 	{
@@ -278,6 +377,15 @@ void UTunaSweeperGraphicsSettingsWidget::NativeDestruct()
 			Row->OnQualityStepRequested.RemoveAll(this);
 		}
 	}
+	for (UTunaSweeperOptionRowWidget* Row : {
+		PresetOptionRow.Get(), WindowModeOptionRow.Get(), ResolutionOptionRow.Get(),
+		DLSSOptionRow.Get(), FrameRateOptionRow.Get() })
+	{
+		if (Row)
+		{
+			Row->OnStepRequested.RemoveAll(this);
+		}
+	}
 	Super::NativeDestruct();
 }
 
@@ -293,7 +401,7 @@ void UTunaSweeperGraphicsSettingsWidget::NativeTick(const FGeometry& MyGeometry,
 	if (ResolutionConfirmationText)
 	{
 		ResolutionConfirmationText->SetText(FText::Format(
-			ResolveUiText(FName(TEXT("ui.settings.resolution_confirm_countdown")), FText::FromString(TEXT("이 화면 설정을 유지할까요? {0}초 후 복구됩니다."))),
+			ResolveUiText(FName(TEXT("ui.settings.resolution_confirm_countdown"))),
 			FText::AsNumber(FMath::Max(0, FMath::CeilToInt(ResolutionConfirmationSecondsRemaining)))));
 	}
 	if (ResolutionConfirmationSecondsRemaining <= 0.0f)
@@ -348,28 +456,7 @@ void UTunaSweeperGraphicsSettingsWidget::BindButtons()
 {
 #define BIND_GRAPHICS_BUTTON(Button, Handler) \
 	if (Button) { Button->OnClicked.RemoveDynamic(this, &UTunaSweeperGraphicsSettingsWidget::Handler); Button->OnClicked.AddDynamic(this, &UTunaSweeperGraphicsSettingsWidget::Handler); }
-	BIND_GRAPHICS_BUTTON(PresetAutoButton, HandlePresetAutoClicked);
-	BIND_GRAPHICS_BUTTON(PresetLowButton, HandlePresetLowClicked);
-	BIND_GRAPHICS_BUTTON(PresetMediumButton, HandlePresetMediumClicked);
-	BIND_GRAPHICS_BUTTON(PresetHighButton, HandlePresetHighClicked);
-	BIND_GRAPHICS_BUTTON(PresetEpicButton, HandlePresetEpicClicked);
-	BIND_GRAPHICS_BUTTON(WindowedModeButton, HandleWindowedModeClicked);
-	BIND_GRAPHICS_BUTTON(BorderlessWindowModeButton, HandleBorderlessWindowModeClicked);
-	BIND_GRAPHICS_BUTTON(FullscreenModeButton, HandleFullscreenModeClicked);
-	BIND_GRAPHICS_BUTTON(Resolution1280Button, HandleResolution1280Clicked);
-	BIND_GRAPHICS_BUTTON(Resolution1600Button, HandleResolution1600Clicked);
-	BIND_GRAPHICS_BUTTON(Resolution1920Button, HandleResolution1920Clicked);
-	BIND_GRAPHICS_BUTTON(Resolution2560Button, HandleResolution2560Clicked);
-	BIND_GRAPHICS_BUTTON(Resolution3840Button, HandleResolution3840Clicked);
-	BIND_GRAPHICS_BUTTON(DLSSOffButton, HandleDLSSOffClicked);
-	BIND_GRAPHICS_BUTTON(DLSSQualityButton, HandleDLSSQualityClicked);
-	BIND_GRAPHICS_BUTTON(DLSSBalancedButton, HandleDLSSBalancedClicked);
-	BIND_GRAPHICS_BUTTON(DLSSPerformanceButton, HandleDLSSPerformanceClicked);
 	BIND_GRAPHICS_BUTTON(VSyncToggleButton, HandleVSyncToggleClicked);
-	BIND_GRAPHICS_BUTTON(FrameRateUnlimitedButton, HandleFrameRateUnlimitedClicked);
-	BIND_GRAPHICS_BUTTON(FrameRate60Button, HandleFrameRate60Clicked);
-	BIND_GRAPHICS_BUTTON(FrameRate120Button, HandleFrameRate120Clicked);
-	BIND_GRAPHICS_BUTTON(FrameRate144Button, HandleFrameRate144Clicked);
 	BIND_GRAPHICS_BUTTON(MotionBlurToggleButton, HandleMotionBlurToggleClicked);
 	BIND_GRAPHICS_BUTTON(DynamicResolutionToggleButton, HandleDynamicResolutionToggleClicked);
 	BIND_GRAPHICS_BUTTON(HardwareRayTracingToggleButton, HandleHardwareRayTracingToggleClicked);
@@ -378,6 +465,39 @@ void UTunaSweeperGraphicsSettingsWidget::BindButtons()
 	BIND_GRAPHICS_BUTTON(ConfirmResolutionButton, HandleConfirmResolutionClicked);
 	BIND_GRAPHICS_BUTTON(RevertResolutionButton, HandleRevertResolutionClicked);
 #undef BIND_GRAPHICS_BUTTON
+
+	TunaSweeperUIStyle::ApplyButton(ApplyGraphicsSettingsButton, TunaSweeperUIStyle::EButtonRole::Primary);
+	TunaSweeperUIStyle::ApplyButton(CancelGraphicsSettingsButton, TunaSweeperUIStyle::EButtonRole::Secondary);
+	TunaSweeperUIStyle::ApplyButton(ConfirmResolutionButton, TunaSweeperUIStyle::EButtonRole::Primary);
+	TunaSweeperUIStyle::ApplyButton(RevertResolutionButton, TunaSweeperUIStyle::EButtonRole::Danger);
+}
+
+void UTunaSweeperGraphicsSettingsWidget::ConfigureOptionRows()
+{
+	struct FRowBinding
+	{
+		UTunaSweeperOptionRowWidget* Row;
+		FName LabelKey;
+		void (UTunaSweeperGraphicsSettingsWidget::*Handler)(int32);
+	};
+
+	const FRowBinding Rows[] = {
+		{ PresetOptionRow, FName(TEXT("ui.settings.preset")), &UTunaSweeperGraphicsSettingsWidget::HandlePresetStepRequested },
+		{ WindowModeOptionRow, FName(TEXT("ui.settings.window_mode")), &UTunaSweeperGraphicsSettingsWidget::HandleWindowModeStepRequested },
+		{ ResolutionOptionRow, FName(TEXT("ui.settings.resolution")), &UTunaSweeperGraphicsSettingsWidget::HandleResolutionStepRequested },
+		{ DLSSOptionRow, FName(TEXT("ui.settings.dlss")), &UTunaSweeperGraphicsSettingsWidget::HandleDLSSStepRequested },
+		{ FrameRateOptionRow, FName(TEXT("ui.settings.frame_rate")), &UTunaSweeperGraphicsSettingsWidget::HandleFrameRateStepRequested }
+	};
+
+	for (const FRowBinding& Binding : Rows)
+	{
+		if (Binding.Row)
+		{
+			Binding.Row->Configure(ResolveUiText(Binding.LabelKey));
+			Binding.Row->OnStepRequested.RemoveAll(this);
+			Binding.Row->OnStepRequested.AddUObject(this, Binding.Handler);
+		}
+	}
 }
 
 void UTunaSweeperGraphicsSettingsWidget::ConfigureQualityRows()
@@ -387,28 +507,27 @@ void UTunaSweeperGraphicsSettingsWidget::ConfigureQualityRows()
 		UTunaSweeperGraphicsQualityRowWidget* Row;
 		ETunaSweeperScalabilityOption Option;
 		const TCHAR* Key;
-		const TCHAR* Label;
 	};
 
 	const FRowDefinition Rows[] = {
-		{ TextureQualityRow, ETunaSweeperScalabilityOption::Texture, TEXT("ui.settings.texture"), TEXT("텍스처") },
-		{ ShadowQualityRow, ETunaSweeperScalabilityOption::Shadow, TEXT("ui.settings.shadow"), TEXT("그림자") },
-		{ GlobalIlluminationQualityRow, ETunaSweeperScalabilityOption::GlobalIllumination, TEXT("ui.settings.global_illumination"), TEXT("전역 조명") },
-		{ ReflectionQualityRow, ETunaSweeperScalabilityOption::Reflection, TEXT("ui.settings.reflection"), TEXT("반사") },
-		{ ViewDistanceQualityRow, ETunaSweeperScalabilityOption::ViewDistance, TEXT("ui.settings.view_distance"), TEXT("가시 거리") },
-		{ EffectsQualityRow, ETunaSweeperScalabilityOption::Effects, TEXT("ui.settings.effects"), TEXT("효과") },
-		{ PostProcessQualityRow, ETunaSweeperScalabilityOption::PostProcess, TEXT("ui.settings.post_process"), TEXT("후처리") },
-		{ FoliageQualityRow, ETunaSweeperScalabilityOption::Foliage, TEXT("ui.settings.foliage"), TEXT("식생") },
-		{ ShadingQualityRow, ETunaSweeperScalabilityOption::Shading, TEXT("ui.settings.shading"), TEXT("셰이딩") },
-		{ LandscapeQualityRow, ETunaSweeperScalabilityOption::Landscape, TEXT("ui.settings.landscape"), TEXT("지형") },
-		{ AntiAliasingQualityRow, ETunaSweeperScalabilityOption::AntiAliasing, TEXT("ui.settings.anti_aliasing"), TEXT("안티앨리어싱") }
+		{ TextureQualityRow, ETunaSweeperScalabilityOption::Texture, TEXT("ui.settings.texture") },
+		{ ShadowQualityRow, ETunaSweeperScalabilityOption::Shadow, TEXT("ui.settings.shadow") },
+		{ GlobalIlluminationQualityRow, ETunaSweeperScalabilityOption::GlobalIllumination, TEXT("ui.settings.global_illumination") },
+		{ ReflectionQualityRow, ETunaSweeperScalabilityOption::Reflection, TEXT("ui.settings.reflection") },
+		{ ViewDistanceQualityRow, ETunaSweeperScalabilityOption::ViewDistance, TEXT("ui.settings.view_distance") },
+		{ EffectsQualityRow, ETunaSweeperScalabilityOption::Effects, TEXT("ui.settings.effects") },
+		{ PostProcessQualityRow, ETunaSweeperScalabilityOption::PostProcess, TEXT("ui.settings.post_process") },
+		{ FoliageQualityRow, ETunaSweeperScalabilityOption::Foliage, TEXT("ui.settings.foliage") },
+		{ ShadingQualityRow, ETunaSweeperScalabilityOption::Shading, TEXT("ui.settings.shading") },
+		{ LandscapeQualityRow, ETunaSweeperScalabilityOption::Landscape, TEXT("ui.settings.landscape") },
+		{ AntiAliasingQualityRow, ETunaSweeperScalabilityOption::AntiAliasing, TEXT("ui.settings.anti_aliasing") }
 	};
 
 	for (const FRowDefinition& Definition : Rows)
 	{
 		if (Definition.Row)
 		{
-			Definition.Row->Configure(Definition.Option, ResolveUiText(FName(Definition.Key), FText::FromString(Definition.Label)));
+			Definition.Row->Configure(Definition.Option, ResolveUiText(FName(Definition.Key)));
 			Definition.Row->OnQualityStepRequested.RemoveAll(this);
 			Definition.Row->OnQualityStepRequested.AddUObject(this, &UTunaSweeperGraphicsSettingsWidget::HandleQualityStepRequested);
 		}
@@ -418,72 +537,139 @@ void UTunaSweeperGraphicsSettingsWidget::ConfigureQualityRows()
 void UTunaSweeperGraphicsSettingsWidget::RefreshVisualState()
 {
 	if (WidgetTree) if (UTextBlock* Header = Cast<UTextBlock>(WidgetTree->FindWidget(TEXT("GraphicsSectionTitleText"))))
-		Header->SetText(ResolveUiText(FName(TEXT("ui.settings.graphics")), FText::FromString(TEXT("그래픽"))));
+		Header->SetText(ResolveUiText(FName(TEXT("ui.settings.graphics"))));
 	if (!bHasSettingsSnapshot)
 	{
 		return;
+	}
+	if (WidgetTree)
+	{
+		if (UTextBlock* Heading = Cast<UTextBlock>(WidgetTree->FindWidget(TEXT("QualityHeading"))))
+		{
+			Heading->SetText(ResolveUiText(FName(TEXT("ui.settings.individual_quality"))));
+			TunaSweeperUIStyle::ApplyLabel(Heading, 15);
+		}
+		if (UTextBlock* Heading = Cast<UTextBlock>(WidgetTree->FindWidget(TEXT("PerformanceHeading"))))
+		{
+			Heading->SetText(ResolveUiText(FName(TEXT("ui.settings.performance_effects"))));
+			TunaSweeperUIStyle::ApplyLabel(Heading, 15);
+		}
 	}
 
 	const UTunaSweeperGameUserSettings* Settings = UTunaSweeperGameUserSettings::Get();
 	if (GraphicsStatusText && Settings)
 	{
-		const ETunaSweeperGraphicsPreset DisplayPreset = PendingState.Preset == ETunaSweeperGraphicsPreset::Auto
-			? Settings->GetResolvedAutoGraphicsPreset()
-			: PendingState.Preset;
-		const FString AutoSuffix = PendingState.Preset == ETunaSweeperGraphicsPreset::Auto
-			? FString::Printf(TEXT(" (%s, VRAM %d MB)"), *BuildPresetText(DisplayPreset).ToString(), Settings->GetLastDetectedDedicatedVideoMemoryMB())
-			: FString();
-		GraphicsStatusText->SetText(FText::FromString(FString::Printf(
-			TEXT("%s%s%s"),
-			*BuildPresetText(PendingState.Preset).ToString(),
-			*AutoSuffix,
-			HasPendingChanges() ? TEXT(" · 적용 대기") : TEXT(""))));
+		FText Status = BuildPresetText(PendingState.Preset);
+		if (PendingState.Preset == ETunaSweeperGraphicsPreset::Auto)
+		{
+			Status = FText::Format(
+				ResolveUiText(FName(TEXT("ui.settings.preset.auto_details"))),
+				Status,
+				BuildPresetText(Settings->GetResolvedAutoGraphicsPreset()),
+				FText::AsNumber(Settings->GetLastDetectedDedicatedVideoMemoryMB()));
+		}
+		if (HasPendingChanges())
+		{
+			Status = FText::FromString(Status.ToString() + ResolveUiText(FName(TEXT("ui.settings.pending_suffix"))).ToString());
+		}
+		GraphicsStatusText->SetText(Status);
 	}
 
-	SetChoiceButtonText(PresetAutoButtonText, BuildPresetText(ETunaSweeperGraphicsPreset::Auto), PendingState.Preset == ETunaSweeperGraphicsPreset::Auto);
-	SetChoiceButtonText(PresetLowButtonText, BuildPresetText(ETunaSweeperGraphicsPreset::Low), PendingState.Preset == ETunaSweeperGraphicsPreset::Low);
-	SetChoiceButtonText(PresetMediumButtonText, BuildPresetText(ETunaSweeperGraphicsPreset::Medium), PendingState.Preset == ETunaSweeperGraphicsPreset::Medium);
-	SetChoiceButtonText(PresetHighButtonText, BuildPresetText(ETunaSweeperGraphicsPreset::High), PendingState.Preset == ETunaSweeperGraphicsPreset::High);
-	SetChoiceButtonText(PresetEpicButtonText, BuildPresetText(ETunaSweeperGraphicsPreset::Epic), PendingState.Preset == ETunaSweeperGraphicsPreset::Epic);
+	RefreshOptionRows();
 
-	SetChoiceButtonText(WindowedModeButtonText, ResolveUiText(FName(TEXT("ui.settings.windowed")), FText::FromString(TEXT("창모드"))), PendingState.WindowMode == EWindowMode::Windowed);
-	SetChoiceButtonText(BorderlessWindowModeButtonText, ResolveUiText(FName(TEXT("ui.settings.borderless")), FText::FromString(TEXT("테두리 없는 창모드"))), PendingState.WindowMode == EWindowMode::WindowedFullscreen);
-	SetChoiceButtonText(FullscreenModeButtonText, ResolveUiText(FName(TEXT("ui.settings.fullscreen")), FText::FromString(TEXT("전체화면"))), PendingState.WindowMode == EWindowMode::Fullscreen);
-
-	SetChoiceButtonText(Resolution1280ButtonText, FText::FromString(TEXT("1280 x 720")), PendingState.Resolution == FIntPoint(1280, 720));
-	SetChoiceButtonText(Resolution1600ButtonText, FText::FromString(TEXT("1600 x 900")), PendingState.Resolution == FIntPoint(1600, 900));
-	SetChoiceButtonText(Resolution1920ButtonText, FText::FromString(TEXT("1920 x 1080")), PendingState.Resolution == FIntPoint(1920, 1080));
-	SetChoiceButtonText(Resolution2560ButtonText, FText::FromString(TEXT("2560 x 1440")), PendingState.Resolution == FIntPoint(2560, 1440));
-	SetChoiceButtonText(Resolution3840ButtonText, FText::FromString(TEXT("3840 x 2160")), PendingState.Resolution == FIntPoint(3840, 2160));
-
-	SetChoiceButtonText(DLSSOffButtonText, BuildDLSSModeText(ETunaSweeperTitleDLSSMode::Off), PendingState.DLSSMode == ETunaSweeperTitleDLSSMode::Off);
-	SetChoiceButtonText(DLSSQualityButtonText, BuildDLSSModeText(ETunaSweeperTitleDLSSMode::Quality), PendingState.DLSSMode == ETunaSweeperTitleDLSSMode::Quality);
-	SetChoiceButtonText(DLSSBalancedButtonText, BuildDLSSModeText(ETunaSweeperTitleDLSSMode::Balanced), PendingState.DLSSMode == ETunaSweeperTitleDLSSMode::Balanced);
-	SetChoiceButtonText(DLSSPerformanceButtonText, BuildDLSSModeText(ETunaSweeperTitleDLSSMode::Performance), PendingState.DLSSMode == ETunaSweeperTitleDLSSMode::Performance);
-	if (DLSSOffButton) DLSSOffButton->SetIsEnabled(true);
-	if (DLSSQualityButton) DLSSQualityButton->SetIsEnabled(IsDLSSModeAvailable(ETunaSweeperTitleDLSSMode::Quality));
-	if (DLSSBalancedButton) DLSSBalancedButton->SetIsEnabled(IsDLSSModeAvailable(ETunaSweeperTitleDLSSMode::Balanced));
-	if (DLSSPerformanceButton) DLSSPerformanceButton->SetIsEnabled(IsDLSSModeAvailable(ETunaSweeperTitleDLSSMode::Performance));
-
-	if (VSyncToggleButtonText) VSyncToggleButtonText->SetText(BuildToggleText(ResolveUiText(FName(TEXT("ui.settings.vsync")), FText::FromString(TEXT("수직 동기화"))), PendingState.bVSyncEnabled));
-	if (MotionBlurToggleButtonText) MotionBlurToggleButtonText->SetText(BuildToggleText(ResolveUiText(FName(TEXT("ui.settings.motion_blur")), FText::FromString(TEXT("모션 블러"))), PendingState.bMotionBlurEnabled));
-	if (DynamicResolutionToggleButtonText) DynamicResolutionToggleButtonText->SetText(BuildToggleText(ResolveUiText(FName(TEXT("ui.settings.dynamic_resolution")), FText::FromString(TEXT("동적 해상도"))), PendingState.bDynamicResolutionEnabled));
-	if (HardwareRayTracingToggleButtonText) HardwareRayTracingToggleButtonText->SetText(BuildToggleText(ResolveUiText(FName(TEXT("ui.settings.hardware_ray_tracing")), FText::FromString(TEXT("하드웨어 레이 트레이싱"))), PendingState.bHardwareRayTracingEnabled));
+	if (VSyncToggleButtonText) VSyncToggleButtonText->SetText(ResolveUiText(FName(TEXT("ui.settings.vsync"))));
+	if (MotionBlurToggleButtonText) MotionBlurToggleButtonText->SetText(ResolveUiText(FName(TEXT("ui.settings.motion_blur"))));
+	if (DynamicResolutionToggleButtonText) DynamicResolutionToggleButtonText->SetText(ResolveUiText(FName(TEXT("ui.settings.dynamic_resolution"))));
+	if (HardwareRayTracingToggleButtonText) HardwareRayTracingToggleButtonText->SetText(ResolveUiText(FName(TEXT("ui.settings.hardware_ray_tracing"))));
+	TunaSweeperUIStyle::SetCheckButton(WidgetTree, VSyncToggleButton, VSyncToggleButtonText, PendingState.bVSyncEnabled);
+	TunaSweeperUIStyle::SetCheckButton(WidgetTree, MotionBlurToggleButton, MotionBlurToggleButtonText, PendingState.bMotionBlurEnabled);
+	TunaSweeperUIStyle::SetCheckButton(WidgetTree, DynamicResolutionToggleButton, DynamicResolutionToggleButtonText, PendingState.bDynamicResolutionEnabled);
+	TunaSweeperUIStyle::SetCheckButton(WidgetTree, HardwareRayTracingToggleButton, HardwareRayTracingToggleButtonText, PendingState.bHardwareRayTracingEnabled);
 	if (HardwareRayTracingToggleButton) HardwareRayTracingToggleButton->SetIsEnabled(GRHISupportsRayTracing);
 
-	SetChoiceButtonText(FrameRateUnlimitedButtonText, ResolveUiText(FName(TEXT("ui.settings.fps_unlimited")), FText::FromString(TEXT("제한 없음"))), PendingState.FrameRateLimit <= 0.0f);
-	SetChoiceButtonText(FrameRate60ButtonText, FText::FromString(TEXT("60 FPS")), FMath::IsNearlyEqual(PendingState.FrameRateLimit, 60.0f));
-	SetChoiceButtonText(FrameRate120ButtonText, FText::FromString(TEXT("120 FPS")), FMath::IsNearlyEqual(PendingState.FrameRateLimit, 120.0f));
-	SetChoiceButtonText(FrameRate144ButtonText, FText::FromString(TEXT("144 FPS")), FMath::IsNearlyEqual(PendingState.FrameRateLimit, 144.0f));
-
-	if (ApplyGraphicsSettingsButtonText) ApplyGraphicsSettingsButtonText->SetText(ResolveUiText(FName(TEXT("ui.common.apply")), FText::FromString(TEXT("적용"))));
-	if (CancelGraphicsSettingsButtonText) CancelGraphicsSettingsButtonText->SetText(ResolveUiText(FName(TEXT("ui.common.cancel")), FText::FromString(TEXT("취소"))));
-	if (ConfirmResolutionButtonText) ConfirmResolutionButtonText->SetText(ResolveUiText(FName(TEXT("ui.common.keep")), FText::FromString(TEXT("유지"))));
-	if (RevertResolutionButtonText) RevertResolutionButtonText->SetText(ResolveUiText(FName(TEXT("ui.common.revert")), FText::FromString(TEXT("되돌리기"))));
+	if (ApplyGraphicsSettingsButtonText) ApplyGraphicsSettingsButtonText->SetText(ResolveUiText(FName(TEXT("ui.common.apply"))));
+	if (CancelGraphicsSettingsButtonText) CancelGraphicsSettingsButtonText->SetText(ResolveUiText(FName(TEXT("ui.common.cancel"))));
+	if (ConfirmResolutionButtonText) ConfirmResolutionButtonText->SetText(ResolveUiText(FName(TEXT("ui.common.keep"))));
+	if (RevertResolutionButtonText) RevertResolutionButtonText->SetText(ResolveUiText(FName(TEXT("ui.common.revert"))));
 	if (ApplyGraphicsSettingsButton) ApplyGraphicsSettingsButton->SetIsEnabled(HasPendingChanges() && !bResolutionConfirmationActive);
 	if (CancelGraphicsSettingsButton) CancelGraphicsSettingsButton->SetIsEnabled(HasPendingChanges() && !bResolutionConfirmationActive);
 
 	RefreshQualityRows();
+}
+
+void UTunaSweeperGraphicsSettingsWidget::RefreshOptionRows()
+{
+	ConfigureOptionRows();
+
+	if (PresetOptionRow)
+	{
+		PresetOptionRow->SetValue(BuildPresetText(PendingState.Preset));
+		if (PendingState.Preset == ETunaSweeperGraphicsPreset::Custom)
+		{
+			PresetOptionRow->SetStepEnabled(true, true);
+		}
+		else
+		{
+			const int32 Index = static_cast<int32>(PendingState.Preset);
+			PresetOptionRow->SetStepEnabled(Index > 0, Index < static_cast<int32>(ETunaSweeperGraphicsPreset::Epic));
+		}
+	}
+
+	const TArray<EWindowMode::Type> WindowModes = {
+		EWindowMode::Windowed,
+		EWindowMode::WindowedFullscreen,
+		EWindowMode::Fullscreen
+	};
+	if (WindowModeOptionRow)
+	{
+		const int32 Index = WindowModes.IndexOfByKey(PendingState.WindowMode);
+		WindowModeOptionRow->SetValue(BuildWindowModeText(PendingState.WindowMode));
+		WindowModeOptionRow->SetStepEnabled(Index > 0, Index != INDEX_NONE && Index < WindowModes.Num() - 1);
+	}
+
+	const TArray<FIntPoint> Resolutions = TunaSweeperGraphicsSettingsOptions::BuildResolutionCandidates(
+		PendingState.Resolution,
+		AppliedState.Resolution);
+	if (ResolutionOptionRow)
+	{
+		const int32 Index = Resolutions.IndexOfByKey(PendingState.Resolution);
+		ResolutionOptionRow->SetValue(BuildResolutionText(PendingState.Resolution));
+		ResolutionOptionRow->SetStepEnabled(Index > 0, Index != INDEX_NONE && Index < Resolutions.Num() - 1);
+	}
+
+	TArray<ETunaSweeperTitleDLSSMode> DLSSModes;
+	for (ETunaSweeperTitleDLSSMode Mode : {
+		ETunaSweeperTitleDLSSMode::Off,
+		ETunaSweeperTitleDLSSMode::Quality,
+		ETunaSweeperTitleDLSSMode::Balanced,
+		ETunaSweeperTitleDLSSMode::Performance })
+	{
+		if (IsDLSSModeAvailable(Mode) || Mode == PendingState.DLSSMode)
+		{
+			DLSSModes.Add(Mode);
+		}
+	}
+	if (DLSSOptionRow)
+	{
+		const int32 Index = DLSSModes.IndexOfByKey(PendingState.DLSSMode);
+		FText DisplayText = BuildDLSSModeText(PendingState.DLSSMode);
+		if (!IsDLSSModeAvailable(PendingState.DLSSMode))
+		{
+			DisplayText = FText::Format(ResolveUiText(FName(TEXT("ui.settings.unavailable_suffix"))), DisplayText);
+		}
+		DLSSOptionRow->SetValue(DisplayText);
+		DLSSOptionRow->SetStepEnabled(Index > 0, Index != INDEX_NONE && Index < DLSSModes.Num() - 1);
+	}
+
+	const TArray<float> FrameRates = TunaSweeperGraphicsSettingsOptions::BuildFrameRateCandidates(
+		PendingState.FrameRateLimit,
+		AppliedState.FrameRateLimit);
+	if (FrameRateOptionRow)
+	{
+		const int32 Index = FrameRates.IndexOfByPredicate([this](float Value) { return FMath::IsNearlyEqual(Value, PendingState.FrameRateLimit); });
+		FrameRateOptionRow->SetValue(BuildFrameRateText(PendingState.FrameRateLimit));
+		FrameRateOptionRow->SetStepEnabled(Index > 0, Index != INDEX_NONE && Index < FrameRates.Num() - 1);
+	}
 }
 
 void UTunaSweeperGraphicsSettingsWidget::RefreshQualityRows()
@@ -503,7 +689,9 @@ void UTunaSweeperGraphicsSettingsWidget::RefreshQualityRows()
 		{
 			const int32 Quality = TunaSweeperGraphicsSettingsWidget::GetQuality(PendingState.QualityLevels, Row.Option);
 			Row.Widget->SetQualityLevel(Quality, BuildQualityText(Quality));
-			Row.Widget->SetIsEnabled(Row.Option != ETunaSweeperScalabilityOption::AntiAliasing || PendingState.DLSSMode == ETunaSweeperTitleDLSSMode::Off);
+			const bool bCanEdit = Row.Option != ETunaSweeperScalabilityOption::AntiAliasing || PendingState.DLSSMode == ETunaSweeperTitleDLSSMode::Off;
+			Row.Widget->SetIsEnabled(bCanEdit);
+			Row.Widget->SetStepEnabled(bCanEdit && Quality > 0, bCanEdit && Quality < 3);
 		}
 	}
 }
@@ -579,26 +767,26 @@ bool UTunaSweeperGraphicsSettingsWidget::IsDLSSModeAvailable(ETunaSweeperTitleDL
 		(UDLSSLibrary::IsDLSSSupported() && UDLSSLibrary::IsDLSSModeSupported(TunaSweeperGraphicsSettingsWidget::ToRuntimeDLSSMode(Mode)));
 }
 
-FText UTunaSweeperGraphicsSettingsWidget::ResolveUiText(FName StringKey, const FText& FallbackText) const
+FText UTunaSweeperGraphicsSettingsWidget::ResolveUiText(FName StringKey) const
 {
 	if (const UTunaSweeperGameInstance* GameInstance = Cast<UTunaSweeperGameInstance>(GetGameInstance()))
 	{
-		return GameInstance->ResolveLocalizedText(StringKey, bLocalizedStringKeysOnly ? FText::GetEmpty() : FallbackText);
+		return GameInstance->ResolveLocalizedText(StringKey, FText::GetEmpty());
 	}
-	return bLocalizedStringKeysOnly ? FText::GetEmpty() : FallbackText;
+	return FText::GetEmpty();
 }
 
 FText UTunaSweeperGraphicsSettingsWidget::BuildPresetText(ETunaSweeperGraphicsPreset Preset) const
 {
 	switch (Preset)
 	{
-	case ETunaSweeperGraphicsPreset::Auto: return ResolveUiText(FName(TEXT("ui.settings.preset.auto")), FText::FromString(TEXT("자동")));
-	case ETunaSweeperGraphicsPreset::Low: return ResolveUiText(FName(TEXT("ui.settings.preset.low")), FText::FromString(TEXT("낮음")));
-	case ETunaSweeperGraphicsPreset::Medium: return ResolveUiText(FName(TEXT("ui.settings.preset.medium")), FText::FromString(TEXT("중간")));
-	case ETunaSweeperGraphicsPreset::High: return ResolveUiText(FName(TEXT("ui.settings.preset.high")), FText::FromString(TEXT("높음")));
-	case ETunaSweeperGraphicsPreset::Epic: return ResolveUiText(FName(TEXT("ui.settings.preset.epic")), FText::FromString(TEXT("최고")));
+	case ETunaSweeperGraphicsPreset::Auto: return ResolveUiText(FName(TEXT("ui.settings.preset.auto")));
+	case ETunaSweeperGraphicsPreset::Low: return ResolveUiText(FName(TEXT("ui.settings.preset.low")));
+	case ETunaSweeperGraphicsPreset::Medium: return ResolveUiText(FName(TEXT("ui.settings.preset.medium")));
+	case ETunaSweeperGraphicsPreset::High: return ResolveUiText(FName(TEXT("ui.settings.preset.high")));
+	case ETunaSweeperGraphicsPreset::Epic: return ResolveUiText(FName(TEXT("ui.settings.preset.epic")));
 	case ETunaSweeperGraphicsPreset::Custom:
-	default: return ResolveUiText(FName(TEXT("ui.settings.preset.custom")), FText::FromString(TEXT("사용자 지정")));
+	default: return ResolveUiText(FName(TEXT("ui.settings.preset.custom")));
 	}
 }
 
@@ -613,29 +801,46 @@ FText UTunaSweeperGraphicsSettingsWidget::BuildQualityText(int32 Quality) const
 	}
 }
 
+FText UTunaSweeperGraphicsSettingsWidget::BuildWindowModeText(EWindowMode::Type WindowMode) const
+{
+	switch (WindowMode)
+	{
+	case EWindowMode::Fullscreen: return ResolveUiText(FName(TEXT("ui.settings.fullscreen")));
+	case EWindowMode::WindowedFullscreen: return ResolveUiText(FName(TEXT("ui.settings.borderless")));
+	case EWindowMode::Windowed:
+	default: return ResolveUiText(FName(TEXT("ui.settings.windowed")));
+	}
+}
+
 FText UTunaSweeperGraphicsSettingsWidget::BuildDLSSModeText(ETunaSweeperTitleDLSSMode Mode) const
 {
 	switch (Mode)
 	{
-	case ETunaSweeperTitleDLSSMode::Quality: return ResolveUiText(FName(TEXT("ui.settings.dlss.quality")), FText::FromString(TEXT("품질")));
-	case ETunaSweeperTitleDLSSMode::Balanced: return ResolveUiText(FName(TEXT("ui.settings.dlss.balanced")), FText::FromString(TEXT("균형")));
-	case ETunaSweeperTitleDLSSMode::Performance: return ResolveUiText(FName(TEXT("ui.settings.dlss.performance")), FText::FromString(TEXT("성능")));
+	case ETunaSweeperTitleDLSSMode::Quality: return ResolveUiText(FName(TEXT("ui.settings.dlss.quality")));
+	case ETunaSweeperTitleDLSSMode::Balanced: return ResolveUiText(FName(TEXT("ui.settings.dlss.balanced")));
+	case ETunaSweeperTitleDLSSMode::Performance: return ResolveUiText(FName(TEXT("ui.settings.dlss.performance")));
 	case ETunaSweeperTitleDLSSMode::Off:
-	default: return ResolveUiText(FName(TEXT("ui.settings.dlss.off")), FText::FromString(TEXT("끄기")));
+	default: return ResolveUiText(FName(TEXT("ui.settings.dlss.off")));
 	}
 }
 
-FText UTunaSweeperGraphicsSettingsWidget::BuildToggleText(const FText& Label, bool bEnabled) const
+FText UTunaSweeperGraphicsSettingsWidget::BuildResolutionText(const FIntPoint& Resolution) const
 {
-	return FText::FromString(FString::Printf(TEXT("[%s] %s"), bEnabled ? TEXT("x") : TEXT(" "), *Label.ToString()));
+	return FText::Format(
+		ResolveUiText(FName(TEXT("ui.settings.resolution_value"))),
+		FText::AsNumber(Resolution.X, &FNumberFormattingOptions::DefaultNoGrouping()),
+		FText::AsNumber(Resolution.Y, &FNumberFormattingOptions::DefaultNoGrouping()));
 }
 
-void UTunaSweeperGraphicsSettingsWidget::SetChoiceButtonText(UTextBlock* TextBlock, const FText& Label, bool bSelected) const
+FText UTunaSweeperGraphicsSettingsWidget::BuildFrameRateText(float FrameRateLimit) const
 {
-	if (TextBlock)
+	if (FrameRateLimit <= 0.0f)
 	{
-		TextBlock->SetText(FText::FromString(FString::Printf(TEXT("%s %s"), bSelected ? TEXT("✓") : TEXT(" "), *Label.ToString())));
+		return ResolveUiText(FName(TEXT("ui.settings.fps_unlimited")));
 	}
+	return FText::Format(
+		ResolveUiText(FName(TEXT("ui.settings.fps_value"))),
+		FText::AsNumber(FMath::RoundToInt(FrameRateLimit)));
 }
 
 void UTunaSweeperGraphicsSettingsWidget::BeginResolutionConfirmation()
@@ -692,6 +897,83 @@ void UTunaSweeperGraphicsSettingsWidget::HandleQualityStepRequested(ETunaSweeper
 	Quality = FMath::Clamp(Quality + Delta, 0, 3);
 	PendingState.Preset = ETunaSweeperGraphicsPreset::Custom;
 	RefreshVisualState();
+}
+
+void UTunaSweeperGraphicsSettingsWidget::HandlePresetStepRequested(int32 Delta)
+{
+	if (Delta == 0)
+	{
+		return;
+	}
+	if (PendingState.Preset == ETunaSweeperGraphicsPreset::Custom)
+	{
+		SelectPreset(Delta < 0 ? ETunaSweeperGraphicsPreset::Epic : ETunaSweeperGraphicsPreset::Auto);
+		return;
+	}
+	const int32 NextIndex = FMath::Clamp(
+		static_cast<int32>(PendingState.Preset) + FMath::Sign(Delta),
+		static_cast<int32>(ETunaSweeperGraphicsPreset::Auto),
+		static_cast<int32>(ETunaSweeperGraphicsPreset::Epic));
+	SelectPreset(static_cast<ETunaSweeperGraphicsPreset>(NextIndex));
+}
+
+void UTunaSweeperGraphicsSettingsWidget::HandleWindowModeStepRequested(int32 Delta)
+{
+	const TArray<EWindowMode::Type> Modes = {
+		EWindowMode::Windowed,
+		EWindowMode::WindowedFullscreen,
+		EWindowMode::Fullscreen
+	};
+	const int32 Index = Modes.IndexOfByKey(PendingState.WindowMode);
+	if (Index != INDEX_NONE && Delta != 0)
+	{
+		SetWindowMode(Modes[FMath::Clamp(Index + FMath::Sign(Delta), 0, Modes.Num() - 1)]);
+	}
+}
+
+void UTunaSweeperGraphicsSettingsWidget::HandleResolutionStepRequested(int32 Delta)
+{
+	const TArray<FIntPoint> Resolutions = TunaSweeperGraphicsSettingsOptions::BuildResolutionCandidates(
+		PendingState.Resolution,
+		AppliedState.Resolution);
+	const int32 Index = Resolutions.IndexOfByKey(PendingState.Resolution);
+	if (Index != INDEX_NONE && Delta != 0)
+	{
+		SetResolution(Resolutions[FMath::Clamp(Index + FMath::Sign(Delta), 0, Resolutions.Num() - 1)]);
+	}
+}
+
+void UTunaSweeperGraphicsSettingsWidget::HandleDLSSStepRequested(int32 Delta)
+{
+	TArray<ETunaSweeperTitleDLSSMode> Modes;
+	for (ETunaSweeperTitleDLSSMode Mode : {
+		ETunaSweeperTitleDLSSMode::Off,
+		ETunaSweeperTitleDLSSMode::Quality,
+		ETunaSweeperTitleDLSSMode::Balanced,
+		ETunaSweeperTitleDLSSMode::Performance })
+	{
+		if (IsDLSSModeAvailable(Mode) || Mode == PendingState.DLSSMode)
+		{
+			Modes.Add(Mode);
+		}
+	}
+	const int32 Index = Modes.IndexOfByKey(PendingState.DLSSMode);
+	if (Index != INDEX_NONE && Delta != 0)
+	{
+		SetDLSSMode(Modes[FMath::Clamp(Index + FMath::Sign(Delta), 0, Modes.Num() - 1)]);
+	}
+}
+
+void UTunaSweeperGraphicsSettingsWidget::HandleFrameRateStepRequested(int32 Delta)
+{
+	const TArray<float> FrameRates = TunaSweeperGraphicsSettingsOptions::BuildFrameRateCandidates(
+		PendingState.FrameRateLimit,
+		AppliedState.FrameRateLimit);
+	const int32 Index = FrameRates.IndexOfByPredicate([this](float Value) { return FMath::IsNearlyEqual(Value, PendingState.FrameRateLimit); });
+	if (Index != INDEX_NONE && Delta != 0)
+	{
+		SetFrameRateLimit(FrameRates[FMath::Clamp(Index + FMath::Sign(Delta), 0, FrameRates.Num() - 1)]);
+	}
 }
 
 #define PRESET_HANDLER(Name, Value) void UTunaSweeperGraphicsSettingsWidget::Name() { SelectPreset(Value); }

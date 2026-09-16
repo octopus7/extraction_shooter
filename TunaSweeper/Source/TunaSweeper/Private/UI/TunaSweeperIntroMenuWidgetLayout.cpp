@@ -31,6 +31,277 @@ void UTunaSweeperIntroMenuWidget::ResetTitleViewportLayoutState()
 	InvalidateLayoutAndVolatility();
 }
 
+void UTunaSweeperIntroMenuWidget::EnsureLanguageOptionRows()
+{
+	if (!WidgetTree)
+	{
+		return;
+	}
+
+	auto FindVerticalParent = [](UWidget* Widget, UWidget*& OutDirectChild) -> UVerticalBox*
+	{
+		OutDirectChild = Widget;
+		for (UPanelWidget* Parent = Widget ? Widget->GetParent() : nullptr;
+			Parent;
+			OutDirectChild = Parent, Parent = Parent->GetParent())
+		{
+			if (UVerticalBox* VerticalParent = Cast<UVerticalBox>(Parent))
+			{
+				return VerticalParent;
+			}
+		}
+		return nullptr;
+	};
+
+	auto CollapseLegacyControl = [&FindVerticalParent](UWidget* Widget, UVerticalBox* ExpectedParent)
+	{
+		UWidget* DirectChild = nullptr;
+		if (FindVerticalParent(Widget, DirectChild) == ExpectedParent && DirectChild)
+		{
+			DirectChild->SetVisibility(ESlateVisibility::Collapsed);
+		}
+		else if (Widget)
+		{
+			Widget->SetVisibility(ESlateVisibility::Collapsed);
+		}
+	};
+
+	auto AddOptionRow = [this, &FindVerticalParent, &CollapseLegacyControl](
+		TObjectPtr<UTunaSweeperOptionRowWidget>& OptionRow,
+		const TCHAR* RowName,
+		const FText& Label,
+		const TArray<UWidget*>& LegacyControls,
+		UWidget* FallbackPanel)
+	{
+		if (OptionRow)
+		{
+			OptionRow->Configure(Label);
+			return;
+		}
+
+		UWidget* DirectChild = nullptr;
+		UVerticalBox* Parent = LegacyControls.Num() > 0
+			? FindVerticalParent(LegacyControls[0], DirectChild)
+			: nullptr;
+		if (!Parent)
+		{
+			Parent = Cast<UVerticalBox>(FallbackPanel);
+		}
+		if (!Parent)
+		{
+			return;
+		}
+
+		int32 InsertIndex = DirectChild ? Parent->GetChildIndex(DirectChild) : Parent->GetChildrenCount();
+		if (InsertIndex == INDEX_NONE)
+		{
+			InsertIndex = Parent->GetChildrenCount();
+		}
+		for (UWidget* LegacyControl : LegacyControls)
+		{
+			CollapseLegacyControl(LegacyControl, Parent);
+		}
+
+		UWidgetTree* OwningTree = Parent->GetTypedOuter<UWidgetTree>();
+		if (!OwningTree)
+		{
+			OwningTree = WidgetTree;
+		}
+		UTunaSweeperOptionRowWidget* NewRow = OwningTree->ConstructWidget<UTunaSweeperOptionRowWidget>(
+			UTunaSweeperOptionRowWidget::StaticClass(),
+			RowName);
+		if (!NewRow)
+		{
+			return;
+		}
+		NewRow->Configure(Label);
+
+		struct FChildLayout
+		{
+			UWidget* Widget = nullptr;
+			FMargin Padding;
+			FSlateChildSize Size;
+			EHorizontalAlignment HorizontalAlignment = HAlign_Fill;
+			EVerticalAlignment VerticalAlignment = VAlign_Fill;
+		};
+		TArray<FChildLayout> OrderedChildren;
+		OrderedChildren.Reserve(Parent->GetChildrenCount() + 1);
+		for (int32 ChildIndex = 0; ChildIndex < Parent->GetChildrenCount(); ++ChildIndex)
+		{
+			UWidget* Child = Parent->GetChildAt(ChildIndex);
+			FChildLayout Layout;
+			Layout.Widget = Child;
+			if (const UVerticalBoxSlot* ExistingSlot = Cast<UVerticalBoxSlot>(Child ? Child->Slot : nullptr))
+			{
+				Layout.Padding = ExistingSlot->GetPadding();
+				Layout.Size = ExistingSlot->GetSize();
+				Layout.HorizontalAlignment = ExistingSlot->GetHorizontalAlignment();
+				Layout.VerticalAlignment = ExistingSlot->GetVerticalAlignment();
+			}
+			OrderedChildren.Add(Layout);
+		}
+
+		FChildLayout RowLayout;
+		RowLayout.Widget = NewRow;
+		RowLayout.Padding = FMargin(0.0f, 5.0f);
+		RowLayout.Size = FSlateChildSize(ESlateSizeRule::Automatic);
+		RowLayout.HorizontalAlignment = HAlign_Fill;
+		RowLayout.VerticalAlignment = VAlign_Center;
+		OrderedChildren.Insert(RowLayout, FMath::Clamp(InsertIndex, 0, OrderedChildren.Num()));
+
+		// Re-adding the ordered children keeps the live Slate box in sync with UMG's slot order.
+		Parent->ClearChildren();
+		for (const FChildLayout& ChildLayout : OrderedChildren)
+		{
+			if (UVerticalBoxSlot* AddedSlot = Parent->AddChildToVerticalBox(ChildLayout.Widget))
+			{
+				AddedSlot->SetPadding(ChildLayout.Padding);
+				AddedSlot->SetSize(ChildLayout.Size);
+				AddedSlot->SetHorizontalAlignment(ChildLayout.HorizontalAlignment);
+				AddedSlot->SetVerticalAlignment(ChildLayout.VerticalAlignment);
+			}
+		}
+		OptionRow = NewRow;
+	};
+
+	AddOptionRow(
+		InterfaceLanguageOptionRow,
+		TEXT("InterfaceLanguageOptionRow"),
+		ResolveUiText(FName(TEXT("ui.settings.language")), FText::GetEmpty()),
+		{LanguageEnglishButton.Get(), LanguageKoreanButton.Get(), LanguageJapaneseButton.Get(),
+			FindIntroWidget(TEXT("LanguageLabelText"))},
+		InterfaceSettingsPanel.Get());
+	if (InterfaceLanguageOptionRow)
+	{
+		InterfaceLanguageOptionRow->OnStepRequested.RemoveAll(this);
+		InterfaceLanguageOptionRow->OnStepRequested.AddUObject(
+			this,
+			&UTunaSweeperIntroMenuWidget::HandleInterfaceLanguageStepRequested);
+	}
+	if (UBorder* LegacyLanguageSection = Cast<UBorder>(FindIntroWidget(TEXT("SettingsLanguageSection"))))
+	{
+		FSlateBrush ClearBrush;
+		ClearBrush.DrawAs = ESlateBrushDrawType::NoDrawType;
+		ClearBrush.SetResourceObject(nullptr);
+		LegacyLanguageSection->SetBrush(ClearBrush);
+		LegacyLanguageSection->SetBrushColor(FLinearColor::Transparent);
+	}
+
+	AddOptionRow(
+		DebugDisplayLanguageOptionRow,
+		TEXT("DebugDisplayLanguageOptionRow"),
+		ResolveUiText(FName(TEXT("ui.settings.development.debug_display_language")), FText::GetEmpty()),
+		{DebugDisplayLanguageKoreanButton.Get(), DebugDisplayLanguageEnglishButton.Get(),
+			FindIntroWidget(TEXT("DebugDisplayLanguageLabelText"))},
+		DevelopmentSettingsPanel.Get());
+	if (DebugDisplayLanguageOptionRow)
+	{
+		DebugDisplayLanguageOptionRow->OnStepRequested.RemoveAll(this);
+		DebugDisplayLanguageOptionRow->OnStepRequested.AddUObject(
+			this,
+			&UTunaSweeperIntroMenuWidget::HandleDebugDisplayLanguageStepRequested);
+	}
+}
+
+void UTunaSweeperIntroMenuWidget::ApplyUnifiedControlStyles()
+{
+	using TunaSweeperUIStyle::EButtonRole;
+
+	auto ApplyNestedLabels = [](UWidget* Root)
+	{
+		TArray<UWidget*> Pending;
+		if (Root)
+		{
+			Pending.Add(Root);
+		}
+		while (Pending.Num() > 0)
+		{
+			UWidget* Widget = Pending.Pop(EAllowShrinking::No);
+			if (UTextBlock* Label = Cast<UTextBlock>(Widget))
+			{
+				TunaSweeperUIStyle::ApplyLabel(Label);
+			}
+			if (UPanelWidget* Panel = Cast<UPanelWidget>(Widget))
+			{
+				for (int32 ChildIndex = 0; ChildIndex < Panel->GetChildrenCount(); ++ChildIndex)
+				{
+					Pending.Add(Panel->GetChildAt(ChildIndex));
+				}
+			}
+		}
+	};
+
+	auto StyleButton = [&ApplyNestedLabels](UButton* Button, EButtonRole Role, bool bSelected = false)
+	{
+		if (!Button)
+		{
+			return;
+		}
+		TunaSweeperUIStyle::ApplyButton(Button, Role, bSelected);
+		ApplyNestedLabels(Button->GetContent());
+	};
+	auto EnsureFittedTabLabel = [this](UButton* Button)
+	{
+		if (!Button || Cast<UScaleBox>(Button->GetContent()))
+		{
+			return;
+		}
+
+		UTextBlock* Label = Cast<UTextBlock>(Button->GetContent());
+		UWidgetTree* OwningTree = Button->GetTypedOuter<UWidgetTree>();
+		if (!Label || !OwningTree)
+		{
+			return;
+		}
+
+		Label->RemoveFromParent();
+		Label->SetAutoWrapText(false);
+		UScaleBox* LabelScaleBox = OwningTree->ConstructWidget<UScaleBox>(
+			UScaleBox::StaticClass(),
+			FName(*(Button->GetName() + TEXT("_LabelScaleBox"))));
+		LabelScaleBox->SetStretch(EStretch::ScaleToFit);
+		LabelScaleBox->SetStretchDirection(EStretchDirection::DownOnly);
+		LabelScaleBox->SetContent(Label);
+		if (UScaleBoxSlot* LabelSlot = Cast<UScaleBoxSlot>(Label->Slot))
+		{
+			LabelSlot->SetHorizontalAlignment(HAlign_Center);
+			LabelSlot->SetVerticalAlignment(VAlign_Center);
+		}
+		Button->SetContent(LabelScaleBox);
+	};
+
+	StyleButton(StartButton, EButtonRole::Primary);
+	StyleButton(SlotSelectButton, EButtonRole::Secondary);
+	StyleButton(SettingsButton, EButtonRole::Secondary);
+	StyleButton(CreditsButton, EButtonRole::Secondary);
+	StyleButton(QuitButton, EButtonRole::Secondary);
+	StyleButton(SteamDemoWishlistButton, EButtonRole::Primary);
+
+	// Save-slot cards retain their comparison presentation; only their actions adopt the shared language.
+	StyleButton(PrimarySaveSlotButton, EButtonRole::Primary);
+	StyleButton(DeleteSaveSlotButton, EButtonRole::Danger);
+	StyleButton(BackToMainMenuButton, EButtonRole::Secondary);
+	StyleButton(ConfirmDeleteButton, EButtonRole::Danger);
+	StyleButton(CancelDeleteButton, EButtonRole::Secondary);
+
+	EnsureFittedTabLabel(SettingsGraphicsTabButton);
+	EnsureFittedTabLabel(SettingsInterfaceTabButton);
+	EnsureFittedTabLabel(SettingsDevelopmentTabButton);
+	StyleButton(SettingsGraphicsTabButton, EButtonRole::Tab, !bShowingInterfaceSettingsTab && !bShowingDevelopmentSettingsTab);
+	StyleButton(SettingsInterfaceTabButton, EButtonRole::Tab, bShowingInterfaceSettingsTab);
+	StyleButton(SettingsDevelopmentTabButton, EButtonRole::Tab, bShowingDevelopmentSettingsTab);
+	StyleButton(ConfirmInterfaceSettingsButton, EButtonRole::Primary);
+	StyleButton(CancelInterfaceSettingsButton, EButtonRole::Secondary);
+	StyleButton(BackFromSettingsButton, EButtonRole::Secondary);
+	StyleButton(DeleteCurrentSaveDataButton, EButtonRole::Danger);
+
+	StyleButton(DifficultyStartButton, EButtonRole::Primary);
+	StyleButton(DifficultyBackButton, EButtonRole::Secondary);
+	StyleButton(DemoNoticeConfirmButton, EButtonRole::Primary);
+	StyleButton(DemoNoticeBackButton, EButtonRole::Secondary);
+	StyleButton(BackFromCreditsButton, EButtonRole::Secondary);
+}
+
 void UTunaSweeperIntroMenuWidget::EnsurePiggyBankToggleButton()
 {
 	if (PiggyBankToggleButton || !WidgetTree || !EnemyCombatDebugToggleButton)
@@ -71,7 +342,9 @@ void UTunaSweeperIntroMenuWidget::EnsurePiggyBankToggleButton()
 		return;
 	}
 
-	PiggyBankToggleButtonText->SetText(FText::FromString(TEXT("\uB3FC\uC9C0\uC800\uAE08\uD1B5")));
+	PiggyBankToggleButtonText->SetText(ResolveUiText(
+		FName(TEXT("ui.settings.development.piggy_bank")),
+		FText::GetEmpty()));
 	PiggyBankToggleButtonText->SetJustification(ETextJustify::Center);
 	PiggyBankToggleButtonText->SetColorAndOpacity(FSlateColor(FLinearColor(0.90f, 0.96f, 0.96f, 1.0f)));
 	TunaSweeperUIFont::ApplyFont(PiggyBankToggleButtonText, 17, ETunaSweeperUIFontWeight::Bold);
@@ -154,7 +427,9 @@ void UTunaSweeperIntroMenuWidget::EnsureAlwaysSlowPresentationToggleButton()
 		return;
 	}
 
-	NewToggleButtonText->SetText(FText::FromString(TEXT("\uC0C1\uC2DC \uC2AC\uB85C\uC6B0 \uC5F0\uCD9C")));
+	NewToggleButtonText->SetText(ResolveUiText(
+		FName(TEXT("ui.settings.development.always_slow_presentation")),
+		FText::GetEmpty()));
 	NewToggleButtonText->SetJustification(ETextJustify::Center);
 	NewToggleButtonText->SetColorAndOpacity(FSlateColor(FLinearColor(0.90f, 0.96f, 0.96f, 1.0f)));
 	TunaSweeperUIFont::ApplyFont(NewToggleButtonText, 17, ETunaSweeperUIFontWeight::Bold);
@@ -307,59 +582,11 @@ void UTunaSweeperIntroMenuWidget::EnsureDevelopmentToggleButtonContent(
 	FName LabelWidgetName,
 	FName IndicatorWidgetName)
 {
-	if (!WidgetTree || !ToggleButton || FindIntroWidget(IndicatorWidgetName))
+	(void)IndicatorWidgetName;
+	if (UTextBlock* LabelText = Cast<UTextBlock>(FindIntroWidget(LabelWidgetName)))
 	{
-		return;
+		TunaSweeperUIStyle::SetCheckButton(WidgetTree, ToggleButton, LabelText, false);
 	}
-
-	UTextBlock* LabelText = Cast<UTextBlock>(FindIntroWidget(LabelWidgetName));
-	constexpr float CheckBoxLaneWidth = 76.0f;
-	constexpr float CheckBoxLeftPadding = 26.0f;
-
-	UHorizontalBox* Content = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass());
-	USizeBox* IndicatorLane = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass());
-	UHorizontalBox* IndicatorLaneContent = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass());
-	USizeBox* IndicatorBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass());
-	UCheckBox* Indicator = WidgetTree->ConstructWidget<UCheckBox>(
-		UCheckBox::StaticClass(),
-		IndicatorWidgetName);
-	if (!LabelText || !Content || !IndicatorLane || !IndicatorLaneContent || !IndicatorBox || !Indicator)
-	{
-		return;
-	}
-
-	LabelText->RemoveFromParent();
-	LabelText->SetJustification(ETextJustify::Left);
-	IndicatorLane->SetWidthOverride(CheckBoxLaneWidth);
-	IndicatorBox->SetWidthOverride(26.0f);
-	IndicatorBox->SetHeightOverride(26.0f);
-	Indicator->SetIsChecked(false);
-	Indicator->SetVisibility(ESlateVisibility::HitTestInvisible);
-	IndicatorBox->SetContent(Indicator);
-	if (UHorizontalBoxSlot* IndicatorSlot = IndicatorLaneContent->AddChildToHorizontalBox(IndicatorBox))
-	{
-		IndicatorSlot->SetHorizontalAlignment(HAlign_Left);
-		IndicatorSlot->SetVerticalAlignment(VAlign_Center);
-		IndicatorSlot->SetPadding(FMargin(CheckBoxLeftPadding, 0.0f, 0.0f, 0.0f));
-		IndicatorSlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
-	}
-	IndicatorLane->SetContent(IndicatorLaneContent);
-
-	if (UHorizontalBoxSlot* IndicatorLaneSlot = Content->AddChildToHorizontalBox(IndicatorLane))
-	{
-		IndicatorLaneSlot->SetHorizontalAlignment(HAlign_Fill);
-		IndicatorLaneSlot->SetVerticalAlignment(VAlign_Center);
-		IndicatorLaneSlot->SetSize(FSlateChildSize(ESlateSizeRule::Automatic));
-	}
-
-	if (UHorizontalBoxSlot* LabelSlot = Content->AddChildToHorizontalBox(LabelText))
-	{
-		LabelSlot->SetHorizontalAlignment(HAlign_Left);
-		LabelSlot->SetVerticalAlignment(VAlign_Center);
-		LabelSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
-	}
-
-	ToggleButton->SetContent(Content);
 }
 
 void UTunaSweeperIntroMenuWidget::EnsureDemoBuildImage()

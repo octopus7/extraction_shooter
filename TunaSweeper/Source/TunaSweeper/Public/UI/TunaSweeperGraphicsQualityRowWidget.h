@@ -21,6 +21,7 @@ class TUNASWEEPER_API UTunaSweeperGraphicsQualityRowWidget : public UUserWidget
 public:
 	void Configure(ETunaSweeperScalabilityOption InOption, const FText& InLabel);
 	void SetQualityLevel(int32 InQualityLevel, const FText& InQualityText);
+	void SetStepEnabled(bool bCanStepPrevious, bool bCanStepNext);
 	ETunaSweeperScalabilityOption GetOption() const { return Option; }
 
 	FTunaSweeperGraphicsQualityStepRequested OnQualityStepRequested;
@@ -49,6 +50,10 @@ protected:
 	TObjectPtr<UTextBlock> NextButtonText;
 
 private:
+	void ApplyPresentation();
+	void EnsureFittedLabelColumn();
+	void EnsureFixedValueColumn();
+
 	UFUNCTION()
 	void HandlePreviousClicked();
 
@@ -58,4 +63,7 @@ private:
 	ETunaSweeperScalabilityOption Option = ETunaSweeperScalabilityOption::Texture;
 	int32 QualityLevel = 0;
 	FText Label;
+	FText QualityText;
+	bool bPreviousEnabled = true;
+	bool bNextEnabled = true;
 };

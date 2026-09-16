@@ -8,6 +8,8 @@
 #include "Editor.h"
 #include "UI/TunaSweeperIntroMenuWidget.h"
 #include "UI/TunaSweeperGraphicsSettingsWidget.h"
+#include "UI/TunaSweeperOptionRowWidget.h"
+#include "UI/TunaSweeperCheckIndicatorWidget.h"
 #include "Slate/WidgetRenderer.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "ImageUtils.h"
@@ -38,25 +40,27 @@ bool FTitleScreenAssetTest::RunTest(const FString& Parameters)
 	TestNotNull(TEXT("Graphics section heading exists"), Menu->TitleGraphicsSettingsWidget->WidgetTree->FindWidget(TEXT("GraphicsSectionTitleText")));
 	for (const TCHAR* Name : { TEXT("ApplyGraphicsSettingsButton"), TEXT("CancelGraphicsSettingsButton") }) {
 		UButton* Action=Cast<UButton>(Menu->TitleGraphicsSettingsWidget->WidgetTree->FindWidget(Name));
-		TestTrue(FString::Printf(TEXT("Unframed and bound action %s"),Name),Action && Action->GetStyle().Normal.DrawAs==ESlateBrushDrawType::NoDrawType && Action->OnClicked.IsBound());
+		TestTrue(FString::Printf(TEXT("Rounded and bound action %s"),Name),Action && Action->GetStyle().Normal.DrawAs==ESlateBrushDrawType::RoundedBox && Action->OnClicked.IsBound());
 	}
 	UWidget* BackTitle = Menu->FindIntroWidget(TEXT("SettingsTitleText"));
 	TestTrue(TEXT("Settings title is inside back button hit area"), BackTitle && BackTitle->GetParent() && BackTitle->GetParent()->GetParent() == Menu->BackFromSettingsButton);
 	TestNotNull(TEXT("Curved back arrow image exists"), Menu->FindIntroWidget(TEXT("SettingsBackArrowImage")));
-	TestTrue(TEXT("Back header is borderless"), Menu->BackFromSettingsButton && Menu->BackFromSettingsButton->GetStyle().Normal.DrawAs == ESlateBrushDrawType::NoDrawType);
+	TestTrue(TEXT("Back header uses the shared borderless rounded control"), Menu->BackFromSettingsButton
+		&& Menu->BackFromSettingsButton->GetStyle().Normal.DrawAs == ESlateBrushDrawType::RoundedBox
+		&& Menu->BackFromSettingsButton->GetStyle().Normal.OutlineSettings.Width == 0.0f);
 	if (Menu->BackFromSettingsButton) {
-		TestEqual(TEXT("Back header idle alpha"), Menu->BackFromSettingsButton->GetStyle().NormalForeground.GetSpecifiedColor().A, 0.9f);
 		TestEqual(TEXT("Back header hovered alpha"), Menu->BackFromSettingsButton->GetStyle().HoveredForeground.GetSpecifiedColor().A, 1.0f);
 	}
-	TestEqual(TEXT("Idle settings tab has no frame"), Menu->SettingsDevelopmentTabButton->GetStyle().Normal.DrawAs, ESlateBrushDrawType::NoDrawType);
-	TestNotNull(TEXT("Tab hover uses mist material"), Menu->SettingsDevelopmentTabButton->GetStyle().Hovered.GetResourceObject());
+	TestEqual(TEXT("Settings tab uses common rounded control"), Menu->SettingsDevelopmentTabButton->GetStyle().Normal.DrawAs, ESlateBrushDrawType::RoundedBox);
 	for (const TCHAR* Name : { TEXT("VSyncToggleButton"), TEXT("MotionBlurToggleButton"), TEXT("DynamicResolutionToggleButton"), TEXT("HardwareRayTracingToggleButton") })
 	{
 		UButton* Toggle = Cast<UButton>(Menu->TitleGraphicsSettingsWidget->WidgetTree->FindWidget(Name));
-		TestTrue(FString::Printf(TEXT("Unframed toggle %s"), Name), Toggle && Toggle->GetStyle().Normal.DrawAs == ESlateBrushDrawType::NoDrawType);
+		TestTrue(FString::Printf(TEXT("Checkbox remains bound %s"), Name), Toggle && Toggle->OnClicked.IsBound());
+		TestNotNull(TEXT("Checkbox uses a painted indicator"), Cast<UTunaSweeperCheckIndicatorWidget>(
+			Menu->TitleGraphicsSettingsWidget->WidgetTree->FindWidget(FName(*(FString(Name) + TEXT("_CheckIndicator"))))));
 	}
-	UButton* Preset = Cast<UButton>(Menu->TitleGraphicsSettingsWidget->WidgetTree->FindWidget(TEXT("PresetHighButton")));
-	TestTrue(TEXT("Baked graphics preset is bound"), Preset && Preset->OnClicked.IsBound());
+	UTunaSweeperOptionRowWidget* Preset = Cast<UTunaSweeperOptionRowWidget>(Menu->TitleGraphicsSettingsWidget->WidgetTree->FindWidget(TEXT("PresetOptionRow")));
+	TestTrue(TEXT("Compact preset selector is bound"), Preset && Preset->OnStepRequested.IsBound());
 	Menu->ShowSettingsPanel();
 	Menu->TickMenuTransitions(0.15f);
 	UWidget* First = Menu->FindIntroWidget(TEXT("GraphicsTabButtonBox"));

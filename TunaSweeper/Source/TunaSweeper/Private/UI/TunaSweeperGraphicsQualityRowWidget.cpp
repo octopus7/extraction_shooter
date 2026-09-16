@@ -4,13 +4,28 @@
 #include "Components/Button.h"
 #include "Components/HorizontalBox.h"
 #include "Components/HorizontalBoxSlot.h"
+#include "Components/PanelWidget.h"
+#include "Components/ScaleBox.h"
+#include "Components/ScaleBoxSlot.h"
 #include "Components/SizeBox.h"
+#include "Components/SizeBoxSlot.h"
+#include "Components/Spacer.h"
 #include "Components/TextBlock.h"
-#include "UI/TunaSweeperUIFont.h"
+#include "UI/TunaSweeperUIStyle.h"
+
+namespace TunaSweeperGraphicsQualityRowWidget
+{
+	constexpr float LabelWidth = 250.0f;
+	constexpr float ValueWidth = 280.0f;
+	constexpr float ArrowWidth = 44.0f;
+	constexpr float RowHeight = 42.0f;
+}
 
 TSharedRef<SWidget> UTunaSweeperGraphicsQualityRowWidget::RebuildWidget()
 {
 	BuildRuntimeWidgetTree();
+	EnsureFittedLabelColumn();
+	EnsureFixedValueColumn();
 	return Super::RebuildWidget();
 }
 
@@ -34,49 +49,42 @@ void UTunaSweeperGraphicsQualityRowWidget::BuildRuntimeWidgetTree()
 	NextButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("NextButton"));
 	NextButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("NextButtonText"));
 
-	TunaSweeperUIFont::ApplyFont(OptionLabelText, 18);
-	TunaSweeperUIFont::ApplyFont(PreviousButtonText, 18);
-	TunaSweeperUIFont::ApplyFont(QualityValueText, 18);
-	TunaSweeperUIFont::ApplyFont(NextButtonText, 18);
-	OptionLabelText->SetColorAndOpacity(FSlateColor(FLinearColor(0.86f, 0.91f, 0.92f, 1.0f)));
-	QualityValueText->SetColorAndOpacity(FSlateColor(FLinearColor::White));
-	QualityValueText->SetJustification(ETextJustify::Center);
-	PreviousButtonText->SetText(FText::FromString(TEXT("<")));
-	NextButtonText->SetText(FText::FromString(TEXT(">")));
 	PreviousButton->SetContent(PreviousButtonText);
 	NextButton->SetContent(NextButtonText);
-	// Quiet hit areas: the arrow is primary; fill only becomes apparent on interaction.
-	for (UButton* Button : { PreviousButton.Get(), NextButton.Get() })
-	{
-		auto Fill = [](FLinearColor Color) {
-			FSlateBrush Brush;
-			Brush.DrawAs = ESlateBrushDrawType::Box;
-			Brush.TintColor = Color;
-			return Brush;
-		};
-		FButtonStyle Style = Button->GetStyle();
-		Style.SetNormal(Fill(FLinearColor(0.005f, 0.015f, 0.017f, 0.16f)));
-		Style.SetHovered(Fill(FLinearColor(0.24f, 0.40f, 0.34f, 0.38f)));
-		Style.SetPressed(Fill(FLinearColor(0.36f, 0.52f, 0.42f, 0.50f)));
-		Style.SetDisabled(Fill(FLinearColor::Transparent));
-		Button->SetStyle(Style);
-		Button->SetBackgroundColor(FLinearColor::White);
-	}
 
 	USizeBox* LabelColumn = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("QualityLabelColumn"));
-	LabelColumn->SetWidthOverride(300); LabelColumn->SetContent(OptionLabelText);
+	LabelColumn->SetWidthOverride(TunaSweeperGraphicsQualityRowWidget::LabelWidth);
+	LabelColumn->SetMinDesiredHeight(TunaSweeperGraphicsQualityRowWidget::RowHeight);
+	LabelColumn->SetContent(OptionLabelText);
+	if (USizeBoxSlot* ContentSlot = Cast<USizeBoxSlot>(LabelColumn->GetContentSlot()))
+	{
+		ContentSlot->SetVerticalAlignment(VAlign_Center);
+	}
 	if (UHorizontalBoxSlot* RowSlot = Root->AddChildToHorizontalBox(LabelColumn))
 	{
-		RowSlot->SetPadding(FMargin(0,8));
 		RowSlot->SetVerticalAlignment(VAlign_Center);
 	}
-	Root->AddChildToHorizontalBox(PreviousButton)->SetPadding(FMargin(8.0f, 2.0f));
-	if (UHorizontalBoxSlot* RowSlot = Root->AddChildToHorizontalBox(QualityValueText))
+	auto AddArrow = [this, Root](UButton* Button, const TCHAR* Name)
 	{
-		RowSlot->SetPadding(FMargin(12.0f, 2.0f));
-		RowSlot->SetVerticalAlignment(VAlign_Center);
+		USizeBox* Box = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), Name);
+		Box->SetWidthOverride(TunaSweeperGraphicsQualityRowWidget::ArrowWidth);
+		Box->SetHeightOverride(TunaSweeperGraphicsQualityRowWidget::RowHeight);
+		Box->SetContent(Button);
+		Root->AddChildToHorizontalBox(Box)->SetVerticalAlignment(VAlign_Center);
+	};
+	AddArrow(PreviousButton, TEXT("PreviousButtonBox"));
+	USizeBox* ValueColumn = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("QualityValueColumn"));
+	ValueColumn->SetWidthOverride(TunaSweeperGraphicsQualityRowWidget::ValueWidth);
+	ValueColumn->SetHeightOverride(TunaSweeperGraphicsQualityRowWidget::RowHeight);
+	ValueColumn->SetContent(QualityValueText);
+	if (USizeBoxSlot* ContentSlot = Cast<USizeBoxSlot>(ValueColumn->GetContentSlot()))
+	{
+		ContentSlot->SetVerticalAlignment(VAlign_Center);
 	}
-	Root->AddChildToHorizontalBox(NextButton)->SetPadding(FMargin(8.0f, 2.0f));
+	Root->AddChildToHorizontalBox(ValueColumn)->SetVerticalAlignment(VAlign_Center);
+	AddArrow(NextButton, TEXT("NextButtonBox"));
+	EnsureFittedLabelColumn();
+	ApplyPresentation();
 }
 
 void UTunaSweeperGraphicsQualityRowWidget::Configure(
@@ -85,10 +93,7 @@ void UTunaSweeperGraphicsQualityRowWidget::Configure(
 {
 	Option = InOption;
 	Label = InLabel;
-	if (OptionLabelText)
-	{
-		OptionLabelText->SetText(Label);
-	}
+	ApplyPresentation();
 }
 
 void UTunaSweeperGraphicsQualityRowWidget::SetQualityLevel(
@@ -96,15 +101,23 @@ void UTunaSweeperGraphicsQualityRowWidget::SetQualityLevel(
 	const FText& InQualityText)
 {
 	QualityLevel = FMath::Clamp(InQualityLevel, 0, 3);
-	if (QualityValueText)
-	{
-		QualityValueText->SetText(InQualityText);
-	}
+	QualityText = InQualityText;
+	ApplyPresentation();
+}
+
+void UTunaSweeperGraphicsQualityRowWidget::SetStepEnabled(bool bCanStepPrevious, bool bCanStepNext)
+{
+	bPreviousEnabled = bCanStepPrevious;
+	bNextEnabled = bCanStepNext;
+	if (PreviousButton) PreviousButton->SetIsEnabled(bPreviousEnabled);
+	if (NextButton) NextButton->SetIsEnabled(bNextEnabled);
 }
 
 void UTunaSweeperGraphicsQualityRowWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
+	EnsureFittedLabelColumn();
+	EnsureFixedValueColumn();
 
 	if (PreviousButton)
 	{
@@ -116,17 +129,116 @@ void UTunaSweeperGraphicsQualityRowWidget::NativeConstruct()
 		NextButton->OnClicked.RemoveDynamic(this, &UTunaSweeperGraphicsQualityRowWidget::HandleNextClicked);
 		NextButton->OnClicked.AddDynamic(this, &UTunaSweeperGraphicsQualityRowWidget::HandleNextClicked);
 	}
+	ApplyPresentation();
+}
+
+void UTunaSweeperGraphicsQualityRowWidget::EnsureFittedLabelColumn()
+{
+	if (!OptionLabelText && WidgetTree)
+	{
+		OptionLabelText = Cast<UTextBlock>(WidgetTree->FindWidget(TEXT("OptionLabelText")));
+	}
+	if (!WidgetTree || !OptionLabelText || Cast<UScaleBox>(OptionLabelText->GetParent()))
+	{
+		return;
+	}
+	USizeBox* LabelColumn = Cast<USizeBox>(OptionLabelText->GetParent());
+	if (!LabelColumn)
+	{
+		return;
+	}
+
+	LabelColumn->RemoveChild(OptionLabelText);
+	UHorizontalBox* FittedLabelRow = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), TEXT("QualityFittedLabelRow"));
+	UScaleBox* LabelScale = WidgetTree->ConstructWidget<UScaleBox>(UScaleBox::StaticClass(), TEXT("QualityLabelScale"));
+	LabelScale->SetStretch(EStretch::ScaleToFit);
+	LabelScale->SetStretchDirection(EStretchDirection::DownOnly);
+	LabelScale->SetContent(OptionLabelText);
+	if (UScaleBoxSlot* ScaleSlot = Cast<UScaleBoxSlot>(LabelScale->GetContentSlot()))
+	{
+		ScaleSlot->SetHorizontalAlignment(HAlign_Left);
+		ScaleSlot->SetVerticalAlignment(VAlign_Center);
+	}
+	if (UHorizontalBoxSlot* ScaleRowSlot = FittedLabelRow->AddChildToHorizontalBox(LabelScale))
+	{
+		ScaleRowSlot->SetSize(FSlateChildSize(ESlateSizeRule::Fill));
+		ScaleRowSlot->SetVerticalAlignment(VAlign_Center);
+	}
+	USpacer* RightReserve = WidgetTree->ConstructWidget<USpacer>(USpacer::StaticClass(), TEXT("QualityLabelRightReserve"));
+	RightReserve->SetSize(FVector2D(8.0f, 1.0f));
+	FittedLabelRow->AddChildToHorizontalBox(RightReserve);
+	LabelColumn->SetContent(FittedLabelRow);
+	if (USizeBoxSlot* ContentSlot = Cast<USizeBoxSlot>(LabelColumn->GetContentSlot()))
+	{
+		ContentSlot->SetVerticalAlignment(VAlign_Center);
+	}
+}
+
+void UTunaSweeperGraphicsQualityRowWidget::EnsureFixedValueColumn()
+{
+	if (!QualityValueText && WidgetTree)
+	{
+		QualityValueText = Cast<UTextBlock>(WidgetTree->FindWidget(TEXT("QualityValueText")));
+	}
+	if (!WidgetTree || !QualityValueText || Cast<USizeBox>(QualityValueText->GetParent()))
+	{
+		return;
+	}
+	UHorizontalBox* Parent = Cast<UHorizontalBox>(QualityValueText->GetParent());
+	if (!Parent)
+	{
+		return;
+	}
+	const int32 Index = Parent->GetChildIndex(QualityValueText);
+	Parent->RemoveChild(QualityValueText);
+	USizeBox* ValueColumn = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("QualityValueColumn"));
+	ValueColumn->SetWidthOverride(TunaSweeperGraphicsQualityRowWidget::ValueWidth);
+	ValueColumn->SetHeightOverride(TunaSweeperGraphicsQualityRowWidget::RowHeight);
+	ValueColumn->SetContent(QualityValueText);
+	if (USizeBoxSlot* ContentSlot = Cast<USizeBoxSlot>(ValueColumn->GetContentSlot()))
+	{
+		ContentSlot->SetVerticalAlignment(VAlign_Center);
+	}
+	if (UHorizontalBoxSlot* AddedSlot = Cast<UHorizontalBoxSlot>(Parent->InsertChildAt(Index, ValueColumn)))
+	{
+		AddedSlot->SetVerticalAlignment(VAlign_Center);
+	}
+}
+
+void UTunaSweeperGraphicsQualityRowWidget::ApplyPresentation()
+{
+	if (OptionLabelText)
+	{
+		OptionLabelText->SetText(Label);
+		TunaSweeperUIStyle::ApplyLabel(OptionLabelText, 18);
+	}
+	if (QualityValueText)
+	{
+		QualityValueText->SetText(QualityText);
+		QualityValueText->SetJustification(ETextJustify::Center);
+		TunaSweeperUIStyle::ApplyLabel(QualityValueText, 18);
+	}
 	if (PreviousButtonText)
 	{
 		PreviousButtonText->SetText(FText::FromString(TEXT("<")));
+		PreviousButtonText->SetJustification(ETextJustify::Center);
+		TunaSweeperUIStyle::ApplyLabel(PreviousButtonText, 20);
 	}
 	if (NextButtonText)
 	{
 		NextButtonText->SetText(FText::FromString(TEXT(">")));
+		NextButtonText->SetJustification(ETextJustify::Center);
+		TunaSweeperUIStyle::ApplyLabel(NextButtonText, 20);
 	}
-	if (OptionLabelText)
+	if (PreviousButton)
 	{
-		OptionLabelText->SetText(Label);
+		TunaSweeperUIStyle::ApplyButton(PreviousButton, TunaSweeperUIStyle::EButtonRole::Icon);
+		PreviousButton->SetIsEnabled(bPreviousEnabled);
+	}
+	if (NextButton)
+	{
+		TunaSweeperUIStyle::ApplyButton(NextButton, TunaSweeperUIStyle::EButtonRole::Icon);
+		NextButton->SetIsEnabled(bNextEnabled);
 	}
 }
 
