@@ -16,6 +16,9 @@
 #include "Misc/Paths.h"
 #include "AssetCompilingManager.h"
 #include "RenderingThread.h"
+#include "Engine/GameInstance.h"
+#include "Subsystem/TunaSweeperTextSubsystem.h"
+#include "Framework/Application/SlateApplication.h"
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FTitleScreenAssetTest,
 	"TunaSweeper.UI.Title.ScreenAssetsAndTransitions",
@@ -108,6 +111,23 @@ bool FTitleScreenAssetTest::RunTest(const FString& Parameters)
 	Menu->TickMenuTransitions(1.0f);
 	TestEqual(TEXT("Settings closes after exit fade"), Menu->SettingsPanel->GetVisibility(), ESlateVisibility::Collapsed);
 	TestEqual(TEXT("Main menu visible after exit"), Menu->MainMenuPanel->GetVisibility(), ESlateVisibility::Visible);
+	// The editor-world fixture has no game instance; supply the real string-table label for the capture.
+	UGameInstance* PreviewInstance = NewObject<UGameInstance>();
+	UTunaSweeperTextSubsystem* PreviewStrings = NewObject<UTunaSweeperTextSubsystem>(PreviewInstance);
+	Menu->SetNamedText(TEXT("SteamDemoWishlistButtonText"), PreviewStrings->ResolveText(
+		TEXT("ui.title.wishlist"), ETunaSweeperItemTextLanguage::Korean, FText::GetEmpty()));
+	Menu->InvalidateLayoutAndVolatility();
+	FSlateApplication::Get().InvalidateAllWidgets(true);
+	Slate->Invalidate(EInvalidateWidgetReason::Layout | EInvalidateWidgetReason::Paint);
+	Menu->ForceLayoutPrepass();
+	Renderer.DrawWidget(Target, Slate, FVector2D(1920, 1080), 0.0f);
+	FlushRenderingCommands();
+	if (Target)
+	{
+		FImage Pixels;
+		if (FImageUtils::GetRenderTargetImage(Target, Pixels))
+			FImageUtils::SaveImageByExtension(*(FPaths::ProjectSavedDir() / TEXT("Screenshots/TitleMain.png")), Pixels);
+	}
 	Menu->ShowSettingsPanel();
 	Menu->TickMenuTransitions(1.0f);
 	TestTrue(TEXT("Re-entry restores content input"), Menu->FindIntroWidget(TEXT("SettingsPageStack"))->GetIsEnabled());

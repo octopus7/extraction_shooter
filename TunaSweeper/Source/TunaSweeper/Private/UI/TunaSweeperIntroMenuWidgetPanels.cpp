@@ -82,7 +82,7 @@ void UTunaSweeperIntroMenuWidget::EnsureSteamDemoWishlistButton()
 {
 	if (SteamDemoWishlistButton || !IsSteamDemoDistribution() || !WidgetTree) return;
 	UVerticalBox* MainMenuStack = Cast<UVerticalBox>(FindIntroWidget(TEXT("MainMenuPanel")));
-	UWidget* SettingsButtonContainer = FindIntroWidget(TEXT("SettingsButtonBox"));
+	USizeBox* SettingsButtonContainer = Cast<USizeBox>(FindIntroWidget(TEXT("SettingsButtonBox")));
 	if (!MainMenuStack || !SettingsButtonContainer) return;
 
 	USizeBox* WishlistButtonBox = WidgetTree->ConstructWidget<USizeBox>(
@@ -91,29 +91,23 @@ void UTunaSweeperIntroMenuWidget::EnsureSteamDemoWishlistButton()
 	UButton* WishlistButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("SteamDemoWishlistButton"));
 	UTextBlock* WishlistButtonText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("SteamDemoWishlistButtonText"));
 	if (!WishlistButtonBox || !WishlistButton || !WishlistButtonText) return;
-	WishlistButtonText->SetText(ResolveUiText(FName(TEXT("ui.title.wishlist")), FText::FromString(TEXT("위시리스트에 추가"))));
+	WishlistButtonText->SetText(ResolveUiText(FName(TEXT("ui.title.wishlist")), FText::GetEmpty()));
 	WishlistButtonText->SetJustification(ETextJustify::Center);
 	WishlistButtonText->SetColorAndOpacity(FSlateColor(FLinearColor(0.90f, 0.96f, 0.96f, 1.0f)));
 	TunaSweeperUIFont::ApplyFont(WishlistButtonText, 17, ETunaSweeperUIFontWeight::Bold);
 	WishlistButton->SetContent(WishlistButtonText);
-	const FVector2D ButtonSize(380.0f, 44.0f);
+	const FVector2D ButtonSize(SettingsButtonContainer->GetWidthOverride() * 0.8f, 44.0f);
 	WishlistButtonBox->SetWidthOverride(ButtonSize.X);
 	WishlistButtonBox->SetHeightOverride(ButtonSize.Y);
 	WishlistButtonBox->SetContent(WishlistButton);
-	FButtonStyle ButtonStyle;
-	ButtonStyle.SetNormal(TunaSweeperSettingsUi::MakeRoundedBoxBrush(ButtonSize, FLinearColor(0.03f, 0.08f, 0.09f, 0.85f), FLinearColor(0.32f, 0.90f, 0.96f, 0.90f), 1.5f, 7.0f));
-	ButtonStyle.SetHovered(TunaSweeperSettingsUi::MakeRoundedBoxBrush(ButtonSize, FLinearColor(0.06f, 0.16f, 0.18f, 0.95f), FLinearColor(0.58f, 0.96f, 1.0f, 1.0f), 2.0f, 7.0f));
-	ButtonStyle.SetPressed(TunaSweeperSettingsUi::MakeRoundedBoxBrush(ButtonSize, FLinearColor(0.02f, 0.05f, 0.06f, 0.95f), FLinearColor(0.22f, 0.70f, 0.76f, 0.90f), 1.0f, 7.0f));
-	WishlistButton->SetStyle(ButtonStyle);
 	WishlistButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleSteamDemoWishlistClicked);
 
-	const int32 SettingsButtonIndex = MainMenuStack->GetChildIndex(SettingsButtonContainer);
-	if (UVerticalBoxSlot* WishlistSlot = Cast<UVerticalBoxSlot>(
-		MainMenuStack->InsertChildAt(SettingsButtonIndex + 1, WishlistButtonBox)))
+	if (UVerticalBoxSlot* WishlistSlot = MainMenuStack->AddChildToVerticalBox(WishlistButtonBox))
 	{
 		WishlistSlot->SetHorizontalAlignment(HAlign_Left);
 		WishlistSlot->SetVerticalAlignment(VAlign_Center);
-		WishlistSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, 12.0f));
+		// The menu stack is wider than its buttons; center within the regular button width.
+		WishlistSlot->SetPadding(FMargin(SettingsButtonContainer->GetWidthOverride() * 0.1f, 20.0f, 0.0f, 12.0f));
 		SteamDemoWishlistButtonContainer = WishlistButtonBox;
 		SteamDemoWishlistButton = WishlistButton;
 	}

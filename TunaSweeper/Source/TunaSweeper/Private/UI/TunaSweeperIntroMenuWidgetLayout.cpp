@@ -270,12 +270,34 @@ void UTunaSweeperIntroMenuWidget::ApplyUnifiedControlStyles()
 		Button->SetContent(LabelScaleBox);
 	};
 
+	// Keep only the localized action label, removing the authored number and slash ornaments.
+	for (UButton* Button : {StartButton.Get(), SlotSelectButton.Get(), SettingsButton.Get(), CreditsButton.Get(), QuitButton.Get()})
+	{
+		UTextBlock* Label = Button ? Cast<UTextBlock>(FindIntroWidget(FName(*(Button->GetName() + TEXT("Text"))))) : nullptr;
+		if (!Label) continue;
+		if (Button->GetContent() != Label)
+		{
+			Label->RemoveFromParent();
+			Button->SetContent(Label);
+		}
+		Label->SetJustification(ETextJustify::Center);
+		Label->SetMargin(FMargin(0.0f));
+	}
+
 	StyleButton(StartButton, EButtonRole::Primary);
 	StyleButton(SlotSelectButton, EButtonRole::Secondary);
 	StyleButton(SettingsButton, EButtonRole::Secondary);
 	StyleButton(CreditsButton, EButtonRole::Secondary);
 	StyleButton(QuitButton, EButtonRole::Secondary);
 	StyleButton(SteamDemoWishlistButton, EButtonRole::Primary);
+	if (SteamDemoWishlistButton)
+	{
+		FButtonStyle WishlistStyle = SteamDemoWishlistButton->GetStyle();
+		WishlistStyle.Normal.TintColor = FLinearColor(0.55f, 0.24f, 0.10f);
+		WishlistStyle.Hovered.TintColor = FLinearColor(0.70f, 0.34f, 0.16f);
+		WishlistStyle.Pressed.TintColor = FLinearColor(0.38f, 0.15f, 0.06f);
+		SteamDemoWishlistButton->SetStyle(WishlistStyle);
+	}
 
 	// Save-slot cards retain their comparison presentation; only their actions adopt the shared language.
 	StyleButton(PrimarySaveSlotButton, EButtonRole::Primary);
