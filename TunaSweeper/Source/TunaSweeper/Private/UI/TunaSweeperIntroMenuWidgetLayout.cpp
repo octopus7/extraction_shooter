@@ -1,5 +1,6 @@
 #include "TunaSweeperIntroMenuWidgetShared.h"
 #include "Settings/TunaSweeperBuildFlavor.h"
+#include "Components/ButtonSlot.h"
 
 namespace TunaSweeperIntroMenuLayout
 {
@@ -309,6 +310,42 @@ void UTunaSweeperIntroMenuWidget::ApplyUnifiedControlStyles()
 	EnsureFittedTabLabel(SettingsGraphicsTabButton);
 	EnsureFittedTabLabel(SettingsInterfaceTabButton);
 	EnsureFittedTabLabel(SettingsDevelopmentTabButton);
+	auto ExtendButtonToLeftEdge = [this](UButton* Button, const TCHAR* BoxName)
+	{
+		if (!Button || !Button->GetContent()) return;
+		USizeBox* Box = Cast<USizeBox>(FindIntroWidget(BoxName));
+		UCanvasPanelSlot* Slot = Box ? Cast<UCanvasPanelSlot>(Box->Slot) : nullptr;
+		UVerticalBoxSlot* StackSlot = Box ? Cast<UVerticalBoxSlot>(Box->Slot) : nullptr;
+		UCanvasPanelSlot* StackCanvasSlot = Box && Box->GetParent()
+			? Cast<UCanvasPanelSlot>(Box->GetParent()->Slot) : nullptr;
+		const float LeftInset = Slot ? Slot->GetPosition().X
+			: (StackSlot && StackCanvasSlot ? StackCanvasSlot->GetPosition().X + StackSlot->GetPadding().Left : 0.0f);
+		if (LeftInset <= 0.0f) return;
+		if (Slot)
+		{
+			Slot->SetPosition(FVector2D(0.0f, Slot->GetPosition().Y));
+			Slot->SetSize(Slot->GetSize() + FVector2D(LeftInset, 0.0f));
+		}
+		else
+		{
+			FMargin Padding = StackSlot->GetPadding();
+			Padding.Left -= LeftInset;
+			StackSlot->SetPadding(Padding);
+		}
+		if (Box->IsWidthOverride()) Box->SetWidthOverride(Box->GetWidthOverride() + LeftInset);
+		// Expand the hit area and background while preserving the content's screen position.
+		if (UButtonSlot* ContentSlot = Cast<UButtonSlot>(Button->GetContent()->Slot))
+		{
+			FMargin Padding = ContentSlot->GetPadding();
+			Padding.Left += LeftInset;
+			ContentSlot->SetPadding(Padding);
+			if (Cast<UScaleBox>(Button->GetContent())) ContentSlot->SetHorizontalAlignment(HAlign_Fill);
+		}
+	};
+	ExtendButtonToLeftEdge(SettingsGraphicsTabButton, TEXT("GraphicsTabButtonBox"));
+	ExtendButtonToLeftEdge(SettingsInterfaceTabButton, TEXT("InterfaceTabButtonBox"));
+	ExtendButtonToLeftEdge(SettingsDevelopmentTabButton, TEXT("DevelopmentTabButtonBox"));
+	ExtendButtonToLeftEdge(BackFromSettingsButton, TEXT("BackFromSettingsButtonBox"));
 	auto StyleSettingsTab = [this, &ApplyNestedLabels](UButton* Button, bool bSelected)
 	{
 		ApplySettingsTabButtonStyle(Button, FVector2D(214.0f, 50.0f), bSelected);
@@ -320,6 +357,14 @@ void UTunaSweeperIntroMenuWidget::ApplyUnifiedControlStyles()
 	StyleButton(ConfirmInterfaceSettingsButton, EButtonRole::Primary);
 	StyleButton(CancelInterfaceSettingsButton, EButtonRole::Secondary);
 	StyleButton(BackFromSettingsButton, EButtonRole::Secondary);
+	if (BackFromSettingsButton)
+	{
+		FButtonStyle BackStyle = BackFromSettingsButton->GetStyle();
+		BackStyle.Normal.TintColor = FLinearColor::Transparent;
+		BackStyle.Hovered.OutlineSettings.CornerRadii = FVector4(0.0f);
+		BackStyle.Pressed.OutlineSettings.CornerRadii = FVector4(0.0f);
+		BackFromSettingsButton->SetStyle(BackStyle);
+	}
 	StyleButton(DeleteCurrentSaveDataButton, EButtonRole::Danger);
 
 	StyleButton(DifficultyStartButton, EButtonRole::Primary);

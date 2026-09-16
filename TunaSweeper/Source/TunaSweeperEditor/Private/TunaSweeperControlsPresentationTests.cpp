@@ -18,6 +18,7 @@
 #include "Misc/Paths.h"
 #include "Misc/ScopeExit.h"
 #include "RenderingThread.h"
+#include "Framework/Application/SlateApplication.h"
 #include "Slate/WidgetRenderer.h"
 #include "Subsystem/TunaSweeperTextSubsystem.h"
 #include "UI/TunaSweeperCheckIndicatorWidget.h"
@@ -143,6 +144,19 @@ bool FTunaSweeperControlsPresentationTest::RunTest(const FString& Parameters)
 			TestTrue(TEXT("Rendered UMG image is saved"), FImageUtils::SaveImageByExtension(*Path, Pixels));
 		};
 		Capture(TEXT("top"));
+		for (const TCHAR* Name : {TEXT("BackFromSettingsButton"), TEXT("SettingsGraphicsTabButton"), TEXT("SettingsInterfaceTabButton")})
+		{
+			UButton* EdgeButton = Cast<UButton>(Find(Menu.Get(), Name));
+			if (!TestNotNull(TEXT("Left-edge navigation button exists"), EdgeButton)) return false;
+			TestTrue(TEXT("Navigation hit area begins at the screen edge"), FMath::IsNearlyZero(EdgeButton->GetCachedGeometry().GetAbsolutePosition().X));
+		}
+		UButton* BackButton = Cast<UButton>(Find(Menu.Get(), TEXT("BackFromSettingsButton")));
+		TSharedPtr<SWidget> BackSlate = BackButton->GetCachedWidget();
+		BackSlate->OnMouseEnter(BackButton->GetCachedGeometry(), FPointerEvent());
+		FSlateApplication::Get().InvalidateAllWidgets(true);
+		Capture(TEXT("back_hover"));
+		BackSlate->OnMouseLeave(FPointerEvent());
+		FSlateApplication::Get().InvalidateAllWidgets(true);
 		UUserWidget* LongQualityRow = Cast<UUserWidget>(Find(Graphics, TEXT("GlobalIlluminationQualityRow")));
 		UWidget* QualityLabel = Find(LongQualityRow, TEXT("OptionLabelText"));
 		UWidget* QualityPrevious = Find(LongQualityRow, TEXT("PreviousButton"));
