@@ -50,6 +50,10 @@ bool FTunaSweeperPauseExitSaveFailureTest::RunTest(const FString& Parameters)
 	TestEqual(TEXT("Failed save preserves quick slots"), Instance->UsableQuickSlots[0].ItemUid, Item.Uid);
 	TestEqual(TEXT("Failed save preserves pending raid experience"), Instance->PendingRaidExperiencePoints, int64(27));
 	TestTrue(TEXT("Failed save leaves the raid active"), Instance->bRaidExperienceSessionActive);
+	TestFalse(TEXT("Bunker exit also requires a successful save without pending item changes"), Instance->SaveForGameplayExit(false));
+	TestTrue(TEXT("Failed bunker exit preserves carried items"), Instance->ItemInstancesByUid.Contains(Item.Uid));
+	TestEqual(TEXT("Bunker exit preserves equipment"), Instance->EquipmentSlots[0].ItemUid, Item.Uid);
+	TestEqual(TEXT("Bunker exit preserves quick slots"), Instance->UsableQuickSlots[0].ItemUid, Item.Uid);
 	return true;
 }
 #endif

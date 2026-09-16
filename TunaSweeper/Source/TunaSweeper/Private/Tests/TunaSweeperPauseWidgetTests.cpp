@@ -81,8 +81,10 @@ bool FTunaSweeperPauseWidgetTest::RunTest(const FString& Parameters)
 		UBorder* Confirmation = Cast<UBorder>(Widget->WidgetTree->FindWidget(TEXT("PauseConfirmationPanel")));
 		UButton* Cancel = Button(TEXT("CancelExitButton"));
 		UTextBlock* Warning = Text(TEXT("LossWarning"));
+		UTextBlock* ConfirmationHeading = Text(TEXT("ConfirmationHeading"));
 		if (!TestNotNull(TEXT("Menu exists"), Menu) || !TestNotNull(TEXT("Confirmation exists"), Confirmation)
-			|| !TestNotNull(TEXT("Cancel exists"), Cancel) || !TestNotNull(TEXT("Warning exists"), Warning)) return false;
+			|| !TestNotNull(TEXT("Cancel exists"), Cancel) || !TestNotNull(TEXT("Warning exists"), Warning)
+			|| !TestNotNull(TEXT("Confirmation heading exists"), ConfirmationHeading)) return false;
 		TestEqual(TEXT("Confirmation starts hidden"), Confirmation->GetVisibility(), ESlateVisibility::Collapsed);
 		UBackgroundBlur* Blur = Cast<UBackgroundBlur>(Widget->WidgetTree->FindWidget(TEXT("PauseBackgroundBlur")));
 		if (!TestNotNull(TEXT("Pause uses a real UMG background blur"), Blur)) return false;
@@ -116,10 +118,16 @@ bool FTunaSweeperPauseWidgetTest::RunTest(const FString& Parameters)
 			Button(ExitButton)->OnClicked.Broadcast();
 			TestEqual(TEXT("Selecting exit opens confirmation"), Confirmation->GetVisibility(), ESlateVisibility::Visible);
 			TestEqual(TEXT("Base menu is unavailable behind confirmation"), Menu->GetVisibility(), ESlateVisibility::Collapsed);
-			TestEqual(TEXT("Warning matches raid or bunker loss policy"), Warning->GetText().ToString(),
-				Instance->ResolveLocalizedText(bRaid ? TEXT("ui.pause.raid_warning") : TEXT("ui.pause.bunker_warning"), FText::GetEmpty()).ToString());
+			const bool bQuit = FCString::Strcmp(ExitButton, TEXT("QuitButton")) == 0;
+			TestEqual(TEXT("Confirmation asks the localized exit question"), ConfirmationHeading->GetText().ToString(),
+				Instance->ResolveLocalizedText(bQuit ? TEXT("ui.pause.confirm_quit") : TEXT("ui.pause.confirm_title"), FText::GetEmpty()).ToString());
+			TestEqual(TEXT("Only raids reserve space for a progress loss warning"), Warning->GetVisibility(),
+				bRaid ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
+			TestEqual(TEXT("Bunker confirmation has no warning text"), Warning->GetText().ToString(),
+				bRaid ? Instance->ResolveLocalizedText(TEXT("ui.pause.raid_warning"), FText::GetEmpty()).ToString() : FString());
 			Widget->ShowExitFailure();
 			TestEqual(TEXT("Save failure stays in confirmation"), Confirmation->GetVisibility(), ESlateVisibility::Visible);
+			TestEqual(TEXT("Save failure is visible in both bunker and raid"), Warning->GetVisibility(), ESlateVisibility::HitTestInvisible);
 			TestEqual(TEXT("Save failure displays localized recovery guidance"), Warning->GetText().ToString(),
 				Instance->ResolveLocalizedText(TEXT("ui.pause.save_failed"), FText::GetEmpty()).ToString());
 			Cancel->OnClicked.Broadcast();

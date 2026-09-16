@@ -165,8 +165,11 @@ void UTunaSweeperPauseMenuWidget::RefreshTexts()
 	TitleText->SetText(Text(TEXT("ui.pause.return_to_title")));
 	QuitText->SetText(Text(TEXT("ui.title.quit")));
 	ConfirmationHeading->SetText(Text(bQuitRequested ? TEXT("ui.pause.confirm_quit") : TEXT("ui.pause.confirm_title")));
-	WarningText->SetText(Text(bExitFailed ? TEXT("ui.pause.save_failed") :
-		(bRaidContext ? TEXT("ui.pause.raid_warning") : TEXT("ui.pause.bunker_warning"))));
+	const bool bShowWarning = bExitFailed || bRaidContext;
+	WarningText->SetVisibility(bShowWarning ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
+	WarningText->SetText(bShowWarning
+		? Text(bExitFailed ? TEXT("ui.pause.save_failed") : TEXT("ui.pause.raid_warning"))
+		: FText::GetEmpty());
 	ConfirmText->SetText(Text(bQuitRequested ? TEXT("ui.title.quit") : TEXT("ui.pause.return_to_title")));
 	CancelText->SetText(Text(TEXT("ui.common.cancel")));
 }
