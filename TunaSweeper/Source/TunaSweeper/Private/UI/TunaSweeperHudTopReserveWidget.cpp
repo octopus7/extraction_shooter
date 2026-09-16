@@ -5,6 +5,7 @@
 #include "Components/ButtonSlot.h"
 #include "Components/Image.h"
 #include "Engine/Texture2D.h"
+#include "Settings/TunaSweeperBuildFlavor.h"
 #include "UI/TunaSweeperUIFont.h"
 #include "UI/TunaSweeperUIStyle.h"
 
@@ -118,6 +119,11 @@ void UTunaSweeperHudTopReserveWidget::RefreshTabVisuals()
 	SetTabVisual(ETunaSweeperHudMode::Map, MapModeButton, MapModeIcon, TEXT("MapModeIcon"));
 	SetTabVisual(ETunaSweeperHudMode::Memo, MemoModeButton, MemoModeIcon, TEXT("MemoModeIcon"));
 	SetTabVisual(ETunaSweeperHudMode::Research, ResearchModeButton, ResearchModeIcon, TEXT("ResearchModeIcon"));
+	const ESlateVisibility ResearchVisibility = TunaSweeperBuildFlavor::IsDemo()
+		? ESlateVisibility::Collapsed : ESlateVisibility::Visible;
+	if (ResearchModeButton) ResearchModeButton->SetVisibility(ResearchVisibility);
+	if (UWidget* ResearchFrame = WidgetTree ? WidgetTree->FindWidget(TEXT("ResearchModeButtonFrame")) : nullptr)
+		ResearchFrame->SetVisibility(ResearchVisibility);
 }
 
 void UTunaSweeperHudTopReserveWidget::CacheNamedWidgets()
@@ -273,5 +279,6 @@ void UTunaSweeperHudTopReserveWidget::HandleMemoModeClicked()
 
 void UTunaSweeperHudTopReserveWidget::HandleResearchModeClicked()
 {
+	if (TunaSweeperBuildFlavor::IsDemo()) return;
 	OnHudModeSelected.Broadcast(ETunaSweeperHudMode::Research);
 }
