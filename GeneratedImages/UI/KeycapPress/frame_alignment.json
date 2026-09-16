@@ -1,0 +1,210 @@
+[
+  {
+    "frame": 0,
+    "originalBounds": [
+      52,
+      60,
+      234,
+      213
+    ],
+    "translation": [
+      -15,
+      3
+    ]
+  },
+  {
+    "frame": 1,
+    "originalBounds": [
+      43,
+      59,
+      225,
+      213
+    ],
+    "translation": [
+      -6,
+      3
+    ]
+  },
+  {
+    "frame": 2,
+    "originalBounds": [
+      34,
+      59,
+      216,
+      213
+    ],
+    "translation": [
+      3,
+      3
+    ]
+  },
+  {
+    "frame": 3,
+    "originalBounds": [
+      25,
+      62,
+      206,
+      213
+    ],
+    "translation": [
+      12,
+      3
+    ]
+  },
+  {
+    "frame": 4,
+    "originalBounds": [
+      54,
+      53,
+      234,
+      206
+    ],
+    "translation": [
+      -16,
+      10
+    ]
+  },
+  {
+    "frame": 5,
+    "originalBounds": [
+      45,
+      67,
+      225,
+      211
+    ],
+    "translation": [
+      -7,
+      5
+    ]
+  },
+  {
+    "frame": 6,
+    "originalBounds": [
+      38,
+      76,
+      217,
+      216
+    ],
+    "translation": [
+      0,
+      0
+    ]
+  },
+  {
+    "frame": 7,
+    "originalBounds": [
+      28,
+      77,
+      206,
+      216
+    ],
+    "translation": [
+      11,
+      0
+    ]
+  },
+  {
+    "frame": 8,
+    "originalBounds": [
+      54,
+      73,
+      234,
+      208
+    ],
+    "translation": [
+      -16,
+      8
+    ]
+  },
+  {
+    "frame": 9,
+    "originalBounds": [
+      44,
+      53,
+      224,
+      203
+    ],
+    "translation": [
+      -6,
+      13
+    ]
+  },
+  {
+    "frame": 10,
+    "originalBounds": [
+      35,
+      51,
+      215,
+      203
+    ],
+    "translation": [
+      3,
+      13
+    ]
+  },
+  {
+    "frame": 11,
+    "originalBounds": [
+      25,
+      52,
+      206,
+      203
+    ],
+    "translation": [
+      12,
+      13
+    ]
+  },
+  {
+    "frame": 12,
+    "originalBounds": [
+      53,
+      37,
+      233,
+      189
+    ],
+    "translation": [
+      -15,
+      27
+    ]
+  },
+  {
+    "frame": 13,
+    "originalBounds": [
+      44,
+      37,
+      224,
+      189
+    ],
+    "translation": [
+      -6,
+      27
+    ]
+  },
+  {
+    "frame": 14,
+    "originalBounds": [
+      34,
+      37,
+      215,
+      189
+    ],
+    "translation": [
+      4,
+      27
+    ]
+  },
+  {
+    "frame": 15,
+    "originalBounds": [
+      25,
+      38,
+      205,
+      190
+    ],
+    "translation": [
+      13,
+      26
+    ]
+  }
+]

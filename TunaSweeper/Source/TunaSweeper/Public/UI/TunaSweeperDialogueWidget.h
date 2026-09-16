@@ -60,7 +60,8 @@ private:
 	void BeginCurrentLine();
 	void UpdateVisibleDialogueText();
 	void UpdateSpeakerPresentation(const FTunaSweeperDialogueLine& CurrentLine);
-	void UpdateContinueInputHint();
+	void UpdateContinueKeycapAnimation(float InDeltaTime);
+	void ApplyContinueKeycapFrame(int32 FrameIndex);
 	void AdvanceOrFillLine();
 	void FinishDialogue();
 	bool IsCurrentLineFullyVisible() const;
@@ -96,10 +97,10 @@ private:
 	TObjectPtr<UTextBlock> ContinuePromptText;
 
 	UPROPERTY(Transient)
-	TObjectPtr<UBorder> ContinueKeycap;
+	TObjectPtr<UImage> ContinueKeycapImage;
 
 	UPROPERTY(Transient)
-	TObjectPtr<UTextBlock> ContinueKeyText;
+	TObjectPtr<UTexture2D> ContinueKeycapTexture;
 
 	TArray<FTunaSweeperDialogueLine> DialogueLines;
 	FTunaSweeperDialogueLineActivatedDelegate LineActivatedDelegate;
@@ -107,8 +108,9 @@ private:
 	FString CurrentFullText;
 	float CharactersPerSecond = 5.0f;
 	float TypewriterAccumulator = 0.0f;
+	float ContinueKeycapAnimationTime = 0.0f;
 	int32 CurrentLineIndex = INDEX_NONE;
 	int32 VisibleCharacterCount = 0;
-	bool bLastInputWasGamepad = false;
+	int32 ContinueKeycapFrameIndex = INDEX_NONE;
 	bool bDialogueRunning = false;
 };

@@ -36,7 +36,12 @@ namespace TunaSweeperDialogueWidget
 	constexpr float BodyHeight = 154.0f;
 	constexpr float ContinueReservedWidth = 166.0f;
 	constexpr float SpeakerIconSize = 32.0f;
+	constexpr float ContinueKeycapSize = 48.0f;
+	constexpr float ContinueKeycapLoopSeconds = 1.3f;
+	constexpr int32 ContinueKeycapGridSize = 4;
+	constexpr int32 ContinueKeycapFrameCount = ContinueKeycapGridSize * ContinueKeycapGridSize;
 	constexpr TCHAR DialogueSurfaceTexturePath[] = TEXT("/Game/UI/Dialogue/T_UI_DialoguePanelSurface_C1.T_UI_DialoguePanelSurface_C1");
+	constexpr TCHAR ContinueKeycapTexturePath[] = TEXT("/Game/UI/Dialogue/T_KeycapPress_4x4.T_KeycapPress_4x4");
 }
 
 namespace
@@ -67,6 +72,11 @@ namespace
 	UTexture2D* LoadDialogueSurfaceTexture()
 	{
 		return LoadObject<UTexture2D>(nullptr, TunaSweeperDialogueWidget::DialogueSurfaceTexturePath);
+	}
+
+	UTexture2D* LoadContinueKeycapTexture()
+	{
+		return LoadObject<UTexture2D>(nullptr, TunaSweeperDialogueWidget::ContinueKeycapTexturePath);
 	}
 
 	float EstimateTextWidth(const FString& Text, float FontSize)
@@ -232,7 +242,13 @@ void UTunaSweeperDialogueWidget::NativeTick(const FGeometry& MyGeometry, float I
 {
 	Super::NativeTick(MyGeometry, InDeltaTime);
 
-	if (!bDialogueRunning || DialogueLines.IsEmpty() || !DialogueLines.IsValidIndex(CurrentLineIndex) || IsCurrentLineFullyVisible())
+	if (!bDialogueRunning || DialogueLines.IsEmpty() || !DialogueLines.IsValidIndex(CurrentLineIndex))
+	{
+		return;
+	}
+
+	UpdateContinueKeycapAnimation(InDeltaTime);
+	if (IsCurrentLineFullyVisible())
 	{
 		return;
 	}
@@ -257,8 +273,6 @@ FReply UTunaSweeperDialogueWidget::NativeOnKeyDown(const FGeometry& InGeometry, 
 		return FReply::Handled();
 	}
 
-	bLastInputWasGamepad = InKeyEvent.GetKey().IsGamepadKey();
-	UpdateContinueInputHint();
 	AdvanceOrFillLine();
 	return FReply::Handled();
 }
@@ -343,12 +357,9 @@ void UTunaSweeperDialogueWidget::BuildDialogueWidget()
 	ContinuePromptText = WidgetTree->ConstructWidget<UTextBlock>(
 		UTextBlock::StaticClass(),
 		TEXT("ContinuePromptText"));
-	ContinueKeycap = WidgetTree->ConstructWidget<UBorder>(
-		UBorder::StaticClass(),
-		TEXT("ContinueKeycap"));
-	ContinueKeyText = WidgetTree->ConstructWidget<UTextBlock>(
-		UTextBlock::StaticClass(),
-		TEXT("ContinueKeyText"));
+	ContinueKeycapImage = WidgetTree->ConstructWidget<UImage>(
+		UImage::StaticClass(),
+		TEXT("ContinueKeycapImage"));
 
 	if (!SafeZone ||
 		!RootCanvas ||
@@ -362,8 +373,7 @@ void UTunaSweeperDialogueWidget::BuildDialogueWidget()
 		!SpeakerNameText ||
 		!DialogueBodyText ||
 		!ContinuePromptText ||
-		!ContinueKeycap ||
-		!ContinueKeyText)
+		!ContinueKeycapImage)
 	{
 		return;
 	}
@@ -553,40 +563,32 @@ void UTunaSweeperDialogueWidget::BuildDialogueWidget()
 		PromptSlot->SetZOrder(4);
 	}
 
-	ContinueKeycap->SetBrush(MakeRoundedBoxBrush(
-		FVector2D(58.0f, 34.0f),
-		FLinearColor(0.90f, 0.94f, 0.95f, 0.96f),
-		6.0f,
-		FLinearColor(0.30f, 0.46f, 0.55f, 0.88f),
-		1.5f));
-	ContinueKeycap->SetVisibility(ESlateVisibility::Collapsed);
-	if (UCanvasPanelSlot* KeycapSlot = RootCanvas->AddChildToCanvas(ContinueKeycap))
+	ContinueKeycapTexture = LoadContinueKeycapTexture();
+	if (ContinueKeycapTexture)
+	{
+		ContinueKeycapImage->SetBrushFromTexture(ContinueKeycapTexture, false);
+		FSlateBrush KeycapBrush = ContinueKeycapImage->GetBrush();
+		KeycapBrush.DrawAs = ESlateBrushDrawType::Image;
+		KeycapBrush.SetImageSize(FVector2D(
+			TunaSweeperDialogueWidget::ContinueKeycapSize,
+			TunaSweeperDialogueWidget::ContinueKeycapSize));
+		KeycapBrush.TintColor = FSlateColor(FLinearColor::White);
+		ContinueKeycapImage->SetBrush(KeycapBrush);
+		ApplyContinueKeycapFrame(0);
+	}
+	ContinueKeycapImage->SetVisibility(ESlateVisibility::Collapsed);
+	if (UCanvasPanelSlot* KeycapSlot = RootCanvas->AddChildToCanvas(ContinueKeycapImage))
 	{
 		KeycapSlot->SetAnchors(FAnchors(0.5f, 1.0f));
 		KeycapSlot->SetAlignment(FVector2D(1.0f, 1.0f));
 		KeycapSlot->SetPosition(FVector2D(
 			TunaSweeperDialogueWidget::PanelWidth * 0.5f - 28.0f,
 			-TunaSweeperDialogueWidget::PanelBottomMargin - 22.0f));
-		KeycapSlot->SetSize(FVector2D(58.0f, 34.0f));
+		KeycapSlot->SetSize(FVector2D(
+			TunaSweeperDialogueWidget::ContinueKeycapSize,
+			TunaSweeperDialogueWidget::ContinueKeycapSize));
 		KeycapSlot->SetZOrder(4);
 	}
-
-	ContinueKeyText->SetFont(MakeDialogueFont(ContinueKeyText, 18));
-	ContinueKeyText->SetColorAndOpacity(FSlateColor(FLinearColor(0.20f, 0.33f, 0.40f, 1.0f)));
-	ContinueKeyText->SetJustification(ETextJustify::Center);
-	ContinueKeyText->SetVisibility(ESlateVisibility::Collapsed);
-	if (UCanvasPanelSlot* KeyTextSlot = RootCanvas->AddChildToCanvas(ContinueKeyText))
-	{
-		KeyTextSlot->SetAnchors(FAnchors(0.5f, 1.0f));
-		KeyTextSlot->SetAlignment(FVector2D(1.0f, 1.0f));
-		KeyTextSlot->SetPosition(FVector2D(
-			TunaSweeperDialogueWidget::PanelWidth * 0.5f - 28.0f,
-			-TunaSweeperDialogueWidget::PanelBottomMargin - 22.0f));
-		KeyTextSlot->SetSize(FVector2D(58.0f, 34.0f));
-		KeyTextSlot->SetZOrder(5);
-	}
-
-	UpdateContinueInputHint();
 }
 
 void UTunaSweeperDialogueWidget::BeginCurrentLine()
@@ -621,7 +623,10 @@ void UTunaSweeperDialogueWidget::BeginCurrentLine()
 			TunaSweeperDialogueWidget::ContinueReservedWidth);
 	}
 	TypewriterAccumulator = 0.0f;
+	ContinueKeycapAnimationTime = 0.0f;
+	ContinueKeycapFrameIndex = INDEX_NONE;
 	VisibleCharacterCount = 0;
+	ApplyContinueKeycapFrame(0);
 
 	UpdateSpeakerPresentation(CurrentLine);
 	UpdateVisibleDialogueText();
@@ -639,16 +644,9 @@ void UTunaSweeperDialogueWidget::UpdateVisibleDialogueText()
 		DialogueBodyText->SetText(FText::FromString(CurrentFullText.Left(VisibleCharacterCount)));
 	}
 
-	if (ContinueKeycap)
+	if (ContinueKeycapImage)
 	{
-		ContinueKeycap->SetVisibility(IsCurrentLineFullyVisible()
-			? ESlateVisibility::HitTestInvisible
-			: ESlateVisibility::Collapsed);
-	}
-
-	if (ContinueKeyText)
-	{
-		ContinueKeyText->SetVisibility(IsCurrentLineFullyVisible()
+		ContinueKeycapImage->SetVisibility(IsCurrentLineFullyVisible()
 			? ESlateVisibility::HitTestInvisible
 			: ESlateVisibility::Collapsed);
 	}
@@ -699,12 +697,48 @@ void UTunaSweeperDialogueWidget::UpdateSpeakerPresentation(const FTunaSweeperDia
 	}
 }
 
-void UTunaSweeperDialogueWidget::UpdateContinueInputHint()
+void UTunaSweeperDialogueWidget::UpdateContinueKeycapAnimation(float InDeltaTime)
 {
-	if (ContinueKeyText)
+	if (!ContinueKeycapImage || !ContinueKeycapTexture || !IsCurrentLineFullyVisible())
 	{
-		ContinueKeyText->SetText(FText::FromString(bLastInputWasGamepad ? TEXT("A") : TEXT("Enter")));
+		return;
 	}
+
+	ContinueKeycapAnimationTime = FMath::Fmod(
+		ContinueKeycapAnimationTime + FMath::Max(0.0f, InDeltaTime),
+		TunaSweeperDialogueWidget::ContinueKeycapLoopSeconds);
+	const int32 FrameIndex = FMath::Clamp(
+		FMath::FloorToInt(
+			ContinueKeycapAnimationTime /
+			TunaSweeperDialogueWidget::ContinueKeycapLoopSeconds *
+			static_cast<float>(TunaSweeperDialogueWidget::ContinueKeycapFrameCount)),
+		0,
+		TunaSweeperDialogueWidget::ContinueKeycapFrameCount - 1);
+	ApplyContinueKeycapFrame(FrameIndex);
+}
+
+void UTunaSweeperDialogueWidget::ApplyContinueKeycapFrame(int32 FrameIndex)
+{
+	if (!ContinueKeycapImage || !ContinueKeycapTexture || ContinueKeycapFrameIndex == FrameIndex)
+	{
+		return;
+	}
+
+	const int32 ClampedFrameIndex = FMath::Clamp(
+		FrameIndex,
+		0,
+		TunaSweeperDialogueWidget::ContinueKeycapFrameCount - 1);
+	const int32 Column = ClampedFrameIndex % TunaSweeperDialogueWidget::ContinueKeycapGridSize;
+	const int32 Row = ClampedFrameIndex / TunaSweeperDialogueWidget::ContinueKeycapGridSize;
+	const float FrameUvSize = 1.0f / static_cast<float>(TunaSweeperDialogueWidget::ContinueKeycapGridSize);
+	const FVector2f MinUv(
+		static_cast<float>(Column) * FrameUvSize,
+		static_cast<float>(Row) * FrameUvSize);
+
+	FSlateBrush KeycapBrush = ContinueKeycapImage->GetBrush();
+	KeycapBrush.SetUVRegion(FBox2f(MinUv, MinUv + FVector2f(FrameUvSize, FrameUvSize)));
+	ContinueKeycapImage->SetBrush(KeycapBrush);
+	ContinueKeycapFrameIndex = ClampedFrameIndex;
 }
 
 void UTunaSweeperDialogueWidget::AdvanceOrFillLine()
@@ -745,6 +779,8 @@ void UTunaSweeperDialogueWidget::FinishDialogue()
 	CurrentLineIndex = INDEX_NONE;
 	VisibleCharacterCount = 0;
 	TypewriterAccumulator = 0.0f;
+	ContinueKeycapAnimationTime = 0.0f;
+	ContinueKeycapFrameIndex = INDEX_NONE;
 
 	if (FinishedDelegate.IsBound())
 	{
