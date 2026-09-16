@@ -228,6 +228,40 @@ void UTunaSweeperGameHudWidget::ApplyHudModeVisibility()
 	RefreshCursorDistanceWidget();
 }
 
+void UTunaSweeperGameHudWidget::NormalizeTopModeDockLayout()
+{
+	if (!TopStatusReserveWidget) return;
+
+	if (UCanvasPanelSlot* TopSlot = Cast<UCanvasPanelSlot>(TopStatusReserveWidget->Slot))
+	{
+		TopSlot->SetAnchors(FAnchors(0.5f, 0.0f));
+		TopSlot->SetAlignment(FVector2D(0.5f, 0.0f));
+		TopSlot->SetPosition(FVector2D::ZeroVector);
+		TopSlot->SetAutoSize(true);
+	}
+
+	UWidgetTree* TopTree = TopStatusReserveWidget->WidgetTree;
+	if (!TopTree) return;
+	if (USizeBox* RootSize = Cast<USizeBox>(TopTree->FindWidget(TEXT("RootSizeBox"))))
+	{
+		// The dock follows the visible tabs, including the demo's shorter tab row.
+		RootSize->ClearWidthOverride();
+		RootSize->ClearHeightOverride();
+	}
+	if (UBorder* Background = Cast<UBorder>(TopTree->FindWidget(TEXT("ReservedBackground"))))
+	{
+		Background->SetPadding(FMargin(8.0f, 0.0f, 8.0f, 6.0f));
+		Background->SetVerticalAlignment(VAlign_Top);
+		FSlateBrush Brush;
+		Brush.DrawAs = ESlateBrushDrawType::RoundedBox;
+		Brush.TintColor = FLinearColor(0.025f, 0.055f, 0.06f, 0.94f);
+		Brush.OutlineSettings.CornerRadii = FVector4(0.0f, 0.0f, 6.0f, 6.0f);
+		Brush.OutlineSettings.RoundingType = ESlateBrushRoundingType::FixedRadius;
+		Background->SetBrush(Brush);
+		Background->SetBrushColor(FLinearColor::White);
+	}
+}
+
 void UTunaSweeperGameHudWidget::NormalizeCenterContentPanelLayout()
 {
 	if (UCanvasPanelSlot* CenterSlot = CenterContentPanel

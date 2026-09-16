@@ -123,6 +123,7 @@ void UTunaSweeperGameHudWidget::NativeConstruct()
 	EnsureMemoPanelWidget();
 	EnsureQuestPanelWidgets();
 	TunaSweeperUIFont::ApplyFontToWidgetTree(this);
+	NormalizeTopModeDockLayout();
 	NormalizeCenterContentPanelLayout();
 	CacheAmmoCancelableActionWidgets();
 	RefreshLocalizedTexts();
