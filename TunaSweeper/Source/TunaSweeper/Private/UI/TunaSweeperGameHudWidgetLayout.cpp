@@ -1,4 +1,5 @@
 #include "TunaSweeperGameHudWidgetShared.h"
+#include "UI/TunaSweeperUIStyle.h"
 
 void UTunaSweeperGameHudWidget::ApplyHudModeVisibility()
 {
@@ -869,11 +870,10 @@ void UTunaSweeperGameHudWidget::EnsureHousingFacilityContextMenuWidget()
 	HousingContextMenuPanel->SetContent(MenuStack);
 
 	HousingContextStoreText->SetJustification(ETextJustify::Center);
-	HousingContextStoreText->SetColorAndOpacity(FSlateColor(FLinearColor(0.88f, 0.98f, 1.0f, 1.0f)));
-	TunaSweeperUIFont::ApplyFont(HousingContextStoreText, 14, ETunaSweeperUIFontWeight::Bold);
+	TunaSweeperUIStyle::ApplyLabel(HousingContextStoreText, 14);
 
 	HousingContextStoreButton->SetContent(HousingContextStoreText);
-	HousingContextStoreButton->SetBackgroundColor(FLinearColor(0.08f, 0.22f, 0.25f, 0.96f));
+	TunaSweeperUIStyle::ApplyButton(HousingContextStoreButton, TunaSweeperUIStyle::EButtonRole::Secondary);
 	HousingContextStoreButton->OnClicked.RemoveDynamic(this, &UTunaSweeperGameHudWidget::HandleHousingContextStoreClicked);
 	HousingContextStoreButton->OnClicked.AddDynamic(this, &UTunaSweeperGameHudWidget::HandleHousingContextStoreClicked);
 	if (UVerticalBoxSlot* ButtonSlot = MenuStack->AddChildToVerticalBox(HousingContextStoreButton))

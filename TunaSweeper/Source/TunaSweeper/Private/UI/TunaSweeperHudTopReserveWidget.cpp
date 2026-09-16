@@ -6,6 +6,7 @@
 #include "Components/Image.h"
 #include "Engine/Texture2D.h"
 #include "UI/TunaSweeperUIFont.h"
+#include "UI/TunaSweeperUIStyle.h"
 
 namespace TunaSweeperHudTopReserve
 {
@@ -233,7 +234,11 @@ void UTunaSweeperHudTopReserveWidget::SetTabVisual(
 
 	if (Button)
 	{
-		Button->SetRenderOpacity(bActive ? 1.0f : 0.72f);
+		TunaSweeperUIStyle::ApplyButton(Button, TunaSweeperUIStyle::EButtonRole::Tab, bActive);
+		FButtonStyle CompactTabStyle = Button->GetStyle();
+		CompactTabStyle.SetNormalPadding(FMargin(5.0f));
+		CompactTabStyle.SetPressedPadding(FMargin(5.0f, 6.0f, 5.0f, 4.0f));
+		Button->SetStyle(CompactTabStyle);
 	}
 
 	UImage* ResolvedIcon = EnsureTabIcon(Mode, Button, Icon, IconWidgetName);

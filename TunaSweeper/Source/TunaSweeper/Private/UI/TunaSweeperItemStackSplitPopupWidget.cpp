@@ -15,6 +15,7 @@
 #include "InputCoreTypes.h"
 #include "Styling/SlateBrush.h"
 #include "UI/TunaSweeperUIFont.h"
+#include "UI/TunaSweeperUIStyle.h"
 #include "UI/TunaSweeperUiText.h"
 
 namespace TunaSweeperStackSplitPopup
@@ -147,12 +148,14 @@ void UTunaSweeperItemStackSplitPopupWidget::NativeConstruct()
 
 	if (OkButton)
 	{
+		TunaSweeperUIStyle::ApplyButton(OkButton);
 		OkButton->OnClicked.RemoveDynamic(this, &UTunaSweeperItemStackSplitPopupWidget::HandleOkClicked);
 		OkButton->OnClicked.AddDynamic(this, &UTunaSweeperItemStackSplitPopupWidget::HandleOkClicked);
 	}
 
 	if (CancelButton)
 	{
+		TunaSweeperUIStyle::ApplyButton(CancelButton, TunaSweeperUIStyle::EButtonRole::Secondary);
 		CancelButton->OnClicked.RemoveDynamic(this, &UTunaSweeperItemStackSplitPopupWidget::HandleCancelClicked);
 		CancelButton->OnClicked.AddDynamic(this, &UTunaSweeperItemStackSplitPopupWidget::HandleCancelClicked);
 	}
@@ -266,14 +269,13 @@ void UTunaSweeperItemStackSplitPopupWidget::BuildSplitPopupWidget()
 	}
 
 	OkButton->SetContent(OkButtonText);
-	OkButton->SetBackgroundColor(FLinearColor(0.56f, 0.84f, 0.92f, 1.0f));
+	TunaSweeperUIStyle::ApplyButton(OkButton);
 	OkButtonText->SetText(TunaSweeperStackSplitPopup::ResolveUiText(
 		TunaGameInstance.Get(),
 		TEXT("ui.common.ok"),
 		TEXT("OK")));
 	OkButtonText->SetJustification(ETextJustify::Center);
-	OkButtonText->SetColorAndOpacity(FSlateColor(FLinearColor(0.02f, 0.035f, 0.04f, 1.0f)));
-	TunaSweeperUIFont::ApplyFont(OkButtonText, 15, ETunaSweeperUIFontWeight::Bold);
+	TunaSweeperUIStyle::ApplyLabel(OkButtonText, 15);
 	if (UHorizontalBoxSlot* OkSlot = ButtonRow->AddChildToHorizontalBox(OkButton))
 	{
 		OkSlot->SetSize(TunaSweeperStackSplitPopup::MakeSlateChildSize(ESlateSizeRule::Fill));
@@ -281,14 +283,13 @@ void UTunaSweeperItemStackSplitPopupWidget::BuildSplitPopupWidget()
 	}
 
 	CancelButton->SetContent(CancelButtonText);
-	CancelButton->SetBackgroundColor(FLinearColor(0.18f, 0.20f, 0.21f, 1.0f));
+	TunaSweeperUIStyle::ApplyButton(CancelButton, TunaSweeperUIStyle::EButtonRole::Secondary);
 	CancelButtonText->SetText(TunaSweeperStackSplitPopup::ResolveUiText(
 		TunaGameInstance.Get(),
 		TEXT("ui.common.cancel"),
 		TEXT("\uCDE8\uC18C")));
 	CancelButtonText->SetJustification(ETextJustify::Center);
-	CancelButtonText->SetColorAndOpacity(FSlateColor(FLinearColor(0.82f, 0.88f, 0.86f, 1.0f)));
-	TunaSweeperUIFont::ApplyFont(CancelButtonText, 15, ETunaSweeperUIFontWeight::Bold);
+	TunaSweeperUIStyle::ApplyLabel(CancelButtonText, 15);
 	if (UHorizontalBoxSlot* CancelSlot = ButtonRow->AddChildToHorizontalBox(CancelButton))
 	{
 		CancelSlot->SetSize(TunaSweeperStackSplitPopup::MakeSlateChildSize(ESlateSizeRule::Fill));

@@ -16,6 +16,7 @@
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
 #include "UI/TunaSweeperCurrencyDisplayWidget.h"
 #include "UI/TunaSweeperUIFont.h"
+#include "UI/TunaSweeperUIStyle.h"
 #include "UI/TunaSweeperUiText.h"
 #include "Widgets/SWidget.h"
 
@@ -164,9 +165,11 @@ void UTunaSweeperShopSellPanelWidget::NativeConstruct()
 
 	if (SellButton)
 	{
+		TunaSweeperUIStyle::ApplyButton(SellButton);
 		SellButton->OnClicked.RemoveDynamic(this, &UTunaSweeperShopSellPanelWidget::HandleSellButtonClicked);
 		SellButton->OnClicked.AddDynamic(this, &UTunaSweeperShopSellPanelWidget::HandleSellButtonClicked);
 	}
+	TunaSweeperUIStyle::ApplyLabel(SellButtonText, 18);
 
 	RefreshSelectedItem();
 }
@@ -285,9 +288,9 @@ void UTunaSweeperShopSellPanelWidget::BuildNativeWidgetTree()
 	}
 
 	SellButtonText->SetJustification(ETextJustify::Center);
-	SellButtonText->SetColorAndOpacity(FSlateColor(FLinearColor(0.02f, 0.024f, 0.028f, 1.0f)));
-	TunaSweeperUIFont::ApplyFont(SellButtonText, 18, ETunaSweeperUIFontWeight::Bold);
+	TunaSweeperUIStyle::ApplyLabel(SellButtonText, 18);
 	SellButton->SetContent(SellButtonText);
+	TunaSweeperUIStyle::ApplyButton(SellButton);
 	SellButtonSizeBox->SetHeightOverride(TunaSweeperShopSellPanel::SellButtonHeight);
 	SellButtonSizeBox->SetContent(SellButton);
 	UVerticalBoxSlot* ButtonSlot = PanelStack->AddChildToVerticalBox(SellButtonSizeBox);

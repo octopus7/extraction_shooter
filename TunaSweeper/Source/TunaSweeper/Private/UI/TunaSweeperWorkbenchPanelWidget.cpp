@@ -20,12 +20,11 @@
 #include "UI/TunaSweeperItemDragDropOperation.h"
 #include "UI/TunaSweeperItemStackTileItemObject.h"
 #include "UI/TunaSweeperUIFont.h"
+#include "UI/TunaSweeperUIStyle.h"
 #include "UI/TunaSweeperUiText.h"
 
 namespace TunaSweeperWorkbenchPanel
 {
-	const FLinearColor EnabledButtonColor(0.05f, 0.33f, 0.78f, 1.0f);
-	const FLinearColor DisabledButtonColor(0.24f, 0.25f, 0.27f, 0.78f);
 	const FLinearColor NormalTextColor(0.90f, 0.94f, 0.98f, 1.0f);
 	const FLinearColor MissingTextColor(0.92f, 0.18f, 0.12f, 1.0f);
 	constexpr float TargetTileEntrySize = 96.0f;
@@ -227,6 +226,12 @@ void UTunaSweeperWorkbenchPanelWidget::NativeConstruct()
 	TunaSweeperWorkbenchPanel::SetButtonContentCentered(CraftButton);
 	TunaSweeperWorkbenchPanel::SetButtonContentCentered(DismantleButton);
 	TunaSweeperWorkbenchPanel::SetButtonContentCentered(BlueprintRegisterButton);
+	TunaSweeperUIStyle::ApplyButton(CraftButton);
+	TunaSweeperUIStyle::ApplyButton(DismantleButton);
+	TunaSweeperUIStyle::ApplyButton(BlueprintRegisterButton);
+	TunaSweeperUIStyle::ApplyLabel(Cast<UTextBlock>(CraftButton ? CraftButton->GetContent() : nullptr));
+	TunaSweeperUIStyle::ApplyLabel(Cast<UTextBlock>(DismantleButton ? DismantleButton->GetContent() : nullptr));
+	TunaSweeperUIStyle::ApplyLabel(Cast<UTextBlock>(BlueprintRegisterButton ? BlueprintRegisterButton->GetContent() : nullptr));
 
 	if (CraftButton)
 	{
@@ -1039,9 +1044,7 @@ void UTunaSweeperWorkbenchPanelWidget::SetActionButtonState(UButton* Button, boo
 	}
 
 	Button->SetIsEnabled(bEnabled);
-	Button->SetBackgroundColor(bEnabled
-		? TunaSweeperWorkbenchPanel::EnabledButtonColor
-		: TunaSweeperWorkbenchPanel::DisabledButtonColor);
+	TunaSweeperUIStyle::ApplyButton(Button);
 }
 
 void UTunaSweeperWorkbenchPanelWidget::SetPanelModeVisibility() const

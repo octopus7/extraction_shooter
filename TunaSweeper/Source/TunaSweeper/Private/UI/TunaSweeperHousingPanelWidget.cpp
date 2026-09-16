@@ -13,6 +13,7 @@
 #include "Subsystem/TunaSweeperHousingSubsystem.h"
 #include "TimerManager.h"
 #include "UI/TunaSweeperUIFont.h"
+#include "UI/TunaSweeperUIStyle.h"
 #include "UI/TunaSweeperUiText.h"
 
 namespace TunaSweeperHousingPanel
@@ -130,6 +131,7 @@ void UTunaSweeperHousingFacilityEntryWidget::BuildEntryWidget()
 
 	WidgetTree->RootWidget = EntryButton;
 	EntryButton->SetContent(EntryStack);
+	TunaSweeperUIStyle::ApplyButton(EntryButton, TunaSweeperUIStyle::EButtonRole::Secondary);
 
 	NameText->SetAutoWrapText(true);
 	NameText->SetWrapTextAt(284.0f);
@@ -160,15 +162,14 @@ void UTunaSweeperHousingFacilityEntryWidget::RefreshEntryView()
 	if (EntryButton)
 	{
 		const bool bActionable = View.bCanStartPlacement || View.bCanStore;
-		EntryButton->SetIsEnabled(bActionable);
-		EntryButton->SetRenderOpacity(bActionable ? 0.94f : 0.58f);
-		EntryButton->SetBackgroundColor(
+		const bool bReadyForPlacement =
 			View.BuildState == ETunaSweeperHousingFacilityBuildState::Buildable ||
-				View.BuildState == ETunaSweeperHousingFacilityBuildState::Stored
-				? FLinearColor(0.08f, 0.20f, 0.24f, 0.92f)
-				: View.BuildState == ETunaSweeperHousingFacilityBuildState::Placed
-					? FLinearColor(0.15f, 0.14f, 0.09f, 0.92f)
-					: FLinearColor(0.10f, 0.09f, 0.095f, 0.86f));
+			View.BuildState == ETunaSweeperHousingFacilityBuildState::Stored;
+		EntryButton->SetIsEnabled(bActionable);
+		TunaSweeperUIStyle::ApplyButton(
+			EntryButton,
+			TunaSweeperUIStyle::EButtonRole::Secondary,
+			bReadyForPlacement);
 	}
 
 	if (NameText)

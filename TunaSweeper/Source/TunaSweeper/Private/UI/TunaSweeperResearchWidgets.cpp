@@ -6,10 +6,13 @@
 #include "Components/TextBlock.h"
 #include "Game/TunaSweeperGameInstance.h"
 #include "Subsystem/TunaSweeperResearchSubsystem.h"
+#include "UI/TunaSweeperUIStyle.h"
 
 void UTunaSweeperResearchNodeWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
+	TunaSweeperUIStyle::ApplyButton(NodeButton, TunaSweeperUIStyle::EButtonRole::Secondary);
+	TunaSweeperUIStyle::ApplyLabel(ActionText);
 	NodeButton->OnClicked.RemoveAll(this);
 	NodeButton->OnClicked.AddDynamic(this, &UTunaSweeperResearchNodeWidget::HandleNodeClicked);
 	RefreshFromSubsystem();
@@ -38,7 +41,16 @@ void UTunaSweeperResearchNodeWidget::RefreshFromSubsystem()
 	case ETunaSweeperResearchNodeState::Applied: Action = NSLOCTEXT("TunaSweeperResearch", "Applied", "Applied"); break;
 	}
 	ActionText->SetText(Action);
-	NodeButton->SetIsEnabled(View.State == ETunaSweeperResearchNodeState::Available || View.State == ETunaSweeperResearchNodeState::ReadyToClaim);
+	const bool bActionable =
+		View.State == ETunaSweeperResearchNodeState::Available ||
+		View.State == ETunaSweeperResearchNodeState::ReadyToClaim;
+	NodeButton->SetIsEnabled(bActionable);
+	TunaSweeperUIStyle::ApplyButton(
+		NodeButton,
+		TunaSweeperUIStyle::EButtonRole::Secondary,
+		View.State == ETunaSweeperResearchNodeState::Researching ||
+			View.State == ETunaSweeperResearchNodeState::ReadyToClaim);
+	TunaSweeperUIStyle::ApplyLabel(ActionText);
 	ResearchProgressBar->SetVisibility(View.State == ETunaSweeperResearchNodeState::Researching ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
 }
 

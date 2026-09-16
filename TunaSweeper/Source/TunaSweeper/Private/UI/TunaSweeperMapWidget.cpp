@@ -30,6 +30,7 @@
 #include "Styling/SlateBrush.h"
 #include "UI/TunaSweeperGameHudWidget.h"
 #include "UI/TunaSweeperUIFont.h"
+#include "UI/TunaSweeperUIStyle.h"
 
 namespace TunaSweeperMap
 {
@@ -405,9 +406,9 @@ void UTunaSweeperMapWidget::BuildMapWidget()
 
 		Text->SetText(Glyph);
 		Text->SetJustification(ETextJustify::Center);
-		Text->SetColorAndOpacity(FSlateColor(FLinearColor(0.88f, 0.96f, 0.98f, 1.0f)));
-		TunaSweeperUIFont::ApplyFont(Text, 20, ETunaSweeperUIFontWeight::Bold);
+		TunaSweeperUIStyle::ApplyLabel(Text, 20);
 		Button->SetContent(Text);
+		TunaSweeperUIStyle::ApplyButton(Button, TunaSweeperUIStyle::EButtonRole::Icon);
 		AddSizedWidget(Button, 38.0f, 38.0f, 8.0f);
 		return Button;
 	};
@@ -1145,10 +1146,18 @@ void UTunaSweeperMapWidget::ConfigureChoiceButton(UButton* Button, const FLinear
 		return;
 	}
 
-	Button->SetRenderOpacity(OutlineColor.A >= 0.95f ? 1.0f : 0.72f);
+	const bool bSelected = OutlineColor.A >= 0.95f;
+	TunaSweeperUIStyle::ApplyButton(Button, TunaSweeperUIStyle::EButtonRole::Icon, bSelected);
+	const FLinearColor SelectionOutline = bSelected ? OutlineColor : FLinearColor::Transparent;
+	const float SelectionOutlineWidth = bSelected ? 2.0f : 0.0f;
 
-	FButtonStyle ButtonStyle;
-	ButtonStyle.SetNormal(TunaSweeperMap::MakeMapBoxBrush(FVector2D(38.0f, 38.0f), FillColor, FLinearColor::Transparent, 0.0f, 4.0f));
+	FButtonStyle ButtonStyle = Button->GetStyle();
+	ButtonStyle.SetNormal(TunaSweeperMap::MakeMapBoxBrush(
+		FVector2D(38.0f, 38.0f),
+		FillColor,
+		SelectionOutline,
+		SelectionOutlineWidth,
+		4.0f));
 	ButtonStyle.SetHovered(TunaSweeperMap::MakeMapBoxBrush(
 		FVector2D(38.0f, 38.0f),
 		FLinearColor(
@@ -1156,8 +1165,8 @@ void UTunaSweeperMapWidget::ConfigureChoiceButton(UButton* Button, const FLinear
 			FMath::Min(FillColor.G + 0.08f, 1.0f),
 			FMath::Min(FillColor.B + 0.08f, 1.0f),
 			FillColor.A),
-		FLinearColor::Transparent,
-		0.0f,
+		SelectionOutline,
+		SelectionOutlineWidth,
 		4.0f));
 	ButtonStyle.SetPressed(TunaSweeperMap::MakeMapBoxBrush(
 		FVector2D(38.0f, 38.0f),
@@ -1166,8 +1175,8 @@ void UTunaSweeperMapWidget::ConfigureChoiceButton(UButton* Button, const FLinear
 			FMath::Max(FillColor.G - 0.05f, 0.0f),
 			FMath::Max(FillColor.B - 0.05f, 0.0f),
 			FillColor.A),
-		FLinearColor::Transparent,
-		0.0f,
+		SelectionOutline,
+		SelectionOutlineWidth,
 		4.0f));
 	Button->SetStyle(ButtonStyle);
 }
