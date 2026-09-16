@@ -531,14 +531,46 @@ void UTunaSweeperIntroMenuWidget::ApplySettingsChoiceButtonStyle(
 }
 
 void UTunaSweeperIntroMenuWidget::ApplySettingsTabButtonStyle(
-	UButton* Button, const FVector2D& ButtonSize, bool bSelected) const
+	UButton* Button, const FVector2D& ButtonSize, bool bSelected)
 {
+	if (!Button) return;
 	(void)ButtonSize;
 	TunaSweeperUIStyle::ApplyButton(Button, TunaSweeperUIStyle::EButtonRole::Tab, bSelected);
-	if (Button)
+	Button->SetIsEnabled(true);
+	if (!SettingsTabFadeTexture)
 	{
-		Button->SetIsEnabled(true);
+		constexpr int32 FadeWidth = 256;
+		TArray<uint8> Pixels;
+		Pixels.Init(255, FadeWidth * 4);
+		for (int32 X = 0; X < FadeWidth; ++X)
+			Pixels[X * 4 + 3] = static_cast<uint8>(255.0f * (1.0f - FMath::SmoothStep(0.0f, 1.0f, float(X) / (FadeWidth - 1))));
+		SettingsTabFadeTexture = UTexture2D::CreateTransient(FadeWidth, 1, PF_B8G8R8A8, NAME_None, Pixels);
+		if (SettingsTabFadeTexture)
+		{
+			SettingsTabFadeTexture->LODGroup = TEXTUREGROUP_UI;
+			SettingsTabFadeTexture->SRGB = true;
+			SettingsTabFadeTexture->NeverStream = true;
+			SettingsTabFadeTexture->Filter = TF_Bilinear;
+			SettingsTabFadeTexture->AddressX = TA_Clamp;
+			SettingsTabFadeTexture->AddressY = TA_Clamp;
+			SettingsTabFadeTexture->UpdateResource();
+		}
 	}
+	auto Background = [this](float Opacity)
+	{
+		FSlateBrush Brush;
+		Brush.DrawAs = ESlateBrushDrawType::Image;
+		Brush.ImageSize = FVector2D(256.0f, 1.0f);
+		Brush.SetResourceObject(SettingsTabFadeTexture);
+		Brush.TintColor = FLinearColor(0.26f, 0.48f, 0.50f, Opacity);
+		return Brush;
+	};
+	FButtonStyle Style = Button->GetStyle();
+	Style.SetNormal(Background(bSelected ? 1.0f : 0.0f));
+	Style.SetHovered(Background(bSelected ? 1.0f : 0.5f));
+	Style.SetPressed(Background(bSelected ? 1.0f : 0.5f));
+	Style.SetDisabled(Background(0.0f));
+	Button->SetStyle(Style);
 }
 
 void UTunaSweeperIntroMenuWidget::RefreshLocalizedTexts()
@@ -566,7 +598,7 @@ void UTunaSweeperIntroMenuWidget::RefreshLocalizedTexts()
 		ResolveUiText(FName(TEXT("ui.common.cancel")), FText::FromString(TEXT("\uCDE8\uC18C"))));
 	SetNamedText(
 		FName(TEXT("SettingsTitleText")),
-		ResolveUiText(FName(TEXT("ui.title.settings")), FText::FromString(TEXT("\uC124\uC815"))));
+		ResolveUiText(FName(TEXT("ui.common.back")), FText::GetEmpty()));
 	SetNamedText(
 		FName(TEXT("SettingsGraphicsTabButtonText")),
 		ResolveUiText(FName(TEXT("ui.settings.graphics")), FText::FromString(TEXT("\uADF8\uB798\uD53D"))));

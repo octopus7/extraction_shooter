@@ -54,7 +54,7 @@ bool FTitleScreenAssetTest::RunTest(const FString& Parameters)
 	if (Menu->BackFromSettingsButton) {
 		TestEqual(TEXT("Back header hovered alpha"), Menu->BackFromSettingsButton->GetStyle().HoveredForeground.GetSpecifiedColor().A, 1.0f);
 	}
-	TestEqual(TEXT("Settings tab uses common rounded control"), Menu->SettingsDevelopmentTabButton->GetStyle().Normal.DrawAs, ESlateBrushDrawType::RoundedBox);
+	TestEqual(TEXT("Settings tab uses a fading image background"), Menu->SettingsDevelopmentTabButton->GetStyle().Normal.DrawAs, ESlateBrushDrawType::Image);
 	for (const TCHAR* Name : { TEXT("VSyncToggleButton"), TEXT("MotionBlurToggleButton"), TEXT("DynamicResolutionToggleButton"), TEXT("HardwareRayTracingToggleButton") })
 	{
 		UButton* Toggle = Cast<UButton>(Menu->TitleGraphicsSettingsWidget->WidgetTree->FindWidget(Name));
@@ -83,8 +83,19 @@ bool FTitleScreenAssetTest::RunTest(const FString& Parameters)
 	Menu->RequestSettingsTab(0);
 	Menu->TickMenuTransitions(0.4f);
 	TestFalse(TEXT("Graphics tab restored"), Menu->bShowingInterfaceSettingsTab || Menu->bShowingDevelopmentSettingsTab);
+	TestEqual(TEXT("Tab switching preserves the gradient background"), Menu->SettingsGraphicsTabButton->GetStyle().Normal.DrawAs, ESlateBrushDrawType::Image);
+	TestEqual(TEXT("Selected tab keeps full background strength"), Menu->SettingsGraphicsTabButton->GetStyle().Hovered.TintColor.GetSpecifiedColor().A, 1.0f);
+	TestEqual(TEXT("Inactive tab has no normal background"), Menu->SettingsInterfaceTabButton->GetStyle().Normal.TintColor.GetSpecifiedColor().A, 0.0f);
+	TestEqual(TEXT("Inactive tab hover uses half background strength"), Menu->SettingsInterfaceTabButton->GetStyle().Hovered.TintColor.GetSpecifiedColor().A, 0.5f);
 
 	// Render the actual composed UMG tree, including nested WBP controls, for visual inspection.
+	// The editor-world fixture has no game instance; supply real string-table labels for the captures.
+	UGameInstance* PreviewInstance = NewObject<UGameInstance>();
+	UTunaSweeperTextSubsystem* PreviewStrings = NewObject<UTunaSweeperTextSubsystem>(PreviewInstance);
+	Menu->SetNamedText(TEXT("SettingsTitleText"), PreviewStrings->ResolveText(
+		TEXT("ui.common.back"), ETunaSweeperItemTextLanguage::Korean, FText::GetEmpty()));
+	Menu->SetNamedText(TEXT("SteamDemoWishlistButtonText"), PreviewStrings->ResolveText(
+		TEXT("ui.title.wishlist"), ETunaSweeperItemTextLanguage::Korean, FText::GetEmpty()));
 	FAssetCompilingManager::Get().FinishAllCompilation();
 	FlushRenderingCommands();
 	FWidgetRenderer Renderer(true);
@@ -111,11 +122,6 @@ bool FTitleScreenAssetTest::RunTest(const FString& Parameters)
 	Menu->TickMenuTransitions(1.0f);
 	TestEqual(TEXT("Settings closes after exit fade"), Menu->SettingsPanel->GetVisibility(), ESlateVisibility::Collapsed);
 	TestEqual(TEXT("Main menu visible after exit"), Menu->MainMenuPanel->GetVisibility(), ESlateVisibility::Visible);
-	// The editor-world fixture has no game instance; supply the real string-table label for the capture.
-	UGameInstance* PreviewInstance = NewObject<UGameInstance>();
-	UTunaSweeperTextSubsystem* PreviewStrings = NewObject<UTunaSweeperTextSubsystem>(PreviewInstance);
-	Menu->SetNamedText(TEXT("SteamDemoWishlistButtonText"), PreviewStrings->ResolveText(
-		TEXT("ui.title.wishlist"), ETunaSweeperItemTextLanguage::Korean, FText::GetEmpty()));
 	Menu->InvalidateLayoutAndVolatility();
 	FSlateApplication::Get().InvalidateAllWidgets(true);
 	Slate->Invalidate(EInvalidateWidgetReason::Layout | EInvalidateWidgetReason::Paint);

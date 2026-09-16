@@ -309,9 +309,14 @@ void UTunaSweeperIntroMenuWidget::ApplyUnifiedControlStyles()
 	EnsureFittedTabLabel(SettingsGraphicsTabButton);
 	EnsureFittedTabLabel(SettingsInterfaceTabButton);
 	EnsureFittedTabLabel(SettingsDevelopmentTabButton);
-	StyleButton(SettingsGraphicsTabButton, EButtonRole::Tab, !bShowingInterfaceSettingsTab && !bShowingDevelopmentSettingsTab);
-	StyleButton(SettingsInterfaceTabButton, EButtonRole::Tab, bShowingInterfaceSettingsTab);
-	StyleButton(SettingsDevelopmentTabButton, EButtonRole::Tab, bShowingDevelopmentSettingsTab);
+	auto StyleSettingsTab = [this, &ApplyNestedLabels](UButton* Button, bool bSelected)
+	{
+		ApplySettingsTabButtonStyle(Button, FVector2D(214.0f, 50.0f), bSelected);
+		if (Button) ApplyNestedLabels(Button->GetContent());
+	};
+	StyleSettingsTab(SettingsGraphicsTabButton, !bShowingInterfaceSettingsTab && !bShowingDevelopmentSettingsTab);
+	StyleSettingsTab(SettingsInterfaceTabButton, bShowingInterfaceSettingsTab);
+	StyleSettingsTab(SettingsDevelopmentTabButton, bShowingDevelopmentSettingsTab);
 	StyleButton(ConfirmInterfaceSettingsButton, EButtonRole::Primary);
 	StyleButton(CancelInterfaceSettingsButton, EButtonRole::Secondary);
 	StyleButton(BackFromSettingsButton, EButtonRole::Secondary);

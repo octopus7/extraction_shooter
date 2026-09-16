@@ -544,7 +544,7 @@ private:
 		const FVector2D& ButtonSize,
 		bool bSelected,
 		bool bPrimary = false) const;
-	void ApplySettingsTabButtonStyle(UButton* Button, const FVector2D& ButtonSize, bool bSelected) const;
+	void ApplySettingsTabButtonStyle(UButton* Button, const FVector2D& ButtonSize, bool bSelected);
 	FText BuildWindowModeText(EWindowMode::Type WindowMode) const;
 	FText BuildDLSSModeText(ETunaSweeperTitleDLSSMode DLSSMode) const;
 	FText BuildLanguageNameText(ETunaSweeperItemTextLanguage Language) const;
@@ -726,6 +726,9 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<UTexture2D> SaveSlotSelectionRingTexture;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTexture2D> SettingsTabFadeTexture;
 
 	UPROPERTY(Transient)
 	TObjectPtr<UTunaSweeperScreenFadeWidget> StartTravelFadeWidget;
