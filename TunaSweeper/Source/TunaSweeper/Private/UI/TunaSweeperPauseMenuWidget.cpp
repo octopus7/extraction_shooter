@@ -15,6 +15,7 @@
 #include "Player/TunaSweeperPlayerController.h"
 #include "UI/TunaSweeperIntroMenuWidget.h"
 #include "UI/TunaSweeperUIFont.h"
+#include "UI/TunaSweeperUIStyle.h"
 
 void UTunaSweeperPauseMenuWidget::InitializePauseMenu(bool bRaid)
 {
@@ -50,11 +51,8 @@ UTextBlock* UTunaSweeperPauseMenuWidget::AddText(UVerticalBox* Parent, FName Nam
 UButton* UTunaSweeperPauseMenuWidget::AddButton(UVerticalBox* Parent, FName Name, UTextBlock*& Label)
 {
 	UButton* Button = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), Name);
+	TunaSweeperUIStyle::ApplyButton(Button);
 	FButtonStyle Style = Button->GetStyle();
-	Style.SetNormal(FSlateRoundedBoxBrush(FLinearColor(0.012f, 0.35f, 0.43f), 15.0f));
-	Style.SetHovered(FSlateRoundedBoxBrush(FLinearColor(0.025f, 0.49f, 0.58f), 15.0f));
-	Style.SetPressed(FSlateRoundedBoxBrush(FLinearColor(0.008f, 0.23f, 0.29f), 15.0f));
-	Style.SetDisabled(FSlateRoundedBoxBrush(FLinearColor(0.08f, 0.18f, 0.20f), 15.0f));
 	Style.SetNormalPadding(FMargin(22.0f, 12.0f));
 	Style.SetPressedPadding(FMargin(22.0f, 13.0f, 22.0f, 11.0f));
 	Button->SetStyle(Style);
@@ -63,9 +61,7 @@ UButton* UTunaSweeperPauseMenuWidget::AddButton(UVerticalBox* Parent, FName Name
 	MenuButtons.Add(Button);
 	Label = WidgetTree->ConstructWidget<UTextBlock>();
 	TunaSweeperUIFont::ApplyFont(Label, 23, ETunaSweeperUIFontWeight::Bold);
-	Label->SetColorAndOpacity(FSlateColor(FLinearColor(0.97f, 1.0f, 1.0f)));
-	Label->SetShadowOffset(FVector2D(1.0f, 1.0f));
-	Label->SetShadowColorAndOpacity(FLinearColor(0.005f, 0.035f, 0.05f, 0.55f));
+	TunaSweeperUIStyle::ApplyLabel(Label);
 	Label->SetJustification(ETextJustify::Center);
 	Button->SetContent(Label);
 	USizeBox* Size = WidgetTree->ConstructWidget<USizeBox>();
@@ -169,8 +165,11 @@ void UTunaSweeperPauseMenuWidget::RefreshTexts()
 	TitleText->SetText(Text(TEXT("ui.pause.return_to_title")));
 	QuitText->SetText(Text(TEXT("ui.title.quit")));
 	ConfirmationHeading->SetText(Text(bQuitRequested ? TEXT("ui.pause.confirm_quit") : TEXT("ui.pause.confirm_title")));
-	WarningText->SetText(Text(bExitFailed ? TEXT("ui.pause.save_failed") :
-		(bRaidContext ? TEXT("ui.pause.raid_warning") : TEXT("ui.pause.bunker_warning"))));
+	const bool bShowWarning = bExitFailed || bRaidContext;
+	WarningText->SetVisibility(bShowWarning ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
+	WarningText->SetText(bShowWarning
+		? Text(bExitFailed ? TEXT("ui.pause.save_failed") : TEXT("ui.pause.raid_warning"))
+		: FText::GetEmpty());
 	ConfirmText->SetText(Text(bQuitRequested ? TEXT("ui.title.quit") : TEXT("ui.pause.return_to_title")));
 	CancelText->SetText(Text(TEXT("ui.common.cancel")));
 }

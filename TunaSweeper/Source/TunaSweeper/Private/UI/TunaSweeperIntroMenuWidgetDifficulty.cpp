@@ -110,7 +110,9 @@ void UTunaSweeperIntroMenuWidget::EnsureDifficultySelectionPanel()
 		TEXT("DifficultyTitleText"));
 	if (DifficultyTitleText)
 	{
-		DifficultyTitleText->SetText(FText::FromString(TEXT("\uB09C\uC774\uB3C4 \uC120\uD0DD")));
+		DifficultyTitleText->SetText(ResolveUiText(
+			FName(TEXT("ui.difficulty.select_title")),
+			FText::GetEmpty()));
 		DifficultyTitleText->SetJustification(ETextJustify::Center);
 		DifficultyTitleText->SetColorAndOpacity(FSlateColor(FLinearColor(0.10f, 0.18f, 0.20f, 1.0f)));
 		TunaSweeperUIFont::ApplyFont(DifficultyTitleText, 42.0f);
@@ -358,24 +360,15 @@ void UTunaSweeperIntroMenuWidget::EnsureDifficultySelectionPanel()
 			const TCHAR* ButtonName,
 			const TCHAR* TextName,
 			const FText& Label,
+			bool bPrimary,
 			TObjectPtr<UTextBlock>& OutText) -> UButton*
 		{
 			UButton* Button = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), ButtonName);
 			UOverlay* Overlay = WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass());
-			UImage* Background = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass());
 			OutText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TextName);
-			if (!Button || !Overlay || !Background || !OutText)
+			if (!Button || !Overlay || !OutText)
 			{
 				return nullptr;
-			}
-
-			ApplyDifficultyButtonStyle(Button);
-			ConfigureDifficultyActionButtonBackground(Background, false);
-			Background->SetRenderOpacity(0.92f);
-			if (UOverlaySlot* BackgroundSlot = Overlay->AddChildToOverlay(Background))
-			{
-				BackgroundSlot->SetHorizontalAlignment(HAlign_Fill);
-				BackgroundSlot->SetVerticalAlignment(VAlign_Fill);
 			}
 
 			OutText->SetText(Label);
@@ -390,18 +383,26 @@ void UTunaSweeperIntroMenuWidget::EnsureDifficultySelectionPanel()
 			}
 
 			Button->SetContent(Overlay);
+			TunaSweeperUIStyle::ApplyButton(
+				Button,
+				bPrimary
+					? TunaSweeperUIStyle::EButtonRole::Primary
+					: TunaSweeperUIStyle::EButtonRole::Secondary);
+			TunaSweeperUIStyle::ApplyLabel(OutText);
 			return Button;
 		};
 
 		DifficultyBackButton = BuildActionButton(
 			TEXT("DifficultyBackButton"),
 			TEXT("DifficultyBackButtonText"),
-			FText::FromString(TEXT("\uB3CC\uC544\uAC00\uAE30")),
+			ResolveUiText(FName(TEXT("ui.common.back")), FText::GetEmpty()),
+			false,
 			DifficultyBackButtonText);
 		DifficultyStartButton = BuildActionButton(
 			TEXT("DifficultyStartButton"),
 			TEXT("DifficultyStartButtonText"),
-			FText::FromString(TEXT("\uAC8C\uC784 \uC2DC\uC791")),
+			ResolveUiText(FName(TEXT("ui.difficulty.start")), FText::GetEmpty()),
+			true,
 			DifficultyStartButtonText);
 
 		if (DifficultyBackButton)
@@ -467,25 +468,25 @@ void UTunaSweeperIntroMenuWidget::RefreshDifficultySelectionPanel()
 		{
 			DemoNoticeTitleText->SetText(ResolveUiText(
 				FName(TEXT("ui.title.demo_notice_title")),
-				FText::FromString(TEXT("데모 안내"))));
+				FText::GetEmpty()));
 		}
 		if (DemoNoticeMessageText)
 		{
 			DemoNoticeMessageText->SetText(ResolveUiText(
 				FName(TEXT("ui.title.demo_notice_message")),
-				FText::FromString(TEXT("데모 저장 데이터는 본편과 연동되지 않습니다."))));
+				FText::GetEmpty()));
 		}
 		if (DemoNoticeBackButtonText)
 		{
 			DemoNoticeBackButtonText->SetText(ResolveUiText(
 				FName(TEXT("ui.common.back")),
-				FText::FromString(TEXT("돌아가기"))));
+				FText::GetEmpty()));
 		}
 		if (DemoNoticeConfirmButtonText)
 		{
 			DemoNoticeConfirmButtonText->SetText(ResolveUiText(
 				FName(TEXT("ui.common.confirm")),
-				FText::FromString(TEXT("확인"))));
+				FText::GetEmpty()));
 		}
 		if (DemoNoticeConfirmButton)
 		{
@@ -516,32 +517,34 @@ void UTunaSweeperIntroMenuWidget::RefreshDifficultySelectionPanel()
 			: ESlateVisibility::Collapsed);
 		DifficultyDemoNoticeText->SetText(ResolveUiText(
 			FName(TEXT("ui.title.demo_notice_message")),
-			FText::FromString(TEXT("데모 저장 데이터는 본편과 연동되지 않습니다."))));
+			FText::GetEmpty()));
 	}
 
 	if (DifficultyTitleText)
 	{
-		DifficultyTitleText->SetText(bDemoNotice
-			? ResolveUiText(FName(TEXT("ui.title.demo_notice_title")), FText::FromString(TEXT("데모 안내")))
-			: FText::FromString(
-			bDifficultyAdjustmentMode
-				? TEXT("\uB09C\uC774\uB3C4 \uC870\uC815")
-				: TEXT("\uB09C\uC774\uB3C4 \uC120\uD0DD")));
+		DifficultyTitleText->SetText(ResolveUiText(
+			bDemoNotice
+				? FName(TEXT("ui.title.demo_notice_title"))
+				: (bDifficultyAdjustmentMode
+					? FName(TEXT("ui.difficulty.adjust_title"))
+					: FName(TEXT("ui.difficulty.select_title"))),
+			FText::GetEmpty()));
 	}
 	if (DifficultyStartButtonText)
 	{
-		DifficultyStartButtonText->SetText(bDemoNotice
-			? ResolveUiText(FName(TEXT("ui.common.confirm")), FText::FromString(TEXT("확인")))
-			: FText::FromString(
-			bDifficultyAdjustmentMode
-				? TEXT("\uC801\uC6A9")
-				: TEXT("\uAC8C\uC784 \uC2DC\uC791")));
+		DifficultyStartButtonText->SetText(ResolveUiText(
+			bDemoNotice
+				? FName(TEXT("ui.common.confirm"))
+				: (bDifficultyAdjustmentMode
+					? FName(TEXT("ui.common.apply"))
+					: FName(TEXT("ui.difficulty.start"))),
+			FText::GetEmpty()));
 	}
 	if (DifficultyBackButtonText)
 	{
 		DifficultyBackButtonText->SetText(bDifficultyAdjustmentMode
-			? ResolveUiText(FName(TEXT("ui.common.cancel")), FText::FromString(TEXT("\uCDE8\uC18C")))
-			: ResolveUiText(FName(TEXT("ui.common.back")), FText::FromString(TEXT("\uB3CC\uC544\uAC00\uAE30"))));
+			? ResolveUiText(FName(TEXT("ui.common.cancel")), FText::GetEmpty())
+			: ResolveUiText(FName(TEXT("ui.common.back")), FText::GetEmpty()));
 	}
 
 	RefreshDifficultyOption(
@@ -583,13 +586,13 @@ void UTunaSweeperIntroMenuWidget::RefreshDifficultySelectionPanel()
 		if (DifficultyNormalTitleText)
 		{
 			DifficultyNormalTitleText->SetText(ResolveUiText(
-				FName(TEXT("ui.title.demo_label")), FText::FromString(TEXT("데모"))));
+				FName(TEXT("ui.title.demo_label")), FText::GetEmpty()));
 		}
 		if (DifficultyNormalDescriptionText)
 		{
 			DifficultyNormalDescriptionText->SetText(ResolveUiText(
 				FName(TEXT("ui.title.demo_notice_message")),
-				FText::FromString(TEXT("이 데모의 저장 데이터는 본편과 연동되지 않습니다."))));
+				FText::GetEmpty()));
 		}
 	}
 
@@ -597,6 +600,7 @@ void UTunaSweeperIntroMenuWidget::RefreshDifficultySelectionPanel()
 	{
 		DifficultyStartButton->SetIsEnabled((bDemoNotice || SelectedDifficultyStage != INDEX_NONE) && !bStartTravelPending);
 	}
+	ApplyUnifiedControlStyles();
 }
 
 void UTunaSweeperIntroMenuWidget::RefreshDifficultyOption(
@@ -693,70 +697,6 @@ void UTunaSweeperIntroMenuWidget::ApplyDemoNoticeVisualStyle()
 		DemoNoticeMessageText->SetColorAndOpacity(FSlateColor(BodyColor));
 	}
 
-	auto MakeRoundedBrush = [](
-		const FLinearColor& FillColor,
-		const FLinearColor& OutlineColor,
-		float OutlineWidth)
-	{
-		FSlateBrush Brush;
-		Brush.DrawAs = ESlateBrushDrawType::RoundedBox;
-		Brush.TintColor = FSlateColor(FillColor);
-		Brush.OutlineSettings = FSlateBrushOutlineSettings(
-			22.0f,
-			FSlateColor(OutlineColor),
-			OutlineWidth);
-		Brush.OutlineSettings.bUseBrushTransparency = false;
-		return Brush;
-	};
-
-	auto ApplyButtonPalette = [&MakeRoundedBrush](
-		UButton* Button,
-		bool bPrimary)
-	{
-		if (!Button)
-		{
-			return;
-		}
-
-		const FLinearColor OutlineColor = bPrimary
-			? FLinearColor(0.12f, 0.31f, 0.34f, 1.0f)
-			: FLinearColor(0.24f, 0.43f, 0.45f, 0.92f);
-		const FSlateBrush NormalBrush = MakeRoundedBrush(
-			bPrimary
-				? FLinearColor(0.28f, 0.50f, 0.53f, 0.98f)
-				: FLinearColor(0.91f, 0.94f, 0.90f, 0.96f),
-			OutlineColor,
-			2.0f);
-		const FSlateBrush HoveredBrush = MakeRoundedBrush(
-			bPrimary
-				? FLinearColor(0.34f, 0.58f, 0.60f, 1.0f)
-				: FLinearColor(0.84f, 0.91f, 0.87f, 1.0f),
-			OutlineColor,
-			3.0f);
-		const FSlateBrush PressedBrush = MakeRoundedBrush(
-			bPrimary
-				? FLinearColor(0.22f, 0.42f, 0.45f, 1.0f)
-				: FLinearColor(0.77f, 0.86f, 0.82f, 1.0f),
-			OutlineColor,
-			3.0f);
-		const FSlateBrush DisabledBrush = MakeRoundedBrush(
-			bPrimary
-				? FLinearColor(0.38f, 0.49f, 0.49f, 0.55f)
-				: FLinearColor(0.78f, 0.80f, 0.77f, 0.55f),
-			FLinearColor(0.31f, 0.39f, 0.40f, 0.45f),
-			2.0f);
-
-		FButtonStyle ButtonStyle;
-		ButtonStyle.SetNormal(NormalBrush);
-		ButtonStyle.SetHovered(HoveredBrush);
-		ButtonStyle.SetPressed(PressedBrush);
-		ButtonStyle.SetDisabled(DisabledBrush);
-		ButtonStyle.SetNormalPadding(FMargin(0.0f));
-		ButtonStyle.SetPressedPadding(FMargin(0.0f, 2.0f, 0.0f, 0.0f));
-		Button->SetStyle(ButtonStyle);
-		Button->SetClickMethod(EButtonClickMethod::DownAndUp);
-	};
-
 	// The old child images contain coral/cyan double outlines. The button styles now provide
 	// the full background and interaction states, so those decorative images stay hidden.
 	if (UImage* BackBackground = Cast<UImage>(FindIntroWidget(TEXT("DemoNoticeBackButtonBackground"))))
@@ -768,16 +708,14 @@ void UTunaSweeperIntroMenuWidget::ApplyDemoNoticeVisualStyle()
 		ConfirmBackground->SetVisibility(ESlateVisibility::Collapsed);
 	}
 
-	ApplyButtonPalette(DemoNoticeBackButton, false);
-	ApplyButtonPalette(DemoNoticeConfirmButton, true);
-	if (DemoNoticeBackButtonText)
-	{
-		DemoNoticeBackButtonText->SetColorAndOpacity(FSlateColor(HeadingColor));
-	}
-	if (DemoNoticeConfirmButtonText)
-	{
-		DemoNoticeConfirmButtonText->SetColorAndOpacity(FSlateColor(FLinearColor(0.97f, 0.98f, 0.93f, 1.0f)));
-	}
+	TunaSweeperUIStyle::ApplyButton(
+		DemoNoticeBackButton,
+		TunaSweeperUIStyle::EButtonRole::Secondary);
+	TunaSweeperUIStyle::ApplyButton(
+		DemoNoticeConfirmButton,
+		TunaSweeperUIStyle::EButtonRole::Primary);
+	TunaSweeperUIStyle::ApplyLabel(DemoNoticeBackButtonText);
+	TunaSweeperUIStyle::ApplyLabel(DemoNoticeConfirmButtonText);
 }
 
 
@@ -804,31 +742,6 @@ void UTunaSweeperIntroMenuWidget::ConfigureDifficultyCardBackground(UImage* Back
 	BackgroundImage->SetBrush(BackgroundBrush);
 	BackgroundImage->SetVisibility(ESlateVisibility::HitTestInvisible);
 	BackgroundImage->SetRenderOpacity(bSelected ? 1.0f : 0.90f);
-}
-
-void UTunaSweeperIntroMenuWidget::ConfigureDifficultyActionButtonBackground(UImage* BackgroundImage, bool bSelected)
-{
-	if (!BackgroundImage)
-	{
-		return;
-	}
-
-	FSlateBrush BackgroundBrush;
-	BackgroundBrush.DrawAs = ESlateBrushDrawType::Box;
-	BackgroundBrush.Margin = FMargin(0.25f, 0.36f);
-	BackgroundBrush.SetImageSize(FVector2D(420.0f, 82.0f));
-	BackgroundBrush.TintColor = FSlateColor(bSelected
-		? FLinearColor::White
-		: FLinearColor(0.96f, 0.99f, 0.99f, 0.93f));
-	if (UTexture2D* ButtonTexture = LoadDifficultyTexture(
-		DifficultyActionButtonTexture,
-		TunaSweeperDifficultySelect::ActionButtonTexturePath))
-	{
-		BackgroundBrush.SetResourceObject(ButtonTexture);
-	}
-	BackgroundImage->SetBrush(BackgroundBrush);
-	BackgroundImage->SetVisibility(ESlateVisibility::HitTestInvisible);
-	BackgroundImage->SetRenderOpacity(bSelected ? 1.0f : 0.92f);
 }
 
 void UTunaSweeperIntroMenuWidget::ConfigureDifficultySelectionBorder(UBorder* SelectionBorder, bool bSelected)
@@ -925,10 +838,10 @@ FText UTunaSweeperIntroMenuWidget::BuildDifficultyTitleText(int32 DifficultyStag
 			return Candidate.DifficultyStage == DifficultyStage;
 		}))
 	{
-		return ResolveUiText(OptionText->TitleStringKey, TunaSweeperDifficultySelect::MakeFallbackTitle(DifficultyStage));
+		return ResolveUiText(OptionText->TitleStringKey, FText::GetEmpty());
 	}
 
-	return TunaSweeperDifficultySelect::MakeFallbackTitle(DifficultyStage);
+	return FText::GetEmpty();
 }
 
 FText UTunaSweeperIntroMenuWidget::BuildDifficultyDescriptionText(int32 DifficultyStage) const
@@ -939,10 +852,10 @@ FText UTunaSweeperIntroMenuWidget::BuildDifficultyDescriptionText(int32 Difficul
 			return Candidate.DifficultyStage == DifficultyStage;
 		}))
 	{
-		return ResolveUiText(OptionText->DescriptionStringKey, TunaSweeperDifficultySelect::MakeFallbackDescription(DifficultyStage));
+		return ResolveUiText(OptionText->DescriptionStringKey, FText::GetEmpty());
 	}
 
-	return TunaSweeperDifficultySelect::MakeFallbackDescription(DifficultyStage);
+	return FText::GetEmpty();
 }
 
 UTexture2D* UTunaSweeperIntroMenuWidget::LoadDifficultyTexture(

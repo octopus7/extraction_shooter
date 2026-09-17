@@ -272,3 +272,23 @@ research.node.weapon_burn_2.name,소총 발화 연구 II,Rifle Ignition II,ラ�
 research.node.weapon_burn_2.description,소총의 발화가 추가로 1초 더 지속되고 틱 피해가 기본 피해의 25%만큼 증가합니다.,Rifle burns last another 1 second and gain another 25% of base tick damage.,ライフルによる燃焼がさらに1秒長く続き、毎秒のダメージが基本ダメージの25%分増加します。
 research.node.ammo_burn_2.name,소이탄 연소 연구 II,Incendiary Ammunition II,焼夷弾燃焼研究 II
 research.node.ammo_burn_2.description,소총 탄약의 발화가 추가로 1초 더 지속되고 틱 피해가 기본 피해의 25%만큼 증가합니다.,Rifle ammunition burns last another 1 second and gain another 25% of base tick damage.,ライフル弾薬による燃焼がさらに1秒長く続き、毎秒のダメージが基本ダメージの25%分増加します。
+ui.settings.preset,전체 품질 프리셋,Overall Quality Preset,全体品質プリセット
+ui.settings.frame_rate,프레임 제한,Frame Rate Limit,フレームレート上限
+ui.settings.individual_quality,개별 품질,Individual Quality,個別品質
+ui.settings.performance_effects,성능 및 효과,Performance and Effects,性能と効果
+ui.settings.preset.auto_details,"{0} ({1}, VRAM {2} MB)","{0} ({1}, VRAM {2} MB)","{0} ({1}, VRAM {2} MB)"
+ui.settings.pending_suffix, · 적용 대기, · Apply pending, · 適用待ち
+ui.settings.fps_value,{0} FPS,{0} FPS,{0} FPS
+ui.settings.unavailable_suffix,{0} (사용 불가),{0} (Unavailable),{0} (使用不可)
+ui.language.english,English,English,English
+ui.language.korean,한국어,한국어,한국어
+ui.language.japanese,日本語,日本語,日本語
+ui.settings.development,개발,Development,開発
+ui.settings.development.enemy_combat_debug,적 전투 디버그,Enemy Combat Debug,敵戦闘デバッグ
+ui.settings.development.debug_display_language,디버그 표시 언어,Debug Display Language,デバッグ表示言語
+ui.settings.development.piggy_bank,돼지저금통,Piggy Bank,貯金箱
+ui.settings.development.always_slow_presentation,상시 슬로우 연출,Always Slow Presentation,常時スロー演出
+ui.difficulty.select_title,난이도 선택,Choose Difficulty,難易度選択
+ui.difficulty.adjust_title,난이도 변경,Change Difficulty,難易度変更
+ui.difficulty.start,시작하기,Start,開始
+ui.settings.resolution_value,{0} × {1},{0} × {1},{0} × {1}

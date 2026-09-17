@@ -92,23 +92,13 @@ FText UTunaSweeperIntroMenuWidget::BuildLanguageNameText(ETunaSweeperItemTextLan
 	switch (Language)
 	{
 	case ETunaSweeperItemTextLanguage::Korean:
-		return FText::FromString(TEXT("\uD55C\uAD6D\uC5B4"));
+		return ResolveUiText(FName(TEXT("ui.language.korean")), FText::GetEmpty());
 	case ETunaSweeperItemTextLanguage::Japanese:
-		return FText::FromString(TEXT("\u65E5\u672C\u8A9E"));
+		return ResolveUiText(FName(TEXT("ui.language.japanese")), FText::GetEmpty());
 	case ETunaSweeperItemTextLanguage::English:
 	default:
-		return FText::FromString(TEXT("English"));
+		return ResolveUiText(FName(TEXT("ui.language.english")), FText::GetEmpty());
 	}
-}
-
-FText UTunaSweeperIntroMenuWidget::BuildLanguageOptionText(
-	ETunaSweeperItemTextLanguage Language,
-	bool bSelected) const
-{
-	return FText::FromString(FString::Printf(
-		TEXT("%s %s"),
-		bSelected ? TEXT("[x]") : TEXT("[ ]"),
-		*BuildLanguageNameText(Language).ToString()));
 }
 
 FText UTunaSweeperIntroMenuWidget::ResolveUiText(FName StringKey, const FText& FallbackText) const

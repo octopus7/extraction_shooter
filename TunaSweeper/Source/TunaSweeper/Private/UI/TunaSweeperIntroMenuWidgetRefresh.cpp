@@ -225,23 +225,16 @@ void UTunaSweeperIntroMenuWidget::RefreshInterfaceSettingsPanel()
 			BuildLanguageNameText(CurrentLanguage)));
 	}
 
-	if (LanguageEnglishButtonText)
+	EnsureLanguageOptionRows();
+	if (InterfaceLanguageOptionRow)
 	{
-		LanguageEnglishButtonText->SetText(BuildLanguageOptionText(
-			ETunaSweeperItemTextLanguage::English,
-			PendingInterfaceLanguage == ETunaSweeperItemTextLanguage::English));
-	}
-	if (LanguageKoreanButtonText)
-	{
-		LanguageKoreanButtonText->SetText(BuildLanguageOptionText(
-			ETunaSweeperItemTextLanguage::Korean,
-			PendingInterfaceLanguage == ETunaSweeperItemTextLanguage::Korean));
-	}
-	if (LanguageJapaneseButtonText)
-	{
-		LanguageJapaneseButtonText->SetText(BuildLanguageOptionText(
-			ETunaSweeperItemTextLanguage::Japanese,
-			PendingInterfaceLanguage == ETunaSweeperItemTextLanguage::Japanese));
+		InterfaceLanguageOptionRow->Configure(ResolveUiText(
+			FName(TEXT("ui.settings.language")),
+			FText::GetEmpty()));
+		InterfaceLanguageOptionRow->SetValue(BuildLanguageNameText(PendingInterfaceLanguage));
+		InterfaceLanguageOptionRow->SetStepEnabled(
+			PendingInterfaceLanguage != ETunaSweeperItemTextLanguage::English,
+			PendingInterfaceLanguage != ETunaSweeperItemTextLanguage::Japanese);
 	}
 
 	if (LanguageEnglishButton)
@@ -288,51 +281,44 @@ void UTunaSweeperIntroMenuWidget::RefreshDevelopmentSettingsPanel()
 
 	if (SettingsStatusText)
 	{
-		SettingsStatusText->SetText(FText::Format(
-			FText::FromString(TEXT("{0}\n\uB514\uBC84\uADF8 \uD45C\uAE30 \uC5B8\uC5B4: {1}\n\uB3FC\uC9C0\uC800\uAE08\uD1B5: {2} (\uB2E4\uC74C \uBC99\uCEE4 \uC785\uC7A5\uBD80\uD130)\n\uC0C1\uC2DC \uC2AC\uB85C\uC6B0 \uC5F0\uCD9C: {3}")),
-			bEnemyCombatDebugEnabled
-				? FText::FromString(TEXT("\uC804\uD22C \uB514\uBC84\uADF8: \uCF1C\uC9D0 (F8)"))
-				: FText::FromString(TEXT("\uC804\uD22C \uB514\uBC84\uADF8: \uAEBC\uC9D0 (F8)")),
-			DebugDisplayLanguage == ETunaSweeperDebugDisplayLanguage::Korean
-				? FText::FromString(TEXT("\uD55C\uAD6D\uC5B4"))
-				: FText::FromString(TEXT("English")),
-			bPiggyBankEnabled
-				? FText::FromString(TEXT("\uCF1C\uC9D0"))
-				: FText::FromString(TEXT("\uAEBC\uC9D0")),
-			bAlwaysSlowPresentationEnabled
-				? FText::FromString(TEXT("\uCF1C\uC9D0"))
-				: FText::FromString(TEXT("\uAEBC\uC9D0"))));
+		SettingsStatusText->SetText(FText::GetEmpty());
+		SettingsStatusText->SetVisibility(ESlateVisibility::Collapsed);
 	}
-
-	auto SetToggleIndicatorState = [this](FName IndicatorWidgetName, bool bChecked)
-	{
-		if (WidgetTree)
-		{
-			if (UCheckBox* Indicator = Cast<UCheckBox>(FindIntroWidget(IndicatorWidgetName)))
-			{
-				Indicator->SetIsChecked(bChecked);
-			}
-		}
-	};
 
 	SetNamedText(
 		FName(TEXT("EnemyCombatDebugToggleButtonText")),
-		FText::FromString(TEXT("\uC801 \uC804\uD22C \uB514\uBC84\uADF8 \uD45C\uC2DC")));
-	SetToggleIndicatorState(FName(TEXT("EnemyCombatDebugToggleIndicator")), bEnemyCombatDebugEnabled);
+		ResolveUiText(
+			FName(TEXT("ui.settings.development.enemy_combat_debug")),
+			FText::GetEmpty()));
+	EnsureDevelopmentToggleButtonContent(
+		EnemyCombatDebugToggleButton,
+		FName(TEXT("EnemyCombatDebugToggleButtonText")),
+		NAME_None);
+	TunaSweeperUIStyle::SetCheckButton(
+		WidgetTree,
+		EnemyCombatDebugToggleButton,
+		Cast<UTextBlock>(FindIntroWidget(TEXT("EnemyCombatDebugToggleButtonText"))),
+		bEnemyCombatDebugEnabled);
 
 	if (EnemyCombatDebugToggleButton)
 	{
 		EnemyCombatDebugToggleButton->SetIsEnabled(true);
 	}
-	SetNamedText(
-		FName(TEXT("DebugDisplayLanguageLabelText")),
-		FText::FromString(TEXT("\uB514\uBC84\uADF8 \uD45C\uAE30 \uC5B8\uC5B4")));
-	SetNamedText(
-		FName(TEXT("DebugDisplayLanguageKoreanButtonText")),
-		FText::FromString(TEXT("\uD55C\uAD6D\uC5B4")));
-	SetNamedText(
-		FName(TEXT("DebugDisplayLanguageEnglishButtonText")),
-		FText::FromString(TEXT("English")));
+	EnsureLanguageOptionRows();
+	if (DebugDisplayLanguageOptionRow)
+	{
+		DebugDisplayLanguageOptionRow->Configure(ResolveUiText(
+			FName(TEXT("ui.settings.development.debug_display_language")),
+			FText::GetEmpty()));
+		DebugDisplayLanguageOptionRow->SetValue(ResolveUiText(
+			DebugDisplayLanguage == ETunaSweeperDebugDisplayLanguage::Korean
+				? FName(TEXT("ui.language.korean"))
+				: FName(TEXT("ui.language.english")),
+			FText::GetEmpty()));
+		DebugDisplayLanguageOptionRow->SetStepEnabled(
+			DebugDisplayLanguage == ETunaSweeperDebugDisplayLanguage::Korean,
+			DebugDisplayLanguage == ETunaSweeperDebugDisplayLanguage::English);
+	}
 	if (DebugDisplayLanguageKoreanButton)
 	{
 		DebugDisplayLanguageKoreanButton->SetIsEnabled(true);
@@ -343,8 +329,14 @@ void UTunaSweeperIntroMenuWidget::RefreshDevelopmentSettingsPanel()
 	}
 	SetNamedText(
 		FName(TEXT("PiggyBankToggleButtonText")),
-		FText::FromString(TEXT("\uB3FC\uC9C0\uC800\uAE08\uD1B5")));
-	SetToggleIndicatorState(FName(TEXT("PiggyBankToggleIndicator")), bPiggyBankEnabled);
+		ResolveUiText(
+			FName(TEXT("ui.settings.development.piggy_bank")),
+			FText::GetEmpty()));
+	TunaSweeperUIStyle::SetCheckButton(
+		WidgetTree,
+		PiggyBankToggleButton,
+		Cast<UTextBlock>(FindIntroWidget(TEXT("PiggyBankToggleButtonText"))),
+		bPiggyBankEnabled);
 
 	if (PiggyBankToggleButton)
 	{
@@ -352,9 +344,13 @@ void UTunaSweeperIntroMenuWidget::RefreshDevelopmentSettingsPanel()
 	}
 	SetNamedText(
 		FName(TEXT("AlwaysSlowPresentationToggleButtonText")),
-		FText::FromString(TEXT("\uC0C1\uC2DC \uC2AC\uB85C\uC6B0 \uC5F0\uCD9C")));
-	SetToggleIndicatorState(
-		FName(TEXT("AlwaysSlowPresentationToggleIndicator")),
+		ResolveUiText(
+			FName(TEXT("ui.settings.development.always_slow_presentation")),
+			FText::GetEmpty()));
+	TunaSweeperUIStyle::SetCheckButton(
+		WidgetTree,
+		AlwaysSlowPresentationToggleButton,
+		Cast<UTextBlock>(FindIntroWidget(TEXT("AlwaysSlowPresentationToggleButtonText"))),
 		bAlwaysSlowPresentationEnabled);
 
 	if (AlwaysSlowPresentationToggleButton)
@@ -366,7 +362,7 @@ void UTunaSweeperIntroMenuWidget::RefreshDevelopmentSettingsPanel()
 		FName(TEXT("SaveDataManagementTitleText")),
 		ResolveUiText(
 			FName(TEXT("ui.settings.development.save_data_title")),
-			FText::FromString(TEXT("세이브 데이터 관리"))));
+			FText::GetEmpty()));
 	if (SaveDataManagementStatusText)
 	{
 		SaveDataManagementStatusText->SetText(FText::Format(
@@ -374,9 +370,7 @@ void UTunaSweeperIntroMenuWidget::RefreshDevelopmentSettingsPanel()
 				bHasCurrentSaveData
 					? FName(TEXT("ui.settings.development.save_data_exists"))
 					: FName(TEXT("ui.settings.development.no_save_data")),
-				bHasCurrentSaveData
-					? FText::FromString(TEXT("현재 슬롯 {0}: 저장 데이터 있음"))
-					: FText::FromString(TEXT("현재 슬롯 {0}: 저장 데이터 없음"))),
+				FText::GetEmpty()),
 			FText::AsNumber(ActiveSaveSlotIndex)));
 		SaveDataManagementStatusText->SetColorAndOpacity(FSlateColor(
 			bHasCurrentSaveData
@@ -387,7 +381,7 @@ void UTunaSweeperIntroMenuWidget::RefreshDevelopmentSettingsPanel()
 		FName(TEXT("DeleteCurrentSaveDataButtonText")),
 		ResolveUiText(
 			FName(TEXT("ui.settings.development.delete_current_save")),
-			FText::FromString(TEXT("현재 슬롯 세이브 데이터 즉시 삭제"))));
+			FText::GetEmpty()));
 	if (DeleteCurrentSaveDataButton)
 	{
 		DeleteCurrentSaveDataButton->SetIsEnabled(bHasCurrentSaveData);
@@ -470,18 +464,6 @@ void UTunaSweeperIntroMenuWidget::RefreshInterfaceSelectionStyles()
 	ApplySettingsTabButtonStyle(SettingsDevelopmentTabButton, FVector2D(214.0f, 50.0f), false);
 
 	ApplySettingsChoiceButtonStyle(
-		LanguageEnglishButton,
-		FVector2D(660.0f, 46.0f),
-		PendingInterfaceLanguage == ETunaSweeperItemTextLanguage::English);
-	ApplySettingsChoiceButtonStyle(
-		LanguageKoreanButton,
-		FVector2D(660.0f, 46.0f),
-		PendingInterfaceLanguage == ETunaSweeperItemTextLanguage::Korean);
-	ApplySettingsChoiceButtonStyle(
-		LanguageJapaneseButton,
-		FVector2D(660.0f, 46.0f),
-		PendingInterfaceLanguage == ETunaSweeperItemTextLanguage::Japanese);
-	ApplySettingsChoiceButtonStyle(
 		CancelInterfaceSettingsButton,
 		FVector2D(160.0f, 46.0f),
 		false);
@@ -503,26 +485,10 @@ void UTunaSweeperIntroMenuWidget::RefreshDevelopmentSelectionStyles()
 	ApplySettingsTabButtonStyle(SettingsGraphicsTabButton, FVector2D(214.0f, 50.0f), false);
 	ApplySettingsTabButtonStyle(SettingsInterfaceTabButton, FVector2D(214.0f, 50.0f), false);
 	ApplySettingsTabButtonStyle(SettingsDevelopmentTabButton, FVector2D(214.0f, 50.0f), true);
-	ApplySettingsChoiceButtonStyle(
-		EnemyCombatDebugToggleButton,
-		FVector2D(660.0f, 46.0f),
-		bEnemyCombatDebugEnabled);
-	ApplySettingsChoiceButtonStyle(
-		DebugDisplayLanguageKoreanButton,
-		FVector2D(660.0f, 46.0f),
-		DebugDisplayLanguage == ETunaSweeperDebugDisplayLanguage::Korean);
-	ApplySettingsChoiceButtonStyle(
-		DebugDisplayLanguageEnglishButton,
-		FVector2D(660.0f, 46.0f),
-		DebugDisplayLanguage == ETunaSweeperDebugDisplayLanguage::English);
-	ApplySettingsChoiceButtonStyle(
-		PiggyBankToggleButton,
-		FVector2D(660.0f, 46.0f),
-		bPiggyBankEnabled);
-	ApplySettingsChoiceButtonStyle(
-		AlwaysSlowPresentationToggleButton,
-		FVector2D(660.0f, 46.0f),
-		bAlwaysSlowPresentationEnabled);
+	(void)bEnemyCombatDebugEnabled;
+	(void)bPiggyBankEnabled;
+	(void)bAlwaysSlowPresentationEnabled;
+	(void)DebugDisplayLanguage;
 
 	if (DeleteCurrentSaveDataButton)
 	{
@@ -537,38 +503,10 @@ void UTunaSweeperIntroMenuWidget::RefreshDevelopmentSelectionStyles()
 			return false;
 		}();
 
-		const FVector2D ButtonSize(660.0f, 46.0f);
-		const FLinearColor DisabledFill(0.045f, 0.045f, 0.045f, 0.56f);
-		const FLinearColor DisabledOutline(0.24f, 0.25f, 0.25f, 0.48f);
-		FButtonStyle ButtonStyle;
-		ButtonStyle.SetNormal(TunaSweeperSettingsUi::MakeRoundedBoxBrush(
-			ButtonSize,
-			bHasCurrentSaveData ? FLinearColor(0.30f, 0.035f, 0.025f, 0.88f) : DisabledFill,
-			bHasCurrentSaveData ? FLinearColor(0.90f, 0.30f, 0.24f, 0.88f) : DisabledOutline,
-			1.2f,
-			TunaSweeperSettingsUi::ButtonCornerRadius));
-		ButtonStyle.SetHovered(TunaSweeperSettingsUi::MakeRoundedBoxBrush(
-			ButtonSize,
-			FLinearColor(0.46f, 0.055f, 0.038f, 0.96f),
-			FLinearColor(1.0f, 0.44f, 0.34f, 1.0f),
-			1.6f,
-			TunaSweeperSettingsUi::ButtonCornerRadius));
-		ButtonStyle.SetPressed(TunaSweeperSettingsUi::MakeRoundedBoxBrush(
-			ButtonSize,
-			FLinearColor(0.20f, 0.025f, 0.020f, 0.96f),
-			FLinearColor(0.72f, 0.20f, 0.16f, 0.88f),
-			1.0f,
-			TunaSweeperSettingsUi::ButtonCornerRadius));
-		ButtonStyle.SetDisabled(TunaSweeperSettingsUi::MakeRoundedBoxBrush(
-			ButtonSize,
-			DisabledFill,
-			DisabledOutline,
-			1.0f,
-			TunaSweeperSettingsUi::ButtonCornerRadius));
-		ButtonStyle.SetNormalPadding(FMargin(0.0f));
-		ButtonStyle.SetPressedPadding(FMargin(0.0f, 1.0f, 0.0f, 0.0f));
-		DeleteCurrentSaveDataButton->SetStyle(ButtonStyle);
-		DeleteCurrentSaveDataButton->SetClickMethod(EButtonClickMethod::DownAndUp);
+		TunaSweeperUIStyle::ApplyButton(
+			DeleteCurrentSaveDataButton,
+			TunaSweeperUIStyle::EButtonRole::Danger);
+		DeleteCurrentSaveDataButton->SetIsEnabled(bHasCurrentSaveData);
 	}
 }
 
@@ -583,71 +521,63 @@ void UTunaSweeperIntroMenuWidget::ApplySettingsChoiceButtonStyle(
 		return;
 	}
 
-	using namespace TunaSweeperSettingsUi;
-
-	const FLinearColor NormalFill = bSelected
-		? FLinearColor(0.04f, 0.25f, 0.28f, 0.92f)
-		: (bPrimary ? FLinearColor(0.05f, 0.34f, 0.38f, 0.92f) : FLinearColor(0.022f, 0.034f, 0.040f, 0.80f));
-	const FLinearColor HoveredFill = bSelected
-		? FLinearColor(0.06f, 0.36f, 0.40f, 0.98f)
-		: (bPrimary ? FLinearColor(0.07f, 0.44f, 0.48f, 0.98f) : FLinearColor(0.045f, 0.075f, 0.085f, 0.92f));
-	const FLinearColor PressedFill = NormalFill * 0.78f;
-	const FLinearColor Outline = bSelected || bPrimary
-		? Accent
-		: FLinearColor(0.56f, 0.66f, 0.66f, 0.70f);
-
-	FButtonStyle ButtonStyle;
-	ButtonStyle.SetNormal(TunaSweeperSettingsUi::MakeRoundedBoxBrush(
-		ButtonSize,
-		NormalFill,
-		Outline,
-		bSelected || bPrimary ? 1.8f : 1.0f,
-		ButtonCornerRadius));
-	ButtonStyle.SetHovered(TunaSweeperSettingsUi::MakeRoundedBoxBrush(
-		ButtonSize,
-		HoveredFill,
-		FLinearColor(0.82f, 0.98f, 1.0f, 1.0f),
-		bSelected || bPrimary ? 2.2f : 1.4f,
-		ButtonCornerRadius));
-	ButtonStyle.SetPressed(TunaSweeperSettingsUi::MakeRoundedBoxBrush(
-		ButtonSize,
-		PressedFill,
-		Outline * 0.84f,
-		1.0f,
-		ButtonCornerRadius));
-	ButtonStyle.SetDisabled(TunaSweeperSettingsUi::MakeRoundedBoxBrush(
-		ButtonSize,
-		bSelected ? NormalFill : FLinearColor(0.018f, 0.024f, 0.028f, 0.58f),
-		bSelected ? Outline : FLinearColor(0.30f, 0.36f, 0.36f, 0.42f),
-		bSelected ? 1.6f : 0.8f,
-		ButtonCornerRadius));
-	ButtonStyle.SetNormalPadding(FMargin(0.0f));
-	ButtonStyle.SetPressedPadding(FMargin(0.0f, 1.0f, 0.0f, 0.0f));
-
-	Button->SetStyle(ButtonStyle);
-	Button->SetClickMethod(EButtonClickMethod::DownAndUp);
+	(void)ButtonSize;
+	TunaSweeperUIStyle::ApplyButton(
+		Button,
+		bSelected || bPrimary
+			? TunaSweeperUIStyle::EButtonRole::Primary
+			: TunaSweeperUIStyle::EButtonRole::Secondary,
+		bSelected);
 }
 
 void UTunaSweeperIntroMenuWidget::ApplySettingsTabButtonStyle(
-	UButton* Button, const FVector2D& ButtonSize, bool bSelected) const
+	UButton* Button, const FVector2D& ButtonSize, bool bSelected)
 {
 	if (!Button) return;
-	Button->SetBackgroundColor(FLinearColor::White);
-	FButtonStyle Style = Button->GetStyle();
-	FSlateBrush Clear; Clear.DrawAs = ESlateBrushDrawType::NoDrawType;
-	Style.SetNormal(bSelected ? Style.Disabled : Clear);
-	Button->SetStyle(Style);
-	// Selection is visual state, not disabled input (which greys out the label).
+	(void)ButtonSize;
+	TunaSweeperUIStyle::ApplyButton(Button, TunaSweeperUIStyle::EButtonRole::Tab, bSelected);
 	Button->SetIsEnabled(true);
-	if (UTextBlock* Text = Cast<UTextBlock>(Button->GetContent()))
-		Text->SetColorAndOpacity(bSelected ? FLinearColor(1.0f, 0.98f, 0.88f) : FLinearColor(0.70f, 0.79f, 0.76f));
+	if (!SettingsTabFadeTexture)
+	{
+		constexpr int32 FadeWidth = 256;
+		TArray<uint8> Pixels;
+		Pixels.Init(255, FadeWidth * 4);
+		for (int32 X = 0; X < FadeWidth; ++X)
+			Pixels[X * 4 + 3] = static_cast<uint8>(255.0f * (1.0f - FMath::SmoothStep(0.0f, 1.0f, float(X) / (FadeWidth - 1))));
+		SettingsTabFadeTexture = UTexture2D::CreateTransient(FadeWidth, 1, PF_B8G8R8A8, NAME_None, Pixels);
+		if (SettingsTabFadeTexture)
+		{
+			SettingsTabFadeTexture->LODGroup = TEXTUREGROUP_UI;
+			SettingsTabFadeTexture->SRGB = true;
+			SettingsTabFadeTexture->NeverStream = true;
+			SettingsTabFadeTexture->Filter = TF_Bilinear;
+			SettingsTabFadeTexture->AddressX = TA_Clamp;
+			SettingsTabFadeTexture->AddressY = TA_Clamp;
+			SettingsTabFadeTexture->UpdateResource();
+		}
+	}
+	auto Background = [this](float Opacity)
+	{
+		FSlateBrush Brush;
+		Brush.DrawAs = ESlateBrushDrawType::Image;
+		Brush.ImageSize = FVector2D(256.0f, 1.0f);
+		Brush.SetResourceObject(SettingsTabFadeTexture);
+		Brush.TintColor = FLinearColor(0.26f, 0.48f, 0.50f, Opacity);
+		return Brush;
+	};
+	FButtonStyle Style = Button->GetStyle();
+	Style.SetNormal(Background(bSelected ? 1.0f : 0.0f));
+	Style.SetHovered(Background(bSelected ? 1.0f : 0.5f));
+	Style.SetPressed(Background(bSelected ? 1.0f : 0.5f));
+	Style.SetDisabled(Background(0.0f));
+	Button->SetStyle(Style);
 }
 
 void UTunaSweeperIntroMenuWidget::RefreshLocalizedTexts()
 {
 	SetNamedText(
 		FName(TEXT("SteamDemoWishlistButtonText")),
-		ResolveUiText(FName(TEXT("ui.title.wishlist")), FText::FromString(TEXT("\uC704\uC2DC\uB9AC\uC2A4\uD2B8\uC5D0 \uCD94\uAC00"))));
+		ResolveUiText(FName(TEXT("ui.title.wishlist")), FText::GetEmpty()));
 	SetNamedText(
 		FName(TEXT("SaveSlotPanelTitleText")),
 		ResolveUiText(FName(TEXT("ui.title.slot_select")), FText::FromString(TEXT("\uC2AC\uB86F \uC120\uD0DD"))));
@@ -668,13 +598,16 @@ void UTunaSweeperIntroMenuWidget::RefreshLocalizedTexts()
 		ResolveUiText(FName(TEXT("ui.common.cancel")), FText::FromString(TEXT("\uCDE8\uC18C"))));
 	SetNamedText(
 		FName(TEXT("SettingsTitleText")),
-		ResolveUiText(FName(TEXT("ui.title.settings")), FText::FromString(TEXT("\uC124\uC815"))));
+		ResolveUiText(FName(TEXT("ui.common.back")), FText::GetEmpty()));
 	SetNamedText(
 		FName(TEXT("SettingsGraphicsTabButtonText")),
 		ResolveUiText(FName(TEXT("ui.settings.graphics")), FText::FromString(TEXT("\uADF8\uB798\uD53D"))));
 	SetNamedText(
 		FName(TEXT("SettingsInterfaceTabButtonText")),
 		ResolveUiText(FName(TEXT("ui.settings.interface")), FText::FromString(TEXT("\uC778\uD130\uD398\uC774\uC2A4"))));
+	SetNamedText(
+		FName(TEXT("SettingsDevelopmentTabButtonText")),
+		ResolveUiText(FName(TEXT("ui.settings.development")), FText::GetEmpty()));
 	SetNamedText(
 		FName(TEXT("WindowModeLabelText")),
 		ResolveUiText(FName(TEXT("ui.settings.window_mode")), FText::FromString(TEXT("\uD654\uBA74 \uBAA8\uB4DC"))));
@@ -723,24 +656,41 @@ void UTunaSweeperIntroMenuWidget::RefreshLocalizedTexts()
 
 	if (DifficultyTitleText)
 	{
-		DifficultyTitleText->SetText(FText::FromString(
+		DifficultyTitleText->SetText(ResolveUiText(
 			bDifficultyAdjustmentMode
-				? TEXT("\uB09C\uC774\uB3C4 \uC870\uC815")
-				: TEXT("\uB09C\uC774\uB3C4 \uC120\uD0DD")));
+				? FName(TEXT("ui.difficulty.adjust_title"))
+				: FName(TEXT("ui.difficulty.select_title")),
+			FText::GetEmpty()));
 	}
 	if (DifficultyStartButtonText)
 	{
-		DifficultyStartButtonText->SetText(FText::FromString(
+		DifficultyStartButtonText->SetText(ResolveUiText(
 			bDifficultyAdjustmentMode
-				? TEXT("\uC801\uC6A9")
-				: TEXT("\uAC8C\uC784 \uC2DC\uC791")));
+				? FName(TEXT("ui.common.apply"))
+				: FName(TEXT("ui.difficulty.start")),
+			FText::GetEmpty()));
 	}
 	if (DifficultyBackButtonText)
 	{
 		DifficultyBackButtonText->SetText(bDifficultyAdjustmentMode
-			? ResolveUiText(FName(TEXT("ui.common.cancel")), FText::FromString(TEXT("\uCDE8\uC18C")))
-			: ResolveUiText(FName(TEXT("ui.common.back")), FText::FromString(TEXT("\uB3CC\uC544\uAC00\uAE30"))));
+			? ResolveUiText(FName(TEXT("ui.common.cancel")), FText::GetEmpty())
+			: ResolveUiText(FName(TEXT("ui.common.back")), FText::GetEmpty()));
 	}
+
+	EnsureLanguageOptionRows();
+	if (InterfaceLanguageOptionRow)
+	{
+		InterfaceLanguageOptionRow->Configure(ResolveUiText(
+			FName(TEXT("ui.settings.language")),
+			FText::GetEmpty()));
+	}
+	if (DebugDisplayLanguageOptionRow)
+	{
+		DebugDisplayLanguageOptionRow->Configure(ResolveUiText(
+			FName(TEXT("ui.settings.development.debug_display_language")),
+			FText::GetEmpty()));
+	}
+	ApplyUnifiedControlStyles();
 }
 
 void UTunaSweeperIntroMenuWidget::RefreshSaveSlotButton(int32 SaveSlotIndex, UButton* SlotButton, UTextBlock* SlotText)

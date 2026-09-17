@@ -421,6 +421,7 @@ private:
 	void RefreshQuickSlotsFromGameState();
 	void RefreshInventoryQuickSlotPanel();
 	void RefreshLocalizedTexts();
+	void NormalizeTopModeDockLayout();
 	void NormalizeCenterContentPanelLayout();
 	void RefreshCancelableActionWidgets(const FGeometry* GeometryForPlacement = nullptr);
 	void RefreshDialogueHudVisibility();

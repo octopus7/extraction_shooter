@@ -1,4 +1,5 @@
 #include "TunaSweeperGameHudWidgetShared.h"
+#include "UI/TunaSweeperUIStyle.h"
 
 void UTunaSweeperGameHudWidget::ApplyHudModeVisibility()
 {
@@ -225,6 +226,40 @@ void UTunaSweeperGameHudWidget::ApplyHudModeVisibility()
 
 	RefreshExtractionProgressWidget();
 	RefreshCursorDistanceWidget();
+}
+
+void UTunaSweeperGameHudWidget::NormalizeTopModeDockLayout()
+{
+	if (!TopStatusReserveWidget) return;
+
+	if (UCanvasPanelSlot* TopSlot = Cast<UCanvasPanelSlot>(TopStatusReserveWidget->Slot))
+	{
+		TopSlot->SetAnchors(FAnchors(0.5f, 0.0f));
+		TopSlot->SetAlignment(FVector2D(0.5f, 0.0f));
+		TopSlot->SetPosition(FVector2D::ZeroVector);
+		TopSlot->SetAutoSize(true);
+	}
+
+	UWidgetTree* TopTree = TopStatusReserveWidget->WidgetTree;
+	if (!TopTree) return;
+	if (USizeBox* RootSize = Cast<USizeBox>(TopTree->FindWidget(TEXT("RootSizeBox"))))
+	{
+		// The dock follows the visible tabs, including the demo's shorter tab row.
+		RootSize->ClearWidthOverride();
+		RootSize->ClearHeightOverride();
+	}
+	if (UBorder* Background = Cast<UBorder>(TopTree->FindWidget(TEXT("ReservedBackground"))))
+	{
+		Background->SetPadding(FMargin(8.0f, 0.0f, 8.0f, 6.0f));
+		Background->SetVerticalAlignment(VAlign_Top);
+		FSlateBrush Brush;
+		Brush.DrawAs = ESlateBrushDrawType::RoundedBox;
+		Brush.TintColor = FLinearColor(0.025f, 0.055f, 0.06f, 0.94f);
+		Brush.OutlineSettings.CornerRadii = FVector4(0.0f, 0.0f, 6.0f, 6.0f);
+		Brush.OutlineSettings.RoundingType = ESlateBrushRoundingType::FixedRadius;
+		Background->SetBrush(Brush);
+		Background->SetBrushColor(FLinearColor::White);
+	}
 }
 
 void UTunaSweeperGameHudWidget::NormalizeCenterContentPanelLayout()
@@ -869,11 +904,10 @@ void UTunaSweeperGameHudWidget::EnsureHousingFacilityContextMenuWidget()
 	HousingContextMenuPanel->SetContent(MenuStack);
 
 	HousingContextStoreText->SetJustification(ETextJustify::Center);
-	HousingContextStoreText->SetColorAndOpacity(FSlateColor(FLinearColor(0.88f, 0.98f, 1.0f, 1.0f)));
-	TunaSweeperUIFont::ApplyFont(HousingContextStoreText, 14, ETunaSweeperUIFontWeight::Bold);
+	TunaSweeperUIStyle::ApplyLabel(HousingContextStoreText, 14);
 
 	HousingContextStoreButton->SetContent(HousingContextStoreText);
-	HousingContextStoreButton->SetBackgroundColor(FLinearColor(0.08f, 0.22f, 0.25f, 0.96f));
+	TunaSweeperUIStyle::ApplyButton(HousingContextStoreButton, TunaSweeperUIStyle::EButtonRole::Secondary);
 	HousingContextStoreButton->OnClicked.RemoveDynamic(this, &UTunaSweeperGameHudWidget::HandleHousingContextStoreClicked);
 	HousingContextStoreButton->OnClicked.AddDynamic(this, &UTunaSweeperGameHudWidget::HandleHousingContextStoreClicked);
 	if (UVerticalBoxSlot* ButtonSlot = MenuStack->AddChildToVerticalBox(HousingContextStoreButton))

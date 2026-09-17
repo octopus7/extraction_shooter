@@ -8,12 +8,17 @@
 #include "Editor.h"
 #include "UI/TunaSweeperIntroMenuWidget.h"
 #include "UI/TunaSweeperGraphicsSettingsWidget.h"
+#include "UI/TunaSweeperOptionRowWidget.h"
+#include "UI/TunaSweeperCheckIndicatorWidget.h"
 #include "Slate/WidgetRenderer.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "ImageUtils.h"
 #include "Misc/Paths.h"
 #include "AssetCompilingManager.h"
 #include "RenderingThread.h"
+#include "Engine/GameInstance.h"
+#include "Subsystem/TunaSweeperTextSubsystem.h"
+#include "Framework/Application/SlateApplication.h"
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FTitleScreenAssetTest,
 	"TunaSweeper.UI.Title.ScreenAssetsAndTransitions",
@@ -38,25 +43,27 @@ bool FTitleScreenAssetTest::RunTest(const FString& Parameters)
 	TestNotNull(TEXT("Graphics section heading exists"), Menu->TitleGraphicsSettingsWidget->WidgetTree->FindWidget(TEXT("GraphicsSectionTitleText")));
 	for (const TCHAR* Name : { TEXT("ApplyGraphicsSettingsButton"), TEXT("CancelGraphicsSettingsButton") }) {
 		UButton* Action=Cast<UButton>(Menu->TitleGraphicsSettingsWidget->WidgetTree->FindWidget(Name));
-		TestTrue(FString::Printf(TEXT("Unframed and bound action %s"),Name),Action && Action->GetStyle().Normal.DrawAs==ESlateBrushDrawType::NoDrawType && Action->OnClicked.IsBound());
+		TestTrue(FString::Printf(TEXT("Rounded and bound action %s"),Name),Action && Action->GetStyle().Normal.DrawAs==ESlateBrushDrawType::RoundedBox && Action->OnClicked.IsBound());
 	}
 	UWidget* BackTitle = Menu->FindIntroWidget(TEXT("SettingsTitleText"));
 	TestTrue(TEXT("Settings title is inside back button hit area"), BackTitle && BackTitle->GetParent() && BackTitle->GetParent()->GetParent() == Menu->BackFromSettingsButton);
 	TestNotNull(TEXT("Curved back arrow image exists"), Menu->FindIntroWidget(TEXT("SettingsBackArrowImage")));
-	TestTrue(TEXT("Back header is borderless"), Menu->BackFromSettingsButton && Menu->BackFromSettingsButton->GetStyle().Normal.DrawAs == ESlateBrushDrawType::NoDrawType);
+	TestTrue(TEXT("Back header uses the shared borderless rounded control"), Menu->BackFromSettingsButton
+		&& Menu->BackFromSettingsButton->GetStyle().Normal.DrawAs == ESlateBrushDrawType::RoundedBox
+		&& Menu->BackFromSettingsButton->GetStyle().Normal.OutlineSettings.Width == 0.0f);
 	if (Menu->BackFromSettingsButton) {
-		TestEqual(TEXT("Back header idle alpha"), Menu->BackFromSettingsButton->GetStyle().NormalForeground.GetSpecifiedColor().A, 0.9f);
 		TestEqual(TEXT("Back header hovered alpha"), Menu->BackFromSettingsButton->GetStyle().HoveredForeground.GetSpecifiedColor().A, 1.0f);
 	}
-	TestEqual(TEXT("Idle settings tab has no frame"), Menu->SettingsDevelopmentTabButton->GetStyle().Normal.DrawAs, ESlateBrushDrawType::NoDrawType);
-	TestNotNull(TEXT("Tab hover uses mist material"), Menu->SettingsDevelopmentTabButton->GetStyle().Hovered.GetResourceObject());
+	TestEqual(TEXT("Settings tab uses a fading image background"), Menu->SettingsDevelopmentTabButton->GetStyle().Normal.DrawAs, ESlateBrushDrawType::Image);
 	for (const TCHAR* Name : { TEXT("VSyncToggleButton"), TEXT("MotionBlurToggleButton"), TEXT("DynamicResolutionToggleButton"), TEXT("HardwareRayTracingToggleButton") })
 	{
 		UButton* Toggle = Cast<UButton>(Menu->TitleGraphicsSettingsWidget->WidgetTree->FindWidget(Name));
-		TestTrue(FString::Printf(TEXT("Unframed toggle %s"), Name), Toggle && Toggle->GetStyle().Normal.DrawAs == ESlateBrushDrawType::NoDrawType);
+		TestTrue(FString::Printf(TEXT("Checkbox remains bound %s"), Name), Toggle && Toggle->OnClicked.IsBound());
+		TestNotNull(TEXT("Checkbox uses a painted indicator"), Cast<UTunaSweeperCheckIndicatorWidget>(
+			Menu->TitleGraphicsSettingsWidget->WidgetTree->FindWidget(FName(*(FString(Name) + TEXT("_CheckIndicator"))))));
 	}
-	UButton* Preset = Cast<UButton>(Menu->TitleGraphicsSettingsWidget->WidgetTree->FindWidget(TEXT("PresetHighButton")));
-	TestTrue(TEXT("Baked graphics preset is bound"), Preset && Preset->OnClicked.IsBound());
+	UTunaSweeperOptionRowWidget* Preset = Cast<UTunaSweeperOptionRowWidget>(Menu->TitleGraphicsSettingsWidget->WidgetTree->FindWidget(TEXT("PresetOptionRow")));
+	TestTrue(TEXT("Compact preset selector is bound"), Preset && Preset->OnStepRequested.IsBound());
 	Menu->ShowSettingsPanel();
 	Menu->TickMenuTransitions(0.15f);
 	UWidget* First = Menu->FindIntroWidget(TEXT("GraphicsTabButtonBox"));
@@ -76,8 +83,19 @@ bool FTitleScreenAssetTest::RunTest(const FString& Parameters)
 	Menu->RequestSettingsTab(0);
 	Menu->TickMenuTransitions(0.4f);
 	TestFalse(TEXT("Graphics tab restored"), Menu->bShowingInterfaceSettingsTab || Menu->bShowingDevelopmentSettingsTab);
+	TestEqual(TEXT("Tab switching preserves the gradient background"), Menu->SettingsGraphicsTabButton->GetStyle().Normal.DrawAs, ESlateBrushDrawType::Image);
+	TestEqual(TEXT("Selected tab keeps full background strength"), Menu->SettingsGraphicsTabButton->GetStyle().Hovered.TintColor.GetSpecifiedColor().A, 1.0f);
+	TestEqual(TEXT("Inactive tab has no normal background"), Menu->SettingsInterfaceTabButton->GetStyle().Normal.TintColor.GetSpecifiedColor().A, 0.0f);
+	TestEqual(TEXT("Inactive tab hover uses half background strength"), Menu->SettingsInterfaceTabButton->GetStyle().Hovered.TintColor.GetSpecifiedColor().A, 0.5f);
 
 	// Render the actual composed UMG tree, including nested WBP controls, for visual inspection.
+	// The editor-world fixture has no game instance; supply real string-table labels for the captures.
+	UGameInstance* PreviewInstance = NewObject<UGameInstance>();
+	UTunaSweeperTextSubsystem* PreviewStrings = NewObject<UTunaSweeperTextSubsystem>(PreviewInstance);
+	Menu->SetNamedText(TEXT("SettingsTitleText"), PreviewStrings->ResolveText(
+		TEXT("ui.common.back"), ETunaSweeperItemTextLanguage::Korean, FText::GetEmpty()));
+	Menu->SetNamedText(TEXT("SteamDemoWishlistButtonText"), PreviewStrings->ResolveText(
+		TEXT("ui.title.wishlist"), ETunaSweeperItemTextLanguage::Korean, FText::GetEmpty()));
 	FAssetCompilingManager::Get().FinishAllCompilation();
 	FlushRenderingCommands();
 	FWidgetRenderer Renderer(true);
@@ -104,6 +122,18 @@ bool FTitleScreenAssetTest::RunTest(const FString& Parameters)
 	Menu->TickMenuTransitions(1.0f);
 	TestEqual(TEXT("Settings closes after exit fade"), Menu->SettingsPanel->GetVisibility(), ESlateVisibility::Collapsed);
 	TestEqual(TEXT("Main menu visible after exit"), Menu->MainMenuPanel->GetVisibility(), ESlateVisibility::Visible);
+	Menu->InvalidateLayoutAndVolatility();
+	FSlateApplication::Get().InvalidateAllWidgets(true);
+	Slate->Invalidate(EInvalidateWidgetReason::Layout | EInvalidateWidgetReason::Paint);
+	Menu->ForceLayoutPrepass();
+	Renderer.DrawWidget(Target, Slate, FVector2D(1920, 1080), 0.0f);
+	FlushRenderingCommands();
+	if (Target)
+	{
+		FImage Pixels;
+		if (FImageUtils::GetRenderTargetImage(Target, Pixels))
+			FImageUtils::SaveImageByExtension(*(FPaths::ProjectSavedDir() / TEXT("Screenshots/TitleMain.png")), Pixels);
+	}
 	Menu->ShowSettingsPanel();
 	Menu->TickMenuTransitions(1.0f);
 	TestTrue(TEXT("Re-entry restores content input"), Menu->FindIntroWidget(TEXT("SettingsPageStack"))->GetIsEnabled());

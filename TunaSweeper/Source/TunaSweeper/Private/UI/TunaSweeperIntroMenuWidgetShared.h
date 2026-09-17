@@ -8,14 +8,16 @@
 #include "Components/Button.h"
 #include "Components/CanvasPanel.h"
 #include "Components/CanvasPanelSlot.h"
-#include "Components/CheckBox.h"
 #include "DLSSLibrary.h"
 #include "Components/HorizontalBox.h"
 #include "Components/HorizontalBoxSlot.h"
 #include "Components/Image.h"
 #include "Components/Overlay.h"
 #include "Components/OverlaySlot.h"
+#include "Components/PanelWidget.h"
 #include "Components/ScrollBox.h"
+#include "Components/ScaleBox.h"
+#include "Components/ScaleBoxSlot.h"
 #include "Components/SizeBox.h"
 #include "Components/Spacer.h"
 #include "Components/TextBlock.h"
@@ -46,8 +48,10 @@
 #include "Subsystem/TunaSweeperToastSubsystem.h"
 #include "TimerManager.h"
 #include "UI/TunaSweeperScreenFadeWidget.h"
+#include "UI/TunaSweeperOptionRowWidget.h"
 #include "UI/TunaSweeperTitleWindParticleWidget.h"
 #include "UI/TunaSweeperUIFont.h"
+#include "UI/TunaSweeperUIStyle.h"
 
 namespace TunaSweeperTitleGraphicsSettings
 {
@@ -108,40 +112,9 @@ namespace TunaSweeperDifficultySelect
 	inline const TCHAR* DefinitionsJsonRelativePath = TEXT("Data/DifficultyDefinitions.json");
 	inline const TCHAR* BackgroundTexturePath = TEXT("/Game/UI/Difficulty/T_DifficultyBackground.T_DifficultyBackground");
 	inline const TCHAR* CardFrameTexturePath = TEXT("/Game/UI/Difficulty/T_DifficultyCardFrame.T_DifficultyCardFrame");
-	inline const TCHAR* ActionButtonTexturePath = TEXT("/Game/UI/Difficulty/T_DifficultyActionButton.T_DifficultyActionButton");
 	inline const TCHAR* FarmingIconTexturePath = TEXT("/Game/UI/Difficulty/T_DifficultyIcon_Farming.T_DifficultyIcon_Farming");
 	inline const TCHAR* NormalIconTexturePath = TEXT("/Game/UI/Difficulty/T_DifficultyIcon_Normal.T_DifficultyIcon_Normal");
 	inline const TCHAR* HardIconTexturePath = TEXT("/Game/UI/Difficulty/T_DifficultyIcon_Hard.T_DifficultyIcon_Hard");
-
-	inline FText MakeFallbackTitle(int32 DifficultyStage)
-	{
-		switch (DifficultyStage)
-		{
-		case 1:
-			return FText::FromString(TEXT("\uD30C\uBC0D"));
-		case 2:
-			return FText::FromString(TEXT("\uC77C\uBC18"));
-		case 3:
-			return FText::FromString(TEXT("\uC5B4\uB824\uC6C0"));
-		default:
-			return FText::FromString(TEXT("\uD30C\uBC0D"));
-		}
-	}
-
-	inline FText MakeFallbackDescription(int32 DifficultyStage)
-	{
-		switch (DifficultyStage)
-		{
-		case 1:
-			return FText::FromString(TEXT("\uD30C\uBC0D\uACFC \uD0D0\uC0C9\uC5D0 \uC5EC\uC720\uAC00 \uC788\uB294 \uC2DC\uC791 \uB09C\uC774\uB3C4\uC785\uB2C8\uB2E4."));
-		case 2:
-			return FText::FromString(TEXT("\uC0DD\uC874\uACFC \uC804\uD22C\uAC00 \uADE0\uD615 \uC788\uAC8C \uC9C4\uD589\uB418\uB294 \uAE30\uBCF8 \uB09C\uC774\uB3C4\uC785\uB2C8\uB2E4."));
-		case 3:
-			return FText::FromString(TEXT("\uC790\uC6D0\uACFC \uC804\uD22C \uC555\uBC15\uC774 \uCEE4\uC9C0\uB294 \uB3C4\uC804 \uB09C\uC774\uB3C4\uC785\uB2C8\uB2E4."));
-		default:
-			return FText::GetEmpty();
-		}
-	}
 
 	inline FString GetDefinitionsJsonPath()
 	{

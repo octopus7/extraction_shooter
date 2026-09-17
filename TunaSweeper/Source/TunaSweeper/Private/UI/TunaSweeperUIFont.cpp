@@ -36,6 +36,16 @@ namespace
 					BoldFontPath,
 					EFontHinting::Default,
 					EFontLoadingPolicy::LazyLoad);
+				// NanumSquareRound does not cover all Japanese glyphs. Reuse the engine's
+				// packaged CJK fallback while retaining the project's primary typeface.
+				const FString FallbackFontPath = FPaths::EngineContentDir() / TEXT("Slate/Fonts/DroidSansFallback.ttf");
+				if (FPaths::FileExists(FallbackFontPath))
+				{
+					CompositeFont->FallbackTypeface.Typeface.Fonts.Emplace(
+						RegularTypefaceName, FallbackFontPath, EFontHinting::Default, EFontLoadingPolicy::LazyLoad);
+					CompositeFont->FallbackTypeface.Typeface.Fonts.Emplace(
+						BoldTypefaceName, FallbackFontPath, EFontHinting::Default, EFontLoadingPolicy::LazyLoad);
+				}
 				DefaultCompositeFont = CompositeFont;
 			}
 		}

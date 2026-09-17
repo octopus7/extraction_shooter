@@ -24,6 +24,7 @@
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
 #include "Subsystem/TunaSweeperQuestSubsystem.h"
 #include "UI/TunaSweeperUIFont.h"
+#include "UI/TunaSweeperUIStyle.h"
 
 namespace
 {
@@ -183,7 +184,7 @@ void UTunaSweeperQuestListEntryWidget::BuildEntryWidget()
 	EntrySizeBox->SetMinDesiredWidth(QuestListEntryWidth);
 	EntrySizeBox->SetContent(EntryButton);
 	EntryButton->SetContent(EntryStack);
-	EntryButton->SetRenderOpacity(0.9f);
+	TunaSweeperUIStyle::ApplyButton(EntryButton, TunaSweeperUIStyle::EButtonRole::Secondary);
 	if (UButtonSlot* EntryButtonSlot = Cast<UButtonSlot>(EntryStack->Slot))
 	{
 		EntryButtonSlot->SetHorizontalAlignment(HAlign_Fill);
@@ -214,11 +215,10 @@ void UTunaSweeperQuestListEntryWidget::RefreshEntryView()
 {
 	if (EntryButton)
 	{
-		EntryButton->SetRenderOpacity(bSelected ? 1.0f : 0.82f);
-		EntryButton->SetBackgroundColor(
-			bSelected
-				? FLinearColor(0.18f, 0.30f, 0.25f, 0.92f)
-				: FLinearColor(0.08f, 0.09f, 0.095f, 0.82f));
+		TunaSweeperUIStyle::ApplyButton(
+			EntryButton,
+			TunaSweeperUIStyle::EButtonRole::Secondary,
+			bSelected);
 	}
 
 	if (EntryLabelText)
@@ -712,10 +712,9 @@ void UTunaSweeperQuestWidget::BuildQuestWidget()
 	}
 
 	PrimaryButton->SetContent(PrimaryButtonText);
-	PrimaryButton->SetBackgroundColor(FLinearColor(0.55f, 0.82f, 0.98f, 1.0f));
+	TunaSweeperUIStyle::ApplyButton(PrimaryButton);
 	PrimaryButtonText->SetJustification(ETextJustify::Center);
-	PrimaryButtonText->SetColorAndOpacity(FSlateColor(FLinearColor(0.03f, 0.05f, 0.06f, 1.0f)));
-	TunaSweeperUIFont::ApplyFont(PrimaryButtonText, 18, ETunaSweeperUIFontWeight::Bold);
+	TunaSweeperUIStyle::ApplyLabel(PrimaryButtonText, 18);
 	if (UVerticalBoxSlot* PrimaryButtonSlot = DetailStack->AddChildToVerticalBox(PrimaryButton))
 	{
 		PrimaryButtonSlot->SetHorizontalAlignment(HAlign_Right);
@@ -774,6 +773,7 @@ void UTunaSweeperQuestWidget::BuildQuestWidget()
 		UTextBlock* CountText)
 	{
 		Button->SetContent(Content);
+		TunaSweeperUIStyle::ApplyButton(Button, TunaSweeperUIStyle::EButtonRole::Tab);
 		if (UButtonSlot* ButtonSlot = Cast<UButtonSlot>(Content->Slot))
 		{
 			ButtonSlot->SetHorizontalAlignment(HAlign_Fill);
@@ -782,7 +782,7 @@ void UTunaSweeperQuestWidget::BuildQuestWidget()
 
 		Text->SetJustification(ETextJustify::Center);
 		Text->SetAutoWrapText(false);
-		TunaSweeperUIFont::ApplyFont(Text, 13, ETunaSweeperUIFontWeight::Bold);
+		TunaSweeperUIStyle::ApplyLabel(Text, 13);
 		if (UOverlaySlot* TextSlot = Content->AddChildToOverlay(Text))
 		{
 			TextSlot->SetHorizontalAlignment(HAlign_Fill);
@@ -1046,18 +1046,15 @@ void UTunaSweeperQuestWidget::UpdateTabButtonStates()
 		if (Tab.Button)
 		{
 			Tab.Button->SetVisibility(ESlateVisibility::Visible);
-			Tab.Button->SetBackgroundColor(
-				bActive
-					? FLinearColor(0.44f, 0.76f, 0.88f, 1.0f)
-					: FLinearColor(0.13f, 0.15f, 0.16f, 0.92f));
+			TunaSweeperUIStyle::ApplyButton(
+				Tab.Button,
+				TunaSweeperUIStyle::EButtonRole::Tab,
+				bActive);
 		}
 		if (Tab.Text)
 		{
 			Tab.Text->SetText(TabLabel);
-			Tab.Text->SetColorAndOpacity(FSlateColor(
-				bActive
-					? FLinearColor(0.03f, 0.05f, 0.06f, 1.0f)
-					: FLinearColor(0.76f, 0.82f, 0.84f, 1.0f)));
+			TunaSweeperUIStyle::ApplyLabel(Tab.Text, 13);
 		}
 		if (Tab.CountBadge && Tab.CountText)
 		{
@@ -1139,7 +1136,8 @@ void UTunaSweeperQuestWidget::UpdateDetailView()
 	{
 		PrimaryButton->SetIsEnabled(bHasQuest && IsPrimaryButtonEnabled(QuestId));
 		PrimaryButton->SetVisibility(bHasQuest ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
-		PrimaryButton->SetRenderOpacity(1.0f);
+		TunaSweeperUIStyle::ApplyButton(PrimaryButton);
+		TunaSweeperUIStyle::ApplyLabel(PrimaryButtonText, 18);
 	}
 }
 

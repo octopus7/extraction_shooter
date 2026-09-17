@@ -231,6 +231,42 @@ void UTunaSweeperIntroMenuWidget::HandleDebugDisplayLanguageEnglishClicked()
 	RefreshDevelopmentSettingsPanel();
 }
 
+void UTunaSweeperIntroMenuWidget::HandleInterfaceLanguageStepRequested(int32 Delta)
+{
+	static constexpr ETunaSweeperItemTextLanguage Languages[] = {
+		ETunaSweeperItemTextLanguage::English,
+		ETunaSweeperItemTextLanguage::Korean,
+		ETunaSweeperItemTextLanguage::Japanese};
+
+	int32 CurrentIndex = 0;
+	for (int32 Index = 0; Index < UE_ARRAY_COUNT(Languages); ++Index)
+	{
+		if (Languages[Index] == PendingInterfaceLanguage)
+		{
+			CurrentIndex = Index;
+			break;
+		}
+	}
+	PendingInterfaceLanguage = Languages[FMath::Clamp(
+		CurrentIndex + FMath::Sign(Delta),
+		0,
+		UE_ARRAY_COUNT(Languages) - 1)];
+	RefreshInterfaceSettingsPanel();
+}
+
+void UTunaSweeperIntroMenuWidget::HandleDebugDisplayLanguageStepRequested(int32 Delta)
+{
+	const ETunaSweeperDebugDisplayLanguage CurrentLanguage =
+		TunaSweeperDebugDisplaySettings::GetDebugDisplayLanguage();
+	const bool bSelectKorean = Delta > 0 ||
+		(CurrentLanguage == ETunaSweeperDebugDisplayLanguage::Korean && Delta == 0);
+	TunaSweeperDebugDisplaySettings::SetDebugDisplayLanguage(
+		bSelectKorean
+			? ETunaSweeperDebugDisplayLanguage::Korean
+			: ETunaSweeperDebugDisplayLanguage::English);
+	RefreshDevelopmentSettingsPanel();
+}
+
 void UTunaSweeperIntroMenuWidget::HandlePiggyBankToggleClicked()
 {
 	const bool bEnabled = !ATunaSweeperPlayerController::GetDeveloperPiggyBankPreference();

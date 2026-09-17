@@ -5,33 +5,31 @@
 #include "Components/ButtonSlot.h"
 #include "Components/Image.h"
 #include "Engine/Texture2D.h"
+#include "Settings/TunaSweeperBuildFlavor.h"
 #include "UI/TunaSweeperUIFont.h"
+#include "UI/TunaSweeperUIStyle.h"
 
 namespace TunaSweeperHudTopReserve
 {
-	const TCHAR* InventoryModeIconPath = TEXT("/Game/UI/Icons/T_UI_Mode_Inventory.T_UI_Mode_Inventory");
-	const TCHAR* QuestModeIconPath = TEXT("/Game/UI/Icons/T_UI_Mode_Quest.T_UI_Mode_Quest");
-	const TCHAR* MapModeIconPath = TEXT("/Game/UI/Icons/T_UI_Mode_Map.T_UI_Mode_Map");
-	const TCHAR* MemoModeIconPath = TEXT("/Game/UI/Icons/T_UI_Mode_Memo.T_UI_Mode_Memo");
-	const TCHAR* ResearchModeIconPath = TEXT("/Game/UI/Icons/T_UI_Mode_Memo.T_UI_Mode_Memo");
-	constexpr float ModeIconSize = 28.0f;
+	const TCHAR* ModeIconAtlasPath = TEXT("/Game/UI/Icons/T_UI_Mode_ColorAtlas.T_UI_Mode_ColorAtlas");
+	constexpr float ModeIconSize = 36.0f;
 
-	const TCHAR* ResolveIconPath(ETunaSweeperHudMode Mode)
+	int32 ResolveIconCell(ETunaSweeperHudMode Mode)
 	{
 		switch (Mode)
 		{
 		case ETunaSweeperHudMode::Inventory:
-			return InventoryModeIconPath;
+			return 0;
 		case ETunaSweeperHudMode::Quest:
-			return QuestModeIconPath;
+			return 1;
 		case ETunaSweeperHudMode::Map:
-			return MapModeIconPath;
+			return 2;
 		case ETunaSweeperHudMode::Memo:
-			return MemoModeIconPath;
+			return 3;
 		case ETunaSweeperHudMode::Research:
-			return ResearchModeIconPath;
+			return 4;
 		default:
-			return nullptr;
+			return INDEX_NONE;
 		}
 	}
 }
@@ -117,6 +115,11 @@ void UTunaSweeperHudTopReserveWidget::RefreshTabVisuals()
 	SetTabVisual(ETunaSweeperHudMode::Map, MapModeButton, MapModeIcon, TEXT("MapModeIcon"));
 	SetTabVisual(ETunaSweeperHudMode::Memo, MemoModeButton, MemoModeIcon, TEXT("MemoModeIcon"));
 	SetTabVisual(ETunaSweeperHudMode::Research, ResearchModeButton, ResearchModeIcon, TEXT("ResearchModeIcon"));
+	const ESlateVisibility ResearchVisibility = TunaSweeperBuildFlavor::IsDemo()
+		? ESlateVisibility::Collapsed : ESlateVisibility::Visible;
+	if (ResearchModeButton) ResearchModeButton->SetVisibility(ResearchVisibility);
+	if (UWidget* ResearchFrame = WidgetTree ? WidgetTree->FindWidget(TEXT("ResearchModeButtonFrame")) : nullptr)
+		ResearchFrame->SetVisibility(ResearchVisibility);
 }
 
 void UTunaSweeperHudTopReserveWidget::CacheNamedWidgets()
@@ -207,11 +210,19 @@ UImage* UTunaSweeperHudTopReserveWidget::EnsureTabIcon(
 		ButtonSlot->SetPadding(FMargin(0.0f));
 	}
 
-	if (const TCHAR* IconPath = TunaSweeperHudTopReserve::ResolveIconPath(Mode))
+	const int32 IconCell = TunaSweeperHudTopReserve::ResolveIconCell(Mode);
+	if (IconCell != INDEX_NONE)
 	{
-		if (UTexture2D* IconTexture = LoadObject<UTexture2D>(nullptr, IconPath))
+		if (UTexture2D* IconTexture = LoadObject<UTexture2D>(nullptr, TunaSweeperHudTopReserve::ModeIconAtlasPath))
 		{
-			Icon->SetBrushFromTexture(IconTexture, true);
+			FSlateBrush Brush = Icon->GetBrush();
+			Brush.SetResourceObject(IconTexture);
+			Brush.DrawAs = ESlateBrushDrawType::Image;
+			Brush.ImageSize = FVector2D(TunaSweeperHudTopReserve::ModeIconSize);
+			const FVector2f CellSize(1.0f / 3.0f, 0.5f);
+			const FVector2f MinUv((IconCell % 3) * CellSize.X, (IconCell / 3) * CellSize.Y);
+			Brush.SetUVRegion(FBox2f(MinUv, MinUv + CellSize));
+			Icon->SetBrush(Brush);
 		}
 	}
 
@@ -233,16 +244,19 @@ void UTunaSweeperHudTopReserveWidget::SetTabVisual(
 
 	if (Button)
 	{
-		Button->SetRenderOpacity(bActive ? 1.0f : 0.72f);
+		TunaSweeperUIStyle::ApplyButton(Button, TunaSweeperUIStyle::EButtonRole::Tab, bActive);
+		FButtonStyle CompactTabStyle = Button->GetStyle();
+		CompactTabStyle.SetNormalPadding(FMargin(5.0f));
+		CompactTabStyle.SetPressedPadding(FMargin(5.0f, 6.0f, 5.0f, 4.0f));
+		for (FSlateBrush* Brush : {&CompactTabStyle.Normal, &CompactTabStyle.Hovered, &CompactTabStyle.Pressed, &CompactTabStyle.Disabled})
+			Brush->OutlineSettings.CornerRadii = FVector4(0.0f, 0.0f, 5.0f, 5.0f);
+		Button->SetStyle(CompactTabStyle);
 	}
 
 	UImage* ResolvedIcon = EnsureTabIcon(Mode, Button, Icon, IconWidgetName);
 	if (ResolvedIcon)
 	{
-		ResolvedIcon->SetColorAndOpacity(
-			bActive
-				? FLinearColor(0.82f, 0.98f, 0.88f, 1.0f)
-				: FLinearColor(0.74f, 0.80f, 0.82f, 1.0f));
+		ResolvedIcon->SetColorAndOpacity(FLinearColor::White);
 	}
 }
 
@@ -268,5 +282,6 @@ void UTunaSweeperHudTopReserveWidget::HandleMemoModeClicked()
 
 void UTunaSweeperHudTopReserveWidget::HandleResearchModeClicked()
 {
+	if (TunaSweeperBuildFlavor::IsDemo()) return;
 	OnHudModeSelected.Broadcast(ETunaSweeperHudMode::Research);
 }

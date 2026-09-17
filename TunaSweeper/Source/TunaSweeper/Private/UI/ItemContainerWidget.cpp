@@ -20,6 +20,7 @@
 #include "UI/TunaSweeperItemStackSplitPopupWidget.h"
 #include "UI/TunaSweeperItemStackTileItemObject.h"
 #include "UI/TunaSweeperUIFont.h"
+#include "UI/TunaSweeperUIStyle.h"
 #include "UI/TunaSweeperUiText.h"
 
 namespace ItemContainerUi
@@ -949,14 +950,12 @@ void UStorageContainerWidget::EnsureStorageSortButton()
 
 	StorageSortButton->SetContent(StorageSortButtonText);
 	StorageSortButton->SetClickMethod(EButtonClickMethod::DownAndUp);
-	StorageSortButton->SetBackgroundColor(FLinearColor(0.46f, 0.72f, 0.86f, 0.96f));
-	FButtonStyle ButtonStyle = StorageSortButton->GetStyle();
-	ButtonStyle.NormalPadding = FMargin(8.0f, 3.0f);
-	ButtonStyle.PressedPadding = FMargin(8.0f, 4.0f, 8.0f, 2.0f);
-	StorageSortButton->SetStyle(ButtonStyle);
-
-	StorageSortButtonText->SetColorAndOpacity(FSlateColor(FLinearColor(0.02f, 0.03f, 0.035f, 1.0f)));
-	TunaSweeperUIFont::ApplyFont(StorageSortButtonText, 14, ETunaSweeperUIFontWeight::Bold);
+	TunaSweeperUIStyle::ApplyButton(StorageSortButton, TunaSweeperUIStyle::EButtonRole::Secondary);
+	FButtonStyle CompactSortStyle = StorageSortButton->GetStyle();
+	CompactSortStyle.SetNormalPadding(FMargin(8.0f, 3.0f));
+	CompactSortStyle.SetPressedPadding(FMargin(8.0f, 4.0f, 8.0f, 2.0f));
+	StorageSortButton->SetStyle(CompactSortStyle);
+	TunaSweeperUIStyle::ApplyLabel(StorageSortButtonText, 14);
 
 	StorageSortButton->OnClicked.RemoveDynamic(this, &UStorageContainerWidget::HandleStorageSortButtonClicked);
 	StorageSortButton->OnClicked.AddDynamic(this, &UStorageContainerWidget::HandleStorageSortButtonClicked);
@@ -1224,10 +1223,10 @@ void UStorageContainerWidget::RefreshStorageFilterControls()
 		if (Button)
 		{
 			Button->SetIsEnabled(true);
-			Button->SetRenderOpacity(bActive ? 1.0f : 0.72f);
-			Button->SetBackgroundColor(bActive
-				? FLinearColor(0.78f, 0.58f, 0.18f, 0.88f)
-				: FLinearColor(0.18f, 0.20f, 0.22f, 0.58f));
+			TunaSweeperUIStyle::ApplyButton(
+				Button,
+				TunaSweeperUIStyle::EButtonRole::Icon,
+				bActive);
 			Button->SetToolTipText(ResolveStorageFilterText(ButtonFilter));
 		}
 		if (ButtonImage)
@@ -1319,10 +1318,7 @@ void UStorageContainerWidget::AddStorageFilterButton(ETunaSweeperStorageFilter F
 	IconBox->SetContent(ButtonImage);
 	Button->SetContent(IconBox);
 	Button->SetToolTipText(ResolveStorageFilterText(Filter));
-	FButtonStyle ButtonStyle = Button->GetStyle();
-	ButtonStyle.NormalPadding = FMargin(3.0f);
-	ButtonStyle.PressedPadding = FMargin(3.0f);
-	Button->SetStyle(ButtonStyle);
+	TunaSweeperUIStyle::ApplyButton(Button, TunaSweeperUIStyle::EButtonRole::Icon);
 
 	switch (Filter)
 	{
@@ -1863,6 +1859,7 @@ void UShopContainerWidget::NativeConstruct()
 
 	if (ShopRefreshStockButton)
 	{
+		TunaSweeperUIStyle::ApplyButton(ShopRefreshStockButton, TunaSweeperUIStyle::EButtonRole::Secondary);
 		ShopRefreshStockButton->OnClicked.RemoveDynamic(
 			this,
 			&UShopContainerWidget::HandleShopRefreshStockButtonClicked);
@@ -1893,6 +1890,7 @@ void UShopContainerWidget::RefreshHeaderControls()
 	{
 		ShopRefreshStockButton->SetVisibility(ESlateVisibility::Visible);
 		ShopRefreshStockButton->SetIsEnabled(true);
+		TunaSweeperUIStyle::ApplyButton(ShopRefreshStockButton, TunaSweeperUIStyle::EButtonRole::Secondary);
 	}
 	if (ShopRefreshStockButtonText)
 	{
@@ -1900,6 +1898,7 @@ void UShopContainerWidget::RefreshHeaderControls()
 			GetGameInstance<UTunaSweeperGameInstance>(),
 			TEXT("ui.shop.debug_refresh_stock"),
 			TEXT("\uAC31\uC2E0")));
+		TunaSweeperUIStyle::ApplyLabel(ShopRefreshStockButtonText);
 	}
 	if (ShopCurrencyDisplayWidget)
 	{

@@ -14,6 +14,7 @@
 #include "Styling/SlateBrush.h"
 #include "Subsystem/TunaSweeperMemoSubsystem.h"
 #include "UI/TunaSweeperUIFont.h"
+#include "UI/TunaSweeperUIStyle.h"
 #include "UI/TunaSweeperUiText.h"
 
 namespace
@@ -102,7 +103,7 @@ void UTunaSweeperMemoListEntryWidget::BuildEntryWidget()
 
 	WidgetTree->RootWidget = EntryButton;
 	EntryButton->SetContent(EntryLabelText);
-	EntryButton->SetRenderOpacity(0.9f);
+	TunaSweeperUIStyle::ApplyButton(EntryButton, TunaSweeperUIStyle::EButtonRole::Secondary);
 	EntryLabelText->SetJustification(ETextJustify::Left);
 	EntryLabelText->SetAutoWrapText(false);
 	TunaSweeperUIFont::ApplyFont(EntryLabelText, 17);
@@ -113,7 +114,10 @@ void UTunaSweeperMemoListEntryWidget::RefreshEntryView()
 	if (EntryButton)
 	{
 		EntryButton->SetIsEnabled(bAcquired);
-		EntryButton->SetRenderOpacity(bAcquired ? (bSelected ? 1.0f : 0.82f) : 0.38f);
+		TunaSweeperUIStyle::ApplyButton(
+			EntryButton,
+			TunaSweeperUIStyle::EButtonRole::Secondary,
+			bSelected);
 	}
 
 	if (EntryLabelText)

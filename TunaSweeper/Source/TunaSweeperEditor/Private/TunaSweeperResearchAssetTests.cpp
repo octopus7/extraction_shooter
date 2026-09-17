@@ -9,6 +9,47 @@
 #include "Misc/AutomationTest.h"
 #include "Subsystem/TunaSweeperResearchSubsystem.h"
 #include "UI/TunaSweeperResearchWidgets.h"
+#include "UI/TunaSweeperHudTopReserveWidget.h"
+#include "Settings/TunaSweeperBuildTargetSettings.h"
+#include "Editor.h"
+#include "Misc/ScopeExit.h"
+#include "UObject/StrongObjectPtr.h"
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FTunaSweeperResearchTabDistributionTest,
+	"TunaSweeper.Research.HudTabDistribution",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool FTunaSweeperResearchTabDistributionTest::RunTest(const FString& Parameters)
+{
+	UTunaSweeperBuildTargetSettings* Settings = GetMutableDefault<UTunaSweeperBuildTargetSettings>();
+	const ETunaSweeperBuildTarget OriginalTarget = Settings->BuildTarget;
+	ON_SCOPE_EXIT { Settings->BuildTarget = OriginalTarget; };
+	UClass* Class = LoadClass<UTunaSweeperHudTopReserveWidget>(nullptr, TEXT("/Game/UI/WBP_HudTopReserve.WBP_HudTopReserve_C"));
+	if (!TestNotNull(TEXT("Authored HUD tabs load"), Class)) return false;
+	TStrongObjectPtr<UTunaSweeperHudTopReserveWidget> Tabs(CreateWidget<UTunaSweeperHudTopReserveWidget>(
+		GEditor->GetEditorWorldContext().World(), Class));
+	if (!TestNotNull(TEXT("HUD tabs instantiate"), Tabs.Get())) return false;
+	TSharedRef<SWidget> Slate = Tabs->TakeWidget();
+	for (ETunaSweeperBuildTarget Target : {ETunaSweeperBuildTarget::SteamDemo, ETunaSweeperBuildTarget::SteamFull})
+	{
+		Settings->BuildTarget = Target;
+		Tabs->SetActiveMode(ETunaSweeperHudMode::Inventory);
+		for (const TCHAR* Name : {TEXT("ResearchModeButton"), TEXT("ResearchModeButtonFrame")})
+		{
+			UWidget* Widget = Tabs->WidgetTree->FindWidget(Name);
+			if (!TestNotNull(TEXT("Research tab and layout frame exist"), Widget)) return false;
+			TestEqual(TEXT("Demo removes research and its spacing; full game retains it"), Widget->GetVisibility(),
+				Settings->IsDemoBuild() ? ESlateVisibility::Collapsed : ESlateVisibility::Visible);
+		}
+		for (const TCHAR* Name : {TEXT("InventoryModeButton"), TEXT("QuestModeButton"), TEXT("MapModeButton"), TEXT("MemoModeButton")})
+		{
+			UWidget* Widget = Tabs->WidgetTree->FindWidget(Name);
+			if (!TestNotNull(TEXT("Other HUD tab exists"), Widget)) return false;
+			TestTrue(TEXT("Other HUD tabs remain visible in both builds"), Widget->IsVisible());
+		}
+	}
+	return true;
+}
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(
 	FTunaSweeperResearchAuthoredNodesTest,
