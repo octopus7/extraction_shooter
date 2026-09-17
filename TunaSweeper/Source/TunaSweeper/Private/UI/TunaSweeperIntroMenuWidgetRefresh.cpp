@@ -647,13 +647,6 @@ void UTunaSweeperIntroMenuWidget::RefreshLocalizedTexts()
 	SetNamedText(
 		FName(TEXT("CancelInterfaceSettingsButtonText")),
 		ResolveUiText(FName(TEXT("ui.common.cancel")), FText::FromString(TEXT("\uCDE8\uC18C"))));
-	SetNamedText(
-		FName(TEXT("CreditsTitleText")),
-		ResolveUiText(FName(TEXT("ui.title.credits")), FText::FromString(TEXT("\uD06C\uB808\uB527"))));
-	SetNamedText(
-		FName(TEXT("BackFromCreditsButtonText")),
-		ResolveUiText(FName(TEXT("ui.common.back")), FText::FromString(TEXT("\uB3CC\uC544\uAC00\uAE30"))));
-
 	if (DifficultyTitleText)
 	{
 		DifficultyTitleText->SetText(ResolveUiText(

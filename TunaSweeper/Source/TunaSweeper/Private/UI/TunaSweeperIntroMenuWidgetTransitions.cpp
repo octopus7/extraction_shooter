@@ -37,7 +37,6 @@ void UTunaSweeperIntroMenuWidget::BindScreenWidgets()
 	if (UWidget* View = FindIntroWidget(TEXT("MainMenuPanelView"))) MainMenuPanel = View;
 	if (UWidget* View = FindIntroWidget(TEXT("SaveSlotPanelView"))) SaveSlotPanel = View;
 	if (UWidget* View = FindIntroWidget(TEXT("SettingsPanelView"))) SettingsPanel = View;
-	if (UWidget* View = FindIntroWidget(TEXT("CreditsPanelView"))) CreditsPanel = View;
 	if (UWidget* View = FindIntroWidget(TEXT("DemoNoticePanelView"))) DemoNoticePanel = View;
 	TitleGraphicsSettingsWidget = Cast<UTunaSweeperGraphicsSettingsWidget>(FindIntroWidget(TEXT("TitleGraphicsSettingsWidget")));
 }

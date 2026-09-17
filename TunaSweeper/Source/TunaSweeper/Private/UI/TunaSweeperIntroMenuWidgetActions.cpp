@@ -24,11 +24,6 @@ void UTunaSweeperIntroMenuWidget::HandleSettingsClicked()
 	ShowSettingsPanel();
 }
 
-void UTunaSweeperIntroMenuWidget::HandleCreditsClicked()
-{
-	ShowCreditsPanel();
-}
-
 void UTunaSweeperIntroMenuWidget::HandleQuitClicked()
 {
 	UKismetSystemLibrary::QuitGame(this, GetOwningPlayer(), EQuitPreference::Quit, false);
@@ -430,11 +425,6 @@ void UTunaSweeperIntroMenuWidget::HandleConfirmInterfaceSettingsClicked()
 }
 
 void UTunaSweeperIntroMenuWidget::HandleCancelInterfaceSettingsClicked()
-{
-	ShowMainMenu();
-}
-
-void UTunaSweeperIntroMenuWidget::HandleBackFromCreditsClicked()
 {
 	ShowMainMenu();
 }

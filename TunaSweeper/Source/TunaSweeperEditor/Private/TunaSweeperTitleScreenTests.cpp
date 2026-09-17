@@ -33,8 +33,20 @@ bool FTitleScreenAssetTest::RunTest(const FString& Parameters)
 	Menu->AddToRoot();
 	TSharedRef<SWidget> Slate = Menu->TakeWidget();
 	Menu->BindScreenWidgets();
-	for (const TCHAR* Name : { TEXT("MainMenuPanelView"), TEXT("SaveSlotPanelView"), TEXT("SettingsPanelView"), TEXT("CreditsPanelView"), TEXT("DemoNoticePanelView"), TEXT("TitleGraphicsSettingsWidget") })
+	for (const TCHAR* Name : { TEXT("MainMenuPanelView"), TEXT("SaveSlotPanelView"), TEXT("SettingsPanelView"), TEXT("DemoNoticePanelView"), TEXT("TitleGraphicsSettingsWidget") })
 		TestNotNull(FString::Printf(TEXT("Child WBP %s"), Name), Cast<UUserWidget>(Menu->FindIntroWidget(Name)));
+	const bool bCreditsButtonAbsent = TestNull(
+		TEXT("Credits button is absent"),
+		Menu->FindIntroWidget(TEXT("CreditsButton")));
+	const bool bCreditsScreenAbsent = TestNull(
+		TEXT("Credits screen is absent"),
+		Menu->FindIntroWidget(TEXT("CreditsPanelView")));
+	if (!bCreditsButtonAbsent || !bCreditsScreenAbsent)
+	{
+		Menu->NativeDestruct();
+		Menu->RemoveFromRoot();
+		return false;
+	}
 	TestNotNull(TEXT("Bound development button"), Menu->SettingsDevelopmentTabButton.Get());
 	TestNotNull(TEXT("Bound graphics widget"), Menu->TitleGraphicsSettingsWidget.Get());
 	if (!Menu->SettingsDevelopmentTabButton || !Menu->TitleGraphicsSettingsWidget) { Menu->RemoveFromRoot(); return false; }

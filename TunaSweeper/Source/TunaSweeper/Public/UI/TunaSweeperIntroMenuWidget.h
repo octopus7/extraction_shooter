@@ -12,7 +12,6 @@ class UButton;
 class UBorder;
 class UHorizontalBox;
 class UImage;
-class UScrollBox;
 class USizeBox;
 class UTextBlock;
 class UTexture2D;
@@ -80,9 +79,6 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
 	TObjectPtr<UButton> SettingsButton;
-
-	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
-	TObjectPtr<UButton> CreditsButton;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
 	TObjectPtr<UButton> QuitButton;
@@ -295,30 +291,6 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
 	TObjectPtr<UButton> CancelInterfaceSettingsButton;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
-	TObjectPtr<UWidget> CreditsPanel;
-
-	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
-	TObjectPtr<UScrollBox> CreditsScrollBox;
-
-	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
-	TObjectPtr<UScrollBox> CreditsScrollBox2;
-
-	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
-	TObjectPtr<UScrollBox> CreditsScrollBox3;
-
-	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
-	TObjectPtr<UTextBlock> CreditsText;
-
-	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
-	TObjectPtr<UTextBlock> CreditsText2;
-
-	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
-	TObjectPtr<UTextBlock> CreditsText3;
-
-	UPROPERTY(BlueprintReadOnly, Category = "Intro", meta = (BindWidgetOptional))
-	TObjectPtr<UButton> BackFromCreditsButton;
-
 private:
 	friend class FTitleScreenAssetTest;
 	UWidget* FindIntroWidget(FName Name) const;
@@ -351,9 +323,6 @@ private:
 
 	UFUNCTION()
 	void HandleSettingsClicked();
-
-	UFUNCTION()
-	void HandleCreditsClicked();
 
 	UFUNCTION()
 	void HandleQuitClicked();
@@ -491,9 +460,6 @@ private:
 	void HandleCancelInterfaceSettingsClicked();
 
 	UFUNCTION()
-	void HandleBackFromCreditsClicked();
-
-	UFUNCTION()
 	void HandleVersionCheckCompleted(bool bIsAllowed, const FString& Message, const FString& UpdateUrl);
 
 	void HandleLanguageChanged();
@@ -507,7 +473,6 @@ private:
 	void EnsureGraphicsSettingsWidget();
 	void ShowInterfaceSettingsTab();
 	void ShowDevelopmentSettingsTab();
-	void ShowCreditsPanel();
 	void HideOverlayPanels();
 	void SetTitleLogoVisible(bool bVisible);
 	void SelectSaveSlot(int32 SaveSlotIndex);
@@ -570,14 +535,11 @@ private:
 	UTexture2D* LoadDifficultyTexture(TObjectPtr<UTexture2D>& TextureCache, const TCHAR* TexturePath);
 	FText BuildCurrentSaveSlotText(int32 SaveSlotIndex) const;
 	FText BuildSaveSlotButtonText(int32 SaveSlotIndex) const;
-	FString BuildCreditsRollText() const;
-	FString BuildCreditsColumnText(int32 ColumnIndex) const;
 	FString FormatSaveTime(int64 LastSavedAtTicks) const;
 	FString FormatPlayTime(float TotalPlaySeconds) const;
 	FText BuildSaveSlotDifficultyText(int32 DifficultyStage, bool bDifficultySelected = true) const;
 	bool IsSaveSlotSelectionVisible() const;
 	bool IsDifficultySelectionVisible() const;
-	bool IsCreditsPanelVisible() const;
 	bool CanDeleteSelectedSaveSlot() const;
 	void ApplyDisplaySettings(EWindowMode::Type WindowMode);
 	void ApplyResolutionSetting(const FIntPoint& Resolution);
@@ -621,7 +583,6 @@ private:
 	int32 SelectedSaveSlotIndex = INDEX_NONE;
 	int32 SelectedDifficultyStage = INDEX_NONE;
 	float DeleteHoldElapsedSeconds = 0.0f;
-	float CreditsScrollOffset = 0.0f;
 	float SaveSlotSelectionRingAngle = 0.0f;
 	bool bDeleteHoldActive = false;
 	bool bDeleteConfirmVisible = false;
@@ -754,5 +715,4 @@ private:
 	TArray<FDifficultyOptionText> DifficultyOptionTexts;
 
 	static constexpr float DeleteHoldDurationSeconds = 3.0f;
-	static constexpr float CreditsScrollSpeed = 34.0f;
 };

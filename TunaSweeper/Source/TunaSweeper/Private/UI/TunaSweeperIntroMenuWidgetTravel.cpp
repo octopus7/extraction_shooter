@@ -137,7 +137,6 @@ void UTunaSweeperIntroMenuWidget::SetStartTravelControlsEnabled(bool bEnabled)
 		DemoNoticeBackButton.Get(),
 		SlotSelectButton.Get(),
 		SettingsButton.Get(),
-		CreditsButton.Get(),
 		QuitButton.Get(),
 		PrimarySaveSlotButton.Get(),
 		DeleteSaveSlotButton.Get(),
@@ -163,8 +162,7 @@ void UTunaSweeperIntroMenuWidget::SetStartTravelControlsEnabled(bool bEnabled)
 		LanguageKoreanButton.Get(),
 		LanguageJapaneseButton.Get(),
 		ConfirmInterfaceSettingsButton.Get(),
-		CancelInterfaceSettingsButton.Get(),
-		BackFromCreditsButton.Get()
+		CancelInterfaceSettingsButton.Get()
 	};
 
 	for (UButton* Button : ButtonsToUpdate)

@@ -65,64 +65,6 @@ FText UTunaSweeperIntroMenuWidget::BuildSaveSlotButtonText(int32 SaveSlotIndex) 
 	return FText::FromString(FString::Join(Lines, LINE_TERMINATOR));
 }
 
-FString UTunaSweeperIntroMenuWidget::BuildCreditsRollText() const
-{
-	const FString CreditsFilePath = FPaths::Combine(
-		FPaths::ProjectContentDir(),
-		TEXT("UI"),
-		TEXT("Credits"),
-		TEXT("StaffRoll.txt"));
-
-	FString CreditsTextFromFile;
-	if (FFileHelper::LoadFileToString(CreditsTextFromFile, *CreditsFilePath) &&
-		!CreditsTextFromFile.TrimStartAndEnd().IsEmpty())
-	{
-		return CreditsTextFromFile;
-	}
-
-	return FString(
-		TEXT("Tuna Sweeper\n\n")
-		TEXT("A Game by BlenG\n\n\n")
-		TEXT("Direction\nBlenG\n\n")
-		TEXT("Game Design\nBlenG\n\n")
-		TEXT("Programming\nBlenG\n\n")
-		TEXT("Art Direction\nBlenG\n\n")
-		TEXT("UI Design\nBlenG\n\n")
-		TEXT("Scenario\nBlenG\n\n")
-		TEXT("Level Design\nBlenG\n\n")
-		TEXT("Audio Direction\nBlenG\n\n")
-		TEXT("QA\nBlenG\n\n\n")
-		TEXT("Thank you for playing.\n"));
-}
-
-FString UTunaSweeperIntroMenuWidget::BuildCreditsColumnText(int32 ColumnIndex) const
-{
-	TArray<FString> Lines;
-	BuildCreditsRollText().ParseIntoArrayLines(Lines, false);
-
-	if (Lines.IsEmpty())
-	{
-		return FString();
-	}
-
-	const int32 ClampedColumnIndex = FMath::Clamp(ColumnIndex, 0, 2);
-	const int32 LinesPerColumn = FMath::Max(1, FMath::DivideAndRoundUp(Lines.Num(), 3));
-	const int32 StartIndex = ClampedColumnIndex * LinesPerColumn;
-	const int32 EndIndex = FMath::Min(StartIndex + LinesPerColumn, Lines.Num());
-
-	FString ColumnText;
-	for (int32 LineIndex = StartIndex; LineIndex < EndIndex; ++LineIndex)
-	{
-		if (!ColumnText.IsEmpty())
-		{
-			ColumnText += LINE_TERMINATOR;
-		}
-		ColumnText += Lines[LineIndex];
-	}
-
-	return ColumnText;
-}
-
 FString UTunaSweeperIntroMenuWidget::FormatSaveTime(int64 LastSavedAtTicks) const
 {
 	if (LastSavedAtTicks <= 0)
@@ -170,11 +112,6 @@ bool UTunaSweeperIntroMenuWidget::IsDifficultySelectionVisible() const
 {
 	return (DifficultySelectPanel && DifficultySelectPanel->GetVisibility() == ESlateVisibility::Visible) ||
 		(DemoNoticePanel && DemoNoticePanel->GetVisibility() == ESlateVisibility::Visible);
-}
-
-bool UTunaSweeperIntroMenuWidget::IsCreditsPanelVisible() const
-{
-	return CreditsPanel && CreditsPanel->GetVisibility() == ESlateVisibility::Visible;
 }
 
 bool UTunaSweeperIntroMenuWidget::CanDeleteSelectedSaveSlot() const

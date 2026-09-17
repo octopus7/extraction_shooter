@@ -309,10 +309,6 @@ void UTunaSweeperIntroMenuWidget::ShowSettingsPanel()
 		DemoNoticePanel->SetVisibility(ESlateVisibility::Collapsed);
 	}
 	SetTitleLogoVisible(false);
-	if (CreditsPanel)
-	{
-		CreditsPanel->SetVisibility(ESlateVisibility::Collapsed);
-	}
 	if (SettingsPanel)
 	{
 		SettingsPanel->SetVisibility(ESlateVisibility::Visible);
@@ -464,65 +460,6 @@ void UTunaSweeperIntroMenuWidget::ShowDevelopmentSettingsTab()
 	RefreshDevelopmentSettingsPanel();
 }
 
-void UTunaSweeperIntroMenuWidget::ShowCreditsPanel()
-{
-	SetTitlePresentationMainMenuActive(false);
-	HideDeleteConfirmDialog();
-	ResetDeleteHoldProgress();
-
-	if (MainMenuPanel)
-	{
-		MainMenuPanel->SetVisibility(ESlateVisibility::Collapsed);
-	}
-	if (SaveSlotPanel)
-	{
-		SaveSlotPanel->SetVisibility(ESlateVisibility::Collapsed);
-	}
-	if (DifficultySelectPanel)
-	{
-		DifficultySelectPanel->SetVisibility(ESlateVisibility::Collapsed);
-	}
-	if (DemoNoticePanel)
-	{
-		DemoNoticePanel->SetVisibility(ESlateVisibility::Collapsed);
-	}
-	if (SettingsPanel)
-	{
-		SettingsPanel->SetVisibility(ESlateVisibility::Collapsed);
-	}
-	SetTitleLogoVisible(true);
-	if (CreditsText)
-	{
-		CreditsText->SetText(FText::FromString(BuildCreditsColumnText(0)));
-	}
-	if (CreditsText2)
-	{
-		CreditsText2->SetText(FText::FromString(BuildCreditsColumnText(1)));
-	}
-	if (CreditsText3)
-	{
-		CreditsText3->SetText(FText::FromString(BuildCreditsColumnText(2)));
-	}
-	if (CreditsPanel)
-	{
-		CreditsPanel->SetVisibility(ESlateVisibility::Visible);
-		FadeInScreen(CreditsPanel);
-	}
-	if (CreditsScrollBox)
-	{
-		CreditsScrollOffset = 0.0f;
-		CreditsScrollBox->SetScrollOffset(0.0f);
-	}
-	if (CreditsScrollBox2)
-	{
-		CreditsScrollBox2->SetScrollOffset(0.0f);
-	}
-	if (CreditsScrollBox3)
-	{
-		CreditsScrollBox3->SetScrollOffset(0.0f);
-	}
-}
-
 void UTunaSweeperIntroMenuWidget::SetTitlePresentationMainMenuActive(bool bActive)
 {
 	UWorld* World = GetWorld();
@@ -552,13 +489,7 @@ void UTunaSweeperIntroMenuWidget::HideOverlayPanels()
 	{
 		SettingsPanel->SetVisibility(ESlateVisibility::Collapsed);
 	}
-	if (CreditsPanel)
-	{
-		CreditsPanel->SetVisibility(ESlateVisibility::Collapsed);
-	}
 	SetTitleLogoVisible(true);
-
-	CreditsScrollOffset = 0.0f;
 }
 
 void UTunaSweeperIntroMenuWidget::SetTitleLogoVisible(bool bVisible)

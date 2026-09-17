@@ -80,12 +80,6 @@ void UTunaSweeperIntroMenuWidget::NativeConstruct()
 		SettingsButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleSettingsClicked);
 	}
 
-	if (CreditsButton)
-	{
-		CreditsButton->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleCreditsClicked);
-		CreditsButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleCreditsClicked);
-	}
-
 	if (QuitButton)
 	{
 		QuitButton->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleQuitClicked);
@@ -362,12 +356,6 @@ void UTunaSweeperIntroMenuWidget::NativeConstruct()
 		CancelInterfaceSettingsButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleCancelInterfaceSettingsClicked);
 	}
 
-	if (BackFromCreditsButton)
-	{
-		BackFromCreditsButton->OnClicked.RemoveDynamic(this, &UTunaSweeperIntroMenuWidget::HandleBackFromCreditsClicked);
-		BackFromCreditsButton->OnClicked.AddDynamic(this, &UTunaSweeperIntroMenuWidget::HandleBackFromCreditsClicked);
-	}
-
 	if (UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GetGameInstance()))
 	{
 		TunaGameInstance->OnLanguageChanged.RemoveAll(this);
@@ -377,19 +365,6 @@ void UTunaSweeperIntroMenuWidget::NativeConstruct()
 	RefreshLocalizedTexts();
 	LoadTitleGraphicsSettings();
 	ApplyDLSSModeToRuntime(PreferredDLSSMode);
-
-	if (CreditsText)
-	{
-		CreditsText->SetText(FText::FromString(BuildCreditsColumnText(0)));
-	}
-	if (CreditsText2)
-	{
-		CreditsText2->SetText(FText::FromString(BuildCreditsColumnText(1)));
-	}
-	if (CreditsText3)
-	{
-		CreditsText3->SetText(FText::FromString(BuildCreditsColumnText(2)));
-	}
 
 	if (UTunaSweeperGameInstance* TunaGameInstance = Cast<UTunaSweeperGameInstance>(GetGameInstance()))
 	{
@@ -484,33 +459,6 @@ void UTunaSweeperIntroMenuWidget::NativeTick(const FGeometry& MyGeometry, float 
 {
 	Super::NativeTick(MyGeometry, InDeltaTime);
 	TickMenuTransitions(InDeltaTime);
-
-	if (IsCreditsPanelVisible() && CreditsScrollBox)
-	{
-		CreditsScrollOffset += InDeltaTime * CreditsScrollSpeed;
-		CreditsScrollBox->SetScrollOffset(CreditsScrollOffset);
-		if (CreditsScrollBox2)
-		{
-			CreditsScrollBox2->SetScrollOffset(CreditsScrollOffset);
-		}
-		if (CreditsScrollBox3)
-		{
-			CreditsScrollBox3->SetScrollOffset(CreditsScrollOffset);
-		}
-		if (CreditsScrollOffset > 3600.0f)
-		{
-			CreditsScrollOffset = 0.0f;
-			CreditsScrollBox->SetScrollOffset(0.0f);
-			if (CreditsScrollBox2)
-			{
-				CreditsScrollBox2->SetScrollOffset(0.0f);
-			}
-			if (CreditsScrollBox3)
-			{
-				CreditsScrollBox3->SetScrollOffset(0.0f);
-			}
-		}
-	}
 
 	if (!IsSaveSlotSelectionVisible())
 	{

@@ -27,7 +27,6 @@ void UTunaSweeperIntroMenuWidget::ResetTitleViewportLayoutState()
 	ResetWidgetTransform(MainMenuPanel.Get());
 	ResetWidgetTransform(SaveSlotPanel.Get());
 	ResetWidgetTransform(SettingsPanel.Get());
-	ResetWidgetTransform(CreditsPanel.Get());
 
 	InvalidateLayoutAndVolatility();
 }
@@ -272,7 +271,7 @@ void UTunaSweeperIntroMenuWidget::ApplyUnifiedControlStyles()
 	};
 
 	// Keep only the localized action label, removing the authored number and slash ornaments.
-	for (UButton* Button : {StartButton.Get(), SlotSelectButton.Get(), SettingsButton.Get(), CreditsButton.Get(), QuitButton.Get()})
+	for (UButton* Button : {StartButton.Get(), SlotSelectButton.Get(), SettingsButton.Get(), QuitButton.Get()})
 	{
 		UTextBlock* Label = Button ? Cast<UTextBlock>(FindIntroWidget(FName(*(Button->GetName() + TEXT("Text"))))) : nullptr;
 		if (!Label) continue;
@@ -288,7 +287,6 @@ void UTunaSweeperIntroMenuWidget::ApplyUnifiedControlStyles()
 	StyleButton(StartButton, EButtonRole::Primary);
 	StyleButton(SlotSelectButton, EButtonRole::Secondary);
 	StyleButton(SettingsButton, EButtonRole::Secondary);
-	StyleButton(CreditsButton, EButtonRole::Secondary);
 	StyleButton(QuitButton, EButtonRole::Secondary);
 	StyleButton(SteamDemoWishlistButton, EButtonRole::Primary);
 	if (SteamDemoWishlistButton)
@@ -371,7 +369,6 @@ void UTunaSweeperIntroMenuWidget::ApplyUnifiedControlStyles()
 	StyleButton(DifficultyBackButton, EButtonRole::Secondary);
 	StyleButton(DemoNoticeConfirmButton, EButtonRole::Primary);
 	StyleButton(DemoNoticeBackButton, EButtonRole::Secondary);
-	StyleButton(BackFromCreditsButton, EButtonRole::Secondary);
 }
 
 void UTunaSweeperIntroMenuWidget::EnsurePiggyBankToggleButton()
@@ -750,7 +747,6 @@ void UTunaSweeperIntroMenuWidget::EnsureTitleWindParticleOverlay()
 	SetCanvasZOrder(FindIntroWidget(TEXT("VersionText")), 4);
 	SetCanvasZOrder(SaveSlotPanel, 10);
 	SetCanvasZOrder(SettingsPanel, 10);
-	SetCanvasZOrder(CreditsPanel, 10);
 
 	TitleWindParticleOverlay = WidgetTree->ConstructWidget<UTunaSweeperTitleWindParticleWidget>(
 		UTunaSweeperTitleWindParticleWidget::StaticClass(),
