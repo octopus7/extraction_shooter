@@ -122,6 +122,12 @@ namespace TunaSweeperHousing
 	}
 }
 
+bool UTunaSweeperHousingSubsystem::ShouldCreateSubsystem(UObject* Outer) const
+{
+	(void)Outer;
+	return false;
+}
+
 void UTunaSweeperHousingSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);

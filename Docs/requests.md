@@ -8817,3 +8817,9 @@
 - 요청: 타이틀 메뉴의 크레딧 버튼과 실제 크레딧 UI·한 사람 이름으로 작성된 내용을 모두 제거. 이 대화에서는 작업 완료 후 즉시 커밋하고, 기존 미커밋 상태였던 Docs/questions.md와 Docs/requests.md도 커밋에 포함.
 - 처리: WBP_TitleMain의 크레딧 버튼 묶음과 WBP_IntroMenu의 크레딧 화면 인스턴스를 제거. WBP_TitleCredits와 StaffRoll.txt 삭제. 크레딧 진입·복귀·자동 스크롤·본문 생성 C++ 로직, 위젯 바인딩, 문자열 키, NonUFS 스테이징 설정 및 에셋 인벤토리 참조 정리. 실제 WBP를 수정한 일회성 생성기는 에셋과 함께 커밋한 뒤 진입점과 전용 의존성을 포함해 즉시 제거.
 - 검증: 실제 조립된 타이틀 위젯에서 CreditsButton과 CreditsPanelView가 없어야 하는 자동화 검사를 먼저 실패시킨 뒤 구현. UE 5.7 Development Editor 최종 빌드 성공. TunaSweeper.UI.Title.ScreenAssetsAndTransitions 자동 검사 1개 성공. 최종 WBP 바이너리·문자열 표·설정에 크레딧 표기 없음과 전용 에셋·텍스트 파일 부재 확인. 두 단계 커밋, 원격 푸시 없음.
+
+## 2026-09-18 05:29:30 (소요시간: 00:10:00)
+
+- 요청: 사용하지 않는 하우징 시스템의 완전 제거는 후속 작업으로 보류하고, 현재는 하우징 서브시스템이 아무 일도 하지 않도록 최소 비활성화. 앞선 벙커 시설관리 배치 질문 기록과 함께 커밋하고 완전 제거 설계 문서는 향후 작업을 위해 보존.
+- 처리: `UTunaSweeperHousingSubsystem::ShouldCreateSubsystem()`이 항상 false를 반환하도록 하여 GameInstance가 서브시스템을 생성하지 않게 했다. 기존 하우징 코드·UI·저장·퀘스트 데이터는 변경하지 않았고, 후속 완전 제거 범위는 `Docs/housing_removal_design.md`에 보류 상태로 보존했다.
+- 검증: 비활성화 자동화 검사를 구현 전에 실패시킨 뒤 최소 구현 후 성공을 확인했다. UE 5.7 Development Editor 빌드 성공. 최종 공백 검사와 에디터 실행 확인 후 관련 코드·검사·설계·질문 및 요청 기록을 함께 커밋한다.
