@@ -20,8 +20,12 @@ class TUNASWEEPER_API UTunaSweeperTitleSkeletalMeshComponent : public UTunaSweep
 	GENERATED_BODY()
 
 public:
+	// Desired direction in mesh component space (+Y forward), not an additive pose offset.
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Title|Look")
 	void SetDirectHeadLookRotation(float YawDegrees, float PitchDegrees);
+
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Title|Look")
+	void ClearDirectHeadLookRotation();
 
 	void SetTemporaryRelaxedArmPose(float BlendAlpha, float MotionPhaseSeconds);
 	void SetTemporaryRelaxedArmPoseEnabled(bool bEnabled);
@@ -55,6 +59,7 @@ private:
 
 	float DirectHeadLookYaw = 0.0f;
 	float DirectHeadLookPitch = 0.0f;
+	bool bHasDirectHeadLookTarget = false;
 	float TemporaryRelaxedArmBlendAlpha = 1.0f;
 	float TemporaryRelaxedArmMotionPhase = 0.0f;
 };

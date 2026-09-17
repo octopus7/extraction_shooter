@@ -44,6 +44,14 @@ void UTunaSweeperTitleSkeletalMeshComponent::SetDirectHeadLookRotation(float Yaw
 {
 	DirectHeadLookYaw = YawDegrees;
 	DirectHeadLookPitch = PitchDegrees;
+	bHasDirectHeadLookTarget = true;
+}
+
+void UTunaSweeperTitleSkeletalMeshComponent::ClearDirectHeadLookRotation()
+{
+	bHasDirectHeadLookTarget = false;
+	DirectHeadLookYaw = 0.0f;
+	DirectHeadLookPitch = 0.0f;
 }
 
 void UTunaSweeperTitleSkeletalMeshComponent::SetTemporaryRelaxedArmPose(
@@ -199,36 +207,45 @@ void UTunaSweeperTitleSkeletalMeshComponent::ApplyRelaxedArmBranch(
 
 void UTunaSweeperTitleSkeletalMeshComponent::ApplyDirectHeadLookToEditablePose()
 {
-	if (!bApplyDirectHeadLook ||
-		(FMath::IsNearlyZero(DirectHeadLookYaw, 0.01f) && FMath::IsNearlyZero(DirectHeadLookPitch, 0.01f)))
+	if (!bApplyDirectHeadLook || !bHasDirectHeadLookTarget)
 	{
 		return;
 	}
 
+	int32 HeadBoneIndex = GetBoneIndex(HeadBoneName);
+	if (HeadBoneIndex == INDEX_NONE)
+	{
+		HeadBoneIndex = GetBoneIndex(TEXT("head"));
+	}
+	if (HeadBoneIndex == INDEX_NONE)
+	{
+		return;
+	}
 	int32 LookRootBoneIndex = GetBoneIndex(HeadLookRootBoneName);
 	if (LookRootBoneIndex == INDEX_NONE)
 	{
-		LookRootBoneIndex = GetBoneIndex(HeadBoneName);
-	}
-	if (LookRootBoneIndex == INDEX_NONE)
-	{
-		LookRootBoneIndex = GetBoneIndex(TEXT("head"));
-	}
-	if (LookRootBoneIndex == INDEX_NONE)
-	{
-		return;
+		LookRootBoneIndex = HeadBoneIndex;
 	}
 
 	TArray<FTransform>& ComponentSpaceTransforms = GetEditableComponentSpaceTransforms();
-	if (!ComponentSpaceTransforms.IsValidIndex(LookRootBoneIndex))
+	if (!ComponentSpaceTransforms.IsValidIndex(LookRootBoneIndex) ||
+		!ComponentSpaceTransforms.IsValidIndex(HeadBoneIndex))
 	{
 		return;
 	}
 
 	const FVector LookRootLocation = ComponentSpaceTransforms[LookRootBoneIndex].GetLocation();
-	const FQuat YawDelta(FVector::UpVector, FMath::DegreesToRadians(-DirectHeadLookYaw));
-	const FQuat PitchDelta(FVector::ForwardVector, FMath::DegreesToRadians(DirectHeadLookPitch));
-	const FQuat LookDelta = (PitchDelta * YawDelta).GetNormalized();
+	const float YawRadians = FMath::DegreesToRadians(DirectHeadLookYaw);
+	const float PitchRadians = FMath::DegreesToRadians(DirectHeadLookPitch);
+	const FVector DesiredAimDirection(
+		FMath::Sin(YawRadians) * FMath::Cos(PitchRadians),
+		FMath::Cos(YawRadians) * FMath::Cos(PitchRadians),
+		FMath::Sin(PitchRadians));
+	// Read this frame's animated head before either head or eye corrections. Applying
+	// the absolute target angles as an offset would retain the animation's head tilt.
+	const FVector AnimatedAimDirection = ComponentSpaceTransforms[HeadBoneIndex].GetRotation()
+		.RotateVector(FVector::RightVector).GetSafeNormal();
+	const FQuat LookDelta = FQuat::FindBetweenNormals(AnimatedAimDirection, DesiredAimDirection).GetNormalized();
 
 	for (int32 BoneIndex = 0; BoneIndex < ComponentSpaceTransforms.Num(); ++BoneIndex)
 	{
@@ -461,7 +478,7 @@ void ATunaSweeperTitlePresentationActor::BeginPlay()
 	{
 		CurrentHeadLookYaw = 0.0f;
 		CurrentHeadLookPitch = 0.0f;
-		BodyMesh->SetDirectHeadLookRotation(0.0f, 0.0f);
+		BodyMesh->ClearDirectHeadLookRotation();
 	}
 	ConfigureSkirtExternalPhysicsCollision();
 	SetMainMenuPresentationActive(true);
@@ -488,7 +505,7 @@ void ATunaSweeperTitlePresentationActor::Tick(float DeltaSeconds)
 		CurrentHeadLookPitch = 0.0f;
 		if (BodyMesh)
 		{
-			BodyMesh->SetDirectHeadLookRotation(0.0f, 0.0f);
+			BodyMesh->ClearDirectHeadLookRotation();
 		}
 		if (GazeTracking)
 		{
@@ -674,6 +691,10 @@ void ATunaSweeperTitlePresentationActor::UpdateCamera(float DeltaSeconds)
 
 void ATunaSweeperTitlePresentationActor::UpdateCursorLook(float DeltaSeconds)
 {
+	if (BodyMesh && !bEnableHeadCursorTracking)
+	{
+		BodyMesh->ClearDirectHeadLookRotation();
+	}
 	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(this, 0);
 	if (!PlayerController || !TitleCamera || !BodyMesh)
 	{
@@ -720,7 +741,7 @@ void ATunaSweeperTitlePresentationActor::UpdateCursorLook(float DeltaSeconds)
 		CurrentHeadLookYaw, DesiredHeadYaw, DeltaSeconds, HeadLookInterpolationSpeed);
 	CurrentHeadLookPitch = FMath::FInterpTo(
 		CurrentHeadLookPitch, DesiredHeadPitch, DeltaSeconds, HeadLookInterpolationSpeed);
-	if (BodyMesh)
+	if (bEnableHeadCursorTracking)
 	{
 		BodyMesh->SetDirectHeadLookRotation(CurrentHeadLookYaw, CurrentHeadLookPitch);
 	}

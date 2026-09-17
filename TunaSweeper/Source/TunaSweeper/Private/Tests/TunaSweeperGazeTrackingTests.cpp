@@ -614,4 +614,86 @@ bool FTunaSweeperGazeTestRobotRigTest::RunTest(const FString& Parameters)
 	return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(
+	FTunaSweeperTitleHeadLookAnimatedPoseTest,
+	"TunaSweeper.Gaze.TitleHeadLookAnimatedPose",
+	TunaSweeperGazeTrackingTests::TestFlags)
+
+bool FTunaSweeperTitleHeadLookAnimatedPoseTest::RunTest(const FString& Parameters)
+{
+	(void)Parameters;
+	USkeletalMesh* Mesh = LoadObject<USkeletalMesh>(nullptr,
+		TEXT("/Game/Characters/Player/LunaMk2/SKM_LunaMk2.SKM_LunaMk2"));
+	if (!TestNotNull(TEXT("Title mesh loads"), Mesh))
+	{
+		return false;
+	}
+	const FReferenceSkeleton& Skeleton = Mesh->GetRefSkeleton();
+	const int32 HeadIndex = Skeleton.FindBoneIndex(TEXT("Head"));
+	const int32 NeckIndex = Skeleton.FindBoneIndex(TEXT("neck_01"));
+	const int32 PelvisIndex = Skeleton.FindBoneIndex(TEXT("pelvis"));
+	if (!TestTrue(TEXT("Title look bones exist"),
+		HeadIndex != INDEX_NONE && NeckIndex != INDEX_NONE && PelvisIndex != INDEX_NONE))
+	{
+		return false;
+	}
+
+	TArray<FTransform> BasePose = Skeleton.GetRefBonePose();
+	for (int32 BoneIndex = 0; BoneIndex < BasePose.Num(); ++BoneIndex)
+	{
+		const int32 ParentIndex = Skeleton.GetParentIndex(BoneIndex);
+		if (ParentIndex != INDEX_NONE)
+		{
+			BasePose[BoneIndex] *= BasePose[ParentIndex];
+		}
+	}
+	// An animated head looking down ten degrees, with a left yaw and some roll.
+	const FVector AnimatedAim(-0.3043223319f, 0.9366078308f, -0.1736481777f);
+	BasePose[HeadIndex].SetRotation(
+		FQuat(AnimatedAim, FMath::DegreesToRadians(12.0f)) *
+		FQuat::FindBetweenNormals(FVector::RightVector, AnimatedAim));
+
+	struct FLookCase
+	{
+		float Yaw;
+		float Pitch;
+		FVector ExpectedAim;
+	};
+	const FLookCase Cases[] = {
+		{0.0f, 8.0f, FVector(0.0f, 0.9902680687f, 0.1391731010f)},
+		{0.0f, 0.0f, FVector::RightVector},
+		{28.0f, 16.0f, FVector(0.4512844758f, 0.8487435576f, 0.2756373558f)}};
+	for (const FLookCase& LookCase : Cases)
+	{
+		UTunaSweeperTitleSkeletalMeshComponent* Component =
+			NewObject<UTunaSweeperTitleSkeletalMeshComponent>();
+		Component->SetSkeletalMeshAsset(Mesh);
+		Component->SetTemporaryRelaxedArmPoseEnabled(false);
+		TArray<FTransform>& Pose = Component->GetEditableComponentSpaceTransforms();
+		Pose = BasePose;
+		Component->FinalizeBoneTransform();
+		TestTrue(TEXT("A component without a target preserves its animated head"),
+			Pose[HeadIndex].Equals(BasePose[HeadIndex], 0.0001f));
+		Pose = BasePose;
+		Component->SetDirectHeadLookRotation(LookCase.Yaw, LookCase.Pitch);
+		Component->FinalizeBoneTransform();
+		const FVector ActualAim = Pose[HeadIndex].GetRotation().RotateVector(FVector::RightVector);
+		TestTrue(FString::Printf(TEXT("Animated head reaches yaw %.0f pitch %.0f without its base offset"),
+			LookCase.Yaw, LookCase.Pitch), ActualAim.Equals(LookCase.ExpectedAim, 0.001f));
+		TestTrue(TEXT("Head tracking preserves the body animation"),
+			Pose[PelvisIndex].Equals(BasePose[PelvisIndex], 0.0001f));
+		TestTrue(TEXT("Head tracking preserves its neck pivot"),
+			Pose[NeckIndex].GetLocation().Equals(BasePose[NeckIndex].GetLocation(), 0.0001f));
+		TestTrue(TEXT("Head tracking preserves neck-to-head distance"), FMath::IsNearlyEqual(
+			FVector::Distance(Pose[HeadIndex].GetLocation(), Pose[NeckIndex].GetLocation()),
+			FVector::Distance(BasePose[HeadIndex].GetLocation(), BasePose[NeckIndex].GetLocation()), 0.001));
+		Component->ClearDirectHeadLookRotation();
+		Pose = BasePose;
+		Component->FinalizeBoneTransform();
+		TestTrue(TEXT("Clearing tracking restores the animated head instead of aiming forward"),
+			Pose[HeadIndex].Equals(BasePose[HeadIndex], 0.0001f));
+	}
+	return true;
+}
+
 #endif // WITH_DEV_AUTOMATION_TESTS
