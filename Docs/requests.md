@@ -8800,9 +8800,20 @@
 - 처리: 상단 메뉴 캔버스 Y와 내부 위 여백을 0으로 설정하고 콘텐츠 크기에 맞춰 중앙 정렬. 외곽과 버튼의 위쪽 라운딩 제거, 아래쪽만 작은 라운딩 적용. 이미지 생성으로 인벤토리·퀘스트·지도·메모·연구 아이콘 시트를 만들고 프로젝트의 단색 배경 알파 추출 절차로 투명 PNG 생성. 표시용 384×256 아틀라스를 UI 텍스처로 임포트하고 UV로 각 아이콘 표시. 데모 연구 탭 숨김과 4개 탭 너비, 정식 5개 탭 유지.
 - 검증: UE 5.7 Development Editor 빌드 성공. 최종 텍스처를 새 프로세스에서 로드한 TopEdgeDock 및 HudTabDistribution 자동 검사 2개 성공. 실제 WBP 렌더와 지오메트리로 상단 밀착·중앙 정렬·모서리·컬러 아이콘·데모/정식 너비 확인. 기존 임포터는 에셋 저장 후 종료 과정에서 오류가 발생했으나 저장된 최종 에셋의 새 프로세스 로드 및 렌더 검사는 통과. 프로젝트 에디터 재실행. 이미지 원본·투명 시트·프롬프트·에셋과 UI 코드·검사·기록을 분리 커밋하며 푸시 없음.
 
+## 2026-09-18 04:31:38 (소요시간: 00:00:24)
+
+- 요청: STOVE 데모 BAT 패키징 채널이 Steam으로 잘못 분기되지 않는지 재확인.
+- 확인: BAT의 타겟 TunaSweeperStoveDemo 및 CustomConfig StoveDemo, 쿠커 CustomConfig 전달, 타겟 정의, 전용 INI의 Stove/Demo와 Steam 비활성 설정을 대조했다. bMakeBinaryConfig=True가 유지되어 있고 UE 5.7 AutomationTool이 MakeBinaryConfig에 선택 CustomConfig를 전달하는 코드도 확인했다. UI는 패키지에서 GGameIni 채널을 참조하며 에디터 설정은 WITH_EDITOR 분기에만 사용한다. 기본 INI의 Steam 값은 전용 설정으로 덮어쓰는 구조다. 소스·설정 확인만 수행했으며 이번에 새 패키지 실행 검증은 하지 않았다.
+
 
 ## 2026-09-18 04:45:26 (소요시간: 00:01:34)
 
 - 요청: 작업 브랜치를 main에 병합하고 ATV도 머지 커밋에 포함.
 - 처리: codex/unified-ui-controls의 UI 변경과 ATV 커밋 b6bbb165를 main에 --no-ff로 병합. 머지 커밋 bf56e2d3 생성. 기존 미커밋 문서 수정은 임시 보관 후 복원.
 - 검증: UI 및 연구 탭 자동 검사 17개 성공, 실행 종료 코드 0. 병합 결과 트리가 검사한 작업 브랜치와 동일함을 확인. 충돌 없음. 원격 푸시 없음.
+
+## 2026-09-18 05:00:00 (소요시간: 00:23:00)
+
+- 요청: 타이틀 메뉴의 크레딧 버튼과 실제 크레딧 UI·한 사람 이름으로 작성된 내용을 모두 제거. 이 대화에서는 작업 완료 후 즉시 커밋하고, 기존 미커밋 상태였던 Docs/questions.md와 Docs/requests.md도 커밋에 포함.
+- 처리: WBP_TitleMain의 크레딧 버튼 묶음과 WBP_IntroMenu의 크레딧 화면 인스턴스를 제거. WBP_TitleCredits와 StaffRoll.txt 삭제. 크레딧 진입·복귀·자동 스크롤·본문 생성 C++ 로직, 위젯 바인딩, 문자열 키, NonUFS 스테이징 설정 및 에셋 인벤토리 참조 정리. 실제 WBP를 수정한 일회성 생성기는 에셋과 함께 커밋한 뒤 진입점과 전용 의존성을 포함해 즉시 제거.
+- 검증: 실제 조립된 타이틀 위젯에서 CreditsButton과 CreditsPanelView가 없어야 하는 자동화 검사를 먼저 실패시킨 뒤 구현. UE 5.7 Development Editor 최종 빌드 성공. TunaSweeper.UI.Title.ScreenAssetsAndTransitions 자동 검사 1개 성공. 최종 WBP 바이너리·문자열 표·설정에 크레딧 표기 없음과 전용 에셋·텍스트 파일 부재 확인. 두 단계 커밋, 원격 푸시 없음.

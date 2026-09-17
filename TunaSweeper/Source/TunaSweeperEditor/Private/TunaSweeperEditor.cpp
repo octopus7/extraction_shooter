@@ -5,9 +5,6 @@
 #include "TunaSweeperGlbTextureExtractorTool.h"
 #include "TunaSweeperLevelOpenTool.h"
 #include "TunaSweeperMapCaptureActorDetails.h"
-#include "TunaSweeperTitleCreditsRemoval.h"
-
-#include "Containers/Ticker.h"
 #include "CoreMinimal.h"
 #include "Misc/CommandLine.h"
 #include "Misc/Parse.h"
@@ -18,28 +15,6 @@ class FTunaSweeperEditorModule final : public IModuleInterface
 public:
 	virtual void StartupModule() override
 	{
-		if (FParse::Param(FCommandLine::Get(), TEXT("TunaSweeperRemoveTitleCredits")))
-		{
-			const bool bSucceeded = TunaSweeperTitleCreditsRemoval::Run();
-			if (!bSucceeded)
-			{
-				UE_LOG(LogTemp, Error, TEXT("Failed to remove title credits widgets."));
-			}
-			else
-			{
-				UE_LOG(LogTemp, Display, TEXT("Removed title credits widgets."));
-			}
-			FTSTicker::GetCoreTicker().AddTicker(FTickerDelegate::CreateLambda([bSucceeded](float)
-			{
-				FPlatformMisc::RequestExitWithStatus(
-					false,
-					bSucceeded ? 0 : 1,
-					TEXT("TunaSweeperRemoveTitleCredits"));
-				return false;
-			}));
-			return;
-		}
-
 		if (IsRunningCommandlet())
 		{
 			return;
