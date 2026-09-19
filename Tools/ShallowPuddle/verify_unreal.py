@@ -4,6 +4,7 @@ from pathlib import Path
 import unreal
 
 DEST = "/Game/Environment/ShallowPuddle"
+FOOTSTEP = DEST + "/Audio/SW_ShallowPuddle_Footstep.SW_ShallowPuddle_Footstep"
 REPORT = Path(__file__).resolve().parents[2] / "TunaSweeper/Saved/Automation/ShallowPuddle/assets.json"
 
 
@@ -26,12 +27,21 @@ def verify():
     defaults = unreal.get_default_object(cls)
     assert defaults.get_editor_property("water_material") is not None
     assert defaults.get_editor_property("wet_edge_material") is not None
-    assert defaults.get_editor_property("water_footstep_sound") is not None
+    sound = defaults.get_editor_property("water_footstep_sound")
+    assert sound and sound.get_path_name() == FOOTSTEP, "Puddle must use its new dedicated footstep sound"
+    assert isinstance(sound, unreal.SoundWave)
+    assert sound.get_editor_property("num_channels") == 1
+    assert sound.get_editor_property("imported_sample_rate") == 48000
+    assert abs(sound.get_editor_property("duration") - 0.42) < 0.001
+    assert not sound.get_editor_property("looping")
+    native_sound = unreal.get_default_object(unreal.TunaSweeperShallowPuddleActor).get_editor_property("water_footstep_sound")
+    assert native_sound and native_sound.get_path_name() == FOOTSTEP, "Native actor default must use the dedicated sound too"
     world = unreal.EditorLoadingAndSavingUtils.load_map(paths["map"])
     assert world, "Review map failed to reload"
     puddles = unreal.GameplayStatics.get_all_actors_of_class(world, cls)
     assert len(puddles) >= 3, "Review map must include three puddle examples"
     for actor in puddles:
+        assert actor.get_editor_property("water_footstep_sound").get_path_name() == FOOTSTEP
         meshes = actor.get_components_by_class(unreal.StaticMeshComponent)
         assert len(meshes) == 1
         surface = meshes[0]
@@ -69,7 +79,9 @@ def verify():
         delegate.remove_callable(record_step)
         actor.set_editor_property("water_material", original_material)
         actor.refresh_puddle()
-    result = {"status": "passed", "assets": paths, "review_puddles": len(puddles)}
+    result = {"status": "passed", "assets": paths, "review_puddles": len(puddles),
+              "footstep_sound": FOOTSTEP, "sound_duration_seconds": 0.42,
+              "sound_sample_rate": 48000, "sound_channels": 1}
     REPORT.parent.mkdir(parents=True, exist_ok=True)
     REPORT.write_text(json.dumps(result, indent=2), encoding="utf-8")
     unreal.log("SHALLOW_PUDDLE_VERIFY_PASSED " + json.dumps(result))

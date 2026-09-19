@@ -27,7 +27,7 @@ ATunaSweeperShallowPuddleActor::ATunaSweeperShallowPuddleActor()
 	WetEdge->SetupAttachment(RootComponent);
 	WetEdge->SetAbsolute(true, true, true);
 	WetEdge->FadeScreenSize = 0.001f;
-	static ConstructorHelpers::FObjectFinder<USoundBase> Sound(TEXT("/Game/Audio/Imported/SW_Footstep_Water.SW_Footstep_Water"));
+	static ConstructorHelpers::FObjectFinder<USoundBase> Sound(TEXT("/Game/Environment/ShallowPuddle/Audio/SW_ShallowPuddle_Footstep.SW_ShallowPuddle_Footstep"));
 	WaterFootstepSound = Sound.Object;
 }
 

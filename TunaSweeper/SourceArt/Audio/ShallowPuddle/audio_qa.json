@@ -1,0 +1,17 @@
+{
+  "passed": true,
+  "file": "SW_ShallowPuddle_Footstep.wav",
+  "duration_seconds": 0.42,
+  "sample_rate": 48000,
+  "channels": 1,
+  "bits_per_sample": 24,
+  "looping": false,
+  "peak_dbfs": -4.000001358084259,
+  "rms_dbfs": -23.909521960390823,
+  "estimated_true_peak_dbfs_4x": -3.9999987017001013,
+  "clipped_samples": 0,
+  "dc_offset": 6.118759158111754e-05,
+  "sha256": "fedd7a23b620f0718c035d9e245b5cc1c2f798f7d912854dc0a00af6d3462f22",
+  "provenance": "Original deterministic synthesis; no sampled recordings.",
+  "validation": "Signal/file checks only; not a human listening acceptance test."
+}

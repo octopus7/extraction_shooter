@@ -39,7 +39,7 @@
 7. `Max Water Depth Cm`은 발걸음 바닥 판정과 젖음 데칼 투영 깊이다. 수면과 실제 지면의 거리보다 크게 맞추되 다른 층의 바닥까지 포함하지 않도록 한다. 물의 시각적 깊이는 실제 지면과 수면 사이 거리로 결정된다.
 8. 움직임·충돌은 원래 지면이 담당한다. 물 액터는 수영, 부력, 이동 감속을 추가하지 않는다. 런타임에 액터 위치/크기/파라미터를 변경하면 `Refresh Puddle`을 호출한다.
 
-물소리는 기존 `SW_Footstep_Water` 오디오를 사용한다. 사운드 참조가 비어 있으면 일반 발소리로 돌아간다. 발소리 발생 주기와 AI 소음 수치는 기존 규칙을 사용한다. 기본 Blueprint에는 Niagara 시스템이 없으며 후속 연결은 [보류 문서](shallow_puddle_niagara_deferred.md)를 따른다.
+물소리는 새로 합성한 `/Game/Environment/ShallowPuddle/Audio/SW_ShallowPuddle_Footstep`을 사용한다. 원본은 `TunaSweeper/SourceArt/Audio/ShallowPuddle/SW_ShallowPuddle_Footstep.wav`이며 0.42초·48kHz·24비트 모노 one-shot이다. 액터 자체 또는 Blueprint의 Class Defaults에서 `Puddle > Footstep > Water Footstep Sound`로 변경할 수 있다. 사운드 참조가 비어 있으면 일반 발소리로 돌아간다. 발소리 발생 주기와 AI 소음 수치는 기존 규칙을 사용한다. 기본 Blueprint에는 Niagara 시스템이 없으며 후속 연결은 [보류 문서](shallow_puddle_niagara_deferred.md)를 따른다.
 
 ## 검토 맵과 검증 도구
 
@@ -70,3 +70,12 @@
 - 검증 이미지는 `TunaSweeper/Saved/Automation/ShallowPuddle/ShallowPuddle_Review.png`. 테스트 결과 JSON도 같은 폴더 아래에 있다.
 - 플레이어 직접 조작에 따른 오디오 청취 및 Niagara 시각 수용 확인은 자동 테스트로 대체했다고 주장하지 않는다. Niagara 수용 확인은 보류 문서의 후속 작업이다.
 - 생성기와 에셋은 `8007e773`에 함께 기록했다. 일회성 생성기를 제거한 뒤 새 프로세스 에셋/이벤트 검증도 오류 0건으로 통과했다. 최종 소스 트리에는 생성기나 시작 시 재생성 경로가 없다.
+
+## 전용 발소리 추가 (2026-09-19)
+
+- 사용자 요청에 따라 기존 오디오 참조를 새 합성 WAV와 SoundWave로 교체했다. C++ 기본값, `BP_ShallowPuddle` 기본값, 검토 맵 세 인스턴스가 모두 `SW_ShallowPuddle_Footstep`을 참조한다.
+- WAV 검사: 0.42초, 48kHz/24-bit/mono, 피크 -4.00dBFS, RMS -23.91dBFS, 클리핑 0건, 시작/끝 무음 확인.
+- UE 5.7 에디터 빌드 성공. 새 프로세스에서 정확한 사운드 경로, SoundWave 종류, 길이/모노/샘플레이트/비루프, 기존 물웅덩이 및 이벤트 검사 통과.
+- 임포트는 오디오 디코더 등록을 위해 `-AllowCommandletAudio`를 사용한다. `-nosound`로 임포트하면 BINKA 디코더가 초기화되지 않는다.
+- 연결 검증 시 별도 동시 작업 중인 ATV의 `PA_ATV` 누락을 포함한 로딩 경고 4건이 있었다. 물웅덩이 오디오 검사는 성공했으며 해당 차량 에셋은 이 작업에서 수정하지 않았다.
+- 음색의 최종 청취 평가는 사용자에게 맡긴다. Niagara 보류 상태는 유지한다.
