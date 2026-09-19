@@ -30,6 +30,8 @@ Unreal FBX는 `TunaSweeper/SourceArt/Characters/Mole/`에 있다. Unreal 에셋�
 
 `ABP_MoleCompanion`은 기존 `BS_Mole_IdleTurn` 포즈를 캐시하고, `MoleUpperBody` 슬롯을 `spine`부터 Layered Blend per Bone으로 합성한다. 루트·골반·다리는 기존 호흡 및 방향별 회전 포즈를 유지한다. `UTunaSweeperMoleAnimInstance`는 상체 모션을 1회 재생하고 블렌드아웃이 끝난 뒤 다음 휴식 시간을 무작위로 정한다. 슬롯 블렌드인은 0.3초, 블렌드아웃은 0.4초다.
 
+UE의 기본 `A_Mole_Idle_Breathe`는 4초 호흡에 맞춰 양쪽 위팔 회전 폭을 약 3도, 팔꿈치를 약 1도로 보강했다. 루프 양끝은 같은 포즈이며 속도도 0으로 이어진다. 팔 4개 본의 회전 키만 수정했으며 몸통·머리·하체 및 본 위치·스케일은 그대로다. 이 보강은 UE 에셋에 적용했고 Blender/FBX 원본에는 아직 반영하지 않았다.
+
 상체 모션은 UE 애니메이션 에셋으로 제작한 `A_Mole_Idle_Sniff`(주변 킁킁거리기), `A_Mole_Idle_ShoulderRoll`(어깨·앞발 풀기), `A_Mole_Idle_HeadTilt`(고개 갸웃하기), `A_Mole_Idle_PawWave`(한쪽 앞발 흔들기) 4종이다. 각각 기존 호흡 클립을 기준으로 상체 회전 키만 추가했으며 Blender 원본 액션은 변경하지 않았다. `ABP_MoleCompanion` 클래스 기본값의 `Idle Variations` 배열에서 모션 구성을 편집할 수 있다.
 
 `BP_Mole`의 `Mole Companion > Idle Variations`에서 `Enable Idle Variations`, `Idle Variation Min Delay`, `Idle Variation Max Delay`를 조절한다. 기본 휴식 범위는 **4~15초**이고 첫 재생 전에도 같은 범위를 사용한다. 최대값이 최소값보다 작으면 최소값으로 보정한다. 휴식과 현재 모션은 저장 대상이 아닌 일시적 연출 상태다.
