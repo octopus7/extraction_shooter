@@ -5,6 +5,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMesh.h"
 #include "Engine/World.h"
+#include "Kismet/GameplayStatics.h"
 #include "NiagaraComponent.h"
 #include "NiagaraSystem.h"
 #include "TimerManager.h"
@@ -36,6 +37,7 @@ void ATunaSweeperATVActor::CreateDamageComponents()
 	DestructionExplosion->SetCanEverAffectNavigation(false);
 	static ConstructorHelpers::FObjectFinder<UNiagaraSystem> Explosion(TEXT("/Game/Effects/ExplosionTuna/NS_Explosion_Tuna.NS_Explosion_Tuna"));
 	DestructionExplosion->SetAsset(Explosion.Object);
+	DestructionExplosionSound = TSoftObjectPtr<USoundBase>(FSoftObjectPath(TEXT("/Game/Audio/Imported/SW_barrel_explosion.SW_barrel_explosion")));
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> Front(TEXT("/Game/Meshes/Props/ATV/Debris/SM_ATV_Debris_wheel_FL.SM_ATV_Debris_wheel_FL"));
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> Rear(TEXT("/Game/Meshes/Props/ATV/Debris/SM_ATV_Debris_wheel_RR.SM_ATV_Debris_wheel_RR"));
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> Bar(TEXT("/Game/Meshes/Props/ATV/Debris/SM_ATV_Debris_handlebar.SM_ATV_Debris_handlebar"));
@@ -153,11 +155,16 @@ void ATunaSweeperATVActor::PlayDestructionExplosion()
 {
 	if (!bVehicleDestroyed || bDestructionExplosionTriggered || IsActorBeingDestroyed()) return;
 	bDestructionExplosionTriggered = true;
+	const FVector ExplosionLocation = DestructionExplosion ? DestructionExplosion->GetComponentLocation() : GetActorLocation();
 	if (DestructionExplosion)
 	{
 		// Burst at the wreck's current position, then keep it fixed in world space.
 		DestructionExplosion->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 		DestructionExplosion->Activate(true);
+	}
+	if (USoundBase* Sound = DestructionExplosionSound.LoadSynchronous())
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, Sound, ExplosionLocation);
 	}
 }
 

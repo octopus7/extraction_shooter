@@ -9,6 +9,7 @@ class UChaosWheeledVehicleMovementComponent;
 class ATunaSweeperTopDownCharacter;
 class UNiagaraComponent;
 class UStaticMesh;
+class USoundBase;
 
 UENUM(BlueprintType)
 enum class ETunaSweeperATVDamageState : uint8 { Healthy, Damaged, Critical, Destroyed };
@@ -50,6 +51,8 @@ public:
 	/** Seconds after destruction; zero plays the visual immediately. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="ATV|Effects", meta=(ClampMin="0", Units="s"))
 	float DestructionExplosionDelay = 3.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="ATV|Effects")
+	TSoftObjectPtr<USoundBase> DestructionExplosionSound;
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Transient, Category="ATV|Effects")
 	bool bDestructionExplosionTriggered = false;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="ATV|Effects")

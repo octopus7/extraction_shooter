@@ -41,6 +41,8 @@
 
 파괴 후 기본 3초 뒤 잔해의 현재 위치에서 `NS_Explosion_Tuna`를 한 번 재생한다. `BP_ATV_TypeA` 클래스 기본값 또는 레벨 인스턴스의 `ATV > Effects > Destruction Explosion Delay`로 지연 시간을 조정하며, 0이면 즉시 재생한다. 추가 피격은 타이머를 재시작하지 않고 차량 제거 시 예약을 취소한다. 폭발 연출 코드와 `TunaSweeper.Vehicle.DelayedExplosion` 테스트를 추가했으며, 현재는 컴파일만 확인했고 에디터 재시작 후 실행 검증이 필요하다.
 
+폭발 시 배럴과 동일한 `/Game/Audio/Imported/SW_barrel_explosion`을 폭발 위치에서 한 번 재생한다. `ATV > Effects > Destruction Explosion Sound`에서 사운드를 변경할 수 있다. 지연 폭발과 같은 중복 방지 처리를 사용한다. 사운드 연결은 컴파일 확인을 마쳤으며 전체 빌드 후 청취 검증이 필요하다.
+
 ## 운전자 자세
 
 - 탑승 중 `TunaSweeperATVRiderAnimInstance`로 전환한다. 자연스러운 몸 자세를 우선해 상체는 12°만 앞으로 기울이고 고개는 8° 반대로 보정한다. 골반과 다리를 기존 안장/발판에 억지로 맞추지 않으며, 엉덩이가 안장 안에 들어가거나 발이 공중에 떠도 허용한다. 이 자세에 맞춰 차량 모델링을 후속 조정한다.
