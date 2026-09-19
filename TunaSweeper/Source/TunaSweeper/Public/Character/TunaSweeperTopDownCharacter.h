@@ -108,6 +108,7 @@ class TUNASWEEPER_API ATunaSweeperTopDownCharacter : public ACharacter
 
 public:
 	ATunaSweeperTopDownCharacter();
+	bool IsAimExternallyControlled() const { return bExternalAimControl; }
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Vehicle")
 	bool IsMountedInVehicle() const;
@@ -509,6 +510,8 @@ protected:
 	float DeathRagdollUpwardImpulse = 1800.0f;
 
 private:
+	friend class UTunaSweeperCombatLabAutopilotComponent;
+	bool bExternalAimControl = false;
 	friend class UTunaSweeperVehicleMountComponent;
 	UPROPERTY(Transient)
 	TObjectPtr<UTunaSweeperVehicleMountComponent> VehicleMount;

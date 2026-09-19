@@ -101,6 +101,7 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Combat")
 	bool IsDead() const { return bIsDead; }
+	float GetHealth() const { return CurrentHealth; }
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Combat|Burn")
 	UTunaSweeperBurnComponent* GetBurnComponent() const { return BurnComponent; }

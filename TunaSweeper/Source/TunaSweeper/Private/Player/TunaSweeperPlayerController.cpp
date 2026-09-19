@@ -724,6 +724,7 @@ void ATunaSweeperPlayerController::PlayerTick(float DeltaTime)
 	}
 
 	TryFlushPendingBunkerItemStateSave();
+	if (ControlledCharacter->IsAimExternallyControlled()) return;
 
 	FVector AimPoint;
 	FHitResult AimHit;

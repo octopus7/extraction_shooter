@@ -74,7 +74,7 @@ def validate():
     for direction in ("North", "South", "West", "East"):
         assert labels["Perimeter_" + direction].static_mesh_component.get_collision_enabled() == unreal.CollisionEnabled.QUERY_AND_PHYSICS
     text_actors = unreal.GameplayStatics.get_all_actors_of_class(world, unreal.TextRenderActor)
-    assert len(text_actors) == 7
+    assert not text_actors, "All user-facing text belongs to the localized runtime HUD"
     for actor in text_actors:
         rotation = actor.get_actor_rotation()
         close(vec(unreal.MathLibrary.get_forward_vector(rotation)), [0, 0, 1])

@@ -105,7 +105,6 @@ def build():
         box("Edge_X_" + str(sign), (sign * 1550, 0, 2), (8, 2480, 3), "Trim", False)
         box("Edge_Y_" + str(sign), (0, sign * 1250, 2), (3100, 8, 3), "Trim", False)
         box("Flank_Guide_" + str(sign), (0, sign * 1090, 2), (2360, 5, 2), "Cyan", False)
-        text("Label_Flank_" + str(sign), "FLANK", (80, sign * 1140, 4), 34, (105, 203, 218))
     for index in range(-3, 4):
         box("Grid_X_" + str(index), (index * 400, 0, 1), (2, 2440, 1), "Grid", False)
     for index in range(-2, 3):
@@ -126,11 +125,8 @@ def build():
         x, y, _ = pos
         for sign in (-1, 1):
             box(f"SpawnPad_{index}_{sign}", (x + sign * 92, y, 2), (8, 170, 3), "Amber", False)
-        text("Label_Enemy_" + str(index), f"0{index}", (x - 175, y, 4), 45, (235, 179, 103))
     spawn(unreal.PlayerStart, "CombatLabPlayerStart", (-1120, 0, 100))
     box("Player_ReadyLine", (-1260, 0, 2), (10, 750, 3), "Cyan", False)
-    text("Label_Title", "COMBAT LAB  /  3 HOSTILES", (1440, 0, 4), 50)
-    text("Label_Player", "PLAYER", (-1430, 0, 4), 48, (105, 203, 218))
     nav = spawn(unreal.NavMeshBoundsVolume, "Navigation_Bounds", (0, 0, 150))
     _, extent = nav.get_actor_bounds(False)
     assert min(extent.x, extent.y, extent.z) > 0

@@ -296,3 +296,18 @@ ui.difficulty.select_title,난이도 선택,Choose Difficulty,難易度選択
 ui.difficulty.adjust_title,난이도 변경,Change Difficulty,難易度変更
 ui.difficulty.start,시작하기,Start,開始
 ui.settings.resolution_value,{0} × {1},{0} × {1},{0} × {1}
+ui.combat_lab.status,전투 실험실 · 라운드 {0} · {1} · 남은 적 {2},Combat lab · Round {0} · {1} · {2} hostiles,戦闘ラボ · ラウンド {0} · {1} · 敵 {2}
+ui.combat_lab.metrics,{0}초 · 발사 탄환 {1} / 적 {2} · 받은 피해 {3},{0}s · Projectiles {1} / enemy {2} · Damage taken {3},{0}秒 · 発射弾 {1} / 敵 {2} · 被ダメージ {3}
+ui.combat_lab.controls,F6 자동/수동 · Home 재시작 · F8 적 상태 · WASD 이동 · 마우스 사격,F6 Auto/manual · Home Restart · F8 Enemy state · WASD Move · Mouse Fire,F6 自動/手動 · Home 再開 · F8 敵状態 · WASD 移動 · マウス 射撃
+ui.combat_lab.manual,수동 조작,Manual control,手動操作
+ui.combat_lab.seek,탐색 중,Searching,探索中
+ui.combat_lab.engage,교전 중,Engaging,交戦中
+ui.combat_lab.reload,재장전,Reloading,リロード中
+ui.combat_lab.dodge,회피,Dodging,回避中
+ui.combat_lab.ready,전투 준비,Preparing,戦闘準備
+ui.combat_lab.win,승리 · 다음 전투 준비,Victory · Preparing next round,勝利 · 次の戦闘準備
+ui.combat_lab.loss,사망 · 다음 전투 준비,Defeat · Preparing next round,死亡 · 次の戦闘準備
+ui.combat_lab.timeout,시간 초과 · 재시도,Time limit · Retrying,時間切れ · 再試行
+ui.combat_lab.reset,전투 초기화,Resetting,戦闘リセット
+ui.combat_lab.stopped,전투 종료,Stopped,戦闘終了
+ui.combat_lab.error,전투 배치를 확인하세요,Check combat placement,戦闘配置を確認してください
