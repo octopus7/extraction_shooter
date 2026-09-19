@@ -1,6 +1,6 @@
 # 하우징 시스템 완전 제거 설계
 
-> 상태: 후속 작업으로 보류. 현재는 `UTunaSweeperHousingSubsystem::ShouldCreateSubsystem()`에서 생성을 차단하는 최소 비활성화만 적용한다.
+> 상태: 구현 승인됨. 기존의 `UTunaSweeperHousingSubsystem::ShouldCreateSubsystem()` 최소 비활성화를 포함해 아래 범위를 완전히 제거한다.
 
 ## 목표
 
