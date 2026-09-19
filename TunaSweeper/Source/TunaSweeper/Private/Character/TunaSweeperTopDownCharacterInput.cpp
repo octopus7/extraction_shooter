@@ -116,6 +116,12 @@ void ATunaSweeperTopDownCharacter::AddDefaultInputMapping() const
 
 void ATunaSweeperTopDownCharacter::HandleMove(const FInputActionValue& Value)
 {
+	if (IsMountedInVehicle())
+	{
+		VehicleMount->SetDriveInput(Value.Get<FVector2D>());
+		CurrentMoveInput = FVector2D::ZeroVector;
+		return;
+	}
 	if (bIsDead || IsGameplayActionInputLocked())
 	{
 		CurrentMoveInput = FVector2D::ZeroVector;
@@ -142,6 +148,7 @@ void ATunaSweeperTopDownCharacter::HandleMove(const FInputActionValue& Value)
 
 void ATunaSweeperTopDownCharacter::HandleMoveStopped(const FInputActionValue& Value)
 {
+	if (IsMountedInVehicle()) VehicleMount->SetDriveInput(FVector2D::ZeroVector);
 	(void)Value;
 	CurrentMoveInput = FVector2D::ZeroVector;
 }
@@ -370,6 +377,11 @@ void ATunaSweeperTopDownCharacter::HandleCameraMode(const FInputActionValue& Val
 
 void ATunaSweeperTopDownCharacter::BeginSprint(const FInputActionValue& Value)
 {
+	if (IsMountedInVehicle())
+	{
+		VehicleMount->SetBoostInput(true);
+		return;
+	}
 	(void)Value;
 	if (bIsDead || IsGameplayActionInputLocked())
 	{
@@ -381,6 +393,7 @@ void ATunaSweeperTopDownCharacter::BeginSprint(const FInputActionValue& Value)
 
 void ATunaSweeperTopDownCharacter::EndSprint(const FInputActionValue& Value)
 {
+	if (IsMountedInVehicle()) VehicleMount->SetBoostInput(false);
 	(void)Value;
 	bSprintInputHeld = false;
 	bIsSprinting = false;

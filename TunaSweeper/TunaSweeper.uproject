@@ -17,6 +17,10 @@
 	],
 	"Plugins": [
 		{
+			"Name": "ChaosVehiclesPlugin",
+			"Enabled": true
+		},
+		{
 			"Name": "SplineWorldBuilder",
 			"Enabled": true
 		},

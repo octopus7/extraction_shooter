@@ -1,4 +1,5 @@
 #include "Vehicle/TunaSweeperVehicleMountComponent.h"
+#include "Vehicle/TunaSweeperATVActor.h"
 #include "Character/TunaSweeperTopDownCharacter.h"
 #include "Player/TunaSweeperPlayerController.h"
 #include "Components/AudioComponent.h"
@@ -119,6 +120,7 @@ bool UTunaSweeperVehicleMountComponent::TryDismount()
 
 void UTunaSweeperVehicleMountComponent::ReleaseRider(const FVector& Location, bool bPlaySound)
 {
+	ClearDriveInput();
 	auto* Character = Rider.Get();
 	Rider.Reset();
 	StopEngineAudio();
@@ -147,6 +149,11 @@ void UTunaSweeperVehicleMountComponent::ReleaseRiderForEndPlay()
 
 void UTunaSweeperVehicleMountComponent::StopEngineAudio()
 {
+	bEngineRunning = false;
+	DriveAudioBlend = BoostAudioBlend = 0;
+	if (IsValid(DriveAudio)) DriveAudio->Stop();
+	if (IsValid(BoostAudio)) BoostAudio->Stop();
+	DriveAudio = BoostAudio = nullptr;
 	if (GetWorld()) GetWorld()->GetTimerManager().ClearTimer(EngineStartTimer);
 	if (IsValid(EngineAudio)) EngineAudio->Stop();
 	EngineAudio = nullptr;
@@ -156,6 +163,44 @@ void UTunaSweeperVehicleMountComponent::StartIdleAudio()
 {
 	StopEngineAudio();
 	if (Rider.IsValid() && EngineIdleSound) EngineAudio = UGameplayStatics::SpawnSoundAttached(EngineIdleSound, this);
+	if (Rider.IsValid())
+	{
+		bEngineRunning = true;
+		if (EngineDriveSound) DriveAudio = UGameplayStatics::SpawnSoundAttached(EngineDriveSound, this, NAME_None, FVector::ZeroVector, EAttachLocation::KeepRelativeOffset, true, 0.001f);
+		if (EngineBoostSound) BoostAudio = UGameplayStatics::SpawnSoundAttached(EngineBoostSound, this, NAME_None, FVector::ZeroVector, EAttachLocation::KeepRelativeOffset, true, 0.001f);
+	}
+}
+
+void UTunaSweeperVehicleMountComponent::SetDriveInput(const FVector2D& Input)
+{
+	if (auto* ATV = Cast<ATunaSweeperATVActor>(GetOwner())) ATV->SetDriveInput(Input);
+}
+void UTunaSweeperVehicleMountComponent::SetBoostInput(bool bHeld)
+{
+	if (auto* ATV = Cast<ATunaSweeperATVActor>(GetOwner())) ATV->SetBoostInput(bHeld);
+}
+void UTunaSweeperVehicleMountComponent::ClearDriveInput()
+{
+	if (auto* ATV = Cast<ATunaSweeperATVActor>(GetOwner())) ATV->ClearDriveInput();
+}
+void UTunaSweeperVehicleMountComponent::UpdateDrivingAudio(float DeltaTime, float Speed, float RPMRatio, bool bBoosting)
+{
+	if (!bEngineRunning) return;
+	const float Moving = FMath::Clamp(Speed / 250.0f, 0.0f, 1.0f);
+	DriveAudioBlend = FMath::FInterpTo(DriveAudioBlend, Moving, DeltaTime, 5.0f);
+	BoostAudioBlend = FMath::FInterpTo(BoostAudioBlend, bBoosting ? Moving : 0.0f, DeltaTime, 5.0f);
+	const float Pitch = FMath::Lerp(0.8f, 1.25f, FMath::Clamp(RPMRatio, 0.0f, 1.0f));
+	if (IsValid(EngineAudio)) EngineAudio->SetVolumeMultiplier(FMath::Lerp(0.75f, 0.15f, DriveAudioBlend));
+	if (IsValid(DriveAudio))
+	{
+		DriveAudio->SetVolumeMultiplier(FMath::Max(0.001f, 0.8f * DriveAudioBlend * (1.0f - BoostAudioBlend)));
+		DriveAudio->SetPitchMultiplier(Pitch);
+	}
+	if (IsValid(BoostAudio))
+	{
+		BoostAudio->SetVolumeMultiplier(FMath::Max(0.001f, 0.85f * BoostAudioBlend));
+		BoostAudio->SetPitchMultiplier(Pitch);
+	}
 }
 
 void UTunaSweeperVehicleMountComponent::UpdateStationaryHint(float DeltaTime, float Speed)

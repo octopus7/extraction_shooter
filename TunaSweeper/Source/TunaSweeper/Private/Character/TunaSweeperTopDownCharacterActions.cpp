@@ -373,6 +373,7 @@ void ATunaSweeperTopDownCharacter::CancelActiveCancelableAction()
 
 void ATunaSweeperTopDownCharacter::CancelActiveGameplayActions()
 {
+	if (IsMountedInVehicle()) VehicleMount->ClearDriveInput();
 	FinishRoll();
 	bFireHeld = false;
 	bIsAiming = false;

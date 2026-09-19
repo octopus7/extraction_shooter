@@ -31,6 +31,10 @@ public:
 	bool FindDismountLocation(FVector& OutLocation) const;
 	void ReleaseRiderForEndPlay();
 	void UpdateStationaryHint(float DeltaTime, float Speed);
+	void SetDriveInput(const FVector2D& Input);
+	void SetBoostInput(bool bHeld);
+	void ClearDriveInput();
+	void UpdateDrivingAudio(float DeltaTime, float Speed, float RPMRatio, bool bBoosting);
 	UPROPERTY(BlueprintAssignable, Category="TunaSweeper|Vehicle")
 	FTunaSweeperRiderChanged OnMounted;
 	UPROPERTY(BlueprintAssignable, Category="TunaSweeper|Vehicle")
@@ -49,6 +53,10 @@ public:
 	TObjectPtr<USoundBase> EngineIdleSound;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="TunaSweeper|Vehicle|Audio")
 	TObjectPtr<USoundBase> EngineStopSound;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="TunaSweeper|Vehicle|Audio")
+	TObjectPtr<USoundBase> EngineDriveSound;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="TunaSweeper|Vehicle|Audio")
+	TObjectPtr<USoundBase> EngineBoostSound;
 private:
 	void ReleaseRider(const FVector& Location, bool bPlaySound);
 	void StopEngineAudio();
@@ -57,6 +65,13 @@ private:
 	TWeakObjectPtr<ATunaSweeperTopDownCharacter> Rider;
 	UPROPERTY(Transient)
 	TObjectPtr<UAudioComponent> EngineAudio;
+	UPROPERTY(Transient)
+	TObjectPtr<UAudioComponent> DriveAudio;
+	UPROPERTY(Transient)
+	TObjectPtr<UAudioComponent> BoostAudio;
+	float DriveAudioBlend = 0;
+	float BoostAudioBlend = 0;
+	bool bEngineRunning = false;
 	UPROPERTY(Transient)
 	TObjectPtr<UTunaSweeperVehicleDismountWidget> DismountWidget;
 	FTimerHandle EngineStartTimer;

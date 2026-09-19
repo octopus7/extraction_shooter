@@ -1,6 +1,15 @@
-# ATV 승하차
+# ATV 승하차와 주행
 
-레벨에는 `/Game/Blueprints/Vehicles/ATV/BP_ATV_TypeA`를 배치한다. 부모는 `TunaSweeperATVActor`이며 기존 `SKM_ATV`, 차체 박스 충돌, `seat` 본에 연결된 `TunaSweeperVehicleMountComponent`, 시동/공회전/정지 사운드를 상속한다. 메시의 지면 원점은 액터 원점보다 45cm 아래다. 기존 StaticMeshActor에 둔 `SM_ATV`는 자동으로 교체하지 않는다.
+레벨에는 `/Game/Blueprints/Vehicles/ATV/BP_ATV_TypeA`를 배치한다. 부모 `TunaSweeperATVActor`는 APawn이며 기존 `SKM_ATV`, 차체 물리 애셋 `PA_ATV`, Chaos 차량 이동 컴포넌트, `seat` 본의 `TunaSweeperVehicleMountComponent`, 가솔린 엔진 사운드를 상속한다. 메시가 루트이며 액터 원점은 메시의 지면 원점과 같다. 배치 시 스케일 1을 사용하고 바퀴가 지면에 닿도록 놓는다. 기존 StaticMeshActor의 `SM_ATV`는 자동으로 교체하지 않는다.
+
+## 주행과 기계 부품
+
+- 기존 IA_Move 입력을 탑승 컴포넌트로 전달한다. W는 차량 전방 가속, S는 제동 후 후진, A/D는 좌우 조향이다. 카메라 방향을 기준으로 평행 이동하지 않는다. Shift+W는 가속 강도와 최고속을 높인다.
+- 기본 최고속 목표는 전진 1,000cm/s(36km/h), Shift 1,600cm/s(57.6km/h), 후진 400cm/s(14.4km/h)이며 액터에서 조절한다. 목표 부근에서 구동 입력을 줄이므로 실제 속도는 지형·저항에 따라 달라진다.
+- 340kg 차체, 네 바퀴 AWD, 자동 변속/후진, 전륜 Ackermann 조향과 속도별 조향 제한을 사용한다. 각 바퀴는 구면 접지 검사, 스프링/댐퍼, 위 8cm·아래 12cm 이동 범위를 가진다. 탑승자 Pawn은 바퀴 접지 대상에서 제외한다.
+- `TunaSweeperATVAnimInstance`가 휠 회전·조향·서스펜션 이동을 본에 반영한다. 너클, 위/아래 암, 쇼크 양쪽과 스프링, 핸들도 연동한다. 별도 AnimBP 제작 없이 네이티브 애니메이션 인스턴스를 사용한다.
+- UI 열기·행동 취소·하차 시 입력과 Shift 상태를 초기화한다. 탑승자가 없거나 UI가 주행을 막는 동안 주차 브레이크를 건다. 무인 차량에 입력을 보내도 움직이지 않는다.
+- `PA_ATV`의 root 박스가 실제 차체 충돌이다. 기존 `ChassisCollision` 컴포넌트는 BP 참조 호환용으로 남기고 충돌을 끈다.
 
 ## 상호작용
 
@@ -17,15 +26,18 @@
 - `DismountHintDelay`, `StationarySpeedThreshold`, `DismountDistance`, 좌석의 위치/회전 오프셋은 컴포넌트에서 조정할 수 있다.
 - `UITextStrings.csv`의 `ui.vehicle.mount`, `ui.vehicle.dismount`, `ui.key.x`를 기존 로컬라이징 경로로 해석한다. 한국어/영어/일본어를 제공한다.
 - 탑승 시 `SW_ATV_Mount_Start` → `SW_ATV_Idle_Loop`, 하차 시 `SW_ATV_Dismount_Stop`을 재생한다. 시동 도중 하차하면 대기 중인 공회전 전환도 취소한다.
+- 시동 완료 후 속도에 따라 `SW_ATV_Drive_Loop`, Shift 가속 시 `SW_ATV_Boost_Loop`을 부드럽게 섞는다. 엔진 RPM에 따라 주행/가속 루프의 피치를 조절하고 하차 시 모든 루프를 정리한다.
 
 ## 범위와 확장 지점
 
-이번 구현은 상호작용을 통한 승하차다. Chaos 주행, 휠/서스펜션 런타임 구동, 운전자 앉는 자세와 손발 IK는 별도 구현 대상이다. 차량에 이미 주행 컴포넌트가 있다면 그 차량의 좌석에 `TunaSweeperVehicleMountComponent`를 추가해 같은 승하차 처리를 사용할 수 있다. `OnMounted`/`OnDismounted` 이벤트와 `GetRider`, 캐릭터의 `IsMountedInVehicle`/`GetVehicleMount`를 제공한다.
+승하차·Chaos 주행·휠/서스펜션 구동을 구현했다. 운전자 앉는 자세와 손발 IK는 아직 별도 구현 대상이다. `OnMounted`/`OnDismounted` 이벤트와 `GetRider`, 캐릭터의 `IsMountedInVehicle`/`GetVehicleMount`를 제공한다. 탑승 컴포넌트는 다른 좌석에도 사용할 수 있지만 주행 입력 전달은 현재 ATV 액터에 연결되어 있다.
 
-좌석 점유·안내 타이머·엔진 오디오는 일시적인 월드 상태이며 저장하지 않는다. 세이브 구조를 변경하지 않았다.
+좌석 점유·차량 주행 상태/이동 위치·안내 타이머·엔진 오디오는 일시적인 월드 상태이며 저장하지 않는다. 세이브 구조를 변경하지 않았다.
 
 ## 검증
 
 - 에디터 자동 테스트: `TunaSweeper.Vehicle.MountInteraction`
+- 물리 주행/접지/조향/실제 휠·스프링·핸들 본/Shift 가속/입력 해제: `TunaSweeper.Vehicle.Driving`. 저장된 `BP_ATV_TypeA`로 실행한다.
 - 별도 UE 프로세스에서 기본값/자산 참조 확인: `Tools/ATVRig/verify_mount_setup.py`
+- 주행 기본값/물리 애셋/애니메이션/사운드 참조 확인: `Tools/ATVRig/verify_driving_setup.py`
 - UI의 실제 화면 배치와 청취, 운전자 자세의 최종 게임 내 확인은 별도 플레이 검수가 필요하다.
