@@ -1,0 +1,27 @@
+{
+  "meshes": [
+    {
+      "name": "SM_BarrierHousing",
+      "triangles": 4680,
+      "vertices": 2388
+    },
+    {
+      "name": "SM_BarrierArm",
+      "triangles": 108,
+      "vertices": 56
+    },
+    {
+      "name": "SM_BarrierRedLens",
+      "triangles": 284,
+      "vertices": 144
+    },
+    {
+      "name": "SM_BarrierGreenLens",
+      "triangles": 284,
+      "vertices": 144
+    }
+  ],
+  "housing_texture": 1024,
+  "unique_housing_uv": true,
+  "arm_length_cm": 350
+}
