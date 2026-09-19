@@ -30,6 +30,7 @@ ATunaSweeperMoleCompanionActor::ATunaSweeperMoleCompanionActor()
 	SkeletalMesh->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
 	SkeletalMesh->SetAnimationMode(EAnimationMode::AnimationSingleNode);
 	SkeletalMesh->bEditableWhenInherited = true;
+	SkeletalMesh->AddTickPrerequisiteActor(this);
 
 	BodyCollision = CreateDefaultSubobject<UCapsuleComponent>(TEXT("BodyCollision"));
 	BodyCollision->SetupAttachment(SceneRoot);
@@ -233,17 +234,26 @@ float ATunaSweeperMoleCompanionActor::ResolveTurnAnimationAmount(float PreviousY
 	{
 		return 0.0f;
 	}
-	const float TurnSpeed = FMath::Abs(FMath::FindDeltaAngleDegrees(PreviousYaw, CurrentYaw)) / DeltaSeconds;
+	const float SignedTurnSpeed = FMath::FindDeltaAngleDegrees(PreviousYaw, CurrentYaw) / DeltaSeconds;
 	// Ignore tiny gaze drift and settle into breathing as the look-at rotation finishes.
-	return FMath::GetMappedRangeValueClamped(FVector2D(2.0f, 25.0f), FVector2D(0.0f, 1.0f), TurnSpeed);
+	return FMath::Sign(SignedTurnSpeed) * FMath::GetMappedRangeValueClamped(
+		FVector2D(2.0f, 25.0f), FVector2D(0.0f, 1.0f), FMath::Abs(SignedTurnSpeed));
 }
 
 void ATunaSweeperMoleCompanionActor::UpdateCompanionAnimation(float PreviousYaw, float DeltaSeconds)
 {
 	if (UAnimSingleNodeInstance* Animation = SkeletalMesh ? SkeletalMesh->GetSingleNodeInstance() : nullptr)
 	{
-		// The blend space contains only breathing and stationary steps. Actor rotation owns yaw.
-		Animation->SetBlendSpacePosition(FVector(ResolveTurnAnimationAmount(PreviousYaw, GetActorRotation().Yaw, DeltaSeconds), 0.0f, 0.0f));
+		// Negative yaw selects left footwork, positive yaw selects right footwork.
+		// The clips have fixed roots; only the actor owns the heading.
+		const float TurnAmount = ResolveTurnAnimationAmount(PreviousYaw, GetActorRotation().Yaw, DeltaSeconds);
+		Animation->SetBlendSpacePosition(FVector(TurnAmount, 0.0f, 0.0f));
+		// Source turns cover 90 degrees in 64 frames at 30 fps. Match their cadence
+		// to the actual rotation while preserving normal-speed breathing at rest.
+		const float TurnSpeed = DeltaSeconds > SMALL_NUMBER
+			? FMath::Abs(FMath::FindDeltaAngleDegrees(PreviousYaw, GetActorRotation().Yaw)) / DeltaSeconds : 0.0f;
+		const float StepRate = FMath::Clamp(TurnSpeed / (90.0f / (64.0f / 30.0f)), 0.5f, 2.2f);
+		Animation->SetPlayRate(FMath::Lerp(1.0f, StepRate, FMath::Abs(TurnAmount)));
 	}
 }
 
@@ -349,7 +359,10 @@ void ATunaSweeperMoleCompanionActor::UpdatePlayerLookAt(float DeltaSeconds)
 
 	const FRotator CurrentRotation = GetActorRotation();
 	const FRotator TargetRotation(CurrentRotation.Pitch, DesiredYaw, CurrentRotation.Roll);
-	SetActorRotation(FMath::RInterpTo(CurrentRotation, TargetRotation, DeltaSeconds, FMath::Max(0.0f, InterpSpeed)));
+	const FRotator SmoothedRotation = FMath::RInterpTo(CurrentRotation, TargetRotation, DeltaSeconds, FMath::Max(0.0f, InterpSpeed));
+	const float MaxYawStep = FMath::Max(0.0f, LookAtMaxTurnSpeed) * DeltaSeconds;
+	const float YawStep = FMath::Clamp(FMath::FindDeltaAngleDegrees(CurrentRotation.Yaw, SmoothedRotation.Yaw), -MaxYawStep, MaxYawStep);
+	SetActorRotation(FRotator(CurrentRotation.Pitch, CurrentRotation.Yaw + YawStep, CurrentRotation.Roll));
 }
 
 bool ATunaSweeperMoleCompanionActor::TryGetPlayerLookYaw(float& OutYaw, float& OutDistance2D) const

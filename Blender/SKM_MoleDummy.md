@@ -20,8 +20,12 @@
 
 Unreal FBX는 `TunaSweeper/SourceArt/Characters/Mole/`에 있다. Unreal 에셋은 `/Game/Characters/NPC/Mole/`에 있으며 기존 `M_Mole` 재질을 사용한다.
 
-`/Game/Characters/Mole/BP_Mole` 및 `BunkerMap` 배치 액터는 `SKM_MoleDummy`를 사용한다. 기존 `DummyMesh` 스태틱 컴포넌트는 제거했다. `BS_Mole_IdleTurn`에는 `A_Mole_Idle_Breathe`와 `A_Mole_Turn_InPlace`만 연결한다. 액터의 실제 yaw 변화 속도를 입력으로 사용하므로 플레이어 쪽 회전과 원래 방향 복귀 모두 제자리 걸음을 섞고, 회전이 멈추면 호흡 idle로 전환한다. 애니메이션은 액터 위치나 yaw를 추가로 변경하지 않는다.
+`/Game/Characters/Mole/BP_Mole` 및 `BunkerMap` 배치 액터는 `SKM_MoleDummy`를 사용한다. 기존 `DummyMesh` 스태틱 컴포넌트는 제거했다. `BS_Mole_IdleTurn`은 음수 입력에 `A_Mole_Turn_Left_InPlace`, 0에 `A_Mole_Idle_Breathe`, 양수 입력에 `A_Mole_Turn_Right_InPlace`를 연결한다. 방향별 제자리 클립은 원본 90도 회전 클립의 root 트랙을 아이들 첫 프레임의 위치·회전·스케일로 고정한 파생 에셋이다. 원본 FBX와 Blender 액션은 보존한다.
 
-`A_Mole_Walk_InPlace`, `A_Mole_Walk_Forward` 및 별도 90도 회전 클립은 에셋으로만 보관한다. 런타임 블렌드에는 연결하지 않는다.
+액터의 실제 yaw 변화 속도와 부호로 플레이어 추적 및 원래 방향 복귀의 발동작을 선택한다. 회전이 멈추면 기존 호흡 idle로 복귀한다. 액터 회전은 기본 초당 90도로 제한하고 클립 재생 속도를 실제 회전 속도에 맞추며, 메시 틱은 액터의 추적 회전 계산 뒤에 실행한다. 애니메이션은 액터 위치나 yaw를 추가로 변경하지 않는다.
+
+방향별 클립은 아이들과 동일한 `Force Root Lock` 및 기준 포즈 루트 잠금을 사용한다. 골격의 root 스케일 100과 원본 애니메이션의 root 스케일 1 사이 단위 차이를 유지해야 하므로, raw root 트랙만 고정하고 루트 잠금을 끄면 회전 중 메시가 100분의 1로 축소된다.
+
+`A_Mole_Walk_InPlace`, `A_Mole_Walk_Forward`, 기존 공통 `A_Mole_Turn_InPlace` 및 원본 90도 회전 클립은 에셋으로 보관하며 런타임 블렌드에 직접 연결하지 않는다.
 
 검증: 저장 후 Blender 4.5에서 재열기, 모든 버텍스 가중치 합계, 전체 액션 프레임의 유한 좌표, 걷기 이음 포즈, 루트 전진 거리 및 좌우 회전각 확인. 주요 포즈 렌더 및 걷기/왼쪽 회전 미리보기 영상 생성.

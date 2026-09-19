@@ -33,7 +33,7 @@ public:
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Mole Companion")
 	FName GetCompanionId() const { return CompanionId; }
 
-	/** Zero means breathing idle; positive values blend stationary turning steps. */
+	/** Zero means breathing idle; negative/positive values select left/right footwork. */
 	static float ResolveTurnAnimationAmount(float PreviousYaw, float CurrentYaw, float DeltaSeconds);
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Quest")
@@ -115,6 +115,9 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mole Companion|Look At", meta = (AllowPrivateAccess = "true", ClampMin = "0.0"))
 	float LookAtReturnInterpolationSpeed = 1.8f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mole Companion|Look At", meta = (AllowPrivateAccess = "true", ClampMin = "0.0"))
+	float LookAtMaxTurnSpeed = 90.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mole Companion|Look At", meta = (AllowPrivateAccess = "true", ClampMin = "0.0"))
 	float LookAtReturnDelay = 2.0f;

@@ -27,19 +27,29 @@ bool FTunaSweeperMoleCompanionVisualComponentsTest::RunTest(const FString& Param
 	TestEqual(TEXT("Keeps former visual forward axis"), Mesh->GetRelativeRotation().Yaw, -90.0);
 	const UBlendSpace* Blend = Cast<UBlendSpace>(Mesh->AnimationData.AnimToPlay);
 	if (!TestNotNull(TEXT("Serialized idle/turn blend is connected"), Blend)) return false;
-	TestEqual(TEXT("Exactly two runtime clips"), Blend->GetBlendSamples().Num(), 2);
+	TestEqual(TEXT("Idle and both turn directions are connected"), Blend->GetBlendSamples().Num(), 3);
 	for (const FBlendSample& Sample : Blend->GetBlendSamples())
 	{
 		if (!TestNotNull(TEXT("Blend sample animation exists"), Sample.Animation.Get())) continue;
 		const FString Name = Sample.Animation->GetName();
-		TestTrue(TEXT("Only breathing and stationary turning are used"), Name == TEXT("A_Mole_Idle_Breathe") || Name == TEXT("A_Mole_Turn_InPlace"));
+		TestTrue(TEXT("Only breathing and directional stationary turning are used"), Name == TEXT("A_Mole_Idle_Breathe") || Name == TEXT("A_Mole_Turn_Left_InPlace") || Name == TEXT("A_Mole_Turn_Right_InPlace"));
 		TestEqual(TEXT("Same skeleton"), Sample.Animation->GetSkeleton(), Mesh->GetSkeletalMeshAsset()->GetSkeleton());
 	}
-	for (float Input : {0.0f, 0.5f, 1.0f})
+	for (float Input : {-1.0f, -0.5f, 0.0f, 0.5f, 1.0f})
 	{
 		TArray<FBlendSampleData> Samples; int32 Cache = INDEX_NONE;
 		TestTrue(TEXT("Blend has baked runtime interpolation data"), Blend->GetSamplesFromBlendInput(FVector(Input, 0, 0), Samples, Cache, true));
 		TestTrue(TEXT("Runtime sampling returns a pose"), Samples.Num() > 0);
+		if (Input == 0.0f || FMath::Abs(Input) == 1.0f)
+		{
+			const FString Expected = Input < 0 ? TEXT("A_Mole_Turn_Left_InPlace") : Input > 0 ? TEXT("A_Mole_Turn_Right_InPlace") : TEXT("A_Mole_Idle_Breathe");
+			float ExpectedWeight = 0.0f;
+			for (const FBlendSampleData& Sample : Samples)
+			{
+				if (Blend->GetBlendSamples()[Sample.SampleDataIndex].Animation->GetName() == Expected) ExpectedWeight += Sample.GetClampedWeight();
+			}
+			TestEqual(TEXT("Turn sign selects the matching footwork at full weight"), ExpectedWeight, 1.0f);
+		}
 	}
 	return true;
 }
@@ -53,11 +63,16 @@ bool FTunaSweeperMoleTurnAnimationTest::RunTest(const FString& Parameters)
 	TestEqual(TEXT("No turn is idle"), Mole::ResolveTurnAnimationAmount(15,15,.1f), 0.0f);
 	TestEqual(TEXT("Tiny gaze drift is idle"), Mole::ResolveTurnAnimationAmount(15,15.1f,.1f), 0.0f);
 	TestEqual(TEXT("No time elapsed is idle"), Mole::ResolveTurnAnimationAmount(0,90,0), 0.0f);
-	TestEqual(TEXT("Left turn steps"), Mole::ResolveTurnAnimationAmount(0,3,.1f), 1.0f);
-	TestEqual(TEXT("Right turn steps"), Mole::ResolveTurnAnimationAmount(0,-3,.1f), 1.0f);
+	TestEqual(TEXT("Right turn steps"), Mole::ResolveTurnAnimationAmount(0,3,.1f), 1.0f);
+	TestEqual(TEXT("Left turn steps"), Mole::ResolveTurnAnimationAmount(0,-3,.1f), -1.0f);
+	TestEqual(TEXT("Left turn across yaw wrap keeps its direction"), Mole::ResolveTurnAnimationAmount(-179,179,.1f), -Mole::ResolveTurnAnimationAmount(0,2,.1f));
 	TestEqual(TEXT("Yaw wrap uses short arc"), Mole::ResolveTurnAnimationAmount(179,-179,.1f), Mole::ResolveTurnAnimationAmount(0,2,.1f));
 	TestTrue(TEXT("Settling turn blends to idle"), Mole::ResolveTurnAnimationAmount(0,1,.1f) > 0 && Mole::ResolveTurnAnimationAmount(0,1,.1f) < 1);
-	for (const TCHAR* Name : {TEXT("Idle_Breathe"), TEXT("Turn_InPlace")})
+	const UAnimSequence* Idle = LoadObject<UAnimSequence>(nullptr, TEXT("/Game/Characters/NPC/Mole/A_Mole_Idle_Breathe.A_Mole_Idle_Breathe"));
+	if (!TestNotNull(TEXT("Breathing reference exists"), Idle)) return false;
+	FTransform IdleRoot;
+	Idle->GetBoneTransform(IdleRoot, FSkeletonPoseBoneIndex(0), FAnimExtractContext(0.0), true);
+	for (const TCHAR* Name : {TEXT("Idle_Breathe"), TEXT("Turn_Left_InPlace"), TEXT("Turn_Right_InPlace")})
 	{
 		const FString Path = FString::Printf(TEXT("/Game/Characters/NPC/Mole/A_Mole_%s.A_Mole_%s"), Name, Name);
 		const UAnimSequence* Clip = LoadObject<UAnimSequence>(nullptr, *Path);
@@ -65,6 +80,7 @@ bool FTunaSweeperMoleTurnAnimationTest::RunTest(const FString& Parameters)
 		if (!TestNotNull(TEXT("Runtime clip skeleton is saved"), Clip->GetSkeleton())) continue;
 		TestFalse(TEXT("No runtime root motion"), Clip->bEnableRootMotion);
 		FTransform First; Clip->GetBoneTransform(First, FSkeletonPoseBoneIndex(0), FAnimExtractContext(0.0), true);
+		TestTrue(TEXT("Turn root matches idle so blending preserves body scale and heading"), First.Equals(IdleRoot, .001f));
 		for (int32 Frame=0; Frame<Clip->GetNumberOfSampledKeys(); ++Frame)
 		{
 			FTransform Root; Clip->GetBoneTransform(Root, FSkeletonPoseBoneIndex(0), FAnimExtractContext(Frame/30.0), true);
@@ -105,13 +121,42 @@ bool FTunaSweeperMoleRuntimeTurnTest::RunTest(const FString& Parameters)
 			const FVector Position = Actor->GetActorLocation();
 			Actor->SetActorRotation(FRotator(0, 90, 0));
 			Actor->Tick(.1f);
+			TestTrue(TEXT("Tracking yaw is limited so footwork can follow"), FMath::Abs(FMath::FindDeltaAngleDegrees(90.0f, Actor->GetActorRotation().Yaw)) <= 9.01f);
 			FVector Input, Filtered; Anim->GetBlendSpaceState(Input, Filtered);
-			TestTrue(TEXT("Actual returning rotation drives stationary steps"), Input.X > 0);
+			TestTrue(TEXT("Returning from positive yaw drives left steps"), Input.X < 0);
+			Actor->SetActorRotation(FRotator(0, -90, 0)); Actor->Tick(.1f);
+			Anim->GetBlendSpaceState(Input, Filtered);
+			TestTrue(TEXT("Returning from negative yaw drives right steps"), Input.X > 0);
 			TestTrue(TEXT("Turning does not move actor"), Actor->GetActorLocation().Equals(Position));
 			Actor->SetActorRotation(FRotator::ZeroRotator); Actor->Tick(.1f);
 			Anim->GetBlendSpaceState(Input, Filtered);
 			TestEqual(TEXT("Settled actor returns to breathing"), Input.X, 0.0);
+			TestEqual(TEXT("Settled breathing plays at normal speed"), Anim->GetPlayRate(), 1.0f);
 			TestEqual(TEXT("Playback still uses only idle/turn blend"), Anim->GetAnimationAsset()->GetName(), FString(TEXT("BS_Mole_IdleTurn")));
+			TArray<FVector> DirectionPoses;
+			for (float Direction : {-1.0f, 1.0f})
+			{
+				Anim->SetBlendSpacePosition(FVector(Direction, 0, 0));
+				Anim->SetPosition(0.0f, false);
+				FBox LeftFootMotion(ForceInit), RightFootMotion(ForceInit);
+				for (int32 Frame = 0; Frame < 128; ++Frame)
+				{
+					// AnimInstanceProxy advances its native state once per engine frame.
+					++GFrameCounter;
+					Mesh->TickAnimation(1.0f / 60.0f, false);
+					Mesh->RefreshBoneTransforms();
+					const FVector Foot = Mesh->GetSocketTransform(TEXT("foot_L"), RTS_Component).GetLocation();
+					LeftFootMotion += Foot;
+					RightFootMotion += Mesh->GetSocketTransform(TEXT("foot_R"), RTS_Component).GetLocation();
+					if (Frame == 30) DirectionPoses.Add(Foot);
+				}
+				// A directional turn may pivot on the inner foot; the stepping foot must move.
+				AddInfo(FString::Printf(TEXT("Direction %.0f: left/right foot travel %.3f / %.3f cm"), Direction, LeftFootMotion.GetSize().Size(), RightFootMotion.GetSize().Size()));
+				AddInfo(FString::Printf(TEXT("Direction %.0f: head %s, root %s"), Direction, *Mesh->GetSocketTransform(TEXT("head"), RTS_Component).ToString(), *Mesh->GetSocketTransform(TEXT("root"), RTS_Component).ToString()));
+				TestTrue(TEXT("Turning retains full-sized skeletal pose"), Mesh->GetSocketTransform(TEXT("head"), RTS_Component).GetLocation().Z > 40.0f);
+				TestTrue(TEXT("Evaluated turning pose visibly moves a stepping foot"), FMath::Max(LeftFootMotion.GetSize().Size(), RightFootMotion.GetSize().Size()) > 1.0f);
+			}
+			TestTrue(TEXT("Left and right produce different evaluated foot poses"), !DirectionPoses[0].Equals(DirectionPoses[1], 0.1f));
 		}
 	}
 	World->DestroyWorld(false); World->RemoveFromRoot();
