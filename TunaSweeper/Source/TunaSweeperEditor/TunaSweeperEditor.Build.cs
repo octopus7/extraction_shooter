@@ -29,7 +29,6 @@ public class TunaSweeperEditor : ModuleRules
 			"RenderCore",
 			"MeshDescription",
 			"SkeletalMeshDescription",
-			"StaticMeshDescription",
 			"AnimGraph",
 			"AnimGraphRuntime",
 			"BlueprintGraph",
