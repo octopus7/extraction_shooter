@@ -1,6 +1,7 @@
 # EOS 도움 코옵 설계 및 어뷰징 검토
 
 - 검토일: 2026-09-16
+- 인증·초대코드 추가 검토: 2026-09-20
 - 대상: TunaSweeper / Unreal Engine 5.7
 - 상태: 구현 전 검토. 아래 권장안은 확정된 구현 계약이 아니다.
 - 목적: 진행 중인 싱글플레이 세이브 슬롯에 헬퍼가 참가하여 전투를 돕되, 아이템 거래와 진행 오염을 방지한다.
@@ -16,6 +17,9 @@
 - 상자 넣기나 버리기를 통한 간접 거래도 금지한다.
 - 호스트 사망 시 즉시 게임 종료 처리한다.
 - 헬퍼 사망 시 이어하기를 허용하지 않는다.
+- 호스트가 방을 생성하면 임의 숫자를 왼쪽 0으로 채운 8자리 초대코드를 표시한다.
+- 별도 매칭 서버를 운영하지 않고 EOS가 제공하는 로비·검색·참가 기능을 사용한다.
+- Steam·STOVE 플랫폼 인증을 EOS의 공통 온라인 인증 계층으로 연결한다. 기술 검토는 15절을 따른다.
 
 ### 이 문서의 해석과 미확정 사항
 
@@ -360,6 +364,215 @@ RPC는 다른 머신에서 함수를 실행하도록 보내는 요청이며 반�
 - [레벨 이동](../TunaSweeper/Source/TunaSweeper/Private/Subsystem/TunaSweeperLevelTransitionSubsystem.cpp)
 - [GameMode](../TunaSweeper/Source/TunaSweeper/Private/Game/TunaSweeperGameMode.cpp)
 
-## 14. 결론
+## 14. 추가 요구사항과 기존 조사안의 적용 범위
+
+2026-09-20 추가 요구에 따라 **호스트 방 생성 → 8자리 숫자 코드 공유 → 헬퍼 코드 입력 → EOS 로비 참가**를 기본 입장 흐름으로 정한다. 기존 조사안의 2/3/4인 랜덤 매칭과 인원 충족 시 자동 시작은 이번 도움 코옵 요구로 채택하지 않는다. 인원수 등 앞 절의 미확정 정책은 그대로 별도 결정 사항이다.
+
+유지할 방향은 플랫폼별 인증 어댑터, EOS Connect의 PUID 식별, EOS Lobby, UE 리슨 서버와 리플리케이션, EOS P2P 전송이다. Epic Games 계정 로그인을 추가로 요구하지 않는 방향을 우선 검토한다. 플랫폼별 빌드가 이미 분리되어 있으므로 동일 실행 파일을 만들기 위한 재구조화는 필수 조건이 아니다.
+
+**자체 매칭 서버가 없다는 조건과 인증 중개 서비스가 없다는 조건은 다르다.** 아래 STOVE 경로는 작은 인증 서비스를 필요로 하는 설계 제안이다. 방 목록·초대코드·멤버십은 이 서비스에 저장하지 않으며 EOS가 관리한다. 인증 서비스까지 전혀 운영하지 않는 조건은 현재 확인한 STOVE 연동 경로로는 충족되지 않는다.
+
+## 15. Steam·STOVE 인증을 EOS Connect로 통합
+
+### 15.1 EOS Auth와 Connect, PUID의 의미
+
+- `EOS_Auth`는 Epic Account Services 계정 로그인 계층이다. 플랫폼 로그인만으로 게임 서비스에 접근하려는 이번 흐름에서는 `EOS_Connect_Login`을 중심으로 구성한다.
+- Connect는 지원하는 외부 자격증명을 검증하여 `EOS_ProductUserId`(PUID)를 반환한다. 플랫폼 ID 문자열을 PUID로 변환하거나 클라이언트가 임의로 정하는 방식이 아니다.
+- Steam 계정과 STOVE 계정은 EOS에서 서로 다른 외부 신원이다. 같은 사람이 두 스토어를 써도 자동으로 같은 PUID가 되지 않는다. 계정 연결은 양쪽 인증을 확인하는 별도 기능이며, 교차 플레이 자체에 계정 병합은 필요하지 않다.
+- 닉네임·이메일·로컬 세이브 슬롯 이름으로 계정을 자동 연결하지 않는다. 크로스플레이 허용과 기존 채널별 저장·업적 네임스페이스 통합도 별개의 결정이다.
+- 이 절은 공식 API를 조합한 설계다. 실제 Dev Portal 등록 상태, 로그인 성공, 스토어 간 입장 성공을 검증한 결과는 아니다.
+
+공식 근거: [EOS Connect](https://dev.epicgames.com/docs/epic-online-services/eos-fundamentals/connect-interface), [Identity Provider Management](https://dev.epicgames.com/docs/epic-online-services/eos-fundamentals/identity-provider-management).
+
+### 15.2 Steam 경로: EOS가 지원하는 티켓 검증
+
+```text
+Steam 초기화 및 플랫폼 실행 확인
+  → GetAuthTicketForWebApi("epiconlineservices")
+  → 비동기 GetTicketForWebApiResponse_t 성공 확인
+  → 실제 길이의 티켓 바이트를 hex 문자열로 변환
+  → EOS_Connect_Login(EOS_ECT_STEAM_SESSION_TICKET)
+  → PUID
+```
+
+1. 해당 게임의 Steam 앱과 EOS Identity Provider를 등록하고 사용하는 sandbox에서 활성화한다. Demo와 Main의 앱 ID를 각각 올바르게 연결한다. 에디터용 테스트 앱 ID를 출시 인증에 사용하지 않는다.
+2. `GetAuthTicketForWebApi`의 identity 문자열과 EOS 공급자에 설정한 identity 값을 일치시킨다. UE 5.7에 동봉된 EOS SDK는 `epiconlineservices`를 권장한다. 이 용도의 티켓은 다른 서비스 인증에 재사용하지 않는다. Portal의 현재 필드명과 필요한 키 종류는 실제 공급자 등록 화면에서 확인한다.
+3. 비동기 콜백의 성공 여부·티켓 핸들·실제 길이를 확인한다. 티켓 바이트는 `EOS_ByteArray_ToString` 등의 hex 변환을 거쳐 전달한다. 핸들과 토큰의 수명, 갱신 및 취소 시점도 관리한다.
+4. `EOS_Connect_Login` 성공 시 반환된 PUID만 사용한다. 유효한 외부 인증에 대해 `EOS_InvalidUser`가 반환되면 Connect 사용자 생성/기존 계정 연결 정책에 따라 `ContinuanceToken`을 처리한다. 일반 인증 실패나 네트워크 오류 때 새 계정을 만들지 않는다.
+5. Steam 티켓, EOS 토큰과 플랫폼 서버용 비밀키는 로그·로비 속성·게임 저장 파일에 기록하지 않는다. Steam 파트너 키 등을 게임 실행 파일에 넣어 자체 검증하는 구조는 사용하지 않는다.
+
+`GetAuthSessionTicket`과 `GetAuthTicketForWebApi`는 교환 가능한 함수가 아니다. Steam은 Web API 검증용 티켓에 후자를 사용하도록 구분하며, 설치된 EOS SDK의 `EOS_ECT_STEAM_SESSION_TICKET` 설명도 후자를 지정한다. 기존 Encrypted App Ticket 경로를 사용한다면 별도 자격증명 타입과 공급자 설정을 맞춰야 하며, 이 문서의 기본안은 Web API 티켓 경로다. [Steam ISteamUser](https://partner.steamgames.com/doc/api/ISteamUser#GetAuthTicketForWebApi), [EOS 외부 자격증명 타입](https://dev.epicgames.com/docs/api-ref/enums/eos-e-external-credential-type).
+
+### 15.3 STOVE 경로: 토큰 검증과 OpenID 인증 브리지
+
+**2026-09-20 확인한 EOS 공식 공급자 목록과 UE 5.7 SDK 자격증명 enum에는 STOVE 전용 항목이 없다.** STOVE access token을 Steam 타입 또는 OpenID 타입으로 지정하기만 하면 EOS가 알아서 검증한다고 가정하면 안 된다. OpenID를 사용하려면 EOS가 신뢰할 공급자와 검증 경로를 등록해야 한다. [EOS 공급자 관리](https://dev.epicgames.com/docs/epic-online-services/eos-fundamentals/identity-provider-management)
+
+권장 후보는 다음과 같다. 이는 완성된 공식 STOVE/EOS 통합 모듈이 아니라 공식 기능을 조합한 설계다.
+
+```text
+STOVE 실행·소유권 확인
+  → PCSDK Base_GetAccessToken으로 최신 사용자 토큰 조회
+  → HTTPS 인증 브리지에 전달
+  → 브리지가 STOVE 서버 API로 사용자 토큰 검증
+  → 검증된 사용자 ID를 sub로 갖는 짧은 수명의 서명 토큰 발급
+  → EOS_Connect_Login(EOS_ECT_OPENID_ACCESS_TOKEN)
+  → EOS에 등록한 OpenID 공급자/JWKS로 검증
+  → PUID
+```
+
+STOVE 공식 인증 가이드는 다음 서버 흐름을 설명한다.
+
+- 서버 자격증명으로 `POST /auth/v5/server_token`을 호출하여 API Access Token을 얻는다.
+- 이를 사용해 `POST /member/v3.0/{game_id}/token/verify`로 사용자 토큰을 검증한다.
+- 성공 코드와 검증 응답의 `value.guid` 또는 레거시 `value.member_no`를 확인한다.
+- 사용자 access token은 사용 시점에 SDK에서 조회하고 SDK의 갱신 흐름을 따른다.
+
+토큰 유효성 검사와 게임 구매·소유권 확인은 구분한다. 클라이언트가 보내는 `owned=true`는 소유권 증명이 아니다. 서버 측 소유권까지 요구할 경우 STOVE에서 제공하는 해당 계약·API를 추가 확인해야 한다. [STOVE 인증 가이드](https://developers.onstove.com/docs/stove/guide/authentication), [STOVE Unreal 연동 가이드](https://studio-docs.onstove.com/en/pc/Integration/unreal.html)
+
+브리지 구현 시 필요한 사항:
+
+- STOVE 서버 비밀키와 토큰 서명용 개인키는 운영 서비스에만 둔다. 플레이어 PC의 리슨 서버도 키 보관 장소로 사용하지 않는다.
+- `sub`는 검증 응답의 안정적인 ID를 기반으로 고정한다. 재로그인·PC 교체·닉네임 변경마다 달라지면 안 된다. 클라이언트가 주장한 사용자 번호를 그대로 서명하지 않는다.
+- JWKS 공개키 검증, 공급자와 일치하는 issuer/audience 설정, 유효기간, 키 회전을 설계하고 EOS sandbox에서 발급 토큰 호환성을 확인한다.
+- SDK의 `gameUserId`와 서버의 `guid`가 동일하다고 이름만으로 단정하지 않는다. 현재 PCSDK의 `GetMemberNumber()`는 폐기 예정 안내가 있으므로 `GetGameUserId()`와 실제 검증 응답 간 대응을 확인한다.
+- 브리지 장애·토큰 만료·계정 변경 시 온라인 입장을 차단하고 복구 가능한 오류를 표시한다. 자동으로 Device ID 익명 계정으로 전환해 참가 이력을 우회시키지 않는다.
+- 브리지는 게임 계정의 이메일·비밀번호를 수집할 필요가 없다. 안정적 외부 ID를 사용하면 자체 사용자 DB 없이 구성할 여지도 있지만, 키 관리·운영·요청 제한은 여전히 필요하다.
+- EOS는 OpenID UserInfo 엔드포인트 방식도 지원한다. STOVE 검증을 중개하는 UserInfo 어댑터는 대안이지만 전달 헤더·응답 필드·공급자 설정을 별도로 검증해야 한다.
+
+인증 서비스까지 없애려면 STOVE가 EOS에 직접 연결 가능한 공급자 구성을 제공하는지 공급사에 추가 확인하거나, Epic 계정 등 다른 인증 수단을 선택해야 한다. 후자는 사용자에게 별도 로그인을 요구하지 않는 기존 방향의 변경이다.
+
+### 15.4 UE 5.7 및 현재 프로젝트 연결 지점
+
+| 확인된 현재 상태 | 필요한 작업 |
+|---|---|
+| 기본 `DefaultPlatformService=Steam`, STOVE 타깃은 `NULL` | 코옵용 EOS와 플랫폼 기능 선택을 명시적으로 분리 |
+| STOVE 래퍼의 실행·초기화·Ownership 처리 | 최신 사용자 토큰 조회, 비동기 인증 브리지 호출, EOS Connect 연결 추가 |
+| STOVE 래퍼의 공개 진입점은 Startup/Shutdown 중심 | 인증 상태·갱신·실패·계정 변경을 노출하는 어댑터 계약 추가 |
+| UE OSS EOS의 Steam 토큰 처리 | `SteamTokenType=WebApi:epiconlineservices` 경로와 Dev Portal identity 일치 검증 |
+| EOS 공급자가 STOVE를 자동 인식하지 않음 | OpenID 토큰을 EOS 로그인 및 UE 로컬 사용자 상태에 연결하는 경로 구현 |
+
+Steam은 기존 OSS Steam의 티켓 획득을 활용할 수 있다. STOVE는 현재 래퍼가 Unreal OnlineSubsystem 구현 자체가 아니므로 EOS Plus를 켜는 것만으로 토큰이 전달되지는 않는다. 다음 중 하나의 통합 책임을 정한다.
+
+1. 플랫폼 인증을 OSS Identity 어댑터로 제공하고 OSS EOS/필요한 EOS Plus 계층에 연결한다.
+2. 공통 EOS 어댑터가 native Connect와 Lobby를 다루되, EOS P2P NetDriver 및 UE의 로컬 PUID·사용자 등록과 일관되게 연동한다.
+
+서로 다른 EOS Platform handle에 중복 로그인한 뒤 한쪽은 Lobby, 다른 쪽은 NetDriver에서 쓰는 구조를 만들지 않는다. native Connect의 성공만으로 OSS 내부 사용자 목록과 UniqueNetId가 자동 등록되는 것도 아니다. 계정·로비·접속 주소를 책임지는 통합 경로를 하나로 정하고 두 스토어에서 같은 흐름을 검증한다.
+
+기본 OSS 변경 후 업적·상점 링크 등 기존 플랫폼 기능이 EOS를 잘못 참조하지 않도록 명시적 플랫폼 선택을 감사한다. 기존 Steam/STOVE 저장 네임스페이스는 이번 인증 통합만으로 변경하지 않는다. [UE 5.7 OSS EOS](https://dev.epicgames.com/documentation/en-us/unreal-engine/online-subsystem-eos-plugin-in-unreal-engine?application_version=5.7)
+
+### 15.5 공통 로그인 수명과 입장 검증
+
+- 초기 로그인, 최초 사용자 생성, 재로그인, 계정 연결은 서로 다른 상태로 관리한다.
+- `EOS_Connect_AddNotifyAuthExpiration`과 로그인 상태 변경 통지를 처리한다. 만료 시간을 고정 상수로 가정하지 않는다.
+- Steam은 새 티켓을, STOVE는 SDK 최신 토큰을 거친 새 브리지 자격증명을 받아 Connect 로그인을 갱신한다.
+- Connect 자체는 외부 자격증명을 암묵적으로 갱신하지 않는다. 로그인 상태 알림뿐 아니라 각 EOS API의 인증 실패도 처리하고, 종료 시 등록한 알림 핸들을 해제한다.
+- 온라인 플레이 중 외부 계정이 바뀌면 기존 참가자로 계속 취급하지 않는다. 출격 결과·정산을 다른 계정에 적용하지 않는다.
+- 로비 멤버십·실제 접속의 인증된 PUID·입장 승인 계정을 일치시킨다. URL 인자로 받은 PUID만 믿지 않는다. 필요한 인증 토큰 검증은 EOS 검증 경로를 사용한다.
+- 플랫폼 실행·소유권 정책과 별개로 EOS 장애가 기존에 허용된 오프라인 플레이를 막지 않도록 한다. STOVE 실행 정책 자체를 우회한다는 의미는 아니다.
+
+상세 근거: [Connect reference](https://dev.epicgames.com/docs/epic-online-services/eos-fundamentals/connect-interface/connect-reference), [인증 갱신 가이드](https://dev.epicgames.com/docs/epic-online-services/eos-fundamentals/connect-interface/connect-guide/refresh-player-authentication).
+
+## 16. EOS 기본 로비를 사용하는 8자리 숫자 초대코드
+
+### 16.1 사용자 흐름과 서비스 범위
+
+```text
+호스트: 슬롯 선택 → EOS 로그인 → 코드 후보 생성 → EOS 로비 생성 성공
+        → 방 준비 완료 → 8자리 코드 표시
+헬퍼:   EOS 로그인 → 코드 입력 → 해당 로비 조회 → 상태·버전 확인
+        → 로비 참가 → 호스트 EOS P2P 접속 → 출격 참가 승인
+```
+
+매칭·방 등록·조회·멤버십은 EOS Lobby에서 처리한다. 자체 코드 조회 서버, 매칭 DB, MMR 서버를 추가하지 않는다. EOS가 숫자 코드를 자동 발급해 준다고 가정하지 않고 **코드 생성·표시·재시도는 클라이언트**, 로비의 등록·참가 판정은 EOS가 담당하도록 한다.
+
+UE의 `IOnlineSession`을 사용하더라도 `bUseLobbiesIfAvailable` 경로는 내부적으로 EOS Lobby를 사용할 수 있다. EOS Lobby와 EOS Sessions를 모두 별개로 생성해야 하는 것은 아니다. 기본안은 Lobby를 방의 유일한 멤버십 원본으로 사용하고 UE 연결을 붙이는 방식이다. 별도 EOS Session은 실제 기능상의 필요가 있을 때만 추가한다.
+
+### 16.2 코드 형식과 로비 ID
+
+- 코드는 `00000000`부터 `99999999`까지의 고정 8자리 ASCII 숫자 문자열로 취급한다. 예: `1234`를 생성하면 표시·공유 값은 `00001234`.
+- 정수로 저장·전달해 앞의 0을 잃지 않는다. 입력은 8자리 검증 후 사용한다. 붙여넣기 주변 공백 처리와 숫자 형식 오류 안내는 문자열 키로 제공한다.
+- 암호학적 난수원으로 범위 내 후보를 균등 생성한다. 시간·계정 ID의 끝자리나 연속 번호로 만들지 않는다.
+- 내부 로비 ID는 양쪽 클라이언트가 동일하게 계산하는 `게임/환경/콘텐츠 구분용 고정 접두부 + 8자리 코드`로 구성하는 방안을 우선 검토한다. 실제 문자열은 SDK의 허용 문자·길이 조건에 맞춘다.
+- Steam/STOVE별 접두부를 사용하지 않는다. 같은 환경·콘텐츠끼리는 서로 같은 로비 ID를 계산해야 한다. 세부 빌드 호환성은 조회 후 검증해 버전 불일치를 표시할 수 있게 한다.
+
+EOS `EOS_Lobby_CreateLobbyOptions.LobbyId`는 서버가 배정하는 ID 대신 개발자가 지정한 전역적으로 고유한 값을 사용할 수 있다. 설치된 UE 5.7 SDK 헤더는 override 길이를 4~60자로 정의한다. UE OSS의 `FOnlineSessionSettings::SessionIdOverride`가 이 `LobbyId`로 전달되는 것도 확인했다. **SDK 필드 이름은 `LobbyId`이며, UE의 필드 이름은 `SessionIdOverride`다.** [EOS CreateLobbyOptions](https://dev.epicgames.com/docs/api-ref/structs/eos-lobby-create-lobby-options)
+
+전용 고정 접두부로 다른 제품·환경과의 충돌 가능성을 줄이고, 같은 코드 후보의 최종 소유는 EOS 생성 결과로 판정한다. 문서가 override와 자동 배정 혼용을 피하도록 안내하므로 이 코드 방 경로는 하나의 ID 생성 방식으로 통일한다. 접두부는 비밀키가 아니며 보안 수단으로 취급하지 않는다.
+
+### 16.3 충돌·생성 실패 처리
+
+1. 코드와 로비 ID 후보를 만든다.
+2. EOS 로비 생성을 요청한다.
+3. 성공 콜백과 최종 ID를 확인한 뒤 필요한 로비 속성을 설정한다.
+4. 실제 방 준비가 끝난 뒤에만 코드를 표시한다.
+5. ID 충돌이면 새 난수로 제한된 횟수만 재시도한다. 인증 오류·서비스 제한·장애는 코드 충돌과 구분한다.
+6. 타임아웃으로 성공 여부가 불명확하면 현재 로비 및 생성 결과를 확인해 고아 방·중복 방을 정리한다.
+
+검색 결과가 없다는 사실만으로 코드를 선점했다고 판단하면 동시에 생성한 호스트가 같은 코드를 표시할 수 있다. **공개 `InviteCode` 속성 검색만으로 고유성을 확보하는 방식은 기본안으로 채택하지 않는다.** 생성 결과와 충돌 처리를 사용하고, SDK의 `EOS_Lobby_LobbyAlreadyExists` 및 OSS가 전달하는 오류 형태를 sandbox에서 검증한다.
+
+코드 공간은 1억 개지만 충돌 확률은 0이 아니다. 로비 삭제 뒤 ID 재사용 가능 시점과 동시 생성 시 동작은 실제 서비스 검증 항목으로 둔다. 코드와 별개로 기존 출격 ID를 유지하여 코드 재발급으로 사망·탈락 이력이 초기화되지 않게 한다.
+
+### 16.4 코드 조회, 권한 레벨과 UE 어댑터 주의점
+
+기본 후보는 **일반 목록에 광고하지 않고, ID를 아는 사용자가 조회·참가하는 로비**다. EOS의 `Join via presence` 권한은 이름과 달리 ID를 아는 클라이언트의 접근도 허용한다고 공식 문서가 설명한다. `Invite only`는 EOS 초대를 받은 사용자만 허용하므로 숫자 코드를 입력했다는 사실만으로 권한이 생기지는 않는다. [EOS 로비·세션 보안 고려 사항](https://dev.epicgames.com/docs/epic-online-services/multiplayer/lobbies-and-sessions/security-considerations)
+
+권장 조회 흐름은 재구성한 로비 ID로 `EOS_LobbySearch_SetLobbyId` → `EOS_LobbySearch_Find` → 결과 상세 핸들 → `EOS_Lobby_JoinLobby`다. 일반 속성 검색과 ID 검색을 한 검색 핸들에서 섞지 않는다. UE 5.7의 `FindSessionById`에도 로비 ID 검색 경로가 있다.
+
+`EOS_Lobby_JoinLobbyById`는 비슷한 이름이지만 기본안과 다른 API다. 동봉 SDK는 이를 통합 플랫폼의 native invite 지원용 특수 경로로 안내하므로 숫자 코드 기능이라는 이유만으로 `bEnableJoinById`를 켜서 사용하지 않는다.
+
+로비를 `EOS_LPL_JOINVIAPRESENCE`로 설정하되 Epic 소셜 Presence 연결은 사용하지 않는 구성을 후보로 검증한다. `bPresenceEnabled`와 로비 접근 권한은 SDK에서 별개의 설정이다. 다만 **기본 OSS 설정 몇 개만으로 이 조합이 구현된다고 단정하면 안 된다.** 설치된 UE 5.7 `OnlineSessionEOS.cpp`에서는 다음 동작을 확인했다.
+
+- `NumPublicConnections > 0`이면 `PUBLICADVERTISED` 권한을 선택한다.
+- `bUsesPresence=false`이면 `bAllowJoinViaPresence`를 해제한다.
+- 위 조건 다음에 `bAllowJoinViaPresence` 여부로 `JOINVIAPRESENCE`와 `INVITEONLY`를 선택한다.
+- `bEnableJoinById`와 `bRejoinAfterKickRequiresInvite`는 기본 생성 경로에서 false로 설정한다.
+- 호스트 이전은 기본 true이며 `SETTING_HOST_MIGRATION`으로 제어한다.
+
+따라서 Connect 전용·비광고 코드 로비를 목표로 할 때는 EOS 통합 어댑터에서 native 로비 옵션을 명시적으로 다루거나 OSS 확장 지점을 마련해야 한다. 직접 native 로비를 만들 경우에도 15.4절의 사용자 등록·NetDriver·접속 주소 연결을 완성해야 한다. 이 조합을 두 스토어와 서로 다른 PC에서 검증하는 것이 구현의 첫 관문이다.
+
+### 16.5 참가·잠금·종료와 코드의 보안 한계
+
+- 조회 성공은 참가 성공이 아니다. 로비 참가 콜백과 호스트 접속 승인에서 정원·출격 상태·버전·재참여 제한을 다시 검사한다.
+- 조회 화면에는 호스트 표시명과 콘텐츠·난이도 등 확인에 필요한 최소 정보를 보여준다. 오래된 코드가 다른 방에 재사용된 경우 곧바로 다른 출격에 들어가지 않게 한다.
+- 8자리 코드는 사용자 편의를 위한 주소다. 약 26.6비트 공간이며 강한 비밀번호·인증 수단이 아니다. 코드 추측과 유출에 대한 완전한 차단을 약속하지 않는다.
+- 클라이언트 입력 재시도 제한, EOS 서비스 제한 처리, 호스트 차단·강퇴, 필요 시 호스트 참가 승인 정책을 검토한다. 클라이언트 제한만으로 악성 프로그램의 요청을 통제할 수는 없다.
+- 토큰·세이브 전체·비밀 정보를 로비 속성에 넣지 않는다. 코드와 전체 로비 ID도 공개 검색 속성으로 중복 노출하지 않는다.
+- 방 준비·출격 시작·종료 상태를 관리하고, 출격 중 신규 입장 금지는 호스트 서버에서 강제한다. 로비 `State` 속성 하나는 접근 제어가 아니다.
+- 호스트 이전은 SDK의 `bDisableHostMigration=true` 또는 검증된 OSS 설정으로 끈다. 호스트 사망 시 서버 플레이를 즉시 종료하고 로비를 닫는다. 연결 단절 탐지와 백엔드 정리는 지연될 수 있으므로 발견되는 잔존 로비를 정상 방으로 간주하지 않는다.
+- 호스트 사망 또는 탈락한 헬퍼가 코드·로비를 다시 만들어 출격 이력을 초기화하지 못하도록 출격 기록은 별개로 유지한다.
+
+### 16.6 인증·코드 입장 구현 전 검증 목록
+
+| 검증 | 통과 조건 |
+|---|---|
+| Steam 최초·반복 로그인 | 올바른 PUID 유지, 실패를 신규 계정으로 처리하지 않음 |
+| Steam 잘못된 identity·앱 ID·만료 티켓 | 온라인 인증 거절, 토큰 로그 노출 없음 |
+| STOVE 서버 API 권한과 ID 대응 | PCSDK 3.4.2 사용자와 검증 응답의 안정적 ID 대응 확인 |
+| STOVE 브리지 위조·만료 토큰 | 잘못된 토큰·audience·서명을 거절, 클라이언트 주장 ID 무시 |
+| 계정 전환·인증 갱신·서비스 장애 | 기존 계정의 참가·정산을 다른 계정에 적용하지 않음 |
+| Steam 호스트/STOVE 헬퍼 및 역방향 | Epic 계정 로그인 없이 같은 EOS 로비·P2P 접속 |
+| `00000000`, `00001234`, `99999999` | 8자리 그대로 표시·입력·ID 재구성 |
+| 두 호스트의 동일 코드 동시 생성 | 한 방으로 혼동되지 않음, 충돌 측은 재생성 |
+| 비광고 로비의 ID 조회 | 일반 목록 비노출, 알려진 코드로 조회·참가 가능 |
+| InviteOnly 또는 권한 없는 로비 | 코드만으로 EOS 초대 권한을 우회하지 않음 |
+| 가득 찬 방·출격 중·삭제된 방·생성 타임아웃 | 명확한 실패/복구, 중복 생성·무제한 재시도 없음 |
+| Demo/Main·배포 환경·버전 불일치 | 호환되지 않는 방에 입장하지 않음 |
+| 강퇴·사망 후 코드 재입장 | 해당 출격의 재참여 제한 유지 |
+| 호스트 종료·로비 소유자 변경 | 게임 호스트 자동 승계 없음, 출격 종료 |
+
+### 16.7 근거와 검증 범위
+
+이번 추가 검토는 공식 웹 문서 및 설치된 UE 5.7 소스/SDK의 정적 확인이다. 외부 계정 로그인, Dev Portal 변경, 인증 브리지 배포, 실제 로비 생성·코드 충돌 시험은 수행하지 않았다.
+
+- 공식 링크는 각 절에 기재했다. EOS API 사이트의 일반 텍스트 수집으로 본문을 얻지 못한 페이지는 브라우저에서 공식 본문을 확인했다.
+- 설치된 SDK `Engine/Source/ThirdParty/EOSSDK/SDK/Include/eos_version.h`: 버전 1.18.0 계열. 정확한 통합 대상은 실제 빌드의 SDK 버전으로 고정하고 새 문서와 차이를 재확인한다.
+- 같은 Include 폴더의 `eos_common.h`, `eos_lobby_types.h`, `eos_lobby.h`, `eos_result.h`: 자격증명, ID 길이, JoinById 용도 및 오류 정의.
+- `Engine/Plugins/Online/OnlineSubsystemEOS/Source/OnlineSubsystemEOS/Private/OnlineSessionEOS.cpp`: `CreateLobbySession`, `GetLobbyPermissionLevelFromSessionSettings`, `FindSessionById`.
+- 같은 Private 폴더의 `UserManagerEOS.cpp`: Steam 토큰 타입·플랫폼 Identity 연결.
+- [프로젝트 STOVE 래퍼](../TunaSweeper/Source/TunaSweeper/Private/Platform/TunaSweeperStove.cpp), [STOVE 래퍼 인터페이스](../TunaSweeper/Source/TunaSweeper/Private/Platform/TunaSweeperStove.h), [플랫폼 빌드 구성](../TunaSweeper/Source/TunaSweeper/TunaSweeper.Build.cs).
+
+## 17. 결론
 
 EOS 도움 코옵의 핵심은 연결 자체보다 **아이템 소유권 분리, 출격 단위 참가 이력, 사망 결과의 단일 확정, 장애에 견디는 소비 정산**이다. 이 경계를 먼저 정한 뒤 작은 참가 규모로 검증하는 것이 적합하다. 게임 코드와 현행 저장 계약은 이번 검토에서 변경하지 않았다.
+
+추가 인증 설계에서는 **Steam의 직접 티켓 인증과 STOVE의 OpenID 인증 브리지를 구분**해야 한다. 매칭과 8자리 코드 입장은 EOS 로비에 맡길 수 있지만, 코드 생성·충돌·권한 설정 및 UE 사용자/NetDriver 연결은 게임에서 구현해야 한다.
