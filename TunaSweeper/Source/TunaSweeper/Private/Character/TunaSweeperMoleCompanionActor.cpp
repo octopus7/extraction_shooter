@@ -3,7 +3,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/SceneComponent.h"
 #include "Components/SkeletalMeshComponent.h"
-#include "Animation/AnimSingleNodeInstance.h"
+#include "Character/TunaSweeperMoleAnimInstance.h"
 #include "Animation/BlendSpace.h"
 #include "Component/TunaSweeperQuestMarkerComponent.h"
 #include "Engine/GameInstance.h"
@@ -92,6 +92,9 @@ ATunaSweeperMoleCompanionActor::ATunaSweeperMoleCompanionActor()
 		IdleTurnBlendSpace = MoleIdleTurn.Object;
 		SkeletalMesh->OverrideAnimationData(IdleTurnBlendSpace, true, true);
 	}
+	static ConstructorHelpers::FClassFinder<UTunaSweeperMoleAnimInstance> MoleAnimClass(
+		TEXT("/Game/Characters/NPC/Mole/ABP_MoleCompanion"));
+	CompanionAnimClass = MoleAnimClass.Class;
 }
 
 void ATunaSweeperMoleCompanionActor::Tick(float DeltaSeconds)
@@ -215,9 +218,10 @@ void ATunaSweeperMoleCompanionActor::RefreshCompanionVisuals()
 		}
 		SkeletalMesh->SetVisibility(true, true);
 		SkeletalMesh->SetHiddenInGame(false, true);
-		if (IdleTurnBlendSpace && SkeletalMesh->AnimationData.AnimToPlay != IdleTurnBlendSpace)
+		if (CompanionAnimClass && (SkeletalMesh->GetAnimClass() != CompanionAnimClass
+			|| SkeletalMesh->GetAnimationMode() != EAnimationMode::AnimationBlueprint))
 		{
-			SkeletalMesh->OverrideAnimationData(IdleTurnBlendSpace, true, true);
+			SkeletalMesh->SetAnimInstanceClass(CompanionAnimClass);
 		}
 	}
 
@@ -242,19 +246,25 @@ float ATunaSweeperMoleCompanionActor::ResolveTurnAnimationAmount(float PreviousY
 
 void ATunaSweeperMoleCompanionActor::UpdateCompanionAnimation(float PreviousYaw, float DeltaSeconds)
 {
-	if (UAnimSingleNodeInstance* Animation = SkeletalMesh ? SkeletalMesh->GetSingleNodeInstance() : nullptr)
+	if (auto* Animation = SkeletalMesh ? Cast<UTunaSweeperMoleAnimInstance>(SkeletalMesh->GetAnimInstance()) : nullptr)
 	{
 		// Negative yaw selects left footwork, positive yaw selects right footwork.
 		// The clips have fixed roots; only the actor owns the heading.
 		const float TurnAmount = ResolveTurnAnimationAmount(PreviousYaw, GetActorRotation().Yaw, DeltaSeconds);
-		Animation->SetBlendSpacePosition(FVector(TurnAmount, 0.0f, 0.0f));
+		Animation->TurnAmount = TurnAmount;
 		// Source turns cover 90 degrees in 64 frames at 30 fps. Match their cadence
 		// to the actual rotation while preserving normal-speed breathing at rest.
 		const float TurnSpeed = DeltaSeconds > SMALL_NUMBER
 			? FMath::Abs(FMath::FindDeltaAngleDegrees(PreviousYaw, GetActorRotation().Yaw)) / DeltaSeconds : 0.0f;
 		const float StepRate = FMath::Clamp(TurnSpeed / (90.0f / (64.0f / 30.0f)), 0.5f, 2.2f);
-		Animation->SetPlayRate(FMath::Lerp(1.0f, StepRate, FMath::Abs(TurnAmount)));
+		Animation->TurnPlayRate = FMath::Lerp(1.0f, StepRate, FMath::Abs(TurnAmount));
 	}
+}
+
+FVector2D ATunaSweeperMoleCompanionActor::GetIdleVariationDelayRange() const
+{
+	const float Minimum = FMath::Max(0.1f, IdleVariationMinDelay);
+	return FVector2D(Minimum, FMath::Max(Minimum, IdleVariationMaxDelay));
 }
 
 void ATunaSweeperMoleCompanionActor::RefreshQuestNoticeVisibility()

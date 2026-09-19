@@ -1,7 +1,8 @@
 #if WITH_DEV_AUTOMATION_TESTS
 #include "Character/TunaSweeperMoleCompanionActor.h"
 #include "Animation/AnimSequence.h"
-#include "Animation/AnimSingleNodeInstance.h"
+#include "Character/TunaSweeperMoleAnimInstance.h"
+#include "Animation/AnimMontage.h"
 #include "Animation/BlendSpace.h"
 #include "Animation/Skeleton.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -115,29 +116,29 @@ bool FTunaSweeperMoleRuntimeTurnTest::RunTest(const FString& Parameters)
 	if (TestNotNull(TEXT("Placed BP instance"), Actor))
 	{
 		USkeletalMeshComponent* Mesh = Actor->FindComponentByClass<USkeletalMeshComponent>();
-		UAnimSingleNodeInstance* Anim = Mesh ? Mesh->GetSingleNodeInstance() : nullptr;
+		UTunaSweeperMoleAnimInstance* Anim = Mesh ? Cast<UTunaSweeperMoleAnimInstance>(Mesh->GetAnimInstance()) : nullptr;
+		Actor->bEnableIdleVariations = false;
 		if (TestNotNull(TEXT("Playback instance initialized"), Anim))
 		{
 			const FVector Position = Actor->GetActorLocation();
 			Actor->SetActorRotation(FRotator(0, 90, 0));
 			Actor->Tick(.1f);
 			TestTrue(TEXT("Tracking yaw is limited so footwork can follow"), FMath::Abs(FMath::FindDeltaAngleDegrees(90.0f, Actor->GetActorRotation().Yaw)) <= 9.01f);
-			FVector Input, Filtered; Anim->GetBlendSpaceState(Input, Filtered);
+			FVector Input(Anim->TurnAmount, 0, 0);
 			TestTrue(TEXT("Returning from positive yaw drives left steps"), Input.X < 0);
 			Actor->SetActorRotation(FRotator(0, -90, 0)); Actor->Tick(.1f);
-			Anim->GetBlendSpaceState(Input, Filtered);
+			Input.X = Anim->TurnAmount;
 			TestTrue(TEXT("Returning from negative yaw drives right steps"), Input.X > 0);
 			TestTrue(TEXT("Turning does not move actor"), Actor->GetActorLocation().Equals(Position));
 			Actor->SetActorRotation(FRotator::ZeroRotator); Actor->Tick(.1f);
-			Anim->GetBlendSpaceState(Input, Filtered);
+			Input.X = Anim->TurnAmount;
 			TestEqual(TEXT("Settled actor returns to breathing"), Input.X, 0.0);
-			TestEqual(TEXT("Settled breathing plays at normal speed"), Anim->GetPlayRate(), 1.0f);
-			TestEqual(TEXT("Playback still uses only idle/turn blend"), Anim->GetAnimationAsset()->GetName(), FString(TEXT("BS_Mole_IdleTurn")));
+			TestEqual(TEXT("Settled breathing plays at normal speed"), Anim->TurnPlayRate, 1.0f);
+			TestEqual(TEXT("Playback uses the upper-body animation graph"), Anim->GetClass()->GetName(), FString(TEXT("ABP_MoleCompanion_C")));
 			TArray<FVector> DirectionPoses;
 			for (float Direction : {-1.0f, 1.0f})
 			{
-				Anim->SetBlendSpacePosition(FVector(Direction, 0, 0));
-				Anim->SetPosition(0.0f, false);
+				Anim->TurnAmount = Direction;
 				FBox LeftFootMotion(ForceInit), RightFootMotion(ForceInit);
 				for (int32 Frame = 0; Frame < 128; ++Frame)
 				{
@@ -158,6 +159,93 @@ bool FTunaSweeperMoleRuntimeTurnTest::RunTest(const FString& Parameters)
 			}
 			TestTrue(TEXT("Left and right produce different evaluated foot poses"), !DirectionPoses[0].Equals(DirectionPoses[1], 0.1f));
 		}
+	}
+	World->DestroyWorld(false); World->RemoveFromRoot();
+	return true;
+}
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FTunaSweeperMoleIdleVariationTest,
+	"TunaSweeper.Character.Mole.IdleVariations",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FTunaSweeperMoleIdleVariationTest::RunTest(const FString& Parameters)
+{
+	for (const TCHAR* Name : {TEXT("Sniff"), TEXT("ShoulderRoll"), TEXT("HeadTilt"), TEXT("PawWave")})
+	{
+		const FString Path = FString::Printf(TEXT("/Game/Characters/NPC/Mole/A_Mole_Idle_%s"), Name);
+		TestNotNull(TEXT("Authored upper-body idle exists"), LoadObject<UAnimSequence>(nullptr, *Path));
+	}
+	UClass* Class = LoadClass<UAnimInstance>(nullptr, TEXT("/Game/Characters/NPC/Mole/ABP_MoleCompanion.ABP_MoleCompanion_C"));
+	TestNotNull(TEXT("Mole has an animation graph supporting upper-body slots"), Class);
+	if (!Class) return false;
+	const auto* Defaults = Cast<UTunaSweeperMoleAnimInstance>(Class->GetDefaultObject());
+	if (!TestNotNull(TEXT("Native idle scheduler"), Defaults)) return false;
+	TestEqual(TEXT("Four gestures are configured"), Defaults->IdleVariations.Num(), 4);
+	const auto* MoleDefaults = GetDefault<ATunaSweeperMoleCompanionActor>();
+	TestEqual(TEXT("Default minimum rest is four seconds"), MoleDefaults->IdleVariationMinDelay, 4.0f);
+	TestEqual(TEXT("Default maximum rest is fifteen seconds"), MoleDefaults->IdleVariationMaxDelay, 15.0f);
+	UWorld* World = UWorld::CreateWorld(EWorldType::Game, false);
+	UClass* MoleClass = LoadClass<ATunaSweeperMoleCompanionActor>(nullptr, TEXT("/Game/Characters/Mole/BP_Mole.BP_Mole_C"));
+	for (int32 Gesture = 0; Gesture < 4; ++Gesture)
+	{
+		auto* BaseActor = World->SpawnActor<ATunaSweeperMoleCompanionActor>(MoleClass);
+		auto* OverlayActor = World->SpawnActor<ATunaSweeperMoleCompanionActor>(MoleClass);
+		BaseActor->bEnableIdleVariations = OverlayActor->bEnableIdleVariations = false;
+		auto* BaseMesh = BaseActor->FindComponentByClass<USkeletalMeshComponent>();
+		auto* OverlayMesh = OverlayActor->FindComponentByClass<USkeletalMeshComponent>();
+		auto* BaseAnim = Cast<UTunaSweeperMoleAnimInstance>(BaseMesh->GetAnimInstance());
+		auto* OverlayAnim = Cast<UTunaSweeperMoleAnimInstance>(OverlayMesh->GetAnimInstance());
+		if (!TestNotNull(TEXT("Placed actor uses slot AnimBP"), BaseAnim) || !TestNotNull(TEXT("Second actor uses slot AnimBP"), OverlayAnim)) break;
+		BaseAnim->TurnAmount = OverlayAnim->TurnAmount = Gesture % 2 ? -1.0f : 1.0f;
+		TestTrue(TEXT("Gesture starts in slot"), OverlayAnim->PlayIdleVariation(Gesture));
+		TestFalse(TEXT("A gesture cannot overwrite an active gesture"), OverlayAnim->PlayIdleVariation((Gesture + 1) % 4));
+		float MaxLowerDifference = 0, MaxUpperDifference = 0;
+		for (int32 Frame = 0; Frame < 300; ++Frame)
+		{
+			++GFrameCounter;
+			for (auto* M : {BaseMesh, OverlayMesh}) { M->TickAnimation(1.0f / 60.0f, false); M->RefreshBoneTransforms(); }
+			for (const TCHAR* Bone : {TEXT("pelvis"), TEXT("foot_L"), TEXT("foot_R")})
+			{
+				const FTransform A = BaseMesh->GetSocketTransform(Bone, RTS_Component), B = OverlayMesh->GetSocketTransform(Bone, RTS_Component);
+				MaxLowerDifference = FMath::Max(MaxLowerDifference, float(FVector::Distance(A.GetLocation(), B.GetLocation())));
+				TestTrue(TEXT("Slot preserves lower-body rotation and scale"), A.GetRotation().Equals(B.GetRotation(), .001f) && A.GetScale3D().Equals(B.GetScale3D(), .001f));
+			}
+			for (const TCHAR* Bone : {TEXT("head"), TEXT("hand_L"), TEXT("hand_R")})
+			{
+				const FTransform A = BaseMesh->GetSocketTransform(Bone, RTS_Component), B = OverlayMesh->GetSocketTransform(Bone, RTS_Component);
+				MaxUpperDifference = FMath::Max(MaxUpperDifference, float(FMath::RadiansToDegrees(A.GetRotation().AngularDistance(B.GetRotation()))));
+			}
+		}
+		AddInfo(FString::Printf(TEXT("Gesture %d: lower-body difference %.5f cm, upper-body rotation difference %.2f degrees"), Gesture, MaxLowerDifference, MaxUpperDifference));
+		TestTrue(TEXT("Slot leaves turning footwork unchanged"), MaxLowerDifference < .01f);
+		TestTrue(TEXT("Each gesture visibly animates the upper body"), MaxUpperDifference > 5.0f);
+		TestFalse(TEXT("Gesture is a one-shot, not a loop"), OverlayAnim->Montage_IsPlaying(nullptr));
+		TestTrue(TEXT("After gesture the upper body returns to base pose"), BaseMesh->GetSocketTransform(TEXT("head"), RTS_Component).Equals(OverlayMesh->GetSocketTransform(TEXT("head"), RTS_Component), .01f));
+		BaseActor->Destroy(); OverlayActor->Destroy();
+	}
+	// Observe real montage start/end transitions with a short BP-configured rest.
+	auto* Actor = World->SpawnActor<ATunaSweeperMoleCompanionActor>(MoleClass);
+	Actor->IdleVariationMinDelay = .2f; Actor->IdleVariationMaxDelay = .4f;
+	auto* Mesh = Actor->FindComponentByClass<USkeletalMeshComponent>();
+	auto* Anim = Cast<UTunaSweeperMoleAnimInstance>(Mesh->GetAnimInstance());
+	if (Anim)
+	{
+		bool WasPlaying = false; int32 Starts = 0; float Rest = 0;
+		for (int32 Frame = 0; Frame < 720; ++Frame)
+		{
+			++GFrameCounter; Mesh->TickAnimation(1.0f / 60.0f, false); Mesh->RefreshBoneTransforms();
+			const bool Playing = Anim->Montage_IsActive(nullptr);
+			if (!WasPlaying) Rest += 1.0f / 60.0f;
+			if (Playing && !WasPlaying)
+			{
+				++Starts;
+				TestTrue(TEXT("BP rest bounds apply initially and after every gesture"), Rest >= .18f && Rest <= .45f);
+				TestTrue(TEXT("Random selection stays within four gestures"), Anim->GetLastIdleVariationIndex() >= 0 && Anim->GetLastIdleVariationIndex() < 4);
+			}
+			if (!Playing && WasPlaying) Rest = 0;
+			WasPlaying = Playing;
+		}
+		TestTrue(TEXT("Occasional playback repeats after a completed gesture"), Starts >= 2);
+		Actor->IdleVariationMinDelay = 9; Actor->IdleVariationMaxDelay = 3;
+		TestEqual(TEXT("Reversed BP bounds are normalized safely"), Actor->GetIdleVariationDelayRange(), FVector2D(9, 9));
 	}
 	World->DestroyWorld(false); World->RemoveFromRoot();
 	return true;

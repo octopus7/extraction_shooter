@@ -10,6 +10,7 @@ class USceneComponent;
 class USkeletalMeshComponent;
 class USkeletalMesh;
 class UBlendSpace;
+class UTunaSweeperMoleAnimInstance;
 class UTunaSweeperInteractableComponent;
 class UTunaSweeperInteractionMarkerWidget;
 class UTunaSweeperQuestMarkerComponent;
@@ -35,6 +36,18 @@ public:
 
 	/** Zero means breathing idle; negative/positive values select left/right footwork. */
 	static float ResolveTurnAnimationAmount(float PreviousYaw, float CurrentYaw, float DeltaSeconds);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mole Companion|Idle Variations")
+	bool bEnableIdleVariations = true;
+
+	/** Rest after a gesture finishes, in seconds. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mole Companion|Idle Variations", meta = (ClampMin = "0.1", Units = "s"))
+	float IdleVariationMinDelay = 4.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mole Companion|Idle Variations", meta = (ClampMin = "0.1", Units = "s"))
+	float IdleVariationMaxDelay = 15.0f;
+
+	FVector2D GetIdleVariationDelayRange() const;
 
 	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Quest")
 	FName ResolveQuestId() const;
@@ -82,6 +95,9 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mole Companion|Visual", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UBlendSpace> IdleTurnBlendSpace;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Mole Companion|Visual")
+	TSubclassOf<UTunaSweeperMoleAnimInstance> CompanionAnimClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mole Companion|Collision", meta = (AllowPrivateAccess = "true"))
 	FVector BodyCollisionRelativeLocation = FVector(0.0f, 0.0f, 72.0f);
