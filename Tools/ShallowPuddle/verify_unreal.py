@@ -25,7 +25,8 @@ def verify():
     cls = unreal.EditorAssetLibrary.load_blueprint_class(paths["blueprint"])
     assert cls is not None, "Puddle Blueprint failed to load"
     defaults = unreal.get_default_object(cls)
-    assert defaults.get_editor_property("water_material") is not None
+    expected_surface = f"{DEST}/Materials/MI_ShallowPuddle_Surface.MI_ShallowPuddle_Surface"
+    assert defaults.get_editor_property("water_material").get_path_name() == expected_surface
     assert defaults.get_editor_property("wet_edge_material") is not None
     sound = defaults.get_editor_property("water_footstep_sound")
     assert sound and sound.get_path_name() == FOOTSTEP, "Puddle must use its new dedicated footstep sound"
@@ -41,6 +42,7 @@ def verify():
     puddles = unreal.GameplayStatics.get_all_actors_of_class(world, cls)
     assert len(puddles) >= 3, "Review map must include three puddle examples"
     for actor in puddles:
+        assert actor.get_editor_property("water_material").get_path_name() == expected_surface
         assert actor.get_editor_property("water_footstep_sound").get_path_name() == FOOTSTEP
         meshes = actor.get_components_by_class(unreal.StaticMeshComponent)
         assert len(meshes) == 1
