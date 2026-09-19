@@ -1602,6 +1602,15 @@ void ATunaSweeperPlayerController::HandleToggleHoveredInventorySortLock()
 
 void ATunaSweeperPlayerController::HandleDrop(const FInputActionValue&)
 {
+	// X belongs to the rider while mounted; never fall through to cancel/drop, even if the exit is blocked.
+	if (auto* RiderCharacter = Cast<ATunaSweeperTopDownCharacter>(GetPawn()); RiderCharacter && RiderCharacter->IsMountedInVehicle())
+	{
+		if (!RiderCharacter->IsDead() && !IsPauseMenuOpen() && !IsInventoryUiOpen() && !IsDialogueSequenceActive() && !IsHousingModeOpen())
+		{
+			RiderCharacter->TryDismountVehicle();
+		}
+		return;
+	}
 	if (IsIntroMap() || IsOpeningScenarioMap())
 	{
 		return;

@@ -22,6 +22,8 @@
 #include "Interaction/TunaSweeperPiggyBankActor.h"
 #include "Interaction/TunaSweeperPickupItemActor.h"
 #include "Interaction/TunaSweeperResearchStationActor.h"
+#include "Vehicle/TunaSweeperVehicleMountComponent.h"
+#include "Character/TunaSweeperTopDownCharacter.h"
 #include "Interaction/TunaSweeperSelfDestructInteractableActor.h"
 #include "Interaction/TunaSweeperShopActor.h"
 #include "Interaction/TunaSweeperStorageActor.h"
@@ -124,6 +126,8 @@ namespace TunaSweeperInteractionQuestEvents
 			return FName(TEXT("difficulty_adjustment"));
 		case ETunaSweeperInteractionType::Research:
 			return FName(TEXT("research"));
+		case ETunaSweeperInteractionType::VehicleMount:
+			return FName(TEXT("vehicle_mount"));
 		default:
 			return NAME_None;
 		}
@@ -236,6 +240,7 @@ bool UTunaSweeperInteractionSubsystem::TryInteract(APawn* InstigatorPawn)
 
 bool UTunaSweeperInteractionSubsystem::RequestInteraction(UTunaSweeperInteractableComponent* Interactable, APawn* InstigatorPawn)
 {
+	if (const auto* Character = Cast<ATunaSweeperTopDownCharacter>(InstigatorPawn); Character && (Character->IsMountedInVehicle() || Character->IsDead())) return false;
 	if (!IsValid(Interactable) ||
 		!IsValid(InstigatorPawn) ||
 		!CanOfferInteraction(Interactable) ||
@@ -321,6 +326,12 @@ bool UTunaSweeperInteractionSubsystem::RequestInteraction(UTunaSweeperInteractab
 	case ETunaSweeperInteractionType::Research:
 		bHandled = HandleResearchInteraction(Interactable, InstigatorPawn);
 		break;
+	case ETunaSweeperInteractionType::VehicleMount:
+		if (auto* Mount = Cast<UTunaSweeperVehicleMountComponent>(Interactable))
+		{
+			bHandled = Mount->TryMount(Cast<ATunaSweeperTopDownCharacter>(InstigatorPawn));
+		}
+		break;
 	default:
 		return false;
 	}
@@ -343,6 +354,8 @@ bool UTunaSweeperInteractionSubsystem::RequestInteraction(UTunaSweeperInteractab
 
 bool UTunaSweeperInteractionSubsystem::CanOfferInteraction(const UTunaSweeperInteractableComponent* Interactable) const
 {
+	const auto* Player = Cast<ATunaSweeperTopDownCharacter>(UGameplayStatics::GetPlayerPawn(this, 0));
+	if (Player && Player->IsMountedInVehicle()) return false;
 	if (!IsValid(Interactable) || Interactable->GetInteractionType() == ETunaSweeperInteractionType::None)
 	{
 		return false;
@@ -356,6 +369,12 @@ bool UTunaSweeperInteractionSubsystem::CanOfferInteraction(const UTunaSweeperInt
 	if (TunaSweeperInteractionQuestEvents::IsHousingInteractionSuppressed(GetWorld()))
 	{
 		return false;
+	}
+
+	if (Interactable->GetInteractionType() == ETunaSweeperInteractionType::VehicleMount)
+	{
+		const auto* Mount = Cast<UTunaSweeperVehicleMountComponent>(Interactable);
+		return Mount && !Mount->GetRider() && (!Player || Mount->CanMount(Player));
 	}
 
 	if (Interactable->GetInteractionType() == ETunaSweeperInteractionType::Memo)

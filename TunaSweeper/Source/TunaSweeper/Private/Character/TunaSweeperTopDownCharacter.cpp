@@ -238,6 +238,7 @@ void ATunaSweeperTopDownCharacter::Tick(float DeltaSeconds)
 
 void ATunaSweeperTopDownCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
+	if (IsValid(VehicleMount)) VehicleMount->ReleaseRiderForEndPlay();
 	if (GetWorld())
 	{
 		GetWorldTimerManager().ClearTimer(FireTimerHandle);

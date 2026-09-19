@@ -8,6 +8,7 @@
 #include "TunaSweeperTopDownCharacter.generated.h"
 
 class ATunaSweeperWeapon;
+class UTunaSweeperVehicleMountComponent;
 class ATunaSweeperMeleeImpactBurstActor;
 class ATunaSweeperMeleeSwingTrailActor;
 class UAnimMontage;
@@ -107,6 +108,13 @@ class TUNASWEEPER_API ATunaSweeperTopDownCharacter : public ACharacter
 
 public:
 	ATunaSweeperTopDownCharacter();
+
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Vehicle")
+	bool IsMountedInVehicle() const;
+	UFUNCTION(BlueprintPure, Category = "TunaSweeper|Vehicle")
+	UTunaSweeperVehicleMountComponent* GetVehicleMount() const { return VehicleMount; }
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Vehicle")
+	bool TryDismountVehicle();
 
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void OnConstruction(const FTransform& Transform) override;
@@ -501,6 +509,10 @@ protected:
 	float DeathRagdollUpwardImpulse = 1800.0f;
 
 private:
+	friend class UTunaSweeperVehicleMountComponent;
+	UPROPERTY(Transient)
+	TObjectPtr<UTunaSweeperVehicleMountComponent> VehicleMount;
+
 	void AddDefaultInputMapping() const;
 	void EnsureEquippedWeaponActor();
 	void ClearEquippedWeaponActor();

@@ -199,7 +199,7 @@ void ATunaSweeperTopDownCharacter::EndAim(const FInputActionValue& Value)
 
 void ATunaSweeperTopDownCharacter::HandleInteract(const FInputActionValue& Value)
 {
-	if (bIsDead)
+	if (bIsDead || IsMountedInVehicle())
 	{
 		return;
 	}
@@ -236,7 +236,7 @@ void ATunaSweeperTopDownCharacter::HandleInteract(const FInputActionValue& Value
 
 void ATunaSweeperTopDownCharacter::HandleInteractionFocus(const FInputActionValue& Value)
 {
-	if (bIsDead || bAmmoSelectionOpen)
+	if (bIsDead || bAmmoSelectionOpen || IsMountedInVehicle())
 	{
 		return;
 	}

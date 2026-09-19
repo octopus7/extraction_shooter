@@ -86,6 +86,7 @@ void ATunaSweeperTopDownCharacter::HandleDeath()
 		return;
 	}
 
+	if (IsValid(VehicleMount)) VehicleMount->ReleaseRiderForEndPlay();
 	bIsDead = true;
 	FinishRoll();
 	bFireHeld = false;

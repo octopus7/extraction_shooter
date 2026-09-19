@@ -340,12 +340,23 @@ void ATunaSweeperTopDownCharacter::MoveAmmoSelectionFocus(int32 FocusDelta)
 
 bool ATunaSweeperTopDownCharacter::IsGameplayActionInputLocked() const
 {
+	if (IsMountedInVehicle()) return true;
 	const ATunaSweeperPlayerController* TunaPlayerController = Cast<ATunaSweeperPlayerController>(GetController());
 	return TunaPlayerController &&
 		(TunaPlayerController->IsInventoryUiOpen() ||
 			TunaPlayerController->IsPauseMenuOpen() ||
 			TunaPlayerController->IsDialogueSequenceActive() ||
 			TunaPlayerController->IsHousingModeOpen());
+}
+
+bool ATunaSweeperTopDownCharacter::TryDismountVehicle()
+{
+	return IsValid(VehicleMount) && VehicleMount->TryDismount();
+}
+
+bool ATunaSweeperTopDownCharacter::IsMountedInVehicle() const
+{
+	return IsValid(VehicleMount);
 }
 
 bool ATunaSweeperTopDownCharacter::IsCarryWeightMovementBlocked() const
