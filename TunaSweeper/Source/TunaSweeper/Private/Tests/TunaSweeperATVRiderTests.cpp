@@ -46,15 +46,31 @@ bool FTunaSweeperATVRiderTest::RunTest(const FString& Parameters)
 	Mesh->TickAnimation(1.0f / 60, false);
 	Mesh->RefreshBoneTransforms();
 	const FVector Pelvis = Mesh->GetSocketLocation(TEXT("pelvis"));
-	TestTrue(TEXT("Pelvis sits above the seat"), Pelvis.Z > Mount->GetComponentLocation().Z);
+	const FVector Torso = Mesh->GetSocketLocation(TEXT("neck_01")) - Pelvis;
+	const float TorsoLean = FMath::RadiansToDegrees(FMath::Atan2(Torso.X, Torso.Z));
+	TestTrue(TEXT("Rider has a relaxed forward lean instead of folding over the bars"), TorsoLean > 0 && TorsoLean < 25);
+	auto JointAngle = [&](FName Root, FName Joint, FName End)
+	{
+		const FVector JointPosition = Mesh->GetSocketLocation(Joint);
+		return FMath::RadiansToDegrees(FMath::Acos(FMath::Clamp(FVector::DotProduct(
+			(Mesh->GetSocketLocation(Root) - JointPosition).GetSafeNormal(),
+			(Mesh->GetSocketLocation(End) - JointPosition).GetSafeNormal()), -1.0, 1.0)));
+	};
 	for (const TCHAR* Side : {TEXT("l"), TEXT("r")})
 	{
 		const FString Suffix(Side);
-		const float HandError = FVector::Distance(Mesh->GetSocketLocation(FName(*(TEXT("hand_")+Suffix))), ATV->VehicleMesh->GetSocketLocation(FName(*(TEXT("grip_")+Suffix))));
-		const float FootError = FVector::Distance(Mesh->GetSocketLocation(FName(*(TEXT("foot_")+Suffix))), ATV->VehicleMesh->GetSocketLocation(FName(*(TEXT("foot_")+Suffix))));
-		AddInfo(FString::Printf(TEXT("%s hand/grip %.2f cm, ankle/footrest %.2f cm"), Side, HandError, FootError));
-		TestTrue(TEXT("Hands reach handle grips"), HandError < 18);
-		TestTrue(TEXT("Feet rest on footplates"), FootError < 10);
+		const float ElbowAngle = JointAngle(FName(*(TEXT("upperarm_")+Suffix)), FName(*(TEXT("lowerarm_")+Suffix)), FName(*(TEXT("hand_")+Suffix)));
+		const float KneeAngle = JointAngle(FName(*(TEXT("thigh_")+Suffix)), FName(*(TEXT("calf_")+Suffix)), FName(*(TEXT("foot_")+Suffix)));
+		const FVector Knee = Mesh->GetSocketLocation(FName(*(TEXT("calf_")+Suffix)));
+		const FVector Ankle = Mesh->GetSocketLocation(FName(*(TEXT("foot_")+Suffix)));
+		const FVector Shoulder = Mesh->GetSocketLocation(FName(*(TEXT("upperarm_")+Suffix)));
+		const FVector Wrist = Mesh->GetSocketLocation(FName(*(TEXT("hand_")+Suffix)));
+		AddInfo(FString::Printf(TEXT("%s elbow %.2f deg, knee %.2f deg, torso lean %.2f deg"), Side, ElbowAngle, KneeAngle, TorsoLean));
+		TestTrue(TEXT("Elbows stay comfortably bent without locking or folding shut"), ElbowAngle > 65 && ElbowAngle < 155);
+		TestTrue(TEXT("Hands sit below the shoulders so the rider can relax the arms"), Wrist.Z < Shoulder.Z - 3);
+		TestTrue(TEXT("Knees keep a seated bend instead of stretching to the footplates"), KneeAngle > 80 && KneeAngle < 130);
+		TestTrue(TEXT("Knees point forward and ankles hang below them"), Knee.X > Pelvis.X + 15 && Ankle.Z < Knee.Z - 25);
+		TestTrue(TEXT("Knees remain close enough to the body for a relaxed straddle"), FMath::Abs(Knee.Y - Pelvis.Y) < 22);
 	}
 	if (FParse::Param(FCommandLine::Get(), TEXT("ATVRiderPreview")))
 	{
@@ -79,9 +95,12 @@ bool FTunaSweeperATVRiderTest::RunTest(const FString& Parameters)
 		Capture->TextureTarget = Target;
 		Capture->FOVAngle = 38;
 		const FVector Views[] = {FVector(240,-280,180), FVector(-80,-350,140), FVector(-250,-240,200)};
-		for (int32 View=0; View<3; ++View)
+		for (int32 View=0; View<6; ++View)
 		{
-			Capture->SetWorldLocation(Views[View]);
+			// The current vehicle is wider than the intended rider posture. Also
+			// render the rider alone so the future remodel does not hide leg QA.
+			if (View == 3) Capture->HideComponent(ATV->VehicleMesh);
+			Capture->SetWorldLocation(Views[View % 3]);
 			Capture->SetWorldRotation((FVector(0,0,90)-Capture->GetComponentLocation()).Rotation());
 			Light->SetWorldRotation(Capture->GetComponentRotation());
 			World->SendAllEndOfFrameUpdates();
@@ -92,7 +111,8 @@ bool FTunaSweeperATVRiderTest::RunTest(const FString& Parameters)
 			Target->GameThread_GetRenderTargetResource()->ReadPixels(Pixels);
 			TArray64<uint8> PNG;
 			FImageUtils::PNGCompressImageArray(1000,1000,Pixels,PNG);
-			FFileHelper::SaveArrayToFile(PNG, *(FPaths::ProjectSavedDir()/FString::Printf(TEXT("ATVRigWork/RiderPose%d.png"), View)));
+			const FString Name = View < 3 ? FString::Printf(TEXT("RiderPose%d.png"), View) : FString::Printf(TEXT("RiderPoseBody%d.png"), View-3);
+			FFileHelper::SaveArrayToFile(PNG, *(FPaths::ProjectSavedDir()/TEXT("ATVRigWork")/Name));
 		}
 	}
 	Mount->ReleaseRiderForEndPlay();

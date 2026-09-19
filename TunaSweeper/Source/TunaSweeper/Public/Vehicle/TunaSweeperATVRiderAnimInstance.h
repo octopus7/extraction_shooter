@@ -3,7 +3,7 @@
 #include "Animation/AnimInstance.h"
 #include "TunaSweeperATVRiderAnimInstance.generated.h"
 
-/** Seated Luna pose with handlebar and footrest contact; used only while mounted. */
+/** Relaxed Luna riding posture; saddle and footplates do not constrain the limbs. */
 UCLASS(Transient)
 class TUNASWEEPER_API UTunaSweeperATVRiderAnimInstance : public UAnimInstance
 {

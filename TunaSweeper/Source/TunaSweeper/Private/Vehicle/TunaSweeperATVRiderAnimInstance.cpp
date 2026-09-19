@@ -12,7 +12,7 @@ namespace
 	{
 		using FAnimInstanceProxy::FAnimInstanceProxy;
 		bool bValid = false;
-		FVector Pelvis, Hands[2], Feet[2], Forward, Right, Up;
+		FVector Pelvis, Hands[2], Forward, Right, Up;
 		virtual void PreUpdate(UAnimInstance* Instance, float DeltaSeconds) override
 		{
 			FAnimInstanceProxy::PreUpdate(Instance, DeltaSeconds);
@@ -30,20 +30,19 @@ namespace
 			Forward = MeshToVehicle.InverseTransformVectorNoScale(Bar.GetUnitAxis(EAxis::X));
 			Right = MeshToVehicle.InverseTransformVectorNoScale(Bar.GetUnitAxis(EAxis::Y));
 			Up = MeshToVehicle.InverseTransformVectorNoScale(FVector::UpVector);
-			// Move the hips slightly across the saddle with the steering column.
-			const FVector Seat = ATV->VehicleMesh->GetSocketTransform(TEXT("seat"), RTS_Component).GetLocation();
+			// Fit the riding posture to Luna's short torso and arms. The saddle and
+			// footplates are intentionally not constraints: the vehicle will be
+			// remodelled around a relaxed rider, including any seat penetration.
 			const FVector GripCenter = (ATV->VehicleMesh->GetSocketTransform(TEXT("grip_l"), RTS_Component).GetLocation() + ATV->VehicleMesh->GetSocketTransform(TEXT("grip_r"), RTS_Component).GetLocation()) * .5f;
-			const FVector HipHorizontal = GripCenter - Bar.GetUnitAxis(EAxis::X) * 22.0f;
-			const FVector Hip = HipHorizontal + FVector::UpVector * (FVector::DotProduct(Seat - HipHorizontal, FVector::UpVector) + 5.0f);
+			const FVector Hip = GripCenter - Bar.GetUnitAxis(EAxis::X) * 26.0f - FVector::UpVector * 18.0f;
 			Pelvis = MeshToVehicle.InverseTransformPosition(Hip);
 			for (int32 Side = 0; Side < 2; ++Side)
 			{
 				const FName Grip = Side == 0 ? TEXT("grip_l") : TEXT("grip_r");
-				const FName Foot = Side == 0 ? TEXT("foot_l") : TEXT("foot_r");
-				// Grip markers are at the outer ends; wrists sit behind the rubber grips.
-				const FVector Wrist = ATV->VehicleMesh->GetSocketTransform(Grip, RTS_Component).GetLocation() + Bar.TransformVectorNoScale(FVector(-5, Side == 0 ? 12 : -12, 3));
+				// A narrower hand span leaves room for bent elbows instead of forcing
+				// the small character to stretch across the entire handlebar.
+				const FVector Wrist = ATV->VehicleMesh->GetSocketTransform(Grip, RTS_Component).GetLocation() + Bar.TransformVectorNoScale(FVector(-5, Side == 0 ? 22 : -22, 0));
 				Hands[Side] = MeshToVehicle.InverseTransformPosition(Wrist);
-				Feet[Side] = MeshToVehicle.InverseTransformPosition(ATV->VehicleMesh->GetSocketTransform(Foot, RTS_Component).GetLocation() + FVector(0, Side == 0 ? -3 : 3, 7));
 			}
 			bValid = true;
 		}
@@ -90,10 +89,10 @@ namespace
 			{
 				// Luna's mesh faces +Y. Convert that reference direction to the steering frame.
 				const FQuat Heading = FQuat::FindBetweenNormals(FVector::RightVector, Forward);
-				const FQuat Lean(Right, FMath::DegreesToRadians(35.0f));
+				const FQuat Lean(Right, FMath::DegreesToRadians(12.0f));
 				Move(Spine, Pose[Spine].GetLocation(), Lean * Heading * Pose[Spine].GetRotation());
 				const int32 Head = Find(TEXT("head"));
-				if (Head >= 0) Move(Head, Pose[Head].GetLocation(), FQuat(Right, FMath::DegreesToRadians(-25.f)) * Pose[Head].GetRotation());
+				if (Head >= 0) Move(Head, Pose[Head].GetLocation(), FQuat(Right, FMath::DegreesToRadians(-8.f)) * Pose[Head].GetRotation());
 			}
 			auto Limb = [&](int32 A, int32 B, int32 C, FVector Target, const FVector& Pole, const FQuat& EndRotation)
 			{
@@ -120,8 +119,21 @@ namespace
 				const int32 Finger = Find(FName(*(TEXT("middle_01")+Suffix)));
 				if (Hand < 0 || Foot < 0 || Finger < 0) continue;
 				const FQuat HandRotation = FQuat::FindBetweenNormals((Rest[Finger].GetLocation()-Rest[Hand].GetLocation()).GetSafeNormal(), (Forward-Up*.15f).GetSafeNormal()) * Rest[Hand].GetRotation();
-				Limb(Find(FName(*(TEXT("upperarm")+Suffix))), Find(FName(*(TEXT("lowerarm")+Suffix))), Hand, Hands[Side], Pelvis+Right*Sign*50+Up*15, HandRotation);
-				Limb(Find(FName(*(TEXT("thigh")+Suffix))), Find(FName(*(TEXT("calf")+Suffix))), Foot, Feet[Side], Pelvis+Forward*20+Right*Sign*100-Up*5, Rest[Foot].GetRotation());
+				Limb(Find(FName(*(TEXT("upperarm")+Suffix))), Find(FName(*(TEXT("lowerarm")+Suffix))), Hand, Hands[Side], Pelvis-Forward*5+Right*Sign*35+Up*12, HandRotation);
+				const int32 Thigh = Find(FName(*(TEXT("thigh")+Suffix)));
+				const int32 Calf = Find(FName(*(TEXT("calf")+Suffix)));
+				if (Thigh >= 0 && Calf >= 0)
+				{
+					const float ThighLength = FVector::Distance(Rest[Thigh].GetLocation(), Rest[Calf].GetLocation());
+					const float ShinLength = FVector::Distance(Rest[Calf].GetLocation(), Rest[Foot].GetLocation());
+					// Thighs reach forward with a modest straddle; shins hang almost
+					// vertically. Bone proportions determine the feet, not the ATV.
+					const FVector ThighDirection = (Forward*.84f + Right*Sign*.18f - Up*.51f).GetSafeNormal();
+					const FVector ShinDirection = (-Forward*.15f + Right*Sign*.04f - Up*.99f).GetSafeNormal();
+					const FVector Ankle = Pose[Thigh].GetLocation() + ThighDirection*ThighLength + ShinDirection*ShinLength;
+					const FQuat FootHeading = FQuat::FindBetweenNormals(FVector::RightVector, Forward);
+					Limb(Thigh, Calf, Foot, Ankle, Pelvis+Forward*60+Right*Sign*15-Up*12, FootHeading*Rest[Foot].GetRotation());
+				}
 				for (const TCHAR* FingerName : {TEXT("index"),TEXT("middle"),TEXT("ring"),TEXT("pinky")})
 				{
 					for (int32 Joint=1; Joint<=3; ++Joint)

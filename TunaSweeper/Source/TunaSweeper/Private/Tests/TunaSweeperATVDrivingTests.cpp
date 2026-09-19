@@ -89,7 +89,7 @@ bool FTunaSweeperATVDrivingTest::RunTest(const FString& Parameters)
 	{
 		const FString Suffix(Side);
 		const FTransform Bar = ATV->VehicleMesh->GetSocketTransform(TEXT("handlebar"));
-		const FVector Target = ATV->VehicleMesh->GetSocketLocation(FName(*(TEXT("grip_")+Suffix))) + Bar.TransformVectorNoScale(FVector(-5, Suffix==TEXT("l") ? 12 : -12, 3));
+		const FVector Target = ATV->VehicleMesh->GetSocketLocation(FName(*(TEXT("grip_")+Suffix))) + Bar.TransformVectorNoScale(FVector(-5, Suffix==TEXT("l") ? 22 : -22, 0));
 		const float Error = FVector::Distance(Player->GetMesh()->GetSocketLocation(FName(*(TEXT("hand_")+Suffix))), Target);
 		AddInfo(FString::Printf(TEXT("Steering hand %s target error %.2f cm"), Side, Error));
 		TestTrue(TEXT("Rider hands follow turning handlebar"), Error < 1);

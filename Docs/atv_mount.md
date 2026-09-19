@@ -37,8 +37,8 @@
 
 ## 운전자 자세
 
-- 탑승 중 `TunaSweeperATVRiderAnimInstance`로 전환해 좌석 앞쪽에 앉고 상체를 숙인 자세를 만든다. 고개는 전방을 바라보도록 별도로 보정한다. 새 AnimSequence 애셋을 재생하는 방식이 아니라 현재 ATV 본을 목표로 매 프레임 계산하는 네이티브 자세다.
-- `grip_l/r`, `foot_l/r`에 손목과 발목을 맞추는 2본 IK를 사용한다. 손목은 핸들 끝 표시보다 안쪽/뒤쪽, 발목은 발판보다 위쪽에 놓고 손가락을 굽힌다. 무릎은 차체 바깥으로 벌린다. 조향 시 핸들과 함께 상체와 손 위치를 갱신한다.
+- 탑승 중 `TunaSweeperATVRiderAnimInstance`로 전환한다. 자연스러운 몸 자세를 우선해 상체는 12°만 앞으로 기울이고 고개는 8° 반대로 보정한다. 골반과 다리를 기존 안장/발판에 억지로 맞추지 않으며, 엉덩이가 안장 안에 들어가거나 발이 공중에 떠도 허용한다. 이 자세에 맞춰 차량 모델링을 후속 조정한다.
+- 손목은 `grip_l/r` 끝 표시보다 안쪽으로 좁혀 팔꿈치가 굽혀질 여유를 만든다. 다리는 실제 허벅지/정강이 길이에 비례해 허벅지를 앞쪽으로, 정강이는 거의 아래로 내리는 2본 IK를 사용한다. 무릎은 약간만 벌리고 발판 본은 목표로 사용하지 않는다. 조향 시 핸들 방향에 따라 자세와 손 위치를 갱신한다. 별도 AnimSequence 애셋 없이 매 프레임 계산하는 네이티브 자세다.
 - 현재 Luna Mk2 비율과 +Y 메시 전방에 맞춘 자세다. 다른 스켈레톤에 대한 범용 리타기팅이나 별도 승차/하차 전환 모션은 포함하지 않는다.
 - 탑승 중에는 보행 AnimBP를 전용 인스턴스로 교체하므로 기존 보행 그래프 안의 머리카락 RigidBody 등 부가 노드는 실행하지 않는다. 별도 Skirt 컴포넌트의 AnimBP는 유지한다. 탑승용 머리카락 물리는 후속 연결 대상이다.
 - 탑승 중 장착 무기를 숨기고, 하차/사망/좌석 종료 시 기존 AnimBP·메시 갱신 설정·무기 표시 상태를 복원한다. 탑승 중에는 물리 갱신 뒤 매 프레임 자세를 평가해 손 위치가 늦게 따라오지 않게 한다.
@@ -49,7 +49,7 @@
 
 - 에디터 자동 테스트: `TunaSweeper.Vehicle.MountInteraction`
 - 물리 주행/접지/조향/실제 휠·스프링·핸들 본/Shift 가속/입력 해제: `TunaSweeper.Vehicle.Driving`. 저장된 `BP_ATV_TypeA`로 실행한다.
-- 실제 플레이어 BP의 좌석/손발 접촉 및 하차 복원: `TunaSweeper.Vehicle.RiderPose`. `-ATVRiderPreview`와 렌더링을 활성화해 실행하면 `Saved/ATVRigWork/RiderPose0~2.png`에 검토 이미지를 저장한다.
+- 실제 플레이어 BP의 완만한 상체 기울기, 팔꿈치/무릎 굽힘, 무릎 방향과 벌림, 하차 복원: `TunaSweeper.Vehicle.RiderPose`. `-ATVRiderPreview`와 렌더링을 활성화해 실행하면 `Saved/ATVRigWork/RiderPose0~2.png`에 검토 이미지를 저장한다.
 - 실제 플레이어 BP의 전방·측면 보행 충돌 및 주차 차량 밀림: `TunaSweeper.Vehicle.PedestrianContact`.
 - 총알의 접지 검사 제외, 물리 충돌 제외, 주행 중 연속 피격 안정성 및 탑승자 피해: `TunaSweeper.Vehicle.ProjectileContact`.
 - 별도 UE 프로세스에서 기본값/자산 참조 확인: `Tools/ATVRig/verify_mount_setup.py`
