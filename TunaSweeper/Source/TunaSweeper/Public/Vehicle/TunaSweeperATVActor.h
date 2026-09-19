@@ -8,6 +8,7 @@ class UTunaSweeperVehicleMountComponent;
 class UChaosWheeledVehicleMovementComponent;
 class ATunaSweeperTopDownCharacter;
 class UNiagaraComponent;
+class UNiagaraSystem;
 class UStaticMesh;
 class USoundBase;
 
@@ -53,6 +54,8 @@ public:
 	float DestructionExplosionDelay = 3.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="ATV|Effects")
 	TSoftObjectPtr<USoundBase> DestructionExplosionSound;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="ATV|Effects")
+	TSoftObjectPtr<UNiagaraSystem> DestructionExplosionSystem;
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Transient, Category="ATV|Effects")
 	bool bDestructionExplosionTriggered = false;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="ATV|Effects")

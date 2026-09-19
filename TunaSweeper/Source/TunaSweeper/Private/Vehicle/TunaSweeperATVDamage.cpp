@@ -35,8 +35,8 @@ void ATunaSweeperATVActor::CreateDamageComponents()
 	DestructionExplosion->SetAbsolute(false, true, true);
 	DestructionExplosion->SetAutoActivate(false);
 	DestructionExplosion->SetCanEverAffectNavigation(false);
-	static ConstructorHelpers::FObjectFinder<UNiagaraSystem> Explosion(TEXT("/Game/Effects/ExplosionTuna/NS_Explosion_Tuna.NS_Explosion_Tuna"));
-	DestructionExplosion->SetAsset(Explosion.Object);
+	// This system contains component renderers that require initialized engine registries.
+	DestructionExplosionSystem = TSoftObjectPtr<UNiagaraSystem>(FSoftObjectPath(TEXT("/Game/Effects/ExplosionTuna/NS_Explosion_Tuna.NS_Explosion_Tuna")));
 	DestructionExplosionSound = TSoftObjectPtr<USoundBase>(FSoftObjectPath(TEXT("/Game/Audio/Imported/SW_barrel_explosion.SW_barrel_explosion")));
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> Front(TEXT("/Game/Meshes/Props/ATV/Debris/SM_ATV_Debris_wheel_FL.SM_ATV_Debris_wheel_FL"));
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> Rear(TEXT("/Game/Meshes/Props/ATV/Debris/SM_ATV_Debris_wheel_RR.SM_ATV_Debris_wheel_RR"));

@@ -10,6 +10,8 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Engine/SkeletalMesh.h"
 #include "Sound/SoundBase.h"
+#include "NiagaraComponent.h"
+#include "NiagaraSystem.h"
 #include "TunaSweeperCollisionChannels.h"
 #include "UObject/ConstructorHelpers.h"
 
@@ -87,6 +89,10 @@ ATunaSweeperATVActor::ATunaSweeperATVActor()
 void ATunaSweeperATVActor::BeginPlay()
 {
 	Super::BeginPlay();
+	if (DestructionExplosion && !DestructionExplosion->GetAsset())
+	{
+		DestructionExplosion->SetAsset(DestructionExplosionSystem.LoadSynchronous());
+	}
 	MaxDurability = FMath::IsFinite(MaxDurability) ? FMath::Max(1.0f, MaxDurability) : 300.0f;
 	CurrentDurability = MaxDurability;
 	SmokeDurabilityRatio = FMath::Clamp(SmokeDurabilityRatio, 0.0f, 1.0f);

@@ -39,9 +39,9 @@
 
 차량 내구도·피격 연기·파괴 시 부분 분해는 [구현 계획과 진행 상태](atv_damage_destruction_plan.md)에 기록했다. 현재 내구도/연기 상태/부품 분리 구현은 있으나, 막힌 출구의 하차 좌표 테스트 1건과 연기 최종 시각 검수가 남아 있다.
 
-파괴 후 기본 3초 뒤 잔해의 현재 위치에서 `NS_Explosion_Tuna`를 한 번 재생한다. `BP_ATV_TypeA` 클래스 기본값 또는 레벨 인스턴스의 `ATV > Effects > Destruction Explosion Delay`로 지연 시간을 조정하며, 0이면 즉시 재생한다. 추가 피격은 타이머를 재시작하지 않고 차량 제거 시 예약을 취소한다. 폭발 연출 코드와 `TunaSweeper.Vehicle.DelayedExplosion` 테스트를 추가했으며, 현재는 컴파일만 확인했고 에디터 재시작 후 실행 검증이 필요하다.
+파괴 후 기본 3초 뒤 잔해의 현재 위치에서 `NS_Explosion_Tuna`를 한 번 재생한다. `BP_ATV_TypeA` 클래스 기본값 또는 레벨 인스턴스의 `ATV > Effects > Destruction Explosion Delay`로 지연 시간을 조정하며, 0이면 즉시 재생한다. 추가 피격은 타이머를 재시작하지 않고 차량 제거 시 예약을 취소한다. Steam Demo Shipping 패키징과 `TunaSweeper.Vehicle.DelayedExplosion` 자동 테스트를 통과했다. 폭발 시스템은 소프트 참조로 유지하고 BeginPlay에서 로드해 초기 CDO 생성 시 Niagara 컴포넌트 렌더러의 레지스트리 오류를 피한다. 최종 시각 검증은 별도다.
 
-폭발 시 배럴과 동일한 `/Game/Audio/Imported/SW_barrel_explosion`을 폭발 위치에서 한 번 재생한다. `ATV > Effects > Destruction Explosion Sound`에서 사운드를 변경할 수 있다. 지연 폭발과 같은 중복 방지 처리를 사용한다. 사운드 연결은 컴파일 확인을 마쳤으며 전체 빌드 후 청취 검증이 필요하다.
+폭발 시 배럴과 동일한 `/Game/Audio/Imported/SW_barrel_explosion`을 폭발 위치에서 한 번 재생한다. `ATV > Effects > Destruction Explosion Sound`에서 사운드를 변경할 수 있다. 지연 폭발과 같은 중복 방지 처리를 사용한다. 사운드 연결은 Steam Demo Shipping 빌드에 포함했으며 최종 청취 검증은 별도다.
 
 ## 운전자 자세
 

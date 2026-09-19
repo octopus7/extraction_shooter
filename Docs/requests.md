@@ -9211,3 +9211,24 @@
 
 - 요청: ATV 폭발음 연결 커밋.
 - 처리: 배럴과 동일한 폭발음 연결 코드와 관련 문서만 커밋. 직전 컴파일 확인 완료, 전체 링크·청취 검증은 보류 상태를 유지한다.
+
+## 2026-09-20 04:35:35 (소요시간: 00:07:20)
+
+- 요청: 스팀용 패키징. 현재 기본 타겟과 기존 출력에 맞춰 Steam Demo / Shipping / 0.2.9160으로 진행.
+- 처리: PackageTunaSweeperSteamDemoWin64.bat의 전체 빌드·쿡·패키징을 수행했다. 첫 쿡에서 ATV CDO가 NS_Explosion_Tuna를 조기 로드하여 Niagara 컴포넌트 렌더러 레지스트리 ensure로 실패(ExitCode 25). 소프트 참조를 사용하고 BeginPlay에서 로드하도록 수정 후 재패키징했다.
+- 검증: 최종 BUILD SUCCESSFUL / ExitCode 0. VerifyDemo 통과, ScenarioDefinitions의 demo 확인, MakeBinaryConfig -CustomConfig=Demo 및 PAK 내 BinaryConfig.ini 포함 확인. 패키지 실행 파일 SHA256이 최신 Shipping 산출물과 일치. WITH_TUNASWEEPER_STOVE=0 확인, STOVE SDK DLL 및 .env 미포함. DelayedExplosion 자동 테스트 성공.
+- 결과: TunaSweeper/Builds/Steam/Demo/Windows 전체, 1,172,420,441 bytes. 패키지 실행 및 해당 실행 경로의 창 생성은 확인했으나 Computer Use 화면 접근이 승인되지 않아 버전 문구·버튼·실제 플레이/청취는 미확인. 스팀 업로드는 수행하지 않았다. 수정 소스와 문서는 미커밋 상태로 두고 프로젝트 에디터를 다시 연다.
+- 로그: TunaSweeper/Saved/SteamDemoPackaging-20260920-retry.log, TunaSweeper/Saved/ATVRigWork/explosion-packaging-fix.log. 기존 콘텐츠의 재질/참조 경고는 남아 있으나 최종 쿡 오류는 없다.
+
+## 2026-09-20 04:43:13 (소요시간: 00:02:34)
+
+- 요청: 버전 끝 4자리를 9200으로 수정.
+- 처리: DefaultGame.ini의 ProjectVersion을 0.2.9200으로 변경하고 Steam Demo Shipping 패키지를 전체 재생성했다. 이전 검증용 실행 프로세스의 파일 잠금을 해제한 뒤 패키징했다.
+- 검증: BUILD SUCCESSFUL / ExitCode 0, VerifyDemo 통과, 패키지와 최신 Shipping 실행 파일 SHA256 일치. 실제 PAK의 BinaryConfig.ini를 추출하여 0.2.9200 포함 및 0.2.9160 미포함 확인. 화면 접근 미승인 상태여서 실제 타이틀 시각 확인은 하지 않았다.
+- 결과: TunaSweeper/Builds/Steam/Demo/Windows. 기존 프로젝트 에디터 인스턴스를 유지한다. 업로드·커밋하지 않음. 로그: TunaSweeper/Saved/SteamDemoPackaging-0.2.9200.log.
+
+## 2026-09-20 04:45:57 (소요시간: 00:00:20)
+
+- 요청: 버전 수정 및 패키징 후 현재 작업 커밋.
+- 처리: 0.2.9200 버전, 패키징 중 발견한 ATV 폭발 시스템 조기 로드 수정, 관련 문서와 검증 기록을 함께 커밋한다.
+- 검증: 변경 공백 검사 통과. 최신 Steam Demo Shipping 패키징 성공 및 DelayedExplosion 자동 테스트 성공 기록 확인. 푸시하지 않음.
