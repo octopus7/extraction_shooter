@@ -12,6 +12,7 @@ public class TunaSweeper : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 		PublicDependencyModuleNames.Add("ChaosVehicles");
+		PublicDependencyModuleNames.Add("AnimGraphRuntime");
 	
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "AIModule", "UMG", "Slate", "SlateCore", "MediaAssets", "Niagara", "GameplayTags", "PhysicsCore", "ProceduralMeshComponent", "Chaos", "GeometryCollectionEngine", "FieldSystemEngine", "TunaWarpTransition", "MiyakovCharacterSystem" });
 

@@ -5,6 +5,11 @@
 	"Description": "",
 	"Modules": [
 		{
+			"Name": "TunaSweeperAnimGraph",
+			"Type": "UncookedOnly",
+			"LoadingPhase": "Default"
+		},
+		{
 			"Name": "TunaSweeper",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"

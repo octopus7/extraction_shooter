@@ -27,6 +27,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Title|Look")
 	void ClearDirectHeadLookRotation();
 
+	// Captured on the game thread by the head-look AnimNode before parallel evaluation.
+	bool GetDirectHeadLookRequest(float& OutYaw, float& OutPitch, FName& OutHeadBone, FName& OutRootBone) const;
+
 	void SetTemporaryRelaxedArmPose(float BlendAlpha, float MotionPhaseSeconds);
 	void SetTemporaryRelaxedArmPoseEnabled(bool bEnabled);
 	bool IsTemporaryRelaxedArmPoseEnabled() const { return bApplyTemporaryRelaxedArms; }
@@ -55,7 +58,6 @@ private:
 		FName UpperArmBoneName,
 		FName LowerArmBoneName,
 		float SidePhaseOffset) const;
-	void ApplyDirectHeadLookToEditablePose();
 
 	float DirectHeadLookYaw = 0.0f;
 	float DirectHeadLookPitch = 0.0f;

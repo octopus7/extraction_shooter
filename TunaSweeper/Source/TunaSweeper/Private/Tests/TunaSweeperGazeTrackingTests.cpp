@@ -12,6 +12,8 @@
 #include "Misc/AutomationTest.h"
 #include "ReferenceSkeleton.h"
 #include "Title/TunaSweeperTitlePresentationActor.h"
+#include "Title/AnimNode_TunaSweeperTitleHeadLook.h"
+#include "Animation/AnimInstance.h"
 
 namespace TunaSweeperGazeTrackingTests
 {
@@ -663,20 +665,39 @@ bool FTunaSweeperTitleHeadLookAnimatedPoseTest::RunTest(const FString& Parameter
 		{0.0f, 8.0f, FVector(0.0f, 0.9902680687f, 0.1391731010f)},
 		{0.0f, 0.0f, FVector::RightVector},
 		{28.0f, 16.0f, FVector(0.4512844758f, 0.8487435576f, 0.2756373558f)}};
+	FMemMark MemMark(FMemStack::Get());
+	TArray<FBoneIndexType> BoneIndices;
+	for (int32 Index = 0; Index < BasePose.Num(); ++Index) BoneIndices.Add(Index);
+	FBoneContainer Bones(BoneIndices, UE::Anim::FCurveFilterSettings(), *Mesh);
 	for (const FLookCase& LookCase : Cases)
 	{
 		UTunaSweeperTitleSkeletalMeshComponent* Component =
 			NewObject<UTunaSweeperTitleSkeletalMeshComponent>();
 		Component->SetSkeletalMeshAsset(Mesh);
 		Component->SetTemporaryRelaxedArmPoseEnabled(false);
+		UAnimInstance* Instance = NewObject<UAnimInstance>(Component);
+		FAnimNode_TunaSweeperTitleHeadLook Node;
+		auto EvaluateHeadLook = [&]()
+		{
+			Node.PreUpdate(Instance);
+			FComponentSpacePoseContext Context(nullptr);
+			Context.Pose.InitPose(&Bones);
+			for (int32 Index = 0; Index < BasePose.Num(); ++Index)
+				Context.Pose.SetComponentSpaceTransform(FCompactPoseBoneIndex(Index), BasePose[Index]);
+			TArray<FBoneTransform> Changes;
+			Node.EvaluateSkeletalControl_AnyThread(Context, Changes);
+			if (!Changes.IsEmpty()) Context.Pose.LocalBlendCSBoneTransforms(Changes, 1.0f);
+			auto& Result = Component->GetEditableComponentSpaceTransforms();
+			Result.SetNum(BasePose.Num());
+			for (int32 Index = 0; Index < BasePose.Num(); ++Index)
+				Result[Index] = Context.Pose.GetComponentSpaceTransform(FCompactPoseBoneIndex(Index));
+		};
 		TArray<FTransform>& Pose = Component->GetEditableComponentSpaceTransforms();
-		Pose = BasePose;
-		Component->FinalizeBoneTransform();
+		EvaluateHeadLook();
 		TestTrue(TEXT("A component without a target preserves its animated head"),
 			Pose[HeadIndex].Equals(BasePose[HeadIndex], 0.0001f));
-		Pose = BasePose;
 		Component->SetDirectHeadLookRotation(LookCase.Yaw, LookCase.Pitch);
-		Component->FinalizeBoneTransform();
+		EvaluateHeadLook();
 		const FVector ActualAim = Pose[HeadIndex].GetRotation().RotateVector(FVector::RightVector);
 		TestTrue(FString::Printf(TEXT("Animated head reaches yaw %.0f pitch %.0f without its base offset"),
 			LookCase.Yaw, LookCase.Pitch), ActualAim.Equals(LookCase.ExpectedAim, 0.001f));
@@ -688,10 +709,17 @@ bool FTunaSweeperTitleHeadLookAnimatedPoseTest::RunTest(const FString& Parameter
 			FVector::Distance(Pose[HeadIndex].GetLocation(), Pose[NeckIndex].GetLocation()),
 			FVector::Distance(BasePose[HeadIndex].GetLocation(), BasePose[NeckIndex].GetLocation()), 0.001));
 		Component->ClearDirectHeadLookRotation();
-		Pose = BasePose;
-		Component->FinalizeBoneTransform();
+		EvaluateHeadLook();
 		TestTrue(TEXT("Clearing tracking restores the animated head instead of aiming forward"),
 			Pose[HeadIndex].Equals(BasePose[HeadIndex], 0.0001f));
+		// Finalization must not rotate an already simulated pose, even with a new target.
+		Component->SetDirectHeadLookRotation(45, 30);
+		const TArray<FTransform> SolvedPose = Pose;
+		Component->FinalizeBoneTransform();
+		for (int32 Index = 0; Index < Pose.Num(); ++Index)
+			TestTrue(TEXT("Finalization preserves the solved head and hair pose"), Pose[Index].Equals(SolvedPose[Index], 0.0001f));
+		Node.PreUpdate(NewObject<UAnimInstance>(NewObject<USkeletalMeshComponent>()));
+		TestFalse(TEXT("The head node is inactive on ordinary gameplay meshes"), Node.IsValidToEvaluate(Mesh->GetSkeleton(), Bones));
 	}
 	return true;
 }

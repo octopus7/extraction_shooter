@@ -32,6 +32,9 @@ public class TunaSweeperEditor : ModuleRules
 			"ToolMenus",
 			"UATHelper",
 			"TunaSweeper",
+			"AnimGraph",
+			"BlueprintGraph",
+			"TunaSweeperAnimGraph",
 		});
 	}
 }

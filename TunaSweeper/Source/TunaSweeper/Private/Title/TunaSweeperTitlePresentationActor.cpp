@@ -54,6 +54,16 @@ void UTunaSweeperTitleSkeletalMeshComponent::ClearDirectHeadLookRotation()
 	DirectHeadLookPitch = 0.0f;
 }
 
+bool UTunaSweeperTitleSkeletalMeshComponent::GetDirectHeadLookRequest(
+	float& OutYaw, float& OutPitch, FName& OutHeadBone, FName& OutRootBone) const
+{
+	OutYaw = DirectHeadLookYaw;
+	OutPitch = DirectHeadLookPitch;
+	OutHeadBone = HeadBoneName;
+	OutRootBone = HeadLookRootBoneName;
+	return bApplyDirectHeadLook && bHasDirectHeadLookTarget;
+}
+
 void UTunaSweeperTitleSkeletalMeshComponent::SetTemporaryRelaxedArmPose(
 	float BlendAlpha,
 	float MotionPhaseSeconds)
@@ -70,7 +80,6 @@ void UTunaSweeperTitleSkeletalMeshComponent::SetTemporaryRelaxedArmPoseEnabled(b
 void UTunaSweeperTitleSkeletalMeshComponent::FinalizeBoneTransform()
 {
 	ApplyTemporaryRelaxedArmPoseToEditablePose();
-	ApplyDirectHeadLookToEditablePose();
 	Super::FinalizeBoneTransform();
 }
 
@@ -205,62 +214,6 @@ void UTunaSweeperTitleSkeletalMeshComponent::ApplyRelaxedArmBranch(
 	}
 }
 
-void UTunaSweeperTitleSkeletalMeshComponent::ApplyDirectHeadLookToEditablePose()
-{
-	if (!bApplyDirectHeadLook || !bHasDirectHeadLookTarget)
-	{
-		return;
-	}
-
-	int32 HeadBoneIndex = GetBoneIndex(HeadBoneName);
-	if (HeadBoneIndex == INDEX_NONE)
-	{
-		HeadBoneIndex = GetBoneIndex(TEXT("head"));
-	}
-	if (HeadBoneIndex == INDEX_NONE)
-	{
-		return;
-	}
-	int32 LookRootBoneIndex = GetBoneIndex(HeadLookRootBoneName);
-	if (LookRootBoneIndex == INDEX_NONE)
-	{
-		LookRootBoneIndex = HeadBoneIndex;
-	}
-
-	TArray<FTransform>& ComponentSpaceTransforms = GetEditableComponentSpaceTransforms();
-	if (!ComponentSpaceTransforms.IsValidIndex(LookRootBoneIndex) ||
-		!ComponentSpaceTransforms.IsValidIndex(HeadBoneIndex))
-	{
-		return;
-	}
-
-	const FVector LookRootLocation = ComponentSpaceTransforms[LookRootBoneIndex].GetLocation();
-	const float YawRadians = FMath::DegreesToRadians(DirectHeadLookYaw);
-	const float PitchRadians = FMath::DegreesToRadians(DirectHeadLookPitch);
-	const FVector DesiredAimDirection(
-		FMath::Sin(YawRadians) * FMath::Cos(PitchRadians),
-		FMath::Cos(YawRadians) * FMath::Cos(PitchRadians),
-		FMath::Sin(PitchRadians));
-	// Read this frame's animated head before either head or eye corrections. Applying
-	// the absolute target angles as an offset would retain the animation's head tilt.
-	const FVector AnimatedAimDirection = ComponentSpaceTransforms[HeadBoneIndex].GetRotation()
-		.RotateVector(FVector::RightVector).GetSafeNormal();
-	const FQuat LookDelta = FQuat::FindBetweenNormals(AnimatedAimDirection, DesiredAimDirection).GetNormalized();
-
-	for (int32 BoneIndex = 0; BoneIndex < ComponentSpaceTransforms.Num(); ++BoneIndex)
-	{
-		if (!IsBoneDescendantOf(BoneIndex, LookRootBoneIndex))
-		{
-			continue;
-		}
-
-		FTransform& BoneTransform = ComponentSpaceTransforms[BoneIndex];
-		BoneTransform.SetLocation(
-			LookRootLocation + LookDelta.RotateVector(BoneTransform.GetLocation() - LookRootLocation));
-		BoneTransform.SetRotation((LookDelta * BoneTransform.GetRotation()).GetNormalized());
-	}
-}
-
 ATunaSweeperTitlePresentationActor::ATunaSweeperTitlePresentationActor()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -280,6 +233,7 @@ ATunaSweeperTitlePresentationActor::ATunaSweeperTitlePresentationActor()
 
 	BodyMesh = CreateDefaultSubobject<UTunaSweeperTitleSkeletalMeshComponent>(TEXT("BodyMesh"));
 	BodyMesh->SetupAttachment(CharacterAnchor);
+	BodyMesh->AddTickPrerequisiteActor(this);
 	BodyMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	BodyMesh->SetGenerateOverlapEvents(false);
 	BodyMesh->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::OnlyTickPoseWhenRendered;
