@@ -12,5 +12,6 @@ public class TunaSweeperEditorTarget : TargetRules
 		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_7;
 		ExtraModuleNames.Add("TunaSweeper");
 		ExtraModuleNames.Add("TunaSweeperEditor");
+		ExtraModuleNames.Add("TunaSweeperAnimGraph");
 	}
 }
