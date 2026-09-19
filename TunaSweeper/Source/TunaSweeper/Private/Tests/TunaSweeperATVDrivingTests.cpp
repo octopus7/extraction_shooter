@@ -30,7 +30,9 @@ bool FTunaSweeperATVDrivingTest::RunTest(const FString& Parameters)
 	UClass* ATVClass = LoadClass<ATunaSweeperATVActor>(nullptr, TEXT("/Game/Blueprints/Vehicles/ATV/BP_ATV_TypeA.BP_ATV_TypeA_C"));
 	if (!TestNotNull(TEXT("Saved ATV Blueprint"), ATVClass)) return false;
 	auto* ATV = World->SpawnActor<ATunaSweeperATVActor>(ATVClass, FVector(0,0,30), FRotator::ZeroRotator, Spawn);
-	auto* Player = World->SpawnActor<ATunaSweeperTopDownCharacter>(FVector(0,140,90), FRotator::ZeroRotator, Spawn);
+	UClass* PlayerClass = LoadClass<ATunaSweeperTopDownCharacter>(nullptr, TEXT("/Game/Characters/Player/BP_TunaSweeperPlayerCharacter.BP_TunaSweeperPlayerCharacter_C"));
+	if (!TestNotNull(TEXT("Player Blueprint"), PlayerClass)) return false;
+	auto* Player = World->SpawnActor<ATunaSweeperTopDownCharacter>(PlayerClass, FVector(0,140,90), FRotator::ZeroRotator, Spawn);
 	auto* Controller = World->SpawnActor<APlayerController>();
 	Controller->Possess(Player);
 	auto* Mount = ATV->MountComponent.Get();
@@ -83,6 +85,15 @@ bool FTunaSweeperATVDrivingTest::RunTest(const FString& Parameters)
 		TestFalse(TEXT("Handlebar bone follows steering"), ATV->VehicleMesh->GetSocketTransform(TEXT("handlebar"), RTS_Component).GetRotation().Equals(HandleRest, 0.01f));
 	}
 	Mount->SetDriveInput(FVector2D(0,-1));
+	for (const TCHAR* Side : {TEXT("l"), TEXT("r")})
+	{
+		const FString Suffix(Side);
+		const FTransform Bar = ATV->VehicleMesh->GetSocketTransform(TEXT("handlebar"));
+		const FVector Target = ATV->VehicleMesh->GetSocketLocation(FName(*(TEXT("grip_")+Suffix))) + Bar.TransformVectorNoScale(FVector(-5, Suffix==TEXT("l") ? 12 : -12, 3));
+		const float Error = FVector::Distance(Player->GetMesh()->GetSocketLocation(FName(*(TEXT("hand_")+Suffix))), Target);
+		AddInfo(FString::Printf(TEXT("Steering hand %s target error %.2f cm"), Side, Error));
+		TestTrue(TEXT("Rider hands follow turning handlebar"), Error < 1);
+	}
 	Step(600);
 	AddInfo(FString::Printf(TEXT("Reverse speed %.1f cm/s"), Movement->GetForwardSpeed()));
 	TestTrue(TEXT("S brakes then reverses"), Movement->GetForwardSpeed() < -50);

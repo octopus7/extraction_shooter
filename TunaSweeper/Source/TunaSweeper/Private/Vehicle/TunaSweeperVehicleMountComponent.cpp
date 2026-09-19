@@ -1,5 +1,8 @@
 #include "Vehicle/TunaSweeperVehicleMountComponent.h"
 #include "Vehicle/TunaSweeperATVActor.h"
+#include "Vehicle/TunaSweeperATVRiderAnimInstance.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "Weapon/TunaSweeperWeapon.h"
 #include "Character/TunaSweeperTopDownCharacter.h"
 #include "Player/TunaSweeperPlayerController.h"
 #include "Components/AudioComponent.h"
@@ -49,6 +52,7 @@ bool UTunaSweeperVehicleMountComponent::TryMount(ATunaSweeperTopDownCharacter* C
 	Character->GetCapsuleComponent()->IgnoreActorWhenMoving(GetOwner(), true);
 	Character->SetActorRelativeLocation(RiderRelativeTransform.GetLocation());
 	Character->SetActorRelativeRotation(RiderRelativeTransform.GetRotation());
+	StartRiderPose();
 	StationarySeconds = 0;
 	bHintVisible = false;
 	PreviousVehicleLocation = GetComponentLocation();
@@ -128,6 +132,7 @@ void UTunaSweeperVehicleMountComponent::ReleaseRider(const FVector& Location, bo
 	StationarySeconds = 0;
 	if (DismountWidget) DismountWidget->RemoveFromParent();
 	DismountWidget = nullptr;
+	RestoreRiderPose(Character);
 	if (!Character) return;
 	Character->VehicleMount = nullptr;
 	Character->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
@@ -145,6 +150,50 @@ void UTunaSweeperVehicleMountComponent::ReleaseRiderForEndPlay()
 	FVector Location;
 	if (!FindDismountLocation(Location)) Location = LastOnFootTransform.GetLocation();
 	ReleaseRider(Location, false);
+}
+
+void UTunaSweeperVehicleMountComponent::StartRiderPose()
+{
+	auto* Character = Rider.Get();
+	auto* ATV = Cast<ATunaSweeperATVActor>(GetOwner());
+	if (!Character || !ATV) return;
+	auto* Mesh = Character->GetMesh();
+	// Keep unsupported/custom animation modes intact.
+	if (!Mesh || Mesh->GetAnimationMode() != EAnimationMode::AnimationBlueprint ||
+		Mesh->GetBoneIndex(TEXT("pelvis")) == INDEX_NONE || Mesh->GetBoneIndex(TEXT("hand_l")) == INDEX_NONE) return;
+	SavedRiderAnimClass = Mesh->GetAnimClass();
+	SavedRiderTickGroup = Mesh->PrimaryComponentTick.TickGroup;
+	SavedRiderVisibilityTickOption = uint8(Mesh->VisibilityBasedAnimTickOption);
+	bSavedRiderUpdateRateOptimizations = Mesh->bEnableUpdateRateOptimizations;
+	Mesh->SetTickGroup(TG_PostPhysics);
+	Mesh->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
+	Mesh->bEnableUpdateRateOptimizations = false;
+	Mesh->AddTickPrerequisiteComponent(ATV->VehicleMesh);
+	Mesh->SetAnimInstanceClass(UTunaSweeperATVRiderAnimInstance::StaticClass());
+	bRiderPoseActive = true;
+	if (IsValid(Character->EquippedWeapon))
+	{
+		HiddenRiderWeapon = Character->EquippedWeapon;
+		bRiderWeaponWasHidden = Character->EquippedWeapon->IsHidden();
+		Character->EquippedWeapon->SetActorHiddenInGame(true);
+	}
+}
+
+void UTunaSweeperVehicleMountComponent::RestoreRiderPose(ATunaSweeperTopDownCharacter* Character)
+{
+	if (bRiderPoseActive && Character && Character->GetMesh())
+	{
+		auto* Mesh = Character->GetMesh();
+		if (auto* ATV = Cast<ATunaSweeperATVActor>(GetOwner())) Mesh->RemoveTickPrerequisiteComponent(ATV->VehicleMesh);
+		Mesh->SetAnimInstanceClass(SavedRiderAnimClass);
+		Mesh->SetTickGroup(SavedRiderTickGroup);
+		Mesh->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption(SavedRiderVisibilityTickOption);
+		Mesh->bEnableUpdateRateOptimizations = bSavedRiderUpdateRateOptimizations;
+	}
+	if (HiddenRiderWeapon.IsValid()) HiddenRiderWeapon->SetActorHiddenInGame(bRiderWeaponWasHidden);
+	HiddenRiderWeapon.Reset();
+	SavedRiderAnimClass = nullptr;
+	bRiderPoseActive = false;
 }
 
 void UTunaSweeperVehicleMountComponent::StopEngineAudio()

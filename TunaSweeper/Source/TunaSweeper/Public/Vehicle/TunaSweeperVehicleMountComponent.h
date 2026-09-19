@@ -7,6 +7,7 @@ class ATunaSweeperTopDownCharacter;
 class UAudioComponent;
 class USoundBase;
 class UTunaSweeperVehicleDismountWidget;
+class UAnimInstance;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FTunaSweeperRiderChanged, ATunaSweeperTopDownCharacter*, Character);
 
 /** Attach to a vehicle's seat socket. Possession stays on the player. */
@@ -61,6 +62,17 @@ private:
 	void ReleaseRider(const FVector& Location, bool bPlaySound);
 	void StopEngineAudio();
 	void StartIdleAudio();
+	void StartRiderPose();
+	void RestoreRiderPose(ATunaSweeperTopDownCharacter* Character);
+	UPROPERTY(Transient)
+	TSubclassOf<UAnimInstance> SavedRiderAnimClass;
+	UPROPERTY(Transient)
+	TWeakObjectPtr<AActor> HiddenRiderWeapon;
+	bool bRiderPoseActive = false;
+	bool bRiderWeaponWasHidden = false;
+	TEnumAsByte<ETickingGroup> SavedRiderTickGroup = TG_PrePhysics;
+	uint8 SavedRiderVisibilityTickOption = 0;
+	bool bSavedRiderUpdateRateOptimizations = false;
 	UPROPERTY(Transient)
 	TWeakObjectPtr<ATunaSweeperTopDownCharacter> Rider;
 	UPROPERTY(Transient)

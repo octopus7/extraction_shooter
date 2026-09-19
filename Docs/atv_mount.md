@@ -30,7 +30,15 @@
 
 ## 범위와 확장 지점
 
-승하차·Chaos 주행·휠/서스펜션 구동을 구현했다. 운전자 앉는 자세와 손발 IK는 아직 별도 구현 대상이다. `OnMounted`/`OnDismounted` 이벤트와 `GetRider`, 캐릭터의 `IsMountedInVehicle`/`GetVehicleMount`를 제공한다. 탑승 컴포넌트는 다른 좌석에도 사용할 수 있지만 주행 입력 전달은 현재 ATV 액터에 연결되어 있다.
+승하차·Chaos 주행·휠/서스펜션 구동과 Luna Mk2 탑승 자세를 구현했다. `OnMounted`/`OnDismounted` 이벤트와 `GetRider`, 캐릭터의 `IsMountedInVehicle`/`GetVehicleMount`를 제공한다. 탑승 컴포넌트는 다른 좌석에도 사용할 수 있지만 주행 입력 전달은 현재 ATV 액터에 연결되어 있다.
+
+## 운전자 자세
+
+- 탑승 중 `TunaSweeperATVRiderAnimInstance`로 전환해 좌석 앞쪽에 앉고 상체를 숙인 자세를 만든다. 고개는 전방을 바라보도록 별도로 보정한다. 새 AnimSequence 애셋을 재생하는 방식이 아니라 현재 ATV 본을 목표로 매 프레임 계산하는 네이티브 자세다.
+- `grip_l/r`, `foot_l/r`에 손목과 발목을 맞추는 2본 IK를 사용한다. 손목은 핸들 끝 표시보다 안쪽/뒤쪽, 발목은 발판보다 위쪽에 놓고 손가락을 굽힌다. 무릎은 차체 바깥으로 벌린다. 조향 시 핸들과 함께 상체와 손 위치를 갱신한다.
+- 현재 Luna Mk2 비율과 +Y 메시 전방에 맞춘 자세다. 다른 스켈레톤에 대한 범용 리타기팅이나 별도 승차/하차 전환 모션은 포함하지 않는다.
+- 탑승 중에는 보행 AnimBP를 전용 인스턴스로 교체하므로 기존 보행 그래프 안의 머리카락 RigidBody 등 부가 노드는 실행하지 않는다. 별도 Skirt 컴포넌트의 AnimBP는 유지한다. 탑승용 머리카락 물리는 후속 연결 대상이다.
+- 탑승 중 장착 무기를 숨기고, 하차/사망/좌석 종료 시 기존 AnimBP·메시 갱신 설정·무기 표시 상태를 복원한다. 탑승 중에는 물리 갱신 뒤 매 프레임 자세를 평가해 손 위치가 늦게 따라오지 않게 한다.
 
 좌석 점유·차량 주행 상태/이동 위치·안내 타이머·엔진 오디오는 일시적인 월드 상태이며 저장하지 않는다. 세이브 구조를 변경하지 않았다.
 
@@ -38,6 +46,7 @@
 
 - 에디터 자동 테스트: `TunaSweeper.Vehicle.MountInteraction`
 - 물리 주행/접지/조향/실제 휠·스프링·핸들 본/Shift 가속/입력 해제: `TunaSweeper.Vehicle.Driving`. 저장된 `BP_ATV_TypeA`로 실행한다.
+- 실제 플레이어 BP의 좌석/손발 접촉 및 하차 복원: `TunaSweeper.Vehicle.RiderPose`. `-ATVRiderPreview`와 렌더링을 활성화해 실행하면 `Saved/ATVRigWork/RiderPose0~2.png`에 검토 이미지를 저장한다.
 - 별도 UE 프로세스에서 기본값/자산 참조 확인: `Tools/ATVRig/verify_mount_setup.py`
 - 주행 기본값/물리 애셋/애니메이션/사운드 참조 확인: `Tools/ATVRig/verify_driving_setup.py`
 - UI의 실제 화면 배치와 청취, 운전자 자세의 최종 게임 내 확인은 별도 플레이 검수가 필요하다.
