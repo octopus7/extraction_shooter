@@ -398,26 +398,26 @@ bool FTunaSweeperGazeTitleHierarchyTest::RunTest(const FString& Parameters)
 		BodyMesh->GetClass()->ImplementsInterface(UTunaSweeperGazePoseSink::StaticClass()));
 	if (SkirtMesh)
 	{
-		const USkeletalMesh* PlayerSkirtMesh = LoadObject<USkeletalMesh>(
+		const USkeletalMesh* TitleSkirtMesh = LoadObject<USkeletalMesh>(
 			nullptr,
-			TEXT("/Game/Characters/Player/Luna/Skirt/Luna__Skirt_front.Luna__Skirt_front"));
-		TestTrue(TEXT("Title skirt uses the player skirt mesh"), SkirtMesh->GetSkeletalMeshAsset() == PlayerSkirtMesh);
+			TEXT("/Game/Characters/Player/LunaMk2/Skirt/SKM_LunaMk2_TitleSkirt.SKM_LunaMk2_TitleSkirt"));
+		TestTrue(TEXT("Title skirt uses its body-compatible mesh"), SkirtMesh->GetSkeletalMeshAsset() == TitleSkirtMesh);
 		TestTrue(
-			TEXT("Title skirt is attached to the Mk2 body like the player Blueprint"),
+			TEXT("Title skirt uses the Mk2 body component as pose source"),
 			SkirtMesh->GetAttachParent() == BodyMesh);
 		TestEqual(
-			TEXT("Title skirt uses the player Blueprint pelvis socket"),
+			TEXT("Title skirt does not double-apply a bone socket transform"),
 			SkirtMesh->GetAttachSocketName(),
-			FName(TEXT("pelvis")));
+			NAME_None);
 		TestTrue(
-			TEXT("Title skirt copies the player Blueprint position correction"),
-			SkirtMesh->GetRelativeLocation().Equals(FVector(6.012824f, 5.358606f, -1.723956f), 0.001f));
+			TEXT("Title skirt shares body-space origin"),
+			SkirtMesh->GetRelativeLocation().Equals(FVector::ZeroVector, 0.001f));
 		TestTrue(
-			TEXT("Title skirt copies the player Blueprint rotation correction"),
-			SkirtMesh->GetRelativeRotation().Equals(FRotator(-90.0f, 34.0f, 0.0f), 0.01f));
+			TEXT("Title skirt shares body-space axes"),
+			SkirtMesh->GetRelativeRotation().Equals(FRotator::ZeroRotator, 0.01f));
 		TestTrue(
-			TEXT("Title skirt uses the same animation Blueprint as the player skirt"),
-			SkirtMesh->GetAnimClass() && SkirtMesh->GetAnimClass()->GetPathName().Contains(TEXT("ABP_Luna_Skirt")));
+			TEXT("Title skirt uses body pose copying followed by skirt physics"),
+			SkirtMesh->GetAnimClass() && SkirtMesh->GetAnimClass()->GetPathName().Contains(TEXT("ABP_LunaMk2_TitleSkirt")));
 	}
 
 	const FVector CursorTarget = ATunaSweeperTitlePresentationActor::CalculateCursorTargetWorldLocation(

@@ -246,9 +246,8 @@ ATunaSweeperTitlePresentationActor::ATunaSweeperTitlePresentationActor()
 	FaceMesh->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::OnlyTickPoseWhenRendered;
 
 	SkirtMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Skirt"));
-	SkirtMesh->SetupAttachment(BodyMesh, TEXT("pelvis"));
-	SkirtMesh->SetRelativeLocation(FVector(6.012824f, 5.358606f, -1.723956f));
-	SkirtMesh->SetRelativeRotation(FRotator(-90.0f, 34.0f, 0.0f));
+	// The title skirt is skinned in BodyMesh space; Copy Pose supplies pelvis/spine motion.
+	SkirtMesh->SetupAttachment(BodyMesh);
 	SkirtMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	SkirtMesh->SetGenerateOverlapEvents(false);
 	SkirtMesh->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::OnlyTickPoseWhenRendered;
@@ -307,14 +306,14 @@ ATunaSweeperTitlePresentationActor::ATunaSweeperTitlePresentationActor()
 	}
 
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> SkirtMeshFinder(
-		TEXT("/Game/Characters/Player/Luna/Skirt/Luna__Skirt_front.Luna__Skirt_front"));
+		TEXT("/Game/Characters/Player/LunaMk2/Skirt/SKM_LunaMk2_TitleSkirt.SKM_LunaMk2_TitleSkirt"));
 	if (SkirtMeshFinder.Succeeded())
 	{
 		SkirtMesh->SetSkeletalMeshAsset(SkirtMeshFinder.Object);
 	}
 
 	static ConstructorHelpers::FClassFinder<UAnimInstance> SkirtAnimClassFinder(
-		TEXT("/Game/Characters/Player/Luna/Skirt/Animations/ABP_Luna_Skirt"));
+		TEXT("/Game/Characters/Player/LunaMk2/Skirt/ABP_LunaMk2_TitleSkirt"));
 	if (SkirtAnimClassFinder.Succeeded())
 	{
 		SkirtMesh->SetAnimationMode(EAnimationMode::AnimationBlueprint);
@@ -624,8 +623,9 @@ void ATunaSweeperTitlePresentationActor::ConfigureSkirtAttachment()
 
 	SkirtMesh->AttachToComponent(
 		BodyMesh,
-		FAttachmentTransformRules::KeepRelativeTransform,
-		TEXT("pelvis"));
+		FAttachmentTransformRules::SnapToTargetIncludingScale);
+	// Copy Pose must read this frame's body transforms before its own RigidBody evaluation.
+	SkirtMesh->AddTickPrerequisiteComponent(BodyMesh);
 }
 
 void ATunaSweeperTitlePresentationActor::UpdateCamera(float DeltaSeconds)
