@@ -1,0 +1,113 @@
+{
+  "passed": true,
+  "file_count": 7,
+  "limitations": [
+    "Objective signal checks do not replace human listening.",
+    "Four-times reconstructed peak is an estimate, not a certified BS.1770 true-peak measurement."
+  ],
+  "files": [
+    {
+      "file": "SW_ATV_Idle_Loop.wav",
+      "duration_seconds": 8.0,
+      "sample_rate": 48000,
+      "channels": 1,
+      "bits_per_sample": 24,
+      "peak_dbfs": -11.410944118208587,
+      "estimated_true_peak_dbfs_4x": -11.410904064835583,
+      "rms_dbfs": -21.000001024783764,
+      "dc_offset": 1.831601063410441e-11,
+      "clipped_samples": 0,
+      "sha256": "e385b02ca141b3205a4500cf4b64d93078d7d6c14d759e54134dd6eb37a35e98",
+      "loop_boundary_step_dbfs": -108.93137291103811,
+      "derivative_99th_percentile_dbfs": -36.610546560707675,
+      "seam_rms_ratio_to_median": 1.226275998866855,
+      "embedded_loop_verified": true
+    },
+    {
+      "file": "SW_ATV_Drive_Loop.wav",
+      "duration_seconds": 8.0,
+      "sample_rate": 48000,
+      "channels": 1,
+      "bits_per_sample": 24,
+      "peak_dbfs": -10.765219102081858,
+      "estimated_true_peak_dbfs_4x": -10.764265724690741,
+      "rms_dbfs": -19.000001042305882,
+      "dc_offset": 1.1796752611796061e-11,
+      "clipped_samples": 0,
+      "sha256": "b6272167b3c6f120b47f47f75dae7154b69a569e6511dcbeda3d0e737a69d64c",
+      "loop_boundary_step_dbfs": -75.98371350874571,
+      "derivative_99th_percentile_dbfs": -35.36050155110699,
+      "seam_rms_ratio_to_median": 1.0666558864849223,
+      "embedded_loop_verified": true
+    },
+    {
+      "file": "SW_ATV_Boost_Loop.wav",
+      "duration_seconds": 8.0,
+      "sample_rate": 48000,
+      "channels": 1,
+      "bits_per_sample": 24,
+      "peak_dbfs": -9.325268383409247,
+      "estimated_true_peak_dbfs_4x": -9.32498181754162,
+      "rms_dbfs": -17.00000103508347,
+      "dc_offset": 1.893689235051473e-10,
+      "clipped_samples": 0,
+      "sha256": "0252730d70e158756dc26a6ce7585b8bf09b966206df33f4d912a8e5d099a15d",
+      "loop_boundary_step_dbfs": -84.22080397288711,
+      "derivative_99th_percentile_dbfs": -33.7345383294491,
+      "seam_rms_ratio_to_median": 1.0061471504956991,
+      "embedded_loop_verified": true
+    },
+    {
+      "file": "SW_ATV_Mount_Start.wav",
+      "duration_seconds": 3.8,
+      "sample_rate": 48000,
+      "channels": 1,
+      "bits_per_sample": 24,
+      "peak_dbfs": -9.785748024399402,
+      "estimated_true_peak_dbfs_4x": -9.785465830618428,
+      "rms_dbfs": -22.263455667548694,
+      "dc_offset": 4.979817752252545e-07,
+      "clipped_samples": 0,
+      "sha256": "12419e25a00e2f3636b79c78db7404f57475ee741d360ce8d8b0bcfc96446a50"
+    },
+    {
+      "file": "SW_ATV_Dismount_Stop.wav",
+      "duration_seconds": 2.4,
+      "sample_rate": 48000,
+      "channels": 1,
+      "bits_per_sample": 24,
+      "peak_dbfs": -10.434227486330066,
+      "estimated_true_peak_dbfs_4x": -10.43101052364067,
+      "rms_dbfs": -26.485412298930285,
+      "dc_offset": 9.1924455223812e-05,
+      "clipped_samples": 0,
+      "sha256": "66d1280694526949a07968b859338e388f2ddb1ec5f1b37745b6f6caa2139eeb"
+    },
+    {
+      "file": "SW_ATV_Dismount_Mechanical.wav",
+      "duration_seconds": 0.95,
+      "sample_rate": 48000,
+      "channels": 1,
+      "bits_per_sample": 24,
+      "peak_dbfs": -5.171835582576964,
+      "estimated_true_peak_dbfs_4x": -5.151465901743489,
+      "rms_dbfs": -25.459387655920416,
+      "dc_offset": 2.901805074591386e-10,
+      "clipped_samples": 0,
+      "sha256": "f7293f79049863fcef290e38a91e952e854d0e806d9caa702ed14032b450e7e1"
+    },
+    {
+      "file": "ATV_Audition_Sequence.wav",
+      "duration_seconds": 22.12,
+      "sample_rate": 48000,
+      "channels": 1,
+      "bits_per_sample": 24,
+      "peak_dbfs": -7.490994932936471,
+      "estimated_true_peak_dbfs_4x": -7.49099486853067,
+      "rms_dbfs": -19.640759360245813,
+      "dc_offset": 9.620243334281581e-07,
+      "clipped_samples": 0,
+      "sha256": "4c17d301694c7cae10db08803671168e8fc178673e4447a476f436a26a10b83a"
+    }
+  ]
+}

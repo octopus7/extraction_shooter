@@ -1,0 +1,49 @@
+{
+  "passed": true,
+  "engine_version": "5.7.4-51494982+++UE5+Release-5.7",
+  "validation": "Fresh-process load and stored SoundWave property verification; no audible playback test.",
+  "assets": [
+    {
+      "asset": "/Game/Audio/ATV/SW_ATV_Idle_Loop",
+      "duration_seconds": 8.0,
+      "num_channels": 1,
+      "imported_sample_rate": 48000,
+      "looping": true
+    },
+    {
+      "asset": "/Game/Audio/ATV/SW_ATV_Drive_Loop",
+      "duration_seconds": 8.0,
+      "num_channels": 1,
+      "imported_sample_rate": 48000,
+      "looping": true
+    },
+    {
+      "asset": "/Game/Audio/ATV/SW_ATV_Boost_Loop",
+      "duration_seconds": 8.0,
+      "num_channels": 1,
+      "imported_sample_rate": 48000,
+      "looping": true
+    },
+    {
+      "asset": "/Game/Audio/ATV/SW_ATV_Mount_Start",
+      "duration_seconds": 3.799999952316284,
+      "num_channels": 1,
+      "imported_sample_rate": 48000,
+      "looping": false
+    },
+    {
+      "asset": "/Game/Audio/ATV/SW_ATV_Dismount_Stop",
+      "duration_seconds": 2.4000000953674316,
+      "num_channels": 1,
+      "imported_sample_rate": 48000,
+      "looping": false
+    },
+    {
+      "asset": "/Game/Audio/ATV/SW_ATV_Dismount_Mechanical",
+      "duration_seconds": 0.949999988079071,
+      "num_channels": 1,
+      "imported_sample_rate": 48000,
+      "looping": false
+    }
+  ]
+}
