@@ -1,6 +1,7 @@
 #include "TunaSweeperTopDownCharacterShared.h"
 
 #include "Character/TunaSweeperFootstepPresentationDataAsset.h"
+#include "Environment/TunaSweeperShallowPuddleActor.h"
 #include "Sound/SoundBase.h"
 #include "Sound/SoundWaveProcedural.h"
 #include "Subsystem/TunaSweeperNoiseSubsystem.h"
@@ -187,11 +188,19 @@ void ATunaSweeperTopDownCharacter::PlayPlayerFootstepSound(
 	bool bSprintFootstep)
 {
 	USoundBase* SoundToPlay = nullptr;
+	const UCharacterMovementComponent* Movement = GetCharacterMovement();
+	const FVector GroundPoint = Movement && Movement->CurrentFloor.IsWalkableFloor()
+		? Movement->CurrentFloor.HitResult.ImpactPoint : SoundLocation;
+	if (ATunaSweeperShallowPuddleActor* Puddle = ATunaSweeperShallowPuddleActor::FindPuddleAtGroundPoint(GetWorld(), GroundPoint))
+	{
+		SoundToPlay = Puddle->WaterFootstepSound;
+		Puddle->NotifyFootstep(GroundPoint, GetVelocity().Size2D(), bSprintFootstep, this);
+	}
 	const UTunaSweeperGameInstance* TunaGameInstance = GetGameInstance<UTunaSweeperGameInstance>();
 	const UTunaSweeperFootstepPresentationDataAsset* PresentationData = TunaGameInstance
 		? TunaGameInstance->FootstepPresentationDataAsset.LoadSynchronous()
 		: nullptr;
-	if (PresentationData)
+	if (!SoundToPlay && PresentationData)
 	{
 		SoundToPlay = PresentationData->BasicFootstepSound.LoadSynchronous();
 	}
