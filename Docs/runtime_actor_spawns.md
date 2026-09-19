@@ -47,7 +47,7 @@ Every `MemoSpawns.json` row requires:
 ```json
 {
   "level_name": "DemoRaidMap",
-  "placement_id": 301,
+  "placement_id": 2100,
   "memo_id": 1
 }
 ```

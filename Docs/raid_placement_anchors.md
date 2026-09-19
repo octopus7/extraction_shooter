@@ -1,5 +1,7 @@
 # Raid placement anchors
 
+Read `Docs/raid_placement_id_numbering.md` before assigning or changing a `PlacementId`. It defines the reserved ranges, allocation procedure, and retirement rules for every anchor kind.
+
 ## Level contract
 
 `ATunaSweeperRaidPlacementAnchor` is the spatial source of truth for data-owned enemy, loot-container, and memo placement. The reusable Blueprint is `/Game/Raid/Placement/BP_RaidPlacementAnchor`.
@@ -33,7 +35,7 @@ Loot-container anchor placement:
 ```json
 {
   "level_name": "DemoRaidMap",
-  "placement_id": 201,
+  "placement_id": 1100,
   "loot_container_class": "/Game/Interaction/BP_LootContainer.BP_LootContainer_C",
   "container_definition_id": 7001,
   "contents_id": 8001,
@@ -49,7 +51,7 @@ Memo placement:
 ```json
 {
   "level_name": "DemoRaidMap",
-  "placement_id": 301,
+  "placement_id": 2100,
   "memo_id": 1,
   "visual_scale": [0.85, 0.55, 0.08]
 }

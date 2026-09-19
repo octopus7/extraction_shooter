@@ -125,7 +125,7 @@ quest.demo.first.objective,레이드 구역 확인,Inspect the raid zone,レイ�
 [
   {
     "level_name": "DemoRaidMap",
-    "placement_id": 301,
+    "placement_id": 2100,
     "memo_id": 1,
     "visual_scale": [0.85, 0.55, 0.08]
   }
