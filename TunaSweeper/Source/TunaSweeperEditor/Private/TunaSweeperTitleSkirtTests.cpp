@@ -182,15 +182,17 @@ bool FTitleSkirtLayersTest::RunTest(const FString& Parameters)
         return Vertices;
     };
     // Source topology identifies the white front panel and black skirt as separate islands.
-    const auto Apron = Island(2), Skirt = Island(101);
-    if (!TestEqual(TEXT("Apron panel topology"), Apron.Num(), 97) || !TestEqual(TEXT("Black skirt topology"), Skirt.Num(), 196)) return false;
+    const auto Parts = Description.TriangleAttributes().GetAttributesRef<int32>(TEXT("TitleSkirtPart"));
+    const auto Apron = Parts.IsValid() ? TSet<FVertexID>() : Island(2);
+    const auto Skirt = Parts.IsValid() ? TSet<FVertexID>() : Island(101);
     TArray<FTriangleID> ApronTriangles, SkirtTriangles;
     for (FTriangleID T : Description.Triangles().GetElementIDs())
     {
         const FVertexID V = Description.GetTriangleVertices(T)[0];
-        if (Apron.Contains(V)) ApronTriangles.Add(T);
-        if (Skirt.Contains(V)) SkirtTriangles.Add(T);
+        if (Parts.IsValid() ? Parts[T] == 2 : Apron.Contains(V)) ApronTriangles.Add(T);
+        if (Parts.IsValid() ? Parts[T] == 1 : Skirt.Contains(V)) SkirtTriangles.Add(T);
     }
+    if (!TestTrue(TEXT("Apron and black skirt surfaces exist"), ApronTriangles.Num() > 100 && SkirtTriangles.Num() > 100)) return false;
     int32 Intersections = 0;
     for (FTriangleID AT : ApronTriangles)
         for (FTriangleID ST : SkirtTriangles)
@@ -209,6 +211,49 @@ bool FTitleSkirtLayersTest::RunTest(const FString& Parameters)
             Intersections += bIntersects;
         }
     TestEqual(TEXT("Upper apron does not intersect black skirt triangles"), Intersections, 0);
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FTitleSkirtSeamTest,
+    "TunaSweeper.Title.Skirt.WeldedApronSeam",
+    EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FTitleSkirtSeamTest::RunTest(const FString& Parameters)
+{
+    auto* Mesh = LoadObject<USkeletalMesh>(nullptr, TEXT("/Game/Characters/Player/LunaMk2/Skirt/SKM_LunaMk2_TitleSkirt"));
+    if (!Mesh || !Mesh->GetMeshDescription(0)) return false;
+    const auto& D = *Mesh->GetMeshDescription(0);
+    const auto Part = D.TriangleAttributes().GetAttributesRef<int32>(TEXT("TitleSkirtPart"));
+    const auto Join = D.VertexAttributes().GetAttributesRef<int32>(TEXT("TitleApronJoin"));
+    if (!TestTrue(TEXT("Welded seam source topology is present"), Part.IsValid() && Join.IsValid())) return false;
+    TMap<FVertexID, int32> Faces;
+    for (FTriangleID T : D.Triangles().GetElementIDs())
+        for (FVertexID V : D.GetTriangleVertices(T)) Faces.FindOrAdd(V) |= 1 << Part[T];
+    int32 EdgeVertices = 0, CenterVertices = 0;
+    for (FVertexID V : D.Vertices().GetElementIDs())
+    {
+        const int32 Mask = Faces.FindRef(V);
+        if (Join[V] == 1)
+        {
+            TestTrue(TEXT("Apron and frill use one logical skinned vertex"), (Mask & (1 << 2)) && (Mask & ((1 << 3) | (1 << 4))));
+            ++EdgeVertices;
+        }
+        if (Join[V] == 2)
+        {
+            TestTrue(TEXT("Left and right center frills share one vertex"), (Mask & (1 << 3)) && (Mask & (1 << 4)));
+            ++CenterVertices;
+        }
+    }
+    TestEqual(TEXT("Entire curved attachment is welded"), EdgeVertices, 84);
+    TestEqual(TEXT("All free center cross-section vertices are welded"), CenterVertices, 3);
+    for (FEdgeID E : D.Edges().GetElementIDs())
+    {
+        const auto V = D.GetEdgeVertices(E);
+        if (Join[V[0]] != 1 || Join[V[1]] != 1) continue;
+        int32 Mask = 0;
+        for (FTriangleID T : D.GetEdgeConnectedTriangleIDs(E)) Mask |= 1 << Part[T];
+        if (Mask & ((1 << 3) | (1 << 4)))
+            TestTrue(TEXT("Frill attachment has no unshared edges or T-junctions"), (Mask & (1 << 2)) != 0);
+    }
     return true;
 }
 
@@ -279,6 +324,14 @@ bool FTitleSkirtAnimatedPoseTest::RunTest(const FString& Parameters)
             TestTrue(TEXT("Garment diagnostic capture saved"), FImageUtils::SaveImageByExtension(*(Directory / FString::Printf(TEXT("title_garment_%03d.png"), Frame)), Pixels));
         Capture->HiddenComponents.Remove(Body);
         Capture->CaptureSource = ESceneCaptureSource::SCS_FinalColorLDR;
+        const FVector Waist = Body->GetComponentTransform().TransformPosition(FVector(-1, 10, 89));
+        Capture->SetWorldLocation(Waist - Camera->GetForwardVector() * 100.f);
+        Capture->FOVAngle = 35.f;
+        Capture->CaptureScene(); FlushRenderingCommands();
+        if (TestTrue(TEXT("Seam close-up readable"), FImageUtils::GetRenderTargetImage(Target, Pixels)))
+            TestTrue(TEXT("Seam close-up saved"), FImageUtils::SaveImageByExtension(*(Directory / FString::Printf(TEXT("title_seam_%03d.png"), Frame)), Pixels));
+        Capture->SetWorldTransform(Camera->GetComponentTransform());
+        Capture->FOVAngle = Camera->FieldOfView;
     }
     Capture->DestroyComponent();
     return true;
