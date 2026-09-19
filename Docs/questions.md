@@ -6864,3 +6864,13 @@ Unreal Editor commandlet 검사 후 작업 트리에 나타난 무관한 139개 
 
 - 질문: 머리 회전을 기존 회전에 더해서 사용하는 이유는 기존 애니메이션 모션을 활용하기 위해서인가?
 - 답변: 현재 구조는 애니메이션으로 계산된 목·머리 포즈에 추가 회전을 합성하므로 기본 모션을 유지하면서 커서 반응을 얹는 방식이다. 다만 작성 당시 의도까지 확정하는 것은 아니며, 현재 구현의 효과에 대한 설명이다. 문제는 추가 회전 자체가 아니라 메시 정면 기준 목표 각도를 현재 머리 방향과의 차이로 바꾸지 않고 그대로 적용하는 데 있다. 애니메이션 포즈 평가 후 현재 조준축에서 목표까지의 차이를 제한·보간·가중 적용하면 기존 몸 모션을 활용하면서 머리 추적 정확도를 높일 수 있다. 완전한 목표 정렬은 애니메이션의 머리 방향 흔들림을 상쇄하므로 잔여 모션을 얼마나 보존할지는 추적 가중치와 데드존 등으로 조절한다.
+
+## 2026-09-19 14:24:35 (소요시간: 00:00:24)
+
+- 질문: 현재 적 모델에 색상이 적용된 BP가 여러 개 존재하는지.
+- 답변: 현재 /Game/Blueprints/Enemies/QuadrupedVariants에 BP_QuadrupedGunEnemy_Blue, BrightGray, DarkGray, Gold, Red의 색상별 BP 에셋 5개가 있으며, Characters/Robot/Materials에도 각 색상에 대응하는 MI_Robot 머터리얼 인스턴스가 존재한다.
+
+## 2026-09-19 14:31:31 (소요시간: 00:00:17)
+
+- 질문: 적은 레벨 배치용 앵커 설치 후 ID 기준으로 설정하는지.
+- 답변: 맞다. BP_RaidPlacementAnchor를 배치하고 AnchorKind=Enemy, PlacementId를 지정한다. EnemySpawns.json의 level_name 및 placement_id로 앵커를 연결하고 profile_id로 EnemySpawnProfiles.json의 프로필을 찾는다. 프로필의 enemy_class가 생성할 적 BP를 정하므로 색상별 BP 경로를 지정하면 된다. 생성 위치·회전·스케일은 앵커의 Transform을 사용한다. 현재 확인한 기본 데이터는 DemoRaidMap/1에서 enemy.quadruped_gun_test를 통해 기본 BP_QuadrupedGunEnemy를 참조한다.

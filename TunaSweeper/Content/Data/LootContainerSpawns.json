@@ -1,7 +1,7 @@
 [
   {
     "level_name": "DemoRaidMap",
-    "placement_id": 2,
+    "placement_id": 1000,
     "loot_container_class": "/Game/Interaction/BP_LootContainer.BP_LootContainer_C",
     "container_definition_id": 7009,
     "contents_id": 8013,

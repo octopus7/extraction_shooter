@@ -116,7 +116,7 @@ flowchart TB
 
 ### Loot Container 앵커
 
-- A08: `PlacementId=2`, `AnchorKind=Loot Container`, 실제 위치 `(X 1387, Y 307.1, Z 52.4) cm`.
+- A08: `PlacementId=1000`, `AnchorKind=Loot Container`, 실제 위치 `(X 1387, Y 307.1, Z 52.4) cm`.
 - SSOT 데이터: `TunaSweeper/Content/Data/LootContainerSpawns.json`의 논리 레벨 `DemoRaidMap`, 클래스 `/Game/Interaction/BP_LootContainer.BP_LootContainer_C`, 컨테이너 정의 `7009` (`container.north_crate`), 내용물 `8013`.
 - 현재 내용물 행은 `6005 × 1`이며, 이 배치는 방수 테이프(아이템 6005) 1개를 확정 지급하는 북쪽 상자 데이터다.
 - 위치는 앵커 Transform이 소유하고, JSON에는 location·rotation·scale을 두지 않는 현재 배치 계약을 따른다.

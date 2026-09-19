@@ -5,5 +5,40 @@
     "profile_id": "enemy.quadruped_gun_test",
     "spawn_chance": 10000,
     "condition_id": "always"
+  },
+  {
+    "level_name": "DemoRaidMap",
+    "placement_id": 2,
+    "profile_id": "enemy.quadruped_gun_blue",
+    "spawn_chance": 10000,
+    "condition_id": "always"
+  },
+  {
+    "level_name": "DemoRaidMap",
+    "placement_id": 3,
+    "profile_id": "enemy.quadruped_gun_bright_gray",
+    "spawn_chance": 10000,
+    "condition_id": "always"
+  },
+  {
+    "level_name": "DemoRaidMap",
+    "placement_id": 4,
+    "profile_id": "enemy.quadruped_gun_dark_gray",
+    "spawn_chance": 10000,
+    "condition_id": "always"
+  },
+  {
+    "level_name": "DemoRaidMap",
+    "placement_id": 5,
+    "profile_id": "enemy.quadruped_gun_gold",
+    "spawn_chance": 10000,
+    "condition_id": "always"
+  },
+  {
+    "level_name": "DemoRaidMap",
+    "placement_id": 6,
+    "profile_id": "enemy.quadruped_gun_red",
+    "spawn_chance": 10000,
+    "condition_id": "always"
   }
 ]
