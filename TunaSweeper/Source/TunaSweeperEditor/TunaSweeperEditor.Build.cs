@@ -30,7 +30,6 @@ public class TunaSweeperEditor : ModuleRules
 			"MeshDescription",
 			"SkeletalMeshDescription",
 			"AnimGraph",
-			"AnimGraphRuntime",
 			"BlueprintGraph",
 			"Slate",
 			"SlateCore",

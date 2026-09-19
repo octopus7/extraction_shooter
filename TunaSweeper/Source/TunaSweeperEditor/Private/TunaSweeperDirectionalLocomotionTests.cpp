@@ -89,4 +89,3 @@ bool FDirectionalLocomotionTest::RunTest(const FString& Parameters)
     return !HasAnyErrors();
 }
 #endif
-
