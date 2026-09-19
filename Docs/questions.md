@@ -6874,3 +6874,9 @@ Unreal Editor commandlet 검사 후 작업 트리에 나타난 무관한 139개 
 
 - 질문: 적은 레벨 배치용 앵커 설치 후 ID 기준으로 설정하는지.
 - 답변: 맞다. BP_RaidPlacementAnchor를 배치하고 AnchorKind=Enemy, PlacementId를 지정한다. EnemySpawns.json의 level_name 및 placement_id로 앵커를 연결하고 profile_id로 EnemySpawnProfiles.json의 프로필을 찾는다. 프로필의 enemy_class가 생성할 적 BP를 정하므로 색상별 BP 경로를 지정하면 된다. 생성 위치·회전·스케일은 앵커의 Transform을 사용한다. 현재 확인한 기본 데이터는 DemoRaidMap/1에서 enemy.quadruped_gun_test를 통해 기본 BP_QuadrupedGunEnemy를 참조한다.
+
+## 2026-09-19 20:02:19 (소요시간: 00:04:09)
+
+- 질문: 현재 플레이어에 ATV를 어떤 구조로 추가하면 좋은지. 바퀴 회전, 완충 장치, 스티어링에 따른 전륜 회전까지 구현하고 싶다.
+- 답변: UE 5.7 Chaos Vehicles 기반의 별도 WheeledVehiclePawn을 만들고, 현재 플레이어 캐릭터의 possession을 유지한 채 탑승 컴포넌트가 차량에 입력을 전달하는 방식을 권장했다. 컨트롤러/HUD/상호작용/일부 저장 경로가 현재 Pawn을 플레이어 캐릭터로 가정하므로 곧바로 차량으로 Possess하면 관련 흐름 수정 범위가 커진다. 설치된 UE 5.7 소스의 SetRequiresControllerForInputs(false) 지원을 확인했다. 탑승 중 걷기·구르기·커서 방향 몸 회전과 충돌을 별도 처리하고, 캐릭터는 좌석을 따라가며 기존 체력과 GameInstance 소유 인벤토리를 유지한다. 기존 탑다운 카메라는 차체 기울기와 분리하고 하차 시 지면/캡슐 여유 공간을 검증한다. 현재 SM_ATV는 실제 StaticMesh 자산이므로 root와 네 바퀴, 핸들, 노출 서스펜션 부품에 본과 강체 웨이트를 준비한 Skeletal Mesh가 필요하다. Chaos가 바퀴 접지·스프링·댐핑·주행·조향을 계산하고 Vehicle AnimBP의 Wheel Controller가 구름 회전·조향·상하 이동을 반영하며, 쇼크 업소버 길이와 암 움직임은 추가 본/Look At/Control Rig로 연동한다. 전륜만 조향하고 Ackermann 및 속도별 조향 제한을 적용하는 구성을 추천했다. 리깅, 차량 단독 주행/서스펜션 검증, 플레이어 승하차 연결, 탑승 자세·손발 IK 순으로 구현하는 것이 적절하다. 이는 설계 제안이며 구현이나 주행 검증은 수행하지 않았다.
+- 근거: 현재 플레이어 입력/컨트롤러/카메라 코드, SM_ATV 자산 메타데이터, 로컬 UE 5.7 ChaosVehicles 소스, Epic UE 5.7 차량 설정 및 Vehicle Art Setup 문서.
