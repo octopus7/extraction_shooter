@@ -60,7 +60,10 @@ bool UTunaSweeperVehicleMountComponent::TryMount(ATunaSweeperTopDownCharacter* C
 	PreviousVehicleLocation = GetComponentLocation();
 	if (auto* Controller = Cast<APlayerController>(Character->GetController()); Controller && Controller->IsLocalController() && Controller->GetLocalPlayer())
 	{
-		DismountWidget = CreateWidget<UTunaSweeperVehicleDismountWidget>(Controller);
+		if (const auto HudClass = VehicleHudClass.LoadSynchronous())
+		{
+			DismountWidget = CreateWidget<UTunaSweeperVehicleDismountWidget>(Controller, HudClass);
+		}
 		if (DismountWidget)
 		{
 			DismountWidget->SetVehicle(Cast<ATunaSweeperATVActor>(GetOwner()));

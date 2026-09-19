@@ -49,6 +49,8 @@ public:
 	float StationarySpeedThreshold = 5.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="TunaSweeper|Vehicle", meta=(ClampMin="50.0"))
 	float DismountDistance = 150.0f;
+	UPROPERTY(EditDefaultsOnly, Category="TunaSweeper|Vehicle|UI")
+	TSoftClassPtr<UTunaSweeperVehicleDismountWidget> VehicleHudClass{FSoftObjectPath(TEXT("/Game/UI/Vehicle/WBP_ATV_HUD.WBP_ATV_HUD_C"))};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="TunaSweeper|Vehicle|Audio")
 	TObjectPtr<USoundBase> EngineStartSound;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="TunaSweeper|Vehicle|Audio")

@@ -19,6 +19,12 @@
 #include "ImageUtils.h"
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
+#include "Blueprint/WidgetTree.h"
+#include "Components/Border.h"
+#include "Components/CanvasPanelSlot.h"
+#include "Components/HorizontalBox.h"
+#include "Components/ProgressBar.h"
+#include "Components/TextBlock.h"
 
 namespace
 {
@@ -36,6 +42,8 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FTunaSweeperVehicleHUDLayoutTest,
 	"TunaSweeper.Vehicle.HUDLayout", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 bool FTunaSweeperVehicleHUDLayoutTest::RunTest(const FString& Parameters)
 {
+	UClass* HudClass = LoadClass<UTunaSweeperVehicleDismountWidget>(nullptr, TEXT("/Game/UI/Vehicle/WBP_ATV_HUD.WBP_ATV_HUD_C"));
+	if (!TestNotNull(TEXT("Saved editable ATV HUD Blueprint"), HudClass)) return false;
 	UWorld* World = UWorld::CreateWorld(EWorldType::Game, false);
 	FWorldContext& Context = GEngine->CreateNewWorldContext(EWorldType::Game);
 	Context.SetCurrentWorld(World);
@@ -45,22 +53,44 @@ bool FTunaSweeperVehicleHUDLayoutTest::RunTest(const FString& Parameters)
 	World->SetGameInstance(Instance);
 	Instance->UGameInstance::Init();
 	Instance->GetSubsystem<UTunaSweeperTextSubsystem>()->LoadTextData();
-	auto* Widget = NewObject<UTunaSweeperVehicleDismountWidget>(World);
+	auto* Widget = NewObject<UTunaSweeperVehicleDismountWidget>(World, HudClass);
 	Widget->Initialize();
 	auto* ATV = World->SpawnActor<ATunaSweeperATVActor>();
 	Widget->SetVehicle(ATV);
+	Widget->TakeWidget();
+	auto* Panel = Cast<UBorder>(Widget->WidgetTree->FindWidget(TEXT("DismountPanel")));
+	auto* Label = Cast<UTextBlock>(Widget->WidgetTree->FindWidget(TEXT("DismountText")));
+	auto* KeyText = Cast<UTextBlock>(Widget->WidgetTree->FindWidget(TEXT("DismountKeyText")));
+	auto* Keycap = Cast<UBorder>(Widget->WidgetTree->FindWidget(TEXT("DismountKeycap")));
+	auto* Row = Cast<UHorizontalBox>(Widget->WidgetTree->FindWidget(TEXT("DismountRow")));
+	auto* Bar = Cast<UProgressBar>(Widget->WidgetTree->FindWidget(TEXT("DurabilityBar")));
+	TestTrue(TEXT("Serialized WBP tree supplies all runtime bindings"), Panel && Label && KeyText && Keycap && Row && Bar);
+	if (Panel && Label && KeyText && Keycap && Row && Bar)
+	{
+		TestTrue(TEXT("Keycap follows text on the right"), Row->GetChildAt(0) == Label && Row->GetChildAt(1) == Keycap);
+		TestEqual(TEXT("White interaction panel"), Panel->Background.TintColor.GetSpecifiedColor(), FLinearColor::White);
+		TestEqual(TEXT("Matching keycap radius"), Keycap->Background.OutlineSettings.CornerRadii.X, 5.0);
+		TestEqual(TEXT("Matching keycap outline"), Keycap->Background.OutlineSettings.Width, 1.0f);
+		TestEqual(TEXT("Key is two font points below label"), KeyText->GetFont().Size, Label->GetFont().Size - 2);
+		TestEqual(TEXT("Localized dismount label"), Label->GetText().ToString(), Instance->ResolveLocalizedText(TEXT("ui.vehicle.dismount"), FText::GetEmpty()).ToString());
+		TestEqual(TEXT("Localized X key"), KeyText->GetText().ToString(), Instance->ResolveLocalizedText(TEXT("ui.key.x"), FText::GetEmpty()).ToString());
+	}
+	TestNull(TEXT("No interaction ring in HUD"), Widget->WidgetTree->FindWidget(TEXT("RingImage")));
 	const FGameViewportWidgetSlot Slot = UGameViewportSubsystem::Get()->GetWidgetSlot(Widget);
 	// Check the final engine slot, not just the intended SetAnchors argument.
 	TestTrue(TEXT("Vehicle HUD stays anchored at bottom center after sizing"),
 		Slot.Anchors.Minimum.Equals(FVector2D(0.5, 0.82), 0.001) &&
 		Slot.Anchors.Maximum.Equals(FVector2D(0.5, 0.82), 0.001));
 	const FVector2D Size(Slot.Offsets.Right, Slot.Offsets.Bottom);
-	TestTrue(TEXT("Vehicle HUD has room for the bar and hint"), Size.Equals(FVector2D(180, 58)));
+	TestTrue(TEXT("Vehicle HUD reserves one extra text line above the hint"), Size.Equals(FVector2D(180, 86)));
 	for (const FVector2D Viewport : {FVector2D(1280, 720), FVector2D(1920, 1080)})
 	{
-		const FVector2D TopLeft = Viewport * Slot.Anchors.Minimum - Size * Slot.Alignment;
+		const FVector2D TopLeft = Viewport * Slot.Anchors.Minimum - Size * Slot.Alignment + FVector2D(Slot.Offsets.Left, Slot.Offsets.Top);
 		TestTrue(TEXT("Entire vehicle HUD lies inside the viewport"),
 			TopLeft.X >= 0 && TopLeft.Y >= 0 && TopLeft.X + Size.X <= Viewport.X && TopLeft.Y + Size.Y <= Viewport.Y);
+		TestTrue(TEXT("Bar rises 28px while hint retains previous vertical position"),
+			FMath::IsNearlyEqual(TopLeft.Y, Viewport.Y * .82 - 29 - 28, .01) &&
+			FMath::IsNearlyEqual(TopLeft.Y + 50, Viewport.Y * .82 - 29 + 22, .01));
 	}
 	if (FParse::Param(FCommandLine::Get(), TEXT("ATVHUDPreview")))
 	{
@@ -80,12 +110,14 @@ bool FTunaSweeperVehicleHUDLayoutTest::RunTest(const FString& Parameters)
 			FReadSurfaceDataFlags ReadFlags;
 			ReadFlags.SetLinearToGamma(false); // Slate already rendered in gamma space.
 			Target->GameThread_GetRenderTargetResource()->ReadPixels(Pixels, ReadFlags);
-			const FColor Filled = Pixels[566 * 1280 + 560];
-			const FColor Empty = Pixels[566 * 1280 + 710];
-			const FColor KeyBox = Pixels[590 * 1280 + 554];
+			const FColor Filled = Pixels[540 * 1280 + 560];
+			const FColor Empty = Pixels[540 * 1280 + 710];
+			const FColor KeyBox = Pixels[590 * 1280 + 552];
+			const FColor Outline = Pixels[540 * 1280 + 550];
 			TestTrue(TEXT("Green durability is painted inside the screen"), Filled.G > Filled.R && Filled.G > Filled.B && Filled.A > 200);
 			TestTrue(TEXT("Empty durability is opaque dark gray"), FMath::Abs(int32(Empty.G) - Empty.R) < 3 && Empty.R < 100 && Empty.A > 200);
 			TestTrue(TEXT("X key box is painted only for the stationary hint"), bHint ? KeyBox.R > 200 && KeyBox.A > 200 : KeyBox.A == 0);
+			TestTrue(TEXT("Durability has a darker opaque outline"), Outline.R < Empty.R && Outline.A > 200);
 			TArray64<uint8> PNG;
 			FImageUtils::PNGCompressImageArray(1280, 720, Pixels, PNG);
 			FFileHelper::SaveArrayToFile(PNG, *(FPaths::ProjectSavedDir() / (bHint ? TEXT("ATVRigWork/HUD_Stopped.png") : TEXT("ATVRigWork/HUD_Moving.png"))));
