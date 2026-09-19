@@ -106,6 +106,11 @@ bool FTunaSweeperATVDrivingTest::RunTest(const FString& Parameters)
 	Player->CancelActiveGameplayActions();
 	TestTrue(TEXT("UI cancellation clears held vehicle input"), ATV->GetDriveInput().IsNearlyZero());
 	TestFalse(TEXT("UI cancellation clears boost"), ATV->IsBoosting());
+	Step(600);
+	AddInfo(FString::Printf(TEXT("Stopped ATV velocity %s, seat %s, hint %d, threshold %.2f, tick %d"),
+		*ATV->GetVelocity().ToString(), *Mount->GetComponentLocation().ToString(),
+		Mount->IsDismountHintVisible(), Mount->StationarySpeedThreshold, Mount->IsComponentTickEnabled()));
+	TestTrue(TEXT("Stationary saved Blueprint shows the delayed dismount hint after driving"), Mount->IsDismountHintVisible());
 	Mount->ReleaseRiderForEndPlay();
 	TestTrue(TEXT("Dismount applies parking brake"), Movement->GetHandbrakeInput());
 	TestTrue(TEXT("Dismount clears input"), ATV->GetDriveInput().IsNearlyZero());

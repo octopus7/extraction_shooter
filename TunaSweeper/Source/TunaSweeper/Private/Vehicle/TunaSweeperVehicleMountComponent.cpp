@@ -63,11 +63,9 @@ bool UTunaSweeperVehicleMountComponent::TryMount(ATunaSweeperTopDownCharacter* C
 		DismountWidget = CreateWidget<UTunaSweeperVehicleDismountWidget>(Controller);
 		if (DismountWidget)
 		{
+			DismountWidget->SetVehicle(Cast<ATunaSweeperATVActor>(GetOwner()));
 			DismountWidget->AddToPlayerScreen(20);
-			DismountWidget->SetAnchorsInViewport(FAnchors(0.5f, 0.82f));
-			DismountWidget->SetAlignmentInViewport(FVector2D(0.5f, 0.5f));
-			DismountWidget->SetDesiredSizeInViewport(FVector2D(180, 36));
-			DismountWidget->SetVisibility(ESlateVisibility::Collapsed);
+			DismountWidget->SetVisibility(ESlateVisibility::HitTestInvisible);
 		}
 	}
 	StopEngineAudio();
@@ -314,7 +312,8 @@ void UTunaSweeperVehicleMountComponent::TickComponent(float DeltaTime, ELevelTic
 	{
 		const auto* PC = Cast<ATunaSweeperPlayerController>(Rider->GetController());
 		const bool bUiBlocked = PC && (PC->IsInventoryUiOpen() || PC->IsPauseMenuOpen() || PC->IsDialogueSequenceActive() || PC->IsHousingModeOpen());
-		DismountWidget->SetVisibility(bHintVisible && !bUiBlocked ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
+		DismountWidget->SetDismountHintVisible(bHintVisible);
+		DismountWidget->SetVisibility(!bUiBlocked ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed);
 	}
 }
 

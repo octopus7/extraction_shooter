@@ -23,6 +23,9 @@
 
 ## 안내 및 사운드
 
+- 탑승 중 화면 아래쪽에 180×12 가로 내구도 막대를 표시한다. 남은 비율은 녹색, 빈 부분은 어두운 회색이며 주행 중에도 유지된다. 하차 안내는 막대 아래에서 별도로 표시/숨김 처리하고, 인벤토리·일시정지·대화·하우징 UI가 열리면 둘 다 숨긴다. 하차·사망·차량 파괴 시 탑승 HUD를 제거한다.
+- 하차 X 안내는 `UTunaSweeperVehicleDismountWidget` 화면 위젯이다. 탑승 F의 상호작용 마커 위젯/컴포넌트를 재사용하지는 않는다.
+- UE 5.7의 `SetDesiredSizeInViewport`는 앵커를 좌상단으로 초기화하므로 HUD 크기 설정 후 하단 앵커와 정렬을 적용한다. 순서를 바꾸면 내구도 막대와 X 안내가 함께 화면 밖으로 밀릴 수 있다.
 - 좌석의 실제 위치 변화와 액터 속도를 함께 사용한다. 기본 5cm/s 이하에서 1.5초 정지하면 화면 아래쪽에 둥근 X 박스와 `내리기`를 표시한다. 이동 재개 시 바로 숨기고 시간을 초기화한다.
 - `DismountHintDelay`, `StationarySpeedThreshold`, `DismountDistance`, 좌석의 위치/회전 오프셋은 컴포넌트에서 조정할 수 있다.
 - `UITextStrings.csv`의 `ui.vehicle.mount`, `ui.vehicle.dismount`, `ui.key.x`를 기존 로컬라이징 경로로 해석한다. 한국어/영어/일본어를 제공한다.
@@ -47,6 +50,7 @@
 
 ## 검증
 
+- HUD의 실제 엔진 슬롯과 두 해상도에서 화면 안 배치: `TunaSweeper.Vehicle.HUDLayout`. `-ATVHUDPreview`로 렌더링하면 녹색/회색 픽셀과 X 안내 표시 전환도 검사하고 `Saved/ATVRigWork/HUD_Moving.png`, `HUD_Stopped.png`를 저장한다.
 - 에디터 자동 테스트: `TunaSweeper.Vehicle.MountInteraction`
 - 물리 주행/접지/조향/실제 휠·스프링·핸들 본/Shift 가속/입력 해제: `TunaSweeper.Vehicle.Driving`. 저장된 `BP_ATV_TypeA`로 실행한다.
 - 실제 플레이어 BP의 완만한 상체 기울기, 팔꿈치/무릎 굽힘, 무릎 방향과 벌림, 하차 복원: `TunaSweeper.Vehicle.RiderPose`. `-ATVRiderPreview`와 렌더링을 활성화해 실행하면 `Saved/ATVRigWork/RiderPose0~2.png`에 검토 이미지를 저장한다.

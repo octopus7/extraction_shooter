@@ -9,6 +9,98 @@
 #include "Subsystem/TunaSweeperInteractionSubsystem.h"
 #include "Vehicle/TunaSweeperATVActor.h"
 #include "Vehicle/TunaSweeperVehicleMountComponent.h"
+#include "Blueprint/GameViewportSubsystem.h"
+#include "UI/TunaSweeperVehicleDismountWidget.h"
+#include "Game/TunaSweeperGameInstance.h"
+#include "Subsystem/TunaSweeperTextSubsystem.h"
+#include "Slate/WidgetRenderer.h"
+#include "Engine/TextureRenderTarget2D.h"
+#include "Widgets/Layout/SConstraintCanvas.h"
+#include "ImageUtils.h"
+#include "Misc/FileHelper.h"
+#include "Misc/Paths.h"
+
+namespace
+{
+	struct FVehicleHUDWorldContextAccess : UGameInstance
+	{
+		static void Attach(UGameInstance* Instance, FWorldContext* Context)
+		{
+			auto Member = &FVehicleHUDWorldContextAccess::WorldContext;
+			Instance->*Member = Context;
+		}
+	};
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FTunaSweeperVehicleHUDLayoutTest,
+	"TunaSweeper.Vehicle.HUDLayout", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FTunaSweeperVehicleHUDLayoutTest::RunTest(const FString& Parameters)
+{
+	UWorld* World = UWorld::CreateWorld(EWorldType::Game, false);
+	FWorldContext& Context = GEngine->CreateNewWorldContext(EWorldType::Game);
+	Context.SetCurrentWorld(World);
+	auto* Instance = NewObject<UTunaSweeperGameInstance>(GEngine);
+	FVehicleHUDWorldContextAccess::Attach(Instance, &Context);
+	Context.OwningGameInstance = Instance;
+	World->SetGameInstance(Instance);
+	Instance->UGameInstance::Init();
+	Instance->GetSubsystem<UTunaSweeperTextSubsystem>()->LoadTextData();
+	auto* Widget = NewObject<UTunaSweeperVehicleDismountWidget>(World);
+	Widget->Initialize();
+	auto* ATV = World->SpawnActor<ATunaSweeperATVActor>();
+	Widget->SetVehicle(ATV);
+	const FGameViewportWidgetSlot Slot = UGameViewportSubsystem::Get()->GetWidgetSlot(Widget);
+	// Check the final engine slot, not just the intended SetAnchors argument.
+	TestTrue(TEXT("Vehicle HUD stays anchored at bottom center after sizing"),
+		Slot.Anchors.Minimum.Equals(FVector2D(0.5, 0.82), 0.001) &&
+		Slot.Anchors.Maximum.Equals(FVector2D(0.5, 0.82), 0.001));
+	const FVector2D Size(Slot.Offsets.Right, Slot.Offsets.Bottom);
+	TestTrue(TEXT("Vehicle HUD has room for the bar and hint"), Size.Equals(FVector2D(180, 58)));
+	for (const FVector2D Viewport : {FVector2D(1280, 720), FVector2D(1920, 1080)})
+	{
+		const FVector2D TopLeft = Viewport * Slot.Anchors.Minimum - Size * Slot.Alignment;
+		TestTrue(TEXT("Entire vehicle HUD lies inside the viewport"),
+			TopLeft.X >= 0 && TopLeft.Y >= 0 && TopLeft.X + Size.X <= Viewport.X && TopLeft.Y + Size.Y <= Viewport.Y);
+	}
+	if (FParse::Param(FCommandLine::Get(), TEXT("ATVHUDPreview")))
+	{
+		ATV->CurrentDurability = ATV->MaxDurability * 0.5f;
+		// A linear render target preserves Slate's already converted vertex colors.
+		FWidgetRenderer Renderer(false);
+		const FVector2D Resolution(1280, 720);
+		auto Canvas = SNew(SConstraintCanvas)
+			+ SConstraintCanvas::Slot().Offset(Slot.Offsets).Anchors(Slot.Anchors).Alignment(Slot.Alignment)
+			[Widget->TakeWidget()];
+		for (const bool bHint : {false, true})
+		{
+			Widget->SetDismountHintVisible(bHint);
+			auto* Target = Renderer.DrawWidget(Canvas, Resolution);
+			FlushRenderingCommands();
+			TArray<FColor> Pixels;
+			FReadSurfaceDataFlags ReadFlags;
+			ReadFlags.SetLinearToGamma(false); // Slate already rendered in gamma space.
+			Target->GameThread_GetRenderTargetResource()->ReadPixels(Pixels, ReadFlags);
+			const FColor Filled = Pixels[566 * 1280 + 560];
+			const FColor Empty = Pixels[566 * 1280 + 710];
+			const FColor KeyBox = Pixels[590 * 1280 + 554];
+			TestTrue(TEXT("Green durability is painted inside the screen"), Filled.G > Filled.R && Filled.G > Filled.B && Filled.A > 200);
+			TestTrue(TEXT("Empty durability is opaque dark gray"), FMath::Abs(int32(Empty.G) - Empty.R) < 3 && Empty.R < 100 && Empty.A > 200);
+			TestTrue(TEXT("X key box is painted only for the stationary hint"), bHint ? KeyBox.R > 200 && KeyBox.A > 200 : KeyBox.A == 0);
+			TArray64<uint8> PNG;
+			FImageUtils::PNGCompressImageArray(1280, 720, Pixels, PNG);
+			FFileHelper::SaveArrayToFile(PNG, *(FPaths::ProjectSavedDir() / (bHint ? TEXT("ATVRigWork/HUD_Stopped.png") : TEXT("ATVRigWork/HUD_Moving.png"))));
+		}
+	}
+	UGameViewportSubsystem::Get()->RemoveWidget(Widget);
+	Instance->UGameInstance::Shutdown();
+	World->SetGameInstance(nullptr);
+	Context.OwningGameInstance = nullptr;
+	FVehicleHUDWorldContextAccess::Attach(Instance, nullptr);
+	World->DestroyWorld(false);
+	GEngine->DestroyWorldContext(World);
+	World->RemoveFromRoot();
+	return true;
+}
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FTunaSweeperVehicleMountTest,
 	"TunaSweeper.Vehicle.MountInteraction", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
