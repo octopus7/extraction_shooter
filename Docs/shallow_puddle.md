@@ -2,7 +2,7 @@
 
 ## 구현 범위
 
-2026-09-19 대화에서 승인한 수평 메시 + Single Layer Water + 젖은 가장자리 데칼 구성을 독립된 `BP_ShallowPuddle`로 구현한다. 기존 물 렌더링 구현에는 의존하지 않는다. Niagara 제작은 사용자의 요청으로 보류한다.
+2026-09-19 대화에서 승인한 수평 메시 + Single Layer Water + 젖은 가장자리 데칼 구성을 독립된 `BP_ShallowPuddle`로 구현했다. 기존 물 렌더링 구현에는 의존하지 않는다. 후속 요청에 따라 Niagara 물방울·파문도 Computer Use로 제작해 연결했다.
 
 ## 구현 계획
 
@@ -21,7 +21,7 @@
 - 엔진 기본 Plane을 재사용한다. 수면은 액터의 yaw와 XY 크기를 따르지만 pitch/roll에는 기울어지지 않는다.
 - 동일한 방사형 윤곽 수식으로 머티리얼과 발걸음 판정을 맞춘다. 사각형 모서리, 젖은 테두리, 수면보다 높은 바닥과 깊이 범위 밖의 바닥은 물 발걸음에서 제외한다.
 - 수면과 데칼은 이동 충돌이나 내비게이션을 만들지 않는다. 걷는 바닥은 원래 지면이다.
-- 발걸음 이벤트는 수면 위 위치, 이동 속도, 질주 여부, 발걸음 주체를 전달한다. Niagara 시스템과 실시간 유체 시뮬레이션은 추가하지 않는다.
+- 발걸음 이벤트는 수면 위 위치, 이동 속도, 질주 여부, 발걸음 주체를 전달한다. 기본 Blueprint가 짧은 Niagara 물방울·파문을 생성한다. 실시간 유체 시뮬레이션은 없다.
 - UI 문자열과 저장 데이터는 추가하지 않는다. 레벨에 저장된 액터 설정만 사용한다.
 
 ## 검토할 조건
@@ -39,7 +39,7 @@
 7. `Max Water Depth Cm`은 발걸음 바닥 판정과 젖음 데칼 투영 깊이다. 수면과 실제 지면의 거리보다 크게 맞추되 다른 층의 바닥까지 포함하지 않도록 한다. 물의 시각적 깊이는 실제 지면과 수면 사이 거리로 결정된다.
 8. 움직임·충돌은 원래 지면이 담당한다. 물 액터는 수영, 부력, 이동 감속을 추가하지 않는다. 런타임에 액터 위치/크기/파라미터를 변경하면 `Refresh Puddle`을 호출한다.
 
-물소리는 새로 합성한 `/Game/Environment/ShallowPuddle/Audio/SW_ShallowPuddle_Footstep`을 사용한다. 원본은 `TunaSweeper/SourceArt/Audio/ShallowPuddle/SW_ShallowPuddle_Footstep.wav`이며 0.42초·48kHz·24비트 모노 one-shot이다. 액터 자체 또는 Blueprint의 Class Defaults에서 `Puddle > Footstep > Water Footstep Sound`로 변경할 수 있다. 사운드 참조가 비어 있으면 일반 발소리로 돌아간다. 발소리 발생 주기와 AI 소음 수치는 기존 규칙을 사용한다. 기본 Blueprint에는 Niagara 시스템이 없으며 후속 연결은 [보류 문서](shallow_puddle_niagara_deferred.md)를 따른다.
+물소리는 새로 합성한 `/Game/Environment/ShallowPuddle/Audio/SW_ShallowPuddle_Footstep`을 사용한다. 원본은 `TunaSweeper/SourceArt/Audio/ShallowPuddle/SW_ShallowPuddle_Footstep.wav`이며 0.42초·48kHz·24비트 모노 one-shot이다. 액터 자체 또는 Blueprint의 Class Defaults에서 `Puddle > Footstep > Water Footstep Sound`로 변경할 수 있다. 사운드 참조가 비어 있으면 일반 발소리로 돌아간다. 발소리 발생 주기와 AI 소음 수치는 기존 규칙을 사용한다. 기본 Blueprint의 Niagara 연결과 설정은 [물방울·파문 문서](shallow_puddle_niagara_deferred.md)를 따른다.
 
 ## 검토 맵과 검증 도구
 
@@ -57,7 +57,7 @@
 - 윤곽은 절차적인 방사형 마스크다. 임의의 복잡한 강 모양이나 지형 높이에 따른 자동 윤곽 생성은 지원하지 않는다.
 - 수면끼리 겹쳐 놓는 배치는 피한다. 발걸음은 가장 높은 유효 수면 한 곳에만 전달하지만, 렌더링 중첩 자체를 합치지는 않는다.
 - 반사의 모습은 프로젝트의 반사 설정, 화면 안에 보이는 물체, 하늘 조명에 따라 달라진다. 별도 Planar Reflection이나 SceneCapture를 물웅덩이마다 추가하지 않는다.
-- 발걸음으로 퍼지는 링과 물튀김은 Niagara 보류 작업에 포함되며 현재 제공되지 않는다.
+- 발걸음으로 퍼지는 링과 물튀김은 `BP_ShallowPuddle`에 연결되어 있다. 부모 C++ 액터만 직접 배치하면 Blueprint의 Niagara 연결은 실행되지 않는다.
 
 ## 검증 기록 (2026-09-19)
 
@@ -78,4 +78,4 @@
 - UE 5.7 에디터 빌드 성공. 새 프로세스에서 정확한 사운드 경로, SoundWave 종류, 길이/모노/샘플레이트/비루프, 기존 물웅덩이 및 이벤트 검사 통과.
 - 임포트는 오디오 디코더 등록을 위해 `-AllowCommandletAudio`를 사용한다. `-nosound`로 임포트하면 BINKA 디코더가 초기화되지 않는다.
 - 연결 검증 시 별도 동시 작업 중인 ATV의 `PA_ATV` 누락을 포함한 로딩 경고 4건이 있었다. 물웅덩이 오디오 검사는 성공했으며 해당 차량 에셋은 이 작업에서 수정하지 않았다.
-- 음색의 최종 청취 평가는 사용자에게 맡긴다. Niagara 보류 상태는 유지한다.
+- 음색의 최종 청취 평가는 사용자에게 맡긴다. 이 오디오 작업 당시 보류했던 Niagara는 후속 Computer Use 작업에서 연결했다.

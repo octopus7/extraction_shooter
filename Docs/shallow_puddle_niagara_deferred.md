@@ -1,14 +1,16 @@
-# 물웅덩이 Niagara — 보류 작업
+# 물웅덩이 Niagara — 구현 상태와 후속 시각 조정
 
 ## 상태와 재개 조건
 
-**보류 중. 이 문서는 제작 지침이며 Niagara 에셋 제작·UI 조작·예약 실행을 시작하지 않는다.**
+**2026-09-20: Computer Use로 물방울·파문과 BP 발걸음 연결을 제작·저장했다. 사용자 요청으로 현재 상태를 먼저 커밋한다. 실제 게임 카메라 거리의 크기·가시성 조정과 최종 시각 수용 확인은 남아 있다.**
 
-사용자 요청: 물웅덩이는 먼저 구현하고, Niagara는 사용자가 컴퓨터를 사용하지 않는 동안 나중에 Computer Use로 제작한다. 사용자가 재개를 요청하고 컴퓨터를 사용하지 않는 시점에 진행한다. 기존 물 구현을 재사용하는 작업으로 바꾸지 않는다.
+첫 시도는 원격 화면 캡처 오류로 중단했으며 복구 후 동일 프로젝트 에디터에서 제작했다. 마지막 Computer Use는 사용자의 Esc 입력으로 중단됐다. 현재 에셋은 저장됐고 크기 조정은 아직 적용하지 않았다. 후속 UI 작업은 재개 지시 후 충돌 여부를 조율한다.
+
+사용자 요청: 물웅덩이는 먼저 구현하고, Niagara는 나중에 Computer Use로 제작한다. 재개 시 다른 프로젝트 작업의 에디터 조작이나 빌드가 충돌하면 일시 보류를 요청해 이 작업을 우선한다. 기존 물 구현을 재사용하는 작업으로 바꾸지 않는다.
 
 반드시 `D:/github/extraction_shooter/TunaSweeper/TunaSweeper.uproject`를 열거나 해당 프로젝트의 기존 에디터를 재사용한다. UE 5.7 기준이다. 시작 전에 현재 Computer Use 스킬을 읽고, 사용자 작업 화면을 점유해도 되는 시점인지 확인한다.
 
-## 이미 준비되는 연결
+## 현재 연결
 
 - 배치 액터: `/Game/Environment/ShallowPuddle/BP_ShallowPuddle`.
 - 부모 클래스: `ATunaSweeperShallowPuddleActor`.
@@ -18,19 +20,36 @@
 - 발걸음 주체: `StepInstigator`.
 - 발걸음 판정은 기존 플레이어 이동 타이밍을 사용한다. 정지·공중·구르기 때 재생하지 않으며, 물의 윤곽과 수심 범위를 확인한 뒤 이벤트를 발생시킨다.
 - 물소리와 AI 청각 소음은 C++에서 처리한다. Niagara Blueprint에서 소리를 추가 재생하거나 AI 소음을 다시 발생시키지 않는다.
-- 현재 머티리얼의 잔물결은 배경용 노멀 애니메이션이다. 발걸음에서 퍼지는 원형 파문은 이 보류 작업에서 추가한다.
+- 수면 머티리얼의 잔물결은 배경용 노멀 애니메이션이며, 발걸음에서 퍼지는 원형 파문은 별도 Niagara sprite다.
 
-## 제작할 에셋
+## 저장된 에셋과 설정
 
-다음은 **예정 경로**이며 현재 제작 완료를 뜻하지 않는다.
+아래 에셋은 UE 편집기 UI로 제작했으며 일회성 에셋 생성기는 사용하지 않았다.
 
 - `/Game/Environment/ShallowPuddle/FX/NS_ShallowPuddle_Footstep`
-- `/Game/Environment/ShallowPuddle/FX/M_ShallowPuddle_Splash`
-- `/Game/Environment/ShallowPuddle/FX/M_ShallowPuddle_Ripple`
+- `/Game/Environment/ShallowPuddle/Materials/M_ShallowPuddle_Splash`
+- `/Game/Environment/ShallowPuddle/Materials/M_ShallowPuddle_Ripple`
+
+- CPU, 월드 공간, 한 번 재생. 물방울 8개, 수명 0.18~0.35초, 초기 속도 60~120cm/s, 크기 0.7~1.8cm.
+- 파문 1개, 수명 0.6~0.75초, 기본 크기 28~36cm에 수명 0→1 확장 곡선을 곱한다. 알파는 1→0으로 감소한다. 월드 +Z facing과 +Y alignment로 수평을 유지한다.
+- `User.StepStrength`: 걷기 1.0, 질주 1.4. 현재 파문 크기에 적용하며 물방울 속도에는 적용하지 않았다.
+- `BP_ShallowPuddle`: BeginPlay → 부모 BeginPlay → 이벤트 바인딩. 발걸음 시 전용 서버를 제외하고 수면 위치 +Z 0.3cm에 생성한다. Auto Activate를 끄고 유효성 검사 → 강도 설정 → Activate 순서다. Auto Destroy 사용, pooling은 None이다. 추가 Tick·오디오·AI 소음 노드는 없다.
+- 시스템 fixed bounds는 각 축 -100~100cm다. 별도 Effect Type/거리 scalability 제한은 아직 추가하지 않았다.
+
+## 검증과 남은 작업
+
+- BP UI 컴파일 성공. 새 UE 5.7 프로세스에서 저장된 에셋과 실제 PIE BeginPlay 바인딩을 읽어 맑은 물·기본 물·탁한 물의 걷기/질주 6개 조건을 검사했다. 발걸음당 컴포넌트 1개, 강도 값, 수면 +0.3cm 위치, 활성화, 종료 후 제거 검증 통과.
+- 60초 분량의 180회 질주 이벤트를 수동 시뮬레이션했다. 최대 동시 컴포넌트 4개, 종료 후 0개. 실제 사용자가 1분간 직접 달린 검사와는 구분한다.
+- Niagara SimCache에서 실제 입자 위치·크기·알파와 파문 +Z facing/+Y alignment를 읽었다. 근접 렌더에서 가운데가 빈 파문을 확인했다. 원거리 캡처만으로 게임 카메라 가시성은 승인하지 않았다.
+- 기존 `Footprint`, `Selection`, `PlayerFootsteps` 자동 테스트 3개 성공. 저장 에셋/오디오/이벤트 검증도 통과했다. 이번 변경의 C++ 부분은 주석만 바뀌었으며 새 C++ 빌드는 수행하지 않았다.
+- 결과: `TunaSweeper/Saved/Automation/ShallowPuddle/niagara.json`, `niagara_render_verify.log`, `regression_after_niagara.log`, `ShallowPuddle_Niagara_Close.png`.
+- **후속 작업**: 실제 게임 카메라 거리에서 파문 크기·가시성을 조정하고 직접 걷기/질주 시 모습을 최종 확인한다. 거리 scalability/pooling은 필요성을 확인한 뒤 결정한다. 아래 원래 수용 목록 전체가 완료된 것은 아니다.
+
+검증 도구 `Tools/ShallowPuddle/verify_niagara.py`는 별도 프로세스의 저장하지 않는 PIE 월드에서 실행하는 검사·캡처 도구다. 에셋을 생성하거나 저장하지 않는다. `UnrealEditor-Cmd.exe`에 프로젝트와 검토 맵을 명시하고 `-ExecutePythonScript="D:/github/extraction_shooter/Tools/ShallowPuddle/verify_niagara.py" -ExecCmds="fx.Niagara.ForceWaitForCompilationOnActivate 1" -EnablePlugins=PythonScriptPlugin,EditorScriptingUtilities -ddc=InstalledNoZenLocalFallback -unattended -nosplash -RenderOffscreen`으로 실행한다. 스크립트는 검증 후 해당 프로세스를 종료하므로 사용 중인 에디터에서 실행하지 않는다. 성공 판정은 프로세스 종료 코드만 보지 말고 `niagara.json`의 `status=passed`와 로그를 확인한다.
 
 시스템 하나에 소량의 물방울과 수면 위 링 파문을 만든다. Niagara Fluids나 지속적인 유체 시뮬레이션은 필요하지 않다. CPU emitter와 짧은 one-shot burst로 시작한다.
 
-## Computer Use 제작 순서
+## 원래 Computer Use 제작 지침
 
 1. Git 상태와 에디터의 미저장 작업을 확인한다. 물웅덩이 검토 맵 `/Game/Environment/ShallowPuddle/Maps/L_ShallowPuddle_Review`를 연다.
 2. Content Browser에서 위 FX 폴더를 만들고 one-shot Niagara System을 생성한다. 로컬 공간은 끄고 월드 공간에서 입자가 남도록 한다.

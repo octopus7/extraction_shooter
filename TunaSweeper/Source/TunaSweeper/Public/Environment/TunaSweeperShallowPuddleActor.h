@@ -70,7 +70,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Puddle|Footstep")
 	TObjectPtr<USoundBase> WaterFootstepSound;
 
-	/** Niagara authoring is deferred. Bind a future effect to this event in BP_ShallowPuddle. */
+	/** BP_ShallowPuddle binds its one-shot splash and ripple effect to this event. */
 	UPROPERTY(BlueprintAssignable, Category = "Puddle|Footstep")
 	FTunaSweeperPuddleFootstep OnPuddleFootstep;
 
