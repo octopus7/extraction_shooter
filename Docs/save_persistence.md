@@ -273,7 +273,7 @@ Ability-stat research is persisted per save slot through `AppliedResearchNodeIds
 
 ## Maintenance Rule
 
-ATV durability (`MaxDurability` configuration / transient `CurrentDurability`), destruction latch, smoke timers and detached debris are session-local vehicle state. They follow the existing non-persistent ATV placement/movement policy and reset on a fresh level load. No save-owned fields or migration are added by the vehicle damage implementation.
+ATV durability (`MaxDurability` configuration / transient `CurrentDurability`), destruction latch, smoke timers, delayed explosion timer/trigger latch and detached debris are session-local vehicle state. They follow the existing non-persistent ATV placement/movement policy and reset on a fresh level load. No save-owned fields or migration are added by the vehicle damage implementation.
 
 When adding a field that should survive save/load:
 

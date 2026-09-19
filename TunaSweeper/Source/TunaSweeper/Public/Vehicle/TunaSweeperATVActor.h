@@ -47,6 +47,13 @@ public:
 	float HitSmokeDuration = 2.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="ATV|Effects", meta=(ClampMin="0"))
 	float WreckSmokeDuration = 20.0f;
+	/** Seconds after destruction; zero plays the visual immediately. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="ATV|Effects", meta=(ClampMin="0", Units="s"))
+	float DestructionExplosionDelay = 3.0f;
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Transient, Category="ATV|Effects")
+	bool bDestructionExplosionTriggered = false;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="ATV|Effects")
+	TObjectPtr<UNiagaraComponent> DestructionExplosion;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="ATV|Effects", meta=(ClampMin="1"))
 	float DebrisLifetime = 30.0f;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="ATV|Effects")
@@ -84,6 +91,8 @@ private:
 	void CreateDamageComponents();
 	void UpdateDamageSmoke(float DeltaSeconds);
 	void DestroyVehicle();
+	void PlayDestructionExplosion();
+	FTimerHandle DestructionExplosionTimer;
 	TArray<TWeakObjectPtr<AActor>> DetachedParts;
 	float HitSmokeRemaining = 0;
 	float WreckSmokeElapsed = 0;

@@ -7,6 +7,7 @@
 #include "Engine/World.h"
 #include "NiagaraComponent.h"
 #include "NiagaraSystem.h"
+#include "TimerManager.h"
 #include "UObject/ConstructorHelpers.h"
 
 void ATunaSweeperATVActor::CreateDamageComponents()
@@ -27,6 +28,14 @@ void ATunaSweeperATVActor::CreateDamageComponents()
 	static ConstructorHelpers::FObjectFinder<UNiagaraSystem> Heavy(TEXT("/Game/Effects/ATV/NS_ATV_DamageSmokeHeavy.NS_ATV_DamageSmokeHeavy"));
 	LightDamageSmoke->SetAsset(Light.Object);
 	HeavyDamageSmoke->SetAsset(Heavy.Object);
+	DestructionExplosion = CreateDefaultSubobject<UNiagaraComponent>(TEXT("DestructionExplosion"));
+	DestructionExplosion->SetupAttachment(VehicleMesh);
+	DestructionExplosion->SetRelativeLocation(FVector(-15, 0, 65));
+	DestructionExplosion->SetAbsolute(false, true, true);
+	DestructionExplosion->SetAutoActivate(false);
+	DestructionExplosion->SetCanEverAffectNavigation(false);
+	static ConstructorHelpers::FObjectFinder<UNiagaraSystem> Explosion(TEXT("/Game/Effects/ExplosionTuna/NS_Explosion_Tuna.NS_Explosion_Tuna"));
+	DestructionExplosion->SetAsset(Explosion.Object);
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> Front(TEXT("/Game/Meshes/Props/ATV/Debris/SM_ATV_Debris_wheel_FL.SM_ATV_Debris_wheel_FL"));
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> Rear(TEXT("/Game/Meshes/Props/ATV/Debris/SM_ATV_Debris_wheel_RR.SM_ATV_Debris_wheel_RR"));
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> Bar(TEXT("/Game/Meshes/Props/ATV/Debris/SM_ATV_Debris_handlebar.SM_ATV_Debris_handlebar"));
@@ -132,10 +141,30 @@ void ATunaSweeperATVActor::DestroyVehicle()
 		DetachedParts.Add(Part);
 		VehicleMesh->HideBoneByName(Bones[Index], PBO_None);
 	}
+	const float Delay = FMath::IsFinite(DestructionExplosionDelay) ? FMath::Max(0.0f, DestructionExplosionDelay) : 0.0f;
+	if (Delay > 0)
+	{
+		GetWorldTimerManager().SetTimer(DestructionExplosionTimer, this, &ATunaSweeperATVActor::PlayDestructionExplosion, Delay, false);
+	}
+	else PlayDestructionExplosion();
+}
+
+void ATunaSweeperATVActor::PlayDestructionExplosion()
+{
+	if (!bVehicleDestroyed || bDestructionExplosionTriggered || IsActorBeingDestroyed()) return;
+	bDestructionExplosionTriggered = true;
+	if (DestructionExplosion)
+	{
+		// Burst at the wreck's current position, then keep it fixed in world space.
+		DestructionExplosion->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+		DestructionExplosion->Activate(true);
+	}
 }
 
 void ATunaSweeperATVActor::EndPlay(const EEndPlayReason::Type Reason)
 {
+	GetWorldTimerManager().ClearTimer(DestructionExplosionTimer);
+	if (DestructionExplosion) DestructionExplosion->DeactivateImmediate();
 	for (const auto& Part : DetachedParts) if (Part.IsValid()) Part->Destroy();
 	DetachedParts.Empty();
 	Super::EndPlay(Reason);
