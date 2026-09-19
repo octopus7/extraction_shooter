@@ -36,4 +36,4 @@
 - `Tools/BarrierGate/run_unreal.ps1`: 새 UE 프로세스에서 BP/에셋 바인딩, 메시 UV, 봉 길이와 피벗을 읽기 전용으로 검증.
 - Blender에서 `Tools/BarrierGate/verify_model.py`: UV 퇴화/겹침, 텍셀 밀도, 봉 원점을 검증. 결과는 `TunaSweeper/Saved/Automation/BarrierGate/`에 기록한다.
 
-일회성 모델 생성기와 임포트 코드는 에셋 생성 커밋 직후 별도 커밋으로 제거한다. 검증 도구만 유지한다.
+일회성 모델 생성기와 임포트 코드는 에셋 생성 커밋 직후 별도 커밋으로 제거했다. 검증 도구만 유지한다.

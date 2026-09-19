@@ -8907,3 +8907,11 @@
 - 요청: BP_ATV_TypeA 생성 및 현재 ATV 작업 커밋.
 - 처리: /Game/Blueprints/Vehicles/ATV/BP_ATV_TypeA를 TunaSweeperATVActor의 자식 Blueprint로 생성했다. 앞서 구현한 상호작용 승하차 코드·로컬라이징·검증 도구·문서를 BP 애셋과 함께 커밋한다. 프로젝트 일회성 생성기 규칙에 따라 생성 스크립트를 함께 커밋한 직후 제거하고 재로드 검증 후 제거 커밋을 이어서 만든다. 다른 작업 변경은 포함하지 않으며 원격 푸시는 하지 않는다.
 - 검증: Blueprint 컴파일/저장 성공. 새 UE 5.7 프로세스에서 부모 클래스, SKM_ATV, 차체 충돌, seat 본 부착, VehicleMount 상호작용 및 시동/공회전/정지 사운드 상속 재로드 검사 통과(0 errors/0 warnings). 부모 구현의 Development Editor 빌드와 TunaSweeper.Vehicle.MountInteraction 자동 테스트 통과 기록도 확인했다.
+
+## 2026-09-19 21:07:20 (소요시간: 00:34:14)
+
+- 요청: 초소 없는 무인 주차장 봉 차단기를 C++ 클래스와 BP로 구현하고 커밋. 근접 자동 개폐, 회전축 제어부 녹색·붉은색 LED, 직접 제작한 간소한 모델과 제어함 고유 UV 텍스처를 포함하고 레벨 배치는 하지 않는다.
+- 구현: ATunaSweeperBarrierGateActor와 /Game/Environment/BarrierGate/BP_BarrierGate, 350cm 봉, 약 112.5cm 제어함, 두 LED 렌즈와 발광/보조광을 제작했다. 양방향 플레이어 조종 Pawn 감지, 85도 개방, 이탈 후 1.5초 지연 닫힘, 재진입 반전과 점유 중 닫힘 방지를 구현했다. 완전 개방은 녹색, 닫힘/이동 중은 붉은색이다. UE 5.7의 PlayerState 의존 판정 대신 실제 PlayerController 조종 여부를 사용한다.
+- 에셋: 제어함 1024² 전용 BaseColor와 중복 없는 UV, 봉 256×128 적백색 반복 텍스처, .blend/FBX/PNG 원본과 미리보기를 포함했다. 모델은 총 5,356 삼각형이다. 사용법은 Docs/barrier_gate.md에 기록했다. 맵이나 기존 배치 데이터는 이 작업의 커밋에 포함하지 않았다.
+- 검증: UE 5.7 Editor 통합 빌드 성공. MotionAndProximity 자동화 테스트 성공 1/실패 0/미실행 0으로 개폐·반전·LED·양방향 감지·지연·BeginPlay 타이머·점유자 제거·저장 BP를 검증했다. 새 UE 프로세스에서 메시/머티리얼/텍스처/BP와 350cm 봉 피벗, 두 LED 위치를 재로드 검증했다. Blender 검증에서 퇴화 UV 없음, 제어함 1024 해상도 UV 겹침 0픽셀, 중앙 텍셀 밀도 약 400px/m를 확인했다. 생성기 제거 후 세 검사를 다시 통과했다.
+- 정리: bb0f1686에 생성기와 검증된 코드/에셋을 함께 커밋했고, 바로 다음 정리 커밋에서 일회성 모델 생성기·임포트 코드·실행 진입점을 제거한다. 읽기 전용 검증 도구만 유지한다. 다른 작업의 변경 사항은 커밋하지 않고 원격 푸시는 수행하지 않는다.
