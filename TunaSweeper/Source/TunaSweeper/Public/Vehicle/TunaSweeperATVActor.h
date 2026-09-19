@@ -7,6 +7,11 @@ class USkeletalMeshComponent;
 class UTunaSweeperVehicleMountComponent;
 class UChaosWheeledVehicleMovementComponent;
 class ATunaSweeperTopDownCharacter;
+class UNiagaraComponent;
+class UStaticMesh;
+
+UENUM(BlueprintType)
+enum class ETunaSweeperATVDamageState : uint8 { Healthy, Damaged, Critical, Destroyed };
 
 /** Four-wheel Chaos ATV controlled by its rider without changing player possession. */
 UCLASS(Blueprintable)
@@ -17,7 +22,40 @@ public:
 	ATunaSweeperATVActor();
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
+	virtual void EndPlay(const EEndPlayReason::Type Reason) override;
+	virtual float TakeDamage(float DamageAmount, const FDamageEvent& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 	virtual UPawnMovementComponent* GetMovementComponent() const override;
+	UFUNCTION(BlueprintPure, Category="ATV|Durability")
+	ETunaSweeperATVDamageState GetDamageState() const;
+	UFUNCTION(BlueprintPure, Category="ATV|Durability")
+	float GetDurabilityRatio() const;
+	UFUNCTION(BlueprintPure, Category="ATV|Durability")
+	bool IsVehicleDestroyed() const { return bVehicleDestroyed; }
+	/** Requested emission; previously emitted particles may still be draining. */
+	bool IsDamageSmokeEmitting(bool bHeavy) const { return bHeavy ? bHeavySmokeEmitting : bLightSmokeEmitting; }
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="ATV|Durability", meta=(ClampMin="1"))
+	float MaxDurability = 300.0f;
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Transient, Category="ATV|Durability")
+	float CurrentDurability = 300.0f;
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Transient, Category="ATV|Durability")
+	bool bVehicleDestroyed = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="ATV|Durability", meta=(ClampMin="0", ClampMax="1"))
+	float SmokeDurabilityRatio = 0.65f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="ATV|Durability", meta=(ClampMin="0", ClampMax="1"))
+	float HeavySmokeDurabilityRatio = 0.30f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="ATV|Effects", meta=(ClampMin="0"))
+	float HitSmokeDuration = 2.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="ATV|Effects", meta=(ClampMin="0"))
+	float WreckSmokeDuration = 20.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="ATV|Effects", meta=(ClampMin="1"))
+	float DebrisLifetime = 30.0f;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="ATV|Effects")
+	TObjectPtr<UNiagaraComponent> LightDamageSmoke;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="ATV|Effects")
+	TObjectPtr<UNiagaraComponent> HeavyDamageSmoke;
+	/** Meshes are authored around wheel_FL, wheel_RR and handlebar respectively. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="ATV|Effects")
+	TArray<TObjectPtr<UStaticMesh>> DetachedPartMeshes;
 	void SetDriveInput(const FVector2D& Input);
 	void SetBoostInput(bool bHeld);
 	void ClearDriveInput();
@@ -43,6 +81,16 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="ATV")
 	TObjectPtr<UTunaSweeperVehicleMountComponent> MountComponent;
 private:
+	void CreateDamageComponents();
+	void UpdateDamageSmoke(float DeltaSeconds);
+	void DestroyVehicle();
+	TArray<TWeakObjectPtr<AActor>> DetachedParts;
+	float HitSmokeRemaining = 0;
+	float WreckSmokeElapsed = 0;
+	bool bProcessingDamage = false;
+	bool bLightSmokeEmitting = false;
+	bool bHeavySmokeEmitting = false;
+	void ConfigureContactCollision();
 	UFUNCTION()
 	void HandleRiderChanged(ATunaSweeperTopDownCharacter* Rider);
 	FVector2D DriveInput = FVector2D::ZeroVector;

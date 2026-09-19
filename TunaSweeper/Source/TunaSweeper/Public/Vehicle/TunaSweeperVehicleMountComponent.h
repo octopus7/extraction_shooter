@@ -31,6 +31,7 @@ public:
 	bool IsDismountHintVisible() const { return bHintVisible; }
 	bool FindDismountLocation(FVector& OutLocation) const;
 	void ReleaseRiderForEndPlay();
+	void ReleaseRiderForVehicleDestruction();
 	void UpdateStationaryHint(float DeltaTime, float Speed);
 	void SetDriveInput(const FVector2D& Input);
 	void SetBoostInput(bool bHeld);
@@ -75,6 +76,8 @@ private:
 	bool bSavedRiderUpdateRateOptimizations = false;
 	UPROPERTY(Transient)
 	TWeakObjectPtr<ATunaSweeperTopDownCharacter> Rider;
+	UPROPERTY(Transient)
+	TWeakObjectPtr<ATunaSweeperTopDownCharacter> EmergencyReleasedRider;
 	UPROPERTY(Transient)
 	TObjectPtr<UAudioComponent> EngineAudio;
 	UPROPERTY(Transient)

@@ -7,6 +7,7 @@
 #include "Player/TunaSweeperPlayerController.h"
 #include "Components/AudioComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/BoxComponent.h"
 #include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundBase.h"
@@ -23,6 +24,7 @@ UTunaSweeperVehicleMountComponent::UTunaSweeperVehicleMountComponent()
 
 bool UTunaSweeperVehicleMountComponent::CanMount(const ATunaSweeperTopDownCharacter* Character) const
 {
+	if (const auto* ATV = Cast<ATunaSweeperATVActor>(GetOwner()); ATV && ATV->IsVehicleDestroyed()) return false;
 	if (!IsValid(Character) || !IsValid(GetOwner()) || GetOwner()->IsActorBeingDestroyed() || Rider.IsValid() ||
 		Character->IsDead() || Character->IsMountedInVehicle() || Character->GetAttachParentActor() ||
 		!IsWithinInteractionDistance(Character) || FMath::Abs(Character->GetActorLocation().Z - GetComponentLocation().Z) > InteractionDistance)
@@ -152,6 +154,27 @@ void UTunaSweeperVehicleMountComponent::ReleaseRiderForEndPlay()
 	ReleaseRider(Location, false);
 }
 
+void UTunaSweeperVehicleMountComponent::ReleaseRiderForVehicleDestruction()
+{
+	FVector Location;
+	if (FindDismountLocation(Location))
+	{
+		ReleaseRider(Location, false);
+		return;
+	}
+	// If all exits are obstructed, release at the current seat instead of teleporting
+	// to the potentially distant/now occupied original boarding position. Ignore only
+	// this wreck until the capsule clears it; world obstacles remain blocking.
+	auto* Character = Rider.Get();
+	Location = Character ? Character->GetActorLocation() : GetComponentLocation();
+	ReleaseRider(Location, false);
+	if (Character)
+	{
+		Character->GetCapsuleComponent()->IgnoreActorWhenMoving(GetOwner(), true);
+		EmergencyReleasedRider = Character;
+	}
+}
+
 void UTunaSweeperVehicleMountComponent::StartRiderPose()
 {
 	auto* Character = Rider.Get();
@@ -262,6 +285,17 @@ void UTunaSweeperVehicleMountComponent::UpdateStationaryHint(float DeltaTime, fl
 void UTunaSweeperVehicleMountComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	if (auto* Released = EmergencyReleasedRider.Get())
+	{
+		const auto* ATV = Cast<ATunaSweeperATVActor>(GetOwner());
+		const auto* Capsule = Released->GetCapsuleComponent();
+		const FVector Padding(Capsule->GetScaledCapsuleRadius(), Capsule->GetScaledCapsuleRadius(), Capsule->GetScaledCapsuleHalfHeight());
+		if (!ATV || !ATV->ChassisCollision->Bounds.GetBox().ExpandBy(Padding).IsInside(Released->GetActorLocation()))
+		{
+			Released->GetCapsuleComponent()->IgnoreActorWhenMoving(GetOwner(), false);
+			EmergencyReleasedRider.Reset();
+		}
+	}
 	if (!Rider.IsValid())
 	{
 		if (EngineAudio || DismountWidget) ReleaseRiderForEndPlay();
@@ -286,6 +320,8 @@ void UTunaSweeperVehicleMountComponent::TickComponent(float DeltaTime, ELevelTic
 
 void UTunaSweeperVehicleMountComponent::EndPlay(const EEndPlayReason::Type Reason)
 {
+	if (auto* Released = EmergencyReleasedRider.Get()) Released->GetCapsuleComponent()->IgnoreActorWhenMoving(GetOwner(), false);
+	EmergencyReleasedRider.Reset();
 	ReleaseRiderForEndPlay();
 	Super::EndPlay(Reason);
 }

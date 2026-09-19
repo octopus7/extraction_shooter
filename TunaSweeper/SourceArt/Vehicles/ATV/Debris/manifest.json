@@ -1,0 +1,44 @@
+[
+  {
+    "bone": "wheel_FL",
+    "file": "SM_ATV_Debris_wheel_FL.fbx",
+    "vertices": 657,
+    "pivot_blender_cm": [
+      48.84731674194336,
+      42.18632125854492,
+      33.208248138427734
+    ],
+    "materials": [
+      "M_ATV",
+      "M_ATV_DarkSteel"
+    ]
+  },
+  {
+    "bone": "wheel_RR",
+    "file": "SM_ATV_Debris_wheel_RR.fbx",
+    "vertices": 620,
+    "pivot_blender_cm": [
+      -60.900550842285156,
+      -46.944175720214844,
+      33.52543640136719
+    ],
+    "materials": [
+      "M_ATV",
+      "M_ATV_DarkSteel"
+    ]
+  },
+  {
+    "bone": "handlebar",
+    "file": "SM_ATV_Debris_handlebar.fbx",
+    "vertices": 229,
+    "pivot_blender_cm": [
+      23.789278030395508,
+      -2.537523031234741,
+      105.21045684814453
+    ],
+    "materials": [
+      "M_ATV",
+      "M_ATV_DarkSteel"
+    ]
+  }
+]

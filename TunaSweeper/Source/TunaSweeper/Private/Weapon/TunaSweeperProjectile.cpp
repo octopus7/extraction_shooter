@@ -455,7 +455,9 @@ void ATunaSweeperProjectile::ApplyProjectileCollisionDefaults()
 		return;
 	}
 
-	CollisionComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	// ProjectileMovement sweeps still dispatch HandleHit and point damage. A kinematic
+	// bullet must not also act as a rigid-body obstacle against simulated vehicles.
+	CollisionComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	CollisionComponent->bReturnMaterialOnMove = true;
 	CollisionComponent->SetCollisionObjectType(TunaSweeperCollisionChannels::Projectile);
 	CollisionComponent->SetCollisionResponseToAllChannels(ECR_Block);

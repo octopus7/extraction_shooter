@@ -9,7 +9,8 @@
 - 340kg 차체, 네 바퀴 AWD, 자동 변속/후진, 전륜 Ackermann 조향과 속도별 조향 제한을 사용한다. 각 바퀴는 구면 접지 검사, 스프링/댐퍼, 위 8cm·아래 12cm 이동 범위를 가진다. 탑승자 Pawn은 바퀴 접지 대상에서 제외한다.
 - `TunaSweeperATVAnimInstance`가 휠 회전·조향·서스펜션 이동을 본에 반영한다. 너클, 위/아래 암, 쇼크 양쪽과 스프링, 핸들도 연동한다. 별도 AnimBP 제작 없이 네이티브 애니메이션 인스턴스를 사용한다.
 - UI 열기·행동 취소·하차 시 입력과 Shift 상태를 초기화한다. 탑승자가 없거나 UI가 주행을 막는 동안 주차 브레이크를 건다. 무인 차량에 입력을 보내도 움직이지 않는다.
-- `PA_ATV`의 root 박스가 실제 차체 충돌이다. 기존 `ChassisCollision` 컴포넌트는 BP 참조 호환용으로 남기고 충돌을 끈다.
+- `PA_ATV`의 root 박스가 지형·장애물과 충돌하는 물리 차체다. Pawn과의 직접 물리 충돌은 제외하고 `ChassisCollision`의 QueryOnly 박스로 보행을 막아 캐릭터의 밀기 힘과 캡슐 침투 보정이 차체에 전달되지 않게 한다. 미탑승 상태에서도 차체 중력·서스펜션·환경 충돌은 계속 계산한다.
+- 총알은 ProjectileMovement의 스윕으로 명중·피해를 처리하며 강체 물리 충돌에는 참여하지 않는다. ATV의 접지 검사에서도 Projectile 채널을 제외해 총알을 바닥으로 잘못 인식하지 않게 한다. 차체의 기존 포인트 대미지 충격과 탑승자의 피격 판정은 유지한다. 저장된 BP/레벨 인스턴스에도 시작 시 충돌 정책을 적용한다.
 
 ## 상호작용
 
@@ -32,6 +33,8 @@
 
 승하차·Chaos 주행·휠/서스펜션 구동과 Luna Mk2 탑승 자세를 구현했다. `OnMounted`/`OnDismounted` 이벤트와 `GetRider`, 캐릭터의 `IsMountedInVehicle`/`GetVehicleMount`를 제공한다. 탑승 컴포넌트는 다른 좌석에도 사용할 수 있지만 주행 입력 전달은 현재 ATV 액터에 연결되어 있다.
 
+차량 내구도·피격 연기·파괴 시 부분 분해는 [구현 계획과 진행 상태](atv_damage_destruction_plan.md)에 기록했다. 현재 내구도/연기 상태/부품 분리 구현은 있으나, 막힌 출구의 하차 좌표 테스트 1건과 연기 최종 시각 검수가 남아 있다.
+
 ## 운전자 자세
 
 - 탑승 중 `TunaSweeperATVRiderAnimInstance`로 전환해 좌석 앞쪽에 앉고 상체를 숙인 자세를 만든다. 고개는 전방을 바라보도록 별도로 보정한다. 새 AnimSequence 애셋을 재생하는 방식이 아니라 현재 ATV 본을 목표로 매 프레임 계산하는 네이티브 자세다.
@@ -47,6 +50,8 @@
 - 에디터 자동 테스트: `TunaSweeper.Vehicle.MountInteraction`
 - 물리 주행/접지/조향/실제 휠·스프링·핸들 본/Shift 가속/입력 해제: `TunaSweeper.Vehicle.Driving`. 저장된 `BP_ATV_TypeA`로 실행한다.
 - 실제 플레이어 BP의 좌석/손발 접촉 및 하차 복원: `TunaSweeper.Vehicle.RiderPose`. `-ATVRiderPreview`와 렌더링을 활성화해 실행하면 `Saved/ATVRigWork/RiderPose0~2.png`에 검토 이미지를 저장한다.
+- 실제 플레이어 BP의 전방·측면 보행 충돌 및 주차 차량 밀림: `TunaSweeper.Vehicle.PedestrianContact`.
+- 총알의 접지 검사 제외, 물리 충돌 제외, 주행 중 연속 피격 안정성 및 탑승자 피해: `TunaSweeper.Vehicle.ProjectileContact`.
 - 별도 UE 프로세스에서 기본값/자산 참조 확인: `Tools/ATVRig/verify_mount_setup.py`
 - 주행 기본값/물리 애셋/애니메이션/사운드 참조 확인: `Tools/ATVRig/verify_driving_setup.py`
 - UI의 실제 화면 배치와 청취, 운전자 자세의 최종 게임 내 확인은 별도 플레이 검수가 필요하다.
