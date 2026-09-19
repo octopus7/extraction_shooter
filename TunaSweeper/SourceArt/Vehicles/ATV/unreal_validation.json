@@ -1,0 +1,195 @@
+{
+  "passed": true,
+  "engine": "5.7.4-51494982+++UE5+Release-5.7",
+  "skeletal_mesh": "/Game/Meshes/Props/ATV/SKM_ATV.SKM_ATV",
+  "skeleton": "/Game/Meshes/Props/ATV/SKM_ATV_Skeleton.SKM_ATV_Skeleton",
+  "bone_count": 35,
+  "bone_names": [
+    "root",
+    "handlebar",
+    "grip_l",
+    "grip_r",
+    "wheel_FL",
+    "lower_arm_FL",
+    "upper_arm_FL",
+    "knuckle_FL",
+    "shock_upper_FL",
+    "shock_lower_FL",
+    "spring_FL",
+    "wheel_FR",
+    "lower_arm_FR",
+    "upper_arm_FR",
+    "knuckle_FR",
+    "shock_upper_FR",
+    "shock_lower_FR",
+    "spring_FR",
+    "wheel_RL",
+    "lower_arm_RL",
+    "upper_arm_RL",
+    "knuckle_RL",
+    "shock_upper_RL",
+    "shock_lower_RL",
+    "spring_RL",
+    "wheel_RR",
+    "lower_arm_RR",
+    "upper_arm_RR",
+    "knuckle_RR",
+    "shock_upper_RR",
+    "shock_lower_RR",
+    "spring_RR",
+    "seat",
+    "foot_l",
+    "foot_r"
+  ],
+  "root_and_wheel_reference_poses": {
+    "root": {
+      "location_cm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_xyzw": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    "wheel_FL": {
+      "location_cm": [
+        48.84731674194336,
+        -42.18632125854492,
+        33.208248138427734
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_xyzw": [
+        0.0,
+        0.0,
+        0.0,
+        -1.0
+      ]
+    },
+    "wheel_FR": {
+      "location_cm": [
+        44.08946228027344,
+        47.578556060791016,
+        33.208248138427734
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_xyzw": [
+        0.0,
+        0.0,
+        0.0,
+        -1.0
+      ]
+    },
+    "wheel_RL": {
+      "location_cm": [
+        -58.36302947998047,
+        -39.96598815917969,
+        33.842628479003906
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_xyzw": [
+        0.0,
+        0.0,
+        0.0,
+        -1.0
+      ]
+    },
+    "wheel_RR": {
+      "location_cm": [
+        -60.900550842285156,
+        46.944175720214844,
+        33.52543640136719
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "rotation_xyzw": [
+        0.0,
+        0.0,
+        0.0,
+        -1.0
+      ]
+    }
+  },
+  "inspection_clip": "/Game/Meshes/Props/ATV/AN_ATV_RigCheck.AN_ATV_RigCheck",
+  "pose_1s_wheel_travel_cm": {
+    "FL": 7.000003814697266,
+    "FR": -7.0,
+    "RL": -6.999998092651367,
+    "RR": 6.999996185302734
+  },
+  "pose_1s_wheel_axles": {
+    "FL": [
+      0.4067361564919992,
+      0.9135456742835116,
+      -1.2246467864107189e-16
+    ],
+    "FR": [
+      0.4067361564919992,
+      0.9135456742835116,
+      -1.2246467864107189e-16
+    ],
+    "RL": [
+      -1.2246465071688196e-16,
+      1.0,
+      -1.2246467991473187e-16
+    ],
+    "RR": [
+      -1.2246465071688196e-16,
+      1.0,
+      -1.2246467991473187e-16
+    ]
+  },
+  "pose_1s_spring_scales": {
+    "FL": [
+      0.8676471710205078,
+      1.0,
+      1.0
+    ],
+    "FR": [
+      1.1269595623016357,
+      1.0,
+      1.0
+    ],
+    "RL": [
+      1.1352851390838623,
+      0.9999999403953552,
+      1.0
+    ],
+    "RR": [
+      0.8738604784011841,
+      0.9999998807907104,
+      0.9999998211860657
+    ]
+  },
+  "shock_cylinders_rigid": true,
+  "materials": [
+    "/Game/Meshes/Props/ATV/M_ATV.M_ATV",
+    "/Game/Meshes/Props/ATV/M_ATV_DarkSteel.M_ATV_DarkSteel",
+    "/Game/Meshes/Props/ATV/M_ATV_Chrome.M_ATV_Chrome",
+    "/Game/Meshes/Props/ATV/M_ATV_ShockGold.M_ATV_ShockGold"
+  ],
+  "runtime_driving_implemented": false
+}

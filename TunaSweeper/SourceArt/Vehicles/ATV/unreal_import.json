@@ -1,0 +1,10 @@
+{
+  "skeletal_mesh": "/Game/Meshes/Props/ATV/SKM_ATV.SKM_ATV",
+  "skeleton": "/Game/Meshes/Props/ATV/SKM_ATV_Skeleton.SKM_ATV_Skeleton",
+  "materials": [
+    "/Game/Meshes/Props/ATV/M_ATV.M_ATV",
+    "/Game/Meshes/Props/ATV/M_ATV_DarkSteel.M_ATV_DarkSteel",
+    "/Game/Meshes/Props/ATV/M_ATV_Chrome.M_ATV_Chrome",
+    "/Game/Meshes/Props/ATV/M_ATV_ShockGold.M_ATV_ShockGold"
+  ]
+}

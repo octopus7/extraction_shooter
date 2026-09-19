@@ -1,0 +1,41 @@
+{
+  "passed": true,
+  "blender_version": "4.5.12 LTS",
+  "source_unchanged": true,
+  "bones": 35,
+  "mesh_parts": 50,
+  "rigid_weights": true,
+  "four_wheel_axes_x_forward": true,
+  "pose_rigid_wheels": true,
+  "bind_bounds_blender_cm": [
+    [
+      -95.65403747558594,
+      83.2890853881836
+    ],
+    [
+      -63.802406311035156,
+      56.42586135864258
+    ],
+    [
+      5.247554613063699e-10,
+      127.62059020996094
+    ]
+  ],
+  "fbx_roundtrip_passed": true,
+  "fbx_bounds_blender_cm": [
+    [
+      -95.65403747558594,
+      83.2890853881836
+    ],
+    [
+      -63.80240249633789,
+      56.425865173339844
+    ],
+    [
+      5.247554613063699e-10,
+      127.62059020996094
+    ]
+  ],
+  "max_fbx_bounds_error_cm": 3.814697265625e-06,
+  "fbx_sha256": "132f0990d9bdcc3006f2bf27a99a3cd4265de93191cb1acb867dbe9b3bf5a537"
+}
