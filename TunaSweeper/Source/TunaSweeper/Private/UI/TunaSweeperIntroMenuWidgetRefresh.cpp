@@ -576,6 +576,12 @@ void UTunaSweeperIntroMenuWidget::ApplySettingsTabButtonStyle(
 void UTunaSweeperIntroMenuWidget::RefreshLocalizedTexts()
 {
 	SetNamedText(
+		FName(TEXT("SettingsButtonText")),
+		ResolveUiText(FName(TEXT("ui.title.settings")), FText::GetEmpty()));
+	SetNamedText(
+		FName(TEXT("QuitButtonText")),
+		ResolveUiText(FName(TEXT("ui.title.quit")), FText::GetEmpty()));
+	SetNamedText(
 		FName(TEXT("SteamDemoWishlistButtonText")),
 		ResolveUiText(FName(TEXT("ui.title.wishlist")), FText::GetEmpty()));
 	SetNamedText(
