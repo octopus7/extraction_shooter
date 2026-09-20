@@ -14,6 +14,14 @@
 #include "AssetCompilingManager.h"
 #include "RenderingThread.h"
 #include "ContentStreaming.h"
+#include "Engine/StaticMesh.h"
+#include "Materials/Material.h"
+#include "SceneView.h"
+#include "Tests/AutomationEditorCommon.h"
+#include "Tests/AutomationCommon.h"
+#include "Camera/PlayerCameraManager.h"
+#include "GameFramework/PlayerController.h"
+#include "Misc/FileHelper.h"
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FTitleStudioSeparationTest,
 	"TunaSweeper.Title.Studio.SeparationAndBackdrop",
@@ -43,8 +51,21 @@ bool FTitleStudioSeparationTest::RunTest(const FString& Parameters)
 	}
 	if (!TestNotNull(TEXT("Matte backdrop"), Backdrop)) return false;
 	TestNotNull(TEXT("Saved backdrop material"), Backdrop->GetMaterial(0));
+	if (TestNotNull(TEXT("Curved screen mesh"), Backdrop->GetStaticMesh().Get()))
+	{
+		TestEqual(TEXT("Saved curved screen asset"), Backdrop->GetStaticMesh()->GetFName(), FName(TEXT("SM_TitleCurvedScreen")));
+		TestTrue(TEXT("Screen has actual depth curvature"), Backdrop->GetStaticMesh()->GetBoundingBox().GetSize().Z > 10.f);
+	}
+	if (UMaterial* Material = Backdrop->GetMaterial(0)->GetMaterial())
+	{
+		TestTrue(TEXT("Matte has no lighting or shape shadows"), Material->GetShadingModels().HasShadingModel(MSM_Unlit));
+		TestEqual(TEXT("Matte avoids opaque emissive GBuffer"), Material->GetBlendMode(), BLEND_Translucent);
+	}
 	auto* Camera = Character->FindComponentByClass<UCameraComponent>();
 	if (!TestNotNull(TEXT("Character camera retained"), Camera)) return false;
+	TestTrue(TEXT("Title explicitly controls exposure"), Camera->PostProcessSettings.bOverride_AutoExposureMethod);
+	TestEqual(TEXT("Title exposure cannot adapt over time"), Camera->PostProcessSettings.AutoExposureMethod.GetValue(), AEM_Manual);
+	TestFalse(TEXT("Exposure is independent of physical camera defaults"), bool(Camera->PostProcessSettings.AutoExposureApplyPhysicalCameraExposure));
 	const FRotator OriginalRotation = Camera->GetRelativeRotation();
 	const float OriginalAspect = Camera->AspectRatio;
 	const bool OriginalConstrain = Camera->bConstrainAspectRatio;
@@ -91,10 +112,95 @@ bool FTitleStudioSeparationTest::RunTest(const FString& Parameters)
 	if (TestTrue(TEXT("Title capture readable"), FImageUtils::GetRenderTargetImage(Target, Pixels)))
 		TestTrue(TEXT("Title capture saved"), FImageUtils::SaveImageByExtension(*(FPaths::ProjectSavedDir() / TEXT("Screenshots/TitleMatteLake.png")), Pixels));
 	Capture->DestroyComponent();
+	// Render the same camera at genuinely different output aspect ratios, keeping
+	// its reference aspect fixed, just as a resized game viewport does.
+	for (FIntPoint Resolution : {FIntPoint(1280,720), FIntPoint(960,720), FIntPoint(2560,720), FIntPoint(720,1280)})
+	{
+		auto* AspectCapture = NewObject<USceneCaptureComponent2D>(Studio);
+		auto* AspectTarget = NewObject<UTextureRenderTarget2D>();
+		AspectTarget->InitCustomFormat(Resolution.X, Resolution.Y, PF_B8G8R8A8, false);
+		AspectCapture->TextureTarget = AspectTarget;
+		AspectCapture->CaptureSource = ESceneCaptureSource::SCS_FinalColorLDR;
+		AspectCapture->bCaptureEveryFrame = false;
+		AspectCapture->bCaptureOnMovement = false;
+		AspectCapture->RegisterComponentWithWorld(World);
+		AspectCapture->SetWorldTransform(Camera->GetComponentTransform());
+		AspectCapture->PostProcessSettings = Camera->PostProcessSettings;
+		FMinimalViewInfo View;
+		Camera->GetCameraView(0.f, View);
+		FSceneViewProjectionData Projection;
+		const FIntRect Rect(0,0,Resolution.X,Resolution.Y);
+		Projection.SetViewRectangle(Rect);
+		FMinimalViewInfo::CalculateProjectionMatrixGivenViewRectangle(View, AspectRatio_MaintainYFOV, Rect, Projection);
+		AspectCapture->bUseCustomProjectionMatrix = true;
+		AspectCapture->CustomProjectionMatrix = Projection.ProjectionMatrix;
+		const FVector2D Size = ATunaSweeperTitleStudioActor::CalculateBackdropSize(Camera, Resolution, AspectRatio_MaintainYFOV);
+		Backdrop->SetWorldScale3D(FVector(Size.X/100.f, Size.Y/100.f, FMath::Min(Size.X,Size.Y)/100.f));
+		AspectCapture->CaptureScene();
+		FlushRenderingCommands();
+		FImage AspectPixels;
+		if (TestTrue(TEXT("Aspect capture readable"), FImageUtils::GetRenderTargetImage(AspectTarget, AspectPixels)))
+		{
+			TestTrue(TEXT("Aspect capture saved"), FImageUtils::SaveImageByExtension(*(FPaths::ProjectSavedDir() /
+				FString::Printf(TEXT("Screenshots/TitleProjected_%dx%d.png"),Resolution.X,Resolution.Y)), AspectPixels));
+			AspectCapture->HiddenActors.Add(Character);
+			AspectCapture->CaptureScene();
+			FlushRenderingCommands();
+			FImageUtils::GetRenderTargetImage(AspectTarget, AspectPixels);
+			if (AspectPixels.Format == ERawImageFormat::BGRA8)
+			{
+				const FColor* Colors = reinterpret_cast<const FColor*>(AspectPixels.RawData.GetData());
+				for (FIntPoint Corner : {FIntPoint(2,2),FIntPoint(Resolution.X-3,2),FIntPoint(2,Resolution.Y-3),FIntPoint(Resolution.X-3,Resolution.Y-3)})
+				{
+					const FColor Color = Colors[Corner.Y*Resolution.X+Corner.X];
+					TestTrue(TEXT("Projected matte covers viewport corners"), FMath::Max3(Color.R,Color.G,Color.B)>3);
+				}
+			}
+		}
+		AspectCapture->DestroyComponent();
+	}
 	Camera->AspectRatio = OriginalAspect;
 	Camera->bConstrainAspectRatio = OriginalConstrain;
 	Camera->bOverrideAspectRatioAxisConstraint = OriginalOverride;
 	Studio->Tick(0.f);
+	return true;
+}
+DEFINE_LATENT_AUTOMATION_COMMAND_TWO_PARAMETER(FCheckTitleRuntimeExposure, FAutomationTestBase*, Test, FString, CaptureName);
+bool FCheckTitleRuntimeExposure::Update()
+{
+	UWorld* World = GEditor->PlayWorld;
+	if (!Test->TestNotNull(TEXT("Title PIE world"), World)) return true;
+	APlayerController* Controller = World->GetFirstPlayerController();
+	if (!Test->TestNotNull(TEXT("Title PIE controller"), Controller)) return true;
+	const FPostProcessSettings& Settings = Controller->PlayerCameraManager->GetCameraCacheView().PostProcessSettings;
+	Test->TestEqual(TEXT("Runtime view retains manual exposure"), Settings.AutoExposureMethod.GetValue(), AEM_Manual);
+	Test->TestEqual(TEXT("Runtime fixed exposure compensation"), Settings.AutoExposureBias, 3.f);
+	FViewport* Viewport = GEditor->GetPIEViewport();
+	if (!Test->TestNotNull(TEXT("Title PIE viewport"), Viewport)) return true;
+	TArray<FColor> Pixels;
+	if (Test->TestTrue(TEXT("Runtime title pixels"), Viewport->ReadPixels(Pixels)))
+	{
+		const FIntPoint Size = Viewport->GetSizeXY();
+		TArray<uint8> Png;
+		FImageUtils::CompressImageArray(Size.X, Size.Y, Pixels, Png);
+		Test->TestTrue(TEXT("Runtime title capture saved"), FFileHelper::SaveArrayToFile(Png,
+			*(FPaths::ProjectSavedDir() / TEXT("Screenshots") / CaptureName)));
+	}
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FTitleRuntimeExposureTest,
+	"TunaSweeper.Title.Studio.RuntimeExposure",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FTitleRuntimeExposureTest::RunTest(const FString& Parameters)
+{
+	if (!FEditorFileUtils::LoadMap(FPaths::ProjectContentDir() / TEXT("Maps/IntroMap.umap"), false, true)) return false;
+	ADD_LATENT_AUTOMATION_COMMAND(FStartPIECommand(false));
+	ADD_LATENT_AUTOMATION_COMMAND(FWaitLatentCommand(2.f));
+	ADD_LATENT_AUTOMATION_COMMAND(FCheckTitleRuntimeExposure(this, TEXT("TitleRuntime_2s.png")));
+	ADD_LATENT_AUTOMATION_COMMAND(FWaitLatentCommand(5.f));
+	ADD_LATENT_AUTOMATION_COMMAND(FCheckTitleRuntimeExposure(this, TEXT("TitleRuntime_7s.png")));
+	ADD_LATENT_AUTOMATION_COMMAND(FEndPlayMapCommand());
 	return true;
 }
 #endif

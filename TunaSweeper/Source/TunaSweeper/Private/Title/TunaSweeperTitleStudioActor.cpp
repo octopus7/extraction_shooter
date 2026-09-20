@@ -168,7 +168,7 @@ void ATunaSweeperTitleStudioActor::UpdateBackdrop()
 	// Plane X/Y span camera right/down; the normal points back toward the lens.
 	MatteBackdrop->SetWorldLocation(Camera->GetComponentLocation() + Camera->GetForwardVector() * Distance);
 	MatteBackdrop->SetWorldRotation(FRotationMatrix::MakeFromXY(Camera->GetRightVector(), -Camera->GetUpVector()).ToQuat());
-	MatteBackdrop->SetWorldScale3D(FVector(Size.X / 100.0f, Size.Y / 100.0f, 1.0f));
+	MatteBackdrop->SetWorldScale3D(FVector(Size.X / 100.0f, Size.Y / 100.0f, FMath::Min(Size.X, Size.Y) / 100.0f));
 }
 
 FVector2D ATunaSweeperTitleStudioActor::CalculateBackdropSize(const UCameraComponent* Camera,
@@ -183,9 +183,8 @@ FVector2D ATunaSweeperTitleStudioActor::CalculateBackdropSize(const UCameraCompo
 	const FIntRect Rect(0, 0, FMath::Max(ViewportSize.X, 1), FMath::Max(ViewportSize.Y, 1));
 	Projection.SetViewRectangle(Rect);
 	FMinimalViewInfo::CalculateProjectionMatrixGivenViewRectangle(View, AxisConstraint, Rect, Projection);
-	constexpr float ImageAspect = 1670.0f / 942.0f;
 	const float ViewWidth = 6000.f / Projection.ProjectionMatrix.M[0][0];
 	const float ViewHeight = 6000.f / Projection.ProjectionMatrix.M[1][1];
-	const float Width = FMath::Max(ViewWidth, ViewHeight * ImageAspect) * 1.01f;
-	return FVector2D(Width, Width / ImageAspect);
+	// Projection mapping handles image framing; geometry provides an overscanned curved screen.
+	return FVector2D(ViewWidth, ViewHeight) * 1.08f;
 }

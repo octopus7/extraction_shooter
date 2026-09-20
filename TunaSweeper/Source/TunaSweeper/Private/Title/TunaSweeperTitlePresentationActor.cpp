@@ -300,11 +300,13 @@ ATunaSweeperTitlePresentationActor::ATunaSweeperTitlePresentationActor()
 	}
 
 	ApplyDesignTransforms();
+	ConfigureTitleExposure();
 }
 
 void ATunaSweeperTitlePresentationActor::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
+	ConfigureTitleExposure();
 	ConfigureSkirtAttachment();
 	if (BodyMesh)
 	{
@@ -332,6 +334,7 @@ void ATunaSweeperTitlePresentationActor::OnConstruction(const FTransform& Transf
 void ATunaSweeperTitlePresentationActor::BeginPlay()
 {
 	Super::BeginPlay();
+	ConfigureTitleExposure();
 	if (TitleCamera)
 	{
 		MainMenuCameraLocation = TitleCamera->GetRelativeLocation();
@@ -481,6 +484,23 @@ FVector ATunaSweeperTitlePresentationActor::CalculateCursorTargetWorldLocation(
 	const float EyeDepth = FVector::DotProduct(EyeCenterWorldLocation - CursorRayOrigin, NormalizedDirection);
 	const float TargetDistance = FMath::Max(MinimumDistance, EyeDepth - FMath::Max(0.0f, FrontOffset));
 	return CursorRayOrigin + NormalizedDirection * TargetDistance;
+}
+
+void ATunaSweeperTitlePresentationActor::ConfigureTitleExposure()
+{
+	if (!TitleCamera) return;
+	FPostProcessSettings& Settings = TitleCamera->PostProcessSettings;
+	Settings.bOverride_AutoExposureMethod = true;
+	Settings.AutoExposureMethod = AEM_Manual;
+	Settings.bOverride_AutoExposureApplyPhysicalCameraExposure = true;
+	Settings.AutoExposureApplyPhysicalCameraExposure = false;
+	Settings.bOverride_AutoExposureBias = true;
+	Settings.AutoExposureBias = TitleExposureCompensation;
+	Settings.bOverride_LocalExposureHighlightContrastScale = true;
+	Settings.LocalExposureHighlightContrastScale = 1.0f;
+	Settings.bOverride_LocalExposureShadowContrastScale = true;
+	Settings.LocalExposureShadowContrastScale = 1.0f;
+	TitleCamera->PostProcessBlendWeight = 1.0f;
 }
 
 void ATunaSweeperTitlePresentationActor::ApplyDesignTransforms()
