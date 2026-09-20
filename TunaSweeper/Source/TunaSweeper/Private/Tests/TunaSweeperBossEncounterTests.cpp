@@ -433,6 +433,25 @@ bool FTunaSweeperBossTestInventorySessionTest::RunTest(const FString& Parameters
 	TestTrue(TEXT("The lab enables the temporary-session save guard"), Instance->IsCombatTestSession());
 	const int32 FullMagazine = Instance->GetWeaponMagazineCapacity(1);
 	TestTrue(TEXT("The lab provides a functioning loaded rifle"), FullMagazine > 0 && Instance->GetWeaponLoadedAmmoCount(1) == FullMagazine);
+	FTunaSweeperItemInstance TestRifle;
+	FTunaSweeperItemDefinition TestRifleDefinition;
+	if (!TestTrue(
+		TEXT("The lab provides the default rifle in weapon slot one"),
+		Instance->TryGetEquipmentWeaponSlotItem(1, TestRifle, TestRifleDefinition)))
+	{
+		return false;
+	}
+	const FGuid* LaserSightUid = TestRifle.AttachmentSlots.Find(FName(TEXT("attachment.slot.tactical")));
+	if (!TestTrue(
+		TEXT("The default rifle has a laser sight in its tactical attachment slot"),
+		LaserSightUid && LaserSightUid->IsValid()))
+	{
+		return false;
+	}
+	FTunaSweeperItemInstance LaserSight;
+	TestTrue(
+		TEXT("The tactical attachment resolves to the laser sight item"),
+		Instance->TryGetItemInstance(*LaserSightUid, LaserSight) && LaserSight.ItemId == 2006);
 	TestTrue(TEXT("The lab provides enough reserve rounds for repeated attempts"), Instance->GetWeaponInventoryAmmoCount(1) >= 300);
 	TestTrue(TEXT("Lab ammunition can actually be consumed"), Instance->TryConsumeLoadedAmmoForWeaponSlot(1));
 	Instance->BeginCombatTestSession();

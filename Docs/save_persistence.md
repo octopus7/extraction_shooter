@@ -119,7 +119,7 @@ Marker add/delete actions update `UTunaSweeperGameInstance` memory immediately a
 
 Stored through `UTunaSweeperSaveGame::ItemInstances`.
 
-Confirming the Demo notice creates the single Demo save slot with a starting rifle (`1002`) in equipment weapon slot 1 and 60 total rifle rounds (`2002`): 30 rounds loaded in the rifle and 30 rounds in the first inventory slot. The rifle stores `2002` as both its loaded and selected ammo item id, and weapon slot 1 is selected for the immediate Bunker entry. This loadout is initialized only while creating a new Demo slot; Main saves and already-existing Demo saves are not modified.
+Confirming the Demo notice creates the single Demo save slot with a starting rifle (`1002`) in equipment weapon slot 1, a laser sight (`2006`) attached to that rifle's `attachment.slot.tactical` slot, and 60 total rifle rounds (`2002`): 30 rounds loaded in the rifle and 30 rounds in the first inventory slot. The rifle stores `2002` as both its loaded and selected ammo item id, and weapon slot 1 is selected for the immediate Bunker entry. The laser sight exists as a nested item instance referenced by the rifle rather than occupying an inventory slot. This loadout is initialized only while creating a new Demo slot; Main saves and already-existing Demo saves are not modified.
 
 Each `FTunaSweeperItemInstance` must preserve:
 

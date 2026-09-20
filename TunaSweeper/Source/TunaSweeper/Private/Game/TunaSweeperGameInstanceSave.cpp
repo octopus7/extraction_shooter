@@ -1175,6 +1175,7 @@ bool UTunaSweeperGameInstance::InitializeDemoStartingLoadout()
 {
 	constexpr int32 RifleItemId = 1002;
 	constexpr int32 RifleAmmoItemId = 2002;
+	constexpr int32 LaserSightItemId = 2006;
 	constexpr int32 StartingAmmoCount = 60;
 	constexpr int32 PrimaryWeaponEquipmentSlotIndex = 0;
 	constexpr int32 ReserveAmmoInventorySlotIndex = 0;
@@ -1188,11 +1189,14 @@ bool UTunaSweeperGameInstance::InitializeDemoStartingLoadout()
 	UTunaSweeperItemDataSubsystem* ItemDataSubsystem = GetSubsystem<UTunaSweeperItemDataSubsystem>();
 	FTunaSweeperItemDefinition RifleDefinition;
 	FTunaSweeperItemDefinition RifleAmmoDefinition;
+	FTunaSweeperItemDefinition LaserSightDefinition;
 	if (!ItemDataSubsystem ||
 		!ItemDataSubsystem->TryGetItemDefinition(RifleItemId, RifleDefinition) ||
 		!ItemDataSubsystem->TryGetItemDefinition(RifleAmmoItemId, RifleAmmoDefinition) ||
+		!ItemDataSubsystem->TryGetItemDefinition(LaserSightItemId, LaserSightDefinition) ||
 		!DoesItemDefinitionMatchEquipmentSlot(PrimaryWeaponEquipmentSlotIndex, RifleDefinition) ||
-		!IsAmmoDefinitionCompatibleWithWeapon(RifleDefinition, RifleAmmoDefinition))
+		!IsAmmoDefinitionCompatibleWithWeapon(RifleDefinition, RifleAmmoDefinition) ||
+		!DoesItemDefinitionAcceptAttachment(RifleDefinition, LaserSightDefinition))
 	{
 		return false;
 	}
@@ -1203,6 +1207,20 @@ bool UTunaSweeperGameInstance::InitializeDemoStartingLoadout()
 	{
 		return false;
 	}
+
+	const FGuid LaserSightUid = CreateItemInstance(LaserSightItemId, 1);
+	if (!LaserSightUid.IsValid())
+	{
+		ItemInstancesByUid.Remove(RifleUid);
+		return false;
+	}
+	RifleInstance = ItemInstancesByUid.Find(RifleUid);
+	if (!RifleInstance)
+	{
+		ItemInstancesByUid.Remove(LaserSightUid);
+		return false;
+	}
+	RifleInstance->AttachmentSlots.Add(LaserSightDefinition.AttachmentSlotTag, LaserSightUid);
 
 	const int32 LoadedAmmoCount = FMath::Min(
 		StartingAmmoCount,
@@ -1219,6 +1237,7 @@ bool UTunaSweeperGameInstance::InitializeDemoStartingLoadout()
 		if (!AmmoUid.IsValid())
 		{
 			EquipmentSlots[PrimaryWeaponEquipmentSlotIndex].Clear();
+			ItemInstancesByUid.Remove(LaserSightUid);
 			ItemInstancesByUid.Remove(RifleUid);
 			return false;
 		}
@@ -1227,6 +1246,7 @@ bool UTunaSweeperGameInstance::InitializeDemoStartingLoadout()
 
 	MarkItemEverAcquired(RifleItemId);
 	MarkItemEverAcquired(RifleAmmoItemId);
+	MarkItemEverAcquired(LaserSightItemId);
 	SetRuntimeSelectedWeaponSlotNumber(1);
 	return true;
 }
