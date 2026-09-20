@@ -6,8 +6,6 @@ Authored clips: A, 4-second subtle breathing loop in the supplied leaning-forwar
 
 ## Generation prompt
 
-Later arm correction (2026-09-21): the user rejected the crossed hands behind the back as looking restrained. All five current clips now use relaxed arms open diagonally downward beside the body, with softly bent elbows and wrists aligned with the forearms. The generated reference sheet below is historical; the OpenArms front/side/back previews show the current pose.
-
 Historical prompt below. On 2026-09-21 the user corrected C using a side-view screenshot: mirror its facing direction, start in screen-left profile, and turn to A in the opposite direction. Current C uses a 90-degree side-to-front arc, replacing the original 140-degree rear view. A/B and their connecting clips remain unchanged. Current title integration is documented in `Docs/title_standalone_motions.md`.
 
 Use case: stylized-concept.
