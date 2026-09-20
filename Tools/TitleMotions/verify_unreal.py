@@ -62,8 +62,17 @@ for foot in ['foot_l','foot_r']:
     assert min(heights)>=floor-.05,(foot,'C below reference floor')
     assert max(heights)>floor+2,(foot,'C needs a lifted turning step')
     report['assets'][NAMES[2]][foot+'_lift_cm']=max(heights)-floor
-qa,qc=bone(ap,'pelvis').rotation,bone(cp,'pelvis').rotation
-assert abs(qa.x*qc.x+qa.y*qc.y+qa.z*qc.z+qa.w*qc.w)<.7,'C must begin facing away'
+def root_yaw(p):
+    q=bone(p,'root').rotation
+    return math.degrees(math.atan2(2*(q.w*q.z+q.x*q.y),1-2*(q.y*q.y+q.z*q.z)))
+# UE yaw +90 corresponds to the mirrored reference: screen-left profile.
+# Follow the short path to front, opposite to the original -140-degree entrance.
+yaws=[root_yaw(pose(c,c.get_play_length()*i/180)) for i in range(181)]
+assert abs(yaws[0]-90)<.1,('C must begin at mirrored side profile',yaws[0])
+assert abs(yaws[-1])<.1,('C must finish facing front',yaws[-1])
+assert all(-.01<=y<=90.01 for y in yaws),'C must use the short side-to-front arc'
+assert all(b<=a+.01 for a,b in zip(yaws,yaws[1:])),'C turn direction must be reversed'
+report['assets'][NAMES[2]]['root_yaw_start_end_degrees']=[yaws[0],yaws[-1]]
 out=Path('D:/github/extraction_shooter/TunaSweeper/SourceArt/Characters/LunaMk2/TitleMotions')
 report['passed']=True
 (out/'unreal_validation.json').write_text(json.dumps(report,indent=2))
