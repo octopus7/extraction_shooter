@@ -173,6 +173,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Title|Camera")
 	float TitleExposureCompensation = 3.0f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Title|Camera", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+	float TitleColorGradeStrength = 1.0f;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Title|Look", meta = (ClampMin = "0.0", ClampMax = "90.0"))
 	float MaxHeadLookYaw = 28.0f;
 

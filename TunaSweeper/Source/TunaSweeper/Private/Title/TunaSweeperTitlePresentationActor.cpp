@@ -500,6 +500,24 @@ void ATunaSweeperTitlePresentationActor::ConfigureTitleExposure()
 	Settings.LocalExposureHighlightContrastScale = 1.0f;
 	Settings.bOverride_LocalExposureShadowContrastScale = true;
 	Settings.LocalExposureShadowContrastScale = 1.0f;
+	// Grade only this camera. Keep cool ambient shadows, lift their muddy values,
+	// warm the skin midtones gently, and retain detail in white hair/clothing.
+	const float Grade = FMath::Clamp(TitleColorGradeStrength, 0.0f, 1.0f);
+	const FVector4 Neutral(1.0f, 1.0f, 1.0f, 1.0f);
+	Settings.bOverride_ColorGammaShadows = true;
+	Settings.ColorGammaShadows = FMath::Lerp(Neutral, FVector4(1.0f, 1.01f, 1.02f, 1.08f), Grade);
+	Settings.bOverride_ColorSaturationShadows = true;
+	Settings.ColorSaturationShadows = FMath::Lerp(Neutral, FVector4(1.0f, 1.0f, 1.0f, 1.05f), Grade);
+	Settings.bOverride_ColorCorrectionShadowsMax = true;
+	Settings.ColorCorrectionShadowsMax = 0.18f;
+	Settings.bOverride_ColorGainMidtones = true;
+	Settings.ColorGainMidtones = FMath::Lerp(Neutral, FVector4(1.025f, 1.005f, 0.99f, 1.0f), Grade);
+	Settings.bOverride_ColorGammaMidtones = true;
+	Settings.ColorGammaMidtones = FMath::Lerp(Neutral, FVector4(1.0f, 1.0f, 1.0f, 1.025f), Grade);
+	Settings.bOverride_ColorGainHighlights = true;
+	Settings.ColorGainHighlights = FMath::Lerp(Neutral, FVector4(1.0f, 1.0f, 1.0f, 0.96f), Grade);
+	Settings.bOverride_ColorSaturationHighlights = true;
+	Settings.ColorSaturationHighlights = FMath::Lerp(Neutral, FVector4(1.0f, 1.0f, 1.0f, 0.98f), Grade);
 	TitleCamera->PostProcessBlendWeight = 1.0f;
 }
 

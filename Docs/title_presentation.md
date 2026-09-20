@@ -13,6 +13,8 @@
 
 타이틀 카메라는 Manual 노출을 사용하며 물리 카메라 노출과 로컬 노출 대비를 해제한다. `Title Exposure Compensation`으로 고정 밝기를 조절한다. 게임 플레이 카메라나 전역 자동노출 설정은 바꾸지 않는다.
 
+타이틀 전용 컬러그레이딩은 같은 카메라의 Post Process Settings에만 적용한다. 암부 감마를 완만하게 올리면서 약한 청색과 채도를 보태고, 중간톤은 미세하게 따뜻하게, 하이라이트는 조금 낮춰 흰 머리카락·의상 디테일을 유지한다. `Title Color Grade Strength`는 기본 1이며 0으로 하면 이 보정이 중립값이 된다. 고정 노출은 별도로 유지한다. 배경과 캐릭터를 함께 보정하지만 UMG와 다른 게임 카메라에는 적용하지 않는다. 컬러그레이딩은 실제 환경광을 생성하지 않으므로 환경 큐브맵으로 보완할 수 있는 방향별 반사광을 대신하지는 않는다.
+
 `Show Studio Geometry` 기본값은 꺼짐이다. 켜면 기존 벽·바닥을 표시하고 호수 배경판을 숨겨 세트장을 별도로 확인할 수 있다. 조명은 두 모드에서 스튜디오 BP가 관리한다.
 
 회귀 검증: `TunaSweeper.Title.Studio.SeparationAndBackdrop`. 실제 타이틀 카메라의 렌더 캡처는 `TunaSweeper/Saved/Screenshots/TitleMatteLake.png`, 화면 비율별 캡처는 같은 폴더의 `TitleProjected_<가로>x<세로>.png`에 저장된다.
