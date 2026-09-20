@@ -4,15 +4,10 @@
 #include "Component/TunaSweeperGazeTrackingComponent.h"
 #include "ReferenceSkeleton.h"
 #include "Camera/CameraComponent.h"
-#include "Components/PointLightComponent.h"
 #include "Components/SceneComponent.h"
 #include "Components/SkeletalMeshComponent.h"
-#include "Components/SkyLightComponent.h"
-#include "Components/StaticMeshComponent.h"
-#include "Engine/StaticMesh.h"
 #include "GameFramework/PlayerController.h"
 #include "Kismet/GameplayStatics.h"
-#include "Materials/MaterialInterface.h"
 #include "PhysicsEngine/PhysicsAsset.h"
 #include "UObject/ConstructorHelpers.h"
 
@@ -20,24 +15,6 @@ namespace TunaSweeperTitlePresentation
 {
 	const FName LunaMk2LeftEyeBoneName(TEXT("eye_l"));
 	const FName LunaMk2RightEyeBoneName(TEXT("eye_r"));
-
-	void ConfigureWallComponent(
-		UStaticMeshComponent* Component,
-		UStaticMesh* CubeMesh,
-		UMaterialInterface* WallMaterial)
-	{
-		if (!Component)
-		{
-			return;
-		}
-
-		Component->SetStaticMesh(CubeMesh);
-		Component->SetMaterial(0, WallMaterial);
-		Component->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		Component->SetGenerateOverlapEvents(false);
-		Component->SetMobility(EComponentMobility::Movable);
-		Component->CastShadow = true;
-	}
 }
 
 void UTunaSweeperTitleSkeletalMeshComponent::SetDirectHeadLookRotation(float YawDegrees, float PitchDegrees)
@@ -271,25 +248,6 @@ ATunaSweeperTitlePresentationActor::ATunaSweeperTitlePresentationActor()
 	RightEyeTarget->SetupAttachment(GazeTracking);
 	RightEyeTarget->SetRelativeLocation(FVector(0.0f, 3.2f, 0.0f));
 
-	BackWall = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BackWall"));
-	BackWall->SetupAttachment(SceneRoot);
-	LeftWall = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("LeftWall"));
-	LeftWall->SetupAttachment(SceneRoot);
-	RightWall = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("RightWall"));
-	RightWall->SetupAttachment(SceneRoot);
-	Floor = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Floor"));
-	Floor->SetupAttachment(SceneRoot);
-
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> CubeMeshFinder(TEXT("/Engine/BasicShapes/Cube.Cube"));
-	static ConstructorHelpers::FObjectFinder<UMaterialInterface> WallMaterialFinder(
-		TEXT("/Engine/BasicShapes/BasicShapeMaterial.BasicShapeMaterial"));
-	UStaticMesh* CubeMesh = CubeMeshFinder.Succeeded() ? CubeMeshFinder.Object : nullptr;
-	UMaterialInterface* WallMaterial = WallMaterialFinder.Succeeded() ? WallMaterialFinder.Object : nullptr;
-	TunaSweeperTitlePresentation::ConfigureWallComponent(BackWall, CubeMesh, WallMaterial);
-	TunaSweeperTitlePresentation::ConfigureWallComponent(LeftWall, CubeMesh, WallMaterial);
-	TunaSweeperTitlePresentation::ConfigureWallComponent(RightWall, CubeMesh, WallMaterial);
-	TunaSweeperTitlePresentation::ConfigureWallComponent(Floor, CubeMesh, WallMaterial);
-
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> BodyMeshFinder(
 		TEXT("/Game/Characters/Player/LunaMk2/SKM_LunaMk2.SKM_LunaMk2"));
 	if (BodyMeshFinder.Succeeded())
@@ -323,25 +281,6 @@ ATunaSweeperTitlePresentationActor::ATunaSweeperTitlePresentationActor()
 	SkirtBodyCollisionProxyPhysicsAsset = TSoftObjectPtr<UPhysicsAsset>(FSoftObjectPath(
 		TEXT("/Game/Characters/Player/Luna/Skirt/PA_Luna_SkirtBodyProxy.PA_Luna_SkirtBodyProxy")));
 
-	AmbientLight = CreateDefaultSubobject<USkyLightComponent>(TEXT("AmbientLight"));
-	AmbientLight->SetupAttachment(SceneRoot);
-	AmbientLight->SetMobility(EComponentMobility::Movable);
-	AmbientLight->SetIntensity(0.8f);
-
-	CharacterKeyLight = CreateDefaultSubobject<UPointLightComponent>(TEXT("CharacterKeyLight"));
-	CharacterKeyLight->SetupAttachment(SceneRoot);
-	CharacterKeyLight->SetMobility(EComponentMobility::Movable);
-	CharacterKeyLight->SetIntensity(5200.0f);
-	CharacterKeyLight->SetAttenuationRadius(1150.0f);
-	CharacterKeyLight->SetLightColor(FLinearColor(1.0f, 0.82f, 0.68f));
-
-	EmptyWallLight = CreateDefaultSubobject<UPointLightComponent>(TEXT("EmptyWallLight"));
-	EmptyWallLight->SetupAttachment(SceneRoot);
-	EmptyWallLight->SetMobility(EComponentMobility::Movable);
-	EmptyWallLight->SetIntensity(3200.0f);
-	EmptyWallLight->SetAttenuationRadius(1050.0f);
-	EmptyWallLight->SetLightColor(FLinearColor(0.48f, 0.68f, 1.0f));
-
 	UActorComponent* BlueprintEditableComponents[] = {
 		TitleCamera,
 		CharacterAnchor,
@@ -351,14 +290,7 @@ ATunaSweeperTitlePresentationActor::ATunaSweeperTitlePresentationActor()
 		HeadLookTarget,
 		GazeTracking,
 		LeftEyeTarget,
-		RightEyeTarget,
-		BackWall,
-		LeftWall,
-		RightWall,
-		Floor,
-		AmbientLight,
-		CharacterKeyLight,
-		EmptyWallLight};
+		RightEyeTarget};
 	for (UActorComponent* Component : BlueprintEditableComponents)
 	{
 		if (Component)
@@ -565,35 +497,6 @@ void ATunaSweeperTitlePresentationActor::ApplyDesignTransforms()
 		CharacterAnchor->SetRelativeRotation(CharacterRelativeRotation);
 	}
 
-	if (BackWall)
-	{
-		BackWall->SetRelativeLocation(FVector(300.0f, 0.0f, 200.0f));
-		BackWall->SetRelativeScale3D(FVector(0.2f, 12.0f, 4.0f));
-	}
-	if (LeftWall)
-	{
-		LeftWall->SetRelativeLocation(FVector(-300.0f, -600.0f, 200.0f));
-		LeftWall->SetRelativeScale3D(FVector(12.0f, 0.2f, 4.0f));
-	}
-	if (RightWall)
-	{
-		RightWall->SetRelativeLocation(FVector(-300.0f, 600.0f, 200.0f));
-		RightWall->SetRelativeScale3D(FVector(12.0f, 0.2f, 4.0f));
-	}
-	if (Floor)
-	{
-		Floor->SetRelativeLocation(FVector(-300.0f, 0.0f, -25.0f));
-		Floor->SetRelativeScale3D(FVector(12.0f, 12.0f, 0.5f));
-	}
-
-	if (CharacterKeyLight)
-	{
-		CharacterKeyLight->SetRelativeLocation(FVector(-240.0f, 330.0f, 360.0f));
-	}
-	if (EmptyWallLight)
-	{
-		EmptyWallLight->SetRelativeLocation(FVector(-80.0f, -420.0f, 300.0f));
-	}
 }
 
 void ATunaSweeperTitlePresentationActor::ConfigureSkirtExternalPhysicsCollision()

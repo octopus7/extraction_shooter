@@ -6,11 +6,8 @@
 #include "TunaSweeperTitlePresentationActor.generated.h"
 
 class UCameraComponent;
-class UPointLightComponent;
 class UPhysicsAsset;
 class USceneComponent;
-class USkyLightComponent;
-class UStaticMeshComponent;
 class UTunaSweeperGazeTrackingComponent;
 struct FReferenceSkeleton;
 
@@ -142,27 +139,6 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "TunaSweeper|Title|Components")
 	TObjectPtr<USceneComponent> RightEyeTarget;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "TunaSweeper|Title|Components")
-	TObjectPtr<UStaticMeshComponent> BackWall;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "TunaSweeper|Title|Components")
-	TObjectPtr<UStaticMeshComponent> LeftWall;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "TunaSweeper|Title|Components")
-	TObjectPtr<UStaticMeshComponent> RightWall;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "TunaSweeper|Title|Components")
-	TObjectPtr<UStaticMeshComponent> Floor;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "TunaSweeper|Title|Components")
-	TObjectPtr<USkyLightComponent> AmbientLight;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "TunaSweeper|Title|Components")
-	TObjectPtr<UPointLightComponent> CharacterKeyLight;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "TunaSweeper|Title|Components")
-	TObjectPtr<UPointLightComponent> EmptyWallLight;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Title|Character")
 	FName FaceAttachmentSocketName = TEXT("head");
