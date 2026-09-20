@@ -191,6 +191,8 @@ Each entry is a stable recipe id from `Content/Data/WorkbenchRecipes.json`. Reci
 
 ### World Progress Objects
 
+Bunker pipe repair unlocks from the existing `demo.water_intake.blocked_screen` completed state. Before crowbar debris clearing, the pipe uses its intact mesh and has no repair interaction; after clearing it uses the damaged mesh and allows repair. This presentation is derived again on load without a new save field. An already completed pipe repair still restores the repaired replacement, including older saves.
+
 Stored through `UTunaSweeperSaveGame::WorldProgressStates`.
 
 The bunker pipe BP (`/Game/Interaction/BunkerPipe/BP_BunkerPipe_Broken`) reuses this state: waterproof tape item 6005, quantity 1, completed replacement `BP_BunkerPipe_Repaired`. Assign a stable unique `ProgressObjectId` to each placed pipe; the BP leaves it unset rather than sharing one ID across all placements. Completion is restored through the existing replacement flow, including the placed actor's scale. No save schema change is required.

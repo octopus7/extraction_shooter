@@ -10,6 +10,7 @@
 #include "Interaction/TunaSweeperInteractableComponent.h"
 #include "Interaction/TunaSweeperTransparentObstacleActor.h"
 #include "Materials/MaterialInterface.h"
+#include "Particles/ParticleSystemComponent.h"
 #include "Subsystem/TunaSweeperItemDataSubsystem.h"
 #include "UObject/ConstructorHelpers.h"
 
@@ -23,6 +24,10 @@ ATunaSweeperWorldProgressActor::ATunaSweeperWorldProgressActor()
 {
 	SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("SceneRoot"));
 	RootComponent = SceneRoot;
+	DamageLeakComponent = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("DamageLeak"));
+	DamageLeakComponent->SetupAttachment(RootComponent);
+	DamageLeakComponent->bAutoActivate = false;
+	DamageLeakComponent->SetRelativeLocation(FVector(0.0f, 11.6f, 49.5f));
 
 	BlockingCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("BlockingCollision"));
 	BlockingCollision->SetupAttachment(RootComponent);
@@ -37,6 +42,9 @@ ATunaSweeperWorldProgressActor::ATunaSweeperWorldProgressActor()
 	VisualMesh->SetRelativeScale3D(FVector(2.2f, 0.5f, 0.22f));
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> CubeMesh(TEXT("/Engine/BasicShapes/Cube.Cube"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> IntactPipeMesh(
+		TEXT("/Game/Interaction/BunkerPipe/SM_BunkerPipe_LowPoly_Normal.SM_BunkerPipe_LowPoly_Normal"));
+	IntactBunkerPipeMesh = IntactPipeMesh.Object;
 	if (CubeMesh.Succeeded())
 	{
 		VisualMesh->SetStaticMesh(CubeMesh.Object);
@@ -67,6 +75,8 @@ void ATunaSweeperWorldProgressActor::BeginPlay()
 	{
 		TunaGameInstance->OnInventoryStateChanged.RemoveAll(this);
 		TunaGameInstance->OnInventoryStateChanged.AddUObject(this, &ATunaSweeperWorldProgressActor::RefreshPresentation);
+		TunaGameInstance->OnWorldProgressChanged.RemoveAll(this);
+		TunaGameInstance->OnWorldProgressChanged.AddUObject(this, &ATunaSweeperWorldProgressActor::RefreshPresentation);
 		TunaGameInstance->OnLanguageChanged.RemoveAll(this);
 		TunaGameInstance->OnLanguageChanged.AddUObject(this, &ATunaSweeperWorldProgressActor::RefreshPresentation);
 	}
@@ -82,6 +92,7 @@ void ATunaSweeperWorldProgressActor::EndPlay(const EEndPlayReason::Type EndPlayR
 	{
 		TunaGameInstance->OnInventoryStateChanged.RemoveAll(this);
 		TunaGameInstance->OnLanguageChanged.RemoveAll(this);
+		TunaGameInstance->OnWorldProgressChanged.RemoveAll(this);
 	}
 
 	Super::EndPlay(EndPlayReason);
@@ -137,7 +148,7 @@ void ATunaSweeperWorldProgressActor::ApplyBridgeVisualMesh()
 	}
 	if (ProgressVisualMesh)
 	{
-		VisualMesh->SetStaticMesh(ProgressVisualMesh);
+		VisualMesh->SetStaticMesh(!IsRepairUnlocked() && IntactBunkerPipeMesh ? IntactBunkerPipeMesh : ProgressVisualMesh);
 		VisualMesh->EmptyOverrideMaterials();
 		VisualMesh->SetRelativeLocation(FVector::ZeroVector);
 		VisualMesh->SetRelativeScale3D(FVector::OneVector);
@@ -175,12 +186,12 @@ int32 ATunaSweeperWorldProgressActor::GetOwnedRequiredItemCount() const
 
 bool ATunaSweeperWorldProgressActor::IsRepairReady() const
 {
-	return !bCompleted && GetProgressQuantity() >= FMath::Max(1, RequiredQuantity);
+	return !bCompleted && IsRepairUnlocked() && GetProgressQuantity() >= FMath::Max(1, RequiredQuantity);
 }
 
 int32 ATunaSweeperWorldProgressActor::UseAvailableRequiredItems(bool bSaveImmediately)
 {
-	if (bCompleted)
+	if (bCompleted || !IsRepairUnlocked())
 	{
 		return 0;
 	}
@@ -231,7 +242,7 @@ bool ATunaSweeperWorldProgressActor::Repair(bool bSaveImmediately)
 
 bool ATunaSweeperWorldProgressActor::RepairUsingAvailableRequiredItems(bool bSaveImmediately)
 {
-	if (bCompleted)
+	if (bCompleted || !IsRepairUnlocked())
 	{
 		return false;
 	}
@@ -288,19 +299,56 @@ void ATunaSweeperWorldProgressActor::ApplyCollisionDefaults()
 	BlockingCollision->SetVisibility(false);
 }
 
+bool ATunaSweeperWorldProgressActor::IsRepairUnlocked() const
+{
+	if (ProgressInfoId != TEXT("bunker_pipe"))
+	{
+		return true;
+	}
+
+	const UTunaSweeperGameInstance* TunaGameInstance = GetTunaGameInstance();
+	FTunaSweeperWorldProgressSaveData ScreenState;
+	return TunaGameInstance && TunaGameInstance->TryGetWorldProgressState(
+		TEXT("demo.water_intake.blocked_screen"), ScreenState) &&
+		ScreenState.State == ETunaSweeperWorldProgressState::Completed;
+}
+
 void ATunaSweeperWorldProgressActor::RefreshPresentation()
 {
+	const bool bRepairAvailable = !bCompleted && IsRepairUnlocked();
+	if (DamageLeakComponent)
+	{
+		const bool bShouldLeak = HasActorBegunPlay() && ProgressInfoId == TEXT("bunker_pipe") && bRepairAvailable && DamageLeakEffect;
+		if (DamageLeakComponent->Template != DamageLeakEffect)
+		{
+			DamageLeakComponent->SetTemplate(DamageLeakEffect);
+		}
+		if (bShouldLeak && !DamageLeakComponent->IsActive())
+		{
+			DamageLeakComponent->Activate(true);
+		}
+		else if (!bShouldLeak && DamageLeakComponent->IsActive())
+		{
+			DamageLeakComponent->DeactivateSystem();
+			DamageLeakComponent->KillParticlesForced();
+		}
+		DamageLeakComponent->SetVisibility(bShouldLeak, true);
+	}
+	if (ProgressInfoId == TEXT("bunker_pipe"))
+	{
+		ApplyBridgeVisualMesh();
+	}
 	if (InteractableComponent)
 	{
 		InteractableComponent->SetInteractionTypeDisplayNameAndStringKey(
-			bCompleted ? ETunaSweeperInteractionType::None : ETunaSweeperInteractionType::WorldProgress,
-			bCompleted ? FText::GetEmpty() : ResolveInteractionDisplayName(),
-			bCompleted ? NAME_None : InteractionDisplayNameStringKey);
-		InteractableComponent->SetObjectiveEventId(bCompleted ? NAME_None : ObjectiveEventId);
+			bRepairAvailable ? ETunaSweeperInteractionType::WorldProgress : ETunaSweeperInteractionType::None,
+			bRepairAvailable ? ResolveInteractionDisplayName() : FText::GetEmpty(),
+			bRepairAvailable ? InteractionDisplayNameStringKey : NAME_None);
+		InteractableComponent->SetObjectiveEventId(bRepairAvailable ? ObjectiveEventId : NAME_None);
 		InteractableComponent->SetInteractionRequirementPreview(
 			LoadRequiredItemIconTexture(),
 			GetRemainingRequiredQuantity(),
-			!bCompleted && GetRemainingRequiredQuantity() > 0);
+			bRepairAvailable && GetRemainingRequiredQuantity() > 0);
 	}
 
 	if (BlockingCollision)

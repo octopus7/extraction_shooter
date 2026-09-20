@@ -11,6 +11,8 @@ class USceneComponent;
 class UStaticMeshComponent;
 class UStaticMesh;
 class UTexture2D;
+class UParticleSystem;
+class UParticleSystemComponent;
 class UTunaSweeperGameInstance;
 class UTunaSweeperInteractableComponent;
 
@@ -82,6 +84,12 @@ public:
 	bool RepairUsingAvailableRequiredItems(bool bSaveImmediately = true);
 
 protected:
+	UPROPERTY(EditDefaultsOnly, Category = "World Progress|Presentation")
+	TObjectPtr<UParticleSystem> DamageLeakEffect;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UParticleSystemComponent> DamageLeakComponent;
+
 	// An authored mesh bypasses the legacy bridge presentation entirely.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "World Progress|Presentation")
 	TObjectPtr<UStaticMesh> ProgressVisualMesh;
@@ -144,6 +152,11 @@ protected:
 	TSoftClassPtr<AActor> CompletedReplacementActorClass;
 
 private:
+	bool IsRepairUnlocked() const;
+
+	UPROPERTY()
+	TObjectPtr<UStaticMesh> IntactBunkerPipeMesh;
+
 	void ApplyBridgeVisualMesh();
 	void ApplyCollisionDefaults();
 	void RefreshPresentation();

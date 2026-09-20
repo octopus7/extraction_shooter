@@ -1,0 +1,15 @@
+{
+  "triangles": 636,
+  "geometry": "shared beveled square elbow, couplings, mounting brackets and flanges",
+  "height_cm": 107.1,
+  "elbow_height_cm": 99,
+  "leak_blender_m": [
+    0,
+    -0.116,
+    0.495
+  ],
+  "uv_state_panels": {
+    "normal": "left",
+    "damaged": "right"
+  }
+}

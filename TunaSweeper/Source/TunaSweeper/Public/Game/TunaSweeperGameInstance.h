@@ -816,6 +816,7 @@ public:
 	bool ConsumePendingBunkerEntryVitals(UTunaSweeperVitalsComponent* VitalsComponent);
 
 	FSimpleMulticastDelegate OnInventoryStateChanged;
+	FSimpleMulticastDelegate OnWorldProgressChanged;
 	FSimpleMulticastDelegate OnSelectedInventoryItemChanged;
 	FSimpleMulticastDelegate OnActiveLootContainerUiClosed;
 	FSimpleMulticastDelegate OnMemoStateChanged;

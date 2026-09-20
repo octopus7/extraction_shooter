@@ -87,6 +87,7 @@ bool UTunaSweeperGameInstance::UpdateWorldProgressState(
 	}
 
 	WorldProgressStatesById.Add(ObjectId, NewState);
+	OnWorldProgressChanged.Broadcast();
 	if (bSaveImmediately)
 	{
 		SaveGameStateInternal();
