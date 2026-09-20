@@ -22,6 +22,7 @@
 #include "Interaction/TunaSweeperPiggyBankActor.h"
 #include "Interaction/TunaSweeperPickupItemActor.h"
 #include "Interaction/TunaSweeperResearchStationActor.h"
+#include "Interaction/TunaSweeperTutorialReviewActor.h"
 #include "Vehicle/TunaSweeperVehicleMountComponent.h"
 #include "Character/TunaSweeperTopDownCharacter.h"
 #include "Interaction/TunaSweeperSelfDestructInteractableActor.h"
@@ -127,6 +128,8 @@ namespace TunaSweeperInteractionQuestEvents
 			return FName(TEXT("difficulty_adjustment"));
 		case ETunaSweeperInteractionType::Research:
 			return FName(TEXT("research"));
+		case ETunaSweeperInteractionType::TutorialReview:
+			return FName(TEXT("tutorial_review"));
 		case ETunaSweeperInteractionType::VehicleMount:
 			return FName(TEXT("vehicle_mount"));
 		default:
@@ -327,6 +330,13 @@ bool UTunaSweeperInteractionSubsystem::RequestInteraction(UTunaSweeperInteractab
 	case ETunaSweeperInteractionType::Research:
 		bHandled = HandleResearchInteraction(Interactable, InstigatorPawn);
 		break;
+	case ETunaSweeperInteractionType::TutorialReview:
+		if (Cast<ATunaSweeperTutorialReviewActor>(Interactable->GetOwner()))
+		{
+			auto* Controller = Cast<ATunaSweeperPlayerController>(InstigatorPawn->GetController());
+			bHandled = Controller && Controller->OpenTutorialReview();
+		}
+		break;
 	case ETunaSweeperInteractionType::VehicleMount:
 		if (auto* Mount = Cast<UTunaSweeperVehicleMountComponent>(Interactable))
 		{
@@ -446,6 +456,11 @@ bool UTunaSweeperInteractionSubsystem::CanOfferInteraction(const UTunaSweeperInt
 	{
 		return TunaSweeperInteractionQuestEvents::IsBunkerMap(GetWorld()) &&
 			Cast<ATunaSweeperResearchStationActor>(Interactable->GetOwner());
+	}
+	if (Interactable->GetInteractionType() == ETunaSweeperInteractionType::TutorialReview)
+	{
+		return TunaSweeperInteractionQuestEvents::IsBunkerMap(GetWorld()) &&
+			Cast<ATunaSweeperTutorialReviewActor>(Interactable->GetOwner());
 	}
 
 	if (Interactable->GetInteractionType() != ETunaSweeperInteractionType::Quest)

@@ -51,6 +51,8 @@ public:
 	bool CanShowBunkerBasicsTutorial() const;
 	bool TryShowRaidCombatTutorial();
 	bool CanShowRaidCombatTutorial() const;
+	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Tutorial")
+	bool OpenTutorialReview();
 	UFUNCTION()
 	void DismissTutorialPopup();
 	static bool IsPauseMenuKey(const FKey& Key, const UWorld* World);
@@ -162,8 +164,14 @@ public:
 protected:
 	friend class FTunaTutorialTriggerTest;
 	bool IsTutorialGameplayReady() const;
-	bool ShowTutorialPage(int32 PageIndex, FName CompletionFlag);
+	bool ShowTutorialPage(int32 PageIndex, FName CompletionFlag, bool bReviewMode = false);
 	FName ActiveTutorialCompletionFlag;
+	bool bTutorialReviewMode = false;
+	UFUNCTION()
+	void ShowPreviousTutorialPage();
+	UFUNCTION()
+	void ShowNextTutorialPage();
+	void StepTutorialPage(int32 Direction);
 
 	UPROPERTY(EditDefaultsOnly, Category = "Tutorial")
 	TSoftClassPtr<UTunaSweeperTutorialPopupWidget> TutorialPopupClass;

@@ -55,14 +55,41 @@ bool ATunaSweeperPlayerController::TryShowRaidCombatTutorial()
     return CanShowRaidCombatTutorial() && ShowTutorialPage(1, CombatTutorialFlag);
 }
 
-bool ATunaSweeperPlayerController::ShowTutorialPage(int32 PageIndex, FName CompletionFlag)
+bool ATunaSweeperPlayerController::OpenTutorialReview()
+{
+    return IsBunkerMap() && IsTutorialGameplayReady() && ShowTutorialPage(0, NAME_None, true);
+}
+
+void ATunaSweeperPlayerController::ShowPreviousTutorialPage() { StepTutorialPage(-1); }
+void ATunaSweeperPlayerController::ShowNextTutorialPage() { StepTutorialPage(1); }
+
+void ATunaSweeperPlayerController::StepTutorialPage(int32 Direction)
+{
+    if (!bTutorialReviewMode || !TutorialPopupWidget) return;
+    auto* Pages = Cast<UWidgetSwitcher>(TutorialPopupWidget->GetWidgetFromName(TEXT("PageSwitcher")));
+    if (!Pages || Pages->GetChildrenCount() == 0) return;
+    const int32 Count = Pages->GetChildrenCount();
+    Pages->SetActiveWidgetIndex((Pages->GetActiveWidgetIndex() + Direction + Count) % Count);
+}
+
+bool ATunaSweeperPlayerController::ShowTutorialPage(int32 PageIndex, FName CompletionFlag, bool bReviewMode)
 {
     auto* Popup = CreateWidget<UTunaSweeperTutorialPopupWidget>(this, TutorialPopupClass.LoadSynchronous());
     if (!Popup || !Popup->WidgetTree) return false;
     auto* Pages = Cast<UWidgetSwitcher>(Popup->WidgetTree->FindWidget(TEXT("PageSwitcher")));
     auto* Continue = Cast<UButton>(Popup->WidgetTree->FindWidget(TEXT("ContinueButton")));
+    auto* Previous = Cast<UButton>(Popup->GetWidgetFromName(TEXT("PreviousPageButton")));
+    auto* Next = Cast<UButton>(Popup->GetWidgetFromName(TEXT("NextPageButton")));
     // Never pause unless the authored asset provides a working way to resume.
     if (!Pages || PageIndex < 0 || PageIndex >= Pages->GetChildrenCount() || !Continue) return false;
+    if (bReviewMode && (!Previous || !Next)) return false;
+    if (Previous) Previous->SetVisibility(bReviewMode ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
+    if (Next) Next->SetVisibility(bReviewMode ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
+    if (bReviewMode)
+    {
+        Previous->OnClicked.AddDynamic(this, &ThisClass::ShowPreviousTutorialPage);
+        Next->OnClicked.AddDynamic(this, &ThisClass::ShowNextTutorialPage);
+    }
     Pages->SetActiveWidgetIndex(PageIndex);
     Continue->OnClicked.AddDynamic(this, &ThisClass::DismissTutorialPopup);
     CancelPawnGameplayActions();
@@ -77,6 +104,7 @@ bool ATunaSweeperPlayerController::ShowTutorialPage(int32 PageIndex, FName Compl
     }
     SetIgnoreMoveInput(true);
     ActiveTutorialCompletionFlag = CompletionFlag;
+    bTutorialReviewMode = bReviewMode;
     SetIgnoreLookInput(true);
     ApplyDefaultGameInputMode();
     Continue->SetKeyboardFocus();
@@ -89,11 +117,13 @@ void ATunaSweeperPlayerController::DismissTutorialPopup()
     if (auto* Instance = GetGameInstance<UTunaSweeperGameInstance>())
     {
         // Existing per-slot scenario persistence also clears this on a new game.
-        Instance->MarkScenarioProgressFlag(ActiveTutorialCompletionFlag, true);
+        if (!ActiveTutorialCompletionFlag.IsNone())
+            Instance->MarkScenarioProgressFlag(ActiveTutorialCompletionFlag, true);
     }
     TutorialPopupWidget->RemoveFromParent();
     TutorialPopupWidget = nullptr;
     ActiveTutorialCompletionFlag = NAME_None;
+    bTutorialReviewMode = false;
     SetPause(false);
     ApplyDefaultGameInputMode();
 }

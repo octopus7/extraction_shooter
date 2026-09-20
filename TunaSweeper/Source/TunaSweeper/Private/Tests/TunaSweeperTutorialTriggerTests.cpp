@@ -19,6 +19,8 @@
 #include "Subsystem/TunaSweeperLevelTransitionSubsystem.h"
 #include "Settings/TunaSweeperBuildFlavor.h"
 #include "Misc/PackageName.h"
+#include "Interaction/TunaSweeperTutorialReviewActor.h"
+#include "Components/StaticMeshComponent.h"
 
 namespace
 {
@@ -91,6 +93,7 @@ bool FTunaTutorialTriggerTest::RunTest(const FString&)
     Controller->TogglePauseMenu();
     TestNull(TEXT("Escape cannot stack a pause menu"), Controller->PauseMenuWidget.Get());
     auto* Popup = Controller->TutorialPopupWidget.Get();
+    TestEqual(TEXT("Automatic help hides paging"), Popup->GetWidgetFromName(TEXT("NextPageButton"))->GetVisibility(), ESlateVisibility::Collapsed);
     auto* Pages = Cast<UWidgetSwitcher>(Popup->WidgetTree->FindWidget(TEXT("PageSwitcher")));
     TestEqual(TEXT("Only first page is shown"), Pages->GetActiveWidgetIndex(), 0);
     auto* Continue = Cast<UButton>(Popup->WidgetTree->FindWidget(TEXT("ContinueButton")));
@@ -144,6 +147,33 @@ bool FTunaTutorialTriggerTest::RunTest(const FString&)
     TestFalse(TEXT("New slot clears tutorial completion"), Instance->IsScenarioProgressFlagSet(Flag));
     TestFalse(TEXT("New slot clears combat help completion"), Instance->IsScenarioProgressFlagSet(CombatFlag));
     TestFalse(TEXT("Pending help never leaks into another save slot"), Instance->HasPendingRaidTutorial());
+    Instance->bInventoryStateInitialized = true;
+    World->GetOutermost()->Rename(TEXT("/Temp/TutorialBunkerMap"));
+    auto* ReviewActor = World->SpawnActor<ATunaSweeperTutorialReviewActor>();
+    ReviewActor->SetActorLocation(FVector(11.856562,60.546406,70));
+    Pawn->SetActorLocation(ReviewActor->GetActorLocation());
+    auto* ReviewMesh = ReviewActor->FindComponentByClass<UStaticMeshComponent>();
+    TestTrue(TEXT("Review actor geometry is invisible in game"), ReviewMesh && ReviewMesh->bHiddenInGame);
+    TestEqual(TEXT("Review actor does not obstruct the lounge"), ReviewMesh->GetCollisionEnabled(), ECollisionEnabled::NoCollision);
+    if (!TestTrue(TEXT("Actual interaction opens review"), ReviewActor->RequestInteraction(Pawn))) return false;
+    Popup = Controller->TutorialPopupWidget.Get();
+    Pages = Cast<UWidgetSwitcher>(Popup->GetWidgetFromName(TEXT("PageSwitcher")));
+    auto* Previous = Cast<UButton>(Popup->GetWidgetFromName(TEXT("PreviousPageButton")));
+    auto* Next = Cast<UButton>(Popup->GetWidgetFromName(TEXT("NextPageButton")));
+    TestEqual(TEXT("Review starts at page one"), Pages->GetActiveWidgetIndex(),0);
+    TestEqual(TEXT("Review shows left icon"),Previous->GetVisibility(),ESlateVisibility::Visible);
+    TestEqual(TEXT("Review shows right icon"),Next->GetVisibility(),ESlateVisibility::Visible);
+    Previous->OnClicked.Broadcast();
+    TestEqual(TEXT("Left from first wraps to third"), Pages->GetActiveWidgetIndex(),2);
+    Next->OnClicked.Broadcast();
+    TestEqual(TEXT("Right from last wraps to first"), Pages->GetActiveWidgetIndex(),0);
+    Next->OnClicked.Broadcast(); Next->OnClicked.Broadcast();
+    TestEqual(TEXT("Third page is accessible through review"), Pages->GetActiveWidgetIndex(),2);
+    Cast<UButton>(Popup->GetWidgetFromName(TEXT("ContinueButton")))->OnClicked.Broadcast();
+    TestEqual(TEXT("Review does not mark automatic tutorials completed"), Instance->CompletedScenarioFlags.Num(),0);
+    TestFalse(TEXT("Review close resumes gameplay"), UGameplayStatics::IsGamePaused(World));
+    TestTrue(TEXT("Interaction can reopen review any time"), ReviewActor->RequestInteraction(Pawn));
+    Controller->DismissTutorialPopup();
     return true;
 }
 #endif

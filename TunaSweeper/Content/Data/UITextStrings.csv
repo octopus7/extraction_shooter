@@ -334,5 +334,6 @@ ui.tutorial.loot.title,전리품 획득,Collect loot,物資を集める
 ui.tutorial.loot.body,F 키로 상자를 열고 필요한 물품을 챙기세요.,Press F to open containers and collect useful supplies.,Fキーで箱を開けて必要な物資を集めましょう。
 ui.tutorial.inventory.title,인벤토리,Inventory,インベントリ
 ui.tutorial.inventory.body,Tab 키로 가방을 열어 가진 물품을 확인하세요.,Press Tab to open your inventory and check your supplies.,Tabキーでバッグを開いて持ち物を確認しましょう。
+ui.interaction.tutorial_review,조작법,Controls,操作方法
 ui.tutorial.heal.title,회복,Heal,回復
 ui.tutorial.heal.body,가방의 회복 아이템에 마우스를 올리고 U 키로 사용하세요.,Hover over a healing item in your inventory and press U to use it.,バッグの回復アイテムにカーソルを合わせてUキーで使いましょう。

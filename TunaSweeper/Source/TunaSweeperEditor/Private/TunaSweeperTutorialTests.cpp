@@ -19,6 +19,9 @@
 #include "UObject/StrongObjectPtr.h"
 #include "UI/TunaSweeperTutorialPopupWidget.h"
 #include "Subsystem/TunaSweeperTextSubsystem.h"
+#include "Engine/World.h"
+#include "Engine/Level.h"
+#include "Interaction/TunaSweeperTutorialReviewActor.h"
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FTutorialAuthoredAssetTest,"TunaSweeper.UI.Tutorial.AuthoredAsset",
     EAutomationTestFlags::EditorContext|EAutomationTestFlags::EngineFilter)
@@ -97,6 +100,31 @@ bool FTutorialAuthoredAssetTest::RunTest(const FString& Parameters)
             }
         }
     }
+    auto* Previous=Cast<UButton>(Widget->GetWidgetFromName(TEXT("PreviousPageButton")));
+    auto* Next=Cast<UButton>(Widget->GetWidgetFromName(TEXT("NextPageButton")));
+    if(!TestNotNull(TEXT("Authored previous-page icon"),Previous)||!TestNotNull(TEXT("Authored next-page icon"),Next)) return false;
+    TestEqual(TEXT("Navigation is hidden by default"),Previous->GetVisibility(),ESlateVisibility::Collapsed);
+    Previous->SetVisibility(ESlateVisibility::Visible); Next->SetVisibility(ESlateVisibility::Visible);
+    Widget->PreviewLanguage=ETunaSweeperItemTextLanguage::Korean; Widget->RefreshLocalizedText();
+    Switcher->SetActiveWidgetIndex(2); Widget->ForceLayoutPrepass();
+    TStrongObjectPtr<UTextureRenderTarget2D> ReviewTarget(Renderer.DrawWidget(Slate,FVector2D(1920,1080)));
+    FlushRenderingCommands(); Renderer.DrawWidget(ReviewTarget.Get(),Slate,FVector2D(1920,1080),0); FlushRenderingCommands();
+    FImage ReviewPixels;
+    if(TestTrue(TEXT("Render review navigation"),FImageUtils::GetRenderTargetImage(ReviewTarget.Get(),ReviewPixels)))
+    {
+        ReviewPixels.GammaSpace=EGammaSpace::Linear;
+        TestTrue(TEXT("Save review preview"),FImageUtils::SaveImageByExtension(*(Output/TEXT("Tutorial_Review_Items_ko.png")),ReviewPixels));
+    }
+    auto* Bunker=LoadObject<UWorld>(nullptr,TEXT("/Game/Maps/BunkerMap.BunkerMap"));
+    if(!TestNotNull(TEXT("Saved bunker map loads"),Bunker)) return false;
+    int32 ReviewActors=0;
+    for(AActor* Actor:Bunker->PersistentLevel->Actors)
+        if(auto* Review=Cast<ATunaSweeperTutorialReviewActor>(Actor))
+        {
+            ++ReviewActors;
+            TestTrue(TEXT("Actor is at the lounge tea table"),Review->GetActorLocation().Equals(FVector(11.856562,60.546406,70),1));
+        }
+    TestEqual(TEXT("Exactly one saved review interaction point"),ReviewActors,1);
     return true;
 }
 #endif
