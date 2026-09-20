@@ -2,6 +2,10 @@
 
 2026-09-20: LunaMk2 플레이어에 후진 및 좌우 횡이동의 최초 연결 버전을 추가했다.
 
+현재 적용 상태: 사용자 요청으로 `ABP_LunaMk2`를 연결 직전 버전으로 복원했다. 플레이어는 기존 `BS_RunWalk` 기반 속도 전용 로코모션을 사용한다. 아래 생성 모션 3개와 `BS_DirectionalWalk`는 삭제하거나 변경하지 않고 미연결 에셋으로 보관한다. 아래 제작·연결 설명은 최초 제작 당시 기록이다.
+
+2026-09-21 재점검에서 플레이어 AnimBP 파일이 다시 생성 모션 연결 당시 버전과 일치함을 확인해 원본을 재복원했다. 플레이어 BP의 실제 AnimClass와 저장된 그래프를 새 프로세스에서 확인했다. 타이틀은 별도 `Title/ABP_LunaMk2_Title`을 사용하며, 이번 복원에서는 타이틀 모션과 연결을 수정하지 않았다.
+
 ## 에셋과 연결
 
 `/Game/Characters/Player/LunaMk2/Animations/`:
@@ -21,7 +25,7 @@
 
 ## 검증
 
-- `TunaSweeper.Player.DirectionalLocomotion`: 모션 루프 경계, 유효한 본 변환, 방향별 선택, 재생속도, 실제 플레이어 AnimBP의 회전 상대 방향 계산.
+- `TunaSweeper.Player.DirectionalLocomotion`: 보관된 모션의 루프 경계, 유효한 본 변환, 방향별 선택, 재생속도 및 플레이어가 원래 `BS_RunWalk`를 사용하는지 확인한다.
 - `TunaSweeper.Player.DirectionalPoseCapture`: 저장된 모션을 실제 플레이어 메시에서 평가하고 발 이동을 검사하며 12개 포즈를 `Saved/DirectionalLocomotion/Capture`에 렌더링한다. 렌더링 가능한 별도 에디터 프로세스에서 실행한다.
 
 생성·재생속도 보정 코드는 에셋과 함께 먼저 커밋한 뒤 다음 커밋에서 제거한다. 최종 소스에는 검증 코드만 남긴다.
