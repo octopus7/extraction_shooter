@@ -4,8 +4,13 @@
 #include "Blueprint/WidgetTree.h"
 #include "Components/Button.h"
 #include "Components/CanvasPanel.h"
+#include "Components/CanvasPanelSlot.h"
+#include "Components/Image.h"
 #include "Components/PanelWidget.h"
+#include "Components/SizeBox.h"
+#include "Components/VerticalBoxSlot.h"
 #include "Editor.h"
+#include "Engine/Texture2D.h"
 #include "UI/TunaSweeperIntroMenuWidget.h"
 #include "UI/TunaSweeperGraphicsSettingsWidget.h"
 #include "UI/TunaSweeperOptionRowWidget.h"
@@ -33,6 +38,49 @@ bool FTitleScreenAssetTest::RunTest(const FString& Parameters)
 	Menu->AddToRoot();
 	TSharedRef<SWidget> Slate = Menu->TakeWidget();
 	Menu->BindScreenWidgets();
+	UTexture2D* DemoVersionRibbon = LoadObject<UTexture2D>(
+		nullptr,
+		TEXT("/Game/UI/Title/T_DemoVersionRibbon.T_DemoVersionRibbon"));
+	TestNotNull(TEXT("Demo version ribbon texture exists"), DemoVersionRibbon);
+	if (Menu->DemoBuildImage)
+	{
+		TestEqual(
+			TEXT("Demo marker uses the version ribbon texture"),
+			Menu->DemoBuildImage->GetBrush().GetResourceObject(),
+			static_cast<UObject*>(DemoVersionRibbon));
+		if (const UCanvasPanelSlot* DemoSlot = Cast<UCanvasPanelSlot>(Menu->DemoBuildImage->Slot))
+		{
+			TestEqual(TEXT("Demo ribbon position"), DemoSlot->GetPosition(), FVector2D(113.0f, 245.0f));
+			TestEqual(TEXT("Demo ribbon size"), DemoSlot->GetSize(), FVector2D(318.0f, 54.0f));
+		}
+		else
+		{
+			AddError(TEXT("Demo version ribbon must use a canvas slot"));
+		}
+	}
+	for (const TPair<const TCHAR*, float>& Spacing : {
+		TPair<const TCHAR*, float>(TEXT("StartButtonBox"), 4.0f),
+		TPair<const TCHAR*, float>(TEXT("SettingsButtonBox"), -4.0f)})
+	{
+		const USizeBox* ButtonBox = Cast<USizeBox>(Menu->FindIntroWidget(Spacing.Key));
+		const UVerticalBoxSlot* ButtonSlot = ButtonBox ? Cast<UVerticalBoxSlot>(ButtonBox->Slot) : nullptr;
+		TestTrue(
+			FString::Printf(TEXT("%s has a vertical-box slot"), Spacing.Key),
+			ButtonSlot != nullptr);
+		if (ButtonSlot)
+		{
+			TestEqual(
+				FString::Printf(TEXT("%s bottom spacing"), Spacing.Key),
+				ButtonSlot->GetPadding().Bottom,
+				Spacing.Value);
+		}
+	}
+	if (!DemoVersionRibbon)
+	{
+		Menu->NativeDestruct();
+		Menu->RemoveFromRoot();
+		return false;
+	}
 	for (const TCHAR* Name : { TEXT("MainMenuPanelView"), TEXT("SaveSlotPanelView"), TEXT("SettingsPanelView"), TEXT("DemoNoticePanelView"), TEXT("TitleGraphicsSettingsWidget") })
 		TestNotNull(FString::Printf(TEXT("Child WBP %s"), Name), Cast<UUserWidget>(Menu->FindIntroWidget(Name)));
 	const bool bCreditsButtonAbsent = TestNull(

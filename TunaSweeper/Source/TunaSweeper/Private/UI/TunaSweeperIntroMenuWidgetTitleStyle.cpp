@@ -199,9 +199,9 @@ void UTunaSweeperIntroMenuWidget::ApplyReferenceTitleStyle()
 			}
 		}
 	};
-	Apply(StartButton, TEXT("StartButtonBox"), EArtwork::Play, 454, 112, 0, -2);
-	Apply(SlotSelectButton, TEXT("SlotSelectButtonBox"), EArtwork::Save, 418, 98, 12, -8);
-	Apply(SettingsButton, TEXT("SettingsButtonBox"), EArtwork::Settings, 418, 98, 12, -8);
+	Apply(StartButton, TEXT("StartButtonBox"), EArtwork::Play, 454, 112, 0, 4);
+	Apply(SlotSelectButton, TEXT("SlotSelectButtonBox"), EArtwork::Save, 418, 98, 12, -4);
+	Apply(SettingsButton, TEXT("SettingsButtonBox"), EArtwork::Settings, 418, 98, 12, -4);
 	Apply(QuitButton, TEXT("QuitButtonBox"), EArtwork::Quit, 418, 98, 12, 0);
 	Apply(SteamDemoWishlistButton, TEXT("SteamDemoWishlistButtonBox"), EArtwork::Wishlist, 418, 94, 12, 0);
 

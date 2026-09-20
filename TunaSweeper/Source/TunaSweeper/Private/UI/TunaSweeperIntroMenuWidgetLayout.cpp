@@ -4,8 +4,8 @@
 
 namespace TunaSweeperIntroMenuLayout
 {
-	constexpr const TCHAR* DemoFishTexturePath =
-		TEXT("/Game/UI/Title/tuna_sweeper_fish_transparent.tuna_sweeper_fish_transparent");
+	constexpr const TCHAR* DemoVersionRibbonTexturePath =
+		TEXT("/Game/UI/Title/T_DemoVersionRibbon.T_DemoVersionRibbon");
 }
 
 void UTunaSweeperIntroMenuWidget::ResetTitleViewportLayoutState()
@@ -694,25 +694,25 @@ void UTunaSweeperIntroMenuWidget::EnsureDemoBuildImage()
 			return;
 		}
 
-		UTexture2D* DemoFishTexture = LoadObject<UTexture2D>(
+		UTexture2D* DemoVersionRibbonTexture = LoadObject<UTexture2D>(
 			nullptr,
-			TunaSweeperIntroMenuLayout::DemoFishTexturePath);
-		if (!DemoFishTexture)
+			TunaSweeperIntroMenuLayout::DemoVersionRibbonTexturePath);
+		if (!DemoVersionRibbonTexture)
 		{
 			DemoBuildImage->RemoveFromParent();
 			DemoBuildImage = nullptr;
 			return;
 		}
 
-		DemoBuildImage->SetBrushFromTexture(DemoFishTexture, false);
-		FSlateBrush FishBrush = DemoBuildImage->GetBrush();
-		FishBrush.SetImageSize(FVector2D(63.0f, 36.0f));
-		DemoBuildImage->SetBrush(FishBrush);
+		DemoBuildImage->SetBrushFromTexture(DemoVersionRibbonTexture, false);
+		FSlateBrush RibbonBrush = DemoBuildImage->GetBrush();
+		RibbonBrush.SetImageSize(FVector2D(318.0f, 54.0f));
+		DemoBuildImage->SetBrush(RibbonBrush);
 		if (UCanvasPanelSlot* DemoSlot = RootCanvas->AddChildToCanvas(DemoBuildImage))
 		{
 			DemoSlot->SetAnchors(FAnchors(0.0f, 0.0f));
-			DemoSlot->SetPosition(FVector2D(245.0f, 91.0f));
-			DemoSlot->SetSize(FVector2D(63.0f, 36.0f));
+			DemoSlot->SetPosition(FVector2D(113.0f, 245.0f));
+			DemoSlot->SetSize(FVector2D(318.0f, 54.0f));
 			DemoSlot->SetZOrder(4);
 		}
 	}
