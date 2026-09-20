@@ -22,6 +22,7 @@ Scenario levels themselves are reusable presentation spaces. Do not block entry 
 | Flag | Meaning |
 | --- | --- |
 | `tutorial.bunker.basics_seen` | The first controls popup at the bunker passage was acknowledged with Continue; an immediate save is attempted. |
+| `tutorial.raid.combat_seen` | The second controls popup after bunker-to-raid arrival was acknowledged with Continue; an immediate save is attempted. It is gated until travel presentation and gameplay input locks finish. |
 | `scenario.opening.awakening` | The first-start opening presentation has completed and the player successfully entered the bunker. |
 | `dialogue.demo.toilet_intro` | The Demo-only two-line toilet-failure introduction has completed for the save slot. |
 | `dialogue.main.bunker_intro` | The Main-only first bunker dialogue has completed for the save slot. |

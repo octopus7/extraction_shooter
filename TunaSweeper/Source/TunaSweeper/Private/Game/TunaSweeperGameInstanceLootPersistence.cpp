@@ -273,6 +273,7 @@ bool UTunaSweeperGameInstance::ClearInventoryAndSaveInternal(bool bNotifyChanges
 
 void UTunaSweeperGameInstance::HandleLevelTravelPersistence(FName SourceLevelName, FName TargetLevelName)
 {
+	bPendingRaidTutorial = false;
 	if (IsRaidToBunkerTravel(SourceLevelName, TargetLevelName))
 	{
 		EnsureInventoryStateInitialized();
@@ -290,6 +291,7 @@ void UTunaSweeperGameInstance::HandleLevelTravelPersistence(FName SourceLevelNam
 	{
 		SaveGameState();
 		BeginRaidExperienceSession();
+		bPendingRaidTutorial = !IsScenarioProgressFlagSet(TEXT("tutorial.raid.combat_seen"));
 	}
 }
 

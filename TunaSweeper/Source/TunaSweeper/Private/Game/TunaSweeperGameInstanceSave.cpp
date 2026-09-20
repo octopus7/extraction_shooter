@@ -572,6 +572,7 @@ bool UTunaSweeperGameInstance::LoadGameState()
 	bRaidExperienceSessionActive = false;
 	bHasPendingRaidExperienceAnimationState = false;
 	PendingRaidExperienceAnimationState = FTunaSweeperExperienceAnimationState();
+	bPendingRaidTutorial = false;
 	CompletedScenarioFlags.Reset();
 	for (const FName& ScenarioFlag : SaveGame->CompletedScenarioFlags)
 	{
@@ -1090,6 +1091,7 @@ void UTunaSweeperGameInstance::ResetRuntimeStateForSaveSlotSelection()
 	PendingBunkerEntryHealthRatio = 1.0f;
 	PendingBunkerEntryFoodRatio = 1.0f;
 	PendingBunkerEntryHydrationRatio = 1.0f;
+	bPendingRaidTutorial = false;
 	CompletedScenarioFlags.Reset();
 	AcquiredMemoIds.Reset();
 	EverAcquiredItemIds.Reset();
@@ -1129,6 +1131,7 @@ void UTunaSweeperGameInstance::GenerateDefaultInventoryState()
 	PendingBunkerEntryHealthRatio = 1.0f;
 	PendingBunkerEntryFoodRatio = 1.0f;
 	PendingBunkerEntryHydrationRatio = 1.0f;
+	bPendingRaidTutorial = false;
 	CompletedScenarioFlags.Reset();
 	AcquiredMemoIds.Reset();
 	EverAcquiredItemIds.Reset();

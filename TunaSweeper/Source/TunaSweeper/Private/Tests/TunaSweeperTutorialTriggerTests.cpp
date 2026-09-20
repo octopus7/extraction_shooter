@@ -16,6 +16,9 @@
 #include "UI/TunaSweeperTutorialPopupWidget.h"
 #include "UObject/StrongObjectPtr.h"
 #include "Widgets/SOverlay.h"
+#include "Subsystem/TunaSweeperLevelTransitionSubsystem.h"
+#include "Settings/TunaSweeperBuildFlavor.h"
+#include "Misc/PackageName.h"
 
 namespace
 {
@@ -103,8 +106,44 @@ bool FTunaTutorialTriggerTest::RunTest(const FString&)
     TestTrue(TEXT("Completion serializes through existing save format"), UGameplayStatics::SaveGameToMemory(Save, Bytes));
     auto* Loaded = Cast<UTunaSweeperSaveGame>(UGameplayStatics::LoadGameFromMemory(Bytes));
     if (TestNotNull(TEXT("Save reloads"), Loaded)) TestTrue(TEXT("Completion survives reload"), Loaded->CompletedScenarioFlags.Contains(Flag));
+    const FName CombatFlag(TEXT("tutorial.raid.combat_seen"));
+    TestFalse(TEXT("Combat tutorial does not open in bunker"), Controller->TryShowRaidCombatTutorial());
+    const FName RaidLevel = TunaSweeperBuildFlavor::GetRaidGameplayLevelName();
+    World->GetOutermost()->Rename(*(TEXT("/Temp/") + FPackageName::GetShortName(RaidLevel.ToString())));
+    TestFalse(TEXT("Opening a raid directly does not count as bunker departure"), Controller->TryShowRaidCombatTutorial());
+    Instance->HandleLevelTravelPersistence(TEXT("BunkerMap"), RaidLevel);
+    TestTrue(TEXT("Bunker departure queues combat help"), Instance->HasPendingRaidTutorial());
+    auto* Transition = Instance->GetSubsystem<UTunaSweeperLevelTransitionSubsystem>();
+    if (!TestNotNull(TEXT("Transition subsystem exists"), Transition)) return false;
+    Transition->Phase = UTunaSweeperLevelTransitionSubsystem::ETransitionPhase::CircularRevealFinalExpand;
+    TestFalse(TEXT("Reveal must finish even if input was already unlocked"), Controller->TryShowRaidCombatTutorial());
+    Transition->Phase = UTunaSweeperLevelTransitionSubsystem::ETransitionPhase::Idle;
+    Controller->SetIgnoreMoveInput(true);
+    TestFalse(TEXT("Arrival input lock defers second tutorial"), Controller->TryShowRaidCombatTutorial());
+    Controller->SetIgnoreMoveInput(false);
+    Controller->bDialogueSequenceActive = true;
+    TestFalse(TEXT("Arrival dialogue defers second tutorial"), Controller->TryShowRaidCombatTutorial());
+    Controller->bDialogueSequenceActive = false;
+    if (!TestTrue(TEXT("Combat help opens when gameplay becomes available"), Controller->TryShowRaidCombatTutorial())) return false;
+    Popup = Controller->TutorialPopupWidget.Get();
+    Pages = Cast<UWidgetSwitcher>(Popup->WidgetTree->FindWidget(TEXT("PageSwitcher")));
+    TestEqual(TEXT("Second authored page is selected"), Pages->GetActiveWidgetIndex(), 1);
+    TestTrue(TEXT("Combat help pauses gameplay"), UGameplayStatics::IsGamePaused(World));
+    Cast<UButton>(Popup->WidgetTree->FindWidget(TEXT("ContinueButton")))->OnClicked.Broadcast();
+    TestFalse(TEXT("Combat help restores gameplay"), UGameplayStatics::IsGamePaused(World) || Controller->IsMoveInputIgnored());
+    TestTrue(TEXT("Second page has its own slot flag"), Instance->IsScenarioProgressFlagSet(CombatFlag));
+    Instance->HandleLevelTravelPersistence(TEXT("BunkerMap"), RaidLevel);
+    TestFalse(TEXT("Later raid departures do not queue completed help"), Instance->HasPendingRaidTutorial());
+    TestFalse(TEXT("Second help cannot repeat"), Controller->TryShowRaidCombatTutorial());
+    Save->CompletedScenarioFlags = Instance->CompletedScenarioFlags.Array();
+    TestTrue(TEXT("Both help flags serialize"), UGameplayStatics::SaveGameToMemory(Save, Bytes));
+    Loaded = Cast<UTunaSweeperSaveGame>(UGameplayStatics::LoadGameFromMemory(Bytes));
+    if (TestNotNull(TEXT("Both help flags reload"), Loaded))
+        TestTrue(TEXT("Both completion flags survive disk format round trip"), Loaded->CompletedScenarioFlags.Contains(CombatFlag) && Loaded->CompletedScenarioFlags.Contains(Flag));
     Instance->ResetRuntimeStateForSaveSlotSelection();
     TestFalse(TEXT("New slot clears tutorial completion"), Instance->IsScenarioProgressFlagSet(Flag));
+    TestFalse(TEXT("New slot clears combat help completion"), Instance->IsScenarioProgressFlagSet(CombatFlag));
+    TestFalse(TEXT("Pending help never leaks into another save slot"), Instance->HasPendingRaidTutorial());
     return true;
 }
 #endif

@@ -680,7 +680,7 @@ void ATunaSweeperPlayerController::SetupInputComponent()
 void ATunaSweeperPlayerController::PlayerTick(float DeltaTime)
 {
 	Super::PlayerTick(DeltaTime);
-	if (TutorialPopupWidget || TryShowBunkerBasicsTutorial()) return;
+	if (TutorialPopupWidget || TryShowBunkerBasicsTutorial() || TryShowRaidCombatTutorial()) return;
 
 	if (bEnemyCombatDebugEnabled)
 	{

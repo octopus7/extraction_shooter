@@ -22,6 +22,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual TStatId GetStatId() const override;
 	virtual bool IsTickable() const override;
+	bool IsTransitionActive() const { return Phase != ETransitionPhase::Idle; }
 
 	bool StartTransition(
 		UObject* WorldContextObject,
@@ -33,6 +34,7 @@ public:
 		const FText& InTransitionMessage);
 
 private:
+	friend class FTunaTutorialTriggerTest;
 	enum class ETransitionPhase : uint8
 	{
 		Idle,

@@ -813,6 +813,7 @@ public:
 	/** Explicit, confirmed menu exit: raid loss or a full bunker save. */
 	bool SaveForGameplayExit(bool bAbandonRaid);
 	void HandleLevelTravelPersistence(FName SourceLevelName, FName TargetLevelName);
+	bool HasPendingRaidTutorial() const { return bPendingRaidTutorial; }
 	void CaptureBunkerEntryVitalsFromPawn(APawn* Pawn);
 	bool ConsumePendingBunkerEntryVitals(UTunaSweeperVitalsComponent* VitalsComponent);
 
@@ -1131,6 +1132,7 @@ private:
 
 	UPROPERTY(Transient)
 	bool bRaidExperienceSessionActive = false;
+	bool bPendingRaidTutorial = false;
 
 	UPROPERTY(Transient)
 	bool bHasPendingRaidExperienceAnimationState = false;
