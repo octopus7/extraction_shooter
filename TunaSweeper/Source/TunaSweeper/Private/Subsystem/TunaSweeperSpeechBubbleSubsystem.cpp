@@ -280,10 +280,7 @@ bool UTunaSweeperSpeechBubbleSubsystem::ResolveLogicalAnchor(
 			{
 				return false;
 			}
-			FVector BoundsOrigin;
-			FVector BoundsExtent;
-			Actor->GetActorBounds(false, BoundsOrigin, BoundsExtent, false);
-			AnchorWorldLocation = BoundsOrigin + FVector(0.0, 0.0, BoundsExtent.Z) + Bubble.WorldOffset;
+			AnchorWorldLocation = TunaSweeperSpeechBubbleInternal::GetActorAnchorLocation(Actor, Bubble.WorldOffset);
 		}
 
 		if (!UWidgetLayoutLibrary::ProjectWorldLocationToWidgetPosition(

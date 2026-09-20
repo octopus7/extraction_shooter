@@ -136,7 +136,11 @@ void UTunaSweeperScreenSpaceSpeechBubbleWidget::BuildNativeWidgetTree()
 	BodyBox->SetContent(BodyOverlay);
 	RootOverlay->AddChildToOverlay(BodyBox);
 
-	BodyOverlay->AddChildToOverlay(BodyImage);
+	if (UOverlaySlot* BackgroundSlot = BodyOverlay->AddChildToOverlay(BodyImage))
+	{
+		BackgroundSlot->SetHorizontalAlignment(HAlign_Fill);
+		BackgroundSlot->SetVerticalAlignment(VAlign_Fill);
+	}
 	if (UOverlaySlot* TextSlot = BodyOverlay->AddChildToOverlay(BubbleText))
 	{
 		TextSlot->SetPadding(FMargin(22.0f, 12.0f));

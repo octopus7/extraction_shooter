@@ -1,11 +1,28 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameFramework/Actor.h"
+#include "GameFramework/Character.h"
+#include "Components/CapsuleComponent.h"
 
 class AActor;
 
 namespace TunaSweeperSpeechBubbleInternal
 {
+	inline FVector GetActorAnchorLocation(const AActor* Actor, const FVector& WorldOffset)
+	{
+		// Character bounds also include camera and UI primitives, far beyond the body.
+		if (const auto* Character = Cast<ACharacter>(Actor))
+		{
+			const auto* Capsule = Character->GetCapsuleComponent();
+			return Capsule->GetComponentLocation()
+				+ FVector(0.0, 0.0, Capsule->GetScaledCapsuleHalfHeight()) + WorldOffset;
+		}
+		FVector Origin, Extent;
+		Actor->GetActorBounds(false, Origin, Extent, false);
+		return Origin + FVector(0.0, 0.0, Extent.Z) + WorldOffset;
+	}
+
 	enum class ETargetType : uint8
 	{
 		Screen,

@@ -3,6 +3,10 @@
 #include "Misc/AutomationTest.h"
 
 #include "Engine/GameInstance.h"
+#include "Engine/World.h"
+#include "GameFramework/Character.h"
+#include "Components/BoxComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "Engine/Texture2D.h"
 #include "GameFramework/Actor.h"
 #include "Subsystem/TunaSweeperSpeechBubbleSubsystem.h"
@@ -51,6 +55,31 @@ namespace TunaSweeperSpeechBubbleTests
 		Target.WorldLocation = Position;
 		return Target;
 	}
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(
+	FTunaSweeperSpeechBubbleCharacterAnchorTest,
+	"TunaSweeper.UI.SpeechBubble.CharacterAnchor",
+	TunaSweeperSpeechBubbleTests::Flags)
+
+bool FTunaSweeperSpeechBubbleCharacterAnchorTest::RunTest(const FString& Parameters)
+{
+	UWorld* World = UWorld::CreateWorld(EWorldType::Game, false);
+	auto* Character = World->SpawnActor<ACharacter>();
+	auto* CameraBounds = NewObject<UBoxComponent>(Character);
+	CameraBounds->SetupAttachment(Character->GetRootComponent());
+	CameraBounds->SetBoxExtent(FVector(1010.0));
+	CameraBounds->SetRelativeLocation(FVector(-500.0, 0.0, 900.0));
+	CameraBounds->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	CameraBounds->RegisterComponent();
+	const FVector Offset(0.0, 0.0, 20.0);
+	const auto* Capsule = Character->GetCapsuleComponent();
+	const FVector Expected = Capsule->GetComponentLocation() + FVector(0.0, 0.0, Capsule->GetScaledCapsuleHalfHeight()) + Offset;
+	TestTrue(TEXT("Camera and other accessory bounds cannot move dialogue away from the character head"),
+		TunaSweeperSpeechBubbleInternal::GetActorAnchorLocation(Character, Offset).Equals(Expected, 0.01));
+	World->DestroyWorld(false);
+	World->RemoveFromRoot();
+	return true;
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(

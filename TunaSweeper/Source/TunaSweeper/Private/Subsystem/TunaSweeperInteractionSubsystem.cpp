@@ -41,7 +41,6 @@
 #include "Subsystem/TunaSweeperMemoSubsystem.h"
 #include "Subsystem/TunaSweeperScenarioSubsystem.h"
 #include "Subsystem/TunaSweeperSpeechBubbleSubsystem.h"
-#include "Components/CapsuleComponent.h"
 
 namespace TunaSweeperInteractionQuestEvents
 {
@@ -339,8 +338,8 @@ bool UTunaSweeperInteractionSubsystem::RequestInteraction(UTunaSweeperInteractab
 				{
 					Speech->ShowForActor(
 						GameInstance->ResolveLocalizedText(TEXT("ui.vehicle.no_fuel"), FText::GetEmpty()),
-						Character, FVector(0.0, 0.0, Character->GetCapsuleComponent()->GetScaledCapsuleHalfHeight() + 20.0),
-						ETunaSweeperSpeechBubbleTailDirection::Down, 2.5f);
+						Character, FVector(0.0, 0.0, 20.0),
+						ETunaSweeperSpeechBubbleTailDirection::None, 2.5f);
 				}
 			}
 			// Feedback consumes the input, but does not complete a vehicle-mount objective.
