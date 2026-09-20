@@ -34,6 +34,15 @@ for n,c in clips.items():
     samples=[pose(c,length*i/60) for i in range(61)]
     for p in samples:
         assert dist(bone(p,'root').translation,unreal.Vector(0,0,0))<.001,(n,'root translation')
+        # Hands stay on their own sides even while C turns; no crossed wrists behind the back.
+        root=bone(p,'root')
+        left=bone(p,'hand_l').translation-root.translation
+        right=bone(p,'hand_r').translation-root.translation
+        yaw=math.atan2(2*(root.rotation.w*root.rotation.z+root.rotation.x*root.rotation.y),1-2*(root.rotation.y**2+root.rotation.z**2))
+        lx=math.cos(yaw)*left.x+math.sin(yaw)*left.y
+        rx=math.cos(yaw)*right.x+math.sin(yaw)*right.y
+        assert lx>20 and rx<-20,(n,'arms must remain open on separate sides',lx,rx)
+        assert dist(bone(p,'hand_l').translation,bone(p,'hand_r').translation)>45,(n,'wrists must not cross')
         for name in unreal.AnimPoseExtensions.get_bone_names(p):
             tr=bone(p,name)
             assert all(math.isfinite(v) for v in tr.translation.to_tuple()),(n,name)
