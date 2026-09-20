@@ -9584,3 +9584,9 @@
 - 완료: BunkerMap의 (-439.010357, -135.576503, 79.345408), 반경 X/Y ±70cm 및 Z ±100cm 영역에서 기존 WBP 첫 페이지를 연다. 게임을 멈추고 계속 버튼으로 재개하며 대화/다른 메뉴/입력 잠금 중에는 표시를 미룬다.
 - 저장: 기존 슬롯별 CompletedScenarioFlags의 tutorial.bunker.basics_seen으로 재표시를 막고 새 슬롯에서는 초기화한다. 확인 시 즉시 저장을 시도하며 실패 시 메모리 기록을 유지하여 다음 정상 저장에 포함한다.
 - 검증: UE 5.7 Editor 빌드 성공. TunaSweeper.UI.Tutorial.AuthoredAsset와 FirstPassage 모두 성공. 실제 WBP/3개 언어 렌더링, 위치/높이/입력 조건, 일시 정지, 계속 버튼, 중복 방지, 플래그 직렬화/초기화를 검사했다. 실제 사용자 저장은 수정하지 않았다.
+
+## 2026-09-21 05:42:13 (소요시간: 00:01:04)
+
+- 요청: Steam 채널에서만 최초 언어를 OS 언어 대신 영어로 선택하도록 조건 변경.
+- 처리: 저장 언어 우선 적용을 유지하고, 저장값이 없거나 유효하지 않을 때 Steam은 영어, STOVE/NoStore는 기존 OS 언어·로케일 감지로 초기화. 패키징은 DistributionChannel, 에디터는 선택 빌드 타깃을 사용해 타이틀과 같은 채널 판별 적용. 저장 계약 갱신.
+- 검증: Steam Demo/Full, STOVE Demo/Full, NoStore Demo/Full 설정값 및 기존 OS 감지의 ko/en/ja와 영어 대체 흐름 검토. git diff --check 통과. 빌드·런타임 검증은 미수행.

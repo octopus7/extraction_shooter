@@ -5,7 +5,7 @@ Update it whenever a new state field is expected to persist across save slots, l
 
 ## Current Save Container
 
-Interface language persists independently of gameplay slots in `GGameUserSettingsIni`, under `TunaSweeper.InterfaceSettings/Language`. Startup restores a valid saved language. If the value is missing or invalid, startup selects and saves English (`en`); OS language/locale auto-detection is temporarily unused. Manual language selection continues to use the existing global setting.
+Interface language persists independently of gameplay slots in `GGameUserSettingsIni`, under `TunaSweeper.InterfaceSettings/Language`. Startup restores a valid saved language. If the value is missing or invalid, Steam selects and saves English (`en`); other distribution channels detect the OS language/locale, falling back to English when unsupported. Packaged builds read `TunaSweeper.Distribution/DistributionChannel` from `GGameIni`; editor runs use the selected build target, matching title-menu channel selection. Manual language selection continues to use the existing global setting. This setting remains shared across stores, so a valid language saved by another store also takes precedence over the first-launch default.
 
 - Save object: `UTunaSweeperSaveGame`
 - Current save version: `21`

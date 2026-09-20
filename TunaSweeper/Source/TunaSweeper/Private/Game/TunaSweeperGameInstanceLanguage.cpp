@@ -1,5 +1,7 @@
 #include "TunaSweeperGameInstanceShared.h"
 
+#include "Settings/TunaSweeperBuildTargetSettings.h"
+
 void UTunaSweeperGameInstance::SetCurrentTextLanguage(ETunaSweeperItemTextLanguage Language, bool bSaveImmediately)
 {
 	const bool bLanguageChanged = CurrentTextLanguage != Language;
@@ -42,8 +44,26 @@ void UTunaSweeperGameInstance::InitializeGlobalLanguageSetting()
 		return;
 	}
 
-	// OS language auto-detection is temporarily disabled for first launch.
-	CurrentTextLanguage = ETunaSweeperItemTextLanguage::English;
+	FString DistributionChannel(TEXT("Steam"));
+	if (GConfig)
+	{
+		GConfig->GetString(TEXT("TunaSweeper.Distribution"), TEXT("DistributionChannel"), DistributionChannel, GGameIni);
+	}
+	DistributionChannel.TrimStartAndEndInline();
+	if (DistributionChannel.IsEmpty())
+	{
+		DistributionChannel = TEXT("Steam");
+	}
+#if WITH_EDITOR
+	if (const UTunaSweeperBuildTargetSettings* BuildTargetSettings = GetDefault<UTunaSweeperBuildTargetSettings>())
+	{
+		DistributionChannel = BuildTargetSettings->GetDistributionChannel();
+	}
+#endif
+
+	CurrentTextLanguage = DistributionChannel.Equals(TEXT("Steam"), ESearchCase::IgnoreCase)
+		? ETunaSweeperItemTextLanguage::English
+		: DetectDefaultLanguageFromOS();
 	ApplyCurrentLanguageCulture();
 	SaveGlobalLanguageSetting();
 }
