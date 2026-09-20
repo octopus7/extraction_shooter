@@ -41,7 +41,7 @@ bool FTunaSweeperATVRiderTest::RunTest(const FString& Parameters)
 	auto* Mount = ATV->MountComponent.Get();
 	Mount->EngineStartSound = Mount->EngineIdleSound = Mount->EngineStopSound = nullptr;
 	Mount->EngineDriveSound = Mount->EngineBoostSound = nullptr;
-	TestTrue(TEXT("Mount succeeds"), Mount->RequestInteraction(Player));
+	TestTrue(TEXT("Mount succeeds"), Mount->TryMount(Player));
 	TestTrue(TEXT("Rider animation replaces on-foot graph while mounted"), Mesh->GetAnimClass() && Mesh->GetAnimClass()->GetName().Contains(TEXT("ATVRider")));
 	Mesh->TickAnimation(1.0f / 60, false);
 	Mesh->RefreshBoneTransforms();

@@ -157,7 +157,17 @@ bool FTunaSweeperVehicleMountTest::RunTest(const FString& Parameters)
 	TestFalse(TEXT("Remote interaction cannot mount"), Mount->RequestInteraction(Player));
 	Player->SetActorLocation(FVector(0,150,90));
 	const auto MovementMode = Player->GetCharacterMovement()->MovementMode.GetValue();
-	TestTrue(TEXT("Shared interaction path mounts the player"), Mount->RequestInteraction(Player));
+	const FTransform OnFootTransform = Player->GetActorTransform();
+	TestTrue(TEXT("No-fuel interaction consumes the input"), Mount->RequestInteraction(Player));
+	TestFalse(TEXT("No-fuel interaction leaves the player on foot"), Player->IsMountedInVehicle());
+	TestNull(TEXT("No-fuel interaction leaves the seat empty"), Mount->GetRider());
+	TestNull(TEXT("No-fuel interaction does not attach the player"), Player->GetAttachParentActor());
+	TestTrue(TEXT("No-fuel interaction preserves transform"), Player->GetActorTransform().Equals(OnFootTransform));
+	TestEqual(TEXT("No-fuel interaction preserves movement"), Player->GetCharacterMovement()->MovementMode.GetValue(), MovementMode);
+	TestEqual(TEXT("No-fuel interaction preserves collision"), Player->GetCapsuleComponent()->GetCollisionEnabled(), Collision);
+	TestTrue(TEXT("Repeated no-fuel interaction is handled"), Mount->RequestInteraction(Player));
+	TestFalse(TEXT("Repeated interaction still cannot mount"), Player->IsMountedInVehicle());
+	TestTrue(TEXT("Direct mount API remains available for vehicle lifecycle tests"), Mount->TryMount(Player));
 	TestTrue(TEXT("Player records the seat"), Player->GetVehicleMount() == Mount);
 	TestTrue(TEXT("Possession stays on the original player"), Controller->GetPawn() == Player);
 	TestTrue(TEXT("Player is attached to the vehicle"), Player->GetAttachParentActor() == ATV);
@@ -197,7 +207,7 @@ bool FTunaSweeperVehicleMountTest::RunTest(const FString& Parameters)
 	TestEqual(TEXT("Collision restored"), Player->GetCapsuleComponent()->GetCollisionEnabled(), Collision);
 	TestEqual(TEXT("Original movement mode restored"), int32(Player->GetCharacterMovement()->MovementMode.GetValue()), int32(MovementMode));
 	Player->SetActorLocation(FVector(0,150,90));
-	TestTrue(TEXT("Remount works"), Mount->RequestInteraction(Player));
+	TestTrue(TEXT("Direct remount works"), Mount->TryMount(Player));
 	Mount->ReleaseRiderForEndPlay();
 	TestFalse(TEXT("Vehicle cleanup releases character state"), Player->IsMountedInVehicle());
 	World->DestroyWorld(false);

@@ -2,6 +2,7 @@ string_key,ko,en,ja
 editor.anim.title_head_look.title,타이틀 머리 추적,Title Head Look,タイトルの頭追従
 editor.anim.title_head_look.tooltip,타이틀의 머리 목표 방향을 물리 계산 전 포즈에 적용합니다.,Applies the title head target direction to the pose before physics.,タイトルの頭の目標方向を物理計算前のポーズに適用します。
 ui.vehicle.mount,탑승하기,Mount,乗る
+ui.vehicle.no_fuel,연료가 없다,There's no fuel.,燃料がない。
 ui.vehicle.dismount,내리기,Dismount,降りる
 ui.key.x,X,X,X
 ui.pause.title,일시 정지,Paused,一時停止

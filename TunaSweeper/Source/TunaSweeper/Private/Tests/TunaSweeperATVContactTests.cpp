@@ -137,7 +137,7 @@ bool FTunaSweeperATVProjectileContactTest::RunTest(const FString& Parameters)
 		CastChecked<USphereComponent>(ProbeShot->GetRootComponent())->IsPhysicsCollisionEnabled());
 	ProbeShot->Destroy();
 	Scene.Player->SetActorLocation(Scene.ATV->GetActorLocation() + FVector(0, 140, 90));
-	if (!TestTrue(TEXT("Mount for driving under fire"), Scene.ATV->MountComponent->RequestInteraction(Scene.Player))) return false;
+	if (!TestTrue(TEXT("Mount for driving under fire"), Scene.ATV->MountComponent->TryMount(Scene.Player))) return false;
 	Scene.ATV->MountComponent->SetDriveInput(FVector2D(0, 1));
 	Scene.Step(360);
 	TArray<TWeakObjectPtr<ATunaSweeperProjectile>> Shots;

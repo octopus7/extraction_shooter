@@ -181,7 +181,7 @@ bool FTunaSweeperATVDamageTest::RunTest(const FString& Parameters)
 	Capture(TEXT("HeavySmoke"));
 	Player->SetActorLocation(ATV->GetActorLocation()+FVector(0,140,90));
 	const auto* OriginalAnimClass = Player->GetMesh()->GetAnimClass();
-	TestTrue(TEXT("Damaged vehicle can still be mounted"), Mount->RequestInteraction(Player));
+	TestTrue(TEXT("Damaged vehicle can still be mounted"), Mount->TryMount(Player));
 	Mount->SetDriveInput(FVector2D(0,1));
 	Step(45);
 	TestEqual(TEXT("Lethal damage clamps to remaining durability"), ATV->TakeDamage(1000, Hit, nullptr, nullptr), 80.0f);
@@ -224,7 +224,7 @@ bool FTunaSweeperATVDamageTest::RunTest(const FString& Parameters)
 	TrappedMount->EngineStartSound = TrappedMount->EngineIdleSound = TrappedMount->EngineStopSound = nullptr;
 	TrappedMount->EngineDriveSound = TrappedMount->EngineBoostSound = nullptr;
 	Player->SetActorLocation(FVector(0,840,90));
-	TestTrue(TEXT("Board before blocked-exit scenario"), TrappedMount->RequestInteraction(Player));
+	TestTrue(TEXT("Board before blocked-exit scenario"), TrappedMount->TryMount(Player));
 	TrappedATV->SetActorLocation(FVector(700,700,30), false, nullptr, ETeleportType::TeleportPhysics);
 	for (int32 Side=0; Side<4; ++Side)
 	{

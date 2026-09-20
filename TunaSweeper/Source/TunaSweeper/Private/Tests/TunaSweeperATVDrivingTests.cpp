@@ -49,7 +49,7 @@ bool FTunaSweeperATVDrivingTest::RunTest(const FString& Parameters)
 	World->BeginPlay();
 	ATV->SetDriveInput(FVector2D(1,1));
 	TestTrue(TEXT("Unoccupied input is rejected"), ATV->GetDriveInput().IsNearlyZero());
-	TestTrue(TEXT("Mount through interaction"), Mount->RequestInteraction(Player));
+	TestTrue(TEXT("Direct mount for driving test"), Mount->TryMount(Player));
 	Mount->SetDriveInput(FVector2D(0,1));
 	AddInfo(FString::Printf(TEXT("Wheel FL %s, mass %.1f, COM %s"), *ATV->VehicleMesh->GetSocketTransform(TEXT("wheel_FL"), RTS_Component).GetLocation().ToString(), ATV->VehicleMesh->GetMass(), *ATV->VehicleMesh->GetCenterOfMass().ToString()));
 	TestEqual(TEXT("Mounted W input reaches vehicle"), float(ATV->GetDriveInput().Y), 1.0f);
