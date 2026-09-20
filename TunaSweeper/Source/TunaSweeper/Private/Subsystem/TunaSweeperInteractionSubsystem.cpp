@@ -339,7 +339,7 @@ bool UTunaSweeperInteractionSubsystem::RequestInteraction(UTunaSweeperInteractab
 					Speech->ShowForActor(
 						GameInstance->ResolveLocalizedText(TEXT("ui.vehicle.no_fuel"), FText::GetEmpty()),
 						Character, FVector(0.0, 0.0, 20.0),
-						ETunaSweeperSpeechBubbleTailDirection::None, 2.5f);
+						ETunaSweeperSpeechBubbleTailDirection::None, 2.5f, -28.0f);
 				}
 			}
 			// Feedback consumes the input, but does not complete a vehicle-mount objective.

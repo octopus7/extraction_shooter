@@ -41,7 +41,8 @@ public:
 		AActor* Actor,
 		FVector WorldOffset,
 		ETunaSweeperSpeechBubbleTailDirection TailDirection,
-		float DurationSeconds = 2.0f);
+		float DurationSeconds = 2.0f,
+		float ScreenVerticalOffset = 0.0f);
 
 	UFUNCTION(BlueprintCallable, Category = "TunaSweeper|Speech Bubble")
 	bool HideSpeechBubble(FGuid Handle);
@@ -71,6 +72,8 @@ private:
 		FVector WorldLocation = FVector::ZeroVector;
 		TWeakObjectPtr<AActor> Actor;
 		FVector WorldOffset = FVector::ZeroVector;
+		// DPI-scaled UI units, applied after world-to-screen projection.
+		float ScreenVerticalOffset = 0.0f;
 		TWeakObjectPtr<UTunaSweeperScreenSpaceSpeechBubbleWidget> Widget;
 		float DurationSeconds = 0.0f;
 		float ElapsedSeconds = 0.0f;

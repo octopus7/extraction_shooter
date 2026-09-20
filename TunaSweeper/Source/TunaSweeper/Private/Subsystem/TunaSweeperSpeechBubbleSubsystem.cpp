@@ -84,9 +84,10 @@ FGuid UTunaSweeperSpeechBubbleSubsystem::ShowForActor(
 	AActor* Actor,
 	const FVector WorldOffset,
 	const ETunaSweeperSpeechBubbleTailDirection TailDirection,
-	const float DurationSeconds)
+	const float DurationSeconds,
+	const float ScreenVerticalOffset)
 {
-	if (Text.IsEmpty() || !IsValid(Actor) || WorldOffset.ContainsNaN())
+	if (Text.IsEmpty() || !IsValid(Actor) || WorldOffset.ContainsNaN() || !FMath::IsFinite(ScreenVerticalOffset))
 	{
 		return FGuid();
 	}
@@ -95,6 +96,7 @@ FGuid UTunaSweeperSpeechBubbleSubsystem::ShowForActor(
 	Candidate.AnchorType = EAnchorType::Actor;
 	Candidate.Actor = Actor;
 	Candidate.WorldOffset = WorldOffset;
+	Candidate.ScreenVerticalOffset = ScreenVerticalOffset;
 	return ShowBubble(Text, Candidate, TailDirection, DurationSeconds);
 }
 
@@ -293,6 +295,7 @@ bool UTunaSweeperSpeechBubbleSubsystem::ResolveLogicalAnchor(
 		}
 	}
 
+	OutLogicalAnchor.Y += Bubble.ScreenVerticalOffset;
 	if (OutLogicalAnchor.ContainsNaN())
 	{
 		return false;
