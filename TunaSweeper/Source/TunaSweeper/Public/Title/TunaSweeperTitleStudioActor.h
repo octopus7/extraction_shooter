@@ -32,6 +32,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Title|Studio")
 	bool bShowStudioGeometry = false;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TunaSweeper|Title|Backdrop", meta = (ClampMin = "1.0", ClampMax = "22.0"))
+	float BackdropFStop = 2.8f;
+
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "TunaSweeper|Title|Components")
 	TObjectPtr<USceneComponent> SceneRoot;

@@ -155,15 +155,29 @@ void ATunaSweeperTitleStudioActor::UpdateBackdrop()
 	}
 	MatteBackdrop->SetVisibility(!bShowStudioGeometry);
 	if (!IsValid(PresentationActor)) return;
-	if (const auto* Body = PresentationActor->FindComponentByClass<UTunaSweeperTitleSkeletalMeshComponent>())
+	const auto* Body = PresentationActor->FindComponentByClass<UTunaSweeperTitleSkeletalMeshComponent>();
+	if (Body)
 	{
 		// Aim at the mesh, not the presentation actor's camera-relative origin.
 		// The cone covers the full idle/entrance motion while concentrating VSM resolution.
 		const FVector Target = Body->GetComponentLocation() + FVector(0.0f, 0.0f, 100.0f);
 		CharacterKeyLight->SetWorldRotation((Target - CharacterKeyLight->GetComponentLocation()).Rotation());
 	}
-	const UCameraComponent* Camera = PresentationActor->FindComponentByClass<UCameraComponent>();
+	UCameraComponent* Camera = PresentationActor->FindComponentByClass<UCameraComponent>();
 	if (!Camera) return;
+	if (Body)
+	{
+		// Keep the face in focus as the title camera moves between menu views.
+		const FVector FocusPoint = Body->GetSocketLocation(TEXT("head"));
+		FPostProcessSettings& Settings = Camera->PostProcessSettings;
+		Settings.bOverride_DepthOfFieldFocalDistance = true;
+		Settings.DepthOfFieldFocalDistance = FMath::Max(1.0f, FVector::DotProduct(
+			FocusPoint - Camera->GetComponentLocation(), Camera->GetForwardVector()));
+		Settings.bOverride_DepthOfFieldFstop = true;
+		Settings.DepthOfFieldFstop = FMath::Clamp(BackdropFStop, 1.0f, 22.0f);
+		Settings.bOverride_DepthOfFieldSensorWidth = true;
+		Settings.DepthOfFieldSensorWidth = 36.0f;
+	}
 	FIntPoint ViewportSize(1920, FMath::RoundToInt(1920.f / FMath::Max(Camera->AspectRatio, 0.1f)));
 	EAspectRatioAxisConstraint AxisConstraint = GetDefault<ULocalPlayer>()->AspectRatioAxisConstraint;
 	if (const UWorld* World = GetWorld())
