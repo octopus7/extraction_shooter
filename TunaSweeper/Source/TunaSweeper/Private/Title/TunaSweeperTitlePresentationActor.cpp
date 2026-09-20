@@ -256,7 +256,7 @@ ATunaSweeperTitlePresentationActor::ATunaSweeperTitlePresentationActor()
 	}
 
 	static ConstructorHelpers::FClassFinder<UAnimInstance> BodyAnimClassFinder(
-		TEXT("/Game/Characters/Player/LunaMk2/Animations/ABP_LunaMk2"));
+		TEXT("/Game/Characters/Player/LunaMk2/Animations/Title/ABP_LunaMk2_Title"));
 	if (BodyAnimClassFinder.Succeeded())
 	{
 		BodyMesh->SetAnimationMode(EAnimationMode::AnimationBlueprint);

@@ -1,6 +1,16 @@
-# 루나 Mk2 타이틀 전용 미연결 모션
+# 루나 Mk2 타이틀 전용 모션
 
-2026-09-20 제작. 첨부 타이틀 이미지에서 생성한 전신 포즈 레퍼런스를 바탕으로, 기존 Luna Mk2 리그에 아래 애니메이션을 제작했다. 타이틀 액터, IntroMap, AnimBP, 랜덤 선택 로직에는 연결하지 않았다.
+2026-09-20 제작. 첨부 타이틀 이미지에서 생성한 전신 포즈 레퍼런스를 바탕으로, 기존 Luna Mk2 리그에 아래 애니메이션을 제작했다. 최초에는 미연결 에셋으로 제작했으며, 후속 작업에서 별도 `ABP_LunaMk2_Title`을 만들어 타이틀 액터와 IntroMap에 적용했다.
+
+## 타이틀 적용
+
+`ABP_LunaMk2_Title`의 부모는 `UTunaSweeperTitleAnimInstance`다. C를 시작 시 한 번 재생하고 A로 연결한다. A/B는 각각 2~4회(8~16초) 무작위로 반복한 뒤 AtoB/BtoA를 통해 교대로 전환한다. 완전한 루프 경계에서만 전환하며 프레임의 남은 시간을 다음 클립으로 넘긴다. 메뉴 표시 전환은 애니메이션을 재시작하지 않는다.
+
+AnimGraph는 명시적 시간으로 Sequence Evaluator를 평가하고, 기존 Title Head Look 및 양갈래 Rigid Body 설정을 이어받는다. C의 마지막 0.5초 동안 머리 추적을 부드럽게 켜 뒷모습을 유지한다. 기존 안구 추적과 별도 타이틀 치마 ABP도 유지한다. 이 평가기는 노티파이와 루트 모션 추출을 사용하지 않는다.
+
+`BP_TitlePresentationActor.BodyMesh`, IntroMap에 저장된 타이틀 메시, 네이티브 액터 기본값은 새 ABP를 사용한다. 플레이어 캐릭터는 기존 `ABP_LunaMk2`를 계속 사용한다.
+
+`Tools/TitleMotions/verify_title_abp.py`는 저장된 양쪽 BP 및 IntroMap의 연결 분리를 검사한다. `TunaSweeper.Title.Animation.Timing`은 진입·랜덤 체류·프레임 시간 처리를, `EvaluatedPose`는 5개 구간의 실제 ABP 출력과 원본 클립 포즈 일치를 검사한다. `Presentation`은 IntroMap PIE의 C/A/B 재생과 메뉴 복귀 시 재시작 방지를 검사하고 Saved/Screenshots에 화면을 기록한다. 타이틀 시선·머리카락·치마 회귀 검사도 통과했다.
 
 ## 저장된 UE 에셋
 
