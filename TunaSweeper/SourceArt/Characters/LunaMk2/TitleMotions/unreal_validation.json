@@ -1,0 +1,42 @@
+{
+  "assets": {
+    "AS_LunaMk2_Title_A": {
+      "seconds": 4.0,
+      "skeleton": "/Game/Characters/Player/LunaMk2/SKM_LunaMk2_Skeleton.SKM_LunaMk2_Skeleton",
+      "foot_l_drift_cm": 0.0,
+      "foot_r_drift_cm": 0.0,
+      "breath_cm": 0.1552382659003791
+    },
+    "AS_LunaMk2_Title_B": {
+      "seconds": 4.0,
+      "skeleton": "/Game/Characters/Player/LunaMk2/SKM_LunaMk2_Skeleton.SKM_LunaMk2_Skeleton",
+      "foot_l_drift_cm": 0.0,
+      "foot_r_drift_cm": 0.0,
+      "breath_cm": 0.15514059178099082
+    },
+    "AS_LunaMk2_Title_C": {
+      "seconds": 3.0,
+      "skeleton": "/Game/Characters/Player/LunaMk2/SKM_LunaMk2_Skeleton.SKM_LunaMk2_Skeleton",
+      "foot_l_lift_cm": 3.71700345436566,
+      "foot_r_lift_cm": 3.42277262049236
+    },
+    "AS_LunaMk2_Title_AtoB": {
+      "seconds": 1.600000023841858,
+      "skeleton": "/Game/Characters/Player/LunaMk2/SKM_LunaMk2_Skeleton.SKM_LunaMk2_Skeleton"
+    },
+    "AS_LunaMk2_Title_BtoA": {
+      "seconds": 1.600000023841858,
+      "skeleton": "/Game/Characters/Player/LunaMk2/SKM_LunaMk2_Skeleton.SKM_LunaMk2_Skeleton"
+    }
+  },
+  "seams": {
+    "AS_LunaMk2_Title_A": 0.0,
+    "AS_LunaMk2_Title_B": 0.0,
+    "C_A": 0.00018039427035320004,
+    "A_AB": 0.0,
+    "AB_B": 2.9811217605979984e-05,
+    "B_BA": 0.0,
+    "BA_A": 2.985516076623702e-05
+  },
+  "passed": true
+}

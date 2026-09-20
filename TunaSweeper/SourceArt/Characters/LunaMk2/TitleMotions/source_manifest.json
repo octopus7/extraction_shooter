@@ -1,0 +1,32 @@
+{
+  "AS_LunaMk2_Title_A": {
+    "seconds": 4,
+    "fps": 30,
+    "keys": 121,
+    "bones": 130
+  },
+  "AS_LunaMk2_Title_B": {
+    "seconds": 4,
+    "fps": 30,
+    "keys": 121,
+    "bones": 130
+  },
+  "AS_LunaMk2_Title_C": {
+    "seconds": 3,
+    "fps": 30,
+    "keys": 91,
+    "bones": 130
+  },
+  "AS_LunaMk2_Title_AtoB": {
+    "seconds": 1.6,
+    "fps": 30,
+    "keys": 49,
+    "bones": 130
+  },
+  "AS_LunaMk2_Title_BtoA": {
+    "seconds": 1.6,
+    "fps": 30,
+    "keys": 49,
+    "bones": 130
+  }
+}

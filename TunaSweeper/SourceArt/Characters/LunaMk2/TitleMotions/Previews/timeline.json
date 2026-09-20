@@ -1,0 +1,32 @@
+[
+  {
+    "clip": "C",
+    "start_seconds": 0.0,
+    "duration": 3
+  },
+  {
+    "clip": "A",
+    "start_seconds": 3.0,
+    "duration": 4
+  },
+  {
+    "clip": "AtoB",
+    "start_seconds": 7.0,
+    "duration": 1.6
+  },
+  {
+    "clip": "B",
+    "start_seconds": 8.6,
+    "duration": 4
+  },
+  {
+    "clip": "BtoA",
+    "start_seconds": 12.6,
+    "duration": 1.6
+  },
+  {
+    "clip": "A",
+    "start_seconds": 14.2,
+    "duration": 1
+  }
+]
