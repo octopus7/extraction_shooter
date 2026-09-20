@@ -2,6 +2,7 @@
 #include "Title/TunaSweeperTitlePresentationActor.h"
 #include "Camera/CameraComponent.h"
 #include "Components/PointLightComponent.h"
+#include "Components/SpotLightComponent.h"
 #include "Components/SkyLightComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMesh.h"
@@ -62,12 +63,15 @@ ATunaSweeperTitleStudioActor::ATunaSweeperTitleStudioActor()
 	AmbientLight->SetMobility(EComponentMobility::Movable);
 	AmbientLight->SetIntensity(0.8f);
 
-	CharacterKeyLight = CreateDefaultSubobject<UPointLightComponent>(TEXT("CharacterKeyLight"));
+	CharacterKeyLight = CreateDefaultSubobject<USpotLightComponent>(TEXT("CharacterKeyLight"));
 	CharacterKeyLight->SetupAttachment(SceneRoot);
 	CharacterKeyLight->SetMobility(EComponentMobility::Movable);
 	CharacterKeyLight->SetIntensity(5200.0f);
 	CharacterKeyLight->SetAttenuationRadius(1150.0f);
 	CharacterKeyLight->SetLightColor(FLinearColor(1.0f, 0.82f, 0.68f));
+	CharacterKeyLight->SetInnerConeAngle(20.0f);
+	CharacterKeyLight->SetOuterConeAngle(28.0f);
+	CharacterKeyLight->SetSourceRadius(22.0f);
 
 	EmptyWallLight = CreateDefaultSubobject<UPointLightComponent>(TEXT("EmptyWallLight"));
 	EmptyWallLight->SetupAttachment(SceneRoot);
@@ -75,6 +79,8 @@ ATunaSweeperTitleStudioActor::ATunaSweeperTitleStudioActor()
 	EmptyWallLight->SetIntensity(3200.0f);
 	EmptyWallLight->SetAttenuationRadius(1050.0f);
 	EmptyWallLight->SetLightColor(FLinearColor(0.48f, 0.68f, 1.0f));
+	// Fill lifts the shaded side without adding a second hard self-shadow.
+	EmptyWallLight->SetCastShadows(false);
 	if (BackWall)
 	{
 		BackWall->SetRelativeLocation(FVector(300.0f, 0.0f, 200.0f));
@@ -149,6 +155,13 @@ void ATunaSweeperTitleStudioActor::UpdateBackdrop()
 	}
 	MatteBackdrop->SetVisibility(!bShowStudioGeometry);
 	if (!IsValid(PresentationActor)) return;
+	if (const auto* Body = PresentationActor->FindComponentByClass<UTunaSweeperTitleSkeletalMeshComponent>())
+	{
+		// Aim at the mesh, not the presentation actor's camera-relative origin.
+		// The cone covers the full idle/entrance motion while concentrating VSM resolution.
+		const FVector Target = Body->GetComponentLocation() + FVector(0.0f, 0.0f, 100.0f);
+		CharacterKeyLight->SetWorldRotation((Target - CharacterKeyLight->GetComponentLocation()).Rotation());
+	}
 	const UCameraComponent* Camera = PresentationActor->FindComponentByClass<UCameraComponent>();
 	if (!Camera) return;
 	FIntPoint ViewportSize(1920, FMath::RoundToInt(1920.f / FMath::Max(Camera->AspectRatio, 0.1f)));

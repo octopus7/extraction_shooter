@@ -9,6 +9,7 @@ class USceneComponent;
 class UStaticMeshComponent;
 class USkyLightComponent;
 class UPointLightComponent;
+class USpotLightComponent;
 class UCameraComponent;
 
 // Independently editable title set, lighting, and camera-aligned matte backdrop.
@@ -52,7 +53,7 @@ protected:
 	TObjectPtr<USkyLightComponent> AmbientLight;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "TunaSweeper|Title|Components")
-	TObjectPtr<UPointLightComponent> CharacterKeyLight;
+	TObjectPtr<USpotLightComponent> CharacterKeyLight;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "TunaSweeper|Title|Components")
 	TObjectPtr<UPointLightComponent> EmptyWallLight;

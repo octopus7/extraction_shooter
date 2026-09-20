@@ -9343,3 +9343,10 @@
 
 - 요청: 커밋.
 - 처리: C 측면 시작·반대 회전 수정 b71dd96c와 생성기 정리 118d9201의 커밋 완료 및 관련 파일의 미커밋 변경 없음을 확인. 이 확인 기록만 추가 커밋.
+
+## 2026-09-21 00:09:19 (소요시간: 00:12:46)
+
+- 요청: 타이틀 한정으로 캐릭터 주변에 그림자 해상도를 집중하고 그림자 경계도 부드럽게 조정.
+- 처리: 타이틀 스튜디오 CharacterKeyLight를 PointLight에서 SpotLight로 변경하고 내부 20도·외부 28도, Source Radius 22cm 적용. 실제 BodyMesh 위치 위 100cm를 향하도록 갱신하며 보조광의 그림자는 해제. 기존 광량·색상·위치·감쇠 반경은 유지. 전역 VSM 설정과 게임 플레이 조명은 변경하지 않음. 저장된 BP와 IntroMap은 애셋 재생성 없이 새 네이티브 기본값으로 로드됨.
+- 검증: 동일 포즈에서 기존/그림자 없음/좁은 SpotLight/12cm·22cm 반경 뷰포트 비교 후 22cm 채택. 초기 빌드는 열린 에디터의 DLL 잠금으로 실패했고 정상 종료 후 TunaSweeperEditor Win64 Development 빌드 성공. 실제 PIE 12초의 1368회 샘플에서 머리·골반·손·발이 내부 원뿔 안에 유지됨(최대 8.952도). RuntimeExposure와 SeparationAndBackdrop 기존 테스트 2개 통과. 최종 화면과 verification.json은 Saved/Automation/TitleShadows에 저장. 코드 검토에서 지적 사항 없음. 패키지 실행은 미검증.
+- 마무리: 비교용 임시 스크립트는 제거하고 읽기 전용 verify_title_shadows.py와 설명 문서를 유지. 프로젝트 에디터를 IntroMap으로 다시 열고 이번 작업만 커밋 대상으로 분리.
